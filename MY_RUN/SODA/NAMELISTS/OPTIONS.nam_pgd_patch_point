@@ -1,16 +1,12 @@
-&NAM_CONF_PROJ
-   XBETA=0,
-   XLAT0=59.2,
-   XLON0=-10.0,
-   XRPK=0.858959896930664,
-/
-&NAM_CONF_PROJ_GRID
-   NIMAX=39,
-   NJMAX=39,
-   XDX=11000.,
-   XDY=11000.,
-   XLATCEN=59.2,
-   XLONCEN=14.0,
+&NAM_PGD_GRID
+  CGRID="LONLATVAL",
+/ 
+&NAM_LONLATVAL
+  NPOINTS = 1 
+  XX      = 10.1309,
+  XY      = 59.734,
+  XDX     = 0.01,
+  XDY     = 0.01,
 /
 &NAM_COVER
    YCOVER="ecoclimats_v2",

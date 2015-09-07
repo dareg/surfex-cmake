@@ -3,9 +3,9 @@ SUBROUTINE ASSIM_ISBA_n (DGMI, IG, I, U, &
                          HPROGRAM,KI,                                   &
                         PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                         PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
-                        PSWEC,     PTSC,      PUCLS, PVCLS,            &
+                        PSWEC,     PTSC,        PUCLS,     PVCLS,      &
                         PTS,       PT2M,        PHU2M,     PSWE,       &
-                        HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
+                        HTEST,     OD_MASKEXT,  PLON_IN,   PLAT_IN )
 
 !     ###############################################################################
 !
@@ -159,9 +159,9 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
                             HPROGRAM, KI,                                  &
                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
-                            PSWEC,     PTSC,     PUCLS, PVCLS,             &
+                            PSWEC,     PTSC,        PUCLS,     PVCLS,      &
                             PTS,       PT2M,        PHU2M,     ZSWE,       &
-                            HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
+                            HTEST,     OD_MASKEXT,  PLON_IN,   PLAT_IN )
   !
   ! Snow analysis/update (changed in oi_cacsts). Get the full increment
   IF (LAESNM) THEN

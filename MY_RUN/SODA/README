@@ -9,9 +9,15 @@ RUN
 run_soda.sh
 TESTS
 
+Old data set
 (*)  Download from http://hirlam.org/index.php?option=com_docman&task=doc_download&gid=1457&Itemid=157
 
+New data set
+(*)  Download from http://hirlam.org/index.php/component/docman/doc_download/1767-input-soda-test-new?Itemid=157
 
-Usage: ./run_soda.sh EXP [option]
-EXP:  OI
-     EKF
+Usage: ./run_soda.sh EXP FILEFORMAT NPROC [option]
+       EXP: OI OI_POINT OI_POINTS EKF EKF_PATCH EKF_POINT EKF_POINTS EKF_PATCH_POINT EKF_PATCH_POINTS
+FILEFORMAT: NC LFI ASCII FA
+
+Run all tests:
+./test_all.sh

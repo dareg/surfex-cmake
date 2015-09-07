@@ -294,7 +294,7 @@ ELSEIF (KTILE==3) THEN
                       HPROGRAM,KSIZE,                                             &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
-                      ZP_PSWEC,     ZP_PTSC,   ZP_UCLS, ZP_VCLS,                  &
+                      ZP_PSWEC,     ZP_PTSC,        ZP_UCLS,      ZP_VCLS,        &
                       ZP_PTS,       ZP_PT2M,        ZP_PHU2M,     ZP_PSWE,        & 
                       HTEST, GD_MASKEXT, ZP_LON, ZP_LAT )
   

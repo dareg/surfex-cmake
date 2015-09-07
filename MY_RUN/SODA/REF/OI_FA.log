@@ -1,0 +1,220 @@
+  
+     ----------------------
+     | PGD ENDS CORRECTLY |
+     ----------------------
+  
+     -----------------------
+     | PREP ENDS CORRECTLY |
+     -----------------------
+Running offline
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+
+    ------------------------------------
+    |               SODA               |
+    | SURFEX OFFLINE DATA ASSIMILATION |
+    ------------------------------------
+
+ INITIALIZING SURFEX...
+ READING input files...
+ READ FG_OI_MAIN OK
+ READ CANARI OK
+ READ CLIMATOLOGY OK
+ READING SST FROM SST_SIC
+ READ SST_SIC OK
+   ECMWF_SST_SIC
+  SURFSEA.TEMPERA - min, mean, max:    0.2855E+03   0.2863E+03   0.2880E+03
+   Replaced land by UNDEF 
+  SST            - min, mean, max:    0.2855E+03   0.2863E+03   0.2880E+03
+ PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...
+ *********************************************
+ *      ASSIMILATIONS FOR SEA POINTS         *
+ *********************************************
+ UPDATING SST FOR SCHEME: SEAFLX
+ Mean SST increments over SEA     0.52200680826893808     
+ *********************************************
+ *      ASSIMILATIONS FOR WATER POINTS       *
+ *********************************************
+ UPDATING LST FOR INLAND_WATER SCHEME : WATFLX
+ Lake surface temperature set to    282.73852216119622      from nearest neighbour at I=         299
+ Lake surface temperature set to    282.74561895104455      from nearest neighbour at I=         338
+ Lake surface temperature set to    282.35893149974493      from nearest neighbour at I=         366
+ Lake surface temperature set to    283.08453708014775      from nearest neighbour at I=         376
+ Lake surface temperature set to    282.65848170779481      from nearest neighbour at I=         377
+ Lake surface temperature set to    282.39804654458840      from nearest neighbour at I=         406
+ Lake surface temperature set to    281.90043254144797      from nearest neighbour at I=         415
+ Lake surface temperature set to    282.60212524708771      from nearest neighbour at I=         416
+ Lake surface temperature set to    282.81197711212661      from nearest neighbour at I=         445
+ Lake surface temperature set to    282.40369717707983      from nearest neighbour at I=         446
+ Lake surface temperature set to    281.93840647754888      from nearest neighbour at I=         454
+ Lake surface temperature set to    282.47851107663496      from nearest neighbour at I=         455
+ Lake surface temperature set to    282.80595208087544      from nearest neighbour at I=         483
+ Lake surface temperature set to    282.82303339847363      from nearest neighbour at I=         484
+ Lake surface temperature set to    282.38569866185640      from nearest neighbour at I=         485
+ Lake surface temperature set to    282.16717476775648      from nearest neighbour at I=         493
+ Lake surface temperature set to    282.08720671617363      from nearest neighbour at I=         494
+ Lake surface temperature set to    283.02552086667788      from nearest neighbour at I=         522
+ Lake surface temperature set to    283.03833287429342      from nearest neighbour at I=         523
+ Lake surface temperature set to    282.39807254069046      from nearest neighbour at I=         524
+ Lake surface temperature set to    282.39479529856663      from nearest neighbour at I=         525
+ Lake surface temperature set to    282.04226322490615      from nearest neighbour at I=         526
+ Lake surface temperature set to    282.20614373079201      from nearest neighbour at I=         532
+ Lake surface temperature set to    281.83521586273150      from nearest neighbour at I=         533
+ Lake surface temperature set to    282.99171695288021      from nearest neighbour at I=         561
+ Lake surface temperature set to    282.45961453522136      from nearest neighbour at I=         562
+ Lake surface temperature set to    282.45642274700327      from nearest neighbour at I=         563
+ Lake surface temperature set to    282.45958870920254      from nearest neighbour at I=         564
+ Lake surface temperature set to    282.08269563341628      from nearest neighbour at I=         565
+ Lake surface temperature set to    282.30010131964042      from nearest neighbour at I=         566
+ Lake surface temperature set to    282.43043229805352      from nearest neighbour at I=         571
+ Lake surface temperature set to    281.85138480943965      from nearest neighbour at I=         572
+ Lake surface temperature set to    281.81339310634303      from nearest neighbour at I=         573
+ Lake surface temperature set to    283.00233828640819      from nearest neighbour at I=         588
+ Lake surface temperature set to    282.61819650760185      from nearest neighbour at I=         600
+ Lake surface temperature set to    282.44181630137240      from nearest neighbour at I=         601
+ Lake surface temperature set to    282.45657232601155      from nearest neighbour at I=         603
+ Lake surface temperature set to    282.92812518549869      from nearest neighbour at I=         604
+ Lake surface temperature set to    282.24977931590803      from nearest neighbour at I=         611
+ Lake surface temperature set to    282.42973176550544      from nearest neighbour at I=         641
+ Lake surface temperature set to    282.45658797186849      from nearest neighbour at I=         642
+ Lake surface temperature set to    282.93069720493145      from nearest neighbour at I=         643
+ Lake surface temperature set to    282.92060221810004      from nearest neighbour at I=         644
+ Lake surface temperature set to    282.16466089310512      from nearest neighbour at I=         645
+ Lake surface temperature set to    282.31293703392510      from nearest neighbour at I=         648
+ Lake surface temperature set to    282.32889505678639      from nearest neighbour at I=         650
+ Lake surface temperature set to    282.53366247780713      from nearest neighbour at I=         680
+ Lake surface temperature set to    282.55337894678524      from nearest neighbour at I=         681
+ Lake surface temperature set to    282.11269785191485      from nearest neighbour at I=         682
+ Lake surface temperature set to    282.10208367047585      from nearest neighbour at I=         683
+ Lake surface temperature set to    282.49396401194150      from nearest neighbour at I=         718
+ Lake surface temperature set to    282.54895671754338      from nearest neighbour at I=         719
+ Lake surface temperature set to    282.07703716822385      from nearest neighbour at I=         720
+ Lake surface temperature set to    282.06314086716651      from nearest neighbour at I=         721
+ Lake surface temperature set to    282.05424075845195      from nearest neighbour at I=         722
+ Lake surface temperature set to    282.00146226542432      from nearest neighbour at I=         758
+ Lake surface temperature set to    282.06956901663858      from nearest neighbour at I=         759
+ Lake surface temperature set to    282.02083738651510      from nearest neighbour at I=         760
+ Lake surface temperature set to    282.13984788770074      from nearest neighbour at I=         761
+ Lake surface temperature set to    281.50180099756528      from nearest neighbour at I=         792
+ Lake surface temperature set to    282.66439399103422      from nearest neighbour at I=         857
+ Lake surface temperature set to    282.24225847631112      from nearest neighbour at I=         887
+ Lake surface temperature set to    282.14175260934309      from nearest neighbour at I=         925
+ Lake surface temperature set to    282.35926070079336      from nearest neighbour at I=         926
+ Lake surface temperature set to    282.01734977443738      from nearest neighbour at I=        1089
+ Lake surface temperature set to    280.20975560372131      from nearest neighbour at I=        1093
+ Lake surface temperature set to    278.57618346034468      from nearest neighbour at I=        1422
+ Mean LST increments over inland water    -0.11065382216834616     
+ *********************************************
+ *      ASSIMILATIONS FOR NATURE POINTS      *
+ *********************************************
+ UPDATE SNOW FROM ANALYSED CANARI VALUES
+ --------------------------------------------------------------------------
+ |                                                                        |
+ |                             ENTER OI_ASSIM                             |
+ |                                                                        |
+ --------------------------------------------------------------------------
+ value in PREP file => WG1         0.22788585100318920     
+ value in PREP file => WG2         0.22492234421740617     
+ value in PREP file => TG1          277.94972083986551     
+ value in PREP file => TG2          281.26270523078688     
+ value in PREP file => WGI2        5.62437416096227534E-006
+ value in PREP file => WSNOW_VEG1  9.89305071918293935E-003
+ value in PREP file => LAI         1.45137880986937600E+017
+ value in PREP file => VEG         0.84204903073745196     
+ value in PREP file => RSMIN       1.45137880986937600E+017
+ value in PREP file => DATA_DG2     1.7819020264425915     
+ value in PREP file => SAND         62.515292727741773     
+ value in PREP file => CLAY         12.627659851143839     
+  NUMBER OF ASCAT OBSERVATIONS AFTER INITIAL CHECKS  ::            0
+  NUMBER OF ASCAT OBSERVATIONS AFTER BACKGROUND CHECK  ::            0
+ Mean T2m increments     1.5687596283663701     
+ Mean HU2m increments  -3.20442679659805260E-002
+ PERFORMING OI SOIL ANALYSIS
+ ---------------------------------------------------------------
+ Mean WS increments over NATURE    0.0000000000000000     
+ Mean WP increments over NATURE   5.72334946388608620E-005
+ Mean TS increments over NATURE    1.5687596283663701     
+ Mean TP increments over NATURE   0.24967584937751189     
+ Mean TL increments over NATURE  -5.72334946388879603E-005
+ ---------------------------------------------------------------
+ UPDATE SNOW FROM ANALYSED OI_CACSTS VALUES
+  SURFRESERV.NEIGE - min, mean, max:    0.0000E+00   0.3399E+00   0.2898E-02
+ Mean SN increments over NATURE   -8.7937903344012565     
+ Surface temperature set to    277.94989746532019      from nearest neighbour at I=          13
+ Surface temperature set to    279.71171966970928      from nearest neighbour at I=          14
+ Surface temperature set to    277.94965681277574      from nearest neighbour at I=          52
+ Surface temperature set to    279.45500254789380      from nearest neighbour at I=          90
+ Surface temperature set to    278.20779985437980      from nearest neighbour at I=         243
+ Surface temperature set to    280.62251123717033      from nearest neighbour at I=         299
+ Surface temperature set to    280.50258239288081      from nearest neighbour at I=         338
+ Surface temperature set to    278.03154482887044      from nearest neighbour at I=         366
+ Surface temperature set to    279.35705265185123      from nearest neighbour at I=         376
+ Surface temperature set to    280.11786583793617      from nearest neighbour at I=         377
+ Surface temperature set to    281.79499304784241      from nearest neighbour at I=         397
+ Surface temperature set to    275.81453335304337      from nearest neighbour at I=         406
+ Surface temperature set to    279.39779861729721      from nearest neighbour at I=         415
+ Surface temperature set to    280.66401399201055      from nearest neighbour at I=         435
+ Surface temperature set to    275.08222158253892      from nearest neighbour at I=         446
+ Surface temperature set to    278.31859060729681      from nearest neighbour at I=         454
+ Surface temperature set to    279.38168376111179      from nearest neighbour at I=         455
+ Surface temperature set to    278.95800037250496      from nearest neighbour at I=         468
+ Surface temperature set to    278.59038215866326      from nearest neighbour at I=         473
+ Surface temperature set to    281.33800888449775      from nearest neighbour at I=         474
+ Surface temperature set to    276.17427539121576      from nearest neighbour at I=         485
+ Surface temperature set to    279.58144799035250      from nearest neighbour at I=         493
+ Surface temperature set to    275.88804586089719      from nearest neighbour at I=         494
+ Surface temperature set to    276.41654344741443      from nearest neighbour at I=         507
+ Surface temperature set to    278.59179933423945      from nearest neighbour at I=         511
+ Surface temperature set to    276.18664927004983      from nearest neighbour at I=         524
+ Surface temperature set to    276.18337202792600      from nearest neighbour at I=         525
+ Surface temperature set to    277.86467750152275      from nearest neighbour at I=         526
+ Surface temperature set to    279.45436594822678      from nearest neighbour at I=         532
+ Surface temperature set to    276.12952751412251      from nearest neighbour at I=         533
+ Surface temperature set to    280.39808508499857      from nearest neighbour at I=         549
+ Surface temperature set to    275.57766521620283      from nearest neighbour at I=         566
+ Surface temperature set to    280.04927553149696      from nearest neighbour at I=         571
+ Surface temperature set to    276.02569163187161      from nearest neighbour at I=         573
+ Surface temperature set to    280.42358398931901      from nearest neighbour at I=         588
+ Surface temperature set to    280.40306969894885      from nearest neighbour at I=         600
+ Surface temperature set to    279.71689102997510      from nearest neighbour at I=         601
+ Surface temperature set to    278.14985091856937      from nearest neighbour at I=         604
+ Surface temperature set to    279.36020357193894      from nearest neighbour at I=         611
+ Surface temperature set to    280.76704401149186      from nearest neighbour at I=         626
+ Surface temperature set to    279.70480649410814      from nearest neighbour at I=         641
+ Surface temperature set to    278.37285440787548      from nearest neighbour at I=         645
+ Surface temperature set to    280.53528670956689      from nearest neighbour at I=         648
+ Surface temperature set to    280.40297866788046      from nearest neighbour at I=         650
+ Surface temperature set to    277.54815525600731      from nearest neighbour at I=         683
+ Surface temperature set to    281.00786602424500      from nearest neighbour at I=         718
+ Surface temperature set to    278.34421409769357      from nearest neighbour at I=         722
+ Surface temperature set to    277.90778743525419      from nearest neighbour at I=         739
+ Surface temperature set to    280.82294928418793      from nearest neighbour at I=         758
+ Surface temperature set to    280.62134032277294      from nearest neighbour at I=         759
+ Surface temperature set to    279.82842883542565      from nearest neighbour at I=         761
+ Surface temperature set to    278.43207063050295      from nearest neighbour at I=         778
+ Surface temperature set to    280.54101719047986      from nearest neighbour at I=         792
+ Surface temperature set to    281.25062223427693      from nearest neighbour at I=         857
+ Surface temperature set to    281.12274460158750      from nearest neighbour at I=         887
+ Surface temperature set to    281.25737907250601      from nearest neighbour at I=         897
+ Surface temperature set to    280.03768308435912      from nearest neighbour at I=         925
+ Surface temperature set to    281.32732171043290      from nearest neighbour at I=         926
+ Surface temperature set to    278.01731509494795      from nearest neighbour at I=         936
+ Surface temperature set to    278.81175112716994      from nearest neighbour at I=        1089
+ Surface temperature set to    279.64314758293062      from nearest neighbour at I=        1093
+ Surface temperature set to    279.87970979038221      from nearest neighbour at I=        1422
+ Surface temperature set to    281.62551872928395      from nearest neighbour at I=        1520
+ *********************************************
+ *      ASSIMILATIONS FOR URBAN POINTS       *
+ *********************************************
+ UPDATING TOWN FOR SCHEME: TEB
+ Mean T2m increments over TOWN    1.8169499291758091     
+ Mean T_ROAD3 increments over TOWN    1.8169499291758091     
+  
+     -----------------------
+     | SODA ENDS CORRECTLY |
+     -----------------------

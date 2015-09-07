@@ -57,6 +57,7 @@ END IF
 IF ( I%TSNOW%SCHEME=='D95' ) THEN
   JL = 1
   JP = 1
+  IF ( I%NPATCH > 1 ) CALL ABOR1_SFX("Update of snow is only implemented for D95 and one patch")
 ELSE
   CALL ABOR1_SFX("Update of snow is only implemented for D95")
 ENDIF

@@ -1,0 +1,582 @@
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+  
+     ----------------------
+     | PGD ENDS CORRECTLY |
+     ----------------------
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+  
+     -----------------------
+     | PREP ENDS CORRECTLY |
+     -----------------------
+Running offline
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_19h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_20h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_21h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_22h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20080930_23h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_00h00                                                    
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+
+    ------------------------------------
+    |               SODA               |
+    | SURFEX OFFLINE DATA ASSIMILATION |
+    ------------------------------------
+
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ INITIALIZING SURFEX...
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ READING input files...
+ READ FG_OI_MAIN OK
+ READ CANARI OK
+ READ CLIMATOLOGY OK
+ READING SST FROM SST_SIC
+ READ SST_SIC OK
+   ECMWF_SST_SIC
+  SURFSEA.TEMPERA - min, mean, max:    0.2855E+03   0.2863E+03   0.2880E+03
+   Replaced land by UNDEF 
+  SST            - min, mean, max:    0.2855E+03   0.2863E+03   0.2880E+03
+ PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...
+ *********************************************
+ *      ASSIMILATIONS FOR SEA POINTS         *
+ *********************************************
+ UPDATING SST FOR SCHEME: SEAFLX
+ Mean SST increments over SEA     0.52200679072390921     
+ *********************************************
+ *      ASSIMILATIONS FOR WATER POINTS       *
+ *********************************************
+ UPDATING LST FOR INLAND_WATER SCHEME : WATFLX
+ Lake surface temperature set to    282.73852214389893      from nearest neighbour at I=         299
+ Lake surface temperature set to    282.74561901507070      from nearest neighbour at I=         338
+ Lake surface temperature set to    282.35893151127277      from nearest neighbour at I=         366
+ Lake surface temperature set to    283.08453687067208      from nearest neighbour at I=         376
+ Lake surface temperature set to    282.65848194997409      from nearest neighbour at I=         377
+ Lake surface temperature set to    282.39804643684425      from nearest neighbour at I=         406
+ Lake surface temperature set to    281.90043279187898      from nearest neighbour at I=         415
+ Lake surface temperature set to    282.60212526582353      from nearest neighbour at I=         416
+ Lake surface temperature set to    282.81197703939927      from nearest neighbour at I=         445
+ Lake surface temperature set to    282.40369698488456      from nearest neighbour at I=         446
+ Lake surface temperature set to    281.93840672797990      from nearest neighbour at I=         454
+ Lake surface temperature set to    282.47851114799244      from nearest neighbour at I=         455
+ Lake surface temperature set to    282.80595200814810      from nearest neighbour at I=         483
+ Lake surface temperature set to    282.82303332574628      from nearest neighbour at I=         484
+ Lake surface temperature set to    282.38569864239440      from nearest neighbour at I=         485
+ Lake surface temperature set to    282.16717501869084      from nearest neighbour at I=         493
+ Lake surface temperature set to    282.08720687290895      from nearest neighbour at I=         494
+ Lake surface temperature set to    283.02552083973131      from nearest neighbour at I=         522
+ Lake surface temperature set to    283.03833284734685      from nearest neighbour at I=         523
+ Lake surface temperature set to    282.39807252122847      from nearest neighbour at I=         524
+ Lake surface temperature set to    282.39479527910464      from nearest neighbour at I=         525
+ Lake surface temperature set to    282.04226297682163      from nearest neighbour at I=         526
+ Lake surface temperature set to    282.20614349980661      from nearest neighbour at I=         532
+ Lake surface temperature set to    281.83521582007097      from nearest neighbour at I=         533
+ Lake surface temperature set to    282.99171682351187      from nearest neighbour at I=         561
+ Lake surface temperature set to    282.45961449445383      from nearest neighbour at I=         562
+ Lake surface temperature set to    282.45642270623574      from nearest neighbour at I=         563
+ Lake surface temperature set to    282.45958866843500      from nearest neighbour at I=         564
+ Lake surface temperature set to    282.08269538533176      from nearest neighbour at I=         565
+ Lake surface temperature set to    282.30010141392899      from nearest neighbour at I=         566
+ Lake surface temperature set to    282.43043215444317      from nearest neighbour at I=         571
+ Lake surface temperature set to    281.85138476677912      from nearest neighbour at I=         572
+ Lake surface temperature set to    281.81339306368250      from nearest neighbour at I=         573
+ Lake surface temperature set to    283.00233852176177      from nearest neighbour at I=         588
+ Lake surface temperature set to    282.61819657357586      from nearest neighbour at I=         600
+ Lake surface temperature set to    282.44181626060487      from nearest neighbour at I=         601
+ Lake surface temperature set to    282.45657228524402      from nearest neighbour at I=         603
+ Lake surface temperature set to    282.92812527247992      from nearest neighbour at I=         604
+ Lake surface temperature set to    282.24977924697862      from nearest neighbour at I=         611
+ Lake surface temperature set to    282.42973172473791      from nearest neighbour at I=         641
+ Lake surface temperature set to    282.45658793110096      from nearest neighbour at I=         642
+ Lake surface temperature set to    282.93069729191268      from nearest neighbour at I=         643
+ Lake surface temperature set to    282.92060230508127      from nearest neighbour at I=         644
+ Lake surface temperature set to    282.16466109052607      from nearest neighbour at I=         645
+ Lake surface temperature set to    282.31293719300692      from nearest neighbour at I=         648
+ Lake surface temperature set to    282.32889493281516      from nearest neighbour at I=         650
+ Lake surface temperature set to    282.53366226926221      from nearest neighbour at I=         680
+ Lake surface temperature set to    282.55337873824033      from nearest neighbour at I=         681
+ Lake surface temperature set to    282.11269808827694      from nearest neighbour at I=         682
+ Lake surface temperature set to    282.10208390683795      from nearest neighbour at I=         683
+ Lake surface temperature set to    282.49396380339658      from nearest neighbour at I=         718
+ Lake surface temperature set to    282.54895650899846      from nearest neighbour at I=         719
+ Lake surface temperature set to    282.07703699476491      from nearest neighbour at I=         720
+ Lake surface temperature set to    282.06314102296426      from nearest neighbour at I=         721
+ Lake surface temperature set to    282.05424091424970      from nearest neighbour at I=         722
+ Lake surface temperature set to    282.00146231251335      from nearest neighbour at I=         758
+ Lake surface temperature set to    282.06956884317964      from nearest neighbour at I=         759
+ Lake surface temperature set to    282.02083732551512      from nearest neighbour at I=         760
+ Lake surface temperature set to    282.13984783176306      from nearest neighbour at I=         761
+ Lake surface temperature set to    281.50180077808028      from nearest neighbour at I=         792
+ Lake surface temperature set to    282.66439411394038      from nearest neighbour at I=         857
+ Lake surface temperature set to    282.24225842775212      from nearest neighbour at I=         887
+ Lake surface temperature set to    282.14175236987376      from nearest neighbour at I=         925
+ Lake surface temperature set to    282.35926045897065      from nearest neighbour at I=         926
+ Lake surface temperature set to    282.01734954101170      from nearest neighbour at I=        1089
+ Lake surface temperature set to    280.20975563792456      from nearest neighbour at I=        1093
+ Lake surface temperature set to    278.57618358410406      from nearest neighbour at I=        1422
+ Mean LST increments over inland water    -0.11065381728297860     
+ *********************************************
+ *      ASSIMILATIONS FOR NATURE POINTS      *
+ *********************************************
+ UPDATE SNOW FROM ANALYSED CANARI VALUES
+ --------------------------------------------------------------------------
+ |                                                                        |
+ |                             ENTER OI_ASSIM                             |
+ |                                                                        |
+ --------------------------------------------------------------------------
+ value in PREP file => WG1         0.22788585088372620     
+ value in PREP file => WG2         0.22492234430033609     
+ value in PREP file => TG1          277.94972083685775     
+ value in PREP file => TG2          281.26270523791396     
+ value in PREP file => WGI2        5.62437415242040208E-006
+ value in PREP file => WSNOW_VEG1  9.89305071918293935E-003
+ value in PREP file => LAI         1.45137880986937600E+017
+ value in PREP file => VEG         0.84204903073745196     
+ value in PREP file => RSMIN       1.45137880986937600E+017
+ value in PREP file => DATA_DG2     1.7819020264425915     
+ value in PREP file => SAND         62.515292727741773     
+ value in PREP file => CLAY         12.627659851143839     
+  NUMBER OF ASCAT OBSERVATIONS AFTER INITIAL CHECKS  ::            0
+  NUMBER OF ASCAT OBSERVATIONS AFTER BACKGROUND CHECK  ::            0
+ Mean T2m increments     1.5687596220688680     
+ Mean HU2m increments  -3.20442679740107345E-002
+ PERFORMING OI SOIL ANALYSIS
+ ---------------------------------------------------------------
+ Mean WS increments over NATURE    0.0000000000000000     
+ Mean WP increments over NATURE   5.72334949571510086E-005
+ Mean TS increments over NATURE    1.5687596220688680     
+ Mean TP increments over NATURE   0.24967584837523374     
+ Mean TL increments over NATURE  -5.72334949571040558E-005
+ ---------------------------------------------------------------
+ UPDATE SNOW FROM ANALYSED OI_CACSTS VALUES
+  SURFRESERV.NEIGE - min, mean, max:    0.0000E+00   0.3399E+00   0.2898E-02
+ Mean SN increments over NATURE   -8.7937903318306372     
+ Surface temperature set to    277.94989703574089      from nearest neighbour at I=          13
+ Surface temperature set to    279.71171924802104      from nearest neighbour at I=          14
+ Surface temperature set to    277.94965638319644      from nearest neighbour at I=          52
+ Surface temperature set to    279.45500245077136      from nearest neighbour at I=          90
+ Surface temperature set to    278.20779989066921      from nearest neighbour at I=         243
+ Surface temperature set to    280.62251084541083      from nearest neighbour at I=         299
+ Surface temperature set to    280.50258275414404      from nearest neighbour at I=         338
+ Surface temperature set to    278.03154464577852      from nearest neighbour at I=         366
+ Surface temperature set to    279.35705271405391      from nearest neighbour at I=         376
+ Surface temperature set to    280.11786585170671      from nearest neighbour at I=         377
+ Surface temperature set to    281.79499271068784      from nearest neighbour at I=         397
+ Surface temperature set to    275.81453364235938      from nearest neighbour at I=         406
+ Surface temperature set to    279.39779871252841      from nearest neighbour at I=         415
+ Surface temperature set to    280.66401343746611      from nearest neighbour at I=         435
+ Surface temperature set to    275.08222157507407      from nearest neighbour at I=         446
+ Surface temperature set to    278.31859043284544      from nearest neighbour at I=         454
+ Surface temperature set to    279.38168403054681      from nearest neighbour at I=         455
+ Surface temperature set to    278.95800048226386      from nearest neighbour at I=         468
+ Surface temperature set to    278.59038247356250      from nearest neighbour at I=         473
+ Surface temperature set to    281.33800884740549      from nearest neighbour at I=         474
+ Surface temperature set to    276.17427538122678      from nearest neighbour at I=         485
+ Surface temperature set to    279.58144832531542      from nearest neighbour at I=         493
+ Surface temperature set to    275.88804564637627      from nearest neighbour at I=         494
+ Surface temperature set to    276.41654388013211      from nearest neighbour at I=         507
+ Surface temperature set to    278.59179964913869      from nearest neighbour at I=         511
+ Surface temperature set to    276.18664926006085      from nearest neighbour at I=         524
+ Surface temperature set to    276.18337201793702      from nearest neighbour at I=         525
+ Surface temperature set to    277.86467782380060      from nearest neighbour at I=         526
+ Surface temperature set to    279.45436605372282      from nearest neighbour at I=         532
+ Surface temperature set to    276.12952715296194      from nearest neighbour at I=         533
+ Surface temperature set to    280.39808550193868      from nearest neighbour at I=         549
+ Surface temperature set to    275.57766516873926      from nearest neighbour at I=         566
+ Surface temperature set to    280.04927591866397      from nearest neighbour at I=         571
+ Surface temperature set to    276.02569149541887      from nearest neighbour at I=         573
+ Surface temperature set to    280.42358411991432      from nearest neighbour at I=         588
+ Surface temperature set to    280.40307015830859      from nearest neighbour at I=         600
+ Surface temperature set to    279.71689078882673      from nearest neighbour at I=         601
+ Surface temperature set to    278.14985065559461      from nearest neighbour at I=         604
+ Surface temperature set to    279.36020359664712      from nearest neighbour at I=         611
+ Surface temperature set to    280.76704381362504      from nearest neighbour at I=         626
+ Surface temperature set to    279.70480625295977      from nearest neighbour at I=         641
+ Surface temperature set to    278.37285407015372      from nearest neighbour at I=         645
+ Surface temperature set to    280.53528720383161      from nearest neighbour at I=         648
+ Surface temperature set to    280.40297853113805      from nearest neighbour at I=         650
+ Surface temperature set to    277.54815519071815      from nearest neighbour at I=         683
+ Surface temperature set to    281.00786646586999      from nearest neighbour at I=         718
+ Surface temperature set to    278.34421390707558      from nearest neighbour at I=         722
+ Surface temperature set to    277.90778772724343      from nearest neighbour at I=         739
+ Surface temperature set to    280.82294883735318      from nearest neighbour at I=         758
+ Surface temperature set to    280.62134028447025      from nearest neighbour at I=         759
+ Surface temperature set to    279.82842885541402      from nearest neighbour at I=         761
+ Surface temperature set to    278.43207055990877      from nearest neighbour at I=         778
+ Surface temperature set to    280.54101685020123      from nearest neighbour at I=         792
+ Surface temperature set to    281.25062231695233      from nearest neighbour at I=         857
+ Surface temperature set to    281.12274466116457      from nearest neighbour at I=         887
+ Surface temperature set to    281.25737915518141      from nearest neighbour at I=         897
+ Surface temperature set to    280.03768308945678      from nearest neighbour at I=         925
+ Surface temperature set to    281.32732114146938      from nearest neighbour at I=         926
+ Surface temperature set to    278.01731498379797      from nearest neighbour at I=         936
+ Surface temperature set to    278.81175071025842      from nearest neighbour at I=        1089
+ Surface temperature set to    279.64314800531065      from nearest neighbour at I=        1093
+ Surface temperature set to    279.87970976575099      from nearest neighbour at I=        1422
+ Surface temperature set to    281.62551858850719      from nearest neighbour at I=        1520
+ *********************************************
+ *      ASSIMILATIONS FOR URBAN POINTS       *
+ *********************************************
+ UPDATING TOWN FOR SCHEME: TEB
+ Mean T2m increments over TOWN    1.8169499195232266     
+ Mean T_ROAD3 increments over TOWN    1.8169499195232266     
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20081001_12h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+  
+     -----------------------
+     | SODA ENDS CORRECTLY |
+     -----------------------
