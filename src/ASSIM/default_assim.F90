@@ -1,24 +1,21 @@
 !     #########
-      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_ISBA,KPRINTLEV,         &
-                               OAROME,OECSST,OAESST,OAESNM,                 &
-                               OALADSURF,OREAD_SST_FROM_FILE,               &
-                               HFILE_FORMAT_SST,OEXTRAP_SEA,                &
-                               OEXTRAP_WATER,OEXTRAP_NATURE,                &
-                               OWATERTG2,KBOUTPUT,KECHGU,PRCLIMCA,          &
-                               PRCLISST,PSIGH2MO,PSIGT2MO,PSIGWGO,          &
-                               PSIGWGB,PSIGW2B,OOBSWG,OOBS2M,OIMVEG,        &
-                               PSPRECIP2,PRTHR_QC,PSIGWGO_MAX,              &
-                               PRSCAL_JAC,OPRT,OSIM,OBEV,OBFIXED,           &
-                               KOBSTYPE,OOBSHEADER,HFILE_FORMAT_OBS,        &
-                               HFILE_FORMAT_FG,HFILE_FORMAT_LSM,            &
-                               HFILE_FORMAT_CLIM,PERROBS_M,PQCOBS_M,        &
-                               KNCO,KIVAR,KVAR,HVAR_M,HPREFIX_M,            &
-                               PSIGMA_M,PTPRT_M,KNCV,PSCALE_Q,              &
-                               PSCALE_QLAI,HBIO,HPREFIX_BIO,PALPH,          &
-                               KENS,KIE,PINFL_M,PADDINFL_M, PASSIM_WINH,    &
-                               PADDTIMECORR_M,OENS_GEN,OPB_CORRELATIONS,    &
-                               OPERTURBATION_RUN,OBIAS_CORRECTION,          &
-                               OENKF,ODENKF,HTEST)
+      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_ISBA,KPRINTLEV,     &
+                               OAROME,OECSST,OAESST,OAESNM,             &
+                               OALADSURF,OREAD_SST_FROM_FILE,           &
+                               OEXTRAP_SEA,OEXTRAP_WATER,OEXTRAP_NATURE,&
+                               OWATERTG2,KBOUTPUT,KECHGU,PRCLIMCA,      &
+                               PRCLISST,PSIGH2MO,PSIGT2MO,PSIGWGO,      &
+                               PSIGWGB,PSIGW2B,OOBSWG,OOBS2M,OIMVEG,    &
+                               PSPRECIP2,PRTHR_QC,PSIGWGO_MAX,          &
+                               PRSCAL_JAC,OPRT,OSIM,OBEV,OBFIXED,       &
+                               KOBSTYPE,OOBSFILE,PERROBS_M,PQCOBS_M,    &
+                               KNCO,KIVAR,KVAR,HVAR_M,HPREFIX_M,        &
+                               PSIGMA_M,PTPRT_M,KNCV,PSCALE_Q,          &
+                               PSCALE_QLAI,HBIO,HPREFIX_BIO,PALPH,      &
+                               KENS,KIE,PINFL_M,PADDINFL_M, PASSIM_WINH,&
+                               PADDTIMECORR_M,OENS_GEN,OPB_CORRELATIONS,&
+                               OPERTURBATION_RUN,OBIAS_CORRECTION,      &
+                               OENKF,ODENKF )
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA assimilation scheme
@@ -72,7 +69,6 @@ LOGICAL,           INTENT(OUT) :: OAESST
 LOGICAL,           INTENT(OUT) :: OAESNM
 LOGICAL,           INTENT(OUT) :: OALADSURF
 LOGICAL,           INTENT(OUT) :: OREAD_SST_FROM_FILE
-CHARACTER(LEN=6),  INTENT(OUT) :: HFILE_FORMAT_SST
 LOGICAL,           INTENT(OUT) :: OEXTRAP_SEA
 LOGICAL,           INTENT(OUT) :: OEXTRAP_WATER
 LOGICAL,           INTENT(OUT) :: OEXTRAP_NATURE
@@ -101,11 +97,7 @@ LOGICAL,           INTENT(OUT) :: OBEV
 LOGICAL,           INTENT(OUT) :: OBFIXED
 !
 INTEGER,             INTENT(OUT) :: KOBSTYPE
-LOGICAL,             INTENT(OUT) :: OOBSHEADER
-CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_OBS
-CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_FG
-CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_LSM
-CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_CLIM
+LOGICAL,             INTENT(OUT) :: OOBSFILE
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PERROBS_M
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PQCOBS_M
 INTEGER, DIMENSION(NOBSMAX), INTENT(OUT) :: KNCO
@@ -135,17 +127,11 @@ LOGICAL, INTENT(OUT) :: OENS_GEN
 LOGICAL, INTENT(OUT) :: OPB_CORRELATIONS
 LOGICAL, INTENT(OUT) :: OPERTURBATION_RUN
 LOGICAL, INTENT(OUT) :: OBIAS_CORRECTION
-CHARACTER(LEN=2),   INTENT(IN) :: HTEST
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DEFAULT_ASSIM',0,ZHOOK_HANDLE)
-
-IF (HTEST/='OK') THEN
-  CALL ABOR1_SFX('default_assim: FATAL ERROR DURING ARGUMENT TRANSFER')
-END IF
-
 !
 OASSIM    = .FALSE.
 HASSIM    = "PLUS "
@@ -157,12 +143,10 @@ OAESST    = .FALSE.
 OAESNM    = .FALSE.
 OALADSURF = .TRUE.
 OREAD_SST_FROM_FILE=.FALSE.
-HFILE_FORMAT_SST = "FA    "
 OEXTRAP_SEA    = .TRUE.
 OEXTRAP_WATER  = .TRUE.
 OEXTRAP_NATURE = .FALSE.
 OWATERTG2      = .FALSE.
-
 KBOUTPUT = 1
 !
 KECHGU = 6
@@ -196,13 +180,10 @@ OBEV = .TRUE.
 OBFIXED = .FALSE.
 !
 KOBSTYPE = 2
-OOBSHEADER = .FALSE.
-HFILE_FORMAT_OBS = "FA    "
-HFILE_FORMAT_FG = "FA    "
-HFILE_FORMAT_LSM = "FA    "
-HFILE_FORMAT_CLIM = "FA    "
-PERROBS_M = (/1.0,0.1,0.4,0.2,0.1/)
-KNCO = (/1,1,0,0,0/)
+OOBSFILE = .FALSE.
+PERROBS_M = (/1.0,0.1,0.4,0.2/)
+PQCOBS_M = (/999.,999.,999.,999./)
+KNCO = (/1,1,0,0/)
 !
 KIVAR = 1
 KVAR = 4

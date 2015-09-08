@@ -246,14 +246,8 @@ CALL OI_BC_SOIL_MOISTURE(KI,ZSM_O,ZSAB,ZWS_O)
 !
 !
 ! Screen-level innovations
-ZT2INC=0.
-WHERE ( PT2M_O(:) /= 999.0 ) 
-  ZT2INC(:) = PT2M_O (:) - ZTCLS(:)
-END WHERE
-ZH2INC=0.
-WHERE ( PHU2M_O(:) /= 999.0 ) 
-  ZH2INC(:) = PHU2M_O(:) - ZHCLS(:)
-END WHERE
+ZT2INC(:) = PT2M_O (:) - ZTCLS(:)
+ZH2INC(:) = PHU2M_O(:) - ZHCLS(:)
 !
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone

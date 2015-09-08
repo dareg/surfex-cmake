@@ -7,7 +7,7 @@ PROGRAM SODA
 !!
 !!    PURPOSE
 !!    -------
-!!    Program to perform surface data assimilation within SURFEX 
+!!    Program to perform surface data within SURFEX 
 !!
 !!
 !!    METHOD
@@ -142,11 +142,8 @@ USE MODD_ISBA_n, ONLY : I => ISBA
 !
 USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
                        NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU, XI,  &
-                       XLAI_PASS, XBIO_PASS, CBIO, NIVAR, XYO, NIFIC, &
-                       NOBS, NPRINTLEV, LREAD_ALL, NENS,LBIAS_CORRECTION, &
-                       LEXTRAP_SEA,LEXTRAP_WATER,LEXTRAP_NATURE,LOBSHEADER,NOBSMAX, &
-                       CFILE_FORMAT_FG,CFILE_FORMAT_LSM,CFILE_FORMAT_OBS,CFILE_FORMAT_CLIM,&
-                       NNCO
+                       NBOUTPUT, XLAI_PASS, XBIO_PASS, CBIO, NIVAR, XYO, NIFIC, &
+                       NOBS, LOBSFILE, NPRINTLEV, LREAD_ALL, NENS,LBIAS_CORRECTION
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
@@ -164,6 +161,7 @@ USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE, XSTARTW, XCOUNTW, LTIME_WRI
                             LDEFINED_TOWN, LDEFINED_SURF_ATM, LPARTW
                             
 #endif
+!
 #ifdef SFX_NC
 USE MODD_IO_SURF_NC,   ONLY : CFILEIN_NC, CFILEIN_NC_SAVE, CFILEPGD_NC, CFILEOUT_NC, LDEF, &
                               CLUOUT_NC
@@ -227,23 +225,22 @@ INCLUDE 'mpif.h'
 !*    0.     Declaration of local variables
 !            ------------------------------
 !
-CHARACTER(LEN=200) :: YMFILE     ! Name of the observation, perturbed or reference file!
-CHARACTER(LEN=3)   :: YINIT
-CHARACTER(LEN=2), PARAMETER  :: YTEST        = 'OK'          ! must be equal to 'OK'
-CHARACTER(LEN=28)            :: YATMFILE  ='   '  ! name of the Atmospheric file
-CHARACTER(LEN=6)             :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
-CHARACTER(LEN=28)            :: YLUOUT    ='LISTING_SODA                '  ! name of listing
-CHARACTER(LEN=6)             :: YPROGRAM2 = 'FA    '
-CHARACTER(LEN=28)            :: YFILEIN
-CHARACTER                    :: YVAR
+ CHARACTER(LEN=200) :: YMFILE     ! Name of the observation, perturbed or reference file!
+ CHARACTER(LEN=3)  :: YINIT
+ CHARACTER(LEN=2), PARAMETER  :: YTEST        = 'OK'          ! must be equal to 'OK'
+ CHARACTER(LEN=28)            :: YATMFILE  ='   '  ! name of the Atmospheric file
+ CHARACTER(LEN=6)             :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+ CHARACTER(LEN=28)            :: YLUOUT    ='LISTING_SODA                '  ! name of listing
+ CHARACTER(LEN=6)             :: YPROGRAM2 = 'FA    '
+ CHARACTER(LEN=28)            :: YFILEIN
+ CHARACTER(LEN=3)             :: YVAR
 !
-CHARACTER(LEN=100) :: YNAME
-CHARACTER(LEN=10)  :: YRANK
-CHARACTER(LEN=3)   :: YENS
-CHARACTER(LEN=10),DIMENSION(:), ALLOCATABLE  :: COBSINFILE     ! Identifier for simulated observations in file
-
+ CHARACTER(LEN=100) :: YNAME
+ CHARACTER(LEN=10)  :: YRANK
+ CHARACTER(LEN=3) :: YENS
 !
-REAL,ALLOCATABLE, DIMENSION(:,:) :: ZWORK
+REAL,ALLOCATABLE, DIMENSION(:,:) :: ZYO_NAT, ZYO
+REAL,ALLOCATABLE, DIMENSION(:)   :: ZNATURE
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZLSM                ! Land-Sea mask
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZCON_RAIN           ! Amount of convective liquid precipitation
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZSTRAT_RAIN         ! Amount of stratiform liquid precipitation
@@ -279,6 +276,7 @@ TYPE (DATE_TIME)                 :: TTIME               ! Current date and time
 !
 INTEGER, DIMENSION(11)  :: IDATEF
 INTEGER :: IDIM_FULL
+INTEGER :: INI          ! grid dimension
 INTEGER :: ISV                 ! Number of scalar species
 INTEGER :: ISW                 ! Number of radiative bands 
 INTEGER :: IYEAR, IMONTH, IDAY, IHOUR
@@ -286,14 +284,14 @@ INTEGER :: IYEAR_OUT, IMONTH_OUT, IDAY_OUT
 INTEGER :: JL,JI,JJ,INB,ICPT
 INTEGER :: INW, JNW
 INTEGER :: ISTEP
-INTEGER :: IOBS
+INTEGER :: IOBS, IIOBS
 INTEGER :: IGPCOMP
 INTEGER :: ILUOUT
 INTEGER :: ILUNAM
 INTEGER :: IRET, INBFA
 INTEGER :: IRESP, ISTAT               ! Response value
 INTEGER :: INFOMPI, ILEVEL
-INTEGER :: ISIZE, IENS,NSIZE_FULL
+INTEGER :: ISIZE, IENS
 !
 ! Flag diag :
 !
@@ -305,27 +303,27 @@ LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
 !
 REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 ! ******************************************************************************************
-
+!
 INFOMPI=1
-
+!
 #ifdef SFX_MPI
-CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
+ CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
 #endif
-
+!
 IF (LHOOK) CALL DR_HOOK('SODA',0,ZHOOK_HANDLE)
-
-CSOFTWARE = 'SODA'
-
+!
+ CSOFTWARE = 'SODA'
+!
 #ifdef SFX_MPI
 NCOMM = MPI_COMM_WORLD
-CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
-CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
+ CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
+ CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
-
-CALL PREP_LOG_MPI
-
+!
+ CALL PREP_LOG_MPI
+!
 !--------------------------------------
-
+!
 IF (NRANK==NPIO) THEN
   WRITE(*,*)
   WRITE(*,*) '   ------------------------------------'
@@ -334,10 +332,10 @@ IF (NRANK==NPIO) THEN
   WRITE(*,*) '   ------------------------------------'
   WRITE(*,*)
 ENDIF
-
+!
 WRITE(YRANK,FMT='(I10)') NRANK
 YNAME=TRIM(YLUOUT)//ADJUSTL(YRANK)
-
+!
 ! Open ascii outputfile for writing
 #ifdef SFX_LFI
 CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
@@ -345,30 +343,28 @@ CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
 #ifdef SFX_NC
 CLUOUT_NC = ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
 #endif
-CALL GET_LUOUT('ASCII ',ILUOUT)
+ CALL GET_LUOUT('ASCII ',ILUOUT)
 OPEN(UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YNAME)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
-
+!
 ! Read offline specific things
-CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
-
-CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
+ CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
+ CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
-CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
-
+ CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+!
 IF (NPROC==1) THEN 
   XIO_FRAC=1.
 ELSE
   XIO_FRAC = MAX(MIN(XIO_FRAC,1.),0.)
 ENDIF
-
-! Check validity of NAM_IO_OFFLINE settings
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CSURF_FILETYPE',CSURF_FILETYPE,'ASCII ','LFI   ','FA    ','NC    ')
-CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
-                                                                          'ASCII ','LFI   ','FA    ',&
-                                                                          'NONE  ','OFFLIN','NC    ')  
-
+!
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CSURF_FILETYPE',CSURF_FILETYPE,'ASCII ','LFI   ','FA    ','NC    ')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
+                                                                            'ASCII ','LFI   ','FA    ',&
+                                                                            'NONE  ','OFFLIN','NC    ')  
+!
 IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
-
+!
 ! Setting input files read from namelist
 IF ( CSURF_FILETYPE == "LFI   " ) THEN
 #ifdef SFX_LFI
@@ -398,8 +394,7 @@ ELSEIF ( CSURF_FILETYPE == "NC    " ) THEN
 ELSE
   CALL ABOR1_SFX(TRIM(CSURF_FILETYPE)//" is not implemented!")
 ENDIF
-
-
+!
 ! Allocation of Surfex Types
 CALL ALLOC_SURFEX(1)
 !
@@ -408,11 +403,9 @@ CALL READ_ALL_NAMELISTS(CHF, CHI, CHS, CHU, CHT, CHW, &
                         DGEI, DGF, DGL, DGI, DGMF, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
                         F, I, O, S, USS, TGRO, T, TOP, TVG, W, &
                         CSURF_FILETYPE,'ALL',.FALSE.)
-
+!
 CPROGNAME = CSURF_FILETYPE
-LREAD_ALL = .TRUE.
-
-! Initialization netcdf file handling
+!
 IF (NRANK==NPIO) THEN
   !
   XSTART            = NUNDEF
@@ -426,546 +419,408 @@ IF (NRANK==NPIO) THEN
   LDEFINED_TOWN     = .FALSE.
   LDEFINED_WATER    = .FALSE.
   LDEFINED_SEA      = .FALSE.
+  !
 ENDIF
-
+!
+LREAD_ALL = .TRUE.
+!
 ! Go to SURFEX
 CALL GOTO_SURFEX(1,.TRUE.)
-
+!
 CALL INIT_INDEX_MPI(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
                     DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
                     DGT, DGUT, DGW, F, FSB, GB, IOB, ICP, I, O, S, &
                     SSB, UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, &
                     TVG, W, WSB, &
                     CSURF_FILETYPE, YALG_MPI, XIO_FRAC, .FALSE.)
-
-
+!
+!
 ! Initialize time information
 IYEAR    = NUNDEF
 IMONTH   = NUNDEF
 IDAY     = NUNDEF
 ZTIME    = XUNDEF
-
-CALL SET_SURFEX_FILEIN(CSURF_FILETYPE,'PREP')
-CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
-                    DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
-                    F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
-                    TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
-                    CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
-CALL READ_SURF(IOB, &
-               CSURF_FILETYPE,'DIM_FULL  ',IDIM_FULL,  IRESP)
-CALL READ_SURF(IOB, &
-               CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
-CALL END_IO_SURF_n(CSURF_FILETYPE)
-
-CALL GET_SIZE_FULL_n(U,CSURF_FILETYPE,IDIM_FULL,NSIZE_FULL)
-
+ CALL SET_SURFEX_FILEIN(CSURF_FILETYPE,'PREP')
+ CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
+ CALL READ_SURF(IOB, &
+                CSURF_FILETYPE,'DIM_FULL  ',IDIM_FULL,  IRESP)
+ CALL READ_SURF(IOB, &
+                CSURF_FILETYPE,'DTCUR     ',TTIME,  IRESP)
+ CALL END_IO_SURF_n(CSURF_FILETYPE)
+!
+ CALL GET_SIZE_FULL_n(U,CSURF_FILETYPE,IDIM_FULL,INI)
+!
 IF (ALLOCATED(NMASK_FULL)) DEALLOCATE(NMASK_FULL)
-
+!
 ISW = 0
 ISV = 0
-ALLOCATE(CSV(NSIZE_FULL))
-ALLOCATE(XCO2(NSIZE_FULL))
-ALLOCATE(XRHOA(NSIZE_FULL))
-ALLOCATE(XZENITH(NSIZE_FULL))
-ALLOCATE(XAZIM(NSIZE_FULL))
+ALLOCATE(CSV(ISV))
+ALLOCATE(XCO2(INI))
+ALLOCATE(XRHOA(INI))
+ALLOCATE(XZENITH(INI))
+ALLOCATE(XAZIM(INI))
 ALLOCATE(XSW_BANDS(ISW))
-ALLOCATE(XDIR_ALB(NSIZE_FULL,ISW))
-ALLOCATE(XSCA_ALB(NSIZE_FULL,ISW))
-ALLOCATE(XEMIS(NSIZE_FULL))
-ALLOCATE(XTSRAD(NSIZE_FULL))
-ALLOCATE(XTSURF(NSIZE_FULL))
+ALLOCATE(XDIR_ALB(INI,ISW))
+ALLOCATE(XSCA_ALB(INI,ISW))
+ALLOCATE(XEMIS(INI))
+ALLOCATE(XTSRAD(INI))
+ALLOCATE(XTSURF(INI))
 !
 ! Indicate that zenith and azimuth angles are not initialized
 XZENITH = XUNDEF
 XAZIM   = XUNDEF
 XCO2    = 0.
 XRHOA   = 1.
-
-! Sanity check
-IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
-
-
-! Set the number of initializations to be done
-! Default is one
-INB = 1
+!
 IF ( CASSIM_ISBA == 'EKF  ' ) THEN
   ! Has to do initialization for all the perturbations + 
   ! control + the real run at last
   INB = NVAR + 2
   ISIZE = NVAR
+ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
+  INB = 1
 ELSEIF ( CASSIM_ISBA == 'ENKF ' ) THEN
   INB = NENS
   IF (LBIAS_CORRECTION) INB = INB + 1
   ISIZE = NENS
 ENDIF
-
+!
 IF (NRANK==NPIO) WRITE(*,*) "INITIALIZING SURFEX..."
-
+!
 YINIT = 'ALL'
-
+!
 IYEAR  = TTIME%TDATE%YEAR
 IMONTH = TTIME%TDATE%MONTH
 IDAY   = TTIME%TDATE%DAY
 ZTIME  = TTIME%TIME
-IHOUR  = NINT(ZTIME/3600.)
-
+!
 NOBS = 0
-
-LREAD_ALL = .FALSE.
-
-! Do initializations
-DO NIFIC = INB,1,-1
+!
+IHOUR = 0
+ZTIME = FLOAT(NECHGU) * 3600.
+! BEGINNING OF TIME LOOP
+DO ISTEP = 1,NBOUTPUT
   !
-  ! If we have more than one initialization to do
-  ! For last initialization, we must re-do the first.
-  ! Could be avoided by introducing knowlegde of LASSIM on this level
-  IF ( CASSIM_ISBA == 'EKF  ' .OR. CASSIM_ISBA == 'ENKF ' ) THEN
+  ! Update date
+  CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
+  ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
+  IHOUR = IHOUR + NECHGU
+  !
+  LREAD_ALL = .FALSE.  
+  !
+  DO NIFIC = INB,1,-1
     !
-    IF (CASSIM_ISBA == 'EKF  ') THEN
-      IF ( NIFIC<INB ) THEN
+    ! If we have more than one initialization to do
+    ! For last initialization, we must re-do the first.
+    ! Could be avoided by introducing knowlegde of LASSIM on this level
+    IF ( CASSIM_ISBA == 'EKF  ' .OR. CASSIM_ISBA == 'ENKF ' ) THEN
+      !
+      IF (CASSIM_ISBA == 'EKF  ') THEN
+        IF ( NIFIC<INB ) THEN
+          YMFILE = "PREP_"
+          CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)              
+          WRITE(YVAR,'(I1.1)') NIFIC-1
+          YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//ADJUSTL(YVAR)
+        ELSE
+          YFILEIN = "PREP_INIT"
+        ENDIF
+      ELSEIF (CASSIM_ISBA == 'ENKF ') THEN
         YMFILE = "PREP_"
-        CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
-        WRITE(YVAR,'(I1.1)') NIFIC-1
-        YFILEIN = TRIM(YMFILE)//"_EKF_PERT"//YVAR
-      ELSE
-        YFILEIN = "PREP_INIT"
+        CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)              
+        WRITE(YVAR,'(I1.1)') NIFIC
+        YFILEIN = TRIM(YMFILE)//"_EKF_ENS"//ADJUSTL(YVAR)
       ENDIF
-    ELSEIF (CASSIM_ISBA == 'ENKF ') THEN
-      YMFILE = "PREP_"
-      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
-      WRITE(YENS(1:3),'(I3)') NIFIC
-      YFILEIN = YMFILE(1:14)//"_EKF_ENS"//YENS(1:3)
-    ENDIF
-    
-    CALL SET_FILEIN(YFILEIN)
-    
-  ENDIF 
- 
-  ! Deallocate arrays to be ready for initialization
-  CALL DEALLOC_SURF_ATM_n(B, CHE, CHF, CHI, CHS, CHU, CHT, CHW, DTI, DTT, DUU, FG, F, &
+      !
+      CALL SET_FILEIN(YFILEIN)
+      !
+    ENDIF 
+    !
+    CALL DEALLOC_SURF_ATM_n(B, CHE, CHF, CHI, CHS, CHU, CHT, CHW, DTI, DTT, DUU, FG, F, &
                                GB, IG, I, SG, S, UG, U, USS, SV, TG, T, TOP, TPN, WG, W)
-
-  IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC==1 ) LREAD_ALL = .TRUE.
-  
-  ! Initialize the SURFEX interface
-  CALL IO_BUFF_CLEAN_n(IOB)
-  CALL INIT_SURF_ATM_n(AG, B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, &
-                      CHW, DTB, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, &
-                      DGF, DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, &
-                      DGT, DGUT, DGW, DST, DUU, FG, F, FSB, GBGD, GBGR, GB, &
-                      IOB, ICP, IG, I, O, OR, SG, S, SSB, SLT, SSCP, &
-                      UG, U, USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, &
-                      TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, WG, W, WSB, &
-                      CSURF_FILETYPE,YINIT, LLAND_USE, NSIZE_FULL, ISV, ISW,  &
-                      CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS,     &
-                      XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSURF,       &
-                      IYEAR, IMONTH, IDAY, ZTIME,                      &
-                      YATMFILE, YATMFILETYPE, YTEST              )
-    
-  IF ( CASSIM_ISBA=='EKF  ' .OR. CASSIM_ISBA=='ENKF ' ) THEN
-     
-    IF ( NIFIC==INB ) THEN
-      ALLOCATE(XLAI_PASS(U%NSIZE_NATURE,I%NPATCH)) 
-      ALLOCATE(XBIO_PASS(U%NSIZE_NATURE,I%NPATCH))     
-      IF (CASSIM_ISBA=='EKF  ') ALLOCATE(XI       (U%NSIZE_NATURE,I%NPATCH,ISIZE    ))
-      ALLOCATE(XF       (U%NSIZE_NATURE,I%NPATCH,ISIZE+1,NVAR ))
-      ALLOCATE(XF_PATCH (U%NSIZE_NATURE,I%NPATCH,ISIZE+1,NOBSTYPE))
-    ENDIF
- 
-    IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC<INB .OR. CASSIM_ISBA=='ENKF ') THEN
-      
-      ! Set the global state values for this control value
-      DO IOBS = 1,NOBSTYPE
-        DO JI=1,I%NPATCH
-          SELECT CASE (TRIM(COBS(IOBS)))
-            CASE("T2M")
-              XF_PATCH(:,JI,NIFIC,IOBS) = XAT2M_ISBA(:,1)
-            CASE("HU2M")
-              XF_PATCH(:,JI,NIFIC,IOBS) = XAHU2M_ISBA(:,1)
+    !
+    IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC==1 ) LREAD_ALL = .TRUE.
+    !    
+    ! Initialize the SURFEX interface
+    CALL IO_BUFF_CLEAN_n(IOB)
+    CALL INIT_SURF_ATM_n(AG, B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, &
+                            CHW, DTB, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, &
+                            DGF, DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, &
+                            DGT, DGUT, DGW, DST, DUU, FG, F, FSB, GBGD, GBGR, GB, &
+                            IOB, ICP, IG, I, O, OR, SG, S, SSB, SLT, SSCP, &
+                            UG, U, USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, &
+                            TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, WG, W, WSB, &
+                            CSURF_FILETYPE,YINIT, LLAND_USE, INI, ISV, ISW,  &
+                         CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS,     &
+                         XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSURF,       &
+                         IYEAR, IMONTH, IDAY, ZTIME,                      &
+                          YATMFILE, YATMFILETYPE, YTEST              )
+    !
+    IF ( CASSIM_ISBA=='EKF  ' .OR. CASSIM_ISBA=='ENKF ' ) THEN
+      !
+      IF ( ISTEP==1 .AND. NIFIC==INB ) THEN
+        ALLOCATE(XLAI_PASS(U%NSIZE_NATURE,I%NPATCH)) 
+        ALLOCATE(XBIO_PASS(U%NSIZE_NATURE,I%NPATCH))     
+        IF (CASSIM_ISBA=='EKF  ') ALLOCATE(XI       (U%NSIZE_NATURE,I%NPATCH,ISIZE   ))
+        ALLOCATE(XF       (U%NSIZE_NATURE,I%NPATCH,ISIZE+1,NVAR    ))
+        ALLOCATE(XF_PATCH (U%NSIZE_NATURE,I%NPATCH,ISIZE+1,NOBSTYPE*NBOUTPUT))
+      ENDIF
+      !
+      IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC<INB .OR. CASSIM_ISBA=='ENKF ') THEN
+        !
+        ! Set the global state values for this control value
+        DO IOBS = 1,NOBSTYPE
+          IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
+          DO JI=1,I%NPATCH
+            SELECT CASE (TRIM(COBS(IOBS)))
+              CASE("T2M")
+                XF_PATCH(:,JI,NIFIC,IIOBS) = XAT2M_ISBA(:,1)
+              CASE("HU2M")
+                XF_PATCH(:,JI,NIFIC,IIOBS) = XAHU2M_ISBA(:,1)
+              CASE("WG1")
+                XF_PATCH(:,JI,NIFIC,IIOBS) = I%XWG(:,1,JI)
+              CASE("LAI")
+                XF_PATCH(:,JI,NIFIC,IIOBS) = I%XLAI(:,JI)
+              CASE DEFAULT
+                CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
+            END SELECT
+          ENDDO
+        ENDDO
+        !
+        ! Prognostic fields for assimilation (Control vector)
+        DO JL = 1,NVAR
+          SELECT CASE (TRIM(CVAR(JL)))
+            CASE("TG1")
+              XF(:,:,NIFIC,JL) = I%XTG(:,1,:)
+            CASE("TG2")
+              XF(:,:,NIFIC,JL) = I%XTG(:,2,:)
             CASE("WG1")
-              XF_PATCH(:,JI,NIFIC,IOBS) = I%XWG(:,1,JI)
+              XF(:,:,NIFIC,JL) = I%XWG(:,1,:)
+            CASE("WG2")
+              XF(:,:,NIFIC,JL) = I%XWG(:,2,:)
+            CASE("WG3")
+              XF(:,:,NIFIC,JL) = I%XWG(:,3,:)              
             CASE("LAI")
-              XF_PATCH(:,JI,NIFIC,IOBS) = I%XLAI(:,JI)
-            CASE("SWE")
-              ! Handled independently
+              XF(:,:,NIFIC,JL) = I%XLAI(:,:)
             CASE DEFAULT
-              CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
           END SELECT
         ENDDO
-      ENDDO
-
-      ! Prognostic fields for assimilation (Control vector)
-      DO JL = 1,NVAR
-        SELECT CASE (TRIM(CVAR(JL)))
-          CASE("TG1")
-            XF(:,:,NIFIC,JL) = I%XTG(:,1,:)
-          CASE("TG2")
-            XF(:,:,NIFIC,JL) = I%XTG(:,2,:)
-          CASE("WG1")
-            XF(:,:,NIFIC,JL) = I%XWG(:,1,:)
-          CASE("WG2")
-            XF(:,:,NIFIC,JL) = I%XWG(:,2,:)
-          CASE("WG3")
-            XF(:,:,NIFIC,JL) = I%XWG(:,3,:)  
-          CASE("LAI")
-            XF(:,:,NIFIC,JL) = I%XLAI(:,:)
-          CASE DEFAULT
-            CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
-        END SELECT
-      ENDDO
-
-      IF ( NIFIC==1 ) THEN
-        DO  JL = 1,NVAR
-          IF (TRIM(CVAR(JL))=="LAI") THEN
-            IF ( I%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
-              CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF with NPATCH=1!")
+        !
+        IF ( NIFIC==1 ) THEN
+          !
+          DO JL = 1,NVAR
+            IF (TRIM(CVAR(JL))=="LAI") THEN
+              IF ( I%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
+                CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF with NPATCH=1!")
+              ENDIF
+              SELECT CASE (TRIM(CBIO))
+                CASE("BIOMA1","BIOMASS1")
+                  XBIO_PASS(:,:) = I%XBIOMASS(:,1,:)
+                CASE("BIOMA2","BIOMASS2")
+                  XBIO_PASS(:,:) = I%XBIOMASS(:,2,:)
+                CASE("RESPI1","RESP_BIOM1")
+                  XBIO_PASS(:,:) = I%XRESP_BIOMASS(:,1,:)
+                CASE("RESPI2","RESP_BIOM2")
+                  XBIO_PASS(:,:) = I%XRESP_BIOMASS(:,2,:)
+                CASE("LAI")
+                  XBIO_PASS(:,:) = I%XLAI(:,:)
+                CASE DEFAULT
+                  CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
+              END SELECT
+              !
+              XLAI_PASS(:,:) = I%XLAI(:,:)          
+              !
             ENDIF
-            SELECT CASE (TRIM(CBIO))
-              CASE("BIOMA1","BIOMASS1")
-                XBIO_PASS(:,:) = I%XBIOMASS(:,1,:)
-              CASE("BIOMA2","BIOMASS2")
-                XBIO_PASS(:,:) = I%XBIOMASS(:,2,:)
-              CASE("RESPI1","RESP_BIOM1")
-                XBIO_PASS(:,:) = I%XRESP_BIOMASS(:,1,:)
-              CASE("RESPI2","RESP_BIOM2")
-                XBIO_PASS(:,:) = I%XRESP_BIOMASS(:,2,:)
-              CASE("LAI")
-                XBIO_PASS(:,:) = I%XLAI(:,:)
-              CASE DEFAULT
-                CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
-            END SELECT
-            XLAI_PASS(:,:) = I%XLAI(:,:)          
-            EXIT
-          ENDIF
-        ENDDO
-      ENDIF
-    ELSE
-
-      DO JL = 1,NVAR
-        SELECT CASE (TRIM(CVAR(JL)))
-          CASE("TG1")
-            XI(:,:,JL) = I%XTG(:,1,:)
-          CASE("TG2")
-            XI(:,:,JL) = I%XTG(:,2,:)
-          CASE("WG1")
-            XI(:,:,JL) = I%XWG(:,1,:)
-          CASE("WG2")
-            XI(:,:,JL) = I%XWG(:,2,:)
-          CASE("WG3")
-            XI(:,:,JL) = I%XWG(:,3,:)              
-          CASE("LAI")
-            XI(:,:,JL) = I%XLAI(:,:)
-          CASE DEFAULT
-            CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
-        END SELECT
-      ENDDO
-    ENDIF
-  ENDIF
-ENDDO
-
-! Allocate input fields to the assimilation interface
-ALLOCATE(ZLSM        (NSIZE_FULL))
-ALLOCATE(ZCON_RAIN   (NSIZE_FULL))
-ALLOCATE(ZSTRAT_RAIN (NSIZE_FULL))
-ALLOCATE(ZCON_SNOW   (NSIZE_FULL))
-ALLOCATE(ZSTRAT_SNOW (NSIZE_FULL))
-ALLOCATE(ZCLOUDS     (NSIZE_FULL))
-ALLOCATE(ZEVAPTR     (NSIZE_FULL))
-ALLOCATE(ZEVAP       (NSIZE_FULL))
-ALLOCATE(ZTSC        (NSIZE_FULL))
-ALLOCATE(ZSWEC       (NSIZE_FULL))
-ALLOCATE(ZTS         (NSIZE_FULL))
-ALLOCATE(ZUCLS       (NSIZE_FULL))
-ALLOCATE(ZVCLS       (NSIZE_FULL))
-ALLOCATE(ZSST        (NSIZE_FULL))
-ALLOCATE(ZSIC        (NSIZE_FULL))
-ZTS(:) = XUNDEF
-
-! Allocate observations
-ALLOCATE(ZT2M        (NSIZE_FULL))
-ALLOCATE(ZHU2M       (NSIZE_FULL))
-ALLOCATE(ZSWE        (NSIZE_FULL))
-
-
-! OI needs first guess values used in oi_cacsts
-IF (CASSIM_ISBA=="OI   ") THEN
-  IF ( TRIM(CFILE_FORMAT_FG) == "ASCII" ) THEN
-    ALLOCATE(ZWORK(U%NDIM_FULL,8))
-    IF (NRANK==NPIO) THEN
-      YMFILE = 'FIRST_GUESS_'
-      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
-      WRITE(*,*) "READING first guess from file "//TRIM(YMFILE)//".DAT"
-      ISTAT = 0
-      OPEN(UNIT=55,FILE=TRIM(YMFILE)//".DAT",FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT)
-      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Can not open "//TRIM(YMFILE))
-
-      ZWORK(:,:) = XUNDEF
-      ! Read first guess
-      DO JI = 1,U%NDIM_FULL
-        READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,8)
-        IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-      ENDDO
-      CLOSE(55)
-    ENDIF
-
-    ! Distribute values on processors
-    IF (NPROC>1) THEN
-      CALL READ_AND_SEND_MPI(ZWORK(:,1),ZCON_RAIN(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,2),ZSTRAT_SNOW(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,3),ZCON_SNOW(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,4),ZSTRAT_SNOW(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,5),ZCLOUDS(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,6),ZLSM(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,7),ZEVAP(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,8),ZEVAPTR(:))
-    ELSE
-      ! Set First-Guess variables
-      ZCON_RAIN(:)=ZWORK(:,1)
-      ZSTRAT_SNOW(:)=ZWORK(:,2)
-      ZCON_SNOW(:)=ZWORK(:,3)
-      ZSTRAT_SNOW(:)=ZWORK(:,4)
-      ZCLOUDS(:)=ZWORK(:,5)
-      ZLSM(:)=ZWORK(:,6)
-      ZEVAP(:)=ZWORK(:,7)
-      ZEVAPTR(:)=ZWORK(:,8)
-    ENDIF
-    DEALLOCATE(ZWORK)
-  ELSEIF ( TRIM(CFILE_FORMAT_FG) == "FA" ) THEN
-    !  Read atmospheric forecast fields from FA files 
-#ifdef SFX_FA
-    CFILEIN_FA = 'FG_OI_MAIN'
-    CDNOMC     = 'oimain'                  ! new frame name
-
-    IF (NRANK==NPIO) WRITE(*,*) "READING first guess from file "//TRIM(CFILEIN_FA)
-
-    !  Open FA file (LAM version with extension zone)
-    CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
-                    DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
-                    F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
-                    TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
-                    YPROGRAM2,'EXTZON','SURF  ','READ ')
-
-    !  Read model forecast quantities
-    IF (LAROME) THEN
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFACCPLUIE',    ZCON_RAIN    ,IRESP)
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFACCNEIGE',  ZSTRAT_SNOW  ,IRESP)
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFACCGRAUPEL',  ZCON_SNOW   ,IRESP)
-      ! So far graupel has not been used
-      !ZCON_SNOW=ZCON_SNOW+ZCON_GRAUPEL
-      ZCON_RAIN(:) = 0.0
-    ELSE
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFPREC.EAU.CON',ZCON_RAIN    ,IRESP)
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFPREC.EAU.GEC',ZSTRAT_RAIN  ,IRESP)
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFPREC.NEI.CON',ZCON_SNOW    ,IRESP)
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFPREC.NEI.GEC',ZSTRAT_SNOW  ,IRESP)
-    ENDIF
-
-    CALL READ_SURF(IOB, &
-                YPROGRAM2,'ATMONEBUL.BASSE ',ZCLOUDS,IRESP)
-    CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFFLU.LAT.MEVA',ZEVAP  ,IRESP) ! accumulated fluxes (not available in LFI)
-
-    IF (.NOT.LALADSURF) THEN
-      CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFXEVAPOTRANSP',ZEVAPTR,IRESP) ! not in ALADIN SURFEX
-    ELSE
-      ZEVAPTR(:) = 0.0
-    ENDIF
-  
-    !  Close FA file
-    CALL END_IO_SURF_n(YPROGRAM2)
-    CALL IO_BUFF_CLEAN_n(IOB)
-#else
-    CALL ABOR1_SFX("The first guess is supposed to be an FA file. You must compile with FA support enabled: -DSFX_FA")
-#endif
-  ELSE
-    CALL ABOR1_SFX("CFILE_FORMAT_FG="//TRIM(CFILE_FORMAT_FG)//" not implemented!")
-  ENDIF
-  IF (NRANK==NPIO) WRITE(*,*)'READ FIRST GUESS OK'
-ENDIF
-
-! If we want to extrapolate values, we need to have a land-sea-mask available
-IF ((LEXTRAP_SEA) .OR. (LEXTRAP_WATER) .OR. (LEXTRAP_NATURE)) THEN
-  IF (NRANK==NPIO) WRITE(*,*) "READING Land-Sea mask"
-
-  IF ( TRIM(CFILE_FORMAT_LSM) == "ASCII" ) THEN
-    ALLOCATE(ZWORK(U%NDIM_FULL,1))
-    IF (NRANK==NPIO) THEN
-      YMFILE = 'LSM.DAT'
-      WRITE(*,*) "READING LSM from file "//TRIM(YMFILE)
-      OPEN(UNIT=55,FILE=TRIM(YMFILE),FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT)
-      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Can not open "//TRIM(YMFILE))
-
-      ZWORK(:,:) = XUNDEF
-      ! Read LSM
-      DO JI = 1,U%NDIM_FULL
-        READ (55,*,IOSTAT=ISTAT)  ZWORK(JI,1)
-        IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-      ENDDO
-      CLOSE(55)
-    ENDIF
-
-    ! Distribute values on processors
-    IF (NPROC>1) THEN
-      CALL READ_AND_SEND_MPI(ZWORK(:,1),ZLSM(:))
-    ELSE
-      ! Set First-Guess variables
-      ZLSM(:)=ZWORK(:,1)
-    ENDIF
-    DEALLOCATE(ZWORK)
-  ELSEIF ( TRIM(CFILE_FORMAT_LSM) == "FA" ) THEN
-    !  Read atmospheric forecast fields from FA files 
-#ifdef SFX_FA
-    CFILEIN_FA = 'FG_OI_MAIN'
-    CDNOMC     = 'oimain'                  ! new frame name
-
-    !  Open FA file (LAM version with extension zone)
-    CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
-                    DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
-                    F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
-                    TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
-                    YPROGRAM2,'EXTZON','SURF  ','READ ')
-    CALL READ_SURF(IOB, &
-                YPROGRAM2,'SURFIND.TERREMER',ZLSM   ,IRESP)
-    IF (IRESP /=0) CALL ABOR1_SFX("Can not read Land-Sea mask from FA file "//TRIM(CFILEIN_FA))
-    !  Close FA file
-    CALL END_IO_SURF_n(YPROGRAM2)
-    CALL IO_BUFF_CLEAN_n(IOB)
-#else
-    CALL ABOR1_SFX("The Land-sea mask file is assumed to be an FA file. You must compile with FA support enabled: -DSFX_FA")
-#endif
-  ELSE
-    CALL ABOR1_SFX("CFILE_FORMAT_LSM="//TRIM(CFILE_FORMAT_LSM)//" not implemented!")
-  ENDIF
-  IF (NRANK==NPIO) WRITE(*,*)'READ LSM OK'
-ENDIF
-
-
-! The observations used in the analysis is read.
-! The options are either from a CANARI analysis or from a file
-
-IF ( CASSIM_ISBA=="EKF  " .OR. CASSIM_ISBA=="ENKF " ) THEN
-  ALLOCATE(XYO(U%NSIZE_NATURE,NOBSTYPE))
-ENDIF
-
-IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
-  ALLOCATE(ZWORK(U%NDIM_FULL,NOBSTYPE))
-  IF (NRANK==NPIO) THEN
-
-    YMFILE = 'OBSERVATIONS_'
-    CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
-    YMFILE=TRIM(YMFILE)//".DAT"
-    ISTAT = 0
-    OPEN(UNIT=55,FILE=TRIM(YMFILE),FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT)
-    IF ( ISTAT /=0 ) CALL ABOR1_SFX("Error opening file "//TRIM(YMFILE))
-
-    ! Get the nature points from processors
-    ! If the file has an header, we check for consistency
-    IF ( LOBSHEADER ) THEN
-      ! Read in first line and check if variables are consistent
-      ALLOCATE(COBSINFILE(NOBSTYPE))
-      READ (55,*,IOSTAT=ISTAT)  (COBSINFILE(JJ),JJ=1,NOBSTYPE)
-      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading header in "//TRIM(YMFILE))
-
-      DO IOBS = 1,NOBSTYPE
-        IF ( TRIM(COBS(IOBS)) /= TRIM(COBSINFILE(IOBS))) THEN
-          CALL ABOR1_SFX("Mapping of observations in "//TRIM(YMFILE)//&
-               " is not consistent with setup! "//TRIM(COBS(IOBS))//" /= "//TRIM(COBSINFILE(IOBS)))
+            !
+          ENDDO
         ENDIF
-      ENDDO
-      DEALLOCATE(COBSINFILE)
-    ENDIF
-
-    ZWORK(:,:) = XUNDEF
-    !   Read all observations (NDIM_FULL)
-    DO JI = 1,U%NDIM_FULL
-      READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
-      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-    ENDDO
-    CLOSE(55)
-    WRITE(*,*) 'Read observation file OK'
-  ENDIF
-
-  ! Initialize possible observations
-  ZT2M=999
-  ZHU2M=999
-  ZSWE=999
-
-  IF (NPROC>1) THEN
-    ! Running on more CPU's
-    ! For EKF/EnKF we must distribute variables for nature tile
-    IF ( CASSIM_ISBA=="EKF  " .OR. CASSIM_ISBA=="ENKF " ) THEN
-      CALL READ_AND_SEND_MPI(ZWORK,XYO,U%NR_NATURE)
-    ENDIF
-    ! Set observations used for possibly other tiles than nature
-    ! Distribute read variables
-    JJ = 1
-    DO JI = 1,NOBSMAX
-      IF (NNCO(JI) == 1 .AND. JJ <= NOBSTYPE ) THEN
-        SELECT CASE (JI)
-          CASE (1)
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
-          CASE (2)
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
-          CASE (5)
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
-        END SELECT
-        JJ = JJ + 1
+        !
+      ELSE
+        !
+        DO JL = 1,NVAR
+          SELECT CASE (TRIM(CVAR(JL)))
+            CASE("TG1")
+              XI(:,:,JL) = I%XTG(:,1,:)
+            CASE("TG2")
+              XI(:,:,JL) = I%XTG(:,2,:)
+            CASE("WG1")
+              XI(:,:,JL) = I%XWG(:,1,:)
+            CASE("WG2")
+              XI(:,:,JL) = I%XWG(:,2,:)
+            CASE("WG3")
+              XI(:,:,JL) = I%XWG(:,3,:)               
+            CASE("LAI")
+              XI(:,:,JL) = I%XLAI(:,:)
+            CASE DEFAULT
+              CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
+          END SELECT
+        ENDDO        
+        !
       ENDIF
-    ENDDO
-  ELSE
-    ! Running on one CPU
-    IF ( CASSIM_ISBA=="EKF  " .OR. CASSIM_ISBA=="ENKF " ) THEN
-      DO JI = 1,U%NSIZE_NATURE
-        XYO(JI,:) = ZWORK(U%NR_NATURE(JI),:)
-      ENDDO
+      !
     ENDIF
-    ! Set observations used for possibly other tiles than nature
-    JJ = 1
-    DO JI = 1,NOBSMAX
-      IF (NNCO(JI) == 1 .AND. JJ <= NOBSTYPE ) THEN 
-        SELECT CASE (JI)
-          CASE (1)
-            ZT2M(:)=ZWORK(:,JJ)
-          CASE (2)
-            ZHU2M(:)=ZWORK(:,JJ)
-          CASE (5)
-            ZSWE(:)=ZWORK(:,JJ)
-         END SELECT
-         JJ = JJ + 1
-       ENDIF
-     ENDDO
+    !
+  ENDDO
+  !
+  IF ( CASSIM_ISBA=="EKF  " .OR. CASSIM_ISBA=="ENKF " ) THEN
+    !
+    IF (ISTEP==1) ALLOCATE(XYO(U%NSIZE_NATURE,NOBSTYPE*NBOUTPUT))
+    !
+    IF ( LOBSFILE ) THEN
+      !
+      IF (ISTEP==1 .AND. NRANK==NPIO) THEN
+        ALLOCATE(ZYO_NAT(U%NDIM_NATURE,NOBSTYPE))
+        ALLOCATE(ZYO(U%NDIM_FULL,NOBSTYPE))
+        ALLOCATE(ZNATURE(U%NDIM_FULL))
+      ENDIF
+      !      
+      YMFILE = 'CANARI_NATURE_'
+      CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
+      ISTAT = 0
+      IF (NRANK==NPIO) OPEN(UNIT=55,FILE=TRIM(YMFILE)//".DAT",FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT) 
+      IF ( ISTAT==0 ) THEN
+        IF (NPROC>1) CALL GATHER_AND_WRITE_MPI(U%XNATURE,ZNATURE)
+        IF (NRANK==NPIO) THEN               
+          !   If it exists, read observations
+          DO JI = 1,U%NSIZE_NATURE
+            READ (55,*)  (ZYO_NAT(JI,NOBS+JJ),JJ=1,NOBSTYPE)
+          ENDDO
+          IF (NPROC>1) THEN       
+            ZYO(:,:) = XUNDEF
+            ICPT = 0
+            DO JI = 1,U%NDIM_FULL
+              IF (ZNATURE(JI)>0.) THEN
+                ICPT = ICPT + 1
+                ZYO(JI,:) = ZYO_NAT(ICPT,:)
+              ENDIF
+            ENDDO
+          ENDIF
+        ENDIF
+        IF (NPROC>1) THEN
+          CALL READ_AND_SEND_MPI(ZYO,XYO,U%NR_NATURE)
+        ELSE
+          XYO(:,:) = ZYO_NAT(:,:)
+        ENDIF          
+        NOBS = NOBS + NOBSTYPE      
+        IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in obs: ', XYO(1,:), NOBS
+        CLOSE(55)
+      ENDIF
+      !
+      IF (ISTEP==NBOUTPUT .AND. NRANK==NPIO) DEALLOCATE(ZYO_NAT,ZYO,ZNATURE)
+      !      
+    ELSE
+      !
+      NOBS = NOBSTYPE
+      !
+    ENDIF
+    !
   ENDIF
-  DEALLOCATE(ZWORK)
-
-  NOBS = NOBS + NOBSTYPE
-  IF (( CASSIM_ISBA=="EKF  " .OR. CASSIM_ISBA=="ENKF " ) .AND. ( NPRINTLEV > 2 )) WRITE(ILUOUT,*) 'read in obs: ', XYO(1,:), NOBS
-
-ELSEIF ( TRIM(CFILE_FORMAT_OBS) == "FA") THEN
-  NOBS = NOBSTYPE
-
+  !
+ENDDO
+!
+IF ( NOBS==0 .AND. CASSIM_ISBA=="EKF  " ) THEN
+  IF ( NPRINTLEV > 0 ) WRITE(*,*) 'No observations read for LAI in OBS file - stop'
+  CALL ABOR1_SFX("SODA: No observations read for LAI in OBS file - stop")
+ENDIF
+!
+!
+IF (NRANK==NPIO) WRITE(*,*) "READING input files..."
+!
+! Normal reading of needed FA fields
+ALLOCATE(ZLSM        (INI))
+ALLOCATE(ZCON_RAIN   (INI))
+ALLOCATE(ZSTRAT_RAIN (INI))
+ALLOCATE(ZCON_SNOW   (INI))
+ALLOCATE(ZSTRAT_SNOW (INI))
+ALLOCATE(ZCLOUDS     (INI))
+ALLOCATE(ZEVAPTR     (INI))
+ALLOCATE(ZEVAP       (INI))
+ALLOCATE(ZTSC        (INI))
+ALLOCATE(ZSWE        (INI))
+ALLOCATE(ZSWEC       (INI))
+ALLOCATE(ZTS         (INI))
+ALLOCATE(ZT2M        (INI))
+ALLOCATE(ZHU2M       (INI))
+ALLOCATE(ZUCLS       (INI))
+ALLOCATE(ZVCLS       (INI))
+ALLOCATE(ZSST        (INI))
+ALLOCATE(ZSIC        (INI))
+!
+ZTS(:) = XUNDEF
+!
+IF (CASSIM_ISBA=="OI   " .OR. .NOT.LOBSFILE) THEN
+  !
+  !  Read atmospheric forecast fields from FA files 
 #ifdef SFX_FA
-  IF (NRANK==NPIO) WRITE(*,*) 'READING CANARI ANALYSIS'
-
+  CFILEIN_FA = 'FG_OI_MAIN'
+  CDNOMC     = 'oimain'                  ! new frame name
+#endif
+  !  Open FA file (LAM version with extension zone)
+  CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+                      DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                      F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
+                      TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                     YPROGRAM2,'EXTZON','SURF  ','READ ')
+  !
+  !  Read model forecast quantities
+  IF (LAROME) THEN  
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFACCPLUIE',    ZCON_RAIN    ,IRESP)
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFACCNEIGE',  ZSTRAT_SNOW  ,IRESP)
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFACCGRAUPEL',  ZCON_SNOW   ,IRESP)
+    ! So far graupel has not been used
+    !ZCON_SNOW=ZCON_SNOW+ZCON_GRAUPEL
+    ZCON_RAIN(:) = 0.0
+  ELSE    
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFPREC.EAU.CON',ZCON_RAIN    ,IRESP)
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFPREC.EAU.GEC',ZSTRAT_RAIN  ,IRESP)
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFPREC.NEI.CON',ZCON_SNOW    ,IRESP)
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFPREC.NEI.GEC',ZSTRAT_SNOW  ,IRESP)
+  ENDIF
+  !
+  CALL READ_SURF(IOB, &
+                YPROGRAM2,'ATMONEBUL.BASSE ',ZCLOUDS,IRESP)
+  CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFIND.TERREMER',ZLSM   ,IRESP)
+  CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFFLU.LAT.MEVA',ZEVAP  ,IRESP) ! accumulated fluxes (not available in LFI)
+  !
+  IF (.NOT.LALADSURF) THEN    
+    CALL READ_SURF(IOB, &
+                YPROGRAM2,'SURFXEVAPOTRANSP',ZEVAPTR,IRESP) ! not in ALADIN SURFEX
+  ELSE
+    ZEVAPTR(:) = 0.0
+  ENDIF
+  !
+  !  Close FA file
+  CALL END_IO_SURF_n(YPROGRAM2)
+  CALL IO_BUFF_CLEAN_n(IOB)
+  WRITE(*,*)'READ FG_OI_MAIN OK'
+  !
+  !
   !  Define FA file name for CANARI analysis
+#ifdef SFX_FA
   CFILEIN_FA = 'CANARI'        ! input CANARI analysis
-  CDNOMC     = 'canari'        ! new frame name
-
-  ! Open FA file 
+  CDNOMC     = 'canari'                  ! new frame name
+#endif
+!  Open FA file 
   CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
                       DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
                       F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
                       TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
                      YPROGRAM2,'EXTZON','SURF  ','READ ')
 
-  ! Read CANARI analysis
+!  Read CANARI analysis
   CALL READ_SURF(IOB, &
                 YPROGRAM2,'CLSTEMPERATURE  ',ZT2M ,IRESP)
   CALL READ_SURF(IOB, &
@@ -977,94 +832,56 @@ ELSEIF ( TRIM(CFILE_FORMAT_OBS) == "FA") THEN
   CALL READ_SURF(IOB, &
                  YPROGRAM2,'CLSVENT.ZONAL   ',ZUCLS,IRESP)
   CALL READ_SURF(IOB, &
-                YPROGRAM2,'CLSVENT.MERIDIEN',ZVCLS,IRESP)
+                YPROGRAM2,'CLSVENT.MERIDIEN',ZVCLS,IRESP)  
 
-  ! Close CANARI file
+!  Close CANARI file
   CALL END_IO_SURF_n(YPROGRAM2)
   CALL IO_BUFF_CLEAN_n(IOB)
-  IF (NRANK==NPIO) WRITE(*,*) 'READ CANARI OK'
-#else
-  CALL ABOR1_SFX("CANARI analyis is supposed to be an FA file. You must compile with FA support enabled: -DSFX_FA")       
-#endif
-ELSE
-  CALL ABOR1_SFX("CFILE_FORMAT_OBS="//TRIM(CFILE_FORMAT_OBS)//" not implemented!")
+  WRITE(*,*) 'READ CANARI OK'
+  !
 ENDIF
-
-! Climatological fields are only used in OI
+!
 IF (CASSIM_ISBA=="OI   ") THEN
-
-  IF (TRIM(CFILE_FORMAT_CLIM) == "ASCII" ) THEN
-    ALLOCATE(ZWORK(U%NDIM_FULL,2))
-    IF (NRANK==NPIO) THEN
-      YMFILE = 'CLIMATE.DAT'
-      WRITE(*,*) "READING CLIM from file "//TRIM(YMFILE)
-      OPEN(UNIT=55,FILE=TRIM(YMFILE),FORM='FORMATTED',STATUS='OLD',IOSTAT=ISTAT)
-      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Can not open "//TRIM(YMFILE))
-
-      ZWORK(:,:) = XUNDEF
-      ! Read CLIMATE file
-      DO JI = 1,U%NDIM_FULL
-        READ (55,*,IOSTAT=ISTAT) (ZWORK(JI,JJ),JJ=1,2)
-        IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-      ENDDO
-      CLOSE(55)
-    ENDIF
-
-    ! Distribute values on processors
-    IF (NPROC>1) THEN
-      CALL READ_AND_SEND_MPI(ZWORK(:,1),ZSWEC(:))
-      CALL READ_AND_SEND_MPI(ZWORK(:,2),ZTSC(:))
-    ELSE
-      ! Set First-Guess variables
-      ZSWEC(:)=ZWORK(:,1)
-      ZTSC=ZWORK(:,2)
-    ENDIF
-    DEALLOCATE(ZWORK)
-  ELSEIF (TRIM(CFILE_FORMAT_CLIM) == "FA" ) THEN
+  !
+  !  Define FA file name for surface climatology
 #ifdef SFX_FA
-    ! Define FA file name for surface climatology
-    CFILEIN_FA = 'clim_isba'               ! input climatology
-    CDNOMC     = 'climat'                  ! new frame name
-
-    ! Open FA file 
-    CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
+  CFILEIN_FA = 'clim_isba'               ! input climatology
+  CDNOMC     = 'climat'                  ! new frame name
+#endif
+!  Open FA file 
+  CALL INIT_IO_SURF_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, &
                       DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
                       F, FSB, GB, IOB, ICP, I, O, S, SSB, UG, U, SV, &
                       TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
                      YPROGRAM2,'EXTZON','SURF  ','READ ')
 
-    ! Read climatology file
-    CALL READ_SURF(IOB, &
+!  Read climatology file
+  CALL READ_SURF(IOB, &
                 YPROGRAM2,'SURFRESERV.NEIGE',ZSWEC,IRESP)
-    CALL READ_SURF(IOB, &
+  CALL READ_SURF(IOB, &
                 YPROGRAM2,'SURFTEMPERATURE' ,ZTSC ,IRESP)
 
-    ! Close climatology file
-    CALL END_IO_SURF_n(YPROGRAM2)
-    CALL IO_BUFF_CLEAN_n(IOB)
-#else
-    CALL ABOR1_SFX("The climate file is supposed to be an FA file. You must compile with FA support enabled: -DSFX_FA")
-#endif
-  ELSE
-    CALL ABOR1_SFX("CFILE_FORMAT_CLIM="//TRIM(CFILE_FORMAT_CLIM)//" not implemented!")
-  ENDIF
-  IF (NRANK==NPIO) WRITE(*,*) 'READ CLIMATOLOGY OK'
+!  Close climatology file
+  CALL END_IO_SURF_n(YPROGRAM2)
+  CALL IO_BUFF_CLEAN_n(IOB)
+  WRITE(*,*) 'READ CLIMATOLOGY OK'
+  !
 ENDIF
-
-! Set SST (possibly from file)
-CALL ASSIM_SET_SST(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, SSB, UG, &
-                   SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
-                   IOB, S, U,NSIZE_FULL,ZLSM,ZSST,ZSIC,YTEST)
+!
+ CALL ASSIM_SET_SST(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
+                           DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
+                           DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, SSB, UG, &
+                           SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                    IOB, S, U, &
+                    INI,ZLSM,ZSST,ZSIC,YTEST)
 
 IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
 !
-ALLOCATE(GD_MASKEXT(NSIZE_FULL))
+ALLOCATE(GD_MASKEXT(INI))
 GD_MASKEXT(:) = .FALSE.
 !
-ALLOCATE(ZLON(NSIZE_FULL))
-ALLOCATE(ZLAT(NSIZE_FULL))
+ALLOCATE(ZLON(INI))
+ALLOCATE(ZLAT(INI))
 ZLON(:) = UG%XLON(:)
 ZLAT(:) = UG%XLAT(:)        
 !
@@ -1072,14 +889,14 @@ GLKEEPEXTZONE = .TRUE.
 !
 IF (NRANK==NPIO) WRITE(*,*) 'PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...'
  CALL ASSIM_SURF_ATM_n(DGMI, IG, I, S, U, T, TOP, W, &
-                       CSURF_FILETYPE,NSIZE_FULL,   &
-                       ZCON_RAIN,  ZSTRAT_RAIN, ZCON_SNOW, ZSTRAT_SNOW, &
-                       ZCLOUDS,    ZLSM,        ZEVAPTR,   ZEVAP,       &
-                       ZSWEC,      ZTSC,                                &
-                       ZTS,        ZT2M,        ZHU2M,     ZSWE,        &
-                       ZSST,       ZSIC,        ZUCLS,     ZVCLS,       &
-                       YTEST, GD_MASKEXT, ZLON, ZLAT, GLKEEPEXTZONE )
-
+                       CSURF_FILETYPE,INI,   &
+                      ZCON_RAIN,  ZSTRAT_RAIN, ZCON_SNOW, ZSTRAT_SNOW, &
+                      ZCLOUDS,    ZLSM,        ZEVAPTR,   ZEVAP,       &
+                      ZSWEC,      ZTSC,       &
+                      ZTS,        ZT2M,        ZHU2M,     ZSWE,        &
+                      ZSST,       ZSIC,  ZUCLS,     ZVCLS,       &
+                      YTEST, GD_MASKEXT, ZLON, ZLAT, GLKEEPEXTZONE )
+!
 DEALLOCATE(ZCON_RAIN)
 DEALLOCATE(ZSTRAT_RAIN)
 DEALLOCATE(ZCON_SNOW)
@@ -1099,6 +916,8 @@ DEALLOCATE(ZVCLS)
 DEALLOCATE(ZSST)
 DEALLOCATE(ZSIC)
 !
+!
+!
 ZTIME_OUT  = ZTIME
 IDAY_OUT   = IDAY
 IMONTH_OUT = IMONTH
@@ -1106,7 +925,7 @@ IYEAR_OUT  = IYEAR
 !
 IF (NRANK==NPIO) THEN
   !
-  IF (LOUT_TIMENAME) THEN
+  IF(LOUT_TIMENAME)THEN
     ! if true, change the name of output file at the end of a day
     ! (ex: 19860502_00h00 -> 19860501_24h00)                     
     IF(ZTIME==0.0)THEN
@@ -1175,9 +994,9 @@ DO IENS = 1,ISIZE
   IF (CASSIM_ISBA=="ENKF ") THEN
     !
     YMFILE = "PREP_"
-    CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)
+    CALL GET_FILE_NAME(IYEAR,IMONTH,IDAY,IHOUR,YMFILE)              
     WRITE(YVAR,'(I3)') IENS
-    YFILEIN = TRIM(YMFILE)//"_EKF_ENS"//YVAR
+    YFILEIN = TRIM(YMFILE)//"_EKF_ENS"//ADJUSTL(YVAR)
     CALL SET_FILEIN(YFILEIN)
     !
     LREAD_ALL = .TRUE.
@@ -1188,17 +1007,17 @@ DO IENS = 1,ISIZE
     ! Initialize the SURFEX interface
     CALL IO_BUFF_CLEAN_n(IOB)
     CALL INIT_SURF_ATM_n(AG, B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, &
-                         CHW, DTB, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, &
-                         DGF, DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, &
-                         DGT, DGUT, DGW, DST, DUU, FG, F, FSB, GBGD, GBGR, GB, &
-                         IOB, ICP, IG, I, O, OR, SG, S, SSB, SLT, SSCP, &
-                         UG, U, USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, &
-                         TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, WG, W, WSB, &
-                         CSURF_FILETYPE,YINIT, LLAND_USE, NSIZE_FULL, ISV, ISW,  &
+                            CHW, DTB, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, &
+                            DGF, DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, &
+                            DGT, DGUT, DGW, DST, DUU, FG, F, FSB, GBGD, GBGR, GB, &
+                            IOB, ICP, IG, I, O, OR, SG, S, SSB, SLT, SSCP, &
+                            UG, U, USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, &
+                            TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, WG, W, WSB, &
+                            CSURF_FILETYPE,YINIT, LLAND_USE, INI, ISV, ISW,  &
                          CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS,     &
                          XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSURF,       &
                          IYEAR, IMONTH, IDAY, ZTIME,                      &
-                         YATMFILE, YATMFILETYPE, YTEST              )
+                          YATMFILE, YATMFILETYPE, YTEST              )
     !
     !
     DO JL=1,NVAR
@@ -1224,7 +1043,7 @@ DO IENS = 1,ISIZE
     !
   ENDIF
   !
-#ifdef SFX_NC
+#ifdef SFX_NC  
   LDEF = .TRUE.
 #endif
   !
@@ -1261,7 +1080,7 @@ DO IENS = 1,ISIZE
     I2M       = 0
     GPGD_ISBA = .FALSE.
   ENDIF  
-  GFRAC                  = .TRUE.
+  GFRAC                  = .TRUE.  
   GDIAG_GRID             = .TRUE.
   GSURF_BUDGET           = .FALSE.
   GRAD_BUDGET            = .FALSE.
@@ -1278,7 +1097,7 @@ DO IENS = 1,ISIZE
   GCH_NO_FLUX_ISBA       = .FALSE.
   GSURF_MISC_BUDGET_ISBA = .FALSE.
   GPGD_TEB               = .FALSE.
-  GSURF_MISC_BUDGET_TEB  = .FALSE.
+  GSURF_MISC_BUDGET_TEB  = .FALSE.  
   !
   CALL FLAG_DIAG_UPDATE(CHF, CHI, CHS, CHT, CHW, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGW, I, U, &
                         GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
@@ -1342,7 +1161,7 @@ DO IENS = 1,ISIZE
     LDEF = .FALSE.
 #endif
     !
-  ENDDO
+  ENDDO  
   !
 ENDDO
 !

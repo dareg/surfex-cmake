@@ -1,5 +1,0 @@
-       SUBROUTINE INIT_SURFCONSPHY
-
-!RJ: dummy, can be removed
-
-       END SUBROUTINE INIT_SURFCONSPHY

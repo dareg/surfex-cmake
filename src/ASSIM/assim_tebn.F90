@@ -78,10 +78,7 @@ ZTCLS(:) = XAT2M_TEB(:)  ! T2M (TEB)
 
 ! Screen-level innovations
 
-ZT2INC=0.
-WHERE ( PT2M_O(:) /= 999. )
-  ZT2INC(:) = PT2M_O(:) - ZTCLS(:)
-END WHERE
+ZT2INC(:) = PT2M_O(:) - ZTCLS(:)
 
 IF ( NPRINTLEV > 0 ) WRITE(*,*) 'Mean T2m increments over TOWN ',SUM(ZT2INC)/KI
 

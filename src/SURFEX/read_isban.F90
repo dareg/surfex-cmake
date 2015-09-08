@@ -553,7 +553,7 @@ ENDIF
 IF ( LASSIM ) THEN
   IF ( TRIM(CASSIM_ISBA) == "OI" ) THEN
     IF ( I%NPATCH /= 1 ) CALL ABOR1_SFX ('Reading of diagnostical values for'&
-                       & //' assimilation at the moment only works for one patch for OI')          
+                       & //'assimilation at the moment only works for one patch')          
     ! Diagnostic fields for assimilation
     IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,1))
     XAT2M_ISBA=XUNDEF
@@ -603,11 +603,9 @@ IF ( LASSIM ) THEN
        CASE("WG1")
          ! This is already read above
        CASE("LAI")
-         ! This is already read above
-       CASE("SWE")
-         ! This is handled independently 
+         ! This is already read above         
        CASE DEFAULT
-         CALL ABOR1_SFX("Mapping of "//TRIM(COBS(IOBS))//" is not defined in READ_ISBA_n!")
+         CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in READ_ISBA_n!")
      END SELECT
     ENDDO
   ENDIF
