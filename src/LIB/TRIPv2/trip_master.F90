@@ -24,11 +24,8 @@ PROGRAM TRIP_MASTER
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TRIP, ONLY : TP => TRIP
-!
-USE MODD_TRIP_DIAG, ONLY : TPDG => TRIP_DIAG
-!
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+USE MODD_SURFEX_n
+USE MODD_OFF_SURFEX_n
 !
 USE MODD_TRIP_LISTING
 !
@@ -54,9 +51,6 @@ USE MODI_TRIP_OASIS_INIT
 USE MODI_TRIP_OASIS_READ_NAM
 USE MODI_TRIP_OASIS_DEFINE
 USE MODI_TRIP_OASIS_END
-!
-USE MODI_ALLOC_TRIP
-USE MODI_DEALLOC_TRIP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -101,7 +95,7 @@ CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM,ZRUNTIME)
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_MASTER',0,ZHOOK_HANDLE)
 !
-CALL ALLOC_TRIP(1)
+ CALL SURFEX_ALLOC(1)
 !
 CALL INIT_TRIP_PAR
 !
@@ -166,12 +160,12 @@ ENDIF
 ! * 4. TRIP initializations
 ! --------------------------------------------------------------------------------------
 !
-CALL GOTO_TRIP (1)
+ YSURF_CUR => YSURF_LIST(1)
 !
-CALL READ_NAM_TRIP_GRID(TPG, &
+CALL READ_NAM_TRIP_GRID(YSURF_CUR%TPG, &
                         NLISTING)
 !
-CALL INIT_TRIP(TPDG, TP, TPG, &
+CALL INIT_TRIP(YSURF_CUR%TPDG, YSURF_CUR%TP, YSURF_CUR%TPG, &
                IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT,XTSTEP_RUN,XTSTEP_DIAG,LRESTART)
 !
 ! --------------------------------------------------------------------------------------
@@ -203,7 +197,7 @@ ENDIF
 ! * 7. Read and prepare drainage and runoff if offline
 ! --------------------------------------------------------------------------------------
 !
-CALL TRIP_RUN(TPDG, TP, TPG, &
+CALL TRIP_RUN(YSURF_CUR%TPDG, YSURF_CUR%TP, YSURF_CUR%TPG, &
               GOASIS,                           &
               NLISTING,ILON,ILAT,INB_TSTEP_RUN, &
               ZRUNTIME,ILON_OL,ILAT_OL,INB_OL,  &
@@ -213,11 +207,11 @@ CALL TRIP_RUN(TPDG, TP, TPG, &
 ! * 9. Store run mean diagnostic and write restart
 !-------------------------------------------------------------------------------
 !
-CALL TRIP_DIAG_RUN(TPDG, TPG, &
+CALL TRIP_DIAG_RUN(YSURF_CUR%TPDG, YSURF_CUR%TPG, &
                    NLISTING,ILON,ILAT,ZRUNTIME)
 !
 IF(LRESTART)THEN
-   CALL TRIP_RESTART(TP, TPG, &
+   CALL TRIP_RESTART(YSURF_CUR%TP, YSURF_CUR%TPG, &
                      NLISTING,IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT)
 ENDIF
 !
@@ -233,7 +227,7 @@ WRITE(*,*) '    | TRIP MASTER ENDS CORRECTLY |'
 WRITE(*,*) '    ------------------------------'
 WRITE(*,*) ' '
 !
-CALL DEALLOC_TRIP
+CALL SURFEX_DEALLO
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_MASTER',1,ZHOOK_HANDLE)
 !

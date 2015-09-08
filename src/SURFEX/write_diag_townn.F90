@@ -2,7 +2,7 @@
 SUBROUTINE WRITE_DIAG_TOWN_n (BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTT, DTZ, &
                                DGEI, DGF, DGI, DGMI, DGO, DGS, DGSI, DGU, DGW, F, FSB, &
                                GB, IOB, ICP, I, O, S, SSB, UG, SV, TCP, TGD, &
-                               TGDO, TGR, TGRO, W, WSB, &
+                               TGDO, TGR, TGRO, TGRPE, W, WSB, &
                                B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, U, TGDPE, TGDP, T, TOP, TPN, TVG, &
                               HPROGRAM,HWRITE)
 !     ###############################################################################
@@ -33,7 +33,7 @@ SUBROUTINE WRITE_DIAG_TOWN_n (BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTT,
 !
 !
 !
-!
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -139,6 +139,7 @@ TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
 TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
 TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
 TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(TEB_GREENROOF_PGD_EVOL_t), INTENT(INOUT) :: TGRPE
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
 !
@@ -173,7 +174,7 @@ IF (U%CTOWN=='TEB   ') THEN
   CALL WRITE_DIAG_TEB_n(BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTT, DTZ, &
                               DGEI, DGF, DGI, DGMI, DGO, DGS, DGSI, DGU, DGW, F, FSB, &
                               GB, IOB, ICP, I, O, S, SSB, UG, U, SV, TCP, &
-                              TGD, TGDO, TGR, TGRO, W, WSB, &
+                              TGD, TGDO, TGR, TGRO, TGRPE, W, WSB, &
                         B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, TGDPE, TGDP, T, TOP, TPN, TVG, &
                         HPROGRAM,HWRITE)
 END IF

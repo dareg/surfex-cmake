@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_TOWN (B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
+SUBROUTINE PREP_TOWN (DGCT, DGMT, &
+                      B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
                       TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, T, TOP, TVG, &
                       HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
@@ -25,11 +26,10 @@ SUBROUTINE PREP_TOWN (B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
 !!      Original    01/2004
 !!------------------------------------------------------------------
 !
-
 !
 !
-!
-!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -65,6 +65,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
@@ -102,7 +104,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TOWN',0,ZHOOK_HANDLE)
 IF (U%CTOWN=='TEB   ') THEN
-  CALL PREP_TEB(B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
+  CALL PREP_TEB(DGCT, DGMT, B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
                      TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, T, TOP, TVG, &
                      HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 END IF

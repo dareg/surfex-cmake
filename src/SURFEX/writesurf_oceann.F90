@@ -316,8 +316,8 @@ END DO
 !-------------------------------------------------------------------------------
 !Sea Surface Salinity
 !
-YRECFM='SSS'
-YCOMMENT='SSS'
+YRECFM='SSS_OC'
+YCOMMENT='SSS_OC'
  CALL WRITE_SURF(DGU, IOB, U, &
                  HPROGRAM,YRECFM,O%XSEAS(:,NOCKMIN),IRESP,HCOMMENT=YCOMMENT)
 !-------------------------------------------------------------------------------

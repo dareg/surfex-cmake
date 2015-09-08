@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_TEB_n (BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
+      SUBROUTINE WRITE_TEB_n (DGCT, DGMT, &
+                              BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
                                DGF, DGI, DGMI, DGO, DGS, DGSI, DGW, F, FSB, GB, IOB, &
                                ICP, I, O, S, SSB, UG, U, SV, W, WSB, &
                                B, BOP, CHT, DTT, DGMTO, DGU, DGT, DGUT, TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
@@ -39,12 +40,8 @@
 !              ------------
 !
 !
-!
-!
-!
-!
-!
-!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -116,7 +113,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-!
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
@@ -197,13 +195,13 @@ IF (LHOOK) CALL DR_HOOK('WRITE_TEB_N',0,ZHOOK_HANDLE)
                            HPROGRAM)
 !
 DO JPATCH=1,TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, JPATCH)
   CALL WRITESURF_TEB_n(DGU, IOB, U, &
                        B, BOP, DTT, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
                        HPROGRAM,JPATCH,HWRITE)
 END DO
 !     
- CALL GOTO_WRAPPER_TEB_PATCH(1)
+ CALL GOTO_WRAPPER_TEB_PATCH(B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, 1)
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(DGU, IOB, U, &
                                                                        TCP, TOP, &
                                                                        HPROGRAM,HWRITE)

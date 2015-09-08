@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_TOWN_n (BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
+      SUBROUTINE WRITE_TOWN_n (DGCT, DGMT, &
+                                BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
                                 DGF, DGI, DGMI, DGO, DGS, DGSI, DGW, F, FSB, GB, IOB, &
                                 ICP, I, O, S, SSB, UG, SV, W, WSB, &
                                 B, BOP, CHT, DTT, DGMTO, DGU, DGT, DGUT, U, &
@@ -39,10 +40,8 @@
 !              ------------
 !
 !
-!
-!
-!
-!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -108,7 +107,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-!
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
@@ -176,7 +176,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_TOWN_N',0,ZHOOK_HANDLE)
 IF (U%CTOWN=='TEB   ') THEN
-  CALL WRITE_TEB_n(BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
+  CALL WRITE_TEB_n(DGCT, DGMT, BDD, CHE, CHI, CHS, CHN, CHU, CHW, DTCO, DTS, DTZ, DGEI, &
                                DGF, DGI, DGMI, DGO, DGS, DGSI, DGW, F, FSB, GB, IOB, &
                                ICP, I, O, S, SSB, UG, U, SV, W, WSB, &
                    B, BOP, CHT, DTT, DGMTO, DGU, DGT, DGUT, TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &

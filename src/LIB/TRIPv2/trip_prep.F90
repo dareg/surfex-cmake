@@ -23,9 +23,8 @@ PROGRAM TRIP_PREP
 !!      Original    06/2008
 !!------------------------------------------------------------------
 !
-USE MODD_TRIP, ONLY : TP => TRIP
-!
-USE MODD_TRIP_GRID, ONLY : TPG => TRIP_GRID
+USE MODD_SURFEX_n
+USE MODD_OFF_SURFEX_n
 !
 USE MODD_TRIP_LISTING
 !
@@ -40,8 +39,6 @@ USE MODI_TRIP_POSNAM
 USE MODI_READ_NAM_TRIP
 USE MODI_READ_NAM_TRIP_GRID
 !
-USE MODI_ALLOC_TRIP
-USE MODI_DEALLOC_TRIP
 USE MODI_TRIP_OASIS_END
 !
 USE MODI_TRIP_OASIS_INIT
@@ -84,8 +81,8 @@ CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM)
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CALL ALLOC_TRIP(1)
-CALL GOTO_TRIP (1)
+ CALL SURFEX_ALLOC(1)
+ YSURF_CUR => YSURF_LIST(1)
 !-------------------------------------------------------------------------------
 !
 CLISTING = CLISTING_PREP
@@ -120,7 +117,7 @@ CALL INIT_TRIP_PAR
 !
 CALL READ_NAM_TRIP(NLISTING)
 !
-CALL READ_NAM_TRIP_GRID(TPG, &
+CALL READ_NAM_TRIP_GRID(YSURF_CUR%TPG, &
                         NLISTING)
 !
 IF(GOASIS)THEN
@@ -131,11 +128,11 @@ ENDIF
 !* 4. TRIP parameters preparation
 ! --------------------------------------------------------------------------------------
 !
-CALL PREP_TRIP_RUN(TP, TPG, &
+CALL PREP_TRIP_RUN(YSURF_CUR%TP, YSURF_CUR%TPG, &
                    NYEAR,NMONTH,NDAY,XTIME,ILON,ILAT)
 !
 IF(GOASIS)THEN
-  CALL TRIP_OASIS_PREP(TPG, &
+  CALL TRIP_OASIS_PREP(YSURF_CUR%TPG, &
                        NLISTING,ILON,ILAT)
 ENDIF
 !
@@ -154,7 +151,7 @@ WRITE(*,*) '    ----------------------------'
 CLOSE(NLISTING)
 !
 !-------------------------------------------------------------------------------
-CALL DEALLOC_TRIP
+CALL SURFEX_DEALLO
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',1,ZHOOK_HANDLE)

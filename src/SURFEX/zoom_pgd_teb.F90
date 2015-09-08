@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_TEB (BOP, BDD, DTB, DTCO, DTT, IOB, UG, U, TGDO, TGDP, TG, &
+      SUBROUTINE ZOOM_PGD_TEB (B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, &
+                               BOP, BDD, DTB, DTCO, DTT, IOB, UG, U, TGDO, TGDP, TG, &
                                TOP, TVG, &
                                HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP,OGARDEN)
 !     ###########################################################
@@ -38,11 +39,14 @@
 !            -----------
 !
 !
-!
-!
-!
-!
-!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TEB_GARDEN_PGD_EVOL_t
+USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
@@ -84,6 +88,14 @@ IMPLICIT NONE
 !            ------------------------------
 !
 !
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_GARDEN_PGD_EVOL_t), INTENT(INOUT) :: TGDPE
+TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
+TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
+TYPE(TEB_GREENROOF_PGD_EVOL_t), INTENT(INOUT) :: TGRPE
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
@@ -143,7 +155,7 @@ END IF
  CALL OPEN_AUX_IO_SURF(IOB, &
                        HINIFILE,HINIFILETYPE,'FULL  ')
 !
- CALL GOTO_WRAPPER_TEB_PATCH(1)
+ CALL GOTO_WRAPPER_TEB_PATCH(B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, 1)
 !-------------------------------------------------------------------------------
 !
 !*    2.      Number of points and packing of general fields
@@ -221,7 +233,7 @@ IF (TOP%CBEM/='DEF') THEN
 END IF
 !
 DO JPATCH=1,TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, JPATCH)
   CALL READ_PGD_TEB_PAR_n(DTCO, IOB, U, &
                           BDD, DTB, DTT, TG, TOP, &
                           HPROGRAM,INI,'A')

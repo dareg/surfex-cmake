@@ -75,15 +75,16 @@ YCOMMENT=' '
  CALL READ_SURF(IOB, &
                 HPROGRAM,YRECFM,DUU%NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
-DUU%CDUMMY_NAME(:) = '                    '
-DUU%CDUMMY_AREA(:) = '   '
-
 !-------------------------------------------------------------------------------
 !
 !*       3.     Dummy fields :
 !               ------------
 !
+ALLOCATE(DUU%CDUMMY_NAME(DUU%NDUMMY_NBR))
+ALLOCATE(DUU%CDUMMY_AREA(DUU%NDUMMY_NBR))
 ALLOCATE(DUU%XDUMMY_FIELDS(U%NSIZE_FULL,DUU%NDUMMY_NBR))
+DUU%CDUMMY_NAME(:) = '                    '
+DUU%CDUMMY_AREA(:) = '   '
 !
 !
 DO JDUMMY=1,DUU%NDUMMY_NBR

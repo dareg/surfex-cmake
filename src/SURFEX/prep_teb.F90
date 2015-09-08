@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_TEB (B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
+SUBROUTINE PREP_TEB (DGCT, DGMT, &
+                     B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
                      TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, T, TOP, TVG, &
                      HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
@@ -27,14 +28,8 @@ SUBROUTINE PREP_TEB (B, BOP, DTCO, IOB, IG, I, UG, U, USS, TCP, TGD, &
 !!------------------------------------------------------------------
 !
 !
-!
-!
-!
-!
-!
-!
-!
-!
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -93,6 +88,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
@@ -155,7 +152,7 @@ TOP%CWALL_OPT = CWALL_OPT
 !
 DO JPATCH=1,TOP%NTEB_PATCH
   !
-  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, JPATCH)
   !*      2.1    Water reservoirs
   !
   CALL PREP_HOR_TEB_FIELD(B, BOP, DTCO, IOB, IG, U, TG, T, TOP, &
