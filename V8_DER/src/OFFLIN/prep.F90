@@ -1,0 +1,430 @@
+!------------------------
+PROGRAM PREP
+!------------------------
+!!
+!!    PURPOSE
+!!    -------
+!!   This program prepares the initial file for offline run
+!!
+!!    METHOD
+!!    ------
+!!   
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!    AUTHOR
+!!    ------
+!!
+!!    P. LeMoigne                  Meteo-France
+!!
+!!    MODIFICATION
+!!    ------------
+!!
+!!    Original     22/04/04
+!!
+!----------------------------------------------------------------------------
+!
+USE MODD_AGRI_n, ONLY : AG => AGRI
+USE MODD_DATA_BEM_n, ONLY : DTB => DATA_BEM
+USE MODD_DATA_ISBA_n, ONLY : DTI => DATA_ISBA
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DTGD => DATA_TEB_GARDEN
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DTGR => DATA_TEB_GREENROOF
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUU => DUMMY_SURF_FIELDS
+USE MODD_FLAKE_GRID_n, ONLY : FG => FLAKE_GRID
+USE MODD_GR_BIOG_GARDEN_n, ONLY : GBGD => GR_BIOG_GARDEN
+USE MODD_GR_BIOG_GREENROOF_n, ONLY : GBGR => GR_BIOG_GREENROOF
+USE MODD_ISBA_GRID_n, ONLY : IG => ISBA_GRID
+USE MODD_SEAFLUX_GRID_n, ONLY : SG => SEAFLUX_GRID
+USE MODD_SLT_n, ONLY : SLT => SLT
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TGRP => TEB_GREENROOF_PGD
+USE MODD_TEB_GRID_n, ONLY : TG => TEB_GRID
+USE MODD_TEB_IRRIG_n, ONLY : TIR => TEB_IRRIG
+USE MODD_WATFLUX_GRID_n, ONLY : WG => WATFLUX_GRID
+!
+USE MODD_OCEAN_REL_n, ONLY : OR => OCEAN_REL
+USE MODD_SSO_CANOPY_n, ONLY : SSCP => SSO_CANOPY
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TGRPE => TEB_GREENROOF_PGD_EVOL
+!
+USE MODD_BLD_DESCRIPTION_n, ONLY : BDD => BLD_DESC
+USE MODD_DATA_SEAFLUX_n, ONLY : DTS => DATA_SEAFLUX
+USE MODD_DATA_TEB_n, ONLY : DTT => DATA_TEB
+USE MODD_DATA_TSZ0_n, ONLY : DTZ => DATA_TSZ0
+USE MODD_FLAKE_SBL_n, ONLY : FSB => FLAKE_SBL
+USE MODD_ISBA_CANOPY_n, ONLY : ICP => ISBA_CANOPY
+USE MODD_SEAFLUX_SBL_n, ONLY : SSB => SEAFLUX_SBL
+USE MODD_TEB_CANOPY_n, ONLY : TCP => TEB_CANOPY
+USE MODD_TEB_GARDEN_n, ONLY : TGD => TEB_GARDEN
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TGDO => TEB_GARDEN_OPTIONS
+USE MODD_TEB_GREENROOF_n, ONLY : TGR => TEB_GREENROOF
+USE MODD_WATFLUX_SBL_n, ONLY : WSB => WATFLUX_SBL
+!
+USE MODD_BEM_n, ONLY : B => BEM
+USE MODD_BEM_OPTION_n, ONLY : BOP => BEM_OPTIONS
+USE MODD_CH_EMIS_FIELD_n, ONLY : CHE => CH_EMIS_FIELD
+USE MODD_CH_SNAP_n, ONLY : CHN => CH_EMIS_SNAP
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DGCT => DIAG_CUMUL_TEB
+USE MODD_DIAG_MISC_TEB_n, ONLY : DGMT => DIAG_MISC_TEB
+USE MODD_DST_n, ONLY : DST => DST
+USE MODD_GR_BIOG_n, ONLY : GB => GR_BIOG
+USE MODD_SV_n, ONLY : SV => SV
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TGDPE => TEB_GARDEN_PGD_EVOL
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TGDP => TEB_GARDEN_PGD
+USE MODD_TEB_PANEL_n, ONLY : TPN => TEB_PANEL
+!
+USE MODD_CH_FLAKE_n, ONLY : CHF => CH_FLAKE
+USE MODD_CH_ISBA_n, ONLY : CHI => CH_ISBA
+USE MODD_CH_SEAFLUX_n, ONLY : CHS => CH_SEAFLUX
+USE MODD_CH_SURF_n, ONLY : CHU => CH_SURF
+USE MODD_CH_TEB_n, ONLY : CHT => CH_TEB
+USE MODD_CH_WATFLUX_n, ONLY : CHW => CH_WATFLUX
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DGEI => DIAG_EVAP_ISBA
+USE MODD_DIAG_FLAKE_n, ONLY : DGF => DIAG_FLAKE
+USE MODD_DIAG_IDEAL_n, ONLY : DGL => DIAG_IDEAL
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DGMF => DIAG_MISC_FLAKE
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DGMI => DIAG_MISC_ISBA
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DGMTO => DIAG_MISC_TEB_OPTIONS
+USE MODD_DIAG_OCEAN_n, ONLY : DGO => DIAG_OCEAN
+USE MODD_DIAG_SEAFLUX_n, ONLY : DGS => DIAG_SEAFLUX
+USE MODD_DIAG_SEAICE_n, ONLY : DGSI => DIAG_SEAICE
+USE MODD_DIAG_TEB_n, ONLY : DGT => DIAG_TEB
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DGUT => DIAG_UTCI_TEB
+USE MODD_DIAG_WATFLUX_n, ONLY : DGW => DIAG_WATFLUX
+USE MODD_FLAKE_n, ONLY : F => FLAKE
+USE MODD_OCEAN_n, ONLY : O => OCEAN
+USE MODD_SEAFLUX_n, ONLY : S => SEAFLUX
+USE MODD_SURF_ATM_SSO_n, ONLY : USS => SURF_ATM_SSO
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TGRO => TEB_GREENROOF_OPTIONS
+USE MODD_TEB_n, ONLY : T => TEB
+USE MODD_TEB_OPTION_n, ONLY : TOP => TEB_OPTIONS
+USE MODD_TEB_VEG_n, ONLY : TVG => TEB_VEG_OPTIONS
+USE MODD_WATFLUX_n, ONLY : W => WATFLUX
+!
+USE MODD_DATA_COVER_n, ONLY : DTCO => DATA_COVER
+!
+USE MODD_ISBA_n, ONLY : I => ISBA
+USE MODD_SURF_ATM_GRID_n, ONLY : UG => SURF_ATM_GRID
+!
+USE MODD_IO_BUFF_n, ONLY : IOB => IO_BUFF
+!
+USE MODD_DIAG_ISBA_n, ONLY : DGI => DIAG_ISBA
+USE MODD_DIAG_SURF_ATM_n, ONLY : DGU => DIAG_SURF_ATM
+!
+USE MODE_POS_SURF
+!
+USE MODD_SURFEX_OMP, ONLY : NWORK, NWORK2, XWORK, XWORK2, XWORK3, NBLOCKTOT, &
+                             NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
+!
+USE MODD_IO_SURF_ASC
+USE MODD_IO_SURF_FA
+USE MODD_IO_SURF_LFI
+USE MODD_IO_SURF_NC
+USE MODD_SURF_PAR
+USE MODD_SURF_CONF, ONLY : CSOFTWARE
+!
+USE MODD_SURF_ATM_n, ONLY : U => SURF_ATM
+!
+USE MODD_SFX_OASIS, ONLY : LOASIS
+!
+USE MODI_OPEN_NAMELIST
+USE MODI_CLOSE_NAMELIST
+USE MODI_READ_ALL_NAMELISTS
+USE MODI_ALLOC_SURFEX
+USE MODI_DEALLOC_SURFEX
+USE MODI_GET_LUOUT
+!
+USE MODI_GOTO_SURFEX
+USE MODI_INIT_PGD_SURF_ATM
+USE MODI_IO_BUFF_CLEAN_n
+USE MODI_PREP_SURF_ATM
+USE MODI_WRITE_DIAG_SURF_ATM_n
+USE MODI_WRITE_HEADER_MNH
+USE MODI_WRITE_SURF_ATM_n
+!
+USE MODI_GET_LONLAT_n
+USE MODI_FLAG_UPDATE
+USE MODI_ABOR1_SFX
+!
+USE MODI_SFX_OASIS_INIT
+USE MODI_SFX_OASIS_READ_NAM
+USE MODI_SFX_OASIS_PREP
+USE MODI_SFX_OASIS_END
+!
+USE MODN_IO_OFFLINE
+!------------------------------------------------------------------------------
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifndef AIX64
+INCLUDE 'omp_lib.h'
+#endif
+!
+#ifdef SFX_MPI
+INCLUDE 'mpif.h'
+#endif
+!
+!*    0.     Declaration of local variables
+!            ------------------------------
+!
+INTEGER            :: ILUOUT
+INTEGER            :: ILUNAM
+INTEGER            :: IYEAR, IMONTH, IDAY
+REAL               :: ZTIME
+LOGICAL            :: GFOUND
+
+REAL, DIMENSION(0) :: ZZS
+CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
+CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
+CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
+CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
+!
+INTEGER, DIMENSION(11)  :: IDATEF
+!
+INTEGER :: JNW, INW
+INTEGER :: IRET, INB
+#ifdef SFXOASIS
+INTEGER :: ILOCAL_COMM, INFOMPI, INPROC
+#endif
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!------------------------------------------------------------------------------
+!
+!
+!*    1.      Set default names and parallelized I/O
+!             --------------------------------------
+!
+#ifdef SFXOASIS
+!Must be call before DRHOOK !
+CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM,'PRE')
+#else
+LOASIS = .FALSE.
+#endif
+!
+IF (LHOOK) CALL DR_HOOK('PREP',0,ZHOOK_HANDLE)
+!
+#ifdef SFXOASIS
+IF(LOASIS)THEN
+  CALL MPI_COMM_SIZE(ILOCAL_COMM,INPROC,INFOMPI)
+  IF(INPROC>1)THEN
+    CALL ABOR1_SFX('PREP: FOR PREP"WITH OASIS ONLY 1 PROC MUST BE USED')
+  ENDIF
+ENDIF
+#endif
+!
+!    Allocations of Surfex Types
+CALL ALLOC_SURFEX(1)
+!
+CSOFTWARE='PREP'
+!
+!     1.1     initializations
+!             ---------------
+!
+IYEAR    = NUNDEF
+IMONTH   = NUNDEF
+IDAY     = NUNDEF
+ZTIME    = XUNDEF
+!
+LPREP    = .TRUE.
+!
+!     1.2     output listing
+!             --------------
+CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
+CALL GET_LUOUT('ASCII ',ILUOUT)
+OPEN (UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
+!
+!     1.3     output file name read in namelist
+!             ---------------------------------
+!
+ CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
+!
+ CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
+IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
+!
+CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
+CFILEIN      = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')      ! output of PGD program
+CFILEIN_SAVE = CFILEIN
+CFILEOUT     = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
+!
+CFILEPGD_FA  = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+CFILEIN_FA   = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+CFILEIN_FA_SAVE = CFILEIN_FA
+CFILEOUT_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
+!
+CFILEPGD_LFI = CPGDFILE
+CFILEIN_LFI  = CPGDFILE
+CFILEIN_LFI_SAVE = CFILEIN_LFI
+CFILEOUT_LFI = CPREPFILE
+!
+CFILEPGD_NC = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+CFILEIN_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+CFILEIN_NC_SAVE  = CFILEIN_NC
+CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+!
+CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+!
+! Reading all namelist (also assimilation)
+CALL READ_ALL_NAMELISTS(CHF, CHI, CHS, CHU, CHT, CHW, &
+                        DGEI, DGF, DGL, DGI, DGMF, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, &
+                        F, I, O, S, USS, TGRO, T, TOP, TVG, W, &
+                        CSURF_FILETYPE,'PRE',.FALSE.)
+!
+!*      1.4.   Reads SFX - OASIS coupling namelists
+!              ------------------------------------
+!
+CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF,'PRE')
+!
+!*      1.5.   Goto model of Surfex Types
+!              ---------------------------
+!
+CALL GOTO_SURFEX(1,.TRUE.)
+!
+!*    2.      Preparation of surface physiographic fields
+!             -------------------------------------------
+!
+!$OMP PARALLEL
+!$ NBLOCKTOT = OMP_GET_NUM_THREADS()
+!$OMP END PARALLEL
+!
+ CALL IO_BUFF_CLEAN_n(IOB)
+ CALL INIT_PGD_SURF_ATM(AG, B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, &
+                              CHW, DTB, DTCO, DTI, DTS, DTGD, DTGR, DTT, DTZ, DGCT, DGEI, &
+                              DGF, DGL, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, &
+                              DGT, DGUT, DGW, DST, DUU, FG, F, FSB, GBGD, GBGR, GB, &
+                              IOB, ICP, IG, I, O, OR, SG, S, SSB, SLT, SSCP, &
+                              UG, U, USS, SV, TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, &
+                              TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, WG, W, WSB, &
+                              CSURF_FILETYPE,'PRE',YATMFILE,YATMFILETYPE, &
+                         IYEAR, IMONTH, IDAY, ZTIME            ) 
+!
+ CALL IO_BUFF_CLEAN_n(IOB)
+ CALL PREP_SURF_ATM(B, BOP, DTCO, DTS, FG, F, FSB, IOB, ICP, IG, I, &
+                          O, OR, SG, S, SSB, UG, U, USS, TCP, TGD, TGDO, &
+                          TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, T, TOP, TVG, WG, &
+                          W, WSB, &
+                    CSURF_FILETYPE,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+!
+!*    3.      Preparation of SFX-OASIS grid, mask, areas files
+!             ------------------------------------------------
+!
+IF(LOASIS)THEN
+  CALL SFX_OASIS_PREP(I, UG, U, &
+                      CSURF_FILETYPE)
+ENDIF
+!
+!*    4.      Store of surface physiographic fields
+!             -------------------------------------
+!
+CALL FLAG_UPDATE(DGI, DGU, &
+                 .FALSE.,.TRUE.,.FALSE.,.FALSE.)
+!
+!* opens the file
+IF (CSURF_FILETYPE=='FA    ') THEN
+  LFANOCOMPACT = .TRUE.
+  IDATEF(1)=U%TTIME%TDATE%YEAR
+  IDATEF(2)=U%TTIME%TDATE%MONTH
+  IDATEF(3)=U%TTIME%TDATE%DAY
+  IDATEF(4)=NINT(U%TTIME%TIME/3600.) 
+  IDATEF(5)=NINT(U%TTIME%TIME/60.) - IDATEF(4) * 60 
+  IDATEF(6)=1 
+  IDATEF(7:11)=0  
+  CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'NEW',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
+  CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+END IF
+!
+LDEF = .TRUE.
+!
+INW = 1
+IF (CSURF_FILETYPE=="NC    ") INW = 2
+!
+DO JNW = 1,INW
+  !
+  IF (LWRITE_COORD) CALL GET_LONLAT_n(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
+                                DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
+                                DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, SV, &
+                                TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
+                                      DTCO, IOB, UG, U, &
+                                      CSURF_FILETYPE)
+  !
+  !* writes into the file
+  CALL IO_BUFF_CLEAN_n(IOB)
+  !
+  ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
+  CALL WRITE_SURF_ATM_n(B, BOP, BDD, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                                   DTCO, DTS, DTT, DTZ, DGEI, DGF, DGI, DGMF, DGMI, DGMTO, DGO, &
+                                   DGS, DGSI, DGU, DGT, DGUT, DGW, DST, F, FSB, GB, IOB, &
+                                   ICP, I, O, OR, S, SSB, SSCP, UG, U, USS, SV, &
+                                   TCP, TGD, TGDO, TGDPE, TGR, TGRO, TGRPE, T, TOP, TPN, TVG, &
+                                   W, WSB, &
+                        CSURF_FILETYPE,'PRE',LLAND_USE) !no pgd field
+  CALL WRITE_DIAG_SURF_ATM_n(BDD, DTCO, DTS, DTT, DTZ, FSB, IOB, ICP, O, SSB, TCP, &
+                                   TGD, TGDO, TGR, TGRO, WSB, &
+                             B, BOP, CHE, CHF, CHI, CHS, CHN, CHU, CHT, CHW, &
+                             DGCT, DGEI, DGF, DGI, DGMF, DGMI, DGMT, DGMTO, DGO, DGS, DGSI, DGU, DGT, DGUT, DGW, DST, &
+                             F, GB, I, S, UG, U, SV, TGDPE, TGDP, T, TOP, TPN, TVG, W, &
+                             CSURF_FILETYPE,'ALL')
+  !
+  LDEF = .FALSE.
+  CALL IO_BUFF_CLEAN_n(IOB)  
+  !
+ENDDO
+!
+!* closes the file
+IF (CSURF_FILETYPE=='FA    ') THEN
+  CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+END IF
+!
+!* add informations in the file
+IF (CSURF_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
+!
+!
+!*    4.     Close parallelized I/O
+!            ----------------------
+!
+WRITE(ILUOUT,*) ' '
+WRITE(ILUOUT,*) '    -----------------------'
+WRITE(ILUOUT,*) '    | PREP ENDS CORRECTLY |'
+WRITE(ILUOUT,*) '    -----------------------'
+!
+WRITE(*,*) ' '
+WRITE(*,*) '    -----------------------'
+WRITE(*,*) '    | PREP ENDS CORRECTLY |'
+WRITE(*,*) '    -----------------------'
+!
+CLOSE(ILUOUT)
+!
+CALL DEALLOC_SURFEX
+!
+IF (ASSOCIATED(NWORK)) DEALLOCATE(NWORK)
+IF (ASSOCIATED(XWORK)) DEALLOCATE(XWORK)
+IF (ASSOCIATED(NWORK2)) DEALLOCATE(NWORK2)
+IF (ASSOCIATED(XWORK2)) DEALLOCATE(XWORK2)
+IF (ASSOCIATED(XWORK3)) DEALLOCATE(XWORK3)
+IF (ASSOCIATED(NWORK_FULL)) DEALLOCATE(NWORK_FULL)
+IF (ASSOCIATED(XWORK_FULL)) DEALLOCATE(XWORK_FULL)
+IF (ASSOCIATED(NWORK2_FULL)) DEALLOCATE(NWORK2_FULL)
+IF (ASSOCIATED(XWORK2_FULL)) DEALLOCATE(XWORK2_FULL)
+!
+IF (LHOOK) CALL DR_HOOK('PREP',1,ZHOOK_HANDLE)
+!
+! * OASIS must be finalized after the last DR_HOOK call
+!
+IF(LOASIS)THEN
+  CALL SFX_OASIS_END
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+END PROGRAM PREP

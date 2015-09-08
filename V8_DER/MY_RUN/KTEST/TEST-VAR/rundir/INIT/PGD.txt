@@ -1,0 +1,333 @@
+ &FULL   VERSION     
+(-)                                               
+           8
+ &FULL   BUG         
+(-)                                               
+           0
+ &FULL   STORAGETYPE 
+(-)                                               
+PGD                                     
+ &FULL   SEA         
+(-)                                               
+NONE                                    
+ &FULL   WATER       
+(-)                                               
+NONE                                    
+ &FULL   NATURE      
+(-)                                               
+ISBA                                    
+ &FULL   TOWN        
+(-)                                               
+NONE                                    
+ &FULL   DIM_FULL    
+(-)                                               
+           1
+ &FULL   DIM_SEA     
+(-)                                               
+           0
+ &FULL   DIM_NATURE  
+(-)                                               
+           1
+ &FULL   DIM_WATER   
+(-)                                               
+           0
+ &FULL   DIM_TOWN    
+(-)                                               
+           0
+ &FULL   ECOCLIMAP   
+(-)                                               
+ T
+ &FULL   WATER_TO_NAT
+(-)                                               
+ T
+ &FULL   TOWN_TO_ROCK
+(-)                                               
+ T
+ &FULL   GARDEN      
+(-)                                               
+ F
+ &FULL   DATA_IRRIG  
+FLAG TO READ USER IRRIGATION DATA FOR ECOCLIMAP2  
+ F
+ &FULL   LCLIM_LAI   
+FLAG TO USE CLIMATOLOGICAL LAI                    
+ F
+ &FULL   GRID_TYPE   
+GRID TYPE                                         
+IGN                                     
+ &FULL   LAMBERT     
+LAMBERT 2 ETENDU                                  
+           5
+ &FULL   XX          
+XX                                                
+      0.51600000D+06
+ &FULL   XY          
+XY                                                
+      0.18170000D+07
+ &FULL   DX          
+XDX                                               
+      0.80000000D+04
+ &FULL   DY          
+XDY                                               
+      0.80000000D+04
+ &FULL   FRAC_SEA    
+(-)                                               
+      0.00000000D+00
+ &FULL   FRAC_NATURE 
+(-)                                               
+      0.10000000D+01
+ &FULL   FRAC_WATER  
+(-)                                               
+      0.00000000D+00
+ &FULL   FRAC_TOWN   
+(-)                                               
+      0.00000000D+00
+ &FULL   COVER_LIST  
+(LOGICAL LIST)                                    
+ F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T F F F T T F F F F F T F T F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F T F F F F F F F F F F F F
+ &FULL   COVER376    
+X_Y_COVER376                                      
+      0.21052632D-01
+ &FULL   COVER446    
+X_Y_COVER446                                      
+      0.21052632D+00
+ &FULL   COVER450    
+X_Y_COVER450                                      
+      0.37894737D+00
+ &FULL   COVER451    
+X_Y_COVER451                                      
+      0.10526316D+00
+ &FULL   COVER457    
+X_Y_COVER457                                      
+      0.14736842D+00
+ &FULL   COVER459    
+X_Y_COVER459                                      
+      0.31578947D-01
+ &FULL   COVER492    
+X_Y_COVER492                                      
+      0.94736842D-01
+ &FULL   COVER561    
+X_Y_COVER561                                      
+      0.10526316D-01
+ &FULL   ZS          
+X_Y_ZS (M)                                        
+      0.21900000D+03
+ &FULL   AVG_ZS      
+X_Y_AVG_ZS (M)                                    
+      0.21900000D+03
+ &FULL   SIL_ZS      
+X_Y_SIL_ZS (M)                                    
+      0.21900000D+03
+ &FULL   SSO_STDEV   
+X_Y_SSO_STDEV (M)                                 
+      0.00000000D+00
+ &FULL   MIN_ZS      
+X_Y_MIN_ZS (M)                                    
+      0.21900000D+03
+ &FULL   MAX_ZS      
+X_Y_MAX_ZS (M)                                    
+      0.21900000D+03
+ &FULL   SSO_ANIS    
+X_Y_SSO_ANIS (-)                                  
+      0.00000000D+00
+ &FULL   SSO_DIR     
+X_Y_SSO_DIR (DEG)                                 
+      0.00000000D+00
+ &FULL   SSO_SLOPE   
+X_Y_SSO_SLOPE (-)                                 
+      0.00000000D+00
+ &FULL   HO2IP       
+X_Y_HO2IP (M)                                     
+      0.00000000D+00
+ &FULL   HO2JP       
+X_Y_HO2JP (M)                                     
+      0.00000000D+00
+ &FULL   HO2IM       
+X_Y_HO2IM (M)                                     
+      0.00000000D+00
+ &FULL   HO2JM       
+X_Y_HO2JM (M)                                     
+      0.00000000D+00
+ &FULL   AOSIP       
+X_Y_AOSIP (-)                                     
+      0.00000000D+00
+ &FULL   AOSJP       
+X_Y_AOSJP (-)                                     
+      0.00000000D+00
+ &FULL   AOSIM       
+X_Y_AOSIM (-)                                     
+      0.00000000D+00
+ &FULL   AOSJM       
+X_Y_AOSJM (-)                                     
+      0.00000000D+00
+ &FULL   DUMMY_GR_NBR
+                                                  
+           0
+ &FULL   CH_EMIS     
+CH_EMIS                                           
+ F
+ &NATURE ISBA        
+ISBA                                              
+3-L                                     
+ &NATURE PEDOTF      
+PEDOTF                                            
+CH78                                    
+ &NATURE PHOTO       
+PHOTO                                             
+NIT                                     
+ &NATURE TR_ML       
+TR_ML                                             
+ T
+ &NATURE RM_PATCH    
+RM_PATCH                                          
+   0.0000000000000000     
+ &NATURE GROUND_LAYER
+GROUND_LAYER                                      
+           3
+ &NATURE NBIOMASS    
+NBIOMASS                                          
+           3
+ &NATURE PATCH_NUMBER
+PATCH_NUMBER                                      
+          12
+ &NATURE CLAY        
+X_Y_CLAY                                          
+      0.29750000D+00
+ &NATURE SAND        
+X_Y_SAND                                          
+      0.33250000D+00
+ &NATURE SOCP        
+                                                  
+ F
+ &NATURE PERMAFROST  
+                                                  
+ F
+ &NATURE NO          
+                                                  
+ F
+ &NATURE RUNOFFB     
+X_Y_RUNOFFB                                       
+      0.50000000D+00
+ &NATURE WDRAIN      
+X_Y_WDRAIN                                        
+      0.10000000D-02
+ &NATURE CTI         
+                                                  
+ F
+ &NATURE L_VEGTYPE   
+L_VEGTYPE                                         
+ F
+ &NATURE L_VEG       
+L_VEG                                             
+ F
+ &NATURE L_LAI       
+L_LAI                                             
+ F
+ &NATURE L_Z0        
+L_Z0                                              
+ F
+ &NATURE L_EMIS      
+L_EMIS                                            
+ F
+ &NATURE L_RSMIN     
+L_RSMIN                                           
+ F
+ &NATURE L_GAMMA     
+L_GAMMA                                           
+ F
+ &NATURE L_WRMAX_CF  
+L_WRMAX_CF                                        
+ F
+ &NATURE L_RGL       
+L_RGL                                             
+ F
+ &NATURE L_CV        
+L_CV                                              
+ F
+ &NATURE L_Z0_O_Z0H  
+L_Z0_O_Z0H                                        
+ F
+ &NATURE L_DG        
+L_DG                                              
+ F
+ &NATURE L_ROOTFRAC  
+L_ROOTFRAC                                        
+ F
+ &NATURE L_GROUND_DPT
+L_GROUND_DPT                                      
+ F
+ &NATURE L_ROOT_DEPTH
+L_ROOT_DEPTH                                      
+ F
+ &NATURE L_ROOT_EXT  
+L_ROOT_EXT                                        
+ F
+ &NATURE L_ROOT_LIN  
+L_ROOT_LIN                                        
+ F
+ &NATURE L_DICE      
+L_DICE                                            
+ F
+ &NATURE L_ALBNIR_VEG
+L_ALBNIR_VEG                                      
+ F
+ &NATURE L_ALBVIS_VEG
+L_ALBVIS_VEG                                      
+ F
+ &NATURE L_ALBUV_VEG 
+L_ALBUV_VEG                                       
+ F
+ &NATURE L_ALBNIR_SOI
+L_ALBNIR_SOI                                      
+ F
+ &NATURE L_ALBVIS_SOI
+L_ALBVIS_SOI                                      
+ F
+ &NATURE L_ALBUV_SOI 
+L_ALBUV_SOI                                       
+ F
+ &NATURE L_GMES      
+L_GMES                                            
+ F
+ &NATURE L_BSLAI     
+L_BSLAI                                           
+ F
+ &NATURE L_LAIMIN    
+L_LAIMIN                                          
+ F
+ &NATURE L_SEFOLD    
+L_SEFOLD                                          
+ F
+ &NATURE L_GC        
+L_GC                                              
+ F
+ &NATURE L_DMAX      
+L_DMAX                                            
+ F
+ &NATURE L_F2I       
+L_F2I                                             
+ F
+ &NATURE L_STRESS    
+L_STRESS                                          
+ F
+ &NATURE L_H_TREE    
+L_H_TREE                                          
+ F
+ &NATURE L_RE25      
+L_RE25                                            
+ F
+ &NATURE L_CE_NITRO  
+L_CE_NITRO                                        
+ F
+ &NATURE L_CF_NITRO  
+L_CF_NITRO                                        
+ F
+ &NATURE L_CNA_NITRO 
+L_CNA_NITRO                                       
+ F
+ &NATURE L_IRRIG     
+L_IRRIG                                           
+ F
+ &NATURE L_WATSUP    
+L_WATSUP                                          
+ F

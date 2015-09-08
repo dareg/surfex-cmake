@@ -1,0 +1,97 @@
+!     #########
+      SUBROUTINE READ_LCOVER (IOB, &
+                              HPROGRAM,OCOVER)
+!     ################################
+!
+!!****  *READ_LCOVER* - routine to read a file for
+!!                         physiographic data file of model _n 
+!!
+!!    PURPOSE
+!!    -------
+!!       The purpose of this routine is to initialise the list of covers
+!!
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!      
+!!
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!      V. Masson   *Meteo France*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    10/2008
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+!
+USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
+!
+USE MODI_READ_SURF
+USE MODI_OLD_NAME
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments
+!              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+LOGICAL, DIMENSION(JPCOVER)    :: OCOVER   ! list of covers
+!
+!*       0.2   Declarations of local variables
+!              -------------------------------
+!
+INTEGER           :: IRESP          ! Error code after redding
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+INTEGER           :: IVERSION       ! version of surfex file being read
+LOGICAL, DIMENSION(:), ALLOCATABLE :: GCOVER ! cover list in the file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+!
+!* ascendant compatibility
+IF (LHOOK) CALL DR_HOOK('READ_LCOVER',0,ZHOOK_HANDLE)
+YRECFM='VERSION'
+ CALL READ_SURF(IOB, &
+                HPROGRAM,YRECFM,IVERSION,IRESP)
+IF (IVERSION<=3) THEN
+  ALLOCATE(GCOVER(255))
+ELSE
+  ALLOCATE(GCOVER(JPCOVER))
+END IF
+ CALL OLD_NAME(IOB, &
+               HPROGRAM,'COVER_LIST      ',YRECFM)
+ CALL READ_SURF(IOB, &
+                HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
+!
+OCOVER=.FALSE.
+OCOVER(:SIZE(GCOVER))=GCOVER(:)
+DEALLOCATE(GCOVER)
+IF (LHOOK) CALL DR_HOOK('READ_LCOVER',1,ZHOOK_HANDLE)
+!
+!-------------------------------------------------------------------------------
+!
+END SUBROUTINE READ_LCOVER

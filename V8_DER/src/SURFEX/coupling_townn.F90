@@ -1,0 +1,260 @@
+!     ###############################################################################
+SUBROUTINE COUPLING_TOWN_n (DTCO, DTI, DTGD, DTGR, IG, I, &
+                             B, BOP, CHT, DGCT, DGL, DGMT, DGMTO, DGT, DGUT, DST, SLT, U, &
+                            TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, &
+                            HPROGRAM, HCOUPLING, PTIMEC,                                      &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
+                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
+                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
+                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
+                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
+                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
+                 HTEST                                                                       )  
+!     ###############################################################################
+!
+!!****  *COUPLING_TOWN_n * - Chooses the surface schemes for towns 
+!!
+!!    PURPOSE
+!!    -------
+!
+!!**  METHOD
+!!    ------
+!!
+!!    REFERENCE
+!!    ---------
+!!      
+!!
+!!    AUTHOR
+!!    ------
+!!     V. Masson 
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    01/2004
+!!      B. Decharme  04/2013 new coupling variables
+!!------------------------------------------------------------------
+!
+!
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
+USE MODD_DIAG_CUMUL_TEB_n, ONLY : DIAG_CUMUL_TEB_t
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
+USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_DIAG_UTCI_TEB_n, ONLY : DIAG_UTCI_TEB_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_SLT_n, ONLY : SLT_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
+USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
+USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
+USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TEB_GARDEN_PGD_EVOL_t
+USE MODD_TEB_GARDEN_PGD_n, ONLY : TEB_GARDEN_PGD_t
+USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
+USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+!
+USE MODD_CSTS,       ONLY : XTT, XCPD, XRD, XP00
+!
+! 
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+USE MODI_COUPLING_IDEAL_FLUX
+!
+USE MODI_COUPLING_TEB_OROGRAPHY_n
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
+TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
+TYPE(DIAG_CUMUL_TEB_t), INTENT(INOUT) :: DGCT
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
+TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_UTCI_TEB_t), INTENT(INOUT) :: DGUT
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(SLT_t), INTENT(INOUT) :: SLT
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
+TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
+TYPE(TEB_GARDEN_PGD_EVOL_t), INTENT(INOUT) :: TGDPE
+TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
+TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
+TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(TEB_GREENROOF_PGD_EVOL_t), INTENT(INOUT) :: TGRPE
+TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
+TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+!
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
+                                              ! 'E' : explicit
+                                              ! 'I' : implicit
+REAL,                INTENT(IN)  :: PTIMEC    ! cumulated time since beginning of simulation
+INTEGER,             INTENT(IN)  :: KYEAR     ! current year (UTC)
+INTEGER,             INTENT(IN)  :: KMONTH    ! current month (UTC)
+INTEGER,             INTENT(IN)  :: KDAY      ! current day (UTC)
+REAL,                INTENT(IN)  :: PTIME     ! current time since midnight (UTC, s)
+INTEGER,             INTENT(IN)  :: KI        ! number of points
+INTEGER,             INTENT(IN)  :: KSV       ! number of scalars
+INTEGER,             INTENT(IN)  :: KSW       ! number of short-wave spectral bands
+REAL, DIMENSION(KI), INTENT(IN)  :: PTSUN     ! solar time                    (s from midnight)
+REAL,                INTENT(IN)  :: PTSTEP    ! atmospheric time-step                 (s)
+REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
+!
+REAL, DIMENSION(KI), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
+REAL, DIMENSION(KI), INTENT(IN)  :: PQA       ! air humidity forcing                  (kg/m3)
+REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                           (kg/m3)
+REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
+!                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
+!                                             !
+ CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
+REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
+REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
+!                                             !                                       (W/m2)
+REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
+!                                             !                                       (W/m2)
+REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
+REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
+!                                             !                                       (W/m2)
+REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
+REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
+REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
+REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
+!
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                          (W/m2)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
+REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
+REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
+REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
+!
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
+REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
+REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
+REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+!
+!*      0.2    declarations of local variables
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------------
+!
+!*      0.     initialization of implicit coefficients
+!              ---------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('COUPLING_TOWN_N',0,ZHOOK_HANDLE)
+!
+IF (U%CTOWN=='TEB   ') THEN 
+  CALL COUPLING_TEB_OROGRAPHY_n(DTCO, DTI, DTGD, DTGR, IG, I, &
+                                B, BOP, CHT, DGCT, DGMT, DGMTO, DGT, DGUT, DST, SLT, &
+                                TCP, TGD, TGDO, TGDPE, TGDP, TGR, TGRO, TGRPE, TGRP, TG, TIR, T, TOP, TPN, TVG, &
+                                HPROGRAM, HCOUPLING,                                       &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
+                 KI, KSV, KSW,                                                               &
+                 PTSUN, PZENITH, PAZIM,                                                      &
+                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
+                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
+                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
+                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
+                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
+                 'OK'                                                                        )  
+ELSE IF (U%CTOWN=='FLUX  ') THEN
+  CALL COUPLING_IDEAL_FLUX(DGL, &
+                           HPROGRAM, HCOUPLING, PTIMEC,                                      &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
+                 KI, KSV, KSW,                                                               &
+                 PTSUN, PZENITH, PAZIM,                                                      &
+                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
+                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
+                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
+                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
+                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
+                 'OK'                                                                        )  
+ELSE IF (U%CTOWN=='NONE  ') THEN
+  PSFTH = 0.
+  PSFTQ = 0.
+  PSFTS = 0.
+  PSFU  = 0.
+  PSFV  = 0.
+  PSFCO2= 0.
+!
+  PTRAD = XTT
+  PDIR_ALB = 0.
+  PSCA_ALB = 0.
+  PEMIS   = 1.
+!  
+  PTSURF = XTT
+  PZ0    = 0.1
+  PZ0H   = 0.001
+  PQSURF = 0.0
+!  
+END IF
+IF (LHOOK) CALL DR_HOOK('COUPLING_TOWN_N',1,ZHOOK_HANDLE)
+!
+!-------------------------------------------------------------------------------------
+!
+END SUBROUTINE COUPLING_TOWN_n

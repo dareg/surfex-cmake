@@ -1,0 +1,100 @@
+!     #######################################################
+      SUBROUTINE OPEN_AUX_IO_SURF_LFI (IOB, &
+                                       HFILE,HFILETYPE,HMASK)
+!     #######################################################
+!
+!!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!      V. Masson    *Meteo France*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    10/2006
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+!
+!
+USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+!
+USE MODD_IO_SURF_LFI,ONLY:CLUOUT_LFI,NMASK,NFULL,CMASK, NLUOUT, &
+                            CFILE_LFI, NUNIT_LFI, NFULL_AUX,&
+                            NIB,NIE,NIU,NJB,NJE,NJU, NFULL_AUX, &
+                            CFILEPGD_LFI 
+USE MODI_GET_LUOUT
+USE MODI_READ_SURF
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+USE MODI_GET_1D_MASK
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments
+!              -------------------------
+!
+!
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+!
+ CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+!
+!*       0.2   Declarations of local variables
+!              -------------------------------
+!
+REAL, DIMENSION(:),ALLOCATABLE :: ZFULL  ! total cover
+INTEGER                        :: ILU,IRET, IL
+INTEGER                        :: INB ! number of articles in the file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
+ CALL GET_LUOUT('LFI   ',NLUOUT)
+!
+ CALL FMOPEN(HFILE,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
+!
+CMASK = HMASK
+CFILE_LFI=HFILE
+ CALL READ_SURF(IOB, &
+                'LFI   ','DIM_FULL',ILU,IRET)
+NFULL_AUX = ILU
+!
+!------------------------------------------------------------------------------
+NFULL = NFULL_AUX
+!
+IL = NFULL
+ALLOCATE(ZFULL(IL))
+ALLOCATE(NMASK(IL))
+ZFULL=1.
+ CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
+!
+!------------------------------------------------------------------------------
+CMASK = HMASK
+IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END SUBROUTINE OPEN_AUX_IO_SURF_LFI
