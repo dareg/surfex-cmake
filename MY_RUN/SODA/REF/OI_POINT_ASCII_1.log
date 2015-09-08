@@ -1,0 +1,34 @@
+  
+     ----------------------
+     | PGD ENDS CORRECTLY |
+     ----------------------
+  
+     -----------------------
+     | PREP ENDS CORRECTLY |
+     -----------------------
+Running offline
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+At line 61 of file /disk1/svn/surfex/branches/V8_DER/src/dir_obj-LXgfortran-SFX-V8-0-0-MPIAUTO-OMP-DEBUG/MASTER/spll_read_and_send_mpi_x1d.f90
+Fortran runtime error: Index '2' of dimension 1 of array 'pwork' above upper bound of 1
+
+Backtrace for this error:
+  + function read_and_send_mpi_x1d_ (0x7BB0E0)
+    at line 61 of file spll_read_and_send_mpi_x1d.f90
+  + function read_surfx1_ol_ (0xBBDC38)
+    at line 174 of file spll_read_surfx1_ol.f90
+  + function read_surfx1_ (0xAA95B1)
+    at line 101 of file spll_read_surfx1.f90
+  + function ol_read_atm_conf_netcdf_ (0x79AC2D)
+    at line 275 of file spll_ol_read_atm_conf_netcdf.f90
+  + function ol_read_atm_conf_ (0x51D93F)
+    at line 194 of file spll_ol_read_atm_conf.f90
+  + function offline (0x472E9C)
+    at line 607 of file spll_offline.f90
+  + /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xed) [0x7f023e1bd76d]
+--------------------------------------------------------------------------
+mpirun has exited due to process rank 0 with PID 3463 on
+node pc4495 exiting without calling "finalize". This may
+have caused other processes in the application to be
+terminated by signals sent by mpirun (as reported here).
+--------------------------------------------------------------------------

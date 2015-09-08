@@ -1,0 +1,96 @@
+  
+     ----------------------
+     | PGD ENDS CORRECTLY |
+     ----------------------
+  
+     -----------------------
+     | PREP ENDS CORRECTLY |
+     -----------------------
+Running offline for perturbation 0
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 1
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 2
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 3
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 4
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Assuming we are evolving B matrix from initial state for first cycle with assimilation
+
+    ------------------------------------
+    |               SODA               |
+    | SURFEX OFFLINE DATA ASSIMILATION |
+    ------------------------------------
+
+ INITIALIZING SURFEX...
+ Read observation file OK
+ PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...
+ *********************************************
+ *      ASSIMILATIONS FOR NATURE POINTS      *
+ *********************************************
+ UPDATE SNOW FROM ANALYSED VALUES
+  SURFRESERV.NEIGE - min, mean, max:    0.5000E+00   0.1000E+01   0.7500E+00
+ Mean SN increments over NATURE   0.75000000000000000     
+
+    --------------------------
+    |   ENTERING  VARASSIM   |
+    --------------------------
+
+ number of patches =           1
+ Initialized B
+ LTM d(wg2)/d(wg2)  0.98595147857231036     
+ B before wg2 wg2 ==>   0.51989549103613986       4.62793123517900029E-002
+ Q value wg2 wg2 ==>   3.12948872017533634E-005  2.78576345591599304E-006
+ B after wg2 wg2 ==>  0.51992678592334163       4.62820981152459177E-002
+ LTM d(wg2)/d(wg2)  0.98595837384907226     
+ B before wg2 wg2 ==>   0.53939794292974941       4.80153536877349074E-002
+ Q value wg2 wg2 ==>   3.12948872017533634E-005  2.78576345591599304E-006
+ B after wg2 wg2 ==>  0.53942923781695107       4.80181394511908222E-002
+ store B matrix after TL evolution ==>  4.62820981152459177E-002
+ writing out B
+ calculating jacobians           3
+  and then PERFORMING ANALYSIS
+ read in sim obs yf   283.35048000000000        283.35048000000000        283.35048000000000        283.35048000000000        283.35048000000000     
+ read in sim obs yf   283.52767999999998        283.52767999999998        283.52767999999998        283.52767999999998        283.52767999999998     
+
+    ---------------------------------------
+    |   EXITING VARASSIM AFTER ANALYSIS   |
+    ---------------------------------------
+
+ Number of assimilated observations =           0
+
+  
+     -----------------------
+     | SODA ENDS CORRECTLY |
+     -----------------------

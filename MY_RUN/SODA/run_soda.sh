@@ -30,19 +30,19 @@ else
   if [ "$exp" == "EKF_PATCH" ]; then
     exp="EKF"
     dtg=2008093018
-    extra=
+    extra="_patch"
     extra_pgd="_patch"
     extra_prep=""
   elif [ "$exp" == "EKF_PATCH_POINT" ]; then
     exp="EKF"
     dtg=2015082500
-    extra="_point"
+    extra="_patch_point"
     extra_pgd="_patch_point"
     extra_prep="_point"
   elif [ "$exp" == "EKF_PATCH_POINTS" ]; then
     exp="EKF"
     dtg=2015082800
-    extra="_point"
+    extra="_patch_point"
     extra_pgd="_patch_points"
     extra_prep="_points"
  elif [ "$exp" == "EKF_POINT" ]; then

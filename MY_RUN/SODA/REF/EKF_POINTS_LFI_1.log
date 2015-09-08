@@ -1,0 +1,720 @@
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+  
+     ----------------------
+     | PGD ENDS CORRECTLY |
+     ----------------------
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+  
+     -----------------------
+     | PREP ENDS CORRECTLY |
+     -----------------------
+Running offline for perturbation 0
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 1
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 2
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 3
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Running offline for perturbation 4
+ CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?
+ PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_01h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_02h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_03h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_04h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_05h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+  
+     --------------------------
+     | OFFLINE ENDS CORRECTLY |
+     --------------------------
+  
+Assuming we are evolving B matrix from initial state for first cycle with assimilation
+
+    ------------------------------------
+    |               SODA               |
+    | SURFEX OFFLINE DATA ASSIMILATION |
+    ------------------------------------
+
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_SODA                                                                 
+ INITIALIZING SURFEX...
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_INIT                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_INIT                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_INIT                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_INIT                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_INIT                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_INIT                                                                 
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT4                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT4                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT4                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT4                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT4                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT4                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT3                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT3                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT3                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT3                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT3                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT3                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT2                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT2                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT2                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT2                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT2                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT2                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT1                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT1                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT1                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT1                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT1                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT1                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT0                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT0                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT0                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT0                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT0                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PGD_SODA                                                                  
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         PREP_150828H06_EKF_PERT0                                                  
+ Read observation file OK
+ PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...
+ *********************************************
+ *      ASSIMILATIONS FOR NATURE POINTS      *
+ *********************************************
+ UPDATE SNOW FROM ANALYSED VALUES
+  SURFRESERV.NEIGE - min, mean, max:    0.5000E+00   0.1000E+01   0.7500E+00
+ Mean SN increments over NATURE   0.75000000000000000     
+
+    --------------------------
+    |   ENTERING  VARASSIM   |
+    --------------------------
+
+ number of patches =           1
+ Initialized B
+ LTM d(wg2)/d(wg2)  0.98575564279960082     
+ B before wg2 wg2 ==>   0.53755845996637730       4.78516092273664762E-002
+ Q value wg2 wg2 ==>   3.12948872017533634E-005  2.78576345591599304E-006
+ B after wg2 wg2 ==>  0.53758975485357907       4.78543949908223909E-002
+ LTM d(wg2)/d(wg2)  0.98574541450939723     
+ B before wg2 wg2 ==>   0.54667430609059597       4.86630705641301065E-002
+ Q value wg2 wg2 ==>   3.12948872017533634E-005  2.78576345591599304E-006
+ B after wg2 wg2 ==>  0.54670560097779775       4.86658563275860212E-002
+ store B matrix after TL evolution ==>  4.78543949908223909E-002
+ writing out B
+ calculating jacobians           3
+  and then PERFORMING ANALYSIS
+ read in sim obs yf   283.35048166910809        283.35048166910809        283.35048166910809        283.35048166910809        283.35048166910809     
+ read in sim obs yf   283.52768452962238        283.52768452962238        283.52768452962238        283.52768452962238        283.52768452962238     
+
+    ---------------------------------------
+    |   EXITING VARASSIM AFTER ANALYSIS   |
+    ---------------------------------------
+
+ Number of assimilated observations =           0
+
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT.20150828_06h00                                                    
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+ KTYPE=           1
+ YCOMMAND=transfer.x MESONH         SURFOUT                                                                   
+  
+     -----------------------
+     | SODA ENDS CORRECTLY |
+     -----------------------
