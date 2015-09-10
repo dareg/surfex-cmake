@@ -150,15 +150,7 @@ ALLOCATE(YSC%UG%XJPDIR(YSC%U%NSIZE_FULL))
 !
  CALL PGD_FRAC(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                HPROGRAM,YSC%U%LECOCLIMAP)
-IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, &
-                             YSC%CHU, YSC%CHT, YSC%CHW, YSC%DTS, YSC%DTT, &
-                             YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, &
-                             YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, &
-                             YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, &
-                             YSC%I, YSC%O, YSC%S, YSC%SSB, &
-                             YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, &
-                             YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
-                             YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
+IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                                  HPROGRAM,LRM_RIVER)
 !
 !-------------------------------------------------------------------------------
@@ -166,12 +158,7 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS
 !*    4.      Orography
 !             ---------
 !
- CALL PGD_OROGRAPHY(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, &
-                    YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, &
-                    YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, &
-                    YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, &
-                    YSC%UG, YSC%U, YSC%USS, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, &
-                    YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
+ CALL PGD_OROGRAPHY(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                     HPROGRAM,YSC%U%XSEA,YSC%U%XWATER,HFILE,HFILETYPE,OZS)
 !
 !_______________________________________________________________________________
@@ -179,25 +166,17 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, &
-                                     YSC%CHT, YSC%CHW, YSC%DTCO, YSC%DTI, YSC%DTS, YSC%DTT, YSC%DTZ, &
-                                     YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, &
-                                     YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, &
-                                     YSC%IOB, YSC%ICP, YSC%IG, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, &
-                                     YSC%USS, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, &
-                                     YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, HPROGRAM,YSC%U%LECOCLIMAP)  
+IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%DTI, YSC%DTZ, YSC%DGU, YSC%IOB, YSC%IG, &
+                                         YSC%I, YSC%UG, YSC%U, YSC%USS, &
+                                         HPROGRAM,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
-IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, &
-                        YSC%CHW, YSC%DTB, YSC%DTCO, YSC%DTI, YSC%DTS, YSC%DTGD, YSC%DTGR, YSC%DTT, YSC%DTZ, &
-                        YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, &
-                        YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, &
-                        YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%USS, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, &
-                        YSC%TGDP, YSC%TGR, YSC%TGRO, YSC%TGRP, YSC%TG, YSC%TIR, YSC%T, YSC%TOP, YSC%TVG, &
-                        YSC%W, YSC%WSB, &
+IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%BDD, YSC%BOP, YSC%DTB, YSC%DTCO, YSC%DTI, YSC%DTGD, YSC%DTGR, &
+                                YSC%DTT, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, YSC%USS, YSC%TGDO, &
+                                YSC%TGDP, YSC%TGRO, YSC%TGRP, YSC%TG, YSC%TIR,YSC%T, YSC%TOP, YSC%TVG, &
                                  HPROGRAM,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
 !_______________________________________________________________________________
 !

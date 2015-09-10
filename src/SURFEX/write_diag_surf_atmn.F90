@@ -70,37 +70,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
 CPROGNAME = HPROGRAM
 !
-IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHN, YSC%CHU, &
-                                        YSC%CHT, YSC%CHW, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, &
-                                        YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGT, &
-                                        YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, &
-                                        YSC%I, YSC%O, YSC%SSB, YSC%UG, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, &
-                                        YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
-                                        YSC%CHS, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%S, YSC%U, &
+IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHS, &
+                                                YSC%DGS, YSC%DGSI, YSC%S, YSC%DGO, & 
+                                                HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+                                        YSC%CHW, YSC%DGW, YSC%W, YSC%CHF, YSC%DGF, YSC%DGMF, YSC%F, &
                                                      HPROGRAM,HWRITE)
-IF (YSC%U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, &
-                                        YSC%CHU, YSC%CHT, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGI, &
-                                        YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGT, YSC%DGUT, &
-                                        YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, &
-                                        YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, &
-                                        YSC%TVG, YSC%WSB, YSC%CHF, YSC%CHW, YSC%DGF, YSC%DGMF, YSC%DGU, YSC%DGW, &
-                                        YSC%F, YSC%U, YSC%W, &
-                                                     HPROGRAM,HWRITE)
-IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, &
-                                 YSC%CHW, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGF, YSC%DGMTO, YSC%DGO, YSC%DGS, &
-                                 YSC%DGSI, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%IOB, YSC%ICP, YSC%O, YSC%S, &
-                                 YSC%SSB, YSC%UG, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, &
-                                 YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, YSC%CHI, YSC%DGEI, YSC%DGI, YSC%DGMI, YSC%DGU, &
-                                 YSC%DST, YSC%GB, YSC%I, YSC%U, &
-                                                     HPROGRAM,HWRITE)
-IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHW, &
-                                YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, &
-                                YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, &
-                                YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%SV, YSC%TCP, YSC%TGD, &
-                                YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%TGRPE, YSC%W, YSC%WSB, YSC%B, YSC%BOP, YSC%CHT, YSC%DGCT, &
-                                YSC%DGMT, YSC%DGMTO, YSC%DGT, YSC%DGUT, YSC%U, YSC%TGDPE, YSC%TGDP, YSC%T, YSC%TOP, &
-                                YSC%TPN, YSC%TVG, &
-                                                     HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHI, YSC%DGEI, &
+                                                   YSC%DGI, YSC%DGMI, YSC%DST, YSC%GB, YSC%I, &
+                                                   HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHT, YSC%DGT, YSC%DGUT, &
+                                                 YSC%B, YSC%BOP, YSC%DGCT, YSC%DGMT, YSC%DGMTO, YSC%T, YSC%TGD, &
+                                                 YSC%TGDPE, YSC%TGDP, YSC%TGR, YSC%TGRPE, &
+                                                 YSC%TOP, YSC%TPN, YSC%TVG, &
+                                                      HPROGRAM,HWRITE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Writing
@@ -111,11 +94,7 @@ IF (YSC%DGU%XDIAG_TSTEP==XUNDEF .OR. &
         ABS(NINT(YSC%U%TTIME%TIME/YSC%DGU%XDIAG_TSTEP)*YSC%DGU%XDIAG_TSTEP-YSC%U%TTIME%TIME)<1.E-3 ) THEN
   !
   IF (YSC%DGU%LFRAC) THEN
-     CALL INIT_IO_SURF_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, &
-                        YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, &
-                        YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, &
-                        YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%SV, &
-                        YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','WRITE')          
     YCOMMENT = '(-)'
     CALL WRITE_SURF(YSC%DGU, YSC%IOB, YSC%U, &
@@ -129,27 +108,16 @@ IF (YSC%DGU%XDIAG_TSTEP==XUNDEF .OR. &
     CALL END_IO_SURF_n(HPROGRAM)
   END IF
   !
-  IF (HWRITE/='PGD'.AND.YSC%DGU%LDIAG_GRID) CALL WRITE_DIAG_SEB_SURF_ATM_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, &
-                YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, &
-                YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGT, YSC%DGUT, YSC%DGW, &
-                YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%U, YSC%SV, YSC%TCP, &
-                YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, YSC%DGU, YSC%UG, &
-                                                                       HPROGRAM)
+  IF (HWRITE/='PGD'.AND.YSC%DGU%LDIAG_GRID) &
+          CALL WRITE_DIAG_SEB_SURF_ATM_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%UG, &
+                                         HPROGRAM)
   !
   IF (YSC%CHU%LCH_EMIS .AND. YSC%SV%NBEQ>0 .AND. YSC%CHU%LCH_SURF_EMIS) THEN
     IF (YSC%CHU%CCH_EMIS=='AGGR') THEN 
-      CALL WRITE_DIAG_CH_AGGR_n(YSC%BOP, YSC%BDD, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, YSC%DTCO, &
-                                YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, &
-                                YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, &
-                                YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, &
-                                YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, YSC%CHE, &
+      CALL WRITE_DIAG_CH_AGGR_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHE, &
                                 HPROGRAM)
     ELSE IF (YSC%CHU%CCH_EMIS=='SNAP') THEN
-      CALL WRITE_DIAG_CH_SNAP_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHU, YSC%CHT, YSC%CHW, YSC%DTCO, YSC%DTS, &
-                                YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, &
-                                YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, &
-                                YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, &
-                                YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, YSC%CHN, &
+      CALL WRITE_DIAG_CH_SNAP_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHN, &
                                 HPROGRAM)
     END IF
   END IF

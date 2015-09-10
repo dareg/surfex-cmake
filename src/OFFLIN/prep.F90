@@ -68,6 +68,8 @@ USE MODI_SFX_OASIS_READ_NAM
 USE MODI_SFX_OASIS_PREP
 USE MODI_SFX_OASIS_END
 !
+USE MODI_INIT_OUTPUT_NC_n
+!
 USE MODN_IO_OFFLINE
 !------------------------------------------------------------------------------
 !
@@ -248,6 +250,12 @@ IF (CSURF_FILETYPE=='FA    ') THEN
 END IF
 !
 LDEF = .TRUE.
+!
+IF (CSURF_FILETYPE=="NC    ") THEN
+  CALL INIT_OUTPUT_NC_n (YSURF_CUR%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
+                         YSURF_CUR%DTS, YSURF_CUR%DTT, YSURF_CUR%DTZ, YSURF_CUR%I, &
+                         YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)
+ENDIF
 !
 INW = 1
 IF (CSURF_FILETYPE=="NC    ") INW = 2

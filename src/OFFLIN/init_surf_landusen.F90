@@ -128,11 +128,7 @@ ENDIF
 !
 !* initialization for I/O
 !
- CALL INIT_IO_SURF_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, &
-                     YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, &
-                     YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, &
-                     YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%SV, &
-                     YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
                         HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !* 1D physical dimension
@@ -180,23 +176,13 @@ DEALLOCATE(ZWORK)
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
- CALL SET_VEGTYPES_FRACTIONS(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, &
-                             YSC%CHW, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, &
-                             YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, &
-                             YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%ICP, YSC%O, YSC%S, YSC%SSB, YSC%SV, &
-                             YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, &
-                             YSC%W, YSC%WSB, YSC%DTCO, YSC%DTI, YSC%IOB, YSC%IG, YSC%I, YSC%UG, YSC%U, &
+ CALL SET_VEGTYPES_FRACTIONS(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%DTI, YSC%IG, YSC%I, YSC%UG, YSC%U, &
                              HPROGRAM)
 !
 !* re-initialize ISBA with new parameters
 !       
- CALL COMPUTE_ISBA_PARAMETERS(YSC%AG, YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, &
-                              YSC%CHT, YSC%CHW, YSC%DTCO, YSC%DTI, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, &
-                              YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, &
-                              YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%DST, YSC%F, YSC%FSB, YSC%GB, &
-                              YSC%IOB, YSC%ICP, YSC%IG, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%SLT, YSC%UG, &
-                              YSC%U, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, &
-                              YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
+ CALL COMPUTE_ISBA_PARAMETERS(YSC%AG, YSC%CHI, YSC%DTCO, YSC%DTI, YSC%DGEI, YSC%DGI, YSC%DGMI, YSC%DGU, YSC%DST, &
+                              YSC%GB, YSC%IOB, YSC%ICP, YSC%IG, YSC%I, YSC%SLT, YSC%UG, YSC%U, YSC%SV, &
                               HPROGRAM,HINIT,OLAND_USE,                  &
                              ILU,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &

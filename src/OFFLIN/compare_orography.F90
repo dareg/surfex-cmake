@@ -65,11 +65,7 @@ CPROGNAME = HPROGRAM
 ! 
 !  orography from initial file
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, &
-                     YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, &
-                     YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, &
-                     YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%SV, &
-                     YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ') 
  CALL READ_SURF(YSC%IOB, &
                 HPROGRAM,'ZS', ZS1, IRET)

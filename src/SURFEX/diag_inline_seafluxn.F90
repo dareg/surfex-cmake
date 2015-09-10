@@ -114,7 +114,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PEMIS     ! emissivity                        
 REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall (kg/m2/s)
 !
-TYPE(T_GLT)                    :: TPGLT     ! Sea-ice state , diagnostics and auxilliaries
+TYPE(T_GLT), INTENT(IN)        :: TPGLT     ! Sea-ice state , diagnostics and auxilliaries
 REAL, DIMENSION(:), INTENT(IN) :: PSIC      ! Sea-ice cover
 !
 LOGICAL, INTENT(IN)               :: OHANDLE_SIC ! Do we weight seaice and open sea fluxes

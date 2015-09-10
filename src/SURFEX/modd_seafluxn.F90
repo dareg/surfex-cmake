@@ -124,7 +124,7 @@ TYPE SEAFLUX_t
 !
 ! Sea-ice :
 !
-  TYPE(T_GLT), POINTER                  :: TGLT ! Sea-ice state , diagnostics and auxilliaries
+  TYPE(T_GLT)                           :: TGLT ! Sea-ice state , diagnostics and auxilliaries
                                              ! for the case of embedded Gelato Seaice model
 !
 ! Date:

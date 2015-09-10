@@ -99,11 +99,7 @@ CPROGNAME = HPROGRAM
 !
 !         Initialisation for IO
 !
- CALL INIT_IO_SURF_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, YSC%CHW, &
-                        YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGMTO, &
-                        YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, &
-                        YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%U, YSC%SV, &
-                        YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 LSAVE_SELECT=YSC%DGU%LSELECT
@@ -156,50 +152,36 @@ END IF
 !*       3.     Sea
 !               ---
 !
-IF (YSC%U%NDIM_SEA>0) CALL WRITE_SEA_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHN, YSC%CHU, YSC%CHT, &
-                                YSC%CHW, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, &
-                                YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGS, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, &
-                                YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%UG, YSC%SV, YSC%TCP, YSC%TGD, &
-                                YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, &
-                                YSC%CHS, YSC%DGO, YSC%DGSI, YSC%DGU, YSC%O, YSC%OR, YSC%S, YSC%SSB, YSC%U, &
-                                   HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_SEA>0) CALL WRITE_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHS, YSC%DGO, &
+                                       YSC%DGSI, YSC%O, YSC%OR, YSC%S, YSC%SSB, &
+                                       HPROGRAM,HWRITE)
 !
 !
 !*       4.     Inland water
 !               ------------
 !
-IF (YSC%U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, &
-                                YSC%CHU, YSC%CHT, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGEI, YSC%DGF, &
-                                YSC%DGI, YSC%DGMI, YSC%DGMTO, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGT, YSC%DGUT, &
-                                YSC%DGW, YSC%GB, YSC%IOB, YSC%ICP, YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, &
-                                YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, &
-                                YSC%CHF, YSC%CHW, YSC%DGMF, YSC%DGU, YSC%F, YSC%FSB, YSC%U, YSC%W, YSC%WSB, &
-                                              HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHW, YSC%W, &
+                                                  YSC%WSB, YSC%CHF, YSC%DGMF, YSC%F, YSC%FSB, &
+                                                  HPROGRAM,HWRITE)
 !
 !
 !*       5.     Vegetation scheme
 !               -----------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL WRITE_NATURE_n(YSC%BOP, YSC%BDD, YSC%CHE, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHT, &
-                                  YSC%CHW, YSC%DTCO, YSC%DTS, YSC%DTT, YSC%DTZ, YSC%DGF, YSC%DGMTO, YSC%DGO, &
-                                  YSC%DGS, YSC%DGSI, YSC%DGT, YSC%DGUT, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, &
-                                  YSC%IOB, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%SV, YSC%TCP, YSC%TGD, YSC%TGDO, &
-                                  YSC%TGR, YSC%TGRO, YSC%T, YSC%TOP, YSC%TVG, YSC%W, YSC%WSB, YSC%CHI, &
-                                  YSC%DGEI, YSC%DGI, YSC%DGMI, YSC%DGU, YSC%DST, YSC%ICP, YSC%I, YSC%U, &
+IF (YSC%U%NDIM_NATURE>0) CALL WRITE_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHI, &
+                                             YSC%DGEI, YSC%DGI, YSC%DGMI, YSC%I, YSC%DST, YSC%ICP, &
                                          HPROGRAM,HWRITE,OLAND_USE)
 !
 !
 !*       6.     Urban scheme
 !               ------------
 !
-IF (YSC%U%NDIM_TOWN>0) CALL WRITE_TOWN_n(YSC%DGCT, YSC%DGMT, YSC%BDD, YSC%CHE, YSC%CHI, YSC%CHS, YSC%CHN, YSC%CHU, YSC%CHW, &
-                                YSC%DTCO, YSC%DTS, YSC%DTZ, YSC%DGEI, YSC%DGF, YSC%DGI, YSC%DGMI, YSC%DGO, &
-                                YSC%DGS, YSC%DGSI, YSC%DGW, YSC%F, YSC%FSB, YSC%GB, YSC%IOB, YSC%ICP, &
-                                YSC%I, YSC%O, YSC%S, YSC%SSB, YSC%UG, YSC%SV, YSC%W, YSC%WSB, YSC%B, &
-                                YSC%BOP, YSC%CHT, YSC%DTT, YSC%DGMTO, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%U, &
-                                YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGDPE, YSC%TGR, YSC%TGRO, YSC%TGRPE, &
-                                YSC%T, YSC%TOP, YSC%TPN, YSC%TVG, &
-                                     HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_TOWN>0) CALL WRITE_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%DGCT, YSC%DGMT, YSC%B, &
+                                         YSC%BOP, YSC%CHT, YSC%DTT, YSC%DGMTO, YSC%DGT, YSC%DGUT, &
+                                         YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGDPE, YSC%TGR, YSC%TGRO, &
+                                         YSC%TGRPE, YSC%T, YSC%TOP, YSC%TPN, YSC%TVG, &
+                                         HPROGRAM,HWRITE)
+!
 IF (LHOOK) CALL DR_HOOK('WRITE_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

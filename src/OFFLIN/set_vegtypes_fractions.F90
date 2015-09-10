@@ -1,9 +1,5 @@
 !     #########
-      SUBROUTINE SET_VEGTYPES_FRACTIONS (BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTS, DTT, &
-                                          DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, DGT, &
-                                          DGUT, DGW, F, FSB, GB, ICP, O, S, SSB, SV, TCP, &
-                                          TGD, TGDO, TGR, TGRO, T, TOP, TVG, W, WSB, &
-                                          DTCO, DTI, IOB, IG, I, UG, U, &
+      SUBROUTINE SET_VEGTYPES_FRACTIONS (DTCO, DGU, IOB, DTI, IG, I, UG, U, &
                                          HPROGRAM)
 !     ##############################################################
 !
@@ -47,59 +43,15 @@
 !
 !
 !
-!
-!
-!
-USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
-USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
-USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
-USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
-USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
-USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
-USE MODD_CH_SURF_n, ONLY : CH_SURF_t
-USE MODD_CH_TEB_n, ONLY : CH_TEB_t
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
-USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
-USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
-USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
-USE MODD_DIAG_UTCI_TEB_n, ONLY : DIAG_UTCI_TEB_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
-USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
-USE MODD_ISBA_CANOPY_n, ONLY : ISBA_CANOPY_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
-USE MODD_SV_n, ONLY : SV_t
-USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
-USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
-USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
-USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
-USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 !
 USE MODD_OL_FILEID, ONLY : XVAR_TO_FILEIN
 !
@@ -145,56 +97,15 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
-TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
-TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
-TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
-TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
-TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
-TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
-TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
-TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
-TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
-TYPE(DIAG_UTCI_TEB_t), INTENT(INOUT) :: DGUT
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
-TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
-TYPE(ISBA_CANOPY_t), INTENT(INOUT) :: ICP
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
-TYPE(SV_t), INTENT(INOUT) :: SV
-TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
-TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
-TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
-TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
-TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
-TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
-!
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
@@ -284,138 +195,43 @@ IF (CFTYP_VEGTYPE=='FA    '.OR.CFTYP_VEGTYPE=='ASCII '.OR.CFTYP_VEGTYPE=='LFI   
 !        
   DTI%LDATA_VEGTYPE=.TRUE.
 !
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,1),HNAM='VEGTY_P1')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,2),HNAM='VEGTY_P2')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,3),HNAM='VEGTY_P3')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,4),HNAM='VEGTY_P4')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,5),HNAM='VEGTY_P5')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,6),HNAM='VEGTY_P6')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,7),HNAM='VEGTY_P7')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,8),HNAM='VEGTY_P8')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,9),HNAM='VEGTY_P9')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,10),HNAM='VEGTY_P10')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,11),HNAM='VEGTY_P11')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,12),HNAM='VEGTY_P12')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,13),HNAM='VEGTY_P13')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,14),HNAM='VEGTY_P14')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,18),HNAM='VEGTY_P15')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,15),HNAM='VEGTY_P16')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,16),HNAM='VEGTY_P17')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,17),HNAM='VEGTY_P18')
-  CALL READ_FROM_SURFEX_FILE(BOP, BDD, CHE, CHI, CHS, CHN, CHU, CHT, CHW, DTCO, DTS, &
-                                   DTT, DTZ, DGEI, DGF, DGI, DGMI, DGMTO, DGO, DGS, DGSI, DGU, &
-                                   DGT, DGUT, DGW, F, FSB, GB, ICP, I, O, S, SSB, &
-                                   UG, U, SV, TCP, TGD, TGDO, TGR, TGRO, T, TOP, TVG, &
-                                   W, WSB, &
-                             IOB, &
+  CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
                              CFTYP_VEGTYPE,CFNAM_VEGTYPE,'NATURE','      ',DTI%XPAR_VEGTYPE(:,19),HNAM='VEGTY_P19')
 !
 ENDIF
