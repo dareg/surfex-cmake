@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_FLAKE_n (DTCO, DGU, IOB, U, CHF, DGMF, F, FSB, &
+      SUBROUTINE WRITE_FLAKE_n (DTCO, DGU, IOB, U, FM, &
                                 HPROGRAM,HWRITE)
 !     ####################################
 !
@@ -36,14 +36,12 @@
 !              ------------
 !
 !
+USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODI_INIT_IO_SURF_n
@@ -66,10 +64,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
+TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
@@ -88,14 +83,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_FLAKE_CONF_n(CHF, DGMF, F, &
+ CALL WRITESURF_FLAKE_CONF_n(FM%CHF, FM%DGMF, FM%F, &
                              HPROGRAM)
  CALL WRITESURF_FLAKE_n(DGU, IOB, U, &
-                        F, &
+                        FM%F, &
                         HPROGRAM)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_FLAKE_SBL_n(DGU, IOB, U, &
-                                                                      F, FSB, &
+                                                                      FM%F, FM%FSB, &
                                                                       HPROGRAM,HWRITE)
 !
 !

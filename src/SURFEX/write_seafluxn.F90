@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_SEAFLUX_n (DTCO, DGU, IOB, U, CHS, DGO, DGSI, O, OR, S, SSB, &
+      SUBROUTINE WRITE_SEAFLUX_n (DTCO, DGU, IOB, U, SM, &
                                   HPROGRAM,HWRITE)
 !     ####################################
 !
@@ -40,13 +40,8 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
-USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
-USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
+!
+USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODI_INIT_IO_SURF_n
@@ -70,13 +65,8 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
+
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
@@ -97,14 +87,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_SEAFLUX_CONF_n(CHS, DGO, DGSI, O, S, &
+ CALL WRITESURF_SEAFLUX_CONF_n(SM%CHS, SM%DGO, SM%DGSI, SM%O, SM%S, &
                                HPROGRAM)
  CALL WRITESURF_SEAFLUX_n(DGU, IOB, U, &
-                          O, OR, S, &
+                          SM%O, SM%OR, SM%S, &
                           HPROGRAM)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_SEAFLUX_SBL_n(DGU, IOB, U, &
-                                                                        S, SSB, &
+                                                                        SM%S, SM%SSB, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

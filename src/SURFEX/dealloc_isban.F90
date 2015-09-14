@@ -182,7 +182,7 @@ IF (ASSOCIATED(I%XH_VEG      )) DEALLOCATE(I%XH_VEG      )
 !
 IF(ASSOCIATED(CHI%XDEP))      DEALLOCATE(CHI%XDEP)
 IF(ASSOCIATED(CHI%CCH_NAMES)) DEALLOCATE(CHI%CCH_NAMES)
-IF(ASSOCIATED(CHI%CSV))       DEALLOCATE(CHI%CSV)
+IF(ASSOCIATED(CHI%SVI%CSV))       DEALLOCATE(CHI%SVI%CSV)
 !
 !-------------------------------------------------------------------------------------
 !

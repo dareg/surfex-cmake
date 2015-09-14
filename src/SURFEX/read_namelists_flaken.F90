@@ -1,16 +1,12 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_FLAKE_n (CHF, DGF, DGMF, F, &
+SUBROUTINE READ_NAMELISTS_FLAKE_n (FM, &
                                    HPROGRAM, HINIT)
 !     #######################################################
 !
 !---------------------------    
 !
 !
-!
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 !
 USE MODN_FLAKE_n
 !
@@ -29,10 +25,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -50,10 +43,10 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_FLAKE_N',0,ZHOOK_HANDLE)
                          LWATER_PROFILE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP,  &
                          XZWAT_PROFILE             )  
 !
- CALL READ_DEFAULT_FLAKE_n(CHF, DGF, DGMF, F, &
+ CALL READ_DEFAULT_FLAKE_n(FM%CHF, FM%DGF, FM%DGMF, FM%F, &
                            HPROGRAM)
 !
- CALL READ_FLAKE_CONF_n(CHF, DGF, DGMF, F, &
+ CALL READ_FLAKE_CONF_n(FM%CHF, FM%DGF, FM%DGMF, FM%F, &
                         HPROGRAM)
 !
 !----------------------------------------------------------------------------

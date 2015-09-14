@@ -152,34 +152,28 @@ END IF
 !*       3.     Sea
 !               ---
 !
-IF (YSC%U%NDIM_SEA>0) CALL WRITE_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHS, YSC%DGO, &
-                                       YSC%DGSI, YSC%O, YSC%OR, YSC%S, YSC%SSB, &
+IF (YSC%U%NDIM_SEA>0) CALL WRITE_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%SM, &
                                        HPROGRAM,HWRITE)
 !
 !
 !*       4.     Inland water
 !               ------------
 !
-IF (YSC%U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHW, YSC%W, &
-                                                  YSC%WSB, YSC%CHF, YSC%DGMF, YSC%F, YSC%FSB, &
+IF (YSC%U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%WM, YSC%FM,  &
                                                   HPROGRAM,HWRITE)
 !
 !
 !*       5.     Vegetation scheme
 !               -----------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL WRITE_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHI, &
-                                             YSC%DGEI, YSC%DGI, YSC%DGMI, YSC%I, YSC%DST, YSC%ICP, &
+IF (YSC%U%NDIM_NATURE>0) CALL WRITE_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%IM, YSC%DST, &
                                          HPROGRAM,HWRITE,OLAND_USE)
 !
 !
 !*       6.     Urban scheme
 !               ------------
 !
-IF (YSC%U%NDIM_TOWN>0) CALL WRITE_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%DGCT, YSC%DGMT, YSC%B, &
-                                         YSC%BOP, YSC%CHT, YSC%DTT, YSC%DGMTO, YSC%DGT, YSC%DGUT, &
-                                         YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGDPE, YSC%TGR, YSC%TGRO, &
-                                         YSC%TGRPE, YSC%T, YSC%TOP, YSC%TPN, YSC%TVG, &
+IF (YSC%U%NDIM_TOWN>0) CALL WRITE_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%TM, YSC%GDM, YSC%GRM, &
                                          HPROGRAM,HWRITE)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_SURF_ATM_N',1,ZHOOK_HANDLE)

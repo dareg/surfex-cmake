@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_WATFLUX_n (CHW, DTCO, DGU, DGW, IOB, UG, U, WG, W, WSB, &
+      SUBROUTINE INIT_WATFLUX_n (DTCO, DGU, IOB, UG, U, WM, &
                                  HPROGRAM,HINIT,                             &
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
@@ -44,16 +44,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
-USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
@@ -96,16 +93,12 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -170,32 +163,33 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_WATFLUX(W%XTSTEP,W%XOUT_TSTEP,W%CWAT_ALB,W%CINTERPOL_TS)
- CALL DEFAULT_CH_DEP(CHW%CCH_DRY_DEP)
- CALL DEFAULT_DIAG_WATFLUX(DGW%N2M,DGW%LSURF_BUDGET,DGW%L2M_MIN_ZS,DGW%LRAD_BUDGET,DGW%LCOEF,DGW%LSURF_VARS, &
-                           DGW%LSURF_BUDGETC,DGW%LRESET_BUDGETC,DGW%XDIAG_TSTEP        )  
+ CALL DEFAULT_WATFLUX(WM%W%XTSTEP,WM%W%XOUT_TSTEP,WM%W%CWAT_ALB,WM%W%CINTERPOL_TS)
+ CALL DEFAULT_CH_DEP(WM%CHW%CCH_DRY_DEP)
+ CALL DEFAULT_DIAG_WATFLUX(WM%DGW%N2M,WM%DGW%LSURF_BUDGET,WM%DGW%L2M_MIN_ZS,WM%DGW%LRAD_BUDGET,&
+                           WM%DGW%LCOEF,WM%DGW%LSURF_VARS, &
+                           WM%DGW%LSURF_BUDGETC,WM%DGW%LRESET_BUDGETC,WM%DGW%XDIAG_TSTEP        )  
  !
 ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_WATFLUX_n(CHW, DGW, W, &
+ CALL READ_DEFAULT_WATFLUX_n(WM%CHW, WM%DGW, WM%W, &
                              HPROGRAM)
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
 !
- CALL READ_WATFLUX_CONF_n(CHW, DGW, W, &
+ CALL READ_WATFLUX_CONF_n(WM%CHW, WM%DGW, WM%W, &
                           HPROGRAM)
 !
-W%LINTERPOL_TS=.FALSE.
+WM%W%LINTERPOL_TS=.FALSE.
 IF(LCPL_SEA)THEN       
 ! No TS water interpolation in Earth System Model
-  W%CINTERPOL_TS='NONE  '
-  W%LINTERPOL_TS=.FALSE.
-ELSEIF(W%CINTERPOL_TS/='NONE  ')THEN
-  W%LINTERPOL_TS=.TRUE.
+  WM%W%CINTERPOL_TS='NONE  '
+  WM%W%LINTERPOL_TS=.FALSE.
+ELSEIF(WM%W%CINTERPOL_TS/='NONE  ')THEN
+  WM%W%LINTERPOL_TS=.TRUE.
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -206,23 +200,24 @@ ENDIF
 !
 SELECT CASE (HINIT)
   CASE ('PGD')
-    W%TTIME%TDATE%YEAR = NUNDEF
-    W%TTIME%TDATE%MONTH= NUNDEF
-    W%TTIME%TDATE%DAY  = NUNDEF
-    W%TTIME%TIME       = XUNDEF
+    WM%W%TTIME%TDATE%YEAR = NUNDEF
+    WM%W%TTIME%TDATE%MONTH= NUNDEF
+    WM%W%TTIME%TDATE%DAY  = NUNDEF
+    WM%W%TTIME%TIME       = XUNDEF
 
   CASE ('PRE')
-    CALL PREP_CTRL_WATFLUX(DGW%N2M,DGW%LSURF_BUDGET,DGW%L2M_MIN_ZS,DGW%LRAD_BUDGET,DGW%LCOEF,DGW%LSURF_VARS,&
-                             ILUOUT,DGW%LSURF_BUDGETC )  
+    CALL PREP_CTRL_WATFLUX(WM%DGW%N2M,WM%DGW%LSURF_BUDGET,WM%DGW%L2M_MIN_ZS,&
+                           WM%DGW%LRAD_BUDGET,WM%DGW%LCOEF,WM%DGW%LSURF_VARS,&
+                             ILUOUT,WM%DGW%LSURF_BUDGETC )  
     IF (LNAM_READ) CALL READ_NAM_PREP_WATFLUX_n(HPROGRAM)                 
     CALL READ_WATFLUX_DATE(IOB, &
-                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,W%TTIME)
+                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,WM%W%TTIME)
 
   CASE DEFAULT
 CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
     CALL READ_SURF(IOB, &
-                   HPROGRAM,'DTCUR',W%TTIME,IRESP)
+                   HPROGRAM,'DTCUR',WM%W%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
 !
@@ -240,7 +235,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !
 !         Reading of the fields
 !
- CALL READ_PGD_WATFLUX_n(DTCO, IOB, U, WG, W, &
+ CALL READ_PGD_WATFLUX_n(DTCO, IOB, U, WM%WG, WM%W, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -272,7 +267,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !*       2.     Prognostic and cover fields:
 !               ---------------------------
 !
- CALL READ_WATFLUX_n(DTCO, IOB, U, W, &
+ CALL READ_WATFLUX_n(DTCO, IOB, U, WM%W, &
                      HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
@@ -281,43 +276,43 @@ IF (HINIT/='ALL') THEN
   RETURN
 END IF
 !
-ILU = SIZE(W%XCOVER,1)
+ILU = SIZE(WM%W%XCOVER,1)
 !
 !
 !*       3.     Specific fields when using earth system model (Ice temperature)
 !               ---------------------------------------------------------------
 !
 IF(LCPL_SEAICE)THEN
-  ALLOCATE(W%XTICE   (ILU))
-  ALLOCATE(W%XICE_ALB(ILU))
-  W%XTICE   (:)=XUNDEF
-  W%XICE_ALB(:)=XUNDEF
+  ALLOCATE(WM%W%XTICE   (ILU))
+  ALLOCATE(WM%W%XICE_ALB(ILU))
+  WM%W%XTICE   (:)=XUNDEF
+  WM%W%XICE_ALB(:)=XUNDEF
 ELSE
-  ALLOCATE(W%XTICE   (0))
-  ALLOCATE(W%XICE_ALB(0))
+  ALLOCATE(WM%W%XTICE   (0))
+  ALLOCATE(WM%W%XICE_ALB(0))
 ENDIF
 !
 !*       4.     Albedo, emissivity and temperature fields on open water and ice
 !               ---------------------------------------------------------------
 !
-ALLOCATE(W%XDIR_ALB (ILU))
-ALLOCATE(W%XSCA_ALB (ILU))
-ALLOCATE(W%XEMIS    (ILU))
-W%XDIR_ALB = 0.0
-W%XSCA_ALB = 0.0
-W%XEMIS    = 0.0
+ALLOCATE(WM%W%XDIR_ALB (ILU))
+ALLOCATE(WM%W%XSCA_ALB (ILU))
+ALLOCATE(WM%W%XEMIS    (ILU))
+WM%W%XDIR_ALB = 0.0
+WM%W%XSCA_ALB = 0.0
+WM%W%XEMIS    = 0.0
 !
- CALL UPDATE_RAD_WATER(W%CWAT_ALB,W%XTS,PZENITH,XTT,W%XEMIS,W%XDIR_ALB,&
-                       W%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
+ CALL UPDATE_RAD_WATER(WM%W%CWAT_ALB,WM%W%XTS,PZENITH,XTT,WM%W%XEMIS,WM%W%XDIR_ALB,&
+                       WM%W%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
 !
-PTSURF(:) = W%XTS(:)
+PTSURF(:) = WM%W%XTS(:)
 !
 !-------------------------------------------------------------------------------
 !
 !*       5.     SBL air fields:
 !               --------------
 !
- CALL READ_WATFLUX_SBL_n(DTCO, IOB, U, W, WSB, &
+ CALL READ_WATFLUX_SBL_n(DTCO, IOB, U, WM%W, WM%WSB, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -325,19 +320,17 @@ PTSURF(:) = W%XTS(:)
 !*       6.     Chemistry / dust
 !               ----------------
 !
- CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, CHW%NBEQ, CHW%CSV, CHW%NAEREQ,            &
-                     CHW%NSV_CHSBEG, CHW%NSV_CHSEND, CHW%NSV_AERBEG, CHW%NSV_AEREND, &
-                     CHW%CCH_NAMES, CHW%CAER_NAMES, CHW%NDSTEQ, CHW%NSV_DSTBEG,      &
-                     CHW%NSV_DSTEND, CHW%NSLTEQ, CHW%NSV_SLTBEG, CHW%NSV_SLTEND,     &
-                     HDSTNAMES=CHW%CDSTNAMES, HSLTNAMES=CHW%CSLTNAMES        )
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, WM%CHW%SVW,         &
+                     WM%CHW%CCH_NAMES, WM%CHW%CAER_NAMES,      &
+                     HDSTNAMES=WM%CHW%CDSTNAMES, HSLTNAMES=WM%CHW%CSLTNAMES        )
 !
 !* depositiion scheme
 !
 
-IF (CHW%NBEQ>0 .AND. CHW%CCH_DRY_DEP=='WES89') THEN
-  ALLOCATE(CHW%XDEP(ILU,CHW%NBEQ))
+IF (WM%CHW%SVW%NBEQ>0 .AND. WM%CHW%CCH_DRY_DEP=='WES89') THEN
+  ALLOCATE(WM%CHW%XDEP(ILU,WM%CHW%SVW%NBEQ))
 ELSE
-  ALLOCATE(CHW%XDEP(0,0))
+  ALLOCATE(WM%CHW%XDEP(0,0))
 END IF
 !
 !-------------------------------------------------------------------------------
@@ -346,7 +339,7 @@ END IF
 !               --------------------------
 !
  CALL DIAG_WATFLUX_INIT_n(IOB, &
-                          DGU, DGW, W, &
+                          DGU, WM%DGW, WM%W, &
                           HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

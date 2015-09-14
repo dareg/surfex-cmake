@@ -449,10 +449,8 @@ ENDIF
 !
 !*       2.4     Allocation of chemical species name, chemical index of HSV array 
 !
- CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, YSC%SV%NBEQ, YSC%SV%CSV, YSC%SV%NAEREQ,            &
-                     YSC%SV%NSV_CHSBEG, YSC%SV%NSV_CHSEND, YSC%SV%NSV_AERBEG, YSC%SV%NSV_AEREND, &
-                     YSC%CHU%CCH_NAMES, YSC%CHU%CAER_NAMES, YSC%SV%NDSTEQ, YSC%SV%NSV_DSTBEG,      &
-                     YSC%SV%NSV_DSTEND, YSC%SV%NSLTEQ, YSC%SV%NSV_SLTBEG, YSC%SV%NSV_SLTEND      )
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, YSC%SV,        &
+                     YSC%CHU%CCH_NAMES, YSC%CHU%CAER_NAMES     )
 !
 !        2.4 Initialize Chemical Emissions
 !
@@ -615,9 +613,9 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XSEA(:)
 !
 ! initialization
 IF (YSC%U%NDIM_SEA>0) &
-  CALL INIT_SEA_n(YSC%CHS, YSC%DTCO, YSC%DTS, YSC%DGL, YSC%DGO, YSC%DGS, YSC%DGSI, YSC%DGU, &
-                  YSC%IOB, YSC%O, YSC%OR, YSC%SG, YSC%S, YSC%SSB, YSC%UG, YSC%U, &
-                  HPROGRAM,HINIT,YSC%U%NSIZE_SEA,KSV,KSW,                  &
+  CALL INIT_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, &
+                  YSC%SM, YSC%DGL,  &
+                  HPROGRAM,HINIT,YSC%U%NSIZE_SEA,KSV,KSW,            &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                   ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
@@ -644,9 +642,8 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XWATER(:)
 !
 ! initialization
 IF (YSC%U%NDIM_WATER>0) &
-  CALL INIT_INLAND_WATER_n(YSC%CHW, YSC%DTCO, YSC%DGU, YSC%DGW, YSC%IOB, YSC%UG, &
-                           YSC%U, YSC%WG, YSC%W, YSC%WSB, YSC%CHF, YSC%DGF, &
-                           YSC%DGMF, YSC%FG, YSC%F, YSC%FSB, YSC%DGL,        &
+  CALL INIT_INLAND_WATER_n(YSC%DTCO, YSC%DGU,YSC%IOB, YSC%UG, &
+                           YSC%U, YSC%WM, YSC%FM, YSC%DGL,    &
                            HPROGRAM,HINIT,YSC%U%NSIZE_WATER,KSV,KSW,          &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -673,9 +670,9 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XNATURE(:)
 !
 ! initialization
 IF (YSC%U%NDIM_NATURE>0) &
-  CALL INIT_NATURE_n(YSC%AG, YSC%CHI, YSC%DTCO, YSC%DTI, YSC%DTZ, YSC%DGEI, YSC%DGI, YSC%DGL, YSC%DGMI, &
-                     YSC%DGU, YSC%DST, YSC%GB, YSC%IOB, YSC%ICP, YSC%IG, YSC%I, YSC%SLT, YSC%UG, YSC%U, YSC%SV, &
-                     HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,KSV,KSW,     &
+  CALL INIT_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, YSC%IM, &
+                     YSC%DTZ, YSC%DGL, YSC%DST, YSC%SLT, YSC%SV, &
+                     HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,KSV,KSW,   &
                      HSV,ZP_CO2,ZP_RHOA,                                &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                      ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
@@ -701,11 +698,10 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XTOWN(:)
 !
 ! initialization
 IF (YSC%U%NDIM_TOWN>0) &
-  CALL INIT_TOWN_n(YSC%B, YSC%BOP, YSC%BDD, YSC%CHI, YSC%CHT, YSC%DTB, YSC%DTCO, YSC%DTI, YSC%DTGD, YSC%DTGR, &
-                   YSC%DTT, YSC%DGCT, YSC%DGMT, YSC%DGL, YSC%DGMTO, YSC%DGU, YSC%DGT, YSC%DGUT, YSC%DST, YSC%GBGD, &
-                   YSC%GBGR, YSC%I, YSC%IOB, YSC%SLT, YSC%UG, YSC%U, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGDPE, YSC%TGDP, &
-                   YSC%TGR, YSC%TGRO, YSC%TGRPE, YSC%TGRP, YSC%TG, YSC%TIR, YSC%T, YSC%TOP, YSC%TPN, YSC%TVG, &
-                   HPROGRAM,HINIT,YSC%U%NSIZE_TOWN,KSV,KSW,                 &
+  CALL INIT_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, &
+                   YSC%IM%CHI, YSC%IM%DTI, YSC%IM%I, &
+                   YSC%TM, YSC%GDM, YSC%GRM, YSC%DGL, YSC%DST, YSC%SLT, &
+                   HPROGRAM,HINIT,YSC%U%NSIZE_TOWN,KSV,KSW,             &
                    HSV,ZP_CO2,ZP_RHOA,                                &
                    ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                    ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &

@@ -70,19 +70,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
 CPROGNAME = HPROGRAM
 !
-IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHS, &
-                                                YSC%DGS, YSC%DGSI, YSC%S, YSC%DGO, & 
+IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%SM, & 
                                                 HPROGRAM,HWRITE)
 IF (YSC%U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
-                                        YSC%CHW, YSC%DGW, YSC%W, YSC%CHF, YSC%DGF, YSC%DGMF, YSC%F, &
+                                                         YSC%WM, YSC%FM, &
                                                      HPROGRAM,HWRITE)
-IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHI, YSC%DGEI, &
-                                                   YSC%DGI, YSC%DGMI, YSC%DST, YSC%GB, YSC%I, &
+IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%IM, YSC%DST, &
                                                    HPROGRAM,HWRITE)
-IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%CHT, YSC%DGT, YSC%DGUT, &
-                                                 YSC%B, YSC%BOP, YSC%DGCT, YSC%DGMT, YSC%DGMTO, YSC%T, YSC%TGD, &
-                                                 YSC%TGDPE, YSC%TGDP, YSC%TGR, YSC%TGRPE, &
-                                                 YSC%TOP, YSC%TPN, YSC%TVG, &
+IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%TM, YSC%GDM, YSC%GRM, &
                                                       HPROGRAM,HWRITE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

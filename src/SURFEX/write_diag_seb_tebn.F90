@@ -394,7 +394,7 @@ END IF
 !*       6.     chemical diagnostics:
 !               --------------------
 !
-IF (CHT%NBEQ>0 .AND. CHT%CCH_DRY_DEP=="WES89 ") THEN
+IF (CHT%SVT%NBEQ>0 .AND. CHT%CCH_DRY_DEP=="WES89 ") THEN
   DO JSV = 1,SIZE(CHT%CCH_NAMES,1)
     YRECFM='DV_TWN_'//TRIM(CHT%CCH_NAMES(JSV))
     WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_TWN_',JSV

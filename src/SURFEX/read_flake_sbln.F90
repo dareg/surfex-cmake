@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_FLAKE_SBL_n (DTCO, F, FSB, IOB, U, &
+      SUBROUTINE READ_FLAKE_SBL_n (DTCO, IOB, U, F, FSB, &
                                    HPROGRAM)
 !     #########################################
 !

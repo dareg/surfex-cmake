@@ -1,6 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_INLAND_WATER_n (CHW, DTCO, DGU, DGW, IOB, UG, U, WG, W, WSB, &
-                                      CHF, DGF, DGMF, FG, F, FSB, DGL,        &
+      SUBROUTINE INIT_INLAND_WATER_n (DTCO, DGU, IOB, UG, U, WM, FM, DGL,     &
                                       HPROGRAM,HINIT,                         &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
@@ -44,23 +43,14 @@
 !              ------------
 !
 !
+USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
+USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
-USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
 !
@@ -82,22 +72,13 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
+TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -148,15 +129,14 @@ ELSE IF (U%CWATER=='FLUX  ') THEN
                          PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                          PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CWATER=='WATFLX') THEN
-  CALL INIT_WATFLUX_n(CHW, DTCO, DGU, DGW, IOB, UG, U, WG, W, WSB, &
+  CALL INIT_WATFLUX_n(DTCO, DGU, IOB, UG, U, WM, &
                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &
                         KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK'                                          )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL INIT_FLAKE_n(CHF, DTCO, DGF, DGMF, DGU, FG, F, FSB, IOB, &
-                    UG, U, &
+  CALL INIT_FLAKE_n(DTCO, DGU, IOB, UG, U, FM, &
                     HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,       &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &

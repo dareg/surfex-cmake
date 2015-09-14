@@ -1,6 +1,5 @@
 !     #############################################################
-SUBROUTINE INIT_FLAKE_n ( CHF, DTCO, DGF, DGMF, DGU, FG, F, FSB, IOB, &
-                          UG, U, &
+SUBROUTINE INIT_FLAKE_n ( DTCO, DGU, IOB, UG, U, FM,                 &
                           HPROGRAM,HINIT,                            &
                           KI,KSV,KSW,                                &
                           HSV,PCO2,PRHOA,                            &
@@ -46,16 +45,11 @@ SUBROUTINE INIT_FLAKE_n ( CHF, DTCO, DGF, DGMF, DGU, FG, F, FSB, IOB, &
 !              ------------
 !
 !
+USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -110,17 +104,12 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -172,7 +161,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('INIT_FLAKEN: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-ALLOCATE(DGMF%XZWAT_PROFILE(100))
+ALLOCATE(FM%DGMF%XZWAT_PROFILE(100))
 !
 !         Others litlle things
 !
@@ -189,25 +178,25 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_FLAKE(F%XTSTEP,F%XOUT_TSTEP,F%LSEDIMENTS,F%CSNOW_FLK,F%CFLK_FLUX,F%CFLK_ALB,&
-                    F%LSKINTEMP)
- CALL DEFAULT_CH_DEP(CHF%CCH_DRY_DEP)
- CALL DEFAULT_DIAG_FLAKE(DGF%N2M,DGF%LSURF_BUDGET,DGF%L2M_MIN_ZS,DGF%LRAD_BUDGET,DGF%LCOEF,DGF%LSURF_VARS, &
-                         DGMF%LWATER_PROFILE,DGF%LSURF_BUDGETC,DGF%LRESET_BUDGETC,DGF%XDIAG_TSTEP,  &
-                         DGMF%XZWAT_PROFILE             )  
+ CALL DEFAULT_FLAKE(FM%F%XTSTEP,FM%F%XOUT_TSTEP,FM%F%LSEDIMENTS,FM%F%CSNOW_FLK,FM%F%CFLK_FLUX,FM%F%CFLK_ALB,&
+                    FM%F%LSKINTEMP)
+ CALL DEFAULT_CH_DEP(FM%CHF%CCH_DRY_DEP)
+ CALL DEFAULT_DIAG_FLAKE(FM%DGF%N2M,FM%DGF%LSURF_BUDGET,FM%DGF%L2M_MIN_ZS,FM%DGF%LRAD_BUDGET,&
+                         FM%DGF%LCOEF,FM%DGF%LSURF_VARS, FM%DGMF%LWATER_PROFILE,FM%DGF%LSURF_BUDGETC,&
+                         FM%DGF%LRESET_BUDGETC,FM%DGF%XDIAG_TSTEP,FM%DGMF%XZWAT_PROFILE      )  
  !
 ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_FLAKE_n(CHF, DGF, DGMF, F, &
+ CALL READ_DEFAULT_FLAKE_n(FM%CHF, FM%DGF, FM%DGMF, FM%F, &
                            HPROGRAM)
 
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
- CALL READ_FLAKE_CONF_n(CHF, DGF, DGMF, F, &
+ CALL READ_FLAKE_CONF_n(FM%CHF, FM%DGF, FM%DGMF, FM%F, &
                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -218,23 +207,24 @@ ENDIF
 !
 SELECT CASE (HINIT)
   CASE ('PGD')
-    F%TTIME%TDATE%YEAR = NUNDEF
-    F%TTIME%TDATE%MONTH= NUNDEF
-    F%TTIME%TDATE%DAY  = NUNDEF
-    F%TTIME%TIME       = XUNDEF
+    FM%F%TTIME%TDATE%YEAR = NUNDEF
+    FM%F%TTIME%TDATE%MONTH= NUNDEF
+    FM%F%TTIME%TDATE%DAY  = NUNDEF
+    FM%F%TTIME%TIME       = XUNDEF
 
   CASE ('PRE')
-    CALL PREP_CTRL_FLAKE(DGF%N2M,DGF%LSURF_BUDGET,DGF%L2M_MIN_ZS,DGF%LRAD_BUDGET,DGF%LCOEF,DGF%LSURF_VARS,&
-                             ILUOUT,DGMF%LWATER_PROFILE,DGF%LSURF_BUDGETC) 
+    CALL PREP_CTRL_FLAKE(FM%DGF%N2M,FM%DGF%LSURF_BUDGET,FM%DGF%L2M_MIN_ZS,FM%DGF%LRAD_BUDGET,&
+                         FM%DGF%LCOEF,FM%DGF%LSURF_VARS,ILUOUT,&
+                         FM%DGMF%LWATER_PROFILE,FM%DGF%LSURF_BUDGETC) 
     IF (LNAM_READ) CALL READ_NAM_PREP_FLAKE_n(HPROGRAM)                            
     CALL READ_FLAKE_DATE(IOB, &
-                         HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,F%TTIME)
+                         HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,FM%F%TTIME)
 
   CASE DEFAULT
 CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
                         HPROGRAM,'WATER ','FLAKE ','READ ')
     CALL READ_SURF(IOB, &
-                   HPROGRAM,'DTCUR',F%TTIME,IRESP)
+                   HPROGRAM,'DTCUR',FM%F%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
 !
@@ -250,7 +240,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !
 !         Reading of the fields
 !
- CALL READ_PGD_FLAKE_n(DTCO, FG, F, IOB, U, &
+ CALL READ_PGD_FLAKE_n(DTCO, IOB, U, FM%FG, FM%F, &
                        HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
@@ -275,52 +265,53 @@ END IF
 CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
                         HPROGRAM,'WATER ','FLAKE ','READ ')
 !
- CALL READ_FLAKE_n(DTCO, F, IOB, U, &
+ CALL READ_FLAKE_n(DTCO, IOB, U, FM%F, &
                    HPROGRAM)
 !
-ILU = SIZE(F%XCOVER,1)
+ILU = SIZE(FM%F%XCOVER,1)
 !
 !-------------------------------------------------------------------------------
 !
 !*       3.     Specific fields 
 !               ---------------
 !
-ALLOCATE(F%XCORIO         (ILU))
-ALLOCATE(F%XICE_ALB       (ILU))
-ALLOCATE(F%XSNOW_ALB      (ILU))
-ALLOCATE(F%XEXTCOEF_ICE   (ILU))
-ALLOCATE(F%XEXTCOEF_SNOW  (ILU))
+ALLOCATE(FM%F%XCORIO         (ILU))
+ALLOCATE(FM%F%XICE_ALB       (ILU))
+ALLOCATE(FM%F%XSNOW_ALB      (ILU))
+ALLOCATE(FM%F%XEXTCOEF_ICE   (ILU))
+ALLOCATE(FM%F%XEXTCOEF_SNOW  (ILU))
 !
-F%XCORIO(:) = 2*XOMEGA*SIN(FG%XLAT(:)*XPI/180.)
+FM%F%XCORIO(:) = 2*XOMEGA*SIN(FM%FG%XLAT(:)*XPI/180.)
 !
-F%XICE_ALB  = XALBWATICE  ! constant, should be improved latter
-F%XSNOW_ALB = XALBWATSNOW ! constant, should be improved latter
+FM%F%XICE_ALB  = XALBWATICE  ! constant, should be improved latter
+FM%F%XSNOW_ALB = XALBWATSNOW ! constant, should be improved latter
 !
-F%XEXTCOEF_ICE  = XUNDEF !not used
-F%XEXTCOEF_SNOW = XUNDEF !not used
+FM%F%XEXTCOEF_ICE  = XUNDEF !not used
+FM%F%XEXTCOEF_SNOW = XUNDEF !not used
 !-------------------------------------------------------------------------------
 !
 !*       4.     Albedo, emissivity and radiative fields on lake
 !               -----------------------------------------------
 !
-ALLOCATE(F%XDIR_ALB (ILU))
-ALLOCATE(F%XSCA_ALB (ILU))
-ALLOCATE(F%XEMIS    (ILU))
-F%XDIR_ALB = 0.0
-F%XSCA_ALB = 0.0
-F%XEMIS    = 0.0
+ALLOCATE(FM%F%XDIR_ALB (ILU))
+ALLOCATE(FM%F%XSCA_ALB (ILU))
+ALLOCATE(FM%F%XEMIS    (ILU))
+FM%F%XDIR_ALB = 0.0
+FM%F%XSCA_ALB = 0.0
+FM%F%XEMIS    = 0.0
 !
- CALL UPDATE_RAD_FLAKE(F%CFLK_ALB,F%XTS,PZENITH,F%XH_ICE,F%XH_SNOW,F%XICE_ALB,F%XSNOW_ALB, &
-                       F%XDIR_ALB,F%XSCA_ALB,F%XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )
+ CALL UPDATE_RAD_FLAKE(FM%F%CFLK_ALB,FM%F%XTS,PZENITH,FM%F%XH_ICE,FM%F%XH_SNOW,&
+                       FM%F%XICE_ALB,FM%F%XSNOW_ALB,FM%F%XDIR_ALB,FM%F%XSCA_ALB,&
+                       FM%F%XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD  )
 !
-PTSURF(:) = F%XTS(:)
+PTSURF(:) = FM%F%XTS(:)
 !
 !-------------------------------------------------------------------------------
 !
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_FLAKE_SBL_n(DTCO, F, FSB, IOB, U, &
+ CALL READ_FLAKE_SBL_n(DTCO, IOB, U, FM%F, FM%FSB, &
                        HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -329,18 +320,16 @@ PTSURF(:) = F%XTS(:)
 !               ----------------
 !
 !
- CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, CHF%NBEQ, CHF%CSV, CHF%NAEREQ,            &
-                     CHF%NSV_CHSBEG, CHF%NSV_CHSEND, CHF%NSV_AERBEG, CHF%NSV_AEREND, &
-                     CHF%CCH_NAMES, CHF%CAER_NAMES, CHF%NDSTEQ, CHF%NSV_DSTBEG,      &
-                     CHF%NSV_DSTEND, CHF%NSLTEQ, CHF%NSV_SLTBEG, CHF%NSV_SLTEND,     &
-                     HDSTNAMES=CHF%CDSTNAMES, HSLTNAMES=CHF%CSLTNAMES        )
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, FM%CHF%SVF,    &      
+                     FM%CHF%CCH_NAMES, FM%CHF%CAER_NAMES,      &
+                     HDSTNAMES=FM%CHF%CDSTNAMES, HSLTNAMES=FM%CHF%CSLTNAMES  )
 !
 !* depositiion scheme
 !
-IF (CHF%NBEQ>0 .AND. CHF%CCH_DRY_DEP=='WES89') THEN
-  ALLOCATE(CHF%XDEP(ILU,CHF%NBEQ))
+IF (FM%CHF%SVF%NBEQ>0 .AND. FM%CHF%CCH_DRY_DEP=='WES89') THEN
+  ALLOCATE(FM%CHF%XDEP(ILU,FM%CHF%SVF%NBEQ))
 ELSE
-  ALLOCATE(CHF%XDEP(0,0))
+  ALLOCATE(FM%CHF%XDEP(0,0))
 END IF
 !
 !-------------------------------------------------------------------------------
@@ -348,8 +337,7 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_FLAKE_INIT_n(IOB, &
-                        DGF, DGMF, DGU, F, &
+ CALL DIAG_FLAKE_INIT_n(IOB, DGU, FM%DGF, FM%DGMF, FM%F, &
                         HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

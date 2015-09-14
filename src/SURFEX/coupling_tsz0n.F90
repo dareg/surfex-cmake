@@ -1,7 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_TSZ0_n (AG, CHI, DTCO, DTI, DTGD, DTGR, DTZ, DGEI, DGI, DGMI, DST, &
-                            GB, ICP, IG, I, PKCI, PKDI, PKI, SLT, UG, U, USS, &
-                            TGRO, &
+SUBROUTINE COUPLING_TSZ0_n (DTCO, UG, U, USS, IM, DTZ, DTGD, DTGR, TGRO, DST, SLT,  &
                             HPROGRAM, HCOUPLING,                                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
@@ -39,32 +37,19 @@ SUBROUTINE COUPLING_TSZ0_n (AG, CHI, DTCO, DTI, DTGD, DTGR, DTZ, DGEI, DGI, DGMI
 !!------------------------------------------------------------------
 !
 !
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
-!
-!
-USE MODD_AGRI_n, ONLY : AGRI_t
-USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
-USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
-USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_DST_n, ONLY : DST_t
-USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
-USE MODD_ISBA_CANOPY_n, ONLY : ISBA_CANOPY_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_PACK_CH_ISBA, ONLY : PACK_CH_ISBA_t
-USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
-USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
-USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
+USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
 USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_SLT_n, ONLY : SLT_t
+!
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,   ONLY : XP00, XRD, XCPD
@@ -80,29 +65,17 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(AGRI_t), INTENT(INOUT) :: AG
-TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
-TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
-TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
-TYPE(ISBA_CANOPY_t), INTENT(INOUT) :: ICP
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(PACK_CH_ISBA_t), INTENT(INOUT) :: PKCI
-TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKDI
-TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
-TYPE(SLT_t), INTENT(INOUT) :: SLT
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
+TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
+TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
 TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -176,16 +149,16 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(KI,I%NGROUND_LAYER,I%NPATCH) :: ZTG   ! soil temperature
-REAL, DIMENSION(KI,I%NGROUND_LAYER,I%NPATCH) :: ZWG   ! soil water content
-REAL, DIMENSION(KI,I%NGROUND_LAYER,I%NPATCH) :: ZWGI  ! soil ice content
-REAL, DIMENSION(KI,I%NPATCH) :: ZWR   ! interception reservoir
-REAL, DIMENSION(KI,I%NPATCH) :: ZRESA ! aerodynamical resistance
-REAL, DIMENSION(KI,I%TSNOW%NLAYER,I%NPATCH) :: ZWSNOW! snow reservoir
-REAL, DIMENSION(KI,I%TSNOW%NLAYER,I%NPATCH) :: ZRHOSN! snow density
-REAL, DIMENSION(KI,I%TSNOW%NLAYER,I%NPATCH) :: ZHEASN! snow heat content
-REAL, DIMENSION(KI,I%NPATCH) :: ZALBSN! snow albedo
-REAL, DIMENSION(KI,I%NPATCH) :: ZEMISN! snow emissivity
+REAL, DIMENSION(KI,IM%I%NGROUND_LAYER,IM%I%NPATCH) :: ZTG   ! soil temperature
+REAL, DIMENSION(KI,IM%I%NGROUND_LAYER,IM%I%NPATCH) :: ZWG   ! soil water content
+REAL, DIMENSION(KI,IM%I%NGROUND_LAYER,IM%I%NPATCH) :: ZWGI  ! soil ice content
+REAL, DIMENSION(KI,IM%I%NPATCH) :: ZWR   ! interception reservoir
+REAL, DIMENSION(KI,IM%I%NPATCH) :: ZRESA ! aerodynamical resistance
+REAL, DIMENSION(KI,IM%I%TSNOW%NLAYER,IM%I%NPATCH) :: ZWSNOW! snow reservoir
+REAL, DIMENSION(KI,IM%I%TSNOW%NLAYER,IM%I%NPATCH) :: ZRHOSN! snow density
+REAL, DIMENSION(KI,IM%I%TSNOW%NLAYER,IM%I%NPATCH) :: ZHEASN! snow heat content
+REAL, DIMENSION(KI,IM%I%NPATCH) :: ZALBSN! snow albedo
+REAL, DIMENSION(KI,IM%I%NPATCH) :: ZEMISN! snow emissivity
 !
 REAL, DIMENSION(KI)     :: ZPEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KI)     :: ZPEW_B_COEF ! needed if HCOUPLING='I'
@@ -202,31 +175,30 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',0,ZHOOK_HANDLE)
 !              ------------------------------------------------
 !
  CALL TSZ0(DTZ, &
-           PTIME, PTSTEP, I%XWFC, I%XTG, I%XWG)
+           PTIME, PTSTEP, IM%I%XWFC, IM%I%XTG, IM%I%XWG)
 !
 !
 !*      2.     Saves the prognostic variables
 !              ------------------------------
 !
-ZTG  (:,:,:) = I%XTG        (:,:,:)
-ZWG  (:,:,:) = I%XWG        (:,:,:)
-ZWGI (:,:,:) = I%XWGI       (:,:,:)
-ZWR  (:,:)   = I%XWR        (:,:)
-ZRESA(:,:)   = I%XRESA      (:,:)
-ZWSNOW(:,:,:)= I%TSNOW%WSNOW(:,:,:)
-ZRHOSN(:,:,:)= I%TSNOW%RHO  (:,:,:)
-ZALBSN(:,:)  = I%TSNOW%ALB  (:,:)
-IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
-  ZHEASN(:,:,:)= I%TSNOW%HEAT (:,:,:)
-  ZEMISN(:,:)  = I%TSNOW%EMIS (:,:)
+ZTG  (:,:,:) = IM%I%XTG        (:,:,:)
+ZWG  (:,:,:) = IM%I%XWG        (:,:,:)
+ZWGI (:,:,:) = IM%I%XWGI       (:,:,:)
+ZWR  (:,:)   = IM%I%XWR        (:,:)
+ZRESA(:,:)   = IM%I%XRESA      (:,:)
+ZWSNOW(:,:,:)= IM%I%TSNOW%WSNOW(:,:,:)
+ZRHOSN(:,:,:)= IM%I%TSNOW%RHO  (:,:,:)
+ZALBSN(:,:)  = IM%I%TSNOW%ALB  (:,:)
+IF (IM%I%TSNOW%SCHEME=='3-L' .OR. IM%I%TSNOW%SCHEME=='CRO') THEN
+  ZHEASN(:,:,:)= IM%I%TSNOW%HEAT (:,:,:)
+  ZEMISN(:,:)  = IM%I%TSNOW%EMIS (:,:)
 END IF
 !
 !
 !*      3.     Call to surface scheme
 !              ----------------------
 !
- CALL COUPLING_ISBA_OROGRAPHY_n(AG, CHI, DTCO, DTI, DTGD, DTGR, DGEI, DGI, DGMI, DST, GB, &
-                                      ICP, IG, I, PKCI, PKDI, PKI, SLT, UG, U, USS, TGRO, &
+ CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
                                 HPROGRAM, 'E',                                              &
                  0.001, KYEAR, KMONTH, KDAY, PTIME,                                          &
                  KI, KSV, KSW,                                                               &
@@ -244,17 +216,17 @@ END IF
 !              --------------------------------------------
 !
 !
-I%XTG  (:,:,:) = ZTG
-I%XWG  (:,:,:) = ZWG
-I%XWGI (:,:,:) = ZWGI
-I%XWR  (:,:)   = ZWR
-I%XRESA(:,:)   = ZRESA
-I%TSNOW%WSNOW(:,:,:) = ZWSNOW
-I%TSNOW%RHO  (:,:,:) = ZRHOSN
-I%TSNOW%ALB  (:,:)   = ZALBSN
-IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
-  I%TSNOW%HEAT (:,:,:) = ZHEASN
-  I%TSNOW%EMIS (:,:)   = ZEMISN
+IM%I%XTG  (:,:,:) = ZTG
+IM%I%XWG  (:,:,:) = ZWG
+IM%I%XWGI (:,:,:) = ZWGI
+IM%I%XWR  (:,:)   = ZWR
+IM%I%XRESA(:,:)   = ZRESA
+IM%I%TSNOW%WSNOW(:,:,:) = ZWSNOW
+IM%I%TSNOW%RHO  (:,:,:) = ZRHOSN
+IM%I%TSNOW%ALB  (:,:)   = ZALBSN
+IF (IM%I%TSNOW%SCHEME=='3-L' .OR. IM%I%TSNOW%SCHEME=='CRO') THEN
+  IM%I%TSNOW%HEAT (:,:,:) = ZHEASN
+  IM%I%TSNOW%EMIS (:,:)   = ZEMISN
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',1,ZHOOK_HANDLE)

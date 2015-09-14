@@ -1,10 +1,10 @@
 !     #########
        SUBROUTINE DIAG_INLINE_WATFLUX_n (DGW, W, &
-                                          PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
-                                           PMERA, PHT, PHW, PCD, PCDN, PCH, PRI, PHU, PZ0, &
+                                          PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,  &
+                                           PMERA, PHT, PHW, PCD, PCDN, PCH, PRI, PHU,  &
                                            PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,      &
                                            PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,      &
-                                           PEMIS, PTRAD, PRAIN, PSNOW, PTICE, PSFTH_ICE,   &
+                                           PEMIS, PTRAD, PRAIN, PSNOW, PSFTH_ICE,   &
                                            PSFTQ_ICE                                       )  
 !     ###############################################################################
 !
@@ -65,7 +65,6 @@ TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL,               INTENT(IN) :: PTSTEP ! atmospheric time-step                 (s)
 REAL, DIMENSION(:), INTENT(IN) :: PTA    ! atmospheric temperature
-REAL, DIMENSION(:), INTENT(IN) :: PTS    ! surface temperature
 REAL, DIMENSION(:), INTENT(IN) :: PQA    ! atmospheric specific humidity
 REAL, DIMENSION(:), INTENT(IN) :: PPA    ! atmospheric level pressure
 REAL, DIMENSION(:), INTENT(IN) :: PPS    ! surface pressure
@@ -79,7 +78,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PCDN   ! neutral drag coefficient
 REAL, DIMENSION(:), INTENT(IN) :: PCH    ! drag coefficient for heat
 REAL, DIMENSION(:), INTENT(IN) :: PRI    ! Richardson number
 REAL, DIMENSION(:), INTENT(IN) :: PHU    ! near-surface humidity
-REAL, DIMENSION(:), INTENT(IN) :: PZ0    ! roughness length for momentum
 REAL, DIMENSION(:), INTENT(IN) :: PZ0H   ! roughness length for heat
 REAL, DIMENSION(:), INTENT(IN) :: PQSAT  ! humidity at saturation
 REAL, DIMENSION(:), INTENT(IN) :: PSFZON ! zonal friction
@@ -100,7 +98,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH_ICE ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ_ICE ! water flux (kg/m2/s)
-REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Ice Surface Temperature
 !
 !*      0.2    declarations of local variables
 !
@@ -112,19 +109,19 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_WATFLUX_N',0,ZHOOK_HANDLE)
 !
 ! * Mean surface temperature need to couple with AGCM
 !
-DGW%XDIAG_TS(:) = PTS(:)
+DGW%XDIAG_TS(:) = W%XTS(:)
 !
 IF (.NOT. W%LSBL) THEN
 !
   IF (DGW%N2M==1) THEN
-    CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
+    CALL PARAM_CLS(PTA, W%XTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
                      PSFTH, PSFTQ, PSFZON, PSFMER,                    &
                      DGW%XT2M, DGW%XQ2M, DGW%XHU2M, DGW%XZON10M, DGW%XMER10M              )  
   ELSE IF (DGW%N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                   PCD, PCH, PRI,                   &
-                  PTS, PHU, PZ0H, ZH,              &
+                  W%XTS, PHU, PZ0H, ZH,              &
                   DGW%XT2M, DGW%XQ2M, DGW%XHU2M                )  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,             &
@@ -161,7 +158,7 @@ ENDIF
 !
 IF (DGW%LSURF_BUDGET.OR.DGW%LSURF_BUDGETC) THEN
   !
-  CALL  DIAG_SURF_BUDGET_WATER (XTT, PTS, PRHOA, PSFTH, PSFTQ,          &
+  CALL  DIAG_SURF_BUDGET_WATER (XTT, W%XTS, PRHOA, PSFTH, PSFTQ,          &
                                   PDIR_SW, PSCA_SW, PLW,                &
                                   PDIR_ALB, PSCA_ALB, PEMIS, PTRAD,     &
                                   PSFZON, PSFMER,                       &
@@ -188,7 +185,7 @@ IF (DGW%LCOEF) THEN
   !
   !* Roughness lengths
   !
-  DGW%XZ0  = PZ0
+  DGW%XZ0  = W%XZ0
   DGW%XZ0H = PZ0H
   !
 ENDIF
@@ -208,7 +205,7 @@ IF (LCPL_SEA) THEN
   CALL DIAG_CPL_ESM_WATER(W, &
                           PTSTEP,DGW%XZON10M,DGW%XMER10M,DGW%XFMU,DGW%XFMV,  &
                             DGW%XSWD,DGW%XSWU,DGW%XGFLUX,PSFTQ,PRAIN,      &
-                            PSNOW,PLW,PTICE,PSFTH_ICE,         &
+                            PSNOW,PLW,W%XTICE,PSFTH_ICE,         &
                             PSFTQ_ICE,PDIR_SW,PSCA_SW          )  
 ! 
 ENDIF

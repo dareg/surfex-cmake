@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_ISBA_n (DTCO, DGU, IOB, U, CHI, DGEI, DGI, DGMI, I, DST, ICP, &
+      SUBROUTINE WRITE_ISBA_n (DTCO, DGU, IOB, U, IM, DST, &
                                HPROGRAM,HWRITE,OLAND_USE)
 !     ####################################
 !
@@ -41,13 +41,8 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
-USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_DST_n, ONLY : DST_t
-USE MODD_ISBA_CANOPY_n, ONLY : ISBA_CANOPY_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODI_INIT_IO_SURF_n
@@ -70,13 +65,8 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
-TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(ISBA_CANOPY_t), INTENT(INOUT) :: ICP
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
@@ -98,14 +88,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !        
- CALL WRITESURF_ISBA_CONF_n(CHI, DGEI, DGI, DGMI, I, &
+ CALL WRITESURF_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I, &
                             HPROGRAM)
  CALL WRITESURF_ISBA_n(DGU, IOB, U, &
-                       CHI, DST, I, &
+                       IM%CHI, DST, IM%I, &
                        HPROGRAM,OLAND_USE)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(DGU, IOB, U, &
-                                                                        ICP, I, &
+                                                                        IM%ICP, IM%I, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

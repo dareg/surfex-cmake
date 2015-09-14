@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GARDEN_PROPERTIES (TGD, TGDO, TGDPE, TGDP, T, TVG, &
+      SUBROUTINE GARDEN_PROPERTIES (T, GDM, &
                                     PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
                                    PTS, PEMIS, PALB, PTA,            &
                                    PALBNIR_TVEG, PALBVIS_TVEG,       &
@@ -32,12 +32,8 @@
 !
 !
 !
-USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TEB_GARDEN_PGD_EVOL_t
-USE MODD_TEB_GARDEN_PGD_n, ONLY : TEB_GARDEN_PGD_t
 USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
@@ -54,12 +50,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
-TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
-TYPE(TEB_GARDEN_PGD_EVOL_t), INTENT(INOUT) :: TGDPE
-TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
 TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PDIR_SW            ! direct incoming solar radiation
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSCA_SW            ! diffus incoming solar radiation
@@ -107,33 +99,36 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GARDEN_n(TGD, TGDO, TGDPE, T, TVG, &
+ CALL FLAG_TEB_GARDEN_n(GDM%TGD, GDM%TGDO, GDM%TGDPE, T, GDM%TVG, &
                         1)
 !
 !
 !*      2.     Computes several properties of gardens
 !              --------------------------------------
 !
- CALL ISBA_PROPERTIES(TVG%CISBA, TVG%LTR_ML, TGD%CUR%TSNOW, 1,                            &
+ CALL ISBA_PROPERTIES(GDM%TVG%CISBA, GDM%TVG%LTR_ML, GDM%TGD%CUR%TSNOW, 1,          &
                      PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                   &
-                     TGDPE%CUR%XALBNIR(:), TGDPE%CUR%XALBVIS(:), TGDPE%CUR%XALBUV(:),                  &
-                     TGDP%XALBNIR_VEG(:), TGDP%XALBVIS_VEG(:), TGDP%XALBUV_VEG(:),      &
-                     TGDP%XALBNIR_SOIL(:), TGDP%XALBVIS_SOIL(:), TGDP%XALBUV_SOIL(:),   &
-                     TGDPE%CUR%XVEG(:), TGDPE%CUR%XLAI(:), TGDPE%CUR%XZ0(:), TGDPE%CUR%XEMIS(:),TGD%CUR%XTG(:,1),          &
+                     GDM%TGDPE%CUR%XALBNIR(:), GDM%TGDPE%CUR%XALBVIS(:), GDM%TGDPE%CUR%XALBUV(:),  &
+                     GDM%TGDP%XALBNIR_VEG(:), GDM%TGDP%XALBVIS_VEG(:), GDM%TGDP%XALBUV_VEG(:),    &
+                     GDM%TGDP%XALBNIR_SOIL(:), GDM%TGDP%XALBVIS_SOIL(:), GDM%TGDP%XALBUV_SOIL(:),   &
+                     GDM%TGDPE%CUR%XVEG(:), GDM%TGDPE%CUR%XLAI(:), GDM%TGDPE%CUR%XZ0(:), &
+                     GDM%TGDPE%CUR%XEMIS(:),GDM%TGD%CUR%XTG(:,1),          &
                      ZASNOW, ZANOSNOW, ZESNOW, ZENOSNOW, ZTSSNOW, ZTSNOSNOW,      &
-                     TGD%CUR%XSNOWFREE_ALB_VEG, TGD%CUR%XSNOWFREE_ALB_SOIL,                       &
+                     GDM%TGD%CUR%XSNOWFREE_ALB_VEG, GDM%TGD%CUR%XSNOWFREE_ALB_SOIL,               &
                      ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, ZALBVIS_TSOIL,    &
-                     TGD%CUR%XPSN(:), TGD%CUR%XPSNV_A(:), TGD%CUR%XPSNG(:), TGD%CUR%XPSNV(:)          )  
+                     GDM%TGD%CUR%XPSN(:), GDM%TGD%CUR%XPSNV_A(:), GDM%TGD%CUR%XPSNG(:), &
+                     GDM%TGD%CUR%XPSNV(:)          )  
 !
-TGD%CUR%XSNOWFREE_ALB = ZANOSNOW
+GDM%TGD%CUR%XSNOWFREE_ALB = ZANOSNOW
 !
 !* averaged albedo
-PALB =  TGD%CUR%XPSN(:) * ZASNOW              + (1.-TGD%CUR%XPSN(:)) * ZANOSNOW
+PALB =  GDM%TGD%CUR%XPSN(:) * ZASNOW              + (1.-GDM%TGD%CUR%XPSN(:)) * ZANOSNOW
 !* averaged emissivity
-PEMIS=  TGD%CUR%XPSN(:) * ZESNOW              + (1.-TGD%CUR%XPSN(:)) * ZENOSNOW
+PEMIS=  GDM%TGD%CUR%XPSN(:) * ZESNOW              + (1.-GDM%TGD%CUR%XPSN(:)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
-PTS  =((TGD%CUR%XPSN(:) * ZESNOW * ZTSSNOW**4 + (1.-TGD%CUR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+PTS  =((GDM%TGD%CUR%XPSN(:) * ZESNOW * ZTSSNOW**4 + &
+        (1.-GDM%TGD%CUR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 !
 IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
 IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)

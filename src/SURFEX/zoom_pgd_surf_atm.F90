@@ -140,7 +140,8 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !             ------------------------------------
 !
 IF (YSC%U%NDIM_NATURE>0)                                 &
-  CALL ZOOM_PGD_NATURE(YSC%CHI, YSC%DTCO, YSC%DTI, YSC%IOB, YSC%IG, YSC%I, YSC%UG, YSC%U, YSC%USS, &
+  CALL ZOOM_PGD_NATURE(YSC%IM%CHI, YSC%DTCO, YSC%IM%DTI, YSC%IOB, YSC%IM%IG, &
+                        YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
                        HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
@@ -148,9 +149,10 @@ IF (YSC%U%NDIM_NATURE>0)                                 &
 !             ----------------------------------
 !
 IF (YSC%U%NDIM_TOWN>0)                                 &
-  CALL ZOOM_PGD_TOWN(YSC%B, YSC%DGCT, YSC%DGMT, YSC%T, YSC%TGD, YSC%TGDPE, YSC%TGR, YSC%TGRPE, &
-                     YSC%BOP, YSC%BDD, YSC%DTB, YSC%DTCO, YSC%DTT, YSC%IOB, YSC%UG, YSC%U, &
-                     YSC%TGDO, YSC%TGDP, YSC%TG, YSC%TOP, YSC%TVG, &
+  CALL ZOOM_PGD_TOWN(YSC%TM%B, YSC%TM%DGCT, YSC%TM%DGMT, YSC%TM%T, YSC%GDM%TGD, &
+                     YSC%GDM%TGDPE, YSC%GRM%TGR, YSC%GRM%TGRPE, &
+                     YSC%TM%BOP, YSC%TM%BDD, YSC%TM%DTB, YSC%DTCO, YSC%TM%DTT, YSC%IOB, YSC%UG, YSC%U, &
+                     YSC%GDM%TGDO, YSC%GDM%TGDP, YSC%TM%TG, YSC%TM%TOP, YSC%GDM%TVG, &
                      HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
 !_______________________________________________________________________________
 !
@@ -158,7 +160,7 @@ IF (YSC%U%NDIM_TOWN>0)                                 &
 !             ------------------------------------------
 !
 IF (YSC%U%NDIM_WATER>0)                                 &
-  CALL ZOOM_PGD_INLAND_WATER(YSC%DTCO, YSC%FG, YSC%F, YSC%UG, YSC%U, YSC%USS, YSC%WG, YSC%W, &
+  CALL ZOOM_PGD_INLAND_WATER(YSC%DTCO, YSC%FM%FG, YSC%FM%F, YSC%UG, YSC%U, YSC%USS, YSC%WM%WG, YSC%WM%W, &
                              HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
@@ -166,7 +168,7 @@ IF (YSC%U%NDIM_WATER>0)                                 &
 !             ---------------------------------
 !
 IF (YSC%U%NDIM_SEA>0)                                 &
-  CALL ZOOM_PGD_SEA(YSC%DTCO, YSC%DTS, YSC%IOB, YSC%SG, YSC%S, YSC%UG, YSC%U, &
+  CALL ZOOM_PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%IOB, YSC%SM%SG, YSC%SM%S, YSC%UG, YSC%U, &
                     HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)  
 !
 !_______________________________________________________________________________

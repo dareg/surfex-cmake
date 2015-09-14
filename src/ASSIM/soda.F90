@@ -443,11 +443,7 @@ DO ISTEP = 1,NBOUTPUT
       !
     ENDIF 
     !
-    CALL DEALLOC_SURF_ATM_n(YSURF_CUR%B, YSURF_CUR%CHE, YSURF_CUR%CHF, YSURF_CUR%CHI, YSURF_CUR%CHS, &
-                YSURF_CUR%CHU, YSURF_CUR%CHT, YSURF_CUR%CHW, YSURF_CUR%DTI, YSURF_CUR%DTT, &
-                YSURF_CUR%DUU, YSURF_CUR%FG, YSURF_CUR%F, YSURF_CUR%GB, YSURF_CUR%IG, YSURF_CUR%I, &
-                YSURF_CUR%SG, YSURF_CUR%S, YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%USS, YSURF_CUR%SV, &
-                YSURF_CUR%TG, YSURF_CUR%T, YSURF_CUR%TOP, YSURF_CUR%TPN, YSURF_CUR%WG, YSURF_CUR%W)
+    CALL DEALLOC_SURF_ATM_n(YSURF_CUR)
     !
     IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC==1 ) LREAD_ALL = .TRUE.
     !    
@@ -463,11 +459,11 @@ DO ISTEP = 1,NBOUTPUT
     IF ( CASSIM_ISBA=='EKF  ' .OR. CASSIM_ISBA=='ENKF ' ) THEN
       !
       IF ( ISTEP==1 .AND. NIFIC==INB ) THEN
-        ALLOCATE(XLAI_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%I%NPATCH)) 
-        ALLOCATE(XBIO_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%I%NPATCH))     
-        IF (CASSIM_ISBA=='EKF  ') ALLOCATE(XI       (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%I%NPATCH,ISIZE   ))
-        ALLOCATE(XF       (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%I%NPATCH,ISIZE+1,NVAR    ))
-        ALLOCATE(XF_PATCH (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%I%NPATCH,ISIZE+1,NOBSTYPE*NBOUTPUT))
+        ALLOCATE(XLAI_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH)) 
+        ALLOCATE(XBIO_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH))     
+        IF (CASSIM_ISBA=='EKF  ') ALLOCATE(XI       (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH,ISIZE   ))
+        ALLOCATE(XF       (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH,ISIZE+1,NVAR    ))
+        ALLOCATE(XF_PATCH (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH,ISIZE+1,NOBSTYPE*NBOUTPUT))
       ENDIF
       !
       IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC<INB .OR. CASSIM_ISBA=='ENKF ') THEN
@@ -475,16 +471,16 @@ DO ISTEP = 1,NBOUTPUT
         ! Set the global state values for this control value
         DO IOBS = 1,NOBSTYPE
           IIOBS = (ISTEP-1)*NOBSTYPE + IOBS
-          DO JI=1,YSURF_CUR%I%NPATCH
+          DO JI=1,YSURF_CUR%IM%I%NPATCH
             SELECT CASE (TRIM(COBS(IOBS)))
               CASE("T2M")
                 XF_PATCH(:,JI,NIFIC,IIOBS) = XAT2M_ISBA(:,1)
               CASE("HU2M")
                 XF_PATCH(:,JI,NIFIC,IIOBS) = XAHU2M_ISBA(:,1)
               CASE("WG1")
-                XF_PATCH(:,JI,NIFIC,IIOBS) = YSURF_CUR%I%XWG(:,1,JI)
+                XF_PATCH(:,JI,NIFIC,IIOBS) = YSURF_CUR%IM%I%XWG(:,1,JI)
               CASE("LAI")
-                XF_PATCH(:,JI,NIFIC,IIOBS) = YSURF_CUR%I%XLAI(:,JI)
+                XF_PATCH(:,JI,NIFIC,IIOBS) = YSURF_CUR%IM%I%XLAI(:,JI)
               CASE DEFAULT
                 CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
             END SELECT
@@ -495,17 +491,17 @@ DO ISTEP = 1,NBOUTPUT
         DO JL = 1,NVAR
           SELECT CASE (TRIM(CVAR(JL)))
             CASE("TG1")
-              XF(:,:,NIFIC,JL) = YSURF_CUR%I%XTG(:,1,:)
+              XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XTG(:,1,:)
             CASE("TG2")
-              XF(:,:,NIFIC,JL) = YSURF_CUR%I%XTG(:,2,:)
+              XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XTG(:,2,:)
             CASE("WG1")
-              XF(:,:,NIFIC,JL) = YSURF_CUR%I%XWG(:,1,:)
+              XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XWG(:,1,:)
             CASE("WG2")
-              XF(:,:,NIFIC,JL) = YSURF_CUR%I%XWG(:,2,:)
+              XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XWG(:,2,:)
             CASE("WG3")
-              XF(:,:,NIFIC,JL) = YSURF_CUR%I%XWG(:,3,:)              
+              XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XWG(:,3,:)              
             CASE("LAI")
-              XF(:,:,NIFIC,JL) = YSURF_CUR%I%XLAI(:,:)
+              XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
           END SELECT
@@ -515,25 +511,25 @@ DO ISTEP = 1,NBOUTPUT
           !
           DO JL = 1,NVAR
             IF (TRIM(CVAR(JL))=="LAI") THEN
-              IF ( YSURF_CUR%I%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
+              IF ( YSURF_CUR%IM%I%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
                 CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF with NPATCH=1!")
               ENDIF
               SELECT CASE (TRIM(CBIO))
                 CASE("BIOMA1","BIOMASS1")
-                  XBIO_PASS(:,:) = YSURF_CUR%I%XBIOMASS(:,1,:)
+                  XBIO_PASS(:,:) = YSURF_CUR%IM%I%XBIOMASS(:,1,:)
                 CASE("BIOMA2","BIOMASS2")
-                  XBIO_PASS(:,:) = YSURF_CUR%I%XBIOMASS(:,2,:)
+                  XBIO_PASS(:,:) = YSURF_CUR%IM%I%XBIOMASS(:,2,:)
                 CASE("RESPI1","RESP_BIOM1")
-                  XBIO_PASS(:,:) = YSURF_CUR%I%XRESP_BIOMASS(:,1,:)
+                  XBIO_PASS(:,:) = YSURF_CUR%IM%I%XRESP_BIOMASS(:,1,:)
                 CASE("RESPI2","RESP_BIOM2")
-                  XBIO_PASS(:,:) = YSURF_CUR%I%XRESP_BIOMASS(:,2,:)
+                  XBIO_PASS(:,:) = YSURF_CUR%IM%I%XRESP_BIOMASS(:,2,:)
                 CASE("LAI")
-                  XBIO_PASS(:,:) = YSURF_CUR%I%XLAI(:,:)
+                  XBIO_PASS(:,:) = YSURF_CUR%IM%I%XLAI(:,:)
                 CASE DEFAULT
                   CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
               END SELECT
               !
-              XLAI_PASS(:,:) = YSURF_CUR%I%XLAI(:,:)          
+              XLAI_PASS(:,:) = YSURF_CUR%IM%I%XLAI(:,:)          
               !
             ENDIF
             !
@@ -545,17 +541,17 @@ DO ISTEP = 1,NBOUTPUT
         DO JL = 1,NVAR
           SELECT CASE (TRIM(CVAR(JL)))
             CASE("TG1")
-              XI(:,:,JL) = YSURF_CUR%I%XTG(:,1,:)
+              XI(:,:,JL) = YSURF_CUR%IM%I%XTG(:,1,:)
             CASE("TG2")
-              XI(:,:,JL) = YSURF_CUR%I%XTG(:,2,:)
+              XI(:,:,JL) = YSURF_CUR%IM%I%XTG(:,2,:)
             CASE("WG1")
-              XI(:,:,JL) = YSURF_CUR%I%XWG(:,1,:)
+              XI(:,:,JL) = YSURF_CUR%IM%I%XWG(:,1,:)
             CASE("WG2")
-              XI(:,:,JL) = YSURF_CUR%I%XWG(:,2,:)
+              XI(:,:,JL) = YSURF_CUR%IM%I%XWG(:,2,:)
             CASE("WG3")
-              XI(:,:,JL) = YSURF_CUR%I%XWG(:,3,:)               
+              XI(:,:,JL) = YSURF_CUR%IM%I%XWG(:,3,:)               
             CASE("LAI")
-              XI(:,:,JL) = YSURF_CUR%I%XLAI(:,:)
+              XI(:,:,JL) = YSURF_CUR%IM%I%XLAI(:,:)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
           END SELECT
@@ -760,7 +756,7 @@ CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%IOB, YSURF_CUR%U, &
   !
 ENDIF
 !
- CALL ASSIM_SET_SST(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%IOB, YSURF_CUR%S, YSURF_CUR%U, &
+ CALL ASSIM_SET_SST(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%IOB, YSURF_CUR%SM%S, YSURF_CUR%U, &
                     INI,ZLSM,ZSST,ZSIC,YTEST)
 
 IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
@@ -776,8 +772,8 @@ ZLAT(:) = YSURF_CUR%UG%XLAT(:)
 GLKEEPEXTZONE = .TRUE.
 !
 IF (NRANK==NPIO) WRITE(*,*) 'PERFORMIMG OFFLINE SURFEX DATA ASSIMILATION...'
- CALL ASSIM_SURF_ATM_n(YSURF_CUR%DGMI, YSURF_CUR%IG, YSURF_CUR%I, YSURF_CUR%S, &
-                       YSURF_CUR%U, YSURF_CUR%T, YSURF_CUR%TOP, YSURF_CUR%W, &
+ CALL ASSIM_SURF_ATM_n(YSURF_CUR%IM%DGMI, YSURF_CUR%IM%IG, YSURF_CUR%IM%I, YSURF_CUR%SM%S, &
+                       YSURF_CUR%U, YSURF_CUR%TM%T, YSURF_CUR%TM%TOP, YSURF_CUR%WM%W, &
                        CSURF_FILETYPE,INI,   &
                       ZCON_RAIN,  ZSTRAT_RAIN, ZCON_SNOW, ZSTRAT_SNOW, &
                       ZCLOUDS,    ZLSM,        ZEVAPTR,   ZEVAP,       &
@@ -807,16 +803,7 @@ DEALLOCATE(ZSIC)
 !
 !
 IF (CTIMESERIES_FILETYPE=="OFFLIN") THEN
-  CALL INIT_OUTPUT_OL_n (YSURF_CUR%BOP, YSURF_CUR%CHE, YSURF_CUR%CHI, YSURF_CUR%CHS, &
-                         YSURF_CUR%CHN, YSURF_CUR%CHU, YSURF_CUR%CHT, YSURF_CUR%CHW, &
-                         YSURF_CUR%DGEI, YSURF_CUR%DGF, YSURF_CUR%DGI, YSURF_CUR%DGMI, &
-                         YSURF_CUR%DGMTO, YSURF_CUR%DGO, YSURF_CUR%DGS, YSURF_CUR%DGSI, &
-                         YSURF_CUR%DGU, YSURF_CUR%DGT, YSURF_CUR%DGUT, YSURF_CUR%DGW, &
-                         YSURF_CUR%F, YSURF_CUR%FSB, YSURF_CUR%GB, YSURF_CUR%ICP, &
-                         YSURF_CUR%I, YSURF_CUR%O, YSURF_CUR%S, YSURF_CUR%SSB, &
-                         YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%SV, YSURF_CUR%TCP, &
-                         YSURF_CUR%TGD, YSURF_CUR%TGDO, YSURF_CUR%TGR, YSURF_CUR%TGRO, &
-                         YSURF_CUR%T, YSURF_CUR%TOP, YSURF_CUR%TVG, YSURF_CUR%W, YSURF_CUR%WSB)
+  CALL INIT_OUTPUT_OL_n (YSURF_CUR)
 ENDIF
 !
 ZTIME_OUT  = ZTIME
@@ -902,11 +889,7 @@ DO IENS = 1,ISIZE
     !
     LREAD_ALL = .TRUE.
     !
-    CALL DEALLOC_SURF_ATM_n(YSURF_CUR%B, YSURF_CUR%CHE, YSURF_CUR%CHF, YSURF_CUR%CHI, YSURF_CUR%CHS, &
-                YSURF_CUR%CHU, YSURF_CUR%CHT, YSURF_CUR%CHW, YSURF_CUR%DTI, YSURF_CUR%DTT, &
-                YSURF_CUR%DUU, YSURF_CUR%FG, YSURF_CUR%F, YSURF_CUR%GB, YSURF_CUR%IG, YSURF_CUR%I, &
-                YSURF_CUR%SG, YSURF_CUR%S, YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%USS, YSURF_CUR%SV, &
-                YSURF_CUR%TG, YSURF_CUR%T, YSURF_CUR%TOP, YSURF_CUR%TPN, YSURF_CUR%WG, YSURF_CUR%W)    
+    CALL DEALLOC_SURF_ATM_n(YSURF_CUR)    
     !
     ! Initialize the SURFEX interface
     CALL IO_BUFF_CLEAN_n(YSURF_CUR%IOB)
@@ -923,17 +906,17 @@ DO IENS = 1,ISIZE
       ! Update the modified values
       SELECT CASE (TRIM(CVAR(JL)))
         CASE("TG1")
-          YSURF_CUR%I%XTG(:,1,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%XTG(:,1,:) = XF(:,:,IENS,JL)
         CASE("TG2")
-          YSURF_CUR%I%XTG(:,2,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%XTG(:,2,:) = XF(:,:,IENS,JL)
         CASE("WG1")
-          YSURF_CUR%I%XWG(:,1,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%XWG(:,1,:) = XF(:,:,IENS,JL)
         CASE("WG2")
-          YSURF_CUR%I%XWG(:,2,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%XWG(:,2,:) = XF(:,:,IENS,JL)
         CASE("WG3")
-          YSURF_CUR%I%XWG(:,3,:) = XF(:,:,IENS,JL)          
+          YSURF_CUR%IM%I%XWG(:,3,:) = XF(:,:,IENS,JL)          
         CASE("LAI") 
-          YSURF_CUR%I%XLAI(:,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%XLAI(:,:) = XF(:,:,IENS,JL)
         CASE DEFAULT
           CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in EKF!")
       END SELECT
@@ -946,8 +929,8 @@ DO IENS = 1,ISIZE
 #endif
   !
   IF (CTIMESERIES_FILETYPE=="NC    ") THEN
-    CALL INIT_OUTPUT_NC_n (YSURF_CUR%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                               YSURF_CUR%DTS, YSURF_CUR%DTT, YSURF_CUR%DTZ, YSURF_CUR%I, &
+    CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
+                               YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
                                YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)                   
   ENDIF
   !
@@ -965,7 +948,7 @@ DO IENS = 1,ISIZE
 #endif
   ENDDO
   !
-  CALL FLAG_UPDATE(YSURF_CUR%DGI, YSURF_CUR%DGU,.FALSE.,.TRUE.,.FALSE.,.FALSE.)
+  CALL FLAG_UPDATE(YSURF_CUR%IM%DGI, YSURF_CUR%DGU,.FALSE.,.TRUE.,.FALSE.,.FALSE.)
   !
   IF (LRESTART_2M) THEN
     I2M       = 1
@@ -993,11 +976,11 @@ DO IENS = 1,ISIZE
   GPGD_TEB               = .FALSE.
   GSURF_MISC_BUDGET_TEB  = .FALSE.  
   !
-    CALL FLAG_DIAG_UPDATE(YSURF_CUR%CHF, YSURF_CUR%CHI, YSURF_CUR%CHS, YSURF_CUR%CHT, &
-                          YSURF_CUR%CHW, YSURF_CUR%DGEI, YSURF_CUR%DGF, YSURF_CUR%DGI, &
-                          YSURF_CUR%DGMF, YSURF_CUR%DGMI, YSURF_CUR%DGMTO, YSURF_CUR%DGO, &
-                          YSURF_CUR%DGS, YSURF_CUR%DGSI, YSURF_CUR%DGU, YSURF_CUR%DGT, &
-                          YSURF_CUR%DGW, YSURF_CUR%I, YSURF_CUR%U, &          
+    CALL FLAG_DIAG_UPDATE(YSURF_CUR%FM%CHF, YSURF_CUR%IM%CHI, YSURF_CUR%SM%CHS, YSURF_CUR%TM%CHT, &
+                          YSURF_CUR%WM%CHW, YSURF_CUR%IM%DGEI, YSURF_CUR%FM%DGF, YSURF_CUR%IM%DGI, &
+                          YSURF_CUR%FM%DGMF, YSURF_CUR%IM%DGMI, YSURF_CUR%TM%DGMTO, YSURF_CUR%SM%DGO, &
+                          YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGSI, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, &
+                          YSURF_CUR%WM%DGW, YSURF_CUR%IM%I, YSURF_CUR%U, &          
                         GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                         GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
                         GWATER_PROFILE,                                            &
@@ -1033,8 +1016,8 @@ DO IENS = 1,ISIZE
 #endif
   !  
   IF (CSURF_FILETYPE=="NC    ") THEN
-    CALL INIT_OUTPUT_NC_n (YSURF_CUR%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                         YSURF_CUR%DTS, YSURF_CUR%DTT, YSURF_CUR%DTZ, YSURF_CUR%I, &
+    CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
+                         YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
                          YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)
   ENDIF
   !  
@@ -1048,7 +1031,7 @@ DO IENS = 1,ISIZE
     ! Store results from assimilation
     CALL WRITE_SURF_ATM_n(YSURF_CUR, &
                         CSURF_FILETYPE,'ALL',LLAND_USE)
-    IF (YSURF_CUR%DGU%LREAD_BUDGETC.AND..NOT.YSURF_CUR%DGEI%LRESET_BUDGETC) THEN
+    IF (YSURF_CUR%DGU%LREAD_BUDGETC.AND..NOT.YSURF_CUR%IM%DGEI%LRESET_BUDGETC) THEN
       CALL WRITE_DIAG_SURF_ATM_n(YSURF_CUR, &
                              CSURF_FILETYPE,'ALL')
     ENDIF

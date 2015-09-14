@@ -94,8 +94,7 @@ ENDIF
 ! SEA Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_SEA>0) CALL PREP_SEA(YSC%IOB, &
-   YSC%DTCO, YSC%DTS, YSC%O, YSC%OR, YSC%SG, YSC%S, YSC%SSB, YSC%UG, YSC%U, &
+IF(YSC%U%NDIM_SEA>0) CALL PREP_SEA(YSC%DTCO, YSC%IOB, YSC%UG, YSC%U, YSC%SM,  &
    HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -103,25 +102,23 @@ IF(YSC%U%NDIM_SEA>0) CALL PREP_SEA(YSC%IOB, &
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF(YSC%U%NDIM_WATER>0) CALL PREP_INLAND_WATER(YSC%DTCO, YSC%IOB, YSC%USS, &
-   YSC%FG, YSC%F, YSC%FSB, YSC%UG, YSC%U, YSC%WG, YSC%W, YSC%WSB, &
+                                    YSC%UG, YSC%U, YSC%FM, YSC%WM, &
    HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_NATURE>0) CALL PREP_NATURE(YSC%DTCO, YSC%IOB, YSC%ICP, YSC%IG, &
-               YSC%I, YSC%UG, YSC%U, YSC%USS, &
-   HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(YSC%U%NDIM_NATURE>0) CALL PREP_NATURE(YSC%DTCO, YSC%IOB, YSC%IM%ICP, YSC%IM%IG, &
+                                          YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
+                                    HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DGCT, YSC%DGMT, YSC%B, YSC%BOP, YSC%DTCO, YSC%IOB, YSC%IG, &
-                      YSC%I, YSC%UG, YSC%U, YSC%USS, YSC%TCP, YSC%TGD, &
-                      YSC%TGDO, YSC%TGDPE, YSC%TGDP, YSC%TGR, YSC%TGRO, YSC%TGRPE, &
-                      YSC%TGRP, YSC%TG, YSC%T, YSC%TOP, YSC%TVG, &
+IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DTCO, YSC%IOB, YSC%UG, YSC%U, YSC%USS, &
+                      YSC%IM%IG, YSC%IM%I, YSC%TM, YSC%GDM, YSC%GRM, &
                       HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
  CALL CLEAR_GRIB_INDEX

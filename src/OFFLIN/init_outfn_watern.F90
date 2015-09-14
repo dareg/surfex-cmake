@@ -224,7 +224,7 @@ IF (DGW%LSURF_BUDGET)  THEN
                       IFILE_ID,'SUBL_WAT'   ,'Averaged_Sublimation_of_ice'               ,IDDIM,YATT_TITLE,YATT)  
 ENDIF
 !
-IF (CHW%NBEQ>0 .AND. CHW%CCH_DRY_DEP=="WES89 ") THEN
+IF (CHW%SVW%NBEQ>0 .AND. CHW%CCH_DRY_DEP=="WES89 ") THEN
   !
   YATT="(m/s)"
   !

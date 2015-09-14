@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE CH_INIT_DEP_ISBA_n (CHI, DTCO, I, &
-                                     KCH,KLUOUT,HSV,KLU)
+                                     KCH,KLUOUT,KLU)
 !!    ##################################################
 !!
 !!*** *CH_INIT_DEP_ISBA_n*
@@ -8,7 +8,7 @@
 !!    PURPOSE
 !!    -------
 !        The purpose of this subroutine is to calculate the surface flux
-!     (emission or deposition) for the chemical (=scalar) variables
+!     (emission or deposition) for the chemical (=scalar) variable
 !!
 !!**  METHOD
 !!    ------
@@ -91,7 +91,6 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,                         INTENT(IN)  :: KCH      ! chemistry input file
 INTEGER,                         INTENT(IN)  :: KLUOUT   ! output listing channel
- CHARACTER(LEN=6), DIMENSION(:),  INTENT(IN)  :: HSV      ! name of chemical species
 INTEGER,                         INTENT(IN)  :: KLU      ! number of points
 !
 !*      0.2    declarations of local variables
@@ -140,7 +139,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     !
     !*       3.    read surface resistance SURF_RES
     !
-    ALLOCATE(CHI%XDEP(KLU,CHI%NBEQ,I%NPATCH))
+    ALLOCATE(CHI%XDEP(KLU,CHI%SVI%NBEQ,I%NPATCH))
     !
 !$OMP SINGLE
     ! open input file

@@ -1,6 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEA_n (CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGSI, DGW, DST, F, O, OR, SG, SLT, W, &
-                            DGL, DGS, S, SSB, U, &
+SUBROUTINE COUPLING_SEA_n (SM, DGL, U, DST, SLT, &
                            HPROGRAM, HCOUPLING, PTIMEC,                                       &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM,PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,           &
@@ -35,33 +34,14 @@ SUBROUTINE COUPLING_SEA_n (CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGSI, DGW, DST, F
 !!-----------------------------------------------------------------------
 !
 !
-!
-!
-!
-!
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
-USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
-USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
-USE MODD_DST_n, ONLY : DST_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
-USE MODD_SLT_n, ONLY : SLT_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_SLT_n, ONLY : SLT_t
 !
+
 USE MODD_CSTS,       ONLY : XTT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -76,29 +56,11 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
-TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
-TYPE(SLT_t), INTENT(INOUT) :: SLT
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-!
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -176,8 +138,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SEA_N',0,ZHOOK_HANDLE)
 IF (U%CSEA=='SEAFLX') THEN
-  CALL COUPLING_SEAFLUX_OROG_n(CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGSI, DGW, DST, F, O, OR, SG, SLT, W, &
-                               DGS, S, SSB, &
+  CALL COUPLING_SEAFLUX_OROG_n(SM, DST, SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC,                                  &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &
@@ -188,7 +149,7 @@ IF (U%CSEA=='SEAFLX') THEN
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+                 HTEST                                                                        )  
 ELSE IF (U%CSEA=='FLUX  ') THEN
   CALL COUPLING_IDEAL_FLUX(DGL, &
                            HPROGRAM, HCOUPLING, PTIMEC,                                      &
@@ -201,7 +162,7 @@ ELSE IF (U%CSEA=='FLUX  ') THEN
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+                 HTEST                                                                        )  
 ELSE IF (U%CSEA=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.

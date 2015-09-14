@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_FLAKE (DTCO, IOB, USS, &
-                        FG, F, FSB, UG, U, &
+SUBROUTINE PREP_FLAKE (DTCO, IOB, USS, FM, UG, U, &
                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -31,17 +30,12 @@ SUBROUTINE PREP_FLAKE (DTCO, IOB, USS, &
 !
 !
 !
-!
-!
-!
+USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
-USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -80,9 +74,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
-TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
+TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -106,7 +98,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_FLAKE',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
  CALL PREP_OUTPUT_GRID(UG, U, &
-                       ILUOUT,FG%CGRID,FG%XGRID_PAR,FG%XLAT,FG%XLON)
+                       ILUOUT,FM%FG%CGRID,FM%FG%XGRID_PAR,FM%FG%XLAT,FM%FG%XLON)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -116,7 +108,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_FLAKE',0,ZHOOK_HANDLE)
 !*      2.0    Large scale orography
 !
  CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1    FLake variables
@@ -126,58 +118,58 @@ GNOVALUE = .FALSE.
 IF (.NOT.LCLIM_LAKE) THEN
   !
   CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'TS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
   IF (GNOVALUE) CALL ABOR1_SFX('PREP_FLAKE: AT LEAST TS SHOULD BE GIVEN!')
   !
   CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'T_SNOW ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'T_ICE  ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'T_WML  ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
-  ALLOCATE(F%XT_MNW(SIZE(FG%XLAT)))
+  ALLOCATE(FM%F%XT_MNW(SIZE(FM%FG%XLAT)))
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'T_BOT  ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'T_B1   ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'CT     ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'H_SNOW ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'H_ICE  ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'H_ML   ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
   IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, IOB, UG, U, USS, &
-                           FG, F, &
+                           FM%FG, FM%F, &
                            HPROGRAM,'H_B1   ',HATMFILE,HATMFILETYPE,&
         HPGDFILE,HPGDFILETYPE,GNOVALUE)
   !
@@ -185,31 +177,31 @@ ENDIF
 !
 IF (LCLIM_LAKE .OR. GNOVALUE) THEN
   IF (LCLIM_LAKE) THEN
-    ALLOCATE(F%XTS(SIZE(FG%XLAT)))
-    F%XTS(:)=XUNDEF
+    ALLOCATE(FM%F%XTS(SIZE(FM%FG%XLAT)))
+    FM%F%XTS(:)=XUNDEF
   ENDIF
-  ALLOCATE(F%XT_SNOW(SIZE(FG%XLAT))) 
-  ALLOCATE(F%XT_ICE(SIZE(FG%XLAT)))  
-  ALLOCATE(F%XT_WML(SIZE(FG%XLAT)))
-  ALLOCATE(F%XT_MNW(SIZE(FG%XLAT))) 
-  ALLOCATE(F%XT_BOT(SIZE(FG%XLAT)))  
-  ALLOCATE(F%XT_B1(SIZE(FG%XLAT)))
-  ALLOCATE(F%XCT(SIZE(FG%XLAT)))  
-  ALLOCATE(F%XH_SNOW(SIZE(FG%XLAT)))  
-  ALLOCATE(F%XH_ICE(SIZE(FG%XLAT)))
-  ALLOCATE(F%XH_ML(SIZE(FG%XLAT)))
-  ALLOCATE(F%XH_B1(SIZE(FG%XLAT)))  
-  F%XT_SNOW(:)=XUNDEF
-  F%XT_ICE(:)=XUNDEF
-  F%XT_WML(:)=XUNDEF
-  F%XT_MNW(:)=XUNDEF
-  F%XT_BOT(:)=XUNDEF
-  F%XT_B1(:)=XUNDEF
-  F%XCT(:)=XUNDEF
-  F%XH_SNOW(:)=XUNDEF
-  F%XH_ICE(:)=XUNDEF
-  F%XH_ML(:)=XUNDEF
-  F%XH_B1(:)=XUNDEF
+  ALLOCATE(FM%F%XT_SNOW(SIZE(FM%FG%XLAT))) 
+  ALLOCATE(FM%F%XT_ICE(SIZE(FM%FG%XLAT)))  
+  ALLOCATE(FM%F%XT_WML(SIZE(FM%FG%XLAT)))
+  ALLOCATE(FM%F%XT_MNW(SIZE(FM%FG%XLAT))) 
+  ALLOCATE(FM%F%XT_BOT(SIZE(FM%FG%XLAT)))  
+  ALLOCATE(FM%F%XT_B1(SIZE(FM%FG%XLAT)))
+  ALLOCATE(FM%F%XCT(SIZE(FM%FG%XLAT)))  
+  ALLOCATE(FM%F%XH_SNOW(SIZE(FM%FG%XLAT)))  
+  ALLOCATE(FM%F%XH_ICE(SIZE(FM%FG%XLAT)))
+  ALLOCATE(FM%F%XH_ML(SIZE(FM%FG%XLAT)))
+  ALLOCATE(FM%F%XH_B1(SIZE(FM%FG%XLAT)))  
+  FM%F%XT_SNOW(:)=XUNDEF
+  FM%F%XT_ICE(:)=XUNDEF
+  FM%F%XT_WML(:)=XUNDEF
+  FM%F%XT_MNW(:)=XUNDEF
+  FM%F%XT_BOT(:)=XUNDEF
+  FM%F%XT_B1(:)=XUNDEF
+  FM%F%XCT(:)=XUNDEF
+  FM%F%XH_SNOW(:)=XUNDEF
+  FM%F%XH_ICE(:)=XUNDEF
+  FM%F%XH_ML(:)=XUNDEF
+  FM%F%XH_B1(:)=XUNDEF
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -218,13 +210,13 @@ ENDIF
 !
 !*      2.2    Roughness
 !
-ALLOCATE(F%XZ0(SIZE(F%XTS)))
-F%XZ0 = 0.001
+ALLOCATE(FM%F%XZ0(SIZE(FM%F%XTS)))
+FM%F%XZ0 = 0.001
 !
 !*      2.2    Friction velocity
 !
-ALLOCATE(F%XUSTAR(SIZE(F%XTS)))
-F%XUSTAR = 0.
+ALLOCATE(FM%F%XUSTAR(SIZE(FM%F%XTS)))
+FM%F%XUSTAR = 0.
 !
 !-------------------------------------------------------------------------------------
 
@@ -233,7 +225,7 @@ F%XUSTAR = 0.
 !
 IF(.NOT.LCLIM_LAKE) THEN
   IF (LVERTSHIFT)THEN    
-    CALL PREP_VER_FLAKE(F)
+    CALL PREP_VER_FLAKE(FM%F)
     WRITE(ILUOUT,*) "WARNING: You want the vertical shift for lakes?"
     WRITE(ILUOUT,*) "WARNING: Vertical shift for the lake temperature profile is impossible!"
     WRITE(ILUOUT,*) "WARNING: So, set the default vertical profiles from the shifted surface temperature."    !
@@ -248,29 +240,29 @@ DEALLOCATE(XZS_LS)
 !              or read data from climate files 
 !
 IF (LCLIM_LAKE) THEN
- CALL CLI_LAKE(FG, F)
+ CALL CLI_LAKE(FM%FG, FM%F)
 ELSEIF (.NOT.GNOVALUE) THEN
-  F%XT_MNW(:)=F%XT_WML(:)-(F%XT_WML(:)-F%XT_BOT(:))*(1.-F%XH_ML(:)/F%XWATER_DEPTH(:))*F%XCT(:)
+  FM%F%XT_MNW(:)=FM%F%XT_WML(:)-(FM%F%XT_WML(:)-FM%F%XT_BOT(:))*(1.-FM%F%XH_ML(:)/FM%F%XWATER_DEPTH(:))*FM%F%XCT(:)
 ELSE
   WRITE(ILUOUT,*) "WARNING! One of the lake profile variales was not indicated, so set the default profile!"
-  F%XT_WML=MAX(F%XTS(:),XTT)  
-  F%XT_SNOW=MIN(F%XTS(:),XTT)
-  F%XT_ICE=MIN(F%XTS(:),XTT)
-  F%XH_B1=0.0 
-  F%XCT=0.5   
-  F%XH_SNOW=0.0   
-  WHERE (F%XTS <= XTT)
-   F%XT_BOT=XTT+4.
-   F%XT_B1=XTT+3.9
-   F%XH_ICE=0.01
-   F%XH_ML=F%XWATER_DEPTH/2.
-   F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
+  FM%F%XT_WML=MAX(FM%F%XTS(:),XTT)  
+  FM%F%XT_SNOW=MIN(FM%F%XTS(:),XTT)
+  FM%F%XT_ICE=MIN(FM%F%XTS(:),XTT)
+  FM%F%XH_B1=0.0 
+  FM%F%XCT=0.5   
+  FM%F%XH_SNOW=0.0   
+  WHERE (FM%F%XTS <= XTT)
+   FM%F%XT_BOT=XTT+4.
+   FM%F%XT_B1=XTT+3.9
+   FM%F%XH_ICE=0.01
+   FM%F%XH_ML=FM%F%XWATER_DEPTH/2.
+   FM%F%XT_MNW=FM%F%XT_WML-(FM%F%XT_WML-FM%F%XT_BOT)*(1.-FM%F%XH_ML/FM%F%XWATER_DEPTH)*FM%F%XCT
   ELSEWHERE
-   F%XT_BOT=F%XTS
-   F%XT_B1=F%XTS-0.1
-   F%XH_ICE=0.0
-   F%XH_ML=F%XWATER_DEPTH
-   F%XT_MNW=F%XTS 
+   FM%F%XT_BOT=FM%F%XTS
+   FM%F%XT_B1=FM%F%XTS-0.1
+   FM%F%XH_ICE=0.0
+   FM%F%XH_ML=FM%F%XWATER_DEPTH
+   FM%F%XT_MNW=FM%F%XTS 
   END WHERE
 END IF
 !
@@ -278,8 +270,8 @@ END IF
 !
 !*      6.     Preparation of SBL air variables
 !
-F%LSBL = LWAT_SBL
-IF (F%LSBL) CALL PREP_FLAKE_SBL(FG, FSB)
+FM%F%LSBL = LWAT_SBL
+IF (FM%F%LSBL) CALL PREP_FLAKE_SBL(FM%FG, FM%FSB)
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

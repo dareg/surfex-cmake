@@ -166,31 +166,31 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, 
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%DTI, YSC%DTZ, YSC%DGU, YSC%IOB, YSC%IG, &
-                                         YSC%I, YSC%UG, YSC%U, YSC%USS, &
+IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%IM%DTI, YSC%DTZ, YSC%DGU, YSC%IOB, YSC%IM%IG, &
+                                         YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
                                          HPROGRAM,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
-IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%BDD, YSC%BOP, YSC%DTB, YSC%DTCO, YSC%DTI, YSC%DTGD, YSC%DTGR, &
-                                YSC%DTT, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, YSC%USS, YSC%TGDO, &
-                                YSC%TGDP, YSC%TGRO, YSC%TGRP, YSC%TG, YSC%TIR,YSC%T, YSC%TOP, YSC%TVG, &
+IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%DTCO, YSC%DGU, YSC%IOB ,YSC%UG, YSC%U, YSC%USS, &
+                                     YSC%IM%DTI, YSC%TM, YSC%GDM, YSC%GRM, &
                                  HPROGRAM,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
 !             ------------------------------------------
 !
-IF (YSC%U%NDIM_WATER>0) CALL PGD_INLAND_WATER(YSC%DTCO, YSC%FG, YSC%F, YSC%UG, YSC%U, YSC%USS, YSC%WG, YSC%W, &
+IF (YSC%U%NDIM_WATER>0) CALL PGD_INLAND_WATER(YSC%DTCO, YSC%FM%FG, YSC%FM%F, YSC%UG, YSC%U, &
+                                           YSC%USS, YSC%WM%WG, YSC%WM%W, &
                                           HPROGRAM,YSC%U%LECOCLIMAP,LRM_RIVER)   
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme
 !             ---------------------------------
 !
-IF (YSC%U%NDIM_SEA>0) CALL PGD_SEA(YSC%DTCO, YSC%DTS, YSC%SG, YSC%S, YSC%UG, YSC%U, YSC%USS, &
+IF (YSC%U%NDIM_SEA>0) CALL PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%SG, YSC%SM%S, YSC%UG, YSC%U, YSC%USS, &
                                HPROGRAM)  
 !
 !_______________________________________________________________________________

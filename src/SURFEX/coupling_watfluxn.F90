@@ -1,8 +1,8 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_WATFLUX_n (CHW, DGW, DST, SLT, W, &
+SUBROUTINE COUPLING_WATFLUX_n (WM, DST, SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC,                                   &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
+                 PAZIM, PZREF, PUREF, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
@@ -42,8 +42,7 @@ SUBROUTINE COUPLING_WATFLUX_n (CHW, DGW, DST, SLT, W, &
 !
 !
 !
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -81,11 +80,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -125,7 +122,6 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizonta
 !                                             !                                       (W/m2)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
-REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
@@ -242,15 +238,15 @@ ZQA(:) = PQA(:) / PRHOA(:)
 ! Time evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-W%TTIME%TIME = W%TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TDATE%DAY,W%TTIME%TIME)
+WM%W%TTIME%TIME = WM%W%TTIME%TIME + PTSTEP
+CALL ADD_FORECAST_TO_DATE_SURF(WM%W%TTIME%TDATE%YEAR,WM%W%TTIME%TDATE%MONTH,WM%W%TTIME%TDATE%DAY,WM%W%TTIME%TIME)
 !
 !--------------------------------------------------------------------------------------
 ! Fluxes over water according to Charnock formulae
 !--------------------------------------------------------------------------------------
 !
 !
-CALL WATER_FLUX(W%XZ0, PTA, ZEXNA, PRHOA, W%XTS, ZEXNS, ZQA, PRAIN,    &
+CALL WATER_FLUX(WM%W%XZ0, PTA, ZEXNA, PRHOA, WM%W%XTS, ZEXNS, ZQA, PRAIN,    &
                 PSNOW, XTT, ZWIND, PZREF, PUREF, PPS, GHANDLE_SIC, &
                 ZQSAT, PSFTH, PSFTQ, ZUSTAR, ZCD, ZCDN, ZCH, ZRI,  &
                 ZRESA_WATER, ZZ0H                                  )  
@@ -262,12 +258,12 @@ CALL WATER_FLUX(W%XZ0, PTA, ZEXNA, PRHOA, W%XTS, ZEXNS, ZQA, PRAIN,    &
 ISWB = SIZE(PSW_BANDS)
 !
 DO JSWB=1,ISWB
-     ZDIR_ALB(:,JSWB) = W%XDIR_ALB(:)
-     ZSCA_ALB(:,JSWB) = W%XSCA_ALB(:)
+     ZDIR_ALB(:,JSWB) = WM%W%XDIR_ALB(:)
+     ZSCA_ALB(:,JSWB) = WM%W%XSCA_ALB(:)
 END DO
 !
-ZEMIS  = W%XEMIS
-ZTRAD  = W%XTS
+ZEMIS  = WM%W%XEMIS
+ZTRAD  = WM%W%XTS
 !
 !-------------------------------------------------------------------------------------
 !Specific fields for GELATO when using earth system model 
@@ -275,9 +271,9 @@ ZTRAD  = W%XTS
 !-------------------------------------------------------------------------------------
 !
 IF(LCPL_SEAICE)THEN   
-  CALL COUPLING_ICEFLUX_n(KI, PTA, ZEXNA, PRHOA, W%XTICE, ZEXNS,      &
+  CALL COUPLING_ICEFLUX_n(KI, PTA, ZEXNA, PRHOA, WM%W%XTICE, ZEXNS,      &
                             ZQA, PRAIN, PSNOW, ZWIND, PZREF, PUREF, &
-                            PPS, W%XTS, XTT, ZSFTH_ICE, ZSFTQ_ICE     )  
+                            PPS, WM%W%XTS, XTT, ZSFTH_ICE, ZSFTQ_ICE     )  
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -285,36 +281,36 @@ ENDIF
 !-------------------------------------------------------------------------------------
 !
 !
-IF (CHW%NBEQ>0) THEN
-  IF (CHW%CCH_DRY_DEP == "WES89") THEN
+IF (WM%CHW%SVW%NBEQ>0) THEN
+  IF (WM%CHW%CCH_DRY_DEP == "WES89") THEN
     CALL CH_DEP_WATER  (ZRESA_WATER, ZUSTAR, PTA, ZTRAD,      &
-                          PSV(:,CHW%NSV_CHSBEG:CHW%NSV_CHSEND),       &
-                          CHW%CSV(CHW%NSV_CHSBEG:CHW%NSV_CHSEND),         &
-                          CHW%XDEP(:,1:CHW%NBEQ) )  
+                          PSV(:,WM%CHW%SVW%NSV_CHSBEG:WM%CHW%SVW%NSV_CHSEND),       &
+                          WM%CHW%SVW%CSV(WM%CHW%SVW%NSV_CHSBEG:WM%CHW%SVW%NSV_CHSEND),         &
+                          WM%CHW%XDEP(:,1:WM%CHW%SVW%NBEQ) )  
 
-   PSFTS(:,CHW%NSV_CHSBEG:CHW%NSV_CHSEND) = - PSV(:,CHW%NSV_CHSBEG:CHW%NSV_CHSEND)  &
-                                               * CHW%XDEP(:,1:CHW%NBEQ)  
-     IF (CHW%NAEREQ > 0 ) THEN
-        CALL CH_AER_DEP(PSV(:,CHW%NSV_AERBEG:CHW%NSV_AEREND),&
-                          PSFTS(:,CHW%NSV_AERBEG:CHW%NSV_AEREND),&
+   PSFTS(:,WM%CHW%SVW%NSV_CHSBEG:WM%CHW%SVW%NSV_CHSEND) = - PSV(:,WM%CHW%SVW%NSV_CHSBEG:WM%CHW%SVW%NSV_CHSEND)  &
+                                               * WM%CHW%XDEP(:,1:WM%CHW%SVW%NBEQ)  
+     IF (WM%CHW%SVW%NAEREQ > 0 ) THEN
+        CALL CH_AER_DEP(PSV(:,WM%CHW%SVW%NSV_AERBEG:WM%CHW%SVW%NSV_AEREND),&
+                          PSFTS(:,WM%CHW%SVW%NSV_AERBEG:WM%CHW%SVW%NSV_AEREND),&
                           ZUSTAR,ZRESA_WATER,PTA,PRHOA)     
       END IF
 
   ELSE
-    PSFTS(:,CHW%NSV_CHSBEG:CHW%NSV_CHSEND) =0.
-    IF(CHW%NSV_AERBEG.LT.CHW%NSV_AEREND) PSFTS(:,CHW%NSV_AERBEG:CHW%NSV_AEREND) =0.
+    PSFTS(:,WM%CHW%SVW%NSV_CHSBEG:WM%CHW%SVW%NSV_CHSEND) =0.
+    IF(WM%CHW%SVW%NSV_AERBEG.LT.WM%CHW%SVW%NSV_AEREND) PSFTS(:,WM%CHW%SVW%NSV_AERBEG:WM%CHW%SVW%NSV_AEREND) =0.
   ENDIF
 ENDIF
 !
-IF (CHW%NDSTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,CHW%NSV_DSTBEG:CHW%NSV_DSTEND), PSFTS(:,CHW%NSV_DSTBEG:CHW%NSV_DSTEND),   &
+IF (WM%CHW%SVW%NDSTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,WM%CHW%SVW%NSV_DSTBEG:WM%CHW%SVW%NSV_DSTEND), PSFTS(:,WM%CHW%SVW%NSV_DSTBEG:WM%CHW%SVW%NSV_DSTEND),   &
                 ZUSTAR, ZRESA_WATER, PTA, PRHOA, DST%XEMISSIG_DST, DST%XEMISRADIUS_DST, &
                 JPMODE_DST, XDENSITY_DST, XMOLARWEIGHT_DST, ZCONVERTFACM0_DST,  &
                 ZCONVERTFACM6_DST, ZCONVERTFACM3_DST, LVARSIG_DST, LRGFIX_DST,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,CHW%NSV_DSTBEG:CHW%NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,WM%CHW%SVW%NSV_DSTBEG:WM%CHW%SVW%NSV_DSTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
     DST%XEMISRADIUS_DST,                &!I [um] emitted radius for the modes (max 3)
     DST%XEMISSIG_DST,                   &!I [-] emitted sigma for the different modes (max 3)
@@ -325,15 +321,15 @@ IF (CHW%NDSTEQ>0) THEN
     LVARSIG_DST, LRGFIX_DST         )  
 ENDIF
 !
-IF (CHW%NSLTEQ>0) THEN
-  CALL DSLT_DEP(PSV(:,CHW%NSV_SLTBEG:CHW%NSV_SLTEND), PSFTS(:,CHW%NSV_SLTBEG:CHW%NSV_SLTEND),   &
+IF (WM%CHW%SVW%NSLTEQ>0) THEN
+  CALL DSLT_DEP(PSV(:,WM%CHW%SVW%NSV_SLTBEG:WM%CHW%SVW%NSV_SLTEND), PSFTS(:,WM%CHW%SVW%NSV_SLTBEG:WM%CHW%SVW%NSV_SLTEND),   &
                 ZUSTAR, ZRESA_WATER, PTA, PRHOA, SLT%XEMISSIG_SLT, SLT%XEMISRADIUS_SLT, &
                 JPMODE_SLT, XDENSITY_SLT, XMOLARWEIGHT_SLT, ZCONVERTFACM0_SLT,  &
                 ZCONVERTFACM6_SLT, ZCONVERTFACM3_SLT, LVARSIG_SLT, LRGFIX_SLT,  &
                 CVERMOD  )  
 
   CALL MASSFLUX2MOMENTFLUX(         &
-    PSFTS(:,CHW%NSV_SLTBEG:CHW%NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
+    PSFTS(:,WM%CHW%SVW%NSV_SLTBEG:WM%CHW%SVW%NSV_SLTEND), & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     PRHOA,                          & !I [kg/m3] air density
     SLT%XEMISRADIUS_SLT,                &!I [um] emitted radius for the modes (max 3)
     SLT%XEMISSIG_SLT,                   &!I [-] emitted sigma for the different modes (max 3)
@@ -383,20 +379,20 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 ! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_INLINE_WATFLUX_n(DGW, W, &
-                            PTSTEP,PTA, W%XTS, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
-                             PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, W%XZ0, ZZ0H, ZQSAT,     &
+ CALL DIAG_INLINE_WATFLUX_n(WM%DGW, WM%W, &
+                            PTSTEP,PTA, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
+                             PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, ZZ0H, ZQSAT,     &
                              PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,       &
                              ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD, PRAIN, PSNOW,        &
-                             W%XTICE, ZSFTH_ICE, ZSFTQ_ICE                            )
+                             ZSFTH_ICE, ZSFTQ_ICE                            )
 !
 !-------------------------------------------------------------------------------
 ! IMPOSED MONTHLY TS AT TIME t+1
 !-------------------------------------------------------------------------------
 !  
-IF (W%LINTERPOL_TS.AND.MOD(W%TTIME%TIME,XDAY) == 0.) THEN
-   CALL INTERPOL_TS_WATER_MTH(W, &
-                              W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TDATE%DAY,W%XTS)
+IF (WM%W%LINTERPOL_TS.AND.MOD(WM%W%TTIME%TIME,XDAY) == 0.) THEN
+   CALL INTERPOL_TS_WATER_MTH(WM%W, &
+                              WM%W%TTIME%TDATE%YEAR,WM%W%TTIME%TDATE%MONTH,WM%W%TTIME%TDATE%DAY,WM%W%XTS)
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -405,8 +401,8 @@ ENDIF
 !difficult to do. Maybe it will be done later. However, Ts can be at time t+1
 !-------------------------------------------------------------------------------
 !
-PTSURF (:) = W%XTS  (:)
-PZ0    (:) = W%XZ0  (:)
+PTSURF (:) = WM%W%XTS  (:)
+PZ0    (:) = WM%W%XZ0  (:)
 PZ0H   (:) = ZZ0H (:)
 PQSURF (:) = ZQSAT(:)
 !
@@ -415,8 +411,8 @@ PQSURF (:) = ZQSAT(:)
 !the energy budget between surfex and the atmosphere
 !-------------------------------------------------------------------------------------
 !
- CALL UPDATE_RAD_WATER(W%CWAT_ALB,W%XTS,PZENITH2,XTT,W%XEMIS,W%XDIR_ALB, &
-                       W%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTRAD    )  
+ CALL UPDATE_RAD_WATER(WM%W%CWAT_ALB,WM%W%XTS,PZENITH2,XTT,WM%W%XEMIS,WM%W%XDIR_ALB, &
+                       WM%W%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTRAD    )  
 !
 !=======================================================================================
 !

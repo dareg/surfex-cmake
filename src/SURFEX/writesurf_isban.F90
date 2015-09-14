@@ -443,7 +443,7 @@ IF (I%CRESPSL=='CNT') THEN
 ENDIF
 !
 !
-IF (CHI%NDSTEQ > 0)THEN
+IF (CHI%SVI%NDSTEQ > 0)THEN
   DO JSV = 1,NDSTMDE ! for all dust modes
     WRITE(YRECFM,'(A8,I3.3)')'FLX_DSTM',JSV
     YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'

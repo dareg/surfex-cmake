@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX (IOB, &
-                          DTCO, DTS, O, OR, SG, S, SSB, UG, U, &
+SUBROUTINE PREP_SEAFLUX (IOB, DTCO, UG, U, SM, &
                          HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -30,22 +29,11 @@ SUBROUTINE PREP_SEAFLUX (IOB, &
 !!------------------------------------------------------------------
 !
 !
-!
-!
-!
-!
-!
-!
+USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -73,17 +61,12 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
+TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -108,24 +91,24 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
  CALL PREP_OUTPUT_GRID(UG, U, &
-                       ILUOUT,SG%CGRID,SG%XGRID_PAR,SG%XLAT,SG%XLON)
+                       ILUOUT,SM%SG%CGRID,SM%SG%XGRID_PAR,SM%SG%XLAT,SM%SG%XLON)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.     Read namelist
 !
-S%LSBL = LSEA_SBL
-O%LMERCATOR = LOCEAN_MERCATOR
-O%LCURRENT  = LOCEAN_CURRENT
+SM%S%LSBL = LSEA_SBL
+SM%O%LMERCATOR = LOCEAN_MERCATOR
+SM%O%LCURRENT  = LOCEAN_CURRENT
 ! Relaxation-forcing parameters
-OR%XTAU_REL   = XTIME_REL
-OR%XQCORR     = XCORFLX
+SM%OR%XTAU_REL   = XTIME_REL
+SM%OR%XQCORR     = XCORFLX
 !
-OR%LREL_CUR   = LCUR_REL
-OR%LREL_TS    = LTS_REL
-OR%LFLUX_NULL = LZERO_FLUX
-OR%LFLX_CORR  = LCORR_FLUX
-OR%LDIAPYCNAL = LDIAPYC
+SM%OR%LREL_CUR   = LCUR_REL
+SM%OR%LREL_TS    = LTS_REL
+SM%OR%LFLUX_NULL = LZERO_FLUX
+SM%OR%LFLX_CORR  = LCORR_FLUX
+SM%OR%LDIAPYCNAL = LDIAPYC
 !
 !-------------------------------------------------------------------------------------
 !
@@ -135,46 +118,46 @@ OR%LDIAPYCNAL = LDIAPYC
 !*      2.0    Large scale orography
 !
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
-                            DTS, O, OR, SG, S, &
+                            SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.1    Temperature
 !
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
-                            DTS, O, OR, SG, S, &
+                            SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.2    Salinity
 !
 
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
-                            DTS, O, OR, SG, S, &
+                            SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.3   Sea-ice
 !
 IF (CSEAICE_SCHEME /= 'NONE  ') THEN 
    CALL PREP_SEAICE(IOB, UG, &
-                    DTCO, DTS, O, OR, SG, S, U, &
+                    DTCO, SM%DTS, SM%O, SM%OR, SM%SG, SM%S, U, &
                     HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
 !
 !*      2.2    Roughness
 !
-ALLOCATE(S%XZ0(SIZE(S%XSST)))
-S%XZ0 = 0.001
+ALLOCATE(SM%S%XZ0(SIZE(SM%S%XSST)))
+SM%S%XZ0 = 0.001
 !
-ALLOCATE(S%XZ0H(SIZE(S%XSST)))
-S%XZ0H = S%XZ0
+ALLOCATE(SM%S%XZ0H(SIZE(SM%S%XSST)))
+SM%S%XZ0H = SM%S%XZ0
 !
 !*      2.3   Ocean Surface Albedo
 !
-IF(S%CSEA_ALB=='RS14')THEN
-  ALLOCATE(S%XDIR_ALB(SIZE(S%XSST)))
-  ALLOCATE(S%XSCA_ALB(SIZE(S%XSST)))
-  S%XDIR_ALB = 0.065
-  S%XSCA_ALB = 0.065
+IF(SM%S%CSEA_ALB=='RS14')THEN
+  ALLOCATE(SM%S%XDIR_ALB(SIZE(SM%S%XSST)))
+  ALLOCATE(SM%S%XSCA_ALB(SIZE(SM%S%XSST)))
+  SM%S%XDIR_ALB = 0.065
+  SM%S%XSCA_ALB = 0.065
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -184,7 +167,7 @@ ENDIF
 !*      3.     Vertical interpolations of all variables
 !
 IF(LVERTSHIFT)THEN
-  CALL PREP_VER_SEAFLUX(S)
+  CALL PREP_VER_SEAFLUX(SM%S)
 ENDIF
 !
 DEALLOCATE(XZS_LS)
@@ -193,17 +176,17 @@ DEALLOCATE(XZS_LS)
 !
 !*      4.     Preparation of optional interpolation of monthly sst
 !
-S%LINTERPOL_SST=.FALSE.
-IF(TRIM(S%CINTERPOL_SST)/='NONE')THEN
+SM%S%LINTERPOL_SST=.FALSE.
+IF(TRIM(SM%S%CINTERPOL_SST)/='NONE')THEN
 !
-  S%LINTERPOL_SST=.TRUE.
+  SM%S%LINTERPOL_SST=.TRUE.
 !
 ! Precedent, Current, Next, and Second-next Monthly SST
   INMTH=4
 !
-  ALLOCATE(S%XSST_MTH(SIZE(S%XSST),INMTH))
+  ALLOCATE(SM%S%XSST_MTH(SIZE(SM%S%XSST),INMTH))
   DO JMTH=1,INMTH
-     S%XSST_MTH(:,JMTH)=S%XSST(:)
+     SM%S%XSST_MTH(:,JMTH)=SM%S%XSST(:)
   ENDDO
 !
 ENDIF
@@ -213,17 +196,17 @@ ENDIF
 !
 !*      5.     Optional preparation of interpolation of monthly Sea Surface salinity
 !
-S%LINTERPOL_SSS=.FALSE.
-IF(TRIM(S%CINTERPOL_SSS)/='NONE')THEN
+SM%S%LINTERPOL_SSS=.FALSE.
+IF(TRIM(SM%S%CINTERPOL_SSS)/='NONE')THEN
 !
-   S%LINTERPOL_SSS=.TRUE.
+   SM%S%LINTERPOL_SSS=.TRUE.
    !
    ! Precedent, Current, Next, and Second-next Monthly SSS
    INMTH=4
    !
-   ALLOCATE(S%XSSS_MTH(SIZE(S%XSSS),INMTH))
+   ALLOCATE(SM%S%XSSS_MTH(SIZE(SM%S%XSSS),INMTH))
    DO JMTH=1,INMTH
-      S%XSSS_MTH(:,JMTH)=S%XSSS(:)
+      SM%S%XSSS_MTH(:,JMTH)=SM%S%XSSS(:)
    ENDDO
    !
 ENDIF
@@ -233,7 +216,7 @@ ENDIF
 !*      6.     Preparation of SBL air variables
 !
 !
-IF (S%LSBL) CALL PREP_SEAFLUX_SBL(SG, SSB)
+IF (SM%S%LSBL) CALL PREP_SEAFLUX_SBL(SM%SG, SM%SSB)
 !
 !-------------------------------------------------------------------------------------
 !

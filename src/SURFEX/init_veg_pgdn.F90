@@ -10,10 +10,8 @@ SUBROUTINE INIT_VEG_PGD_n (CHI, DTCO, DST, I, SLT, U, &
                           PGMES, PGC, PDMAX, PANMAX, PFZERO, PEPSO, PGAMM, PQDGAMM,   &
                           PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,&
                           PAH, PBH, PTAU_WOOD, PINCREASE, PTURNOVER,                  &
-                          KSV, HSV, KBEQ, HSVO, KAEREQ, KSV_CHSBEG, KSV_CHSEND,       &
-                          KSV_AERBEG, KSV_AEREND, HCH_NAMES, HAER_NAMES, KDSTEQ,      &
-                          KSV_DSTBEG, KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
-                          HDSTNAMES, HSLTNAMES, HCHEM_SURF_FILE,                      &
+                          KSV, HSV, YSV, HCH_NAMES, HAER_NAMES, HDSTNAMES, HSLTNAMES, &
+                          HCHEM_SURF_FILE,                      &
                           PSFDST, PSFDSTM, PSFSLT,                                    &
                           PAOSIP, PAOSIM, PAOSJP, PAOSJM, PHO2IP, PHO2IM, PHO2JP,     &
                           PHO2JM, PZ0, PZ0EFFIP, PZ0EFFIM, PZ0EFFJP, PZ0EFFJM, PZ0REL,&
@@ -65,6 +63,7 @@ SUBROUTINE INIT_VEG_PGD_n (CHI, DTCO, DST, I, SLT, U, &
 !
 !
 !
+USE MODD_SV_n, ONLY : SV_t
 !
 !
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -180,21 +179,9 @@ REAL, DIMENSION(:,:,:), POINTER :: PTURNOVER
 !
 INTEGER,                          INTENT(IN) :: KSV      ! number of scalars
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
-INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
- CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
-INTEGER,                         INTENT(OUT) :: KAEREQ  ! number of aerosol variables
-INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
-INTEGER,                         INTENT(OUT) :: KSV_AEREND  ! last  aerosol var.
+TYPE(SV_t), INTENT(INOUT) :: YSV 
  CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
  CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
-INTEGER,                         INTENT(OUT) :: KDSTEQ     ! number of chemical variables
-INTEGER,                         INTENT(OUT) :: KSV_DSTBEG  ! first chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_DSTEND  ! last  chemical var.
-INTEGER,                         INTENT(OUT) :: KSLTEQ     ! number of chemical variables
-INTEGER,                         INTENT(OUT) :: KSV_SLTBEG  ! first chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_SLTEND  ! last  chemical var.
  CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
  CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
 !
@@ -471,29 +458,26 @@ END IF
     ! contains explicitely modules from ISBAn. It should be cleaned in a future
     ! version.
 IF (HSURF=='NATURE') THEN
- CALL INIT_CHEMICAL_n(KLUOUT, KSV, HSV, KBEQ, HSVO, KAEREQ,           &
-                     KSV_CHSBEG, KSV_CHSEND, KSV_AERBEG, KSV_AEREND, &
-                     HCH_NAMES, HAER_NAMES, KDSTEQ, KSV_DSTBEG,      &
-                     KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
+ CALL INIT_CHEMICAL_n(KLUOUT, KSV, HSV, YSV, HCH_NAMES, HAER_NAMES,  &
                      HDSTNAMES=HDSTNAMES, HSLTNAMES=HSLTNAMES        )
 END IF
 !
 IF (KSV /= 0) THEN
   !
-  IF (HSURF=='NATURE' .AND. KBEQ > 0) THEN
+  IF (HSURF=='NATURE' .AND. YSV%NBEQ > 0) THEN
     !* for the time being, chemistry deposition on vegetation works only for
     ! ISBA on nature tile (not for gardens), because subroutine CH_INIT_DEP_ISBA_n
     ! contains explicitely modules from ISBAn. It should be cleaned in a future
     ! version.
     CALL OPEN_NAMELIST(HPROGRAM, ICH, HFILE=HCHEM_SURF_FILE)
     CALL CH_INIT_DEP_ISBA_n(CHI, DTCO, I, &
-                            ICH, KLUOUT, HSVO, KI)
+                            ICH, KLUOUT, KI)
     CALL CLOSE_NAMELIST(HPROGRAM, ICH)
   END IF
   !
-  IF (KDSTEQ >=1) THEN
-    ALLOCATE (PSFDST (KI, KDSTEQ, KPATCH))  !Output array
-    ALLOCATE (PSFDSTM(KI, KDSTEQ, KPATCH))  !Output array
+  IF (YSV%NDSTEQ >=1) THEN
+    ALLOCATE (PSFDST (KI, YSV%NDSTEQ, KPATCH))  !Output array
+    ALLOCATE (PSFDSTM(KI, YSV%NDSTEQ, KPATCH))  !Output array
     PSFDST(:,:,:)  = 0.
     PSFDSTM(:,:,:) = 0.     
     CALL INIT_DST(DST, U, &
@@ -504,8 +488,8 @@ IF (KSV /= 0) THEN
     ALLOCATE(PSFDSTM(0,0,0))
   END IF
   !
-  IF (KSLTEQ >=1) THEN
-    ALLOCATE (PSFSLT(KI,KSLTEQ,KPATCH))  !Output array
+  IF (YSV%NSLTEQ >=1) THEN
+    ALLOCATE (PSFSLT(KI,YSV%NSLTEQ,KPATCH))  !Output array
     CALL INIT_SLT(SLT, &
                   HPROGRAM)   
   ELSE

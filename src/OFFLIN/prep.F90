@@ -225,14 +225,14 @@ CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF,'PRE')
 !             ------------------------------------------------
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_PREP(YSURF_CUR%I, YSURF_CUR%UG, YSURF_CUR%U, &
+  CALL SFX_OASIS_PREP(YSURF_CUR%IM%I, YSURF_CUR%UG, YSURF_CUR%U, &
                       CSURF_FILETYPE)
 ENDIF
 !
 !*    4.      Store of surface physiographic fields
 !             -------------------------------------
 !
-CALL FLAG_UPDATE(YSURF_CUR%DGI, YSURF_CUR%DGU, &
+CALL FLAG_UPDATE(YSURF_CUR%IM%DGI, YSURF_CUR%DGU, &
                  .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !* opens the file
@@ -252,8 +252,8 @@ END IF
 LDEF = .TRUE.
 !
 IF (CSURF_FILETYPE=="NC    ") THEN
-  CALL INIT_OUTPUT_NC_n (YSURF_CUR%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                         YSURF_CUR%DTS, YSURF_CUR%DTT, YSURF_CUR%DTZ, YSURF_CUR%I, &
+  CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
+                         YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
                          YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)
 ENDIF
 !

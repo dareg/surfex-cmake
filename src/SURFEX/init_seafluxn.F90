@@ -1,6 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_SEAFLUX_n (CHS, DTCO, DTS, DGO, DGS, DGSI, DGU, &
-                                 IOB, O, OR, SG, S, SSB, UG, U, &
+      SUBROUTINE INIT_SEAFLUX_n (DTCO, DGU, IOB, UG, U, SM, &
                                  HPROGRAM,HINIT,                            &
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
@@ -51,19 +50,11 @@
 !              ------------
 !
 !
-USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
+USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
-USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -116,21 +107,12 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
-TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
 CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -187,8 +169,8 @@ PEMIS    = XUNDEF
 PTSRAD   = XUNDEF
 PTSURF   = XUNDEF
 !
-O%LMERCATOR = .FALSE.
-O%LCURRENT  = .FALSE.
+SM%O%LMERCATOR = .FALSE.
+SM%O%LCURRENT  = .FALSE.
 !
 IF (LNAM_READ) THEN
  !
@@ -198,59 +180,61 @@ IF (LNAM_READ) THEN
  !        0.1. Hard defaults
  !      
  
- CALL DEFAULT_SEAFLUX(S%XTSTEP,S%XOUT_TSTEP,S%CSEA_ALB,S%CSEA_FLUX,S%LPWG, &
-                        S%LPRECIP,S%LPWEBB,S%NZ0,S%NGRVWAVES,O%LPROGSST,   &
-                        O%NTIME_COUPLING,S%XICHCE,S%CINTERPOL_SST,     &
-                        S%CINTERPOL_SSS                            )
+ CALL DEFAULT_SEAFLUX(SM%S%XTSTEP,SM%S%XOUT_TSTEP,SM%S%CSEA_ALB,SM%S%CSEA_FLUX,SM%S%LPWG, &
+                        SM%S%LPRECIP,SM%S%LPWEBB,SM%S%NZ0,SM%S%NGRVWAVES,SM%O%LPROGSST,   &
+                        SM%O%NTIME_COUPLING,SM%S%XICHCE,SM%S%CINTERPOL_SST,     &
+                        SM%S%CINTERPOL_SSS                            )
  CALL DEFAULT_SEAICE(HPROGRAM,                                   &
-                     S%CINTERPOL_SIC,S%CINTERPOL_SIT, S%XFREEZING_SST, &
-                     S%XSEAICE_TSTEP, S%XSIC_EFOLDING_TIME,          &
-                     S%XSIT_EFOLDING_TIME, S%XCD_ICE_CST, S%XSI_FLX_DRV)     
+                     SM%S%CINTERPOL_SIC,SM%S%CINTERPOL_SIT, SM%S%XFREEZING_SST, &
+                     SM%S%XSEAICE_TSTEP, SM%S%XSIC_EFOLDING_TIME,          &
+                     SM%S%XSIT_EFOLDING_TIME, SM%S%XCD_ICE_CST, SM%S%XSI_FLX_DRV)     
  !                     
- CALL DEFAULT_CH_DEP(CHS%CCH_DRY_DEP) 
+ CALL DEFAULT_CH_DEP(SM%CHS%CCH_DRY_DEP) 
  !            
- CALL DEFAULT_DIAG_SEAFLUX(DGS%N2M,DGS%LSURF_BUDGET,DGS%L2M_MIN_ZS,DGS%LRAD_BUDGET,DGS%LCOEF,DGS%LSURF_VARS,&
-                           DGO%LDIAG_OCEAN,DGSI%LDIAG_SEAICE,DGS%LSURF_BUDGETC,DGS%LRESET_BUDGETC,DGS%XDIAG_TSTEP )  
+ CALL DEFAULT_DIAG_SEAFLUX(SM%DGS%N2M,SM%DGS%LSURF_BUDGET,SM%DGS%L2M_MIN_ZS,&
+                        SM%DGS%LRAD_BUDGET,SM%DGS%LCOEF,SM%DGS%LSURF_VARS,&
+                           SM%DGO%LDIAG_OCEAN,SM%DGSI%LDIAG_SEAICE,SM%DGS%LSURF_BUDGETC,&
+                          SM%DGS%LRESET_BUDGETC,SM%DGS%XDIAG_TSTEP )  
 
 ENDIF
 !
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_SEAFLUX_n(CHS, DGO, DGS, DGSI, O, S, &
+ CALL READ_DEFAULT_SEAFLUX_n(SM%CHS, SM%DGO, SM%DGS, SM%DGSI, SM%O, SM%S, &
                              HPROGRAM)
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
- CALL READ_SEAFLUX_CONF_n(CHS, DGO, DGS, DGSI, O, S, &
+ CALL READ_SEAFLUX_CONF_n(SM%CHS, SM%DGO, SM%DGS, SM%DGSI, SM%O, SM%S, &
                           HPROGRAM)
 !
-S%LINTERPOL_SST=.FALSE.
-S%LINTERPOL_SSS=.FALSE.
-S%LINTERPOL_SIC=.FALSE.
-S%LINTERPOL_SIT=.FALSE.
+SM%S%LINTERPOL_SST=.FALSE.
+SM%S%LINTERPOL_SSS=.FALSE.
+SM%S%LINTERPOL_SIC=.FALSE.
+SM%S%LINTERPOL_SIT=.FALSE.
 IF(LCPL_SEA)THEN 
-  IF(DGS%N2M<1)THEN
+  IF(SM%DGS%N2M<1)THEN
      CALL ABOR1_SFX('INIT_SEAFLUX_n: N2M must be set >0 in case of LCPL_SEA')
   ENDIF
 ! No STT / SSS interpolation in Earth System Model
-  S%CINTERPOL_SST='NONE  '
-  S%CINTERPOL_SSS='NONE  '
-  S%CINTERPOL_SIC='NONE  '
-  S%CINTERPOL_SIT='NONE  '
+  SM%S%CINTERPOL_SST='NONE  '
+  SM%S%CINTERPOL_SSS='NONE  '
+  SM%S%CINTERPOL_SIC='NONE  '
+  SM%S%CINTERPOL_SIT='NONE  '
 ELSE
-   IF(TRIM(S%CINTERPOL_SST)/='NONE')THEN
-      S%LINTERPOL_SST=.TRUE.
+   IF(TRIM(SM%S%CINTERPOL_SST)/='NONE')THEN
+      SM%S%LINTERPOL_SST=.TRUE.
    ENDIF
-   IF(TRIM(S%CINTERPOL_SSS)/='NONE')THEN
-      S%LINTERPOL_SSS=.TRUE.
+   IF(TRIM(SM%S%CINTERPOL_SSS)/='NONE')THEN
+      SM%S%LINTERPOL_SSS=.TRUE.
    ENDIF
-   IF(TRIM(S%CINTERPOL_SIC)/='NONE')THEN
-      S%LINTERPOL_SIC=.TRUE.
+   IF(TRIM(SM%S%CINTERPOL_SIC)/='NONE')THEN
+      SM%S%LINTERPOL_SIC=.TRUE.
    ENDIF
-   IF(TRIM(S%CINTERPOL_SIT)/='NONE')THEN
-      S%LINTERPOL_SIT=.TRUE.
+   IF(TRIM(SM%S%CINTERPOL_SIT)/='NONE')THEN
+      SM%S%LINTERPOL_SIT=.TRUE.
    ENDIF
 ENDIF
 !
@@ -262,25 +246,26 @@ SELECT CASE (HINIT)
 !
   CASE ('PGD')
 !
-    S%TTIME%TDATE%YEAR = NUNDEF
-    S%TTIME%TDATE%MONTH= NUNDEF
-    S%TTIME%TDATE%DAY  = NUNDEF
-    S%TTIME%TIME       = XUNDEF
+    SM%S%TTIME%TDATE%YEAR = NUNDEF
+    SM%S%TTIME%TDATE%MONTH= NUNDEF
+    SM%S%TTIME%TDATE%DAY  = NUNDEF
+    SM%S%TTIME%TIME       = XUNDEF
 !
   CASE ('PRE')
 !
-    CALL PREP_CTRL_SEAFLUX(DGS%N2M,DGS%LSURF_BUDGET,DGS%L2M_MIN_ZS,DGS%LRAD_BUDGET,DGS%LCOEF,DGS%LSURF_VARS,&
-                             DGO%LDIAG_OCEAN,DGSI%LDIAG_SEAICE,ILUOUT,DGS%LSURF_BUDGETC ) 
+    CALL PREP_CTRL_SEAFLUX(SM%DGS%N2M,SM%DGS%LSURF_BUDGET,SM%DGS%L2M_MIN_ZS,&
+                                SM%DGS%LRAD_BUDGET,SM%DGS%LCOEF,SM%DGS%LSURF_VARS,&
+                             SM%DGO%LDIAG_OCEAN,SM%DGSI%LDIAG_SEAICE,ILUOUT,SM%DGS%LSURF_BUDGETC ) 
     IF (LNAM_READ) CALL READ_NAM_PREP_SEAFLUX_n(HPROGRAM)      
-    CALL READ_SEAFLUX_DATE(IOB, O, &
-                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,S%TTIME)
+    CALL READ_SEAFLUX_DATE(IOB, SM%O, &
+                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,SM%S%TTIME)
 !
   CASE DEFAULT
 !
 CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
     CALL READ_SURF(IOB, &
-                   HPROGRAM,'DTCUR',S%TTIME,IRESP)
+                   HPROGRAM,'DTCUR',SM%S%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 !
 END SELECT
@@ -297,7 +282,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(DTCO, DTS, IOB, SG, S, U, &
+ CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, IOB, SM%SG, SM%S, U, &
                          HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
@@ -321,15 +306,15 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !*       2.     Prognostic fields:
 !               ----------------
 !
-IF(S%LINTERPOL_SST.OR.S%LINTERPOL_SSS.OR.S%LINTERPOL_SIC.OR.S%LINTERPOL_SIT)THEN
+IF(SM%S%LINTERPOL_SST.OR.SM%S%LINTERPOL_SSS.OR.SM%S%LINTERPOL_SIC.OR.SM%S%LINTERPOL_SIT)THEN
 !  Initialize current Month for SST interpolation
-   S%TZTIME%TDATE%YEAR  = S%TTIME%TDATE%YEAR
-   S%TZTIME%TDATE%MONTH = S%TTIME%TDATE%MONTH
-   S%TZTIME%TDATE%DAY   = S%TTIME%TDATE%DAY
-   S%TZTIME%TIME        = S%TTIME%TIME        
+   SM%S%TZTIME%TDATE%YEAR  = SM%S%TTIME%TDATE%YEAR
+   SM%S%TZTIME%TDATE%MONTH = SM%S%TTIME%TDATE%MONTH
+   SM%S%TZTIME%TDATE%DAY   = SM%S%TTIME%TDATE%DAY
+   SM%S%TZTIME%TIME        = SM%S%TTIME%TIME        
 ENDIF
 !
- CALL READ_SEAFLUX_n(DTCO, IOB, SG, S, U, &
+ CALL READ_SEAFLUX_n(DTCO, IOB, SM%SG, SM%S, U, &
                      HPROGRAM,ILUOUT)
 !
 IF (HINIT/='ALL') THEN
@@ -342,21 +327,21 @@ END IF
 !*       2.1    Ocean fields:
 !               -------------
 !
- CALL READ_OCEAN_n(DTCO, IOB, O, OR, U, &
+ CALL READ_OCEAN_n(DTCO, IOB, SM%O, SM%OR, U, &
                    HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
-ILU = SIZE(S%XCOVER,1)
+ILU = SIZE(SM%S%XCOVER,1)
 !
-ALLOCATE(S%XSST_INI    (ILU))
-S%XSST_INI(:) = S%XSST(:)
+ALLOCATE(SM%S%XSST_INI    (ILU))
+SM%S%XSST_INI(:) = SM%S%XSST(:)
 !
-ALLOCATE(S%XZ0H(ILU))
-WHERE (S%XSST(:)>=XTTS)
-  S%XZ0H(:) = S%XZ0(:)
+ALLOCATE(SM%S%XZ0H(ILU))
+WHERE (SM%S%XSST(:)>=XTTS)
+  SM%S%XZ0H(:) = SM%S%XZ0(:)
 ELSEWHERE
-  S%XZ0H(:) = XZ0HSN
+  SM%S%XZ0H(:) = XZ0HSN
 ENDWHERE
 !
 !-------------------------------------------------------------------------------
@@ -365,29 +350,29 @@ ENDWHERE
 !               (Sea current and Sea-ice temperature)
 !               -----------------------------------------------------------------
 !
-IF(LCPL_SEA.OR.S%LHANDLE_SIC)THEN       
+IF(LCPL_SEA.OR.SM%S%LHANDLE_SIC)THEN       
 ! 
-  ALLOCATE(S%XUMER   (ILU))
-  ALLOCATE(S%XVMER   (ILU))
+  ALLOCATE(SM%S%XUMER   (ILU))
+  ALLOCATE(SM%S%XVMER   (ILU))
 !
-  S%XUMER   (:)=XUNDEF
-  S%XVMER   (:)=XUNDEF
+  SM%S%XUMER   (:)=XUNDEF
+  SM%S%XVMER   (:)=XUNDEF
 !
 ELSE
 ! 
-  ALLOCATE(S%XUMER   (0))
-  ALLOCATE(S%XVMER   (0))
+  ALLOCATE(SM%S%XUMER   (0))
+  ALLOCATE(SM%S%XVMER   (0))
 !
 ENDIF
 !
-IF(LCPL_SEAICE.OR.S%LHANDLE_SIC)THEN       
-  ALLOCATE(S%XTICE   (ILU))
-  ALLOCATE(S%XICE_ALB(ILU))
-  S%XTICE   (:)=XUNDEF
-  S%XICE_ALB(:)=XUNDEF
+IF(LCPL_SEAICE.OR.SM%S%LHANDLE_SIC)THEN       
+  ALLOCATE(SM%S%XTICE   (ILU))
+  ALLOCATE(SM%S%XICE_ALB(ILU))
+  SM%S%XTICE   (:)=XUNDEF
+  SM%S%XICE_ALB(:)=XUNDEF
 ELSE
-  ALLOCATE(S%XTICE   (0))
-  ALLOCATE(S%XICE_ALB(0))
+  ALLOCATE(SM%S%XTICE   (0))
+  ALLOCATE(SM%S%XICE_ALB(0))
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -395,7 +380,7 @@ ENDIF
 !*       4.     Seaice prognostic variables and forcings :
 !
 CALL READ_SEAICE_n(IOB, &
-                   SG, S, &
+                   SM%SG, SM%S, &
                    HPROGRAM,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
@@ -403,17 +388,17 @@ CALL READ_SEAICE_n(IOB, &
 !*       5.     Albedo, emissivity and temperature fields on the mix (open sea + sea ice)
 !               -----------------------------------------------------------------
 !
-ALLOCATE(S%XEMIS    (ILU))
-S%XEMIS    = 0.0
+ALLOCATE(SM%S%XEMIS    (ILU))
+SM%S%XEMIS    = 0.0
 !
-CALL UPDATE_RAD_SEA(S%CSEA_ALB,S%XSST,PZENITH,XTTS,S%XEMIS,S%XDIR_ALB,&
-                    S%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,  &
-                    S%LHANDLE_SIC,S%XTICE,S%XSIC,S%XICE_ALB           )  
+CALL UPDATE_RAD_SEA(SM%S%CSEA_ALB,SM%S%XSST,PZENITH,XTTS,SM%S%XEMIS,SM%S%XDIR_ALB,&
+                    SM%S%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,  &
+                    SM%S%LHANDLE_SIC,SM%S%XTICE,SM%S%XSIC,SM%S%XICE_ALB           )  
 !
-IF (S%LHANDLE_SIC) THEN
-   PTSURF(:) = S%XSST(:) * ( 1 - S%XSIC(:)) + S%XTICE(:) * S%XSIC(:)
+IF (SM%S%LHANDLE_SIC) THEN
+   PTSURF(:) = SM%S%XSST(:) * ( 1 - SM%S%XSIC(:)) + SM%S%XTICE(:) * SM%S%XSIC(:)
 ELSE
-   PTSURF(:) = S%XSST(:)
+   PTSURF(:) = SM%S%XSST(:)
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -421,7 +406,7 @@ ENDIF
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_SEAFLUX_SBL_n(DTCO, IOB, S, SSB, U, &
+ CALL READ_SEAFLUX_SBL_n(DTCO, IOB, SM%S, SM%SSB, U, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -429,18 +414,16 @@ ENDIF
 !*       7.     Chemistry /dust
 !               ---------
 !
- CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, CHS%NBEQ, CHS%CSV, CHS%NAEREQ,            &
-                     CHS%NSV_CHSBEG, CHS%NSV_CHSEND, CHS%NSV_AERBEG, CHS%NSV_AEREND, &
-                     CHS%CCH_NAMES, CHS%CAER_NAMES, CHS%NDSTEQ, CHS%NSV_DSTBEG,      &
-                     CHS%NSV_DSTEND, CHS%NSLTEQ, CHS%NSV_SLTBEG, CHS%NSV_SLTEND,     &
-                     HDSTNAMES=CHS%CDSTNAMES, HSLTNAMES=CHS%CSLTNAMES        )
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, SM%CHS%SVS,     &
+                     SM%CHS%CCH_NAMES, SM%CHS%CAER_NAMES,     &
+                     HDSTNAMES=SM%CHS%CDSTNAMES, HSLTNAMES=SM%CHS%CSLTNAMES        )
 !
 !* deposition scheme
 !
-IF (CHS%NBEQ>0 .AND. CHS%CCH_DRY_DEP=='WES89') THEN
-  ALLOCATE(CHS%XDEP(ILU,CHS%NBEQ))
+IF (SM%CHS%SVS%NBEQ>0 .AND. SM%CHS%CCH_DRY_DEP=='WES89') THEN
+  ALLOCATE(SM%CHS%XDEP(ILU,SM%CHS%SVS%NBEQ))
 ELSE
-  ALLOCATE(CHS%XDEP(0,0))
+  ALLOCATE(SM%CHS%XDEP(0,0))
 END IF
 !
 !-------------------------------------------------------------------------------
@@ -448,12 +431,12 @@ END IF
 !*       8.     diagnostics initialization
 !               --------------------------
 !
-IF(.NOT.(S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
-  DGSI%LDIAG_SEAICE=.FALSE.
+IF(.NOT.(SM%S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
+  SM%DGSI%LDIAG_SEAICE=.FALSE.
 ENDIF
 !
 CALL DIAG_SEAFLUX_INIT_n(IOB, &
-                         DGO, DGS, DGSI, DGU, S, &
+                         SM%DGO, SM%DGS, SM%DGSI, DGU, SM%S, &
                          HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

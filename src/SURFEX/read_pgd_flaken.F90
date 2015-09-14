@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_PGD_FLAKE_n (DTCO, FG, F, IOB, U, &
+      SUBROUTINE READ_PGD_FLAKE_n (DTCO, IOB, U, FG, F, &
                                    HPROGRAM)
 !     #########################################
 !

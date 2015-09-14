@@ -1,8 +1,8 @@
 !     #########
        SUBROUTINE DIAG_INLINE_FLAKE_n (DGF, F, &
-                                        PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
+                                        PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,  &
                                          PMERA, PHT, PHW, PRAIN, PSNOW,                &
-                                         PCD, PCDN, PCH, PRI, PHU, PZ0,                &
+                                         PCD, PCDN, PCH, PRI, PHU,                &
                                          PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
                                          PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,    &
                                          PLE, PLEI, PSUBL, PLWUP, PALB, PSWE           )  
@@ -65,7 +65,6 @@ TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL              , INTENT(IN) :: PTSTEP ! atmospheric time-step (s)
 REAL, DIMENSION(:), INTENT(IN) :: PTA    ! atmospheric temperature
-REAL, DIMENSION(:), INTENT(IN) :: PTS    ! surface temperature
 REAL, DIMENSION(:), INTENT(IN) :: PQA    ! atmospheric specific humidity
 REAL, DIMENSION(:), INTENT(IN) :: PPA    ! atmospheric level pressure
 REAL, DIMENSION(:), INTENT(IN) :: PPS    ! surface pressure
@@ -81,7 +80,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PCDN   ! neutral drag coefficient
 REAL, DIMENSION(:), INTENT(IN) :: PCH    ! drag coefficient for heat
 REAL, DIMENSION(:), INTENT(IN) :: PRI    ! Richardson number
 REAL, DIMENSION(:), INTENT(IN) :: PHU    ! near-surface humidity
-REAL, DIMENSION(:), INTENT(IN) :: PZ0    ! roughness length for momentum
 REAL, DIMENSION(:), INTENT(IN) :: PZ0H   ! roughness length for heat
 REAL, DIMENSION(:), INTENT(IN) :: PQSAT  ! humidity at saturation
 REAL, DIMENSION(:), INTENT(IN) :: PSFZON ! zonal friction
@@ -111,19 +109,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_FLAKE_N',0,ZHOOK_HANDLE)
 !
-DGF%XDIAG_TS(:) = PTS(:)
+DGF%XDIAG_TS(:) = F%XTS(:)
 !
 IF (.NOT. F%LSBL) THEN
 !
   IF (DGF%N2M==1) THEN
-    CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
+    CALL PARAM_CLS(PTA, F%XTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
                      PSFTH, PSFTQ, PSFZON, PSFMER,                       &
                      DGF%XT2M, DGF%XQ2M, DGF%XHU2M, DGF%XZON10M, DGF%XMER10M                       )  
   ELSE IF (DGF%N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                   PCD, PCH, PRI,                   &
-                  PTS, PHU, PZ0H, ZH,              &
+                  F%XTS, PHU, PZ0H, ZH,              &
                   DGF%XT2M, DGF%XQ2M, DGF%XHU2M                )  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,             &
@@ -194,7 +192,7 @@ IF (DGF%LCOEF) THEN
   !
   !* Roughness lengths
   !
-  DGF%XZ0  = PZ0
+  DGF%XZ0  = F%XZ0
   DGF%XZ0H = PZ0H
   !
 END IF

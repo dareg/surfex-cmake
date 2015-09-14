@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_WATFLUX_n (DTCO, DGU, IOB, U, CHW, W, WSB, &
+      SUBROUTINE WRITE_WATFLUX_n (DTCO, DGU, IOB, U, WM, &
                                   HPROGRAM,HWRITE)
 !     ####################################
 !
@@ -38,13 +38,12 @@
 !              ------------
 !
 !
+USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
-USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODI_INIT_IO_SURF_n
@@ -68,9 +67,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE    ! 'PREP' : does not write SBL XUNDEF fields
@@ -89,14 +86,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_WATFLUX_CONF_n(CHW, W, &
+ CALL WRITESURF_WATFLUX_CONF_n(WM%CHW, WM%W, &
                                HPROGRAM)
  CALL WRITESURF_WATFLUX_n(DGU, IOB, U, &
-                          W, &
+                          WM%W, &
                           HPROGRAM)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_WATFLUX_SBL_n(DGU, IOB, U, &
-                                                                        W, WSB, &
+                                                                        WM%W, WM%WSB, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

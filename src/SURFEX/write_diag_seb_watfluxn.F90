@@ -441,7 +441,7 @@ END IF
 !*       7.     chemical diagnostics:
 !               --------------------
 !
-IF (CHW%NBEQ>0 .AND. CHW%CCH_DRY_DEP=="WES89 ") THEN
+IF (CHW%SVW%NBEQ>0 .AND. CHW%CCH_DRY_DEP=="WES89 ") THEN
   DO JSV = 1,SIZE(CHW%CCH_NAMES,1)
     YRECFM='DV_WAT_'//TRIM(CHW%CCH_NAMES(JSV))
     WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_WAT_',JSV

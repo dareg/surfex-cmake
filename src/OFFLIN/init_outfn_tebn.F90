@@ -476,7 +476,7 @@ IF (DGT%LSURF_BUDGET) THEN
                       IFILE_ID,'FMV_TEB'  ,'Averaged_Merid_Wind_Stress '               ,IDDIM,YATT_TITLE,YATT)
 ENDIF
 !
-IF (CHT%NBEQ>0 .AND. CHT%CCH_DRY_DEP=="WES89 ") THEN
+IF (CHT%SVT%NBEQ>0 .AND. CHT%CCH_DRY_DEP=="WES89 ") THEN
   !
   YATT="(m/s)"
   !

@@ -584,9 +584,7 @@ ENDDO
 !
 IF (KTILE==1) THEN
   !
-  CALL COUPLING_SEA_n(YSC%CHF, YSC%CHS, YSC%CHW, YSC%DTS, YSC%DGF, YSC%DGMF, YSC%DGO, YSC%DGSI,&
-             YSC%DGW, YSC%DST, YSC%F, YSC%O, YSC%OR, YSC%SG, YSC%SLT, YSC%W, YSC%DGL, YSC%DGS,&
-             YSC%S, YSC%SSB, YSC%U, &
+  CALL COUPLING_SEA_n(YSC%SM, YSC%DGL, YSC%U, YSC%DST, YSC%SLT,  &
                       HPROGRAM, HCOUPLING, PTIMEC,                                           &
               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
               YSC%U%NSIZE_SEA, KSV, KSW,                                                      &
@@ -601,9 +599,7 @@ IF (KTILE==1) THEN
   !
 ELSEIF (KTILE==2) THEN
   !
-  CALL COUPLING_INLAND_WATER_n(YSC%CHF, YSC%CHS, YSC%CHW, YSC%DTS, YSC%DGMF, YSC%DGO, YSC%DGS,&
-               YSC%DGSI, YSC%DST, YSC%O, YSC%OR, YSC%SG, YSC%S, YSC%SLT, YSC%DGF, YSC%DGL, &
-               YSC%DGW, YSC%F, YSC%FSB, YSC%U, YSC%W, YSC%WSB, &
+  CALL COUPLING_INLAND_WATER_n(YSC%FM, YSC%WM, YSC%DGL, YSC%U, YSC%DST, YSC%SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC,                                   &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                YSC%U%NSIZE_WATER, KSV, KSW,                                                   &
@@ -618,9 +614,8 @@ ELSEIF (KTILE==2) THEN
   !
 ELSEIF (KTILE==3) THEN
   !
-  CALL COUPLING_NATURE_n(YSC%AG, YSC%CHI, YSC%DTCO, YSC%DTI, YSC%DTGD, YSC%DTGR, YSC%DTZ, &
-               YSC%DGEI, YSC%DGL, YSC%DGI, YSC%DGMI, YSC%DST, YSC%GB, YSC%ICP, YSC%IG, YSC%I, &
-               YSC%PKCI, YSC%PKDI, YSC%PKI, YSC%SLT, YSC%UG, YSC%U, YSC%USS, YSC%TGRO, &
+  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, &
+                         YSC%GDM%DTGD, YSC%GRM%DTGR, YSC%GRM%TGRO, YSC%DGL, YSC%DST, YSC%SLT, &
                          HPROGRAM, HCOUPLING, PTIMEC,                                         &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                YSC%U%NSIZE_NATURE, KSV, KSW,                                                  &
@@ -635,10 +630,8 @@ ELSEIF (KTILE==3) THEN
   !
 ELSEIF (KTILE==4) THEN
   !
-  CALL COUPLING_TOWN_n(YSC%DTCO, YSC%DTI, YSC%DTGD, YSC%DTGR, YSC%IG, YSC%I, YSC%B, YSC%BOP, &
-               YSC%CHT, YSC%DGCT, YSC%DGL, YSC%DGMT, YSC%DGMTO, YSC%DGT, YSC%DGUT, YSC%DST, &
-               YSC%SLT, YSC%U, YSC%TCP, YSC%TGD, YSC%TGDO, YSC%TGDPE, YSC%TGDP, YSC%TGR, &
-               YSC%TGRO, YSC%TGRPE, YSC%TGRP, YSC%TG, YSC%TIR, YSC%T, YSC%TOP, YSC%TPN, YSC%TVG, &
+  CALL COUPLING_TOWN_n(YSC%DTCO, YSC%U, YSC%IM%DTI, YSC%IM%IG, YSC%IM%I, YSC%DGL, &
+                       YSC%DST, YSC%SLT, YSC%TM, YSC%GDM, YSC%GRM,  &
                        HPROGRAM, HCOUPLING, PTIMEC,                                           &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                YSC%U%NSIZE_TOWN, KSV, KSW,                                                    &

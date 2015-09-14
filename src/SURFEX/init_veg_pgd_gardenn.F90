@@ -6,10 +6,8 @@ SUBROUTINE INIT_VEG_PGD_GARDEN_n (CHI, DTCO, DST, I, SLT, U, &
                         PGMES, PGC, PDMAX, PANMAX, PFZERO, PEPSO, PGAMM, PQDGAMM,   &
                         PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,&
                         PAH, PBH,                   &
-                        KSV, HSV, KBEQ, HSVO, KAEREQ, KSV_CHSBEG, KSV_CHSEND,       &
-                        KSV_AERBEG, KSV_AEREND, HCH_NAMES, HAER_NAMES, KDSTEQ,      &
-                        KSV_DSTBEG, KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
-                        HDSTNAMES, HSLTNAMES, HCHEM_SURF_FILE,                      &
+                        KSV, HSV, YSV, HCH_NAMES, HAER_NAMES, HDSTNAMES, HSLTNAMES, &
+                        HCHEM_SURF_FILE,                      &
                         PCLAY, PSAND, HPEDOTF,                                      &
                         PCONDSAT, PMPOTSAT, PBCOEF, PWWILT, PWFC, PWSAT,            &
                         PTAUICE, PCGSAT, PC1SAT, PC2REF, PC3, PC4B, PACOEF, PPCOEF, &
@@ -55,6 +53,7 @@ SUBROUTINE INIT_VEG_PGD_GARDEN_n (CHI, DTCO, DST, I, SLT, U, &
 !              ------------
 !
 !
+USE MODD_SV_n, ONLY : SV_t
 !
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -97,6 +96,7 @@ REAL, DIMENSION(:), POINTER :: PGAMMAT
  CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
  CHARACTER(LEN=3), INTENT(IN) :: HINIT
 LOGICAL, INTENT(IN) :: OTR_ML
+ CHARACTER(LEN=4), INTENT(IN) :: HRUNOFF
 INTEGER, INTENT(IN) :: KNBIOMASS
 REAL, DIMENSION(:), INTENT(IN) :: PCO2
 REAL, DIMENSION(:), INTENT(IN) :: PRHOA
@@ -122,21 +122,9 @@ REAL, DIMENSION(:), POINTER :: PBH
 !
 INTEGER,                          INTENT(IN) :: KSV      ! number of scalars
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN) :: HSV      ! name of all scalar variables
-INTEGER,                         INTENT(OUT) :: KBEQ     ! number of chemical variables
- CHARACTER(LEN=6), DIMENSION(:), POINTER :: HSVO          ! name of scalar species without # and @
-INTEGER,                         INTENT(OUT) :: KAEREQ  ! number of aerosol variables
-INTEGER,                         INTENT(OUT) :: KSV_CHSBEG  ! first chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_CHSEND  ! last  chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_AERBEG  ! first aerosol var.
-INTEGER,                         INTENT(OUT) :: KSV_AEREND  ! last  aerosol var.
+TYPE(SV_t), INTENT(INOUT) :: YSV
  CHARACTER(LEN=6), DIMENSION(:), POINTER :: HCH_NAMES
  CHARACTER(LEN=6), DIMENSION(:), POINTER :: HAER_NAMES     
-INTEGER,                         INTENT(OUT) :: KDSTEQ     ! number of chemical variables
-INTEGER,                         INTENT(OUT) :: KSV_DSTBEG  ! first chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_DSTEND  ! last  chemical var.
-INTEGER,                         INTENT(OUT) :: KSLTEQ     ! number of chemical variables
-INTEGER,                         INTENT(OUT) :: KSV_SLTBEG  ! first chemical var.
-INTEGER,                         INTENT(OUT) :: KSV_SLTEND  ! last  chemical var.
  CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HDSTNAMES
  CHARACTER(LEN=6), DIMENSION(:), POINTER, OPTIONAL :: HSLTNAMES
 !
@@ -167,7 +155,6 @@ REAL, DIMENSION(:), POINTER :: PPLSTT
 !
  CHARACTER(LEN=4), INTENT(IN) :: HSCOND
  CHARACTER(LEN=3), INTENT(IN) :: HISBA
- CHARACTER(LEN=4), INTENT(IN) :: HRUNOFF
 REAL, DIMENSION(:,:), POINTER :: PHCAPSOIL
 REAL, DIMENSION(:,:), POINTER :: PCONDDRY
 REAL, DIMENSION(:,:), POINTER :: PCONDSLD
@@ -363,10 +350,8 @@ ZDMAX(:,1) = PDMAX(:)
                   ZGMES, ZGC, ZDMAX, ZANMAX, ZFZERO, ZEPSO, ZGAMM, ZQDGAMM,   &
                   ZQDGMES, ZT1GMES, ZT2GMES, ZAMAX, ZQDAMAX, ZT1AMAX, ZT2AMAX,&
                   ZAH, ZBH, ZTAU_WOOD, ZINCREASE, ZTURNOVER,                  &
-                  KSV, HSV, KBEQ, HSVO, KAEREQ, KSV_CHSBEG, KSV_CHSEND,       &
-                  KSV_AERBEG, KSV_AEREND, HCH_NAMES, HAER_NAMES, KDSTEQ,      &
-                  KSV_DSTBEG, KSV_DSTEND, KSLTEQ, KSV_SLTBEG, KSV_SLTEND,     &
-                  HDSTNAMES, HSLTNAMES, HCHEM_SURF_FILE,                      &
+                  KSV, HSV, YSV, HCH_NAMES, HAER_NAMES, HDSTNAMES, HSLTNAMES, &
+                  HCHEM_SURF_FILE,                      &
                   ZSFDST, ZSFDSTM, ZSFSLT,                                    &
                   ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM, ZHO2IP, ZHO2IM, ZHO2JP,     &
                   ZHO2JM, ZZ0, ZZ0EFFIP, ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, ZZ0REL,&

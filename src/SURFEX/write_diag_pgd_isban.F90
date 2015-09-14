@@ -530,7 +530,7 @@ END IF
 !
 !* chemical soil resistances
 !
-IF (CHI%CCH_DRY_DEP=='WES89' .AND. CHI%NBEQ>0) THEN
+IF (CHI%CCH_DRY_DEP=='WES89' .AND. CHI%SVI%NBEQ>0) THEN
   YRECFM='SOILRC_SO2'
   YCOMMENT='bare soil resistance for SO2 (?)'
   CALL WRITE_SURF(DGU, IOB, U, &

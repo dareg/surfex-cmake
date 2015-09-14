@@ -90,7 +90,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 CPROGNAME = HPROGRAM
 !
- CALL FLAG_UPDATE(YSC%DGI, YSC%DGU, &
+ CALL FLAG_UPDATE(YSC%IM%DGI, YSC%DGU, &
                   .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !*       1.     Configuration and cover fields:
@@ -187,7 +187,8 @@ ENDIF
 !*       2.     Sea
 !               ---
 !
-IF (YSC%U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%DTS, YSC%SG, YSC%S, &
+IF (YSC%U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+                                YSC%SM%DTS, YSC%SM%SG, YSC%SM%S, &
                                            HPROGRAM)
 !
 !
@@ -195,14 +196,15 @@ IF (YSC%U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YS
 !               ------------
 !
 IF (YSC%U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
-                                                      YSC%WG, YSC%W, YSC%FG, YSC%F, &
+                                                      YSC%WM%WG, YSC%WM%W, YSC%FM%FG, YSC%FM%F, &
                                                       HPROGRAM)
 !
 !
 !*       4.     Vegetation scheme
 !               -----------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, YSC%DTI, YSC%DTZ, YSC%IG, YSC%I, &
+IF (YSC%U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+                                                YSC%IM%DTI, YSC%DTZ, YSC%IM%IG, YSC%IM%I, &
                                                  HPROGRAM)
 !
 !
@@ -210,9 +212,7 @@ IF (YSC%U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC
 !               ------------
 !
 IF (YSC%U%NDIM_TOWN>0) CALL WRITE_PGD_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
-                                  YSC%B, YSC%BOP, YSC%BDD, YSC%DTB, YSC%DTGD, YSC%DTGR, YSC%DTT, YSC%DGCT, YSC%DGMT, &
-                                  YSC%T, YSC%TGD, YSC%TGDO, YSC%TGDP, YSC%TGDPE, YSC%TGR, YSC%TGRPE, YSC%TGRO, YSC%TGRP, &
-                                  YSC%TG, YSC%TIR, YSC%TOP, YSC%TVG, &
+                                             YSC%TM, YSC%GDM, YSC%GRM, &
                                          HPROGRAM)
 !
 !

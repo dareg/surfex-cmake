@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_FLAKE_INIT_n (IOB, &
-                                     DGF, DGMF, DGU, F, &
+      SUBROUTINE DIAG_FLAKE_INIT_n (IOB, DGU, DGF, DGMF, F, &
                                     HPROGRAM,KLU,KSW)
 !     #####################
 !

@@ -1,6 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GARDEN_n (DTCO, DTGD, DGMTO, DGU, IOB, UG, &
-                              U, TGD, TGDO, TGDPE, TGDP, TOP, TVG, &
+SUBROUTINE INIT_TEB_GARDEN_n (DTCO, DGU, IOB, UG, U, DGMTO, TOP, GDM, &
                               HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
 !#############################################################
 !
@@ -36,18 +35,13 @@ SUBROUTINE INIT_TEB_GARDEN_n (DTCO, DTGD, DGMTO, DGU, IOB, UG, &
 !              ------------
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
-USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
-USE MODD_TEB_GARDEN_PGD_EVOL_n, ONLY : TEB_GARDEN_PGD_EVOL_t
-USE MODD_TEB_GARDEN_PGD_n, ONLY : TEB_GARDEN_PGD_t
+USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
 !
 USE MODD_TYPE_DATE_SURF
 USE MODD_TYPE_SNOW
@@ -79,18 +73,13 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
-TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
-TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
-TYPE(TEB_GARDEN_PGD_EVOL_t), INTENT(INOUT) :: TGDPE
-TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
+TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 !
  CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                   INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -132,9 +121,10 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_N',0,ZHOOK_HANDLE)
 !* initialization of snow scheme (TSNOW defined in MODD_TEB_GARDEN_n)
 !
 IF (HINIT=='PRE') THEN
-  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,TGD%CUR%TSNOW%SCHEME,TGD%CUR%TSNOW%NLAYER)
+  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,GDM%TGD%CUR%TSNOW%SCHEME,GDM%TGD%CUR%TSNOW%NLAYER)
 !
-  IF (TGD%CUR%TSNOW%SCHEME.NE.'3-L' .AND. TGD%CUR%TSNOW%SCHEME.NE.'CRO' .AND. TVG%CISBA=='DIF') THEN
+  IF (GDM%TGD%CUR%TSNOW%SCHEME.NE.'3-L' .AND. &
+                GDM%TGD%CUR%TSNOW%SCHEME.NE.'CRO' .AND. GDM%TVG%CISBA=='DIF') THEN
     CALL ABOR1_SFX("INIT_TEB_GARDEN_n: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
   ENDIF
   IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_N',1,ZHOOK_HANDLE)
@@ -142,12 +132,12 @@ IF (HINIT=='PRE') THEN
 ENDIF
 !-------------------------------------------------------------------------------
 !
- CALL ALLOCATE_TEB_GARDEN(TGD, TVG, &
-                          KI, TGDO%NGROUND_LAYER)  
+ CALL ALLOCATE_TEB_GARDEN(GDM%TGD, GDM%TVG, &
+                          KI, GDM%TGDO%NGROUND_LAYER)  
 !
 !-------------------------------------------------------------------------------
 !
-IF( TVG%CCPSURF=='DRY' .AND. LCPL_ARP ) THEN
+IF( GDM%TVG%CCPSURF=='DRY' .AND. LCPL_ARP ) THEN
   CALL ABOR1_SFX('CCPSURF=DRY must not be used with LCPL_ARP')
 ENDIF
 !
@@ -170,50 +160,49 @@ ENDIF
   CALL GET_CURRENT_TEB_PATCH(JTEB_PATCH)
   IF (TOP%NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'T',JTEB_PATCH,'_'
 !
-  CALL READ_TEB_GARDEN_n(DTCO, DGU, IOB, U, TGD, TGDO, TGDPE, TGDP, TVG, &
+  CALL READ_TEB_GARDEN_n(DTCO, DGU, IOB, U, GDM, &
                          HPROGRAM,YPATCH)
 !
 !
- CALL INIT_VEG_GARDEN_n(KI, TOP%LCANOPY, TVG%CROUGH, TGD%CUR%TSNOW, &
-                   TVG%CPHOTO, TGDP%XLAIMIN, TGDP%XH_TREE, TGDP%XVEGTYPE, TGDPE%CUR%XLAI, &
-                   TGDPE%CUR%XZ0, TGDPE%CUR%XVEG, TGDPE%CUR%XEMIS, &
-                   TVG%LTR_ML, TGD%CUR%XFAPARC, TGD%CUR%XFAPIRC, TGD%CUR%XLAI_EFFC, TGD%CUR%XMUS, &
-                   TGDP%XALBNIR_SOIL, TGDP%XALBVIS_SOIL, TGDP%XALBUV_SOIL, TGDPE%CUR%XALBNIR, &
-                   TGDPE%CUR%XALBVIS, TGDPE%CUR%XALBUV, &
-                   DGMTO%LSURF_DIAG_ALBEDO, TGD%CUR%XPSN, TGD%CUR%XPSNG, TGD%CUR%XPSNV, TGD%CUR%XPSNV_A, &
+ CALL INIT_VEG_GARDEN_n(KI, TOP%LCANOPY, GDM%TVG%CROUGH, GDM%TGD%CUR%TSNOW, &
+                   GDM%TVG%CPHOTO, GDM%TGDP%XLAIMIN, GDM%TGDP%XH_TREE, GDM%TGDP%XVEGTYPE, &
+                   GDM%TGDPE%CUR%XLAI, GDM%TGDPE%CUR%XZ0, GDM%TGDPE%CUR%XVEG, GDM%TGDPE%CUR%XEMIS, &
+                   GDM%TVG%LTR_ML, GDM%TGD%CUR%XFAPARC, GDM%TGD%CUR%XFAPIRC, GDM%TGD%CUR%XLAI_EFFC, &
+                   GDM%TGD%CUR%XMUS, GDM%TGDP%XALBNIR_SOIL, GDM%TGDP%XALBVIS_SOIL, &
+                   GDM%TGDP%XALBUV_SOIL, GDM%TGDPE%CUR%XALBNIR, GDM%TGDPE%CUR%XALBVIS, &
+                   GDM%TGDPE%CUR%XALBUV, DGMTO%LSURF_DIAG_ALBEDO, GDM%TGD%CUR%XPSN, &
+                   GDM%TGD%CUR%XPSNG, GDM%TGD%CUR%XPSNV, GDM%TGD%CUR%XPSNV_A, &
                    ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTSRAD )
 !
-ZWG1(:) = TGD%CUR%XWG(:,1)
-ZTG1(:) = TGD%CUR%XTG(:,1)
+ZWG1(:) = GDM%TGD%CUR%XWG(:,1)
+ZTG1(:) = GDM%TGD%CUR%XTG(:,1)
 !
-IF (.NOT. TGDO%LPAR_GARDEN) THEN
-  CALL SOIL_ALBEDO(TVG%CALBEDO,                               &
-                     TGDP%XWSAT(:,1),ZWG1,                       &
-                     TGDP%XALBVIS_DRY,TGDP%XALBNIR_DRY,TGDP%XALBUV_DRY,    &
-                     TGDP%XALBVIS_WET,TGDP%XALBNIR_WET,TGDP%XALBUV_WET,    &
-                     TGDP%XALBVIS_SOIL,TGDP%XALBNIR_SOIL,TGDP%XALBUV_SOIL  )  
+IF (.NOT. GDM%TGDO%LPAR_GARDEN) THEN
+  CALL SOIL_ALBEDO(GDM%TVG%CALBEDO,                               &
+                     GDM%TGDP%XWSAT(:,1),ZWG1,                       &
+                     GDM%TGDP%XALBVIS_DRY,GDM%TGDP%XALBNIR_DRY,GDM%TGDP%XALBUV_DRY,    &
+                     GDM%TGDP%XALBVIS_WET,GDM%TGDP%XALBNIR_WET,GDM%TGDP%XALBUV_WET,    &
+                     GDM%TGDP%XALBVIS_SOIL,GDM%TGDP%XALBNIR_SOIL,GDM%TGDP%XALBUV_SOIL  )  
 ELSE
   IF (TOP%TTIME%TDATE%MONTH /= NUNDEF) THEN
     IDECADE = 3 * ( TOP%TTIME%TDATE%MONTH - 1 ) + MIN(TOP%TTIME%TDATE%DAY-1,29) / 10 + 1
   ELSE
     IDECADE = 1
   END IF
-  CALL INIT_FROM_DATA_GRDN_n(DTGD, &
-                             IDECADE,TVG%CPHOTO,              &
-                               PALBNIR_SOIL=TGDP%XALBNIR_SOIL,   &
-                               PALBVIS_SOIL=TGDP%XALBVIS_SOIL,   &
-                               PALBUV_SOIL=TGDP%XALBUV_SOIL      )  
+  CALL INIT_FROM_DATA_GRDN_n(GDM%DTGD, &
+                             IDECADE,GDM%TVG%CPHOTO,              &
+                               PALBNIR_SOIL=GDM%TGDP%XALBNIR_SOIL,   &
+                               PALBVIS_SOIL=GDM%TGDP%XALBVIS_SOIL,   &
+                               PALBUV_SOIL=GDM%TGDP%XALBUV_SOIL      )  
 END IF
 !
- CALL AVG_ALBEDO_EMIS_GARDEN(TGD, &
-                             TVG%CALBEDO,                                   &
-                                 TGDPE%CUR%XVEG,TGDPE%CUR%XZ0,TGDPE%CUR%XLAI,ZTG1,                     &
-                                 PSW_BANDS,                              &
-                                 TGDP%XALBNIR_VEG,TGDP%XALBVIS_VEG,TGDP%XALBUV_VEG,     &
-                                 TGDP%XALBNIR_SOIL,TGDP%XALBVIS_SOIL,TGDP%XALBUV_SOIL,  &
-                                 TGDPE%CUR%XEMIS,                                  &
-                                 TGD%CUR%TSNOW,                                  &
-                                 TGDPE%CUR%XALBNIR,TGDPE%CUR%XALBVIS,TGDPE%CUR%XALBUV,                 &
+ CALL AVG_ALBEDO_EMIS_GARDEN(GDM%TGD, GDM%TVG%CALBEDO,                  &
+                             GDM%TGDPE%CUR%XVEG,GDM%TGDPE%CUR%XZ0,GDM%TGDPE%CUR%XLAI,ZTG1,      &
+                             PSW_BANDS,                             &
+                             GDM%TGDP%XALBNIR_VEG,GDM%TGDP%XALBVIS_VEG,GDM%TGDP%XALBUV_VEG,     &
+                             GDM%TGDP%XALBNIR_SOIL,GDM%TGDP%XALBVIS_SOIL,GDM%TGDP%XALBUV_SOIL,  &
+                             GDM%TGDPE%CUR%XEMIS, GDM%TGD%CUR%TSNOW,                            &
+                             GDM%TGDPE%CUR%XALBNIR,GDM%TGDPE%CUR%XALBVIS,GDM%TGDPE%CUR%XALBUV,  &
                                  ZDIR_ALB, ZSCA_ALB,                     &
                                  ZEMIS,ZTSRAD                            )  
 !

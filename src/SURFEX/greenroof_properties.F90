@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GREENROOF_PROPERTIES (TGR, TGRO, TGRPE, TGRP, T, TVG, &
+      SUBROUTINE GREENROOF_PROPERTIES (T, TVG, GRM, &
                                        PDIR_SW, PSCA_SW, PSW_BANDS, KSW,&
                                       PTS, PEMIS, PALB, PTA,           &  
                                       PALBNIR_TVEG, PALBVIS_TVEG,      &
@@ -37,13 +37,9 @@
 !               ------------
 !
 !
-!
-USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
-USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
 USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
 !
 USE MODD_SURF_PAR,            ONLY : XUNDEF
 !
@@ -61,12 +57,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
-TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
-TYPE(TEB_GREENROOF_PGD_EVOL_t), INTENT(INOUT) :: TGRPE
-TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PDIR_SW            ! direct incoming solar radiation
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSCA_SW            ! diffus incoming solar radiation
@@ -115,7 +108,7 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GREENROOF_n(TGR, TGRO, TGRPE, T, TVG, &
+ CALL FLAG_TEB_GREENROOF_n(GRM%TGR, GRM%TGRO, GRM%TGRPE, T, TVG, &
                            1)
 !
 !
@@ -123,30 +116,31 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',0,ZHOOK_HANDLE)
 !              ------------------------------------------
 !
 !
- CALL ISBA_PROPERTIES(TGRO%CISBA_GR, TGRO%LTR_ML_GR, TGR%CUR%TSNOW, 1,             &
+ CALL ISBA_PROPERTIES(GRM%TGRO%CISBA_GR, GRM%TGRO%LTR_ML_GR, GRM%TGR%CUR%TSNOW, 1,       &
                       PDIR_SW, PSCA_SW, PSW_BANDS, KSW,          &
-                      TGRPE%CUR%XALBNIR, TGRPE%CUR%XALBVIS, TGRPE%CUR%XALBUV,                  &
-                      TGRP%XALBNIR_VEG, TGRP%XALBVIS_VEG, TGRP%XALBUV_VEG,      &
-                      TGRP%XALBNIR_SOIL, TGRP%XALBVIS_SOIL,                &
-                      TGRP%XALBUV_SOIL,                               &
-                      TGRPE%CUR%XVEG, TGRPE%CUR%XLAI, TGRPE%CUR%XZ0, TGRPE%CUR%XEMIS, TGR%CUR%XTG(:,1),          &
+                      GRM%TGRPE%CUR%XALBNIR, GRM%TGRPE%CUR%XALBVIS, GRM%TGRPE%CUR%XALBUV,  &
+                      GRM%TGRP%XALBNIR_VEG, GRM%TGRP%XALBVIS_VEG, GRM%TGRP%XALBUV_VEG,      &
+                      GRM%TGRP%XALBNIR_SOIL, GRM%TGRP%XALBVIS_SOIL,                &
+                      GRM%TGRP%XALBUV_SOIL, GRM%TGRPE%CUR%XVEG, GRM%TGRPE%CUR%XLAI, &
+                      GRM%TGRPE%CUR%XZ0, GRM%TGRPE%CUR%XEMIS, GRM%TGR%CUR%XTG(:,1),          &
                       ZASNOW,ZANOSNOW,                           &
                       ZESNOW,ZENOSNOW,                           &
                       ZTSSNOW,ZTSNOSNOW,                         &
-                      TGR%CUR%XSNOWFREE_ALB_VEG, TGR%CUR%XSNOWFREE_ALB_SOIL,     &
+                      GRM%TGR%CUR%XSNOWFREE_ALB_VEG, GRM%TGR%CUR%XSNOWFREE_ALB_SOIL,     &
                       ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, &
                       ZALBVIS_TSOIL,                             &
-                      TGR%CUR%XPSN, TGR%CUR%XPSNV_A, TGR%CUR%XPSNG, TGR%CUR%XPSNV                )
+                      GRM%TGR%CUR%XPSN, GRM%TGR%CUR%XPSNV_A, GRM%TGR%CUR%XPSNG, GRM%TGR%CUR%XPSNV         )
 !
-TGR%CUR%XSNOWFREE_ALB = ZANOSNOW
+GRM%TGR%CUR%XSNOWFREE_ALB = ZANOSNOW
 !
 !* averaged albedo
-PALB =  TGR%CUR%XPSN(:)    * ZASNOW              + (1.-TGR%CUR%XPSN(:)) * ZANOSNOW
+PALB =  GRM%TGR%CUR%XPSN(:)    * ZASNOW              + (1.-GRM%TGR%CUR%XPSN(:)) * ZANOSNOW
 !* averaged emissivity
-PEMIS=  TGR%CUR%XPSN(:)    * ZESNOW              + (1.-TGR%CUR%XPSN(:)) * ZENOSNOW
+PEMIS=  GRM%TGR%CUR%XPSN(:)    * ZESNOW              + (1.-GRM%TGR%CUR%XPSN(:)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
-PTS  =((TGR%CUR%XPSN(:)    * ZESNOW * ZTSSNOW**4 + (1.-TGR%CUR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+PTS  =((GRM%TGR%CUR%XPSN(:)    * ZESNOW * ZTSSNOW**4 + &
+        (1.-GRM%TGR%CUR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 !
 IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
 IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)
@@ -157,4 +151,5 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF_PROPERTIES',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
+
 END SUBROUTINE GREENROOF_PROPERTIES

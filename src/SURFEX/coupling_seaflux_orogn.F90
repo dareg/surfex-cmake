@@ -1,6 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEAFLUX_OROG_n (CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGSI, DGW, DST, F, O, OR, SG, SLT, W, &
-                                     DGS, S, SSB, &
+SUBROUTINE COUPLING_SEAFLUX_OROG_n (SM, DST, SLT, &
                                     HPROGRAM, HCOUPLING, PTIMEC,                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
@@ -39,28 +38,11 @@ SUBROUTINE COUPLING_SEAFLUX_OROG_n (CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGSI, DG
 !!-------------------------------------------------------------
 !
 !
+USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
-!
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
-USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
-USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 USE MODD_DST_n, ONLY : DST_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 USE MODD_SLT_n, ONLY : SLT_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
-USE MODD_SEAFLUX_SBL_n, ONLY : SEAFLUX_SBL_t
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00
@@ -79,27 +61,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SLT_t), INTENT(INOUT) :: SLT
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-!
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(SEAFLUX_SBL_t), INTENT(INOUT) :: SSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -205,7 +169,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,S%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,SM%S%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -228,21 +192,16 @@ ELSE
 !
 ENDIF
 !
- CALL COUPLING_SEAWAT_SBL_n(CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGS, DGSI, DGW, DST, F, O, OR, SG, S, SLT, W, &
-                            HPROGRAM, HCOUPLING, PTIMEC, 'S',                    &
-               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                               &
-               KI, KSV, KSW,                                                     &
-               PTSUN, PZENITH, PZENITH2, PAZIM,                                  &
-               PZREF, PUREF, S%XZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,       &
-               ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,         &
-               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, S%LSBL, S%XSST, S%XZ0,         &
-               SSB%XZ, SSB%XU, SSB%NLVL, SSB%XTKE, SSB%XT, SSB%XQ, SSB%XLMO, SSB%XZF, SSB%XDZ, SSB%XDZF, SSB%XP,             &
-               DGS%N2M, DGS%XT2M, DGS%XQ2M, DGS%XHU2M, DGS%XZON10M, DGS%XMER10M, DGS%XWIND10M, DGS%XWIND10M_MAX, &
-               DGS%XT2M_MIN, DGS%XT2M_MAX, DGS%XHU2M_MIN, DGS%XHU2M_MAX,                         &
-               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,      &
-               PPEW_A_COEF, PPEW_B_COEF,                                         &
-               PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,               &
-               'OK'                                                              )
+ CALL COUPLING_SEAFLUX_SBL_n(SM, DST, SLT, &
+                             HPROGRAM, HCOUPLING, PTIMEC, PTSTEP,                   &
+                             KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,              &
+                             PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PU, PV, &
+                             ZQA, ZTA, ZRHOA, PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW,    &
+                             PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA, PSFTQ, PSFTH,   &
+                             PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,  &
+                             PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,         &
+                             PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF,    &
+                             ZPEQ_B_COEF, HTEST                                     )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SEAFLUX_OROG_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

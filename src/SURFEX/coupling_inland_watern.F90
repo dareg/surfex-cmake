@@ -1,6 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_INLAND_WATER_n (CHF, CHS, CHW, DTS, DGMF, DGO, DGS, DGSI, DST, O, OR, SG, S, SLT, &
-                                     DGF, DGL, DGW, F, FSB, U, W, WSB, &
+SUBROUTINE COUPLING_INLAND_WATER_n (FM, WM, DGL, U, DST, SLT, &
                                     HPROGRAM, HCOUPLING, PTIMEC,                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
@@ -35,34 +34,15 @@ SUBROUTINE COUPLING_INLAND_WATER_n (CHF, CHS, CHW, DTS, DGMF, DGO, DGS, DGSI, DS
 !----------------------------------------------------------------
 !
 !
+USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
+USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 !
-!
-!
-!
-!
-USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
-USE MODD_CH_SEAFLUX_n, ONLY : CH_SEAFLUX_t
-USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
-USE MODD_DIAG_SEAICE_n, ONLY : DIAG_SEAICE_t
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DST_n, ONLY : DST_t
-USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_FLAKE_SBL_n, ONLY : FLAKE_SBL_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
-USE MODD_WATFLUX_SBL_n, ONLY : WATFLUX_SBL_t
+!
 !
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -81,29 +61,13 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
-TYPE(DIAG_SEAICE_t), INTENT(INOUT) :: DGSI
+TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
-TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
-TYPE(WATFLUX_SBL_t), INTENT(INOUT) :: WSB
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -181,8 +145,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_INLAND_WATER_N',0,ZHOOK_HANDLE)
 IF (U%CWATER=='WATFLX') THEN
-  CALL COUPLING_WATFLUX_OROG_n(CHF, CHS, CHW, DTS, DGF, DGMF, DGO, DGS, DGSI, DST, F, O, OR, SG, S, SLT, &
-                               DGW, W, WSB, &
+  CALL COUPLING_WATFLUX_OROG_n(WM, DST, SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC,                                 &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
@@ -193,7 +156,7 @@ IF (U%CWATER=='WATFLX') THEN
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,               &
                  PPEW_A_COEF, PPEW_B_COEF,                                                  &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
-                 'OK'                                                                       )  
+                 HTEST                                                                      )  
 ELSE IF (U%CWATER=='FLUX  ') THEN
   CALL COUPLING_IDEAL_FLUX(DGL, &
                            HPROGRAM, HCOUPLING, PTIMEC,                                     &
@@ -206,11 +169,10 @@ ELSE IF (U%CWATER=='FLUX  ') THEN
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,               &
                  PPEW_A_COEF, PPEW_B_COEF,                                                  &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
-                 'OK'                                                                       )  
+                 HTEST                                                                       )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL COUPLING_FLAKE_OROGRAPHY_n(CHF, CHS, CHW, DTS, DGMF, DGO, DGS, DGSI, DGW, DST, O, OR, SG, S, SLT, W, &
-                                  DGF, F, FSB, &
-                                  HPROGRAM, HCOUPLING, PTIMEC,                              &
+  CALL COUPLING_FLAKE_OROGRAPHY_n(FM, DST, SLT,                 &
+                                  HPROGRAM, HCOUPLING,                             &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
                  KI, KSV, KSW,                                                              &
                  PTSUN, PZENITH, PZENITH2, PAZIM,                                           &
@@ -220,7 +182,7 @@ ELSE IF (U%CWATER=='FLAKE ') THEN
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,               &
                  PPEW_A_COEF, PPEW_B_COEF,                                                  &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
-                 'OK'                                                                       )  
+                 HTEST                                                                    )  
 ELSE IF (U%CWATER=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.
