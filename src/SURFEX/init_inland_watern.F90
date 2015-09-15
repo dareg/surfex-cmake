@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_INLAND_WATER_n (DTCO, DGU, IOB, UG, U, WM, FM, DGL,     &
+      SUBROUTINE INIT_INLAND_WATER_n (DTCO, DGU, UG, U, WM, FM, DGL,     &
                                       HPROGRAM,HINIT,                         &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
@@ -48,7 +48,6 @@ USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
@@ -74,7 +73,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
@@ -129,14 +127,14 @@ ELSE IF (U%CWATER=='FLUX  ') THEN
                          PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                          PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CWATER=='WATFLX') THEN
-  CALL INIT_WATFLUX_n(DTCO, DGU, IOB, UG, U, WM, &
+  CALL INIT_WATFLUX_n(DTCO, DGU, UG, U, WM, &
                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &
                         KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK'                                          )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL INIT_FLAKE_n(DTCO, DGU, IOB, UG, U, FM, &
+  CALL INIT_FLAKE_n(DTCO, DGU, UG, U, FM, &
                     HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,       &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &

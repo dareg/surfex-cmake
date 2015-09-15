@@ -1,10 +1,11 @@
 !     #########
-SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, IOB, &
+SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, &
                                  IG, U, &
                                 HPROGRAM,                       &
                                 HFILE,HFILETYPE,                &
                                 HFILEPGD,HFILEPGDTYPE,          &
                                 KLUOUT,OUNIF,HSNSURF,KPATCH,    &
+                                KTEB_PATCH, &
                                 KL,TPSNOW, TPTIME,              &
                                 PUNIF_WSNOW, PUNIF_RSNOW,       &
                                 PUNIF_TSNOW, PUNIF_LWCSNOW,     &
@@ -47,7 +48,6 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, IOB, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -84,7 +84,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -98,6 +97,7 @@ INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
  CHARACTER(LEN=10)               :: HSNSURF   ! type of field
 INTEGER,            INTENT(IN)  :: KPATCH    ! patch number for output scheme
+INTEGER,            INTENT(IN) :: KTEB_PATCH
 INTEGER,            INTENT(IN)  :: KL        ! number of points
 TYPE(SURF_SNOW)                 :: TPSNOW    ! snow fields
 TYPE(DATE_TIME),    INTENT(IN)  :: TPTIME    ! date and time
@@ -158,9 +158,9 @@ ELSE IF (HFILETYPE=='GRIB  ') THEN
   CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)
 ELSE IF (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '.OR. HFILETYPE=='FA    ') THEN
   GSNOW_IDEAL = OSNOW_IDEAL
-  CALL PREP_SNOW_EXTERN(IOB, &
+  CALL PREP_SNOW_EXTERN(&
                         HPROGRAM,HSNSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                        KLUOUT,ZFIELDIN,GSNOW_IDEAL,TPSNOW%NLAYER)
+                        KLUOUT,ZFIELDIN,GSNOW_IDEAL,TPSNOW%NLAYER,KTEB_PATCH)
 ELSE IF (HFILETYPE=='BUFFER') THEN
   CALL PREP_SNOW_BUFFER(IG, U, &
                         HPROGRAM,HSNSURF,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)

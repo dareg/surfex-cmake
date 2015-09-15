@@ -1,5 +1,5 @@
 !     #######################################################
-      SUBROUTINE OPEN_AUX_IO_SURF_LFI (IOB, &
+      SUBROUTINE OPEN_AUX_IO_SURF_LFI (&
                                        HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
@@ -36,7 +36,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_LFI,ONLY:CLUOUT_LFI,NMASK,NFULL,CMASK, NLUOUT, &
                             CFILE_LFI, NUNIT_LFI, NFULL_AUX,&
@@ -57,7 +56,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
@@ -79,7 +77,7 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
 !
 CMASK = HMASK
 CFILE_LFI=HFILE
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'LFI   ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
 !

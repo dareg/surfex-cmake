@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TOPO_INDEX (DGU, IOB, DTCO, UG, U, USS, I, &
+      SUBROUTINE PGD_TOPO_INDEX (DGU, DTCO, UG, U, USS, I, &
                                  HPROGRAM,KLU,HCTI,HCTIFILETYPE,OIMP_CTI)
 !     ##################################################################
 !
@@ -39,7 +39,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -94,7 +93,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -224,19 +222,19 @@ ELSE
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(HCTI)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                            YFILETYPE,'FULL  ','SURF  ','READ ')
      ENDIF     
 !   
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     YFILETYPE,'TI_MIN' ,XMIN_WORK ,IRET) 
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     YFILETYPE,'TI_MAX' ,XMAX_WORK ,IRET)
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     YFILETYPE,'TI_MEAN',XMEAN_WORK,IRET)
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     YFILETYPE,'TI_STD' ,XSTD_WORK ,IRET) 
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     YFILETYPE,'TI_SKEW',XSKEW_WORK,IRET) 
 !
      CALL END_IO_SURF_n(YFILETYPE)

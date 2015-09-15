@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INIT_CPL_GCM_n (IOB, &
+      SUBROUTINE INIT_CPL_GCM_n (&
                                   U, &
                                  HPROGRAM,HINIT)
 !     ########################################
@@ -50,7 +50,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -66,7 +65,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -117,37 +115,37 @@ ELSE
 ENDIF
 !
 YRECFM='VERSION'
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 LREAD=(HINIT/='PGD'.AND.HINIT/='PRE'.AND.IVERSION>=8)
 !
 IF (LREAD) THEN
    YRECFM='LCPL_GCM'
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HPROGRAM,YRECFM,GCPL_GCM,IRESP)
 ENDIF  
 !
 IF (LREAD.AND.GCPL_GCM) THEN
 !
    YRECFM='RAIN_GCM'
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HPROGRAM,YRECFM,U%XRAIN(:),IRESP)
 !
    YRECFM='SNOW_GCM'
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HPROGRAM,YRECFM,U%XSNOW(:),IRESP)
 !
    YRECFM='Z0_GCM'
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HPROGRAM,YRECFM,U%XZ0(:),IRESP)
 !
    YRECFM='Z0H_GCM'
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HPROGRAM,YRECFM,U%XZ0H(:),IRESP)
 !
    YRECFM='QS_GCM'
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HPROGRAM,YRECFM,U%XQSURF(:),IRESP)
 !
 ENDIF        

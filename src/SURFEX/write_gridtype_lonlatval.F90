@@ -1,5 +1,5 @@
 !     #################################################################
-      SUBROUTINE WRITE_GRIDTYPE_LONLATVAL (DGU, IOB, U, &
+      SUBROUTINE WRITE_GRIDTYPE_LONLATVAL (DGU, U, &
                                            HPROGRAM,KLU,KGRID_PAR,PGRID_PAR,KRESP)
 !     #################################################################
 !
@@ -37,7 +37,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_WRITE_SURF
@@ -55,7 +54,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
@@ -94,19 +92,19 @@ ALLOCATE(ZDY(KLU))
 !              -----------------------------------------
 !
 YCOMMENT='XX'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
 !
 YCOMMENT='XY'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'XY',ZY,KRESP,YCOMMENT)
 !
 YCOMMENT='XDX'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
 !
 YCOMMENT='XDY'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
 !
 !---------------------------------------------------------------------------

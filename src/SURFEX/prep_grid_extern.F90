@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PREP_GRID_EXTERN (IOB, &
+      SUBROUTINE PREP_GRID_EXTERN (&
                                    HFILETYPE,KLUOUT,HGRIDTYPE,HINTERP_TYPE,KNI)
 !     ##########################################################################
 !
@@ -37,7 +37,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_PREP_GRID_CONF_PROJ
@@ -56,7 +55,6 @@ IMPLICIT NONE
 !       ------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
 INTEGER,           INTENT(IN)    :: KLUOUT       ! logical unit of output listing
@@ -76,7 +74,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      ------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_EXTERN',0,ZHOOK_HANDLE)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,'GRID_TYPE',HGRIDTYPE,IRESP)
 !
 !-----------------------------------------------------------------------
@@ -85,17 +83,17 @@ IF (LHOOK) CALL DR_HOOK('PREP_GRID_EXTERN',0,ZHOOK_HANDLE)
 !      ---------------
 !
 IF (HGRIDTYPE=='CONF PROJ ') THEN
-  CALL PREP_GRID_CONF_PROJ(IOB, &
+  CALL PREP_GRID_CONF_PROJ(&
                            HFILETYPE,HINTERP_TYPE,KNI)
 ELSE IF (HGRIDTYPE=='CARTESIAN ') THEN
-  CALL PREP_GRID_CARTESIAN(IOB, &
+  CALL PREP_GRID_CARTESIAN(&
                            HFILETYPE,HINTERP_TYPE,KNI)
 ELSE IF (HGRIDTYPE=='GAUSS     ') THEN
-  CALL PREP_GRID_GAUSS(IOB, &
+  CALL PREP_GRID_GAUSS(&
                        HFILETYPE,HINTERP_TYPE,KNI)
 ELSE IF (HGRIDTYPE=='LONLAT REG') THEN
   HGRIDTYPE = 'LATLON    '
-  CALL PREP_GRID_LONLAT_REG(IOB, &
+  CALL PREP_GRID_LONLAT_REG(&
                             HFILETYPE,HINTERP_TYPE,KNI)
 ELSE
   WRITE(KLUOUT,*) 'GRIDTYPE "',HGRIDTYPE,'" NOT ACCEPTED AS INPUT FILE FOR FIELD PREPARATION'

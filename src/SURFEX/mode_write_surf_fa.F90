@@ -20,7 +20,7 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX0_FA (IOB, &
+      SUBROUTINE WRITE_SURFX0_FA (&
                                   HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -28,7 +28,6 @@ CONTAINS
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -36,7 +35,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,7 +46,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 REAL,               INTENT(IN) :: PFIELD   ! the real scalar to be read
@@ -64,7 +62,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:ERROR_WRITE_SURF_FA:WRITE_SURFX0_FA'
 !
 KRESP=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 IF (LWORK0 .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX0_FA',1,ZHOOK_HANDLE)
 IF (LWORK0) RETURN
@@ -91,7 +89,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN0_FA (IOB, &
+      SUBROUTINE WRITE_SURFN0_FA (&
                                   HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -99,7 +97,6 @@ END SUBROUTINE WRITE_SURFX0_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -107,7 +104,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NMASK, CPREFIX1D, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -118,7 +115,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN) :: KFIELD   ! the integer to be read
@@ -135,7 +131,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN0_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 IF (LWORK0 .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN0_FA',1,ZHOOK_HANDLE)
 IF (LWORK0) RETURN
@@ -162,7 +158,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL0_FA (IOB, &
+      SUBROUTINE WRITE_SURFL0_FA (&
                                   HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -170,7 +166,6 @@ END SUBROUTINE WRITE_SURFN0_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -178,7 +173,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -189,7 +184,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(IN) :: OFIELD   ! array containing the data field
@@ -206,7 +200,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL0_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 IF (LWORK0 .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL0_FA',1,ZHOOK_HANDLE)
 IF (LWORK0) RETURN
@@ -233,7 +227,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFC0_FA (IOB, &
+      SUBROUTINE WRITE_SURFC0_FA (&
                                   HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -241,7 +235,6 @@ END SUBROUTINE WRITE_SURFL0_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -249,7 +242,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -260,7 +253,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC      ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD    ! the integer to be read
@@ -278,7 +270,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 IF (LWORK0.AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',1,ZHOOK_HANDLE)
 IF (LWORK0) RETURN
@@ -306,7 +298,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_FA (IOB, &
+      SUBROUTINE WRITE_SURFX1_FA (&
                                   HREC,KL,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -314,7 +306,6 @@ END SUBROUTINE WRITE_SURFC0_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE, WLOG_MPI
 !
@@ -324,7 +315,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NMASK, NFULL, CPREFIX1D, &
                             LFANOCOMPACT 
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 USE MODI_GATHER_AND_WRITE_MPI
 !
@@ -340,7 +331,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN) :: KL       ! number of points
@@ -366,7 +356,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',0,ZHOOK_HANDLE)
 !$OMP SINGLE
 NWORKB=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !$OMP END SINGLE
 !
@@ -426,7 +416,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_FA (IOB, &
+      SUBROUTINE WRITE_SURFX2_FA (&
                                   HREC,KL1,KL2,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -434,7 +424,6 @@ END SUBROUTINE WRITE_SURFX1_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -444,7 +433,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NMASK, NFULL, &
                             CPREFIX2D, LFANOCOMPACT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 USE MODI_GATHER_AND_WRITE_MPI
 !
@@ -460,7 +449,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN) :: KL1      ! number of points
@@ -490,7 +478,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',0,ZHOOK_HANDLE)
 !$OMP SINGLE
 NWORKB=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !$OMP END SINGLE
 !
@@ -555,7 +543,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX2_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1_FA (IOB, &
+      SUBROUTINE WRITE_SURFN1_FA (&
                                   HREC,KL,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -563,7 +551,6 @@ END SUBROUTINE WRITE_SURFX2_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -573,7 +560,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NMASK, NFULL, CPREFIX1D, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 USE MODI_GATHER_AND_WRITE_MPI
 !
@@ -589,7 +576,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN) :: KL       ! number of points
@@ -613,7 +599,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN1_FA',0,ZHOOK_HANDLE)
 !$OMP SINGLE
 NWORKB = 0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !$OMP END SINGLE
 !
@@ -666,7 +652,7 @@ RETURN
 END SUBROUTINE WRITE_SURFN1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL1_FA (IOB, &
+      SUBROUTINE WRITE_SURFL1_FA (&
                                   HREC,KL,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -674,7 +660,6 @@ END SUBROUTINE WRITE_SURFN1_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -684,7 +669,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -699,7 +684,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN) :: KL       ! number of points
@@ -722,7 +706,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL1_FA',0,ZHOOK_HANDLE)
 !$OMP SINGLE
 NWORKB=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !$OMP END SINGLE
 !
@@ -767,7 +751,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL1_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT0_FA (IOB, &
+      SUBROUTINE WRITE_SURFT0_FA (&
                                   HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -775,7 +759,6 @@ END SUBROUTINE WRITE_SURFL1_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -783,7 +766,7 @@ USE MODD_IO_SURF_FA, ONLY : CPREFIX1D, NUNIT_FA, LFANOCOMPACT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_WRITE_SURF_FA
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -794,7 +777,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
@@ -826,7 +808,7 @@ IF (HREC=='DTCUR') THEN
 !
 ELSE
 !
-  CALL IO_BUFF_n(IOB, &
+  CALL IO_BUFF(&
                 HREC,'W',LWORK0)
   IF (LWORK0 .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT0_FA',1,ZHOOK_HANDLE)
   IF (LWORK0) RETURN
@@ -865,7 +847,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT0_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT0_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT2_FA (IOB, &
+      SUBROUTINE WRITE_SURFT2_FA (&
                                   HREC,KL1,KL2,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -873,7 +855,6 @@ END SUBROUTINE WRITE_SURFT0_FA
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -883,7 +864,7 @@ USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, NLUOUT
 !
 USE MODE_FASURFEX
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ABOR1_SFX
 USE MODI_ERROR_WRITE_SURF_FA
 !
@@ -899,7 +880,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                      INTENT(IN) :: KL1      ! number of points
@@ -923,7 +903,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT2_FA',0,ZHOOK_HANDLE)
 !$OMP SINGLE
 NWORKB = 0
 !
-CALL IO_BUFF_n(IOB, &
+CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !$OMP END SINGLE
 !

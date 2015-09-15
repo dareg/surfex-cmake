@@ -1,10 +1,11 @@
 !     #########
 SUBROUTINE PREP_HOR_SNOW_FIELDS (DTCO, &
-                                  IOB, IG, U, &
+                                  IG, U, &
                                  HPROGRAM,HSURF,              &
                                 HFILE,HFILETYPE,             &
                                 HFILEPGD,HFILEPGDTYPE,       &
                                 KLUOUT,OUNIF,KPATCH,         &
+                                KTEB_PATCH, &
                                 KL,TPSNOW, TPTIME,           &
                                 PUNIF_WSNOW, PUNIF_RSNOW,    &
                                 PUNIF_TSNOW, PUNIF_LWCSNOW,  &
@@ -46,7 +47,6 @@ SUBROUTINE PREP_HOR_SNOW_FIELDS (DTCO, &
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -76,7 +76,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -89,6 +88,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
 INTEGER,            INTENT(IN)  :: KPATCH    ! patch number for output scheme
+INTEGER,            INTENT(IN) :: KTEB_PATCH
 INTEGER,            INTENT(IN)  :: KL        ! number of points
 TYPE(SURF_SNOW)                 :: TPSNOW    ! snow fields
 TYPE(DATE_TIME),    INTENT(IN)  :: TPTIME    ! date and time
@@ -166,18 +166,18 @@ IF(PRESENT(OKEY))THEN
   IF ( (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '.OR. HFILETYPE=='FA    ') &
        .AND. (HSURF=='SN_VEG ')  ) THEN
 !       
-     CALL OPEN_AUX_IO_SURF(IOB, &
+     CALL OPEN_AUX_IO_SURF(&
                            HFILE,HFILETYPE,'FULL  ')
      YRECFM='VERSION'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HFILETYPE,YRECFM,IVERSION,IRESP)    
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !  
      IF(IVERSION>=7)THEN       
-       CALL OPEN_AUX_IO_SURF(IOB, &
+       CALL OPEN_AUX_IO_SURF(&
                            HFILE,HFILETYPE,'NATURE')
        YRECFM='GLACIER'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HFILETYPE,YRECFM,GGLACIER,IRESP)    
        CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)  
        IF(GGLACIER)OKEY=.FALSE.
@@ -196,10 +196,10 @@ ENDIF
 ALLOCATE(ZW(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='WWW'//HSURF
-CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE,  &
-                         KLUOUT, OUNIF, YSNSURF, KPATCH, KL, TPSNOW, TPTIME,  &
+                         KLUOUT, OUNIF, YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,  &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,&
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,             &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,         &                      
@@ -213,10 +213,10 @@ CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
 ALLOCATE(ZD(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='DEP'//HSURF
-CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE,  &
-                         KLUOUT, OUNIF, YSNSURF, KPATCH, KL, TPSNOW, TPTIME,  &
+                         KLUOUT, OUNIF, YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,  &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,&
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,             &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,         &
@@ -256,10 +256,10 @@ ENDIF
 !
 !* density profile
 YSNSURF='RHO'//HSURF
-CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,           &
-                         KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,         &
+                         KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,         &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,     &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                  &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,              &
@@ -328,10 +328,10 @@ ENDIF
 !
 !* albedo
 YSNSURF='ALB'//HSURF
- CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,         &
-                         KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
+                         KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
@@ -342,10 +342,10 @@ IF (TPSNOW%SCHEME/='D95') THEN
   !
   !* heat in snowpack profile
   YSNSURF='HEA'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,          &
-                           KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
+                           KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,        &
                            PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                            PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                            PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
@@ -358,10 +358,10 @@ IF (TPSNOW%SCHEME=='CRO'.OR. TPSNOW%SCHEME=='3-L') THEN
   !
   !* age in snowpack profile
   YSNSURF='AGE'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
-                         KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
+                         KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
@@ -383,10 +383,10 @@ ENDIF
 IF (TPSNOW%SCHEME=='CRO') THEN
   !
   YSNSURF='SG1'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
-                         KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
+                         KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
@@ -394,10 +394,10 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
   YSNSURF='SG2'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
-                         KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
+                         KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
@@ -405,10 +405,10 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
   YSNSURF='HIS'//HSURF
-  CALL PREP_HOR_SNOW_FIELD(DTCO, IOB, &
+  CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
-                         KLUOUT,OUNIF,YSNSURF, KPATCH, KL, TPSNOW, TPTIME,        &
+                         KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,        &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &

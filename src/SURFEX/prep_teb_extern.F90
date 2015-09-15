@@ -1,13 +1,12 @@
 !     #########
-SUBROUTINE PREP_TEB_EXTERN (DTCO, IOB, &
-                            HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
+SUBROUTINE PREP_TEB_EXTERN (DTCO, &
+                            HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,KPATCH,PFIELD)
 !     #################################################################################
 !
 !
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -19,7 +18,6 @@ USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_TOWN_PRESENCE
 USE MODI_READ_TEB_PATCH
-USE MODI_GET_CURRENT_TEB_PATCH
 !
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, &
@@ -37,7 +35,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -46,6 +43,7 @@ TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
  CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
+INTEGER,            INTENT(IN)  :: KPATCH
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
@@ -73,7 +71,6 @@ INTEGER           :: INI            ! total 1D dimension
 LOGICAL                              :: GTEB      ! flag if TEB fields are present
 INTEGER                              :: IPATCH    ! number of soil temperature patches
 INTEGER                              :: ITEB_PATCH! number of TEB patches in file
-INTEGER                              :: ICURRENT_PATCH! current TEB patch to be initialized
  CHARACTER(LEN=3)                     :: YPATCH    ! indentificator for TEB patch
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -89,11 +86,11 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_EXTERN',0,ZHOOK_HANDLE)
 !
 !
 !* reading of version of the file being read
-CALL OPEN_AUX_IO_SURF(IOB, &
+CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
 CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
@@ -103,21 +100,21 @@ GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(IOB, &
+CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !* reads the grid
-CALL PREP_GRID_EXTERN(IOB, &
+CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !* reads if TEB fields exist in the input file
-CALL TOWN_PRESENCE(IOB, &
+CALL TOWN_PRESENCE(&
                    HFILEPGDTYPE,GTEB)
 CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 IF (.NOT.GOLD_NAME.AND.GTEB) THEN
    YRECFM='BEM'
-   CALL OPEN_AUX_IO_SURF(IOB, &
+   CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'TOWN  ')
-   CALL READ_SURF(IOB, &
+   CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,YBEM,IRESP)
    CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 ELSE
@@ -132,9 +129,9 @@ IF (HSURF=='ZS     ') THEN
   !
   ALLOCATE(PFIELD(INI,1))
   YRECFM='ZS'
-  CALL OPEN_AUX_IO_SURF(IOB, &
+  CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   !
@@ -147,15 +144,14 @@ ELSE
 !
   IF (GTEB) THEN
 !
-    CALL READ_TEB_PATCH(IOB, &
+    CALL READ_TEB_PATCH(&
                         HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
-    CALL GET_CURRENT_TEB_PATCH(ICURRENT_PATCH)
     YPATCH='   '
     IF (ITEB_PATCH>1) THEN
-      WRITE(YPATCH,FMT='(A,I1,A)') 'T',MIN(ICURRENT_PATCH,ITEB_PATCH),'_'
+      WRITE(YPATCH,FMT='(A,I1,A)') 'T',MIN(KPATCH,ITEB_PATCH),'_'
     END IF
 !    
-    CALL OPEN_AUX_IO_SURF(IOB, &
+    CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'TOWN  ')
 !
 !---------------------------------------------------------------------------------------
@@ -180,48 +176,48 @@ ELSE
           YRECFM='FLOOR_LAYER'
         END IF
       END IF
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,ILAYER,IRESP)
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
       !
       ALLOCATE(ZD(INI,ILAYER))
-      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD)
-      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD)
-      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD)
-      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(IOB, &
+      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(&
                                                DTCO, &
                                                HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD)
       !
-      CALL OPEN_AUX_IO_SURF(IOB, &
+      CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'TOWN  ')
       !
       !* reading option for road orientation
       YWALL_OPT = 'UNIF'
       IF (YSURF =='T_WALL' .AND. .NOT. GOLD_NAME) THEN
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP)
       END IF
       IF (YSURF =='T_WALLA' .AND. .NOT. GOLD_NAME) THEN
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP)
       END IF
       IF (YSURF =='T_WALLB' .AND. .NOT. GOLD_NAME) THEN
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP)
       END IF
       !
@@ -248,7 +244,7 @@ ELSE
         END IF
         YRECFM=YPATCH//YRECFM
         YRECFM=ADJUSTL(YRECFM)
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,YRECFM,ZFIELD(:,JLAYER),IRESP,HDIR='A')
       END DO
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
@@ -309,9 +305,9 @@ ELSE
         YRECFM=YPATCH//YRECFM
         YRECFM=ADJUSTL(YRECFM)
         CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-        CALL OPEN_AUX_IO_SURF(IOB, &
+        CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'TOWN  ')
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
         CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
       ELSE
@@ -342,9 +338,9 @@ ELSE
       YRECFM=YPATCH//YRECFM
       YRECFM=ADJUSTL(YRECFM)
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-      CALL OPEN_AUX_IO_SURF(IOB, &
+      CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'TOWN  ')
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
@@ -363,19 +359,19 @@ ELSE
     CASE('T_ROAD','T_ROOF','T_WALL','T_WIN1','T_FLOOR','T_CAN','TI_ROAD','T_WALLA','T_WALLB')
       YSURF=HSURF(1:6)
       !* reading of the soil surface temperature
-      CALL OPEN_AUX_IO_SURF(IOB, &
+      CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'NATURE')
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                HFILEPGDTYPE,'PATCH_NUMBER',IPATCH,IRESP)
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
       ALLOCATE(ZFIELD(INI,IPATCH))
-      CALL OPEN_AUX_IO_SURF(IOB, &
+      CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'NATURE')
       IF (YSURF=='T_FLOO' .OR. YSURF=='T_CAN ' .OR. YSURF=='TI_ROA') THEN
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,'TG2',ZFIELD(:,:),IRESP,HDIR='A')
       ELSE
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                HFILETYPE,'TG1',ZFIELD(:,:),IRESP,HDIR='A')
       ENDIF
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)

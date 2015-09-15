@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_OROGRAPHY (DGU, IOB, DTCO, UG, U, USS, &
+      SUBROUTINE PGD_OROGRAPHY (DGU, DTCO, UG, U, USS, &
                                 HPROGRAM,PSEA,PWATER,HFILE,HFILETYPE,OZS)
 !     ##############################################################
 !
@@ -40,7 +40,6 @@
 !            -----------
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -93,7 +92,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -236,9 +234,9 @@ IF (OZS) THEN
 !*    5.1     Use of imposed field
 !             --------------------
 !
-  CALL OPEN_AUX_IO_SURF(IOB, &
+  CALL OPEN_AUX_IO_SURF(&
                         HFILE,HFILETYPE,'FULL  ')
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HFILETYPE,'DIM_FULL  ',IDIM_FULL,IRESP)
   CALL GET_SIZE_FULL_n(U, &
                        HPROGRAM,IDIM_FULL,IZS)
@@ -254,7 +252,7 @@ IF (OZS) THEN
     WRITE(ILUOUT,*) ' '
     CALL ABOR1_SFX('PGD_OROGRAPHY: ATMOSPHERIC PRESCRIBED OROGRAPHY DOES NOT HAVE THE CORRECT NB OF POINTS')
   END IF
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HFILETYPE,'ZS',U%XZS(:),IRESP)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   !
@@ -378,13 +376,13 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YZS)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF     
 !   
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  YFILETYPE,'ZS',U%XZS(:),IRESP) 
-  CALL READ_SSO_n(IOB, &
+  CALL READ_SSO_n(&
                   U, USS, &
                   YFILETYPE)
 !

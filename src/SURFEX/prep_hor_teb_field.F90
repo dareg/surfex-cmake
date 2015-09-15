@@ -1,6 +1,6 @@
 !     #########
-SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, IOB, IG, U, TG, T, TOP, &
-                               HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, IG, U, TG, T, TOP, &
+                               HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
 !
 !
@@ -33,7 +33,6 @@ SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, IOB, IG, U, TG, T, TOP, &
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
@@ -74,7 +73,6 @@ IMPLICIT NONE
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
@@ -87,6 +85,8 @@ TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+!
+INTEGER,            INTENT(IN)  :: KPATCH
 !
 !*      0.2    declarations of local variables
 !
@@ -130,11 +130,11 @@ IF (HSURF=='SN_ROOF') THEN
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROOF)))                                 
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IOB, IG, U, &
+                            IG, U, &
                             HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &
-                            ILUOUT,GUNIF,1,              &
+                            ILUOUT,GUNIF,1,KPATCH,       &
                             SIZE(TG%XLAT),T%CUR%TSNOW_ROOF, TOP%TTIME,&
                             XWSNOW_ROOF, XRSNOW_ROOF,    &
                             XTSNOW_ROOF, XLWCSNOW_ROOF,  &
@@ -157,11 +157,11 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROAD)))                                   
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IOB, IG, U, &
+                            IG, U, &
                             HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &                            
-                            ILUOUT,GUNIF,1,              &
+                            ILUOUT,GUNIF,1,KPATCH,       &
                             SIZE(TG%XLAT),T%CUR%TSNOW_ROAD, TOP%TTIME,&
                             XWSNOW_ROAD, XRSNOW_ROAD,    &
                             XTSNOW_ROAD, XLWCSNOW_ROAD,  &
@@ -184,8 +184,8 @@ IF (GUNIF) THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_TEB_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
  ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR. YFILETYPE=='FA    ') THEN
-  CALL PREP_TEB_EXTERN(DTCO, IOB, &
-                       HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
+  CALL PREP_TEB_EXTERN(DTCO, &
+                       HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,KPATCH,ZFIELDIN)
  ELSE IF (YFILETYPE=='BUFFER') THEN
   CALL PREP_TEB_BUFFER(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
  ELSE

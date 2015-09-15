@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PREP_GRID_GAUSS (IOB, &
+      SUBROUTINE PREP_GRID_GAUSS (&
                                   HFILETYPE,HINTERP_TYPE,KNI)
 !     ##########################################################################
 !
@@ -39,7 +39,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -54,7 +53,6 @@ IMPLICIT NONE
 !       ------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
  CHARACTER(LEN=6),  INTENT(OUT)   :: HINTERP_TYPE ! Grid type
@@ -87,13 +85,13 @@ IF (LHOOK) CALL DR_HOOK('PREP_GRID_GAUSS',0,ZHOOK_HANDLE)
 !      ----------
 !
 YRECFM = 'LAPO'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,ZLAPO,IRESP)
 YRECFM = 'LOPO'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,ZLOPO,IRESP)
 YRECFM = 'CODIL'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,ZCODIL,IRESP)
 !
 !-----------------------------------------------------------------------
@@ -102,7 +100,7 @@ YRECFM = 'CODIL'
 !      ----
 !
 YRECFM = 'NLATI'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,INLATI,IRESP)
 !
 IF (ALLOCATED(INLOPA)) DEALLOCATE(INLOPA)
@@ -110,7 +108,7 @@ ALLOCATE(INLOPA(INLATI))
 IF (ALLOCATED(NINLO)) DEALLOCATE(NINLO)
 ALLOCATE(NINLO(INLATI))
 YRECFM = 'NLOPA'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,INLOPA,IRESP,HDIR='A')
 !
 KNI = SUM(INLOPA)

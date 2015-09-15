@@ -81,7 +81,7 @@ CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM)
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
- CALL SURFEX_ALLOC(1)
+ CALL SURFEX_ALLOC_LIST(1)
  YSURF_CUR => YSURF_LIST(1)
 !-------------------------------------------------------------------------------
 !
@@ -151,7 +151,7 @@ WRITE(*,*) '    ----------------------------'
 CLOSE(NLISTING)
 !
 !-------------------------------------------------------------------------------
-CALL SURFEX_DEALLO
+CALL SURFEX_DEALLO_LIST
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',1,ZHOOK_HANDLE)

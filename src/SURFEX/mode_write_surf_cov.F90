@@ -8,7 +8,7 @@ PUBLIC :: WRITE_SURF_COV
 CONTAINS
 
 !     #############################################################
-      SUBROUTINE WRITE_SURF_COV (DGU, IOB, U, &
+      SUBROUTINE WRITE_SURF_COV (DGU, U, &
                                  HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -17,7 +17,6 @@ CONTAINS
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_WRITE_SURF, ONLY: WRITE_SURF
@@ -34,7 +33,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
@@ -76,7 +74,7 @@ ELSE
     YREC = 'COVER_PACKED'
     YCOMMENT='-'
 !!    YCOMMENT=HCOMMENT
-    CALL WRITE_SURF(DGU, IOB, U, &
+    CALL WRITE_SURF(DGU, U, &
                     HPROGRAM,YREC,.FALSE.,KRESP,YCOMMENT)
   ENDIF
   !
@@ -88,7 +86,7 @@ ELSE
     IF (.NOT. OFLAG(JCOVER)) CYCLE
     ICOVER = ICOVER+1
     !
-    CALL WRITE_SURF(DGU, IOB, U, &
+    CALL WRITE_SURF(DGU, U, &
                     HPROGRAM,YREC,PFIELD(:,ICOVER),KRESP,YCOMMENT,YDIR)
     !
   END DO

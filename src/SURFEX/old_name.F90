@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE OLD_NAME (IOB, &
+      SUBROUTINE OLD_NAME (&
                            HPROGRAM,HRECIN,HRECOUT)
 !     #######################################################
 !
@@ -38,7 +38,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -51,7 +50,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
  CHARACTER(LEN=12), INTENT(IN)  :: HRECIN   ! name of field to be read
@@ -72,9 +70,9 @@ IF (LHOOK) CALL DR_HOOK('OLD_NAME',0,ZHOOK_HANDLE)
 !
 HRECOUT = HRECIN
 IF (HRECIN=='COVER_LIST') THEN
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'VERSION',IVERSION,IRESP)
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'BUG', IBUGFIX ,IRESP)
   IF (IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX==0)) HRECOUT='COVER'
 END IF

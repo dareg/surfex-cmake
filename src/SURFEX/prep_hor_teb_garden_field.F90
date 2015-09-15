@@ -1,7 +1,7 @@
 !     #########
-SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, IOB, IG, I, UG, U, USS, &
+SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, IG, I, UG, U, USS, &
                                        TGD, TGDO, TGDPE, TGDP, TG, TOP, TVG, &
-                                      HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                      HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
 !
 !!****  *PREP_HOR_TEB_GARDEN_FIELD* - reads, interpolates and prepares an ISBA field
@@ -39,7 +39,6 @@ SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, IOB, IG, I, UG, U, USS, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -90,7 +89,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
@@ -111,6 +109,8 @@ TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+!
+INTEGER,            INTENT(IN)  :: KPATCH
 !
 !*      0.2    declarations of local variables
 !
@@ -184,12 +184,12 @@ IF (HSURF=='SN_VEG ') THEN
   ZPATCH=1.
   ZVEGTYPE_PATCH(:,:,1) = TGDP%XVEGTYPE(:,:)
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IOB, IG, U, &
+                            IG, U, &
                             HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &
-                            ILUOUT,GUNIF_SNOW,1,            &
-                            INI,TGD%CUR%TSNOW, TOP%TTIME,               &
+                            ILUOUT,GUNIF_SNOW,1,KPATCH,     &
+                            INI,TGD%CUR%TSNOW, TOP%TTIME,   &
                             XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
                             XLWCSNOW_GD, XASNOW_GD,         &
                             LSNOW_IDEAL_GD, ZSG1SNOW,       &
@@ -216,8 +216,8 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_TEB_GARDEN_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
-   CALL PREP_TEB_GARDEN_EXTERN(DTCO, IOB, I, U, &
-                               HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
+   CALL PREP_TEB_GARDEN_EXTERN(DTCO, I, U, &
+                               HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,KPATCH,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_TEB_GARDEN_BUFFER(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE

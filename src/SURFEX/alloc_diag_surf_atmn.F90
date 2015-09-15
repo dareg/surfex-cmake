@@ -1,6 +1,5 @@
 !     #############################################################
-      SUBROUTINE ALLOC_DIAG_SURF_ATM_n (IOB, &
-                                         DGU, U, &
+      SUBROUTINE ALLOC_DIAG_SURF_ATM_n (DGU, U, &
                                         HPROGRAM,KSW)
 !     #############################################################
 !
@@ -20,11 +19,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
-!
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -43,8 +37,6 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -279,8 +271,7 @@ IF (DGU%LSURF_BUDGETC) THEN
   ALLOCATE(DGU%XAVG_FMVC    (U%NSIZE_FULL))
 !
   YREC='BUDC'
-  CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%LREAD_BUDGETC,IRESP)
+  CALL READ_SURF(HPROGRAM,YREC,DGU%LREAD_BUDGETC,IRESP)
 !
   IF (.NOT. DGU%LREAD_BUDGETC) THEN
       DGU%TIME_BUDGETC = U%TTIME
@@ -314,53 +305,44 @@ IF (DGU%LSURF_BUDGETC) THEN
       DGU%XAVG_FMVC   = 0.0       
   ELSE
       YREC='TBUDC'
-      CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%TIME_BUDGETC,IRESP)
+      CALL READ_SURF(HPROGRAM,YREC,DGU%TIME_BUDGETC,IRESP)
      YREC='RNC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_RNC,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_RNC,IRESP)
      YREC='HC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_HC ,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_HC ,IRESP)
      YREC='LEC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_LEC,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_LEC,IRESP)
      YREC='LEIC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_LEIC,IRESP)     
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_LEIC,IRESP)     
      YREC='GFLUXC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_GFLUXC ,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_GFLUXC ,IRESP)
      YREC='SWDC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_SWDC,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_SWDC,IRESP)
      YREC='SWUC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_SWUC,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_SWUC,IRESP)
      YREC='LWDC'
-     CALL READ_SURF(IOB, &
-                 HPROGRAM,YREC,DGU%XAVG_LWDC,IRESP)
+     CALL READ_SURF(HPROGRAM,YREC,DGU%XAVG_LWDC,IRESP)
      YREC='LWUC'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF( &
                  HPROGRAM,YREC,DGU%XAVG_LWUC,IRESP)
      YREC='FMUC'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                  HPROGRAM,YREC,DGU%XAVG_FMUC,IRESP)
      YREC='FMVC'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                  HPROGRAM,YREC,DGU%XAVG_FMVC,IRESP)   
 !
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                  HPROGRAM,'VERSION',IVERSION,IRESP)
       IF (IVERSION<8)THEN
          DGU%XAVG_EVAPC  = 0.0
          DGU%XAVG_SUBLC  = 0.0              
       ELSE
          YREC='EVAPC'
-         CALL READ_SURF(IOB, &
+         CALL READ_SURF(&
                  HPROGRAM,YREC,DGU%XAVG_EVAPC,IRESP)
          YREC='SUBLC'
-         CALL READ_SURF(IOB, &
+         CALL READ_SURF(&
                  HPROGRAM,YREC,DGU%XAVG_SUBLC,IRESP)              
       ENDIF
 !     

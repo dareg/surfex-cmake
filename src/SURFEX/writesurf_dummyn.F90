@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_DUMMY_n (DGU, IOB, U, &
+      SUBROUTINE WRITESURF_DUMMY_n (DGU, U, &
                                      DUU, &
                                     HPROGRAM)
 !     ##########################################
@@ -26,7 +26,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
@@ -45,7 +44,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DUMMY_SURF_FIELDS_t), INTENT(INOUT) :: DUU
@@ -74,7 +72,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_DUMMY_N',0,ZHOOK_HANDLE)
 YRECFM='DUMMY_GR_NBR'
 YCOMMENT=' '
 !
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,DUU%NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
@@ -89,7 +87,7 @@ DO JDUMMY=1,DUU%NDUMMY_NBR
   YSTRING03=DUU%CDUMMY_AREA(JDUMMY)
   YCOMMENT='X_Y_'//YRECFM//YSTRING20//YSTRING03//  &
              '                                                             '  
-  CALL WRITE_SURF(DGU, IOB, U, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,DUU%XDUMMY_FIELDS(:,JDUMMY),IRESP,HCOMMENT=YCOMMENT)
 END DO
 IF (LHOOK) CALL DR_HOOK('WRITESURF_DUMMY_N',1,ZHOOK_HANDLE)

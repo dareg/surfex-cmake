@@ -1,5 +1,5 @@
 !     ######spl
-      SUBROUTINE ZOOM_PGD_SEAFLUX (DTCO, DTS, IOB, SG, S, UG, U, &
+      SUBROUTINE ZOOM_PGD_SEAFLUX (DTCO, DTS, SG, S, UG, U, &
                                    HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)
 !     ##############################################################
 !
@@ -44,7 +44,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -77,7 +76,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
@@ -117,7 +115,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !  Their value must be defined as XUNDEF.
 !
 !
- CALL OPEN_AUX_IO_SURF(IOB, &
+ CALL OPEN_AUX_IO_SURF(&
                        HINIFILE,HINIFILETYPE,'FULL  ')
 !
 !-------------------------------------------------------------------------------
@@ -145,7 +143,7 @@ ALLOCATE(SG%XMESH_SIZE (SG%NDIM))
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(IOB, &
+ CALL PREP_GRID_EXTERN(&
                        HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
  CALL PREP_OUTPUT_GRID(UG, U, &
@@ -161,7 +159,7 @@ LINTERP(:) = .TRUE.
 !              -----------------
 !
 ALLOCATE(ZSEABATHY(INI,1))
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'BATHY',ZSEABATHY(:,1),IRESP,HDIR='A')
 !
 ALLOCATE(ZWORK(SG%NDIM,1))
@@ -174,12 +172,10 @@ DEALLOCATE(ZSEABATHY,ZWORK)
 !============================================================
 ! G. TANGUY 03/2009
 ! reading of fields for SST_DATA
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
 !
-IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTCO, U, &
-                                               IOB, &
-                                               DTS, SG, &
+IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTCO, U, DTS, SG, &
                                                HPROGRAM,INI,HDIR='A')
 !
 !============================================================

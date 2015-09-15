@@ -1,6 +1,6 @@
 !
 !#############################################
-SUBROUTINE WRITE_HEADER_FA (IOB, UG, &
+SUBROUTINE WRITE_HEADER_FA (UG, &
                             CFILETYPE,HWRITE)
 !#############################################
 !
@@ -39,7 +39,6 @@ SUBROUTINE WRITE_HEADER_FA (IOB, UG, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODD_GRID_CONF_PROJ,  ONLY : XLATC, XLONC
@@ -58,7 +57,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 !
-USE MODI_IO_BUFF_CLEAN_n
+USE MODI_IO_BUFF_CLEAN
 !
 USE MODI_GET_LUOUT
 !
@@ -68,7 +67,6 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
  CHARACTER(LEN=3),    INTENT(IN)  :: HWRITE       ! 'PGD' : only physiographic fields are written
@@ -126,7 +124,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_HEADER_FA',0,ZHOOK_HANDLE)
- CALL IO_BUFF_CLEAN_n(IOB)
+ CALL IO_BUFF_CLEAN
 !
 ZRAD=XPI/180.0
 !

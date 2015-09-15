@@ -128,7 +128,7 @@ ENDIF
 !
 !* initialization for I/O
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !* 1D physical dimension
@@ -151,7 +151,7 @@ IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_WATSUP)) ALLOCATE(YSC%IM%DTI%XPAR_WATSUP(ILU
 !       
 ALLOCATE(YSC%IM%I%XPATCH_OLD(ILU,YSC%IM%I%NPATCH))       
 YRECFM = 'PATCH'
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,YSC%IM%I%XPATCH_OLD(:,:),IRESP)
 !
 !* read old soil layer thicknesses (m)
@@ -161,7 +161,7 @@ ALLOCATE(YSC%IM%I%XDG_OLD(ILU,YSC%IM%I%NGROUND_LAYER,YSC%IM%I%NPATCH))
 DO JLAYER=1,YSC%IM%I%NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='OLD_DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-  CALL READ_SURF(YSC%IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
   YSC%IM%I%XDG_OLD(:,JLAYER,:)=ZWORK
 END DO
@@ -176,12 +176,12 @@ DEALLOCATE(ZWORK)
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
- CALL SET_VEGTYPES_FRACTIONS(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%IM%DTI, YSC%IM%IG, YSC%IM%I, YSC%UG, YSC%U, &
+ CALL SET_VEGTYPES_FRACTIONS(YSC%DTCO, YSC%DGU, YSC%IM%DTI, YSC%IM%IG, YSC%IM%I, YSC%UG, YSC%U, &
                              HPROGRAM)
 !
 !* re-initialize ISBA with new parameters
 !       
- CALL COMPUTE_ISBA_PARAMETERS(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, YSC%IM, &
+ CALL COMPUTE_ISBA_PARAMETERS(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%IM, &
                              YSC%DST, YSC%SLT,  YSC%SV, &
                               HPROGRAM,HINIT,OLAND_USE,                  &
                              ILU,KSV,KSW,                                &

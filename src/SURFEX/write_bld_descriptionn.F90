@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE WRITE_BLD_DESCRIPTION_n (DGU, IOB, U, &
+      SUBROUTINE WRITE_BLD_DESCRIPTION_n (DGU, U, &
                                            BDD, &
                                           HPROGRAM)
 !     #########################
@@ -41,7 +41,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
@@ -61,7 +60,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
@@ -101,7 +99,7 @@ ZWORK(6) = FLOAT(BDD%NDESC_ROAD_LAYER)
 ZWORK(7) = FLOAT(BDD%NDESC_FLOOR_LAYER)
 !
 YCOMMENT='Configuration numbers for descriptive building data'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,'-','Bld_dimensions  ')
 DEALLOCATE(ZWORK)
 !
@@ -191,7 +189,7 @@ END DO
  CALL UP_DESC_IND_W(BDD%NDESC_AGE) ; ZWORK(I1:I2) = FLOAT(BDD%NDESC_AGE_DATE(:))
 !
 YCOMMENT='Descriptive building data'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'BLD_DESC_DAT',ZWORK,IRESP,YCOMMENT,'-','Bld_parameters  ')
 DEALLOCATE(ZWORK)
 !

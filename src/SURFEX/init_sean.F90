@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_SEA_n (DTCO, DGU, IOB, UG, U, SM, DGL, &
+      SUBROUTINE INIT_SEA_n (DTCO, DGU, UG, U, SM, DGL, &
                              HPROGRAM,HINIT,                            &
                               KI,KSV,KSW,                                &
                               HSV,PCO2,PRHOA,                            &
@@ -47,7 +47,6 @@ USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -71,7 +70,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
@@ -126,7 +124,7 @@ ELSE IF (U%CSEA=='FLUX  ') THEN
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CSEA=='SEAFLX') THEN
-  CALL INIT_SEAFLUX_n(DTCO, DGU, IOB, UG, U, SM, &
+  CALL INIT_SEAFLUX_n(DTCO, DGU, UG, U, SM, &
                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                         PEMIS,PTSRAD,PTSURF,                          &

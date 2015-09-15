@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_GRID (IOB, &
+      SUBROUTINE READ_GRID (&
                             HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR)
 !     #########################################
 !
@@ -36,7 +36,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
@@ -54,7 +53,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
  CHARACTER(LEN=10),  INTENT(OUT) :: HGRID      ! type of horizontal grid
@@ -84,7 +82,7 @@ IF (LASSIM) THEN
   LREAD_ALL = .TRUE.
 ENDIF
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'GRID_TYPE',HGRID,KRESP)
 !
 !---------------------------------------------------------------------------
@@ -92,11 +90,11 @@ ENDIF
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_GRIDTYPE(IOB, &
+ CALL READ_GRIDTYPE(&
                     HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.FALSE.)
 !
 ALLOCATE(PGRID_PAR(IGRID_PAR))
- CALL READ_GRIDTYPE(IOB, &
+ CALL READ_GRIDTYPE(&
                     HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.TRUE.,PGRID_PAR,KRESP)
 !
 !---------------------------------------------------------------------------
@@ -110,15 +108,15 @@ SELECT CASE (HGRID)
   CASE("NONE      ")
     IF (PRESENT(PDIR)) PDIR(:) = 0.
     !
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'LON',      PLON,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'LAT',      PLAT,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'MESH_SIZE',PMESH_SIZE,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN

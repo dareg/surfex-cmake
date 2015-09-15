@@ -54,13 +54,12 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX0_ASC (IOB, &
+      SUBROUTINE READ_SURFX0_ASC (&
                                   HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -68,7 +67,7 @@ USE MODD_IO_SURF_ASC, ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -79,7 +78,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*), INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,              INTENT(OUT) :: PFIELD   ! the real scalar to be read
@@ -98,7 +96,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !
@@ -120,7 +118,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX1_ASC (IOB, &
+      SUBROUTINE READ_SURFX1_ASC (&
                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -128,7 +126,6 @@ END SUBROUTINE READ_SURFX0_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
@@ -138,7 +135,7 @@ USE MODD_IO_SURF_ASC,  ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 USE MODI_READ_AND_SEND_MPI
 !
@@ -154,7 +151,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:), INTENT(OUT)  :: PFIELD   ! array containing the data field
@@ -208,7 +204,7 @@ IF (NRANK==NPIO) THEN
     IF (.NOT. LWORK0) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,LWORK0,NLUOUT)
   ELSE
     YMASK=CMASK
-    CALL IO_BUFF_n(IOB, &
+    CALL IO_BUFF(&
                 HREC,'R',LWORK0)
     IF (LWORK0) YMASK='FULL  '
     CALL POSNAM(NUNIT,YMASK//' '//HREC,LWORK0,NLUOUT)
@@ -271,7 +267,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX1_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFX2_ASC (IOB, &
+      SUBROUTINE READ_SURFX2_ASC (&
                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -280,7 +276,6 @@ END SUBROUTINE READ_SURFX1_ASC
 
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0, XWORKD2, NWORKB, CWORK0, LWORK0
 !
@@ -290,7 +285,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 USE MODI_READ_AND_SEND_MPI
 !
@@ -306,7 +301,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
@@ -361,7 +355,7 @@ IF (NRANK==NPIO) THEN
     IF (.NOT. LWORK0) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,LWORK0,NLUOUT)
   ELSE
     YMASK=CMASK
-    CALL IO_BUFF_n(IOB, &
+    CALL IO_BUFF(&
                 HREC,'R',LWORK0)
     IF (LWORK0) YMASK='FULL  '
     CALL POSNAM(NUNIT,YMASK//' '//HREC,LWORK0,NLUOUT)
@@ -424,7 +418,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFX2_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFX2_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN0_ASC (IOB, &
+      SUBROUTINE READ_SURFN0_ASC (&
                                   HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -432,7 +426,6 @@ END SUBROUTINE READ_SURFX2_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -440,7 +433,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -451,7 +444,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KFIELD   ! the integer to be read
@@ -470,7 +462,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !
@@ -492,7 +484,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFN0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFN1_ASC (IOB, &
+      SUBROUTINE READ_SURFN1_ASC (&
                                   HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -500,7 +492,6 @@ END SUBROUTINE READ_SURFN0_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
 !
@@ -510,7 +501,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, NMASK, NFULL, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 USE MODI_READ_AND_SEND_MPI
 !
@@ -526,7 +517,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(OUT) :: KFIELD   ! the integer to be read
@@ -580,7 +570,7 @@ IF (NRANK==NPIO) THEN
     IF (.NOT. LWORK0) CALL POSNAM(NUNIT,'FULL  '//' '//HREC,LWORK0,NLUOUT)
   ELSE
     YMASK=CMASK
-    CALL IO_BUFF_n(IOB, &
+    CALL IO_BUFF(&
                 HREC,'R',LWORK0)
     IF (LWORK0) YMASK='FULL  '
     CALL POSNAM(NUNIT,YMASK//' '//HREC,LWORK0,NLUOUT)
@@ -643,7 +633,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFN1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFN1_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFC0_ASC (IOB, &
+      SUBROUTINE READ_SURFC0_ASC (&
                                   HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -651,7 +641,6 @@ END SUBROUTINE READ_SURFN1_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -659,7 +648,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -670,7 +659,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC      ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(OUT) :: HFIELD    ! the integer to be read
@@ -690,7 +678,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !
@@ -710,7 +698,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFC0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFC0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL0_ASC (IOB, &
+      SUBROUTINE READ_SURFL0_ASC (&
                                   HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -718,7 +706,6 @@ END SUBROUTINE READ_SURFC0_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -726,7 +713,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -737,7 +724,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL,            INTENT(OUT) :: OFIELD   ! array containing the data field
@@ -755,7 +741,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !
@@ -777,7 +763,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFL0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFL0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFL1_ASC (IOB, &
+      SUBROUTINE READ_SURFL1_ASC (&
                                   HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -785,7 +771,6 @@ END SUBROUTINE READ_SURFL0_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0, LWORKD, NWORKB, CWORK0
 !
@@ -795,7 +780,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -810,7 +795,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:),  INTENT(OUT) :: OFIELD   ! array containing the data field
@@ -848,7 +832,7 @@ IF (NRANK==NPIO) THEN
 !$OMP SINGLE
   ! 
   YMASK=CMASK
-  CALL IO_BUFF_n(IOB, &
+  CALL IO_BUFF(&
                 HREC,'R',LWORK0)
   IF (LWORK0) YMASK='FULL  '
   !
@@ -890,7 +874,7 @@ END SUBROUTINE READ_SURFL1_ASC
 !
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT0_ASC (IOB, &
+      SUBROUTINE READ_SURFT0_ASC (&
                                   HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -898,7 +882,6 @@ END SUBROUTINE READ_SURFL1_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURFEX_OMP, ONLY : LWORK0, NBLOCK
@@ -907,7 +890,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -918,7 +901,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(OUT) :: KYEAR    ! year
@@ -940,7 +922,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !
@@ -974,7 +956,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT0_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFT0_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT1_ASC (IOB, &
+      SUBROUTINE READ_SURFT1_ASC (&
                                   HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -982,7 +964,6 @@ END SUBROUTINE READ_SURFT0_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURFEX_OMP, ONLY : LWORK0, NBLOCK
@@ -991,7 +972,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -1002,7 +983,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(OUT) :: KYEAR    ! year
@@ -1025,7 +1005,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !
@@ -1056,7 +1036,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_SURFT1_ASC
 !
 !     #############################################################
-      SUBROUTINE READ_SURFT2_ASC (IOB, &
+      SUBROUTINE READ_SURFT2_ASC (&
                                   HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
@@ -1064,7 +1044,6 @@ END SUBROUTINE READ_SURFT1_ASC
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_OMP, ONLY : LWORK0
 !
@@ -1072,7 +1051,7 @@ USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NLUOUT, CMASK
 !
 USE MODE_POS_SURF
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_ERROR_READ_SURF_ASC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -1083,7 +1062,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(OUT) :: KYEAR    ! year
@@ -1106,7 +1084,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_ASC:READ_SURFT2_ASC',0,ZHOOK_HANDLE)
 KRESP=0
 !
 YMASK=CMASK
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'R',LWORK0)
 IF (LWORK0) YMASK='FULL  '
 !

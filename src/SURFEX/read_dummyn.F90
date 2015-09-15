@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_DUMMY_n (IOB, &
+      SUBROUTINE READ_DUMMY_n (&
                                 DUU, U, &
                                HPROGRAM)
 !     #################################
@@ -25,7 +25,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -43,7 +42,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DUMMY_SURF_FIELDS_t), INTENT(INOUT) :: DUU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -72,7 +70,7 @@ IF (LHOOK) CALL DR_HOOK('READ_DUMMY_N',0,ZHOOK_HANDLE)
 YRECFM='DUMMY_GR_NBR'
 YCOMMENT=' '
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,DUU%NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
@@ -90,7 +88,7 @@ DUU%CDUMMY_AREA(:) = '   '
 DO JDUMMY=1,DUU%NDUMMY_NBR
   !
   WRITE(YRECFM,FMT='(A8,I3.3,A5)') 'DUMMY_GR',JDUMMY,'     '
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,YRECFM,DUU%XDUMMY_FIELDS(:,JDUMMY),IRESP,HCOMMENT=YCOMMENT)
   !
   !

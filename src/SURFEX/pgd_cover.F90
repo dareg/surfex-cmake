@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_COVER ( DGU, IOB, DTCO, UG, U, USS, &
+      SUBROUTINE PGD_COVER ( DGU, DTCO, UG, U, USS, &
                             HPROGRAM,ORM_RIVER)
 !     ##############################################################
 !
@@ -42,7 +42,6 @@
 !            -----------
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -96,7 +95,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -249,15 +247,15 @@ ELSEIF(LIMP_COVER)THEN !LIMP_COVER (impose cover from input file at the same res
 #ifdef SFX_LFI
     CFILEIN_LFI = ADJUSTL(YCOVER)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF
 !
   ALLOCATE(U%LCOVER(JPCOVER))
-  CALL READ_LCOVER(IOB, &
+  CALL READ_LCOVER(&
                    YFILETYPE,U%LCOVER)
 !
-  CALL READ_SURF_COV(IOB, &
+  CALL READ_SURF_COV(&
                      YFILETYPE,'COVER',U%XCOVER(:,:),U%LCOVER,IRESP)
 !
   CALL END_IO_SURF_n(YFILETYPE)

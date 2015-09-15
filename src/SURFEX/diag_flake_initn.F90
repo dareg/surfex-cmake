@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_FLAKE_INIT_n (IOB, DGU, DGF, DGMF, F, &
+      SUBROUTINE DIAG_FLAKE_INIT_n (DGU, DGF, DGMF, F, &
                                     HPROGRAM,KLU,KSW)
 !     #####################
 !
@@ -39,7 +39,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
 USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
@@ -64,7 +63,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
 TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
@@ -195,7 +193,7 @@ IF (DGF%LSURF_BUDGETC) THEN
      DGF%XFMUC   = 0.0
      DGF%XFMVC   = 0.0
   ELSE
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,'VERSION',IVERSION,IRESP)
      IF (IVERSION<8)THEN
        DGF%XRNC    = 0.0
@@ -213,43 +211,43 @@ IF (DGF%LSURF_BUDGETC) THEN
        DGF%XFMVC   = 0.0             
      ELSE
        YREC='RNC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XRNC,IRESP)
        YREC='HC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XHC ,IRESP)
        YREC='LEC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XLEC,IRESP)
        YREC='LEIC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XLEIC,IRESP)     
        YREC='GFLUXC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XGFLUXC,IRESP)
        YREC='SWDC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XSWDC,IRESP)
        YREC='SWUC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XSWUC,IRESP)
        YREC='LWDC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XLWDC,IRESP)
        YREC='LWUC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XLWUC,IRESP)
        YREC='FMUC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XFMUC,IRESP)
        YREC='FMVC_WAT'
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XFMVC,IRESP)
        YREC='EVAPC_WAT'
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XEVAPC,IRESP)
         YREC='SUBLC_WAT'
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                     HPROGRAM,YREC,DGF%XSUBLC,IRESP)              
       ENDIF
 !

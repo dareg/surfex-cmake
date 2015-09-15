@@ -1,5 +1,5 @@
 !     ###########################################################
-      SUBROUTINE PGD_GRID_SURF_ATM (IOB, &
+      SUBROUTINE PGD_GRID_SURF_ATM (&
                                      UG, U, &
                                     HPROGRAM,HFILE,HFILETYPE,OGRID)
 !     ###########################################################
@@ -40,7 +40,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -65,7 +64,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -98,7 +96,7 @@ CPROGNAME=HPROGRAM
 !*    2.      Initialisation of output grid
 !             -----------------------------
 !
- CALL PGD_GRID(IOB, &
+ CALL PGD_GRID(&
                UG, U, &
                        HPROGRAM,HFILE,HFILETYPE,OGRID,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR)
 ! 

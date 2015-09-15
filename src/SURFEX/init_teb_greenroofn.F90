@@ -1,6 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GREENROOF_n (DTCO, IOB, U, DGMTO, TOP, TVG, GRM, &
-                                 HPROGRAM,HINIT,KI,KSW,PSW_BANDS)
+SUBROUTINE INIT_TEB_GREENROOF_n (DTCO, U, DGMTO, TOP, TVG, GRM, &
+                                 HPROGRAM,HINIT,KI,KSW,PSW_BANDS,KPATCH)
 !#############################################################
 !
 !!****  *INIT_TEB_GREENROOF_n* - routine to initialize ISBA
@@ -36,7 +36,6 @@ SUBROUTINE INIT_TEB_GREENROOF_n (DTCO, IOB, U, DGMTO, TOP, TVG, GRM, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
@@ -57,7 +56,6 @@ USE MODI_GET_LUOUT
 USE MODI_READ_PREP_GREENROOF_SNOW
 USE MODI_ALLOCATE_TEB_GREENROOF
 USE MODI_ABOR1_SFX
-USE MODI_GET_CURRENT_TEB_PATCH
 USE MODI_READ_TEB_GREENROOF_n
 USE MODI_INIT_VEG_GARDEN_n
 USE MODI_SOIL_ALBEDO
@@ -74,7 +72,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: DGMTO
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
@@ -86,6 +83,7 @@ TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 REAL,             DIMENSION(KSW),   INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
+INTEGER,                            INTENT(IN)  :: KPATCH
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -94,7 +92,6 @@ INTEGER           :: ILUOUT   ! unit of output listing file
 !
 INTEGER           :: IDECADE  ! decade of simulation
 !
-INTEGER :: JTEB_PATCH  ! loop counter on TEB patches
  CHARACTER(LEN=3) :: YPATCH ! patch identificator
 !
 REAL, DIMENSION(KI)               :: ZWG1 ! work array for surface water content
@@ -157,10 +154,9 @@ ENDIF
 !
 !
   YPATCH='   '
-  CALL GET_CURRENT_TEB_PATCH(JTEB_PATCH)
-  IF (TOP%NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'T',JTEB_PATCH,'_'
+  IF (TOP%NTEB_PATCH>1) WRITE(YPATCH,FMT='(A,I1,A)') 'T',KPATCH,'_'
 !
-  CALL READ_TEB_GREENROOF_n(DTCO, IOB, U, TVG, GRM, &
+  CALL READ_TEB_GREENROOF_n(DTCO, U, TVG, GRM, &
                             HPROGRAM,YPATCH)
 !
 !

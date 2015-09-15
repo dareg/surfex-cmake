@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_WATFLUX (DTCO, IOB, UG, U, WM, &
+SUBROUTINE PREP_WATFLUX (DTCO, UG, U, WM, &
                          HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -31,7 +31,6 @@ USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -60,7 +59,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -98,13 +96,13 @@ IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',0,ZHOOK_HANDLE)
 !
 !*      2.0    Large scale orography
 !
- CALL PREP_HOR_WATFLUX_FIELD(DTCO, IOB, U, &
+ CALL PREP_HOR_WATFLUX_FIELD(DTCO, U, &
                              WM%WG, WM%W, &
                              HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1    Temperature
 !
- CALL PREP_HOR_WATFLUX_FIELD(DTCO, IOB, U, &
+ CALL PREP_HOR_WATFLUX_FIELD(DTCO, U, &
                              WM%WG, WM%W, &
                              HPROGRAM,'TSWATER',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !

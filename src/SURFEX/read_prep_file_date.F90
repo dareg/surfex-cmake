@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE READ_PREP_FILE_DATE (IOB, &
+SUBROUTINE READ_PREP_FILE_DATE (&
                                 HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
 !     #################################################################################
 !
@@ -26,8 +26,7 @@ SUBROUTINE READ_PREP_FILE_DATE (IOB, &
 !!------------------------------------------------------------------
 !
 !
-!
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
+USE MODD_IO_BUFF, ONLY : CREC, NREC
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -47,7 +46,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
@@ -76,15 +74,15 @@ IF(HFILETYPE=='GRIB  ') THEN
 !
 ELSE IF(HFILETYPE=='MESONH' .OR. HFILETYPE=='LFI   ' .OR. HFILETYPE=='ASCII ') THEN
 !
-  HREC = IOB%CREC
-  IREC = IOB%NREC
-  CALL OPEN_AUX_IO_SURF(IOB, &
+  HREC = CREC
+  IREC = NREC
+  CALL OPEN_AUX_IO_SURF(&
                         HFILE,HFILETYPE,'FULL  ')
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HFILETYPE,'DTCUR           ',TPTIME,IRESP)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
-  IOB%CREC = HREC
-  IOB%NREC = IREC
+  CREC = HREC
+  NREC = IREC
 !
 ELSE IF(HFILETYPE=='BUFFER') THEN
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INI_VAR_FROM_DATA_0D (DTCO, DGU, IOB, UG, U, USS, &
+      SUBROUTINE INI_VAR_FROM_DATA_0D (DTCO, DGU, UG, U, USS, &
                                        HPROGRAM, HATYPE,  HNAME, HTYPE, HFNAM, &
                                         HFTYP, PUNIF, PFIELD, OPRESENT)
 !     ##############################################################
@@ -40,7 +40,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
@@ -63,7 +62,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
@@ -101,19 +99,19 @@ IF (HFTYP.EQ.'FA    ' .OR. HFTYP.EQ.'ASCII ' .OR. HFTYP.EQ.'LFI   ') THEN
   OPRESENT=.TRUE.
   SELECT CASE (HTYPE)
     CASE ('LAN')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
+      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
                                  HFTYP,HFNAM,'SURF  ','      ',PFIELD)
     CASE ('TWN')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
+      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
                                  HFTYP,HFNAM,'TOWN  ','      ',PFIELD)              
     CASE ('NAT')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
+      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
                                  HFTYP,HFNAM,'NATURE','      ',PFIELD)              
     CASE ('SEA')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
+      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
                                  HFTYP,HFNAM,'SEA   ','      ',PFIELD)              
     CASE ('WAT')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, IOB, U, &
+      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
                                  HFTYP,HFNAM,'WATER ','      ',PFIELD)              
    END SELECT
 

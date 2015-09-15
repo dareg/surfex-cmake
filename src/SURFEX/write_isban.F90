@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_ISBA_n (DTCO, DGU, IOB, U, IM, DST, &
+      SUBROUTINE WRITE_ISBA_n (DTCO, DGU, U, IM, DST, &
                                HPROGRAM,HWRITE,OLAND_USE)
 !     ####################################
 !
@@ -39,7 +39,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_DST_n, ONLY : DST_t
@@ -63,7 +62,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -82,7 +80,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !*       1.     Selection of surface scheme
@@ -90,11 +88,11 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !        
  CALL WRITESURF_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I, &
                             HPROGRAM)
- CALL WRITESURF_ISBA_n(DGU, IOB, U, &
+ CALL WRITESURF_ISBA_n(DGU, U, &
                        IM%CHI, DST, IM%I, &
                        HPROGRAM,OLAND_USE)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(DGU, IOB, U, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(DGU, U, &
                                                                         IM%ICP, IM%I, &
                                                                         HPROGRAM,HWRITE)
 !

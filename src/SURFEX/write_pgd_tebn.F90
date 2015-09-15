@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_TEB_n (DTCO, DGU, IOB, U, TM, GDM, GRM, &
+      SUBROUTINE WRITE_PGD_TEB_n (DTCO, DGU, U, TM, GDM, GRM, &
                                   HPROGRAM)
 !     ####################################
 !
@@ -37,7 +37,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
@@ -59,7 +58,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
@@ -78,7 +76,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_TEB_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !*       1.     Selection of surface scheme
@@ -86,7 +84,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !
  CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
                              GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, 1)
- CALL WRITESURF_PGD_TEB_n(DGU, IOB, U, TM, GDM, GRM, &
+ CALL WRITESURF_PGD_TEB_n(DGU, U, TM, GDM, GRM, &
                           HPROGRAM)
 !
 !-------------------------------------------------------------------------------

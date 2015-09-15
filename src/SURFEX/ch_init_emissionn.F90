@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE CH_INIT_EMISSION_n (IOB, &
-                                      CHE, CHU, SV, &
+      SUBROUTINE CH_INIT_EMISSION_n (CHE, CHU, SV, &
                                      HPROGRAM,KLU,KCH,PRHOA)
 !     #######################################
 !
@@ -30,13 +29,6 @@
 !*       0.    DECLARATIONS
 !
 !
-!
-!
-!
-!
-!
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
-!
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
 USE MODD_SV_n, ONLY : SV_t
@@ -57,8 +49,6 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 !
 !
-!
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
@@ -97,7 +87,7 @@ WRITE(ILUOUT,*) '------ Beginning of CH_INIT_EMISSION ------'
 !
 !* ascendant compatibility
 YRECFM='VERSION'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF( &
                 HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 !*      2.     Chemical Emission fields
@@ -105,10 +95,10 @@ YRECFM='VERSION'
 !
 ! Read the total number of emission files 
 IF (IVERSION>=4) THEN
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,'EMISFILE_NBR',CHE%NEMIS_NBR,IRESP)
 ELSE
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,'EMISFILE_GR_NBR',CHE%NEMIS_NBR,IRESP)
 END IF
 IF (IRESP/=0) THEN
@@ -117,10 +107,10 @@ END IF
 !
 ! Read the number of emission species
 IF (IVERSION>=4) THEN
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,'EMISPEC_NBR',CHE%NEMISPEC_NBR,IRESP)
 ELSE
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,'EMISPEC_GR_NBR',CHE%NEMISPEC_NBR,IRESP)
 END IF
 IF (IRESP/=0) THEN
@@ -154,23 +144,23 @@ DO JSPEC = 1,CHE%NEMISPEC_NBR ! Loop on the number of species
 ! Read article EMISNAMExxx for the name of species
 ! and extract from comment : surface type + number of emission times
   WRITE(YRECFM,'("EMISNAME",I3.3)') JSPEC
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,YRECFM,YSPEC_NAME,IRESP,YCOMMENT)
   IF (IRESP/=0) THEN
     CALL ABOR1_SFX('CH_INIT_EMISSIONN: PROBLEM WHEN READING NAME OF EMITTED CHEMICAL SPECIES')
   END IF
 
   WRITE(YRECFM,'("EMISAREA",I3.3)') JSPEC
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,YRECFM,YSURF,IRESP,YCOMMENT)
   WRITE(YRECFM,'("EMISNBT",I3.3)') JSPEC
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,YRECFM,INBTS,IRESP,YCOMMENT)
   WRITE(ILUOUT,*) ' Emission ',JSPEC,' : ',TRIM(YSPEC_NAME),'(',INBTS,' instants )'
 !
 ! Read emission times for species number JSPEC
   WRITE(YRECFM,'("EMISTIMES",I3.3)') JSPEC
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF( &
                 HPROGRAM,YRECFM,ITIMES(1:INBTS),IRESP,YCOMMENT,'-')
   IF (IRESP/=0) THEN
     CALL ABOR1_SFX('CH_INIT_EMISSIONN: PROBLEM WHEN READING EMISSION TIMES')
@@ -213,7 +203,7 @@ IF (INBOFF > 0) THEN
   ALLOCATE(CHE%TSEMISS(INBOFF))
   ALLOCATE(YEMIS_NAME(INBOFF))
 
-  CALL BUILD_EMISSTAB_n(IOB, &
+  CALL BUILD_EMISSTAB_n( &
                         CHU, &
                         HPROGRAM,KCH,CHE%CEMIS_NAME,INBTIMES,CHE%NEMIS_TIME,&
          IOFFNDX,CHE%TSEMISS,KLU,ILUOUT,IVERB,PRHOA)  

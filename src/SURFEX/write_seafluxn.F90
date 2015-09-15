@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_SEAFLUX_n (DTCO, DGU, IOB, U, SM, &
+      SUBROUTINE WRITE_SEAFLUX_n (DTCO, DGU, U, SM, &
                                   HPROGRAM,HWRITE)
 !     ####################################
 !
@@ -38,7 +38,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
@@ -63,7 +62,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 
@@ -81,7 +79,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_SEAFLUX_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !
 !*       1.     Selection of surface scheme
@@ -89,11 +87,11 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !
  CALL WRITESURF_SEAFLUX_CONF_n(SM%CHS, SM%DGO, SM%DGSI, SM%O, SM%S, &
                                HPROGRAM)
- CALL WRITESURF_SEAFLUX_n(DGU, IOB, U, &
+ CALL WRITESURF_SEAFLUX_n(DGU, U, &
                           SM%O, SM%OR, SM%S, &
                           HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_SEAFLUX_SBL_n(DGU, IOB, U, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_SEAFLUX_SBL_n(DGU, U, &
                                                                         SM%S, SM%SSB, &
                                                                         HPROGRAM,HWRITE)
 !

@@ -1,5 +1,5 @@
 !################################################################
-SUBROUTINE READ_GRIDTYPE_GAUSS (IOB, &
+SUBROUTINE READ_GRIDTYPE_GAUSS (&
                                 HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !################################################################
 !
@@ -36,7 +36,6 @@ SUBROUTINE READ_GRIDTYPE_GAUSS (IOB, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -55,7 +54,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
@@ -100,11 +98,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LAPO',ZLAPO, KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LOPO',ZLOPO,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'CODIL',ZCODIL,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
@@ -112,33 +110,33 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'NLATI',INLATI,KRESP,HDIR=HDIR)
 ALLOCATE(INLOPA(INLATI))
 IF (HDIR=='A') THEN
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,'NLOPA',INLOPA(:),KRESP,HDIR=HDIR)
 ELSE
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,'NLOPA',INLOPA(:),KRESP,HDIR='-')
 ENDIF
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LATGAUSS',ZLAT(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LONGAUSS',ZLON(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LAT_G_XY',ZLAT_XY(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LON_G_XY',ZLON_XY(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'MESHGAUSS',ZMESH_SIZE(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LONINF',ZLONINF(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LATINF',ZLATINF(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LONSUP',ZLONSUP(:),KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LATSUP',ZLATSUP(:),KRESP,HDIR=HDIR)
 
 !---------------------------------------------------------------------------

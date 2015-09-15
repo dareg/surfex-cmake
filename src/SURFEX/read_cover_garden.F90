@@ -1,11 +1,10 @@
 !     ######################################################################
-      SUBROUTINE READ_COVER_GARDEN (IOB, &
+      SUBROUTINE READ_COVER_GARDEN (&
                                     HPROGRAM,OGARDEN,HDIR)
 !     ######################################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -19,7 +18,6 @@ IMPLICIT NONE
 !  ---------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 LOGICAL,           INTENT(OUT) :: OGARDEN   ! T: Definition of urban green areas
@@ -45,14 +43,14 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
 YRECFM='VERSION'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,IVERSION,IRESP,HDIR=YDIR)
 !
 IF (IVERSION<=5) THEN
   OGARDEN = .FALSE.
 ELSE
   YRECFM='GARDEN'
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,YRECFM,OGARDEN,IRESP,HDIR=YDIR)
 END IF
 IF (LHOOK) CALL DR_HOOK('READ_COVER_GARDEN',1,ZHOOK_HANDLE)

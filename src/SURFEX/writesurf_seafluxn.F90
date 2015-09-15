@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_SEAFLUX_n (DGU, IOB, U, &
+      SUBROUTINE WRITESURF_SEAFLUX_n (DGU, U, &
                                        O, OR, S, &
                                       HPROGRAM)
 !     ########################################
@@ -44,7 +44,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
@@ -66,7 +65,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
@@ -92,7 +90,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',0,ZHOOK_HANDLE)
 !
-CALL WRITESURF_OCEAN_n(DGU, IOB, U, &
+CALL WRITESURF_OCEAN_n(DGU, U, &
                        O, OR, &
                        HPROGRAM)
 !
@@ -102,10 +100,10 @@ CALL WRITESURF_OCEAN_n(DGU, IOB, U, &
 !* flag to tell if Sea Ice model is used
 !
 YCOMMENT='flag to handle sea ice cover'
-CALL WRITE_SURF(DGU, IOB, U, &
+CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,'HANDLE_SIC',S%LHANDLE_SIC,IRESP,YCOMMENT)
 !
-IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(DGU, IOB, U, &
+IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(DGU, U, &
                                            S, &
                                            HPROGRAM)
 !
@@ -123,7 +121,7 @@ IF(S%LINTERPOL_SST)THEN
      WRITE(YMTH,'(I2)') (JMTH-1)
      YRECFM='SST_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
      YCOMMENT='SST at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-     CALL WRITE_SURF(DGU, IOB, U, &
+     CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSST_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
   ENDDO
 !
@@ -131,7 +129,7 @@ ENDIF
 !
 YRECFM='SST'
 YCOMMENT='SST'
-CALL WRITE_SURF(DGU, IOB, U, &
+CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSST(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !-------------------------------------------------------------------------------
@@ -143,7 +141,7 @@ CALL WRITE_SURF(DGU, IOB, U, &
 !
 YRECFM='Z0SEA'
 YCOMMENT='Z0SEA (m)'
-CALL WRITE_SURF(DGU, IOB, U, &
+CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !
@@ -157,7 +155,7 @@ IF(S%LINTERPOL_SSS)THEN
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SSS_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
       YCOMMENT='Sea Surface Salinity at month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL WRITE_SURF(DGU, IOB, U, &
+      CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSSS_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
    ENDDO
 !
@@ -165,7 +163,7 @@ ENDIF
 !
 YRECFM='SSS'
 YCOMMENT='Sea Surface Salinity'
-CALL WRITE_SURF(DGU, IOB, U, &
+CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSSS(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !
@@ -175,12 +173,12 @@ IF(S%CSEA_ALB=='RS14')THEN
 !
   YRECFM='OSA_DIR'
   YCOMMENT='direct ocean surface albedo (-)'
-  CALL WRITE_SURF(DGU, IOB, U, &
+  CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XDIR_ALB(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='OSA_SCA'
   YCOMMENT='diffuse ocean surface albedo (-)'
-  CALL WRITE_SURF(DGU, IOB, U, &
+  CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSCA_ALB(:),IRESP,HCOMMENT=YCOMMENT)
 !
 ENDIF
@@ -192,7 +190,7 @@ ENDIF
 !
 YRECFM='DTCUR'
 YCOMMENT='s'
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%TTIME,IRESP,HCOMMENT=YCOMMENT)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',1,ZHOOK_HANDLE)
 !

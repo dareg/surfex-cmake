@@ -1,11 +1,10 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX_EXTERN (IOB, &
+SUBROUTINE PREP_SEAFLUX_EXTERN (&
                                 HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -24,7 +23,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -61,9 +59,9 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL OPEN_AUX_IO_SURF(IOB, &
+ CALL OPEN_AUX_IO_SURF(&
                        HFILEPGD,HFILEPGDTYPE,'FULL  ')
- CALL PREP_GRID_EXTERN(IOB, &
+ CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
@@ -84,9 +82,9 @@ SELECT CASE(HSURF)
   CASE('SST    ')
     ALLOCATE(PFIELD(INI,1))
     YRECFM='SST'
-    CALL OPEN_AUX_IO_SURF(IOB, &
+    CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'SEA   ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
@@ -96,15 +94,15 @@ SELECT CASE(HSURF)
   CASE('SSS    ')
     ALLOCATE(PFIELD(INI,1))
     YRECFM='SSS'
-    CALL OPEN_AUX_IO_SURF(IOB, &
+    CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'FULL  ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    HFILETYPE,'VERSION',IVERSION,IRESP)
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
     IF(IVERSION>=8)THEN
-      CALL OPEN_AUX_IO_SURF(IOB, &
+      CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'SEA   ')
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                    HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
     ELSE

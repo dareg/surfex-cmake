@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_ISBA_n (DTCO, DGU, IOB, UG, U, IM, DTZ, DST, SLT, SV, &
+SUBROUTINE INIT_ISBA_n (DTCO, DGU, UG, U, IM, DTZ, DST, SLT, SV, &
                             HPROGRAM,HINIT,OLAND_USE,                    &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
@@ -62,7 +62,6 @@ USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
@@ -135,7 +134,6 @@ IMPLICIT NONE
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
@@ -238,9 +236,9 @@ ENDIF
  CALL READ_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I, &
                        HPROGRAM)
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','ISBA  ','READ ')
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'VERSION',IVERSION,IRESP)
  CALL END_IO_SURF_n(HPROGRAM)
 !
@@ -272,22 +270,22 @@ IF (HINIT=='PRE') THEN
 
 ELSEIF (HINIT=='ALL') THEN
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','READ ')
 !
   IF (IVERSION<6) THEN
     IM%I%CRESPSL='DEF'
   ELSE  
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'RESPSL',IM%I%CRESPSL,IRESP)
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'NLITTER',IM%I%NNLITTER,IRESP)
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'NLITTLEVS',IM%I%NNLITTLEVS,IRESP)
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'NSOILCARB',IM%I%NNSOILCARB,IRESP)
     IF(IVERSION>=7.AND.(IM%I%LSPINUPCARBS.OR.IM%I%LSPINUPCARBW))THEN
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HPROGRAM,'NBYEARSOLD',IM%I%NNBYEARSOLD,IRESP)
     ELSE
       IM%I%NNBYEARSOLD=NUNDEF
@@ -319,13 +317,13 @@ SELECT CASE (HINIT)
                           IM%DGEI%LSURF_EVAP_BUDGET,IM%DGMI%LSURF_MISC_BUDGET,IM%DGEI%LSURF_BUDGETC,     &
                           IM%DGI%LPATCH_BUDGET,IM%DGMI%LSURF_MISC_DIF,ILUOUT                    )    
     IF (LNAM_READ) CALL READ_NAM_PREP_ISBA_n(HPROGRAM)                        
-    CALL READ_ISBA_DATE(IOB, &
+    CALL READ_ISBA_DATE(&
                         HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,IM%I%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','READ ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HPROGRAM,'DTCUR',IM%I%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
@@ -337,14 +335,14 @@ END SELECT
 ! initialization for I/O
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
- CALL READ_PGD_ISBA_n(IM%CHI, DTCO, IM%DTI, DTZ, DGU, IM%GB, IOB, IM%IG, IM%I, &
+ CALL READ_PGD_ISBA_n(IM%CHI, DTCO, IM%DTI, DTZ, DGU, IM%GB, IM%IG, IM%I, &
                       UG, U, SV, &
                       HPROGRAM,OLAND_USE)
 !
@@ -448,7 +446,7 @@ IF (OLAND_USE .OR. HINIT=='PGD') THEN
   RETURN
 END IF
 !
-CALL COMPUTE_ISBA_PARAMETERS(DTCO, DGU, IOB, UG, U, IM, DST, SLT, SV, &
+CALL COMPUTE_ISBA_PARAMETERS(DTCO, DGU, UG, U, IM, DST, SLT, SV, &
                              HPROGRAM,HINIT,OLAND_USE,                  &
                              KI,KSV,KSW,                                &
                              HSV,ZCO2,PRHOA,                            &

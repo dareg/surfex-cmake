@@ -1,6 +1,5 @@
 !     #########
-       SUBROUTINE BUILD_EMISSTAB_n (IOB, &
-                                     CHU, &
+       SUBROUTINE BUILD_EMISSTAB_n (CHU, &
                                     HPROGRAM,KCH,HEMIS_GR_NAME, KNBTIMES,&
               KEMIS_GR_TIME,KOFFNDX,TPEMISS,KSIZE,KLUOUT, KVERB,PRHODREF)  
 !!    #####################################################################
@@ -32,8 +31,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
-!
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
 !
 USE MODI_CH_OPEN_INPUTB
@@ -58,8 +55,6 @@ IMPLICIT NONE
 !*       0.1  declaration of arguments
 !
 !
-!
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
 !
@@ -160,8 +155,7 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
     ALLOCATE(TPEMISS(JSPEC)%XEMISDATA(KSIZE,INBTS))
 ! Read file for emission data
     YRECFM='E_'//TRIM(TPEMISS(JSPEC)%CNAME)
-    CALL READ_SURF(IOB, &
-                   HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
+    CALL READ_SURF(HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
 ! and apply conversion

@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_LONLAT_REG (IOB, &
+      SUBROUTINE READ_GRIDTYPE_LONLAT_REG (&
                                            HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
@@ -36,7 +36,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -55,7 +54,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
@@ -92,21 +90,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_LONLAT_REG',0,ZHOOK_HANDLE)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LONMIN',ZLONMIN,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LONMAX',ZLONMAX,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LATMIN',ZLATMIN,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LATMAX',ZLATMAX,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'NLON',ILON,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'NLAT',ILAT,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'REG_LON',ZLON,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'REG_LAT',ZLAT,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, IOB, UG, U, IM, DST, SLT, SV, &
+SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, UG, U, IM, DST, SLT, SV, &
                                     HPROGRAM,HINIT,OLAND_USE,            &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
@@ -63,7 +63,6 @@ USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DST_n, ONLY : DST_t
@@ -136,7 +135,6 @@ IMPLICIT NONE
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -598,13 +596,13 @@ IF (CASSIM_ISBA=="ENKF ") THEN
   !
 ENDIF
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                     HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !*      10.     Prognostic and semi-prognostic fields
 !               -------------------------------------
 !
- CALL READ_ISBA_n(DTCO, IOB, IM%I, U, &
+ CALL READ_ISBA_n(DTCO, IM%I, U, &
                   HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
@@ -633,7 +631,7 @@ END IF
 !*      12.     Canopy air fields:
 !               -----------------
 !
- CALL READ_ISBA_CANOPY_n(DTCO, IOB, IM%ICP, IM%I, U, &
+ CALL READ_ISBA_CANOPY_n(DTCO, IM%ICP, IM%I, U, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -671,22 +669,22 @@ END DO
 ! Load randomly perturbed fields. Perturbation ratios are saved in case fields are reset later.
 IF(IM%I%LPERTSURF) THEN
 !
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'VEG',IM%I%XVEG(:,:),IRESP)
   ALLOCATE(IM%I%XPERTVEG(KI))
   IM%I%XPERTVEG(:)=IM%I%XVEG(:,1)
 !
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'LAI',IM%I%XLAI(:,:),IRESP)
   ALLOCATE(IM%I%XPERTLAI(KI))
   IM%I%XPERTLAI(:)=IM%I%XLAI(:,1)
 !
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'CV',IM%I%XCV(:,:),IRESP)
   ALLOCATE(IM%I%XPERTCV(KI))
   IM%I%XPERTCV(:)=IM%I%XCV(:,1)
 !
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'PERTALB',ZPERTBUF(:,:),IRESP)
   ALLOCATE(IM%I%XPERTALB(KI))
   IM%I%XPERTALB(:)=ZPERTBUF(:,1)
@@ -697,7 +695,7 @@ IF(IM%I%LPERTSURF) THEN
   WHERE(IM%I%XALBVIS_SOIL(:,1)/=XUNDEF) IM%I%XALBVIS_SOIL(:,1)= IM%I%XALBVIS_SOIL(:,1)*( 1.+ IM%I%XPERTALB(:) )
   WHERE(IM%I%XALBUV_SOIL(:,1)/=XUNDEF)  IM%I%XALBUV_SOIL(:,1) = IM%I%XALBUV_SOIL(:,1) *( 1.+ IM%I%XPERTALB(:) )
 !
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  HPROGRAM,'PERTZ0LAND',ZPERTBUF(:,:),IRESP)
   ALLOCATE(IM%I%XPERTZ0(KI))
   IM%I%XPERTZ0(:)=ZPERTBUF(:,1)
@@ -744,7 +742,7 @@ PTSURF = ZTSURF_NAT
 !
 IF(IM%I%NPATCH<=1) IM%DGI%LPATCH_BUDGET=.FALSE.
 !
- CALL DIAG_ISBA_INIT_n(IOB, &
+ CALL DIAG_ISBA_INIT_n(&
                        IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, DGU, IM%GB, IM%I, &
                        HPROGRAM,KI,KSW)
 !

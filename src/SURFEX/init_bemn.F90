@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_BEM_n ( DGU, IOB, DTCO, UG, U, TM, &
+      SUBROUTINE INIT_BEM_n ( DGU, DTCO, UG, U, TM, &
                              KLUOUT)
 !     #############################################################
 !
@@ -36,7 +36,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -60,7 +59,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -235,7 +233,7 @@ END SELECT
 !*       8.     Building HVAC automatic sizing:
 !               -------------------------------  
 IF (TM%TOP%CBEM=='BEM' .AND. TM%BOP%LAUTOSIZE) THEN
-  CALL HVAC_AUTOSIZE(TM%BDD, DTCO, DGU, IOB, TM%B, TM%BOP, UG, U, TM%TG, TM%T, TM%TOP, &
+  CALL HVAC_AUTOSIZE(TM%BDD, DTCO, DGU, TM%B, TM%BOP, UG, U, TM%TG, TM%T, TM%TOP, &
                      ILU,KLUOUT)
   !* stores the real systems characteristics in physiographic data 
   !  for further use

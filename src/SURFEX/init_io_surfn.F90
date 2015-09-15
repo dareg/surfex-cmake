@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_n (DTCO, DGU, IOB, U, &
+      SUBROUTINE INIT_IO_SURF_n (DTCO, DGU, U, &
                                  HPROGRAM,HMASK,HSCHEME,HACTION)
 !     #######################################################
 !
@@ -41,7 +41,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 #ifdef SFX_ASC
@@ -80,7 +79,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
@@ -103,14 +101,14 @@ END IF
 !
 IF (HPROGRAM=='OFFLIN' ) THEN
 #ifdef SFX_OL
-  CALL INIT_IO_SURF_OL_n(DTCO, DGU, IOB, U, &
+  CALL INIT_IO_SURF_OL_n(DTCO, DGU, U, &
                          HPROGRAM,HMASK,HSCHEME,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='ASCII ' ) THEN
 #ifdef SFX_ASC
-  CALL INIT_IO_SURF_ASC_n(DTCO, IOB, U, &
+  CALL INIT_IO_SURF_ASC_n(DTCO, U, &
                           HMASK,HACTION)
 #endif
 ENDIF
@@ -137,21 +135,21 @@ ENDIF
 !
 IF (HPROGRAM=='FA    ' ) THEN
 #ifdef SFX_FA
-  CALL INIT_IO_SURF_FA_n(DTCO, IOB, U, &
+  CALL INIT_IO_SURF_FA_n(DTCO, U, &
                          HPROGRAM,HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='LFI   ' ) THEN
 #ifdef SFX_LFI
-  CALL INIT_IO_SURF_LFI_n(DTCO, IOB, U, &
+  CALL INIT_IO_SURF_LFI_n(DTCO, U, &
                           HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='NC    ' ) THEN
 #ifdef SFX_NC
-  CALL INIT_IO_SURF_NC_n(DTCO, IOB, U, DGU, &
+  CALL INIT_IO_SURF_NC_n(DTCO, U, DGU, &
                          HMASK,HACTION)
 #endif
 ENDIF

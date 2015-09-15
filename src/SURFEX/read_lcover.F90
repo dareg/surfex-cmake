@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_LCOVER (IOB, &
+      SUBROUTINE READ_LCOVER (&
                               HPROGRAM,OCOVER)
 !     ################################
 !
@@ -40,7 +40,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
@@ -56,7 +55,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 LOGICAL, DIMENSION(JPCOVER)    :: OCOVER   ! list of covers
@@ -75,16 +73,16 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* ascendant compatibility
 IF (LHOOK) CALL DR_HOOK('READ_LCOVER',0,ZHOOK_HANDLE)
 YRECFM='VERSION'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,IVERSION,IRESP)
 IF (IVERSION<=3) THEN
   ALLOCATE(GCOVER(255))
 ELSE
   ALLOCATE(GCOVER(JPCOVER))
 END IF
- CALL OLD_NAME(IOB, &
+ CALL OLD_NAME(&
                HPROGRAM,'COVER_LIST      ',YRECFM)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
 !
 OCOVER=.FALSE.

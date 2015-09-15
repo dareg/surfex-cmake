@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE OL_READ_ATM_NETCDF (IOB, &
+SUBROUTINE OL_READ_ATM_NETCDF (&
                                 HSURF_FILETYPE,                            &
                                  PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,   &
                                  PRAIN,PPS,PCO2,PDIR                        )  
@@ -45,7 +45,6 @@ SUBROUTINE OL_READ_ATM_NETCDF (IOB, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_OL, ONLY : XCOUNT
 USE MODI_READ_SURF
@@ -58,7 +57,6 @@ IMPLICIT NONE
 !
 ! global variables
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 REAL, DIMENSION(:,:),INTENT(OUT) :: PTA
 REAL, DIMENSION(:,:),INTENT(OUT) :: PQA
@@ -79,27 +77,27 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_NETCDF',0,ZHOOK_HANDLE)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','Tair',      PTA    (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','Qair',      PQA    (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','Wind',      PWIND  (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','LWdown',    PLW    (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','DIR_SWdown',PDIR_SW(:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','SCA_SWdown',PSCA_SW(:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','Rainf',     PRAIN  (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','Snowf',     PSNOW  (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','PSurf',     PPS    (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','Wind_DIR',  PDIR   (:,1:XCOUNT),IRET)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'OFFLIN','CO2air',    PCO2   (:,1:XCOUNT),IRET)
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_NETCDF',1,ZHOOK_HANDLE)
 

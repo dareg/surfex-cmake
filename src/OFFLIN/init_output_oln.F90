@@ -59,18 +59,15 @@ IMPLICIT NONE
 TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
 !
-REAL              :: ZDEN
-INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-INTEGER           :: ILU,IRET, IL, IFULL
+INTEGER           :: IRET
 INTEGER           :: ILUOUT
 REAL(KIND=JPRB)  :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------ 
 IF (LHOOK) CALL DR_HOOK('INIT_OUTPUT_OL_N',0,ZHOOK_HANDLE)
 !
+ILUOUT = 0
+!
 IF (NRANK==NPIO) THEN
-  !
-!$OMP SINGLE 
   !
   IF (.NOT. LDEFINED_SURF_ATM) THEN         
     CALL INIT_OUTFN_SURF_ATM_n(YSC%CHE, YSC%CHN, YSC%CHU, YSC%DGU, YSC%UG, YSC%U, YSC%SV, &
@@ -121,8 +118,6 @@ IF (NRANK==NPIO) THEN
     LDEFINED_TOWN=.TRUE.
   ENDIF
   !
-!$OMP END SINGLE
-  !  
 ENDIF
 !
 !------------------------------------------------------------------------------

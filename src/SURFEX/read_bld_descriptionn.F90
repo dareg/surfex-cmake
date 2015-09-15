@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE READ_BLD_DESCRIPTION_n (IOB, &
+      SUBROUTINE READ_BLD_DESCRIPTION_n (&
                                           BDD, &
                                          HPROGRAM)
 !     #########################
@@ -40,7 +40,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 !
@@ -58,7 +57,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !
@@ -87,9 +85,9 @@ IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION_n',0,ZHOOK_HANDLE)
 !*    1.   Read file version
 !          -----------------
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'VERSION',IVERSION,IRESP)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'BUG',IBUGFIX,IRESP)
 !-------------------------------------------------------------------------------
 !
@@ -97,7 +95,7 @@ IF (LHOOK) CALL DR_HOOK('READ_BLD_DESCRIPTION_n',0,ZHOOK_HANDLE)
 !          ----------------------------------------------------
 !
 ALLOCATE(ZWORK(7))
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,HDIR='-')
 !
 BDD%NDESC_BLD         = NINT(ZWORK(1))
@@ -181,7 +179,7 @@ ITOT=(21+3*BDD%NDESC_ROOF_LAYER+3*BDD%NDESC_ROAD_LAYER+3*BDD%NDESC_WALL_LAYER+3*
       + 9*BDD%NDESC_USE + 2*BDD%NDESC_AGE + BDD%NDESC_BLD
 ALLOCATE(ZWORK(ITOT))
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'BLD_DESC_DAT',ZWORK,IRESP,HDIR='-')
 !
 !

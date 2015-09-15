@@ -116,7 +116,6 @@ CALL GET_DIM_FULL_n(U, &
                     IFULL)
 
 IF (NRANK==NPIO) THEN
-!$OMP SINGLE
   INQUIRE(FILE=CFILEOUT_NC,EXIST=GEXIST)
   INQUIRE(FILE=CFILEOUT_NC,OPENED=GOPENED)
   IF (.NOT.GOPENED) THEN
@@ -193,7 +192,6 @@ IF (NRANK==NPIO) THEN
   ENDIF
   IF (LDEF) IRET = NF_ENDDEF(NID_NC)
   IRET = NF_CLOSE(NID_NC)
-!$OMP END SINGLE
 ENDIF
 !
 !------------------------------------------------------------------------------

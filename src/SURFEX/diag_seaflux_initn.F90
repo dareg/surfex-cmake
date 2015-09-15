@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_SEAFLUX_INIT_n (IOB, &
+      SUBROUTINE DIAG_SEAFLUX_INIT_n (&
                                        DGO, DGS, DGSI, DGU, S, &
                                       HPROGRAM,KLU,KSW)
 !     #####################
@@ -48,7 +48,6 @@ USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
@@ -73,7 +72,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
 TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
@@ -254,40 +252,40 @@ IF (DGS%LSURF_BUDGETC .OR. .NOT.DGS%LRESET_BUDGETC) THEN
      DGS%XFMVC   = 0.0
      DGS%XFMVC_ICE=0.0
   ELSE
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,'VERSION',IVERSION,IRESP)    
      YREC='RNC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XRNC,IRESP)
      YREC='HC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XHC ,IRESP)
      YREC='LEC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XLEC,IRESP)
      YREC='LEIC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XLEC_ICE,IRESP) 
      YREC='GFLUXC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XGFLUXC ,IRESP)
      YREC='SWDC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XSWDC,IRESP)
      YREC='SWUC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XSWUC,IRESP)
      YREC='LWDC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XLWDC,IRESP)
      YREC='LWUC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XLWUC,IRESP)
      YREC='FMUC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XFMUC,IRESP)
      YREC='FMVC_SEA'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XFMVC,IRESP)
      IF (IVERSION<8)THEN
         DGS%XEVAPC      = 0.0
@@ -295,10 +293,10 @@ IF (DGS%LSURF_BUDGETC .OR. .NOT.DGS%LRESET_BUDGETC) THEN
      ELSE
         !
         YREC='EVAPC_SEA'
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XEVAPC,IRESP)
         YREC='SUBLC_SEA'
-        CALL READ_SURF(IOB, &
+        CALL READ_SURF(&
                     HPROGRAM,YREC,DGS%XSUBLC,IRESP)
      ENDIF
      DGS%XRNC_ICE    = 0.0

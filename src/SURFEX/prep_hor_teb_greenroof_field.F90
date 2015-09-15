@@ -1,7 +1,7 @@
 !     #########
-SUBROUTINE PREP_HOR_TEB_GREENROOF_FIELD (DTCO, IOB, IG, I, UG, U, USS, TGR, TGRO, TGRPE, TGRP, &
+SUBROUTINE PREP_HOR_TEB_GREENROOF_FIELD (DTCO, IG, I, UG, U, USS, TGR, TGRO, TGRPE, TGRP, &
                                          TG, TOP, &
-                                         HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                         HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################################
 !
 !!****  *PREP_HOR_TEB_GREENROOF_FIELD* - reads, interpolates and prepares an ISBA field for green roofs
@@ -28,14 +28,7 @@ SUBROUTINE PREP_HOR_TEB_GREENROOF_FIELD (DTCO, IOB, IG, I, UG, U, USS, TGR, TGRO
 !!------------------------------------------------------------------
 !
 !
-!
-!
-!
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -82,7 +75,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
@@ -101,6 +93,8 @@ TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+!
+INTEGER,            INTENT(IN)  :: KPATCH
 !
 !*      0.2    declarations of local variables
 !
@@ -175,11 +169,11 @@ IF (HSURF=='SN_VEG ') THEN
   ZPATCH=1.
   ZVEGTYPE_PATCH(:,:,1) = TGRP%XVEGTYPE(:,:)
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IOB, IG, U, &
+                            IG, U, &
                             HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &
-                            ILUOUT,GUNIF_SNOW, 1,           &
+                            ILUOUT,GUNIF_SNOW, 1, KPATCH,   &
                             SIZE(TG%XLAT),TGR%CUR%TSNOW, TOP%TTIME,        &
                             XWSNOW_GR, XRSNOW_GR, XTSNOW_GR,&
                             XLWCSNOW_GR, XASNOW_GR,         &
@@ -207,8 +201,8 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_TEB_GREENROOF_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR. YFILETYPE=='FA    ') THEN
-   CALL PREP_TEB_GREENROOF_EXTERN(DTCO, IOB, I, U, &
-                                  HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
+   CALL PREP_TEB_GREENROOF_EXTERN(DTCO, I, U, &
+                                  HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,KPATCH,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_TEB_GREENROOF_BUFFER(HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE

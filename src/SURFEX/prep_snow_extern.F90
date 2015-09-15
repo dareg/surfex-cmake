@@ -1,7 +1,7 @@
 !     #########
-SUBROUTINE PREP_SNOW_EXTERN (IOB, &
+SUBROUTINE PREP_SNOW_EXTERN (&
                              HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                            KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER)
+                            KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER,KTEB_PATCH)
 !     #################################################################################
 !
 !
@@ -40,7 +40,6 @@ SUBROUTINE PREP_SNOW_EXTERN (IOB, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
@@ -65,7 +64,6 @@ USE MODI_INTERP_GRID_NAT
 USE MODI_READ_GR_SNOW
 USE MODI_READ_SURF
 USE MODI_SNOW_T_WLIQ_TO_HEAT
-USE MODI_GET_CURRENT_TEB_PATCH
 USE MODI_READ_TEB_PATCH
 !
 IMPLICIT NONE
@@ -73,7 +71,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=10),  INTENT(IN)  :: HSURF     ! type of field
@@ -85,6 +82,7 @@ INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally
 LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL
 INTEGER,            INTENT(IN)  :: KLAYER    ! Number of layer of output snow scheme
+INTEGER,            INTENT(IN) :: KTEB_PATCH
 !
 !*      0.2    declarations of local variables
 !
@@ -112,7 +110,6 @@ CHARACTER(LEN=8)                  :: YAREA          ! area treated ('ROOF','ROAD
 CHARACTER(LEN=3)                  :: YPREFIX        ! prefix to identify patch
 INTEGER                           :: IPATCH         ! number of input patch
 INTEGER                           :: ITEB_PATCH     ! number of input patch for TEB
-INTEGER                           :: ICURRENT_TEB_PATCH ! current patch for TEB
 INTEGER                           :: JPATCH         ! loop on patch
 CHARACTER(LEN=6)                  :: YMASK          ! type of tile mask
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -148,22 +145,22 @@ END IF
 !  Their value must be defined as XUNDEF.
 !
 !* reading of version of the file being read
-CALL OPEN_AUX_IO_SURF(IOB, &
+CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
 CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL OPEN_AUX_IO_SURF(IOB, &
+CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,YMASK)
 !
 IF (YAREA(1:4)=='VEG ') THEN
   YRECFM = 'PATCH_NUMBER'
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 ELSE
@@ -172,11 +169,10 @@ ELSE
      IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
    ENDIF
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-  CALL READ_TEB_PATCH(IOB, &
+  CALL READ_TEB_PATCH(&
                       HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
   IF (ITEB_PATCH>1) THEN
-    CALL GET_CURRENT_TEB_PATCH(ICURRENT_TEB_PATCH)
-    WRITE(YPREFIX,FMT='(A,I1,A)') 'T',MIN(ICURRENT_TEB_PATCH,ITEB_PATCH),'_'
+    WRITE(YPREFIX,FMT='(A,I1,A)') 'T',MIN(KTEB_PATCH,ITEB_PATCH),'_'
   END IF  
 END IF
 !
@@ -186,10 +182,10 @@ END IF
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(IOB, &
+CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
-CALL PREP_GRID_EXTERN(IOB, &
+CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !-------------------------------------------------------------------------------------
@@ -198,7 +194,7 @@ CALL PREP_GRID_EXTERN(IOB, &
 !              ---------------------
 !
 IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)=='RD') THEN
-  CALL TOWN_PRESENCE(IOB, &
+  CALL TOWN_PRESENCE(&
                      HFILEPGDTYPE,GTOWN)
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   IF (.NOT. GTOWN) THEN
@@ -206,18 +202,18 @@ IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)
     TZSNOW%NLAYER=1
     CALL ALLOCATE_GR_SNOW(TZSNOW,INI,IPATCH)
   ELSE
-    CALL OPEN_AUX_IO_SURF(IOB, &
+    CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,YMASK)
-    CALL READ_GR_SNOW(IOB, &
+    CALL READ_GR_SNOW(&
                       HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW, &
                       HDIR='A',KVERSION=IVERSION,KBUGFIX=IBUGFIX)
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   ENDIF
 ELSE
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-  CALL OPEN_AUX_IO_SURF(IOB, &
+  CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,YMASK)
-  CALL READ_GR_SNOW(IOB, &
+  CALL READ_GR_SNOW(&
                       HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW, &
                     HDIR='A',KVERSION=IVERSION,KBUGFIX=IBUGFIX)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)

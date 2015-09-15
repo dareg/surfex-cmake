@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE OL_READ_ATM (IOB, &
+SUBROUTINE OL_READ_ATM (&
                          HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
                           PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
                           PCO2,PDIR,OLIMIT_QAIR                             )  
@@ -44,7 +44,6 @@ SUBROUTINE OL_READ_ATM (IOB, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_IO_SURF_OL, ONLY : XSTART,XCOUNT,XSTRIDE,LPARTR
@@ -65,7 +64,6 @@ IMPLICIT NONE
 !
 ! global variables
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PTA !K
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PQA
@@ -103,7 +101,7 @@ LPARTR=.TRUE.
 ! read data
 !
 IF      (HFORCING_FILETYPE == 'NETCDF') THEN
-  CALL OL_READ_ATM_NETCDF(IOB, &
+  CALL OL_READ_ATM_NETCDF(&
                            HSURF_FILETYPE,                                   &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
                            PCO2,PDIR                                         )  

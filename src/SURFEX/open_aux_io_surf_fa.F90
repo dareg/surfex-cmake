@@ -1,5 +1,5 @@
 !     #######################################################
-      SUBROUTINE OPEN_AUX_IO_SURF_FA (IOB, &
+      SUBROUTINE OPEN_AUX_IO_SURF_FA (&
                                       HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
@@ -36,12 +36,11 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_FA,ONLY:NUNIT_FA,NLUOUT,NFULL,NMASK,CMASK,IVERBFA,CDNOMC
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
-USE MODI_IO_BUFF_CLEAN_n
+USE MODI_IO_BUFF_CLEAN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -58,7 +57,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
@@ -78,7 +76,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_FA',0,ZHOOK_HANDLE)
-CALL IO_BUFF_CLEAN_n(IOB)
+CALL IO_BUFF_CLEAN
 CALL GET_LUOUT(HFILETYPE,NLUOUT)
 !
 ILU  =0
@@ -89,7 +87,7 @@ CALL FAITOU(IRET,NUNIT_FA,.TRUE.,YFILE,'OLD',.TRUE.,.FALSE.,IVERBFA,0,INB,YCADRE
 WRITE(NLUOUT,*)'HFILETYPE ',HFILETYPE,'READ EXTERNAL',NUNIT_FA,YFILE
 !
 CMASK = 'FULL  '
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILETYPE,'DIM_FULL',ILU,IRET)
 NFULL = ILU
 !

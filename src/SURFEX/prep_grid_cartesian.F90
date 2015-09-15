@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PREP_GRID_CARTESIAN (IOB, &
+      SUBROUTINE PREP_GRID_CARTESIAN (&
                                       HFILETYPE,HINTERP_TYPE,KNI)
 !     ##########################################################################
 !
@@ -37,7 +37,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -53,7 +52,6 @@ IMPLICIT NONE
 !       ------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)    :: HFILETYPE    ! file type
  CHARACTER(LEN=6),  INTENT(OUT)   :: HINTERP_TYPE ! Grid type
@@ -76,10 +74,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_GRID_CARTESIAN',0,ZHOOK_HANDLE)
 YRECFM = 'IMAX'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,NX,IRESP)
 YRECFM = 'JMAX'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,NY,IRESP)
 !
 KNI = NX * NY
@@ -89,7 +87,7 @@ ALLOCATE(ZW(KNI))
 IF (ALLOCATED(XX)) DEALLOCATE(XX)
 ALLOCATE(XX(NX))
 YRECFM = 'XX'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,ZW,IRESP,HDIR='A')
 XX = ZW(1:NX)
 
@@ -97,7 +95,7 @@ XX = ZW(1:NX)
 IF (ALLOCATED(XY)) DEALLOCATE(XY)
 ALLOCATE(XY(NY))
 YRECFM = 'YY'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,YRECFM,ZW,IRESP,HDIR='A')
 DO JL=1,KNI
   IF (MOD(JL,NX)==0) XY(JL/NX) = ZW(JL)

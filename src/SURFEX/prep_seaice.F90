@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_SEAICE (IOB, UG, &
+SUBROUTINE PREP_SEAICE (UG, &
                          DTCO, DTS, O, OR, SG, S, U, &
                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
@@ -31,7 +31,6 @@ SUBROUTINE PREP_SEAICE (IOB, UG, &
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -64,7 +63,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
@@ -118,7 +116,7 @@ ENDIF
 !*      2.     Reading and horizontal interpolations of Seaice cover
 !
 IF (S%LHANDLE_SIC) THEN 
-   CALL PREP_HOR_SEAFLUX_FIELD(DTCO, IOB, UG, U, &
+   CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
                                DTS, O, OR, SG, S, &
                                HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF

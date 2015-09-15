@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_ASC_n (DTCO, IOB, U, &
+      SUBROUTINE INIT_IO_SURF_ASC_n (DTCO, U, &
                                      HMASK,HACTION)
 !     ######################
 !
@@ -37,7 +37,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NSIZE, NPIO
@@ -59,7 +58,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
@@ -99,7 +97,7 @@ IF (HACTION == 'READ ') THEN
   ! NFULL must be known even if HMASK/=FULL because it's no longer 
   ! updated in init_io_surf_maskn.
   CMASK = 'FULL ' 
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  'ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
   CMASK = HMASK
 ELSE

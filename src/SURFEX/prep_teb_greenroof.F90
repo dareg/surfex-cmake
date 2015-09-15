@@ -1,6 +1,6 @@
 !     #########
-SUBROUTINE PREP_TEB_GREENROOF (DTCO, IOB, UG, U, USS, IG, I, TG, T, TOP, TVG, GRM, &
-                               HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+SUBROUTINE PREP_TEB_GREENROOF (DTCO, UG, U, USS, IG, I, TG, T, TOP, TVG, GRM, &
+                               HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
 !
 !!****  *PREP_TEB_GREENROOF* - Prepares ISBA fields for greenroofs
@@ -30,7 +30,6 @@ SUBROUTINE PREP_TEB_GREENROOF (DTCO, IOB, UG, U, USS, IG, I, TG, T, TOP, TVG, GR
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
@@ -68,7 +67,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
@@ -85,6 +83,8 @@ TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+!
+INTEGER,            INTENT(IN)  :: KPATCH
 !
 !*      0.2    declarations of local variables
 !
@@ -107,27 +107,27 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GREENROOF',0,ZHOOK_HANDLE)
 !
- CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IOB, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
+ CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
                                          TG, TOP, &
-                                   HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                   HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.2    Soil ice reservoirs
 !
- CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IOB, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
+ CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
                                          TG, TOP, &
-                                   HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                   HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.3    Leaves interception water reservoir
 !
- CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IOB, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
+ CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
                                          TG, TOP, &
-                                   HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                   HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.4    Temperature profile
 !
- CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IOB, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
+ CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
                                          TG, TOP, &
-                                   HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                   HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 ! Initializing deep GR temp. with that of the outer layer of the structural roof 
 !
@@ -135,15 +135,15 @@ GRM%TGRP%XTDEEP(:) = T%CUR%XT_ROOF(:,1)
 !
 !*      2.5    Snow variables
 !
- CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IOB, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
+ CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
                                          TG, TOP, &
-                                   HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                   HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.6    LAI
 !
- CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IOB, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
+ CALL PREP_HOR_TEB_GREENROOF_FIELD(DTCO, IG, I, UG, U, USS, GRM%TGR, GRM%TGRO, GRM%TGRPE, GRM%TGRP, &
                                          TG, TOP, &
-                                   HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                   HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !-------------------------------------------------------------------------------------
 !

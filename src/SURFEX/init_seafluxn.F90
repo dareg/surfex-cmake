@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_SEAFLUX_n (DTCO, DGU, IOB, UG, U, SM, &
+      SUBROUTINE INIT_SEAFLUX_n (DTCO, DGU, UG, U, SM, &
                                  HPROGRAM,HINIT,                            &
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
@@ -54,7 +54,6 @@ USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -109,7 +108,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
@@ -257,14 +255,14 @@ SELECT CASE (HINIT)
                                 SM%DGS%LRAD_BUDGET,SM%DGS%LCOEF,SM%DGS%LSURF_VARS,&
                              SM%DGO%LDIAG_OCEAN,SM%DGSI%LDIAG_SEAICE,ILUOUT,SM%DGS%LSURF_BUDGETC ) 
     IF (LNAM_READ) CALL READ_NAM_PREP_SEAFLUX_n(HPROGRAM)      
-    CALL READ_SEAFLUX_DATE(IOB, SM%O, &
+    CALL READ_SEAFLUX_DATE(SM%O, &
                            HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,SM%S%TTIME)
 !
   CASE DEFAULT
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    HPROGRAM,'DTCUR',SM%S%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 !
@@ -277,12 +275,12 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, IOB, SM%SG, SM%S, U, &
+ CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%SG, SM%S, U, &
                          HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
@@ -300,7 +298,7 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !*       2.     Prognostic fields:
@@ -314,7 +312,7 @@ IF(SM%S%LINTERPOL_SST.OR.SM%S%LINTERPOL_SSS.OR.SM%S%LINTERPOL_SIC.OR.SM%S%LINTER
    SM%S%TZTIME%TIME        = SM%S%TTIME%TIME        
 ENDIF
 !
- CALL READ_SEAFLUX_n(DTCO, IOB, SM%SG, SM%S, U, &
+ CALL READ_SEAFLUX_n(DTCO, SM%SG, SM%S, U, &
                      HPROGRAM,ILUOUT)
 !
 IF (HINIT/='ALL') THEN
@@ -327,7 +325,7 @@ END IF
 !*       2.1    Ocean fields:
 !               -------------
 !
- CALL READ_OCEAN_n(DTCO, IOB, SM%O, SM%OR, U, &
+ CALL READ_OCEAN_n(DTCO, SM%O, SM%OR, U, &
                    HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -379,7 +377,7 @@ ENDIF
 !
 !*       4.     Seaice prognostic variables and forcings :
 !
-CALL READ_SEAICE_n(IOB, &
+CALL READ_SEAICE_n(&
                    SM%SG, SM%S, &
                    HPROGRAM,ILU,ILUOUT)
 !
@@ -406,7 +404,7 @@ ENDIF
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_SEAFLUX_SBL_n(DTCO, IOB, SM%S, SM%SSB, U, &
+ CALL READ_SEAFLUX_SBL_n(DTCO, SM%S, SM%SSB, U, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -435,7 +433,7 @@ IF(.NOT.(SM%S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
   SM%DGSI%LDIAG_SEAICE=.FALSE.
 ENDIF
 !
-CALL DIAG_SEAFLUX_INIT_n(IOB, &
+CALL DIAG_SEAFLUX_INIT_n(&
                          SM%DGO, SM%DGS, SM%DGSI, DGU, SM%S, &
                          HPROGRAM,ILU,KSW)
 !

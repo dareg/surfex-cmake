@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_TEB_DATE (IOB, &
+      SUBROUTINE READ_TEB_DATE (&
                                 HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
                                  KYEAR,KMONTH,KDAY,PTIME,TPTIME)  
 !     #######################################################
@@ -38,7 +38,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_DATE_SURF
 USE MODD_SURF_PAR,       ONLY : NUNDEF, XUNDEF
@@ -59,7 +58,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
@@ -117,7 +115,7 @@ IF (TPTIME%TDATE%YEAR==NUNDEF.OR.TPTIME%TDATE%MONTH==NUNDEF &
                           HATMFILE,HATMFILETYPE,YFILEPGDIN,YFILEPGDINTYPE,KLUOUT,GUNIF)
   !
   IF (LEN_TRIM(YFILETYPE)/=0) THEN
-    CALL READ_PREP_FILE_DATE(IOB, &
+    CALL READ_PREP_FILE_DATE(&
                              HPROGRAM,YFILE,YFILETYPE,TPTIME,KLUOUT)
   END IF
   !

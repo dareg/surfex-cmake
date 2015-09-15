@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TEB (DTCO, DGU, IOB, UG, U, USS, DTI, TM, GDM, GRM, &
+      SUBROUTINE PGD_TEB (DTCO, DGU, UG, U, USS, DTI, TM, GDM, GRM, &
                           HPROGRAM,OECOCLIMAP,OGARDEN)
 !     ##############################################################
 !
@@ -41,7 +41,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
@@ -77,7 +76,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
@@ -162,7 +160,7 @@ ALLOCATE(TM%TG%XMESH_SIZE (TM%TG%NDIM))
 !             -------------------
 !
 TM%TOP%LECOCLIMAP = OECOCLIMAP
- CALL PGD_TEB_PAR(DTCO, DGU, IOB, UG, U, USS, TM%BDD, TM%DTT, DTI, TM%TG, &
+ CALL PGD_TEB_PAR(DTCO, DGU, UG, U, USS, TM%BDD, TM%DTT, DTI, TM%TG, &
                   HPROGRAM,OGARDEN,TM%TOP%LGREENROOF,TM%TOP%CBLD_ATYPE)
 !
 !-------------------------------------------------------------------------------
@@ -188,7 +186,7 @@ IF (TM%TOP%LGARDEN) CALL PGD_TEB_VEG(DTCO, UG, U, USS, GDM, GRM, TM%TOP, TM%TG, 
 !*    8.      Case of Building Energy Model
 !             -----------------------------
 !
-IF (TM%TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(DTCO, DGU, IOB, UG, U, USS, TM%DTB, DTI, TM%TG, &
+IF (TM%TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(DTCO, DGU, UG, U, USS, TM%DTB, DTI, TM%TG, &
                                           HPROGRAM,TM%BOP%LAUTOSIZE)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB',1,ZHOOK_HANDLE)

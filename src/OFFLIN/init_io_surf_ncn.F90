@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_NC_n (DTCO, IOB, U, DGU, &
+      SUBROUTINE INIT_IO_SURF_NC_n (DTCO, U, DGU, &
                                     HMASK,HACTION)
 !     ######################
 !
@@ -31,7 +31,6 @@
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 !
@@ -59,7 +58,6 @@ INCLUDE "netcdf.inc"
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
@@ -86,7 +84,7 @@ IF (HACTION=='READ ') THEN
       IRET = NF_OPEN(CFILEIN_NC,NF_NOWRITE,NID_NC)
 !$OMP END SINGLE
     ENDIF
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    'NC    ','DIM_FULL',IFULL,IRET,HDIR='A')
   ENDIF
 ELSE 

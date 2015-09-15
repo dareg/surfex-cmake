@@ -1,5 +1,5 @@
 !     #################################################################
-      SUBROUTINE WRITE_GRIDTYPE_LONLAT_REG (DGU, IOB, U, &
+      SUBROUTINE WRITE_GRIDTYPE_LONLAT_REG (DGU, U, &
                                             HPROGRAM,KLU,KGRID_PAR,PGRID_PAR,KRESP)
 !     #################################################################
 !
@@ -37,7 +37,6 @@
 !
 !
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_WRITE_SURF
@@ -55,7 +54,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
@@ -98,21 +96,21 @@ ALLOCATE(ZLAT(IL))
 !              -----------------------------------------
 !
 YCOMMENT=' '
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'LONMIN',ZLONMIN,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'LONMAX',ZLONMAX,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'LATMIN',ZLATMIN,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'LATMAX',ZLATMAX,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'NLON',ILON,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'NLAT',ILAT,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'REG_LON',ZLON,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, IOB, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,'REG_LAT',ZLAT,KRESP,YCOMMENT)
 !---------------------------------------------------------------------------
 DEALLOCATE(ZLON)

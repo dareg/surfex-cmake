@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_WATFLUX_INIT_n (IOB, &
+      SUBROUTINE DIAG_WATFLUX_INIT_n (&
                                        DGU, DGW, W, &
                                       HPROGRAM,KLU,KSW)
 !     #####################
@@ -43,7 +43,6 @@ USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE,     ONLY : LRESTART
@@ -64,7 +63,6 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
@@ -193,50 +191,50 @@ IF (DGW%LSURF_BUDGETC .OR. .NOT.DGW%LRESET_BUDGETC) THEN
      DGW%XFMVC   = 0.0
   ELSE
      YREC='RNC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XRNC,IRESP)
      YREC='HC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XHC ,IRESP)
      YREC='LEC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XLEC,IRESP)
      YREC='LEIC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XLEIC,IRESP)     
      YREC='GFLUXC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XGFLUXC,IRESP)
      YREC='SWDC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XSWDC,IRESP)
      YREC='SWUC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XSWUC,IRESP)
      YREC='LWDC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XLWDC,IRESP)
      YREC='LWUC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XLWUC,IRESP)
      YREC='FMUC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XFMUC,IRESP)
      YREC='FMVC_WAT'
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XFMVC,IRESP)
 !
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                     HPROGRAM,'VERSION',IVERSION,IRESP)
       IF (IVERSION<8)THEN
          DGW%XEVAPC  = 0.0
          DGW%XSUBLC  = 0.0              
       ELSE
          YREC='EVAPC_WAT'
-         CALL READ_SURF(IOB, &
+         CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XEVAPC,IRESP)
          YREC='SUBLC_WAT'
-         CALL READ_SURF(IOB, &
+         CALL READ_SURF(&
                     HPROGRAM,YREC,DGW%XSUBLC,IRESP)              
       ENDIF
 !

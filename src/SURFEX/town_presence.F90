@@ -1,11 +1,10 @@
 !     #########
-SUBROUTINE TOWN_PRESENCE (IOB, &
+SUBROUTINE TOWN_PRESENCE (&
                           HFILETYPE,OTEB)
 !     #################################################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -17,7 +16,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
 LOGICAL,            INTENT(OUT) :: OTEB      ! TRUE if TEB data exist in the file
@@ -35,9 +33,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TOWN_PRESENCE',0,ZHOOK_HANDLE)
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,'TOWN',YTOWN,IRESP)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILETYPE,'DIM_TOWN',IDIM_TOWN,IRESP)
 !
 OTEB = (YTOWN=='TEB   ') .AND. (IDIM_TOWN > 0)

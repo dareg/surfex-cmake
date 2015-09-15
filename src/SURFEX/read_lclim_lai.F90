@@ -1,11 +1,10 @@
 !     #######################
-      SUBROUTINE READ_LCLIM_LAI (IOB, &
+      SUBROUTINE READ_LCLIM_LAI (&
                                  HPROGRAM,OCLIM_LAI)
 !     #######################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -19,7 +18,6 @@ IMPLICIT NONE
 !  ---------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
 LOGICAL,              INTENT(OUT)   :: OCLIM_LAI ! flag for use of climatologic LAI
@@ -40,17 +38,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_LCLIM_LAI',0,ZHOOK_HANDLE)
 YRECFM='VERSION'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,IVERSION,IRESP)
 YRECFM='BUG'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 IF (IVERSION<4 .OR. IVERSION==4 .AND. IBUGFIX==2) THEN
   OCLIM_LAI = .FALSE.
 ELSE
   YRECFM='LCLIM_LAI'
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,YRECFM,OCLIM_LAI,IRESP)
 END IF
 IF (LHOOK) CALL DR_HOOK('READ_LCLIM_LAI',1,ZHOOK_HANDLE)

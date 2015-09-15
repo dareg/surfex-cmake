@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_WATFLUX_n (DTCO, DGU, IOB, UG, U, WM, &
+      SUBROUTINE INIT_WATFLUX_n (DTCO, DGU, UG, U, WM, &
                                  HPROGRAM,HINIT,                             &
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
@@ -48,7 +48,6 @@ USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -95,7 +94,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
@@ -210,13 +208,13 @@ SELECT CASE (HINIT)
                            WM%DGW%LRAD_BUDGET,WM%DGW%LCOEF,WM%DGW%LSURF_VARS,&
                              ILUOUT,WM%DGW%LSURF_BUDGETC )  
     IF (LNAM_READ) CALL READ_NAM_PREP_WATFLUX_n(HPROGRAM)                 
-    CALL READ_WATFLUX_DATE(IOB, &
+    CALL READ_WATFLUX_DATE(&
                            HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,WM%W%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    HPROGRAM,'DTCUR',WM%W%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
@@ -230,12 +228,12 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_WATFLUX_n(DTCO, IOB, U, WM%WG, WM%W, &
+ CALL READ_PGD_WATFLUX_n(DTCO, U, WM%WG, WM%W, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -260,14 +258,14 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !
 !*       2.     Prognostic and cover fields:
 !               ---------------------------
 !
- CALL READ_WATFLUX_n(DTCO, IOB, U, WM%W, &
+ CALL READ_WATFLUX_n(DTCO, U, WM%W, &
                      HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
@@ -312,7 +310,7 @@ PTSURF(:) = WM%W%XTS(:)
 !*       5.     SBL air fields:
 !               --------------
 !
- CALL READ_WATFLUX_SBL_n(DTCO, IOB, U, WM%W, WM%WSB, &
+ CALL READ_WATFLUX_SBL_n(DTCO, U, WM%W, WM%WSB, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -338,7 +336,7 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_WATFLUX_INIT_n(IOB, &
+ CALL DIAG_WATFLUX_INIT_n(&
                           DGU, WM%DGW, WM%W, &
                           HPROGRAM,ILU,KSW)
 !

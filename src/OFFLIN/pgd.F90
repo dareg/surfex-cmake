@@ -73,7 +73,7 @@ USE MODI_CLOSE_NAMELIST
 !      
 USE MODI_GET_LONLAT_n
 !
-USE MODI_IO_BUFF_CLEAN_n
+USE MODI_IO_BUFF_CLEAN
 USE MODI_PGD_OROG_FILTER
 USE MODI_PGD_SURF_ATM
 USE MODI_PGD_GRID_SURF_ATM
@@ -116,7 +116,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PGD',0,ZHOOK_HANDLE)
 !
- CALL SURFEX_ALLOC(1)
+ CALL SURFEX_ALLOC_LIST(1)
 CSOFTWARE='PGD    '
  CALL GOTO_MODEL(1)
 !
@@ -144,7 +144,7 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
 !
- CALL PGD_GRID_SURF_ATM(YSURF_CUR%IOB, YSURF_CUR%UG, YSURF_CUR%U,&
+ CALL PGD_GRID_SURF_ATM(YSURF_CUR%UG, YSURF_CUR%U,&
                 CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
  CALL SPLIT_GRID(YSURF_CUR%UG, YSURF_CUR%U,&
@@ -162,7 +162,7 @@ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !* building of the header for the opening of the file in case of Arpege file
 IF (CSURF_FILETYPE=='FA    ') THEN
   LFANOCOMPACT = .TRUE.
-  CALL WRITE_HEADER_FA(YSURF_CUR%IOB, YSURF_CUR%UG, &
+  CALL WRITE_HEADER_FA(YSURF_CUR%UG, &
                        CSURF_FILETYPE,'PGD') 
 END IF
 !
@@ -183,14 +183,14 @@ DO JNW = 1,INW
                                       CSURF_FILETYPE)
   !
   !* writing of the fields
- CALL IO_BUFF_CLEAN_n(YSURF_CUR%IOB)
+ CALL IO_BUFF_CLEAN
   
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
   CALL WRITE_PGD_SURF_ATM_n(YSURF_CUR, &
                             CSURF_FILETYPE)
   !
   LDEF = .FALSE.
-  CALL IO_BUFF_CLEAN_n(YSURF_CUR%IOB)  
+  CALL IO_BUFF_CLEAN  
   !
 ENDDO
 !
@@ -216,7 +216,7 @@ WRITE(*,*) '    | PGD ENDS CORRECTLY |'
 WRITE(*,*) '    ----------------------'
       !
 CLOSE(ILUOUT)
- CALL SURFEX_DEALLO
+ CALL SURFEX_DEALLO_LIST
 !
 IF (ASSOCIATED(NWORK)) DEALLOCATE(NWORK)
 IF (ASSOCIATED(XWORK)) DEALLOCATE(XWORK)

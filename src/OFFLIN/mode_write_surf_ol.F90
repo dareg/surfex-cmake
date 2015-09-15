@@ -341,7 +341,7 @@ END SUBROUTINE WRITE_TIME_DIM
 END SUBROUTINE WRITE_SURFX0_TIME_OL
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_OL (IOB, &
+      SUBROUTINE WRITE_SURFX1_OL (&
                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
@@ -349,7 +349,6 @@ END SUBROUTINE WRITE_SURFX0_TIME_OL
 !  
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_NPIO_WRITE, &
                             XTIME_COMM_WRITE, WLOG_MPI
@@ -359,7 +358,7 @@ USE MODD_SURFEX_OMP, ONLY : CWORK0, NWORK0, NWORKVAR, NWORKB, NWORKDIMS, &
 USE MODD_IO_SURF_OL, ONLY: LMASK, NMASK, NMASK_IGN, XSTART, &
                            XSTRIDE, LPARTW, XSTARTW, XCOUNTW
 !
-USE MODI_IO_BUFF_n
+USE MODI_IO_BUFF
 USE MODI_OL_FIND_FILE_WRITE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -376,7 +375,6 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -413,7 +411,7 @@ NWORKLEN(:) = 0
 CWORK0 = ""
 NWORKB=0
 !
- CALL IO_BUFF_n(IOB, &
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !
 !$OMP END SINGLE
@@ -818,13 +816,12 @@ END SUBROUTINE WRITE_DATAX2_OL
 END SUBROUTINE WRITE_SURFX2_OL
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1_OL (IOB, &
+      SUBROUTINE WRITE_SURFN1_OL (&
                                   HREC,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -833,7 +830,6 @@ IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -851,7 +847,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFN1_OL',0,ZHOOK_HANDLE)
 !
 ZFIELD=FLOAT(KFIELD)
- CALL WRITE_SURFX1_OL(IOB, &
+ CALL WRITE_SURFX1_OL(&
                       HREC,ZFIELD,KRESP,HCOMMENT,HDIR)
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFN1_OL',1,ZHOOK_HANDLE)

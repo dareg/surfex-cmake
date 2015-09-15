@@ -1,5 +1,5 @@
 !     #######################################################
-      SUBROUTINE OPEN_AUX_IO_SURF_ASC (IOB, &
+      SUBROUTINE OPEN_AUX_IO_SURF_ASC (&
                                        HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
@@ -36,12 +36,11 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_ASC,ONLY:NUNIT,CFILEIN,CFILEOUT,NMASK,NLUOUT,NFULL,CMASK
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
-USE MODI_IO_BUFF_CLEAN_n
+USE MODI_IO_BUFF_CLEAN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -53,7 +52,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
@@ -70,7 +68,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_ASC',0,ZHOOK_HANDLE)
- CALL IO_BUFF_CLEAN_n(IOB)
+ CALL IO_BUFF_CLEAN
  CALL GET_LUOUT('ASCII ',NLUOUT)
 !
 NUNIT=9
@@ -78,7 +76,7 @@ NUNIT=9
 OPEN(UNIT=NUNIT,FILE=TRIM(HFILE)//'.txt',FORM='FORMATTED')
 !
 CMASK = 'FULL  '
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'ASCII ','DIM_FULL',NFULL,IRET)
 ALLOCATE(NMASK(NFULL))
 ALLOCATE(ZFULL(NFULL))

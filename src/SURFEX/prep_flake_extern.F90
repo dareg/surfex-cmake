@@ -1,11 +1,10 @@
 !     #########
-SUBROUTINE PREP_FLAKE_EXTERN (IOB, &
+SUBROUTINE PREP_FLAKE_EXTERN (&
                               HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -27,7 +26,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -61,10 +59,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_EXTERN',0,ZHOOK_HANDLE)
 !
- CALL OPEN_AUX_IO_SURF(IOB, &
+ CALL OPEN_AUX_IO_SURF(&
                        HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILEPGDTYPE,'WATER',YWATER,IRESP)
 !
 !-------------------------------------------------------------------------------------
@@ -72,10 +70,10 @@ IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(IOB, &
+ CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP)
 !
 IF (IDIM_WATER==0) THEN
@@ -98,7 +96,7 @@ SELECT CASE(HSURF)
   CASE('ZS     ')
     ALLOCATE(PFIELD(INI,1))
     YRECFM='ZS'
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
@@ -109,9 +107,9 @@ SELECT CASE(HSURF)
     ALLOCATE(PFIELD(INI,1))
     YRECFM='TS_WATER'
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-    CALL OPEN_AUX_IO_SURF(IOB, &
+    CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'WATER ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
@@ -126,7 +124,7 @@ IF (HSURF/='ZS    ' .AND. HSURF/='TS    ') THEN
 
   IF (YWATER=='FLAKE ') THEN
 
-    CALL OPEN_AUX_IO_SURF(IOB, &
+    CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'WATER ')
 
     SELECT CASE(HSURF)
@@ -134,55 +132,55 @@ IF (HSURF/='ZS    ' .AND. HSURF/='TS    ') THEN
     CASE('T_SNOW ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='T_SNOW  '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('T_ICE  ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='T_ICE   '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('T_MNW  ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='T_MNW   '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('T_BOT  ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='T_BOT   '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('T_B1   ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='T_B1    '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('H_SNOW ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='H_SNOW  '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('H_ICE  ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='H_ICE   '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('H_ML   ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='H_ML    '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
     CASE('H_B1   ')
       ALLOCATE(PFIELD(INI,1))
       YRECFM='H_B1    '  
-      CALL READ_SURF(IOB, &
+      CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
 !
 !---------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_WATFLUX_n (DTCO, DGU, IOB, U, WM, &
+      SUBROUTINE WRITE_WATFLUX_n (DTCO, DGU, U, WM, &
                                   HPROGRAM,HWRITE)
 !     ####################################
 !
@@ -42,7 +42,6 @@ USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
@@ -65,7 +64,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
@@ -80,7 +78,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_WATFLUX_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'WATER ','WATFLX','WRITE')
 !
 !*       1.     Selection of surface scheme
@@ -88,11 +86,11 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 !
  CALL WRITESURF_WATFLUX_CONF_n(WM%CHW, WM%W, &
                                HPROGRAM)
- CALL WRITESURF_WATFLUX_n(DGU, IOB, U, &
+ CALL WRITESURF_WATFLUX_n(DGU, U, &
                           WM%W, &
                           HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_WATFLUX_SBL_n(DGU, IOB, U, &
+IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_WATFLUX_SBL_n(DGU, U, &
                                                                         WM%W, WM%WSB, &
                                                                         HPROGRAM,HWRITE)
 !

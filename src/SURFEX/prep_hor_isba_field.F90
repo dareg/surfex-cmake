@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IOB, IG, I, UG, U, USS, &
+SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IG, I, UG, U, USS, &
                                 HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,OKEY)
 !     #################################################################################
 !
@@ -39,7 +39,6 @@ SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IOB, IG, I, UG, U, USS, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -81,7 +80,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
@@ -157,12 +155,12 @@ IF (HSURF=='SN_VEG ') THEN
     ENDIF
   ENDIF
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IOB, IG, U, &
+                            IG, U, &
                             HPROGRAM, HSURF,                     &
                             YFILE_SNOW, YFILETYPE_SNOW,          &
                             YFILEPGD_SNOW, YFILEPGDTYPE_SNOW,    &
-                            ILUOUT, GUNIF_SNOW, I%NPATCH,          &
-                            INI,I%TSNOW, I%TTIME,                    &
+                            ILUOUT, GUNIF_SNOW, I%NPATCH, 1,     &
+                            INI,I%TSNOW, I%TTIME,                &
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
@@ -192,7 +190,7 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_ISBA_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN,OKEY)
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
-   CALL PREP_ISBA_EXTERN(DTCO, IOB, I, U, &
+   CALL PREP_ISBA_EXTERN(DTCO, I, U, &
                          HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,OKEY)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    CALL PREP_ISBA_BUFFER(IG, U, &

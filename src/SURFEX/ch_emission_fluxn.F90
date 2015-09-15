@@ -197,7 +197,7 @@ DO JI=1,SIZE(YSC%CHE%TSEMISS)
 !
         IF (.NOT. LIOINIT) THEN
 !         Must be done once before reading
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
           IF (IVERB >= 6) WRITE(ILUOUT,*) 'INIT des I/O DONE.'
           LIOINIT=.TRUE.
@@ -206,8 +206,7 @@ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
         IF (IVERB >= 6)&
                WRITE (ILUOUT,*) 'READ emission :',TRIM(YRECFM),&
                ', SIZE(ZWORK)=',SIZE(ZWORK,1),INBTS 
-        CALL READ_SURF(YSC%IOB, &
-                       HPROGRAM,YRECFM,ZWORK(:,1:INBTS),IRESP)
+        CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,1:INBTS),IRESP)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
         WHERE(ZWORK(:,1:INBTS) == 999.)

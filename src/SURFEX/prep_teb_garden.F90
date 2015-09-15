@@ -1,6 +1,6 @@
 !     #########
-SUBROUTINE PREP_TEB_GARDEN (DTCO, IOB, UG, U, USS, IG, I, TG, TOP, GDM, &
-                            HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+SUBROUTINE PREP_TEB_GARDEN (DTCO, UG, U, USS, IG, I, TG, TOP, GDM, &
+                            HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
 !
 !!****  *PREP_TEB_GARDEN* - Prepares ISBA fields
@@ -32,7 +32,6 @@ SUBROUTINE PREP_TEB_GARDEN (DTCO, IOB, UG, U, USS, IG, I, TG, TOP, GDM, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
@@ -69,7 +68,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
@@ -84,6 +82,8 @@ TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+!
+INTEGER,            INTENT(IN)  :: KPATCH
 !
 !*      0.2    declarations of local variables
 !
@@ -104,41 +104,41 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      2.1    Soil Water reservoirs
 !
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN',0,ZHOOK_HANDLE)
- CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IOB, IG, I, UG, U, USS, &
+ CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IG, I, UG, U, USS, &
                                 GDM%TGD, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TG, TOP, GDM%TVG, &
-                                HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                HPROGRAM,'WG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.2    Soil ice reservoirs
 !
- CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IOB, IG, I, UG, U, USS, &
+ CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IG, I, UG, U, USS, &
                                 GDM%TGD, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TG, TOP, GDM%TVG, &
-                                HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                HPROGRAM,'WGI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.3    Leaves interception water reservoir
 !
- CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IOB, IG, I, UG, U, USS, &
+ CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IG, I, UG, U, USS, &
                                 GDM%TGD, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TG, TOP, GDM%TVG, &
-                                HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                HPROGRAM,'WR     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.4    Temperature profile
 !
- CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IOB, IG, I, UG, U, USS, &
+ CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IG, I, UG, U, USS, &
                                 GDM%TGD, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TG, TOP, GDM%TVG, &
-                                HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                HPROGRAM,'TG     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !*      2.5    Snow variables
 !
- CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IOB, IG, I, UG, U, USS, &
+ CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IG, I, UG, U, USS, &
                                 GDM%TGD, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TG, TOP, GDM%TVG, &
-                                HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                HPROGRAM,'SN_VEG ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 
 !
 !*      2.6    LAI
 !
 IF (GDM%TVG%CPHOTO/='NON' .AND. GDM%TVG%CPHOTO/='AGS' .AND. GDM%TVG%CPHOTO/='LST')  &
- CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IOB, IG, I, UG, U, USS, &
+ CALL PREP_HOR_TEB_GARDEN_FIELD(DTCO, IG, I, UG, U, USS, &
                                 GDM%TGD, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TG, TOP, GDM%TVG, &
-                                HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                                HPROGRAM,'LAI    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !
 !-------------------------------------------------------------------------------------
 !

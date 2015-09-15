@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_CONF_PROJ (IOB, &
+      SUBROUTINE READ_GRIDTYPE_CONF_PROJ (&
                                           HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
@@ -36,7 +36,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -54,7 +53,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
@@ -100,13 +98,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LAT0',ZLAT0,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LON0',ZLON0,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'RPK ',ZRPK, KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'BETA',ZBETA,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
@@ -114,23 +112,23 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LATORI',ZLATORI,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'LONORI',ZLONORI,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'IMAX ',IIMAX, KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'JMAX ',IJMAX, KRESP,HDIR=HDIR)
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'YY',ZY,KRESP,HDIR=HDIR)
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------

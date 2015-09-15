@@ -1,5 +1,5 @@
 !     #######################################################
-      SUBROUTINE OPEN_AUX_IO_SURF_NC (IOB, &
+      SUBROUTINE OPEN_AUX_IO_SURF_NC (&
                                       HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
@@ -36,7 +36,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_IO_SURF_NC,ONLY: NMASK,NFULL,CMASK, NLUOUT, &
                             CFILEIN_NC, NID_NC, NFULL_AUX 
@@ -57,7 +56,6 @@ INCLUDE "netcdf.inc"
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
@@ -86,7 +84,7 @@ ENDIF
 !
 CMASK = HMASK
 CFILEIN_NC = YFILE
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 'NC    ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
 !

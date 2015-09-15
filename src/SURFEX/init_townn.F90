@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_TOWN_n (DTCO, DGU, IOB, UG, U, CHI, DTI, I, &
+      SUBROUTINE INIT_TOWN_n (DTCO, DGU, UG, U, CHI, DTI, I, &
                               TM, GDM, GRM, DGL, DST, SLT, &                        
                                   HPROGRAM,HINIT,                            &
                                    KI,KSV,KSW,                                &
@@ -49,7 +49,6 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -79,7 +78,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
@@ -143,7 +141,7 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CTOWN=='TEB   ') THEN
-  CALL INIT_TEB_n(DTCO, DGU, IOB, UG, U, CHI, DTI, I, &
+  CALL INIT_TEB_n(DTCO, DGU, UG, U, CHI, DTI, I, &
                   TM, GDM, GRM, DST, SLT, &
                   HPROGRAM,HINIT,                               &
                     KI,KSV,KSW,HSV,PCO2,PRHOA,                    &

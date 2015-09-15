@@ -1,6 +1,6 @@
 !     #########
-SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, IOB, I, U, &
-                                   HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
+SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, I, U, &
+                                   HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,KPATCH,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_TEB_GARDEN_EXTERN* - initializes ISBA fields from operational GRIB
@@ -31,7 +31,6 @@ SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, IOB, I, U, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -45,7 +44,6 @@ USE MODI_INTERP_GRID_NAT
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_READ_TEB_PATCH
-USE MODI_GET_CURRENT_TEB_PATCH
 USE MODI_TOWN_PRESENCE
 !
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
@@ -64,7 +62,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -75,6 +72,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
  CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
+INTEGER,            INTENT(IN)  :: KPATCH
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally (on final soil grid)
 !
 !*      0.2    declarations of local variables
@@ -91,7 +89,6 @@ REAL, DIMENSION(:,:), POINTER       :: ZD1            ! depth of field in the so
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT           !
 INTEGER                             :: JPATCH         ! loop counter for patch
 INTEGER                             :: ITEB_PATCH     ! number of TEB patches in file
-INTEGER                             :: ICURRENT_PATCH ! current TEB patch to be initialized
 INTEGER                             :: IVERSION       ! SURFEX version
 INTEGER                             :: IBUGFIX        ! SURFEX bug version
 LOGICAL                             :: GOLD_NAME      ! old name flag for temperatures
@@ -117,33 +114,32 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(IOB, &
+CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
 !* reading of version of the file being read
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(IOB, &
+CALL READ_SURF(&
                HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL PREP_GRID_EXTERN(IOB, &
+CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !* reads if TEB fields exist in the input file
-CALL TOWN_PRESENCE(IOB, &
+CALL TOWN_PRESENCE(&
                    HFILEPGDTYPE,GTEB)
 !
 IF (GTEB) THEN
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-  CALL READ_TEB_PATCH(IOB, &
+  CALL READ_TEB_PATCH(&
                       HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
-  CALL OPEN_AUX_IO_SURF(IOB, &
+  CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')  
-  CALL GET_CURRENT_TEB_PATCH(ICURRENT_PATCH)
   YPATCH='   '
   IF (ITEB_PATCH>1) THEN
-    WRITE(YPATCH,FMT='(A,I1,A)') 'T',MIN(ICURRENT_PATCH,ITEB_PATCH),'_'
+    WRITE(YPATCH,FMT='(A,I1,A)') 'T',MIN(KPATCH,ITEB_PATCH),'_'
   END IF
 END IF
 !
@@ -160,7 +156,7 @@ SELECT CASE(HSURF)
   CASE('ZS     ')
     ALLOCATE(PFIELD(INI,1,1))
     YRECFM='ZS'
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,PFIELD(:,1,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
@@ -172,7 +168,7 @@ SELECT CASE(HSURF)
   CASE('TG    ','WG    ','WGI   ')
 !* choice if one reads garden fields (if present) or ISBA fields
     GGARDEN = .FALSE.
-    IF (GTEB) CALL READ_SURF(IOB, &
+    IF (GTEB) CALL READ_SURF(&
                HFILEPGDTYPE,'GARDEN',GGARDEN,IRESP)
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
     IF (GGARDEN) THEN
@@ -185,7 +181,7 @@ SELECT CASE(HSURF)
     YSURF=ADJUSTL(YSURF)  
 !* reading of the profile and its depth definition
      CALL READ_EXTERN_ISBA(U, &
-                           DTCO, IOB, I, &
+                           DTCO, I, &
                            HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,INI,&
                 HSURF,YSURF,ZFIELD,ZD)
 ! 
@@ -214,7 +210,7 @@ SELECT CASE(HSURF)
      ALLOCATE(PFIELD(INI,1,NVEGTYPE))
      !* choice if one reads garden fields (if present) or ISBA fields    
      GGARDEN = .FALSE.
-     IF (GTEB) CALL READ_SURF(IOB, &
+     IF (GTEB) CALL READ_SURF(&
                HFILEPGDTYPE,'GARDEN',GGARDEN,IRESP)
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
      IF (GGARDEN) THEN
@@ -222,23 +218,23 @@ SELECT CASE(HSURF)
        YRECFM = 'GD_WR'
        IF (GOLD_NAME) YRECFM = 'TWN_WR'
        YRECFM = YPATCH//YRECFM
-       CALL OPEN_AUX_IO_SURF(IOB, &
+       CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'TOWN  ')
      ELSE            
        YRECFM = 'PATCH_NUMBER'
-       CALL OPEN_AUX_IO_SURF(IOB, &
+       CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'NATURE')
-       CALL READ_SURF(IOB, &
+       CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
        CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-       CALL OPEN_AUX_IO_SURF(IOB, &
+       CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'NATURE')
        YRECFM = 'WR'
      END IF
      YRECFM=ADJUSTL(YRECFM)
      
      ALLOCATE(ZFIELD(INI,1,IPATCH))
-     CALL READ_SURF(IOB, &
+     CALL READ_SURF(&
                HFILETYPE,YRECFM,ZFIELD(:,1,:),IRESP,HDIR='A')
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
      CALL PUT_ON_ALL_VEGTYPES(INI,1,1,NVEGTYPE,ZFIELD,PFIELD)

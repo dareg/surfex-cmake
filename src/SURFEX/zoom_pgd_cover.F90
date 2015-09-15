@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE ZOOM_PGD_COVER (DTCO, IOB, UG, U, &
+      SUBROUTINE ZOOM_PGD_COVER (DTCO, UG, U, &
                                  HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP)
 !     ###########################################################
 
@@ -43,7 +43,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -76,7 +75,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -113,10 +111,10 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
 !  These points will not be used during the horizontal interpolation step.
 !  Their value must be defined as XUNDEF.
 !
- CALL OPEN_AUX_IO_SURF(IOB, &
+ CALL OPEN_AUX_IO_SURF(&
                        HINIFILE,HINIFILETYPE,'FULL  ')
 !
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,'ECOCLIMAP',OECOCLIMAP,IRESP)
 !
 !------------------------------------------------------------------------------
@@ -124,7 +122,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(IOB, &
+ CALL PREP_GRID_EXTERN(&
                        HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
  CALL PREP_OUTPUT_GRID(UG, U, &
@@ -136,17 +134,17 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
 !              ----------------
 !
 YRECFM='VERSION'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 ALLOCATE(U%LCOVER(JPCOVER))
- CALL OLD_NAME(IOB, &
+ CALL OLD_NAME(&
                HPROGRAM,'COVER_LIST      ',YRECFM)
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,U%LCOVER(:),IRESP,HDIR='-')
 !
 ALLOCATE(ZCOVER(INI,COUNT(U%LCOVER)))
- CALL READ_SURF_COV(IOB, &
+ CALL READ_SURF_COV(&
                     HPROGRAM,YRECFM,ZCOVER(:,:),U%LCOVER,IRESP,HDIR='A')
 !
 ALLOCATE(ZSEA1   (INI,1))
@@ -155,13 +153,13 @@ ALLOCATE(ZWATER1 (INI,1))
 ALLOCATE(ZTOWN1  (INI,1))
 !
 IF (IVERSION>=7) THEN
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,'FRAC_SEA   ',ZSEA1(:,1),   IRESP,HDIR='A')
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,'FRAC_NATURE',ZNATURE1(:,1),IRESP,HDIR='A')
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,'FRAC_WATER ',ZWATER1(:,1), IRESP,HDIR='A')
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,'FRAC_TOWN  ',ZTOWN1(:,1),  IRESP,HDIR='A')
   !
 ELSE

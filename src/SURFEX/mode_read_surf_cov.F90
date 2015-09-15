@@ -8,13 +8,12 @@ PUBLIC :: READ_SURF_COV
 CONTAINS
 
 !     #############################################################
-      SUBROUTINE READ_SURF_COV (IOB, &
+      SUBROUTINE READ_SURF_COV (&
                                 HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -31,7 +30,6 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM    ! calling program
  CHARACTER(LEN=*), INTENT(IN) :: HREC        ! name of the article to be read
@@ -83,7 +81,7 @@ ELSE
 !RJ: xundef is done for whole array above, to ensure status INTENT(OUT)
 !RJ     PFIELD(:,JCOVER)=0.
     !
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    HPROGRAM,YREC,PFIELD(:,JCOVER),KRESP,YCOMMENT,YDIR)
     !
   END DO

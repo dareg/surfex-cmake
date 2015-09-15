@@ -1,5 +1,5 @@
 !     #############################################################
-SUBROUTINE INIT_FLAKE_n ( DTCO, DGU, IOB, UG, U, FM,                 &
+SUBROUTINE INIT_FLAKE_n ( DTCO, DGU, UG, U, FM,                 &
                           HPROGRAM,HINIT,                            &
                           KI,KSV,KSW,                                &
                           HSV,PCO2,PRHOA,                            &
@@ -50,7 +50,6 @@ USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -106,7 +105,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
@@ -217,13 +215,13 @@ SELECT CASE (HINIT)
                          FM%DGF%LCOEF,FM%DGF%LSURF_VARS,ILUOUT,&
                          FM%DGMF%LWATER_PROFILE,FM%DGF%LSURF_BUDGETC) 
     IF (LNAM_READ) CALL READ_NAM_PREP_FLAKE_n(HPROGRAM)                            
-    CALL READ_FLAKE_DATE(IOB, &
+    CALL READ_FLAKE_DATE(&
                          HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,FM%F%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','FLAKE ','READ ')
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    HPROGRAM,'DTCUR',FM%F%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
@@ -235,12 +233,12 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','FLAKE ','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_FLAKE_n(DTCO, IOB, U, FM%FG, FM%F, &
+ CALL READ_PGD_FLAKE_n(DTCO, U, FM%FG, FM%F, &
                        HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
@@ -262,10 +260,10 @@ END IF
 !*       2.     Prognostic and cover fields:
 !               ---------------------------
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','FLAKE ','READ ')
 !
- CALL READ_FLAKE_n(DTCO, IOB, U, FM%F, &
+ CALL READ_FLAKE_n(DTCO, U, FM%F, &
                    HPROGRAM)
 !
 ILU = SIZE(FM%F%XCOVER,1)
@@ -311,7 +309,7 @@ PTSURF(:) = FM%F%XTS(:)
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_FLAKE_SBL_n(DTCO, IOB, U, FM%F, FM%FSB, &
+ CALL READ_FLAKE_SBL_n(DTCO, U, FM%F, FM%FSB, &
                        HPROGRAM)
 !
 !-------------------------------------------------------------------------------
@@ -337,7 +335,7 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_FLAKE_INIT_n(IOB, DGU, FM%DGF, FM%DGMF, FM%F, &
+ CALL DIAG_FLAKE_INIT_n(DGU, FM%DGF, FM%DGMF, FM%F, &
                         HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

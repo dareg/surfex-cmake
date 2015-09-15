@@ -150,7 +150,7 @@ ALLOCATE(YSC%UG%XJPDIR(YSC%U%NSIZE_FULL))
 !
  CALL PGD_FRAC(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                HPROGRAM,YSC%U%LECOCLIMAP)
-IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
+IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                                  HPROGRAM,LRM_RIVER)
 !
 !-------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, 
 !*    4.      Orography
 !             ---------
 !
- CALL PGD_OROGRAPHY(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
+ CALL PGD_OROGRAPHY(YSC%DGU, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                     HPROGRAM,YSC%U%XSEA,YSC%U%XWATER,HFILE,HFILETYPE,OZS)
 !
 !_______________________________________________________________________________
@@ -166,7 +166,7 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%IOB, YSC%DTCO, YSC%UG, YSC%U, 
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%IM%DTI, YSC%DTZ, YSC%DGU, YSC%IOB, YSC%IM%IG, &
+IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%IM%DTI, YSC%DTZ, YSC%DGU, YSC%IM%IG, &
                                          YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
                                          HPROGRAM,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
@@ -174,7 +174,7 @@ IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%IM%DTI, YSC%DTZ, YSC%DGU,
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
-IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%DTCO, YSC%DGU, YSC%IOB ,YSC%UG, YSC%U, YSC%USS, &
+IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%USS, &
                                      YSC%IM%DTI, YSC%TM, YSC%GDM, YSC%GRM, &
                                  HPROGRAM,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
 !_______________________________________________________________________________

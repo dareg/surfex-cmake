@@ -1,11 +1,10 @@
 !     ######################################################################
-      SUBROUTINE READ_ARRANGE_COVER (IOB, &
+      SUBROUTINE READ_ARRANGE_COVER (&
                                      HPROGRAM,OWATER_TO_NATURE,OTOWN_TO_ROCK,HDIR)
 !     ######################################################################
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE MODI_READ_SURF
 !
@@ -19,7 +18,6 @@ IMPLICIT NONE
 !  ---------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 LOGICAL,           INTENT(OUT) :: OWATER_TO_NATURE ! T: Change Wetland treated as inland water into nature
@@ -46,7 +44,7 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
 YRECFM='VERSION'
- CALL READ_SURF(IOB, &
+ CALL READ_SURF(&
                 HPROGRAM,YRECFM,IVERSION,IRESP,HDIR=YDIR)
 !
 IF (IVERSION<5) THEN
@@ -54,10 +52,10 @@ IF (IVERSION<5) THEN
   OTOWN_TO_ROCK    = .FALSE.
 ELSE
   YRECFM='WATER_TO_NAT'
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,YRECFM,OWATER_TO_NATURE,IRESP,HDIR=YDIR)
   YRECFM='TOWN_TO_ROCK'
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                 HPROGRAM,YRECFM,OTOWN_TO_ROCK,IRESP,HDIR=YDIR)
 END IF
 IF (LHOOK) CALL DR_HOOK('READ_ARRANGE_COVER',1,ZHOOK_HANDLE)

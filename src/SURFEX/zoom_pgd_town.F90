@@ -1,6 +1,6 @@
 !     ###########################################################
       SUBROUTINE ZOOM_PGD_TOWN (B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, &
-                                BOP, BDD, DTB, DTCO, DTT, IOB, UG, U, TGDO, TGDP, TG, &
+                                BOP, BDD, DTB, DTCO, DTT, UG, U, TGDO, TGDP, TG, &
                                 TOP, TVG, &
                                 HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP,OGARDEN)
 !     ###########################################################
@@ -54,7 +54,6 @@ USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
@@ -87,7 +86,6 @@ TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
@@ -119,7 +117,7 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
   RETURN
 ELSE IF (U%CTOWN=='TEB   ') THEN
   CALL ZOOM_PGD_TEB(B, DGCT, DGMT, T, TGD, TGDPE, TGR, TGRPE, &
-                    BOP, BDD, DTB, DTCO, DTT, IOB, UG, U, TGDO, TGDP, TG, &
+                    BOP, BDD, DTB, DTCO, DTT, UG, U, TGDO, TGDP, TG, &
                                TOP, TVG, &
                     HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP,OGARDEN)
 END IF

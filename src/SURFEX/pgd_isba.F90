@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_ISBA (DTCO, DTI, DGU, IOB, IG, I, UG, U, USS, &
+      SUBROUTINE PGD_ISBA (DTCO, DTI, DGU, IG, I, UG, U, USS, &
                            HPROGRAM,OECOCLIMAP)
 !     ##############################################################
 !
@@ -49,7 +49,6 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -111,7 +110,6 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
@@ -393,7 +391,7 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
 !*    6.      Topographic index for TOPMODEL
 !             ------------------------------
 !
- CALL PGD_TOPO_INDEX(DGU, IOB, DTCO, UG, U, USS, I, &
+ CALL PGD_TOPO_INDEX(DGU, DTCO, UG, U, USS, I, &
                      HPROGRAM,ILU,YCTI,YCTIFILETYPE,LIMP_CTI)
 !
 !-------------------------------------------------------------------------------
@@ -419,11 +417,11 @@ IF(LIMP_SAND)THEN
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YSAND)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YSANDFILETYPE,'NATURE','ISBA  ','READ ')
   ENDIF     
 !   
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  YSANDFILETYPE,'SAND',I%XSAND(:,1),IRESP) 
 !
   CALL END_IO_SURF_n(YSANDFILETYPE)
@@ -457,11 +455,11 @@ IF(LIMP_CLAY)THEN
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YSAND)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YCLAYFILETYPE,'NATURE','ISBA  ','READ ')
   ENDIF     
 !   
-  CALL READ_SURF(IOB, &
+  CALL READ_SURF(&
                  YCLAYFILETYPE,'CLAY',I%XCLAY(:,1),IRESP) 
 !
   CALL END_IO_SURF_n(YCLAYFILETYPE)
@@ -512,11 +510,11 @@ IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YSOC_TOP)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YSOCFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                  YSOCFILETYPE,'SOC_TOP',I%XSOC(:,1),IRESP) 
 !
     CALL END_IO_SURF_n(YSOCFILETYPE)
@@ -535,11 +533,11 @@ CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YSOC_SUB)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YSOCFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                  YSOCFILETYPE,'SOC_SUB',I%XSOC(:,2),IRESP) 
 !
     CALL END_IO_SURF_n(YSOCFILETYPE)
@@ -585,11 +583,11 @@ IF(LEN_TRIM(YPERM)/=0.OR.XUNIF_PERM/=XUNDEF)THEN
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YPERM)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YPERMFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                  YPERMFILETYPE,'PERM',I%XPERM(:),IRESP) 
 !
     CALL END_IO_SURF_n(YPERMFILETYPE)
@@ -628,11 +626,11 @@ IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YGW)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YGWFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                  YGWFILETYPE,'GW',I%XGW(:),IRESP) 
 !
     CALL END_IO_SURF_n(YGWFILETYPE)
@@ -692,7 +690,7 @@ ALLOCATE(I%XWDRAIN(ILU))
 !
 I%LECOCLIMAP = OECOCLIMAP
 !
- CALL PGD_ISBA_PAR(DTCO, DGU, IOB, UG, U, USS, DTI, I, IG, &
+ CALL PGD_ISBA_PAR(DTCO, DGU, UG, U, USS, DTI, I, IG, &
                    HPROGRAM)
 !
 !-------------------------------------------------------------------------------

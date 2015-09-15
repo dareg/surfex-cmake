@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SET_SST (DTCO, DGU, IOB, S, U, &
+SUBROUTINE ASSIM_SET_SST (DTCO, DGU, S, U, &
                           KI,PITM,PSST,PSIC,HTEST)
 
 !     ###############################################################################
@@ -27,7 +27,6 @@ SUBROUTINE ASSIM_SET_SST (DTCO, DGU, IOB, S, U, &
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -44,7 +43,7 @@ USE MODI_ABOR1_SFX
 USE MODI_INIT_IO_SURF_n
 USE MODI_READ_SURF
 USE MODI_END_IO_SURF_n
-USE MODI_IO_BUFF_CLEAN_n
+USE MODI_IO_BUFF_CLEAN
 USE MODI_UNPACK_SAME_RANK
 !
 USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
@@ -58,7 +57,6 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -105,25 +103,25 @@ IF ( LREAD_SST_FROM_FILE ) THEN
 !
 !  Open FA file
 !
-  CALL INIT_IO_SURF_n(DTCO, DGU, IOB, U, &
+  CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                       YPROGRAM2,'EXTZON','SURF  ','READ ')
 !
 !  Read SST_SIC 
 !
   IF ( LECSST ) THEN
   ! SST field interpolated from ECMWF SST ANALYSIS to model domain
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    YPROGRAM2,'SURFSEA.TEMPERA',PSST,IRESP)
   ELSE
   ! Surface temperature from boundary in SST_SIC
-    CALL READ_SURF(IOB, &
+    CALL READ_SURF(&
                    YPROGRAM2,'SURFTEMPERATURE',PSST,IRESP)
   ENDIF
 !
 !  Close SST_SIC file
 !
   CALL END_IO_SURF_n(YPROGRAM2)
-  CALL IO_BUFF_CLEAN_n(IOB)
+  CALL IO_BUFF_CLEAN
   IF (NRANK==NPIO) WRITE(*,*) 'READ SST_SIC OK'
 
 ELSE

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE OPEN_AUX_IO_SURF (IOB, &
+      SUBROUTINE OPEN_AUX_IO_SURF (&
                                    HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
@@ -39,7 +39,6 @@
 !
 !
 !
-USE MODD_IO_BUFF_n, ONLY : IO_BUFF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -74,7 +73,6 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(IO_BUFF_t), INTENT(INOUT) :: IOB
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
@@ -101,7 +99,7 @@ ENDIF
 !
 IF (HFILETYPE=='ASCII ' ) THEN
 #ifdef SFX_ASC
-  CALL OPEN_AUX_IO_SURF_ASC(IOB, &
+  CALL OPEN_AUX_IO_SURF_ASC(&
                             HFILE,HFILETYPE,HMASK)
 #endif
 ENDIF
@@ -114,21 +112,21 @@ ENDIF
 !
 IF (HFILETYPE=='FA    ' ) THEN
 #ifdef SFX_FA
-  CALL OPEN_AUX_IO_SURF_FA(IOB, &
+  CALL OPEN_AUX_IO_SURF_FA(&
                            HFILE,HFILETYPE,HMASK)
 #endif
 ENDIF
 !
 IF (HFILETYPE=='LFI   ' ) THEN
 #ifdef SFX_LFI
-  CALL OPEN_AUX_IO_SURF_LFI(IOB, &
+  CALL OPEN_AUX_IO_SURF_LFI(&
                             HFILE,HFILETYPE,HMASK)
 #endif
 ENDIF
 !
 IF (HFILETYPE=='NC    ' ) THEN
 #ifdef SFX_NC
-  CALL OPEN_AUX_IO_SURF_NC(IOB, &
+  CALL OPEN_AUX_IO_SURF_NC(&
                            HFILE,HFILETYPE,HMASK)
 #endif
 ENDIF

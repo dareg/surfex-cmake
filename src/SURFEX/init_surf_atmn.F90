@@ -299,13 +299,13 @@ SELECT CASE (HINIT)
                             YSC%DGU%LPROVAR_TO_DIAG)  
     ! preparation of fields  (date not present in PGD file)
     IF (LNAM_READ) CALL READ_NAM_PREP_SURF_n(HPROGRAM)
-    CALL READ_SURF_ATM_DATE(YSC%IOB, &
+    CALL READ_SURF_ATM_DATE(&
                             HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,YSC%U%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
-    CALL READ_SURF(YSC%IOB, &
+    CALL READ_SURF(&
                    HPROGRAM,'DTCUR',YSC%U%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 
@@ -320,30 +320,30 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
 !
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'VERSION',IVERSION,IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'BUG',IBUGFIX,IRESP)
 !
 IF (IVERSION>7 .OR. IVERSION==7 .AND.IBUGFIX>=2) THEN
-  CALL READ_SURF(YSC%IOB, &
+  CALL READ_SURF(&
                    HPROGRAM,'STORAGETYPE',YREAD,IRESP)
 ENDIF
 !         reading
 !
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'SEA   ',YSC%U%CSEA   ,IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'WATER ',YSC%U%CWATER ,IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'NATURE',YSC%U%CNATURE,IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'TOWN  ',YSC%U%CTOWN  ,IRESP)
 !
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
 IF (HINIT=='PRE') THEN
   NINDX2SFX = YSC%U%NDIM_FULL
@@ -352,7 +352,7 @@ IF (HINIT=='PRE') THEN
   !Initialize full mask with good dimension
   IF (ALLOCATED(NMASK_FULL)) DEALLOCATE(NMASK_FULL)
   CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
   ALLOCATE(NWORK(YSC%U%NDIM_FULL))
   ALLOCATE(XWORK(YSC%U%NDIM_FULL))
@@ -371,28 +371,28 @@ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
     ALLOCATE(XWORK2_FULL(0,0))
   ENDIF
 ENDIF  
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'DIM_SEA   ',YSC%U%NDIM_SEA,   IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'DIM_NATURE',YSC%U%NDIM_NATURE,IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'DIM_WATER ',YSC%U%NDIM_WATER, IRESP)
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'DIM_TOWN  ',YSC%U%NDIM_TOWN,  IRESP)
- CALL READ_LECOCLIMAP(YSC%IOB, &
+ CALL READ_LECOCLIMAP(&
                       HPROGRAM,YSC%U%LECOCLIMAP)
- CALL READ_ARRANGE_COVER(YSC%IOB, &
+ CALL READ_ARRANGE_COVER(&
                          HPROGRAM,YSC%U%LWATER_TO_NATURE,YSC%U%LTOWN_TO_ROCK)
- CALL READ_COVER_GARDEN(YSC%IOB, &
+ CALL READ_COVER_GARDEN(&
                         HPROGRAM,YSC%U%LGARDEN)
 !
 !* reads if climatological LAI is used or not for ecoclimap2. If not, looks for year to be used.
- CALL READ_LCLIM_LAI(YSC%IOB, &
+ CALL READ_LCLIM_LAI(&
                      HPROGRAM,LCLIM_LAI)
 IF (.NOT. LCLIM_LAI .AND. YSC%U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
                      .AND. YSC%U%TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) YSC%DTCO%NYEAR=YSC%U%TTIME%TDATE%YEAR
  CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
- CALL READ_ECO2_IRRIG(YSC%IOB, &
+ CALL READ_ECO2_IRRIG(&
                       YSC%DTCO, &
                       HPROGRAM)
 !
@@ -406,7 +406,7 @@ IF (.NOT. LCLIM_LAI .AND. YSC%U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
 !
 !        2.1. Read cover
 !
- CALL READ_COVER_n(YSC%DTCO, YSC%IOB, YSC%U, &
+ CALL READ_COVER_n(YSC%DTCO, YSC%U, &
                    HPROGRAM)
 !
 !        2.2. Read grid
@@ -415,7 +415,7 @@ ALLOCATE(YSC%UG%XLAT       (YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%UG%XLON       (YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%UG%XMESH_SIZE (YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%USS%XZ0EFFJPDIR(YSC%U%NSIZE_FULL))
- CALL READ_GRID(YSC%IOB, &
+ CALL READ_GRID(&
                 HPROGRAM,YSC%UG%CGRID,YSC%UG%XGRID_PAR,YSC%UG%XLAT,YSC%UG%XLON,YSC%UG%XMESH_SIZE,IRESP,YSC%USS%XZ0EFFJPDIR)
 YSC%UG%NGRID_PAR=SIZE(YSC%UG%XGRID_PAR)
 !
@@ -427,7 +427,7 @@ IF (.NOT. LZENITH) THEN
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
 !$OMP END PARALLEL
   ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
-  CALL GET_SIZES_PARALLEL(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, &
+  CALL GET_SIZES_PARALLEL(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, &
                           NBLOCKTOT,KI,0,ISIZE_OMP)
   CALL SUNPOS(ISIZE_OMP,KYEAR, KMONTH, KDAY, PTIME, YSC%UG%XLON, YSC%UG%XLAT, ZTSUN, ZZENITH, ZAZIM)
   DEALLOCATE(ISIZE_OMP)
@@ -437,10 +437,10 @@ ENDIF
 IF (HPROGRAM/='AROME '.AND.NRANK==NPIO) THEN
   !
   IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
-    CALL READ_GRIDTYPE(YSC%IOB, &
+    CALL READ_GRIDTYPE(&
                        HPROGRAM,YSC%UG%CGRID,YSC%UG%NGRID_PAR,YSC%U%NDIM_FULL,.FALSE.,HDIR='A')
     ALLOCATE(YSC%UG%XGRID_FULL_PAR(YSC%UG%NGRID_PAR))
-    CALL READ_GRIDTYPE(YSC%IOB, &
+    CALL READ_GRIDTYPE(&
                        HPROGRAM,YSC%UG%CGRID,YSC%UG%NGRID_PAR,YSC%U%NDIM_FULL,.TRUE.,&
                        YSC%UG%XGRID_FULL_PAR,IRESP,HDIR='A')
   ENDIF
@@ -454,7 +454,7 @@ ENDIF
 !
 !        2.4 Initialize Chemical Emissions
 !
- CALL READ_SURF(YSC%IOB, &
+ CALL READ_SURF(&
                    HPROGRAM,'CH_EMIS',YSC%CHU%LCH_EMIS,IRESP)
 !
 IF (YSC%CHU%LCH_EMIS) THEN
@@ -462,7 +462,7 @@ IF (YSC%CHU%LCH_EMIS) THEN
   IF ( IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3 ) THEN
     YSC%CHU%CCH_EMIS='AGGR'
   ELSE
-    CALL READ_SURF(YSC%IOB, &
+    CALL READ_SURF(&
                    HPROGRAM,'CH_EMIS_OPT',YSC%CHU%CCH_EMIS,IRESP)
   END IF
   !
@@ -472,11 +472,11 @@ IF (YSC%CHU%LCH_EMIS) THEN
     !
     IF (YSC%CHU%LCH_SURF_EMIS) THEN
       IF (YSC%CHU%CCH_EMIS=='AGGR') THEN
-        CALL CH_INIT_EMISSION_n(YSC%IOB, &
+        CALL CH_INIT_EMISSION_n(&
                                 YSC%CHE, YSC%CHU, YSC%SV, &
                                 HPROGRAM,YSC%U%NSIZE_FULL,ICH,PRHOA) 
       ELSE
-        CALL CH_INIT_SNAP_n(YSC%IOB, &
+        CALL CH_INIT_SNAP_n(&
                             YSC%CHN, YSC%SV, &
                             HPROGRAM,YSC%U%NSIZE_FULL,HINIT,ICH,PRHOA)
       END IF
@@ -500,7 +500,7 @@ END IF
 !
 !*       2.5 Subgrid orography
 !
- CALL READ_SSO_n(YSC%IOB, &
+ CALL READ_SSO_n(&
                  YSC%U, YSC%USS, &
                  HPROGRAM)
 !
@@ -519,7 +519,7 @@ ALLOCATE(YSC%USS%XZ0REL  (YSC%U%NSIZE_FULL))
 !
 !*       2.7 Dummy fields
 !
- CALL READ_DUMMY_n(YSC%IOB, &
+ CALL READ_DUMMY_n(&
                    YSC%DUU,YSC% U, &
                    HPROGRAM)
 !
@@ -535,24 +535,24 @@ ALLOCATE(YSC%USS%XZ0REL  (YSC%U%NSIZE_FULL))
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%U, &
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
 !
 !*       2.8 Allocations and Initialization of diagnostics
 !
-IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(YSC%IOB, &
+IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(&
                                              YSC%DGU, YSC%U, &
                                              HPROGRAM,KSW)
 !
 !
 !*       Canopy fields if Beljaars et al 2004 parameterization is used
 !
-IF (YSC%USS%CROUGH=='BE04') CALL READ_SSO_CANOPY_n(YSC%DTCO, YSC%IOB, YSC%SSCP, YSC%U, &
+IF (YSC%USS%CROUGH=='BE04') CALL READ_SSO_CANOPY_n(YSC%DTCO, YSC%SSCP, YSC%U, &
                                                HPROGRAM,HINIT)
 !
 !*       Physical fields need for ARPEGE/ALADIN climate run
 !
- CALL INIT_CPL_GCM_n(YSC%IOB, &
+ CALL INIT_CPL_GCM_n(&
                      YSC%U, &
                      HPROGRAM,HINIT)
 !
@@ -613,7 +613,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XSEA(:)
 !
 ! initialization
 IF (YSC%U%NDIM_SEA>0) &
-  CALL INIT_SEA_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, &
+  CALL INIT_SEA_n(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, &
                   YSC%SM, YSC%DGL,  &
                   HPROGRAM,HINIT,YSC%U%NSIZE_SEA,KSV,KSW,            &
                   HSV,ZP_CO2,ZP_RHOA,                                &
@@ -642,7 +642,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XWATER(:)
 !
 ! initialization
 IF (YSC%U%NDIM_WATER>0) &
-  CALL INIT_INLAND_WATER_n(YSC%DTCO, YSC%DGU,YSC%IOB, YSC%UG, &
+  CALL INIT_INLAND_WATER_n(YSC%DTCO, YSC%DGU,YSC%UG, &
                            YSC%U, YSC%WM, YSC%FM, YSC%DGL,    &
                            HPROGRAM,HINIT,YSC%U%NSIZE_WATER,KSV,KSW,          &
                            HSV,ZP_CO2,ZP_RHOA,                                &
@@ -670,7 +670,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XNATURE(:)
 !
 ! initialization
 IF (YSC%U%NDIM_NATURE>0) &
-  CALL INIT_NATURE_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, YSC%IM, &
+  CALL INIT_NATURE_n(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%IM, &
                      YSC%DTZ, YSC%DGL, YSC%DST, YSC%SLT, YSC%SV, &
                      HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,KSV,KSW,   &
                      HSV,ZP_CO2,ZP_RHOA,                                &
@@ -698,7 +698,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XTOWN(:)
 !
 ! initialization
 IF (YSC%U%NDIM_TOWN>0) &
-  CALL INIT_TOWN_n(YSC%DTCO, YSC%DGU, YSC%IOB, YSC%UG, YSC%U, &
+  CALL INIT_TOWN_n(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, &
                    YSC%IM%CHI, YSC%IM%DTI, YSC%IM%I, &
                    YSC%TM, YSC%GDM, YSC%GRM, YSC%DGL, YSC%DST, YSC%SLT, &
                    HPROGRAM,HINIT,YSC%U%NSIZE_TOWN,KSV,KSW,             &
