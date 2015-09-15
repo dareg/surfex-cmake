@@ -42,6 +42,7 @@
 !!
 !!      Original   09/10/2003
 !!                 03/2014 (B. Vincendon) correction for meshes covered by several watersheds
+!!                 03/2015 (E. Artinyan) YSTEP jusqu'a 99999 steps
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -97,7 +98,7 @@ REAL, DIMENSION(KI)       :: ZDG_FULL
 !
 REAL, DIMENSION(KI,NNCAT) :: ZCOUNT, ZW_CAT
 !
-CHARACTER(LEN=3)          :: YSTEP
+CHARACTER(LEN=5)          :: YSTEP
 INTEGER                   :: JCAT_IN
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -203,8 +204,12 @@ IF ( (NFREQ_MAPS_WG/=0 .AND. MOD(KSTEP,NFREQ_MAPS_WG)==0) .OR.&
     WRITE(YSTEP,'(I1)') KSTEP
   ELSEIF (KSTEP < 100) THEN
     WRITE(YSTEP,'(I2)') KSTEP
-  ELSE
+  ELSEIF (KSTEP < 1000) THEN
     WRITE(YSTEP,'(I3)') KSTEP
+  ELSEIF (KSTEP < 10000) THEN
+    WRITE(YSTEP,'(I4)') KSTEP
+  ELSE
+    WRITE(YSTEP,'(I5)') KSTEP
   ENDIF
   !
   CALL OPEN_FILE('ASCII ',NUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')

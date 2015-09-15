@@ -48,6 +48,7 @@
 !!                patch
 !!      03/2014: Modif BV : New organisation for first time step (displacement
 !!                          from init_coupl_topd)
+!!      07/2015: Modif BV : modification of recharge computation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -130,6 +131,7 @@ REAL, DIMENSION(NNCAT,NMESHT) :: ZKAPPA          ! topographic index
 REAL, DIMENSION(NNCAT)        :: ZKAPPAC         ! critical topographic index
 REAL, DIMENSION(KI)           :: ZRI             ! recharge on ISBA grid (m)
 REAL, DIMENSION(KI)           :: ZRI_WGI         ! water changing of phase on ISBA grid
+REAL, DIMENSION(KI)           :: ZWM,ZWIM        ! Water content on SurfEx grid after the previous topodyn time step
 REAL, DIMENSION(KI)           :: Z_WSTOPI, Z_WFCTOPI
 REAL, DIMENSION(KI)           :: ZRUNOFFC_FULL   ! Cumulated runoff from isba on the full domain (kg/m2)
 REAL, DIMENSION(KI)           :: ZRUNOFFC_FULLM  ! Cumulated runoff from isba on the full domain (kg/m2) at t-dt
@@ -190,7 +192,8 @@ ELSEIF (I%CISBA=='3-L') THEN
                    SIZE(I%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
 ENDIF
 !
-
+ZWM (1:KI) = XWG_FULL(1:KI)
+ZWIM(1:KI) = XWGI_FULL(1:KI)
 !
 !*       1.     ISBA => TOPODYN
 !               ---------------
@@ -230,7 +233,12 @@ ELSEWHERE
   XWGI_FULL = XUNDEF
 END WHERE
 !
-CALL UNPACK_SAME_RANK(U%NR_NATURE,DGEI%XAVG_DWGI(:),ZRI_WGI)
+WHERE ( (XDTOPI/=XUNDEF).AND.(XWGI_FULL/=XUNDEF).AND.(ZWIM/=XUNDEF))
+  ZRI_WGI = ( (XWGI_FULL - ZWIM)  ) * XDTOPI!old code
+ELSEWHERE
+  ZRI_WGI = 0.0
+END WHERE
+!CALL UNPACK_SAME_RANK(U%NR_NATURE,DGEI%XAVG_DWGI(:),ZRI_WGI)
 !
 WHERE ( XDTOPI==XUNDEF ) 
   ZRI_WGI = 0.0
@@ -292,9 +300,8 @@ ENDIF
 ! This recharge is computed without regarding the changing of phase of water
 ! and the lateral transfers are performed regarding wsat et Wfc of last time step
 !
-CALL UNPACK_SAME_RANK(U%NR_NATURE,DGEI%XAVG_DWG(:),ZRI)
-WHERE ( XDTOPI/=XUNDEF )
-  ZRI=(ZRI+ ZRI_WGI )* XDTOPI
+WHERE ( (XDTOPI/=XUNDEF).AND.(XWG_FULL/=XUNDEF).AND.(ZWM/=XUNDEF))
+  ZRI = ( (XWG_FULL - ZWM)  ) * XDTOPI+ ZRI_WGI
 ELSEWHERE
   ZRI = 0.0
 ENDWHERE

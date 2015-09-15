@@ -36,6 +36,7 @@
 !!
 !!      Original   16/03/2005
 !!                 03/2014 (E. Artinian) manages the option CGRID='IGN'
+!!                 07/2015 (E. Artinian) corrections  for option CGRID='IGN'
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -161,17 +162,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA:INIT_4POINTS',0,ZHOOK_HANDLE)
 !
 IF (UG%CGRID=='IGN') THEN 
-CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,PDX=ZDX,PDY=ZDY)
- IDXN=KDXM
- PX1 = XXI(IDXN)              ! coordonnée X du point courant
- PX2 = XXI(IDXN+1)            ! coordonnée X du point suivant
- PX3 = XXI(IDXN)    ! coordonnée X du point aligné sur la ligne suivante 
- PX4 = XXI(IDXN+1)  ! coordonnée X du point suivant sur la ligne suivante
-!
- PY1 = XYI(IDXN)              ! coordonnée Y du point courant
- PY2 = XYI(IDXN+1)            ! coordonnée Y du point suivant
- PY3 = XYI(IDXN)+ZDY(IDXN)    ! coordonnée Y du point aligné sur la ligne suivante
- PY4 = XYI(IDXN+1)+ZDY(IDXN+1)  ! coordonnée Y du point suivant sur la ligne suivante
+  CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,PDX=ZDX,PDY=ZDY)
+  IDXN=KDXM
+  !on va juste retourner les quatre coins de la maille, les XXI et XYI etant les coordonees du centre
+  !on se contente de verifier si la maille TOP est dans la maille SURFEX
+  !la grille est reguliere dans les deux sens mais pas forcement rectangulaire
+  PX1=XXI(IDXN)-ZDX(IDXN)/2.0
+  PX2=XXI(IDXN)+ZDX(IDXN)/2.0
+  PX3=XXI(IDXN)-ZDX(IDXN)/2.0
+  PX4=XXI(IDXN)+ZDX(IDXN)/2.0
+  PY1=XYI(IDXN)-ZDY(IDXN)/2.0
+  PY2=XYI(IDXN)-ZDY(IDXN)/2.0
+  PY3=XYI(IDXN)+ZDY(IDXN)/2.0
+  PY4=XYI(IDXN)+ZDY(IDXN)/2.0
 ELSE
  ILINE = INT(KDXM/(NIMAX))+1      ! number of the current line
  II    = KDXM-((ILINE-1)*NIMAX)   ! index of point in the line

@@ -33,6 +33,7 @@
 !!
 !!      Original   25/01/2005
 !!                 03/2014 (E. Artinian) manages the option CGRID='IGN'
+!!                 07/2015 (E. Artinian) get the real ZDXI and ZDYI values
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -94,10 +95,8 @@ ELSE IF(UG%CGRID.EQ.'LONLAT REG') THEN
     ZDXI(:)=(ZLONMAX-ZLONMIN)/(IIMAX-1)
     ZDYI(:)=(ZLATMAX-ZLATMIN)/(IJMAX-1)
 ELSE IF (UG%CGRID=='IGN') THEN 
- CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,KLAMBERT=ILAMBERT,KL=INI,PX=ZXN,PY=ZYN)
-  INI=KI
-  ZDXI(:)=8000
-  ZDYI(:)=8000
+  CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,KLAMBERT=ILAMBERT,KL=INI,PX=ZXN,PY=ZYN,PDX=ZDXI,PDY=ZDYI)
+  INI=KI        
 ELSE
     CALL ABOR1_SFX("READ_FILE_ISBAMAP: TYPE DE GRILLE NON GERE PAR LE CODE")
 ENDIF
