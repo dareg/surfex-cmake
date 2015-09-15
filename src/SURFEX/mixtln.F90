@@ -54,7 +54,7 @@ USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 !
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
-USE MODD_OCEAN_GRID_n
+USE MODD_OCEAN_GRID
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -444,22 +444,22 @@ DO JPT=1,SIZE(PFSOL)
 
     IF (J<IBOT) THEN
       IF (J>IUP) THEN
-        ZA (J) = XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWS(J-1) + ZKMED(J-1)) 
-        ZAI(J) = XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWM(J-1) + ZKMED(J-1))
-        ZA2(J) = XOCEAN_TSTEP * XK2(J) * ZKMELM(J)
+        ZA (J) = O%XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWS(J-1) + ZKMED(J-1)) 
+        ZAI(J) = O%XOCEAN_TSTEP * XK1(J) * (ZKMEL(J-1) + ZKMES(J-1) + ZKMEWM(J-1) + ZKMED(J-1))
+        ZA2(J) = O%XOCEAN_TSTEP * XK2(J) * ZKMELM(J)
       ENDIF
-      ZC (J) = XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWS(J)   + ZKMED(J)) 
-      ZCI(J) = XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWM(J)   + ZKMED(J))
-      ZC2(J) = XOCEAN_TSTEP * XK3(J) * ZKMELM(J+1)
+      ZC (J) = O%XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWS(J)   + ZKMED(J)) 
+      ZCI(J) = O%XOCEAN_TSTEP * XK2(J) * (ZKMEL(J)   + ZKMES(J)   + ZKMEWM(J)   + ZKMED(J))
+      ZC2(J) = O%XOCEAN_TSTEP * XK3(J) * ZKMELM(J+1)
     ENDIF
   
     ZB (J) = 1. - ZA (J) - ZC (J)
     ZBI(J) = 1. - ZAI(J) - ZCI(J)
-    ZB2(J) = 1. - ZA2(J) - ZC2(J) + XOCEAN_TSTEP * ZSEAE(J)/ZLE(J)/XZCE
+    ZB2(J) = 1. - ZA2(J) - ZC2(J) + O%XOCEAN_TSTEP * ZSEAE(J)/ZLE(J)/XZCE
 
     ZAU(J)    = ZAI(J) * (1.,0.) 
     ZCU(J)    = ZCI(J) * (1.,0.) 
-    ZBU(J)    = ZBI(J) * (1.,0.) + XOCEAN_TSTEP * ZF * XGAMA * (0.,1.)
+    ZBU(J)    = ZBI(J) * (1.,0.) + O%XOCEAN_TSTEP * ZF * XGAMA * (0.,1.)
     
 
     ZOMT(J)   = 1./(ZB (J) - ZA (J) * ZOMT(J-1) * ZC (J-1)) 
@@ -468,17 +468,17 @@ DO JPT=1,SIZE(PFSOL)
     ZOME(J)   = 1./(ZB2(J) - ZA2(J) * ZOME(J-1) * ZC2(J-1))
  
 
-    ZYT(J)    = ZSEAT(J) + XOCEAN_TSTEP * (ZDTFSOL(J) + ADVT(J)) 
-    ZYS(J)    = ZSEAS(J) + XOCEAN_TSTEP * (             ADVS(J))  
+    ZYT(J)    = ZSEAT(J) + O%XOCEAN_TSTEP * (ZDTFSOL(J) + ADVT(J)) 
+    ZYS(J)    = ZSEAS(J) + O%XOCEAN_TSTEP * (             ADVS(J))  
     IF (OR%LREL_TS) THEN
-      IF (.NOT.OR%LFLX_CORR) ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZTDTREL(J)
-      ZYS(J) = ZYS(J) + XOCEAN_TSTEP * ZSDTREL(J)
+      IF (.NOT.OR%LFLX_CORR) ZYT(J) = ZYT(J) + O%XOCEAN_TSTEP * ZTDTREL(J)
+      ZYS(J) = ZYS(J) + O%XOCEAN_TSTEP * ZSDTREL(J)
     ENDIF
     
     ZUC(J,1)  = ZSEAU(J)*(1.,0.) + ZSEAV(J)*(0.,1.)
-    ZYU(J)    = ZUC(J,1) + XOCEAN_TSTEP * (ZUC(J,1)*ZF*(1.-XGAMA)*(0.,-1.) + ADVU(J)*(1.,0.) + ADVV(J)*(0.,1.))
+    ZYU(J)    = ZUC(J,1) + O%XOCEAN_TSTEP * (ZUC(J,1)*ZF*(1.-XGAMA)*(0.,-1.) + ADVU(J)*(1.,0.) + ADVV(J)*(0.,1.))
     ! damping on current if LREL_CUR=T in explicit scheme
-    IF (OR%LREL_CUR) ZYU(J) = ZYU(J) + XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.) + ZVDTREL(J)*(0.,1.))  
+    IF (OR%LREL_CUR) ZYU(J) = ZYU(J) + O%XOCEAN_TSTEP * (ZUDTREL(J)*(1.,0.) + ZVDTREL(J)*(0.,1.))  
 
     IF (J<IBOT) THEN
       ZDRHODZ   = (ZZDRHO(J)-ZZDRHO(J+1))/XDZ1(J)
@@ -492,13 +492,13 @@ DO JPT=1,SIZE(PFSOL)
       ZPDY(J) = ZPDY(J-1)
     ENDIF
 
-    ZYE(J)    = ZSEAE(J) + XOCEAN_TSTEP * (0.5 * ZSEAE(J)**2/ZLE(J)/XZCE + ADVE(J)) + ZPTH(J) + ZPDY(J)
+    ZYE(J)    = ZSEAE(J) + O%XOCEAN_TSTEP * (0.5 * ZSEAE(J)**2/ZLE(J)/XZCE + ADVE(J)) + ZPTH(J) + ZPDY(J)
 
     IF (J==IUP) THEN
-      ZYT(J) = ZYT(J) + XOCEAN_TSTEP * ZDTFNSOL
-      ZYS(J) = ZYS(J) + XOCEAN_TSTEP * ZSEAS(IUP) * ZSFTEAU / XDZ2(IUP)
-      ZYU(J) = ZYU(J) - XOCEAN_TSTEP * ( ZSFU*(1.,0.) + ZSFV*(0.,1.) ) / XDZ2(IUP) / XRHOSW
-      ZYE(J) = ZYE(J) + XOCEAN_TSTEP * ZEWS / XDZ1(IUP)
+      ZYT(J) = ZYT(J) + O%XOCEAN_TSTEP * ZDTFNSOL
+      ZYS(J) = ZYS(J) + O%XOCEAN_TSTEP * ZSEAS(IUP) * ZSFTEAU / XDZ2(IUP)
+      ZYU(J) = ZYU(J) - O%XOCEAN_TSTEP * ( ZSFU*(1.,0.) + ZSFV*(0.,1.) ) / XDZ2(IUP) / XRHOSW
+      ZYE(J) = ZYE(J) + O%XOCEAN_TSTEP * ZEWS / XDZ1(IUP)
     ENDIF
 
 
@@ -531,7 +531,7 @@ DO JPT=1,SIZE(PFSOL)
   ! Transformation to preserve E <EMAX; secure if mixt crash
     ZE(J)  = MIN(ZE(J),ZEMAX)
   !bilan TKE
-    !ZTENDE(J) = (ZE(J)*ZE(J)-ZSEAE(J)**2)/XOCEAN_TSTEP
+    !ZTENDE(J) = (ZE(J)*ZE(J)-ZSEAE(J)**2)/O%XOCEAN_TSTEP
     !ZDIFFV(J) = ZTENDE(J) - ZSEAE(J)*(ZPDY(J) + ZPTH(J))
     !
     ZSEAT(J)  = ZT(J)
@@ -545,7 +545,7 @@ DO JPT=1,SIZE(PFSOL)
 !!       3.     New oceanic profiles
 !!              --------------------
 !!
-  IF (O%LPROGSST) O%XSEATEND(JPT) = (ZT(IUP)-ZSEAT(IUP)) / XOCEAN_TSTEP
+  IF (O%LPROGSST) O%XSEATEND(JPT) = (ZT(IUP)-ZSEAT(IUP)) / O%XOCEAN_TSTEP
   ZSEAT(NOCKMIN)  = ZT(IUP)
   ZSEAS(NOCKMIN)  = ZS(IUP)  
   ZSEAU(NOCKMIN)  = ZU(IUP)

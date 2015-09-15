@@ -56,9 +56,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INI_OCEAN_CSTS',0,ZHOOK_HANDLE)
 !
-NOCKMIN = 0
-NOCKMAX = 40
-!
 XRHOSW=1024.
 XRHOSWREF=1024.458
 XCPSW=4178.4
@@ -81,8 +78,6 @@ XD2=23.
 !albedo of seawater
 XALBEDOSW=0.06
 !
-!*       5.      OCEANIC MODEL TIME STEP
-XOCEAN_TSTEP=5.*60.
 IF (LHOOK) CALL DR_HOOK('INI_OCEAN_CSTS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

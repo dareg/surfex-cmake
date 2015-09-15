@@ -34,6 +34,8 @@ USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
 !
+USE MODD_OCEAN_GRID
+!
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -103,6 +105,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGO%XDOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+!
 !------------------------------------------------------------------------------
 !
 !         End of IO

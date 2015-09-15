@@ -179,9 +179,9 @@ IF (LNAM_READ) THEN
  !      
  
  CALL DEFAULT_SEAFLUX(SM%S%XTSTEP,SM%S%XOUT_TSTEP,SM%S%CSEA_ALB,SM%S%CSEA_FLUX,SM%S%LPWG, &
-                        SM%S%LPRECIP,SM%S%LPWEBB,SM%S%NZ0,SM%S%NGRVWAVES,SM%O%LPROGSST,   &
-                        SM%O%NTIME_COUPLING,SM%S%XICHCE,SM%S%CINTERPOL_SST,     &
-                        SM%S%CINTERPOL_SSS                            )
+                      SM%S%LPRECIP,SM%S%LPWEBB,SM%S%NZ0,SM%S%NGRVWAVES,SM%O%LPROGSST,   &
+                      SM%O%NTIME_COUPLING,SM%O%XOCEAN_TSTEP,SM%S%XICHCE,SM%S%CINTERPOL_SST,&
+                      SM%S%CINTERPOL_SSS                            )
  CALL DEFAULT_SEAICE(HPROGRAM,                                   &
                      SM%S%CINTERPOL_SIC,SM%S%CINTERPOL_SIT, SM%S%XFREEZING_SST, &
                      SM%S%XSEAICE_TSTEP, SM%S%XSIC_EFOLDING_TIME,          &

@@ -31,10 +31,6 @@
 !
 IMPLICIT NONE 
 !
-INTEGER, SAVE :: NOCKMIN  !first ocean level indice
-INTEGER, SAVE :: NOCKMAX  ! last ocean level indice
-!
-REAL,SAVE :: XOCEAN_TSTEP       ! time step of the oceanic 1D model
 REAL,SAVE :: XRHOSW,XRHOSWREF   ! densities of seawater
 REAL,SAVE :: XCPSW              ! Cp (for seawater)
 !

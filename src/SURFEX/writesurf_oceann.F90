@@ -31,6 +31,7 @@
 !!    -------------
 !!      Original    03/2007
 !!      Modified    07/2012, P. Le Moigne : CMO1D phasing
+!!      11/2014 (David BARBARY) : Write oceanic level
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -45,9 +46,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
 !
-USE MODD_OCEAN_GRID_n
-!
-USE MODD_OCEAN_CSTS
+USE MODD_OCEAN_GRID
 !
 USE MODI_WRITE_SURF
 !
@@ -97,6 +96,22 @@ YCOMMENT='flag to use OCEAN model'
 !
 IF (.NOT. O%LMERCATOR .AND. LHOOK) CALL DR_HOOK('WRITESURF_OCEAN_N',1,ZHOOK_HANDLE)
 IF (.NOT. O%LMERCATOR) RETURN
+!
+! Write Oceanic Level
+YRECFM='SEA_NBLEVEL'
+YCOMMENT='Number of OCEAN levels'
+CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,YRECFM,NOCKMAX,IRESP,HCOMMENT=YCOMMENT)
+
+DO JLEVEL=NOCKMIN+1,NOCKMAX
+  WRITE(YLVL,'(I4)') JLEVEL
+  YRECFM='LEVL_OC'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+  YFORM='(A21,I1.1,A4)'
+  IF (JLEVEL >= 10)  YFORM='(A21,I2.2,A4)'
+  WRITE(YCOMMENT,FMT=YFORM) 'Depth of OCEAN level ',JLEVEL,' (m)'
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,XZHOC(JLEVEL),IRESP,HCOMMENT=YCOMMENT)
+END DO
 !
 ! Relaxation time  
 YRECFM='TAU_REL_OC'
