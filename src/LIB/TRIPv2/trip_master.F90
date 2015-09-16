@@ -24,9 +24,6 @@ PROGRAM TRIP_MASTER
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SURFEX_n
-USE MODD_OFF_SURFEX_n
-!
 USE MODD_SURFEX_TRIP_n
 USE MODD_OFF_TRIP_n
 !
