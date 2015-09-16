@@ -27,8 +27,8 @@ USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
 !
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, XQCOBS, NNCO, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XSIGMA, CBIO, XI,        &
-                               XF_PATCH, XF, COBS, XSCALE_QLAI, LOBSFILE, XALPH,    &
-                               NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS,      &
+                               XF_PATCH, XF, COBS, XSCALE_QLAI,CFILE_FORMAT_OBS,   &
+                               XALPH,NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS,&
                                NOBS, XYO
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
@@ -62,7 +62,7 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !    Declarations of local variables
 !
  CHARACTER(LEN=30)  :: YBGFILE
- CHARACTER(LEN=17)  :: YLFNAME
+ CHARACTER(LEN=19)  :: YLFNAME
  CHARACTER(LEN=9)   :: YFNAME
  CHARACTER(LEN=7)   :: YMYPROC
  CHARACTER(LEN=1)   :: YCHAR
@@ -217,7 +217,7 @@ ENDDO
 !   Calculate the LTM, and evolve B. 
 !
 ! Set the B input file depending of an existing B was found or not
-YBGFILE = "BGROUNDin."//YMYPROC
+YBGFILE = "BGROUNDin."//TRIM(YMYPROC)
 INQUIRE (FILE=TRIM(YBGFILE),EXIST=GBEXISTS)
 !
 IF ( LBEV .AND. GBEXISTS ) THEN
@@ -282,12 +282,12 @@ IF ( LBEV ) THEN
   !
 !//////////////////////TO WRITE LTM/////////////////////////////////////
   IF (NPRINTLEV>0) THEN
-    IUNIT = 110
+    IUNIT = 120
     DO JL=1,NVAR
       DO JK=1,NVAR
         IUNIT = IUNIT + 1
         WRITE(YCHAR,'(I1)') JK
-        YLFNAME='LTM_del'//TRIM(CVAR(JK))//'_del'//TRIM(CVAR(JL))//"."//YMYPROC
+        YLFNAME='LTM_del'//TRIM(CVAR(JK))//'_del'//TRIM(CVAR(JL))//"."//TRIM(YMYPROC)
         OPEN(UNIT=IUNIT,FILE=YLFNAME,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='APPEND')
       ENDDO
     ENDDO
@@ -297,7 +297,7 @@ IF ( LBEV ) THEN
     !
     ! calculate LTM
     ZLTM(:,:) = 0.0
-    IUNIT = 110
+    IUNIT = 120
     DO JL = 1,NVAR    ! control variable (x at previous time step)
       DO JK = 1,NVAR 
         IUNIT = IUNIT + 1
@@ -324,7 +324,7 @@ IF ( LBEV ) THEN
     !
 !//////////////////////TO WRITE LTM/////////////////////////////////////   
     IF (NPRINTLEV>0) THEN
-      IUNIT = 110
+      IUNIT = 120
       DO JL=1,NVAR
         DO JK=1,NVAR
           IUNIT = IUNIT + 1
@@ -372,7 +372,7 @@ IF ( LBEV ) THEN
   ! write out the LTM for the forward model
   ! Write out current B
   IF (NPRINTLEV>0) THEN
-    YBGFILE="BGROUNDout_LBEV."//YMYPROC
+    YBGFILE="BGROUNDout_LBEV."//TRIM(YMYPROC)
     CALL B_BIG_LOOP(I, &
                     "WRIT",YBGFILE,ZB)
     WRITE(*,*) 'store B matrix after TL evolution ==>',ZB(1,1,1)
@@ -397,32 +397,27 @@ ZTIME = FLOAT(NECHGU) * 3600.
 !
 !############################# READS OBSERVATIONS ###############################
 !
-! BEGINNING OF TIME LOOP
-DO ISTEP=1,NBOUTPUT
-  ! Update date
-  CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
-  ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
-  IHOUR = IHOUR + NECHGU
+! Map the variables in case we read them from CANARI inline/offline FA files
+! At the moment only T2M and HU2M can be used. If other variables should be used 
+! they must be added to the interface or be read from file.
+IF ( TRIM(CFILE_FORMAT_OBS) == "FA" ) THEN
   !
-  IF ( .NOT.LOBSFILE ) THEN
-    !
-    DO IOBS = 1,NOBS
-      SELECT CASE (TRIM(COBS(IOBS)))   
-        CASE("T2M") 
-          XYO(:,IOBS) = PT2M(:)
-        CASE("HU2M")   
-          XYO(:,IOBS) = PHU2M(:)
-        CASE("WG1","LAI")  
-          CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
-      END SELECT                 
-    ENDDO
-    !  
-  ENDIF
-  !
-ENDDO 
+  DO IOBS = 1,NOBSTYPE
+    SELECT CASE (TRIM(COBS(IOBS)))   
+      CASE("T2M") 
+        XYO(:,IOBS) = PT2M(:)
+      CASE("HU2M")   
+        XYO(:,IOBS) = PHU2M(:)
+      CASE("WG1","LAI")  
+        CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
+    END SELECT                 
+  ENDDO
+  !  
+ENDIF
+!
 !
 !//////////////////////TO WRITE OBS/////////////////////////////////////
-IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
+IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//TRIM(YMYPROC),STATUS='unknown',IOSTAT=ISTAT)
 DO JI = 1,KI
   IF ( MINVAL(I%XWGI(JI,1,:))>0. ) THEN
     XYO (JI,:) = XUNDEF
@@ -443,18 +438,18 @@ IF ( NPRINTLEV > 0 ) THEN
   !
   !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
   ! WRITE OUT OBS AND YERROR FOR DIAGNOSTIC PURPOSES
-  OPEN (UNIT=111,FILE='OBSERRORout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
+  OPEN (UNIT=111,FILE='OBSERRORout.'//TRIM(YMYPROC),STATUS='unknown',IOSTAT=ISTAT)
   ! *** Write innovations in ASCII file ***
-  OPEN (unit=112,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
+  OPEN (unit=112,file='INNOV.'//TRIM(YMYPROC),status='unknown',IOSTAT=ISTAT)
   ! Write analysis results and increments in ASCII file
-  OPEN (unit=113,file='ANAL_INCR.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
+  OPEN (unit=113,file='ANAL_INCR.'//TRIM(YMYPROC),status='unknown',IOSTAT=ISTAT)
   ! **** Write out the observation operator + Gain matrix ****
-  IUNIT = 113
+  IUNIT = 150
   DO JL = 1,NVAR
     DO JK=1,NOBSTYPE
       IUNIT = IUNIT + 1
       WRITE(YCHAR,'(I1)') JK
-      YFNAME='HO_'//CVAR(JL)//'_v'//YCHAR
+      YFNAME='HO_'//TRIM(CVAR(JL))//'_v'//YCHAR
       OPEN(UNIT=IUNIT,FILE=YFNAME,FORM='FORMATTED',STATUS='UNKNOWN',IOSTAT=ISTAT)
     ENDDO
   ENDDO
@@ -517,9 +512,12 @@ DO JI=1,KI
           !
           L1 = JJ + I%NPATCH*(JL-1)
           !
-          ZHOWR(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
+          IF ( I%XPATCH(JI,JJ)>0.0 .AND. XF_PATCH(JI,JJ,JL+1,JK).NE.XUNDEF .AND. XF_PATCH(JI,JJ,1,JK).NE.XUNDEF ) THEN 
+            ZHOWR(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
+          ENDIF
           !
-          IF( XYO(JI,K1).NE.XUNDEF .AND. XYO(JI,K1).NE.999.0 ) THEN         !if obs available
+          IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) .AND. (I%XPATCH(JI,JJ)>0.0) &
+            .AND. (XF_PATCH(JI,JJ,JL+1,JK).NE.XUNDEF) .AND. (XF_PATCH(JI,JJ,1,JK).NE.XUNDEF) ) THEN         !if obs available
             ! Jacobian of obs operator
             ZHO(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
             ! impose limits  
@@ -603,7 +601,7 @@ DO JI=1,KI
   IF (.NOT.LBFIXED)  ZB(JI,:,:) = MATMUL(ZIDKH(:,:),MATMUL(ZB(JI,:,:),TRANSPOSE(ZIDKH(:,:)))) + ZKRK(:,:)
   
   IF ( NPRINTLEV > 0 ) THEN
-    IUNIT = 113
+    IUNIT = 150
     DO JL = 1,NVAR
       DO JK = 1,NOBSTYPE
         IUNIT = IUNIT + 1
@@ -622,7 +620,7 @@ IF ( NPRINTLEV > 0 ) THEN
   CLOSE(111)
   CLOSE(112)
   CLOSE(113)
-  IUNIT = 113
+  IUNIT = 150
   DO JL = 1,NVAR
     DO JK = 1,NOBSTYPE
       IUNIT = IUNIT + 1
@@ -634,7 +632,7 @@ ENDIF
 !
 IF (LBEV .OR. NPRINTLEV>0) THEN
   ! Write out analysed B (for use in next cycle)
-  YBGFILE = "BGROUNDout_ASSIM."//YMYPROC
+  YBGFILE = "BGROUNDout_ASSIM."//TRIM(YMYPROC)
   CALL B_BIG_LOOP(I, &
                     "WRIT",YBGFILE,ZB)
 ENDIF

@@ -21,7 +21,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_ENKF(I, HPROGRAM, KI, PT2M, PHU2M, HTEST)
 !
 USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
 USE MODD_ASSIM,         ONLY : NOBSTYPE, XERROBS, NVAR, NPRINTLEV, CVAR, &
-                               XF_PATCH, XF, COBS, LOBSFILE, NENS, &
+                               XF_PATCH, XF,COBS,CFILE_FORMAT_OBS,NENS, &
                                NECHGU, NBOUTPUT, NOBS, XYO, LENKF, LDENKF, &
                                LPB_CORRELATIONS, LPERTURBATION_RUN, &
                                LBIAS_CORRECTION, XINFL
@@ -171,29 +171,23 @@ ZTIME = FLOAT(NECHGU) * 3600.
 !
 !############################# READS OBSERVATIONS ###############################
 !
-! BEGINNING OF TIME LOOP
-DO ISTEP=1,NBOUTPUT
-  ! Update date
-  CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZTIME)
-  ZTIME = ZTIME + FLOAT(NECHGU) * 3600.
-  IHOUR = IHOUR + NECHGU
+! Map the variables in case we read them from CANARI inline/offline FA files
+! At the moment only T2M and HU2M can be used. If other variables should be used 
+! they must be added to the interface or be read from file.
+IF ( TRIM(CFILE_FORMAT_OBS) == "FA" ) THEN
   !
-  IF ( .NOT.LOBSFILE ) THEN
-    !
-    DO IOBS = 1,NOBS
-      SELECT CASE (TRIM(COBS(IOBS)))   
-        CASE("T2M") 
-          XYO(:,IOBS) = PT2M(:)
-        CASE("HU2M")   
-          XYO(:,IOBS) = PHU2M(:)
-        CASE("WG1","LAI")  
-          CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
-      END SELECT                 
-    ENDDO
-    !  
-  ENDIF
-  !
-ENDDO 
+  DO IOBS = 1,NOBSTYPE
+    SELECT CASE (TRIM(COBS(IOBS)))   
+      CASE("T2M") 
+        XYO(:,IOBS) = PT2M(:)
+      CASE("HU2M")   
+        XYO(:,IOBS) = PHU2M(:)
+      CASE("WG1","LAI")  
+        CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
+    END SELECT                 
+  ENDDO
+  !  
+ENDIF
 !
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)

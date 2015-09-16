@@ -45,6 +45,11 @@ IMPLICIT NONE
  LOGICAL                               :: LAESNM               ! Update snow analysis
  LOGICAL                               :: LALADSURF            
  LOGICAL                               :: LREAD_SST_FROM_FILE  ! Read SST from file
+ CHARACTER(LEN=6)                      :: CFILE_FORMAT_SST     ! Format of the SST file ASCII/FA
+ CHARACTER(LEN=6)                      :: CFILE_FORMAT_FG      ! Format of the first guess file ASCII/FA (OI)
+ CHARACTER(LEN=6)                      :: CFILE_FORMAT_LSM     ! Format of the LSM file ASCII/FA (OI/extrapolations)
+ CHARACTER(LEN=6)                      :: CFILE_FORMAT_OBS     ! Format of the observations file ASCII/FA
+ CHARACTER(LEN=6)                      :: CFILE_FORMAT_CLIM    ! Format of the climate file ASCII/FA (OI)
  LOGICAL                               :: LWATERTG2            ! Use deep soil temperature as lake temp.
  LOGICAL                               :: LEXTRAP_SEA          ! Extrapolation of sea points
  LOGICAL                               :: LEXTRAP_WATER        ! Extrapolation of inland water  points
@@ -53,9 +58,9 @@ IMPLICIT NONE
  LOGICAL                               :: LSIM                 ! Running VARASSIM in a perturbation mode 
  LOGICAL                               :: LBEV                 ! Running VARASSIM to evolve B
  LOGICAL                               :: LBFIXED    
- LOGICAL                               :: LOBSFILE 
+ LOGICAL                               :: LOBSHEADER
 
- INTEGER, PARAMETER                    :: NOBSMAX = 4
+ INTEGER, PARAMETER                    :: NOBSMAX = 5
  INTEGER, PARAMETER                    :: NVARMAX = 5
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
