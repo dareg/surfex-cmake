@@ -23,8 +23,8 @@ PROGRAM TRIP_PREP
 !!      Original    06/2008
 !!------------------------------------------------------------------
 !
-USE MODD_SURFEX_n
-USE MODD_OFF_SURFEX_n
+USE MODD_SURFEX_TRIP_n
+USE MODD_OFF_TRIP_n
 !
 USE MODD_TRIP_LISTING
 !
@@ -81,8 +81,8 @@ CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM)
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
- CALL SURFEX_ALLOC_LIST(1)
- YSURF_CUR => YSURF_LIST(1)
+ CALL TRIP_ALLOC_LIST(1)
+ YTRIP_CUR => YTRIP_LIST(1)
 !-------------------------------------------------------------------------------
 !
 CLISTING = CLISTING_PREP
@@ -117,7 +117,7 @@ CALL INIT_TRIP_PAR
 !
 CALL READ_NAM_TRIP(NLISTING)
 !
-CALL READ_NAM_TRIP_GRID(YSURF_CUR%TPG, &
+CALL READ_NAM_TRIP_GRID(YTRIP_CUR%TPG, &
                         NLISTING)
 !
 IF(GOASIS)THEN
@@ -128,11 +128,11 @@ ENDIF
 !* 4. TRIP parameters preparation
 ! --------------------------------------------------------------------------------------
 !
-CALL PREP_TRIP_RUN(YSURF_CUR%TP, YSURF_CUR%TPG, &
+CALL PREP_TRIP_RUN(YTRIP_CUR%TP, YTRIP_CUR%TPG, &
                    NYEAR,NMONTH,NDAY,XTIME,ILON,ILAT)
 !
 IF(GOASIS)THEN
-  CALL TRIP_OASIS_PREP(YSURF_CUR%TPG, &
+  CALL TRIP_OASIS_PREP(YTRIP_CUR%TPG, &
                        NLISTING,ILON,ILAT)
 ENDIF
 !
@@ -151,7 +151,7 @@ WRITE(*,*) '    ----------------------------'
 CLOSE(NLISTING)
 !
 !-------------------------------------------------------------------------------
-CALL SURFEX_DEALLO_LIST
+CALL TRIP_DEALLO_LIST
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',1,ZHOOK_HANDLE)
