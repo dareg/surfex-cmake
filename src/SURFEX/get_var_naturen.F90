@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE GET_VAR_NATURE_n (DGI, DGMI, &
-                                   HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW)
+      SUBROUTINE GET_VAR_NATURE_n (I, DGI, DGMI, &
+                                   HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW,PBARE)
 !     ######################################################################
 !
 !!****  *GET_VAR_NATURE_n* - routine to get variables defined only over nature
@@ -31,18 +31,20 @@
 !!      Original    02/2006
 !       M. Jidane   08/2008 Z0 and Z0H recovery from nature tiles
 !       S. Riette   06/2010 TWSNOW added
+!       V. Masson   02/2015 adds LAI, height of trees, fraction of bare soil
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
 !
+USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,    ONLY   : XUNDEF
-!
+USE MODD_DATA_COVER_PAR,   ONLY   : NVT_NO
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -54,6 +56,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 !
@@ -66,6 +69,7 @@ REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0EFF  ! effective roughness length (z0
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PTWSNOW ! Snow total reservoir
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PBARE   ! Bare soil fraction
 !
 !
 !*       0.2   Declarations of local variables
@@ -104,6 +108,9 @@ ELSE
    PZ0      = XUNDEF      
    PZ0H     = XUNDEF
 ENDIF
+!
+PBARE = I%XVEGTYPE(:,NVT_NO)
+!
 IF (LHOOK) CALL DR_HOOK('GET_VAR_NATURE_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================

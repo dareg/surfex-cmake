@@ -30,6 +30,7 @@ SUBROUTINE SSO_Z0_FRICTION_n (USS, &
 !!      B. Decharme 09/2012 new wind implicitation and sea fraction
 !!      B. Decharme 06/2013 CIMPLICIT_WIND in MODD_REPROD_OPER
 !!      J. Escobar  05/2014 for bug with ifort/10, replace WHERE by IF
+!!      J. Escobar  06/2015 bug with gfortran ZZ0EFF to small, change with > XSURF_EPSILON
 !----------------------------------------------------------------
 !
 !
@@ -37,7 +38,7 @@ USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
-USE MODD_SURF_PAR,         ONLY : XUNDEF
+USE MODD_SURF_PAR,         ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_CSTS,             ONLY : XKARMAN, XPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -148,17 +149,20 @@ ENDIF
 ZCD    (:) = 0.
 ZUSTAR2(:) = 0.
 !
-GMASK(:)=(GMASK(:).AND.ZZ0EFF(:)>0.)
+GMASK(:)=(GMASK(:).AND.ZZ0EFF(:)>XSURF_EPSILON)
 !
-WHERE (GMASK(:))
-!
-!* sets a limit to roughness length
-  ZZ0EFF(:) = MIN(ZZ0EFF(:),PUREF(:)/USS%XFRACZ0)
-!
-! neutral case
-  ZCD(:) = (XKARMAN/LOG(PUREF(:)/ZZ0EFF(:)))**2
-!
-END WHERE
+DO II=1,SIZE(GMASK)
+  !
+  IF (GMASK(II)) THEN
+    !
+    !* sets a limit to roughness length
+    ZZ0EFF(II) = MIN(ZZ0EFF(II),PUREF(II)/USS%XFRACZ0)
+    !
+    ! neutral case
+    ZCD(II) = (XKARMAN/LOG(PUREF(II)/ZZ0EFF(II)))**2
+  END IF
+  !
+END DO
 !
 !*      5.     Friction due to orography
 !              -------------------------

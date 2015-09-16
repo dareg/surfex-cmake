@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_SURF_VAR_n (DGF, DGI, DGMI, DGS, DGU, DGT, DGW, F, UG, U, USS, &
+      SUBROUTINE GET_SURF_VAR_n (DGF, I, DGI, DGMI, DGS, DGU, DGT, DGW, F, UG, U, USS, &
                                  HPROGRAM, KI, KS,                              &
                                   PSEA, PWATER, PNATURE, PTOWN,                &
                                   PT2M, PQ2M, PQS, PZ0, PZ0H, PZ0EFF,          &
@@ -7,7 +7,8 @@
                                   PZ0H_SEA, PZ0H_WATER, PZ0H_NATURE, PZ0H_TOWN,&
                                   PQS_SEA, PQS_WATER, PQS_NATURE, PQS_TOWN,    &
                                   PPSNG, PPSNV, PZS, PSERIES, PTWSNOW,         &
-                                  PSSO_STDEV, PLON, PLAT                       )  
+                                  PSSO_STDEV, PLON, PLAT,                      &
+                                  PBARE, PLAI_TREE, PH_TREE                    )  
 !     #######################################################################
 !
 !!****  *GET_SURF_VAR_n* - gets some surface fields on atmospheric grid
@@ -49,16 +50,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-!
-!
-!
-!
-!
-!
 USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
@@ -90,6 +83,7 @@ USE MODI_ABOR1_SFX
 USE MODI_GET_SSO_STDEV_n
 USE MODI_GET_1D_MASK
 USE MODI_GET_COORD_n
+USE MODI_GET_VEG_n
 !
 IMPLICIT NONE
 !
@@ -98,6 +92,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
@@ -154,6 +149,10 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PSSO_STDEV ! S.S.O. standard deviat
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLON       ! longitude
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLAT       ! latitude
 !
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PBARE      ! bare soil fraction on grid mesh     (-)
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLAI_TREE       ! Leaf Area Index    on grid mesh     (-)
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PH_TREE        ! Height of trees    on grid mesh     (-)
+!
 !-------------------------------------------------------------------------------
 !
 !
@@ -161,7 +160,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLAT       ! latitude
 !              -------------------------------
 !
 REAL, DIMENSION(KI)    :: ZFIELD1, ZFIELD2, ZFIELD3, ZFIELD4, ZFIELD5, ZFIELD6
-REAL, DIMENSION(KI)    :: ZFIELD7
+REAL, DIMENSION(KI)    :: ZFIELD7, ZFIELD8
 REAL, DIMENSION(KI,KS) :: ZSERIES
 INTEGER, DIMENSION(KI) :: IMASK
 !
@@ -326,7 +325,7 @@ ENDIF
    !-------------------------------------------------------------------------------
    !
 IF ( PRESENT(PQS_NATURE) .OR. PRESENT(PPSNG) .OR. PRESENT(PPSNV) .OR.  PRESENT(PZ0EFF).OR. &
-     PRESENT(PTWSNOW) ) THEN
+     PRESENT(PTWSNOW) .OR. PRESENT(PBARE) .OR. PRESENT(PLAI_TREE) .OR. PRESENT(PH_TREE) ) THEN
    !
    ! Get parameters over nature tile
    !
@@ -342,10 +341,13 @@ IF ( PRESENT(PQS_NATURE) .OR. PRESENT(PPSNG) .OR. PRESENT(PPSNV) .OR.  PRESENT(P
    IMASK(:)=0
    CALL GET_1D_MASK(KI_NATURE, KI, PNATURE, IMASK(1:KI_NATURE))
    !
-   CALL GET_VAR_NATURE_n(DGI, DGMI, &
-                         HPROGRAM, KI_NATURE, ZFIELD1(1:KI_NATURE), ZFIELD2(1:KI_NATURE), &
-                                              ZFIELD3(1:KI_NATURE), ZFIELD4(1:KI_NATURE), &
-                        ZFIELD5(1:KI_NATURE), ZFIELD6(1:KI_NATURE), ZFIELD7(1:KI_NATURE))
+   IF (KI_NATURE>0) THEN
+     CALL GET_VAR_NATURE_n(I, DGI, DGMI, &
+                           HPROGRAM, KI_NATURE, ZFIELD1(1:KI_NATURE), ZFIELD2(1:KI_NATURE), &
+                                                ZFIELD3(1:KI_NATURE), ZFIELD4(1:KI_NATURE), &
+                          ZFIELD5(1:KI_NATURE), ZFIELD6(1:KI_NATURE), ZFIELD7(1:KI_NATURE), &
+                          ZFIELD8(1:KI_NATURE))
+   ENDIF
    !
    IF(PRESENT(PQS_NATURE))THEN
      PQS_NATURE    (:) = XUNDEF
@@ -396,6 +398,39 @@ IF ( PRESENT(PQS_NATURE) .OR. PRESENT(PPSNG) .OR. PRESENT(PPSNV) .OR.  PRESENT(P
      ENDDO
    ENDIF
    !
+   !* bare soil fraction
+   !
+   IF(PRESENT(PBARE)) THEN
+     PBARE    (:) = XUNDEF
+     DO JI = 1, KI_NATURE
+       PBARE   (IMASK(JI)) = ZFIELD8(JI)
+     ENDDO
+     PBARE(:) = PBARE(:) * U%XNATURE(:) ! averages bare soil fraction on whole grid mesh
+   ENDIF
+   !
+   !*   LAI and height of trees
+   !
+   IF (PRESENT(PLAI_TREE) .OR. PRESENT(PH_TREE) ) THEN
+     !
+     CALL GET_VEG_n(HPROGRAM, KI_NATURE, U, I, ZFIELD1(1:KI_NATURE), ZFIELD2(1:KI_NATURE))
+     !
+     IF (PRESENT(PLAI_TREE)) THEN
+       PLAI_TREE(:) = XUNDEF
+       DO JI = 1, KI_NATURE
+         PLAI_TREE   (IMASK(JI)) = ZFIELD1(JI)
+       ENDDO
+       PLAI_TREE(:) = PLAI_TREE(:) * U%XNATURE(:) ! averages tree LAI on whole grid mesh
+     END IF
+     !
+     IF (PRESENT(PH_TREE)) THEN
+       PH_TREE(:) = 0.
+       DO JI = 1, KI_NATURE
+         PH_TREE   (IMASK(JI)) = ZFIELD2(JI)
+       ENDDO
+     END IF
+     !
+   END IF   
+   !   
 ENDIF
    !
    !-------------------------------------------------------------------------------
