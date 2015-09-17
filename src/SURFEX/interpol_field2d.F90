@@ -132,18 +132,18 @@ IF (IERR1>0 .OR. IERR2>0) THEN
   IF (IERR2>0) THEN
     WRITE(KLUOUT,*) ' Number of points that could not be interpolated : ', &
                       IERR2
-    IF (ANY(ZDEF(:)/=XUNDEF)) THEN
-      DO JLOOP=1,SIZE(PFIELD,2)
+    DO JLOOP=1,SIZE(PFIELD,2)
+      IF (ZDEF(JLOOP)/=XUNDEF) THEN
         WHERE(KCODE(:)==-4)
           PFIELD(:,JLOOP)=ZDEF(JLOOP)
         END WHERE
         WRITE(KLUOUT,*) ' For these points, the default value (',ZDEF(JLOOP),') is set.'
-      END DO
-    ELSE
-      WRITE(KLUOUT,*) ' Please provide data with better resolution'
-      WRITE(KLUOUT,*) ' Or define a higher halo value             '
-      CALL ABOR1_SFX('Some points lack data and are too far away from other points')
-    END IF
+      ELSE
+        WRITE(KLUOUT,*) ' Please provide data with better resolution'
+        WRITE(KLUOUT,*) ' Or define a higher halo value             '
+        CALL ABOR1_SFX('Some points lack data and are too far away from other points')
+      END IF
+    ENDDO
   END IF
 !
 END IF
