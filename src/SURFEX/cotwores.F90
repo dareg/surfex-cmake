@@ -283,6 +283,11 @@ ZFZERO(:) = PFZERO(:)
 !        (with fixed f0=0.74 for Carrer rad. transf., f0=0.7 with Calvet rad. transf.)
 GTROP (:) = (PVEGTYPE(:,NVT_TRBE) > 0.8) 
 !
+GHERB(:) = (PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBE) + PVEGTYPE(:,NVT_BONE)   &
+           +PVEGTYPE(:,NVT_TRBD) + PVEGTYPE(:,NVT_TEBE) + PVEGTYPE(:,NVT_TENE)   & 
+           +PVEGTYPE(:,NVT_BOBD) + PVEGTYPE(:,NVT_BOND) + PVEGTYPE(:,NVT_SHRB)<0.5)
+GWOOD      (:) = (.NOT.GHERB (:))
+!
 IF (HPHOTO=='AGS' .OR. HPHOTO=='LAI') THEN
   !
   !  Compute conductance and assimilation of CO2: 
@@ -308,10 +313,6 @@ ELSEIF (HPHOTO=='AST' .OR. HPHOTO=='LST' .OR. HPHOTO=='NIT' .OR. HPHOTO=='NCB') 
   !  
   ZDMAX(:)  = PDMAX(:)
   !
-  GHERB(:) = (PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBE) + PVEGTYPE(:,NVT_BONE)   &
-             +PVEGTYPE(:,NVT_TRBD) + PVEGTYPE(:,NVT_TEBE) + PVEGTYPE(:,NVT_TENE)   & 
-             +PVEGTYPE(:,NVT_BOBD) + PVEGTYPE(:,NVT_BOND) + PVEGTYPE(:,NVT_SHRB)<0.5)
-  GWOOD      (:) = (.NOT.GHERB (:))
   GF2_INF_F2I(:) = (PF2(:)<PF2I(:))
   !
   ! -HERBACEOUS-
@@ -471,13 +472,12 @@ DO JINT = 1, SIZE(PABC)
   !Extinction of respiration depends on LAI above only for tropical evergreen forest
   ZLAITOP(:) = 0.
   ZZLAI  (:) = 1.
-  IF (OTR_ML) THEN
+  IF (OTR_ML) THEN         
     WHERE(GWOOD(:))  
       ZLAITOP(:) = (1.-(PABC(JINT)+ZABC)/2.)*ZLAI(:)
       ZZLAI(:) = ZLAI(:)
     ENDWHERE
   ENDIF
-
   CALL COTWO(PCSP, PF2, ZXIA, ZDSP, ZGAMMT,             &
              ZFZERO, ZEPSO, ZANMAX, ZGMEST, PGC, ZDMAX, &  
              ZAN0, ZGS0, ZRDK, ZLAITOP, ZZLAI           )
