@@ -59,6 +59,7 @@ IMPLICIT NONE
  LOGICAL                               :: LBEV                 ! Running VARASSIM to evolve B
  LOGICAL                               :: LBFIXED    
  LOGICAL                               :: LOBSHEADER
+ LOGICAL                               :: LOBSNAT
 
  INTEGER, PARAMETER                    :: NOBSMAX = 5
  INTEGER, PARAMETER                    :: NVARMAX = 5

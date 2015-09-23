@@ -9,7 +9,7 @@
                                PSIGWGB,PSIGW2B,OOBSWG,OOBS2M,OIMVEG,        &
                                PSPRECIP2,PRTHR_QC,PSIGWGO_MAX,              &
                                PRSCAL_JAC,OPRT,OSIM,OBEV,OBFIXED,           &
-                               KOBSTYPE,OOBSHEADER,HFILE_FORMAT_OBS,        &
+                               KOBSTYPE,OOBSHEADER,HFILE_FORMAT_OBS,OOBSNAT,&
                                HFILE_FORMAT_FG,HFILE_FORMAT_LSM,            &
                                HFILE_FORMAT_CLIM,PERROBS_M,PQCOBS_M,        &
                                KNCO,KIVAR,KVAR,HVAR_M,HPREFIX_M,            &
@@ -109,6 +109,7 @@ CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_CLIM
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PERROBS_M
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PQCOBS_M
 INTEGER, DIMENSION(NOBSMAX), INTENT(OUT) :: KNCO
+LOGICAL, INTENT(OUT) :: OOBSNAT
 !
 INTEGER,           INTENT(OUT) :: KIVAR
 INTEGER,           INTENT(OUT) :: KVAR
@@ -204,6 +205,7 @@ HFILE_FORMAT_CLIM = "FA    "
 PERROBS_M = (/1.0,0.1,0.4,0.2,0.1/)
 PQCOBS_M = (/999.,999.,999.,999.,999./)
 KNCO = (/1,1,0,0,0/)
+OOBSNAT = .FALSE.
 !
 KIVAR = 1
 KVAR = 4
