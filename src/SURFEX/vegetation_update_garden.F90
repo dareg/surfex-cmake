@@ -128,7 +128,6 @@ REAL, DIMENSION(KLU,1) :: ZCNA_NITRO
 !
 ! MEB stuff
 REAL, DIMENSION(KLU,1) :: ZGNDLITTER
-REAL, DIMENSION(KLU,1) :: ZZF_TALLVEG
 REAL, DIMENSION(KLU,1) :: ZRGLGV
 REAL, DIMENSION(KLU,1) :: ZGAMMAGV
 REAL, DIMENSION(KLU,1) :: ZRSMINGV
@@ -217,7 +216,7 @@ IF (GDM%TVG%CPHOTO=='NON' .OR. GDM%TVG%CPHOTO=='AGS' .OR. GDM%TVG%CPHOTO=='AST')
                          ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL,        &
                          ZCE_NITRO, ZCF_NITRO, ZCNA_NITRO,               &
                          TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
-                         ZGNDLITTER,ZZF_TALLVEG, ZRGLGV,ZGAMMAGV,        &
+                         ZGNDLITTER,ZRGLGV,ZGAMMAGV,                     &
                          ZRSMINGV, ZWRMAX_CFGV,                          &
                          ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
                          GUPDATED, OABSENT=(T%CUR%XGARDEN==0.)                 )

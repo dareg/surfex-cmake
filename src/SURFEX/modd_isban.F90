@@ -128,6 +128,8 @@ TYPE ISBA_t
   LOGICAL                        :: LFORC_MEASURE ! True = Forcing data from observations
 !                                                         ! False = Forcing data from atmospheric model (default)
 !
+  LOGICAL                        :: LMEB_LITTER ! Activate Litter
+!
   LOGICAL                        :: LVEGUPD  ! True = update vegetation parameters every decade
                                              ! False = keep vegetation parameters constant in time
 !  
@@ -308,7 +310,6 @@ TYPE ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XLAIGV            ! understory veg Leaf Area Index                 (m2/m2)
   REAL, POINTER, DIMENSION(:,:) :: XZ0LITTER         ! ground litter roughness length                 (m)
 !
-  REAL, POINTER, DIMENSION(:,:) :: XZF_TALLVEG       ! tall veg fraction                              (-)
   REAL, POINTER, DIMENSION(:,:) :: XH_VEG            ! height of vegetation                           (m)
 !
 !-------------------------------------------------------------------------------
@@ -490,11 +491,12 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !
 ! - For multi-energy balance:
 !
-  REAL, POINTER, DIMENSION(:,:)     :: XWRV          ! liquid water retained on the foliage
-!                                                    ! of the canopy vegetation                  (kg/m2)
+  REAL, POINTER, DIMENSION(:,:)     :: XWRL          ! liquid water retained on litter          (kg/m2)
+  REAL, POINTER, DIMENSION(:,:)     :: XWRLI          ! ice retained on litter          (kg/m2)
   REAL, POINTER, DIMENSION(:,:)     :: XWRVN         ! snow retained on the foliage
 !                                                    ! of the canopy vegetation                  (kg/m2)
   REAL, POINTER, DIMENSION(:,:)     :: XTV           ! canopy vegetation temperature             (K)
+  REAL, POINTER, DIMENSION(:,:)     :: XTL           ! litter temperature             (K)
   REAL, POINTER, DIMENSION(:,:)     :: XTC           ! canopy air temperature                    (K)
   REAL, POINTER, DIMENSION(:,:)     :: XQC           ! canopy air specific humidity              (kg/kg)
 !
@@ -903,11 +905,12 @@ IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YISBA%XWRMAX_CFGV)
   NULLIFY(YISBA%XLAIGV)
   NULLIFY(YISBA%XZ0LITTER)
-  NULLIFY(YISBA%XZF_TALLVEG)
   NULLIFY(YISBA%XH_VEG)
-  NULLIFY(YISBA%XWRV)
+  NULLIFY(YISBA%XWRL)
+  NULLIFY(YISBA%XWRLI)
   NULLIFY(YISBA%XWRVN)
   NULLIFY(YISBA%XTV)
+  NULLIFY(YISBA%XTL)
   NULLIFY(YISBA%XTC)
   NULLIFY(YISBA%XQC)
   !
@@ -928,6 +931,7 @@ YISBA%CCPSURF=' '
 YISBA%LTEMP_ARP=.FALSE.
 YISBA%LGLACIER=.FALSE.
 YISBA%LFORC_MEASURE=.FALSE.
+YISBA%LMEB_LITTER=.FALSE.
 YISBA%LVEGUPD=.FALSE.
 YISBA%LNITRO_DILU=.FALSE.
 YISBA%LCANOPY=.FALSE.

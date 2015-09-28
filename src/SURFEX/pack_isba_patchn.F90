@@ -743,20 +743,22 @@ ENDIF
 !
 IF (I%LMEB_PATCH(KPATCH))THEN
 !
-!nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-!nogv  XP_WRV         => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  PKI%XP_WRL         => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  PKI%XP_WRLI         => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_WRVN        => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_TV          => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+  PKI%XP_TL          => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_TC          => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_QC          => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 !nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 !nogv  XP_RSMINV      => XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
-  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
-  PKI%XP_ZF_TALLVEG  => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_H_VEG       => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 !nogv  ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -777,20 +779,22 @@ IF (I%LMEB_PATCH(KPATCH))THEN
 !nogv  ISIZE_GROUND = ISIZE_GROUND + 1
 !nogv  XP_ROOTFRACV   => XBLOCK_GROUND(:,:,ISIZE_GROUND)  
 ELSE
-!nogv  ISIZE_0 = ISIZE_0 + 1
-!nogv  XP_WRV         => XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  PKI%XP_WRL         => PKI%XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  PKI%XP_WRLI         => PKI%XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   PKI%XP_WRVN        => PKI%XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   PKI%XP_TV          => PKI%XBLOCK_0(:,ISIZE_0)
+  ISIZE_0 = ISIZE_0 + 1
+  PKI%XP_TL          => PKI%XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   PKI%XP_TC          => PKI%XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   PKI%XP_QC          => PKI%XBLOCK_0(:,ISIZE_0)
 !nogv  ISIZE_0 = ISIZE_0 + 1
 !nogv  XP_RSMINV      => XBLOCK_0(:,ISIZE_0)
-  ISIZE_0 = ISIZE_0 + 1
-  PKI%XP_ZF_TALLVEG  => PKI%XBLOCK_0(:,ISIZE_0)
   ISIZE_0 = ISIZE_0 + 1
   PKI%XP_H_VEG       => PKI%XBLOCK_0(:,ISIZE_0)
 !nogv  ISIZE_0 = ISIZE_0 + 1
@@ -811,8 +815,6 @@ ELSE
 !nogv  ISIZE_01 = ISIZE_01 + 1
 !nogv  XP_ROOTFRACV   => XBLOCK_01(:,:,ISIZE_01)
 ENDIF
-ISIZE_0 = ISIZE_0 + 1
-PKI%XP_WRV         => PKI%XBLOCK_0(:,ISIZE_0)
 ISIZE_0 = ISIZE_0 + 1
 PKI%XP_RSMINV      => PKI%XBLOCK_0(:,ISIZE_0)
 ISIZE_0 = ISIZE_0 + 1
@@ -1055,9 +1057,11 @@ IF (I%NPATCH==1) THEN
 !
   IF(I%LMEB_PATCH(1))THEN
 !
-!nogv    XP_WRV          (:)    =    XWRV          (:, 1) 
+    PKI%XP_WRL          (:)    =    I%XWRL          (:, 1) 
+    PKI%XP_WRLI         (:)    =    I%XWRLI         (:, 1) 
     PKI%XP_WRVN         (:)    =    I%XWRVN         (:, 1) 
     PKI%XP_TV           (:)    =    I%XTV           (:, 1) 
+    PKI%XP_TL           (:)    =    I%XTL           (:, 1) 
     PKI%XP_TC           (:)    =    I%XTC           (:, 1) 
     PKI%XP_QC           (:)    =    I%XQC           (:, 1) 
 !
@@ -1076,7 +1080,6 @@ IF (I%NPATCH==1) THEN
 !nogv      XP_RSMIN  (:)    = XRSMINGV  (:, 1)
 !nogv    END IF
 !
-    PKI%XP_ZF_TALLVEG   (:)    =    I%XZF_TALLVEG   (:, 1)
 !nogv    XP_RGLV         (:)    =    XRGL          (:, 1)
 !nogv    XP_GAMMAV       (:)    =    XGAMMA        (:, 1)
 !nogv    XP_WRMAX_CFV    (:)    =    XWRMAX_CF     (:, 1)
@@ -1437,9 +1440,11 @@ ELSE
 !
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-!nogv      XP_WRV          (JJ)    =    XWRV          (JI, KPATCH) 
+      PKI%XP_WRL          (JJ)    =    I%XWRL          (JI, KPATCH) 
+      PKI%XP_WRLI         (JJ)    =    I%XWRLI         (JI, KPATCH) 
       PKI%XP_WRVN         (JJ)    =    I%XWRVN         (JI, KPATCH) 
       PKI%XP_TV           (JJ)    =    I%XTV           (JI, KPATCH) 
+      PKI%XP_TL           (JJ)    =    I%XTL           (JI, KPATCH) 
       PKI%XP_TC           (JJ)    =    I%XTC           (JI, KPATCH) 
       PKI%XP_QC           (JJ)    =    I%XQC           (JI, KPATCH) 
     ENDDO
@@ -1470,7 +1475,6 @@ ELSE
 !
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_ZF_TALLVEG   (JJ)    =    I%XZF_TALLVEG   (JI, KPATCH)
       PKI%XP_H_VEG        (JJ)    =    I%XH_VEG        (JI, KPATCH)
 !nogv      XP_RGLV         (JJ)    =    XRGL          (JI, KPATCH)
 !nogv      XP_GAMMAV       (JJ)    =    XGAMMA        (JI, KPATCH)

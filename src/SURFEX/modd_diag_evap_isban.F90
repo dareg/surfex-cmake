@@ -76,6 +76,10 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XLETRGV       ! MEB: transpiration from understory vegetation [W/m2]
   REAL, POINTER, DIMENSION(:,:) :: XLETRCV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:,:) :: XLERGV        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLELITTER        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XLELITTERI        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:,:) :: XDRIPLIT       ! 
+  REAL, POINTER, DIMENSION(:,:) :: XRRLIT         ! 
   REAL, POINTER, DIMENSION(:,:) :: XLERCV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:,:) :: XLE_V_C       ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
   REAL, POINTER, DIMENSION(:,:) :: XLE_G_C       ! MEB: latent heat flux from understory [W/m2]
@@ -149,6 +153,10 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XAVG_LETRGV       ! MEB: transpiration from understory vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XAVG_LETRCV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XAVG_LERGV        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LELITTER        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_LELITTERI        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XAVG_DRIPLIT      ! 
+  REAL, POINTER, DIMENSION(:) :: XAVG_RRLIT        !
   REAL, POINTER, DIMENSION(:) :: XAVG_LERCV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XAVG_LE_V_C       ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XAVG_LE_G_C       ! MEB: latent heat flux from understory [W/m2]
@@ -393,6 +401,10 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_EVAP_ISBA%XLETRGV)
   NULLIFY(YDIAG_EVAP_ISBA%XLETRCV)
   NULLIFY(YDIAG_EVAP_ISBA%XLERGV)
+  NULLIFY(YDIAG_EVAP_ISBA%XLELITTER)
+  NULLIFY(YDIAG_EVAP_ISBA%XLELITTERI)
+  NULLIFY(YDIAG_EVAP_ISBA%XDRIPLIT)
+  NULLIFY(YDIAG_EVAP_ISBA%XRRLIT)
   NULLIFY(YDIAG_EVAP_ISBA%XLERCV)
   NULLIFY(YDIAG_EVAP_ISBA%XLE_V_C)
   NULLIFY(YDIAG_EVAP_ISBA%XLE_G_C)
@@ -453,6 +465,10 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_EVAP_ISBA%XAVG_LETRGV)
   NULLIFY(YDIAG_EVAP_ISBA%XAVG_LETRCV)
   NULLIFY(YDIAG_EVAP_ISBA%XAVG_LERGV)
+  NULLIFY(YDIAG_EVAP_ISBA%XAVG_LELITTER)
+  NULLIFY(YDIAG_EVAP_ISBA%XAVG_LELITTERI)
+  NULLIFY(YDIAG_EVAP_ISBA%XAVG_DRIPLIT)
+  NULLIFY(YDIAG_EVAP_ISBA%XAVG_RRLIT)
   NULLIFY(YDIAG_EVAP_ISBA%XAVG_LERCV)
   NULLIFY(YDIAG_EVAP_ISBA%XAVG_LE_V_C)
   NULLIFY(YDIAG_EVAP_ISBA%XAVG_LE_G_C)

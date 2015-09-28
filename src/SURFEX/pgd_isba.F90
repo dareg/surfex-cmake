@@ -244,8 +244,13 @@ ALLOCATE(I%LMEB_PATCH(I%NPATCH))
 !
 I%LMEB_PATCH(:) = .FALSE.
 I%LFORC_MEASURE = .FALSE.
+I%LMEB_LITTER   = .FALSE.
+
 IF(GMEB)THEN
-  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,GMEB_PATCH,I%LFORC_MEASURE)
+
+  I%LTR_ML      = .TRUE. ! Always use this SW radiative transfer option with MEB
+
+  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,GMEB_PATCH,I%LFORC_MEASURE,I%LMEB_LITTER)
   I%LMEB_PATCH(1:I%NPATCH) = GMEB_PATCH(1:I%NPATCH)
 ENDIF
 !
@@ -340,9 +345,10 @@ IF ( I%CPHOTO/='NON' .AND. I%NPATCH/=12 .AND. I%NPATCH/=19 ) THEN
   CALL ABOR1_SFX('PGD_ISBA: CPHOTO='//I%CPHOTO//' REQUIRES NPATCH=12 or 19')
 END IF
 !
-IF ( I%CPHOTO=='NON' .AND. I%LTR_ML ) THEN
+IF ( I%CPHOTO=='NON' .AND. I%LTR_ML .AND. .NOT. GMEB) THEN
   WRITE(ILUOUT,*) '*****************************************'
-  WRITE(ILUOUT,*) '* With option CPHOTO == NON '
+  WRITE(ILUOUT,*) '* With option CPHOTO == NON      '
+  WRITE(ILUOUT,*) '* And With MEB = F               '
   WRITE(ILUOUT,*) '* New radiative transfert TR_ML  '
   WRITE(ILUOUT,*) '* cant be used '
   WRITE(ILUOUT,*) '*****************************************'

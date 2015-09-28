@@ -159,7 +159,6 @@ REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_RSMINGV
 REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_GAMMAGV
 REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_WRMAX_CFGV
 REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_RGLGV
-REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_ZF_TALLVEG
 REAL, DIMENSION(NVEGTYPE_MAX,NTIME_MAX)     :: XUNIF_H_VEG
 REAL, DIMENSION(NVEGTYPE_MAX)               :: XUNIF_ROOT_EXTINCTIONGV! root extinction parameter
 !
@@ -215,7 +214,6 @@ CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_RSMINGV
 CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_GAMMAGV
 CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_WRMAX_CFGV
 CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_RGLGV
-CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_ZF_TALLVEG
 CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFNAM_H_VEG
 CHARACTER(LEN=28), DIMENSION(NVEGTYPE_MAX)             :: CFNAM_ROOT_EXTINCTIONGV! root extinction parameter
 !
@@ -269,7 +267,6 @@ CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_RSMINGV
 CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_GAMMAGV
 CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_WRMAX_CFGV
 CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_RGLGV
-CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_ZF_TALLVEG
 CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX,NTIME_MAX)   :: CFTYP_H_VEG
 CHARACTER(LEN=6), DIMENSION(NVEGTYPE_MAX)             :: CFTYP_ROOT_EXTINCTIONGV! root extinction parameter
 !
@@ -306,13 +303,13 @@ NAMELIST/NAM_DATA_ISBA/NTIME, XUNIF_VEGTYPE, XUNIF_DG, XUNIF_ROOTFRAC, XUNIF_DIC
                          CFTYP_DMAX,CFTYP_F2I, CFTYP_H_TREE,CFTYP_RE25,                             &
                          CFTYP_CE_NITRO,CFTYP_CF_NITRO,CFTYP_CNA_NITRO,                             &
                          XUNIF_LAIGV, XUNIF_Z0LITTER, XUNIF_ROOTFRACGV, XUNIF_GNDLITTER, XUNIF_RSMINGV, &
-                         XUNIF_GAMMAGV, XUNIF_WRMAX_CFGV, XUNIF_RGLGV, XUNIF_ZF_TALLVEG ,           &
+                         XUNIF_GAMMAGV, XUNIF_WRMAX_CFGV, XUNIF_RGLGV,                              &
                          XUNIF_H_VEG, XUNIF_ROOT_EXTINCTIONGV,                                      &
                          CFNAM_LAIGV, CFNAM_Z0LITTER, CFNAM_ROOTFRACGV, CFNAM_GNDLITTER, CFNAM_RSMINGV, &
-                         CFNAM_GAMMAGV, CFNAM_WRMAX_CFGV, CFNAM_RGLGV, CFNAM_ZF_TALLVEG ,           &
+                         CFNAM_GAMMAGV, CFNAM_WRMAX_CFGV, CFNAM_RGLGV,                              &
                          CFNAM_H_VEG, CFNAM_ROOT_EXTINCTIONGV,                                      &
                          CFTYP_LAIGV, CFTYP_Z0LITTER, CFTYP_ROOTFRACGV, CFTYP_GNDLITTER, CFTYP_RSMINGV, &
-                         CFTYP_GAMMAGV, CFTYP_WRMAX_CFGV, CFTYP_RGLGV, CFTYP_ZF_TALLVEG,            &
+                         CFTYP_GAMMAGV, CFTYP_WRMAX_CFGV, CFTYP_RGLGV,                              &
                          CFTYP_H_VEG, CFTYP_ROOT_EXTINCTIONGV
 
 DATA XSTRESS /1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./
@@ -369,7 +366,6 @@ XUNIF_RSMINGV         = XUNDEF
 XUNIF_GAMMAGV         = XUNDEF
 XUNIF_WRMAX_CFGV      = XUNDEF
 XUNIF_RGLGV           = XUNDEF
-XUNIF_ZF_TALLVEG      = XUNDEF
 XUNIF_H_VEG           = XUNDEF
 XUNIF_ROOT_EXTINCTIONGV = XUNDEF ! root extinction parameter
 !
@@ -422,7 +418,6 @@ CFNAM_RSMINGV     (:) = '                            '
 CFNAM_GAMMAGV     (:) = '                            '
 CFNAM_WRMAX_CFGV  (:) = '                            '
 CFNAM_RGLGV       (:) = '                            '
-CFNAM_ZF_TALLVEG  (:) = '                            '
 CFNAM_H_VEG       (:,:) = '                            '
 CFNAM_ROOT_EXTINCTIONGV (:) = '                            '
 
@@ -475,7 +470,6 @@ CFTYP_RSMINGV     (:) = '      '
 CFTYP_GAMMAGV     (:) = '      '
 CFTYP_WRMAX_CFGV  (:) = '      '
 CFTYP_RGLGV       (:) = '      '
-CFTYP_ZF_TALLVEG  (:) = '      '
 CFTYP_H_VEG       (:,:) = '      '
 CFTYP_ROOT_EXTINCTIONGV (:) = '      '
 !
@@ -922,12 +916,6 @@ CALL INI_VAR_FROM_DATA(DTCO, DGU, UG, U, USS, DTI, &
          CFTYP_RGLGV,XUNIF_RGLGV,DTI%XPAR_RGLGV,DTI%LDATA_RGLGV)  
   IF (.NOT. DTI%LDATA_RGLGV) DEALLOCATE(DTI%XPAR_RGLGV)
   !
-  ALLOCATE(DTI%XPAR_ZF_TALLVEG  (IG%NDIM,NVEGTYPE))
-CALL INI_VAR_FROM_DATA(DTCO, DGU, UG, U, USS, DTI, &
-                        HPROGRAM,'ARI','ZF_TALLVEG: MEB tall vegetation binary','NAT',CFNAM_ZF_TALLVEG,   &
-         CFTYP_ZF_TALLVEG,XUNIF_ZF_TALLVEG,DTI%XPAR_ZF_TALLVEG,DTI%LDATA_ZF_TALLVEG)  
-  IF (.NOT. DTI%LDATA_ZF_TALLVEG) DEALLOCATE(DTI%XPAR_ZF_TALLVEG)
-  !
 ENDIF
 ! ------------ End MEB parameters ---------------------
 !
@@ -952,7 +940,7 @@ CALL INI_VAR_FROM_DATA(DTCO, DGU, UG, U, USS, DTI, &
 ENDIF
 !
 IF (.NOT.I%LECOCLIMAP .AND. ISIZE_LMEB_PATCH>0 .AND. .NOT.(DTI%LDATA_H_TREE      &
-         .AND. DTI%LDATA_GNDLITTER .AND. DTI%LDATA_Z0LITTER .AND. DTI%LDATA_ZF_TALLVEG &
+         .AND. DTI%LDATA_GNDLITTER .AND. DTI%LDATA_Z0LITTER  &
          .AND. DTI%LDATA_BSLAI))THEN
   WRITE(ILUOUT,*) ' '
   WRITE(ILUOUT,*) '***********************************************************'
@@ -961,7 +949,6 @@ IF (.NOT.I%LECOCLIMAP .AND. ISIZE_LMEB_PATCH>0 .AND. .NOT.(DTI%LDATA_H_TREE     
   IF (.NOT.DTI%LDATA_GNDLITTER   ) WRITE(ILUOUT,*) '* for GNDLITTER              *'
   IF (.NOT.DTI%LDATA_Z0LITTER    ) WRITE(ILUOUT,*) '* for Z0LITTER               *'
   IF (.NOT.DTI%LDATA_H_TREE      ) WRITE(ILUOUT,*) '* for H_TREE                 *'
-  IF (.NOT.DTI%LDATA_ZF_TALLVEG  ) WRITE(ILUOUT,*) '* for ZF_TALLVEG             *'
   IF (.NOT.DTI%LDATA_BSLAI       ) WRITE(ILUOUT,*) '* for BSLAI                  *'
   WRITE(ILUOUT,*) '* Without ECOCLIMAP, these fields must be prescribed      *'
   WRITE(ILUOUT,*) '***********************************************************'

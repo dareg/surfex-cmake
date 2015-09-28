@@ -96,9 +96,11 @@ IF (I%NPATCH==1) THEN
   I%XLE             (:, 1)    = PKI%XP_LE         (:)
   !
    IF(I%LMEB_PATCH(KPATCH))THEN
-     !nogv XWRV            (:, 1)    = XP_WRV        (:)
+     I%XWRL            (:, 1)    = PKI%XP_WRL        (:)
+     I%XWRLI           (:, 1)    = PKI%XP_WRLI       (:)
      I%XWRVN           (:, 1)    = PKI%XP_WRVN       (:)
      I%XTV             (:, 1)    = PKI%XP_TV         (:)
+     I%XTL             (:, 1)    = PKI%XP_TL         (:)
      I%XTC             (:, 1)    = PKI%XP_TC         (:)
      I%XQC             (:, 1)    = PKI%XP_QC         (:)
    ELSE
@@ -195,9 +197,11 @@ ELSE
   IF(I%LMEB_PATCH(KPATCH))THEN
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
-      !nogv XWRV            (JI, KPATCH)    = XP_WRV        (JJ)
+      I%XWRL            (JI, KPATCH)    = PKI%XP_WRL        (JJ)
+      I%XWRLI           (JI, KPATCH)    = PKI%XP_WRLI       (JJ)
       I%XWRVN           (JI, KPATCH)    = PKI%XP_WRVN       (JJ)
       I%XTV             (JI, KPATCH)    = PKI%XP_TV         (JJ)
+      I%XTL             (JI, KPATCH)    = PKI%XP_TL         (JJ)
       I%XTC             (JI, KPATCH)    = PKI%XP_TC         (JJ)
       I%XQC             (JI, KPATCH)    = PKI%XP_QC         (JJ)
     END DO
@@ -548,13 +552,14 @@ PKI%XP_TOPQS=> NULL()
 !
 PKI%XP_MUF=> NULL()
 !
-PKI%XP_WRV          => NULL()
+PKI%XP_WRL          => NULL()
+PKI%XP_WRLI         => NULL()
 PKI%XP_WRVN         => NULL() 
 PKI%XP_TV           => NULL() 
+PKI%XP_TL           => NULL() 
 PKI%XP_TC           => NULL() 
 PKI%XP_QC           => NULL() 
 
-PKI%XP_ZF_TALLVEG   => NULL()
 PKI%XP_H_VEG        => NULL()
 PKI%XP_RGLV         => NULL()
 PKI%XP_GAMMAV       => NULL()

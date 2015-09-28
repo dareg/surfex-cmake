@@ -4,7 +4,7 @@
                                PALBNIR, PALBVIS, PALBUV,                  &
                                PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG,      &
                                PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,   &
-                               PSNOWALB, PPSNV, PPSNG, PFALB, PFFV, PFFG, &
+                               PFALB, PFFV, PFFG,                         &
                                PGLOBAL_SW, PSNOWFREE_ALB,                 &
                                PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL,     &
                                PMEB_SCA_SW,                               &
@@ -30,7 +30,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      S. Belair           * Meteo-France *
+!!	S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -73,11 +73,6 @@ REAL, DIMENSION(:)  , INTENT(IN)   :: PALBUV_VEG         ! UV      veg   albedo
 REAL, DIMENSION(:)  , INTENT(IN)   :: PALBNIR_SOIL       ! nearIR  soil  albedo
 REAL, DIMENSION(:)  , INTENT(IN)   :: PALBVIS_SOIL       ! visible soil  albedo
 REAL, DIMENSION(:)  , INTENT(IN)   :: PALBUV_SOIL        ! UV      soil  albedo
-REAL, DIMENSION(:)  , INTENT(IN)   :: PSNOWALB           ! Snow albedo
-REAL, DIMENSION(:)  , INTENT(IN)   :: PPSNV              ! fraction of the the veg.
-!                                                        ! covered by snow
-REAL, DIMENSION(:)  , INTENT(IN)   :: PPSNG              ! fraction of the the bare
-!                                                        ! ground covered by snow
 REAL, DIMENSION(:)  , INTENT(IN)   :: PFALB              ! Floodplain albedo
 REAL, DIMENSION(:)  , INTENT(IN)   :: PFFV               ! Floodplain fraction over vegetation
 REAL, DIMENSION(:)  , INTENT(IN)   :: PFFG               ! Floodplain fraction over the ground
@@ -117,16 +112,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_ALBEDO',0,ZHOOK_HANDLE)
 !
-IF (OTR_ML) THEN
-  PALBNIR_TVEG (:) = ( 1.-PPSNV(:)-PFFV(:))*PALBNIR_VEG(:)  + PPSNV(:)*PSNOWALB(:) + PFFV(:)*PFALB(:)
-  PALBNIR_TSOIL(:) = ( 1.-PPSNG(:)-PFFG(:))*PALBNIR_SOIL(:) + PPSNG(:)*PSNOWALB(:) + PFFG(:)*PFALB(:)   
-  PALBVIS_TVEG (:) = ( 1.-PPSNV(:)-PFFV(:))*PALBVIS_VEG(:)  + PPSNV(:)*PSNOWALB(:) + PFFV(:)*PFALB(:)
-  PALBVIS_TSOIL(:) = ( 1.-PPSNG(:)-PFFG(:))*PALBVIS_SOIL(:) + PPSNG(:)*PSNOWALB(:) + PFFG(:)*PFALB(:)
-ELSEIF (OMEB) THEN
-  PALBNIR_TVEG (:) = PALBNIR_VEG(:)
-  PALBNIR_TSOIL(:) = ( 1.-PFFG(:))*PALBNIR_SOIL(:) + PFFG(:)*PFALB(:)   
-  PALBVIS_TVEG (:) = PALBVIS_VEG(:)
-  PALBVIS_TSOIL(:) = ( 1.-PFFG(:))*PALBVIS_SOIL(:) + PFFG(:)*PFALB(:)
+IF (OTR_ML )THEN
+   IF (OMEB) THEN
+      PALBNIR_TVEG (:) =               PALBNIR_VEG(:)
+      PALBNIR_TSOIL(:) = ( 1.-PFFG(:))*PALBNIR_SOIL(:) + PFFG(:)*PFALB(:)   
+      PALBVIS_TVEG (:) =               PALBVIS_VEG(:)
+      PALBVIS_TSOIL(:) = ( 1.-PFFG(:))*PALBVIS_SOIL(:) + PFFG(:)*PFALB(:)
+   ELSE
+      PALBNIR_TVEG (:) = PALBNIR_VEG(:)
+      PALBNIR_TSOIL(:) = PALBNIR_SOIL(:) 
+      PALBVIS_TVEG (:) = PALBVIS_VEG(:)
+      PALBVIS_TSOIL(:) = PALBVIS_SOIL(:) 
+   ENDIF
 ELSE
   PALBNIR_TVEG (:) = XUNDEF
   PALBNIR_TSOIL(:) = XUNDEF

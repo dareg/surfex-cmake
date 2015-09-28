@@ -4,7 +4,7 @@
                                  PZENITH,PVEG,PZ0,PLAI,     &
                                  OMEB_PATCH,PGNDLITTER,     &
                                  PZ0LITTER,PLAIGV,          &
-                                 PZF_TALLVEG, PH_VEG, PTV,  &
+                                 PH_VEG, PTV,               &
                                  PTG1,PPATCH,               &
                                  PSW_BANDS,                 &
                                  PALBNIR_VEG,PALBVIS_VEG,   &
@@ -98,7 +98,6 @@ LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logic
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PGNDLITTER  ! Ground litter fraction
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV      ! Understory leaf area index
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0LITTER   ! Ground litter roughness length
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZF_TALLVEG ! Indicator for tall canopy vegetation
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG      ! Height of vegetation
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PTV         ! canopy vegetation temperature
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PTG1        ! soil surface temperature
@@ -214,7 +213,6 @@ IF(PRESENT(PDIR_SW))THEN
                          PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
                          ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH,             &
                          PDIR_SW, PSCA_SW,                                      &
-                         PZF_TALLVEG,                                           &
                          PALBNIR_VEG, PALBNIR_SOIL,                             &
                          PALBVIS_VEG, PALBVIS_SOIL                              )
 ELSE

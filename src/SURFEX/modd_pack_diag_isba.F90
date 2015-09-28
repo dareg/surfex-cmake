@@ -219,7 +219,11 @@ TYPE PACK_DIAG_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XP_H_G_C         ! MEB: sensible heat flux from understory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XP_LETRGV        ! MEB: transpiration from understory vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XP_LETRCV        ! MEB: transpiration from overstory canopy vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XP_LERGV         ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XP_LERGV         ! MEB: interception evaporation from understory vegetation [W/m2  
+  REAL, POINTER, DIMENSION(:) :: XP_LELITTER      ! MEB: water evaporation from litter[W/m2]
+  REAL, POINTER, DIMENSION(:) :: XP_LELITTERI     ! MEB: ice sublimation from litter [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XP_DRIPLIT       ! 
+  REAL, POINTER, DIMENSION(:) :: XP_RRLIT         ! 
   REAL, POINTER, DIMENSION(:) :: XP_LERCV         ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XP_H_C_A         ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
   REAL, POINTER, DIMENSION(:) :: XP_H_N_C         ! MEB: sensible heat flux from the snow on the ground [W/m2]
@@ -395,6 +399,10 @@ IF (LHOOK) CALL DR_HOOK("MODD_PACK_DIAG_ISBA_N:PACK_DIAG_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YPACK_DIAG_ISBA%XP_LETRGV)
   NULLIFY(YPACK_DIAG_ISBA%XP_LETRCV)
   NULLIFY(YPACK_DIAG_ISBA%XP_LERGV)
+  NULLIFY(YPACK_DIAG_ISBA%XP_LELITTER)
+  NULLIFY(YPACK_DIAG_ISBA%XP_LELITTERI)
+  NULLIFY(YPACK_DIAG_ISBA%XP_DRIPLIT)
+  NULLIFY(YPACK_DIAG_ISBA%XP_RRLIT)
   NULLIFY(YPACK_DIAG_ISBA%XP_LERCV)
   NULLIFY(YPACK_DIAG_ISBA%XP_H_C_A)
   NULLIFY(YPACK_DIAG_ISBA%XP_H_N_C)

@@ -320,15 +320,16 @@ TYPE PACK_ISBA_t
   REAL, POINTER, DIMENSION(:)     :: XP_RESA       ! aerodynamic resistance                  (s/m)
 ! - For multi-energy balance:
 !
-  REAL, POINTER, DIMENSION(:)     :: XP_WRV        ! liquid water retained on the foliage
-!                                                    ! of the canopy vegetation                (kg/m2)
+  REAL, POINTER, DIMENSION(:)     :: XP_WRL        ! liquid water retained on the litter
+!                                                  ! of the canopy vegetation                (kg/m2)
+  REAL, POINTER, DIMENSION(:)     :: XP_WRLI       ! solid water retained on the litter
   REAL, POINTER, DIMENSION(:)     :: XP_WRVN       ! snow retained on the foliage
 !                                                    ! of the canopy vegetation                (kg/m2)
   REAL, POINTER, DIMENSION(:)     :: XP_TV         ! canopy vegetation temperature           (K)
+  REAL, POINTER, DIMENSION(:)     :: XP_TL         ! litter temperature           (K)
   REAL, POINTER, DIMENSION(:)     :: XP_TC         ! canopy air temperature                  (K)
   REAL, POINTER, DIMENSION(:)     :: XP_QC         ! canopy air specific humidity            (kg/kg)
 !
-  REAL, POINTER, DIMENSION(:)     :: XP_ZF_TALLVEG   ! MEB tall vegetation binary              (-)
   REAL, POINTER, DIMENSION(:)     :: XP_RGLV         ! canopy veg maximum solar radiation
   REAL, POINTER, DIMENSION(:)     :: XP_GAMMAV       ! coefficient for the calculation
 !                                                      ! of the canopy veg surface stomatal
@@ -581,12 +582,13 @@ IF (LHOOK) CALL DR_HOOK("MODD_PACK_ISBA_N:PACK_ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YPACK_ISBA%XP_WG)
   NULLIFY(YPACK_ISBA%XP_WGI)
   NULLIFY(YPACK_ISBA%XP_RESA)
-  NULLIFY(YPACK_ISBA%XP_WRV)
+  NULLIFY(YPACK_ISBA%XP_WRL)
+  NULLIFY(YPACK_ISBA%XP_WRLI)
   NULLIFY(YPACK_ISBA%XP_WRVN)
   NULLIFY(YPACK_ISBA%XP_TV)
+  NULLIFY(YPACK_ISBA%XP_TL)
   NULLIFY(YPACK_ISBA%XP_TC)
   NULLIFY(YPACK_ISBA%XP_QC)
-  NULLIFY(YPACK_ISBA%XP_ZF_TALLVEG)
   NULLIFY(YPACK_ISBA%XP_RGLV)
   NULLIFY(YPACK_ISBA%XP_GAMMAV)
   NULLIFY(YPACK_ISBA%XP_RSMINV)

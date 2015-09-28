@@ -31,10 +31,6 @@ IMPLICIT NONE
 !
 REAL, SAVE       :: XTAU_LW
 !
-! Extinction coefficient for view factor for short-wave radiation 
-!
-REAL, SAVE       :: XTAU_V_CF
-!
 ! MEB resistance increase factor for canopy air sapce
 !
 REAL, SAVE       :: XRAGNC_FACTOR

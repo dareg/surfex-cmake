@@ -44,7 +44,7 @@ USE MODD_SURF_CONF, ONLY : CPROGNAME
 !
 USE MODD_WATER_PAR
 USE MODD_FLOOD_PAR
-USE MODD_MEB_PAR,   ONLY : XTAU_LW, XTAU_V_CF,        &
+USE MODD_MEB_PAR,   ONLY : XTAU_LW,                            &
                            XRAGNC_FACTOR, XKDELTA_WR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XAGLAMIN, XAGLAMAX, XHGLA,          &
@@ -88,7 +88,7 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XZ0FLOOD, XALBWATSNOW,                         &
                         LMEBREC,                                       &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
-                        XTAU_LW, XTAU_V_CF, XRAGNC_FACTOR
+                        XTAU_LW, XRAGNC_FACTOR
 !
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
@@ -180,10 +180,6 @@ XTAU_SMELT = 300.
 ! Extinction coefficient for view factor for long-wave radiation 
 !
 XTAU_LW = 0.5   ! -
-!
-! Extinction coefficient for view factor for short-wave radiation 
-!
-XTAU_V_CF = 0.5 ! -
 !
 ! MEB resistance increase factor for canopy air sapce.
 ! If=1, then NO effect. It is generally >=1

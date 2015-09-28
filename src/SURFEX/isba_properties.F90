@@ -31,7 +31,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      S. Belair           * Meteo-France *
+!!	S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    ------------- 
@@ -135,7 +135,7 @@ ZFFG          = 0.
                    PALBNIR, PALBVIS, PALBUV,                               &
                    PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG,                   &
                    PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL,                &
-                   TPSNOW%ALB(:,1), PPSNV, PPSNG, ZALBF, ZFFV, ZFFG,       &
+                   ZALBF, ZFFV, ZFFG,                                      &
                    ZGLOBAL_SW, PANOSNOW,                                   &
                    PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL,                  &
                    ZP_MEB_SCA_SW,                                          &

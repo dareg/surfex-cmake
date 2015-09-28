@@ -358,10 +358,18 @@ SELECT CASE (HSURF)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
- CASE('WRV    ') 
-  ALLOCATE(I%XWRV(INI,I%NPATCH))
+  CASE('WRL    ') 
+  ALLOCATE(I%XWRL(INI,I%NPATCH))
   DO JPATCH=1,I%NPATCH
-    I%XWRV(:,JPATCH) = ZW(:,1,JPATCH)
+    I%XWRL(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+  CASE('WRLI   ') 
+  ALLOCATE(I%XWRLI(INI,I%NPATCH))
+  DO JPATCH=1,I%NPATCH
+    I%XWRLI(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -378,6 +386,14 @@ SELECT CASE (HSURF)
   ALLOCATE(I%XTV(INI,I%NPATCH))
   DO JPATCH=1,I%NPATCH
     I%XTV(:,JPATCH) = ZW(:,1,JPATCH)
+  END DO
+  !
+  !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  !
+ CASE('TL     ') 
+  ALLOCATE(I%XTL(INI,I%NPATCH))
+  DO JPATCH=1,I%NPATCH
+    I%XTL(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

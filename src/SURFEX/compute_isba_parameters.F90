@@ -216,7 +216,7 @@ ZWORK(:)   = XUNDEF
                      IM%I%XCE_NITRO, IM%I%XCF_NITRO, IM%I%XCNA_NITRO,                   &
                      IM%I%TSEED, IM%I%TREAP, IM%I%XWATSUP, IM%I%XIRRIG,                      &
                      IM%I%XROOTFRAC, IM%I%NWG_LAYER, IM%I%XDROOT, IM%I%XDG2,                 &
-                     IM%I%XGNDLITTER,IM%I%XZF_TALLVEG,IM%I%XRGLGV,IM%I%XGAMMAGV,IM%I%XRSMINGV,    &
+                     IM%I%XGNDLITTER,IM%I%XRGLGV,IM%I%XGAMMAGV,IM%I%XRSMINGV,    &
                      IM%I%XROOTFRACGV,IM%I%XWRMAX_CFGV,IM%I%XLAIGV,IM%I%XZ0LITTER,IM%I%XH_VEG     )
 !
 IF (IM%I%TTIME%TDATE%MONTH /= NUNDEF) THEN
@@ -252,7 +252,7 @@ ENDIF
                         PRE25=IM%I%XRE25,PCE_NITRO=IM%I%XCE_NITRO,PCF_NITRO=IM%I%XCF_NITRO,   &
                         PCNA_NITRO=IM%I%XCNA_NITRO,PD_ICE=IM%I%XD_ICE,TPSEED=IM%I%TSEED,      &
                         TPREAP=IM%I%TREAP,PWATSUP=IM%I%XWATSUP,PIRRIG=IM%I%XIRRIG,            &
-                        PGNDLITTER=IM%I%XGNDLITTER,PZF_TALLVEG=IM%I%XZF_TALLVEG,         &
+                        PGNDLITTER=IM%I%XGNDLITTER,                                           &
                         PRGLGV=IM%I%XRGLGV,   &
                         PGAMMAGV=IM%I%XGAMMAGV,PRSMINGV=IM%I%XRSMINGV,                   &
                         PROOTFRACGV=IM%I%XROOTFRACGV,PWRMAX_CFGV=IM%I%XWRMAX_CFGV,       &
@@ -719,7 +719,7 @@ IM%I%XEMIS_NAT (:) = XUNDEF
                                 IM%I%LFLOOD, IM%I%CALBEDO, PZENITH,                &
                                  IM%I%XVEG,IM%I%XZ0,IM%I%XLAI,                          &
                                  IM%I%LMEB_PATCH,IM%I%XGNDLITTER,IM%I%XZ0LITTER,IM%I%XLAIGV, &
-                                 IM%I%XZF_TALLVEG, IM%I%XH_VEG, IM%I%XTV,               &
+                                 IM%I%XH_VEG, IM%I%XTV,               &
                                  ZTG1,                                   &
                                  IM%I%XPATCH,                                 &
                                  PSW_BANDS,                              &

@@ -1,6 +1,6 @@
 !     #########
 SUBROUTINE TRIDIAG_GROUND_RM_COEFS(PTSTEP,PDEPTH,PTEMP,PHEATCAP,PCONDTRM,              &
-     PTDEEP_A,PTDEEP_B,PCONDA_DELZ,PA_COEF,PB_COEF)
+     PSOURCE,PTDEEP_A,PTDEEP_B,PCONDA_DELZ,PA_COEF,PB_COEF)
 !
 !
 !!****  *TRIDIAG_GROUND_RM_COEF*  
@@ -40,7 +40,7 @@ SUBROUTINE TRIDIAG_GROUND_RM_COEFS(PTSTEP,PDEPTH,PTEMP,PHEATCAP,PCONDTRM,       
 !!    AUTHOR
 !!    ------
 !!
-!!      A. Boone           * Meteo-France *
+!!	A. Boone           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -69,6 +69,7 @@ REAL, DIMENSION(:,:), INTENT(IN)  :: PTEMP         ! surface and sub-surface soi
 !                                                  ! temperature profile               (K)
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHEATCAP      ! soil heat capacity                (J/K/m3)
 REAL, DIMENSION(:,:), INTENT(IN)  :: PCONDTRM      ! soil thermal conductivity         (W/m/K)
+REAL, DIMENSION(:,:), INTENT(IN)  :: PSOURCE       ! soil heat source function         (J/m2/s)
 REAL, DIMENSION(:),   INTENT(IN)  :: PTDEEP_A, PTDEEP_B
 !                                                  ! PTDEEP_A = Deep soil temperature
 !                                                  ! coefficient depending on flux     (m2/K/W)
@@ -159,10 +160,11 @@ ENDDO
 ZTHRM(:,INL)        = PCONDTRM(:,INL) 
 !
 !
-! Energy sink: phase change: convert to K
-! NOTE for now, set to zero as accounted for elsewhere.
+! Energy sink: 
+! NOTE for now, set this part to zero as accounted for elsewhere.
 !!!ZSINK(:,:)       = -PPHASE(:,:)*PTSTEP/ZGHEATCAP(:,:)
-ZSINK(:,:)          = 0.0 
+!
+ZSINK(:,:)          = -PSOURCE(:,:)  ! J/m2/s
 !
 ! Thermal cond/dz ratio (W m-2 K-1):
 !

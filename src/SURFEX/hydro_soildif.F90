@@ -60,7 +60,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!      A. Boone          * Meteo-France *
+!!	A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -149,7 +149,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PDRAIN, PHORTON
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTOPQS
 !                                      PTOPQS = Topmodel subsurface flow by layer (m/s)
 !
-REAL, DIMENSION(:),   INTENT(OUT)   :: PQSB     !Lateral subsurface flow [kg/m2/s]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PQSB     !Lateral subsurface flow [kg/m²/s]
 !
 !
 !*      0.2    declarations of local variables
@@ -285,6 +285,7 @@ DO JL=1,INL
 !
    ENDDO
 ENDDO
+!
 !
 DO JJ=1,INI
    IDEPTH=KWG_LAYER(JJ)

@@ -212,7 +212,12 @@ ENDIF
 IF(ISIZE_LMEB_PATCH>0)THEN
   CALL PREP_HOR_ISBA_FIELD(DTCO, IG, I, UG, U, USS, &
                           HPROGRAM,'TV     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-  !nogv CALL PREP_HOR_ISBA_FIELD(HPROGRAM,'WRV    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+  CALL PREP_HOR_ISBA_FIELD(DTCO, IG, I, UG, U, USS, &
+                        HPROGRAM,'TL     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+  CALL PREP_HOR_ISBA_FIELD(DTCO, IG, I, UG, U, USS, &
+                          HPROGRAM,'WRL    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+  CALL PREP_HOR_ISBA_FIELD(DTCO, IG, I, UG, U, USS, &
+                          HPROGRAM,'WRLI   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, IG, I, UG, U, USS, &
                           HPROGRAM,'WRVN   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
   CALL PREP_HOR_ISBA_FIELD(DTCO, IG, I, UG, U, USS, &
@@ -369,7 +374,7 @@ CALL AVERAGED_ALBEDO_EMIS_ISBA(I, &
                                .FALSE., I%CALBEDO, ZZENITH,                &
                                  I%XVEG,I%XZ0,I%XLAI,                          &
                                  I%LMEB_PATCH,I%XGNDLITTER,I%XZ0LITTER,I%XLAIGV, &
-                                 I%XZF_TALLVEG, I%XH_VEG, I%XTV,               &
+                                 I%XH_VEG, I%XTV,               &
                                  I%XTG(:,1,:),I%XPATCH, ZSW_BANDS,           &
                                  I%XALBNIR_VEG,I%XALBVIS_VEG,I%XALBUV_VEG,     &
                                  I%XALBNIR_SOIL,I%XALBVIS_SOIL,I%XALBUV_SOIL,  &

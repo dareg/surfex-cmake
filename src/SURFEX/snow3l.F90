@@ -195,17 +195,19 @@ REAL, DIMENSION(:,:), INTENT(INOUT):: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST
 !                                                   dendritic snow)
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE  ! Snow grain age
 !
-REAL, DIMENSION(:), INTENT(INOUT)   :: PRNSNOW, PHSNOW, PGFLUXSNOW, PLES3L, PLEL3L, &
+REAL, DIMENSION(:), INTENT(INOUT)   :: PRNSNOW, PHSNOW, PLES3L, PLEL3L, &
                                        PHPSNOW, PEVAP,  PGRNDFLUX, PEMISNOW
 !                                      PLES3L      = evaporation heat flux from snow (W/m2)
 !                                      PLEL3L      = sublimation (W/m2)
 !                                      PHPSNOW     = heat release from rainfall (W/m2)
 !                                      PRNSNOW     = net radiative flux from snow (W/m2)
 !                                      PHSNOW      = sensible heat flux from snow (W/m2)
-!                                      PGFLUXSNOW  = net heat flux from snow (W/m2)
 !                                      PEVAP       = total evaporative flux (kg/m2/s)
 !                                      PGRNDFLUX   = soil/snow interface heat flux (W/m2)
 !                                      PEMISNOW    = snow surface emissivity
+!
+REAL, DIMENSION(:), INTENT(OUT)     :: PGFLUXSNOW
+!                                      PGFLUXSNOW  = net heat flux from snow (W/m2)
 !
 REAL, DIMENSION(:), INTENT(INOUT) :: PSWNETSNOW, PLWNETSNOW, PSWNETSNOWS
 !                                      PSWNETSNOW = net shortwave radiation entering top of snowpack 
@@ -311,7 +313,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZMELTXS, ZL
 !                                      ZLIQHEATXS = excess snowpack heating for vanishingly thin
 !                                                 snow cover: add energy to snow/ground heat
 !                                                 flux (W m-2)
-!                                      ZLWUPSNOW = upwelling longwave raaditive flux (W m-2)
+!                                      ZLWUPSNOW = upwelling longwave radiative flux (W m-2)
 !                                      ZGRNDFLUXO= snow-ground flux before correction (W m-2)
 !                                      ZGRNDFLUX = snow-ground flux after correction (W m-2)
 !                                      ZGRNDFLUXI= for the case where the ground flux is imposed,
@@ -500,7 +502,8 @@ IF(OMEB)THEN
    CALL SNOW3LEBUDMEB(PTSTEP,XSNOWDZMIN,                                     &                
                 ZSNOWTEMP(:,1),PSNOWDZ(:,1),PSNOWDZ(:,2),                    & 
                 ZSCOND(:,1),ZSCOND(:,2),ZSCAP(:,1),                          &
-                PRNSNOW,PHSNOW,PLES3L,PLEL3L,ZRADSINK(:,1),PHPSNOW,          & 
+                PSWNETSNOWS,PLWNETSNOW,                                      &
+                PHSNOW,PLES3L,PLEL3L,PHPSNOW,                                &   
                 ZCT,ZTSTERM1,ZTSTERM2,PGFLUXSNOW)
 
 ! - for mass fluxes, snow fraction notion removed
@@ -610,7 +613,7 @@ ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
 ! If all snow in uppermost layer evaporates/sublimates, re-distribute
 ! grid (below could be evoked for vanishingly thin snowpacks):
 !
- CALL SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ)
+CALL SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ)
 !
 !
 !*      12.     Update surface albedo:
@@ -715,45 +718,11 @@ IF(OMEB)THEN
       ENDDO
    ENDDO
 
-! Here we impose that the implicit snow T profile found in e_budget_meb
-! be imposed, while conserving the overall heat content of the snowpack
-! This results in smoother near surface Ts for certain conditions 
-! and more consistency with sfc fluxes. Total heat content of the snowpack 
-! is unchanged/conserved.
-   
-   ZWORK2D(:,:)   = PSNOWHEAT(:,:)
-   DO JJ=1,INLVLS ! this can be 1 to INLVLS...
-      DO JI=1,INI
-         ZWORK2D(JI,JJ) = MIN(0., PSNOWDZ(JI,JJ)*( ZSCAP(JI,JJ)*(ZSNOWTEMPO(JI,JJ)-XTT)  &
-                         - XLMTT*PSNOWRHO(JI,JJ) ) + XLMTT*XRHOLW*PSNOWLIQ(JI,JJ) ) 
-      ENDDO
-   ENDDO
-   ZWORK(:)       = 0.0
-   ZWORK2(:)      = 0.0
-   DO JJ=1,INLVLS
-      DO JI=1,INI
-         ZWORK(JI)   = ZWORK(JI)  + PSNOWHEAT(JI,JJ)
-         ZWORK2(JI)  = ZWORK2(JI) + ZWORK2D(JI,JJ)
-      ENDDO
-   ENDDO
-   WHERE(ZWORK2(:) > -1.E-10)
-      ZWORK(:) = 1. ! i.e. no modifs to T profile
-   ELSEWHERE
-      ZWORK(:) = ZWORK(:)/ZWORK2(:)
-   END WHERE
-   DO JJ=1,1,INLVLS
-      DO JI=1,INI
-         PSNOWHEAT(JI,JJ) = ZWORK2D(JI,JJ)*ZWORK(JI) ! possibly change heat profile 
-                                                     ! but conserve total
-      ENDDO
-   ENDDO
-
 ! these are just updated diagnostics at this point:
 
-   PSNOWTEMP(:,:) = XTT + ( ((PSNOWHEAT(:,:)/PSNOWDZ(:,:))                   &
-                    + XLMTT*PSNOWRHO(:,:))/ZSCAP(:,:) )  
-   PSNOWLIQ(:,:)  = MAX(0.0,PSNOWTEMP(:,:)-XTT)*ZSCAP(:,:)*                  &
-                    PSNOWDZ(:,:)/(XLMTT*XRHOLW)  
+   ZWORK2D(:,:)   = MIN(1.0, PSNOWDZ(:,:)/XSNOWDMIN)/MAX(XSNOWDMIN,PSNOWDZ(:,:))
+   PSNOWTEMP(:,:) = XTT + ZWORK2D(:,:)*( (PSNOWHEAT(:,:) + XLMTT*PSNOWSWE(:,:))/ZSCAP(:,:) )
+   PSNOWLIQ(:,:)  = MAX(0.0,PSNOWTEMP(:,:)-XTT)*ZSCAP(:,:)*PSNOWDZ(:,:)/(XLMTT*XRHOLW)  
    PSNOWTEMP(:,:) = MIN(XTT,PSNOWTEMP(:,:))
 
 ENDIF
@@ -1668,6 +1637,7 @@ IF(OMEB)THEN
    ZCOEF(:,1)          = 1.0 - PSWNETSNOWS(:)/MAX(1.E-4,PSWNETSNOW(:))
 
 ELSE
+!
    DO JJ=1,INLVLS
       DO JI=1,INI
       !
@@ -1683,7 +1653,7 @@ ELSE
    ENDDO
 
    PSWNETSNOW(:)       = PSW_RAD(:)*(1.-PSNOWALB(:))
-   PSWNETSNOWS(:)      = PSWNETSNOW(:)*(1.0-ZCOEF(:,1)) ! SW rad absorbed in uppermost layer
+   PSWNETSNOWS(:)      = PSWNETSNOW(:)*(1.0-ZCOEF(:,1)) 
 
 ENDIF
 !
@@ -2951,7 +2921,8 @@ SUBROUTINE SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,         &
 !     snow AND underlying surface.
 !
 !
-USE MODD_CSTS,ONLY : XTT, XLSTT, XLVTT
+USE MODD_CSTS,        ONLY : XTT, XLSTT, XLVTT
+USE MODD_SNOW_METAMO, ONLY : XSNOWDZMIN
 !
 IMPLICIT NONE
 !
@@ -2984,7 +2955,7 @@ INTEGER                             :: JJ, JI
 INTEGER                             :: INI
 INTEGER                             :: INLVLS
 !
-REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWHEATC, ZSNOWGONE_DELTA
+REAL, DIMENSION(SIZE(PLES3L))       :: ZSNOWHEATC, ZSNOWGONE_DELTA, ZSNOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -3001,9 +2972,11 @@ PEVAPCOR(:)           = 0.0
 PTHRUFAL(:)           = 0.0
 !
 ZSNOWHEATC(:)         = 0.
+ZSNOW(:)              = 0.
 DO JJ=1,INLVLS
    DO JI=1,INI
       ZSNOWHEATC(JI) = ZSNOWHEATC(JI) + PSNOWHEAT(JI,JJ) ! total heat content (J m-2)
+      ZSNOW(JI)      = ZSNOW(JI)      + PSNOWDZ(JI,JJ)   ! total snow depth (m)
    ENDDO
 ENDDO
 ZSNOWGONE_DELTA(:)    = 1.0
@@ -3016,7 +2989,7 @@ ZSNOWGONE_DELTA(:)    = 1.0
 ! actual inflow of heat from below (as heat content correction owing to a corrected
 ! flux has not yet been done: here we compare to pre-corrected heat content).
 !
-WHERE(PGFLUXSNOW(:) - PGRNDFLUXO(:) + PRADSINK(:) >= (-ZSNOWHEATC(:)/PTSTEP) )
+WHERE(PGFLUXSNOW(:) + PRADSINK(:) >= (-ZSNOWHEATC(:)/PTSTEP) .AND. ZSNOW(:) <= XSNOWDZMIN)
    PGRNDFLUX(:)       = PGFLUXSNOW(:) + (ZSNOWHEATC(:)/PTSTEP)
    PEVAPCOR(:)        = (PLEL3L(:)/XLVTT) + (PLES3L(:)/XLSTT)
    PRADXS(:)          = 0.0
@@ -3149,7 +3122,8 @@ END SUBROUTINE SNOW3LEVAPGONE
 !####################################################################
 SUBROUTINE SNOW3LEBUDMEB(PTSTEP, PSNOWDZMIN,                        &
            PTS, PSNOWDZ1, PSNOWDZ2, PSCOND1, PSCOND2, PSCAP,        &
-           PRNSNOW, PHSNOW, PLES3L, PLEL3L, PRADSINK, PHPSNOW,      &
+           PSWNETSNOWS, PLWNETSNOW,                                 &
+           PHSNOW, PLES3L, PLEL3L, PHPSNOW,                         &
            PCT, PTSTERM1, PTSTERM2, PGFLUXSNOW                      )                          
 !
 !!    PURPOSE
@@ -3163,7 +3137,8 @@ IMPLICIT NONE
 REAL,    INTENT(IN)               :: PTSTEP, PSNOWDZMIN
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PTS, PSNOWDZ1, PSNOWDZ2, PSCOND1, PSCOND2, PSCAP,  &
-                                     PRNSNOW, PHSNOW, PLES3L, PLEL3L, PRADSINK, PHPSNOW
+                                     PHSNOW, PLES3L, PLEL3L, PHPSNOW,                   &
+                                     PSWNETSNOWS, PLWNETSNOW
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PCT, PTSTERM1, PTSTERM2, PGFLUXSNOW
 !
@@ -3192,7 +3167,7 @@ PCT(:)        = 1.0/(PSCAP(:)*ZSNOWDZM1(:))
 !
 ! Surface fluxes entering the snowpack (radiative and turbulent):
 !
-PGFLUXSNOW(:) = PRNSNOW(:) - PHSNOW(:) - PLES3L(:) - PLEL3L(:)
+PGFLUXSNOW(:) = PSWNETSNOWS(:) + PLWNETSNOW(:) - PHSNOW(:) - PLES3L(:) - PLEL3L(:)
 !
 ! Thermal conductivity between uppermost and lower snow layers:
 !
@@ -3206,7 +3181,7 @@ ZB(:)         = 1./PTSTEP
 !
 ZA(:)         = ZB(:) + PCT(:)*(2*ZSCONDA(:)/(ZSNOWDZM2(:)+ZSNOWDZM1(:)))
 !
-ZC(:)         = PCT(:)*( PGFLUXSNOW(:) + PHPSNOW(:) + PRADSINK(:) )
+ZC(:)         = PCT(:)*( PGFLUXSNOW(:) + PHPSNOW(:) )
 !
 ! Coefficients needed for implicit solution
 ! of linearized surface energy budget:

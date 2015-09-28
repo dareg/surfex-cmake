@@ -13,7 +13,7 @@
                                   PD_ICE, PWG1,                          &
                                   PALBNIR_SOIL,PALBVIS_SOIL,PALBUV_SOIL, &
                                   TPSEED, TPREAP, PWATSUP, PIRRIG,       &
-                                  PGNDLITTER, PZF_TALLVEG , PRGLGV,      &
+                                  PGNDLITTER, PRGLGV,                    &
                                   PGAMMAGV, PRSMINGV, PROOTFRACGV,       &
                                   PWRMAX_CFGV, PLAIGV, PZ0LITTER, PH_VEG )
 !     ##############################################################
@@ -88,7 +88,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                &
                                 XDATA_GMES_ST, XDATA_BSLAI_ST,          &
                                 XDATA_SEFOLD_ST, XDATA_GC_ST,           &
                                 XDATA_DMAX_ST, XDATA_WATSUP,            &
-                                XDATA_GNDLITTER, XDATA_ZF_TALLVEG,      &
+                                XDATA_GNDLITTER,                        &
                                 XDATA_RGLGV, XDATA_GAMMAGV,             &
                                 XDATA_RSMINGV, XDATA_ROOT_DEPTHGV,      &
                                 XDATA_WRMAX_CFGV, XDATA_LAIGV,          &
@@ -180,7 +180,6 @@ REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PWATSUP
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PIRRIG
 !
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGNDLITTER
-REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZF_TALLVEG 
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRGLGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PGAMMAGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRSMINGV
@@ -477,16 +476,6 @@ IF (PRESENT(PRGLGV)) THEN
   ELSE
     CALL AV_PGD(DTCO, &
                    PRGLGV,PCOVER,XDATA_RGLGV,YVEG,'ARI',OCOVER,KDECADE=KDECADE)  
-  ENDIF
-ENDIF
-!
-IF (PRESENT(PZF_TALLVEG)) THEN
-  IF (GDATA .AND. DTI%LDATA_ZF_TALLVEG) THEN
-    CALL AV_PGD_PARAM(DTI, &
-                      PZF_TALLVEG,DTI%XPAR_VEGTYPE,DTI%XPAR_ZF_TALLVEG,YVEG,'ARI',KDECADE=KDECADE2)
-  ELSE
-    CALL AV_PGD(DTCO, &
-                   PZF_TALLVEG,PCOVER,XDATA_ZF_TALLVEG,YVEG,'ARI',OCOVER,KDECADE=KDECADE)
   ENDIF
 ENDIF
 !

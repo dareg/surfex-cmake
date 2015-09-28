@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_NAM_PGD_ISBA_MEB(HPROGRAM, KLUOUT, OMEB_PATCH, OFORC_MEASURE)  
+      SUBROUTINE READ_NAM_PGD_ISBA_MEB(HPROGRAM, KLUOUT, OMEB_PATCH, OFORC_MEASURE,OMEB_LITTER)  
 !     #############################################################################
 !
 !!**** *READ_NAM_PGD_ISBA_MEB* reads namelist for ISBA
@@ -55,6 +55,7 @@ INTEGER,             INTENT(IN)    :: KLUOUT
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OMEB_PATCH
 LOGICAL              , INTENT(OUT) :: OFORC_MEASURE
+LOGICAL              , INTENT(OUT) :: OMEB_LITTER
 !
 !
 !*    0.2    Declaration of local variables
@@ -69,10 +70,11 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !
 LOGICAL, DIMENSION(19) :: LMEB_PATCH
 LOGICAL                :: LFORC_MEASURE
+LOGICAL                :: LMEB_LITTER
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_MEB_ISBA/LMEB_PATCH,LFORC_MEASURE  
+NAMELIST/NAM_MEB_ISBA/LMEB_PATCH,LFORC_MEASURE,LMEB_LITTER  
 !
 !-------------------------------------------------------------------------------
 !
@@ -83,6 +85,7 @@ IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_ISBA_MEB',0,ZHOOK_HANDLE)
 !
 LMEB_PATCH(:) =.FALSE.
 LFORC_MEASURE =.FALSE.
+LMEB_LITTER   =.FALSE.
 !
 !-------------------------------------------------------------------------------
 !
@@ -110,6 +113,8 @@ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 OMEB_PATCH(:) = LMEB_PATCH(:)
 !
 OFORC_MEASURE = LFORC_MEASURE
+OMEB_LITTER   = LMEB_LITTER
+!
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_ISBA_MEB',1,ZHOOK_HANDLE)
 !

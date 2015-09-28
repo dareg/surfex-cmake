@@ -314,8 +314,9 @@ REAL, DIMENSION(0,0) :: ZINCREASE
 ! Dummy variables for MEB:
 LOGICAL,PARAMETER::OMEB=.FALSE.
 LOGICAL,PARAMETER::OFORC_MEASURE=.FALSE.
+LOGICAL,PARAMETER::OMEB_LITTER=.FALSE.
 REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, &
-          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                                  &
+          ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                                                  &
           ZP_WRMAX_CFV, ZP_LAIV,                                                          &
           ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                                           &
           ZZ0G_WITHOUT_SNOW,                                                              &
@@ -324,12 +325,13 @@ REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, &
           ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                                                   &
           ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_GNDLITTER
 REAL, DIMENSION(SIZE(GRM%TGRP%XROOTFRAC,1),SIZE(GRM%TGRP%XROOTFRAC,2)) :: ZP_ROOTFRACV
-REAL, DIMENSION(SIZE(PPS)) :: ZP_WRV,ZP_WRVN,ZP_TV
+REAL, DIMENSION(SIZE(PPS)) :: ZP_WRL,ZP_WRLI,ZP_WRVN,ZP_TV,ZP_TL
 REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
 REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,       &
           ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                    &
           ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                          &
-          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LELITTER, ZP_LELITTERI,      &
+          ZP_DRIPLIT,ZP_RRLIT, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
           ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                     &
           ZP_EVAP_N_C, ZP_EVAP_G_C,                                       & 
           ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                                  &
@@ -449,7 +451,7 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
  CALL ISBA(GRM%TGRO%CISBA_GR, TVG%CPHOTO, GRM%TGRO%LTR_ML_GR, 'WSAT', GRM%TGRO%CKSAT_GR,     &
           HRAIN, GRM%TGRO%CHORT_GR, TVG%CC1DRY, GRM%TGRO%CSCOND_GR, GRM%TGR%CUR%TSNOW%SCHEME, &
           TVG%CSNOWRES, TVG%CCPSURF, TVG%CSOILFRZ, TVG%CDIFSFCOND, TPTIME, OFLOOD, &
-          OTEMP_ARP, OGLACIER, OMEB, OFORC_MEASURE, PTSTEP,        &
+          OTEMP_ARP, OGLACIER, OMEB, OFORC_MEASURE, OMEB_LITTER, PTSTEP,        &
           HIMPLICIT_WIND, GAGRI_TO_GRASS,                          &
           GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,           &
           YSNOWMETAMO,YSNOWRAD,                                    &          
@@ -464,7 +466,7 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           GRM%TGR%CUR%XSNOWFREE_ALB, GRM%TGRP%XWRMAX_CF, GRM%TGRPE%CUR%XVEG, &
           GRM%TGRPE%CUR%XLAI, GRM%TGRPE%CUR%XEMIS, GRM%TGRPE%CUR%XZ0,        &
           GRM%TGRPE%CUR%XZ0/GRM%TGRP%XZ0_O_Z0H, GRM%TGRP%XVEGTYPE, GRM%TGRPE%CUR%XZ0,    &
-          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,              &
+          ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                              &
           ZP_ROOTFRACV, ZP_WRMAX_CFV, ZP_LAIV,                        &
           ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                       &
           ZZ0G_WITHOUT_SNOW,                                          &
@@ -490,7 +492,7 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &
           ZLEIFLOOD, ZSODELX, TG%XLAT, TG%XLON, GRM%TGR%CUR%XTG, GRM%TGR%CUR%XWG, &
           GRM%TGR%CUR%XWGI, GRM%TGRP%XPCPS, GRM%TGRP%XPLVTT, GRM%TGRP%XPLSTT, GRM%TGR%CUR%XWR, &
-          ZP_WRV,ZP_WRVN,ZP_TV,                                       &
+          ZP_WRL,ZP_WRLI,ZP_WRVN,ZP_TV, ZP_TL,                                &
           GRM%TGR%CUR%XRESA, GRM%TGR%CUR%XANFM, ZFSAT, GRM%TGR%CUR%TSNOW%ALB(:,1),             &
           GRM%TGR%CUR%TSNOW%ALBVIS(:,1), GRM%TGR%CUR%TSNOW%ALBNIR(:,1), GRM%TGR%CUR%TSNOW%ALBFIR(:,1),    &
           GRM%TGR%CUR%TSNOW%WSNOW(:,:,1), GRM%TGR%CUR%TSNOW%HEAT(:,:,1), GRM%TGR%CUR%TSNOW%RHO(:,:,1),    &
@@ -514,7 +516,8 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,            &
           ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                         &
           ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                      &
-          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LELITTER, ZP_LELITTERI,  &
+          ZP_DRIPLIT,ZP_RRLIT, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
           ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                 &
           ZP_EVAP_N_C, ZP_EVAP_G_C,                                   & 
           ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                              &

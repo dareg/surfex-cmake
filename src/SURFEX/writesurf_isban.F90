@@ -253,9 +253,17 @@ IF (ISIZE_LMEB_PATCH>0) THEN
 !
 !* water intercepted on canopy vegetation leaves
 !
-  !nogv YRECFM='WRV'
-  !nogv YCOMMENT='X_Y_WRV (kg/m2)'
-  !nogv CALL WRITE_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP,HCOMMENT=YCOMMENT)
+  YRECFM='WRL'
+  YCOMMENT='X_Y_WRL (kg/m2)'
+  CALL WRITE_SURF(DGU, U, &
+                 HPROGRAM,YRECFM,I%XWRL(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* ice on litter
+!
+  YRECFM='WRLI'
+  YCOMMENT='X_Y_WRLI (kg/m2)'
+  CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,YRECFM,I%XWRLI(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* snow intercepted on canopy vegetation leaves
 !
@@ -270,6 +278,13 @@ IF (ISIZE_LMEB_PATCH>0) THEN
   YCOMMENT='X_Y_TV (K)'
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,I%XTV(:,:),IRESP,HCOMMENT=YCOMMENT)
+!
+!* litter temperature
+!
+  YRECFM='TL'
+  YCOMMENT='X_Y_TL (K)'
+  CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,YRECFM,I%XTL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* vegetation canopy air temperature
 !

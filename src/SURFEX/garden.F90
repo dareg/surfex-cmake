@@ -308,8 +308,9 @@ REAL, DIMENSION(0,0) :: ZINCREASE
 ! Dummy variables for MEB:
 LOGICAL,PARAMETER::OMEB=.FALSE.
 LOGICAL,PARAMETER::OFORC_MEASURE=.FALSE.
+LOGICAL,PARAMETER::OMEB_LITTER=.FALSE.
 REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW,                     &
-          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,         &
+          ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                         &
           ZP_WRMAX_CFV, ZP_LAIV,                                 &
           ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                  &
           ZZ0G_WITHOUT_SNOW,                                     &
@@ -318,12 +319,13 @@ REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW,                     &
           ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                          &
           ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_GNDLITTER
 REAL, DIMENSION(SIZE(GDM%TGDP%XROOTFRAC,1),SIZE(GDM%TGDP%XROOTFRAC,2)) :: ZP_ROOTFRACV
-REAL, DIMENSION(SIZE(PPS)) :: ZP_WRV,ZP_WRVN,ZP_TV
+REAL, DIMENSION(SIZE(PPS)) :: ZP_WRL,ZP_WRLI,ZP_WRVN,ZP_TV, ZP_TL
 REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
 REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,    &
           ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                                     &
           ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                                  &
-          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,           &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LELITTER, ZP_LELITTERI,              &
+          ZP_DRIPLIT,ZP_RRLIT, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,                      &
           ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                             &
           ZP_EVAP_N_C, ZP_EVAP_G_C,                                               & 
           ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                                          &
@@ -435,7 +437,7 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           GDM%TVG%CC1DRY, GDM%TVG%CSCOND, GDM%TGD%CUR%TSNOW%SCHEME, &
           GDM%TVG%CSNOWRES, GDM%TVG%CCPSURF, GDM%TVG%CSOILFRZ,  &
           GDM%TVG%CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER,        &
-          OMEB, OFORC_MEASURE, PTSTEP, HIMPLICIT_WIND, GAGRI_TO_GRASS,&
+          OMEB, OFORC_MEASURE,OMEB_LITTER, PTSTEP, HIMPLICIT_WIND, GAGRI_TO_GRASS,&
           GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,              &
           YSNOWMETAMO,YSNOWRAD,                                       &
           GDM%TVG%XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW, PT_LOWCAN,         &
@@ -450,7 +452,7 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           GDM%TGD%CUR%XSNOWFREE_ALB, GDM%TGDP%XWRMAX_CF, GDM%TGDPE%CUR%XVEG, &
           GDM%TGDPE%CUR%XLAI, GDM%TGDPE%CUR%XEMIS, GDM%TGDPE%CUR%XZ0,       &
           GDM%TGDPE%CUR%XZ0/GDM%TGDP%XZ0_O_Z0H, GDM%TGDP%XVEGTYPE, GDM%TGDPE%CUR%XZ0,  &
-          ZP_ZF_TALLVEG , ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,              &
+          ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                               &
           ZP_ROOTFRACV, ZP_WRMAX_CFV, ZP_LAIV,                        &
           ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                       &
           ZZ0G_WITHOUT_SNOW,                                          &
@@ -478,7 +480,7 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZLEIFLOOD, ZSODELX, TG%XLAT, TG%XLON, GDM%TGD%CUR%XTG, GDM%TGD%CUR%XWG, &
           GDM%TGD%CUR%XWGI, GDM%TGDP%XPCPS,      &
           GDM%TGDP%XPLVTT, GDM%TGDP%XPLSTT, GDM%TGD%CUR%XWR,                             &
-          ZP_WRV,ZP_WRVN,ZP_TV,                                       &
+          ZP_WRL,ZP_WRLI,ZP_WRVN,ZP_TV, ZP_TL,                                &
           GDM%TGD%CUR%XRESA, GDM%TGD%CUR%XANFM, ZFSAT, GDM%TGD%CUR%TSNOW%ALB(:,1),          &
           GDM%TGD%CUR%TSNOW%ALBVIS(:,1), GDM%TGD%CUR%TSNOW%ALBNIR(:,1), GDM%TGD%CUR%TSNOW%ALBFIR(:,1),    &
           GDM%TGD%CUR%TSNOW%WSNOW(:,:,1), GDM%TGD%CUR%TSNOW%HEAT(:,:,1), GDM%TGD%CUR%TSNOW%RHO(:,:,1),    &
@@ -503,7 +505,8 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,            &
           ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                         &
           ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                      &
-          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
+          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LELITTER,ZP_LELITTERI,   &
+          ZP_DRIPLIT,ZP_RRLIT, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
           ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                 &
           ZP_EVAP_N_C, ZP_EVAP_G_C,                                   & 
           ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                              &
@@ -540,7 +543,7 @@ IF (GDM%TVG%CPHOTO=='LAI' .OR. GDM%TVG%CPHOTO=='LST' .OR. GDM%TVG%CPHOTO=='NIT')
                        GDM%TVG%CALBEDO, .FALSE., GDM%TVG%LTR_ML,   &
                        GDM%TVG%LNITRO_DILU, GAGRI_TO_GRASS,                        &
                        PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, 1,    &
-                       TPTIME%TIME, TG%XLAT, PRHOA, GDM%TGDP%XDG, GDM%TGDP%XDZG, GDM%TGDP%NWG_LAYER, & 
+                       TPTIME%TIME, TG%XLAT, PRHOA, GDM%TGDP%XDG, GDM%TGDP%XDZG, GDM%TGDP%NWG_LAYER,  & 
                        GDM%TGD%CUR%XTG, GDM%TGDP%XALBNIR_VEG, GDM%TGDP%XALBVIS_VEG, &
                        GDM%TGDP%XALBUV_VEG, GDM%TGDP%XALBNIR_SOIL, GDM%TGDP%XALBVIS_SOIL, &
                        GDM%TGDP%XALBUV_SOIL, GDM%TGDP%XVEGTYPE, GDM%TGDP%XSEFOLD, GDM%TGDP%XANMAX, &

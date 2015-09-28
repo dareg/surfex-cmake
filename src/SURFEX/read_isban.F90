@@ -314,11 +314,15 @@ ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
 IF (ISIZE_LMEB_PATCH>0) THEN
 !
-!* water intercepted on vegetation canopy leaves
-!
-  !nogv ALLOCATE(XWRV(ILU,NPATCH))
-  !nogv YRECFM = 'WRV'
-  !nogv CALL READ_SURF(HPROGRAM,YRECFM,XWRV(:,:),IRESP)
+!* water intercepted on litter
+
+ ALLOCATE(I%XWRL(ILU,I%NPATCH))
+ YRECFM = 'WRL'
+ CALL READ_SURF(HPROGRAM,YRECFM,I%XWRL(:,:),IRESP)
+
+ ALLOCATE(I%XWRLI(ILU,I%NPATCH))
+ YRECFM = 'WRLI'
+ CALL READ_SURF(HPROGRAM,YRECFM,I%XWRLI(:,:),IRESP)
 !
 !* snow intercepted on vegetation canopy leaves
 !
@@ -331,8 +335,13 @@ IF (ISIZE_LMEB_PATCH>0) THEN
 !
   ALLOCATE(I%XTV(ILU,I%NPATCH))
   YRECFM = 'TV'
-  CALL READ_SURF(&
-                 HPROGRAM,YRECFM,I%XTV(:,:),IRESP)
+  CALL READ_SURF(HPROGRAM,YRECFM,I%XTV(:,:),IRESP)
+!
+!* litter temperature
+!
+  ALLOCATE(I%XTL(ILU,I%NPATCH))
+  YRECFM = 'TL'
+  CALL READ_SURF(HPROGRAM,YRECFM,I%XTL(:,:),IRESP)
 !
 !* vegetation canopy air temperature
 !

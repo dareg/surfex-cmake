@@ -3,7 +3,7 @@
            PPS,PCG,PCT,PCV,PWRVN,PWR,                                                         &
            PTDEEP_A,PTDEEP_B,PD_G,PSOILCONDZ,PSOILHCAPZ,                                      &  
            PSNOWDZ,PSNOWCONDZ,PSNOWHCAPZ,                                                     &  
-           PSWNET_V,PSWNET_G,PSWNET_N,                                                        &
+           PSWNET_V,PSWNET_G,PSWNET_N,PTAU_N,                                                 &
            PLWNET_V,PLWNET_G,PLWNET_N,                                                        &
            PLWNET_V_DTV,PLWNET_V_DTG,PLWNET_V_DTN,                                            &
            PLWNET_G_DTV,PLWNET_G_DTG,PLWNET_G_DTN,                                            &
@@ -73,7 +73,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      A. Boone           * CNRM-GAME, Meteo-France *
+!!	A. Boone           * CNRM-GAME, Meteo-France *
 !!      P. Samuelsson      * SMHI *
 !!      S. Gollvik         * SMHI * 
 !!
@@ -91,6 +91,7 @@ USE MODD_CSTS,                    ONLY : XLVTT, XLSTT, XTT, XCPD, XCPV, XCL, &
                                          XDAY, XPI
 USE MODD_SURF_ATM,                ONLY : LCPL_ARP
 USE MODD_SURF_PAR,                ONLY : XUNDEF
+USE MODD_SNOW_METAMO,             ONLY : XSNOWDZMIN
 !
 USE MODE_THERMOS
 USE MODE_MEB,                     ONLY : SFC_HEATCAP_VEG
@@ -153,6 +154,13 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PSWNET_V, PSWNET_G, PSWNET_N
 !                                     PSWNET_G = Understory-ground net SW radiation explicit term (W m-2)
 !                                     PSWNET_V = Vegetation canopy net SW radiation explicit term (W m-2)
 !                                     PSWNET_N = Ground-based snow net SW radiation explicit term (W m-2)
+!
+REAL, DIMENSION(:,:), INTENT(IN)   :: PTAU_N
+!                                     PTAU_N   = shortwave radiation transmission through (at the base of)
+!                                                each snow layer. Implicitly PTAU_N(0) = 1 (-)
+!                                                It decreases with depth to zero somewhere in a deep snowpack,
+!                                                but can be above 0 at snowpack base for shallow snow, then
+!                                                it is presumed to go into the uppermost soil layer.
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PLWNET_V, PLWNET_G, PLWNET_N
 !                                     PLWNET_G = Understory-ground net LW radiation explicit term (W m-2)
@@ -329,9 +337,10 @@ REAL, DIMENSION(SIZE(PPS))                :: ZTCONDA_DELZ_G, ZTCONDA_DELZ_N, ZTC
 !
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))  :: ZSOIL_COEF_A, ZSOIL_COEF_B
 !
-REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)):: ZSNOW_COEF_A, ZSNOW_COEF_B
+REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)):: ZSNOW_COEF_A, ZSNOW_COEF_B, ZSNOWDZ
 !
-REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)+SIZE(PSNOWDZ,2)) :: ZD, ZT, ZHCAPZ, ZCONDZ, ZCOEF_A, ZCOEF_B
+REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)+SIZE(PSNOWDZ,2)) :: ZD, ZT, ZHCAPZ, ZCONDZ,         &
+                                             ZCOEF_A, ZCOEF_B, ZSOURCE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -355,9 +364,11 @@ ZTVO(:)   = PTV(:)
 
 ZPSNA(:)  = MIN(1.0-ZERTOL, PPSNA(:))
 
-JNSNOW    = SIZE(PTN,2)
-JNGRND    = SIZE(PTG,2)
-JNPTS     = SIZE(PTG,1)
+ZSNOWDZ(:,:) = 0.0 ! local working variable
+
+JNSNOW       = SIZE(PTN,2)
+JNGRND       = SIZE(PTG,2)
+JNPTS        = SIZE(PTG,1)
 
 ! sub-surface / surface coupling coefficients:
 
@@ -425,8 +436,9 @@ END WHERE
 !
 PUSTAR2_IC(:)= ZUSTAR2(:) 
 !
-!aabtmptest put in new option HIMPLICIT_WIND=='OLD' or 'NEW' ?
+! NOTE: put in new option HIMPLICIT_WIND=='OLD' or 'NEW' ?
 !
+ZSOURCE(:,:) = 0. ! heat Eq source term initialization: c dz dT/dt = d/dz(k dT/dz) + Source
 !
 IF(HISBA == 'DIF')THEN
 !
@@ -436,8 +448,8 @@ IF(HISBA == 'DIF')THEN
 ! interfacial thermal conductivity to layer thickness ratio (W m-2 K-1) 
 ! These coefficients are used to compute the temperature profile implicitly.
 !
-   CALL TRIDIAG_GROUND_RM_COEFS(PTSTEP,PD_G,ZTGO,PSOILHCAPZ,PSOILCONDZ, &
-        PTDEEP_A,PTDEEP_B,ZTCONDA_DELZ_G,ZSOIL_COEF_A,ZSOIL_COEF_B)
+   CALL TRIDIAG_GROUND_RM_COEFS(PTSTEP,PD_G,ZTGO,PSOILHCAPZ,PSOILCONDZ,                &
+        ZSOURCE(:,1:JNGRND),PTDEEP_A,PTDEEP_B,ZTCONDA_DELZ_G,ZSOIL_COEF_A,ZSOIL_COEF_B)
 !
 ! Here we repeat this for the snowpack: but note, this is just
 ! to better estimate surface fluxes via the surface-sub surface heat
@@ -450,33 +462,46 @@ IF(HISBA == 'DIF')THEN
 ! so it is more accurate as the snow fraction approaches unity.
 ! Starting from snowpack surface downward to base of ground:
 !
-   DO JJ=1,JNPTS
-      JL                 = 0
-      DO JK=1,JNSNOW
-         JL              = JL + 1
-         ZD(JJ,JL)        = PSNOWDZ(JJ,JK)
+   ZSNOWDZ(:,:)           = MAX(XSNOWDZMIN, PSNOWDZ(:,:))
+!
+
+   JL                     = 1
+   ZD(:,JL)               = ZSNOWDZ(:,1)
+   ZT(:,JL)               = ZTNO(:,1)
+   ZHCAPZ(:,JL)           = PSNOWHCAPZ(:,1)
+   ZCONDZ(:,JL)           = PSNOWCONDZ(:,1)
+   ZSOURCE(:,JL)          = 0.               ! Included in energy budget
+   DO JK=2,JNSNOW
+      JL                  = JL + 1
+      DO JJ=1,JNPTS
+         ZD(JJ,JL)        = ZSNOWDZ(JJ,JK)
          ZT(JJ,JL)        = ZTNO(JJ,JK)
-         ZHCAPZ(JJ,JL)    = PSNOWHCAPZ(JJ,JK)*PSNOWDZ(JJ,JK)
+         ZHCAPZ(JJ,JL)    = PSNOWHCAPZ(JJ,JK)
          ZCONDZ(JJ,JL)    = PSNOWCONDZ(JJ,JK)
+         ZSOURCE(JJ,JL)   = PSWNET_N(JJ)*(PTAU_N(JJ,JK-1)-PTAU_N(JJ,JK))
       ENDDO
-      JL                 = JL + 1
-      ZD(JJ,JL)           = PD_G(JJ,1)
-      ZT(JJ,JL)           = ZTGO(JJ,1)
-      ZHCAPZ(JJ,JL)       = PCHEATG(JJ)/PD_G(JJ,1)
-      ZCONDZ(JJ,JL)       = PSOILCONDZ(JJ,1)
-      DO JK=2,JNGRND
-         JL              = JL + 1
+   ENDDO
+   JL                     = JL + 1
+   ZD(:,JL)               = PD_G(:,1)
+   ZT(:,JL)               = ZTGO(:,1)
+   ZHCAPZ(:,JL)           = PCHEATG(:)/PD_G(:,1)
+   ZCONDZ(:,JL)           = PSOILCONDZ(:,1)
+   ZSOURCE(:,JL)          = PSWNET_N(:)*PTAU_N(:,JNSNOW)
+   DO JK=2,JNGRND
+      JL                  = JL + 1
+      DO JJ=1,JNPTS
          ZD(JJ,JL)        = PD_G(JJ,JK)
          ZT(JJ,JL)        = ZTGO(JJ,JK)
          ZHCAPZ(JJ,JL)    = PSOILHCAPZ(JJ,JK)
          ZCONDZ(JJ,JL)    = PSOILCONDZ(JJ,JK)
+         ZSOURCE(JJ,JL)   = 0.
       ENDDO
    ENDDO
 !
 ! Get coefficients from upward sweep (starting from soil base to snow surface):
 !
-   CALL TRIDIAG_GROUND_RM_COEFS(PTSTEP,ZD,ZT,ZHCAPZ,ZCONDZ,            &
-        PTDEEP_A,PTDEEP_B,ZTCONDA_DELZ_N,ZCOEF_A,ZCOEF_B)
+   CALL TRIDIAG_GROUND_RM_COEFS(PTSTEP,ZD,ZT,ZHCAPZ,ZCONDZ,           &
+        ZSOURCE,PTDEEP_A,PTDEEP_B,ZTCONDA_DELZ_N,ZCOEF_A,ZCOEF_B)
 !
    ZSNOW_COEF_A(:,2)  = ZCOEF_A(:,2)
    ZSNOW_COEF_B(:,2)  = ZCOEF_B(:,2)
@@ -497,26 +522,34 @@ ELSE
 
    ZGCOND1(:)            = (4*XPI/XDAY)/( PCG(:)*PCG(:)/(PD_G(:,1)*PCT(:)) )
 
-   DO JJ=1,JNPTS
-      JL                 = 0
-      DO JK=1,JNSNOW
-         JL              = JL + 1
-         ZD(JJ,JL)       = PSNOWDZ(JJ,JK)
-         ZT(JJ,JL)       = ZTNO(JJ,JK)
-         ZHCAPZ(JJ,JL)   = PSNOWHCAPZ(JJ,JK)*PSNOWDZ(JJ,JK)
-         ZCONDZ(JJ,JL)   = PSNOWCONDZ(JJ,JK)
-      ENDDO
+
+   JL                    = 1
+   ZD(:,JL)              = ZSNOWDZ(:,1)
+   ZT(:,JL)              = ZTNO(:,1)
+   ZHCAPZ(:,JL)          = PSNOWHCAPZ(:,1)
+   ZCONDZ(:,JL)          = PSNOWCONDZ(:,1)
+   ZSOURCE(:,JL)         = 0.               ! Included in energy budget
+   DO JK=2,JNSNOW
       JL                 = JL + 1
-      ZD(JJ,JL)          = PD_G(JJ,1)
-      ZT(JJ,JL)          = ZTGO(JJ,1)
-      ZHCAPZ(JJ,JL)      = 1/PCT(JJ)
-      ZCONDZ(JJ,JL)      = ZGCOND1(JJ)
+      DO JJ=1,JNPTS
+         ZD(JJ,JL)       = ZSNOWDZ(JJ,JK)
+         ZT(JJ,JL)       = ZTNO(JJ,JK)
+         ZHCAPZ(JJ,JL)   = PSNOWHCAPZ(JJ,JK)
+         ZCONDZ(JJ,JL)   = PSNOWCONDZ(JJ,JK)
+         ZSOURCE(JJ,JL)  = PSWNET_N(JJ)*(PTAU_N(JJ,JK-1)-PTAU_N(JJ,JK))
+      ENDDO
    ENDDO
+   JL                    = JL + 1
+   ZD(:,JL)              = PD_G(:,1)
+   ZT(:,JL)              = ZTGO(:,1)
+   ZHCAPZ(:,JL)          = 1/PCT(:)
+   ZCONDZ(:,JL)          = ZGCOND1(:)
+   ZSOURCE(:,JL)         = PSWNET_N(:)*PTAU_N(:,JNSNOW)
 
 ! Get coefficients from upward sweep (starting from soil base to snow surface):
 !
    CALL TRIDIAG_GROUND_RM_COEFS(PTSTEP,ZD(:,1:JL),ZT(:,1:JL),                &
-        ZHCAPZ(:,1:JL),ZCONDZ(:,1:JL),                                       &
+        ZHCAPZ(:,1:JL),ZCONDZ(:,1:JL),ZSOURCE(:,1:JL),                       &
         PTDEEP_A,PTDEEP_B,ZTCONDA_DELZ_N,ZCOEF_A(:,1:JL),ZCOEF_B(:,1:JL))
 
    ZSNOW_COEF_A(:,2)     = ZCOEF_A(:,2)
@@ -526,7 +559,7 @@ ENDIF
 !
 ! Interfacial ground-snowbase thermal conductivity divided by interfacial dz:
 !
-ZTCONDA_DELZ_NG(:) = 2/((PSNOWDZ(:,JNSNOW)/PSNOWCONDZ(:,JNSNOW))+(PD_G(:,1)/ZGCOND1(:) ))
+ZTCONDA_DELZ_NG(:) = 2/((ZSNOWDZ(:,JNSNOW)/PSNOWCONDZ(:,JNSNOW))+(PD_G(:,1)/ZGCOND1(:) ))
 !
 !
 !*       3.     Pseudo humidity factors (-)
@@ -813,6 +846,20 @@ ELSEWHERE ! snow free canopy-understory case:
 END WHERE
 !
 !
+! Compute test sub-surface snow temperatures: this improves time split estimate of 
+! surface to sub-surface flux estimates. Note that the sub-surface
+! snow temperatures are "test" temperatures, with final "true" values
+! computed within the snow routine.
+!
+
+CALL TRIDIAG_GROUND_RM_SOLN(ZT,ZCOEF_A,ZCOEF_B)
+DO JK=2,JNSNOW
+   WHERE(PPSN(:) > 0.0)
+      PTN(:,JK) = MIN(XTT,ZT(:,JK))
+   ENDWHERE
+ENDDO
+!
+!
 !*       8.     Solve soil temperature profile (implicitly coupled to surface energy budgets)
 !               -----------------------------------------------------------------------------
 ! The back-substitution of sub-surface soil T profile
@@ -856,7 +903,7 @@ PDELTAT_N(:)   = PTN(:,1) - ZTNO(:,1)
 ! transferred to the soil as heating/cooling, thus
 ! conserving energy.
 !
-PGRNDFLUX(:)    = PPSN(:)*ZTCONDA_DELZ_NG(:)*( ZTNO(:,JNSNOW) - PTG(:,1) )
+PGRNDFLUX(:)    = PPSN(:)*ZTCONDA_DELZ_NG(:)*( PTN(:,JNSNOW) - PTG(:,1) )
 !
 !
 !*      10.     Energy Storage Diagnostics (W m-2)
@@ -879,9 +926,9 @@ IF(HISBA == 'DIF')THEN
 ! These terms are used for computing energy budget diagnostics.
 !
 !
-   DO JJ=1,JNPTS
-      PDELHEATG(JJ)    = PDELHEATG_SFC(JJ) ! initialize
-      DO JK=2,JNGRND
+   PDELHEATG(:)        = PDELHEATG_SFC(:) ! initialize
+   DO JK=2,JNGRND
+      DO JJ=1,JNPTS
          PDELHEATG(JJ) =  PDELHEATG(JJ) + PSOILHCAPZ(JJ,JK)*(PD_G(JJ,JK)-PD_G(JJ,JK-1))*    &
                           (PTG(JJ,JK) - ZTGO(JJ,JK))/PTSTEP
       ENDDO

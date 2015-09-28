@@ -461,11 +461,6 @@ IF (ISIZE_LMEB_PATCH>0) THEN
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,I%XWRMAX_CFGV(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
-  YRECFM='ZF_TALLVEG'
-  YCOMMENT='MEB: identification variable for tall vegetation (-)'
-  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XZF_TALLVEG(:,:),IRESP,HCOMMENT=YCOMMENT)
-  !
   YRECFM='H_VEG'
   YCOMMENT='MEB: height of vegetation (m)'
   CALL WRITE_SURF(DGU, U, &

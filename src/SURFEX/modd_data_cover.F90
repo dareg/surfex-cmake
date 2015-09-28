@@ -220,7 +220,6 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_TC_FLOOR     ! thermal conductivity o
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_D_FLOOR      ! thickness of floor layers [m]
 !
 ! For multi-energy balance (MEB)
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_ZF_TALLVEG         ! Binary for tall vegetation
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RGLGV              ! 
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_GAMMAGV            !
 REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RSMINGV            ! Understory minimum

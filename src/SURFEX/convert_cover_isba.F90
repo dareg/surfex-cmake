@@ -16,7 +16,7 @@
                                          PGNDLITTER, PLAIGV, PRSMINGV,       &
                                          PGAMMAGV,                           &
                                          PWRMAX_CFGV, PRGLGV, PROOTFRACGV,   &
-                                         PZ0LITTER, PZF_TALLVEG,PH_VEG       )  
+                                         PZ0LITTER, PH_VEG       )  
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* convert surface cover classes into secondary 
@@ -81,7 +81,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
                                   TDATA_SEED, TDATA_REAP,XDATA_IRRIG,     &
                                   XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH,   &
                                   XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN,  &
-                                  XDATA_GNDLITTER, XDATA_ZF_TALLVEG,      &
+                                  XDATA_GNDLITTER,                        &
                                   XDATA_RGLGV, XDATA_GAMMAGV,             &
                                   XDATA_RSMINGV, XDATA_WRMAX_CFGV,        &
                                   XDATA_LAIGV, XDATA_Z0LITTER,            &
@@ -144,7 +144,6 @@ REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PWRMAX_CFGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PRGLGV
 REAL, DIMENSION(:,:,:), OPTIONAL, INTENT(OUT)   :: PROOTFRACGV
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZ0LITTER
-REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PZF_TALLVEG
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(OUT)   :: PH_VEG
 !
 REAL, DIMENSION(:,:), OPTIONAL, INTENT(OUT)   :: PVEGTYPE
@@ -310,11 +309,6 @@ IF (PRESENT(PRGLGV)) &
 IF (PRESENT(PCV)) &
   CALL AV_PGD(DTCO, &
                PCV        ,PCOVER ,XDATA_CV    (:,:),YVEG,'INV',OCOVER,KDECADE=KDECADE)  
-!
-IF (PRESENT(PZF_TALLVEG)) THEN
- CALL AV_PGD(DTCO, &
-               PZF_TALLVEG,PCOVER,XDATA_ZF_TALLVEG(:,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE) 
-ENDIF
 !
 IF (PRESENT(PH_VEG)) THEN
  CALL AV_PGD(DTCO, &

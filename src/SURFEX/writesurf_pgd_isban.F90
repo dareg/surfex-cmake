@@ -196,6 +196,12 @@ YCOMMENT=YRECFM
 CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,I%LFORC_MEASURE,IRESP,HCOMMENT=YCOMMENT)
 !
+!* flag indicating if litter layer is used or not
+!
+YRECFM='MEB_LITTER'
+YCOMMENT=YRECFM
+CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,YRECFM,I%LMEB_LITTER,IRESP,HCOMMENT=YCOMMENT)
 !
 !*       2.     Physiographic data fields:
 !               -------------------------
