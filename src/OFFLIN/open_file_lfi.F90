@@ -23,11 +23,12 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!       10/2014 : test if file exist for 'read' E. Martin
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -61,11 +62,20 @@ INTEGER,           INTENT(IN) :: KRECL    ! record length
 INTEGER :: ILUOUT
 INTEGER :: IRESP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+LOGICAL :: LEXIST
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_FILE_LFI',0,ZHOOK_HANDLE)
  CALL FMATTR(HFILE,CLUOUT_LFI,KUNIT,IRESP)
 !
+IF(HACTION=='READ     ') THEN
+        INQUIRE (FILE=HFILE,EXIST=LEXIST)
+        IF (.NOT. LEXIST ) THEN
+        CALL ABOR1_SFX ('ERROR WHILE OPENING '//HFILE//' THIS FILE IS MISSING'// &
+                  ' IN THE RUN DIRECTORY')
+        ENDIF
+ENDIF
+
 IF (HFORM=='FORMATTED') THEN
   OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION,   &
          FORM=HFORM, POSITION=HPOSITION, ERR=100 )  

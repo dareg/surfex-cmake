@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_WATER (PTSTEP,PZON10M,PMER10M,PSFU,PSFV,   &
+       SUBROUTINE DIAG_CPL_ESM_WATER (W, &
+                                       PTSTEP,PZON10M,PMER10M,PSFU,PSFV,   &
                                         PSWD,PSWU,PGFLUX,PSFTQ,PRAIN,PSNOW, &
                                         PLW,PTICE,PSFTH_ICE,PSFTQ_ICE,      &
                                         PDIR_SW,PSCA_SW                     )  
@@ -27,14 +28,12 @@
 !!      Original    08/2009
 !!------------------------------------------------------------------
 !
+!
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_CSTS,      ONLY : XSTEFAN, XLSTT
 USE MODD_WATER_PAR, ONLY : XEMISWATICE
 !
-USE MODD_WATFLUX_n, ONLY : XCPL_WATER_WIND,XCPL_WATER_EVAP,XCPL_WATER_HEAT, &
-                             XCPL_WATER_SNET,XCPL_WATER_FWSU,XCPL_WATER_FWSV, &
-                             XCPL_WATER_RAIN,XCPL_WATER_SNOW,XCPL_WATER_FWSM, &
-                             XICE_ALB, XCPL_WATERICE_SNET,                    &
-                             XCPL_WATERICE_EVAP,XCPL_WATERICE_HEAT  
 ! 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -43,6 +42,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
 REAL, DIMENSION(:), INTENT(IN) :: PZON10M   ! zonal wind
@@ -64,11 +66,16 @@ REAL, DIMENSION(:,:),INTENT(IN):: PSCA_SW   ! diffuse solar radiation (on horizo
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(XICE_ALB)) :: ZSWU
+REAL, DIMENSION(SIZE(W%XICE_ALB)) :: ZSWU, ZTICE4
 !
 INTEGER                      :: ISWB ! number of SW bands
 INTEGER                      :: JSWB ! loop counter on number of SW bands
+INTEGER                      :: INI  ! number of points
+INTEGER                      :: JI   ! loop counter on number of points
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------
 ! Total or free-ice water flux
@@ -76,55 +83,60 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !* 10m wind speed (m)
 !
-IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',0,ZHOOK_HANDLE)
-XCPL_WATER_WIND(:) = XCPL_WATER_WIND(:) + PTSTEP * SQRT(PZON10M(:)**2+PMER10M(:)**2)
+W%XCPL_WATER_WIND(:) = W%XCPL_WATER_WIND(:) + PTSTEP * SQRT(PZON10M(:)**2+PMER10M(:)**2)
 ! 
 !* wind stress (Pa.s)
 !
-XCPL_WATER_FWSU(:) = XCPL_WATER_FWSU(:) + PTSTEP * PSFU(:)
-XCPL_WATER_FWSV(:) = XCPL_WATER_FWSV(:) + PTSTEP * PSFV(:)
-XCPL_WATER_FWSM(:) = XCPL_WATER_FWSM(:) + PTSTEP * SQRT(PSFU(:)**2+PSFV(:)**2)
+W%XCPL_WATER_FWSU(:) = W%XCPL_WATER_FWSU(:) + PTSTEP * PSFU(:)
+W%XCPL_WATER_FWSV(:) = W%XCPL_WATER_FWSV(:) + PTSTEP * PSFV(:)
+W%XCPL_WATER_FWSM(:) = W%XCPL_WATER_FWSM(:) + PTSTEP * SQRT(PSFU(:)**2+PSFV(:)**2)
 !
 !* Solar net heat flux (J/m2)
 !
-XCPL_WATER_SNET(:) = XCPL_WATER_SNET(:) + PTSTEP * (PSWD(:) - PSWU(:))
+W%XCPL_WATER_SNET(:) = W%XCPL_WATER_SNET(:) + PTSTEP * (PSWD(:) - PSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-XCPL_WATER_HEAT(:) = XCPL_WATER_HEAT(:) + PTSTEP * (PGFLUX(:) + PSWU(:) - PSWD(:)) 
+W%XCPL_WATER_HEAT(:) = W%XCPL_WATER_HEAT(:) + PTSTEP * (PGFLUX(:) + PSWU(:) - PSWD(:)) 
 !
-!* Evaporation (mm/day)
+!* Evaporation (kg/m2)
 !
-XCPL_WATER_EVAP(:) = XCPL_WATER_EVAP(:) + PTSTEP * PSFTQ(:)
+W%XCPL_WATER_EVAP(:) = W%XCPL_WATER_EVAP(:) + PTSTEP * PSFTQ(:)
 !
-!* Precip (mm/day)
+!* Precip (kg/m2)
 ! 
-XCPL_WATER_RAIN(:) = XCPL_WATER_RAIN(:) + PTSTEP * PRAIN(:) 
-XCPL_WATER_SNOW(:) = XCPL_WATER_SNOW(:) + PTSTEP * PSNOW(:)
+W%XCPL_WATER_RAIN(:) = W%XCPL_WATER_RAIN(:) + PTSTEP * PRAIN(:) 
+W%XCPL_WATER_SNOW(:) = W%XCPL_WATER_SNOW(:) + PTSTEP * PSNOW(:)
 !
 !-------------------------------------------------------------------------------------
 ! Ice flux
 !-------------------------------------------------------------------------------------
 !
+INI  = SIZE(PDIR_SW,1)
 ISWB = SIZE(PDIR_SW,2)
 !
 !* Solar net heat flux (J/m2)
 !
 ZSWU(:)=0.0
 DO JSWB=1,ISWB
-   ZSWU(:) = ZSWU(:) + (PDIR_SW(:,JSWB)+PSCA_SW(:,JSWB)) * XICE_ALB(:)
+   DO JI=1,INI
+      ZSWU(JI) = ZSWU(JI) + (PDIR_SW(JI,JSWB)+PSCA_SW(JI,JSWB)) * W%XICE_ALB(JI)
+   ENDDO
 ENDDO
 !
-XCPL_WATERICE_SNET(:) = XCPL_WATERICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
+W%XCPL_WATERICE_SNET(:) = W%XCPL_WATERICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-XCPL_WATERICE_HEAT(:) = XCPL_WATERICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*PTICE(:)**4) &
-                                                             - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)      )  
+ZTICE4(:)=PTICE(:)**4
 !
-!* Sublimation (mm/day)
+W%XCPL_WATERICE_HEAT(:) = W%XCPL_WATERICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &
+                                                             - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)  )  
 !
-XCPL_WATERICE_EVAP(:) = XCPL_WATERICE_EVAP(:) + PTSTEP * PSFTQ_ICE(:)
+!* Sublimation (kg/m2)
+!
+W%XCPL_WATERICE_EVAP(:) = W%XCPL_WATERICE_EVAP(:) + PTSTEP * PSFTQ_ICE(:)
+!
 IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_FLAKE_CONF_n(HPROGRAM)
+      SUBROUTINE WRITESURF_FLAKE_CONF_n (CHF, DGMF, F, &
+                                         HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_FLAKE_CONF* - routine to read the configuration for FLAKE
@@ -23,15 +24,24 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!!      Modified    04/2013, P. Le Moigne: FLake chemistry
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
+!
+!
+USE MODD_CH_FLAKE_n, ONLY : CH_FLAKE_t
+USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODN_FLAKE_n
 !
@@ -45,6 +55,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling FLAKE
 
@@ -66,13 +81,13 @@ IF (ILUDES==0) RETURN
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_NAM_FLAKEn
- CALL INIT_NAM_DIAG_FLAKEn
- CALL INIT_NAM_CH_WATFLUXn
+ CALL INIT_NAM_FLAKEn(F)
+ CALL INIT_NAM_DIAG_FLAKEn(DGMF)
+ CALL INIT_NAM_CH_FLAKEn(CHF)
 !
 WRITE(UNIT=ILUDES,NML=NAM_FLAKEn)
 WRITE(UNIT=ILUDES,NML=NAM_DIAG_FLAKEn)
-WRITE(UNIT=ILUDES,NML=NAM_CH_WATFLUXn)
+WRITE(UNIT=ILUDES,NML=NAM_CH_FLAKEn)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_FLAKE_CONF_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

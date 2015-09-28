@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_OCEAN_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_OCEAN_n (DTCO, DGU, U, DGO, &
+                                         HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_OCEAN_n* - write the oceanic diagnostic fields
@@ -17,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	C. Lebeaupin Brossier   *Meteo France*	
+!!      C. Lebeaupin Brossier   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -27,8 +28,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_OCEAN_n, ONLY : XSEAHMO
-USE MODD_DIAG_OCEAN_n
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+!
+USE MODD_OCEAN_GRID
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -42,6 +48,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
@@ -58,7 +69,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_OCEAN_N',0,ZHOOK_HANDLE)
- CALL INIT_IO_SURF_n(HPROGRAM,'SEA   ','SEAFLX','WRITE')
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                     HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !
 !
 !*       2.     Mean values in OML :
@@ -67,27 +79,33 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_OCEAN_N',0,ZHOOK_HANDLE)
   YRECFM='TOML'
   YCOMMENT='X_Y_'//YRECFM
 !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XTOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGO%XTOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='SOML'
   YCOMMENT='X_Y_'//YRECFM
 !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XSOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGO%XSOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='UOML'
   YCOMMENT='X_Y_'//YRECFM
 !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XUOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGO%XUOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='VOML'
   YCOMMENT='X_Y_'//YRECFM
 !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XVOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGO%XVOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='DOML'
   YCOMMENT='X_Y_'//YRECFM
 !
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XDOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGO%XDOCMOY(:),IRESP,HCOMMENT=YCOMMENT)
+!
 !------------------------------------------------------------------------------
 !
 !         End of IO

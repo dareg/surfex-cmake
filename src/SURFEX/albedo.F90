@@ -111,7 +111,7 @@ END MODULE MODI_ALBEDO
 !!      
 !!    AUTHOR
 !!    ------
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -228,7 +228,7 @@ END SUBROUTINE ALBEDO_1D
 !!      
 !!    AUTHOR
 !!    ------
-!!	F.Solmon  /  V. Masson          
+!!      F.Solmon  /  V. Masson          
 !!
 !!    MODIFICATIONS
 !!    -------------

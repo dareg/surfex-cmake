@@ -40,7 +40,7 @@ FUNCTION UTCI_APPROX(PTA,PEHPA,PTMRT,PVA) RESULT(PUTCI_APPROX)
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Broede
+!!      P. Broede
 !!
 !!    MODIFICATIONS
 !!    -------------

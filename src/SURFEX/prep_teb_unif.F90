@@ -49,7 +49,7 @@ REAL, POINTER, DIMENSION(:,:)   :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 REAL, DIMENSION(:), ALLOCATABLE :: ZPS       ! surface pressure
 REAL, DIMENSION(:), ALLOCATABLE :: ZTI_BLD   ! indoor building temperature
-REAL, PARAMETER                 :: ZRHOA=1.19! air volumic mass at 20°C and 1015hPa
+REAL, PARAMETER                 :: ZRHOA=1.19! air volumic mass at 20C and 1015hPa
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

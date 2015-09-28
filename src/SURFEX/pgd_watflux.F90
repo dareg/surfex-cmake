@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_WATFLUX(HPROGRAM)
+      SUBROUTINE PGD_WATFLUX (DTCO, U, WG, W, &
+                              HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_WATFLUX* monitor for averaging and interpolations of WATFLUX physiographic fields
@@ -35,9 +36,14 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
+!
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_WATFLUX_n,       ONLY : XCOVER, LCOVER, XZS
-USE MODD_WATFLUX_GRID_n,  ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
 !
 USE MODI_GET_SURF_SIZE_n
 USE MODI_PACK_PGD
@@ -52,6 +58,12 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -84,19 +96,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',0,ZHOOK_HANDLE)
- CALL GET_SURF_SIZE_n('WATER ',NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'WATER ',WG%NDIM)
 !
-ALLOCATE(LCOVER     (JPCOVER))
-ALLOCATE(XCOVER     (NDIM,JPCOVER))
-ALLOCATE(XZS        (NDIM))
-ALLOCATE(XLAT       (NDIM))
-ALLOCATE(XLON       (NDIM))
-ALLOCATE(XMESH_SIZE (NDIM))
+ALLOCATE(W%LCOVER     (JPCOVER))
+ALLOCATE(W%XZS        (WG%NDIM))
+ALLOCATE(WG%XLAT       (WG%NDIM))
+ALLOCATE(WG%XLON       (WG%NDIM))
+ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
 !
- CALL PACK_PGD(HPROGRAM, 'WATER ',                    &
-                CGRID,  XGRID_PAR,                     &
-                LCOVER, XCOVER, XZS,                   &
-                XLAT, XLON, XMESH_SIZE                 )  
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'WATER ',                    &
+                WG%CGRID,  WG%XGRID_PAR,                     &
+                W%LCOVER, W%XCOVER, W%XZS,                   &
+                WG%XLAT, WG%XLON, WG%XMESH_SIZE                 )  
 !
 !-------------------------------------------------------------------------------
  CALL WRITE_COVER_TEX_WATER

@@ -1,9 +1,7 @@
 !     #########
     SUBROUTINE URBAN_HYDRO(PWS_ROOF_MAX,PWS_ROAD_MAX, PWS_ROOF, PWS_ROAD,  &
-                             PRR, PTSTEP, PBLD, PLE_ROOF, PLE_ROAD,          &
-                             PRUNOFF_ROOF,                                   &
-                             PRUNOFF_ROAD,                                   &
-                             PRUNOFF_TOWN                                    )  
+                             PRR, PIRRIG_ROAD, PTSTEP, PBLD, PLE_ROOF,     &
+                             PLE_ROAD, PRUNOFF_STRLROOF, PRUNOFF_ROAD      )
 !   ##########################################################################
 !
 !!****  *URBAN_HYDRO*  
@@ -44,7 +42,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -71,14 +69,14 @@ REAL, DIMENSION(:), INTENT(IN) :: PWS_ROAD_MAX    ! maximum deepness of road wat
 REAL, DIMENSION(:), INTENT(INOUT) :: PWS_ROOF     ! roof water reservoir
 REAL, DIMENSION(:), INTENT(INOUT) :: PWS_ROAD     ! road water reservoir
 REAL, DIMENSION(:), INTENT(IN)    :: PRR          ! rain rate
+REAL, DIMENSION(:), INTENT(IN)    :: PIRRIG_ROAD  ! watering rate for roads
 REAL,               INTENT(IN)    :: PTSTEP       ! time step
 REAL, DIMENSION(:), INTENT(IN)    :: PBLD         ! fraction of buildings
 REAL, DIMENSION(:), INTENT(IN)    :: PLE_ROOF     ! latent heat flux over roof
 REAL, DIMENSION(:), INTENT(IN)    :: PLE_ROAD     ! latent heat flux over road
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF_ROOF ! runoff (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF_STRLROOF ! runoff (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF_ROAD ! runoff (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT)   :: PRUNOFF_TOWN ! runoff (kg/m2/s)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
@@ -105,7 +103,7 @@ PWS_ROOF(:) = MAX(0., PWS_ROOF(:))
 !                                           if Ws_town > Ws_town_max,
 !                                           there is runoff
 !
-PRUNOFF_ROOF(:) = MAX(0., (PWS_ROOF(:) - PWS_ROOF_MAX(:)) / PTSTEP )
+PRUNOFF_STRLROOF(:) = MAX(0., (PWS_ROOF(:) - PWS_ROOF_MAX(:)) / PTSTEP )
 !
 PWS_ROOF(:) = MIN(PWS_ROOF(:), PWS_ROOF_MAX(:))
 !
@@ -120,7 +118,7 @@ PWS_ROOF(:) = MIN(PWS_ROOF(:), PWS_ROOF_MAX(:))
 !                                           PRR in kg/m2/s therefore PWS in mm
 !
 PWS_ROAD(:) =  PWS_ROAD(:)                                 &
-               - PTSTEP * ( PLE_ROAD(:) / XLVTT -  PRR(:) )  
+               - PTSTEP * ( PLE_ROAD(:) / XLVTT -  PRR(:) - PIRRIG_ROAD(:) )  
 !
 !                                           Ws_town must be positive
 !
@@ -134,11 +132,6 @@ PRUNOFF_ROAD(:) = MAX(0., (PWS_ROAD(:) - PWS_ROAD_MAX(:)) / PTSTEP )
 PWS_ROAD(:) = MIN(PWS_ROAD(:), PWS_ROAD_MAX(:))
 !
 !-------------------------------------------------------------------------------
-!
-!*      3.     Area-averaged runoff
-!              --------------------
-!
-PRUNOFF_TOWN(:) = PRUNOFF_ROAD(:) * (1.-PBLD(:)) + PRUNOFF_ROOF(:) * PBLD(:)
 IF (LHOOK) CALL DR_HOOK('URBAN_HYDRO',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

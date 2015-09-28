@@ -21,7 +21,7 @@ CONTAINS
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Faroux   *Meteo France*	
+!!      S.Faroux   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -74,7 +74,7 @@ END SUBROUTINE PUT_GRIDTYPE_LONLATVAL
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Faroux   *Meteo France*	
+!!      S. Faroux   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

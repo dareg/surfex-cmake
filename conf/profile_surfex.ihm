@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 ##########################################################
 #                                                        #
 # ENVIRONEMMENT CONFIGURATION FOR MESONH                 #
@@ -45,6 +45,10 @@ export ARCH=${ARCH}
 #
 export VER_MPI=${VER_MPI}
 #
+#  Version of OMP
+#
+export VER_OMP=${VER_OMP}
+#
 # OPTIMIZATION LEVEL
 #
 #export OPTLEVEL=DEBUG,O2
@@ -69,6 +73,15 @@ export VERSION_CDF=${VERSION_CDF}
 export VER_GRIBAPI=${VER_GRIBAPI}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI}
 #
+# Version of OASIS
+#
+export VER_OASIS=${VER_OASIS}
+export VERSION_OASIS=${VERSION_OASIS}
+#
+# Version of DR_HOOK
+#
+export VER_DRHOOK=${VER_DRHOOK}
+#
 # Version of Def integer
 #
 export MNH_INT=${MNH_INT}
@@ -82,7 +95,7 @@ export MNH_INT=${MNH_INT}
 ##########################################################
 ##########################################################
 #
-export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}\${VER_USER:+-\${VER_USER}}-\${VER_MPI}-\${OPTLEVEL}"
+export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}\${VER_USER:+-\${VER_USER}}-\${VER_MPI}-\${VER_OMP}-\${OPTLEVEL}"
 #[ "x\${VER_USER}" != "x" ] && export XYZ="\${XYZ}-\${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
 export BIN_TOOLS=${BIN_TOOLS}

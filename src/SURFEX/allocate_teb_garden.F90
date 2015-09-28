@@ -1,15 +1,22 @@
 !     #########
-    SUBROUTINE ALLOCATE_TEB_GARDEN(KLU,KGROUND_LAYER)  
+    SUBROUTINE ALLOCATE_TEB_GARDEN (TGD, TVG, &
+                                    KLU,KGROUND_LAYER)  
 !   ##########################################################################
 !
-USE MODD_TEB_VEG_n, ONLY : NNBIOMASS
-USE MODD_TEB_GARDEN_n
 !
+!
+!
+USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
+TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
 INTEGER, INTENT(IN) :: KLU
 INTEGER, INTENT(IN) :: KGROUND_LAYER
@@ -25,9 +32,9 @@ IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN',0,ZHOOK_HANDLE)
 !
 ! Averaged Surface radiative parameters:
 !
-ALLOCATE(XSNOWFREE_ALB           (KLU))
-ALLOCATE(XSNOWFREE_ALB_VEG       (KLU))
-ALLOCATE(XSNOWFREE_ALB_SOIL      (KLU))
+ALLOCATE(TGD%CUR%XSNOWFREE_ALB           (KLU))
+ALLOCATE(TGD%CUR%XSNOWFREE_ALB_VEG       (KLU))
+ALLOCATE(TGD%CUR%XSNOWFREE_ALB_SOIL      (KLU))
 !
 !-------------------------------------------------------------------------------
 !
@@ -36,23 +43,23 @@ ALLOCATE(XSNOWFREE_ALB_SOIL      (KLU))
 !
 ! - Soil and vegetation heat and water:
 !
-ALLOCATE(XWR                     (KLU                    )) 
-ALLOCATE(XTG                     (KLU,KGROUND_LAYER      )) 
-ALLOCATE(XWG                     (KLU,KGROUND_LAYER      )) 
-ALLOCATE(XWGI                    (KLU,KGROUND_LAYER      )) 
-ALLOCATE(XRESA                   (KLU                    )) 
+ALLOCATE(TGD%CUR%XWR                     (KLU                    )) 
+ALLOCATE(TGD%CUR%XTG                     (KLU,KGROUND_LAYER      )) 
+ALLOCATE(TGD%CUR%XWG                     (KLU,KGROUND_LAYER      )) 
+ALLOCATE(TGD%CUR%XWGI                    (KLU,KGROUND_LAYER      )) 
+ALLOCATE(TGD%CUR%XRESA                   (KLU                    )) 
 !
 ! - Vegetation: Ags Prognostic (YPHOTO = 'LAI', 'LST', 'AGS' or 'LST')
 !
-ALLOCATE(XAN                     (KLU                    )) 
-ALLOCATE(XANDAY                  (KLU                    )) 
-ALLOCATE(XANFM                   (KLU                    )) 
-ALLOCATE(XLE                     (KLU                    ))
+ALLOCATE(TGD%CUR%XAN                     (KLU                    )) 
+ALLOCATE(TGD%CUR%XANDAY                  (KLU                    )) 
+ALLOCATE(TGD%CUR%XANFM                   (KLU                    )) 
+ALLOCATE(TGD%CUR%XLE                     (KLU                    ))
 !
 ! - Vegetation (Ags 'NIT' 'NCB' option):
 !
-ALLOCATE(XBIOMASS                (KLU,NNBIOMASS          ))
-ALLOCATE(XRESP_BIOMASS           (KLU,NNBIOMASS          ))
+ALLOCATE(TGD%CUR%XBIOMASS                (KLU,TVG%NNBIOMASS          ))
+ALLOCATE(TGD%CUR%XRESP_BIOMASS           (KLU,TVG%NNBIOMASS          ))
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN',1,ZHOOK_HANDLE)
 !

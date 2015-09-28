@@ -29,7 +29,7 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -53,7 +53,7 @@ USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               
                             XSNOW     ,&! snow precipitation                    (kg/m2/s)
                             XRAIN     ,&! liquid precipitation                  (kg/m2/s)
                             XZREF       ! height of T,q forcing                 (m)  
-USE MODD_SURFEX_OMP, ONLY : NINDX1,NINDX2,NBLOCK,NBLOCKTOT, INIT_DIM, RESET_DIM
+USE MODD_SURFEX_OMP, ONLY : NINDX1SFX,NINDX2SFX,NBLOCK,NBLOCKTOT, INIT_DIM, RESET_DIM
 !
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
@@ -67,7 +67,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-INCLUDE "netcdf.inc"
 !
 #ifndef AIX64
 !$ INCLUDE 'omp_lib.h'
@@ -104,12 +103,12 @@ ZCOEF = ZSURF_STEP / ZNB_ATM
 !$ NBLOCK = OMP_GET_THREAD_NUM()
 !
 IF (NBLOCK==NBLOCKTOT) THEN
-  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1,NINDX2)
+  CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
 ELSE
-  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1,NINDX2)
+  CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
 ENDIF
 !
-DO J = NINDX1,NINDX2
+DO J = NINDX1SFX,NINDX2SFX
   !
   IF (PTA1(J)/=XUNDEF) THEN
     ! 
@@ -163,7 +162,7 @@ DO J = NINDX1,NINDX2
   !
 ENDDO
 !
- CALL RESET_DIM(SIZE(PTA1),INKPROMA,NINDX1,NINDX2)
+ CALL RESET_DIM(SIZE(PTA1),INKPROMA,NINDX1SFX,NINDX2SFX)
 !
 !$OMP END PARALLEL
 !

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
+SUBROUTINE COMPARE_OROGRAPHY (YSC, &
+                               HPROGRAM, OSURFZS, PDELT_ZSMAX              )
 !**************************************************************************
 !
 !!    PURPOSE
@@ -21,8 +22,10 @@ SUBROUTINE COMPARE_OROGRAPHY (HPROGRAM, OSURFZS, PDELT_ZSMAX              )
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne   *Meteo France*	
+!!      P. Le Moigne   *Meteo France*
 !!
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_READ_SURF
@@ -42,6 +45,9 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 ! global variables
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
+!
  CHARACTER(LEN=6)    ,INTENT(IN)  :: HPROGRAM
 REAL                ,INTENT(IN)  :: PDELT_ZSMAX
 LOGICAL             ,INTENT(IN)  :: OSURFZS
@@ -59,8 +65,10 @@ CPROGNAME = HPROGRAM
 ! 
 !  orography from initial file
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
- CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','READ ')
- CALL READ_SURF(HPROGRAM,'ZS', ZS1, IRET)
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+                        HPROGRAM,'FULL  ','SURF  ','READ ') 
+ CALL READ_SURF(&
+                HPROGRAM,'ZS', ZS1, IRET)
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !

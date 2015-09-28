@@ -1,11 +1,11 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGET_WATER (PTT  , PRHOA, PSFTH, PSFTQ,          &
+       SUBROUTINE DIAG_SURF_BUDGET_WATER (PTT, PTS, PRHOA, PSFTH, PSFTQ,         &
                                            PDIR_SW, PSCA_SW, PLW,                &
                                            PDIR_ALB, PSCA_ALB, PEMIS, PTRAD,     &
                                            PSFZON, PSFMER,                       &
                                            PRN, PH, PLE, PLEI, PGFLUX,           &
-                                           PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU,  &
-                                           PFMU, PFMV                            )  
+                                           PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, &
+                                           PFMU, PFMV, PEVAP, PSUBL              )  
 !     ###############################################################################
 !
 !!****  *DIAG_SURF_BUDGET_WATER * - Computes diagnostics over water
@@ -27,6 +27,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
+!                             Ts instead of Tsrad
 !!------------------------------------------------------------------
 !
 
@@ -44,6 +46,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 REAL,               INTENT(IN) :: PTT       ! freezing temperature of water surface
+REAL, DIMENSION(:), INTENT(IN) :: PTS       ! surface temperature (K)
 REAL, DIMENSION(:), INTENT(IN) :: PRHOA     ! air density
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH     ! heat flux
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ     ! water flux
@@ -64,6 +67,8 @@ REAL, DIMENSION(:), INTENT(OUT):: PH        ! sensible heat flux                
 REAL, DIMENSION(:), INTENT(OUT):: PLE       ! total latent heat flux                (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PLEI      ! sublimation latent heat flux          (W/m2)
 REAL, DIMENSION(:), INTENT(OUT):: PGFLUX    ! storage flux                          (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PEVAP     ! total evaporation                     (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT):: PSUBL     ! sublimation                           (kg/m2/s)
 !
 REAL, DIMENSION(:,:), INTENT(OUT):: PSWBD  ! incoming short wave radiation by spectral band (W/m2)
 REAL, DIMENSION(:,:), INTENT(OUT):: PSWBU  ! upward  short wave radiation by spectral band (W/m2)
@@ -115,12 +120,16 @@ PH     = PSFTH(:)
 !
 !* latent heat flux
 !
-WHERE (PTRAD<PTT  )
+WHERE (PTS<PTT  )
   PLE    = PSFTQ * XLSTT
   PLEI   = PSFTQ * XLSTT
+  PEVAP  = PSFTQ
+  PSUBL  = PSFTQ
 ELSEWHERE
   PLE    = PSFTQ * XLVTT
   PLEI   = 0.0
+  PEVAP  = PSFTQ
+  PSUBL  = 0.0
 END WHERE
 !
 !* storage flux

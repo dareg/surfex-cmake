@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_LATLONMASK_n(OLATLONMASK,HGRID,PGRID_PAR,KGRID_PAR)
+      SUBROUTINE GET_LATLONMASK_n (UG, &
+                                   OLATLONMASK,HGRID,PGRID_PAR,KGRID_PAR)
 !     #######################################################
 !
 !!**** *GET_LATLONMASK_n* get the grid dimensions
@@ -28,8 +29,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR
 !      
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+!
 USE MODI_LATLONMASK
 !
 !
@@ -40,6 +43,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+!
  CHARACTER(LEN=10), INTENT(OUT)             ::  HGRID      
 REAL, DIMENSION(:), POINTER                ::  PGRID_PAR      
 INTEGER, INTENT(OUT)                       ::  KGRID_PAR      
@@ -54,17 +60,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('GET_LATLONMASK_N',0,ZHOOK_HANDLE)
-NGRID_PAR=SIZE(XGRID_PAR)
+UG%NGRID_PAR=SIZE(UG%XGRID_PAR)
 
- CALL LATLONMASK(CGRID,NGRID_PAR,XGRID_PAR,OLATLONMASK)
+ CALL LATLONMASK(UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR,OLATLONMASK)
 !
-HGRID=CGRID
+HGRID=UG%CGRID
 !
-KGRID_PAR=NGRID_PAR
+KGRID_PAR=UG%NGRID_PAR
 !
 ALLOCATE(PGRID_PAR(KGRID_PAR))
 !
-PGRID_PAR(:)=XGRID_PAR(:)
+PGRID_PAR(:)=UG%XGRID_PAR(:)
 IF (LHOOK) CALL DR_HOOK('GET_LATLONMASK_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

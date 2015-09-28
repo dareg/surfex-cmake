@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE PREP_FLAKE_ASCLLV(HPROGRAM,HSURF,KLUOUT,PFIELD)
+SUBROUTINE PREP_FLAKE_ASCLLV (DTCO, UG, U, USS, &
+                              HPROGRAM,HSURF,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_FLAKE_ASCLLV* - prepares FLAKE field from prescribed values
@@ -24,6 +25,15 @@ SUBROUTINE PREP_FLAKE_ASCLLV(HPROGRAM,HSURF,KLUOUT,PFIELD)
 !!------------------------------------------------------------------
 !
 !
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_PGD_GRID,       ONLY : NL,LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR
 USE MODD_PGDWORK,        ONLY : CATYPE
@@ -41,6 +51,12 @@ USE MODI_GET_TYPE_DIM_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -61,17 +77,20 @@ CATYPE = 'ARI'
 !
 !*      1.    get full dimension of grid
 !
- CALL GET_TYPE_DIM_n('FULL  ',NL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'FULL  ',NL)
 !
 !*      2.    get water dimension
 !
- CALL GET_TYPE_DIM_n('WATER ',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'WATER ',IL)
 !
 ALLOCATE(ZFIELD(IL))
 !
 !*      3.    get grid informations known over full grid
 !
- CALL GET_LATLONMASK_n(LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
+ CALL GET_LATLONMASK_n(UG, &
+                       LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
 !
 !
 SELECT CASE(HSURF)
@@ -81,7 +100,8 @@ SELECT CASE(HSURF)
 
   CASE('TS     ')
 
-    CALL PGD_FIELD(HPROGRAM,'TS_WATER: temperature','WAT',CFILE_FLAKE,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, &
+                   HPROGRAM,'TS_WATER: temperature','WAT',CFILE_FLAKE,   &
                         CTYPE,XUNDEF,ZFIELD(:))  
 
     ALLOCATE(PFIELD(IL,1))

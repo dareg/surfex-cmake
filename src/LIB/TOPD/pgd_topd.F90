@@ -1,6 +1,7 @@
 !-------------------------------------------------------------------------------
 !     #############################################################
-      SUBROUTINE PGD_TOPD(HPROGRAM)
+      SUBROUTINE PGD_TOPD (I, UG, U, USS, &
+                           HPROGRAM)
 !     #############################################################
 !
 !!****  *PGD_TOPD* - routine to determine the masks that permit to couple ISBA grid with Topmodel one
@@ -24,16 +25,25 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Vincendon   *Meteo France*	
+!!      B. Vincendon   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    11/2011
+!!                 03/2014 (E. Artinian) manages the option CGRID='IGN'
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,         ONLY : CCAT, NNCAT, XRTOP_D2, NMESHT, XDXT
 USE MODD_COUPLING_TOPD,   ONLY : LCOUPL_TOPD, NIMAX, NJMAX, &
                                  XXI, XYI, NMASKI, NMASKT, NNPIX,&
@@ -41,10 +51,7 @@ USE MODD_COUPLING_TOPD,   ONLY : LCOUPL_TOPD, NIMAX, NJMAX, &
 USE MODD_DUMMY_EXP_PROFILE, ONLY : XF_PARAM_BV, XC_DEPTH_RATIO_BV
 !
 USE MODD_SURF_PAR,          ONLY : NUNDEF
-USE MODD_SURF_ATM_GRID_N,   ONLY : XGRID_PAR, CGRID  !mll: ajout CGRID
-USE MODD_SURF_ATM_n,        ONLY : NDIM_FULL
 !
-USE MODD_ISBA_n, ONLY : CISBA
 !
 USE MODE_GRIDTYPE_CONF_PROJ
 USE MODE_GRIDTYPE_LONLAT_REG
@@ -59,7 +66,7 @@ USE MODI_MAKE_MASK_ISBA_TO_TOPD
 USE MODI_WRITE_FILE_MASKTOPD
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
-USE MODI_TOPD_TO_ISBA_SLOPE
+!USE MODI_TOPD_TO_ISBA_SLOPE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -69,15 +76,21 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
 !
- CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+!
+CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
+!
+CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
 INTEGER                   :: IL                     ! number of points
 INTEGER                   :: JJ,JI,JK,JWRK ! loop control 
 INTEGER                   :: JCAT,JMESH,JPIX ! loop control 
 INTEGER                           :: ILUOUT       ! Logical unit for output filr
-INTEGER                           :: IUNIT       ! Logical unit for carte_asat file
 INTEGER                           :: IMESHL       !  number of ISBA grid nodes
+INTEGER                           :: ILAMBERT     ! Lambert projection type
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: ZXI, ZYI     ! natural coordinates of ISBA grid (conformal projection or latlon)
 REAL, DIMENSION(:), ALLOCATABLE   :: ZDXI, ZDYI   ! Isba grid resolution in the conformal projection
@@ -102,12 +115,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_TOPD',0,ZHOOK_HANDLE)
 !
- CALL GET_LUOUT(HPROGRAM,ILUOUT)
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !  
- CALL READ_NAM_PGD_TOPD(HPROGRAM,LCOUPL_TOPD,CCAT,XF_PARAM_BV,XC_DEPTH_RATIO_BV)
+CALL READ_NAM_PGD_TOPD(HPROGRAM,LCOUPL_TOPD,CCAT,XF_PARAM_BV,XC_DEPTH_RATIO_BV)
 !
-IF (LCOUPL_TOPD .AND. CISBA/='3-L') &
-  CALL ABOR1_SFX("PGD_TOPD: coupling with topmodel only runs with CISBA=3-L")
+IF (LCOUPL_TOPD .AND. (I%CISBA/='3-L'.AND. I%CISBA/='DIF')) &
+  CALL ABOR1_SFX("PGD_TOPD: coupling with topmodel only runs with CISBA=3-L or CISBA=DIF  ")
 !
 !         1.   Reads the namelists
 !              --------------------
@@ -119,7 +132,7 @@ IF (LCOUPL_TOPD) THEN
   !              -------------------------------------------
   WRITE(ILUOUT,*) 'NNCAT',NNCAT
   !
-  CALL INIT_TOPD(HPROGRAM)
+  CALL INIT_TOPD_PGD(HPROGRAM)
   !
   !         4.   Compute masks to couple ISBA and TOPODYN grids
   !              -------------------------------------------------------
@@ -133,22 +146,22 @@ IF (LCOUPL_TOPD) THEN
   ALLOCATE(NMASKT(NNCAT,NMESHT))
   NMASKT(:,:)=NUNDEF
   !
-  IF(CGRID.EQ.'CONF PROJ') THEN
+  IF(UG%CGRID.EQ.'CONF PROJ') THEN
     !
     WRITE(ILUOUT,*) 'GRILLE PROJ CONF (application Cevennes)'
     !
     !*      1.1.1   lecture des coordonnees X et Y conformes 
     !               -----------------------------------------
     !
-    ALLOCATE(ZXI(NDIM_FULL))
-    ALLOCATE(ZYI(NDIM_FULL))
+    ALLOCATE(ZXI(U%NDIM_FULL))
+    ALLOCATE(ZYI(U%NDIM_FULL))
     ZXI(:)=0.0
     ZYI(:)=0.0
     !
-    ALLOCATE(ZDXI(NDIM_FULL))
-    ALLOCATE(ZDYI(NDIM_FULL))
+    ALLOCATE(ZDXI(U%NDIM_FULL))
+    ALLOCATE(ZDYI(U%NDIM_FULL))
     !
-    CALL GET_GRIDTYPE_CONF_PROJ(XGRID_PAR,PLAT0=ZLAT0,PLON0=ZLON0,PRPK=ZRPK, &
+    CALL GET_GRIDTYPE_CONF_PROJ(UG%XGRID_PAR,PLAT0=ZLAT0,PLON0=ZLON0,PRPK=ZRPK, &
                                 PBETA=ZBETA,PLATOR=ZLATOR,PLONOR=ZLONOR,     &
                                 KIMAX=NIMAX,KJMAX=NJMAX,PX=ZXI,PY=ZYI,       &
                                 PDX=ZDXI,PDY=ZDYI)
@@ -206,15 +219,15 @@ IF (LCOUPL_TOPD) THEN
     !*      1.2 Gestion des coordonnees geographiques
     !           -------------------------------------
     !
-  ELSE IF(CGRID.EQ.'LONLAT REG') THEN
+  ELSE IF(UG%CGRID.EQ.'LONLAT REG') THEN
     !
     WRITE(ILUOUT,*) 'GRILLE LONLAT REG (application AMMA)' 
     !
-    ALLOCATE(ZXI(NDIM_FULL))
-    ALLOCATE(ZYI(NDIM_FULL))
+    ALLOCATE(ZXI(U%NDIM_FULL))
+    ALLOCATE(ZYI(U%NDIM_FULL))
     ZXI(:)=0.0
     ZYI(:)=0.0
-    CALL GET_GRIDTYPE_LONLAT_REG(XGRID_PAR,PLONMIN=ZLONMIN,PLONMAX=ZLONMAX,             &
+    CALL GET_GRIDTYPE_LONLAT_REG(UG%XGRID_PAR,PLONMIN=ZLONMIN,PLONMAX=ZLONMAX,             &
                                  PLATMIN=ZLATMIN,PLATMAX=ZLATMAX,KLON=NIMAX,KLAT=NJMAX, &
                                  KL=IL,PLON=ZXI,PLAT=ZYI)
     !
@@ -222,8 +235,8 @@ IF (LCOUPL_TOPD) THEN
     !
     ALLOCATE(ZLON(IMESHL))
     ALLOCATE(ZLAT(IMESHL))
-    ALLOCATE(ZDXI(NDIM_FULL))
-    ALLOCATE(ZDYI(NDIM_FULL))
+    ALLOCATE(ZDXI(U%NDIM_FULL))
+    ALLOCATE(ZDYI(U%NDIM_FULL))
     !
     ZDXI(:)=(ZLONMAX-ZLONMIN)/(NIMAX-1)
     ZDYI(:)=(ZLATMAX-ZLATMIN)/(NJMAX-1)
@@ -263,7 +276,19 @@ IF (LCOUPL_TOPD) THEN
       ENDDO
     ENDDO
     !
-  ELSE
+  ! Modification by Eram Artinian to take into account IGN grid 1
+  ELSE IF (UG%CGRID=='IGN') THEN 
+    WRITE(ILUOUT,*) 'GRILLE IGN (application Bulgarie)' 
+    ALLOCATE(ZXN(U%NDIM_FULL))
+    ALLOCATE(ZYN(U%NDIM_FULL))
+    CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,KLAMBERT=ILAMBERT,&
+                          KL=IL,PX=ZXN,PY=ZYN,KDIMX=NIMAX)
+    IMESHL=IL
+    ALLOCATE(ZLAT(IMESHL))
+    ALLOCATE(ZLON(IMESHL))
+    CALL LATLON_IGN(ILAMBERT,ZXN,ZYN,ZLAT,ZLON)
+  !End modification by Eram Artinian to take into account IGN grid
+  ELSE 
     !       
     WRITE(ILUOUT,*) 'ERREUR: TYPE DE GRILLE NON GERE PAR LE CODE'
     CALL ABOR1_SFX("PGD_TOPD: TYPE DE GRILLE NON GERE PAR LE CODE")
@@ -275,39 +300,50 @@ IF (LCOUPL_TOPD) THEN
   !
   ALLOCATE(XXI(IMESHL))
   ALLOCATE(XYI(IMESHL))
-  CALL XY_IGN(5,XXI,XYI,ZLAT,ZLON)
+  ! Modification by Eram Artinian to take into account IGN grid 2
+  IF (UG%CGRID/='IGN') THEN
+    CALL XY_IGN(5,XXI,XYI,ZLAT,ZLON)
+  ELSE
+    XXI=ZXN
+    XYI=ZYN
+    DEALLOCATE(ZXN)
+    DEALLOCATE(ZYN)
+  ENDIF
+  !End modification by Eram Artinian to take into account IGN grid 2
   DEALLOCATE(ZLAT)
   DEALLOCATE(ZLON)
   !
   !*      2.0     mask
   !               ----
   !***
-  CALL MAKE_MASK_TOPD_TO_ISBA(NDIM_FULL)
+  CALL MAKE_MASK_TOPD_TO_ISBA(UG, &
+                              U%NDIM_FULL)
   !
-  ALLOCATE(NNPIX(NDIM_FULL))
+  ALLOCATE(NNPIX(U%NDIM_FULL))
   NNPIX(:) = NUNDEF
-  DO JJ=1,NDIM_FULL
+  DO JJ=1,U%NDIM_FULL
     NNPIX(JJ) = COUNT(NMASKT(:,:)==JJ)
   ENDDO
   !
-  CALL MAKE_MASK_ISBA_TO_TOPD(NDIM_FULL)
+  CALL MAKE_MASK_ISBA_TO_TOPD(U%NDIM_FULL)
   !
-  CALL WRITE_FILE_MASKTOPD(NDIM_FULL)
+  CALL WRITE_FILE_MASKTOPD(U%NDIM_FULL)
   !
   !*        3.0 Compute Mean slope over each ISBA_MESH
+!            ----------------------------------------------------------------------
+CALL TOPD_TO_ISBA_SLOPE(USS, &
+                        U%NDIM_FULL)
+!
+!*        4.0  Compute F and DC for each ISBA mesh
   !            ----------------------------------------------------------------------
-  CALL TOPD_TO_ISBA_SLOPE(NDIM_FULL)
   !
-  !*        4.0  Compute F and DC for each ISBA mesh
-  !            ----------------------------------------------------------------------
-  !
-  ALLOCATE(NNBV_IN_MESH(NDIM_FULL,NNCAT))
-  ALLOCATE(XBV_IN_MESH(NDIM_FULL,NNCAT))
-  ALLOCATE(XTOTBV_IN_MESH(NDIM_FULL))
+  ALLOCATE(NNBV_IN_MESH(U%NDIM_FULL,NNCAT))
+  ALLOCATE(XBV_IN_MESH(U%NDIM_FULL,NNCAT))
+  ALLOCATE(XTOTBV_IN_MESH(U%NDIM_FULL))
   !
   XTOTBV_IN_MESH(:) = 0.0
   !
-  DO JMESH=1,NDIM_FULL
+  DO JMESH=1,U%NDIM_FULL
     XBV_IN_MESH(JMESH,:)=0.0
     DO JCAT=1,NNCAT
       NNBV_IN_MESH(JMESH,JCAT) = COUNT(NMASKI(JMESH,JCAT,:)/=NUNDEF)
@@ -316,13 +352,13 @@ IF (LCOUPL_TOPD) THEN
     ENDDO
   ENDDO
   !
-  ALLOCATE (ZF_PARAM(NDIM_FULL))
-  ALLOCATE (ZC_DEPTH_RATIO(NDIM_FULL))
+  ALLOCATE (ZF_PARAM(U%NDIM_FULL))
+  ALLOCATE (ZC_DEPTH_RATIO(U%NDIM_FULL))
   !
   ZF_PARAM(:) = 0.
   ZC_DEPTH_RATIO(:) = 0.
   DO JCAT=1,NNCAT
-    DO JMESH=1,NDIM_FULL
+    DO JMESH=1,U%NDIM_FULL
       IF ( XTOTBV_IN_MESH(JMESH)/=0. ) THEN
         ZF_PARAM(JMESH) = ZF_PARAM(JMESH) + XF_PARAM_BV(JCAT)*XBV_IN_MESH(JMESH,JCAT)/XTOTBV_IN_MESH(JMESH)
         ZC_DEPTH_RATIO(JMESH) = ZC_DEPTH_RATIO(JMESH) + XC_DEPTH_RATIO_BV(JCAT)*XBV_IN_MESH(JMESH,JCAT)/XTOTBV_IN_MESH(JMESH)
@@ -338,11 +374,11 @@ IF (LCOUPL_TOPD) THEN
   !write(*,*) 'f min max isba',MINVAL(ZF_PARAM),MAXVAL(ZF_PARAM)
   !write(*,*) 'dc min max isba',MINVAL(ZC_DEPTH_RATIO),MAXVAL(ZC_DEPTH_RATIO)
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,'carte_f_dc.txt','FORMATTED',HACTION='WRITE')
-  DO JMESH=1,NDIM_FULL
-    WRITE(IUNIT,*) ZF_PARAM(JMESH),ZC_DEPTH_RATIO(JMESH)
+  CALL OPEN_FILE('ASCII ',NUNIT,'carte_f_dc.txt','FORMATTED',HACTION='WRITE')
+  DO JMESH=1,U%NDIM_FULL
+    WRITE(NUNIT,*) ZF_PARAM(JMESH),ZC_DEPTH_RATIO(JMESH)
   ENDDO
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !
   DEALLOCATE(ZF_PARAM)
   DEALLOCATE(ZC_DEPTH_RATIO)

@@ -35,7 +35,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	J.-P. Pinty      * Laboratoire d'Aerologie*
+!!      J.-P. Pinty      * Laboratoire d'Aerologie*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -44,7 +44,7 @@
 !!      (J.Stein)            01:04/96  bug correction for ZZEANG     
 !!      (K. Suhre)           14/02/97  bug correction for ZLON0     
 !!      (V. Masson)          01/03/03  add zenithal angle output
-!!      (J.Escobar)           11/2013  add !$ to inhibit completly omp dependency  
+!!      (V. Masson)          14/03/14  avoid discontinuous declination at 00UTC each day
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -121,10 +121,10 @@ DO JI=2,11
   IBIS(JI) = INOBIS(JI)+1
 END DO
 IF( MOD(KYEAR,4).EQ.0 .AND. (MOD(KYEAR,100).NE.0 .OR. MOD(KYEAR,400).EQ.0)) THEN
-  ZDATE = FLOAT(KDAY +   IBIS(KMONTH-1)) - 1
+  ZDATE = FLOAT(KDAY +   IBIS(KMONTH-1)) - 1 + PTIME/XDAY
   ZAD = 2.0*XPI*ZDATE/366.0
 ELSE
-  ZDATE = FLOAT(KDAY + INOBIS(KMONTH-1)) - 1
+  ZDATE = FLOAT(KDAY + INOBIS(KMONTH-1)) - 1 + PTIME/XDAY
   ZAD = 2.0*XPI*ZDATE/365.0
 END IF
 
@@ -135,7 +135,7 @@ ZTSIDER = (7.67825*SIN(ZA1)+10.09176*SIN(ZA2)) / 60.0
 !-------------------------------------------------------------------------------
 !
 !*       2.     COMPUTE THE SOLAR DECLINATION ANGLE
-!	        -----------------------------------
+!               -----------------------------------
 !
 ZDECSOL = 0.006918-0.399912*COS(ZAD)   +0.070257*SIN(ZAD)    &
            -0.006758*COS(2.*ZAD)+0.000907*SIN(2.*ZAD) &
@@ -195,7 +195,7 @@ DO JJ = IINDX1,IINDX2
 !              --------------------------------------------
 !
   IF (ZSINZEN(JJ)/=0.) THEN
-    !Azimuth is measured counter-opposite-clockwise from due south
+    !Azimuth is measured clockwise from north
     ZSINAZI(JJ)  = - ZCOSDEL * SIN(ZSOLANG(JJ)) / ZSINZEN(JJ)
     ZCOSAZI(JJ)  = (-SIN(ZLAT(JJ))*ZCOSDEL*COS(ZSOLANG(JJ))      &
                        +COS(ZLAT(JJ))*ZSINDEL                       &

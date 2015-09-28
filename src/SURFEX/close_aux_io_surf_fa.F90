@@ -23,16 +23,17 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
+!!    B. Decharme (03/2014) read fa file in prep
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_SURF_ASC,ONLY:NUNIT,CMASK,NMASK
+USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NFULL, CMASK, NLUOUT, NMASK
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -45,6 +46,8 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
+INTEGER :: IRET ! error code
+CHARACTER(LEN=28) :: YFILE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
@@ -53,11 +56,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_AUX_IO_SURF_FA',0,ZHOOK_HANDLE)
-CLOSE(NUNIT)
 !
-NUNIT=0
+NFULL = 0
 CMASK='      '
 DEALLOCATE(NMASK)
+CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+!
+YFILE=HFILE(1:LEN_TRIM(HFILE))//'.fa'
+WRITE(NLUOUT,*)'HFILETYPE ',HFILETYPE,'END EXTERNAL',NUNIT_FA,YFILE
+!
 IF (LHOOK) CALL DR_HOOK('CLOSE_AUX_IO_SURF_FA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

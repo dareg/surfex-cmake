@@ -6,7 +6,9 @@
 !!      B. Decharme : partition pgd/prep (grid attributes are only in the PGD file)
 !!
 !-------------------------------------------------------------------------------
-!        
+!    
+USE MODD_OFF_SURFEX_n
+!
         USE MODD_IO_SURF_ASC
         USE MODD_SURF_PAR
         USE MODI_READ_SURF
@@ -20,13 +22,11 @@
 !
         USE MODI_ABOR1_SFX
 !
-        USE MODI_GOTO_SURFEX
         USE MODI_GET_LUOUT
 !
-        USE MODI_ALLOC_SURFEX
-        USE MODI_DEALLOC_SURFEX
         USE MODI_END_IO_SURF_n
         USE MODI_INIT_IO_SURF_n
+!
         IMPLICIT NONE        
 
         REAL, ALLOCATABLE, DIMENSION(:)   ::   ZLOC
@@ -66,7 +66,7 @@
         !*
         !=====================================================================
         IF (LHOOK) CALL DR_HOOK('SXPOST',0,ZHOOK_HANDLE)
-        CALL ALLOC_SURFEX(1)
+        CALL SURFEX_ALLOC_LIST(1)
 
         CALL GET_LUOUT('ASCII ',NLUOUT)
         OPEN(UNIT=NLUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),&
@@ -95,22 +95,28 @@
         !*
         !=====================================================================
 
-        CALL GOTO_SURFEX(1,.TRUE.)
+         CALL GOTO_MODEL(1)
 
-        CALL INIT_IO_SURF_n('ASCII ','FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'ASCII ','FULL  ','SURF  ','READ ')          
 
-        CALL READ_SURF('ASCII ','DIM_FULL', INI, IRET)
-        CALL READ_SURF('ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
-        CALL READ_SURF('ASCII ','DIM_NATURE', INI_N, IRET)        
+        CALL READ_SURF(&
+                       'ASCII ','DIM_FULL', INI, IRET)
+        CALL READ_SURF(&
+                       'ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
+        CALL READ_SURF(&
+                       'ASCII ','DIM_NATURE', INI_N, IRET)        
            
         CALL END_IO_SURF_n('ASCII ')
 
         NFULL = INI
 
         IF (INI_N.NE.0) THEN
-          CALL INIT_IO_SURF_n('ASCII ','NATURE','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'ASCII ','NATURE','SURF  ','READ ')                   
 
-          CALL READ_SURF('ASCII ','PATCH_NUMBER', IPATCH, IRET)
+          CALL READ_SURF(&
+                       'ASCII ','PATCH_NUMBER', IPATCH, IRET)
 
           CALL END_IO_SURF_n('ASCII ')
         ENDIF
@@ -120,7 +126,8 @@
         !** get domain size and read latitudes and longitudes 
         !*
         !=====================================================================
-        CALL INIT_IO_SURF_n('ASCII ','FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'ASCII ','FULL  ','SURF  ','READ ')          
 
         OPEN(UNIT=45,FILE='SXPOST.nam',FORM='FORMATTED')
         READ(45,*)IFIELD
@@ -206,13 +213,15 @@
          IC=IC+1
          
          IF (LINITP) CFILEIN = 'PREP.txt'
-         CALL INIT_IO_SURF_n('ASCII ',CMASK_SAVE,'SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'ASCII ',CMASK_SAVE,'SURF  ','READ ')           
          CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
          IF (.NOT.GFOUND .AND. LINITP)THEN
            ! Search now in PGD file
            CALL END_IO_SURF_n('ASCII ')
            CFILEIN = 'PGD.txt'
-           CALL INIT_IO_SURF_n('ASCII ',CMASK_SAVE,'SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'ASCII ',CMASK_SAVE,'SURF  ','READ ')            
            CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
          ENDIF
          IF (.NOT.GFOUND) CALL ERR_STOP(HREC,CFILEIN,NLUOUT)
@@ -279,7 +288,7 @@
        ENDDO
 
        CLOSE(NLUOUT)
-       CALL DEALLOC_SURFEX
+       CALL SURFEX_DEALLO_LIST
        IF (LHOOK) CALL DR_HOOK('SXPOST',1,ZHOOK_HANDLE)
 
 
@@ -289,7 +298,6 @@
        WRITE(NLUOUT,*) ' ERROR WHEN READING ARTICLE',HREC
        WRITE(NLUOUT,*) ' '
        CLOSE(NLUOUT)
-       CALL DEALLOC_SURFEX
        IF (LHOOK) CALL DR_HOOK('SXPOST',1,ZHOOK_HANDLE)
 
        CONTAINS

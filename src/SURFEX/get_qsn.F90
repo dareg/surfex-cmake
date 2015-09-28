@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_QS_n(HPROGRAM,KI,PQS)
+      SUBROUTINE GET_QS_n (DGU, &
+                           HPROGRAM,KI,PQS)
 !     #########################################
 !
 !!****  *GET_QS_n* - routine to get roughness lengths
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne *Meteo France*	
+!!      P. Le Moigne *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,10 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_QS, LSURF_VARS
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -63,8 +69,8 @@ IF (LHOOK) CALL DR_HOOK('GET_QS_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LSURF_VARS)      THEN 
-  PQS      = XAVG_QS      
+IF (DGU%LSURF_VARS)      THEN 
+  PQS      = DGU%XAVG_QS      
 ELSE 
   PQS      = XUNDEF      
 ENDIF           

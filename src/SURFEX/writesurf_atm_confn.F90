@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_ATM_CONF_n(HPROGRAM)
+      SUBROUTINE WRITESURF_ATM_CONF_n (CHU, DGU, USS, &
+                                       HPROGRAM)
 !     #########################################
 !
 !!****  *MNHWRITE_SURF_ATM_CONF* - routine to write the configuration for the surface
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,6 +33,14 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
+!
+!
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODN_SSO_n
 USE MODN_SURF_ATM_n
@@ -50,6 +59,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling ISBA
 !
@@ -70,12 +84,12 @@ IF (ILUDES==0) RETURN
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_NAM_SSOn
- CALL INIT_NAM_CH_CONTROLn
- CALL INIT_NAM_CH_SURFn
- CALL INIT_NAM_DIAG_SURF_ATMn
- CALL INIT_NAM_DIAG_SURFn
- CALL INIT_NAM_WRITE_DIAG_SURFn
+ CALL INIT_NAM_SSOn(USS)
+ CALL INIT_NAM_CH_CONTROLn(CHU)
+ CALL INIT_NAM_CH_SURFn(CHU)
+ CALL INIT_NAM_DIAG_SURF_ATMn(DGU)
+ CALL INIT_NAM_DIAG_SURFn(DGU)
+ CALL INIT_NAM_WRITE_DIAG_SURFn(DGU)
 !
 WRITE(UNIT=ILUDES,NML=NAM_SSOn)
 WRITE(UNIT=ILUDES,NML=NAM_CH_CONTROLn)

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GRID_FROM_FILE(HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL)
+      SUBROUTINE GRID_FROM_FILE (&
+                                 HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -34,6 +35,9 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+!
+!
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_READ_GRIDTYPE
 USE MODI_CLOSE_AUX_IO_SURF
@@ -50,6 +54,8 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
 !
  CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
  CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! file name
@@ -85,31 +91,36 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !*       2.    Opening of the file
 !              -------------------
 !
- CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
 !
 !---------------------------------------------------------------------------
 !
 !*       3.    Number of points in this file
 !              -----------------------------
 !
- CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP)
+ CALL READ_SURF(&
+                HFILETYPE,'DIM_FULL  ',KL,IRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       4.    Grid type
 !              ---------
 !
- CALL READ_SURF(HFILETYPE,'GRID_TYPE',HGRID,IRESP)
+ CALL READ_SURF(&
+                HFILETYPE,'GRID_TYPE',HGRID,IRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       5.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
+ CALL READ_GRIDTYPE(&
+                    HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
 !
 ALLOCATE(PGRID_PAR(KGRID_PAR))
- CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
+ CALL READ_GRIDTYPE(&
+                    HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
 !
 !---------------------------------------------------------------------------
 !

@@ -50,7 +50,7 @@ END MODULE MODI_UNPACK_SAME_RANK2
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -127,7 +127,7 @@ END SUBROUTINE UNPACK_SAME_RANK2_FROM1D
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

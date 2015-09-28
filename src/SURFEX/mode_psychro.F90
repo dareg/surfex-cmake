@@ -19,11 +19,11 @@ MODULE MODE_PSYCHRO
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!      
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    12/04/11 
+!!      Original    12/04/11
 !!      J.Escobar   11/13 :  remove space in ELSEWHERE statement
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -267,7 +267,7 @@ end function TWB_FROM_TPQ_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!      
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -337,7 +337,7 @@ END FUNCTION ENTH_FN_T_Q
 !!
 !!    AUTHOR
 !!    ------
-!!	
+!!      
 !!
 !!    MODIFICATIONS
 !!    -------------

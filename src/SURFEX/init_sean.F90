@@ -1,9 +1,10 @@
 !     #############################################################
-      SUBROUTINE INIT_SEA_n(HPROGRAM,HINIT,                            &
+      SUBROUTINE INIT_SEA_n (DTCO, DGU, UG, U, SM, DGL, &
+                             HPROGRAM,HINIT,                            &
                               KI,KSV,KSW,                                &
                               HSV,PCO2,PRHOA,                            &
                               PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                              PEMIS,PTSRAD,                              &
+                              PEMIS,PTSRAD,PTSURF,                       &
                               KYEAR, KMONTH,KDAY, PTIME,                 &
                               HATMFILE,HATMFILETYPE,                     &
                               HTEST                                      )  
@@ -30,19 +31,28 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003
+!!      B. Decharme  04/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CSEA
-USE MODD_CSTS,       ONLY : XTT
 !
+USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+!
+USE MODD_CSTS,       ONLY : XTT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -56,6 +66,14 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -72,6 +90,7 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -93,19 +112,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_SEA_N',0,ZHOOK_HANDLE)
-IF (CSEA=='NONE  ') THEN
+IF (U%CSEA=='NONE  ') THEN
   PDIR_ALB=0.
   PSCA_ALB=0.
   PEMIS   =1.
   PTSRAD  =XTT
-ELSE IF (CSEA=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
+  PTSURF  =XTT
+ELSE IF (U%CSEA=='FLUX  ') THEN
+  CALL INIT_IDEAL_FLUX(DGL, &
+                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
-                           PEMIS,PTSRAD,'OK'                           )  
-ELSE IF (CSEA=='SEAFLX') THEN
-  CALL INIT_SEAFLUX_n(HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
+                           PEMIS,PTSRAD,PTSURF,'OK'                    )  
+ELSE IF (U%CSEA=='SEAFLX') THEN
+  CALL INIT_SEAFLUX_n(DTCO, DGU, UG, U, SM, &
+                      HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                        PEMIS,PTSRAD,                                 &
+                        PEMIS,PTSRAD,PTSURF,                          &
                         KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK'                                          )  
 END IF

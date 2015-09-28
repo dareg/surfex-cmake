@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_INLAND_WATER(HPROGRAM)
+      SUBROUTINE PGD_INLAND_WATER (DTCO, FG, F, UG, U, USS, WG, W, &
+                                   HPROGRAM,OECOCLIMAP,ORM_RIVER)
 !     #############################################################
 !
 !!****  *PGD_INLAND_WATER* - routine to choose initialization of lake scheme
@@ -23,17 +24,29 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    03/2004
+!!     B. Decharme  02/2014  Add LRM_RIVER
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CWATER
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_PGD_WATFLUX
 USE MODI_PGD_FLAKE
@@ -48,12 +61,24 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
- CHARACTER(LEN=6),                INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
+!
+CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+LOGICAL,             INTENT(IN)  :: OECOCLIMAP
+LOGICAL,             INTENT(IN)  :: ORM_RIVER ! delete river coverage (default = false)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -61,17 +86,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_INLAND_WATER',0,ZHOOK_HANDLE)
-IF (CWATER=='NONE  ') THEN
+!
+IF (U%CWATER=='NONE  ') THEN
   IF (LHOOK) CALL DR_HOOK('PGD_INLAND_WATER',1,ZHOOK_HANDLE)
   RETURN
-ELSE IF (CWATER=='FLUX  ') THEN
+ELSE IF (U%CWATER=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('PGD_INLAND_WATER',1,ZHOOK_HANDLE)
   RETURN
-ELSE IF (CWATER=='WATFLX') THEN
-  CALL PGD_WATFLUX(HPROGRAM)
-ELSE IF (CWATER=='FLAKE ') THEN
-  CALL PGD_FLAKE(HPROGRAM)
+ELSE IF (U%CWATER=='WATFLX') THEN
+  CALL PGD_WATFLUX(DTCO, U, WG, W, &
+                   HPROGRAM)
+ELSE IF (U%CWATER=='FLAKE ') THEN
+  CALL PGD_FLAKE(DTCO, FG, F, UG, U, USS, &
+                 HPROGRAM,OECOCLIMAP,ORM_RIVER)
 END IF
+!
 IF (LHOOK) CALL DR_HOOK('PGD_INLAND_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CH_EMISSION_TO_ATM_n(PSFSV,PRHOA)
+      SUBROUTINE CH_EMISSION_TO_ATM_n (CHN, SV, &
+                                       PSFSV,PRHOA)
 !     ######################################################################
 !!
 !!***  *CH_EMISSION_TO_ATM_n* - 
@@ -26,9 +27,11 @@
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 !!
+!
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+USE MODD_SV_n, ONLY : SV_t
+!
 USE MODD_TYPE_EFUTIL
-USE MODD_CH_SNAP_n,   ONLY: XEMIS_FIELDS, TSPRONOSLIST
-USE MODD_SV_n,        ONLY: CSV
 USE MODD_CHS_AEROSOL
 !
 USE MODI_CH_AER_EMISSION
@@ -45,6 +48,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
 REAL,             DIMENSION(:,:),INTENT(INOUT):: PSFSV  ! flux of     atmospheric scalar var.   (Mol/m2/s)
 REAL,             DIMENSION(:),  INTENT(IN)   :: PRHOA  ! Air density (kg/m3)
@@ -71,14 +78,14 @@ IF (LHOOK) CALL DR_HOOK('CH_EMISSION_TO_ATM_n',0,ZHOOK_HANDLE)
 !      1.     Agregation : emissions computation
 !             ----------------------------------
 !
-ISV = SIZE(CSV)
+ISV = SIZE(SV%CSV)
 !
 ZEMIS(:,:) = 0.
 !
 ! Point on head of Pronostic variable list
 ! to cover the entire list.
-CNAMES=>CSV
-CURPRONOS=>TSPRONOSLIST
+CNAMES=>SV%CSV
+CURPRONOS=>CHN%TSPRONOSLIST
 !
 DO WHILE(ASSOCIATED(CURPRONOS))
   IF (CURPRONOS%NAMINDEX > ISV) CALL ABOR1_SFX('CH_EMISSION_FLUXN: FATAL ERROR')
@@ -89,7 +96,7 @@ DO WHILE(ASSOCIATED(CURPRONOS))
   DO JSPEC=1,CURPRONOS%NBCOEFF
     !   Compute agregated flux    
     ZEMIS(:,CURPRONOS%NAMINDEX) = ZEMIS(:,CURPRONOS%NAMINDEX)+ &
-            CURPRONOS%XCOEFF(JSPEC)*XEMIS_FIELDS(:,CURPRONOS%NEFINDEX(JSPEC))
+            CURPRONOS%XCOEFF(JSPEC)*CHN%XEMIS_FIELDS(:,CURPRONOS%NEFINDEX(JSPEC))
   END DO
   !
   CURPRONOS=>CURPRONOS%NEXT
@@ -104,10 +111,10 @@ END DO
 IF (LCH_AERO_FLUX) THEN
   ZFCO(:) = 0.
   DO JSV=1,ISV
-    IF (CSV(JSV)=='CO    ') ZFCO(:) = ZEMIS(:,JSV)
+    IF (SV%CSV(JSV)=='CO    ') ZFCO(:) = ZEMIS(:,JSV)
   END DO
   !
-  CALL CH_AER_EMISSION(ZEMIS,PRHOA,CSV,1,ZFCO)
+  CALL CH_AER_EMISSION(ZEMIS,PRHOA,SV%CSV,1,ZFCO)
 END IF
 !
 !------------------------------------------------------------------------------

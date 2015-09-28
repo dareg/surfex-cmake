@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
+SUBROUTINE PREP_ISBA_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD,OKEY)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_GRIB* - initializes ISBA fields from operational GRIB
@@ -29,11 +29,11 @@ USE MODE_READ_GRIB
 USE MODD_TYPE_DATE_SURF
 !
 USE MODI_PREP_GRIB_GRID
-USE MODI_INTERP_GRID
+USE MODI_INTERP_GRID_NAT
 !
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
-USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF
-USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
+USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF, XWRV_DEF,     &
+                                XWRVN_DEF, XQC_DEF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_GRID_GRIB,      ONLY : CGRIB_FILE, NNI
 !
@@ -47,11 +47,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
- CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
+CHARACTER(LEN=6),   INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=7),   INTENT(IN)    :: HSURF     ! type of field
+CHARACTER(LEN=28),  INTENT(IN)    :: HFILE     ! name of file
+INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
+LOGICAL, OPTIONAL,  INTENT(INOUT) :: OKEY
 !
 !*      0.2    declarations of local variables
 !
@@ -60,7 +61,7 @@ TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
 REAL, DIMENSION(:)  , POINTER   :: ZMASK => NULL()          ! Land mask
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD => NULL()         ! field read
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D => NULL()       ! field read
-REAL, DIMENSION(:,:), POINTER   :: ZD => NULL()             ! depth of field in the soil
+REAL, DIMENSION(:,:), POINTER   :: ZD => NULL()             ! layer thicknesses
 INTEGER                         :: JVEGTYPE       ! loop counter on vegtypes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -92,6 +93,7 @@ SELECT CASE(HSURF)
      !* reading of the profile and its depth definition
      SELECT CASE(YINMODEL)
        CASE('ECMWF ')
+         IF(PRESENT(OKEY))OKEY=.FALSE.
          CALL READ_GRIB_TG_ECMWF(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
        CASE('ARPEGE','ALADIN','MOCAGE')
          CALL READ_GRIB_TG_METEO_FRANCE(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
@@ -104,6 +106,7 @@ SELECT CASE(HSURF)
      !* reading of the profile and its depth definition
      SELECT CASE(YINMODEL)
        CASE('ECMWF ')
+         IF(PRESENT(OKEY))OKEY=.FALSE.
          CALL READ_GRIB_WG_ECMWF(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
        CASE('ARPEGE','ALADIN','MOCAGE')
          CALL READ_GRIB_WG_METEO_FRANCE(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
@@ -118,6 +121,7 @@ SELECT CASE(HSURF)
      !* reading of the profile and its depth definition
      SELECT CASE(YINMODEL)
        CASE('ECMWF ')
+         IF(PRESENT(OKEY))OKEY=.FALSE.
          CALL READ_GRIB_WGI_ECMWF(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
        CASE('ARPEGE','ALADIN','MOCAGE')
          CALL READ_GRIB_WGI_METEO_FRANCE(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
@@ -129,11 +133,11 @@ SELECT CASE(HSURF)
 !*      3.4    Water content intercepted on leaves, LAI
 !
   CASE('WR     ')
-     ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
+     ALLOCATE(PFIELD(NNI,1,1))
      PFIELD(:,:,:) = XWR_DEF
 !
   CASE('LAI    ')
-     ALLOCATE(PFIELD(NNI,1,NVEGTYPE))
+     ALLOCATE(PFIELD(NNI,1,1))
      PFIELD(:,:,:) = XUNDEF
 !
 !
@@ -144,10 +148,44 @@ SELECT CASE(HSURF)
      ALLOCATE(PFIELD(SIZE(ZFIELD1D,1),1,1))
      PFIELD(:,1,1)=ZFIELD1D(:)
      DEALLOCATE(ZFIELD1D)
-
+!
+  CASE('ICE_STO')
+     ALLOCATE(PFIELD(NNI,1,1))
+     PFIELD(:,:,:) = 0.0
+!
+!*      3.6    MEB fields
+!
+  CASE('WRV    ')
+     ALLOCATE(PFIELD(NNI,1,1))
+     PFIELD(:,:,:) = XWRV_DEF
+!
+  CASE('WRVN   ')
+     ALLOCATE(PFIELD(NNI,1,1))
+     PFIELD(:,:,:) = XWRVN_DEF
+!
+  CASE('QC     ')
+     ALLOCATE(PFIELD(NNI,1,1))
+     PFIELD(:,:,:) = XQC_DEF
+!
+  CASE('TV     ','TC     ')
+     !* reading of the profile and its depth definition
+     SELECT CASE(YINMODEL)
+       CASE('ECMWF ')
+         IF(PRESENT(OKEY))OKEY=.FALSE.
+         CALL READ_GRIB_TG_ECMWF(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
+       CASE('ARPEGE','ALADIN','MOCAGE')
+         CALL READ_GRIB_TG_METEO_FRANCE(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
+       CASE('HIRLAM')
+         CALL READ_GRIB_TG_HIRLAM(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
+     END SELECT
+     ALLOCATE(PFIELD(NNI,1,1))
+     PFIELD(:,1,1) =ZFIELD(:,1)
+     DEALLOCATE(ZFIELD)
+     DEALLOCATE(ZD)
+!
   CASE DEFAULT
-     CALL ABOR1_SFX('PREP_ISBA_GRIB: OPTION NOT SUPPORTED - '//HSURF)
-
+    CALL ABOR1_SFX('PREP_ISBA_GRIB: '//TRIM(HSURF)//" initialization not implemented !")
+!
 END SELECT
 !
 DEALLOCATE(ZMASK)
@@ -177,13 +215,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
      !* interpolation on fine vertical grid
      IF (LHOOK) CALL DR_HOOK('SOIL_PROFILE_GRIB',0,ZHOOK_HANDLE)
      ALLOCATE(ZOUT  (SIZE(ZFIELD,1),SIZE(XGRID_SOIL)))
-     CALL INTERP_GRID(ZD,ZFIELD,XGRID_SOIL,ZOUT)
+     CALL INTERP_GRID_NAT(ZD,ZFIELD,XGRID_SOIL,ZOUT)
      !
      !* extends definition to all vegtypes.
-     ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),NVEGTYPE))
-     DO JVEGTYPE=1,NVEGTYPE
-       PFIELD(:,:,JVEGTYPE)=ZOUT(:,:)
-     END DO
+     ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),1))
+     PFIELD(:,:,1)=ZOUT(:,:)
      !* end
      DEALLOCATE(ZOUT)
      DEALLOCATE(ZFIELD)

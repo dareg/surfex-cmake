@@ -30,7 +30,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!  	V. Ducrocq       * Meteo France *
+!!      V. Ducrocq       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -42,6 +42,7 @@
 !!      C. Mari     31/10/00  add NDAYSEC
 !!      V. Masson   01/03/03  add XCONDI
 !!      A. Voldoire 01/12/09  add XTTSI, XICEC, XTTS for ESM
+!!      J. Escobar  28/03/2014 for pb with emissivity/aerosol reset XSURF_TINY=1.0e-80 in real8 case
 !!
 !-------------------------------------------------------------------------------
 !
@@ -64,13 +65,26 @@ IMPLICIT NONE
 !  
 !-------------------------------------------------------------------------------
 !
-!*	 1.     FUNDAMENTAL CONSTANTS
-!	        ---------------------
+!*       1.     FUNDAMENTAL CONSTANTS
+!               ---------------------
 !
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('INI_CSTS',0,ZHOOK_HANDLE)
+
+#ifdef SFX_MNH
+#ifdef MNH_MPI_DOUBLE_PRECISION
+XSURF_TINY    = 1.0e-80
+#else
+XSURF_TINY    = TINY    (XSURF_TINY    )
+#endif
+#else
+XSURF_TINY    = 1.0e-80
+#endif
+XSURF_TINY_12 = SQRT    (XSURF_TINY    )
+XSURF_EPSILON = EPSILON (XSURF_EPSILON ) * 10.0
+
 XPI         = 2.*ASIN(1.)
 XKARMAN     = 0.4
 XBOLTZ      = 1.380658E-23
@@ -81,7 +95,7 @@ XAVOGADRO   = 6.0221367E+23
 !-------------------------------------------------------------------------------
 !
 !*       2.     ASTRONOMICAL CONSTANTS
-!	        ----------------------
+!               ----------------------
 !
 XDAY   = 86400.
 XSIYEA = 365.25*XDAY*2.*XPI/ 6.283076
@@ -93,30 +107,31 @@ NDAYSEC = 24*3600 ! Number of seconds in a day
 !
 !
 !*       3.     TERRESTRIAL GEOIDE CONSTANTS
-!	        ----------------------------
+!               ----------------------------
 !
 XRADIUS = 6371229.
 XG      = 9.80665
 !
 !-------------------------------------------------------------------------------
 !
-!*	 4.     REFERENCE PRESSURE
-!	        -------------------
+!*       4.     REFERENCE PRESSURE
+!               -------------------
 !
 XP00 = 1.E5
 XTH00 = 300.
 !-------------------------------------------------------------------------------
 !
-!*	 5.     RADIATION CONSTANTS
-!	        -------------------
+!*       5.     RADIATION CONSTANTS
+!               -------------------
 !
-XSTEFAN = 2.* XPI**5 * XBOLTZ**4 / (15.* XLIGHTSPEED**2 * XPLANCK**3)
+!JUAN OVERFLOW XSTEFAN = 2.* XPI**5 * XBOLTZ**4 / (15.* XLIGHTSPEED**2 * XPLANCK**3)
+XSTEFAN = ( 2.* XPI**5 / 15. ) * ( (XBOLTZ / XPLANCK)* XBOLTZ ) * (XBOLTZ/(XLIGHTSPEED*XPLANCK))**2 
 XI0     = 1370.
 !
 !-------------------------------------------------------------------------------
 !
-!*	 6.     THERMODYNAMIC CONSTANTS
-!	        -----------------------
+!*       6.     THERMODYNAMIC CONSTANTS
+!               -----------------------
 !
 XMD    = 28.9644E-3
 XMV    = 18.0153E-3
@@ -146,19 +161,19 @@ XALPI  = LOG(XESTT) + (XBETAI /XTT) + (XGAMI *LOG(XTT))
 !
 !-------------------------------------------------------------------------------
 !
-!*	 7.     TURBULENCE CONSTANTS
-!	        --------------------
+!*       7.     TURBULENCE CONSTANTS
+!               --------------------
 !
  CALL INI_CTURBS
 !-------------------------------------------------------------------------------
 !
-!*	 8.     OCEAN CONSTANTS
-!	        ---------------
+!*       8.     OCEAN CONSTANTS
+!               ---------------
 !
  CALL INI_OCEAN_CSTS
 !
-!*	 9.     SURFACE CONSTANTS
-!	        -----------------
+!*       9.     SURFACE CONSTANTS
+!               -----------------
 !
  CALL INI_SURF_CSTS
 IF (LHOOK) CALL DR_HOOK('INI_CSTS',1,ZHOOK_HANDLE)

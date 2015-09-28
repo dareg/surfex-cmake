@@ -19,13 +19,14 @@
 !!       
 !!    AUTHOR
 !!    ------
-!!	P. Jabouille   *Meteo France*
+!!      P. Jabouille   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    20/01/99                      
 !!      F. solmon   01/06/00 adaptation for patch approach  (+1D)
 !!      V. Masson   01/2004  surface externalization
+!!      P. Samuelsson 07/2014 additional snow albedos
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -43,6 +44,9 @@ REAL, DIMENSION(:,:,:), POINTER :: T         ! temperature '1-L'
 REAL, DIMENSION(:,:,:), POINTER :: TEMP      ! temperature '3-L' (K)
 REAL, DIMENSION(:,:,:), POINTER :: RHO       ! density
 REAL, DIMENSION(:,:),   POINTER :: ALB       ! snow surface albedo
+REAL, DIMENSION(:,:),   POINTER :: ALBVIS    ! snow surface visible albedo
+REAL, DIMENSION(:,:),   POINTER :: ALBNIR    ! snow surface near-infrared albedo
+REAL, DIMENSION(:,:),   POINTER :: ALBFIR    ! snow surface far-infrared albedo
 REAL, DIMENSION(:,:),   POINTER :: EMIS      ! snow surface emissivity
 REAL, DIMENSION(:,:),   POINTER :: TS        ! snow surface temperature
 REAL, DIMENSION(:,:,:),   POINTER :: GRAN1   ! snow grain parameter 1

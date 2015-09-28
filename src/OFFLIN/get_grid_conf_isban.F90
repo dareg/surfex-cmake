@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_GRID_CONF_ISBA_n(PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
+      SUBROUTINE GET_GRID_CONF_ISBA_n (IG, &
+                                       PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
 !     #########################################
 !
 !!****  *GET_GRID_CONF_ISBA_n* - routine to get the ISBA grid configuration
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+!
 USE MODE_GRIDTYPE_LONLAT_REG
-USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR 
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -44,6 +47,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 !
 REAL,               INTENT(OUT) :: PLONMIN
 REAL,               INTENT(OUT) :: PLONMAX
@@ -61,14 +67,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_CONF_ISBA_N',0,ZHOOK_HANDLE)
-SELECT CASE (CGRID)
+SELECT CASE (IG%CGRID)
 !     
 !  CASE("CONF PROJ ")
 !
 !  CASE("CARTESIAN ")
 
   CASE("LONLAT REG")
-    CALL GET_GRIDTYPE_LONLAT_REG(XGRID_PAR,PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
+    CALL GET_GRIDTYPE_LONLAT_REG(IG%XGRID_PAR,PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
 !
 !  CASE("GAUSS     ")
 !

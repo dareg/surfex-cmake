@@ -1,8 +1,13 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_WATFLUX_n(HPROGRAM,HINIT)
+SUBROUTINE READ_NAMELISTS_WATFLUX_n (WM, &
+                                     HPROGRAM,HINIT)
 !     #######################################################
 !
 ! --------------------------------------------------------------------------
+!
+!
+!
+USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODN_WATFLUX_n
 !
@@ -10,7 +15,7 @@ USE MODI_DEFAULT_WATFLUX
 USE MODI_DEFAULT_CH_DEP
 USE MODI_DEFAULT_DIAG_WATFLUX
 USE MODI_READ_DEFAULT_WATFLUX_n
-USE MODi_READ_WATFLUX_CONF_n
+USE MODI_READ_WATFLUX_CONF_n
 !
 USE MODI_READ_NAM_PREP_WATFLUX_n
 !
@@ -20,6 +25,9 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_READ_WATFLUX_CONF_n
 IMPLICIT NONE
+!
+!
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -35,9 +43,11 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_WATFLUX_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_DIAG_WATFLUX(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
                            LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP        )
 !
- CALL READ_DEFAULT_WATFLUX_n(HPROGRAM)
+ CALL READ_DEFAULT_WATFLUX_n(WM%CHW, WM%DGW, WM%W, &
+                             HPROGRAM)
 !
- CALL READ_WATFLUX_CONF_n(HPROGRAM)
+ CALL READ_WATFLUX_CONF_n(WM%CHW, WM%DGW, WM%W, &
+                          HPROGRAM)
 !
 !----------------------------------------------------------------------------
 !

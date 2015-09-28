@@ -37,11 +37,13 @@
 !!    -------------
 !!
 !!      Original   11/2006
+!!                 03/2014 (B. Vincendon) format correction
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : NPMAX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -67,7 +69,6 @@ INTEGER, DIMENSION(:),INTENT(OUT)  :: KLINE    ! second index of the pixel in th
 !
 !
 INTEGER                   :: JJ          ! loop control 
-INTEGER                   :: IUNIT       ! Unit of the files
 INTEGER                   :: ILUOUT      ! Unit of the files
 INTEGER                   :: IINDEX      ! index of the pixel in the topo domain
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -78,23 +79,23 @@ IF (LHOOK) CALL DR_HOOK('READ_CONNEX_FILE',0,ZHOOK_HANDLE)
 !               ----------------------
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL OPEN_FILE(HPROGRAM,IUNIT,HFILE,HFORM,HACTION='READ')
+ CALL OPEN_FILE(HPROGRAM,NUNIT,HFILE,HFORM,HACTION='READ')
 !
 WRITE(ILUOUT,*) 'Open ',HFILE,'debut'
 !
 DO JJ=1,7
-  READ(IUNIT,*) 
+  READ(NUNIT,*) 
 ENDDO
 !
 DO JJ=1,KNMC
   !
-  READ(IUNIT,'(f9.0,1x,f8.3,1x,2(f1.0,1x),8(f8.0,1x,f8.6,1x))',END=120) PCONN(JJ,:)
+  READ(NUNIT,*,END=120) PCONN(JJ,:)
   IINDEX = INT(PCONN(JJ,1))
   KLINE(IINDEX) = JJ
   !
 ENDDO
 !   
-120   CALL CLOSE_FILE(HPROGRAM,IUNIT)
+120   CALL CLOSE_FILE(HPROGRAM,NUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('READ_CONNEX_FILE',1,ZHOOK_HANDLE)
 !

@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*	
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,10 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef OL
+#ifdef SFX_OL
 USE MODI_SUM_ON_ALL_PROCS_OL
 #endif
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_SUM_ON_ALL_PROCS_MNH
 #endif
 !
@@ -74,15 +74,15 @@ IIN   = 0
 WHERE(OIN) IIN = 1
 !
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH
+#ifdef SFX_MNH
   CALL SUM_ON_ALL_PROCS_MNH(ISIZE,IIN,KOUT)
 #endif
 ELSE IF (HPROGRAM=='AROME ' ) THEN
-#ifdef ARO
+#ifdef SFX_ARO
   KOUT = MAX(COUNT(OIN),1)   ! to be coded properly in AROME
 #endif
 ELSE
-#ifdef OL
+#ifdef SFX_OL
   ! to be coded properly once Offline version is parallelized
   YNAME = ' '
   IF (PRESENT(HNAME)) YNAME = HNAME

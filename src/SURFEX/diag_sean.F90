@@ -1,11 +1,13 @@
 !     #########
-SUBROUTINE DIAG_SEA_n(HPROGRAM,                                           &
+SUBROUTINE DIAG_SEA_n (DGL, DGS, U, &
+                       HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, PFMU, PFMV,   &
                         PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,      &
                         PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
-                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX        )  
+                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
+                        PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 !     #####################################################################
 !
 !!****  *DIAG_SEA_n * - Chooses the surface schemes for sea diagnostics
@@ -29,12 +31,19 @@ SUBROUTINE DIAG_SEA_n(HPROGRAM,                                           &
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      Modified    08/2009 : new diag
+!       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
 
 !
+!
+!
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : CSEA
 !
 USE MODI_DIAG_SEAFLUX_n
 USE MODI_DIAG_IDEAL_n
@@ -46,6 +55,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PRN      ! Net radiation       (W/m2)
@@ -53,6 +67,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux       (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux (W/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
 REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient    (W/s2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! transf. coef heat   (W/s)
@@ -79,6 +95,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux    (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
+REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
@@ -99,17 +117,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SEA_N',0,ZHOOK_HANDLE)
-IF (CSEA=='SEAFLX') THEN
-  CALL DIAG_SEAFLUX_n(HPROGRAM,                                           &
+IF (U%CSEA=='SEAFLX') THEN
+  CALL DIAG_SEAFLUX_n(DGS, &
+                      HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
                         PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,      &
                         PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
-                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX        )
-ELSEIF (CSEA=='FLUX') THEN
-  CALL DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
+                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
+                        PEVAP, PEVAPC, PSUBL, PSUBLC                        )
+ELSEIF (U%CSEA=='FLUX') THEN
+  CALL DIAG_IDEAL_n(DGL, &
+                    HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
   PLEI     = XUNDEF
+  PEVAP    = XUNDEF
+  PSUBL    = XUNDEF
   PRI      = XUNDEF
   PCD      = XUNDEF
   PCH      = XUNDEF
@@ -132,6 +155,8 @@ ELSEIF (CSEA=='FLUX') THEN
   PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF
@@ -140,16 +165,18 @@ ELSEIF (CSEA=='FLUX') THEN
   PFMUC    = XUNDEF
   PFMVC    = XUNDEF
   PT2M_MIN = XUNDEF
-  PT2M_MAX = XUNDEF 
+  PT2M_MAX = XUNDEF
   PHU2M_MIN= XUNDEF
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF
-  PWIND10M_MAX = XUNDEF      
-ELSE IF (CSEA=='NONE  ') THEN
+  PWIND10M_MAX = XUNDEF
+ELSE IF (U%CSEA=='NONE  ') THEN
   PRN      = XUNDEF
   PH       = XUNDEF
   PLE      = XUNDEF
   PLEI     = XUNDEF
+  PEVAP    = XUNDEF
+  PSUBL    = XUNDEF  
   PGFLUX   = XUNDEF
   PRI      = XUNDEF
   PCD      = XUNDEF
@@ -176,6 +203,8 @@ ELSE IF (CSEA=='NONE  ') THEN
   PHC      = XUNDEF
   PLEC     = XUNDEF
   PLEIC    = XUNDEF
+  PEVAPC   = XUNDEF
+  PSUBLC   = XUNDEF
   PGFLUXC  = XUNDEF
   PSWDC    = XUNDEF
   PSWUC    = XUNDEF
@@ -184,7 +213,7 @@ ELSE IF (CSEA=='NONE  ') THEN
   PFMUC    = XUNDEF
   PFMVC    = XUNDEF
   PT2M_MIN = XUNDEF
-  PT2M_MAX = XUNDEF 
+  PT2M_MAX = XUNDEF
   PHU2M_MIN= XUNDEF
   PHU2M_MAX= XUNDEF  
   PWIND10M = XUNDEF

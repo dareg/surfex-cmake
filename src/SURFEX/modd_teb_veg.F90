@@ -20,7 +20,7 @@
 !!          
 !!    AUTHOR
 !!    ------
-!!	C. de Munck & A. Lemonsu  *Meteo France*
+!!      C. de Munck & A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,7 +32,7 @@
 !
 IMPLICIT NONE 
 !
-INTEGER, PARAMETER       :: NTIME_GR_MAX  = 1
+INTEGER, PARAMETER       :: NTIME_GR_MAX  = 12
 INTEGER, PARAMETER       :: NLAYER_GR_MAX = 6
 !
 END MODULE MODD_TEB_VEG

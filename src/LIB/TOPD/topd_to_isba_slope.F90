@@ -1,6 +1,7 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA_SLOPE(KI)
+      SUBROUTINE TOPD_TO_ISBA_SLOPE (USS, &
+                                     KI)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -34,7 +35,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      B. Vincendon	* Meteo-France *
+!!      B. Vincendon    * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -45,12 +46,12 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XTANB
 USE MODD_COUPLING_TOPD, ONLY : NMASKT,NNPIX
-USE MODD_SURF_ATM_SSO_n, ONLY : XSSO_SLOPE
 USE MODD_SURF_PAR,        ONLY : NUNDEF
-USE MODD_SURF_ATM_n,      ONLY : XNATURE, NSIZE_NATURE, NR_NATURE, &
-                                 NSIZE_FULL, NDIM_NATURE, NDIM_FULL  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -59,6 +60,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 !
@@ -79,7 +83,7 @@ IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA_SLOPE',0,ZHOOK_HANDLE)
 !
 !write(*,*) 'pente avt topmodel',MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)
 !
-ZSSO_SLOPE = XSSO_SLOPE
+ZSSO_SLOPE = USS%XSSO_SLOPE
 !
 ZCOUNT(:) = REAL(NNPIX(:))
 
@@ -99,9 +103,10 @@ WHERE (ZCOUNT /= 0.0)
    ZSSO_SLOPE = ZSSO_SLOPE / ZCOUNT
 ENDWHERE
 !
-XSSO_SLOPE = ZSSO_SLOPE
+USS%XSSO_SLOPE = ZSSO_SLOPE
 !
-!write(*,*) 'pente apres modification',MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),COUNT(ZCOUNT/=0.0),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)
+!write(*,*) 'pente apres modification', &
+!           MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),COUNT(ZCOUNT/=0.0),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)
 !
 IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA_SLOPE',1,ZHOOK_HANDLE)
 !

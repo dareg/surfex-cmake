@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE, HFORCING_FILETYPE,  &
+SUBROUTINE OL_READ_ATM_CONF_ASCII (YSC, &
+                                    HSURF_FILETYPE, HFORCING_FILETYPE,  &
                                      PDURATION, PTSTEP_FORC, KNI, &
                                      KYEAR, KMONTH, KDAY, PTIME,  &
                                      PLAT, PLON, PZS,             &
@@ -27,7 +28,7 @@ SUBROUTINE OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -36,6 +37,12 @@ SUBROUTINE OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!      Modified by P. Le Moigne (04/2006): init_io_surf for nature
 !!                  with GTMSK to read dimensions.
 !==================================================================
+!
+!
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
+!
+!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, XTIME_COMM_READ, XTIME_NPIO_READ
@@ -51,14 +58,19 @@ USE MODI_GET_SIZE_FULL_n
 USE MODI_READ_AND_SEND_MPI
 USE MODI_ABOR1_SFX
 !
+USE MODI_SET_SURFEX_FILEIN
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
+!
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
  CHARACTER(LEN=6), INTENT(IN)  :: HFORCING_FILETYPE
@@ -91,12 +103,13 @@ IF (NRANK==NPIO) THEN
   !
   CALL GET_LUOUT(HSURF_FILETYPE,ILUOUT) 
   !
-#ifndef NOMPI  
-  XTIME0 = MPI_WTIME()  
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
 #endif
   !
   !*      1.    Define configuration parameters
   !
+  YSWAP='N'
   IF (HFORCING_FILETYPE == 'BINARY') READ(21,*) YSWAP
   IF (YSWAP.EQ.'Y') THEN 
     LITTLE_ENDIAN_ARCH=.NOT.LITTLE_ENDIAN_ARCH
@@ -118,14 +131,14 @@ IF (NRANK==NPIO) THEN
   READ(21,*) IDAY
   READ(21,*) ZTIME
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
   !
 ENDIF
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI        
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
   CALL MPI_BCAST(PTSTEP_FORC,KIND(PTSTEP_FORC)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
   CALL MPI_BCAST(PDURATION,KIND(PDURATION)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
@@ -136,10 +149,13 @@ ENDIF
 !*      2.    Read full grid dimension and date
 !
  CALL SET_SURFEX_FILEIN(HSURF_FILETYPE,'PREP')
- CALL INIT_IO_SURF_n(HSURF_FILETYPE,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+                     HSURF_FILETYPE,'FULL  ','SURF  ','READ ') 
 !
- CALL READ_SURF(HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
- CALL READ_SURF(HSURF_FILETYPE,'DTCUR',TTIME,IRET)
+ CALL READ_SURF(&
+                HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
+ CALL READ_SURF(&
+                HSURF_FILETYPE,'DTCUR',TTIME,IRET)
 !
  CALL END_IO_SURF_n(HSURF_FILETYPE)
 !
@@ -150,7 +166,8 @@ PTIME  = TTIME%TIME
 !
 !*      4.    Geographical initialization
 !
- CALL GET_SIZE_FULL_n('OFFLIN ',IDIM_FULL,KNI) 
+ CALL GET_SIZE_FULL_n(YSC%U, &
+                      'OFFLIN ',IDIM_FULL,KNI) 
 !
 ALLOCATE(PLON (KNI))
 ALLOCATE(PLAT (KNI))
@@ -166,9 +183,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
-#endif  
+#endif
   !
   IF (INI==1) THEN
     READ(UNIT=21,FMT='(F15.8)') ZWORK0
@@ -177,7 +194,7 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
@@ -185,26 +202,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
-  XTIME0 = MPI_WTIME()  
-#endif
-  !
-  IF (INI==1) THEN
-    READ(UNIT=21,FMT='(F15.8)') ZWORK0
-    ZWORK(:) = ZWORK0
-  ELSE
-    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
-  END IF
-  !
-#ifndef NOMPI  
-  XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
-#endif
-ENDIF
- CALL READ_AND_SEND_MPI(ZWORK,PLAT)
-!
-IF (NRANK==NPIO) THEN
-  !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
   !
@@ -215,7 +213,26 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
+  XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+ENDIF
+ CALL READ_AND_SEND_MPI(ZWORK,PLAT)
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
+  !
+  IF (INI==1) THEN
+    READ(UNIT=21,FMT='(F15.8)') ZWORK0
+    ZWORK(:) = ZWORK0
+  ELSE
+    READ(UNIT=21,FMT='(50(F15.8))') ZWORK
+  END IF
+  !
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
@@ -223,7 +240,7 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME() 
 #endif
   !
@@ -234,7 +251,7 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
@@ -242,9 +259,9 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
-  XTIME0 = MPI_WTIME() 
-#endif 
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
   !
   IF (INI==1) THEN
     READ(UNIT=21,FMT='(F15.8)') ZWORK0
@@ -253,7 +270,7 @@ IF (NRANK==NPIO) THEN
     READ(UNIT=21,FMT='(50(F15.8))') ZWORK
   END IF
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF

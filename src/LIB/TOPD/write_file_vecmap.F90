@@ -25,7 +25,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      K. Chancibault	* Meteo-France *
+!!      K. Chancibault  * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -36,6 +36,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN
 !
 USE MODD_SURF_PAR, ONLY:XUNDEF
@@ -59,7 +60,6 @@ INTEGER,           INTENT(IN) :: KCAT   ! catchment number
  CHARACTER(LEN=40)          :: CFMT
 INTEGER                    :: JJ,JI,JK
 INTEGER                    :: IINDEX ! reference number of the pixel
-INTEGER                    :: IUNIT
 REAL                       :: ZOUT ! pixel not included in the catchment
 REAL                       :: ZMIN,ZMAX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -75,33 +75,33 @@ ZMAX = MAXVAL(PVAR)
 !
 CNAME = TRIM(CCAT(KCAT))//TRIM(HVAR)
 !
- CALL OPEN_FILE('ASCII ',IUNIT,HFILE=CNAME,HFORM='FORMATTED')
+ CALL OPEN_FILE('ASCII ',NUNIT,HFILE=CNAME,HFORM='FORMATTED')
 !
 DO JI=1,5
-  WRITE(IUNIT,*)
+  WRITE(NUNIT,*)
 ENDDO
 !
-WRITE(IUNIT,*) XX0(KCAT)
-WRITE(IUNIT,*) XY0(KCAT)
-WRITE(IUNIT,*) NNXC(KCAT) 
-WRITE(IUNIT,*) NNYC(KCAT)
-WRITE(IUNIT,*) ZOUT
-WRITE(IUNIT,*) XDXT(KCAT)
-WRITE(IUNIT,*) ZMIN
-WRITE(IUNIT,*) ZMAX
+WRITE(NUNIT,*) XX0(KCAT)
+WRITE(NUNIT,*) XY0(KCAT)
+WRITE(NUNIT,*) NNXC(KCAT) 
+WRITE(NUNIT,*) NNYC(KCAT)
+WRITE(NUNIT,*) ZOUT
+WRITE(NUNIT,*) XDXT(KCAT)
+WRITE(NUNIT,*) ZMIN
+WRITE(NUNIT,*) ZMAX
 !
 DO JI=1,NNYC(KCAT)
   DO JK=1,NNXC(KCAT)
     IINDEX = (JI - 1) * NNXC(KCAT) + JK
     IF (XTOPD(KCAT,IINDEX).EQ.XNUL(KCAT)) THEN
-      WRITE(IUNIT,*) ZOUT
+      WRITE(NUNIT,*) ZOUT
     ELSE
-      WRITE(IUNIT,*) PVAR(NLINE(KCAT,IINDEX))
+      WRITE(NUNIT,*) PVAR(NLINE(KCAT,IINDEX))
     ENDIF
   ENDDO
 ENDDO
 ! 
- CALL CLOSE_FILE('ASCII ',IUNIT)
+ CALL CLOSE_FILE('ASCII ',NUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_FILE_VECMAP',1,ZHOOK_HANDLE)
 !

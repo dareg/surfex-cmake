@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,9 +33,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_MNHGET_DESFM_n
 #endif
+!
+USE MODI_GET_LUOUT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,16 +59,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_DEFAULT_NAM_N',0,ZHOOK_HANDLE)
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH
+#ifdef SFX_MNH
   CALL MNHGET_DESFM_n(HACTION,KLUDES)
   IF (HACTION=='READ ' .AND. KLUDES.NE.0) REWIND(KLUDES)
 #endif
 ELSEIF (HPROGRAM=='AROME ') THEN
-#ifdef ARO
+#ifdef SFX_ARO
   CALL AROGET_DESFM_n(HACTION,KLUDES)
 #endif
 ELSE
   KLUDES = 0
+  IF (HACTION=='WRITE') CALL GET_LUOUT(HPROGRAM,KLUDES)
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_DEFAULT_NAM_N',1,ZHOOK_HANDLE)
 !

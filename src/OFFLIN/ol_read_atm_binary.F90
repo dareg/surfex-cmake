@@ -29,7 +29,7 @@ SUBROUTINE OL_READ_ATM_BINARY(KFORC_STEP,                                 &
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

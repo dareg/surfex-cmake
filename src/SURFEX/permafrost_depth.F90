@@ -28,7 +28,7 @@ SUBROUTINE PERMAFROST_DEPTH (KNI,KPATCH,PPERM,PSOILDEPTH)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme     
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -36,6 +36,7 @@ SUBROUTINE PERMAFROST_DEPTH (KNI,KPATCH,PPERM,PSOILDEPTH)
 !-------------------------------------------------------------------------------
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_ISBA_PAR, ONLY : XPERMFRAC, XPERMDEPTH
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -52,13 +53,7 @@ REAL, DIMENSION(:),  INTENT(IN   ) :: PPERM      ! permafrost area (fraction)
 !
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PSOILDEPTH ! output soil depth distribution (m)
 !
-!*      0.2    declarations of local parameter
-!
-REAL, PARAMETER :: ZPERMFRAC  = 0.25   ! permafrost limit area (fraction)
-!
-REAL, PARAMETER :: ZPERMDEPTH = 12.0   ! permafrost depth (m)
-!
-!*      0.3    declarations of local variables
+!*      0.2    declarations of local variables
 !
 REAL, DIMENSION(KNI) :: ZPERM
 !
@@ -75,8 +70,8 @@ WHERE(PPERM(:)/=XUNDEF)ZPERM(:)=PPERM(:)
 !
 DO JPATCH=1,KPATCH
    DO JJ=1,KNI
-      IF(ZPERM(JJ)>=ZPERMFRAC.AND.PSOILDEPTH(JJ,JPATCH)/=XUNDEF)THEN
-         PSOILDEPTH(JJ,JPATCH)=ZPERMDEPTH
+      IF(ZPERM(JJ)>=XPERMFRAC.AND.PSOILDEPTH(JJ,JPATCH)/=XUNDEF)THEN
+         PSOILDEPTH(JJ,JPATCH)=MAX(PSOILDEPTH(JJ,JPATCH),XPERMDEPTH)
        ENDIF
    ENDDO
 ENDDO

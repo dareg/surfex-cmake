@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_SEAFLUX(HPROGRAM)
+      SUBROUTINE PGD_SEAFLUX (DTCO, DTS, SG, S, UG, U, USS, &
+                              HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_SEAFLUX* monitor for averaging and interpolations of SEAFLUX physiographic fields
@@ -36,11 +37,19 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_PGD_GRID,       ONLY : NL
 USE MODD_DATA_COVER_PAR,  ONLY : JPCOVER
-USE MODD_SEAFLUX_n,       ONLY : XCOVER, LCOVER, XZS
-USE MODD_SEAFLUX_GRID_n,  ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE, NDIM
-USE MODD_DATA_SEAFLUX_n,  ONLY : LSST_DATA
 !
 USE MODI_READ_NAM_PGD_SEABATHY
 USE MODI_PGD_BATHYFIELD
@@ -58,6 +67,15 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
@@ -102,30 +120,34 @@ IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !*    4.      Bathymetry
 !             ----------
 !
- CALL PGD_BATHYFIELD(HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
+ CALL PGD_BATHYFIELD(UG, U, USS, &
+                     HPROGRAM,'bathymetry','SEA',YSEABATHY,YSEABATHYFILETYPE,&
        YNCVARNAME,XUNIF_SEABATHY,ZSEABATHY(:))  
 !-------------------------------------------------------------------------------
 !
 !*    5.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n('SEA   ',NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'SEA   ',SG%NDIM)
 !
-ALLOCATE(LCOVER     (JPCOVER))
-ALLOCATE(XCOVER     (NDIM,JPCOVER))
-ALLOCATE(XZS        (NDIM))
-ALLOCATE(XLAT       (NDIM))
-ALLOCATE(XLON       (NDIM))
-ALLOCATE(XMESH_SIZE (NDIM))
+ALLOCATE(S%LCOVER     (JPCOVER))
+ALLOCATE(S%XZS        (SG%NDIM))
+ALLOCATE(SG%XLAT       (SG%NDIM))
+ALLOCATE(SG%XLON       (SG%NDIM))
+ALLOCATE(SG%XMESH_SIZE (SG%NDIM))
 !
- CALL PACK_PGD(HPROGRAM, 'SEA   ',                    &
-                CGRID,  XGRID_PAR,                     &
-                LCOVER, XCOVER, XZS,                   &
-                XLAT, XLON, XMESH_SIZE                 )  
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'SEA   ',                    &
+                SG%CGRID,  SG%XGRID_PAR,                     &
+                S%LCOVER, S%XCOVER, S%XZS,                   &
+                SG%XLAT, SG%XLON, SG%XMESH_SIZE                 )  
 !
- CALL PACK_PGD_SEAFLUX(HPROGRAM, ZSEABATHY)
+ CALL PACK_PGD_SEAFLUX(DTCO, SG, S, U, &
+                       HPROGRAM, ZSEABATHY)
 !
- CALL PGD_SEAFLUX_PAR(HPROGRAM,LSST_DATA)
+ CALL PGD_SEAFLUX_PAR(DTCO, DTS, SG, UG, U, USS, &
+                      HPROGRAM,DTS%LSST_DATA)
 IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

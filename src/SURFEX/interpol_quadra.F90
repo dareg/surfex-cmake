@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INTERPOL_QUADRA(PDAT,PNDAT,PVAL1,PVAL2,PVAL3,POUT)
+      SUBROUTINE INTERPOL_QUADRA(PDAT,PNDAT,PVAL0,PVAL1,PVAL2,POUT)
 !     #############################################################
 !
 !!**** *INTERPOL_QUADRA* Quadractic interpolation between 3 month, especially
@@ -31,7 +31,7 @@
 !!    ------------
 !!
 !!    Original    08/2009
-!!    18-11-2010 by F. Chauvin	: bugfix for temporal interpolation coeff.
+!!    18-11-2010 by F. Chauvin  : bugfix for temporal interpolation coeff.
 !!
 !----------------------------------------------------------------------------
 !
@@ -50,38 +50,31 @@ IMPLICIT NONE
 !
 REAL,                    INTENT(IN)    :: PDAT    ! Present date in the current month
 REAL,                    INTENT(IN)    :: PNDAT   ! Number of date in the current month
-REAL, DIMENSION(:),      INTENT(IN)    :: PVAL1   ! Value of the precedent month
-REAL, DIMENSION(:),      INTENT(IN)    :: PVAL2   ! Value of the current month
-REAL, DIMENSION(:),      INTENT(IN)    :: PVAL3   ! Value of the next month
+REAL, DIMENSION(:),      INTENT(IN)    :: PVAL0   ! Value of the precedent month
+REAL, DIMENSION(:),      INTENT(IN)    :: PVAL1   ! Value of the current month
+REAL, DIMENSION(:),      INTENT(IN)    :: PVAL2   ! Value of the next month
 REAL, DIMENSION(:),      INTENT(OUT)   :: POUT    ! Interpolated value
 !
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL, DIMENSION(:), ALLOCATABLE        :: ZMID1   ! Mid point between t-1 and t
-REAL, DIMENSION(:), ALLOCATABLE        :: ZMID2   ! Mid point between t+1 and t
-REAL, DIMENSION(:), ALLOCATABLE        :: ZA      ! Interpolation coef
-REAL, DIMENSION(:), ALLOCATABLE        :: ZB      ! Interpolation coef
-REAL, DIMENSION(:), ALLOCATABLE        :: ZC      ! Interpolation coef
+REAL, DIMENSION(SIZE(PVAL0)) :: ZMID1   ! Mid point between t-1 and t
+REAL, DIMENSION(SIZE(PVAL0)) :: ZMID2   ! Mid point between t+1 and t
+REAL, DIMENSION(SIZE(PVAL0)) :: ZA      ! Interpolation coef
+REAL, DIMENSION(SIZE(PVAL0)) :: ZB      ! Interpolation coef
+REAL, DIMENSION(SIZE(PVAL0)) :: ZC      ! Interpolation coef
 !
-REAL                                   :: ZSCARRE ! Quadratic coef
-REAL                                   :: ZSUM    ! Quadratic coef
+REAL                         :: ZSCARRE ! Quadratic coef
+REAL                         :: ZSUM    ! Quadratic coef
 !
-INTEGER                                :: JDAT, INDAT
+INTEGER                      :: JDAT, INDAT
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !
-!*    0.     Allocation
-!            ----------
-!
 IF (LHOOK) CALL DR_HOOK('INTERPOL_QUADRA',0,ZHOOK_HANDLE)
-ALLOCATE(ZMID1(SIZE(PVAL1)))
-ALLOCATE(ZMID2(SIZE(PVAL1)))
-ALLOCATE(ZA(SIZE(PVAL1)))
-ALLOCATE(ZB(SIZE(PVAL1)))
-ALLOCATE(ZC(SIZE(PVAL1)))
 !
 !*    1.     Initialization
 !            --------------
@@ -99,14 +92,14 @@ ENDDO
 !*    2.     Mid points
 !            ----------
 ! 
-ZMID1(:) = 0.5 * (PVAL2(:)+PVAL1(:))
-ZMID2(:) = 0.5 * (PVAL2(:)+PVAL3(:))
+ZMID1(:) = 0.5 * (PVAL1(:)+PVAL0(:))
+ZMID2(:) = 0.5 * (PVAL1(:)+PVAL2(:))
 !
 !
 !*    3.     Coef calculation
 !            ----------------
 !
-ZA(:) = ((PVAL2(:)-ZMID1(:))*PNDAT - (ZMID2(:)-ZMID1(:))*(ZSUM-PNDAT)/PNDAT) &
+ZA(:) = ((PVAL1(:)-ZMID1(:))*PNDAT - (ZMID2(:)-ZMID1(:))*(ZSUM-PNDAT)/PNDAT) &
       / ((ZSCARRE-PNDAT)-(ZSUM-PNDAT)*(PNDAT+2.0))
 !
 ZB(:) = ((ZMID2(:)-ZMID1(:)) - (PNDAT*(PNDAT+2.0) * ZA(:))) / PNDAT
@@ -121,11 +114,6 @@ POUT(:) = ZA(:) * PDAT**2 + ZB(:) * PDAT + ZC(:)
 !*    4.     End
 !            ---
 !
-DEALLOCATE(ZMID1)
-DEALLOCATE(ZMID2)
-DEALLOCATE(ZA)
-DEALLOCATE(ZB)
-DEALLOCATE(ZC)
 IF (LHOOK) CALL DR_HOOK('INTERPOL_QUADRA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

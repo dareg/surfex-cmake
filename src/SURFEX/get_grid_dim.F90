@@ -23,6 +23,7 @@
 !!
 !!    Original    03/2004
 !!      07/2011     add IGN grid (B. Decharme)
+!!      P. Samuelsson SMHI  10/2014   Rotated lonlat
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -34,6 +35,7 @@ USE MODI_GET_GRID_DIM_LONLAT_REG
 USE MODI_GET_GRID_DIM_GAUSS
 USE MODI_GET_GRID_DIM_LONLATVAL
 USE MODI_GET_GRID_DIM_IGN
+USE MODI_GET_GRID_DIM_LONLAT_ROT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -76,6 +78,9 @@ SELECT CASE (HGRID)
 
   CASE("IGN       ")
     CALL GET_GRID_DIM_IGN(KGRID_PAR,PGRID_PAR,ORECT,KDIM1,KDIM2)
+
+  CASE("LONLAT ROT")
+    CALL GET_GRID_DIM_LONLAT_ROT(KGRID_PAR,PGRID_PAR,ORECT,KDIM1,KDIM2)
 
   CASE("NONE      ")
     ORECT = .FALSE.

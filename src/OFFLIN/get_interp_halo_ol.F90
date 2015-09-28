@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*	
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,7 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
+USE MODN_IO_OFFLINE, ONLY : NHALO
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -56,7 +56,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('GET_INTERP_HALO_OL',0,ZHOOK_HANDLE)
 !
-KHALO=2
+KHALO = NHALO
 !
 IF (LHOOK) CALL DR_HOOK('GET_INTERP_HALO_OL',1,ZHOOK_HANDLE)
 !

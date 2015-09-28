@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE SOIL( HC1DRY, HSCOND, HSNOW_ISBA,                             &
+      SUBROUTINE SOIL( HC1DRY, HSCOND, HSNOW_ISBA, OGLACIER,                     &
                          PSNOWRHOM, PVEG,                                        &
                          PCGSAT, PCGMAX,                                         &
                          PC1SAT, PC2REF, PACOEF, PPCOEF, PCV,                    &
@@ -43,7 +43,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	S. Belair           * Meteo-France *
+!!      S. Belair           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -64,6 +64,7 @@
 !!                                          to solve numerical problem
 !!                     10/10     (Decharme) The previous computation of WGEQ as ( 1.-ZX(JJ)**(PPCOEF(JJ)*8.) )
 !!                                          can introduced some model explosions for heavy clay soil
+!!                     12/14     (LeMoigne) EBA scheme update
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -83,23 +84,28 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
- CHARACTER(LEN=*),     INTENT(IN)   :: HC1DRY  ! C1 for dry soil formulation
+CHARACTER(LEN=*),     INTENT(IN)   :: HC1DRY  ! C1 for dry soil formulation
 !                                             ! 'DEF' Default: Giard and Bazile
 !                                             ! 'GB93' Giordani 1993, Braud 1993
 !                                             ! (discontinuous at WILT)
 !
- CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
+CHARACTER(LEN=*),     INTENT(IN)   :: HSCOND  ! thermal conductivity formulation
 !                                             ! 'NP89':  Noilhan and Planton 
 !                                             !  (1989: McCumber-Pielke (1981) and
 !                                             !  Clapp and Hornberger (1978))
 !                                             ! 'PL98' Method of Johansen (1975) as
 !                                             ! presented by Peters-Lidard (JAS: 1998)
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                               !         (Douville et al. 1995)
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)
 !
+LOGICAL, INTENT(IN)               :: OGLACIER   ! T = Over permanent snow and ice, 
+!                                               !     initialise WGI=WSAT, Hsnow>=10m 
+!                                               !     and allow 0.8<SNOWALB<0.85
+!                                               ! F = No specific treatment
+!                                                  
 REAL, DIMENSION(:), INTENT(IN)    :: PSNOWRHOM
 !                                      Prognostic variables of ISBA at 't-dt'
 !                                      PSNOWRHOM = density of snow
@@ -155,7 +161,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCS, PFROZEN1
 !                                      PFROZEN1   = fraction of ice in superficial
 !                                               soil
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
+CHARACTER(LEN=*),     INTENT(IN)  :: HKSAT      ! soil hydraulic profil option
 !                                               ! 'DEF'  = ISBA homogenous soil
 !                                               ! 'SGH'  = ksat exponential decay
 !
@@ -321,7 +327,7 @@ ELSE
 !
 ! Degree of saturation of soil:
 !
-    ZSATDEG(JJ)   = MAX(0.1, PWG(JJ,2)/PWSAT(JJ))
+    ZSATDEG(JJ)   = MAX(0.1, (PWGI(JJ,2)+PWG(JJ,2))/PWSAT(JJ))
 !
 ! Kersten number:
 !
@@ -332,7 +338,7 @@ ELSE
 ! in soil:
 !
     ZKERSTEN(JJ)  = (1.0-ZFROZEN2(JJ))*ZKERSTEN(JJ) +           &
-                        ZFROZEN2(JJ) *ZSATDEG(JJ)  
+                         ZFROZEN2(JJ) *ZSATDEG (JJ)  
 !
 ! Thermal conductivity of soil:
 !
@@ -340,9 +346,9 @@ ELSE
 !
 ! Heat capacity of soil:
 !
-    ZHCAP(JJ)     = (1.0-PWSAT(JJ))*PHCAPSOILZ(JJ)      +     &
-                         PWG(JJ,2)  *XCL*XRHOLW       +     &
-                         PWGI(JJ,2) *XCI*XRHOLI       
+    ZHCAP(JJ)     = (1.0-PWSAT(JJ)) * PHCAPSOILZ(JJ) +     &
+                         PWG (JJ,2) * XCL * XRHOLW   +     &
+                         PWGI(JJ,2) * XCI * XRHOLI       
 !
 ! Explicit CG calculation:
 !
@@ -365,7 +371,7 @@ WHERE (PFF(:) > 0.)
        ZCF(:) = 2.0 * SQRT( XPI/(XCONDWTR*XRHOLW*XCL*XDAY) )
 END WHERE  
 !
-IF(HSNOW_ISBA == 'D95')THEN
+IF(HSNOW_ISBA == 'D95' .OR. (HSNOW_ISBA == 'EBA' .AND. OGLACIER) )THEN
 !
    WHERE (PPSN > 0.)
       ZLAMS(:) = XCONDI * (PSNOWRHOM(:)/XRHOLW)**1.885              ! first calculate the
@@ -428,7 +434,7 @@ WHERE (PWG(:,1) > ZWWILT(:))
 END WHERE
 !
 !
-! 	                              Calculate C1 coefficient for dry soil.
+!                                     Calculate C1 coefficient for dry soil.
 !                                     The default option is the continuous
 !                                     formulation of Giard and Bazile. The
 !                                     alternate approach is a discontinuous

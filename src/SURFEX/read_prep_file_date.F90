@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE READ_PREP_FILE_DATE(HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
+SUBROUTINE READ_PREP_FILE_DATE (&
+                                HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
 !     #################################################################################
 !
 !!****  *READ_PREP_FILE_DATE* - reads the date for the surface
@@ -25,8 +26,9 @@ SUBROUTINE READ_PREP_FILE_DATE(HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
 !!------------------------------------------------------------------
 !
 !
+USE MODD_IO_BUFF, ONLY : CREC, NREC
+!
 USE MODD_TYPE_DATE_SURF
-USE MODD_IO_BUFF_n, ONLY : CREC, NREC
 !
 USE MODI_PREP_GRIB_GRID
 USE MODI_READ_BUFFER
@@ -42,6 +44,8 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
@@ -72,8 +76,10 @@ ELSE IF(HFILETYPE=='MESONH' .OR. HFILETYPE=='LFI   ' .OR. HFILETYPE=='ASCII ') T
 !
   HREC = CREC
   IREC = NREC
-  CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
-  CALL READ_SURF(HFILETYPE,'DTCUR           ',TPTIME,IRESP)
+  CALL OPEN_AUX_IO_SURF(&
+                        HFILE,HFILETYPE,'FULL  ')
+  CALL READ_SURF(&
+                 HFILETYPE,'DTCUR           ',TPTIME,IRESP)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   CREC = HREC
   NREC = IREC

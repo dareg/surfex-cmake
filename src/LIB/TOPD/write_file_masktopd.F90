@@ -25,20 +25,22 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      B. Vincendon	* Meteo-France *
+!!      B. Vincendon    * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!
 !!      Original   11/2011
+!!                 03/2014 (B. Vincendon) modification of mask_surf files format
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN, ONLY : CCAT, NNCAT
 USE MODD_COUPLING_TOPD, ONLY : NMASKI, NNPIX
-USE MODD_SURF_PAR,        ONLY : XUNDEF
+USE MODD_SURF_PAR,        ONLY : NUNDEF
 !
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
@@ -56,7 +58,6 @@ INTEGER, INTENT(IN)             :: KI    ! Grid dimensions
 !
 !*      0.2    declarations of local variables
 INTEGER           :: JCAT,JMESH,JPIX
-INTEGER           :: IUNIT
  CHARACTER(LEN=50) :: YNAME
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -69,15 +70,16 @@ DO JCAT=1,NNCAT
   !
   YNAME = TRIM(CCAT(JCAT))//TRIM('.mask_surf')
   !
-  CALL OPEN_FILE('ASCII ',IUNIT,YNAME,'FORMATTED',HACTION='WRITE')
+  CALL OPEN_FILE('ASCII ',NUNIT,YNAME,'FORMATTED',HACTION='WRITE')
   !
   DO JMESH=1,KI
     DO JPIX=1,NNPIX(JMESH)
-      WRITE(IUNIT,*) NMASKI(JMESH,JCAT,JPIX)
+    IF (NMASKI(JMESH,JCAT,JPIX)/=NUNDEF)&
+      WRITE(NUNIT,*) JMESH,NMASKI(JMESH,JCAT,JPIX)
     ENDDO
   ENDDO
   !
-  CALL CLOSE_FILE('ASCII ',IUNIT)
+  CALL CLOSE_FILE('ASCII ',NUNIT)
   !
 ENDDO
 !

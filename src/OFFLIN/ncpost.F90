@@ -7,19 +7,17 @@
 !!
 !-------------------------------------------------------------------------------
 !
+USE MODD_OFF_SURFEX_n
+!
         USE MODD_IO_SURF_ASC
         USE MODD_SURF_PAR
         USE MODI_OPEN_FILEIN_OL
         USE MODI_CLOSE_FILEIN_OL
         USE MODI_READ_SURF
         USE MODE_POS_SURF
-        USE MODD_IO_SURF_OL, ONLY : XSTART,XCOUNT,XSTRIDE,LPARTR
-        
 !
         USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
         USE PARKIND1  ,ONLY : JPRB
-!
-        USE MODI_GOTO_SURFEX
 !
         USE MODI_END_IO_SURF_n
         USE MODI_INIT_IO_SURF_n
@@ -59,12 +57,13 @@
         character (len=40) :: cfile
         character (len=56) :: comlink
         integer    ::   inb_forc
-        integer    ::   i
+        integer    ::   ji
         REAL(KIND=JPRB) :: ZHOOK_HANDLE
         !=====================================================================
 
         IF (LHOOK) CALL DR_HOOK('NCPOST',0,ZHOOK_HANDLE)
-        CALL GOTO_SURFEX(1,.TRUE.)
+        CALL SURFEX_ALLOC_LIST(1)  
+       CALL GOTO_MODEL(1)
 
         !=====================================================================
         !*
@@ -86,10 +85,13 @@
               CFILEIN='PGD.txt'
            ENDIF
 
-           CALL INIT_IO_SURF_n('ASCII ','FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'ASCII ','FULL  ','SURF  ','READ ')
 
-           CALL READ_SURF('ASCII ','DIM_FULL', INI, IRET)
-           CALL READ_SURF('ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
+           CALL READ_SURF(&
+                          'ASCII ','DIM_FULL', INI, IRET)
+           CALL READ_SURF(&
+                          'ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
 
         
            ALLOCATE(XLON(INI))
@@ -139,8 +141,11 @@
         READ(46,'(A1,1X,A6,1X,A16,1X,A40)')PATCHFLAG,CMASK,HREC,CFILE
 
         CALL OPEN_FILEIN_OL
-        call init_io_surf_n('OFFLIN','FULL  ','SURF  ','READ ')
-        call read_surf('OFFLIN','DIM_FULL', INI, IRET)
+CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
+                        'OFFLIN','FULL  ','SURF  ','READ ')
+        
+        CALL READ_SURF(&
+                       'OFFLIN','DIM_FULL', INI, IRET)
         ALLOCATE(XLON(INI))
         ALLOCATE(XLAT(INI))
         OPEN(UNIT=30,FILE='LONLAT.dat',FORM='FORMATTED')
@@ -148,30 +153,35 @@
            READ(30,*)XLON(IP),XLAT(IP)
         ENDDO
 
-        call read_surf('OFFLIN','NB_TIMESTP', INB_FORC, IRET)
-        CALL READ_SURF('OFFLIN','PATCH_NUMBER', IPATCH, IRET)
-        call system('rm SXPOST.nc')
+        CALL READ_SURF(&
+                       'OFFLIN','NB_TIMESTP', INB_FORC, IRET)
+        CALL READ_SURF(&
+                          'OFFLIN','PATCH_NUMBER', IPATCH, IRET)
+        CALL system('rm SXPOST.nc')
         comlink='ln -s '//CFILE//' SXPOST.nc'
-        call system(comlink)
+        CALL system(comlink)
 
         IF (CMASK == 'FORC') THEN
            allocate(zfield2d(inb_forc-1,ini))
-           call read_surf('OFFLIN',HREC,zfield2d(:,:), IRET)
-           do i=1,ini
-              write(50,*)xlon(i),xlat(i),zfield2d(1,i)
+           CALL READ_SURF(&
+                          'OFFLIN',HREC,zfield2d(:,:), IRET)
+           do ji=1,ini
+              write(50,*)xlon(ji),xlat(ji),zfield2d(1,ji)
            enddo
         ELSEIF (CMASK == 'SIMU') THEN
            IF (PATCHFLAG == '+') THEN
               allocate(zfield3d(ini,ipatch,inb_forc-1))
-              call read_surf('OFFLIN',HREC,zfield3d(:,:,:), IRET)
-              do i=1,ini
-                 write(50,*)xlon(i),xlat(i),zfield3d(i,1,1)
+              CALL READ_SURF(&
+                             'OFFLIN',HREC,zfield3d(:,:,:), IRET)
+              do ji=1,ini
+                 write(50,*)xlon(ji),xlat(ji),zfield3d(ji,1,1)
               enddo
            ELSE IF (PATCHFLAG == '-') THEN
               allocate(zfield2d(ini,inb_forc-1))
-              call read_surf('OFFLIN',HREC,zfield2d(:,:), IRET)
-              do i=1,ini
-                 write(50,*)xlon(i),xlat(i),zfield2d(i,1)
+              CALL READ_SURF(&
+                             'OFFLIN',HREC,zfield2d(:,:), IRET)
+              do ji=1,ini
+                 write(50,*)xlon(ji),xlat(ji),zfield2d(ji,1)
               enddo
            ENDIF
         ELSE
@@ -181,6 +191,7 @@
         ENDIF
 
         CALL CLOSE_FILEIN_OL
+        CALL SURFEX_DEALLO_LIST
 
         STOP
  100    CONTINUE

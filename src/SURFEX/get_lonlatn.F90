@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_LONLAT_n(HPROGRAM)
+      SUBROUTINE GET_LONLAT_n (YSC, &
+                               HPROGRAM)
 !     ####################################
 !
 !!****  *GET_LONLAT_n* - routine to get some surface fields
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne   *Meteo France*	
+!!      P. Le Moigne   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,6 +33,9 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
 USE MODI_GET_LUOUT
 USE MODI_GET_COORD_n
@@ -44,12 +48,15 @@ USE MODI_END_IO_SURF_n
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_IO_BUFF_CLEAN_n
+USE MODI_IO_BUFF_CLEAN
 !
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 !
@@ -71,21 +78,26 @@ IF (LHOOK) CALL DR_HOOK('GET_LONLAT_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
- CALL GET_SURF_SIZE_n('FULL', INI)
+ CALL GET_SURF_SIZE_n(YSC%DTCO, YSC%U, &
+                      'FULL', INI)
 !
 ALLOCATE(ZLON(INI))
 ALLOCATE(ZLAT(INI))
 !
- CALL GET_COORD_n(HPROGRAM,INI,ZLON,ZLAT)      
+ CALL GET_COORD_n(YSC%UG, &
+                  HPROGRAM,INI,ZLON,ZLAT)      
 !
- CALL IO_BUFF_CLEAN_n
- CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
+ CALL IO_BUFF_CLEAN
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+                     HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 YCOMMENT='XLON'
- CALL WRITE_SURF(HPROGRAM,'XLON',ZLON(:),IRET,HCOMMENT=YCOMMENT,HDIR='A')
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
+                 HPROGRAM,'XLON',ZLON(:),IRET,HCOMMENT=YCOMMENT,HDIR='A')
 !
 YCOMMENT='XLAT'
- CALL WRITE_SURF(HPROGRAM,'XLAT',ZLAT(:),IRET,HCOMMENT=YCOMMENT,HDIR='A')
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
+                 HPROGRAM,'XLAT',ZLAT(:),IRET,HCOMMENT=YCOMMENT,HDIR='A')
 !
  CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('GET_LONLAT_N',1,ZHOOK_HANDLE)

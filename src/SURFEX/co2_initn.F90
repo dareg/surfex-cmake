@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE CO2_INIT_n(HPHOTO, KSIZE_NATURE_P, KR_NATURE_P, PVEGTYPE_PATCH, &
+      SUBROUTINE CO2_INIT_n (I, &
+                             HPHOTO, KSIZE_NATURE_P, KR_NATURE_P, PVEGTYPE_PATCH, &
                             PCO2, PGMES, PGC, PDMAX, PABC, PPOI, PANMAX, &
                             PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,      &
                             PT1GMES, PT2GMES, PAMAX, PQDAMAX,            &
@@ -28,7 +29,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -47,6 +48,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
@@ -59,6 +65,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
 INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_NATURE_P
@@ -132,9 +141,12 @@ DO JP=1,IPATCH
 !
   IF (KSIZE_NATURE_P(JP) == 0 ) CYCLE
 !
+  IF (MAXVAL(PGMES(:,JP)).NE.XUNDEF .OR. MINVAL(PGMES(:,JP)).NE.XUNDEF) THEN
+
      CALL PACK_CO2_INIT(KR_NATURE_P(:,JP),KSIZE_NATURE_P(JP),JP)
 !
-     CALL COTWOINIT_n(HPHOTO, ZP_VEGTYPE_PATCH,ZP_GMES,ZP_CO2,ZP_GC,   &
+     CALL COTWOINIT_n(I, &
+                      HPHOTO, ZP_VEGTYPE_PATCH,ZP_GMES,ZP_CO2,ZP_GC,   &
             ZP_DMAX,ZP_ABC,ZP_POI,ZP_ANMAX,ZP_FZERO,            &
             ZP_EPSO,ZP_GAMM,ZP_QDGAMM,ZP_QDGMES,ZP_T1GMES,      &
             ZP_T2GMES,ZP_AMAX,ZP_QDAMAX,ZP_T1AMAX,              &
@@ -144,6 +156,9 @@ DO JP=1,IPATCH
      ZP_TURNOVER = 0.
 !
      CALL UNPACK_CO2_INIT(KR_NATURE_P(:,JP),KSIZE_NATURE_P(JP),JP)
+
+  ENDIF
+
 ENDDO
 !
 !-------------------------------------------------------------------------------

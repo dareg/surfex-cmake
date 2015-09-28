@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE HOR_INTERPOL_BUFFER(KLUOUT,PFIELDIN,PFIELDOUT)
+SUBROUTINE HOR_INTERPOL_BUFFER (DTCO, U, &
+                                KLUOUT,PFIELDIN,PFIELDOUT)
 !     #################################################################################
 !
 !!****  *HOR_INTERPOL_BUFFER * - Only extrapolation
@@ -25,6 +26,11 @@ SUBROUTINE HOR_INTERPOL_BUFFER(KLUOUT,PFIELDIN,PFIELDOUT)
 !
 !
 !
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_PREP,       ONLY : CMASK
 !
 USE MODD_GRID_BUFFER,  ONLY : NNI
@@ -41,6 +47,10 @@ USE MODI_GET_SURF_MASK_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFIELDIN  ! field to interpolate horizontally
@@ -59,7 +69,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('HOR_INTERPOL_BUFFER',0,ZHOOK_HANDLE)
 INO = SIZE(PFIELDOUT,1)
 ALLOCATE(IMASKOUT(INO))
- CALL GET_SURF_MASK_n(CMASK,INO,IMASKOUT,NNI,KLUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, &
+                      CMASK,INO,IMASKOUT,NNI,KLUOUT)
 !
 !*      2.    Mask the input field with the output mask
 !!mask du tableau de taille FULL en fonction du type de surface

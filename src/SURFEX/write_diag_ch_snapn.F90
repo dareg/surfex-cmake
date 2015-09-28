@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_CH_SNAP_n(HPROGRAM)
+      SUBROUTINE WRITE_DIAG_CH_SNAP_n (DTCO, DGU, U, CHN, &
+                                       HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_CH_SNAP_n* - writes surface chemical emissions diagnostics
@@ -18,18 +19,24 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson & S. Queguiner  *Meteo France*	
+!!      V. Masson & S. Queguiner  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2012
+!!    M.Leriche 04/2014  change emissions name EMIS_ -> E_ name for coherence with PGD
+!!                       change length of CHARACTER for emission 6->12
 !!-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
+!
 USE MODD_CSTS,        ONLY : XAVOGADRO
-USE MODD_CH_SNAP_n,   ONLY : NEMIS_NBR,XEMIS_FIELDS,CEMIS_NAME,LEMIS_FIELDS
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
@@ -43,6 +50,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
+!
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
@@ -50,7 +63,7 @@ IMPLICIT NONE
 !
 
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=16) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 !
 INTEGER           :: JSPEC
@@ -61,21 +74,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_CH_SNAP_n',0,ZHOOK_HANDLE)
- CALL INIT_IO_SURF_n(HPROGRAM,'FULL  ','SURF  ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                     HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
 !         Writes Emissions of all species
 !
-IF (LEMIS_FIELDS) THEN
-!
-DO JSPEC=1,NEMIS_NBR
-  YRECFM = "EMIS_"//TRIM(CEMIS_NAME(JSPEC))
+DO JSPEC=1,CHN%NEMIS_NBR
+  YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))
   YCOMMENT = "Emission data at time t (ppm*m/s)"
-  CALL WRITE_SURF(HPROGRAM,YRECFM,XEMIS_FIELDS(:,JSPEC),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,CHN%XEMIS_FIELDS(:,JSPEC),IRESP,HCOMMENT=YCOMMENT)
 END DO
 !
-END IF
 !-------------------------------------------------------------------------------
 !
 !         End of IO

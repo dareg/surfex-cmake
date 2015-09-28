@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	    V. Masson   * Meteo France *
+!!      V. Masson   * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -45,7 +45,7 @@ INTEGER                           :: NFORCT
 REAL, DIMENSION(:), ALLOCATABLE   :: XSFTH     ! hourly data of heat surface flux        (W/m2)
 REAL, DIMENSION(:), ALLOCATABLE   :: XSFTQ     ! hourly data of water vapor surface flux (kg/m2/s) or (W/m2)
 REAL, DIMENSION(:,:), ALLOCATABLE :: XSFTS      ! hourly data of scalar surface flux      (kg/m2/s)
-REAL, DIMENSION(:), ALLOCATABLE   :: XSFCO2    ! hourly data of CO2 surface flux         (kg/m2/s)
+REAL, DIMENSION(:), ALLOCATABLE   :: XSFCO2    ! hourly data of CO2 surface flux         (m/s*kg_CO2/kg_air)
  CHARACTER(LEN=5)                  :: CUSTARTYPE ! type of computation for friction
                                                 ! 'USTAR'
                                                 ! 'Z0   '

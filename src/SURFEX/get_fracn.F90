@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_FRAC_n(HPROGRAM,KI,PSEA,PWATER,PNATURE,PTOWN)
+      SUBROUTINE GET_FRAC_n (U, &
+                             HPROGRAM,KI,PSEA,PWATER,PNATURE,PTOWN)
 !     ########################################
 !
 !!****  *GET_FRAC_n* - routine to get some surface fields
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,9 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_n,     ONLY : XSEA, XWATER, XNATURE, XTOWN
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)            :: HPROGRAM
 INTEGER,              INTENT(IN)            :: KI      ! number of points
@@ -67,16 +73,16 @@ IF (LHOOK) CALL DR_HOOK('GET_FRAC_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PSEA) /= SIZE(XSEA) ) THEN
+IF ( SIZE(PSEA) /= SIZE(U%XSEA) ) THEN
   WRITE(ILUOUT,*) 'try to get SEA field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PSEA) :', SIZE(PSEA)
-  WRITE(ILUOUT,*) 'size of field inthe surface                     (XSEA) :', SIZE(XSEA)
+  WRITE(ILUOUT,*) 'size of field inthe surface                     (XSEA) :', SIZE(U%XSEA)
   CALL ABOR1_SFX('GET_FRACN: SEA SIZE NOT CORRECT')
 ELSE
-  PSEA    = XSEA
-  PNATURE = XNATURE
-  PWATER  = XWATER
-  PTOWN   = XTOWN
+  PSEA    = U%XSEA
+  PNATURE = U%XNATURE
+  PWATER  = U%XWATER
+  PTOWN   = U%XTOWN
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_FRAC_N',1,ZHOOK_HANDLE)
 !

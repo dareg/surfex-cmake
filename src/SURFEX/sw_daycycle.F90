@@ -11,6 +11,9 @@ INTEGER,             INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH     ! Zenith angle (rad)
 REAL, DIMENSION(KI), INTENT(OUT) :: PTOT_SW     ! Extraterrestrial solar radiation (W m-2)
 !
+!RJ: missing declaration
+INTEGER :: JJ
+!
 REAL      :: ZC_SOL  ! Solar constant [W/m2]
 REAL      :: ZD_CORR ! Correction to acutal solar distance at any specific day of the year
 INTEGER   :: ZJULIAN ! Julian day of the year

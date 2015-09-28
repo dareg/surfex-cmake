@@ -21,12 +21,13 @@ SUBROUTINE PREP_SEAFLUX_UNIF(KLUOUT,HSURF,PFIELD)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      Modified    09/2013 : S. Senesi : extends to SSS and SIC variables
 !!------------------------------------------------------------------
 !
 
 !
 USE MODD_PREP,       ONLY : CINTERP_TYPE
-USE MODD_PREP_SEAFLUX,   ONLY : XSST_UNIF
+USE MODD_PREP_SEAFLUX,   ONLY : XSST_UNIF, XSSS_UNIF, XSIC_UNIF
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -60,6 +61,19 @@ SELECT CASE(HSURF)
   CASE('SST    ')
     ALLOCATE(PFIELD(1,1))
     PFIELD = XSST_UNIF
+!
+!*      3.2    Sea surface salinity
+!
+  CASE('SSS    ')
+    ALLOCATE(PFIELD(1,1))
+    PFIELD = XSSS_UNIF
+!
+!
+!*      3.3    Sea Ice Cover
+!
+  CASE('SIC    ')
+    ALLOCATE(PFIELD(1,1))
+    PFIELD = XSIC_UNIF
 !
 END SELECT
 !

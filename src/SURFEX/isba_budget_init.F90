@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE ISBA_BUDGET_INIT(HISBA, HSNOW_ISBA,                   &
+SUBROUTINE ISBA_BUDGET_INIT (DGEI, &
+                             HISBA, HSNOW_ISBA,                   &
                             PWG, PWGI, PWR, PSNOWSWE, PDG, PDZG, &
                             PWG_INI, PWGI_INI, PWR_INI, PSWE_INI )
 !     ###############################################################################
@@ -26,10 +27,12 @@ SUBROUTINE ISBA_BUDGET_INIT(HISBA, HSNOW_ISBA,                   &
 !!
 !!------------------------------------------------------------------
 !
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XRHOLW
 !    
-USE MODD_DIAG_EVAP_ISBA_n, ONLY : LWATER_BUDGET
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -37,6 +40,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HISBA      ! type of ISBA version:
 !                                               ! '2-L' (default)
@@ -83,7 +89,7 @@ PWR_INI (:) = XUNDEF
 ! * Water budget
 !   ------------
 !
-IF(LWATER_BUDGET)THEN
+IF(DGEI%LWATER_BUDGET)THEN
 !
 ! total wr at t-1
   PWR_INI(:)=PWR(:)

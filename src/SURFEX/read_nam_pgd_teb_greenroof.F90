@@ -45,6 +45,7 @@ USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 !
+USE MODI_ABOR1_SFX
 USE MODE_POS_SURF
 !
 !
@@ -154,6 +155,10 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_TEB_GREENROOF)
 !
  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
+!--------------------------------------------------
+IF (NTIME_GR/=1 .AND. NTIME_GR/=12) THEN
+  CALL ABOR1_SFX('NTIME_GR must be either equal to 1 (uniform LAI) or 12 (monthly LAI)')
+END IF
 !--------------------------------------------------
 !
 KTIME_GR           = NTIME_GR

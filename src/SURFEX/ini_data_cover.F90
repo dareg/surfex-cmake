@@ -2,7 +2,7 @@
 @PROCESS NOOPTIMIZE
 #endif
 !     #########################
-      SUBROUTINE INI_DATA_COVER
+      SUBROUTINE INI_DATA_COVER (DTCO, U)
 !     #########################
 !
 !!**** *INI_DATA_COVER* initializes cover-field correspondance arrays
@@ -36,10 +36,15 @@
 !!    B.Decharme  01/03/09 Arrange cover by user
 !!    G.Pigeon      08/12 add ROUGH_WALL/ROUGH_ROOF
 !!    V. Masson     04/13 merges Arrange cover & garden use option in arrange_cover routine
+!!    R.Alkama      05/15 Add 7 new vegtype (19 rather than 12)
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -49,9 +54,6 @@ USE MODD_SURFEX_OMP,     ONLY : IDC
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
-USE MODD_DATA_COVER_n,   ONLY : XDATA_NATURE_n => XDATA_NATURE, &
-                                XDATA_GARDEN_n => XDATA_GARDEN, &
-                                XDATA_VEGTYPE_n=> XDATA_VEGTYPE
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER, &
                                   XDATA_LAI, XDATA_VEGTYPE, XDATA_H_TREE,           &
@@ -65,7 +67,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_VEG, XDATA_GREEN, XDATA_Z0, XDATA_Z0_O_Z0H, &
                                   XDATA_EMIS_ECO, XDATA_WRMAX_CF,                   &
                                   XDATA_CE_NITRO,XDATA_CF_NITRO,XDATA_CNA_NITRO,    &
-                                  XDATA_BSLAI_NITRO,                                &
                                   XDATA_GROUND_DEPTH, XDATA_ROOT_DEPTH,             &
                                   XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN,            &
                                   XDATA_SOILRC_SO2, XDATA_SOILRC_O3,                &
@@ -93,26 +94,34 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_CAP_SYS_RAT, XDATA_T_ADP, XDATA_M_SYS_RAT,  &
                                   XDATA_COP_RAT, XDATA_T_SIZE_MAX, XDATA_T_SIZE_MIN,&
                                   XDATA_SHADE, XDATA_NATVENT, XDATA_ROUGH_ROOF,     &
-                                  XDATA_ROUGH_WALL, XDATA_FRAC_GR
+                                  XDATA_ROUGH_WALL, XDATA_FRAC_GR,XDATA_RESIDENTIAL,&
+                                  XDATA_EMIS_PANEL, XDATA_ALB_PANEL,                &
+                                  XDATA_EFF_PANEL, XDATA_FRAC_PANEL,                &
+                                  XDATA_GNDLITTER,                                  &
+                                  XDATA_RGLGV, XDATA_GAMMAGV, XDATA_RSMINGV,        &
+                                  XDATA_ROOT_EXTINCTIONGV, XDATA_WRMAX_CFGV,        &
+                                  XDATA_LAIGV, XDATA_Z0LITTER, XDATA_H_VEG
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
-                                  NVT_TREE, NVT_CONI, NVT_EVER, NVT_C3,   &
+                                  NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_C3,   &
                                   NVT_C4, NVT_IRR, NVT_GRAS, NVT_TROG,    &
-                                  NVT_PARK, JPCOVER, NDATA_ROAD_LAYER,    &
+                                  NVT_PARK, NVT_TRBD, NVT_TEBE, NVT_TENE, &
+                                  NVT_BOBD, NVT_BOND, NVT_BOGR, NVT_SHRB, &
+                                  JPCOVER, NDATA_ROAD_LAYER,              &
                                   NDATA_WALL_LAYER, NDATA_ROOF_LAYER,     &
                                   NDATA_FLOOR_LAYER, CNAMES, NBARE_SOIL,  &
                                   NROCK, NSEA, NWATER, NPERMSNOW  
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
-USE MODD_SURF_ATM_n,     ONLY : LGARDEN
 !
 USE MODE_POS_SURF
 !
 USE MODI_READ_COVERS_PARAM
 !
-USE MODI_DEFAULT_DATA_COVER_1
-USE MODI_DEFAULT_DATA_COVER_2
+USE MODI_ABOR1_SFX
+!
+USE MODI_DEFAULT_DATA_COVER
 !
 USE MODI_DEFAULT_LAI_ECO1_01
 USE MODI_DEFAULT_LAI_ECO1_02
@@ -126,31 +135,36 @@ USE MODI_DEFAULT_LAI_ECO1_09
 USE MODI_DEFAULT_LAI_ECO1_10
 USE MODI_DEFAULT_LAI_ECO1_11
 USE MODI_DEFAULT_LAI_ECO1_12
+USE MODI_DEFAULT_LAI_ECO1_13
+USE MODI_DEFAULT_LAI_ECO1_14
+USE MODI_DEFAULT_LAI_ECO1_15
+USE MODI_DEFAULT_LAI_ECO1_16
+USE MODI_DEFAULT_LAI_ECO1_17
+USE MODI_DEFAULT_LAI_ECO1_18
+USE MODI_DEFAULT_LAI_ECO1_19
 !
-USE MODI_DEFAULT_ALB_ECO1_01_1
-USE MODI_DEFAULT_ALB_ECO1_02_1
-USE MODI_DEFAULT_ALB_ECO1_03_1
-USE MODI_DEFAULT_ALB_ECO1_04_1
-USE MODI_DEFAULT_ALB_ECO1_05_1
-USE MODI_DEFAULT_ALB_ECO1_06_1
-USE MODI_DEFAULT_ALB_ECO1_07_1
-USE MODI_DEFAULT_ALB_ECO1_08_1
-USE MODI_DEFAULT_ALB_ECO1_09_1
-USE MODI_DEFAULT_ALB_ECO1_10_1
-USE MODI_DEFAULT_ALB_ECO1_11_1
-USE MODI_DEFAULT_ALB_ECO1_12_1
-USE MODI_DEFAULT_ALB_ECO1_01_2
-USE MODI_DEFAULT_ALB_ECO1_02_2
-USE MODI_DEFAULT_ALB_ECO1_03_2
-USE MODI_DEFAULT_ALB_ECO1_04_2
-USE MODI_DEFAULT_ALB_ECO1_05_2
-USE MODI_DEFAULT_ALB_ECO1_06_2
-USE MODI_DEFAULT_ALB_ECO1_07_2
-USE MODI_DEFAULT_ALB_ECO1_08_2
-USE MODI_DEFAULT_ALB_ECO1_09_2
-USE MODI_DEFAULT_ALB_ECO1_10_2
-USE MODI_DEFAULT_ALB_ECO1_11_2
-USE MODI_DEFAULT_ALB_ECO1_12_2
+USE MODI_DEFAULT_ALB_SOIL_ECO1
+USE MODI_DEFAULT_ALB_SOIL_ECO2
+!
+USE MODI_DEFAULT_ALB_VEG_ECO1_01
+USE MODI_DEFAULT_ALB_VEG_ECO1_02
+USE MODI_DEFAULT_ALB_VEG_ECO1_03
+USE MODI_DEFAULT_ALB_VEG_ECO1_04
+USE MODI_DEFAULT_ALB_VEG_ECO1_05
+USE MODI_DEFAULT_ALB_VEG_ECO1_06
+USE MODI_DEFAULT_ALB_VEG_ECO1_07
+USE MODI_DEFAULT_ALB_VEG_ECO1_08
+USE MODI_DEFAULT_ALB_VEG_ECO1_09
+USE MODI_DEFAULT_ALB_VEG_ECO1_10
+USE MODI_DEFAULT_ALB_VEG_ECO1_11
+USE MODI_DEFAULT_ALB_VEG_ECO1_12
+USE MODI_DEFAULT_ALB_VEG_ECO1_13
+USE MODI_DEFAULT_ALB_VEG_ECO1_14
+USE MODI_DEFAULT_ALB_VEG_ECO1_15
+USE MODI_DEFAULT_ALB_VEG_ECO1_16
+USE MODI_DEFAULT_ALB_VEG_ECO1_17
+USE MODI_DEFAULT_ALB_VEG_ECO1_18
+USE MODI_DEFAULT_ALB_VEG_ECO1_19
 !
 USE MODI_ARRANGE_COVER
 USE MODI_COVER301_573
@@ -164,6 +178,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -230,20 +248,30 @@ XDATA_SEA = 0.
 !!possible patches correspond to  vegetation types
 !
 !*    2.0    vegetation type fractions
-NVEGTYPE = 12
+!
+NVEGTYPE = 19
 !  
-NVT_NO    = 1      ! no vegetation (smooth)
-NVT_ROCK  = 2      ! no vegetation (rocks)
-NVT_SNOW  = 3      ! permanent snow and ice
-NVT_TREE  = 4      ! forest and trees
-NVT_CONI  = 5      ! forest and trees (coniferous)
-NVT_EVER  = 6      ! forest and trees (broadleaf evergreen)
-NVT_C3    = 7      ! C3 cultures types
-NVT_C4    = 8      ! C4 cultures types
-NVT_IRR   = 9      ! irrigated crops
-NVT_GRAS  =10      ! grassland
-NVT_TROG  =11      ! tropical grassland
-NVT_PARK  =12      ! peat bogs, parks and gardens (irrigated grass)
+!New name  N   Nold   Comments
+!-----------------------------
+NVT_NO   = 1   ! 1  ! no vegetation (smooth)
+NVT_ROCK = 2   ! 2  ! no vegetation (rocks)
+NVT_SNOW = 3   ! 3  ! permanent snow and ice
+NVT_TEBD = 4   ! 4  ! temperate broadleaf cold-deciduous summergreen (TREE)
+NVT_BONE = 5   ! 5  ! boreal needleleaf evergreen  (CONI)
+NVT_TRBE = 6   ! 6  ! tropical broadleaf evergreen (EVER)
+NVT_C3   = 7   ! 7  ! C3 cultures types
+NVT_C4   = 8   ! 8  ! C4 cultures types
+NVT_IRR  = 9   ! 9  ! irrigated crops
+NVT_GRAS =10   !10  ! grassland
+NVT_TROG =11   !11  ! tropical grassland
+NVT_PARK =12   !12  ! peat bogs, parks and gardens (irrigated grass)
+NVT_TRBD =13   ! 4  ! tropical broadleaf deciduous (TREE)
+NVT_TEBE =14   ! 4  ! temperate broadleaf evergreen (TREE)
+NVT_TENE =15   ! 5  ! temperate needleleaf evergreen (CONI)
+NVT_BOBD =16   ! 4  ! boreal broadleaf cold-deciduous summergreen (TREE)
+NVT_BOND =17   ! 5  ! boreal needleleaf cold-deciduous summergreen (CONI)
+NVT_BOGR =18   !10  ! boreal grass (GRAS)
+NVT_SHRB =19   ! 4  ! shrub (TREE)
 !
 !*    2.1    leaf area index
 !            ---------------
@@ -588,15 +616,6 @@ XDATA_CNA_NITRO (:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
-!*    2.23   biomass/LAI ratio from nitrogen decline theory
-!            ----------------------------------------------
-!
-ALLOCATE(XDATA_BSLAI_NITRO(JPCOVER,NVEGTYPE))
-!
-XDATA_BSLAI_NITRO (:,:) = XUNDEF                                
-!
-!-------------------------------------------------------------------------------
-!
 !*    2.24   seeding and reaping dates
 !            -------------------------
 !
@@ -631,6 +650,38 @@ XDATA_IRRIG (:,:) = 0.
 ALLOCATE(XDATA_WATSUP(JPCOVER,NVEGTYPE))
 !
 XDATA_WATSUP (:,:) = 0.                                
+!
+!-------------------------------------------------------------------------------
+!
+!*    2.26   For multi-energy balance (MEB)
+!            ------------------------------                     
+!
+ALLOCATE(XDATA_RGLGV(JPCOVER,NVEGTYPE))
+XDATA_RGLGV (:,:) = XUNDEF                                
+!
+ALLOCATE(XDATA_GAMMAGV(JPCOVER,NVEGTYPE))
+XDATA_GAMMAGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_RSMINGV(JPCOVER,NVEGTYPE))
+XDATA_RSMINGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_ROOT_EXTINCTIONGV(JPCOVER,NVEGTYPE))
+XDATA_ROOT_EXTINCTIONGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_WRMAX_CFGV(JPCOVER,NVEGTYPE))
+XDATA_WRMAX_CFGV (:,:) = XUNDEF
+!
+ALLOCATE(XDATA_LAIGV(JPCOVER,36,NVEGTYPE))
+XDATA_LAIGV (:,:,:) = XUNDEF
+!
+ALLOCATE(XDATA_GNDLITTER(JPCOVER,36,NVEGTYPE))
+XDATA_GNDLITTER (:,:,:) = XUNDEF
+!
+ALLOCATE(XDATA_Z0LITTER(JPCOVER,36,NVEGTYPE))
+XDATA_Z0LITTER (:,:,:) = XUNDEF
+!
+ALLOCATE(XDATA_H_VEG(JPCOVER,36,NVEGTYPE))
+XDATA_H_VEG (:,:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -860,6 +911,9 @@ ALLOCATE(XDATA_ROUGH_WALL (JPCOVER))
 XDATA_ROUGH_ROOF(:) = XUNDEF 
 XDATA_ROUGH_WALL(:) = XUNDEF
 !
+ALLOCATE(XDATA_RESIDENTIAL (JPCOVER))
+XDATA_RESIDENTIAL(:) = XUNDEF
+!
 !-------------------------------------------------------------------------------
 !
 !*    3.13   For greenroof
@@ -868,6 +922,21 @@ XDATA_ROUGH_WALL(:) = XUNDEF
 ALLOCATE(XDATA_FRAC_GR (JPCOVER))
 !
 XDATA_FRAC_GR (:) = 0.
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.14   For solar panels
+!            ----------------
+!
+ALLOCATE(XDATA_EMIS_PANEL (JPCOVER))
+ALLOCATE(XDATA_ALB_PANEL  (JPCOVER))
+ALLOCATE(XDATA_EFF_PANEL  (JPCOVER))
+ALLOCATE(XDATA_FRAC_PANEL (JPCOVER))
+!
+XDATA_EMIS_PANEL (:) = XUNDEF
+XDATA_ALB_PANEL  (:) = XUNDEF
+XDATA_EFF_PANEL  (:) = XUNDEF
+XDATA_FRAC_PANEL (:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -888,8 +957,7 @@ XDATA_FRAC_GR (:) = 0.
 IF (LREAD_DATA_COVER) THEN
   CALL READ_COVERS_PARAM(1)
 ELSE
-  CALL DEFAULT_DATA_COVER_1
-  CALL DEFAULT_DATA_COVER_2
+  CALL DEFAULT_DATA_COVER
 !
   CALL DEFAULT_LAI_ECO1_01
   CALL DEFAULT_LAI_ECO1_02
@@ -903,36 +971,50 @@ ELSE
   CALL DEFAULT_LAI_ECO1_10
   CALL DEFAULT_LAI_ECO1_11
   CALL DEFAULT_LAI_ECO1_12
+  CALL DEFAULT_LAI_ECO1_13
+  CALL DEFAULT_LAI_ECO1_14
+  CALL DEFAULT_LAI_ECO1_15
+  CALL DEFAULT_LAI_ECO1_16
+  CALL DEFAULT_LAI_ECO1_17
+  CALL DEFAULT_LAI_ECO1_18
+  CALL DEFAULT_LAI_ECO1_19
 !
-  CALL DEFAULT_ALB_ECO1_01_1
-  CALL DEFAULT_ALB_ECO1_02_1
-  CALL DEFAULT_ALB_ECO1_03_1
-  CALL DEFAULT_ALB_ECO1_04_1
-  CALL DEFAULT_ALB_ECO1_05_1
-  CALL DEFAULT_ALB_ECO1_06_1
-  CALL DEFAULT_ALB_ECO1_07_1
-  CALL DEFAULT_ALB_ECO1_08_1
-  CALL DEFAULT_ALB_ECO1_09_1
-  CALL DEFAULT_ALB_ECO1_10_1
-  CALL DEFAULT_ALB_ECO1_11_1
-  CALL DEFAULT_ALB_ECO1_12_1
+  CALL DEFAULT_ALB_SOIL_ECO1
+  CALL DEFAULT_ALB_SOIL_ECO2
 !
-  CALL DEFAULT_ALB_ECO1_01_2
-  CALL DEFAULT_ALB_ECO1_02_2
-  CALL DEFAULT_ALB_ECO1_03_2
-  CALL DEFAULT_ALB_ECO1_04_2
-  CALL DEFAULT_ALB_ECO1_05_2
-  CALL DEFAULT_ALB_ECO1_06_2
-  CALL DEFAULT_ALB_ECO1_07_2
-  CALL DEFAULT_ALB_ECO1_08_2
-  CALL DEFAULT_ALB_ECO1_09_2
-  CALL DEFAULT_ALB_ECO1_10_2
-  CALL DEFAULT_ALB_ECO1_11_2
-  CALL DEFAULT_ALB_ECO1_12_2
+  CALL DEFAULT_ALB_VEG_ECO1_01
+  CALL DEFAULT_ALB_VEG_ECO1_02
+  CALL DEFAULT_ALB_VEG_ECO1_03
+  CALL DEFAULT_ALB_VEG_ECO1_04
+  CALL DEFAULT_ALB_VEG_ECO1_05
+  CALL DEFAULT_ALB_VEG_ECO1_06
+  CALL DEFAULT_ALB_VEG_ECO1_07
+  CALL DEFAULT_ALB_VEG_ECO1_08
+  CALL DEFAULT_ALB_VEG_ECO1_09
+  CALL DEFAULT_ALB_VEG_ECO1_10
+  CALL DEFAULT_ALB_VEG_ECO1_11
+  CALL DEFAULT_ALB_VEG_ECO1_12
+  CALL DEFAULT_ALB_VEG_ECO1_13
+  CALL DEFAULT_ALB_VEG_ECO1_14
+  CALL DEFAULT_ALB_VEG_ECO1_15
+  CALL DEFAULT_ALB_VEG_ECO1_16
+  CALL DEFAULT_ALB_VEG_ECO1_17
+  CALL DEFAULT_ALB_VEG_ECO1_18
+  CALL DEFAULT_ALB_VEG_ECO1_19
 !
 ENDIF
 !
- CALL COVER301_573
+CALL COVER301_573
+!
+!-------------------------------------------------------------------------------
+!
+!For one cover, the soil albedo from CM13 is the same for each vegtype
+DO JVEGTYPE=2,NVEGTYPE
+   DO JCOVER = 1, JPCOVER
+      XDATA_ALB_SOIL_NIR(JCOVER,:,JVEGTYPE) = XDATA_ALB_SOIL_NIR(JCOVER,:,1)
+      XDATA_ALB_SOIL_VIS(JCOVER,:,JVEGTYPE) = XDATA_ALB_SOIL_VIS(JCOVER,:,1)
+   ENDDO
+ENDDO
 !
 !-------------------------------------------------------------------------------
 !
@@ -949,17 +1031,25 @@ DO JCOVER = 1, JPCOVER
   !
   IF (XDATA_SEA(JCOVER)==1.) THEN
     ICPT_SEA = ICPT_SEA + 1
+    IF(ICPT_SEA>SIZE(NSEA))THEN
+      CALL ABOR1_SFX('INI_DATA_COVER: problem with ecoclimap param : ICPT_SEA > SIZE(NSEA) ')
+    ENDIF    
     NSEA(ICPT_SEA) = JCOVER
   ENDIF
   !
   IF (XDATA_WATER(JCOVER)==1.) THEN
     ICPT_WATER = ICPT_WATER + 1
+    IF(ICPT_WATER>SIZE(NWATER))THEN
+      CALL ABOR1_SFX('INI_DATA_COVER: problem with ecoclimap param : ICPT_WATER > SIZE(NWATER) ')
+    ENDIF
     NWATER(ICPT_WATER) = JCOVER
   ENDIF
   !
   IF (XDATA_TOWN(JCOVER)==0.) CYCLE
   !
   XDATA_CAN_HW_RATIO(JCOVER) = 0.5 * XDATA_WALL_O_HOR(JCOVER) / (1.-XDATA_BLD (JCOVER))
+  !
+  !* Building Energy Model variables 
   !
   XDATA_HC_FLOOR(JCOVER,:) = 2016000.
   XDATA_TC_FLOOR(JCOVER,:) = 1.95
@@ -995,6 +1085,12 @@ DO JCOVER = 1, JPCOVER
   XDATA_NATVENT(JCOVER)      = 0.0  
   XDATA_ROUGH_ROOF(JCOVER)   = 1.52  
   XDATA_ROUGH_WALL(JCOVER)   = 1.52  
+  XDATA_RESIDENTIAL(JCOVER)  = 1.
+  !
+  XDATA_EMIS_PANEL (JCOVER) = 0.9
+  XDATA_ALB_PANEL  (JCOVER) = 0.1
+  XDATA_EFF_PANEL  (JCOVER) = 0.14
+  XDATA_FRAC_PANEL (JCOVER) = 0.
   !  
   IF (XDATA_GARDEN(JCOVER)/=0.) THEN
     DO JVEGTYPE=1,NVEGTYPE
@@ -1009,12 +1105,19 @@ DO JCOVER = 1, JPCOVER
   !
 END DO
 !
+IF(ICPT_SEA<SIZE(NSEA))THEN
+  CALL ABOR1_SFX('INI_DATA_COVER: problem with ecoclimap param : ICPT_SEA < SIZE(NSEA) ')
+ENDIF    
+IF(ICPT_WATER<SIZE(NWATER))THEN
+  CALL ABOR1_SFX('INI_DATA_COVER: problem with ecoclimap param : ICPT_WATER < SIZE(NWATER) ')
+ENDIF
+!
 !-------------------------------------------------------------------------------
 CNAMES(:,:) = ' '
 !-------------------------------------------------------------------------------
 !
 CNAMES(1,1) = 'Sea and ocean'
-CNAMES(2,1) = 'Inland waters'
+CNAMES(2,1) = 'Lakes'
 CNAMES(3,1) = 'Rivers'
 CNAMES(4,1) = 'Bare land'
 CNAMES(5,1) = 'Rocks'
@@ -1520,15 +1623,15 @@ CNAMES(546,1)='BARE LAND11'
 CNAMES(547,1)='BARE LAND12'
 CNAMES(548,1)='PERMANENT SNOW1'
 
-!swamp areas and inland waters      
-CNAMES(549,1)='INLAND WATERS1'
-CNAMES(550,1)='UNDEFINED1'
-CNAMES(551,1)='INLAND WATERS2'
+!Estuaries and swamp areas      
+CNAMES(549,1)='WADDEN SEA'
+CNAMES(550,1)='ESTUARY1'
+CNAMES(551,1)='ESTUARY2'
 CNAMES(552,1)='POLAR WETLANDS1'
-CNAMES(553,1)='INLAND WATERS3'
-CNAMES(554,1)='INLAND WATERS4'
-CNAMES(555,1)='INLAND WATERS5'
-CNAMES(556,1)='INLAND WATERS6'
+CNAMES(553,1)='ESTUARY3'
+CNAMES(554,1)='ESTUARY4'
+CNAMES(555,1)='ESTUARY5'
+CNAMES(556,1)='ESTUARY6'
 CNAMES(557,1)='POLAR WETLANDS2'
 CNAMES(558,1)='SUBPOLAR WETLANDS1'
 CNAMES(559,1)='SUBPOLAR WETLANDS2'
@@ -1555,7 +1658,7 @@ CNAMES(573,1)='LANGUEDOC VINEYARDS1'
 !
 
 CNAMES(1,2) = "Mers et oc\'eans"
-CNAMES(2,2) = "Eaux int\'erieures"
+CNAMES(2,2) = "Lacs"
 CNAMES(3,2) = "rivi\`eres"
 CNAMES(4,2) = "Sol nu"
 CNAMES(5,2) = "Rochers"
@@ -2062,15 +2165,15 @@ CNAMES(546,2)='BARE LAND11'
 CNAMES(547,2)='BARE LAND12'
 CNAMES(548,2)='PERMANENT SNOW1'
 
-!swamp areas and inland waters      
-CNAMES(549,2)='INLAND WATERS1'
-CNAMES(550,2)='UNDEFINED1'
-CNAMES(551,2)='INLAND WATERS2'
+!Estuaries and swamp areas      
+CNAMES(549,2)='WADDEN SEA'
+CNAMES(550,2)='ESTUARY1'
+CNAMES(551,2)='ESTUARY2'
 CNAMES(552,2)='POLAR WETLANDS1'
-CNAMES(553,2)='INLAND WATERS3'
-CNAMES(554,2)='INLAND WATERS4'
-CNAMES(555,2)='INLAND WATERS5'
-CNAMES(556,2)='INLAND WATERS6'
+CNAMES(553,2)='ESTUARY3'
+CNAMES(554,2)='ESTUARY4'
+CNAMES(555,2)='ESTUARY5'
+CNAMES(556,2)='ESTUARY6'
 CNAMES(557,2)='POLAR WETLANDS2'
 CNAMES(558,2)='SUBPOLAR WETLANDS1'
 CNAMES(559,2)='SUBPOLAR WETLANDS2'
@@ -2113,27 +2216,28 @@ ENDIF
 !*    9.     Arrange cover (optional nam_pgd_arrange_cover & option to use !gardens or not)
 !            ------------------------------------------------------------------------------
 !
- CALL ARRANGE_COVER(XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
-                    XDATA_GARDEN,LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
+ CALL ARRANGE_COVER(DTCO, U, &
+                    XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
+                    XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
 !-------------------------------------------------------------------------------
 !
 !*   10.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
- CALL ECOCLIMAP2_LAI
+ CALL ECOCLIMAP2_LAI(DTCO)
 !
 !-------------------------------------------------------------------------------
 !
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
- CALL INI_DATA_PARAM(XDATA_VEGTYPE_n, PSURF=XDATA_NATURE_n, PSURF2=XDATA_GARDEN_n, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+ CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                                   PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                                   PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
                                   PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
-                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN=XDATA_LAIMIN, PDMAX=XDATA_DMAX,                  &
+                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
                                   PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
                                   PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
                                   PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
@@ -2141,7 +2245,11 @@ ENDIF
                                   PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
                                   PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
                                   PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
-                                  PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST)
+                                  PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST,                            &
+                                  PGNDLITTER=XDATA_GNDLITTER,                                                    &
+                                  PRGLGV=XDATA_RGLGV,PGAMMAGV=XDATA_GAMMAGV, PRSMINGV=XDATA_RSMINGV,             &
+                                  PROOT_EXTINCTIONGV=XDATA_ROOT_EXTINCTIONGV, PWRMAX_CFGV=XDATA_WRMAX_CFGV,      &
+                                  PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0LITTER=XDATA_Z0LITTER           )
 !
 IDC = 1
 !

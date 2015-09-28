@@ -1,5 +1,6 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_LONLAT_REG(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
+      SUBROUTINE READ_GRIDTYPE_LONLAT_REG (&
+                                           HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
 !!****  *READ_GRIDTYPE_LONLAT_REG* - routine to initialise the horizontal grid
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,6 +33,9 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -48,6 +52,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
@@ -75,7 +81,8 @@ REAL, DIMENSION(KLU) :: ZLAT ! latitudes
 !
 INTEGER :: ILUOUT
 !---------------------------------------------------------------------------
-REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR
+REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR=>NULL()
+!$OMP THREADPRIVATE(ZGRID_PAR)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
@@ -83,14 +90,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_LONLAT_REG',0,ZHOOK_HANDLE)
- CALL READ_SURF(HPROGRAM,'LONMIN',ZLONMIN,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'LONMAX',ZLONMAX,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'LATMIN',ZLATMIN,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'LATMAX',ZLATMAX,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'NLON',ILON,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'NLAT',ILAT,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'REG_LON',ZLON,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'REG_LAT',ZLAT,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'LONMIN',ZLONMIN,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'LONMAX',ZLONMAX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'LATMIN',ZLATMIN,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'LATMAX',ZLATMAX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'NLON',ILON,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'NLAT',ILAT,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'REG_LON',ZLON,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'REG_LAT',ZLAT,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !

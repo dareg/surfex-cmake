@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_Z0_n(HPROGRAM,KI,PZ0,PZ0H)
+      SUBROUTINE GET_Z0_n (DGU, &
+                           HPROGRAM,KI,PZ0,PZ0H)
 !     #########################################
 !
 !!****  *GET_Z0_n* - routine to get roughness lengths
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne *Meteo France*	
+!!      P. Le Moigne *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,10 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY   : XAVG_Z0, XAVG_Z0H, LCOEF
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -46,6 +49,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -64,9 +70,9 @@ IF (LHOOK) CALL DR_HOOK('GET_Z0_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (LCOEF)      THEN 
-        PZ0      = XAVG_Z0      
-        PZ0H     = XAVG_Z0H
+IF (DGU%LCOEF)      THEN 
+        PZ0      = DGU%XAVG_Z0      
+        PZ0H     = DGU%XAVG_Z0H
    ELSE 
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF

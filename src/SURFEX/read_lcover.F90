@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_LCOVER(HPROGRAM,OCOVER)
+      SUBROUTINE READ_LCOVER (&
+                              HPROGRAM,OCOVER)
 !     ################################
 !
 !!****  *READ_LCOVER* - routine to read a file for
@@ -27,7 +28,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -36,6 +37,9 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
@@ -49,6 +53,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 LOGICAL, DIMENSION(JPCOVER)    :: OCOVER   ! list of covers
@@ -67,14 +73,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* ascendant compatibility
 IF (LHOOK) CALL DR_HOOK('READ_LCOVER',0,ZHOOK_HANDLE)
 YRECFM='VERSION'
- CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,IVERSION,IRESP)
 IF (IVERSION<=3) THEN
   ALLOCATE(GCOVER(255))
 ELSE
   ALLOCATE(GCOVER(JPCOVER))
 END IF
- CALL OLD_NAME(HPROGRAM,'COVER_LIST      ',YRECFM)
- CALL READ_SURF(HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
+ CALL OLD_NAME(&
+               HPROGRAM,'COVER_LIST      ',YRECFM)
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
 !
 OCOVER=.FALSE.
 OCOVER(:SIZE(GCOVER))=GCOVER(:)

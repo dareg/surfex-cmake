@@ -23,8 +23,8 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
-!!
+!!      E. Martin   *Meteo France*
+!!      M Lafaysse 08/2013 missing deallocate
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2007 
@@ -106,6 +106,18 @@ PMESH_SIZE(:) = XRADIUS**2 * XPI/180.*(ZDLON(:))              &
 !              ----------------------------------------------------
 !
 PDIR(:) = 0.
+
+
+
+DEALLOCATE(ZX)
+DEALLOCATE(ZY)
+DEALLOCATE(ZDX)
+DEALLOCATE(ZDY)
+DEALLOCATE(ZDLON)
+DEALLOCATE(ZDLAT)
+
+
+
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_LONLATVAL',1,ZHOOK_HANDLE)
 !
 !---------------------------------------------------------------------------

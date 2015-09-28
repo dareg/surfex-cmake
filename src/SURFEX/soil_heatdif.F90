@@ -1,6 +1,8 @@
 !     #########
-      SUBROUTINE SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,                          &
-                              PSOILHCAPZ,PCT,PTERM1,PTERM2,PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX)  
+      SUBROUTINE SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,   &
+                              PSOILHCAPZ,PCT,PTERM1,PTERM2,    &
+                              PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX,&
+                              PFLUX_COR                        )  
 !     ############################################################################
 !
 !!****  *SOIL_HEATDIF*  
@@ -48,13 +50,14 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	A. Boone          * Meteo-France *
+!!      A. Boone          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    16/02/00   Boone
 !!      Modif       08/2011 B. Decharme : Optimization
-!
+!!      Modif       10/2014 B. Decharme : Use harmonic mean to compute 
+!!                                        interfacial thermal conductivities
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -90,9 +93,11 @@ REAL, DIMENSION(:), INTENT(IN)      :: PCT, PTERM1, PTERM2, PTDEEP_A, PTDEEP_B
 !                                      Tdeep = PTDEEP_B + PTDEEP_A * PDEEP_FLUX
 !                                              (with PDEEP_FLUX in W/m2)
 !
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ, PSOILHCAPZ
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ, PSOILHCAPZ, PFLUX_COR
 !                                      PSOILCONDZ = soil thermal conductivity [W/(K m)]
 !                                      PSOILHCAPZ = soil heat capacity [J/(m3 K)]
+!                                      PFLUX_COR  = correction flux to close energy budget (W/m2)
+!
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDZDIF, PDZG
 !                                      PDZDIF = distance between consecuative layer mid-points
 !                                      PDZG   = soil layers thicknesses
@@ -139,13 +144,14 @@ INLVLD = SIZE(PTG(:,:),2)
 !
 DO JL=1,INLVLD
   DO JJ=1,INI
-     ZWORK1 = PDZG(JJ,JL)*PSOILCONDZ(JJ,JL)
      IF(JL<INLVLD)THEN
-       ZWORK2 = PDZG(JJ,JL+1)*PSOILCONDZ(JJ,JL+1)
+       ZWORK1 = PDZG(JJ,JL  )/(2.0*PDZDIF(JJ,JL)*PSOILCONDZ(JJ,JL  ))
+       ZWORK2 = PDZG(JJ,JL+1)/(2.0*PDZDIF(JJ,JL)*PSOILCONDZ(JJ,JL+1))
      ELSE
+       ZWORK1 = PDZG(JJ,JL)/(2.0*PDZDIF(JJ,JL)*PSOILCONDZ(JJ,JL))
        ZWORK2 = 0.0
      ENDIF
-     ZDTERM(JJ,JL)=(ZWORK1+ZWORK2)/(2.0*PDZDIF(JJ,JL)*PDZDIF(JJ,JL))
+     ZDTERM(JJ,JL)=1.0/(PDZDIF(JJ,JL)*(ZWORK1+ZWORK2))
      ZCTERM(JJ,JL)= PSOILHCAPZ(JJ,JL)*PDZG(JJ,JL)/PTSTEP
   ENDDO
 ENDDO 
@@ -166,7 +172,7 @@ DO JL=2,INLVLD-1
    ZAMTRX(JJ,JL) = -ZDTERM(JJ,JL-1) 
    ZBMTRX(JJ,JL) =  ZCTERM(JJ,JL) + ZDTERM(JJ,JL-1) + ZDTERM(JJ,JL)
    ZCMTRX(JJ,JL) = -ZDTERM(JJ,JL)
-   ZFRCV (JJ,JL) =  ZCTERM(JJ,JL)*ZTGM(JJ,JL)
+   ZFRCV (JJ,JL) =  ZCTERM(JJ,JL)*ZTGM(JJ,JL)+PFLUX_COR(JJ,JL)
    ENDDO
 ENDDO
 !
@@ -190,10 +196,11 @@ WHERE(PTDEEP_B(:) /= XUNDEF)
    ZBMTRX(:,INLVLD) =  ZCTERM(:,INLVLD) + ZDTERM(:,INLVLD-1) &
                      + ZDTERM(:,INLVLD)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
    ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) &
-                     + ZDTERM(:,INLVLD)*PTDEEP_B(:)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A)
+                     + ZDTERM(:,INLVLD)*PTDEEP_B(:)/(1.+ZDTERM(:,INLVLD)*PTDEEP_A) &
+                     + PFLUX_COR(:,INLVLD)
 ELSEWHERE
    ZBMTRX(:,INLVLD) =  ZCTERM(:,INLVLD) + ZDTERM(:,INLVLD-1) 
-   ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD) 
+   ZFRCV(:,INLVLD)  =  ZCTERM(:,INLVLD)*ZTGM(:,INLVLD)+PFLUX_COR(:,INLVLD)
 END WHERE
 !
 ! - - -------------------------------------------------

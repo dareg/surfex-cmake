@@ -1,9 +1,11 @@
-!     #######################################################################################
-      SUBROUTINE UPDATE_ESM_SEAFLUX_n(HPROGRAM,KI,KSW,PZENITH,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD)
-!     #######################################################################################
+!     ###################################################################
+      SUBROUTINE UPDATE_ESM_SEAFLUX_n (S, &
+                                       KI,KSW,PZENITH,PDIR_ALB,     &
+                                      PSCA_ALB,PEMIS,PTSRAD,PTSURF )
+!     ##############################################################
 !
-!!****  *UPDATE_ESM_SEAFLUX_n* - routine to update SEAFLUX radiative properties in Earth
-!!                               System Model after the call to OASIS coupler in order 
+!!****  *UPDATE_ESM_SEAFLUX_n* - routine to update SEAFLUX radiative and physical properties in
+!!                               Earth System Model after the call to OASIS coupler in order 
 !!                               to close the energy budget between radiative scheme and surfex
 !!
 !!    PURPOSE
@@ -30,16 +32,18 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    09/2009
+!!      B. Decharme 06/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_CSTS,           ONLY : XTTS
-USE MODD_SEAFLUX_n,      ONLY : XDIR_ALB, XSCA_ALB,   &
-                                  XEMIS, XSST, CSEA_ALB  
 !
-USE MODI_UPDATE_RAD_SEAWAT
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
+USE MODD_CSTS,           ONLY : XTTS
+!
+USE MODI_UPDATE_RAD_SEA
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -50,7 +54,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+!
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
 !
@@ -60,11 +66,13 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSRAD    ! radiative temperature
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
@@ -73,8 +81,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_SEAFLUX_N',0,ZHOOK_HANDLE)
- CALL UPDATE_RAD_SEAWAT(CSEA_ALB,XSST,PZENITH,XTTS,XEMIS,XDIR_ALB,&
-                         XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD   )  
+!
+CALL UPDATE_RAD_SEA(S%CSEA_ALB,S%XSST,PZENITH,XTTS,S%XEMIS,S%XDIR_ALB,&
+                    S%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD   ) 
+!
+PTSURF(:) = S%XSST(:)
+!
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_SEAFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

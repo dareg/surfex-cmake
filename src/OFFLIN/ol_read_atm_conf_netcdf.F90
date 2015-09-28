@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF_NETCDF(HSURF_FILETYPE,                &
+SUBROUTINE OL_READ_ATM_CONF_NETCDF (YSC, &
+                                    HSURF_FILETYPE,                &
                                      PDURATION, PTSTEP_FORC, KNI, &
                                      KYEAR, KMONTH, KDAY, PTIME,  &
                                      PLAT, PLON, PZS,             &
@@ -27,7 +28,7 @@ SUBROUTINE OL_READ_ATM_CONF_NETCDF(HSURF_FILETYPE,                &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -37,6 +38,9 @@ SUBROUTINE OL_READ_ATM_CONF_NETCDF(HSURF_FILETYPE,                &
 !!                  with GTMSK to read dimensions.
 !!      Modified by Matthieu Lafaysse 2012-11-12
 !==================================================================
+!
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -57,9 +61,11 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
 INTEGER,          INTENT(OUT) :: KNI
@@ -91,10 +97,10 @@ IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_CONF_NETCDF',0,ZHOOK_HANDLE)
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
 #endif
-  !  
+  !
   CALL GET_LUOUT(HSURF_FILETYPE,ILUOUT)
   !
   !*      1.    Read parameters from netcdf forcing file
@@ -102,31 +108,35 @@ IF (NRANK==NPIO) THEN
   YUNITS = ""
   CALL READ_SURF_DIM_OL(YUNITS, INB_FORC, INI, ZFIRSTTIMEFILE, IRET)
   !
-#ifndef NOMPI  
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
-  !  
+  !
 ENDIF
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI        
+#ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
   CALL MPI_BCAST(INB_FORC,KIND(INB_FORC)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
   XTIME_COMM_READ = XTIME_COMM_READ + (MPI_WTIME() - XTIME0)
 #endif
 ENDIF
 !
- CALL READ_SURF('OFFLIN','FRC_TIME_STP'  ,PTSTEP_FORC   ,IRET)
+ CALL READ_SURF(&
+                'OFFLIN','FRC_TIME_STP'  ,PTSTEP_FORC   ,IRET)
 !
 PDURATION = ( INB_FORC - 1 ) * PTSTEP_FORC
 !
 !*      2.    Read full grid dimension and date
 !
  CALL SET_SURFEX_FILEIN(HSURF_FILETYPE,'PREP')
- CALL INIT_IO_SURF_n(HSURF_FILETYPE,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+                      HSURF_FILETYPE,'FULL  ','SURF  ','READ ')  
 !
- CALL READ_SURF(HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
- CALL READ_SURF(HSURF_FILETYPE,'DTCUR',TTIME,IRET)
+ CALL READ_SURF(&
+                HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
+ CALL READ_SURF(&
+                HSURF_FILETYPE,'DTCUR',TTIME,IRET)
 !
 KYEAR  = TTIME%TDATE%YEAR
 KMONTH = TTIME%TDATE%MONTH
@@ -137,7 +147,8 @@ PTIME  = TTIME%TIME
 !
 !*      5.    Geographical initialization
 !
- CALL GET_SIZE_FULL_n('OFFLIN ',IDIM_FULL,KNI) 
+ CALL GET_SIZE_FULL_n(YSC%U, &
+                      'OFFLIN ',IDIM_FULL,KNI) 
 !
 ALLOCATE(PLON(KNI))
 ALLOCATE(PLAT(KNI))
@@ -145,11 +156,16 @@ ALLOCATE(PZS(KNI))
 ALLOCATE(PZREF(KNI))
 ALLOCATE(PUREF(KNI))
 !
- CALL READ_SURF('OFFLIN','LAT',PLAT,IRET)
- CALL READ_SURF('OFFLIN','LON',PLON,IRET)
- CALL READ_SURF('OFFLIN','ZS',PZS,IRET)
- CALL READ_SURF('OFFLIN','ZREF',PZREF,IRET)
- CALL READ_SURF('OFFLIN','UREF',PUREF,IRET)
+ CALL READ_SURF(&
+                'OFFLIN','LAT',PLAT,IRET)
+ CALL READ_SURF(&
+                'OFFLIN','LON',PLON,IRET)
+ CALL READ_SURF(&
+                'OFFLIN','ZS',PZS,IRET)
+ CALL READ_SURF(&
+                'OFFLIN','ZREF',PZREF,IRET)
+ CALL READ_SURF(&
+                'OFFLIN','UREF',PUREF,IRET)
 !
 !*      6.    Check the consistency
 !

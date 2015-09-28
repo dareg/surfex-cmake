@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE DEEPSOIL_UPDATE(KMONTH)
+    SUBROUTINE DEEPSOIL_UPDATE (I, &
+                                KMONTH)
 !   ###############################################################
 !!****  *DEEPSOIL_UPDATE*
 !!
@@ -27,7 +28,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	P. Le Moigne          * Meteo-France *
+!!      P. Le Moigne          * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -38,8 +39,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DEEPSOIL, ONLY : XTDEEP_CLI, XGAMMAT_CLI
-USE MODD_ISBA_n  , ONLY : XTDEEP, XGAMMAT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -50,6 +53,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 INTEGER,              INTENT(IN)    :: KMONTH   ! current month
 !
 !*      0.2    declarations of local variables
@@ -59,11 +65,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',0,ZHOOK_HANDLE)
-DO IP=1,SIZE(XTDEEP)
+DO IP=1,SIZE(I%XTDEEP)
    !
-   XTDEEP (IP) = XTDEEP_CLI (KMONTH)
+   I%XTDEEP (IP) = XTDEEP_CLI (KMONTH)
    !
-   XGAMMAT(IP) = 1. / XGAMMAT_CLI(KMONTH)
+   I%XGAMMAT(IP) = 1. / XGAMMAT_CLI(KMONTH)
    !
 ENDDO
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',1,ZHOOK_HANDLE)

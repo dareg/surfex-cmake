@@ -19,12 +19,17 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Ducrocq       * Meteo France *
+!!      V. Ducrocq       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    28/08/94 
 !!      Modified    01/2006 : sea flux parameterization.
+!!      B. Decharme 05/2013 : Qsat function of XTT
+!!                            so, Qsat=Qsati if Tg <= XTT and inversely
+!!      S. Belamari 03/2014 : new formula (QSAT_SEAWATER2) for sat. air pressure
+!!                            over seawater (with explicit salinity dependency)
+!!                            
 !--------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -39,7 +44,12 @@ USE PARKIND1  ,ONLY : JPRB
 INTERFACE PSAT
   MODULE PROCEDURE PSAT_0D
   MODULE PROCEDURE PSAT_1D
+  MODULE PROCEDURE PSAT_2D
 END INTERFACE
+INTERFACE DPSAT
+  MODULE PROCEDURE DPSAT_1D
+END INTERFACE
+
 INTERFACE QSAT
   MODULE PROCEDURE QSATW_0D         
   MODULE PROCEDURE QSATW_1D
@@ -47,6 +57,9 @@ INTERFACE QSAT
 END INTERFACE
 INTERFACE QSAT_SEAWATER
   MODULE PROCEDURE QSATSEAW_1D
+END INTERFACE
+INTERFACE QSAT_SEAWATER2
+  MODULE PROCEDURE QSATSEAW2_1D
 END INTERFACE
 INTERFACE DQSAT
   MODULE PROCEDURE DQSATW_O_DT_1D
@@ -69,6 +82,7 @@ CONTAINS
 !              ------------
 !
 USE MODD_CSTS
+USE MODD_REPROD_OPER, ONLY : CQSAT
 !
 IMPLICIT NONE
 !
@@ -80,6 +94,9 @@ REAL                            :: PPSAT  ! saturation vapor
                                           ! specific humidity
                                           ! with respect to
                                           ! water (kg/kg)
+!
+REAL            :: ZALP, ZBETA, ZGAM
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE                                          
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_0D',0,ZHOOK_HANDLE)
@@ -87,7 +104,18 @@ IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_0D',0,ZHOOK_HANDLE)
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-PPSAT = EXP( XALPW - XBETAW/PT - XGAMW*LOG(PT)  )
+ZALP  = XALPW
+ZBETA = XBETAW
+ZGAM  = XGAMW
+!
+IF(CQSAT=='NEW'.AND.PT<=XTT)THEN
+ ZALP  = XALPI
+ ZBETA = XBETAI
+ ZGAM  = XGAMI       
+ENDIF
+!
+PPSAT = EXP( ZALP - ZBETA/PT - ZGAM*LOG(PT) )
+!
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_0D',1,ZHOOK_HANDLE)
 !
@@ -102,6 +130,7 @@ END FUNCTION PSAT_0D
 !              ------------
 !
 USE MODD_CSTS
+USE MODD_REPROD_OPER, ONLY : CQSAT
 !
 IMPLICIT NONE
 !
@@ -111,6 +140,8 @@ IMPLICIT NONE
 REAL, DIMENSION(:), INTENT(IN)                :: PT     ! Temperature (Kelvin)
 REAL, DIMENSION(SIZE(PT))                     :: PPSAT  ! saturation vapor pressure (Pa)
 !
+REAL, DIMENSION(SIZE(PT))  :: ZALP, ZBETA, ZGAM
+!
 INTEGER                         :: JJ !loop index
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -119,14 +150,136 @@ IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_1D',0,ZHOOK_HANDLE)
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
+ZALP (:) = XALPW
+ZBETA(:) = XBETAW
+ZGAM (:) = XGAMW
+!
+IF(CQSAT=='NEW')THEN
+ WHERE(PT<=XTT)
+   ZALP  (:) = XALPI
+   ZBETA (:) = XBETAI
+   ZGAM  (:) = XGAMI 
+ ENDWHERE
+ENDIF
+!
 !cdir nodep
 DO JJ=1,SIZE(PT)
-  PPSAT(JJ) = EXP( XALPW - XBETAW/PT(JJ) - XGAMW*LOG(PT(JJ))  )
+  PPSAT(JJ) = EXP( ZALP(JJ) - ZBETA(JJ)/PT(JJ) - ZGAM(JJ)*LOG(PT(JJ)) )
 ENDDO
+!
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_1D',1,ZHOOK_HANDLE)
 !
 END FUNCTION PSAT_1D
+!-------------------------------------------------------------------------------
+!     ######################################
+      FUNCTION PSAT_2D(PT,KMASK) RESULT(PPSAT)
+!     ######################################
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS
+USE MODD_REPROD_OPER, ONLY : CQSAT
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, DIMENSION(:,:), INTENT(IN)              :: PT     ! Temperature (Kelvin)
+INTEGER, DIMENSION(:), INTENT(IN)             :: KMASK
+!
+REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: PPSAT  ! saturation vapor pressure (Pa)
+!
+REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: ZALP, ZBETA, ZGAM
+!
+INTEGER         :: JJ, JL, INI, INL, IWORK !loop index
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_2D',0,ZHOOK_HANDLE)
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+INI=SIZE(PT,1)
+INL=SIZE(PT,2)
+!
+PPSAT(:,:) = 0.0
+!
+ZALP (:,:) = XALPW
+ZBETA(:,:) = XBETAW
+ZGAM (:,:) = XGAMW
+!
+IF(CQSAT=='NEW')THEN
+ WHERE(PT(:,:)<=XTT)
+   ZALP  (:,:) = XALPI
+   ZBETA (:,:) = XBETAI
+   ZGAM  (:,:) = XGAMI 
+ ENDWHERE
+ENDIF
+!
+DO JL=1,INL
+  DO JJ=1,INI
+     IWORK=KMASK(JJ)
+     IF(JL<=IWORK)THEN
+       PPSAT(JJ,JL) = EXP( ZALP(JJ,JL) - ZBETA(JJ,JL)/PT(JJ,JL) - ZGAM(JJ,JL)*LOG(PT(JJ,JL)) )
+     ENDIF
+  ENDDO
+ENDDO
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:PSAT_2D',1,ZHOOK_HANDLE)
+!
+END FUNCTION PSAT_2D
+!-------------------------------------------------------------------------------
+!     ######################################
+      FUNCTION DPSAT_1D(PT) RESULT(PDPSAT)
+!     ######################################
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS
+USE MODD_REPROD_OPER, ONLY : CQSAT
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, DIMENSION(:), INTENT(IN) :: PT      ! Temperature (Kelvin)
+!
+REAL, DIMENSION(SIZE(PT))      :: PDPSAT  
+!
+REAL, DIMENSION(SIZE(PT))      :: ZBETA, ZGAM
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DPSAT_1D',0,ZHOOK_HANDLE)
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+ZBETA(:) = XBETAW
+ZGAM (:) = XGAMW
+!
+IF(CQSAT=='NEW')THEN
+ WHERE(PT<=XTT)
+   ZBETA (:) = XBETAI
+   ZGAM  (:) = XGAMI 
+ ENDWHERE
+ENDIF
+!
+PDPSAT(:) = ZBETA(:)/PT(:)**2 - ZGAM(:)/PT(:)
+!
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DPSAT_1D',1,ZHOOK_HANDLE)
+!
+END FUNCTION DPSAT_1D
 !-------------------------------------------------------------------------------
 !     ######################################
       FUNCTION QSATW_0D(PT,PP) RESULT(PQSAT)
@@ -176,7 +329,7 @@ END FUNCTION PSAT_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -212,13 +365,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_0D',0,ZHOOK_HANDLE)
 !
-ZWORK2 = XRD/XRV
-!
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-ZFOES = EXP( XALPW - XBETAW/PT - XGAMW*LOG(PT)  )
-ZWORK1    = ZFOES/PP
+ZFOES  = PSAT(PT)
+ZWORK1 = ZFOES/PP
+ZWORK2 = XRD/XRV
 !
 !*       2.    COMPUTE SATURATION HUMIDITY
 !              ---------------------------
@@ -279,7 +431,7 @@ END FUNCTION QSATW_0D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -313,27 +465,24 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
 !
 REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
 REAL                                        :: ZWORK2 
-INTEGER                         :: JJ !loop index
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_1D',0,ZHOOK_HANDLE)
-ZWORK2 = XRD/XRV
 !
-!cdir nodep
-DO JJ=1,SIZE(PT)
+!
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-  ZFOES(JJ) = EXP( XALPW - XBETAW/PT(JJ) - XGAMW*LOG(PT(JJ))  )
-  ZWORK1(JJ)    = ZFOES(JJ)/PP(JJ)
+ZFOES (:) = PSAT(PT(:))
+ZWORK1(:) = ZFOES(:)/PP(:)
+ZWORK2    = XRD/XRV
 !
 !*       2.    COMPUTE SATURATION HUMIDITY
 !              ---------------------------
 !
-  PQSAT(JJ) = ZWORK2*ZWORK1(JJ) / (1.+(ZWORK2-1.)*ZWORK1(JJ))
+PQSAT(:) = ZWORK2*ZWORK1(:) / (1.+(ZWORK2-1.)*ZWORK1(:))
 !
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_1D',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
@@ -391,7 +540,7 @@ END FUNCTION QSATW_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -426,10 +575,11 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))        :: PQSAT  ! saturation vapor
 !
 !*       0.2   Declarations of local variables
 !
-INTEGER, DIMENSION(SIZE(PT,1)) :: IMASK
+REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2)) :: ZFOES
 !
-REAL            :: ZFOES  ! saturation vapor pressure (Pascal) 
-INTEGER         :: JJ, JI, INL, IWORK   ! loop indexes
+INTEGER, DIMENSION(SIZE(PT,1))         :: IMASK
+!
+INTEGER         :: INL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -444,27 +594,19 @@ ELSE
 ENDIF
 !
 PQSAT(:,:)=XUNDEF
+ZFOES(:,:)=0.0
 !
-DO JJ=1,INL
-  DO JI=1,SIZE(PT,1)
-!
-     IWORK=IMASK(JI)
-     IF(JJ<=IWORK)THEN
-!
+!  
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-         ZFOES = EXP( XALPW - XBETAW/PT(JI,JJ) - XGAMW*LOG(PT(JI,JJ))  )
+ZFOES(:,1:INL) = PSAT(PT(:,1:INL),IMASK(:))
 !
 !*       2.    COMPUTE SATURATION HUMIDITY
 !              ---------------------------
 !
-         PQSAT(JI,JJ) = XRD/XRV*ZFOES/PP(JI,JJ) / (1.+(XRD/XRV-1.)*ZFOES/PP(JI,JJ))  
+PQSAT(:,:) = XRD/XRV*ZFOES(:,:)/PP(:,:) / (1.+(XRD/XRV-1.)*ZFOES(:,:)/PP(:,:))  
 !
-     ENDIF
-!
-  ENDDO
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATW_2D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
@@ -526,7 +668,7 @@ END FUNCTION QSATW_2D
 !!
 !!    AUTHOR
 !!    ------
-!!	C. Lebeaupin    * Meteo France *
+!!      C. Lebeaupin    * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -558,31 +700,133 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
                                                         ! pressure
                                                         ! (Pascal) 
 !
-INTEGER                         :: JJ   ! loop index
+REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
+REAL                                        :: ZWORK2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW_1D',0,ZHOOK_HANDLE)
-DO JJ = 1, SIZE(PT)
-!*       1.    COMPUTE SATURATION VAPOR PRESSURE
-!              ---------------------------------
 !
-  ZFOES(JJ) = 0.98*EXP( XALPW - XBETAW/PT(JJ) - XGAMW*LOG(PT(JJ))  )
+ZFOES (:) = PSAT(PT(:))
+ZFOES (:) = 0.98*ZFOES(:)
 ! vapor pressure reduction of 2% over saline seawater could have a significant 
 ! impact on the computation of surface latent heat flux under strong wind 
 ! conditions (Zeng et al, 1998). 
 !
+ZWORK1(:) = ZFOES(:)/PP(:)
+ZWORK2    = XRD/XRV
+!
 !*       2.    COMPUTE SATURATION HUMIDITY
 !              ---------------------------
 !
-  PQSAT(JJ) = XRD/XRV*ZFOES(JJ)/PP(JJ)   &
-                     / (1.+(XRD/XRV-1.)*ZFOES(JJ)/PP(JJ))  
+PQSAT(:) = ZWORK2*ZWORK1(:) / (1.+(ZWORK2-1.)*ZWORK1(:))
 !
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END FUNCTION QSATSEAW_1D
+!
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!
+!     ######################################
+      FUNCTION QSATSEAW2_1D(PT,PP,PSSS) RESULT(PQSAT)
+!     ######################################
+!
+!!****  *QSATW * - function to compute saturation vapor humidity from
+!!                 temperature
+!!
+!!    PURPOSE
+!!    -------
+!       The purpose of this function is to compute the saturation vapor 
+!     pressure from temperature over saline seawater
+!      
+!
+!!**  METHOD
+!!    ------
+!!       Given temperature T (PT) and salinity S (PSSS), the saturation vapor 
+!!    pressure es(T,S) (FOES(PT,PSSS)) is computed following Weiss and Price
+!!    (1980).
+!!
+!!      Then, the specific humidity at saturation is deduced.
+!!  
+!!
+!!    EXTERNAL
+!!    --------
+!!      NONE
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!      Module MODD_CST : contains physical constants
+!!      
+!!    REFERENCE
+!!    ---------
+!!      Weiss, R.F., and Price, B.A., 1980 : Nitrous oxide solubility in water
+!!      and seawater. Marine Chemistry, n°8, pp 347-359.
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!      S. Belamari     * Meteo France *
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    19/03/2014 
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+USE MODD_CSTS, ONLY : XRD, XRV
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments and results
+!
+!
+REAL, DIMENSION(:), INTENT(IN)                :: PT     ! Temperature
+                                                        ! (Kelvin)
+REAL, DIMENSION(:), INTENT(IN)                :: PP     ! Pressure
+                                                        ! (Pascal)
+REAL, DIMENSION(:), INTENT(IN)                :: PSSS   ! Salinity
+                                                        ! (g/kg)
+REAL, DIMENSION(SIZE(PT))                   :: PQSAT  ! saturation vapor
+                                                        ! specific humidity
+                                                        ! with respect to
+                                                        ! water (kg/kg)
+!
+!*       0.2   Declarations of local variables
+!
+REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
+                                                        ! pressure
+                                                        ! (Pascal)
+!
+REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
+REAL                                        :: ZWORK2
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW2_1D',0,ZHOOK_HANDLE)
+!
+!*       1.    COMPUTE SATURATION VAPOR PRESSURE
+!              ---------------------------------
+!
+ZFOES(:) = EXP( 24.4543 -67.4509*(100.0/PT(:)) -4.8489*LOG(PT(:)/100.0)   &
+                -5.44E-04*(PSSS(:)/1.00472) ) !see Sharqawy et al (2010) Eq32 p368
+ZFOES(:) = ZFOES(:)*1013.25E+02             !convert from atm to Pa
+!
+ZWORK1(:) = ZFOES(:)/PP(:)
+ZWORK2    = XRD/XRV
+!
+!*       2.    COMPUTE SATURATION SPECIFIC HUMIDITY
+!              ------------------------------------
+!
+PQSAT(:) = ZWORK2*ZWORK1(:) / (1.0+(ZWORK2-1.0)*ZWORK1(:))
+!
+IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATSEAW2_1D',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!
+END FUNCTION QSATSEAW2_1D
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -636,7 +880,7 @@ END FUNCTION QSATSEAW_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -675,29 +919,26 @@ REAL, DIMENSION(SIZE(PT))  :: ZFOES  ! saturation vapor
                                                           ! (Pascal) 
 !
 REAL                       :: ZWORK1
-REAL, DIMENSION(SIZE(PT))  :: ZWORK2   ! loop index
-INTEGER :: JJ
+REAL, DIMENSION(SIZE(PT))  :: ZWORK2
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DQSATW_O_DT_1D',0,ZHOOK_HANDLE)
-ZWORK1=XRD/XRV
 !
-DO JJ=1,SIZE(PT)
 !
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-  ZFOES(JJ) = PP(JJ) / (1.+ZWORK1*(1./PQSAT(JJ)-1.))
-  ZWORK2(JJ) = ZFOES(JJ) / PP(JJ)
+ZWORK1    = XRD/XRV
+ZFOES (:) = PP(:) / (1.+ZWORK1*(1./PQSAT(:)-1.))
+ZWORK2(:) = DPSAT(PT(:))
 !
 !*       2.    DERIVATION ACCORDING TO TEMPERATURE
 !              -----------------------------------
 !
-  PDQSAT(JJ) = PQSAT(JJ) / (1.+(ZWORK1-1.)*ZWORK2(JJ) ) &
-                     * (XBETAW/PT(JJ)**2 - XGAMW/PT(JJ))  
+PDQSAT(:) = ZWORK2(:) * PQSAT(:) / (1.+(ZWORK1-1.)*ZFOES(:)/PP(:) )
 !
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DQSATW_O_DT_1D',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
@@ -756,7 +997,7 @@ END FUNCTION DQSATW_O_DT_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -794,27 +1035,27 @@ REAL, DIMENSION(SIZE(PT))                       :: ZFOES  ! saturation vapor
                                                           ! pressure
                                                           ! (Pascal) 
 !
-REAL   :: ZWORK1
-INTEGER                 ::   JJ  ! loop index
+REAL                      :: ZWORK1
+REAL, DIMENSION(SIZE(PT)) :: ZWORK2
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DQSATI_O_DT_1D',0,ZHOOK_HANDLE)
-ZWORK1=XRD/XRV
-DO JJ = 1,SIZE(PT)
+!
 !
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-  ZFOES(JJ) = PP(JJ) / (1.+ZWORK1*(1./PQSAT(JJ)-1.))
+ZWORK1    = XRD/XRV
+ZFOES (:) = PP(:) / (1.+ZWORK1*(1./PQSAT(:)-1.))
+ZWORK2(:) = DPSAT(PT(:))
 !
-!*       3.    DERIVATION ACCORDING TO TEMPERATURE
+!*       2.    DERIVATION ACCORDING TO TEMPERATURE
 !              -----------------------------------
 !
-  PDQSAT(JJ) = PQSAT(JJ) / (1.+(ZWORK1-1.)*ZFOES(JJ)/PP(JJ) ) &
-                     * (XBETAI/PT(JJ)**2 - XGAMI/PT(JJ))  
+PDQSAT(:) = ZWORK2(:) * PQSAT(:) / (1.+(ZWORK1-1.)*ZFOES(:)/PP(:) )
 !
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:DQSATI_O_DT_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
@@ -871,7 +1112,7 @@ END FUNCTION DQSATI_O_DT_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -903,24 +1144,26 @@ REAL, DIMENSION(SIZE(PT))                   :: ZFOES  ! saturation vapor
                                                         ! pressure
                                                         ! (Pascal) 
 !
-INTEGER   :: JJ !loop index
+REAL, DIMENSION(SIZE(PT))                   :: ZWORK1
+REAL                                        :: ZWORK2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATI_1D',0,ZHOOK_HANDLE)
-DO JJ = 1, SIZE(PT)
+!
+!
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-  ZFOES(JJ) = EXP( XALPI - XBETAI/PT(JJ) - XGAMI*LOG(PT(JJ))  )
+ZFOES (:) = PSAT(PT(:))
+ZWORK1(:) = ZFOES(:)/PP(:)
+ZWORK2    = XRD/XRV
 !
 !*       2.    COMPUTE SATURATION HUMIDITY
 !              ---------------------------
 !
-  PQSAT(JJ) = XRD/XRV*ZFOES(JJ)/PP(JJ)   &
-                     / (1.+(XRD/XRV-1.)*ZFOES(JJ)/PP(JJ))  
+PQSAT(:) = ZWORK2*ZWORK1(:) / (1.+(ZWORK2-1.)*ZWORK1(:))
 !
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATI_1D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
@@ -976,7 +1219,7 @@ END FUNCTION QSATI_1D
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -1011,11 +1254,11 @@ REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))      :: PQSAT  ! saturation vapor
 !
 !*       0.2   Declarations of local variables
 !
-REAL            :: ZFOES  ! saturation vapor pressure (Pascal) 
+REAL, DIMENSION(SIZE(PT,1),SIZE(PT,2))      :: ZFOES  ! saturation vapor pressure (Pascal) 
 !
 INTEGER, DIMENSION(SIZE(PT,1)) :: IMASK
 !
-INTEGER         :: JJ, JI, INL, IWORK   ! loop indexes
+INTEGER         :: INL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -1030,27 +1273,19 @@ ELSE
 ENDIF
 !
 PQSAT(:,:)=XUNDEF
+ZFOES(:,:)=0.0
 !
-DO JJ=1,INL
-  DO JI=1,SIZE(PT,1)
-!
-     IWORK=IMASK(JI)
-     IF(JJ<=IWORK)THEN
 !  
 !*       1.    COMPUTE SATURATION VAPOR PRESSURE
 !              ---------------------------------
 !
-         ZFOES = EXP( XALPI - XBETAI/PT(JI,JJ) - XGAMI*LOG(PT(JI,JJ))  )
+ZFOES(:,1:INL) = PSAT(PT(:,1:INL),IMASK(:))
 !
 !*       2.    COMPUTE SATURATION HUMIDITY
 !              ---------------------------
 !
-         PQSAT(JI,JJ) = XRD/XRV*ZFOES/PP(JI,JJ) / (1.+(XRD/XRV-1.)*ZFOES/PP(JI,JJ))  
+PQSAT(:,:) = XRD/XRV*ZFOES(:,:)/PP(:,:) / (1.+(XRD/XRV-1.)*ZFOES(:,:)/PP(:,:))  
 !
-     ENDIF
-!
-  ENDDO
-ENDDO
 IF (LHOOK) CALL DR_HOOK('MODE_THERMOS:QSATI_2D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE BUILD_PRONOSLIST_n(KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
+      SUBROUTINE BUILD_PRONOSLIST_n (SV, &
+                                     KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
 !!    #######################################################################
 !!
 !!*** *BUILD_PRONOSLIST*
@@ -22,15 +23,19 @@
 !!    C. Mari  30/10/00 call to MODD_TYPE_EFUTIL
 !!    D. Gazen 01/12/03 change emissions handling for surf. externalization
 !!    P. Tulet 01/05/05 aerosols primary emission
+!!    M.Leriche 04/2014  change length of CHARACTER for emission 6->12
 !!
 !!    EXTERNAL
 !!    --------
+!
+USE MODD_SV_n, ONLY : SV_t
+!
 USE MODI_CH_OPEN_INPUTB
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
+USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_TYPE_EFUTIL
-USE MODD_SV_n,  ONLY: CSV
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -45,8 +50,11 @@ IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
 !
+!
+TYPE(SV_t), INTENT(INOUT) :: SV
+!
 INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
- CHARACTER(LEN=6), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
+ CHARACTER(LEN=12), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
 TYPE(PRONOSVAR_T),             POINTER     :: TPPRONOS
 INTEGER,                       INTENT(IN)  :: KCH     ! logical unit of input chemistry file
 INTEGER,                       INTENT(IN)  :: KLUOUT  ! output listing channel
@@ -74,14 +82,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
 !
-!
 ! CNAMES points on chemical variables name
-CNAMES => CSV
-IEQ = SIZE(CSV)
+CNAMES => SV%CSV
+IEQ = SIZE(SV%CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !
+!$OMP SINGLE
  CALL CH_OPEN_INPUTB("AGREGATION", KCH , KLUOUT)
+!$OMP END SINGLE
 !
 ! Parse each eq. line and build the TPPRONOS list
 !
@@ -91,7 +100,9 @@ DO
 !
 ! Read a line and convert 'tab' to 'space' characters
 ! until the keyword 'END_AGREGATION' is reached
+!$OMP SINGLE
   READ(KCH,'(A)',IOSTAT=IERR) YINPLINE
+!$OMP END SINGLE COPYPRIVATE(YINPLINE,IERR)
   IF (IERR /= 0) EXIT
   YINPLINE = TRIM(ADJUSTL(YINPLINE))
   IF (LEN_TRIM(YINPLINE) == 0) CYCLE ! skip blank line
@@ -115,7 +126,7 @@ DO
   IF (.NOT. GFOUND) THEN
     WRITE(KLUOUT,*) 'BUILD_PRONOSLIST ERROR : ',TRIM(YPRO_NAME),&
             ' not found in pronostic variables list !'  
-    CALL ABOR1_SFX('CH_BUILDPRONOSN: VARIABLE NOT FOUND')
+    CALL ABOR1_SFX('BUILD_PRONOSLISTN: VARIABLE NOT FOUND')
   END IF
 !
 ! If YPRO_NAME variable already encountered : append the new equation (coeffs)
@@ -150,7 +161,7 @@ DO
       WRITE(KLUOUT,*) 'FATAL ERROR : Number of aggregation coefficients for ',&
              TRIM(YPRO_NAME),' exceeds constant JPNBCOEFFMAX = ',JPNBCOEFFMAX  
       WRITE(KLUOUT,*) '=> You should increase the JPNBCOEFFMAX value in modd_type_efutil.f90'
-      CALL ABOR1_SFX('CH_BUILDPRONOSN: NUMBER OF AGGREGATION COEFFICIENTS TOO BIG')
+      CALL ABOR1_SFX('BUILD_PRONOSLISTN: NUMBER OF AGGREGATION COEFFICIENTS TOO BIG')
     END IF
     READ(YINPLINE(1:INDX-1),*) CURRENT%XCOEFF(INBCOEFF)
 !
@@ -162,7 +173,7 @@ DO
 ! check EMIS species name
     GFOUND = .FALSE.
     DO JI=1,KEMIS_NBR
-      IF (HEMIS_NAME(JI) == YEMIS_NAME) THEN
+      IF (TRIM(HEMIS_NAME(JI)) == TRIM(YEMIS_NAME)) THEN
         GFOUND = .TRUE.
         CURRENT%NEFINDEX(INBCOEFF) = JI
         EXIT
@@ -171,12 +182,11 @@ DO
     IF (.NOT. GFOUND) THEN
       WRITE(KLUOUT,*) 'ERROR : ',TRIM(YEMIS_NAME),&
               ' not found in emission variables list !'  
-      CALL ABOR1_SFX('CH_BUILDPRONOSN: UNKNOWN EMISSION VARIABLE')
+      CALL ABOR1_SFX('BUILD_PRONOSLISTN: UNKNOWN EMISSION VARIABLE')
     END IF
   END DO
   CURRENT%NBCOEFF = INBCOEFF
 END DO
-
 !
 ! Update TPPRONOS pointer with head of list
 TPPRONOS => HEAD
@@ -194,8 +204,9 @@ IF (KVERB >= 6) THEN
     CURRENT=>CURRENT%NEXT
   END DO
 END IF
-
+!
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',1,ZHOOK_HANDLE)
+!
 CONTAINS 
 !!
 !!    ###########################

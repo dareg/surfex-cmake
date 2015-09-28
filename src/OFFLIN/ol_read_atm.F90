@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
+SUBROUTINE OL_READ_ATM (&
+                         HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
                           PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
                           PCO2,PDIR,OLIMIT_QAIR                             )  
 !**************************************************************************
@@ -29,7 +30,7 @@ SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -40,6 +41,9 @@ SUBROUTINE OL_READ_ATM (HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
 !!      P. Le Moigne 10/2005: consistency checking between orographies read from forcing 
 !!                            file and from initial file
 !!      B. Decharme  01/2009: Optional, limitation of Qair (<= Qsat(tair))
+!
+!
+!
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_IO_SURF_OL, ONLY : XSTART,XCOUNT,XSTRIDE,LPARTR
@@ -59,6 +63,8 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 ! global variables
+!
+!
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PTA !K
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PQA
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PWIND
@@ -95,7 +101,8 @@ LPARTR=.TRUE.
 ! read data
 !
 IF      (HFORCING_FILETYPE == 'NETCDF') THEN
-  CALL OL_READ_ATM_NETCDF (HSURF_FILETYPE,                                   &
+  CALL OL_READ_ATM_NETCDF(&
+                           HSURF_FILETYPE,                                   &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
                            PCO2,PDIR                                         )  
 ELSE IF (HFORCING_FILETYPE == 'ASCII ') THEN

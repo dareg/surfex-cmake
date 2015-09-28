@@ -18,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -52,7 +52,7 @@ IMPLICIT NONE
                                          'ISBA_VEG_EVOLUTION_A.OUT.nc',&
                                          'ISBA_PROGNOSTIC.OUT.nc     ',&
                                          'ISBA_DIAGNOSTICS.OUT.nc    '/)
- CHARACTER(LEN=200), DIMENSION(21) :: XNETCDF_FILENAME_OUT= &
+ CHARACTER(LEN=200), DIMENSION(22) :: XNETCDF_FILENAME_OUT= &
                                        (/'ISBA_VEG_EVOLUTION.OUT.nc  ',&
                                          'ISBA_VEG_EVOLUTION_P.OUT.nc', &
                                          'ISBA_VEG_EVOLUTION_A.OUT.nc', &
@@ -70,6 +70,7 @@ IMPLICIT NONE
                                          'FLAKE_DIAG_CUMUL.OUT.nc    ',&
                                          'TEB_PROGNOSTIC.OUT.nc      ',&
                                          'TEB_DIAGNOSTICS.OUT.nc     ',&
+                                         'TEB_PGD.OUT.nc             ',&
                                          'TEB_CANOPY.OUT.nc          ',&
                                          'TEB_DIAG_CUMUL.OUT.nc      ',&
                                          'SURF_ATM.OUT.nc            ',&

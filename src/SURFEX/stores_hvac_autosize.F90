@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE STORES_HVAC_AUTOSIZE
+      SUBROUTINE STORES_HVAC_AUTOSIZE (B, BOP, DTB)
 !     #############################################################
 !
 !!****  *STORES_HVAC_AUTOSIZE* - routine to store the HVAC system
@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,13 +34,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_BEM_n,      ONLY:      LAUTOSIZE,                            &
-                                XM_SYS_RAT, XCAP_SYS_RAT, XCAP_SYS_HEAT
-USE MODD_DATA_BEM_n, ONLY :     XPAR_M_SYS_RAT,    LDATA_M_SYS_RAT,   &
-                                XPAR_CAP_SYS_RAT,  LDATA_CAP_SYS_RAT, &
-                                XPAR_CAP_SYS_HEAT, LDATA_CAP_SYS_HEAT,&
-                                LDATA_T_SIZE_MIN, LDATA_T_SIZE_MAX
 !
+!
+!
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
+USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 !
 USE MODI_ABOR1_SFX
 !
@@ -55,6 +54,11 @@ IMPLICIT NONE
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
+!
+!
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
+TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 !
 INTEGER :: IL
 !
@@ -73,23 +77,23 @@ IF (LHOOK) CALL DR_HOOK('STORES_HVAC_AUTOSIZE',0,ZHOOK_HANDLE)
 !* stores the real systems characteristics in physiographic data 
 !  for further use
 !
-IL = SIZE(XM_SYS_RAT)
+IL = SIZE(B%CUR%XM_SYS_RAT)
 !
-LDATA_M_SYS_RAT = .TRUE.
-ALLOCATE(XPAR_M_SYS_RAT(IL))
-XPAR_M_SYS_RAT = XM_SYS_RAT 
+DTB%LDATA_M_SYS_RAT = .TRUE.
+ALLOCATE(DTB%XPAR_M_SYS_RAT(IL))
+DTB%XPAR_M_SYS_RAT = B%CUR%XM_SYS_RAT 
 !
-LDATA_CAP_SYS_RAT = .TRUE.
-ALLOCATE(XPAR_CAP_SYS_RAT(IL))
-XPAR_CAP_SYS_RAT = XCAP_SYS_RAT
+DTB%LDATA_CAP_SYS_RAT = .TRUE.
+ALLOCATE(DTB%XPAR_CAP_SYS_RAT(IL))
+DTB%XPAR_CAP_SYS_RAT = B%CUR%XCAP_SYS_RAT
 !
-LDATA_CAP_SYS_HEAT = .TRUE.
-ALLOCATE(XPAR_CAP_SYS_HEAT(IL))
-XPAR_CAP_SYS_HEAT = XCAP_SYS_HEAT
+DTB%LDATA_CAP_SYS_HEAT = .TRUE.
+ALLOCATE(DTB%XPAR_CAP_SYS_HEAT(IL))
+DTB%XPAR_CAP_SYS_HEAT = B%CUR%XCAP_SYS_HEAT
 !
-LAUTOSIZE = .FALSE.
-LDATA_T_SIZE_MIN = .FALSE.
-LDATA_T_SIZE_MAX = .FALSE.
+BOP%LAUTOSIZE = .FALSE.
+DTB%LDATA_T_SIZE_MIN = .FALSE.
+DTB%LDATA_T_SIZE_MAX = .FALSE.
 !
 !-------------------------------------------------------------------------------
 !

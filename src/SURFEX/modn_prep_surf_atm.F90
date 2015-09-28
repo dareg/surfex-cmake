@@ -17,7 +17,7 @@
 !!       
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,13 +34,15 @@ IMPLICIT NONE
  CHARACTER(LEN=6)  :: CFILETYPE    ! file type
  CHARACTER(LEN=28) :: CFILEPGD        ! file name
  CHARACTER(LEN=6)  :: CFILEPGDTYPE    ! file type
+INTEGER           :: NHALO_PREP   ! HALO for nearest point extrapolation
 INTEGER           :: NYEAR        ! YEAR for surface
 INTEGER           :: NMONTH       ! MONTH for surface
 INTEGER           :: NDAY         ! DAY for surface
 REAL              :: XTIME        ! TIME for surface
 
 !
-NAMELIST/NAM_PREP_SURF_ATM/CFILE, CFILETYPE, CFILEPGD, CFILEPGDTYPE, NYEAR, NMONTH, NDAY, XTIME
+NAMELIST/NAM_PREP_SURF_ATM/CFILE, CFILETYPE, CFILEPGD, CFILEPGDTYPE, NHALO_PREP, &
+         NYEAR, NMONTH, NDAY, XTIME
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,5 +1,6 @@
 !     #########
-    SUBROUTINE COARE30_FLUX(PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
+    SUBROUTINE COARE30_FLUX (S, &
+                             PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
             PVMOD,PZREF,PUREF,PPS,PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE,PRI,&
             PRESA,PRAIN,PZ0HSEA)  
 !     #######################################################################
@@ -39,7 +40,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!     C. Lebeaupin  *Météo-France* (adapted from C. Fairall's code)
+!!     C. Lebeaupin  *MÃ©tÃ©o-France* (adapted from C. Fairall's code)
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -47,18 +48,23 @@
 !!      B. Decharme    06/2009 limitation of Ri
 !!      B. Decharme    09/2012 Bug in Ri calculation and limitation of Ri in surface_ri.F90
 !!      B. Decharme    06/2013 bug in z0 (output) computation 
+!!      J.Escobar      06/2013  for REAL4/8 add EPSILON management
+!!      C. Lebeaupin   03/2014 bug if PTA=PSST and PEXNA=PEXNS: set a minimum value
+!!                             add abort if no convergence
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
+!
+!
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, XPI, &
                             XLVTT, XCL, XCPD, XCPV, XRHOLW, XTT, &
                             XP00
 USE MODD_SURF_ATM,   ONLY : XVZ0CM
 !
-USE MODD_SEAFLUX_n
-USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SURF_PAR,   ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_WATER_PAR
 !
 USE MODI_SURFACE_RI
@@ -68,6 +74,8 @@ USE MODE_COARE30_PSI
 USE MODE_THERMOS
 !
 !
+USE MODI_ABOR1_SFX
+!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -76,6 +84,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PTA   ! air temperature at atm. level (K)
 REAL, DIMENSION(:), INTENT(IN)       :: PQA   ! air humidity at atm. level (kg/kg)
@@ -111,6 +122,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PZ0HSEA ! heat roughness length
 !
 REAL, DIMENSION(SIZE(PTA))      :: ZVMOD    ! wind intensity
 REAL, DIMENSION(SIZE(PTA))      :: ZPA      ! Pressure at atm. level
+REAL, DIMENSION(SIZE(PTA))      :: ZTA      ! Temperature at atm. level
 REAL, DIMENSION(SIZE(PTA))      :: ZQASAT   ! specific humidity at saturation  at atm. level (kg/kg)
 !
 REAL, DIMENSION(SIZE(PTA))      :: ZO       ! rougness length ref 
@@ -184,7 +196,7 @@ IF (LHOOK) CALL DR_HOOK('COARE30_FLUX',0,ZHOOK_HANDLE)
 !
 ZRVSRDM1  = XRV/XRD-1. ! 0.607766
 ZRDSRV    = XRD/XRV    ! 0.62198
-ZR2       = 1.-ZRDSRV  ! pas utilisé dans cette routine
+ZR2       = 1.-ZRDSRV  ! pas utilisÃ© dans cette routine
 ZBETAGUST = 1.2        ! value based on TOGA-COARE experiment
 ZZBL      = 600.       ! Set a default value for boundary layer depth
 ZS        = 10.        ! Standard heigth =10m
@@ -210,6 +222,16 @@ PRESA(:)=XUNDEF
 !       2. INITIAL GUESS FOR THE ITERATIVE METHOD 
 !          -------------------------------------
 !
+!       2.0     Temperature 
+!
+! Set a non-zero value for the temperature gradient
+!
+WHERE((PTA(:)*PEXNS(:)/PEXNA(:)-PSST(:))==0.) 
+      ZTA(:)=PTA(:)-1E-3
+ELSEWHERE
+      ZTA(:)=PTA(:)      
+ENDWHERE
+
 !       2.1     Wind and humidity 
 !
 ! Sea surface specific humidity 
@@ -223,12 +245,12 @@ ZVMOD(:) = WIND_THRESHOLD(PVMOD(:),PUREF(:))
 ! Specific humidity at saturation at the atm. level 
 !
 ZPA(:) = XP00* (PEXNA(:)**(XCPD/XRD))
-ZQASAT(:) = QSAT(PTA(:),ZPA(:)) 
+ZQASAT(:) = QSAT(ZTA(:),ZPA(:)) 
 !
 !
-ZO(:)  = PZ0SEA(:)
+ZO(:)  = 0.0001
 ZWG(:) = 0.
-IF (LPWG) ZWG(:) = 0.5
+IF (S%LPWG) ZWG(:) = 0.5
 !
 ZCHARN(:) = 0.011  
 !
@@ -238,7 +260,7 @@ DO J=1,SIZE(PTA)
   !    
   ZDU(J) = ZVMOD(J)   !wind speed difference with surface current(=0) (m/s)
                       !initial guess for gustiness factor
-  ZDT(J) = -(PTA(J)/PEXNA(J)) + (PSST(J)/PEXNS(J)) !potential temperature difference
+  ZDT(J) = -(ZTA(J)/PEXNA(J)) + (PSST(J)/PEXNS(J)) !potential temperature difference
   ZDQ(J) = PQSAT(J)-PQA(J)                         !specific humidity difference
   !
   ZDUWG(J) = SQRT(ZDU(J)**2+ZWG(J)**2)     !wind speed difference including gustiness ZWG
@@ -247,8 +269,8 @@ DO J=1,SIZE(PTA)
   !
   ZU10(J)  = ZDUWG(J)*LOG(ZS/ZO(J))/LOG(PUREF(J)/ZO(J))
   ZUSR(J)  = 0.035*ZU10(J)
-  ZVISA(J) = 1.326E-5*(1.+6.542E-3*(PTA(J)-XTT)+&
-             8.301E-6*(PTA(J)-XTT)**2-4.84E-9*(PTA(J)-XTT)**3) !Andrea (1989) CRREL Rep. 89-11
+  ZVISA(J) = 1.326E-5*(1.+6.542E-3*(ZTA(J)-XTT)+&
+             8.301E-6*(ZTA(J)-XTT)**2-4.84E-9*(ZTA(J)-XTT)**3) !Andrea (1989) CRREL Rep. 89-11
   ! 
   ZO10(J) = ZCHARN(J)*ZUSR(J)*ZUSR(J)/XG+0.11*ZVISA(J)/ZUSR(J)
   ZCD(J)  = (XKARMAN/LOG(PUREF(J)/ZO10(J)))**2  !drag coefficient
@@ -262,10 +284,10 @@ DO J=1,SIZE(PTA)
   ZCC(J) = XKARMAN*ZCT(J)/ZCD(J)               !z/L vs Rib linear coef.
   !
   ZRIBCU(J) = -PUREF(J)/(ZZBL*0.004*ZBETAGUST**3) !saturation or plateau Rib
-  !ZRIBU(J) =-XG*PUREF(J)*(ZDT(J)+ZRVSRDM1*(PTA(J)-XTT)*ZDQ)/&
-  !     &((PTA(J)-XTT)*ZDUWG(J)**2)
-  ZRIBU(J)  = -XG*PUREF(J)*(ZDT(J)+ZRVSRDM1*PTA(J)*ZDQ(J))/&
-               (PTA(J)*ZDUWG(J)**2)  
+  !ZRIBU(J) =-XG*PUREF(J)*(ZDT(J)+ZRVSRDM1*(ZTA(J)-XTT)*ZDQ)/&
+  !     &((ZTA(J)-XTT)*ZDUWG(J)**2)
+  ZRIBU(J)  = -XG*PUREF(J)*(ZDT(J)+ZRVSRDM1*ZTA(J)*ZDQ(J))/&
+               (ZTA(J)*ZDUWG(J)**2)  
   !
   IF (ZRIBU(J)<0.) THEN
     ZETU(J) = ZCC(J)*ZRIBU(J)/(1.+ZRIBU(J)/ZRIBCU(J))    !Unstable G and F
@@ -299,8 +321,8 @@ DO J=1,SIZE(PTA)
   !                3.  ITERATIVE LOOP TO COMPUTE USR, TSR, QSR 
   !                -------------------------------------------
   !
-  ZHWAVE(J) = 0.018*PVMOD(J)*PVMOD(J)*(1.+0.015*PVMOD(J))
-  ZTWAVE(J) = 0.729*PVMOD(J)
+  ZHWAVE(J) = 0.018*ZVMOD(J)*ZVMOD(J)*(1.+0.015*ZVMOD(J))
+  ZTWAVE(J) = 0.729*ZVMOD(J)
   ZCWAVE(J) = XG*ZTWAVE(J)/(2.*XPI)
   ZLWAVE(J) = ZTWAVE(J)*ZCWAVE(J)
   !
@@ -314,12 +336,12 @@ DO JLOOP=1,MAXVAL(ITERMAX) ! begin of iterative loop
     !
     IF (JLOOP.GT.ITERMAX(J)) CYCLE
     !
-    IF (NGRVWAVES==0) THEN
+    IF (S%NGRVWAVES==0) THEN
       ZO(J) = ZCHARN(J)*ZUSR(J)*ZUSR(J)/XG + 0.11*ZVISA(J)/ZUSR(J) !Smith 1988
-    ELSE IF (NGRVWAVES==1) THEN
+    ELSE IF (S%NGRVWAVES==1) THEN
       ZO(J) = (50./(2.*XPI))*ZLWAVE(J)*(ZUSR(J)/ZCWAVE(J))**4.5 &
               + 0.11*ZVISA(J)/ZUSR(J)                       !Oost et al. 2002  
-    ELSE IF (NGRVWAVES==2) THEN
+    ELSE IF (S%NGRVWAVES==2) THEN
       ZO(J) = 1200.*ZHWAVE(J)*(ZHWAVE(J)/ZLWAVE(J))**4.5 &
               + 0.11*ZVISA(J)/ZUSR(J)                       !Taulor and Yelland 2001  
     ENDIF
@@ -329,8 +351,8 @@ DO JLOOP=1,MAXVAL(ITERMAX) ! begin of iterative loop
     ZOT(J) = ZOQ(J)
     !
     ZZL(J) = XKARMAN * XG * PUREF(J) * &
-              ( ZTSR(J)*(1.+ZRVSRDM1*PQA(J)) + ZRVSRDM1*PTA(J)*ZQSR(J) ) / &
-              ( PTA(J)*ZUSR(J)*ZUSR(J)*(1.+ZRVSRDM1*PQA(J)) )  
+              ( ZTSR(J)*(1.+ZRVSRDM1*PQA(J)) + ZRVSRDM1*ZTA(J)*ZQSR(J) ) / &
+              ( ZTA(J)*ZUSR(J)*ZUSR(J)*(1.+ZRVSRDM1*PQA(J)) )  
     ZZTL(J)= ZZL(J)*PZREF(J)/PUREF(J)  ! for T 
 !    ZZQL(J)=ZZL(J)*PZREF(J)/PUREF(J)  ! for Q
   ENDDO
@@ -351,8 +373,8 @@ DO JLOOP=1,MAXVAL(ITERMAX) ! begin of iterative loop
     !
     !             3.2 Gustiness factor (ZWG)
     !
-    IF(LPWG) THEN
-      ZBF(J) = -XG/PTA(J)*ZUSR(J)*(ZTSR(J)+ZRVSRDM1*PTA(J)*ZQSR(J))
+    IF(S%LPWG) THEN
+      ZBF(J) = -XG/ZTA(J)*ZUSR(J)*(ZTSR(J)+ZRVSRDM1*ZTA(J)*ZQSR(J))
       IF (ZBF(J)>0.) THEN
         ZWG(J) = ZBETAGUST*(ZBF(J)*ZZBL)**(1./3.)
       ELSE
@@ -384,7 +406,7 @@ DO J=1,SIZE(PTA)
   !                 and neutral PCDN, ZCHN, ZCEN 
   !
   PCD(J) = (ZUSR(J)/ZDUWG(J))**2.
-  PCH(J) = ZUSR(J)*ZTSR(J)/(ZDUWG(J)*(PTA(J)*PEXNS(J)/PEXNA(J)-PSST(J)))
+  PCH(J) = ZUSR(J)*ZTSR(J)/(ZDUWG(J)*(ZTA(J)*PEXNS(J)/PEXNA(J)-PSST(J)))
   PCE(J) = ZUSR(J)*ZQSR(J)/(ZDUWG(J)*(PQA(J)-PQSAT(J)))
   !
   PCDN(J) = (XKARMAN/LOG(ZS/ZO(J)))**2.
@@ -395,7 +417,14 @@ DO J=1,SIZE(PTA)
   !
   !            4. 2 surface fluxes 
   !
-  IF (ABS(PCDN(J))<=1.E-2) THEN   !!!! secure COARE3.0 CODE 
+  IF (ABS(PCDN(J))>1.E-2) THEN   !!!! secure COARE3.0 CODE 
+    write(*,*) 'pb PCDN in COARE30: ',PCDN(J)
+    write(*,*) 'point: ',J,"/",SIZE(PTA)
+    write(*,*) 'roughness: ', ZO(J)
+    write(*,*) 'ustar: ',ZUSR(J)
+    write(*,*) 'wind: ',ZDUWG(J)
+    CALL ABOR1_SFX('COARE30: PCDN too large -> no convergence')
+  ELSE
     ZTSR(J) = -ZTSR(J)
     ZQSR(J) = -ZQSR(J)
     ZTAU(J) = -PRHOA(J)*ZUSR(J)*ZUSR(J)*ZVMOD(J)/ZDUWG(J)
@@ -407,18 +436,18 @@ DO J=1,SIZE(PTA)
     ! SB: a priori, le facteur ZRDSRV=XRD/XRV est introduit pour
     !     adapter la formule de Clausius-Clapeyron (pour l'air
     !     sec) au cas humide.
-    IF (LPRECIP) THEN
+    IF (S%LPRECIP) THEN
       ! 
       ! heat surface  fluxes
       !
-      ZTAC(J)  = PTA(J)-XTT
+      ZTAC(J)  = ZTA(J)-XTT
       !
       ZXLR(J)  = XLVTT + (XCPV-XCL)* ZTAC(J)                            ! latent heat of rain vaporization
-      ZDQSDT(J)= ZQASAT(J) * ZXLR(J) / (XRD*PTA(J)**2)                  ! Clausius-Clapeyron relation
+      ZDQSDT(J)= ZQASAT(J) * ZXLR(J) / (XRD*ZTA(J)**2)                  ! Clausius-Clapeyron relation
       ZDTMP(J) = (1.0 + 3.309e-3*ZTAC(J) -1.44e-6*ZTAC(J)*ZTAC(J)) * &  !heat diffusivity
                   0.02411 / (PRHOA(J)*XCPD)
       !
-      ZDWAT(J) = 2.11e-5 * (XP00/ZPA(J)) * (PTA(J)/XTT)**1.94           ! water vapour diffusivity from eq (13.3)
+      ZDWAT(J) = 2.11e-5 * (XP00/ZPA(J)) * (ZTA(J)/XTT)**1.94           ! water vapour diffusivity from eq (13.3)
       !                                                                 ! of Pruppacher and Klett (1978)      
       ZALFAC(J)= 1.0 / (1.0 + &                                         ! Eq.11 in GoF95
                    ZRDSRV*ZDQSDT(J)*ZXLR(J)*ZDWAT(J)/(ZDTMP(J)*XCPD))   ! ZALFAC=wet-bulb factor (sans dim)     
@@ -429,7 +458,7 @@ DO J=1,SIZE(PTA)
                                     (4.7884e-5 - 2.0027e-6* ZTAC(J))))) ! specific heat  
       !       
       ZRF(J)   = PRAIN(J) * ZCPLW(J) * ZALFAC(J) * &                    !Eq.12 in GoF95 !SIGNE?
-                   (PSST(J) - PTA(J) + (PQSAT(J)-PQA(J))*ZXLR(J)/XCPD )
+                   (PSST(J) - ZTA(J) + (PQSAT(J)-PQA(J))*ZXLR(J)/XCPD )
       !
       ! Momentum flux due to rainfall  
       !
@@ -440,7 +469,7 @@ DO J=1,SIZE(PTA)
     !             4.4   Webb correction to latent heat flux
     ! 
     ZWBAR(J)=- (1./ZRDSRV)*ZUSR(J)*ZQSR(J) / (1.0+(1./ZRDSRV)*PQA(J)) &
-               - ZUSR(J)*ZTSR(J)/PTA(J)                        ! Eq.21*rhoa in FBR96    
+               - ZUSR(J)*ZTSR(J)/ZTA(J)                        ! Eq.21*rhoa in FBR96    
     !
     !             4.5   friction velocity which contains correction du to rain            
     !
@@ -462,13 +491,13 @@ ENDDO
 !             
 !
 ZDIRCOSZW(:) = 1.
- CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,PTA,ZQASAT,  &
-                  PZREF,PUREF,ZDIRCOSZW,PVMOD,PRI)  
+CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,ZTA,ZQASAT,&
+                PZREF,PUREF,ZDIRCOSZW,PVMOD,PRI   )  
 !
 !       5.2     Aerodynamical conductance and resistance
 !             
 ZAC(:) = PCH(:)*ZVMOD(:)
-PRESA(:) = 1. / ZAC(:)
+PRESA(:) = 1. / MAX(ZAC(:),XSURF_EPSILON)
 !
 !       5.3 Z0 and Z0H over sea
 !

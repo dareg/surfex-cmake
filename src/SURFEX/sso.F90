@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE SSO(OSSO,OSSO_ANIS,PSEA)
+      SUBROUTINE SSO (UG, USS, &
+                      OSSO,OSSO_ANIS,PSEA)
 !     #########################
 !
 !!*SSO  computes the SSO anisotropy, direction and slope
@@ -24,14 +25,16 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODI_GET_MESH_DIM
 USE MODI_GET_ADJACENT_MESHES
 !
 USE MODD_CSTS,           ONLY : XPI
 USE MODD_PGDWORK,        ONLY : NSSO, XSSQO, LSSQO
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR, NGRID_PAR
-USE MODD_SURF_ATM_GRID_n, ONLY : XMESH_SIZE
-USE MODD_SURF_ATM_SSO_n,  ONLY : XSSO_ANIS, XSSO_DIR, XSSO_SLOPE
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -41,6 +44,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OSSO   ! .T. : the SSO coefficients
 !                                            ! are computed at grid point
@@ -119,7 +126,7 @@ OSSO_ANIS(:)=.FALSE.
 !*    1.2    Grid dimension (meters)
 !            -----------------------
 !
- CALL GET_MESH_DIM(CGRID,NGRID_PAR,NL,XGRID_PAR,ZDX,ZDY,XMESH_SIZE)
+ CALL GET_MESH_DIM(CGRID,NGRID_PAR,NL,XGRID_PAR,ZDX,ZDY,UG%XMESH_SIZE)
 !
 !
 !*    1.3    Left, top, right and bottom adjacent gris meshes
@@ -434,37 +441,37 @@ END WHERE
 !            -----------------------------
 !
 WHERE (OSSO(:) .AND. ZL(:)>1.E-30 )
-  XSSO_DIR(:) = 0.5* ATAN(ZM/ZL) * (180./XPI)
+  USS%XSSO_DIR(:) = 0.5* ATAN(ZM/ZL) * (180./XPI)
 END WHERE
 !
 WHERE (OSSO(:) .AND. ZL(:)<-1.E-30 )
-  XSSO_DIR(:) = 0.5* ATAN(ZM/ZL) * (180./XPI) + 90.
+  USS%XSSO_DIR(:) = 0.5* ATAN(ZM/ZL) * (180./XPI) + 90.
 END WHERE
 !
 WHERE (OSSO(:) .AND. ABS(ZL(:))<=1.E-30 )
-  XSSO_DIR(:) = 45.
+  USS%XSSO_DIR(:) = 45.
 END WHERE
 !
-WHERE (OSSO(:) .AND. XSSO_DIR(:)>90. )
-  XSSO_DIR(:) = XSSO_DIR(:) - 180.
+WHERE (OSSO(:) .AND. USS%XSSO_DIR(:)>90. )
+  USS%XSSO_DIR(:) = USS%XSSO_DIR(:) - 180.
 END WHERE
 !
 !*    8.2    S.S.O. slope
 !            ------------
 !
 WHERE (OSSO(:))
-  XSSO_SLOPE(:) = SQRT( ZK+SQRT(ZL*ZL+ZM*ZM) )
+  USS%XSSO_SLOPE(:) = SQRT( ZK+SQRT(ZL*ZL+ZM*ZM) )
 END WHERE
 !
 !*    8.3    S.S.O. anisotropy
 !            -----------------
 !
 WHERE (OSSO_ANIS(:) .AND. (ZK+SQRT(ZL*ZL+ZM*ZM)) >0. )
-  XSSO_ANIS(:)=SQRT( MAX(ZK-SQRT(ZL*ZL+ZM*ZM),0.) / (ZK+SQRT(ZL*ZL+ZM*ZM)))
+  USS%XSSO_ANIS(:)=SQRT( MAX(ZK-SQRT(ZL*ZL+ZM*ZM),0.) / (ZK+SQRT(ZL*ZL+ZM*ZM)))
 END WHERE
 !
 WHERE (OSSO_ANIS(:) .AND. (ZK+SQRT(ZL*ZL+ZM*ZM))==0. )
-  XSSO_ANIS(:)=1.
+  USS%XSSO_ANIS(:)=1.
 END WHERE
 IF (LHOOK) CALL DR_HOOK('SSO',1,ZHOOK_HANDLE)
 !

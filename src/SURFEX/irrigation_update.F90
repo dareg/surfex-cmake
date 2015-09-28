@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE IRRIGATION_UPDATE(PIRRIG, PTSTEP, KMONTH, KDAY,   &
+      SUBROUTINE IRRIGATION_UPDATE (AG, &
+                                    PIRRIG, PTSTEP, KMONTH, KDAY,   &
        PTIME,TSEEDMONTH,TSEEDDAY,TREAPMONTH,TREAPDAY) 
 !     ####################################################################
 !
@@ -24,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne  *Meteo France*	
+!!      P. Le Moigne  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,13 +35,18 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_AGRI_n, ONLY : AGRI_t
+!
 USE MODD_AGRI,   ONLY   : JPSTAGE, XTHRESHOLD
-USE MODD_AGRI_n, ONLY   : NIRRINUM, LIRRIDAY, XTHRESHOLDSPT, LIRRIGATE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+TYPE(AGRI_t), INTENT(INOUT) :: AG
+!
 INTEGER, DIMENSION(:,:), INTENT(IN) :: TSEEDMONTH
 INTEGER, DIMENSION(:,:), INTENT(IN) :: TSEEDDAY
 INTEGER, DIMENSION(:,:), INTENT(IN) :: TREAPMONTH
@@ -61,15 +67,15 @@ IF (LHOOK) CALL DR_HOOK('MODI_IRRIGATION_UPDATE:IRRIGATION_UPDATE',0,ZHOOK_HANDL
 GMASK = ( PTIME - PTSTEP < 0. ) .AND. ( PTIME >= 0. )
 !
 IF (GMASK) THEN
-!
-   WHERE( (PIRRIG(:,:).GT.0.).AND.(LIRRIDAY(:,:)) .AND.(NIRRINUM(:,:).LT.JPSTAGE))
-      NIRRINUM (:,:) = NIRRINUM(:,:) + 1
-      LIRRIDAY (:,:) = .FALSE.
+
+   WHERE( (PIRRIG(:,:).GT.0.).AND.(AG%LIRRIDAY(:,:)) .AND.(AG%NIRRINUM(:,:).LT.JPSTAGE))
+      AG%NIRRINUM (:,:) = AG%NIRRINUM(:,:) + 1
+      AG%LIRRIDAY (:,:) = .FALSE.
    ENDWHERE
 !   
    DO IL=1,SIZE(PIRRIG,1)
        DO JL=1,SIZE(PIRRIG,2)
-           XTHRESHOLDSPT(IL,JL)=XTHRESHOLD(NIRRINUM(IL,JL))
+           AG%XTHRESHOLDSPT(IL,JL)=XTHRESHOLD(AG%NIRRINUM(IL,JL))
        ENDDO
    ENDDO
 !
@@ -78,29 +84,29 @@ END IF
 ! Reinitialization of irrigation stage (necessary for runs from August to August)
 !
 IF((KMONTH==1).AND.(KDAY==1)) THEN
-   NIRRINUM(:,:) = 1
+   AG%NIRRINUM(:,:) = 1
 ENDIF
 !
-LIRRIGATE(:,:) = .FALSE.
+AG%LIRRIGATE(:,:) = .FALSE.
 DO IL=1,SIZE(PIRRIG,1)
    DO JL=1,SIZE(PIRRIG,2)
       !
       ! Activate irrigation after seeding date
       !
       IF (KMONTH == TSEEDMONTH(IL,JL) .AND. KDAY .GE. TSEEDDAY(IL,JL)) THEN
-         LIRRIGATE(IL,JL) = .TRUE.
+         AG%LIRRIGATE(IL,JL) = .TRUE.
       END IF
       IF (KMONTH > TSEEDMONTH(IL,JL)) THEN
-         LIRRIGATE(IL,JL) = .TRUE.
+         AG%LIRRIGATE(IL,JL) = .TRUE.
       END IF
       !
       ! Stop irrigation after reaping date
       !
       IF (KMONTH == TREAPMONTH(IL,JL) .AND. KDAY .GT. TREAPDAY(IL,JL)) THEN
-         LIRRIGATE(IL,JL) = .FALSE.
+         AG%LIRRIGATE(IL,JL) = .FALSE.
       END IF
       IF (KMONTH > TREAPMONTH(IL,JL)) THEN
-         LIRRIGATE(IL,JL) = .FALSE.
+         AG%LIRRIGATE(IL,JL) = .FALSE.
       END IF
    ENDDO
 ENDDO

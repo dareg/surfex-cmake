@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DEFAULT_TEB(HZ0H,PTSTEP,POUT_TSTEP, HCH_BEM)
+      SUBROUTINE DEFAULT_TEB(HZ0H,PTSTEP,POUT_TSTEP, HCH_BEM, PDT_RES, PDT_OFF)
 !     ########################################################################
 !
 !!****  *DEFAULT_TEB* - routine to set default values for the configuration for TEB scheme
@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -50,6 +50,8 @@ IMPLICIT NONE
  CHARACTER(LEN=5),  INTENT(OUT) :: HCH_BEM    ! TEB option building conv. coef.
 REAL,              INTENT(OUT) :: PTSTEP     ! time step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time step for writing
+REAL,              INTENT(OUT) :: PDT_RES    ! target temperature change when unoccupied (K) (residential buildings)
+REAL,              INTENT(OUT) :: PDT_OFF    ! target temperature change when unoccupied (K) (offices buildings)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
@@ -58,10 +60,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_TEB',0,ZHOOK_HANDLE)
-HZ0H       = 'MASC95'
+HZ0H       = 'KAND07'
 PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
-HCH_BEM    = ''
+HCH_BEM    = 'DOE-2'
+PDT_RES    = 0.
+PDT_OFF    = 0.
 IF (LHOOK) CALL DR_HOOK('DEFAULT_TEB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

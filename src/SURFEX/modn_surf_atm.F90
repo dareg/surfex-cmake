@@ -21,7 +21,7 @@
 !!    ------------------
 USE MODD_SURF_ATM, ONLY : XCISMIN, XVMODMIN, LALDTHRES, &
                             LDRAG_COEF_ARP, LALDZ0H,      &
-                            LNOSOF, LRW_PRECIP,           &
+                            LNOSOF, LCPL_GCM,             &
                             XEDB, XEDC, XEDD, XEDK,       &
                             XUSURIC, XUSURID, XUSURICL,   &
                             XVCHRNK, XVZ0CM, XDELTA_MAX,  &
@@ -30,7 +30,8 @@ USE MODD_SURF_ATM, ONLY : XCISMIN, XVMODMIN, LALDTHRES, &
                             XVZIUSTAR0,XRZHZ0M,           &
                             XRRSCALE, XRRGAMMA,           &
                             XUTILGUST, LCPL_ARP, LQVNPLUS,&
-                            CIMPLICIT_WIND
+                            LVSHIFT_LW, LVSHIFT_PRCP,     &
+                            XCO2UNCPL         
 !
 !-----------------------------------------------------------------------------
 !
@@ -40,7 +41,7 @@ IMPLICIT NONE
 SAVE
 NAMELIST /NAM_SURF_ATM/XCISMIN, XVMODMIN, LALDTHRES, &
                          LDRAG_COEF_ARP, LALDZ0H,      &
-                         LNOSOF, LRW_PRECIP,           &
+                         LNOSOF, LCPL_GCM,             &
                          XEDB, XEDC, XEDD, XEDK,       &
                          XUSURIC, XUSURID, XUSURICL,   &
                          XVCHRNK, XVZ0CM, XDELTA_MAX,  &
@@ -49,6 +50,7 @@ NAMELIST /NAM_SURF_ATM/XCISMIN, XVMODMIN, LALDTHRES, &
                          XVZIUSTAR0,XRZHZ0M,           &
                          XRRSCALE, XRRGAMMA,           &
                          XUTILGUST, LCPL_ARP, LQVNPLUS,&
-                         CIMPLICIT_WIND
+                         LVSHIFT_LW, LVSHIFT_PRCP,     &
+                         XCO2UNCPL         
 !
 END MODULE MODN_SURF_ATM

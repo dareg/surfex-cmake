@@ -1,3 +1,6 @@
+####
+MAKEFLAGS += -r
+####
 ##########################################################
 #                                                        #
 #  MACRO : dependance_flist                              #
@@ -7,10 +10,10 @@
 ##########################################################
 #
 dependance_flist = $(notdir $(shell find $(1) -follow -type f \
-               -name '*.f' -o -name '*.f90' -o -name '*.fx90' -o -name '*.F' -o -name '*.F90'\
+               -iname '*.f' -o -iname '*.f90' -o -name '*.fx90' \
                | grep -v ',v' | sed -e 's/\.f.*/.D/g' -e 's/\.F.*/.D/g' ))
 obj_flist        = $(notdir $(shell find $(1) -follow -type f \
-               -name 'spll_*.f*' | sed -e 's/\..*/.o/g' )) 
+               -iname 'spll_*.f*' | sed -e 's/\..*/.o/g' ))
 #
 ##########################################################
 #                                                        #
@@ -20,11 +23,55 @@ obj_flist        = $(notdir $(shell find $(1) -follow -type f \
 #
 include Rules.$(ARCH)$(F).mk
 #
+#RJ guess real FC if using wrappers
+REALFC ?= $(F90)
+#
+#RJ try to get fortran module output flag if not provided
+#RJ if fails, use workaround for *.mod file movement
+ifeq "x$(MODOUT_FLAG)" "x"
+ifneq (,$(findstring gfortran,$(REALFC)))
+MODOUT_FLAG=-J
+endif
+#RJ be more careful, since all mpi implemetations switched to common mpifort wrapper
+ifneq (,$(findstring _ifort,_$(REALFC)))
+MODOUT_FLAG=-module
+endif
+ifneq (,$(findstring ftn,$(REALFC)))
+MODOUT_FLAG=-e m -J
+endif
+ifneq (,$(findstring pgf90,$(REALFC)))
+MODOUT_FLAG=-module
+endif
+#RJ from xlf documentation -I path is also needed search paths
+ifneq (,$(findstring xlf,$(REALFC)))
+MODOUT_FLAG=-qmoddir
+##MODOUT?=$(MODOUT_FLAG) $(OBJDIR)/MOD -I $(OBJDIR)/MOD
+endif
+#sun
+#MODOUT_FLAG=-moddir=
+endif
+#
+#RJ check if needed workaround to move *.mod files and force serial compilation
+ifeq "x$(MODOUT_FLAG)" "x"
+MODOUT=-I $(OBJDIR)/MOD
+.NOTPARALLEL :
+else
+#RJ be more generous to all compilers
+#RJ however it might be useful to strip part of fullpath in OBJDIR and OBJDIR_MASTER here...
+MODOUT?=$(MODOUT_FLAG) $(OBJDIR)/MOD -I$(OBJDIR)/MOD
+endif
+#
+#RJ add 'make user' support
+ifdef DO_COMP_USER
+MODOUT+= -I$(OBJDIR_MASTER)/MOD
+endif
+
+#
 ##########################################################
 ##########################################################
 ##########################################################
 #                                                        #
-#    DONT MODIFY LINES AFTER THIS  !!!!!!!!!!!!!         #         
+#    DONT MODIFY LINES AFTER THIS  !!!!!!!!!!!!!         #
 #                                                        #
 ##########################################################
 ##########################################################
@@ -36,7 +83,7 @@ include Rules.$(ARCH)$(F).mk
 #                                                        #
 #   "*.D" files contain dependance deduceed              #
 #   form all "*.f*" FORTRAN sources files                #
-#                                                        #   
+#                                                        #
 # "use" key word                                         #
 #     --> dependance on "*.mod" module files             #
 # "module" key word key word                             #
@@ -54,7 +101,7 @@ include Rules.$(ARCH)$(F).mk
 #   All modification are allowed !!!!!                   #
 #   adding new subroutines                               #
 #       or                                               #
-#   adding new modules                                   #       
+#   adding new modules                                   #
 #                                                        #
 #   REM : if during modification, you deleting some      #
 #         FORTRAN subroutines you must also deleted the  #
@@ -104,7 +151,8 @@ endif
 #
 ifdef DO_COMP_USER
 VPATH += $(OBJDIR_USER) $(OBJDIR_USER)/MOD $(OBJDIR_MASTER) $(OBJDIR_MASTER)/MOD
-INC += -I $(OBJDIR_MASTER)/MOD
+#RJ fix, include it above
+##INC += -I $(OBJDIR_MASTER)/MOD
 endif
 #
 endif
@@ -123,22 +171,22 @@ endif
 #                                                        #
 ##########################################################
 #
-# MASTER 
+# MASTER
 #
-OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find $(OBJDIR_MASTER) -follow -type f -name "spll_*.f*" | sed -e 's/\..*/.o/g' )) 
-#OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(obj_flist $(OBJDIR_MASTER)) 
+OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find $(OBJDIR_MASTER) -follow -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
+#OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(obj_flist $(OBJDIR_MASTER))
 #
-OBJS_LISTE_MASTER := $(sort $(filter-out $(IGNORE_OBJS),$(OBJS_LISTE_MASTER))) 
+OBJS_LISTE_MASTER := $(sort $(filter-out $(IGNORE_OBJS),$(OBJS_LISTE_MASTER)))
 #
 LIB_MASTER=$(OBJDIR_MASTER)/$(LIB_OBJS_ROOT)-MASTER.a
 #
 # USER
 #
 #ifdef DO_COMP_USER
-OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find $(OBJDIR_USER) -follow -type f -name "spll_*.f*" | sed -e 's/\..*/.o/g' )) 
-#OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(obj_flist $(OBJDIR_USER)) 
+OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find $(OBJDIR_USER) -follow -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
+#OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(obj_flist $(OBJDIR_USER))
 #
-OBJS_LISTE_USER := $(sort $(filter-out $(IGNORE_OBJS), $(OBJS_LISTE_USER) $(OBJS_LISTE_MASTER) )) 
+OBJS_LISTE_USER := $(sort $(filter-out $(IGNORE_OBJS), $(OBJS_LISTE_USER) $(OBJS_LISTE_MASTER) ))
 #
 LIB_USER=$(OBJDIR_USER)/$(LIB_OBJS_ROOT)-$(VER_USER).a
 #endif
@@ -155,10 +203,10 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 
 .PHONY : clean all objdir objdirmaster depall objs lib prog print
 
-.DELETE_ON_ERROR:  
+.DELETE_ON_ERROR:
 
 .SUFFIXES:
-.SUFFIXES:  .o .f90 .f .fx90 .mod .D .a
+.SUFFIXES:  .o .F90 .f90 .f .fx90 .mod .D .a
 
 .INTERMEDIATE:   $(LIB_MASTER)
 
@@ -168,13 +216,29 @@ DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 # MASTER RULES                                           #
 #                                                        #
 ##########################################################
-ifeq "$(VER_CDF)" "CDFAUTO"
-all : drhook ecoclimap gribapi cdf progmaster
-else
-all : drhook ecoclimap gribapi progmaster
+#RJ: compile internal packages as REDISTS, before compilation of the SURFEX code
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
+REDISTS += gribapi
 endif
 
-objdirmaster :  $(OBJDIR_MASTER)/.dummy
+ifeq "$(VER_CDF)" "CDFAUTO"
+REDISTS += cdf
+endif
+
+#RJ: re-add oasis back
+ifeq "$(VER_OASIS)" "mct"
+ifneq "$(VER_MPI)" "NOMPI"
+EXTCOUPLERS += oasis
+endif
+endif
+
+# main projectes
+PROJECTS += ecoclimap progmaster
+
+#RJ: add new main target, must come first!
+all : $(REDISTS) $(EXTCOUPLERS) $(PROJECTS)
+
+objdirmaster :  $(OBJDIR_MASTER)/.dummy $(REDISTS) $(EXTCOUPLERS)
 
 $(OBJDIR_MASTER)/.dummy :
 	-mkdir -p $(OBJDIR_MASTER)/.dummy
@@ -200,29 +264,34 @@ bibmaster :  libmaster
 objmaster :  $(OBJS_LISTE_MASTER)
 
 $(LIB_MASTER) :  $(OBJS_LISTE_MASTER)
-	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER) 
+	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER)
 
 progmaster : libmaster
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
 	OBJDIR=$(OBJDIR_MASTER) \
 	LIB_MNH=$(LIB_MASTER) \
 	PROG_DIR=$(OBJDIR_MASTER) \
-	$(PROG_LIST) cleanlibmaster
+	$(PROG_LIST)
+	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
+	OBJDIR=$(OBJDIR_MASTER) \
+	LIB_MNH=$(LIB_MASTER) \
+	PROG_DIR=$(OBJDIR_MASTER) \
+	cleanlibmaster
 
 installmaster : libmaster
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  OBJDIR=$(OBJDIR_MASTER) install
 
 cleanlibmaster :
-	rm -f  $(LIB_MASTER) 
+	-rm -f  $(LIB_MASTER)
 
-cleanmaster : gribex_clean 
-	test -d $(OBJDIR_MASTER) && rm -fr  $(OBJDIR_MASTER)
+cleanmaster : $(addprefix clean_,$(PROJECTS))
+	-test -d $(OBJDIR_MASTER) && rm -fr $(OBJDIR_MASTER)
 
-cleanobjmaster :  
-	test -d $(OBJDIR_MASTER) && find $(OBJDIR_MASTER) -follow -name "*.o" -o -name "*.mod" | xargs rm 
+cleanobjmaster :
+	-test -d $(OBJDIR_MASTER) && find $(OBJDIR_MASTER) -follow -name "*.o" -o -name "*.mod" | xargs rm
 
-cleanprogmaster :
-	test -d $(OBJDIR_MASTER) && cd $(OBJDIR_MASTER) && rm -f $(PROG_LIST)
+clean_progmaster :
+	-test -d $(OBJDIR_MASTER) && cd $(OBJDIR_MASTER) && rm -f $(PROG_LIST)
 
 ##########################################################
 #                                                        #
@@ -232,61 +301,66 @@ cleanprogmaster :
 
 user : proguser
 
-objdiruser :  $(OBJDIR_USER)/.dummy
+objdiruser :  $(OBJDIR_USER)/.dummy $(REDISTS) $(EXTCOUPLERS)
 
 $(OBJDIR_USER)/.dummy :
 	-mkdir -p $(OBJDIR_USER)/.dummy
 	-mkdir -p $(OBJDIR_USER)/MOD
 
-depuser : objdiruser
+#RJ: guessing that depmaster is missing here for filemaster dependency
+depuser : objdiruser depmaster
 	@$(MAKE) DO_DEP_USER=YES OBJDIR=$(OBJDIR_USER) filedepalluser
 
 filedepalluser : $(DEP_ALL_USER)
-	find  $(OBJDIR_USER) -follow -name "*.D" >  $(OBJDIR_USER)/fileuser 
+	find  $(OBJDIR_USER) -follow -name "*.D" >  $(OBJDIR_USER)/fileuser
 	cat $(OBJDIR_USER)/fileuser | sed -e "s!$(OBJDIR_USER)!$(OBJDIR_MASTER)!g"  >  $(OBJDIR_USER)/filenotmaster
 	grep -F -v -f   $(OBJDIR_USER)/filenotmaster  $(OBJDIR_MASTER)/filemaster >  $(OBJDIR_USER)/filemaster
 	rm -f  $(OBJDIR_USER)/filedepalluser
 	cat $(OBJDIR_USER)/fileuser $(OBJDIR_USER)/filemaster | xargs cat >>  $(OBJDIR_USER)/filedepalluser
 
 
-libuser :   depuser 
+libuser :   depuser
 	@$(MAKE) -I $(OBJDIR_USER) DO_COMP_USER=YES OBJDIR=$(OBJDIR_USER) objuser
 
 objuser :  $(OBJS_LISTE_USER)
 
 $(LIB_USER) :  $(OBJS_LISTE_USER)
 	rm -f $(LIB_USER)
-	cd $(OBJDIR_MASTER) ; find . -name "*.o" | xargs $(AR) r $(LIB_USER) 
-	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER) 
+	cd $(OBJDIR_MASTER) ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
+	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
 
 proguser : libuser
 	@$(MAKE) -I $(OBJDIR_USER)  DO_COMP_USER=YES \
 	OBJDIR=$(OBJDIR_USER) \
 	LIB_MNH=$(LIB_USER) \
 	PROG_DIR="$(OBJDIR_USER) $(OBJDIR_MASTER)" \
-	$(PROG_LIST) # cleanlibuser
+	PROG_LIST="$(or $(PROG_LIST_USER), PROG_LIST_USER_not_set)" \
+	$(PROG_LIST_USER) # cleanlibuser
 
 cleanlibuser :
-	rm -f  $(LIB_USER) 
+	rm -f  $(LIB_USER)
 
-installuser : 
-	@$(MAKE)  -I $(OBJDIR_USER) DO_COMP_USER=YES  OBJDIR=$(OBJDIR_USER) install	
+installuser :
+	@$(MAKE)  -I $(OBJDIR_USER) DO_COMP_USER=YES  OBJDIR=$(OBJDIR_USER) \
+	PROG_LIST="$(PROG_LIST_USER)" install
 
 cleanproguser :
-	test -d $(OBJDIR_USER) && cd $(OBJDIR_USER) && rm -f $(PROG_LIST)
+	test -d $(OBJDIR_USER) && cd $(OBJDIR_USER) && rm -f $(PROG_LIST_USER)
 
 ##########################################################
 #                                                        #
 # EXTRA LIB : GRIBEX                                     #
 #                                                        #
 ##########################################################
+#RJ: seems not needed
+ifdef GRIBEX
 ifneq "$(findstring 64,$(shell uname -m))" ""
 A64=A64
 endif
 #$(LIB_GRIBEX) : libmaster
-$(LIB_GRIBEX) : 
+$(LIB_GRIBEX) :
 ifneq "$(ARCH)" "SX8"
-	- [ ! -d $(DIR_GRIBEX)_$(ARCH) ] && cp -Rp  $(DIR_GRIBEX) $(DIR_GRIBEX)_$(ARCH) 
+	- [ ! -d $(DIR_GRIBEX)_$(ARCH) ] && cp -Rp  $(DIR_GRIBEX) $(DIR_GRIBEX)_$(ARCH)
 	cd $(DIR_GRIBEX)_$(ARCH) && $(MAKE) -j 1 ARCH=$(TARGET_GRIBEX) R64=$(R64_GRIBEX) CNAME=$(CNAME_GRIBEX) A64=$(A64)
 else
 ifneq "$(findstring brodie,$(shell uname -n))" ""
@@ -302,63 +376,82 @@ endif
 endif
 
 gribex_clean :
-	- [  -d $(DIR_GRIBEX)_$(ARCH) ] && rm -fr $(DIR_GRIBEX)_$(ARCH) 
+	- [ ! -d $(DIR_GRIBEX)_$(ARCH) ] || rm -fr $(DIR_GRIBEX)_$(ARCH)
+endif
 ##########################################################
 #                                                        #
 # EXTRA LIB : GRIBAPI                                    #
 #                                                        #
 ##########################################################
+#RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
+ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 gribapi : $(GRIBAPI_INC)
-$(GRIBAPI_INC) : 
-	cd ${DIR_GRIBAPI} && ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(FC)" && $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install	
+$(GRIBAPI_INC) :
+	cd $(DIR_GRIBAPI) && LDFLAGS= CFLAGS= CPPFLAGS=  \
+	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(REALFC)" && \
+	 $(MAKE) -j 1 clean && \
+	 $(MAKE) -j 1 && \
+	 $(MAKE) -j 1 install && \
+	 $(MAKE) -j 1 clean
 
-gribapi_clean :
-	- [  -d ${GRIBAPI_PATH} ] && rm -fr ${GRIBAPI_PATH} 
+clean_gribapi :
+	- [ ! -d ${GRIBAPI_PATH} ] || rm -fr ${GRIBAPI_PATH}
+endif
 ##########################################################
 #                                                        #
 # EXTRA LIB : NETCDF                                     #
 #                                                        #
 ##########################################################
+#RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
+ifeq "$(VERSION_CDF)" "3.6.3"
+NETCDF_OPTS ?= FC="$(REALFC)" CPPFLAGS="-DpgiFortran" --disable-shared --disable-cxx
+else
+#RJ: assume to build netcdf4 library with only netcdf3-classic file support
+NETCDF_OPTS ?= FC="$(REALFC)" --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-compiler-recover --with-pic
+endif
+#
 cdf : $(CDF_INC)
-$(CDF_INC) : 
-	cd ${DIR_CDF} && ./configure --prefix=${CDF_PATH} FC="$(FC)" FCFLAGS="$(OPT_BASE)" CPPFLAGS="-DpgiFortran" && make && make install
+$(CDF_INC) :
+	cd $(DIR_CDF) && LDFLAGS= CFLAGS= CPPFLAGS=  \
+	 ./configure --prefix=${CDF_PATH} $(NETCDF_OPTS) && \
+	 $(MAKE) -j 1 clean && \
+	 $(MAKE) -j 1 && \
+	 $(MAKE) -j 1 install && \
+	 $(MAKE) -j 1 clean
 
-cleanmaster : cleancdf
-cleancdf :
-	- [ -d ${CDF_PATH} ] && rm -fr  ${CDF_PATH}
+clean_cdf :
+	- [ ! -d ${CDF_PATH} ] || rm -fr  ${CDF_PATH}
 endif
+
 ##########################################################
 #                                                        #
-# EXTRA LIB : DR_HOOK                                    #
+# EXTRA LIB : OASIS3-MCT                                 #
 #                                                        #
 ##########################################################
-ifeq "$(F90)" "gfortran"
-ARCHOOK="linuxgfortran"
-#ARCHOOK="linuxgfortran_ubuntu"
-else 
-ifeq "$(F90)" "mpif90"
-ARCHOOK="linuxmpif90"
-#ARCHOOK="linuxmpif90_ubuntu"
-else
-ifeq "$(F90)" "LXpgi"
-ARCHOOK="linux"
-else
-ARCHOOK=$(ARCH)
-ifeq "$(VER_MPI)" "NOMPI"
-ARCHOOK=$(ARCH)_nompi
-endif
-endif
-endif
-endif
+ifeq "$(VER_OASIS)" "mct"
+ifneq "$(VER_MPI)" "NOMPI"
+#
+oasis : $(OASIS_KEY)
+$(OASIS_KEY) : $(CDF_INC)
+	([ ! -d ${OASIS_PATH} ] && mkdir ${OASIS_PATH}) || true
+	@echo '=> Compiling oasis'
+	@echo '===> check util/make_dir/COMP.log STDOUT messages'
+	@echo '===> check util/make_dir/COMP.err for STDERR logs'
+	cd $(DIR_OASIS)/util/make_dir && \
+	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS= LDFLAGS= \
+	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(OPT) $(INC_NETCDF) $(LIB_NETCDF)" \
+	    $(MAKE) -j 1 -f TopMakefileOasis3
+	echo '=> Compiling oasis DONE'
 
-drhook : $(DIR_HOOK)/parkind1.mod
-$(DIR_HOOK)/parkind1.mod : 
-	cd ${DIR_HOOK} && ./configure ARCH=$(ARCHOOK) -a $(ARCHOOK) && make ARCH=$(ARCHOOK) drhook 2>&1 | tee log.make 
-
-cleandrhook : 
-	cd ${DIR_HOOK} && rm -f *.mod *.a
+clean_oasis :
+	cd ${DIR_OASIS}/util/make_dir && \
+	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" \
+	    $(MAKE) -j 1 realclean -f TopMakefileOasis3
+	- [ ! -d ${OASIS_PATH} ] || rm -fr  ${OASIS_PATH}
+endif
+endif
 ##########################################################
 #                                                        #
 # EXTRA LIB : ECOCLIMAP                                  #
@@ -366,37 +459,19 @@ cleandrhook :
 ##########################################################
 ecoclimap:${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin
 
-
-ifeq "$(F90)" "ifort"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && ./a.out
-else
-ifeq "$(F90)" "mpiifort"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && ./a.out
-else
-ifeq "$(F90)" "pgf90"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -byteswapio convert_ecoclimap_param.f90  && ./a.out
-else
-ifeq "$(ARCH)" "SX8"
 ${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && qsub job_ecoclimap_sx8
+ifeq "$(ARCH)" "SX8"
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && qsub job_ecoclimap_sx8
 else
 ifeq "$(ARCH)" "AIX64"
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin :
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) convert_ecoclimap_param.f90 && llsubmit job_ecoclimap_aix64
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && llsubmit job_ecoclimap_aix64
 else
-${SRC_SURFEX}/MY_RUN/ECOCLIMAP/ecoclimapI_covers_param.bin : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) -fconvert=swap convert_ecoclimap_param.f90 && ./a.out
-endif
-endif
-endif
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && $(F90) $(F90FLAGS) convert_ecoclimap_param.f90 && ./a.out
 endif
 endif
 
-cleanecoclimap : 
-	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && rm -f *.bin
+clean_ecoclimap :
+	cd ${SRC_SURFEX}/MY_RUN/ECOCLIMAP && rm -f ./*.bin ./a.out
 
 ##########################################################
 #                                                        #
@@ -406,25 +481,40 @@ cleanecoclimap :
 ifdef PROG_LIST
 
 prog :   lib $(LIB_GRIBEX)
-	@$(MAKE) -I $(OBJDIR) DEP=YES  $(PROG_LIST)  
+	@$(MAKE) -I $(OBJDIR) DEP=YES  $(PROG_LIST)
 
+ifeq "$(DO_COMP_USER)" "YES"
+install : $(patsubst %,%-${ARCH_XYZ}-${VER_USER},$(PROG_LIST))
+else
 install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
+endif
 
-$(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -name "spll_*.f*" \
-              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/g' | head -1 )  
+$(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -iname "spll_*.f*" \
+              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/gI' | head -1 )
 
+#RJ: added hack when linking user if no master was linked
 $(PROG_LIST) :  $(LIB_MNH)  $(LIB_GRIBEX)
+ifeq "$(DO_COMP_USER)" "YES"
+	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ \
+	  $(shell ([ -e $(OBJ_PROG) ] && echo $(OBJ_PROG)) || echo $(OBJ_PROG) | sed -e 's@/MASTER/spll_@/$(VER_USER)/spll_@') \
+	  $(LIB_MNH) $(LIBS)
+else
 	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ $(OBJ_PROG) $(LIB_MNH) $(LIBS)
+endif
+
+ifeq "$(DO_COMP_USER)" "YES"
+%-${ARCH_XYZ}-${VER_USER} :%
+	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}-${VER_USER}
+#RJ #	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}-${VER_USER}
+#RJ 	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)${XYZ}
+#	-rm -f $(SRC_SURFEX)/exe/$(*F)_${ARCH_XYZ}~
+endif
 
 %-${ARCH_XYZ} :%
-ifndef DO_COMP_USER
 	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}
-else
-#	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)-${ARCH_XYZ}-${VER_USER}
-	ln -sf $(OBJDIR)/$(*F) $(SRC_SURFEX)/exe/$(*F)${XYZ}
-endif
-	rm -f $(SRC_SURFEX)/exe/$(*F)_${ARCH_XYZ}~
+#	-rm -f $(SRC_SURFEX)/exe/$(*F)_${ARCH_XYZ}~
 
+endif
 ##########################################################
 #                                                        #
 # EXAMPLES RULES                                         #
@@ -447,14 +537,14 @@ examplesclean :  $(patsubst %,%_clean,$(EXAMPLES))
 $(EXAMPLES) :
 	cd $(PWD_KTEST)/$@ ; run_$@
 
-%_ncl1 : 
+%_ncl1 :
 	cd $(PWD_KTEST)/$(*F) ; run_$(*F) all_ncl_extractdia
 
-%_ncl2 : 
+%_ncl2 :
 	cd $(PWD_KTEST)/$(*F) ; run_$(*F) all_ncl_lfi2cdf
 
-%_clean : 
-	cd $(PWD_KTEST)/$(*F) ; $(MAKE) clean
+%_clean :
+	[ ! -d "$(PWD_KTEST)/$(*F)" ] || (cd $(PWD_KTEST)/$(*F) ; $(MAKE) clean)
 
 EXAMPLES_CHIMIE=009_ICARTT 011_KW78CHEM
 
@@ -467,11 +557,11 @@ $(EXAMPLES_CHIMIE) :
 #
 purgelist : $(patsubst %,purge_%,$(notdir $(PL)))
 purge_%.f90 :
-	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster 
+	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster
 purge_%.fx90 :
-	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster 
+	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster
 purge_%.f :
-	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster 
+	cd $(OBJDIR_MASTER) ; grep -l "depfile:$(*F).D" *.f* | xargs rm -f ; rm -f $(*F).D ; rm -f filedepallmaster filemaster
 
 #
 # rules to remove spll* source on USER directory
@@ -489,19 +579,15 @@ stat_f90 :
 stat_o :
 	cd $(OBJDIR_MASTER) ; find . -name "*.o" | wc -l
 
-endif
 
 
-
-
-
-cleanuser :  
+cleanuser :
 	test -d $(OBJDIR_USER) && rm -fr  $(OBJDIR_USER)
 
-clean :  examplesclean gribex_clean
+clean :  examplesclean cleanmaster $(addprefix clean_,$(REDISTS)) $(addprefix clean_,$(EXTCOUPLERS))
 	rm -fr  $(OBJDIR_ROOT)
 cleanprog :
-	cd $(OBJDIR_ROOT) ; rm -f $(PROG_LIST)
+	cd $(OBJDIR_MASTER) ; rm -f $(PROG_LIST)
 
 print :
 	@echo $(VAR)=$($(VAR))
@@ -513,60 +599,101 @@ ARFLAGS=r
 
 #
 #  GENERATION OF DEPENDANCE FILES : *.D
-# 
+#
+SPLR_FLAGS = --split --modi --deps
+#RJ: implement part No.7 of Hirlam technical contribution, breaks on recursive dependencies
+ifeq "$(USE_SPLR_WRAP)" "YES"
+SPLR_FLAGS += --wrap
+endif
 
+ifeq "$(AVOID_CPP)" "YES"
 %.D:%.F90
-	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f90 
-	spll $(NSOURCE) $(OBJDIR)/$(*F).f90 
-	rm -f $(OBJDIR)/$(*F).f90 
+	splr.pl $(FUNDEFS) $(FPPFLAGS) --fpp $(SPLR_FLAGS) --odir=$(OBJDIR) $<
+else
+%.D:%.F90
+	$(CPP) $(INC) $(FPPFLAGS) $< >  $(OBJDIR)/$(*F).f90
+ifeq "$(USE_SPLR)" "YES"
+	splr.pl $(SPLR_FLAGS) --odir=$(OBJDIR) $(OBJDIR)/$(*F).f90
+else
+	spll $(NSOURCE) $(OBJDIR)/$(*F).f90
+endif
+	-@rm -f $(OBJDIR)/$(*F).f90
+endif
 
+#RJ: no cpp for lower case ones, actually even dangerous a bit
 %.D:%.f90
-	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f90 
-	spll $(NSOURCE) $(OBJDIR)/$(*F).f90 
-	rm -f $(OBJDIR)/$(*F).f90 
+ifeq "$(USE_SPLR)" "YES"
+	splr.pl $(SPLR_FLAGS) --odir=$(OBJDIR) $<
+else
+	cp $< $(OBJDIR)/$(*F).f90
+	spll $(NSOURCE) $(OBJDIR)/$(*F).f90
+	-@rm -f $(OBJDIR)/$(*F).f90
+endif
 
-%.D:%.fx90
-	$(CPP)  $(INC) $(CPPFLAGS) $< > $(OBJDIR)/$(*F).fx90
-	spll $(NSOURCE) $(OBJDIR)/$(*F).fx90 
-	rm -f $(OBJDIR)/$(*F).fx90
- 
+#RJ: strange
+#%.D:%.fx90
+#	$(CPP)  $(INC) $(FPPFLAGS) $< > $(OBJDIR)/$(*F).fx90
+#	spll $(NSOURCE) $(OBJDIR)/$(*F).fx90
+#	-@rm -f $(OBJDIR)/$(*F).fx90
+
 %.D:%.F
-	$(CPP) $(INC) $(CPPFLAGS) $< >  $(OBJDIR)/$(*F).f
+	$(CPP) $(INC) $(FPPFLAGS) $< >  $(OBJDIR)/$(*F).f
 	spll $(NSOURCE) $(OBJDIR)/$(*F).f
-	rm -f $(OBJDIR)/$(*F).f
+	-@rm -f $(OBJDIR)/$(*F).f
 
 %.D:%.f
-	$(CPP)  $(INC) $(CPPFLAGS) $< > $(OBJDIR)/$(*F).f
-	spll $(NSOURCE) $(OBJDIR)/$(*F).f 
-	rm -f $(OBJDIR)/$(*F).f
- 
+	cp $< $(OBJDIR)/$(*F).f
+	spll $(NSOURCE) $(OBJDIR)/$(*F).f
+	-@rm -f $(OBJDIR)/$(*F).f
+
 #
 # GENERATION OF OBJET FILES : *.o
 #
 
+#RJ: add asm_lst capabilities for debugging
+#RJ: rules for F90 sources
+%.o:%.F90
+ifeq "$(DO_ASM)" "YES"
+	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c -S $< -g0 -o $(OBJDIR)/$(*F).s
+endif
+	$(F90) $(MODOUT) $(INC) $(F90FLAGS) $(FPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
+ifeq "x$(MODOUT_FLAG)" "x"
+	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+endif
+
 %.o:%.f90
-	$(F90) -I$(OBJDIR) $(INC) -c $(F90FLAGS) $< 
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+ifeq "$(DO_ASM)" "YES"
+	$(F90) $(MODOUT) $(INC) -c -S $(F90FLAGS) $< -g0 -o $(OBJDIR)/$(*F).s
+endif
+	$(F90) $(MODOUT) $(INC) -c $(F90FLAGS) $< -o $(OBJDIR)/$(*F).o
+ifeq "x$(MODOUT_FLAG)" "x"
+	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+endif
 
 %.o:%.f
-	$(F77) -I$(OBJDIR) $(INC) -c $(F77FLAGS)  $<  
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+ifeq "$(DO_ASM)" "YES"
+	$(F77) $(MODOUT) $(INC) -c -S $(F77FLAGS) $< -g0 -o $(OBJDIR)/$(*F).s
+endif
+	$(F77) $(MODOUT) $(INC) -c $(F77FLAGS)  $< -o $(OBJDIR)/$(*F).o
+ifeq "x$(MODOUT_FLAG)" "x"
+	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+endif
 
-%.o:%.fx90
-	cp $< $(OBJDIR)/$(*F).f 
-	$(FX90) -I$(OBJDIR) $(INC) -c $(FX90FLAGS) $(OBJDIR)/$(*F).f   
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+#RJ: unneeded
+#%.o:%.fx90
+#	@cp $< $(OBJDIR)/$(*F).f
+#	$(FX90) $(MODOUT) $(INC) -c $(FX90FLAGS) $(OBJDIR)/$(*F).f
+#ifeq "x$(MODOUT_FLAG)" "x"
+#	-@mv ./*.mod  $(OBJDIR)/MOD/. || echo mods OK
+#endif
 
 %.o : %.c
-	$(CC) $(INC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o
-	-mv  $(*F).o $(OBJDIR)/. || echo OK $(*F).o
+	$(CC) $(INC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(OBJDIR)/$(*F).o -o $(OBJDIR)/$(*F).o
 
 ifeq "$(DO_COMP_MASTER)" "YES"
 include  filedepallmaster
-endif 
+endif
 
 ifeq "$(DO_COMP_USER)" "YES"
 include  filedepalluser
-endif 
-
-
+endif

@@ -37,15 +37,16 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	A. Boone           * Meteo-France *
+!!      A. Boone           * Meteo-France *
 !!      new version :
-!!	B. Decharme        * Meteo-France *
+!!      B. Decharme        * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original     12/04/03
 !!      new version :10/08/2011
 !!      modif       :   09/2012 soildepth can reach 12m (permafrost)
+!!                              bug coef algo
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -135,14 +136,14 @@ ELSE
         DO JL=2,INL
           !
           PDG      (JJ,JL,JPATCH) = PSOILGRID(JL)
-          ! 
+          !
           IF ( PSOILGRID(JL)-PSOILGRID(JL-1)<=0.3 ) THEN       
             ZWORK = ABS(PSOILGRID(JL)-PSOILDEPTH(JJ,JPATCH))
             IF(ZWORK<=ZREF(JJ,JPATCH))THEN
               KWG_LAYER(JJ,JPATCH) = JL
               ZREF     (JJ,JPATCH) = ZWORK
             ENDIF
-          ELSEIF( PSOILDEPTH(JJ,JPATCH)>=(PSOILGRID(JL)*0.6+PSOILGRID(JL-1)*0.4) )THEN
+          ELSEIF(PSOILDEPTH(JJ,JPATCH)>=(PSOILGRID(JL)*0.3+PSOILGRID(JL-1)*0.7))THEN
             KWG_LAYER(JJ,JPATCH) = JL
           ENDIF
         ENDDO
@@ -164,6 +165,8 @@ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE OPTIMSOILGRID
+!
+USE MODD_REPROD_OPER, ONLY : CDGDIF
 !
 IMPLICIT NONE
 !
@@ -189,25 +192,51 @@ ZDG_WATER (:,:) = XUNDEF
 !-------------------------------------------------------------------------------
 !a. Arranged depth
 !
-DO JPATCH=1,IPATCH
-   DO JJ=1,INI
-      IF(PSOILDEPTH(JJ,JPATCH)<1.25)THEN
-        ZDG_WATER(JJ,JPATCH)=MIN(1.0,PSOILDEPTH(JJ,JPATCH))
-      ELSEIF(PSOILDEPTH(JJ,JPATCH)>=5.50.AND.PSOILDEPTH(JJ,JPATCH)<6.50)THEN
-              ZDG_WATER(JJ,JPATCH)=5.50
-      ELSEIF(PSOILDEPTH(JJ,JPATCH)>=6.50.AND.PSOILDEPTH(JJ,JPATCH)<10.50)THEN
+IF(CDGDIF=='ROOT')THEN
+!
+  DO JPATCH=1,IPATCH
+     DO JJ=1,INI
+        IF(PSOILDEPTH(JJ,JPATCH)<=1.1)THEN
+          ZDG_WATER(JJ,JPATCH)=MIN(1.0,PSOILDEPTH(JJ,JPATCH))
+        ELSEIF(PSOILDEPTH(JJ,JPATCH)>1.1.AND.PSOILDEPTH(JJ,JPATCH)<=1.25)THEN
+          ZDG_WATER(JJ,JPATCH)=1.25          
+        ELSEIF(PSOILDEPTH(JJ,JPATCH)>5.50.AND.PSOILDEPTH(JJ,JPATCH)<=8.00)THEN
               ZDG_WATER(JJ,JPATCH)=8.00
-      ELSEIF(PSOILDEPTH(JJ,JPATCH)>=10.50.AND.PSOILDEPTH(JJ,JPATCH)<XUNDEF)THEN
-              ZDG_WATER(JJ,JPATCH)=12.00              
-      ELSE
-        DO JL=1,NDLIM-1         
-           IF(PSOILDEPTH(JJ,JPATCH)>=ZDLIM(JL).AND.PSOILDEPTH(JJ,JPATCH)<ZDLIM(JL+1))THEN
-              ZDG_WATER(JJ,JPATCH)=MERGE(ZDLIM(JL),ZDLIM(JL+1),PSOILDEPTH(JJ,JPATCH)<(0.4*ZDLIM(JL)+0.6*ZDLIM(JL+1)))
-           ENDIF
-        ENDDO
-      ENDIF
-   ENDDO
-ENDDO      
+        ELSEIF(PSOILDEPTH(JJ,JPATCH)>8.00.AND.PSOILDEPTH(JJ,JPATCH)<XUNDEF)THEN
+              ZDG_WATER(JJ,JPATCH)=12.00 ! Permafrost case
+        ELSE
+          DO JL=1,NDLIM-1         
+             IF(PSOILDEPTH(JJ,JPATCH)>ZDLIM(JL).AND.PSOILDEPTH(JJ,JPATCH)<=ZDLIM(JL+1))THEN
+               ZDG_WATER(JJ,JPATCH)=MERGE(ZDLIM(JL),ZDLIM(JL+1),PSOILDEPTH(JJ,JPATCH)<(0.8*ZDLIM(JL)+0.2*ZDLIM(JL+1)))
+             ENDIF
+          ENDDO
+        ENDIF
+     ENDDO
+  ENDDO
+!
+ELSE
+!
+  DO JPATCH=1,IPATCH
+     DO JJ=1,INI
+        IF(PSOILDEPTH(JJ,JPATCH)<1.25)THEN
+          ZDG_WATER(JJ,JPATCH)=MIN(1.0,PSOILDEPTH(JJ,JPATCH))
+        ELSEIF(PSOILDEPTH(JJ,JPATCH)>=5.50.AND.PSOILDEPTH(JJ,JPATCH)<6.50)THEN
+              ZDG_WATER(JJ,JPATCH)=5.50
+        ELSEIF(PSOILDEPTH(JJ,JPATCH)>=6.50.AND.PSOILDEPTH(JJ,JPATCH)<10.50)THEN
+              ZDG_WATER(JJ,JPATCH)=8.00
+        ELSEIF(PSOILDEPTH(JJ,JPATCH)>=10.50.AND.PSOILDEPTH(JJ,JPATCH)<XUNDEF)THEN
+              ZDG_WATER(JJ,JPATCH)=12.00 ! Permafrost case
+        ELSE
+          DO JL=1,NDLIM-1         
+             IF(PSOILDEPTH(JJ,JPATCH)>=ZDLIM(JL).AND.PSOILDEPTH(JJ,JPATCH)<ZDLIM(JL+1))THEN
+               ZDG_WATER(JJ,JPATCH)=MERGE(ZDLIM(JL),ZDLIM(JL+1),PSOILDEPTH(JJ,JPATCH)<(0.4*ZDLIM(JL)+0.6*ZDLIM(JL+1)))
+             ENDIF
+          ENDDO
+        ENDIF
+     ENDDO
+  ENDDO
+!
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !b. General cases

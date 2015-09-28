@@ -42,6 +42,7 @@
 !!    ------------
 !!
 !!    Original    29/08/95
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
 !!
 !----------------------------------------------------------------------------
 !
@@ -51,6 +52,7 @@
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODD_CSTS ,ONLY : XSURF_EPSILON
 !
 IMPLICIT NONE
 !
@@ -186,7 +188,7 @@ PCUTVAL=ZVAL(1)
 PGLBLATMAX=ZVAL(2)
 PGLBLATMIN=ZVAL(3)
 PGLBLONMIN=ZVAL(5)
-PGLBLONMAX=ZVAL(4)+NINT((ZVAL(5)-ZVAL(4)+180.+1.E-10)/360.)*360.
+PGLBLONMAX=ZVAL(4)+NINT((ZVAL(5)-ZVAL(4)+180.*(1.0+XSURF_EPSILON))/360.)*360.
 KNBLAT=NINT(ZVAL(6))
 KNBLON=NINT(ZVAL(7))
 !

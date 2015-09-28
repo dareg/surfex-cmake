@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVERAGE1_LDB(KLUOUT,PLAT,PLON,PVALUE,HTYPE)
+      SUBROUTINE AVERAGE1_LDB(KLUOUT,KNBLINES,PLAT,PLON,PVALUE,HTYPE,PNODATA)
 !     #######################################################
 !
 !!**** *AVERAGE1_LDB* 
@@ -52,24 +52,28 @@ IMPLICIT NONE
 !            ------------------------
 !
 INTEGER,                 INTENT(IN)    :: KLUOUT
+INTEGER,                 INTENT(IN)    :: KNBLINES
 REAL, DIMENSION(:),      INTENT(IN)    :: PLAT    ! latitude of the point to add
 REAL, DIMENSION(:),      INTENT(IN)    :: PLON    ! longitude of the point to add
 REAL, DIMENSION(:),      INTENT(IN)    :: PVALUE  ! value of the point to add
- CHARACTER(LEN=1),        INTENT(IN)    :: HTYPE
+ CHARACTER(LEN=1),       INTENT(IN)    :: HTYPE
+REAL, OPTIONAL, INTENT(IN) :: PNODATA
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZBOUND
 !
-INTEGER, DIMENSION(SIZE(PLAT)) :: IINDEX ! mesh index of all input points
+INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: IINDEX ! mesh index of all input points
                                          ! 0 indicates the point is out of the domain                              
 !
+REAL, DIMENSION(SIZE(PLAT)) :: ZVALUE
+REAL :: ZNODATA
+!
 REAL    :: ZCUT
-INTEGER :: JLOOP, JGRAD        ! loop index on input arrays
+INTEGER :: JLOOP, JGRAD, JOVER        ! loop index on input arrays
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
-!
 !
 !*    1.     Get position
 !            ------------
@@ -91,24 +95,29 @@ SELECT CASE (HTYPE)
 !
 END SELECT
 !
-IF (ALLOCATED(XNUM)) DEALLOCATE(XNUM)
-ALLOCATE(XNUM(SIZE(PLAT)))
 !
-XNUM(:)=1
-!                                         
-DO WHILE(MAXVAL(XNUM).NE.0)
-!
-  CALL GET_MESH_INDEX(KLUOUT,PLAT,PLON,IINDEX)
+IF (PRESENT(PNODATA)) THEN
+  ZVALUE(:) = PVALUE(:)
+  ZNODATA = PNODATA
+  CALL GET_MESH_INDEX(KLUOUT,KNBLINES,PLAT,PLON,IINDEX,ZVALUE,ZNODATA)
+ELSE
+  ZVALUE(:) = 1.
+  ZNODATA = 0.
+  CALL GET_MESH_INDEX(KLUOUT,KNBLINES,PLAT,PLON,IINDEX)
+ENDIF
 !
 !*    2.     Loop on all input data points
 !            -----------------------------
-!     
-  DO JLOOP = 1 , SIZE(PLAT)
+!    
+bloop: &
+DO JLOOP = 1 , SIZE(PLAT)
+!
+  DO JOVER = 1, NOVMX
 !
 !*    3.     Tests on position
 !            -----------------
 !     
-    IF (IINDEX(JLOOP)==0) CYCLE
+    IF (IINDEX(JOVER,JLOOP)==0) CYCLE bloop
 !
 !*    4.     Test on value meaning
 !            ---------------------
@@ -117,7 +126,7 @@ DO WHILE(MAXVAL(XNUM).NE.0)
 !
     DO JGRAD = 1, SIZE(ZBOUND)-1
       IF (ZCUT.GT.ZBOUND(JGRAD) .AND. ZCUT.LE.ZBOUND(JGRAD+1)) THEN
-        XTNG(IINDEX(JLOOP),JGRAD) = XTNG(IINDEX(JLOOP),JGRAD) + 1
+        XTNG(IINDEX(1,JLOOP),JGRAD) = XTNG(IINDEX(1,JLOOP),JGRAD) + 1
         EXIT
       ENDIF
     ENDDO
@@ -125,10 +134,11 @@ DO WHILE(MAXVAL(XNUM).NE.0)
 !*    5.     Summation
 !            ---------
 !
-    NSIZE(IINDEX(JLOOP))=NSIZE(IINDEX(JLOOP))+1
+    NSIZE(IINDEX(1,JLOOP))=NSIZE(IINDEX(1,JLOOP))+1
 !
   END DO
-ENDDO
+!
+ENDDO bloop
 !
 DEALLOCATE(ZBOUND)
 !

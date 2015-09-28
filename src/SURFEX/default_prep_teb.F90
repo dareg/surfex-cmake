@@ -23,7 +23,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -37,7 +37,7 @@ USE MODD_PREP_TEB,   ONLY : CFILE_TEB, CTYPE, CFILEPGD_TEB, CTYPEPGD,           
                               CFILE_WS, CTYPE_WS, XWS_ROOF, XWS_ROAD,                   &
                               CFILE_TS, CTYPE_TS, XTS_ROOF, XTS_ROAD, XTS_WALL,         &
                               XTI_BLD, XTI_ROAD, XQ_CAN, XHUI_BLD_DEF, XHUI_BLD,        &
-                              XWS_ROAD_DEF, XWS_ROOF_DEF, XTI_BLD_DEF  
+                              XWS_ROAD_DEF, XWS_ROOF_DEF, XTI_BLD_DEF, XT_CAN  
 
 USE MODN_PREP_TEB,   ONLY : LTEB_CANOPY, CROAD_DIR, CWALL_OPT
 
@@ -82,6 +82,7 @@ XTS_WALL = XUNDEF
 XTI_ROAD = XUNDEF
 XTI_BLD  = XUNDEF
 XHUI_BLD = XUNDEF
+XT_CAN   = XUNDEF
 !
 XWS_ROOF_DEF = 0.
 XWS_ROAD_DEF = 0.

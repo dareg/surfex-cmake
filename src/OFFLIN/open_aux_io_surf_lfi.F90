@@ -1,5 +1,6 @@
 !     #######################################################
-      SUBROUTINE OPEN_AUX_IO_SURF_LFI(HFILE,HFILETYPE,HMASK)
+      SUBROUTINE OPEN_AUX_IO_SURF_LFI (&
+                                       HFILE,HFILETYPE,HMASK)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*	
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,6 +33,9 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
 !
 USE MODD_IO_SURF_LFI,ONLY:CLUOUT_LFI,NMASK,NFULL,CMASK, NLUOUT, &
                             CFILE_LFI, NUNIT_LFI, NFULL_AUX,&
@@ -50,6 +54,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
@@ -71,7 +77,8 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
 !
 CMASK = HMASK
 CFILE_LFI=HFILE
- CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET)
+ CALL READ_SURF(&
+                'LFI   ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------

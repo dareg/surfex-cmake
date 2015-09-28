@@ -1,5 +1,6 @@
 !     #########
-       SUBROUTINE BUILD_EMISSTAB_n(HPROGRAM,KCH,HEMIS_GR_NAME, KNBTIMES,&
+       SUBROUTINE BUILD_EMISSTAB_n (CHU, &
+                                    HPROGRAM,KCH,HEMIS_GR_NAME, KNBTIMES,&
               KEMIS_GR_TIME,KOFFNDX,TPEMISS,KSIZE,KLUOUT, KVERB,PRHODREF)  
 !!    #####################################################################
 !!
@@ -22,9 +23,16 @@
 !!    D.Gazen  01/12/03  change emissions handling for surf. externalization!!
 !!    P.Tulet  01/01/04  change conversion for externalization (flux unit is
 !!                        molec./m2/s)
+!!    M.Leriche  04/14   apply conversion factor if lead = f
+!!                       change emissions name EMIS_ -> E_ name for coherence with PGD
 !!
 !!    EXTERNAL
 !!    --------
+!
+!
+!
+USE MODD_CH_SURF_n, ONLY : CH_SURF_t
+!
 USE MODI_CH_OPEN_INPUTB
 USE MODI_READ_SURF
 !!
@@ -32,7 +40,6 @@ USE MODI_READ_SURF
 !!    ------------------
 USE MODD_TYPE_EFUTIL, ONLY : EMISSVAR_T
 USE MODD_CSTS,        ONLY : NDAYSEC, XMD, XAVOGADRO
-USE MODD_CH_SURF_n,   ONLY : XCONVERSION
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -46,6 +53,10 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !*       0.1  declaration of arguments
+!
+!
+!
+TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
 !
  CHARACTER(LEN=6),                INTENT(IN) :: HPROGRAM   ! Program name
 INTEGER,                         INTENT(IN) :: KCH
@@ -87,28 +98,29 @@ END IF
 !*       1.   READ DATA 
 !        --------------
 !
+!$OMP SINGLE
  CALL CH_OPEN_INPUTB("EMISUNIT", KCH, KLUOUT)
 !
 ! read unit identifier
 READ(KCH,'(A3)') YUNIT
-!
+!$OMP END SINGLE COPYPRIVATE(YUNIT)
 !
 !*       2.   MAP DATA ONTO PROGNOSTIC VARIABLES
 !        ---------------------------------------
 !
-ALLOCATE (XCONVERSION(SIZE(PRHODREF,1)))
+ALLOCATE (CHU%XCONVERSION(SIZE(PRHODREF,1)))
 ! determine the conversion factor
-  XCONVERSION(:) = 1.
+  CHU%XCONVERSION(:) = 1.
 SELECT CASE (YUNIT)
 CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
 ! where 1 molecule/cm2/s = (224.14/6.022136E23) ppp*m/s
-  XCONVERSION(:) = XAVOGADRO * PRHODREF(:) / XMD
+  CHU%XCONVERSION(:) = XAVOGADRO * PRHODREF(:) / XMD
 CASE ('CON') ! flux given in molecules/cm2/s, conversion to molec/m2/s 
-  XCONVERSION(:) =  1E4
+  CHU%XCONVERSION(:) =  1E4
 CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s  
 ! where 1 microMol/m2/day = (22.414/86.400)*1E-12 ppp*m/s
   !XCONVERSION(:) = (22.414/86.400)*1E-12 * XAVOGADRO * PRHODREF(:) / XMD
-  XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
+  CHU%XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
 
 CASE DEFAULT
   CALL ABOR1_SFX('CH_BUILDEMISSN: UNKNOWN CONVERSION FACTOR')
@@ -142,7 +154,7 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
     TPEMISS(JSPEC)%LREAD = .FALSE. ! to prevent future reading
     ALLOCATE(TPEMISS(JSPEC)%XEMISDATA(KSIZE,INBTS))
 ! Read file for emission data
-    YRECFM='EMIS_'//TRIM(TPEMISS(JSPEC)%CNAME)
+    YRECFM='E_'//TRIM(TPEMISS(JSPEC)%CNAME)
     CALL READ_SURF(HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
@@ -154,9 +166,9 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
       TPEMISS(JSPEC)%XEMISDATA(:,:) = 0. 
     END WHERE
       DO ITIME=1,INBTS
-      ! XCONVERSION HAS BEEN ALREADY APPLY IN CH_EMISSION_FLUXN 
-      !TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME) * XCONVERSION(:)
-      TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME)
+      ! XCONVERSION HAS BEEN ALREADY APPLY IN CH_EMISSION_FLUXN ONLY FOR LREAD = T
+      TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME) * CHU%XCONVERSION(:)
+      !TPEMISS(JSPEC)%XEMISDATA(:,ITIME) = TPEMISS(JSPEC)%XEMISDATA(:,ITIME)
       END DO
     ELSE
 ! Read window size is smaller than number of emission times

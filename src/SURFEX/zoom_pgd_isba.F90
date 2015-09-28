@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_ISBA(HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP)
+      SUBROUTINE ZOOM_PGD_ISBA (CHI, DTCO, DTI, IG, I, UG, U, USS, &
+                                HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP)
 !     ###########################################################
 
 !!
@@ -37,14 +38,22 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+!
+!
+!
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_ISBA_n,         ONLY : NPATCH, NGROUND_LAYER, CISBA,            &
-                                  CPEDOTF, XCOVER, LCOVER, XZS,          &
-                                  XZ0EFFJPDIR, CPHOTO, NNBIOMASS,        &
-                                  XSAND, XCLAY, XRUNOFFB, XWDRAIN,       &
-                                  LECOCLIMAP, LTR_ML, XSOILGRID
-USE MODD_ISBA_GRID_n,    ONLY : CGRID, XGRID_PAR, XLAT, XLON, XMESH_SIZE
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
 !
@@ -66,6 +75,16 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
+!
+!
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
@@ -104,59 +123,70 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA',0,ZHOOK_HANDLE)
 !  These points will not be used during the horizontal interpolation step.
 !  Their value must be defined as XUNDEF.
 !
- CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(&
+                       HINIFILE,HINIFILETYPE,'FULL  ')
 !
- CALL READ_SURF(HINIFILETYPE,'VERSION',IVERSION,IRESP)
- CALL READ_SURF(HINIFILETYPE,'BUG',IBUGFIX,IRESP) 
- CALL READ_SURF(HINIFILETYPE,'PATCH_NUMBER',NPATCH,IRESP)
- CALL READ_SURF(HINIFILETYPE,'GROUND_LAYER',NGROUND_LAYER,IRESP)
- CALL READ_SURF(HINIFILETYPE,'ISBA',CISBA,IRESP)
+ CALL READ_SURF(&
+                HINIFILETYPE,'VERSION',IVERSION,IRESP)
+ CALL READ_SURF(&
+                HINIFILETYPE,'BUG',IBUGFIX,IRESP) 
+ CALL READ_SURF(&
+                HINIFILETYPE,'PATCH_NUMBER',I%NPATCH,IRESP)
+ CALL READ_SURF(&
+                HINIFILETYPE,'GROUND_LAYER',I%NGROUND_LAYER,IRESP)
+ CALL READ_SURF(&
+                HINIFILETYPE,'ISBA',I%CISBA,IRESP)
 IF (IVERSION >= 7) THEN
-  CALL READ_SURF(HINIFILETYPE,'PEDOTF',CPEDOTF,IRESP)
+  CALL READ_SURF(&
+                HINIFILETYPE,'PEDOTF',I%CPEDOTF,IRESP)
 ELSE
-  CPEDOTF = 'CH78'
+  I%CPEDOTF = 'CH78'
 ENDIF
- CALL READ_SURF(HINIFILETYPE,'PHOTO',CPHOTO,IRESP)
+ CALL READ_SURF(&
+                HINIFILETYPE,'PHOTO',I%CPHOTO,IRESP)
 !
 IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
   !
-  CALL READ_SURF(HINIFILETYPE,'TR_ML',LTR_ML,IRESP)
+  CALL READ_SURF(&
+                HINIFILETYPE,'TR_ML',I%LTR_ML,IRESP)
   !
 ELSE 
-  LTR_ML = .FALSE.
+  I%LTR_ML = .FALSE.
 ENDIF
 !
-IF(CISBA=='DIF') THEN
-  ALLOCATE(XSOILGRID(NGROUND_LAYER))
-  XSOILGRID=XUNDEF
+IF(I%CISBA=='DIF') THEN
+  ALLOCATE(I%XSOILGRID(I%NGROUND_LAYER))
+  I%XSOILGRID=XUNDEF
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
-    CALL READ_SURF(HINIFILETYPE,'SOILGRID',XSOILGRID,IRESP,HDIR='-')
+    CALL READ_SURF(&
+                HINIFILETYPE,'SOILGRID',I%XSOILGRID,IRESP,HDIR='-')
   ELSE
-    XSOILGRID(1:NGROUND_LAYER)=XOPTIMGRID(1:NGROUND_LAYER)
+    I%XSOILGRID(1:I%NGROUND_LAYER)=XOPTIMGRID(1:I%NGROUND_LAYER)
   ENDIF
 ELSE
-  ALLOCATE(XSOILGRID(0))
+  ALLOCATE(I%XSOILGRID(0))
 ENDIF
 !
 !* number of biomass pools
 !
 IF (IVERSION>=6) THEN
-  CALL READ_SURF(HPROGRAM,'NBIOMASS',NNBIOMASS,IRESP)
+  CALL READ_SURF(&
+                HPROGRAM,'NBIOMASS',I%NNBIOMASS,IRESP)
 ELSE
-  SELECT CASE (CPHOTO)
+  SELECT CASE (I%CPHOTO)
     CASE ('AGS','LAI','AST','LST')
-      NNBIOMASS = 1
+      I%NNBIOMASS = 1
     CASE ('NIT')
-      NNBIOMASS = 3
+      I%NNBIOMASS = 3
     CASE ('NCB')
-      NNBIOMASS = 6
+      I%NNBIOMASS = 6
   END SELECT
 ENDIF
 !
  CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
 !
 !------------------------------------------------------------------------------
-LECOCLIMAP = OECOCLIMAP
+I%LECOCLIMAP = OECOCLIMAP
 !
 !-------------------------------------------------------------------------------
 !
@@ -164,38 +194,41 @@ LECOCLIMAP = OECOCLIMAP
 !             ----------------------------------------------
 !
 !
- CALL GET_SURF_SIZE_n('NATURE',ILU)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'NATURE',ILU)
 !
-ALLOCATE(LCOVER     (JPCOVER))
-ALLOCATE(XCOVER     (ILU,JPCOVER))
-ALLOCATE(XZS        (ILU))
-ALLOCATE(XLAT       (ILU))
-ALLOCATE(XLON       (ILU))
-ALLOCATE(XMESH_SIZE (ILU))
-ALLOCATE(XZ0EFFJPDIR(ILU))
+ALLOCATE(I%LCOVER     (JPCOVER))
+ALLOCATE(I%XZS        (ILU))
+ALLOCATE(IG%XLAT       (ILU))
+ALLOCATE(IG%XLON       (ILU))
+ALLOCATE(IG%XMESH_SIZE (ILU))
+ALLOCATE(I%XZ0EFFJPDIR(ILU))
 !
- CALL PACK_PGD(HPROGRAM, 'NATURE',                    &
-                CGRID,  XGRID_PAR,                     &
-                LCOVER, XCOVER, XZS,                   &
-                XLAT, XLON, XMESH_SIZE, XZ0EFFJPDIR    )  
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'NATURE',                    &
+                IG%CGRID,  IG%XGRID_PAR,                     &
+                I%LCOVER, I%XCOVER, I%XZS,                   &
+                IG%XLAT, IG%XLON, IG%XMESH_SIZE, I%XZ0EFFJPDIR    )  
 !
 !------------------------------------------------------------------------------
 !
 !*      3.     Reading of sand, clay, runoffb, wdrain and interpolations
 !              --------------------------------------------------
 !
-ALLOCATE(XSAND(ILU,NGROUND_LAYER))
-ALLOCATE(XCLAY(ILU,NGROUND_LAYER))
-ALLOCATE(XRUNOFFB(ILU))
-ALLOCATE(XWDRAIN (ILU))
- CALL ZOOM_PGD_ISBA_FULL(HPROGRAM,HINIFILE,HINIFILETYPE)
+ALLOCATE(I%XSAND(ILU,I%NGROUND_LAYER))
+ALLOCATE(I%XCLAY(ILU,I%NGROUND_LAYER))
+ALLOCATE(I%XRUNOFFB(ILU))
+ALLOCATE(I%XWDRAIN (ILU))
+ CALL ZOOM_PGD_ISBA_FULL(CHI, DTCO, DTI, IG, I, UG, U, &
+                         HPROGRAM,HINIFILE,HINIFILETYPE)
 !
 !-------------------------------------------------------------------------------
 !
 !*    8.      Packing of ISBA specific fields
 !             -------------------------------
 !
- CALL GET_SURF_SIZE_n('FULL  ',IL)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'FULL  ',IL)
 !
 ALLOCATE(ZAOSIP(IL))
 ALLOCATE(ZAOSIM(IL))
@@ -207,10 +240,13 @@ ALLOCATE(ZHO2JP(IL))
 ALLOCATE(ZHO2JM(IL))
 ALLOCATE(ZSSO_SLOPE(IL))
 
- CALL GET_AOS_n(HPROGRAM,IL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
- CALL GET_SSO_n(HPROGRAM,IL,ZSSO_SLOPE)
+ CALL GET_AOS_n(USS, &
+                HPROGRAM,IL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
+ CALL GET_SSO_n(USS, &
+                HPROGRAM,IL,ZSSO_SLOPE)
 
- CALL PACK_PGD_ISBA(HPROGRAM,                                    &
+ CALL PACK_PGD_ISBA(DTCO, IG, I, U, &
+                    HPROGRAM,                                    &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
                      ZSSO_SLOPE                                   )  

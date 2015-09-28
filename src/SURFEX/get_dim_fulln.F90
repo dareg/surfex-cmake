@@ -1,5 +1,6 @@
 !     ########################################
-      SUBROUTINE GET_DIM_FULL_n(KDIM_FULL)
+      SUBROUTINE GET_DIM_FULL_n (U, &
+                                 KDIM_FULL)
 !     ########################################
 !
 !!****  *GET_DIM_FULL_n* - routine to get some ISBA fields
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,8 +34,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n,     ONLY : NDIM_FULL
 !
+!
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -43,6 +46,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER, INTENT(OUT) :: KDIM_FULL ! total number of points
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -54,7 +60,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_DIM_FULL_N',0,ZHOOK_HANDLE)
-KDIM_FULL = NDIM_FULL
+KDIM_FULL = U%NDIM_FULL
 IF (LHOOK) CALL DR_HOOK('GET_DIM_FULL_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================

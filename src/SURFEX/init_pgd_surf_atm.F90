@@ -1,5 +1,6 @@
 !     #################################################################################
-SUBROUTINE INIT_PGD_SURF_ATM(HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
+SUBROUTINE INIT_PGD_SURF_ATM (YSC, &
+                              HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
                                KYEAR, KMONTH, KDAY, PTIME            )  
 !     #################################################################################
 !
@@ -22,9 +23,12 @@ SUBROUTINE INIT_PGD_SURF_ATM(HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      B. Decharme  04/2013 new coupling variables
 !!------------------------------------------------------------------
 !
 !
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -35,6 +39,9 @@ USE MODI_INIT_SURF_ATM_n
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
@@ -58,17 +65,19 @@ REAL,             DIMENSION(0,1):: ZDIR_ALB  ! direct albedo for each band
 REAL,             DIMENSION(0,1):: ZSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(0)  :: ZEMIS     ! emissivity
 REAL,             DIMENSION(0)  :: ZTSRAD    ! radiative temperature
+REAL,             DIMENSION(0)  :: ZTSURF    ! radiative temperature
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 !* initialization of PGD fields of output domain
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',0,ZHOOK_HANDLE)
- CALL INIT_SURF_ATM_n(HPROGRAM,HINIT,.FALSE.,                     &
+ CALL INIT_SURF_ATM_n(YSC, &
+                      HPROGRAM,HINIT,.FALSE.,                     &
                       0,0,1,                                     &
                       YSV,ZCO2,ZRHOA,                            &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &
-                      ZEMIS,ZTSRAD,                              &
+                      ZEMIS,ZTSRAD,ZTSURF,                       &
                       KYEAR, KMONTH, KDAY, PTIME,                &
                       HATMFILE,HATMFILETYPE, 'OK'                )  
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',1,ZHOOK_HANDLE)

@@ -1,6 +1,7 @@
 !     #########
       SUBROUTINE READ_NAM_PGD_OROGRAPHY(HPROGRAM, HZS, HFILETYPE, PUNIF_ZS, &
-                                          HOROGTYPE, PENV, OIMP_ZS )  
+                                          HOROGTYPE, PENV, OIMP_ZS,&
+                                  HSLOPE, HSLOPEFILETYPE, OEXPLICIT_SLOPE )  
 !     ##############################################################
 !
 !!**** *READ_NAM_PGD_OROGRAPHY* reads namelist for Orography
@@ -30,6 +31,7 @@
 !!    ------------
 !!
 !!    Original    02/2010
+!!    M Lafaysse 07/2013 : explicit slope
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -59,6 +61,9 @@ REAL,                INTENT(OUT)   :: PUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3),    INTENT(OUT)   :: HOROGTYPE   ! orogpraphy type 
 REAL,                INTENT(OUT)   :: PENV        ! parameter for enveloppe orography:
 LOGICAL,             INTENT(OUT)   :: OIMP_ZS     ! Imposed orography from another PGD file
+CHARACTER(LEN=28),   INTENT(OUT),OPTIONAL   :: HSLOPE         ! file name for slope
+CHARACTER(LEN=6),    INTENT(OUT),OPTIONAL   :: HSLOPEFILETYPE   ! data file type
+LOGICAL,             INTENT(OUT),OPTIONAL   :: OEXPLICIT_SLOPE ! Slope is computed from explicit ZS field and not subgrid orography
 !                                  
 !
 !*    0.2    Declaration of local variables
@@ -72,7 +77,9 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !            ------------------------
 !
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
- CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
+ CHARACTER(LEN=6)         :: YZSFILETYPE   ! data file type
+CHARACTER(LEN=28)        :: YSLOPE         ! file name for slope
+CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
@@ -81,9 +88,11 @@ REAL                     :: XUNIF_ZS    ! uniform orography
 REAL                     :: XENV        ! parameter for enveloppe orography:
 !                                       ! zs = avg_zs + XENV * SSO_STEDV
 LOGICAL                  :: LIMP_ZS     ! Imposed orography from another PGD file
+LOGICAL                  :: LEXPLICIT_SLOPE ! Slope is computed from explicit ZS field and not subgrid orography
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_ZS/YZS, YFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS  
+NAMELIST/NAM_ZS/YZS, YZSFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS , & 
+                YSLOPE, YSLOPEFILETYPE, LEXPLICIT_SLOPE
 !
 !-------------------------------------------------------------------------------
 !
@@ -93,11 +102,14 @@ NAMELIST/NAM_ZS/YZS, YFILETYPE, XUNIF_ZS, COROGTYPE, XENV, LIMP_ZS
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 XUNIF_ZS       = XUNDEF
 YZS            = '                          '
-YFILETYPE      = '      '
+YZSFILETYPE    = '      '
+YSLOPE            = '                          '
+YSLOPEFILETYPE      = '      '
 !
 COROGTYPE      = 'ENV'
 XENV           = 0.
 LIMP_ZS        = .FALSE.
+LEXPLICIT_SLOPE=.FALSE.
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
@@ -116,11 +128,18 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_ZS)
 !-------------------------------------------------------------------------------
 !
 HZS       = YZS       ! file name for orography
-HFILETYPE = YFILETYPE ! data file type
+HFILETYPE = YZSFILETYPE ! data file type
+IF (PRESENT(HSLOPE)) THEN
+  HSLOPE       = YSLOPE       ! file name for slope
+  HSLOPEFILETYPE = YSLOPEFILETYPE ! data file type
+END IF
 PUNIF_ZS  = XUNIF_ZS  ! uniform orography
 HOROGTYPE = COROGTYPE ! orogpraphy type 
 PENV      = XENV      ! parameter for enveloppe orography:
 OIMP_ZS   = LIMP_ZS   ! Imposed orography from another PGD file
+IF (PRESENT(OEXPLICIT_SLOPE)) THEN
+    OEXPLICIT_SLOPE=LEXPLICIT_SLOPE ! Slope is computed from explicit ZS field and not subgrid orography
+END IF
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_OROGRAPHY',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

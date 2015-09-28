@@ -2,6 +2,7 @@
       SUBROUTINE AVERAGED_ALBEDO_TEB(HBEM, HROAD_DIR, HWALL_OPT,     &
                        PZENITH, PAZIM,                               &
                        PBLD, PGARDEN, PROAD_DIR, PROAD, PFRAC_GR,    &
+                       PFRAC_PANEL, PALB_PANEL,                      &
                        PWALL_O_HOR, PCAN_HW_RATIO,                   &
                        PALB_ROOF,                                    &
                        PALB_ROAD, PSVF_ROAD,                         &
@@ -78,9 +79,11 @@ REAL, DIMENSION(:), INTENT(IN) :: PAZIM         ! solar azimuthal angle
 REAL, DIMENSION(:), INTENT(IN) :: PBLD          ! building fraction
 REAL, DIMENSION(:), INTENT(IN) :: PGARDEN       ! green area fraction
 REAL, DIMENSION(:), INTENT(IN) :: PROAD_DIR     ! Road direction
-                                                ! (° from N, clockwise)
+                                                ! (deg from N, clockwise)
 REAL, DIMENSION(:), INTENT(IN) :: PROAD         ! road fraction
 REAL, DIMENSION(:), INTENT(IN) :: PFRAC_GR      ! fraction of greenroof
+REAL, DIMENSION(:), INTENT(IN) :: PFRAC_PANEL   ! fraction of solar panels
+REAL, DIMENSION(:), INTENT(IN) :: PALB_PANEL    ! albedo   of solar panels
 REAL, DIMENSION(:), INTENT(IN) :: PWALL_O_HOR   ! vertical surf. / horizontal surf.
 REAL, DIMENSION(:), INTENT(IN) :: PSVF_ROAD     ! sky-view-factor from roads
 REAL, DIMENSION(:), INTENT(IN) :: PSVF_WALL     ! sky-view-factor from walls
@@ -129,12 +132,14 @@ REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_GARDEN     ! shortwave absorbed by green 
 REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_GREENROOF  ! shortwave absorbed by green roofs
 REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_SNOW_ROAD  ! shortwave absorbed by snow
 REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_SNOW_ROOF  ! on roads, roofs,
+REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_PANEL      ! shortwave absorbed by solar panels
 !
 REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_ROAD       ! shortwave received by roads
 REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_WALL_A     ! shortwave received by walls
 REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_WALL_B     ! shortwave received by walls
 REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_GARDEN     ! shortwave received by green areas
 REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_SNOW_ROAD  ! shortwave received by snow on roads
+REAL, DIMENSION(SIZE(PBLD)) :: ZREC_SW_ROOF       ! shortwave received by roofs
 !
 REAL, DIMENSION(SIZE(PBLD)) :: ZSW_RAD_GARDEN ! total solar radiation reaching green areas
 REAL, DIMENSION(SIZE(PBLD)) :: ZABS_SW_WIN       ! shortwave absorbed by walls
@@ -170,6 +175,7 @@ IF (SIZE(OSHAD_DAY)>0) GSHAD_DAY=OSHAD_DAY
                      PWALL_O_HOR, PCAN_HW_RATIO,                   &
                      PALB_ROOF,                                    &
                      PALB_ROAD, PSVF_ROAD, PALB_WALL, PSVF_WALL,   &
+                     PFRAC_PANEL, PALB_PANEL,                      &
                      PALB_GARDEN, PSVF_GARDEN,                     &
                      PALB_GREENROOF,                               &
                      TSNOW_ROOF%ALB(:,1), TSNOW_ROAD%ALB(:,1),     &
@@ -179,9 +185,10 @@ IF (SIZE(OSHAD_DAY)>0) GSHAD_DAY=OSHAD_DAY
                      ZABS_SW_WALL_A, ZABS_SW_WALL_B,               &
                      ZABS_SW_GARDEN, ZABS_SW_GREENROOF,            &
                      ZABS_SW_SNOW_ROOF, ZABS_SW_SNOW_ROAD,         &
+                     ZABS_SW_PANEL,                                &
                      ZREC_SW_ROAD,  ZREC_SW_SNOW_ROAD,             &
                      ZREC_SW_WALL_A, ZREC_SW_WALL_B,               &
-                     ZREC_SW_GARDEN,                               &
+                     ZREC_SW_GARDEN, ZREC_SW_ROOF,                 &
                      PDIR_ALB_TOWN, PSCA_ALB_TOWN,                 &
                      ZSW_RAD_GARDEN, ZABS_SW_WIN, ZREC_SW_WIN,     &
                      PTRAN_WIN,                                    &

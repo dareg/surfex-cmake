@@ -27,11 +27,12 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/2011
+!!      P. Samuelsson  07/2014 Added snow albedos
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -102,7 +103,10 @@ DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
   !
   IF (KFLAG==1) THEN
     !
-    WHERE(OMASK(:)) TPSNOW%ALB  (:,JPATCH) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALB    (:,JPATCH) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALBVIS (:,JPATCH) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALBNIR (:,JPATCH) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALBFIR (:,JPATCH) = XUNDEF
     !
     IF (SIZE(TPSNOW%EMIS ) >0) THEN
       WHERE(OMASK(:))

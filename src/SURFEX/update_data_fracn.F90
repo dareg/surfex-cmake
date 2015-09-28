@@ -36,9 +36,6 @@
 !            -----------
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
-USE MODD_DATA_COVER_n, ONLY : XDATA_NATURE, XDATA_TOWN, XDATA_GARDEN, &
-                              XDATA_SEA, XDATA_WATER,                 &
-                              XDATA_BLD, XDATA_WALL_O_HOR, LGARDEN
 !
 USE MODI_ARRANGE_COVER
 !

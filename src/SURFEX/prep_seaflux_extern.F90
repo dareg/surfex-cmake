@@ -1,6 +1,10 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX_EXTERN(HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
+SUBROUTINE PREP_SEAFLUX_EXTERN (&
+                                HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
 !     #################################################################################
+!
+!
+!
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -18,6 +22,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+!
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
@@ -30,10 +36,11 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 !
 !
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 !
 INTEGER           :: INI            ! total 1D dimension
+INTEGER           :: IVERSION       ! total 1D dimension
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -52,8 +59,10 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'SEA   ')
- CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ CALL OPEN_AUX_IO_SURF(&
+                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
+ CALL PREP_GRID_EXTERN(&
+                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 !---------------------------------------------------------------------------------------
@@ -73,9 +82,39 @@ SELECT CASE(HSURF)
   CASE('SST    ')
     ALLOCATE(PFIELD(INI,1))
     YRECFM='SST'
-    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'SEA   ')
-    CALL READ_SURF(HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+    CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+!
+!*      5.  Sea surface salinity
+!           --------------------
+!
+  CASE('SSS    ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='SSS'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+!
+!*      6.  Sea ice fraction
+!           ----------------
+!
+  CASE('SIC    ')
+    ALLOCATE(PFIELD(INI,1))
+    PFIELD = 0.0
 !
 !---------------------------------------------------------------------------------------
 END SELECT

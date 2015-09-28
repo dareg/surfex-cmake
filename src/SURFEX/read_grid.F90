@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_GRID(HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR)
+      SUBROUTINE READ_GRID (&
+                            HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR)
 !     #########################################
 !
 !!****  *READ_GRID* - routine to initialise the horizontal grid of a scheme
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,11 +34,15 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+!
+!
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
 USE MODI_LATLON_GRID
 USE MODI_READ_GRIDTYPE
 !
+USE MODD_ASSIM, ONLY : LREAD_ALL, LASSIM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -46,6 +51,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
  CHARACTER(LEN=10),  INTENT(OUT) :: HGRID      ! type of horizontal grid
@@ -59,6 +66,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDIR ! heading of main axis of grid
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+LOGICAL :: GREAD_ALL
 INTEGER :: IGRID_PAR
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -68,17 +76,26 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              -----------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRID',0,ZHOOK_HANDLE)
- CALL READ_SURF(HPROGRAM,'GRID_TYPE',HGRID,KRESP)
+!
+IF (LASSIM) THEN
+  GREAD_ALL = LREAD_ALL
+  LREAD_ALL = .TRUE.
+ENDIF
+!
+ CALL READ_SURF(&
+                HPROGRAM,'GRID_TYPE',HGRID,KRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_GRIDTYPE(HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.FALSE.)
+ CALL READ_GRIDTYPE(&
+                    HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.FALSE.)
 !
 ALLOCATE(PGRID_PAR(IGRID_PAR))
- CALL READ_GRIDTYPE(HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.TRUE.,PGRID_PAR,KRESP)
+ CALL READ_GRIDTYPE(&
+                    HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.TRUE.,PGRID_PAR,KRESP)
 !
 !---------------------------------------------------------------------------
 !
@@ -91,13 +108,16 @@ SELECT CASE (HGRID)
   CASE("NONE      ")
     IF (PRESENT(PDIR)) PDIR(:) = 0.
     !
-    CALL READ_SURF(HPROGRAM,'LON',      PLON,KRESP)
+    CALL READ_SURF(&
+                HPROGRAM,'LON',      PLON,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
-    CALL READ_SURF(HPROGRAM,'LAT',      PLAT,KRESP)
+    CALL READ_SURF(&
+                HPROGRAM,'LAT',      PLAT,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
-    CALL READ_SURF(HPROGRAM,'MESH_SIZE',PMESH_SIZE,KRESP)
+    CALL READ_SURF(&
+                HPROGRAM,'MESH_SIZE',PMESH_SIZE,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
 
@@ -109,6 +129,9 @@ SELECT CASE (HGRID)
     END IF
 
 END SELECT
+!
+IF (LASSIM) LREAD_ALL = GREAD_ALL
+!
 IF (LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
 !
 !---------------------------------------------------------------------------

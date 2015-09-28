@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_LCOVER_n(HPROGRAM,KCOVER,OCOVER)
+      SUBROUTINE GET_LCOVER_n (U, &
+                               HPROGRAM,KCOVER,OCOVER)
 !     ########################################
 !
 !!****  *GET_LCOVER_n* - routine to get some surface fields
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,9 +34,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_n,     ONLY : LCOVER
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,6 +50,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM
 INTEGER,                    INTENT(IN)  :: KCOVER  ! number of covers
@@ -64,13 +70,13 @@ IF (LHOOK) CALL DR_HOOK('GET_LCOVER_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(OCOVER) /= SIZE(LCOVER) ) THEN
+IF ( SIZE(OCOVER) /= SIZE(U%LCOVER) ) THEN
   WRITE(ILUOUT,*) 'try to get COVER field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (OCOVER) :', SIZE(OCOVER)
-  WRITE(ILUOUT,*) 'size of field inthe surface                     (LCOVER) :', SIZE(LCOVER)
+  WRITE(ILUOUT,*) 'size of field inthe surface                     (LCOVER) :', SIZE(U%LCOVER)
   CALL ABOR1_SFX('GET_LCOVERN: (1) LCOVER SIZE NOT CORRECT')
 ELSE
-  OCOVER = LCOVER
+  OCOVER = U%LCOVER
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_LCOVER_N',1,ZHOOK_HANDLE)
 !

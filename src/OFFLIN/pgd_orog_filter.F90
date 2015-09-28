@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE PGD_OROG_FILTER(HPROGRAM)
+      SUBROUTINE PGD_OROG_FILTER (U, &
+                                  HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_OROGRAPHY* monitor for averaging and interpolations of cover fractions
@@ -36,8 +37,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_PGD_GRID,       ONLY : CGRID, XGRID_PAR
-USE MODD_SURF_ATM_n,     ONLY : XZS, XSEA
 !
 USE MODI_READ_NAM_PGD_OROG_FILTER
 USE MODI_OROGRAPHY_FILTER
@@ -49,6 +52,9 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !
@@ -81,7 +87,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !*   11.      Filtering of orography
 !             ----------------------
 !
- CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, XSEA, NZSFILTER, XZS)
+ CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, U%XSEA, NZSFILTER, U%XZS)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_OROG_FILTER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

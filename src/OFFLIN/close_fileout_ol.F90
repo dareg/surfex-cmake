@@ -22,7 +22,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Faroux   *Meteo France*	
+!!      S. Faroux   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_TXT_n(HMASK,HACTION)
+      SUBROUTINE INIT_IO_SURF_TXT_n (DTCO, U, &
+                                     HMASK,HACTION)
 !     ######################
 !
 !!****  *INIT_IO_SURF_TXT_n* Keep in memory the output files
@@ -17,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -30,6 +31,12 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_IO_SURF_TXT, ONLY : NMASK, NFULL, CMASK
 !
@@ -44,6 +51,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
  CHARACTER(LEN=5),  INTENT(IN)  :: HACTION    
 !
@@ -54,13 +65,17 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_TXT_N',0,ZHOOK_HANDLE)
 !
  CALL GET_LUOUT('TEXTE ',ILUOUT)
 !
- CALL GET_DIM_FULL_n(NFULL)
+ CALL GET_DIM_FULL_n(U, &
+                     NFULL)
 !
- CALL GET_SIZE_FULL_n('TEXTE ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n(U, &
+                      'TEXTE ',NFULL,ILU)
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(HMASK,IL)
- CALL INIT_IO_SURF_MASK_n(HMASK, IL, ILUOUT, ILU, NMASK)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     HMASK,IL)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, &
+                          HMASK, IL, ILUOUT, ILU, NMASK)
 !
 CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_TXT_N',1,ZHOOK_HANDLE)

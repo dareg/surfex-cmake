@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_ASC_n(HMASK,HACTION)
+      SUBROUTINE INIT_IO_SURF_ASC_n (DTCO, U, &
+                                     HMASK,HACTION)
 !     ######################
 !
 !!****  *INIT_IO_SURF_ASC* Keep in memory the output files
@@ -17,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -30,6 +31,13 @@
 !
 !*       0.   DECLARATIONS
 !             ------------
+!
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NSIZE, NPIO
 !
@@ -47,6 +55,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
  CHARACTER(LEN=5),  INTENT(IN)  :: HACTION    
@@ -85,7 +97,8 @@ IF (HACTION == 'READ ') THEN
   ! NFULL must be known even if HMASK/=FULL because it's no longer 
   ! updated in init_io_surf_maskn.
   CMASK = 'FULL ' 
-  CALL READ_SURF('ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
+  CALL READ_SURF(&
+                 'ASCII ','DIM_FULL',NFULL,IRET,HDIR='A')
   CMASK = HMASK
 ELSE
   IF (NRANK==NPIO) THEN
@@ -100,7 +113,8 @@ ELSE
 !$OMP END SINGLE  
   ENDIF
   ! NFULL must be known in every case. 
-  CALL GET_DIM_FULL_n(NFULL)
+  CALL GET_DIM_FULL_n(U, &
+                      NFULL)
   CMASK = HMASK
 ENDIF
 !
@@ -114,12 +128,15 @@ ENDIF
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
- CALL GET_SIZE_FULL_n('ASCII ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n(U, &
+                      'ASCII ',NFULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(HMASK,IL)
- CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     HMASK,IL)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, &
+                          HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !$OMP BARRIER
 !

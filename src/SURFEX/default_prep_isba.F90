@@ -23,12 +23,13 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
 !!      Modified    03/2007   P. Le Moigne 
+!!      MEB         10/2014   P. Samuelsson
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -42,7 +43,9 @@ USE MODD_PREP_ISBA,  ONLY : CFILE_ISBA, CTYPE, CFILEPGD_ISBA, CTYPEPGD,       &
                               CFILE_TG, CTYPE_TG,                             &
                               CFILE_TG_SURF, CFILE_TG_ROOT, CFILE_TG_DEEP,    &
                               XTG_SURF, XTG_ROOT, XTG_DEEP,                   &
-                              XWR_DEF  
+                              XWR_DEF, LEXTRAP_TG, LEXTRAP_WG, LEXTRAP_WGI,   &
+                              LEXTRAP_SN,                                     &
+                              XWRV_DEF, XWRVN_DEF, XQC_DEF
 !
 USE MODN_PREP_ISBA,  ONLY : LISBA_CANOPY
 !
@@ -97,8 +100,16 @@ XTG_ROOT  = XUNDEF
 XTG_DEEP  = XUNDEF
 !
 XWR_DEF   = 0.
+XWRV_DEF  = 0.
+XWRVN_DEF = 0.
+XQC_DEF   = 0.
 !
-LISBA_CANOPY = .FALSE. 
+LISBA_CANOPY = .FALSE.
+LEXTRAP_TG   = .FALSE.
+LEXTRAP_WG   = .FALSE.
+LEXTRAP_WGI  = .FALSE.
+LEXTRAP_SN   = .FALSE.
+ 
 IF (LHOOK) CALL DR_HOOK('DEFAULT_PREP_ISBA',1,ZHOOK_HANDLE)
 
 !-------------------------------------------------------------------------------

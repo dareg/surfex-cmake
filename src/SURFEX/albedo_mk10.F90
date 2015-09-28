@@ -27,7 +27,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	E. Bazile           * Meteo-France *
+!!      E. Bazile           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------

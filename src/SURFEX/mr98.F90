@@ -31,7 +31,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!      from part of water_flux.f90 written by M. tomasini
 !!
 !!    MODIFICATIONS

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_WATFLUX_n(HPROGRAM)
+      SUBROUTINE READ_WATFLUX_n (DTCO, U, W, &
+                                 HPROGRAM)
 !     #########################################
 !
 !!****  *READ_WATFLUX_n* - reads WATFLUX variables
@@ -24,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,9 +35,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_WATFLUX_n,      ONLY : XTS, XZ0, LINTERPOL_TS, &
-                                  CINTERPOL_TS, XTS_MTH, &
-                                  TTIME  
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_READ_SURF
 USE MODI_INTERPOL_TS_WATER_MTH
@@ -51,6 +56,11 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 !
@@ -74,37 +84,45 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_WATFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_WATER'
- CALL GET_TYPE_DIM_n('WATER ',ILU)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'WATER ',ILU)
 !
 !*       3.     Prognostic fields:
 !               -----------------
 !
 !* water temperature
 !
-ALLOCATE(XTS(ILU))
+ALLOCATE(W%XTS(ILU))
 !
-IF(LINTERPOL_TS)THEN
+IF(W%LINTERPOL_TS)THEN
 !
-! Precedent, Current and Next Monthly SST
-  INMTH=3
-! Precedent, Current and Next Annual Monthly SST
-  IF(CINTERPOL_TS=='ANNUAL')INMTH=14
+!  Initialize current Month
+   W%TZTIME%TDATE%YEAR  = W%TTIME%TDATE%YEAR
+   W%TZTIME%TDATE%MONTH = W%TTIME%TDATE%MONTH
+   W%TZTIME%TDATE%DAY   = W%TTIME%TDATE%DAY
+   W%TZTIME%TIME        = W%TTIME%TIME
+
+! Precedent, Current, Next, and Second-next Monthly SST
+  INMTH=4
 !
-  ALLOCATE(XTS_MTH(SIZE(XTS),INMTH))
+  ALLOCATE(W%XTS_MTH(SIZE(W%XTS),INMTH))
   DO JMTH=1,INMTH
      WRITE(YMTH,'(I2)') (JMTH-1)
      YRECFM='TS_WATER'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-     CALL READ_SURF(HPROGRAM,YRECFM,XTS_MTH(:,JMTH),IRESP)
+     CALL READ_SURF(&
+                    HPROGRAM,YRECFM,W%XTS_MTH(:,JMTH),IRESP)
   ENDDO
 !
-  CALL INTERPOL_TS_WATER_MTH(TTIME%TDATE%YEAR,TTIME%TDATE%MONTH,TTIME%TDATE%DAY,XTS)
+  CALL INTERPOL_TS_WATER_MTH(W, &
+                             W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TDATE%DAY,W%XTS)
 !
 ELSE
 ! 
-  ALLOCATE(XTS_MTH(0,0))
+  ALLOCATE(W%XTS_MTH(0,0))
 !
   YRECFM='TS_WATER'
-  CALL READ_SURF(HPROGRAM,YRECFM,XTS(:),IRESP)
+  CALL READ_SURF(&
+                    HPROGRAM,YRECFM,W%XTS(:),IRESP)
 !
 ENDIF
 !
@@ -116,10 +134,11 @@ ENDIF
 !
 !* roughness length
 !
-ALLOCATE(XZ0(ILU))
+ALLOCATE(W%XZ0(ILU))
 YRECFM='Z0WATER'
-XZ0(:) = 0.001
-  CALL READ_SURF(HPROGRAM,YRECFM,XZ0(:),IRESP)
+W%XZ0(:) = 0.001
+  CALL READ_SURF(&
+                    HPROGRAM,YRECFM,W%XZ0(:),IRESP)
 IF (LHOOK) CALL DR_HOOK('READ_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

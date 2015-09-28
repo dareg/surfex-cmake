@@ -1,10 +1,11 @@
 !     ############################################################
-SUBROUTINE COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                                  &
+SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
+                                HPROGRAM, HCOUPLING, PTIMEC,                                  &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,                                           &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  HTEST                                                                       )  
@@ -42,19 +43,20 @@ SUBROUTINE COUPLING_IDEAL_FLUX(HPROGRAM, HCOUPLING, PTIMEC,                     
 !!    -------------
 !!      Original    01/2004
 !!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
+!!      B. Decharme  04/2013 new coupling variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XPI, XLVTT, XDAY
 USE MODD_IDEAL_FLUX, ONLY : NFORCF, NFORCT, XSFTH, XSFTQ, XSFTS, XSFCO2, &
                             CUSTARTYPE, XUSTAR, XZ0, XALB, XEMIS, XTSRAD, &
                             XTIMEF, XTIMET 
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_DIAG_IDEAL_n, ONLY : XH, XLE, XRN, XGFLUX, LSURF_BUDGET, &
-                              LCOEF, XZ0_d=>XZ0, XZ0H_d=>XZ0H, &
-                              LSURF_VARS, XQS
 !
 USE MODE_SBLS
 USE MODE_THERMOS
@@ -68,6 +70,9 @@ IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
 ! 
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+!
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
                                               ! 'E' : explicit
@@ -115,13 +120,18 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     ! flux of heat                    
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor                   (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
-REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
+REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
 !
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(KI), INTENT(OUT) :: PEMIS     ! emissivity                            (-)
+!
+REAL, DIMENSION(KI), INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0       ! roughness length for momentum         (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PZ0H      ! roughness length for heat             (m)
+REAL, DIMENSION(KI), INTENT(OUT) :: PQSURF    ! specific humidity at surface          (kg/kg)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_A_COEF! implicit coefficients
 REAL, DIMENSION(KI), INTENT(IN) :: PPEW_B_COEF! needed if HCOUPLING='I'
@@ -274,25 +284,30 @@ PTRAD(:) = XTSRAD(IHOURT) + ( XTSRAD(IHOURT+1)-XTSRAD(IHOURT) )*ZALPHA
 PDIR_ALB = XALB
 PSCA_ALB = XALB
 PEMIS    = XEMIS
+!  
+PTSURF(:) = PTRAD(:)
+PZ0   (:) = XZ0
+PZ0H  (:) = XZ0
+PQSURF(:) = QSAT(PTSURF(:),PPS(:))
 !
 !-------------------------------------------------------------------------------
 !  
 !*       9.    turbulent fluxes as diagnostics
 !              ------------------------------------
-IF (LSURF_BUDGET) THEN
-  XH  = PSFTH
-  XLE = XLVTT * PSFTQ
-  XRN = XH+XLE
-  XGFLUX = 0.
+IF (DGL%LSURF_BUDGET) THEN
+  DGL%XH  = PSFTH
+  DGL%XLE = XLVTT * PSFTQ
+  DGL%XRN = DGL%XH+DGL%XLE
+  DGL%XGFLUX = 0.
 ENDIF
 !
-IF (LCOEF) THEN
-  XZ0_d  = XZ0
-  XZ0H_d = XZ0
+IF (DGL%LCOEF) THEN
+  DGL%XZ0  = PZ0 (:)
+  DGL%XZ0H = PZ0H(:)
 ENDIF
 !
-IF (LSURF_VARS) THEN
-  XQS(:) = QSAT(PTRAD(:),PPS(:))
+IF (DGL%LSURF_VARS) THEN
+  DGL%XQS(:) = PQSURF(:)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)

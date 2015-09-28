@@ -27,7 +27,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel       * Meteo France *
+!!      S.Malardel       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -37,7 +37,7 @@
 !*       0.    DECLARATIONS
 !
 !
-#ifdef MNH
+#ifdef SFX_MNH
 USE MODI_DETECT_FIELD_MNH
 #endif
 !
@@ -66,18 +66,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('DETECT_FIELD',0,ZHOOK_HANDLE)
 IF (HPROGRAM=='MESONH') THEN
 !
-#ifdef MNH
+#ifdef SFX_MNH
   CALL DETECT_FIELD_MNH(HPROGRAM,SIZE(PFIELD,1),SIZE(PFIELD,2),PFIELD,OITSHERE)
 #endif
 !
 ELSEIF (HPROGRAM=='OFFLIN' .OR. HPROGRAM=='ASCII ' .OR. HPROGRAM=='TEXTE ' &
-   .OR. HPROGRAM=='FA    ' .OR. HPROGRAM=='BINARY' .OR. HPROGRAM=='LFI   ') THEN
+   .OR. HPROGRAM=='FA    ' .OR. HPROGRAM=='BINARY' .OR. HPROGRAM=='LFI   ' &
+   .OR. HPROGRAM=='NC    ' ) THEN
 !
   OITSHERE = .TRUE.
 !
 ELSEIF (HPROGRAM=='AROME ') THEN
 !
-#ifdef ARO
+#ifdef SFX_ARO
   CALL DETECT_FIELD_ARO(HPROGRAM,SIZE(PFIELD,1),SIZE(PFIELD,2),PFIELD,OITSHERE)
 #endif
 !

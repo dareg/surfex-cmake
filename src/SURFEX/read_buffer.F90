@@ -65,7 +65,7 @@ END MODULE MODI_READ_BUFFER
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -103,7 +103,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFC0',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef ARO
+#ifdef SFX_ARO
  CALL GET_BUFC0(HNAME,HFIELD,LEN(HFIELD),KRET)
 #endif
 !
@@ -143,7 +143,7 @@ END SUBROUTINE READ_BUFC0
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -181,7 +181,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFN0',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef ARO
+#ifdef SFX_ARO
  CALL GET_BUFN0(HNAME,KFIELD,KRET)
 #endif
 !
@@ -221,7 +221,7 @@ END SUBROUTINE READ_BUFN0
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -259,7 +259,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFN1',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef ARO
+#ifdef SFX_ARO
  CALL GET_BUFN1(HNAME,SIZE(KFIELD),KFIELD,KRET)
 #endif
 !
@@ -299,7 +299,7 @@ END SUBROUTINE READ_BUFN1
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -337,7 +337,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX0',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef ARO
+#ifdef SFX_ARO
  CALL GET_BUFX0(HNAME,PFIELD,KRET)
 #endif
 !
@@ -377,7 +377,7 @@ END SUBROUTINE READ_BUFX0
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -415,7 +415,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODI_READ_BUFFER:READ_BUFX1',0,ZHOOK_HANDLE)
  CALL GET_LUOUT('AROME ',ILUOUT)
 !
-#ifdef ARO
+#ifdef SFX_ARO
  CALL GET_BUFX1(HNAME,SIZE(PFIELD),PFIELD,KRET)
 #endif
 !

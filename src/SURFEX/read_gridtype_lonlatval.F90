@@ -1,5 +1,6 @@
 !     ################################################################
-      SUBROUTINE READ_GRIDTYPE_LONLATVAL(HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
+      SUBROUTINE READ_GRIDTYPE_LONLATVAL (&
+                                          HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
 !     ################################################################
 !
 !!****  *READ_GRIDTYPE_IGN* - routine to initialise the horizontal grid
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
+!!      E. Martin   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,6 +33,9 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
 !
 USE MODI_READ_SURF
 USE MODI_GET_LUOUT
@@ -48,6 +52,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
 !
  CHARACTER(LEN=6),       INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                INTENT(INOUT) :: KGRID_PAR  ! real size of PGRID_PAR
@@ -71,7 +77,8 @@ REAL, DIMENSION(KLU)              :: ZDY      ! Y grid mesh size
 !
 INTEGER                           :: ILUOUT
 !---------------------------------------------------------------------------
-REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR
+REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR=>NULL()
+!$OMP THREADPRIVATE(ZGRID_PAR)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
@@ -79,11 +86,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_LONLATVAL',0,ZHOOK_HANDLE)
- CALL READ_SURF(HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'XX',ZX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'XY',ZY,KRESP,HDIR=HDIR)
 !
- CALL READ_SURF(HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
- CALL READ_SURF(HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'DX',ZDX,KRESP,HDIR=HDIR)
+ CALL READ_SURF(&
+                HPROGRAM,'DY',ZDY,KRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !

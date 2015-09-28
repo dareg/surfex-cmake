@@ -1,5 +1,6 @@
 !     ################################################
-      SUBROUTINE INTERPOL_FIELD2D(HPROGRAM,KLUOUT,KCODE,PFIELD,HFIELD,PDEF,KNPTS)
+      SUBROUTINE INTERPOL_FIELD2D (UG, U, &
+                                   HPROGRAM,KLUOUT,KCODE,PFIELD,HFIELD,PDEF,KNPTS)
 !     ################################################
 !
 !!**** *INTERPOL_FIELD* initializes coordinate system for spline interpolation
@@ -32,9 +33,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR,  ONLY : XUNDEF
-USE MODD_SURF_ATM_n, ONLY : NDIM_FULL, NSIZE_FULL
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID
 !
 USE MODI_GET_GRID_COORD
 USE MODI_INTERPOL_NPTS
@@ -48,6 +52,10 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),        INTENT(IN)   :: HPROGRAM ! host program
 INTEGER,                 INTENT(IN)   :: KLUOUT   ! output listing
@@ -92,22 +100,24 @@ IF (PRESENT(PDEF)) ZDEF = PDEF
 !*    2.     Miscellaneous Initializations
 !            -----------------------------
 !
- CALL GET_GRID_COORD(KLUOUT,PX=ZX,PY=ZY)
+ CALL GET_GRID_COORD(UG, U, &
+                     KLUOUT,PX=ZX,PY=ZY)
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.     Interpolation with 3 nearest points
 !            -----------------------------------
 !
- CALL INTERPOL_NPTS(HPROGRAM,KLUOUT,INPTS,KCODE,ZX,ZY,PFIELD)
+ CALL INTERPOL_NPTS(UG, U, &
+                    HPROGRAM,KLUOUT,INPTS,KCODE,ZX,ZY,PFIELD)
 !
 !-------------------------------------------------------------------------------
 !
 !*    6.     Final check
 !            -----------
 !
-IERR1 = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,KCODE(:)==0)
-IERR2 = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,KCODE(:)==-4)
+IERR1 = SUM_ON_ALL_PROCS(HPROGRAM,UG%CGRID,KCODE(:)==0)
+IERR2 = SUM_ON_ALL_PROCS(HPROGRAM,UG%CGRID,KCODE(:)==-4)
 !
 IF (IERR1>0 .OR. IERR2>0) THEN
   !
@@ -122,18 +132,18 @@ IF (IERR1>0 .OR. IERR2>0) THEN
   IF (IERR2>0) THEN
     WRITE(KLUOUT,*) ' Number of points that could not be interpolated : ', &
                       IERR2
-    IF (PRESENT(PDEF)) THEN
-      DO JLOOP=1,SIZE(PFIELD,2)
+    DO JLOOP=1,SIZE(PFIELD,2)
+      IF (ZDEF(JLOOP)/=XUNDEF) THEN
         WHERE(KCODE(:)==-4)
-          PFIELD(:,JLOOP)=PDEF(JLOOP)
+          PFIELD(:,JLOOP)=ZDEF(JLOOP)
         END WHERE
-        WRITE(KLUOUT,*) ' For these points, the default value (',PDEF(JLOOP),') is set.'
-      END DO
-    ELSE
-      WRITE(KLUOUT,*) ' Please provide data with better resolution'
-      WRITE(KLUOUT,*) ' Or define a higher halo value             '
-      CALL ABOR1_SFX('Some points lack data and are too far away from other points')
-    END IF
+        WRITE(KLUOUT,*) ' For these points, the default value (',ZDEF(JLOOP),') is set.'
+      ELSE
+        WRITE(KLUOUT,*) ' Please provide data with better resolution'
+        WRITE(KLUOUT,*) ' Or define a higher halo value             '
+        CALL ABOR1_SFX('Some points lack data and are too far away from other points')
+      END IF
+    ENDDO
   END IF
 !
 END IF

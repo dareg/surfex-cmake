@@ -1,4 +1,4 @@
-SUBROUTINE COUPLING_SLT_n(  &
+SUBROUTINE COUPLING_SLT_n (SLT, &
       KI,                   &!I [nbr] number of sea points 
       KSLT,                 &!I [nbr] number of sea points 
       PWIND,                &!I Wind velocity
@@ -13,9 +13,11 @@ SUBROUTINE COUPLING_SLT_n(  &
 !-------
 ! P. Tulet
 !
+!
+USE MODD_SLT_n, ONLY : SLT_t
+!
 USE MODD_CSTS, ONLY : XAVOGADRO, XPI
 USE MODD_SLT_SURF
-USE MODD_SLT_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -23,6 +25,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !INPUT
+!
+TYPE(SLT_t), INTENT(INOUT) :: SLT
+!
 INTEGER, INTENT(IN)                :: KI             !I Number of sea points
 INTEGER, INTENT(IN)                :: KSLT           !I Number of sea salt emission variables
 REAL, DIMENSION(KI),      INTENT(IN)  :: PWIND       !I wind velocity
@@ -152,8 +157,8 @@ DO JN=1,JPMODE_SLT
   IF (LVARSIG_SLT) THEN
     !
     PSFSLT(:,1+(JN-1)*3) = ZSFSLT_MDE(:,JORDER_SLT(JN))
-    PSFSLT(:,2+(JN-1)*3) = PSFSLT(:,1+(JN-1)*3) * (XEMISRADIUS_SLT(JN)**3)*EXP(4.5 * LOG(XEMISSIG_SLT(JN))**2)  
-    PSFSLT(:,3+(JN-1)*3) = PSFSLT(:,1+(JN-1)*3) * (XEMISRADIUS_SLT(JN)**6)*EXP(18. * LOG(XEMISSIG_SLT(JN))**2)  
+    PSFSLT(:,2+(JN-1)*3) = PSFSLT(:,1+(JN-1)*3) * (SLT%XEMISRADIUS_SLT(JN)**3)*EXP(4.5 * LOG(SLT%XEMISSIG_SLT(JN))**2)  
+    PSFSLT(:,3+(JN-1)*3) = PSFSLT(:,1+(JN-1)*3) * (SLT%XEMISRADIUS_SLT(JN)**6)*EXP(18. * LOG(SLT%XEMISSIG_SLT(JN))**2)  
     !
     ! Conversion into fluxes
     PSFSLT(:,1+(JN-1)*3) = PSFSLT(:,1+(JN-1)*3) * ZCONVERTFACM0_SLT
@@ -161,13 +166,13 @@ DO JN=1,JPMODE_SLT
     PSFSLT(:,3+(JN-1)*3) = PSFSLT(:,3+(JN-1)*3) * ZCONVERTFACM6_SLT
 
   ELSE IF (LRGFIX_SLT) THEN
-    PSFSLT(:,JN) =  ZSFSLT_MDE(:,JORDER_SLT(JN)) * (XEMISRADIUS_SLT(JN)**3)*EXP(4.5 * LOG(XEMISSIG_SLT(JN))**2) 
+    PSFSLT(:,JN) =  ZSFSLT_MDE(:,JORDER_SLT(JN)) * (SLT%XEMISRADIUS_SLT(JN)**3)*EXP(4.5 * LOG(SLT%XEMISSIG_SLT(JN))**2) 
     ! Conversion into fluxes
     PSFSLT(:,JN) = PSFSLT(:,JN) * ZCONVERTFACM3_SLT
 
   ELSE
     PSFSLT(:,1+(JN-1)*2) = ZSFSLT_MDE(:,JORDER_SLT(JN)) 
-    PSFSLT(:,2+(JN-1)*2) = PSFSLT(:,1+(JN-1)*2) * (XEMISRADIUS_SLT(JN)**3)*EXP(4.5 * LOG(XEMISSIG_SLT(JN))**2) 
+    PSFSLT(:,2+(JN-1)*2) = PSFSLT(:,1+(JN-1)*2) * (SLT%XEMISRADIUS_SLT(JN)**3)*EXP(4.5 * LOG(SLT%XEMISSIG_SLT(JN))**2) 
 
     ! Conversion into fluxes
     PSFSLT(:,1+(JN-1)*2) = PSFSLT(:,1+(JN-1)*2) * ZCONVERTFACM0_SLT

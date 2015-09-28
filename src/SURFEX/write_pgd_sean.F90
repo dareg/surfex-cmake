@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITE_PGD_SEA_n(HPROGRAM)
+      SUBROUTINE WRITE_PGD_SEA_n (DTCO, DGU, U, DTS, SG, S, &
+                                  HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_SEA_n* - routine to write pgd surface variables in their respective files
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	B. Decharme   *Meteo France*	
+!!      B. Decharme   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,7 +34,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_n, ONLY : CSEA
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODI_WRITE_PGD_SEAFLUX_n
 !
@@ -45,6 +52,15 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -59,8 +75,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               ---------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SEA_N',0,ZHOOK_HANDLE)
-IF (CSEA=='SEAFLX') THEN
-  CALL WRITE_PGD_SEAFLUX_n(HPROGRAM)
+IF (U%CSEA=='SEAFLX') THEN
+  CALL WRITE_PGD_SEAFLUX_n(DTCO, DGU, U, DTS, SG, S, &
+                           HPROGRAM)
 END IF
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SEA_N',1,ZHOOK_HANDLE)
 !

@@ -9,7 +9,7 @@
 #------------------------------------------------------------
 # list of available datasets
 #
-XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}-${VER_USER}-${VER_MPI}-${OPTLEVEL}
+XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_MPI:+-${VER_MPI}}${VER_OMP:+-${VER_OMP}}-${OPTLEVEL}${VER_USER:+-${VER_USER}}
 #
 if [ "${1}" == "" ]
 then
@@ -47,6 +47,7 @@ then
 fi
 #------------------------------------------------------------
 mkdir ${SRC_SURFEX}/MY_RUN/KTEST/$1    > $HOME/.bidon 2>&1
+cp ${SRC_SURFEX}/MY_RUN/NAMELIST/$1/OPTIONS.nam .
 cp ${SRC_SURFEX}/MY_RUN/NAMELIST/$1/MY_PARAM.nam .
 /bin/vi MY_PARAM.nam
 export OMP_NUM_THREADS=1
@@ -121,6 +122,7 @@ fi
 	option1=$(grep CFORCING_FILETYPE OPTIONS.nam | cut -f2 -d "'")
 	option2=$(grep YFORCING_FILETYPE ${SRC_SURFEX}/MY_RUN/FORCING/MY_PARAM.nam | cut -f2 -d "'")
 	rm ${SRC_SURFEX}/MY_RUN/FORCING/MY_PARAM.nam*
+	rm ${SRC_SURFEX}/MY_RUN/FORCING/OPTIONS.nam*
 
 	if [ "$option1" != "$option2" ] 
 	then
@@ -131,7 +133,7 @@ fi
 		echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		echo " "
 		echo " You must set CFORCING_FILETYPE to $option2 in namelist  "
-		echo " ${SRC_SURFEX}/MY_RUN/KTEST/$1/OPTIONS.nam "
+		echo " ${SRC_SURFEX}/MY_RUN/$1/OPTIONS.nam "
 		echo " "
 		echo " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		echo " "

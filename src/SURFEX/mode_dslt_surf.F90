@@ -49,7 +49,8 @@ SUBROUTINE MASSFLUX2MOMENTFLUX(     &
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!    none
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
+!!    
 !!
 !!    EXTERNAL
 !!    --------
@@ -207,7 +208,8 @@ SUBROUTINE DSLTMOMENT2SIZE(       &
 !!
 !!    EXTERNAL
 !!    --------
-!!    None
+!!    
+USE MODD_SURF_PAR , ONLY : XSURF_TINY
 !!
 IMPLICIT NONE
 !!
@@ -254,7 +256,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_DSLT_SURF:DSLTMOMENT2SIZE',0,ZHOOK_HANDLE)
 !Get scalar variable indexes
 !
 !Save the moments in a local array
-ZSV(:,:) = MAX(PSVT(:,:), 1E-80)
+ZSV(:,:) = MAX(PSVT(:,:),  XSURF_TINY)
 !
 DO JN=1,SIZE(KM0)
 

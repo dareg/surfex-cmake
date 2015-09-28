@@ -2,6 +2,12 @@
 SUBROUTINE OL_ALLOC_ATM(KNI,KBANDS,KSCAL)
 !     #################################################################################
 !
+!!
+!!    MODIFICATIONS
+!!    -------------
+!     05/2013  B. Decharme : New coupling variables (for AGCM)
+!-------------------------------------------------------------------------------
+!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 
 USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
@@ -42,8 +48,11 @@ USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
                             XPET_A_COEF ,&
                             XPEQ_A_COEF ,&
                             XPET_B_COEF ,&
-                            XPEQ_B_COEF  
-
+                            XPEQ_B_COEF ,&
+                            XTSURF    ,&
+                            XZ0       ,&
+                            XZ0H      ,&
+                            XQSURF
 !
 !
 !
@@ -103,8 +112,72 @@ IF (.NOT.ALLOCATED(XPET_A_COEF)) ALLOCATE(XPET_A_COEF (KNI)     )
 IF (.NOT.ALLOCATED(XPEQ_A_COEF)) ALLOCATE(XPEQ_A_COEF (KNI)     )
 IF (.NOT.ALLOCATED(XPET_B_COEF)) ALLOCATE(XPET_B_COEF (KNI)     )
 IF (.NOT.ALLOCATED(XPEQ_B_COEF)) ALLOCATE(XPEQ_B_COEF (KNI)     )
-
-CSV       (:)  ='UNDEF '! name of all scalar variables
+IF (.NOT.ALLOCATED(XTSURF)) ALLOCATE(XTSURF(KNI)     )
+IF (.NOT.ALLOCATED(XZ0)   ) ALLOCATE(XZ0   (KNI)     )
+IF (.NOT.ALLOCATED(XZ0H)  ) ALLOCATE(XZ0H  (KNI)     )
+IF (.NOT.ALLOCATED(XQSURF)) ALLOCATE(XQSURF(KNI)     )
+!
+IF (SIZE(CSV)>=1) CSV(1) = '#CO   '
+IF (SIZE(CSV)>=2) CSV(2) = '#O3   '     
+IF (SIZE(CSV)>=3) CSV(3) = '#H2O2 ' 
+IF (SIZE(CSV)>=4) CSV(4) = '#NO   '  
+IF (SIZE(CSV)>=5) CSV(5) = '#NO2  ' 
+IF (SIZE(CSV)>=6) CSV(6) = '#NO3  '
+IF (SIZE(CSV)>=7) CSV(7) = '#N2O5 '
+IF (SIZE(CSV)>=8) CSV(8) = '#HONO '
+IF (SIZE(CSV)>=9) CSV(9) = '#HNO3 '
+IF (SIZE(CSV)>=10) CSV(10) = '#HNO4 '
+IF (SIZE(CSV)>=11) CSV(11) = '#NH3  '
+IF (SIZE(CSV)>=12) CSV(12) = '#SO2  '
+IF (SIZE(CSV)>=13) CSV(13) = '#SULF '
+IF (SIZE(CSV)>=14) CSV(14) = '#OH   '
+IF (SIZE(CSV)>=15) CSV(15) = '#HO2  '
+IF (SIZE(CSV)>=16) CSV(16) = '#CH4  '
+IF (SIZE(CSV)>=17) CSV(17) = '#ETH  '
+IF (SIZE(CSV)>=18) CSV(18) = '#ALKA '
+IF (SIZE(CSV)>=19) CSV(19) = '#ALKE '
+IF (SIZE(CSV)>=20) CSV(20) = '#BIO  '
+IF (SIZE(CSV)>=21) CSV(21) = '#ARO  '
+IF (SIZE(CSV)>=22) CSV(22) = '#HCHO '
+IF (SIZE(CSV)>=23) CSV(23) = '#ALD  '
+IF (SIZE(CSV)>=24) CSV(24) = '#KET  '
+IF (SIZE(CSV)>=25) CSV(25) = '#CARBO'
+IF (SIZE(CSV)>=26) CSV(26) = '#ONIT '
+IF (SIZE(CSV)>=27) CSV(27) = '#PAN  '
+IF (SIZE(CSV)>=28) CSV(28) = '#OP1  '
+IF (SIZE(CSV)>=29) CSV(29) = '#OP2  '
+IF (SIZE(CSV)>=30) CSV(30) = '#ORA  '
+IF (SIZE(CSV)>=31) CSV(31) = '#ORA2 '
+IF (SIZE(CSV)>=32) CSV(32) = '#MO2  '
+IF (SIZE(CSV)>=33) CSV(33) = '#ALKAP'
+IF (SIZE(CSV)>=34) CSV(34) = '#ALKEP'
+IF (SIZE(CSV)>=35) CSV(35) = '#BIOP '
+IF (SIZE(CSV)>=36) CSV(36) = '#PHO  '
+IF (SIZE(CSV)>=37) CSV(37) = '#ADD  '
+IF (SIZE(CSV)>=38) CSV(38) = '#AROP '
+IF (SIZE(CSV)>=39) CSV(39) = '#CARBO'
+IF (SIZE(CSV)>=40) CSV(40) = '#OLN  '
+IF (SIZE(CSV)>=41) CSV(41) = '#XO2  '
+IF (SIZE(CSV)>=42) CSV(42) = '@M0I '
+IF (SIZE(CSV)>=43) CSV(43) = '@M0J '
+IF (SIZE(CSV)>=44) CSV(44) = '@M6I '
+IF (SIZE(CSV)>=45) CSV(45) = '@M6J '
+IF (SIZE(CSV)>=46) CSV(46) = '@H2OI'
+IF (SIZE(CSV)>=47) CSV(47) = '@H2OJ'
+IF (SIZE(CSV)>=48) CSV(48) = '@SO4I'
+IF (SIZE(CSV)>=49) CSV(49) = '@SO4J'
+IF (SIZE(CSV)>=50) CSV(50) = '@NO3I'
+IF (SIZE(CSV)>=51) CSV(51) = '@NO3J'
+IF (SIZE(CSV)>=52) CSV(52) = '@NH3I'
+IF (SIZE(CSV)>=53) CSV(53) = '@NH3J'
+IF (SIZE(CSV)>=54) CSV(54) = '@OCI'
+IF (SIZE(CSV)>=55) CSV(55) = '@OCJ'
+IF (SIZE(CSV)>=56) CSV(56) = '@BCI'
+IF (SIZE(CSV)>=57) CSV(57) = '@BCJ'
+IF (SIZE(CSV)>=58) CSV(58) = '@DSTI'
+IF (SIZE(CSV)>=59) CSV(59) = '@DSTJ'
+!
+!CSV       (:)  ='UNDEF '! name of all scalar variables
 XDIR_ALB  (:,:)=XUNDEF ! direct albedo for each band
 XSCA_ALB  (:,:)=XUNDEF ! diffuse albedo for each band
 XEMIS     (:)=XUNDEF ! emissivity
@@ -143,6 +216,11 @@ XPET_A_COEF (:)=XUNDEF
 XPEQ_A_COEF (:)=XUNDEF
 XPET_B_COEF (:)=XUNDEF
 XPEQ_B_COEF (:)=XUNDEF
+XTSURF    (:)=XUNDEF ! effective temperature                  (K)
+XZ0       (:)=XUNDEF ! surface roughness length for momentum  (m)
+XZ0H      (:)=XUNDEF ! surface roughness length for heat      (m)
+XQSURF    (:)=XUNDEF ! specific humidity at surface           (kg/kg)
+!
 IF (LHOOK) CALL DR_HOOK('OL_ALLOC_ATM',1,ZHOOK_HANDLE)
 
 END SUBROUTINE OL_ALLOC_ATM

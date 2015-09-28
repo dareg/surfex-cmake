@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE HYDRO_GLACIER (PTSTEP,PSR,PSNOWRHO,PSNOWSWE,PGLASTO,PICEFLUX)
+      SUBROUTINE HYDRO_GLACIER (I, &
+                                 PTSTEP,PSR,PSNOWRHO,PSNOWSWE,PGLASTO,PICEFLUX)
 !     ########################################################################
 !
 !!****  *HYDRO_GLACIER*  
@@ -29,7 +30,7 @@
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Decharme     
+!!      B. Decharme     
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -39,8 +40,10 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_CSTS,     ONLY : XDAY
-USE MODD_ISBA_n,   ONLY : TSNOW
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX, XHGLA, XSNOWDMIN, XRHOSMAX_ES
 !
 !
@@ -51,23 +54,26 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
+!
 REAL, INTENT(IN)                     :: PTSTEP
 !                                       KTSTEP = timestep [s]
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PSR
-!                                       PSR      = Snowfall    [kg/m²s]
+!                                       PSR      = Snowfall    [kg/mÂ²s]
 !
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWRHO
 !                                       PSNOWRHO = Snow density [kg/m3]
 !
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWSWE
-!                                       PSNOWSWE = Snow water equivalent [kg/m²]
+!                                       PSNOWSWE = Snow water equivalent [kg/mÂ²]
 !
 REAL, DIMENSION(:), INTENT(INOUT)    :: PGLASTO
-!                                       PGLASTO  = Glacier storage      [kg/m²]
+!                                       PGLASTO  = Glacier storage      [kg/mÂ²]
 !
 REAL, DIMENSION(:), INTENT(OUT)      :: PICEFLUX
-!                                       PICEFLUX = Ice flux from the Snowfall reservoir [kg/m²s]
+!                                       PICEFLUX = Ice flux from the Snowfall reservoir [kg/mÂ²s]
 !
 !
 !*      0.2    declarations of local variables
@@ -99,7 +105,7 @@ PICEFLUX(:) = 0.0
 !-------------------------------------------------------------------------------
 !Ice accumulation only if snow amount is > to 33.3 meters of aged snow
 !
-IF(TSNOW%SCHEME/='3-L' .AND. TSNOW%SCHEME/='CRO')THEN
+IF(I%TSNOW%SCHEME/='3-L' .AND. I%TSNOW%SCHEME/='CRO')THEN
   ZRHOSMAX=XRHOSMAX
   ZSWE(:)=PSNOWSWE(:,1)
 ELSE
@@ -139,7 +145,7 @@ WHERE(PGLASTO(:)<=1.E-10)PGLASTO(:)=0.0
 !-------------------------------------------------------------------------------
 !Snow pack update
 !
-IF(TSNOW%SCHEME/='3-L' .AND. TSNOW%SCHEME/='CRO')THEN
+IF(I%TSNOW%SCHEME/='3-L' .AND. I%TSNOW%SCHEME/='CRO')THEN
 !
   WHERE(PSNOWSWE(:,1)<=XHGLA*ZRHOSMAX)PICEFLUX(:)=0.0
   PSNOWSWE(:,1)=PSNOWSWE(:,1)-PICEFLUX(:)*PTSTEP

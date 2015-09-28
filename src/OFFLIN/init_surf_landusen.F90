@@ -1,9 +1,10 @@
 !#############################################################
-SUBROUTINE INIT_SURF_LANDUSE_n(HPROGRAM,HINIT,OLAND_USE,                  &
+SUBROUTINE INIT_SURF_LANDUSE_n (YSC, &
+                                HPROGRAM,HINIT,OLAND_USE,                  &
                                KI,KSV,KSW,                                &
                                HSV,PCO2,PRHOA,                            &
                                PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                               PEMIS,PTSRAD,                              &
+                               PEMIS,PTSRAD,PTSURF,                       &
                                KYEAR, KMONTH,KDAY, PTIME,                 &
                                HATMFILE,HATMFILETYPE,                     &
                                HTEST                                      )  
@@ -30,20 +31,25 @@ SUBROUTINE INIT_SURF_LANDUSE_n(HPROGRAM,HINIT,OLAND_USE,                  &
 !!
 !!    AUTHOR
 !!    ------
-!!    S. Faroux	   *Meteo France*	
+!!    S. Faroux    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!
+!!      modified    06-13  B. Decharme  : New coupling variable
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_n,  ONLY : XPATCH_OLD,XDG_OLD,CISBA
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
+!
 USE YOMHOOK   ,   ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-USE MODD_ISBA_n,  ONLY : NGROUND_LAYER, NPATCH
+!
+USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
+!
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
@@ -59,6 +65,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -76,6 +84,8 @@ REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSRAD    ! radiative temperature
+REAL,             DIMENSION(KI),  INTENT(OUT) :: PTSURF    ! surface effective temperature         (K)
+!
 INTEGER,                          INTENT(IN)  :: KYEAR     ! current year (UTC)
 INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
@@ -110,7 +120,7 @@ IF (.NOT. OLAND_USE)THEN
    RETURN
 ENDIF
 !
-IF (CISBA=='DIF') THEN
+IF (YSC%IM%I%CISBA=='DIF') THEN
    CALL ABOR1_SFX('INIT_SURF_LANDUSEN: LAND USE NOT IMPLEMENTED WITH DIF')
 ENDIF
 !
@@ -118,28 +128,42 @@ ENDIF
 !
 !* initialization for I/O
 !
- CALL INIT_IO_SURF_n(HPROGRAM,'NATURE','ISBA  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+                        HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !* 1D physical dimension
 !
- CALL GET_TYPE_DIM_n('NATURE',ILU)
-ALLOCATE(ZWORK(ILU,NPATCH))
+ CALL GET_TYPE_DIM_n(YSC%DTCO, YSC%U, &
+                     'NATURE',ILU)
+ALLOCATE(ZWORK(ILU,YSC%IM%I%NPATCH))
+!
+YSC%IM%DTI%LDATA_MIXPAR = .TRUE.
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_VEGTYPE)) ALLOCATE(YSC%IM%DTI%XPAR_VEGTYPE(ILU,NVEGTYPE))
+IF (YSC%IM%DTI%NTIME==0) YSC%IM%DTI%NTIME = 36
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_LAI)) ALLOCATE(YSC%IM%DTI%XPAR_LAI(ILU,YSC%IM%DTI%NTIME,NVEGTYPE))
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_H_TREE)) ALLOCATE(YSC%IM%DTI%XPAR_H_TREE(ILU,NVEGTYPE))
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_ROOT_DEPTH)) ALLOCATE(YSC%IM%DTI%XPAR_ROOT_DEPTH(ILU,NVEGTYPE))
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_GROUND_DEPTH)) ALLOCATE(YSC%IM%DTI%XPAR_GROUND_DEPTH(ILU,NVEGTYPE))
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_IRRIG)) ALLOCATE(YSC%IM%DTI%XPAR_IRRIG(ILU,YSC%IM%DTI%NTIME,NVEGTYPE))
+IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_WATSUP)) ALLOCATE(YSC%IM%DTI%XPAR_WATSUP(ILU,YSC%IM%DTI%NTIME,NVEGTYPE))
 !
 !* read old patch fraction
 !       
-ALLOCATE(XPATCH_OLD(ILU,NPATCH))       
-YRECFM = 'OLD_PATCH'
- CALL READ_SURF(HPROGRAM,YRECFM,XPATCH_OLD(:,:),IRESP)
+ALLOCATE(YSC%IM%I%XPATCH_OLD(ILU,YSC%IM%I%NPATCH))       
+YRECFM = 'PATCH'
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,YSC%IM%I%XPATCH_OLD(:,:),IRESP)
 !
 !* read old soil layer thicknesses (m)
 !
-ALLOCATE(XDG_OLD(ILU,NGROUND_LAYER,NPATCH))
+ALLOCATE(YSC%IM%I%XDG_OLD(ILU,YSC%IM%I%NGROUND_LAYER,YSC%IM%I%NPATCH))
 !
-DO JLAYER=1,NGROUND_LAYER
+DO JLAYER=1,YSC%IM%I%NGROUND_LAYER
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM='OLD_DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-  CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-  XDG_OLD(:,JLAYER,:)=ZWORK
+  CALL READ_SURF(&
+                HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
+  YSC%IM%I%XDG_OLD(:,JLAYER,:)=ZWORK
 END DO
 DEALLOCATE(ZWORK)
 !
@@ -152,15 +176,18 @@ DEALLOCATE(ZWORK)
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
- CALL SET_VEGTYPES_FRACTIONS(HPROGRAM)
+ CALL SET_VEGTYPES_FRACTIONS(YSC%DTCO, YSC%DGU, YSC%IM%DTI, YSC%IM%IG, YSC%IM%I, YSC%UG, YSC%U, &
+                             HPROGRAM)
 !
 !* re-initialize ISBA with new parameters
 !       
- CALL COMPUTE_ISBA_PARAMETERS(HPROGRAM,HINIT,OLAND_USE,                  &
-                             KI,KSV,KSW,                                &
+ CALL COMPUTE_ISBA_PARAMETERS(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%IM, &
+                             YSC%DST, YSC%SLT,  YSC%SV, &
+                              HPROGRAM,HINIT,OLAND_USE,                  &
+                             ILU,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                             PEMIS,PTSRAD,                              &
+                             PEMIS,PTSRAD,PTSURF,                       &
                              HTEST                                      )
 !-------------------------------------------------------------------------------
 !                       

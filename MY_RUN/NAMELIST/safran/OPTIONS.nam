@@ -9,7 +9,7 @@
                        LGARDEN = .FALSE.
 /
 &NAM_COVER             YCOVER  = 'ECOCLIMAP_II_EUROP',
-                       YFILETYPE ='DIRECT'           ,
+                       YCOVERFILETYPE ='DIRECT'           ,
                        XRM_COVER = 0.001 
 /
 &NAM_WRITE_DIAG_SURFn  LSELECT=T,
@@ -24,7 +24,7 @@
 &NAM_ECOCLIMAP2        LCLIM_LAI=T 
 /
 &NAM_ZS                YZS       = 'Z.SIM'       ,
-                       YFILETYPE = 'ASCLLV'      ,    
+                       YZSFILETYPE = 'ASCLLV'      ,    
                        COROGTYPE = 'MAX' 
 /
 &NAM_ISBA              YCLAY         = 'CLAY.SIM', 
@@ -86,11 +86,12 @@
 /
 &NAM_IO_OFFLINE        LRESTART = T                      ,
                        LPRINT  = T                       ,
-                       CFORCING_FILETYPE =    'BINARY'   ,
+                       CFORCING_FILETYPE =    'NETCDF'   ,
                        CSURF_FILETYPE =       'ASCII '   ,
                        CTIMESERIES_FILETYPE = 'BINARY '   ,
                        XTSTEP_OUTPUT = 10800.             ,
                        LWRITE_COORD = T
+                       LSET_FORC_ZS = T
 /
 &NAM_DIAG_SURFn        LSURF_BUDGET = F      ,
                        LSURF_BUDGETC = T     ,

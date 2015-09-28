@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE DEFAULT_DIAG_SEAFLUX(K2M,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET,OCOEF,OSURF_VARS,&
-                                      ODIAG_OCEAN,OSURF_BUDGETC,ORESET_BUDGETC,PDIAG_TSTEP  )  
+                                      ODIAG_OCEAN,ODIAG_SEAICE,OSURF_BUDGETC,ORESET_BUDGETC,PDIAG_TSTEP  )  
 !     ########################################################################
 !
 !!****  *DEFAULT_DIAG_SEAFLUX* - routine to set default values for the choice of diagnostics
@@ -24,11 +24,12 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!!      Modified    09/2013 : S. Senesi : introduce ODIAG_SEAICE
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -53,6 +54,7 @@ LOGICAL,  INTENT(OUT) :: ORAD_BUDGET   ! flag for radiative budget
 LOGICAL,  INTENT(OUT) :: OCOEF
 LOGICAL,  INTENT(OUT) :: OSURF_VARS
 LOGICAL,  INTENT(OUT) :: ODIAG_OCEAN
+LOGICAL,  INTENT(OUT) :: ODIAG_SEAICE
 LOGICAL,  INTENT(OUT) :: OSURF_BUDGETC ! flag for cumulated surface budget
 LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC! flag for cumulated surface budget
 REAL,     INTENT(OUT) :: PDIAG_TSTEP   ! time-step for writing
@@ -76,8 +78,9 @@ OCOEF        = .FALSE.
 OSURF_VARS   = .FALSE.
 !
 ODIAG_OCEAN  = .FALSE.
+ODIAG_SEAICE = .FALSE.
 !
-OSURF_BUDGETC= .FALSE.
+OSURF_BUDGETC = .FALSE.
 ORESET_BUDGETC= .FALSE.
 !
 PDIAG_TSTEP  = XUNDEF

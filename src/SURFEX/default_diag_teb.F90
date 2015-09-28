@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE DEFAULT_DIAG_TEB (K2M,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET,OCOEF,OSURF_VARS, &
-                                   OSURF_MISC_BUDGET,OUTCI,OPGD,OPGD_FIX,PDIAG_TSTEP         )  
+                                   OSURF_MISC_BUDGET,OSURF_DIAG_ALBEDO,OUTCI,OPGD,OPGD_FIX,PDIAG_TSTEP )  
 !     #################################################################################################################
 !
 !!****  *DEFAULT_DIAG_TEB * - routine to set default values for the choice of diagnostics
@@ -24,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -54,6 +54,7 @@ LOGICAL,  INTENT(OUT) :: ORAD_BUDGET        ! flag for radiative budget
 LOGICAL,  INTENT(OUT) :: OCOEF
 LOGICAL,  INTENT(OUT) :: OSURF_VARS
 LOGICAL,  INTENT(OUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
+LOGICAL,  INTENT(OUT) :: OSURF_DIAG_ALBEDO  ! flag for albedo
 LOGICAL,  INTENT(OUT) :: OUTCI              ! flag for UTCI fields
 LOGICAL,  INTENT(OUT) :: OPGD               ! flag for PGD fields
 LOGICAL,  INTENT(OUT) :: OPGD_FIX           ! flag for PGD fields
@@ -77,6 +78,7 @@ OCOEF             = .FALSE.
 OSURF_VARS        = .FALSE.
 !
 OSURF_MISC_BUDGET = .FALSE.
+OSURF_DIAG_ALBEDO = .FALSE.
 !
 OUTCI             = .FALSE.
 !

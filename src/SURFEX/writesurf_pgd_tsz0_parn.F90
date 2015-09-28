@@ -1,5 +1,7 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_TSZ0_PAR_n(HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TSZ0_PAR_n (DGU, U, &
+                                            DTZ, &
+                                           HPROGRAM)
 !     ################################################
 !
 !!****  *WRITESURF_PGD_TSZ0_PAR_n* - writes TSZ0 physiographic fields
@@ -24,7 +26,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -35,7 +37,14 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DATA_TSZ0_n,    ONLY : NTIME, XDATA_DTS, XDATA_DHUGRD   
+!
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 !
 USE MODI_WRITE_SURF
 !
@@ -46,6 +55,13 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
@@ -61,18 +77,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TSZ0_PAR_N',0,ZHOOK_HANDLE)
 !
-NTIME = SIZE(XDATA_DTS)
+DTZ%NTIME = SIZE(DTZ%XDATA_DTS)
 YRECFM   = 'ND_TSZ0_TIME'
 YCOMMENT = '(-)'
- CALL WRITE_SURF(HPROGRAM,YRECFM,NTIME,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(DGU, U, &
+                 HPROGRAM,YRECFM,DTZ%NTIME,IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM   = 'D_DTS'
 YCOMMENT = 'X_Y_DATA_DTS'
- CALL WRITE_SURF(HPROGRAM,YRECFM,XDATA_DTS(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(DGU, U, &
+                 HPROGRAM,YRECFM,DTZ%XDATA_DTS(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-',HNAM_DIM="Nforc_tsz0      ")
 !
 YRECFM   = 'D_DHUGRD'
 YCOMMENT = 'X_Y_DATA_DHUGRD'
- CALL WRITE_SURF(HPROGRAM,YRECFM,XDATA_DHUGRD(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_SURF(DGU, U, &
+                 HPROGRAM,YRECFM,DTZ%XDATA_DHUGRD(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-',HNAM_DIM="Nforc_tsz0      ")
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TSZ0_PAR_N',1,ZHOOK_HANDLE)
 !

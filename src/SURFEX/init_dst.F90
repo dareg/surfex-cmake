@@ -1,13 +1,16 @@
-SUBROUTINE INIT_DST(HPROGRAM,  &    ! Program calling unit
+SUBROUTINE INIT_DST (DST, U, &
+                     HPROGRAM,  &    ! Program calling unit
                   KSIZE_NATURE_P, & ! Number of nature points in a patch
                   KR_NATURE_P, &    ! Mask from patch --> nature vectors
                   KPATCH, &         ! Maximum number of patches
                   PVEGTYPE_PATCH  ) ! fraction (in a nature point) of a vegtype for a patch
 
-USE MODD_DST_n
+!
+USE MODD_DST_n, ONLY : DST_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_DST_SURF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK
-USE MODD_SURF_ATM_n,     ONLY : NSIZE_NATURE   ! Number of nature points
 !
 USE MODI_GET_LUOUT
 USE MODI_GET_VEGTYPE_2_PATCH_MASK
@@ -19,6 +22,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !PASSED VARIABLES
+!
+TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6), INTENT(IN)      :: HPROGRAM              !Passing unit
 !
 INTEGER, DIMENSION(:), POINTER :: KSIZE_NATURE_P
@@ -42,9 +49,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_DST',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !Allocate memory for the real values which will be used by the model
-ALLOCATE(XEMISRADIUS_DST(NDSTMDE))
-ALLOCATE(XEMISSIG_DST   (NDSTMDE))
-ALLOCATE(XMSS_FRC_SRC   (NDSTMDE))
+ALLOCATE(DST%XEMISRADIUS_DST(NDSTMDE))
+ALLOCATE(DST%XEMISSIG_DST   (NDSTMDE))
+ALLOCATE(DST%XMSS_FRC_SRC   (NDSTMDE))
 !
 !Get initial size distributions. This is cut and pasted
 !from dead routine dstpsd.F90
@@ -95,19 +102,19 @@ ENDIF
 DO JMODE=1,NDSTMDE
   JMODE_IDX=JORDER_DST(JMODE)
   !
-  XEMISSIG_DST   (JMODE) = XEMISSIG_INI_DST(JMODE_IDX)
-  XEMISRADIUS_DST(JMODE) = XEMISRADIUS_INI_DST(JMODE_IDX)
-  XMSS_FRC_SRC   (JMODE) = XMSS_FRC_SRC_INI(JMODE_IDX)
+  DST%XEMISSIG_DST   (JMODE) = XEMISSIG_INI_DST(JMODE_IDX)
+  DST%XEMISRADIUS_DST(JMODE) = XEMISRADIUS_INI_DST(JMODE_IDX)
+  DST%XMSS_FRC_SRC   (JMODE) = XMSS_FRC_SRC_INI(JMODE_IDX)
   !
   !Get emisradius, and at the same time convert to number median radius
   IF (CRGUNIT=='MASS') &
-    XEMISRADIUS_DST(JMODE) = XEMISRADIUS_DST(JMODE) * EXP(-3.d0 * (LOG(XEMISSIG_DST(JMODE)))**2)  
+    DST%XEMISRADIUS_DST(JMODE) = DST%XEMISRADIUS_DST(JMODE) * EXP(-3.d0 * (LOG(DST%XEMISSIG_DST(JMODE)))**2)  
   !
 ENDDO
 !
 !Normalize the sum of the emissions to 1 so that all dust is
 !put in one mode or the other
-IF(SUM(XMSS_FRC_SRC(:)).LT.1.) XMSS_FRC_SRC(:) = XMSS_FRC_SRC(:) / SUM(XMSS_FRC_SRC(:))
+IF(SUM(DST%XMSS_FRC_SRC(:)).LT.1.) DST%XMSS_FRC_SRC(:) = DST%XMSS_FRC_SRC(:) / SUM(DST%XMSS_FRC_SRC(:))
 !
 !Allocate memory
 !ALLOCATE(NVEGNO_DST)
@@ -115,27 +122,27 @@ IF(SUM(XMSS_FRC_SRC(:)).LT.1.) XMSS_FRC_SRC(:) = XMSS_FRC_SRC(:) / SUM(XMSS_FRC_
 NVEGNO_DST = 2
 !
 !Allocate memory for the vegtype-translator
-ALLOCATE(NVT_DST(NVEGNO_DST))
+ALLOCATE(DST%NVT_DST(NVEGNO_DST))
 !
 !Set the dust/vegtype translator vector
-NVT_DST(1)  = NVT_NO
-NVT_DST(2)  = NVT_ROCK
+DST%NVT_DST(1)  = NVT_NO
+DST%NVT_DST(2)  = NVT_ROCK
 !
 !Allocate memory for roughness lengths of erodible surfaces
-ALLOCATE(Z0_EROD_DST(NVEGNO_DST))
+ALLOCATE(DST%Z0_EROD_DST(NVEGNO_DST))
 !
 !Set the roughness lengths corresponding to erodible surfaces
 !Smooth roughness length is given to 1.d-5 (dstmbl.f90)
-Z0_EROD_DST(1) = 30.d-6    !m (30 um) 
-Z0_EROD_DST(2) = 200.d-6   !m (200 um) 
+DST%Z0_EROD_DST(1) = 30.d-6    !m (30 um) 
+DST%Z0_EROD_DST(2) = 200.d-6   !m (200 um) 
 !
 !Allocate memory for dust emitter surface vectors in patch vectors
-IF (.NOT.ASSOCIATED(NSIZE_PATCH_DST)) ALLOCATE(NSIZE_PATCH_DST(NVEGNO_DST,KPATCH))
+IF (.NOT.ASSOCIATED(DST%NSIZE_PATCH_DST)) ALLOCATE(DST%NSIZE_PATCH_DST(NVEGNO_DST,KPATCH))
 !
 DO JPATCH = 1,KPATCH
   DO JVEG = 1,NVEGNO_DST
     !Count all the points in the patch where you have dust emitter vegetation
-    NSIZE_PATCH_DST(JVEG,JPATCH) = COUNT(PVEGTYPE_PATCH(:,NVT_DST(JVEG),JPATCH) > 0.) 
+    DST%NSIZE_PATCH_DST(JVEG,JPATCH) = COUNT(PVEGTYPE_PATCH(:,DST%NVT_DST(JVEG),JPATCH) > 0.) 
   ENDDO
 ENDDO
 !
@@ -144,27 +151,32 @@ ENDDO
 ISIZE_LARGEST_DST = 0
 DO JPATCH=1,KPATCH
   DO JVEG = 1,NVEGNO_DST
-    ISIZE_LARGEST_DST = max(ISIZE_LARGEST_DST,NSIZE_PATCH_DST(JVEG,JPATCH))
+    ISIZE_LARGEST_DST = max(ISIZE_LARGEST_DST,DST%NSIZE_PATCH_DST(JVEG,JPATCH))
   ENDDO
 ENDDO
 !
 !Allocate memory for NR_PATCH_DST mask translate from patch vector to dust vector
-ALLOCATE(NR_PATCH_DST(ISIZE_LARGEST_DST,NVEGNO_DST,KPATCH))
+ALLOCATE(DST%NR_PATCH_DST(ISIZE_LARGEST_DST,NVEGNO_DST,KPATCH))
 !
 !Initialize the mask array
-NR_PATCH_DST(:,:,:)=0
+DST%NR_PATCH_DST(:,:,:)=0
 !
 !Get values from the dust emitter vegetation mask
 DO JPATCH=1,KPATCH
   DO JVEG=1,NVEGNO_DST
-    JVEG_IN = NVT_DST(JVEG)          ! Get the real vegtype index
+    JVEG_IN = DST%NVT_DST(JVEG)          ! Get the real vegtype index
     CALL GET_VEGTYPE_2_PATCH_MASK(ILUOUT,    &
-             NSIZE_PATCH_DST(JVEG,JPATCH),             &!I Size of dust emitter vector
+             DST%NSIZE_PATCH_DST(JVEG,JPATCH),             &!I Size of dust emitter vector
              KSIZE_NATURE_P(JPATCH),                   &!I Size of patch vector
-             NSIZE_NATURE,                             &!I Size of nature vector
+             U%NSIZE_NATURE,                             &!I Size of nature vector
+!RJ: attempt to make this call generic
+#ifdef RJ_OFIX
+             KR_NATURE_P(:KSIZE_NATURE_P(JPATCH),JPATCH),&!I Mask from patch to nature
+#else
              KR_NATURE_P,                              &!I Mask from patch to nature
+#endif
              PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
-             NR_PATCH_DST(:NSIZE_PATCH_DST(JVEG,JPATCH),JVEG,JPATCH),  &!O Part of mask array to fill with values
+             DST%NR_PATCH_DST(:DST%NSIZE_PATCH_DST(JVEG,JPATCH),JVEG,JPATCH),  &!O Part of mask array to fill with values
              KPATCH,                                   &!I Number of possible patches
              JPATCH,                                   &!I Index of patch in question
              JVEG_IN                                  &!I Index of vegtype in question

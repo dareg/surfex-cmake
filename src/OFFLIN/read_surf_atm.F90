@@ -27,7 +27,7 @@ SUBROUTINE READ_SURF_ATM     (HPROGRAM, PFIELD, KFORC_STEP, KNB, KINIT)
 !!
 !!    AUTHOR
 !!    ------
-!!	A. Lemonsu  *Meteo France*	
+!!      A. Lemonsu  *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -52,7 +52,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
 !
@@ -91,10 +91,10 @@ ENDIF
 !
 IF (NRANK==NPIO) THEN
   !
-#ifndef NOMPI
-  XTIME0 = MPI_WTIME() 
-#endif 
-  !  
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
+  !
   IF (HPROGRAM == 'ASCII ') THEN
     !
     IF (KFORC_STEP .EQ. 1) THEN
@@ -139,7 +139,7 @@ IF (NRANK==NPIO) THEN
     !
   ENDIF
   !
-#ifndef NOMPI
+#ifdef SFX_MPI
   XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
   !  

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_IDEAL_CONF_n(HPROGRAM)
+      SUBROUTINE READ_IDEAL_CONF_n (DGL, &
+                                    HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_IDEAL_CONF* - routine to read the configuration for IDEAL
@@ -24,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,6 +34,10 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -55,6 +60,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+!
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 
 !
@@ -76,7 +84,7 @@ IF (LHOOK) CALL DR_HOOK('READ_IDEAL_CONF_N',0,ZHOOK_HANDLE)
 !
 IMI=GET_CURRENT_MODEL_INDEX_SURFEX()
 !
-IF (IMI.NE.-1 .AND. LNAM_READ) CALL INIT_NAM_DIAG_SURFn
+IF (IMI.NE.-1 .AND. LNAM_READ) CALL INIT_NAM_DIAG_SURFn(DGL)
 ! 
 IF (LNAM_READ) THEN
  !        
@@ -96,7 +104,7 @@ IF (LNAM_READ) THEN
 !
 ENDIF
 !
-IF (IMI.NE.-1) CALL UPDATE_NAM_DIAG_SURFn
+IF (IMI.NE.-1) CALL UPDATE_NAM_DIAG_SURFn(DGL)
 IF (LHOOK) CALL DR_HOOK('READ_IDEAL_CONF_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

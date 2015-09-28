@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE HOR_INTERPOL(KLUOUT,PFIELDIN,PFIELDOUT)
+SUBROUTINE HOR_INTERPOL (DTCO, U, &
+                         KLUOUT,PFIELDIN,PFIELDOUT)
 !     #################################################################################
 !
 !!****  *HOR_INTERPOL * - Call the interpolation of a surface field
@@ -25,6 +26,11 @@ SUBROUTINE HOR_INTERPOL(KLUOUT,PFIELDIN,PFIELDOUT)
 !!------------------------------------------------------------------
 !
 !
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 !
 USE MODI_HOR_INTERPOL_GAUSS
@@ -44,6 +50,10 @@ USE MODI_HOR_INTERPOL_BUFFER
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:,:), INTENT(IN)   :: PFIELDIN  ! field to interpolate horizontally
@@ -113,7 +123,8 @@ SELECT CASE (CINTERP_TYPE)
 !              ------------------------------
 !
   CASE('BUFFER')
-    CALL HOR_INTERPOL_BUFFER(KLUOUT,PFIELDIN,PFIELDOUT)
+    CALL HOR_INTERPOL_BUFFER(DTCO, U, &
+                             KLUOUT,PFIELDIN,PFIELDOUT)
 
 !
 !*      4.     no interpolation

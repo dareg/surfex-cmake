@@ -18,11 +18,12 @@ MODULE MODD_SURF_PAR
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson *Meteo France*
+!!      V. Masson *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       02/2004
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -34,8 +35,19 @@ IMPLICIT NONE
 INTEGER :: NVERSION  ! surface version
 INTEGER :: NBUGFIX   ! bugfix number of this version
 !
-REAL,    PARAMETER :: XUNDEF = 1.E+20! undefined value
-INTEGER, PARAMETER :: NUNDEF = 1E+9  ! undefined value
+#ifndef SFX_MNH
+REAL,    PARAMETER :: XUNDEF = 1.E+20
+#else 
+#ifdef MNH_MPI_DOUBLE_PRECISION
+REAL,    PARAMETER :: XUNDEF = 1.E+20! HUGE(XUNDEF) ! Z'7FFFFFFFFFFFFFFF' !  undefined value
+#else
+REAL,    PARAMETER :: XUNDEF = 1.E+6 ! HUGE(XUNDEF) ! Z'7FBFFFFF' ! undefined value
+#endif
+#endif
+INTEGER, PARAMETER :: NUNDEF = 1E+9   !  HUGE(NUNDEF) !  undefined value
+REAL,    PARAMETER :: XSURF_EPSILON = EPSILON(XSURF_EPSILON)  ! minimum 
+REAL,    PARAMETER :: XSURF_HUGE    = HUGE(XSURF_HUGE) 
+REAL,    PARAMETER :: XSURF_TINY    = TINY(XSURF_TINY) 
 !-----------------------------------------------------------------------------------------------------
 !
 END MODULE MODD_SURF_PAR

@@ -21,7 +21,8 @@
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original       29/09/03
+!!     Original 29/09/03
+!!              03/2014 (B. Vincendon) new variable to create a mask for N patches
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -37,6 +38,7 @@ LOGICAL                           :: LTOPD_STEP
 INTEGER                             :: NTOPD_STEP
 INTEGER                             :: NFREQ_MAPS_WG       !frequency of output WG maps
 INTEGER                             :: NFREQ_MAPS_ASAT     !frequency of output ASAT maps
+INTEGER                             :: NFREQ_MAPS_RUNOFF   !frequency of output RUNOFF maps
 !
 INTEGER                             :: NNB_TOPD   ! Ratio between Time steps of Topmodel and ISBA
 !
@@ -47,9 +49,10 @@ INTEGER                             :: NJMAX     ! number of ISBA grid points on
 REAL, ALLOCATABLE, DIMENSION(:)     :: XXI ! Extended Lambert II coordinates of Isba 
 REAL, ALLOCATABLE, DIMENSION(:)     :: XYI ! nodes 
 !
-INTEGER, ALLOCATABLE, DIMENSION(:)  :: NNPIX     ! Number of Topmodel pixels in an ISBA mesh
+INTEGER, ALLOCATABLE, DIMENSION(:)     :: NNPIX     ! Number of Topmodel pixels in an ISBA mesh
 INTEGER, ALLOCATABLE, DIMENSION(:,:,:) :: NMASKI ! pixel number of each catchment in each isba mesh
-INTEGER, ALLOCATABLE, DIMENSION(:,:):: NMASKT    ! mask
+INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: NMASKT    ! mask
+INTEGER, ALLOCATABLE, DIMENSION(:)     :: NMASKT_PATCH    ! mask
 !
 REAL, ALLOCATABLE, DIMENSION(:)     :: XAS_NATURE ! Packed contributive area fraction on Nature grid
 REAL, ALLOCATABLE, DIMENSION(:)     :: XATOP      ! Packed area fraction WITH TOPMODEL on Nature grid

@@ -1,5 +1,6 @@
 !     ################################################################################
-SUBROUTINE SSO_Z0_FRICTION_n(PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
+SUBROUTINE SSO_Z0_FRICTION_n (USS, &
+                              PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
 !     ################################################################################
 !
 !!****  *SSO_Z0_FRICTION_n * - Computes subgrid-scale orography friction
@@ -27,14 +28,18 @@ SUBROUTINE SSO_Z0_FRICTION_n(PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU
 !!      Original    05/2010
 !!      E. Martin   01/2012 Correction masque (compatibilité XUNDEF)
 !!      B. Decharme 09/2012 new wind implicitation and sea fraction
+!!      B. Decharme 06/2013 CIMPLICIT_WIND in MODD_REPROD_OPER
+!!      J. Escobar  05/2014 for bug with ifort/10, replace WHERE by IF
+!!      J. Escobar  06/2015 bug with gfortran ZZ0EFF to small, change with > XSURF_EPSILON
 !----------------------------------------------------------------
 !
 !
-USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SURF_ATM,       ONLY : CIMPLICIT_WIND
-USE MODD_CSTS,           ONLY : XKARMAN, XPI
-USE MODD_SURF_ATM_SSO_n, ONLY : CROUGH, XZ0EFFJPDIR, XZ0REL, XFRACZ0,      &
-                                XZ0EFFIP, XZ0EFFIM, XZ0EFFJP, XZ0EFFJM
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
+USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
+!
+USE MODD_SURF_PAR,         ONLY : XUNDEF, XSURF_EPSILON
+USE MODD_CSTS,             ONLY : XKARMAN, XPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -42,6 +47,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PSEA      ! Sea fraction                          (-)
 REAL, DIMENSION(:), INTENT(IN)    :: PUREF     ! Wind forcing height                   (m)
@@ -56,6 +64,7 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PSFV      ! meridian momentum flux         
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PU))    :: ZWIND   ! wind strength (m/s)
+REAL, DIMENSION(SIZE(PU))    :: ZWORK   ! work array
 REAL, DIMENSION(SIZE(PU))    :: ZDIR    ! wind direction (rad., clockwise)
 REAL, DIMENSION(SIZE(PU))    :: ZALFA   ! angle between z0eff J axis and wind direction (rad., clockwise) 
 REAL, DIMENSION(SIZE(PU))    :: ZCOS2, ZSIN2
@@ -65,67 +74,73 @@ REAL, DIMENSION(SIZE(PU))    :: ZUSTAR2 ! square of friction velocity
 REAL, DIMENSION(SIZE(PU))    :: ZSSO_SFU! zonal orographic momentum flux
 REAL, DIMENSION(SIZE(PU))    :: ZSSO_SFV! meridian orographic momentum flux
 LOGICAL, DIMENSION(SIZE(PU)) :: GMASK   ! mask where SSO exists
+INTEGER                      :: II
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !-------------------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('SSO_Z0_FRICTION_N',0,ZHOOK_HANDLE)
+!
+ZWORK(:) = XUNDEF
+!
 !*      1.     roughness length formalism
 !              --------------------------
-
+!
 !* wind strength
 !
-  IF (LHOOK) CALL DR_HOOK('SSO_Z0_FRICTION_N',0,ZHOOK_HANDLE)
-  ZWIND(:) = SQRT(PU(:)**2+PV(:)**2)
+ZWIND(:) = SQRT(PU(:)**2+PV(:)**2)
 !
 !* wind direction
 !
-  ZDIR(:) = 0.
-  WHERE (ZWIND(:)>0.)  ZDIR(:)=ATAN2(PU(:),PV(:))
+ZDIR(:) = 0.
+WHERE (ZWIND(:)>0.)  ZDIR(:)=ATAN2(PU(:),PV(:))
 !
 !* default value
 !
-  GMASK(:)=(PSEA(:)/=1..AND. XZ0REL(:)/=0.)
-  ZZ0EFF(:) = XUNDEF
+GMASK(:)=(PSEA(:)/=1..AND. USS%XZ0REL(:)/=0.)
+ZZ0EFF(:) = XUNDEF
 !
 !*      2.     Constant orographic roughness length
 !              ------------------------------------
 !
-IF (CROUGH=="Z01D") ZZ0EFF(:) = XZ0REL(:)
+IF (USS%CROUGH=="Z01D") ZZ0EFF(:) = USS%XZ0REL(:)
 !
 !*      3.     Directionnal roughness length
 !              -----------------------------
 !
-IF (CROUGH=="Z04D") THEN
-  WHERE(GMASK(:)) 
-    !
-    ZALFA(:) = ZDIR(:) - XZ0EFFJPDIR(:) * XPI/180.
-    !
-    WHERE    (ZALFA(:)<=-XPI)
-      ZALFA(:) = ZALFA(:) + 2.*XPI
-    ELSEWHERE(ZALFA(:)>  XPI)
-      ZALFA(:) = ZALFA(:) - 2.*XPI
-    ENDWHERE
-    !
-    WHERE (ZALFA(:)>=-XPI.AND.ZALFA(:)<=XPI)
-      !
-      ZSIN2(:) = SIN(ZALFA(:))**2
-      ZCOS2(:) = COS(ZALFA(:))**2
-      !
-      WHERE (ZALFA(:)<0.)
-        ZZ0EFF(:)=XZ0EFFIM(:)*ZSIN2(:)
-      ELSEWHERE
-        ZZ0EFF(:)=XZ0EFFIP(:)*ZSIN2(:)
-      ENDWHERE
-      !
-      WHERE (ZALFA(:)>=-XPI/2. .AND. ZALFA(:)<XPI/2.)
-        ZZ0EFF(:) = ZZ0EFF(:) + XZ0EFFJP(:)*ZCOS2(:)
-      ELSEWHERE
-        ZZ0EFF(:) = ZZ0EFF(:) + XZ0EFFJM(:)*ZCOS2(:)
-      END WHERE
-      !
-    END WHERE
-    !    
-  ENDWHERE
+IF (USS%CROUGH=="Z04D") THEN
+   DO II=1,SIZE(GMASK)
+      IF (GMASK(II)) THEN
+         !
+         ZALFA(II) = ZDIR(II) - USS%XZ0EFFJPDIR(II) * XPI/180.
+         !
+         IF    (ZALFA(II)<=-XPI) THEN
+            ZALFA(II) = ZALFA(II) + 2.*XPI
+         ELSEIF(ZALFA(II)>  XPI) THEN
+            ZALFA(II) = ZALFA(II) - 2.*XPI
+         END IF
+         !
+         IF (ZALFA(II)>=-XPI.AND.ZALFA(II)<=XPI) THEN
+            !
+            ZSIN2(II) = SIN(ZALFA(II))**2
+            ZCOS2(II) = COS(ZALFA(II))**2
+            !
+            IF (ZALFA(II)<0.) THEN
+               ZZ0EFF(II)=USS%XZ0EFFIM(II)*ZSIN2(II)
+            ELSE
+               ZZ0EFF(II)=USS%XZ0EFFIP(II)*ZSIN2(II)
+            END IF
+            !
+            IF (ZALFA(II)>=-XPI/2. .AND. ZALFA(II)<XPI/2.) THEN
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJP(II)*ZCOS2(II)
+            ELSE
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJM(II)*ZCOS2(II)
+            END IF
+            !
+         END IF
+         !    
+      END IF
+   END DO
 ENDIF
 !
 !*      4.     Friction coefficient
@@ -134,17 +149,20 @@ ENDIF
 ZCD    (:) = 0.
 ZUSTAR2(:) = 0.
 !
-GMASK(:)=(GMASK(:).AND.ZZ0EFF(:)>0.)
+GMASK(:)=(GMASK(:).AND.ZZ0EFF(:)>XSURF_EPSILON)
 !
-WHERE (GMASK(:))
-!
-!* sets a limit to roughness length
-  ZZ0EFF(:) = MIN(ZZ0EFF(:),PUREF(:)/XFRACZ0)
-!
-! neutral case
-  ZCD(:) = (XKARMAN/LOG(PUREF(:)/ZZ0EFF(:)))**2
-!
-END WHERE
+DO II=1,SIZE(GMASK)
+  !
+  IF (GMASK(II)) THEN
+    !
+    !* sets a limit to roughness length
+    ZZ0EFF(II) = MIN(ZZ0EFF(II),PUREF(II)/USS%XFRACZ0)
+    !
+    ! neutral case
+    ZCD(II) = (XKARMAN/LOG(PUREF(II)/ZZ0EFF(II)))**2
+  END IF
+  !
+END DO
 !
 !*      5.     Friction due to orography
 !              -------------------------
@@ -163,11 +181,11 @@ ENDIF
 !
 WHERE (GMASK(:))
 !
-  ZWIND(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
-  ZWIND(:) = MAX(ZWIND(:),0.)
+  ZWORK(:) = PRHOA(:)*PPEW_A_COEF(:)*ZUSTAR2(:) + PPEW_B_COEF(:)
+  ZWORK(:) = MAX(ZWORK(:),0.)
 !
   WHERE(PPEW_A_COEF(:)/= 0.)
-    ZUSTAR2(:) = MAX( ( ZWIND(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
+    ZUSTAR2(:) = MAX( ( ZWORK(:) - PPEW_B_COEF(:) ) / (PRHOA(:)*PPEW_A_COEF(:)), 0.)
   ENDWHERE
 !
 END WHERE

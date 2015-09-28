@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_CONF_n(HPROGRAM)
+      SUBROUTINE WRITESURF_WATFLUX_CONF_n (CHW, W, &
+                                           HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_WATFLUX_CONF* - routine to read the configuration for WATFLUX
@@ -23,7 +24,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -32,6 +33,12 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
+!
+USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODN_WATFLUX_n
 !
@@ -45,6 +52,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling WATFLUX
 
@@ -65,8 +76,8 @@ IF (ILUDES==0) RETURN
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_NAM_WATFLUXn
- CALL INIT_NAM_CH_WATFLUXn
+ CALL INIT_NAM_WATFLUXn(W)
+ CALL INIT_NAM_CH_WATFLUXn(CHW)
 !
 WRITE(UNIT=ILUDES,NML=NAM_WATFLUXn)
 WRITE(UNIT=ILUDES,NML=NAM_CH_WATFLUXn)

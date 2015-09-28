@@ -19,7 +19,7 @@ MODULE MODN_PREP_FLAKE
 !!       
 !!    AUTHOR
 !!    ------
-!!	S.Malardel    *Meteo France*
+!!      S.Malardel    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------

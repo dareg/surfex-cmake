@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_WRITE_BIN(HREC,KPATCH,OWFL)
+      SUBROUTINE INIT_WRITE_BIN (DGU, U, &
+                                 HREC,KPATCH,OWFL)
 !     ######################
 !
 !!****  *INIT_WRITE_BIN_n* Initialize array name to be written and associated
@@ -18,7 +19,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	A. LEMONSU     *Meteo France*
+!!      A. LEMONSU     *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -28,11 +29,12 @@
 !             ------------
 !
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_IO_SURF_BIN,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_BIN,  ONLY:NUNIT0, NVAR, CVAR, JPVAR, NIND
-USE MODD_SURF_ATM_n, ONLY:NDIM_FULL
-USE MODD_DIAG_SURF_ATM_n, ONLY:LSELECT, CSELECT
-USE MODD_ISBA_n,     ONLY:NPATCH
 !
 USE MODI_ABOR1_SFX
 USE MODI_TEST_RECORD_LEN
@@ -41,6 +43,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 INTEGER,             INTENT(IN)     :: KPATCH    
@@ -52,7 +58,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_WRITE_BIN',0,ZHOOK_HANDLE)
-IRECLEN=NDIM_FULL*KPATCH*4
+IRECLEN=U%NDIM_FULL*KPATCH*4
 !
 IVAR=NUNIT0
 DO IP=1, JPVAR
@@ -72,7 +78,7 @@ ELSE
   IF (CVAR(1).NE.'                ') IVAR=MAXVAL(NVAR(:))
 !
 !
-  IF (.NOT.LSELECT) THEN
+  IF (.NOT.DGU%LSELECT) THEN
 !
     IF ( (HREC(1:2)/='D_'                          ) .AND.  &
           (HREC(1:2)/='DX'                           ) .AND.  &
@@ -137,12 +143,13 @@ ELSE
   ELSE
 !        
     IFIELD=0
-    DO JFIELD=1,SIZE(CSELECT)
-      IF (CSELECT(JFIELD)== '            ') EXIT
+    DO JFIELD=1,SIZE(DGU%CSELECT)
+      IF (DGU%CSELECT(JFIELD)== '            ') EXIT
       IFIELD=IFIELD+1
     ENDDO
   
-    CALL TEST_RECORD_LEN("ASCII ",HREC,LMATCH)
+    CALL TEST_RECORD_LEN(DGU, &
+                         "ASCII ",HREC,LMATCH)
 
     IF (.NOT. LMATCH ) THEN
 

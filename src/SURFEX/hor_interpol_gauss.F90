@@ -12,7 +12,6 @@ SUBROUTINE HOR_INTERPOL_GAUSS(KLUOUT,PFIELDIN,PFIELDOUT)
 !!
 !!    REFERENCE
 !!    ---------
-!!      
 !!
 !!    AUTHOR
 !!    ------
@@ -21,9 +20,8 @@ SUBROUTINE HOR_INTERPOL_GAUSS(KLUOUT,PFIELDIN,PFIELDOUT)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      M. Jidane   Dec 2013 : initialize NNI if not already done
 !!------------------------------------------------------------------
-!
-!
 !
 USE MODD_PREP,       ONLY : XLAT_OUT, XLON_OUT, LINTERP
 USE MODD_GRID_GAUSS, ONLY : XILA1, XILO1, XILA2, XILO2, NINLA, NINLO, NILEN, LROTPOLE, &
@@ -62,6 +60,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('HOR_INTERPOL_GAUSS',0,ZHOOK_HANDLE)
 INO = SIZE(XLAT_OUT)
 !
+IF (NNI==0) NNI=NILEN
 ALLOCATE(IMASKIN (NNI))
 !
 ALLOCATE(ZLAT    (INO))

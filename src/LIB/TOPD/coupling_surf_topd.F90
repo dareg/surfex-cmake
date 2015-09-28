@@ -1,5 +1,6 @@
 !###################################################################
-SUBROUTINE COUPLING_SURF_TOPD (HPROGRAM,KI)
+SUBROUTINE COUPLING_SURF_TOPD (DGEI, DGMI, IG, I, UG, U, &
+                                HPROGRAM,KI)
 !###################################################################
 !
 !!****  *COUPLING_SURF_TOPD*  
@@ -15,7 +16,7 @@ SUBROUTINE COUPLING_SURF_TOPD (HPROGRAM,KI)
 !!      
 !!    AUTHOR
 !!    ------
-!!	B. Vincendon    
+!!      B. Vincendon    
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -24,6 +25,16 @@ SUBROUTINE COUPLING_SURF_TOPD (HPROGRAM,KI)
 !
 !*       0.     DECLARATIONS
 !               ------------
+!
+!
+!
+!
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_GET_LUOUT
 USE MODI_COUPL_TOPD
@@ -37,7 +48,6 @@ USE MODD_TOPODYN,       ONLY : XQTOT, NNB_TOPD_STEP, XQB_RUN, XQB_DR
 USE MODD_COUPLING_TOPD, ONLY : LCOUPL_TOPD, LBUDGET_TOPD, NNB_TOPD, LTOPD_STEP, NTOPD_STEP, &
                                  NYEAR,NMONTH,NDAY,NH,NM
 !
-USE MODD_ISBA_n,          ONLY : CRUNOFF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -45,6 +55,14 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
@@ -81,15 +99,18 @@ IF ( LTOPD_STEP ) THEN
     WRITE(YSTEP,'(I3)') NTOPD_STEP
   ENDIF
   !
-  write(*,*) 'pas de temps coupl ',YSTEP
+  write(ILUOUT,*) 'pas de temps coupl ',YSTEP
   !
-  IF (CRUNOFF=='TOPD') THEN
-    CALL COUPL_TOPD(HPROGRAM,YSTEP,KI,NTOPD_STEP)
+  IF (I%CRUNOFF=='TOPD') THEN
+    CALL COUPL_TOPD(DGEI, DGMI, IG, I, UG, U, &
+                    HPROGRAM,YSTEP,KI,NTOPD_STEP)
   ELSE
-    CALL ROUT_DATA_ISBA(HPROGRAM,KI,NTOPD_STEP)
+    CALL ROUT_DATA_ISBA(DGEI, DGMI, IG, I, UG, U, &
+                        HPROGRAM,KI,NTOPD_STEP)
   ENDIF
   !
-  IF (LBUDGET_TOPD) CALL BUDGET_COUPL_ROUT(KI,NTOPD_STEP)
+  IF (LBUDGET_TOPD) CALL BUDGET_COUPL_ROUT(DGEI, DGMI, I, U, &
+                                           KI,NTOPD_STEP)
   !
 ENDIF! (LCOUPL_TOPD.AND......
 !

@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF(HSURF_FILETYPE, HFORCING_FILETYPE,  &
+SUBROUTINE OL_READ_ATM_CONF (YSC, &
+                             HSURF_FILETYPE, HFORCING_FILETYPE,  &
                               PDURATION,                          &
                               PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
                               KDAY, PTIME, PLAT, PLON,            &
@@ -27,7 +28,7 @@ SUBROUTINE OL_READ_ATM_CONF(HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!
 !!    AUTHOR
 !!    ------
-!!	F. Habets   *Meteo France*	
+!!      F. Habets   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -36,6 +37,10 @@ SUBROUTINE OL_READ_ATM_CONF(HSURF_FILETYPE, HFORCING_FILETYPE,  &
 !!      Modified by P. Le Moigne (04/2006): init_io_surf for nature
 !!                  with GTMSK to read dimensions.
 !==================================================================
+!
+!
+USE MODD_SURFEX_n, ONLY : SURFEX_t
+!
 USE MODI_OL_READ_ATM_CONF_NETCDF
 USE MODI_OL_READ_ATM_CONF_ASCII
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
@@ -45,6 +50,8 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
  CHARACTER(LEN=6), INTENT(IN)  :: HFORCING_FILETYPE
@@ -64,7 +71,8 @@ CPROGNAME = HSURF_FILETYPE
 !
 IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
- CALL OL_READ_ATM_CONF_NETCDF(HSURF_FILETYPE,                     &
+ CALL OL_READ_ATM_CONF_NETCDF(YSC, &
+                              HSURF_FILETYPE,                     &
                                 PDURATION,                          &
                                 PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
                                 KDAY, PTIME, PLAT, PLON,            &
@@ -72,7 +80,8 @@ IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
 ELSE IF (HFORCING_FILETYPE == 'ASCII ' .OR. HFORCING_FILETYPE == 'BINARY') THEN
 !
- CALL OL_READ_ATM_CONF_ASCII (HSURF_FILETYPE,HFORCING_FILETYPE,   &
+ CALL OL_READ_ATM_CONF_ASCII(YSC, &
+                              HSURF_FILETYPE,HFORCING_FILETYPE,   &
                                 PDURATION,                          &
                                 PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
                                 KDAY, PTIME, PLAT, PLON,            &

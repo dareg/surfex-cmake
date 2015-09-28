@@ -22,7 +22,7 @@ CONTAINS
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
+!!      E. Martin   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -93,7 +93,7 @@ END SUBROUTINE PUT_GRIDTYPE_IGN
 !!
 !!    AUTHOR
 !!    ------
-!!	E. Martin   *Meteo France*	
+!!      E. Martin   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -330,12 +330,14 @@ REAL, DIMENSION(:),   INTENT(OUT):: PX,PY
                                            ! processed points (meters);
 !
 !*     0.2    Declarations of local variables
-! 
-REAL, DIMENSION(SIZE(PLAT)) :: ZWRK1, ZWRK2     ! working arrays
-REAL, DIMENSION(SIZE(PLAT)) :: ZLATRAD, ZLONRAD ! longitude and latitude in radians
-REAL, DIMENSION(SIZE(PLAT)) :: ZGAMMA
-REAL, DIMENSION(SIZE(PLAT)) :: ZLATFI           ! Isometric latitude
-REAL, DIMENSION(SIZE(PLAT)) :: ZR               ! length of arc meridian line projection
+!
+REAL :: ZPI180, ZPI4, ZECC2
+REAL :: ZWRK     ! working arrays
+REAL :: ZLATRAD, ZLONRAD ! longitude and latitude in radians
+REAL :: ZGAMMA
+REAL :: ZLATFI           ! Isometric latitude
+REAL :: ZR               ! length of arc meridian line projection
+INTEGER :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -344,31 +346,43 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.     Latitude /Longitude in radian :
 !               -------------------------------
 !
-      IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',0,ZHOOK_HANDLE)
-      WHERE (PLON(:) > 180.) 
-      ZLONRAD(:) = (PLON(:) - 360. - XLONP(KLAMBERT)) * XPI / 180.
-      ELSEWHERE
-      ZLONRAD(:) = (PLON(:) - XLONP(KLAMBERT)) * XPI / 180.
-      ENDWHERE
-      ZLATRAD(:) = PLAT(:) * XPI / 180.
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',0,ZHOOK_HANDLE)
 !
+ZPI180 = XPI / 180.
+ZPI4 = XPI / 4.
+ZECC2 = XECC / 2. 
+!
+!$OMP PARALLEL DO PRIVATE(JJ,ZLONRAD,ZLATRAD,ZWRK,ZLATFI,ZGAMMA,ZR)
+DO JJ=1,SIZE(PLON)
+  !
+  IF (PLON(JJ) > 180.) THEN
+    ZLONRAD = (PLON(JJ) - 360. - XLONP(KLAMBERT)) * ZPI180
+  ELSE
+    ZLONRAD = (PLON(JJ) - XLONP(KLAMBERT)) * ZPI180
+  ENDIF
+  !
+  ZLATRAD = PLAT(JJ) * ZPI180
+  !
 !*       2.     Calcul of the isometric latitude :
 !               ----------------------------------
-!
-      ZWRK1(:)   = LOG(TAN(XPI / 4. + ZLATRAD(:) / 2.))
-      ZWRK2(:)   = XECC * SIN(ZLATRAD(:))
-      ZWRK2(:)   = (1. - ZWRK2(:)) / (1. + ZWRK2(:))
-      ZWRK2(:)   = XECC / 2. * (LOG(ZWRK2))
-      ZLATFI(:)  = ZWRK1(:) + ZWRK2(:)
-!
-!*       3.     Calcul of the lambert II coordinates X and Y:
+  !
+  ZWRK   = SIN(ZLATRAD) * XECC 
+  !
+  ZLATFI  = LOG(TAN(ZPI4 + ZLATRAD / 2.)) + ( (LOG(1-ZWRK)-LOG(1+ZWRK)) * ZECC2)
+  !
+!*       3.     Calcul of the lambert II coordinates X and YJJ
 !               ---------------------------------------------
-      ZGAMMA(:)  = XN(KLAMBERT) * ZLONRAD(:)
-      ZWRK1(:)   = 0 - XN(KLAMBERT) * ZLATFI(:)
-      ZR(:)      =  EXP(ZWRK1(:))
-      ZR(:)      = XC(KLAMBERT)*ZR(:)
-      PX(:) = XXS(KLAMBERT) + ZR(:) * SIN(ZGAMMA(:))
-      PY(:) = XYS(KLAMBERT) - ZR(:) * COS(ZGAMMA(:)) 
+  !
+  ZR      = EXP(- XN(KLAMBERT) * ZLATFI) * XC(KLAMBERT)
+  !
+  ZGAMMA  = XN(KLAMBERT) * ZLONRAD
+  !
+  PX(JJ) = XXS(KLAMBERT) + SIN(ZGAMMA) * ZR
+  PY(JJ) = XYS(KLAMBERT) - COS(ZGAMMA) * ZR   
+  !
+ENDDO
+!$OMP END PARALLEL DO 
+!
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE XY_IGN

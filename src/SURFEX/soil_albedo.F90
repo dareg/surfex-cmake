@@ -108,7 +108,7 @@ END MODULE MODI_SOIL_ALBEDO
 !!      
 !!    AUTHOR
 !!    ------
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -244,7 +244,7 @@ END SUBROUTINE SOIL_ALBEDO_1D
 !!      
 !!    AUTHOR
 !!    ------
-!!	F.Solmon  /  V. Masson          
+!!      F.Solmon  /  V. Masson          
 !!
 !!    MODIFICATIONS
 !!    -------------

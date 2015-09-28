@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_SEAFLUX_DATE(HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
+      SUBROUTINE READ_SEAFLUX_DATE (O, &
+                                    HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
                                      KYEAR,KMONTH,KDAY,PTIME,TPTIME)  
 !     #######################################################
 !
@@ -24,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,6 +35,11 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
 !
 USE MODD_TYPE_DATE_SURF
 USE MODD_SURF_PAR,       ONLY : NUNDEF, XUNDEF
@@ -53,6 +59,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
@@ -106,11 +115,13 @@ END IF
 IF (TPTIME%TDATE%YEAR==NUNDEF.OR.TPTIME%TDATE%MONTH==NUNDEF &
       .OR.TPTIME%TDATE%DAY==NUNDEF.OR.TPTIME%TIME==XUNDEF) THEN  
   !
-  CALL READ_PREP_SEAFLUX_CONF(HPROGRAM,'DATE   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+  CALL READ_PREP_SEAFLUX_CONF(O, &
+                              HPROGRAM,'DATE   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                               HATMFILE,HATMFILETYPE,YFILEPGDIN,YFILEPGDINTYPE,KLUOUT,GUNIF)
   !
   IF (LEN_TRIM(YFILETYPE)/=0) &
-    CALL READ_PREP_FILE_DATE(HPROGRAM,YFILE,YFILETYPE,TPTIME,KLUOUT)  
+    CALL READ_PREP_FILE_DATE(&
+                             HPROGRAM,YFILE,YFILETYPE,TPTIME,KLUOUT)  
   !
 END IF
 !

@@ -1,5 +1,6 @@
 !     ###########################################################
-      SUBROUTINE SPLIT_GRID(HPROGRAM)
+      SUBROUTINE SPLIT_GRID (UG, U, &
+                             HPROGRAM)
 !     ###########################################################
 !!
 !!    PURPOSE
@@ -34,8 +35,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : CGRID, XGRID_PAR, NGRID_PAR
-USE MODD_SURF_ATM_n,      ONLY : NDIM_FULL, NSIZE_FULL
+!
+!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_SPLIT_GRID_CONF_PROJ
 USE MODI_SPLIT_GRID_CARTESIAN
@@ -50,6 +53,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !
 !
@@ -62,14 +69,15 @@ INTEGER :: IRESP ! error return code
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('SPLIT_GRID',0,ZHOOK_HANDLE)
 !
-SELECT CASE(CGRID)
+SELECT CASE(UG%CGRID)
 
   CASE('CONF PROJ ')
-    CALL SPLIT_GRID_CONF_PROJ(HPROGRAM,NDIM_FULL,NSIZE_FULL,NGRID_PAR,XGRID_PAR)
+    CALL SPLIT_GRID_CONF_PROJ(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,UG%NGRID_PAR,UG%XGRID_PAR)
   CASE('CARTESIAN ')
-    CALL SPLIT_GRID_CARTESIAN(HPROGRAM,NDIM_FULL,NSIZE_FULL,NGRID_PAR,XGRID_PAR)
+    CALL SPLIT_GRID_CARTESIAN(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,UG%NGRID_PAR,UG%XGRID_PAR)
   CASE DEFAULT
-    CALL GET_SIZE_FULL_n(HPROGRAM,NDIM_FULL,NSIZE_FULL)
+    CALL GET_SIZE_FULL_n(U, &
+                         HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
 
 END SELECT
 !

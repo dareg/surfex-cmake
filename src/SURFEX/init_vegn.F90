@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_VEG_n(KPATCH, KI, OCANOPY, HROUGH, TPSNOW, &
+SUBROUTINE INIT_VEG_n(KPATCH, KI, OCANOPY, HROUGH, OAGRI_TO_GRASS, TPSNOW, &
                          HPHOTO, PLAIMIN, PH_TREE, PVEGTYPE_PATCH, PLAI, PZ0, PVEG, PEMIS, &
                          OTR_ML, PFAPARC, PFAPIRC, PLAI_EFFC, PMUS, &
                          PALBNIR_SOIL, PALBVIS_SOIL, PALBUV_SOIL, PALBNIR, PALBVIS, PALBUV, &
@@ -28,7 +28,7 @@ SUBROUTINE INIT_VEG_n(KPATCH, KI, OCANOPY, HROUGH, TPSNOW, &
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!
@@ -58,7 +58,8 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: KPATCH
 INTEGER, INTENT(IN) :: KI
 LOGICAL, INTENT(IN) :: OCANOPY
- CHARACTER(LEN=4), INTENT(INOUT) :: HROUGH
+CHARACTER(LEN=4), INTENT(INOUT) :: HROUGH
+LOGICAL, INTENT(IN) :: OAGRI_TO_GRASS
 TYPE(SURF_SNOW),      INTENT(INOUT) :: TPSNOW  ! snow characteristics
 !
  CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
@@ -111,15 +112,15 @@ IF (LHOOK) CALL DR_HOOK('INIT_VEG_n',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-!*      13.     Roughness length option
-!               -----------------------
+!*      1.     Roughness length option
+!              -----------------------
 !
  CALL SET_ROUGH(OCANOPY,HROUGH)
 !
 !-------------------------------------------------------------------------------
 !
-!*      14.     Radiative fields and snow/flood fracion initialization:
-!               -------------------------------------------------------
+!*      2.     Radiative fields and snow/flood fracion initialization:
+!              -------------------------------------------------------
 !
 !* snow long-wave properties (not initialized in read_gr_snow)
 !
@@ -135,8 +136,8 @@ IF (HPHOTO=='LAI' .OR. HPHOTO=='LST' .OR. HPHOTO=='NIT' .OR. HPHOTO=='NCB') THEN
         IF (PLAI(JILU,JPATCH).LT.PLAIMIN(JILU,JPATCH)) THEN
           PLAI(JILU,JPATCH) = PLAIMIN(JILU,JPATCH)
         ENDIF
-           PZ0  (JILU,JPATCH) = Z0V_FROM_LAI(PLAI(JILU,JPATCH),PH_TREE(JILU,JPATCH),PVEGTYPE_PATCH(JILU,:,JPATCH))
-           PVEG (JILU,JPATCH) = VEG_FROM_LAI(PLAI(JILU,JPATCH),PVEGTYPE_PATCH(JILU,:,JPATCH))
+           PZ0  (JILU,JPATCH) = Z0V_FROM_LAI(PLAI(JILU,JPATCH),PH_TREE(JILU,JPATCH),PVEGTYPE_PATCH(JILU,:,JPATCH),OAGRI_TO_GRASS)
+           PVEG (JILU,JPATCH) = VEG_FROM_LAI(PLAI(JILU,JPATCH),PVEGTYPE_PATCH(JILU,:,JPATCH),OAGRI_TO_GRASS)
            PEMIS(JILU,JPATCH) = EMIS_FROM_VEG(PVEG(JILU,JPATCH),PVEGTYPE_PATCH(JILU,:,JPATCH))
         END IF  
      END DO

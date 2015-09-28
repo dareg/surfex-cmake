@@ -66,7 +66,7 @@ REAL, DIMENSION(KNI),       INTENT(OUT) :: PLAT      ! latitude  (degrees)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Input file:
 !
-CHARACTER(LEN=*), PARAMETER       :: YFILE_DIR= '/sxmosa1/data1/martin/NO_SAVE/SAFRAN/CLIM-SIM/'
+CHARACTER(LEN=*), PARAMETER       :: YFILE_DIR= '/cnrm/mosayc/data1/martin/NO_SAVE/SAFRAN/CLIM-SIM/'
 !
 !----------------------------------------------------------------------------
 ! Declare variables to translate forcing from obs to surfex atmospheric forcing

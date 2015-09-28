@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_DIRECT(HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
+      SUBROUTINE READ_DIRECT (USS, &
+                              HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
 !     #########################################################
 !
 !!**** *READ_DIRECT1* reads a latlon file and call treatment subroutine
@@ -30,10 +31,15 @@
 !!    Original    11/09/95
 !!
 !! V. Masson, March 2010     Optimization of some lat/lon boundaries computations
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
+!
+!
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK, XMESHLENGTH
 !
@@ -56,11 +62,15 @@ USE PARKIND1  ,ONLY : JPRB
 USE MODI_ABOR1_SFX
 !
 USE MODI_REFRESH_PGDWORK
+USE MODD_CSTS ,ONLY : XSURF_EPSILON
 !
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
@@ -391,7 +401,7 @@ DO
 !*    5.1    left domain border is set just higher than the global field min. longitude
 !            -----------------------------------------------------------------
 !
-      ZSHIFT = 360. * NINT((ZLONMIN-ZGLBLONMIN-180.+1.E-10)/360.)
+      ZSHIFT = 360. * NINT((ZLONMIN-ZGLBLONMIN-180.*(1-XSURF_EPSILON))/360.)
 
 !
       ZGLBLONMIN = ZGLBLONMIN + ZSHIFT
@@ -460,7 +470,8 @@ DO
 !            ----------------------------------------------------------
 !
           IF (IWORK>0) &
-            CALL PT_BY_PT_TREATMENT(ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
+            CALL PT_BY_PT_TREATMENT(USS, &
+                                    ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
                                     ZVALUE_WORK(1:IWORK),                          &
                                     HSUBROUTINE                                    )  
 !

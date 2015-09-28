@@ -25,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S.Malardel   *Meteo France*	
+!!      S.Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -83,7 +83,6 @@ HFILE     = CFILE
 HFILETYPE = CFILETYPE
 HFILEPGD     = CFILEPGD
 HFILEPGDTYPE = CFILEPGDTYPE
-
 !
 IF (LEN_TRIM(HFILE)==0 .AND. LEN_TRIM(HATMFILE)>0 ) THEN
    HFILE     = HATMFILE

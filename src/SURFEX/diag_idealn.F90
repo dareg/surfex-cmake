@@ -1,5 +1,6 @@
 !     #########
-SUBROUTINE DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
+SUBROUTINE DIAG_IDEAL_n (DGL, &
+                         HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
 !     ###############################################################################
 !
 !!****  *DIAG_IDEAL_n * - Stores IDEAL_n diagnostics
@@ -25,9 +26,10 @@ SUBROUTINE DIAG_IDEAL_n(HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
 !
 
 !
+!
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+!
 USE MODD_SURF_PAR,    ONLY : XUNDEF
-USE MODD_DIAG_IDEAL_n, ONLY : LSURF_BUDGET, LCOEF, LSURF_VARS, &
-                              XQS, XZ0, XZ0H, XH, XLE, XRN, XGFLUX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -36,6 +38,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
+!
+!
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
@@ -55,20 +60,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_IDEAL_N',0,ZHOOK_HANDLE)
 !
-IF (LSURF_BUDGET) THEN
-  PH       = XH
-  PLE      = XLE
-  PRN      = XRN
-  PGFLUX   = XGFLUX
+IF (DGL%LSURF_BUDGET) THEN
+  PH       = DGL%XH
+  PLE      = DGL%XLE
+  PRN      = DGL%XRN
+  PGFLUX   = DGL%XGFLUX
 END IF
 !
-IF (LCOEF) THEN
-  PZ0  = XZ0
-  PZ0H = XZ0H
+IF (DGL%LCOEF) THEN
+  PZ0  = DGL%XZ0
+  PZ0H = DGL%XZ0H
 ENDIF
 !
-IF (LSURF_VARS) THEN
-  PQS = XQS
+IF (DGL%LSURF_VARS) THEN
+  PQS = DGL%XQS
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_IDEAL_N',1,ZHOOK_HANDLE)

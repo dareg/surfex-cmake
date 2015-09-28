@@ -1,5 +1,6 @@
 !     #################################################
-      SUBROUTINE PUT_ZS_INLAND_WATER_n(HPROGRAM,KI,PZS,HWATER)
+      SUBROUTINE PUT_ZS_INLAND_WATER_n (F, W, &
+                                        HPROGRAM,KI,PZS,HWATER)
 !     #################################################
 !
 !!****  *PUT_ZS_INLAND_WATER_n* - routine to modify inland water oropgraphy using atmospheric
@@ -24,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	P. Le Moigne   *Meteo France*	
+!!      P. Le Moigne   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -33,6 +34,10 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_GET_LUOUT
 !
@@ -46,6 +51,10 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HWATER ! name of the scheme for inland water
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
@@ -74,7 +83,6 @@ CONTAINS
 !
 SUBROUTINE PUT_ZS_WATFLX_n
 !
-USE MODD_WATFLUX_n,     ONLY : XZS
 !
 !-------------------------------------------------------------------------------
 
@@ -84,13 +92,13 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_WATFLX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(W%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field for inland water (WATFLX)         (XZS) :', SIZE(XZS)
+  WRITE(ILUOUT,*) 'size of field for inland water (WATFLX)         (XZS) :', SIZE(W%XZS)
   CALL ABOR1_SFX('PUT_ZS_INLAND_WATERN (WATFLX): GET ZS FROM ATMOSPHERIC MODEL: SIZE NOT CORRECT')
 ELSE
-  XZS = PZS
+  W%XZS = PZS
 END IF
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_WATFLX_N',1,ZHOOK_HANDLE)
 !
@@ -101,7 +109,6 @@ END SUBROUTINE PUT_ZS_WATFLX_n
 !
 SUBROUTINE PUT_ZS_FLAKE_n
 !
-USE MODD_FLAKE_n,     ONLY : XZS
 !
 !-------------------------------------------------------------------------------
 
@@ -111,13 +118,13 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_FLAKE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(F%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field for inland water (FLAKE)          (XZS) :', SIZE(XZS)
+  WRITE(ILUOUT,*) 'size of field for inland water (FLAKE)          (XZS) :', SIZE(F%XZS)
   CALL ABOR1_SFX('PUT_ZS_INLAND_WATERN (FLAKE): GET ZS FROM ATMOSPHERIC MODEL: SIZE NOT CORRECT')
 ELSE
-  XZS = PZS
+  F%XZS = PZS
 END IF
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_FLAKE_N',1,ZHOOK_HANDLE)
 !

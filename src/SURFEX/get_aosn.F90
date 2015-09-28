@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE GET_AOS_n(HPROGRAM,KI,PAOSIP,PAOSIM,PAOSJP,PAOSJM,&
+      SUBROUTINE GET_AOS_n (USS, &
+                            HPROGRAM,KI,PAOSIP,PAOSIM,PAOSJP,PAOSJM,&
                              PHO2IP,PHO2IM,PHO2JP,PHO2JM             )  
 !     ########################################
 !
@@ -24,7 +25,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -34,10 +35,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODI_GET_LUOUT
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : XAOSIP, XAOSIM, XAOSJP, XAOSJM, &
-                                  XHO2IP, XHO2IM, XHO2JP, XHO2JM  
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -49,6 +51,9 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover
@@ -73,20 +78,20 @@ IF (LHOOK) CALL DR_HOOK('GET_AOS_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PAOSIP) /= SIZE(XAOSIP) ) THEN
+IF ( SIZE(PAOSIP) /= SIZE(USS%XAOSIP) ) THEN
   WRITE(ILUOUT,*) 'try to get A/S fields from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PAOSIP) :', SIZE(PAOSIP)
-  WRITE(ILUOUT,*) 'size of field inthe surface                     (XAOSIP) :', SIZE(XAOSIP)
+  WRITE(ILUOUT,*) 'size of field inthe surface                     (XAOSIP) :', SIZE(USS%XAOSIP)
   CALL ABOR1_SFX('GET_AOSN: A/S SIZE NOT CORRECT')
 ELSE
-  PAOSIP = XAOSIP
-  PAOSIM = XAOSIM
-  PAOSJP = XAOSJP
-  PAOSJM = XAOSJM
-  PHO2IP = XHO2IP
-  PHO2IM = XHO2IM
-  PHO2JP = XHO2JP
-  PHO2JM = XHO2JM
+  PAOSIP = USS%XAOSIP
+  PAOSIM = USS%XAOSIM
+  PAOSJP = USS%XAOSJP
+  PAOSJM = USS%XAOSJM
+  PHO2IP = USS%XHO2IP
+  PHO2IM = USS%XHO2IM
+  PHO2JP = USS%XHO2JP
+  PHO2JM = USS%XHO2JM
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_AOS_N',1,ZHOOK_HANDLE)
 !

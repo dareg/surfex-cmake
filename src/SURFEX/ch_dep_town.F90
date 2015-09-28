@@ -18,8 +18,8 @@
   !!    MODIFICATIONS
   !!    -------------
   !!      Original      20/02/97 
-  !!	Modification  21/07/00  (Guenais/Tulet) add deposition on town
-  !!	Modification  18/07/03  (Tulet) surface externalization
+  !!      Modification  21/07/00  (Guenais/Tulet) add deposition on town
+  !!      Modification  18/07/03  (Tulet) surface externalization
   !!
   !-------------------------------------------------------------------------------
   !
@@ -64,7 +64,7 @@
   REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZTOWNRB 
   ! snow quasi-laminar  resistance
   REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZTOWNRC 
-  ! towm surface  resistance				 
+  ! towm surface  resistance
 
   REAL             , DIMENSION(SIZE(PTRAD,1),SIZE(HSV,1)) :: ZRESTOWN 
   !  final town  resistance
@@ -94,7 +94,7 @@
   !
   !        1.0  Aerodynamic resistance for the differents COVER TYPE
   !             ----------------------------------------------------
-  !   PRESA_TOWN(:)	! Aerodynamic resistance for TOWN 
+  !   PRESA_TOWN(:)     ! Aerodynamic resistance for TOWN 
   !
   !       2.0  Quasi-laminar resistance (Hicks, 1987)
   !            ------------------------      
@@ -135,7 +135,7 @@
   ! 
         !        6.0  Compute town resistance
         !             -----------------------
-        !	
+        !
         DO JSV=1,SIZE(HSV,1) 
            ZRESTOWN(:,JSV) = PRESA_TOWN(:) + &
                   ZTOWNRB(:,JSV) + ZTOWNRC(:,JSV)  

@@ -1,10 +1,17 @@
 !     ######spl
 MODULE MODE_SPLINES
-
+!-------------------------------------------------------------------------------
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
+!!
+!-------------------------------------------------------------------------------
 USE MODI_ABOR1_SFX
 USE MODD_SPLINES
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODD_SURF_PAR , ONLY : XSURF_HUGE , XSURF_TINY
 !
 INTERFACE SSCOPY
         MODULE PROCEDURE SSCOPY_1
@@ -1581,7 +1588,7 @@ REAL, INTENT(INOUT) :: P0
 REAL, INTENT(OUT) :: P
 INTEGER, INTENT(OUT) :: IREP
 
-INTEGER, PARAMETER:: EPS=1.E-100, EPSR=1.E-2
+INTEGER, PARAMETER:: EPS=XSURF_TINY, EPSR=1.E-2
 REAL :: DVM, D2VM, P1
 INTEGER :: IFLAG, NITER
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -2167,7 +2174,7 @@ ELSE
   ENDDO
 
 !  Recherche de l'ordre optimal
-  VMMIN=1.E200
+  VMMIN=XSURF_HUGE
   DO NORD=NORDMI,NORDM
     IF(VM(NORD).LT.VMMIN) THEN
       VMMIN=VM(NORD)

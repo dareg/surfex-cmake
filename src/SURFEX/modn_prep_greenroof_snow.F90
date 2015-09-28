@@ -18,7 +18,7 @@
 !!       
 !!    AUTHOR
 !!    ------
-!!	C. de Munck    *Meteo France*
+!!      C. de Munck    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -30,7 +30,7 @@
 !
 IMPLICIT NONE
 !
- CHARACTER(LEN=3)  :: CSNOW          ! snow scheme
-INTEGER           :: NSNOW_LAYER    ! number of snow layers
+ CHARACTER(LEN=3)  :: CSNOW_GR         ! snow scheme
+INTEGER           :: NSNOW_LAYER_GR    ! number of snow layers
 !
 END MODULE MODN_PREP_GREENROOF_SNOW

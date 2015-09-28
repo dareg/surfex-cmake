@@ -16,11 +16,11 @@
 !!       
 !!    AUTHOR
 !!    ------
-!!	V. Masson    *Meteo France*
+!!      V. Masson    *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    10/2003                    
+!!      Original    10/2003
 !-------------------------------------------------------------------------------
 !
 IMPLICIT NONE

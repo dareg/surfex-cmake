@@ -5,6 +5,7 @@
                                  PWALL_O_HOR, PCAN_HW_RATIO,                   &
                                  PALB_ROOF,                                    &
                                  PALB_ROAD, PSVF_ROAD, PALB_WALL, PSVF_WALL,   &
+                                 PFRAC_PANEL, PALB_PANEL,                      &
                                  PALB_GARDEN, PSVF_GARDEN,                     &
                                  PALB_GREENROOF,                               &
                                  PASNOW_ROOF, PASNOW_ROAD,                     &
@@ -14,12 +15,13 @@
                                  PABS_SW_WALL_A, PABS_SW_WALL_B,               &
                                  PABS_SW_GARDEN, PABS_SW_GREENROOF,            &
                                  PABS_SW_SNOW_ROOF, PABS_SW_SNOW_ROAD,         &
+                                 PABS_SW_SOLAR_PANEL,                          &
                                  PREC_SW_ROAD,  PREC_SW_SNOW_ROAD,             &
                                  PREC_SW_WALL_A, PREC_SW_WALL_B,               &
-                                 PREC_SW_GARDEN,                               &
+                                 PREC_SW_GARDEN, PREC_SW_ROOF,                 &
                                  PDIR_ALB_TOWN, PSCA_ALB_TOWN,                 &
                                  PSW_RAD_GARDEN, PABS_SW_WIN, PREC_SW_WIN,     &
-                                 PTRAN_WIN, &
+                                 PTRAN_WIN,                                    &
                                  PREF_SW_GRND, PREF_SW_FAC, PTR_SW_WIN,        &
                                  PE_SHADING, OSHAD_DAY,                        &
                                  OSHADE                                        )  
@@ -173,7 +175,7 @@
 !!    AUTHOR
 !!    ------
 !!
-!!	V. Masson           * Meteo-France *
+!!      V. Masson           * Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -219,7 +221,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PAZIM             ! solar azimuthal angle
 REAL, DIMENSION(:), INTENT(IN)    :: PBLD              ! buildings fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PGARDEN           ! GARDEN area fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PROAD_DIR         ! Road direction
-                                                       ! (° from N, clockwise)
+                                                       ! (deg from N, clockwise)
 REAL, DIMENSION(:), INTENT(IN)    :: PROAD             ! road fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PFRAC_GR          ! green roof fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PWALL_O_HOR       ! wall surf. / hor. surf
@@ -229,6 +231,8 @@ REAL, DIMENSION(:), INTENT(IN)    :: PALB_ROAD         ! road albedo
 REAL, DIMENSION(:), INTENT(IN)    :: PSVF_ROAD         ! road sky view factor
 REAL, DIMENSION(:), INTENT(IN)    :: PALB_WALL         ! wall albedo
 REAL, DIMENSION(:), INTENT(IN)    :: PSVF_WALL         ! wall sky view factor
+REAL, DIMENSION(:), INTENT(IN)    :: PFRAC_PANEL       ! Fraction of solar panel on roofs (-)
+REAL, DIMENSION(:), INTENT(IN)    :: PALB_PANEL        ! Albedo     of solar panels (-)
 REAL, DIMENSION(:), INTENT(IN)    :: PALB_GARDEN       ! GARDEN areas albedo
 REAL, DIMENSION(:), INTENT(IN)    :: PSVF_GARDEN       ! GARDEN areas sky view factor
 REAL, DIMENSION(:), INTENT(IN)    :: PALB_GREENROOF    ! green roof albedo
@@ -262,6 +266,8 @@ REAL, DIMENSION(:), INTENT(OUT)    :: PABS_SW_SNOW_ROOF! solar radiation absorbe
 !                                                      ! by snow-covered roofs
 REAL, DIMENSION(:), INTENT(OUT)    :: PABS_SW_SNOW_ROAD! solar radiation absorbed
 !                                                      ! by snow-covered roads
+REAL, DIMENSION(:), INTENT(OUT)    :: PABS_SW_SOLAR_PANEL! solar radiation absorbed
+!                                                      ! by solar panels
 REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_ROAD     ! solar radiation received
 !                                                      ! by snow-free roads
 REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_WALL_A   ! solar radiation received
@@ -269,6 +275,8 @@ REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_WALL_B   ! solar radiation receive
 !                                                      ! by snow-free walls
 REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_GARDEN   ! solar radiation received
 !                                                      ! by GARDEN areas
+REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_ROOF     ! solar radiation received
+!                                                      ! by ROOF areas (below solar panels if any)
 REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_SNOW_ROAD! solar radiation received
 !                                                      ! by snow-covered roads
 REAL, DIMENSION(:), INTENT(OUT)    :: PDIR_ALB_TOWN    ! town direct albedo
@@ -281,12 +289,12 @@ REAL, DIMENSION(:), INTENT(OUT)    :: PREC_SW_WIN      ! solar radiation receive
 REAL, DIMENSION(:), INTENT(OUT)    :: PREF_SW_GRND     ! total solar radiation reflected by ground
 REAL, DIMENSION(:), INTENT(OUT)    :: PREF_SW_FAC      ! total solar radiation reflected by wall
 REAL, DIMENSION(:), INTENT(OUT)    :: PTR_SW_WIN       ! Solar radiation transmitted
-                                                       ! through glazing [W/m²(bld)]
+                                                       ! through glazing [W/m2(bld)]
 !new arguments for shading
 REAL, DIMENSION(:), INTENT(OUT)    :: PE_SHADING       ! Energy that is not reflected 
                                                        ! by the shading, nor transmitted through
                                                        ! the bld, nor absorbed by the
-                                                       ! [W/m²(win)]
+                                                       ! [W/m2(win)]
 LOGICAL, DIMENSION(:),INTENT(INOUT):: OSHAD_DAY        ! has shading been necessary this day ?
 LOGICAL, DIMENSION(:),INTENT(IN)   :: OSHADE           ! are building conditions favorable for 
 !                                                      ! shading (independantly of solar irradiance) ?
@@ -320,6 +328,7 @@ REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_WALL_B    ! wall B,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_WALL      ! both walls on average,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_GARDEN    ! GARDEN areas,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_GREENROOF ! green roof areas,
+REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_PANEL     ! solar panels,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_WIN       ! window (abs+trans), and snow
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_SNOW_ROOF ! over roof, wall,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_DIR_SW_SNOW_ROAD ! and GARDEN areas
@@ -328,6 +337,7 @@ REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_ROAD      ! absorbed by roofs,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_WALL      ! road, wall,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_GARDEN    ! GARDEN areas,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_GREENROOF ! green roof areas,
+REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_PANEL     ! solar panels,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_WIN       ! window (abs+trans), and snow
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_SNOW_ROOF ! over roof and wall,
 REAL, DIMENSION(SIZE(PDIR_SW)) :: ZABS_SCA_SW_SNOW_ROAD ! coming from diffuse rad.
@@ -368,6 +378,7 @@ PREC_SW_WALL_A    (:) = 0.
 PREC_SW_WALL_B    (:) = 0.
 PREC_SW_GARDEN    (:) = 0.
 PREC_SW_SNOW_ROAD (:) = 0.
+PREC_SW_ROOF      (:) = 0.
 !
 ZDIR_SW = MAX(PDIR_SW,0.)
 ZSCA_SW = MAX(PSCA_SW,0.000001)
@@ -389,12 +400,18 @@ DO JJ=1,SIZE(PROAD)
 !*      1.     SOLAR RADIATIONS FOR ROOFS
 !              --------------------------
 !
-  ZABS_DIR_SW_ROOF     (JJ) = ZDIR_SW(JJ) * (1. - PALB_ROOF     (JJ))
-  ZABS_DIR_SW_SNOW_ROOF(JJ) = ZDIR_SW(JJ) * (1. - PASNOW_ROOF   (JJ))
-  ZABS_DIR_SW_GREENROOF(JJ) = ZDIR_SW(JJ) * (1. - PALB_GREENROOF(JJ))
-  ZABS_SCA_SW_ROOF     (JJ) = ZSCA_SW(JJ) * (1. - PALB_ROOF     (JJ))
-  ZABS_SCA_SW_SNOW_ROOF(JJ) = ZSCA_SW(JJ) * (1. - PASNOW_ROOF   (JJ))
-  ZABS_SCA_SW_GREENROOF(JJ) = ZSCA_SW(JJ) * (1. - PALB_GREENROOF(JJ))
+!* One supposes that solar panels, if present, intercept all solar radiation
+!
+  ZABS_DIR_SW_PANEL    (JJ) = ZDIR_SW(JJ) * (1. - PALB_PANEL    (JJ))
+  ZABS_SCA_SW_PANEL    (JJ) = ZSCA_SW(JJ) * (1. - PALB_PANEL    (JJ))
+!
+!* solar energy received by the surfaces below solar panels
+  ZABS_DIR_SW_ROOF     (JJ) = ZDIR_SW(JJ) * (1. - PALB_ROOF     (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_DIR_SW_SNOW_ROOF(JJ) = ZDIR_SW(JJ) * (1. - PASNOW_ROOF   (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_DIR_SW_GREENROOF(JJ) = ZDIR_SW(JJ) * (1. - PALB_GREENROOF(JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_SCA_SW_ROOF     (JJ) = ZSCA_SW(JJ) * (1. - PALB_ROOF     (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_SCA_SW_SNOW_ROOF(JJ) = ZSCA_SW(JJ) * (1. - PASNOW_ROOF   (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_SCA_SW_GREENROOF(JJ) = ZSCA_SW(JJ) * (1. - PALB_GREENROOF(JJ)) * (1.-PFRAC_PANEL(JJ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -582,7 +599,7 @@ PREF_SW_FAC = (1 - PGR) * PALB_WALL  / (1. - PALB_WALL)                     * &
  CALL TOWN_ALBEDO(ZDIR_SW,ZABS_DIR_SW_ROOF,ZABS_DIR_SW_SNOW_ROOF,              &
                    ZABS_DIR_SW_ROAD, ZABS_DIR_SW_SNOW_ROAD,ZABS_DIR_SW_WALL,  &
                    ZABS_DIR_SW_GARDEN, ZABS_DIR_SW_GREENROOF, ZABS_DIR_SW_WIN,&
-                   PDIR_ALB_TOWN                                              )  
+                   ZABS_DIR_SW_PANEL, PDIR_ALB_TOWN                           )  
 !
 !*      3.2    direct albedo
 !              -------------
@@ -590,7 +607,7 @@ PREF_SW_FAC = (1 - PGR) * PALB_WALL  / (1. - PALB_WALL)                     * &
  CALL TOWN_ALBEDO(ZSCA_SW,ZABS_SCA_SW_ROOF,ZABS_SCA_SW_SNOW_ROOF,              &
                    ZABS_SCA_SW_ROAD, ZABS_SCA_SW_SNOW_ROAD,ZABS_SCA_SW_WALL,  &
                    ZABS_SCA_SW_GARDEN, ZABS_SCA_SW_GREENROOF, ZABS_SCA_SW_WIN,&
-                   PSCA_ALB_TOWN                                              )  
+                   ZABS_SCA_SW_PANEL, PSCA_ALB_TOWN                           )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -604,6 +621,7 @@ WHERE(PDIR_SW(:)==0.)
   ZABS_DIR_SW_WALL_B    (:) = 0.
   ZABS_DIR_SW_GARDEN    (:) = 0.
   ZABS_DIR_SW_GREENROOF (:) = 0.
+  ZABS_DIR_SW_PANEL     (:) = 0.
   ZABS_DIR_SW_WIN       (:) = 0.
   ZABS_DIR_SW_SNOW_ROOF (:) = 0.
   ZABS_DIR_SW_SNOW_ROAD (:) = 0.
@@ -615,6 +633,7 @@ WHERE(PSCA_SW(:)==0.)
   ZABS_SCA_SW_WALL      (:) = 0.
   ZABS_SCA_SW_GARDEN    (:) = 0.
   ZABS_SCA_SW_GREENROOF (:) = 0.
+  ZABS_SCA_SW_PANEL     (:) = 0.
   ZABS_SCA_SW_WIN       (:) = 0.
   ZABS_SCA_SW_SNOW_ROOF (:) = 0.
   ZABS_SCA_SW_SNOW_ROAD (:) = 0.
@@ -644,6 +663,10 @@ DO JJ=1,SIZE(PROAD)
 ! solar radiation absorbed by GREENROOF areas
 !
   PABS_SW_GREENROOF(JJ) = ZABS_DIR_SW_GREENROOF(JJ) + ZABS_SCA_SW_GREENROOF(JJ)
+!
+! solar radiation absorbed by solar panels
+!
+  PABS_SW_SOLAR_PANEL(JJ)= ZABS_DIR_SW_PANEL    (JJ) + ZABS_SCA_SW_PANEL    (JJ)
 !
 ! solar radiation absorbed by walls
 !
@@ -681,6 +704,10 @@ DO JJ=1,SIZE(PROAD)
   PREC_SW_WIN       (JJ) = ZREC_DIR_SW_WIN(JJ) + ZREC_SCA_SW_WIN(JJ)
 !
   PREC_SW_GARDEN    (JJ) = PABS_SW_GARDEN    (JJ)/(1.-PALB_GARDEN (JJ))
+!
+!*      6.2    total solar radiation received by roof surfaces below solar panels
+!
+  PREC_SW_ROOF      (JJ) = (PDIR_SW(JJ) + PSCA_SW(JJ)) * (1.-PFRAC_PANEL(JJ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -822,7 +849,7 @@ END SUBROUTINE SOLAR_REFLECTIONS
 SUBROUTINE TOWN_ALBEDO(ZSW,ZABS_SW_ROOF,ZABS_SW_SNOW_ROOF,              &
                          ZABS_SW_ROAD, ZABS_SW_SNOW_ROAD,ZABS_SW_WALL,  &
                          ZABS_SW_GARDEN, ZABS_SW_GREENROOF, ZABS_SW_WIN,&
-                         ZALBEDO                                        )  
+                         ZABS_SW_PANEL, ZALBEDO                         )  
 !
 REAL, DIMENSION(:), INTENT(IN) :: ZSW               ! incoming solar radiation
 REAL, DIMENSION(:), INTENT(IN) :: ZABS_SW_ROOF      ! solar radiation absorbed by roofs
@@ -833,6 +860,7 @@ REAL, DIMENSION(:), INTENT(IN) :: ZABS_SW_GARDEN    ! solar radiation absorbed b
 REAL, DIMENSION(:), INTENT(IN) :: ZABS_SW_GREENROOF ! solar radiation absorbed by green roof areas
 REAL, DIMENSION(:), INTENT(IN) :: ZABS_SW_SNOW_ROOF ! solar radiation absorbed by roof snow
 REAL, DIMENSION(:), INTENT(IN) :: ZABS_SW_SNOW_ROAD ! solar radiation absorbed by road snow
+REAL, DIMENSION(:), INTENT(IN) :: ZABS_SW_PANEL     ! solar radiation absorbed by solar panels
 REAL, DIMENSION(:), INTENT(OUT):: ZALBEDO           ! town averaged albedo
 
 REAL, DIMENSION(SIZE(ZSW))     :: ZSW_UP            ! outgoing solar radiation
@@ -846,6 +874,7 @@ DO JJ=1,SIZE(ZSW)
             - ( PBLD(JJ)   *(1.-PFRAC_GR(JJ))*PDF_ROOF(JJ) *ZABS_SW_ROOF(JJ)     &
                +PBLD(JJ)   *(1.-PFRAC_GR(JJ))*PDN_ROOF(JJ) *ZABS_SW_SNOW_ROOF(JJ)&
                +PBLD(JJ)   *    PFRAC_GR(JJ)               *ZABS_SW_GREENROOF(JJ)&
+               +PBLD(JJ)   *    PFRAC_PANEL(JJ)            *ZABS_SW_PANEL(JJ)    &
                +PROAD(JJ)                    *PDF_ROAD(JJ) *ZABS_SW_ROAD (JJ)    &
                +PROAD(JJ)                    *PDN_ROAD(JJ) *ZABS_SW_SNOW_ROAD(JJ)&
                +PGARDEN(JJ)                                *ZABS_SW_GARDEN(JJ)   &

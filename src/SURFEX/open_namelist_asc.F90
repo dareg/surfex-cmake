@@ -23,11 +23,12 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!       10/2014 : abort if namelist file does not exist E. Martin
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -35,6 +36,7 @@
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -68,6 +70,9 @@ KLUNAM=11
 INQUIRE(FILE=YNAM,EXIST=LLEXIST)
 IF (LLEXIST) THEN
   OPEN(KLUNAM,FILE=YNAM,ACTION='READ',FORM="FORMATTED",POSITION="REWIND")
+  ELSE 
+    CALL ABOR1_SFX ('ERROR WHILE OPENING '//YNAM//' THIS FILE IS MISSING'// &
+                  ' IN THE RUN DIRECTORY')
 ENDIF
 IF (LHOOK) CALL DR_HOOK('OPEN_NAMELIST_ASC',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_LFI_n(HMASK,HACTION)
+      SUBROUTINE INIT_IO_SURF_LFI_n (DTCO, U, &
+                                     HMASK,HACTION)
 !     ######################
 !
 !!****  *INIT_IO_SURF_LFI* Keep in memory the output files
@@ -17,7 +18,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -29,6 +30,13 @@
 !
 !*       0.   DECLARATIONS
 !             ------------
+!
+!
+!
+!
+!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NINDEX, NPIO, NSIZE
 !
@@ -52,6 +60,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+!
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
  CHARACTER(LEN=5),  INTENT(IN)  :: HACTION    
@@ -85,7 +97,8 @@ IF (HACTION == 'READ ') THEN
 !$OMP END SINGLE    
     CFILE_LFI = CFILEIN_LFI
   ENDIF
-  CALL READ_SURF('LFI   ','DIM_FULL',NFULL,IRET,HDIR='A')
+  CALL READ_SURF(&
+                 'LFI   ','DIM_FULL',NFULL,IRET,HDIR='A')
   IF (HMASK == 'FULL  ') THEN
     NFULL_SURF = NFULL
     NIB_SURF = NIB
@@ -96,7 +109,8 @@ IF (HACTION == 'READ ') THEN
     NJU_SURF = NJU
    ENDIF
 ELSE
-  CALL GET_DIM_FULL_n(NFULL)
+  CALL GET_DIM_FULL_n(U, &
+                      NFULL)
 ENDIF
 !
 !
@@ -128,12 +142,15 @@ ENDIF
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
- CALL GET_SIZE_FULL_n('LFI   ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n(U, &
+                      'LFI   ',NFULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(HMASK,IL)
- CALL INIT_IO_SURF_MASK_n(HMASK, IL, NLUOUT, ILU, NMASK)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     HMASK,IL)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, &
+                          HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

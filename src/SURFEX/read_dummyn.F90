@@ -1,5 +1,7 @@
 !     #########
-      SUBROUTINE READ_DUMMY_n(HPROGRAM)
+      SUBROUTINE READ_DUMMY_n (&
+                                DUU, U, &
+                               HPROGRAM)
 !     #################################
 !
 !!****  *READ_DUMMY_n* - routine to READ dummy surface fields
@@ -9,7 +11,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson   *Meteo France*	
+!!      V. Masson   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -19,9 +21,13 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DUMMY_SURF_FIELDS_n, ONLY : NDUMMY_NBR,  CDUMMY_NAME,    &
-                                       CDUMMY_AREA, XDUMMY_FIELDS  
-USE MODD_SURF_ATM_n         , ONLY : NSIZE_FULL
+!
+!
+!
+!
+!
+USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_READ_SURF
 !
@@ -33,6 +39,12 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+!
+!
+!
+TYPE(DUMMY_SURF_FIELDS_t), INTENT(INOUT) :: DUU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! 
 !
@@ -58,30 +70,33 @@ IF (LHOOK) CALL DR_HOOK('READ_DUMMY_N',0,ZHOOK_HANDLE)
 YRECFM='DUMMY_GR_NBR'
 YCOMMENT=' '
 !
- CALL READ_SURF(HPROGRAM,YRECFM,NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,DUU%NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
-CDUMMY_NAME(:) = '                    '
-CDUMMY_AREA(:) = '   '
-
 !-------------------------------------------------------------------------------
 !
 !*       3.     Dummy fields :
 !               ------------
 !
-ALLOCATE(XDUMMY_FIELDS(NSIZE_FULL,NDUMMY_NBR))
+ALLOCATE(DUU%CDUMMY_NAME(DUU%NDUMMY_NBR))
+ALLOCATE(DUU%CDUMMY_AREA(DUU%NDUMMY_NBR))
+ALLOCATE(DUU%XDUMMY_FIELDS(U%NSIZE_FULL,DUU%NDUMMY_NBR))
+DUU%CDUMMY_NAME(:) = '                    '
+DUU%CDUMMY_AREA(:) = '   '
 !
 !
-DO JDUMMY=1,NDUMMY_NBR
+DO JDUMMY=1,DUU%NDUMMY_NBR
   !
   WRITE(YRECFM,FMT='(A8,I3.3,A5)') 'DUMMY_GR',JDUMMY,'     '
-  CALL READ_SURF(HPROGRAM,YRECFM,XDUMMY_FIELDS(:,JDUMMY),IRESP,HCOMMENT=YCOMMENT)
+  CALL READ_SURF(&
+                HPROGRAM,YRECFM,DUU%XDUMMY_FIELDS(:,JDUMMY),IRESP,HCOMMENT=YCOMMENT)
   !
   !
   YSTRING20=YCOMMENT(21:40)
   YSTRING03=YCOMMENT(41:43)
   !
-  CDUMMY_NAME(JDUMMY) = YSTRING20
-  CDUMMY_AREA(JDUMMY) = YSTRING03
+  DUU%CDUMMY_NAME(JDUMMY) = YSTRING20
+  DUU%CDUMMY_AREA(JDUMMY) = YSTRING03
   !
 END DO
 IF (LHOOK) CALL DR_HOOK('READ_DUMMY_N',1,ZHOOK_HANDLE)

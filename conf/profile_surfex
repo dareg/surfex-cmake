@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 ##########################################################
 #                                                        #
 # ENVIRONEMMENT CONFIGURATION FOR MESONH                 #
@@ -12,10 +12,10 @@ then
 #                                                        #
 ##########################################################
 echo 
-echo '--->' WARNING :: "profile_mesonh"
-echo '--->' vous avez deja initialise votre variable d environnement '$SRC_SURFEX'
+echo '--->' WARNING :: "profile_surfex"
+echo '--->' environment variable already initialized:  '$SRC_SURFEX'
 echo '--->' '$SRC_SURFEX="'$SRC_SURFEX'"'
-echo '--->' '"check your environnment profile_mesonh" !!!! '
+echo '--->' 'check your environnment profile_surfex or do export SRC_SURFEX="" !!!! '
 echo 
 fi
 ##########################################################
@@ -27,11 +27,11 @@ fi
 # SRC_SURFEX : default path to mesonh sources 
 #              MUST BE SET TO YOUR OWN MESONH PATH
 #
-export SRC_SURFEX="/home/faroux/SVN/surfex/branches/DEV"   
+export SRC_SURFEX="/home/faroux/SVN/surfex/branches/V8_ASSIM"   
 #
-#  Version MESONH PACKAGE :: PACK-SURFEX-V7 : 27/03/2012
+#  Version MESONH PACKAGE :: PACK-SFX-V8-0-0 : 27/03/2012
 #
-export VERSION_XYZ=SURFEX-V7
+export VERSION_XYZ=SFX-V8-0-0
 #
 #  Target Architecture/compiler Machine 
 #
@@ -45,6 +45,10 @@ export ARCH=LXgfortran
 #
 export VER_MPI=MPIAUTO
 #
+#  Version of OMP
+#
+export VER_OMP=NOOMP
+#
 # OPTIMIZATION LEVEL
 #
 #export OPTLEVEL=DEBUG,O2
@@ -53,21 +57,30 @@ export OPTLEVEL=DEBUG
 #
 #  USER VERSION
 #
-export VER_USER=
+export VER_USER=MYSRC
 #
 # 'Scandollar' Post Processing default variables
 #
-export CONF_DOLLAR=/home/faroux/SVN/surfex/branches/DEV/conf/post/confdollar_cnrmpc_default
+export CONF_DOLLAR=/home/faroux/SVN/surfex/branches/V8_ASSIM/conf/post/confdollar_cnrmpc_default
 #
 # Version of NETCDF
 #
-export VER_CDF=CDFAUTO
+export VER_CDF=CDFCTI
 export VERSION_CDF=3.6.3
 #
 # Version of GRIBAPI
 #
-export VER_GRIBAPI=
+export VER_GRIBAPI=GRIBAPI_AUTO
 export VERSION_GRIBAPI=1.9.9
+#
+# Version of OASIS
+#
+export VER_OASIS=NOmct
+export VERSION_OASIS=3-mct
+#
+# Version of DR_HOOK
+#
+export VER_DRHOOK=BYPASS
 #
 # Version of Def integer
 #
@@ -82,10 +95,10 @@ export MNH_INT=
 ##########################################################
 ##########################################################
 #
-export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}-${VER_MPI}-${OPTLEVEL}"
+export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}-${VER_MPI}-${VER_OMP}-${OPTLEVEL}"
 #[ "x${VER_USER}" != "x" ] && export XYZ="${XYZ}-${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
-export BIN_TOOLS=
+export BIN_TOOLS=NO
 export PATH=.:$SRC_SURFEX/bin:$SRC_SURFEX/exe:$SRC_SURFEX/bin_tools/${BIN_TOOLS}:$PATH
 #
 # NCARG_ROOT : for use of graphic tools : diaprog 

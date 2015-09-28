@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE READ_PREP_SEAFLUX_CONF(HPROGRAM,HVAR,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE, &
+      SUBROUTINE READ_PREP_SEAFLUX_CONF (O, &
+                                         HPROGRAM,HVAR,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE, &
                                         HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KLUOUT,OUNIF)
 !     #######################################################
 !
@@ -25,25 +26,29 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	S. Malardel   *Meteo France*	
+!!      S. Malardel   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!      C. Lebeaupin 01/2008  Add oceanic variables initialization
+!!      Modified     09/2013  S. Senesi : introduce variables for sea-ice scheme 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+!
+USE MODD_OCEAN_n, ONLY : OCEAN_t
+!
 USE MODN_PREP_SEAFLUX
 !
 USE MODI_READ_PREP_SURF_ATM_CONF
-USE MODI_OCEAN_MERCATORVERGRID
+USE MODI_PREP_OCEAN_MERCATORVERGRID
 !
-USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE, CFILEPGD_SEAFLX, CTYPEPGD, XSST_UNIF
-USE MODD_OCEAN_n, ONLY : LMERCATOR
+USE MODD_PREP_SEAFLUX, ONLY : CFILE_SEAFLX, CTYPE_SEAFLX, CFILEPGD_SEAFLX, CTYPEPGD, &
+                              XSST_UNIF, XSSS_UNIF, XSIC_UNIF
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -58,16 +63,19 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
- CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
- CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
- CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
- CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
- CHARACTER(LEN=6),  INTENT(OUT) :: HFILEPGDTYPE! file type
- CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
- CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
- CHARACTER(LEN=28), INTENT(IN)  :: HPGDFILE    ! atmospheric file name
- CHARACTER(LEN=6),  INTENT(IN)  :: HPGDFILETYPE! atmospheric file type
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
+!
+CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
+CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
+CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
+CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
+CHARACTER(LEN=6),  INTENT(OUT) :: HFILEPGDTYPE! file type
+CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
+CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+CHARACTER(LEN=28), INTENT(IN)  :: HPGDFILE    ! atmospheric file name
+CHARACTER(LEN=6),  INTENT(IN)  :: HPGDFILETYPE! atmospheric file type
 INTEGER,           INTENT(IN)  :: KLUOUT   ! logical unit of output listing
 LOGICAL,           INTENT(OUT) :: OUNIF    ! flag for prescribed uniform field
 
@@ -90,19 +98,19 @@ IF (LHOOK) CALL DR_HOOK('READ_PREP_SEAFLUX_CONF',0,ZHOOK_HANDLE)
 HFILE = '                         '
 HFILETYPE = '      '
 !
-HFILEPGD = '                         '
+HFILEPGD = '                            '
 HFILEPGDTYPE = '      '
 !
 OUNIF     = .FALSE.
 !
 !-------------------------------------------------------------------------------
 !
-!* choice of input file
-!  --------------------
+!* Select seaflux files if they are defined
+!  -----------------------------------------
 !
-IF (LEN_TRIM(HFILE)==0 .AND. LEN_TRIM(CFILE_SEAFLX)>0 .AND. LEN_TRIM(CTYPE)>0) THEN
+IF (LEN_TRIM(HFILE)==0 .AND. LEN_TRIM(CFILE_SEAFLX)>0 .AND. LEN_TRIM(CTYPE_SEAFLX)>0) THEN
   HFILE     = CFILE_SEAFLX
-  HFILETYPE = CTYPE
+  HFILETYPE = CTYPE_SEAFLX
 END IF
 !
 IF (LEN_TRIM(HFILEPGD)==0 .AND. LEN_TRIM(CFILEPGD_SEAFLX)>0 .AND. LEN_TRIM(CTYPEPGD)>0) THEN
@@ -124,7 +132,20 @@ END IF
 !* Is an uniform field prescribed?
 !  ------------------------------
 !
-    OUNIF = (XSST_UNIF/=XUNDEF) 
+SELECT CASE (HVAR)
+   CASE ('SST    ') 
+      OUNIF = (XSST_UNIF/=XUNDEF) 
+   CASE ('SSS    ') 
+      IF (CSEAICE_SCHEME == 'NONE  '.AND. &
+         LEN_TRIM(HFILETYPE)==0.0   .AND. &
+         XSSS_UNIF==XUNDEF                )THEN
+         XSSS_UNIF=0.0
+      ENDIF
+      OUNIF = (XSSS_UNIF/=XUNDEF)
+   CASE ('SIC    ') 
+      OUNIF = (XSIC_UNIF/=XUNDEF) 
+END SELECT
+
 !
 !-------------------------------------------------------------------------------
 !
@@ -146,9 +167,9 @@ END IF
 !* If 1D coupling: ocean variables initializing
 !  --------------------------------------------
 !
-IF (LMERCATOR) THEN
+IF (O%LMERCATOR) THEN
   WRITE(KLUOUT,*) 'LMERCATOR=T : initializing oceanic vertical grid'
-  CALL OCEAN_MERCATORVERGRID
+  CALL PREP_OCEAN_MERCATORVERGRID(HPROGRAM,OUNIF)
 END IF
 IF (LHOOK) CALL DR_HOOK('READ_PREP_SEAFLUX_CONF',1,ZHOOK_HANDLE)
 !

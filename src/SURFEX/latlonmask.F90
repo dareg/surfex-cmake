@@ -17,6 +17,7 @@
 !!      
 !!      Original        03/2004
 !!                      10/2007  E. Martin  IGN Grids
+!!                      12/2012  P. Samuelsson SMHI Rotated lonlat
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -33,6 +34,8 @@ USE MODI_LATLONMASK_IGN
 USE MODI_LATLONMASK_LONLAT_REG
 !
 USE MODI_LATLONMASK_LONLATVAL
+!
+USE MODI_LATLONMASK_LONLAT_ROT
 IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
@@ -58,6 +61,9 @@ SELECT CASE (HGRID)
 
   CASE('LONLATVAL ')
     CALL LATLONMASK_LONLATVAL(KGRID_PAR,PGRID_PAR,OLATLONMASK)
+
+  CASE('LONLAT ROT')
+    CALL LATLONMASK_LONLAT_ROT(KGRID_PAR,PGRID_PAR,OLATLONMASK)
 
   CASE DEFAULT
     OLATLONMASK(:,:) = .TRUE.
