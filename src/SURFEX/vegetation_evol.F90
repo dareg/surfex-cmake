@@ -255,6 +255,7 @@ INL=SIZE(PTG,2)
 ZLOG2 = LOG(2.0)
 !
 ZTG_SOIL(:) = 0.0
+ZTG_VEG (:) = 0.0
 !
 ! Define herbaceous and woody patches
 GHERB(:) = ( PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBE) + PVEGTYPE(:,NVT_BONE)    &
@@ -304,7 +305,6 @@ IF (GMASK) THEN
       IF(HISBA/='DIF')THEN        
         ZTG_VEG(:) = PTG(:,2)
       ELSE 
-        ZTG_VEG(:) = PTG(:,1)      
         DO JI=1,INI
            IDEPTH=KWG_LAYER(JI)
            ZDG_SOIL(JI)=MIN(ZDEPTH_VEG,PDG(JI,IDEPTH))
