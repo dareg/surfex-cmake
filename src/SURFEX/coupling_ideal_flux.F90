@@ -44,6 +44,8 @@ SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
 !!      Original    01/2004
 !!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !!      B. Decharme  04/2013 new coupling variables
+!!      P. Le Moigne 03/2015 add diagnostics IDEAL case
+!!      R. ROEHRIG   06/2015 add PTSTEP in TEMP_FORC_DISTS
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -52,7 +54,8 @@ SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
 !
 USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
-USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XPI, XLVTT, XDAY
+USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XPI, XLVTT, XDAY, XKARMAN, XTT, &
+                            XLSTT, XSTEFAN
 USE MODD_IDEAL_FLUX, ONLY : NFORCF, NFORCT, XSFTH, XSFTQ, XSFTS, XSFCO2, &
                             CUSTARTYPE, XUSTAR, XZ0, XALB, XEMIS, XTSRAD, &
                             XTIMEF, XTIMET 
@@ -60,6 +63,11 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODE_SBLS
 USE MODE_THERMOS
+!
+USE MODI_DIAG_INLINE_IDEAL_n
+USE MODI_SURFACE_AERO_COND
+USE MODI_SURFACE_RI
+USE MODI_SURFACE_CD
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -154,6 +162,19 @@ REAL, DIMENSION(KI)  :: ZWIND   ! wind
 REAL, DIMENSION(KI)  :: ZQ0     ! surface temperature flux (mK/s)
 REAL, DIMENSION(KI)  :: ZE0     ! surface vapor flux (mkg/kg/s)
 REAL, DIMENSION(KI)  :: ZQA     ! specific humidity (kg/kg)
+REAL, DIMENSION(KI)  :: ZDIRCOSZW
+REAL, DIMENSION(KI)  :: ZEXNS, ZEXNA
+REAL, DIMENSION(KI)  :: ZAC, ZRA, ZCH, ZCD, ZCDN, ZRI
+REAL, DIMENSION(KI)  :: ZHU
+REAL, DIMENSION(KI)  :: ZLE    ! total latent heat flux (W/m2)
+REAL, DIMENSION(KI)  :: ZLEI   ! sublimation heat flux (W/m2)
+REAL, DIMENSION(KI)  :: ZSUBL  ! sublimation (kg/m2/s)
+REAL, DIMENSION(KI)  :: ZLWUP  ! upward longwave flux at t
+REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t , 
+REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
+!
+INTEGER              :: ISWB   ! number of shortwave spectral bands
+INTEGER              :: JSWB   ! loop counter on shortwave spectral bands
 !
 REAL                        :: ZALPHA  ! interpolation coefficient
 INTEGER                     :: IHOURF  ! number of hours since midnight
@@ -172,11 +193,15 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('COUPLING_IDEAL_FLUX: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !----------------------------------------------------------------------------------
+ZLE        (:)   = XUNDEF
+ZLEI       (:)   = XUNDEF
+ZSUBL      (:)   = XUNDEF
+ZLWUP      (:)   = XUNDEF
 !
 !*       2.    COMPUTE TIME
 !              ------------
 !
- CALL TEMP_FORC_DISTS (PTIMEC,NFORCF,XTIMEF,IHOURF,ZALPHA)
+ CALL TEMP_FORC_DISTS (PTIMEC,PTSTEP,NFORCF,XTIMEF,IHOURF,ZALPHA)
 !
 !----------------------------------------------------------------------------------
 !
@@ -277,7 +302,7 @@ PSFCO2(:) = XSFCO2(IHOURF) + ( XSFCO2(IHOURF+1)-XSFCO2(IHOURF) )*ZALPHA
 !*       8.    OTHER OUTPUTS (RADIATIVE QUANTITIES) SET TO A CONSTANT VALUE
 !              ------------------------------------
 !
- CALL TEMP_FORC_DISTS (PTIMEC,NFORCT,XTIMET,IHOURT,ZALPHA)
+ CALL TEMP_FORC_DISTS (PTIMEC,PTSTEP,NFORCT,XTIMET,IHOURT,ZALPHA)
 !
 PTRAD(:) = XTSRAD(IHOURT) + ( XTSRAD(IHOURT+1)-XTSRAD(IHOURT) )*ZALPHA
 !
@@ -291,50 +316,77 @@ PZ0H  (:) = XZ0
 PQSURF(:) = QSAT(PTSURF(:),PPS(:))
 !
 !-------------------------------------------------------------------------------
-!  
-!*       9.    turbulent fluxes as diagnostics
-!              ------------------------------------
-IF (DGL%LSURF_BUDGET) THEN
-  DGL%XH  = PSFTH
-  DGL%XLE = XLVTT * PSFTQ
-  DGL%XRN = DGL%XH+DGL%XLE
-  DGL%XGFLUX = 0.
-ENDIF
 !
-IF (DGL%LCOEF) THEN
-  DGL%XZ0  = PZ0 (:)
-  DGL%XZ0H = PZ0H(:)
-ENDIF
+!*       9.    INLINE DIAGNOSTICS
+!              ------------------
 !
-IF (DGL%LSURF_VARS) THEN
-  DGL%XQS(:) = PQSURF(:)
-ENDIF
+ZDIRCOSZW = 1.
+!
+ZEXNS(:)     = (PPS(:)/XP00)**(XRD/XCPD)
+ZEXNA(:)     = (PPA(:)/XP00)**(XRD/XCPD)
+ZQA(:)       = PQA(:) / PRHOA(:)
+!
+ZHU(:)=1.
+!
+WHERE (PTSURF(:)<XTT)
+  ZLE  (:) = PSFTQ(:) * XLSTT
+  ZLEI (:) = PSFTQ(:) * XLSTT
+  ZSUBL(:) = PSFTQ(:)
+ELSEWHERE
+  ZLE  (:) = PSFTQ(:) * XLVTT
+  ZLEI (:) = 0.0
+  ZSUBL(:) = 0.0
+END WHERE
+!
+ZLWUP(:)=(1.-PEMIS(:))*PLW(:)+PEMIS(:)*XSTEFAN*PTSURF(:)**4
+!
+ CALL SURFACE_RI(PTSURF,PQSURF,ZEXNS,ZEXNA,PTA,PQA,  &
+                PZREF, PUREF, ZDIRCOSZW,ZWIND,ZRI)
+
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, ZWIND, PZ0, PZ0H, ZAC, ZRA, ZCH)
+
+ CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0, PZ0H, ZCD, ZCDN)
+
+ CALL DIAG_INLINE_IDEAL_n(DGL, PTSTEP, PTA, PTSURF, ZQA, PPA, PPS, PRHOA, PU,      &
+                            PV, PZREF, PUREF, PRAIN, PSNOW,                  &
+                            ZCD, ZCDN, ZCH, ZRI, ZHU, PZ0,                   &
+                            PZ0H, PQSURF, PSFTH, PSFTQ, PSFU, PSFV,          &
+                            PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,       &
+                            ZLE, ZLEI, ZSUBL, ZLWUP                          )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 CONTAINS
 !
-SUBROUTINE TEMP_FORC_DISTS (PTIMEIN,KFORC,PTIMES,KHOUR,PALPHA)
+SUBROUTINE TEMP_FORC_DISTS (PTIMEIN,PSTEP,KFORC,PTIMES,KHOUR,PALPHA)
 !
 IMPLICIT NONE
 !
 REAL, INTENT(IN) :: PTIMEIN
+REAL, INTENT(IN) :: PSTEP
 INTEGER, INTENT(IN) :: KFORC
 REAL, DIMENSION(:), INTENT(IN) :: PTIMES
 INTEGER, INTENT(OUT):: KHOUR
 REAL, INTENT(OUT):: PALPHA
 !
 INTEGER :: JT
+REAL :: ZTIMEIN
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX:TEMP_FORC_DISTS',0,ZHOOK_HANDLE)
 !
+ZTIMEIN = PTIMEIN - PSTEP/2.
+!
 IF (PTIMES(KFORC)==XUNDEF) THEN
   KHOUR = 1
   PALPHA = 0.
-ELSEIF (PTIMEIN<PTIMES(1).OR.PTIMEIN>PTIMES(KFORC)) THEN
+ELSEIF (ZTIMEIN<PTIMES(1).OR.ZTIMEIN>PTIMES(KFORC)) THEN
+    WRITE(*,*) 'COUPLING_IDEAL_FLUX', ZTIMEIN, PTIMES(1), PTIMES(KFORC)      
   CALL ABOR1_SFX("COUPLING_IDEAL_FLUX:TEMP_FORC_DISTS: PTIMEC OUT OF BOUNDS!!!")
+ELSEIF (ZTIMEIN==PTIMES(KFORC)) THEN
+  KHOUR = KFORC
+  PALPHA = 0.  
 ELSE
  DO JT = KFORC,1,-1
    IF (PTIMEIN.GE.PTIMES(JT)) THEN

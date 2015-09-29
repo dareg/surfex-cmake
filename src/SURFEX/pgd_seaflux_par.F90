@@ -95,7 +95,7 @@ INTEGER               :: JTIME     ! loop counter on time
 !            ------------------------
 !
 INTEGER            :: NTIME_SST
-INTEGER, PARAMETER :: NTIME_MAX    = 365
+INTEGER, PARAMETER :: NTIME_MAX    = 800
 !
 REAL, DIMENSION(NTIME_MAX)     :: XUNIF_SST        ! sea surface temperature
 

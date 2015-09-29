@@ -38,7 +38,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: XTIMEF
 REAL, DIMENSION(:), ALLOCATABLE   :: XTIMET
-INTEGER, PARAMETER                :: NFORC_MAX = 48
+INTEGER, PARAMETER                :: NFORC_MAX = 800
 INTEGER                           :: NFORCF     ! number of surface forcing instants
 INTEGER                           :: NFORCT
 !

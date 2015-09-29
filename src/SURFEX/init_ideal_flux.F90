@@ -1,5 +1,5 @@
 !     ############################################################
-      SUBROUTINE INIT_IDEAL_FLUX (DGL, &
+      SUBROUTINE INIT_IDEAL_FLUX (DGL, OREAD_BUDGETC, &
                                   HPROGRAM,HINIT,                            &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
@@ -43,6 +43,7 @@
 !!      V. Masson      02/03  split the routine in two (initialization here, and run)
 !!      R. Honnert     07/10  allows reading of data in namelist
 !!      B. Decharme  04/2013 new coupling variables
+!!      P. Le Moigne  03/2015 add diagnostics IDEAL case
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -72,6 +73,8 @@ IMPLICIT NONE
 ! 
 !
 TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+!
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -184,7 +187,7 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   XSFTS = 0.
 !
- CALL DIAG_IDEAL_INIT_n(DGL, &
+ CALL DIAG_IDEAL_INIT_n(DGL, HPROGRAM, OREAD_BUDGETC, &
                         KI,KSW)
 !
 ENDIF

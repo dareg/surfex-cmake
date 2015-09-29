@@ -136,7 +136,7 @@ IF (U%CTOWN=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DGL, &
+  CALL INIT_IDEAL_FLUX(DGL, DGU%LREAD_BUDGETC, &
                        HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  

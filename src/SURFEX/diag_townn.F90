@@ -166,48 +166,14 @@ IF (U%CTOWN=='TEB   ') THEN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL DIAG_IDEAL_n(DGL, &
-                    HPROGRAM, PQS, PZ0, PZ0H, PH, PLE, PRN, PGFLUX)
-  PLEI     = XUNDEF
-  PEVAP    = XUNDEF
-  PSUBL    = XUNDEF
-  PRI      = XUNDEF
-  PCD      = XUNDEF
-  PCH      = XUNDEF
-  PCE      = XUNDEF
-  PTS      = XUNDEF
-  PT2M     = XUNDEF
-  PQ2M     = XUNDEF
-  PHU2M    = XUNDEF
-  PZON10M  = XUNDEF
-  PMER10M  = XUNDEF
-  PSWD     = XUNDEF
-  PSWU     = XUNDEF
-  PSWBD    = XUNDEF
-  PSWBU    = XUNDEF
-  PLWD     = XUNDEF
-  PLWU     = XUNDEF
-  PFMU     = XUNDEF
-  PFMV     = XUNDEF
-  PRNC     = XUNDEF
-  PHC      = XUNDEF
-  PLEC     = XUNDEF
-  PLEIC    = XUNDEF
-  PEVAPC   = XUNDEF
-  PSUBLC   = XUNDEF
-  PGFLUXC  = XUNDEF
-  PSWDC    = XUNDEF
-  PSWUC    = XUNDEF
-  PLWDC    = XUNDEF
-  PLWUC    = XUNDEF
-  PFMUC    = XUNDEF
-  PFMVC    = XUNDEF 
-  PT2M_MIN = XUNDEF
-  PT2M_MAX = XUNDEF
-  PHU2M_MIN= XUNDEF
-  PHU2M_MAX= XUNDEF  
-  PWIND10M = XUNDEF
-  PWIND10M_MAX = XUNDEF
+  CALL DIAG_IDEAL_n(DGL, HPROGRAM,                                         &
+                        PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
+                        PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
+                        PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
+                        PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,      &
+                        PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
+                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
+                        PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 ELSE IF (U%CTOWN=='NONE  ') THEN
   PRN      = XUNDEF
   PH       = XUNDEF
