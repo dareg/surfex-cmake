@@ -357,7 +357,7 @@ PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 !
 INLVLS          = SIZE(PSNOWSWE(:,:),2)                         
-INLVLG          = SIZE(PD_G(:,:),     2)                         
+INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
 !
 IF(.NOT.OMEB)THEN 
 !
