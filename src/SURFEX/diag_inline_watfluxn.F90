@@ -42,7 +42,7 @@ USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
 USE MODI_PARAM_CLS
 USE MODI_CLS_TQ
@@ -202,11 +202,10 @@ ENDIF
 !
 IF (LCPL_SEA) THEN
 !
-  CALL DIAG_CPL_ESM_WATER(W, &
-                          PTSTEP,DGW%XZON10M,DGW%XMER10M,DGW%XFMU,DGW%XFMV,  &
-                            DGW%XSWD,DGW%XSWU,DGW%XGFLUX,PSFTQ,PRAIN,      &
-                            PSNOW,PLW,W%XTICE,PSFTH_ICE,         &
-                            PSFTQ_ICE,PDIR_SW,PSCA_SW          )  
+  CALL DIAG_CPL_ESM_WATER(W,                                                             &
+                          LCPL_SEAICE,PTSTEP,DGW%XZON10M,DGW%XMER10M,DGW%XFMU,DGW%XFMV,  &
+                          DGW%XSWD,DGW%XSWU,DGW%XGFLUX,PSFTQ,PRAIN,PSNOW,PLW,W%XTICE,    &
+                          PSFTH_ICE,PSFTQ_ICE,PDIR_SW,PSCA_SW                            )  
 ! 
 ENDIF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_WATFLUX_N',1,ZHOOK_HANDLE)

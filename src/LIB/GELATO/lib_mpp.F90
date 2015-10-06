@@ -96,6 +96,7 @@ MODULE lib_mpp
 !! case: in_surfex
    USE MODI_ABOR1_SFX
    USE modd_wp
+   USE PARKIND1         , ONLY : JPIB, JPRB
 #ifdef SFX_MPI
    !!  Case Surfex Offline with MPI
    !!  define mpp_min, mpp_max, mpp_sum for Offline Surfex case with MPI
@@ -103,7 +104,6 @@ MODULE lib_mpp
 #ifdef in_arpege
    !! Case SUrfex in Arpege
    USE MPL_ALLREDUCE_MOD, ONLY : MPL_ALLREDUCE
-   USE PARKIND1         , ONLY : JPIB, JPRB
 #endif
 #else
    !! Case of Offline without MPI : no call to MPI, 

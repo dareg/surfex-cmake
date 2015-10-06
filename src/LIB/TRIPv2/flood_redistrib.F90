@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE FLOOD_REDISTRIB (TP, TPG, &
+      SUBROUTINE FLOOD_REDISTRIB (TP, TPG,                          &
                                   KLON,KLAT,PREAD,PSRC_FLOOD,PRESIDU)  
 !     #####################################################################
 !
@@ -45,7 +45,6 @@ USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, XRHOLW
 !
-!
 USE MODI_ABORT_TRIP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -56,7 +55,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_t),      INTENT(INOUT) :: TP
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER, INTENT(IN)               :: KLON
@@ -125,7 +124,7 @@ ENDWHERE
 !-------------------------------------------------------------------------------
 !
 IF(GRETURN)THEN
-  IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
@@ -186,7 +185,7 @@ IF(ZFLOOD_AREA==0.0)THEN
   PRESIDU(:,:) = ZRESIDU * TPG%XAREA(:,:) / ZTOT_AREA ![kg/s]
   PSRC_FLOOD(:,:) = 0.0  
 !
-  IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
   RETURN
 !
 ENDIF

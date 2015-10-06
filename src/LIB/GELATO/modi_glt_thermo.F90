@@ -129,6 +129,7 @@ SUBROUTINE glt_thermo  &
   USE mode_glt_stats
   USE mode_glt_stats_r
   USE modi_glt_thermo_r
+  USE modi_glt_constrain_r
 !
   IMPLICIT NONE
 !

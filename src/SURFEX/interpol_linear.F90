@@ -57,7 +57,7 @@ REAL, DIMENSION(:),      INTENT(OUT)   :: POUT    ! Interpolated value
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL         :: ZA, ZFACT0, ZFACT1, ZFACT2
+REAL         :: ZFACT0, ZFACT1, ZFACT2
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -71,18 +71,12 @@ IF (LHOOK) CALL DR_HOOK('INTERPOL_LINEAR',0,ZHOOK_HANDLE)
 !*    1.     Initialization
 !            --------------
 !
-IF(MOD(PNDAT,2.0)/=0.0)THEN
-  ZA=1.0
-ELSE
-  ZA=2.0
-ENDIF
-!
 !*    2.     Coef calculation
 !            ----------------
 !
-ZFACT0=MAX(1.0-(PDAT*2.0+PNDAT-ZA)/(PNDAT*2.0),0.0)
-ZFACT1=(2.0*PNDAT-ABS(2.0*PDAT-PNDAT-ZA))/(PNDAT*2.0)
-ZFACT2=MAX(1.0-((PNDAT+ZA-PDAT)*2.0+PNDAT-ZA)/(PNDAT*2.0),0.0)
+ZFACT0=MAX(1.0-(PDAT*2.0+PNDAT-1.0)/(PNDAT*2.0),0.0)
+ZFACT1=(2.0*PNDAT-ABS(2.0*PDAT-PNDAT-1.0))/(PNDAT*2.0)
+ZFACT2=MAX(1.0-((PNDAT+1.0-PDAT)*2.0+PNDAT-1.0)/(PNDAT*2.0),0.0)
 !
 !*    3.     Final calculation
 !            -----------------

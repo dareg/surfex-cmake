@@ -859,12 +859,6 @@ REAL, DIMENSION(SIZE(PWR))               :: ZFLSN_COR  ! snow/soil-biomass corre
 !
 REAL, DIMENSION(SIZE(PWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
 !                                                       (to be potentially removed from soil) when MEB activated (kg/m2/s)
-! TR_ML radiative scheme:
-!
-REAL, DIMENSION(SIZE(PWR))               :: ZSWUP      ! SWup diagnosed from shortwave energy budget, used to diagnose 
-!                                                      ! effective snow-free albedo
-REAL, DIMENSION(SIZE(PWR))               :: ZALB       ! Effective snow-free albedo
-!
 ! Misc :
 !
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -920,7 +914,6 @@ PHU_AGG     (:)   = 0.0
 PSNOWTEMP   (:,:) = XTT
 PMELT       (:)   = 0.0
 !
-ZSWUP        (:)  = 0.
 !
 !
 ! MEB:
@@ -1041,23 +1034,12 @@ ELSE
 !              -------------------
 !
    IF (OTR_ML) THEN
-
-! Snow and flood free albedo
-
       CALL RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,                &
               PALBVIS_TVEG, PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, &
               PSW_RAD, PLAI, PZENITH, PABC,                             &
               PFAPARC, PFAPIRC, PMUS, PLAI_EFFC, GSHADE, PIACAN,        &              
               ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN,                   &
-              PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS                      )    
-
-      ZALB(:)      = 1. - (XSW_WGHT_VIS*(PFAPAR(:)+PFAPAR_BS(:)) +             &
-                           XSW_WGHT_NIR*(PFAPIR(:)+PFAPIR_BS(:)))
-      ZSWUP(:)     = PSW_RAD(:)*ZALB(:) ! Flooded & Snow-free SWup
-      ZALB(:)      = ZSWUP(:)/MAX(1.E-5, PSW_RAD(:))
-
-   ELSE
-      ZALB(:)      = PALB(:)
+              PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS                      )
    ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -1079,7 +1061,7 @@ ELSE
            PTG, PCG, PCT, ZSOILHCAPZ, ZSOILCONDZ(:,1),                          &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR, PSR,                    &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,                               &
-           PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, ZALB, PD_G, PDZG,      &
+           PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G, PDZG,      &
            PPEW_A_COEF, PPEW_B_COEF,                                            &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
            ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR, ZGSFCSNOW, ZEVAPCOR,            &
@@ -1128,7 +1110,7 @@ ELSE
                 PQA, PRR, PSR, PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF,          &
                 PZ0H_WITH_SNOW, PWFC, PWSAT, PPSN, PPSNG, PPSNV, PZREF,        &
                 PUREF, PDIRCOSZW, ZF5, PFFG, PFFV, PFF, PFFG_NOSNOW,           &
-                PFFV_NOSNOW, PWR, PRHOA, PEMIS, ZALB, PCT, ZCS, PCG,           &
+                PFFV_NOSNOW, PWR, PRHOA, PEMIS, PALB, PCT, ZCS, PCG,           &
                 PD_G, PDZG, PDZDIF, ZSOILCONDZ, ZSOILHCAPZ,  ZFROZEN1,         &
                 PTDEEP_A, PTDEEP_B, PGAMMAT,  PPSNV_A, PSNOWFREE_ALB_VEG,      &
                 PSNOWFREE_ALB_SOIL, ZGRNDFLUX, ZFLSN_COR, ZSNOW_THRUFAL,       &
