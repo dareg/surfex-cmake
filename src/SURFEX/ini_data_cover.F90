@@ -68,6 +68,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_EMIS_ECO, XDATA_WRMAX_CF,                   &
                                   XDATA_CE_NITRO,XDATA_CF_NITRO,XDATA_CNA_NITRO,    &
                                   XDATA_GROUND_DEPTH, XDATA_ROOT_DEPTH,             &
+                                  XDATA_ROOT_DEPTHGV, &
                                   XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN,            &
                                   XDATA_SOILRC_SO2, XDATA_SOILRC_O3,                &
                                   XDATA_Z0_TOWN, XDATA_Z0H_TOWN, XDATA_ALB_ROOF,    &
@@ -190,6 +191,7 @@ INTEGER         :: JCOVER, JVEGTYPE       ! loop counters on covers and decades
 INTEGER         :: ICPT_SEA, ICPT_WATER
 !
 !
+integer :: j
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.3    Declaration of namelists
@@ -2232,6 +2234,9 @@ ENDIF
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
+ALLOCATE(XDATA_ROOT_DEPTHGV(JPCOVER,NVEGTYPE))
+XDATA_ROOT_DEPTHGV(:,:) = XDATA_ROOT_DEPTH(:,:)
+!
  CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                                   PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                                   PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
@@ -2254,6 +2259,15 @@ ENDIF
 IDC = 1
 !
 !
+! type dominant par cover
+! veg roughness length par cover
+! sand & clay par cover
+! veg par cover
+! albedo par cover (min max si varie)
+! LAI par cover
+! rsmin par cover
+! root depth par cover
+! orography par covers
 !
 IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',1,ZHOOK_HANDLE)
 !
