@@ -317,8 +317,11 @@ XDATA_GROUND_DEPTH(:,:) = XUNDEF
 !            ----------
 !
 ALLOCATE(XDATA_ROOT_DEPTH(JPCOVER,NVEGTYPE))
-!
 XDATA_ROOT_DEPTH(:,:) = XUNDEF
+!
+!
+ALLOCATE(XDATA_ROOT_DEPTHGV(JPCOVER,NVEGTYPE))
+XDATA_ROOT_DEPTHGV(:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -2222,6 +2225,8 @@ ENDIF
                     XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
                     XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
+XDATA_ROOT_DEPTHGV(:,:) = XDATA_ROOT_DEPTH(:,:)
+!
 !-------------------------------------------------------------------------------
 !
 !*   10.     LAI for ecoclimap2: climatological or not
@@ -2233,9 +2238,6 @@ ENDIF
 !
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
-!
-ALLOCATE(XDATA_ROOT_DEPTHGV(JPCOVER,NVEGTYPE))
-XDATA_ROOT_DEPTHGV(:,:) = XDATA_ROOT_DEPTH(:,:)
 !
  CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                                   PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
