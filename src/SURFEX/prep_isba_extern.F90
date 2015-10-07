@@ -86,6 +86,7 @@ REAL, DIMENSION(:,:),   POINTER     :: ZFIELD1        ! field read on initial MN
 REAL, DIMENSION(:,:,:), POINTER     :: ZD             ! layer thicknesses
 REAL, DIMENSION(:,:),   POINTER     :: ZD1            ! layer thicknesses, one patch
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT           !
+REAL, DIMENSION(:), ALLOCATABLE     :: ZMASK
 INTEGER                             :: JPATCH, JL       ! loop counter for patch
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -110,6 +111,10 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_EXTERN',0,ZHOOK_HANDLE)
 !
  CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+!
+ALLOCATE(ZMASK(INI))
+YRECFM='FRAC_NATURE'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
 !
 !---------------------------------------------------------------------------------------
 !
@@ -154,7 +159,13 @@ SELECT CASE(HSURF)
         CALL INTERP_GRID_NAT(ZD1,ZFIELD1,XGRID_SOIL,ZOUT)
         PFIELD(:,:,JPATCH)=ZOUT(:,:)
      END DO
-!
+     !
+     DO JPATCH=1,SIZE(PFIELD,3)
+       DO JL=1,SIZE(PFIELD,2)
+         WHERE (ZMASK(:)==0.) PFIELD(:,JL,JPATCH) = XUNDEF
+       ENDDO
+     ENDDO
+     !
      DEALLOCATE(ZFIELD)
      DEALLOCATE(ZOUT)
      DEALLOCATE(ZFIELD1)
@@ -181,6 +192,9 @@ SELECT CASE(HSURF)
      CALL READ_SURF(&
                    HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+     DO JPATCH=1,SIZE(PFIELD,3)
+       WHERE (ZMASK(:)==0.) PFIELD(:,1,JPATCH) = XUNDEF
+     ENDDO     
 !
   CASE('LAI    ')
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
@@ -203,6 +217,9 @@ SELECT CASE(HSURF)
        CALL READ_SURF(&
                    HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
        CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+       DO JPATCH=1,SIZE(PFIELD,3)
+         WHERE (ZMASK(:)==0.) PFIELD(:,1,JPATCH) = XUNDEF
+       ENDDO       
      ENDIF
 !
   CASE('ICE_STO')
@@ -227,12 +244,16 @@ SELECT CASE(HSURF)
                    HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
      ENDIF
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+     DO JPATCH=1,SIZE(PFIELD,3)
+       WHERE (ZMASK(:)==0.) PFIELD(:,1,JPATCH) = XUNDEF
+     ENDDO     
 !
   CASE DEFAULT
     CALL ABOR1_SFX('PREP_ISBA_EXTERN: '//TRIM(HSURF)//" initialization not implemented !")
 !
 END SELECT
 !
+DEALLOCATE(ZMASK)
 !
 !---------------------------------------------------------------------------
 !

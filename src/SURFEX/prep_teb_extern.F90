@@ -54,6 +54,8 @@ REAL, DIMENSION(:),   ALLOCATABLE :: ZDEPTH_TOT     ! total depth of surface
 !
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZD  ! intermediate array
 !
+REAL, DIMENSION(:), ALLOCATABLE :: ZMASK
+!
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILAYER         ! number of layers
@@ -105,6 +107,11 @@ CALL OPEN_AUX_IO_SURF(&
 !* reads the grid
 CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+!
+ALLOCATE(ZMASK(INI))
+YRECFM='FRAC_TOWN'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+!
 !* reads if TEB fields exist in the input file
 CALL TOWN_PRESENCE(&
                    HFILEPGDTYPE,GTEB)
@@ -248,6 +255,9 @@ ELSE
                HFILETYPE,YRECFM,ZFIELD(:,JLAYER),IRESP,HDIR='A')
       END DO
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      DO JLAYER=1,SIZE(ZFIELD,2)
+        WHERE (ZMASK(:)==0.) ZFIELD(:,JLAYER) = XUNDEF
+      ENDDO
       !
       !* recovers middle layer depth (from the surface)
       ALLOCATE(ZDEPTH    (INI,ILAYER))
@@ -310,6 +320,7 @@ ELSE
         CALL READ_SURF(&
                HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
         CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+        WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF        
       ELSE
         PFIELD(:,1) = XUNDEF
       ENDIF
@@ -343,6 +354,7 @@ ELSE
       CALL READ_SURF(&
                HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
 !
 !---------------------------------------------------------------------------------------
     END SELECT
@@ -375,6 +387,9 @@ ELSE
                HFILETYPE,'TG1',ZFIELD(:,:),IRESP,HDIR='A')
       ENDIF
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      DO JLAYER=1,SIZE(ZFIELD,2)
+        WHERE (ZMASK(:)==0.) ZFIELD(:,JLAYER) = XUNDEF
+      ENDDO      
       !* fills the whole temperature profile by this soil temperature
       IF (YSURF=='T_ROAD') ILAYER=SIZE(XGRID_ROAD)
       IF (YSURF=='T_ROOF') ILAYER=SIZE(XGRID_ROOF)
@@ -424,6 +439,8 @@ ELSE
 !-------------------------------------------------------------------------------------
 END IF
 !-------------------------------------------------------------------------------------
+!
+DEALLOCATE(ZMASK)
 !
 !*      6.     End of IO
 !              ---------

@@ -13,6 +13,7 @@ USE MODI_READ_SURF
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -36,6 +37,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 !
 !
+REAL, DIMENSION(:), ALLOCATABLE :: ZMASK
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 !
@@ -63,6 +65,10 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_EXTERN',0,ZHOOK_HANDLE)
                        HFILEPGD,HFILEPGDTYPE,'FULL  ')
  CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ALLOCATE(ZMASK(INI))
+YRECFM='FRAC_SEA'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+
  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 !---------------------------------------------------------------------------------------
@@ -87,6 +93,7 @@ SELECT CASE(HSURF)
     CALL READ_SURF(&
                    HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF    
 !
 !*      5.  Sea surface salinity
 !           --------------------
@@ -105,6 +112,7 @@ SELECT CASE(HSURF)
       CALL READ_SURF(&
                    HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
     ELSE
       PFIELD = 0.0
     ENDIF
@@ -119,6 +127,8 @@ SELECT CASE(HSURF)
 !---------------------------------------------------------------------------------------
 END SELECT
 !-------------------------------------------------------------------------------------
+!
+DEALLOCATE(ZMASK)
 !
 !*      6.     End of IO
 !              ---------

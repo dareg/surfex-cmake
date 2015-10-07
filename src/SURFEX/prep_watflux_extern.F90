@@ -15,6 +15,7 @@ USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -38,6 +39,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 !
 !
+REAL, DIMENSION(:), ALLOCATABLE :: ZMASK
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILUOUT
@@ -69,6 +71,10 @@ CALL PREP_GRID_EXTERN(&
 !
 CALL READ_SURF(&
                HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP)
+!
+ALLOCATE(ZMASK(INI))
+YRECFM='FRAC_WATER'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')       
 !
 IF (IDIM_WATER==0) THEN
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
@@ -105,10 +111,13 @@ SELECT CASE(HSURF)
     CALL READ_SURF(&
                HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF    
 !
 !---------------------------------------------------------------------------------------
 END SELECT
 !-------------------------------------------------------------------------------------
+!
+DEALLOCATE(ZMASK)
 !
 !*      6.     End of IO
 !              ---------

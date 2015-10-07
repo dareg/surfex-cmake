@@ -78,6 +78,7 @@ INTEGER, DIMENSION(:,:), INTENT(OUT):: KWG_LAYER
 !* local variables
 !  ---------------
 !
+CHARACTER(LEN=4 ) :: YLVL
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=16) :: YRECFM2
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
@@ -92,6 +93,7 @@ LOGICAL, DIMENSION(JPCOVER)          :: GCOVER ! flag to read the covers
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZCOVER ! cover fractions
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZGROUND_DEPTH ! cover fractions
 REAL,  DIMENSION(:,:),   ALLOCATABLE :: ZWORK  ! work array
+INTEGER, DIMENSION(:), ALLOCATABLE   :: ZSOILGRID
 REAL,  DIMENSION(KNI)                :: ZHVEG  ! high vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZLVEG  ! low  vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZNVEG  ! no   vegetation fraction
@@ -102,7 +104,7 @@ CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
 LOGICAL                              :: GECOCLIMAP ! T if ecoclimap is used
 LOGICAL                              :: GPAR_GARDEN! T if garden data are used
 LOGICAL                              :: GDATA_DG
-LOGICAL                              :: GDATA_GROUND_DEPTH
+LOGICAL                              :: GDATA_GROUND_DEPTH, GDATA_ROOT_DEPTH
 LOGICAL                              :: GPERM
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -230,6 +232,22 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
   !
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
     !
+    !cas when root_depth and ground_depth were extrapolated in extrapol_field
+    !during pgd step
+    IF (.NOT.GDATA_DG .AND. HISBA=="3-L") THEN
+      !
+      YRECFM2='L_ROOT_DEPTH'
+      YCOMMENT=YRECFM2
+      CALL READ_SURF(HPROGRAM,YRECFM2,GDATA_ROOT_DEPTH,IRESP,HCOMMENT=YCOMMENT)
+      !
+      IF (GDATA_ROOT_DEPTH) THEN
+        YRECFM2='D_ROOT_DEPTH'
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
+                                  HPROGRAM,YRECFM2,KLUOUT,KNI,PDEPTH(:,2,:),IRESP,IVERSION,HDIR='A')
+      ENDIF
+      !
+    ENDIF
+    !    
     YRECFM2='L_GROUND_DEPTH'
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='L_GROUND_DPT'
     YCOMMENT=YRECFM2
@@ -244,6 +262,34 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
                                 HPROGRAM,YRECFM2,KLUOUT,KNI,ZGROUND_DEPTH(:,:),IRESP,IVERSION,HDIR='A')
       !
+      IF (.NOT.GDATA_DG) THEN
+        !
+        IF (HISBA=="2-L") THEN
+          !
+          PDEPTH(:,2,:) = ZGROUND_DEPTH(:,:)
+          PDEPTH(:,1,:) = XUNDEF
+          WHERE (ZGROUND_DEPTH(:,:)/=XUNDEF) PDEPTH(:,1,:) = 0.01
+          !
+        ELSEIF (HISBA=="3-L") THEN
+          !
+          PDEPTH(:,3,:) = ZGROUND_DEPTH(:,:)
+          PDEPTH(:,1,:) = XUNDEF
+          WHERE (ZGROUND_DEPTH(:,:)/=XUNDEF) PDEPTH(:,1,:) = 0.01
+          !
+        ELSEIF (HISBA=="DIF") THEN
+          !
+          ALLOCATE(ZSOILGRID(KLAYER))
+          DO JLAYER=1,KLAYER
+            WRITE(YLVL,'(I4)') JLAYER
+            YRECFM2='SOILGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+            CALL READ_SURF(HPROGRAM,YRECFM,ZSOILGRID(JLAYER),IRESP)
+            PDEPTH(:,JLAYER,:) = ZSOILGRID(JLAYER)
+          ENDDO
+          DEALLOCATE(ZSOILGRID)
+          !
+        ENDIF
+      ENDIF
+      !      
       DO JPATCH=1,KPATCH
         DO JJ=1,KNI
           DO JLAYER=1,KLAYER
@@ -571,7 +617,11 @@ IWG_LAYER(:,:) = NUNDEF
 !
 ALLOCATE(ZNAT(KNI))
 IF (IVERSION>=7) THEN
-  CALL READ_SURF(HFILEPGDTYPE,'FRAC_NATURE',ZNAT,IRESP,HDIR='A')
+  IF (GTEB) THEN
+    CALL READ_SURF(HFILEPGDTYPE,'FRAC_TOWN',ZNAT,IRESP,HDIR='A')
+  ELSE
+    CALL READ_SURF(HFILEPGDTYPE,'FRAC_NATURE',ZNAT,IRESP,HDIR='A')
+  ENDIF
 ELSE
   ZNAT=1.0
 ENDIF
@@ -660,9 +710,12 @@ DO JLAYER=1,IWORK
   CALL READ_SURF(&
                HFILETYPE,YRECFM,ZWORK(:,:),IRESP,HDIR='A')
   DO JPATCH=1,IPATCH
+    WHERE (ZNAT(:)==0.) ZWORK(:,JPATCH) = XUNDEF
     ZVAR(:,JLAYER,JPATCH)=ZWORK(:,JPATCH)
   END DO
 END DO
+!
+DEALLOCATE (ZNAT)
 !
 IF(YISBA=='3-L') THEN
   SELECT CASE(HFIELD)
@@ -782,7 +835,7 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
     DO JPATCH=1,IPATCH
       DO JLAYER=1,ILAYER
        DO JI=1,KNI
-       IF(ZNAT(JI)>0.0 .AND. ZVAR(JI,JLAYER,JPATCH)/=XUNDEF)THEN
+       IF(ZVAR(JI,JLAYER,JPATCH)/=XUNDEF)THEN
           ZVAR(JI,JLAYER,JPATCH) = MAX(MIN(ZVAR(JI,JLAYER,JPATCH),ZWSAT(JI,JLAYER)),0.)
           !
           PFIELD(JI,JLAYER,JPATCH) = (ZVAR(JI,JLAYER,JPATCH) - ZWWILT(JI,JLAYER)) / (ZWFC(JI,JLAYER) - ZWWILT(JI,JLAYER))
@@ -793,14 +846,13 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
   ELSE IF (HFIELD=='WGI   ') THEN
     DO JPATCH=1,IPATCH
       DO JLAYER=1,ILAYER
-        WHERE(ZNAT(:)>0.0 .AND. ZVAR(:,JLAYER,JPATCH)/=XUNDEF)
+        WHERE(ZVAR(:,JLAYER,JPATCH)/=XUNDEF)
           PFIELD(:,JLAYER,JPATCH) = ZVAR(:,JLAYER,JPATCH) / ZWSAT(:,JLAYER) 
         END WHERE
       END DO
     END DO
   END IF
 !
-  DEALLOCATE (ZNAT)
   DEALLOCATE (ZWSAT)
   DEALLOCATE (ZWWILT)
   DEALLOCATE (ZWFC)
