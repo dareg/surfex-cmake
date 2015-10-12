@@ -374,7 +374,10 @@ fi
 if [ -z ${BIN_TOOLS} ] ; then
   export BIN_TOOLS=NO
 fi
-
+#
+if [ "x${VER_MPI}" = "xNOMPI" ] ; then
+  export VER_DRHOOK=MINI
+fi
 #
 # Generate profile_surfex
 #
@@ -444,7 +447,7 @@ else
   fi
 fi
 fi
-#
+!
 ##########################################################
 #                                                        #
 #      RESUME                                            #
