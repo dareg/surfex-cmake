@@ -70,7 +70,7 @@ USE MODD_BUDGET_COUPL_ROUT ! contains all useful variables XB_*
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XQTOT,&
                                  NNB_TOPD_STEP, XDXT, XQB_DR, XQB_RUN
 USE MODD_COUPLING_TOPD, ONLY : XAS_NATURE,  NNB_TOPD,&
-                                 XRUNOFF_TOP, XATOP, XBV_IN_MESH
+                               XATOP, XBV_IN_MESH
 !
 USE MODD_SURF_PAR,         ONLY:XUNDEF
 !

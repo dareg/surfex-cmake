@@ -98,6 +98,8 @@ PKAPPA(:,: )= 0.0
 PKAPPAC(:) = 0.
 GTOPD(:) = .TRUE.
 PDEF(:,:) = 0.
+ZAS=0.
+ZAD=1.
 !
 DO JJ = 1,NNCAT
   !*    0.    Initialisation
@@ -122,7 +124,7 @@ DO JJ = 1,NNCAT
   !
   DO J1=1,NNMC(JJ)
     !
-    IF ( ZRW(J1).GT.0.0 ) THEN
+    IF ( ZRW(J1)>0.0 .AND. ZRW(J1)/=XUNDEF) THEN
       ZMASK(J1)=1.0
     ELSE
       ZMASK(J1)=0.0
@@ -327,7 +329,7 @@ DO JJ = 1,NNCAT
     !*    2.2    Local deficits 
     !            --------------
     !
-    ZSOMME=0.0
+   ! ZSOMME=0.0
     !ZTMP(:)=XUNDEF
     !
     DO J1=1,NNMC(JJ)
@@ -353,7 +355,7 @@ DO JJ = 1,NNCAT
         ENDIF
         !
         ! nouveau contenu en eau total (m)
-        ZSOMME = ZSOMME + ( XWSTOPT(JJ,J1)*XDTOPT(JJ,J1) - PDEF(JJ,J1) )
+        !ZSOMME = ZSOMME + ( XWSTOPT(JJ,J1)*XDTOPT(JJ,J1) - PDEF(JJ,J1) )
         !
       ELSE
         !

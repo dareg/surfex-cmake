@@ -44,11 +44,11 @@
 !
 !*       0.     DECLARATIONS
 !               ------------
-USE MODD_COUPLING_TOPD, ONLY: NMASKI, XWFCTOPT, XDMAXFC, XWTOPT,&
+USE MODD_COUPLING_TOPD, ONLY: NMASKI, NMASKT, XWFCTOPT, XDMAXFC, XWTOPT,&
                                 XDTOPT, XWSTOPT, NNPIX, NNBV_IN_MESH
 USE MODD_TOPODYN,       ONLY: NNCAT, XDMAXT
 !
-USE MODD_SURF_PAR,        ONLY: XUNDEF,NUNDEF
+USE MODD_SURF_PAR,        ONLY: NUNDEF,XUNDEF
 !
 USE MODI_ABOR1_SFX
 !
@@ -96,19 +96,20 @@ DO J3 = 1,KI
       J2 = NMASKI(J3,J1,J4)
       DO WHILE (J2 /= NUNDEF .AND. J4<=NNBV_IN_MESH(J3,J1) )
         !
-        IF ( XWFCTOPT(J1,J2) /= XUNDEF ) THEN
+        IF ( NMASKT(J1,J2) /= NUNDEF ) THEN
           !
           ZWNEW = XWTOPT(J1,J2) + PHI(J3) / XDTOPT(J1,J2)
           !
           IF ( ZWNEW >= XWFCTOPT(J1,J2) ) THEN
             !
             ! on reste au-dessus de la capacite au champ, malgre l'assechement
-            XDMAXT(J1,J2) = XDMAXFC(J1,J2) 
+            IF (XDMAXFC(J1,J2)/=XUNDEF) XDMAXT(J1,J2) = XDMAXFC(J1,J2) 
             PHT(J1,J2) = (ZWNEW - XWFCTOPT(J1,J2)) * XDTOPT(J1,J2)
             !
           ELSE ! on passe au-dessous de la capacite au champ
             !
-            XDMAXT(J1,J2) = (XWSTOPT(J1,J2) - ZWNEW) * XDTOPT(J1,J2)
+            IF (XWSTOPT(J1,J2)/=XUNDEF) &
+                    XDMAXT(J1,J2) = (XWSTOPT(J1,J2) - ZWNEW) * XDTOPT(J1,J2)
             PHT(J1,J2) = 0.0
             !
           ENDIF
@@ -143,7 +144,7 @@ DO J3 = 1,KI
         !
         DO WHILE ( J2/=NUNDEF .AND. J4<=NNBV_IN_MESH(J3,J1) )
           !
-          IF ( GTEST(J1,J4) .AND. XWFCTOPT(J1,J2)/=XUNDEF ) THEN
+          IF ( GTEST(J1,J4) .AND. NMASKT(J1,J2)/=NUNDEF ) THEN
             !
             ZWNEW = XWTOPT(J1,J2) + PHI(J3) / XDTOPT(J1,J2)
             !
@@ -185,7 +186,7 @@ DO J3 = 1,KI
               !
             ENDIF
             !
-          ELSE IF ( XWFCTOPT(J1,J2)==XUNDEF ) THEN! pixel non défini dans Isba
+          ELSE IF ( NMASKT(J1,J2)==NUNDEF ) THEN! pixel non défini dans Isba
             !
             XDMAXT(J1,J2) = 0.0
             PHT = 0.0
