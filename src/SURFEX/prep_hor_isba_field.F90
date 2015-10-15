@@ -295,7 +295,7 @@ SELECT CASE (HSURF)
   !
   !* retrieves soil ice content from soil relative humidity
   ALLOCATE(I%XWGI(INI,I%NGROUND_LAYER,I%NPATCH))
-  I%XWGI(:,:,:)=XUNDEF
+  I%XWGI(:,:,:)=0.0
   IF(I%CISBA=='DIF')THEN
      IWORK(:,:)=I%NWG_LAYER(:,:)
   ELSE
