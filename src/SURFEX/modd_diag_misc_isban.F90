@@ -33,7 +33,7 @@
 !!       B. Decharme 10/2012 : New diag for DIF 
 !!                               active layer thickness over permafrost area
 !!                               frozen layer thickness over non-permafrost area
-!!
+!!       M. Lafaysse 09/2015 : new Crocus-MEPRA outputs
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -52,6 +52,7 @@ TYPE DIAG_MISC_ISBA_t
   LOGICAL :: LSURF_MISC_BUDGET   ! flag for miscellaneous terms of isba scheme
   LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo
   LOGICAL :: LSURF_MISC_DIF      ! flag for miscellaneous terms of isba-dif scheme
+  LOGICAL :: LPROSNOW            ! flag for Crocus-MEPRA outputs
 !
 !* variables for each patch
 !
@@ -65,11 +66,29 @@ TYPE DIAG_MISC_ISBA_t
 !
   REAL, POINTER, DIMENSION(:,:,:) :: XSNOWLIQ    ! snow liquid water profile (ISBA-ES:3-L)
   REAL, POINTER, DIMENSION(:,:,:) :: XSNOWTEMP   ! snow temperature profile  (ISBA-ES:3-L)
+
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWDZ     ! snow layer thickness (Crocus)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWDEND   ! dendricity (Crocus)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWSPHER  ! sphericity (Crocus)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWSIZE    ! grain size (Crocus)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWSSA    ! snow specific surface area (Crocus)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWTYPEMEPRA ! snow grain type (Crocus-MEPRA)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWRAM    ! snow ram resistance (Crocus-MEPRA)
+  REAL, POINTER, DIMENSION(:,:,:) :: XSNOWSHEAR  ! snow shear resistance (Crocus-MEPRA)
 !     
   REAL, POINTER, DIMENSION(:,:) :: XTWSNOW       ! Total snow reservoir
   REAL, POINTER, DIMENSION(:,:) :: XTDSNOW       ! Total snow height
   REAL, POINTER, DIMENSION(:,:) :: XTTSNOW       ! Total snow temperature
+  
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWDEPTH_1DAYS,XSNOWDEPTH_3DAYS,XSNOWDEPTH_5DAYS,XSNOWDEPTH_7DAYS ! fresh snow depth in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSWE_1DAYS,XSNOWSWE_3DAYS,XSNOWSWE_5DAYS,XSNOWSWE_7DAYS! fresh snow water equivalent in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWRAM_SONDE ! penetration depth of the ram resistance sensor (2 DaN)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOW_WETTHICKNESS ! Thickness of wet snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:,:) :: XSNOW_REFROZENTHICKNESS  ! Thickness of refrozen snow at the top of the snowpack
 !
+  REAL, POINTER, DIMENSION(:,:) :: XSYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
+  REAL, POINTER, DIMENSION(:,:) :: XSYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
+  
   REAL, POINTER, DIMENSION(:,:) :: XDPSNG         ! Snow fraction over ground, diag at time t
   REAL, POINTER, DIMENSION(:,:) :: XDPSNV         ! Snow fraction over vegetation, diag at time t
   REAL, POINTER, DIMENSION(:,:) :: XDPSN          ! Total Snow fraction, diag at time t
@@ -123,6 +142,15 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XAVG_FFV        ! Flood fraction over vegetation
   REAL, POINTER, DIMENSION(:) :: XAVG_FF         ! Total Flood fraction  
 !
+  REAL, POINTER, DIMENSION(:) :: XAVG_SNOWDEPTH_1DAYS,XAVG_SNOWDEPTH_3DAYS,XAVG_SNOWDEPTH_5DAYS,XAVG_SNOWDEPTH_7DAYS ! fresh snow depth in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:) :: XAVG_SNOWSWE_1DAYS,XAVG_SNOWSWE_3DAYS,XAVG_SNOWSWE_5DAYS,XAVG_SNOWSWE_7DAYS! fresh snow water equivalent in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:) :: XAVG_SNOWRAM_SONDE ! penetration depth of the ram resistance sensor (2 DaN)
+  REAL, POINTER, DIMENSION(:) :: XAVG_SNOW_WETTHICKNESS ! Thickness of wet snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:) :: XAVG_SNOW_REFROZENTHICKNESS  ! Thickness of refrozen snow at the top of the snowpack
+!  
+  REAL, POINTER, DIMENSION(:) :: XAVG_SYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
+  REAL, POINTER, DIMENSION(:) :: XAVG_SYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
+!
   REAL, POINTER, DIMENSION(:) :: XFRD2_TSWI      ! ISBA-FR-DG2 comparable soil wetness index (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWG       ! ISBA-FR-DG2 comparable soil water content (liquid+ice) (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWGI      ! ISBA-FR-DG2 comparable soil ice content (DIF option)  
@@ -157,9 +185,41 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_MISC_ISBA%XFLT)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWLIQ)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWTEMP)
+  NULLIFY(YDIAG_MISC_ISBA%XSYTMASS)
+  NULLIFY(YDIAG_MISC_ISBA%XSYTMASSC)
   NULLIFY(YDIAG_MISC_ISBA%XTWSNOW)
   NULLIFY(YDIAG_MISC_ISBA%XTDSNOW)
   NULLIFY(YDIAG_MISC_ISBA%XTTSNOW)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWDZ)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWDEND)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSPHER)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSIZE)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWTYPEMEPRA)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSSA)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWRAM)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSHEAR)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWDEPTH_1DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWDEPTH_3DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWDEPTH_5DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWDEPTH_7DAYS) 
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSWE_1DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSWE_3DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSWE_5DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWSWE_7DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOWRAM_SONDE)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOW_REFROZENTHICKNESS)
+  NULLIFY(YDIAG_MISC_ISBA%XSNOW_WETTHICKNESS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWDEPTH_1DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWDEPTH_3DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWDEPTH_5DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWDEPTH_7DAYS) 
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_1DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_3DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_5DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_7DAYS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWRAM_SONDE)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_REFROZENTHICKNESS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_WETTHICKNESS)  
   NULLIFY(YDIAG_MISC_ISBA%XDPSNG)
   NULLIFY(YDIAG_MISC_ISBA%XDPSNV)
   NULLIFY(YDIAG_MISC_ISBA%XDPSN)
@@ -197,6 +257,8 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_MISC_ISBA%XAVG_FFG)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_FFV)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_FF)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SYTMASS)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SYTMASSC)  
   NULLIFY(YDIAG_MISC_ISBA%XFRD2_TSWI)
   NULLIFY(YDIAG_MISC_ISBA%XFRD2_TWG)
   NULLIFY(YDIAG_MISC_ISBA%XFRD2_TWGI)

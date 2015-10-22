@@ -143,6 +143,9 @@ TYPE ISBA_t
 !
   LOGICAL                        :: LSNOW_ABS_ZENITH ! if True modify solar absorption as a function of solar zenithal angle
                                                      ! (physically wrong but better results in polar regions when CSNOWRAD=B92)
+  LOGICAL                        :: LSNOWSYTRON ! Logicals to activate Sytron wind-induced snow redistribution scheme 
+                                                ! Work only in the conceptual representation of the topography of the French
+                                                ! operational chain for avalanche hazard forecasting
 ! Scheme of snow metamorphism (Crocus)
   CHARACTER(3)                   :: CSNOWMETAMO ! B92 (historical version, Brun et al 92), C13, T07, F06 (see Carmagnola et al 2014)
 !
@@ -259,6 +262,7 @@ TYPE ISBA_t
   REAL, DIMENSION(:), POINTER   :: XZ0REL         ! relief roughness length                 (m)
 !
   REAL, DIMENSION(:), POINTER   :: XSSO_SLOPE     ! slope of S.S.O.                         (-)
+  REAL, DIMENSION(:), POINTER   :: XSSO_DIR       ! direction of S.S.O.                    (deg)
   REAL, DIMENSION(:), POINTER   :: XSSO_STDEV     ! relief  standard deviation              (m)
 !-------------------------------------------------------------------------------
 !
@@ -738,6 +742,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YISBA%XZ0EFFJPDIR)
   NULLIFY(YISBA%XZ0REL)
   NULLIFY(YISBA%XSSO_SLOPE)
+  NULLIFY(YISBA%XSSO_DIR)  
   NULLIFY(YISBA%XSSO_STDEV)
   NULLIFY(YISBA%XZ0_O_Z0H)
   NULLIFY(YISBA%XALBNIR)
@@ -940,6 +945,7 @@ YISBA%LPERTSURF=.FALSE.
 YISBA%LSNOWDRIFT=.TRUE.
 YISBA%LSNOWDRIFT_SUBLIM=.FALSE.
 YISBA%LSNOW_ABS_ZENITH=.FALSE.
+YISBA%LSNOWSYTRON=.FALSE.
 YISBA%CSNOWMETAMO='B92'
 YISBA%CSNOWRAD='B92'
 YISBA%LECOCLIMAP=.FALSE.

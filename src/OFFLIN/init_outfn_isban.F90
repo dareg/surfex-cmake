@@ -49,7 +49,7 @@
 !!                                           bug : TSRAD_P and not TTSRAD_P
 !!                                           add diag (Qsb, Subl) and Snow noted SN
 !!      modified    10-14, by P. Samuelsson: Added MEB output
-!!
+!!      modified    09-15  by M. Lafaysse  : new Crocus-MEPRA outputs
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -119,20 +119,23 @@ INTEGER,          INTENT(IN) :: KLUOUT
  CHARACTER(LEN=50)                :: YFILE
  CHARACTER(LEN=12)                :: YRECFM
  CHARACTER(LEN=3)                 :: YPAS, YLVL
+ CHARACTER(LEN=1)                 :: YNDAYS
  CHARACTER(LEN=3)                 :: YISBA
  CHARACTER(LEN=2)                 :: YLVLV
 ! 
 REAL,DIMENSION(:), POINTER       :: ZX, ZY
 !
-INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
+INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIMALL
 INTEGER, DIMENSION(:), ALLOCATABLE :: JDIM 
+INTEGER, DIMENSION(:), ALLOCATABLE :: IDDIM
 INTEGER                          :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS, &
                                     INLITTER, INLITTLEVS, INSOILCARB
 INTEGER                          :: JLAYER, JVEG, JNBIOMASS, JNLITTER, JNLITTLEVS, JNSOILCARB
-INTEGER                          :: IDIM1, INDIMS
+INTEGER                          :: IDIM1, INDIMS, INDIMSALL,INJDIMS
 INTEGER                          :: IFILE_ID, IDIMID, JSV
 INTEGER                          :: IL, JRET
 INTEGER                          :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
+INTEGER                          :: JNDAYS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -151,12 +154,23 @@ ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
                        INLITTER, INLITTLEVS, INSOILCARB)  
 !
  CALL OL_DEFINE_DIM(UG, U, &
-                    HPROGRAM, KLUOUT, INI, IDIM1, YUNIT1, YUNIT2, &
-                   ZX, ZY, IDIMS, IDDIM, YNAME_DIM, KNPATCH=INPATCH)
+                    HPROGRAM, KLUOUT, INI, DGU%LSNOWDIMNC, I%TSNOW, IDIM1, YUNIT1, YUNIT2, &
+                   ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM, KNPATCH=INPATCH)
  CALL GET_DATE_OL(I%TTIME,XTSTEP_OUTPUT,YDATE(1))
 !
-INDIMS = SIZE(IDDIM)
-ALLOCATE(JDIM(INDIMS-1))
+INDIMSALL = SIZE(IDDIMALL)
+
+IF (DGU%LSNOWDIMNC) THEN
+  INJDIMS=INDIMSALL-2
+  INDIMS=INDIMSALL-1
+
+ELSE
+  INJDIMS=INDIMSALL-1
+  INDIMS=INDIMSALL
+ENDIF
+
+ALLOCATE(IDDIM(INDIMS))
+ALLOCATE(JDIM(INJDIMS))
 !
 ! 4. Create output file for prognostic variables
 !----------------------------------------------------------
@@ -168,17 +182,20 @@ XOUT=0
 !
 !
 YFILE='ISBA_PROGNOSTIC.OUT.nc'
- CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+
+ CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
 JRET=NF_REDEF(IFILE_ID) 
 !
 IF (IDIM1.NE.0) THEN
-  JDIM(1)=IDDIM(1)
-  JDIM(2)=IDDIM(2)
-  JDIM(3)=IDDIM(4)
+  JDIM(1)=IDDIMALL(1)
+  JDIM(2)=IDDIMALL(2)
+  IDDIM(1:2)=IDDIMALL(1:2)
 ELSE
-  JDIM(1)=IDDIM(1)
-  JDIM(2)=IDDIM(3)
+  JDIM(1)=IDDIMALL(1)
+  IDDIM(1)=IDDIMALL(1)
 ENDIF
+JDIM(INJDIMS)=IDDIMALL(INDIMSALL)
+IDDIM(INDIMS-1:INDIMS)=IDDIMALL(INDIMSALL-1:INDIMSALL)
 !
 IF(I%LTEMP_ARP)THEN
   IL=I%NTEMPLAYER_ARP
@@ -241,32 +258,56 @@ IF(I%LGLACIER)THEN
                       IFILE_ID, 'ICE_STO',   'Glacier_reservoir',        IDDIM, YATT_TITLE, (/'Kg/m2'/))
 ENDIF
 !
-DO JLAYER=1,INLVLS
-  WRITE(YPAS,'(I3)') JLAYER
-  YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+IF (DGU%LSNOWDIMNC) THEN
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'WSN_VEG', 'Snow_Water_Equivalent', IDDIMALL, YATT_TITLE, (/'Kg/m2'/))
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWRO', 'Snow_density' ,         IDDIMALL, YATT_TITLE, (/'Kg/m3'/))
+    IF ((I%TSNOW%SCHEME=='3-L') .OR. (I%TSNOW%SCHEME=='CRO')) THEN   
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWHEAT',  'Snow_heat',              IDDIMALL, YATT_TITLE, (/'J/m2'/))
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWAGE','Snow_age_param', IDDIMALL, YATT_TITLE,(/'days_since_snowfall'/))
+    ELSEIF(I%TSNOW%SCHEME=='1-L') THEN
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWTEMP',  'Snow_temp',              IDDIMALL, YATT_TITLE, (/'K'/))
+    ENDIF
+    IF (I%TSNOW%SCHEME=='CRO') THEN   
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWGRAN1','Snow_grain_parameter1', IDDIMALL, YATT_TITLE, (/'-'/))
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWGRAN2','Snow_grain_parameter2', IDDIMALL, YATT_TITLE, (/'-'/))
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWHIST','Snow_historical_param', IDDIMALL, YATT_TITLE, (/'-'/))
+    ENDIF
+ELSE
+  DO JLAYER=1,INLVLS
+    WRITE(YPAS,'(I3)') JLAYER
+    YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
   !
-  CALL DEF_VAR_NETCDF(DGU, &
+    CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'WSN_VEG'//YLVL, 'Snow_Water_Equivalent_layer_'//YLVL, IDDIM, YATT_TITLE, (/'Kg/m2'/))
-  CALL DEF_VAR_NETCDF(DGU, &
+    CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'RSN_VEG'//YLVL, 'Snow_density_layer_'//YLVL ,         IDDIM, YATT_TITLE, (/'Kg/m3'/))
-  IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN   
-    CALL DEF_VAR_NETCDF(DGU, &
+    IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN   
+      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'HSN_VEG'//YLVL,  'Snow_heat_layer'//YLVL,              IDDIM, YATT_TITLE, (/'J/m2'/))
-    CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SAG_VEG'//YLVL,'Snow_age_param_layer_'//YLVL, IDDIM, YATT_TITLE,(/'days_since_snowfall'/))
-  ELSEIF(I%TSNOW%SCHEME=='1-L') THEN
-    CALL DEF_VAR_NETCDF(DGU, &
+    ELSEIF(I%TSNOW%SCHEME=='1-L') THEN
+      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'TSN_VEG'//YLVL,  'Snow_temp_layer'//YLVL,              IDDIM, YATT_TITLE, (/'K'/))
-  ENDIF
-  IF (I%TSNOW%SCHEME=='CRO') THEN   
-    CALL DEF_VAR_NETCDF(DGU, &
+    ENDIF
+    IF (I%TSNOW%SCHEME=='CRO') THEN   
+      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SG1_VEG'//YLVL,'Snow_grain_parameter1_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-    CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SG2_VEG'//YLVL,'Snow_grain_parameter2_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-    CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SHI_VEG'//YLVL,'Snow_historical_param_layer_'//YLVL, IDDIM, YATT_TITLE, (/'-'/))
-  ENDIF
-ENDDO
+    ENDIF
+  ENDDO
+ENDIF
 !
  CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'ASN_VEG', 'Snow_albedo', IDDIM, YATT_TITLE, (/'-'/))
@@ -329,17 +370,21 @@ IF (I%LCANOPY) THEN
   END DO
 ENDIF
 !
+
+IF (.NOT. DGMI%LPROSNOW) THEN
+
  CALL OL_WRITE_COORD(DGU, &
-                     YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
-!
-!
-! 4. Create output file for fluxes values
-!----------------------------------------------------------
-!
-YFILE='ISBA_DIAGNOSTICS.OUT.nc'
- CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
-JRET=NF_REDEF(IFILE_ID) 
-YATT = 'dimensionless'
+                      YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
+ !
+ ! 4. Create output file for fluxes values
+ !----------------------------------------------------------
+ !
+ YFILE='ISBA_DIAGNOSTICS.OUT.nc'
+ CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
+ JRET=NF_REDEF(IFILE_ID) 
+ YATT = 'dimensionless'
+
+ENDIF
 !
 IF (IDIM1.NE.0) THEN
   JDIM(1)=IDDIM(1)
@@ -939,16 +984,83 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     ENDIF
   ENDIF
   !
-  DO JLAYER=1,INLVLS
-    WRITE(YPAS,'(I3)') JLAYER
-    YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
-    IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN  
+  IF (I%TSNOW%SCHEME=='CRO' .AND. I%LSNOWSYTRON) THEN
+    YATT = 'kg/m2/s'          
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'SYTFLX_ISBA' ,'SYTRON_snow_erosion/deposition_flux    ' ,JDIM, YATT_TITLE,YATT)
+    IF(DGI%LPATCH_BUDGET) THEN
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWTEMP'//YLVL,  'Snow_Temp_layer'//YLVL         , IDDIM, YATT_TITLE, (/'K'/))
-      CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWLIQ'//YLVL,   'Snow_liquid_water_layer_'//YLVL, IDDIM, YATT_TITLE, (/'m'/))
+                      IFILE_ID,'SYTFLX_P' ,'SYTRON_snow_erosion/deposition_flux    ' ,IDDIM, YATT_TITLE,YATT)
     ENDIF
-  ENDDO
+  ENDIF
+  
+  IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+  
+    IF (DGU%LSNOWDIMNC) THEN
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWTEMP',  'Snow_Temp_layer'         , IDDIMALL, YATT_TITLE, (/'K'/))
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWLIQ',   'Snow_liquid_water_layer', IDDIMALL, YATT_TITLE, (/'m'/))    
+                      
+      IF (DGMI%LPROSNOW) THEN
+        ! Variables with layer dimension
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWDZ',  'Snow layer thickness'         , IDDIMALL, YATT_TITLE, (/'m'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWDEND',  'Snow layer dendricity'         , IDDIMALL, YATT_TITLE, (/'between 0 and 1'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWSPHER',   'Snow layer sphericity', IDDIMALL, YATT_TITLE, (/'between 0 and 1'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWSIZE',   'Snow layer grain size', IDDIMALL, YATT_TITLE, (/'m'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWSSA',  'Snow layer specific surface area'         , IDDIMALL, YATT_TITLE, (/'m2 kg-1'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWTYPE',   'Snow layer grain type', IDDIMALL, YATT_TITLE, (/'no unit'/))                    
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWRAM',   'Snow layer ram resistance', IDDIMALL, YATT_TITLE, (/'daN'/))  
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWSHEAR',   'Snow layer shear resistance', IDDIMALL, YATT_TITLE, (/'kPa'/))    
+      END IF
+    ELSE
+
+      DO JLAYER=1,INLVLS
+      WRITE(YPAS,'(I3)') JLAYER
+      YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWTEMP'//YLVL,  'Snow_Temp_layer'//YLVL         , IDDIM, YATT_TITLE, (/'K'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWLIQ'//YLVL,   'Snow_liquid_water_layer_'//YLVL, IDDIM, YATT_TITLE, (/'m'/))
+      END DO
+
+    ENDIF
+    
+    IF (DGMI%LPROSNOW) THEN
+      ! Variables without layer dimension
+      DO JNDAYS=1,7,2
+        WRITE(YPAS,'(I1)') JNDAYS
+        YNDAYS = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+        PRINT*,'SD_'//YLVL//'DAYS'
+        CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'SD_'//YNDAYS//'DAYS', 'accumulated snow thickness for past '//YLVL//' days' ,&
+                    IDDIM, YATT_TITLE, (/'m'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'SWE_'//YNDAYS//'DAYS', 'accumulated snow water equivalent for past '//YLVL//' days',&
+                    IDDIM, YATT_TITLE, (/'kg m-2'/))
+      END DO
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'RAM_SONDE',   &
+                    'Penetration of ram resistance sensor (2 daN)', IDDIM, YATT_TITLE, (/'m'/))                    
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'WET_TH',   &
+                    'Thickness of wet snow at the top of the snowpack', IDDIM, YATT_TITLE, (/'m'/))  
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'REFROZ_TH',   &
+                    'Thickness of refrozen snow at the top of the snowpack', IDDIM, YATT_TITLE, (/'m'/))         
+    ENDIF
+  
+  ENDIF
+  
+
   ! 
   IF(I%CRAIN=='SGH ')THEN
     YATT = '-'
@@ -972,12 +1084,21 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'LAI_ISBA'     ,'leaf_area_index             '               ,JDIM,YATT_TITLE,YATT) 
   ENDIF 
-  YATT = 'kg/m2'
-  CALL DEF_VAR_NETCDF(DGU, &
+
+  IF (DGMI%LPROSNOW) THEN
+    YATT = 'kg/m2'
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'WSN_T_ISBA'  , 'Total_snow_reservoir '                        ,IDDIM,YATT_TITLE,YATT)
+    YATT = 'm'
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'DSN_T_ISBA'  , 'Total_snow_depth '                            ,IDDIM,YATT_TITLE,YATT)
+  ELSE
+    CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'WSN_T_ISBA'  , 'Total_snow_reservoir '                        ,JDIM,YATT_TITLE,YATT)
-  YATT = 'm'
-  CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'DSN_T_ISBA'  , 'Total_snow_depth '                            ,JDIM,YATT_TITLE,YATT)
+    YATT = 'm'
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'DSN_T_ISBA'  , 'Total_snow_depth '                            ,JDIM,YATT_TITLE,YATT)  
+  ENDIF
   YATT = 'K'
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'TSN_T_ISBA'  , 'Total_snow_temperature '                      ,JDIM,YATT_TITLE,YATT)  
@@ -1258,7 +1379,7 @@ ENDIF
 IF (DGEI%LSURF_BUDGETC) THEN
   !
   YFILE='ISBA_DIAG_CUMUL.OUT.nc'
-  CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+  CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
   JRET=NF_REDEF(IFILE_ID)
   YATT      (1)='dimensionless'
   !
@@ -1372,6 +1493,33 @@ IF (DGEI%LSURF_BUDGETC) THEN
                       IFILE_ID,'DSWEC_P'    ,'Cumulated_change_in_snow_water_equivalent '  ,IDDIM,YATT_TITLE,YATT)
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'WATBUDC_P'  ,'Cumulated_isba_water_budget_as_residue    '  ,IDDIM,YATT_TITLE,YATT)
+    ENDIF
+    IF (I%TSNOW%SCHEME=='CRO' .AND. I%LSNOWSYTRON) THEN
+      YATT = 'kg/m2'          
+      CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'SYTFLXC_P' ,'Cumulated_SYTRON_snow_erosion_deposition_flux' ,IDDIM, YATT_TITLE,YATT)
+    ENDIF
+    IF (DGMI%LPROSNOW) THEN
+      ! Variables without layer dimension
+      DO JNDAYS=1,7,2
+        WRITE(YPAS,'(I1)') JNDAYS
+        YLVL = ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
+        CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'SD_'//YLVL//'DAYS_P', 'accumulated snow thickness for past '//YLVL//' days' ,&
+                    IDDIM, YATT_TITLE, (/'m'/))
+        CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'SWE_'//YLVL//'DAYS_P', 'accumulated snow water equivalent for past '//YLVL//' days',&
+                    IDDIM, YATT_TITLE, (/'kg m-2'/))
+      END DO
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'RAM_SONDE_P',   &
+                    'Penetration of ram resistance sensor (2 daN)', IDDIM, YATT_TITLE, (/'m'/))                    
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'WET_TH_P',   &
+                    'Thickness of wet snow at the top of the snowpack', IDDIM, YATT_TITLE, (/'m'/))  
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'REFROZ_TH_P',   &
+                    'Thickness of refrozen snow at the top of the snowpack', IDDIM, YATT_TITLE, (/'m'/))         
     ENDIF
   ENDIF
   !  
@@ -1491,6 +1639,11 @@ IF (DGEI%LSURF_BUDGETC) THEN
                       IFILE_ID,'FMUC_ISBA'   ,'Averaged_Cumulated_Zonal_Wind_Stress '                ,JDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'FMVC_ISBA'   ,'Averaged_Cumulated_Merid_Wind_Stress '                ,JDIM,YATT_TITLE,YATT)
+  IF (I%TSNOW%SCHEME=='CRO' .AND. I%LSNOWSYTRON) THEN
+    YATT = 'kg/m2'          
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'SYTFLXC_ISBA' ,'Average_Cumulated_SYTRON_snow_erosion_deposition_flux' ,JDIM, YATT_TITLE,YATT)
+  ENDIF
   !  
   CALL OL_WRITE_COORD(DGU, &
                      YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
@@ -1504,7 +1657,7 @@ ENDIF
 IF(LASSIM) THEN
   IF(CASSIM=='PLUS ') THEN
     YFILE='ISBA_VEG_EVOLUTION_P.OUT.nc'
-    CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+    CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
     JRET=NF_REDEF(IFILE_ID)
     YATT='dimensionless'
     CALL DEF_VAR_NETCDF(DGU, &
@@ -1513,7 +1666,7 @@ IF(LASSIM) THEN
                      YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
   ELSEIF(CASSIM=='AVERA') THEN
     YFILE='ISBA_VEG_EVOLUTION_A.OUT.nc'
-    CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+    CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
     JRET=NF_REDEF(IFILE_ID)
     YATT ='dimensionless'     
     CALL DEF_VAR_NETCDF(DGU, &
@@ -1522,7 +1675,7 @@ IF(LASSIM) THEN
                      YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
   ELSEIF(CASSIM=='2DVAR') THEN
     YFILE='ISBA_VEG_EVOLUTION.OUT.nc'
-    CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+    CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
     JRET=NF_REDEF(IFILE_ID)
     YATT='dimensionless'
     CALL DEF_VAR_NETCDF(DGU, &
@@ -1532,7 +1685,7 @@ IF(LASSIM) THEN
   ENDIF
 ELSEIF(DGI%LPGD)THEN
   YFILE='ISBA_VEG_EVOLUTION.OUT.nc'
-  CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)  
+  CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)  
   JRET=NF_REDEF(IFILE_ID)
   YATT ='dimensionless'
   !
@@ -1691,6 +1844,7 @@ ELSEIF(DGI%LPGD)THEN
 ENDIF
 !
 DEALLOCATE(JDIM)
+DEALLOCATE(IDDIM)
 !
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_ISBA_N',1,ZHOOK_HANDLE)
 !

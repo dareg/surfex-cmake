@@ -13,7 +13,8 @@ OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic 
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
-OPT_CHECK = -fcheck=bounds,do,mem,pointer,recursion -finit-real=nan
+OPT_CHECK = -fbounds-check -finit-real=nan
+#OPT_CHECK = -fcheck=bounds,do,mem,pointer,recursion -finit-real=nan
 OPT_I8    = -fdefault-integer-8
 #
 #

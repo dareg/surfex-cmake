@@ -1,5 +1,5 @@
 SUBROUTINE OL_DEFINE_DIM (UG, U, &
-                          HPROGRAM, KLUOUT, KNI, KDIM1, HUNIT1, HUNIT2, &
+                          HPROGRAM, KLUOUT, KNI, OSNOWDIMNC, TSNOW, KDIM1, HUNIT1, HUNIT2, &
                          PX, PY, KDIMS, KDDIM, HNAME_DIM, KNPATCH)
 !     #######################################################
 !!****  *OL_DEFINE_DIM* - 
@@ -30,6 +30,7 @@ SUBROUTINE OL_DEFINE_DIM (UG, U, &
 !!    -------------
 !!      Original    06/2010 
 !!      07/2011     add specific computation for IGN grid (B. Decharme)
+!!      09/2015     M. Lafaysse : snow layer dimension
 !-------------------------------------------------------------------------------                         
 !
 !
@@ -46,6 +47,8 @@ USE MODI_GET_GRID_COORD
 !
 USE MODE_GRIDTYPE_IGN
 !
+USE MODD_TYPE_SNOW,ONLY : SURF_SNOW
+
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -59,6 +62,8 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
  CHARACTER(LEN=6),  INTENT(IN)    :: HPROGRAM
 INTEGER, INTENT(IN)              :: KLUOUT
 INTEGER, INTENT(IN)              :: KNI
+LOGICAL, INTENT(IN)              :: OSNOWDIMNC
+TYPE(SURF_SNOW),INTENT(IN)           :: TSNOW
 INTEGER, INTENT(OUT)             :: KDIM1
  CHARACTER(LEN=13) , DIMENSION(:), INTENT(OUT) :: HUNIT1, HUNIT2
 REAL,DIMENSION(:), POINTER                :: PX, PY
@@ -71,12 +76,14 @@ REAL, DIMENSION(KNI)             :: ZXX, ZYY
 INTEGER                          :: INDIMS, IDIM2
 INTEGER                          :: I, J, K, L
 LOGICAL                          :: GRECT     ! T if rectangular grid
+INTEGER                          :: IDIMSNOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('OL_DEFINE_DIM',0,ZHOOK_HANDLE)
 !
 KDIM1=0
 IDIM2=0
+
 !
 IF (.NOT.LWRITE_COORD) THEN
   !
@@ -96,6 +103,7 @@ ENDIF
 INDIMS = 2
 IF ( KDIM1.NE.0       ) INDIMS = 3
 IF ( PRESENT(KNPATCH) ) INDIMS = INDIMS + 1
+IF (OSNOWDIMNC) INDIMS=INDIMS+1
 !
 ALLOCATE(KDIMS(INDIMS))
 ALLOCATE(KDDIM(INDIMS))
@@ -187,8 +195,16 @@ ENDIF
 IF (PRESENT(KNPATCH)) THEN
   KDIMS     (INDIMS-1) = KNPATCH
   HNAME_DIM (INDIMS-1) = 'Number_of_Tile'
+  IDIMSNOW=INDIMS-2
+ELSE
+  IDIMSNOW=INDIMS-1
 ENDIF
 !
+IF (OSNOWDIMNC) THEN
+  KDIMS     (IDIMSNOW) = TSNOW%NLAYER
+  HNAME_DIM (IDIMSNOW) = 'snow_layer'
+ENDIF 
+
 IF (HPROGRAM/='NOTIME ') THEN
   KDIMS     (INDIMS) = NF_UNLIMITED
   HNAME_DIM (INDIMS) = 'time'

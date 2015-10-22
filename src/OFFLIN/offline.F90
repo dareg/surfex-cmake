@@ -70,6 +70,7 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
 !
 USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
+USE MODD_SYTRON_PAR, ONLY : NTAB_SYT
 USE MODD_IO_SURF_ASC,ONLY : CFILEIN,CFILEIN_SAVE,CFILEOUT,CFILEPGD
 USE MODD_SURF_PAR
 USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE,       &
@@ -170,6 +171,9 @@ USE MODI_LOCAL_SLOPE_PARAM
 !
 USE MODE_GLT_DIA_LU
 !
+!
+USE MODI_INIT_SYTRON_TABLE
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -231,6 +235,7 @@ INTEGER                           :: JFORC_STEP          ! atmospheric loop inde
 INTEGER                           :: JSURF_STEP          ! isba loop index
 INTEGER                           :: ICOUNT              ! day counter 
 REAL                              :: ZDURATION           ! duration of run                     (s)
+INTEGER                           :: ITIMESTARTINDEX
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTA                 ! air temperature forcing               (K)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZQA                 ! air humidity forcing                  (kg/m3)
@@ -253,6 +258,7 @@ LOGICAL                           :: GFOUND              ! return logical when r
 LOGICAL                           :: GSHADOWS    
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
 REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
+LOGICAL:: GSNOWSYTRON                                        ! activate Sytron snow redistribution scheme (works with Crocus Only)
 !
 ! Flag diag :
 !
@@ -496,9 +502,9 @@ XTIME0 = MPI_WTIME()
 !       configuration of run
 !
  CALL OL_READ_ATM_CONF(YSURF_CUR, &
-                       CSURF_FILETYPE, CFORCING_FILETYPE,            &
-                      ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
-                      ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF     )
+                       CSURF_FILETYPE, CFORCING_FILETYPE, LDELAYEDSTART_NC,   &
+                      NDATESTOP, ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
+                      ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF, ITIMESTARTINDEX     )
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc conf ',PLOG=XTIME_NPIO_READ)
@@ -631,7 +637,7 @@ XTIME0 = MPI_WTIME()
 IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
  CALL OL_READ_ATM(&
-                  CSURF_FILETYPE, CFORCING_FILETYPE, 1,             &
+                  CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
                    ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
                    ZCO2,ZDIR,LLIMIT_QAIR                           ) 
 !
@@ -714,6 +720,14 @@ IF (GSHADOWS) THEN
   CALL LOCAL_SLOPE_PARAM(NINDX1SFX,NINDX2SFX)
 END IF
 !
+! initialization routines to define sytron grid
+IF(GSNOWSYTRON) THEN
+    CALL INIT_SYTRON_TABLE(YSURF_CUR%IM%I,ZZS_FORC,INI,ZLAT,ZLON)
+ELSE
+    ALLOCATE(NTAB_SYT(INI))
+    NTAB_SYT(:)=-999
+ENDIF
+
  CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !
 #ifdef SFX_MPI
@@ -813,7 +827,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
     ENDIF
     CALL OL_READ_ATM(&
-                  CSURF_FILETYPE, CFORCING_FILETYPE, JFORC_STEP,    &
+                  CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1,    &
                      ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX), &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),&
@@ -1538,6 +1552,7 @@ IF ( LINQUIRE ) THEN
   DEALLOCATE( ZPSNV      )
   DEALLOCATE( ZZ0EFF     )
   DEALLOCATE( ZZS        )
+  DEALLOCATE(NTAB_SYT)
   !
   IF (NRANK==NPIO) THEN
 !$OMP SINGLE

@@ -129,6 +129,9 @@ INTERFACE SNOW3LALB
   MODULE PROCEDURE SNOW3LALB
 END INTERFACE
 !
+INTERFACE SYVAGRE
+  MODULE PROCEDURE SYVAGRE
+END INTERFACE
 !-------------------------------------------------------------------------------
 CONTAINS
 !
@@ -2042,6 +2045,126 @@ IF (LHOOK) CALL DR_HOOK('GET_DIAM',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE GET_DIAM
 !####################################################################
+SUBROUTINE SYVAGRE(PSNOWGRAN1I,PSNOWGRAN2I,PSNOWGRAN1J,PSNOWGRAN2J,      &
+                   PSNOWGRAN1F,PSNOWGRAN2F,PZI,PZJ)
+!
+!!    PURPOSE
+!!    -------
+!!    Aggregate snow grain characteristics in 2 layers (I and J) to get the
+!!    averaged grain characteristics 
+!!
+!!    METHOD
+!!    -------
+!!    Based on the subroutine get_mass_heat in mode_snow3l.f90
+!!
+!!    AUTHOR
+!!    ------
+!!    V. Vionnet  * Meteo-France *   Implementation in SURFEX
+!!
+!
+USE MODD_SNOW_PAR, ONLY : XSNOWCRITD, XD1, XD2, XD3, XX, XVALB5, XVALB6
+!   
+IMPLICIT NONE
+!
+!
+!*      0.1    declarations of arguments
+!
+REAL, INTENT(IN)      :: PSNOWGRAN1I,PSNOWGRAN2I,PSNOWGRAN1J,PSNOWGRAN2J
+REAL, INTENT(IN)      :: PZI,PZJ      !   Weight of layer I and J
+REAL, INTENT(OUT)     :: PSNOWGRAN1F,PSNOWGRAN2F
+
+!
+!*      0.2    declarations of local variables
+!
+REAL ZDIAMI,ZDIAMJ,ZDIAMMOY
+REAL ZDENTI,ZDENTJ,ZDENTMOY
+REAL ZSPHERI,ZSPHERJ,ZSPHERMOY
+REAL ZALBI,ZALBJ,ZALBMOY
+
+!
+!    1. Compute properties for each layer
+!
+! For layer I
+IF(PSNOWGRAN1I<0.) THEN
+    ZDIAMI = -PSNOWGRAN1I*XD1/XX + (1.+PSNOWGRAN1I/XX) * &
+                 ( PSNOWGRAN2I*XD2/XX +(1.-PSNOWGRAN2I/XX)*XD3 ) 
+    ZDIAMI = ZDIAMI/10000.
+    ZDENTI  = -PSNOWGRAN1I/XX
+    ZSPHERI = PSNOWGRAN2I/XX
+ELSE
+   ZDIAMI = PSNOWGRAN2I
+   ZDENTI =0.
+   ZSPHERI = PSNOWGRAN2I/XX
+ENDIF
+ZALBI = MAX( 0.,  (XVALB5-XVALB6*SQRT(ZDIAMI)) )
+!
+! For layer J
+IF(PSNOWGRAN1J<0.) THEN
+    ZDIAMJ = -PSNOWGRAN1J*XD1/XX + (1.+PSNOWGRAN1J/XX) * &
+                 ( PSNOWGRAN2J*XD2/XX +(1.-PSNOWGRAN2J/XX)*XD3 )
+    ZDIAMJ = ZDIAMJ/10000.
+    ZDENTJ  = -PSNOWGRAN1J/XX
+    ZSPHERJ = PSNOWGRAN2J/XX
+ELSE
+   ZDIAMJ = PSNOWGRAN2J
+   ZDENTJ =0.
+   ZSPHERJ = PSNOWGRAN2J/XX
+ENDIF
+ZALBJ = MAX( 0.,  (XVALB5-XVALB6*SQRT(ZDIAMJ)) )
+!
+!    2. Compute averaged properties
+!
+ZDENTMOY  = MAX(0.,(ZDENTI*PZI+ZDENTJ*PZJ)/( PZI+PZJ))
+ZSPHERMOY = MAX(0.,(ZSPHERI*PZI+ZSPHERJ*PZJ)/( PZI+PZJ))
+ZALBMOY   = MAX(0.,(ZALBI*PZI+ZALBJ*PZJ)/( PZI+PZJ))
+ZDIAMMOY = ( (XVALB5-ZALBMOY)/XVALB6 )**2
+!
+!    3. Compute GRAN1 and GRAN2 of averaged layer
+!
+! size between D2 and D3 and dendricity < 0         
+! sphericity is first preserved, if possible. If not,
+! dendricity = 0
+PSNOWGRAN1F= -XX * ZDENTMOY
+!
+IF(ZDENTMOY/=1.) THEN
+      PSNOWGRAN2F = XX * ( ( ZDIAMMOY*10000. + PSNOWGRAN1F*XD1/XX) &
+                     / ( 1. + PSNOWGRAN1F/XX ) - XD3 )/ ( XD2-XD3 )
+ENDIF
+!
+! dendricity is preserved if possible and sphericity is adjusted
+IF ( ZDIAMMOY < XD2/10000. - 0.0000001 ) THEN
+    !
+    IF ( ABS( PSNOWGRAN1F+XX ) < 0.01 ) THEN
+    !
+       PSNOWGRAN2F = XX * ZSPHERMOY
+    !
+    ELSEIF ( ABS( PSNOWGRAN1F) < 0.0001 ) THEN ! dendritic snow
+    !
+      PSNOWGRAN1F = XX * ZSPHERMOY
+      PSNOWGRAN2F = ZDIAMMOY
+!
+    ELSEIF ( PSNOWGRAN2F < 0. ) THEN ! non dendritic
+!
+      PSNOWGRAN2F = 0.
+!
+    ELSEIF ( PSNOWGRAN2F > XX + 0.0000001 ) THEN ! non dendritic
+!
+      PSNOWGRAN2F = XX
+!
+    ENDIF
+!
+ELSEIF ( ZDIAMMOY > XD3/10000. .OR. ZDENTMOY <= 0. + 0.0000001 .OR. &
+     PSNOWGRAN2F < 0. .OR. PSNOWGRAN2F > XX ) THEN
+!
+! dendritic snow
+! inconsistency with ZDIAM ==>  dendricity = 0
+! size between D2 and D3 and dendricity == 0          
+    PSNOWGRAN1F = XX * ZSPHERMOY
+    PSNOWGRAN2F = ZDIAMMOY
+!
+ENDIF
+
+END SUBROUTINE SYVAGRE
 !####################################################################
 !####################################################################
 FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC,PDSGRAIN) RESULT(PCOEF)

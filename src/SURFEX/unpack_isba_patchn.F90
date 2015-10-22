@@ -412,6 +412,8 @@ PKI%XP_HO2IM        => NULL()
 PKI%XP_HO2JP        => NULL()
 PKI%XP_HO2JM        => NULL()
 PKI%XP_SSO_SLOPE    => NULL()
+PKI%XP_SSO_DIR      => NULL()
+PKI%NP_TAB_SYT      => NULL()
 PKI%XP_GAMMAT       => NULL()
 PKI%XP_TDEEP        => NULL() 
 !

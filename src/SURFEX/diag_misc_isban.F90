@@ -5,7 +5,7 @@ SUBROUTINE DIAG_MISC_ISBA_n (DGMI, PKDI, &
                             PPSN, PPSNG, PPSNV, PFF, PFFG, PFFV,          &
                             PWG, PWGI, PWFC, PWWILT, PWSNOW, PRSNOW,      &
                             PFAPARC, PFAPIRC, PLAI_EFFC, PMUS, PFSAT,     &
-                            PDG, PTG                                      )  
+                            PDG, PTG, PSLOPECOS                            )  
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-ISBA_n * - additional diagnostics for ISBA
@@ -37,7 +37,7 @@ SUBROUTINE DIAG_MISC_ISBA_n (DGMI, PKDI, &
 !!       B. Decharme 05/2012 : Carbon fluxes in diag_evap
 !!       B. Decharme 05/2012 : Active and frozen layers thickness for dif
 !!       B. Decharme 06/2013 : Snow temp for EBA scheme (XP_SNOWTEMP not allocated)
-!!
+!!       M. Lafaysse 09/2015 : new Crocus-MEPRA outputs
 !!------------------------------------------------------------------
 !
 !
@@ -98,10 +98,13 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PLAI_EFFC
 REAL, DIMENSION(:), INTENT(INOUT) :: PMUS
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PFSAT
+
+REAL, DIMENSION(:),  INTENT(IN) :: PSLOPECOS ! cosine of the slope for Crocus
 !
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PPSN))    :: ZSNOWTEMP
+REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWSNOW
 REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORK
 REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORKTEMP
 !
@@ -117,6 +120,16 @@ IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
 !
 IF (DGMI%LSURF_MISC_BUDGET) THEN
   !
+  IF (DGMI%LPROSNOW) THEN
+    DO JI = 1,SIZE(PWSNOW,2)
+      DO JJ = 1,SIZE(PWSNOW,1)
+        ZWSNOW(JJ,JI)=PWSNOW(JJ,JI)/PSLOPECOS(JJ)
+      ENDDO
+    ENDDO
+  ELSE
+    ZWSNOW(:,:)=PWSNOW(:,:)
+  END IF
+  
   PKDI%XP_SWI (:,:)=XUNDEF
   PKDI%XP_TSWI(:,:)=XUNDEF  
   DO JJ=1,SIZE(PWG,2)
@@ -190,6 +203,20 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
      DGMI%XTDSNOW  (JI, KPATCH)  =  PKDI%XP_TDSNOW   (JJ)
      DGMI%XTTSNOW  (JI, KPATCH)  =  ZSNOWTEMP   (JJ)
      DGMI%XDFSAT   (JI, KPATCH)  =  PFSAT       (JJ)     
+     
+     IF (DGMI%LPROSNOW) THEN
+       DGMI%XSNOWDEPTH_1DAYS(JI, KPATCH)= PKDI%XP_SNOWDEPTH_1DAYS(JJ)
+       DGMI%XSNOWDEPTH_3DAYS(JI, KPATCH)= PKDI%XP_SNOWDEPTH_3DAYS(JJ)
+       DGMI%XSNOWDEPTH_5DAYS(JI, KPATCH)= PKDI%XP_SNOWDEPTH_5DAYS(JJ)
+       DGMI%XSNOWDEPTH_7DAYS(JI, KPATCH)= PKDI%XP_SNOWDEPTH_7DAYS(JJ)    
+       DGMI%XSNOWSWE_1DAYS(JI, KPATCH)= PKDI%XP_SNOWSWE_1DAYS(JJ)
+       DGMI%XSNOWSWE_3DAYS(JI, KPATCH)= PKDI%XP_SNOWSWE_3DAYS(JJ)
+       DGMI%XSNOWSWE_5DAYS(JI, KPATCH)= PKDI%XP_SNOWSWE_5DAYS(JJ)
+       DGMI%XSNOWSWE_7DAYS(JI, KPATCH)= PKDI%XP_SNOWSWE_7DAYS(JJ)
+       DGMI%XSNOWRAM_SONDE(JI, KPATCH)= PKDI%XP_SNOWRAM_SONDE(JJ)
+       DGMI%XSNOW_REFROZENTHICKNESS(JI, KPATCH)= PKDI%XP_SNOW_REFROZENTHICKNESS(JJ)     
+       DGMI%XSNOW_WETTHICKNESS(JI, KPATCH)= PKDI%XP_SNOW_WETTHICKNESS(JJ)
+     ENDIF
      !
   END DO
 !
@@ -202,10 +229,31 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         !
         DGMI%XSNOWLIQ (JI,JK,KPATCH)  =  PKDI%XP_SNOWLIQ    (JJ,JK)
         DGMI%XSNOWTEMP(JI,JK,KPATCH)  =  PKDI%XP_SNOWTEMP   (JJ,JK)
+        
+        IF (DGMI%LPROSNOW) THEN
+          DGMI%XSNOWDZ(JI,JK,KPATCH)=PKDI%XP_SNOWDZ(JJ,JK)
+          DGMI%XSNOWDEND(JI,JK,KPATCH)=PKDI%XP_SNOWDEND(JJ,JK)
+          DGMI%XSNOWSPHER(JI,JK,KPATCH)=PKDI%XP_SNOWSPHER(JJ,JK)
+          DGMI%XSNOWSIZE(JI,JK,KPATCH)=PKDI%XP_SNOWSIZE(JJ,JK)          
+          DGMI%XSNOWSSA(JI,JK,KPATCH)=PKDI%XP_SNOWSSA(JJ,JK)
+          DGMI%XSNOWTYPEMEPRA(JI,JK,KPATCH)=PKDI%XP_SNOWTYPEMEPRA(JJ,JK)
+          DGMI%XSNOWRAM(JI,JK,KPATCH)=PKDI%XP_SNOWRAM(JJ,JK)
+          DGMI%XSNOWSHEAR(JI,JK,KPATCH)=PKDI%XP_SNOWSHEAR(JJ,JK)
+        ENDIF
+        
         !
       END DO
     ENDDO
+  ENDIF
      !
+  IF (HSNOW=='CRO') THEN
+    DO JJ=1,KSIZE
+      JI                      =  KMASK         (JJ)
+      !
+      DGMI%XSYTMASS (JI,KPATCH)  =  PKDI%XP_SYTMASS    (JJ)
+      DGMI%XSYTMASSC(JI,KPATCH)  =  DGMI%XSYTMASSC(JI,KPATCH)+PKDI%XP_SYTMASS(JJ)*PTSTEP
+      !
+    END DO
   ENDIF
 !
 ! cosine of solar zenith angle 

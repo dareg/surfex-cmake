@@ -588,6 +588,7 @@ PTRAD = IM%I%XTSRAD_NAT
 !
  CALL AVERAGE_DIAG_ISBA_n(IM%DGEI, IM%DGI, IM%I, &
                           PUREF,PZREF,PSFCO2,PTRAD)
+
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
@@ -689,6 +690,7 @@ REAL, DIMENSION(KSIZE)      :: ZP_ALBVIS_TSOIL        ! total soil albedo in vis
 REAL, DIMENSION(KSIZE) :: ZP_EMIS                      ! emissivity
 REAL, DIMENSION(KSIZE) :: ZP_GLOBAL_SW                 ! global incoming SW rad.
 REAL, DIMENSION(KSIZE) :: ZP_SLOPE_COS                 ! typical slope in the grid cosine
+REAL, DIMENSION(KSIZE) :: ZP_SLOPE_DIR                 ! typical slope aspect in the grid 
 !
 REAL, DIMENSION(KSIZE) :: ZP_Z0FLOOD  !Floodplain 
 REAL, DIMENSION(KSIZE) :: ZP_FFGNOS   !Floodplain fraction over the ground without snow
@@ -858,10 +860,15 @@ END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Cosine of the slope typically encoutered in the grid mesh (including subgrid orography)
+!  and orientation of this slope
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 ZP_SLOPE_COS(:) = 1./SQRT(1.+IM%PKI%XP_SSO_SLOPE(:)**2)
-IF(LNOSOF)ZP_SLOPE_COS(:) = 1.0
+ZP_SLOPE_DIR(:) = +IM%PKI%XP_SSO_DIR(:)
+IF(LNOSOF) THEN
+    ZP_SLOPE_COS(:) = 1.0
+    ZP_SLOPE_DIR(:) = -1.0
+ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Snow fractions
@@ -963,9 +970,9 @@ ZIRRIG_GR(:)= 0.
            IM%I%CCPSURF, IM%I%CSOILFRZ, IM%I%CDIFSFCOND, IM%I%TTIME, IM%I%LFLOOD, &
            IM%I%LTEMP_ARP, IM%I%LGLACIER, GMEB, IM%I%LFORC_MEASURE, IM%I%LMEB_LITTER, PTSTEP, &
            CIMPLICIT_WIND, IM%I%LAGRI_TO_GRASS, IM%I%LSNOWDRIFT, IM%I%LSNOWDRIFT_SUBLIM, &
-           IM%I%LSNOW_ABS_ZENITH, IM%I%CSNOWMETAMO, IM%I%CSNOWRAD, IM%I%XCGMAX, ZP_ZREF, &
-           ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, &
-           ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND, ZP_PEW_A_COEF, &
+           IM%I%LSNOW_ABS_ZENITH, IM%I%CSNOWMETAMO, IM%I%CSNOWRAD, IM%I%LSNOWSYTRON, IM%I%XCGMAX, ZP_ZREF, &
+           ZP_UREF, ZP_SLOPE_COS, ZP_SLOPE_DIR, ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, &
+           ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, &
            ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,  ZP_PET_B_COEF, ZP_PEQ_B_COEF, &
            IM%PKI%XP_RSMIN, IM%PKI%XP_RGL, IM%PKI%XP_GAMMA, IM%PKI%XP_CV, IM%PKI%XP_RUNOFFD, &
            IM%PKI%XP_SOILWGHT, IM%I%NLAYER_HORT, IM%I%NLAYER_DUN, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG,  &
@@ -1020,7 +1027,12 @@ ZIRRIG_GR(:)= 0.
            IM%PKDI%XP_H_N_C, IM%PKDI%XP_LE_C_A, IM%PKDI%XP_LE_V_C, IM%PKDI%XP_LE_G_C,IM%PKDI%XP_LE_N_C, &
            IM%PKDI%XP_EVAP_N_C, IM%PKDI%XP_EVAP_G_C, IM%PKDI%XP_SR_GN, IM%PKDI%XP_MELTCV, IM%PKDI%XP_FRZCV,   &
            IM%PKDI%XP_SWDOWN_GN, IM%PKDI%XP_LWDOWN_GN, ZIRRIG_GR, IM%PKI%XP_TOPQS, IM%PKDI%XP_QSB, IM%PKDI%XP_SUBL, &
-           IM%PKI%XP_FWTD, IM%PKI%XP_WTD, IM%PKDI%XP_SNDRIFT               )
+           IM%PKI%XP_FWTD, IM%PKI%XP_WTD, IM%PKDI%XP_SNDRIFT, IM%PKI%NP_TAB_SYT, IM%PKDI%XP_SYTMASS,&
+           IM%PKDI%XP_SNOWDEND,IM%PKDI%XP_SNOWSPHER,IM%PKDI%XP_SNOWSIZE,IM%PKDI%XP_SNOWSSA,&
+           IM%PKDI%XP_SNOWTYPEMEPRA,IM%PKDI%XP_SNOWRAM,       &
+           IM%PKDI%XP_SNOWSHEAR,IM%PKDI%XP_SNOWDEPTH_1DAYS,IM%PKDI%XP_SNOWDEPTH_3DAYS,IM%PKDI%XP_SNOWDEPTH_5DAYS,         &
+           IM%PKDI%XP_SNOWDEPTH_7DAYS,IM%PKDI%XP_SNOWSWE_1DAYS,IM%PKDI%XP_SNOWSWE_3DAYS,IM%PKDI%XP_SNOWSWE_5DAYS,         &
+           IM%PKDI%XP_SNOWSWE_7DAYS,IM%PKDI%XP_SNOWRAM_SONDE,IM%PKDI%XP_SNOW_WETTHICKNESS,IM%PKDI%XP_SNOW_REFROZENTHICKNESS)
 !
 ZP_TRAD=IM%PKDI%XP_TSRAD
 !
@@ -1324,7 +1336,7 @@ ZP_QSURF (:) = IM%PKDI%XP_QS (:)
                       IM%PKI%XP_PSN, IM%PKI%XP_PSNG, IM%PKI%XP_PSNV, IM%PKI%XP_FF, IM%PKI%XP_FFG, IM%PKI%XP_FFV,        &
                       IM%PKI%XP_WG, IM%PKI%XP_WGI, IM%PKI%XP_WFC, IM%PKI%XP_WWILT, IM%PKI%XP_SNOWSWE, IM%PKI%XP_SNOWRHO,&
                       IM%PKI%XP_FAPARC, IM%PKI%XP_FAPIRC, IM%PKI%XP_LAI_EFFC, IM%PKI%XP_MUS, IM%PKI%XP_FSAT,     &
-                      IM%PKI%XP_DG, IM%PKI%XP_TG       )                  
+                      IM%PKI%XP_DG, IM%PKI%XP_TG, ZP_SLOPE_COS )                  
 !
 ! Unpack ISBA diagnostics (modd_diag_isban) for each patch:ISIZE_MAX = MAXVAL(NSIZE_NATURE_P)
 

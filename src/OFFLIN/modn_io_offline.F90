@@ -89,6 +89,11 @@ INTEGER          :: NHALO = 2
 REAL             :: XTSTEP_SURF   = 300.   ! time step of the surface 
 REAL             :: XTSTEP_OUTPUT = 1800.  ! time step of the output time-series
 INTEGER          :: NB_READ_FORC  = 0      ! subdivisions of the reading of forcings
+
+!*    Allow the simulation to start from a different time step than the first record of a netcdf file
+!     ----------
+LOGICAL          :: LDELAYEDSTART_NC = .FALSE.
+INTEGER,DIMENSION(4) :: NDATESTOP=(/0,0,0,0/) ! Year month day time (sec) to stop the simulation before the end of the netcdf forcing file
 !
 !*    General flag for coherence between forcing file orography and surface file orography
 !     ----------
@@ -145,7 +150,8 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
                         LSHADOWS_SLOPE,LSHADOWS_OTHER,                           &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
-                        YALG_MPI, XDELTA_OROG, LADAPT_SW
+                        YALG_MPI, XDELTA_OROG, LADAPT_SW,                        &
+                        LDELAYEDSTART_NC,NDATESTOP
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE

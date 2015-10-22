@@ -294,6 +294,135 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XAVG_TTSNOW(:),IRESP,HCOMMENT=YCOMMENT)
   !
+  IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+    !
+    IF (DGU%LSNOWDIMNC) THEN
+      YCOMMENT='snow liquid water (m)'
+      CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWLIQ',DGMI%XSNOWLIQ(:,:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YCOMMENT='snow temperature (K)'
+      CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWTEMP',DGMI%XSNOWTEMP(:,:,:),IRESP,HCOMMENT=YCOMMENT)
+      !        
+      IF (DGMI%LPROSNOW) THEN
+        YCOMMENT=  'snow layer thickness'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWDZ',DGMI%XSNOWDZ(:,:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+        YCOMMENT=  'snow layer dendricity'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWDEND',DGMI%XSNOWDEND(:,:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+        YCOMMENT='snow layer sphericity'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWSPHER',DGMI%XSNOWSPHER(:,:,:),IRESP,HCOMMENT=YCOMMENT)      
+      !
+        YCOMMENT='snow layer grain size'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWSIZE',DGMI%XSNOWSIZE(:,:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+        YCOMMENT='snow layer specific surface area'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWSSA',DGMI%XSNOWSSA(:,:,:),IRESP,HCOMMENT=YCOMMENT)   
+      !
+        YCOMMENT='snow layer grain type'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWTYPE',DGMI%XSNOWTYPEMEPRA(:,:,:),IRESP,HCOMMENT=YCOMMENT)      
+      !
+        YCOMMENT='snow layer ram resistance'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWRAM',DGMI%XSNOWRAM(:,:,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+        YCOMMENT='snow layer shear resistance'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SNOWSHEAR',DGMI%XSNOWSHEAR(:,:,:),IRESP,HCOMMENT=YCOMMENT)                   
+      ENDIF
+                
+    ELSE
+      DO JLAYER=1,I%TSNOW%NLAYER
+      !
+        WRITE(YLVL,'(I2)') JLAYER
+      !
+        YRECFM='SNOWLIQ'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+        YFORM='(A17,I1.1,A4)'
+        IF (JLAYER >= 10)  YFORM='(A17,I2.2,A4)'
+        WRITE(YCOMMENT,FMT=YFORM) 'snow liquid water',JLAYER,' (m)'
+        CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGMI%XSNOWLIQ(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+        YRECFM='SNOWTEMP'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+        YFORM='(A16,I1.1,A4)'
+        IF (JLAYER >= 10)  YFORM='(A16,I2.2,A4)'
+        WRITE(YCOMMENT,FMT=YFORM) 'snow temperature',JLAYER,' (K)'
+        CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGMI%XSNOWTEMP(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      END DO
+    END IF
+    
+    IF (DGMI%LPROSNOW) THEN
+      YCOMMENT='accumulated snow thickness for past 1 days'
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_1DAYS',DGMI%XAVG_SNOWDEPTH_1DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                 
+      YCOMMENT='accumulated snow thickness for past 3 days'        
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_3DAYS',DGMI%XAVG_SNOWDEPTH_3DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                 
+      YCOMMENT='accumulated snow thickness for past 5 days'
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_5DAYS',DGMI%XAVG_SNOWDEPTH_5DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                  
+      YCOMMENT='accumulated snow thickness for past 7 days'  
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_7DAYS',DGMI%XAVG_SNOWDEPTH_7DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                  
+      YCOMMENT='accumulated snow water equivalent for past 1 days'  
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_1DAYS',DGMI%XAVG_SNOWSWE_1DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                 
+      YCOMMENT='accumulated snow water equivalent for past 3 days'      
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_3DAYS',DGMI%XAVG_SNOWSWE_3DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                 
+      YCOMMENT='accumulated snow water equivalent for past 5 days'  
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_5DAYS',DGMI%XAVG_SNOWSWE_5DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                  
+      YCOMMENT='accumulated snow water equivalent for past 7 days'     
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_7DAYS',DGMI%XAVG_SNOWSWE_7DAYS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                  
+      YCOMMENT='Penetration of ram resistance sensor (2 daN)'              
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'RAM_SONDE',DGMI%XAVG_SNOWRAM_SONDE(:),IRESP,&
+              HCOMMENT=YCOMMENT)                   
+      YCOMMENT='Thickness of wet snow at the top of the snowpack'  
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'WET_TH',DGMI%XAVG_SNOW_WETTHICKNESS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                  
+      YCOMMENT='Thickness of refrozen snow at the top of the snowpack'
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'REFROZ_TH',DGMI%XAVG_SNOW_WETTHICKNESS(:),IRESP,&
+              HCOMMENT=YCOMMENT)                                 
+    ENDIF
+    
+    !        
+  ENDIF
+
+  IF(I%TSNOW%SCHEME=='CRO') THEN
+      YRECFM='SYTFLX_ISBA'
+      YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
+      CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGMI%XAVG_SYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
+      ! 
+      YRECFM='SYTFLXC_ISBA'
+      YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
+      CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGMI%XAVG_SYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
+  ENDIF
+  !
   !        2.6    SGH scheme
   !               ----------
   !
@@ -532,6 +661,66 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         !
       END DO
       !        
+    ENDIF
+    
+        
+    IF (DGMI%LPROSNOW) THEN
+      YCOMMENT='accumulated snow thickness for past 1 days per patch'
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_1DAYS_P',DGMI%XSNOWDEPTH_1DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT=   'accumulated snow thickness for past 3 days per patch'   
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_3DAYS_P',DGMI%XSNOWDEPTH_3DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT=  'accumulated snow thickness for past 5 days per patch'
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_5DAYS_P',DGMI%XSNOWDEPTH_5DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='accumulated snow thickness for past 7 days per patch'      
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SD_7DAYS_P',DGMI%XSNOWDEPTH_7DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='accumulated snow water equivalent for past 1 days per patch'   
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_1DAYS_P',DGMI%XSNOWSWE_1DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='accumulated snow water equivalent for past 3 days per patch'      
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_3DAYS_P',DGMI%XSNOWSWE_3DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='accumulated snow water equivalent for past 5 days per patch'  
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_5DAYS_P',DGMI%XSNOWSWE_5DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='accumulated snow water equivalent for past 7 days per patch'      
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SWE_7DAYS_P',DGMI%XSNOWSWE_7DAYS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='Penetration of ram resistance sensor (2 daN) per patch'               
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'RAM_SONDE_P',DGMI%XSNOWRAM_SONDE(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='Thickness of wet snow at the top of the snowpack per patch'    
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'WET_TH_P',DGMI%XSNOW_WETTHICKNESS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT) 
+      YCOMMENT='Thickness of refrozen snow at the top of the snowpack per patch'
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'REFROZ_TH_P',DGMI%XSNOW_WETTHICKNESS(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)                
+    ENDIF
+    
+    IF (I%TSNOW%SCHEME=='CRO') THEN
+        YRECFM='SYTFLX_P'
+        YCOMMENT='Sytron_erosion_accumulation_flux (kg/m2/s) per patch'
+        CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGMI%XSYTMASS(:,:),IRESP,HCOMMENT=YCOMMENT)
+        ! 
+        YRECFM='SYTFLXC_P'
+        YCOMMENT='Total_Sytron_erosion_accumulation_mass (kg/m2) patch'
+        CALL WRITE_SURF(DGU, U, &
+                  HPROGRAM,YRECFM,DGMI%XSYTMASSC(:,:),IRESP,HCOMMENT=YCOMMENT)
     ENDIF
     !
   END IF

@@ -27,6 +27,7 @@ SUBROUTINE PACK_DIAG_PATCH_GET_SIZE_n (DGEI, DGI, DGMI, I, PKDI, &
 !!      Modified       2008 by B. Decharme : Allocation for the floodplains
 !!      Modified      04-09 by A.L. Gibelin : Add carbon diagnostics
 !!      Modified      10-14 by P. Samuelsson: MEB
+!!      Modified      09-15 by M. Lafaysse: new Crocus-MEPRA outputs
 !!
 !!------------------------------------------------------------------
 !
@@ -68,6 +69,10 @@ PKDI%NSIZE_00=0
 IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
   PKDI%NSIZE_SIMPLE=PKDI%NSIZE_SIMPLE+25
   PKDI%NSIZE_SNOW=PKDI%NSIZE_SNOW+2
+  IF (DGMI%LPROSNOW) THEN
+    PKDI%NSIZE_SIMPLE=PKDI%NSIZE_SIMPLE+11
+    PKDI%NSIZE_SNOW=PKDI%NSIZE_SNOW+7
+  ENDIF
 ELSE
   PKDI%NSIZE_0=PKDI%NSIZE_0+25
   PKDI%NSIZE_00=PKDI%NSIZE_00+2 
@@ -83,6 +88,12 @@ IF(I%TSNOW%SCHEME=='EBA') THEN
   PKDI%NSIZE_SIMPLE=PKDI%NSIZE_SIMPLE+2 
 ELSE
   PKDI%NSIZE_0=PKDI%NSIZE_0+2 
+ENDIF
+!
+IF(I%TSNOW%SCHEME=='CRO') THEN
+  PKDI%NSIZE_SIMPLE=PKDI%NSIZE_SIMPLE+1 
+ELSE
+  PKDI%NSIZE_0=PKDI%NSIZE_0+1
 ENDIF
 !
 IF (I%LTR_ML) THEN

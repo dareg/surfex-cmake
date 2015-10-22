@@ -488,6 +488,13 @@ YRECFM='SSO_STDEV'
  CALL READ_SURF(&
                 HPROGRAM,YRECFM,I%XSSO_STDEV(:),IRESP)
 !
+!* direction of subgrid-scale orography  
+!
+ALLOCATE(I%XSSO_DIR(IG%NDIM))
+YRECFM='SSO_DIR'
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,I%XSSO_DIR(:),IRESP)
+!
 !* orographic runoff coefficient
 !
 ALLOCATE(I%XRUNOFFB(IG%NDIM))

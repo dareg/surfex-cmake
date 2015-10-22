@@ -96,8 +96,13 @@ TYPE PACK_ISBA_t
 ! General surface parameters:
 !
   REAL, POINTER, DIMENSION(:)    :: XP_SSO_SLOPE     ! orography slope within the grid mesh    (-)
+  REAL, POINTER, DIMENSION(:)    :: XP_SSO_DIR       ! orography direction within the grid mesh  (deg)
   REAL, POINTER, DIMENSION(:)    :: XP_LAT           ! latitude    (-)
   REAL, POINTER, DIMENSION(:)    :: XP_LON           ! latitude    (-)
+!
+!  Sytron parameters
+!
+  INTEGER, POINTER, DIMENSION(:)    :: NP_TAB_SYT       !  Array of indexes defining opposite points for Sytron
 !
 ! Subgrid orography parameters
 !

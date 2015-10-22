@@ -47,6 +47,7 @@ USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 !
 USE MODD_TREEDRAG,    ONLY : LTREEDRAG
+USE MODD_SYTRON_PAR,   ONLY : NTAB_SYT                             
 USE MODD_AGRI,        ONLY : LAGRIP
                              
 
@@ -230,7 +231,11 @@ PKI%XP_HO2JM        => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 PKI%XP_SSO_SLOPE    => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
+PKI%XP_SSO_DIR      => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 PKI%XP_GAMMAT       => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
+ISIZE_NSIMPLE = ISIZE_NSIMPLE + 1
+PKI%NP_TAB_SYT      => PKI%NBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 PKI%XP_TDEEP        => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -929,6 +934,8 @@ IF (I%NPATCH==1) THEN
   PKI%XP_HO2JP        (:)    =    I%XHO2JP        (:)
   PKI%XP_HO2JM        (:)    =    I%XHO2JM        (:)
   PKI%XP_SSO_SLOPE    (:)    =    I%XSSO_SLOPE    (:)
+  PKI%XP_SSO_DIR      (:)    =    I%XSSO_DIR      (:)
+  PKI%NP_TAB_SYT      (:)    =    NTAB_SYT      (:)
   PKI%XP_GAMMAT       (:)    =    I%XGAMMAT       (:)
   PKI%XP_TDEEP        (:)    =    I%XTDEEP        (:)  
   PKI%XP_LAT          (:)    =    IG%XLAT          (:)
@@ -1229,6 +1236,7 @@ ELSE
     PKI%XP_HO2JP        (JJ)    =    I%XHO2JP        (JI)
     PKI%XP_HO2JM        (JJ)    =    I%XHO2JM        (JI)
     PKI%XP_SSO_SLOPE    (JJ)    =    I%XSSO_SLOPE    (JI)
+    PKI%XP_SSO_DIR      (JJ)    =    I%XSSO_DIR      (JI)
     PKI%XP_GAMMAT       (JJ)    =    I%XGAMMAT       (JI)
     PKI%XP_TDEEP        (JJ)    =    I%XTDEEP        (JI) 
     PKI%XP_LAT          (JJ)    =    IG%XLAT          (JI)

@@ -66,11 +66,11 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
                        LCOEF,LSURF_VARS,LSURF_EVAP_BUDGET,        &
                        LSURF_MISC_BUDGET,LSURF_DIAG_ALBEDO,       &
                        LSURF_BUDGETC,LSURF_MISC_DIF,LPATCH_BUDGET,&
-                       LPGD,LRESET_BUDGETC,LWATER_BUDGET,         &
+                       LPGD,LRESET_BUDGETC,LWATER_BUDGET,LPROSNOW,&
                        XDIAG_TSTEP                                )     
 !      
  CALL DEFAULT_CROCUS(LSNOWDRIFT,LSNOWDRIFT_SUBLIM,LSNOW_ABS_ZENITH,&
-                     CSNOWMETAMO,CSNOWRAD)
+                     CSNOWMETAMO,CSNOWRAD,LSNOWSYTRON)
 !
  CALL READ_DEFAULT_ISBA_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I, &
                           HPROGRAM)

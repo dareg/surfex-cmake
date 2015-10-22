@@ -72,6 +72,27 @@ END SUBROUTINE WRITE_SURFX2
 !
 !RJ: interface to WRITE_SURFX2COV moved out
 !
+     SUBROUTINE WRITE_SURFX3 (DGU, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
+REAL, DIMENSION(:,:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
+INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+!                                             ! 'H' : field with
+!                                             !       horizontal spatial dim.
+!                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+END SUBROUTINE WRITE_SURFX3
+
      SUBROUTINE WRITE_SURFN0 (DGU, U, &
                               HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
 !
@@ -693,6 +714,88 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFX2
+
+
+
+
+!     #############################################################
+      SUBROUTINE WRITE_SURFX3 (DGU, U, &
+                              HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!     #############################################################
+!
+!!****  *WRITEX3* - routine to fill a real 3D array for the externalised surface 
+!
+!
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+#ifdef SFX_OL
+USE MODE_WRITE_SURF_OL, ONLY: WRITE_SURFL1X3_OL
+#endif
+
+!
+USE MODI_TEST_RECORD_LEN
+!
+IMPLICIT NONE
+!
+!*      0.1   Declarations of arguments
+!
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
+REAL, DIMENSION(:,:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
+INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+!                                             ! 'H' : field with
+!                                             !       horizontal spatial dim.
+!                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+!*      0.2   Declarations of local variables
+!
+ CHARACTER(LEN=12)  :: YREC
+INTEGER            :: IL1
+INTEGER            :: IL2
+ CHARACTER(LEN=1)   :: YDIR
+LOGICAL :: LNOWRITE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',0,ZHOOK_HANDLE)
+!
+YREC = HREC
+YDIR = 'H'
+IF (PRESENT(HDIR)) YDIR = HDIR
+IL1  = SIZE(PFIELD,1)
+IL2  = SIZE(PFIELD,2)
+!
+ CALL TEST_RECORD_LEN(DGU, &
+                      HPROGRAM,YREC,LNOWRITE)
+IF(LNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',1,ZHOOK_HANDLE)
+IF(LNOWRITE)RETURN
+!
+IF (HPROGRAM=='OFFLIN') THEN
+#ifdef SFX_OL
+  CALL WRITE_SURFL1X3_OL(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX3
+
+
+
+
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN0 (DGU, U, &
