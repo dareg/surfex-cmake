@@ -1913,7 +1913,7 @@ ZWORK(:) = 0.0
 IF(OMEB_LITTER)THEN
    PTGL(:,1)                  = PTL(:)
    ZWORK(:)                   = PWRL(:)/PGNDLITTER(:)
-   PSOILHCAPL(:,1)            = (Z1*Z2+Z3*1000/XRHOLW)*ZWORK(:)
+   PSOILHCAPL(:,1)            = Z1*Z2 + Z3*1000/XRHOLW*ZWORK(:)
    PSOILCONDL(:,1)            = Z4 +  (Z5/XRHOLW)     *ZWORK(:)
    PWSATL(:,1)                = Z6
    PWFCL(:,1)                 = Z7
