@@ -733,6 +733,11 @@ PFAPIR_BS(:)       = 0.
 PRRLIT(:)          =0.0
 PDRIPLIT(:)        =0.0
 !
+PLEGI(:)  = 0.
+PLEG(:)   = 0.
+ZLESFCI(:)= 0.
+ZLESFC(:) = 0.
+!
 ZIACAN_SUNLIT(:,:) = XUNDEF
 ZIACAN_SHADE(:,:)  = XUNDEF
 ZFRAC_SUN (:,:)    = XUNDEF
@@ -741,7 +746,6 @@ ZALBVIS_TSOIL(:)   = XUNDEF
 ZALBNIR_TSOIL(:)   = XUNDEF
 ZSWNET_S(:)        = XUNDEF
 ZQSAT(:)           = XUNDEF
-!
 !
 !*      1.1    Preliminaries for litter parameters
 !              -----------------------------------
