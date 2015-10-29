@@ -2989,7 +2989,7 @@ ZSNOWGONE_DELTA(:)    = 1.0
 ! actual inflow of heat from below (as heat content correction owing to a corrected
 ! flux has not yet been done: here we compare to pre-corrected heat content).
 !
-WHERE(PGFLUXSNOW(:) + PRADSINK(:) >= (-ZSNOWHEATC(:)/PTSTEP) .AND. ZSNOW(:) <= XSNOWDZMIN)
+WHERE(PGFLUXSNOW(:) + PRADSINK(:) >= (-ZSNOWHEATC(:)/PTSTEP) )
    PGRNDFLUX(:)       = PGFLUXSNOW(:) + (ZSNOWHEATC(:)/PTSTEP)
    PEVAPCOR(:)        = (PLEL3L(:)/XLVTT) + (PLES3L(:)/XLSTT)
    PRADXS(:)          = 0.0
