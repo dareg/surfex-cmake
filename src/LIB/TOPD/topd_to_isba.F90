@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA (I, UG, U, &
-                               KI,KSTEP,GTOPD)
+      SUBROUTINE TOPD_TO_ISBA(KI,KSTEP,GTOPD)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -35,24 +34,18 @@
 !!    AUTHOR
 !!    ------
 !!
-!!      K. Chancibault  * LTHE / Meteo-France *
+!!      K. Chancibault	* LTHE / Meteo-France *
 !!
 !!    MODIFICATIONS
 !!    -------------
 !!
 !!      Original   09/10/2003
 !!                 03/2014 (B. Vincendon) correction for meshes covered by several watersheds
-!!                 03/2015 (E. Artinyan) YSTEP jusqu'a 99999 steps
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_UNPACK_SAME_RANK
 !
@@ -60,13 +53,15 @@ USE MODI_WRITE_FILE_ISBAMAP
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
 !
-USE MODD_TOPD_PAR, ONLY : NUNIT
 USE MODD_TOPODYN,         ONLY : NNCAT, NNMC, NNB_TOPD_STEP
 USE MODD_COUPLING_TOPD,   ONLY : XWG_FULL, XDTOPT, XWTOPT, XWSUPSAT,&
                                  NMASKT, XTOTBV_IN_MESH, NNPIX,&
                                  NFREQ_MAPS_WG, XBV_IN_MESH,NNBV_IN_MESH
 !
+USE MODD_ISBA_n,          ONLY : XWSAT
+USE MODD_SURF_ATM_GRID_n, ONLY : XMESH_SIZE
 USE MODD_SURF_PAR,        ONLY : XUNDEF,NUNDEF
+USE MODD_SURF_ATM_n,      ONLY : NR_NATURE
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -77,11 +72,6 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-!
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 INTEGER, INTENT(IN)                 :: KSTEP   ! Topodyn current time step
 LOGICAL, DIMENSION(:), INTENT(INOUT)   :: GTOPD     ! 
@@ -90,6 +80,7 @@ LOGICAL, DIMENSION(:), INTENT(INOUT)   :: GTOPD     !
 !
 !
 INTEGER                   :: JJ, JI , JMESH, JCAT         ! loop control 
+INTEGER                   :: IUNIT               
 REAL, DIMENSION(KI)       :: ZW              ! TOPODYN water content on ISBA grid (mm)
 REAL, DIMENSION(KI)       :: ZWSAT_FULL      ! Water content at saturation on the layer 2 
                                           ! on the full grid
@@ -140,9 +131,9 @@ DO JMESH=1,KI
    IF (XTOTBV_IN_MESH(JMESH)==XBV_IN_MESH(JMESH,JCAT)) THEN ! only 1 catchment on mesh
     JCAT_IN=JCAT
     IF (GTOPD(JCAT).AND. NNBV_IN_MESH(JMESH,JCAT) /=0.) THEN
-     IF (XBV_IN_MESH(JMESH,JCAT)>=UG%XMESH_SIZE(JMESH)*0.75) THEN ! catchment covers totaly mesh
+     IF (XBV_IN_MESH(JMESH,JCAT)>=XMESH_SIZE(JMESH)*0.75.AND. ZCOUNT(JMESH,JCAT)/=0.) THEN ! catchment covers totaly mesh
      ZW(JMESH) = ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT) 
-     ELSE
+     ELSEIF(ZCOUNT(JMESH,JCAT)/=0.)THEN
       ZW(JMESH) = ZW_CAT(JMESH,JCAT) /  ZCOUNT(JMESH,JCAT) 
      ENDIF
 
@@ -155,11 +146,11 @@ DO JMESH=1,KI
   IF(ZW(JMESH)==0.0) JCAT_IN=0 ! several catchments on the same mesh
   !
   IF (JCAT_IN==0) THEN  ! several catchments on the same mesh
-   IF (XTOTBV_IN_MESH(JMESH)>=UG%XMESH_SIZE(JMESH)*0.75) THEN ! catchmentS cover totaly mesh
+   IF (XTOTBV_IN_MESH(JMESH)>=XMESH_SIZE(JMESH)*0.75) THEN ! catchmentS cover totaly mesh
     DO JCAT=1,NNCAT
      IF (GTOPD(JCAT).AND. ZCOUNT(JMESH,JCAT)/=0.) THEN
       ZW(JMESH) = ZW(JMESH) + ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT) *&
-                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/UG%XMESH_SIZE(JMESH)))
+                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/XMESH_SIZE(JMESH)))
      ELSE
       ZW(JMESH)=0.
      ENDIF
@@ -169,7 +160,7 @@ DO JMESH=1,KI
     DO JCAT=1,NNCAT
      IF (GTOPD(JCAT).AND. ZCOUNT(JMESH,JCAT)/=0.) THEN
       ZW(JMESH) = ZW(JMESH) + ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT)*&
-                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/UG%XMESH_SIZE(JMESH)))
+                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/XMESH_SIZE(JMESH)))
      ELSE
       ZW(JMESH)=0.
      ENDIF
@@ -187,7 +178,7 @@ ENDDO
 XWG_FULL(:) = MAX(ZW(:),XWGMIN)
 !
 !
- CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XWSAT(:,2),ZWSAT_FULL)
+ CALL UNPACK_SAME_RANK(NR_NATURE,XWSAT(:,2),ZWSAT_FULL)
 !
 XWSUPSAT=0.
 !ludo glace Wsat varie
@@ -206,16 +197,15 @@ IF ( (NFREQ_MAPS_WG/=0 .AND. MOD(KSTEP,NFREQ_MAPS_WG)==0) .OR.&
     WRITE(YSTEP,'(I2)') KSTEP
   ELSEIF (KSTEP < 1000) THEN
     WRITE(YSTEP,'(I3)') KSTEP
-  ELSEIF (KSTEP < 10000) THEN
+   ELSEIF (KSTEP < 10000) THEN
     WRITE(YSTEP,'(I4)') KSTEP
-  ELSE
+   ELSE
     WRITE(YSTEP,'(I5)') KSTEP
   ENDIF
   !
-  CALL OPEN_FILE('ASCII ',NUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')
-  CALL WRITE_FILE_ISBAMAP(UG, &
-                          NUNIT,XWG_FULL,KI)
-  CALL CLOSE_FILE('ASCII ',NUNIT)
+  CALL OPEN_FILE('ASCII ',IUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')
+  CALL WRITE_FILE_ISBAMAP(IUNIT,XWG_FULL,KI)
+  CALL CLOSE_FILE('ASCII ',IUNIT)
   !
 ENDIF
 !
