@@ -88,6 +88,7 @@ REAL, DIMENSION(:,:),   POINTER     :: ZD1            ! layer thicknesses, one p
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT           !
 REAL, DIMENSION(:), ALLOCATABLE     :: ZMASK
 INTEGER                             :: JPATCH, JL       ! loop counter for patch
+INTEGER :: IVERSION
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -112,9 +113,16 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_EXTERN',0,ZHOOK_HANDLE)
  CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
+YRECFM='VERSION'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+!
 ALLOCATE(ZMASK(INI))
-YRECFM='FRAC_NATURE'
- CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+IF (IVERSION>=7) THEN 
+  YRECFM='FRAC_NATURE'
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+ELSE
+  ZMASK(:) = 1.
+ENDIF
 !
 !---------------------------------------------------------------------------------------
 !
