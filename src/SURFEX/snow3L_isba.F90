@@ -89,6 +89,10 @@ USE MODI_SNOWCRO
 USE MODI_SNOWCRO_DIAG
 USE MODI_SNOW_SYTRON
 !
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE, ONLY : XTSTEP_OUTPUT
+#endif
+!
 USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -368,6 +372,9 @@ INTEGER                            :: ISIZE_SNOW ! number of points where comput
 INTEGER, DIMENSION(SIZE(PTA))      :: NMASK      ! indices correspondance between arrays
 !
 LOGICAL, DIMENSION(SIZE(PTA))      :: LREMOVE_SNOW
+
+LOGICAL :: GCOMPUTECRODIAG ! flag to compute Crocus-MEPRA diagnostics
+
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -983,9 +990,15 @@ IF (HSNOW_ISBA=='CRO') THEN
   ZP_FLSN_COR(:) = 0.0
   ZP_SOILCOR (:) = 0.0
 !
+   !SIZE(PSNOWDEND)>1 is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
+#ifdef SFX_OL
+  GCOMPUTECRODIAG=(SIZE(PSNOWDEND)>1)
+#else
+  GCOMPUTECRODIAG=(SIZE(PSNOWDEND)>1).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT) == 0.)
+#endif
+
    !Ajout test sur pas de temps de sortie
-   IF (SIZE(PSNOWDEND)>1) THEN
-     ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
+   IF (GCOMPUTECRODIAG) THEN
      CALL SNOWCRO_DIAG(ZP_SNOWDZ,ZP_SNOWSWE,ZP_SNOWRHO,ZP_SNOWGRAN1,ZP_SNOWGRAN2,ZP_SNOWAGE,ZP_SNOWHIST,ZP_SNOWTEMP,&
                      ZP_SNOWLIQ,ZP_DIRCOSZW,ZP_SNOWDEND,ZP_SNOWSPHER,ZP_SNOWSIZE,ZP_SNOWSSA,ZP_SNOWTYPEMEPRA,     &
                      ZP_SNOWRAM, ZP_SNOWSHEAR,ZP_SNOWDEPTH_1DAYS,ZP_SNOWDEPTH_3DAYS,ZP_SNOWDEPTH_5DAYS,           &
