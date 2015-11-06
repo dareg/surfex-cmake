@@ -723,7 +723,9 @@ END IF
 !
 ! initialization routines to define sytron grid
 IF(GSNOWSYTRON) THEN
+  IF (NBLOCK==0) THEN
     CALL INIT_SYTRON_TABLE(YSURF_CUR%IM%I,ZZS_FORC,INI,ZLAT,ZLON)
+  END IF
 ELSE
     ALLOCATE(NTAB_SYT(INI))
     NTAB_SYT(:)=-999
