@@ -992,6 +992,7 @@ IF (HSNOW_ISBA=='CRO') THEN
 !
    !SIZE(PSNOWDEND)>1 is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
 #ifdef SFX_OL
+  ! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
   GCOMPUTECRODIAG=(SIZE(PSNOWDEND)>1)
 #else
   GCOMPUTECRODIAG=(SIZE(PSNOWDEND)>1).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT) == 0.)
