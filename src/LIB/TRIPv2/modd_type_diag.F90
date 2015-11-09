@@ -59,8 +59,6 @@ TYPE DIAG
   REAL, DIMENSION(:,:), POINTER :: XQGCELL     ! Grid-cell fluxes budget [m3 s-1]
   REAL, DIMENSION(:,:), POINTER :: XWTD        ! Water table depth       [m]
   REAL, DIMENSION(:,:), POINTER :: XFWTD       ! grid-cell fraction of water table to rise
-  REAL, DIMENSION(:,:), POINTER :: XWTDRIV     ! WTD to river elevation  [m]
-  REAL, DIMENSION(:,:), POINTER :: XWTDELEV    ! WTD to mean elevation   [m]
   REAL, DIMENSION(:,:), POINTER :: XHGHS       ! Hground - Hstream       [m]
 !
 !-------------------------------------------------------------------------------

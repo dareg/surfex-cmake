@@ -1,5 +1,5 @@
-      SUBROUTINE GWF_CPL_UPDATE(PTABGW_H,PTABGW_F,OMASK_GW,PTOPO_RIV,     &
-                                PELEV,PHGROUND,PHG_OLD,PWTD,PFWTD,PWTDELEV)
+      SUBROUTINE GWF_CPL_UPDATE(PTABGW_H,PTABGW_F,OMASK_GW,PTOPO_RIV, &
+                                PHGROUND,PHG_OLD,PWTD,PFWTD           )
 !     ##########################################################################
 !
 !!****  *FLOOD_UPDATE*  
@@ -49,13 +49,11 @@ REAL,    DIMENSION(:,:,:), INTENT(IN)    :: PTABGW_H
 REAL,    DIMENSION(:,:,:), INTENT(IN)    :: PTABGW_F
 LOGICAL, DIMENSION(:,:),   INTENT(IN)    :: OMASK_GW
 REAL,    DIMENSION(:,:),   INTENT(IN)    :: PTOPO_RIV
-REAL,    DIMENSION(:,:),   INTENT(IN)    :: PELEV
 REAL,    DIMENSION(:,:),   INTENT(IN)    :: PHGROUND
 !
 REAL,    DIMENSION(:,:),   INTENT(INOUT) :: PHG_OLD
 REAL,    DIMENSION(:,:),   INTENT(OUT)   :: PWTD
 REAL,    DIMENSION(:,:),   INTENT(OUT)   :: PFWTD
-REAL,    DIMENSION(:,:),   INTENT(OUT)   :: PWTDELEV
 !
 !*      0.2    declarations of local variables
 !
@@ -83,7 +81,6 @@ INFRAC = SIZE(PTABGW_H,3)
 !
 WHERE(OMASK_GW(:,:).AND.PHGROUND(:,:)/=PHG_OLD(:,:))
       PWTD    (:,:) = PHGROUND(:,:)-PTOPO_RIV(:,:)
-      PWTDELEV(:,:) = PHGROUND(:,:)-PELEV(:,:)
       PFWTD   (:,:) = PTABGW_F(:,:,1)
 ENDWHERE
 !

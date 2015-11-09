@@ -4,8 +4,9 @@
                          OMASK_GW,OMASK_VEL,OMASK_FLD,                    &
                          PTAUG,PFLOOD_LEN,PSLOPEBED,PWIDTH,PN,            &
                          PN_FLOOD,PHC_BED,PWFLOOD,PTAB_F,PTAB_H,PTAB_VF,  &
-                         PDRAIN,PRUNOFF,PSOURCE,PGROUND_STO,PSURF_STO,    &
-                         PFLOOD_STO,PSOUT,PGOUT,PHS,PHFLOOD,PVEL,         &
+                         PDRAIN,PRUNOFF,PSOURCE,PHS,PVEL,                 &
+                         PGROUND_STO,PSURF_STO,                           &
+                         PFLOOD_STO,PSOUT,PGOUT,PHFLOOD,                  &
                          PFFLOOD,PQFR,PQRF,PVFIN,PVFOUT,                  &
                          PHSF,PSIN,KTRIP,KTSEPT,KTSTEP_END,               &  
                          PGSTO_ALL,PGSTO2_ALL,PGIN_ALL,PGOUT_ALL,         &
@@ -73,7 +74,7 @@ LOGICAL, DIMENSION(:,:), INTENT(IN)  :: OMASK_GW   !Groundwater mask
 LOGICAL, DIMENSION(:,:), INTENT(IN)  :: OMASK_VEL  !Variable velocity mask
 LOGICAL, DIMENSION(:,:), INTENT(IN)  :: OMASK_FLD  !Floodplain mask
 !
-REAL,DIMENSION(:,:), INTENT(IN)      :: PTAUG      !ground water transfer time  [s]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PTAUG      ! ground water transfer time  [s]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PLEN       ! river length       [m] 
 REAL,DIMENSION(:,:), INTENT(IN)      :: PSLOPEBED  ! river bed slopes             [m/m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PWIDTH     ! river widths                 [m]
@@ -84,6 +85,9 @@ REAL,DIMENSION(:,:), INTENT(IN)      :: PSOURCE    ! precip-infiltration-evapora
 REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m2]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PDRAIN     ! Subsurface runoff from ISBA [kg/s]
 REAL,DIMENSION(:,:), INTENT(INOUT)   :: PRUNOFF    ! Surface runoff from ISBA    [kg/s]
+!
+REAL,DIMENSION(:,:), INTENT(IN)      :: PHS   ! River height [m]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PVEL  ! River channel velocity  [m/s]
 !
 REAL,DIMENSION(:,:), INTENT(INOUT)   :: PHFLOOD    ! Floodplain water depth       [m]
 REAL,DIMENSION(:,:), INTENT(INOUT)   :: PWFLOOD    ! Floodplain width             [m]
@@ -96,8 +100,6 @@ REAL,DIMENSION(:,:), INTENT(INOUT)   :: PFLOOD_STO ! Floodplain water storage at
 REAL,DIMENSION(:,:), INTENT(OUT)     :: PSOUT ! Outflow from the surface river reservoir [kg/s]
 REAL,DIMENSION(:,:), INTENT(OUT)     :: PSIN  ! Inflow to the surface river reservoir [kg/s]
 REAL,DIMENSION(:,:), INTENT(INOUT)   :: PGOUT ! ground water outflow        [kg/s]
-REAL,DIMENSION(:,:), INTENT(OUT)     :: PHS   ! River height [m]
-REAL,DIMENSION(:,:), INTENT(OUT)     :: PVEL  ! River channel velocity  [m/s]
 REAL,DIMENSION(:,:), INTENT(OUT)     :: PQFR  ! Flood flow to river
 REAL,DIMENSION(:,:), INTENT(OUT)     :: PQRF  ! River flow to floodplain
 !
@@ -151,6 +153,7 @@ ZFOUT_ALL   = 0.0
 ZHS_ALL     = 0.0
 ZHF_ALL     = 0.0
 ZFF_ALL     = 0.0
+ZRECUP_ALL  = 0.0
 !
 ZSURF_STO2   (:,:) = 0.0
 ZGROUND_STO2 (:,:) = 0.0
@@ -181,9 +184,9 @@ ENDIF
 IF(OFLOOD)THEN    
 !        
    CALL TRIP_SURFACE_FLOOD(KLISTING,PTSTEP,OPRINT,OMASK_FLD,        &
-                           PTAB_F,PTAB_H,PTAB_VF,PLEN,PAREA,        &
+                           PTAB_F,PTAB_H,PTAB_VF,PAREA,             &
                            PWIDTH,PN_FLOOD,PHC_BED,                 &
-                           PSURF_STO,PFLOOD_STO,PSOURCE,            &
+                           PHS,PSURF_STO,PFLOOD_STO,PSOURCE,        &
                            ZFLOOD_STO2,PHFLOOD,PFFLOOD,PFLOOD_LEN,  &
                            PWFLOOD,PQFR,PQRF,PVFIN,PVFOUT,PHSF,     &
                            ZFSTO_ALL,ZFSTO2_ALL,ZSOURCE_ALL,        &
@@ -200,7 +203,7 @@ ENDIF
 !       
 CALL TRIP_SURFACE_WATER(KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
                         OPRINT,OMASK_VEL,PLEN,PSLOPEBED,PWIDTH,PN,PRUNOFF,&
-                        PSURF_STO,ZSURF_STO2,PGOUT,PSIN,PSOUT,PVEL,PHS,   &
+                        PVEL,PHS,PSURF_STO,ZSURF_STO2,PGOUT,PSIN,PSOUT,   &
                         PAREA,ZQFR,ZQRF,                                  &
                         ZSSTO_ALL,ZSSTO2_ALL,ZSIN_ALL,ZDRUN_ALL,          &
                         ZSOUT_ALL,ZVEL_ALL,ZHS_ALL                        )
@@ -224,14 +227,14 @@ IF(OPRINT.AND.KTRIP==1.AND.KTSEPT==1)THEN
   WRITE(KLISTING,*)'        START RUN ISBA-TRIP-FP     '
   WRITE(KLISTING,*)'          Budget en  kg/m2         '
   WRITE(KLISTING,*)''
-  WRITE(KLISTING,'(a90)')'RUN TSTEP   S_err    F_err     G_err    MR(mm/y) Vel(m/s)  Hs      Hf         Ff    UNCSV'
+  WRITE(KLISTING,'(a90)')'RUN TSTEP   S_err    F_err  G_err    MR(mm/y) Vel(m/s)     Hs       Hf        Ff    UNCSV'
   WRITE(KLISTING,*)''
 !  
 ENDIF
 !
 IF(OPRINT) THEN
 !
-    WRITE(KLISTING,'(i3,1x,i3,3(2x,g8.2),f8.2,f8.2,8(2x,g8.2))')         &
+    WRITE(KLISTING,'(i3,1x,i3,3(2x,g8.2),f8.2,f8.2,8(2x,f8.3))')         &
     KTRIP,KTSEPT,                                                        &
 !   surface budget S_err
     (ZSSTO_ALL-ZSSTO2_ALL)+PTSTEP*(ZSIN_ALL-ZSOUT_ALL),                  &

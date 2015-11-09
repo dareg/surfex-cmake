@@ -60,9 +60,9 @@ INTEGER,           INTENT(IN)  :: KLUOUT
 LOGICAL,           INTENT(IN)  :: OCPL_WTD
 LOGICAL,           INTENT(IN)  :: OCPL_FLOOD
 !
-REAL, DIMENSION(:), INTENT(IN) :: PWTD     !(m)
-REAL, DIMENSION(:), INTENT(IN) :: PFWTD
-REAL, DIMENSION(:), INTENT(IN) :: PFFLOOD
+REAL, DIMENSION(:), INTENT(IN) :: PWTD     ! water table depth (negative below soil surface) (m)
+REAL, DIMENSION(:), INTENT(IN) :: PFWTD    ! fraction of water table rise (-)
+REAL, DIMENSION(:), INTENT(IN) :: PFFLOOD  ! fraction of flooded area (-)
 REAL, DIMENSION(:), INTENT(IN) :: PPIFLOOD !(kg/m2)
 !
 !*       0.2   Declarations of local variables
@@ -100,7 +100,12 @@ IF(OCPL_WTD)THEN
   CALL PACK_SAME_RANK(U%NR_NATURE(:),PFWTD(:),I%XFWTD(:))
   CALL CHECK_LAND(YCOMMENT,I%XFWTD)
 !
-  I%XFWTD(:)=I%XFWTD(:)*I%XGW(:)
+  WHERE(I%XGW(:)==0.0)
+        I%XWTD    (:) = XUNDEF
+        I%XFWTD   (:) = 0.0
+  ELSEWHERE
+        I%XFWTD(:)=I%XFWTD(:)*I%XGW(:)
+  ENDWHERE
 !
 ENDIF
 !

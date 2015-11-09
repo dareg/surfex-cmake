@@ -53,7 +53,6 @@ INTEGER, INTENT(IN) :: KLAT
 REAL, DIMENSION(KLON,KLAT) :: ZHG_OLD    !Water table elevation at t-1    [m]
 REAL, DIMENSION(KLON,KLAT) :: ZWTD       !Water table depth               [m]
 REAL, DIMENSION(KLON,KLAT) :: ZFWTD      !Fraction of Water table to rise
-REAL, DIMENSION(KLON,KLAT) :: ZWTDELEV   !Water table depth / elevation   [m]
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -64,7 +63,6 @@ IF (LHOOK) CALL DR_HOOK('INIT_TRIP_CPL_ESM',0,ZHOOK_HANDLE)
 ZHG_OLD (:,:) = XUNDEF
 ZWTD    (:,:) = XUNDEF
 ZFWTD   (:,:) = XUNDEF
-ZWTDELEV(:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 ! * Allocate coupling variables
@@ -138,12 +136,12 @@ IF(LCPL_LAND)THEN
 !
   IF(LCPL_GW)THEN
 !
-    CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW, &
-                        TP%XTOPO_RIV,TP%XELEV,TP%XHGROUND,   &
-                        ZHG_OLD,ZWTD,ZFWTD,ZWTDELEV                   )
+    CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,&
+                        TP%XTOPO_RIV,TP%XHGROUND,ZHG_OLD,    &
+                        ZWTD,ZFWTD                           )
 !
     WHERE(TPG%GMASK_GW(:,:))
-          TP%XCPL_WTD (:,:) = MAX(-1.0*ZWTD(:,:),0.0)
+          TP%XCPL_WTD (:,:) = ZWTD (:,:)
           TP%XCPL_FWTD(:,:) = ZFWTD(:,:)
     ENDWHERE
 !    

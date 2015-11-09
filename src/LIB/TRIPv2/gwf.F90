@@ -1,10 +1,10 @@
 !     ###################################################################
-      SUBROUTINE GWF (TPG, &
-                       KLON,KLAT,OPRINT,PTSTEP_RUN,PTSTEP,OMASK,PNUM_AQUI, &
+      SUBROUTINE GWF (TPG,                                                &
+                      KLON,KLAT,OPRINT,PTSTEP_RUN,PTSTEP,OMASK,PNUM_AQUI, &
                       PDRAIN,PLEN,PWIDTH,PHC_BED,PTOPO_RIV,PTAUG,         &
-                      PAREA,PELEV,PTRANS,PWEFF,PTABGW_F,PTABGW_H,         &
+                      PAREA,PTRANS,PWEFF,PTABGW_F,PTABGW_H,PHS,           &
                       PSURF_STO,PHGROUND,PHG_OLD,PQGCELL,PWTD,PFWTD,      &
-                      PWTDRIV,PWTDELEV,PHGHS,PGOUT,PGNEG,                 &
+                      PHGHS,PGOUT,PGNEG,                                  &
                       PGSTO_ALL,PGSTO2_ALL,PGIN_ALL,PGOUT_ALL             )
 !     ###################################################################
 !-------------------------------------------------------------------------------
@@ -51,12 +51,13 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PHC_BED    ! River bed depth             
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTOPO_RIV  ! River elevatation             [m]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTAUG      ! ground water transfer time    [s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PAREA      ! Grid-cell area                [m2]
-REAL, DIMENSION(:,:), INTENT(IN)    :: PELEV      ! Grdi cell elevation           [m]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PTRANS     ! Transmissivity                [m2/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PWEFF      ! Effective porosity            [-]
 !
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTABGW_F   !  Groundwater fraction         [-]
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTABGW_H   ! Topo height                   [m]
+!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PHS        ! river height at t             [m]
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSURF_STO  ! river channel storage at t    [kg]
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PHGROUND   ! water table elevation         [m]
@@ -65,8 +66,6 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PHG_OLD    ! water table elevation at t-1
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PQGCELL
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PWTD
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PFWTD
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PWTDRIV
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PWTDELEV
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PHGHS
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PGOUT
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PGNEG
@@ -88,7 +87,6 @@ INTEGER, PARAMETER    :: IITERMAX = 100
 REAL, DIMENSION(KLAT) :: ZLAT
 REAL                  :: ZGRID_RES
 !
-REAL, DIMENSION(KLON,KLAT)          :: ZHS              !
 REAL, DIMENSION(KLON,KLAT)          :: ZHDRAIN_RIV      !
 REAL, DIMENSION(KLON,KLAT)          :: ZRIVERBED        !
 REAL, DIMENSION(KLON,KLAT)          :: ZGWDEEP          !
@@ -98,6 +96,8 @@ REAL, DIMENSION(KLON,KLAT)          :: ZCR              !
 REAL, DIMENSION(KLON,KLAT)          :: ZHCOF            !
 REAL, DIMENSION(KLON,KLAT)          :: ZRHS             !
 REAL, DIMENSION(KLON,KLAT)          :: ZQDRAIN
+REAL, DIMENSION(KLON,KLAT)          :: ZTAUG
+REAL, DIMENSION(KLON,KLAT)          :: ZSLOPE
 !
 REAL                                :: ZEVOL            !
 REAL                                :: ZNPTS            ! Number of points in aquifer basins
@@ -125,7 +125,6 @@ ZQDRAIN (:,:) = 0.0
 !
 PWTD    (:,:) = XUNDEF
 PFWTD   (:,:) = XUNDEF
-PWTDELEV(:,:) = XUNDEF
 !
 ! * groundwater mask
 !
@@ -135,27 +134,24 @@ ZNPTS = REAL(COUNT(OMASK(:,:)))
 !
 PHG_OLD(:,:) = PHGROUND(:,:)
 !
-! * stream water height
-!
-ZHS(:,:)=XUNDEF
-WHERE(OMASK(:,:).AND.PWIDTH(:,:)>0.0)
-     ZHS(:,:)=PSURF_STO(:,:)/(XRHOLW*PLEN(:,:)*PWIDTH(:,:))
-ENDWHERE
-!
-! * Niveau de drainage en rivière
+! * Niveau de drainage en riviere
 !
 ZRIVERBED  (:,:) = PTOPO_RIV(:,:) - PHC_BED(:,:)
-ZHDRAIN_RIV(:,:) = ZRIVERBED(:,:) + MIN(PHC_BED(:,:),ZHS(:,:))
+ZHDRAIN_RIV(:,:) = ZRIVERBED(:,:) + MIN(PHC_BED(:,:),PHS(:,:))
 !
 ! * grid 
 !
 CALL GET_LAT_GWF(TPG, &
                  KLAT,ZGRID_RES,ZLAT)
 !
-! * Coefficients nappe/rivière
+! * Coefficients nappe/riviere
+!
+ZSLOPE(:,:)=MIN(1.0,MAX(0.0,PHGROUND(:,:)-ZRIVERBED(:,:))/PHC_BED(:,:))
+!
+ZTAUG(:,:)=PTAUG(:,:)-(PTAUG(:,:)-XDAY)*ZSLOPE(:,:)
 !
 WHERE(OMASK(:,:))
-    ZCRIV(:,:) = PWIDTH(:,:) * PLEN(:,:)/PTAUG(:,:)
+    ZCRIV(:,:) = PWIDTH(:,:) * PLEN(:,:)/ZTAUG(:,:)
 ENDWHERE
 !
 CALL GWF_INT(KLON,KLAT,ZGRID_RES,ZLAT,OMASK,PNUM_AQUI,PTRANS,ZCR,ZCC)
@@ -174,12 +170,12 @@ DO WHILE (ZEVOL>ZEPSILON.AND.IITER<=IITERMAX)
         IF(OMASK(JLON,JLAT))THEN
         
 !          initialisations des coefficients
-           IF(PHGROUND(JLON,JLAT)<=ZHDRAIN_RIV(JLON,JLAT).AND.ZHS(JLON,JLAT)<=0.1)THEN
+           IF(PHGROUND(JLON,JLAT)<ZHDRAIN_RIV(JLON,JLAT).AND.PHS(JLON,JLAT)<=XHSMIN)THEN
               ZCRIV   (JLON,JLAT) = 0.0
            ENDIF
-           IF(PHGROUND(JLON,JLAT)<=ZRIVERBED(JLON,JLAT))THEN
+           IF(PHGROUND(JLON,JLAT)<ZRIVERBED(JLON,JLAT))THEN
               ZCRIV   (JLON,JLAT) = 0.0
-              ZGWDEEP (JLON,JLAT) = MAX(0.,(ZHS(JLON,JLAT)-0.1))*PWIDTH(JLON,JLAT)*PLEN(JLON,JLAT)/PTAUG(JLON,JLAT)
+              ZGWDEEP (JLON,JLAT) = MAX(0.,(PHS(JLON,JLAT)-XHSMIN))*PWIDTH(JLON,JLAT)*PLEN(JLON,JLAT)/ZTAUG(JLON,JLAT)
            ENDIF
 !           
 !          formulation des coefficients 
@@ -208,7 +204,6 @@ CALL GWF_BUDGET(KLON,KLAT,OMASK,PHGROUND,ZHDRAIN_RIV, &
 DO JLAT=1, KLAT
    DO JLON=1, KLON
       IF(OMASK(JLON,JLAT))THEN
-         PWTDRIV  (JLON,JLAT) = PHGROUND(JLON,JLAT)-PTOPO_RIV(JLON,JLAT)
          PHGHS    (JLON,JLAT) = PHGROUND(JLON,JLAT)-ZHDRAIN_RIV(JLON,JLAT)
          PGOUT    (JLON,JLAT) = MAX(0.0,ZQDRAIN(JLON,JLAT))
          PGNEG    (JLON,JLAT) = MIN(0.0,ZQDRAIN(JLON,JLAT))
@@ -250,8 +245,8 @@ ENDIF
 !
 PHG_OLD(:,:)=XUNDEF
 !
-CALL GWF_CPL_UPDATE(PTABGW_H,PTABGW_F,OMASK,PTOPO_RIV,PELEV, &
-                    PHGROUND,PHG_OLD,PWTD,PFWTD,PWTDELEV     )
+CALL GWF_CPL_UPDATE(PTABGW_H,PTABGW_F,OMASK,PTOPO_RIV, &
+                    PHGROUND,PHG_OLD,PWTD,PFWTD        )
 !
 IF (LHOOK) CALL DR_HOOK('GWF',1,ZHOOK_HANDLE)
 !
