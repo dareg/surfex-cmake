@@ -98,6 +98,7 @@ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=4 ) :: YLVL
 !
 INTEGER :: JJ, JLAYER
+INTEGER :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -188,20 +189,25 @@ YCOMMENT='(LOGICAL LIST)'
 CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,I%LMEB_PATCH(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
+ISIZE_LMEB_PATCH = COUNT(I%LMEB_PATCH(:))
+!
+IF (ISIZE_LMEB_PATCH>0)THEN
 !
 !* flag indicating if forcing is from observed measurements or not
 !
-YRECFM='FORC_MEASURE'
-YCOMMENT=YRECFM
-CALL WRITE_SURF(DGU, U, &
+   YRECFM='FORC_MEASURE'
+   YCOMMENT=YRECFM
+   CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,I%LFORC_MEASURE,IRESP,HCOMMENT=YCOMMENT)
 !
 !* flag indicating if litter layer is used or not
 !
-YRECFM='MEB_LITTER'
-YCOMMENT=YRECFM
-CALL WRITE_SURF(DGU, U, &
+   YRECFM='MEB_LITTER'
+   YCOMMENT=YRECFM
+   CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,I%LMEB_LITTER,IRESP,HCOMMENT=YCOMMENT)
+!
+ENDIF
 !
 !*       2.     Physiographic data fields:
 !               -------------------------

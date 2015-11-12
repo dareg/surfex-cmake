@@ -594,23 +594,20 @@ DO JLOOP=1,SIZE(PTYPE,1)
     ENDIF 
 !--------------------------------------------------------------------
 !
-!*    7.16   Fraction of ground litter coverage
-!            ----------------------------------
+!*    7.16   Fraction of ground litter
+!            -------------------------
 ! 	 
     IF (PRESENT(PGNDLITTER)) THEN
       PGNDLITTER (JLOOP,:,:) = 0.
-      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBD) = 0.95
-      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PGNDLITTER (JLOOP,:,NVT_BONE) = 0.95
-      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PGNDLITTER (JLOOP,:,NVT_TRBE) = 0.99
-      IF(PTYPE(JLOOP,NVT_GRAS)>0. )  PGNDLITTER (JLOOP,:,NVT_GRAS) = 0.95
-      IF(PTYPE(JLOOP,NVT_TROG)>0. )  PGNDLITTER (JLOOP,:,NVT_TROG) = 0.95
-      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TRBD) = 0.95
-      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBE) = 0.95
-      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PGNDLITTER (JLOOP,:,NVT_TENE) = 0.95
-      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PGNDLITTER (JLOOP,:,NVT_BOBD) = 0.95
-      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PGNDLITTER (JLOOP,:,NVT_BOND) = 0.95
-      IF(PTYPE(JLOOP,NVT_BOGR)>0. )  PGNDLITTER (JLOOP,:,NVT_BOGR) = 0.95
-      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PGNDLITTER (JLOOP,:,NVT_SHRB) = 0.95
+      IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBD) = 0.03
+      IF(PTYPE(JLOOP,NVT_BONE)>0. )  PGNDLITTER (JLOOP,:,NVT_BONE) = 0.03
+      IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PGNDLITTER (JLOOP,:,NVT_TRBE) = 0.03
+      IF(PTYPE(JLOOP,NVT_TRBD)>0. )  PGNDLITTER (JLOOP,:,NVT_TRBD) = 0.03
+      IF(PTYPE(JLOOP,NVT_TEBE)>0. )  PGNDLITTER (JLOOP,:,NVT_TEBE) = 0.03
+      IF(PTYPE(JLOOP,NVT_TENE)>0. )  PGNDLITTER (JLOOP,:,NVT_TENE) = 0.03
+      IF(PTYPE(JLOOP,NVT_BOBD)>0. )  PGNDLITTER (JLOOP,:,NVT_BOBD) = 0.03
+      IF(PTYPE(JLOOP,NVT_BOND)>0. )  PGNDLITTER (JLOOP,:,NVT_BOND) = 0.03
+      IF(PTYPE(JLOOP,NVT_SHRB)>0. )  PGNDLITTER (JLOOP,:,NVT_SHRB) = 0.03
     ENDIF
 !-------------------------------------------------------------------------------
 !*    7.16   Binary for tall vegetation
@@ -977,23 +974,9 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !
 !-------------------------------------------------------------------------------
 !
-!*    7.21   z0 understory vegetation
-!            ----------
-!
-! In original MEB development understory vegetation exicted but not anymore.
-! New z0 understory vegetation assumes bare soil only. Old formulation, based on
-! LAI, is kept but commenetd for later devlopment.
-!    IF (PRESENT(PZ0GV) .AND. ( PRESENT(PLAIGV_IN) .OR. PRESENT(PLAIGV_OUT) ) ) THEN
-!      DO JMONTH=1,SIZE(PZ0GV,2)
-!        IF (PRESENT(PLAIGV_OUT)) THEN
-!          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_OUT(JLOOP,JMONTH,:) / 6.)
-!        ELSEIF (PRESENT(PLAIGV_IN)) THEN
-!          PZ0GV(JLOOP,JMONTH,:) = MAX(0.001, 0.13*PLAIGV_IN(JLOOP,JMONTH,:) / 6.)
-!        ENDIF
-!      END DO
-!    ELSEIF (PRESENT(PZ0GV) .AND. (.NOT.PRESENT(PLAIGV_IN) .AND. .NOT.PRESENT(PLAIGV_OUT)    )) THEN
-!      CALL ABOR1_SFX("INI_DATA_PARAM: WHEN CALLING WITH PZ0GV, PLAIGV_IN OR PLAIGV_OUT MUST BE IN ARGUMENTS TOO")
-!    ENDIF   
+!*    7.21   z0 understory litter
+!            --------------------
+! 
     IF (PRESENT(PZ0LITTER)) THEN
       PZ0LITTER(JLOOP,:,:)  = 0.013 ! Roughness for bare soil
     ENDIF   

@@ -1,6 +1,6 @@
-SUBROUTINE TRIP_DIAG (TPDG, TP, TPG, &
-                      PTSTEP,PSOUT,PSIN,PVEL,PHS,PGOUT,PGNEG,    &
-                     PWTD,PFWTD,PWTDRIV,PWTDELEV,PQGCELL,PHGHS, &
+SUBROUTINE TRIP_DIAG(TPDG, TP, TPG, &
+                     PTSTEP,PSOUT,PSIN,PVEL,PHS,PGOUT,PGNEG,    &
+                     PWTD,PFWTD,PQGCELL,PHGHS,                  &
                      PQFR,PQRF,PVFIN,PVFOUT,PHSF,PSRC_FLOOD,    &
                      PDRAIN,PRUNOFF,PDISCHARGE                  )  
 !     #####################################################
@@ -60,8 +60,6 @@ REAL, DIMENSION(:,:), INTENT(IN)  :: PGOUT      !Groundwater outflow           [
 REAL, DIMENSION(:,:), INTENT(IN)  :: PGNEG      !Groundwater intflow (neg)     [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)  :: PWTD       !Water table depth for coupling[m]
 REAL, DIMENSION(:,:), INTENT(IN)  :: PFWTD      !Fraction of water table to rise
-REAL, DIMENSION(:,:), INTENT(IN)  :: PWTDRIV    !Water table depth / topo riv  [m]
-REAL, DIMENSION(:,:), INTENT(IN)  :: PWTDELEV   !Water table depth / mean elev [m]
 REAL, DIMENSION(:,:), INTENT(IN)  :: PQGCELL    !lateral groundwater exchanges [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)  :: PHGHS      !groundwater minus river heigh [m]
 REAL, DIMENSION(:,:), INTENT(IN)  :: PQFR       !floodplains to river exchange [kg/s]
@@ -121,12 +119,11 @@ ENDIF
 IF(CGROUNDW=='CST')THEN        
   TPDG%TDIAG%XGROUND_STO(:,:) = TPDG%TDIAG%XGROUND_STO(:,:) + TP%XGROUND_STO(:,:) * PTSTEP / TPG%XAREA(:,:)
 ELSEIF(CGROUNDW=='DIF')THEN
-  TPDG%TDIAG%XHGROUND(:,:) = TPDG%TDIAG%XHGROUND(:,:) + TP%XHGROUND (:,:) * PTSTEP
-  TPDG%TDIAG%XWTD    (:,:) = TPDG%TDIAG%XWTD    (:,:) + PWTD           (:,:) * PTSTEP
-  TPDG%TDIAG%XFWTD   (:,:) = TPDG%TDIAG%XFWTD   (:,:) + PFWTD          (:,:) * PTSTEP
+  TPDG%TDIAG%XHGROUND   (:,:) = TPDG%TDIAG%XHGROUND   (:,:) + TP%XHGROUND   (:,:) * PTSTEP
+  TPDG%TDIAG%XGROUND_STO(:,:) = TPDG%TDIAG%XGROUND_STO(:,:) + TP%XHGROUND   (:,:) * PTSTEP * TP%XWEFF(:,:) * XRHOLW
+  TPDG%TDIAG%XWTD       (:,:) = TPDG%TDIAG%XWTD       (:,:) + PWTD          (:,:) * PTSTEP
+  TPDG%TDIAG%XFWTD      (:,:) = TPDG%TDIAG%XFWTD      (:,:) + PFWTD         (:,:) * PTSTEP
   IF(LDIAG_MISC)THEN
-    TPDG%TDIAG%XWTDRIV (:,:) = TPDG%TDIAG%XWTDRIV (:,:) + PWTDRIV (:,:) * PTSTEP
-    TPDG%TDIAG%XWTDELEV(:,:) = TPDG%TDIAG%XWTDELEV(:,:) + PWTDELEV(:,:) * PTSTEP
     TPDG%TDIAG%XQGCELL (:,:) = TPDG%TDIAG%XQGCELL (:,:) + PQGCELL (:,:) * PTSTEP / XRHOLW
     TPDG%TDIAG%XHGHS   (:,:) = TPDG%TDIAG%XHGHS   (:,:) + PHGHS   (:,:) * PTSTEP
   ENDIF 
@@ -143,8 +140,8 @@ IF(LFLOOD)THEN
      TPDG%TDIAG%XQRF   (:,:) = TPDG%TDIAG%XQRF   (:,:) + PQRF            (:,:) * PTSTEP / XRHOLW
      TPDG%TDIAG%XVFIN  (:,:) = TPDG%TDIAG%XVFIN  (:,:) + PVFIN           (:,:) * PTSTEP
      TPDG%TDIAG%XVFOUT (:,:) = TPDG%TDIAG%XVFOUT (:,:) + PVFOUT          (:,:) * PTSTEP
-     TPDG%TDIAG%XWF    (:,:) = TPDG%TDIAG%XWF    (:,:) + TP%XWFLOOD   (:,:) * PTSTEP
-     TPDG%TDIAG%XLF    (:,:) = TPDG%TDIAG%XLF    (:,:) + TP%XFLOOD_LEN(:,:) * PTSTEP
+     TPDG%TDIAG%XWF    (:,:) = TPDG%TDIAG%XWF    (:,:) + TP%XWFLOOD      (:,:) * PTSTEP
+     TPDG%TDIAG%XLF    (:,:) = TPDG%TDIAG%XLF    (:,:) + TP%XFLOOD_LEN   (:,:) * PTSTEP
      TPDG%TDIAG%XHSF   (:,:) = TPDG%TDIAG%XHSF   (:,:) + PHSF            (:,:) * PTSTEP
      TPDG%TDIAG%XSOURCE(:,:) = TPDG%TDIAG%XSOURCE(:,:) + PSRC_FLOOD      (:,:) * PTSTEP / TPG%XAREA(:,:)
    ENDIF  

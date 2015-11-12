@@ -583,6 +583,7 @@ INTEGER , DIMENSION(:), INTENT(IN)   ::  KTAB_SYT    ! Array of index defining o
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PFWTD    ! grid-cell fraction of water table rises
 REAL, DIMENSION(:), INTENT(IN)   :: PWTD     ! water table depth from hydrological model (m)
+!                                            ! negative below the soil surface
 !
 !* prognostic variables
 !  --------------------
@@ -892,6 +893,7 @@ REAL, DIMENSION(SIZE(PWR))               :: ZFLSN_COR  ! snow/soil-biomass corre
 !
 REAL, DIMENSION(SIZE(PWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
 !                                                       (to be potentially removed from soil) when MEB activated (kg/m2/s)
+!
 ! Misc :
 !
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -931,7 +933,7 @@ IF (LHOOK) CALL DR_HOOK('ISBA',0,ZHOOK_HANDLE)
 PC1(:)          = XUNDEF
 PC2(:)          = XUNDEF
 PWGEQ(:)        = XUNDEF
-ZCS(:)          = XUNDEF           
+ZCS(:)          = XUNDEF
 !
 ZEMIST      (:) = XUNDEF
 ZALBT       (:) = XUNDEF
@@ -979,7 +981,7 @@ ZALB3L(:)=PSNOWALB(:)
 !              ---------------
 !
 IF(HISBA =='2-L' .OR. HISBA == '3-L')THEN
-
+!
    CALL SOIL (HC1DRY, HSCOND, HSNOW_ISBA, OGLACIER, PSNOWRHO(:,1), ZVEG, PCGSAT,&
      PCGMAX, PC1SAT, PC2REF, PACOEF, PPCOEF, PCV, PPSN, PPSNG, PPSNV, PFFG,     &
      PFFV, PFF, PCG, PC1, PC2, PWGEQ, PCT, ZCS, ZFROZEN1, PTG(:,1), PWG, PWGI,  &
@@ -992,7 +994,7 @@ ELSE
      PCG, PCT, ZFROZEN1, PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                 &
      PHCAPSOIL, PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ,        &
      ZSOILHCAPZ, PFWTD, PWTD, PWR, PPIFLOOD                                     )
-   !
+!
 ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

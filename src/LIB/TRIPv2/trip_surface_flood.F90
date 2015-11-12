@@ -1,7 +1,7 @@
 SUBROUTINE TRIP_SURFACE_FLOOD (KLISTING,PTSTEP,OPRINT,OMASK_FLD,        &
-                               PTAB_F,PTAB_H,PTAB_VF,PLEN,PAREA,        &
+                               PTAB_F,PTAB_H,PTAB_VF,PAREA,             &
                                PWIDTH,PN_FLOOD,PHC,                     &
-                               PSURF_STO,PFLOOD_STO,PSOURCE,            &
+                               PHS,PSURF_STO,PFLOOD_STO,PSOURCE,        &
                                PFLOOD_STO2,PHFLOOD,PFFLOOD,PFLOOD_LEN,  &
                                PWFLOOD,PQFR,PQRF,PVFIN,PVFOUT,PHSF,     &
                                PFSTO_ALL,PFSTO2_ALL,PSOURCE_ALL,        &
@@ -68,11 +68,11 @@ REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_F  ! Flood fraction array
 REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_H  ! Topo height array
 REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_VF ! Flood volume array
 !
-REAL,DIMENSION(:,:), INTENT(IN)      :: PLEN       ! river length       [m] 
 REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m²]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PWIDTH     ! river widths                 [m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PN_FLOOD   ! Manning coeficient over floodplains   [-] (0.1)
 REAL,DIMENSION(:,:), INTENT(IN)      :: PHC        ! River bed depth              [m]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PHS        ! river channel height [m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PSURF_STO  ! river channel storage at t    [kg]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PFLOOD_STO ! Floodplain water storage at t [kg]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PSOURCE    ! precip-infiltration-evaporation [kg/s]
@@ -99,15 +99,14 @@ REAL,                 INTENT(OUT)    :: PFSTO_ALL,PFSTO2_ALL,PSOURCE_ALL, &
 REAL, PARAMETER                            :: ZLEN_MIN = 1.E-6
 REAL, PARAMETER                            :: ZVF_MIN  = 1.E-3
 !
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZHS
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZMF
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZSLOPE
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZRADIUS
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZDIST
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZDELTA
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZMF_IN
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZMF_OUT
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZFLD_LEN
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZSLOPE
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZRADIUS
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZDIST
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZDELTA
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF_IN
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF_OUT
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZFLD_LEN
 !
 REAL    :: ZAREA
 !
@@ -121,8 +120,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_FLOOD',0,ZHOOK_HANDLE)
 !
-ILON = SIZE(PLEN,1)
-ILAT = SIZE(PLEN,2)
+ILON = SIZE(PAREA,1)
+ILAT = SIZE(PAREA,2)
 !
 PFLOOD_STO2(:,:) = 0.0
 PHSF       (:,:) = 0.0
@@ -131,7 +130,6 @@ PVFOUT     (:,:) = 0.0
 PQFR       (:,:) = 0.0
 PQRF       (:,:) = 0.0
 !
-ZHS        (:,:) = 0.0
 ZMF        (:,:) = 0.0
 ZSLOPE     (:,:) = 0.0
 ZRADIUS    (:,:) = 0.0
@@ -171,8 +169,7 @@ DO JLAT=1,ILAT
 !        ------------------------------------------------------------------
 !        Calculate the potential water mass exchange
 !           
-         ZHS (JLON,JLAT)=PSURF_STO(JLON,JLAT)/(XRHOLW*PLEN(JLON,JLAT)*PWIDTH(JLON,JLAT))
-         PHSF(JLON,JLAT)=ZHS(JLON,JLAT)-PHC(JLON,JLAT)-PHFLOOD(JLON,JLAT)
+         PHSF(JLON,JLAT)=PHS(JLON,JLAT)-PHC(JLON,JLAT)-PHFLOOD(JLON,JLAT)
 !
          ZMF   (JLON,JLAT)=PHSF(JLON,JLAT)*ZFLD_LEN(JLON,JLAT)*PWIDTH(JLON,JLAT)*XRHOLW
          ZDIST (JLON,JLAT)=PWIDTH(JLON,JLAT)+PWFLOOD(JLON,JLAT)
@@ -185,8 +182,8 @@ DO JLAT=1,ILAT
 !
       IF(ZMF(JLON,JLAT)>0.0.AND.PFFLOOD(JLON,JLAT)<1.0)THEN
 !
-        ZRADIUS(JLON,JLAT) = (ZHS(JLON,JLAT)-PHC(JLON,JLAT))*ZFLD_LEN(JLON,JLAT)     &
-                           / (ZFLD_LEN(JLON,JLAT)+2.0*(ZHS(JLON,JLAT)-PHC(JLON,JLAT)))
+        ZRADIUS(JLON,JLAT) = (PHS(JLON,JLAT)-PHC(JLON,JLAT))*ZFLD_LEN(JLON,JLAT)     &
+                           / (ZFLD_LEN(JLON,JLAT)+2.0*(PHS(JLON,JLAT)-PHC(JLON,JLAT)))
         ZRADIUS(JLON,JLAT) = EXP(XM*LOG(ZRADIUS(JLON,JLAT)))
 !
         PVFIN (JLON,JLAT) = MAX(ZVF_MIN,ZRADIUS(JLON,JLAT)*SQRT(ZSLOPE(JLON,JLAT))/PN_FLOOD(JLON,JLAT))

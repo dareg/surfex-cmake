@@ -43,11 +43,13 @@ SUBROUTINE INIT_TRIP (TPDG, TP, TPG, &
 !
 !
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
-USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
-                      XCVEL, XRATMED, XTSTEP
+                      XCVEL, XRATMED, XTSTEP,  &
+                      XTAUG_UNIF, XTAUG_UP,    &
+                      XTAUG_DOWN
 !
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
@@ -59,7 +61,7 @@ USE MODE_TRIP_FUNCTION
 USE MODE_RW_TRIP
 !
 USE MODI_ABORT_TRIP
-!USE MODI_READ_TRIP_GRID
+USE MODI_TRIP_HS_VEL
 USE MODI_INIT_TRIP_DIAG
 USE MODI_INIT_RESTART_TRIP
 USE MODI_GET_LONLAT_TRIP
@@ -76,7 +78,7 @@ IMPLICIT NONE
 !
 !
 TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
-TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_t),      INTENT(INOUT) :: TP
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,          INTENT(OUT) :: KYEAR   !date UTC
@@ -110,11 +112,11 @@ REAL,DIMENSION(4)                    :: ZDATE
 !
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZREAD
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHSTREAM
+REAL,DIMENSION(:,:),ALLOCATABLE      :: ZVEL
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWORK
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHG_OLD
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWTD
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZFWTD
-REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWTDELEV
 !
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLON
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLAT
@@ -246,6 +248,24 @@ IF(ZGRID_RES<0.5.AND.XRATMED==1.4)THEN
      CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5° or 1° resolution !!!')
 ENDIF
 !
+IF(CGROUNDW=='CST')THEN
+  IF(XTAUG_UNIF<1.0.OR.XTAUG_UNIF>365.0)THEN
+    WRITE(NLISTING,*)'! Constant transfert time value XTAUG_UNIF must be at least 1 day or inferior to 365 days !!!'
+    CALL ABORT_TRIP('INIT_TRIP: Constant transfert time value must be at least 1 day or inferior to 365 days')
+  ENDIF        
+ENDIF
+!
+IF(CGROUNDW=='DIF')THEN
+  IF(XTAUG_UP<1.0)THEN
+    WRITE(NLISTING,*)'! Upstream transfert time value XTAUG_UP must be at least 1 day !!!'
+    CALL ABORT_TRIP('INIT_TRIP: Upstream transfert time value must be at least 1 day')
+  ENDIF
+  IF(XTAUG_DOWN>365.0)THEN
+    WRITE(NLISTING,*)'! Downstream transfert time value XTAUG_DOWN must be lower than 365 days !!!'
+    CALL ABORT_TRIP('INIT_TRIP: Downstream transfert time value must be lower than 365 days')
+  ENDIF
+ENDIF
+!
 !-------------------------------------------------------------------------------
 ! * Allocate trip grid arguments
 !-------------------------------------------------------------------------------
@@ -295,14 +315,12 @@ IF(CGROUNDW=='DIF')THEN
   ALLOCATE(TP%XWEFF    (KLON,KLAT))
   ALLOCATE(TP%XTRANS   (KLON,KLAT))
   ALLOCATE(TP%XNUM_AQUI(KLON,KLAT))
-  ALLOCATE(TP%XELEV    (KLON,KLAT))
   ALLOCATE(TP%XTOPO_RIV(KLON,KLAT))  
 ELSE
   ALLOCATE(TP%XHGROUND (0,0))
   ALLOCATE(TP%XWEFF    (0,0))
   ALLOCATE(TP%XTRANS   (0,0))
   ALLOCATE(TP%XNUM_AQUI(0,0))
-  ALLOCATE(TP%XELEV    (0,0))
   ALLOCATE(TP%XTOPO_RIV(0,0))  
 ENDIF
 !
@@ -470,9 +488,6 @@ IF(CGROUNDW == 'DIF')THEN
   YVAR = 'TRANS'
   CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTRANS)
 !
-  YVAR = 'ELEV'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XELEV)
-!
   YVAR = 'TOPO_RIV'
   CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTOPO_RIV)
 !
@@ -569,15 +584,15 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 ALLOCATE(ZHSTREAM(KLON,KLAT))
+ALLOCATE(ZVEL    (KLON,KLAT))
 ZHSTREAM(:,:) = 0.0
+ZVEL    (:,:) = 0.0
 !
 IF(CVIT == 'VAR')THEN       
 !
-  WHERE(TP%XWIDTH(:,:)>0.0)
-        ZHSTREAM(:,:)=MAX(0.0,TP%XSURF_STO(:,:)/(XRHOLW*TPG%XLEN(:,:)*TP%XWIDTH(:,:)))
-  ELSEWHERE
-        ZHSTREAM(:,:)=0.0
-  ENDWHERE
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL,  &
+                    TPG%XLEN,TP%XWIDTH,TP%XSLOPEBED, &
+                    TP%XN,TP%XSURF_STO,ZHSTREAM,ZVEL )
 !
 ENDIF
 !
@@ -699,6 +714,7 @@ IF(LFLOOD)THEN
   WRITE(NLISTING,*)''
 ENDIF
 !
+DEALLOCATE(ZVEL)
 DEALLOCATE(ZHSTREAM)
 !
 !-------------------------------------------------------------------------------
@@ -706,7 +722,7 @@ DEALLOCATE(ZHSTREAM)
 !-------------------------------------------------------------------------------
 !
 YFILE  = YDIAG  
-YTITLE = 'TRIP high frequency outputs'  
+YTITLE = 'TRIP high frequency outputs'
 CALL OUTPUT_DATE(YUNITTIME,XTIME_DIAG)
 CALL INIT_TRIP_DIAG(TPDG, TPG, &
                     NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.) 

@@ -761,6 +761,11 @@ PFAPIR_BS(:)       = 0.
 PRRLIT(:)          =0.0
 PDRIPLIT(:)        =0.0
 !
+PLEGI(:)  = 0.
+PLEG(:)   = 0.
+ZLESFCI(:)= 0.
+ZLESFC(:) = 0.
+!
 ZIACAN_SUNLIT(:,:) = XUNDEF
 ZIACAN_SHADE(:,:)  = XUNDEF
 ZFRAC_SUN (:,:)    = XUNDEF
@@ -769,7 +774,6 @@ ZALBVIS_TSOIL(:)   = XUNDEF
 ZALBNIR_TSOIL(:)   = XUNDEF
 ZSWNET_S(:)        = XUNDEF
 ZQSAT(:)           = XUNDEF
-!
 !
 !*      1.1    Preliminaries for litter parameters
 !              -----------------------------------
@@ -1945,7 +1949,7 @@ ZWORK(:) = 0.0
 IF(OMEB_LITTER)THEN
    PTGL(:,1)                  = PTL(:)
    ZWORK(:)                   = PWRL(:)/PGNDLITTER(:)
-   PSOILHCAPL(:,1)            = (Z1*Z2+Z3*1000/XRHOLW)*ZWORK(:)
+   PSOILHCAPL(:,1)            = Z1*Z2 + Z3*1000/XRHOLW*ZWORK(:)
    PSOILCONDL(:,1)            = Z4 +  (Z5/XRHOLW)     *ZWORK(:)
    PWSATL(:,1)                = Z6
    PWFCL(:,1)                 = Z7
