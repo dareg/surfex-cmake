@@ -7,7 +7,6 @@
                                          PSWU_ICE, PLWU_ICE, PFMU_ICE, PFMV_ICE)  
 !     ########################################################################
 !
-!
 !!****  *DIAG_SURF_BUDGETC_SEA * - Computes cumulated diagnostics over sea
 !!
 !!    PURPOSE
