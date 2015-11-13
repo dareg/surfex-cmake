@@ -200,7 +200,7 @@ END IF
  CALL END_IO_SURF_n(HPROGRAM)
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
 CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'TOWN  ','TEB   ','READ ')
+                     HPROGRAM,'FULL  ','SURF  ','READ ')
 !
  CALL TOWN_PRESENCE(&
                     HPROGRAM,GTOWN)

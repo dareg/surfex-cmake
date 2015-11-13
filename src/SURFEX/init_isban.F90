@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_ISBA_n (DTCO, DGU, UG, U, IM, DTZ, DST, SLT, SV, &
+SUBROUTINE INIT_ISBA_n (DTCO, DGU, UG, U, USS, IM, DTZ, DST, SLT, SV, &
                             HPROGRAM,HINIT,OLAND_USE,                    &
                              KI,KSV,KSW,                                &
                              HSV,PCO2,PRHOA,                            &
@@ -64,6 +64,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
@@ -131,11 +132,12 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
@@ -343,7 +345,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !               ---------------------------------
 !
  CALL READ_PGD_ISBA_n(IM%CHI, DTCO, IM%DTI, DTZ, DGU, IM%GB, IM%IG, IM%I, &
-                      UG, U, SV, &
+                      UG, U, USS, SV, &
                       HPROGRAM,OLAND_USE)
 !
 ISIZE_LMEB_PATCH=COUNT(IM%I%LMEB_PATCH(:))

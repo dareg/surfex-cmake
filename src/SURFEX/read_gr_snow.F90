@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE READ_GR_SNOW (&
-                               HPROGRAM,HSURFTYPE,HPREFIX,     &
+      SUBROUTINE READ_GR_SNOW(HPROGRAM,HSURFTYPE,HPREFIX,     &
                               KLU,KPATCH,TPSNOW,HDIR,KVERSION,KBUGFIX)  
 !     ##########################################################
 !
@@ -29,7 +28,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      V. Masson       * Meteo France *
+!!	V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -40,9 +39,6 @@
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
-!
-!
-!
 !
 USE MODD_TYPE_SNOW
 !
@@ -59,8 +55,6 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*       0.1   declarations of arguments
-!
-!
 !
  CHARACTER(LEN=6),   INTENT(IN)           :: HPROGRAM  ! calling program
  CHARACTER (LEN=*),  INTENT(IN)           :: HSURFTYPE ! generic name used for
@@ -80,22 +74,25 @@ INTEGER,            INTENT(IN), OPTIONAL :: KBUGFIX
 !
 !*       0.2   declarations of local variables
 !
-INTEGER             :: IRESP               ! Error code after redding
- CHARACTER(LEN=12)   :: YRECFM              ! Name of the article to be read
- CHARACTER(LEN=16)   :: YRECFM2 
-!
+ CHARACTER (LEN=7) :: YFMT0               ! format for writing
  CHARACTER (LEN=100) :: YFMT                ! format for writing
-INTEGER             :: ISURFTYPE_LEN       ! 
-LOGICAL             :: GSNOW               ! snow written in the file
-INTEGER             :: JLAYER              ! loop counter
-REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK ! 2D array to write data in file
- CHARACTER(LEN=1)    :: YDIR                ! type of reading
+ CHARACTER(LEN=16)   :: YRECFM2 
+ CHARACTER(LEN=12)   :: YRECFM              ! Name of the article to be read
  CHARACTER(LEN=4)    :: YNLAYER     !Format depending on the number of layers
+ CHARACTER(LEN=1)    :: YDIR                ! type of reading
+!
+INTEGER             :: IRESP, JI, JP              ! Error code after redding
+INTEGER             :: ISURFTYPE_LEN       ! 
+INTEGER             :: JLAYER              ! loop counter
 INTEGER             :: IVERSION, IBUGFIX
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+LOGICAL :: GVERSION
+LOGICAL             :: GSNOW               ! snow written in the file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',0,ZHOOK_HANDLE)
+!
 YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
@@ -114,10 +111,13 @@ ELSE
 ENDIF
 !-------------------------------------------------------------------------------
 !
+GVERSION = (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3)
+!
 !*       1.    Type of snow scheme
 !              -------------------
 !
 ISURFTYPE_LEN=LEN_TRIM(HSURFTYPE)
+!
 IF (IVERSION <=2 .OR. (IVERSION==3 .AND. IBUGFIX<=4)) THEN
   WRITE(YFMT,'(A5,I1,A4)')     '(A5,A',ISURFTYPE_LEN,',A5)'
   WRITE(YRECFM2,YFMT) 'SNOW_',HSURFTYPE,'_TYPE'
@@ -132,8 +132,7 @@ ELSE
   ENDIF
 END IF
 !
- CALL READ_SURF(&
-                 HPROGRAM,YRECFM2,TPSNOW%SCHEME,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM2,TPSNOW%SCHEME,IRESP)
 !
 !*       2.    Snow levels
 !              -----------
@@ -148,8 +147,7 @@ ELSE
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2=ADJUSTL(HPREFIX//YRECFM2)
 END IF
 !
- CALL READ_SURF(&
-                 HPROGRAM,YRECFM2,TPSNOW%NLAYER,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM2,TPSNOW%NLAYER,IRESP)
 !
 !*       2.    Presence of snow fields in the file
 !              -----------------------------------
@@ -158,8 +156,7 @@ IF (IVERSION >6 .OR. (IVERSION==6 .AND. IBUGFIX>=1)) THEN
   WRITE(YFMT,'(A5,I1,A1)')     '(A3,A',ISURFTYPE_LEN,')'
   WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM=ADJUSTL(HPREFIX//YRECFM)
-  CALL READ_SURF(&
-                 HPROGRAM,YRECFM,GSNOW,IRESP)
+  CALL READ_SURF(HPROGRAM,YRECFM,GSNOW,IRESP)
 ELSE
   IF (TPSNOW%NLAYER==0) THEN
     GSNOW = .FALSE.
@@ -178,7 +175,7 @@ END IF
  CALL ALLOCATE_GR_SNOW(TPSNOW,KLU,KPATCH)
 !
 IF (.NOT. GSNOW) THEN
-  IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',1,ZHOOK_HANDLE)
   RETURN
 END IF
 !-------------------------------------------------------------------------------
@@ -186,195 +183,174 @@ END IF
 !*       4.    Additional key
 !              ---------------
 !
-IF (IVERSION >= 7 .AND. HSURFTYPE=='VEG') CALL READ_SURF(&
-                 HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP)
+IF (IVERSION >= 7 .AND. HSURFTYPE=='VEG') CALL READ_SURF(HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP)
 !
 !-------------------------------------------------------------------------------
 !
 !*       5.    Snow reservoir
 !              --------------
 !
-ALLOCATE(ZWORK(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,3)))
 !
-DO JLAYER = 1,TPSNOW%NLAYER
-!
-  YNLAYER='I1.1'
-  IF (JLAYER>9) YNLAYER='I2.2'
-!   
-  IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' .OR. TPSNOW%SCHEME=='3-L' &
-     .OR. TPSNOW%SCHEME=='CRO') THEN  
-!
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)') '(A6,A',ISURFTYPE_LEN,','//YNLAYER//')'            
-      WRITE(YRECFM,YFMT) 'WSNOW_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)') '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'WSN_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%WSNOW(:,JLAYER,:)=ZWORK
-  END IF
-!
-!*       6.    Snow density
-!              ------------
-!
-  IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' .OR. TPSNOW%SCHEME=='3-L' &
-     .OR. TPSNOW%SCHEME=='CRO') THEN  
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A6,A',ISURFTYPE_LEN,','//YNLAYER//')'            
-      WRITE(YRECFM,YFMT) 'RSNOW_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'RSN_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF    
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%RHO(:,JLAYER,:)=ZWORK
-    WHERE(TPSNOW%WSNOW(:,JLAYER,:)==0.0)TPSNOW%RHO(:,JLAYER,:)=XUNDEF
-  END IF
-!
-!*       7.    Snow temperature
-!              ----------------
-!
-  IF (TPSNOW%SCHEME=='1-L') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A6,A',ISURFTYPE_LEN,','//YNLAYER//')'      
-      WRITE(YRECFM,YFMT) 'TSNOW_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'TSN_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF      
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%T(:,JLAYER,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%T(:,JLAYER,:) = XUNDEF
-  END IF
-!
-!*       8.    Heat content
-!              ------------
-!
-  IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A6,A',ISURFTYPE_LEN,','//YNLAYER//')'      
-      WRITE(YRECFM,YFMT) 'HSNOW_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'HSN_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF       
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%HEAT(:,JLAYER,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%HEAT(:,JLAYER,:) = XUNDEF
-  END IF
-!
-!*       9.    Snow Gran1
-!              ------------
-!
-  IF (TPSNOW%SCHEME=='CRO') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A7,A',ISURFTYPE_LEN,','//YNLAYER//')'      
-      WRITE(YRECFM,YFMT) 'SGRAN1_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SG1_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF      
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%GRAN1(:,JLAYER,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%GRAN1(:,JLAYER,:) = XUNDEF
-  END IF
-!
-!*       10.    Snow Gran2
-!              ------------
-!
-  IF (TPSNOW%SCHEME=='CRO') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A7,A',ISURFTYPE_LEN,','//YNLAYER//')'       
-      WRITE(YRECFM,YFMT) 'SGRAN2_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SG2_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF     
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%GRAN2(:,JLAYER,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%GRAN2(:,JLAYER,:) = XUNDEF
-  END IF
-!
-!*       11.    Historical parameter
-!              -------------------
-!
-  IF (TPSNOW%SCHEME=='CRO') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A6,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SHIST_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SHI_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF    
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%HIST(:,JLAYER,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%HIST(:,JLAYER,:) = XUNDEF
-  END IF
-!
-!*       12.    Age parameter
-!              -------------------
-!
-  IF ((TPSNOW%SCHEME=='3-L'.AND.IVERSION>=8) .OR. TPSNOW%SCHEME=='CRO') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A5,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SAGE_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SAG_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF     
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%AGE(:,JLAYER,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%AGE(:,JLAYER,:) = XUNDEF
-  ELSEIF(TPSNOW%SCHEME=='3-L'.AND.IVERSION<8)THEN
-    WHERE (TPSNOW%WSNOW(:,1,:) >= 0.0) 
-           TPSNOW%AGE(:,JLAYER,:) = 0.0
-    ELSEWHERE
-           TPSNOW%AGE(:,JLAYER,:) = XUNDEF
-    ENDWHERE
-  END IF
-!-------------------------------------------------------------------------------
-!
-END DO
-!
-DEALLOCATE(ZWORK)
-!-------------------------------------------------------------------------------
-!
-!*       13.    Albedo
-!              ------
-!
-IF (TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' .OR. TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='3-L' &
-    .OR. TPSNOW%SCHEME=='CRO') THEN  
-  IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-    WRITE(YFMT,'(A5,I1,A1)')     '(A6,A',ISURFTYPE_LEN,')'
-    WRITE(YRECFM,YFMT) 'ASNOW_',HSURFTYPE
+IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
+                         .OR. TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN 
+  !
+  WRITE(YFMT0,'(A5,I1,A1)') ',A1,A',ISURFTYPE_LEN
+  !
+  IF (GVERSION) THEN
+    YFMT = '(A3'//YFMT0
   ELSE
-    WRITE(YFMT,'(A5,I1,A1)')     '(A4,A',ISURFTYPE_LEN,')'
-    WRITE(YRECFM,YFMT) 'ASN_',HSURFTYPE
-    YRECFM=ADJUSTL(HPREFIX//YRECFM)
-  ENDIF  
-  CALL READ_SURF(&
-                 HPROGRAM,YRECFM,TPSNOW%ALB(:,:),IRESP,HDIR=YDIR)
-  WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%ALB(:,:) = XUNDEF
-END IF
-IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',1,ZHOOK_HANDLE)
+    YFMT = '(A5'//YFMT0
+  ENDIF
+  CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"WSNOW",HSURFTYPE,TPSNOW%WSNOW)
+  CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"RSNOW",HSURFTYPE,TPSNOW%RHO)
+  !
+  !*       7.    Snow temperature
+  !              ----------------
+  !
+  IF (TPSNOW%SCHEME=='1-L') THEN
+    !
+    CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"TSNOW",HSURFTYPE,TPSNOW%T)
+    !
+  ENDIF
+  !
+  !*       8.    Heat content
+  !              ------------
+  !
+  IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
+    !
+    CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"HSNOW",HSURFTYPE,TPSNOW%HEAT)
+    !
+    IF (TPSNOW%SCHEME=='CRO') THEN
+      !
+      CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SHIST",HSURFTYPE,TPSNOW%HIST)
+      !
+      !*       9.    Snow Gran1
+      !              ------------
+      !
+      IF (GVERSION) THEN
+        YFMT = "(A2"//YFMT0         
+      ELSE
+        YFMT = "(A5"//YFMT0
+      ENDIF
+      YFMT = YFMT//YNLAYER//')'
+      CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SGRAN",HSURFTYPE,TPSNOW%GRAN1,HREC2="1")
+      CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SGRAN",HSURFTYPE,TPSNOW%GRAN2,HREC2="2")
+      !
+      !*       12.    Age parameter
+      !              -------------------
+      !
+      IF (GVERSION) THEN
+        YFMT = "(A3"//YFMT0         
+      ELSE
+        YFMT = "(A4"//YFMT0
+      ENDIF
+      YFMT = YFMT//YNLAYER//')'
+      CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SAGE",HSURFTYPE,TPSNOW%AGE)
+      !
+    ELSEIF(TPSNOW%SCHEME=='3-L'.AND.IVERSION<8)THEN
+      !
+      DO JLAYER = 1,TPSNOW%NLAYER
+        WHERE (TPSNOW%WSNOW(:,1,:) >= 0.0) 
+          TPSNOW%AGE(:,JLAYER,:) = 0.0
+        ELSEWHERE
+          TPSNOW%AGE(:,JLAYER,:) = XUNDEF
+        ENDWHERE
+      ENDDO
+      !
+    END IF    
+    !
+  ENDIF
+  !
+  YFMT = TRIM(YFMT)//')'
+  WRITE(YRECFM,YFMT) 'ASNOW','_',HSURFTYPE
+  IF (GVERSION) YRECFM=ADJUSTL(HPREFIX//YRECFM) 
+  CALL READ_SURF(HPROGRAM,YRECFM,TPSNOW%ALB(:,:),IRESP,HDIR=YDIR)
+  !
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',1,ZHOOK_HANDLE)
+!
+IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
+                         .OR. TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN 
+  !
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(JI,JP,JLAYER)
+  DO JI = 1,SIZE(TPSNOW%WSNOW,1)
+    DO JP = 1,SIZE(TPSNOW%WSNOW,3)
+      !
+      IF (TPSNOW%WSNOW(JI,1,JP) == 0.0 ) THEN
+        !
+        TPSNOW%ALB(JI,JP) = XUNDEF
+        !
+        DO JLAYER = 1,TPSNOW%NLAYER
+          !
+          TPSNOW%RHO(JI,JLAYER,JP)=XUNDEF
+          IF (TPSNOW%SCHEME=='1-L') THEN
+            TPSNOW%T(JI,JLAYER,JP) = XUNDEF
+          ELSEIF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
+            TPSNOW%HEAT(JI,JLAYER,JP) = XUNDEF
+            IF (TPSNOW%SCHEME=='CRO') THEN
+              TPSNOW%HIST (JI,JLAYER,JP) = XUNDEF
+              TPSNOW%GRAN1(JI,JLAYER,JP) = XUNDEF
+              TPSNOW%GRAN2(JI,JLAYER,JP) = XUNDEF
+              TPSNOW%AGE  (JI,JLAYER,JP) = XUNDEF
+            ENDIF
+          ENDIF
+          !
+        ENDDO
+      ENDIF
+    ENDDO
+  ENDDO
+!$OMP ENDDO
+IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
+  !
+ENDIF
 !
 !-------------------------------------------------------------------------------
+!
+CONTAINS
+!
+SUBROUTINE READ_LAYERS(OVERSION,KNL,HDIRIN,HPREF,HFMT,HREC,HSURF,PTAB,HREC2)
+!
+IMPLICIT NONE
+!
+LOGICAL, INTENT(IN) :: OVERSION
+INTEGER, INTENT(IN) :: KNL
+ CHARACTER(LEN=*), INTENT(IN) :: HDIRIN
+ CHARACTER(LEN=*), INTENT(IN) :: HPREF
+ CHARACTER(LEN=*), INTENT(IN) :: HFMT
+ CHARACTER(LEN=*), INTENT(IN) :: HREC
+ CHARACTER(LEN=*), INTENT(IN) :: HSURF
+REAL, DIMENSION(:,:,:), INTENT(OUT) :: PTAB
+ CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: HREC2
+!
+ CHARACTER(LEN=1) :: YREC2
+ CHARACTER (LEN=100) :: YFMT     ! format for writing
+ CHARACTER(LEN=12)   :: YRECFM   ! Name of the article to be read
+ CHARACTER(LEN=4) :: YNLAYER     !Format depending on the number of layers
+INTEGER :: JLAYER, IRESP
+!
+IF (PRESENT(HREC2)) THEN
+  YREC2=TRIM(HREC2)
+ELSE
+  YREC2=""
+ENDIF
+!
+YNLAYER='I1.1'
+DO JLAYER = 1,KNL
+  !
+  IF (JLAYER==10) YNLAYER='I2.2'
+  YFMT = TRIM(HFMT)//','//YNLAYER//')'
+  !
+  WRITE(YRECFM,YFMT) TRIM(HREC),TRIM(YREC2)//'_',TRIM(HSURF),JLAYER
+  IF (OVERSION) YRECFM=ADJUSTL(TRIM(HPREF)//YRECFM)
+  !
+  CALL READ_SURF(HPROGRAM,YRECFM,PTAB(:,JLAYER,:),IRESP,HDIR=HDIRIN)
+  !
+ENDDO
+!
+END SUBROUTINE READ_LAYERS
 !
 END SUBROUTINE READ_GR_SNOW

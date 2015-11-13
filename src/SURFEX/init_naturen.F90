@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_NATURE_n (DTCO, DGU, UG, U, IM, DTZ, DGL, &
+      SUBROUTINE INIT_NATURE_n (DTCO, DGU, UG, U, USS, IM, DTZ, DGL, &
                                 DST, SLT, SV, &
                                   HPROGRAM,HINIT,OLAND_USE,                    &
                                    KI,KSV,KSW,                                &
@@ -53,6 +53,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 USE MODD_DST_n, ONLY : DST_t
@@ -82,6 +83,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -138,7 +140,7 @@ ELSE IF (U%CNATURE=='FLUX  ') THEN
                            PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
-  CALL INIT_ISBA_n(DTCO, DGU, UG, U, IM, DTZ, DST, SLT, SV, &
+  CALL INIT_ISBA_n(DTCO, DGU, UG, U, USS, IM, DTZ, DST, SLT, SV, &
                    HPROGRAM,HINIT,OLAND_USE,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                      PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                      PEMIS,PTSRAD,PTSURF,                          &

@@ -14,18 +14,41 @@ CONTAINS
 !
 !
 !
-!
+USE MODD_SURFEX_MPI, ONLY : NPROC, NPIO, NRANK, IDX_R, NREQ, NCOMM, NSIZE, NINDEX
+USE MODD_SURFEX_OMP, ONLY : NINDX1SFX, NINDX2SFX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
-USE MODI_READ_SURF, ONLY : READ_SURF
+#ifdef SFX_LFI
+USE MODE_READ_SURF_LFI, ONLY: READ_SURFN_LFI
+USE MODD_IO_SURF_LFI, ONLY : NMASK_lfi=>NMASK, NFULL_lfi=>NFULL
+#endif
+#ifdef SFX_NC
+USE MODE_READ_SURF_NC, ONLY: READ_SURFN_NC
+USE MODD_IO_SURF_NC, ONLY : NMASK_nc=>NMASK, NFULL_nc=>NFULL
+#endif
+#ifdef SFX_ASC
+USE MODE_READ_SURF_ASC, ONLY: READ_SURFN_ASC
+USE MODD_IO_SURF_ASC, ONLY : NMASK_asc=>NMASK, NFULL_asc=>NFULL
+#endif
+#ifdef SFX_FA
+USE MODE_READ_SURF_FA, ONLY: READ_SURFX_FA
+USE MODD_IO_SURF_FA, ONLY : NMASK_fa=>NMASK, NFULL_fa=>NFULL
+#endif
 #ifdef SFX_MNH
 USE MODI_READ_SURFX2COV_MNH
 #endif
+!
+USE MODI_PACK_SAME_RANK
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -43,16 +66,27 @@ INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem 
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
+#endif
+INTEGER, DIMENSION(NPROC) :: ITREQ
+REAL, DIMENSION(:,:),ALLOCATABLE :: ZWORKR
+REAL, DIMENSION(:),ALLOCATABLE :: ZFIELD
+INTEGER, DIMENSION(:), POINTER :: IMASKF
+INTEGER, DIMENSION(SIZE(PFIELD,2)) :: IMASK
  CHARACTER(LEN=100) :: YCOMMENT
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
-INTEGER            :: JJ
-INTEGER            :: JCOVER
-INTEGER            :: IL1, IL2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+ CHARACTER(LEN=4)  :: YLVL
+INTEGER            :: JJ, IPIO_SAVE, IPAS, JP, IDEB, IFIN
+INTEGER            :: JCOVER, JPROC, IPROC
+INTEGER            :: IL1, IL2, IDX_SAVE, IDX, IVAL
+INTEGER :: INFOMPI, IREQ, JPROC2, IFULL
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 IF (LHOOK) CALL DR_HOOK('READ_SURF_COV',0,ZHOOK_HANDLE)
 !
+IDX_SAVE = IDX_R
 YREC = HREC
 YCOMMENT="empty"
 YDIR = 'H'
@@ -65,26 +99,207 @@ PFIELD(:,:)=XUNDEF
 !
 IF (HPROGRAM=='MESONH') THEN
 #ifdef SFX_MNH
-    CALL READ_SURFX2COV_MNH(YREC,IL1,IL2,PFIELD,OFLAG,KRESP,YCOMMENT,YDIR)
+   CALL READ_SURFX2COV_MNH(YREC,IL1,IL2,PFIELD,OFLAG,KRESP,YCOMMENT,YDIR)
 #endif
 ELSE
   !
+  !mask associating the index of the cover in xcover to its real number
   JCOVER = 0
-  DO JJ=1,SIZE(OFLAG)
+  DO JJ = 1,SIZE(OFLAG)
+    IF (OFLAG(JJ)) THEN
+      JCOVER=JCOVER+1
+      IMASK(JCOVER) = JJ
+    ENDIF
+  ENDDO
+  !
+  !the mask to call read_and_send_mpi depends on the I/O type
+  IF (HPROGRAM=='LFI   ') THEN
+#ifdef SFX_LFI
+    ALLOCATE(ZFIELD(NFULL_lfi))
+    IFULL = NFULL_lfi
+    IMASKF=>NMASK_lfi
+#endif
+  ELSEIF (HPROGRAM=='ASCII ') THEN
+#ifdef SFX_ASC
+    ALLOCATE(ZFIELD(NFULL_asc))
+    IFULL = NFULL_asc
+    IMASKF=>NMASK_asc
+#endif
+  ELSEIF (HPROGRAM=='FA     ') THEN
+#ifdef SFX_FA
+    ALLOCATE(ZFIELD(NFULL_fa))
+    IFULL = NFULL_fa
+    IMASKF=>NMASK_fa
+#endif
+  ELSEIF (HPROGRAM=='NC     ') THEN
+#ifdef SFX_NC
+    ALLOCATE(ZFIELD(NFULL_nc))
+    IFULL = NFULL_nc
+    IMASKF=>NMASK_nc
+#endif
+  ENDIF
+  !
+  !if we want to get covers for the current task or for the whole domain
+  IF (YDIR=='H') THEN
+     !second dimension because the reading of covers is parallelized with MPI
+    ALLOCATE(ZWORKR(NSIZE,NPROC-1))
+  ELSE
+    ALLOCATE(ZWORKR(IFULL,NPROC))
+  ENDIF
+  ZWORKR(:,:) = 0.
+  !
+  IF (NPROC>1) THEN
+    !for the parallelization of reading, NINDEX must be known by all tasks
+    IF (NRANK/=NPIO) ALLOCATE(NINDEX(IFULL))
+    CALL MPI_BCAST(NINDEX,SIZE(NINDEX)*KIND(NINDEX)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+  ENDIF
+  !
+  IPIO_SAVE = NPIO
+  !number of covers read by each task
+  IPAS = CEILING(IL2*1./NPROC)
+  !
+  PFIELD(:,:) = 0.
+  !
+  !first cover number read by the current task
+  IDEB = IPAS*NRANK
+  !
+  DO JP = 1,IPAS
     !
-    IF (.NOT. OFLAG(JJ)) CYCLE
+    !index of the cover read by this task at this loop index
+    JCOVER = IDEB + JP
     !
-    JCOVER = JCOVER + 1
+    IF (JCOVER<=IL2) THEN
+      !
+      !real number of the cover
+      JJ = IMASK(JCOVER)
+      !
+      IF (TRIM(HREC)=='COVER') THEN
+        WRITE(YREC,'(A5,I3.3)') TRIM(HREC),JJ
+      ELSE
+        WRITE(YLVL,'(I4)') JJ
+        YREC = TRIM(HREC)//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      ENDIF
+      YCOMMENT='X_Y_'//YREC
+      !
+      !
+      IF (HPROGRAM=='AROME ') THEN
+#ifdef ARO
+        CALL READ_SURFX1_ARO(YREC,IL1,PFIELD(:,JCOVER),KRESP,YCOMMENT,YDIR)
+#endif
+      ELSE
+        !
+        !reads one cover by task
+        !
+        !number of the I/O task for this read 
+        NPIO = NRANK
+        !
+        !reading of the whol cover (HDIR='A')
+        IF (HPROGRAM=='LFI   ') THEN
+#ifdef SFX_LFI
+          CALL READ_SURFN_LFI(YREC,ZFIELD,KRESP,YCOMMENT,'A')
+#endif
+        ELSEIF (HPROGRAM=='ASCII ') THEN
+#ifdef SFX_ASC
+          CALL READ_SURFN_ASC(YREC,ZFIELD,KRESP,YCOMMENT,'A')
+#endif
+        ELSEIF (HPROGRAM=='FA     ') THEN
+#ifdef SFX_FA
+          CALL READ_SURFX_FA(YREC,SIZE(ZFIELD),ZFIELD,KRESP,YCOMMENT,'A')
+#endif
+        ELSEIF (HPROGRAM=='NC     ') THEN
+#ifdef SFX_NC
+          CALL READ_SURFN_NC(YREC,ZFIELD,KRESP,YCOMMENT,'A')
+#endif
+        ENDIF
+        !
+        !NPIO rebecomes the I/O task 
+        NPIO = IPIO_SAVE
+        !
+        IDX = IDX_SAVE + JP
+        IF (YDIR=='H') THEN
+          !
+          !send covers to other tasks
+          CALL READ_AND_SEND_MPI(ZFIELD,PFIELD(:,JCOVER),IMASKF,NRANK,IDX)
+          !
+        ELSEIF (YDIR=='A' .OR. YDIR=='E') THEN
+          !
+          !NPIO needs to know all covers read
+          IF (NRANK/=NPIO) THEN
+            IDX = IDX + 1 
+            CALL MPI_SEND(ZFIELD,SIZE(ZFIELD)*KIND(ZFIELD)/4,MPI_REAL,NPIO,IDX,NCOMM,INFOMPI)
+          ENDIF
+          !
+        ELSE
+          CALL ABOR1_SFX("READ_SURFX2COV:HDIR MUST BE H OR A OR E")
+        ENDIF 
+        !   
+      ENDIF
+      !
+      IF (NRANK==NPIO .OR. YDIR=='H') THEN
+        !
+        !receives pieces of cover fields
+        ITREQ(:) = 0
+        !
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IDX,ISTATUS,INFOMPI)
+        DO JPROC=0,NPROC-1
+          !
+          !the cover exists and was read
+          IF (IPAS*JPROC + JP<=IL2) THEN
+            !
+            IF (JPROC<NRANK) THEN
+              ITREQ(JPROC+1) = JPROC+1
+            ELSEIF (JPROC==NPIO .AND. YDIR/='H') THEN
+              ITREQ(JPROC+1) = NPROC
+              DO JPROC2=NPROC-1,0,-1
+                IF (IPAS*JPROC2+JP>IL2) ITREQ(JPROC+1) = ITREQ(JPROC+1) -1
+              ENDDO
+            ELSE
+              ITREQ(JPROC+1) = JPROC
+            ENDIF    
+            !     
+            IF (JPROC/=NRANK) THEN
+              IDX = IDX_SAVE + JP + 1
+              !each task receives the part of the cover read that concerns it 
+              !only NPIO in cas of HDIR/=H
+              CALL MPI_RECV(ZWORKR(:,ITREQ(JPROC+1)),SIZE(ZWORKR,1)*KIND(ZWORKR)/4,&
+                            MPI_REAL,JPROC,IDX,NCOMM,ISTATUS,INFOMPI)
+            ELSEIF (JPROC==NPIO .AND. YDIR/='H') THEN
+              ZWORKR(:,ITREQ(JPROC+1)) = ZFIELD(:)
+            ENDIF
+            !
+          ENDIF
+          !
+        ENDDO
+!$OMP END DO
+!$OMP END PARALLEL        
+        !
+        !waits that all cover pieces are sent
+#ifndef NOMPI
+        IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN
+          CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS,INFOMPI)
+        ENDIF
+#endif
+        !
+      ENDIF
+      !
+      IF (YDIR=='H' .OR. NRANK==NPIO) THEN
+        !packs data
+        IREQ = MAXVAL(ITREQ)
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IVAL)
+        DO JPROC=0,IREQ-1
+          IVAL = IPAS*JPROC + JP
+          IF (JPROC>=NRANK .AND. YDIR=='H') IVAL = IVAL + IPAS
+          CALL PACK_SAME_RANK(IMASKF,ZWORKR(:,JPROC+1),PFIELD(:,IVAL))
+        ENDDO
+!$OMP END DO
+!$OMP END PARALLEL
+      ENDIF
+      !
+    ENDIF
     !
-    WRITE(YREC,'(A5,I3.3)') 'COVER',JJ
-    YCOMMENT='X_Y_'//YREC
-!RJ: xundef is done for whole array above, to ensure status INTENT(OUT)
-!RJ     PFIELD(:,JCOVER)=0.
-    !
-    CALL READ_SURF(&
-                   HPROGRAM,YREC,PFIELD(:,JCOVER),KRESP,YCOMMENT,YDIR)
-    !
-  END DO
+  ENDDO
   !
 ENDIF
 !

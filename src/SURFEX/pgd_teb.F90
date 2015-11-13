@@ -38,6 +38,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
@@ -142,7 +143,6 @@ ENDIF
                       'TOWN  ',TM%TG%NDIM)
 !
 ALLOCATE(TM%TOP%LCOVER     (JPCOVER))
-ALLOCATE(TM%TOP%XCOVER     (TM%TG%NDIM,JPCOVER))
 ALLOCATE(TM%TOP%XZS        (TM%TG%NDIM))
 ALLOCATE(TM%TG%XLAT       (TM%TG%NDIM))
 ALLOCATE(TM%TG%XLON       (TM%TG%NDIM))
@@ -168,7 +168,7 @@ TM%TOP%LECOCLIMAP = OECOCLIMAP
 !*    6.      Prints of cover parameters in a tex file
 !             ----------------------------------------
 !
-IF (OECOCLIMAP) CALL WRITE_COVER_TEX_TEB
+IF (OECOCLIMAP .AND. NRANK==NPIO) CALL WRITE_COVER_TEX_TEB
 !
 !
 !-------------------------------------------------------------------------------

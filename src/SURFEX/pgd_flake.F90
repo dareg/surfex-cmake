@@ -38,7 +38,7 @@
 !            -----------
 !
 !
-!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
@@ -295,7 +295,7 @@ CALL PGD_FIELD(DTCO, UG, U, USS, &
 !*   10.     Prints of flake parameters in a tex file
 !            ----------------------------------------
 !
-CALL WRITE_COVER_TEX_WATER
+IF (NRANK==NPIO) CALL WRITE_COVER_TEX_WATER
 !
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

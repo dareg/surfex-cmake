@@ -28,6 +28,7 @@
 IMPLICIT NONE
 !
 CHARACTER(LEN=6), SAVE  :: CDNOMC ='header'     ! Name of the header
+CHARACTER(LEN=28),SAVE  :: CFILE_FA       ='SURFIN.fa'  ! Name of the input
 CHARACTER(LEN=28),SAVE  :: CFILEIN_FA       ='SURFIN.fa'  ! Name of the input
 CHARACTER(LEN=28),SAVE  :: CFILEIN_FA_SAVE  ='SURFIN.fa'  ! Name of the input
 CHARACTER(LEN=28),SAVE  :: CFILEOUT_FA      ='SURFOUT.fa' ! Name of the input
@@ -46,8 +47,7 @@ LOGICAL, SAVE           :: LFANOCOMPACT=.FALSE.
 LOGICAL, SAVE           :: LPREP       =.FALSE.
 LOGICAL                 :: LOPEN   ! flag to know if the file has been openned during the surface call
 !      
-INTEGER, DIMENSION(:), POINTER :: NMASK     ! 1D mask to read only interesting
-!$OMP THREADPRIVATE(NMASK)
+INTEGER, DIMENSION(:), POINTER :: NMASK=>NULL()     ! 1D mask to read only interesting
 INTEGER                        :: NFULL     ! total number of points of surface
 !$OMP THREADPRIVATE(NFULL)
 INTEGER                        :: NFULL_EXT ! total number of points including the extension zone (ALADIN)

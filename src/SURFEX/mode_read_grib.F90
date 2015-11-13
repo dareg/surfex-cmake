@@ -375,11 +375,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_ZS_SEA',0,ZHOOK_HANDLE)
 !
-IF (HINMODEL=='HIRLAM') THEN
-  CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_ZS_SEA:OPTION NOT SUPPORTED '//HINMODEL)
-ELSE
   CALL READ_GRIB_ZS(HGRIB,KLUOUT,HINMODEL,PZSS)
-ENDIF
 !
 IF (SIZE(PMASK)==SIZE(PZSS)) &
   WHERE (PMASK(:)/=0.) PZSS = 0.
@@ -485,11 +481,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SST',0,ZHOOK_HANDLE)
 !
-IF (HINMODEL=='HIRLAM') THEN
-  CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_SST:OPTION NOT SUPPORTED '//HINMODEL)
-ELSE
-  CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PSST)
-ENDIF
+ CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PSST)
 !
 IF (SIZE(PMASK)==SIZE(PSST)) &
   WHERE (PMASK(:)/=0.) PSST = XUNDEF
@@ -512,7 +504,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PT2       ! 
 !
 INTEGER(KIND=kindOfInt)                           :: IRET
-INTEGER                           :: ILTYPE    ! type of level (Grib code table 3)
+INTEGER                           :: ILTYPE, ILEV    ! type of level (Grib code table 3)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !* Read deep soil temperature
@@ -528,7 +520,11 @@ SELECT CASE (HINMODEL)
     IF (IRET /= 0) THEN
        ILTYPE=105
       CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,PT2,KLTYPE=ILTYPE)   
-    ENDIF     
+    ENDIF  
+  CASE ('HIRLAM ')
+     ILTYPE=105
+     ILEV=954
+    CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,PT2,KLTYPE=ILTYPE,KLEV1=ILEV)      
    CASE DEFAULT
      CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_T2:OPTION NOT SUPPORTED '//HINMODEL)
 END SELECT

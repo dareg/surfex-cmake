@@ -139,8 +139,8 @@ IF (OHANDLE_SIC) THEN
 !
 !* wind stress
 !
-   DGS%XFMUC(:) = DGS%XFMUC(:) + PFMU(:) * PTSTEP 
-   DGS%XFMVC(:) = DGS%XFMVC(:) + PFMV(:) * PTSTEP
+   DGS%XFMUC_ICE(:) = DGS%XFMUC_ICE(:) + PFMU_ICE(:) * PTSTEP 
+   DGS%XFMVC_ICE(:) = DGS%XFMVC_ICE(:) + PFMV_ICE(:) * PTSTEP
 !        
 ENDIF
 !

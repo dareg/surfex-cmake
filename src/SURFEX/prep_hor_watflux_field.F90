@@ -26,21 +26,21 @@ SUBROUTINE PREP_HOR_WATFLUX_FIELD (DTCO, U, &
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!------------------------------------------------------------------
 !
-!
-!
-!
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
+!
 USE MODD_PREP,          ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, XLAT_OUT, XLON_OUT, &
                                XX_OUT, XY_OUT, CMASK
 !
+USE MODD_GRID_GRIB, ONLY : CINMODEL
+!
+USE MODI_PREP_GRIB_GRID
 USE MODI_READ_PREP_WATFLUX_CONF
 USE MODI_PREP_WATFLUX_GRIB
 USE MODI_PREP_WATFLUX_UNIF
@@ -54,6 +54,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -78,11 +82,13 @@ TYPE(WATFLUX_t), INTENT(INOUT) :: W
  CHARACTER(LEN=28)             :: YFILE     ! name of file
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
-REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN  ! field to interpolate horizontally
+ TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
+REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN=>NULL()  ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:) :: ZFIELDOUT ! field interpolated   horizontally
 INTEGER                       :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
+INTEGER :: INFOMPI, INL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -104,7 +110,8 @@ CMASK = 'WATER'
 IF (GUNIF) THEN
   CALL PREP_WATFLUX_UNIF(ILUOUT,HSURF,ZFIELDIN)
 ELSE IF (YFILETYPE=='GRIB  ') THEN
-  CALL PREP_WATFLUX_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
+  CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)
+  IF (NRANK==NPIO) CALL PREP_WATFLUX_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)         
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR. YFILETYPE=='FA    ') THEN
    CALL PREP_WATFLUX_EXTERN(&
                             HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN)
@@ -117,7 +124,18 @@ END IF
 !
 !*      4.     Horizontal interpolation
 !
-ALLOCATE(ZFIELDOUT(SIZE(WG%XLAT),SIZE(ZFIELDIN,2)))
+IF (NRANK==NPIO) THEN
+  INL = SIZE(ZFIELDIN,2)
+ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
+ ALLOCATE(ZFIELDIN(0,0))
+ENDIF
+!
+IF (NPROC>1) THEN
+#ifndef NOMPI
+  CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
+ENDIF
+ALLOCATE(ZFIELDOUT(SIZE(WG%XLAT),INL))
 !
  CALL HOR_INTERPOL(DTCO, U, &
                    ILUOUT,ZFIELDIN,ZFIELDOUT)

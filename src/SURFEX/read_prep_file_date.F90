@@ -58,6 +58,7 @@ INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
  CHARACTER(LEN=12), DIMENSION(3000) :: HREC   ! list of records already read/written
 INTEGER                            :: IREC
  CHARACTER(LEN=6)              :: YINMODEL  ! model from which GRIB file originates
+ CHARACTER(LEN=6)             :: YINTERPTYPE
  CHARACTER(LEN=10)             :: YGRIDTYPE ! Grid type
 INTEGER                       :: IRESP     ! Error code after redding
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -70,7 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_PREP_FILE_DATE',0,ZHOOK_HANDLE)
 IF(HFILETYPE=='GRIB  ') THEN
 !
-  CALL PREP_GRIB_GRID(HFILE,KLUOUT,YINMODEL,YGRIDTYPE,TPTIME)
+  CALL PREP_GRIB_GRID(HFILE,KLUOUT,YINMODEL,YGRIDTYPE,YINTERPTYPE,TPTIME)
 !
 ELSE IF(HFILETYPE=='MESONH' .OR. HFILETYPE=='LFI   ' .OR. HFILETYPE=='ASCII ') THEN
 !

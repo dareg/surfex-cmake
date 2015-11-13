@@ -34,13 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-USE MODD_IO_SURF_LFI,ONLY:CLUOUT_LFI,NMASK,NFULL,CMASK, NLUOUT, &
-                            CFILE_LFI, NUNIT_LFI, NFULL_AUX,&
-                            NIB,NIE,NIU,NJB,NJE,NJU, NFULL_AUX, &
-                            CFILEPGD_LFI 
+USE MODD_SURFEX_MPI, ONLY : NRANK
+USE MODD_IO_SURF_LFI,ONLY : CLUOUT_LFI,NMASK,NFULL,CMASK, NLUOUT, &
+                            NFULL_AUX,CFILE_LFI 
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
 !
@@ -77,18 +73,20 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
 !
 CMASK = HMASK
 CFILE_LFI=HFILE
- CALL READ_SURF(&
-                'LFI   ','DIM_FULL',ILU,IRET)
+ CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET,HDIR='-')
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------
 NFULL = NFULL_AUX
 !
+ALLOCATE(ZFULL(NFULL))
 IL = NFULL
-ALLOCATE(ZFULL(IL))
+ZFULL = 1.
+!
 ALLOCATE(NMASK(IL))
-ZFULL=1.
  CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
+!
+DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

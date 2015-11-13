@@ -66,7 +66,6 @@ INCLUDE "netcdf.inc"
 !
 REAL, DIMENSION(:),ALLOCATABLE :: ZFULL  ! total cover
 INTEGER                        :: ILU,IRET, IL
-INTEGER                        :: INB ! number of articles in the file
 CHARACTER(LEN=28) :: YFILE
 LOGICAL :: GOPENED
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -96,6 +95,8 @@ ALLOCATE(ZFULL(IL))
 ALLOCATE(NMASK(IL))
 ZFULL=1.
  CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
+!
+DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------
 CMASK = HMASK

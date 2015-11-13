@@ -32,19 +32,25 @@ IMPLICIT NONE
 !
 !--------------------------------------------------------------------------
 !
- CHARACTER(LEN=10)  :: CINGRID_TYPE   ! type of input grid
- CHARACTER(LEN=6)   :: CINTERP_TYPE   ! type of interpolation
- CHARACTER(LEN=6)   :: CMASK          ! type of surface
+ CHARACTER(LEN=10)  :: CINGRID_TYPE = "          "   ! type of input grid
+ CHARACTER(LEN=6)   :: CINTERP_TYPE = "      "   ! type of interpolation
+ CHARACTER(LEN=6)   :: CMASK = "      "         ! type of surface
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE :: LINTERP ! .true. where interpolation must be done
+!$OMP THREADPRIVATE(LINTERP)
 !
 REAL, DIMENSION(:), ALLOCATABLE :: XZS_LS   ! Large scale orography interpolated on output grid
+!$OMP THREADPRIVATE(XZS_LS)
 !
 REAL, DIMENSION(:), ALLOCATABLE :: XLAT_OUT ! Output grid latitudes
+!$OMP THREADPRIVATE(XLAT_OUT)
 REAL, DIMENSION(:), ALLOCATABLE :: XLON_OUT ! Output grid longitudes
+!$OMP THREADPRIVATE(XLON_OUT)
 !
 REAL, DIMENSION(:), ALLOCATABLE :: XX_OUT   ! Output grid 1st coordinate
+!$OMP THREADPRIVATE(XX_OUT)
 REAL, DIMENSION(:), ALLOCATABLE :: XY_OUT   ! Output grid 2nd coordinate
+!$OMP THREADPRIVATE(XY_OUT)
 !--------------------------------------------------------------------------
 REAL, PARAMETER :: XT_CLIM_GRAD = -0.0065   ! climatological vertical temperature gradient
 !--------------------------------------------------------------------------

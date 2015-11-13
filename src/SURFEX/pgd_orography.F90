@@ -46,8 +46,11 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
+!
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
-USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, XSSQO, LSSQO, NSSO
+USE MODD_PGDWORK,        ONLY : X2D_ALL, NSIZE_ALL, XSSQO, LSSQO, NSSO, &
+                                XEXTVAL2, XSUMVAL2, NSIZE
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
 USE MODI_GET_LUOUT
@@ -58,7 +61,6 @@ USE MODI_READ_SURF
 USE MODI_TREAT_FIELD
 USE MODI_READ_PGD_NETCDF
 USE MODI_INTERPOL_FIELD
-USE MODI_INI_SSOWORK
 USE MODI_SSO
 USE MODI_SUBSCALE_AOS
 USE MODI_GET_SIZE_FULL_n
@@ -214,16 +216,6 @@ USS%XHO2JM    (:) = XUNDEF
 !*    4.      Allocations of work arrays
 !             --------------------------
 !
-ALLOCATE(NSIZE     (NL))
-ALLOCATE(XSUMVAL   (NL))
-ALLOCATE(XSUMVAL2  (NL))
-!
-NSIZE    (:) = 0.
-XSUMVAL  (:) = 0.
-XSUMVAL2 (:) = 0.
-!
- CALL INI_SSOWORK
-!
 !-------------------------------------------------------------------------------
 !
 !*    5.      Uniform field is prescribed
@@ -273,10 +265,6 @@ IF (OZS) THEN
   USS%XSSO_DIR(:)   = 0.
   USS%XSSO_SLOPE(:) = 0.
 
-  DEALLOCATE(NSIZE    )
-  DEALLOCATE(XSUMVAL  )
-  DEALLOCATE(XSUMVAL2 )
-
   IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',1,ZHOOK_HANDLE)
   RETURN
 
@@ -304,10 +292,6 @@ ELSE IF (XUNIF_ZS/=XUNDEF) THEN
   USS%XSSO_DIR(:)   = 0.
   USS%XSSO_SLOPE(:) = 0.
 
-  DEALLOCATE(NSIZE    )
-  DEALLOCATE(XSUMVAL  )
-  DEALLOCATE(XSUMVAL2 )
-
   IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',1,ZHOOK_HANDLE)
   RETURN
 !
@@ -328,7 +312,7 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
   IF(YFILETYPE=='NETCDF')THEN
      
 !      CALL ABOR1_SFX('Use another format than netcdf for topo input file with LIMP_ZS')
-     CALL READ_PGD_NETCDF(USS, &
+     CALL READ_PGD_NETCDF(UG,U,USS, &
                           HPROGRAM,'SURF  ','      ',YZS,'ZS                  ',U%XZS)
      
      USS%XSIL_ZS(:)    = U%XZS(:)
@@ -353,7 +337,7 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
       ALLOCATE(ZSLOPE(NL))
 
     ! Read field on the same grid as FORCING
-      CALL READ_PGD_NETCDF(USS, &
+      CALL READ_PGD_NETCDF(UG,U,USS, &
                           HPROGRAM,'SURF  ','      ',YSLOPE,'slope               ',ZSLOPE)
 
       DO JJ=1,NL
@@ -388,28 +372,38 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
   CALL END_IO_SURF_n(YFILETYPE)
 !
-  DEALLOCATE(NSIZE    )
-  DEALLOCATE(XSUMVAL  )
-  DEALLOCATE(XSUMVAL2 )
-!
   IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',1,ZHOOK_HANDLE)
   RETURN
 !
 
-END IF
-!
-!-------------------------------------------------------------------------------
-
+ELSE
+  !
+  ALLOCATE(NSIZE_ALL (U%NDIM_FULL))
+  ALLOCATE(X2D_ALL   (U%NDIM_FULL,2))
+  ALLOCATE(XEXTVAL2  (U%NDIM_FULL,2))
+  NSIZE_ALL(:) = 0.
+  X2D_ALL(:,:) = 0.
+  XEXTVAL2 (:,1) = -99999.
+  XEXTVAL2 (:,2) = 99999.
+  !
+  !-------------------------------------------------------------------------------
 !
 !*    6.      Averages the field
 !             ------------------
 !
- CALL TREAT_FIELD(UG, U, USS, &
+  CALL TREAT_FIELD(UG, U, USS, &
                   HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS,  &
                    'ZS                  '                     )  
 !
-DEALLOCATE(XSUMVAL  )
-DEALLOCATE(XSUMVAL2 )
+
+  DEALLOCATE(XSUMVAL2 )
+  !
+ENDIF  
+!
+IF (.NOT.ALLOCATED(NSIZE)) THEN
+  ALLOCATE(NSIZE(NL))
+  NSIZE(:) = 0
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
@@ -496,7 +490,7 @@ END SELECT
 !*   12.      Subgrid scale orography characteristics
 !             ---------------------------------------
 !
- CALL SSO(UG, USS, &
+ CALL SSO(U, UG, USS, &
           GSSO,GSSO_ANIS,PSEA)
 !
 IFLAG(:) = NSIZE(:)
@@ -538,7 +532,7 @@ END WHERE
 !*   13.      Subgrid scale orography roughness
 !             ---------------------------------
 !
- CALL SUBSCALE_AOS(UG, USS, &
+ CALL SUBSCALE_AOS(U, UG, USS, &
                    GZ0EFFI,GZ0EFFJ,PSEA)
 !
 IFLAG(:) = NSIZE(:)

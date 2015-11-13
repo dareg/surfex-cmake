@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE READ_PGD_ISBA_n (CHI, DTCO, DTI, DTZ, DGU, GB, IG, I, &
-                                  UG, U, SV, &
+                                  UG, U, USS, SV, &
                                   HPROGRAM,OLAND_USE)
 !     #########################################
 !
@@ -54,6 +54,7 @@ USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 USE MODD_SV_n, ONLY : SV_t
 !
 USE MODD_TYPE_DATE_SURF
@@ -69,7 +70,8 @@ USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
 !
 USE MODI_READ_SURF
-USE MODI_READ_GRID
+USE MODI_PACK_INIT
+USE MODI_PACK_SSO
 USE MODI_READ_LCOVER
 USE MODI_READ_PGD_ISBA_PAR_n
 USE MODI_READ_PGD_TSZ0_PAR_n
@@ -102,6 +104,7 @@ TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 TYPE(SV_t), INTENT(INOUT) :: SV
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
@@ -117,6 +120,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=4 ) :: YLVL
 !
+INTEGER :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 INTEGER :: ILU    ! expected physical size of full surface array
 INTEGER :: ILUOUT ! output listing logical unit
 INTEGER :: IRESP  ! Error code after redding
@@ -250,14 +254,22 @@ YRECFM='PATCH_NUMBER'
 ALLOCATE(I%LMEB_PATCH(I%NPATCH))
 !
 IF (IVERSION>=8) THEN
+!
    YRECFM='MEB_PATCH'
-   CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%LMEB_PATCH(:),IRESP,HDIR='-')
-   YRECFM='FORC_MEASURE'
-   CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%LFORC_MEASURE,IRESP)
-   YRECFM='MEB_LITTER'
-   CALL READ_SURF(HPROGRAM,YRECFM,I%LMEB_LITTER,IRESP)
+   CALL READ_SURF(HPROGRAM,YRECFM,I%LMEB_PATCH(:),IRESP,HDIR='-')
+!
+   ISIZE_LMEB_PATCH = COUNT(I%LMEB_PATCH(:))
+!
+   IF (ISIZE_LMEB_PATCH>0)THEN
+      YRECFM='FORC_MEASURE'
+      CALL READ_SURF(HPROGRAM,YRECFM,I%LFORC_MEASURE,IRESP)
+      YRECFM='MEB_LITTER'
+      CALL READ_SURF(HPROGRAM,YRECFM,I%LMEB_LITTER,IRESP)
+   ELSE
+      I%LFORC_MEASURE=.FALSE.
+      I%LMEB_LITTER  =.FALSE.           
+   ENDIF
+!
 ELSE
    I%LMEB_PATCH(:)=.FALSE.
    I%LFORC_MEASURE=.FALSE.
@@ -273,31 +285,14 @@ ENDIF
 !               -------------
 !
 ALLOCATE(I%LCOVER(JPCOVER))
- CALL READ_LCOVER(&
-                  HPROGRAM,I%LCOVER)
-!
-ALLOCATE(I%XCOVER(IG%NDIM,COUNT(I%LCOVER)))
- CALL READ_SURF_COV(&
-                    HPROGRAM,'COVER',I%XCOVER(:,:),I%LCOVER,IRESP)
-!
-!*       3.2    Orography :
-!               ---------
-!
-!
 ALLOCATE(I%XZS(IG%NDIM))
-YRECFM='ZS'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XZS(:),IRESP)
-!
-!
-!* latitude, longitude, mesh size, and heading of JP axis (deg from N clockwise)
-!
 ALLOCATE(IG%XLAT       (IG%NDIM))
 ALLOCATE(IG%XLON       (IG%NDIM))
 ALLOCATE(IG%XMESH_SIZE (IG%NDIM))
 ALLOCATE(I%XZ0EFFJPDIR(IG%NDIM))
- CALL READ_GRID(&
-                HPROGRAM,IG%CGRID,IG%XGRID_PAR,IG%XLAT,IG%XLON,IG%XMESH_SIZE,IRESP,I%XZ0EFFJPDIR)
+!
+CALL PACK_INIT(DTCO,U,UG,HPROGRAM,'NATURE',IG%CGRID,IG%XGRID_PAR,     &
+               I%LCOVER,I%XCOVER,I%XZS,IG%XLAT,IG%XLON,IG%XMESH_SIZE, I%XZ0EFFJPDIR )
 !
 !* clay fraction : attention, seul un niveau est present dans le fichier
 !* on rempli tout les niveaux de  XCLAY avec les valeurs du fichiers
@@ -435,58 +430,18 @@ END IF
 !* subgrid-scale orography parameters to compute dynamical roughness length
 !
 ALLOCATE(I%XAOSIP(IG%NDIM))
-YRECFM='AOSIP'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XAOSIP,IRESP)
-!
 ALLOCATE(I%XAOSIM(IG%NDIM))
-YRECFM='AOSIM'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XAOSIM,IRESP)
-
 ALLOCATE(I%XAOSJP(IG%NDIM))
-YRECFM='AOSJP'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XAOSJP,IRESP)
-!
 ALLOCATE(I%XAOSJM(IG%NDIM))
-YRECFM='AOSJM'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XAOSJM,IRESP)
-!
 ALLOCATE(I%XHO2IP(IG%NDIM))
-YRECFM='HO2IP'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XHO2IP,IRESP)
-!
 ALLOCATE(I%XHO2IM(IG%NDIM))
-YRECFM='HO2IM'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XHO2IM,IRESP)
-!
 ALLOCATE(I%XHO2JP(IG%NDIM))
-YRECFM='HO2JP'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XHO2JP,IRESP)
-!
 ALLOCATE(I%XHO2JM(IG%NDIM))
-YRECFM='HO2JM'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XHO2JM,IRESP)
-!
-!* orographic parameter to compute effective surface of energy exchanges
-!
 ALLOCATE(I%XSSO_SLOPE(IG%NDIM))
-YRECFM='SSO_SLOPE'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XSSO_SLOPE,IRESP)
-!
-!* orographic standard deviation for subgrid-scale orographic drag
-!
 ALLOCATE(I%XSSO_STDEV(IG%NDIM))
-YRECFM='SSO_STDEV'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XSSO_STDEV(:),IRESP)
+!
+ CALL PACK_SSO(USS,HPROGRAM,U%NR_NATURE, I%XAOSIP, I%XAOSIM, I%XAOSJP, I%XAOSJM,  &
+               I%XHO2IP, I%XHO2IM, I%XHO2JP, I%XHO2JM, I%XSSO_SLOPE,I%XSSO_STDEV)
 !
 !* orographic runoff coefficient
 !

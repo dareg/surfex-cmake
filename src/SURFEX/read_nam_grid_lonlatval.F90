@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_NAM_GRID_LONLATVAL(HPROGRAM,KGRID_PAR,KL,PGRID_PAR)
+      SUBROUTINE READ_NAM_GRID_LONLATVAL(UG,U,HPROGRAM,KGRID_PAR,KL,PGRID_PAR,HDIR)
 !     ################################################################
 !
 !!****  *READ_NAM_GRID_LONLATVAL* - routine to read in namelist the horizontal grid
@@ -33,6 +33,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK
+!
 USE MODE_POS_SURF
 !
 USE MODI_OPEN_NAMELIST
@@ -40,6 +45,7 @@ USE MODI_CLOSE_NAMELIST
 USE MODI_GET_LUOUT
 !
 USE MODE_GRIDTYPE_LONLATVAL
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -49,21 +55,25 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
  CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER :: ILUOUT ! output listing logical unit
 INTEGER :: ILUNAM ! namelist file  logical unit
-
-REAL, DIMENSION(:),   ALLOCATABLE :: ZX       ! X conformal coordinate of grid mesh
-REAL, DIMENSION(:),   ALLOCATABLE :: ZY       ! Y conformal coordinate of grid mesh
-REAL, DIMENSION(:),   ALLOCATABLE :: ZDX      ! X grid mesh size
-REAL, DIMENSION(:),   ALLOCATABLE :: ZDY      ! Y grid mesh size
+!
+REAL, DIMENSION(:),   ALLOCATABLE :: ZX, ZX0       ! X conformal coordinate of grid mesh
+REAL, DIMENSION(:),   ALLOCATABLE :: ZY, ZY0       ! Y conformal coordinate of grid mesh
+REAL, DIMENSION(:),   ALLOCATABLE :: ZDX, ZDX0      ! X grid mesh size
+REAL, DIMENSION(:),   ALLOCATABLE :: ZDY, ZDY0      ! Y grid mesh size
 !
 !*       0.3   Declarations of namelist
 !              ------------------------
@@ -88,46 +98,66 @@ NAMELIST/NAM_LONLATVAL/NPOINTS,XX,XY,XDX,XDY
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_LONLATVAL',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-!
-!---------------------------------------------------------------------------
-!
-!*       2.    Reading of projection parameters
-!              --------------------------------
-!
- CALL POSNAM(ILUNAM,'NAM_LONLATVAL',GFOUND,ILUOUT)
-IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LONLATVAL)
-!
-!---------------------------------------------------------------------------
- CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-!---------------------------------------------------------------------------
-!
-!*       3.    Number of points
-!              ----------------
-!
-KL = NPOINTS
-!
-!---------------------------------------------------------------------------
-!
-!*       3.    Array of X and Y coordinates
-!              ----------------------------
-!
-!
-ALLOCATE(ZX(KL))
-ALLOCATE(ZY(KL))
-ZX(:) = XX(:KL)
-ZY(:) = XY(:KL)
-!
-!---------------------------------------------------------------------------
-!
-!*       4.    Array of X and Y increments
-!              ---------------------------
-!
-ALLOCATE(ZDX(KL))
-ALLOCATE(ZDY(KL))
-ZDX(:) = XDX(:KL)
-ZDY(:) = XDY(:KL)
-!
+IF (HDIR/='H') THEN
+  !
+  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       2.    Reading of projection parameters
+  !              --------------------------------
+  !
+  CALL POSNAM(ILUNAM,'NAM_LONLATVAL',GFOUND,ILUOUT)
+  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LONLATVAL)
+  !
+  !---------------------------------------------------------------------------
+  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+  !---------------------------------------------------------------------------
+  !
+  !*       3.    Number of points
+  !              ----------------
+  !
+  KL = NPOINTS
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       3.    Array of X and Y coordinates
+  !              ----------------------------
+  !
+  !
+  ALLOCATE(ZX(KL))
+  ALLOCATE(ZY(KL))
+  ZX(:) = XX(:KL)
+  ZY(:) = XY(:KL)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       4.    Array of X and Y increments
+  !              ---------------------------
+  !
+  ALLOCATE(ZDX(KL))
+  ALLOCATE(ZDY(KL))
+  ZDX(:) = XDX(:KL)
+  ZDY(:) = XDY(:KL)
+  !
+ELSE
+  !
+  ALLOCATE(ZX0(U%NDIM_FULL),ZY0(U%NDIM_FULL),ZDX0(U%NDIM_FULL),ZDY0(U%NDIM_FULL))
+  !
+  CALL GET_GRIDTYPE_LONLATVAL(UG%XGRID_FULL_PAR,&
+                              PX=ZX0,PY=ZY0,PDX=ZDX0,PDY=ZDY0)
+  !
+  KL = NSIZE_TASK(NRANK)
+  ALLOCATE(ZX(KL),ZY(KL),ZDX(KL),ZDY(KL))
+  !
+  CALL READ_AND_SEND_MPI(ZX0,ZX)
+  CALL READ_AND_SEND_MPI(ZY0,ZY)
+  CALL READ_AND_SEND_MPI(ZDX0,ZDX)
+  CALL READ_AND_SEND_MPI(ZDY0,ZDY)
+  !
+  DEALLOCATE(ZX0,ZY0,ZDX0,ZDY0)  
+  !
+ENDIF
 !---------------------------------------------------------------------------
 !
 !*       8.    All this information stored into pointer PGRID_PAR

@@ -75,61 +75,84 @@ REAL,    DIMENSION(:,:), INTENT(OUT):: PCOEFLIN ! interpolation
 !*       0.2   Declaration of local variables
 !              ------------------------------
 !
-LOGICAL,DIMENSION(SIZE(PZ1,1),SIZE(PZ1,2))            :: GLEVEL
-INTEGER                                               :: JK2,JI
-INTEGER,DIMENSION(SIZE(PZ1,1))                        :: ILEVEL
-INTEGER,DIMENSION(SIZE(PZ1,1))                        :: IUNDER
-REAL                                                  :: ZEPS ! a small number
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL, DIMENSION(SIZE(PZ1,1),SIZE(PZ1,2)-1) :: ZDIZ1
+INTEGER, DIMENSION(SIZE(PZ1,1),SIZE(PZ2,2)) :: ILEVEL
+INTEGER  :: JK, JK2,JI, IS1
+INTEGER  :: ILEV
+REAL :: ZTHR
+REAL :: ZEPS ! a small number
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF',0,ZHOOK_HANDLE)
 ZEPS=1.E-12
+!
+IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF_1',0,ZHOOK_HANDLE)
+!$OMP PARALLEL DO PRIVATE(JI,JK)
+DO JK = 1,SIZE(PZ1,2)-1
+  DO JI = 1,SIZE(PZ1,1)
+    IF (PZ1(JI,JK)==PZ1(JI,JK+1)) THEN
+      ZDIZ1(JI,JK) = 0.
+    ELSE
+      ZDIZ1(JI,JK) = 1./(PZ1(JI,JK)-PZ1(JI,JK+1))
+    ENDIF
+  ENDDO
+ENDDO
+!$OMP END PARALLEL DO
+IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF_1',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
 !*       2.    LOOP ON THE TARGET VERTICAL GRID
 !              --------------------------------
 !
-DO JK2=1,SIZE(PZ2,2)
+IS1 = SIZE(PZ1,2)
 !
-!-------------------------------------------------------------------------------
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF_2',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(JK2,JI,ZTHR)
+DO JK2 = 1,SIZE(PZ2,2)
+  !
+  DO JI = 1,SIZE(PZ1,1)
+    !
+    ZTHR = PZ2(JI,JK2) * (1.-ZEPS)
+    ILEVEL(JI,JK2) = COUNT(PZ1(JI,:)<=ZTHR)
+    !
+  ENDDO
+ENDDO
+!$OMP ENDDO 
+IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF_2',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
-!*       3.    Determination of the initial level under the target level JK2
-!              -------------------------------------------------------------
-!
-  GLEVEL(:,:)=PZ1(:,:)<=SPREAD(PZ2(:,JK2),2,SIZE(PZ1,2)) *(1.-ZEPS)
-  ILEVEL(:)  =COUNT(GLEVEL(:,:),2)
-!
-!* linear extrapolation under the ground
-  IUNDER=ILEVEL
-  ILEVEL(:)=MAX(ILEVEL(:),1)
-!
-!* linear extrapolation above the uppest level
-  ILEVEL(:)=MIN(ILEVEL(:),SIZE(PZ1,2)-1)
-!
-  KKLIN(:,JK2)=ILEVEL(:)
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF_3',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(JK2,JI)
+DO JK2 = 1,SIZE(PZ2,2)
+  !
+  DO JI = 1,SIZE(PZ1,1)
 
-!-------------------------------------------------------------------------------
+   IF (ILEVEL(JI,JK2) < 1 ) THEN
+     KKLIN(JI,JK2) = 1
+     PCOEFLIN(JI,JK2) = 1.                       ! no extrapolation
+     CYCLE
+   ENDIF
+
+!* linear extrapolation above the uppest level
+!* linear extrapolation under the ground
+    ILEVEL(JI,JK2) = MIN(ILEVEL(JI,JK2),IS1-1)
+    KKLIN (JI,JK2) = ILEVEL(JI,JK2)
 !
 !*       4.    Linear interpolation coefficients
 !              ---------------------------------
 !
-  DO JI=1,SIZE(PZ1,1)
-    IF (PZ1(JI,ILEVEL(JI))==PZ1(JI,ILEVEL(JI)+1)) THEN
-      PCOEFLIN(JI,JK2)= 0.
-    ELSE
-      PCOEFLIN(JI,JK2)=(PZ2(JI,JK2)-PZ1(JI,ILEVEL(JI)+1))              &
-                        /(PZ1(JI,ILEVEL(JI))-PZ1(JI,ILEVEL(JI)+1))   
-    END IF
-    IF (IUNDER(JI) < 1 )           PCOEFLIN(JI,JK2)=1.                       ! no extrapolation
-    IF (ILEVEL(JI)==SIZE(PZ1,2)-1) PCOEFLIN(JI,JK2)=MAX(PCOEFLIN(JI,JK2),0.) ! no extrapolation
+    PCOEFLIN(JI,JK2) = (PZ2(JI,JK2)-PZ1(JI,ILEVEL(JI,JK2)+1))*ZDIZ1(JI,ILEVEL(JI,JK2))
+    IF (ILEVEL(JI,JK2)==IS1-1) PCOEFLIN(JI,JK2) = MAX(PCOEFLIN(JI,JK2),0.) ! no extrapolation
+  !
   ENDDO
-!
 !-------------------------------------------------------------------------------
-!
 END DO
-IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF',1,ZHOOK_HANDLE)
+!$OMP END DO 
+IF (LHOOK) CALL DR_HOOK('COEF_VER_INTERP_LIN_SURF_3',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
 !-------------------------------------------------------------------------------
 !

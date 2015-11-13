@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE OLD_NAME (&
-                           HPROGRAM,HRECIN,HRECOUT)
+                           HPROGRAM,HRECIN,HRECOUT,HDIR)
 !     #######################################################
 !
 !!****  *OLD_NAME* - get the old name of a field for reading in an old SURFEX file
@@ -54,11 +54,13 @@ IMPLICIT NONE
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
  CHARACTER(LEN=12), INTENT(IN)  :: HRECIN   ! name of field to be read
  CHARACTER(LEN=12), INTENT(OUT) :: HRECOUT  ! name of field to be read is old file
+ CHARACTER(LEN=1), INTENT(IN), OPTIONAL :: HDIR
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+ CHARACTER(LEN=1) :: YDIR
 INTEGER :: IVERSION  ! version of the old file
 INTEGER :: IBUGFIX   ! bugfix  of the old file
 !
@@ -68,12 +70,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('OLD_NAME',0,ZHOOK_HANDLE)
 !
+YDIR = 'H'
+IF (PRESENT(HDIR)) YDIR = HDIR
+!
 HRECOUT = HRECIN
 IF (HRECIN=='COVER_LIST') THEN
-  CALL READ_SURF(&
-                 HPROGRAM,'VERSION',IVERSION,IRESP)
-  CALL READ_SURF(&
-                 HPROGRAM,'BUG', IBUGFIX ,IRESP)
+  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP,YDIR)
+  CALL READ_SURF(HPROGRAM,'BUG', IBUGFIX ,IRESP,YDIR)
   IF (IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX==0)) HRECOUT='COVER'
 END IF
 !

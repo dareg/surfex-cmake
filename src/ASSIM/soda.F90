@@ -343,7 +343,7 @@ IF (NRANK==NPIO) THEN
 ENDIF
 !
 CALL INIT_INDEX_MPI(YSURF_CUR, &
-                    CSURF_FILETYPE, YALG_MPI, XIO_FRAC, .FALSE.)
+                    CSURF_FILETYPE, 'OFF', YALG_MPI, XIO_FRAC, .FALSE.)
 !
 !
 ! Initialize time information

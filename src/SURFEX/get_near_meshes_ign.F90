@@ -28,6 +28,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURFEX_MPI, ONLY : NINDEX, NRANK, NNUM
+!
 USE MODE_GRIDTYPE_IGN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -47,13 +49,14 @@ INTEGER, DIMENSION(:,:),POINTER :: KNEAR    ! near mesh indices
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-REAL, DIMENSION(KL,KNEAR_NBR) :: ZNEAR
+REAL, DIMENSION(SIZE(KNEAR,1),KNEAR_NBR) :: ZNEAR
 REAL,DIMENSION(KL)  :: ZX
 REAL,DIMENSION(KL)  :: ZY
 REAL,DIMENSION(KL)  :: ZDX
 REAL,DIMENSION(KL)  :: ZDY
+INTEGER, DIMENSION(SIZE(KNEAR,1)) :: IDMAX
 REAL :: ZDIS
-INTEGER :: JP1, JP2, JN1, JN2
+INTEGER :: JP1, JP2, JN1, JN2, ID1, ID2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
@@ -61,6 +64,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN_1',0,ZHOOK_HANDLE)
 !
  CALL GET_GRIDTYPE_IGN(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY)
+!
+IDMAX(:) = 1
 !
 KNEAR(:,:) = 0
 ZNEAR(:,:) = 0.
@@ -71,35 +76,48 @@ ZNEAR(:,:) = 0.
 IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN_1',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN_2',0,ZHOOK_HANDLE)
 !
-!$OMP PARALLEL DO PRIVATE(JP1,JP2,ZDIS)
+!$OMP PARALLEL DO PRIVATE(JP1,JP2,ID1,ID2,ZDIS)
 DO JP1=1,KL-1
+  !
+  ID1 = NNUM(JP1)
   !
   DO JP2=JP1+1,KL
     !
-    ZDIS = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
-    !
-    IF (JP1==1) THEN 
+    IF (NINDEX(JP1)==NRANK .OR. NINDEX(JP2)==NRANK) THEN
       !
-      ZNEAR(JP2,1) = ZDIS
-      KNEAR(JP2,1) = 1
+      ID2 = NNUM(JP2)
       !
-      IF (JP2==2) THEN
+      ZDIS = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
+      !
+      IF (JP1==1) THEN 
         !
-        ZNEAR(1,1) = ZDIS
-        KNEAR(1,1) = 2
+        IF (NINDEX(JP2)==NRANK) THEN
+          ZNEAR(ID2,1) = ZDIS
+          KNEAR(ID2,1) = 1
+        ENDIF
+        !
+        IF (JP2==2) THEN
+          !
+          IF (NINDEX(JP1)==NRANK) THEN
+            ZNEAR(ID1,1) = ZDIS
+            KNEAR(ID1,1) = 2
+          ENDIF
+          !
+        ELSE
+          !
+          IF (NINDEX(JP1)==NRANK) CALL GET_NEAR_POINTS(ID1,JP2,ZDIS)
+          !
+        ENDIF
         !
       ELSE
         !
-        CALL GET_NEAR_POINTS(JP1,JP2,ZDIS)
+        IF (NINDEX(JP1)==NRANK) CALL GET_NEAR_POINTS(ID1,JP2,ZDIS)
+        IF (NINDEX(JP2)==NRANK) CALL GET_NEAR_POINTS(ID2,JP1,ZDIS)
         !
       ENDIF
       !
-    ELSE
-      !
-      CALL GET_NEAR_POINTS(JP1,JP2,ZDIS)
-      CALL GET_NEAR_POINTS(JP2,JP1,ZDIS)
-      !
     ENDIF
+    !
   ENDDO
   !
 ENDDO
@@ -122,9 +140,11 @@ DO JN1 = 1,KNEAR_NBR
   !
   IF (PDIS<ZNEAR(KP1,JN1) .OR. KNEAR(KP1,JN1)==0) THEN
     !
+    IF (IDMAX(KP1)<KNEAR_NBR) IDMAX(KP1) = IDMAX(KP1) + 1
+    !
     IF (JN1<KNEAR_NBR) THEN
       !
-      DO JN2=KNEAR_NBR,JN1+1,-1
+      DO JN2=IDMAX(KP1),JN1+1,-1
         !
         ZNEAR(KP1,JN2) = ZNEAR(KP1,JN2-1)
         KNEAR(KP1,JN2) = KNEAR(KP1,JN2-1)

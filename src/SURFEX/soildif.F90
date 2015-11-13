@@ -88,7 +88,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PFWTD, PWTD, PCV, PWR
 !                                      Soil and vegetation parameters
 !                                      PVEG = fraction of vegetation
 !                                      PFWTD= grid-cell fraction of water table to rise
-!                                      PWTD = water table depth
+!                                      PWTD = water table depth (negative below soil surface)
 !                                      PCV  = the heat capacity of the vegetation
 !                                      PWR  = canopy intercepted water
 !
@@ -129,7 +129,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFFG
 !                                   PFFV = Floodplain fraction over vegetation
 !                                   without snow (ES)
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD
+REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD ! Floodplain potential infiltration or water mass (kg m-2)
 !
 !*      0.2    declarations of local variables
 !
@@ -166,18 +166,21 @@ ZCF (:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
-!*       1.     MATRIC POTENTIAL AND MOISTURE EXTRAPOLATION
-!               -------------------------------------------
-!
-!
-!Water Table depth (m)
+!*       1.     WATER TABLE DETH ADJUSTMENT FOR ISBA (m)
+!               -----------------------------------------
 !
 WHERE(PWTD(:)==XUNDEF)
-  ZWTD(:) = XWTD_MAXDEPTH !no water table / surface coupling over some regions
+! no water table / surface coupling over some regions        
+  ZWTD     (:) = XWTD_MAXDEPTH 
 ELSEWHERE
-  ZWTD(:) = PFWTD(:)/MAX(PWTD(:),0.1) + (1.0-PFWTD(:))/MAX(PWTD(:),XWTD_MAXDEPTH)
-  ZWTD(:) = 1.0/ZWTD(:)
+  ZWTD     (:) = PFWTD(:)/MAX(-PWTD(:),0.001) + (1.0-PFWTD(:))/MAX(-PWTD(:),XWTD_MAXDEPTH)
+  ZWTD     (:) = 1.0/ZWTD(:)
 ENDWHERE
+!
+!-------------------------------------------------------------------------------
+!
+!*       2.     MATRIC POTENTIAL AND MOISTURE EXTRAPOLATION
+!               -------------------------------------------
 !
 DO JL=1,INL
    DO JJ=1,INI
@@ -220,7 +223,7 @@ ENDDO
 !
 !-------------------------------------------------------------------------------
 !
-!*       2.     SURFACE FROZEN FRACTION
+!*       3.     SURFACE FROZEN FRACTION
 !               -----------------------
 !
 !
@@ -230,7 +233,7 @@ PFROZEN1(:) = PWGI(:,1)/(PWGI(:,1) + MAX(PWG(:,1),XWGMIN))
 !
 !-------------------------------------------------------------------------------
 !
-!*       3.     SIMPLE LITTER/MULCH EFFECT
+!*       4.     SIMPLE LITTER/MULCH EFFECT
 !               --------------------------
 !
 ! This takes into account the insulating effect of dead vegetation/leaf litter/mulch on
@@ -259,7 +262,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!*       4.     THE THERMAL CONDUCTIVITY OF BARE-GROUND
+!*       5.     THE THERMAL CONDUCTIVITY OF BARE-GROUND
 !               ---------------------------------------
 !
 ! Calculate thermal conductivity using PL98 :
@@ -293,7 +296,7 @@ ENDDO
 !
 !-------------------------------------------------------------------------------
 !
-!*       5.     THE HEAT CAPACITY OF BARE-GROUND
+!*       6.     THE HEAT CAPACITY OF BARE-GROUND
 !               --------------------------------
 !
 ! Soil Heat capacity [J/(m3 K)]
@@ -314,7 +317,7 @@ PCG(:) = MIN(ZCTMAX,PCG(:))
 !
 !-------------------------------------------------------------------------------
 !
-!*       6.     THE HEAT CAPACITY OF VEGETATION
+!*       7.     THE HEAT CAPACITY OF VEGETATION
 !               --------------------------------
 !
 ! Vegetation thermal inertia [(m2 K)/J]
@@ -325,7 +328,7 @@ ZCV(:) = MIN(ZCTMAX,ZCV(:))
 !
 !-------------------------------------------------------------------------------
 !
-!*       7.     THE HEAT CAPACITY OF FLOOD
+!*       8.     THE HEAT CAPACITY OF FLOOD
 !               --------------------------------
 !
 IF(OFLOOD)THEN
@@ -342,7 +345,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!*      8.      GRID-AVERAGED HEAT CAPACITY
+!*      9.      GRID-AVERAGED HEAT CAPACITY
 !               ---------------------------
 !
 ! With contribution from the ground, flood and vegetation for explicit
@@ -354,7 +357,7 @@ PCT(:) = 1. / ( (1.-PVEG(:))*(1.-PFFG(:)) / PCG(:)     &
 !
 !-------------------------------------------------------------------------------
 !
-!*      9.      RESTORE DEFAULT VALUES
+!*      10.     RESTORE DEFAULT VALUES
 !               ----------------------
 !
 ! restore default moisture and ice values under moisture soil depth

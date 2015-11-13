@@ -55,7 +55,6 @@ USE MODI_GET_LCOVER_n
 USE MODI_GET_ZS_n
 USE MODI_PACK_SAME_RANK
 USE MODI_PACK_GRID
-USE MODI_LATLON_GRID
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -127,29 +126,26 @@ ILU=0
 !
 !-------------------------------------------------------------------------------
 !
-!*    3.      Computes geographical quantities
-!             --------------------------------
-!
- CALL LATLON_GRID(HGRID,SIZE(PGRID_PAR),IL,ILUOUT,PGRID_PAR,PLAT,PLON,PMESH_SIZE,ZDIR)
-!
-IF (PRESENT(PDIR)) PDIR = ZDIR
-!
-!-------------------------------------------------------------------------------
-!
 !*    4.      Packing of fields
 !             -----------------
 !
- CALL GET_LCOVER_n(U, &
-                   HPROGRAM,JPCOVER,GCOVER)
+ CALL GET_LCOVER_n(U,HPROGRAM,JPCOVER,GCOVER)
 !
-ALLOCATE(PCOVER(SIZE(PLAT),COUNT(GCOVER)))
+IF (HSURF=='NATURE') THEN
+  !
+  ALLOCATE(PCOVER(SIZE(PLAT),COUNT(GCOVER)))
+  !
+  DO JCOVER=1,COUNT(GCOVER)
+    CALL GET_COVER_n(U,HPROGRAM,JCOVER,ZCOVER)
+    CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
+  ENDDO
+  !
+ELSE
+  !
+  ALLOCATE(PCOVER(0,0))
+  !
+ENDIF
 !
-DO JCOVER=1,COUNT(GCOVER)
-  CALL GET_COVER_n(U, &
-                   HPROGRAM,JCOVER,ZCOVER)
-  CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
-ENDDO
-
  CALL GET_ZS_n(U, &
                HPROGRAM,NL,ZZS)
 !

@@ -47,9 +47,10 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR, NGRID_PAR
-USE MODD_PGDWORK,        ONLY : XSUMCOVER, NSIZE
+USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR
+USE MODD_PGDWORK,        ONLY : X3D_ALL, NSIZE_ALL, NSIZE, XSUMVAL2
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA, XDATA_NATURE, XDATA_WATER
 !
@@ -66,6 +67,7 @@ USE MODI_CONVERT_COVER_FRAC
 USE MODI_READ_LCOVER
 USE MODI_SUM_ON_ALL_PROCS
 !
+USE MODI_MAKE_LCOVER
 USE MODI_READ_NAM_PGD_COVER
 !
 USE MODI_INIT_IO_SURF_n
@@ -89,6 +91,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
@@ -132,18 +138,20 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER, ZCOVER
 !
 !
+INTEGER :: INFOMPI, JPROC
 INTEGER               :: ILUOUT    ! output listing logical unit
 INTEGER               :: IRESP     ! Error code after redding
 INTEGER               :: JCOVER    ! loop counter on covers
-INTEGER               :: JL        ! loop counter on horizontal points
+INTEGER               :: JL, JI    ! loop counter on horizontal points
 INTEGER               :: ICOVER, ICOVERSUM, ICOVER_OLD, ICPT  ! 0 if cover is not present, >1 if present somewhere
 INTEGER               :: IPERMSNOW, IECO2 
 INTEGER               :: IC_NAT, IC_TWN, IC_WAT, IC_SEA
 !
-INTEGER, DIMENSION(1) :: IMAXCOVER ! index of maximum cover for the given point
+INTEGER :: IMAXCOVER ! index of maximum cover for the given point
 INTEGER, DIMENSION(:), POINTER :: IMASK_COVER=>NULL()
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_SEA, IMASK_WATER
 !
+LOGICAL, DIMENSION(:,:), ALLOCATABLE :: GCOVER_ALL
 LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
                                         ! (Earth Model over Antarctic)
 LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
@@ -154,7 +162,7 @@ LOGICAL                  :: LRM_RIVER   ! delete inland river coverage. Default 
 !
 REAL, PARAMETER          :: ZLAT_ANT_WATER = -60. ! Lattitude limit to delete lake over antarctica
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !---------------------------------------------------------------
 !
@@ -266,15 +274,16 @@ ELSE
 !*    3.      Averages the field
 !             ------------------
 !
-  ALLOCATE(NSIZE     (NL)        )
-  ALLOCATE(XSUMCOVER (NL,JPCOVER))
+  ALLOCATE(NSIZE_ALL(U%NDIM_FULL)        )
+  ALLOCATE(X3D_ALL  (U%NDIM_FULL,1,2)    )
 !
-  NSIZE    (:)   = 0.
-  XSUMCOVER(:,:) = 0.
+  NSIZE_ALL (:)   = 0.
+  X3D_ALL(:,:,:) = 0.
   CALL TREAT_FIELD(UG, U, USS, &
                    HPROGRAM,'SURF  ',YFILETYPE,'A_COVR',YCOVER,  &
                      'COVER               '                      ) 
-
+!
+  DEALLOCATE(XSUMVAL2  )
 !
 !*    4.      Interpolation if some points are not initialized (no data for these points) (same time)
 !             ---------------------------------------------------------------------------------------
@@ -293,7 +302,6 @@ ELSE
   U%XCOVER(:,:)=U%XCOVER(:,:)/SPREAD(SUM(U%XCOVER(:,:),2),2,ICOVER)
 !
   DEALLOCATE(NSIZE    )
-  DEALLOCATE(XSUMCOVER)
 !
   CALL MAKE_MASK_COVER(IMASK_COVER,ICOVER)
 !
@@ -331,24 +339,15 @@ ELSE
 !*    6.      Special treatments asked by user
 !             --------------------------------
 !
-! * removes cover with very small coverage
-  DO JL=1,SIZE(U%XCOVER,1)
-    IMAXCOVER(:) = MAXLOC(U%XCOVER(JL,:))
-    DO JCOVER=1,ICOVER
-      IF (U%XCOVER(JL,JCOVER)/=0.) THEN
-        IF (U%XCOVER(JL,JCOVER)<=XRM_COVER .AND. JCOVER /= IMAXCOVER(1)) THEN
-          U%XCOVER(JL,JCOVER) = 0.
-        END IF
-      ENDIF
-    END DO
-  END DO
+ CALL GET_RMCOV_OMP(ICOVER,U%XCOVER)
+!
   !
   ! * removes River if the user want
   ORM_RIVER=LRM_RIVER
   IF(LRM_RIVER.AND.IMASK_WATER(2)/=0)THEN
     DO JL=1,SIZE(U%XCOVER,1)
-       IMAXCOVER(:) = MAXLOC(U%XCOVER(JL,:))
-       IF(IMASK_WATER(2)/=IMAXCOVER(1).AND.U%XCOVER(JL,IMASK_WATER(2))>0.)THEN
+       IMAXCOVER = MAXLOC(U%XCOVER(JL,:),1)
+       IF(IMASK_WATER(2)/=IMAXCOVER.AND.U%XCOVER(JL,IMASK_WATER(2))>0.)THEN
          U%XCOVER(JL,IMASK_WATER(2)) = 0.
        ENDIF
     ENDDO
@@ -378,27 +377,31 @@ ELSE
   !
   !
   ! * removes cover; replace by sea or inland water if sea > XRM_COAST
-  DO JCOVER=1,ICOVER
+  IF (XRM_COAST<1.) THEN
     !
     DO JL=1,SIZE(NSEA)
       IF (IMASK_SEA(JL)/=0) THEN
-        WHERE(U%XCOVER(:,IMASK_SEA(JL))>=XRM_COAST)
-          U%XCOVER(:,JCOVER) = 0.
-          U%XCOVER(:,IMASK_SEA(JL)) = 1.
-        END WHERE 
+        DO JI=1,SIZE(U%XCOVER,1)   
+          IF (U%XCOVER(JI,IMASK_SEA(JL))>=XRM_COAST .AND. U%XCOVER(JI,IMASK_SEA(JL))/=1.) THEN
+            U%XCOVER(JI,:) = 0.
+            U%XCOVER(JI,IMASK_SEA(JL)) = 1.
+          ENDIF
+        ENDDO
       ENDIF
     ENDDO
-    !
+    !    
     DO JL=1,SIZE(NWATER)
       IF (IMASK_WATER(JL)/=0) THEN
-        WHERE(U%XCOVER(:,IMASK_WATER(JL))>=XRM_COAST)
-          U%XCOVER(:,JCOVER) = 0.
-          U%XCOVER(:,IMASK_WATER(JL)) = 1.
-        END WHERE
+         DO JI=1,SIZE(U%XCOVER,1)
+          IF ( U%XCOVER(JI,IMASK_WATER(JL))>=XRM_COAST .AND. U%XCOVER(JI,IMASK_WATER(JL))/=1. ) THEN
+            U%XCOVER(JI,:) = 0.
+            U%XCOVER(JI,IMASK_WATER(JL)) = 1.
+          ENDIF
+        ENDDO
       ENDIF
-    ENDDO 
+    ENDDO     
     !    
-  ENDDO
+  ENDIF
 !
 !
 ! * Compatibility between Surfex and Orca grid 
@@ -445,30 +448,33 @@ ELSE
 !*    8.      List of cover present
 !             ---------------------
 !
-  ALLOCATE(ZCOVER(NL,ICOVER))
-  ZCOVER(:,:) = 0.
+  U%LCOVER(:) = .FALSE.
+  DO JCOVER=1,ICOVER
+    IF (ANY(U%XCOVER(:,JCOVER)/=0.)) U%LCOVER(IMASK_COVER(JCOVER)) = .TRUE.
+  ENDDO
+!
+ CALL MAKE_LCOVER(U%LCOVER)
 !
   ICOVER_OLD = ICOVER
-  ICOVER = 0
-!
+  ICOVER = COUNT(U%LCOVER)
   IECO2 = 0
+  IF (ANY(U%LCOVER(301:))) IECO2=1
 !
-  U%LCOVER(:) = .FALSE.
-  DO JCOVER=1,ICOVER_OLD
-    ICOVERSUM = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,U%XCOVER(:,JCOVER)/=0., 'COV')
-    IF (ICOVERSUM>0) THEN
-      U%LCOVER(IMASK_COVER(JCOVER))=.TRUE.
-      ICOVER = ICOVER+1
-      ZCOVER(:,ICOVER) = U%XCOVER(:,JCOVER)
-      IF (IMASK_COVER(JCOVER)>300) IECO2 = ICOVER
-    ENDIF
-  END DO
+  IF (ICOVER<ICOVER_OLD) THEN
+    ALLOCATE(ZCOVER(NL,ICOVER_OLD))
+    ZCOVER(:,:) = U%XCOVER(:,:)
+    DEALLOCATE(U%XCOVER)
+    ALLOCATE(U%XCOVER(NL,ICOVER))
+    ICPT = 0
+    DO JCOVER=1,ICOVER_OLD
+      IF (U%LCOVER(IMASK_COVER(JCOVER))) THEN
+        ICPT = ICPT + 1
+        U%XCOVER(:,ICPT) = ZCOVER(:,JCOVER)
+      ENDIF
+    ENDDO
+    DEALLOCATE(ZCOVER)
+  ENDIF
 !
-  DEALLOCATE(U%XCOVER)
-  ALLOCATE(U%XCOVER(NL,ICOVER))
-  U%XCOVER(:,:) = ZCOVER(:,1:ICOVER)
-!
-  DEALLOCATE(ZCOVER)
   DEALLOCATE(IMASK_COVER)
 !
 !-------------------------------------------------------------------------------
@@ -484,9 +490,7 @@ IF(.NOT.LIMP_COVER)THEN
 !             ---------------------
 !
   IF (IECO2/=0) THEN
-    IF ( SUM_ON_ALL_PROCS(HPROGRAM,CGRID,ANY(U%XCOVER(:,IECO2:)>0.,DIM=2),'COV' ) >0 ) &
-      CALL PGD_ECOCLIMAP2_DATA(DTCO, &
-                               HPROGRAM)
+      CALL PGD_ECOCLIMAP2_DATA(DTCO, HPROGRAM)
   ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -683,6 +687,9 @@ INTEGER, INTENT(INOUT) :: KCOVER
 INTEGER, INTENT(OUT) :: KC_SURF
 !
 LOGICAL :: GPRESENT
+REAL :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('PGD_COVER:FIT_COVERS',0,ZHOOK_HANDLE)
 !
 GPRESENT = .FALSE.
 DO JCOVER=1,KCOVER
@@ -729,6 +736,8 @@ IF (ANY(PSURF(:)/=0.)) THEN
   !
 ENDIF
 !
+IF (LHOOK) CALL DR_HOOK('PGD_COVER:FIT_COVERS',1,ZHOOK_HANDLE)
+!
 END SUBROUTINE FIT_COVERS
 !
 !------------------------------------------------------
@@ -739,6 +748,9 @@ INTEGER, DIMENSION(:), POINTER :: KMASK_COVER
 INTEGER, INTENT(IN) :: KCOVER
 !
 INTEGER :: ICPT
+REAL :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('PGD_COVER:MAKE_MASK_COVER',0,ZHOOK_HANDLE)
 !
 IF (ASSOCIATED(KMASK_COVER)) DEALLOCATE(KMASK_COVER)
 ALLOCATE(KMASK_COVER(KCOVER))
@@ -750,6 +762,40 @@ DO JCOVER=1,JPCOVER
   ENDIF
 ENDDO
 !
+IF (LHOOK) CALL DR_HOOK('PGD_COVER:MAKE_MASK_COVER',1,ZHOOK_HANDLE)
+!
 END SUBROUTINE MAKE_MASK_COVER
+!
+!------------------------------------------------------
+!
+SUBROUTINE GET_RMCOV_OMP(KCOVER,PCOVER)
+!
+USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
+!
+INTEGER, INTENT(IN) :: KCOVER
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PCOVER
+!
+INTEGER :: JK, IMAXCOVER, JCOVER, ISIZE_OMP
+REAL :: ZHOOK_HANDLE_OMP
+!
+ISIZE_OMP = SIZE(PCOVER,1)/NBLOCKTOT
+!
+! * removes cover with very small coverage
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('PGD_COVER:GET_RMCOV_OMP',0,ZHOOK_HANDLE_OMP)
+!$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(JL,IMAXCOVER,JCOVER)
+DO JL=1,SIZE(PCOVER,1)
+  IMAXCOVER = MAXLOC(PCOVER(JL,:),1)
+  DO JCOVER=1,KCOVER
+    IF (JCOVER /= IMAXCOVER) THEN
+      IF (PCOVER(JL,JCOVER)<=XRM_COVER ) PCOVER(JL,JCOVER) = 0.
+    ENDIF
+  END DO
+END DO
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('PGD_COVER:GET_RMCOV_OMP',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
+!
+END SUBROUTINE GET_RMCOV_OMP
 !
 END SUBROUTINE PGD_COVER

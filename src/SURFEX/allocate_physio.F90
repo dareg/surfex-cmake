@@ -46,6 +46,8 @@ USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_TYPE_DATE_SURF
 !
+USE MODD_AGRI,        ONLY : LAGRIP
+!
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -206,7 +208,7 @@ ENDIF
 !
 ! - Irrigation, seeding and reaping
 !
-IF (HPHOTO == 'LAI' .OR. HPHOTO == 'LST' .OR. HPHOTO == 'NIT' .OR. HPHOTO == 'NCB')  THEN
+IF (LAGRIP .AND. (HPHOTO == 'LAI' .OR. HPHOTO == 'LST' .OR. HPHOTO == 'NIT' .OR. HPHOTO == 'NCB'))  THEN
   ALLOCATE(PTSEED                  (KLU,KPATCH              )) 
   ALLOCATE(PTREAP                  (KLU,KPATCH              )) 
   ALLOCATE(PWATSUP                 (KLU,KPATCH              )) 

@@ -233,7 +233,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !         Reading of the fields
 !
- CALL READ_PGD_WATFLUX_n(DTCO, U, WM%WG, WM%W, &
+ CALL READ_PGD_WATFLUX_n(DTCO, U, UG, WM%WG, WM%W, &
                          HPROGRAM)
 !
 !-------------------------------------------------------------------------------

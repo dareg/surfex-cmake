@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_DIRECT (USS, &
+      SUBROUTINE READ_DIRECT (UG, U, USS, &
                               HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
 !     #########################################################
 !
@@ -38,9 +38,11 @@
 !            -----------
 !
 !
-!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NPIO
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK, XMESHLENGTH
 !
 USE MODD_ARCH, ONLY : LITTLE_ENDIAN_ARCH
@@ -70,6 +72,8 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
@@ -127,13 +131,13 @@ REAL    :: ZLATMAX                    ! maximum latitude of mask mesh
 REAL    :: ZSHIFT                     ! shift on longitudes
 REAL    :: ZFACT                      ! Factor integer to real
 !
- CHARACTER,        DIMENSION(:), ALLOCATABLE :: IVALUE8 ! value of a data point
- CHARACTER(LEN=2), DIMENSION(:), ALLOCATABLE :: IVALUE16 ! value of a data point
- CHARACTER(LEN=4), DIMENSION(:), ALLOCATABLE :: IVALUE32R ! value of a data point
+ CHARACTER,        DIMENSION(:), ALLOCATABLE :: YVALUE8 ! value of a data point
+ CHARACTER(LEN=2), DIMENSION(:), ALLOCATABLE :: YVALUE16 ! value of a data point
+ CHARACTER(LEN=4), DIMENSION(:), ALLOCATABLE :: YVALUE32 ! value of a data point
+ CHARACTER(LEN=8), DIMENSION(:), ALLOCATABLE :: YVALUE64 ! value of a data point
 INTEGER (KIND=4), DIMENSION(:), ALLOCATABLE :: IVALUE32 ! value of a data point
 INTEGER (KIND=8), DIMENSION(:), ALLOCATABLE :: IVALUE64 ! value of a data point
 REAL    (KIND=4), DIMENSION(:), ALLOCATABLE :: ZVALUE32 ! value of a data point
- CHARACTER(LEN=8), DIMENSION(:), ALLOCATABLE :: ZVALUE64 ! value of a data point
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: ZVALUE             ! value of a record of data points
 !
@@ -143,7 +147,9 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZLON_WORK          ! longitude of a valid d
 INTEGER                           :: IWORK              ! index of these data
 LOGICAL                           :: GSWAP              ! T: swap has been done
 !
+INTEGER, DIMENSION(360) :: IMASK
 !
+INTEGER :: ICPT, IPAS, JL, IDEB, INB
 INTEGER          :: IRECLENGTH        ! record length
 INTEGER          :: IREC              ! record number
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -249,13 +255,13 @@ IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK(XMESHLENGTH,ZDLAT,ZDLON)
 !
 IRECLENGTH = IBITS/8 * INBCOL
 ALLOCATE (ZVALUE(INBCOL))
-ALLOCATE (IVALUE8 (INBCOL))
-ALLOCATE (IVALUE16(INBCOL))
+ALLOCATE (YVALUE8 (INBCOL))
+ALLOCATE (YVALUE16(INBCOL))
+ALLOCATE (YVALUE32(INBCOL))
+ALLOCATE (YVALUE64(INBCOL))
 ALLOCATE (IVALUE32(INBCOL))
-ALLOCATE (IVALUE32R(INBCOL))
 ALLOCATE (IVALUE64(INBCOL))
 ALLOCATE (ZVALUE32(INBCOL))
-ALLOCATE (ZVALUE64(INBCOL))
 !
 !*    7.2    Openning of direct access file
 !            ------------------------------
@@ -268,16 +274,36 @@ ALLOCATE (ZVALUE64(INBCOL))
 !*    4.     loop on mask meshes (lat)
 !            -------------------
 !
+IMASK(:) = 0
+ICPT = 0
+DO JLAT = 1,360
+  IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) CYCLE
+  ZLATMIN = (JLAT-180)/2. - 0.5
+  ZLATMAX = (JLAT-180)/2.
+  IF ( .NOT. ANY(ZLAT(:)<ZLATMAX .AND. ZLAT(:)>=ZLATMIN) ) CYCLE
+  ICPT = ICPT + 1
+  IMASK(ICPT) = JLAT
+ENDDO
+INB = ICPT
+!
+IPAS = CEILING(INB*1./NPROC)
+!
 GSWAP = .FALSE.
 !
-JLAT = 0
+JL = IPAS + 1
+!
+ICPT = 0
+!
+IDEB = IPAS*NRANK
 !
 DO 
-!
-  JLAT = JLAT + 1
-  IF (JLAT==361) EXIT
-!
-  IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) CYCLE
+  !
+  JL = JL - 1
+  IF (JL==0) EXIT
+  !
+  IF (IDEB+JL>INB) CYCLE
+  !
+  JLAT = IMASK(IDEB+JL)
 !
   ZLATMIN = (JLAT-180)/2. - 0.5
   ZLATMAX = (JLAT-180)/2.
@@ -289,7 +315,6 @@ DO
 !
   ILINE1=MAX(MIN(INT((ZGLBLATMAX-ZDLAT/2.-ZLATMAX)/ZDLAT+1.),INBLINE),0)+1
   ILINE2=MAX(MIN(INT((ZGLBLATMAX-ZDLAT/2.-ZLATMIN)/ZDLAT+1.),INBLINE),0)
-  IF ( .NOT. ANY(ZLAT(:)<ZLATMAX .AND. ZLAT(:)>=ZLATMIN) ) CYCLE
 !
 !----------------------------------------------------------------------------
 !
@@ -312,25 +337,30 @@ DO
 !            ------------------------------------------------------
 !
     IF      (YTYPE=='INTEGER' .AND. IBITS== 8) THEN
-      READ(IGLB,REC=IREC) IVALUE8(:)
-      ZVALUE(:)=IVALUE8(:)
+      READ(IGLB,REC=IREC) YVALUE8(:)
+      ZVALUE(:)=YVALUE8(:)
       ! negative values are shifted to positive values according to binary coding
       WHERE (ZVALUE(:)<0.) ZVALUE(:) = NINT(256.+ZVALUE(:))
       !
     ELSE IF (YTYPE=='INTEGER' .AND. IBITS==16) THEN
-      READ(IGLB,REC=IREC) IVALUE16(:)
-      ZVALUE(:)=IVALUE16(:)
-      IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
-        IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
-        LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
-        GSWAP = .TRUE.
-        WRITE(ILUOUT,*) '*******************************************************************'
-        WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
-                           LITTLE_ENDIAN_ARCH  
-        WRITE(ILUOUT,*) '*******************************************************************'
-        JLAT = 0
-        CALL REFRESH_PGDWORK
-        EXIT   ! rereads the file
+      READ(IGLB,REC=IREC) YVALUE16(:)
+      ZVALUE(:)=YVALUE16(:)
+      ICPT = ICPT + 1
+      IF (ICPT<=2) THEN      
+        IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
+          IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
+          LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
+          GSWAP = .TRUE.
+          IF (NRANK==NPIO) THEN
+            WRITE(ILUOUT,*) '*******************************************************************'
+            WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
+                               LITTLE_ENDIAN_ARCH  
+            WRITE(ILUOUT,*) '*******************************************************************'
+          ENDIF
+          JL = IPAS + 1
+          CALL REFRESH_PGDWORK
+          EXIT   ! rereads the file
+        ENDIF
       END IF
 
     ELSE IF (YTYPE=='INTEGER' .AND. IBITS==32) THEN
@@ -340,36 +370,46 @@ DO
       READ(IGLB,REC=IREC) IVALUE64(:)
       ZVALUE(:)=IVALUE64(:)
     ELSE IF (YTYPE=='REAL   ' .AND. IBITS==32) THEN
-      READ(IGLB,REC=IREC) IVALUE32R(:)
-      ZVALUE(:)=IVALUE32R(:)
-      IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
-           .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
-        IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
-        LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
-        GSWAP = .TRUE.
-        WRITE(ILUOUT,*) '*******************************************************************'
-        WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
-                         LITTLE_ENDIAN_ARCH
-        WRITE(ILUOUT,*) '*******************************************************************'
-        JLAT = 0
-        CALL REFRESH_PGDWORK
-        EXIT
+      READ(IGLB,REC=IREC) YVALUE32(:)
+      ZVALUE(:)=YVALUE32(:)
+      ICPT = ICPT + 1
+      IF (ICPT<=2) THEN      
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+             .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
+          IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
+          LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
+          GSWAP = .TRUE.
+          IF (NRANK==NPIO) THEN
+            WRITE(ILUOUT,*) '*******************************************************************'
+            WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
+                             LITTLE_ENDIAN_ARCH
+            WRITE(ILUOUT,*) '*******************************************************************'
+          ENDIF
+          JL = IPAS + 1        
+          CALL REFRESH_PGDWORK
+          EXIT
+        ENDIF
       END IF                
     ELSE IF (YTYPE=='REAL   ' .AND. IBITS==64) THEN
-      READ(IGLB,REC=IREC) ZVALUE64(:)
-      ZVALUE(:)=ZVALUE64(:)
-      IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
-             .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
-        IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
-        LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
-        GSWAP = .TRUE.
-        WRITE(ILUOUT,*) '*******************************************************************'
-        WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
-                           LITTLE_ENDIAN_ARCH  
-        WRITE(ILUOUT,*) '*******************************************************************'
-        JLAT = 0
-        CALL REFRESH_PGDWORK
-        EXIT
+      READ(IGLB,REC=IREC) YVALUE64(:)
+      ZVALUE(:)=YVALUE64(:)
+      ICPT = ICPT + 1
+      IF (ICPT<=2) THEN      
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+               .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
+          IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
+          LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
+          GSWAP = .TRUE.
+          IF (NRANK==NPIO) THEN
+            WRITE(ILUOUT,*) '*******************************************************************'
+            WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
+                               LITTLE_ENDIAN_ARCH  
+            WRITE(ILUOUT,*) '*******************************************************************'
+          ENDIF
+          JL = IPAS + 1
+          CALL REFRESH_PGDWORK
+          EXIT
+        ENDIF
       END IF
     ELSE
       CALL ABOR1_SFX('READ_DIRECT1: DATA TYPE NOT SUPPORTED')
@@ -470,7 +510,7 @@ DO
 !            ----------------------------------------------------------
 !
           IF (IWORK>0) &
-            CALL PT_BY_PT_TREATMENT(USS, &
+            CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                                     ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
                                     ZVALUE_WORK(1:IWORK),                          &
                                     HSUBROUTINE                                    )  
@@ -495,13 +535,13 @@ DEALLOCATE(ZLON_WORK  )
 DEALLOCATE(ZVALUE_WORK)
 !
 DEALLOCATE (ZVALUE)
-DEALLOCATE (IVALUE8 )
-DEALLOCATE (IVALUE16)
+DEALLOCATE (YVALUE8 )
+DEALLOCATE (YVALUE16)
+DEALLOCATE (YVALUE32)
+DEALLOCATE (YVALUE64)
 DEALLOCATE (IVALUE32)
-DEALLOCATE (IVALUE32R)
 DEALLOCATE (IVALUE64)
 DEALLOCATE (ZVALUE32)
-DEALLOCATE (ZVALUE64)
 !
  CALL CLOSE_FILE(HPROGRAM,IGLB)
 IF (LHOOK) CALL DR_HOOK('READ_DIRECT',1,ZHOOK_HANDLE)

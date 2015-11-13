@@ -33,10 +33,8 @@ SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IG, I, UG, U, USS, &
 !!      P Samuelsson 10/2014, MEB
 !!------------------------------------------------------------------
 !
-!
-!
-!
-!
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
@@ -45,8 +43,11 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
-USE MODD_PREP,     ONLY : XZS_LS, LINTERP, CMASK
-
+USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, &
+                          XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT, &
+                          LINTERP, CMASK
+USE MODD_GRID_GRIB, ONLY : CINMODEL  
+!
 USE MODD_PREP_ISBA, ONLY : XGRID_SOIL, NGRID_LEVEL, LSNOW_IDEAL,    &
                            XWSNOW, XRSNOW, XTSNOW, XLWCSNOW, XASNOW,          &
                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
@@ -56,6 +57,7 @@ USE MODD_ISBA_PAR,       ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF,NUNDEF
 !
+USE MODI_PREP_GRIB_GRID
 USE MODI_READ_PREP_ISBA_CONF
 USE MODI_READ_PREP_ISBA_SNOW
 USE MODI_PREP_ISBA_ASCLLV
@@ -75,6 +77,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -105,13 +111,14 @@ LOGICAL, OPTIONAL,  INTENT(INOUT):: OKEY
  CHARACTER(LEN=28)             :: YFILEPGD_SNOW     ! name of file 
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
-REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizontally
-REAL, POINTER, DIMENSION(:,:)       :: ZFIELD ! field to interpolate horizontally
+REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN=>NULL()  ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   soil grid, npatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZF        ! work array (x, output soil grid, npatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZDG       ! out T grid (x, output soil grid, npatch)
+TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
+!
 INTEGER                       :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
@@ -119,6 +126,7 @@ LOGICAL                       :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: INI, INL, INP, JJ, JL! Work integer
+INTEGER                       :: INFOMPI
 INTEGER, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,3)) :: IWORK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -188,7 +196,8 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
   CALL PREP_ISBA_ASCLLV(DTCO, UG, U, USS, &
                         HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='GRIB  ') THEN
-  CALL PREP_ISBA_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN,OKEY)
+  CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)        
+  IF (NRANK==NPIO) CALL PREP_ISBA_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)        
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
    CALL PREP_ISBA_EXTERN(DTCO, I, U, &
                          HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,OKEY)
@@ -206,40 +215,53 @@ END IF
 !
 !*      5.     Horizontal interpolation
 !
-INL = SIZE(ZFIELDIN,2)
-INP = SIZE(ZFIELDIN,3)
+IF (NRANK==NPIO) THEN
+  INL = SIZE(ZFIELDIN,2)
+  INP = SIZE(ZFIELDIN,3)
+ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
+  ALLOCATE(ZFIELDIN(0,0,0))
+ENDIF
 !
+IF (NPROC>1) THEN
+#ifndef NOMPI
+  CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+  CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
+ENDIF
 ALLOCATE(ZFIELDOUTP(INI,INL,INP))
-ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
 !
 DO JPATCH = 1, INP
-  ZFIELD=ZFIELDIN(:,:,JPATCH)
   IF (INP==NVEGTYPE) THEN
      LINTERP = (I%XVEGTYPE(:,JPATCH) > 0.)
   ELSEIF(INP==I%NPATCH)THEN
      LINTERP = (I%XPATCH(:,JPATCH) > 0.)
   ENDIF
   CALL HOR_INTERPOL(DTCO, U, &
-                    ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
+                    ILUOUT,ZFIELDIN(:,:,JPATCH),ZFIELDOUTP(:,:,JPATCH))
   LINTERP = .TRUE.
 END DO
 !
-DEALLOCATE(ZFIELD)
+DEALLOCATE(ZFIELDIN)
 !
-ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
-!
-CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+ALLOCATE(ZW (INI,INL,I%NPATCH))
+ZW = 0.
+IF (I%NPATCH/=INP) THEN
+  !
+  ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
+  CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+  !
+  !*      6.     Transformation from vegtype grid to patch grid
+  !
+  CALL VEGTYPE_GRID_TO_PATCH_GRID(I%NPATCH,I%XVEGTYPE_PATCH,I%XPATCH,ZFIELDOUTV,ZW)
+  DEALLOCATE(ZFIELDOUTV)
+  !
+ELSE
+  !
+  ZW(:,:,:) = ZFIELDOUTP(:,:,:)
+  !
+ENDIF
 !
 DEALLOCATE(ZFIELDOUTP)
-!
-!-------------------------------------------------------------------------------------
-!
-!*      6.     Transformation from vegtype grid to patch grid
-!
-ALLOCATE(ZW (INI,SIZE(ZFIELDOUTV,2),I%NPATCH))
-!
-ZW = 0.
-CALL VEGTYPE_GRID_TO_PATCH_GRID(I%NPATCH,I%XVEGTYPE_PATCH,I%XPATCH,ZFIELDOUTV,ZW)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -252,7 +274,7 @@ SELECT CASE (HSURF)
   !
  CASE('ZS     ') 
   ALLOCATE(XZS_LS(INI))
-  XZS_LS(:) = ZFIELDOUTV(:,1,1)
+  XZS_LS(:) = ZW(:,1,1)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
@@ -436,9 +458,6 @@ DEALLOCATE(ZW)
 !-------------------------------------------------------------------------------------
 !
 !*      8.     Deallocations
-!
-DEALLOCATE(ZFIELDIN )
-DEALLOCATE(ZFIELDOUTV)
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',1,ZHOOK_HANDLE)
 !

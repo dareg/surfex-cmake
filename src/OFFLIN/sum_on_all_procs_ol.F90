@@ -34,7 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURFEX_MPI, ONLY : NINDEX, NRANK, NPIO, NCOMM, NPROC
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC, NDIM_FULL_INIT
 !
 USE MODD_SURFEX_OMP, ONLY : NWORK0
 !
@@ -61,7 +61,7 @@ INTEGER,                   INTENT(INOUT) :: KOUT  ! sum of all integers
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER, DIMENSION(SIZE(NINDEX)) :: IIN
+INTEGER, DIMENSION(NDIM_FULL_INIT) :: IIN
 INTEGER :: INFOMPI
 REAL(KIND=JPRB)           :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------

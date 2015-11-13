@@ -238,7 +238,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !         Reading of the fields
 !
- CALL READ_PGD_FLAKE_n(DTCO, U, FM%FG, FM%F, &
+ CALL READ_PGD_FLAKE_n(DTCO, U, UG, FM%FG, FM%F, &
                        HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)

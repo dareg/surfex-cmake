@@ -1,5 +1,5 @@
 !#################################################################################
-SUBROUTINE READ_PGD_NETCDF (USS, &
+SUBROUTINE READ_PGD_NETCDF (UG, U, USS, &
                             HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD,PFIELD)
 !#################################################################################
 !
@@ -24,9 +24,9 @@ SUBROUTINE READ_PGD_NETCDF (USS, &
 !!      Original    11/2012
 !!------------------------------------------------------------------
 !
-
 !
-!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_ABOR1_SFX
@@ -45,8 +45,9 @@ INCLUDE 'netcdf.inc'
 !
 !*      0.1    declarations of arguments
 !
-
 !
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
@@ -130,7 +131,7 @@ ELSE
     !*    5.     Call to the adequate subroutine (point by point treatment)
     !            ----------------------------------------------------------
     !     
-    CALL PT_BY_PT_TREATMENT(USS, &
+    CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                             ILUOUT,  (/ ZLAT2D(JPOINT)/) , (/ZLON2D(JPOINT)/) , (/ ZFIELD(JPOINT)/) , &
       HSUBROUTINE                                       )  
 

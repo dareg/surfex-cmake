@@ -30,14 +30,6 @@ SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, IG, I, UG, U, USS, &
 !!                            new vertical interpol
 !!------------------------------------------------------------------
 !
-!
-!
-!
-!
-!
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
@@ -53,6 +45,9 @@ USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+USE MODD_GRID_GRIB, ONLY : CINMODEL
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
 USE MODD_PREP,            ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,       &
                                  XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT,       &
                                  LINTERP, CMASK
@@ -65,6 +60,7 @@ USE MODD_ISBA_PAR,        ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 USE MODD_SURF_PAR,        ONLY : XUNDEF
 !
+USE MODI_PREP_GRIB_GRID
 USE MODI_READ_PREP_TEB_GARDEN_CONF
 USE MODI_READ_PREP_GARDEN_SNOW
 USE MODI_PREP_TEB_GARDEN_ASCLLV
@@ -83,6 +79,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -122,8 +122,8 @@ INTEGER,            INTENT(IN)  :: KPATCH
  CHARACTER(LEN=28)             :: YFILE_SNOW     ! name of file
  CHARACTER(LEN=6)              :: YFILEPGDTYPE_SNOW ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD_SNOW     ! name of file 
-REAL, POINTER,     DIMENSION(:,:,:) :: ZFIELDIN  ! field to interpolate horizontally
-REAL, POINTER,     DIMENSION(:,:)   :: ZFIELD ! field to interpolate horizontally
+REAL, POINTER,     DIMENSION(:,:,:) :: ZFIELDIN=>NULL()  ! field to interpolate horizontally
+REAL, POINTER,     DIMENSION(:,:)   :: ZFIELD=>NULL() ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZVEGTYPE_PATCH ! vegtype for each patch
@@ -135,12 +135,14 @@ REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZPATCH    ! work array for patches
 REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW
 INTEGER                             :: ILUOUT    ! output listing logical unit
 !
+TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
 LOGICAL                             :: GUNIF     ! flag for prescribed uniform field
 LOGICAL                             :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                             :: JVEGTYPE, JPATCH  ! loop on vegtypes
 INTEGER                             :: JLAYER    ! loop on layers
 INTEGER                             :: JI, INP, INL, INI
 INTEGER                             :: IWORK     ! Work integer
+INTEGER :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -214,7 +216,8 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
   CALL PREP_TEB_GARDEN_ASCLLV(DTCO, UG, U, USS, &
                               HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='GRIB  ') THEN
-  CALL PREP_TEB_GARDEN_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
+  CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
+   IF (NRANK==NPIO) CALL PREP_TEB_GARDEN_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)        
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
    CALL PREP_TEB_GARDEN_EXTERN(DTCO, I, U, &
                                HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,KPATCH,ZFIELDIN)
@@ -228,14 +231,26 @@ END IF
 !
 !*      5.     Horizontal interpolation
 !
-INL = SIZE(ZFIELDIN,2)
-INP = SIZE(ZFIELDIN,3)
+IF (NRANK==NPIO) THEN
+  INL = SIZE(ZFIELDIN,2)
+  INP = SIZE(ZFIELDIN,3)
+  ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
+ELSE
+ IF (.NOT.ASSOCIATED(ZFIELDIN)) ALLOCATE(ZFIELDIN(0,0,0))
+ IF (.NOT.ASSOCIATED(ZFIELD)) ALLOCATE(ZFIELD(0,0))
+ENDIF
+!
+IF (NPROC>1) THEN
+#ifndef NOMPI
+  CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+  CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
+ENDIF
 !
 ALLOCATE(ZFIELDOUTP(INI,INL,INP))
-ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
 !
-DO JPATCH = 1, SIZE(ZFIELDIN,3)
-  ZFIELD=ZFIELDIN(:,:,JPATCH)
+DO JPATCH = 1, INP
+  IF (NRANK==NPIO) ZFIELD=ZFIELDIN(:,:,JPATCH)
   IF (INP==NVEGTYPE) LINTERP = (TGDP%XVEGTYPE(:,JPATCH) > 0.)
   CALL HOR_INTERPOL(DTCO, U, &
                     ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))

@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_NAM_GRID_LONLAT_ROT(HPROGRAM,KGRID_PAR,KL,PGRID_PAR)
+      SUBROUTINE READ_NAM_GRID_LONLAT_ROT(UG,U,HPROGRAM,KGRID_PAR,KL,PGRID_PAR,HDIR)
 !     ################################################################
 !
 !!****  *READ_NAM_GRID_LONLAT_ROT* - routine to read in namelist the horizontal grid
@@ -33,6 +33,11 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK
+!
 USE MODE_POS_SURF
 !
 USE MODI_OPEN_NAMELIST
@@ -41,6 +46,7 @@ USE MODI_GET_LUOUT
 !
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
+USE MODI_READ_AND_SEND_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -50,10 +56,14 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
 CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -61,8 +71,8 @@ REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining th
 INTEGER :: ILUOUT ! output listing logical unit
 INTEGER :: ILUNAM ! namelist file  logical unit
 !
-REAL, DIMENSION(:), ALLOCATABLE :: ZLAT ! latitude  of all points
-REAL, DIMENSION(:), ALLOCATABLE :: ZLON ! longitude of all points
+REAL, DIMENSION(:), ALLOCATABLE :: ZLAT, ZLAT0 ! latitude  of all points
+REAL, DIMENSION(:), ALLOCATABLE :: ZLON, ZLON0 ! longitude of all points
 !
 REAL,    DIMENSION(:), POINTER     :: ZGRID_PAR
 !
@@ -90,37 +100,56 @@ NAMELIST/NAM_LONLAT_ROT/XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT,NLON,NLAT
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_LONLAT_ROT',0,ZHOOK_HANDLE)
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+IF (HDIR/='H') THEN
+  !
+  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       2.    Reading of projection parameters
+  !              --------------------------------
+  !
+  CALL POSNAM(ILUNAM,'NAM_LONLAT_ROT',GFOUND,ILUOUT)
+  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LONLAT_ROT)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       3.    Number of points
+  !              ----------------
+  !
+  KL = NLON * NLAT
+  !
+  !---------------------------------------------------------------------------
+  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+  !---------------------------------------------------------------------------
+  !
+  !*       4.    All this information stored into pointer PGRID_PAR
+  !              --------------------------------------------------
+  !
+  ALLOCATE(ZLAT(KL))
+  ALLOCATE(ZLON(KL))
+  !
+  CALL LATLON_LONLAT_ROT(XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT, &
+                           NLON,NLAT,ZLON,ZLAT                   )  
+  !
+ELSE
+  !
+  ALLOCATE(ZLON0(U%NDIM_FULL),ZLAT0(U%NDIM_FULL))
+  !
+  CALL GET_GRIDTYPE_LONLAT_ROT(UG%XGRID_FULL_PAR,PWEST=XWEST,PSOUTH=XSOUTH,&
+                       PDLON=XDLON,PDLAT=XDLAT,PPOLON=XPOLON,PPOLAT=XPOLAT,&
+                       KLON=NLON,KLAT=NLAT,KL=KL,PLON=ZLON0,PLAT=ZLAT0)
+  !
+  ALLOCATE(ZLON(KL),ZLAT(KL))
+  !
+  CALL READ_AND_SEND_MPI(ZLON0,ZLON)
+  CALL READ_AND_SEND_MPI(ZLAT0,ZLAT)
+  !
+  DEALLOCATE(ZLON0,ZLAT0)
+  !
+ENDIF
 !
-!---------------------------------------------------------------------------
-!
-!*       2.    Reading of projection parameters
-!              --------------------------------
-!
-CALL POSNAM(ILUNAM,'NAM_LONLAT_ROT',GFOUND,ILUOUT)
-IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LONLAT_ROT)
-!
-!---------------------------------------------------------------------------
-!
-!*       3.    Number of points
-!              ----------------
-!
-KL = NLON * NLAT
-!
-!---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-!---------------------------------------------------------------------------
-!
-!*       4.    All this information stored into pointer PGRID_PAR
-!              --------------------------------------------------
-!
-ALLOCATE(ZLAT(KL))
-ALLOCATE(ZLON(KL))
-!
-CALL LATLON_LONLAT_ROT(XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT, &
-                         NLON,NLAT,ZLON,ZLAT                   )  
-!
-CALL PUT_GRIDTYPE_LONLAT_ROT(ZGRID_PAR,                                 &
+ CALL PUT_GRIDTYPE_LONLAT_ROT(ZGRID_PAR,                                 &
                                XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT,  &
                                NLON,NLAT,KL,ZLON,ZLAT                   )  
 !

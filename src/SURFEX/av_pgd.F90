@@ -158,6 +158,8 @@ END MODULE MODI_AV_PGD
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
+USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
+USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER,     ONLY : XDATA_BLD_HEIGHT 
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, &
@@ -190,17 +192,17 @@ INTEGER,                INTENT(IN), OPTIONAL :: KDECADE ! current month
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-INTEGER :: JJ
+INTEGER :: JJ, JI, ID0
 INTEGER :: ICOVER  ! number of cover classes
 INTEGER :: JCOVER  ! loop on cover classes
 !
-REAL, DIMENSION(SIZE(PCOVER,1)) :: ZWORK, ZDZ
-REAL                            :: ZWEIGHT
-REAL, DIMENSION(SIZE(PCOVER,1)) :: ZCOVER_WEIGHT
-REAL                            :: ZDATA
+INTEGER :: ISIZE_OMP
+INTEGER, DIMENSION(SIZE(PCOVER,2)) :: IMASK
+REAL, DIMENSION(SIZE(PCOVER,1)) :: ZWORK, ZDZ, ZVAL
+REAL, DIMENSION(SIZE(PCOVER,2)) :: ZWEIGHT
+REAL :: ZCOVER_WEIGHT
 REAL, DIMENSION(SIZE(PCOVER,1)) :: ZSUM_COVER_WEIGHT
-REAL, DIMENSION(SIZE(PCOVER,1)) :: ZWEIGHT_MAX
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
 !*    1.1    field does not exist
@@ -215,7 +217,7 @@ IF (SIZE(PFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(OCOVER)
+ICOVER=SIZE(PCOVER,2)
 !
 IF (PRESENT(PDZ)) THEN
   ZDZ(:)=PDZ(:)
@@ -224,18 +226,24 @@ ELSE
 END IF
 !
 PFIELD(:)=XUNDEF
+IF (HSFTYPE=='TRE' .OR. HSFTYPE=='GRT') PFIELD(:) = 0.
 !
 ZWORK(:)=0.
-ZWEIGHT_MAX(:)=0.
 ZSUM_COVER_WEIGHT(:)=0.
-!-------------------------------------------------------------------------------
+!
 JCOVER = 0
-DO JJ=1,ICOVER
+DO JJ = 1,SIZE(OCOVER)
+  IF (OCOVER(JJ)) THEN
+    JCOVER=JCOVER+1
+    IMASK(JCOVER) = JJ
+  ENDIF
+ENDDO
+!
+!-------------------------------------------------------------------------------
+DO JCOVER=1,ICOVER
   !
-  IF (.NOT.OCOVER(JJ)) CYCLE
-  !
-  JCOVER = JCOVER + 1
-  !
+  JJ = IMASK(JCOVER)
+  !  
 !-------------------------------------------------------------------------------
 !
 !*    2.     Selection of the weighting function
@@ -243,36 +251,35 @@ DO JJ=1,ICOVER
 !
   SELECT CASE (HSFTYPE)
        CASE('ALL')
-         ZWEIGHT=1.
+         ZWEIGHT(JCOVER)=1.
 
        CASE('NAT')
-         ZWEIGHT=DTCO%XDATA_NATURE(JJ)
+         ZWEIGHT(JCOVER)=DTCO%XDATA_NATURE(JJ)
 
        CASE('GRD')
-         ZWEIGHT=DTCO%XDATA_TOWN (JJ) * DTCO%XDATA_GARDEN(JJ)
+         ZWEIGHT(JCOVER)=DTCO%XDATA_TOWN (JJ) * DTCO%XDATA_GARDEN(JJ)
 
        CASE('TWN')
-         ZWEIGHT=DTCO%XDATA_TOWN  (JJ)
+         ZWEIGHT(JCOVER)=DTCO%XDATA_TOWN  (JJ)
 
        CASE('WAT')
-         ZWEIGHT=DTCO%XDATA_WATER (JJ)
+         ZWEIGHT(JCOVER)=DTCO%XDATA_WATER (JJ)
 
        CASE('SEA')
-         ZWEIGHT=DTCO%XDATA_SEA   (JJ)
+         ZWEIGHT(JCOVER)=DTCO%XDATA_SEA   (JJ)
 
        CASE('BLD')
-         ZWEIGHT=DTCO%XDATA_TOWN  (JJ) *        DTCO%XDATA_BLD(JJ)
+         ZWEIGHT(JCOVER)=DTCO%XDATA_TOWN  (JJ) *        DTCO%XDATA_BLD(JJ)
 
        CASE('BLV')  !* building Volume
-         ZWEIGHT=DTCO%XDATA_TOWN  (JJ) *        DTCO%XDATA_BLD(JJ) &
+         ZWEIGHT(JCOVER)=DTCO%XDATA_TOWN  (JJ) *        DTCO%XDATA_BLD(JJ) &
                                       * XDATA_BLD_HEIGHT(JJ)
 
        CASE('STR')
-         ZWEIGHT=DTCO%XDATA_TOWN  (JJ) * ( 1. - DTCO%XDATA_BLD(JJ) )
+         ZWEIGHT(JCOVER)=DTCO%XDATA_TOWN  (JJ) * ( 1. - DTCO%XDATA_BLD(JJ) )
 
        CASE('TRE')
-         PFIELD(:)=0.
-         ZWEIGHT=DTCO%XDATA_NATURE(JJ) * (  DTCO%XDATA_VEGTYPE(JJ,NVT_TEBD) &
+         ZWEIGHT(JCOVER)=DTCO%XDATA_NATURE(JJ) * (  DTCO%XDATA_VEGTYPE(JJ,NVT_TEBD) &
                                        + DTCO%XDATA_VEGTYPE(JJ,NVT_TRBE) &
                                        + DTCO%XDATA_VEGTYPE(JJ,NVT_TRBD) &
                                        + DTCO%XDATA_VEGTYPE(JJ,NVT_TEBE) &
@@ -283,8 +290,7 @@ DO JJ=1,ICOVER
                                        + DTCO%XDATA_VEGTYPE(JJ,NVT_BONE) )  
 
        CASE('GRT')
-         PFIELD(:)=0.
-         ZWEIGHT=DTCO%XDATA_TOWN(JJ) * DTCO%XDATA_GARDEN(JJ) &
+         ZWEIGHT(JCOVER)=DTCO%XDATA_TOWN(JJ) * DTCO%XDATA_GARDEN(JJ) &
                          * (  DTCO%XDATA_VEGTYPE(JJ,NVT_TEBD) &
                             + DTCO%XDATA_VEGTYPE(JJ,NVT_TRBE) &
                             + DTCO%XDATA_VEGTYPE(JJ,NVT_TRBD) &
@@ -299,6 +305,7 @@ DO JJ=1,ICOVER
          CALL ABOR1_SFX('AV_PGD_1D: WEIGHTING FUNCTION NOT ALLOWED '//HSFTYPE)
   END SELECT
 !
+ENDDO
 !-------------------------------------------------------------------------------
 !
 !*    3.     Averaging
@@ -307,65 +314,54 @@ DO JJ=1,ICOVER
 !*    3.1    Work arrays
 !            -----------
 !
-  ZCOVER_WEIGHT(:) = PCOVER(:,JCOVER) * ZWEIGHT
-!
-  ZSUM_COVER_WEIGHT(:) = ZSUM_COVER_WEIGHT(:) + ZCOVER_WEIGHT(:)
-!
-  ZDATA = PDATA(JJ)
-!
-!*    3.2    Selection of averaging type
-!            ---------------------------
-!
-  SELECT CASE (HATYPE)
-!
-!-------------------------------------------------------------------------------
-!
-!*    3.4    Arithmetic averaging
-!            --------------------
-!
-  CASE ('ARI')
-!
-    ZWORK(:) = ZWORK(:) + ZDATA * ZCOVER_WEIGHT(:) 
-!
-!-------------------------------------------------------------------------------
-!
-!*    3.5    Inverse averaging
-!            -----------------
-!
-  CASE('INV' )
-!
-    ZWORK (:)= ZWORK(:) + 1./ZDATA * ZCOVER_WEIGHT(:)
-!
-!-------------------------------------------------------------------------------!
-!
-!*    3.6    Roughness length averaging
-!            --------------------------
-
-!
-  CASE('CDN')
-!
-    ZWORK (:)= ZWORK(:) + 1./(LOG(ZDZ(:)/ZDATA))**2 * ZCOVER_WEIGHT(:)
-!
-!-------------------------------------------------------------------------------
-!
-!*    3.7    Majoritary averaging
-!            --------------------
-!
-  CASE('MAJ' )
-!
-    WHERE(ZCOVER_WEIGHT(:)>ZWEIGHT_MAX(:))
-      ZWEIGHT_MAX(:) = ZCOVER_WEIGHT(:)
-      ZWORK      (:) = ZDATA
-    END WHERE
-!
-!-------------------------------------------------------------------------------
-!
-  CASE DEFAULT
-    CALL ABOR1_SFX('AV_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED : "'//HATYPE//'"')
-!
-  END SELECT
-!
-END DO
+IF (HATYPE=='ARI' .OR. HATYPE=='INV' .OR. HATYPE=='CDN') THEN
+  !
+  ISIZE_OMP = MAX(1,ICOVER/NBLOCKTOT)
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP) 
+!$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(JCOVER,JJ,ZVAL,JI,ZCOVER_WEIGHT) &
+!$OMP & REDUCTION(+:ZSUM_COVER_WEIGHT,ZWORK)
+  DO JCOVER=1,ICOVER
+    IF (ZWEIGHT(JCOVER)/=0.) THEN
+      !
+      JJ = IMASK(JCOVER)
+      !
+      IF (HATYPE=='ARI') THEN
+        ZVAL(:) = PDATA(JJ)
+      ELSEIF (HATYPE=='INV') THEN
+        ZVAL(:) = 1./PDATA(JJ)
+      ELSEIF (HATYPE=='CDN') THEN
+        ZVAL(:) = 1./(LOG(ZDZ(:)/PDATA(JJ)))**2 
+      ENDIF
+      !
+      DO JI = 1,SIZE(PCOVER,1)
+        IF (PCOVER(JI,JCOVER)/=0.) THEN
+          ZCOVER_WEIGHT = PCOVER(JI,JCOVER) * ZWEIGHT(JCOVER)
+          ZSUM_COVER_WEIGHT(JI) = ZSUM_COVER_WEIGHT(JI) + ZCOVER_WEIGHT
+          ZWORK(JI) = ZWORK(JI) + ZVAL(JI) * ZCOVER_WEIGHT
+        ENDIF
+      ENDDO
+      !
+    ENDIF
+  ENDDO
+!$OMP END DO
+!$OMP END PARALLEL
+ELSEIF (HATYPE=='MAJ') THEN
+  !
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3b',0,ZHOOK_HANDLE_OMP)
+!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JI,ID0)
+  DO JI = 1,SIZE(PCOVER,1) 
+    ID0 = MAXVAL(MAXLOC(PCOVER(JI,:)*ZWEIGHT(:)))
+    ZWORK(JI) = PDATA(IMASK(ID0))
+    ZSUM_COVER_WEIGHT(JI) = ZSUM_COVER_WEIGHT(JI) + SUM(PCOVER(JI,:)*ZWEIGHT(:))
+  ENDDO
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3b',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
+  !
+ELSE
+  CALL ABOR1_SFX('AV_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED : "'//HATYPE//'"')
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
@@ -542,6 +538,7 @@ INTEGER :: JJ, JI, JK
 !
 REAL         :: ZCOVER_WEIGHT
 !
+INTEGER, DIMENSION(SIZE(PCOVER,2)) :: IMASK0
 REAL, DIMENSION(SIZE(PCOVER,1)) :: ZVAL
 !
 REAL, DIMENSION(SIZE(PCOVER,2),NVEGTYPE)         :: ZWEIGHT
@@ -554,7 +551,7 @@ REAL, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))   :: ZDZ
 INTEGER, DIMENSION(SIZE(PCOVER,1),SIZE(PFIELD,2))  :: IMASK
 INTEGER, DIMENSION(SIZE(PFIELD,2)) :: JCOUNT
 INTEGER ::  PATCH_LIST(NVEGTYPE)
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 
 !-------------------------------------------------------------------------------
 !
@@ -571,7 +568,7 @@ IF (SIZE(PFIELD)==0) RETURN
 !*    1.2    Initializations
 !            ---------------
 !
-ICOVER=SIZE(OCOVER)
+ICOVER=SIZE(PCOVER,2)
 IPATCH=SIZE(PFIELD,2)
 !
 IF (PRESENT(PDZ)) THEN
@@ -592,6 +589,14 @@ DO JVEGTYPE=1,NVEGTYPE
   PATCH_LIST(JVEGTYPE) = VEGTYPE_TO_PATCH (JVEGTYPE, IPATCH)
 ENDDO
 !
+JCOVER = 0
+DO JJ = 1,SIZE(OCOVER)
+  IF (OCOVER(JJ)) THEN
+    JCOVER=JCOVER+1
+    IMASK0(JCOVER) = JJ
+  ENDIF
+ENDDO
+!
 IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_1',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_2',0,ZHOOK_HANDLE)
 !
@@ -600,12 +605,9 @@ IF (.NOT.ASSOCIATED(DTCO%XDATA_WEIGHT)) THEN
   ALLOCATE(DTCO%XDATA_WEIGHT(SIZE(PCOVER,2),NVEGTYPE,12))
   DTCO%XDATA_WEIGHT(:,:,:) = 0.
   !
-  JCOVER=0
-  DO JJ=1,ICOVER
+  DO JCOVER=1,ICOVER
     !
-    IF (.NOT.OCOVER(JJ)) CYCLE
-    !
-    JCOVER = JCOVER+1
+    JJ = IMASK0(JCOVER)
     !
     DO JVEGTYPE=1,NVEGTYPE
       !  CASE('NAT')
@@ -710,7 +712,6 @@ SELECT CASE (HSFTYPE)
 END SELECT
 !
 IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_2',1,ZHOOK_HANDLE)
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
   !
@@ -720,49 +721,49 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',0,ZHOOK_HANDLE)
   !
 JCOVER=0
 !
-DO JJ=1,ICOVER
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP) REDUCTION(+:ZSUM_COVER_WEIGHT_PATCH,ZWORK)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',0,ZHOOK_HANDLE_OMP)
+!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JCOVER,JJ,JVEGTYPE,JPATCH, &
+!$OMP   ZVAL,JI,ZCOVER_WEIGHT)
+DO JCOVER=1,ICOVER
   !
-  IF (OCOVER(JJ)) THEN
+  JJ = IMASK0(JCOVER)
+  !
+  DO JVEGTYPE=1,NVEGTYPE
     !
-    JCOVER = JCOVER+1
+    JPATCH= PATCH_LIST(JVEGTYPE)  
     !
-    DO JVEGTYPE=1,NVEGTYPE
+    IF (ZWEIGHT(JCOVER,JVEGTYPE)/=0.) THEN
       !
-      JPATCH= PATCH_LIST(JVEGTYPE)  
-      !
-      IF (ZWEIGHT(JCOVER,JVEGTYPE)/=0.) THEN
-        !
-        IF (HATYPE=='ARI') THEN
-          ZVAL(:) = PDATA(JJ,JVEGTYPE)
-        ELSEIF (HATYPE=='INV') THEN
-          ZVAL(:) = 1. / PDATA(JJ,JVEGTYPE)
-        ELSEIF (HATYPE=='CDN') THEN
-          DO JI=1,SIZE(PCOVER,1)
-            ZVAL(JI) = 1./(LOG(ZDZ(JI,JPATCH)/PDATA(JJ,JVEGTYPE)))**2 
-          ENDDO
-        ELSE
-          CALL ABOR1_SFX('AV_PATCH_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED')
-        ENDIF
-        !
-!$OMP PARALLEL DO PRIVATE(JI,ZCOVER_WEIGHT)
+      IF (HATYPE=='ARI') THEN
+        ZVAL(:) = PDATA(JJ,JVEGTYPE)
+      ELSEIF (HATYPE=='INV') THEN
+        ZVAL(:) = 1. / PDATA(JJ,JVEGTYPE)
+      ELSEIF (HATYPE=='CDN') THEN
         DO JI=1,SIZE(PCOVER,1)
-          IF (PCOVER(JI,JCOVER)/=0.) THEN
-            ZCOVER_WEIGHT =  PCOVER(JI,JCOVER) * ZWEIGHT(JCOVER,JVEGTYPE)      
-            ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) = ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) + ZCOVER_WEIGHT
-            ZWORK(JI,JPATCH) = ZWORK(JI,JPATCH) + ZVAL(JI) * ZCOVER_WEIGHT
-          ENDIF
+          ZVAL(JI) = 1./(LOG(ZDZ(JI,JPATCH)/PDATA(JJ,JVEGTYPE)))**2 
         ENDDO
-!$OMP END PARALLEL DO 
-        !
+      ELSE
+        CALL ABOR1_SFX('AV_PATCH_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED')
       ENDIF
-      !   
-    ENDDO 
+      !
+      DO JI=1,SIZE(PCOVER,1)
+        IF (PCOVER(JI,JCOVER)/=0.) THEN
+          ZCOVER_WEIGHT =  PCOVER(JI,JCOVER) * ZWEIGHT(JCOVER,JVEGTYPE)      
+          ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) = ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH) + ZCOVER_WEIGHT
+          ZWORK(JI,JPATCH) = ZWORK(JI,JPATCH) + ZVAL(JI) * ZCOVER_WEIGHT
+        ENDIF
+      ENDDO
+      !
+    ENDIF
     !
-  ENDIF
+  ENDDO
   !
 ENDDO
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_3',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PATCH_PGD_1D_4',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

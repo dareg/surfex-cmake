@@ -296,7 +296,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
  CALL READ_COVER_GARDEN(&
                         HPROGRAM,TM%TOP%LGARDEN)
 !
- CALL READ_PGD_TEB_n(DTCO, U, TM, &
+ CALL READ_PGD_TEB_n(DTCO, U, UG, TM, &
                      HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
@@ -309,18 +309,20 @@ ALLOCATE(TM%TOP%XTEB_PATCH(ILU,TM%TOP%NTEB_PATCH))
  CALL CONVERT_TEB(TM%TOP, &
                   TM%TOP%XCOVER,TM%TOP%XTEB_PATCH)
 !
- CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                        HPROGRAM,'TOWN  ','TEB   ','READ ')
-!
- CALL READ_SURF(&
-                   HPROGRAM,'VERSION',IVERSION,IRESP)
- CALL READ_SURF(&
-                   HPROGRAM,'BUG',IBUGFIX,IRESP)
 !
 !* reads what is the option defined for road orientations & walls
 !
 IF (HINIT=='ALL') THEN
+  !
+  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
+  CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                        HPROGRAM,'TOWN  ','TEB   ','READ ')
+!
+  CALL READ_SURF(&
+                   HPROGRAM,'VERSION',IVERSION,IRESP)
+  CALL READ_SURF(&
+                   HPROGRAM,'BUG',IBUGFIX,IRESP)
+!
   TM%TOP%CROAD_DIR='UNIF'
   TM%TOP%CWALL_OPT='UNIF'
   IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
@@ -329,8 +331,10 @@ IF (HINIT=='ALL') THEN
     CALL READ_SURF(&
                    HPROGRAM,'WALL_OPT',TM%TOP%CWALL_OPT,IRESP)
   END IF
-END IF
- CALL END_IO_SURF_n(HPROGRAM)
+  CALL END_IO_SURF_n(HPROGRAM)
+  !
+ENDIF
+!      
 !-----------------------------------------------------------------------------------
 !
 !*              LOOP ON TEB PATCHES

@@ -658,7 +658,7 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !  
   LOGICAL                      :: LWTD          ! Activation of Water table depth coupling
   REAL, POINTER, DIMENSION(:)  :: XFWTD         ! grid-cell fraction of water table rise
-  REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (m)
+  REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (negative below soil surface) (m)
 !
 !-------------------------------------------------------------------------------
 !

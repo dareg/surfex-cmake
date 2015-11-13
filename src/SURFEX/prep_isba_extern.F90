@@ -25,15 +25,11 @@ SUBROUTINE PREP_ISBA_EXTERN (DTCO, I, U, &
 !!      B. Decharme  04/2014, external init with FA files
 !!------------------------------------------------------------------
 !
-!
-!
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
 USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -81,13 +77,11 @@ INTEGER           :: IPATCH         ! number of patch
 LOGICAL           :: GGLACIER
 CHARACTER(LEN=3)  :: YPHOTO
 !
-REAL, DIMENSION(:,:,:), POINTER     :: ZFIELD         ! field read on initial MNH vertical soil grid, all patches
-REAL, DIMENSION(:,:),   POINTER     :: ZFIELD1        ! field read on initial MNH vertical soil grid, one patch
-REAL, DIMENSION(:,:,:), POINTER     :: ZD             ! layer thicknesses
-REAL, DIMENSION(:,:),   POINTER     :: ZD1            ! layer thicknesses, one patch
-REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT           !
+REAL, DIMENSION(:,:,:), POINTER     :: ZFIELD=>NULL()         ! field read on initial MNH vertical soil grid, all patches
+REAL, DIMENSION(:,:,:), POINTER     :: ZD=>NULL()            ! layer thicknesses
 REAL, DIMENSION(:), ALLOCATABLE     :: ZMASK
 INTEGER                             :: JPATCH, JL       ! loop counter for patch
+INTEGER :: IVERSION
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -112,9 +106,20 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_EXTERN',0,ZHOOK_HANDLE)
  CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
+YRECFM='VERSION'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+!
 ALLOCATE(ZMASK(INI))
-YRECFM='FRAC_NATURE'
- CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+IF (IVERSION>=7) THEN 
+  YRECFM='FRAC_NATURE'
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+ELSE
+  ZMASK(:) = 1.
+ENDIF
+!
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+!
+IF (NRANK/=NPIO) INI = 0
 !
 !---------------------------------------------------------------------------------------
 !
@@ -130,8 +135,9 @@ SELECT CASE(HSURF)
     ALLOCATE(PFIELD(INI,1,1))
     PFIELD(:,:,:) = XUNDEF
     YRECFM='ZS'
+    CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
     CALL READ_SURF(&
-                   HFILEPGDTYPE,YRECFM,PFIELD(:,1,1),IRESP,HDIR='A')
+                   HFILEPGDTYPE,YRECFM,PFIELD(:,1,1),IRESP,HDIR='E')
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 !--------------------------------------------------------------------------
@@ -140,25 +146,18 @@ SELECT CASE(HSURF)
 !*      3.1    Profile of temperature, water or ice in the soil
 !
   CASE('TG    ','WG    ','WGI   ')
-     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !* reading of the profile and its depth definition
      CALL READ_EXTERN_ISBA(U, &
                            DTCO, I, &
                            HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                            KLUOUT,INI,HSURF,HSURF,ZFIELD,ZD,OKEY)
 ! 
-     ALLOCATE(ZFIELD1(SIZE(ZFIELD,1),SIZE(ZFIELD,2)))
-     ALLOCATE(ZD1(SIZE(ZFIELD,1),SIZE(ZFIELD,2)))
-     ALLOCATE(ZOUT(SIZE(ZFIELD,1),SIZE(XGRID_SOIL)))
-     ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),SIZE(ZFIELD,3)))
-     PFIELD(:,:,:) = XUNDEF
-!
-     DO JPATCH=1,SIZE(ZFIELD,3)
-        ZFIELD1(:,:)=ZFIELD(:,:,JPATCH)
-        ZD1    (:,:)=ZD    (:,:,JPATCH)
-        CALL INTERP_GRID_NAT(ZD1,ZFIELD1,XGRID_SOIL,ZOUT)
-        PFIELD(:,:,JPATCH)=ZOUT(:,:)
-     END DO
+    IF (INI>0) THEN
+      ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),SIZE(ZFIELD,3)))
+      DO JPATCH=1,SIZE(ZFIELD,3)
+        CALL INTERP_GRID_NAT(ZD(:,:,JPATCH),ZFIELD(:,:,JPATCH),XGRID_SOIL,PFIELD(:,:,JPATCH))
+      END DO
+    ENDIF
      !
      DO JPATCH=1,SIZE(PFIELD,3)
        DO JL=1,SIZE(PFIELD,2)
@@ -167,22 +166,19 @@ SELECT CASE(HSURF)
      ENDDO
      !
      DEALLOCATE(ZFIELD)
-     DEALLOCATE(ZOUT)
-     DEALLOCATE(ZFIELD1)
      DEALLOCATE(ZD)
 !
 !--------------------------------------------------------------------------
 !
 !*      3.4    Water content intercepted on leaves, LAI
 !
-  CASE('WR     ')
-     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)     
+  CASE('WR     ')    
      !* number of tiles
      CALL OPEN_AUX_IO_SURF(&
                        HFILEPGD,HFILEPGDTYPE,'NATURE')
      YRECFM='PATCH_NUMBER'
      CALL READ_SURF(&
-                   HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
+                   HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
      ALLOCATE(PFIELD(INI,1,IPATCH))
      PFIELD(:,:,:) = XUNDEF
@@ -190,23 +186,22 @@ SELECT CASE(HSURF)
      CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'NATURE')
      CALL READ_SURF(&
-                   HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
+                   HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='E')
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
      DO JPATCH=1,SIZE(PFIELD,3)
        WHERE (ZMASK(:)==0.) PFIELD(:,1,JPATCH) = XUNDEF
      ENDDO     
 !
   CASE('LAI    ')
-     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
      !* number of tiles
      CALL OPEN_AUX_IO_SURF(&
                        HFILEPGD,HFILEPGDTYPE,'NATURE')
      YRECFM='PATCH_NUMBER'
      CALL READ_SURF(&
-                   HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
+                   HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
      YRECFM='PHOTO'
      CALL READ_SURF(&
-                   HFILEPGDTYPE,YRECFM,YPHOTO,IRESP)     
+                   HFILEPGDTYPE,YRECFM,YPHOTO,IRESP,HDIR='-')     
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
      ALLOCATE(PFIELD(INI,1,IPATCH))
      PFIELD(:,:,:) = XUNDEF     
@@ -215,33 +210,32 @@ SELECT CASE(HSURF)
                        HFILE,HFILETYPE,'NATURE')
        YRECFM = 'LAI'
        CALL READ_SURF(&
-                   HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
+                   HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='E')
        CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
        DO JPATCH=1,SIZE(PFIELD,3)
          WHERE (ZMASK(:)==0.) PFIELD(:,1,JPATCH) = XUNDEF
        ENDDO       
      ENDIF
 !
-  CASE('ICE_STO')
-     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)     
+  CASE('ICE_STO') 
       !* number of tiles
      CALL OPEN_AUX_IO_SURF(&
                        HFILEPGD,HFILEPGDTYPE,'NATURE')
      YRECFM='PATCH_NUMBER'
      CALL READ_SURF(&
-                   HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
+                   HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
      CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'NATURE')
      YRECFM='GLACIER'
      CALL READ_SURF(&
-                   HFILETYPE,YRECFM,GGLACIER,IRESP)
+                   HFILETYPE,YRECFM,GGLACIER,IRESP,HDIR='-')
      ALLOCATE(PFIELD(INI,1,IPATCH))
      PFIELD(:,:,:) = 0.0     
      IF(GGLACIER)THEN
        YRECFM = 'ICE_STO'
        CALL READ_SURF(&
-                   HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='A')
+                   HFILETYPE,YRECFM,PFIELD(:,1,:),IRESP,HDIR='E')
      ENDIF
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
      DO JPATCH=1,SIZE(PFIELD,3)

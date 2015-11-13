@@ -125,6 +125,8 @@ LOGICAL          :: LADAPT_SW = .FALSE.
 LOGICAL          :: LSHADOWS_SLOPE = .FALSE.
 LOGICAL          :: LSHADOWS_OTHER = .FALSE.
 !
+LOGICAL          :: LWR_VEGTYPE = .FALSE.
+!
 ! * For offline driver with openMP
 INTEGER         :: NPROMA                 ! Size of openMP packets
 INTEGER         :: NI,NJ                  ! Domain size
@@ -143,7 +145,7 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LPRINT, LRESTART, LINQUIRE, NSCAL, NHALO,                &
                         XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
-                        LSHADOWS_SLOPE,LSHADOWS_OTHER,                           &
+                        LSHADOWS_SLOPE,LSHADOWS_OTHER, LWR_VEGTYPE,              &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
                         YALG_MPI, XDELTA_OROG, LADAPT_SW
 !

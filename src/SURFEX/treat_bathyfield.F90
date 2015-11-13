@@ -45,6 +45,14 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_PGDWORK, ONLY : NSIZE, NSIZE_ALL, X1D_ALL, XSUMVAL
+!
+USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NREQ, NINDEX, IDX_R, &
+                                NSIZE_TASK,NREQ, NSIZE_max=>NSIZE
+!
+USE MODI_INI_SSOWORK
 USE MODI_GET_LUOUT
 USE MODI_READ_DIRECT
 USE MODI_READ_BINLLV
@@ -52,7 +60,7 @@ USE MODI_READ_BINLLVFAST
 USE MODI_READ_ASCLLV
 USE MODI_READ_NETCDF
 USE MODI_AVERAGE2_MESH
-!
+USE MODI_READ_AND_SEND_MPI
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -66,6 +74,10 @@ USE MODI_AVERAGE2_OROGRAPHY
 !
 USE MODI_READ_DIRECT_GAUSS
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
@@ -88,8 +100,17 @@ REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PPGDARRAY ! field on MESONH grid
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-INTEGER :: ILUOUT
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK
+REAL, DIMENSION(:), ALLOCATABLE :: ZEXTVAL
+INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE
+!
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS2
+#endif
+INTEGER :: ILUOUT, INFOMPI, JP, ICPT, JI, JL, IREQ, IDX,&
+                        IDX_SAVE, ISIZE_OMP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TREAT_BATHYFIELD',0,ZHOOK_HANDLE)
@@ -102,43 +123,110 @@ SELECT CASE (HFILETYPE)
 
    CASE ('DIRECT')
          IF(UG%CGRID=="GAUSS     ")THEN
-            CALL READ_DIRECT_GAUSS(USS, &
+            CALL READ_DIRECT_GAUSS(UG, U, USS, &
                                    HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
          ELSE
-            CALL READ_DIRECT(USS, &
+            CALL READ_DIRECT(UG, U, USS, &
                              HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
          ENDIF
    CASE ('BINLLV')
-       CALL READ_BINLLV(USS, &
+       CALL INI_SSOWORK
+    IF (NRANK==NPIO) CALL READ_BINLLV(UG, U, USS, &
                         HPROGRAM,HSUBROUTINE,HFILENAME)
 
    CASE ('BINLLF')
-       CALL READ_BINLLVFAST(USS, &
+       CALL INI_SSOWORK
+    IF (NRANK==NPIO) CALL READ_BINLLVFAST(UG, U, USS, &
                             HPROGRAM,HSUBROUTINE,HFILENAME)
 
    CASE ('ASCLLV')
-       CALL READ_ASCLLV(USS, &
+       CALL INI_SSOWORK
+    IF (NRANK==NPIO) CALL READ_ASCLLV(UG, U, USS, &
                         HPROGRAM,HSUBROUTINE,HFILENAME)
 
    CASE ('NETCDF')
-       CALL READ_NETCDF(USS, &
+       CALL INI_SSOWORK
+    IF (NRANK==NPIO) CALL READ_NETCDF(UG, U, USS, &
                         HPROGRAM,HSUBROUTINE,HFILENAME,HNCVARNAME)
 
 END SELECT
 !
 !-------------------------------------------------------------------------------
 !
+!nsize contains the number of points found for each of the domain, for each task
+ALLOCATE(NSIZE(U%NSIZE_FULL))
+!
+IF (NPROC>1) THEN
+  !
+  ALLOCATE(ISIZE(NSIZE_max))
+  !
+  IDX_SAVE = IDX_R
+  IDX = IDX_SAVE + NRANK
+  !each task sends to each other task the part of NSIZE_ALL it got, stored in
+  !isize
+  CALL READ_AND_SEND_MPI(NSIZE_ALL,ISIZE(1:NSIZE_TASK(NRANK)),KPIO=NRANK,KDX=IDX)
+  !
+  NSIZE(:) = 0
+  ISIZE_OMP = NPROC/NBLOCKTOT
+  !for each task
+  DO JP=0,NPROC-1
+   !
+    IF (JP/=NRANK) THEN
+      !
+      !each task receives each ISIZE from each task
+      CALL MPI_RECV(ISIZE,NSIZE_max*KIND(ISIZE)/4,MPI_INTEGER,&
+                JP,IDX_SAVE+1+JP,NCOMM,ISTATUS,INFOMPI)
+      !
+    ELSE
+      !
+      ICPT = 0
+      DO JI = 1,SIZE(NINDEX)
+        IF (NINDEX(JI)==JP) THEN
+          ICPT = ICPT + 1
+          ISIZE(ICPT) = NSIZE_ALL(JI)
+        ENDIF
+      ENDDO
+      !
+    ENDIF
+    !
+    !nsize is the sum of all parts isize
+    NSIZE(:) = NSIZE(:) + ISIZE(1:NSIZE_TASK(NRANK))
+    !
+  ENDDO
+  DEALLOCATE(ISIZE)
+  CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS2,INFOMPI)
+ELSE
+  NSIZE(:) = NSIZE_ALL(:)
+ENDIF
+!
+!
+DEALLOCATE(NSIZE_ALL)
+!
+!
+SELECT CASE (HSUBROUTINE)
+
+  CASE ('A_MESH')
+    !most simple case
+    ALLOCATE(XSUMVAL(U%NSIZE_FULL))
+    IF (NPROC>1) THEN
+      XSUMVAL(:) = 0.
+      ALLOCATE(ZEXTVAL(U%NSIZE_FULL))
+      DO JP = 0,NPROC-1
+        CALL READ_AND_SEND_MPI(X1D_ALL,ZEXTVAL,KPIO=JP)
+        XSUMVAL(:) = XSUMVAL(:) + ZEXTVAL(:)
+      ENDDO
+      DEALLOCATE(ZEXTVAL)
+    ELSE
+      XSUMVAL(:) = X1D_ALL(:)
+    ENDIF
+    DEALLOCATE(X1D_ALL)
+    !
+END SELECT
+!
 !*    2.     Call to the adequate subroutine (global treatment)
 !            --------------------------------------------------
 !
 SELECT CASE (HSUBROUTINE)
-
-  CASE ('A_COVR')
-    CALL AVERAGE2_COVER(U, &
-                        HPROGRAM)
-
-  CASE ('A_OROG')
-    CALL AVERAGE2_OROGRAPHY(USS)
 
   CASE ('A_MESH')
     IF (.NOT. PRESENT(PPGDARRAY)) THEN

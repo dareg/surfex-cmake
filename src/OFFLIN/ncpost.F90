@@ -54,7 +54,6 @@ USE MODD_OFF_SURFEX_n
         !=====================================================================
         real, allocatable, dimension(:,:,:)   ::   zfield3d
         real, allocatable, dimension(:,:)     ::   zfield2d
-        character (len=40) :: cfile
         character (len=56) :: comlink
         integer    ::   inb_forc
         integer    ::   ji

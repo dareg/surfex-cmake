@@ -37,10 +37,7 @@ SUBROUTINE PREP_SNOW_EXTERN (&
 !!                            improve vertical interpolation
 !-------------------------------------------------------------------------------
 !
-!
-!
-!
-!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_TYPE_SNOW
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
 USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW, NGRID_LEVEL
@@ -54,12 +51,12 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_TOWN_PRESENCE
-USE MODI_PUT_ON_ALL_VEGTYPES
 USE MODI_ABOR1_SFX
 USE MODI_PREP_GRID_EXTERN
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_ALLOCATE_GR_SNOW
+USE MODI_DEALLOC_GR_SNOW
 USE MODI_INTERP_GRID_NAT
 USE MODI_READ_GR_SNOW
 USE MODI_READ_SURF
@@ -80,7 +77,7 @@ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
 CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally
-LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL
+LOGICAL,            INTENT(INOUT)  :: OSNOW_IDEAL
 INTEGER,            INTENT(IN)  :: KLAYER    ! Number of layer of output snow scheme
 INTEGER,            INTENT(IN) :: KTEB_PATCH
 !
@@ -89,7 +86,6 @@ INTEGER,            INTENT(IN) :: KTEB_PATCH
 TYPE(SURF_SNOW)                    :: TZSNOW ! snow characteristics
 
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZFIELD       ! work field on input snow grid
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZFIELD_FINE  ! work field on fine snow grid
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTEMP        ! snow temperature
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWLIQ        ! liquid water snow pack content
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZD           ! total snow depth
@@ -145,48 +141,44 @@ END IF
 !  Their value must be defined as XUNDEF.
 !
 !* reading of version of the file being read
-CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'FULL  ')
-CALL READ_SURF(&
-               HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(&
-               HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-!
+CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP,HDIR='-')
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP,HDIR='-')
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,YMASK)
+ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+!
+ CALL TOWN_PRESENCE(HFILEPGDTYPE,GTOWN,HDIR='-')
+!
+CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+!
+CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,YMASK)
 !
 IF (YAREA(1:4)=='VEG ') THEN
   YRECFM = 'PATCH_NUMBER'
-  CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
-  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
 ELSE
   IF (.NOT.GOLD_NAME) THEN
-     IF (YAREA(1:4)=='ROOF') YAREA(1:4) = 'RF  '
-     IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
-   ENDIF
-  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-  CALL READ_TEB_PATCH(&
-                      HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
+    IF (YAREA(1:4)=='ROOF') YAREA(1:4) = 'RF  '
+    IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
+  ENDIF
+  IF (GTOWN) THEN   
+    CALL READ_TEB_PATCH(HFILEPGD,HFILEPGDTYPE,IVERSION,IBUGFIX,ITEB_PATCH,HDIR='-')
+  ELSE
+    ITEB_PATCH = 1
+  ENDIF    
   IF (ITEB_PATCH>1) THEN
     WRITE(YPREFIX,FMT='(A,I1,A)') 'T',MIN(KTEB_PATCH,ITEB_PATCH),'_'
   END IF  
 END IF
 !
-!
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !-------------------------------------------------------------------------------------
 !
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'FULL  ')
-!
-CALL PREP_GRID_EXTERN(&
-                      HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+IF (NRANK/=NPIO) INI = 0
 !
 !-------------------------------------------------------------------------------------
 !
@@ -194,29 +186,28 @@ CALL PREP_GRID_EXTERN(&
 !              ---------------------
 !
 IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)=='RD') THEN
-  CALL TOWN_PRESENCE(&
-                     HFILEPGDTYPE,GTOWN)
-  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   IF (.NOT. GTOWN) THEN
     TZSNOW%SCHEME='1-L'
     TZSNOW%NLAYER=1
     CALL ALLOCATE_GR_SNOW(TZSNOW,INI,IPATCH)
   ELSE
-    CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HFILETYPE,YMASK)
-    CALL READ_GR_SNOW(&
-                      HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW, &
-                      HDIR='A',KVERSION=IVERSION,KBUGFIX=IBUGFIX)
+    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
+    CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW, &
+                      HDIR='E',KVERSION=IVERSION,KBUGFIX=IBUGFIX)
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   ENDIF
 ELSE
-  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HFILETYPE,YMASK)
-  CALL READ_GR_SNOW(&
-                      HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW, &
-                    HDIR='A',KVERSION=IVERSION,KBUGFIX=IBUGFIX)
+  CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
+  CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),YPREFIX,INI,IPATCH,TZSNOW, &
+                    HDIR='E',KVERSION=IVERSION,KBUGFIX=IBUGFIX)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+ENDIF
+!
+IF (TZSNOW%NLAYER.LT.KLAYER) THEN
+   CALL DEALLOC_GR_SNOW(TZSNOW)
+  CALL ABOR1_SFX("PREP_SNOW_EXTERN: SNOW NLAYER IN EXTERN FILE MUST BE GROWER THAN CURRENT NLAYER")
+ELSEIF (TZSNOW%NLAYER.EQ.KLAYER) THEN
+  OSNOW_IDEAL = .TRUE.
 ENDIF
 !
 !-------------------------------------------------------------------------------------
@@ -224,24 +215,21 @@ ENDIF
 !*      5.     Total snow content
 !              ------------------
 !
-SELECT CASE (HSURF(1:3))
-  CASE ('WWW')
-    IF (OSNOW_IDEAL) THEN
-      ALLOCATE(ZFIELD(INI,KLAYER,IPATCH))
-      ZFIELD(:,:,:) = TZSNOW%WSNOW(:,1:KLAYER,:)
-      ALLOCATE(PFIELD(INI,KLAYER,IVEGTYPE))
-      CALL PUT_ON_ALL_VEGTYPES(INI,KLAYER,IPATCH,IVEGTYPE,ZFIELD,PFIELD)
-    ELSE
-      ALLOCATE(ZFIELD(INI,1,IPATCH))
-      ZFIELD(:,1,:) = 0.0
-      DO JLAYER=1,TZSNOW%NLAYER
-        ZFIELD(:,1,:) = ZFIELD(:,1,:) + TZSNOW%WSNOW(:,JLAYER,:)
-      END DO 
-      WHERE ( ZFIELD(:,1,:)>XUNDEF ) ZFIELD(:,1,:)=XUNDEF
-      ALLOCATE(PFIELD(INI,1,IVEGTYPE))
-      CALL PUT_ON_ALL_VEGTYPES(INI,1,IPATCH,IVEGTYPE,ZFIELD,PFIELD)
-    ENDIF
-    DEALLOCATE(ZFIELD)
+IF (NRANK==NPIO) THEN
+  !
+  SELECT CASE (HSURF(1:3))
+    CASE ('WWW')
+      IF (OSNOW_IDEAL) THEN
+        ALLOCATE(PFIELD(INI,KLAYER,IPATCH))
+        PFIELD(:,:,:) = TZSNOW%WSNOW(:,1:KLAYER,:)              
+      ELSE
+        ALLOCATE(PFIELD(INI,1,IPATCH))
+        PFIELD = 0.
+        DO JLAYER=1,TZSNOW%NLAYER
+          PFIELD(:,1,:) = PFIELD(:,1,:) + TZSNOW%WSNOW(:,JLAYER,:)
+        END DO 
+        WHERE ( PFIELD(:,1,:)>XUNDEF ) PFIELD(:,1,:)=XUNDEF
+      ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
@@ -249,12 +237,8 @@ SELECT CASE (HSURF(1:3))
 !              ------
 !
   CASE ('ALB')
-    ALLOCATE(ZFIELD(INI,1,IPATCH))
-    ZFIELD(:,1,:) = TZSNOW%ALB(:,:)
-    !
-    ALLOCATE(PFIELD(INI,1,IVEGTYPE))
-    CALL PUT_ON_ALL_VEGTYPES(INI,1,IPATCH,IVEGTYPE,ZFIELD,PFIELD)
-    DEALLOCATE(ZFIELD)
+    ALLOCATE(PFIELD(INI,1,IPATCH))
+    PFIELD(:,1,:) = TZSNOW%ALB(:,:)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -262,40 +246,26 @@ SELECT CASE (HSURF(1:3))
 !              ------------------------
 !
   CASE ('DEP')
-    ALLOCATE(ZFIELD_FINE(INI,KLAYER,IPATCH))
-    IF (OSNOW_IDEAL) THEN
-      ZFIELD_FINE(:,:,:) = TZSNOW%WSNOW(:,1:KLAYER,:)/TZSNOW%RHO(:,1:KLAYER,:)
-      WHERE(TZSNOW%WSNOW(:,1:KLAYER,:)==XUNDEF) ZFIELD_FINE(:,:,:)=XUNDEF
-    ELSE          
-      ALLOCATE(ZDEPTH(INI,TZSNOW%NLAYER,IPATCH))
-      ZDEPTH(:,:,:) = TZSNOW%WSNOW(:,:,:)/TZSNOW%RHO(:,:,:)
-      WHERE(TZSNOW%WSNOW(:,:,:)==XUNDEF) ZDEPTH(:,:,:)=XUNDEF
-      IF(TZSNOW%NLAYER/=KLAYER)THEN
-        !* total depth
-        ALLOCATE(ZD(INI,IPATCH))
-        ZD(:,:) = 0.0
-        DO JPATCH=1,IPATCH
-           DO JLAYER=1,TZSNOW%NLAYER
-              DO JI=1,INI
-                 IF(ZDEPTH(JI,JLAYER,JPATCH)/=XUNDEF)THEN
-                   ZD(JI,JPATCH) = ZD(JI,JPATCH) + ZDEPTH(JI,JLAYER,JPATCH)
-                 ENDIF
-              ENDDO
-           ENDDO
-        ENDDO
-        !* fine grid
-        DO JPATCH=1,IPATCH
-           CALL SNOW3LGRID(ZFIELD_FINE(:,:,JPATCH),ZD(:,JPATCH))
-        ENDDO  
-        DEALLOCATE(ZD)
-      ELSE
-        ZFIELD_FINE(:,:,:)=ZDEPTH(:,:,:)
-      ENDIF
-      DEALLOCATE(ZDEPTH)
+    ALLOCATE(PFIELD(INI,KLAYER,IPATCH))
+    IF (OSNOW_IDEAL.OR.TZSNOW%NLAYER==KLAYER) THEN    
+      PFIELD(:,:,:) = TZSNOW%WSNOW(:,1:KLAYER,:)/TZSNOW%RHO(:,1:KLAYER,:)
+      WHERE(TZSNOW%WSNOW(:,1:KLAYER,:)==XUNDEF) PFIELD(:,:,:)=XUNDEF
+    ELSE     
+      ALLOCATE(ZD(INI,IPATCH))
+      ZD(:,:) = 0.0
+      DO JPATCH=1,IPATCH
+        DO JLAYER=1,TZSNOW%NLAYER
+          ZD(:,JPATCH) = ZD(:,JPATCH) + &
+                        TZSNOW%WSNOW(:,JLAYER,JPATCH)/TZSNOW%RHO(:,JLAYER,JPATCH)
+        END DO
+        WHERE(TZSNOW%WSNOW(:,1,JPATCH)==XUNDEF) ZD(:,JPATCH)=XUNDEF
+      ENDDO
+      !* fine grid
+      DO JPATCH=1,IPATCH
+        CALL SNOW3LGRID(PFIELD(:,:,JPATCH),ZD(:,JPATCH))
+      ENDDO  
+      DEALLOCATE(ZD)
     ENDIF
-    ALLOCATE(PFIELD(INI,KLAYER,IVEGTYPE))
-    CALL PUT_ON_ALL_VEGTYPES(INI,KLAYER,IPATCH,IVEGTYPE,ZFIELD_FINE,PFIELD)
-    DEALLOCATE(ZFIELD_FINE)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -303,56 +273,47 @@ SELECT CASE (HSURF(1:3))
 !              -----------------------
 !
   CASE ('RHO','HEA','SG1','SG2','HIS','AGE')
-    ALLOCATE(ZFIELD(INI,TZSNOW%NLAYER,IPATCH))
 !
     SELECT CASE (TZSNOW%SCHEME)
       CASE ('D95','1-L','EBA')
-        ALLOCATE(ZFIELD_FINE(INI,NGRID_LEVEL,IPATCH))      
+        ALLOCATE(PFIELD(INI,1,IPATCH))   
         !* computes output physical variable
-        IF (HSURF(1:3)=='RHO') ZFIELD(:,1,:) = TZSNOW%RHO(:,1,:)
+        IF (HSURF(1:3)=='RHO') PFIELD(:,1,:) = TZSNOW%RHO(:,1,:)
         IF (HSURF(1:3)=='HEA') THEN
           ALLOCATE(ZTEMP(INI,TZSNOW%NLAYER,IPATCH))
           ALLOCATE(ZWLIQ(INI,TZSNOW%NLAYER,IPATCH))
           IF (TZSNOW%SCHEME=='D95'.OR.TZSNOW%SCHEME=='EBA') ZTEMP(:,1,:) = XTT-2.
           IF (TZSNOW%SCHEME=='1-L') ZTEMP(:,1,:) = TZSNOW%T(:,1,:)
           ZWLIQ(:,:,:) = 0.0
-          CALL SNOW_T_WLIQ_TO_HEAT(ZFIELD,TZSNOW%RHO,ZTEMP,ZWLIQ)
+          CALL SNOW_T_WLIQ_TO_HEAT(PFIELD,TZSNOW%RHO,ZTEMP,ZWLIQ)
           DEALLOCATE(ZTEMP)
           DEALLOCATE(ZWLIQ)
         END IF
-        IF (HSURF(1:3)=='SG1') ZFIELD(:,1,:) = -20.0
-        IF (HSURF(1:3)=='SG2') ZFIELD(:,1,:) = 80.0
-        IF (HSURF(1:3)=='HIS') ZFIELD(:,1,:) = 0.0
-        IF (HSURF(1:3)=='AGE') ZFIELD(:,1,:) = 3.0
-        !* put profile on fine snow grid
-        DO JLAYER=1,NGRID_LEVEL
-          ZFIELD_FINE(:,JLAYER,:) = ZFIELD(:,1,:)
-        END DO
-        ALLOCATE(PFIELD(INI,NGRID_LEVEL,IVEGTYPE))
-        CALL PUT_ON_ALL_VEGTYPES(INI,NGRID_LEVEL,IPATCH,IVEGTYPE,ZFIELD_FINE,PFIELD)
+        IF (HSURF(1:3)=='SG1') PFIELD(:,1,:) = -20.0
+        IF (HSURF(1:3)=='SG2') PFIELD(:,1,:) = 80.0
+        IF (HSURF(1:3)=='HIS') PFIELD(:,1,:) = 0.0
+        IF (HSURF(1:3)=='AGE') PFIELD(:,1,:) = 3.0
 
       CASE ('3-L','CRO')
+        ALLOCATE(ZFIELD(INI,TZSNOW%NLAYER,IPATCH))
         !* input physical variable
         IF (HSURF(1:3)=='RHO') ZFIELD(:,:,:) = TZSNOW%RHO (:,1:TZSNOW%NLAYER,:)
         IF (HSURF(1:3)=='HEA') ZFIELD(:,:,:) = TZSNOW%HEAT(:,1:TZSNOW%NLAYER,:)
-        IF (HSURF(1:3)=='AGE') ZFIELD(:,:,:) = TZSNOW%AGE (:,1:TZSNOW%NLAYER,:)
+        IF (HSURF(1:3)=='AGE') ZFIELD(:,:,:) = TZSNOW%AGE(:,1:KLAYER,:)
         IF (TZSNOW%SCHEME=='CRO')THEN
-           IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = TZSNOW%GRAN1(:,1:TZSNOW%NLAYER,:)
-           IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = TZSNOW%GRAN2(:,1:TZSNOW%NLAYER,:)
-           IF (HSURF(1:3)=='HIS') ZFIELD(:,:,:) = TZSNOW%HIST (:,1:TZSNOW%NLAYER,:)
+          IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = TZSNOW%GRAN1(:,1:KLAYER,:)
+          IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = TZSNOW%GRAN2(:,1:KLAYER,:)
+          IF (HSURF(1:3)=='HIS') ZFIELD(:,:,:) = TZSNOW%HIST(:,1:KLAYER,:)
         ELSE
-           IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = -20.0
-           IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = 80.0
-           IF (HSURF(1:3)=='HIS') ZFIELD(:,:,:) = 0.0
-        ENDIF
+         IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = -20.0
+         IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = 80.0
+         IF (HSURF(1:3)=='HIS') ZFIELD(:,:,:) = 0.0                  
+        ENDIF    
         !
-        IF (OSNOW_IDEAL) THEN
-          ALLOCATE(ZFIELD_FINE(INI,KLAYER,IPATCH))
-          ZFIELD_FINE(:,:,:) = ZFIELD(:,:,:)
-          ALLOCATE(PFIELD(INI,KLAYER,IVEGTYPE))
-          CALL PUT_ON_ALL_VEGTYPES(INI,KLAYER,IPATCH,IVEGTYPE,ZFIELD_FINE,PFIELD)
+        ALLOCATE(PFIELD(INI,KLAYER,IPATCH))
+        IF (OSNOW_IDEAL.OR.TZSNOW%NLAYER==KLAYER) THEN 
+          PFIELD(:,:,:) = ZFIELD(:,:,:)
         ELSE
-          ALLOCATE(ZFIELD_FINE(INI,NGRID_LEVEL,IPATCH))  
           !
           !* input snow layer thickness
           ALLOCATE(ZDEPTH(INI,TZSNOW%NLAYER,IPATCH))
@@ -392,19 +353,19 @@ SELECT CASE (HSURF(1:3))
           !* interpolation of profile onto fine normalized snow grid
           DO JPATCH=1,IPATCH
             CALL INTERP_GRID_NAT(ZGRID(:,:,JPATCH),ZFIELD(:,:,JPATCH),    &
-                             XGRID_SNOW(:), ZFIELD_FINE(:,:,JPATCH))
+                             XGRID_SNOW(:), PFIELD(:,:,JPATCH))
           END DO
           DEALLOCATE(ZGRID)
-          ALLOCATE(PFIELD(INI,NGRID_LEVEL,IVEGTYPE))
-          CALL PUT_ON_ALL_VEGTYPES(INI,NGRID_LEVEL,IPATCH,IVEGTYPE,ZFIELD_FINE,PFIELD)
         ENDIF
+        DEALLOCATE(ZFIELD)
+
       END SELECT
-    !
-    !* put field form patch to all vegtypes
-    DEALLOCATE(ZFIELD)
-    DEALLOCATE(ZFIELD_FINE)
+      !* put field form patch to all vegtypes    
+  END SELECT
 !
-END SELECT
+ENDIF
+!
+CALL DEALLOC_GR_SNOW(TZSNOW)
 !
 !-------------------------------------------------------------------------------------
 !

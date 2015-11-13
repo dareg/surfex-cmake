@@ -4,7 +4,8 @@ SUBROUTINE PREP_WATFLUX_EXTERN (&
 !     #################################################################################
 !
 !
-!
+USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
+USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -16,7 +17,6 @@ USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -45,6 +45,7 @@ INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILUOUT
 INTEGER           :: IDIM_WATER
 !
+INTEGER           :: IVERSION       ! total 1D dimension
 INTEGER           :: INI            ! total 1D dimension
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -69,12 +70,18 @@ CALL OPEN_AUX_IO_SURF(&
 CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
-CALL READ_SURF(&
-               HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP)
+CALL READ_SURF(HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP,HDIR='-')
+!
+YRECFM='VERSION'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
 !
 ALLOCATE(ZMASK(INI))
-YRECFM='FRAC_WATER'
- CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')       
+IF (IVERSION>=7) THEN
+  YRECFM='FRAC_WATER'
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')       
+ELSE
+  ZMASK(:) = 1.
+ENDIF  
 !
 IF (IDIM_WATER==0) THEN
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
@@ -85,6 +92,9 @@ IF (IDIM_WATER==0) THEN
   WRITE(ILUOUT,*) 'specify inland water temperature XTS_WATER_UNIF'
   CALL ABOR1_SFX('PREP_WATFLUX_EXTERN: No inland water data available in input file')
 END IF
+!
+IF (NRANK/=NPIO) INI=0
+!
 !---------------------------------------------------------------------------------------
 SELECT CASE(HSURF)
 !---------------------------------------------------------------------------------------
@@ -96,7 +106,7 @@ SELECT CASE(HSURF)
     ALLOCATE(PFIELD(INI,1))
     YRECFM='ZS'
     CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+               HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 !*      4.  Sea surface temperature
@@ -109,7 +119,7 @@ SELECT CASE(HSURF)
     CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'WATER ')
     CALL READ_SURF(&
-               HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+               HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
     WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF    
 !

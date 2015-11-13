@@ -34,7 +34,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL, XSUMVAL2, XSUMVAL3, &
+USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL2,  &
                                  XMEAN_WORK, XSTD_WORK, XSKEW_WORK, &
                                  XMIN_WORK, XMAX_WORK 
 !
@@ -66,7 +66,7 @@ WHERE (NSIZE(:)>=36)
 !*    1.     Mean CTI
 !            --------------
 !
-  XMEAN_WORK(:)=XSUMVAL(:)/ZSIZE(:)
+  XMEAN_WORK(:)=XSUMVAL2(:,1)/ZSIZE(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -74,7 +74,7 @@ WHERE (NSIZE(:)>=36)
 !            ------------------
 !
   WHERE (XMAX_WORK(:)-XMIN_WORK(:)>=1.0) 
-    XSTD_WORK(:)=SQRT( MAX(0.,XSUMVAL2(:)/NSIZE(:) - XMEAN_WORK(:)*XMEAN_WORK(:)) )
+    XSTD_WORK(:)=SQRT( MAX(0.,XSUMVAL2(:,2)/NSIZE(:) - XMEAN_WORK(:)*XMEAN_WORK(:)) )
   ELSEWHERE
     XSTD_WORK(:)=0.0
   END WHERE
@@ -86,7 +86,7 @@ WHERE (NSIZE(:)>=36)
 !
   WHERE(XSTD_WORK(:)>0.0)
 !          
-        XSKEW_WORK(:)=XSUMVAL3(:)-ZSIZE(:)*XMEAN_WORK(:)*XMEAN_WORK(:)*XMEAN_WORK(:) &
+        XSKEW_WORK(:)=XSUMVAL2(:,3)-ZSIZE(:)*XMEAN_WORK(:)*XMEAN_WORK(:)*XMEAN_WORK(:) &
                        -3.0*ZSIZE(:)*XMEAN_WORK(:)*XSTD_WORK(:)*XSTD_WORK(:)  
 !
         XSKEW_WORK(:)=XSKEW_WORK(:)/(ZSIZE(:)*XSTD_WORK(:)*XSTD_WORK(:)*XSTD_WORK(:))

@@ -247,7 +247,7 @@ NNCV(:) = 0
  CALL GOTO_MODEL(1)
 !
  CALL INIT_INDEX_MPI(YSURF_CUR, &
-                     CPROGNAME, 'LIN ', 0., .FALSE.)
+                     CPROGNAME, 'OFF','LIN ', 0., .FALSE.)
 !
 !      0.4 Allocate arrays depending on the control vector dimension
 !

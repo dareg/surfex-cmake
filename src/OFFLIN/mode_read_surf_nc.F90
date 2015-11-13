@@ -210,7 +210,7 @@ END SUBROUTINE READ_SURFX0_NC
 !!****  *READX1* - routine to fill a real 1D array for the externalised surface 
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_READ, NPROC, NCOMM, &
-                                 XTIME_NPIO_READ, XTIME_COMM_READ
+                                 XTIME_NPIO_READ, XTIME_COMM_READ, NREQ
 !
 USE MODD_SURFEX_OMP, ONLY : XWORKD, NWORKB, CWORK0
 !
@@ -218,6 +218,7 @@ USE MODD_IO_SURF_NC, ONLY: LMASK,NMASK,NID_NC
 !
 USE MODD_SURF_PAR,   ONLY: XUNDEF
 !
+USE MODI_PACK_SAME_RANK
 USE MODI_ERROR_READ_SURF_NC
 USE MODI_READ_AND_SEND_MPI
 !
@@ -244,6 +245,9 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
+#endif
  CHARACTER(LEN=100) :: YFILE,YOUT          ! Filename
  CHARACTER(LEN=100)    :: YNAME
 INTEGER :: IL1, IVAR_ID,JRET,JDIM,INDIMS, ITYPE, INFOMPI
@@ -349,7 +353,11 @@ HCOMMENT = CWORK0
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
-IF (HDIR=='A') THEN  ! no distribution on other tasks
+IF (HDIR=='E') THEN
+  IF ( NRANK==NPIO ) THEN
+    CALL PACK_SAME_RANK(NMASK,XWORKD(:),PFIELD(:))
+  ENDIF
+ELSEIF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
 #ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
@@ -376,6 +384,9 @@ ELSE
   ELSE 
     CALL READ_AND_SEND_MPI(XWORKD,PFIELD)
   END IF
+  IF (NRANK==NPIO) THEN
+    CALL MPI_WAITALL(NPROC-1,NREQ,ISTATUS,INFOMPI)
+  ENDIF  
 ENDIF
 !
 !$OMP BARRIER
@@ -394,7 +405,7 @@ END SUBROUTINE READ_SURFX1_NC
 !
 !!****  *READX2* - routine to fill a real 2D array for the externalised surface 
 !
-USE MODD_SURFEX_MPI, ONLY: NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ
+USE MODD_SURFEX_MPI, ONLY: NRANK, NPROC, NCOMM, NPIO, XTIME_NPIO_READ, XTIME_COMM_READ, NREQ
 !
 USE MODD_SURFEX_OMP, ONLY : XWORKD2, NWORKB, CWORK0
 !
@@ -404,6 +415,7 @@ USE MODD_SURF_PAR,   ONLY: XUNDEF
 !
 USE MODI_ERROR_READ_SURF_NC
 USE MODI_READ_AND_SEND_MPI
+USE MODI_PACK_SAME_RANK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -428,6 +440,9 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
+#ifndef NOMPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
+#endif
  CHARACTER(LEN=100) :: YFILE,YOUT          ! filename
  CHARACTER(LEN=100)    :: YNAME 
 INTEGER            :: IL1, IL2
@@ -536,7 +551,11 @@ HCOMMENT = CWORK0
 XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
 #endif
 !
-IF (HDIR=='A') THEN  ! no distribution on other tasks
+IF (HDIR=='E') THEN
+  IF ( NRANK==NPIO ) THEN
+    CALL PACK_SAME_RANK(NMASK,XWORKD2(:,:),PFIELD(:,:))
+  ENDIF
+ELSEIF (HDIR=='A') THEN  ! no distribution on other tasks
   IF ( NRANK==NPIO ) THEN
 #ifdef SFX_MPI
     XTIME0 = MPI_WTIME()
@@ -563,6 +582,9 @@ ELSE
   ELSE 
     CALL READ_AND_SEND_MPI(XWORKD2(:,1:SIZE(PFIELD,2)),PFIELD)
   END IF
+  IF (NRANK==NPIO) THEN
+    CALL MPI_WAITALL(NPROC-1,NREQ,ISTATUS,INFOMPI)
+  ENDIF    
 ENDIF
 !
 !$OMP BARRIER

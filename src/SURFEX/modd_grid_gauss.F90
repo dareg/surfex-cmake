@@ -42,5 +42,8 @@ REAL                                :: XLAP    ! Latitude of stretching pole
 REAL                                :: XLOP    ! Longitude of stretching pole
 REAL                                :: XCOEF   ! Stretching coefficient
 !
+REAL, DIMENSION(:), ALLOCATABLE :: XLAT, XLON
+!$OMP THREADPRIVATE(XLAT,XLON)
+!
 END MODULE MODD_GRID_GAUSS
 

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_DIRECT_GAUSS (USS, &
+      SUBROUTINE READ_DIRECT_GAUSS (UG, U, USS, &
                                     HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
 !     #########################################################
 !
@@ -37,7 +37,10 @@
 !            -----------
 !
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NPIO
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK, XMESHLENGTH
@@ -67,7 +70,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
@@ -130,9 +134,10 @@ INTEGER :: ILINE1,ILINE2              ! limits of index of lines
 INTEGER :: ICOL                       ! number of columns in mask domain
 INTEGER :: ICOLINDEX                  ! column index in record
 INTEGER :: INBLINES, ISIZE
-INTEGER :: IWORK              ! index of these data
-INTEGER :: JLOOP, JLON, JLAT, JLINE, JCOL                    ! loop index
+INTEGER :: IWORK, IDEB, IPAS         ! index of these data
+INTEGER :: JLOOP, JLON, JLAT, JLINE, JCOL, JL, ICPT, INB             ! loop index
 !
+INTEGER, DIMENSION(360) :: IMASK
 INTEGER, DIMENSION(2) :: ICOL1, ICOL2 ! limits of index of columns
 !
 INTEGER (KIND=4), DIMENSION(:), ALLOCATABLE :: IVALUE32 ! value of a data point
@@ -277,17 +282,48 @@ IF (LHOOK) CALL DR_HOOK('READ_DIRECT_GAUSS_5',0,ZHOOK_HANDLE)
 !*    4.     loop on mask meshes (lat)
 !            -------------------
 !
+!IMASK contains the indexes of lat to be read (inside the domain)
+IMASK(:) = 0
+ICPT = 0
+DO JLAT = 1,360
+  IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) CYCLE
+  ZLATMIN = (JLAT-180)/2. - 0.5
+  ZLATMAX = (JLAT-180)/2.
+  IF ( .NOT. ANY(ZLAT(:)<ZLATMAX .AND. ZLAT(:)>=ZLATMIN) ) CYCLE
+  ICPT = ICPT + 1
+  IMASK(ICPT) = JLAT
+ENDDO
+!INB: number of lat to be read
+INB = ICPT
+!
+!IPAS: number of lat to be read for each task
+IPAS = CEILING(ICPT*1./NPROC)
+!
 GSWAP = .FALSE.
 !
-JLAT = 0
+JL = IPAS+1
+!
+ICPT = 0
+!
+!first lat read for this task
+IDEB = IPAS*NRANK
 !
 DO 
   !
-  JLAT = JLAT + 1
-  IF (JLAT==361) EXIT
+  !the file is read from the top to the bottom (quicker)
+  JL = JL - 1
+  IF (JL==0) THEN
+    EXIT
+  ENDIF
   !
-  IF ( .NOT. ANY(LLATLONMASK(:,JLAT)) ) CYCLE
   !
+  IF (IDEB+JL>INB) THEN
+    CYCLE
+  ENDIF
+  !
+  !lat read by this task for this loop index JL
+  JLAT = IMASK(IDEB+JL)
+  !  
   ZLATMIN = (JLAT-180)/2. - 0.5
   ZLATMAX = (JLAT-180)/2.
   !
@@ -298,7 +334,6 @@ DO
   !
   ILINE1=MAX(MIN(INT((ZGLBLATMAX-ZDLAT/2.-ZLATMAX)/ZDLAT+1.),INBLINE),0)+1
   ILINE2=MAX(MIN(INT((ZGLBLATMAX-ZDLAT/2.-ZLATMIN)/ZDLAT+1.),INBLINE),0)
-  IF ( .NOT. ANY(ZLAT(:)<ZLATMAX .AND. ZLAT(:)>=ZLATMIN) ) CYCLE
   !
   !----------------------------------------------------------------------------
   !
@@ -332,18 +367,23 @@ DO
       READ(IGLB,REC=IREC) YVALUE16(:)
       ZVALUE(:)=YVALUE16(:)
       !
-      IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
-        IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
-        LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
-        GSWAP = .TRUE.
-        WRITE(ILUOUT,*) '*******************************************************************'
-        WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
-                           LITTLE_ENDIAN_ARCH  
-        WRITE(ILUOUT,*) '*******************************************************************'
-        JLAT = 0
-        CALL REFRESH_PGDWORK
-        EXIT   ! rereads the file
-      END IF
+      ICPT = ICPT + 1
+      IF (ICPT<=2) THEN      
+        IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
+          IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
+          LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
+          GSWAP = .TRUE.
+          IF (NRANK==NPIO) THEN
+            WRITE(ILUOUT,*) '*******************************************************************'
+            WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
+                             LITTLE_ENDIAN_ARCH  
+            WRITE(ILUOUT,*) '*******************************************************************'
+          ENDIF
+          JL = IPAS + 1 !back to first lat
+          CALL REFRESH_PGDWORK
+          EXIT   ! rereads the file
+        END IF
+      ENDIF
       !
     ELSE IF (YTYPE=='INTEGER' .AND. IBITS==32) THEN
       READ(IGLB,REC=IREC) IVALUE32(:)
@@ -357,37 +397,47 @@ DO
       READ(IGLB,REC=IREC) YVALUE32R(:)
       ZVALUE(:)=YVALUE32R(:)
       !
-      IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
-           .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
-        IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
-        LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
-        GSWAP = .TRUE.
-        WRITE(ILUOUT,*) '*******************************************************************'
-        WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
-                         LITTLE_ENDIAN_ARCH
-        WRITE(ILUOUT,*) '*******************************************************************'
-        JLAT = 0
-        CALL REFRESH_PGDWORK
-        EXIT
+      ICPT = ICPT + 1
+      IF (ICPT<=2) THEN      
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+             .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
+          IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
+          LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
+          GSWAP = .TRUE.
+          IF (NRANK==NPIO) THEN
+            WRITE(ILUOUT,*) '*******************************************************************'
+            WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
+                             LITTLE_ENDIAN_ARCH
+            WRITE(ILUOUT,*) '*******************************************************************'
+          ENDIF
+          JL = IPAS + 1
+          CALL REFRESH_PGDWORK
+          EXIT
+        ENDIF
       END IF      
       !      
     ELSE IF (YTYPE=='REAL   ' .AND. IBITS==64) THEN
       READ(IGLB,REC=IREC) YVALUE64(:)
       ZVALUE(:)=YVALUE64(:)
       !
-      IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
-             .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
-        IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
-        LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
-        GSWAP = .TRUE.
-        WRITE(ILUOUT,*) '*******************************************************************'
-        WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
-                           LITTLE_ENDIAN_ARCH  
-        WRITE(ILUOUT,*) '*******************************************************************'
-        JLAT = 0
-        CALL REFRESH_PGDWORK
-        EXIT
-      END IF
+      ICPT = ICPT + 1
+      IF (ICPT<=2) THEN      
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+               .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
+          IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
+          LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
+          GSWAP = .TRUE.
+          IF (NRANK==NPIO) THEN
+            WRITE(ILUOUT,*) '*******************************************************************'
+            WRITE(ILUOUT,*) 'Architecture of the machine needs to swap LITTLE_ENDIAN_ARCH to ', &
+                             LITTLE_ENDIAN_ARCH  
+            WRITE(ILUOUT,*) '*******************************************************************'
+          ENDIF
+          JL = IPAS + 1
+          CALL REFRESH_PGDWORK
+          EXIT
+        END IF
+      ENDIF
       !
     ELSE
       CALL ABOR1_SFX('READ_DIRECT_GAUSS1: DATA TYPE NOT SUPPORTED')
@@ -484,7 +534,7 @@ DO
   !            ----------------------------------------------------------
   !
   IF (IWORK>0) &
-    CALL PT_BY_PT_TREATMENT(USS, &
+    CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                             ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
                             ZVALUE_WORK(1:IWORK),                          &
                             HSUBROUTINE, INBLINES, ZNODATA                 )

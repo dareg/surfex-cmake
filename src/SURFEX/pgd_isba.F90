@@ -46,7 +46,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE,     ONLY : LWR_VEGTYPE
+#endif
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DATA_COVER,     ONLY : XDATA_VEGTYPE
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
@@ -61,6 +66,8 @@ USE MODD_PGDWORK,        ONLY : CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, JPCOVER
 !
 USE MODD_ISBA_PAR,       ONLY : NOPTIMLAYER, XOPTIMGRID
+!
+USE MODI_AV_PGD
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_NAM_PGD_ISBA
@@ -147,6 +154,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !
 INTEGER                  :: IPATCH           ! number of patches
 INTEGER                  :: IGROUND_LAYER    ! number of soil layers
+INTEGER                  :: JVEGTYPE
 CHARACTER(LEN=3)         :: YISBA            ! ISBA option
 CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo transfert function for DIF
 CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
@@ -375,6 +383,21 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
                 IG%CGRID,  IG%XGRID_PAR,                     &
                 I%LCOVER, I%XCOVER, I%XZS,                   &
                 IG%XLAT, IG%XLON, IG%XMESH_SIZE, I%XZ0EFFJPDIR    )  
+!
+#ifdef SFX_OL
+IF (LWR_VEGTYPE) THEN
+  ALLOCATE(I%XVEGTYPE(ILU,NVEGTYPE))
+  IF (DTI%LDATA_VEGTYPE) THEN
+    I%XVEGTYPE(:,:) = DTI%XPAR_VEGTYPE(:,:)
+  ELSE
+    DO JVEGTYPE=1,NVEGTYPE
+      CALL AV_PGD(DTCO,I%XVEGTYPE(:,JVEGTYPE),I%XCOVER,XDATA_VEGTYPE(:,JVEGTYPE),'NAT','ARI',I%LCOVER)
+    ENDDO
+  ENDIF
+ENDIF
+#endif
+!
+DEALLOCATE(I%XCOVER)
 !
 !-------------------------------------------------------------------------------
 !

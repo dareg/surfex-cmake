@@ -80,8 +80,8 @@ LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
 !
 !*      0.2    declarations of local variables
 !
-REAL, POINTER, DIMENSION(:,:,:)    ::ZFIELDIN!field to interpolate horizontally
-REAL, POINTER, DIMENSION(:,:)      ::ZFIELD  !field to interpolate horizontally
+REAL, POINTER, DIMENSION(:,:,:)    ::ZFIELDIN=>NULL()!field to interpolate horizontally
+REAL, POINTER, DIMENSION(:,:)      ::ZFIELD=>NULL()  !field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:)::ZFIELDOUT!field interpolated horizontally
 !
 INTEGER                       :: JLEV    ! loop on oceanic vertical level

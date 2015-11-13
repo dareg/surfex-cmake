@@ -37,6 +37,7 @@
 !            -----------
 !
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -112,7 +113,7 @@ ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
                 WG%XLAT, WG%XLON, WG%XMESH_SIZE                 )  
 !
 !-------------------------------------------------------------------------------
- CALL WRITE_COVER_TEX_WATER
+IF (NRANK==NPIO) CALL WRITE_COVER_TEX_WATER
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

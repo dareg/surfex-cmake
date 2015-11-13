@@ -39,15 +39,25 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: XSUMVAL  
                             ! Sum of data in each mesh
-REAL, DIMENSION(:), ALLOCATABLE   :: XSUMVAL2 
+REAL, DIMENSION(:,:), ALLOCATABLE   :: XSUMVAL2 
                             ! Sum of square data in each mesh
-REAL, DIMENSION(:), ALLOCATABLE   :: XSUMVAL3
-                            ! Sum of cube data in each mesh                            
-REAL, DIMENSION(:,:), ALLOCATABLE :: XSUMCOVER
+REAL, DIMENSION(:,:,:), ALLOCATABLE   :: XSUMVAL3 
+                            ! Sum of square data in each mesh
+REAL, DIMENSION(:,:), ALLOCATABLE   :: XEXTVAL2
+                            ! Sum of square data in each mesh                            
+INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: N3D_ALL
+                            ! Sum of each cover type data in each mesh                    
+INTEGER, DIMENSION(:), ALLOCATABLE :: NVAL1D
+                            ! Sum of each cover type data in each mesh            
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: X3D_ALL
+                            ! Sum of each cover type data in each mesh                           
+REAL, DIMENSION(:,:), ALLOCATABLE :: X2D_ALL
                             ! Sum of each cover type data in each mesh
-REAL, DIMENSION(:,:), ALLOCATABLE :: XTNG
-                            ! for flake
+REAL, DIMENSION(:), ALLOCATABLE   :: X1D_ALL
+                            ! Sum of data in each mesh                            
 INTEGER, DIMENSION(:), ALLOCATABLE:: NSIZE
+!                          ! Number of points inside each mesh of the domain
+INTEGER, DIMENSION(:), ALLOCATABLE:: NSIZE_ALL
 !                          ! Number of points inside each mesh of the domain
 !
  CHARACTER(LEN=3)                  :: CATYPE = 'ARI'

@@ -4,10 +4,9 @@ SUBROUTINE PREP_TEB_EXTERN (DTCO, &
 !     #################################################################################
 !
 !
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_TYPE_DATE_SURF
 !
 USE MODI_PREP_GRID_EXTERN
@@ -50,7 +49,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZFIELD         ! field read
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDEPTH         ! depth of each layer
-REAL, DIMENSION(:),   ALLOCATABLE :: ZDEPTH_TOT     ! total depth of surface
+REAL :: ZDEPTH_TOT     ! total depth of surface
 !
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZD  ! intermediate array
 !
@@ -59,9 +58,9 @@ REAL, DIMENSION(:), ALLOCATABLE :: ZMASK
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILAYER         ! number of layers
-INTEGER           :: JLAYER         ! loop counter
-INTEGER           :: IVERSION       ! SURFEX version
-INTEGER           :: IBUGFIX        ! SURFEX bug version
+INTEGER           :: JLAYER, JI         ! loop counter
+INTEGER           :: IVERSION_PGD, IVERSION_PREP       ! SURFEX version
+INTEGER           :: IBUGFIX_PGD, IBUGFIX_PREP        ! SURFEX bug version
 LOGICAL           :: GOLD_NAME      ! old name flag for temperatures
  CHARACTER(LEN=4)  :: YWALL_OPT      ! option of walls
  CHARACTER(LEN=6)  :: YSURF          ! Surface type
@@ -87,46 +86,31 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_TEB_EXTERN',0,ZHOOK_HANDLE)
 !
 !
+ CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+ CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION_PREP,IRESP,HDIR='-')
+ CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX_PREP,IRESP,HDIR='-')
+ CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+ !
 !* reading of version of the file being read
-CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'FULL  ')
-CALL READ_SURF(&
-               HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(&
-               HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
+CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION_PGD,IRESP,HDIR='-')
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX_PGD,IRESP,HDIR='-')
 !
 !-------------------------------------------------------------------------------------
 !
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !* reads the grid
-CALL PREP_GRID_EXTERN(&
-                      HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
-ALLOCATE(ZMASK(INI))
-YRECFM='FRAC_TOWN'
- CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+IF (NRANK/=NPIO) INI = 0
 !
 !* reads if TEB fields exist in the input file
-CALL TOWN_PRESENCE(&
-                   HFILEPGDTYPE,GTEB)
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL TOWN_PRESENCE(HFILEPGDTYPE,GTEB,HDIR='-')
 !
-IF (.NOT.GOLD_NAME.AND.GTEB) THEN
-   YRECFM='BEM'
-   CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'TOWN  ')
-   CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,YBEM,IRESP)
-   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-ELSE
-   YBEM='DEF'
-ENDIF
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+!
 !---------------------------------------------------------------------------------------
 !
 !*     3.      Orography
@@ -136,10 +120,8 @@ IF (HSURF=='ZS     ') THEN
   !
   ALLOCATE(PFIELD(INI,1))
   YRECFM='ZS'
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'FULL  ')
-  CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+  CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
   !
   !---------------------------------------------------------------------------------------
@@ -151,16 +133,21 @@ ELSE
 !
   IF (GTEB) THEN
 !
-    CALL READ_TEB_PATCH(&
-                        HFILEPGD,HFILEPGDTYPE,ITEB_PATCH)
+    CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
+    GOLD_NAME=(IVERSION_PGD<7 .OR. (IVERSION_PGD==7 .AND. IBUGFIX_PGD<3))
+    IF (.NOT.GOLD_NAME.AND.GTEB) THEN
+      YRECFM='BEM'
+      CALL READ_SURF(HFILEPGDTYPE,YRECFM,YBEM,IRESP,HDIR='-')
+    ELSE
+      YBEM='DEF'
+    ENDIF
+    CALL READ_TEB_PATCH(HFILEPGD,HFILEPGDTYPE,IVERSION_PGD,IBUGFIX_PGD,ITEB_PATCH,HDIR='-')
     YPATCH='   '
     IF (ITEB_PATCH>1) THEN
       WRITE(YPATCH,FMT='(A,I1,A)') 'T',MIN(KPATCH,ITEB_PATCH),'_'
     END IF
+    CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !    
-    CALL OPEN_AUX_IO_SURF(&
-                      HFILEPGD,HFILEPGDTYPE,'TOWN  ')
-!
 !---------------------------------------------------------------------------------------
     SELECT CASE(HSURF)
 !---------------------------------------------------------------------------------------
@@ -169,13 +156,12 @@ ELSE
 !             ------------------------------------------------
 !
     CASE('T_ROAD','T_ROOF','T_WALLA','T_WALLB','T_FLOOR','T_MASS')
+      CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'TOWN  ')
       YSURF=HSURF(1:6)
       !* reading of number of layers
       IF (YSURF=='T_ROAD') YRECFM='ROAD_LAYER'
       IF (YSURF=='T_ROOF') YRECFM='ROOF_LAYER'
       IF (YSURF=='T_WALL') YRECFM='WALL_LAYER'
-      IF (YSURF=='T_WALLA') YRECFM='WALL_LAYER'
-      IF (YSURF=='T_WALLB') YRECFM='WALL_LAYER'
       IF (YSURF=='T_FLOO' .OR. YSURF=='T_MASS') THEN 
         IF (YBEM=='DEF') THEN
           YRECFM='ROAD_LAYER'
@@ -183,33 +169,28 @@ ELSE
           YRECFM='FLOOR_LAYER'
         END IF
       END IF
-      CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ILAYER,IRESP)
+      CALL READ_SURF(HFILEPGDTYPE,YRECFM,ILAYER,IRESP,HDIR='-')
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
       !
       ALLOCATE(ZD(INI,ILAYER))
-      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD)
-      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD)
-      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD)
-      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD)
-      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(&
-                                               DTCO, &
-                                               HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD)
+      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD,HDIR='E')
+      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD,HDIR='E')
+      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
+      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
+      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
+      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
+      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(DTCO, &
+                                               HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
       !
+      !* reading of version of the file being read
+      GOLD_NAME=(IVERSION_PREP<7 .OR. (IVERSION_PREP==7 .AND. IBUGFIX_PREP<3))
+      !      
       CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'TOWN  ')
       !
@@ -217,92 +198,87 @@ ELSE
       YWALL_OPT = 'UNIF'
       IF (YSURF =='T_WALL' .AND. .NOT. GOLD_NAME) THEN
         CALL READ_SURF(&
-               HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP)
-      END IF
-      IF (YSURF =='T_WALLA' .AND. .NOT. GOLD_NAME) THEN
-        CALL READ_SURF(&
-               HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP)
-      END IF
-      IF (YSURF =='T_WALLB' .AND. .NOT. GOLD_NAME) THEN
-        CALL READ_SURF(&
-               HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP)
+               HFILETYPE,'WALL_OPT',YWALL_OPT,IRESP,HDIR='-')
       END IF
       !
       !* reading of the profile
       ALLOCATE(ZFIELD(INI,ILAYER))
       DO JLAYER=1,ILAYER
+        !
         IF (GOLD_NAME) THEN
           WRITE(YRECFM,'(A6,I1.1)') HSURF(1:6),JLAYER
         ELSE
-          WRITE(YRECFM,'(A1,A4,I1.1)') HSURF(1:1),HSURF(3:6),JLAYER
-          IF (YSURF =='T_WALL' .AND. YWALL_OPT/='UNIF') &
+          !
+          IF (YSURF =='T_WALL' .AND. YWALL_OPT/='UNIF') THEN
             WRITE(YRECFM,'(A1,A5,I1.1)') HSURF(1:1),HSURF(3:7),JLAYER
-          IF (YSURF =='T_WALLA' .AND. YWALL_OPT/='UNIF') &
-            WRITE(YRECFM,'(A1,A5,I1.1)') HSURF(1:1),HSURF(3:7),JLAYER
-          IF (YSURF =='T_WALLB' .AND. YWALL_OPT/='UNIF') &
-            WRITE(YRECFM,'(A1,A5,I1.1)') HSURF(1:1),HSURF(3:7),JLAYER
-          IF ((HSURF=='T_FLOOR' .OR. HSURF=='T_MASS') .AND. YBEM=='DEF') THEN
-            IF (HSURF=='T_FLOOR' .AND. JLAYER>1) THEN 
+          ELSEIF ((YSURF=='T_FLOO' .OR. YSURF=='T_MASS') .AND. YBEM=='DEF') THEN
+            IF (YSURF=='T_FLOO' .AND. JLAYER>1) THEN 
               WRITE(YRECFM,'(A5,I1.1)') 'TROAD',JLAYER
             ELSE
               WRITE(YRECFM,'(A6)') 'TI_BLD'
             ENDIF
+          ELSE
+            WRITE(YRECFM,'(A1,A4,I1.1)') HSURF(1:1),HSURF(3:6),JLAYER            
           END IF
+          !
         END IF
+        !
         YRECFM=YPATCH//YRECFM
         YRECFM=ADJUSTL(YRECFM)
         CALL READ_SURF(&
-               HFILETYPE,YRECFM,ZFIELD(:,JLAYER),IRESP,HDIR='A')
+               HFILETYPE,YRECFM,ZFIELD(:,JLAYER),IRESP,HDIR='E')
+        !
       END DO
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      !
       DO JLAYER=1,SIZE(ZFIELD,2)
         WHERE (ZMASK(:)==0.) ZFIELD(:,JLAYER) = XUNDEF
       ENDDO
       !
-      !* recovers middle layer depth (from the surface)
-      ALLOCATE(ZDEPTH    (INI,ILAYER))
-      ALLOCATE(ZDEPTH_TOT(INI))
-      ZDEPTH    (:,1)=ZD(:,1)/2.
-      ZDEPTH_TOT(:)  =ZD(:,1)
-      DO JLAYER=2,ILAYER
-        ZDEPTH    (:,JLAYER) = ZDEPTH_TOT(:) + ZD(:,JLAYER)/2.
-        ZDEPTH_TOT(:) = ZDEPTH_TOT(:) + ZD(:,JLAYER)
-      END DO
-      !
-      !* in case of wall or roof, normalizes by total wall or roof thickness
-      IF (YSURF=='T_ROOF' .OR. YSURF=='T_WALL' .OR. HSURF == 'T_FLOOR' &
-       &.OR. HSURF == 'T_MASS'.OR. YSURF=='T_WALLA' .OR. HSURF == 'T_WALLB') THEN
-        DO JLAYER=1,ILAYER
-          ZDEPTH(:,JLAYER) = ZDEPTH(:,JLAYER) / ZDEPTH_TOT(:)
-        END DO
-      END IF
-      !
-      !* interpolation on the fine vertical grid
-      IF (YSURF=='T_ROAD') THEN
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROAD)))
-        CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROAD,PFIELD)
-      ELSEIF (YSURF=='T_ROOF') THEN
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROOF)))
-        CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROOF,PFIELD)
-      ELSEIF (YSURF=='T_WALL') THEN
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_WALL)))
-        CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_WALL,PFIELD)
-      ELSEIF (YSURF=='T_WALLA') THEN
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_WALL)))
-        CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_WALL,PFIELD)
-      ELSEIF (YSURF=='T_WALLB') THEN
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_WALL)))
-        CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_WALL,PFIELD)
-      ELSEIF (YSURF=='T_FLOO' .OR. YSURF=='T_MASS') THEN
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_FLOOR)))
-        CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_FLOOR,PFIELD)
-      END IF
+      IF (NRANK==NPIO) THEN
+        !
+        !* recovers middle layer depth (from the surface)
+        ALLOCATE(ZDEPTH    (INI,ILAYER))
+        DO JI=1,INI
+          !
+          ZDEPTH    (JI,1)= ZD(JI,1)/2.
+          ZDEPTH_TOT      = ZD(JI,1)
+          DO JLAYER=2,ILAYER
+            ZDEPTH    (JI,JLAYER) = ZDEPTH_TOT + ZD(JI,JLAYER)/2.
+            ZDEPTH_TOT = ZDEPTH_TOT + ZD(JI,JLAYER)
+          ENDDO
+          !
+          !* in case of wall or roof, normalizes by total wall or roof thickness
+          IF (YSURF=='T_ROOF' .OR. YSURF=='T_WALL' .OR. YSURF == 'T_FLOO' .OR. YSURF == 'T_MASS') THEN
+            DO JLAYER=1,ILAYER
+              ZDEPTH(JI,JLAYER) = ZDEPTH(JI,JLAYER) / ZDEPTH_TOT
+            END DO
+          END IF
+          !
+        ENDDO
+        !
+        DEALLOCATE(ZD)
+        !
+        !* interpolation on the fine vertical grid
+        IF (YSURF=='T_ROAD') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROAD)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROAD,PFIELD)
+        ELSEIF (YSURF=='T_ROOF') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROOF)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROOF,PFIELD)
+        ELSEIF (YSURF=='T_WALL') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_WALL)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_WALL,PFIELD)
+        ELSEIF (YSURF=='T_FLOO' .OR. YSURF=='T_MASS') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_FLOOR)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_FLOOR,PFIELD)
+        END IF
+        DEALLOCATE(ZDEPTH)        
+        !
+      ENDIF
       !
       !* end
-      DEALLOCATE(ZD)
       DEALLOCATE(ZFIELD)
-      DEALLOCATE(ZDEPTH)
-      DEALLOCATE(ZDEPTH_TOT)
 !---------------------------------------------------------------------------------------
 !
 !*      4.2    Internal moisture
@@ -314,15 +290,14 @@ ELSE
         YRECFM='QI_BLD'
         YRECFM=YPATCH//YRECFM
         YRECFM=ADJUSTL(YRECFM)
-        CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
         CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'TOWN  ')
         CALL READ_SURF(&
-               HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+               HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
         CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
         WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF        
       ELSE
-        PFIELD(:,1) = XUNDEF
+        IF (INI>0) PFIELD(:,1) = XUNDEF
       ENDIF
 !
 !---------------------------------------------------------------------------------------
@@ -332,7 +307,9 @@ ELSE
 !
     CASE DEFAULT
       ALLOCATE(PFIELD(INI,1))
+      CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'TOWN  ')
       YRECFM=HSURF
+      GOLD_NAME=(IVERSION_PREP<7 .OR. (IVERSION_PREP==7 .AND. IBUGFIX_PREP<3))
       IF (HSURF=='T_CAN  ') THEN
         YRECFM='TCANYON'
         IF (GOLD_NAME) YRECFM='T_CANYON'
@@ -348,11 +325,8 @@ ELSE
       ENDIF
       YRECFM=YPATCH//YRECFM
       YRECFM=ADJUSTL(YRECFM)
-      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
-      CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HFILETYPE,'TOWN  ')
       CALL READ_SURF(&
-               HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+               HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
       WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
 !
@@ -370,21 +344,24 @@ ELSE
     !* temperature profiles
     CASE('T_ROAD','T_ROOF','T_WALL','T_WIN1','T_FLOOR','T_CAN','TI_ROAD','T_WALLA','T_WALLB')
       YSURF=HSURF(1:6)
+      !
       !* reading of the soil surface temperature
       CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'NATURE')
+      IPATCH = 0
       CALL READ_SURF(&
-               HFILEPGDTYPE,'PATCH_NUMBER',IPATCH,IRESP)
+               HFILEPGDTYPE,'PATCH_NUMBER',IPATCH,IRESP,HDIR='-')
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+      !
       ALLOCATE(ZFIELD(INI,IPATCH))
       CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'NATURE')
       IF (YSURF=='T_FLOO' .OR. YSURF=='T_CAN ' .OR. YSURF=='TI_ROA') THEN
         CALL READ_SURF(&
-               HFILETYPE,'TG2',ZFIELD(:,:),IRESP,HDIR='A')
+               HFILETYPE,'TG2',ZFIELD(:,:),IRESP,HDIR='E')
       ELSE
         CALL READ_SURF(&
-               HFILETYPE,'TG1',ZFIELD(:,:),IRESP,HDIR='A')
+               HFILETYPE,'TG1',ZFIELD(:,:),IRESP,HDIR='E')
       ENDIF
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
       DO JLAYER=1,SIZE(ZFIELD,2)
@@ -394,8 +371,6 @@ ELSE
       IF (YSURF=='T_ROAD') ILAYER=SIZE(XGRID_ROAD)
       IF (YSURF=='T_ROOF') ILAYER=SIZE(XGRID_ROOF)
       IF (YSURF=='T_WALL') ILAYER=SIZE(XGRID_WALL)
-      IF (YSURF=='T_WALLA') ILAYER=SIZE(XGRID_WALL)
-      IF (YSURF=='T_WALLB') ILAYER=SIZE(XGRID_WALL)
       IF (YSURF=='T_FLOO') ILAYER=SIZE(XGRID_FLOOR)
       IF (YSURF=='T_WIN1' .OR. YSURF=='T_CAN ' .OR. YSURF=='TI_ROA') ILAYER=1
       ALLOCATE(PFIELD(INI,ILAYER))

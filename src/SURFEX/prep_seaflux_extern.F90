@@ -4,7 +4,7 @@ SUBROUTINE PREP_SEAFLUX_EXTERN (&
 !     #################################################################################
 !
 !
-!
+USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -65,12 +65,21 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_EXTERN',0,ZHOOK_HANDLE)
                        HFILEPGD,HFILEPGDTYPE,'FULL  ')
  CALL PREP_GRID_EXTERN(&
                        HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+!
+YRECFM='VERSION'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+!
 ALLOCATE(ZMASK(INI))
-YRECFM='FRAC_SEA'
+IF (IVERSION>=7) THEN
+  YRECFM='FRAC_SEA'
  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
-
+ELSE
+  ZMASK(:) = 1.
+ENDIF
+!
  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
+IF (NRANK/=NPIO) INI = 0
 !---------------------------------------------------------------------------------------
 SELECT CASE(HSURF)
 !---------------------------------------------------------------------------------------
@@ -91,7 +100,7 @@ SELECT CASE(HSURF)
     CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'SEA   ')
     CALL READ_SURF(&
-                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
     WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF    
 !
@@ -110,7 +119,7 @@ SELECT CASE(HSURF)
       CALL OPEN_AUX_IO_SURF(&
                        HFILE,HFILETYPE,'SEA   ')
       CALL READ_SURF(&
-                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='E')
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
       WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
     ELSE

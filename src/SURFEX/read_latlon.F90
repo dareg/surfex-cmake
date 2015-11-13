@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_LATLON (USS, &
+      SUBROUTINE READ_LATLON (UG, U, USS, &
                               HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME)
 !     #########################################################
 !
@@ -36,7 +36,8 @@
 !            -----------
 !
 !
-!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : XMESHLENGTH
@@ -61,7 +62,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
@@ -188,7 +190,7 @@ DO JLINE=1,INBLINE
 !*   10.     Call to the adequate subroutine (point by point treatment)
 !            ----------------------------------------------------------
 !
-    CALL PT_BY_PT_TREATMENT(USS, &
+    CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                             ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&
                               HSUBROUTINE                                              )  
 !

@@ -280,7 +280,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%SG, SM%S, U, &
+ CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%SG, SM%S, U, UG, &
                          HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)

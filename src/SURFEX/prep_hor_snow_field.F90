@@ -44,8 +44,8 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, &
 !
 !
 !
-!
-!
+USE MODD_GRID_GRIB, ONLY : CINMODEL
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
@@ -59,10 +59,11 @@ USE MODD_CSTS,           ONLY : XTT
 USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_SNOW
-USE MODD_PREP,           ONLY : LINTERP
+USE MODD_PREP,           ONLY : LINTERP,CINTERP_TYPE,CINGRID_TYPE
 !
 USE MODD_SNOW_PAR, ONLY : XANSMAX
 !
+USE MODI_PREP_GRIB_GRID
 USE MODI_PREP_SNOW_GRIB
 USE MODI_PREP_SNOW_UNIF
 USE MODI_PREP_SNOW_EXTERN
@@ -78,6 +79,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifndef NOMPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -121,18 +126,20 @@ REAL,DIMENSION(:,:),  INTENT(IN), OPTIONAL :: PPATCH ! fraction of each patch
 !
 !*      0.2    declarations of local variables
 !
-REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizontally
-REAL, POINTER, DIMENSION(:,:)       :: ZFIELD ! field to interpolate horizontally
-REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUT ! field interpolated   horizontally
+REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN=>NULL()  ! field to interpolate horizontally
+REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
+REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZD        ! snow depth (x, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   snow grid, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZHEAT     ! work array (x, output snow grid, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZGRID     ! grid array (x, output snow grid, kpatch)
 !
+TYPE (DATE_TIME)              :: TZTIME_GRIB    ! current date and time
 LOGICAL                       :: GSNOW_IDEAL
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: JLAYER    ! loop on layers
+INTEGER :: INFOMPI, INL, INP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -155,7 +162,8 @@ IF (OUNIF) THEN
                       PUNIF_SG2SNOW, PUNIF_HISTSNOW, PUNIF_AGESNOW,       &
                       TPSNOW%NLAYER                                       )
 ELSE IF (HFILETYPE=='GRIB  ') THEN
-  CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)
+  CALL PREP_GRIB_GRID(HFILE,KLUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
+   IF (NRANK==NPIO) CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)        
 ELSE IF (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '.OR. HFILETYPE=='FA    ') THEN
   GSNOW_IDEAL = OSNOW_IDEAL
   CALL PREP_SNOW_EXTERN(&
@@ -172,41 +180,70 @@ END IF
 !
 !*      3.     Horizontal interpolation
 !
-ALLOCATE(ZFIELDOUT(KL,SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)))
-ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,2)))
+IF (NRANK==NPIO) THEN
+  INL = SIZE(ZFIELDIN,2)
+  INP = SIZE(ZFIELDIN,3)
+ELSEIF (.NOT.ASSOCIATED(ZFIELDIN)) THEN
+ ALLOCATE(ZFIELDIN(0,0,0))
+ENDIF
 !
-DO JVEGTYPE = 1, SIZE(ZFIELDIN,3)
-  !* horizontal interpolation
-  ZFIELD=ZFIELDIN(:,:,JVEGTYPE)
-  IF(PRESENT(PVEGTYPE).AND.SIZE(ZFIELDIN,3)==NVEGTYPE) LINTERP(:) = (PVEGTYPE(:,JVEGTYPE) > 0.)
-  IF(PRESENT(PDEPTH)) THEN
-     JPATCH = 1
-     IF (KPATCH>1) JPATCH = VEGTYPE_TO_PATCH(JVEGTYPE,KPATCH)
-     LINTERP(:) = (LINTERP(:).AND.PDEPTH(:,1,JPATCH)>0..AND.PDEPTH(:,1,JPATCH)<XUNDEF)
+IF (NPROC>1) THEN
+#ifndef NOMPI
+  CALL MPI_BCAST(INL,KIND(INL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+  CALL MPI_BCAST(INP,KIND(INP)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
+ENDIF
+!    
+ALLOCATE(ZFIELDOUTP(KL,INL,INP))
+!
+DO JVEGTYPE = 1, INP
+  IF (INP==NVEGTYPE) THEN
+    JPATCH = 1
+    IF (KPATCH>1) JPATCH = VEGTYPE_TO_PATCH(JVEGTYPE,KPATCH)
+    !* does not interpolates snow caracteristics on points without snow
+    IF (PRESENT(PDEPTH)) LINTERP(:) = ( PDEPTH(:,1,JPATCH) /= 0. .AND. PDEPTH(:,1,JPATCH) /= XUNDEF )
+    IF (PRESENT(PPATCH)) LINTERP(:) = (LINTERP(:) .AND. PPATCH(:,JPATCH)>0.)
+  ELSE
+    IF (PRESENT(PDEPTH)) THEN
+      LINTERP(:) = .FALSE.
+      DO JPATCH = 1,KPATCH
+        LINTERP(:) = LINTERP(:) .OR. (PDEPTH(:,1,JPATCH)/=0. .AND. PDEPTH(:,1,JPATCH)/=XUNDEF)
+      ENDDO
+    ENDIF
   ENDIF
-  !
+  !* horizontal interpolation
   CALL HOR_INTERPOL(DTCO, U, &
-                    KLUOUT,ZFIELD,ZFIELDOUT(:,:,JVEGTYPE))
+                    KLUOUT,ZFIELDIN(:,:,JVEGTYPE),ZFIELDOUTP(:,:,JVEGTYPE))
   !
   LINTERP(:) = .TRUE.
 END DO
 !
-DEALLOCATE(ZFIELD)
+DEALLOCATE(ZFIELDIN )
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !*      4.     Transformation from vegtype grid to patch grid, if any
 !
-ALLOCATE(ZW (SIZE(ZFIELDOUT,1),SIZE(ZFIELDOUT,2),KPATCH))
+ALLOCATE(ZW (KL,INL,KPATCH))
 !
 ZW = 0.
-IF (SIZE(ZFIELDOUT,3)==NVEGTYPE.AND.SIZE(PVEGTYPE_PATCH,2)==NVEGTYPE) THEN
-  CALL VEGTYPE_GRID_TO_PATCH_GRID(KPATCH,PVEGTYPE_PATCH,PPATCH,ZFIELDOUT,ZW)
+IF (KPATCH/=INP) THEN
+  !
+  ALLOCATE(ZFIELDOUTV(KL,INL,NVEGTYPE))
+  CALL PUT_ON_ALL_VEGTYPES(KL,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+  !
+  !*      6.     Transformation from vegtype grid to patch grid
+  !
+  CALL VEGTYPE_GRID_TO_PATCH_GRID(KPATCH,PVEGTYPE_PATCH,PPATCH,ZFIELDOUTV,ZW)
+  DEALLOCATE(ZFIELDOUTV)
+  !
 ELSE
-  DO JPATCH=1,KPATCH
-    ZW(:,:,JPATCH) = ZFIELDOUT(:,:,1)
-  END DO
-END IF
+  !
+  ZW(:,:,:) = ZFIELDOUTP(:,:,:)
+  !
+ENDIF
+!
+DEALLOCATE(ZFIELDOUTP)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
@@ -288,7 +325,7 @@ SELECT CASE (HSNSURF(1:3))
       PF(:,:,:) = ZW(:,:,:)
     ELSE
       DO JLAYER=1,SIZE(PF,2)
-        PF(:,JLAYER,:) = ZW(:,JLAYER,:)
+        PF(:,JLAYER,:) = ZW(:,1,:)
       ENDDO
     ENDIF
     !
@@ -306,8 +343,12 @@ SELECT CASE (HSNSURF(1:3))
     !
     IF (GSNOW_IDEAL) THEN
       TPSNOW%RHO(:,:,:) = ZW(:,:,:)
+    ELSEIF(SIZE(ZW,2)==1) THEN
+      DO JLAYER = 1,TPSNOW%NLAYER
+        TPSNOW%RHO(:,JLAYER,:) = ZW(:,1,:)
+      ENDDO      
     ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
-      TPSNOW%RHO(:,:,:) = ZW(:,:,:)      
+      TPSNOW%RHO(:,:,:) = ZW(:,:,:)
     ELSE
       !* interpolation on snow levels
       CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW,ZGRID,TPSNOW%RHO)
@@ -341,6 +382,10 @@ SELECT CASE (HSNSURF(1:3))
       !
       IF (GSNOW_IDEAL) THEN
         TPSNOW%HEAT(:,:,:) = ZW(:,:,:)
+      ELSEIF(SIZE(ZW,2)==1) THEN
+        DO JLAYER = 1,TPSNOW%NLAYER
+          TPSNOW%HEAT(:,JLAYER,:) = ZW(:,1,:)
+        ENDDO        
       ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
         TPSNOW%HEAT(:,:,:) = ZW(:,:,:)
       ELSE
@@ -357,10 +402,14 @@ SELECT CASE (HSNSURF(1:3))
       !
     ELSE IF (TPSNOW%SCHEME=='1-L') THEN
       !* interpolation of heat on snow levels
-      ALLOCATE(ZHEAT(SIZE(ZFIELDOUT,1),TPSNOW%NLAYER,KPATCH))
+      ALLOCATE(ZHEAT(KL,TPSNOW%NLAYER,KPATCH))
       !
       IF (GSNOW_IDEAL) THEN
         ZHEAT(:,:,:) = ZW(:,:,:)
+      ELSEIF(SIZE(ZW,2)==1) THEN
+        DO JLAYER = 1,TPSNOW%NLAYER
+          ZHEAT(:,JLAYER,:) = ZW(:,1,:)
+        ENDDO        
       ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
         ZHEAT(:,:,:) = ZW(:,:,:)
       ELSE
@@ -386,6 +435,10 @@ SELECT CASE (HSNSURF(1:3))
     !
     IF (GSNOW_IDEAL) THEN
       TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
+    ELSEIF(SIZE(ZW,2)==1) THEN
+      DO JLAYER = 1,TPSNOW%NLAYER
+        TPSNOW%GRAN1(:,JLAYER,:) = ZW(:,1,:)
+      ENDDO      
     ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
       TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
     ELSE
@@ -404,6 +457,10 @@ SELECT CASE (HSNSURF(1:3))
     !
     IF (GSNOW_IDEAL) THEN
       TPSNOW%GRAN2(:,:,:) = ZW(:,:,:)
+    ELSEIF(SIZE(ZW,2)==1) THEN
+      DO JLAYER = 1,TPSNOW%NLAYER
+        TPSNOW%GRAN2(:,JLAYER,:) = ZW(:,1,:)
+      ENDDO      
     ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
       TPSNOW%GRAN2(:,:,:) = ZW(:,:,:)
     ELSE
@@ -422,6 +479,10 @@ SELECT CASE (HSNSURF(1:3))
     !
     IF (GSNOW_IDEAL) THEN
       TPSNOW%HIST(:,:,:) = ZW(:,:,:)
+    ELSEIF(SIZE(ZW,2)==1) THEN
+      DO JLAYER = 1,TPSNOW%NLAYER
+        TPSNOW%HIST(:,JLAYER,:) = ZW(:,1,:)
+      ENDDO      
     ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
       TPSNOW%HIST(:,:,:) = ZW(:,:,:)
     ELSE
@@ -443,6 +504,10 @@ SELECT CASE (HSNSURF(1:3))
     ELSE
       IF (GSNOW_IDEAL) THEN
         TPSNOW%AGE(:,:,:) = ZW(:,:,:)
+      ELSEIF(SIZE(ZW,2)==1) THEN
+        DO JLAYER = 1,TPSNOW%NLAYER
+          TPSNOW%AGE(:,JLAYER,:) = ZW(:,1,:)
+        ENDDO        
       ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
         TPSNOW%AGE(:,:,:) = ZW(:,:,:)
       ELSE
@@ -464,8 +529,6 @@ END SELECT
 !
 !*      7.     Deallocations
 !
-DEALLOCATE(ZFIELDIN )
-DEALLOCATE(ZFIELDOUT)
 IF (PRESENT(PDEPTH) .AND. .NOT.GSNOW_IDEAL) DEALLOCATE(ZGRID    )
 DEALLOCATE(ZW       )
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_SNOW_FIELD',1,ZHOOK_HANDLE)
@@ -485,8 +548,9 @@ REAL, DIMENSION(:),     INTENT(IN)  :: PGRID1 ! normalized grid
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PD2    ! output layer thickness
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PT2    ! variable profile
 !
-INTEGER                                  :: JL  ! loop counter
-REAL, DIMENSION(SIZE(PT1,1),SIZE(PT1,2)) :: ZD1 ! input grid
+INTEGER                                  :: JL, JL1  ! loop counter
+REAL, DIMENSION(SIZE(PT1,1),SIZE(PGRID1),SIZE(PT1,3)) :: ZT1
+REAL, DIMENSION(SIZE(PT1,1),SIZE(PGRID1)) :: ZD1 ! input grid
 REAL, DIMENSION(SIZE(PD2,1),SIZE(PD2,2)) :: ZD2 ! output grid
 INTEGER                       :: JPATCH    ! loop on patches
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -500,11 +564,13 @@ DO JPATCH=1,KPATCH
     ZD2(:,JL) = PD2(:,JL,JPATCH)
   END DO
   !
-  DO JL=1,SIZE(PT1,2)
+  DO JL=1,SIZE(PGRID1)
+    JL1 = MIN(JL,SIZE(PT1,2))
+    ZT1(:,JL,:) = PT1(:,JL1,:)
     ZD1(:,JL) = PGRID1(JL)
   END DO
   !
-  CALL INTERP_GRID_NAT(ZD1,PT1(:,:,JPATCH),ZD2,PT2(:,:,JPATCH))
+  CALL INTERP_GRID_NAT(ZD1,ZT1(:,:,JPATCH),ZD2,PT2(:,:,JPATCH))
 END DO
 IF (LHOOK) CALL DR_HOOK('INIT_FROM_REF_GRID',1,ZHOOK_HANDLE)
 !

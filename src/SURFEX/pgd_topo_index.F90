@@ -45,13 +45,15 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
+!
 USE MODD_PGD_GRID,       ONLY : NL
 !
 !
-USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, &
+USE MODD_PGDWORK,        ONLY : X2D_ALL, XEXTVAL2, NSIZE_ALL, &
                                 XMIN_WORK, XMAX_WORK,     &
                                 XMEAN_WORK, XSTD_WORK,    &
-                                XSKEW_WORK, XSUMVAL3  
+                                XSKEW_WORK, NSIZE, XSUMVAL2 
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -246,15 +248,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !*    6.      Use of cti file
 !             ---------------
 !
-     ALLOCATE(NSIZE   (IFULL))
-     ALLOCATE(XSUMVAL (IFULL))
-     ALLOCATE(XSUMVAL2(IFULL))
-     ALLOCATE(XSUMVAL3(IFULL))
+     ALLOCATE(NSIZE_ALL   (U%NDIM_FULL))
+     ALLOCATE(X2D_ALL (U%NDIM_FULL,3))
+     ALLOCATE(XEXTVAL2 (U%NDIM_FULL,2))
 !
-     NSIZE    (:) = 0.
-     XSUMVAL  (:) = 0.
-     XSUMVAL2 (:) = 0.
-     XSUMVAL3 (:) = 0.
+     NSIZE_ALL  (:) = 0.
+     X2D_ALL  (:,:) = 0.
+     XEXTVAL2 (:,1) = -99999.
+     XEXTVAL2 (:,2) = 99999.
 !
      XMAX_WORK(:) =-99999.
 !
@@ -415,9 +416,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,ILUOUT,NSIZE,XSKEW_WORK(:),'TI_SKEW',PDEF=XUNDEF,KNPTS=1)
 !
     DEALLOCATE(NSIZE     )
-    DEALLOCATE(XSUMVAL   )
     DEALLOCATE(XSUMVAL2  )
-    DEALLOCATE(XSUMVAL3  )
     DEALLOCATE(ZLAT      )
 !
   ENDIF

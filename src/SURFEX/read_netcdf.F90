@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_NETCDF (USS, &
+      SUBROUTINE READ_NETCDF (UG, U, USS, &
                               HPROGRAM,HSUBROUTINE,HFILENAME,HNCVARNAME)
 !     ##############################################################
 !
@@ -25,7 +25,8 @@
 !            -----------
 !
 !
-!
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
@@ -44,6 +45,8 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
@@ -111,7 +114,7 @@ DO JLOOP=1,SIZE(ZVALU)
 !*    5.     Call to the adequate subroutine (point by point treatment)
 !            ----------------------------------------------------------
 ! 
-  CALL PT_BY_PT_TREATMENT(USS, &
+  CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                           ILUOUT,  (/ ZLAT /) , (/ ZLON /) , (/ ZVALUE /) , &
                             HSUBROUTINE                                       )  
 !

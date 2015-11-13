@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE GRID_FROM_FILE (&
-                                 HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL)
+      SUBROUTINE GRID_FROM_FILE (HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -35,8 +34,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-!
-!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK
 !
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_READ_GRIDTYPE
@@ -65,6 +63,7 @@ LOGICAL,           INTENT(IN)   :: OGRID      ! .true. if grid is imposed by atm
 INTEGER,           INTENT(OUT)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 INTEGER,           INTENT(OUT)  :: KL         ! number of points on processor
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR
 !
 !
 !*    0.2    Declaration of local variables
@@ -99,8 +98,11 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !*       3.    Number of points in this file
 !              -----------------------------
 !
- CALL READ_SURF(&
-                HFILETYPE,'DIM_FULL  ',KL,IRESP)
+IF (HDIR/='H') THEN
+  CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP)
+ELSE
+  KL = NSIZE_TASK(NRANK)
+ENDIF
 !
 !---------------------------------------------------------------------------
 !
@@ -108,7 +110,7 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !              ---------
 !
  CALL READ_SURF(&
-                HFILETYPE,'GRID_TYPE',HGRID,IRESP)
+                HFILETYPE,'GRID_TYPE',HGRID,IRESP,HDIR='-')
 !
 !---------------------------------------------------------------------------
 !
@@ -116,11 +118,11 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !              ------------------------------
 !
  CALL READ_GRIDTYPE(&
-                    HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR='A')
+                    HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR=HDIR)
 !
 ALLOCATE(PGRID_PAR(KGRID_PAR))
  CALL READ_GRIDTYPE(&
-                    HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR='A')
+                    HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR=HDIR)
 !
 !---------------------------------------------------------------------------
 !

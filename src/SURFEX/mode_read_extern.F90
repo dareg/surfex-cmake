@@ -26,7 +26,8 @@ CONTAINS
 !     #######################
       SUBROUTINE READ_EXTERN_DEPTH (U, &
                                      DTCO, I, &
-                                    HFILE,HPROGRAM,KLUOUT,HISBA,HNAT,HFIELD,KNI,KLAYER, &
+                                    HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
+                                    KLUOUT,HISBA,HNAT,HFIELD,KNI,KLAYER, &
                                    KPATCH,PSOILGRID,PDEPTH,KVERSION,KWG_LAYER          )
 !     #######################
 !
@@ -41,6 +42,10 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
+!
+USE MODI_OPEN_AUX_IO_SURF
+USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_READ_SURF_ISBA_PAR_n
 USE MODI_CONVERT_COVER_ISBA
 USE MODI_GARDEN_SOIL_DEPTH
@@ -61,8 +66,10 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=28),  INTENT(IN)      :: HFILE     ! name of file!
-CHARACTER(LEN=6),     INTENT(IN)    :: HPROGRAM  ! type of input file
+ CHARACTER(LEN=28),    INTENT(IN)    :: HFILE  ! type of input file
+ CHARACTER(LEN=6),     INTENT(IN)    :: HFILETYPE  ! type of input file
+ CHARACTER(LEN=28),    INTENT(IN)    :: HFILEPGD  ! type of input file
+ CHARACTER(LEN=6),     INTENT(IN)    :: HFILEPGDTYPE  ! type of input file
 INTEGER,              INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 CHARACTER(LEN=3),     INTENT(IN)    :: HISBA     ! type of ISBA soil scheme
 CHARACTER(LEN=3),     INTENT(IN)    :: HNAT      ! type of surface (nature, gardens)
@@ -78,34 +85,36 @@ INTEGER, DIMENSION(:,:), INTENT(OUT):: KWG_LAYER
 !* local variables
 !  ---------------
 !
-CHARACTER(LEN=4 ) :: YLVL
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=16) :: YRECFM2
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=16) :: YRECFM2
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=6) :: YSURF
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: JLAYER         ! loop counter
 INTEGER           :: JPATCH         ! loop counter
-INTEGER           :: JJ
+INTEGER           :: JJ, JI
 INTEGER           :: IVERSION
 INTEGER           :: IBUGFIX
 !
 LOGICAL, DIMENSION(JPCOVER)          :: GCOVER ! flag to read the covers
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZCOVER ! cover fractions
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZGROUND_DEPTH ! cover fractions
-REAL,  DIMENSION(:,:),   ALLOCATABLE :: ZWORK  ! work array
-INTEGER, DIMENSION(:), ALLOCATABLE   :: ZSOILGRID
+REAL, DIMENSION(:), ALLOCATABLE   :: ZSOILGRID
 REAL,  DIMENSION(KNI)                :: ZHVEG  ! high vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZLVEG  ! low  vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZNVEG  ! no   vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZPERM  ! permafrost distribution
-CHARACTER(LEN=4)                     :: YHVEG  ! type of high vegetation
-CHARACTER(LEN=4)                     :: YLVEG  ! type of low  vegetation
-CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
+ CHARACTER(LEN=4)                     :: YHVEG  ! type of high vegetation
+ CHARACTER(LEN=4)                     :: YLVEG  ! type of low  vegetation
+ CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
 LOGICAL                              :: GECOCLIMAP ! T if ecoclimap is used
 LOGICAL                              :: GPAR_GARDEN! T if garden data are used
 LOGICAL                              :: GDATA_DG
 LOGICAL                              :: GDATA_GROUND_DEPTH, GDATA_ROOT_DEPTH
 LOGICAL                              :: GPERM
+LOGICAL                              :: GREAD_EXT
+LOGICAL      :: GREAD_OK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -113,95 +122,39 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_DEPTH',0,ZHOOK_HANDLE)
 !
-CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'FULL  ')
-YRECFM='VERSION'
-CALL READ_SURF(&
-               HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+
+ YRECFM='VERSION'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP,HDIR='-')
+!
 YRECFM='BUG'
-CALL READ_SURF(&
-               HPROGRAM,YRECFM,IBUGFIX,IRESP)
-CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP,HDIR='-')
 !
 IF (HNAT=='NAT') THEN
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'FULL  ')
-  CALL READ_LECOCLIMAP(&
-                       HPROGRAM,GECOCLIMAP)
-  CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
+  CALL READ_LECOCLIMAP(HFILEPGDTYPE,GECOCLIMAP,HDIR='-')
+  YSURF = "NATURE"
 ELSE
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'TOWN  ')
-  CALL READ_SURF(&
-               HPROGRAM,'PAR_GARDEN',GPAR_GARDEN,IRESP)
-  CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
+  CALL READ_SURF(HFILEPGDTYPE,'PAR_GARDEN',GPAR_GARDEN,IRESP,HDIR='-')
   GECOCLIMAP = .NOT. GPAR_GARDEN
+  YSURF = "TOWN  "
 END IF
 !
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+!
 !------------------------------------------------------------------------------
-!
-!* permafrost distribution for soil depth
-!
-GPERM   =.FALSE.
-ZPERM(:)=0.0
-!
-IF (HNAT=='NAT'.AND.(IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>3)))THEN
-   CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'NATURE')
-   YRECFM='PERMAFROST'
-   CALL READ_SURF(&
-               HPROGRAM,YRECFM,GPERM,IRESP)
-   IF(GPERM)THEN
-     YRECFM='PERM'
-     CALL READ_SURF(&
-               HPROGRAM,YRECFM,ZPERM(:),IRESP,HDIR='A')           
-   ENDIF
-   CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
-ENDIF
 !
 ALLOCATE(PDEPTH(KNI,KLAYER,KPATCH))
 PDEPTH(:,:,:) = XUNDEF
 !
 KWG_LAYER(:,:) = NUNDEF
 !
-IF (GECOCLIMAP) THEN
-  !
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'FULL  ')
-  !
-  !* reading of the cover to obtain the depth of inter-layers
-  !
-  CALL OLD_NAME(&
-                HPROGRAM,'COVER_LIST      ',YRECFM)
-  CALL READ_SURF(&
-               HPROGRAM,YRECFM,GCOVER(:),IRESP,HDIR='-')
-  !
-  ALLOCATE(ZCOVER(KNI,COUNT(GCOVER)))
-  YRECFM='COVER'
-  CALL READ_SURF_COV(&
-                     HPROGRAM,YRECFM,ZCOVER(:,:),GCOVER(:),IRESP,HDIR='A')
-  !
-  !* computes soil layers
-  !  
-  CALL CONVERT_COVER_ISBA(DTCO, I, &
-                          HISBA,1,ZCOVER,GCOVER,'   ',HNAT,PSOILGRID=PSOILGRID, &
-                          PPERM=ZPERM,PDG=PDEPTH,KWG_LAYER=KWG_LAYER             )
-  !
-  DEALLOCATE(ZCOVER)
-  !
-  CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
-  !
-ENDIF
-!
-IF (HNAT=='GRD') THEN
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'TOWN  ')
-ELSE
-  CALL OPEN_AUX_IO_SURF(&
-                      HFILE,HPROGRAM,'NATURE')
-ENDIF
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,YSURF)
 !
 !-------------------------------------------------------------------
+!
+GREAD_OK = .FALSE.
+!
 IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
   !
   !* directly read soil layers in the file for nature ISBA soil layers
@@ -210,23 +163,18 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
   IF (IVERSION>=7) THEN
     YRECFM='L_DG'
     YCOMMENT=YRECFM
-    CALL READ_SURF(&
-               HPROGRAM,YRECFM,GDATA_DG,IRESP,HCOMMENT=YCOMMENT)
+    CALL READ_SURF(HFILEPGDTYPE,YRECFM,GDATA_DG,IRESP,HCOMMENT=YCOMMENT,HDIR='-')
   ENDIF
   !
   IF (GDATA_DG) THEN
     !
-    ALLOCATE(ZWORK(KNI,KPATCH))
     DO JLAYER=1,KLAYER
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A4,I1.1)') 'D_DG',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A4,I2.2)') 'D_DG',JLAYER
       CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
-                                HPROGRAM,YRECFM,KLUOUT,KNI,ZWORK,IRESP,IVERSION,HDIR='A')
-      DO JPATCH=1,KPATCH
-        PDEPTH(:,JLAYER,JPATCH) = ZWORK(:,JPATCH)
-      END DO
+                                HFILEPGDTYPE,YRECFM,KLUOUT,KNI,PDEPTH(:,JLAYER,:),IRESP,IVERSION,HDIR='E')
     END DO
-    DEALLOCATE(ZWORK)
+    GREAD_OK = .TRUE.
     !
   ENDIF
   !
@@ -238,12 +186,12 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       !
       YRECFM2='L_ROOT_DEPTH'
       YCOMMENT=YRECFM2
-      CALL READ_SURF(HPROGRAM,YRECFM2,GDATA_ROOT_DEPTH,IRESP,HCOMMENT=YCOMMENT)
+      CALL READ_SURF(HFILEPGDTYPE,YRECFM2,GDATA_ROOT_DEPTH,IRESP,HCOMMENT=YCOMMENT,HDIR='-')
       !
       IF (GDATA_ROOT_DEPTH) THEN
         YRECFM2='D_ROOT_DEPTH'
         CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
-                                  HPROGRAM,YRECFM2,KLUOUT,KNI,PDEPTH(:,2,:),IRESP,IVERSION,HDIR='A')
+                                  HFILEPGDTYPE,YRECFM2,KLUOUT,KNI,PDEPTH(:,2,:),IRESP,IVERSION,HDIR='E')
       ENDIF
       !
     ENDIF
@@ -252,7 +200,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='L_GROUND_DPT'
     YCOMMENT=YRECFM2
     CALL READ_SURF(&
-               HPROGRAM,YRECFM2,GDATA_GROUND_DEPTH,IRESP,HCOMMENT=YCOMMENT)
+               HFILEPGDTYPE,YRECFM2,GDATA_GROUND_DEPTH,IRESP,HCOMMENT=YCOMMENT,HDIR='-')
     !
     IF (GDATA_GROUND_DEPTH) THEN
       !
@@ -260,7 +208,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='D_GROUND_DPT'
       ALLOCATE(ZGROUND_DEPTH(KNI,KPATCH))
       CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
-                                HPROGRAM,YRECFM2,KLUOUT,KNI,ZGROUND_DEPTH(:,:),IRESP,IVERSION,HDIR='A')
+                                HFILEPGDTYPE,YRECFM2,KLUOUT,KNI,ZGROUND_DEPTH(:,:),IRESP,IVERSION,HDIR='E')
       !
       IF (.NOT.GDATA_DG) THEN
         !
@@ -269,12 +217,14 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
           PDEPTH(:,2,:) = ZGROUND_DEPTH(:,:)
           PDEPTH(:,1,:) = XUNDEF
           WHERE (ZGROUND_DEPTH(:,:)/=XUNDEF) PDEPTH(:,1,:) = 0.01
+          GREAD_OK = .TRUE.
           !
         ELSEIF (HISBA=="3-L") THEN
           !
           PDEPTH(:,3,:) = ZGROUND_DEPTH(:,:)
           PDEPTH(:,1,:) = XUNDEF
           WHERE (ZGROUND_DEPTH(:,:)/=XUNDEF) PDEPTH(:,1,:) = 0.01
+          IF (GDATA_ROOT_DEPTH) GREAD_OK = .TRUE.
           !
         ELSEIF (HISBA=="DIF") THEN
           !
@@ -282,10 +232,11 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
           DO JLAYER=1,KLAYER
             WRITE(YLVL,'(I4)') JLAYER
             YRECFM2='SOILGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-            CALL READ_SURF(HPROGRAM,YRECFM,ZSOILGRID(JLAYER),IRESP)
+            CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZSOILGRID(JLAYER),IRESP)
             PDEPTH(:,JLAYER,:) = ZSOILGRID(JLAYER)
           ENDDO
           DEALLOCATE(ZSOILGRID)
+          GREAD_OK = .TRUE.
           !
         ENDIF
       ENDIF
@@ -304,28 +255,93 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
     !
   ENDIF
   !
-ELSE IF (HNAT=='GRD' .AND. .NOT.GECOCLIMAP) THEN
+ELSE IF (HNAT=='GRD' .AND. .NOT.GECOCLIMAP ) THEN
   !
   !* computes soil layers from vegetation fractions read in the file
   !
   CALL READ_SURF(&
-               HPROGRAM,'D_TYPE_HVEG',YHVEG,IRESP)
+               HFILEPGDTYPE,'D_TYPE_HVEG',YHVEG,IRESP,HDIR='E')
   CALL READ_SURF(&
-               HPROGRAM,'D_TYPE_LVEG',YLVEG,IRESP)
+               HFILEPGDTYPE,'D_TYPE_LVEG',YLVEG,IRESP,HDIR='E')
   CALL READ_SURF(&
-               HPROGRAM,'D_TYPE_NVEG',YNVEG,IRESP)
+               HFILEPGDTYPE,'D_TYPE_NVEG',YNVEG,IRESP,HDIR='E')
   CALL READ_SURF(&
-               HPROGRAM,'D_FRAC_HVEG',ZHVEG,IRESP,HDIR='A')
+               HFILEPGDTYPE,'D_FRAC_HVEG',ZHVEG,IRESP,HDIR='E')
   CALL READ_SURF(&
-               HPROGRAM,'D_FRAC_LVEG',ZLVEG,IRESP,HDIR='A')
+               HFILEPGDTYPE,'D_FRAC_LVEG',ZLVEG,IRESP,HDIR='E')
   CALL READ_SURF(&
-               HPROGRAM,'D_FRAC_NVEG',ZNVEG,IRESP,HDIR='A')
+               HFILEPGDTYPE,'D_FRAC_NVEG',ZNVEG,IRESP,HDIR='E')
   ! Ground layers
   CALL GARDEN_SOIL_DEPTH(YNVEG,YLVEG,YHVEG,ZNVEG,ZLVEG,ZHVEG,PDEPTH)
   !
 END IF
 !
-CALL CLOSE_AUX_IO_SURF(HFILE,HPROGRAM)
+CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+!
+IF (GECOCLIMAP .AND. .NOT.GREAD_OK ) THEN
+  !
+  IF (IVERSION>=8) THEN
+    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')   
+    CALL READ_SURF(HFILETYPE,'WRITE_EXT  ',GREAD_EXT,IRESP,HDIR='-')
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+  ELSE
+    GREAD_EXT = .FALSE.
+  ENDIF
+  !  
+  IF (GREAD_EXT) THEN
+    !
+    CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YSURF)
+    DO JLAYER=1,KLAYER
+      WRITE(YLVL,'(I4)') JLAYER
+      YRECFM='DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      CALL READ_SURF(HFILETYPE,YRECFM,PDEPTH(:,JLAYER,:),IRESP,HDIR='E')      
+    END DO     
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    !
+  ELSE
+    !
+    CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+    !
+    !* reading of the cover to obtain the depth of inter-layers
+    !
+    CALL OLD_NAME(HFILEPGDTYPE,'COVER_LIST      ',YRECFM,HDIR='-')
+    CALL READ_SURF(HFILEPGDTYPE,YRECFM,GCOVER(:),IRESP,HDIR='-')
+    !
+    ALLOCATE(ZCOVER(KNI,COUNT(GCOVER)))
+    YRECFM='COVER'
+    CALL READ_SURF_COV(HFILEPGDTYPE,YRECFM,ZCOVER(:,:),GCOVER(:),IRESP,HDIR='E')
+    !
+    CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE) 
+    !* computes soil layers
+    !
+    !* permafrost distribution for soil depth
+    !
+    GPERM   =.FALSE.
+    ZPERM(:)=0.0
+    !
+    IF (HNAT=='NAT'.AND.(IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>3)))THEN
+      CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'NATURE')        
+      YRECFM='PERMAFROST'
+      CALL READ_SURF(HFILEPGDTYPE,YRECFM,GPERM,IRESP,HDIR='-')
+      IF(GPERM)THEN
+        YRECFM='PERM'
+        CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZPERM(:),IRESP,HDIR='E')           
+      ENDIF
+      CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+    ENDIF
+    !
+    IF (NRANK==NPIO) THEN
+      CALL CONVERT_COVER_ISBA(DTCO, I, &
+                              HISBA,1,ZCOVER,GCOVER,'   ',HNAT,PSOILGRID=PSOILGRID, &
+                              PPERM=ZPERM,PDG=PDEPTH,KWG_LAYER=KWG_LAYER             )
+    ENDIF
+    !
+    DEALLOCATE(ZCOVER)
+    !
+  ENDIF
+  !
+ENDIF
+!
 !-------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_DEPTH',1,ZHOOK_HANDLE)
@@ -345,16 +361,12 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !     #######################
 !
 !
-!
-!
-!
-!
-!
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 !
 USE MODE_SOIL
@@ -394,7 +406,7 @@ LOGICAL, OPTIONAL,  INTENT(INOUT) :: OKEY
  CHARACTER(LEN=3)  :: YNAT           ! type of surface (nature, garden)
  CHARACTER(LEN=4)  :: YPEDOTF        ! type of pedo-transfert function
 INTEGER           :: IRESP          ! reading return code
-INTEGER           :: ILAYER         ! number of layers
+INTEGER           :: ILAYER, ILAYER_SAVE         ! number of layers
 INTEGER           :: JLAYER         ! loop counter
 INTEGER           :: IPATCH         ! number of patch
 INTEGER           :: JPATCH         ! loop counter
@@ -403,9 +415,6 @@ LOGICAL           :: GTEB           ! TEB field
 INTEGER           :: IWORK          ! work integer
 INTEGER           :: JI
 !
-REAL,  DIMENSION(:,:),   ALLOCATABLE :: ZWORK  ! field read, one level, all patches
-!
-REAL,  DIMENSION(:,:,:), ALLOCATABLE :: ZVAR      ! profile of physical variable
 REAL,  DIMENSION(:),   ALLOCATABLE   :: ZCLAY     ! clay fraction
 REAL,  DIMENSION(:),   ALLOCATABLE   :: ZSAND     ! sand fraction
 REAL,  DIMENSION(:),   ALLOCATABLE   :: ZSOILGRID
@@ -457,10 +466,10 @@ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 YRECFM='VERSION'
 CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+               HFILEPGDTYPE,YRECFM,IVERSION,IRESP,HDIR='-')
 YRECFM='BUG'
 CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP)
+               HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP,HDIR='-')
 CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 IF (GTEB) THEN
@@ -479,7 +488,7 @@ IF (GTEB) THEN
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_LAYER'
 ENDIF
 CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ILAYER,IRESP)
+               HFILEPGDTYPE,YRECFM,ILAYER,IRESP,HDIR='-')
 !
 !* number of tiles
 !
@@ -487,7 +496,7 @@ IPATCH=1
 IF (.NOT. GTEB) THEN
   YRECFM='PATCH_NUMBER'
   CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
+               HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
 END IF
 !
 !* soil scheme
@@ -498,7 +507,7 @@ IF (GTEB) THEN
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_ISBA'
 ENDIF
 CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,YISBA,IRESP)
+               HFILEPGDTYPE,YRECFM,YISBA,IRESP,HDIR='-')
 IF(YISBA=='DIF'.AND.PRESENT(OKEY))THEN
   OKEY=.FALSE.
 ENDIF
@@ -513,7 +522,7 @@ IF (IVERSION>=7) THEN
     IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_PEDOTF'
   ENDIF
   CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,YPEDOTF,IRESP)
+               HFILEPGDTYPE,YRECFM,YPEDOTF,IRESP,HDIR='-')
   !
 ELSE
   YPEDOTF = 'CH78'
@@ -536,7 +545,7 @@ IF (GTEB) THEN
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_CLAY'
 ENDIF
  CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ZCLAY(:),IRESP,HDIR='A')
+               HFILEPGDTYPE,YRECFM,ZCLAY(:),IRESP,HDIR='E')
 !
 !-------------------------------------------------------------------------------
 !
@@ -550,7 +559,7 @@ IF (GTEB) THEN
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_SAND'
 ENDIF
  CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ZSAND(:),IRESP,HDIR='A')
+               HFILEPGDTYPE,YRECFM,ZSAND(:),IRESP,HDIR='E')
 !
 !-------------------------------------------------------------------------------
 !
@@ -566,10 +575,10 @@ IF ( (.NOT.GTEB).AND.(IVERSION>7.OR.(IVERSION==7.AND.IBUGFIX>3)) &
    IF(GSOC_DATA)THEN
      YRECFM='SOC_TOP'
      CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ZSOC(:,1),IRESP,HDIR='A')
+               HFILEPGDTYPE,YRECFM,ZSOC(:,1),IRESP,HDIR='E')
      YRECFM='SOC_SUB'
      CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ZSOC(:,2),IRESP,HDIR='A')
+               HFILEPGDTYPE,YRECFM,ZSOC(:,2),IRESP,HDIR='E')
      WHERE(ZSOC(:,:)==XUNDEF)ZSOC(:,:)=0.0
    ENDIF
 ENDIF
@@ -592,7 +601,7 @@ IF(YISBA=='DIF') THEN
            YRECFM='GD_SGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
         ENDIF
         CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ZSOILGRID(JLAYER),IRESP)
+               HFILEPGDTYPE,YRECFM,ZSOILGRID(JLAYER),IRESP,HDIR='A')
      ENDDO
   ELSEIF (IVERSION==7 .AND. IBUGFIX>=2) THEN
     YRECFM='SOILGRID'
@@ -601,7 +610,7 @@ IF(YISBA=='DIF') THEN
       IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM='GD_SOILGRID'
     ENDIF
     CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ZSOILGRID,IRESP,HDIR='-')
+               HFILEPGDTYPE,YRECFM,ZSOILGRID,IRESP,HDIR='A')
   ELSE
     ZSOILGRID(1:ILAYER) = XOPTIMGRID(1:ILAYER)
   ENDIF
@@ -618,9 +627,9 @@ IWG_LAYER(:,:) = NUNDEF
 ALLOCATE(ZNAT(KNI))
 IF (IVERSION>=7) THEN
   IF (GTEB) THEN
-    CALL READ_SURF(HFILEPGDTYPE,'FRAC_TOWN',ZNAT,IRESP,HDIR='A')
+    CALL READ_SURF(HFILEPGDTYPE,'FRAC_TOWN',ZNAT,IRESP,HDIR='E')
   ELSE
-    CALL READ_SURF(HFILEPGDTYPE,'FRAC_NATURE',ZNAT,IRESP,HDIR='A')
+    CALL READ_SURF(HFILEPGDTYPE,'FRAC_NATURE',ZNAT,IRESP,HDIR='E')
   ENDIF
 ELSE
   ZNAT=1.0
@@ -634,12 +643,12 @@ IF (.NOT.GTEB .AND. HFIELD=='TG    ' .AND. (YISBA=='2-L' .OR. YISBA=='3-L') ) TH
       CALL OPEN_AUX_IO_SURF(&
                       HFILE,HFILETYPE,'NATURE')
       CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,GTEMP_ARP,IRESP)
+               HFILEPGDTYPE,YRECFM,GTEMP_ARP,IRESP,HDIR='-')
    ENDIF
    IF(GTEMP_ARP)THEN
       YRECFM = 'NTEMPLARP'
       CALL READ_SURF(&
-               HFILEPGDTYPE,YRECFM,ILAYER,IRESP)     
+               HFILEPGDTYPE,YRECFM,ILAYER,IRESP,HDIR='-')     
       CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
    ENDIF
 ENDIF  
@@ -663,21 +672,13 @@ ELSE
   IF (GTEB) YNAT='GRD'
   CALL READ_EXTERN_DEPTH(U, &
                          DTCO, I, &
-                         HFILEPGD,HFILEPGDTYPE,KLUOUT,YISBA,YNAT,HFIELD,KNI,  &
+                         HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
+                         KLUOUT,YISBA,YNAT,HFIELD,KNI,  &
                          ILAYER,IPATCH,ZSOILGRID,PDEPTH,IVERSION,IWG_LAYER)
 END IF
 !
 DEALLOCATE(ZSOILGRID)
 !
-!
-!* Allocate soil variable profile
-!  ------------------------------
-!
-!
-ALLOCATE(ZVAR(KNI,ILAYER,IPATCH))
-ALLOCATE(ZWORK(KNI,IPATCH))
-ZWORK(:,:  ) = XUNDEF
-ZVAR (:,:,:) = 0.0
 !
 ! *.  Read soil variable profile
 !     --------------------------
@@ -704,14 +705,15 @@ IF(YISBA=='2-L'.OR.YISBA=='3-L') THEN
   END SELECT
 ENDIF
 !
+ALLOCATE(PFIELD(KNI,ILAYER,IPATCH))
+!
 DO JLAYER=1,IWORK
   WRITE(YLVL,'(I4)') JLAYER
   YRECFM=TRIM(HNAME)//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL READ_SURF(&
-               HFILETYPE,YRECFM,ZWORK(:,:),IRESP,HDIR='A')
+               HFILETYPE,YRECFM,PFIELD(:,JLAYER,:),IRESP,HDIR='E')
   DO JPATCH=1,IPATCH
-    WHERE (ZNAT(:)==0.) ZWORK(:,JPATCH) = XUNDEF
-    ZVAR(:,JLAYER,JPATCH)=ZWORK(:,JPATCH)
+    WHERE (ZNAT(:)==0.) PFIELD(:,JLAYER,JPATCH) = XUNDEF
   END DO
 END DO
 !
@@ -720,23 +722,17 @@ DEALLOCATE (ZNAT)
 IF(YISBA=='3-L') THEN
   SELECT CASE(HFIELD)
          CASE('TG    ')
-         IF(.NOT.GTEMP_ARP)ZVAR(:,3,:)=ZVAR(:,2,:)
+         IF(.NOT.GTEMP_ARP)PFIELD(:,3,:)=PFIELD(:,2,:)
          CASE('WGI   ')       
-         ZVAR(:,3,:)=ZVAR(:,2,:)
+         PFIELD(:,3,:)=PFIELD(:,2,:)
   END SELECT
 ENDIF
 !
  CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
-DEALLOCATE(ZWORK)
-!
 !
 ! *.  Compute relative humidity from units kg/m^2 (SWI)
 !     ------------------------------------------------
-!
-ALLOCATE(PFIELD(KNI,ILAYER,IPATCH))
-!
-PFIELD(:,:,:) = ZVAR(:,:,:)
 !
 IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
   !
@@ -770,10 +766,10 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
                       HFILE,HFILETYPE,'NATURE')
     YRECFM='SOC'
     CALL READ_SURF(&
-               HFILETYPE,YRECFM,GSOC,IRESP)
+               HFILETYPE,YRECFM,GSOC,IRESP,HDIR='-')
     YRECFM='PATCH'
     CALL READ_SURF(&
-               HFILETYPE,YRECFM,ZPATCH(:,:),IRESP,HDIR='A')
+               HFILETYPE,YRECFM,ZPATCH(:,:),IRESP,HDIR='E')
     WHERE(ZPATCH(:,:)==XUNDEF)ZPATCH(:,:)=0.0
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)    
     !
@@ -824,7 +820,7 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
          IWORK=IWG_LAYER(JI,JPATCH)
          IF(IWORK<ILAYER)THEN
            DO JLAYER=IWORK+1,ILAYER
-              ZVAR(JI,JLAYER,JPATCH)=ZVAR(JI,IWORK,JPATCH)
+              PFIELD(JI,JLAYER,JPATCH)=PFIELD(JI,IWORK,JPATCH)
            ENDDO
          ENDIF
       ENDDO
@@ -835,10 +831,10 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
     DO JPATCH=1,IPATCH
       DO JLAYER=1,ILAYER
        DO JI=1,KNI
-       IF(ZVAR(JI,JLAYER,JPATCH)/=XUNDEF)THEN
-          ZVAR(JI,JLAYER,JPATCH) = MAX(MIN(ZVAR(JI,JLAYER,JPATCH),ZWSAT(JI,JLAYER)),0.)
+       IF(PFIELD(JI,JLAYER,JPATCH)/=XUNDEF)THEN
+          PFIELD(JI,JLAYER,JPATCH) = MAX(MIN(PFIELD(JI,JLAYER,JPATCH),ZWSAT(JI,JLAYER)),0.)
           !
-          PFIELD(JI,JLAYER,JPATCH) = (ZVAR(JI,JLAYER,JPATCH) - ZWWILT(JI,JLAYER)) / (ZWFC(JI,JLAYER) - ZWWILT(JI,JLAYER))
+          PFIELD(JI,JLAYER,JPATCH) = (PFIELD(JI,JLAYER,JPATCH) - ZWWILT(JI,JLAYER)) / (ZWFC(JI,JLAYER) - ZWWILT(JI,JLAYER))
         ENDIF
       END DO
       END DO
@@ -846,8 +842,8 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
   ELSE IF (HFIELD=='WGI   ') THEN
     DO JPATCH=1,IPATCH
       DO JLAYER=1,ILAYER
-        WHERE(ZVAR(:,JLAYER,JPATCH)/=XUNDEF)
-          PFIELD(:,JLAYER,JPATCH) = ZVAR(:,JLAYER,JPATCH) / ZWSAT(:,JLAYER) 
+        WHERE(PFIELD(:,JLAYER,JPATCH)/=XUNDEF)
+          PFIELD(:,JLAYER,JPATCH) = PFIELD(:,JLAYER,JPATCH) / ZWSAT(:,JLAYER) 
         END WHERE
       END DO
     END DO
@@ -859,7 +855,6 @@ IF (HFIELD=='WG    ' .OR. HFIELD=='WGI   ') THEN
 !
 END IF
 !
-DEALLOCATE(ZVAR)
 DEALLOCATE(IWG_LAYER)
 !-------------------------------------------------------------------------------
 !

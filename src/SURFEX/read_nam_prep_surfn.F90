@@ -40,6 +40,7 @@ CFILE     = '                         '
 CFILETYPE = '      '
 CFILEPGD     = '                         '
 CFILEPGDTYPE = '      '
+LWRITE_EXTERN = .FALSE.
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !

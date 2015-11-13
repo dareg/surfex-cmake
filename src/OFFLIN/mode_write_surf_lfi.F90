@@ -299,7 +299,7 @@ DOUBLE PRECISION         :: XTIME0
 REAL                     :: ZUNDEF  ! default value
 REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD)))   :: ZWORK   ! work array read in the file
 REAL, DIMENSION(NIU,NJU) :: ZWORK2D ! work array read in a MNH file
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX1_LFI',0,ZHOOK_HANDLE)
 !
@@ -336,12 +336,20 @@ IF (NRANK==NPIO) THEN
       CALL ERROR_WRITE_SURF_LFI(HREC,NWORKB)
     ELSE
       !
-      ZWORK2D(:,:) = ZUNDEF
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)  
+!$OMP DO PRIVATE(JJ,JI)
       DO JJ=1,NJE-NJB+1
         DO JI=1,NIE-NIB+1
           ZWORK2D(NIB+JI-1,NJB+JJ-1) = ZWORK(JI+(NIE-NIB+1)*(JJ-1))
         END DO
       END DO
+!$OMP END DO
+!$OMP END PARALLEL      
+      !
+      ZWORK2D(1:NIB-1,:) = ZUNDEF
+      ZWORK2D(:,NJE+1:NJU) = ZUNDEF
+      ZWORK2D(:,1:NJB-1) = ZUNDEF
+      ZWORK2D(NIE+1:NIU,:) = ZUNDEF      
       !
       IF     (HREC=='DX              ' .OR. HREC=='XX              ') THEN
         YREC = 'XHAT'
