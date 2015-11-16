@@ -14,7 +14,8 @@ CONTAINS
 !
 !
 !
-USE MODD_SURFEX_MPI, ONLY : NPROC, NPIO, NRANK, IDX_R, NREQ, NCOMM, NSIZE, NINDEX
+USE MODD_SURFEX_MPI, ONLY : NPROC, NPIO, NRANK, IDX_R, NREQ, NCOMM, NSIZE, NINDEX, &
+                            NDIM_FULL_INIT
 USE MODD_SURFEX_OMP, ONLY : NINDX1SFX, NINDX2SFX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -46,7 +47,7 @@ USE PARKIND1 ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -66,7 +67,7 @@ INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem 
 !                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
 #endif
 INTEGER, DIMENSION(NPROC) :: ITREQ
@@ -95,8 +96,6 @@ IF (PRESENT(HDIR)) YDIR = HDIR
 IL1 = SIZE(PFIELD,1)
 IL2 = SIZE(PFIELD,2)
 !
-PFIELD(:,:)=XUNDEF
-!
 IF (HPROGRAM=='MESONH') THEN
 #ifdef SFX_MNH
    CALL READ_SURFX2COV_MNH(YREC,IL1,IL2,PFIELD,OFLAG,KRESP,YCOMMENT,YDIR)
@@ -115,29 +114,30 @@ ELSE
   !the mask to call read_and_send_mpi depends on the I/O type
   IF (HPROGRAM=='LFI   ') THEN
 #ifdef SFX_LFI
-    ALLOCATE(ZFIELD(NFULL_lfi))
     IFULL = NFULL_lfi
+    ALLOCATE(ZFIELD(NFULL_lfi))
     IMASKF=>NMASK_lfi
 #endif
   ELSEIF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-    ALLOCATE(ZFIELD(NFULL_asc))
     IFULL = NFULL_asc
+    ALLOCATE(ZFIELD(NFULL_asc))
     IMASKF=>NMASK_asc
 #endif
   ELSEIF (HPROGRAM=='FA     ') THEN
 #ifdef SFX_FA
-    ALLOCATE(ZFIELD(NFULL_fa))
     IFULL = NFULL_fa
+    ALLOCATE(ZFIELD(NFULL_fa))
     IMASKF=>NMASK_fa
 #endif
   ELSEIF (HPROGRAM=='NC     ') THEN
 #ifdef SFX_NC
-    ALLOCATE(ZFIELD(NFULL_nc))
     IFULL = NFULL_nc
+    ALLOCATE(ZFIELD(NFULL_nc))
     IMASKF=>NMASK_nc
 #endif
   ENDIF
+  !IFULL = NDIM_FULL_INIT
   !
   !if we want to get covers for the current task or for the whole domain
   IF (YDIR=='H') THEN
@@ -231,57 +231,57 @@ ELSE
           !
         ELSE
           CALL ABOR1_SFX("READ_SURFX2COV:HDIR MUST BE H OR A OR E")
-        ENDIF 
+        ENDIF
         !   
       ENDIF
       !
-      IF (NRANK==NPIO .OR. YDIR=='H') THEN
-        !
-        !receives pieces of cover fields
-        ITREQ(:) = 0
-        !
+    ENDIF
+    !
+    IF (NRANK==NPIO .OR. YDIR=='H') THEN
+      !
+      !receives pieces of cover fields
+      ITREQ(:) = 0
+      !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
 !$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IDX,ISTATUS,INFOMPI)
-        DO JPROC=0,NPROC-1
+      DO JPROC=0,NPROC-1
+        !
+        !the cover exists and was read
+        IF (IPAS*JPROC + JP<=IL2) THEN
           !
-          !the cover exists and was read
-          IF (IPAS*JPROC + JP<=IL2) THEN
-            !
-            IF (JPROC<NRANK) THEN
-              ITREQ(JPROC+1) = JPROC+1
-            ELSEIF (JPROC==NPIO .AND. YDIR/='H') THEN
-              ITREQ(JPROC+1) = NPROC
-              DO JPROC2=NPROC-1,0,-1
-                IF (IPAS*JPROC2+JP>IL2) ITREQ(JPROC+1) = ITREQ(JPROC+1) -1
-              ENDDO
-            ELSE
-              ITREQ(JPROC+1) = JPROC
-            ENDIF    
-            !     
-            IF (JPROC/=NRANK) THEN
-              IDX = IDX_SAVE + JP + 1
-              !each task receives the part of the cover read that concerns it 
-              !only NPIO in cas of HDIR/=H
-              CALL MPI_RECV(ZWORKR(:,ITREQ(JPROC+1)),SIZE(ZWORKR,1)*KIND(ZWORKR)/4,&
-                            MPI_REAL,JPROC,IDX,NCOMM,ISTATUS,INFOMPI)
-            ELSEIF (JPROC==NPIO .AND. YDIR/='H') THEN
-              ZWORKR(:,ITREQ(JPROC+1)) = ZFIELD(:)
-            ENDIF
-            !
+          IF (JPROC<NRANK) THEN
+            ITREQ(JPROC+1) = JPROC+1
+          ELSEIF (JPROC==NPIO .AND. YDIR/='H') THEN
+            ITREQ(JPROC+1) = NPROC
+            DO JPROC2=NPROC-1,0,-1
+              IF (IPAS*JPROC2+JP>IL2) ITREQ(JPROC+1) = ITREQ(JPROC+1) -1
+            ENDDO
+          ELSE
+            ITREQ(JPROC+1) = JPROC
+          ENDIF    
+          !     
+          IF (JPROC/=NRANK) THEN
+            IDX = IDX_SAVE + JP + 1
+            !each task receives the part of the cover read that concerns it 
+            !only NPIO in cas of HDIR/=H
+            CALL MPI_RECV(ZWORKR(:,ITREQ(JPROC+1)),SIZE(ZWORKR,1)*KIND(ZWORKR)/4,&
+                          MPI_REAL,JPROC,IDX,NCOMM,ISTATUS,INFOMPI)
+          ELSEIF (JPROC==NPIO .AND. YDIR/='H') THEN
+            ZWORKR(:,ITREQ(JPROC+1)) = ZFIELD(:)
           ENDIF
           !
-        ENDDO
-!$OMP END DO
-!$OMP END PARALLEL        
-        !
-        !waits that all cover pieces are sent
-#ifndef NOMPI
-        IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN
-          CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS,INFOMPI)
         ENDIF
-#endif
         !
+      ENDDO
+!$OMP END DO
+!$OMP END PARALLEL 
+      !
+      !waits that all cover pieces are sent
+#ifdef SFX_MPI
+      IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN
+        CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS,INFOMPI)
       ENDIF
+#endif
       !
       IF (YDIR=='H' .OR. NRANK==NPIO) THEN
         !packs data

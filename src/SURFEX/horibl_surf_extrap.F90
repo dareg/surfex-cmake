@@ -104,7 +104,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -129,7 +129,7 @@ REAL, DIMENSION(:), INTENT(IN), OPTIONAL :: PILATARRAY
 !
 !*      0.2. Declaration of local variables
 !          
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif  
  ! Variables implied in the extension procedure
@@ -152,7 +152,7 @@ INL = SIZE(PAROUT,2)
 !* no data point
 IF (NRANK==NPIO) ICOUNT = COUNT(PARIN(:,:)/=XUNDEF)
 IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   CALL MPI_BCAST(ICOUNT,KIND(ICOUNT)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 #endif
 ENDIF

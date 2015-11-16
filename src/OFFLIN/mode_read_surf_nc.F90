@@ -245,7 +245,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
                                             ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
 #endif
  CHARACTER(LEN=100) :: YFILE,YOUT          ! Filename
@@ -440,7 +440,7 @@ INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a pr
                                                   ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
 #endif
  CHARACTER(LEN=100) :: YFILE,YOUT          ! filename

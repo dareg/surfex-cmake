@@ -104,7 +104,7 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -136,7 +136,7 @@ REAL :: ZVECT     ! -1 if input is vectorial
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: ILSMIN    ! Extended land/sea mask
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: IP
 INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: IOUT
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDARIN

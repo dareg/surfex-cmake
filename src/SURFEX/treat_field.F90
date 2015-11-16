@@ -87,7 +87,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -118,7 +118,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZSUMVAL2
 REAL, DIMENSION(:), ALLOCATABLE :: ZEXTVAL
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS2
 #endif
@@ -262,7 +262,7 @@ SELECT CASE (HSUBROUTINE)
     !because each task did not necessarily meet the same number of coves, itcov 
     !contains the numbers of covers met for all tasks 
     IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
     CALL MPI_ALLGATHER(IS2,KIND(IS2)/4,MPI_INTEGER,&
                      ITCOV,KIND(ITCOV)/4,MPI_INTEGER,NCOMM,INFOMPI)
 #endif

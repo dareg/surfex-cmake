@@ -124,6 +124,8 @@ ENDIF
 IF (.NOT.ALLOCATED(NINDEX) .AND. NRANK==NPIO) THEN
   ALLOCATE(NINDEX(NFULL))
   NINDEX(:) = 0
+ELSE
+  CALL GET_DIM_FULL_n(U,NFULL)  
 ENDIF
 !
 !------------------------------------------------------------------------------

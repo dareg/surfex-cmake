@@ -89,7 +89,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -104,7 +104,7 @@ REAL, DIMENSION(:,:),   INTENT(OUT) :: PFIELD2 ! FIELD on model 2
 !
 !*       0.2    Declarations of local variables for print on FM file
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZFIELD1,ZFIELDS
@@ -136,7 +136,7 @@ IF (LHOOK) CALL DR_HOOK('BILIN_VALUE_1',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('BILIN_VALUE_2',0,ZHOOK_HANDLE)
 !
 IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   CALL MPI_GATHER(IJEXT,4*KIND(IJEXT)/4,MPI_INTEGER,&
                 IBOR,4*KIND(IBOR)/4,MPI_INTEGER,& 
                 NPIO,NCOMM,INFOMPI)

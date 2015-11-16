@@ -37,7 +37,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -49,7 +49,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELDOUT ! interpolated field
 !
 !*      0.2    declarations of local variables
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZW, ZFIELDIN,ZFGET

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_OROG_FILTER (U, &
+      SUBROUTINE PGD_OROG_FILTER (U, UG, &
                                   HPROGRAM)
 !     ##############################################################
 !
@@ -39,11 +39,15 @@
 !
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_PGD_GRID,       ONLY : CGRID, XGRID_PAR
 !
 USE MODI_READ_NAM_PGD_OROG_FILTER
 USE MODI_OROGRAPHY_FILTER
+USE MODI_READ_AND_SEND_MPI
+USE MODI_GATHER_AND_WRITE_MPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -55,6 +59,7 @@ IMPLICIT NONE
 !
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !
@@ -65,6 +70,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
+REAL, DIMENSION(:), ALLOCATABLE :: ZZS, ZSEA
 INTEGER                  :: NZSFILTER   ! number of orographic spatial filter iterations
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -87,7 +93,21 @@ IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !*   11.      Filtering of orography
 !             ----------------------
 !
- CALL OROGRAPHY_FILTER(CGRID, XGRID_PAR, U%XSEA, NZSFILTER, U%XZS)
+IF (NRANK==NPIO) THEN
+  ALLOCATE(ZZS (U%NDIM_FULL))
+  ALLOCATE(ZSEA(U%NDIM_FULL))
+ELSE
+  ALLOCATE(ZZS(0))
+  ALLOCATE(ZSEA(0))
+ENDIF
+ CALL GATHER_AND_WRITE_MPI(U%XZS,ZZS)
+ CALL GATHER_AND_WRITE_MPI(U%XSEA,ZSEA)
+!
+IF (NRANK==NPIO) CALL OROGRAPHY_FILTER(CGRID, UG%XGRID_FULL_PAR, U%XSEA, NZSFILTER, U%XZS)
+!
+ CALL READ_AND_SEND_MPI(ZZS,U%XZS)
+!
+DEALLOCATE(ZZS,ZSEA)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_OROG_FILTER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

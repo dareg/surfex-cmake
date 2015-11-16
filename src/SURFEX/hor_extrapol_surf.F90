@@ -48,7 +48,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -99,7 +99,7 @@ INTEGER :: ISIZE, ISIZE_MAX, J, ID0, ICOMPT, ICPT
 INTEGER :: INFOMPI, IDX, INL
 INTEGER  :: JI, JL, JLAT, JLON, JIPOS   ! loop index on points
 INTEGER  :: JISC  ! loop index on valid points
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 LOGICAL  :: GLALO ! flag true is second coordinate is a longitude or pseudo-lon.
@@ -235,7 +235,7 @@ ENDDO
 !
 !NPIO knows the numbers of points to extrapolate for all tasks
 IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   CALL MPI_GATHER(ITSIZE,2*KIND(ITSIZE)/4,MPI_INTEGER,&
                   IBOR,2*KIND(IBOR)/4,MPI_INTEGER,& 
                   NPIO,NCOMM,INFOMPI)

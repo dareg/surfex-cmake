@@ -67,7 +67,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifndef NOMPI
+#ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
 !
@@ -127,7 +127,7 @@ INTEGER                            :: INPTS
 INTEGER                            :: ISCAN, ID2          ! number of points to scan
 INTEGER, DIMENSION(:), ALLOCATABLE :: IINDEX       ! list of index to scan
 INTEGER                            :: INUM        ! halo available
-#ifndef NOMPI
+#ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
 INTEGER :: INFOMPI
@@ -167,7 +167,7 @@ CALL GATHER_AND_WRITE_MPI(KCODE,NSIZE_ALL)
 !
 !...known by all tasks
 IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   CALL MPI_BCAST(NSIZE_ALL,U%NDIM_FULL*KIND(NSIZE_ALL)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
 #endif
 ENDIF
@@ -262,7 +262,7 @@ ZNDIST(:,:) = SQRT(ZNDIST(:,:))
 !
 !numbers of points to interpolated are gathered
 IF (NPROC>1) THEN
-#ifndef NOMPI
+#ifdef SFX_MPI
   CALL MPI_ALLGATHER(ICPT,KIND(ICPT)/4,MPI_INTEGER,&
                      ISIZE,KIND(ISIZE)/4,MPI_INTEGER,NCOMM,INFOMPI)
 #endif
@@ -293,7 +293,7 @@ ALLOCATE(ININD_ALL(MAXVAL(ISIZE),KNPTS,0:NPROC-1))
 IF (NPROC>1) THEN
   !for each task
   DO JP=0,NPROC-1
-#ifndef NOMPI   
+#ifdef SFX_MPI   
     !inind_all receives from all tasks the points they need that are
     !located in it
     CALL MPI_GATHER(ININD0(:,:,JP),MAXVAL(ISIZE)*KNPTS*KIND(ININD0)/4,MPI_INTEGER,&
@@ -327,7 +327,7 @@ ENDDO
 ALLOCATE(ZFIELD2(ICPT,KNPTS,SIZE(PFIELD,2),0:NPROC-1))
 IF (NPROC>1) THEN
   DO JP=0,NPROC-1
-#ifndef NOMPI
+#ifdef SFX_MPI
     CALL MPI_GATHER(ZFIELD(1:ISIZE(JP),:,:,JP),SIZE(ZFIELD(1:ISIZE(JP),:,:,JP))*KIND(ZFIELD)/4,MPI_REAL,&
                     ZFIELD2,ISIZE(JP)*KNPTS*SIZE(PFIELD,2)*KIND(ZFIELD2)/4,MPI_REAL,JP,NCOMM,INFOMPI)
 #endif
