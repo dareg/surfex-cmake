@@ -14,8 +14,7 @@ CONTAINS
 !
 !
 !
-USE MODD_SURFEX_MPI, ONLY : NPROC, NPIO, NRANK, IDX_R, NREQ, NCOMM, NSIZE, NINDEX, &
-                            NDIM_FULL_INIT
+USE MODD_SURFEX_MPI, ONLY : NPROC, NPIO, NRANK, IDX_R, NREQ, NCOMM, NSIZE, NINDEX
 USE MODD_SURFEX_OMP, ONLY : NINDX1SFX, NINDX2SFX
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -137,7 +136,6 @@ ELSE
     IMASKF=>NMASK_nc
 #endif
   ENDIF
-  !IFULL = NDIM_FULL_INIT
   !
   !if we want to get covers for the current task or for the whole domain
   IF (YDIR=='H') THEN

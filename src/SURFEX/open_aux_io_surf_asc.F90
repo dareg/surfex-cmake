@@ -1,6 +1,6 @@
 !     #######################################################
       SUBROUTINE OPEN_AUX_IO_SURF_ASC (&
-                                       HFILE,HFILETYPE,HMASK)
+                                       HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -54,8 +54,9 @@ IMPLICIT NONE
 !
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
- CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
- CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=6), INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=6), INTENT(IN)  :: HMASK
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -74,15 +75,17 @@ NUNIT=9
 !
 OPEN(UNIT=NUNIT,FILE=TRIM(HFILE)//'.txt',FORM='FORMATTED')
 !
-CMASK = 'FULL  '
+CMASK = HMASK
  CALL READ_SURF(&
-                'ASCII ','DIM_FULL',NFULL,IRET)
-ALLOCATE(NMASK(NFULL))
+                'ASCII ','DIM_FULL',NFULL,IRET,HDIR=HDIR)
+!
+ALLOCATE(ZFULL(NFULL))
 IL = NFULL
 ZFULL = 1.
 !  
 ALLOCATE(NMASK(IL))
- CALL GET_1D_MASK(IL,NFULL,ZFULL,NMASK)
+CALL GET_1D_MASK(IL,NFULL,ZFULL,NMASK)
+!
 DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------

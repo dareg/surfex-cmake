@@ -1,6 +1,6 @@
 !     #######################################################
       SUBROUTINE OPEN_AUX_IO_SURF_LFI (&
-                                       HFILE,HFILETYPE,HMASK)
+                                       HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -56,6 +56,7 @@ IMPLICIT NONE
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR 
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -73,7 +74,7 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
 !
 CMASK = HMASK
 CFILE_LFI=HFILE
- CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET,HDIR='-')
+ CALL READ_SURF('LFI   ','DIM_FULL',ILU,IRET,HDIR=HDIR)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------

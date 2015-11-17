@@ -38,14 +38,14 @@
 !            -----------
 !
 !
-!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
-USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE
+USE MODD_PGDWORK,        ONLY : X1D_ALL, NSIZE_ALL, NSIZE, XSUMVAL
 !
 USE MODI_GET_LUOUT
 USE MODI_TREAT_BATHYFIELD
@@ -96,7 +96,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_BATHYFIELD',0,ZHOOK_HANDLE)
-PFIELD(:) = XUNDEF
 !-------------------------------------------------------------------------------
 !
 !*    2.      Output listing logical unit
@@ -116,15 +115,17 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    3.      Averages the field
 !             ------------------
 !
-  ALLOCATE(NSIZE     (NL))
-  ALLOCATE(XSUMVAL   (NL))
+  ALLOCATE(NSIZE_ALL (U%NDIM_FULL))
+  ALLOCATE(X1D_ALL   (U%NDIM_FULL))
 !
-  NSIZE    (:) = 0.
-  XSUMVAL  (:) = 0.
+  NSIZE_ALL(:) = 0.
+  X1D_ALL  (:) = 0.
 !
   YFIELD = '                    '
   YFIELD = HFIELD(1:MIN(LEN(HFIELD),20))
 !
+  PFIELD(:) = XUNDEF
+
   CALL TREAT_BATHYFIELD(UG, U, USS, &
                         HPROGRAM,'SURF  ',HFILETYPE,'A_MESH',HFILE, HNCVARNAME,&
                      YFIELD,PFIELD,HAREA                           )  

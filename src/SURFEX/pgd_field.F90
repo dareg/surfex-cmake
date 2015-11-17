@@ -134,26 +134,28 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !             ------------------
 !
   ALLOCATE(NSIZE_ALL (U%NDIM_FULL))
-  ALLOCATE(X1D_ALL   (U%NDIM_FULL))
 !
   NSIZE_ALL(:) = 0.
-  X1D_ALL  (:) = 0.
 !
-  INPTS        = 3
-!
-  IF(HFIELD=="water depth") THEN
-    INPTS = 1
-  ENDIF  
+ 
 !
   IF (CATYPE=='MAJ') THEN
-    ALLOCATE(NVALNBR  (NL))
-    ALLOCATE(NVALCOUNT(NL,JPVALMAX))
-    ALLOCATE(XVALLIST (NL,JPVALMAX))
+    ALLOCATE(NVALNBR  (U%NDIM_FULL))
+    ALLOCATE(NVALCOUNT(U%NDIM_FULL,JPVALMAX))
+    ALLOCATE(XVALLIST (U%NDIM_FULL,JPVALMAX))
     NVALNBR   = 0
     NVALCOUNT = 0
     XVALLIST  = XUNDEF
     INPTS     = 1
-  END IF
+  ELSE
+    ALLOCATE(X1D_ALL   (U%NDIM_FULL))
+    X1D_ALL  (:) = 0.
+    INPTS        = 3
+  ENDIF
+!
+  IF(HFIELD=="water depth") THEN
+    INPTS = 1
+  ENDIF
 !
   YFIELD = '                    '
   YFIELD = HFIELD(1:MIN(LEN(HFIELD),20))
@@ -199,11 +201,6 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   DEALLOCATE(NSIZE    )
   DEALLOCATE(XSUMVAL  )
-  IF (CATYPE=='MAJ') THEN
-    DEALLOCATE(NVALNBR  )
-    DEALLOCATE(NVALCOUNT)
-    DEALLOCATE(XVALLIST )
-  END IF
 !
 !-------------------------------------------------------------------------------
 !

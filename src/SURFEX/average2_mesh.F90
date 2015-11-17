@@ -23,9 +23,8 @@
 !
 !*    0.     DECLARATION
 !            -----------
-!
-USE MODD_PGDWORK,        ONLY : NSIZE, XSUMVAL, CATYPE, &
-                                NVALNBR, NVALCOUNT, XVALLIST
+
+USE MODD_PGDWORK,        ONLY : NSIZE, XSUMVAL, CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : XCDREF
 !
 !
@@ -45,8 +44,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 INTEGER :: JLOOP ! loop counter on grid points
 INTEGER :: JVAL  ! loop counter on values encountered in grid mesh
-INTEGER :: IMAX  ! Maximum of times a value has been encountered in the grid mesh
-INTEGER :: IVAL  ! Index of this value
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',0,ZHOOK_HANDLE)
@@ -68,21 +65,10 @@ SELECT CASE (CATYPE)
   ENDWHERE
 
   CASE ('MAJ')
-  DO JLOOP=1,SIZE(NSIZE)
-    IF(NSIZE(JLOOP)==0) CYCLE
-    !* determines the index of the value which has been the most encountered
-    !  in the grid mesh
-    IMAX=0
-    DO JVAL=1,NVALNBR(JLOOP)
-      IF (NVALCOUNT(JLOOP,JVAL)>IMAX) THEN
-        IMAX=NVALCOUNT(JLOOP,JVAL)
-        IVAL = JVAL
-      END IF
-    END DO
-    !* sets this value to the PGD field
-    PPGDARRAY(JLOOP)=XVALLIST(JLOOP,IVAL)
-  END DO
-
+  WHERE (NSIZE(:)/=0)
+    PPGDARRAY(:)=XSUMVAL(:)
+  ENDWHERE
+          
 END SELECT
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',1,ZHOOK_HANDLE)
 

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GRID_FROM_FILE (HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
+      SUBROUTINE GRID_FROM_FILE (UG,U,HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -34,8 +34,12 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK
 !
+USE MODI_READ_NAM_GRIDTYPE
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_READ_GRIDTYPE
 USE MODI_CLOSE_AUX_IO_SURF
@@ -54,6 +58,8 @@ IMPLICIT NONE
 !            ------------------------------
 !
 !
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
  CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! file name
@@ -90,67 +96,73 @@ IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',0,ZHOOK_HANDLE)
 !*       2.    Opening of the file
 !              -------------------
 !
- CALL OPEN_AUX_IO_SURF(&
-                       HFILE,HFILETYPE,'FULL  ')
-!
 !---------------------------------------------------------------------------
 !
 !*       3.    Number of points in this file
 !              -----------------------------
 !
 IF (HDIR/='H') THEN
-  CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP)
+  !
+  CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ',HDIR=HDIR)
+  !  
+  CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP,HDIR=HDIR)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       4.    Grid type
+  !              ---------
+  !
+   CALL READ_SURF(&
+                  HFILETYPE,'GRID_TYPE',HGRID,IRESP,HDIR=HDIR)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       5.    Reading parameters of the grid
+  !              ------------------------------
+  !
+  CALL READ_GRIDTYPE(&
+                     HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR=HDIR)
+  !
+  !
+  ALLOCATE(PGRID_PAR(KGRID_PAR))
+   CALL READ_GRIDTYPE(&
+                      HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR=HDIR)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       6.    Closes the file
+  !              ---------------
+  !
+  CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+  !
+  !------------------------------------------------------------------------------
+  !
+  !*       7.    Open namelist
+  !              -------------
+  !
+  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+  !
+  !------------------------------------------------------------------------------
+  !
+  !*       8.    Grid modification
+  !              -----------------
+  !
+  IF (.NOT. OGRID) CALL GRID_MODIF(ILUOUT,ILUNAM,HGRID,KGRID_PAR,PGRID_PAR,KL)
+  !
+  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+  !
 ELSE
-  KL = NSIZE_TASK(NRANK)
+  !
+  CALL READ_NAM_GRIDTYPE(UG,U,HPROGRAM,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
+  !
 ENDIF
-!
-!---------------------------------------------------------------------------
-!
-!*       4.    Grid type
-!              ---------
-!
- CALL READ_SURF(&
-                HFILETYPE,'GRID_TYPE',HGRID,IRESP,HDIR='-')
-!
-!---------------------------------------------------------------------------
-!
-!*       5.    Reading parameters of the grid
-!              ------------------------------
-!
- CALL READ_GRIDTYPE(&
-                    HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR=HDIR)
-!
-ALLOCATE(PGRID_PAR(KGRID_PAR))
- CALL READ_GRIDTYPE(&
-                    HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR=HDIR)
-!
-!---------------------------------------------------------------------------
-!
-!*       6.    Closes the file
-!              ---------------
-!
- CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
-!
-!------------------------------------------------------------------------------
-!
-!*       7.    Open namelist
-!              -------------
-!
- CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-!
-!------------------------------------------------------------------------------
-!
-!*       8.    Grid modification
-!              -----------------
-!
-IF (.NOT. OGRID) CALL GRID_MODIF(ILUOUT,ILUNAM,HGRID,KGRID_PAR,PGRID_PAR,KL)
-!
-!------------------------------------------------------------------------------
-!
+  !
+  !------------------------------------------------------------------------------
+  !
 !*       9.    Close namelist
 !              --------------
 !
- CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

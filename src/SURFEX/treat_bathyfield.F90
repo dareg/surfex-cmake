@@ -109,7 +109,7 @@ INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS2
 #endif
 INTEGER :: ILUOUT, INFOMPI, JP, ICPT, JI, JL, IREQ, IDX,&
-                        IDX_SAVE, ISIZE_OMP
+                        IDX_SAVE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
@@ -167,7 +167,6 @@ IF (NPROC>1) THEN
   CALL READ_AND_SEND_MPI(NSIZE_ALL,ISIZE(1:NSIZE_TASK(NRANK)),KPIO=NRANK,KDX=IDX)
   !
   NSIZE(:) = 0
-  ISIZE_OMP = NPROC/NBLOCKTOT
   !for each task
   DO JP=0,NPROC-1
    !

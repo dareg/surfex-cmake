@@ -153,8 +153,8 @@ END IF
 IF (KJMAX1==1) THEN
   ZYHAT1(1) = ZYM1(1) - 0.5 * PDY1(1)
   ZYHAT1(2) = ZYM1(1) + 0.5 * PDY1(1)
-ELSE
-  ZYHAT1(1) = 1.5 * ZYM1(1) - 0.5 * ZYM1(2)
+        ELSE
+          ZYHAT1(1) = 1.5 * ZYM1(1) - 0.5 * ZYM1(2)
   DO JJ=2,KJMAX1
     ZYHAT1(JJ) = 0.5 * ZYM1(JJ-1) + 0.5 * ZYM1(JJ)
   END DO

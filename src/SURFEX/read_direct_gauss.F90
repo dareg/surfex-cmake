@@ -367,9 +367,9 @@ DO
       READ(IGLB,REC=IREC) YVALUE16(:)
       ZVALUE(:)=YVALUE16(:)
       !
-      ICPT = ICPT + 1
-      IF (ICPT<=2) THEN      
+      IF (ICPT==0) THEN      
         IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
+          ICPT = ICPT + 1      
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
           LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
           GSWAP = .TRUE.
@@ -397,10 +397,10 @@ DO
       READ(IGLB,REC=IREC) YVALUE32R(:)
       ZVALUE(:)=YVALUE32R(:)
       !
-      ICPT = ICPT + 1
-      IF (ICPT<=2) THEN      
+      IF (ICPT==0) THEN      
         IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
              .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
+          ICPT = ICPT + 1 
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
           LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
           GSWAP = .TRUE.
@@ -420,10 +420,10 @@ DO
       READ(IGLB,REC=IREC) YVALUE64(:)
       ZVALUE(:)=YVALUE64(:)
       !
-      ICPT = ICPT + 1
-      IF (ICPT<=2) THEN      
+      IF (ICPT==0) THEN      
         IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
                .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
+          ICPT = ICPT + 1 
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
           LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
           GSWAP = .TRUE.

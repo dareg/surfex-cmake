@@ -1,6 +1,6 @@
 !     #######################################################
       SUBROUTINE OPEN_AUX_IO_SURF_NC (&
-                                      HFILE,HFILETYPE,HMASK)
+                                      HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -60,6 +60,7 @@ INCLUDE "netcdf.inc"
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR  
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -84,7 +85,7 @@ ENDIF
 CMASK = HMASK
 CFILEIN_NC = YFILE
  CALL READ_SURF(&
-                'NC    ','DIM_FULL',ILU,IRET)
+                'NC    ','DIM_FULL',ILU,IRET,HDIR=HDIR)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 !     #######################################################
       SUBROUTINE OPEN_AUX_IO_SURF_FA (&
-                                      HFILE,HFILETYPE,HMASK)
+                                      HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -57,6 +57,7 @@ IMPLICIT NONE
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -83,7 +84,7 @@ WRITE(NLUOUT,*)' FA OPEN_AUX_IO_SURF ',NUNIT_FA,CFILEIN_FA
  CALL FACAGE(CDNOMC,.TRUE.)
 !
 CMASK = 'FULL  '
-CALL READ_SURF(HFILETYPE,'DIM_FULL',ILU,IRET)
+CALL READ_SURF(HFILETYPE,'DIM_FULL',ILU,IRET,HDIR=HDIR)
 NFULL = ILU
 !
 !------------------------------------------------------------------------------
