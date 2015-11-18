@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_TEB_EXTERN (DTCO, &
+SUBROUTINE PREP_TEB_EXTERN (DTCO,  &
                             HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,KPATCH,PFIELD)
 !     #################################################################################
 !
@@ -106,6 +106,14 @@ CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 IF (NRANK/=NPIO) INI = 0
 !
+ALLOCATE(ZMASK(INI))
+IF (IVERSION_PGD>=7) THEN 
+  YRECFM='FRAC_TOWN'
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+ELSE
+  ZMASK(:) = 1.
+ENDIF
+!
 !* reads if TEB fields exist in the input file
  CALL TOWN_PRESENCE(HFILEPGDTYPE,GTEB,HDIR='-')
 !
@@ -173,19 +181,19 @@ ELSE
       CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
       !
       ALLOCATE(ZD(INI,ILAYER))
-      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD,HDIR='E')
-      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD,HDIR='E')
-      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
-      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_WALLA') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
-      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_WALLB') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
-      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
-      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(DTCO, &
+      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(DTCO,  &
                                                HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
       !
       !* reading of version of the file being read

@@ -146,7 +146,7 @@ ELSE
   ENDIF
   ZWORKR(:,:) = 0.
   !
-  IF (NPROC>1) THEN
+  IF (NPROC>1 .AND. YDIR=='H') THEN
     !for the parallelization of reading, NINDEX must be known by all tasks
     IF (NRANK/=NPIO) ALLOCATE(NINDEX(IFULL))
     CALL MPI_BCAST(NINDEX,SIZE(NINDEX)*KIND(NINDEX)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
@@ -299,6 +299,13 @@ ELSE
     !
   ENDDO
   !
+  IF (NRANK/=NPIO .AND. YDIR=='H') DEALLOCATE(NINDEX)
+  !
+  IDX_R = IDX_R + IPAS + 1
+  DEALLOCATE(ZWORKR)
+  DEALLOCATE(ZFIELD)
+  IMASKF=>NULL()
+  !  
 ENDIF
 !
 !RJ: what is a point of comment here? last field comment? Should be 'COVER_PACKED' status?

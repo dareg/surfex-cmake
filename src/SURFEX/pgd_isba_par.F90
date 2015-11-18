@@ -1106,7 +1106,7 @@ DTI%LDATA_WATSUP=.FALSE.
 !----------------------------------------------------------------------------------------
 !
 IF (I%LECOCLIMAP .AND. DTI%LDATA_VEGTYPE) THEN
-  !
+  !  
   CALL EXTRAPOL_FIELDS(DTCO, DTI, IG, I, UG, U, &
                        HPROGRAM,ILUOUT)
   !

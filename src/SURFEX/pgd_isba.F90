@@ -384,21 +384,6 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
                 I%LCOVER, I%XCOVER, I%XZS,                   &
                 IG%XLAT, IG%XLON, IG%XMESH_SIZE, I%XZ0EFFJPDIR    )  
 !
-#ifdef SFX_OL
-IF (LWR_VEGTYPE) THEN
-  ALLOCATE(I%XVEGTYPE(ILU,NVEGTYPE))
-  IF (DTI%LDATA_VEGTYPE) THEN
-    I%XVEGTYPE(:,:) = DTI%XPAR_VEGTYPE(:,:)
-  ELSE
-    DO JVEGTYPE=1,NVEGTYPE
-      CALL AV_PGD(DTCO,I%XVEGTYPE(:,JVEGTYPE),I%XCOVER,XDATA_VEGTYPE(:,JVEGTYPE),'NAT','ARI',I%LCOVER)
-    ENDDO
-  ENDIF
-ENDIF
-#endif
-!
-DEALLOCATE(I%XCOVER)
-!
 !-------------------------------------------------------------------------------
 !
 !*    5.      Packing of ISBA specific fields
@@ -414,6 +399,33 @@ DEALLOCATE(I%XCOVER)
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
                      ZSSO_SLOPE                                   )  
+!
+!-------------------------------------------------------------------------------
+!
+!*   15.      ISBA specific fields
+!             --------------------
+!
+I%LECOCLIMAP = OECOCLIMAP
+!
+ CALL PGD_ISBA_PAR(DTCO, DGU, UG, U, USS, DTI, I, IG, &
+                   HPROGRAM)
+!
+!-------------------------------------------------------------------------------
+!
+#ifdef SFX_OL
+IF (LWR_VEGTYPE) THEN
+  ALLOCATE(I%XVEGTYPE(ILU,NVEGTYPE))
+  IF (DTI%LDATA_VEGTYPE) THEN
+    I%XVEGTYPE(:,:) = DTI%XPAR_VEGTYPE(:,:)
+  ELSE
+    DO JVEGTYPE=1,NVEGTYPE
+      CALL AV_PGD(DTCO,I%XVEGTYPE(:,JVEGTYPE),I%XCOVER,XDATA_VEGTYPE(:,JVEGTYPE),'NAT','ARI',I%LCOVER)
+    ENDDO
+  ENDIF
+ENDIF
+#endif
+!
+DEALLOCATE(I%XCOVER)
 !
 !-------------------------------------------------------------------------------
 !
@@ -711,16 +723,6 @@ ALLOCATE(I%XRUNOFFB(ILU))
 ALLOCATE(I%XWDRAIN(ILU))
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'subgrid drainage','NAT',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,I%XWDRAIN(:))
-!
-!-------------------------------------------------------------------------------
-!
-!*   15.      ISBA specific fields
-!             --------------------
-!
-I%LECOCLIMAP = OECOCLIMAP
-!
- CALL PGD_ISBA_PAR(DTCO, DGU, UG, U, USS, DTI, I, IG, &
-                   HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

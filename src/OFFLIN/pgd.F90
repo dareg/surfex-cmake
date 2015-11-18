@@ -232,7 +232,6 @@ DO JNW = 1,INW
   !
   !* writing of the fields
  CALL IO_BUFF_CLEAN
-  
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
   CALL WRITE_PGD_SURF_ATM_n(YSURF_CUR, &
                             CSURF_FILETYPE)

@@ -76,8 +76,6 @@ CFILE_FA = '                            '
 !
 NMASK=>NULL()
 !
-NUNIT_FA = 0
-!
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_FA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

@@ -58,6 +58,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GINTERP_DUPLIQUE ! .true. where physical value is needed ! Ajout MT
 !-------------------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('HOR_INTERPOL_CONF_PROJ',0,ZHOOK_HANDLE)
+!
 !*      4.    Interpolation with bilinear
 !
  CALL BILIN_VALUE(KLUOUT,NX,NY,PFIELDIN,XCX,XCY,NCIJ(:,1),NCIJ(:,2),PFIELDOUT)

@@ -124,7 +124,7 @@ CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
                             SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-!
+                    !
 !*      2.1.2    Salinity
 !
 
