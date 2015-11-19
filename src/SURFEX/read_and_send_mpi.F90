@@ -511,7 +511,6 @@ ELSE
   IDX = IDX_R
 ENDIF
 !
-!
 IF (NRANK==IPIO) THEN
   !
   IDX = IDX + 1

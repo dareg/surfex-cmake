@@ -30,10 +30,14 @@ SUBROUTINE PREP_ISBA_NETCDF (DTCO, U, &
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 !
 USE MODI_ABOR1_SFX
 USE MODI_GET_TYPE_DIM_n
+USE MODI_READ_AND_SEND_MPI
+USE MODI_GATHER_AND_WRITE_MPI
 !
 USE MODE_READ_CDF
 !
@@ -58,13 +62,13 @@ REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontal
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(:),       POINTER :: ZFIELD   ! field read
-
-REAL,DIMENSION(:,:),ALLOCATABLE:: ZFIELD_2D
+REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
+REAL, DIMENSION(:), ALLOCATABLE :: ZFIELD, ZFIELD0   ! field read
 
 ! CHARACTER(LEN=28) :: YNCVAR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+INTEGER :: JI, ICPT
 INTEGER::IERROR !error status
 INTEGER::JJ,JK,JLOOP ! loop counters
 INTEGER::INLAYERS ! vertical dimension length
@@ -94,62 +98,90 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_NETCDF',0,ZHOOK_HANDLE)
 !
 !*      2.     Reading of field
 !              ----------------
-
-! Open netcdf file
-IERROR=NF_OPEN(HFILE,NF_NOWRITE,ID_FILE)
- CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILE))
-
-! Look for variable ID
-IERROR=NF_INQ_VARID(ID_FILE,TRIM(HSURF),ID_VAR)
- CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HSURF))
-
-! Number of dimensions
-IERROR=NF_INQ_VARNDIMS(ID_FILE,ID_VAR,INVARDIMS)
-if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions number")
-
-! Id of dimensions
-ALLOCATE(IVARDIMSID(INVARDIMS))
-IERROR=NF_INQ_VARDIMID(ID_FILE,ID_VAR,IVARDIMSID)
-if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions ids")
-
-ALLOCATE(ZFIELD(IL))
-
-SELECT CASE (INVARDIMS)
-  CASE (1)
-    ! Check dimension length
-    IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(1),ILENDIM)
-    if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
-  CASE (2)
-    IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(1),ILENDIM1)
-    if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
-    IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(2),ILENDIM2)
-    if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
-
-    ILENDIM=ILENDIM1*ILENDIM2
-
-  CASE DEFAULT
-    CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of dimensions for variable '//TRIM(HSURF))
-
-END SELECT
 !
-IF(ILENDIM/=IL) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
-                                'in netcdf file for variable '//TRIM(HSURF))
+IF (NRANK==NPIO) THEN
+  ! Open netcdf file
+  IERROR=NF_OPEN(HFILE,NF_NOWRITE,ID_FILE)
+   CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILE))
+ 
+  ! Look for variable ID
+  IERROR=NF_INQ_VARID(ID_FILE,TRIM(HSURF),ID_VAR)
+   CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HSURF))
+
+  ! Number of dimensions
+  IERROR=NF_INQ_VARNDIMS(ID_FILE,ID_VAR,INVARDIMS)
+  if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions number")
+  ! Id of dimensions
+  ALLOCATE(IVARDIMSID(INVARDIMS))
+  IERROR=NF_INQ_VARDIMID(ID_FILE,ID_VAR,IVARDIMSID)
+  if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions ids")
+
+  ALLOCATE(ZFIELD(U%NDIM_NATURE))
+
+  SELECT CASE (INVARDIMS)
+    CASE (1)
+      ! Check dimension length
+      IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(1),ILENDIM)
+      if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
+    CASE (2)
+      IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(1),ILENDIM1)
+      if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
+      IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(2),ILENDIM2)
+      if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
+  
+      ILENDIM=ILENDIM1*ILENDIM2
+  
+    CASE DEFAULT
+      CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of dimensions for variable '//TRIM(HSURF))
+  
+  END SELECT
+  !
+  IF(ILENDIM/=U%NDIM_NATURE) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
+                                  'in netcdf file for variable '//TRIM(HSURF))
+  !
+  ! Read 1D variable
+  IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
+   CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+  !
+  ! Close netcdf file
+  IERROR=NF_CLOSE(ID_FILE)
+  !
+ELSE
+  ALLOCATE(ZFIELD(0))
+ENDIF
 !
-! Read 1D variable
-IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
- CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+IF (NRANK==NPIO) THEN
+  ALLOCATE(ZNATURE(U%NDIM_FULL))
+ELSE
+  ALLOCATE(ZNATURE(0))
+ENDIF
+CALL GATHER_AND_WRITE_MPI(U%XNATURE,ZNATURE)
 !
-! Close netcdf file
-IERROR=NF_CLOSE(ID_FILE)
+IF (NRANK==NPIO) THEN
+  ALLOCATE(ZFIELD0(U%NDIM_FULL))
+  ZFIELD0(:) = XUNDEF
+  ICPT = 0
+  DO JI=1,U%NDIM_FULL
+    IF (ZNATURE(JI)/=0.) THEN
+      ICPT = ICPT + 1
+      ZFIELD0(JI) = ZFIELD(ICPT)
+    ENDIF
+  ENDDO
+ELSE
+  ALLOCATE(ZFIELD0(0))
+ENDIF
 !
+DEALLOCATE(ZNATURE,ZFIELD)
 ALLOCATE(PFIELD(IL,INLAYERS,1)) !will be deallocated later by prep_hor_isba_field
 !
+CALL READ_AND_SEND_MPI(ZFIELD0,PFIELD(:,1,1),U%NR_NATURE)
+!
 ! For now initial values are identical for all tiles / soil layers.
-DO JJ=1,INLAYERS
-  PFIELD(:,JJ,1)=ZFIELD
+DO JJ=2,INLAYERS
+  PFIELD(:,JJ,1)=PFIELD(:,1,1)
 END DO
 !
-DEALLOCATE(ZFIELD)
+DEALLOCATE(ZFIELD0)
 !
 !Interpolation method
 CINTERP_TYPE='NONE'
