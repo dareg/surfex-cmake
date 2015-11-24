@@ -516,8 +516,7 @@ DO JI=1,KI
             ZHOWR(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
           ENDIF
           !
-          IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) .AND. (I%XPATCH(JI,JJ)>0.0) &
-            .AND. (XF_PATCH(JI,JJ,JL+1,JK).NE.XUNDEF) .AND. (XF_PATCH(JI,JJ,1,JK).NE.XUNDEF) ) THEN         !if obs available
+          IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0)) THEN         !if obs available
             ! Jacobian of obs operator
             ZHO(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
             ! impose limits  
