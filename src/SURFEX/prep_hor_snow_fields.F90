@@ -97,7 +97,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_RSNOW ! prescribed density (kg/m3)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_TSNOW ! prescribed temperature (K)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_LWCSNOW ! prescribed snow liquid water content (kg/m3)
 REAL,               INTENT(IN)  :: PUNIF_ASNOW ! prescribed albedo (-)
-LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL
+LOGICAL,            INTENT(INOUT)  :: OSNOW_IDEAL
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 

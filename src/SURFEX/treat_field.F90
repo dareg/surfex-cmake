@@ -117,8 +117,8 @@ INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZSUMVAL3
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZSUMVAL2, ZVALLIST
 REAL, DIMENSION(:), ALLOCATABLE :: ZEXTVAL
-INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE, IVALNBR
-INTEGER, DIMENSION(:,:), ALLOCATABLE :: IVALCOUNT
+INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE0, IVALNBR
+INTEGER, DIMENSION(:,:), ALLOCATABLE :: IVALCOUNT, ISIZE
 !
 INTEGER :: IMAX  ! Maximum of times a value has been encountered in the grid mesh
 INTEGER :: IVAL  ! Index of this value
@@ -188,42 +188,67 @@ IF (NPROC>1) THEN
  !
  IF (HFILETYPE=='DIRECT') THEN
   !
-  ALLOCATE(ISIZE(NSIZE_max))
+  ALLOCATE(ISIZE(NSIZE_max,NPROC))
+  ALLOCATE(ISIZE0(NSIZE_max))
   !
   IDX_SAVE = IDX_R
   IDX = IDX_SAVE + NRANK
-  !each task sends to each other task the part of NSIZE_ALL it got, stored in
-  !isize
-  CALL READ_AND_SEND_MPI(NSIZE_ALL,ISIZE(1:NSIZE_TASK(NRANK)),KPIO=NRANK,KDX=IDX)
+  !
+  IDX = IDX + 1
+  ISIZE(:,:) = 0
+!$OMP PARALLEL DO SCHEDULE(DYNAMIC,1) PRIVATE(JP,ICPT,JI,IREQ,INFOMPI)
+  DO JP=0,NPROC-1
+    IF (JP/=NRANK) THEN
+      ICPT = 0
+      DO JI = 1,SIZE(NINDEX)
+        IF (NINDEX(JI)==JP) THEN
+          ICPT = ICPT + 1
+          ISIZE(ICPT,JP+1) = NSIZE_ALL(JI)
+        ENDIF
+      ENDDO
+      IF (JP<NRANK) THEN
+        IREQ = JP+1
+      ELSE
+        IREQ = JP
+      ENDIF
+      CALL MPI_ISEND(ISIZE(:,JP+1),SIZE(ISIZE,1)*KIND(ISIZE)/4,&
+                           MPI_INTEGER,JP,IDX,NCOMM,NREQ(IREQ),INFOMPI)
+    ENDIF
+  ENDDO
+!$OMP END PARALLEL DO  
+  !
   !
   NSIZE(:) = 0
   !for each task
   DO JP=0,NPROC-1
-   !
+    !
+    ISIZE0(:) = 0
+    !
     IF (JP/=NRANK) THEN
-      !
       !each task receives each ISIZE from each task
-      CALL MPI_RECV(ISIZE,NSIZE_max*KIND(ISIZE)/4,MPI_INTEGER,&
+      CALL MPI_RECV(ISIZE0,NSIZE_max*KIND(ISIZE0)/4,MPI_INTEGER,&
                 JP,IDX_SAVE+1+JP,NCOMM,ISTATUS,INFOMPI)
-      !
     ELSE
       !
       ICPT = 0
       DO JI = 1,SIZE(NINDEX)
         IF (NINDEX(JI)==JP) THEN
           ICPT = ICPT + 1
-          ISIZE(ICPT) = NSIZE_ALL(JI)
+          ISIZE0(ICPT) = NSIZE_ALL(JI)
         ENDIF
       ENDDO
       !
     ENDIF
     !
     !nsize is the sum of all parts isize
-    NSIZE(:) = NSIZE(:) + ISIZE(1:NSIZE_TASK(NRANK))
+    NSIZE(:) = NSIZE(:) + ISIZE0(1:NSIZE_TASK(NRANK))
     !
   ENDDO
-  DEALLOCATE(ISIZE)
   CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS2,INFOMPI)
+  !
+  DEALLOCATE(ISIZE,ISIZE0)
+  !
+  IDX_R = IDX_R + NPROC
   !
  ELSE
   !

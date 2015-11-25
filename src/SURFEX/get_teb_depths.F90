@@ -216,15 +216,15 @@ END IF
 IF (.NOT.GDATA) THEN
   !
 !* depths are deduced from the cover types
-  ALLOCATE(ZPAR_D(ILU,IDATA_LAYER))
+  ALLOCATE(ZD(ILU,ILAYER))
   ! 
   IF (IVERSION_PREP>=8) THEN
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'TOWN  ')
     CALL READ_SURF(HFILETYPE,'WRITE_EXT  ',GREAD_EXT,IRESP,HDIR='-')
     IF (GREAD_EXT) THEN
-      DO JLAYER=1,IDATA_LAYER
+      DO JLAYER=1,ILAYER
         WRITE(YRECFM,FMT='(A,I1)') TRIM(YRECFM3),JLAYER
-        CALL READ_SURF(HFILETYPE,YRECFM,ZPAR_D(:,JLAYER),IRESP,HDIR=YDIR)      
+        CALL READ_SURF(HFILETYPE,YRECFM,ZD(:,JLAYER),IRESP,HDIR=YDIR)      
       END DO 
     ENDIF
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
@@ -245,6 +245,7 @@ IF (.NOT.GDATA) THEN
              HDIR=YDIR)
     CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
     !
+    ALLOCATE(ZPAR_D(ILU,IDATA_LAYER))
     IF (NRANK==NPIO) THEN
       !* deduces the depths of each layer
       DO JLAYER=1,IDATA_LAYER
@@ -253,28 +254,24 @@ IF (.NOT.GDATA) THEN
     ENDIF
     DEALLOCATE(ZCOVER)
     !
+    IF (IVERSION_PREP<7 .OR. (IVERSION_PREP==7 .AND. IBUGFIX_PREP<=2)) THEN
+      !* ind version of TEB, the computational grid was equal to the data grid
+      ZD(:,:) = ZPAR_D(:,:)
+    ELSEIF (NRANK==NPIO) THEN
+      !* recomputes the grid from the available data
+      CALL THERMAL_LAYERS_CONF(YSURF,ZPAR_D,ZD)
+    END IF
+    DEALLOCATE(ZPAR_D)
+    !
   ENDIF  
   !  
 ENDIF
-!
-!* recomputes the grid from the available data
-!
-ALLOCATE(ZD(ILU,ILAYER))
-!
-IF (IVERSION_PREP<7 .OR. (IVERSION_PREP==7 .AND. IBUGFIX_PREP<=2)) THEN
-  !* ind version of TEB, the computational grid was equal to the data grid
-  ZD(:,:) = ZPAR_D(:,:)
-ELSEIF (NRANK==NPIO) THEN
-  !* recomputes the grid from the available data
-  CALL THERMAL_LAYERS_CONF(YSURF,ZPAR_D,ZD)
-END IF
 !
 IF (PRESENT(PD_ROOF )) PD_ROOF  = ZD
 IF (PRESENT(PD_WALL )) PD_WALL  = ZD
 IF (PRESENT(PD_ROAD )) PD_ROAD  = ZD
 IF (PRESENT(PD_FLOOR)) PD_FLOOR = ZD
 !
-DEALLOCATE(ZPAR_D)
 DEALLOCATE(ZD)
 !
 IF (LHOOK) CALL DR_HOOK('GET_TEB_DEPTHS',1,ZHOOK_HANDLE)

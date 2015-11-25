@@ -252,10 +252,11 @@ IF (NRANK==NPIO) THEN
       ZD(:,:) = 0.0
       DO JPATCH=1,IPATCH
         DO JLAYER=1,TZSNOW%NLAYER
-          ZD(:,JPATCH) = ZD(:,JPATCH) + &
-                        TZSNOW%WSNOW(:,JLAYER,JPATCH)/TZSNOW%RHO(:,JLAYER,JPATCH)
+          WHERE (TZSNOW%WSNOW(:,JLAYER,JPATCH)/=XUNDEF)
+            ZD(:,JPATCH) = ZD(:,JPATCH) + &
+                          TZSNOW%WSNOW(:,JLAYER,JPATCH)/TZSNOW%RHO(:,JLAYER,JPATCH)
+          ENDWHERE
         END DO
-        WHERE(TZSNOW%WSNOW(:,1,JPATCH)==XUNDEF) ZD(:,JPATCH)=XUNDEF
       ENDDO
       !* fine grid
       DO JPATCH=1,IPATCH

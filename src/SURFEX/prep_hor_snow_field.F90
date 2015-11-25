@@ -111,7 +111,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_RSNOW ! prescribed density (kg/m3)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_TSNOW ! prescribed temperature (K)
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_LWCSNOW ! prescribed snow liquid water content (kg/m3)
 REAL,               INTENT(IN)  :: PUNIF_ASNOW ! prescribed albedo (-)
-LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL
+LOGICAL,            INTENT(INOUT)  :: OSNOW_IDEAL
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
@@ -135,7 +135,6 @@ REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZHEAT     ! work array (x, output snow gr
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZGRID     ! grid array (x, output snow grid, kpatch)
 !
 TYPE (DATE_TIME)              :: TZTIME_GRIB    ! current date and time
-LOGICAL                       :: GSNOW_IDEAL
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: JLAYER    ! loop on layers
@@ -148,15 +147,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_SNOW_FIELD',0,ZHOOK_HANDLE)
 !
-GSNOW_IDEAL = .FALSE.
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !*      2.     Reading of input  configuration (Grid and interpolation type)
 !
 IF (OUNIF) THEN
-  GSNOW_IDEAL = OSNOW_IDEAL
-  CALL PREP_SNOW_UNIF(KLUOUT,HSNSURF,ZFIELDIN, TPTIME, GSNOW_IDEAL,       &
+  CALL PREP_SNOW_UNIF(KLUOUT,HSNSURF,ZFIELDIN, TPTIME, OSNOW_IDEAL,       &
                       PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW,              &
                       PUNIF_LWCSNOW, PUNIF_ASNOW, PUNIF_SG1SNOW,          &
                       PUNIF_SG2SNOW, PUNIF_HISTSNOW, PUNIF_AGESNOW,       &
@@ -165,10 +162,9 @@ ELSE IF (HFILETYPE=='GRIB  ') THEN
   CALL PREP_GRIB_GRID(HFILE,KLUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
    IF (NRANK==NPIO) CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)        
 ELSE IF (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '.OR. HFILETYPE=='FA    ') THEN
-  GSNOW_IDEAL = OSNOW_IDEAL
   CALL PREP_SNOW_EXTERN(&
                         HPROGRAM,HSNSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                        KLUOUT,ZFIELDIN,GSNOW_IDEAL,TPSNOW%NLAYER,KTEB_PATCH)
+                        KLUOUT,ZFIELDIN,OSNOW_IDEAL,TPSNOW%NLAYER,KTEB_PATCH)
 ELSE IF (HFILETYPE=='BUFFER') THEN
   CALL PREP_SNOW_BUFFER(IG, U, &
                         HPROGRAM,HSNSURF,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)
@@ -195,6 +191,7 @@ IF (NPROC>1) THEN
 ENDIF
 !    
 ALLOCATE(ZFIELDOUTP(KL,INL,INP))
+!
 !
 DO JVEGTYPE = 1, INP
   IF (INP==NVEGTYPE) THEN
@@ -249,7 +246,7 @@ DEALLOCATE(ZFIELDOUTP)
 !
 !*      5.     Defines normalized output grid, if depths of snow layers are present
 !
-IF (PRESENT(PDEPTH) .AND. .NOT.GSNOW_IDEAL) THEN
+IF (PRESENT(PDEPTH) .AND. .NOT.OSNOW_IDEAL) THEN
 !
 !* total snow depth
 !
@@ -287,7 +284,7 @@ IF (PRESENT(PDEPTH) .AND. .NOT.GSNOW_IDEAL) THEN
 !
   DEALLOCATE(ZD)
 !
-ELSEIF (.NOT.GSNOW_IDEAL) THEN
+ELSEIF (.NOT.OSNOW_IDEAL) THEN
   IF (HSNSURF(1:3)=='RHO' .OR. HSNSURF(1:3)=='HEA') THEN
     WRITE(KLUOUT,*) 'when interpolation profiles of snow pack quantities,'
     WRITE(KLUOUT,*) 'depth of snow layers must be given'
@@ -303,7 +300,7 @@ SELECT CASE (HSNSURF(1:3))
   !
   CASE('WWW')  ! total snow content
     !
-    IF (GSNOW_IDEAL) THEN
+    IF (OSNOW_IDEAL) THEN
       PF(:,:,:) = ZW(:,:,:)
     ELSE
       DO JLAYER=1,SIZE(PF,2)
@@ -321,7 +318,7 @@ SELECT CASE (HSNSURF(1:3))
   !
   CASE('DEP')  ! snow thickness
     !
-    IF (GSNOW_IDEAL) THEN
+    IF (OSNOW_IDEAL) THEN
       PF(:,:,:) = ZW(:,:,:)
     ELSE
       DO JLAYER=1,SIZE(PF,2)
@@ -341,7 +338,7 @@ SELECT CASE (HSNSURF(1:3))
   !
   CASE('RHO') 
     !
-    IF (GSNOW_IDEAL) THEN
+    IF (OSNOW_IDEAL) THEN
       TPSNOW%RHO(:,:,:) = ZW(:,:,:)
     ELSEIF(SIZE(ZW,2)==1) THEN
       DO JLAYER = 1,TPSNOW%NLAYER
@@ -380,7 +377,7 @@ SELECT CASE (HSNSURF(1:3))
     !
     IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
       !
-      IF (GSNOW_IDEAL) THEN
+      IF (OSNOW_IDEAL) THEN
         TPSNOW%HEAT(:,:,:) = ZW(:,:,:)
       ELSEIF(SIZE(ZW,2)==1) THEN
         DO JLAYER = 1,TPSNOW%NLAYER
@@ -404,7 +401,7 @@ SELECT CASE (HSNSURF(1:3))
       !* interpolation of heat on snow levels
       ALLOCATE(ZHEAT(KL,TPSNOW%NLAYER,KPATCH))
       !
-      IF (GSNOW_IDEAL) THEN
+      IF (OSNOW_IDEAL) THEN
         ZHEAT(:,:,:) = ZW(:,:,:)
       ELSEIF(SIZE(ZW,2)==1) THEN
         DO JLAYER = 1,TPSNOW%NLAYER
@@ -433,7 +430,7 @@ SELECT CASE (HSNSURF(1:3))
   !
   CASE('SG1')
     !
-    IF (GSNOW_IDEAL) THEN
+    IF (OSNOW_IDEAL) THEN
       TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
     ELSEIF(SIZE(ZW,2)==1) THEN
       DO JLAYER = 1,TPSNOW%NLAYER
@@ -455,7 +452,7 @@ SELECT CASE (HSNSURF(1:3))
     !
   CASE('SG2')
     !
-    IF (GSNOW_IDEAL) THEN
+    IF (OSNOW_IDEAL) THEN
       TPSNOW%GRAN2(:,:,:) = ZW(:,:,:)
     ELSEIF(SIZE(ZW,2)==1) THEN
       DO JLAYER = 1,TPSNOW%NLAYER
@@ -477,7 +474,7 @@ SELECT CASE (HSNSURF(1:3))
     !
   CASE('HIS')
     !
-    IF (GSNOW_IDEAL) THEN
+    IF (OSNOW_IDEAL) THEN
       TPSNOW%HIST(:,:,:) = ZW(:,:,:)
     ELSEIF(SIZE(ZW,2)==1) THEN
       DO JLAYER = 1,TPSNOW%NLAYER
@@ -499,10 +496,10 @@ SELECT CASE (HSNSURF(1:3))
     !
   CASE('AGE')
     !
-    IF (TPSNOW%SCHEME=='3-L'.AND.(.NOT.GSNOW_IDEAL).AND.(.NOT.OUNIF))THEN
+    IF (TPSNOW%SCHEME=='3-L'.AND.(.NOT.OSNOW_IDEAL).AND.(.NOT.OUNIF))THEN
        TPSNOW%AGE(:,:,:) = 0.0
     ELSE
-      IF (GSNOW_IDEAL) THEN
+      IF (OSNOW_IDEAL) THEN
         TPSNOW%AGE(:,:,:) = ZW(:,:,:)
       ELSEIF(SIZE(ZW,2)==1) THEN
         DO JLAYER = 1,TPSNOW%NLAYER
@@ -529,7 +526,7 @@ END SELECT
 !
 !*      7.     Deallocations
 !
-IF (PRESENT(PDEPTH) .AND. .NOT.GSNOW_IDEAL) DEALLOCATE(ZGRID    )
+IF (PRESENT(PDEPTH) .AND. .NOT.OSNOW_IDEAL) DEALLOCATE(ZGRID    )
 DEALLOCATE(ZW       )
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_SNOW_FIELD',1,ZHOOK_HANDLE)
 !
