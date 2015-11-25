@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE INTERPOL_NPTS (UG, U, &
-                                HPROGRAM,KLUOUT,KNPTS,KCODE,PX,PY,PFIELD)
+                                HPROGRAM,KLUOUT,KNPTS,KCODE,PX,PY,PFIELD,KNEAR_NBR)
 !     #########################################################
 !
 !!**** *INTERPOL_NPTS* interpolates with ###ine f77 programs a 2D field
@@ -83,6 +83,7 @@ INTEGER,DIMENSION(:),  INTENT(INOUT)  :: KCODE    ! code for each point
 REAL,   DIMENSION(:),  INTENT(IN)     :: PX       ! x of each grid mesh.
 REAL,   DIMENSION(:),  INTENT(IN)     :: PY       ! y of each grid mesh.
 REAL,   DIMENSION(:,:),INTENT(INOUT)  :: PFIELD   ! pgd field on grid mesh.
+INTEGER, INTENT(IN) :: KNEAR_NBR
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -97,7 +98,7 @@ REAL, DIMENSION(0:KNPTS)                :: ZNDIST ! 3 nearest square distances
 REAL, DIMENSION(0:KNPTS,SIZE(PFIELD,2)) :: ZNVAL  ! 3 corresponding field values
 REAL, DIMENSION(SIZE(PFIELD,2))         :: ZSUM
 !
-INTEGER                            :: INEAR_NBR      ! number of points to scan
+INTEGER :: IHALO
 INTEGER                            :: JLIST          ! loop counter on points to interpolate
 INTEGER                            :: ICOUNT         ! counter
 INTEGER                            :: INPTS
@@ -105,7 +106,6 @@ INTEGER                            :: ISCAN          ! number of points to scan
 INTEGER                            :: ISCAN_ALL      ! number of data points
 INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX       ! list of index to scan
 INTEGER, DIMENSION(SIZE(PFIELD,1)) :: IINDEX_ALL   ! list of all data points
-INTEGER                            :: IHALO        ! halo available
 INTEGER, DIMENSION(SIZE(KCODE))    :: ISIZE
 INTEGER                            :: ISIZE0
 !
@@ -116,11 +116,9 @@ IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',0,ZHOOK_HANDLE)
 !
 IL = SIZE(PFIELD,1)
 !
-CALL GET_INTERP_HALO(HPROGRAM,UG%CGRID,IHALO)
-!
-INEAR_NBR = (2*IHALO+1)**2
-!
 IINDEX    (:) = 0
+!
+ CALL GET_INTERP_HALO(HPROGRAM,UG%CGRID,IHALO)
 !
 IF(UG%CGRID=='GAUSS'.OR.IHALO==0)THEN
 !
@@ -140,9 +138,9 @@ IF(UG%CGRID=='GAUSS'.OR.IHALO==0)THEN
   END DO 
 !
 ELSEIF (.NOT.ASSOCIATED(UG%NNEAR)) THEN
-  ALLOCATE(UG%NNEAR(IL,INEAR_NBR))
+  ALLOCATE(UG%NNEAR(IL,KNEAR_NBR))
   UG%NNEAR(:,:) = 0
-  CALL GET_NEAR_MESHES(UG%CGRID,UG%NGRID_PAR,U%NSIZE_FULL,UG%XGRID_PAR,INEAR_NBR,UG%NNEAR)
+  CALL GET_NEAR_MESHES(UG%CGRID,UG%NGRID_PAR,U%NSIZE_FULL,UG%XGRID_PAR,KNEAR_NBR,UG%NNEAR)
 ENDIF
 !
 DO JL=1,IL
@@ -167,7 +165,7 @@ DO JL=1,IL
   ELSE
     !
     ICOUNT = 0
-    DO JD=1,INEAR_NBR
+    DO JD=1,KNEAR_NBR
       IF (UG%NNEAR(JL,JD)>0) THEN
         IF (KCODE(UG%NNEAR(JL,JD))>0) THEN  
           ICOUNT = ICOUNT+1
@@ -176,9 +174,11 @@ DO JL=1,IL
       END IF
     END DO
     !
-    IF (ICOUNT>=1) THEN
+    !IF (ICOUNT>=1) THEN
+    IF (ICOUNT>=KNPTS) THEN
       ISCAN = ICOUNT
-      INPTS = MIN(ICOUNT,KNPTS)
+      !INPTS = MIN(ICOUNT,KNPTS)
+      INPTS = KNPTS
     ELSE
       KCODE(JL) = -4
       CYCLE
