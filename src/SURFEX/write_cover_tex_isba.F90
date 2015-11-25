@@ -118,15 +118,15 @@ DO
 !* WARNING: check the cover type order in ini_data_cover routine
 !
   IF (CLANG=='EN') THEN
-    WRITE(NTEX,*) "&&bare&rocks&snow&broad.d&needl.e&ever-&C3&C4&irr.&grass&grass&irr. &
-                    &broad.d&broad.e&needl.e&broad.d&needl.d&grass&shrubs\\"
-    WRITE(NTEX,*) "&&land&&&temp.&boreal&green&crops&crops&crops&C3&C4&grass&trop. &
-                    &temp.&temp.&boreal&boreal&boreal&broad.\\"
+    WRITE(NTEX, '("&&bare&rocks&snow&broad.d&needl.e&ever-&C3&C4&irr.&grass&grass&irr. ")', ADVANCE='NO') 
+    WRITE(NTEX, '("broad.d&broad.e&needl.e&broad.d&needl.d&grass&shrubs\\")')
+    WRITE(NTEX, '("&&land&&&temp.&boreal&green&crops&crops&crops&C3&C4&grass&trop. ")', ADVANCE='NO')
+    WRITE(NTEX, '("temp.&temp.&boreal&boreal&boreal&broad.\\")')
   ELSE
-    WRITE(NTEX,*) "&&sol&roc&neige&feuillu.d&coni.p&persis-&C3&C4&cult.&prairie&prairie &
-               &pelouse&feuillu.d&feuillu.p&aigui.p&feuillu.d&aigui.d&prairie&arbuste\\"
-    WRITE(NTEX,*) "&&nu&&&temp.&boreale&tants&cult.&cult.&irr.&&tropicale&&tropi.&temp. &
-                    &temp.&boreale&boreale&boreale\\"
+    WRITE(NTEX, '("&&sol&roc&neige&feuillu.d&coni.p&persis-&C3&C4&cult.&prairie&prairie ")', ADVANCE='NO')
+    WRITE(NTEX, '("pelouse&feuillu.d&feuillu.p&aigui.p&feuillu.d&aigui.d&prairie&arbuste\\")')
+    WRITE(NTEX, '("&&nu&&&temp.&boreale&tants&cult.&cult.&irr.&&tropicale&&tropi.&temp. ")', ADVANCE='NO')
+    WRITE(NTEX, '("temp.&boreale&boreale&boreale\\")')
   END IF
   WRITE(NTEX,*) '\hline'
   WRITE(NTEX,*) '\hline'
@@ -551,3 +551,4 @@ IF (LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_ISBA',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE WRITE_COVER_TEX_ISBA
+

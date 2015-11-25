@@ -31,7 +31,7 @@ USE MODD_SURF_PAR,      ONLY : XUNDEF
 USE MODD_ISBA_n,        ONLY : ISBA_t
 !
 #ifdef SFX_ARO
-USE YOMMP,              ONLY : MYPROC 
+USE YOMMP0,             ONLY : MYPROC 
 #endif
 !
 USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
@@ -113,6 +113,9 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',0,ZHOOK_HANDLE)
+
+#ifdef USE_SODA
+
 !
 !############################# BEGINNING ###############################
 !
@@ -453,5 +456,8 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',1,ZHOOK_HANDLE)
+
+#endif
+
 !
 END SUBROUTINE ASSIM_NATURE_ISBA_ENKF

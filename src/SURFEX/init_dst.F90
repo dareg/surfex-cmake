@@ -165,22 +165,32 @@ DST%NR_PATCH_DST(:,:,:)=0
 DO JPATCH=1,KPATCH
   DO JVEG=1,NVEGNO_DST
     JVEG_IN = DST%NVT_DST(JVEG)          ! Get the real vegtype index
+#ifdef RJ_OFIX
     CALL GET_VEGTYPE_2_PATCH_MASK(ILUOUT,    &
              DST%NSIZE_PATCH_DST(JVEG,JPATCH),             &!I Size of dust emitter vector
              KSIZE_NATURE_P(JPATCH),                   &!I Size of patch vector
              U%NSIZE_NATURE,                             &!I Size of nature vector
 !RJ: attempt to make this call generic
-#ifdef RJ_OFIX
              KR_NATURE_P(:KSIZE_NATURE_P(JPATCH),JPATCH),&!I Mask from patch to nature
-#else
-             KR_NATURE_P,                              &!I Mask from patch to nature
-#endif
              PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
              DST%NR_PATCH_DST(:DST%NSIZE_PATCH_DST(JVEG,JPATCH),JVEG,JPATCH),  &!O Part of mask array to fill with values
              KPATCH,                                   &!I Number of possible patches
              JPATCH,                                   &!I Index of patch in question
              JVEG_IN                                  &!I Index of vegtype in question
              )  
+#else
+    CALL GET_VEGTYPE_2_PATCH_MASK(ILUOUT,    &
+             DST%NSIZE_PATCH_DST(JVEG,JPATCH),             &!I Size of dust emitter vector
+             KSIZE_NATURE_P(JPATCH),                   &!I Size of patch vector
+             U%NSIZE_NATURE,                             &!I Size of nature vector
+             KR_NATURE_P,                              &!I Mask from patch to nature
+             PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
+             DST%NR_PATCH_DST(:DST%NSIZE_PATCH_DST(JVEG,JPATCH),JVEG,JPATCH),  &!O Part of mask array to fill with values
+             KPATCH,                                   &!I Number of possible patches
+             JPATCH,                                   &!I Index of patch in question
+             JVEG_IN                                  &!I Index of vegtype in question
+             )  
+#endif
   ENDDO !Loop on patches
 ENDDO    !Loop on veg-types
 !

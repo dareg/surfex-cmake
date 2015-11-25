@@ -35,7 +35,7 @@ USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 !
 #ifdef SFX_ARO
-USE YOMMP,              ONLY : MYPROC 
+USE YOMMP0,             ONLY : MYPROC 
 #endif
 !
 USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
@@ -126,6 +126,9 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',0,ZHOOK_HANDLE)
+
+#ifdef USE_SODA
+
 !
 !############################# BEGINNING ###############################
 !
@@ -516,7 +519,7 @@ DO JI=1,KI
             ZHOWR(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
           ENDIF
           !
-          IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0)) THEN         !if obs available
+          IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN         !if obs available
             ! Jacobian of obs operator
             ZHO(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
             ! impose limits  
@@ -683,6 +686,7 @@ DO JL=1,NVAR
   END SELECT
 ENDDO
 !
+#endif
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',1,ZHOOK_HANDLE)
 !

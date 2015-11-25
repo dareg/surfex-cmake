@@ -1,5 +1,7 @@
 ! *****************************************************************************************
 PROGRAM SODA
+
+#ifdef USE_SODA
 !
 ! ------------------------------------------------------------------------------------------
 !!
@@ -100,6 +102,8 @@ USE MODN_IO_OFFLINE,     ONLY : NAM_IO_OFFLINE, CNAMELIST, CPGDFILE, CPREPFILE, 
 !
 USE MODE_POS_SURF,  ONLY : POSNAM
 !
+USE MODI_DEALLOC_SURF_ATM_N
+USE MODI_INIT_OUTPUT_OL_N
 USE MODI_SET_SURFEX_FILEIN
 USE MODI_INIT_INDEX_MPI
 USE MODI_GATHER_AND_WRITE_MPI
@@ -728,7 +732,7 @@ IF (LEXTRAP_SEA .OR. LEXTRAP_WATER .OR. LEXTRAP_NATURE .OR. .NOT.LWATERTG2) THEN
     IF (IRESP /=0) CALL ABOR1_SFX("Can not read Land-Sea mask from FA file "//TRIM(CFILEIN_FA))
     !  Close FA file
     CALL END_IO_SURF_n(YPROGRAM2)
-    CALL IO_BUFF_CLEAN_n
+    CALL IO_BUFF_CLEAN
 #else
     CALL ABOR1_SFX("The Land-sea mask file is assumed to be an FA file. You must compile with FA support enabled: -DSFX_FA")
 #endif
@@ -1287,5 +1291,6 @@ IF (LHOOK) CALL DR_HOOK('SODA',1,ZHOOK_HANDLE)
 #endif
 !
 !-------------------------------------------------------------------------------
-!
+
+#endif
 END PROGRAM SODA
