@@ -397,7 +397,20 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       YCOMMENT='Penetration of ram resistance sensor (2 daN)'              
       CALL WRITE_SURF(DGU, U, &
               HPROGRAM,'RAM_SONDE',DGMI%XAVG_SNOWRAM_SONDE(:),IRESP,&
-              HCOMMENT=YCOMMENT)                   
+              HCOMMENT=YCOMMENT)     
+      IF (DGMI%LPROBANDS) THEN
+      YCOMMENT='Snow spectral albedo' 
+      IF (DGMI%LPROBANDS) THEN
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SPEC_ALB',DGMI%XAVG_SPEC_ALB(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='Diffuse to total spectral irradiance ratio' 
+      ENDIF
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'DIFF_RATIO',DGMI%XAVG_DIFF_RATIO(:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      ENDIF
+      
       YCOMMENT='Thickness of wet snow at the top of the snowpack'  
       CALL WRITE_SURF(DGU, U, &
               HPROGRAM,'WET_TH',DGMI%XAVG_SNOW_WETTHICKNESS(:),IRESP,&
@@ -701,6 +714,17 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       CALL WRITE_SURF(DGU, U, &
               HPROGRAM,'RAM_SONDE_P',DGMI%XSNOWRAM_SONDE(:,:),IRESP,&
               HCOMMENT=YCOMMENT)
+     IF (DGMI%LPROBANDS) THEN
+     YCOMMENT='Snow spectral albedo per patch'               
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'SPEC_ALB_P',DGMI%XSPEC_ALB(:,:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+      YCOMMENT='Diffuse to total spectral irradiance ratio per patch'               
+      CALL WRITE_SURF(DGU, U, &
+              HPROGRAM,'DIFF_RATIO_P',DGMI%XDIFF_RATIO(:,:,:),IRESP,&
+              HCOMMENT=YCOMMENT)
+       ENDIF       
+              
       YCOMMENT='Thickness of wet snow at the top of the snowpack per patch'    
       CALL WRITE_SURF(DGU, U, &
               HPROGRAM,'WET_TH_P',DGMI%XSNOW_WETTHICKNESS(:,:),IRESP,&

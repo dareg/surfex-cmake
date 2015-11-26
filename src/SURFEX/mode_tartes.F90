@@ -47,6 +47,7 @@ MODULE MODE_TARTES
 !!    -------------
 !!      Original    24/07/2013
 !!      Matthieu Lafaysse interface with SURFEX 23/08/2013
+!!	Marie Dumont 10/11/2015 add spectral repartition of irradiance from atmo-tartes
 !--------------------------------------------------------------------------------
 
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -670,7 +671,7 @@ DO JB = 1,NPNBANDS
       ZTAU(:,JL,JB) = 0.      
     ENDWHERE
     WHERE ( ZTAU(:,JL,JB)>XPTAUMAX )
-      KNLVLS_EFF(:,JB) = MAX(1,JL-1)
+      KNLVLS_EFF(:,JB) = MAX(1,JL)
       GEFF = .FALSE.
     ENDWHERE
     !
@@ -1129,31 +1130,60 @@ IF (LHOOK) CALL DR_HOOK('SOIL_ABSORPTION',1,ZHOOK_HANDLE)
 END SUBROUTINE SOIL_ABSORPTION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE SPECTRAL_REPARTITION(PSW_RAD,PCOSZEN,PSW_RAD_DIF,PSW_RAD_DIR,PNIR_ABS)
+SUBROUTINE SPECTRAL_REPARTITION(PSW_RAD,PCOSZEN,PSW_RAD_DIF,PSW_RAD_DIR,PNIR_ABS,P_DIR_SW, P_SCA_SW)
 
 USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPRATIO_DIR,XPRATIO_DIF,XPCOEFNIR_DIR,XPCOEFNIR_DIF,XP_MUDIFF
+USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM, PPWAVELENGTHS_ATM, PPTEN
 
 IMPLICIT NONE
 
 REAL, DIMENSION(:), INTENT(IN)    :: PSW_RAD ! broadband global incident light (W/m^2) (npoints)
 REAL, DIMENSION(:), INTENT(IN)    :: PCOSZEN ! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:,:), INTENT(IN)  :: P_DIR_SW, P_SCA_SW ! spectral repartition of direct and diffuse from atmotartes (npoints, jpnbands_atm)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSW_RAD_DIF ! spectral diffuse incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSW_RAD_DIR ! spectral direct incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:), INTENT(OUT)   :: PNIR_ABS ! Near infrared radiation (2500-4000 nm) absorbed by snowpack (W/m^2) (npoints)
 !
 REAL, DIMENSION(SIZE(PSW_RAD)) :: ZSW_RAD_BROADDIR,ZSW_RAD_BROADDIF ! direct and diffuse broadband incident light (W/m^2) (npoints)
 INTEGER :: JB !Loop counter
+LOGICAL :: GCRORAD ! activate spectral repartition from atmotartes
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SPECTRAL_REPARTITION',0,ZHOOK_HANDLE)
 !
+GCRORAD=.TRUE.
+IF (GCRORAD) THEN
+
+DO JB = 1,NPNBANDS
+  PSW_RAD_DIF(:,JB) = P_SCA_SW(:,JB)/ XP_MUDIFF
+  PSW_RAD_DIR(:,JB) = P_DIR_SW(:,JB)/PCOSZEN(:)
+END DO
+PNIR_ABS(:)=0.
+DO JB = NPNBANDS,JPNBANDS_ATM
+ PNIR_ABS(:)=PNIR_ABS(:)+P_SCA_SW(:,JB)+P_DIR_SW(:,JB)
+END DO
+
+
+! experience tout en diffus
+!DO JB = 1,NPNBANDS
+!  PSW_RAD_DIF(:,JB) = (P_DIR_SW(:,JB)+P_SCA_SW(:,JB))/XP_MUDIFF
+!  PSW_RAD_DIR(:,JB) = 0.!P_SCA_SW(:,JB)/ XP_MUDIFF
+!END DO
+
+
+! WRITE(*,*) PCOSZEN
+! WRITE(*,*) PNIR_ABS, "NIR absorbed"
+! WRITE(*,*) SUM(PSW_RAD_DIF,2), "DIFFUS"
+! WRITE(*,*) SUM(PSW_RAD_DIR,2) ,"DIRECT"
+
+ELSE
 ! Separate broadband global radiation in direct and diffuse (parametrization Marie Dumont)
 ! NB : thresold 1. to the factor when zenithal angle close to pi/2
 ZSW_RAD_BROADDIF = MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &
                              - 3.52421131883*PCOSZEN + 0.0299111951172 ), 1. ) * PSW_RAD
 ZSW_RAD_BROADDIR = PSW_RAD - ZSW_RAD_BROADDIF
-!
+
 ! Spectral decomposition
 DO JB = 1,NPNBANDS
   PSW_RAD_DIF(:,JB) = XPRATIO_DIF(JB) * ZSW_RAD_BROADDIF / XP_MUDIFF
@@ -1162,6 +1192,11 @@ END DO
 
 PNIR_ABS = ZSW_RAD_BROADDIF*XPCOEFNIR_DIF + ZSW_RAD_BROADDIR*XPCOEFNIR_DIR
 
+
+ENDIF 
+
+
+
 IF (LHOOK) CALL DR_HOOK('SPECTRAL_REPARTITION',1,ZHOOK_HANDLE)
 
 END SUBROUTINE SPECTRAL_REPARTITION
@@ -1169,7 +1204,8 @@ END SUBROUTINE SPECTRAL_REPARTITION
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
                           PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
-                          PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO)
+                          PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW, PSNOWALB_SP,&
+                          PSPEC_DIR, PSPEC_DIF)
 !
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
@@ -1192,6 +1228,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN) :: PSNOWIMP_CONTENT !impurities content (g/g)
 REAL, DIMENSION(:), INTENT(IN)     :: PALB ! soil/vegetation albedo (npoints)
 !
 REAL, DIMENSION(:), INTENT(IN)     :: PSW_RAD ! global broadband incident light (W/m^2) (npoints)
+REAL, DIMENSION(:,:), INTENT(IN)   :: P_DIR_SW, P_SCA_SW ! diffuse and direct spectral irradiance (npoints, jpnbands_atm)
 REAL, DIMENSION(:), INTENT(IN)     :: PZENITH ! zenithal solar angle (npoints)
 !
 INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow layers (npoints)
@@ -1200,6 +1237,8 @@ INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow laye
 REAL, DIMENSION(:,:), INTENT(OUT) :: PRADSINK !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWALB_SP !(npoints,nlayers)
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_DIR, PSPEC_DIF
 !
 LOGICAL, INTENT(IN) :: ODEBUG ! Print for debugging
 CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
@@ -1243,6 +1282,9 @@ IF (LHOOK) CALL DR_HOOK('SNOWCRO_TARTES',0,ZHOOK_HANDLE)
 PRADSINK = 0.
 PRADXS   = 0.
 PSNOWALB = 1.
+PSNOWALB_SP=1.
+PSPEC_DIF=0.
+PSPEC_DIR=0.
 !
 INPOINTS = SIZE(PSNOWRHO,1)
 !
@@ -1321,14 +1363,18 @@ IF ( IPOINTDAY>=1 ) THEN
                            ZSNOWIMP_CONTENT_P(1:IPOINTDAY,1:IMAX_USE,1:NPNIMP),                       &
                            ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),                                &
                            ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),  & 
-                           ZRADSINK_P(1:IPOINTDAY,1:IMAX_USE),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO)
+                           ZRADSINK_P(1:IPOINTDAY,1:IMAX_USE),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO,&
+                           P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
+                           PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:))
 #else
   CALL SNOWCRO_CALL_TARTES(ZSNOWGRAN1_P(1:IPOINTDAY,:),ZSNOWGRAN2_P(1:IPOINTDAY,:),ZSNOWRHO_P(1:IPOINTDAY,:),     &
                            ZSNOWDZ_P(1:IPOINTDAY,:),ZSNOWG0_P(1:IPOINTDAY,:),ZSNOWY0_P(1:IPOINTDAY,:),            &
                            ZSNOWW0_P(1:IPOINTDAY,:),ZSNOWB0_P(1:IPOINTDAY,:),ZSNOWIMP_DENSITY_P(1:IPOINTDAY,:,:), &
                            ZSNOWIMP_CONTENT_P(1:IPOINTDAY,:,:),ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),        &
                            ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),              &
-                           ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO)
+                           ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO,&
+                           P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
+                             PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:))
 #endif
   !
   !Unpack 1d output variables
@@ -1366,7 +1412,8 @@ END SUBROUTINE SNOWCRO_TARTES
 
 SUBROUTINE SNOWCRO_CALL_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
                                PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
-                               PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO)
+                               PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW,PALB_SP,&
+                               PSPEC_DIF,PSPEC_DIR)
 !
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
@@ -1391,6 +1438,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN) :: PSNOWIMP_CONTENT !impurities content (g/g)
 REAL, DIMENSION(:), INTENT(IN)     :: PALB ! soil/vegetation albedo (npoints)
 !
 REAL, DIMENSION(:), INTENT(IN)     :: PSW_RAD ! global broadband incident light (W/m^2) (npoints)
+REAL, DIMENSION(:,:), INTENT(IN)   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral reparation from atmotartes	
 REAL, DIMENSION(:), INTENT(IN)     :: PZENITH ! zenithal solar angle (npoints)
 !
 INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow layers (npoints)
@@ -1399,6 +1447,8 @@ INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow laye
 REAL, DIMENSION(:,:), INTENT(OUT) :: PRADSINK !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
+REAL, DIMENSION(:,:), INTENT(OUT) :: PALB_SP ! spectral albedo (npoints, nlayers)
+REAL, DIMENSION(:,:), INTENT(OUT) ::PSPEC_DIF,PSPEC_DIR
 
 LOGICAL,INTENT(IN) :: ODEBUG ! Print for debugging
 CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
@@ -1431,6 +1481,7 @@ REAL :: ZDIAM !optical diameter
 INTEGER :: JB,JL,JJ !Loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+LOGICAL :: GCRORAD
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO_CALL_TARTES',0,ZHOOK_HANDLE)
 !
@@ -1456,7 +1507,7 @@ DO JB = 1,NPNBANDS
 END DO
 !
 !Spectral repartition of radiation
- CALL SPECTRAL_REPARTITION(PSW_RAD,COS(PZENITH),ZSW_RAD_DIF,ZSW_RAD_DIR,ZNIR_ABS)
+ CALL SPECTRAL_REPARTITION(PSW_RAD,COS(PZENITH),ZSW_RAD_DIF,ZSW_RAD_DIR,ZNIR_ABS,P_DIR_SW, P_SCA_SW)
 !
 IF ( ODEBUG ) THEN
   WRITE(*,*) "ZSW_RAD_DIF=",ZSW_RAD_DIF
@@ -1464,6 +1515,21 @@ IF ( ODEBUG ) THEN
   WRITE(*,*) "PZENITH=",PZENITH
 END IF
 !
+GCRORAD=.TRUE.
+IF (.NOT.GCRORAD) THEN
+PSPEC_DIF(:,:)=0.
+PSPEC_DIR(:,:)=0.
+DO JJ=1,NPNBANDS
+PSPEC_DIR(:,JJ)=ZSW_RAD_DIR(:,JJ)*COS(PZENITH)
+PSPEC_DIF(:,JJ)=ZSW_RAD_DIF(:,JJ)*XP_MUDIFF
+ENDDO
+ELSE 
+
+PSPEC_DIF(:,:)=P_SCA_SW(:,:)
+PSPEC_DIR(:,:)=P_DIR_SW(:,:)
+ENDIF 
+
+
 !Call tartes model
 ! For test and debugging this routine can be called independently by a python interface   
 !
@@ -1538,6 +1604,9 @@ END IF
     ! End modif ML
     ! --------------------------------------------------------------------------------------------------------------------
 !    
+! spectral albedo 
+PALB_SP(:,:)=ZSNOWALB(:,:)
+
 ! Broadband absorbed energy by snowpack and soil
 ZSNOWENERGY_BB = 0.
 ZSOILENERGY_BB = 0.

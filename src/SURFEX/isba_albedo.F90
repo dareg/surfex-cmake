@@ -142,7 +142,7 @@ ENDIF
     PGLOBAL_SW(:) = PGLOBAL_SW(:) + (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB))
     PMEB_SCA_SW(:) = PMEB_SCA_SW(:) + (PSCA_SW(:,JSWB))
   END DO
-!
+
 !* snow-free global albedo (needed by ISBA)
 !
   ZSW_UP(:) = 0. 

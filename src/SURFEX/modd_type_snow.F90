@@ -54,6 +54,7 @@ REAL, DIMENSION(:,:,:),   POINTER :: GRAN2   ! snow grain parameter 2
 REAL, DIMENSION(:,:,:),   POINTER :: HIST    ! snow historical variable
 !                                               (non dendritic case)
 REAL, DIMENSION(:,:,:),   POINTER :: AGE ! snow grain age
+REAL, DIMENSION(:,:,:), POINTER :: IMPUR ! impurity content
 END TYPE SURF_SNOW
 !
 END MODULE MODD_TYPE_SNOW

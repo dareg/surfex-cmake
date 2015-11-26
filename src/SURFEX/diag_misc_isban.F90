@@ -111,7 +111,7 @@ REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORKTEMP
 REAL, DIMENSION(KSIZE) :: ZALT, ZFLT
 !
 LOGICAL :: GMASK
-INTEGER :: JJ, JI, JK
+INTEGER :: JJ, JI, JK, JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -219,6 +219,23 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
      ENDIF
      !
   END DO
+ IF (DGMI%LPROBANDS) THEN
+ DO JP=1,size(PKDI%XP_SPEC_ALB,2)
+ DO JJ=1,KSIZE
+     JI                     =  KMASK       (JJ)
+     !
+      
+
+     
+       DGMI%XSPEC_ALB(JI,JP,KPATCH)=PKDI%XP_SPEC_ALB(JJ,JP)
+       DGMI%XDIFF_RATIO(JI,JP,KPATCH)=PKDI%XP_DIFF_RATIO(JJ,JP)
+    
+
+     !
+  END DO
+  ENDDO
+  ENDIF
+  
 !
   IF (HSNOW=='3-L' .OR. HSNOW=='CRO') THEN
      !

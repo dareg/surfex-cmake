@@ -53,6 +53,7 @@ TYPE DIAG_MISC_ISBA_t
   LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo
   LOGICAL :: LSURF_MISC_DIF      ! flag for miscellaneous terms of isba-dif scheme
   LOGICAL :: LPROSNOW            ! flag for Crocus-MEPRA outputs
+  LOGICAL :: LPROBANDS           ! flag for Crocus spectral ouputs
 !
 !* variables for each patch
 !
@@ -85,7 +86,9 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XSNOWRAM_SONDE ! penetration depth of the ram resistance sensor (2 DaN)
   REAL, POINTER, DIMENSION(:,:) :: XSNOW_WETTHICKNESS ! Thickness of wet snow at the top of the snowpack
   REAL, POINTER, DIMENSION(:,:) :: XSNOW_REFROZENTHICKNESS  ! Thickness of refrozen snow at the top of the snowpack
-!
+  REAL, POINTER, DIMENSION(:,:,:) :: XSPEC_ALB ! spectral snow albedo
+  REAL, POINTER, DIMENSION(:,:,:) :: XDIFF_RATIO ! spectral diffuse to total ratio
+  
   REAL, POINTER, DIMENSION(:,:) :: XSYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
   REAL, POINTER, DIMENSION(:,:) :: XSYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
   
@@ -147,6 +150,8 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XAVG_SNOWRAM_SONDE ! penetration depth of the ram resistance sensor (2 DaN)
   REAL, POINTER, DIMENSION(:) :: XAVG_SNOW_WETTHICKNESS ! Thickness of wet snow at the top of the snowpack
   REAL, POINTER, DIMENSION(:) :: XAVG_SNOW_REFROZENTHICKNESS  ! Thickness of refrozen snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:,:) :: XAVG_SPEC_ALB ! average snow spectral albedo
+  REAL, POINTER, DIMENSION(:,:) :: XAVG_DIFF_RATIO ! average diffuse to total spectral ratio
 !  
   REAL, POINTER, DIMENSION(:) :: XAVG_SYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
   REAL, POINTER, DIMENSION(:) :: XAVG_SYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
@@ -197,6 +202,8 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_MISC_ISBA%XSNOWTYPEMEPRA)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWSSA)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWRAM)
+  NULLIFY(YDIAG_MISC_ISBA%XSPEC_ALB)
+  NULLIFY(YDIAG_MISC_ISBA%XDIFF_RATIO)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWSHEAR)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWDEPTH_1DAYS)
   NULLIFY(YDIAG_MISC_ISBA%XSNOWDEPTH_3DAYS)
@@ -218,6 +225,8 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_5DAYS)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_7DAYS)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWRAM_SONDE)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SPEC_ALB)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_DIFF_RATIO)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_REFROZENTHICKNESS)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_WETTHICKNESS)  
   NULLIFY(YDIAG_MISC_ISBA%XDPSNG)

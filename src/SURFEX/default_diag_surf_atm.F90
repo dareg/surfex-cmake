@@ -2,7 +2,7 @@
       SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M,OT2MMW,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET, &
                                          OCOEF,OSURF_VARS,OSURF_BUDGETC,          &
                                          ORESET_BUDGETC, OSELECT, OPROVAR_TO_DIAG,&
-                                         ODIAG_GRID, OFRAC, PDIAG_TSTEP, OSNOWDIMNC, &
+                                         ODIAG_GRID, OFRAC, PDIAG_TSTEP, OSNOWDIMNC,OSNOWBANDS, &
                                          CSELECT)                                         
 !     ########################################################################
 !
@@ -64,6 +64,7 @@ LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC  ! flag for cumulated surface budget
 LOGICAL,  INTENT(OUT) :: OSELECT       ! switch to control which fields are written
 LOGICAL,  INTENT(OUT) :: OPROVAR_TO_DIAG    ! switch to write (or not) prognostic variable
 LOGICAL,  INTENT(OUT) :: OSNOWDIMNC    ! if true create a snow layer dimension in nc files
+LOGICAL, INTENT(OUT) :: OSNOWBANDS ! if true create spectral dimension in nc files
 LOGICAL,  INTENT(OUT) :: ODIAG_GRID    ! flag for mean grid diag
 LOGICAL,  INTENT(OUT) :: OFRAC         ! flag for fractions of tiles
 REAL,     INTENT(OUT) :: PDIAG_TSTEP   ! time-step for writing
@@ -102,6 +103,8 @@ OFRAC        = .FALSE.
 PDIAG_TSTEP  = XUNDEF
 !
 OSNOWDIMNC = .FALSE.
+OSNOWBANDS = .FALSE.
+
 
 IF (PRESENT(CSELECT)) CSELECT(:) = '            '
 IF (LHOOK) CALL DR_HOOK('DEFAULT_DIAG_SURF_ATM',1,ZHOOK_HANDLE)

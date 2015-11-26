@@ -40,7 +40,8 @@
                       PRESA, PANFM, PFSAT,                                       &
                       PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
                       PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,                 &
-                      PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PGRNDFLUX, PHPSNOW,       &
+                      PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PSNOWIMPUR,               &
+                      PGRNDFLUX, PHPSNOW,                                        &
                       PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                   &
                       PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW,      &
                       PCHSNOW, PTS_RAD, PTS, PHV, PQS, PSNOWTEMP, PSNOWLIQ,      &
@@ -69,7 +70,8 @@
                       PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                       PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                       PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-                      PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)
+                      PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
+                      P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO)
 !     ##########################################################################
 !
 !
@@ -155,6 +157,7 @@
 !!      (A. Boone & P. Samuelsson) (10/2014) Added MEB v1
 !!      (P. LeMoigne) 12/2014 EBA scheme update
 !!      (A. Boone)    02/2015 Consider spectral band dependence of snow for OTR_ML radiation option 
+!! (M. Dumont) 11/2015 Atmotartes and spectral output
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -328,6 +331,11 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZENITH    ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)  :: PSW_RAD    ! solar   incoming radiation
 REAL, DIMENSION(:), INTENT(IN)  :: PSCA_SW    ! solar diffuse incoming radiation
 REAL, DIMENSION(:), INTENT(IN)  :: PLW_RAD    ! thermal incoming radiation
+REAL, DIMENSION(:,:), INTENT(IN):: P_DIR_SW  ! solar direct spectral incoming radiation
+REAL, DIMENSION(:,:), INTENT(IN):: P_SCA_SW ! solar diffuse spectral incoming radiation
+
+
+
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PVMOD      ! modulus of the wind
 !                                             ! parallel to the orography
@@ -637,6 +645,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST   ! Snow grain historical param
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE    ! Snow grain age
 !                                                   NOTE : methamorphism is only activated if the flag
 !                                                   OSNOW_METAMO=TRUE
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR
 ! 
 ! Diagnostics:
 !
@@ -683,7 +692,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWSWE_7DAYS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRAM_SONDE
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_WETTHICKNESS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_REFROZENTHICKNESS
-
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO
 !
 !
 !* output soil parameters
@@ -1062,7 +1071,8 @@ IF(OMEB)THEN
         PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,       &
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
-        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)
+        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
+        P_DIR_SW, P_SCA_SW )
 
 ELSE
 !
@@ -1095,7 +1105,7 @@ ELSE
    CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,&
            TPTIME, PTSTEP, PVEGTYPE,                                            &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                             &
-           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                          &
+           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,              &
            PTG, PCG, PCT, ZSOILHCAPZ, ZSOILCONDZ(:,1),                          &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,             &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                   &
@@ -1115,7 +1125,8 @@ ELSE
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)  
+           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO ) 
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation

@@ -171,7 +171,9 @@ REAL, DIMENSION(SIZE(PPS)) :: ZWINDDIR            ! wind direction (=-1 in TEB)
 INTEGER, DIMENSION(SIZE(PPS)) :: KTAB_SYT        ! array of index containing
                                                   !   opposite direction for Sytron  (=0 in TEB)
 REAL, DIMENSION(SIZE(PPS),GDM%TVG%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
-!
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_DIR_SW ! spectral direct and diffuse irradiance used in snow cro 
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_SCA_SW!
+REAL, DIMENSION(SIZE(PPS),1) :: ZSPEC_ALB, ZDIFF_RATIO
 !  temperatures
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
@@ -452,7 +454,12 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
 !
 !*      2.2    Call ISBA for green areas
 !              -------------------------
-!
+ZP_DIR_SW=XUNDEF
+ZP_SCA_SW=XUNDEF
+ZSPEC_ALB=XUNDEF
+ZDIFF_RATIO=XUNDEF
+
+
 !
  CALL ISBA(GDM%TVG%CISBA, GDM%TVG%CPHOTO, GDM%TVG%LTR_ML, GDM%TVG%CRUNOFF, &
            GDM%TVG%CKSAT, HRAIN, GDM%TVG%CHORT,       &
@@ -509,7 +516,8 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           GDM%TGD%CUR%TSNOW%ALBVIS(:,1), GDM%TGD%CUR%TSNOW%ALBNIR(:,1), GDM%TGD%CUR%TSNOW%ALBFIR(:,1),    &
           GDM%TGD%CUR%TSNOW%WSNOW(:,:,1), GDM%TGD%CUR%TSNOW%HEAT(:,:,1), GDM%TGD%CUR%TSNOW%RHO(:,:,1),    &
           GDM%TGD%CUR%TSNOW%GRAN1(:,:,1), GDM%TGD%CUR%TSNOW%GRAN2(:,:,1), GDM%TGD%CUR%TSNOW%HIST(:,:,1),  &
-          GDM%TGD%CUR%TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
+          GDM%TGD%CUR%TSNOW%AGE(:,:,1), GDM%TGD%CUR%TSNOW%IMPUR(:,:,1),&
+          ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
           ZRNSNOW, ZHSNOW,  ZGFLUXSNOW, ZUSTARSNOW,                   &
           ZSRSFC, ZRRSFC, ZLESL, GDM%TGD%CUR%TSNOW%EMIS(:,1), ZCDSNOW, ZCHSNOW,   &
           PTS_GARDEN, ZTS, ZHV, ZQS, ZSNOWTEMP, ZSNOWLIQ, ZSNOWDZ,    &
@@ -541,9 +549,10 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZSNOWSHEAR,ZSNOWDEPTH_1DAYS,ZSNOWDEPTH_3DAYS,ZSNOWDEPTH_5DAYS,         &
           ZSNOWDEPTH_7DAYS,ZSNOWSWE_1DAYS,ZSNOWSWE_3DAYS,ZSNOWSWE_5DAYS,         &
           ZSNOWSWE_7DAYS,ZSNOWRAM_SONDE,ZSNOW_WETTHICKNESS,&
-          ZSNOW_REFROZENTHICKNESS)                                                           
+          ZSNOW_REFROZENTHICKNESS, ZP_DIR_SW, ZP_SCA_SW, &
+          ZSPEC_ALB, ZDIFF_RATIO)                                                           
 !
-!
+
 IF (GDM%TGD%CUR%TSNOW%SCHEME=='3-L' .OR. GDM%TGD%CUR%TSNOW%SCHEME=='CRO') &
         GDM%TGD%CUR%TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
 !

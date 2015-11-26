@@ -51,7 +51,8 @@
         PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)          
+        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
+        P_DIR_SW, P_SCA_SW)          
 !     ##########################################################################
 !
 !                             
@@ -279,6 +280,8 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PCV           ! vegetation inverse heat c
 REAL, DIMENSION(:),   INTENT(IN)    :: PCG           ! soil inverse heat capacity [(K m2)/J]
 REAL, DIMENSION(:),   INTENT(IN)    :: PFFROZEN      ! Fraction of frozen flood (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PMUF          ! fraction of the grid cell reached by the rainfall (-)
+REAL, DIMENSION(:,:), INTENT(IN )   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral irradiance (W/m2/um)
+
 !
 ! implicit atmospheric coupling coefficients:
 !
@@ -745,6 +748,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 INTEGER :: INI, INL, JJ, JL
 REAL, DIMENSION(SIZE(PWR))         :: ZPHASEL  ! Phase changement in litter (W/m2)
 REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC 
+REAL, DIMENSION(SIZE(PPS),SIZE(P_DIR_SW)) :: PSPEC_ALB, PDIFF_RATIO
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -1189,7 +1193,8 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,            &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &
-           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS) 
+           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO) 
 !
 ! If a litter layer exists, compute hydrology:
 !

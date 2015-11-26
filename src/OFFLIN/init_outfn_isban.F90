@@ -50,6 +50,7 @@
 !!                                           add diag (Qsb, Subl) and Snow noted SN
 !!      modified    10-14, by P. Samuelsson: Added MEB output
 !!      modified    09-15  by M. Lafaysse  : new Crocus-MEPRA outputs
+!! 	modified    11-15 by M. Dumont : new Crocus tartes outputs
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -125,7 +126,7 @@ INTEGER,          INTENT(IN) :: KLUOUT
 ! 
 REAL,DIMENSION(:), POINTER       :: ZX, ZY
 !
-INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIMALL
+INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIMALL, IDDIMSNOW, IDDIMBAND
 INTEGER, DIMENSION(:), ALLOCATABLE :: JDIM 
 INTEGER, DIMENSION(:), ALLOCATABLE :: IDDIM
 INTEGER                          :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS, &
@@ -155,10 +156,11 @@ ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
  CALL OL_DEFINE_DIM(UG, U, &
                     HPROGRAM, KLUOUT, INI, DGU%LSNOWDIMNC, I%TSNOW, IDIM1, YUNIT1, YUNIT2, &
-                   ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM, KNPATCH=INPATCH)
+                   ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM,DGU%LSNOWBANDS, KNPATCH=INPATCH)
  CALL GET_DATE_OL(I%TTIME,XTSTEP_OUTPUT,YDATE(1))
 !
 INDIMSALL = SIZE(IDDIMALL)
+
 
 IF (DGU%LSNOWDIMNC) THEN
   INJDIMS=INDIMSALL-2
@@ -168,9 +170,17 @@ ELSE
   INJDIMS=INDIMSALL-1
   INDIMS=INDIMSALL
 ENDIF
+IF (DGU%LSNOWBANDS) THEN 
+INJDIMS=INJDIMS-1
+INDIMS=INDIMS-1
+ENDIF
 
 ALLOCATE(IDDIM(INDIMS))
 ALLOCATE(JDIM(INJDIMS))
+ALLOCATE(IDDIMSNOW(INDIMS+1))
+ALLOCATE(IDDIMBAND(INDIMS+1))
+
+
 !
 ! 4. Create output file for prognostic variables
 !----------------------------------------------------------
@@ -190,12 +200,25 @@ IF (IDIM1.NE.0) THEN
   JDIM(1)=IDDIMALL(1)
   JDIM(2)=IDDIMALL(2)
   IDDIM(1:2)=IDDIMALL(1:2)
+  IDDIMSNOW(1:2)=IDDIMALL(1:2)
+  IDDIMBAND(1:2)=IDDIMALL(1:2)
+  IDDIMSNOW(3)=3
+  IDDIMBAND(3)=4
 ELSE
   JDIM(1)=IDDIMALL(1)
   IDDIM(1)=IDDIMALL(1)
+  IDDIMSNOW(1)=IDDIMALL(1)
+  IDDIMBAND(1)=IDDIMALL(1)
+  IDDIMSNOW(2)=2
+  IDDIMBAND(2)=3
 ENDIF
 JDIM(INJDIMS)=IDDIMALL(INDIMSALL)
 IDDIM(INDIMS-1:INDIMS)=IDDIMALL(INDIMSALL-1:INDIMSALL)
+IDDIMSNOW(INDIMS:INDIMS+1)=IDDIMALL(INDIMSALL-1:INDIMSALL)
+IDDIMBAND(INDIMS:INDIMS+1)=IDDIMALL(INDIMSALL-1:INDIMSALL)
+
+
+
 !
 IF(I%LTEMP_ARP)THEN
   IL=I%NTEMPLAYER_ARP
@@ -260,25 +283,25 @@ ENDIF
 !
 IF (DGU%LSNOWDIMNC) THEN
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'WSN_VEG', 'Snow_Water_Equivalent', IDDIMALL, YATT_TITLE, (/'Kg/m2'/))
+                      IFILE_ID, 'WSN_VEG', 'Snow_Water_Equivalent', IDDIMSNOW, YATT_TITLE, (/'Kg/m2'/))
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWRO', 'Snow_density' ,         IDDIMALL, YATT_TITLE, (/'Kg/m3'/))
+                      IFILE_ID, 'SNOWRO', 'Snow_density' ,         IDDIMSNOW, YATT_TITLE, (/'Kg/m3'/))
     IF ((I%TSNOW%SCHEME=='3-L') .OR. (I%TSNOW%SCHEME=='CRO')) THEN   
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWHEAT',  'Snow_heat',              IDDIMALL, YATT_TITLE, (/'J/m2'/))
+                      IFILE_ID, 'SNOWHEAT',  'Snow_heat',              IDDIMSNOW, YATT_TITLE, (/'J/m2'/))
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWAGE','Snow_age_param', IDDIMALL, YATT_TITLE,(/'days_since_snowfall'/))
+                      IFILE_ID, 'SNOWAGE','Snow_age_param', IDDIMSNOW, YATT_TITLE,(/'days_since_snowfall'/))
     ELSEIF(I%TSNOW%SCHEME=='1-L') THEN
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWTEMP',  'Snow_temp',              IDDIMALL, YATT_TITLE, (/'K'/))
+                      IFILE_ID, 'SNOWTEMP',  'Snow_temp',              IDDIMSNOW, YATT_TITLE, (/'K'/))
     ENDIF
     IF (I%TSNOW%SCHEME=='CRO') THEN   
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWGRAN1','Snow_grain_parameter1', IDDIMALL, YATT_TITLE, (/'-'/))
+                      IFILE_ID, 'SNOWGRAN1','Snow_grain_parameter1', IDDIMSNOW, YATT_TITLE, (/'-'/))
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWGRAN2','Snow_grain_parameter2', IDDIMALL, YATT_TITLE, (/'-'/))
+                      IFILE_ID, 'SNOWGRAN2','Snow_grain_parameter2', IDDIMSNOW, YATT_TITLE, (/'-'/))
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWHIST','Snow_historical_param', IDDIMALL, YATT_TITLE, (/'-'/))
+                      IFILE_ID, 'SNOWHIST','Snow_historical_param', IDDIMSNOW, YATT_TITLE, (/'-'/))
     ENDIF
 ELSE
   DO JLAYER=1,INLVLS
@@ -998,28 +1021,28 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   
     IF (DGU%LSNOWDIMNC) THEN
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWTEMP',  'Snow_Temp_layer'         , IDDIMALL, YATT_TITLE, (/'K'/))
+                      IFILE_ID, 'SNOWTEMP',  'Snow_Temp_layer'         , IDDIMSNOW, YATT_TITLE, (/'K'/))
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWLIQ',   'Snow_liquid_water_layer', IDDIMALL, YATT_TITLE, (/'m'/))    
+                      IFILE_ID, 'SNOWLIQ',   'Snow_liquid_water_layer', IDDIMSNOW, YATT_TITLE, (/'m'/))    
                       
       IF (DGMI%LPROSNOW) THEN
         ! Variables with layer dimension
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWDZ',  'Snow layer thickness'         , IDDIMALL, YATT_TITLE, (/'m'/))
+                      IFILE_ID, 'SNOWDZ',  'Snow layer thickness'         , IDDIMSNOW, YATT_TITLE, (/'m'/))
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWDEND',  'Snow layer dendricity'         , IDDIMALL, YATT_TITLE, (/'between 0 and 1'/))
+                      IFILE_ID, 'SNOWDEND',  'Snow layer dendricity'         , IDDIMSNOW, YATT_TITLE, (/'between 0 and 1'/))
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWSPHER',   'Snow layer sphericity', IDDIMALL, YATT_TITLE, (/'between 0 and 1'/))
+                      IFILE_ID, 'SNOWSPHER',   'Snow layer sphericity', IDDIMSNOW, YATT_TITLE, (/'between 0 and 1'/))
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWSIZE',   'Snow layer grain size', IDDIMALL, YATT_TITLE, (/'m'/))
+                      IFILE_ID, 'SNOWSIZE',   'Snow layer grain size', IDDIMSNOW, YATT_TITLE, (/'m'/))
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWSSA',  'Snow layer specific surface area'         , IDDIMALL, YATT_TITLE, (/'m2 kg-1'/))
+                      IFILE_ID, 'SNOWSSA',  'Snow layer specific surface area'         , IDDIMSNOW, YATT_TITLE, (/'m2 kg-1'/))
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWTYPE',   'Snow layer grain type', IDDIMALL, YATT_TITLE, (/'no unit'/))                    
+                      IFILE_ID, 'SNOWTYPE',   'Snow layer grain type', IDDIMSNOW, YATT_TITLE, (/'no unit'/))                    
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWRAM',   'Snow layer ram resistance', IDDIMALL, YATT_TITLE, (/'daN'/))  
+                      IFILE_ID, 'SNOWRAM',   'Snow layer ram resistance', IDDIMSNOW, YATT_TITLE, (/'daN'/))  
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWSHEAR',   'Snow layer shear resistance', IDDIMALL, YATT_TITLE, (/'kPa'/))    
+                      IFILE_ID, 'SNOWSHEAR',   'Snow layer shear resistance', IDDIMSNOW, YATT_TITLE, (/'kPa'/))    
       END IF
     ELSE
 
@@ -1056,7 +1079,18 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       CALL DEF_VAR_NETCDF(DGU, &
                     IFILE_ID, 'REFROZ_TH',   &
                     'Thickness of refrozen snow at the top of the snowpack', IDDIM, YATT_TITLE, (/'m'/))         
-    ENDIF
+  
+    IF(DGU%LSNOWBANDS) THEN ! spectral output
+      CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'SPEC_ALB',   &
+                    'Snow spectral albedo', IDDIMBAND, YATT_TITLE, (/'no unity'/))  
+                    CALL DEF_VAR_NETCDF(DGU, &
+                    IFILE_ID, 'DIFF_RATIO',   &
+                    'Spectral diffuse to total ratio', IDDIMBAND, YATT_TITLE, (/'no unity'/))  
+  
+    ENDIF 
+  
+  ENDIF
   
   ENDIF
   
@@ -1845,6 +1879,8 @@ ENDIF
 !
 DEALLOCATE(JDIM)
 DEALLOCATE(IDDIM)
+DEALLOCATE(IDDIMBAND)
+DEALLOCATE(IDDIMSNOW)
 !
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_ISBA_N',1,ZHOOK_HANDLE)
 !
