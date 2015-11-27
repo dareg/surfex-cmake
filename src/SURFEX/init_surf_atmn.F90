@@ -320,8 +320,14 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
+ CALL READ_SURF(&
+                   HPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+                        HPROGRAM,'FULL  ','SURF  ','READ ')
+                
 !
  CALL READ_SURF(&
                    HPROGRAM,'VERSION',IVERSION,IRESP)
@@ -343,8 +349,6 @@ ENDIF
  CALL READ_SURF(&
                    HPROGRAM,'TOWN  ',YSC%U%CTOWN  ,IRESP)
 !
- CALL READ_SURF(&
-                   HPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
 ! 
  CALL READ_SURF(&
                    HPROGRAM,'DIM_SEA   ',YSC%U%NDIM_SEA,   IRESP)
@@ -354,6 +358,7 @@ ENDIF
                    HPROGRAM,'DIM_WATER ',YSC%U%NDIM_WATER, IRESP)
  CALL READ_SURF(&
                    HPROGRAM,'DIM_TOWN  ',YSC%U%NDIM_TOWN,  IRESP)
+!
  CALL READ_LECOCLIMAP(&
                       HPROGRAM,YSC%U%LECOCLIMAP)
  CALL READ_ARRANGE_COVER(&
