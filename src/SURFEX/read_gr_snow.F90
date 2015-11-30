@@ -289,6 +289,25 @@ DO JLAYER = 1,TPSNOW%NLAYER
     TPSNOW%GRAN1(:,JLAYER,:)=ZWORK
     WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%GRAN1(:,JLAYER,:) = XUNDEF
   END IF
+  
+  
+! !   9.b    Snow impurity
+! !              ------------
+! !
+!   IF (TPSNOW%SCHEME=='CRO') THEN
+!     IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
+!       WRITE(YFMT,'(A5,I1,A6)')     '(A7,A',ISURFTYPE_LEN,','//YNLAYER//')'      
+!       WRITE(YRECFM,YFMT) 'SNOWIMPUR_',HSURFTYPE,JLAYER
+!     ELSE
+!       WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
+!       WRITE(YRECFM,YFMT) 'SIMPUR_',HSURFTYPE,JLAYER
+!       YRECFM=ADJUSTL(HPREFIX//YRECFM)
+!     ENDIF      
+!     CALL READ_SURF(&
+!                  HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
+!     TPSNOW%IMPUR(:,JLAYER,:)=ZWORK
+!     WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%IMPUR(:,JLAYER,:) = XUNDEF
+!   END IF
 !
 !*       10.    Snow Gran2
 !              ------------

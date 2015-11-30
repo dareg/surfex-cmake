@@ -87,14 +87,15 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCH      ! drag coefficient for heat
 REAL, DIMENSION(SIZE(PRI)) :: ZZ0, ZZ0H, ZMU,          &
                                ZFH, ZCHSTAR, ZPH, ZCDN, &
                                ZSTA, ZDI, ZWORK1, ZWORK2, ZWORK3 
-REAL, DIMENSION(SIZE(PRI)) :: ZVMOD
+!REAL, DIMENSION(SIZE(PRI)) :: ZVMOD
+REAL, DIMENSION(SIZE(PRI)) :: ZVMOD, ZMARTIN,ZCDN_M98!<bber>
 !
 INTEGER                    :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! Functions:
 REAL :: X, CHSTAR, PH
-CHSTAR(X) = 3.2165 + 4.3431*X + 0.5360*X*X - 0.0781*X*X*X
+ CHSTAR(X) = 3.2165 + 4.3431*X + 0.5360*X*X - 0.0781*X*X*X
 PH    (X) = 0.5802 - 0.1571*X + 0.0327*X*X - 0.0026*X*X*X
 !
 !-------------------------------------------------------------------------------
@@ -126,27 +127,91 @@ DO JJ=1,SIZE(PRI)
 !
 !
   ZSTA(JJ) = PRI(JJ)*ZWORK3(JJ)
-!
-!
-  IF ( PRI(JJ) < 0.0 ) THEN
-    ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
-                   +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
-                                *ZWORK2(JJ)**ZPH(JJ)  &
-                                *ZFH(JJ) * SQRT(-ZSTA(JJ))           &
-                  ) 
-    PAC(JJ) = ZCDN(JJ)*(ZVMOD(JJ)-15.* ZSTA(JJ)*ZDI(JJ))*ZFH(JJ)
 
-  ELSE
-    ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTA(JJ) )
-    PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
-             / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
-  ENDIF
+
+! 
+! !
+! !
+!   IF ( PRI(JJ) < 0.0 ) THEN
+!     ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
+!                    +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
+!                                 *ZWORK2(JJ)**ZPH(JJ)  &
+!                                 *ZFH(JJ) * SQRT(-ZSTA(JJ))           &
+!                   ) 
+!     PAC(JJ) = ZCDN(JJ)*(ZVMOD(JJ)-15.* ZSTA(JJ)*ZDI(JJ))*ZFH(JJ)
+! 
+!   ELSE
+!     ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTA(JJ) )
+!     PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
+!              / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
+!   ENDIF
+! !
+!   PRA(JJ) = 1. / PAC(JJ)
+! !
+!   PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
 !
-  PRA(JJ) = 1. / PAC(JJ)
-!
-  PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
-!
+
+!!<bber
+  ZCDN_M98(JJ)= XKARMAN*XKARMAN/(LOG(PUREF(JJ)/ZZ0(JJ))*LOG(PZREF(JJ)/ZZ0(JJ)))
+   
+!    
+!   IF(HSNOWRES=='RIL' .OR. HSNOWRES=='DEF') THEN
+! !
+!       IF ( PRI(JJ) < 0.0 ) THEN
+!         ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
+!                        +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
+!                                     *ZWORK2(JJ)**ZPH(JJ)  &
+!                                     *ZFH(JJ) * SQRT(-ZSTA(JJ))           &
+!                       ) 
+!         PAC(JJ) = ZCDN(JJ)*  (  ZVMOD(JJ)-15.* ZSTA(JJ)*ZDI(JJ)  )  *  ZFH(JJ)
+! 
+!       ELSE
+!         ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTA(JJ) )
+!         PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
+!                  / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
+!       ENDIF
+!     !
+!       PRA(JJ) = 1. / PAC(JJ)
+!     !
+!       PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
+!   ELSE IF (HSNOWRES=='M98')THEN
+  
+    IF (PRI(JJ)<0.0) THEN
+        IF (ZCDN_M98(JJ)==0.) THEN
+            ZMARTIN(JJ)=1.
+        ELSE
+            ZMARTIN(JJ)= 1.  + (7./  ( 0.83*(ZCDN_M98(JJ))**(-0.62) )  ) &
+            *LOG(1.-0.83*(ZCDN_M98(JJ))**(-0.62)   *  PRI(JJ))
+        ENDIF
+           
+    ELSE
+        IF (PRI(JJ)<0.2) THEN
+            ZMARTIN(JJ) = MAX(0.75,( 1. - 5.*PRI(JJ))*(1. - 5. *PRI(JJ)))!<bber : le min servait à empêcher le CH de remonter pour 
+            !des Ri >0.4 c'est une erreur car cela seuille le Ch dès Ri =0 au lieu de le faire dès Ri=0.026bber>
+        ELSE
+            ZMARTIN(JJ)=MIN(MAX(0.75,( 1. - 5.*PRI(JJ))*(1. - 5. *PRI(JJ))),0.75)
+        ENDIF
+    ENDIF
+    
+    PCH(JJ) = ZMARTIN(JJ) * ZCDN_M98(JJ)!<bber attention fatal error !!!! il faut ZCDN_M98 à la place de ZCDN!!!
+    PRA(JJ)=1./(PCH(JJ)*ZVMOD(JJ))!/!\ be careful bber, checked in noilhan and mahfouf seems ok
+
+    PAC(JJ)=1./(PRA(JJ))
+  !ENDIF
+    !bber>
+
+
+
+
+
+
 ENDDO
+
+
+
+
+
+
 IF (LHOOK) CALL DR_HOOK('SURFACE_AERO_COND',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

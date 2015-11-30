@@ -296,6 +296,8 @@ IF (DGU%LSNOWDIMNC) THEN
                       IFILE_ID, 'SNOWTEMP',  'Snow_temp',              IDDIMSNOW, YATT_TITLE, (/'K'/))
     ENDIF
     IF (I%TSNOW%SCHEME=='CRO') THEN   
+    CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID, 'SNOWIMPUR','Snow_impurity_content', IDDIMSNOW, YATT_TITLE, (/'g/g'/))
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SNOWGRAN1','Snow_grain_parameter1', IDDIMSNOW, YATT_TITLE, (/'-'/))
       CALL DEF_VAR_NETCDF(DGU, &
@@ -1042,7 +1044,9 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SNOWRAM',   'Snow layer ram resistance', IDDIMSNOW, YATT_TITLE, (/'daN'/))  
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWSHEAR',   'Snow layer shear resistance', IDDIMSNOW, YATT_TITLE, (/'kPa'/))    
+                      IFILE_ID, 'SNOWSHEAR',   'Snow layer shear resistance', IDDIMSNOW, YATT_TITLE, (/'kPa'/)) 
+ 
+                      
       END IF
     ELSE
 

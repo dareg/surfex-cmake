@@ -1048,7 +1048,7 @@ IF(OMEB)THEN
         PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, ZF2,                                        &
         PWSAT, PWFC,                                                           &
-        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
+        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,                 &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
         PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
@@ -1102,6 +1102,7 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
+
    CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,&
            TPTIME, PTSTEP, PVEGTYPE,                                            &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                             &
