@@ -42,6 +42,7 @@ SUBROUTINE INIT_SURF_LANDUSE_n (YSC, &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
@@ -62,6 +63,10 @@ USE MODI_COMPUTE_ISBA_PARAMETERS
 USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
+!
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -100,7 +105,7 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
 !*       0.2   Declarations of local variables
 !              -------------------------------
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
-INTEGER           :: JLAYER
+INTEGER           :: JLAYER, INFOMPI
 INTEGER           :: ILU          ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
@@ -126,6 +131,11 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
+CALL MPI_BCAST(YSC%UG%NGRID_FULL_PAR,KIND(YSC%UG%NGRID_FULL_PAR)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+IF (NRANK/=NPIO) ALLOCATE(YSC%UG%XGRID_FULL_PAR(YSC%UG%NGRID_FULL_PAR))
+ CALL MPI_BCAST(YSC%UG%XGRID_FULL_PAR,&
+                SIZE(YSC%UG%XGRID_FULL_PAR)*KIND(YSC%UG%XGRID_FULL_PAR)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
+!   
 !* initialization for I/O
 !
 CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
