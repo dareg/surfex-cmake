@@ -536,6 +536,7 @@ ZALB_GREENROOF(:) = 0.
 ZAC_GARDEN    (:) = 0.
 ZSVF_GARDEN   (:) = 0.
 !
+
 !
 !RJ: fix for OMP races
 !RJ: run parallely for prep, but pseudo serially for offline (already in OMP here)
@@ -547,9 +548,9 @@ ALLOCATE(ISIZE_OMP(0:INBLOCKTOT-1))
  CALL GET_SIZES_PARALLEL(DTCO, DGU, UG, U, &
                          INBLOCKTOT,KI,0,ISIZE_OMP)
 #else
-ALLOCATE(ISIZE_OMP(0:0))
+ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
  CALL GET_SIZES_PARALLEL(DTCO, DGU, UG, U, &
-                         1,KI,0,ISIZE_OMP)
+                         NBLOCKTOT,KI,0,ISIZE_OMP)
 #endif
 
 DO JFORC_STEP= 1,INB_STEP_ATM
