@@ -124,10 +124,10 @@ END IF
 
 ! FLAGS for the various surfaces:
 !
-GSEA      = U%NSIZE_SEA    >0
-GWATER    = U%NSIZE_WATER  >0
-GTOWN     = U%NSIZE_TOWN   >0
-GNATURE   = U%NSIZE_NATURE >0
+GSEA      = U%NDIM_SEA    >0
+GWATER    = U%NDIM_WATER  >0
+GTOWN     = U%NDIM_TOWN   >0
+GNATURE   = U%NDIM_NATURE >0
 !
 ! Tile counter:
 !

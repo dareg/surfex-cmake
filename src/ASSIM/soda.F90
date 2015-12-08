@@ -159,6 +159,9 @@ INCLUDE 'mpif.h'
  CHARACTER(LEN=3) :: YENS
  CHARACTER(LEN=10),DIMENSION(:), ALLOCATABLE  :: COBSINFILE     ! Identifier for simulated observations in file
 !
+REAL, ALLOCATABLE, DIMENSION(:,:) :: ZYO_NAT
+REAL, ALLOCATABLE, DIMENSION(:) :: ZNATURE
+!
 REAL,ALLOCATABLE, DIMENSION(:,:) :: ZWORK
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZLSM                ! Land-Sea mask
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZCON_RAIN           ! Amount of convective liquid precipitation
@@ -781,18 +784,48 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
     ENDIF
 
     ZWORK(:,:) = XUNDEF
-    !   Read all observations (NDIM_FULL)
-    IF (LOBSNAT) THEN
+
+  ENDIF
+
+  !   Read all observations (NDIM_FULL)
+  IF (LOBSNAT) THEN
+
+    IF (NRANK==NPIO) THEN
+      ALLOCATE(ZYO_NAT(YSURF_CUR%U%NDIM_NATURE,NOBSTYPE))
       DO JI = 1,YSURF_CUR%U%NDIM_NATURE
-        READ (55,*,IOSTAT=ISTAT)  (ZWORK(YSURF_CUR%U%NR_NATURE(JI),JJ),JJ=1,NOBSTYPE)
+        READ (55,*,IOSTAT=ISTAT)  (ZYO_NAT(JI,JJ),JJ=1,NOBSTYPE)
         IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
       ENDDO
-    ELSE
-      DO JI = 1,YSURF_CUR%U%NDIM_FULL
-        READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
-        IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-      ENDDO
+      ALLOCATE(ZNATURE(YSURF_CUR%U%NDIM_FULL))
     ENDIF
+
+    IF (NPROC>1) THEN    
+      CALL GATHER_AND_WRITE_MPI(YSURF_CUR%U%XNATURE,ZNATURE)
+    ELSEIF (NRANK==NPIO) THEN
+      ZNATURE(:) = YSURF_CUR%U%XNATURE
+    ENDIF
+
+    IF (NRANK==NPIO) THEN
+      ICPT = 0
+      DO JI = 1,YSURF_CUR%U%NDIM_FULL
+        IF (ZNATURE(JI)>0.) THEN
+          ICPT = ICPT + 1
+          ZWORK(JI,:) = ZYO_NAT(ICPT,:)
+        ENDIF
+      ENDDO
+      DEALLOCATE(ZNATURE,ZYO_NAT) 
+    ENDIF
+
+  ELSEIF (NRANK==NPIO) THEN
+    
+    DO JI = 1,YSURF_CUR%U%NDIM_FULL
+      READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
+      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
+    ENDDO
+
+  ENDIF
+
+  IF (NRANK==NPIO) THEN
 
     CLOSE(55)
     IF (NPRINTLEV>0) WRITE(*,*) 'Read observation file OK'

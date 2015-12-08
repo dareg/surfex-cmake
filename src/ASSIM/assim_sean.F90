@@ -184,7 +184,7 @@ ENDIF
 !
 ! Sum the increments
 ZSSTINC(:) = ZSST(:) - S%XSST(:)
-WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
+IF (KI>0) WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
 !
 ! Setting modified variables
 S%XSST(:) = ZSST(:)
