@@ -83,7 +83,7 @@ WHERE ( PT2M_O(:) /= 999. )
   ZT2INC(:) = PT2M_O(:) - ZTCLS(:)
 END WHERE
 
-IF ( NPRINTLEV > 0 ) WRITE(*,*) 'Mean T2m increments over TOWN ',SUM(ZT2INC)/KI
+IF ( NPRINTLEV > 0 .AND. KI>0) WRITE(*,*) 'Mean T2m increments over TOWN ',SUM(ZT2INC)/KI
 
 
 ! Temperature analysis of TOWN points
@@ -93,7 +93,7 @@ WHERE (ZTRD3(:)/=XUNDEF)
 END WHERE
 !
 
-WRITE(*,*) 'Mean T_ROAD3 increments over TOWN ',SUM(ZT2INC)/KI
+IF (KI>0) WRITE(*,*) 'Mean T_ROAD3 increments over TOWN ',SUM(ZT2INC)/KI
 
 ! Update modified variables
 T%CUR%XT_ROAD(:,3) = ZTRD3  ! T_ROAD3

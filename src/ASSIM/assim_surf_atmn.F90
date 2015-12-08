@@ -36,7 +36,6 @@ SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
 !
 !
 !
-!
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
@@ -124,10 +123,10 @@ END IF
 
 ! FLAGS for the various surfaces:
 !
-GSEA      = U%NSIZE_SEA    >0
-GWATER    = U%NSIZE_WATER  >0
-GTOWN     = U%NSIZE_TOWN   >0
-GNATURE   = U%NSIZE_NATURE >0
+GSEA      = U%NDIM_SEA    >0
+GWATER    = U%NDIM_WATER  >0
+GTOWN     = U%NDIM_TOWN   >0
+GNATURE   = U%NDIM_NATURE >0
 !
 ! Tile counter:
 !
