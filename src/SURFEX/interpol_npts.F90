@@ -210,47 +210,50 @@ DO JL=1,IL
   IF (ICOUNT>=KNPTS) THEN
     ISCAN = ICOUNT
     INPTS = KNPTS
+  ELSEIF (KNEAR_NBR>=U%NDIM_FULL .AND. ICOUNT>=1) THEN
+    ISCAN = ICOUNT
+    INPTS = ICOUNT
   ELSE
     KCODE(JL) = -4
     CYCLE
   END IF
+  !
+  !one point more to interpolate
+  ICPT = ICPT + 1
+  !
+  !loop on points available to interpolate (max=knpts)
+  DO JS=1,ISCAN
     !
-    !one point more to interpolate
-    ICPT = ICPT + 1
+    !index of the point in the whole grid
+    JD = IINDEX(JS)
     !
-    !loop on points available to interpolate (max=knpts)
-    DO JS=1,ISCAN
+    !distance between the point to interpolate (Z) and the nearest point (P)
+    ZDIST=  ( ( PX(JD)-ZX(JL) ) ** 2 ) + ( ( PY(JD)-ZY(JL) ) ** 2 )
+    !
+    !if this point nearest than the last other available? 
+    IF ( ZDIST>ZNDIST(ICPT,INPTS) ) CYCLE
+    !
+    !loop on already kept available point to interpolate
+    DO JP = INPTS,1,-1
       !
-      !index of the point in the whole grid
-      JD = IINDEX(JS)
-      !
-      !distance between the point to interpolate (Z) and the nearest point (P)
-      ZDIST=  ( ( PX(JD)-ZX(JL) ) ** 2 ) + ( ( PY(JD)-ZY(JL) ) ** 2 )
-      !
-      !if this point nearest than the last other available? 
-      IF ( ZDIST>ZNDIST(ICPT,INPTS) ) CYCLE
-      !
-      !loop on already kept available point to interpolate
-      DO JP = INPTS,1,-1
+      IF ( ZDIST>ZNDIST(ICPT,JP-1) ) THEN
         !
-        IF ( ZDIST>ZNDIST(ICPT,JP-1) ) THEN
-          !
-          IF ( JP<INPTS ) THEN
-            DO JPP = INPTS,JP+1,-1
-              ZNDIST(ICPT,JPP)  = ZNDIST(ICPT,JPP-1)
-              ININD(ICPT,JPP) = ININD(ICPT,JPP-1)
-            ENDDO
-          ENDIF
-          !
-          !distances and indexes of points used to interpolate are saved
-          ZNDIST(ICPT,JP)  = ZDIST
-          ININD(ICPT,JP) = JD
-          !
-          EXIT
-          !
+        IF ( JP<INPTS ) THEN
+          DO JPP = INPTS,JP+1,-1
+            ZNDIST(ICPT,JPP)  = ZNDIST(ICPT,JPP-1)
+            ININD(ICPT,JPP) = ININD(ICPT,JPP-1)
+          ENDDO
         ENDIF
         !
-      ENDDO
+        !distances and indexes of points used to interpolate are saved
+        ZNDIST(ICPT,JP)  = ZDIST
+        ININD(ICPT,JP) = JD
+        !
+        EXIT
+        !
+      ENDIF
+      !
+    ENDDO
     !
   ENDDO
   !
