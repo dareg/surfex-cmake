@@ -46,9 +46,7 @@ LOGICAL :: LDEF = .FALSE.
 !
 INTEGER, DIMENSION(:),POINTER :: NMASK=>NULL()
  CHARACTER(LEN=6)               :: CMASK ! surface mask type
-!$OMP THREADPRIVATE(CMASK)
 INTEGER :: NFULL
-!$OMP THREADPRIVATE(NFULL)
 INTEGER :: NFULL_AUX ! total number fo points of surface (Auxilarry file for prep)
 !
 LOGICAL, SAVE                     :: LMASK = .FALSE.

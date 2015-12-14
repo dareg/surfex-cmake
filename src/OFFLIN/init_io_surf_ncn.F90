@@ -75,15 +75,11 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_NC_N',0,ZHOOK_HANDLE)
 !
 LMASK = .TRUE.
 !
-!$OMP BARRIER
-!
 IF (HACTION=='READ ') THEN
   INQUIRE(FILE=CFILEIN_NC,EXIST=GEXIST)
   CFILE_NC = CFILEIN_NC
   IF (GEXIST) THEN 
-!$OMP SINGLE
     IRET = NF_OPEN(CFILEIN_NC,NF_NOWRITE,NID_NC)
-!$OMP END SINGLE
     CALL READ_SURF(&
                    'NC    ','DIM_FULL',NFULL,IRET,HDIR='A')
   ENDIF
@@ -91,14 +87,12 @@ ELSE
   CALL GET_DIM_FULL_n(U, &
                       NFULL)
   IF (NRANK==NPIO) THEN
-!$OMP SINGLE          
     INQUIRE(FILE=CFILEOUT_NC,EXIST=GEXIST)
     INQUIRE(FILE=CFILEOUT_NC,OPENED=GOPENED)
     IF (.NOT.GOPENED) THEN
       IRET = NF_OPEN(CFILEOUT_NC,NF_WRITE,NID_NC)
     ENDIF
     IF (LDEF) IRET = NF_REDEF(NID_NC)
-!$OMP END SINGLE    
   ENDIF
   CFILE_NC = CFILEOUT_NC
 ENDIF
@@ -125,7 +119,6 @@ IL = ILU
 !
 CMASK = HMASK
 !
-!$OMP BARRIER
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_NC_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------

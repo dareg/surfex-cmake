@@ -42,10 +42,7 @@ REAL    :: XRPK   ! projection parameter for the conformal projection
 REAL    :: XBETA  ! rotation   parameter for the conformal projection
 !
 REAL, DIMENSION(:), ALLOCATABLE :: XZX       ! X coordinate
-!$OMP THREADPRIVATE(XZX)
 REAL, DIMENSION(:), ALLOCATABLE :: XZY       ! Y coordinate
-!$OMP THREADPRIVATE(XZY)
 INTEGER, DIMENSION(:), ALLOCATABLE  :: NIX  ! number of points on each line
-!$OMP THREADPRIVATE(NIX)
 !
 END MODULE MODD_GRID_AROME

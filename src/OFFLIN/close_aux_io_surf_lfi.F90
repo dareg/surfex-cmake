@@ -54,9 +54,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
-!$OMP SINGLE
+!
  CALL FMCLOS(HFILE,'KEEP',CLUOUT_LFI,IRET)
-!$OMP END SINGLE
 !
 CMASK='      '
 DEALLOCATE(NMASK)

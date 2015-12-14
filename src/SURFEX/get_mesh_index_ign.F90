@@ -75,7 +75,7 @@ INTEGER                           :: JL       ! loop counter in lambert grid
 INTEGER                           :: JI, JJ       ! loop counter on input points
 INTEGER, DIMENSION(SIZE(PLAT),2) :: ICI
 INTEGER, DIMENSION(1)             :: IDX0
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_1',0,ZHOOK_HANDLE)
@@ -171,9 +171,6 @@ ENDDO
 !*    5.     Localisation of the data points on (x,y) grid
 !            ---------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_2',1,ZHOOK_HANDLE)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',0,ZHOOK_HANDLE)
-!
 IFACT = SIZE(NFRACD) - 1
 !
 KINDEX(:,:)=0
@@ -182,7 +179,12 @@ KISSOX(:,:) = 0
 KISSOY(:,:) = 0
 !
 ICI(:,:) = 0
-!$OMP PARALLEL DO PRIVATE(JL,JI,JJ)
+!
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_2',1,ZHOOK_HANDLE)
+!
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(JL,JI,JJ)
 DO JL=1,SIZE(PLAT)
   !
   IF (ZVALUE(JL)==ZNODATA) CYCLE  
@@ -214,9 +216,10 @@ DO JL=1,SIZE(PLAT)
   ENDDO frac
   !
 ENDDO
-!$OMP END PARALLEL DO
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',0,ZHOOK_HANDLE)
 !
 DO JL=1,SIZE(PLAT)
@@ -247,10 +250,10 @@ DO JL=1,SIZE(PLAT)
   !
 ENDDO
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 DEALLOCATE(ZX )
 DEALLOCATE(ZY )
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE GET_MESH_INDEX_IGN

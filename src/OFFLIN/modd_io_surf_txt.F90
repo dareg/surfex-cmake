@@ -28,10 +28,7 @@
 !
 IMPLICIT NONE
 INTEGER, DIMENSION(:), POINTER :: NMASK ! 1D mask to read only interesting
-!$OMP THREADPRIVATE(NMASK)
  CHARACTER(LEN=6)               :: CMASK ! surface mask type
-!$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL ! total number for points of surface
-!$OMP THREADPRIVATE(NFULL)
 !
 END MODULE MODD_IO_SURF_TXT

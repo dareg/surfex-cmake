@@ -1,7 +1,7 @@
 !#########
 SUBROUTINE SFX_OASIS_RECV_OL (F, I, S, U, W, &
                               HPROGRAM,KI,KSW,PTIMEC,PTSTEP_SURF,   &
-                             KSIZE_OMP,PZENITH,PSW_BANDS,          &
+                             PZENITH,PSW_BANDS,          &
                              PTSRAD,PDIR_ALB,PSCA_ALB,PEMIS,PTSURF )
 !#############################################
 !
@@ -47,9 +47,6 @@ USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_SURFEX_OMP, ONLY :  NINDX1SFX, NINDX2SFX, NBLOCK, NBLOCKTOT, &
-                             INIT_DIM, RESET_DIM
-!
 USE MODI_SFX_OASIS_RECV
 USE MODI_PUT_SFXCPL_n
 !
@@ -82,7 +79,6 @@ INTEGER,                INTENT(IN)  :: KI          ! number of points on this pr
 INTEGER,                INTENT(IN)  :: KSW         ! number of short-wave spectral bands
 REAL,                   INTENT(IN)  :: PTIMEC      ! Cumulated run time step (s)
 REAL,                   INTENT(IN)  :: PTSTEP_SURF ! Surfex time step
-INTEGER, DIMENSION(:),  INTENT(IN)  :: KSIZE_OMP
 !
 REAL, DIMENSION(KI),    INTENT(IN)  :: PZENITH   ! zenithal angle       (radian from the vertical)
 REAL, DIMENSION(KSW),   INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
@@ -109,8 +105,6 @@ REAL, DIMENSION(KI) :: ZSEAICE_CVR   ! Sea-ice cover (-)
 REAL, DIMENSION(KI) :: ZSEAICE_ALB   ! Sea-ice albedo (-)
 !
 LOGICAL  :: GOASIS_PUT
-!
-INTEGER  :: INKPROMA
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -154,40 +148,20 @@ CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,PTIMEC-PTSTEP_SURF,&
 !*       3.     Put definitions for exchange of coupling fields :
 !               -------------------------------------------------
 !
-!$OMP PARALLEL PRIVATE(INKPROMA)
-!
-!$ NBLOCK = OMP_GET_THREAD_NUM()
-!
-IF (NBLOCK==NBLOCKTOT) THEN
-   CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-ELSE
-   CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-ENDIF
-!
-IF (NBLOCK==0) THEN
-   CALL GOTO_MODEL(NBLOCKTOT)
-ELSE
-   CALL GOTO_MODEL(NBLOCK)
-ENDIF
-!
 IF(GOASIS_PUT)THEN
 !
   CALL PUT_SFXCPL_n(F, I, S, U, W, &
-                     HPROGRAM,INKPROMA,KSW,PSW_BANDS,                             &
-                     PZENITH      (NINDX1SFX:NINDX2SFX  ),ZLAND_WTD   (NINDX1SFX:NINDX2SFX  ),&
-                     ZLAND_FWTD   (NINDX1SFX:NINDX2SFX  ),ZLAND_FFLOOD(NINDX1SFX:NINDX2SFX  ),&
-                     ZLAND_PIFLOOD(NINDX1SFX:NINDX2SFX  ),ZSEA_SST    (NINDX1SFX:NINDX2SFX  ),&
-                     ZSEA_UCU     (NINDX1SFX:NINDX2SFX  ),ZSEA_VCU    (NINDX1SFX:NINDX2SFX  ),&                     
-                     ZSEAICE_SIT  (NINDX1SFX:NINDX2SFX  ),ZSEAICE_CVR (NINDX1SFX:NINDX2SFX  ),&
-                     ZSEAICE_ALB  (NINDX1SFX:NINDX2SFX  ),PTSRAD      (NINDX1SFX:NINDX2SFX  ),&
-                     PDIR_ALB     (NINDX1SFX:NINDX2SFX,:),PSCA_ALB    (NINDX1SFX:NINDX2SFX,:),&
-                     PEMIS        (NINDX1SFX:NINDX2SFX  ),PTSURF      (NINDX1SFX:NINDX2SFX  ) )
+                     HPROGRAM,KI,KSW,PSW_BANDS,                             &
+                     PZENITH      (:),ZLAND_WTD   (:),&
+                     ZLAND_FWTD   (:),ZLAND_FFLOOD(:),&
+                     ZLAND_PIFLOOD(:),ZSEA_SST    (:),&
+                     ZSEA_UCU     (:),ZSEA_VCU    (:),&                     
+                     ZSEAICE_SIT  (:),ZSEAICE_CVR (:),&
+                     ZSEAICE_ALB  (:),PTSRAD      (:),&
+                     PDIR_ALB     (:,:),PSCA_ALB    (:,:),&
+                     PEMIS        (:),PTSURF      (:) )
 !
 ENDIF
-!
-CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
-!
-!$OMP END PARALLEL
 !
 !-------------------------------------------------------------------------------
 !

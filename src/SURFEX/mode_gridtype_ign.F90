@@ -338,7 +338,7 @@ REAL :: ZGAMMA
 REAL :: ZLATFI           ! Isometric latitude
 REAL :: ZR               ! length of arc meridian line projection
 INTEGER :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !
 !-------------------------------------------------------------------------------
@@ -346,13 +346,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       1.     Latitude /Longitude in radian :
 !               -------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_1',0,ZHOOK_HANDLE)
 !
 ZPI180 = XPI / 180.
 ZPI4 = XPI / 4.
 ZECC2 = XECC / 2. 
 !
-!$OMP PARALLEL DO PRIVATE(JJ,ZLONRAD,ZLATRAD,ZWRK,ZLATFI,ZGAMMA,ZR)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_1',1,ZHOOK_HANDLE)
+!
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_2',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(JJ,ZLONRAD,ZLATRAD,ZWRK,ZLATFI,ZGAMMA,ZR)
 DO JJ=1,SIZE(PLON)
   !
   IF (PLON(JJ) > 180.) THEN
@@ -381,9 +385,10 @@ DO JJ=1,SIZE(PLON)
   PY(JJ) = XYS(KLAMBERT) - COS(ZGAMMA) * ZR   
   !
 ENDDO
-!$OMP END PARALLEL DO 
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_2',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE XY_IGN
 !-------------------------------------------------------------------------------

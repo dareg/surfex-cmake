@@ -37,7 +37,6 @@ CHARACTER(LEN=4), SAVE  :: CPREFIX1D        ='SFX.'       ! Prefix name in fa fi
 CHARACTER(LEN=1), SAVE  :: CPREFIX2D        ='X'          ! Prefix name in fa file
 !
 CHARACTER(LEN=6)        :: CMASK     ! surface mask type
-!$OMP THREADPRIVATE(CMASK)
 !
 INTEGER                 :: NUNIT_FA         =19           ! logical unit of surface file (FA part)
 INTEGER                 :: NLUOUT         ! logical unit of output file
@@ -49,7 +48,6 @@ LOGICAL                 :: LOPEN   ! flag to know if the file has been openned d
 !      
 INTEGER, DIMENSION(:), POINTER :: NMASK=>NULL()     ! 1D mask to read only interesting
 INTEGER                        :: NFULL     ! total number of points of surface
-!$OMP THREADPRIVATE(NFULL)
 INTEGER                        :: NFULL_EXT ! total number of points including the extension zone (ALADIN)
 INTEGER                        :: NDGL,NDLON,NDLUX,NDGUX        ! dimensions of ALADIN domain
 !

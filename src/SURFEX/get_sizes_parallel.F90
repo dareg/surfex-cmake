@@ -73,7 +73,6 @@ IF (GSHADOWS) THEN
   
   ! Get x and y dimension lengths
 #ifdef SFX_OL
-!$OMP SINGLE
   IF (NIX==0) THEN
 
     !CALL SET_SURFEX_FILEIN(CSURF_FILETYPE,'PREP ') ! not necessary, it works with PGD or PREP file
@@ -90,7 +89,6 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
     CALL GET_GRID_DIM(UG%CGRID,SIZE(UG%XGRID_FULL_PAR),UG%XGRID_FULL_PAR,GRECT,NIX,NIY)  
     UG%XGRID_FULL_PAR=>NULL()
   ENDIF
-!$OMP END SINGLE  
 
   !If get_sizes_parallel is called by init_index_mpi
   !ISIZE_Y represents the number of lines of the total domain

@@ -420,6 +420,8 @@ IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB') THEN
     ! max transpiration rates. Conversion from DM to C. To be changed with DGVM.  (Soil temp in K)        
       ZHTREE(:) = 2.5*0.75*(PBIOMASS(:,1)+PBIOMASS(:,2)+PBIOMASS(:,3)+PBIOMASS(:,4)+PBIOMASS(:,5)+PBIOMASS(:,6))*0.4
       ZSAPFRAC(:) = MIN(0.5, MAX(0.05,0.0025/25.*ZHTREE(:)*0.75*400/(PBIOMASS(:,5)*0.4)))
+      !ZSAPFRAC(:) = 0.5
+      
       PRESP_BIOMASS(:,5) = PRESP_BIOMASS(:,5) + PBIOMASS(:,5) * ZSAPFRAC(:) * PTSTEP &
                                               * MAX(0.,ZWOOD_IBIS*EXP(ZCIBIS1*(ZCIBIS2-1./ZTG_VEG(:)))/(ZNDAY*XDAY))
       PRESP_BIOMASS(:,5) = MIN(PRESP_BIOMASS(:,5), PBIOMASS(:,5))

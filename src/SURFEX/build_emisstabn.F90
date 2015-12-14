@@ -98,12 +98,10 @@ END IF
 !*       1.   READ DATA 
 !        --------------
 !
-!$OMP SINGLE
  CALL CH_OPEN_INPUTB("EMISUNIT", KCH, KLUOUT)
 !
 ! read unit identifier
 READ(KCH,'(A3)') YUNIT
-!$OMP END SINGLE COPYPRIVATE(YUNIT)
 !
 !*       2.   MAP DATA ONTO PROGNOSTIC VARIABLES
 !        ---------------------------------------

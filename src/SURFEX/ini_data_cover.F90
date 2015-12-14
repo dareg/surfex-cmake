@@ -203,8 +203,6 @@ IF (LHOOK) CALL DR_HOOK('INI_DATA_COVER',0,ZHOOK_HANDLE)
 !
 IF (IDC==0) THEN
 !
-!$OMP SINGLE
-!
 !*    1.1    artificial surfaces fraction
 !            ----------------------------
 !
@@ -2212,8 +2210,6 @@ ELSE
     CNAME(JCOVER) = CNAMES(JCOVER,2)
   ENDDO
 END IF
-!
-!$OMP END SINGLE
 !
 ENDIF
 !-------------------------------------------------------------------------------

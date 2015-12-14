@@ -88,9 +88,7 @@ IEQ = SIZE(SV%CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !
-!$OMP SINGLE
  CALL CH_OPEN_INPUTB("AGREGATION", KCH , KLUOUT)
-!$OMP END SINGLE
 !
 ! Parse each eq. line and build the TPPRONOS list
 !
@@ -100,9 +98,7 @@ DO
 !
 ! Read a line and convert 'tab' to 'space' characters
 ! until the keyword 'END_AGREGATION' is reached
-!$OMP SINGLE
   READ(KCH,'(A)',IOSTAT=IERR) YINPLINE
-!$OMP END SINGLE COPYPRIVATE(YINPLINE,IERR)
   IF (IERR /= 0) EXIT
   YINPLINE = TRIM(ADJUSTL(YINPLINE))
   IF (LEN_TRIM(YINPLINE) == 0) CYCLE ! skip blank line

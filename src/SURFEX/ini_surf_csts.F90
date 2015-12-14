@@ -269,7 +269,7 @@ CCHARNOCK = 'NEW'
 !-------------------------------------------------------------------------------
 !
  CALL GET_LUOUT(CPROGNAME,ILUOUT)
-!
+!    
  CALL OPEN_NAMELIST(CPROGNAME,ILUNAM)
 !
  CALL POSNAM(ILUNAM,'NAM_SURF_CSTS',GFOUND,ILUOUT)

@@ -70,17 +70,13 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',0,ZHOOK_HANDLE)
 !
  CALL GET_LUOUT('ASCII ',NLUOUT)
 !
-!$OMP BARRIER
-!
 IF (NRANK==NPIO) LOPEN=.FALSE.
 !
 NUNIT=20
 !
 IF (HACTION=='GTMSK') THEN
   IF (NRANK==NPIO) THEN
-!$OMP SINGLE
     OPEN(UNIT=NUNIT,FILE=CFILEIN,FORM='FORMATTED')
-!$OMP END SINGLE
   ENDIF
   CMASK = HMASK
   CFILE = CFILEIN
@@ -89,9 +85,7 @@ IF (HACTION=='GTMSK') THEN
 ENDIF
 !
 IF (HACTION == 'READ ') THEN
-!$OMP SINGLE          
   OPEN(UNIT=NUNIT,FILE=CFILEIN,FORM='FORMATTED')
-!$OMP END SINGLE     
   LOPEN=.TRUE.
   ! NFULL must be known even if HMASK/=FULL because it's no longer 
   ! updated in init_io_surf_maskn.
@@ -102,7 +96,6 @@ IF (HACTION == 'READ ') THEN
   CFILE = CFILEIN
 ELSE
   IF (NRANK==NPIO) THEN
-!$OMP SINGLE
     IF (LCREATED) THEN
       OPEN(UNIT=NUNIT,FILE=CFILEOUT,FORM='FORMATTED',POSITION='APPEND')
     ELSE
@@ -110,7 +103,6 @@ ELSE
       LCREATED=.TRUE.
     ENDIF
     LOPEN=.TRUE.
-!$OMP END SINGLE  
   ENDIF
   ! NFULL must be known in every case. 
   CALL GET_DIM_FULL_n(U, &
@@ -141,7 +133,6 @@ IL = ILU
  CALL INIT_IO_SURF_MASK_n(DTCO, U, &
                           HMASK, IL, NLUOUT, ILU, NMASK)
 !
-!$OMP BARRIER
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_ASC_N',1,ZHOOK_HANDLE)

@@ -1,6 +1,6 @@
 !#########
 SUBROUTINE SFX_OASIS_SEND_OL (F, I, S, U, W, &
-                              HPROGRAM,KI,PTIMEC,PSTEP_SURF,KSIZE_OMP)
+                              HPROGRAM,KI,PTIMEC,PSTEP_SURF)
 !###########################################
 !
 !!****  *SFX_OASIS_SEND_OL* - Offline driver to send coupling fields
@@ -43,9 +43,6 @@ USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
-!
-USE MODD_SURFEX_OMP, ONLY :  NINDX1SFX, NINDX2SFX, NBLOCK, NBLOCKTOT, &
-                             INIT_DIM, RESET_DIM
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -93,7 +90,6 @@ CHARACTER(LEN=*),      INTENT(IN) :: HPROGRAM
 INTEGER,               INTENT(IN) :: KI            ! number of points
 REAL,                  INTENT(IN) :: PTIMEC        ! Cumulated run time step (s)
 REAL,                  INTENT(IN) :: PSTEP_SURF    ! Model time step (s)
-INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_OMP
 !
 !
 !*       0.2   Declarations of local variables
@@ -186,22 +182,6 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!$OMP PARALLEL PRIVATE(INKPROMA)
-!
-!$ NBLOCK = OMP_GET_THREAD_NUM()
-!
-IF (NBLOCK==NBLOCKTOT) THEN
-   CALL INIT_DIM(KSIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-ELSE
-   CALL INIT_DIM(KSIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-ENDIF
-!
-IF (NBLOCK==0) THEN
-   CALL GOTO_MODEL(NBLOCKTOT)
-ELSE
-   CALL GOTO_MODEL(NBLOCK)
-ENDIF
-!
 !*       2.     get local fields :
 !               ------------------
 !
@@ -211,9 +191,9 @@ IF(GSEND_LAND)THEN
 !
   CALL GET_SFX_LAND(I, U, &
                     LCPL_GW,LCPL_FLOOD,LCPL_CALVING,                           &
-                    ZLAND_RUNOFF (NINDX1SFX:NINDX2SFX),ZLAND_DRAIN   (NINDX1SFX:NINDX2SFX),&
-                    ZLAND_CALVING(NINDX1SFX:NINDX2SFX),ZLAND_RECHARGE(NINDX1SFX:NINDX2SFX),&
-                    ZLAND_WATFLD (NINDX1SFX:NINDX2SFX))
+                    ZLAND_RUNOFF (:),ZLAND_DRAIN   (:),&
+                    ZLAND_CALVING(:),ZLAND_RECHARGE(:),&
+                    ZLAND_WATFLD (:))
 !
 ENDIF
 !
@@ -222,8 +202,8 @@ IF(GSEND_LAKE)THEN
 ! * Get output fields
 !
   CALL GET_SFX_LAKE(F, U, &
-                    ZLAKE_EVAP(NINDX1SFX:NINDX2SFX),ZLAKE_RAIN(NINDX1SFX:NINDX2SFX), &
-                    ZLAKE_SNOW(NINDX1SFX:NINDX2SFX),ZLAKE_WATF(NINDX1SFX:NINDX2SFX) )
+                    ZLAKE_EVAP(:),ZLAKE_RAIN(:), &
+                    ZLAKE_SNOW(:),ZLAKE_WATF(:) )
 !
 ENDIF
 !
@@ -233,18 +213,14 @@ IF(GSEND_SEA)THEN
 !
   CALL GET_SFX_SEA(S, U, W, &
                    LCPL_SEAICE,LWATER,                                                                                    &
-                   ZSEA_FWSU   (NINDX1SFX:NINDX2SFX),ZSEA_FWSV   (NINDX1SFX:NINDX2SFX),ZSEA_HEAT   (NINDX1SFX:NINDX2SFX),&
-                   ZSEA_SNET   (NINDX1SFX:NINDX2SFX),ZSEA_WIND   (NINDX1SFX:NINDX2SFX),ZSEA_FWSM   (NINDX1SFX:NINDX2SFX),&
-                   ZSEA_EVAP   (NINDX1SFX:NINDX2SFX),ZSEA_RAIN   (NINDX1SFX:NINDX2SFX),ZSEA_SNOW   (NINDX1SFX:NINDX2SFX),&
-                   ZSEA_WATF   (NINDX1SFX:NINDX2SFX),                                                                    &
-                   ZSEAICE_HEAT(NINDX1SFX:NINDX2SFX),ZSEAICE_SNET(NINDX1SFX:NINDX2SFX),ZSEAICE_EVAP(NINDX1SFX:NINDX2SFX) )
+                   ZSEA_FWSU   (:),ZSEA_FWSV   (:),ZSEA_HEAT   (:),&
+                   ZSEA_SNET   (:),ZSEA_WIND   (:),ZSEA_FWSM   (:),&
+                   ZSEA_EVAP   (:),ZSEA_RAIN   (:),ZSEA_SNOW   (:),&
+                   ZSEA_WATF   (:),                                                                    &
+                   ZSEAICE_HEAT(:),ZSEAICE_SNET(:),ZSEAICE_EVAP(:) )
 !
 ENDIF
 !
-CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
-!
-!$OMP END PARALLEL
-!    
 !-------------------------------------------------------------------------------
 !
 !*       3.     Send fields to OASIS proc by proc:

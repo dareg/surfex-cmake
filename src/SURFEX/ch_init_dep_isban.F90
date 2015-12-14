@@ -141,7 +141,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     !
     ALLOCATE(CHI%XDEP(KLU,CHI%SVI%NBEQ,I%NPATCH))
     !
-!$OMP SINGLE
     ! open input file
     WRITE(KLUOUT,*) &
            "CH_INIT_DEP_ISBA_n: reading  reactivity factor "  
@@ -154,19 +153,16 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     ! read data input format
     READ(KCH,"(A)") YFORMAT
     WRITE(KLUOUT,*) "input format is: ", YFORMAT
-!$OMP END SINGLE COPYPRIVATE(IRESIS,YFORMAT)
     !
     ! allocate fields
     ALLOCATE(YRESISNAME(IRESIS))
     ALLOCATE(ZRESISVAL(IRESIS))
     !
-!$OMP SINGLE
     ! read reactivity factor 
     DO JI = 1, IRESIS
       READ(KCH,YFORMAT) YRESISNAME(JI), ZRESISVAL(JI)
       WRITE(KLUOUT,YFORMAT) YRESISNAME(JI), ZRESISVAL(JI)
     END DO
-!$OMP END SINGLE COPYPRIVATE(YRESISNAME,ZRESISVAL)
 !
     ! close file
     DO JNREAL = 1, IRESIS
