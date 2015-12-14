@@ -163,6 +163,8 @@ END IF
 !
 !IF (LPAR_GREENROOF) CALL READ_PGD_TEB_GREENROOF_PAR_n(HPROGRAM)
 !
+TGRO%LPAR_GREENROOF = .TRUE. 
+!
  CALL READ_PGD_TEB_GREENROOF_PAR_n(&
                                                        DTGR, TGRO, TG, &
                                                        HPROGRAM)

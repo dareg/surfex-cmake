@@ -158,6 +158,7 @@ ZHO2JM = 0.
 !
 !* vegetation parameters to update
 !
+ZLAI(:,1)         = GRM%TGRPE%CUR%XLAI
 ZVEG(:,1)         = GRM%TGRPE%CUR%XVEG
 ZZ0(:,1)          = GRM%TGRPE%CUR%XZ0
 ZALBNIR(:,1)      = GRM%TGRPE%CUR%XALBNIR
@@ -195,7 +196,7 @@ IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
      CALL VEGETATION_UPDATE(DTCO, DTI, DTGD, GRM%DTGR, IG, I, GRM%TGRO, &
                             PTSTEP,TPTIME,TOP%XCOVER,TOP%LCOVER,                 &
                          TVG%CISBA,(.NOT. GRM%TGRO%LPAR_GREENROOF), TVG%CPHOTO, .FALSE.,  &
-                         TVG%LTR_ML, 'GR ',                                  &
+                         TVG%LTR_ML, 'GNR',                                  &
                          ZLAI,ZVEG,ZZ0,                                  &
                          ZALBNIR,ZALBVIS,ZALBUV,ZEMIS,                   &
                          ZRSMIN,ZGAMMA,ZWRMAX_CF,                        &
@@ -216,6 +217,7 @@ IF (TVG%CPHOTO=='NON' .OR. TVG%CPHOTO=='AGS' .OR. TVG%CPHOTO=='AST') THEN
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+GRM%TGRPE%CUR%XLAI         = ZLAI(:,1)
 GRM%TGRPE%CUR%XVEG         = ZVEG(:,1)
 GRM%TGRPE%CUR%XZ0          = ZZ0(:,1)
 GRM%TGRPE%CUR%XALBNIR      = ZALBNIR(:,1)

@@ -164,6 +164,7 @@ ZHO2JM = 0.
 !
 !* vegetation parameters to update
 !
+ZLAI(:,1) = GDM%TGDPE%CUR%XLAI
 ZVEG(:,1) = GDM%TGDPE%CUR%XVEG
 ZZ0(:,1) = GDM%TGDPE%CUR%XZ0
 ZALBNIR(:,1) = GDM%TGDPE%CUR%XALBNIR
@@ -223,6 +224,7 @@ IF (GDM%TVG%CPHOTO=='NON' .OR. GDM%TVG%CPHOTO=='AGS' .OR. GDM%TVG%CPHOTO=='AST')
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+GDM%TGDPE%CUR%XLAI = ZLAI(:,1)
 GDM%TGDPE%CUR%XVEG = ZVEG(:,1)
 GDM%TGDPE%CUR%XZ0 = ZZ0(:,1)
 GDM%TGDPE%CUR%XALBNIR = ZALBNIR(:,1)
