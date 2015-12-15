@@ -29,7 +29,7 @@ SUBROUTINE PREP_PERM_SNOW (I, &
 !!      M. Lafaysse 09/2012: adaptation with new snow age in Crocus
 !!------------------------------------------------------------------
 !
-
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
@@ -53,6 +53,10 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
 !
 !*      0.1    declarations of arguments
 !
@@ -82,6 +86,13 @@ REAL, DIMENSION(:,:), ALLOCATABLE   :: ZWAT        !
 LOGICAL, DIMENSION(:,:), ALLOCATABLE :: GWORK
 INTEGER                              :: IWORK
 !
+#ifdef SFX_MPI
+INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
+INTEGER :: INFOMPI
+!
+REAL, DIMENSION(0:NPROC-1) :: ZPSN0
+REAL :: ZSUM_PSN
 REAL              ::ZRHOSMAX
 REAL              ::ZAGE_NOW
 !
@@ -108,7 +119,17 @@ ZPSN(:) = MIN ( PPERM_SNOW_FRAC(:,NVT_SNOW) , 0.9999 )
 !
 !* if no permanent snow present
 !
-IF (ALL(ZPSN(:)==0.)) THEN
+ZSUM_PSN = SUM(ZPSN(:))
+IF (NPROC>1) THEN
+#ifdef SFX_MPI
+  CALL MPI_ALLGATHER(ZSUM_PSN,KIND(ZSUM_PSN)/4,MPI_REAL,&
+                     ZPSN0,KIND(ZPSN0)/4,MPI_REAL,NCOMM,INFOMPI)
+#endif
+ELSE
+  ZPSN0(:) = ZSUM_PSN
+ENDIF
+
+IF (ALL(ZPSN0(:)==0.)) THEN
   DEALLOCATE(ZPSN) 
   IF (LHOOK) CALL DR_HOOK('PREP_PERM_SNOW',1,ZHOOK_HANDLE)
   RETURN
