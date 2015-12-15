@@ -522,11 +522,11 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
           ZP_EVAP_N_C, ZP_EVAP_G_C,                                   & 
           ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                              &
           ZP_SWDOWN_GN, ZP_LWDOWN_GN,                                 &
-          PIRRIG_GREENROOF, ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT)  
+          PIRRIG_GREENROOF, ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT) 
+
 !
 PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
 PDRAIN_GREENROOF(:)  = ZDRAIN(:)
-
 !
 IF (GRM%TGR%CUR%TSNOW%SCHEME=='3-L' .OR. GRM%TGR%CUR%TSNOW%SCHEME=='CRO') GRM%TGR%CUR%TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
 !
@@ -573,7 +573,7 @@ ZRESP_AUTO(:)=0.
 !
 IF (TVG%CPHOTO/='NON' .AND. TVG%CRESPSL/='NON' .AND. ANY(GRM%TGRPE%CUR%XLAI(:)/=XUNDEF)) THEN
   ! faire intervenir le type de vegetation du greenroof ? (CTYP_GR)
-  CALL CARBON_EVOL(TVG%CISBA, TVG%CRESPSL, TVG%CPHOTO, PTSTEP, 1,               &
+  CALL CARBON_EVOL(GRM%TGRO%CISBA_GR, TVG%CRESPSL, TVG%CPHOTO, PTSTEP, 1,               &
                      PRHOA, GRM%TGR%CUR%XTG, GRM%TGR%CUR%XWG, GRM%TGRP%XWFC, &
                      GRM%TGRP%XWWILT, GRM%TGRP%XWSAT, GRM%TGRP%XSAND_GR,&
                      GRM%TGRP%XDG, GRM%TGRP%XDZG, GRM%TGRP%NWG_LAYER,                 &                   
