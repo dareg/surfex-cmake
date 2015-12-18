@@ -385,7 +385,15 @@ IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',0,ZHOOK_HANDLE)
 !*       0.     Initialize variables:
 !               ---------------------
 !
-
+IF (SIZE(PSNOWDEND)>1) THEN
+  PSNOWDEND(:,:)=XUNDEF
+  PSNOWSPHER(:,:)=XUNDEF
+  PSNOWSIZE(:,:)=XUNDEF
+  PSNOWSSA(:,:)=XUNDEF
+  PSNOWTYPEMEPRA(:,:)=XUNDEF
+  PSNOWRAM(:,:)=XUNDEF
+  PSNOWSHEAR(:,:)=XUNDEF
+ENDIF
 
 PFLSN_COR(:)   = 0.0
 PTHRUFAL(:)    = 0.0
@@ -641,17 +649,32 @@ ENDIF
 !
    DO JWRK=1,INLVLS
       DO JJ=1,SIZE(PSNOWSWE,1)
-         IF(PSNOWSWE(JJ,JWRK)>0.0.AND.PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
-            WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
-            WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
-            WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
-            WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
-            WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
-            WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
-            WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
-            WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
-            CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+         IF(PSNOWSWE(JJ,JWRK)>0.0) THEN
+           IF (PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
+              WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
+              WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
+              WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
+              WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
+              WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
+              WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
+              WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
+              WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
+              CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+            ENDIF
+            
+         ELSE
+           !Prognostic variables forced to XUNDEF for correct outputs
+           PSNOWDZ(JJ,JWRK)=XUNDEF
+           PSNOWTEMP(JJ,JWRK)=XUNDEF
+           PSNOWLIQ(JJ,JWRK)=XUNDEF
+           PSNOWHEAT(JJ,JWRK)=XUNDEF
+           PSNOWRHO(JJ,JWRK)=XUNDEF
+           PSNOWGRAN1(JJ,JWRK)=XUNDEF
+           PSNOWGRAN2(JJ,JWRK)=XUNDEF
+           PSNOWHIST(JJ,JWRK)=XUNDEF
+           PSNOWAGE(JJ,JWRK)=XUNDEF
          ENDIF
+         
       ENDDO
    ENDDO
 !
@@ -1160,13 +1183,6 @@ IF (HSNOW_ISBA=='CRO') THEN
   
   IF (SIZE(PSNOWDEND)>1) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
-    PSNOWDEND(:,:)=XUNDEF
-    PSNOWSPHER(:,:)=XUNDEF
-    PSNOWSIZE(:,:)=XUNDEF
-    PSNOWSSA(:,:)=XUNDEF
-    PSNOWTYPEMEPRA(:,:)=XUNDEF
-    PSNOWRAM(:,:)=XUNDEF
-    PSNOWSHEAR(:,:)=XUNDEF
     DO JWRK=1,KSIZE2
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
