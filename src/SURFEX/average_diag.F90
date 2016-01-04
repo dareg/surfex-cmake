@@ -517,11 +517,11 @@ ZT2M_SEA     (:)= 0.
 ZT2M_LAND    (:)= 0.
 ZFRL         (:)= 0.
 DO JT=1,2
-  ZT2M_SEA     (:) = ZT2M_SEA(:)  + PFRAC(:,JT) * PT2M_TILE(:,JT)
+  ZT2M_SEA     (:) = ZT2M_SEA(:)  + PFRAC(:,JT) * PFIELD_IN(:,JT)
 END DO
 !
 DO JT=3,4
-  ZT2M_LAND    (:) = ZT2M_LAND(:) + PFRAC(:,JT) * PT2M_TILE(:,JT)
+  ZT2M_LAND    (:) = ZT2M_LAND(:) + PFRAC(:,JT) * PFIELD_IN(:,JT)
   ZFRL         (:) = ZFRL     (:) + PFRAC(:,JT)
 END DO
 ! 
