@@ -124,10 +124,10 @@ NITRAD = NECHGU*1800
 !
 !   Time initializations 
 !
-IYEAR  = I%TTIME%TDATE%YEAR
-IMONTH = I%TTIME%TDATE%MONTH
-IDAY   = I%TTIME%TDATE%DAY
-ISSSSS = I%TTIME%TIME
+IYEAR  = I%I%TTIME%TDATE%YEAR
+IMONTH = I%I%TTIME%TDATE%MONTH
+IDAY   = I%I%TTIME%TDATE%DAY
+ISSSSS = I%I%TTIME%TIME
 IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 !
@@ -146,26 +146,26 @@ JP = 1
 JL = 1
 !
 !
-ZSAB  (:) = I%XSAND(:,JP)*100.
-ZARG  (:) = I%XCLAY(:,JP)*100.
+ZSAB  (:) = I%P%XSAND(:,JP)*100.
+ZARG  (:) = I%P%XCLAY(:,JP)*100.
 !
-ZTS0  (:) = I%XTG  (:,1,JP)
-ZTP0  (:) = I%XTG  (:,2,JP)
+ZTS0  (:) = I%R%XTG  (:,1,JP)
+ZTP0  (:) = I%R%XTG  (:,2,JP)
 !
-ZWS0  (:) = I%XWG  (:,1,JP)
-ZWP0  (:) = I%XWG  (:,2,JP)
-ZTL0  (:) = I%XWGI (:,2,JP)
+ZWS0  (:) = I%R%XWG  (:,1,JP)
+ZWP0  (:) = I%R%XWG  (:,2,JP)
+ZTL0  (:) = I%R%XWGI (:,2,JP)
 !
-ZSNS0(:) = I%TSNOW%WSNOW(:,JL,JP)
+ZSNS0(:) = I%R%TSNOW%WSNOW(:,JL,JP)
 ZSNS (:) = ZSNS0(:)
 !
 ZTCLS (:) = XAT2M_ISBA   (:,JP)
 ZHCLS (:) = XAHU2M_ISBA  (:,JP)
 !
-ZD2   (:) = I%XDG   (:,2,JP)
-ZRSMIN(:) = I%XRSMIN(:,JP)
-ZLAI  (:) = I%XLAI  (:,JP)
-ZVEG  (:) = I%XVEG  (:,JP)
+ZD2   (:) = I%M%X%XDG   (:,2,JP)
+ZRSMIN(:) = I%M%T%XRSMIN(:,JP)
+ZLAI  (:) = I%M%T%XLAI  (:,JP)
+ZVEG  (:) = I%M%T%XVEG  (:,JP)
 !
 ZUCLS(:) = PUCLS(:)
 ZVCLS(:) = PVCLS(:)
@@ -345,11 +345,11 @@ WRITE(*,*) 'Mean TL increments over NATURE ',SUM(ZTLINC)/KI
 WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
-I%XWG (:,1,JP) = ZWS0(:)
-I%XWG (:,2,JP) = ZWP0(:)
-I%XTG (:,1,JP) = ZTS0(:)
-I%XTG (:,2,JP) = ZTP0(:)
-I%XWGI(:,2,JP) = ZTL0(:)
+I%R%XWG (:,1,JP) = ZWS0(:)
+I%R%XWG (:,2,JP) = ZWP0(:)
+I%R%XTG (:,1,JP) = ZTS0(:)
+I%R%XTG (:,2,JP) = ZTP0(:)
+I%R%XWGI(:,2,JP) = ZTL0(:)
 
 !
 ! -------------------------------------------------------------------------------------

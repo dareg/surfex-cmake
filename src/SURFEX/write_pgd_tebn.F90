@@ -82,8 +82,8 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                             GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, 1)
+ CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, 1)
  CALL WRITESURF_PGD_TEB_n(DGU, U, TM, GDM, GRM, &
                           HPROGRAM)
 !

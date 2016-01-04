@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CH_INIT_DEP_ISBA_n (CHI, DTCO, I, &
+      SUBROUTINE CH_INIT_DEP_ISBA_n (CHI, DTCO, KPATCH, OCOVER, PCOVER, &
                                      KCH,KLUOUT,KLU)
 !!    ##################################################
 !!
@@ -61,7 +61,6 @@
 !
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODI_CH_OPEN_INPUTB  ! open the general purpose ASCII input file
 USE MODI_CONVERT_COVER_CH_ISBA
@@ -87,7 +86,10 @@ IMPLICIT NONE
 !
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_t), INTENT(INOUT) :: I
+!
+INTEGER, INTENT(IN) :: KPATCH
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
+REAL, DIMENSION(:,:), INTENT(IN) :: PCOVER
 !
 INTEGER,                         INTENT(IN)  :: KCH      ! chemistry input file
 INTEGER,                         INTENT(IN)  :: KLUOUT   ! output listing channel
@@ -128,18 +130,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     !
     !*       2.    Physiographic fields
     !
-    ALLOCATE(CHI%XSOILRC_SO2(KLU,I%NPATCH))
-    ALLOCATE(CHI%XSOILRC_O3(KLU,I%NPATCH))
+    ALLOCATE(CHI%XSOILRC_SO2(KLU,KPATCH))
+    ALLOCATE(CHI%XSOILRC_O3(KLU,KPATCH))
 
     CALL CONVERT_COVER_CH_ISBA(DTCO, &
-                               I%XCOVER,I%LCOVER,CHI%XSOILRC_SO2,CHI%XSOILRC_O3)
+                               PCOVER,OCOVER,CHI%XSOILRC_SO2,CHI%XSOILRC_O3)
     !
     !---------------------------------------------------------------------------
     !
     !
     !*       3.    read surface resistance SURF_RES
     !
-    ALLOCATE(CHI%XDEP(KLU,CHI%SVI%NBEQ,I%NPATCH))
+    ALLOCATE(CHI%XDEP(KLU,CHI%SVI%NBEQ,KPATCH))
     !
     ! open input file
     WRITE(KLUOUT,*) &

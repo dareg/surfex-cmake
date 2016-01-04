@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_TEB_GARDEN (TGD, TGDO, TGDP, TOP, TVG)
+SUBROUTINE PREP_VER_TEB_GARDEN (GDR, TGDO, TGDP, TOP, PDG)
 !     #################################################################################
 !
 !!****  *PREP_VER_TEB_GARDEN* - change in ISBA fields due to altitude change
@@ -27,11 +27,10 @@ SUBROUTINE PREP_VER_TEB_GARDEN (TGD, TGDO, TGDP, TOP, TVG)
 
 !
 !
-USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
-USE MODD_TEB_GARDEN_OPTION_n, ONLY : TEB_GARDEN_OPTIONS_t
-USE MODD_TEB_GARDEN_PGD_n, ONLY : TEB_GARDEN_PGD_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
 !
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -53,11 +52,12 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 !
 !
-TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
-TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
-TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
+TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: GDR
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGDO
+TYPE(ISBA_PGD_t), INTENT(INOUT) :: TGDP
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+!
+REAL, DIMENSION(:,:), INTENT(IN) :: PDG
 !
 INTEGER                         :: JL        ! loop counter on layers
 INTEGER                         :: IWORK     ! Work integer
@@ -79,40 +79,40 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.0    Ice content climatologic gradient
 !
 IF (LHOOK) CALL DR_HOOK('PREP_VER_TEB_GARDEN',0,ZHOOK_HANDLE)
-ALLOCATE(ZWGI_CLIM_GRAD (SIZE(TGD%CUR%XWG,1),SIZE(TGD%CUR%XWG,2)))
+ALLOCATE(ZWGI_CLIM_GRAD (SIZE(GDR%CUR%XWG,1),SIZE(GDR%CUR%XWG,2)))
 !
-ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - TGDP%XDG(:,:) / ZH0 )
+ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - PDG(:,:) / ZH0 )
 !-------------------------------------------------------------------------------------
 !
 !*      1.1    Temperature profile
 !
-ALLOCATE(ZTG_LS(SIZE(TGD%CUR%XTG,1),SIZE(TGD%CUR%XTG,2)))
-ZTG_LS(:,:) = TGD%CUR%XTG(:,:)
+ALLOCATE(ZTG_LS(SIZE(GDR%CUR%XTG,1),SIZE(GDR%CUR%XTG,2)))
+ZTG_LS(:,:) = GDR%CUR%XTG(:,:,1)
 !
-DO JL=1,SIZE(TGD%CUR%XTG,2)
-  WHERE(TGD%CUR%XTG(:,JL)/=XUNDEF) &
-    TGD%CUR%XTG(:,JL) = TGD%CUR%XTG(:,JL) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
+DO JL=1,SIZE(GDR%CUR%XTG,2)
+  WHERE(GDR%CUR%XTG(:,JL,1)/=XUNDEF) &
+    GDR%CUR%XTG(:,JL,1) = GDR%CUR%XTG(:,JL,1) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
 END DO
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.2    Water and ice in the soil
 !
-ALLOCATE(ZZSFREEZE      (SIZE(TGD%CUR%XWG,1)))
-ALLOCATE(ZWGTOT         (SIZE(TGD%CUR%XWG,1)))
-ALLOCATE(ZDW            (SIZE(TGD%CUR%XWG,1)))
+ALLOCATE(ZZSFREEZE      (SIZE(GDR%CUR%XWG,1)))
+ALLOCATE(ZWGTOT         (SIZE(GDR%CUR%XWG,1)))
+ALLOCATE(ZDW            (SIZE(GDR%CUR%XWG,1)))
 !
 !* general case
 !
-IWORK=SIZE(TGD%CUR%XTG,2)
+IWORK=SIZE(GDR%CUR%XTG,2)
 !
 DO JL=1,IWORK
   !
   ZDW(:) = 0.
   ! altitude where deep soil freezes (diurnal surface response is not treated)
-  ZZSFREEZE(:) = TOP%XZS + (XTT - TGD%CUR%XTG(:,JL)) / XT_CLIM_GRAD
+  ZZSFREEZE(:) = TOP%XZS + (XTT - GDR%CUR%XTG(:,JL,1)) / XT_CLIM_GRAD
   !
-  WHERE(TGD%CUR%XTG(:,JL)/=XUNDEF) 
+  WHERE(GDR%CUR%XTG(:,JL,1)/=XUNDEF) 
     !
     WHERE (ZTG_LS(:,JL) < XTT)
       !
@@ -146,29 +146,29 @@ DO JL=1,IWORK
     !
     ZWGTOT(:) = XUNDEF
     !
-    WHERE(TGD%CUR%XWG(:,JL)/=XUNDEF)         
-      ZWGTOT(:) = TGD%CUR%XWG(:,JL) + TGD%CUR%XWGI(:,JL)
+    WHERE(GDR%CUR%XWG(:,JL,1)/=XUNDEF)         
+      ZWGTOT(:) = GDR%CUR%XWG(:,JL,1) + GDR%CUR%XWGI(:,JL,1)
     ENDWHERE        
     !
-    WHERE(TGD%CUR%XWG(:,JL)/=XUNDEF)      
-      TGD%CUR%XWGI(:,JL) = TGD%CUR%XWGI(:,JL) + ZDW(:)
-      TGD%CUR%XWG (:,JL) = TGD%CUR%XWG (:,JL) - ZDW(:)
+    WHERE(GDR%CUR%XWG(:,JL,1)/=XUNDEF)      
+      GDR%CUR%XWGI(:,JL,1) = GDR%CUR%XWGI(:,JL,1) + ZDW(:)
+      GDR%CUR%XWG (:,JL,1) = GDR%CUR%XWG (:,JL,1) - ZDW(:)
     ENDWHERE
     !
-    WHERE (TGD%CUR%XWGI(:,JL) < 0..AND.TGD%CUR%XWGI(:,JL)/=XUNDEF) 
-      TGD%CUR%XWGI(:,JL) = 0.
-      TGD%CUR%XWG (:,JL) = ZWGTOT(:)
+    WHERE (GDR%CUR%XWGI(:,JL,1) < 0..AND.GDR%CUR%XWGI(:,JL,1)/=XUNDEF) 
+      GDR%CUR%XWGI(:,JL,1) = 0.
+      GDR%CUR%XWG (:,JL,1) = ZWGTOT(:)
     END WHERE
     !
-    WHERE (TGD%CUR%XWG(:,JL) < XWGMIN.AND.TGD%CUR%XWG(:,JL)/=XUNDEF)
-      TGD%CUR%XWG (:,JL) = XWGMIN
-      TGD%CUR%XWGI(:,JL) = ZWGTOT(:) - XWGMIN
+    WHERE (GDR%CUR%XWG(:,JL,1) < XWGMIN.AND.GDR%CUR%XWG(:,JL,1)/=XUNDEF)
+      GDR%CUR%XWG (:,JL,1) = XWGMIN
+      GDR%CUR%XWGI(:,JL,1) = ZWGTOT(:) - XWGMIN
     END WHERE
     !
-    WHERE(TGD%CUR%XWGI(:,JL) > 0..AND.TGD%CUR%XWGI(:,JL)/=XUNDEF)
-      TGD%CUR%XTG(:,JL) = MIN(XTT,TGD%CUR%XTG(:,JL))
+    WHERE(GDR%CUR%XWGI(:,JL,1) > 0..AND.GDR%CUR%XWGI(:,JL,1)/=XUNDEF)
+      GDR%CUR%XTG(:,JL,1) = MIN(XTT,GDR%CUR%XTG(:,JL,1))
     ELSEWHERE
-      TGD%CUR%XTG(:,JL) = MAX(XTT,TGD%CUR%XTG(:,JL))
+      GDR%CUR%XTG(:,JL,1) = MAX(XTT,GDR%CUR%XTG(:,JL,1))
     ENDWHERE
     !
   ENDWHERE
@@ -177,11 +177,11 @@ END DO
 !
 !* limits in force-restore case
 !
-IF (TVG%CISBA=='3-L') THEN 
-  WHERE (TGD%CUR%XWGI(:,3) /= XUNDEF)
-    TGD%CUR%XWG (:,3) = TGD%CUR%XWG(:,3)+TGD%CUR%XWGI(:,3)
-    TGD%CUR%XWGI(:,3) = 0.
-    TGD%CUR%XTG (:,3) = ZTG_LS(:,3)
+IF (TGDO%CISBA=='3-L') THEN 
+  WHERE (GDR%CUR%XWGI(:,3,1) /= XUNDEF)
+    GDR%CUR%XWG (:,3,1) = GDR%CUR%XWG(:,3,1)+GDR%CUR%XWGI(:,3,1)
+    GDR%CUR%XWGI(:,3,1) = 0.
+    GDR%CUR%XTG (:,3,1) = ZTG_LS(:,3)
   END WHERE
 END IF
 !
@@ -191,9 +191,9 @@ DEALLOCATE(ZWGTOT   )
 DEALLOCATE(ZDW      )
 !
 !* masks where fields are not defined
-WHERE (TGD%CUR%XTG(:,1:SIZE(TGD%CUR%XWG,2)) == XUNDEF)
-  TGD%CUR%XWG (:,:) = XUNDEF
-  TGD%CUR%XWGI(:,:) = XUNDEF
+WHERE (GDR%CUR%XTG(:,1:SIZE(GDR%CUR%XWG,2),1) == XUNDEF)
+  GDR%CUR%XWG (:,:,1) = XUNDEF
+  GDR%CUR%XWGI(:,:,1) = XUNDEF
 END WHERE
 !
 !-------------------------------------------------------------------------------------
@@ -201,12 +201,12 @@ END WHERE
 !*      1.4    Snow variables
 !
 !* vertical shift
-IF (TVG%CISBA=='DIF') THEN
+IF (TGDO%CISBA=='DIF') THEN
   IDEEP_SOIL = TGDO%NGROUND_LAYER
 ELSE
   IDEEP_SOIL = 2
 END IF
- CALL PREP_VER_SNOW(TGD%CUR%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),SPREAD(TGD%CUR%XTG,3,1),IDEEP_SOIL)
+ CALL PREP_VER_SNOW(GDR%CUR%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),GDR%CUR%XTG,IDEEP_SOIL)
 !
 !-------------------------------------------------------------------------------------
 !

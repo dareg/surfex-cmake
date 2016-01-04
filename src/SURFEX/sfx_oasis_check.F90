@@ -82,7 +82,7 @@ ENDIF
 !
 !
 IF(LCPL_CALVING)THEN
-  IF(.NOT.I%LGLACIER)THEN
+  IF(.NOT.I%O%LGLACIER)THEN
     WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
     WRITE(KLUOUT,*)'Calving flux is asked by SFX - OASIS coupling      '
     WRITE(KLUOUT,*)'CCALVING = '//TRIM(CCALVING)//' in NAM_SFX_LAND_CPL'
@@ -94,11 +94,11 @@ IF(LCPL_CALVING)THEN
 ENDIF  
 !
 !
-IF(LCPL_GW.AND.I%CISBA/='DIF')THEN
+IF(LCPL_GW.AND.I%O%CISBA/='DIF')THEN
    WRITE(KLUOUT,*)'SFX_OASIS_CHECK: Water table depth / surface coupling requires ISBA-DF'
    CALL ABOR1_SFX('SFX_OASIS_CHECK: ISBA-DF is required for SFX - Groundwater coupling')
 ENDIF   
-IF(.NOT.LCPL_GW.AND.I%CISBA=='DIF'.AND.I%LWTD)THEN           
+IF(.NOT.LCPL_GW.AND.I%O%CISBA=='DIF'.AND.I%O%LWTD)THEN           
       WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
       WRITE(KLUOUT,*)'!!! A groundwater map is specified and LAND coupling    !!!'
       WRITE(KLUOUT,*)'!!!  is activated but not groundwater/surface coupling  !!!'

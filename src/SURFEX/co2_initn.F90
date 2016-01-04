@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CO2_INIT_n (I, &
+      SUBROUTINE CO2_INIT_n (OAGRI_TO_GRASS, OTR_ML,  &
                              HPHOTO, KSIZE_NATURE_P, KR_NATURE_P, PVEGTYPE_PATCH, &
                             PCO2, PGMES, PGC, PDMAX, PABC, PPOI, PANMAX, &
                             PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,      &
@@ -48,10 +48,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
@@ -67,7 +63,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+LOGICAL, INTENT(IN) :: OAGRI_TO_GRASS
+LOGICAL, INTENT(IN) :: OTR_ML
 !
  CHARACTER(LEN=3), INTENT(IN) :: HPHOTO
 INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_NATURE_P
@@ -145,7 +142,7 @@ DO JP=1,IPATCH
 
      CALL PACK_CO2_INIT(KR_NATURE_P(:,JP),KSIZE_NATURE_P(JP),JP)
 !
-     CALL COTWOINIT_n(I, &
+     CALL COTWOINIT_n(OAGRI_TO_GRASS, OTR_ML, &
                       HPHOTO, ZP_VEGTYPE_PATCH,ZP_GMES,ZP_CO2,ZP_GC,   &
             ZP_DMAX,ZP_ABC,ZP_POI,ZP_ANMAX,ZP_FZERO,            &
             ZP_EPSO,ZP_GAMM,ZP_QDGAMM,ZP_QDGMES,ZP_T1GMES,      &

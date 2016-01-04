@@ -34,6 +34,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL2,  &
                                  XMEAN_WORK, XSTD_WORK, XSKEW_WORK, &
                                  XMIN_WORK, XMAX_WORK 
@@ -96,6 +97,20 @@ WHERE (NSIZE(:)>=36)
 !----------------------------------------------------------------------------
 !
 END WHERE
+!
+WHERE (XMEAN_WORK(:)/=XUNDEF) 
+  XMEAN_WORK(:) = AINT(XMEAN_WORK(:)) + &
+              NINT((XMEAN_WORK(:)-AINT(XMEAN_WORK(:)))*100000000.)/100000000.
+  XMIN_WORK(:) = AINT(XMIN_WORK(:)) + &
+              NINT((XMIN_WORK(:)-AINT(XMIN_WORK(:)))*100000000.)/100000000.
+  XMAX_WORK(:) = AINT(XMAX_WORK(:)) + &
+              NINT((XMAX_WORK(:)-AINT(XMAX_WORK(:)))*100000000.)/100000000.
+  XSTD_WORK(:) = AINT(XSTD_WORK(:)) + &
+              NINT((XSTD_WORK(:)-AINT(XSTD_WORK(:)))*100000000.)/100000000.
+  XSKEW_WORK(:) = AINT(XSKEW_WORK(:)) + &
+              NINT((XSKEW_WORK(:)-AINT(XSKEW_WORK(:)))*100000000.)/100000000.
+END WHERE
+!
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_CTI',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -51,7 +51,7 @@
                       PUSTAR_ISBA, PLER_ISBA, PLE_ISBA, PLEI_ISBA, PGFLUX_ISBA,  &
                       PHORT, PDRIP, PRRVEG, PAC_AGG, PHU_AGG, PFAPARC, PFAPIRC,  &
                       PMUS, PLAI_EFFC, PAN, PANDAY, PRESP_BIOMASS_INST, PIACAN,  &
-                      PANF, PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
+                      PGPP, PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS,          &
                       PIRRIG_FLUX, PDEEP_FLUX,                                   & 
                       PSWNET_V, PSWNET_G, PSWNET_N, PSWNET_NS,                   &
                       PLWNET_V, PLWNET_G, PLWNET_N,                              &
@@ -753,7 +753,6 @@ REAL, DIMENSION(:),   INTENT(INOUT) :: PFAPIRC   ! Fapir of vegetation (cumul)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PMUS
 REAL, DIMENSION(:),   INTENT(INOUT) :: PLAI_EFFC ! Effective LAI (cumul)
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PIACAN    ! PAR in the canopy at different gauss level
-REAL, DIMENSION(:),     INTENT(OUT) :: PANF      ! total assimilation over canopy
 REAL, DIMENSION(:),     INTENT(OUT) :: PGPP      ! Gross Primary Production
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPAR    ! Fapar of vegetation
 REAL, DIMENSION(:),     INTENT(OUT) :: PFAPIR    ! Fapir of vegetation
@@ -1005,7 +1004,7 @@ IF(OMEB)THEN
         PAH, PBH, PF2I, PDMAX, PPOI, PCSP, PFZERO, PEPSO,                      &
         PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,                 &  
         PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,                                      &
-        PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
+        PAN, PANDAY, PANFM, PGPP, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, ZF2,                                        &
         PWSAT, PWFC,                                                           &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
@@ -1093,7 +1092,7 @@ ELSE
            PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,      &
            PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, PFFV,                     &
            ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN,             &
-           PABC, PAN, PANDAY, PRS, PANFM, PGPP, PANF, PRESP_BIOMASS_INST(:,1))
+           PABC, PAN, PANDAY, PRS, PANFM, PGPP, PRESP_BIOMASS_INST(:,1))
    ELSE
       PRESP_BIOMASS_INST(:,1) = 0.0
       PGPP(:) = 0.0

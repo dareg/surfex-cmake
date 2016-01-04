@@ -135,17 +135,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX',0,ZHOOK_HANDLE)
 IF(LEN_TRIM(HCTI)==0)THEN
 !
-  ALLOCATE(I%XTI_MIN (0))
-  ALLOCATE(I%XTI_MAX (0))
-  ALLOCATE(I%XTI_MEAN(0))
-  ALLOCATE(I%XTI_STD (0))
-  ALLOCATE(I%XTI_SKEW(0))
+  ALLOCATE(I%P%XTI_MIN (0))
+  ALLOCATE(I%P%XTI_MAX (0))
+  ALLOCATE(I%P%XTI_MEAN(0))
+  ALLOCATE(I%P%XTI_STD (0))
+  ALLOCATE(I%P%XTI_SKEW(0))
 !        
 !-------------------------------------------------------------------------------
 ELSE
 !-------------------------------------------------------------------------------
 !
-  I%LCTI = .TRUE.
+  I%O%LCTI = .TRUE.
 !
 !*    2.      Find LUOUT
 !             ----------
@@ -159,17 +159,17 @@ ELSE
 !*    3.      Allocations of statistics arrays
 !             --------------------------------
 !
-  ALLOCATE(I%XTI_MIN (KLU))
-  ALLOCATE(I%XTI_MAX (KLU))
-  ALLOCATE(I%XTI_MEAN(KLU))
-  ALLOCATE(I%XTI_STD (KLU))
-  ALLOCATE(I%XTI_SKEW(KLU))
+  ALLOCATE(I%P%XTI_MIN (KLU))
+  ALLOCATE(I%P%XTI_MAX (KLU))
+  ALLOCATE(I%P%XTI_MEAN(KLU))
+  ALLOCATE(I%P%XTI_STD (KLU))
+  ALLOCATE(I%P%XTI_SKEW(KLU))
 !
-  I%XTI_MIN (:) = XUNDEF
-  I%XTI_MAX (:) = XUNDEF
-  I%XTI_MEAN(:) = XUNDEF
-  I%XTI_STD (:) = XUNDEF
-  I%XTI_SKEW(:) = XUNDEF
+  I%P%XTI_MIN (:) = XUNDEF
+  I%P%XTI_MAX (:) = XUNDEF
+  I%P%XTI_MEAN(:) = XUNDEF
+  I%P%XTI_STD (:) = XUNDEF
+  I%P%XTI_SKEW(:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -425,11 +425,11 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !*    11.     Asign parameters
 !             ----------------
 !
-  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,I%XTI_MIN)
-  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,I%XTI_MAX)
-  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,I%XTI_MEAN)
-  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,I%XTI_STD)
-  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,I%XTI_SKEW)
+  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,I%P%XTI_MIN)
+  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,I%P%XTI_MAX)
+  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,I%P%XTI_MEAN)
+  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,I%P%XTI_STD)
+  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,I%P%XTI_SKEW)
 !  
 !-------------------------------------------------------------------------------
 !

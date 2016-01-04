@@ -103,7 +103,7 @@ ELSE
       !*     ZLST updated from LAND values of climatological TS
       DO JJ=1,U%NSIZE_NATURE
         IF ( U%NR_WATER(JI)==U%NR_NATURE(JJ) ) THEN
-          ZLST(JI) = I%XTG(JJ,2,1)
+          ZLST(JI) = I%R%XTG(JJ,2,1)
           EXIT
         ENDIF
       ENDDO

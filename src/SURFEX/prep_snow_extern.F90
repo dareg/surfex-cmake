@@ -218,7 +218,7 @@ IF (NRANK==NPIO) THEN
     CASE ('WWW')
       IF (OSNOW_IDEAL) THEN
         ALLOCATE(PFIELD(INI,KLAYER,IPATCH))
-        PFIELD(:,:,:) = TZSNOW%WSNOW(:,1:KLAYER,:)              
+        PFIELD(:,:,:) = TZSNOW%WSNOW(:,1:KLAYER,:)
       ELSE
         ALLOCATE(PFIELD(INI,1,IPATCH))
         PFIELD = 0.

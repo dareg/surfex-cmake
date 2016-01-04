@@ -88,16 +88,16 @@ ALLOCATE(PKI%NBLOCK_0(0,PKI%NSIZE_N0))
 ALLOCATE(PKI%TBLOCK_SIMPLE(KSIZE,PKI%NSIZE_TSIMPLE))
 ALLOCATE(PKI%TBLOCK_0(0,PKI%NSIZE_T0))
 ALLOCATE(PKI%XBLOCK_SIMPLE(KSIZE,PKI%NSIZE_SIMPLE))
-ALLOCATE(PKI%XBLOCK_GROUND(KSIZE,I%NGROUND_LAYER,PKI%NSIZE_GROUND))
+ALLOCATE(PKI%XBLOCK_GROUND(KSIZE,I%O%NGROUND_LAYER,PKI%NSIZE_GROUND))
 ALLOCATE(PKI%XBLOCK_VEGTYPE(KSIZE,NVEGTYPE,PKI%NSIZE_VEGTYPE))
-ALLOCATE(PKI%XBLOCK_TG(KSIZE,SIZE(I%XTG,2),PKI%NSIZE_TG))
-ALLOCATE(PKI%XBLOCK_SNOW(KSIZE,I%TSNOW%NLAYER,PKI%NSIZE_SNOW))
-ALLOCATE(PKI%XBLOCK_ALB(KSIZE,SIZE(I%XDIR_ALB_WITH_SNOW,2),PKI%NSIZE_ALB))
+ALLOCATE(PKI%XBLOCK_TG(KSIZE,SIZE(I%R%XTG,2),PKI%NSIZE_TG))
+ALLOCATE(PKI%XBLOCK_SNOW(KSIZE,I%R%TSNOW%NLAYER,PKI%NSIZE_SNOW))
+ALLOCATE(PKI%XBLOCK_ALB(KSIZE,SIZE(I%I%XDIR_ALB_WITH_SNOW,2),PKI%NSIZE_ALB))
 ALLOCATE(PKI%XBLOCK_2(KSIZE,2,PKI%NSIZE_2))
-ALLOCATE(PKI%XBLOCK_BIOMASS(KSIZE,I%NNBIOMASS,PKI%NSIZE_BIOMASS))
-ALLOCATE(PKI%XBLOCK_SOILCARB(KSIZE,I%NNSOILCARB,PKI%NSIZE_SOILCARB))
-ALLOCATE(PKI%XBLOCK_LITTLEVS(KSIZE,I%NNLITTLEVS,PKI%NSIZE_LITTLEVS))
-ALLOCATE(PKI%XBLOCK_LITTER(KSIZE,I%NNLITTER,I%NNLITTLEVS,PKI%NSIZE_LITTER))
+ALLOCATE(PKI%XBLOCK_BIOMASS(KSIZE,I%O%NNBIOMASS,PKI%NSIZE_BIOMASS))
+ALLOCATE(PKI%XBLOCK_SOILCARB(KSIZE,I%O%NNSOILCARB,PKI%NSIZE_SOILCARB))
+ALLOCATE(PKI%XBLOCK_LITTLEVS(KSIZE,I%O%NNLITTLEVS,PKI%NSIZE_LITTLEVS))
+ALLOCATE(PKI%XBLOCK_LITTER(KSIZE,I%O%NNLITTER,I%O%NNLITTLEVS,PKI%NSIZE_LITTER))
 ALLOCATE(PKI%XBLOCK_0(0,PKI%NSIZE_0))
 ALLOCATE(PKI%XBLOCK_00(0,0,PKI%NSIZE_00))
 ALLOCATE(PKI%XBLOCK_000(0,0,0,PKI%NSIZE_000))
@@ -297,7 +297,7 @@ PKI%XP_EMISF        => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ISIZE_SIMPLE = ISIZE_SIMPLE + 1
 PKI%XP_FSAT         => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 !
-IF(I%TSNOW%SCHEME=='EBA') THEN
+IF(I%R%TSNOW%SCHEME=='EBA') THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_PSNV_A      => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE
@@ -305,7 +305,7 @@ ELSE
   PKI%XP_PSNV_A       => PKI%XBLOCK_0(:,ISIZE_0)
 ENDIF
 !
-IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
   ISIZE_SNOW = ISIZE_SNOW + 1
    PKI%XP_SNOWHEAT   => PKI%XBLOCK_SNOW(:,:,ISIZE_SNOW)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -333,7 +333,7 @@ ELSE
   PKI%XP_SNOWALBFIR   => PKI%XBLOCK_0(:,ISIZE_0) 
 END IF
 !
-IF(I%TSNOW%SCHEME=='CRO') THEN
+IF(I%R%TSNOW%SCHEME=='CRO') THEN
   ISIZE_SNOW = ISIZE_SNOW + 1
    PKI%XP_SNOWGRAN1  => PKI%XBLOCK_SNOW(:,:,ISIZE_SNOW)
   ISIZE_SNOW = ISIZE_SNOW + 1
@@ -349,7 +349,7 @@ ELSE
   PKI%XP_SNOWHIST   => PKI%XBLOCK_00(:,:,ISIZE_00) 
 END IF
 !
-IF(I%LGLACIER)THEN  
+IF(I%O%LGLACIER)THEN  
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1  
    PKI%XP_ICE_STO=> PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE     
@@ -357,7 +357,7 @@ ELSE
   PKI%XP_ICE_STO=> PKI%XBLOCK_0(:,ISIZE_0)
 ENDIF
 !
-IF (I%CSCOND=='PL98'.OR.I%CISBA=='DIF') THEN
+IF (I%O%CSCOND=='PL98'.OR.I%O%CISBA=='DIF') THEN
   ISIZE_GROUND = ISIZE_GROUND + 1
    PKI%XP_HCAPSOIL   => PKI%XBLOCK_GROUND(:,:,ISIZE_GROUND)
   ISIZE_GROUND = ISIZE_GROUND + 1
@@ -373,7 +373,7 @@ ELSE
   PKI%XP_CONDSLD    => PKI%XBLOCK_01(:,:,ISIZE_01)
 END IF
 !
-IF (I%CISBA=='2-L' .OR. I%CISBA=='3-L') THEN   
+IF (I%O%CISBA=='2-L' .OR. I%O%CISBA=='3-L') THEN   
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_C4B          => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE) 
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -414,7 +414,7 @@ PKI%XP_MPOTSAT    => PKI%XBLOCK_GROUND(:,:,ISIZE_GROUND)
 ISIZE_GROUND = ISIZE_GROUND + 1
 PKI%XP_BCOEF      => PKI%XBLOCK_GROUND(:,:,ISIZE_GROUND)
 !
-IF (I%CISBA=='DIF') THEN
+IF (I%O%CISBA=='DIF') THEN
 !
   ISIZE_GROUND = ISIZE_GROUND + 1
    PKI%XP_ROOTFRAC   => PKI%XBLOCK_GROUND(:,:,ISIZE_GROUND) 
@@ -454,7 +454,7 @@ ELSE
 !
 END IF
 !
-IF (I%CISBA=='DIF'.AND.I%CRUNOFF=='SGH') THEN
+IF (I%O%CISBA=='DIF'.AND.I%O%CRUNOFF=='SGH') THEN
 !
   ISIZE_GROUND = ISIZE_GROUND + 1
   PKI%XP_TOPQS => PKI%XBLOCK_GROUND(:,:,ISIZE_GROUND)
@@ -466,7 +466,7 @@ ELSE
 !   
 END IF
 !
-IF (I%LTR_ML) THEN
+IF (I%O%LTR_ML) THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_FAPARC => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -486,7 +486,7 @@ ELSE
   PKI%XP_MUS => PKI%XBLOCK_0(:,ISIZE_0)
 ENDIF
 !
-IF (I%CPHOTO=='NON') THEN
+IF (I%O%CPHOTO=='NON') THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_RSMIN      => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE
@@ -494,7 +494,7 @@ ELSE
   PKI%XP_RSMIN      => PKI%XBLOCK_0(:,ISIZE_0)
 END IF
 !
-IF (I%CPHOTO/='NON' .OR. I%LMEB_PATCH(KPATCH)) THEN
+IF (I%O%CPHOTO/='NON' .OR. I%O%LMEB_PATCH(KPATCH)) THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_BSLAI      => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE
@@ -502,7 +502,7 @@ ELSE
   PKI%XP_BSLAI      => PKI%XBLOCK_0(:,ISIZE_0)
 ENDIF
 !
-IF (I%CPHOTO/='NON'.OR.LTREEDRAG) THEN
+IF (I%O%CPHOTO/='NON'.OR.LTREEDRAG) THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_H_TREE     => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE
@@ -510,7 +510,7 @@ ELSE
   PKI%XP_H_TREE     => PKI%XBLOCK_0(:,ISIZE_0)       
 ENDIF
 !
-IF (I%CPHOTO/='NON') THEN
+IF (I%O%CPHOTO/='NON') THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_LAIMIN     => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -606,7 +606,7 @@ ELSE
   PKI%XP_RESP_BIOMASS   => PKI%XBLOCK_00(:,:,ISIZE_00)
 END IF
 !
-IF (I%CPHOTO=='AST' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') THEN
+IF (I%O%CPHOTO=='AST' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN
   ISIZE_LSIMPLE = ISIZE_LSIMPLE + 1
   PKI%LP_STRESS     => PKI%LBLOCK_SIMPLE(:,ISIZE_LSIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -630,7 +630,7 @@ ELSE
   PKI%XP_DMAX       => PKI%XBLOCK_0(:,ISIZE_0)
 END IF
 !
-IF (LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB')) THEN
+IF (LAGRIP .AND. (I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB')) THEN
   ISIZE_TSIMPLE = ISIZE_TSIMPLE + 1
   PKI%TP_SEED           => PKI%TBLOCK_SIMPLE(:,ISIZE_TSIMPLE)
   ISIZE_TSIMPLE = ISIZE_TSIMPLE + 1
@@ -662,7 +662,7 @@ ELSE
   PKI%XP_LIRRIGATE      => PKI%LBLOCK_0(:,ISIZE_L0)
 ENDIF
 !
-IF(I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') THEN
+IF(I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_CE_NITRO       => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -682,7 +682,7 @@ ELSE
   PKI%XP_BSLAI_NITRO    => PKI%XBLOCK_0(:,ISIZE_0)
 END IF
 !
-IF (I%CPHOTO=='NCB') THEN
+IF (I%O%CPHOTO=='NCB') THEN
   ISIZE_BIOMASS = ISIZE_BIOMASS + 1
   PKI%XP_INCREASE     => PKI%XBLOCK_BIOMASS(:,:,ISIZE_BIOMASS)
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
@@ -694,7 +694,7 @@ ELSE
   PKI%XP_TAU_WOOD     => PKI%XBLOCK_0(:,ISIZE_0)
 ENDIF
 !
-IF (I%CRESPSL=='CNT') THEN
+IF (I%O%CRESPSL=='CNT') THEN
   ISIZE_LITTER = ISIZE_LITTER + 1
   PKI%XP_LITTER         => PKI%XBLOCK_LITTER(:,:,:,ISIZE_LITTER)
   ISIZE_SOILCARB = ISIZE_SOILCARB + 1
@@ -714,7 +714,7 @@ ELSE
   PKI%XP_TURNOVER       => PKI%XBLOCK_00(:,:,ISIZE_00)
 END IF
 !
-IF (I%CRAIN=='SGH')THEN
+IF (I%O%CRAIN=='SGH')THEN
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
    PKI%XP_MUF=> PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
 ELSE
@@ -732,7 +732,7 @@ ENDIF
 ! MEB case. We still keep the GV-variables in the system for future needs.
 ! Code is commented with "nogv" in appropriate places.
 !
-IF (I%LMEB_PATCH(KPATCH))THEN
+IF (I%O%LMEB_PATCH(KPATCH))THEN
 !
   ISIZE_SIMPLE = ISIZE_SIMPLE + 1
   PKI%XP_WRL         => PKI%XBLOCK_SIMPLE(:,ISIZE_SIMPLE)
@@ -866,101 +866,101 @@ IF (ISIZE_N0.GT.PKI%NSIZE_N0) &
 !
 !------------------------------------------------------------------------
 !
-IF (I%NPATCH==1) THEN
+IF (I%O%NPATCH==1) THEN
   !
-  PKI%XP_Z0_O_Z0H     (:)    =    I%XZ0_O_Z0H     (:, 1)
-  PKI%XP_EMIS         (:)    =    I%XEMIS         (:, 1)
-  PKI%XP_ALBNIR       (:)    =    I%XALBNIR       (:, 1)
-  PKI%XP_ALBVIS       (:)    =    I%XALBVIS       (:, 1)
-  PKI%XP_ALBUV        (:)    =    I%XALBUV        (:, 1)
-  PKI%XP_ALBNIR_VEG   (:)    =    I%XALBNIR_VEG   (:, 1)
-  PKI%XP_ALBVIS_VEG   (:)    =    I%XALBVIS_VEG   (:, 1)
-  PKI%XP_ALBUV_VEG    (:)    =    I%XALBUV_VEG    (:, 1)
-  PKI%XP_ALBNIR_SOIL  (:)    =    I%XALBNIR_SOIL  (:, 1)
-  PKI%XP_ALBVIS_SOIL  (:)    =    I%XALBVIS_SOIL  (:, 1)
-  PKI%XP_ALBUV_SOIL   (:)    =    I%XALBUV_SOIL   (:, 1)
-  PKI%XP_Z0           (:)    =    I%XZ0           (:, 1)
-  PKI%XP_WRMAX_CF     (:)    =    I%XWRMAX_CF     (:, 1)
-  PKI%XP_GAMMA        (:)    =    I%XGAMMA        (:, 1)
-  PKI%XP_CV           (:)    =    I%XCV           (:, 1)
-  PKI%XP_RGL          (:)    =    I%XRGL          (:, 1)
-  PKI%XP_RUNOFFD      (:)    =    I%XRUNOFFD      (:, 1) 
-  PKI%XP_Z0EFFIP      (:)    =    I%XZ0EFFIP      (:, 1)
-  PKI%XP_Z0EFFIM      (:)    =    I%XZ0EFFIM      (:, 1)
-  PKI%XP_Z0EFFJP      (:)    =    I%XZ0EFFJP      (:, 1)
-  PKI%XP_Z0EFFJM      (:)    =    I%XZ0EFFJM      (:, 1)  
-  PKI%XP_WR           (:)    =    I%XWR           (:, 1)   
-  PKI%XP_LAI          (:)    =    I%XLAI          (:, 1) 
-  PKI%XP_RESA         (:)    =    I%XRESA         (:, 1)
-  PKI%XP_CPS          (:)    =    I%XPCPS         (:, 1)
-  PKI%XP_LVTT         (:)    =    I%XPLVTT        (:, 1)
-  PKI%XP_LSTT         (:)    =    I%XPLSTT        (:, 1) 
-  PKI%XP_VEG          (:)    =    I%XVEG          (:, 1)  
-  PKI%XP_SNOWALB      (:)    =    I%TSNOW%ALB     (:, 1) 
-  PKI%XP_LE           (:)    =    I%XLE           (:, 1)  
-  PKI%XP_PSN          (:)    =    I%XPSN          (:, 1)
-  PKI%XP_PSNG         (:)    =    I%XPSNG         (:, 1)
-  PKI%XP_PSNV         (:)    =    I%XPSNV         (:, 1)  
-  PKI%XP_ALBNIR_DRY   (:)    =    I%XALBNIR_DRY   (:)
-  PKI%XP_ALBVIS_DRY   (:)    =    I%XALBVIS_DRY   (:)
-  PKI%XP_ALBUV_DRY    (:)    =    I%XALBUV_DRY    (:)
-  PKI%XP_ALBNIR_WET   (:)    =    I%XALBNIR_WET   (:)
-  PKI%XP_ALBVIS_WET   (:)    =    I%XALBVIS_WET   (:)
-  PKI%XP_ALBUV_WET    (:)    =    I%XALBUV_WET    (:)  
-  PKI%XP_RUNOFFB      (:)    =    I%XRUNOFFB      (:)
-  PKI%XP_WDRAIN       (:)    =    I%XWDRAIN       (:)
-  PKI%XP_TAUICE       (:)    =    I%XTAUICE       (:)
-  PKI%XP_Z0REL        (:)    =    I%XZ0REL        (:)
-  PKI%XP_AOSIP        (:)    =    I%XAOSIP        (:)
-  PKI%XP_AOSIM        (:)    =    I%XAOSIM        (:)
-  PKI%XP_AOSJP        (:)    =    I%XAOSJP        (:)
-  PKI%XP_AOSJM        (:)    =    I%XAOSJM        (:)
-  PKI%XP_HO2IP        (:)    =    I%XHO2IP        (:)
-  PKI%XP_HO2IM        (:)    =    I%XHO2IM        (:)
-  PKI%XP_HO2JP        (:)    =    I%XHO2JP        (:)
-  PKI%XP_HO2JM        (:)    =    I%XHO2JM        (:)
-  PKI%XP_SSO_SLOPE    (:)    =    I%XSSO_SLOPE    (:)
-  PKI%XP_GAMMAT       (:)    =    I%XGAMMAT       (:)
-  PKI%XP_TDEEP        (:)    =    I%XTDEEP        (:)  
+  PKI%XP_Z0_O_Z0H     (:)    =    I%M%X%XZ0_O_Z0H     (:, 1)
+  PKI%XP_EMIS         (:)    =    I%M%T%XEMIS         (:, 1)
+  PKI%XP_ALBNIR       (:)    =    I%M%T%XALBNIR       (:, 1)
+  PKI%XP_ALBVIS       (:)    =    I%M%T%XALBVIS       (:, 1)
+  PKI%XP_ALBUV        (:)    =    I%M%T%XALBUV        (:, 1)
+  PKI%XP_ALBNIR_VEG   (:)    =    I%M%T%XALBNIR_VEG   (:, 1)
+  PKI%XP_ALBVIS_VEG   (:)    =    I%M%T%XALBVIS_VEG   (:, 1)
+  PKI%XP_ALBUV_VEG    (:)    =    I%M%T%XALBUV_VEG    (:, 1)
+  PKI%XP_ALBNIR_SOIL  (:)    =    I%M%A%XALBNIR_SOIL  (:, 1)
+  PKI%XP_ALBVIS_SOIL  (:)    =    I%M%A%XALBVIS_SOIL  (:, 1)
+  PKI%XP_ALBUV_SOIL   (:)    =    I%M%A%XALBUV_SOIL   (:, 1)
+  PKI%XP_Z0           (:)    =    I%M%T%XZ0           (:, 1)
+  PKI%XP_WRMAX_CF     (:)    =    I%M%T%XWRMAX_CF     (:, 1)
+  PKI%XP_GAMMA        (:)    =    I%M%T%XGAMMA        (:, 1)
+  PKI%XP_CV           (:)    =    I%M%T%XCV           (:, 1)
+  PKI%XP_RGL          (:)    =    I%M%T%XRGL          (:, 1)
+  PKI%XP_RUNOFFD      (:)    =    I%IP%XRUNOFFD      (:, 1) 
+  PKI%XP_Z0EFFIP      (:)    =    I%IP%XZ0EFFIP      (:, 1)
+  PKI%XP_Z0EFFIM      (:)    =    I%IP%XZ0EFFIM      (:, 1)
+  PKI%XP_Z0EFFJP      (:)    =    I%IP%XZ0EFFJP      (:, 1)
+  PKI%XP_Z0EFFJM      (:)    =    I%IP%XZ0EFFJM      (:, 1)  
+  PKI%XP_WR           (:)    =    I%R%XWR           (:, 1)   
+  PKI%XP_LAI          (:)    =    I%M%T%XLAI          (:, 1) 
+  PKI%XP_RESA         (:)    =    I%R%XRESA         (:, 1)
+  PKI%XP_CPS          (:)    =    I%IP%XPCPS         (:, 1)
+  PKI%XP_LVTT         (:)    =    I%IP%XPLVTT        (:, 1)
+  PKI%XP_LSTT         (:)    =    I%IP%XPLSTT        (:, 1) 
+  PKI%XP_VEG          (:)    =    I%M%T%XVEG          (:, 1)  
+  PKI%XP_SNOWALB      (:)    =    I%R%TSNOW%ALB     (:, 1) 
+  PKI%XP_LE           (:)    =    I%R%XLE           (:, 1)  
+  PKI%XP_PSN          (:)    =    I%R%XPSN          (:, 1)
+  PKI%XP_PSNG         (:)    =    I%R%XPSNG         (:, 1)
+  PKI%XP_PSNV         (:)    =    I%R%XPSNV         (:, 1)  
+  PKI%XP_ALBNIR_DRY   (:)    =    I%IP%XALBNIR_DRY   (:)
+  PKI%XP_ALBVIS_DRY   (:)    =    I%IP%XALBVIS_DRY   (:)
+  PKI%XP_ALBUV_DRY    (:)    =    I%IP%XALBUV_DRY    (:)
+  PKI%XP_ALBNIR_WET   (:)    =    I%IP%XALBNIR_WET   (:)
+  PKI%XP_ALBVIS_WET   (:)    =    I%IP%XALBVIS_WET   (:)
+  PKI%XP_ALBUV_WET    (:)    =    I%IP%XALBUV_WET    (:)  
+  PKI%XP_RUNOFFB      (:)    =    I%P%XRUNOFFB      (:)
+  PKI%XP_WDRAIN       (:)    =    I%P%XWDRAIN       (:)
+  PKI%XP_TAUICE       (:)    =    I%IP%XTAUICE       (:)
+  PKI%XP_Z0REL        (:)    =    I%IP%XZ0REL        (:)
+  PKI%XP_AOSIP        (:)    =    I%P%XAOSIP        (:)
+  PKI%XP_AOSIM        (:)    =    I%P%XAOSIM        (:)
+  PKI%XP_AOSJP        (:)    =    I%P%XAOSJP        (:)
+  PKI%XP_AOSJM        (:)    =    I%P%XAOSJM        (:)
+  PKI%XP_HO2IP        (:)    =    I%P%XHO2IP        (:)
+  PKI%XP_HO2IM        (:)    =    I%P%XHO2IM        (:)
+  PKI%XP_HO2JP        (:)    =    I%P%XHO2JP        (:)
+  PKI%XP_HO2JM        (:)    =    I%P%XHO2JM        (:)
+  PKI%XP_SSO_SLOPE    (:)    =    I%P%XSSO_SLOPE    (:)
+  PKI%XP_GAMMAT       (:)    =    I%IP%XGAMMAT       (:)
+  PKI%XP_TDEEP        (:)    =    I%IP%XTDEEP        (:)  
   PKI%XP_LAT          (:)    =    IG%XLAT          (:)
   PKI%XP_LON          (:)    =    IG%XLON          (:)
   !
-  PKI%XP_CLAY         (:,:)  =    I%XCLAY         (:, :)
-  PKI%XP_SAND         (:,:)  =    I%XSAND         (:, :) 
-  PKI%XP_WFC          (:, :) =    I%XWFC          (:, :)
-  PKI%XP_WWILT        (:, :) =    I%XWWILT        (:, :)
-  PKI%XP_WSAT         (:, :) =    I%XWSAT         (:, :)
-  PKI%XP_CONDSAT      (:, :) =    I%XCONDSAT      (:, :, 1)  
-  PKI%XP_DG           (:, :) =    I%XDG           (:, :, 1)  
-  PKI%XP_WG           (:, :) =    I%XWG           (:, :, 1)
-  PKI%XP_WGI          (:, :) =    I%XWGI          (:, :, 1)
-  PKI%XP_MPOTSAT      (:, :) =    I%XMPOTSAT      (:, :) 
-  PKI%XP_BCOEF        (:, :) =    I%XBCOEF        (:, :)  
+  PKI%XP_CLAY         (:,:)  =    I%P%XCLAY         (:, :)
+  PKI%XP_SAND         (:,:)  =    I%P%XSAND         (:, :) 
+  PKI%XP_WFC          (:, :) =    I%IP%XWFC          (:, :)
+  PKI%XP_WWILT        (:, :) =    I%IP%XWWILT        (:, :)
+  PKI%XP_WSAT         (:, :) =    I%IP%XWSAT         (:, :)
+  PKI%XP_CONDSAT      (:, :) =    I%IP%XCONDSAT      (:, :, 1)  
+  PKI%XP_DG           (:, :) =    I%M%X%XDG           (:, :, 1)  
+  PKI%XP_WG           (:, :) =    I%R%XWG           (:, :, 1)
+  PKI%XP_WGI          (:, :) =    I%R%XWGI          (:, :, 1)
+  PKI%XP_MPOTSAT      (:, :) =    I%IP%XMPOTSAT      (:, :) 
+  PKI%XP_BCOEF        (:, :) =    I%IP%XBCOEF        (:, :)  
   !
-  PKI%XP_KSAT_ICE     (:)    =    I%XKSAT_ICE     (:, 1)
-  PKI%XP_D_ICE        (:)    =    I%XD_ICE        (:, 1)
+  PKI%XP_KSAT_ICE     (:)    =    I%IP%XKSAT_ICE     (:, 1)
+  PKI%XP_D_ICE        (:)    =    I%M%X%XD_ICE        (:, 1)
   !
-  PKI%XP_VEGTYPE_PATCH(:, :) =    I%XVEGTYPE_PATCH(:, :, 1)  
+  PKI%XP_VEGTYPE_PATCH(:, :) =    I%IP%XVEGTYPE_PATCH(:, :, 1)  
   !
-  PKI%XP_TG           (:, :) =    I%XTG           (:, :, 1)  
+  PKI%XP_TG           (:, :) =    I%R%XTG           (:, :, 1)  
   !  
-  PKI%XP_SNOWSWE      (:, :) =    I%TSNOW%WSNOW   (:, :, 1)
-  PKI%XP_SNOWRHO      (:, :) =    I%TSNOW%RHO     (:, :, 1)  
+  PKI%XP_SNOWSWE      (:, :) =    I%R%TSNOW%WSNOW   (:, :, 1)
+  PKI%XP_SNOWRHO      (:, :) =    I%R%TSNOW%RHO     (:, :, 1)  
   !  
-  PKI%XP_DIR_ALB_WITH_SNOW (:,:)= I%XDIR_ALB_WITH_SNOW(:, :, 1)
-  PKI%XP_SCA_ALB_WITH_SNOW (:,:)= I%XSCA_ALB_WITH_SNOW(:, :, 1)
+  PKI%XP_DIR_ALB_WITH_SNOW (:,:)= I%I%XDIR_ALB_WITH_SNOW(:, :, 1)
+  PKI%XP_SCA_ALB_WITH_SNOW (:,:)= I%I%XSCA_ALB_WITH_SNOW(:, :, 1)
   !  
-  PKI%XP_FSAT(:)=I%XFSAT(:)
+  PKI%XP_FSAT(:)=I%I%XFSAT(:)
   !
-  IF(I%LFLOOD)THEN
-    PKI%XP_FFLOOD  (:)=I%XFFLOOD  (:)
-    PKI%XP_PIFLOOD (:)=I%XPIFLOOD (:)
-    PKI%XP_FF      (:)=I%XFF      (:, 1)
-    PKI%XP_FFG     (:)=I%XFFG     (:, 1)
-    PKI%XP_FFV     (:)=I%XFFV     (:, 1)    
-    PKI%XP_FFROZEN (:)=I%XFFROZEN (:, 1)    
-    PKI%XP_ALBF    (:)=I%XALBF    (:, 1)
-    PKI%XP_EMISF   (:)=I%XEMISF   (:, 1)
+  IF(I%O%LFLOOD)THEN
+    PKI%XP_FFLOOD  (:)=I%I%XFFLOOD  (:)
+    PKI%XP_PIFLOOD (:)=I%I%XPIFLOOD (:)
+    PKI%XP_FF      (:)=I%I%XFF      (:, 1)
+    PKI%XP_FFG     (:)=I%I%XFFG     (:, 1)
+    PKI%XP_FFV     (:)=I%I%XFFV     (:, 1)    
+    PKI%XP_FFROZEN (:)=I%I%XFFROZEN (:, 1)    
+    PKI%XP_ALBF    (:)=I%I%XALBF    (:, 1)
+    PKI%XP_EMISF   (:)=I%I%XEMISF   (:, 1)
   ELSE
     PKI%XP_FFLOOD  (:)= 0.0
     PKI%XP_PIFLOOD (:)= 0.0
@@ -972,68 +972,68 @@ IF (I%NPATCH==1) THEN
     PKI%XP_EMISF   (:)= 0.0    
   ENDIF
   !
-  IF(I%TSNOW%SCHEME=='EBA') THEN
-    PKI%XP_PSNV_A (:)    = I%XPSNV_A(:, 1)
+  IF(I%R%TSNOW%SCHEME=='EBA') THEN
+    PKI%XP_PSNV_A (:)    = I%R%XPSNV_A(:, 1)
   ENDIF
   !
-  IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
-    PKI%XP_SNOWHEAT   (:,:) =    I%TSNOW%HEAT  (:,:,1)
-    PKI%XP_SNOWAGE    (:,:) =    I%TSNOW%AGE   (:,:,1)  
-    PKI%XP_SNOWALBVIS   (:)    =    I%TSNOW%ALBVIS  (:, 1) 
-    PKI%XP_SNOWALBNIR   (:)    =    I%TSNOW%ALBNIR  (:, 1) 
-    PKI%XP_SNOWALBFIR   (:)    =    I%TSNOW%ALBFIR  (:, 1) 
+  IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
+    PKI%XP_SNOWHEAT   (:,:) =    I%R%TSNOW%HEAT  (:,:,1)
+    PKI%XP_SNOWAGE    (:,:) =    I%R%TSNOW%AGE   (:,:,1)  
+    PKI%XP_SNOWALBVIS   (:)    =    I%R%TSNOW%ALBVIS  (:, 1) 
+    PKI%XP_SNOWALBNIR   (:)    =    I%R%TSNOW%ALBNIR  (:, 1) 
+    PKI%XP_SNOWALBFIR   (:)    =    I%R%TSNOW%ALBFIR  (:, 1) 
   END IF
   !
-  IF(I%TSNOW%SCHEME=='CRO') THEN
-    PKI%XP_SNOWGRAN1  (:,:) =     I%TSNOW%GRAN1  (:,:,1)
-    PKI%XP_SNOWGRAN2  (:,:) =     I%TSNOW%GRAN2  (:,:,1)
-    PKI%XP_SNOWHIST   (:,:) =     I%TSNOW%HIST   (:,:,1)  
+  IF(I%R%TSNOW%SCHEME=='CRO') THEN
+    PKI%XP_SNOWGRAN1  (:,:) =     I%R%TSNOW%GRAN1  (:,:,1)
+    PKI%XP_SNOWGRAN2  (:,:) =     I%R%TSNOW%GRAN2  (:,:,1)
+    PKI%XP_SNOWHIST   (:,:) =     I%R%TSNOW%HIST   (:,:,1)  
   END IF
   !
-  IF(I%LGLACIER)THEN
-    PKI%XP_ICE_STO (:)= I%XICE_STO  (:,1)
-  ENDIF
-  !  
-  IF (I%CSCOND=='PL98'.OR.I%CISBA=='DIF') THEN
-    PKI%XP_HCAPSOIL(:, :) = I%XHCAPSOIL    (:, :)
-    PKI%XP_CONDDRY (:, :) = I%XCONDDRY     (:, :)
-    PKI%XP_CONDSLD (:, :) = I%XCONDSLD     (:, :)    
-  END IF
-  !
-  IF (I%CISBA=='2-L' .OR. I%CISBA=='3-L') THEN
-    PKI%XP_C4B        (:)    =    I%XC4B          (:)
-    PKI%XP_ACOEF      (:)    =    I%XACOEF        (:)
-    PKI%XP_PCOEF      (:)    =    I%XPCOEF        (:)
-    PKI%XP_CGSAT      (:)    =    I%XCGSAT        (:) 
-    PKI%XP_C1SAT      (:)    =    I%XC1SAT        (:, 1)
-    PKI%XP_C2REF      (:)    =    I%XC2REF        (:, 1)    
-    PKI%XP_C4REF      (:)    =    I%XC4REF        (:, 1)    
-    PKI%XP_C3         (:,:)  =    I%XC3           (:,:,1)    
-  END IF
-  !
-  IF (I%CISBA=='DIF') THEN
-    PKI%XP_ROOTFRAC   (:, :) =    I%XROOTFRAC   (:, :, 1)
-    PKI%XP_DZG        (:, :) =    I%XDZG        (:, :, 1)
-    PKI%XP_DZDIF      (:, :) =    I%XDZDIF      (:, :, 1)
-    PKI%XP_SOILWGHT   (:, :) =    I%XSOILWGHT   (:, :, 1)
-    PKI%NK_WG_LAYER   (:   ) =    I%NWG_LAYER   (:,    1)
-    PKI%XP_FWTD       (:   ) =    I%XFWTD       (:)
-    PKI%XP_WTD        (:   ) =    I%XWTD        (:)
-  END IF
-  !
-  IF (I%CISBA=='DIF'.AND.I%CRUNOFF=='SGH') THEN
-    PKI%XP_TOPQS   (:, :) =    I%XTOPQS   (:, :, 1)
-  END IF
-  !
-  IF (I%LTR_ML) THEN
-    PKI%XP_FAPARC     (:)   =     I%XFAPARC     (:, 1)
-    PKI%XP_FAPIRC     (:)   =     I%XFAPIRC     (:, 1)
-    PKI%XP_LAI_EFFC   (:)   =     I%XLAI_EFFC   (:, 1)
-    PKI%XP_MUS        (:)   =     I%XMUS        (:, 1)
+  IF(I%O%LGLACIER)THEN
+    PKI%XP_ICE_STO (:)= I%R%XICE_STO  (:,1)
   ENDIF
   !  
-  IF (I%CPHOTO=='NON') THEN
-    PKI%XP_RSMIN      (:)    =    I%XRSMIN      (:, 1) 
+  IF (I%O%CSCOND=='PL98'.OR.I%O%CISBA=='DIF') THEN
+    PKI%XP_HCAPSOIL(:, :) = I%IP%XHCAPSOIL    (:, :)
+    PKI%XP_CONDDRY (:, :) = I%IP%XCONDDRY     (:, :)
+    PKI%XP_CONDSLD (:, :) = I%IP%XCONDSLD     (:, :)    
+  END IF
+  !
+  IF (I%O%CISBA=='2-L' .OR. I%O%CISBA=='3-L') THEN
+    PKI%XP_C4B        (:)    =    I%IP%XC4B          (:)
+    PKI%XP_ACOEF      (:)    =    I%IP%XACOEF        (:)
+    PKI%XP_PCOEF      (:)    =    I%IP%XPCOEF        (:)
+    PKI%XP_CGSAT      (:)    =    I%IP%XCGSAT        (:) 
+    PKI%XP_C1SAT      (:)    =    I%IP%XC1SAT        (:, 1)
+    PKI%XP_C2REF      (:)    =    I%IP%XC2REF        (:, 1)    
+    PKI%XP_C4REF      (:)    =    I%IP%XC4REF        (:, 1)    
+    PKI%XP_C3         (:,:)  =    I%IP%XC3           (:,:,1)    
+  END IF
+  !
+  IF (I%O%CISBA=='DIF') THEN
+    PKI%XP_ROOTFRAC   (:, :) =    I%M%X%XROOTFRAC   (:, :, 1)
+    PKI%XP_DZG        (:, :) =    I%IP%XDZG        (:, :, 1)
+    PKI%XP_DZDIF      (:, :) =    I%IP%XDZDIF      (:, :, 1)
+    PKI%XP_SOILWGHT   (:, :) =    I%IP%XSOILWGHT   (:, :, 1)
+    PKI%NK_WG_LAYER   (:   ) =    I%M%X%NWG_LAYER   (:,    1)
+    PKI%XP_FWTD       (:   ) =    I%IP%XFWTD       (:)
+    PKI%XP_WTD        (:   ) =    I%IP%XWTD        (:)
+  END IF
+  !
+  IF (I%O%CISBA=='DIF'.AND.I%O%CRUNOFF=='SGH') THEN
+    PKI%XP_TOPQS   (:, :) =    I%I%XTOPQS   (:, :, 1)
+  END IF
+  !
+  IF (I%O%LTR_ML) THEN
+    PKI%XP_FAPARC     (:)   =     I%R%XFAPARC     (:, 1)
+    PKI%XP_FAPIRC     (:)   =     I%R%XFAPIRC     (:, 1)
+    PKI%XP_LAI_EFFC   (:)   =     I%R%XLAI_EFFC   (:, 1)
+    PKI%XP_MUS        (:)   =     I%R%XMUS        (:, 1)
+  ENDIF
+  !  
+  IF (I%O%CPHOTO=='NON') THEN
+    PKI%XP_RSMIN      (:)    =    I%M%T%XRSMIN      (:, 1) 
   END IF
 !
 ! For multi-energy balance (MEB):
@@ -1046,15 +1046,15 @@ IF (I%NPATCH==1) THEN
 ! MEB case. We still keep the GV-variables in the system for future needs.
 ! Code is commented with "nogv" in appropriate places.
 !
-  IF(I%LMEB_PATCH(1))THEN
+  IF(I%O%LMEB_PATCH(1))THEN
 !
-    PKI%XP_WRL          (:)    =    I%XWRL          (:, 1) 
-    PKI%XP_WRLI         (:)    =    I%XWRLI         (:, 1) 
-    PKI%XP_WRVN         (:)    =    I%XWRVN         (:, 1) 
-    PKI%XP_TV           (:)    =    I%XTV           (:, 1) 
-    PKI%XP_TL           (:)    =    I%XTL           (:, 1) 
-    PKI%XP_TC           (:)    =    I%XTC           (:, 1) 
-    PKI%XP_QC           (:)    =    I%XQC           (:, 1) 
+    PKI%XP_WRL          (:)    =    I%R%XWRL          (:, 1) 
+    PKI%XP_WRLI         (:)    =    I%R%XWRLI         (:, 1) 
+    PKI%XP_WRVN         (:)    =    I%R%XWRVN         (:, 1) 
+    PKI%XP_TV           (:)    =    I%R%XTV           (:, 1) 
+    PKI%XP_TL           (:)    =    I%R%XTL           (:, 1) 
+    PKI%XP_TC           (:)    =    I%R%XTC           (:, 1) 
+    PKI%XP_QC           (:)    =    I%R%XQC           (:, 1) 
 !
 ! Please note that secondary Ecoclimap parameters, i.e. those
 ! with postfix GV, are given to the corresponing original ISBA physiography
@@ -1076,7 +1076,7 @@ IF (I%NPATCH==1) THEN
 !nogv    XP_WRMAX_CFV    (:)    =    XWRMAX_CF     (:, 1)
 !nogv    XP_LAIV         (:)    =    XLAI          (:, 1)
 !nogv    XP_Z0V          (:)    =    XZ0           (:, 1)
-    PKI%XP_H_VEG        (:)    =    I%XH_VEG        (:, 1)
+    PKI%XP_H_VEG        (:)    =    I%M%M%XH_VEG        (:, 1)
 !
 !nogv    XP_VEG          (:)    =    XGNDLITTER    (:, 1)
 !nogv    XP_RGL          (:)    =    XRGLGV        (:, 1)
@@ -1084,80 +1084,80 @@ IF (I%NPATCH==1) THEN
 !nogv    XP_WRMAX_CF     (:)    =    XWRMAX_CFGV   (:, 1)
 !nogv    XP_LAI          (:)    =    XLAIGV        (:, 1)
 !nogv    XP_Z0           (:)    =    XZ0LITTER     (:, 1)
-    PKI%XP_GNDLITTER    (:)    =    I%XGNDLITTER    (:, 1)
-    PKI%XP_Z0LITTER     (:)    =    I%XZ0LITTER     (:, 1)
+    PKI%XP_GNDLITTER    (:)    =    I%M%M%XGNDLITTER    (:, 1)
+    PKI%XP_Z0LITTER     (:)    =    I%M%M%XZ0LITTER     (:, 1)
 
   ENDIF
 !
-  IF(I%CPHOTO/='NON' .OR. I%LMEB_PATCH(1))THEN
-    PKI%XP_BSLAI      (:)    =    I%XBSLAI      (:, 1)
+  IF(I%O%CPHOTO/='NON' .OR. I%O%LMEB_PATCH(1))THEN
+    PKI%XP_BSLAI      (:)    =    I%M%T%XBSLAI      (:, 1)
   ENDIF
 !
-  IF (I%CPHOTO/='NON') THEN
-    PKI%XP_LAIMIN     (:)    =    I%XLAIMIN     (:, 1)
-    PKI%XP_SEFOLD     (:)    =    I%XSEFOLD     (:, 1)
-    PKI%XP_H_TREE     (:)    =    I%XH_TREE     (:, 1)
-    PKI%XP_ANMAX      (:)    =    I%XANMAX      (:, 1)
-    PKI%XP_FZERO      (:)    =    I%XFZERO      (:, 1)
-    PKI%XP_EPSO       (:)    =    I%XEPSO       (:, 1)
-    PKI%XP_GAMM       (:)    =    I%XGAMM       (:, 1)
-    PKI%XP_QDGAMM     (:)    =    I%XQDGAMM     (:, 1)
-    PKI%XP_GMES       (:)    =    I%XGMES       (:, 1)
-    PKI%XP_RE25       (:)    =    I%XRE25       (:, 1)
-    PKI%XP_QDGMES     (:)    =    I%XQDGMES     (:, 1)
-    PKI%XP_T1GMES     (:)    =    I%XT1GMES     (:, 1)
-    PKI%XP_T2GMES     (:)    =    I%XT2GMES     (:, 1)
-    PKI%XP_AMAX       (:)    =    I%XAMAX       (:, 1)
-    PKI%XP_QDAMAX     (:)    =    I%XQDAMAX     (:, 1)
-    PKI%XP_T1AMAX     (:)    =    I%XT1AMAX     (:, 1)
-    PKI%XP_T2AMAX     (:)    =    I%XT2AMAX     (:, 1)
-    PKI%XP_AN         (:)    =    I%XAN         (:, 1) 
-    PKI%XP_ANDAY      (:)    =    I%XANDAY      (:, 1) 
-    PKI%XP_ANFM       (:)    =    I%XANFM       (:, 1) 
-    PKI%XP_GC         (:)    =    I%XGC         (:, 1)
-    PKI%XP_BIOMASS        (:,:)  =    I%XBIOMASS        (:,:,1)
-    PKI%XP_RESP_BIOMASS   (:,:)  =    I%XRESP_BIOMASS   (:,:,1)
+  IF (I%O%CPHOTO/='NON') THEN
+    PKI%XP_LAIMIN     (:)    =    I%M%T%XLAIMIN     (:, 1)
+    PKI%XP_SEFOLD     (:)    =    I%M%T%XSEFOLD     (:, 1)
+    PKI%XP_H_TREE     (:)    =    I%M%X%XH_TREE     (:, 1)
+    PKI%XP_ANMAX      (:)    =    I%IP%XANMAX      (:, 1)
+    PKI%XP_FZERO      (:)    =    I%IP%XFZERO      (:, 1)
+    PKI%XP_EPSO       (:)    =    I%IP%XEPSO       (:, 1)
+    PKI%XP_GAMM       (:)    =    I%IP%XGAMM       (:, 1)
+    PKI%XP_QDGAMM     (:)    =    I%IP%XQDGAMM     (:, 1)
+    PKI%XP_GMES       (:)    =    I%M%T%XGMES       (:, 1)
+    PKI%XP_RE25       (:)    =    I%M%X%XRE25       (:, 1)
+    PKI%XP_QDGMES     (:)    =    I%IP%XQDGMES     (:, 1)
+    PKI%XP_T1GMES     (:)    =    I%IP%XT1GMES     (:, 1)
+    PKI%XP_T2GMES     (:)    =    I%IP%XT2GMES     (:, 1)
+    PKI%XP_AMAX       (:)    =    I%IP%XAMAX       (:, 1)
+    PKI%XP_QDAMAX     (:)    =    I%IP%XQDAMAX     (:, 1)
+    PKI%XP_T1AMAX     (:)    =    I%IP%XT1AMAX     (:, 1)
+    PKI%XP_T2AMAX     (:)    =    I%IP%XT2AMAX     (:, 1)
+    PKI%XP_AN         (:)    =    I%R%XAN         (:, 1) 
+    PKI%XP_ANDAY      (:)    =    I%R%XANDAY      (:, 1) 
+    PKI%XP_ANFM       (:)    =    I%R%XANFM       (:, 1) 
+    PKI%XP_GC         (:)    =    I%M%T%XGC         (:, 1)
+    PKI%XP_BIOMASS        (:,:)  =    I%R%XBIOMASS        (:,:,1)
+    PKI%XP_RESP_BIOMASS   (:,:)  =    I%R%XRESP_BIOMASS   (:,:,1)
   END IF
   !
-  IF (I%CPHOTO=='AST' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') THEN  
-    PKI%LP_STRESS     (:)    =    I%LSTRESS     (:, 1)
-    PKI%XP_F2I        (:)    =    I%XF2I        (:, 1)
-    PKI%XP_AH         (:)    =    I%XAH         (:, 1)
-    PKI%XP_BH         (:)    =    I%XBH         (:, 1)
-    PKI%XP_DMAX       (:)    =    I%XDMAX       (:, 1)
+  IF (I%O%CPHOTO=='AST' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN  
+    PKI%LP_STRESS     (:)    =    I%M%T%LSTRESS     (:, 1)
+    PKI%XP_F2I        (:)    =    I%M%T%XF2I        (:, 1)
+    PKI%XP_AH         (:)    =    I%IP%XAH         (:, 1)
+    PKI%XP_BH         (:)    =    I%IP%XBH         (:, 1)
+    PKI%XP_DMAX       (:)    =    I%M%X%XDMAX       (:, 1)
   END IF
   !
-  IF(LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB')) THEN
-    PKI%TP_SEED     (:) = I%TSEED     (:,1)
-    PKI%TP_REAP     (:) = I%TREAP     (:,1)
-    PKI%XP_IRRIG    (:) = I%XIRRIG    (:,1)
-    PKI%XP_WATSUP   (:) = I%XWATSUP   (:,1)
+  IF(LAGRIP .AND. (I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB')) THEN
+    PKI%TP_SEED     (:) = I%M%I%TSEED     (:,1)
+    PKI%TP_REAP     (:) = I%M%I%TREAP     (:,1)
+    PKI%XP_IRRIG    (:) = I%M%I%XIRRIG    (:,1)
+    PKI%XP_WATSUP   (:) = I%M%I%XWATSUP   (:,1)
     PKI%XP_LIRRIDAY (:) = AG%LIRRIDAY  (:,1)
     PKI%XP_THRESHOLD(:) = AG%XTHRESHOLDSPT(:,1)
     PKI%XP_LIRRIGATE(:) = AG%LIRRIGATE (:,1)
   ENDIF
   !  
-  IF(I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') THEN 
-     PKI%XP_CE_NITRO       (:)  =    I%XCE_NITRO       (:,1)
-     PKI%XP_CF_NITRO       (:)  =    I%XCF_NITRO       (:,1)
-     PKI%XP_CNA_NITRO      (:)  =    I%XCNA_NITRO      (:,1)
-     PKI%XP_BSLAI_NITRO    (:)    =    I%XBSLAI_NITRO  (:,1)
+  IF(I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN 
+     PKI%XP_CE_NITRO       (:)  =    I%M%T%XCE_NITRO       (:,1)
+     PKI%XP_CF_NITRO       (:)  =    I%M%T%XCF_NITRO       (:,1)
+     PKI%XP_CNA_NITRO      (:)  =    I%M%T%XCNA_NITRO      (:,1)
+     PKI%XP_BSLAI_NITRO    (:)    =    I%IP%XBSLAI_NITRO  (:,1)
   END IF
   !
-  IF (I%CPHOTO=='NCB') THEN
-     PKI%XP_INCREASE       (:,:)  =    I%XINCREASE       (:,:,1)          
-     PKI%XP_TAU_WOOD       (:)    =    I%XTAU_WOOD       (:,1)
+  IF (I%O%CPHOTO=='NCB') THEN
+     PKI%XP_INCREASE       (:,:)  =    I%IP%XINCREASE       (:,:,1)          
+     PKI%XP_TAU_WOOD       (:)    =    I%IP%XTAU_WOOD       (:,1)
   END IF
   !
-  IF (I%CRESPSL=='CNT') THEN
-    PKI%XP_LITTER         (:,:,:) =    I%XLITTER         (:,:,:,1)
-    PKI%XP_SOILCARB       (:,:)   =    I%XSOILCARB       (:,:,1)
-    PKI%XP_LIGNIN_STRUC   (:,:)   =    I%XLIGNIN_STRUC   (:,:,1)
-    PKI%XP_TURNOVER       (:,:)   =    I%XTURNOVER       (:,:,1)
+  IF (I%O%CRESPSL=='CNT') THEN
+    PKI%XP_LITTER         (:,:,:) =    I%R%XLITTER         (:,:,:,1)
+    PKI%XP_SOILCARB       (:,:)   =    I%R%XSOILCARB       (:,:,1)
+    PKI%XP_LIGNIN_STRUC   (:,:)   =    I%R%XLIGNIN_STRUC   (:,:,1)
+    PKI%XP_TURNOVER       (:,:)   =    I%IP%XTURNOVER       (:,:,1)
   END IF
   !
-  IF (I%CRAIN=='SGH') THEN
-    PKI%XP_MUF(:)=I%XMUF(:)
+  IF (I%O%CRAIN=='SGH') THEN
+    PKI%XP_MUF(:)=I%I%XMUF(:)
   ENDIF
 !
 !------------------------------------------------------------------------
@@ -1166,129 +1166,129 @@ ELSE
 !
   DO JJ=1,KSIZE
     JI                      =    KMASK(JJ)
-    PKI%XP_Z0_O_Z0H     (JJ)    =    I%XZ0_O_Z0H     (JI, KPATCH)
-    PKI%XP_EMIS         (JJ)    =    I%XEMIS         (JI, KPATCH)
-    PKI%XP_ALBNIR       (JJ)    =    I%XALBNIR       (JI, KPATCH)
-    PKI%XP_ALBVIS       (JJ)    =    I%XALBVIS       (JI, KPATCH)
-    PKI%XP_ALBUV        (JJ)    =    I%XALBUV        (JI, KPATCH)
-    PKI%XP_ALBNIR_VEG   (JJ)    =    I%XALBNIR_VEG   (JI, KPATCH)
-    PKI%XP_ALBVIS_VEG   (JJ)    =    I%XALBVIS_VEG   (JI, KPATCH)
-    PKI%XP_ALBUV_VEG    (JJ)    =    I%XALBUV_VEG    (JI, KPATCH)
-    PKI%XP_ALBNIR_SOIL  (JJ)    =    I%XALBNIR_SOIL  (JI, KPATCH)
-    PKI%XP_ALBVIS_SOIL  (JJ)    =    I%XALBVIS_SOIL  (JI, KPATCH)
-    PKI%XP_ALBUV_SOIL   (JJ)    =    I%XALBUV_SOIL   (JI, KPATCH)
-    PKI%XP_Z0           (JJ)    =    I%XZ0           (JI, KPATCH)
-    PKI%XP_WRMAX_CF     (JJ)    =    I%XWRMAX_CF     (JI, KPATCH)
-    PKI%XP_GAMMA        (JJ)    =    I%XGAMMA        (JI, KPATCH)
-    PKI%XP_CV           (JJ)    =    I%XCV           (JI, KPATCH)
-    PKI%XP_RGL          (JJ)    =    I%XRGL          (JI, KPATCH)
-    PKI%XP_RUNOFFD      (JJ)    =    I%XRUNOFFD      (JI, KPATCH)
-    PKI%XP_Z0EFFIP      (JJ)    =    I%XZ0EFFIP      (JI, KPATCH)
-    PKI%XP_Z0EFFIM      (JJ)    =    I%XZ0EFFIM      (JI, KPATCH)
-    PKI%XP_Z0EFFJP      (JJ)    =    I%XZ0EFFJP      (JI, KPATCH)
-    PKI%XP_Z0EFFJM      (JJ)    =    I%XZ0EFFJM      (JI, KPATCH)  
-    PKI%XP_WR           (JJ)    =    I%XWR           (JI, KPATCH) 
-    PKI%XP_LAI          (JJ)    =    I%XLAI          (JI, KPATCH) 
-    PKI%XP_RESA         (JJ)    =    I%XRESA         (JI, KPATCH) 
-    PKI%XP_CPS          (JJ)    =    I%XPCPS         (JI, KPATCH)
-    PKI%XP_LVTT         (JJ)    =    I%XPLVTT        (JI, KPATCH)
-    PKI%XP_LSTT         (JJ)    =    I%XPLSTT        (JI, KPATCH)
-    PKI%XP_VEG          (JJ)    =    I%XVEG          (JI, KPATCH) 
-    PKI%XP_SNOWALB      (JJ)    =    I%TSNOW%ALB     (JI, KPATCH) 
-    PKI%XP_LE           (JJ)    =    I%XLE           (JI, KPATCH) 
-    PKI%XP_PSN          (JJ)    =    I%XPSN          (JI, KPATCH)
-    PKI%XP_PSNG         (JJ)    =    I%XPSNG         (JI, KPATCH)
-    PKI%XP_PSNV         (JJ)    =    I%XPSNV         (JI, KPATCH)    
-    PKI%XP_ALBNIR_DRY   (JJ)    =    I%XALBNIR_DRY   (JI)
-    PKI%XP_ALBVIS_DRY   (JJ)    =    I%XALBVIS_DRY   (JI)
-    PKI%XP_ALBUV_DRY    (JJ)    =    I%XALBUV_DRY    (JI)
-    PKI%XP_ALBNIR_WET   (JJ)    =    I%XALBNIR_WET   (JI)
-    PKI%XP_ALBVIS_WET   (JJ)    =    I%XALBVIS_WET   (JI)
-    PKI%XP_ALBUV_WET    (JJ)    =    I%XALBUV_WET    (JI)    
-    PKI%XP_RUNOFFB      (JJ)    =    I%XRUNOFFB      (JI)
-    PKI%XP_WDRAIN       (JJ)    =    I%XWDRAIN       (JI)
-    PKI%XP_TAUICE       (JJ)    =    I%XTAUICE       (JI)
-    PKI%XP_Z0REL        (JJ)    =    I%XZ0REL        (JI)
-    PKI%XP_AOSIP        (JJ)    =    I%XAOSIP        (JI)
-    PKI%XP_AOSIM        (JJ)    =    I%XAOSIM        (JI)
-    PKI%XP_AOSJP        (JJ)    =    I%XAOSJP        (JI)
-    PKI%XP_AOSJM        (JJ)    =    I%XAOSJM        (JI)
-    PKI%XP_HO2IP        (JJ)    =    I%XHO2IP        (JI)
-    PKI%XP_HO2IM        (JJ)    =    I%XHO2IM        (JI)
-    PKI%XP_HO2JP        (JJ)    =    I%XHO2JP        (JI)
-    PKI%XP_HO2JM        (JJ)    =    I%XHO2JM        (JI)
-    PKI%XP_SSO_SLOPE    (JJ)    =    I%XSSO_SLOPE    (JI)
-    PKI%XP_GAMMAT       (JJ)    =    I%XGAMMAT       (JI)
-    PKI%XP_TDEEP        (JJ)    =    I%XTDEEP        (JI) 
+    PKI%XP_Z0_O_Z0H     (JJ)    =    I%M%X%XZ0_O_Z0H     (JI, KPATCH)
+    PKI%XP_EMIS         (JJ)    =    I%M%T%XEMIS         (JI, KPATCH)
+    PKI%XP_ALBNIR       (JJ)    =    I%M%T%XALBNIR       (JI, KPATCH)
+    PKI%XP_ALBVIS       (JJ)    =    I%M%T%XALBVIS       (JI, KPATCH)
+    PKI%XP_ALBUV        (JJ)    =    I%M%T%XALBUV        (JI, KPATCH)
+    PKI%XP_ALBNIR_VEG   (JJ)    =    I%M%T%XALBNIR_VEG   (JI, KPATCH)
+    PKI%XP_ALBVIS_VEG   (JJ)    =    I%M%T%XALBVIS_VEG   (JI, KPATCH)
+    PKI%XP_ALBUV_VEG    (JJ)    =    I%M%T%XALBUV_VEG    (JI, KPATCH)
+    PKI%XP_ALBNIR_SOIL  (JJ)    =    I%M%A%XALBNIR_SOIL  (JI, KPATCH)
+    PKI%XP_ALBVIS_SOIL  (JJ)    =    I%M%A%XALBVIS_SOIL  (JI, KPATCH)
+    PKI%XP_ALBUV_SOIL   (JJ)    =    I%M%A%XALBUV_SOIL   (JI, KPATCH)
+    PKI%XP_Z0           (JJ)    =    I%M%T%XZ0           (JI, KPATCH)
+    PKI%XP_WRMAX_CF     (JJ)    =    I%M%T%XWRMAX_CF     (JI, KPATCH)
+    PKI%XP_GAMMA        (JJ)    =    I%M%T%XGAMMA        (JI, KPATCH)
+    PKI%XP_CV           (JJ)    =    I%M%T%XCV           (JI, KPATCH)
+    PKI%XP_RGL          (JJ)    =    I%M%T%XRGL          (JI, KPATCH)
+    PKI%XP_RUNOFFD      (JJ)    =    I%IP%XRUNOFFD      (JI, KPATCH)
+    PKI%XP_Z0EFFIP      (JJ)    =    I%IP%XZ0EFFIP      (JI, KPATCH)
+    PKI%XP_Z0EFFIM      (JJ)    =    I%IP%XZ0EFFIM      (JI, KPATCH)
+    PKI%XP_Z0EFFJP      (JJ)    =    I%IP%XZ0EFFJP      (JI, KPATCH)
+    PKI%XP_Z0EFFJM      (JJ)    =    I%IP%XZ0EFFJM      (JI, KPATCH)  
+    PKI%XP_WR           (JJ)    =    I%R%XWR           (JI, KPATCH) 
+    PKI%XP_LAI          (JJ)    =    I%M%T%XLAI          (JI, KPATCH) 
+    PKI%XP_RESA         (JJ)    =    I%R%XRESA         (JI, KPATCH) 
+    PKI%XP_CPS          (JJ)    =    I%IP%XPCPS         (JI, KPATCH)
+    PKI%XP_LVTT         (JJ)    =    I%IP%XPLVTT        (JI, KPATCH)
+    PKI%XP_LSTT         (JJ)    =    I%IP%XPLSTT        (JI, KPATCH)
+    PKI%XP_VEG          (JJ)    =    I%M%T%XVEG          (JI, KPATCH) 
+    PKI%XP_SNOWALB      (JJ)    =    I%R%TSNOW%ALB     (JI, KPATCH) 
+    PKI%XP_LE           (JJ)    =    I%R%XLE           (JI, KPATCH) 
+    PKI%XP_PSN          (JJ)    =    I%R%XPSN          (JI, KPATCH)
+    PKI%XP_PSNG         (JJ)    =    I%R%XPSNG         (JI, KPATCH)
+    PKI%XP_PSNV         (JJ)    =    I%R%XPSNV         (JI, KPATCH)    
+    PKI%XP_ALBNIR_DRY   (JJ)    =    I%IP%XALBNIR_DRY   (JI)
+    PKI%XP_ALBVIS_DRY   (JJ)    =    I%IP%XALBVIS_DRY   (JI)
+    PKI%XP_ALBUV_DRY    (JJ)    =    I%IP%XALBUV_DRY    (JI)
+    PKI%XP_ALBNIR_WET   (JJ)    =    I%IP%XALBNIR_WET   (JI)
+    PKI%XP_ALBVIS_WET   (JJ)    =    I%IP%XALBVIS_WET   (JI)
+    PKI%XP_ALBUV_WET    (JJ)    =    I%IP%XALBUV_WET    (JI)    
+    PKI%XP_RUNOFFB      (JJ)    =    I%P%XRUNOFFB      (JI)
+    PKI%XP_WDRAIN       (JJ)    =    I%P%XWDRAIN       (JI)
+    PKI%XP_TAUICE       (JJ)    =    I%IP%XTAUICE       (JI)
+    PKI%XP_Z0REL        (JJ)    =    I%IP%XZ0REL        (JI)
+    PKI%XP_AOSIP        (JJ)    =    I%P%XAOSIP        (JI)
+    PKI%XP_AOSIM        (JJ)    =    I%P%XAOSIM        (JI)
+    PKI%XP_AOSJP        (JJ)    =    I%P%XAOSJP        (JI)
+    PKI%XP_AOSJM        (JJ)    =    I%P%XAOSJM        (JI)
+    PKI%XP_HO2IP        (JJ)    =    I%P%XHO2IP        (JI)
+    PKI%XP_HO2IM        (JJ)    =    I%P%XHO2IM        (JI)
+    PKI%XP_HO2JP        (JJ)    =    I%P%XHO2JP        (JI)
+    PKI%XP_HO2JM        (JJ)    =    I%P%XHO2JM        (JI)
+    PKI%XP_SSO_SLOPE    (JJ)    =    I%P%XSSO_SLOPE    (JI)
+    PKI%XP_GAMMAT       (JJ)    =    I%IP%XGAMMAT       (JI)
+    PKI%XP_TDEEP        (JJ)    =    I%IP%XTDEEP        (JI) 
     PKI%XP_LAT          (JJ)    =    IG%XLAT          (JI)
     PKI%XP_LON          (JJ)    =    IG%XLON          (JI)    
-    PKI%XP_FSAT         (JJ)    =    I%XFSAT         (JI)
+    PKI%XP_FSAT         (JJ)    =    I%I%XFSAT         (JI)
   ENDDO
   !  
-  DO JK=1,I%NGROUND_LAYER
+  DO JK=1,I%O%NGROUND_LAYER
     DO JJ=1,KSIZE
       JI                       =    KMASK(JJ)
-      PKI%XP_CLAY         (JJ,JK)  =    I%XCLAY         (JI, JK)
-      PKI%XP_SAND         (JJ,JK)  =    I%XSAND         (JI, JK)
-      PKI%XP_WFC          (JJ,JK)  =    I%XWFC          (JI, JK)
-      PKI%XP_WWILT        (JJ,JK)  =    I%XWWILT        (JI, JK)
-      PKI%XP_WSAT         (JJ,JK)  =    I%XWSAT         (JI, JK)    
-      PKI%XP_CONDSAT      (JJ,JK)  =    I%XCONDSAT      (JI, JK, KPATCH)      
-      PKI%XP_DG           (JJ,JK)  =    I%XDG           (JI, JK, KPATCH)  
-      PKI%XP_WG           (JJ,JK)  =    I%XWG           (JI, JK, KPATCH)
-      PKI%XP_WGI          (JJ,JK)  =    I%XWGI          (JI, JK, KPATCH)
-      PKI%XP_MPOTSAT      (JJ, JK) =    I%XMPOTSAT      (JI, JK)
-      PKI%XP_BCOEF        (JJ, JK) =    I%XBCOEF        (JI, JK)      
+      PKI%XP_CLAY         (JJ,JK)  =    I%P%XCLAY         (JI, JK)
+      PKI%XP_SAND         (JJ,JK)  =    I%P%XSAND         (JI, JK)
+      PKI%XP_WFC          (JJ,JK)  =    I%IP%XWFC          (JI, JK)
+      PKI%XP_WWILT        (JJ,JK)  =    I%IP%XWWILT        (JI, JK)
+      PKI%XP_WSAT         (JJ,JK)  =    I%IP%XWSAT         (JI, JK)    
+      PKI%XP_CONDSAT      (JJ,JK)  =    I%IP%XCONDSAT      (JI, JK, KPATCH)      
+      PKI%XP_DG           (JJ,JK)  =    I%M%X%XDG           (JI, JK, KPATCH)  
+      PKI%XP_WG           (JJ,JK)  =    I%R%XWG           (JI, JK, KPATCH)
+      PKI%XP_WGI          (JJ,JK)  =    I%R%XWGI          (JI, JK, KPATCH)
+      PKI%XP_MPOTSAT      (JJ, JK) =    I%IP%XMPOTSAT      (JI, JK)
+      PKI%XP_BCOEF        (JJ, JK) =    I%IP%XBCOEF        (JI, JK)      
     ENDDO    
   ENDDO  
   !  
   DO JJ=1,KSIZE
      JI              = KMASK(JJ)
-     PKI%XP_KSAT_ICE(JJ) = I%XKSAT_ICE(JI,KPATCH)
-     PKI%XP_D_ICE   (JJ) = I%XD_ICE   (JI,KPATCH)
+     PKI%XP_KSAT_ICE(JJ) = I%IP%XKSAT_ICE(JI,KPATCH)
+     PKI%XP_D_ICE   (JJ) = I%M%X%XD_ICE   (JI,KPATCH)
   END DO
   !
   DO JK=1,NVEGTYPE
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_VEGTYPE_PATCH(JJ,JK) =    I%XVEGTYPE_PATCH(JI, JK, KPATCH)
+      PKI%XP_VEGTYPE_PATCH(JJ,JK) =    I%IP%XVEGTYPE_PATCH(JI, JK, KPATCH)
     ENDDO
   ENDDO  
   !
-  DO JK=1,SIZE(I%XTG,2)
+  DO JK=1,SIZE(I%R%XTG,2)
     DO JJ=1,KSIZE
       JI                       =    KMASK(JJ)
-      PKI%XP_TG           (JJ,JK)  =    I%XTG           (JI, JK, KPATCH)  
+      PKI%XP_TG           (JJ,JK)  =    I%R%XTG           (JI, JK, KPATCH)  
     ENDDO
   ENDDO
   !  
-  DO JK=1,I%TSNOW%NLAYER
+  DO JK=1,I%R%TSNOW%NLAYER
     DO JJ=1,KSIZE
       JI                       =    KMASK(JJ)
-      PKI%XP_SNOWSWE      (JJ,JK)  =    I%TSNOW%WSNOW   (JI, JK, KPATCH)
-      PKI%XP_SNOWRHO      (JJ,JK)  =    I%TSNOW%RHO     (JI, JK, KPATCH)
+      PKI%XP_SNOWSWE      (JJ,JK)  =    I%R%TSNOW%WSNOW   (JI, JK, KPATCH)
+      PKI%XP_SNOWRHO      (JJ,JK)  =    I%R%TSNOW%RHO     (JI, JK, KPATCH)
     ENDDO
   ENDDO  
   !  
   DO JK=1,SIZE(PKI%XP_DIR_ALB_WITH_SNOW,2)
     DO JJ=1,KSIZE
       JI                          = KMASK(JJ)
-      PKI%XP_DIR_ALB_WITH_SNOW (JJ,JK)= I%XDIR_ALB_WITH_SNOW(JI,JK,KPATCH)
-      PKI%XP_SCA_ALB_WITH_SNOW (JJ,JK)= I%XSCA_ALB_WITH_SNOW(JI,JK,KPATCH)
+      PKI%XP_DIR_ALB_WITH_SNOW (JJ,JK)= I%I%XDIR_ALB_WITH_SNOW(JI,JK,KPATCH)
+      PKI%XP_SCA_ALB_WITH_SNOW (JJ,JK)= I%I%XSCA_ALB_WITH_SNOW(JI,JK,KPATCH)
     ENDDO
   ENDDO
   !
-  IF (I%LFLOOD)THEN
+  IF (I%O%LFLOOD)THEN
     DO JJ=1,KSIZE
        JI             = KMASK(JJ)
-       PKI%XP_FFLOOD  (JJ)=I%XFFLOOD  (JI)
-       PKI%XP_PIFLOOD (JJ)=I%XPIFLOOD (JI)
-       PKI%XP_FF      (JJ)=I%XFF      (JI,KPATCH)
-       PKI%XP_FFG     (JJ)=I%XFFG     (JI,KPATCH)
-       PKI%XP_FFV     (JJ)=I%XFFV     (JI,KPATCH)
-       PKI%XP_FFROZEN (JJ)=I%XFFROZEN (JI,KPATCH)    
-       PKI%XP_ALBF    (JJ)=I%XALBF    (JI,KPATCH)
-       PKI%XP_EMISF   (JJ)=I%XEMISF   (JI,KPATCH)       
+       PKI%XP_FFLOOD  (JJ)=I%I%XFFLOOD  (JI)
+       PKI%XP_PIFLOOD (JJ)=I%I%XPIFLOOD (JI)
+       PKI%XP_FF      (JJ)=I%I%XFF      (JI,KPATCH)
+       PKI%XP_FFG     (JJ)=I%I%XFFG     (JI,KPATCH)
+       PKI%XP_FFV     (JJ)=I%I%XFFV     (JI,KPATCH)
+       PKI%XP_FFROZEN (JJ)=I%I%XFFROZEN (JI,KPATCH)    
+       PKI%XP_ALBF    (JJ)=I%I%XALBF    (JI,KPATCH)
+       PKI%XP_EMISF   (JJ)=I%I%XEMISF   (JI,KPATCH)       
     END DO
   ELSE
     PKI%XP_FFLOOD  (:) = 0.0
@@ -1301,141 +1301,141 @@ ELSE
     PKI%XP_EMISF   (:) = 0.0
   ENDIF
 !
-  IF(I%TSNOW%SCHEME=='EBA') THEN
+  IF(I%R%TSNOW%SCHEME=='EBA') THEN
     DO JJ=1,KSIZE
        JI                = KMASK(JJ)
-       PKI%XP_PSNV_A (JJ)    = I%XPSNV_A(JI, KPATCH)
+       PKI%XP_PSNV_A (JJ)    = I%R%XPSNV_A(JI, KPATCH)
     END DO
   END IF
   !
-  IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+  IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
     DO JK=1,SIZE(PKI%XP_SNOWHEAT,2)
       DO JJ=1,KSIZE
         JI                     =    KMASK(JJ)
-        PKI%XP_SNOWHEAT   (JJ, JK) =    I%TSNOW%HEAT   (JI, JK, KPATCH)
-        PKI%XP_SNOWAGE    (JJ, JK) =    I%TSNOW%AGE    (JI, JK, KPATCH)
+        PKI%XP_SNOWHEAT   (JJ, JK) =    I%R%TSNOW%HEAT   (JI, JK, KPATCH)
+        PKI%XP_SNOWAGE    (JJ, JK) =    I%R%TSNOW%AGE    (JI, JK, KPATCH)
       ENDDO
     END DO
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_SNOWALBVIS   (JJ)    =    I%TSNOW%ALBVIS  (JI, KPATCH) 
-      PKI%XP_SNOWALBNIR   (JJ)    =    I%TSNOW%ALBNIR  (JI, KPATCH) 
-      PKI%XP_SNOWALBFIR   (JJ)    =    I%TSNOW%ALBFIR  (JI, KPATCH) 
+      PKI%XP_SNOWALBVIS   (JJ)    =    I%R%TSNOW%ALBVIS  (JI, KPATCH) 
+      PKI%XP_SNOWALBNIR   (JJ)    =    I%R%TSNOW%ALBNIR  (JI, KPATCH) 
+      PKI%XP_SNOWALBFIR   (JJ)    =    I%R%TSNOW%ALBFIR  (JI, KPATCH) 
     ENDDO
   END IF
   !
-  IF (I%TSNOW%SCHEME=='CRO') THEN
+  IF (I%R%TSNOW%SCHEME=='CRO') THEN
     DO JK=1,SIZE(PKI%XP_SNOWGRAN1,2)
       DO JJ=1,KSIZE
         JI                     =    KMASK(JJ)  
-        PKI%XP_SNOWGRAN1  (JJ, JK) =    I%TSNOW%GRAN1  (JI, JK, KPATCH)
-        PKI%XP_SNOWGRAN2  (JJ, JK) =    I%TSNOW%GRAN2  (JI, JK, KPATCH)
-        PKI%XP_SNOWHIST   (JJ, JK) =    I%TSNOW%HIST   (JI, JK, KPATCH)
+        PKI%XP_SNOWGRAN1  (JJ, JK) =    I%R%TSNOW%GRAN1  (JI, JK, KPATCH)
+        PKI%XP_SNOWGRAN2  (JJ, JK) =    I%R%TSNOW%GRAN2  (JI, JK, KPATCH)
+        PKI%XP_SNOWHIST   (JJ, JK) =    I%R%TSNOW%HIST   (JI, JK, KPATCH)
       ENDDO
     END DO
   END IF
   !
-  IF(I%LGLACIER)THEN
+  IF(I%O%LGLACIER)THEN
     DO JJ=1,KSIZE
        JI             = KMASK(JJ)
-       PKI%XP_ICE_STO(JJ) = I%XICE_STO  (JI,KPATCH)
+       PKI%XP_ICE_STO(JJ) = I%R%XICE_STO  (JI,KPATCH)
     ENDDO
   ENDIF
   !  
-  IF (I%CSCOND=='PL98'.OR.I%CISBA=='DIF') THEN
-    DO JK=1,SIZE(I%XHCAPSOIL,2)
+  IF (I%O%CSCOND=='PL98'.OR.I%O%CISBA=='DIF') THEN
+    DO JK=1,SIZE(I%IP%XHCAPSOIL,2)
       DO JJ=1,KSIZE
         JI                    =    KMASK(JJ)
-        PKI%XP_HCAPSOIL   (JJ, JK) =    I%XHCAPSOIL    (JI, JK)
-        PKI%XP_CONDDRY    (JJ, JK) =    I%XCONDDRY     (JI, JK)
-        PKI%XP_CONDSLD    (JJ, JK) =    I%XCONDSLD     (JI, JK)
+        PKI%XP_HCAPSOIL   (JJ, JK) =    I%IP%XHCAPSOIL    (JI, JK)
+        PKI%XP_CONDDRY    (JJ, JK) =    I%IP%XCONDDRY     (JI, JK)
+        PKI%XP_CONDSLD    (JJ, JK) =    I%IP%XCONDSLD     (JI, JK)
       ENDDO
     ENDDO
   END IF
   !
-  IF (I%CISBA=='2-L' .OR. I%CISBA=='3-L') THEN
+  IF (I%O%CISBA=='2-L' .OR. I%O%CISBA=='3-L') THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
-      PKI%XP_C4B        (JJ)    =    I%XC4B          (JI)
-      PKI%XP_ACOEF      (JJ)    =    I%XACOEF        (JI)
-      PKI%XP_PCOEF      (JJ)    =    I%XPCOEF        (JI)
-      PKI%XP_CGSAT      (JJ)    =    I%XCGSAT        (JI) 
-      PKI%XP_C1SAT      (JJ)    =    I%XC1SAT        (JI, KPATCH)
-      PKI%XP_C2REF      (JJ)    =    I%XC2REF        (JI, KPATCH)     
-      PKI%XP_C4REF      (JJ)    =    I%XC4REF        (JI, KPATCH)      
+      PKI%XP_C4B        (JJ)    =    I%IP%XC4B          (JI)
+      PKI%XP_ACOEF      (JJ)    =    I%IP%XACOEF        (JI)
+      PKI%XP_PCOEF      (JJ)    =    I%IP%XPCOEF        (JI)
+      PKI%XP_CGSAT      (JJ)    =    I%IP%XCGSAT        (JI) 
+      PKI%XP_C1SAT      (JJ)    =    I%IP%XC1SAT        (JI, KPATCH)
+      PKI%XP_C2REF      (JJ)    =    I%IP%XC2REF        (JI, KPATCH)     
+      PKI%XP_C4REF      (JJ)    =    I%IP%XC4REF        (JI, KPATCH)      
     ENDDO
     !
-    DO JK=1,SIZE(I%XC3,2)
+    DO JK=1,SIZE(I%IP%XC3,2)
       DO JJ=1,KSIZE
         JI                    =    KMASK(JJ)
-        PKI%XP_C3         (JJ,JK)  =    I%XC3           (JI, JK, KPATCH)
+        PKI%XP_C3         (JJ,JK)  =    I%IP%XC3           (JI, JK, KPATCH)
       ENDDO
     ENDDO
   END IF
   !
-    DO JK=1,SIZE(I%XBCOEF,2)
+    DO JK=1,SIZE(I%IP%XBCOEF,2)
       DO JJ=1,KSIZE    
          JI                  =    KMASK(JJ)
-         PKI%XP_MPOTSAT (JJ, JK) =    I%XMPOTSAT (JI, JK)
-         PKI%XP_BCOEF   (JJ, JK) =    I%XBCOEF   (JI, JK)
+         PKI%XP_MPOTSAT (JJ, JK) =    I%IP%XMPOTSAT (JI, JK)
+         PKI%XP_BCOEF   (JJ, JK) =    I%IP%XBCOEF   (JI, JK)
       ENDDO
     ENDDO
   !
-  IF (I%CISBA=='DIF') THEN
-    DO JK=1,SIZE(I%XROOTFRAC,2)
+  IF (I%O%CISBA=='DIF') THEN
+    DO JK=1,SIZE(I%M%X%XROOTFRAC,2)
       DO JJ=1,KSIZE
         JI                     =    KMASK(JJ)
-        PKI%XP_ROOTFRAC   (JJ, JK) =    I%XROOTFRAC   (JI, JK, KPATCH)
-        PKI%XP_DZG        (JJ, JK) =    I%XDZG        (JI, JK, KPATCH)
-        PKI%XP_DZDIF      (JJ, JK) =    I%XDZDIF      (JI, JK, KPATCH)
-        PKI%XP_SOILWGHT   (JJ, JK) =    I%XSOILWGHT   (JI, JK, KPATCH)
+        PKI%XP_ROOTFRAC   (JJ, JK) =    I%M%X%XROOTFRAC   (JI, JK, KPATCH)
+        PKI%XP_DZG        (JJ, JK) =    I%IP%XDZG        (JI, JK, KPATCH)
+        PKI%XP_DZDIF      (JJ, JK) =    I%IP%XDZDIF      (JI, JK, KPATCH)
+        PKI%XP_SOILWGHT   (JJ, JK) =    I%IP%XSOILWGHT   (JI, JK, KPATCH)
       ENDDO
     ENDDO
     DO JJ=1,KSIZE
       JI                =  KMASK(JJ)
-      PKI%NK_WG_LAYER (JJ)  =  I%NWG_LAYER (JI,KPATCH)
-      PKI%XP_FWTD     (JJ)  =  I%XFWTD     (JI)
-      PKI%XP_WTD      (JJ)  =  I%XWTD      (JI)
+      PKI%NK_WG_LAYER (JJ)  =  I%M%X%NWG_LAYER (JI,KPATCH)
+      PKI%XP_FWTD     (JJ)  =  I%IP%XFWTD     (JI)
+      PKI%XP_WTD      (JJ)  =  I%IP%XWTD      (JI)
     ENDDO
   ENDIF
   !
-  IF (I%CISBA=='DIF'.AND.I%CRUNOFF=='SGH') THEN
-    DO JK=1,SIZE(I%XROOTFRAC,2)
+  IF (I%O%CISBA=='DIF'.AND.I%O%CRUNOFF=='SGH') THEN
+    DO JK=1,SIZE(I%M%X%XROOTFRAC,2)
       DO JJ=1,KSIZE
         JI                     =    KMASK(JJ)
-        PKI%XP_TOPQS   (JJ, JK)    =    I%XTOPQS   (JI, JK, KPATCH)  
+        PKI%XP_TOPQS   (JJ, JK)    =    I%I%XTOPQS   (JI, JK, KPATCH)  
       ENDDO
     ENDDO        
   END IF
   !
-  IF (I%LTR_ML) THEN
+  IF (I%O%LTR_ML) THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
-      PKI%XP_FAPARC      (JJ)    =    I%XFAPARC      (JI, KPATCH)
-      PKI%XP_FAPIRC      (JJ)    =    I%XFAPIRC      (JI, KPATCH)
-      PKI%XP_LAI_EFFC    (JJ)    =    I%XLAI_EFFC    (JI, KPATCH)
-      PKI%XP_MUS         (JJ)    =    I%XMUS         (JI, KPATCH)
+      PKI%XP_FAPARC      (JJ)    =    I%R%XFAPARC      (JI, KPATCH)
+      PKI%XP_FAPIRC      (JJ)    =    I%R%XFAPIRC      (JI, KPATCH)
+      PKI%XP_LAI_EFFC    (JJ)    =    I%R%XLAI_EFFC    (JI, KPATCH)
+      PKI%XP_MUS         (JJ)    =    I%R%XMUS         (JI, KPATCH)
     ENDDO
   ENDIF  
   !
-  IF (I%CPHOTO=='NON') THEN
+  IF (I%O%CPHOTO=='NON') THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
-      PKI%XP_RSMIN      (JJ)    =    I%XRSMIN      (JI, KPATCH)
+      PKI%XP_RSMIN      (JJ)    =    I%M%T%XRSMIN      (JI, KPATCH)
     END DO
   END IF
   !
-  IF(I%LMEB_PATCH(KPATCH))THEN
+  IF(I%O%LMEB_PATCH(KPATCH))THEN
 !
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_WRL          (JJ)    =    I%XWRL          (JI, KPATCH) 
-      PKI%XP_WRLI         (JJ)    =    I%XWRLI         (JI, KPATCH) 
-      PKI%XP_WRVN         (JJ)    =    I%XWRVN         (JI, KPATCH) 
-      PKI%XP_TV           (JJ)    =    I%XTV           (JI, KPATCH) 
-      PKI%XP_TL           (JJ)    =    I%XTL           (JI, KPATCH) 
-      PKI%XP_TC           (JJ)    =    I%XTC           (JI, KPATCH) 
-      PKI%XP_QC           (JJ)    =    I%XQC           (JI, KPATCH) 
+      PKI%XP_WRL          (JJ)    =    I%R%XWRL          (JI, KPATCH) 
+      PKI%XP_WRLI         (JJ)    =    I%R%XWRLI         (JI, KPATCH) 
+      PKI%XP_WRVN         (JJ)    =    I%R%XWRVN         (JI, KPATCH) 
+      PKI%XP_TV           (JJ)    =    I%R%XTV           (JI, KPATCH) 
+      PKI%XP_TL           (JJ)    =    I%R%XTL           (JI, KPATCH) 
+      PKI%XP_TC           (JJ)    =    I%R%XTC           (JI, KPATCH) 
+      PKI%XP_QC           (JJ)    =    I%R%XQC           (JI, KPATCH) 
     ENDDO
 !
 ! Please note that secondary Ecoclimap parameters, i.e. those
@@ -1464,7 +1464,7 @@ ELSE
 !
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_H_VEG        (JJ)    =    I%XH_VEG        (JI, KPATCH)
+      PKI%XP_H_VEG        (JJ)    =    I%M%M%XH_VEG        (JI, KPATCH)
 !nogv      XP_RGLV         (JJ)    =    XRGL          (JI, KPATCH)
 !nogv      XP_GAMMAV       (JJ)    =    XGAMMA        (JI, KPATCH)
 !nogv      XP_WRMAX_CFV    (JJ)    =    XWRMAX_CF     (JI, KPATCH)
@@ -1477,132 +1477,132 @@ ELSE
 !nogv      XP_WRMAX_CF     (JJ)    =    XWRMAX_CFGV   (JI, KPATCH)
 !nogv      XP_LAI          (JJ)    =    XLAIGV        (JI, KPATCH)
 !nogv      XP_Z0           (JJ)    =    XZ0LITTER     (JI, KPATCH)
-      PKI%XP_GNDLITTER    (JJ)    =    I%XGNDLITTER    (JI, KPATCH)
-      PKI%XP_Z0LITTER     (JJ)    =    I%XZ0LITTER     (JI, KPATCH)
+      PKI%XP_GNDLITTER    (JJ)    =    I%M%M%XGNDLITTER    (JI, KPATCH)
+      PKI%XP_Z0LITTER     (JJ)    =    I%M%M%XZ0LITTER     (JI, KPATCH)
     ENDDO
   ENDIF
 !
-  IF(I%CPHOTO/='NON' .OR. I%LMEB_PATCH(KPATCH))THEN
+  IF(I%O%CPHOTO/='NON' .OR. I%O%LMEB_PATCH(KPATCH))THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
-      PKI%XP_BSLAI      (JJ)    =    I%XBSLAI      (JI, KPATCH)
+      PKI%XP_BSLAI      (JJ)    =    I%M%T%XBSLAI      (JI, KPATCH)
     ENDDO
   ENDIF
 !
-  IF (I%CPHOTO/='NON') THEN
+  IF (I%O%CPHOTO/='NON') THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
-      PKI%XP_LAIMIN     (JJ)    =    I%XLAIMIN     (JI, KPATCH)
-      PKI%XP_SEFOLD     (JJ)    =    I%XSEFOLD     (JI, KPATCH)
-      PKI%XP_H_TREE     (JJ)    =    I%XH_TREE     (JI, KPATCH)
-      PKI%XP_ANMAX      (JJ)    =    I%XANMAX      (JI, KPATCH)
-      PKI%XP_FZERO      (JJ)    =    I%XFZERO      (JI, KPATCH)
-      PKI%XP_EPSO       (JJ)    =    I%XEPSO       (JI, KPATCH)
-      PKI%XP_GAMM       (JJ)    =    I%XGAMM       (JI, KPATCH)
-      PKI%XP_QDGAMM     (JJ)    =    I%XQDGAMM     (JI, KPATCH)
-      PKI%XP_GMES       (JJ)    =    I%XGMES       (JI, KPATCH)
-      PKI%XP_RE25       (JJ)    =    I%XRE25       (JI, KPATCH)
-      PKI%XP_QDGMES     (JJ)    =    I%XQDGMES     (JI, KPATCH)
-      PKI%XP_T1GMES     (JJ)    =    I%XT1GMES     (JI, KPATCH)
-      PKI%XP_T2GMES     (JJ)    =    I%XT2GMES     (JI, KPATCH)
-      PKI%XP_AMAX       (JJ)    =    I%XAMAX       (JI, KPATCH)
-      PKI%XP_QDAMAX     (JJ)    =    I%XQDAMAX     (JI, KPATCH)
-      PKI%XP_T1AMAX     (JJ)    =    I%XT1AMAX     (JI, KPATCH)
-      PKI%XP_T2AMAX     (JJ)    =    I%XT2AMAX     (JI, KPATCH)
-      PKI%XP_AN         (JJ)    =    I%XAN         (JI, KPATCH) 
-      PKI%XP_ANDAY      (JJ)    =    I%XANDAY      (JI, KPATCH) 
-      PKI%XP_ANFM       (JJ)    =    I%XANFM       (JI, KPATCH) 
-      PKI%XP_GC         (JJ)    =    I%XGC         (JI, KPATCH)
+      PKI%XP_LAIMIN     (JJ)    =    I%M%T%XLAIMIN     (JI, KPATCH)
+      PKI%XP_SEFOLD     (JJ)    =    I%M%T%XSEFOLD     (JI, KPATCH)
+      PKI%XP_H_TREE     (JJ)    =    I%M%X%XH_TREE     (JI, KPATCH)
+      PKI%XP_ANMAX      (JJ)    =    I%IP%XANMAX      (JI, KPATCH)
+      PKI%XP_FZERO      (JJ)    =    I%IP%XFZERO      (JI, KPATCH)
+      PKI%XP_EPSO       (JJ)    =    I%IP%XEPSO       (JI, KPATCH)
+      PKI%XP_GAMM       (JJ)    =    I%IP%XGAMM       (JI, KPATCH)
+      PKI%XP_QDGAMM     (JJ)    =    I%IP%XQDGAMM     (JI, KPATCH)
+      PKI%XP_GMES       (JJ)    =    I%M%T%XGMES       (JI, KPATCH)
+      PKI%XP_RE25       (JJ)    =    I%M%X%XRE25       (JI, KPATCH)
+      PKI%XP_QDGMES     (JJ)    =    I%IP%XQDGMES     (JI, KPATCH)
+      PKI%XP_T1GMES     (JJ)    =    I%IP%XT1GMES     (JI, KPATCH)
+      PKI%XP_T2GMES     (JJ)    =    I%IP%XT2GMES     (JI, KPATCH)
+      PKI%XP_AMAX       (JJ)    =    I%IP%XAMAX       (JI, KPATCH)
+      PKI%XP_QDAMAX     (JJ)    =    I%IP%XQDAMAX     (JI, KPATCH)
+      PKI%XP_T1AMAX     (JJ)    =    I%IP%XT1AMAX     (JI, KPATCH)
+      PKI%XP_T2AMAX     (JJ)    =    I%IP%XT2AMAX     (JI, KPATCH)
+      PKI%XP_AN         (JJ)    =    I%R%XAN         (JI, KPATCH) 
+      PKI%XP_ANDAY      (JJ)    =    I%R%XANDAY      (JI, KPATCH) 
+      PKI%XP_ANFM       (JJ)    =    I%R%XANFM       (JI, KPATCH) 
+      PKI%XP_GC         (JJ)    =    I%M%T%XGC         (JI, KPATCH)
     ENDDO
-    DO JK=1,SIZE(I%XBIOMASS,2)
+    DO JK=1,SIZE(I%R%XBIOMASS,2)
       DO JJ=1,KSIZE
         JI                    =    KMASK(JJ)
-        PKI%XP_BIOMASS        (JJ,JK)  =    I%XBIOMASS        (JI,JK,KPATCH)
-        PKI%XP_RESP_BIOMASS   (JJ,JK)  =    I%XRESP_BIOMASS   (JI,JK,KPATCH)
+        PKI%XP_BIOMASS        (JJ,JK)  =    I%R%XBIOMASS        (JI,JK,KPATCH)
+        PKI%XP_RESP_BIOMASS   (JJ,JK)  =    I%R%XRESP_BIOMASS   (JI,JK,KPATCH)
       ENDDO
     END DO
   END IF
   !
-  IF (I%CPHOTO=='AST' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') THEN
+  IF (I%O%CPHOTO=='AST' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN
     DO JJ=1,KSIZE
       JI                    =    KMASK(JJ)
-      PKI%LP_STRESS     (JJ)    =    I%LSTRESS     (JI, KPATCH)
-      PKI%XP_F2I        (JJ)    =    I%XF2I        (JI, KPATCH)
-      PKI%XP_AH         (JJ)    =    I%XAH         (JI, KPATCH)
-      PKI%XP_BH         (JJ)    =    I%XBH         (JI, KPATCH)
-      PKI%XP_DMAX       (JJ)    =    I%XDMAX       (JI, KPATCH)
+      PKI%LP_STRESS     (JJ)    =    I%M%T%LSTRESS     (JI, KPATCH)
+      PKI%XP_F2I        (JJ)    =    I%M%T%XF2I        (JI, KPATCH)
+      PKI%XP_AH         (JJ)    =    I%IP%XAH         (JI, KPATCH)
+      PKI%XP_BH         (JJ)    =    I%IP%XBH         (JI, KPATCH)
+      PKI%XP_DMAX       (JJ)    =    I%M%X%XDMAX       (JI, KPATCH)
     END DO
   END IF
   !
-  IF(LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB')) THEN
+  IF(LAGRIP .AND. (I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB')) THEN
     DO JJ=1,KSIZE
       JI               = KMASK(JJ)
-      PKI%TP_SEED     (JJ) = I%TSEED     (JI,KPATCH)
-      PKI%TP_REAP     (JJ) = I%TREAP     (JI,KPATCH)
-      PKI%XP_IRRIG    (JJ) = I%XIRRIG    (JI,KPATCH)
-      PKI%XP_WATSUP   (JJ) = I%XWATSUP   (JI,KPATCH)
+      PKI%TP_SEED     (JJ) = I%M%I%TSEED     (JI,KPATCH)
+      PKI%TP_REAP     (JJ) = I%M%I%TREAP     (JI,KPATCH)
+      PKI%XP_IRRIG    (JJ) = I%M%I%XIRRIG    (JI,KPATCH)
+      PKI%XP_WATSUP   (JJ) = I%M%I%XWATSUP   (JI,KPATCH)
       PKI%XP_LIRRIDAY (JJ) = AG%LIRRIDAY  (JI,KPATCH)
       PKI%XP_THRESHOLD(JJ) = AG%XTHRESHOLDSPT(JI,KPATCH)
       PKI%XP_LIRRIGATE(JJ) = AG%LIRRIGATE (JI,KPATCH)
     ENDDO
   ENDIF
   !
-  IF(I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') THEN
+  IF(I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_CE_NITRO       (JJ)  =    I%XCE_NITRO       (JI,KPATCH)
-      PKI%XP_CF_NITRO       (JJ)  =    I%XCF_NITRO       (JI,KPATCH)
-      PKI%XP_CNA_NITRO      (JJ)  =    I%XCNA_NITRO      (JI,KPATCH)
-      PKI%XP_BSLAI_NITRO    (JJ)  =    I%XBSLAI_NITRO    (JI,KPATCH)      
+      PKI%XP_CE_NITRO       (JJ)  =    I%M%T%XCE_NITRO       (JI,KPATCH)
+      PKI%XP_CF_NITRO       (JJ)  =    I%M%T%XCF_NITRO       (JI,KPATCH)
+      PKI%XP_CNA_NITRO      (JJ)  =    I%M%T%XCNA_NITRO      (JI,KPATCH)
+      PKI%XP_BSLAI_NITRO    (JJ)  =    I%IP%XBSLAI_NITRO    (JI,KPATCH)      
     END DO
   END IF
   !
-  IF (I%CPHOTO=='NCB') THEN
-    DO JK=1,SIZE(I%XINCREASE,2)
+  IF (I%O%CPHOTO=='NCB') THEN
+    DO JK=1,SIZE(I%IP%XINCREASE,2)
       DO JJ=1,KSIZE
         JI                      =    KMASK(JJ)
-        PKI%XP_INCREASE   (JJ,JK)   =    I%XINCREASE       (JI,JK,KPATCH)
+        PKI%XP_INCREASE   (JJ,JK)   =    I%IP%XINCREASE       (JI,JK,KPATCH)
       ENDDO
     END DO
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      PKI%XP_TAU_WOOD       (JJ)  =    I%XTAU_WOOD       (JI,KPATCH)
+      PKI%XP_TAU_WOOD       (JJ)  =    I%IP%XTAU_WOOD       (JI,KPATCH)
     END DO  
   END IF
   !
-  IF (I%CRESPSL=='CNT') THEN
+  IF (I%O%CRESPSL=='CNT') THEN
     DO JL=1,SIZE(PKI%XP_LITTER,3)
       DO JK=1,SIZE(PKI%XP_LITTER,2)
         DO JJ=1,KSIZE
           JI                      =    KMASK(JJ)
-          PKI%XP_LITTER         (JJ,JK,JL) =    I%XLITTER         (JI,JK,JL,KPATCH)
+          PKI%XP_LITTER         (JJ,JK,JL) =    I%R%XLITTER         (JI,JK,JL,KPATCH)
         ENDDO
       ENDDO
     ENDDO
     DO JK=1,SIZE(PKI%XP_SOILCARB,2)
       DO JJ=1,KSIZE
         JI                      =    KMASK(JJ)
-        PKI%XP_SOILCARB       (JJ,JK)   =    I%XSOILCARB       (JI,JK,KPATCH)
+        PKI%XP_SOILCARB       (JJ,JK)   =    I%R%XSOILCARB       (JI,JK,KPATCH)
       ENDDO
     ENDDO
      DO JK=1,SIZE(PKI%XP_LIGNIN_STRUC,2)
       DO JJ=1,KSIZE
         JI                      =    KMASK(JJ)
-        PKI%XP_LIGNIN_STRUC  (JJ,JK)   =    I%XLIGNIN_STRUC  (JI,JK,KPATCH)
+        PKI%XP_LIGNIN_STRUC  (JJ,JK)   =    I%R%XLIGNIN_STRUC  (JI,JK,KPATCH)
       ENDDO
     ENDDO
     DO JK=1,SIZE(PKI%XP_TURNOVER,2)
       DO JJ=1,KSIZE
         JI                      =    KMASK(JJ)
-        PKI%XP_TURNOVER      (JJ,JK)   =    I%XTURNOVER       (JI,JK,KPATCH)
+        PKI%XP_TURNOVER      (JJ,JK)   =    I%IP%XTURNOVER       (JI,JK,KPATCH)
       ENDDO
     ENDDO
   END IF
 !
-  IF (I%CRAIN=='SGH')THEN
+  IF (I%O%CRAIN=='SGH')THEN
     DO JJ=1,KSIZE
        JI         = KMASK(JJ)
-       PKI%XP_MUF(JJ) = I%XMUF(JI)
+       PKI%XP_MUF(JJ) = I%I%XMUF(JI)
     END DO
   ENDIF
 !

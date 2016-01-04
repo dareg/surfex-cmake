@@ -80,30 +80,30 @@ REAL,DIMENSION(KI) :: ZCOFSWI                     ! dynamic range (Wfc - Wwilt)
 !REAL,DIMENSION(KI) :: ZSMSAT                      ! saturation  
 !REAL,DIMENSION(KI) :: ZWILT
 !
-REAL,DIMENSION(KI,I%NPATCH,NVAR) :: ZCOEF
-REAL,DIMENSION(KI,I%NPATCH,NVAR) :: ZEPS            ! The perturbation amplitude
+REAL,DIMENSION(KI,I%O%NPATCH,NVAR) :: ZCOEF
+REAL,DIMENSION(KI,I%O%NPATCH,NVAR) :: ZEPS            ! The perturbation amplitude
 !
 REAL,DIMENSION(NVAR+1,NOBSTYPE) :: ZYF            ! Vector of model observations (averaged) 
 !
-REAL,DIMENSION(KI*I%NPATCH*NVAR*I%NPATCH*NVAR) :: ZBLONG
-REAL,DIMENSION(KI,I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZB           ! background error covariance matrix
+REAL,DIMENSION(KI*I%O%NPATCH*NVAR*I%O%NPATCH*NVAR) :: ZBLONG
+REAL,DIMENSION(KI,I%O%NPATCH*NVAR,I%O%NPATCH*NVAR) :: ZB           ! background error covariance matrix
 !
-REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZLTM         ! linear tangent matrix for the f'ward model
-REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZQ           ! model error matrix
+REAL,DIMENSION(I%O%NPATCH*NVAR,I%O%NPATCH*NVAR) :: ZLTM         ! linear tangent matrix for the f'ward model
+REAL,DIMENSION(I%O%NPATCH*NVAR,I%O%NPATCH*NVAR) :: ZQ           ! model error matrix
 !
-REAL,DIMENSION(NOBSTYPE*NBOUTPUT,I%NPATCH*NVAR) :: ZHO, ZHOWR             ! Jacobian of observation operator
-REAL,DIMENSION(I%NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZHOT            ! Transpose of HO
-REAL,DIMENSION(I%NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
+REAL,DIMENSION(NOBSTYPE*NBOUTPUT,I%O%NPATCH*NVAR) :: ZHO, ZHOWR             ! Jacobian of observation operator
+REAL,DIMENSION(I%O%NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZHOT            ! Transpose of HO
+REAL,DIMENSION(I%O%NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
 !
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZR        ! covariance matrix of observation errors
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZK1
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT) :: ZX,ZB2,ZP
 !
-REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZKRK
-REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZIDKH
-REAL,DIMENSION(I%NPATCH*NVAR,I%NPATCH*NVAR) :: ZIDENT          ! identitiy matrix, used for Ba
+REAL,DIMENSION(I%O%NPATCH*NVAR,I%O%NPATCH*NVAR) :: ZKRK
+REAL,DIMENSION(I%O%NPATCH*NVAR,I%O%NPATCH*NVAR) :: ZIDKH
+REAL,DIMENSION(I%O%NPATCH*NVAR,I%O%NPATCH*NVAR) :: ZIDENT          ! identitiy matrix, used for Ba
 !
-REAL,DIMENSION(I%NPATCH) :: ZVLAIMIN
+REAL,DIMENSION(I%O%NPATCH) :: ZVLAIMIN
 !
 REAL :: ZTIME                      ! current time since start of the run (s)
 
@@ -156,7 +156,7 @@ IMYPROC = NRANK+1
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
+IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%O%NPATCH
 !
 !############################# INITIALISATIONS ###############################
 !
@@ -165,7 +165,7 @@ IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATC
 !   using same clay fraction in both layers
 !   Read SAND fraction to compute the saturation for conversion of ERS SWI
 !
- CALL COFSWI(I%XCLAY(:,1),ZCOFSWI)
+ CALL COFSWI(I%P%XCLAY(:,1),ZCOFSWI)
  !
 !DO JI=1,KI
   !ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
@@ -176,8 +176,8 @@ IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATC
 ZIDENT(:,:) = 0.                   ! identity matrix
 DO JL = 1,NVAR
   !
-  DO JJ = 1,I%NPATCH
-    ZIDENT(JJ+I%NPATCH*(JL-1),JJ+I%NPATCH*(JL-1)) = 1.0
+  DO JJ = 1,I%O%NPATCH
+    ZIDENT(JJ+I%O%NPATCH*(JL-1),JJ+I%O%NPATCH*(JL-1)) = 1.0
   ENDDO
   !
   WHERE ( XI(:,:,JL)/=XUNDEF )
@@ -195,7 +195,7 @@ DO JL = 1,NVAR
   ELSEIF ( TRIM(CVAR(JL))=='LAI' .AND. LBFIXED ) THEN
     !
     DO JI = 1,KI
-      DO JJ = 1,I%NPATCH
+      DO JJ = 1,I%O%NPATCH
         IF ( XLAI_PASS(JI,JJ)/=XUNDEF .AND. XLAI_PASS(JI,JJ)>=2. ) THEN
           ZCOEF(JI,JJ,JL) = XLAI_PASS(JI,JJ)*XLAI_PASS(JI,JJ)
         ELSE 
@@ -236,9 +236,9 @@ ELSEIF ( LBEV .OR. LBFIXED ) THEN
   ZB(:,:,:) = 0.
   DO JI = 1,KI
     DO JL = 1,NVAR
-      DO JJ = 1,I%NPATCH   
+      DO JJ = 1,I%O%NPATCH   
         !
-        L1 = JJ + I%NPATCH *(JL-1)
+        L1 = JJ + I%O%NPATCH *(JL-1)
         ZB(JI,L1,L1) = XSIGMA(JL)*XSIGMA(JL) * ZCOEF(JI,JJ,JL)
         !
       ENDDO
@@ -252,12 +252,12 @@ ELSEIF ( LBEV .OR. LBFIXED ) THEN
     ICPT = 0
     !
     DO JI = 1,KI
-      DO JJ = 1,I%NPATCH
-        DO JJJ = 1,I%NPATCH
+      DO JJ = 1,I%O%NPATCH
+        DO JJJ = 1,I%O%NPATCH
           DO JL = 1,NVAR
             DO JK = 1,NVAR
               !
-              L1 = JJ + I%NPATCH * (JL-1)
+              L1 = JJ + I%O%NPATCH * (JL-1)
               !
               ICPT = ICPT + 1
               ZBLONG(ICPT) = ZB(JI,L1,L1)
@@ -304,12 +304,12 @@ IF ( LBEV ) THEN
     DO JL = 1,NVAR    ! control variable (x at previous time step)
       DO JK = 1,NVAR 
         IUNIT = IUNIT + 1
-        DO JJ = 1,I%NPATCH 
+        DO JJ = 1,I%O%NPATCH 
           !
-          L1 = JJ + I%NPATCH*(JL-1)
-          K1 = JJ + I%NPATCH*(JK-1)
+          L1 = JJ + I%O%NPATCH*(JL-1)
+          K1 = JJ + I%O%NPATCH*(JK-1)
           !
-          IF ( I%XPATCH(JI,JJ)>0.0 .AND. XF(JI,JJ,JL+1,JK).NE.XUNDEF .AND. XF(JI,JJ,1,JK).NE.XUNDEF ) THEN
+          IF ( I%IP%XPATCH(JI,JJ)>0.0 .AND. XF(JI,JJ,JL+1,JK).NE.XUNDEF .AND. XF(JI,JJ,1,JK).NE.XUNDEF ) THEN
             !
             ! Jacobian of fwd model
             ZLTM(L1,K1) = ( XF(JI,JJ,JL+1,JK) - XF(JI,JJ,1,JK) ) / ZEPS(JI,JJ,JL)
@@ -345,9 +345,9 @@ IF ( LBEV ) THEN
     !   Adding model error to background error matrix 
     ZQ(:,:) = 0.0
     DO JL=1,NVAR
-      DO JJ=1,I%NPATCH
+      DO JJ=1,I%O%NPATCH
         !
-        L1 = JJ+I%NPATCH*(JL-1)
+        L1 = JJ+I%O%NPATCH*(JL-1)
         !
         ZQ(L1,L1) = XSIGMA(JL)*XSIGMA(JL)
         !
@@ -391,9 +391,9 @@ ENDIF
 ! ====================================================================
 !
 !   Time reinitialization 
-IYEAR  = I%TTIME%TDATE%YEAR
-IMONTH = I%TTIME%TDATE%MONTH
-IDAY   = I%TTIME%TDATE%DAY
+IYEAR  = I%I%TTIME%TDATE%YEAR
+IMONTH = I%I%TTIME%TDATE%MONTH
+IDAY   = I%I%TTIME%TDATE%DAY
 !
 IHOUR = 0
 ZTIME = FLOAT(NECHGU) * 3600.
@@ -422,7 +422,7 @@ ENDIF
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//TRIM(YMYPROC),STATUS='unknown',IOSTAT=ISTAT)
 DO JI = 1,KI
-  IF ( MINVAL(I%XWGI(JI,1,:))>0. ) THEN
+  IF ( MINVAL(I%R%XWGI(JI,1,:))>0. ) THEN
     XYO (JI,:) = XUNDEF
     IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',JI,' REMOVED'
   ENDIF
@@ -459,24 +459,24 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
 !
-IF (I%NPATCH==12) THEN
+IF (I%O%NPATCH==12) THEN
   ZVLAIMIN = (/0.3,0.3,0.3,0.3,1.0,1.0,0.3,0.3,0.3,0.3,0.3,0.3/)
 ELSE
   ZVLAIMIN = (/0.3/)
 ENDIF
 !
-ALLOCATE(I%XINCR(KI,I%NPATCH*NVAR))
-I%XINCR(:,:) = 0.
+ALLOCATE(I%R%XINCR(KI,I%O%NPATCH*NVAR))
+I%R%XINCR(:,:) = 0.
 !
 IOBSCOUNT = 0
 DO JI=1,KI
   !
 !---------------- MEAN SIMULATED OBS AVERAGED OVER TILES-----------------------
   ZYF(:,:) = 0. 
-  DO JJ=1,I%NPATCH
-    IF (I%XPATCH(JI,JJ) > 0.0) THEN
+  DO JJ=1,I%O%NPATCH
+    IF (I%IP%XPATCH(JI,JJ) > 0.0) THEN
       WHERE ( XF_PATCH(JI,JJ,:,:)/=XUNDEF ) 
-        ZYF(:,:) = ZYF(:,:) + I%XPATCH(JI,JJ)*XF_PATCH(JI,JJ,:,:)
+        ZYF(:,:) = ZYF(:,:) + I%IP%XPATCH(JI,JJ)*XF_PATCH(JI,JJ,:,:)
       ENDWHERE
     ENDIF
   ENDDO
@@ -511,17 +511,17 @@ DO JI=1,KI
       !      
 !--------------------- CALCULATE JACOBIANS ------------------         
       DO JL=1,NVAR
-        DO JJ=1,I%NPATCH
+        DO JJ=1,I%O%NPATCH
           !
-          L1 = JJ + I%NPATCH*(JL-1)
+          L1 = JJ + I%O%NPATCH*(JL-1)
           !
-          IF ( I%XPATCH(JI,JJ)>0.0 .AND. XF_PATCH(JI,JJ,JL+1,JK).NE.XUNDEF .AND. XF_PATCH(JI,JJ,1,JK).NE.XUNDEF ) THEN 
-            ZHOWR(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
+          IF ( I%IP%XPATCH(JI,JJ)>0.0 .AND. XF_PATCH(JI,JJ,JL+1,JK).NE.XUNDEF .AND. XF_PATCH(JI,JJ,1,JK).NE.XUNDEF ) THEN 
+            ZHOWR(K1,L1) = I%IP%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
           ENDIF
           !
           IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN         !if obs available
             ! Jacobian of obs operator
-            ZHO(K1,L1) = I%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
+            ZHO(K1,L1) = I%IP%XPATCH(JI,JJ)*(XF_PATCH(JI,JJ,JL+1,JK) - XF_PATCH(JI,JJ,1,JK))/ZEPS(JI,JJ,JL)
             ! impose limits  
             ZHO(K1,L1) = MAX(-0.1, ZHO(K1,L1))
             ZHO(K1,L1) = MIN( 1.0, ZHO(K1,L1))
@@ -556,21 +556,21 @@ DO JI=1,KI
   ZK1 (:,:) = MATMUL(ZHO(:,:),MATMUL(ZB(JI,:,:),ZHOT(:,:))) + ZR(:,:)
   CALL CHOLDC(NOBSTYPE,ZK1(:,:),ZP(:))                         ! Cholesky decomposition (1)
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
-  I%XINCR(JI,:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
+  I%R%XINCR(JI,:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
   DO JL=1,NVAR
-    DO JJ=1,I%NPATCH
+    DO JJ=1,I%O%NPATCH
       !
-      L1 = JJ+I%NPATCH*(JL-1)
+      L1 = JJ+I%O%NPATCH*(JL-1)
       !
       ! Update the modified values
       IF ( TRIM(CVAR(JL))=="LAI" ) THEN
-        I%XINCR(JI,L1) = MAX( I%XINCR(JI,L1), ZVLAIMIN(JJ)-XF(JI,JJ,1,JL) )
-        XBIO_PASS(JI,JJ) = XBIO_PASS(JI,JJ) + I%XINCR(JI,L1)*XALPH(JJ)
-      ELSEIF ( XF(JI,JJ,1,JL)+I%XINCR(JI,L1)<0. ) THEN
-        I%XINCR(JI,L1) = 0.
+        I%R%XINCR(JI,L1) = MAX( I%R%XINCR(JI,L1), ZVLAIMIN(JJ)-XF(JI,JJ,1,JL) )
+        XBIO_PASS(JI,JJ) = XBIO_PASS(JI,JJ) + I%R%XINCR(JI,L1)*XALPH(JJ)
+      ELSEIF ( XF(JI,JJ,1,JL)+I%R%XINCR(JI,L1)<0. ) THEN
+        I%R%XINCR(JI,L1) = 0.
       ENDIF
       !
-      XF(JI,JJ,1,JL) = XF(JI,JJ,1,JL) + I%XINCR(JI,L1)
+      XF(JI,JJ,1,JL) = XF(JI,JJ,1,JL) + I%R%XINCR(JI,L1)
       !
       ! For no only warn if we have negative values.
       IF ( NPRINTLEV > 0 ) THEN
@@ -581,8 +581,8 @@ DO JI=1,KI
   ENDDO
   !
   IF ( NPRINTLEV > 0 ) THEN
-    DO JJ=1,I%NPATCH
-      WRITE(113,*) (XF(JI,JJ,1,JL),JL=1,NVAR), (I%XINCR(JI,JJ+I%NPATCH*(JL-1)),JL=1,NVAR)
+    DO JJ=1,I%O%NPATCH
+      WRITE(113,*) (XF(JI,JJ,1,JL),JL=1,NVAR), (I%R%XINCR(JI,JJ+I%O%NPATCH*(JL-1)),JL=1,NVAR)
     ENDDO
   ENDIF
   
@@ -607,8 +607,8 @@ DO JI=1,KI
     DO JL = 1,NVAR
       DO JK = 1,NOBSTYPE
         IUNIT = IUNIT + 1
-        DO JJ=1,I%NPATCH
-          WRITE(IUNIT,*) ZHOWR(JK,JJ+I%NPATCH*(JL-1)),ZGAIN(JJ+I%NPATCH*(JL-1),JK)
+        DO JJ=1,I%O%NPATCH
+          WRITE(IUNIT,*) ZHOWR(JK,JJ+I%O%NPATCH*(JL-1)),ZGAIN(JJ+I%O%NPATCH*(JL-1),JK)
         ENDDO
       ENDDO
     ENDDO
@@ -640,7 +640,7 @@ IF (LBEV .OR. NPRINTLEV>0) THEN
 ENDIF
 !
 IF ( NPRINTLEV > 0 ) THEN
-  IOBSCOUNT = IOBSCOUNT / I%NPATCH / NVAR
+  IOBSCOUNT = IOBSCOUNT / I%O%NPATCH / NVAR
   IF (NRANK==NPIO) THEN
     WRITE(*,*)
     WRITE(*,*) '   ---------------------------------------'
@@ -658,26 +658,26 @@ DO JL=1,NVAR
   ! Update the modified values
   SELECT CASE (TRIM(CVAR(JL)))
     CASE("TG1")
-      I%XTG(:,1,:) = XF(:,:,1,JL)
+      I%R%XTG(:,1,:) = XF(:,:,1,JL)
     CASE("TG2")
-      I%XTG(:,2,:) = XF(:,:,1,JL)
+      I%R%XTG(:,2,:) = XF(:,:,1,JL)
     CASE("WG1")
-      I%XWG(:,1,:) = XF(:,:,1,JL)
+      I%R%XWG(:,1,:) = XF(:,:,1,JL)
     CASE("WG2")
-      I%XWG(:,2,:) = XF(:,:,1,JL)
+      I%R%XWG(:,2,:) = XF(:,:,1,JL)
     CASE("LAI") 
-      I%XLAI(:,:) = XF(:,:,1,JL)
+      I%M%T%XLAI(:,:) = XF(:,:,1,JL)
       SELECT CASE (TRIM(CBIO))
         CASE("BIOMA1","BIOMASS1")
-          I%XBIOMASS(:,1,:) = XBIO_PASS(:,:)
+          I%R%XBIOMASS(:,1,:) = XBIO_PASS(:,:)
         CASE("BIOMA2","BIOMASS2")
-          I%XBIOMASS(:,2,:) = XBIO_PASS(:,:)
+          I%R%XBIOMASS(:,2,:) = XBIO_PASS(:,:)
         CASE("RESPI1","RESP_BIOM1")
-          I%XRESP_BIOMASS(:,1,:) = XBIO_PASS(:,:)
+          I%R%XRESP_BIOMASS(:,1,:) = XBIO_PASS(:,:)
         CASE("RESPI2","RESP_BIOM2")
-          I%XRESP_BIOMASS(:,2,:) = XBIO_PASS(:,:)
+          I%R%XRESP_BIOMASS(:,2,:) = XBIO_PASS(:,:)
         CASE("LAI")
-          I%XLAI(:,:) = XBIO_PASS(:,:)
+          I%M%T%XLAI(:,:) = XBIO_PASS(:,:)
         CASE DEFAULT
           CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
       END SELECT

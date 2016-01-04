@@ -23,7 +23,10 @@
 !
 !*    0.     DECLARATION
 !            -----------
-
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC
+!
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PGDWORK,        ONLY : NSIZE, XSUMVAL, CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : XCDREF
 !
@@ -70,6 +73,12 @@ SELECT CASE (CATYPE)
   ENDWHERE
           
 END SELECT
+!
+WHERE (PPGDARRAY/=XUNDEF) 
+  PPGDARRAY(:) = AINT(PPGDARRAY(:)) + &
+            NINT((PPGDARRAY(:)-AINT(PPGDARRAY(:)))*100000000.)/100000000.
+ENDWHERE
+!
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',1,ZHOOK_HANDLE)
 
 !-------------------------------------------------------------------------------

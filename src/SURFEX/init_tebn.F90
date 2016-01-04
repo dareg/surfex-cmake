@@ -229,7 +229,7 @@ ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_TEB_n(TM%CHT, TM%DGMTO, TM%DGT, TM%DGUT, GRM%TGRO, TM%T, TM%TOP, &
+ CALL READ_DEFAULT_TEB_n(TM%CHT, TM%DGMTO, TM%DGT, TM%DGUT, GRM%TV%O, TM%T, TM%TOP, &
                          HPROGRAM)
 !
 !*       1.     Reading of configuration:
@@ -242,8 +242,8 @@ ENDIF
 !
 IF (HINIT=='PRE') THEN
   DO JPATCH=1,TM%TOP%NTEB_PATCH
-    CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TGD, GDM%TGDPE, &
-                                GRM%TGR, GRM%TGRPE, JPATCH)
+    CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, JPATCH)
     CALL READ_PREP_TEB_SNOW(HPROGRAM,TM%T%CUR%TSNOW_ROOF%SCHEME,TM%T%CUR%TSNOW_ROOF%NLAYER, &
                                      TM%T%CUR%TSNOW_ROAD%SCHEME,TM%T%CUR%TSNOW_ROAD%NLAYER)
   END DO
@@ -343,7 +343,7 @@ ENDIF
 DO JPATCH=1,TM%TOP%NTEB_PATCH
 
   CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                              GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, JPATCH)
+                              GDM%TV%R, GDM%TV%M%T, GRM%TV%R, GRM%TV%M%T, JPATCH)
   !-----------------------------------------------------------------------------------
   !
   !*       3.     Physiographic data fields from land cover:
@@ -471,14 +471,15 @@ DO JPATCH=1,TM%TOP%NTEB_PATCH
 CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')     
     IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(&
-                                               TM%CHT, TM%DGMTO, GDM%TGDO, GDM%TVG, &
-                                               HPROGRAM)
+                                               TM%CHT, TM%DGMTO,GDM%TV%O,HPROGRAM)
     CALL INIT_TEB_GARDEN_PGD_n(DTCO, U, CHI, DTI, I, DST, SLT, TM%CHT, TM%TG, TM%T, TM%TOP, GDM, &
                                HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,IBUGFIX,PCO2,PRHOA)
     ! Case of urban green roofs
-    IF (TM%TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_PGD_n(DTCO, U, CHI, DTI, I, DST, SLT, &
-                                       TM%CHT, TM%TG, TM%T, TM%TOP, GDM%TVG, GRM, &
-                                        HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+    IF (TM%TOP%LGREENROOF) THEN
+      CALL INIT_TEB_GREENROOF_PGD_n(DTCO, U, CHI, DTI, I, DST, SLT, &
+                                    TM%CHT, TM%TG, TM%T, TM%TOP, GDM%TV%O, GRM, &
+                                    HPROGRAM,HINIT,(JPATCH==1),KI,KSV,HSV,IVERSION,PCO2,PRHOA)
+    ENDIF
     CALL END_IO_SURF_n(HPROGRAM)
     !
   ENDIF
@@ -524,8 +525,8 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !               -------------------
 !
 DO JPATCH=1,TM%TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                        GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, JPATCH)
+    CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, JPATCH)
 !
 !* TEB fields
   CALL READ_TEB_n(TM%B, TM%BOP, DTCO, DGU, U, TM%T, TM%TOP, TM%TPN, &
@@ -549,7 +550,7 @@ DO JPATCH=1,TM%TOP%NTEB_PATCH
     CALL INIT_TEB_GARDEN_n(DTCO, DGU, UG, U, TM%DGMTO, TM%TOP, GDM, &
                            HPROGRAM,HINIT,KI,KSW,PSW_BANDS,JPATCH)
   ! Case of urban green roofs
-    IF (TM%TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_n(DTCO, U, TM%DGMTO, TM%TOP, GDM%TVG, GRM, &
+    IF (TM%TOP%LGREENROOF) CALL INIT_TEB_GREENROOF_n(DTCO, U, TM%DGMTO, TM%TOP, GDM%TV%O, GRM, &
                                                   HPROGRAM,HINIT,KI,KSV,PSW_BANDS,JPATCH)
 !    CALL END_IO_SURF_n(HPROGRAM)
   ENDIF
@@ -578,7 +579,7 @@ DO JPATCH=1,TM%TOP%NTEB_PATCH
   IF (TM%TOP%LGREENROOF) THEN
     ZDIR_SW=0. ! night as first guess for albedo computation
     ZSCA_SW=0. !
-    CALL GREENROOF_PROPERTIES(TM%T, GDM%TVG, GRM, & 
+    CALL GREENROOF_PROPERTIES(TM%T, GRM, & 
                               ZDIR_SW, ZSCA_SW, PSW_BANDS, KSW,              &
                               ZTS_GREENROOF, ZEMIS_GREENROOF, ZALB_GREENROOF )  
   ELSE
@@ -673,8 +674,8 @@ END IF
  CALL DIAG_TEB_INIT_n(TM%DGT, TM%DGUT, &
                       HPROGRAM,ILU,ISWB)
 DO JPATCH=1,TM%TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                        GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, JPATCH)
+    CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, JPATCH)
   CALL DIAG_MISC_TEB_INIT_n(TM%DGCT, TM%DGMT, TM%DGMTO, TM%TOP, &
                             HPROGRAM,ILU,ISWB)
 END DO ! end of loop on patches

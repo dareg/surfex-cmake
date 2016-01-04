@@ -241,14 +241,14 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTSRAD_PATCH
 !
     IF(OFLOOD)THEN
-      ZEMISF(:) = I%XEMISF(:,JPATCH)
-      ZFF   (:) = I%XFF   (:,JPATCH)
+      ZEMISF(:) = I%I%XEMISF(:,JPATCH)
+      ZFF   (:) = I%I%XFF   (:,JPATCH)
     ELSE
       ZEMISF(:) = XUNDEF
       ZFF   (:) = 0.0
     ENDIF
 !
-    CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),I%XPSN(:,JPATCH),ZPALPHAN,   &
+    CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),I%R%XPSN(:,JPATCH),ZPALPHAN,   &
         TPSNOW%EMIS(:,JPATCH),ZEMISF(:),ZFF(:),                   &
         PTV(:,JPATCH),PTG1(:,JPATCH),TPSNOW%TS(:,JPATCH),         &
         ZLW_RAD,ZLWNET_N,ZLWNET_V,ZLWNET_G,                       &
@@ -271,9 +271,9 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
     ZEMIS(:) = PEMIS_ECO(:,JPATCH)
 !
     IF(OFLOOD.AND.LEXPLICIT_SNOW)THEN
-      WHERE(I%XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
-        ZEMIS(:) = ((1.-I%XFF(:,JPATCH)-I%XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + I%XFF(:,JPATCH)*I%XEMISF(:,JPATCH)) &
-                   /(1.-I%XPSN(:,JPATCH))
+      WHERE(I%R%XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
+        ZEMIS(:) = ((1.-I%I%XFF(:,JPATCH)-I%R%XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + I%I%XFF(:,JPATCH)*I%I%XEMISF(:,JPATCH)) &
+                   /(1.-I%R%XPSN(:,JPATCH))
       ENDWHERE   
     ENDIF
 !
@@ -281,8 +281,8 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
       ZTSRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
     ELSE IF (LEXPLICIT_SNOW) THEN
       WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF .AND. ZEMIS_PATCH(:,JPATCH)/=0.)
-        ZTSRAD_PATCH(:,JPATCH) =( ( (1.-I%XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
-                                    +    I%XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
+        ZTSRAD_PATCH(:,JPATCH) =( ( (1.-I%R%XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
+                                    +    I%R%XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
                                  / ZEMIS_PATCH(:,JPATCH)**0.25  
       END WHERE
     END IF
@@ -298,7 +298,7 @@ END DO
 !* averaged effective temperature
 !
 IF(LEXPLICIT_SNOW)THEN
-  ZTSURF_PATCH(:,:) = PTG1(:,:)*(1.-I%XPSN(:,:)) + TPSNOW%TS(:,:)*I%XPSN(:,:)
+  ZTSURF_PATCH(:,:) = PTG1(:,:)*(1.-I%R%XPSN(:,:)) + TPSNOW%TS(:,:)*I%R%XPSN(:,:)
 ENDIF
 !
 DO JP=1,INP

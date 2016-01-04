@@ -110,8 +110,8 @@ IF (NRANK==NPIO) THEN
   IF (.NOT. LDEFINED_TOWN .AND. YSC%U%NDIM_TOWN>0) THEN
     IF (YSC%U%CTOWN=='TEB   ') THEN 
       CALL INIT_OUTFN_TEB_n(YSC%TM%BOP, YSC%TM%CHT, YSC%TM%DGMTO, YSC%DGU, YSC%TM%DGT, YSC%TM%DGUT, &
-                            YSC%UG, YSC%U, YSC%TM%TCP, YSC%GDM%TGD, YSC%GDM%TGDO, YSC%GRM%TGR, &
-                            YSC%GRM%TGRO, YSC%TM%T, YSC%TM%TOP, YSC%GDM%TVG, &
+                            YSC%UG, YSC%U, YSC%TM%TCP, YSC%GDM%TV%R, YSC%GDM%TV%O, YSC%GRM%TV%R, &
+                            YSC%GRM%TV%O, YSC%TM%T, YSC%TM%TOP,  &
                             "NC    ",ILUOUT)
       CALL ALLOCATE_FILL_VAR(XVAR_TOWN, XID_TOWN)
     ENDIF

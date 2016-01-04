@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GREENROOF_PGD_n (DTCO, U, CHI, DTI, I, DST, SLT, CHT, TG, T, TOP, TVG, GRM, &
+SUBROUTINE INIT_TEB_GREENROOF_PGD_n (DTCO, U, CHI, DTI, I, DST, SLT, CHT, TG, T, TOP, GDO, GRM, &
                                      HPROGRAM,HINIT,OREAD_PGD, KI, KSV, HSV, KVERSION, PCO2, PRHOA)
 !#############################################################
 !
@@ -47,7 +47,7 @@ USE MODD_CH_TEB_n, ONLY : CH_TEB_t
 USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
 !
 USE MODD_TYPE_DATE_SURF
@@ -63,9 +63,9 @@ USE MODD_SGH_PAR,              ONLY: NDIMTAB, XF_DECAY
 USE MODI_GET_LUOUT
 USE MODI_ALLOCATE_TEB_GREENROOF_PGD
 USE MODI_READ_PGD_TEB_GREENROOF_n
-USE MODI_CONVERT_PATCH_TEB_GREENROOF
+USE MODI_CONVERT_PATCH_ISBA
 USE MODI_INIT_FROM_DATA_GREENROOF_n
-USE MODI_INIT_VEG_PGD_GARDEN_n
+USE MODI_INIT_VEG_PGD_n
 USE MODI_EXP_DECAY_SOIL_FR
 USE MODI_ABOR1_SFX
 !
@@ -89,7 +89,7 @@ TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
 TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !
  CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -131,7 +131,34 @@ REAL, PARAMETER   :: ZHCAPSOIL_OM  = 2.5E+6    ! Soil heat capacity for OM
 !
 REAL, PARAMETER   :: ZMPOT_WWILT   = -150.     ! Matric potential at wilting point (m)
 REAL, PARAMETER   :: ZHYDCOND_WFC  = 1.157E-9  ! Hydraulic conductivity at field capacity (m/s)
-!                                              ! = 0.1 mm/day
+!
+        REAL, DIMENSION(:,:), POINTER :: ZPATCH
+        REAL, DIMENSION(:,:,:), POINTER :: ZVEGTYPE_PATCH
+        INTEGER, DIMENSION(:), POINTER :: ISIZE_NATURE_P
+        INTEGER, DIMENSION(:,:), POINTER :: IR_NATURE_P
+        REAL, DIMENSION(0) :: ZTDEEP_CLI, ZGAMMAT_CLI, ZTHRESHOLD
+        INTEGER, DIMENSION(:,:), POINTER :: IIRRINUM
+        LOGICAL, DIMENSION(:,:), POINTER :: GIRRIDAY
+        LOGICAL, DIMENSION(:,:), POINTER :: GIRRIGATE
+        REAL, DIMENSION(:,:), POINTER :: ZTHRESHOLDSPT
+        REAL, DIMENSION(:,:,:), POINTER :: ZINCREASE
+        REAL, DIMENSION(:,:,:), POINTER :: ZTURNOVER
+        REAL, DIMENSION(:,:,:), POINTER :: ZSFDST
+        REAL, DIMENSION(:,:,:), POINTER :: ZSFDSTM
+        REAL, DIMENSION(:,:,:), POINTER :: ZSFSLT
+        REAL, DIMENSION(0) :: ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM
+        REAL, DIMENSION(0) :: ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM
+        REAL, DIMENSION(0,0) :: ZZ0
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFIP
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFIM
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFJP
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFJM
+        REAL, DIMENSION(:), POINTER :: ZZ0REL
+        REAL, DIMENSION(:,:), POINTER :: ZTAU_WOOD
+        REAL, DIMENSION(:,:), POINTER :: ZKANISO
+        REAL, DIMENSION(:,:), POINTER :: ZWD0
+        REAL, DIMENSION(:), POINTER   :: ZFWTD ! grid-cell fraction of water table to rise
+        REAL, DIMENSION(:), POINTER   :: ZWTD  ! water table depth from Obs, TRIP or MODCOU! = 0.1 mm/day
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -147,19 +174,27 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GREENROOF_PGD_n',0,ZHOOK_HANDLE)
 !*       2.     Physiographic fields
 !               --------------------
 !
+GRM%TV%O%NNBIOMASS = GDO%NNBIOMASS
+GRM%TV%O%CPHOTO = GDO%CPHOTO
+GRM%TV%O%CPEDOTF = GDO%CPEDOTF
+GRM%TV%O%CRESPSL = GDO%CRESPSL
 !
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
-IF (OREAD_PGD) &
- CALL READ_PGD_TEB_GREENROOF_n(CHT, DTCO, GRM%DTGR, GRM%GBGR, U, GRM%TGRO, GRM%TGRP, TG, &
-                               HPROGRAM,KVERSION)
-!
 !
 !* allocation of green roofs variables
 !
- CALL ALLOCATE_TEB_GREENROOF_PGD(GRM%TGRPE, GRM%TGRP, &
-                                 OREAD_PGD, KI, NVEGTYPE, GRM%TGRO%NLAYER_GR, NDIMTAB)
+IF (OREAD_PGD) &
+ CALL READ_PGD_TEB_GREENROOF_n(CHT, DTCO, GRM%DTI, GRM%GB, U, GRM%TV%O, GRM%TV%P, GRM%TV%IP, TG, &
+                               HPROGRAM,KVERSION)
+!
+ CALL ALLOCATE_TEB_GREENROOF_PGD(GRM%TV%M, GRM%TV%P, GRM%TV%IP, &
+                                 OREAD_PGD, KI, NVEGTYPE, GRM%TV%O%NGROUND_LAYER, NDIMTAB)
+!
+
+!
+
 !
 !*       2.2    Physiographic data fields from land cover:
 !               -----------------------------------------
@@ -171,31 +206,47 @@ ELSE
 END IF
 !
 !
-IF (.NOT. GRM%TGRO%LPAR_GREENROOF) THEN
-  CALL CONVERT_PATCH_TEB_GREENROOF(DTCO, DTI, I, GRM%TGRO, GRM%TGRPE, GRM%TGRP, TOP, TVG, &
-                                   KI,IDECADE)
+IF (.NOT. GRM%TV%O%LPAR) THEN
+          CALL CONVERT_PATCH_ISBA(DTCO, DTI, GRM%TV%O, &
+                        GRM%TV%O%CISBA,IDECADE,IDECADE,TOP%XCOVER,TOP%LCOVER,&
+                        GRM%TV%O%CPHOTO,.FALSE.,  &
+                        .FALSE.,GRM%TV%O%LTR_ML,'GRD',PVEG=GRM%TV%M%T%CUR%XVEG,PLAI=GRM%TV%M%T%CUR%XLAI,              &
+                        PRSMIN=GRM%TV%M%T%CUR%XRSMIN,PGAMMA=GRM%TV%M%T%CUR%XGAMMA,PWRMAX_CF=GRM%TV%M%T%CUR%XWRMAX_CF,       &
+                        PRGL=GRM%TV%M%T%CUR%XRGL,PCV=GRM%TV%M%T%CUR%XCV,PSOILGRID=GRM%TV%O%XSOILGRID,                 &
+                        PDG=GRM%TV%M%X%XDG,KWG_LAYER=GRM%TV%M%X%NWG_LAYER,PDROOT=GRM%TV%M%X%XDROOT,PDG2=GRM%TV%M%X%XDG2,   &
+                        PZ0=GRM%TV%M%T%CUR%XZ0,PZ0_O_Z0H=GRM%TV%M%X%XZ0_O_Z0H,PPERM=GRM%TV%P%XPERM,         &
+                        PALBNIR_VEG=GRM%TV%M%T%CUR%XALBNIR_VEG,PALBVIS_VEG=GRM%TV%M%T%CUR%XALBVIS_VEG,       &
+                        PALBUV_VEG=GRM%TV%M%T%CUR%XALBUV_VEG,PEMIS_ECO=GRM%TV%M%T%CUR%XEMIS,                 &
+                        PVEGTYPE=GRM%TV%M%X%XVEGTYPE,PROOTFRAC=GRM%TV%M%X%XROOTFRAC,                 &
+                        PGMES=GRM%TV%M%T%CUR%XGMES,PBSLAI=GRM%TV%M%T%CUR%XBSLAI,PLAIMIN=GRM%TV%M%T%CUR%XLAIMIN,             &
+                        PSEFOLD=GRM%TV%M%T%CUR%XSEFOLD,PGC=GRM%TV%M%T%CUR%XGC,                               &
+                        PDMAX=GRM%TV%M%X%XDMAX,PF2I=GRM%TV%M%T%CUR%XF2I,OSTRESS=GRM%TV%M%T%CUR%LSTRESS,PH_TREE=GRM%TV%M%X%XH_TREE, &
+                        PRE25=GRM%TV%M%X%XRE25,PCE_NITRO=GRM%TV%M%T%CUR%XCE_NITRO,PCF_NITRO=GRM%TV%M%T%CUR%XCF_NITRO,   &
+                        PCNA_NITRO=GRM%TV%M%T%CUR%XCNA_NITRO,PD_ICE=GRM%TV%M%X%XD_ICE                    )   
 ELSE
- CALL INIT_FROM_DATA_GREENROOF_n(GRM%DTGR, GRM%TGRO, IDECADE,TVG%CPHOTO,        &
-                                 GRM%TGRP%XOM_GR, GRM%TGRP%XSAND_GR, GRM%TGRP%XCLAY_GR, &
-                                 GRM%TGRPE%CUR%XVEG, GRM%TGRPE%CUR%XLAI,GRM%TGRP%XRSMIN, &
-                                 GRM%TGRP%XGAMMA,GRM%TGRP%XWRMAX_CF,GRM%TGRP%XRGL,GRM%TGRP%XCV,&
-                                 GRM%TGRP%XDG,GRM%TGRP%XD_ICE,GRM%TGRPE%CUR%XZ0,GRM%TGRP%XZ0_O_Z0H,  &
-                                 GRM%TGRP%XALBNIR_VEG,GRM%TGRP%XALBVIS_VEG,GRM%TGRP%XALBUV_VEG,&
-                                 GRM%TGRPE%CUR%XEMIS,GRM%TGRP%XVEGTYPE,GRM%TGRP%XROOTFRAC,          &
-                                 GRM%TGRP%XGMES,GRM%TGRP%XBSLAI,GRM%TGRP%XLAIMIN,GRM%TGRP%XSEFOLD,GRM%TGRP%XGC,   &
-                                 GRM%TGRP%XDMAX, GRM%TGRP%XF2I, GRM%TGRP%LSTRESS, GRM%TGRP%XH_TREE,GRM%TGRP%XRE25,&
-                                 GRM%TGRP%XCE_NITRO,GRM%TGRP%XCF_NITRO,GRM%TGRP%XCNA_NITRO      )  
-  IF (GRM%TGRO%CISBA_GR=='DIF') THEN
+ CALL INIT_FROM_DATA_GREENROOF_n(GRM%DTI, IDECADE,GRM%TV%O%CPHOTO,        &
+                                 GRM%TV%M%T%CUR%XVEG, GRM%TV%M%T%CUR%XLAI,GRM%TV%M%T%CUR%XRSMIN, &
+                                 GRM%TV%M%T%CUR%XGAMMA,GRM%TV%M%T%CUR%XWRMAX_CF,GRM%TV%M%T%CUR%XRGL,&
+                                 GRM%TV%M%T%CUR%XCV,&
+                                 GRM%TV%M%X%XDG,GRM%TV%M%X%XD_ICE,GRM%TV%M%T%CUR%XZ0,GRM%TV%M%X%XZ0_O_Z0H,  &
+                                 GRM%TV%M%T%CUR%XALBNIR_VEG,GRM%TV%M%T%CUR%XALBVIS_VEG,GRM%TV%M%T%CUR%XALBUV_VEG,&
+                                 GRM%TV%M%T%CUR%XEMIS,GRM%TV%M%X%XVEGTYPE,GRM%TV%M%X%XROOTFRAC,          &
+                                 GRM%TV%M%T%CUR%XGMES,GRM%TV%M%T%CUR%XBSLAI,GRM%TV%M%T%CUR%XLAIMIN,&
+                                 GRM%TV%M%T%CUR%XSEFOLD,GRM%TV%M%T%CUR%XGC,   &
+                                 GRM%TV%M%X%XDMAX, GRM%TV%M%T%CUR%XF2I, GRM%TV%M%T%CUR%LSTRESS, &
+                                 GRM%TV%M%X%XH_TREE,GRM%TV%M%X%XRE25,&
+                                 GRM%TV%M%T%CUR%XCE_NITRO,GRM%TV%M%T%CUR%XCF_NITRO,GRM%TV%M%T%CUR%XCNA_NITRO      )  
+  IF (GRM%TV%O%CISBA=='DIF') THEN
     WHERE(T%CUR%XGREENROOF(:)/=0.)
-      GRM%TGRP%NWG_LAYER(:)=GRM%TGRO%NLAYER_GR 
-      GRM%TGRP%XDG2  (:)=0.0
-      GRM%TGRP%XDROOT(:)=0.0
+      GRM%TV%M%X%NWG_LAYER(:,1)=GRM%TV%O%NGROUND_LAYER
+      GRM%TV%M%X%XDG2  (:,1)=0.0
+      GRM%TV%M%X%XDROOT(:,1)=0.0
     ENDWHERE
-    DO JLAYER=GRM%TGRO%NLAYER_GR,1,-1
+    DO JLAYER=GRM%TV%O%NGROUND_LAYER,1,-1
       DO JILU=1,KI
-        IF(T%CUR%XGREENROOF(JILU)/=0..AND.GRM%TGRP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
-          GRM%TGRP%XDG2  (JILU)=GRM%TGRP%XDG(JILU,JLAYER)
-          GRM%TGRP%XDROOT(JILU)=GRM%TGRP%XDG(JILU,JLAYER)
+        IF(T%CUR%XGREENROOF(JILU)/=0..AND.GRM%TV%M%X%XROOTFRAC(JILU,JLAYER,1)>=1.0)THEN
+          GRM%TV%M%X%XDG2  (JILU,1)=GRM%TV%M%X%XDG(JILU,JLAYER,1)
+          GRM%TV%M%X%XDROOT(JILU,1)=GRM%TV%M%X%XDG(JILU,JLAYER,1)
         ENDIF
       ENDDO
     ENDDO
@@ -204,107 +255,143 @@ END IF
 !
 WHERE (T%CUR%XGREENROOF(:)==0.)
   ! GARDEN default values /may need changing for green roofs
-  GRM%TGRP%XOM_GR     (:,1) = 0.5
-  GRM%TGRP%XOM_GR     (:,2) = 0.5
-  GRM%TGRP%XSAND_GR   (:,1) = 0.33
-  GRM%TGRP%XSAND_GR   (:,2) = 0.33
-  GRM%TGRP%XCLAY_GR   (:,1) = 0.33
-  GRM%TGRP%XCLAY_GR   (:,2) = 0.33
-  GRM%TGRPE%CUR%XVEG       (:  ) = 0.
-  GRM%TGRPE%CUR%XLAI       (:  ) = 0.
-  GRM%TGRP%XRSMIN     (:  ) = 40.
-  GRM%TGRP%XGAMMA     (:  ) = 0.
-  GRM%TGRP%XWRMAX_CF  (:  ) = 0.2
-  GRM%TGRP%XRGL       (:  ) = 100.
-  GRM%TGRP%XCV        (:  ) = 2.E-5
-  GRM%TGRPE%CUR%XZ0        (:  ) = 0.013
-  GRM%TGRP%XZ0_O_Z0H  (:  ) = 10.
-  GRM%TGRP%XALBNIR_VEG(:  ) = 0.30
-  GRM%TGRP%XALBVIS_VEG(:  ) = 0.30
-  GRM%TGRP%XALBUV_VEG (:  ) = 0.06
-  GRM%TGRPE%CUR%XEMIS      (:  ) = 0.94
+  GRM%TV%P%XSOC    (:,1) = 0.5
+  GRM%TV%P%XSOC    (:,2) = 0.5
+  GRM%TV%P%XSAND   (:,1) = 0.33
+  GRM%TV%P%XSAND   (:,2) = 0.33
+  GRM%TV%P%XCLAY   (:,1) = 0.33
+  GRM%TV%P%XCLAY   (:,2) = 0.33
+  GRM%TV%M%T%CUR%XVEG       (:  ,1) = 0.
+  GRM%TV%M%T%CUR%XLAI       (:  ,1) = 0.
+  GRM%TV%M%T%CUR%XRSMIN     (:  ,1) = 40.
+  GRM%TV%M%T%CUR%XGAMMA     (:  ,1) = 0.
+  GRM%TV%M%T%CUR%XWRMAX_CF  (:  ,1) = 0.2
+  GRM%TV%M%T%CUR%XRGL       (:  ,1) = 100.
+  GRM%TV%M%T%CUR%XCV        (:  ,1) = 2.E-5
+  GRM%TV%M%T%CUR%XZ0        (: ,1 ) = 0.013
+  GRM%TV%M%X%XZ0_O_Z0H  (: ,1 ) = 10.
+  GRM%TV%M%T%CUR%XALBNIR_VEG(: ,1 ) = 0.30
+  GRM%TV%M%T%CUR%XALBVIS_VEG(:  ,1) = 0.30
+  GRM%TV%M%T%CUR%XALBUV_VEG (:  ,1) = 0.06
+  GRM%TV%M%T%CUR%XEMIS      (: ,1 ) = 0.94
 END WHERE
-IF (TVG%CPHOTO/='NON') THEN
+IF (GRM%TV%O%CPHOTO/='NON') THEN
   WHERE (T%CUR%XGREENROOF(:)==0.)
-    GRM%TGRP%XGMES      (:  ) = 0.020
-    GRM%TGRP%XBSLAI     (:  ) = 0.36
-    GRM%TGRP%XLAIMIN    (:  ) = 0.3
-    GRM%TGRP%XSEFOLD    (:  ) = 90*86400.
-    GRM%TGRP%XH_TREE    (:  ) = 0.
-    GRM%TGRP%XRE25      (:  ) = 3.6E-7    
-    GRM%TGRP%XGC        (:  ) = 0.00025
+    GRM%TV%M%T%CUR%XGMES      (:  ,1) = 0.020
+    GRM%TV%M%T%CUR%XBSLAI     (:  ,1) = 0.36
+    GRM%TV%M%T%CUR%XLAIMIN    (:  ,1) = 0.3
+    GRM%TV%M%T%CUR%XSEFOLD    (:  ,1) = 90*86400.
+    GRM%TV%M%X%XH_TREE    (: ,1 ) = 0.
+    GRM%TV%M%X%XRE25      (: ,1 ) = 3.6E-7    
+    GRM%TV%M%T%CUR%XGC        (: ,1 ) = 0.00025
   END WHERE
-  IF (TVG%CPHOTO/='AGS' .AND. TVG%CPHOTO/='LAI') THEN
+  IF (GRM%TV%O%CPHOTO/='AGS' .AND. GRM%TV%O%CPHOTO/='LAI') THEN
     WHERE (T%CUR%XGREENROOF(:)==0.)     
-      GRM%TGRP%XDMAX      (:  ) = 0.1
-      GRM%TGRP%XF2I       (:  ) = 0.3
+      GRM%TV%M%X%XDMAX      (:  ,1) = 0.1
+      GRM%TV%M%T%CUR%XF2I       (: ,1 ) = 0.3
     END WHERE
-    IF (TVG%CPHOTO=='NIT' .OR. TVG%CPHOTO=='NCB') THEN
+    IF (GRM%TV%O%CPHOTO=='NIT' .OR. GRM%TV%O%CPHOTO=='NCB') THEN
       WHERE (T%CUR%XGREENROOF(:)==0.)          
-        GRM%TGRP%XCE_NITRO  (:  ) = 7.68
-        GRM%TGRP%XCF_NITRO  (:  ) = -4.33
-        GRM%TGRP%XCNA_NITRO (:  ) = 1.3
+        GRM%TV%M%T%CUR%XCE_NITRO  (: ,1 ) = 7.68
+        GRM%TV%M%T%CUR%XCF_NITRO  (: ,1 ) = -4.33
+        GRM%TV%M%T%CUR%XCNA_NITRO (: ,1 ) = 1.3
       END WHERE
     ENDIF
   ENDIF
 ENDIF  
-IF(GRM%TGRO%CISBA_GR/='DIF')THEN
-  DO JLAYER=1,GRM%TGRO%NLAYER_GR
+IF(GRM%TV%O%CISBA/='DIF')THEN
+  DO JLAYER=1,GRM%TV%O%NGROUND_LAYER
     WHERE (T%CUR%XGREENROOF(:)==0.)
-      GRM%TGRP%XDG(:,JLAYER)=0.2*JLAYER
+      GRM%TV%M%X%XDG(:,JLAYER,1)=0.2*JLAYER
     END WHERE
   ENDDO
 ELSE
   WHERE (T%CUR%XGREENROOF(:)==0.) 
-    GRM%TGRP%XDG(:,1)=0.01
-    GRM%TGRP%XDG(:,2)=0.04
-    GRM%TGRP%XROOTFRAC(:,1)=0.
-    GRM%TGRP%XROOTFRAC(:,2)=0.
+    GRM%TV%M%X%XDG(:,1,1)=0.01
+    GRM%TV%M%X%XDG(:,2,1)=0.04
+    GRM%TV%M%X%XROOTFRAC(:,1,1)=0.
+    GRM%TV%M%X%XROOTFRAC(:,2,1)=0.
   END WHERE        
-  DO JLAYER=3,GRM%TGRO%NLAYER_GR
+  DO JLAYER=3,GRM%TV%O%NGROUND_LAYER
     WHERE (T%CUR%XGREENROOF(:)==0.)
-      GRM%TGRP%XDG(:,JLAYER)=0.1*(JLAYER-2)
-      GRM%TGRP%XROOTFRAC(:,JLAYER)=0.
+      GRM%TV%M%X%XDG(:,JLAYER,1)=0.1*(JLAYER-2)
+      GRM%TV%M%X%XROOTFRAC(:,JLAYER,1)=0.
     END WHERE
   ENDDO               
   WHERE (T%CUR%XGREENROOF(:)==0.) 
-    GRM%TGRP%NWG_LAYER(:)=GRM%TGRO%NLAYER_GR
-    GRM%TGRP%XDROOT   (:)=0.0
-    GRM%TGRP%XDG2     (:)=GRM%TGRP%XDG(:,GRM%TGRO%NLAYER_GR-1)
+    GRM%TV%M%X%NWG_LAYER(:,1)=GRM%TV%O%NGROUND_LAYER
+    GRM%TV%M%X%XDROOT   (:,1)=0.0
+    GRM%TV%M%X%XDG2     (:,1)=GRM%TV%M%X%XDG(:,GRM%TV%O%NGROUND_LAYER-1,1)
   ENDWHERE    
 ENDIF  
 WHERE (T%CUR%XGREENROOF(:)==0.) 
-  GRM%TGRP%XD_ICE(:)=0.8*GRM%TGRP%XDG(:,2)
+  GRM%TV%M%X%XD_ICE(:,1)=0.8*GRM%TV%M%X%XDG(:,2,1)
 END WHERE  
 DO JVEGTYPE=1,NVEGTYPE
   WHERE (T%CUR%XGREENROOF(:)==0.)
-    GRM%TGRP%XVEGTYPE(:,JVEGTYPE)=0.
-    GRM%TGRP%XVEGTYPE(:,1)=1.
+    GRM%TV%M%X%XVEGTYPE(:,JVEGTYPE)=0.
+    GRM%TV%M%X%XVEGTYPE(:,1)=1.
   END WHERE
 ENDDO
 !
- CALL INIT_VEG_PGD_GARDEN_n(CHI, DTCO, DST, I, SLT, U, &
-                            HPROGRAM, ILUOUT, KI, GRM%TGRO%NLAYER_GR, TOP%TTIME%TDATE%MONTH,    &
-                        GRM%TGRP%XVEGTYPE, GRM%TGRP%XTDEEP, GRM%TGRP%XGAMMAT, TVG%CPHOTO, HINIT, &
-                        GRM%TGRO%LTR_ML_GR, GRM%TGRO%CRUNOFF_GR, TVG%NNBIOMASS, PCO2, PRHOA, &
-                        GRM%TGRP%XABC, GRM%TGRP%XPOI, GRM%TGRP%XGMES, GRM%TGRP%XGC, GRM%TGRP%XDMAX, &
-                        GRM%TGRP%XANMAX, GRM%TGRP%XFZERO, GRM%TGRP%XEPSO, GRM%TGRP%XGAMM, GRM%TGRP%XQDGAMM,   &
-                        GRM%TGRP%XQDGMES, GRM%TGRP%XT1GMES, GRM%TGRP%XT2GMES, GRM%TGRP%XAMAX, GRM%TGRP%XQDAMAX, &
-                        GRM%TGRP%XT1AMAX, GRM%TGRP%XT2AMAX,GRM%TGRP%XAH, GRM%TGRP%XBH,            &
-                        KSV, HSV, CHT%SVT, CHT%CCH_NAMES, CHT%CAER_NAMES,CHT%CDSTNAMES, CHT%CSLTNAMES, &
-                        CHT%CCHEM_SURF_FILE, GRM%TGRP%XCLAY_GR, GRM%TGRP%XSAND_GR, TVG%CPEDOTF,      &
-                        GRM%TGRP%XCONDSAT, GRM%TGRP%XMPOTSAT, GRM%TGRP%XBCOEF, GRM%TGRP%XWWILT, &
-                        GRM%TGRP%XWFC, GRM%TGRP%XWSAT, GRM%TGRP%XTAUICE, GRM%TGRP%XCGSAT, GRM%TGRP%XC1SAT, &
-                        GRM%TGRP%XC2REF, GRM%TGRP%XC3, GRM%TGRP%XC4B, GRM%TGRP%XACOEF, GRM%TGRP%XPCOEF, &
-                        GRM%TGRP%XC4REF, GRM%TGRP%XPCPS, GRM%TGRP%XPLVTT, GRM%TGRP%XPLSTT,        &
-                        GRM%TGRO%CSCOND_GR, GRM%TGRO%CISBA_GR, GRM%TGRP%XHCAPSOIL, GRM%TGRP%XCONDDRY, &
-                        GRM%TGRP%XCONDSLD, TVG%CCPSURF, GRM%TGRP%XDG, GRM%TGRP%XDROOT, GRM%TGRP%XDG2, &
-                        GRM%TGRP%XROOTFRAC, GRM%TGRP%XRUNOFFD, GRM%TGRP%XDZG, GRM%TGRP%XDZDIF,       &
-                        GRM%TGRP%XSOILWGHT, GRM%TGRP%NWG_LAYER, GRM%TGRO%NLAYER_HORT_GR, &
-                        GRM%TGRO%NLAYER_DUN_GR, GRM%TGRP%XD_ICE,  &
-                        GRM%TGRP%XKSAT_ICE, GRM%TGRP%XALBNIR_DRY, GRM%TGRP%XALBVIS_DRY, GRM%TGRP%XALBUV_DRY,   &
-                        GRM%TGRP%XALBNIR_WET, GRM%TGRP%XALBVIS_WET, GRM%TGRP%XALBUV_WET, GRM%TGRP%XBSLAI_NITRO, &
-                        GRM%TGRP%XCE_NITRO, GRM%TGRP%XCNA_NITRO, GRM%TGRP%XCF_NITRO                            )
+        NULLIFY(ZPATCH)
+        NULLIFY(ZVEGTYPE_PATCH)
+        NULLIFY(ISIZE_NATURE_P)
+        NULLIFY(IR_NATURE_P)
+        NULLIFY(IIRRINUM)
+        NULLIFY(GIRRIDAY)
+        NULLIFY(GIRRIGATE)
+        NULLIFY(ZTHRESHOLDSPT)
+        NULLIFY(ZINCREASE)
+        NULLIFY(ZTURNOVER)
+        NULLIFY(ZSFDST)
+        NULLIFY(ZSFDSTM)
+        NULLIFY(ZSFSLT)
+        NULLIFY(ZZ0EFFIP)
+        NULLIFY(ZZ0EFFIM)
+        NULLIFY(ZZ0EFFJP)
+        NULLIFY(ZZ0EFFJM)
+        NULLIFY(ZZ0REL)
+        NULLIFY(ZFWTD)
+        NULLIFY(ZWTD)
+        NULLIFY(ZWD0)
+        NULLIFY(ZTAU_WOOD)
+        NULLIFY(ZKANISO)
+
+         CALL INIT_VEG_PGD_n(CHI, DTCO, DST, SLT, U, &
+                     GRM%TV%O%LAGRI_TO_GRASS, TOP%LCOVER, TOP%XCOVER, &
+                     HPROGRAM, 'TOWN  ',ILUOUT, KI, 1, GRM%TV%O%NGROUND_LAYER, TOP%TTIME%TDATE%MONTH,    &
+                     GRM%TV%M%X%XVEGTYPE,ZPATCH, ZVEGTYPE_PATCH, ISIZE_NATURE_P, IR_NATURE_P,    &
+                  0.0, .FALSE., .FALSE., ZTDEEP_CLI, ZGAMMAT_CLI, &
+                  GRM%TV%IP%XTDEEP, GRM%TV%IP%XGAMMAT,  .FALSE., &
+                  ZTHRESHOLD, IIRRINUM, GIRRIDAY, GIRRIGATE, ZTHRESHOLDSPT, &
+                  GRM%TV%O%CPHOTO, HINIT,GRM%TV%O%LTR_ML, GRM%TV%O%NNBIOMASS, &
+                  PCO2, PRHOA, GRM%TV%IP%XABC, GRM%TV%IP%XPOI,  &
+                  GRM%TV%M%T%CUR%XGMES, GRM%TV%M%T%CUR%XGC, GRM%TV%M%X%XDMAX, &
+                  GRM%TV%IP%XANMAX, GRM%TV%IP%XFZERO, GRM%TV%IP%XEPSO, GRM%TV%IP%XGAMM, GRM%TV%IP%XQDGAMM,   &
+                  GRM%TV%IP%XQDGMES, GRM%TV%IP%XT1GMES, GRM%TV%IP%XT2GMES, GRM%TV%IP%XAMAX, GRM%TV%IP%XQDAMAX, &
+                  GRM%TV%IP%XT1AMAX, GRM%TV%IP%XT2AMAX,GRM%TV%IP%XAH, GRM%TV%IP%XBH,&           
+                  ZTAU_WOOD, ZINCREASE, ZTURNOVER,                  &
+                  KSV, HSV, CHT%SVT, CHT%CCH_NAMES, CHT%CAER_NAMES,CHT%CDSTNAMES, CHT%CSLTNAMES, &
+                  CHT%CCHEM_SURF_FILE,                     &
+                  ZSFDST, ZSFDSTM, ZSFSLT,                                    &
+                  ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM, ZHO2IP, ZHO2IM, ZHO2JP,     &
+                  ZHO2JM, ZZ0, ZZ0EFFIP, ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, ZZ0REL,&
+                  GRM%TV%P%XCLAY, GRM%TV%P%XSAND, GRM%TV%O%CPEDOTF,      &
+                  GRM%TV%IP%XCONDSAT, GRM%TV%IP%XMPOTSAT, GRM%TV%IP%XBCOEF, GRM%TV%IP%XWWILT, &
+                  GRM%TV%IP%XWFC, GRM%TV%IP%XWSAT, ZWD0, ZKANISO, GRM%TV%O%CRUNOFF,  &
+                  GRM%TV%IP%XTAUICE, GRM%TV%IP%XCGSAT, GRM%TV%IP%XC1SAT, &
+                  GRM%TV%IP%XC2REF, GRM%TV%IP%XC3, GRM%TV%IP%XC4B, GRM%TV%IP%XACOEF, GRM%TV%IP%XPCOEF, &
+                  GRM%TV%IP%XC4REF, GRM%TV%IP%XPCPS, GRM%TV%IP%XPLVTT, GRM%TV%IP%XPLSTT,        &
+                  GRM%TV%O%CSCOND, GRM%TV%O%CISBA, GRM%TV%IP%XHCAPSOIL, GRM%TV%IP%XCONDDRY, &
+                  GRM%TV%IP%XCONDSLD, GRM%TV%O%CCPSURF, GRM%TV%M%X%XDG, GRM%TV%M%X%XDROOT, GRM%TV%M%X%XDG2, &
+                  GRM%TV%M%X%XROOTFRAC, GRM%TV%IP%XRUNOFFD, GRM%TV%IP%XDZG, GRM%TV%IP%XDZDIF,       &
+                  GRM%TV%IP%XSOILWGHT, GRM%TV%M%X%NWG_LAYER, GRM%TV%O%NLAYER_HORT, &
+                  GRM%TV%O%NLAYER_DUN, GRM%TV%M%X%XD_ICE,  &
+                  GRM%TV%IP%XKSAT_ICE, GRM%TV%IP%XALBNIR_DRY, GRM%TV%IP%XALBVIS_DRY, GRM%TV%IP%XALBUV_DRY,   &
+                  GRM%TV%IP%XALBNIR_WET, GRM%TV%IP%XALBVIS_WET, GRM%TV%IP%XALBUV_WET, GRM%TV%IP%XBSLAI_NITRO, &
+                  GRM%TV%M%T%CUR%XCE_NITRO, GRM%TV%M%T%CUR%XCNA_NITRO, GRM%TV%M%T%CUR%XCF_NITRO,          &
+                  ZFWTD, ZWTD               )
 !
 !-------------------------------------------------------------------------------
 !
@@ -315,16 +402,16 @@ ENDDO
 ! Estimation of WSAT_MI for use in HEATCAPZ and THRMCONDZ for mineral fraction
 ! and allow weighted combination with regard to OM & no-OM fractions:
 !
-IF (GRM%TGRO%CSCOND_GR=='PL98' .OR. GRM%TGRO%CISBA_GR=='DIF') THEN
-  DO JLAYER=1,GRM%TGRO%NLAYER_GR
-     GRM%TGRP%XHCAPSOIL(:,JLAYER) =    GRM%TGRP%XOM_GR(:,JLAYER)  * ZHCAPSOIL_OM +      &
-                           (1-GRM%TGRP%XOM_GR(:,JLAYER)) * GRM%TGRP%XHCAPSOIL(:,JLAYER)  
-     GRM%TGRP%XCONDDRY(:,JLAYER) = (ZCONDDRY_OM         * GRM%TGRP%XCONDDRY(:,JLAYER))    &
-                         /(  GRM%TGRP%XOM_GR(:,JLAYER)  * GRM%TGRP%XCONDDRY(:,JLAYER) +   &
-                          (1-GRM%TGRP%XOM_GR(:,JLAYER)) * ZCONDDRY_OM)
-     GRM%TGRP%XCONDSLD(:,JLAYER) = (ZCONDSLD_OM         * GRM%TGRP%XCONDSLD(:,JLAYER))    &
-                         /(  GRM%TGRP%XOM_GR(:,JLAYER)  * GRM%TGRP%XCONDSLD(:,JLAYER) +   &
-                          (1-GRM%TGRP%XOM_GR(:,JLAYER)) * ZCONDSLD_OM)
+IF (GRM%TV%O%CSCOND=='PL98' .OR. GRM%TV%O%CISBA=='DIF') THEN
+  DO JLAYER=1,GRM%TV%O%NGROUND_LAYER
+     GRM%TV%IP%XHCAPSOIL(:,JLAYER) =    GRM%TV%P%XSOC(:,JLAYER)  * ZHCAPSOIL_OM +      &
+                           (1-GRM%TV%P%XSOC(:,JLAYER)) * GRM%TV%IP%XHCAPSOIL(:,JLAYER)  
+     GRM%TV%IP%XCONDDRY(:,JLAYER) = (ZCONDDRY_OM         * GRM%TV%IP%XCONDDRY(:,JLAYER))    &
+                         /(  GRM%TV%P%XSOC(:,JLAYER)  * GRM%TV%IP%XCONDDRY(:,JLAYER) +   &
+                          (1-GRM%TV%P%XSOC(:,JLAYER)) * ZCONDDRY_OM)
+     GRM%TV%IP%XCONDSLD(:,JLAYER) = (ZCONDSLD_OM         * GRM%TV%IP%XCONDSLD(:,JLAYER))    &
+                         /(  GRM%TV%P%XSOC(:,JLAYER)  * GRM%TV%IP%XCONDSLD(:,JLAYER) +   &
+                          (1-GRM%TV%P%XSOC(:,JLAYER)) * ZCONDSLD_OM)
   ENDDO
 END IF
 !
@@ -333,39 +420,39 @@ END IF
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! Substrate layer
 DO JLAYER=1,4
-    GRM%TGRP%XCONDDRY (:,JLAYER) = 0.15
-    GRM%TGRP%XHCAPSOIL(:,JLAYER) = 1342000.
+    GRM%TV%IP%XCONDDRY (:,JLAYER) = 0.15
+    GRM%TV%IP%XHCAPSOIL(:,JLAYER) = 1342000.
 ENDDO
 ! Drainage layer
 DO JLAYER=5,6
-    GRM%TGRP%XCONDDRY (:,JLAYER) = 0.09
-    GRM%TGRP%XHCAPSOIL(:,JLAYER) = 331500.
+    GRM%TV%IP%XCONDDRY (:,JLAYER) = 0.09
+    GRM%TV%IP%XHCAPSOIL(:,JLAYER) = 331500.
 ENDDO
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 !
 !*       5.2     Soil thermal characteristics:
 !               --------------------------------
 !
-DO JLAYER=1,GRM%TGRO%NLAYER_GR
-  GRM%TGRP%XCONDSAT(:,JLAYER) =   GRM%TGRP%XOM_GR(:,JLAYER)* ZCONDSAT_OM   &
-                        +(1-GRM%TGRP%XOM_GR(:,JLAYER))* GRM%TGRP%XCONDSAT(:,JLAYER)
+DO JLAYER=1,GRM%TV%O%NGROUND_LAYER
+  GRM%TV%IP%XCONDSAT(:,JLAYER,1) =   GRM%TV%P%XSOC(:,JLAYER)* ZCONDSAT_OM   &
+                        +(1-GRM%TV%P%XSOC(:,JLAYER))* GRM%TV%IP%XCONDSAT(:,JLAYER,1)
 END DO
 !
 ! Note that if ISBA/=DIF, always CDIF = 'BC' and CPEDOTF = 'CH78'
-DO JLAYER=1,GRM%TGRO%NLAYER_GR
-  GRM%TGRP%XBCOEF  (:,JLAYER) =    GRM%TGRP%XOM_GR(:,JLAYER) * ZBCOEF_OM        &
-                       +(1-GRM%TGRP%XOM_GR(:,JLAYER))* GRM%TGRP%XBCOEF(:,JLAYER)
-  GRM%TGRP%XMPOTSAT(:,JLAYER) =    GRM%TGRP%XOM_GR(:,JLAYER) * ZMPOTSAT_OM      &
-                       +(1-GRM%TGRP%XOM_GR(:,JLAYER))* GRM%TGRP%XMPOTSAT(:,JLAYER)
+DO JLAYER=1,GRM%TV%O%NGROUND_LAYER
+  GRM%TV%IP%XBCOEF  (:,JLAYER) =    GRM%TV%P%XSOC(:,JLAYER) * ZBCOEF_OM        &
+                       +(1-GRM%TV%P%XSOC(:,JLAYER))* GRM%TV%IP%XBCOEF(:,JLAYER)
+  GRM%TV%IP%XMPOTSAT(:,JLAYER) =    GRM%TV%P%XSOC(:,JLAYER) * ZMPOTSAT_OM      &
+                       +(1-GRM%TV%P%XSOC(:,JLAYER))* GRM%TV%IP%XMPOTSAT(:,JLAYER)
 END DO
 !        
-DO JLAYER=1,GRM%TGRO%NLAYER_GR
-   GRM%TGRP%XWSAT (:,JLAYER) =    GRM%TGRP%XOM_GR(:,JLAYER)* ZWSAT_OM            &
-                     +(1-GRM%TGRP%XOM_GR(:,JLAYER))* GRM%TGRP%XWSAT(:,JLAYER)
-   GRM%TGRP%XWWILT(:,JLAYER) = EXP(((LOG(-1*ZMPOT_WWILT)-LOG(-1*GRM%TGRP%XMPOTSAT(:,JLAYER)))   &
-                    / (-1*GRM%TGRP%XBCOEF(:,JLAYER)))+LOG(GRM%TGRP%XWSAT(:,JLAYER)))
-   GRM%TGRP%XWFC  (:,JLAYER) = EXP(((LOG(ZHYDCOND_WFC)-LOG(GRM%TGRP%XCONDSAT(:,JLAYER)))        &
-                    / (2*GRM%TGRP%XBCOEF(:,JLAYER)+3))+LOG(GRM%TGRP%XWSAT(:,JLAYER)))
+DO JLAYER=1,GRM%TV%O%NGROUND_LAYER
+   GRM%TV%IP%XWSAT (:,JLAYER) =    GRM%TV%P%XSOC(:,JLAYER)* ZWSAT_OM            &
+                     +(1-GRM%TV%P%XSOC(:,JLAYER))* GRM%TV%IP%XWSAT(:,JLAYER)
+   GRM%TV%IP%XWWILT(:,JLAYER) = EXP(((LOG(-1*ZMPOT_WWILT)-LOG(-1*GRM%TV%IP%XMPOTSAT(:,JLAYER)))   &
+                    / (-1*GRM%TV%IP%XBCOEF(:,JLAYER)))+LOG(GRM%TV%IP%XWSAT(:,JLAYER)))
+   GRM%TV%IP%XWFC  (:,JLAYER) = EXP(((LOG(ZHYDCOND_WFC)-LOG(GRM%TV%IP%XCONDSAT(:,JLAYER,1)))        &
+                    / (2*GRM%TV%IP%XBCOEF(:,JLAYER)+3))+LOG(GRM%TV%IP%XWSAT(:,JLAYER)))
 END DO
 !
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -373,32 +460,32 @@ END DO
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! Substrate layer
 DO JLAYER=1,4
-  GRM%TGRP%XWSAT   (:,JLAYER) = 0.674     ! Value tested
-  GRM%TGRP%XCONDSAT(:,JLAYER) = 2.162E-3  ! Value tested
-  GRM%TGRP%XMPOTSAT(:,JLAYER) = -0.932    ! Value tested
-  GRM%TGRP%XBCOEF  (:,JLAYER) = 3.9       ! Value tested
-  GRM%TGRP%XWWILT  (:,JLAYER) = 0.15      ! from OBS-NANCY
-  GRM%TGRP%XWFC    (:,JLAYER) = 0.37      ! from OBS-NANCY
+  GRM%TV%IP%XWSAT   (:,JLAYER) = 0.674     ! Value tested
+  GRM%TV%IP%XCONDSAT(:,JLAYER,1) = 2.162E-3  ! Value tested
+  GRM%TV%IP%XMPOTSAT(:,JLAYER) = -0.932    ! Value tested
+  GRM%TV%IP%XBCOEF  (:,JLAYER) = 3.9       ! Value tested
+  GRM%TV%IP%XWWILT  (:,JLAYER) = 0.15      ! from OBS-NANCY
+  GRM%TV%IP%XWFC    (:,JLAYER) = 0.37      ! from OBS-NANCY
 ENDDO
 ! Drainage layer
 DO JLAYER=5,6
-   GRM%TGRP%XWSAT   (:,JLAYER) = 0.9       ! Value tested
-   GRM%TGRP%XCONDSAT(:,JLAYER) = 3.32E-3   ! Value tested
-   GRM%TGRP%XMPOTSAT(:,JLAYER) = -0.121    ! Value tested
-   GRM%TGRP%XBCOEF  (:,JLAYER) = 2.7       ! Value tested
-   GRM%TGRP%XWWILT  (:,JLAYER) = 0.15      ! sert à initialiser le WG ds la couche
-   GRM%TGRP%XWFC    (:,JLAYER) = 0.37      ! sert à initialiser le WG ds la couche
+   GRM%TV%IP%XWSAT   (:,JLAYER) = 0.9       ! Value tested
+   GRM%TV%IP%XCONDSAT(:,JLAYER,1) = 3.32E-3   ! Value tested
+   GRM%TV%IP%XMPOTSAT(:,JLAYER) = -0.121    ! Value tested
+   GRM%TV%IP%XBCOEF  (:,JLAYER) = 2.7       ! Value tested
+   GRM%TV%IP%XWWILT  (:,JLAYER) = 0.15      ! sert à initialiser le WG ds la couche
+   GRM%TV%IP%XWFC    (:,JLAYER) = 0.37      ! sert à initialiser le WG ds la couche
 ENDDO
 !-------------------------------------------------------------------------------
 !
 !*       6.1    Initialize of the SGH scheme:'
 !               ------------------------------
 !
-IF(GRM%TGRO%CKSAT_GR=='SGH' .AND. GRM%TGRO%CISBA_GR/='DIF' .AND. HINIT/='PRE')THEN 
-  ZF(:)=MIN(4.0/GRM%TGRP%XDG(:,2),XF_DECAY)
-  CALL EXP_DECAY_SOIL_FR(GRM%TGRO%CISBA_GR, ZF(:),GRM%TGRP%XC1SAT(:),GRM%TGRP%XC2REF(:),&
-                         GRM%TGRP%XDG(:,:),GRM%TGRP%XD_ICE(:),GRM%TGRP%XC4REF(:),&
-                         GRM%TGRP%XC3(:,:),GRM%TGRP%XCONDSAT(:,:),GRM%TGRP%XKSAT_ICE(:))
+IF(GRM%TV%O%CKSAT=='SGH' .AND. GRM%TV%O%CISBA/='DIF' .AND. HINIT/='PRE')THEN 
+  ZF(:)=MIN(4.0/GRM%TV%M%X%XDG(:,2,1),XF_DECAY)
+  CALL EXP_DECAY_SOIL_FR(GRM%TV%O%CISBA, ZF(:),GRM%TV%IP%XC1SAT(:,1),GRM%TV%IP%XC2REF(:,1),&
+                         GRM%TV%M%X%XDG(:,:,1),GRM%TV%M%X%XD_ICE(:,1),GRM%TV%IP%XC4REF(:,1),&
+                         GRM%TV%IP%XC3(:,:,1),GRM%TV%IP%XCONDSAT(:,:,1),GRM%TV%IP%XKSAT_ICE(:,1))
 ENDIF
 !
 !-------------------------------------------------------------------------------

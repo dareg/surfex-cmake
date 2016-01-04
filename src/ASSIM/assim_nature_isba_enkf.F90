@@ -84,10 +84,10 @@ REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZR        ! covariance ma
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZK1, ZK2, ZHBHT
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT) :: ZP, ZX
 !
-REAL, DIMENSION(I%NPATCH,NVAR,NENS) :: ZXINCR
-REAL, DIMENSION(I%NPATCH,NVAR,NENS) :: ZA, ZF
-REAL, DIMENSION(I%NPATCH,NOBSTYPE*NBOUTPUT,NENS) :: ZF_PATCH
-REAL, DIMENSION(I%NPATCH,NVAR) :: ZF_MEAN, ZA_MEAN
+REAL, DIMENSION(I%O%NPATCH,NVAR,NENS) :: ZXINCR
+REAL, DIMENSION(I%O%NPATCH,NVAR,NENS) :: ZA, ZF
+REAL, DIMENSION(I%O%NPATCH,NOBSTYPE*NBOUTPUT,NENS) :: ZF_PATCH
+REAL, DIMENSION(I%O%NPATCH,NVAR) :: ZF_MEAN, ZA_MEAN
 REAL, DIMENSION(NVAR) :: ZF_AGG, ZA_AGG
 !
 REAL,DIMENSION(:,:,:),ALLOCATABLE :: ZF_MEAN0, ZF_PATCH_MEAN
@@ -143,7 +143,7 @@ IMYPROC = NRANK+1
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
+IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%O%NPATCH
 !
 !############################# INITIALISATIONS ###############################
 !
@@ -152,7 +152,7 @@ IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
 !   using same clay fraction in both layers
 !   Read SAND fraction to compute the saturation for conversion of ERS SWI
 !
- CALL COFSWI(I%XCLAY(:,1),ZCOFSWI)
+ CALL COFSWI(I%P%XCLAY(:,1),ZCOFSWI)
 !DO I=1,KI
   !ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
   !ZWILT  (I) = 0.001 * 37.1342 * ((100.*XCLAY(I,1))**0.5) 
@@ -165,9 +165,9 @@ IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
 ! ====================================================================
 !
 !   Time reinitialization 
-IYEAR  = I%TTIME%TDATE%YEAR
-IMONTH = I%TTIME%TDATE%MONTH
-IDAY   = I%TTIME%TDATE%DAY
+IYEAR  = I%I%TTIME%TDATE%YEAR
+IMONTH = I%I%TTIME%TDATE%MONTH
+IDAY   = I%I%TTIME%TDATE%DAY
 !
 IHOUR = 0
 ZTIME = FLOAT(NECHGU) * 3600.
@@ -195,7 +195,7 @@ ENDIF
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
 DO II = 1,KI
-  IF ( MINVAL(I%XWGI(II,1,:))>0. ) THEN
+  IF ( MINVAL(I%R%XWGI(II,1,:))>0. ) THEN
     XYO (II,:) = XUNDEF
     IF ( NPRINTLEV > 1 ) WRITE(*,*) 'OBSERVATION FOR POINT ',II,' REMOVED'
   ENDIF
@@ -207,11 +207,11 @@ IF ( NPRINTLEV > 0 ) CLOSE(111)
 ! Recentering THE FORECAST ENSEMBLE MEMBERS
 IF ( LBIAS_CORRECTION ) THEN
   !
-  ALLOCATE(ZF_MEAN0(KI,I%NPATCH,NVAR))
-  ALLOCATE(ZF_PATCH_MEAN(KI,I%NPATCH,NOBS))
+  ALLOCATE(ZF_MEAN0(KI,I%O%NPATCH,NVAR))
+  ALLOCATE(ZF_PATCH_MEAN(KI,I%O%NPATCH,NOBS))
   !
   DO II = 1,KI
-    DO J=1,I%NPATCH
+    DO J=1,I%O%NPATCH
       DO L = 1,NVAR
         ZF_MEAN0(II,J,L) = SUM(XF(II,J,1:NENS,L))/REAL(NENS)
       ENDDO
@@ -222,7 +222,7 @@ IF ( LBIAS_CORRECTION ) THEN
   ENDDO
   !
   DO II = 1,KI
-    DO J = 1,I%NPATCH
+    DO J = 1,I%O%NPATCH
       DO IENS = 1,NENS
         !
         DO L = 1,NVAR
@@ -275,10 +275,10 @@ DO II=1,KI
   !
   !---------------- MEAN SIMULATED OBS AVERAGED OVER TILES-----------------------
   ZYF(:,:) = 0. 
-  DO J=1,I%NPATCH
-    IF (I%XPATCH(II,J) > 0.0) THEN
+  DO J=1,I%O%NPATCH
+    IF (I%IP%XPATCH(II,J) > 0.0) THEN
       WHERE ( XF_PATCH(II,J,:,:)/=XUNDEF ) 
-        ZYF(:,:) = ZYF(:,:) + I%XPATCH(II,J)*XF_PATCH(II,J,:,:)
+        ZYF(:,:) = ZYF(:,:) + I%IP%XPATCH(II,J)*XF_PATCH(II,J,:,:)
       ENDWHERE
     ENDIF
   ENDDO
@@ -354,9 +354,9 @@ DO II=1,KI
   !
   IF (.NOT.LPERTURBATION_RUN) THEN
     !
-    DO J = 1,I%NPATCH
+    DO J = 1,I%O%NPATCH
       !
-      CALL OUTER_PRODUCT(NENS,NVAR,NOBS,ZF(J,:,:),I%XPATCH(II,J)*ZF_PATCH(J,:,:),&
+      CALL OUTER_PRODUCT(NENS,NVAR,NOBS,ZF(J,:,:),I%IP%XPATCH(II,J)*ZF_PATCH(J,:,:),&
                          ZBHT(:,:),ZHBHT(:,:),LPB_CORRELATIONS,CVAR,COBS)
       !
       ZK1(:,:) =  ZHBHT(:,:) + ZR(:,:)
@@ -387,7 +387,7 @@ DO II=1,KI
       !
       DO L = 1,NVAR
         !
-        DO J = 1,I%NPATCH       
+        DO J = 1,I%O%NPATCH       
           !
           IF ( LDENKF .AND. CVAR(L)/="WG3" .AND. CVAR(L)/="TG3" ) THEN
             !
@@ -423,10 +423,10 @@ DO II=1,KI
   ZF_AGG(:) = 0.
   ZA_AGG(:) = 0.
   DO L = 1,NVAR
-    DO J = 1,I%NPATCH
+    DO J = 1,I%O%NPATCH
       IF (ZA_MEAN(J,L)/=XUNDEF .AND. ZF_MEAN(J,L)/=XUNDEF) THEN
-        ZF_AGG(L) = ZF_AGG(L) + I%XPATCH(II,J) * ZF_MEAN(J,L)
-        ZA_AGG(L) = ZA_AGG(L) + I%XPATCH(II,J) * ZA_MEAN(J,L)
+        ZF_AGG(L) = ZF_AGG(L) + I%IP%XPATCH(II,J) * ZF_MEAN(J,L)
+        ZA_AGG(L) = ZA_AGG(L) + I%IP%XPATCH(II,J) * ZA_MEAN(J,L)
       ENDIF
     ENDDO
   ENDDO

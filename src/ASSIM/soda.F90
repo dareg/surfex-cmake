@@ -462,27 +462,27 @@ DO NIFIC = INB,1,-1
   IF ( CASSIM_ISBA=='EKF  ' .OR. CASSIM_ISBA=='ENKF ' ) THEN
     !
     IF ( NIFIC==INB ) THEN
-      ALLOCATE(XLAI_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH)) 
-      ALLOCATE(XBIO_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH))     
-      IF (CASSIM_ISBA=='EKF  ') ALLOCATE(XI(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH,ISIZE))
-      ALLOCATE(XF       (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH,ISIZE+1,NVAR))
-      ALLOCATE(XF_PATCH (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%NPATCH,ISIZE+1,NOBSTYPE))
+      ALLOCATE(XLAI_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%O%NPATCH)) 
+      ALLOCATE(XBIO_PASS(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%O%NPATCH))     
+      IF (CASSIM_ISBA=='EKF  ') ALLOCATE(XI(YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%O%NPATCH,ISIZE))
+      ALLOCATE(XF       (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%O%NPATCH,ISIZE+1,NVAR))
+      ALLOCATE(XF_PATCH (YSURF_CUR%U%NSIZE_NATURE,YSURF_CUR%IM%I%O%NPATCH,ISIZE+1,NOBSTYPE))
     ENDIF
     !
     IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC<INB .OR. CASSIM_ISBA=='ENKF ') THEN
       !
       ! Set the global state values for this control value
       DO IOBS = 1,NOBSTYPE
-        DO JI=1,YSURF_CUR%IM%I%NPATCH
+        DO JI=1,YSURF_CUR%IM%I%O%NPATCH
           SELECT CASE (TRIM(COBS(IOBS)))
             CASE("T2M")
               XF_PATCH(:,JI,NIFIC,IOBS) = XAT2M_ISBA(:,1)
             CASE("HU2M")
               XF_PATCH(:,JI,NIFIC,IOBS) = XAHU2M_ISBA(:,1)
             CASE("WG1")
-              XF_PATCH(:,JI,NIFIC,IOBS) = YSURF_CUR%IM%I%XWG(:,1,JI)
+              XF_PATCH(:,JI,NIFIC,IOBS) = YSURF_CUR%IM%I%R%XWG(:,1,JI)
             CASE("LAI")
-              XF_PATCH(:,JI,NIFIC,IOBS) = YSURF_CUR%IM%I%XLAI(:,JI)
+              XF_PATCH(:,JI,NIFIC,IOBS) = YSURF_CUR%IM%I%M%T%XLAI(:,JI)
             CASE DEFAULT
               CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
           END SELECT
@@ -493,17 +493,17 @@ DO NIFIC = INB,1,-1
       DO JL = 1,NVAR
         SELECT CASE (TRIM(CVAR(JL)))
           CASE("TG1")
-            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XTG(:,1,:)
+            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%R%XTG(:,1,:)
           CASE("TG2")
-            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XTG(:,2,:)
+            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%R%XTG(:,2,:)
           CASE("WG1")
-            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XWG(:,1,:)
+            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%R%XWG(:,1,:)
           CASE("WG2")
-            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XWG(:,2,:)
+            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%R%XWG(:,2,:)
           CASE("WG3")
-            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XWG(:,3,:)              
+            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%R%XWG(:,3,:)              
           CASE("LAI")
-            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%XLAI(:,:)
+            XF(:,:,NIFIC,JL) = YSURF_CUR%IM%I%M%T%XLAI(:,:)
           CASE DEFAULT
             CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
         END SELECT
@@ -513,25 +513,25 @@ DO NIFIC = INB,1,-1
         !
         DO JL = 1,NVAR
           IF (TRIM(CVAR(JL))=="LAI") THEN
-            IF ( YSURF_CUR%IM%I%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
+            IF ( YSURF_CUR%IM%I%O%NPATCH==1 .AND. TRIM(CBIO)/="LAI" ) THEN
               CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF with NPATCH=1!")
             ENDIF
             SELECT CASE (TRIM(CBIO))
               CASE("BIOMA1","BIOMASS1")
-                XBIO_PASS(:,:) = YSURF_CUR%IM%I%XBIOMASS(:,1,:)
+                XBIO_PASS(:,:) = YSURF_CUR%IM%I%R%XBIOMASS(:,1,:)
               CASE("BIOMA2","BIOMASS2")
-                XBIO_PASS(:,:) = YSURF_CUR%IM%I%XBIOMASS(:,2,:)
+                XBIO_PASS(:,:) = YSURF_CUR%IM%I%R%XBIOMASS(:,2,:)
               CASE("RESPI1","RESP_BIOM1")
-                XBIO_PASS(:,:) = YSURF_CUR%IM%I%XRESP_BIOMASS(:,1,:)
+                XBIO_PASS(:,:) = YSURF_CUR%IM%I%R%XRESP_BIOMASS(:,1,:)
               CASE("RESPI2","RESP_BIOM2")
-                XBIO_PASS(:,:) = YSURF_CUR%IM%I%XRESP_BIOMASS(:,2,:)
+                XBIO_PASS(:,:) = YSURF_CUR%IM%I%R%XRESP_BIOMASS(:,2,:)
               CASE("LAI")
-                XBIO_PASS(:,:) = YSURF_CUR%IM%I%XLAI(:,:)
+                XBIO_PASS(:,:) = YSURF_CUR%IM%I%M%T%XLAI(:,:)
               CASE DEFAULT
                 CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
             END SELECT
             !
-            XLAI_PASS(:,:) = YSURF_CUR%IM%I%XLAI(:,:)          
+            XLAI_PASS(:,:) = YSURF_CUR%IM%I%M%T%XLAI(:,:)          
             !
           ENDIF
           !
@@ -543,17 +543,17 @@ DO NIFIC = INB,1,-1
       DO JL = 1,NVAR
         SELECT CASE (TRIM(CVAR(JL)))
           CASE("TG1")
-            XI(:,:,JL) = YSURF_CUR%IM%I%XTG(:,1,:)
+            XI(:,:,JL) = YSURF_CUR%IM%I%R%XTG(:,1,:)
           CASE("TG2")
-            XI(:,:,JL) = YSURF_CUR%IM%I%XTG(:,2,:)
+            XI(:,:,JL) = YSURF_CUR%IM%I%R%XTG(:,2,:)
           CASE("WG1")
-            XI(:,:,JL) = YSURF_CUR%IM%I%XWG(:,1,:)
+            XI(:,:,JL) = YSURF_CUR%IM%I%R%XWG(:,1,:)
           CASE("WG2")
-            XI(:,:,JL) = YSURF_CUR%IM%I%XWG(:,2,:)
+            XI(:,:,JL) = YSURF_CUR%IM%I%R%XWG(:,2,:)
           CASE("WG3")
-            XI(:,:,JL) = YSURF_CUR%IM%I%XWG(:,3,:)               
+            XI(:,:,JL) = YSURF_CUR%IM%I%R%XWG(:,3,:)               
           CASE("LAI")
-            XI(:,:,JL) = YSURF_CUR%IM%I%XLAI(:,:)
+            XI(:,:,JL) = YSURF_CUR%IM%I%M%T%XLAI(:,:)
           CASE DEFAULT
             CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
         END SELECT
@@ -1134,17 +1134,17 @@ DO IENS = 1,ISIZE
       ! Update the modified values
       SELECT CASE (TRIM(CVAR(JL)))
         CASE("TG1")
-          YSURF_CUR%IM%I%XTG(:,1,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%R%XTG(:,1,:) = XF(:,:,IENS,JL)
         CASE("TG2")
-          YSURF_CUR%IM%I%XTG(:,2,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%R%XTG(:,2,:) = XF(:,:,IENS,JL)
         CASE("WG1")
-          YSURF_CUR%IM%I%XWG(:,1,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%R%XWG(:,1,:) = XF(:,:,IENS,JL)
         CASE("WG2")
-          YSURF_CUR%IM%I%XWG(:,2,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%R%XWG(:,2,:) = XF(:,:,IENS,JL)
         CASE("WG3")
-          YSURF_CUR%IM%I%XWG(:,3,:) = XF(:,:,IENS,JL)          
+          YSURF_CUR%IM%I%R%XWG(:,3,:) = XF(:,:,IENS,JL)          
         CASE("LAI") 
-          YSURF_CUR%IM%I%XLAI(:,:) = XF(:,:,IENS,JL)
+          YSURF_CUR%IM%I%M%T%XLAI(:,:) = XF(:,:,IENS,JL)
         CASE DEFAULT
           CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in EKF!")
       END SELECT

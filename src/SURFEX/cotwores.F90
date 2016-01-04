@@ -6,7 +6,7 @@ SUBROUTINE COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                   &
             PGAMM, PQDGAMM, PGMES,  PGC, PQDGMES, PT1GMES, PT2GMES,   &
             PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, PFFV,                   &
             PIACAN_SUNLIT, PIACAN_SHADE, PFRAC_SUN, PIACAN,           &
-            PABC, PAN, PANDAY, PRS, PANFM, PGPP, PANF, PRESP_LEAF     ) 
+            PABC, PAN, PANDAY, PRS, PANFM, PGPP, PRESP_LEAF     ) 
 !   #########################################################################
 !
 !!****  *COTWORES*  
@@ -189,8 +189,6 @@ REAL,DIMENSION(:),  INTENT(INOUT) :: PABC, PAN, PANDAY, PRS, PANFM, PGPP
 !                                    PANFM = maximum leaf assimilation
 !                                    PGPP  = Gross Primary Production (kg_CO2/kg_air * m/s)
 !
-REAL,DIMENSION(:),    INTENT(OUT) :: PANF
-!                                    PANF  = total assimilation over canopy
 !
 REAL,DIMENSION(:),    INTENT(OUT) :: PRESP_LEAF
 !                                    PRESP_LEAF = dark respiration over canopy
@@ -201,6 +199,7 @@ REAL, PARAMETER                :: ZRS_MIN     = 1.E-4  ! minimum canopy resistan
 !
 INTEGER                     :: JINT, JJ ! index for loops
 !
+REAL, DIMENSION(SIZE(PLAI)) :: ZANF ! ZANF  = total assimilation over canopy
 REAL, DIMENSION(SIZE(PLAI)) :: ZCONVE1, ZTSPC, ZIA
 !                                 ZTSPC = temperature conversion (K to C) 
 !                                 ZIA   = absorbed PAR
@@ -508,11 +507,11 @@ END DO
 !
 ! Total assimilation
 !
-PANF(:)= ZTAN(:)
+ZANF(:)= ZTAN(:)
 !
 ! Net assimilation over canopy
 !
-PAN(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*PANF(:)*ZLAI(:)
+PAN(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*ZANF(:)*ZLAI(:)
 !
 ! Dark respiration over canopy (does not depend on radiation, 
 ! no need to integrate over vertical dimension)
@@ -529,7 +528,7 @@ PANDAY(:) = PANDAY(:) + PAN(:) * PTSTEP * PRHOA(:)
 !
 ! Adjust maximum leaf assimilation:
 !
-PANFM(:) = MAX( PANF(:), PANFM(:) )
+PANFM(:) = MAX( ZANF(:), PANFM(:) )
 !
 ! Total conductance over canopy 
 !

@@ -1,13 +1,15 @@
 !     #########
-    SUBROUTINE ALLOC_DIAG_TEB_GREENROOF (DGGR, TGR, &
+    SUBROUTINE ALLOC_DIAG_TEB_GREENROOF (DGGR, DGMGR, DGEGR, TGR, &
                                          KLU,KLAYER_GR,KSW)
 !   ##########################################################################
 !
 !
 !
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
 !
-USE MODD_DIAG_TEB_GREENROOF_n, ONLY : DIAG_TEB_GREENROOF_t
-USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -15,8 +17,10 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(DIAG_TEB_GREENROOF_t), INTENT(INOUT) :: DGGR
-TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
+TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGGR
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEGR
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMGR
+TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TGR
 !
 INTEGER, INTENT(IN) :: KLU
 INTEGER, INTENT(IN) :: KLAYER_GR
@@ -28,51 +32,35 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Diagnostic variables:
 !
 IF (LHOOK) CALL DR_HOOK('ALLOC_DIAG_TEB_GREENROOF',0,ZHOOK_HANDLE)
-ALLOCATE(DGGR%XRI                     (KLU                     )) 
-ALLOCATE(DGGR%XCD                     (KLU                     )) 
-ALLOCATE(DGGR%XCH                     (KLU                     )) 
-ALLOCATE(DGGR%XRN                     (KLU                     )) 
-ALLOCATE(DGGR%XH                      (KLU                     )) 
-ALLOCATE(DGGR%XGFLUX                  (KLU                     )) 
-ALLOCATE(DGGR%XQS                     (KLU                     )) 
+ALLOCATE(DGGR%XRI                     (KLU,  1)) 
+ALLOCATE(DGGR%XCD                     (KLU,  1)) 
+ALLOCATE(DGGR%XCH                     (KLU,  1)) 
+ALLOCATE(DGGR%XRN                     (KLU,  1)) 
+ALLOCATE(DGGR%XH                      (KLU,  1)) 
+ALLOCATE(DGGR%XGFLUX                  (KLU,  1)) 
+ALLOCATE(DGGR%XQS                     (KLU,  1)) 
 !
-ALLOCATE(DGGR%XLEI                    (KLU                     )) 
-ALLOCATE(DGGR%XLEG                    (KLU                     )) 
-ALLOCATE(DGGR%XLEGI                   (KLU                     )) 
-ALLOCATE(DGGR%XLEV                    (KLU                     )) 
-ALLOCATE(DGGR%XLES                    (KLU                     )) 
-ALLOCATE(DGGR%XLER                    (KLU                     )) 
-ALLOCATE(DGGR%XLETR                   (KLU                     )) 
-ALLOCATE(DGGR%XEVAP                   (KLU                     )) 
-ALLOCATE(DGGR%XDRAIN                  (KLU                     )) 
-ALLOCATE(DGGR%XRUNOFF                 (KLU                     )) 
-ALLOCATE(DGGR%XHORT                   (KLU                     )) 
-ALLOCATE(DGGR%XDRIP                   (KLU                     )) 
-ALLOCATE(DGGR%XRRVEG                  (KLU                     )) 
-ALLOCATE(DGGR%XMELT                   (KLU                     )) 
+ALLOCATE(DGGR%XLEI                    (KLU,  1))
 !
-ALLOCATE(DGGR%XCG                     (KLU                     )) 
-ALLOCATE(DGGR%XC1                     (KLU                     )) 
-ALLOCATE(DGGR%XC2                     (KLU                     )) 
-ALLOCATE(DGGR%XWGEQ                   (KLU                     )) 
-ALLOCATE(DGGR%XCT                     (KLU                     )) 
-ALLOCATE(DGGR%XRS                     (KLU                     )) 
-ALLOCATE(DGGR%XCDN                    (KLU                     )) 
-ALLOCATE(DGGR%XHU                     (KLU                     )) 
-ALLOCATE(DGGR%XHUG                    (KLU                     )) 
-ALLOCATE(DGGR%XRESTORE                (KLU                     )) 
-ALLOCATE(DGGR%XUSTAR                  (KLU                     )) 
-ALLOCATE(DGGR%XIACAN                  (KLU,3                   )) 
+ALLOCATE(DGEGR%XLEG                    (KLU,  1)) 
+ALLOCATE(DGEGR%XLEGI                   (KLU,  1)) 
+ALLOCATE(DGEGR%XLEV                    (KLU,  1)) 
+ALLOCATE(DGEGR%XLES                    (KLU,  1)) 
+ALLOCATE(DGEGR%XLER                    (KLU,  1)) 
+ALLOCATE(DGEGR%XLETR                   (KLU,  1)) 
+ALLOCATE(DGEGR%XEVAP                   (KLU,  1)) 
+ALLOCATE(DGEGR%XDRAIN                  (KLU,  1)) 
+ALLOCATE(DGEGR%XRUNOFF                 (KLU,  1)) 
+ALLOCATE(DGEGR%XHORT                   (KLU,  1)) 
+ALLOCATE(DGEGR%XDRIP                   (KLU,  1)) 
+ALLOCATE(DGEGR%XRRVEG                  (KLU,  1)) 
+ALLOCATE(DGEGR%XMELT                   (KLU,  1)) 
 !
-ALLOCATE(DGGR%XSNOWTEMP               (KLU,TGR%CUR%TSNOW%NLAYER        )) 
-ALLOCATE(DGGR%XSNOWLIQ                (KLU,TGR%CUR%TSNOW%NLAYER        )) 
-ALLOCATE(DGGR%XSNOWDZ                 (KLU,TGR%CUR%TSNOW%NLAYER        )) 
-ALLOCATE(DGGR%XSNOWHMASS              (KLU                     )) 
-ALLOCATE(DGGR%XMELTADV                (KLU                     )) 
+ALLOCATE(DGMGR%XSNOWTEMP               (KLU,TGR%CUR%TSNOW%NLAYER, 1)) 
+ALLOCATE(DGMGR%XSNOWLIQ                (KLU,TGR%CUR%TSNOW%NLAYER, 1)) 
 !
-ALLOCATE(DGGR%XHV                     (KLU                     ))
-ALLOCATE(DGGR%XALBT                   (KLU                     )) 
-ALLOCATE(DGGR%XEMIST                  (KLU                     )) 
+ALLOCATE(DGMGR%XHV                     (KLU,  1))
+ALLOCATE(DGMGR%XALBT                   (KLU,  1)) 
 IF (LHOOK) CALL DR_HOOK('ALLOC_DIAG_TEB_GREENROOF',1,ZHOOK_HANDLE)
 !
 !

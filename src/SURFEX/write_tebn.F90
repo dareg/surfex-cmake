@@ -92,14 +92,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                            HPROGRAM)
 !
 DO JPATCH=1,TM%TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                              GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, JPATCH)
+  CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, JPATCH)
   CALL WRITESURF_TEB_n(DGU, U, TM, GDM, GRM, &
                        HPROGRAM,JPATCH,HWRITE)
 END DO
 !     
- CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                              GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, 1)
+ CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, 1)
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(DGU, U, &
                                                                        TM%TCP, TM%TOP, &
                                                                        HPROGRAM,HWRITE)

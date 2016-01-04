@@ -1,13 +1,11 @@
-!     ################
-      MODULE MODD_TEB_VEG_n
-!     ################
+!##################
+MODULE MODD_TEB_VEG_n
+!##################
 !
-!!****  *MODD_TEB_VEG_n - declaration of options and parameters for urban vegetation
-!!                        (for parameters common to all types of urban vegetation)
+!!****  *MODD_ISBA - declaration of packed surface parameters for ISBA scheme
 !!
 !!    PURPOSE
 !!    -------
-!     Declaration of options and surface parameters
 !
 !!
 !!**  IMPLICIT ARGUMENTS
@@ -19,182 +17,104 @@
 !!
 !!    AUTHOR
 !!    ------
-!!      C. de Munck & A. Lemonsu   *Meteo France*
+!!      A. Boone   *Meteo France*
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original       07/2012
+!!      Original       20/09/02
+!!      A.L. Gibelin    04/2009 : BIOMASS and RESP_BIOMASS arrays 
+!!      A.L. Gibelin    04/2009 : TAU_WOOD for NCB option 
+!!      A.L. Gibelin    05/2009 : Add carbon spinup
+!!      A.L. Gibelin    06/2009 : Soil carbon variables for CNT option
+!!      A.L. Gibelin    07/2009 : Suppress RDK and transform GPP as a diagnostic
+!!      A.L. Gibelin    07/2009 : Suppress PPST and PPSTF as outputs
+!!      P. Samuelsson   02/2012 : MEB
+!!
+!-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
 !             ------------
 !
+USE MODD_TEB_VEG_PARAM_n
+!
+USE MODD_ISBA_OPTIONS_n
+USE MODD_ISBA_PGD_n
+USE MODD_ISBA_PARAM_n
+USE MODD_ISBA_INIT_n
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t, ISBA_PROG_INIT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
-
-
-TYPE TEB_VEG_OPTIONS_t
-! ISBA options common of all types of urban vegetation
 !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-  LOGICAL                          :: LCANOPY_DRAG ! T: drag activated in SBL scheme within the canopy
-                                                   ! F: no drag activated in SBL atmospheric layers
+TYPE TEB_VEG_PROG_t
+  !
+  TYPE(ISBA_PROG_t), POINTER :: ALP(:) => NULL()
+  TYPE(ISBA_PROG_t), POINTER :: CUR => NULL()
+  !
+END TYPE TEB_VEG_PROG_t
 !
-  LOGICAL                          :: LVEGUPD      ! T = update vegetation parameters every decade
-                                                   ! F = keep vegetation parameters constant in time
+TYPE TEB_VEG_t
 !
-  LOGICAL                          :: LTR_ML
-!  
-  LOGICAL                          :: LNITRO_DILU  ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
-!-------------------------------------------------------------------------------
+TYPE(ISBA_OPTIONS_t) :: O
+TYPE(ISBA_PGD_t) :: P
+TYPE(ISBA_INIT_t) :: I
+TYPE(ISBA_INIT_PGD_t) :: IP
 !
-  CHARACTER(LEN=3)                 :: CISBA       ! type of ISBA version:
-                                                  ! '2-L' (default)
-                                                  ! '3-L'
-                                                  ! 'DIF'
+TYPE(TEB_VEG_PARAM_t) :: M
+TYPE(TEB_VEG_PROG_t) :: R
 !
-  CHARACTER(LEN=4)                 :: CROUGH      ! type of roughness length
-                                                  ! 'Z01D'
-                                                  ! 'Z04D'
+END TYPE TEB_VEG_t
 !
-  CHARACTER(LEN=4)                 :: CPEDOTF     ! NOTE: Only used when HISBA = DIF
-                                                  ! 'CH78' = Clapp and Hornberger 1978 for BC (Default)
-                                                  ! 'CO84' = Cosby et al. 1988 for BC
-                                                  ! 'CP88' = Carsel and Parrish 1988 for VG
-                                                  ! 'WO99' = Wosten et al. 1999 for VG
-!
-  CHARACTER(LEN=3)                 :: CPHOTO      ! type of photosynthesis
-                                                  ! 'NON'
-                                                  ! 'AGS'
-                                                  ! 'LAI'
-                                                  ! 'LST'
-                                                  ! 'AST'
-                                                  ! 'NIT'
-                                                  ! 'NCB'
-!
-  CHARACTER(LEN=4)                 :: CALBEDO     ! albedo type
-                                                  ! 'DRY ' 
-                                                  ! 'EVOL' 
-                                                  ! 'WET ' 
-                                                  ! 'USER' 
-!
-  CHARACTER(LEN=4)                 :: CSCOND      ! Thermal conductivity
-                                                  ! 'DEF ' = DEFault: NP89 implicit method
-                                                  ! 'PL98' = Peters-Lidard et al. 1998 used
-                                                  ! for explicit computation of CG
-!
-  CHARACTER(LEN=4)                 :: CC1DRY      ! C1 formulation for dry soils
-                                                  ! 'DEF ' = DEFault: Giard-Bazile formulation
-                                                  ! 'GB93' = Giordani 1993, Braud 1993 
-                                                  !discontinuous at WILT
-!
-  CHARACTER(LEN=3)                 :: CSOILFRZ    ! soil freezing-physics option
-                                                  ! 'DEF' = Default (Boone et al. 2000; 
-                                                  !        Giard and Bazile 2000)
-                                                  ! 'LWT' = Phase changes as above,
-                                                  !         but relation between unfrozen 
-                                                  !         water and temperature considered
-!                            NOTE that when using the YISBA='DIF' multi-layer soil option,
-!                            the 'LWT' method is used. It is only an option
-!                            when using the force-restore soil method ('2-L' or '3-L')
-!
-  CHARACTER(LEN=4)                 :: CDIFSFCOND  ! Mulch effects
-                                                  ! 'MLCH' = include the insulating effect of
-                                                  ! leaf litter/mulch on the surf. thermal cond.
-                                                  ! 'DEF ' = no mulch effect
-!                           NOTE: Only used when YISBA = DIF
-!
-  CHARACTER(LEN=3)                 :: CSNOWRES    ! Turbulent exchanges over snow
-                                                  ! 'DEF' = Default: Louis (ISBA)
-                                                  ! 'RIL' = Maximum Richardson number limit
-                                                  !         for stable conditions ISBA-SNOW3L
-                                                  !         turbulent exchange option
-!                                           
-  CHARACTER(LEN=3)                 :: CRESPSL     ! Soil respiration
-                                                  ! 'DEF' = Default: Norman (1992)
-                                                  ! 'PRM' = New Parameterization
-                                                  ! 'CNT' = CENTURY model (Gibelin 2007)
-!                                           
-  CHARACTER(LEN=3)                 :: CCPSURF     ! specific heat at surface
-                                                  ! 'DRY' = default value (dry Cp)
-                                                  ! 'HUM' = Cp as a fct of specific humidity
-! - SGH scheme and vertical hydrology
-!                                                     
-  CHARACTER(LEN=4)                 :: CRUNOFF     ! surface runoff formulation
-                                                  ! 'WSAT'
-                                                  ! 'DT92'
-                                                  ! 'SGH ' Topmodel
-!                                                     
-  CHARACTER(LEN=3)                 :: CKSAT       ! ksat
-                                                  ! 'DEF' = default value 
-                                                  ! 'SGH' = profil exponentiel
-!
-  LOGICAL                          :: LSOC        ! soil organic carbon effect
-!                                                 ! FALSE = default value 
-!                                                 ! TRUE  = SOC profil
-!
-  CHARACTER(LEN=3)                 :: CRAIN       ! Rainfall spatial distribution
-                                                  ! 'DEF' = No rainfall spatial distribution
-                                                  ! 'SGH' = Rainfall exponential spatial distribution
-!
-  CHARACTER(LEN=3)                 :: CHORT       ! Horton runoff
-                                                  ! 'DEF' = no Horton runoff
-                                                  ! 'SGH' = Horton runoff
-!
-! -----------------------------------------------------------------------------------------------------------
-!
-  INTEGER                          :: NNBIOMASS   ! number of biomass pools
-  REAL                             :: XCGMAX      ! maximum soil heat capacity (=2.E-5)
-  REAL                             :: XCDRAG      ! drag coefficient in canopy
-  REAL                             :: XTSTEP      !  time step  
-!
-END TYPE TEB_VEG_OPTIONS_t
-
-
-
 CONTAINS
-!----------------------------------------------------------------------------
-
 !
-
-
-
-
-SUBROUTINE TEB_VEG_OPTIONS_INIT(YTEB_VEG_OPTIONS)
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: YTEB_VEG_OPTIONS
+SUBROUTINE TEB_VEG_PROG_GOTO_PATCH(YTEB_VEG_PROG,KTO_PATCH)
+TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: YTEB_VEG_PROG
+INTEGER, INTENT(IN) :: KTO_PATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_OPTIONS_INIT",0,ZHOOK_HANDLE)
-YTEB_VEG_OPTIONS%LCANOPY_DRAG=.FALSE.
-YTEB_VEG_OPTIONS%LVEGUPD=.FALSE. 
-YTEB_VEG_OPTIONS%LNITRO_DILU=.FALSE. 
-YTEB_VEG_OPTIONS%LTR_ML=.FALSE.
-YTEB_VEG_OPTIONS%CISBA=' '
-YTEB_VEG_OPTIONS%CROUGH=' '
-YTEB_VEG_OPTIONS%CSCOND=' '
-YTEB_VEG_OPTIONS%CPEDOTF=' '
-YTEB_VEG_OPTIONS%CPHOTO=' '
-YTEB_VEG_OPTIONS%CALBEDO=' '
-YTEB_VEG_OPTIONS%CC1DRY=' '
-YTEB_VEG_OPTIONS%CSOILFRZ=' '
-YTEB_VEG_OPTIONS%CDIFSFCOND=' '
-YTEB_VEG_OPTIONS%CSNOWRES=' '
-YTEB_VEG_OPTIONS%CRESPSL=' '
-YTEB_VEG_OPTIONS%CCPSURF=' '
-YTEB_VEG_OPTIONS%CRUNOFF=' '
-YTEB_VEG_OPTIONS%CKSAT=' '
-YTEB_VEG_OPTIONS%LSOC=.FALSE.
-YTEB_VEG_OPTIONS%CRAIN=' '
-YTEB_VEG_OPTIONS%CHORT=' '
-YTEB_VEG_OPTIONS%NNBIOMASS=0
-YTEB_VEG_OPTIONS%XCGMAX=0.
-YTEB_VEG_OPTIONS%XCDRAG=0.
-YTEB_VEG_OPTIONS%XTSTEP=0.
-IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_OPTIONS_INIT",1,ZHOOK_HANDLE)
-END SUBROUTINE TEB_VEG_OPTIONS_INIT
+!
+! Current patch is set to patch KTO_PATCH
+IF (LHOOK) CALL DR_HOOK('MODD_TEB_VEG_N:TEB_VEG_PROG_GOTO_PATCH',0,ZHOOK_HANDLE)
 
+YTEB_VEG_PROG%CUR => YTEB_VEG_PROG%ALP(KTO_PATCH)
 
-!----------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('MODD_TEB_VEG_N:TEB_VEG_PROG_GOTO_PATCH',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE TEB_VEG_PROG_GOTO_PATCH
 
+SUBROUTINE TEB_VEG_PROG_INIT(YTEB_VEG_PROG,KPATCH)
+TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: YTEB_VEG_PROG
+INTEGER, INTENT(IN) :: KPATCH
+INTEGER :: JP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_PROG_INIT",0,ZHOOK_HANDLE)
+ ALLOCATE(YTEB_VEG_PROG%ALP(KPATCH))
+ YTEB_VEG_PROG%CUR => YTEB_VEG_PROG%ALP(1)
+DO JP=1,KPATCH
+  CALL ISBA_PROG_INIT(YTEB_VEG_PROG%ALP(JP))
+ENDDO 
+IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_PROG_INIT",1,ZHOOK_HANDLE)
+END SUBROUTINE TEB_VEG_PROG_INIT
+!
+SUBROUTINE TEB_VEG_INIT(YTEB_VEG,KPATCH)
+TYPE(TEB_VEG_t), INTENT(INOUT) :: YTEB_VEG
+INTEGER, INTENT(IN) :: KPATCH
+INTEGER :: JP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_INIT",0,ZHOOK_HANDLE)
+!
+CALL TEB_VEG_PROG_INIT(YTEB_VEG%R,KPATCH)
+CALL TEB_VEG_PARAM_TIME_INIT(YTEB_VEG%M%T,KPATCH)
+!
+CALL ISBA_INIT_INIT(YTEB_VEG%I)
+CALL ISBA_PARAM_INIT(YTEB_VEG%M%X,YTEB_VEG%M%M,YTEB_VEG%M%A,YTEB_VEG%M%I)
+CALL ISBA_PGD_INIT(YTEB_VEG%P)
+CALL ISBA_OPTIONS_INIT(YTEB_VEG%O)
+!
+IF (LHOOK) CALL DR_HOOK("MODD_TEB_VEG_N:TEB_VEG_INIT",1,ZHOOK_HANDLE)
+END SUBROUTINE TEB_VEG_INIT
+!
 END MODULE MODD_TEB_VEG_n

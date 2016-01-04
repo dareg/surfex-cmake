@@ -1,5 +1,5 @@
 !     ######spl
-      SUBROUTINE INIT_TOP (I, &
+      SUBROUTINE INIT_TOP (KPATCH, KSIZE_NATURE_P, &
                             HISBA, KLUOUT, PPATCH, PRUNOFFD,          &
                            PWD0, PWSAT, PTI_MIN,                     &
                            PTI_MAX, PTI_MEAN, PTI_STD, PTI_SKEW,     &
@@ -36,8 +36,6 @@
 !-------------------------------------------------------------------------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_SURF_PAR,ONLY : XUNDEF
 !
 USE MODD_SGH_PAR, ONLY : X2, X4, XREGP, XREGA
@@ -58,7 +56,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+INTEGER, INTENT(IN) :: KPATCH
+INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_NATURE_P
 !
  CHARACTER(LEN=*), INTENT(IN)         :: HISBA   ! type of ISBA version:
 !                                               ! '2-L' (default)
@@ -175,8 +174,8 @@ ZWD0_AVG(:) = 0.0
 !
 IF (HISBA == 'DIF') THEN                                   
 !
-  DO JPATCH=1,I%NPATCH
-    IF (I%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+  DO JPATCH=1,KPATCH
+    IF (KSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
     DO JL=1,INL
        DO JI=1,INI
           ZD_TOP   (JI) = ZD_TOP   (JI) + PPATCH(JI,JPATCH)*PSOILWGHT(JI,JL,JPATCH)
@@ -193,8 +192,8 @@ IF (HISBA == 'DIF') THEN
 !
 ELSE
 !     
-  DO JPATCH=1,I%NPATCH
-     IF (I%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+  DO JPATCH=1,KPATCH
+     IF (KSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
      DO JI=1,INI
         ZD_TOP(JI)=ZD_TOP(JI)+PRUNOFFD(JI,JPATCH)*PPATCH(JI,JPATCH)
      ENDDO

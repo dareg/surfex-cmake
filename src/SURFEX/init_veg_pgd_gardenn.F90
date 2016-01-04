@@ -1,5 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_VEG_PGD_GARDEN_n (CHI, DTCO, DST, I, SLT, U, &
+SUBROUTINE INIT_VEG_PGD_GARDEN_n (CHI, DTCO, DST, SLT, U, &
+                OAGRI_TO_GRASS, OCOVER, PCOVER, &
                                   HPROGRAM, KLUOUT, KI, KGROUND_LAYER, KMONTH,        &
                         PVEGTYPE, PTDEEP, PGAMMAT, HPHOTO, HINIT, OTR_ML, HRUNOFF,  &
                         KNBIOMASS, PCO2, PRHOA, PABC, PPOI,  &
@@ -76,9 +77,12 @@ IMPLICIT NONE
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+LOGICAL, INTENT(IN) :: OAGRI_TO_GRASS
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
+REAL, DIMENSION(:,:), INTENT(IN) :: PCOVER
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER, INTENT(IN)  :: KLUOUT
@@ -340,7 +344,8 @@ ZGMES(:,1) = PGMES(:)
 ZGC(:,1) = PGC(:)
 ZDMAX(:,1) = PDMAX(:)
 !
- CALL INIT_VEG_PGD_n(CHI, DTCO, DST, I, SLT, U, &
+ CALL INIT_VEG_PGD_n(CHI, DTCO, DST, SLT, U, &
+                     OAGRI_TO_GRASS, OCOVER, PCOVER, &
                      HPROGRAM, 'TOWN  ',KLUOUT, KI, 1, KGROUND_LAYER, KMONTH,   &
                   PVEGTYPE, ZPATCH, ZVEGTYPE_PATCH, ISIZE_NATURE_P, IR_NATURE_P,    &
                   0.0, &

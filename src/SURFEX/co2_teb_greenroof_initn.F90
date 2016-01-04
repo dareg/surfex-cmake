@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CO2_TEB_GREENROOF_INIT_n (I, TGRP, TVG, &
+      SUBROUTINE CO2_TEB_GREENROOF_INIT_n (TGRO, TGRIP, TGRM, &
                                            PCO2)
 !     #####################
 !
@@ -44,10 +44,9 @@
 !              ------------
 !
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_OPTIONS_t
+USE MODD_TEB_VEG_PARAM_n, ONLY : TEB_VEG_PARAM_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
@@ -64,9 +63,9 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
-TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: TGRIP
+TYPE(TEB_VEG_PARAM_t), INTENT(INOUT) :: TGRM
 !
 REAL, DIMENSION(:), INTENT(IN) :: PCO2 ! air CO2 concentration (kg/kg)
 !
@@ -75,7 +74,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PCO2 ! air CO2 concentration (kg/kg)
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(TGRP%XVEGTYPE,1)) :: ZTAU_WOOD
+REAL, DIMENSION(SIZE(TGRM%X%XVEGTYPE,1)) :: ZTAU_WOOD
 INTEGER :: ILU   ! size of arrays
 INTEGER :: JP    ! loop on tiles
 !
@@ -83,29 +82,31 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CO2_TEB_GREENROOF_INIT_N',0,ZHOOK_HANDLE)
-ILU = SIZE(TGRP%XVEGTYPE,1)
+ILU = SIZE(TGRM%X%XVEGTYPE,1)
 !
-ALLOCATE(TGRP%XANMAX        (ILU))
-ALLOCATE(TGRP%XFZERO        (ILU))
-ALLOCATE(TGRP%XEPSO         (ILU))
-ALLOCATE(TGRP%XGAMM         (ILU))
-ALLOCATE(TGRP%XQDGAMM       (ILU))
-ALLOCATE(TGRP%XQDGMES       (ILU))
-ALLOCATE(TGRP%XT1GMES       (ILU))
-ALLOCATE(TGRP%XT2GMES       (ILU))
-ALLOCATE(TGRP%XAMAX         (ILU))
-ALLOCATE(TGRP%XQDAMAX       (ILU))
-ALLOCATE(TGRP%XT1AMAX       (ILU))
-ALLOCATE(TGRP%XT2AMAX       (ILU))
-ALLOCATE(TGRP%XAH           (ILU))
-ALLOCATE(TGRP%XBH           (ILU))
+ALLOCATE(TGRIP%XANMAX        (ILU,1))
+ALLOCATE(TGRIP%XFZERO        (ILU,1))
+ALLOCATE(TGRIP%XEPSO         (ILU,1))
+ALLOCATE(TGRIP%XGAMM         (ILU,1))
+ALLOCATE(TGRIP%XQDGAMM       (ILU,1))
+ALLOCATE(TGRIP%XQDGMES       (ILU,1))
+ALLOCATE(TGRIP%XT1GMES       (ILU,1))
+ALLOCATE(TGRIP%XT2GMES       (ILU,1))
+ALLOCATE(TGRIP%XAMAX         (ILU,1))
+ALLOCATE(TGRIP%XQDAMAX       (ILU,1))
+ALLOCATE(TGRIP%XT1AMAX       (ILU,1))
+ALLOCATE(TGRIP%XT2AMAX       (ILU,1))
+ALLOCATE(TGRIP%XAH           (ILU,1))
+ALLOCATE(TGRIP%XBH           (ILU,1))
 !
-     CALL COTWOINIT_n(I, &
-                      TVG%CPHOTO, TGRP%XVEGTYPE,TGRP%XGMES,PCO2,TGRP%XGC,&
-            TGRP%XDMAX,TGRP%XABC,TGRP%XPOI,TGRP%XANMAX, TGRP%XFZERO,           &
-            TGRP%XEPSO,TGRP%XGAMM,TGRP%XQDGAMM,TGRP%XQDGMES,TGRP%XT1GMES,      &
-            TGRP%XT2GMES,TGRP%XAMAX,TGRP%XQDAMAX,TGRP%XT1AMAX,            &
-            TGRP%XT2AMAX,TGRP%XAH,TGRP%XBH,ZTAU_WOOD                 )  
+     CALL COTWOINIT_n(TGRO%LAGRI_TO_GRASS, TGRO%LTR_ML, &
+                      TGRO%CPHOTO, TGRM%X%XVEGTYPE,TGRM%T%CUR%XGMES(:,1),&
+                      PCO2,TGRM%T%CUR%XGC(:,1),TGRM%X%XDMAX(:,1),TGRIP%XABC(:),&
+                      TGRIP%XPOI(:),TGRIP%XANMAX(:,1), TGRIP%XFZERO(:,1),      &
+                      TGRIP%XEPSO(:,1),TGRIP%XGAMM(:,1),TGRIP%XQDGAMM(:,1), &
+                      TGRIP%XQDGMES(:,1),TGRIP%XT1GMES(:,1), TGRIP%XT2GMES(:,1), &
+                      TGRIP%XAMAX(:,1),TGRIP%XQDAMAX(:,1),TGRIP%XT1AMAX(:,1),    &
+                      TGRIP%XT2AMAX(:,1),TGRIP%XAH(:,1),TGRIP%XBH(:,1),ZTAU_WOOD        )  
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CO2_TEB_GREENROOF_INIT_N',1,ZHOOK_HANDLE)

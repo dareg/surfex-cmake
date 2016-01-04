@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,    &
+SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,    &
                                  HPROGRAM, HCOUPLING,                                       &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
@@ -44,9 +44,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
@@ -68,9 +66,8 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
-TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
-TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
@@ -182,14 +179,14 @@ IF (HCOUPLING=='I') THEN
   ZTSTEP=PTSTEP
 !
 !* same timestep as atmospheric timestep as default
-ELSE IF (IM%I%XTSTEP==XUNDEF) THEN
+ELSE IF (IM%I%O%XTSTEP==XUNDEF) THEN
   IT=1
   ZT=1.
   ZTSTEP=PTSTEP
 !
 !* case of specified SVAT time-step
 ELSE
-  IT=MAX(NINT(PTSTEP/IM%I%XTSTEP),1)
+  IT=MAX(NINT(PTSTEP/IM%I%O%XTSTEP),1)
   ZT=FLOAT(IT)
   ZTSTEP=PTSTEP/ZT
 ENDIF
@@ -236,7 +233,7 @@ ZWORK_Z0H= 0.0 ! work array for mean roughness length for heat
 !
 DO JT=1,IT
 !
-  CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
+  CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,   &
                                  HPROGRAM, HCOUPLING,                                      &
                  ZTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &

@@ -65,27 +65,28 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
  REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('DG_DFTO3L',0,ZHOOK_HANDLE)
-INI=SIZE(I%XPATCH,1)
-INP=SIZE(I%XPATCH,2)
+INI=SIZE(I%IP%XPATCH,1)
+INP=SIZE(I%IP%XPATCH,2)
 !
 PDG(:,:)=0.0
 !
     DO JPATCH=1,INP
 !  
-      IF (I%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-      DO JLAYER = 1,I%NGROUND_LAYER
+      IF (I%IP%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+      DO JLAYER = 1,I%O%NGROUND_LAYER
         DO JJ=1,INI
-          IDEPTH=I%NWG_LAYER(JJ,JPATCH)
-          IF(JLAYER<=IDEPTH.AND.IDEPTH/=NUNDEF.AND.I%XPATCH(JJ,JPATCH)/=XUNDEF)THEN
+          IDEPTH=I%M%X%NWG_LAYER(JJ,JPATCH)
+          IF(JLAYER<=IDEPTH.AND.IDEPTH/=NUNDEF.AND.I%IP%XPATCH(JJ,JPATCH)/=XUNDEF)THEN
             !
-            PDG      (JJ,1) = PDG      (JJ,1) + I%XDG(JJ,1,JPATCH) * I%XPATCH(JJ,JPATCH) 
+            PDG      (JJ,1) = PDG      (JJ,1) + I%M%X%XDG(JJ,1,JPATCH) * I%IP%XPATCH(JJ,JPATCH) 
             ! ISBA-FR-DG2 comparable soil wetness index, liquid water and ice contents
-            ZWORK=MIN(I%XDZG(JJ,JLAYER,JPATCH),MAX(0.0,I%XDG2(JJ,JPATCH)-I%XDG(JJ,JLAYER,JPATCH)+I%XDZG(JJ,JLAYER,JPATCH)))
-            PDG      (JJ,2) = PDG      (JJ,2) + ZWORK * I%XPATCH(JJ,JPATCH) 
+            ZWORK=MIN(I%IP%XDZG(JJ,JLAYER,JPATCH),&
+                    MAX(0.0,I%M%X%XDG2(JJ,JPATCH)-I%M%X%XDG(JJ,JLAYER,JPATCH)+I%IP%XDZG(JJ,JLAYER,JPATCH)))
+            PDG      (JJ,2) = PDG      (JJ,2) + ZWORK * I%IP%XPATCH(JJ,JPATCH) 
             !
             ! ISBA-FR-DG3 comparable soil wetness index, liquid water and ice contents
-            ZWORK=MIN(I%XDZG(JJ,JLAYER,JPATCH),MAX(0.0,I%XDG(JJ,JLAYER,JPATCH)-I%XDG2(JJ,JPATCH)))
-            PDG      (JJ,3) = PDG      (JJ,3) + ZWORK * I%XPATCH(JJ,JPATCH) 
+            ZWORK=MIN(I%IP%XDZG(JJ,JLAYER,JPATCH),MAX(0.0,I%M%X%XDG(JJ,JLAYER,JPATCH)-I%M%X%XDG2(JJ,JPATCH)))
+            PDG      (JJ,3) = PDG      (JJ,3) + ZWORK * I%IP%XPATCH(JJ,JPATCH) 
             !
           ENDIF
         ENDDO

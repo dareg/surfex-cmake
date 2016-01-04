@@ -101,7 +101,7 @@ IF ( LTOPD_STEP ) THEN
   !
   write(ILUOUT,*) 'pas de temps coupl ',YSTEP
   !
-  IF (I%CRUNOFF=='TOPD') THEN
+  IF (I%O%CRUNOFF=='TOPD') THEN
     CALL COUPL_TOPD(DGEI, DGMI, IG, I, UG, U, &
                     HPROGRAM,YSTEP,KI,NTOPD_STEP)
   ELSE

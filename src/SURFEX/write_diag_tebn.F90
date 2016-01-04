@@ -74,8 +74,8 @@ IF (HWRITE/='PGD') THEN
       CALL WRITE_DIAG_SEB_TEB_n(DTCO, DGU, U, TM%CHT, TM%DGT, TM%DGUT, &
                                 HPROGRAM)
       DO JTEB_PATCH=1,TM%TOP%NTEB_PATCH
-        CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
-                                    GDM%TGD, GDM%TGDPE, GRM%TGR, GRM%TGRPE, JTEB_PATCH)
+        CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
+                                GRM%TV%R, GRM%TV%M%T, JTEB_PATCH)
         CALL WRITE_DIAG_MISC_TEB_n(DTCO, DGU, U, TM%DGCT, TM%DGMT, TM%DGMTO, TM%T, TM%TOP, &
                                    HPROGRAM,JTEB_PATCH)
       END DO      
@@ -89,7 +89,7 @@ IF (TM%DGT%LPGD) THEN
     IF (ASSOCIATED(TM%T%CUR%XBLD)) THEN
       CALL WRITE_DIAG_PGD_TEB_n(DTCO, DGU, U, TM%B, TM%BOP, TM%T, TM%TOP, TM%TPN, &
                                 HPROGRAM)
-      IF (TM%TOP%LGARDEN) CALL WRITE_DIAG_PGD_GRDN_n(DTCO, DGU, U, TM%DGMTO, GDM%TGDPE, GDM%TGDP, GDM%TVG, &
+      IF (TM%TOP%LGARDEN) CALL WRITE_DIAG_PGD_GRDN_n(DTCO, DGU, U, TM%DGMTO, GDM%TV%M, GDM%TV%I, GDM%TV%O, &
                                                   HPROGRAM)
     ENDIF
   END IF

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE ISBA_CANOPY (I, &
+SUBROUTINE ISBA_CANOPY (PCDRAG, &
                         KI,KLVL,PZ,PZF,PDZ,PDZF,PHEIGHT,PCANOPY_DENSITY,PU,PTKE,   &
                         PUW_GROUND, PDUWDU_GROUND,                                &
                         PFORC_U,PDFORC_UDU,PFORC_E,PDFORC_EDE)  
@@ -42,7 +42,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+REAL, INTENT(IN) :: PCDRAG
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
 INTEGER,                  INTENT(IN)    :: KLVL      ! number of levels in canopy
@@ -101,7 +101,7 @@ END DO
 !*      2.1    Drag coefficient by vegetation (Patton et al 2001)
 !              ------------------------------
 !
-ZCDRAG(:,:) = I%XCDRAG
+ZCDRAG(:,:) = PCDRAG
 !
 !*      1.4    No building volume
 !

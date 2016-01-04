@@ -1,5 +1,5 @@
 !     #########
- SUBROUTINE DIAG_INLINE_ISBA_n (DGEI, DGI, I, PKDI, &
+ SUBROUTINE DIAG_INLINE_ISBA_n (DGEI, DGI, PKDI, OCANOPY, &
                                  PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA, PMERA,  &
                                   PHT, PHW, PCD, PCDN, PCH, PRI, PHU, PZ0, PZ0H, &
                                   PZ0EFF, PSFTH, PSFTQ, PSFZON, PSFMER, PQS,     &
@@ -36,7 +36,6 @@
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
@@ -57,8 +56,9 @@ IMPLICIT NONE
 !
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
 TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
-TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKDI
+!
+LOGICAL, INTENT(IN) :: OCANOPY
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PTA      ! atmospheric temperature
 REAL, DIMENSION(:), INTENT(IN)       :: PTS      ! surface temperature
@@ -107,7 +107,7 @@ ENDIF
 !
 ! * Near surface atmospheric variables
 !
-IF (.NOT. I%LCANOPY) THEN
+IF (.NOT. OCANOPY) THEN
 !        
   IF (DGI%N2M==1) THEN
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW,  &

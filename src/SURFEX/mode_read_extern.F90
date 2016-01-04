@@ -25,7 +25,7 @@ CONTAINS
 !
 !     #######################
       SUBROUTINE READ_EXTERN_DEPTH (U, &
-                                     DTCO, I, &
+                                     DTCO, IO, &
                                     HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                                     KLUOUT,HISBA,HNAT,HFIELD,KNI,KLAYER, &
                                    KPATCH,PSOILGRID,PDEPTH,KVERSION,KWG_LAYER          )
@@ -40,7 +40,7 @@ CONTAINS
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 !
@@ -64,7 +64,7 @@ IMPLICIT NONE
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
  CHARACTER(LEN=28),    INTENT(IN)    :: HFILE  ! type of input file
  CHARACTER(LEN=6),     INTENT(IN)    :: HFILETYPE  ! type of input file
@@ -173,7 +173,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
     DO JLAYER=1,KLAYER
       IF (JLAYER<10)  WRITE(YRECFM,FMT='(A4,I1.1)') 'D_DG',JLAYER
       IF (JLAYER>=10) WRITE(YRECFM,FMT='(A4,I2.2)') 'D_DG',JLAYER
-      CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, IO%NPATCH, &
                                 HFILEPGDTYPE,YRECFM,KLUOUT,KNI,PDEPTH(:,JLAYER,:),IRESP,IVERSION,HDIR='E')
     END DO
     GREAD_OK = .TRUE.
@@ -192,7 +192,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       !
       IF (GDATA_ROOT_DEPTH) THEN
         YRECFM2='D_ROOT_DEPTH'
-        CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, IO%NPATCH, &
                                   HFILEPGDTYPE,YRECFM2,KLUOUT,KNI,PDEPTH(:,2,:),IRESP,IVERSION,HDIR='E')
       ENDIF
       !
@@ -209,7 +209,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
       YRECFM2='D_GROUND_DETPH'
       IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='D_GROUND_DPT'
       ALLOCATE(ZGROUND_DEPTH(KNI,KPATCH))
-      CALL READ_SURF_ISBA_PAR_n(DTCO, U, I, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, IO%NPATCH, &
                                 HFILEPGDTYPE,YRECFM2,KLUOUT,KNI,ZGROUND_DEPTH(:,:),IRESP,IVERSION,HDIR='E')
       !
       IF (.NOT.GDATA_DG) THEN
@@ -334,8 +334,8 @@ IF (GECOCLIMAP .AND. .NOT.GREAD_OK ) THEN
     ENDIF
     !
     IF (NRANK==NPIO) THEN
-      CALL CONVERT_COVER_ISBA(DTCO, I, &
-                              HISBA,1,ZCOVER,GCOVER,'   ',HNAT,PSOILGRID=PSOILGRID, &
+      CALL CONVERT_COVER_ISBA(DTCO, IO%CALBEDO, &
+                              HISBA,IO%LTR_ML,1,ZCOVER,GCOVER,'   ',HNAT,PSOILGRID=PSOILGRID, &
                               PPERM=ZPERM,PDG=PDEPTH,KWG_LAYER=KWG_LAYER             )
     ENDIF
     !
@@ -358,7 +358,7 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !
 !     #######################
       SUBROUTINE READ_EXTERN_ISBA (U, &
-                                    DTCO, I, &
+                                    DTCO, IO, &
                                    HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                                   KLUOUT,KNI,HFIELD,HNAME,PFIELD,PDEPTH,OKEY)
 !     #######################
@@ -367,7 +367,7 @@ END SUBROUTINE READ_EXTERN_DEPTH
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
@@ -385,7 +385,7 @@ IMPLICIT NONE
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 CHARACTER(LEN=28),    INTENT(IN)  :: HFILE     ! name of file
 CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE ! type of input file
@@ -678,7 +678,7 @@ ELSE
   IF (GTEB) YNAT='GRD'
   !
   CALL READ_EXTERN_DEPTH(U, &
-                         DTCO, I, &
+                         DTCO, IO, &
                          HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                          KLUOUT,YISBA,YNAT,HFIELD,KNI,  &
                          ILAYER,IPATCH,ZSOILGRID,PDEPTH,IVERSION,IWG_LAYER)

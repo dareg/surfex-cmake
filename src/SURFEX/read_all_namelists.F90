@@ -92,7 +92,7 @@ IF (.NOT.LNAM_READ) THEN
                                 HPROGRAM,HINIT)
   CALL READ_NAMELISTS_ISBA_n(YSC%IM, &
                              HPROGRAM,HINIT)
-  CALL READ_NAMELISTS_TEB_n(YSC%TM, YSC%GRM%TGRO, YSC%GDM%TVG, &
+  CALL READ_NAMELISTS_TEB_n(YSC%TM, YSC%GRM%TV%O, YSC%GDM%TV%O, &
                             HPROGRAM,HINIT)
   CALL READ_NAMELISTS_IDEAL_n(YSC%DGL, &
                               HPROGRAM)

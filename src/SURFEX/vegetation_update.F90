@@ -1,12 +1,12 @@
 !     #########
-    SUBROUTINE VEGETATION_UPDATE (DTCO, DTI, DTGD, DTGR, IG, I, TGRO, &
+    SUBROUTINE VEGETATION_UPDATE (DTCO, DTI, DTGD, DTGR, IG, IO, &
                                   PTSTEP,TTIME,PCOVER,OCOVER,          &
                        HISBA,OECOCLIMAP, HPHOTO, OAGRIP, OTR_ML,      &
                        HSFTYPE, PLAI,PVEG,PZ0,                        &
                        PALBNIR,PALBVIS,PALBUV,PEMIS,                  &
                        PRSMIN,PGAMMA,PWRMAX_CF,                       &
                        PRGL,PCV,                                      &
-                       PGMES,PBSLAI,PLAIMIN,PSEFOLD,PGC,PDMAX,        &
+                       PGMES,PBSLAI,PLAIMIN,PSEFOLD,PGC,        &
                        PF2I,OSTRESS,                                  &
                        PAOSIP,PAOSIM,PAOSJP,PAOSJM,                   &
                        PHO2IP,PHO2IM,PHO2JP,PHO2JM,                   &
@@ -67,11 +67,8 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
 USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -95,11 +92,10 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
@@ -134,7 +130,6 @@ REAL,   DIMENSION(:,:), INTENT(INOUT) :: PLAIMIN
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PSEFOLD
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PGC
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PF2I
-REAL,   DIMENSION(:,:), INTENT(INOUT) :: PDMAX
 LOGICAL,DIMENSION(:,:), INTENT(INOUT) :: OSTRESS
 !
 ! MEB stuff
@@ -204,15 +199,16 @@ ODUPDATED=.FALSE.
 !
 !* new decade?
   IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
+          
     ODUPDATED=.TRUE.
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
-      CALL UPDATE_DATA_COVER(DTCO, DTI, IG, I, &
+      CALL UPDATE_DATA_COVER(DTCO, DTI, IG, IO%NPATCH, IO%LMEB_PATCH, &
                              TTIME%TDATE%YEAR)  
-      IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(DTCO, DTI, IG, I, &
+      IF (HSFTYPE=='NAT') CALL INIT_ISBA_MIXPAR(DTCO, DTI, IG, IO, &
                                                 HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,HPHOTO,HSFTYPE)
-      CALL CONVERT_PATCH_ISBA(DTCO, DTI, I, &
+      CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, &
                               HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
                            HPHOTO,OAGRIP,.FALSE.,OTR_ML,HSFTYPE, &
                            PVEG=PVEG,PLAI=PLAI,PRSMIN=PRSMIN,    &
@@ -237,7 +233,7 @@ ODUPDATED=.FALSE.
                            PLAIGV=PLAIGV,PZ0LITTER=PZ0LITTER,    &
                            PH_VEG=PH_VEG                         )
       IF ( HALBEDO=='CM13') THEN
-        CALL CONVERT_PATCH_ISBA(DTCO, DTI, I, &
+        CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, &
                               HISBA,IDECADE,IDECADE2,PCOVER,OCOVER,&
                               HPHOTO,OAGRIP,.FALSE.,OTR_ML,HSFTYPE, &
                               PALBNIR_SOIL=PALBNIR_SOIL, &
@@ -247,12 +243,12 @@ ODUPDATED=.FALSE.
     ELSEIF (HSFTYPE=='GRD') THEN
       CALL INIT_FROM_DATA_GRDN_n(DTGD, &
                                  IDECADE,HPHOTO,                                      &
-                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
+                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS    )
      
     ELSEIF (HSFTYPE=='GNR') THEN
-      CALL INIT_FROM_DATA_GREENROOF_n(DTGR, TGRO, &
+      CALL INIT_FROM_DATA_GREENROOF_n(DTGR,  &
                                       IDECADE,HPHOTO,                                 &
-                       PVEG=PVEG(:,1),PLAI=PLAI(:,1),PZ0=PZ0(:,1),PEMIS=PEMIS(:,1)    )  
+                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS   ) 
 
     ENDIF
 !
@@ -308,6 +304,7 @@ ODUPDATED=.FALSE.
     ENDIF
 
   END IF
+
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE',1,ZHOOK_HANDLE)
 !
 !*      2.3    Prescribed vegetation

@@ -200,32 +200,32 @@ YCOMMENT=YRECFM
 YRECFM='GD_PEDOTF'
 YCOMMENT=YRECFM
  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,YRECFM,GDM%TVG%CPEDOTF,IRESP,HCOMMENT=YCOMMENT)
+                 HPROGRAM,YRECFM,GDM%TV%O%CPEDOTF,IRESP,HCOMMENT=YCOMMENT)
 !
 ! * type of photosynthesis
 !
 YRECFM='GD_PHOTO'
 YCOMMENT=YRECFM
  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,YRECFM,GDM%TVG%CPHOTO,IRESP,HCOMMENT=YCOMMENT)
+                 HPROGRAM,YRECFM,GDM%TV%O%CPHOTO,IRESP,HCOMMENT=YCOMMENT)
 !
 !* new radiative transfert
 !
 YRECFM='GD_TR_ML'
 YCOMMENT=YRECFM
  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,YRECFM,GDM%TVG%LTR_ML,IRESP,HCOMMENT=YCOMMENT)
+                 HPROGRAM,YRECFM,GDM%TV%O%LTR_ML,IRESP,HCOMMENT=YCOMMENT)
 !
 ! * ISBA fields specific to urban gardens
 !
  CALL WRITESURF_PGD_TEB_VEG_n(DGU, U, &
-                              GDM%DTGD, GDM%TGDO, GDM%TGDP, GDM%TVG, &
+                              GDM%DTI, GDM%TV%O, GDM%TV%P,  &
                               HPROGRAM)
 !
 ! * ISBA fields specific to urban greenroofs
 !
 IF (TM%TOP%LGREENROOF) CALL WRITESURF_PGD_TEB_GREENROOF_n(DGU, U, &
-                                                       GRM%TGRO, GRM%TGRP, &
+                                                       GRM%DTI, GRM%TV%O, GRM%TV%P, &
                                                        HPROGRAM)
 !
 ENDIF
@@ -255,8 +255,8 @@ YCOMMENT='ZS'
                  HPROGRAM,TM%TG%CGRID,TM%TG%XGRID_PAR,TM%TG%XLAT,TM%TG%XLON,TM%TG%XMESH_SIZE,IRESP)
 !
 !-------------------------------------------------------------------------------
- CALL WRITESURF_PGD_TEB_PAR_n(TM%BDD, TM%DTB, GDM%DTGD, GRM%DTGR, TM%DTT, DGU, U, GDM%TGDO, &
-                              GDM%TGDP, GRM%TGRO, GDM%TIR, TM%TOP, &
+ CALL WRITESURF_PGD_TEB_PAR_n(TM%BDD, TM%DTB, GDM%DTI, GRM%DTI, TM%DTT, DGU, U, GDM%TV%O, &
+                              GDM%TV%P, GRM%TV%O, GRM%TV%P, GDM%TIR, TM%TOP, &
                               HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_N',1,ZHOOK_HANDLE)

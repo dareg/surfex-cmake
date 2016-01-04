@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE Z0EFF (I, &
+    SUBROUTINE Z0EFF (HSNOW_SCHEME, &
                       HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
                       PPALPHAN,PZ0LITTER, PWSNOW,                               &
                       PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,PFF,PZ0_FLOOD,        &
@@ -62,8 +62,6 @@
 !               ------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_CSTS,     ONLY : XPI, XG
 USE MODD_SNOW_PAR, ONLY : XZ0SN, XWCRN, XZ0HSN
 !
@@ -80,7 +78,7 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+ CHARACTER(LEN=*), INTENT(IN) :: HSNOW_SCHEME
 !
  CHARACTER(LEN=*),   INTENT(IN)  :: HROUGH         ! type of roughness length
 LOGICAL, INTENT(IN)             :: OMEB           ! True = patch with multi-energy balance 
@@ -173,7 +171,7 @@ PZ0EFF_MEBN=0.
 PZ0_WITH_SNOW(:)  = PZ0(:)
 PZ0H_WITH_SNOW(:) = PZ0(:) / PZ0_O_Z0H(:)
 !
-IF(I%TSNOW%SCHEME=='EBA') THEN
+IF(HSNOW_SCHEME=='EBA') THEN
 !        
    WHERE (PPSN(:)>0.)
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVG_ALBEDO_EMIS_GARDEN (TGD, &
+      SUBROUTINE AVG_ALBEDO_EMIS_GARDEN (TVR, &
                                          HALBEDO,          &
                                  PVEG,PZ0,PLAI,PTG1,        &
                                  PSW_BANDS,                 &
@@ -50,7 +50,7 @@
 !            -----------
 !
 !
-USE MODD_TEB_GARDEN_n, ONLY : TEB_GARDEN_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -74,7 +74,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(TEB_GARDEN_t), INTENT(INOUT) :: TGD
+TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TVR
 !
  CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 ! Albedo dependance with surface soil water content
@@ -143,25 +143,25 @@ PEMIS   (:)  =0.
 PTSRAD  (:)  =0.
 !   
 !
-  CALL ISBA_SNOW_FRAC(TGD%CUR%TSNOW%SCHEME,           &
-         TGD%CUR%TSNOW%WSNOW(:,:,1), TGD%CUR%TSNOW%RHO(:,:,1),&
-         TGD%CUR%TSNOW%ALB  (:,1),                    &
+  CALL ISBA_SNOW_FRAC(TVR%CUR%TSNOW%SCHEME,           &
+         TVR%CUR%TSNOW%WSNOW(:,:,1), TVR%CUR%TSNOW%RHO(:,:,1),&
+         TVR%CUR%TSNOW%ALB  (:,1),                    &
          PVEG(:), PLAI(:), PZ0(:),            &
-         TGD%CUR%XPSN(:), TGD%CUR%XPSNV_A(:),                 &
-         TGD%CUR%XPSNG(:), TGD%CUR%XPSNV(:)                   )
+         TVR%CUR%XPSN(:,1), TVR%CUR%XPSNV_A(:,1),                 &
+         TVR%CUR%XPSNG(:,1), TVR%CUR%XPSNV(:,1)                   )
 !
  WHERE (PVEG(:)/=XUNDEF)
 !
 ! albedo on this tile
 !
-    ZALBNIR(:) = (1.-TGD%CUR%XPSN(:))*PALBNIR_ECO(:) &
-                +    TGD%CUR%XPSN(:) *TPSNOW%ALB (:,1)  
+    ZALBNIR(:) = (1.-TVR%CUR%XPSN(:,1))*PALBNIR_ECO(:) &
+                +    TVR%CUR%XPSN(:,1) *TPSNOW%ALB (:,1)  
       
-    ZALBVIS(:) = (1.-TGD%CUR%XPSN(:))*PALBVIS_ECO(:) &
-                +    TGD%CUR%XPSN(:) *TPSNOW%ALB (:,1)  
+    ZALBVIS(:) = (1.-TVR%CUR%XPSN(:,1))*PALBVIS_ECO(:) &
+                +    TVR%CUR%XPSN(:,1) *TPSNOW%ALB (:,1)  
       
-    ZALBUV(:)  = (1.-TGD%CUR%XPSN(:))*PALBUV_ECO (:) &
-                +    TGD%CUR%XPSN(:) *TPSNOW%ALB (:,1)  
+    ZALBUV(:)  = (1.-TVR%CUR%XPSN(:,1))*PALBUV_ECO (:) &
+                +    TVR%CUR%XPSN(:,1) *TPSNOW%ALB (:,1)  
   END WHERE
 !
 !* albedo for each wavelength
@@ -172,8 +172,8 @@ PTSRAD  (:)  =0.
 ! emissivity
 !
   WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PEMIS(:)   = (1.-TGD%CUR%XPSN(:))*PEMIS_ECO  (:) &
-                +    TGD%CUR%XPSN(:) *XEMISSN  
+    PEMIS(:)   = (1.-TVR%CUR%XPSN(:,1))*PEMIS_ECO  (:) &
+                +    TVR%CUR%XPSN(:,1) *XEMISSN  
   END WHERE
 !
 !* radiative surface temperature
@@ -182,8 +182,8 @@ PTSRAD  (:)  =0.
     PTSRAD(:) = PTG1(:)
   ELSE IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
     WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PTSRAD(:) =( ( (1.-TGD%CUR%XPSN(:))*PEMIS      (:)       *PTG1     (:)**4         &
-                  +    TGD%CUR%XPSN(:) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
+    PTSRAD(:) =( ( (1.-TVR%CUR%XPSN(:,1))*PEMIS      (:)       *PTG1     (:)**4         &
+                  +    TVR%CUR%XPSN(:,1) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
                              / PEMIS(:)**0.25  
     END WHERE
   END IF

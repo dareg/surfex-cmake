@@ -94,11 +94,11 @@ IKI = SIZE(PTAB,1)
 DO JL = 1,NVAR   ! control variable (x at previous time step)
   DO JK = 1,NVAR
     DO JI = 1,IKI
-      DO JJ = 1,I%NPATCH   
-        DO JJJ = 1,I%NPATCH
+      DO JJ = 1,I%O%NPATCH   
+        DO JJJ = 1,I%O%NPATCH
           !
-          L1 = JJ+I%NPATCH*(JL-1)
-          K1 = JJJ+I%NPATCH*(JK-1)
+          L1 = JJ+I%O%NPATCH*(JL-1)
+          K1 = JJJ+I%O%NPATCH*(JK-1)
           !
           IF ( HACTION=="READ" ) THEN
             READ (111) PTAB(JI,L1,K1)

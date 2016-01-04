@@ -56,6 +56,7 @@ TYPE DIAG_ISBA_t
 !
   REAL, POINTER, DIMENSION(:,:) :: XRI     ! Bulk-Richardson number           (-)
   REAL, POINTER, DIMENSION(:,:) :: XCD     ! drag coefficient for wind        (W/s2)
+  REAL, POINTER, DIMENSION(:,:) :: XCDN    ! neutral drag coefficient         (-)  
   REAL, POINTER, DIMENSION(:,:) :: XCH     ! drag coefficient for heat        (W/s)
   REAL, POINTER, DIMENSION(:,:) :: XCE     ! drag coefficient for vapor       (W/s/K)
   REAL, POINTER, DIMENSION(:,:) :: XRN     ! net radiation at surface         (W/m2)
@@ -165,6 +166,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_ISBA_N:DIAG_ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YDIAG_ISBA%XRI)
   NULLIFY(YDIAG_ISBA%XCD)
+  NULLIFY(YDIAG_ISBA%XCDN)
   NULLIFY(YDIAG_ISBA%XCH)
   NULLIFY(YDIAG_ISBA%XCE)
   NULLIFY(YDIAG_ISBA%XRN)

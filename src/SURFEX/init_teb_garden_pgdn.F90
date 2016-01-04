@@ -1,6 +1,6 @@
 !#############################################################
         SUBROUTINE INIT_TEB_GARDEN_PGD_n (DTCO, U, CHI, DTI, I, DST, SLT, CHT, TG, T, TOP, GDM, &
-                                          HPROGRAM,HINIT, OREAD_PGD,KI, KSV, HSV, KVERSION, KBUGFIX, &
+                                          HPROGRAM, HINIT, OREAD_PGD,KI, KSV, HSV, KVERSION, KBUGFIX, &
                                           PCO2, PRHOA)
         !#############################################################
         !
@@ -62,9 +62,9 @@
         USE MODI_GET_LUOUT
         USE MODI_ALLOCATE_TEB_GARDEN_PGD
         USE MODI_READ_PGD_TEB_GARDEN_n
-        USE MODI_CONVERT_PATCH_GARDEN
+        USE MODI_CONVERT_PATCH_ISBA
         USE MODI_INIT_FROM_DATA_GRDN_n
-        USE MODI_INIT_VEG_PGD_GARDEN_n
+        USE MODI_INIT_VEG_PGD_n
         USE MODI_EXP_DECAY_SOIL_FR
         USE MODI_ABOR1_SFX
         !
@@ -115,6 +115,35 @@
         !
         REAL, DIMENSION(KI)               :: ZF
         REAL, DIMENSION(KI)               :: ZWORK
+        !
+        REAL, DIMENSION(:,:), POINTER :: ZPATCH
+        REAL, DIMENSION(:,:,:), POINTER :: ZVEGTYPE_PATCH
+        INTEGER, DIMENSION(:), POINTER :: ISIZE_NATURE_P
+        INTEGER, DIMENSION(:,:), POINTER :: IR_NATURE_P
+        REAL, DIMENSION(0) :: ZTDEEP_CLI, ZGAMMAT_CLI, ZTHRESHOLD
+        INTEGER, DIMENSION(:,:), POINTER :: IIRRINUM
+        LOGICAL, DIMENSION(:,:), POINTER :: GIRRIDAY
+        LOGICAL, DIMENSION(:,:), POINTER :: GIRRIGATE
+        REAL, DIMENSION(:,:), POINTER :: ZTHRESHOLDSPT
+        REAL, DIMENSION(:,:,:), POINTER :: ZINCREASE
+        REAL, DIMENSION(:,:,:), POINTER :: ZTURNOVER
+        REAL, DIMENSION(:,:,:), POINTER :: ZSFDST
+        REAL, DIMENSION(:,:,:), POINTER :: ZSFDSTM
+        REAL, DIMENSION(:,:,:), POINTER :: ZSFSLT
+        REAL, DIMENSION(0) :: ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM
+        REAL, DIMENSION(0) :: ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM
+        REAL, DIMENSION(0,0) :: ZZ0
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFIP
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFIM
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFJP
+        REAL, DIMENSION(:,:), POINTER :: ZZ0EFFJM
+        REAL, DIMENSION(:), POINTER :: ZZ0REL
+        REAL, DIMENSION(:,:), POINTER :: ZTAU_WOOD
+        REAL, DIMENSION(:,:), POINTER :: ZKANISO
+        REAL, DIMENSION(:,:), POINTER :: ZWD0
+        REAL, DIMENSION(:), POINTER   :: ZFWTD ! grid-cell fraction of water table to rise
+        REAL, DIMENSION(:), POINTER   :: ZWTD  ! water table depth from Obs, TRIP or MODCOU
+        !
         REAL(KIND=JPRB) :: ZHOOK_HANDLE
         !
         !-------------------------------------------------------------------------------
@@ -131,15 +160,15 @@
         !
         !* allocation of urban green area variables
         !
-         CALL ALLOCATE_TEB_GARDEN_PGD(GDM%TGDPE, GDM%TGDP, &
-                                      OREAD_PGD, KI, NVEGTYPE, GDM%TGDO%NGROUND_LAYER, NDIMTAB)  
+         CALL ALLOCATE_TEB_GARDEN_PGD(GDM%TV%M, GDM%TV%P, GDM%TV%IP, &
+                                      OREAD_PGD, KI, NVEGTYPE, GDM%TV%O%NGROUND_LAYER, NDIMTAB)  
         !
         !
         !*       2.1    Cover, soil and orographic fields:
         !               ---------------------------------
         !
         IF (OREAD_PGD) &
-         CALL READ_PGD_TEB_GARDEN_n(CHT, DTCO, GDM%DTGD, GDM%GBGD, U, GDM%TGDO, GDM%TGDP, TG, TOP, &
+         CALL READ_PGD_TEB_GARDEN_n(CHT, DTCO, GDM%DTI, GDM%GB, U, GDM%TV%O, GDM%TV%P, GDM%TV%IP, TG, TOP, &
                                     HPROGRAM,KVERSION,KBUGFIX)
         !
         !
@@ -153,152 +182,203 @@
         END IF
         !
         !
-        IF (.NOT. GDM%TGDO%LPAR_GARDEN) THEN
-          CALL CONVERT_PATCH_GARDEN(DTCO, DTI, I, GDM%TGDO, GDM%TGDPE, GDM%TGDP, TOP, GDM%TVG, &
-                                    KI,IDECADE)
-        ELSE
-         CALL INIT_FROM_DATA_GRDN_n(GDM%DTGD, &
-                                    IDECADE,GDM%TVG%CPHOTO, GDM%TGDPE%CUR%XVEG, &
-                                    GDM%TGDPE%CUR%XLAI,GDM%TGDP%XRSMIN,GDM%TGDP%XGAMMA,&
-                                    GDM%TGDP%XWRMAX_CF, GDM%TGDP%XRGL,GDM%TGDP%XCV,GDM%TGDP%XDG,&
-                                    GDM%TGDP%XD_ICE,GDM%TGDPE%CUR%XZ0,GDM%TGDP%XZ0_O_Z0H,&
-                                    GDM%TGDP%XALBNIR_VEG,GDM%TGDP%XALBVIS_VEG,     &
-                                    GDM%TGDP%XALBUV_VEG,GDM%TGDPE%CUR%XEMIS,      &
-                                    GDM%TGDP%XVEGTYPE,GDM%TGDP%XROOTFRAC,GDM%TGDP%XGMES,&
-                                    GDM%TGDP%XBSLAI,GDM%TGDP%XLAIMIN,GDM%TGDP%XSEFOLD,GDM%TGDP%XGC,   &
-                                    GDM%TGDP%XDMAX, GDM%TGDP%XF2I, GDM%TGDP%LSTRESS, GDM%TGDP%XH_TREE,&
-                                    GDM%TGDP%XRE25,GDM%TGDP%XCE_NITRO,GDM%TGDP%XCF_NITRO,GDM%TGDP%XCNA_NITRO      )  
+        IF (.NOT. GDM%TV%O%LPAR) THEN
+          CALL CONVERT_PATCH_ISBA(DTCO, DTI, GDM%TV%O, &
+                        GDM%TV%O%CISBA,IDECADE,IDECADE,TOP%XCOVER,TOP%LCOVER,&
+                        GDM%TV%O%CPHOTO,.FALSE.,  &
+                        .FALSE.,GDM%TV%O%LTR_ML,'GRD',PVEG=GDM%TV%M%T%CUR%XVEG,PLAI=GDM%TV%M%T%CUR%XLAI,              &
+                        PRSMIN=GDM%TV%M%T%CUR%XRSMIN,PGAMMA=GDM%TV%M%T%CUR%XGAMMA,PWRMAX_CF=GDM%TV%M%T%CUR%XWRMAX_CF,       &
+                        PRGL=GDM%TV%M%T%CUR%XRGL,PCV=GDM%TV%M%T%CUR%XCV,PSOILGRID=GDM%TV%O%XSOILGRID,                 &
+                        PDG=GDM%TV%M%X%XDG,KWG_LAYER=GDM%TV%M%X%NWG_LAYER,PDROOT=GDM%TV%M%X%XDROOT,PDG2=GDM%TV%M%X%XDG2,   &
+                        PZ0=GDM%TV%M%T%CUR%XZ0,PZ0_O_Z0H=GDM%TV%M%X%XZ0_O_Z0H,PPERM=GDM%TV%P%XPERM,         &
+                        PALBNIR_VEG=GDM%TV%M%T%CUR%XALBNIR_VEG,PALBVIS_VEG=GDM%TV%M%T%CUR%XALBVIS_VEG,       &
+                        PALBUV_VEG=GDM%TV%M%T%CUR%XALBUV_VEG,PEMIS_ECO=GDM%TV%M%T%CUR%XEMIS,                 &
+                        PVEGTYPE=GDM%TV%M%X%XVEGTYPE,PROOTFRAC=GDM%TV%M%X%XROOTFRAC,                 &
+                        PGMES=GDM%TV%M%T%CUR%XGMES,PBSLAI=GDM%TV%M%T%CUR%XBSLAI,PLAIMIN=GDM%TV%M%T%CUR%XLAIMIN,             &
+                        PSEFOLD=GDM%TV%M%T%CUR%XSEFOLD,PGC=GDM%TV%M%T%CUR%XGC,                               &
+                        PDMAX=GDM%TV%M%X%XDMAX,PF2I=GDM%TV%M%T%CUR%XF2I,OSTRESS=GDM%TV%M%T%CUR%LSTRESS,PH_TREE=GDM%TV%M%X%XH_TREE, &
+                        PRE25=GDM%TV%M%X%XRE25,PCE_NITRO=GDM%TV%M%T%CUR%XCE_NITRO,PCF_NITRO=GDM%TV%M%T%CUR%XCF_NITRO,   &
+                        PCNA_NITRO=GDM%TV%M%T%CUR%XCNA_NITRO,PD_ICE=GDM%TV%M%X%XD_ICE                    )   
 
-          IF (GDM%TVG%CISBA=='DIF') THEN
+        ELSE
+         CALL INIT_FROM_DATA_GRDN_n(GDM%DTI, &
+                                    IDECADE,GDM%TV%O%CPHOTO, GDM%TV%M%T%CUR%XVEG, &
+                                    GDM%TV%M%T%CUR%XLAI,GDM%TV%M%T%CUR%XRSMIN,GDM%TV%M%T%CUR%XGAMMA,&
+                                    GDM%TV%M%T%CUR%XWRMAX_CF, GDM%TV%M%T%CUR%XRGL,GDM%TV%M%T%CUR%XCV,GDM%TV%M%X%XDG,&
+                                    GDM%TV%M%X%XD_ICE,GDM%TV%M%T%CUR%XZ0,GDM%TV%M%X%XZ0_O_Z0H,&
+                                    GDM%TV%M%T%CUR%XALBNIR_VEG,GDM%TV%M%T%CUR%XALBVIS_VEG,     &
+                                    GDM%TV%M%T%CUR%XALBUV_VEG,GDM%TV%M%T%CUR%XEMIS,      &
+                                    GDM%TV%M%X%XVEGTYPE,GDM%TV%M%X%XROOTFRAC,GDM%TV%M%T%CUR%XGMES,&
+                                    GDM%TV%M%T%CUR%XBSLAI,GDM%TV%M%T%CUR%XLAIMIN,GDM%TV%M%T%CUR%XSEFOLD,GDM%TV%M%T%CUR%XGC,   &
+                                    GDM%TV%M%X%XDMAX, GDM%TV%M%T%CUR%XF2I, GDM%TV%M%T%CUR%LSTRESS, GDM%TV%M%X%XH_TREE,&
+                                    GDM%TV%M%X%XRE25,GDM%TV%M%T%CUR%XCE_NITRO,GDM%TV%M%T%CUR%XCF_NITRO,&
+                                    GDM%TV%M%T%CUR%XCNA_NITRO      )  
+
+          IF (GDM%TV%O%CISBA=='DIF') THEN
             WHERE(T%CUR%XGARDEN(:)/=0.)
-              GDM%TGDP%NWG_LAYER(:)=GDM%TGDO%NGROUND_LAYER 
-              GDM%TGDP%XDG2  (:)=0.0
-              GDM%TGDP%XDROOT(:)=0.0
+              GDM%TV%M%X%NWG_LAYER(:,1)=GDM%TV%O%NGROUND_LAYER 
+              GDM%TV%M%X%XDG2  (:,1)=0.0
+              GDM%TV%M%X%XDROOT(:,1)=0.0
             ENDWHERE
-            DO JLAYER=GDM%TGDO%NGROUND_LAYER,1,-1
+            DO JLAYER=GDM%TV%O%NGROUND_LAYER,1,-1
               DO JILU=1,KI
-                IF(T%CUR%XGARDEN(JILU)/=0..AND.GDM%TGDP%XROOTFRAC(JILU,JLAYER)>=1.0)THEN
-                  GDM%TGDP%XDG2  (JILU)=GDM%TGDP%XDG(JILU,JLAYER)
-                  GDM%TGDP%XDROOT(JILU)=GDM%TGDP%XDG(JILU,JLAYER)
+                IF(T%CUR%XGARDEN(JILU)/=0..AND.GDM%TV%M%X%XROOTFRAC(JILU,JLAYER,1)>=1.0)THEN
+                  GDM%TV%M%X%XDG2  (JILU,:)=GDM%TV%M%X%XDG(JILU,JLAYER,:)
+                  GDM%TV%M%X%XDROOT(JILU,:)=GDM%TV%M%X%XDG(JILU,JLAYER,:)
                 ENDIF
               ENDDO
             ENDDO
           ENDIF
 
         END IF
-        !
-
+        ! 
         WHERE (T%CUR%XGARDEN(:)==0.)
-          GDM%TGDPE%CUR%XVEG(:)=0.
-          GDM%TGDPE%CUR%XLAI(:)=0.
-          GDM%TGDP%XRSMIN(:)=40.
-          GDM%TGDP%XGAMMA(:)=0.
-          GDM%TGDP%XWRMAX_CF(:)=0.2
-          GDM%TGDP%XRGL(:)=100.
-          GDM%TGDP%XCV(:)=2.E-5
-          GDM%TGDPE%CUR%XZ0(:)=0.013
-          GDM%TGDP%XZ0_O_Z0H(:)=10.
-          GDM%TGDP%XALBNIR_VEG(:)=0.30
-          GDM%TGDP%XALBVIS_VEG(:)=0.30
-          GDM%TGDP%XALBUV_VEG(:)=0.06
-          GDM%TGDPE%CUR%XEMIS(:)=0.94
-        ENDWHERE  
-        IF (GDM%TVG%CPHOTO/='NON') THEN
+          GDM%TV%M%T%CUR%XVEG(:,1)=0.
+          GDM%TV%M%T%CUR%XLAI(:,1)=0.
+          GDM%TV%M%T%CUR%XRSMIN(:,1)=40.
+          GDM%TV%M%T%CUR%XGAMMA(:,1)=0.
+          GDM%TV%M%T%CUR%XWRMAX_CF(:,1)=0.2
+          GDM%TV%M%T%CUR%XRGL(:,1)=100.
+          GDM%TV%M%T%CUR%XCV(:,1)=2.E-5
+          GDM%TV%M%T%CUR%XZ0(:,1)=0.013
+          GDM%TV%M%X%XZ0_O_Z0H(:,1)=10.
+          GDM%TV%M%T%CUR%XALBNIR_VEG(:,1)=0.30
+          GDM%TV%M%T%CUR%XALBVIS_VEG(:,1)=0.30
+          GDM%TV%M%T%CUR%XALBUV_VEG(:,1)=0.06
+          GDM%TV%M%T%CUR%XEMIS(:,1)=0.94
+        ENDWHERE
+        IF (GDM%TV%O%CPHOTO/='NON') THEN
           WHERE (T%CUR%XGARDEN(:)==0.)
-            GDM%TGDP%XGMES(:)=0.020
-            GDM%TGDP%XBSLAI(:)=0.36
-            GDM%TGDP%XLAIMIN(:)=0.3
-            GDM%TGDP%XSEFOLD(:)=90*86400.
-            GDM%TGDP%XH_TREE(:)=0.
-            GDM%TGDP%XRE25(:)=3.6E-7
-            GDM%TGDP%XGC(:)=0.00025
+            GDM%TV%M%T%CUR%XGMES(:,1)=0.020
+            GDM%TV%M%T%CUR%XBSLAI(:,1)=0.36
+            GDM%TV%M%T%CUR%XLAIMIN(:,1)=0.3
+            GDM%TV%M%T%CUR%XSEFOLD(:,1)=90*86400.
+            GDM%TV%M%X%XH_TREE(:,1)=0.
+            GDM%TV%M%X%XRE25(:,1)=3.6E-7
+            GDM%TV%M%T%CUR%XGC(:,1)=0.00025
           END WHERE
-          IF (GDM%TVG%CPHOTO/='AGS' .AND. GDM%TVG%CPHOTO/='LAI') THEN
+          IF (GDM%TV%O%CPHOTO/='AGS' .AND. GDM%TV%O%CPHOTO/='LAI') THEN
             WHERE (T%CUR%XGARDEN(:)==0.) 
-              GDM%TGDP%XDMAX(:)=0.1
-              GDM%TGDP%XF2I(:)=0.3
+              GDM%TV%M%X%XDMAX(:,1)=0.1
+              GDM%TV%M%T%CUR%XF2I(:,1)=0.3
             END WHERE
-            IF (GDM%TVG%CPHOTO=='NIT' .OR. GDM%TVG%CPHOTO=='NCB') THEN
+            IF (GDM%TV%O%CPHOTO=='NIT' .OR. GDM%TV%O%CPHOTO=='NCB') THEN
               WHERE (T%CUR%XGARDEN(:)==0.)      
-                GDM%TGDP%XCE_NITRO(:)=7.68
-                GDM%TGDP%XCF_NITRO(:)=-4.33
-                GDM%TGDP%XCNA_NITRO(:)=1.3
+                GDM%TV%M%T%CUR%XCE_NITRO(:,1)=7.68
+                GDM%TV%M%T%CUR%XCF_NITRO(:,1)=-4.33
+                GDM%TV%M%T%CUR%XCNA_NITRO(:,1)=1.3
               END WHERE
             ENDIF
           ENDIF
         ENDIF
-        IF(GDM%TVG%CISBA/='DIF')THEN
-          DO JLAYER=1,GDM%TGDO%NGROUND_LAYER
+        IF(GDM%TV%O%CISBA/='DIF')THEN
+          DO JLAYER=1,GDM%TV%O%NGROUND_LAYER
             WHERE (T%CUR%XGARDEN(:)==0.)
-              GDM%TGDP%XDG(:,JLAYER)=0.2*JLAYER
+              GDM%TV%M%X%XDG(:,JLAYER,1)=0.2*JLAYER
             END WHERE
           ENDDO
         ELSE
           WHERE (T%CUR%XGARDEN(:)==0.) 
-            GDM%TGDP%XDG(:,1)=0.01
-            GDM%TGDP%XDG(:,2)=0.04
-            GDM%TGDP%XROOTFRAC(:,1)=0.
-            GDM%TGDP%XROOTFRAC(:,2)=0.
+            GDM%TV%M%X%XDG(:,1,1)=0.01
+            GDM%TV%M%X%XDG(:,2,1)=0.04
+            GDM%TV%M%X%XROOTFRAC(:,1,1)=0.
+            GDM%TV%M%X%XROOTFRAC(:,2,1)=0.
           END WHERE        
-          DO JLAYER=3,GDM%TGDO%NGROUND_LAYER
+          DO JLAYER=3,GDM%TV%O%NGROUND_LAYER
             WHERE (T%CUR%XGARDEN(:)==0.)
-              GDM%TGDP%XDG(:,JLAYER)=0.1*(JLAYER-2)
-              GDM%TGDP%XROOTFRAC(:,JLAYER)=0.
+              GDM%TV%M%X%XDG(:,JLAYER,1)=0.1*(JLAYER-2)
+              GDM%TV%M%X%XROOTFRAC(:,JLAYER,1)=0.
             END WHERE
           ENDDO               
           WHERE (T%CUR%XGARDEN(:)==0.) 
-            GDM%TGDP%NWG_LAYER(:)=GDM%TGDO%NGROUND_LAYER
-            GDM%TGDP%XDROOT   (:)=0.0
-            GDM%TGDP%XDG2     (:)=GDM%TGDP%XDG(:,GDM%TGDO%NGROUND_LAYER-1)
+            GDM%TV%M%X%NWG_LAYER(:,1)=GDM%TV%O%NGROUND_LAYER
+            GDM%TV%M%X%XDROOT   (:,1)=0.0
+            GDM%TV%M%X%XDG2     (:,1)=GDM%TV%M%X%XDG(:,GDM%TV%O%NGROUND_LAYER-1,1)
           ENDWHERE    
         ENDIF  
         WHERE (T%CUR%XGARDEN(:)==0.) 
-          GDM%TGDP%XD_ICE(:)=0.8*GDM%TGDP%XDG(:,2)
+          GDM%TV%M%X%XD_ICE(:,1)=0.8*GDM%TV%M%X%XDG(:,2,1)
         END WHERE  
         DO JVEGTYPE=1,NVEGTYPE
           WHERE (T%CUR%XGARDEN(:)==0.)
-            GDM%TGDP%XVEGTYPE(:,JVEGTYPE)=0.
-            GDM%TGDP%XVEGTYPE(:,1)=1.
+            GDM%TV%M%X%XVEGTYPE(:,JVEGTYPE)=0.
+            GDM%TV%M%X%XVEGTYPE(:,1)=1.
           END WHERE
         ENDDO
+        !      
+        NULLIFY(ZPATCH)
+        NULLIFY(ZVEGTYPE_PATCH)
+        NULLIFY(ISIZE_NATURE_P)
+        NULLIFY(IR_NATURE_P)
+        NULLIFY(IIRRINUM)
+        NULLIFY(GIRRIDAY)
+        NULLIFY(GIRRIGATE)
+        NULLIFY(ZTHRESHOLDSPT)
+        NULLIFY(ZINCREASE)
+        NULLIFY(ZTURNOVER)
+        NULLIFY(ZSFDST)
+        NULLIFY(ZSFDSTM)
+        NULLIFY(ZSFSLT)
+        NULLIFY(ZZ0EFFIP)
+        NULLIFY(ZZ0EFFIM)
+        NULLIFY(ZZ0EFFJP)
+        NULLIFY(ZZ0EFFJM)
+        NULLIFY(ZZ0REL)
+        NULLIFY(ZFWTD)
+        NULLIFY(ZWTD)
+        NULLIFY(ZWD0)
+        NULLIFY(ZTAU_WOOD)
+        NULLIFY(ZKANISO)
         !
-         CALL INIT_VEG_PGD_GARDEN_n(CHI, DTCO, DST, I, SLT, U, &
-                            HPROGRAM, ILUOUT, KI, GDM%TGDO%NGROUND_LAYER, TOP%TTIME%TDATE%MONTH,    &
-                        GDM%TGDP%XVEGTYPE, GDM%TGDP%XTDEEP, GDM%TGDP%XGAMMAT, GDM%TVG%CPHOTO, HINIT, &
-                        GDM%TVG%LTR_ML, GDM%TVG%CRUNOFF, GDM%TVG%NNBIOMASS, PCO2, PRHOA, &
-                        GDM%TGDP%XABC, GDM%TGDP%XPOI, GDM%TGDP%XGMES, GDM%TGDP%XGC, GDM%TGDP%XDMAX, &
-                        GDM%TGDP%XANMAX, GDM%TGDP%XFZERO, GDM%TGDP%XEPSO, GDM%TGDP%XGAMM, GDM%TGDP%XQDGAMM,   &
-                        GDM%TGDP%XQDGMES, GDM%TGDP%XT1GMES, GDM%TGDP%XT2GMES, GDM%TGDP%XAMAX, GDM%TGDP%XQDAMAX, &
-                        GDM%TGDP%XT1AMAX, GDM%TGDP%XT2AMAX,GDM%TGDP%XAH, GDM%TGDP%XBH,            &
-                        KSV, HSV, CHT%SVT, CHT%CCH_NAMES, CHT%CAER_NAMES,CHT%CDSTNAMES, CHT%CSLTNAMES, &
-                        CHT%CCHEM_SURF_FILE, GDM%TGDP%XCLAY, GDM%TGDP%XSAND, GDM%TVG%CPEDOTF,      &
-                        GDM%TGDP%XCONDSAT, GDM%TGDP%XMPOTSAT, GDM%TGDP%XBCOEF, GDM%TGDP%XWWILT, &
-                        GDM%TGDP%XWFC, GDM%TGDP%XWSAT, GDM%TGDP%XTAUICE, GDM%TGDP%XCGSAT, GDM%TGDP%XC1SAT, &
-                        GDM%TGDP%XC2REF, GDM%TGDP%XC3, GDM%TGDP%XC4B, GDM%TGDP%XACOEF, GDM%TGDP%XPCOEF, &
-                        GDM%TGDP%XC4REF, GDM%TGDP%XPCPS, GDM%TGDP%XPLVTT, GDM%TGDP%XPLSTT,        &
-                        GDM%TVG%CSCOND, GDM%TVG%CISBA, GDM%TGDP%XHCAPSOIL, GDM%TGDP%XCONDDRY, &
-                        GDM%TGDP%XCONDSLD, GDM%TVG%CCPSURF, GDM%TGDP%XDG, GDM%TGDP%XDROOT, GDM%TGDP%XDG2, &
-                        GDM%TGDP%XROOTFRAC, GDM%TGDP%XRUNOFFD, GDM%TGDP%XDZG, GDM%TGDP%XDZDIF,       &
-                        GDM%TGDP%XSOILWGHT, GDM%TGDP%NWG_LAYER, GDM%TGDO%NLAYER_HORT, &
-                        GDM%TGDO%NLAYER_DUN, GDM%TGDP%XD_ICE,  &
-                        GDM%TGDP%XKSAT_ICE, GDM%TGDP%XALBNIR_DRY, GDM%TGDP%XALBVIS_DRY, GDM%TGDP%XALBUV_DRY,   &
-                        GDM%TGDP%XALBNIR_WET, GDM%TGDP%XALBVIS_WET, GDM%TGDP%XALBUV_WET, GDM%TGDP%XBSLAI_NITRO, &
-                        GDM%TGDP%XCE_NITRO, GDM%TGDP%XCNA_NITRO, GDM%TGDP%XCF_NITRO                            )
+         CALL INIT_VEG_PGD_n(CHI, DTCO, DST, SLT, U, &
+                     GDM%TV%O%LAGRI_TO_GRASS, TOP%LCOVER, TOP%XCOVER, &
+                     HPROGRAM, 'TOWN  ',ILUOUT, KI, 1, GDM%TV%O%NGROUND_LAYER, TOP%TTIME%TDATE%MONTH,    &
+                     GDM%TV%M%X%XVEGTYPE,ZPATCH, ZVEGTYPE_PATCH, ISIZE_NATURE_P, IR_NATURE_P,    &
+                  0.0, .FALSE., .FALSE., ZTDEEP_CLI, ZGAMMAT_CLI, &
+                  GDM%TV%IP%XTDEEP, GDM%TV%IP%XGAMMAT,  .FALSE., &
+                  ZTHRESHOLD, IIRRINUM, GIRRIDAY, GIRRIGATE, ZTHRESHOLDSPT, &
+                  GDM%TV%O%CPHOTO, HINIT,GDM%TV%O%LTR_ML, GDM%TV%O%NNBIOMASS, &
+                  PCO2, PRHOA, GDM%TV%IP%XABC, GDM%TV%IP%XPOI,  &
+                  GDM%TV%M%T%CUR%XGMES, GDM%TV%M%T%CUR%XGC, GDM%TV%M%X%XDMAX, &
+                  GDM%TV%IP%XANMAX, GDM%TV%IP%XFZERO, GDM%TV%IP%XEPSO, GDM%TV%IP%XGAMM, GDM%TV%IP%XQDGAMM,   &
+                  GDM%TV%IP%XQDGMES, GDM%TV%IP%XT1GMES, GDM%TV%IP%XT2GMES, GDM%TV%IP%XAMAX, GDM%TV%IP%XQDAMAX, &
+                  GDM%TV%IP%XT1AMAX, GDM%TV%IP%XT2AMAX,GDM%TV%IP%XAH, GDM%TV%IP%XBH,&           
+                  ZTAU_WOOD, ZINCREASE, ZTURNOVER,                  &
+                  KSV, HSV, CHT%SVT, CHT%CCH_NAMES, CHT%CAER_NAMES,CHT%CDSTNAMES, CHT%CSLTNAMES, &
+                  CHT%CCHEM_SURF_FILE,                     &
+                  ZSFDST, ZSFDSTM, ZSFSLT,                                    &
+                  ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM, ZHO2IP, ZHO2IM, ZHO2JP,     &
+                  ZHO2JM, ZZ0, ZZ0EFFIP, ZZ0EFFIM, ZZ0EFFJP, ZZ0EFFJM, ZZ0REL,&
+                  GDM%TV%P%XCLAY, GDM%TV%P%XSAND, GDM%TV%O%CPEDOTF,      &
+                  GDM%TV%IP%XCONDSAT, GDM%TV%IP%XMPOTSAT, GDM%TV%IP%XBCOEF, GDM%TV%IP%XWWILT, &
+                  GDM%TV%IP%XWFC, GDM%TV%IP%XWSAT, ZWD0, ZKANISO, GDM%TV%O%CRUNOFF,  &
+                  GDM%TV%IP%XTAUICE, GDM%TV%IP%XCGSAT, GDM%TV%IP%XC1SAT, &
+                  GDM%TV%IP%XC2REF, GDM%TV%IP%XC3, GDM%TV%IP%XC4B, GDM%TV%IP%XACOEF, GDM%TV%IP%XPCOEF, &
+                  GDM%TV%IP%XC4REF, GDM%TV%IP%XPCPS, GDM%TV%IP%XPLVTT, GDM%TV%IP%XPLSTT,        &
+                  GDM%TV%O%CSCOND, GDM%TV%O%CISBA, GDM%TV%IP%XHCAPSOIL, GDM%TV%IP%XCONDDRY, &
+                  GDM%TV%IP%XCONDSLD, GDM%TV%O%CCPSURF, GDM%TV%M%X%XDG, GDM%TV%M%X%XDROOT, GDM%TV%M%X%XDG2, &
+                  GDM%TV%M%X%XROOTFRAC, GDM%TV%IP%XRUNOFFD, GDM%TV%IP%XDZG, GDM%TV%IP%XDZDIF,       &
+                  GDM%TV%IP%XSOILWGHT, GDM%TV%M%X%NWG_LAYER, GDM%TV%O%NLAYER_HORT, &
+                  GDM%TV%O%NLAYER_DUN, GDM%TV%M%X%XD_ICE,  &
+                  GDM%TV%IP%XKSAT_ICE, GDM%TV%IP%XALBNIR_DRY, GDM%TV%IP%XALBVIS_DRY, GDM%TV%IP%XALBUV_DRY,   &
+                  GDM%TV%IP%XALBNIR_WET, GDM%TV%IP%XALBVIS_WET, GDM%TV%IP%XALBUV_WET, GDM%TV%IP%XBSLAI_NITRO, &
+                  GDM%TV%M%T%CUR%XCE_NITRO, GDM%TV%M%T%CUR%XCNA_NITRO, GDM%TV%M%T%CUR%XCF_NITRO,          &
+                  ZFWTD, ZWTD               )         
 !
 !-------------------------------------------------------------------------------
 !
-IF(GDM%TVG%CISBA=='DIF'.AND.GDM%TVG%LSOC)THEN
+IF(GDM%TV%O%CISBA=='DIF'.AND.GDM%TV%O%LSOC)THEN
   CALL ABOR1_SFX('INIT_TEB_GARDEN_PGDn: SUBGRID Soil organic matter'//&
                  ' effect (LSOC) NOT YET IMPLEMENTED FOR GARDEN')
-ELSEIF (GDM%TVG%CISBA=='3-L'.AND.GDM%TVG%CKSAT=='EXP') THEN 
+ELSEIF (GDM%TV%O%CISBA=='3-L'.AND.GDM%TV%O%CKSAT=='EXP') THEN 
   CALL ABOR1_SFX('INIT_TEB_GARDEN_PGDn: topmodel exponential decay not implemented for garden')
 ENDIF
 !
-IF(GDM%TVG%CKSAT=='SGH' .AND. GDM%TVG%CISBA/='DIF' .AND. HINIT/='PRE')THEN 
-  ZF(:)=MIN(4.0/GDM%TGDP%XDG(:,2),XF_DECAY)
-  CALL EXP_DECAY_SOIL_FR(GDM%TVG%CISBA, ZF(:),GDM%TGDP%XC1SAT(:),GDM%TGDP%XC2REF(:),&
-                         GDM%TGDP%XDG(:,:),GDM%TGDP%XD_ICE(:),GDM%TGDP%XC4REF(:),&
-                         GDM%TGDP%XC3(:,:),GDM%TGDP%XCONDSAT(:,:),GDM%TGDP%XKSAT_ICE(:))
+IF(GDM%TV%O%CKSAT=='SGH' .AND. GDM%TV%O%CISBA/='DIF' .AND. HINIT/='PRE')THEN 
+  ZF(:)=MIN(4.0/GDM%TV%M%X%XDG(:,2,1),XF_DECAY)
+  CALL EXP_DECAY_SOIL_FR(GDM%TV%O%CISBA, ZF(:),GDM%TV%IP%XC1SAT(:,1),GDM%TV%IP%XC2REF(:,1),&
+                         GDM%TV%M%X%XDG(:,:,1),GDM%TV%M%X%XD_ICE(:,1),GDM%TV%IP%XC4REF(:,1),&
+                         GDM%TV%IP%XC3(:,:,1),GDM%TV%IP%XCONDSAT(:,:,1),GDM%TV%IP%XKSAT_ICE(:,1))
 ENDIF
 !
 !-------------------------------------------------------------------------------

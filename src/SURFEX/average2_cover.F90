@@ -91,6 +91,9 @@ DO JCOVER=1,SIZE(U%XCOVER,2)
   END WHERE
 END DO
 !
+U%XCOVER(:,:) = AINT(U%XCOVER(:,:)) + &
+            NINT((U%XCOVER(:,:)-AINT(U%XCOVER(:,:)))*100000000.)/100000000.
+!
 !-------------------------------------------------------------------------------
 DEALLOCATE(ZUNITY)
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_COVER',1,ZHOOK_HANDLE)

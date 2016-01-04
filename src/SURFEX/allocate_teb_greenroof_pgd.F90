@@ -1,13 +1,14 @@
 !     #########
-    SUBROUTINE ALLOCATE_TEB_GREENROOF_PGD (TGRPE, TGRP, &
+    SUBROUTINE ALLOCATE_TEB_GREENROOF_PGD (TVM, TVP, TVIP, &
                                            OALLOC,KLU,KVEGTYPE,KLAYER_GR, KDIMTAB)  
 !   ##########################################################################
 !
 !
 !
 !
-USE MODD_TEB_GREENROOF_PGD_EVOL_n, ONLY : TEB_GREENROOF_PGD_EVOL_t
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+USE MODD_TEB_VEG_PARAM_n, ONLY : TEB_VEG_PARAM_t
+USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -15,8 +16,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(TEB_GREENROOF_PGD_EVOL_t), INTENT(INOUT) :: TGRPE
-TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
+TYPE(TEB_VEG_PARAM_t), INTENT(INOUT) :: TVM
+TYPE(ISBA_PGD_t), INTENT(INOUT) :: TVP
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: TVIP
 !
 LOGICAL, INTENT(IN) :: OALLOC ! True if constant PGD fields must be allocated
 INTEGER, INTENT(IN) :: KLU
@@ -32,16 +34,40 @@ IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GREENROOF_PGD',0,ZHOOK_HANDLE)
 !
 ! - Physiographic field that can evolve prognostically
 !
-ALLOCATE(TGRPE%CUR%XLAI                    (KLU                     ))
-ALLOCATE(TGRPE%CUR%XVEG                    (KLU                     )) 
-ALLOCATE(TGRPE%CUR%XEMIS                   (KLU                     )) 
-ALLOCATE(TGRPE%CUR%XZ0                     (KLU                     )) 
+ALLOCATE(TVM%T%CUR%XLAI                    (KLU                     ,1))
+ALLOCATE(TVM%T%CUR%XVEG                    (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XEMIS                   (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XZ0                     (KLU                     ,1)) 
+!
+ALLOCATE(TVM%T%CUR%XRSMIN                  (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XGAMMA                  (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XWRMAX_CF               (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XRGL                    (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XCV                     (KLU                     ,1)) 
+!
+ALLOCATE(TVM%T%CUR%XLAIMIN                 (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XSEFOLD                 (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XGMES                   (KLU                     ,1))
+ALLOCATE(TVM%T%CUR%XGC                     (KLU                     ,1))
+ALLOCATE(TVM%T%CUR%XF2I                    (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XBSLAI                  (KLU                     ,1))
 !
 ! - vegetation:
 !
-ALLOCATE(TGRP%XALBNIR_VEG             (KLU                     )) 
-ALLOCATE(TGRP%XALBVIS_VEG             (KLU                     )) 
-ALLOCATE(TGRP%XALBUV_VEG              (KLU                     )) 
+ALLOCATE(TVM%T%CUR%XALBNIR_VEG             (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XALBVIS_VEG             (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XALBUV_VEG              (KLU                     ,1)) 
+!
+!
+ALLOCATE(TVM%T%CUR%LSTRESS                 (KLU                     ,1)) 
+!
+!-------------------------------------------------------------------------------
+!
+! - vegetation: Ags Nitrogen-model parameters ('NIT' option)
+!
+ALLOCATE(TVM%T%CUR%XCE_NITRO               (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XCF_NITRO               (KLU                     ,1)) 
+ALLOCATE(TVM%T%CUR%XCNA_NITRO              (KLU                     ,1)) 
 !
 IF (.NOT. OALLOC) THEN
   IF (LHOOK) CALL DR_HOOK('ALLOCATE_TEB_GARDEN_PGD',1,ZHOOK_HANDLE)
@@ -50,7 +76,7 @@ END IF
 !-------------------------------------------------------------------------------
 ! Mask and number of grid elements containing tiles:
 !
-ALLOCATE(TGRP%XVEGTYPE                (KLU,KVEGTYPE            ))
+ALLOCATE(TVM%X%XVEGTYPE                (KLU,KVEGTYPE            ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -58,68 +84,49 @@ ALLOCATE(TGRP%XVEGTYPE                (KLU,KVEGTYPE            ))
 !
 ! - vegetation + bare soil:
 !
-ALLOCATE(TGRP%XZ0_O_Z0H               (KLU                     )) 
+ALLOCATE(TVM%X%XZ0_O_Z0H               (KLU                     ,1)) 
 !
 ! - vegetation: default option (Jarvis) and general parameters:
 !
-ALLOCATE(TGRP%XWRMAX_CF               (KLU                     )) 
-ALLOCATE(TGRP%XGAMMA                  (KLU                     )) 
-ALLOCATE(TGRP%XCV                     (KLU                     )) 
-ALLOCATE(TGRP%XRGL                    (KLU                     )) 
-ALLOCATE(TGRP%XRSMIN                  (KLU                     )) 
-ALLOCATE(TGRP%XROOTFRAC               (KLU,KLAYER_GR           ))
-ALLOCATE(TGRP%NWG_LAYER               (KLU                     ))
-ALLOCATE(TGRP%XDROOT                  (KLU                     ))
-ALLOCATE(TGRP%XDG2                    (KLU                     ))
+ALLOCATE(TVM%X%XROOTFRAC               (KLU,KLAYER_GR           ,1))
+ALLOCATE(TVM%X%NWG_LAYER               (KLU                     ,1))
+ALLOCATE(TVM%X%XDROOT                  (KLU                     ,1))
+ALLOCATE(TVM%X%XDG2                    (KLU                     ,1))
 !
 !-------------------------------------------------------------------------------
 !
 ! - vegetation: Ags parameters ('AGS', 'LAI', 'AST', 'LST', 'NIT' options)
 !
-ALLOCATE(TGRP%XBSLAI                  (KLU                     )) 
-ALLOCATE(TGRP%XLAIMIN                 (KLU                     )) 
-ALLOCATE(TGRP%XSEFOLD                 (KLU                     )) 
-ALLOCATE(TGRP%XH_TREE                 (KLU                     )) 
-ALLOCATE(TGRP%XANF                    (KLU                     ))
-ALLOCATE(TGRP%XGMES                   (KLU                     ))
-ALLOCATE(TGRP%XRE25                   (KLU                     ))
+ALLOCATE(TVM%X%XH_TREE                 (KLU                     ,1)) 
+!
+ALLOCATE(TVM%X%XRE25                   (KLU                     ,1))
 !
 !-------------------------------------------------------------------------------
 !
 ! - vegetation: Ags Stress parameters ('AST', 'LST', 'NIT' options)
 !
-ALLOCATE(TGRP%LSTRESS                 (KLU                     )) 
-ALLOCATE(TGRP%XF2I                    (KLU                     )) 
-ALLOCATE(TGRP%XGC                     (KLU                     )) 
-ALLOCATE(TGRP%XAH                     (KLU                     )) 
-ALLOCATE(TGRP%XBH                     (KLU                     )) 
-ALLOCATE(TGRP%XDMAX                   (KLU                     )) 
-!
-!-------------------------------------------------------------------------------
-!
-! - vegetation: Ags Nitrogen-model parameters ('NIT' option)
-!
-ALLOCATE(TGRP%XCE_NITRO               (KLU                     )) 
-ALLOCATE(TGRP%XCF_NITRO               (KLU                     )) 
-ALLOCATE(TGRP%XCNA_NITRO              (KLU                     )) 
+ALLOCATE(TVIP%XAH                     (KLU                     ,1)) 
+ALLOCATE(TVIP%XBH                     (KLU                     ,1)) 
+
+ALLOCATE(TVM%X%XDMAX                   (KLU                     ,1)) 
 !
 !-------------------------------------------------------------------------------
 !
 ! - soil: primary parameters
 !
-ALLOCATE(TGRP%XOM_GR                  (KLU,KLAYER_GR           ))  
-ALLOCATE(TGRP%XSAND_GR                (KLU,KLAYER_GR           ))  
-ALLOCATE(TGRP%XCLAY_GR                (KLU,KLAYER_GR           ))  
-ALLOCATE(TGRP%XTAUICE                 (KLU                     )) 
-ALLOCATE(TGRP%XGAMMAT                 (KLU                     )) 
-ALLOCATE(TGRP%XDG                     (KLU,KLAYER_GR           )) 
-ALLOCATE(TGRP%XRUNOFFD                (KLU                     )) 
+ALLOCATE(TVIP%XTAUICE                 (KLU                     )) 
+
+ALLOCATE(TVIP%XGAMMAT                 (KLU                     )) 
+
+ALLOCATE(TVM%X%XDG                     (KLU,KLAYER_GR           ,1)) 
+
+ALLOCATE(TVIP%XRUNOFFD                (KLU                     ,1)) 
 !
 !-------------------------------------------------------------------------------
 !
 ! - SGH scheme
 !                                   
-ALLOCATE(TGRP%XD_ICE                  (KLU                     )) 
+ALLOCATE(TVM%X%XD_ICE                  (KLU                     ,1)) 
 !
 !-------------------------------------------------------------------------------
 !

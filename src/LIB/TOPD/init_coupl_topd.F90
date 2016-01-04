@@ -119,7 +119,7 @@ INTEGER                   :: JJ,JI           ! loop control
 INTEGER                   :: JCAT,JMESH      ! loop control 
 INTEGER                   :: ILUOUT          ! Logical unit for output filr
 !
-REAL, DIMENSION(SIZE(I%XWG,1),3)  :: ZWG_3L,ZWGI_3L,ZDG_3L   
+REAL, DIMENSION(SIZE(I%R%XWG,1),3)  :: ZWG_3L,ZWGI_3L,ZDG_3L   
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -134,14 +134,14 @@ NMASKT(:,:) = NUNDEF
 !
 !*       1    Initialization:
 !               ---------------
-ALLOCATE(NMASKT_PATCH(SIZE(I%XWG,1)))
+ALLOCATE(NMASKT_PATCH(SIZE(I%R%XWG,1)))
 !
-IF (I%CISBA=='DIF') THEN
+IF (I%O%CISBA=='DIF') THEN
  CALL DG_DFTO3L(I, &
-                SIZE(I%XWG,1),ZDG_3L)
-ELSEIF (I%CISBA=='3-L') THEN
+                SIZE(I%R%XWG,1),ZDG_3L)
+ELSEIF (I%O%CISBA=='3-L') THEN
  CALL AVG_PATCH_WG(I, &
-                   SIZE(I%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
+                   SIZE(I%R%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
 ENDIF
 ! la surface saturee, à l'initialisation est nulle, donc on initialise les lambdas de telle sorte qu'aucun pixel ne soit sature
 ALLOCATE(XKA_PRE (NNCAT,NMESHT))
@@ -208,8 +208,8 @@ IF (HPROGRAM=='POST  ') GOTO 10
 !
 ALLOCATE(ZSAND_FULL(KI))
 ALLOCATE(ZCLAY_FULL(KI))
- CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XSAND(:,2),ZSAND_FULL)
- CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XCLAY(:,2),ZCLAY_FULL)
+ CALL UNPACK_SAME_RANK(U%NR_NATURE,I%P%XSAND(:,2),ZSAND_FULL)
+ CALL UNPACK_SAME_RANK(U%NR_NATURE,I%P%XCLAY(:,2),ZCLAY_FULL)
 !
 !ludo prof variable pour tr lat (OK car sol homogene verticalement, faux sinon)
 ALLOCATE(ZDG2_FULL(KI))
@@ -240,7 +240,7 @@ ALLOCATE(XFRAC_D3 (KI))
 XFRAC_D2(:)=1.
 XFRAC_D3(:)=0.
 !
-IF (I%CISBA=='3-L') THEN
+IF (I%O%CISBA=='3-L') THEN
  WHERE( ZDG2_FULL/=XUNDEF  ) ! if the depth is < D2
   XFRAC_D2(:) = MIN(1.,ZRTOP_D2(:))
  END WHERE
@@ -291,26 +291,26 @@ ALLOCATE(XWSTOPI   (KI))
 ALLOCATE(XWFCTOPI  (KI))
 XWSTOPI (:) = 0.0
 XWFCTOPI(:) = 0.0
-XWSTOPI    = WSAT_FUNC_1D (ZCLAYTOPI,ZSANDTOPI,I%CPEDOTF)
-IF (I%CISBA=='2-L' .OR. I%CISBA=='3-L') THEN
+XWSTOPI    = WSAT_FUNC_1D (ZCLAYTOPI,ZSANDTOPI,I%O%CPEDOTF)
+IF (I%O%CISBA=='2-L' .OR. I%O%CISBA=='3-L') THEN
   !  field capacity at hydraulic conductivity = 0.1mm/day
- XWFCTOPI   = WFC_FUNC_1D  (ZCLAYTOPI,ZSANDTOPI,I%CPEDOTF)
-ELSE IF (I%CISBA=='DIF') THEN
+ XWFCTOPI   = WFC_FUNC_1D  (ZCLAYTOPI,ZSANDTOPI,I%O%CPEDOTF)
+ELSE IF (I%O%CISBA=='DIF') THEN
   !  field capacity at water potential = 0.33bar        
- XWFCTOPI   = W33_FUNC_1D  (ZCLAYTOPI,ZSANDTOPI,I%CPEDOTF)
+ XWFCTOPI   = W33_FUNC_1D  (ZCLAYTOPI,ZSANDTOPI,I%O%CPEDOTF)
 END IF
 !
 !modif ludo test ksat exp
-WRITE(ILUOUT,*) 'CKSAT==',I%CKSAT
+WRITE(ILUOUT,*) 'CKSAT==',I%O%CKSAT
 
 ALLOCATE(ZKSAT(KI))
 ZKSAT   (:) = 0.0
 ALLOCATE(XCSTOPI(KI))
 XCSTOPI(:) = 0.0
-IF( I%CKSAT=='SGH' .OR. I%CKSAT=='EXP' ) THEN
+IF( I%O%CKSAT=='SGH' .OR. I%O%CKSAT=='EXP' ) THEN
   !
   !valeur patch 1 (idem wsat wfc) a voir cas ou il existe plusieurs patchs 
-  CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XCONDSAT(:,1,1),ZKSAT)
+  CALL UNPACK_SAME_RANK(U%NR_NATURE,I%IP%XCONDSAT(:,1,1),ZKSAT)
   !passage de definition Ksat(profondeur) en Ksat(deficit)
   WHERE ( ZDG_FULL/=XUNDEF .AND. (XWSTOPI-XWFCTOPI/=0.) )
     XCSTOPI(:) = ZKSAT(:) / (XWSTOPI(:)-XWFCTOPI(:))
@@ -318,7 +318,7 @@ IF( I%CKSAT=='SGH' .OR. I%CKSAT=='EXP' ) THEN
   !
 ELSE
   !
-  XCSTOPI(:) = HYDCONDSAT_FUNC(ZCLAYTOPI,ZSANDTOPI,I%CPEDOTF)
+  XCSTOPI(:) = HYDCONDSAT_FUNC(ZCLAYTOPI,ZSANDTOPI,I%O%CPEDOTF)
   !passage de definition Ksat(profondeur) en Ksat(deficit)
   WHERE ( ZDG_FULL/=XUNDEF .AND. (XWSTOPI-XWFCTOPI/=0.) )
     XCSTOPI(:) = XCSTOPI(:) / (XWSTOPI(:)-XWFCTOPI(:))
@@ -374,7 +374,7 @@ XWGI_FULL = 0.
 !
 ALLOCATE(XMPARA (NNCAT))
 XMPARA  (:) = 0.0
-IF (.NOT.ALLOCATED(XF_PARAM)) ALLOCATE(XF_PARAM(SIZE(I%XF_PARAM)))
+IF (.NOT.ALLOCATED(XF_PARAM)) ALLOCATE(XF_PARAM(SIZE(I%I%XF_PARAM)))
 !
 ! 
 !*      5.0      Initial saturated area computation

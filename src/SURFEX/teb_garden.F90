@@ -842,7 +842,7 @@ ZEMIS_GREENROOF  = XUNDEF
 ZTS_GREENROOF    = XUNDEF
 !
 IF (OGREENROOF) THEN
- CALL GREENROOF_PROPERTIES(TM%T, GDM%TVG, GRM, &
+ CALL GREENROOF_PROPERTIES(TM%T, GRM, &
                            PDIR_SW, PSCA_SW, PSW_BANDS, KSW,      &
                            ZTS_GREENROOF, ZEMIS_GREENROOF,        &
                            ZALB_GREENROOF, PTA=PTA,               &
@@ -1008,7 +1008,7 @@ ZPEQ_B_COEF(:) = PQ_LOWCAN(:)
 !
 IF (OGARDEN) THEN
 !
-  CALL GARDEN(DTCO, DTI, IG, I, TM%TG, TM%T, TM%TOP, GRM%DTGR, GRM%TGRO, GDM,  &
+  CALL GARDEN(DTCO, DTI, IG, I, TM%TG, TM%T, TM%TOP, GRM%DTI, GDM,  &
               HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, &
               ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                  &
               PTSTEP, PZ_LOWCAN,                                                   &
@@ -1060,7 +1060,7 @@ ENDIF
 IF (OGREENROOF) THEN
 !
   !
-  CALL GREENROOF(DTCO, DTI, IG, I, TM%TG, TM%T, TM%TOP, GDM%TVG, GDM%DTGD, GDM%TIR, GRM, &
+  CALL GREENROOF(DTCO, DTI, IG, I, TM%TG, TM%T, TM%TOP, GDM%DTI, GDM%TIR, GRM, &
                  HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,            &
                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                  &
                 PTSTEP, PZREF, PUREF,                                                &

@@ -120,7 +120,7 @@ IF(YSC%U%NDIM_NATURE>0) CALL PREP_NATURE(YSC%DTCO, YSC%IM%ICP, YSC%IM%IG, &
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
-                      YSC%IM%IG, YSC%IM%I, YSC%TM, YSC%GDM, YSC%GRM, &
+                      YSC%IM%IG, YSC%TM, YSC%GDM, YSC%GRM, &
                       HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
  CALL CLEAR_GRIB_INDEX

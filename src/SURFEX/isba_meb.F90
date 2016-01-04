@@ -25,7 +25,7 @@
         PAH, PBH, PF2I, PDMAX, PPOI, PCSP, PFZERO, PEPSO,                      &
         PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,                 &  
         PAMAX, PQDAMAX, PT1AMAX, PT2AMAX,                                      &
-        PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
+        PAN, PANDAY, PANFM, PGPP, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, PF2,                                        &
         PWSAT, PWFC,                                                           &
         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                            &
@@ -527,7 +527,6 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PIRRIG_FLUX   ! (kg/m2/s) irrigation flux
 !
 ! diagnostic variables for Carbon assimilation:
 !
-REAL, DIMENSION(:),   INTENT(OUT)   :: PANF          ! total assimilation over canopy
 REAL, DIMENSION(:),   INTENT(OUT)   :: PGPP          ! Gross Primary Production
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomass respiration (kgCO2/kgair m/s)
 !
@@ -913,7 +912,7 @@ ELSE IF (MAXVAL(PGMES) /= XUNDEF .OR. MINVAL(PGMES) /= XUNDEF) THEN
         PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,              &
         PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, ZFFV,                             &
         ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, ZIACAN,                     &
-        PABC, PAN, PANDAY, ZRS, PANFM, PGPP, PANF, PRESP_BIOMASS_INST(:,1))
+        PABC, PAN, PANDAY, ZRS, PANFM, PGPP, PRESP_BIOMASS_INST(:,1))
 !
    PIACAN(:,:)             = ZIACAN(:,:)
 !

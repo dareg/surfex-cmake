@@ -147,7 +147,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XAVG_ALBT(:),IRESP,HCOMMENT=YCOMMENT)
   !
-  IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+  IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
     !        
     YRECFM='TS_ISBA'
     YCOMMENT='total surface temperature (isba+snow) over tile nature'
@@ -157,17 +157,17 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     YRECFM='TSRAD_ISBA'
     YCOMMENT='total radiative surface temperature (isba+snow) over tile nature'
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XTSRAD_NAT(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%R%XTSRAD_NAT(:),IRESP,HCOMMENT=YCOMMENT)
     !
   END IF
   !
   !        2.4    Soil Wetness Index, Water content and active layer depth
   !               --------------------------------------------------------
   !  
-  IF(I%CISBA=='DIF')THEN
-    DO JLAYER = 1,I%NGROUND_LAYER
-     DO JJ=1,SIZE(I%NWG_LAYER,1)
-        IDEPTH=MAXVAL(I%NWG_LAYER(JJ,:),I%NWG_LAYER(JJ,:)/=NUNDEF)
+  IF(I%O%CISBA=='DIF')THEN
+    DO JLAYER = 1,I%O%NGROUND_LAYER
+     DO JJ=1,SIZE(I%M%X%NWG_LAYER,1)
+        IDEPTH=MAXVAL(I%M%X%NWG_LAYER(JJ,:),I%M%X%NWG_LAYER(JJ,:)/=NUNDEF)
         IF(JLAYER>IDEPTH)THEN  
           DGMI%XAVG_SWI (JJ,JLAYER) = XUNDEF
           DGMI%XAVG_TSWI(JJ,JLAYER) = XUNDEF
@@ -176,7 +176,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     ENDDO
   ENDIF         
   !
-  DO JLAYER=1,I%NGROUND_LAYER
+  DO JLAYER=1,I%O%NGROUND_LAYER
     !
     WRITE(YLVL,'(I2)') JLAYER
     !
@@ -228,7 +228,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XSOIL_WGI(:),IRESP,HCOMMENT=YCOMMENT)
   !
-  IF(I%CISBA=='DIF') THEN
+  IF(I%O%CISBA=='DIF') THEN
     !
     IF (DGMI%LSURF_MISC_DIF)THEN
       !
@@ -297,24 +297,24 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   !        2.6    SGH scheme
   !               ----------
   !
-  IF(I%CRUNOFF=='SGH '.OR.I%CRUNOFF=='DT92')THEN     
+  IF(I%O%CRUNOFF=='SGH '.OR.I%O%CRUNOFF=='DT92')THEN     
     YRECFM='FSAT_ISBA'
     YCOMMENT='Soil saturated fraction (-)'
     CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XAVG_FSAT(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF
   !
-  IF(I%CRAIN=='SGH ')THEN
+  IF(I%O%CRAIN=='SGH ')THEN
     YRECFM='MUF_ISBA'
     YCOMMENT='fraction of the grid cell reached by the rainfall (-)'
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XMUF(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%I%XMUF(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF
   !
   !        2.7    Flooding scheme
   !               ---------------
   !
-  IF(I%LFLOOD)THEN
+  IF(I%O%LFLOOD)THEN
     !
     YRECFM='FFG_ISBA'
     YCOMMENT='flood fraction over ground averaged over tile nature (-)'
@@ -334,19 +334,19 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     YRECFM='FFLOOD_ISBA'
     YCOMMENT='Grdi-cell potential flood fraction (-)'
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XFFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%I%XFFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
     YRECFM='PIFLOOD_ISBA'
     YCOMMENT='Grdi-cell Potential_floodplain_infiltration (kg/m2)'
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XPIFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%I%XPIFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF
   !
   !        2.8    Total LAI
   !               ---------
   !
-  IF(I%CPHOTO/='NON'.OR.I%NPATCH>1)THEN        
+  IF(I%O%CPHOTO/='NON'.OR.I%O%NPATCH>1)THEN        
     YRECFM='LAI_ISBA'
     YCOMMENT='leaf area index (m2/m2)'
     CALL WRITE_SURF(DGU, U, &
@@ -356,17 +356,17 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   !        2.9    Water table depth
   !               -----------------
   !
-  IF(I%LWTD)THEN
+  IF(I%O%LWTD)THEN
     !
     YRECFM='FWTD_ISBA'
     YCOMMENT='grid-cell fraction of water table to rise'
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XFWTD(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XFWTD(:),IRESP,HCOMMENT=YCOMMENT)
     !
     YRECFM='WTD_ISBA'
     YCOMMENT='water table depth from RRM model or observation (m)'
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWTD(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XWTD(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF
   !*       3.     Miscellaneous fields for each patch :
@@ -380,7 +380,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     !        3.1    Soil Wetness Index and active layer depth
     !               -----------------------------------------   
     !
-    DO JLAYER=1,I%NGROUND_LAYER
+    DO JLAYER=1,I%O%NGROUND_LAYER
       !
       WRITE(YLVL,'(I2)') JLAYER
       !
@@ -400,7 +400,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       !
     END DO
     !
-    IF(I%CISBA=='DIF')THEN
+    IF(I%O%CISBA=='DIF')THEN
       !
       YRECFM='ALT_P'
       YCOMMENT='active layer thickness over permafrost per patch (m)'
@@ -435,7 +435,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     !        3.3    SGH scheme
     !               ----------
     !
-    IF(I%CRUNOFF=='DT92')THEN     
+    IF(I%O%CRUNOFF=='DT92')THEN     
       YRECFM='FSAT_P'
       YCOMMENT='Soil saturated fraction per patch (-)'
       CALL WRITE_SURF(DGU, U, &
@@ -445,7 +445,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     !        3.3    Flood fractions
     !               --------------
     !
-    IF(I%LFLOOD)THEN
+    IF(I%O%LFLOOD)THEN
       !        
       YRECFM='FFG_P'
       YCOMMENT='flood fraction per patch over ground '
@@ -473,7 +473,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XALBT(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
-    IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+    IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
       YRECFM='TS_P'
       YCOMMENT='total surface temperature (isba+snow) per patch'
       CALL WRITE_SURF(DGU, U, &
@@ -510,9 +510,9 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XTTSNOW(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
-    IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+    IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
       !
-      DO JLAYER=1,I%TSNOW%NLAYER
+      DO JLAYER=1,I%R%TSNOW%NLAYER
         !
         WRITE(YLVL,'(I2)') JLAYER
         !
@@ -548,7 +548,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     !
   ENDIF
   !
-  IF (I%LTR_ML) THEN
+  IF (I%O%LTR_ML) THEN
     !
     YRECFM='FAPAR'
     YCOMMENT='FAPAR (-)'
@@ -594,7 +594,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       YRECFM="ANAL_INCR"//YVAR
       YCOMMENT="by patch"
       CALL WRITE_SURF(DGU, U, &
-                      HPROGRAM,YRECFM,I%XINCR(:,I%NPATCH*(JVAR-1)+1:I%NPATCH*JVAR),IRESP,HCOMMENT=YCOMMENT)
+                      HPROGRAM,YRECFM,I%R%XINCR(:,I%O%NPATCH*(JVAR-1)+1:I%O%NPATCH*JVAR),IRESP,HCOMMENT=YCOMMENT)
     ENDDO
     !
   ENDIF

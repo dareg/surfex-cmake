@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE HYDRO_GLACIER (I, &
+      SUBROUTINE HYDRO_GLACIER (HSNOW_SCHEME, &
                                  PTSTEP,PSR,PSNOWRHO,PSNOWSWE,PGLASTO,PICEFLUX)
 !     ########################################################################
 !
@@ -40,9 +40,6 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_CSTS,     ONLY : XDAY
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX, XHGLA, XSNOWDMIN, XRHOSMAX_ES
 !
@@ -55,7 +52,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+ CHARACTER(LEN=*), INTENT(IN) :: HSNOW_SCHEME
 !
 REAL, INTENT(IN)                     :: PTSTEP
 !                                       KTSTEP = timestep [s]
@@ -105,7 +102,7 @@ PICEFLUX(:) = 0.0
 !-------------------------------------------------------------------------------
 !Ice accumulation only if snow amount is > to 33.3 meters of aged snow
 !
-IF(I%TSNOW%SCHEME/='3-L' .AND. I%TSNOW%SCHEME/='CRO')THEN
+IF(HSNOW_SCHEME/='3-L' .AND. HSNOW_SCHEME/='CRO')THEN
   ZRHOSMAX=XRHOSMAX
   ZSWE(:)=PSNOWSWE(:,1)
 ELSE
@@ -145,7 +142,7 @@ WHERE(PGLASTO(:)<=1.E-10)PGLASTO(:)=0.0
 !-------------------------------------------------------------------------------
 !Snow pack update
 !
-IF(I%TSNOW%SCHEME/='3-L' .AND. I%TSNOW%SCHEME/='CRO')THEN
+IF(HSNOW_SCHEME/='3-L' .AND. HSNOW_SCHEME/='CRO')THEN
 !
   WHERE(PSNOWSWE(:,1)<=XHGLA*ZRHOSMAX)PICEFLUX(:)=0.0
   PSNOWSWE(:,1)=PSNOWSWE(:,1)-PICEFLUX(:)*PTSTEP

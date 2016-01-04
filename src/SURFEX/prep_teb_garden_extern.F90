@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, I, U, &
+SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, TGDO, U, &
                                    HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,KPATCH,PFIELD)
 !     #################################################################################
 !
@@ -27,7 +27,7 @@ SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, I, U, &
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODE_READ_EXTERN
@@ -58,7 +58,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGDO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -182,7 +182,7 @@ SELECT CASE(HSURF)
     YSURF=ADJUSTL(YSURF)  
 !* reading of the profile and its depth definition
      CALL READ_EXTERN_ISBA(U, &
-                           DTCO, I, &
+                           DTCO, TGDO, &
                            HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,INI,&
                 HSURF,YSURF,ZFIELD,ZD)
 ! 

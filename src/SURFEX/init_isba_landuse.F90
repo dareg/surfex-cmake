@@ -78,11 +78,11 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,2),SIZE(I%XDG,3)) :: ZZDG     ! Actual layer thicknesses
-REAL, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,2),SIZE(I%XDG,3)) :: ZZDG_OLD ! Old layer thicknesses
-REAL, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,2),SIZE(I%XDG,3)) :: ZWG_OLD  ! Old XWG
-REAL, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,2),SIZE(I%XDG,3)) :: ZWGI_OLD ! Old XWGI
-REAL, DIMENSION(SIZE(I%XDG,1),1,SIZE(I%XDG,3)) :: ZTEST
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZZDG     ! Actual layer thicknesses
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZZDG_OLD ! Old layer thicknesses
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZWG_OLD  ! Old XWG
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZWGI_OLD ! Old XWGI
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),1,SIZE(I%M%X%XDG,3)) :: ZTEST
 !
 INTEGER :: ILUOUT
 INTEGER :: JLAYER, JNBIOMASS, JNLITTER, JNLITTLEVS, JNSOILCARB
@@ -95,7 +95,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_ISBA_LANDUSE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-IF(ALL(I%XDG(:,I%NGROUND_LAYER,:)==I%XDG_OLD(:,I%NGROUND_LAYER,:)))THEN
+IF(ALL(I%M%X%XDG(:,I%O%NGROUND_LAYER,:)==I%M%X%XDG_OLD(:,I%O%NGROUND_LAYER,:)))THEN
   IF (LHOOK) CALL DR_HOOK('INIT_ISBA_LANDUSE',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
@@ -105,53 +105,53 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
  CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WR      ', I%XWR     (:,:),0)
+                         HPROGRAM,ILUOUT,'WR      ', I%R%XWR     (:,:),0)
 
-IF (I%LGLACIER) CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ICE_STO ', I%XICE_STO(:,:),0)
+IF (I%O%LGLACIER) CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
+                         HPROGRAM,ILUOUT,'ICE_STO ', I%R%XICE_STO(:,:),0)
 !
-DO JLAYER=1,SIZE(I%XTG,2)
+DO JLAYER=1,SIZE(I%R%XTG,2)
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TEMP GRO', I%XTG(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'TEMP GRO', I%R%XTG(:,JLAYER,:),0)
 END DO
 !
 !
  CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ALBSNOW ', I%TSNOW%ALB(:,:),0)
+                         HPROGRAM,ILUOUT,'ALBSNOW ', I%R%TSNOW%ALB(:,:),0)
 !
-IF (I%TSNOW%SCHEME=='1-L'  .OR. I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
+IF (I%R%TSNOW%SCHEME=='1-L'  .OR. I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'EMISSNOW', I%TSNOW%EMIS(:,:),0)    
+                         HPROGRAM,ILUOUT,'EMISSNOW', I%R%TSNOW%EMIS(:,:),0)    
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TSSNOW  ', I%TSNOW%TS  (:,:),0)
+                         HPROGRAM,ILUOUT,'TSSNOW  ', I%R%TSNOW%TS  (:,:),0)
 ENDIF
 !
-DO JLAYER=1,I%TSNOW%NLAYER
+DO JLAYER=1,I%R%TSNOW%NLAYER
    !
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WSNOW   ', I%TSNOW%WSNOW(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'WSNOW   ', I%R%TSNOW%WSNOW(:,JLAYER,:),0)
    !
-   IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN            
+   IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN            
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TEMPSNOW', I%TSNOW%TEMP(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'TEMPSNOW', I%R%TSNOW%TEMP(:,JLAYER,:),0)
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'HEATSNOW', I%TSNOW%HEAT(:,JLAYER,:),0)     
+                         HPROGRAM,ILUOUT,'HEATSNOW', I%R%TSNOW%HEAT(:,JLAYER,:),0)     
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'AGESNOW ', I%TSNOW%AGE (:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'AGESNOW ', I%R%TSNOW%AGE (:,JLAYER,:),0)
    ENDIF
    !
-   IF (I%TSNOW%SCHEME=='1-L') THEN
+   IF (I%R%TSNOW%SCHEME=='1-L') THEN
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TSNOW   ', I%TSNOW%T(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'TSNOW   ', I%R%TSNOW%T(:,JLAYER,:),0)
    ENDIF
    !
-   IF(I%TSNOW%SCHEME=='CRO') THEN
+   IF(I%R%TSNOW%SCHEME=='CRO') THEN
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'GRANSNOW', I%TSNOW%GRAN1(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'GRANSNOW', I%R%TSNOW%GRAN1(:,JLAYER,:),0)
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'GRANSNOW', I%TSNOW%GRAN2(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'GRANSNOW', I%R%TSNOW%GRAN2(:,JLAYER,:),0)
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'HISTSNOW', I%TSNOW%HIST (:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'HISTSNOW', I%R%TSNOW%HIST (:,JLAYER,:),0)
    ENDIF
    !
 ENDDO
@@ -160,29 +160,29 @@ ENDDO
 ! Conserve mass globaly because soil depth change
 !-------------------------------------------------------------------------------
 !
-ZWG_OLD(:,:,:) =I%XWG (:,:,:)
-ZWGI_OLD(:,:,:)=I%XWGI(:,:,:)
+ZWG_OLD(:,:,:) =I%R%XWG (:,:,:)
+ZWGI_OLD(:,:,:)=I%R%XWGI(:,:,:)
 !
-DO JLAYER=1,I%NGROUND_LAYER
+DO JLAYER=1,I%O%NGROUND_LAYER
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WG      ', I%XWG (:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'WG      ', I%R%XWG (:,JLAYER,:),0)
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WGI     ', I%XWGI(:,JLAYER,:),0)
+                         HPROGRAM,ILUOUT,'WGI     ', I%R%XWGI(:,JLAYER,:),0)
 ENDDO
 !
-ZZDG    (:,1,:)=I%XDG    (:,1,:)
-ZZDG_OLD(:,1,:)=I%XDG_OLD(:,1,:)
-IF(I%CISBA=='DIF')THEN
-  DO JLAYER=2,I%NGROUND_LAYER
-     ZZDG    (:,JLAYER,:)=I%XDG    (:,JLAYER,:)-I%XDG    (:,JLAYER-1,:)
-     ZZDG_OLD(:,JLAYER,:)=I%XDG_OLD(:,JLAYER,:)-I%XDG_OLD(:,JLAYER-1,:)
+ZZDG    (:,1,:)=I%M%X%XDG    (:,1,:)
+ZZDG_OLD(:,1,:)=I%M%X%XDG_OLD(:,1,:)
+IF(I%O%CISBA=='DIF')THEN
+  DO JLAYER=2,I%O%NGROUND_LAYER
+     ZZDG    (:,JLAYER,:)=I%M%X%XDG    (:,JLAYER,:)-I%M%X%XDG    (:,JLAYER-1,:)
+     ZZDG_OLD(:,JLAYER,:)=I%M%X%XDG_OLD(:,JLAYER,:)-I%M%X%XDG_OLD(:,JLAYER-1,:)
   ENDDO
 ELSE     
-  ZZDG    (:,2,:)=I%XDG    (:,2,:)
-  ZZDG_OLD(:,2,:)=I%XDG_OLD(:,2,:)
-  IF(I%CISBA=='3-L' )THEN
-    ZZDG    (:,3,:)=I%XDG    (:,3,:)-I%XDG    (:,2,:)
-    ZZDG_OLD(:,3,:)=I%XDG_OLD(:,3,:)-I%XDG_OLD(:,2,:)
+  ZZDG    (:,2,:)=I%M%X%XDG    (:,2,:)
+  ZZDG_OLD(:,2,:)=I%M%X%XDG_OLD(:,2,:)
+  IF(I%O%CISBA=='3-L' )THEN
+    ZZDG    (:,3,:)=I%M%X%XDG    (:,3,:)-I%M%X%XDG    (:,2,:)
+    ZZDG_OLD(:,3,:)=I%M%X%XDG_OLD(:,3,:)-I%M%X%XDG_OLD(:,2,:)
   ENDIF 
 ENDIF
 !
@@ -190,54 +190,54 @@ WHERE(ZZDG(:,:,:)    >1.E+10)ZZDG    (:,:,:)=0.
 WHERE(ZZDG_OLD(:,:,:)>1.E+10)ZZDG_OLD(:,:,:)=0.
 !
  CALL CONSERV_GLOBAL_MASS(DTCO, IG, I, U, &
-                          ILUOUT,ZZDG,ZZDG_OLD,I%XWG, ZWG_OLD )
+                          ILUOUT,ZZDG,ZZDG_OLD,I%R%XWG, ZWG_OLD )
  CALL CONSERV_GLOBAL_MASS(DTCO, IG, I, U, &
-                          ILUOUT,ZZDG,ZZDG_OLD,I%XWGI,ZWGI_OLD)
+                          ILUOUT,ZZDG,ZZDG_OLD,I%R%XWGI,ZWGI_OLD)
 !
 !-------------------------------------------------------------------------------
 ! Extrapolation with 3 pts 
 !-------------------------------------------------------------------------------
 !
  CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'RESA    ', I%XRESA(:,:),3)
+                         HPROGRAM,ILUOUT,'RESA    ', I%R%XRESA(:,:),3)
 !
-DO JLAYER=1,I%TSNOW%NLAYER
+DO JLAYER=1,I%R%TSNOW%NLAYER
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'RHOSNOW ', I%TSNOW%RHO  (:,JLAYER,:),3)
+                         HPROGRAM,ILUOUT,'RHOSNOW ', I%R%TSNOW%RHO  (:,JLAYER,:),3)
 ENDDO
 !
-IF (I%CPHOTO/='NON') THEN
+IF (I%O%CPHOTO/='NON') THEN
    !
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'AN      ', I%XAN   (:,:),3)
+                         HPROGRAM,ILUOUT,'AN      ', I%R%XAN   (:,:),3)
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ANDAY   ', I%XANDAY(:,:),3)   
+                         HPROGRAM,ILUOUT,'ANDAY   ', I%R%XANDAY(:,:),3)   
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ANFM    ', I%XANFM (:,:),3)
+                         HPROGRAM,ILUOUT,'ANFM    ', I%R%XANFM (:,:),3)
    CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'LE      ', I%XLE   (:,:),3)
+                         HPROGRAM,ILUOUT,'LE      ', I%R%XLE   (:,:),3)
    !
-   DO JNBIOMASS=1,I%NNBIOMASS
+   DO JNBIOMASS=1,I%O%NNBIOMASS
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'RESPBIOM', I%XRESP_BIOMASS(:,JNBIOMASS,:),3)
+                         HPROGRAM,ILUOUT,'RESPBIOM', I%R%XRESP_BIOMASS(:,JNBIOMASS,:),3)
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'BIOMASS ', I%XBIOMASS     (:,JNBIOMASS,:),3)
+                         HPROGRAM,ILUOUT,'BIOMASS ', I%R%XBIOMASS     (:,JNBIOMASS,:),3)
    ENDDO
    !
-   IF (I%CRESPSL=='CNT') THEN
+   IF (I%O%CRESPSL=='CNT') THEN
       !
-      DO JNLITTLEVS=1,I%NNLITTLEVS
+      DO JNLITTLEVS=1,I%O%NNLITTLEVS
          CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'LIGNINST',I%XLIGNIN_STRUC(:,JNLITTLEVS,:),3)
-         DO JNLITTER=1,I%NNLITTER
+                         HPROGRAM,ILUOUT,'LIGNINST',I%R%XLIGNIN_STRUC(:,JNLITTLEVS,:),3)
+         DO JNLITTER=1,I%O%NNLITTER
             CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'LITTER  ',I%XLITTER(:,JNLITTER,JNLITTLEVS,:),3)
+                         HPROGRAM,ILUOUT,'LITTER  ',I%R%XLITTER(:,JNLITTER,JNLITTLEVS,:),3)
          ENDDO
       ENDDO
       !
-      DO JNSOILCARB=1,I%NNSOILCARB
+      DO JNSOILCARB=1,I%O%NNSOILCARB
          CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'SOILCARB',I%XSOILCARB(:,JNSOILCARB,:),3)
+                         HPROGRAM,ILUOUT,'SOILCARB',I%R%XSOILCARB(:,JNSOILCARB,:),3)
       ENDDO
       !
    ENDIF

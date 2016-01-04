@@ -131,15 +131,15 @@ GCOVER(:) = .TRUE.
 !ocl scalar
 !
 DO JJ=1,12
-  CALL CONVERT_COVER_ISBA(DTCO, I, &
-                          HISBA,3*JJ-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
+  CALL CONVERT_COVER_ISBA(DTCO, I%O%CALBEDO, &
+                          HISBA,I%O%LTR_ML,3*JJ-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
                             PVEG=ZVEG(:,:,JJ), PLAI=ZLAI(:,:,JJ),            &
                             PZ0=ZZ0VEG(:,:,JJ), PEMIS_ECO=ZEMIS_ECO(:,:,JJ), &
                             PF2I=ZF2I(:,:,JJ),OSTRESS=GSTRESS(:,:,JJ)        )  
 END DO
 
- CALL CONVERT_COVER_ISBA(DTCO, I, &
-                          HISBA,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
+ CALL CONVERT_COVER_ISBA(DTCO, I%O%CALBEDO, &
+                          HISBA,I%O%LTR_ML,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
                         PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &

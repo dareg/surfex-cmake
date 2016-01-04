@@ -80,7 +80,7 @@ REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZFISO_FOR  , ZFMONO_FOR,   &
 !                                Fluxes coming from different landuse
 REAL, DIMENSION(SIZE(PSW_FORBIO,1), NVEGTYPE) :: ZTCOR ,ZTCORM
 !
-REAL, DIMENSION(SIZE(PSW_FORBIO,1),SIZE(I%XABC),NVEGTYPE) :: ZBVOCPAR 
+REAL, DIMENSION(SIZE(PSW_FORBIO,1),SIZE(I%IP%XABC),NVEGTYPE) :: ZBVOCPAR 
 !                                PAR at gauss level in micromolphot/m2/s
 !
 REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZISOPOT, ZMONOPOT, ZRATIO
@@ -108,13 +108,13 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N',0,ZHOOK_HANDLE)
 !
 !1.1.1 Using ISBA_Ags explicit light attenuation 
 ! number of g Gauss level for the integration 
-IF (I%CPHOTO/='NON') THEN
-  KNGAUSS = SIZE(I%XABC)
+IF (I%O%CPHOTO/='NON') THEN
+  KNGAUSS = SIZE(I%IP%XABC)
 ELSE
   !1.1.2 using isba std version 
   ZRAD_PAR (:)= 0.
-  DO JPATCH = 1,I%NPATCH
-    ZRAD_PAR (:)= ZRAD_PAR (:) +(PSW_FORBIO(:,JPATCH)*I%XPATCH(:,JPATCH) ) * XPARCF * 4.7 
+  DO JPATCH = 1,I%O%NPATCH
+    ZRAD_PAR (:)= ZRAD_PAR (:) +(PSW_FORBIO(:,JPATCH)*I%IP%XPATCH(:,JPATCH) ) * XPARCF * 4.7 
   END DO
   ZLCOR_RAD (:) = ZLCOR_FUNC(ZRAD_PAR(:))
 ENDIF
@@ -138,9 +138,9 @@ CALL BY_PATCH(NVT_C4  , ZTCOR(:,NVT_C4)  , ZTCORM(:,NVT_C4)  )
 CALL BY_PATCH(NVT_IRR , ZTCOR(:,NVT_IRR) , ZTCORM(:,NVT_IRR) )
 !
 !
-ZRATIO (:) = I%XVEGTYPE(:,NVT_TEBD) + I%XVEGTYPE(:,NVT_BONE) + I%XVEGTYPE(:,NVT_TRBE) + &
-             I%XVEGTYPE(:,NVT_TRBD) + I%XVEGTYPE(:,NVT_TEBE) + I%XVEGTYPE(:,NVT_TENE) + &
-             I%XVEGTYPE(:,NVT_BOBD) + I%XVEGTYPE(:,NVT_BOND) + I%XVEGTYPE(:,NVT_SHRB)
+ZRATIO (:) = I%M%X%XVEGTYPE(:,NVT_TEBD) + I%M%X%XVEGTYPE(:,NVT_BONE) + I%M%X%XVEGTYPE(:,NVT_TRBE) + &
+             I%M%X%XVEGTYPE(:,NVT_TRBD) + I%M%X%XVEGTYPE(:,NVT_TEBE) + I%M%X%XVEGTYPE(:,NVT_TENE) + &
+             I%M%X%XVEGTYPE(:,NVT_BOBD) + I%M%X%XVEGTYPE(:,NVT_BOND) + I%M%X%XVEGTYPE(:,NVT_SHRB)
 !
 WHERE (ZRATIO(:)/=0.)
   ZISOPOT (:) = GB%XISOPOT (:) / ZRATIO(:)
@@ -204,30 +204,30 @@ REAL, DIMENSION(:), INTENT(OUT) :: PTCOR
 REAL, DIMENSION(:), INTENT(OUT) :: PTCORM
 !
 REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZBVOCSG
-REAL, DIMENSION(SIZE(PSW_FORBIO,1),SIZE(I%XABC)) :: ZBVOCPAR 
+REAL, DIMENSION(SIZE(PSW_FORBIO,1),SIZE(I%IP%XABC)) :: ZBVOCPAR 
 INTEGER:: IPATCH, JLAYER, IT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_PATCH',0,ZHOOK_HANDLE)
 !
-IPATCH = VEGTYPE_TO_PATCH(NVT_VEGTYPE, I%NPATCH)
+IPATCH = VEGTYPE_TO_PATCH(NVT_VEGTYPE, I%O%NPATCH)
 !
 PTCOR  (:) = 0.
 PTCORM (:) = 0.
-DO IT=1,SIZE(I%XTG,1)
-  IF (I%XTG(IT,1,IPATCH).LE.1000.) THEN
-    PTCORM(IT)=ZTCORM0_FUNC(I%XTG(IT,1,IPATCH))
-    PTCOR (IT)=ZTCOR0_FUNC (I%XTG(IT,1,IPATCH))
+DO IT=1,SIZE(I%R%XTG,1)
+  IF (I%R%XTG(IT,1,IPATCH).LE.1000.) THEN
+    PTCORM(IT)=ZTCORM0_FUNC(I%R%XTG(IT,1,IPATCH))
+    PTCOR (IT)=ZTCOR0_FUNC (I%R%XTG(IT,1,IPATCH))
   ENDIF
 ENDDO
 !
-IF (I%CPHOTO/='NON') THEN
+IF (I%O%CPHOTO/='NON') THEN
   !PAR over Forest canopies, in micro-molE.m-2.s-1 
   ZBVOCPAR(:,:) = GB%XIACAN(:,:,IPATCH)*4.7
   !Calculation of radiative attenuation effect in the canopy on correction factor
   ZBVOCSG(:) = 0.
   DO JLAYER=1,KNGAUSS
-    ZBVOCSG(:) = ZBVOCSG(:) + I%XPOI(JLAYER) * ZLCOR_FUNC(ZBVOCPAR(:,JLAYER)) 
+    ZBVOCSG(:) = ZBVOCSG(:) + I%IP%XPOI(JLAYER) * ZLCOR_FUNC(ZBVOCPAR(:,JLAYER)) 
   ENDDO
   PTCOR(:) = PTCOR(:) * ZBVOCSG(:)
 ELSE
@@ -258,17 +258,17 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG3',0,ZHOOK_HANDLE)
 !isoprene flux 
 !!
 !! warning, XISOPOT external map accounts for the total forest fraction
-WHERE ( I%XVEGTYPE(:,NVT_V1) + I%XVEGTYPE(:,NVT_V2) + I%XVEGTYPE(:,NVT_V3) > 0. )
+WHERE ( I%M%X%XVEGTYPE(:,NVT_V1) + I%M%X%XVEGTYPE(:,NVT_V2) + I%M%X%XVEGTYPE(:,NVT_V3) > 0. )
   !
   PFISO(:) = PISOPOT(:) *                   &
-     ( ZTCOR(:,NVT_V1) * I%XVEGTYPE(:,NVT_V1) &
-      +ZTCOR(:,NVT_V2) * I%XVEGTYPE(:,NVT_V2) &
-      +ZTCOR(:,NVT_V3) * I%XVEGTYPE(:,NVT_V3) )
+     ( ZTCOR(:,NVT_V1) * I%M%X%XVEGTYPE(:,NVT_V1) &
+      +ZTCOR(:,NVT_V2) * I%M%X%XVEGTYPE(:,NVT_V2) &
+      +ZTCOR(:,NVT_V3) * I%M%X%XVEGTYPE(:,NVT_V3) )
   !
   PFMONO(:) = PMONOPOT(:) *                  &
-     ( ZTCORM(:,NVT_V1) * I%XVEGTYPE(:,NVT_V1) &
-      +ZTCORM(:,NVT_V2) * I%XVEGTYPE(:,NVT_V2) &
-      +ZTCORM(:,NVT_V3) * I%XVEGTYPE(:,NVT_V3) )          
+     ( ZTCORM(:,NVT_V1) * I%M%X%XVEGTYPE(:,NVT_V1) &
+      +ZTCORM(:,NVT_V2) * I%M%X%XVEGTYPE(:,NVT_V2) &
+      +ZTCORM(:,NVT_V3) * I%M%X%XVEGTYPE(:,NVT_V3) )          
   !
 ELSEWHERE
   !
@@ -302,20 +302,20 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG4',0,ZHOOK_HANDLE)
 !isoprene flux 
 !!
 !! warning, XISOPOT external map accounts for the total forest fraction
-WHERE ( I%XVEGTYPE(:,NVT_V1) + I%XVEGTYPE(:,NVT_V2) + I%XVEGTYPE(:,NVT_V3) &
-       +I%XVEGTYPE(:,NVT_V4) > 0. )
+WHERE ( I%M%X%XVEGTYPE(:,NVT_V1) + I%M%X%XVEGTYPE(:,NVT_V2) + I%M%X%XVEGTYPE(:,NVT_V3) &
+       +I%M%X%XVEGTYPE(:,NVT_V4) > 0. )
   !
   PFISO(:) = PISOPOT(:) *                   &
-     ( ZTCOR(:,NVT_V1) * I%XVEGTYPE(:,NVT_V1) &
-      +ZTCOR(:,NVT_V2) * I%XVEGTYPE(:,NVT_V2) &
-      +ZTCOR(:,NVT_V3) * I%XVEGTYPE(:,NVT_V3) &
-      +ZTCOR(:,NVT_V4) * I%XVEGTYPE(:,NVT_V4) )
+     ( ZTCOR(:,NVT_V1) * I%M%X%XVEGTYPE(:,NVT_V1) &
+      +ZTCOR(:,NVT_V2) * I%M%X%XVEGTYPE(:,NVT_V2) &
+      +ZTCOR(:,NVT_V3) * I%M%X%XVEGTYPE(:,NVT_V3) &
+      +ZTCOR(:,NVT_V4) * I%M%X%XVEGTYPE(:,NVT_V4) )
   !
   PFMONO(:) = PMONOPOT(:) *                  &
-     ( ZTCORM(:,NVT_V1) * I%XVEGTYPE(:,NVT_V1) &
-      +ZTCORM(:,NVT_V2) * I%XVEGTYPE(:,NVT_V2) &
-      +ZTCORM(:,NVT_V3) * I%XVEGTYPE(:,NVT_V3) &
-      +ZTCORM(:,NVT_V4) * I%XVEGTYPE(:,NVT_V4) )            
+     ( ZTCORM(:,NVT_V1) * I%M%X%XVEGTYPE(:,NVT_V1) &
+      +ZTCORM(:,NVT_V2) * I%M%X%XVEGTYPE(:,NVT_V2) &
+      +ZTCORM(:,NVT_V3) * I%M%X%XVEGTYPE(:,NVT_V3) &
+      +ZTCORM(:,NVT_V4) * I%M%X%XVEGTYPE(:,NVT_V4) )            
   !
 ELSEWHERE
   !
@@ -354,31 +354,31 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG9',0,ZHOOK_HANDLE)
 !isoprene flux 
 !!
 !! warning, XISOPOT external map accounts for the total forest fraction
-WHERE ( I%XVEGTYPE(:,NVT_V1) + I%XVEGTYPE(:,NVT_V2) + I%XVEGTYPE(:,NVT_V3) &
-       +I%XVEGTYPE(:,NVT_V4) + I%XVEGTYPE(:,NVT_V5) + I%XVEGTYPE(:,NVT_V6) &
-       +I%XVEGTYPE(:,NVT_V7) + I%XVEGTYPE(:,NVT_V8) + I%XVEGTYPE(:,NVT_V9) > 0. )
+WHERE ( I%M%X%XVEGTYPE(:,NVT_V1) + I%M%X%XVEGTYPE(:,NVT_V2) + I%M%X%XVEGTYPE(:,NVT_V3) &
+       +I%M%X%XVEGTYPE(:,NVT_V4) + I%M%X%XVEGTYPE(:,NVT_V5) + I%M%X%XVEGTYPE(:,NVT_V6) &
+       +I%M%X%XVEGTYPE(:,NVT_V7) + I%M%X%XVEGTYPE(:,NVT_V8) + I%M%X%XVEGTYPE(:,NVT_V9) > 0. )
   !
   PFISO(:) = PISOPOT(:) *                   &
-     ( ZTCOR(:,NVT_V1) * I%XVEGTYPE(:,NVT_V1) &
-      +ZTCOR(:,NVT_V2) * I%XVEGTYPE(:,NVT_V2) &
-      +ZTCOR(:,NVT_V3) * I%XVEGTYPE(:,NVT_V3) &
-      +ZTCOR(:,NVT_V4) * I%XVEGTYPE(:,NVT_V4) &
-      +ZTCOR(:,NVT_V5) * I%XVEGTYPE(:,NVT_V5) &
-      +ZTCOR(:,NVT_V6) * I%XVEGTYPE(:,NVT_V6) &
-      +ZTCOR(:,NVT_V7) * I%XVEGTYPE(:,NVT_V7) &
-      +ZTCOR(:,NVT_V8) * I%XVEGTYPE(:,NVT_V8) &
-      +ZTCOR(:,NVT_V9) * I%XVEGTYPE(:,NVT_V9) )
+     ( ZTCOR(:,NVT_V1) * I%M%X%XVEGTYPE(:,NVT_V1) &
+      +ZTCOR(:,NVT_V2) * I%M%X%XVEGTYPE(:,NVT_V2) &
+      +ZTCOR(:,NVT_V3) * I%M%X%XVEGTYPE(:,NVT_V3) &
+      +ZTCOR(:,NVT_V4) * I%M%X%XVEGTYPE(:,NVT_V4) &
+      +ZTCOR(:,NVT_V5) * I%M%X%XVEGTYPE(:,NVT_V5) &
+      +ZTCOR(:,NVT_V6) * I%M%X%XVEGTYPE(:,NVT_V6) &
+      +ZTCOR(:,NVT_V7) * I%M%X%XVEGTYPE(:,NVT_V7) &
+      +ZTCOR(:,NVT_V8) * I%M%X%XVEGTYPE(:,NVT_V8) &
+      +ZTCOR(:,NVT_V9) * I%M%X%XVEGTYPE(:,NVT_V9) )
   !
   PFMONO(:) = PMONOPOT(:) *                  &
-     ( ZTCORM(:,NVT_V1) * I%XVEGTYPE(:,NVT_V1) &
-      +ZTCORM(:,NVT_V2) * I%XVEGTYPE(:,NVT_V2) &
-      +ZTCORM(:,NVT_V3) * I%XVEGTYPE(:,NVT_V3) &
-      +ZTCORM(:,NVT_V4) * I%XVEGTYPE(:,NVT_V4) & 
-      +ZTCORM(:,NVT_V5) * I%XVEGTYPE(:,NVT_V5) & 
-      +ZTCORM(:,NVT_V6) * I%XVEGTYPE(:,NVT_V6) & 
-      +ZTCORM(:,NVT_V7) * I%XVEGTYPE(:,NVT_V7) & 
-      +ZTCORM(:,NVT_V8) * I%XVEGTYPE(:,NVT_V8) &
-      +ZTCORM(:,NVT_V9) * I%XVEGTYPE(:,NVT_V9) ) 
+     ( ZTCORM(:,NVT_V1) * I%M%X%XVEGTYPE(:,NVT_V1) &
+      +ZTCORM(:,NVT_V2) * I%M%X%XVEGTYPE(:,NVT_V2) &
+      +ZTCORM(:,NVT_V3) * I%M%X%XVEGTYPE(:,NVT_V3) &
+      +ZTCORM(:,NVT_V4) * I%M%X%XVEGTYPE(:,NVT_V4) & 
+      +ZTCORM(:,NVT_V5) * I%M%X%XVEGTYPE(:,NVT_V5) & 
+      +ZTCORM(:,NVT_V6) * I%M%X%XVEGTYPE(:,NVT_V6) & 
+      +ZTCORM(:,NVT_V7) * I%M%X%XVEGTYPE(:,NVT_V7) & 
+      +ZTCORM(:,NVT_V8) * I%M%X%XVEGTYPE(:,NVT_V8) &
+      +ZTCORM(:,NVT_V9) * I%M%X%XVEGTYPE(:,NVT_V9) ) 
   !
 ELSEWHERE
   !

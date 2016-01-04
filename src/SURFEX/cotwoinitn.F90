@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE COTWOINIT_n (I, &
+      SUBROUTINE COTWOINIT_n (OAGRI_TO_GRASS, OTR_ML, &
                               HPHOTO,PVEGTYPE,PGMES,PCO2,PGC,PDMAX,            &
                             PABC,PPOI,PANMAX,                                 &
                             PFZERO,PEPSO,PGAMM,PQDGAMM,PQDGMES,PT1GMES,       &
@@ -60,8 +60,6 @@
 !-------------------------------------------------------------------------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_C3, NVT_C4, NVT_IRR, NVT_TROG,     &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,&
                                 NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVT_GRAS
@@ -85,9 +83,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
+LOGICAL, INTENT(IN) :: OAGRI_TO_GRASS
+LOGICAL, INTENT(IN) :: OTR_ML
 !
  CHARACTER(LEN=3),   INTENT(IN)   :: HPHOTO      ! type of photosynthesis
 REAL,DIMENSION(:,:),INTENT(IN)   :: PVEGTYPE
@@ -224,8 +221,8 @@ DO JCLASS=1,NVEGTYPE
   ELSE
     ICO2TYPE = 1   ! C3 type
   END IF
-  IF(I%LAGRI_TO_GRASS.AND.(JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR)) ICO2TYPE = 1
-  IF (I%LTR_ML) THEN
+  IF(OAGRI_TO_GRASS.AND.(JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR)) ICO2TYPE = 1
+  IF (OTR_ML) THEN
     IRAD = 1   ! running with new radiative transfer
   ELSE
     IRAD = 2
@@ -258,7 +255,7 @@ DO JCLASS=1,NVEGTYPE
   PAH    (:) = PAH    (:) + XAH    (ICO2TYPE) * PVEGTYPE(:,JCLASS)
   PBH    (:) = PBH    (:) + XBH    (ICO2TYPE) * PVEGTYPE(:,JCLASS)
   !
-  IF(I%LAGRI_TO_GRASS.AND.(JCLASS==NVT_C3 .OR. JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR))THEN
+  IF(OAGRI_TO_GRASS.AND.(JCLASS==NVT_C3 .OR. JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR))THEN
     ICLASS=NVT_GRAS
   ELSE
     ICLASS=JCLASS

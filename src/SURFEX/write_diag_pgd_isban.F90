@@ -79,10 +79,10 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,3)) :: ZWORK ! Work array
-REAL, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,2)) :: ZDG   ! Work array
-REAL, DIMENSION(SIZE(I%XDG,1)            ) :: ZDG2
-REAL, DIMENSION(SIZE(I%XDG,1)            ) :: ZDTOT
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,3)) :: ZWORK ! Work array
+REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2)) :: ZDG   ! Work array
+REAL, DIMENSION(SIZE(I%M%X%XDG,1)            ) :: ZDG2
+REAL, DIMENSION(SIZE(I%M%X%XDG,1)            ) :: ZDTOT
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
@@ -99,7 +99,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_PGD_ISBA_N',0,ZHOOK_HANDLE)
 !
-ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
+ISIZE_LMEB_PATCH=COUNT(I%O%LMEB_PATCH(:))
 !
 CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','WRITE')
@@ -108,13 +108,13 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !* Leaf Area Index
 !
-IF (I%CPHOTO=='NON' .OR. I%CPHOTO=='AGS' .OR. I%CPHOTO=='AST') THEN
+IF (I%O%CPHOTO=='NON' .OR. I%O%CPHOTO=='AGS' .OR. I%O%CPHOTO=='AST') THEN
   !
   YRECFM='LAI'
   YCOMMENT='leaf area index (-)'
   !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XLAI(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XLAI(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
   IF (ISIZE_LMEB_PATCH>0) THEN
     !
@@ -122,7 +122,7 @@ IF (I%CPHOTO=='NON' .OR. I%CPHOTO=='AGS' .OR. I%CPHOTO=='AST') THEN
     YCOMMENT='MEB: understory leaf area index (-)'
     !
     CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XLAIGV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XLAIGV(:,:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF
   !
@@ -136,7 +136,7 @@ YRECFM='VEG'
 YCOMMENT='vegetation fraction (-)'
 !
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XVEG(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XVEG(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Surface roughness length (without snow)
 !
@@ -144,7 +144,7 @@ YRECFM='Z0VEG'
 YCOMMENT='surface roughness length (without snow) (m)'
 !
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XZ0(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XZ0(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 IF (ISIZE_LMEB_PATCH>0) THEN
   !
@@ -152,13 +152,13 @@ IF (ISIZE_LMEB_PATCH>0) THEN
   YCOMMENT='MEB: ground litter fraction (-)'
   !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XGNDLITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XGNDLITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='Z0LITTER'
   YCOMMENT='MEB: ground litter roughness length (without snow) (m)'
   !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XZ0LITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XZ0LITTER(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
 !
@@ -166,7 +166,7 @@ ENDIF
 !
 !* Soil depth for each patch
 !
-DO JL=1,SIZE(I%XDG,2)
+DO JL=1,SIZE(I%M%X%XDG,2)
   IF (JL<10) THEN
     WRITE(YRECFM,FMT='(A2,I1)') 'DG',JL
   ELSE
@@ -174,23 +174,23 @@ DO JL=1,SIZE(I%XDG,2)
   ENDIF
   YCOMMENT='soil depth'//' (M)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XDG(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%X%XDG(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
 END DO
 !
 !* Averaged Soil depth
 !
-IF(I%NPATCH>1)THEN
+IF(I%O%NPATCH>1)THEN
 !        
   ZDG(:,:)=0.0
-  DO JP=1,I%NPATCH
-     DO JL=1,SIZE(I%XDG,2)
-        DO JJ=1,SIZE(I%XDG,1) 
-           ZDG(JJ,JL)=ZDG(JJ,JL)+I%XPATCH(JJ,JP)*I%XDG(JJ,JL,JP)
+  DO JP=1,I%O%NPATCH
+     DO JL=1,SIZE(I%M%X%XDG,2)
+        DO JJ=1,SIZE(I%M%X%XDG,1) 
+           ZDG(JJ,JL)=ZDG(JJ,JL)+I%IP%XPATCH(JJ,JP)*I%M%X%XDG(JJ,JL,JP)
         ENDDO
      ENDDO
   ENDDO
 !
-  DO JL=1,SIZE(I%XDG,2)
+  DO JL=1,SIZE(I%M%X%XDG,2)
     WRITE(YLVL,'(I4)')JL
     YRECFM='DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
@@ -203,18 +203,18 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-IF(I%CISBA=='DIF')THEN
+IF(I%O%CISBA=='DIF')THEN
 !
   ZDG2 (:)=0.0
   ZDTOT(:)=0.0
   ZWORK(:,:)=XUNDEF
-  DO JP=1,SIZE(I%XDG,3)
-     DO JJ=1,SIZE(I%XDG,1)
-        ZDG2(JJ)=ZDG2(JJ)+I%XPATCH(JJ,JP)*I%XDG2(JJ,JP)
-        JL=I%NWG_LAYER(JJ,JP)
+  DO JP=1,SIZE(I%M%X%XDG,3)
+     DO JJ=1,SIZE(I%M%X%XDG,1)
+        ZDG2(JJ)=ZDG2(JJ)+I%IP%XPATCH(JJ,JP)*I%M%X%XDG2(JJ,JP)
+        JL=I%M%X%NWG_LAYER(JJ,JP)
         IF(JL/=NUNDEF)THEN
-          ZWORK(JJ,JP)=I%XDG(JJ,JL,JP)
-          ZDTOT(JJ)=ZDTOT(JJ)+I%XPATCH(JJ,JP)*I%XDG(JJ,JL,JP)
+          ZWORK(JJ,JP)=I%M%X%XDG(JJ,JL,JP)
+          ZDTOT(JJ)=ZDTOT(JJ)+I%IP%XPATCH(JJ,JP)*I%M%X%XDG(JJ,JL,JP)
         ENDIF
      ENDDO
   ENDDO
@@ -224,14 +224,14 @@ IF(I%CISBA=='DIF')THEN
   YRECFM='DROOT_DIF'
   YCOMMENT='Root depth in ISBA-DIF'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XDROOT(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%X%XDROOT(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='DG2_DIF'
   YCOMMENT='DG2 depth in ISBA-DIF'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XDG2(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%X%XDG2(:,:),IRESP,HCOMMENT=YCOMMENT)
 !  
-  IF(I%NPATCH>1)THEN
+  IF(I%O%NPATCH>1)THEN
     YRECFM='DG2_DIF_ISBA'
     YCOMMENT='Averaged DG2 depth in ISBA-DIF'
     CALL WRITE_SURF(DGU, U, &
@@ -243,7 +243,7 @@ IF(I%CISBA=='DIF')THEN
   YRECFM='RUNOFFD'
   YCOMMENT='Runoff deph in ISBA-DIF'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XRUNOFFD(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XRUNOFFD(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* Total soil depth for mositure
 !
@@ -252,7 +252,7 @@ IF(I%CISBA=='DIF')THEN
   CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,ZWORK(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
-  IF(I%NPATCH>1)THEN
+  IF(I%O%NPATCH>1)THEN
     YRECFM='DTOTDF_ISBA'
     YCOMMENT='Averaged Total soil depth for moisture in ISBA-DIF'
     CALL WRITE_SURF(DGU, U, &
@@ -261,7 +261,7 @@ IF(I%CISBA=='DIF')THEN
 !
 !* Root fraction for each patch
 !
-  DO JL=1,SIZE(I%XROOTFRAC,2)
+  DO JL=1,SIZE(I%M%X%XROOTFRAC,2)
      IF (JL<10) THEN
        WRITE(YRECFM,FMT='(A8,I1)') 'ROOTFRAC',JL
      ELSE
@@ -269,9 +269,9 @@ IF(I%CISBA=='DIF')THEN
      ENDIF  
      YCOMMENT='root fraction by layer (-)'
      ZWORK(:,:)=XUNDEF
-     DO JJ=1,SIZE(I%XDG,1)
-        WHERE(JL<=I%NWG_LAYER(JJ,:).AND.I%NWG_LAYER(JJ,:)/=NUNDEF)
-              ZWORK(JJ,:)=I%XROOTFRAC(JJ,JL,:)
+     DO JJ=1,SIZE(I%M%X%XDG,1)
+        WHERE(JL<=I%M%X%NWG_LAYER(JJ,:).AND.I%M%X%NWG_LAYER(JJ,:)/=NUNDEF)
+              ZWORK(JJ,:)=I%M%X%XROOTFRAC(JJ,JL,:)
         ENDWHERE
      ENDDO
      CALL WRITE_SURF(DGU, U, &
@@ -279,7 +279,7 @@ IF(I%CISBA=='DIF')THEN
   END DO
   !
   IF (ISIZE_LMEB_PATCH>0) THEN
-    DO JL=1,SIZE(I%XROOTFRACGV,2)
+    DO JL=1,SIZE(I%M%M%XROOTFRACGV,2)
        IF (JL<10) THEN
          WRITE(YRECFM,FMT='(A10,I1)') 'ROOTFRACGV',JL
        ELSE
@@ -287,9 +287,9 @@ IF(I%CISBA=='DIF')THEN
        ENDIF  
        YCOMMENT='MEB: understory root fraction by layer (-)'
        ZWORK(:,:)=XUNDEF
-       DO JJ=1,SIZE(I%XDG,1)
-          WHERE(JL<=I%NWG_LAYER(JJ,:).AND.I%NWG_LAYER(JJ,:)/=NUNDEF)
-                ZWORK(JJ,:)=I%XROOTFRACGV(JJ,JL,:)
+       DO JJ=1,SIZE(I%M%X%XDG,1)
+          WHERE(JL<=I%M%X%NWG_LAYER(JJ,:).AND.I%M%X%NWG_LAYER(JJ,:)/=NUNDEF)
+                ZWORK(JJ,:)=I%M%M%XROOTFRACGV(JJ,JL,:)
           ENDWHERE
        ENDDO
        CALL WRITE_SURF(DGU, U, &
@@ -299,8 +299,8 @@ IF(I%CISBA=='DIF')THEN
 !
 !* SOC fraction for each layer
 !
-  IF(I%LSOC)THEN
-    DO JL=1,SIZE(I%XDG,2)
+  IF(I%O%LSOC)THEN
+    DO JL=1,SIZE(I%M%X%XDG,2)
      IF (JL<10) THEN
        WRITE(YRECFM,FMT='(A7,I1)') 'FRACSOC',JL
      ELSE
@@ -308,7 +308,7 @@ IF(I%CISBA=='DIF')THEN
      ENDIF  
      YCOMMENT='SOC fraction by layer (-)'
      CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XFRACSOC(:,JL),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%I%XFRACSOC(:,JL),IRESP,HCOMMENT=YCOMMENT)
     END DO
   ENDIF
 !
@@ -316,7 +316,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-DO JL=1,SIZE(I%XDG,2)
+DO JL=1,SIZE(I%M%X%XDG,2)
    IF (JL<10) THEN
      WRITE(YRECFM,FMT='(A4,I1)') 'WSAT',JL
    ELSE
@@ -324,10 +324,10 @@ DO JL=1,SIZE(I%XDG,2)
    ENDIF  
   YCOMMENT='soil porosity by layer (m3/m3)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWSAT(:,JL),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XWSAT(:,JL),IRESP,HCOMMENT=YCOMMENT)
 ENDDO
 !
-DO JL=1,SIZE(I%XDG,2)
+DO JL=1,SIZE(I%M%X%XDG,2)
    IF (JL<10) THEN
      WRITE(YRECFM,FMT='(A3,I1)') 'WFC',JL
    ELSE
@@ -335,10 +335,10 @@ DO JL=1,SIZE(I%XDG,2)
    ENDIF  
   YCOMMENT='field capacity by layer (m3/m3)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWFC(:,JL),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XWFC(:,JL),IRESP,HCOMMENT=YCOMMENT)
 ENDDO
 !
-DO JL=1,SIZE(I%XDG,2)
+DO JL=1,SIZE(I%M%X%XDG,2)
    IF (JL<10) THEN
      WRITE(YRECFM,FMT='(A5,I1)') 'WWILT',JL
    ELSE
@@ -346,7 +346,7 @@ DO JL=1,SIZE(I%XDG,2)
    ENDIF  
   YCOMMENT='wilting point by layer (m3/m3)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWWILT(:,JL),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XWWILT(:,JL),IRESP,HCOMMENT=YCOMMENT)
 ENDDO     
 !
 !-------------------------------------------------------------------------------
@@ -363,44 +363,44 @@ YRECFM='Z0REL'
 YCOMMENT='orography roughness length (M)'
 !
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XZ0REL(:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%IP%XZ0REL(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
 !* Runoff soil ice depth for each patch
 !
-IF(I%CHORT=='SGH'.AND.I%CISBA/='DIF')THEN
+IF(I%O%CHORT=='SGH'.AND.I%O%CISBA/='DIF')THEN
   YRECFM='DICE'
   YCOMMENT='soil ice depth for runoff (m)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XD_ICE(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%X%XD_ICE(:,:),IRESP,HCOMMENT=YCOMMENT)
 ENDIF
 !
 !-------------------------------------------------------------------------------
 !
 !* Fraction of each vegetation type in the grid cell
 !
-DO JL=1,SIZE(I%XVEGTYPE_PATCH,2)
+DO JL=1,SIZE(I%IP%XVEGTYPE_PATCH,2)
   WRITE(YPAS,'(I2)') JL 
   YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
   WRITE(YRECFM,FMT='(A9)') 'VEGTYPE'//YLVLV
   YCOMMENT='fraction of each vegetation type in the grid cell'//' (-)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XVEGTYPE(:,JL),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%X%XVEGTYPE(:,JL),IRESP,HCOMMENT=YCOMMENT)
 END DO
 !-------------------------------------------------------------------------------
 !
 !* Fraction of each vegetation type for each patch
 !
-IF(I%NPATCH>1.AND.SIZE(I%XVEGTYPE_PATCH,2)/=SIZE(I%XVEGTYPE_PATCH,3))THEN
+IF(I%O%NPATCH>1.AND.SIZE(I%IP%XVEGTYPE_PATCH,2)/=SIZE(I%IP%XVEGTYPE_PATCH,3))THEN
 !
-  DO JL=1,SIZE(I%XVEGTYPE_PATCH,2)
+  DO JL=1,SIZE(I%IP%XVEGTYPE_PATCH,2)
     WRITE(YPAS,'(I2)') JL 
     YLVLV=ADJUSTL(YPAS(:LEN_TRIM(YPAS)))
     WRITE(YRECFM,FMT='(A9)') 'VEGTY_P'//YLVLV
     YCOMMENT='fraction of each vegetation type in each patch'//' (-)'
     CALL WRITE_SURF(DGU, U, &
-                    HPROGRAM,YRECFM,I%XVEGTYPE_PATCH(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
+                    HPROGRAM,YRECFM,I%IP%XVEGTYPE_PATCH(:,JL,:),IRESP,HCOMMENT=YCOMMENT)
   END DO
 !
 ENDIF
@@ -412,59 +412,59 @@ ENDIF
 YRECFM='RSMIN'
 YCOMMENT='minimum stomatal resistance (sm-1)'
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XRSMIN(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XRSMIN(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='GAMMA'
 YCOMMENT='coefficient for RSMIN calculation (-)'
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XGAMMA(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XGAMMA(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='CV'
 YCOMMENT='vegetation thermal inertia coefficient (-)'
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XCV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XCV(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='RGL'
 YCOMMENT='maximum solar radiation usable in photosynthesis (-)'
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XRGL(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XRGL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='EMIS_ISBA'
 YCOMMENT='surface emissivity (-)'
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XEMIS(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XEMIS(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 YRECFM='WRMAX_CF'
 YCOMMENT='coefficient for maximum water interception (-)'
  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWRMAX_CF(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XWRMAX_CF(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 IF (ISIZE_LMEB_PATCH>0) THEN
   !
   YRECFM='RSMINGV'
   YCOMMENT='MEB: understory minimum stomatal resistance (sm-1)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XRSMINGV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XRSMINGV(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='GAMMAGV'
   YCOMMENT='MEB: understory coefficient for RSMIN calculation (-)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XGAMMAGV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XGAMMAGV(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='RGLGV'
   YCOMMENT='MEB: understory maximum solar radiation usable in photosynthesis (-)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XRGLGV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XRGLGV(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='WRMAX_CFGV'
   YCOMMENT='MEB: understory coefficient for maximum water interception (-)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWRMAX_CFGV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XWRMAX_CFGV(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='H_VEG'
   YCOMMENT='MEB: height of vegetation (m)'
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XH_VEG(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%M%XH_VEG(:,:),IRESP,HCOMMENT=YCOMMENT)
   !
 ENDIF
 !
@@ -478,21 +478,21 @@ IF (DGMI%LSURF_DIAG_ALBEDO) THEN
    YRECFM='ALBNIR_S'
    YCOMMENT='soil near-infra-red albedo (-)'
    CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XALBNIR_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%A%XALBNIR_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
    YRECFM='ALBVIS_S'
    YCOMMENT='soil visible albedo (-)'
    CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XALBVIS_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%A%XALBVIS_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
    YRECFM='ALBUV_S'
    YCOMMENT='soil UV albedo (-)'
    CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XALBUV_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%A%XALBUV_SOIL(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -501,21 +501,21 @@ IF (DGMI%LSURF_DIAG_ALBEDO) THEN
    YRECFM='ALBNIR_ISBA'
    YCOMMENT='total near-infra-red albedo (-)'
    CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XALBNIR(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XALBNIR(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
    YRECFM='ALBVIS_ISBA'
    YCOMMENT='total visible albedo (-)'
    CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XALBVIS(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XALBVIS(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
    YRECFM='ALBUV_ISBA'
    YCOMMENT='total UV albedo (-)'
    CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XALBUV(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%T%XALBUV(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 END IF
 !
@@ -537,7 +537,7 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
-IF (LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR. I%CPHOTO=='NCB') ) THEN
+IF (LAGRIP .AND. (I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') ) THEN
 !
 !* seeding and reaping
 !
@@ -546,13 +546,13 @@ IF (LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR.
   YCOMMENT='date of seeding (-)'
 !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%TSEED(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%I%TSEED(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='TREAP'
   YCOMMENT='date of reaping (-)'
 !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%TREAP(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%I%TREAP(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -562,7 +562,7 @@ IF (LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR.
   YCOMMENT='flag for irrigation (irrigation if >0.) (-)'
 !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XIRRIG(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%I%XIRRIG(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -572,7 +572,7 @@ IF (LAGRIP .AND. (I%CPHOTO=='LAI' .OR. I%CPHOTO=='LST' .OR. I%CPHOTO=='NIT' .OR.
   YCOMMENT='water supply during irrigation process (mm)'
 !
   CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,I%XWATSUP(:,:),IRESP,HCOMMENT=YCOMMENT)
+                  HPROGRAM,YRECFM,I%M%I%XWATSUP(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 ENDIF
 !-------------------------------------------------------------------------------

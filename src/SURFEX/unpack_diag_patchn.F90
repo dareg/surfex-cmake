@@ -124,28 +124,28 @@ IF (KNPATCH==1) THEN
     DGI%XQS            (:, KPATCH)    = PKDI%XP_QS             (:)
   END IF
   !
-  IF (I%LCPL_RRM) THEN
+  IF (I%O%LCPL_RRM) THEN
     PCPL_DRAIN     (:, KPATCH)    = PKDI%XP_DRAIN         (:)
     PCPL_RUNOFF    (:, KPATCH)    = PKDI%XP_RUNOFF        (:)
   END IF
   !
-  IF (I%LFLOOD) THEN
+  IF (I%O%LFLOOD) THEN
     PCPL_EFLOOD    (:, KPATCH)    = PKDI%XP_LE_FLOOD (:) / PKI%XP_LVTT(:) &
                                   + PKDI%XP_LEI_FLOOD(:) / PKI%XP_LSTT(:)
     PCPL_PFLOOD    (:, KPATCH)    = PKDI%XP_PFLOOD                (:)
     PCPL_IFLOOD    (:, KPATCH)    = PKDI%XP_IFLOOD                (:)
   END IF    
   !
-  IF(I%LCPL_RRM.AND.I%LGLACIER)THEN
+  IF(I%O%LCPL_RRM.AND.I%O%LGLACIER)THEN
     PCPL_ICEFLUX   (:, KPATCH)    = PKDI%XP_ICEFLUX       (:)
   ENDIF
   !
-  IF(I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO')THEN
-    I%TSNOW%TEMP(:,:,KPATCH) = PKDI%XP_SNOWTEMP(:,:)
-    I%TSNOW%TS  (:,KPATCH)   = PKDI%XP_SNOWTEMP(:,1)
+  IF(I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO')THEN
+    I%R%TSNOW%TEMP(:,:,KPATCH) = PKDI%XP_SNOWTEMP(:,:)
+    I%R%TSNOW%TS  (:,KPATCH)   = PKDI%XP_SNOWTEMP(:,1)
   ENDIF
   !
-  IF (I%CPHOTO/='NON') THEN
+  IF (I%O%CPHOTO/='NON') THEN
     GB%XIACAN(:,:,KPATCH) = PKDI%XP_IACAN(:,:)
   ENDIF
   !
@@ -212,7 +212,7 @@ ELSE
     END DO
   END IF
   !
-  IF (I%LCPL_RRM) THEN
+  IF (I%O%LCPL_RRM) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
       PCPL_DRAIN       (JI, KPATCH)    = PKDI%XP_DRAIN          (JJ)
@@ -220,7 +220,7 @@ ELSE
     END DO
   END IF
   !
-  IF (I%LFLOOD) THEN
+  IF (I%O%LFLOOD) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK                     (JJ)
       PCPL_EFLOOD      (JI, KPATCH)    = PKDI%XP_LE_FLOOD (JJ) / PKI%XP_LVTT(JJ) &
@@ -230,24 +230,24 @@ ELSE
     END DO
   END IF
   !
-  IF(I%LGLACIER)THEN
+  IF(I%O%LGLACIER)THEN
     DO JJ=1,KSIZE
       JI                              = KMASK             (JJ)
       PCPL_ICEFLUX    (JI, KPATCH)    = PKDI%XP_ICEFLUX        (JJ)
     END DO          
   ENDIF
   !
-  IF(I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO')THEN
+  IF(I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO')THEN
     DO JJ=1,KSIZE
       JI                       = KMASK             (JJ)
-      I%TSNOW%TS    (JI,KPATCH)  = PKDI%XP_SNOWTEMP(JJ,1)
-      DO JSW=1,SIZE(I%TSNOW%TEMP,2)
-        I%TSNOW%TEMP(JI,JSW,KPATCH)  = PKDI%XP_SNOWTEMP(JJ,JSW)
+      I%R%TSNOW%TS    (JI,KPATCH)  = PKDI%XP_SNOWTEMP(JJ,1)
+      DO JSW=1,SIZE(I%R%TSNOW%TEMP,2)
+        I%R%TSNOW%TEMP(JI,JSW,KPATCH)  = PKDI%XP_SNOWTEMP(JJ,JSW)
       ENDDO
     ENDDO          
   ENDIF
   !  
-  IF (I%CPHOTO/='NON') THEN
+  IF (I%O%CPHOTO/='NON') THEN
     DO JJ=1,KSIZE
       JI                  = KMASK   (JJ)
       DO JSW=1,SIZE(GB%XIACAN,2)

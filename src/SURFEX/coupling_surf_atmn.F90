@@ -615,7 +615,7 @@ ELSEIF (KTILE==2) THEN
 ELSEIF (KTILE==3) THEN
   !
   CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, &
-                         YSC%GDM%DTGD, YSC%GRM%DTGR, YSC%GRM%TGRO, YSC%DGL, YSC%DST, YSC%SLT, &
+                         YSC%GDM%DTI, YSC%GRM%DTI, YSC%DGL, YSC%DST, YSC%SLT, &
                          HPROGRAM, HCOUPLING, PTIMEC,                                         &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                YSC%U%NSIZE_NATURE, KSV, KSW,                                                  &

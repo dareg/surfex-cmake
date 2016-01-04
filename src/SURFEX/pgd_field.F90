@@ -41,7 +41,7 @@
 !            -----------
 !
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -102,6 +102,7 @@ INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field 
 INTEGER                        :: IDIM   !
 
 !
+INTEGER :: JJ
  CHARACTER(LEN=20)   :: YFIELD
  CHARACTER(LEN=6)    :: YMASK
 INTEGER             :: INPTS     ! number of points used for interpolation

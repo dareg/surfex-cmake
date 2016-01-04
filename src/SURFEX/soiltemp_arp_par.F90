@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE SOILTEMP_ARP_PAR (I, &
+      SUBROUTINE SOILTEMP_ARP_PAR (HISBA, PSODELX, &
                                    HPROGRAM,OTEMP_ARP,KTEMPLAYER_ARP)
 !     ##############################################################
 !
@@ -38,9 +38,6 @@
 !*    0.     DECLARATION
 !            -----------
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 !
@@ -65,7 +62,8 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+ CHARACTER(LEN=*),  INTENT(IN) :: HISBA
+REAL, DIMENSION(:), POINTER :: PSODELX
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: OTEMP_ARP
@@ -118,7 +116,7 @@ ENDIF
 !*    3.      Consistency
 !             -----------
 !
-IF(LTEMP_ARP.AND.I%CISBA=='DIF')THEN
+IF(LTEMP_ARP.AND.HISBA=='DIF')THEN
    LTEMP_ARP=.FALSE.
    WRITE(ILUOUT,*)'LTEMP_ARP put at False because you use the ISBA-DF scheme'
 ENDIF
@@ -146,26 +144,26 @@ ENDIF
 !
 IF(LTEMP_ARP)THEN
 !
-  ALLOCATE(I%XSODELX(NTEMPLAYER_ARP))
+  ALLOCATE(PSODELX(NTEMPLAYER_ARP))
 !
   IF(ALL(SODELX(:)==XUNDEF))THEN
 !          
-    I%XSODELX(1)=0.5
-    I%XSODELX(2)=1.5
-    I%XSODELX(3)=4.5
-    I%XSODELX(4)=13.5
-    WRITE(ILUOUT,*)'SODELX default values : ',I%XSODELX(:)
+    PSODELX(1)=0.5
+    PSODELX(2)=1.5
+    PSODELX(3)=4.5
+    PSODELX(4)=13.5
+    WRITE(ILUOUT,*)'SODELX default values : ',PSODELX(:)
 !    
   ELSE
 !          
-    I%XSODELX(:)=SODELX(1:NTEMPLAYER_ARP)
-    WRITE(ILUOUT,*)'SODELX imposed to : ',I%XSODELX(:)
+    PSODELX(:)=SODELX(1:NTEMPLAYER_ARP)
+    WRITE(ILUOUT,*)'SODELX imposed to : ',PSODELX(:)
 !    
   ENDIF
 !
 ELSE
 !
-  ALLOCATE(I%XSODELX(0))
+  ALLOCATE(PSODELX(0))
 !
 ENDIF
 !

@@ -112,12 +112,12 @@ IF (.NOT.ASSOCIATED(GB%XNOFLUX))  ALLOCATE(GB%XNOFLUX(SIZE(PUA,1)))
 !
 ! Calculation of WFPS
 ! coefficients obtenus a partir des donnees Grignon+Hombori+Escompte(0.536 0.4 0.43)
-ZWFPS_S(:) = (I%XWG(:,1,1) / 0.45) * 100.      
+ZWFPS_S(:) = (I%R%XWG(:,1,1) / 0.45) * 100.      
 ! Change unity of temperatures from Kelvin to Celsius
-ZTG_D(:) = I%XTG(:,2,1)  - 273.15
-ZTG_S(:) = I%XTG(:,1,1)  - 273.15
+ZTG_D(:) = I%R%XTG(:,2,1)  - 273.15
+ZTG_S(:) = I%R%XTG(:,1,1)  - 273.15
 ! Change sand fraction into sand percentage
-ZSAND(:) = I%XSAND(:,1) * 100.
+ZSAND(:) = I%P%XSAND(:,1) * 100.
 ! Calculate wind module
 ZWIND(:) = SQRT( PUA(:)**2 + PVA(:)**2 )
 !
@@ -128,9 +128,9 @@ ZWIND(:) = SQRT( PUA(:)**2 + PVA(:)**2 )
 ZN_ZTG_S(:)   = XCOEF_TG_S(1)   + XCOEF_TG_S(2) * ZTG_S(:)
 ZN_ZWFPS_S(:) = XCOEF_WFPS_S(1) + XCOEF_WFPS_S(2) * ZWFPS_S(:)
 ZN_ZTG_D(:)   = XCOEF_TG_D(1)   + XCOEF_TG_D(2) * ZTG_D(:)
-ZN_FERT(:)    = XCOEF_FERT(1)   + XCOEF_FERT(2) * I%XFERT(:)
+ZN_FERT(:)    = XCOEF_FERT(1)   + XCOEF_FERT(2) * I%P%XFERT(:)
 ZN_ZSAND(:)   = XCOEF_SAND(1)   + XCOEF_SAND(2) * ZSAND(:)
-ZN_PH(:)      = XCOEF_PH(1)     + XCOEF_PH(2) * I%XPH(:)
+ZN_PH(:)      = XCOEF_PH(1)     + XCOEF_PH(2) * I%P%XPH(:)
 ZN_WIND(:)    = XCOEF_WIND(1)   + XCOEF_WIND(2) * ZWIND(:)
 !
 ! 2- weighted sums
@@ -149,7 +149,7 @@ ZN_Y(:) = XWGT_TOT(1) + XWGT_TOT(2)*TANH(ZS(:,1)) + XWGT_TOT(3)*TANH(ZS(:,2)) + 
 !  4- Flux calculation
 !       If  pH> 6, pulse effect, amplitude coefficient is maximum.
 !       If pH < 6, amplitude coefficient is reduced to avoid strong emissions
-WHERE (I%XPH(:) .GE. 6.0)
+WHERE (I%P%XPH(:) .GE. 6.0)
   GB%XNOFLUX(:) = XCOEF_NO0 + XCOEF_NO1_s*ZN_Y(:)
 ELSEWHERE
   GB%XNOFLUX(:) = XCOEF_NO0 + XCOEF_NO1_l*ZN_Y(:)
@@ -171,9 +171,9 @@ GB%XNOFLUX(:) = GB%XNOFLUX(:)*XAVOGADRO/(1.0E4*8.64E4*14)
 !  7- Reduction du flux dans la canopee
 !          WHERE (XLAI(:,1)/=XUNDEF) 
 !         ZCRF(:) = -0.0917*XLAI(:,1) + 0.9429
-WHERE (I%XLAI(:,1) > 1.9 .AND. I%XLAI(:,1) < 5.)
+WHERE (I%M%T%XLAI(:,1) > 1.9 .AND. I%M%T%XLAI(:,1) < 5.)
   ZCRF(:) = 0.5
-ELSEWHERE (I%XLAI(:,1) > 5.)
+ELSEWHERE (I%M%T%XLAI(:,1) > 5.)
   ZCRF(:) = 0.2
 ELSEWHERE
   ZCRF(:) = 1.

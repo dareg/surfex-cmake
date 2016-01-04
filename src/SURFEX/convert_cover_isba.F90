@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE CONVERT_COVER_ISBA (DTCO, I, &
-                                        HISBA,KDECADE,PCOVER,OCOVER,HPHOTO,   &
+      SUBROUTINE CONVERT_COVER_ISBA (DTCO, HALBEDO, &
+                                        HISBA,OTR_ML,KDECADE,PCOVER,OCOVER,HPHOTO,   &
                                          HSFTYPE,PVEG,                       &
                                          PLAI,PRSMIN,PGAMMA,PWRMAX_CF,       &
                                          PRGL,PCV,PSOILGRID,PPERM,           &
@@ -59,7 +59,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                  &
                                   XDATA_VEG, XDATA_Z0, XDATA_Z0_O_Z0H,    &
@@ -105,9 +104,10 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_t), INTENT(INOUT) :: I
 !
+ CHARACTER(LEN=*), INTENT(IN) :: HALBEDO
  CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+ LOGICAL, INTENT(IN) :: OTR_ML
 INTEGER,                INTENT(IN)    :: KDECADE
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:), INTENT(IN)     :: OCOVER
@@ -344,7 +344,7 @@ IF (PRESENT(PD_ICE)) &
 !---------------------------------------------------------------------------------
 !
 IF (PRESENT(PALBNIR_VEG)) THEN
-  IF (I%CALBEDO=='CM13') THEN
+  IF (HALBEDO=='CM13') THEN
     CALL AV_PGD(DTCO, &
                PALBVIS_VEG,PCOVER,XDATA_ALB_VEG_NIR(:,KDECADE,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE)      
   ELSE   
@@ -354,7 +354,7 @@ IF (PRESENT(PALBNIR_VEG)) THEN
 ENDIF
 !
 IF (PRESENT(PALBVIS_VEG)) THEN
-  IF (I%CALBEDO=='CM13') THEN
+  IF (HALBEDO=='CM13') THEN
     CALL AV_PGD(DTCO, &
                PALBVIS_VEG,PCOVER,XDATA_ALB_VEG_VIS(:,KDECADE,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE)      
   ELSE     
@@ -364,7 +364,7 @@ IF (PRESENT(PALBVIS_VEG)) THEN
 ENDIF
 !
 IF (PRESENT(PALBUV_VEG)) THEN
-  IF ((I%CALBEDO=='CM13'.OR.I%LTR_ML).AND.PRESENT(PALBVIS_VEG)) THEN
+  IF ((HALBEDO=='CM13'.OR.OTR_ML).AND.PRESENT(PALBVIS_VEG)) THEN
     PALBUV_VEG(:,:)=PALBVIS_VEG(:,:)
   ELSE
     CALL AV_PGD(DTCO, &

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_VER_TEB_GREENROOF (TGR, TGRO, TGRP, TOP)
+SUBROUTINE PREP_VER_TEB_GREENROOF (GRR, GRRO, GRRP, TOP, PDG)
 !     #################################################################################
 !
 !!****  *PREP_VER_TEB_GREENROOF* - change in ISBA fields due to altitude change
@@ -27,9 +27,9 @@ SUBROUTINE PREP_VER_TEB_GREENROOF (TGR, TGRO, TGRP, TOP)
 
 !
 !
-USE MODD_TEB_GREENROOF_n, ONLY : TEB_GREENROOF_t
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
-USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_ISBA_PAR,          ONLY : XWGMIN
@@ -52,10 +52,12 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 !
 !
-TYPE(TEB_GREENROOF_t), INTENT(INOUT) :: TGR
-TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
-TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
+TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: GRR
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GRRO
+TYPE(ISBA_PGD_t), INTENT(INOUT) :: GRRP
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+!
+REAL, DIMENSION(:,:), INTENT(IN) :: PDG
 !
 INTEGER                         :: JL        ! loop counter on layers
 INTEGER                         :: IWORK     ! Work integer
@@ -77,41 +79,41 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.0    Ice content climatologic gradient
 !
 IF (LHOOK) CALL DR_HOOK('PREP_VER_TEB_GREENROOF',0,ZHOOK_HANDLE)
-ALLOCATE(ZWGI_CLIM_GRAD (SIZE(TGR%CUR%XWG,1),SIZE(TGR%CUR%XWG,2)))
+ALLOCATE(ZWGI_CLIM_GRAD (SIZE(GRR%CUR%XWG,1),SIZE(GRR%CUR%XWG,2)))
 !
-ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - TGRP%XDG(:,:) / ZH0 )
+ZWGI_CLIM_GRAD(:,:) = ZGRADX * EXP( - PDG(:,:) / ZH0 )
 !-------------------------------------------------------------------------------------
 !
 !*      1.1    Temperature profile
 !
-ALLOCATE(ZTG_LS(SIZE(TGR%CUR%XTG,1),SIZE(TGR%CUR%XTG,2)))
-ZTG_LS(:,:) = TGR%CUR%XTG(:,:)
+ALLOCATE(ZTG_LS(SIZE(GRR%CUR%XTG,1),SIZE(GRR%CUR%XTG,2)))
+ZTG_LS(:,:) = GRR%CUR%XTG(:,:,1)
 !
-  DO JL=1,SIZE(TGR%CUR%XTG,2)
-    WHERE(TGR%CUR%XTG(:,JL)/=XUNDEF) &
-      TGR%CUR%XTG(:,JL) = TGR%CUR%XTG(:,JL) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
+  DO JL=1,SIZE(GRR%CUR%XTG,2)
+    WHERE(GRR%CUR%XTG(:,JL,1)/=XUNDEF) &
+      GRR%CUR%XTG(:,JL,1) = GRR%CUR%XTG(:,JL,1) + XT_CLIM_GRAD  * (TOP%XZS - XZS_LS)  
   END DO
 !
 !-------------------------------------------------------------------------------------
 !
 !*      1.2    Water and ice in the soil
 !
-ALLOCATE(ZZSFREEZE      (SIZE(TGR%CUR%XWG,1)))
-ALLOCATE(ZWGTOT         (SIZE(TGR%CUR%XWG,1)))
-ALLOCATE(ZDW            (SIZE(TGR%CUR%XWG,1)))
+ALLOCATE(ZZSFREEZE      (SIZE(GRR%CUR%XWG,1)))
+ALLOCATE(ZWGTOT         (SIZE(GRR%CUR%XWG,1)))
+ALLOCATE(ZDW            (SIZE(GRR%CUR%XWG,1)))
 !
 !* general case
 !
-IWORK=SIZE(TGR%CUR%XTG,2)
+IWORK=SIZE(GRR%CUR%XTG,2)
 !
   !
   DO JL=1,IWORK
     !
     ZDW(:) = 0.
     ! altitude where deep soil freezes (diurnal surface response is not treated)
-    ZZSFREEZE(:) = TOP%XZS + (XTT - TGR%CUR%XTG(:,JL)) / XT_CLIM_GRAD
+    ZZSFREEZE(:) = TOP%XZS + (XTT - GRR%CUR%XTG(:,JL,1)) / XT_CLIM_GRAD
     !
-    WHERE(TGR%CUR%XTG(:,JL)/=XUNDEF) 
+    WHERE(GRR%CUR%XTG(:,JL,1)/=XUNDEF) 
       !
       WHERE (ZTG_LS(:,JL) < XTT)
         !
@@ -145,29 +147,29 @@ IWORK=SIZE(TGR%CUR%XTG,2)
       !
       ZWGTOT(:) = XUNDEF
       !
-      WHERE(TGR%CUR%XWG(:,JL)/=XUNDEF)         
-        ZWGTOT(:) = TGR%CUR%XWG(:,JL) + TGR%CUR%XWGI(:,JL)
+      WHERE(GRR%CUR%XWG(:,JL,1)/=XUNDEF)         
+        ZWGTOT(:) = GRR%CUR%XWG(:,JL,1) + GRR%CUR%XWGI(:,JL,1)
       ENDWHERE 
       !
-      WHERE(TGR%CUR%XWG(:,JL)/=XUNDEF)      
-        TGR%CUR%XWGI(:,JL) = TGR%CUR%XWGI(:,JL) + ZDW(:)
-        TGR%CUR%XWG (:,JL) = TGR%CUR%XWG (:,JL) - ZDW(:)
+      WHERE(GRR%CUR%XWG(:,JL,1)/=XUNDEF)      
+        GRR%CUR%XWGI(:,JL,1) = GRR%CUR%XWGI(:,JL,1) + ZDW(:)
+        GRR%CUR%XWG (:,JL,1) = GRR%CUR%XWG (:,JL,1) - ZDW(:)
       ENDWHERE      
       !
-      WHERE (TGR%CUR%XWGI(:,JL) < 0..AND.TGR%CUR%XWGI(:,JL)/=XUNDEF) 
-        TGR%CUR%XWGI(:,JL) = 0.
-        TGR%CUR%XWG (:,JL) = ZWGTOT(:)
+      WHERE (GRR%CUR%XWGI(:,JL,1) < 0..AND.GRR%CUR%XWGI(:,JL,1)/=XUNDEF) 
+        GRR%CUR%XWGI(:,JL,1) = 0.
+        GRR%CUR%XWG (:,JL,1) = ZWGTOT(:)
       END WHERE
       !
-      WHERE (TGR%CUR%XWG(:,JL) < XWGMIN.AND.TGR%CUR%XWG(:,JL)/=XUNDEF)
-        TGR%CUR%XWG (:,JL) = XWGMIN
-        TGR%CUR%XWGI(:,JL) = ZWGTOT(:) - XWGMIN
+      WHERE (GRR%CUR%XWG(:,JL,1) < XWGMIN.AND.GRR%CUR%XWG(:,JL,1)/=XUNDEF)
+        GRR%CUR%XWG (:,JL,1) = XWGMIN
+        GRR%CUR%XWGI(:,JL,1) = ZWGTOT(:) - XWGMIN
       END WHERE
       !
-      WHERE(TGR%CUR%XWGI(:,JL) > 0..AND.TGR%CUR%XWGI(:,JL)/=XUNDEF)
-        TGR%CUR%XTG(:,JL) = MIN(XTT,TGR%CUR%XTG(:,JL))
+      WHERE(GRR%CUR%XWGI(:,JL,1) > 0..AND.GRR%CUR%XWGI(:,JL,1)/=XUNDEF)
+        GRR%CUR%XTG(:,JL,1) = MIN(XTT,GRR%CUR%XTG(:,JL,1))
       ELSEWHERE
-        TGR%CUR%XTG(:,JL) = MAX(XTT,TGR%CUR%XTG(:,JL))
+        GRR%CUR%XTG(:,JL,1) = MAX(XTT,GRR%CUR%XTG(:,JL,1))
       ENDWHERE
       !
     ENDWHERE
@@ -182,15 +184,15 @@ DEALLOCATE(ZWGTOT        )
 DEALLOCATE(ZDW           )
 !
 !* masks where fields are not defined
-WHERE (TGR%CUR%XTG(:,1:SIZE(TGR%CUR%XWG,2)) == XUNDEF)
-  TGR%CUR%XWG (:,:) = XUNDEF
-  TGR%CUR%XWGI(:,:) = XUNDEF
+WHERE (GRR%CUR%XTG(:,1:SIZE(GRR%CUR%XWG,2),1) == XUNDEF)
+  GRR%CUR%XWG (:,:,1) = XUNDEF
+  GRR%CUR%XWGI(:,:,1) = XUNDEF
 END WHERE
 !
 !-------------------------------------------------------------------------------------
 !
-IDEEP_SOIL = TGRO%NLAYER_GR
- CALL PREP_VER_SNOW(TGR%CUR%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),SPREAD(TGR%CUR%XTG,3,1),IDEEP_SOIL)
+IDEEP_SOIL = GRRO%NGROUND_LAYER
+ CALL PREP_VER_SNOW(GRR%CUR%TSNOW,XZS_LS,TOP%XZS,SPREAD(ZTG_LS,3,1),GRR%CUR%XTG,IDEEP_SOIL)
 !
 !-------------------------------------------------------------------------------------
 !

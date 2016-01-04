@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
+SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,   &
                                       HPROGRAM, HCOUPLING,                                    &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
@@ -45,9 +45,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
-USE MODD_DATA_TEB_GARDEN_n, ONLY : DATA_TEB_GARDEN_t
-USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
-USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
@@ -72,9 +70,8 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
-TYPE(DATA_TEB_GARDEN_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
-TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
@@ -195,7 +192,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,IM%I%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,IM%I%P%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -251,7 +248,7 @@ ELSE
 !
 !  The subgrid slope comes from the XSSO_SLOPE field.
 !
-   Z3D_TOT_SURF(:) = SQRT(1.+IM%I%XSSO_SLOPE(:)**2)
+   Z3D_TOT_SURF(:) = SQRT(1.+IM%I%P%XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
 !
 !  number of spectral shortwave bands
@@ -274,7 +271,7 @@ ELSE
 !  incoming LW radiation per m2 of actual surface
 !
    ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
-          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
+          + XSTEFAN*IM%I%I%XEMIS_NAT(:)*IM%I%R%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !  liquid precipitation per m2 of actual surface
 !
@@ -291,7 +288,7 @@ ENDIF
 !*      3.     Call of ISBA
 !              ------------
 !
- CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
+ CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,   &
                              HPROGRAM, HCOUPLING,                                           &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
                KI, KSV, KSW,                                                                 &

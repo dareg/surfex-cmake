@@ -149,10 +149,10 @@ IF (YSC%U%NDIM_NATURE>0)                                 &
 !             ----------------------------------
 !
 IF (YSC%U%NDIM_TOWN>0)                                 &
-  CALL ZOOM_PGD_TOWN(YSC%TM%B, YSC%TM%DGCT, YSC%TM%DGMT, YSC%TM%T, YSC%GDM%TGD, &
-                     YSC%GDM%TGDPE, YSC%GRM%TGR, YSC%GRM%TGRPE, &
+  CALL ZOOM_PGD_TOWN(YSC%TM%B, YSC%TM%DGCT, YSC%TM%DGMT, YSC%TM%T, YSC%GDM%TV%R, &
+                     YSC%GDM%TV%M%T, YSC%GRM%TV%R, YSC%GRM%TV%M%T, &
                      YSC%TM%BOP, YSC%TM%BDD, YSC%TM%DTB, YSC%DTCO, YSC%TM%DTT, YSC%UG, YSC%U, &
-                     YSC%GDM%TGDO, YSC%GDM%TGDP, YSC%TM%TG, YSC%TM%TOP, YSC%GDM%TVG, &
+                     YSC%GDM%TV%O, YSC%GDM%TV%P, YSC%TM%TG, YSC%TM%TOP, &
                      HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
 !_______________________________________________________________________________
 !

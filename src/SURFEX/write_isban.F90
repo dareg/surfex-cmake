@@ -86,14 +86,14 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !        
- CALL WRITESURF_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I, &
+ CALL WRITESURF_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I%O, &
                             HPROGRAM)
  CALL WRITESURF_ISBA_n(DGU, U, &
                        IM%CHI, DST, IM%I, &
                        HPROGRAM,OLAND_USE)
 !
 IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(DGU, U, &
-                                                                        IM%ICP, IM%I, &
+                                                                        IM%ICP, IM%I%O%LCANOPY, &
                                                                         HPROGRAM,HWRITE)
 !
 !-------------------------------------------------------------------------------

@@ -99,36 +99,35 @@ IF (LHOOK) CALL DR_HOOK('GARDEN_PROPERTIES',0,ZHOOK_HANDLE)
 !
 ! This way, ISBA can run without problem for these points
 !
- CALL FLAG_TEB_GARDEN_n(GDM%TGD, GDM%TGDO, GDM%TGDPE, T, GDM%TVG, &
-                        1)
+ CALL FLAG_TEB_GARDEN_n(GDM%TV%R, GDM%TV%O, GDM%TV%M%T, T, 1)
 !
 !
 !*      2.     Computes several properties of gardens
 !              --------------------------------------
 !
- CALL ISBA_PROPERTIES(GDM%TVG%CISBA, GDM%TVG%LTR_ML, GDM%TGD%CUR%TSNOW, 1,          &
+ CALL ISBA_PROPERTIES(GDM%TV%O%CISBA, GDM%TV%O%LTR_ML, GDM%TV%R%CUR%TSNOW, 1,          &
                      PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                   &
-                     GDM%TGDPE%CUR%XALBNIR(:), GDM%TGDPE%CUR%XALBVIS(:), GDM%TGDPE%CUR%XALBUV(:),  &
-                     GDM%TGDP%XALBNIR_VEG(:), GDM%TGDP%XALBVIS_VEG(:), GDM%TGDP%XALBUV_VEG(:),    &
-                     GDM%TGDP%XALBNIR_SOIL(:), GDM%TGDP%XALBVIS_SOIL(:), GDM%TGDP%XALBUV_SOIL(:),   &
-                     GDM%TGDPE%CUR%XVEG(:), GDM%TGDPE%CUR%XLAI(:), GDM%TGDPE%CUR%XZ0(:), &
-                     GDM%TGDPE%CUR%XEMIS(:),GDM%TGD%CUR%XTG(:,1),          &
+                     GDM%TV%M%T%CUR%XALBNIR(:,1), GDM%TV%M%T%CUR%XALBVIS(:,1), GDM%TV%M%T%CUR%XALBUV(:,1),  &
+                     GDM%TV%M%T%CUR%XALBNIR_VEG(:,1), GDM%TV%M%T%CUR%XALBVIS_VEG(:,1), GDM%TV%M%T%CUR%XALBUV_VEG(:,1),    &
+                     GDM%TV%M%A%XALBNIR_SOIL(:,1), GDM%TV%M%A%XALBVIS_SOIL(:,1), GDM%TV%M%A%XALBUV_SOIL(:,1),   &
+                     GDM%TV%M%T%CUR%XVEG(:,1), GDM%TV%M%T%CUR%XLAI(:,1), GDM%TV%M%T%CUR%XZ0(:,1), &
+                     GDM%TV%M%T%CUR%XEMIS(:,1),GDM%TV%R%CUR%XTG(:,1,1),          &
                      ZASNOW, ZANOSNOW, ZESNOW, ZENOSNOW, ZTSSNOW, ZTSNOSNOW,      &
-                     GDM%TGD%CUR%XSNOWFREE_ALB_VEG, GDM%TGD%CUR%XSNOWFREE_ALB_SOIL,               &
+                     GDM%TV%R%CUR%XSNOWFREE_ALB_VEG(:,1), GDM%TV%R%CUR%XSNOWFREE_ALB_SOIL(:,1),               &
                      ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, ZALBVIS_TSOIL,    &
-                     GDM%TGD%CUR%XPSN(:), GDM%TGD%CUR%XPSNV_A(:), GDM%TGD%CUR%XPSNG(:), &
-                     GDM%TGD%CUR%XPSNV(:)          )  
+                     GDM%TV%R%CUR%XPSN(:,1), GDM%TV%R%CUR%XPSNV_A(:,1), GDM%TV%R%CUR%XPSNG(:,1), &
+                     GDM%TV%R%CUR%XPSNV(:,1)          )  
 !
-GDM%TGD%CUR%XSNOWFREE_ALB = ZANOSNOW
+GDM%TV%R%CUR%XSNOWFREE_ALB(:,1) = ZANOSNOW
 !
 !* averaged albedo
-PALB =  GDM%TGD%CUR%XPSN(:) * ZASNOW              + (1.-GDM%TGD%CUR%XPSN(:)) * ZANOSNOW
+PALB =  GDM%TV%R%CUR%XPSN(:,1) * ZASNOW              + (1.-GDM%TV%R%CUR%XPSN(:,1)) * ZANOSNOW
 !* averaged emissivity
-PEMIS=  GDM%TGD%CUR%XPSN(:) * ZESNOW              + (1.-GDM%TGD%CUR%XPSN(:)) * ZENOSNOW
+PEMIS=  GDM%TV%R%CUR%XPSN(:,1) * ZESNOW              + (1.-GDM%TV%R%CUR%XPSN(:,1)) * ZENOSNOW
 !* averaged surface radiative temperature
 !  (recomputed from emitted long wave)
-PTS  =((GDM%TGD%CUR%XPSN(:) * ZESNOW * ZTSSNOW**4 + &
-        (1.-GDM%TGD%CUR%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
+PTS  =((GDM%TV%R%CUR%XPSN(:,1) * ZESNOW * ZTSSNOW**4 + &
+        (1.-GDM%TV%R%CUR%XPSN(:,1)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 !
 IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
 IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)

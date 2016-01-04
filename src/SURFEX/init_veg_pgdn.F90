@@ -1,5 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_VEG_PGD_n (CHI, DTCO, DST, I, SLT, U, &
+SUBROUTINE INIT_VEG_PGD_n (CHI, DTCO, DST, SLT, U, &
+                           OAGRI_TO_GRASS, OCOVER, PCOVER, &
                            HPROGRAM, HSURF, KLUOUT, KI, KPATCH, KGROUND_LAYER, KMONTH, &
                           PVEGTYPE, PPATCH, PVEGTYPE_PATCH, KSIZE_NATURE_P,           &
                           KR_NATURE_P, PRM_PATCH,                                     &
@@ -69,7 +70,6 @@ USE MODD_SV_n, ONLY : SV_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DST_n, ONLY : DST_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -115,9 +115,12 @@ IMPLICIT NONE
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+LOGICAL, INTENT(IN) :: OAGRI_TO_GRASS
+LOGICAL, DIMENSION(:), INTENT(IN) :: OCOVER
+REAL, DIMENSION(:,:), INTENT(IN) :: PCOVER
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF     ! Type of surface
@@ -418,7 +421,7 @@ IF(HPHOTO /= 'NON' .AND. HINIT == 'ALL') THEN
   ALLOCATE(PTAU_WOOD     (KI,KPATCH))
   ALLOCATE(PINCREASE     (KI,KNBIOMASS,KPATCH))
   ALLOCATE(PTURNOVER     (KI,KNBIOMASS,KPATCH))
-  CALL CO2_INIT_n(I, &
+  CALL CO2_INIT_n(OAGRI_TO_GRASS, OTR_ML, &
                   HPHOTO, KSIZE_NATURE_P, KR_NATURE_P, PVEGTYPE_PATCH, &
                   ZCO2, PGMES, PGC, PDMAX, PABC, PPOI, PANMAX, &
                   PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,      &
@@ -482,7 +485,7 @@ IF (KSV /= 0) THEN
     ! contains explicitely modules from ISBAn. It should be cleaned in a future
     ! version.
     CALL OPEN_NAMELIST(HPROGRAM, ICH, HFILE=HCHEM_SURF_FILE)
-    CALL CH_INIT_DEP_ISBA_n(CHI, DTCO, I, &
+    CALL CH_INIT_DEP_ISBA_n(CHI, DTCO, KPATCH, OCOVER, PCOVER, &
                             ICH, KLUOUT, KI)
     CALL CLOSE_NAMELIST(HPROGRAM, ICH)
   END IF
