@@ -87,11 +87,11 @@ ENDIF
 !
 IF(LCPL_LAND)THEN
 !
-! Water table depth (positive downward) and fraction of water table to rise
+! Water table depth (negative above the surface) and fraction of water table to rise
 !
   IF(LCPL_GW)THEN
     WHERE(TPG%GMASK_GW(:,:))
-          TP%XCPL_WTD (:,:) = MAX(-1.0*PWTD(:,:),0.0)
+          TP%XCPL_WTD (:,:) = PWTD (:,:)
           TP%XCPL_FWTD(:,:) = PFWTD(:,:)
     ENDWHERE
   ENDIF

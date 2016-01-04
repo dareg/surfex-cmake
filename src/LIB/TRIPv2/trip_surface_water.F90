@@ -1,7 +1,7 @@
 !     #########
 SUBROUTINE TRIP_SURFACE_WATER (KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
                                OPRINT,OMASK_VEL,PLEN,PSLOPEBED,PWIDTH,PN,PRUNOFF,&
-                               PSURF_STO,PSURF_STO2,PGOUT,PSIN,PSOUT,PVEL,PHS,   &
+                               PVEL,PHS,PSURF_STO,PSURF_STO2,PGOUT,PSIN,PSOUT,   &
                                PAREA,PQFR,PQRF,                                  &
                                PSSTO_ALL,PSSTO2_ALL,PSIN_ALL,PDRUN_ALL,          &
                                PSOUT_ALL,PVEL_ALL,PHS_ALL                        ) 
@@ -35,7 +35,7 @@ SUBROUTINE TRIP_SURFACE_WATER (KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX,
 !!      
 !!    AUTHOR
 !!    ------
-!!      B. Decharme
+!!    B. Decharme
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -73,7 +73,7 @@ INTEGER, DIMENSION(:,:),INTENT(IN)   :: KNEXTY ! of destination grid:
 INTEGER, INTENT(IN)                    :: KSEQMAX ! maximum down flow
 LOGICAL, INTENT(IN)                    :: OPRINT   !Printable budget key
 !
-LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_VEL  !Variable velocity mask
+LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_VEL  ! Variable velocity mask
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PLEN       ! river length       [m] 
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PSLOPEBED  ! river bed slopes             [m/m]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PWIDTH     ! river widths                 [m]
@@ -83,12 +83,14 @@ REAL,    DIMENSION(:,:), INTENT(IN)    :: PRUNOFF    ! Surface runoff from ISBA 
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PGOUT      ! ground water outflow        [kg/s]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PQFR       ! Flood flow to river         [kg/s]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PQRF       ! River flow to floodplain    [kg/s]
+REAL,    DIMENSION(:,:), INTENT(IN)    :: PHS        ! river channel height [m]
+REAL,    DIMENSION(:,:), INTENT(IN)    :: PVEL       ! River channel velocity  [m/s]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PSURF_STO  ! river channel storage at t  [kg]
+!
 REAL,    DIMENSION(:,:), INTENT(INOUT) :: PSURF_STO2 ! river channel storage at t+1[kg]
-REAL,    DIMENSION(:,:), INTENT(OUT)   :: PHS   ! river channel height [m]
+!
 REAL,    DIMENSION(:,:), INTENT(OUT)   :: PSIN  ! Inflow to the surface river reservoir [kg/s]
 REAL,    DIMENSION(:,:), INTENT(OUT)   :: PSOUT ! Outflow from the surface river reservoir [kg/s]
-REAL,    DIMENSION(:,:), INTENT(OUT)   :: PVEL  ! River channel velocity  [m/s]
 !
 REAL,                    INTENT(OUT)   :: PSSTO_ALL,PSSTO2_ALL,PSIN_ALL,    &
                                           PDRUN_ALL,PSOUT_ALL,PVEL_ALL,     &
@@ -99,15 +101,12 @@ REAL,                    INTENT(OUT)   :: PSSTO_ALL,PSSTO2_ALL,PSIN_ALL,    &
 !
 REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZQIN
 REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZRADIUS
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZHS
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZVEL
-REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZRC
 REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZQOUT
 REAL, DIMENSION(SIZE(PLEN,1),SIZE(PLEN,2)) :: ZSTOMAX
 !
 REAL    :: ZAREA
 !
-INTEGER :: ILON, ILAT, JLON, JLAT, ISEQ
+INTEGER :: ILON, ILAT, JLON, JLAT, ISEQ, INEXTX, INEXTY
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -123,80 +122,34 @@ ILAT = SIZE(PLEN,2)
 PSURF_STO2 (:,:) = 0.0
 PSIN       (:,:) = 0.0
 PSOUT      (:,:) = 0.0
-PVEL       (:,:) = 0.0
-PHS        (:,:) = XUNDEF
 !
 ZQIN       (:,:) = 0.0
 ZRADIUS    (:,:) = 0.0
-ZVEL       (:,:) = 0.0
-ZHS        (:,:) = 0.0
-ZRC        (:,:) = 0.0
 ZQOUT      (:,:) = 0.0
 ZSTOMAX    (:,:) = 0.0
 !
 !-------------------------------------------------------------------------------
-! * River channel velocity             
-!-------------------------------------------------------------------------------
-!           
-WHERE(OMASK_VEL(:,:))
-    PHS     (:,:)=PSURF_STO(:,:)/(XRHOLW*PLEN(:,:)*PWIDTH(:,:))
-    ZHS     (:,:)=MAX(XHSMIN,PHS(:,:))
-    ZRADIUS (:,:)=LOG(PWIDTH(:,:)*ZHS(:,:)/(PWIDTH(:,:)+2.0*ZHS(:,:)))
-    ZVEL    (:,:)=MAX(XVELMIN,EXP(XM*ZRADIUS(:,:))*SQRT(PSLOPEBED(:,:))/PN(:,:))
-    PVEL    (:,:)=MIN(ZVEL(:,:),PLEN(:,:)/PTSTEP)
-    ZRC     (:,:)=PVEL(:,:)/PLEN(:,:)
-ELSEWHERE(KSEQ(:,:)>0)
-    ZRC     (:,:)=XCVEL/PLEN(:,:)
-ENDWHERE
-!
-!-------------------------------------------------------------------------------
-! * Sequence loop
+! * Sequence loop (optimized computation)
 !-------------------------------------------------------------------------------
 !
-DO ISEQ=1,KSEQMAX
-   DO JLAT=1,ILAT
-      DO JLON=1,ILON
-!      
-        IF(KSEQ(JLON,JLAT)==ISEQ)THEN
+ISEQ=1
+CALL SEQUENCE_LOOP(ISEQ)
 !
-!        ---------------------------------------------------------------------
-!        inflow calculation
+IF(KSEQMAX>2)THEN
+  ISEQ=2
+  CALL SEQUENCE_LOOP(ISEQ)
+ENDIF
 !
-         ZQIN(JLON,JLAT)=ZQIN(JLON,JLAT)+PRUNOFF(JLON,JLAT)+PGOUT(JLON,JLAT)+PQFR(JLON,JLAT)-PQRF(JLON,JLAT)
-         PSIN(JLON,JLAT)=ZQIN(JLON,JLAT)
+IF(KSEQMAX>3)THEN
+  DO ISEQ=3,KSEQMAX-1
+     CALL SEQUENCE_LOOP(ISEQ)
+  ENDDO
+ENDIF
 !
-!        ------------------------------------------------------------------
-!        river channel storage calculation
-!
-         PSURF_STO2(JLON,JLAT) = PSURF_STO(JLON,JLAT)*EXP(-(ZRC(JLON,JLAT)*PTSTEP)) &
-                               + (1.0-EXP(-(ZRC(JLON,JLAT)*PTSTEP)))*ZQIN(JLON,JLAT)&
-                               / ZRC(JLON,JLAT)
-!
-!        -------------------------------------------------------------------
-!        supress numerical artifacs
-!
-         ZSTOMAX(JLON,JLAT)=ZQIN(JLON,JLAT)*PTSTEP+PSURF_STO(JLON,JLAT)
-!      
-         PSURF_STO2(JLON,JLAT)=MIN(ZSTOMAX(JLON,JLAT),PSURF_STO2(JLON,JLAT))
-!
-!        ------------------------------------------------------------------
-!        river channel outflow calculation and supress numerical artifacs
-!
-         ZQOUT(JLON,JLAT) = (PSURF_STO(JLON,JLAT)-PSURF_STO2(JLON,JLAT))/PTSTEP+ZQIN(JLON,JLAT)
-         PSOUT(JLON,JLAT) = MAX(ZQOUT(JLON,JLAT),0.0)
-!             
-         PSURF_STO2(JLON,JLAT) = PSURF_STO2(JLON,JLAT) + (PSOUT(JLON,JLAT)-ZQOUT(JLON,JLAT))*PTSTEP        
-!
-!        ------------------------------------------------------------------
-         IF(KGRCN(JLON,JLAT)>=1.AND.KGRCN(JLON,JLAT)<=8)THEN
-           ZQIN(KNEXTX(JLON,JLAT),KNEXTY(JLON,JLAT))=ZQIN(KNEXTX(JLON,JLAT),KNEXTY(JLON,JLAT))+PSOUT(JLON,JLAT)
-         ENDIF
-!
-        ENDIF
-!
-      ENDDO
-   ENDDO
-ENDDO
+IF(KSEQMAX>1)THEN
+  ISEQ=KSEQMAX
+  CALL SEQUENCE_LOOP(ISEQ)
+ENDIF
 !
 !-------------------------------------------------------------------------------
 ! * Budget calculation
@@ -240,5 +193,63 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
+CONTAINS
+!-------------------------------------------------------------------------------
+!
+SUBROUTINE SEQUENCE_LOOP(KNUM)
+!
+INTEGER, INTENT(IN) :: KNUM
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_WATER:SEQUENCE_LOOP',0,ZHOOK_HANDLE)
+!
+DO JLAT=1,ILAT
+   DO JLON=1,ILON
+!      
+      IF(KSEQ(JLON,JLAT)==KNUM)THEN
+!
+!       ---------------------------------------------------------------------
+!       inflow calculation
+!
+        ZQIN(JLON,JLAT)=ZQIN(JLON,JLAT)+PRUNOFF(JLON,JLAT)+PGOUT(JLON,JLAT)+PQFR(JLON,JLAT)-PQRF(JLON,JLAT)
+        PSIN(JLON,JLAT)=ZQIN(JLON,JLAT)
+!
+!       ------------------------------------------------------------------
+!       river channel storage calculation
+!
+        ZSTOMAX   (JLON,JLAT) = PSURF_STO(JLON,JLAT)+ZQIN(JLON,JLAT)*PTSTEP
+!
+        PSURF_STO2(JLON,JLAT) = ZSTOMAX(JLON,JLAT)/(1.0+PTSTEP*PVEL(JLON,JLAT)/PLEN(JLON,JLAT))
+!
+!       -------------------------------------------------------------------
+!       supress numerical artifacs
+!   
+        PSURF_STO2(JLON,JLAT)=MIN(ZSTOMAX(JLON,JLAT),PSURF_STO2(JLON,JLAT))
+!
+!       ------------------------------------------------------------------
+!       river channel outflow calculation and supress numerical artifacs
+!
+        ZQOUT(JLON,JLAT) = (PSURF_STO(JLON,JLAT)-PSURF_STO2(JLON,JLAT))/PTSTEP+ZQIN(JLON,JLAT)
+        PSOUT(JLON,JLAT) = MAX(ZQOUT(JLON,JLAT),0.0)
+!             
+        PSURF_STO2(JLON,JLAT) = PSURF_STO2(JLON,JLAT) + (PSOUT(JLON,JLAT)-ZQOUT(JLON,JLAT))*PTSTEP        
+!
+!       ------------------------------------------------------------------
+        IF(KGRCN(JLON,JLAT)>=1.AND.KGRCN(JLON,JLAT)<=8)THEN
+          INEXTX=KNEXTX(JLON,JLAT)
+          INEXTY=KNEXTY(JLON,JLAT)
+          ZQIN(INEXTX,INEXTY)=ZQIN(INEXTX,INEXTY)+PSOUT(JLON,JLAT)
+        ENDIF
+!
+      ENDIF
+!
+   ENDDO
+ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_WATER:SEQUENCE_LOOP',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SEQUENCE_LOOP
+!
 !-------------------------------------------------------------------------------
 END SUBROUTINE TRIP_SURFACE_WATER

@@ -82,7 +82,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_PARAM_TRIP',0,ZHOOK_HANDLE)
 INPARAM = 6
 IF(CGROUNDW/='DEF'           )INPARAM = INPARAM + 1
 IF(CVIT=='VAR'               )INPARAM = INPARAM + 3
-IF(CGROUNDW=='DIF'           )INPARAM = INPARAM + 7
+IF(CGROUNDW=='DIF'           )INPARAM = INPARAM + 6
 IF(LFLOOD.OR.CGROUNDW=='DIF')INPARAM = INPARAM + 1
 IF(LFLOOD                   )INPARAM = INPARAM + 4
 !
@@ -195,13 +195,6 @@ INUM = INUM + 1
 YVNAME (INUM) = 'NUM_AQUI                  '
 YVLNAME(INUM) = 'Numero aquifere           '
 YUNIT  (INUM) = '                          '
-LZLEN  (INUM) = .FALSE.
-LDOUBLE(INUM) = .FALSE.
-!
-INUM = INUM + 1
-YVNAME (INUM) = 'ELEV                      '
-YVLNAME(INUM) = 'Grid cell elevation       '
-YUNIT  (INUM) = 'm                         '
 LZLEN  (INUM) = .FALSE.
 LDOUBLE(INUM) = .FALSE.
 !

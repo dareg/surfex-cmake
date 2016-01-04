@@ -47,6 +47,7 @@ USE MODD_TRIP_PAR,  ONLY : XRHOLW, XUNDEF
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+USE MODI_TRIP_HS_VEL
 USE MODI_TRIP
 USE MODI_TRIP_DIAG_INIT
 USE MODI_TRIP_DIAG
@@ -100,8 +101,6 @@ REAL, DIMENSION(KLON,KLAT) :: ZGOUT      !Groundwater outflow           [kg/s]
 REAL, DIMENSION(KLON,KLAT) :: ZGNEG      !Groundwater intflow (neg)     [kg/s]
 REAL, DIMENSION(KLON,KLAT) :: ZWTD       !Water table depth for coupling[m]
 REAL, DIMENSION(KLON,KLAT) :: ZFWTD      !fraction of water table to rise
-REAL, DIMENSION(KLON,KLAT) :: ZWTDRIV    !Water table depth / topo riv  [m]
-REAL, DIMENSION(KLON,KLAT) :: ZWTDELEV   !Water table depth / elevation [m]
 REAL, DIMENSION(KLON,KLAT) :: ZQGCELL    !lateral groundwater exchanges [kg/s]
 REAL, DIMENSION(KLON,KLAT) :: ZHGHS      !groundwater minus river heigh [m]
 REAL, DIMENSION(KLON,KLAT) :: ZQFR       !floodplains to river exchange [kg/s]
@@ -127,7 +126,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_INTERFACE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-!*       1.     Initialize :
+!*       0.     Initialize :
 !               ------------
 !
 !Surface runoff treatment
@@ -157,14 +156,22 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!*       2.     Initialize local diag :
+!*       1.     Initialize local diag :
 !               -----------------------
 !
 CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
-                    ZWTD,ZFWTD,ZWTDRIV,ZWTDELEV,ZQGCELL,ZHGHS, &
+                    ZWTD,ZFWTD,ZQGCELL,ZHGHS,                  &
                     ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZSRC_FLOOD,    &
                     ZDISCHARGE,                                &
                     ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL    )
+!
+!-------------------------------------------------------------------------------
+!
+!*       2.     Initialize river height and velocity :
+!               --------------------------------------
+!
+CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
+                 TP%XSLOPEBED,TP%XN,TP%XSURF_STO,ZHS,ZVEL           )
 !
 !-------------------------------------------------------------------------------
 !
@@ -172,17 +179,27 @@ CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
 !               --------------------------
 !
 IF(CGROUNDW=='DIF')THEN
+!
+!  * Groundwater actualization
+!
   CALL GWF(TPG, &
-           KLON,KLAT,OPRINT,PTSTEP_RUN,XTSTEP,          &
-           TPG%GMASK_GW,TP%XNUM_AQUI,ZDRAIN,       &
-           TPG%XLEN,TP%XWIDTH,TP%XHC_BED,       &
-           TP%XTOPO_RIV,TP%XTAUG,TPG%XAREA,     &
-           TP%XELEV,TP%XTRANS,TP%XWEFF,        &
-           TP%XTABGW_F,TP%XTABGW_H,               &
-           TP%XSURF_STO,TP%XHGROUND,ZHG_OLD,      &
-           ZQGCELL,ZWTD,ZFWTD,ZWTDRIV,ZWTDELEV,         &
-           ZHGHS,ZGOUT,ZGNEG,                           &
-           ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL      )
+           KLON,KLAT,OPRINT,PTSTEP_RUN,XTSTEP,      &
+           TPG%GMASK_GW,TP%XNUM_AQUI,ZDRAIN,        &
+           TPG%XLEN,TP%XWIDTH,TP%XHC_BED,           &
+           TP%XTOPO_RIV,TP%XTAUG,TPG%XAREA,         &
+           TP%XTRANS,TP%XWEFF,                      &
+           TP%XTABGW_F,TP%XTABGW_H,ZHS,             &
+           TP%XSURF_STO,TP%XHGROUND,ZHG_OLD,        &
+           ZQGCELL,ZWTD,ZFWTD,ZHGHS,ZGOUT,ZGNEG,    &
+           ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL  )
+!
+!  * Velocity actualization
+!   
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL, &
+                    TPG%XLEN,TP%XWIDTH,             &
+                    TP%XSLOPEBED,TP%XN,             &
+                    TP%XSURF_STO,ZHS,ZVEL           )  
+!            
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -194,16 +211,16 @@ ITSTEP = INT(PTSTEP_RUN/XTSTEP)
 !
 DO JTSTEP=1,ITSTEP !TRIP time step loop
 !
-  CALL TRIP(KLISTING,CGROUNDW,LFLOOD,OPRINT,XTSTEP,               &
+  CALL TRIP(KLISTING,CGROUNDW,LFLOOD,OPRINT,XTSTEP,       &
             TPG%NGRCN,TPG%NSEQ,TPG%NNEXTX,TPG%NNEXTY,     &
-            TPG%NSEQMAX,TPG%XAREA,TPG%XLEN,                 &
-            TPG%GMASK_GW,TPG%GMASK_VEL,TPG%GMASK_FLD,       &
-            TP%XTAUG,TP%XFLOOD_LEN,TP%XSLOPEBED,         &
-            TP%XWIDTH,TP%XN,TP%XN_FLOOD,TP%XHC_BED,   &
-            TP%XWFLOOD,TP%XTAB_F,TP%XTAB_H,              &
-            TP%XTAB_VF,ZDRAIN,ZRUNOFF,ZSRC_FLOOD,              &
-            TP%XGROUND_STO,TP%XSURF_STO,TP%XFLOOD_STO,   &
-            ZSOUT,ZGOUT,ZHS,TP%XHFLOOD,ZVEL,TP%XFFLOOD,     &
+            TPG%NSEQMAX,TPG%XAREA,TPG%XLEN,               &
+            TPG%GMASK_GW,TPG%GMASK_VEL,TPG%GMASK_FLD,     &
+            TP%XTAUG,TP%XFLOOD_LEN,TP%XSLOPEBED,          &
+            TP%XWIDTH,TP%XN,TP%XN_FLOOD,TP%XHC_BED,       &
+            TP%XWFLOOD,TP%XTAB_F,TP%XTAB_H,               &
+            TP%XTAB_VF,ZDRAIN,ZRUNOFF,ZSRC_FLOOD,ZHS,ZVEL,&
+            TP%XGROUND_STO,TP%XSURF_STO,TP%XFLOOD_STO,    &
+            ZSOUT,ZGOUT,TP%XHFLOOD,TP%XFFLOOD,            &
             ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZSIN,KNB_TSTEP_RUN,       &
             JTSTEP,ITSTEP,ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL,&
             TP%XHGROUND,TP%XWEFF)
@@ -211,16 +228,22 @@ DO JTSTEP=1,ITSTEP !TRIP time step loop
 !  * Actualisation of diagnostic  
 !
    IF(CGROUNDW=='DIF')THEN
-      CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW, &
-                          TP%XTOPO_RIV,TP%XELEV,TP%XHGROUND,   &
-                          ZHG_OLD,ZWTD,ZFWTD,ZWTDELEV )          
+      CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,       &
+                          TP%XTOPO_RIV,TP%XHGROUND,ZHG_OLD,ZWTD,ZFWTD )          
    ENDIF
 !
    CALL TRIP_DIAG(TPDG, TP, TPG, &
                   XTSTEP,ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,    &
-                  ZWTD,ZFWTD,ZWTDRIV,ZWTDELEV,ZQGCELL,ZHGHS, &
+                  ZWTD,ZFWTD,ZQGCELL,ZHGHS,                  &
                   ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZSRC_FLOOD,    &
                   ZDRAIN,ZRUNOFF,ZDISCHARGE                  )
+!
+!  * Velocity actualization
+!   
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL, &
+                    TPG%XLEN,TP%XWIDTH,             &
+                    TP%XSLOPEBED,TP%XN,             &
+                    TP%XSURF_STO,ZHS,ZVEL           )  
 !
 !  * Time actualization  
 !
