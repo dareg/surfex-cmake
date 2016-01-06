@@ -453,13 +453,13 @@ IF(LIMP_CLAY)THEN
      CALL ABOR1_SFX('Use another format than netcdf for clay input file with LIMP_CLAY')
   ELSE
 #ifdef SFX_ASC
-     CFILEIN     = ADJUSTL(ADJUSTR(YSAND)//'.txt')
+     CFILEIN     = ADJUSTL(ADJUSTR(YCLAY)//'.txt')
 #endif
 #ifdef SFX_FA
-     CFILEIN_FA  = ADJUSTL(ADJUSTR(YSAND)//'.fa')
+     CFILEIN_FA  = ADJUSTL(ADJUSTR(YCLAY)//'.fa')
 #endif
 #ifdef SFX_LFI
-     CFILEIN_LFI = ADJUSTL(YSAND)
+     CFILEIN_LFI = ADJUSTL(YCLAY)
 #endif
 CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YCLAYFILETYPE,'NATURE','ISBA  ','READ ')
