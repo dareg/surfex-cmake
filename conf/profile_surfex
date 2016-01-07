@@ -27,7 +27,7 @@ fi
 # SRC_SURFEX : default path to mesonh sources 
 #              MUST BE SET TO YOUR OWN MESONH PATH
 #
-export SRC_SURFEX="/home/faroux/SVN/surfex/branches/V8_ASSIM"   
+export SRC_SURFEX="/home/faroux/SVN/surfex/trunk"   
 #
 #  Version MESONH PACKAGE :: PACK-SFX-V8-0-0 : 27/03/2012
 #
@@ -47,7 +47,7 @@ export VER_MPI=MPIAUTO
 #
 #  Version of OMP
 #
-export VER_OMP=NOOMP
+export VER_OMP=OMP
 #
 # OPTIMIZATION LEVEL
 #
@@ -57,11 +57,11 @@ export OPTLEVEL=DEBUG
 #
 #  USER VERSION
 #
-export VER_USER=MYSRC
+export VER_USER=TEST
 #
 # 'Scandollar' Post Processing default variables
 #
-export CONF_DOLLAR=/home/faroux/SVN/surfex/branches/V8_ASSIM/conf/post/confdollar_cnrmpc_default
+export CONF_DOLLAR=/home/faroux/SVN/surfex/trunk/conf/post/confdollar_cnrmpc_default
 #
 # Version of NETCDF
 #
@@ -80,7 +80,7 @@ export VERSION_OASIS=3-mct
 #
 # Version of DR_HOOK
 #
-export VER_DRHOOK=BYPASS
+export VER_DRHOOK=SIMPLE
 #
 # Version of Def integer
 #
@@ -124,4 +124,5 @@ export VARTTY=`tty`
 #
 # Optional Environnement variable/Module  Env
 #
- 
+export GRIB_DEFINITION_PATH=$SRC_SURFEX"/LIB/grib_api-1.9.9/definitions"
+#
