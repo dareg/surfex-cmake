@@ -36,7 +36,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,   ONLY   : XUNDEF
@@ -51,8 +51,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_t), INTENT(IN) :: DGT
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points

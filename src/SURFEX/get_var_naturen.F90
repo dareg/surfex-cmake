@@ -39,7 +39,7 @@
 !
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODI_GET_LUOUT
@@ -57,7 +57,7 @@ IMPLICIT NONE
 !
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_t), INTENT(INOUT) :: DGI
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -84,15 +84,15 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_NATURE_N',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 IF (DGI%LSURF_VARS) THEN 
-        PQS      = DGI%XAVG_QS      
+        PQS      = DGI%XQS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
 !
 IF (DGMI%LSURF_MISC_BUDGET) THEN 
-        PSNG     = DGMI%XAVG_PSNG      
-        PSNV     = DGMI%XAVG_PSNV      
-        PTWSNOW  = DGMI%XAVG_TWSNOW
+        PSNG     = DGMI%XPSNG      
+        PSNV     = DGMI%XPSNV      
+        PTWSNOW  = DGMI%XTWSNOW
    ELSE 
         PSNG     = XUNDEF      
         PSNV     = XUNDEF      
@@ -100,9 +100,9 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
 ENDIF           
 !
 IF (DGI%LCOEF) THEN
-   PZ0EFF   = DGI%XAVG_Z0EFF
-   PZ0      = DGI%XAVG_Z0      
-   PZ0H     = DGI%XAVG_Z0H
+   PZ0EFF   = DGI%XZ0EFF
+   PZ0      = DGI%XZ0      
+   PZ0H     = DGI%XZ0H
 ELSE
    PZ0EFF   = XUNDEF
    PZ0      = XUNDEF      

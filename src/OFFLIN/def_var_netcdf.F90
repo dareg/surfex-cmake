@@ -9,7 +9,7 @@
 !-------------------------------------------------------------------------------
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : CFILEOUT_NC, NID_NC
 USE MODD_OL_FILEID,      ONLY : XVAR_TO_FILEOUT, XOUT
@@ -23,7 +23,7 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
 INTEGER,               INTENT(IN) :: KFILE_ID
  CHARACTER(LEN=*),      INTENT(IN) :: HNAME

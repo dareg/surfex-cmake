@@ -205,11 +205,11 @@ ENDIF
 !*    6.      Latitude and longitude
 !             ----------------------
 !
-ALLOCATE(UG%XLAT       (NL))
-ALLOCATE(UG%XLON       (NL))
-ALLOCATE(UG%XMESH_SIZE (NL))
+ALLOCATE(UG%G%XLAT       (NL))
+ALLOCATE(UG%G%XLON       (NL))
+ALLOCATE(UG%G%XMESH_SIZE (NL))
 ALLOCATE(UG%XJPDIR     (NL))
- CALL LATLON_GRID(CGRID,NGRID_PAR,NL,ILUOUT,XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,UG%XJPDIR)
+ CALL LATLON_GRID(CGRID,NGRID_PAR,NL,ILUOUT,XGRID_PAR,UG%G%XLAT,UG%G%XLON,UG%G%XMESH_SIZE,UG%XJPDIR)
 !
 !------------------------------------------------------------------------------
 !
@@ -217,7 +217,7 @@ ALLOCATE(UG%XJPDIR     (NL))
 !             --------------------------------
 !
 !* in meters
-XMESHLENGTH = SUM ( SQRT(UG%XMESH_SIZE) ) / NL
+XMESHLENGTH = SUM ( SQRT(UG%G%XMESH_SIZE) ) / NL
 !
 !* in degrees (of latitude)
 XMESHLENGTH = XMESHLENGTH *180. / XPI / XRADIUS

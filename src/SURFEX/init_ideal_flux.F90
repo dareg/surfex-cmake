@@ -1,5 +1,5 @@
 !     ############################################################
-      SUBROUTINE INIT_IDEAL_FLUX (DGL, OREAD_BUDGETC, &
+      SUBROUTINE INIT_IDEAL_FLUX (DGL, DGLC, OREAD_BUDGETC, &
                                   HPROGRAM,HINIT,                            &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
@@ -50,7 +50,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IDEAL_FLUX, ONLY : XSFTS, XALB, XEMIS
 USE MODN_IDEAL_FLUX
@@ -72,7 +72,8 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 ! 
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
 LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 !
@@ -185,7 +186,7 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   XSFTS = 0.
 !
- CALL DIAG_IDEAL_INIT_n(DGL, HPROGRAM, OREAD_BUDGETC, &
+ CALL DIAG_IDEAL_INIT_n(DGL, DGLC, HPROGRAM, OREAD_BUDGETC, &
                         KI,KSW)
 !
 ENDIF

@@ -379,7 +379,7 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 ! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_INLINE_WATFLUX_n(WM%DGW, WM%W, &
+ CALL DIAG_INLINE_WATFLUX_n(WM%DGW, WM%DGWC, WM%W, &
                             PTSTEP,PTA, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
                              PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, ZZ0H, ZQSAT,     &
                              PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,       &

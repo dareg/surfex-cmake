@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE VEGETATION_UPDATE (DTCO, DTI, DTGD, DTGR, IG, IO, &
+    SUBROUTINE VEGETATION_UPDATE (DTCO, DTI, IG, IO, &
                                   PTSTEP,TTIME,PCOVER,OCOVER,          &
                        HISBA,OECOCLIMAP, HPHOTO, OAGRIP, OTR_ML,      &
                        HSFTYPE, PLAI,PVEG,PZ0,                        &
@@ -67,7 +67,7 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_TYPE_DATE_SURF
@@ -92,9 +92,7 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
@@ -199,7 +197,6 @@ ODUPDATED=.FALSE.
 !
 !* new decade?
   IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
-          
     ODUPDATED=.TRUE.
 !* time varying parameters
     IF (OECOCLIMAP .OR. HSFTYPE=='NAT') THEN
@@ -241,14 +238,14 @@ ODUPDATED=.FALSE.
                               PALBUV_SOIL=PALBUV_SOIL )
       ENDIF
     ELSEIF (HSFTYPE=='GRD') THEN
-      CALL INIT_FROM_DATA_GRDN_n(DTGD, &
+      CALL INIT_FROM_DATA_GRDN_n(DTI, &
                                  IDECADE,HPHOTO,                                      &
-                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS    )
+                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS    )  
      
     ELSEIF (HSFTYPE=='GNR') THEN
-      CALL INIT_FROM_DATA_GREENROOF_n(DTGR,  &
+      CALL INIT_FROM_DATA_GREENROOF_n(DTI,  &
                                       IDECADE,HPHOTO,                                 &
-                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS   ) 
+                       PVEG=PVEG,PLAI=PLAI,PZ0=PZ0,PEMIS=PEMIS   )  
 
     ENDIF
 !
@@ -304,7 +301,6 @@ ODUPDATED=.FALSE.
     ENDIF
 
   END IF
-
 IF (LHOOK) CALL DR_HOOK('VEGETATION_UPDATE',1,ZHOOK_HANDLE)
 !
 !*      2.3    Prescribed vegetation

@@ -1,6 +1,6 @@
 !-------------------------------------------------------------------------------
 !     #############################################################
-      SUBROUTINE INIT_SURF_TOPD (DGEI, I, UG, U, &
+      SUBROUTINE INIT_SURF_TOPD (DGEIC, I, UG, U, &
                                  HPROGRAM,KI)
 !     #############################################################
 !
@@ -73,7 +73,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIC
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -111,7 +111,7 @@ IF (LCOUPL_TOPD) THEN
   !         4.   Initialises variables nedded for coupling with Topmodel
   !              -------------------------------------------------------
   !
-  CALL INIT_COUPL_TOPD(DGEI, I, UG, U, &
+  CALL INIT_COUPL_TOPD(DGEIC, I, UG, U, &
                        HPROGRAM,KI)
   !
   WRITE(ILUOUT,*) 'Couplage avec TOPMODEL active'

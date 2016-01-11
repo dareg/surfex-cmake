@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE GARDEN (DTCO, DTI, IG, I, TG, T, TOP, DTGR, GDM, &
+    SUBROUTINE GARDEN (DTCO, TG, T, TOP, DTGR, GDM, &
                        HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,       &
                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
                 PTSTEP, PZ_LOWCAN,                                                   &
@@ -53,9 +53,7 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
@@ -84,10 +82,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
@@ -426,7 +421,6 @@ YSNOWMETAMO="B92"
 YSNOWRAD="B92"
 !-------------------------------------------------------------------------------
 !
-
 !*      2.     Treatment of green areas
 !              ------------------------
 !
@@ -445,7 +439,7 @@ CALL TEB_IRRIG(GDM%TIR%LPAR_GD_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
 !
 GUPDATED=.FALSE.
 IF (GDM%TV%O%CPHOTO=='NON' .OR. GDM%TV%O%CPHOTO=='AGS' .OR. GDM%TV%O%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE(DTCO, DTI, GDM%DTI, DTGR, IG, I%O,  &
+     CALL VEGETATION_UPDATE(DTCO, GDM%DTI, TG, GDM%TV%O,  &
                             PTSTEP,TPTIME,TOP%XCOVER,TOP%LCOVER,                 &
                          GDM%TV%O%CISBA,(.NOT. GDM%TV%O%LPAR), &
                          GDM%TV%O%CPHOTO, .FALSE.,     &

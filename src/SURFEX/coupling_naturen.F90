@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DTGD, DTGR, DGL, DST, SLT,  &
+SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DTGD, DTGR, DGL, DGLC, DST, SLT,  &
                               HPROGRAM, HCOUPLING, PTIMEC,                                    &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
@@ -44,7 +44,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
@@ -72,7 +72,8 @@ TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
@@ -178,7 +179,7 @@ ELSE IF (U%CNATURE=='TSZ0  ') THEN
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
                  'OK'                                                                        )  
 ELSE IF (U%CNATURE=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(DGL, &
+  CALL COUPLING_IDEAL_FLUX(DGL, DGLC, &
                            HPROGRAM, HCOUPLING, PTIMEC,                                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI,KSV,KSW,                                                                 &

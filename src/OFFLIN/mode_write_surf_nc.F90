@@ -31,7 +31,7 @@ CONTAINS
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LDEF
 !
@@ -49,7 +49,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,               INTENT(IN)  :: PFIELD   ! the real scalar to be read
@@ -112,7 +112,7 @@ END SUBROUTINE WRITE_SURFX0_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC,LDEF
 !
@@ -130,7 +130,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -195,7 +195,7 @@ END SUBROUTINE WRITE_SURFN0_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LDEF
 !
@@ -213,7 +213,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD   ! the integer scalar to be read
@@ -281,7 +281,7 @@ END SUBROUTINE WRITE_SURFC0_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC,LDEF
 !
@@ -301,7 +301,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,             INTENT(IN) :: OFIELD   ! array containing the data field
@@ -374,7 +374,7 @@ END SUBROUTINE WRITE_SURFL0_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -399,7 +399,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -588,9 +588,9 @@ END SUBROUTINE WRITE_SURFX1_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NINDEX
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN, LDEF
 !
@@ -612,7 +612,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),    INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN) :: PFIELD   ! array containing the data field
@@ -810,7 +810,7 @@ END SUBROUTINE WRITE_SURFX2_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -834,7 +834,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -1019,7 +1019,7 @@ END SUBROUTINE WRITE_SURFN1_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -1043,7 +1043,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -1234,7 +1234,7 @@ END SUBROUTINE WRITE_SURFN2_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
@@ -1260,7 +1260,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=*),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(IN) :: OFIELD   ! array containing the data field
@@ -1363,7 +1363,7 @@ END SUBROUTINE WRITE_SURFL1_NC
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN, LDEF
 !
@@ -1381,7 +1381,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
@@ -1484,7 +1484,7 @@ END SUBROUTINE WRITE_SURFT0_NC
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN
 !
@@ -1497,7 +1497,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(IN)  :: KYEAR    ! year
@@ -1582,7 +1582,7 @@ END SUBROUTINE WRITE_SURFT1_NC
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN
 !
@@ -1595,7 +1595,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KYEAR    ! year

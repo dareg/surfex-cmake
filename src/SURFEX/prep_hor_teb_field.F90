@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, IG, U, TG, T, TOP, &
+SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, U, TG, T, TOP, &
                                HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
 !
@@ -29,9 +29,8 @@ SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, IG, U, TG, T, TOP, &
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
@@ -77,9 +76,8 @@ INCLUDE "mpif.h"
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
@@ -136,7 +134,7 @@ IF (HSURF=='SN_ROOF') THEN
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROOF)))                                 
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IG, U, &
+                            TG, U, &
                             HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &
@@ -163,7 +161,7 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROAD)))                                   
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IG, U, &
+                            TG, U, &
                             HPROGRAM,HSURF,              &
                             YFILE,YFILETYPE,             &
                             YFILEPGD, YFILEPGDTYPE,      &                            

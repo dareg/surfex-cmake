@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_NC_n (DTCO, U, DGU, &
+      SUBROUTINE INIT_IO_SURF_NC_n (DTCO, U, &
                                     HMASK,HACTION)
 !     ######################
 !
@@ -29,7 +29,6 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -61,7 +60,6 @@ INCLUDE "netcdf.inc"
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK    
  CHARACTER(LEN=5),  INTENT(IN)  :: HACTION 

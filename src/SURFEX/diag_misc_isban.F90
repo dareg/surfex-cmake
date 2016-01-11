@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_MISC_ISBA_n (DGMI, PKDI, &
+SUBROUTINE DIAG_MISC_ISBA_n (DGMIP, PKD, OSURF_MISC_BUDGET, &
                              PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
                             PTIME, KSIZE, KPATCH, KMASK, PSEUIL,          &
                             PPSN, PPSNG, PPSNV, PFF, PFFG, PFFV,          &
@@ -41,7 +41,7 @@ SUBROUTINE DIAG_MISC_ISBA_n (DGMI, PKDI, &
 !!------------------------------------------------------------------
 !
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_PATCH_t
 USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
 !
 USE MODD_CSTS,       ONLY : XTT
@@ -60,9 +60,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKDI
+TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
+TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
 !
+LOGICAL, INTENT(IN) :: OSURF_MISC_BUDGET
 REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
  CHARACTER(LEN=*), INTENT(IN)      :: HISBA         ! ISBA scheme
  CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
@@ -115,29 +116,29 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
 !
-IF (DGMI%LSURF_MISC_BUDGET) THEN
+IF (OSURF_MISC_BUDGET) THEN
   !
-  PKDI%XP_SWI (:,:)=XUNDEF
-  PKDI%XP_TSWI(:,:)=XUNDEF  
+  PKD%DGMI%XSWI (:,:)=XUNDEF
+  PKD%DGMI%XTSWI(:,:)=XUNDEF  
   DO JJ=1,SIZE(PWG,2)
     DO JI=1,SIZE(PWG,1)
       IF(PWG (JI,JJ)/=XUNDEF)THEN    
-        PKDI%XP_SWI (JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
-        PKDI%XP_TSWI(JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+        PKD%DGMI%XSWI (JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+        PKD%DGMI%XTSWI(JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
       ENDIF
       IF(PWGI (JI,JJ)/=XUNDEF)THEN    
-        PKDI%XP_TSWI(JI,JJ) = PKDI%XP_TSWI(JI,JJ) +  PWGI(JI,JJ) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+        PKD%DGMI%XTSWI(JI,JJ) = PKD%DGMI%XTSWI(JI,JJ) +  PWGI(JI,JJ) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
       ENDIF
     ENDDO
   ENDDO
   !
-  DO JK=1,SIZE(PKDI%XP_SWI,2)
+  DO JK=1,SIZE(PKD%DGMI%XSWI,2)
 !cdir nodep
     DO JJ=1,KSIZE
       JI                      =  KMASK         (JJ)
       !
-      DGMI%XSWI     (JI,JK,KPATCH)  =  PKDI%XP_SWI        (JJ,JK)
-      DGMI%XTSWI    (JI,JK,KPATCH)  =  PKDI%XP_TSWI       (JJ,JK)
+      DGMIP%AL(KPATCH)%XSWI     (JI,JK)  =  PKD%DGMI%XSWI        (JJ,JK)
+      DGMIP%AL(KPATCH)%XTSWI    (JI,JK)  =  PKD%DGMI%XTSWI       (JJ,JK)
       !
     END DO
   ENDDO  
@@ -149,12 +150,12 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     ENDDO
   ENDDO
   !
-  PKDI%XP_TWSNOW=0.
-  PKDI%XP_TDSNOW=0.
+  PKD%DGMI%XTWSNOW=0.
+  PKD%DGMI%XTDSNOW=0.
   ZSNOWTEMP=0.  
   !
   IF (HSNOW/='EBA')THEN
-     ZWORKTEMP(:,:) = PKDI%XP_SNOWTEMP(:,:)
+     ZWORKTEMP(:,:) = PKD%DGMI%XSNOWTEMP(:,:)
   ELSE
      ZWORKTEMP(:,1) = MIN(PTG(:,1),XTT)
   ENDIF
@@ -162,14 +163,14 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   DO JI = 1,SIZE(PWSNOW,2)
 !cdir nodep 
     DO JJ = 1,SIZE(PWSNOW,1)
-      PKDI%XP_TWSNOW(JJ) = PKDI%XP_TWSNOW(JJ) + PWSNOW(JJ,JI)      
-      PKDI%XP_TDSNOW(JJ) = PKDI%XP_TDSNOW(JJ) + ZWORK (JJ,JI)
+      PKD%DGMI%XTWSNOW(JJ) = PKD%DGMI%XTWSNOW(JJ) + PWSNOW(JJ,JI)      
+      PKD%DGMI%XTDSNOW(JJ) = PKD%DGMI%XTDSNOW(JJ) + ZWORK (JJ,JI)
       ZSNOWTEMP(JJ) = ZSNOWTEMP(JJ) + ZWORKTEMP(JJ,JI) * ZWORK(JJ,JI)
     ENDDO
   ENDDO
   !
-  WHERE(PKDI%XP_TDSNOW(:)>0.0)
-        ZSNOWTEMP(:)=ZSNOWTEMP(:)/PKDI%XP_TDSNOW(:)
+  WHERE(PKD%DGMI%XTDSNOW(:)>0.0)
+        ZSNOWTEMP(:)=ZSNOWTEMP(:)/PKD%DGMI%XTDSNOW(:)
   ELSEWHERE
         ZSNOWTEMP(:)=XUNDEF
   ENDWHERE
@@ -178,30 +179,29 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   DO JJ=1,KSIZE
      JI                     =  KMASK       (JJ)
      !
-     DGMI%XHV      (JI, KPATCH)  =  PKDI%XP_HV       (JJ)
-     DGMI%XDPSNG   (JI, KPATCH)  =  PPSNG       (JJ)
-     DGMI%XDPSNV   (JI, KPATCH)  =  PPSNV       (JJ)
-     DGMI%XDPSN    (JI, KPATCH)  =  PPSN        (JJ)     
-     DGMI%XALBT    (JI, KPATCH)  =  PKDI%XP_ALBT     (JJ)
-     DGMI%XDFF     (JI, KPATCH)  =  PFF         (JJ)
-     DGMI%XDFFG    (JI, KPATCH)  =  PFFG        (JJ)
-     DGMI%XDFFV    (JI, KPATCH)  =  PFFV        (JJ)     
-     DGMI%XTWSNOW  (JI, KPATCH)  =  PKDI%XP_TWSNOW   (JJ)
-     DGMI%XTDSNOW  (JI, KPATCH)  =  PKDI%XP_TDSNOW   (JJ)
-     DGMI%XTTSNOW  (JI, KPATCH)  =  ZSNOWTEMP   (JJ)
-     DGMI%XDFSAT   (JI, KPATCH)  =  PFSAT       (JJ)     
+     DGMIP%AL(KPATCH)%XHV      (JI)  =  PKD%DGMI%XHV       (JJ)
+     DGMIP%AL(KPATCH)%XPSNG   (JI)  =  PPSNG       (JJ)
+     DGMIP%AL(KPATCH)%XPSNV   (JI)  =  PPSNV       (JJ)
+     DGMIP%AL(KPATCH)%XPSN    (JI)  =  PPSN        (JJ)     
+     DGMIP%AL(KPATCH)%XFF     (JI)  =  PFF         (JJ)
+     DGMIP%AL(KPATCH)%XFFG    (JI)  =  PFFG        (JJ)
+     DGMIP%AL(KPATCH)%XFFV    (JI)  =  PFFV        (JJ)     
+     DGMIP%AL(KPATCH)%XTWSNOW  (JI)  =  PKD%DGMI%XTWSNOW   (JJ)
+     DGMIP%AL(KPATCH)%XTDSNOW  (JI)  =  PKD%DGMI%XTDSNOW   (JJ)
+     DGMIP%AL(KPATCH)%XTTSNOW  (JI)  =  ZSNOWTEMP   (JJ)
+     DGMIP%AL(KPATCH)%XFSAT   (JI)  =  PFSAT       (JJ)     
      !
   END DO
 !
   IF (HSNOW=='3-L' .OR. HSNOW=='CRO') THEN
      !
-    DO JK=1,SIZE(PKDI%XP_SNOWLIQ,2)
+    DO JK=1,SIZE(PKD%DGMI%XSNOWLIQ,2)
 !cdir nodep
       DO JJ=1,KSIZE
         JI                      =  KMASK         (JJ)
         !
-        DGMI%XSNOWLIQ (JI,JK,KPATCH)  =  PKDI%XP_SNOWLIQ    (JJ,JK)
-        DGMI%XSNOWTEMP(JI,JK,KPATCH)  =  PKDI%XP_SNOWTEMP   (JJ,JK)
+        DGMIP%AL(KPATCH)%XSNOWLIQ (JI,JK)  =  PKD%DGMI%XSNOWLIQ    (JJ,JK)
+        DGMIP%AL(KPATCH)%XSNOWTEMP(JI,JK)  =  PKD%DGMI%XSNOWTEMP   (JJ,JK)
         !
       END DO
     ENDDO
@@ -217,10 +217,10 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
        DO JJ=1,KSIZE
          JI = KMASK(JJ)
          !
-         DGMI%XFAPAR      (JI, KPATCH) = PKDI%XP_FAPAR      (JJ)
-         DGMI%XFAPIR      (JI, KPATCH) = PKDI%XP_FAPIR      (JJ)
-         DGMI%XFAPAR_BS   (JI, KPATCH) = PKDI%XP_FAPAR_BS   (JJ)
-         DGMI%XFAPIR_BS   (JI, KPATCH) = PKDI%XP_FAPIR_BS   (JJ)
+         DGMIP%AL(KPATCH)%XFAPAR      (JI) = PKD%DGMI%XFAPAR      (JJ)
+         DGMIP%AL(KPATCH)%XFAPIR      (JI) = PKD%DGMI%XFAPIR      (JJ)
+         DGMIP%AL(KPATCH)%XFAPAR_BS   (JI) = PKD%DGMI%XFAPAR_BS   (JJ)
+         DGMIP%AL(KPATCH)%XFAPIR_BS   (JI) = PKD%DGMI%XFAPIR_BS   (JJ)
          !
        ENDDO
        !
@@ -232,9 +232,9 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
            JI = KMASK(JJ)
            !
            IF (PMUS(JJ).NE.0.) THEN
-             DGMI%XDFAPARC   (JI, KPATCH) = PFAPARC   (JJ) / PMUS(JJ) 
-             DGMI%XDFAPIRC   (JI, KPATCH) = PFAPIRC   (JJ) / PMUS(JJ)
-             DGMI%XDLAI_EFFC (JI, KPATCH) = PLAI_EFFC (JJ) / PMUS(JJ)
+             DGMIP%AL(KPATCH)%XDFAPARC   (JI) = PFAPARC   (JJ) / PMUS(JJ) 
+             DGMIP%AL(KPATCH)%XDFAPIRC   (JI) = PFAPIRC   (JJ) / PMUS(JJ)
+             DGMIP%AL(KPATCH)%XDLAI_EFFC (JI) = PLAI_EFFC (JJ) / PMUS(JJ)
            ENDIF
            !
          ENDDO
@@ -255,8 +255,8 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     CALL COMPUT_COLD_LAYERS_THICK(PDG,PTG,ZALT,ZFLT)
     DO JJ=1,KSIZE
        JI              =  KMASK(JJ)
-       DGMI%XALT(JI,KPATCH) =  ZALT(JJ) 
-       DGMI%XFLT(JI,KPATCH) =  ZFLT(JJ)  
+       DGMIP%AL(KPATCH)%XALT(JI) =  ZALT(JJ) 
+       DGMIP%AL(KPATCH)%XFLT(JI) =  ZFLT(JJ)  
     ENDDO
   ENDIF
   !
@@ -268,7 +268,7 @@ IF (OAGRIP) THEN
   DO JJ=1,KSIZE
      JI                     =  KMASK         (JJ)
      !
-     DGMI%XSEUIL   (JI, KPATCH)  =  PSEUIL (JJ)
+     DGMIP%AL(KPATCH)%XSEUIL   (JI)  =  PSEUIL (JJ)
      !
   END DO
 !

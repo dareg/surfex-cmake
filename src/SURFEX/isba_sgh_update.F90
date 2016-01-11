@@ -48,7 +48,7 @@
 !
 !
 !
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SGH_PAR,     ONLY : NDIMTAB, XMTOKM, XSTOHR, X001,      &
@@ -64,7 +64,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=*), INTENT(IN)     :: HISBA  ! type of ISBA version:

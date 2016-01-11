@@ -161,8 +161,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MAKE_MASK_TOPD_TO_ISBA:INIT_4POINTS',0,ZHOOK_HANDLE)
 !
-IF (UG%CGRID=='IGN') THEN 
-  CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,PDX=ZDX,PDY=ZDY)
+IF (UG%G%CGRID=='IGN') THEN 
+  CALL GET_GRIDTYPE_IGN(UG%G%XGRID_PAR,PDX=ZDX,PDY=ZDY)
   IDXN=KDXM
   !on va juste retourner les quatre coins de la maille, les XXI et XYI etant les coordonees du centre
   !on se contente de verifier si la maille TOP est dans la maille SURFEX

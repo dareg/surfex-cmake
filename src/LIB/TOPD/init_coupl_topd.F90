@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !     #######################
-      SUBROUTINE INIT_COUPL_TOPD (DGEI, I, UG, U, &
+      SUBROUTINE INIT_COUPL_TOPD (DGEIC, I, UG, U, &
                                   HPROGRAM,KI)
 !     #######################
 !
@@ -92,7 +92,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIC
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -151,13 +151,13 @@ XKAC_PRE(:)  = MAXVAL(XKA_PRE) + 1.
 !
 !Cumulated runoff initialisation
 ALLOCATE(XRUNOFF_TOP(U%NSIZE_NATURE))
-XRUNOFF_TOP  (:) = DGEI%XAVG_RUNOFFC(:)
+XRUNOFF_TOP  (:) = DGEIC%XRUNOFF(:)
 !
 IF(.NOT.ALLOCATED(XAVG_RUNOFFCM)) ALLOCATE(XAVG_RUNOFFCM(U%NSIZE_NATURE))
-XAVG_RUNOFFCM(:) = DGEI%XAVG_RUNOFFC(:)
+XAVG_RUNOFFCM(:) = DGEIC%XRUNOFF(:)
 !
 IF(.NOT.ALLOCATED(XAVG_DRAINCM )) ALLOCATE(XAVG_DRAINCM (U%NSIZE_NATURE))
-XAVG_DRAINCM (:) = DGEI%XAVG_DRAINC(:)
+XAVG_DRAINCM (:) = DGEIC%XDRAIN(:)
 !
 !
 ! Reading masks
@@ -182,9 +182,9 @@ DO JJ=1,KI
     XTOTBV_IN_MESH (JJ) = XTOTBV_IN_MESH(JJ) + XBV_IN_MESH(JJ,JI)
   ENDDO
   !
-  IF (XTOTBV_IN_MESH(JJ)> UG%XMESH_SIZE(JJ)) THEN
-    XBV_IN_MESH(JJ,:) = XBV_IN_MESH(JJ,:) * UG%XMESH_SIZE(JJ)/XTOTBV_IN_MESH(JJ)
-    XTOTBV_IN_MESH (JJ) = UG%XMESH_SIZE(JJ)
+  IF (XTOTBV_IN_MESH(JJ)> UG%G%XMESH_SIZE(JJ)) THEN
+    XBV_IN_MESH(JJ,:) = XBV_IN_MESH(JJ,:) * UG%G%XMESH_SIZE(JJ)/XTOTBV_IN_MESH(JJ)
+    XTOTBV_IN_MESH (JJ) = UG%G%XMESH_SIZE(JJ)
   ENDIF
 ENDDO
 !
@@ -192,7 +192,7 @@ ENDDO
 !               -------------------------------------------
 !
 ALLOCATE(ZFRAC(KI))  ! fraction not covered by catchments
-ZFRAC(:) = ( UG%XMESH_SIZE(:)-XTOTBV_IN_MESH(:) ) / UG%XMESH_SIZE(:)
+ZFRAC(:) = ( UG%G%XMESH_SIZE(:)-XTOTBV_IN_MESH(:) ) / UG%G%XMESH_SIZE(:)
 ZFRAC(:) = MIN(MAX(ZFRAC(:),0.),1.)
 !
 ALLOCATE(XATOP(U%NSIZE_NATURE)) ! fraction covered by catchments part nature

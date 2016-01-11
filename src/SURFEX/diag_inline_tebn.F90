@@ -36,8 +36,8 @@
 !
 !
 !
-USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
-USE MODD_TEB_CANOPY_n, ONLY : TEB_CANOPY_t
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_CANOPY_n, ONLY : CANOPY_t
 USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -58,8 +58,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
-TYPE(TEB_CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(DIAG_t), INTENT(INOUT) :: DGT
+TYPE(CANOPY_t), INTENT(INOUT) :: TCP
 TYPE(TEB_t), INTENT(INOUT) :: T
 !
 LOGICAL,            INTENT(IN)       :: OCANOPY  ! Flag for canopy
@@ -122,7 +122,7 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',0,ZHOOK_HANDLE)
 !It should be the arithmetic mean of the surface temperature
 !of each independant energy budget, if there is. See ISBA for more detail.
 !
-DGT%XDIAG_TS(:) = PTS(:)
+DGT%XTS(:) = PTS(:)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !

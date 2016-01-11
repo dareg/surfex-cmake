@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE GREENROOF (DTCO, DTI, IG, I, TG, T, TOP, DTGD, TIR, GRM,  &
+    SUBROUTINE GREENROOF (DTCO, TG, T, TOP, DTGD, TIR, GRM,  &
                           HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,    &
                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
                 PTSTEP, PZREF, PUREF,                                                &
@@ -57,9 +57,7 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
@@ -91,10 +89,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
@@ -455,16 +450,13 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
                TIR%XGR_START_MONTH, TIR%XGR_END_MONTH, TIR%XGR_START_HOUR,   &
                TIR%XGR_END_HOUR, TIR%XGR_24H_IRRIG, PIRRIG_GREENROOF     )
 !
-!*      9.2    Call ISBA for greenroofs
-!              ------------------------
-!
 ! --------------------------------------------------------------------------------------
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
 GUPDATED=.FALSE.
 IF (GRM%TV%O%CPHOTO=='NON' .OR. GRM%TV%O%CPHOTO=='AGS' .OR. GRM%TV%O%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE(DTCO, DTI, DTGD, GRM%DTI, IG, I%O,  &
+     CALL VEGETATION_UPDATE(DTCO, GRM%DTI, TG, GRM%TV%O,  &
                             PTSTEP,TPTIME,TOP%XCOVER,TOP%LCOVER,                 &
                          GRM%TV%O%CISBA,(.NOT. GRM%TV%O%LPAR), &
                          GRM%TV%O%CPHOTO, .FALSE.,     &
@@ -475,7 +467,7 @@ IF (GRM%TV%O%CPHOTO=='NON' .OR. GRM%TV%O%CPHOTO=='AGS' .OR. GRM%TV%O%CPHOTO=='AS
                          GRM%TV%M%T%CUR%XRSMIN,GRM%TV%M%T%CUR%XGAMMA,GRM%TV%M%T%CUR%XWRMAX_CF,   &
                          GRM%TV%M%T%CUR%XRGL,GRM%TV%M%T%CUR%XCV,                          &
                          GRM%TV%M%T%CUR%XGMES,GRM%TV%M%T%CUR%XBSLAI,GRM%TV%M%T%CUR%XLAIMIN,&
-                         GRM%TV%M%T%CUR%XSEFOLD,GRM%TV%M%T%CUR%XGC,        &
+                         GRM%TV%M%T%CUR%XSEFOLD,GRM%TV%M%T%CUR%XGC,      &
                          GRM%TV%M%T%CUR%XF2I, GRM%TV%M%T%CUR%LSTRESS,                         &
                          ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,                    &
                          ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM,                    &
@@ -490,6 +482,9 @@ IF (GRM%TV%O%CPHOTO=='NON' .OR. GRM%TV%O%CPHOTO=='AGS' .OR. GRM%TV%O%CPHOTO=='AS
                          ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
                          GUPDATED, OABSENT=(T%CUR%XGREENROOF==0.)                 ) 
 END IF
+!
+!*      9.2    Call ISBA for greenroofs
+!              ------------------------
 !
  CALL ISBA(GRM%TV%O%CISBA, GRM%TV%O%CPHOTO, GRM%TV%O%LTR_ML, 'WSAT', &
            GRM%TV%O%CKSAT, HRAIN, GRM%TV%O%CHORT,       &

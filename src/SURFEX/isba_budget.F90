@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE ISBA_BUDGET (DGEI, &
+SUBROUTINE ISBA_BUDGET (OWATER_BUDGET, &
                         HISBA, HSNOW_ISBA, OGLACIER, PTSTEP,    &
                        PWG, PWGI, PWR, PSNOWSWE, PDG, PDZG,    &
                        PWG_INI, PWGI_INI, PWR_INI, PSWE_INI,   & 
@@ -46,7 +46,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
+LOGICAL, INTENT(IN) :: OWATER_BUDGET
 !
  CHARACTER(LEN=*),      INTENT(IN) :: HISBA      ! type of ISBA version:
 !                                               ! '2-L' (default)
@@ -130,7 +130,7 @@ ENDIF
 !*      2.0    Comptut isba water budget in kg/m2/s
 !       -------------------------------------------
 !
-IF(DGEI%LWATER_BUDGET)THEN
+IF(OWATER_BUDGET)THEN
 !
 ! total swe at t in kg/m2
   ZSWE_T(:)=0.0

@@ -99,7 +99,7 @@ CPROGNAME=HPROGRAM
 !             -----------------------------
 !
  CALL PGD_GRID(UG, U, &
-               HPROGRAM,HFILE,HFILETYPE,OGRID,UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR,YDIR)
+               HPROGRAM,HFILE,HFILETYPE,OGRID,UG%G%CGRID,UG%G%NGRID_PAR,UG%G%XGRID_PAR,YDIR)
 ! 
 !
 !-------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_INLAND_WATER_n (DGF, DGL, DGW, U, &
+SUBROUTINE DIAG_INLAND_WATER_n (DGF, DGFC, DGL, DGLC, DGW, DGWC, U, &
                                 HPROGRAM,                                            &
                                  PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS, &
                                  PZ0,PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,  &
@@ -34,15 +34,8 @@ SUBROUTINE DIAG_INLAND_WATER_n (DGF, DGL, DGW, U, &
 !       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
-
 !
-!
-!
-!
-!
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -60,9 +53,12 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGFC
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGWC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
@@ -123,7 +119,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLAND_WATER_N',0,ZHOOK_HANDLE)
 IF (U%CWATER=='WATFLX') THEN
-  CALL DIAG_WATFLUX_n(DGW, &
+  CALL DIAG_WATFLUX_n(DGW, DGWC, &
                       HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -133,7 +129,7 @@ IF (U%CWATER=='WATFLX') THEN
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL DIAG_FLAKE_n(DGF, &
+  CALL DIAG_FLAKE_n(DGF, DGFC, &
                     HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -144,7 +140,7 @@ ELSE IF (U%CWATER=='FLAKE ') THEN
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )  
 !
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL DIAG_IDEAL_n(DGL, HPROGRAM,                                           &
+  CALL DIAG_IDEAL_n(DGL, DGLC, HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &

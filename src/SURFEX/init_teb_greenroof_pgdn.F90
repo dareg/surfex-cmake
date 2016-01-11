@@ -44,7 +44,7 @@ USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_CH_TEB_n, ONLY : CH_TEB_t
-USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -86,7 +86,7 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
-TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
@@ -182,19 +182,15 @@ GRM%TV%O%CRESPSL = GDO%CRESPSL
 !*       2.1    Cover, soil and orographic fields:
 !               ---------------------------------
 !
-!
-!* allocation of green roofs variables
-!
 IF (OREAD_PGD) &
  CALL READ_PGD_TEB_GREENROOF_n(CHT, DTCO, GRM%DTI, GRM%GB, U, GRM%TV%O, GRM%TV%P, GRM%TV%IP, TG, &
                                HPROGRAM,KVERSION)
 !
+!
+!* allocation of green roofs variables
+!
  CALL ALLOCATE_TEB_GREENROOF_PGD(GRM%TV%M, GRM%TV%P, GRM%TV%IP, &
                                  OREAD_PGD, KI, NVEGTYPE, GRM%TV%O%NGROUND_LAYER, NDIMTAB)
-!
-
-!
-
 !
 !*       2.2    Physiographic data fields from land cover:
 !               -----------------------------------------

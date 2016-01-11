@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_IDEAL(DGL, PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
+       SUBROUTINE DIAG_SURF_BUDGETC_IDEAL(DGL, DGLC, PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
                                             PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,&  
                                             PEVAP, PSUBL                       )  
 !     #########################################################################
@@ -25,7 +25,7 @@
 !!      Original    03/2015
 !!------------------------------------------------------------------
 ! 
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t  
+USE MODD_DIAG_n, ONLY : DIAG_t  
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -34,7 +34,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_IDEAL_t) :: DGL
+TYPE(DIAG_t) :: DGL
+TYPE(DIAG_t) :: DGLC
 !
 REAL,               INTENT(IN) :: PTSTEP    
 REAL, DIMENSION(:), INTENT(IN) :: PRN      ! net radiation                         (W/m2)
@@ -59,40 +60,40 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* total incoming and outgoing SW
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_IDEAL',0,ZHOOK_HANDLE)
-DGL%XSWDC(:) = DGL%XSWDC(:) + PSWD(:) * PTSTEP
-DGL%XSWUC(:) = DGL%XSWUC(:) + PSWU(:) * PTSTEP
+DGLC%XSWD(:) = DGLC%XSWD(:) + PSWD(:) * PTSTEP
+DGLC%XSWU(:) = DGLC%XSWU(:) + PSWU(:) * PTSTEP
 !
 !*incoming outgoing LW
 !
-DGL%XLWDC(:) = DGL%XLWDC(:) + PLWD(:) * PTSTEP
-DGL%XLWUC(:) = DGL%XLWUC(:) + PLWU(:) * PTSTEP
+DGLC%XLWD(:) = DGLC%XLWD(:) + PLWD(:) * PTSTEP
+DGLC%XLWU(:) = DGLC%XLWU(:) + PLWU(:) * PTSTEP
 !
 !* net radiation
 !
-DGL%XRNC(:) = DGL%XRNC(:) + PRN(:) * PTSTEP
+DGLC%XRN(:) = DGLC%XRN(:) + PRN(:) * PTSTEP
 !
 !* sensible heat flux
 !
-DGL%XHC(:) = DGL%XHC(:) + PH(:) * PTSTEP 
+DGLC%XH(:) = DGLC%XH(:) + PH(:) * PTSTEP 
 !
 !* latent heat flux
 !
-DGL%XLEC (:) = DGL%XLEC (:) + PLE (:) * PTSTEP 
-DGL%XLEIC(:) = DGL%XLEIC(:) + PLEI(:) * PTSTEP 
+DGLC%XLE(:) = DGLC%XLE(:) + PLE (:) * PTSTEP 
+DGLC%XLEI(:) = DGLC%XLEI(:) + PLEI(:) * PTSTEP 
 !
 !* evaporation and sublimation (kg/m2)
 !
-DGL%XEVAPC(:) = DGL%XEVAPC(:) + PEVAP(:) * PTSTEP
-DGL%XSUBLC(:) = DGL%XSUBLC(:) + PSUBL(:) * PTSTEP
+DGLC%XEVAP(:) = DGLC%XEVAP(:) + PEVAP(:) * PTSTEP
+DGLC%XSUBL(:) = DGLC%XSUBL(:) + PSUBL(:) * PTSTEP
 !
 !* storage flux
 !
-DGL%XGFLUXC(:) = DGL%XGFLUXC(:) + PGFLUX(:) * PTSTEP 
+DGLC%XGFLUX(:) = DGLC%XGFLUX(:) + PGFLUX(:) * PTSTEP 
 !
 !* wind stress
 !
-DGL%XFMUC(:) = DGL%XFMUC(:) + PFMU(:) * PTSTEP 
-DGL%XFMVC(:) = DGL%XFMVC(:) + PFMV(:) * PTSTEP
+DGLC%XFMU(:) = DGLC%XFMU(:) + PFMU(:) * PTSTEP 
+DGLC%XFMV(:) = DGLC%XFMV(:) + PFMV(:) * PTSTEP
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_IDEAL',1,ZHOOK_HANDLE)
 !

@@ -1,5 +1,5 @@
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_IGN(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,&
+      SUBROUTINE GET_MESH_INDEX_IGN(KSSO,PGRID_PAR,PLAT,PLON,&
                                 KINDEX,KISSOX,KISSOY,PVALUE,PNODATA)
 !     ###############################################################
 !
@@ -39,7 +39,6 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-INTEGER,                       INTENT(IN)   :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                       INTENT(IN)   :: KSSO      ! number of subgrid mesh in each direction
 REAL,    DIMENSION(:),        INTENT(IN)    :: PGRID_PAR ! grid parameters
 REAL,    DIMENSION(:),        INTENT(IN)    :: PLAT      ! latitude of the point

@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_IDEAL_n (DGL, PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
+       SUBROUTINE DIAG_INLINE_IDEAL_n (DGL, DGLC, PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
                                          PMERA, PHT, PHW, PRAIN, PSNOW,                &
                                          PCD, PCDN, PCH, PRI, PHU, PZ0,                &
                                          PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
@@ -29,7 +29,7 @@
 !!------------------------------------------------------------------
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_CSTS,         ONLY : XTT, XLVTT
 USE MODD_SURF_PAR,     ONLY : XUNDEF
@@ -48,7 +48,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
 REAL              , INTENT(IN) :: PTSTEP ! atmospheric time-step (s)
 REAL, DIMENSION(:), INTENT(IN) :: PTA    ! atmospheric temperature
@@ -95,7 +96,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_IDEAL_N',0,ZHOOK_HANDLE)
 !
-DGL%XDIAG_TS(:) = PTS(:)
+DGL%XTS(:) = PTS(:)
 !
   IF (DGL%N2M==1) THEN
     CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
@@ -147,7 +148,7 @@ IF (DGL%LSURF_BUDGET) THEN
 END IF
 !
 IF( DGL%LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_IDEAL(DGL, PTSTEP,  DGL%XRN,  DGL%XH,  DGL%XLE,  &
+  CALL DIAG_SURF_BUDGETC_IDEAL(DGL, DGLC, PTSTEP,  DGL%XRN,  DGL%XH,  DGL%XLE,  &
                                DGL%XLEI,  DGL%XGFLUX, DGL%XSWD,  DGL%XSWU, &
                                DGL%XLWD,  DGL%XLWU,  DGL%XFMU,  DGL%XFMV,  &
                                DGL%XEVAP, DGL%XSUBL                    )  

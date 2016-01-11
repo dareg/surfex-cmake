@@ -184,7 +184,7 @@ END SUBROUTINE WRITE_SURFL0_TXT
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -206,7 +206,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -268,7 +268,7 @@ END SUBROUTINE WRITE_SURFX1_TXT
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -290,7 +290,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field

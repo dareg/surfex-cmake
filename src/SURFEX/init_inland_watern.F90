@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_INLAND_WATER_n (DTCO, DGU, UG, U, WM, FM, DGL,     &
+      SUBROUTINE INIT_INLAND_WATER_n (DTCO, DGU, UG, U, WM, FM, DGL, DGLC,    &
                                       HPROGRAM,HINIT,                         &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
@@ -47,10 +47,9 @@ USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 !
 USE MODD_CSTS,       ONLY : XTT
@@ -72,12 +71,13 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -122,7 +122,7 @@ IF (U%CWATER=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DGL, DGU%LREAD_BUDGETC, &
+  CALL INIT_IDEAL_FLUX(DGL, DGLC, DGU%LREAD_BUDGETC, &
                        HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,   &
                          PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
                          PEMIS,PTSRAD,PTSURF,'OK'                    )  

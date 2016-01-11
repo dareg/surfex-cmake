@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_SEAFLUX_n (DGS, &
+SUBROUTINE DIAG_SEAFLUX_n (DGS, DGSC, &
                            HPROGRAM,                                           &
                             PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                             PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -37,7 +37,7 @@ SUBROUTINE DIAG_SEAFLUX_n (DGS, &
 
 !
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -50,7 +50,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGSC
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
@@ -113,7 +114,7 @@ IF (DGS%LSURF_BUDGET) THEN
   PRN      = DGS%XRN
   PH       = DGS%XH
   PLE      = DGS%XLE
-  PLEI     = DGS%XLE_ICE
+  PLEI     = DGS%XLEI
   PGFLUX   = DGS%XGFLUX
   PEVAP    = DGS%XEVAP
   PSUBL    = DGS%XSUBL
@@ -128,19 +129,19 @@ IF (DGS%LSURF_BUDGET) THEN
 END IF
 !
 IF (DGS%LSURF_BUDGETC) THEN
-  PRNC      = DGS%XRNC
-  PHC       = DGS%XHC
-  PLEC      = DGS%XLEC
-  PLEIC     = DGS%XLEC_ICE
-  PGFLUXC   = DGS%XGFLUXC
-  PEVAPC    = DGS%XEVAPC
-  PSUBLC    = DGS%XSUBLC
-  PSWDC     = DGS%XSWDC
-  PSWUC     = DGS%XSWUC
-  PLWDC     = DGS%XLWDC
-  PLWUC     = DGS%XLWUC
-  PFMUC     = DGS%XFMUC
-  PFMVC     = DGS%XFMVC
+  PRNC      = DGSC%XRN
+  PHC       = DGSC%XH
+  PLEC      = DGSC%XLE
+  PLEIC     = DGSC%XLEI
+  PGFLUXC   = DGSC%XGFLUX
+  PEVAPC    = DGSC%XEVAP
+  PSUBLC    = DGSC%XSUBL
+  PSWDC     = DGSC%XSWD
+  PSWUC     = DGSC%XSWU
+  PLWDC     = DGSC%XLWD
+  PLWUC     = DGSC%XLWU
+  PFMUC     = DGSC%XFMU
+  PFMVC     = DGSC%XFMV
 END IF
 !
 IF (DGS%N2M>=1 .OR. DGS%LSURF_BUDGET .OR. DGS%LSURF_BUDGETC) PTS = DGS%XTS

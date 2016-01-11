@@ -45,7 +45,7 @@
         USE MODD_DST_n, ONLY : DST_t
         USE MODD_SLT_n, ONLY : SLT_t
         USE MODD_CH_TEB_n, ONLY : CH_TEB_t
-        USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+        USE MODD_GRID_n, ONLY : GRID_t
         USE MODD_TEB_n, ONLY : TEB_t
         USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
         USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
@@ -85,7 +85,7 @@
         TYPE(DST_t), INTENT(INOUT) :: DST
         TYPE(SLT_t), INTENT(INOUT) :: SLT
         TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
-        TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+        TYPE(GRID_t), INTENT(INOUT) :: TG
         TYPE(TEB_t), INTENT(INOUT) :: T
         TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
         TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
@@ -231,7 +231,7 @@
           ENDIF
 
         END IF
-        ! 
+        !
         WHERE (T%CUR%XGARDEN(:)==0.)
           GDM%TV%M%T%CUR%XVEG(:,1)=0.
           GDM%TV%M%T%CUR%XLAI(:,1)=0.
@@ -246,7 +246,7 @@
           GDM%TV%M%T%CUR%XALBVIS_VEG(:,1)=0.30
           GDM%TV%M%T%CUR%XALBUV_VEG(:,1)=0.06
           GDM%TV%M%T%CUR%XEMIS(:,1)=0.94
-        ENDWHERE
+        ENDWHERE  
         IF (GDM%TV%O%CPHOTO/='NON') THEN
           WHERE (T%CUR%XGARDEN(:)==0.)
             GDM%TV%M%T%CUR%XGMES(:,1)=0.020

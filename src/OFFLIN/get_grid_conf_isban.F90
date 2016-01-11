@@ -35,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 !
 USE MODE_GRIDTYPE_LONLAT_REG
 !
@@ -49,7 +49,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(GRID_t), INTENT(INOUT) :: IG
 !
 REAL,               INTENT(OUT) :: PLONMIN
 REAL,               INTENT(OUT) :: PLONMAX

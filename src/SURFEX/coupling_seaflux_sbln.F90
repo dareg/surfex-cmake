@@ -167,7 +167,6 @@ REAL, DIMENSION(KI,SM%SSB%NLVL)   :: ZDFORC_TDT! formal derivative of
 REAL, DIMENSION(KI,SM%SSB%NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
 REAL, DIMENSION(KI,SM%SSB%NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(KI,SM%SSB%NLVL)   :: ZLMO      ! MO length
 REAL, DIMENSION(KI,SM%SSB%NLVL)   :: ZLM       ! mixing length
 REAL, DIMENSION(KI,SM%SSB%NLVL)   :: ZLEPS     ! dissipative length
 REAL, DIMENSION(KI)     :: ZH           ! canopy height (m)
@@ -185,6 +184,7 @@ REAL, DIMENSION(KI)   :: ZBETATH  ! Th+(1) = - alfa rho w'th'(1) + beta
 REAL, DIMENSION(KI)   :: ZALFAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 REAL, DIMENSION(KI)   :: ZBETAQ   ! Q+(1) = - alfa rho w'q'(1) + beta
 !
+INTEGER :: JLAYER
  CHARACTER(LEN=1) :: GCOUPLING
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -227,8 +227,6 @@ IF (SM%S%LSBL) THEN
   ZSFLUX_T = 0.
   ZSFLUX_Q = 0.
 !
-  ZLMO = SPREAD(SM%SSB%XLMO,2,SM%SSB%NLVL)
-!
 !*      1.3   Computes coefficients for implicitation
 !             ---------------------------------------
 !
@@ -239,7 +237,7 @@ IF (SM%S%LSBL) THEN
                  ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                   &
                  SM%SSB%XZ,SM%SSB%XZF,SM%SSB%XDZ,SM%SSB%XDZF,             &
                  SM%SSB%XU,SM%SSB%XTKE,SM%SSB%XT,                         &
-                 SM%SSB%XQ,ZLMO,ZLM,ZLEPS,SM%SSB%XP,ZUSTAR,               &
+                 SM%SSB%XQ,SM%SSB%XLMO,ZLM,ZLEPS,SM%SSB%XP,ZUSTAR,               &
                  ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ              )
 
 !
@@ -332,10 +330,12 @@ ZWIND = SQRT(PU**2+PV**2)
                  ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                       &
                  SM%SSB%XZ,SM%SSB%XZF,SM%SSB%XDZ,SM%SSB%XDZF,                 &
                  SM%SSB%XU,SM%SSB%XTKE,SM%SSB%XT,      &
-                 SM%SSB%XQ,ZLMO,ZLM,ZLEPS,SM%SSB%XP,ZUSTAR,                         &
+                 SM%SSB%XQ,SM%SSB%XLMO,ZLM,ZLEPS,SM%SSB%XP,ZUSTAR,                         &
                  ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ                  )
 !
-SM%SSB%XLMO(:) = ZLMO(:,SM%SSB%NLVL)
+DO JLAYER=1,SM%SSB%NLVL-1
+  SM%SSB%XLMO(:,JLAYER) = SM%SSB%XLMO(:,SM%SSB%NLVL)
+ENDDO
 !
 !-------------------------------------------------------------------------------------
 !

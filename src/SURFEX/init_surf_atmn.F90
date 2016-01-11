@@ -382,27 +382,28 @@ IF (.NOT. LCLIM_LAI .AND. YSC%U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
 !
 !        2.2. Read grid
 !
-ALLOCATE(YSC%UG%XLAT       (YSC%U%NSIZE_FULL))
-ALLOCATE(YSC%UG%XLON       (YSC%U%NSIZE_FULL))
-ALLOCATE(YSC%UG%XMESH_SIZE (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XLAT       (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XLON       (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XMESH_SIZE (YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%USS%XZ0EFFJPDIR(YSC%U%NSIZE_FULL))
  CALL READ_GRID(&
-                HPROGRAM,YSC%UG%CGRID,YSC%UG%XGRID_PAR,YSC%UG%XLAT,YSC%UG%XLON,YSC%UG%XMESH_SIZE,IRESP,YSC%USS%XZ0EFFJPDIR)
-YSC%UG%NGRID_PAR=SIZE(YSC%UG%XGRID_PAR)
+                HPROGRAM,YSC%UG%G%CGRID,YSC%UG%G%XGRID_PAR,YSC%UG%G%XLAT,YSC%UG%G%XLON,&
+                        YSC%UG%G%XMESH_SIZE,IRESP,YSC%USS%XZ0EFFJPDIR)
+YSC%UG%G%NGRID_PAR=SIZE(YSC%UG%G%XGRID_PAR)
 !
 !        2.3. Initialize zenith and azimuth angles if not done yet
 !
 LZENITH = ALL(PZENITH /= XUNDEF)
-IF (.NOT. LZENITH) CALL SUNPOS(KYEAR, KMONTH, KDAY, PTIME, YSC%UG%XLON, YSC%UG%XLAT, ZTSUN, ZZENITH, ZAZIM)
+IF (.NOT. LZENITH) CALL SUNPOS(KYEAR, KMONTH, KDAY, PTIME, YSC%UG%G%XLON, YSC%UG%G%XLAT, ZTSUN, ZZENITH, ZAZIM)
 !
 IF (HPROGRAM/='AROME '.AND.NRANK==NPIO) THEN
   !
   IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
     CALL READ_GRIDTYPE(&
-                       HPROGRAM,YSC%UG%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%U%NDIM_FULL,.FALSE.,HDIR='A')
+                       HPROGRAM,YSC%UG%G%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%U%NDIM_FULL,.FALSE.,HDIR='A')
     ALLOCATE(YSC%UG%XGRID_FULL_PAR(YSC%UG%NGRID_FULL_PAR))
     CALL READ_GRIDTYPE(&
-                       HPROGRAM,YSC%UG%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%U%NDIM_FULL,.TRUE.,&
+                       HPROGRAM,YSC%UG%G%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%U%NDIM_FULL,.TRUE.,&
                        YSC%UG%XGRID_FULL_PAR,IRESP,HDIR='A')
   ENDIF
   !
@@ -501,8 +502,7 @@ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
 !
 !*       2.8 Allocations and Initialization of diagnostics
 !
-IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(&
-                                             YSC%DGU, YSC%U, &
+IF (HINIT=='ALL') CALL ALLOC_DIAG_SURF_ATM_n(YSC%DGU, YSC%DGUC, YSC%DGUP, YSC%DGUPC, YSC%U, &
                                              HPROGRAM,KSW)
 !
 !
@@ -575,7 +575,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XSEA(:)
 ! initialization
 IF (YSC%U%NDIM_SEA>0) &
   CALL INIT_SEA_n(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, &
-                  YSC%SM, YSC%DGL,  &
+                  YSC%SM, YSC%DGL, YSC%DGLC, &
                   HPROGRAM,HINIT,YSC%U%NSIZE_SEA,KSV,KSW,            &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -604,7 +604,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XWATER(:)
 ! initialization
 IF (YSC%U%NDIM_WATER>0) &
   CALL INIT_INLAND_WATER_n(YSC%DTCO, YSC%DGU,YSC%UG, &
-                           YSC%U, YSC%WM, YSC%FM, YSC%DGL,    &
+                           YSC%U, YSC%WM, YSC%FM, YSC%DGL, YSC%DGLC,    &
                            HPROGRAM,HINIT,YSC%U%NSIZE_WATER,KSV,KSW,          &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -632,7 +632,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XNATURE(:)
 ! initialization
 IF (YSC%U%NDIM_NATURE>0) &
   CALL INIT_NATURE_n(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%USS, YSC%IM, &
-                     YSC%DTZ, YSC%DGL, YSC%DST, YSC%SLT, YSC%SV, &
+                     YSC%DTZ, YSC%DGL, YSC%DGLC, YSC%DST, YSC%SLT, YSC%SV, &
                      HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,KSV,KSW,   &
                      HSV,ZP_CO2,ZP_RHOA,                                &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -661,7 +661,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XTOWN(:)
 IF (YSC%U%NDIM_TOWN>0) &
   CALL INIT_TOWN_n(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, &
                    YSC%IM%CHI, YSC%IM%DTI, YSC%IM%I, &
-                   YSC%TM, YSC%GDM, YSC%GRM, YSC%DGL, YSC%DST, YSC%SLT, &
+                   YSC%TM, YSC%GDM, YSC%GRM, YSC%DGL, YSC%DGLC, YSC%DST, YSC%SLT, &
                    HPROGRAM,HINIT,YSC%U%NSIZE_TOWN,KSV,KSW,             &
                    HSV,ZP_CO2,ZP_RHOA,                                &
                    ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &

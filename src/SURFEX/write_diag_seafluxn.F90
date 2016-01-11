@@ -25,8 +25,10 @@ SUBROUTINE WRITE_DIAG_SEAFLUX_n (DTCO, DGU, U, SM, &
 !!      Modified    09/2013 : S. Senesi : call WRITE_DIAG_SEB_SEAICE_n
 !!------------------------------------------------------------------
 !
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
@@ -47,7 +49,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
@@ -65,11 +67,13 @@ IF (HWRITE/='PGD') THEN
 !        
    IF (SM%DGS%XDIAG_TSTEP==XUNDEF .OR. &
            ABS(NINT(SM%S%TTIME%TIME/SM%DGS%XDIAG_TSTEP)*SM%DGS%XDIAG_TSTEP-SM%S%TTIME%TIME)<1.E-3 ) THEN
-      CALL WRITE_DIAG_SEB_SEAFLUX_n(DTCO, DGU, U, SM%CHS, SM%DGS, SM%DGSI, SM%S, &
+      CALL WRITE_DIAG_SEB_SEAFLUX_n(DTCO, DGU, U, SM%CHS, SM%DGS, SM%DGSC, SM%DGMSI, SM%S, &
                                     HPROGRAM)
       IF (SM%DGO%LDIAG_OCEAN)  CALL WRITE_DIAG_SEB_OCEAN_n(DTCO, DGU, U, SM%DGO, &
                                                         HPROGRAM)
-      IF (SM%DGSI%LDIAG_SEAICE) CALL WRITE_DIAG_SEB_SEAICE_n(DTCO, DGU, U, SM%DGS, SM%DGSI, SM%S, &
+      IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) CALL WRITE_DIAG_SEB_SEAICE_n(DTCO, DGU, U, SM%DGS, SM%DGSI, SM%DGSIC, SM%S, &
+                                                          HPROGRAM)                                                
+      IF (SM%DGMSI%LDIAG_MISC_SEAICE) CALL WRITE_DIAG_MISC_SEAICE_n(DTCO, DGU, U, SM%DGMSI, SM%S, &
                                                           HPROGRAM)
    END IF
 !        

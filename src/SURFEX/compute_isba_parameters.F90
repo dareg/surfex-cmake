@@ -62,7 +62,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, UG, U, IM, DST, SLT, SV, &
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DST_n, ONLY : DST_t
@@ -134,7 +134,7 @@ IMPLICIT NONE
 !
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -757,13 +757,15 @@ PTSURF = ZTSURF_NAT
 IF(IM%I%O%NPATCH<=1) IM%DGI%LPATCH_BUDGET=.FALSE.
 !
  CALL DIAG_ISBA_INIT_n(&
-                       IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, DGU, IM%GB, IM%I%O, &
+                       IM%CHI, IM%DGEI, IM%DGEIC, IM%DGEIP, IM%DGEIPC, &
+                       IM%DGI, IM%DGIC, IM%DGIP, IM%DGIPC, &
+                       IM%DGMI, IM%DGMIP, DGU, IM%GB, IM%I%O, &
                        IM%I%R%TSNOW%SCHEME, IM%I%R%TSNOW%NLAYER, SIZE(IM%I%IP%XABC), &
                        HPROGRAM,KI,KSW)
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_SURF_TOPD(IM%DGEI, IM%I, UG, U, &
+ CALL INIT_SURF_TOPD(IM%DGEIC, IM%I, UG, U, &
                      HPROGRAM,U%NDIM_FULL)
 !
 !-------------------------------------------------------------------------------

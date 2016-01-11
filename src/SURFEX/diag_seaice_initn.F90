@@ -1,0 +1,283 @@
+!     #########
+      SUBROUTINE DIAG_SEAICE_INIT_n (&
+                                       DGO, DGS, DGSI, DGSIC, DGMSI, DGU, S, &
+                                      HPROGRAM,KLU,KSW)
+!     #####################
+!
+!!****  *DIAG_SEAFLUX_INIT_n* - routine to initialize SEAFLUX diagnostic variables
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!**  METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!
+!!    AUTHOR
+!!    ------
+!!      V. Masson   *Meteo France*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original    01/2004 
+!!      Modified    01/2006 : sea flux parameterization.
+!!      Modified    08/2009 : cumulative sea flux 
+!!      B. decharme 04/2013 : Add EVAP and SUBL diag
+!!      S.Senesi    01/2014 : introduce fractional seaice 
+!-------------------------------------------------------------------------------
+!
+!*       0.    DECLARATIONS
+!              ------------
+!
+!
+!
+USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_MISC_SEAICE_n, ONLY : DIAG_MISC_SEAICE_t
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+!
+!
+!
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE,     ONLY : LRESTART
+#endif
+USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_SFX_OASIS,      ONLY : LCPL_SEA,LCPL_SEAICE
+
+!                                
+!
+!
+!
+USE MODI_READ_SURF
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*       0.1   Declarations of arguments
+!              -------------------------
+!
+!
+!
+!
+TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGSI
+TYPE(DIAG_t), INTENT(INOUT) :: DGSIC
+TYPE(DIAG_MISC_SEAICE_t), INTENT(INOUT) :: DGMSI
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+!
+INTEGER, INTENT(IN) :: KLU   ! size of arrays
+INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands
+ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
+!
+!*       0.2   Declarations of local variables
+!              -------------------------------
+!
+INTEGER           :: IVERSION
+INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
+CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
+!
+REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+!
+!-------------------------------------------------------------------------------
+!
+!* surface energy budget
+!
+IF (LHOOK) CALL DR_HOOK('DIAG_SEAICE_INIT_N',0,ZHOOK_HANDLE)
+!
+IF (DGS%LSURF_BUDGET.OR.DGS%LSURF_BUDGETC) THEN
+  ALLOCATE(DGSI%XRN (KLU))
+  ALLOCATE(DGSI%XH  (KLU))
+  ALLOCATE(DGSI%XLE (KLU))
+  ALLOCATE(DGSI%XGFLUX(KLU))
+  ALLOCATE(DGSI%XSWU(KLU))
+  ALLOCATE(DGSI%XLWU(KLU))
+  ALLOCATE(DGSI%XSWBU(KLU,KSW))
+  ALLOCATE(DGSI%XFMU(KLU))
+  ALLOCATE(DGSI%XFMV(KLU))
+  !
+  DGSI%XRN  = XUNDEF
+  DGSI%XH   = XUNDEF
+  DGSI%XLE  = XUNDEF
+  DGSI%XGFLUX=XUNDEF
+  DGSI%XSWU = XUNDEF
+  DGSI%XLWU = XUNDEF
+  DGSI%XSWBU= XUNDEF
+  DGSI%XFMU = XUNDEF
+  DGSI%XFMV = XUNDEF
+  !
+ELSE
+  ALLOCATE(DGSI%XRN (0))
+  ALLOCATE(DGSI%XH  (0))
+  ALLOCATE(DGSI%XLE (0))
+  ALLOCATE(DGSI%XGFLUX(0))
+  ALLOCATE(DGSI%XSWU(0))
+  ALLOCATE(DGSI%XLWU(0))
+  ALLOCATE(DGSI%XSWBU(0,0))
+  ALLOCATE(DGSI%XFMU(0))
+  ALLOCATE(DGSI%XFMV(0)) 
+ENDIF
+!
+!* cumulative surface energy budget
+!
+#ifdef SFX_OL
+IF (DGS%LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.DGS%LRESET_BUDGETC)) THEN
+#else
+IF (DGS%LSURF_BUDGETC .OR. .NOT.DGS%LRESET_BUDGETC) THEN
+#endif
+!        
+  ALLOCATE(DGSIC%XRN(KLU))
+  ALLOCATE(DGSIC%XH (KLU))
+  ALLOCATE(DGSIC%XLE (KLU))
+  ALLOCATE(DGSIC%XGFLUX(KLU))
+  ALLOCATE(DGSIC%XSWU(KLU))
+  ALLOCATE(DGSIC%XLWU(KLU))
+  ALLOCATE(DGSIC%XFMU(KLU))
+  ALLOCATE(DGSIC%XFMV(KLU))
+!
+  IF (.NOT. DGU%LREAD_BUDGETC) THEN        
+     DGSIC%XRN =0.0
+     DGSIC%XH  =0.0
+     DGSIC%XLE  =0.0
+     DGSIC%XGFLUX=0.0
+     DGSIC%XSWU=0.0
+     DGSIC%XLWU=0.0
+     DGSIC%XFMU=0.0
+     DGSIC%XFMV=0.0
+  ELSEIF (DGU%LREAD_BUDGETC.AND.DGS%LRESET_BUDGETC) THEN
+     DGSIC%XRN= 0.0
+     DGSIC%XH = 0.0
+     DGSIC%XLE  =0.0
+     DGSIC%XGFLUX=0.0
+     DGSIC%XSWU=0.0
+     DGSIC%XLWU=0.0
+     DGSIC%XFMU=0.0
+     DGSIC%XFMV=0.0
+  ELSE
+     DGSIC%XRN    = 0.0
+     DGSIC%XH     = 0.0
+     DGSIC%XLE  =0.0
+     DGSIC%XGFLUX = 0.0
+     DGSIC%XSWU   = 0.0
+     DGSIC%XLWU   = 0.0
+     DGSIC%XFMU   = 0.0
+     DGSIC%XFMV   = 0.0
+  ENDIF   
+ELSE
+  ALLOCATE(DGSIC%XRN(0))
+  ALLOCATE(DGSIC%XH (0))
+  ALLOCATE(DGSIC%XLE (0))
+  ALLOCATE(DGSIC%XGFLUX(0))
+  ALLOCATE(DGSIC%XSWU(0))
+  ALLOCATE(DGSIC%XLWU(0))
+  ALLOCATE(DGSIC%XFMU(0))
+  ALLOCATE(DGSIC%XFMV(0))
+ENDIF
+!
+!* parameters at 2m
+!
+IF (DGS%N2M>=1) THEN
+  ALLOCATE(DGSI%XRI  (KLU))
+  ALLOCATE(DGSI%XT2M (KLU))
+  ALLOCATE(DGSI%XQ2M (KLU))
+  ALLOCATE(DGSI%XHU2M(KLU))
+  ALLOCATE(DGSI%XZON10M(KLU))
+  ALLOCATE(DGSI%XMER10M(KLU))
+  ALLOCATE(DGSI%XWIND10M(KLU))
+  !
+  DGSI%XRI  = XUNDEF
+  DGSI%XT2M = XUNDEF
+  DGSI%XQ2M = XUNDEF
+  DGSI%XHU2M= XUNDEF
+  DGSI%XZON10M=XUNDEF
+  DGSI%XMER10M=XUNDEF
+  DGSI%XWIND10M=XUNDEF
+ELSE
+  ALLOCATE(DGSI%XRI  (0))
+  ALLOCATE(DGSI%XT2M (0))
+  ALLOCATE(DGSI%XQ2M (0))
+  ALLOCATE(DGSI%XHU2M(0))
+  ALLOCATE(DGSI%XZON10M(0))
+  ALLOCATE(DGSI%XMER10M(0))
+  ALLOCATE(DGSI%XWIND10M (0))
+  ALLOCATE(DGSI%XWIND10M(0))
+END IF
+!
+!* transfer coefficients
+!
+IF (DGS%LCOEF) THEN
+  ALLOCATE(DGSI%XCD (KLU))
+  ALLOCATE(DGSI%XCH (KLU))
+  ALLOCATE(DGSI%XZ0 (KLU))
+  ALLOCATE(DGSI%XZ0H(KLU))
+  !
+  DGSI%XCD  = XUNDEF
+  DGSI%XCH  = XUNDEF
+  DGSI%XZ0  = XUNDEF
+  DGSI%XZ0H = XUNDEF
+ELSE
+  ALLOCATE(DGSI%XCD (0))
+  ALLOCATE(DGSI%XCH (0))
+  ALLOCATE(DGSI%XZ0 (0))
+  ALLOCATE(DGSI%XZ0H(0))
+END IF
+!
+!
+!* surface humidity
+!
+IF (DGS%LSURF_VARS) THEN
+  ALLOCATE(DGSI%XQS (KLU))
+  !
+  DGSI%XQS  = XUNDEF
+ELSE
+  ALLOCATE(DGSI%XQS (0))
+END IF
+!
+!* Seaice model diagnostics init 
+!
+IF (DGMSI%LDIAG_MISC_SEAICE) THEN
+  ALLOCATE(DGMSI%XSIT(KLU))
+  DGMSI%XSIT=XUNDEF
+  ALLOCATE(DGMSI%XSND(KLU))
+  DGMSI%XSND=XUNDEF
+  ALLOCATE(DGMSI%XMLT(KLU))
+  DGMSI%XMLT=XUNDEF
+ELSE
+  ALLOCATE(DGMSI%XSIT  (0))
+  ALLOCATE(DGMSI%XSND  (0))
+  ALLOCATE(DGMSI%XMLT  (0))
+ENDIF
+!
+IF(LCPL_SEAICE.OR.S%LHANDLE_SIC)THEN
+  ALLOCATE(S%XCPL_SEAICE_SNET(KLU))
+  ALLOCATE(S%XCPL_SEAICE_HEAT(KLU))
+  ALLOCATE(S%XCPL_SEAICE_EVAP(KLU))
+  S%XCPL_SEAICE_SNET(:) = 0.0
+  S%XCPL_SEAICE_HEAT(:) = 0.0
+  S%XCPL_SEAICE_EVAP(:) = 0.0
+ELSE
+  ALLOCATE(S%XCPL_SEAICE_SNET(0))
+  ALLOCATE(S%XCPL_SEAICE_HEAT(0))
+  ALLOCATE(S%XCPL_SEAICE_EVAP(0))
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('DIAG_SEAICE_INIT_N',1,ZHOOK_HANDLE)
+!
+!-------------------------------------------------------------------------------
+!
+END SUBROUTINE DIAG_SEAICE_INIT_n

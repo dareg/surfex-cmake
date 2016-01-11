@@ -185,7 +185,6 @@ REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZDFORC_TDT! formal derivative of
 REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
 REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZLMO      ! MO length
 REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZLM       ! mixing length
 REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZLEPS     ! dissipative length
 REAL, DIMENSION(KI)     :: ZH           ! canopy height (m)
@@ -212,7 +211,7 @@ REAL, DIMENSION(KI)   ::ZDUWDU_GROUND
 !
 REAL, DIMENSION(KI,IM%ICP%NLVL)   :: ZZ        ! height above displacement height
 !
-INTEGER                      :: JJ
+INTEGER                      :: JJ, JLAYER
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !-------------------------------------------------------------------------------------
@@ -259,8 +258,6 @@ IF (IM%I%O%LCANOPY) THEN
   ZSFLUX_U = 0.
   ZSFLUX_T = 0.
   ZSFLUX_Q = 0.
-!
-  ZLMO = SPREAD(IM%ICP%XLMO,2,IM%ICP%NLVL)
 !
 !* default :
 !* no canopy in ISBA scheme
@@ -321,7 +318,7 @@ IF (IM%I%O%LCANOPY) THEN
                    ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                   &
                    ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                   &
                    IM%ICP%XZ,IM%ICP%XZF,IM%ICP%XDZ,IM%ICP%XDZF,IM%ICP%XU,&
-                   IM%ICP%XTKE,IM%ICP%XT,IM%ICP%XQ,ZLMO,ZLM,ZLEPS,IM%ICP%XP,ZUSTAR,  &
+                   IM%ICP%XTKE,IM%ICP%XT,IM%ICP%XQ,IM%ICP%XLMO,ZLM,ZLEPS,IM%ICP%XP,ZUSTAR,  &
                    ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ              )
 !
 !*     1.6     Goes from atmospheric forcing to canopy forcing height
@@ -444,10 +441,12 @@ ZWIND = SQRT(PU**2+PV**2)
                  ZFORC_U,ZDFORC_UDU,ZFORC_E,ZDFORC_EDE,                       &
                  ZFORC_T,ZDFORC_TDT,ZFORC_Q,ZDFORC_QDQ,                       &
                  IM%ICP%XZ,IM%ICP%XZF,IM%ICP%XDZ,IM%ICP%XDZF,IM%ICP%XU,IM%ICP%XTKE,&
-                 IM%ICP%XT,IM%ICP%XQ,ZLMO,ZLM,ZLEPS,IM%ICP%XP,ZUSTAR,       &
+                 IM%ICP%XT,IM%ICP%XQ,IM%ICP%XLMO,ZLM,ZLEPS,IM%ICP%XP,ZUSTAR,       &
                  ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ                  )
 !
-IM%ICP%XLMO(:) = ZLMO(:,IM%ICP%NLVL)
+DO JLAYER=1,IM%ICP%NLVL-1
+  IM%ICP%XLMO(:,JLAYER) = IM%ICP%XLMO(:,IM%ICP%NLVL)
+ENDDO
 !
 ! Momentum fluxes if canopy is used
 !
@@ -462,8 +461,8 @@ IF (IM%I%O%LCANOPY_DRAG .OR. IM%I%O%CROUGH=='BE04') THEN
   ENDDO
 !* Total friction due to surface averaged friction and averaged canopy drag
   IF (IM%DGI%LSURF_BUDGET) THEN
-    IM%DGI%XAVG_FMU = PSFU
-    IM%DGI%XAVG_FMV = PSFV          
+    IM%DGI%XFMU = PSFU
+    IM%DGI%XFMV = PSFV          
   ENDIF
 END IF
 !
@@ -475,10 +474,10 @@ END IF
 !
 IF (IM%DGI%N2M>=1) CALL INIT_2M_10M( IM%ICP%XP(:,2), IM%ICP%XT(:,2), IM%ICP%XQ(:,2),  IM%ICP%XU, IM%ICP%XZ, &
                               PU, PV, ZWIND, PRHOA,               &
-                              IM%DGI%XAVG_T2M, IM%DGI%XAVG_Q2M, IM%DGI%XAVG_HU2M, &
-                              IM%DGI%XAVG_ZON10M, IM%DGI%XAVG_MER10M, &
-                              IM%DGI%XAVG_WIND10M, IM%DGI%XAVG_WIND10M_MAX, IM%DGI%XAVG_T2M_MIN,            &
-                              IM%DGI%XAVG_T2M_MAX, IM%DGI%XAVG_HU2M_MIN, IM%DGI%XAVG_HU2M_MAX )
+                              IM%DGI%XT2M, IM%DGI%XQ2M, IM%DGI%XHU2M, &
+                              IM%DGI%XZON10M, IM%DGI%XMER10M, &
+                              IM%DGI%XWIND10M, IM%DGI%XWIND10M_MAX, IM%DGI%XT2M_MIN,            &
+                              IM%DGI%XT2M_MAX, IM%DGI%XHU2M_MIN, IM%DGI%XHU2M_MAX )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_CANOPY_N',1,ZHOOK_HANDLE)
 !

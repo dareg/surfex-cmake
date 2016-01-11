@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_TEB_OROGRAPHY_n (DTCO, DTI, IG, I, DST, SLT, TM, GDM, GRM,  &
+SUBROUTINE COUPLING_TEB_OROGRAPHY_n (DTCO, DST, SLT, TM, GDM, GRM,  &
                                      HPROGRAM, HCOUPLING,                                   &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
@@ -39,9 +39,6 @@ SUBROUTINE COUPLING_TEB_OROGRAPHY_n (DTCO, DTI, IG, I, DST, SLT, TM, GDM, GRM,  
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
@@ -68,9 +65,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
@@ -202,7 +196,7 @@ ELSE
 !
 ENDIF
 !
- CALL COUPLING_TEB_n(DTCO, DTI, IG, I, DST, SLT, TM, GDM, GRM, &
+ CALL COUPLING_TEB_n(DTCO, DST, SLT, TM, GDM, GRM, &
                      HPROGRAM, HCOUPLING,                                                   &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
                  KI, KSV, KSW,                                                               &

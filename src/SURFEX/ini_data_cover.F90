@@ -249,8 +249,6 @@ XDATA_SEA = 0.
 !
 !*    2.0    vegetation type fractions
 !
-NVEGTYPE = 19
-!  
 !New name  N   Nold   Comments
 !-----------------------------
 NVT_NO   = 1   ! 1  ! no vegetation (smooth)

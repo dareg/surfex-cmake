@@ -1,5 +1,5 @@
 !     ############################################################
-SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
+SUBROUTINE COUPLING_IDEAL_FLUX (DGL, DGLC, &
                                 HPROGRAM, HCOUPLING, PTIMEC,                                  &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
@@ -52,7 +52,7 @@ SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
 !              ------------
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XPI, XLVTT, XDAY, XKARMAN, XTT, &
                             XLSTT, XSTEFAN
@@ -79,7 +79,8 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 ! 
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -347,7 +348,7 @@ ZLWUP(:)=(1.-PEMIS(:))*PLW(:)+PEMIS(:)*XSTEFAN*PTSURF(:)**4
 
  CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0, PZ0H, ZCD, ZCDN)
 
- CALL DIAG_INLINE_IDEAL_n(DGL, PTSTEP, PTA, PTSURF, ZQA, PPA, PPS, PRHOA, PU,      &
+ CALL DIAG_INLINE_IDEAL_n(DGL, DGLC, PTSTEP, PTA, PTSURF, ZQA, PPA, PPS, PRHOA, PU,      &
                             PV, PZREF, PUREF, PRAIN, PSNOW,                  &
                             ZCD, ZCDN, ZCH, ZRI, ZHU, PZ0,                   &
                             PZ0H, PQSURF, PSFTH, PSFTQ, PSFU, PSFV,          &

@@ -28,7 +28,7 @@ SUBROUTINE SET_SSO_LEVELS (SSCP, &
 !!------------------------------------------------------------------
 !
 !
-USE MODD_SSO_CANOPY_n, ONLY : SSO_CANOPY_t
+USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -40,7 +40,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(SSO_CANOPY_t), INTENT(INOUT) :: SSCP
+TYPE(CANOPY_t), INTENT(INOUT) :: SSCP
 !
 INTEGER, INTENT(IN) :: KDIM ! 1D physical dimension
 

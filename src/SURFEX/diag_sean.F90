@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_SEA_n (DGL, DGS, U, &
+SUBROUTINE DIAG_SEA_n (DGL, DGLC, DGS, DGSC, U, &
                        HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -39,8 +39,7 @@ SUBROUTINE DIAG_SEA_n (DGL, DGS, U, &
 !
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -56,8 +55,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGSC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
@@ -118,7 +119,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SEA_N',0,ZHOOK_HANDLE)
 IF (U%CSEA=='SEAFLX') THEN
-  CALL DIAG_SEAFLUX_n(DGS, &
+  CALL DIAG_SEAFLUX_n(DGS, DGSC, &
                       HPROGRAM,                                           &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -128,7 +129,7 @@ IF (U%CSEA=='SEAFLX') THEN
                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
 ELSEIF (U%CSEA=='FLUX') THEN
-  CALL DIAG_IDEAL_n(DGL, HPROGRAM,                                          &
+  CALL DIAG_IDEAL_n(DGL, DGLC, HPROGRAM,                                          &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &

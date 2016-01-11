@@ -46,7 +46,7 @@ INTEGER, PARAMETER    :: NCOVER_ECO1_END    = 255
 !firt class number of EUROPE
 INTEGER, PARAMETER    :: NCOVER_ECO2_START  = 301
 !
-INTEGER                                :: NVEGTYPE
+INTEGER                                :: NVEGTYPE = 19
 ! number of vegetation types
 !
 INTEGER  :: NVT_C4    ! C4 cultures types

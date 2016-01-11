@@ -35,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
@@ -51,7 +51,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -70,7 +70,7 @@ IF (LHOOK) CALL DR_HOOK('GET_QS_N',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 IF (DGU%LSURF_VARS)      THEN 
-  PQS      = DGU%XAVG_QS      
+  PQS      = DGU%XQS      
 ELSE 
   PQS      = XUNDEF      
 ENDIF           

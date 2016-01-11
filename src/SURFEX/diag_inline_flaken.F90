@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_FLAKE_n (DGF, F, &
+       SUBROUTINE DIAG_INLINE_FLAKE_n (DGF, DGFC, F, &
                                         PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,  &
                                          PMERA, PHT, PHW, PRAIN, PSNOW,                &
                                          PCD, PCDN, PCH, PRI, PHU,                &
@@ -37,7 +37,7 @@
 !
 !
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODD_CSTS,         ONLY : XTT
@@ -60,7 +60,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGFC
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL              , INTENT(IN) :: PTSTEP ! atmospheric time-step (s)
@@ -109,7 +110,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_FLAKE_N',0,ZHOOK_HANDLE)
 !
-DGF%XDIAG_TS(:) = F%XTS(:)
+DGF%XTS(:) = F%XTS(:)
 !
 IF (.NOT. F%LSBL) THEN
 !
@@ -176,7 +177,7 @@ IF (DGF%LSURF_BUDGET.OR.DGF%LSURF_BUDGETC) THEN
 END IF
 !
 IF(DGF%LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_FLAKE(DGF, &
+  CALL DIAG_SURF_BUDGETC_FLAKE(DGFC, &
                                PTSTEP, DGF%XRN, DGF%XH, DGF%XLE, DGF%XLEI, DGF%XGFLUX,  &
                                  DGF%XSWD, DGF%XSWU, DGF%XLWD, DGF%XLWU, DGF%XFMU, DGF%XFMV,&
                                  DGF%XEVAP, DGF%XSUBL                       )  

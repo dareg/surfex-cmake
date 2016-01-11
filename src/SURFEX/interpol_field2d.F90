@@ -103,7 +103,7 @@ IF (PRESENT(PDEF)) ZDEF = PDEF
 !            -----------------------------
 !
  CALL GET_GRID_COORD(UG, U, &
-                     KLUOUT,KL=U%NDIM_FULL,HGRID=UG%CGRID,PGRID_PAR=UG%XGRID_FULL_PAR,&
+                     KLUOUT,KL=U%NDIM_FULL,HGRID=UG%G%CGRID,PGRID_PAR=UG%XGRID_FULL_PAR,&
                         PX=ZX,PY=ZY)
 !
 !-------------------------------------------------------------------------------
@@ -111,9 +111,9 @@ IF (PRESENT(PDEF)) ZDEF = PDEF
 !*    5.     Interpolation with 3 nearest points
 !            -----------------------------------
 !
-IERR0 = SUM_ON_ALL_PROCS(HPROGRAM,UG%CGRID,KCODE(:)==0)
+IERR0 = SUM_ON_ALL_PROCS(HPROGRAM,UG%G%CGRID,KCODE(:)==0)
 !
- CALL GET_INTERP_HALO(HPROGRAM,UG%CGRID,IHALO)
+ CALL GET_INTERP_HALO(HPROGRAM,UG%G%CGRID,IHALO)
 !
 IF (IHALO/=0) THEN
   INEAR_NBR = (2*IHALO+1)**2
@@ -129,8 +129,8 @@ ENDIF
 !*    6.     Final check
 !            -----------
 !
-IERR1 = SUM_ON_ALL_PROCS(HPROGRAM,UG%CGRID,KCODE(:)==0)
-IERR2 = SUM_ON_ALL_PROCS(HPROGRAM,UG%CGRID,KCODE(:)==-4)
+IERR1 = SUM_ON_ALL_PROCS(HPROGRAM,UG%G%CGRID,KCODE(:)==0)
+IERR2 = SUM_ON_ALL_PROCS(HPROGRAM,UG%G%CGRID,KCODE(:)==-4)
 !
 IF (NRANK==NPIO) THEN
   !

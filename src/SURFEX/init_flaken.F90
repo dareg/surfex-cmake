@@ -47,9 +47,8 @@ SUBROUTINE INIT_FLAKE_n ( DTCO, DGU, UG, U, FM,                 &
 !
 USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -104,7 +103,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
@@ -335,7 +334,7 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_FLAKE_INIT_n(DGU, FM%DGF, FM%DGMF, FM%F, &
+ CALL DIAG_FLAKE_INIT_n(DGU, FM%DGF, FM%DGFC, FM%DGMF, FM%F, &
                         HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

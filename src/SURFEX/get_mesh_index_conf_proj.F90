@@ -1,5 +1,5 @@
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_CONF_PROJ(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
+      SUBROUTINE GET_MESH_INDEX_CONF_PROJ(KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
 !     ###############################################################
 !
 !!**** *GET_MESH_INDEX_CONF_PROJ* get the grid mesh where point (lat,lon) is located
@@ -39,7 +39,6 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-INTEGER,                       INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                       INTENT(IN)    :: KSSO      ! number of subgrid mesh in each direction
 !
 REAL,    DIMENSION(:),         INTENT(IN)    :: PGRID_PAR ! grid parameters

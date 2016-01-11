@@ -457,6 +457,7 @@ XTIME = (MPI_WTIME() - XTIME0)
 XTIME0 = MPI_WTIME()
 #endif
 !
+!
 !       splitting of the grid
 !
 GSHADOWS = LSHADOWS_SLOPE .OR. LSHADOWS_OTHER
@@ -480,6 +481,7 @@ XTIME0 = MPI_WTIME()
 #endif
 !
 !       forcing file handling
+!
 IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('CONF ',CFORCING_FILETYPE,'R')
 IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !
@@ -1064,6 +1066,15 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       IDX_W = 0
       !
+      CALL DIAG_SURF_ATM_n(YSURF_CUR%IM%DGEI, YSURF_CUR%IM%DGEIC, YSURF_CUR%FM%DGF, &
+                           YSURF_CUR%FM%DGFC, YSURF_CUR%DGL, &
+                           YSURF_CUR%DGLC, YSURF_CUR%IM%DGI, YSURF_CUR%IM%DGIC, &
+                           YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGSC, &
+                           YSURF_CUR%DGU, YSURF_CUR%DGUP, YSURF_CUR%DGUC, YSURF_CUR%DGUPC, &
+                           YSURF_CUR%TM%DGT, YSURF_CUR%WM%DGW, &
+                           YSURF_CUR%WM%DGWC, YSURF_CUR%U, YSURF_CUR%USS, &
+                           CTIMESERIES_FILETYPE)
+      !
       DO JNW = 1,INW
         ! 
         CALL IO_BUFF_CLEAN
@@ -1077,10 +1088,6 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL DIAG_SURF_ATM_n(YSURF_CUR%IM%DGEI, YSURF_CUR%FM%DGF, YSURF_CUR%DGL, YSURF_CUR%IM%DGI, &
-                             YSURF_CUR%SM%DGS, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, YSURF_CUR%WM%DGW, &
-                             YSURF_CUR%U, YSURF_CUR%USS, &
-                             CTIMESERIES_FILETYPE)
 #ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
@@ -1268,7 +1275,7 @@ IF ( LRESTART ) THEN
     CALL FLAG_DIAG_UPDATE(YSURF_CUR%FM%CHF, YSURF_CUR%IM%CHI, YSURF_CUR%SM%CHS, YSURF_CUR%TM%CHT, &
                           YSURF_CUR%WM%CHW, YSURF_CUR%IM%DGEI, YSURF_CUR%FM%DGF, YSURF_CUR%IM%DGI, &
                           YSURF_CUR%FM%DGMF, YSURF_CUR%IM%DGMI, YSURF_CUR%TM%DGMTO, YSURF_CUR%SM%DGO, &
-                          YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGSI, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, &
+                          YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGMSI, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, &
                           YSURF_CUR%WM%DGW, YSURF_CUR%IM%I, YSURF_CUR%U, &
                           GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                           GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &

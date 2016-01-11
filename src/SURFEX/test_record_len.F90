@@ -10,7 +10,7 @@ SUBROUTINE TEST_RECORD_LEN (DGU, &
 !-------------------------------------------------------------------------------
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODI_GET_LUOUT
 !
@@ -23,7 +23,7 @@ USE MODI_ABOR1_SFX
 IMPLICIT NONE
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be written

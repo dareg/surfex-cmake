@@ -38,7 +38,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
@@ -53,7 +53,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI        ! Number of points
@@ -86,15 +86,15 @@ IF (LHOOK) CALL DR_HOOK('GET_FLUX_N',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 IF (DGU%LSURF_BUDGET)      THEN 
-        PRN       = DGU%XAVG_RN      
-        PH        = DGU%XAVG_H  
-        PLE       = DGU%XAVG_LE 
-        PLEI      = DGU%XAVG_LEI 
-        PGFLUX    = DGU%XAVG_GFLUX 
-        PSURFLWNET= DGU%XAVG_LWD-DGU%XAVG_LWU
-        PSURFSWNET= DGU%XAVG_SWD-DGU%XAVG_SWU
-        PEVAP     = DGU%XAVG_EVAP
-        PSUBL     = DGU%XAVG_SUBL
+        PRN       = DGU%XRN      
+        PH        = DGU%XH  
+        PLE       = DGU%XLE 
+        PLEI      = DGU%XLEI 
+        PGFLUX    = DGU%XGFLUX 
+        PSURFLWNET= DGU%XLWD-DGU%XLWU
+        PSURFSWNET= DGU%XSWD-DGU%XSWU
+        PEVAP     = DGU%XEVAP
+        PSUBL     = DGU%XSUBL
    ELSE 
         PRN       = XUNDEF
         PH        = XUNDEF
@@ -108,11 +108,11 @@ IF (DGU%LSURF_BUDGET)      THEN
 ENDIF           
 !
 IF (DGU%N2M>0)      THEN 
-        PT2M      = DGU%XAVG_T2M
-        PQ2M      = DGU%XAVG_Q2M
-        PHU2M     = DGU%XAVG_HU2M
-        PZON10M   = DGU%XAVG_ZON10M
-        PMER10M   = DGU%XAVG_MER10M
+        PT2M      = DGU%XT2M
+        PQ2M      = DGU%XQ2M
+        PHU2M     = DGU%XHU2M
+        PZON10M   = DGU%XZON10M
+        PMER10M   = DGU%XMER10M
    ELSE 
         PT2M     = XUNDEF
         PQ2M     = XUNDEF
@@ -122,7 +122,7 @@ IF (DGU%N2M>0)      THEN
 ENDIF   
 !
 IF (DGU%LCOEF) THEN
-  PCD      = DGU%XAVG_CD
+  PCD      = DGU%XCD
 ELSE
   PCD      = XUNDEF
 ENDIF

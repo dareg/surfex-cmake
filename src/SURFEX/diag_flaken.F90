@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_FLAKE_n (DGF, &
+SUBROUTINE DIAG_FLAKE_n (DGF, DGFC, &
                          HPROGRAM,                                                 &
                             PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,    &
                             PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
@@ -36,7 +36,7 @@ SUBROUTINE DIAG_FLAKE_n (DGF, &
 
 !
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
@@ -49,7 +49,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGFC
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
@@ -127,22 +128,22 @@ IF (DGF%LSURF_BUDGET) THEN
 END IF
 !
 IF (DGF%LSURF_BUDGETC) THEN
-  PRNC      = DGF%XRNC
-  PHC       = DGF%XHC
-  PLEC      = DGF%XLEC
-  PLEIC     = DGF%XLEIC
-  PGFLUXC   = DGF%XGFLUXC
-  PEVAPC    = DGF%XEVAPC
-  PSUBLC    = DGF%XSUBLC  
-  PSWDC     = DGF%XSWDC
-  PSWUC     = DGF%XSWUC
-  PLWDC     = DGF%XLWDC
-  PLWUC     = DGF%XLWUC
-  PFMUC     = DGF%XFMUC
-  PFMVC     = DGF%XFMVC
+  PRNC      = DGFC%XRN
+  PHC       = DGFC%XH
+  PLEC      = DGFC%XLE
+  PLEIC     = DGFC%XLEI
+  PGFLUXC   = DGFC%XGFLUX
+  PEVAPC    = DGFC%XEVAP
+  PSUBLC    = DGFC%XSUBL  
+  PSWDC     = DGFC%XSWD
+  PSWUC     = DGFC%XSWU
+  PLWDC     = DGFC%XLWD
+  PLWUC     = DGFC%XLWU
+  PFMUC     = DGFC%XFMU
+  PFMVC     = DGFC%XFMV
 END IF
 !
-IF (DGF%N2M>=1 .OR. DGF%LSURF_BUDGET .OR. DGF%LSURF_BUDGETC) PTS = DGF%XDIAG_TS
+IF (DGF%N2M>=1 .OR. DGF%LSURF_BUDGET .OR. DGF%LSURF_BUDGETC) PTS = DGF%XTS
 !
 IF (DGF%N2M>=1) THEN
   PRI      = DGF%XRI

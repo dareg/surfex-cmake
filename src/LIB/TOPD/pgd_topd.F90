@@ -146,7 +146,7 @@ IF (LCOUPL_TOPD) THEN
   ALLOCATE(NMASKT(NNCAT,NMESHT))
   NMASKT(:,:)=NUNDEF
   !
-  IF(UG%CGRID.EQ.'CONF PROJ') THEN
+  IF(UG%G%CGRID.EQ.'CONF PROJ') THEN
     !
     WRITE(ILUOUT,*) 'GRILLE PROJ CONF (application Cevennes)'
     !
@@ -161,7 +161,7 @@ IF (LCOUPL_TOPD) THEN
     ALLOCATE(ZDXI(U%NDIM_FULL))
     ALLOCATE(ZDYI(U%NDIM_FULL))
     !
-    CALL GET_GRIDTYPE_CONF_PROJ(UG%XGRID_PAR,PLAT0=ZLAT0,PLON0=ZLON0,PRPK=ZRPK, &
+    CALL GET_GRIDTYPE_CONF_PROJ(UG%G%XGRID_PAR,PLAT0=ZLAT0,PLON0=ZLON0,PRPK=ZRPK, &
                                 PBETA=ZBETA,PLATOR=ZLATOR,PLONOR=ZLONOR,     &
                                 KIMAX=NIMAX,KJMAX=NJMAX,PX=ZXI,PY=ZYI,       &
                                 PDX=ZDXI,PDY=ZDYI)
@@ -219,7 +219,7 @@ IF (LCOUPL_TOPD) THEN
     !*      1.2 Gestion des coordonnees geographiques
     !           -------------------------------------
     !
-  ELSE IF(UG%CGRID.EQ.'LONLAT REG') THEN
+  ELSE IF(UG%G%CGRID.EQ.'LONLAT REG') THEN
     !
     WRITE(ILUOUT,*) 'GRILLE LONLAT REG (application AMMA)' 
     !
@@ -227,7 +227,7 @@ IF (LCOUPL_TOPD) THEN
     ALLOCATE(ZYI(U%NDIM_FULL))
     ZXI(:)=0.0
     ZYI(:)=0.0
-    CALL GET_GRIDTYPE_LONLAT_REG(UG%XGRID_PAR,PLONMIN=ZLONMIN,PLONMAX=ZLONMAX,             &
+    CALL GET_GRIDTYPE_LONLAT_REG(UG%G%XGRID_PAR,PLONMIN=ZLONMIN,PLONMAX=ZLONMAX,             &
                                  PLATMIN=ZLATMIN,PLATMAX=ZLATMAX,KLON=NIMAX,KLAT=NJMAX, &
                                  KL=IL,PLON=ZXI,PLAT=ZYI)
     !
@@ -277,11 +277,11 @@ IF (LCOUPL_TOPD) THEN
     ENDDO
     !
   ! Modification by Eram Artinian to take into account IGN grid 1
-  ELSE IF (UG%CGRID=='IGN') THEN 
+  ELSE IF (UG%G%CGRID=='IGN') THEN 
     WRITE(ILUOUT,*) 'GRILLE IGN (application Bulgarie)' 
     ALLOCATE(ZXN(U%NDIM_FULL))
     ALLOCATE(ZYN(U%NDIM_FULL))
-    CALL GET_GRIDTYPE_IGN(UG%XGRID_PAR,KLAMBERT=ILAMBERT,&
+    CALL GET_GRIDTYPE_IGN(UG%G%XGRID_PAR,KLAMBERT=ILAMBERT,&
                           KL=IL,PX=ZXN,PY=ZYN,KDIMX=NIMAX)
     IMESHL=IL
     ALLOCATE(ZLAT(IMESHL))
@@ -301,7 +301,7 @@ IF (LCOUPL_TOPD) THEN
   ALLOCATE(XXI(IMESHL))
   ALLOCATE(XYI(IMESHL))
   ! Modification by Eram Artinian to take into account IGN grid 2
-  IF (UG%CGRID/='IGN') THEN
+  IF (UG%G%CGRID/='IGN') THEN
     CALL XY_IGN(5,XXI,XYI,ZLAT,ZLON)
   ELSE
     XXI=ZXN

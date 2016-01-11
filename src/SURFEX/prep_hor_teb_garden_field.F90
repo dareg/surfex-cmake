@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, IG, UG, U, USS, &
+SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, UG, U, USS, &
                                        TGDR, TGDO, TGDM, TGDIP, TG, TOP,  &
                                       HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
 !     #################################################################################
@@ -31,7 +31,6 @@ SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, IG, UG, U, USS, &
 !!------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
@@ -41,7 +40,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_TEB_VEG_PARAM_n, ONLY : TEB_VEG_PARAM_t
 USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
 !
-USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
@@ -88,7 +87,6 @@ INCLUDE "mpif.h"
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
@@ -97,7 +95,7 @@ TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TGDR
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGDO
 TYPE(TEB_VEG_PARAM_t), INTENT(INOUT) :: TGDM
 TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: TGDIP
-TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -182,7 +180,7 @@ IF (HSURF=='SN_VEG ') THEN
   ZPATCH=1.
   ZVEGTYPE_PATCH(:,:,1) = TGDM%X%XVEGTYPE(:,:)
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IG, U, &
+                            TG, U, &
                             HPROGRAM,HSURF,                 &
                             YFILE,YFILETYPE,                &
                             YFILEPGD, YFILEPGDTYPE,         &

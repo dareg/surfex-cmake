@@ -133,7 +133,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_OROGRAPHY',0,ZHOOK_HANDLE)
                        HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
  CALL PREP_OUTPUT_GRID(UG, U, &
-                       ILUOUT,UG%CGRID,UG%XGRID_PAR,UG%XLAT,UG%XLON)
+                       ILUOUT,UG%G%CGRID,UG%G%XGRID_PAR,UG%G%XLAT,UG%G%XLON)
 !
 !------------------------------------------------------------------------------
 !
@@ -222,7 +222,7 @@ YRECFM='HO2JM'
 !*      4.     Interpolations
 !              --------------
 !
-IL = SIZE(UG%XLAT)
+IL = SIZE(UG%G%XLAT)
 !
 ALLOCATE(U%XZS        (IL))
 !

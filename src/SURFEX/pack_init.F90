@@ -116,7 +116,7 @@ ILU=0
 !*    2.      Packing of grid
 !             ---------------
 !
- CALL PACK_GRID(IMASK,UG%CGRID,HGRID,UG%XGRID_PAR,PGRID_PAR)
+ CALL PACK_GRID(IMASK,UG%G%CGRID,HGRID,UG%G%XGRID_PAR,PGRID_PAR)
 !
 !-------------------------------------------------------------------------------
 !

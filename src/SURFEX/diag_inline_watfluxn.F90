@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_WATFLUX_n (DGW, W, &
+       SUBROUTINE DIAG_INLINE_WATFLUX_n (DGW, DGWC, W, &
                                           PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,  &
                                            PMERA, PHT, PHW, PCD, PCDN, PCH, PRI, PHU,  &
                                            PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,      &
@@ -37,7 +37,7 @@
 !
 !
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_CSTS,           ONLY : XTT
@@ -60,7 +60,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGWC
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL,               INTENT(IN) :: PTSTEP ! atmospheric time-step                 (s)
@@ -109,7 +110,7 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_WATFLUX_N',0,ZHOOK_HANDLE)
 !
 ! * Mean surface temperature need to couple with AGCM
 !
-DGW%XDIAG_TS(:) = W%XTS(:)
+DGW%XTS(:) = W%XTS(:)
 !
 IF (.NOT. W%LSBL) THEN
 !
@@ -169,7 +170,7 @@ IF (DGW%LSURF_BUDGET.OR.DGW%LSURF_BUDGETC) THEN
 END IF
 !
 IF(DGW%LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_WATER(DGW, &
+  CALL DIAG_SURF_BUDGETC_WATER(DGWC, &
                                PTSTEP, DGW%XRN, DGW%XH, DGW%XLE, DGW%XLEI, DGW%XGFLUX,  &
                                  DGW%XSWD, DGW%XSWU, DGW%XLWD, DGW%XLWU, DGW%XFMU, DGW%XFMV,&
                                  DGW%XEVAP, DGW%XSUBL                       )  

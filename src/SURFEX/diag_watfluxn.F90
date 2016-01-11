@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_WATFLUX_n (DGW, &
+SUBROUTINE DIAG_WATFLUX_n (DGW, DGWC, &
                            HPROGRAM,                                               &
                             PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,    &
                             PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,    &
@@ -36,7 +36,7 @@ SUBROUTINE DIAG_WATFLUX_n (DGW, &
 
 !
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !                                
@@ -49,7 +49,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGWC
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
@@ -127,22 +128,22 @@ IF (DGW%LSURF_BUDGET) THEN
 END IF
 !
 IF (DGW%LSURF_BUDGETC) THEN
-  PRNC      = DGW%XRNC
-  PHC       = DGW%XHC
-  PLEC      = DGW%XLEC
-  PLEIC     = DGW%XLEIC
-  PGFLUXC   = DGW%XGFLUXC
-  PEVAPC    = DGW%XEVAPC
-  PSUBLC    = DGW%XSUBLC  
-  PSWDC     = DGW%XSWDC
-  PSWUC     = DGW%XSWUC
-  PLWDC     = DGW%XLWDC
-  PLWUC     = DGW%XLWUC
-  PFMUC     = DGW%XFMUC
-  PFMVC     = DGW%XFMVC
+  PRNC      = DGWC%XRN
+  PHC       = DGWC%XH
+  PLEC      = DGWC%XLE
+  PLEIC     = DGWC%XLEI
+  PGFLUXC   = DGWC%XGFLUX
+  PEVAPC    = DGWC%XEVAP
+  PSUBLC    = DGWC%XSUBL  
+  PSWDC     = DGWC%XSWD
+  PSWUC     = DGWC%XSWU
+  PLWDC     = DGWC%XLWD
+  PLWUC     = DGWC%XLWU
+  PFMUC     = DGWC%XFMU
+  PFMVC     = DGWC%XFMV
 END IF
 !
-IF (DGW%N2M>=1 .OR. DGW%LSURF_BUDGET .OR. DGW%LSURF_BUDGETC) PTS = DGW%XDIAG_TS
+IF (DGW%N2M>=1 .OR. DGW%LSURF_BUDGET .OR. DGW%LSURF_BUDGETC) PTS = DGW%XTS
 !
 IF (DGW%N2M>=1) THEN
   PRI      = DGW%XRI

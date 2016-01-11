@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_TOWN_n (DGL, DGT, U, &
+SUBROUTINE DIAG_TOWN_n (DGL, DGLC, DGT, U, &
                         HPROGRAM,                                           &
                          PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                          PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
@@ -40,8 +40,7 @@ SUBROUTINE DIAG_TOWN_n (DGL, DGT, U, &
 !
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
-USE MODD_DIAG_TEB_n, ONLY : DIAG_TEB_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -58,8 +57,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_TEB_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_t), INTENT(INOUT) :: DGT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
@@ -166,7 +166,7 @@ IF (U%CTOWN=='TEB   ') THEN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL DIAG_IDEAL_n(DGL, HPROGRAM,                                         &
+  CALL DIAG_IDEAL_n(DGL, DGLC, HPROGRAM,                                         &
                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
                         PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &

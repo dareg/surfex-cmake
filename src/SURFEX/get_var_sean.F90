@@ -36,7 +36,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_SEAFLUX_n, ONLY : DIAG_SEAFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
@@ -52,7 +52,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_SEAFLUX_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGS
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points

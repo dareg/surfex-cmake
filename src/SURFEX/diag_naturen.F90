@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_NATURE_n (DGEI, DGL, DGI, U, &
+SUBROUTINE DIAG_NATURE_n (DGEI, DGEIC, DGL, DGLC, DGI, DGIC, U, &
                           HPROGRAM,                                              &
                            PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,   &
                            PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,   &
@@ -42,8 +42,7 @@ SUBROUTINE DIAG_NATURE_n (DGEI, DGL, DGI, U, &
 !
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
-USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -61,8 +60,11 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIC
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_t), INTENT(INOUT) :: DGIC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
@@ -124,7 +126,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('DIAG_NATURE_N',0,ZHOOK_HANDLE)
 IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0  ' ) THEN
 !        
-  CALL DIAG_ISBA_n(DGEI, DGI, &
+  CALL DIAG_ISBA_n(DGEI, DGEIC, DGI, DGIC, &
                    HPROGRAM,                                              &
                      PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,   &
                      PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,   &
@@ -136,7 +138,7 @@ IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0  ' ) THEN
 !                   
 ELSE IF (U%CNATURE=='FLUX  ') THEN
 !   
-  CALL DIAG_IDEAL_n(DGL, HPROGRAM,                                         &
+  CALL DIAG_IDEAL_n(DGL, DGLC, HPROGRAM,                                         &
                      PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,   &
                      PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,   &
                      PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,      &

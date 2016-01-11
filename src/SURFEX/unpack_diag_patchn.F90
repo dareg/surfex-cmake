@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE UNPACK_DIAG_PATCH_n (DGI, GB, I, PKDI, PKI, &
+SUBROUTINE UNPACK_DIAG_PATCH_n (DGI, DGIP, GB, I, PKD, PK, &
                                 KMASK,KSIZE,KNPATCH,KPATCH,    &
                                  PCPL_DRAIN,PCPL_RUNOFF,      &
                                  PCPL_EFLOOD,PCPL_PFLOOD,     &
@@ -39,11 +39,9 @@ SUBROUTINE UNPACK_DIAG_PATCH_n (DGI, GB, I, PKDI, PKI, &
 !!------------------------------------------------------------------
 !
 !
-!
-!
-!
-!
-USE MODD_DIAG_ISBA_n, ONLY : DIAG_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_INIT
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_INIT
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_PATCH_t, DIAG_INIT
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
@@ -55,11 +53,12 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(DIAG_ISBA_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DGIP
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
 TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKDI
-TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
+TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PK
 !
 INTEGER, INTENT(IN)                :: KSIZE, KPATCH, KNPATCH
 INTEGER, DIMENSION(:), INTENT(IN)  :: KMASK
@@ -80,93 +79,97 @@ IF (LHOOK) CALL DR_HOOK('UNPACK_DIAG_PATCH_N',0,ZHOOK_HANDLE)
 !
 IF (KNPATCH==1) THEN
   !
-  DGI%XTS(:, KPATCH) = PKDI%XP_TS(:)
-  DGI%XTSRAD(:, KPATCH) = PKDI%XP_TSRAD(:)
+  DGIP%AL(KPATCH)%XTS(:) = PKD%DGIP%XTS(:)
+  DGIP%AL(KPATCH)%XTSRAD(:) = PKD%DGIP%XTSRAD(:)
+  DGIP%AL(KPATCH)%XALBT (:) = PKD%DGIP%XALBT (:)  
   IF (DGI%N2M>=1) THEN
-    DGI%XT2M    (:, KPATCH)    = PKDI%XP_T2M    (:)
-    DGI%XQ2M    (:, KPATCH)    = PKDI%XP_Q2M    (:)
-    DGI%XHU2M   (:, KPATCH)    = PKDI%XP_HU2M   (:)
-    DGI%XZON10M (:, KPATCH)    = PKDI%XP_ZON10M (:)
-    DGI%XMER10M (:, KPATCH)    = PKDI%XP_MER10M (:)
-    DGI%XRI     (:, KPATCH)    = PKDI%XP_RI     (:)
+    DGIP%AL(KPATCH)%XT2M    (:)    = PKD%DGIP%XT2M    (:)
+    DGIP%AL(KPATCH)%XQ2M    (:)    = PKD%DGIP%XQ2M    (:)
+    DGIP%AL(KPATCH)%XHU2M   (:)    = PKD%DGIP%XHU2M   (:)
+    DGIP%AL(KPATCH)%XZON10M (:)    = PKD%DGIP%XZON10M (:)
+    DGIP%AL(KPATCH)%XMER10M (:)    = PKD%DGIP%XMER10M (:)
+    DGIP%AL(KPATCH)%XRI     (:)    = PKD%DGIP%XRI     (:)
 !    
-    DGI%XWIND10M(:, KPATCH)  = SQRT(PKDI%XP_ZON10M(:)**2+PKDI%XP_MER10M(:)**2)
+    DGIP%AL(KPATCH)%XWIND10M(:)  = SQRT(PKD%DGIP%XZON10M(:)**2+PKD%DGIP%XMER10M(:)**2)
 !    
   END IF
   !
   IF (DGI%LSURF_BUDGET) THEN
-    DGI%XRN    (:, KPATCH)    = PKDI%XP_RN         (:)
-    DGI%XH     (:, KPATCH)    = PKDI%XP_H          (:)
-    DGI%XGFLUX (:, KPATCH)    = PKDI%XP_GFLUX      (:)
-    DGI%XLEI   (:, KPATCH)    = PKDI%XP_LEI        (:)
-    DGI%XSWD   (:, KPATCH)    = PKDI%XP_SWD        (:)
-    DGI%XSWU   (:, KPATCH)    = PKDI%XP_SWU        (:)
-    DGI%XLWD   (:, KPATCH)    = PKDI%XP_LWD        (:)
-    DGI%XLWU   (:, KPATCH)    = PKDI%XP_LWU        (:)
-    DGI%XFMU   (:, KPATCH)    = PKDI%XP_FMU        (:)
-    DGI%XFMV   (:, KPATCH)    = PKDI%XP_FMV        (:)
+    DGIP%AL(KPATCH)%XRN    (:)    = PKD%DGIP%XRN         (:)
+    DGIP%AL(KPATCH)%XH     (:)    = PKD%DGIP%XH          (:)
+    DGIP%AL(KPATCH)%XGFLUX (:)    = PKD%DGIP%XGFLUX      (:)
+    DGIP%AL(KPATCH)%XLEI   (:)    = PKD%DGIP%XLEI        (:)
+    DGIP%AL(KPATCH)%XEVAP  (:)    = PKD%DGIP%XEVAP       (:)
+    DGIP%AL(KPATCH)%XSUBL  (:)    = PKD%DGIP%XSUBL       (:)    
+    DGIP%AL(KPATCH)%XSWD   (:)    = PKD%DGIP%XSWD        (:)
+    DGIP%AL(KPATCH)%XSWU   (:)    = PKD%DGIP%XSWU        (:)
+    DGIP%AL(KPATCH)%XLWD   (:)    = PKD%DGIP%XLWD        (:)
+    DGIP%AL(KPATCH)%XLWU   (:)    = PKD%DGIP%XLWU        (:)
+    DGIP%AL(KPATCH)%XFMU   (:)    = PKD%DGIP%XFMU        (:)
+    DGIP%AL(KPATCH)%XFMV   (:)    = PKD%DGIP%XFMV        (:)
     !
-    DGI%XSWBD   (:, :, KPATCH) = PKDI%XP_SWBD  (:,:)
-    DGI%XSWBU   (:, :, KPATCH) = PKDI%XP_SWBU  (:,:)
+    DGIP%AL(KPATCH)%XSWBD   (:, :) = PKD%DGIP%XSWBD  (:,:)
+    DGIP%AL(KPATCH)%XSWBU   (:, :) = PKD%DGIP%XSWBU  (:,:)
     !
   END IF
   !
   IF (DGI%LCOEF) THEN
-    DGI%XCD            (:, KPATCH)    = PKDI%XP_CD             (:)
-    DGI%XCH            (:, KPATCH)    = PKDI%XP_CH             (:)
-    DGI%XCE            (:, KPATCH)    = PKDI%XP_CE             (:)
-    DGI%XZ0_WITH_SNOW  (:, KPATCH)    = PKDI%XP_Z0_WITH_SNOW   (:)
-    DGI%XZ0H_WITH_SNOW (:, KPATCH)    = PKDI%XP_Z0H_WITH_SNOW  (:)
-    DGI%XZ0EFF         (:, KPATCH)    = PKDI%XP_Z0EFF          (:)
+    DGIP%AL(KPATCH)%XCD            (:)    = PKD%DGIP%XCD             (:)
+    DGIP%AL(KPATCH)%XCH            (:)    = PKD%DGIP%XCH             (:)
+    DGIP%AL(KPATCH)%XCE            (:)    = PKD%DGIP%XCE             (:)
+    DGIP%AL(KPATCH)%XZ0  (:)    = PKD%DGIP%XZ0   (:)
+    DGIP%AL(KPATCH)%XZ0H (:)    = PKD%DGIP%XZ0H  (:)
+    DGIP%AL(KPATCH)%XZ0EFF         (:)    = PKD%DGIP%XZ0EFF          (:)
   END IF
   !
   IF (DGI%LSURF_VARS) THEN
-    DGI%XQS            (:, KPATCH)    = PKDI%XP_QS             (:)
+    DGIP%AL(KPATCH)%XQS            (:)    = PKD%DGIP%XQS             (:)
   END IF
   !
   IF (I%O%LCPL_RRM) THEN
-    PCPL_DRAIN     (:, KPATCH)    = PKDI%XP_DRAIN         (:)
-    PCPL_RUNOFF    (:, KPATCH)    = PKDI%XP_RUNOFF        (:)
+    PCPL_DRAIN     (:,KPATCH)    = PKD%DGEIP%XDRAIN         (:)
+    PCPL_RUNOFF    (:,KPATCH)    = PKD%DGEIP%XRUNOFF        (:)
   END IF
   !
   IF (I%O%LFLOOD) THEN
-    PCPL_EFLOOD    (:, KPATCH)    = PKDI%XP_LE_FLOOD (:) / PKI%XP_LVTT(:) &
-                                  + PKDI%XP_LEI_FLOOD(:) / PKI%XP_LSTT(:)
-    PCPL_PFLOOD    (:, KPATCH)    = PKDI%XP_PFLOOD                (:)
-    PCPL_IFLOOD    (:, KPATCH)    = PKDI%XP_IFLOOD                (:)
+    PCPL_EFLOOD    (:,KPATCH)    = PKD%DGEIP%XLE_FLOOD (:) / PK%I%IP%XPLVTT(:,1) &
+                                  + PKD%DGEIP%XLEI_FLOOD(:) / PK%I%IP%XPLSTT(:,1)
+    PCPL_PFLOOD    (:,KPATCH)    = PKD%DGEIP%XPFLOOD                (:)
+    PCPL_IFLOOD    (:,KPATCH)    = PKD%DGEIP%XIFLOOD                (:)
   END IF    
   !
   IF(I%O%LCPL_RRM.AND.I%O%LGLACIER)THEN
-    PCPL_ICEFLUX   (:, KPATCH)    = PKDI%XP_ICEFLUX       (:)
+    PCPL_ICEFLUX   (:,KPATCH)    = PKD%DGEIP%XICEFLUX       (:)
   ENDIF
   !
   IF(I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO')THEN
-    I%R%TSNOW%TEMP(:,:,KPATCH) = PKDI%XP_SNOWTEMP(:,:)
-    I%R%TSNOW%TS  (:,KPATCH)   = PKDI%XP_SNOWTEMP(:,1)
+    I%R%TSNOW%TEMP(:,:,KPATCH) = PKD%DGMI%XSNOWTEMP(:,:)
+    I%R%TSNOW%TS  (:,KPATCH)   = PKD%DGMI%XSNOWTEMP(:,1)
   ENDIF
   !
   IF (I%O%CPHOTO/='NON') THEN
-    GB%XIACAN(:,:,KPATCH) = PKDI%XP_IACAN(:,:)
+    GB%XIACAN(:,:,KPATCH) = PKD%GB%XIACAN(:,:,1)
   ENDIF
   !
 ELSE
   !
   DO JJ=1,KSIZE
      JI                      = KMASK     (JJ)
-     DGI%XTS    (JI, KPATCH)     = PKDI%XP_TS    (JJ)  
-     DGI%XTSRAD (JI, KPATCH)     = PKDI%XP_TSRAD    (JJ)  
+     DGIP%AL(KPATCH)%XALBT    (JI)  =  PKD%DGIP%XALBT     (JJ)
+     DGIP%AL(KPATCH)%XTS    (JI)     = PKD%DGIP%XTS    (JJ)  
+     DGIP%AL(KPATCH)%XTSRAD (JI)     = PKD%DGIP%XTSRAD    (JJ)  
   END DO
   IF (DGI%N2M>=1) THEN
     DO JJ=1,KSIZE
       JI                      = KMASK     (JJ)
-      DGI%XT2M    (JI, KPATCH)    = PKDI%XP_T2M    (JJ)
-      DGI%XQ2M    (JI, KPATCH)    = PKDI%XP_Q2M    (JJ)
-      DGI%XHU2M   (JI, KPATCH)    = PKDI%XP_HU2M   (JJ)
-      DGI%XZON10M (JI, KPATCH)    = PKDI%XP_ZON10M (JJ)
-      DGI%XMER10M (JI, KPATCH)    = PKDI%XP_MER10M (JJ)
-      DGI%XRI     (JI, KPATCH)    = PKDI%XP_RI     (JJ)
+      DGIP%AL(KPATCH)%XT2M    (JI)    = PKD%DGIP%XT2M    (JJ)
+      DGIP%AL(KPATCH)%XQ2M    (JI)    = PKD%DGIP%XQ2M    (JJ)
+      DGIP%AL(KPATCH)%XHU2M   (JI)    = PKD%DGIP%XHU2M   (JJ)
+      DGIP%AL(KPATCH)%XZON10M (JI)    = PKD%DGIP%XZON10M (JJ)
+      DGIP%AL(KPATCH)%XMER10M (JI)    = PKD%DGIP%XMER10M (JJ)
+      DGIP%AL(KPATCH)%XRI     (JI)    = PKD%DGIP%XRI     (JJ)
       !     
-      DGI%XWIND10M(JI, KPATCH)  = SQRT(PKDI%XP_ZON10M(JJ)**2+PKDI%XP_MER10M(JJ)**2)
+      DGIP%AL(KPATCH)%XWIND10M(JI)  = SQRT(PKD%DGIP%XZON10M(JJ)**2+PKD%DGIP%XMER10M(JJ)**2)
       !      
     END DO
   END IF
@@ -174,20 +177,22 @@ ELSE
   IF (DGI%LSURF_BUDGET) THEN
     DO JJ=1,KSIZE
       JI                     = KMASK         (JJ)
-      DGI%XRN    (JI, KPATCH)    = PKDI%XP_RN         (JJ)
-      DGI%XH     (JI, KPATCH)    = PKDI%XP_H          (JJ)
-      DGI%XGFLUX (JI, KPATCH)    = PKDI%XP_GFLUX      (JJ)
-      DGI%XLEI   (JI, KPATCH)    = PKDI%XP_LEI        (JJ)
-      DGI%XSWD   (JI, KPATCH)    = PKDI%XP_SWD        (JJ)
-      DGI%XSWU   (JI, KPATCH)    = PKDI%XP_SWU        (JJ)
-      DGI%XLWD   (JI, KPATCH)    = PKDI%XP_LWD        (JJ)
-      DGI%XLWU   (JI, KPATCH)    = PKDI%XP_LWU        (JJ)
-      DGI%XFMU   (JI, KPATCH)    = PKDI%XP_FMU        (JJ)
-      DGI%XFMV   (JI, KPATCH)    = PKDI%XP_FMV        (JJ)
+      DGIP%AL(KPATCH)%XRN    (JI)    = PKD%DGIP%XRN         (JJ)
+      DGIP%AL(KPATCH)%XH     (JI)    = PKD%DGIP%XH          (JJ)
+      DGIP%AL(KPATCH)%XGFLUX (JI)    = PKD%DGIP%XGFLUX      (JJ)
+      DGIP%AL(KPATCH)%XLEI   (JI)    = PKD%DGIP%XLEI        (JJ)
+      DGIP%AL(KPATCH)%XEVAP      (JI)  =  PKD%DGIP%XEVAP       (JJ)
+      DGIP%AL(KPATCH)%XSUBL      (JI)  =  PKD%DGIP%XSUBL       (JJ)      
+      DGIP%AL(KPATCH)%XSWD   (JI)    = PKD%DGIP%XSWD        (JJ)
+      DGIP%AL(KPATCH)%XSWU   (JI)    = PKD%DGIP%XSWU        (JJ)
+      DGIP%AL(KPATCH)%XLWD   (JI)    = PKD%DGIP%XLWD        (JJ)
+      DGIP%AL(KPATCH)%XLWU   (JI)    = PKD%DGIP%XLWU        (JJ)
+      DGIP%AL(KPATCH)%XFMU   (JI)    = PKD%DGIP%XFMU        (JJ)
+      DGIP%AL(KPATCH)%XFMV   (JI)    = PKD%DGIP%XFMV        (JJ)
       !
-      DO JSW=1,SIZE(DGI%XSWBD,2)
-        DGI%XSWBD   (JI, JSW, KPATCH) = PKDI%XP_SWBD  (JJ,JSW)
-        DGI%XSWBU   (JI, JSW, KPATCH) = PKDI%XP_SWBU  (JJ,JSW)
+      DO JSW=1,SIZE(DGIP%AL(KPATCH)%XSWBD,2)
+        DGIP%AL(KPATCH)%XSWBD   (JI, JSW) = PKD%DGIP%XSWBD  (JJ,JSW)
+        DGIP%AL(KPATCH)%XSWBU   (JI, JSW) = PKD%DGIP%XSWBU  (JJ,JSW)
       END DO
       !
     END DO
@@ -196,53 +201,53 @@ ELSE
   IF (DGI%LCOEF) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
-      DGI%XCD              (JI, KPATCH)    = PKDI%XP_CD             (JJ)
-      DGI%XCH              (JI, KPATCH)    = PKDI%XP_CH             (JJ)
-      DGI%XCE              (JI, KPATCH)    = PKDI%XP_CE             (JJ)
-      DGI%XZ0_WITH_SNOW    (JI, KPATCH)    = PKDI%XP_Z0_WITH_SNOW   (JJ)
-      DGI%XZ0H_WITH_SNOW   (JI, KPATCH)    = PKDI%XP_Z0H_WITH_SNOW  (JJ)
-      DGI%XZ0EFF           (JI, KPATCH)    = PKDI%XP_Z0EFF          (JJ)
+      DGIP%AL(KPATCH)%XCD              (JI)    = PKD%DGIP%XCD             (JJ)
+      DGIP%AL(KPATCH)%XCH              (JI)    = PKD%DGIP%XCH             (JJ)
+      DGIP%AL(KPATCH)%XCE              (JI)    = PKD%DGIP%XCE             (JJ)
+      DGIP%AL(KPATCH)%XZ0    (JI)    = PKD%DGIP%XZ0   (JJ)
+      DGIP%AL(KPATCH)%XZ0H   (JI)    = PKD%DGIP%XZ0H  (JJ)
+      DGIP%AL(KPATCH)%XZ0EFF           (JI)    = PKD%DGIP%XZ0EFF          (JJ)
     END DO
   END IF
   !
   IF (DGI%LSURF_VARS) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
-      DGI%XQS              (JI, KPATCH)    = PKDI%XP_QS             (JJ)
+      DGIP%AL(KPATCH)%XQS              (JI)    = PKD%DGIP%XQS             (JJ)
     END DO
   END IF
   !
   IF (I%O%LCPL_RRM) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
-      PCPL_DRAIN       (JI, KPATCH)    = PKDI%XP_DRAIN          (JJ)
-      PCPL_RUNOFF      (JI, KPATCH)    = PKDI%XP_RUNOFF         (JJ)
+      PCPL_DRAIN       (JI,KPATCH)    = PKD%DGEIP%XDRAIN          (JJ)
+      PCPL_RUNOFF      (JI,KPATCH)    = PKD%DGEIP%XRUNOFF         (JJ)
     END DO
   END IF
   !
   IF (I%O%LFLOOD) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK                     (JJ)
-      PCPL_EFLOOD      (JI, KPATCH)    = PKDI%XP_LE_FLOOD (JJ) / PKI%XP_LVTT(JJ) &
-                                       + PKDI%XP_LEI_FLOOD(JJ) / PKI%XP_LSTT(JJ)
-      PCPL_PFLOOD      (JI, KPATCH)    = PKDI%XP_PFLOOD                 (JJ)
-      PCPL_IFLOOD      (JI, KPATCH)    = PKDI%XP_IFLOOD                 (JJ)
+      PCPL_EFLOOD      (JI,KPATCH)    = PKD%DGEIP%XLE_FLOOD (JJ) / PK%I%IP%XPLVTT(JJ,1) &
+                                       + PKD%DGEIP%XLEI_FLOOD(JJ) / PK%I%IP%XPLSTT(JJ,1)
+      PCPL_PFLOOD      (JI,KPATCH)    = PKD%DGEIP%XPFLOOD                 (JJ)
+      PCPL_IFLOOD      (JI,KPATCH)    = PKD%DGEIP%XIFLOOD                 (JJ)
     END DO
   END IF
   !
   IF(I%O%LGLACIER)THEN
     DO JJ=1,KSIZE
       JI                              = KMASK             (JJ)
-      PCPL_ICEFLUX    (JI, KPATCH)    = PKDI%XP_ICEFLUX        (JJ)
+      PCPL_ICEFLUX    (JI,KPATCH)    = PKD%DGEIP%XICEFLUX        (JJ)
     END DO          
   ENDIF
   !
   IF(I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO')THEN
     DO JJ=1,KSIZE
       JI                       = KMASK             (JJ)
-      I%R%TSNOW%TS    (JI,KPATCH)  = PKDI%XP_SNOWTEMP(JJ,1)
+      I%R%TSNOW%TS    (JI,KPATCH)  = PKD%DGMI%XSNOWTEMP(JJ,1)
       DO JSW=1,SIZE(I%R%TSNOW%TEMP,2)
-        I%R%TSNOW%TEMP(JI,JSW,KPATCH)  = PKDI%XP_SNOWTEMP(JJ,JSW)
+        I%R%TSNOW%TEMP(JI,JSW,KPATCH)  = PKD%DGMI%XSNOWTEMP(JJ,JSW)
       ENDDO
     ENDDO          
   ENDIF
@@ -251,7 +256,7 @@ ELSE
     DO JJ=1,KSIZE
       JI                  = KMASK   (JJ)
       DO JSW=1,SIZE(GB%XIACAN,2)
-         GB%XIACAN(JI,JSW,KPATCH) = PKDI%XP_IACAN(JJ,JSW)
+         GB%XIACAN(JI,JSW,KPATCH) = PKD%GB%XIACAN(JJ,JSW,1)
       ENDDO
     ENDDO
   ENDIF
@@ -260,173 +265,184 @@ ENDIF
 !
 !------------------------------------------------------------------------
 !
-PKDI%XP_CH           => NULL()
-PKDI%XP_CE           => NULL()
-PKDI%XP_CD           => NULL()
-PKDI%XP_CDN          => NULL()
-PKDI%XP_RI           => NULL()
-PKDI%XP_HU           => NULL()
-PKDI%XP_HUG          => NULL()
-PKDI%XP_ALBT         => NULL()
-PKDI%XP_RN           => NULL()
-PKDI%XP_H            => NULL()
-PKDI%XP_LEI          => NULL()
-PKDI%XP_LEG          => NULL()
-PKDI%XP_LEGI         => NULL()
-PKDI%XP_LEV          => NULL()
-PKDI%XP_LES          => NULL()
-PKDI%XP_LER          => NULL()
-PKDI%XP_LETR         => NULL()
-PKDI%XP_GFLUX        => NULL()
-PKDI%XP_EVAP         => NULL()
-PKDI%XP_SUBL         => NULL()
-PKDI%XP_RESTORE      => NULL()
-PKDI%XP_DRAIN        => NULL()
-PKDI%XP_QSB          => NULL()
-PKDI%XP_RUNOFF       => NULL()
-PKDI%XP_MELT         => NULL()
-PKDI%XP_MELTADV      => NULL()
-PKDI%XP_SRSFC        => NULL()
-PKDI%XP_RRSFC        => NULL()
-PKDI%XP_SNOWFREE_ALB => NULL()
+CALL DIAG_INIT(PKD%DGI)
+CALL DIAG_INIT(PKD%DGIP)
+CALL DIAG_MISC_ISBA_INIT(PKD%DGMI)
+CALL DIAG_EVAP_ISBA_INIT(PKD%DGEI)
+CALL DIAG_EVAP_ISBA_INIT(PKD%DGEIP)
 !
-PKDI%XP_HORT         => NULL()
-PKDI%XP_DRIP         => NULL()
-PKDI%XP_RRVEG        => NULL()
-PKDI%XP_IRRIG_FLUX   => NULL()
+!PKD%DGIP%XCH           => NULL()
+!PKD%DGIP%XCE           => NULL()
+!PKD%DGIP%XCD           => NULL()
+!PKD%DGIP%XCDN          => NULL()
+!PKD%DGIP%XRI           => NULL()
+!PKD%DGIP%XHU           => NULL()
+!PKD%DGIP%XHUG          => NULL()
+!PKD%DGIP%XALBT         => NULL()
+!!
+!PKD%DGIP%XRN           => NULL()
+!PKD%DGIP%XH            => NULL()
+!PKD%DGIP%XLEI          => NULL()
+!PKD%DGIP%XGFLUX        => NULL()
+!!
+!PKD%DGEIP%XLEG          => NULL()
+!PKD%DGEIP%XLEGI         => NULL()
+!PKD%DGEIP%XLEV          => NULL()
+!PKD%DGEIP%XLES          => NULL()
+!PKD%DGEIP%XLER          => NULL()
+!PKD%DGEIP%XLETR         => NULL()
+!PKD%DGIP%XEVAP         => NULL()
+!PKD%DGIP%XSUBL         => NULL()
+!PKD%DGEIP%XRESTORE      => NULL()
+!PKD%DGEIP%XDRAIN        => NULL()
+!PKD%DGEIP%XQSB          => NULL()
+!PKD%DGEIP%XRUNOFF       => NULL()
+!PKD%DGEIP%XMELT         => NULL()
+!PKD%DGEIP%XMELTADV      => NULL()
+!PKD%DGMI%XSRSFC        => NULL()
+!PKD%DGMI%XRRSFC        => NULL()
+!PK%I%R%XSNOWFREE_ALB => NULL()
+!!
+!PKD%DGEIP%XHORT         => NULL()
+!PKD%DGEIP%XDRIP         => NULL()
+!PKD%DGEIP%XRRVEG        => NULL()
+!PKD%DGEIP%XIRRIG_FLUX   => NULL()
+!!
+!PKD%DGIP%XSWBD         => NULL()
+!PKD%DGIP%XSWBU         => NULL()
+!!
+!PKD%DGIP%XSWD          => NULL()
+!PKD%DGIP%XSWU          => NULL()
+!PKD%DGIP%XLWD          => NULL()
+!PKD%DGIP%XLWU          => NULL()
+!PKD%DGIP%XFMU          => NULL()
+!PKD%DGIP%XFMV          => NULL()
+!!
+!PKD%DGIP%XZ0 => NULL()
+!PKD%DGIP%XZ0H => NULL()
+!PKD%DGIP%XZ0EFF        => NULL()
+!!
+!PKD%DGMI%XCG           => NULL()
+!PKD%DGMI%XC1           => NULL()
+!PKD%DGMI%XC2           => NULL()
+!PKD%DGMI%XWGEQ         => NULL()
+!PKD%DGMI%XCT           => NULL()
+!PKD%DGMI%XRS           => NULL()
+!PKD%DGIP%XHV           => NULL()
+!PKD%DGIP%XQS           => NULL()
+!!
+!PKD%DGIP%XTS           => NULL()
+!PKD%DGIP%XTSRAD        => NULL()
+!!
+!PKD%DGEIP%XRESP_AUTO    => NULL()
+!PKD%DGEIP%XRESP_ECO     => NULL()
+!PKD%DGEIP%XGPP          => NULL()
+!PKD%DGMI%XFAPAR        => NULL()
+!PKD%DGMI%XFAPIR        => NULL()
+!PKD%DGMI%XFAPAR_BS     => NULL()
+!PKD%DGMI%XFAPIR_BS     => NULL()
+!!
+!PKD%DGEIP%XIFLOOD       => NULL()
+!PKD%DGEIP%XPFLOOD       => NULL()
+!PKD%DGEIP%XLE_FLOOD     => NULL()
+!PKD%DGEIP%XLEI_FLOOD    => NULL()
+!!
+!PKD%DGMI%XRNSNOW       => NULL()
+!PKD%DGMI%XHSNOW        => NULL()
+!PKD%DGMI%XHPSNOW       => NULL()
+!PKD%DGMI%XGFLUXSNOW    => NULL()
+!PKD%DGMI%XUSTARSNOW    => NULL()
+!PKD%DGMI%XGRNDFLUX     => NULL()
+!PKD%DGEIP%XLESL         => NULL()
+!PKD%DGEIP%XSNDRIFT      => NULL()
+!PKD%DGMI%XCDSNOW       => NULL()
+!PKD%DGMI%XCHSNOW       => NULL()
+!PKD%DGMI%XSNOWHMASS    => NULL()
 !
-PKDI%XP_SWBD         => NULL()
-PKDI%XP_SWBU         => NULL()
+!PKD%DGI%XRN      => NULL()
+!PKD%DGI%XH       => NULL()
+!PKD%DGI%XLE      => NULL()
+!PKD%DGI%XLEI     => NULL()
+!PKD%DGI%XGFLUX   => NULL()
+!!
+!PKD%DGEI%XLEG     => NULL()
+!PKD%DGEI%XLEGI    => NULL()
+!PKD%DGEI%XLEV     => NULL()
+!PKD%DGEI%XLETR    => NULL()
+!PKD%DGEI%XUSTAR   => NULL()
+!PKD%DGEI%XLER     => NULL()
 !
-PKDI%XP_SWD          => NULL()
-PKDI%XP_SWU          => NULL()
-PKDI%XP_LWD          => NULL()
-PKDI%XP_LWU          => NULL()
-PKDI%XP_FMU          => NULL()
-PKDI%XP_FMV          => NULL()
-!
-PKDI%XP_Z0_WITH_SNOW => NULL()
-PKDI%XP_Z0H_WITH_SNOW=> NULL()
-PKDI%XP_Z0EFF        => NULL()
-!
-PKDI%XP_CG           => NULL()
-PKDI%XP_C1           => NULL()
-PKDI%XP_C2           => NULL()
-PKDI%XP_WGEQ         => NULL()
-PKDI%XP_CT           => NULL()
-PKDI%XP_RS           => NULL()
-PKDI%XP_HV           => NULL()
-PKDI%XP_QS           => NULL()
-!
-PKDI%XP_TS           => NULL()
-PKDI%XP_TSRAD        => NULL()
-!
-PKDI%XP_RESP_AUTO    => NULL()
-PKDI%XP_RESP_ECO     => NULL()
-PKDI%XP_GPP          => NULL()
-PKDI%XP_FAPAR        => NULL()
-PKDI%XP_FAPIR        => NULL()
-PKDI%XP_FAPAR_BS     => NULL()
-PKDI%XP_FAPIR_BS     => NULL()
-!
-PKDI%XP_IFLOOD       => NULL()
-PKDI%XP_PFLOOD       => NULL()
-PKDI%XP_LE_FLOOD     => NULL()
-PKDI%XP_LEI_FLOOD    => NULL()
-!
-PKDI%XP_RNSNOW       => NULL()
-PKDI%XP_HSNOW        => NULL()
-PKDI%XP_HPSNOW       => NULL()
-PKDI%XP_GFLUXSNOW    => NULL()
-PKDI%XP_USTARSNOW    => NULL()
-PKDI%XP_GRNDFLUX     => NULL()
-PKDI%XP_LESL         => NULL()
-PKDI%XP_SNDRIFT      => NULL()
-PKDI%XP_CDSNOW       => NULL()
-PKDI%XP_CHSNOW       => NULL()
-PKDI%XP_SNOWHMASS    => NULL()
-PKDI%XP_RN_ISBA      => NULL()
-PKDI%XP_H_ISBA       => NULL()
-PKDI%XP_LEG_ISBA     => NULL()
-PKDI%XP_LEGI_ISBA    => NULL()
-PKDI%XP_LEV_ISBA     => NULL()
-PKDI%XP_LETR_ISBA    => NULL()
-PKDI%XP_USTAR_ISBA   => NULL()
-PKDI%XP_LER_ISBA     => NULL()
-PKDI%XP_LE_ISBA      => NULL()
-PKDI%XP_LEI_ISBA     => NULL()
-PKDI%XP_GFLUX_ISBA   => NULL()
-PKDI%XP_SNOWLIQ      => NULL()
-PKDI%XP_SNOWDZ       => NULL()
-!
-PKDI%XP_SNOWTEMP     => NULL()
-!
-PKDI%XP_SNOWFREE_ALB_VEG=> NULL()
-PKDI%XP_SNOWFREE_ALB_SOIL=> NULL()
-!
-PKDI%XP_IACAN        => NULL()
-!
-PKDI%XP_T2M          => NULL()
-PKDI%XP_Q2M          => NULL()
-PKDI%XP_HU2M         => NULL()
-PKDI%XP_ZON10M       => NULL()
-PKDI%XP_MER10M       => NULL()
-!
-PKDI%XP_SWI          => NULL()
-PKDI%XP_TSWI         => NULL()
-PKDI%XP_TWSNOW       => NULL()
-PKDI%XP_TDSNOW       => NULL()
-!
-PKDI%XP_ICEFLUX      => NULL()
-!
-PKDI%XP_DWG          => NULL()
-PKDI%XP_DWGI         => NULL()
-PKDI%XP_DSWE         => NULL()
-PKDI%XP_WATBUD       => NULL()
-!
-PKDI%XP_SWUP       => NULL()
-! MEB stuff
-PKDI%XP_SWNET_V       => NULL()
-PKDI%XP_SWNET_G       => NULL()
-PKDI%XP_SWNET_N       => NULL()
-PKDI%XP_SWNET_NS       => NULL()
-PKDI%XP_LWUP       => NULL()
-PKDI%XP_LWNET_V       => NULL()
-PKDI%XP_LWNET_G       => NULL()
-PKDI%XP_LWNET_N       => NULL()
-PKDI%XP_LEVCV       => NULL()
-PKDI%XP_LESC       => NULL()
-PKDI%XP_H_V_C       => NULL()
-PKDI%XP_H_G_C       => NULL()
-PKDI%XP_LETRGV       => NULL()
-PKDI%XP_LETRCV       => NULL()
-PKDI%XP_LERGV       => NULL()
-PKDI%XP_LELITTER     => NULL()
-PKDI%XP_LELITTERI    => NULL()
-PKDI%XP_DRIPLIT      => NULL()
-PKDI%XP_RRLIT       => NULL()
-PKDI%XP_LERCV       => NULL()
-PKDI%XP_H_C_A       => NULL()
-PKDI%XP_H_N_C       => NULL()
-PKDI%XP_LE_C_A       => NULL()
-PKDI%XP_LE_V_C       => NULL()
-PKDI%XP_LE_G_C       => NULL()
-PKDI%XP_LE_N_C       => NULL()
-PKDI%XP_EVAP_N_C       => NULL()
-PKDI%XP_EVAP_G_C       => NULL()
-PKDI%XP_SR_GN       => NULL()
-PKDI%XP_MELTCV       => NULL()
-PKDI%XP_FRZCV       => NULL()
-PKDI%XP_SWDOWN_GN       => NULL()
-PKDI%XP_LWDOWN_GN       => NULL()
-!
-DEALLOCATE(PKDI%XBLOCK_SIMPLE)
-DEALLOCATE(PKDI%XBLOCK_GROUND)
-DEALLOCATE(PKDI%XBLOCK_SNOW)
-DEALLOCATE(PKDI%XBLOCK_KSW)
-DEALLOCATE(PKDI%XBLOCK_ABC)
-DEALLOCATE(PKDI%XBLOCK_0)
-DEALLOCATE(PKDI%XBLOCK_00)
+!PKD%DGMI%XSNOWLIQ      => NULL()
+!PKD%DGMI%XSNOWDZ       => NULL()
+!!
+!PKD%DGMI%XSNOWTEMP     => NULL()
+!!
+!PK%I%R%XSNOWFREE_ALB_VEG=> NULL()
+!PK%I%R%XSNOWFREE_ALB_SOIL=> NULL()
+!!
+!PKD%GB%XIACAN        => NULL()
+!!
+!PKD%DGIP%XT2M          => NULL()
+!PKD%DGIP%XQ2M          => NULL()
+!PKD%DGIP%XHU2M         => NULL()
+!PKD%DGIP%XZON10M       => NULL()
+!PKD%DGIP%XMER10M       => NULL()
+!!
+!PKD%DGMI%XSWI          => NULL()
+!PKD%DGMI%XTSWI         => NULL()
+!PKD%DGMI%XTWSNOW       => NULL()
+!PKD%DGMI%XTDSNOW       => NULL()
+!!
+!PKD%DGEIP%XICEFLUX      => NULL()
+!!
+!PKD%DGEIP%XDWG          => NULL()
+!PKD%DGEIP%XDWGI         => NULL()
+!PKD%DGEIP%XDSWE         => NULL()
+!PKD%DGEIP%XWATBUD       => NULL()
+!!
+!PKD%DGEIP%XSWUP       => NULL()
+!! MEB stuff
+!PKD%DGEIP%XSWNET_V       => NULL()
+!PKD%DGEIP%XSWNET_G       => NULL()
+!PKD%DGEIP%XSWNET_N       => NULL()
+!PKD%DGEIP%XSWNET_NS       => NULL()
+!PKD%DGEIP%XLWUP       => NULL()
+!PKD%DGEIP%XLWNET_V       => NULL()
+!PKD%DGEIP%XLWNET_G       => NULL()
+!PKD%DGEIP%XLWNET_N       => NULL()
+!PKD%DGEIP%XLEVCV       => NULL()
+!PKD%DGEIP%XLESC       => NULL()
+!PKD%DGEIP%XH_V_C       => NULL()
+!PKD%DGEIP%XH_G_C       => NULL()
+!PKD%DGEIP%XLETRGV       => NULL()
+!PKD%DGEIP%XLETRCV       => NULL()
+!PKD%DGEIP%XLERGV       => NULL()
+!PKD%DGEIP%XLELITTER     => NULL()
+!PKD%DGEIP%XLELITTERI    => NULL()
+!PKD%DGEIP%XDRIPLIT      => NULL()
+!PKD%DGEIP%XRRLIT       => NULL()
+!PKD%DGEIP%XLERCV       => NULL()
+!PKD%DGEIP%XH_C_A       => NULL()
+!PKD%DGEIP%XH_N_C       => NULL()
+!PKD%DGEIP%XLE_C_A       => NULL()
+!PKD%DGEIP%XLE_V_C       => NULL()
+!PKD%DGEIP%XLE_G_C       => NULL()
+!PKD%DGEIP%XLE_N_C       => NULL()
+!PKD%DGEIP%XEVAP_N_C       => NULL()
+!PKD%DGEIP%XEVAP_G_C       => NULL()
+!PKD%DGEIP%XSR_GN       => NULL()
+!PKD%DGEIP%XMELTCV       => NULL()
+!PKD%DGEIP%XFRZCV       => NULL()
+!PKD%DGEIP%XSWDOWN_GN       => NULL()
+!PKD%DGEIP%XLWDOWN_GN       => NULL()
+!!
+DEALLOCATE(PKD%XBLOCK_SIMPLE)
+DEALLOCATE(PKD%XBLOCK_GROUND)
+DEALLOCATE(PKD%XBLOCK_SNOW)
+DEALLOCATE(PKD%XBLOCK_KSW)
+DEALLOCATE(PKD%XBLOCK_ABC)
+DEALLOCATE(PKD%XBLOCK_0)
+DEALLOCATE(PKD%XBLOCK_00)
 !
 IF (LHOOK) CALL DR_HOOK('UNPACK_DIAG_PATCH_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------

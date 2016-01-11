@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_FLAKE (DGF, &
+       SUBROUTINE DIAG_SURF_BUDGETC_FLAKE (DGFC, &
                                            PTSTEP, PRN, PH, PLE, PLEI, PGFLUX, &
                                             PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,&  
                                             PEVAP, PSUBL                       )  
@@ -29,7 +29,7 @@
 !
 !
 !
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,7 +39,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGFC
 !
 REAL,               INTENT(IN) :: PTSTEP    
 REAL, DIMENSION(:), INTENT(IN) :: PRN      ! net radiation                         (W/m2)
@@ -64,40 +64,40 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* total incoming and outgoing SW
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_FLAKE',0,ZHOOK_HANDLE)
-DGF%XSWDC(:) = DGF%XSWDC(:) + PSWD(:) * PTSTEP
-DGF%XSWUC(:) = DGF%XSWUC(:) + PSWU(:) * PTSTEP
+DGFC%XSWD(:) = DGFC%XSWD(:) + PSWD(:) * PTSTEP
+DGFC%XSWU(:) = DGFC%XSWU(:) + PSWU(:) * PTSTEP
 !
 !*incoming outgoing LW
 !
-DGF%XLWDC(:) = DGF%XLWDC(:) + PLWD(:) * PTSTEP
-DGF%XLWUC(:) = DGF%XLWUC(:) + PLWU(:) * PTSTEP
+DGFC%XLWD(:) = DGFC%XLWD(:) + PLWD(:) * PTSTEP
+DGFC%XLWU(:) = DGFC%XLWU(:) + PLWU(:) * PTSTEP
 !
 !* net radiation
 !
-DGF%XRNC(:) = DGF%XRNC(:) + PRN(:) * PTSTEP
+DGFC%XRN(:) = DGFC%XRN(:) + PRN(:) * PTSTEP
 !
 !* sensible heat flux
 !
-DGF%XHC(:) = DGF%XHC(:) + PH(:) * PTSTEP 
+DGFC%XH(:) = DGFC%XH(:) + PH(:) * PTSTEP 
 !
 !* latent heat flux
 !
-DGF%XLEC (:) = DGF%XLEC (:) + PLE (:) * PTSTEP 
-DGF%XLEIC(:) = DGF%XLEIC(:) + PLEI(:) * PTSTEP 
+DGFC%XLE(:) = DGFC%XLE(:) + PLE (:) * PTSTEP 
+DGFC%XLEI(:) = DGFC%XLEI(:) + PLEI(:) * PTSTEP 
 !
 !* evaporation and sublimation (kg/m2)
 !
-DGF%XEVAPC(:) = DGF%XEVAPC(:) + PEVAP(:) * PTSTEP
-DGF%XSUBLC(:) = DGF%XSUBLC(:) + PSUBL(:) * PTSTEP
+DGFC%XEVAP(:) = DGFC%XEVAP(:) + PEVAP(:) * PTSTEP
+DGFC%XSUBL(:) = DGFC%XSUBL(:) + PSUBL(:) * PTSTEP
 !
 !* storage flux
 !
-DGF%XGFLUXC(:) = DGF%XGFLUXC(:) + PGFLUX(:) * PTSTEP 
+DGFC%XGFLUX(:) = DGFC%XGFLUX(:) + PGFLUX(:) * PTSTEP 
 !
 !* wind stress
 !
-DGF%XFMUC(:) = DGF%XFMUC(:) + PFMU(:) * PTSTEP 
-DGF%XFMVC(:) = DGF%XFMVC(:) + PFMV(:) * PTSTEP
+DGFC%XFMU(:) = DGFC%XFMU(:) + PFMU(:) * PTSTEP 
+DGFC%XFMV(:) = DGFC%XFMV(:) + PFMV(:) * PTSTEP
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_FLAKE',1,ZHOOK_HANDLE)
 !

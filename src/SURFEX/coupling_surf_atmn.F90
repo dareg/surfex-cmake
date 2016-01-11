@@ -384,7 +384,7 @@ IF ((YSC%SV%NBEQ > 0).AND.(YSC%CHU%LCH_SURF_EMIS)) THEN
                             HPROGRAM,PTIME,PSFTS(:,YSC%SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (YSC%CHU%CCH_EMIS=='SNAP') THEN
     CALL CH_EMISSION_SNAP_n(YSC%CHN, &
-                            HPROGRAM,YSC%U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,YSC%UG%XLON)
+                            HPROGRAM,YSC%U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,YSC%UG%G%XLON)
     CALL CH_EMISSION_TO_ATM_n(YSC%CHN, YSC%SV, &
                               PSFTS,PRHOA)
   END IF
@@ -584,7 +584,7 @@ ENDDO
 !
 IF (KTILE==1) THEN
   !
-  CALL COUPLING_SEA_n(YSC%SM, YSC%DGL, YSC%U, YSC%DST, YSC%SLT,  &
+  CALL COUPLING_SEA_n(YSC%SM, YSC%DGL, YSC%DGLC, YSC%U, YSC%DST, YSC%SLT,  &
                       HPROGRAM, HCOUPLING, PTIMEC,                                           &
               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
               YSC%U%NSIZE_SEA, KSV, KSW,                                                      &
@@ -599,7 +599,7 @@ IF (KTILE==1) THEN
   !
 ELSEIF (KTILE==2) THEN
   !
-  CALL COUPLING_INLAND_WATER_n(YSC%FM, YSC%WM, YSC%DGL, YSC%U, YSC%DST, YSC%SLT, &
+  CALL COUPLING_INLAND_WATER_n(YSC%FM, YSC%WM, YSC%DGL, YSC%DGLC, YSC%U, YSC%DST, YSC%SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC,                                   &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                YSC%U%NSIZE_WATER, KSV, KSW,                                                   &
@@ -615,7 +615,7 @@ ELSEIF (KTILE==2) THEN
 ELSEIF (KTILE==3) THEN
   !
   CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, &
-                         YSC%GDM%DTI, YSC%GRM%DTI, YSC%DGL, YSC%DST, YSC%SLT, &
+                         YSC%GDM%DTI, YSC%GRM%DTI, YSC%DGL, YSC%DGLC, YSC%DST, YSC%SLT, &
                          HPROGRAM, HCOUPLING, PTIMEC,                                         &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
                YSC%U%NSIZE_NATURE, KSV, KSW,                                                  &
@@ -630,7 +630,7 @@ ELSEIF (KTILE==3) THEN
   !
 ELSEIF (KTILE==4) THEN
   !
-  CALL COUPLING_TOWN_n(YSC%DTCO, YSC%U, YSC%IM%DTI, YSC%IM%IG, YSC%IM%I, YSC%DGL, &
+  CALL COUPLING_TOWN_n(YSC%DTCO, YSC%U, YSC%DGL, YSC%DGLC, &
                        YSC%DST, YSC%SLT, YSC%TM, YSC%GDM, YSC%GRM,  &
                        HPROGRAM, HCOUPLING, PTIMEC,                                           &
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &

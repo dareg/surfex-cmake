@@ -1,5 +1,5 @@
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_LONLATVAL(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
+      SUBROUTINE GET_MESH_INDEX_LONLATVAL(KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
 !     ###############################################################
 !
 !!**** *GET_MESH_INDEX_LONLATVAL* get the grid mesh where point (lat,lon) is located
@@ -38,7 +38,6 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-INTEGER,                       INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                       INTENT(IN)    :: KSSO      ! number of subgrid mesh in each direction
 REAL,    DIMENSION(:),         INTENT(IN)    :: PGRID_PAR ! grid parameters
 REAL,    DIMENSION(:),         INTENT(IN)    :: PLAT      ! latitude of the point

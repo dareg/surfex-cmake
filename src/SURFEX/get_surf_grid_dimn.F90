@@ -58,9 +58,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',0,ZHOOK_HANDLE)
-HGRID = UG%CGRID
+HGRID = UG%G%CGRID
 !
- CALL GET_GRID_DIM(UG%CGRID,UG%NGRID_PAR,UG%XGRID_PAR,ORECT,KDIM1,KDIM2)
+ CALL GET_GRID_DIM(UG%G%CGRID,UG%G%NGRID_PAR,UG%G%XGRID_PAR,ORECT,KDIM1,KDIM2)
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

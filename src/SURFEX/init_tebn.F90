@@ -47,7 +47,7 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
@@ -121,7 +121,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
@@ -223,7 +223,7 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_DIAG_TEB(TM%DGT%N2M,TM%DGT%LSURF_BUDGET,TM%DGT%L2M_MIN_ZS,TM%DGT%LRAD_BUDGET,&
                        TM%DGT%LCOEF,TM%DGT%LSURF_VARS,TM%DGMTO%LSURF_MISC_BUDGET,&
                        TM%DGMTO%LSURF_DIAG_ALBEDO,TM%DGUT%LUTCI,TM%DGT%LPGD,&
-                       TM%DGT%LPGD_FIX,TM%DGT%XDIAG_TSTEP)  
+                       TM%DGT%XDIAG_TSTEP)  
 !
 ENDIF
 !
@@ -341,7 +341,6 @@ ENDIF
 !               -------------------
 !
 DO JPATCH=1,TM%TOP%NTEB_PATCH
-
   CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, &
                               GDM%TV%R, GDM%TV%M%T, GRM%TV%R, GRM%TV%M%T, JPATCH)
   !-----------------------------------------------------------------------------------
@@ -457,7 +456,7 @@ DO JPATCH=1,TM%TOP%NTEB_PATCH
   !*       6.     Building Energy Model
   !               ---------------------
   !
-  CALL INIT_BEM_n(DGU, DTCO, UG, U, TM, &
+  CALL INIT_BEM_n(DTCO, TM, &
                   ILUOUT)
   !
   !-------------------------------------------------------------------------------

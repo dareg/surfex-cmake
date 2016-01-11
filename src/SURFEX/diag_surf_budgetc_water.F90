@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_WATER (DGW, &
+       SUBROUTINE DIAG_SURF_BUDGETC_WATER (DGWC,  &
                                            PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
                                             PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,&
                                             PEVAP, PSUBL                       )  
@@ -29,7 +29,7 @@
 !
 !
 !
-USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -39,7 +39,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DGWC
 !
 REAL,               INTENT(IN) :: PTSTEP    
 REAL, DIMENSION(:), INTENT(IN) :: PRN      ! net radiation                         (W/m2)
@@ -64,40 +64,40 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* total incoming and outgoing SW
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_WATER',0,ZHOOK_HANDLE)
-DGW%XSWDC(:) = DGW%XSWDC(:) + PSWD(:) * PTSTEP
-DGW%XSWUC(:) = DGW%XSWUC(:) + PSWU(:) * PTSTEP
+DGWC%XSWD(:) = DGWC%XSWD(:) + PSWD(:) * PTSTEP
+DGWC%XSWU(:) = DGWC%XSWU(:) + PSWU(:) * PTSTEP
 !
 !*incoming outgoing LW
 !
-DGW%XLWDC(:) = DGW%XLWDC(:) + PLWD(:) * PTSTEP
-DGW%XLWUC(:) = DGW%XLWUC(:) + PLWU(:) * PTSTEP
+DGWC%XLWD(:) = DGWC%XLWD(:) + PLWD(:) * PTSTEP
+DGWC%XLWU(:) = DGWC%XLWU(:) + PLWU(:) * PTSTEP
 !
 !* net radiation
 !
-DGW%XRNC(:) = DGW%XRNC(:) + PRN(:) * PTSTEP
+DGWC%XRN(:) = DGWC%XRN(:) + PRN(:) * PTSTEP
 !
 !* sensible heat flux
 !
-DGW%XHC(:) = DGW%XHC(:) + PH(:) * PTSTEP 
+DGWC%XH(:) = DGWC%XH(:) + PH(:) * PTSTEP 
 !
 !* latent heat flux (J/m2)
 !
-DGW%XLEC (:) = DGW%XLEC (:) + PLE (:) * PTSTEP 
-DGW%XLEIC(:) = DGW%XLEIC(:) + PLEI(:) * PTSTEP 
+DGWC%XLE (:) = DGWC%XLE (:) + PLE (:) * PTSTEP 
+DGWC%XLEI(:) = DGWC%XLEI(:) + PLEI(:) * PTSTEP 
 !
 !* evaporation and sublimation (kg/m2)
 !
-DGW%XEVAPC(:) = DGW%XEVAPC(:) + PEVAP(:) * PTSTEP
-DGW%XSUBLC(:) = DGW%XSUBLC(:) + PSUBL(:) * PTSTEP
+DGWC%XEVAP(:) = DGWC%XEVAP(:) + PEVAP(:) * PTSTEP
+DGWC%XSUBL(:) = DGWC%XSUBL(:) + PSUBL(:) * PTSTEP
 !
 !* storage flux
 !
-DGW%XGFLUXC(:) = DGW%XGFLUXC(:) + PGFLUX(:) * PTSTEP 
+DGWC%XGFLUX(:) = DGWC%XGFLUX(:) + PGFLUX(:) * PTSTEP 
 !
 !* wind stress
 !
-DGW%XFMUC(:) = DGW%XFMUC(:) + PFMU(:) * PTSTEP 
-DGW%XFMVC(:) = DGW%XFMVC(:) + PFMV(:) * PTSTEP
+DGWC%XFMU(:) = DGWC%XFMU(:) + PFMU(:) * PTSTEP 
+DGWC%XFMV(:) = DGWC%XFMV(:) + PFMV(:) * PTSTEP
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGETC_WATER',1,ZHOOK_HANDLE)
 !

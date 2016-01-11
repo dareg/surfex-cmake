@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_FLAKE_INIT_n (DGU, DGF, DGMF, F, &
+      SUBROUTINE DIAG_FLAKE_INIT_n (DGU, DGF, DGFC, DGMF, F, &
                                     HPROGRAM,KLU,KSW)
 !     #####################
 !
@@ -37,14 +37,13 @@
 !              ------------
 !
 !
-!
-!
-!
-USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE,     ONLY : LRESTART
+#endif
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_LAKE
 !
@@ -64,9 +63,10 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DGFC
 TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
@@ -87,8 +87,8 @@ REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_FLAKE_INIT_N',0,ZHOOK_HANDLE)
 !
-ALLOCATE(DGF%XDIAG_TS(KLU))
-DGF%XDIAG_TS = XUNDEF
+ALLOCATE(DGF%XTS(KLU))
+DGF%XTS = XUNDEF
 !
 IF (DGF%LSURF_BUDGET.OR.DGF%LSURF_BUDGETC) THEN
   ALLOCATE(DGF%XRN     (KLU))
@@ -148,124 +148,128 @@ END IF
 !
 !* cumulative surface energy budget
 !
-IF (DGF%LSURF_BUDGETC) THEN
+#ifdef SFX_OL
+IF (DGF%LSURF_BUDGETC .OR. (LRESTART .AND. .NOT.DGF%LRESET_BUDGETC)) THEN
+#else
+IF (DGF%LSURF_BUDGETC .OR. .NOT.DGF%LRESET_BUDGETC) THEN
+#endif
 !    
-  ALLOCATE(DGF%XRNC    (KLU))
-  ALLOCATE(DGF%XHC     (KLU))
-  ALLOCATE(DGF%XLEC    (KLU))
-  ALLOCATE(DGF%XLEIC   (KLU))
-  ALLOCATE(DGF%XGFLUXC (KLU))
-  ALLOCATE(DGF%XEVAPC  (KLU))
-  ALLOCATE(DGF%XSUBLC  (KLU))  
-  ALLOCATE(DGF%XSWDC   (KLU))
-  ALLOCATE(DGF%XSWUC   (KLU))
-  ALLOCATE(DGF%XLWDC   (KLU))
-  ALLOCATE(DGF%XLWUC   (KLU))
-  ALLOCATE(DGF%XFMUC   (KLU))
-  ALLOCATE(DGF%XFMVC   (KLU))
+  ALLOCATE(DGFC%XRN   (KLU))
+  ALLOCATE(DGFC%XH    (KLU))
+  ALLOCATE(DGFC%XLE   (KLU))
+  ALLOCATE(DGFC%XLEI  (KLU))
+  ALLOCATE(DGFC%XGFLUX(KLU))
+  ALLOCATE(DGFC%XEVAP (KLU))
+  ALLOCATE(DGFC%XSUBL (KLU))  
+  ALLOCATE(DGFC%XSWD  (KLU))
+  ALLOCATE(DGFC%XSWU  (KLU))
+  ALLOCATE(DGFC%XLWD  (KLU))
+  ALLOCATE(DGFC%XLWU  (KLU))
+  ALLOCATE(DGFC%XFMU  (KLU))
+  ALLOCATE(DGFC%XFMV  (KLU))
 !
   IF (.NOT. DGU%LREAD_BUDGETC) THEN        
-     DGF%XRNC    = 0.0
-     DGF%XHC     = 0.0
-     DGF%XLEC    = 0.0
-     DGF%XLEIC   = 0.0
-     DGF%XGFLUXC = 0.0
-     DGF%XEVAPC  = 0.0
-     DGF%XSUBLC  = 0.0
-     DGF%XSWDC   = 0.0
-     DGF%XSWUC   = 0.0
-     DGF%XLWDC   = 0.0
-     DGF%XLWUC   = 0.0
-     DGF%XFMUC   = 0.0
-     DGF%XFMVC   = 0.0
+     DGFC%XRN   = 0.0
+     DGFC%XH    = 0.0
+     DGFC%XLE   = 0.0
+     DGFC%XLEI  = 0.0
+     DGFC%XGFLUX = 0.0
+     DGFC%XEVAP  = 0.0
+     DGFC%XSUBL  = 0.0
+     DGFC%XSWD   = 0.0
+     DGFC%XSWU  = 0.0
+     DGFC%XLWD  = 0.0
+     DGFC%XLWU  = 0.0
+     DGFC%XFMU  = 0.0
+     DGFC%XFMV  = 0.0
   ELSEIF (DGU%LREAD_BUDGETC.AND.DGF%LRESET_BUDGETC) THEN
-     DGF%XRNC    = 0.0
-     DGF%XHC     = 0.0
-     DGF%XLEC    = 0.0
-     DGF%XLEIC   = 0.0
-     DGF%XGFLUXC = 0.0
-     DGF%XEVAPC  = 0.0
-     DGF%XSUBLC  = 0.0     
-     DGF%XSWDC   = 0.0
-     DGF%XSWUC   = 0.0
-     DGF%XLWDC   = 0.0
-     DGF%XLWUC   = 0.0
-     DGF%XFMUC   = 0.0
-     DGF%XFMVC   = 0.0
+     DGFC%XRN   = 0.0
+     DGFC%XH    = 0.0
+     DGFC%XLE   = 0.0
+     DGFC%XLEI  = 0.0
+     DGFC%XGFLUX= 0.0
+     DGFC%XEVAP = 0.0
+     DGFC%XSUBL = 0.0     
+     DGFC%XSWD  = 0.0
+     DGFC%XSWU  = 0.0
+     DGFC%XLWD  = 0.0
+     DGFC%XLWU  = 0.0
+     DGFC%XFMU  = 0.0
+     DGFC%XFMV  = 0.0
   ELSE
      CALL READ_SURF(&
                     HPROGRAM,'VERSION',IVERSION,IRESP)
      IF (IVERSION<8)THEN
-       DGF%XRNC    = 0.0
-       DGF%XHC     = 0.0
-       DGF%XLEC    = 0.0
-       DGF%XLEIC   = 0.0
-       DGF%XGFLUXC = 0.0
-       DGF%XEVAPC  = 0.0
-       DGF%XSUBLC  = 0.0     
-       DGF%XSWDC   = 0.0
-       DGF%XSWUC   = 0.0
-       DGF%XLWDC   = 0.0
-       DGF%XLWUC   = 0.0
-       DGF%XFMUC   = 0.0
-       DGF%XFMVC   = 0.0             
+       DGFC%XRN   = 0.0
+       DGFC%XH    = 0.0
+       DGFC%XLE   = 0.0
+       DGFC%XLEI  = 0.0
+       DGFC%XGFLUX= 0.0
+       DGFC%XEVAP = 0.0
+       DGFC%XSUBL = 0.0     
+       DGFC%XSWD  = 0.0
+       DGFC%XSWU  = 0.0
+       DGFC%XLWD  = 0.0
+       DGFC%XLWU  = 0.0
+       DGFC%XFMU  = 0.0
+       DGFC%XFMV  = 0.0             
      ELSE
        YREC='RNC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XRNC,IRESP)
+                    HPROGRAM,YREC,DGFC%XRN,IRESP)
        YREC='HC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XHC ,IRESP)
+                    HPROGRAM,YREC,DGFC%XH,IRESP)
        YREC='LEC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XLEC,IRESP)
+                    HPROGRAM,YREC,DGFC%XLE,IRESP)
        YREC='LEIC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XLEIC,IRESP)     
+                    HPROGRAM,YREC,DGFC%XLEI,IRESP)     
        YREC='GFLUXC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XGFLUXC,IRESP)
+                    HPROGRAM,YREC,DGFC%XGFLUX,IRESP)
        YREC='SWDC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XSWDC,IRESP)
+                    HPROGRAM,YREC,DGFC%XSWD,IRESP)
        YREC='SWUC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XSWUC,IRESP)
+                    HPROGRAM,YREC,DGFC%XSWU,IRESP)
        YREC='LWDC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XLWDC,IRESP)
+                    HPROGRAM,YREC,DGFC%XLWD,IRESP)
        YREC='LWUC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XLWUC,IRESP)
+                    HPROGRAM,YREC,DGFC%XLWU,IRESP)
        YREC='FMUC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XFMUC,IRESP)
+                    HPROGRAM,YREC,DGFC%XFMU,IRESP)
        YREC='FMVC_WAT'
        CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XFMVC,IRESP)
+                    HPROGRAM,YREC,DGFC%XFMV,IRESP)
        YREC='EVAPC_WAT'
         CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XEVAPC,IRESP)
+                    HPROGRAM,YREC,DGFC%XEVAP,IRESP)
         YREC='SUBLC_WAT'
         CALL READ_SURF(&
-                    HPROGRAM,YREC,DGF%XSUBLC,IRESP)              
+                    HPROGRAM,YREC,DGFC%XSUBL,IRESP)              
       ENDIF
 !
   ENDIF   
 ELSE
-  ALLOCATE(DGF%XRNC    (0))
-  ALLOCATE(DGF%XHC     (0))
-  ALLOCATE(DGF%XLEC    (0))
-  ALLOCATE(DGF%XLEIC   (0))
-  ALLOCATE(DGF%XGFLUXC (0))
-  ALLOCATE(DGF%XEVAPC  (0))
-  ALLOCATE(DGF%XSUBLC  (0))  
-  ALLOCATE(DGF%XSWDC   (0))
-  ALLOCATE(DGF%XSWUC   (0))
-  ALLOCATE(DGF%XLWDC   (0))
-  ALLOCATE(DGF%XLWUC   (0))
-  ALLOCATE(DGF%XFMUC   (0))
-  ALLOCATE(DGF%XFMVC   (0))  
+  ALLOCATE(DGFC%XRN   (0))
+  ALLOCATE(DGFC%XH    (0))
+  ALLOCATE(DGFC%XLE   (0))
+  ALLOCATE(DGFC%XLEI  (0))
+  ALLOCATE(DGFC%XGFLUX(0))
+  ALLOCATE(DGFC%XEVAP (0))
+  ALLOCATE(DGFC%XSUBL (0))  
+  ALLOCATE(DGFC%XSWD  (0))
+  ALLOCATE(DGFC%XSWU  (0))
+  ALLOCATE(DGFC%XLWD  (0))
+  ALLOCATE(DGFC%XLWU  (0))
+  ALLOCATE(DGFC%XFMU  (0))
+  ALLOCATE(DGFC%XFMV  (0))  
 ENDIF
 !
 !* parameters at 2m

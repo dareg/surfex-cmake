@@ -513,7 +513,7 @@ ENDIF
 ! Inline diagnostics at time t for SST and TRAD
 !-------------------------------------------------------------------------------
 !
-CALL DIAG_INLINE_SEAFLUX_n(SM%DGS, SM%DGSI, SM%S, &
+CALL DIAG_INLINE_SEAFLUX_n(SM%DGS, SM%DGSC, SM%DGSI, SM%DGSIC, SM%DGMSI, SM%S, &
                            PTSTEP, PTA, ZQA, PPA, PPS, PRHOA, PU, &
      PV, PZREF, PUREF, ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU,       &
      ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,            &

@@ -137,8 +137,8 @@ CALL SFX_OASIS_CHECK(I, U, &
 CALL GET_MESH_CORNER(UG, &
                      ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 !
-ZLON(:,1)=UG%XLON(:)
-ZLAT(:,1)=UG%XLAT(:)
+ZLON(:,1)=UG%G%XLON(:)
+ZLAT(:,1)=UG%G%XLAT(:)
 !
 IF(I%LGW)THEN
   CALL UNPACK_SAME_RANK(U%NR_NATURE(:),I%XGW(:),ZGW(:))
@@ -178,7 +178,7 @@ CALL OASIS_START_GRIDS_WRITING(IFLAG)
 !
 IF(LCPL_LAND)THEN  
 !
-  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_LAND(:)
+  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_LAND(:)
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0
@@ -192,12 +192,12 @@ IF(LCPL_LAND)THEN
 !
   IF(LCPL_GW)THEN
     WHERE(ZMASK_LAND(:)>0.0)
-          ZAREA(:,1) = UG%XMESH_SIZE(:) * (1.0-ZMASK_GW(:))
+          ZAREA(:,1) = UG%G%XMESH_SIZE(:) * (1.0-ZMASK_GW(:))
     ELSEWHERE
           ZAREA(:,1) = 0.0
     ENDWHERE
   ELSE
-    ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_LAND(:)
+    ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_LAND(:)
   ENDIF
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
@@ -215,7 +215,7 @@ ENDIF
 ! groundwater surface coupling case
 !
 IF(LCPL_GW)THEN       
-  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_GW(:)
+  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_GW(:)
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0
@@ -232,7 +232,7 @@ ENDIF
 !               ----------------------------------
 !
 IF(LCPL_LAKE)THEN
-  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_LAKE(:)
+  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_LAKE(:)
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0
@@ -249,7 +249,7 @@ ENDIF
 !               -------------------------------
 !
 IF(LCPL_SEA)THEN     
-  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_SEA(:)
+  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_SEA(:)
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0

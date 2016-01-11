@@ -76,7 +76,7 @@ REAL, POINTER, DIMENSION(:,:)    :: XEPSO          ! maximum initial quantum use
 !                                                  ! efficiency                              (mg J-1 PAR)
 REAL, POINTER, DIMENSION(:,:)    :: XGAMM          ! CO2 conpensation concentration          (ppm)
 REAL, POINTER, DIMENSION(:,:)    :: XQDGAMM        ! Log of Q10 function for CO2 conpensation 
-!                                                  ! concentration                           (-)
+!                                                 ! concentration                           (-)
 REAL, POINTER, DIMENSION(:,:)    :: XQDGMES        ! Log of Q10 function for mesophyll conductance  (-)
 REAL, POINTER, DIMENSION(:,:)    :: XT1GMES        ! reference temperature for computing 
 !                                                  ! compensation concentration function for 
@@ -187,6 +187,12 @@ REAL, POINTER, DIMENSION(:,:)    :: XBSLAI_NITRO   ! biomass/LAI ratio from nitr
 !
 END TYPE ISBA_INIT_PGD_t
 !
+TYPE ISBA_INIT_PGD_PATCH_t
+!
+TYPE(ISBA_INIT_PGD_t), ALLOCATABLE :: AL(:) 
+!
+END TYPE ISBA_INIT_PGD_PATCH_t
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 TYPE ISBA_INIT_t
@@ -245,10 +251,42 @@ REAL, POINTER, DIMENSION(:)     :: XPERTZ0
 !
 END TYPE ISBA_INIT_t
 !
+TYPE ISBA_INIT_PATCH_t
+!
+TYPE(ISBA_INIT_t), ALLOCATABLE :: AL(:) 
+!
+END TYPE ISBA_INIT_PATCH_t
+!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 CONTAINS
-
+!
+SUBROUTINE ISBA_INIT_PGD_PATCH_INIT(YISBA_INIT_PGD_PATCH,KPATCH)
+TYPE(ISBA_INIT_PGD_PATCH_t), INTENT(INOUT) :: YISBA_INIT_PGD_PATCH 
+INTEGER, INTENT(IN) :: KPATCH
+INTEGER :: JP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK("MODD_ISBA_INIT_N:ISBA_INIT_PGD_PATCH_INIT",0,ZHOOK_HANDLE)
+ ALLOCATE(YISBA_INIT_PGD_PATCH%AL(KPATCH))
+DO JP=1,KPATCH
+  CALL ISBA_INIT_PGD_INIT(YISBA_INIT_PGD_PATCH%AL(JP))
+ENDDO         
+IF (LHOOK) CALL DR_HOOK("MODD_ISBA_INIT_N:ISBA_INIT_PGD_PATCH_INIT",1,ZHOOK_HANDLE)
+END SUBROUTINE ISBA_INIT_PGD_PATCH_INIT
+!
+SUBROUTINE ISBA_INIT_PATCH_INIT(YISBA_INIT_PATCH,KPATCH)
+TYPE(ISBA_INIT_PATCH_t), INTENT(INOUT) :: YISBA_INIT_PATCH 
+INTEGER, INTENT(IN) :: KPATCH
+INTEGER :: JP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK("MODD_ISBA_INIT_N:ISBA_INIT_PATCH_INIT",0,ZHOOK_HANDLE)
+ ALLOCATE(YISBA_INIT_PATCH%AL(KPATCH))
+DO JP=1,KPATCH
+  CALL ISBA_INIT_INIT(YISBA_INIT_PATCH%AL(JP))
+ENDDO         
+IF (LHOOK) CALL DR_HOOK("MODD_ISBA_INIT_N:ISBA_INIT_PATCH_INIT",1,ZHOOK_HANDLE)
+END SUBROUTINE ISBA_INIT_PATCH_INIT
+!
 SUBROUTINE ISBA_INIT_PGD_INIT(YISBA_INIT_PGD)
 TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: YISBA_INIT_PGD
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

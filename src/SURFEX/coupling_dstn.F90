@@ -1,4 +1,4 @@
-SUBROUTINE COUPLING_DST_n (DST, PKI, &
+SUBROUTINE COUPLING_DST_n (DST, PVEGTYPE_PATCH, &
        HPROGRAM,                 &!I [char] Type of ISBA version
        KI,                       &!I [nbr] number of points in patch
        KDST,                     &!I Number of dust emission variables
@@ -66,8 +66,8 @@ IMPLICIT NONE
 !INPUT
 !
 TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(PACK_ISBA_t), INTENT(INOUT) :: PKI
 !
+REAL, DIMENSION(:,:), INTENT(IN) :: PVEGTYPE_PATCH
  CHARACTER(LEN=*), INTENT(IN)       :: HPROGRAM       !I Name of program
 INTEGER, INTENT(IN)                :: KI             !I Number of points in patch
 INTEGER, INTENT(IN)                :: KDST           !I Number of dust emission variables
@@ -436,13 +436,13 @@ DO JMODE=1,NDSTMDE
                
       !Get sum of vegetation fraction in this patch
       !fxm: VERY BAD LOOP ORDER
-      VEGFRAC_IN_PATCH = SUM(PKI%XP_VEGTYPE_PATCH(II,:))
+      VEGFRAC_IN_PATCH = SUM(PVEGTYPE_PATCH(II,:))
                
       !Get production of flux by adding up the contribution 
       !from the different tiles (here, "tiles" are dust emitter surfaces)
       PSFDST(II,JSV_IDX) = PSFDST(II,JSV_IDX)                  & ![kg/m^2_{patch}/sec] dust flux per patch 
                            + (ZSFDST_TILE(II,JJ,JMODE)         & ![kg/m^2_{emittersurface}/sec] Dust flux per surface area of dust emitter surface
-                           * PKI%XP_VEGTYPE_PATCH(II,DST%NVT_DST(JJ))  & ![frc] m^2_{emittersurface}/m^2_{nature}
+                           * PVEGTYPE_PATCH(II,DST%NVT_DST(JJ))  & ![frc] m^2_{emittersurface}/m^2_{nature}
                            / VEGFRAC_IN_PATCH )                  ![frc] m^2_{patch}/m^2_{nature}  
     ENDDO !loop on point in patch
   ENDDO    !loop on different dust emitter surfaces

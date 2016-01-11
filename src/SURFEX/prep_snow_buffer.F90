@@ -25,7 +25,7 @@ SUBROUTINE PREP_SNOW_BUFFER (IG, U, &
 !!------------------------------------------------------------------
 !
 !
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODE_SNOW3L
@@ -61,7 +61,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM  ! program calling surf. schemes

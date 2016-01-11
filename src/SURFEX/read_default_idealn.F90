@@ -37,7 +37,7 @@
 !
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -59,7 +59,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_t), INTENT(INOUT) :: DGL
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 !

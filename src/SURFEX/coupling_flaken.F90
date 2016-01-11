@@ -465,7 +465,7 @@ IF (FM%F%CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake 
 !
 ENDIF
 !
- CALL DIAG_INLINE_FLAKE_n(FM%DGF, FM%F, &
+ CALL DIAG_INLINE_FLAKE_n(FM%DGF, FM%DGFC, FM%F, &
                           PTSTEP, PTA,  ZQA, PPA, PPS, PRHOA, PU,        &
                             PV, PZREF, PUREF, PRAIN, PSNOW,                  &
                             ZCD, ZCDN, ZCH, ZRI, ZHU,                  &
