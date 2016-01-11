@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
+SUBROUTINE ASSIM_SURF_ATM_n (DGMI, DGMIP, IG, I, S, U, T, TOP, W, &
                              HPROGRAM, KI,                                               &
                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,             &
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
@@ -37,8 +37,8 @@ SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
 !
 !
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -69,7 +69,8 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
+TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -285,7 +286,7 @@ ELSEIF (KTILE==3) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_NATURE_n(DGMI, IG, I, U, &
+  CALL ASSIM_NATURE_n(DGMI, DGMIP, IG, I, U, &
                       HPROGRAM,KSIZE,                                             &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 

@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_ISBA_n (DGMI, IG, I, U, &
+SUBROUTINE ASSIM_ISBA_n (DGMI, DGMIP, IG, I, U, &
                          HPROGRAM,KI,                                   &
                         PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                         PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
@@ -33,8 +33,8 @@ SUBROUTINE ASSIM_ISBA_n (DGMI, IG, I, U, &
 !
 !
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -60,7 +60,8 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
+TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -261,7 +262,7 @@ IF ( LEXTRAP_NATURE ) THEN
   I%R%XWGI(:,2,JP) = ZTL_EP(:)
   I%R%TSNOW%WSNOW(:,JL,JP) = ZSWE_EP(:)
   I%R%TSNOW%RHO  (:,JL,JP) = ZSNR_EP(:)
-  I%R%TSNOW%ALB  (:,   JP) = ZSNA_EP(:)
+  I%R%TSNOW%ALB  (:,JP) = ZSNA_EP(:)
   !
   DEALLOCATE(ZWS_EP,ZWP_EP,ZTS_EP,ZTP_EP,ZTL_EP,ZSWE_EP,ZSNR_EP,ZSNA_EP)
   !
@@ -282,7 +283,7 @@ IF (LAESNM) THEN
 ENDIF
 !
 !to be improved later - needed for surfex course
- CALL AVERAGE_DIAG_MISC_ISBA_n(DGMI, I)
+ CALL AVERAGE_DIAG_MISC_ISBA_n(DGMI, DGMIP, I)
  !
 IF (LHOOK) CALL DR_HOOK('ASSIM_ISBA_N',1,ZHOOK_HANDLE)
 !

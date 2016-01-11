@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_NATURE_n (DGMI, IG, I, U, &
+SUBROUTINE ASSIM_NATURE_n (DGMI, DGMIP, IG, I, U, &
                            HPROGRAM,KI,                                    &
                           PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
@@ -32,8 +32,8 @@ SUBROUTINE ASSIM_NATURE_n (DGMI, IG, I, U, &
 !
 !
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
+USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -49,7 +49,8 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
+TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -90,7 +91,7 @@ END IF
 !
 IF (U%CNATURE=='ISBA  ') THEN
   !
-  CALL ASSIM_ISBA_n(DGMI, IG, I, U, &
+  CALL ASSIM_ISBA_n(DGMI, DGMIP, IG, I, U, &
                     HPROGRAM,KI,                                    &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
