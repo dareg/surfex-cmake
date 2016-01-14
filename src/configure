@@ -247,7 +247,7 @@ export MANPATH=\$MPI_ROOT/share/man:\$MANPATH
 Linux*)      
                 export     ARCH=${ARCH:-LXgfortran} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO} 
-                export OPTLEVEL=${OPTLEVEL:-DEBUG}  
+                export OPTLEVEL=${OPTLEVEL:-O2}  
                 export MVWORK=${MVWORK:-NO}
                 #export VER_CDF=${VER_CDF:-CDFGFOR}
                 export VER_CDF=${VER_CDF:-CDFAUTO}

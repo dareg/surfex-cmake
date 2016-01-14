@@ -72,6 +72,7 @@ export VERSION_CDF=${VERSION_CDF}
 #
 export VER_GRIBAPI=${VER_GRIBAPI}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI}
+export GRIB_DEFINITION_PATH=${SRC_SURFEX}"/LIB/grib_api-1.9.9/definitions"
 #
 # Version of OASIS
 #
@@ -85,6 +86,10 @@ export VER_DRHOOK=${VER_DRHOOK}
 # Version of Def integer
 #
 export MNH_INT=${MNH_INT}
+#
+#
+export OMP_NUM_THREADS=1
+#
 ##########################################################
 ##########################################################
 ##########################################################
