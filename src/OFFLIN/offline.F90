@@ -579,10 +579,11 @@ ENDIF
 !
 IBANDS = 1
 ! special case for snowcro tartes!!!!!!
-GCRORAD=.True.
+GCRORAD=.False.
 IF (GCRORAD) THEN 
   IBANDS=JPNBANDS_ATM
 ENDIF 
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  CALL OL_ALLOC_ATM(INI,IBANDS,NSCAL)
@@ -988,7 +989,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       CALL GOTO_MODEL(NBLOCK)
     ENDIF
 !!!    ! IF SNOWCRORAD=TARTES then spectral repartition of direct and diffuse radiation
-   GCRORAD=.True.
+   GCRORAD=.False.
    IF (GCRORAD) THEN 
     ! broadband direct and diffuse irradiance
   

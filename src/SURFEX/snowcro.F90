@@ -784,8 +784,8 @@ ENDIF
 ! Heat source (-sink) term due to shortwave
 ! radiation transmission within the snowpack:
 !
-PSPEC_ALB=0.
-PDIFF_RATIO=0.
+! PSPEC_ALB=0.
+! PDIFF_RATIO=0.
 
 SELECT CASE (HSNOWRAD)
   CASE ("TA1")
@@ -821,36 +821,37 @@ SELECT CASE (HSNOWRAD)
                     PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE,PPS, &
                     PZENITH, PPERMSNOWFRAC,INLVLS_USE,    &
                     OSNOW_ABS_ZENITH,HSNOWMETAMO) 
-  !
+
   CASE ("TAR","TA1","TA2","TA3")
    IF ((ANY(PSNOWIMPUR<0)).OR.(ANY(PSNOWIMPUR>1))) THEN
     PRINT*, PSNOWIMPUR
    ENDIF
+    PRINT*, size(PSPEC_ALB), 'essai'
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
                         ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH, &
                         INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
                         P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF)
-! ! output spectral albedo and diffuse to total irradiance ratio
-    DO JJ=1,NPNBANDS
-	DO JP=1, size(ZSNOW)
-	PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)
-	ENDDO
-    ENDDO
-    
-    DO JJ=1,JPNBANDS_ATM
-	DO JP=1, size(ZSNOW)
-	IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN
-	PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))
-	!PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)
-	ELSE 
-	PDIFF_RATIO(JP,JJ)=1.
-	ENDIF
-	ENDDO
-    ENDDO
-!     DO JP=1, size(ZSNOW)
-!     PDIFF_RATIO(JP,:)=sum(PSPEC_DIR(JP,:))+sum(PSPEC_DIF(JP,:))
-!     enddo
-!    ! write(*,*) "snowcro", PDIFF_RATIO(:,1)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! !!! activation of spectral outputs 
+! 
+! ! ! output spectral albedo and diffuse to total irradiance ratio
+!     DO JJ=1,NPNBANDS
+! 	DO JP=1, size(ZSNOW)
+! 	PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)
+! 	ENDDO
+!     ENDDO
+!     
+!     DO JJ=1,JPNBANDS_ATM
+! 	DO JP=1, size(ZSNOW)
+! 	IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN
+! 	PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))
+! 	ELSE 
+! 	PDIFF_RATIO(JP,JJ)=1.
+! 	ENDIF
+! 	ENDDO
+!     ENDDO
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
   !
   CASE DEFAULT
     CALL ABOR1_SFX("UNKNOWN CSNOWRAD OPTION")
