@@ -151,6 +151,7 @@ TYPE ISBA_t
 !
 ! radiative transfer scheme in snow (Crocus)
   CHARACTER(3)                   :: CSNOWRAD ! B92 (historical version, Brun et al 92), TAR, TA1, TA2 (see Libois et al 2013)
+   LOGICAL                        :: LATMORAD ! activate atmotartes scheme
 !-------------------------------------------------------------------------------
 !
   LOGICAL                        :: LCANOPY ! T: SBL scheme within the canopy
@@ -948,6 +949,7 @@ YISBA%LSNOW_ABS_ZENITH=.FALSE.
 YISBA%LSNOWSYTRON=.FALSE.
 YISBA%CSNOWMETAMO='B92'
 YISBA%CSNOWRAD='B92'
+YISBA%LATMORAD=.FALSE.
 YISBA%LECOCLIMAP=.FALSE.
 YISBA%LCTI=.FALSE.
 YISBA%LSOCP=.FALSE.

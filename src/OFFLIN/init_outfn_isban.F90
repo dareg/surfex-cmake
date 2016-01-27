@@ -156,7 +156,7 @@ ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
  CALL OL_DEFINE_DIM(UG, U, &
                     HPROGRAM, KLUOUT, INI, DGU%LSNOWDIMNC, I%TSNOW, IDIM1, YUNIT1, YUNIT2, &
-                   ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM,DGU%LSNOWBANDS, KNPATCH=INPATCH)
+                   ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM,DGMI%LPROBANDS, KNPATCH=INPATCH)
  CALL GET_DATE_OL(I%TTIME,XTSTEP_OUTPUT,YDATE(1))
 !
 INDIMSALL = SIZE(IDDIMALL)
@@ -170,7 +170,7 @@ ELSE
   INJDIMS=INDIMSALL-1
   INDIMS=INDIMSALL
 ENDIF
-IF (DGU%LSNOWBANDS) THEN 
+IF (DGMI%LPROBANDS) THEN 
 INJDIMS=INJDIMS-1
 INDIMS=INDIMS-1
 ENDIF
@@ -1084,7 +1084,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
                     IFILE_ID, 'REFROZ_TH',   &
                     'Thickness of refrozen snow at the top of the snowpack', IDDIM, YATT_TITLE, (/'m'/))         
   
-    IF(DGU%LSNOWBANDS) THEN ! spectral output
+    IF(DGMI%LPROBANDS) THEN ! spectral output
       CALL DEF_VAR_NETCDF(DGU, &
                     IFILE_ID, 'SPEC_ALB',   &
                     'Snow spectral albedo', IDDIMBAND, YATT_TITLE, (/'no unity'/))  

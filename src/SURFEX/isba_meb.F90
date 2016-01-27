@@ -2,7 +2,7 @@
       SUBROUTINE ISBA_MEB(TPTIME, OMEB, OMEB_LITTER, PGNDLITTER, OFORC_MEASURE, OGLACIER, &
         OTR_ML, OAGRI_TO_GRASS, OSHADE, OSTRESSDEF,                            &
         OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
-        HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON, HPHOTO,                            &           
+        HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON, HPHOTO,                   &           
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
@@ -196,7 +196,7 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO        ! Kind of photosynthesis;
 !                                                    ! 'LAI'
 !                                                    ! 'AST' NOTE: this option currently supported (ISBA-Ags)
 !                                                    ! 'LST'
-!
+LOGICAL, INTENT(IN)                 :: OATMORAD  ! activate atmotartes scheme
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON   ! activate SYTRON snow redistribution scheme
 INTEGER, DIMENSION(:),INTENT(IN)    :: KWG_LAYER     ! Number of soil moisture layers (DIF option)
 !
@@ -1189,7 +1189,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
            PSNOWHMASS, PRISNOW, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
            OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
-           HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,KTAB_SYT,PSYTMASS,                       &
+           HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,KTAB_SYT,PSYTMASS,              &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,            &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &

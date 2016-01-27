@@ -17,7 +17,8 @@
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,PBLOWSNW,               &
                OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
-               HSNOWMETAMO,HSNOWRAD,P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO) 
+               HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,          &
+               PSPEC_ALB, PDIFF_RATIO) 
 !     ##########################################################################
 !
 !!****  *SNOWCRO*
@@ -330,6 +331,7 @@ REAL, DIMENSION(:,:), INTENT(IN)      :: PBLOWSNW !  Properties of deposited blo
 LOGICAL, INTENT(IN)                   :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
 CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO, HSNOWRAD
+LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
                                          !-----------------------
                                          ! Metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -826,30 +828,30 @@ SELECT CASE (HSNOWRAD)
    IF ((ANY(PSNOWIMPUR<0)).OR.(ANY(PSNOWIMPUR>1))) THEN
     PRINT*, PSNOWIMPUR
    ENDIF
-    PRINT*, size(PSPEC_ALB), 'essai'
+!    PRINT*, size(PSPEC_ALB), 'essai'
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
                         ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH, &
                         INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
-                        P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF)
+                        P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF,OATMORAD)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! !!! activation of spectral outputs 
-! 
-! ! ! output spectral albedo and diffuse to total irradiance ratio
-!     DO JJ=1,NPNBANDS
-! 	DO JP=1, size(ZSNOW)
-! 	PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)
-! 	ENDDO
-!     ENDDO
-!     
-!     DO JJ=1,JPNBANDS_ATM
-! 	DO JP=1, size(ZSNOW)
-! 	IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN
-! 	PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))
-! 	ELSE 
-! 	PDIFF_RATIO(JP,JJ)=1.
-! 	ENDIF
-! 	ENDDO
-!     ENDDO
+ !! activation of spectral outputs 
+
+! ! output spectral albedo and diffuse to total irradiance ratio
+    DO JJ=1,NPNBANDS
+	DO JP=1, size(ZSNOW)
+	PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)
+	ENDDO
+    ENDDO
+    
+    DO JJ=1,JPNBANDS_ATM
+	DO JP=1, size(ZSNOW)
+	IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN
+	PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))
+	ELSE 
+	PDIFF_RATIO(JP,JJ)=1.
+	ENDIF
+	ENDDO
+    ENDDO
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
   !

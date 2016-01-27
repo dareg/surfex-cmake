@@ -17,7 +17,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
                          PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
-                         HSNOWMETAMO, HSNOWRAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,                &
+                         HSNOWMETAMO, HSNOWRAD,OATMORAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,                &
                          PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                          PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
@@ -321,6 +321,7 @@ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
                                          ! HSNOWMETAMO=TA1 TARTES with constant impurities
                                          ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTROn snow redistribution scheme
+LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
 
 !*      0.2    declarations of local variables
 !
@@ -992,7 +993,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
-             OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,P_DIR_SW, P_SCA_SW,&
+             OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,&
              PSPEC_ALB, PDIFF_RATIO)
 !
   ZP_GFLXCOR (:) = 0.0

@@ -5,7 +5,7 @@
                       OMEB, OFORC_MEASURE, OMEB_LITTER,                          &
                       PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
-                      OSNOWSYTRON,                                               &
+                      OATMORAD,OSNOWSYTRON,                                      &
                       PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,                &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PVDIR,                   &
@@ -291,6 +291,7 @@ CHARACTER(3),         INTENT(IN)  :: HSNOWRAD
                                          ! HSNOWRAD=TA1 TARTES with constant impurities
                                          ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
 !
+LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTRON snow redistribution scheme
 REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
 !
@@ -1022,7 +1023,7 @@ IF(OMEB)THEN
    CALL ISBA_MEB(TPTIME, OMEB, OMEB_LITTER,PGNDLITTER, OFORC_MEASURE, OGLACIER,&
         OTR_ML, OAGRI_TO_GRASS, GSHADE, OSTRESSDEF,                            &
         OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
-        HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON, HPHOTO,                            &   
+        HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON, HPHOTO,                   &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
@@ -1122,7 +1123,7 @@ ELSE
            PSNOWHMASS, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC,                &
            PLAT, PLON, ZQS3L,                                                   &
            OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
-           HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,                  &
+           HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,        &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &

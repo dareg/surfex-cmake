@@ -1130,7 +1130,7 @@ IF (LHOOK) CALL DR_HOOK('SOIL_ABSORPTION',1,ZHOOK_HANDLE)
 END SUBROUTINE SOIL_ABSORPTION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE SPECTRAL_REPARTITION(PSW_RAD,PCOSZEN,PSW_RAD_DIF,PSW_RAD_DIR,PNIR_ABS,P_DIR_SW, P_SCA_SW)
+SUBROUTINE SPECTRAL_REPARTITION(PSW_RAD,PCOSZEN,PSW_RAD_DIF,PSW_RAD_DIR,PNIR_ABS,P_DIR_SW, P_SCA_SW, OATMORAD)
 
 USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPRATIO_DIR,XPRATIO_DIF,XPCOEFNIR_DIR,XPCOEFNIR_DIF,XP_MUDIFF
 USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM, PPWAVELENGTHS_ATM, PPTEN
@@ -1139,21 +1139,23 @@ IMPLICIT NONE
 
 REAL, DIMENSION(:), INTENT(IN)    :: PSW_RAD ! broadband global incident light (W/m^2) (npoints)
 REAL, DIMENSION(:), INTENT(IN)    :: PCOSZEN ! cosine of zenithal solar angle (npoints)
+LOGICAL, INTENT(IN) :: OATMORAD ! activate spectral repartition from atmotartes
 REAL, DIMENSION(:,:), INTENT(IN)  :: P_DIR_SW, P_SCA_SW ! spectral repartition of direct and diffuse from atmotartes (npoints, jpnbands_atm)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSW_RAD_DIF ! spectral diffuse incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSW_RAD_DIR ! spectral direct incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:), INTENT(OUT)   :: PNIR_ABS ! Near infrared radiation (2500-4000 nm) absorbed by snowpack (W/m^2) (npoints)
-!
+
+
 REAL, DIMENSION(SIZE(PSW_RAD)) :: ZSW_RAD_BROADDIR,ZSW_RAD_BROADDIF ! direct and diffuse broadband incident light (W/m^2) (npoints)
 INTEGER :: JB !Loop counter
-LOGICAL :: GCRORAD ! activate spectral repartition from atmotartes
+
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SPECTRAL_REPARTITION',0,ZHOOK_HANDLE)
 !
-GCRORAD=.false.
-IF (GCRORAD) THEN
+
+IF (OATMORAD) THEN
 
 DO JB = 1,NPNBANDS
   PSW_RAD_DIF(:,JB) = P_SCA_SW(:,JB)/ XP_MUDIFF
@@ -1205,7 +1207,7 @@ END SUBROUTINE SPECTRAL_REPARTITION
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
                           PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
                           PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW, PSNOWALB_SP,&
-                          PSPEC_DIR, PSPEC_DIF)
+                          PSPEC_DIR, PSPEC_DIF,OATMORAD)
 !
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
@@ -1241,6 +1243,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWALB_SP !(npoints,nlayers)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_DIR, PSPEC_DIF
 !
 LOGICAL, INTENT(IN) :: ODEBUG ! Print for debugging
+LOGICAL, INTENT(IN) :: OATMORAD ! activate atmotartes scheme
 CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 !
 !packed variables
@@ -1365,7 +1368,7 @@ IF ( IPOINTDAY>=1 ) THEN
                            ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),  & 
                            ZRADSINK_P(1:IPOINTDAY,1:IMAX_USE),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO,&
                            P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
-                           PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:))
+                           PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:),OATMORAD)
 #else
   CALL SNOWCRO_CALL_TARTES(ZSNOWGRAN1_P(1:IPOINTDAY,:),ZSNOWGRAN2_P(1:IPOINTDAY,:),ZSNOWRHO_P(1:IPOINTDAY,:),     &
                            ZSNOWDZ_P(1:IPOINTDAY,:),ZSNOWG0_P(1:IPOINTDAY,:),ZSNOWY0_P(1:IPOINTDAY,:),            &
@@ -1374,7 +1377,7 @@ IF ( IPOINTDAY>=1 ) THEN
                            ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),              &
                            ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO,&
                            P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
-                             PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:))
+                             PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:),OATMORAD)
 #endif
   !
   !Unpack 1d output variables
@@ -1413,7 +1416,7 @@ END SUBROUTINE SNOWCRO_TARTES
 SUBROUTINE SNOWCRO_CALL_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
                                PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
                                PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW,PALB_SP,&
-                               PSPEC_DIR,PSPEC_DIF)
+                               PSPEC_DIR,PSPEC_DIF,OATMORAD)
 !
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
@@ -1451,6 +1454,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PALB_SP ! spectral albedo (npoints, nlayers
 REAL, DIMENSION(:,:), INTENT(OUT) ::PSPEC_DIF,PSPEC_DIR
 
 LOGICAL,INTENT(IN) :: ODEBUG ! Print for debugging
+LOGICAL,INTENT(IN) :: OATMORAD ! activate atmotartes radiations
 CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 
 !Local variables
@@ -1507,7 +1511,7 @@ DO JB = 1,NPNBANDS
 END DO
 !
 !Spectral repartition of radiation
- CALL SPECTRAL_REPARTITION(PSW_RAD,COS(PZENITH),ZSW_RAD_DIF,ZSW_RAD_DIR,ZNIR_ABS,P_DIR_SW, P_SCA_SW)
+ CALL SPECTRAL_REPARTITION(PSW_RAD,COS(PZENITH),ZSW_RAD_DIF,ZSW_RAD_DIR,ZNIR_ABS,P_DIR_SW, P_SCA_SW, OATMORAD)
 !
 IF ( ODEBUG ) THEN
   WRITE(*,*) "ZSW_RAD_DIF=",ZSW_RAD_DIF
@@ -1515,8 +1519,8 @@ IF ( ODEBUG ) THEN
   WRITE(*,*) "PZENITH=",PZENITH
 END IF
 !
-GCRORAD=.false.
-IF (.NOT.GCRORAD) THEN
+
+IF (.NOT.OATMORAD) THEN
 PSPEC_DIF(:,:)=0.
 PSPEC_DIR(:,:)=0.
 DO JJ=1,NPNBANDS

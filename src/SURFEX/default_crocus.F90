@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
-                 HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON)  
+                 HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON)  
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for Crocus
@@ -29,6 +29,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    07/2012
+!!	M. Dumont 01/2016 atmotartes
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -49,6 +50,7 @@ IMPLICIT NONE
 LOGICAL, INTENT(OUT)          :: OSNOWDRIFT
 LOGICAL, INTENT(OUT)          :: OSNOWDRIFT_SUBLIM
 LOGICAL, INTENT(OUT)          :: OSNOW_ABS_ZENITH
+LOGICAL, INTENT(OUT)          :: OATMORAD
 ! Logical to activate / disactivate Sytron                                          
 LOGICAL, INTENT(OUT)          :: OSNOWSYTRON
 !
@@ -68,6 +70,7 @@ OSNOWDRIFT        = .TRUE.
 OSNOWDRIFT_SUBLIM = .FALSE.
 OSNOW_ABS_ZENITH = .FALSE.
 OSNOWSYTRON=.FALSE.
+OATMORAD=.FALSE.
 !
 HSNOWMETAMO = 'B92'
 HSNOWRAD    = 'B92'
