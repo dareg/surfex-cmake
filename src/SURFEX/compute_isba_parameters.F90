@@ -53,6 +53,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, UG, U, IM, DST, SLT, SV, &
 !!                                          Delete NWG_LAYER_TOT, NWG_SIZE
 !!                                          water table / Surface coupling
 !!      P. Samuelsson  02/14 : MEB
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !!
 !-------------------------------------------------------------------------------
 !
@@ -645,7 +646,8 @@ IM%I%XDIR_ALB_WITH_SNOW = 0.0
 IM%I%XSCA_ALB_WITH_SNOW = 0.0
 !
  CALL INIT_VEG_n(IM%I%NPATCH, KI, IM%I%LCANOPY, IM%I%CROUGH, IM%I%LAGRI_TO_GRASS, IM%I%TSNOW, &
-                 IM%I%CPHOTO, IM%I%XLAIMIN, IM%I%XH_TREE, IM%I%XVEGTYPE_PATCH, IM%I%XLAI, &
+                 IM%I%CPHOTO, IM%DTI%LDATA_VEG, IM%DTI%LDATA_Z0, IM%DTI%LDATA_EMIS, &
+                 IM%I%XLAIMIN, IM%I%XH_TREE, IM%I%XVEGTYPE_PATCH, IM%I%XLAI, &
                  IM%I%XZ0, IM%I%XVEG, IM%I%XEMIS, &
                  IM%I%LTR_ML, IM%I%XFAPARC, IM%I%XFAPIRC, IM%I%XLAI_EFFC, IM%I%XMUS, &
                  IM%I%XALBNIR_SOIL, IM%I%XALBVIS_SOIL, IM%I%XALBUV_SOIL, IM%I%XALBNIR, &

@@ -49,7 +49,7 @@ USE MODI_GET_LONLAT_TRIP
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -89,7 +89,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !*       1.     Define parallel partitions:

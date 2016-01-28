@@ -2,7 +2,7 @@
                                 PHGROUND,PHG_OLD,PWTD,PFWTD           )
 !     ##########################################################################
 !
-!!****  *FLOOD_UPDATE*  
+!!****  *GWF_CPL_UPDATE*  
 !!
 !!    PURPOSE
 !!    -------
@@ -60,6 +60,7 @@ REAL,    DIMENSION(:,:),   INTENT(OUT)   :: PFWTD
 INTEGER, DIMENSION(SIZE(PTABGW_H,1),SIZE(PTABGW_H,2)) :: ISUP
 INTEGER, DIMENSION(SIZE(PTABGW_H,1),SIZE(PTABGW_H,2)) :: IINF
 REAL,    DIMENSION(SIZE(PTABGW_H,1),SIZE(PTABGW_H,2)) :: ZFWTD
+LOGICAL, DIMENSION(SIZE(PTABGW_H,1),SIZE(PTABGW_H,2)) :: LMASK
 !
 INTEGER         :: ILON, ILAT, JLON, JLAT, JFRAC, INFRAC
 !
@@ -75,39 +76,45 @@ ILON   = SIZE(PTABGW_H,1)
 ILAT   = SIZE(PTABGW_H,2)
 INFRAC = SIZE(PTABGW_H,3)
 !
+LMASK(:,:) = (OMASK_GW(:,:).AND.PHGROUND(:,:)/=PHG_OLD(:,:))
+!
 !-------------------------------------------------------------------------------
 ! * Evolution of water table depth
 !-------------------------------------------------------------------------------
 !
-WHERE(OMASK_GW(:,:).AND.PHGROUND(:,:)/=PHG_OLD(:,:))
-      PWTD    (:,:) = PHGROUND(:,:)-PTOPO_RIV(:,:)
-      PFWTD   (:,:) = PTABGW_F(:,:,1)
+WHERE(LMASK(:,:))
+      PWTD  (:,:) = PHGROUND(:,:)-PTOPO_RIV(:,:)
 ENDWHERE
 !
 !-------------------------------------------------------------------------------
 ! * Evolution of the fraction of water table to rise
 !-------------------------------------------------------------------------------
 !
+WHERE(LMASK(:,:).AND.PHGROUND(:,:)<=PTABGW_H(:,:,1))
+      PFWTD(:,:) = MIN(1.0,PTABGW_F(:,:,1))
+      LMASK(:,:) = .FALSE.
+ELSEWHERE(LMASK(:,:).AND.PHGROUND(:,:)>=PTABGW_H(:,:,INFRAC))
+      PFWTD(:,:) = MIN(1.0,PTABGW_F(:,:,INFRAC))
+      LMASK(:,:) = .FALSE.
+ENDWHERE
+!
 ISUP (:,:)=0
 IINF (:,:)=0
-ZFWTD(:,:)=PFWTD(:,:)
 !
 DO JLAT=1,ILAT
-   DO JLON=1,ILON
-      IF(OMASK_GW(JLON,JLAT).AND.PHGROUND(JLON,JLAT)/=PHG_OLD(JLON,JLAT))THEN
+   DO JLON=1,ILON      
+      IF(LMASK(JLON,JLAT))THEN
         DO JFRAC=1,INFRAC-1
            IF(PHGROUND(JLON,JLAT)>=PTABGW_H(JLON,JLAT,JFRAC))THEN
              ISUP(JLON,JLAT)=JFRAC+1
              IINF(JLON,JLAT)=JFRAC
            ENDIF           
         ENDDO
-        IF(IINF(JLON,JLAT)>0)THEN
-          ZFWTD(JLON,JLAT) =  PTABGW_F(JLON,JLAT,IINF(JLON,JLAT))                                       &
-                           + (PHGROUND(JLON,JLAT                )-PTABGW_H(JLON,JLAT,IINF(JLON,JLAT))) &
-                           * (PTABGW_F(JLON,JLAT,ISUP(JLON,JLAT))-PTABGW_F(JLON,JLAT,IINF(JLON,JLAT))) &
-                           / (PTABGW_H(JLON,JLAT,ISUP(JLON,JLAT))-PTABGW_H(JLON,JLAT,IINF(JLON,JLAT)))
-        ENDIF
-        PFWTD(JLON,JLAT)=MIN(1.0,ZFWTD(JLON,JLAT))        
+        PFWTD(JLON,JLAT) = PTABGW_F(JLON,JLAT,IINF(JLON,JLAT))                                      &
+                         + (PHGROUND(JLON,JLAT                )-PTABGW_H(JLON,JLAT,IINF(JLON,JLAT))) &
+                         * (PTABGW_F(JLON,JLAT,ISUP(JLON,JLAT))-PTABGW_F(JLON,JLAT,IINF(JLON,JLAT))) &
+                         / (PTABGW_H(JLON,JLAT,ISUP(JLON,JLAT))-PTABGW_H(JLON,JLAT,IINF(JLON,JLAT)))
+        PFWTD(JLON,JLAT) = MIN(1.0,PFWTD(JLON,JLAT))
       ENDIF
    ENDDO
 ENDDO

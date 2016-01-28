@@ -43,13 +43,13 @@ SUBROUTINE SFX_OASIS_INIT(HNAMELIST,KLOCAL_COMM,HINIT)
 !
 USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
 IMPLICIT NONE
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 INCLUDE 'mpif.h'
 #endif
 !
@@ -123,7 +123,7 @@ ENDIF
 !
 IF(LOASIS)THEN
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
   CALL OASIS_INIT_COMP(ICOMP_ID,CMODEL_NAME,IERR)  
   IF (IERR/=OASIS_OK) THEN
      WRITE(*,'(A)'   )'SFX : Error initializing OASIS'
@@ -152,7 +152,7 @@ ENDIF
 !*       4.     Get local communicator
 !               ----------------------
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 CALL OASIS_GET_LOCALCOMM(KLOCAL_COMM,IERR) 
 IF (IERR/=OASIS_OK) THEN
    IF(IRANK==0)THEN

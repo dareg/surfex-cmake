@@ -36,9 +36,10 @@ SUBROUTINE TRIP_OASIS_RECV (TP, TPG,                           &
 !              ------------
 !
 !
-!
 USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
+!
+USE MODN_TRIP_OASIS, ONLY : XTSTEP_CPL_LAND
 !
 USE MODD_TRIP_PAR,  ONLY : XUNDEF
 !
@@ -49,7 +50,7 @@ USE MODI_FLOOD_REDISTRIB
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -79,6 +80,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSRC_FLOOD    ! Input P-E-I flood source te
 !
 REAL, DIMENSION(KLON,KLAT) :: ZREAD
 REAL, DIMENSION(KLON,KLAT) :: ZSRC_FLOOD
+REAL, DIMENSION(KLON,KLAT) :: ZWORK
 REAL, DIMENSION(KLON,KLAT) :: ZRESIDU
 !
 CHARACTER(LEN=50)          :: YCOMMENT
@@ -89,7 +91,7 @@ INTEGER                    :: JVAR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV',0,ZHOOK_HANDLE)
@@ -110,7 +112,7 @@ PSRC_FLOOD(:,:) = 0.0
 !*       2.     Get coupling fields :
 !               ---------------------
 !
-IF(LCPL_LAND)THEN
+IF(LCPL_LAND.AND.MOD(PTIMEC,XTSTEP_CPL_LAND)==0.0)THEN
 !
 ! * Receive river input fields
 !
@@ -146,16 +148,25 @@ IF(LCPL_LAND)THEN
 !
     ZREAD     (:,:) = XUNDEF 
     ZSRC_FLOOD(:,:) = XUNDEF
-    ZRESIDU   (:,:) = XUNDEF    
+    ZWORK     (:,:) = XUNDEF
+    ZRESIDU   (:,:) = XUNDEF
 !
     YCOMMENT='floodplains freshwater flux (P-E-I)'
     CALL OASIS_GET(NSRCFLOOD_ID,IDATE,ZREAD(:,:),IERR)
     CALL CHECK_TRIP_RECV(IERR,YCOMMENT)
-    CALL FLOOD_REDISTRIB(TP,TPG,KLON,KLAT,ZREAD,ZSRC_FLOOD,ZRESIDU)
+!
+!   Redistribute freshwater flux over flooded grid-cell
+!   and conserve water mass over each bassin
+    CALL FLOOD_REDISTRIB(TP,TPG, &
+                         KLON,KLAT,XTSTEP_CPL_LAND, &
+                         ZREAD,ZSRC_FLOOD,ZWORK     )
+!
     CALL KGM2S_TO_KGS(IERR,ZSRC_FLOOD,PSRC_FLOOD)
-     WHERE(TPG%GMASK(:,:)) 
+    CALL KGM2S_TO_KGS(IERR,ZWORK,ZRESIDU)
+!
+    WHERE(TPG%GMASK_FLD(:,:)) 
          PRUNOFF(:,:)=PRUNOFF(:,:)+ZRESIDU(:,:)
-     ENDWHERE
+    ENDWHERE
 !
   ENDIF
 !
@@ -205,7 +216,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:KGM2S_TO_KGS',0,ZHOOK_HANDLE)
 !
-! kg/m2 -> kg/s
+! kg/m2/s -> kg/s
 !
 IF(KERR>=OASIS_RECVD)THEN
   WHERE(TPG%GMASK(:,:)) 

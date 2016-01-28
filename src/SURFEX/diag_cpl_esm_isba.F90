@@ -34,14 +34,15 @@
 !!    MODIFICATIONS
 !!    -------------
 !!
+!!      B. Decharme    01/16 : Bug with flood budget
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
 USE MODD_ISBA_n, ONLY : ISBA_t
+!
+USE MODN_SFX_OASIS, ONLY : XTSTEP_CPL_LAND
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -147,7 +148,7 @@ ENDDO
 !  --------------------------------------------------------------
 !
 IF(I%LFLOOD)THEN
-  ZBUDGET(:)=I%XPIFLOOD(:)+(I%XCPL_PFLOOD(:)-I%XCPL_IFLOOD(:)-I%XCPL_EFLOOD(:))
+  ZBUDGET(:)=(I%XPIFLOOD(:)*XTSTEP_CPL_LAND)+I%XCPL_PFLOOD(:)-I%XCPL_IFLOOD(:)-I%XCPL_EFLOOD(:)
   WHERE(ZBUDGET (:)<=0.0)
         I%XPIFLOOD(:)=0.0
         I%XFFLOOD (:)=0.0

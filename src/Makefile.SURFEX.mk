@@ -107,7 +107,7 @@ endif
 #DIR_SURFEX += ARCH_SRC/bug_surfex
 # PRE_BUG TEST !!!
 #
-FUNDEFS += -USFXOASIS -UTRIPOASIS
+FUNDEFS += -UCPLOASIS
 #
 DIR_TRIP += LIB/TRIPv2
 #FPPFLAGS_TRIP=
@@ -287,14 +287,14 @@ LIB_OASIS?=-L${OASIS_PATH}/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
 INC_OASIS?=-I${OASIS_PATH}/build/lib/psmile.MPI1
 OASIS_KEY?=${OASIS_PATH}/build/lib/psmile.MPI1/mod_oasis.mod
 #
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DCPLOASIS
 VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
 endif
 endif
 #
 ifeq "$(VER_OASIS)" "mct_EXT"
 ifneq "$(VER_MPI)" "NOMPI"
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DCPLOASIS
 VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
 endif
 endif

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE TRIP_HS_VEL (PTSTEP,OMASK,OMASK_VEL,PLEN,PWIDTH,PSLOPEBED,PN,PSURF_STO,PHS,PVEL)
+SUBROUTINE TRIP_HS_VEL (PTSTEP,OMASK_VEL,PLEN,PWIDTH,PSLOPEBED,PN,PSURF_STO,PHS,PVEL)
 !     ################################################################
 !
 !!****  *TRIP_HS_VEL*  
@@ -53,7 +53,6 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                     :: PTSTEP ! Trip timestep value (10800s)
 !
-LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK      ! General mask mask
 LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_VEL  ! Variable velocity mask
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PLEN       ! river length       [m] 
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PWIDTH     ! river widths                 [m]

@@ -161,8 +161,7 @@ ENDIF
 !
 CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
                     ZWTD,ZFWTD,ZQGCELL,ZHGHS,                  &
-                    ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZSRC_FLOOD,    &
-                    ZDISCHARGE,                                &
+                    ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZDISCHARGE,    &
                     ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL    )
 !
 !-------------------------------------------------------------------------------
@@ -170,8 +169,8 @@ CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
 !*       2.     Initialize river height and velocity :
 !               --------------------------------------
 !
-CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
-                 TP%XSLOPEBED,TP%XN,TP%XSURF_STO,ZHS,ZVEL           )
+CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
+                 TP%XSLOPEBED,TP%XN,TP%XSURF_STO,ZHS,ZVEL )
 !
 !-------------------------------------------------------------------------------
 !
@@ -187,18 +186,21 @@ IF(CGROUNDW=='DIF')THEN
            TPG%GMASK_GW,TP%XNUM_AQUI,ZDRAIN,        &
            TPG%XLEN,TP%XWIDTH,TP%XHC_BED,           &
            TP%XTOPO_RIV,TP%XTAUG,TPG%XAREA,         &
-           TP%XTRANS,TP%XWEFF,                      &
-           TP%XTABGW_F,TP%XTABGW_H,ZHS,             &
-           TP%XSURF_STO,TP%XHGROUND,ZHG_OLD,        &
-           ZQGCELL,ZWTD,ZFWTD,ZHGHS,ZGOUT,ZGNEG,    &
-           ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL  )
+           TP%XTRANS,TP%XWEFF,TP%XTABGW_F,          &
+           TP%XTABGW_H,ZHS,TP%XHGROUND,ZHG_OLD,     &
+           PSURF_STO=TP%XSURF_STO,PQGCELL=ZQGCELL,  &
+           PWTD=ZWTD,PFWTD=ZFWTD,PHGHS=ZHGHS,       &
+           PGOUT=ZGOUT,PGNEG=ZGNEG,                 &
+           PGSTO_ALL=ZGSTO_ALL,                     &
+           PGSTO2_ALL=ZGSTO2_ALL,                   &
+           PGIN_ALL=ZGIN_ALL,PGOUT_ALL=ZGOUT_ALL    )
 !
 !  * Velocity actualization
 !   
-   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL, &
-                    TPG%XLEN,TP%XWIDTH,             &
-                    TP%XSLOPEBED,TP%XN,             &
-                    TP%XSURF_STO,ZHS,ZVEL           )  
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL, &
+                    TPG%XLEN,TP%XWIDTH,   &
+                    TP%XSLOPEBED,TP%XN,   &
+                    TP%XSURF_STO,ZHS,ZVEL )  
 !            
 ENDIF
 !
@@ -240,10 +242,10 @@ DO JTSTEP=1,ITSTEP !TRIP time step loop
 !
 !  * Velocity actualization
 !   
-   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL, &
-                    TPG%XLEN,TP%XWIDTH,             &
-                    TP%XSLOPEBED,TP%XN,             &
-                    TP%XSURF_STO,ZHS,ZVEL           )  
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL, &
+                    TPG%XLEN,TP%XWIDTH,   &
+                    TP%XSLOPEBED,TP%XN,   &
+                    TP%XSURF_STO,ZHS,ZVEL )  
 !
 !  * Time actualization  
 !

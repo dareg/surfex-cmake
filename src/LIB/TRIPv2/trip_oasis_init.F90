@@ -43,7 +43,7 @@ SUBROUTINE TRIP_OASIS_INIT(OOASIS,KLOCAL_COMM,PRUNTIME)
 !
 USE MODN_TRIP_RUN, ONLY : CNAMELIST
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -115,13 +115,13 @@ CLOSE(UNIT=11)
 OOASIS   = LOASIS
 !
 IF(LOASIS)THEN
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
   WRITE(*,'(A)')'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
   WRITE(*,'(A)')'OASIS used for model : ',TRIM(CMODEL_NAME)
   WRITE(*,'(A)')'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 #else
   WRITE(*,'(A)')'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-  WRITE(*,'(A)')'TRIP_OASIS_INIT: When OASIS used, TRIP must be compiled with -DTRIPOASIS cpp key'
+  WRITE(*,'(A)')'TRIP_OASIS_INIT: When OASIS used, TRIP must be compiled with -DCPLOASIS cpp key'
   WRITE(*,'(A)')'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
   CALL ABORT
   STOP 
@@ -132,7 +132,7 @@ ELSE
 ENDIF
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !*       3.     Setup OASIS

@@ -33,7 +33,7 @@ SUBROUTINE TRIP_OASIS_END
 !*       0.    DECLARATIONS
 !              ------------
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -49,7 +49,7 @@ IMPLICIT NONE
 INTEGER                    :: IERR   ! Error info
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 CALL OASIS_TERMINATE(IERR)

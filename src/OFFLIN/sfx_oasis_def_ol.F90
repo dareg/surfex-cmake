@@ -49,7 +49,7 @@ USE MODD_SURFEX_MPI,     ONLY : NPROC, NRANK, NINDEX
 !
 USE MODI_SFX_OASIS_DEFINE
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -90,7 +90,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_DEF_OL',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS 
+#ifdef CPLOASIS 
 !-------------------------------------------------------------------------------
 !
 !*       1.     Define ORANGE parallel partitions:

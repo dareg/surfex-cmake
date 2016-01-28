@@ -47,9 +47,7 @@ USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
-                      XCVEL, XRATMED, XTSTEP,  &
-                      XTAUG_UNIF, XTAUG_UP,    &
-                      XTAUG_DOWN
+                      XCVEL, XRATMED, XTSTEP
 !
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
@@ -109,6 +107,8 @@ CHARACTER(LEN=50)                    :: YFILE
 CHARACTER(LEN=20)                    :: YVAR 
 !
 REAL,DIMENSION(4)                    :: ZDATE
+!
+REAL,DIMENSION(:,:,:),ALLOCATABLE    :: ZREAD3D
 !
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZREAD
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHSTREAM
@@ -217,10 +217,10 @@ IF(LFLOOD)THEN
     WRITE(NLISTING,*)'! You cannot use the flooding scheme without the variable velocity scheme !!!'
     CALL ABORT_TRIP('INIT_TRIP: You cannot use the flooding scheme without the variable velocity scheme !!!')
   ENDIF
-  IF(XTSTEP>1800.)THEN
+  IF(XTSTEP>3600.)THEN
     WRITE(NLISTING,*)'!'
     WRITE(NLISTING,*)'! For flooding, the TRIP time step is too big      !!!'
-    WRITE(NLISTING,*)'! XTSTEP must be equal or inferior to 1800s   !!!'
+    WRITE(NLISTING,*)'! XTSTEP must be equal or inferior to 3600s        !!!'
     WRITE(NLISTING,*)'!'
     CALL ABORT_TRIP('INIT_TRIP: For flooding, the TRIP time step is too big      !!!')
   ENDIF
@@ -246,24 +246,6 @@ IF(ZGRID_RES<0.5.AND.XRATMED==1.4)THEN
      WRITE(NLISTING,*)'! meandering ratio is 1.4 at 0.5° or 1° resolution !!!'   
      WRITE(NLISTING,*)'! for other resolution change XRATMED in namelist  !!!' 
      CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5° or 1° resolution !!!')
-ENDIF
-!
-IF(CGROUNDW=='CST')THEN
-  IF(XTAUG_UNIF<1.0.OR.XTAUG_UNIF>365.0)THEN
-    WRITE(NLISTING,*)'! Constant transfert time value XTAUG_UNIF must be at least 1 day or inferior to 365 days !!!'
-    CALL ABORT_TRIP('INIT_TRIP: Constant transfert time value must be at least 1 day or inferior to 365 days')
-  ENDIF        
-ENDIF
-!
-IF(CGROUNDW=='DIF')THEN
-  IF(XTAUG_UP<1.0)THEN
-    WRITE(NLISTING,*)'! Upstream transfert time value XTAUG_UP must be at least 1 day !!!'
-    CALL ABORT_TRIP('INIT_TRIP: Upstream transfert time value must be at least 1 day')
-  ENDIF
-  IF(XTAUG_DOWN>365.0)THEN
-    WRITE(NLISTING,*)'! Downstream transfert time value XTAUG_DOWN must be lower than 365 days !!!'
-    CALL ABORT_TRIP('INIT_TRIP: Downstream transfert time value must be lower than 365 days')
-  ENDIF
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -526,18 +508,35 @@ IF(LFLOOD)THEN
         TPG%GMASK_FLD(:,:)=.FALSE.
   ENDWHERE
 !
-  ALLOCATE(TP%XTAB_F (KLON,KLAT,NDIMTAB))      
-  ALLOCATE(TP%XTAB_H (KLON,KLAT,NDIMTAB))      
-  ALLOCATE(TP%XTAB_VF(KLON,KLAT,NDIMTAB))      
+  ALLOCATE(ZREAD3D(KLON,KLAT,NDIMTAB))
+!
+  ALLOCATE(TP%XTAB_F (KLON,KLAT,NDIMTAB+1))      
+  ALLOCATE(TP%XTAB_H (KLON,KLAT,NDIMTAB+1))      
+  ALLOCATE(TP%XTAB_VF(KLON,KLAT,NDIMTAB+1))      
+!
+  TP%XTAB_F (:,:,:)=XUNDEF
+  TP%XTAB_H (:,:,:)=XUNDEF
+  TP%XTAB_VF(:,:,:)=XUNDEF
+!  
+  WHERE(TPG%GMASK_FLD(:,:))
+      TP%XTAB_F (:,:,1)=0.0
+      TP%XTAB_H (:,:,1)=0.0
+      TP%XTAB_VF(:,:,1)=0.0         
+  ENDWHERE
 !
   YVAR ='TABF'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTAB_F)
+  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD3D)
+  TP%XTAB_F(:,:,2:NDIMTAB+1)=ZREAD3D(:,:,:)
 !
   YVAR ='TABH'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTAB_H)
+  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD3D)
+  TP%XTAB_H(:,:,2:NDIMTAB+1)=ZREAD3D(:,:,:)
 !
   YVAR ='TABVF'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTAB_VF)
+  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD3D)
+  TP%XTAB_VF(:,:,2:NDIMTAB+1)=ZREAD3D(:,:,:)
+!
+  DEALLOCATE(ZREAD3D)
 !
 ELSE
 !
@@ -590,7 +589,7 @@ ZVEL    (:,:) = 0.0
 !
 IF(CVIT == 'VAR')THEN       
 !
-   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL,  &
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,            &
                     TPG%XLEN,TP%XWIDTH,TP%XSLOPEBED, &
                     TP%XN,TP%XSURF_STO,ZHSTREAM,ZVEL )
 !

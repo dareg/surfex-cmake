@@ -120,7 +120,7 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PDUNNE, PHORTON
 !
 REAL, DIMENSION(:), INTENT(IN   ) :: PFFLOOD
 REAL, DIMENSION(:), INTENT(IN   ) :: PPIFLOOD
-!                                    PPIFLOOD = Floodplain potential infiltration [kg/m²]
+!                                    PPIFLOOD = Floodplain potential infiltration [kg/m²/s]
 !                                             = Floodplain mass
 REAL, DIMENSION(:), INTENT(INOUT) :: PIFLOOD, PPFLOOD
 !                                    PIFLOOD = Floodplain infiltration     [kg/m²/s]
@@ -465,7 +465,7 @@ IF(OFLOOD)THEN
   ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX    (:)*XRHOLW &   !unfrozen soil
              +             ZFROZEN(:)   * ZIMAX_ICE(:)*XRHOLW     !frozen soil
 !
-  PIFLOOD(:)=MAX(0.0,(PFFLOOD(:)-PFSAT(:)))*MIN(PPIFLOOD(:)/PTSTEP,ZIF_MAX(:))
+  PIFLOOD(:)=MAX(0.0,(PFFLOOD(:)-PFSAT(:)))*MIN(PPIFLOOD(:),ZIF_MAX(:))
 !
   IF(HISBA == 'DIF')THEN
     ZDEPTH(:)=0.0

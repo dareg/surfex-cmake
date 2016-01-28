@@ -51,7 +51,7 @@ USE MODI_ABORT_TRIP
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -84,7 +84,7 @@ LOGICAL, DIMENSION(KLON,KLAT) :: LMASK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_SEND',0,ZHOOK_HANDLE)

@@ -35,7 +35,7 @@ SUBROUTINE SFX_OASIS_END
 !
 USE MODD_SFX_OASIS, ONLY : LOASIS
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -51,7 +51,7 @@ IMPLICIT NONE
 INTEGER                    :: IERR   ! Error info
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 IF(LOASIS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arome

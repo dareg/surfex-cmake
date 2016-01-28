@@ -999,7 +999,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     YATT = '-'
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'FFLOOD_ISBA'  ,'Potential_floodplain_grid-cell_fraction' ,JDIM,YATT_TITLE,YATT)
-    YATT (1)='kg/m2'
+    YATT (1)='kg/m2/s'
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'PIFLOOD_ISBA' ,'Potential_floodplain_infiltration',JDIM,YATT_TITLE,YATT)     
   ENDIF

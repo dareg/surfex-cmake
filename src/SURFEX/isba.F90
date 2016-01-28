@@ -149,6 +149,7 @@
 !!      (A. Boone & P. Samuelsson) (10/2014) Added MEB v1
 !!      (P. LeMoigne) 12/2014 EBA scheme update
 !!      (A. Boone)    02/2015 Consider spectral band dependence of snow for OTR_ML radiation option 
+!!      B. Decharme    01/16 : Bug with flood budget
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -559,7 +560,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFROZEN  !Fraction of frozen flood
 REAL, DIMENSION(:), INTENT(IN)   :: PFALB     !Floodplain albedo
 REAL, DIMENSION(:), INTENT(IN)   :: PFEMIS    !Floodplain emis
 REAL, DIMENSION(:), INTENT(IN)   :: PFFLOOD   !Efective floodplain fraction
-REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD  !Floodplains potential infiltration           [kg/m²]
+REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD  !Floodplains potential infiltration           [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT):: PIFLOOD   !Floodplains infiltration                     [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT):: PPFLOOD   !Floodplains direct precipitation             [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT):: PLE_FLOOD, PLEI_FLOOD !Floodplains latent heat flux     [W/m²]
@@ -960,7 +961,7 @@ ELSE
    CALL SOILDIF (HDIFSFCOND, OFLOOD, ZVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
      PCG, PCT, ZFROZEN1, PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                 &
      PHCAPSOIL, PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ,        &
-     ZSOILHCAPZ, PFWTD, PWTD, PWR, PPIFLOOD                                     )
+     ZSOILHCAPZ, PFWTD, PWTD, PWR                                               )
 !
 ENDIF
 !

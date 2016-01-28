@@ -29,18 +29,17 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    08/2009
+!!
+!!      B. Decharme    01/16 : Bug with flood budget
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_n,     ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-!
-!
 !
 USE MODI_PACK_SAME_RANK
 !
@@ -63,7 +62,7 @@ LOGICAL,           INTENT(IN)  :: OCPL_FLOOD
 REAL, DIMENSION(:), INTENT(IN) :: PWTD     ! water table depth (negative below soil surface) (m)
 REAL, DIMENSION(:), INTENT(IN) :: PFWTD    ! fraction of water table rise (-)
 REAL, DIMENSION(:), INTENT(IN) :: PFFLOOD  ! fraction of flooded area (-)
-REAL, DIMENSION(:), INTENT(IN) :: PPIFLOOD !(kg/m2)
+REAL, DIMENSION(:), INTENT(IN) :: PPIFLOOD ! Potential floodplain infiltration (kg/m2)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -103,8 +102,6 @@ IF(OCPL_WTD)THEN
   WHERE(I%XGW(:)==0.0)
         I%XWTD    (:) = XUNDEF
         I%XFWTD   (:) = 0.0
-  ELSEWHERE
-        I%XFWTD(:)=I%XFWTD(:)*I%XGW(:)
   ENDWHERE
 !
 ENDIF
@@ -121,13 +118,6 @@ IF(OCPL_FLOOD)THEN
   YCOMMENT='Potential flood infiltration'
   CALL PACK_SAME_RANK(U%NR_NATURE(:),PPIFLOOD(:),I%XPIFLOOD(:))
   CALL CHECK_LAND(YCOMMENT,I%XPIFLOOD)
-!
-! No flood for very smal flooded area (<0.1% of grid-cell)
-!
-  WHERE(I%XFFLOOD (:)<0.001)
-        I%XFFLOOD (:)=0.0
-        I%XPIFLOOD(:)=0.0
-  ENDWHERE
 !
 ENDIF
 !

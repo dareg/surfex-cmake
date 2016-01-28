@@ -1,6 +1,7 @@
 !     #########
     SUBROUTINE VEGETATION_EVOL(HISBA, HPHOTO, HRESPSL, HALBEDO, OAGRIP,   &
                                OTR_ML, ONITRO_DILU, OAGRI_TO_GRASS,       &
+                               ODATA_VEG, ODATA_Z0, ODATA_EMIS,           &
                                PTSTEP, KMONTH, KDAY, KSPINW,              &
                                PTIME, PLAT, PRHOA,                        &
                                PDG, PDZG, KWG_LAYER,                      &
@@ -58,6 +59,7 @@
 !!      C. Delire    01/2014 : IBIS respiration for tropical evergreen
 !!      R. Seferian  05/2015 : expanding of Nitrogen dilution option to the complete formulation proposed by Yin et al. GCB 2002 
 !!Seferian & Delire  06/2015 : accouting for living woody biomass respiration (expanding work of E Joetzjer to all woody PFTs) 
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -114,6 +116,10 @@ LOGICAL,              INTENT(IN)    :: OAGRIP  ! agricultural practices
 LOGICAL,              INTENT(IN)    :: OTR_ML  ! new radiative transfert
 LOGICAL,              INTENT(IN)    :: ONITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 LOGICAL,              INTENT(IN)    :: OAGRI_TO_GRASS
+!
+LOGICAL,              INTENT(IN)    :: ODATA_VEG
+LOGICAL,              INTENT(IN)    :: ODATA_Z0
+LOGICAL,              INTENT(IN)    :: ODATA_EMIS
 !
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 INTEGER,              INTENT(IN)    :: KMONTH  ! current month
@@ -485,14 +491,18 @@ ENDIF
 !
 IF (GMASK) THEN
   !
-  WHERE( PVEG(:) > 0. )
-    ! Evolution of vegetation fraction and roughness length due to LAI change
-    PZ0 (:) = Z0V_FROM_LAI(PLAI(:),PH_TREE(:),PVEGTYPE(:,:),OAGRI_TO_GRASS) 
-    PVEG(:) = VEG_FROM_LAI(PLAI(:),PVEGTYPE(:,:),OAGRI_TO_GRASS)
-    !
-    ! Evolution of radiative parameters due to vegetation fraction change
-    PEMIS(:)= EMIS_FROM_VEG(PVEG(:),PVEGTYPE(:,:))
-  END WHERE
+  ! Evolution of vegetation fraction and roughness length due to LAI change
+  IF(.NOT.ODATA_Z0) THEN
+    WHERE( PVEG(:) > 0. ) PZ0 (:) = Z0V_FROM_LAI(PLAI(:),PH_TREE(:),PVEGTYPE(:,:),OAGRI_TO_GRASS) 
+  ENDIF
+  IF(.NOT.ODATA_VEG) THEN
+    WHERE( PVEG(:) > 0. ) PVEG(:) = VEG_FROM_LAI(PLAI(:),PVEGTYPE(:,:),OAGRI_TO_GRASS)
+  ENDIF
+  !
+  ! Evolution of radiative parameters due to vegetation fraction change
+  IF(.NOT.ODATA_EMIS) THEN
+    WHERE( PVEG(:) > 0. ) PEMIS(:)= EMIS_FROM_VEG(PVEG(:),PVEGTYPE(:,:))
+  ENDIF
   !
   CALL ALBEDO(HALBEDO,                                  &
               PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,  &

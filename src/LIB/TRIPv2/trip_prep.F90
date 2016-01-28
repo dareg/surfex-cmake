@@ -51,7 +51,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 INCLUDE 'mpif.h'
 #endif
 !
@@ -116,6 +116,8 @@ CALL INIT_TRIP_PAR
 ! --------------------------------------------------------------------------------------
 !
 CALL READ_NAM_TRIP(NLISTING)
+!
+CALL READ_NAM_TRIP_PREP(NLISTING)
 !
 CALL READ_NAM_TRIP_GRID(YTRIP_CUR%TPG, &
                         NLISTING)

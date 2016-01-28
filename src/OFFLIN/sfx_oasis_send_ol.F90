@@ -152,6 +152,15 @@ GSEND_LAND=(LCPL_LAND.AND.MOD(PTIMEC,XTSTEP_CPL_LAND)==0.0)
 GSEND_LAKE=(LCPL_LAKE.AND.MOD(PTIMEC,XTSTEP_CPL_LAKE)==0.0)
 GSEND_SEA =(LCPL_SEA .AND.MOD(PTIMEC,XTSTEP_CPL_SEA )==0.0)
 !
+!-------------------------------------------------------------------------------
+!
+IF(.NOT.(GSEND_LAND.OR.GSEND_LAKE.OR.GSEND_SEA))THEN
+  IF (LHOOK) CALL DR_HOOK('SFX_OASIS_SEND_OL',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
+!
+!-------------------------------------------------------------------------------
+!
 IF(GSEND_LAND)THEN
   ZLAND_RUNOFF  (:) = XUNDEF
   ZLAND_DRAIN   (:) = XUNDEF
@@ -250,18 +259,14 @@ CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !*       3.     Send fields to OASIS proc by proc:
 !               ----------------------------------
 !
-IF(GSEND_LAND.OR.GSEND_LAKE.OR.GSEND_SEA)THEN
 !
-  CALL SFX_OASIS_SEND(ILUOUT,KI,IDATE,GSEND_LAND,GSEND_LAKE,GSEND_SEA,      &
-                      ZLAND_RUNOFF,ZLAND_DRAIN,ZLAND_CALVING,ZLAND_RECHARGE,&
-                      ZLAND_WATFLD,                                         &
-                      ZLAKE_EVAP,ZLAKE_RAIN,ZLAKE_SNOW,ZLAKE_WATF,          &
-                      ZSEA_FWSU,ZSEA_FWSV,ZSEA_HEAT,ZSEA_SNET,ZSEA_WIND,    &
-                      ZSEA_FWSM,ZSEA_EVAP,ZSEA_RAIN,ZSEA_SNOW,ZSEA_WATF,    &
-                      ZSEAICE_HEAT,ZSEAICE_SNET,ZSEAICE_EVAP                )
-                      
-!
-ENDIF
+CALL SFX_OASIS_SEND(ILUOUT,KI,IDATE,GSEND_LAND,GSEND_LAKE,GSEND_SEA,      &
+                    ZLAND_RUNOFF,ZLAND_DRAIN,ZLAND_CALVING,ZLAND_RECHARGE,&
+                    ZLAND_WATFLD,                                         &
+                    ZLAKE_EVAP,ZLAKE_RAIN,ZLAKE_SNOW,ZLAKE_WATF,          &
+                    ZSEA_FWSU,ZSEA_FWSV,ZSEA_HEAT,ZSEA_SNET,ZSEA_WIND,    &
+                    ZSEA_FWSM,ZSEA_EVAP,ZSEA_RAIN,ZSEA_SNOW,ZSEA_WATF,    &
+                    ZSEAICE_HEAT,ZSEAICE_SNET,ZSEAICE_EVAP                )                     
 !
 !-------------------------------------------------------------------------------
 !

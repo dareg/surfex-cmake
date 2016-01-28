@@ -1,6 +1,6 @@
 !#########
 SUBROUTINE SFX_OASIS_RECV_OL (F, I, S, U, W, &
-                              HPROGRAM,KI,KSW,PTIMEC,PTSTEP_SURF,   &
+                             HPROGRAM,KI,KSW,PTIMEC,PTSTEP_SURF,   &
                              KSIZE_OMP,PZENITH,PSW_BANDS,          &
                              PTSRAD,PDIR_ALB,PSCA_ALB,PEMIS,PTSURF )
 !#############################################
@@ -36,7 +36,15 @@ SUBROUTINE SFX_OASIS_RECV_OL (F, I, S, U, W, &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODN_SFX_OASIS,  ONLY : XTSTEP_CPL_LAND, &
+                            XTSTEP_CPL_SEA,  &
+                            LWATER
 !
+USE MODD_SFX_OASIS,  ONLY : LCPL_LAND,         &
+                            LCPL_GW,LCPL_FLOOD,&
+                            LCPL_SEA,          &
+                            LCPL_SEAICE
+!                    
 USE MODD_OFF_SURFEX_n, ONLY : GOTO_MODEL
 !
 USE MODD_FLAKE_n, ONLY : FLAKE_t
@@ -50,8 +58,11 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURFEX_OMP, ONLY :  NINDX1SFX, NINDX2SFX, NBLOCK, NBLOCKTOT, &
                              INIT_DIM, RESET_DIM
 !
+USE MODI_GET_LUOUT
 USE MODI_SFX_OASIS_RECV
-USE MODI_PUT_SFXCPL_n
+USE MODI_PUT_SFX_LAND
+USE MODI_PUT_SFX_SEA
+USE MODI_UPDATE_ESM_SURF_ATM_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -100,7 +111,7 @@ REAL, DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! surface effective temperature
 REAL, DIMENSION(KI) :: ZLAND_WTD     ! Land water table depth (m)
 REAL, DIMENSION(KI) :: ZLAND_FWTD    ! Land grid-cell fraction of water table rise (-)
 REAL, DIMENSION(KI) :: ZLAND_FFLOOD  ! Land Floodplains fraction (-)
-REAL, DIMENSION(KI) :: ZLAND_PIFLOOD ! Land Potential flood infiltration (kg/m2)
+REAL, DIMENSION(KI) :: ZLAND_PIFLOOD ! Land Potential flood infiltration(kg/m2/s)
 REAL, DIMENSION(KI) :: ZSEA_SST      ! Sea surface temperature (K)
 REAL, DIMENSION(KI) :: ZSEA_UCU      ! Sea u-current stress (Pa)
 REAL, DIMENSION(KI) :: ZSEA_VCU      ! Sea v-current stress (Pa)
@@ -108,9 +119,13 @@ REAL, DIMENSION(KI) :: ZSEAICE_SIT   ! Sea-ice Temperature (K)
 REAL, DIMENSION(KI) :: ZSEAICE_CVR   ! Sea-ice cover (-)
 REAL, DIMENSION(KI) :: ZSEAICE_ALB   ! Sea-ice albedo (-)
 !
-LOGICAL  :: GOASIS_PUT
+REAL                :: ZTIME_CPL
 !
-INTEGER  :: INKPROMA
+LOGICAL             :: GRECV_LAND
+LOGICAL             :: GRECV_FLOOD
+LOGICAL             :: GRECV_SEA
+!
+INTEGER             :: INKPROMA, ILUOUT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -123,33 +138,44 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_RECV_OL',0,ZHOOK_HANDLE)
 !*       1.     init coupling fields:
 !               ----------------------------------
 !
-ZLAND_WTD    (:) = XUNDEF
-ZLAND_FWTD   (:) = XUNDEF
-ZLAND_FFLOOD (:) = XUNDEF
-ZLAND_PIFLOOD(:) = XUNDEF
+ZTIME_CPL = PTIMEC-PTSTEP_SURF
 !
-ZSEA_SST(:) = XUNDEF
-ZSEA_UCU(:) = XUNDEF
-ZSEA_VCU(:) = XUNDEF
+GRECV_LAND=(LCPL_LAND.AND.MOD(ZTIME_CPL,XTSTEP_CPL_LAND)==0.0)
+GRECV_SEA =(LCPL_SEA .AND.MOD(ZTIME_CPL,XTSTEP_CPL_SEA )==0.0)
 !
-ZSEAICE_SIT(:) = XUNDEF
-ZSEAICE_CVR(:) = XUNDEF
-ZSEAICE_ALB(:) = XUNDEF
+IF(.NOT.(GRECV_LAND.OR.GRECV_SEA))THEN
+  IF (LHOOK) CALL DR_HOOK('SFX_OASIS_RECV_OL',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
 !
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
+!
+IF(GRECV_LAND)THEN
+  ZLAND_WTD    (:) = XUNDEF
+  ZLAND_FWTD   (:) = XUNDEF
+  ZLAND_FFLOOD (:) = XUNDEF
+  ZLAND_PIFLOOD(:) = XUNDEF
+ENDIF
+!
+IF(GRECV_SEA)THEN
+  ZSEA_SST   (:) = XUNDEF
+  ZSEA_UCU   (:) = XUNDEF
+  ZSEA_VCU   (:) = XUNDEF
+  ZSEAICE_SIT(:) = XUNDEF
+  ZSEAICE_CVR(:) = XUNDEF
+  ZSEAICE_ALB(:) = XUNDEF
+ENDIF
 !
 !*       2.     Receive fields to other models proc by proc:
 !               --------------------------------------------
 !
-GOASIS_PUT = .FALSE.
-!
-CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,PTIMEC-PTSTEP_SURF,&
-                    GOASIS_PUT,                        &
+CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,ZTIME_CPL,         &
+                    GRECV_LAND, GRECV_SEA,             &
                     ZLAND_WTD    (:),ZLAND_FWTD   (:), &
                     ZLAND_FFLOOD (:),ZLAND_PIFLOOD(:), &
                     ZSEA_SST     (:),ZSEA_UCU     (:), &
                     ZSEA_VCU     (:),ZSEAICE_SIT  (:), &
                     ZSEAICE_CVR  (:),ZSEAICE_ALB  (:)  )
-!
 !
 !*       3.     Put definitions for exchange of coupling fields :
 !               -------------------------------------------------
@@ -170,19 +196,41 @@ ELSE
    CALL GOTO_MODEL(NBLOCK)
 ENDIF
 !
-IF(GOASIS_PUT)THEN
+!-------------------------------------------------------------------------------
+! Put variable over land tile
+!-------------------------------------------------------------------------------
 !
-  CALL PUT_SFXCPL_n(F, I, S, U, W, &
-                     HPROGRAM,INKPROMA,KSW,PSW_BANDS,                             &
-                     PZENITH      (NINDX1SFX:NINDX2SFX  ),ZLAND_WTD   (NINDX1SFX:NINDX2SFX  ),&
-                     ZLAND_FWTD   (NINDX1SFX:NINDX2SFX  ),ZLAND_FFLOOD(NINDX1SFX:NINDX2SFX  ),&
-                     ZLAND_PIFLOOD(NINDX1SFX:NINDX2SFX  ),ZSEA_SST    (NINDX1SFX:NINDX2SFX  ),&
-                     ZSEA_UCU     (NINDX1SFX:NINDX2SFX  ),ZSEA_VCU    (NINDX1SFX:NINDX2SFX  ),&                     
-                     ZSEAICE_SIT  (NINDX1SFX:NINDX2SFX  ),ZSEAICE_CVR (NINDX1SFX:NINDX2SFX  ),&
-                     ZSEAICE_ALB  (NINDX1SFX:NINDX2SFX  ),PTSRAD      (NINDX1SFX:NINDX2SFX  ),&
-                     PDIR_ALB     (NINDX1SFX:NINDX2SFX,:),PSCA_ALB    (NINDX1SFX:NINDX2SFX,:),&
-                     PEMIS        (NINDX1SFX:NINDX2SFX  ),PTSURF      (NINDX1SFX:NINDX2SFX  ) )
+IF(GRECV_LAND)THEN
+  CALL PUT_SFX_LAND(I, U,                                                                 &
+                    ILUOUT,LCPL_GW,LCPL_FLOOD,                                            &
+                    ZLAND_WTD   (NINDX1SFX:NINDX2SFX),ZLAND_FWTD   (NINDX1SFX:NINDX2SFX), &
+                    ZLAND_FFLOOD(NINDX1SFX:NINDX2SFX),ZLAND_PIFLOOD(NINDX1SFX:NINDX2SFX)  )        
+ENDIF
 !
+!-------------------------------------------------------------------------------
+! Put variable over sea and/or water tile
+!-------------------------------------------------------------------------------
+!
+IF(GRECV_SEA)THEN
+  CALL PUT_SFX_SEA(S, U, W,                                                           &
+                   ILUOUT,LCPL_SEAICE,LWATER,                                         &
+                   ZSEA_SST   (NINDX1SFX:NINDX2SFX),ZSEA_UCU   (NINDX1SFX:NINDX2SFX), &
+                   ZSEA_VCU   (NINDX1SFX:NINDX2SFX),ZSEAICE_SIT(NINDX1SFX:NINDX2SFX), &
+                   ZSEAICE_CVR(NINDX1SFX:NINDX2SFX),ZSEAICE_ALB(NINDX1SFX:NINDX2SFX)  )
+ENDIF
+!
+!-------------------------------------------------------------------------------
+! Update radiative properties at time t+1 for radiative scheme
+!-------------------------------------------------------------------------------
+!
+GRECV_FLOOD=(GRECV_LAND.AND.LCPL_FLOOD)
+!
+IF(GRECV_SEA.OR.GRECV_FLOOD)THEN     
+  CALL UPDATE_ESM_SURF_ATM_n(F, I, S, U, W, &
+                             HPROGRAM, INKPROMA, KSW, PZENITH(NINDX1SFX:NINDX2SFX), PSW_BANDS, &
+                             PTSRAD(NINDX1SFX:NINDX2SFX), PDIR_ALB(NINDX1SFX:NINDX2SFX,:),     &
+                             PSCA_ALB(NINDX1SFX:NINDX2SFX,:), PEMIS(NINDX1SFX:NINDX2SFX),      &
+                             PTSURF(NINDX1SFX:NINDX2SFX)                                       )                    
 ENDIF
 !
 CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)

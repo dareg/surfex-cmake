@@ -53,7 +53,7 @@ USE MODI_GET_LONLAT_TRIP
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -80,6 +80,7 @@ INTEGER, DIMENSION(2), PARAMETER  :: IVAR_NODIMS  = (/2,1/) ! rank and number of
 CHARACTER(LEN=4)                  :: YCPL_LAND = 'tlan'
 CHARACTER(LEN=4)                  :: YCPL_QSB  = 'tdra'
 CHARACTER(LEN=4)                  :: YCPL_GW   = 'tgw '
+CHARACTER(LEN=4)                  :: YCPL_FLD  = 'tfld'
 CHARACTER(LEN=4)                  :: YCPL_SEA  = 'tsea'
 CHARACTER(LEN=4)                  :: YCPL_GRE  = 'tgre'
 CHARACTER(LEN=4)                  :: YCPL_ANT  = 'tant'
@@ -117,7 +118,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_PREP',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !*       1.     Grid definition :
@@ -220,6 +221,26 @@ IF(LCPL_GW)THEN
   CALL OASIS_WRITE_CORNER(YCPL_GW,KLON,KLAT,INCORNER,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
   CALL OASIS_WRITE_AREA  (YCPL_GW,KLON,KLAT,ZAREA(:,:))
   CALL OASIS_WRITE_MASK  (YCPL_GW,KLON,KLAT,IMASK(:,:))
+!
+ENDIF
+!
+! Floodplains surface coupling case
+!
+IF(LCPL_FLOOD)THEN
+!
+! 0 = not masked ; 1 = masked
+  WHERE(TPG%GMASK_FLD(:,:))
+    IMASK(:,:) = 0
+  ELSEWHERE
+    IMASK(:,:) = 1
+  ENDWHERE
+!
+  ZAREA(:,:) = TPG%XAREA(:,:) * (1.0-IMASK(:,:))
+!
+  CALL OASIS_WRITE_GRID  (YCPL_FLD,KLON,KLAT,ZLON(:,:),ZLAT(:,:))
+  CALL OASIS_WRITE_CORNER(YCPL_FLD,KLON,KLAT,INCORNER,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
+  CALL OASIS_WRITE_AREA  (YCPL_FLD,KLON,KLAT,ZAREA(:,:))
+  CALL OASIS_WRITE_MASK  (YCPL_FLD,KLON,KLAT,IMASK(:,:))
 !
 ENDIF
 !

@@ -53,7 +53,7 @@ USE MODI_GET_MESH_CORNER
 USE MODI_UNPACK_SAME_RANK
 USE MODI_SFX_OASIS_CHECK
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -87,9 +87,8 @@ CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAKE = 'slak'
 !*       0.3   Declarations of local variables
 !              -------------------------------
 !
-REAL,    DIMENSION(U%NDIM_FULL)       :: ZGW        ! frac groundwater
+REAL,    DIMENSION(U%NDIM_FULL)       :: ZGW        ! groundwater mask
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_LAND ! land-sea mask for rrm coupling
-REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_GW   ! groundwater mask for rrm coupling
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_LAKE ! lake mask for ogcm coupling
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_SEA  ! sea-land mask for ogcm coupling
 !
@@ -117,7 +116,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_PREP',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !
@@ -142,7 +141,11 @@ ZLAT(:,1)=UG%XLAT(:)
 !
 IF(I%LGW)THEN
   CALL UNPACK_SAME_RANK(U%NR_NATURE(:),I%XGW(:),ZGW(:))
-  WHERE(ZGW(:)==XUNDEF)ZGW(:)=0.0
+  WHERE(ZGW(:)==XUNDEF)
+        ZGW(:)=0.0
+  ELSEWHERE(ZGW(:)>0.0)
+        ZGW(:)=1.0
+  ENDWHERE
 ELSE
   ZGW(:) = 0.0
 ENDIF
@@ -154,7 +157,6 @@ ENDIF
 !
 ZMASK_LAND(:) = U%XNATURE(:)+U%XTOWN(:)
 ZMASK_SEA (:) = U%XSEA   (:)
-ZMASK_GW  (:) = ZGW    (:)
 IF(U%CWATER=='FLAKE ')THEN
   ZMASK_LAKE(:) = U%XWATER (:)
 ELSE
@@ -190,15 +192,7 @@ IF(LCPL_LAND)THEN
   CALL OASIS_WRITE_AREA  (YSFX_LAND,U%NDIM_FULL,1,ZAREA(:,:))
   CALL OASIS_WRITE_MASK  (YSFX_LAND,U%NDIM_FULL,1,IMASK(:,:))
 !
-  IF(LCPL_GW)THEN
-    WHERE(ZMASK_LAND(:)>0.0)
-          ZAREA(:,1) = UG%XMESH_SIZE(:) * (1.0-ZMASK_GW(:))
-    ELSEWHERE
-          ZAREA(:,1) = 0.0
-    ENDWHERE
-  ELSE
-    ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_LAND(:)
-  ENDIF
+  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_LAND(:) * (1.0-ZGW(:))
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0
@@ -215,7 +209,7 @@ ENDIF
 ! groundwater surface coupling case
 !
 IF(LCPL_GW)THEN       
-  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZMASK_GW(:)
+  ZAREA(:,1) = UG%XMESH_SIZE(:) * ZGW(:)
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0

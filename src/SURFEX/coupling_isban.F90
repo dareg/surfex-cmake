@@ -65,6 +65,8 @@ SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   
 !!      P Samuelsson 10/2014 : MEB
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!      R. Seferian  05/2015 : Add coupling fiels to vegetation_evol call
+!!      B. Decharme    01/16 : Bug with flood budget
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !!-------------------------------------------------------------------
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
@@ -1041,12 +1043,15 @@ ENDIF
 !
 CALL ISBA_BUDGET(IM%DGEI, &
                  IM%I%CISBA,IM%I%TSNOW%SCHEME,IM%I%LGLACIER,PTSTEP,          &
-                 IM%PKI%XP_WG,IM%PKI%XP_WGI,IM%PKI%XP_WR,IM%PKI%XP_SNOWSWE,IM%PKI%XP_DG,IM%PKI%XP_DZG,  & 
-                 ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,ZP_SWE_INI,   &
-                 ZP_RAIN,ZP_SNOW,IM%PKDI%XP_EVAP,IM%PKDI%XP_DRAIN,IM%PKDI%XP_RUNOFF,  &
-                 IM%PKDI%XP_IFLOOD,IM%PKDI%XP_PFLOOD,IM%PKDI%XP_ICEFLUX,IM%PKDI%XP_IRRIG_FLUX,&
-                 IM%PKDI%XP_SNDRIFT,                                  &
-                 IM%PKDI%XP_DWG,IM%PKDI%XP_DWGI,IM%PKDI%XP_DWR,IM%PKDI%XP_DSWE,IM%PKDI%XP_WATBUD      )
+                 IM%PKI%XP_WG,IM%PKI%XP_WGI,IM%PKI%XP_WR,IM%PKI%XP_SNOWSWE,  &
+                 IM%PKI%XP_DG,IM%PKI%XP_DZG,ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,  &
+                 ZP_SWE_INI,ZP_RAIN,ZP_SNOW,IM%PKDI%XP_EVAP,IM%PKDI%XP_DRAIN,&
+                 IM%PKDI%XP_RUNOFF,IM%PKDI%XP_IFLOOD,IM%PKDI%XP_PFLOOD,      &
+                 IM%PKDI%XP_LE_FLOOD, IM%PKDI%XP_LEI_FLOOD,                  &
+                 IM%PKDI%XP_ICEFLUX,IM%PKDI%XP_IRRIG_FLUX,IM%PKDI%XP_SNDRIFT,&
+                 IM%PKI%XP_LVTT, IM%PKI%XP_LSTT,                             &
+                 IM%PKDI%XP_DWG,IM%PKDI%XP_DWGI,IM%PKDI%XP_DWR,              &
+                 IM%PKDI%XP_DSWE,IM%PKDI%XP_WATBUD                           )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Evolution of soil albedo, when depending on surface soil wetness:
@@ -1071,7 +1076,7 @@ END IF
 !
 IF (IM%I%CPHOTO=='LAI' .OR. IM%I%CPHOTO=='LST' .OR. IM%I%CPHOTO=='NIT' .OR. IM%I%CPHOTO=='NCB') THEN
   CALL VEGETATION_EVOL(IM%I%CISBA, IM%I%CPHOTO, IM%I%CRESPSL, IM%I%CALBEDO, LAGRIP, IM%I%LTR_ML,           &
-                       IM%I%LNITRO_DILU, IM%I%LAGRI_TO_GRASS,                               &
+                       IM%I%LNITRO_DILU, IM%I%LAGRI_TO_GRASS, IM%DTI%LDATA_VEG, IM%DTI%LDATA_Z0, IM%DTI%LDATA_EMIS, &
                        PTSTEP, KMONTH, KDAY, IM%I%NSPINW, PTIME, IM%PKI%XP_LAT, ZP_RHOA,      &
                        IM%PKI%XP_DG, IM%PKI%XP_DZG, IM%PKI%NK_WG_LAYER,                         &                       
                        IM%PKI%XP_TG, IM%PKI%XP_ALBNIR_VEG, IM%PKI%XP_ALBVIS_VEG, IM%PKI%XP_ALBUV_VEG,         &

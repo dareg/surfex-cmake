@@ -157,8 +157,9 @@ LAGRI_TO_GRASS = .FALSE.
 ZVEGTYPE_PATCH(:,:,1) = PVEGTYPE(:,:)
 !-------------------------------------------------------------------------------
 !
- CALL INIT_VEG_n(1, KI, OCANOPY, HROUGH, LAGRI_TO_GRASS, TPSNOW, &
-                   HPHOTO, ZLAIMIN, ZH_TREE, ZVEGTYPE_PATCH, ZLAI, ZZ0, ZVEG, ZEMIS, &
+CALL INIT_VEG_n(1, KI, OCANOPY, HROUGH, LAGRI_TO_GRASS, TPSNOW, &
+                   HPHOTO, .FALSE., .FALSE., .FALSE., &
+                   ZLAIMIN, ZH_TREE, ZVEGTYPE_PATCH, ZLAI, ZZ0, ZVEG, ZEMIS, &
                    OTR_ML, ZFAPARC, ZFAPIRC, ZLAI_EFFC, ZMUS, &
                    ZALBNIR_SOIL, ZALBVIS_SOIL, ZALBUV_SOIL, ZALBNIR, ZALBVIS, ZALBUV, &
                    OSURF_DIAG_ALBEDO, ZPSN, ZPSNG, ZPSNV, ZPSNV_A, &

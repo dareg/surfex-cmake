@@ -65,7 +65,7 @@ IF (HWRITE/='PGD') THEN
 !        
    IF (SM%DGS%XDIAG_TSTEP==XUNDEF .OR. &
            ABS(NINT(SM%S%TTIME%TIME/SM%DGS%XDIAG_TSTEP)*SM%DGS%XDIAG_TSTEP-SM%S%TTIME%TIME)<1.E-3 ) THEN
-      CALL WRITE_DIAG_SEB_SEAFLUX_n(DTCO, DGU, U, SM%CHS, SM%DGS, SM%DGSI, SM%S, &
+      CALL WRITE_DIAG_SEB_SEAFLUX_n(DTCO, DGU, U, SM%CHS, SM%DGS, SM%S, &
                                     HPROGRAM)
       IF (SM%DGO%LDIAG_OCEAN)  CALL WRITE_DIAG_SEB_OCEAN_n(DTCO, DGU, U, SM%DGO, &
                                                         HPROGRAM)

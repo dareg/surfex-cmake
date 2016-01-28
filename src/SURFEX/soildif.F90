@@ -5,7 +5,7 @@
                          PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                  &
                          PHCAPSOILZ, PCONDDRYZ, PCONDSLDZ,                       &
                          PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, PSOILHCAPZ,        &
-                         PFWTD, PWTD, PWR, PPIFLOOD                              )
+                         PFWTD, PWTD, PWR                                        )
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -67,6 +67,7 @@ USE MODD_CSTS,       ONLY : XCL, XCI, XRHOLW, XRHOLI, XPI, XDAY, XCONDI, XTT, XL
 USE MODD_ISBA_PAR,   ONLY : XCONDWTR, XWGMIN, XWTD_MAXDEPTH, & 
                             XOMRHO, XOMSPH, XOMCONDDRY,      &
                             XOMCONDSLD, XCVHEATF
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -128,8 +129,6 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFFG
 !                                   without snow (ES)
 !                                   PFFV = Floodplain fraction over vegetation
 !                                   without snow (ES)
-!
-REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD ! Floodplain potential infiltration or water mass (kg m-2)
 !
 !*      0.2    declarations of local variables
 !
@@ -336,10 +335,8 @@ IF(OFLOOD)THEN
   ZFF(:) = PVEG(:)*PFFV(:) + (1.-PVEG(:))*PFFG(:)
 !
   WHERE(ZFF(:)>0.0)
-    ZCF(:) = 1.0 / ( XCL * PPIFLOOD(:) )
+    ZCF(:) = 2.0 * SQRT( XPI/(XCONDWTR*XRHOLW*XCL*XDAY) )
   ENDWHERE
-!
-  ZCF(:) = MIN(ZCTMAX,ZCF(:))
 !
 ENDIF
 !

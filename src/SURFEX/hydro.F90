@@ -295,7 +295,7 @@ REAL, DIMENSION(:),  INTENT(INOUT) :: PRRVEG   !Precip. intercepted by vegetatio
 !
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFG,PFFV
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFLOOD  !Floodplain effective fraction
-REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltration [kg/m²]
+REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltration [kg/m²/s]
 !
 REAL, DIMENSION(:), INTENT(INOUT)  :: PIFLOOD  !Floodplain real infiltration      [kg/m²/s]
 REAL, DIMENSION(:), INTENT(INOUT)  :: PPFLOOD  !Floodplain interception           [kg/m²/s]

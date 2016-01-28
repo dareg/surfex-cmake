@@ -3,7 +3,7 @@
                       KLON,KLAT,OPRINT,PTSTEP_RUN,PTSTEP,OMASK,PNUM_AQUI, &
                       PDRAIN,PLEN,PWIDTH,PHC_BED,PTOPO_RIV,PTAUG,         &
                       PAREA,PTRANS,PWEFF,PTABGW_F,PTABGW_H,PHS,           &
-                      PSURF_STO,PHGROUND,PHG_OLD,PQGCELL,PWTD,PFWTD,      &
+                      PHGROUND,PHG_OLD,PSURF_STO,PQGCELL,PWTD,PFWTD,      &
                       PHGHS,PGOUT,PGNEG,                                  &
                       PGSTO_ALL,PGSTO2_ALL,PGIN_ALL,PGOUT_ALL             )
 !     ###################################################################
@@ -59,21 +59,22 @@ REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTABGW_H   ! Topo height                 
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PHS        ! river height at t             [m]
 !
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSURF_STO  ! river channel storage at t    [kg]
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PHGROUND   ! water table elevation         [m]
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PHG_OLD    ! water table elevation at t-1  [m]
 !
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PQGCELL
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PWTD
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PFWTD
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PHGHS
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PGOUT
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PGNEG
+REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PSURF_STO  ! river channel storage at t    [kg]
 !
-REAL,                 INTENT(OUT)   :: PGSTO_ALL
-REAL,                 INTENT(OUT)   :: PGSTO2_ALL
-REAL,                 INTENT(OUT)   :: PGIN_ALL
-REAL,                 INTENT(OUT)   :: PGOUT_ALL
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PQGCELL
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PWTD
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PFWTD
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PHGHS
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PGOUT
+REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PGNEG
+!
+REAL,                 INTENT(OUT), OPTIONAL   :: PGSTO_ALL
+REAL,                 INTENT(OUT), OPTIONAL   :: PGSTO2_ALL
+REAL,                 INTENT(OUT), OPTIONAL   :: PGIN_ALL
+REAL,                 INTENT(OUT), OPTIONAL   :: PGOUT_ALL
 !
 !*      0.2    declarations of local parameter
 !
@@ -123,9 +124,6 @@ ZCC     (:,:) = 0.0
 ZCRIV   (:,:) = 0.0
 ZQDRAIN (:,:) = 0.0
 !
-PWTD    (:,:) = XUNDEF
-PFWTD   (:,:) = XUNDEF
-!
 ! * groundwater mask
 !
 ZNPTS = REAL(COUNT(OMASK(:,:)))
@@ -146,12 +144,10 @@ CALL GET_LAT_GWF(TPG, &
 !
 ! * Coefficients nappe/riviere
 !
-ZSLOPE(:,:)=MIN(1.0,MAX(0.0,PHGROUND(:,:)-ZRIVERBED(:,:))/PHC_BED(:,:))
-!
-ZTAUG(:,:)=PTAUG(:,:)-(PTAUG(:,:)-XDAY)*ZSLOPE(:,:)
-!
 WHERE(OMASK(:,:))
-    ZCRIV(:,:) = PWIDTH(:,:) * PLEN(:,:)/ZTAUG(:,:)
+     ZSLOPE(:,:) = MIN(1.0,MAX(0.0,PHGROUND(:,:)-ZRIVERBED(:,:))/PHC_BED(:,:))
+     ZTAUG (:,:) = PTAUG(:,:)-(PTAUG(:,:)-XDAY)*ZSLOPE(:,:)
+     ZCRIV (:,:) = PWIDTH(:,:) * PLEN(:,:)/ZTAUG(:,:)
 ENDWHERE
 !
 CALL GWF_INT(KLON,KLAT,ZGRID_RES,ZLAT,OMASK,PNUM_AQUI,PTRANS,ZCR,ZCC)
@@ -194,6 +190,11 @@ DO WHILE (ZEVOL>ZEPSILON.AND.IITER<=IITERMAX)
    IITER = IITER +1
 !
 ENDDO
+!
+IF(.NOT.PRESENT(PSURF_STO))THEN
+  IF (LHOOK) CALL DR_HOOK('GWF',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
 !
 ! *     3.   WATER BUDGET
 !            ------------
@@ -243,7 +244,9 @@ ENDIF
 ! *     5.   WTD COUPLING
 !            ------------
 !
-PHG_OLD(:,:)=XUNDEF
+PWTD   (:,:) = XUNDEF
+PFWTD  (:,:) = XUNDEF
+PHG_OLD(:,:) = XUNDEF
 !
 CALL GWF_CPL_UPDATE(PTABGW_H,PTABGW_F,OMASK,PTOPO_RIV, &
                     PHGROUND,PHG_OLD,PWTD,PFWTD        )

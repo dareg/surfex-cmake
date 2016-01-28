@@ -47,7 +47,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -337,7 +336,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
                   HPROGRAM,YRECFM,I%XFFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
     YRECFM='PIFLOOD_ISBA'
-    YCOMMENT='Grdi-cell Potential_floodplain_infiltration (kg/m2)'
+    YCOMMENT='Grdi-cell Potential_floodplain_infiltration (kg/m2/s)'
     CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,I%XPIFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !

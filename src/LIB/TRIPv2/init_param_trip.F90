@@ -260,7 +260,7 @@ LDOUBLE(INUM) = .FALSE.
 INUM = INUM + 1
 YVNAME (INUM)= 'TABVF                     '
 YVLNAME(INUM)= 'Potential flood volume    '
-YUNIT  (INUM)= 'kg                        '
+YUNIT  (INUM)= 'kg/m2                     '
 LZLEN  (INUM)= .TRUE.
 LDOUBLE(INUM) = .FALSE.
 !

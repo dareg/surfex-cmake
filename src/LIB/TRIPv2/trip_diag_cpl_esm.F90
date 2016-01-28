@@ -100,7 +100,7 @@ IF(LCPL_LAND)THEN
 !       
   IF(LCPL_FLOOD)THEN
     TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
-    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)
+    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)             
   ENDIF
 !  
 ENDIF

@@ -63,7 +63,9 @@ REAL,DIMENSION(:,:),   INTENT(OUT) :: PWFLOOD    ! Floodplain width        [m]
 !
 !*      0.2    declarations of local variables
 !
-INTEGER, DIMENSION(SIZE(PTAB_F,1),SIZE(PTAB_F,2)) :: IUP, IDOWN
+REAL,    DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZFLOOD_STO !kg/m2
+!
+INTEGER, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: IUP, IDOWN
 !
 INTEGER :: ILON, ILAT, JLON, JLAT, JPAS, IPAS
 !
@@ -84,11 +86,13 @@ PFFLOOD   (:,:) = 0.0
 PWFLOOD   (:,:) = 0.0
 PFLOOD_LEN(:,:) = 0.0
 !
+ZFLOOD_STO(:,:) = PFLOOD_STO(:,:)/PAREA(:,:)
+!
 DO JLAT=1,ILAT
    DO JLON=1,ILON
-      IF(PFLOOD_STO(JLON,JLAT)>0.0)THEN
+      IF(ZFLOOD_STO(JLON,JLAT)>0.0)THEN
         DO JPAS=1,IPAS-1
-           IF(PFLOOD_STO(JLON,JLAT)>=PTAB_VF(JLON,JLAT,JPAS))THEN
+           IF(ZFLOOD_STO(JLON,JLAT)>=PTAB_VF(JLON,JLAT,JPAS))THEN
              IUP  (JLON,JLAT) = JPAS+1
              IDOWN(JLON,JLAT) = JPAS
            ENDIF
@@ -103,21 +107,20 @@ ENDDO
 !
 DO JLAT=1,ILAT
    DO JLON=1,ILON
-      IF(PFLOOD_STO(JLON,JLAT)>0.0)THEN
+      IF(ZFLOOD_STO(JLON,JLAT)>0.0)THEN
          PFFLOOD(JLON,JLAT) = PTAB_F(JLON,JLAT,IDOWN(JLON,JLAT))                                      &
-                            + (PFLOOD_STO           (JLON,JLAT) -PTAB_VF(JLON,JLAT,IDOWN(JLON,JLAT))) &
+                            + (ZFLOOD_STO           (JLON,JLAT) -PTAB_VF(JLON,JLAT,IDOWN(JLON,JLAT))) &
                             * (PTAB_F (JLON,JLAT,IUP(JLON,JLAT))-PTAB_F (JLON,JLAT,IDOWN(JLON,JLAT))) &
                             / (PTAB_VF(JLON,JLAT,IUP(JLON,JLAT))-PTAB_VF(JLON,JLAT,IDOWN(JLON,JLAT)))
          PHFLOOD(JLON,JLAT) = PTAB_H(JLON,JLAT,IDOWN(JLON,JLAT))                                      &
-                            + (PFLOOD_STO (JLON,JLAT)           -PTAB_VF(JLON,JLAT,IDOWN(JLON,JLAT))) &
+                            + (ZFLOOD_STO (JLON,JLAT)           -PTAB_VF(JLON,JLAT,IDOWN(JLON,JLAT))) &
                             * (PTAB_H (JLON,JLAT,IUP(JLON,JLAT))-PTAB_H (JLON,JLAT,IDOWN(JLON,JLAT))) &
                             / (PTAB_VF(JLON,JLAT,IUP(JLON,JLAT))-PTAB_VF(JLON,JLAT,IDOWN(JLON,JLAT))) 
       ENDIF
       IF(PFFLOOD(JLON,JLAT)>=1.0)THEN
          PFFLOOD(JLON,JLAT) = 1.0
-         PHFLOOD(JLON,JLAT) = PTAB_H(JLON,JLAT,IUP(JLON,JLAT))                          &
-                            + (PFLOOD_STO(JLON,JLAT)-PTAB_VF(JLON,JLAT,IUP(JLON,JLAT))) &
-                            / (XRHOLW*PAREA(JLON,JLAT))
+         PHFLOOD(JLON,JLAT) = PTAB_H(JLON,JLAT,IUP(JLON,JLAT))                                   &
+                            + (ZFLOOD_STO(JLON,JLAT)-PTAB_VF(JLON,JLAT,IUP(JLON,JLAT))) / XRHOLW
       ENDIF
    ENDDO
 ENDDO
@@ -126,7 +129,7 @@ ENDDO
 ! * Calculate new Wflood, Lflood
 !-------------------------------------------------------------------------------
 !
-WHERE(PFLOOD_STO(:,:)>0.0)
+WHERE(ZFLOOD_STO(:,:)>0.0)
   PFLOOD_LEN(:,:) = XRATMED*SQRT(PFFLOOD(:,:)*PAREA(:,:))
   PWFLOOD   (:,:) = PAREA(:,:)*PFFLOOD(:,:)/PFLOOD_LEN(:,:)
 ENDWHERE

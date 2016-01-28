@@ -110,7 +110,7 @@ INTEGER, DIMENSION(11)  :: IDATEF
 !
 INTEGER :: JNW, INW
 INTEGER :: IRET, INB
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 INTEGER :: ILOCAL_COMM, INFOMPI, INPROC
 #endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -121,7 +121,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.      Set default names and parallelized I/O
 !             --------------------------------------
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !Must be call before DRHOOK !
 CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM,'PRE')
 #else
@@ -130,7 +130,7 @@ LOASIS = .FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('PREP',0,ZHOOK_HANDLE)
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 IF(LOASIS)THEN
   CALL MPI_COMM_SIZE(ILOCAL_COMM,INPROC,INFOMPI)
   IF(INPROC>1)THEN

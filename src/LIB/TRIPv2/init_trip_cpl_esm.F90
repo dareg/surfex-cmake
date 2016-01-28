@@ -148,10 +148,11 @@ IF(LCPL_LAND)THEN
   ENDIF
 !
 ! Flood fraction [-] and potential infiltration [kg/m2]
+! no flood for very smal flooded area (<0.1% of grid-cell)
 !       
   IF(LCPL_FLOOD)THEN
-    TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
-    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)
+     TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
+     TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)             
   ENDIF
 !  
 ENDIF

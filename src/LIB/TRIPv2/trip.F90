@@ -184,8 +184,8 @@ ENDIF
 IF(OFLOOD)THEN    
 !        
    CALL TRIP_SURFACE_FLOOD(KLISTING,PTSTEP,OPRINT,OMASK_FLD,        &
-                           PTAB_F,PTAB_H,PTAB_VF,PAREA,             &
-                           PWIDTH,PN_FLOOD,PHC_BED,                 &
+                           PTAB_F,PTAB_H,PTAB_VF,PAREA,PVEL,        &
+                           PLEN,PWIDTH,PN_FLOOD,PHC_BED,            &
                            PHS,PSURF_STO,PFLOOD_STO,PSOURCE,        &
                            ZFLOOD_STO2,PHFLOOD,PFFLOOD,PFLOOD_LEN,  &
                            PWFLOOD,PQFR,PQRF,PVFIN,PVFOUT,PHSF,     &
@@ -202,7 +202,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !       
 CALL TRIP_SURFACE_WATER(KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
-                        OPRINT,OMASK_VEL,PLEN,PSLOPEBED,PWIDTH,PN,PRUNOFF,&
+                        OPRINT,OMASK_VEL,PLEN,PRUNOFF,                    &
                         PVEL,PHS,PSURF_STO,ZSURF_STO2,PGOUT,PSIN,PSOUT,   &
                         PAREA,ZQFR,ZQRF,                                  &
                         ZSSTO_ALL,ZSSTO2_ALL,ZSIN_ALL,ZDRUN_ALL,          &
