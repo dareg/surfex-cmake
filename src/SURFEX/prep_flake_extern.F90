@@ -39,10 +39,13 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !*      0.2    declarations of local variables
 !
 !
+REAL, DIMENSION(:), ALLOCATABLE :: ZMASK
+!
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILUOUT
 !
+INTEGER           :: IVERSION       ! total 1D dimensio
 INTEGER           :: INI            ! total 1D dimension
  CHARACTER(LEN=6)  :: YWATER         ! lake scheme
 INTEGER           :: IDIM_WATER     ! number of water points
@@ -75,6 +78,17 @@ IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_EXTERN',0,ZHOOK_HANDLE)
 !
  CALL READ_SURF(&
                 HFILEPGDTYPE,'DIM_WATER',IDIM_WATER,IRESP)
+!
+YRECFM='VERSION'
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
+!
+ALLOCATE(ZMASK(INI))
+IF (IVERSION>=7) THEN
+  YRECFM='FRAC_WATER'
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')       
+ELSE
+  ZMASK(:) = 1.
+ENDIF
 !
 IF (IDIM_WATER==0) THEN
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
@@ -112,6 +126,7 @@ SELECT CASE(HSURF)
     CALL READ_SURF(&
                 HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF
 !
 END SELECT
 !
@@ -186,6 +201,7 @@ IF (HSURF/='ZS    ' .AND. HSURF/='TS    ') THEN
 !---------------------------------------------------------------------------------------
     END SELECT
 
+    WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 
   ELSE
@@ -195,6 +211,8 @@ IF (HSURF/='ZS    ' .AND. HSURF/='TS    ') THEN
   END IF
 END IF
 !-------------------------------------------------------------------------------------
+!
+DEALLOCATE(ZMASK)
 !
 !*      6.     End of IO
 !              ---------

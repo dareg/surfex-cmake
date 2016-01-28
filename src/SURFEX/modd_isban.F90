@@ -663,7 +663,7 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !  
   LOGICAL                      :: LWTD          ! Activation of Water table depth coupling
   REAL, POINTER, DIMENSION(:)  :: XFWTD         ! grid-cell fraction of water table rise
-  REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (m)
+  REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (negative below soil surface) (m)
 !
 !-------------------------------------------------------------------------------
 !
@@ -902,6 +902,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YISBA%XPERTALB)
   NULLIFY(YISBA%XPERTZ0)
   NULLIFY(YISBA%XRED_NOISE)
+  NULLIFY(YISBA%XINCR)
   !
   NULLIFY(YISBA%XGNDLITTER)
   NULLIFY(YISBA%XRGLGV)

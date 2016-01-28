@@ -109,7 +109,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PEVAPCOR, PFSAT, &
 !                                                from snow as it completely ablates (m/s)
 !                                      PFSAT  = Saturated fraction
 !                                      PFWTD  = grid-cell fraction of water table to rise
-!                                      PWTD   = water table depth (m)
+!                                      PWTD   = water table depth negative below soil surface (m)
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PQSAT,PQSATI
 !                                      specific humidity at saturation
@@ -158,7 +158,7 @@ INTEGER                             :: JJ, JL    ! loop control
 !
 INTEGER                             :: INI, INL, IDEPTH ! Number of point and grid layers
 !
-REAL, DIMENSION(SIZE(PDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD
+REAL, DIMENSION(SIZE(PDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
 !                                      ZINFILTMAX = maximum allowable infiltration rate
 !                                                   (from Darcy's Law) (m s-1)
 !                                      ZEXCESS    = working variable: excess soil water
@@ -167,6 +167,7 @@ REAL, DIMENSION(SIZE(PDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGT
 !                                                   and the water table (m s-1)
 !                                      ZWGTOT    = total soil moisture for ZINFNEG computation
 !                                      ZPSIWTD   = matric potential at saturation for water table depth coupling
+!                                      ZWTD      = water table depth positive below soil surface (m)
 !
 REAL, DIMENSION(SIZE(PDZG,1),SIZE(PDZG,2)) :: ZWFLUX, ZDFLUXDT1, ZDFLUXDT2, ZWFLUXN
 !                                      ZWFLUX    = vertical soil water flux (+ up) (m s-1)
@@ -236,7 +237,10 @@ PHORTON   (:) = 0.0
 ZINFILTC  (:) = 0.0
 ZEXCESS   (:) = 0.0
 ZINFILTMAX(:) = 0.0
+!
 ZDGN      (:) = XUNDEF
+ZPSIWTD   (:) = XUNDEF
+ZWTD      (:) = XUNDEF
 !
 ZINFNEG  (:,:) = 0.0
 ZINFLAYER(:,:) = 0.0
@@ -259,7 +263,6 @@ ZDFLUXDT2(:,:) = XUNDEF
 ZAMTRX   (:,:) = XUNDEF
 ZBMTRX   (:,:) = XUNDEF
 ZCMTRX   (:,:) = XUNDEF
-!
 !
 ! Modification/addition of frozen soil parameters
 ! -----------------------------------------------
@@ -284,15 +287,6 @@ DO JL=1,INL
      ENDIF
 !
    ENDDO
-ENDDO
-!
-!
-DO JJ=1,INI
-   IDEPTH=KWG_LAYER(JJ)
-!  Modify matric potential at saturation for watertable coupling
-   ZS          = MIN(1.0,ZWSAT(JJ,IDEPTH)/PWSAT(JJ,IDEPTH))
-   ZLOG        = PBCOEF(JJ,IDEPTH)*LOG(ZS)
-   ZPSIWTD(JJ) = PMPOTSAT(JJ,IDEPTH)*EXP(-ZLOG)
 ENDDO
 !
 ! Lateral sub-surface flow (m s-1) if Topmodel
@@ -386,6 +380,23 @@ DO JL=1,INL
    ENDDO
 ENDDO    
 !
+! Prepare water table depth coupling
+! ----------------------------------
+!
+DO JJ=1,INI
+   IDEPTH=KWG_LAYER(JJ)   
+!  Depth of the last node
+   ZDGN   (JJ) = 0.5*(PDG(JJ,IDEPTH)+PDG(JJ,IDEPTH-1))
+   ZPSIWTD(JJ) = ZPSI(JJ,IDEPTH)
+   IF(PWTD(JJ)/=XUNDEF)THEN  
+!    Water table depth
+     ZWTD(JJ)    = MAX(PDG(JJ,IDEPTH),-PWTD(JJ))
+!    Modify matric potential at saturation for water table coupling
+     ZS          = MIN(1.0,ZWSAT(JJ,IDEPTH)/PWSAT(JJ,IDEPTH))
+     ZLOG        = PBCOEF(JJ,IDEPTH)*LOG(ZS)
+     ZPSIWTD(JJ) = PMPOTSAT(JJ,IDEPTH)*EXP(-ZLOG)
+   ENDIF
+ENDDO
 !
 ! 5. Vapor diffusion conductivity (m s-1)
 !    ------------------------------------
@@ -412,15 +423,12 @@ DO JL=1,INL
 !       Law with an added linear drainage term:
         ZWFLUX(JJ,JL) = -ZNU(JJ,JL) * ZHEAD(JJ,JL) - ZKI(JJ,JL)
 !
-      ELSEIF(JL==IDEPTH)THEN !Last layers
-!      
-!       Depth of the last node
-        ZDGN(JJ) = 0.5*(PDG(JJ,IDEPTH)+PDG(JJ,IDEPTH-1))   
+      ELSEIF(JL==IDEPTH)THEN !Last layers   
 !        
 !       Total interfacial conductivity (m s-1) And Potential gradient (dimensionless):
         ZKI  (JJ,IDEPTH) = ZK(JJ,IDEPTH)
         ZNU  (JJ,IDEPTH) = ZK(JJ,IDEPTH) * PFWTD(JJ)
-        ZHEAD(JJ,IDEPTH) = (ZPSI(JJ,IDEPTH)-ZPSIWTD(JJ))/(MAX(PDG(JJ,IDEPTH),PWTD(JJ))-ZDGN(JJ))
+        ZHEAD(JJ,IDEPTH) = (ZPSI(JJ,IDEPTH)-ZPSIWTD(JJ))/(ZWTD(JJ)-ZDGN(JJ))
 !
 !       Total Sub-surface soil water fluxes (m s-1): (+ up, - down) using Darcy's
 !       Law with an added linear drainage term:
@@ -448,8 +456,8 @@ DO JL=1,INL
          ZDFLUXDT1(JJ,JL) = -ZDKDT1*ZHEAD(JJ,JL) - ZNU(JJ,JL)*ZDHEADDT1 - ZDKDT1
          ZDFLUXDT2(JJ,JL) = -ZDKDT2*ZHEAD(JJ,JL) + ZNU(JJ,JL)*ZDHEADDT2 - ZDKDT2  
       ELSEIF(JL==IDEPTH)THEN !Last layers
-         ZDHEADDT1 = -PBCOEF(JJ,IDEPTH)*ZPSI   (JJ,IDEPTH)/(PWG  (JJ,IDEPTH)*(MAX(PDG(JJ,IDEPTH),PWTD(JJ))-ZDGN(JJ))) &
-                     +PBCOEF(JJ,IDEPTH)*ZPSIWTD(JJ       )/(ZWSAT(JJ,IDEPTH)*(MAX(PDG(JJ,IDEPTH),PWTD(JJ))-ZDGN(JJ)))
+         ZDHEADDT1 = -PBCOEF(JJ,IDEPTH)*ZPSI   (JJ,IDEPTH)/(PWG  (JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ))) &
+                     +PBCOEF(JJ,IDEPTH)*ZPSIWTD(JJ       )/(ZWSAT(JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ)))
          ZDHEADDT2 = 0.0
          ZDKDT1    = (2.*PBCOEF(JJ,IDEPTH)+3.)*ZK(JJ,IDEPTH)/PWG(JJ,IDEPTH)
          ZDKDT2    = 0.0                

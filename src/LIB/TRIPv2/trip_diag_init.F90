@@ -1,5 +1,5 @@
 SUBROUTINE TRIP_DIAG_INIT(PSOUT,PSIN,PVEL,PHS,PGOUT,PGNEG,PHG_OLD,   &
-                          PWTD,PFWTD,PWTDRIV,PWTDELEV,PQGCELL,PHGHS, &
+                          PWTD,PFWTD,PQGCELL,PHGHS,                  &
                           PQFR,PQRF,PVFIN,PVFOUT,PHSF,PSRC_FLOOD,    &
                           PDISCHARGE,                                &
                           PGSTO_ALL,PGSTO2_ALL,PGIN_ALL,PGOUT_ALL    )  
@@ -44,8 +44,6 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PGOUT      !Groundwater outflow           [
 REAL, DIMENSION(:,:), INTENT(OUT) :: PGNEG      !Groundwater intflow (neg)     [kg/s]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PWTD       !Water table depth for coupling[m]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFWTD      !Fraction of water table to rise
-REAL, DIMENSION(:,:), INTENT(OUT) :: PWTDRIV    !Water table depth / topo riv  [m]
-REAL, DIMENSION(:,:), INTENT(OUT) :: PWTDELEV   !Water table depth / elevation [m]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PQGCELL    !lateral groundwater exchanges [kg/s]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PHGHS      !groundwater minus river heigh [m]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PQFR       !floodplains to river exchange [kg/s]
@@ -87,16 +85,10 @@ PHSF      (:,:) = XUNDEF
 PQGCELL   (:,:) = XUNDEF
 PWTD      (:,:) = XUNDEF
 PFWTD     (:,:) = XUNDEF
-PWTDRIV   (:,:) = XUNDEF
-PWTDELEV  (:,:) = XUNDEF
 PHGHS     (:,:) = XUNDEF
 PHG_OLD   (:,:) = XUNDEF
 !
 IF(CGROUNDW=='DIF')THEN
-   PWTD     (:,:) = 0.0
-   PFWTD    (:,:) = 0.0
-   PWTDRIV  (:,:) = 0.0
-   PWTDELEV (:,:) = 0.0
    IF(LDIAG_MISC)THEN
      PQGCELL(:,:) = 0.0
      PHGHS  (:,:) = 0.0

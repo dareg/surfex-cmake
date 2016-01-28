@@ -2145,7 +2145,7 @@ CHARACTER(3),INTENT(IN)           :: HSNOWMETAMO ! metamorphism scheme
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),3) :: ZALB_TOP, ZALB_BOT
+REAL, DIMENSION(3,SIZE(PSNOWRHO,1)) :: ZALB_TOP, ZALB_BOT
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1))   :: ZANSMIN, ZANSMAX, ZMIN, ZMAX
 REAL, DIMENSION(SIZE(PSNOWRHO,1))   :: ZFAC_TOP, ZFAC_BOT
@@ -2201,20 +2201,18 @@ DO JJ=1, SIZE(PALBEDOSC)
   ELSE
     !
     CALL GET_ALB(JJ,PSNOWRHO(JJ,1),PPS(JJ),ZVAGE1(JJ),PSNOWGRAN1_TOP(JJ),&
-                 PSNOWGRAN2_TOP(JJ),PSNOWAGE_TOP(JJ),ZALB_TOP(JJ,:),HSNOWMETAMO)
+                 PSNOWGRAN2_TOP(JJ),PSNOWAGE_TOP(JJ),ZALB_TOP(:,JJ),HSNOWMETAMO)
     !                  
 !      IF (KNLVLS_USE(JJ)>=1) THEN
     IF ( KNLVLS_USE(JJ)>=2 ) THEN !modif ML
       ! second surface layer when it exists 
       !
       CALL GET_ALB(JJ,PSNOWRHO(JJ,2),PPS(JJ),ZVAGE1(JJ),PSNOWGRAN1_BOT(JJ),&
-                   PSNOWGRAN2_BOT(JJ),MIN(365.,PSNOWAGE_BOT(JJ)),ZALB_BOT(JJ,:),HSNOWMETAMO)
+                   PSNOWGRAN2_BOT(JJ),MIN(365.,PSNOWAGE_BOT(JJ)),ZALB_BOT(:,JJ),HSNOWMETAMO)
       !
     ELSE
       ! when it does not exist, the second surface layer gets top layer albedo   
-      ZALB_BOT(JJ,1) = ZALB_TOP(JJ,1)
-      ZALB_BOT(JJ,2) = ZALB_TOP(JJ,2)
-      ZALB_BOT(JJ,3) = ZALB_TOP(JJ,3)
+      ZALB_BOT(:,JJ) = ZALB_TOP(:,JJ)
     ENDIF
     ! 
     ! computation of spectral albedo over 3 bands taking into account the respective
@@ -2223,9 +2221,9 @@ DO JJ=1, SIZE(PALBEDOSC)
     ZMAX(JJ) = MAX( 0., (PSNOWDZ(JJ)-XVD1)/XVD2 )
     ZFAC_TOP(JJ) = XVW1 * ZMIN(JJ) + XVW2 * MIN( 1., ZMAX(JJ) )
     ZFAC_BOT(JJ) = XVW1 * ( 1. - ZMIN(JJ) ) + XVW2 * ( 1. - MIN( 1., ZMAX(JJ) ) )
-    PSPECTRALALBEDO(JJ,1) = ZFAC_TOP(JJ) * ZALB_TOP(JJ,1) + ZFAC_BOT(JJ) * ZALB_BOT(JJ,1) 
-    PSPECTRALALBEDO(JJ,2) = ZFAC_TOP(JJ) * ZALB_TOP(JJ,2) + ZFAC_BOT(JJ) * ZALB_BOT(JJ,2)
-    PSPECTRALALBEDO(JJ,3) = ZFAC_TOP(JJ) * ZALB_TOP(JJ,3) + ZFAC_BOT(JJ) * ZALB_BOT(JJ,3)
+    PSPECTRALALBEDO(JJ,1) = ZFAC_TOP(JJ) * ZALB_TOP(1,JJ) + ZFAC_BOT(JJ) * ZALB_BOT(1,JJ) 
+    PSPECTRALALBEDO(JJ,2) = ZFAC_TOP(JJ) * ZALB_TOP(2,JJ) + ZFAC_BOT(JJ) * ZALB_BOT(2,JJ)
+    PSPECTRALALBEDO(JJ,3) = ZFAC_TOP(JJ) * ZALB_TOP(3,JJ) + ZFAC_BOT(JJ) * ZALB_BOT(3,JJ)
     !
     ! arbitrarily specified spectral distribution  
     ! to be changed when solar radiation distribution is an input variable 

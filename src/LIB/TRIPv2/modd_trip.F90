@@ -46,7 +46,6 @@ REAL, POINTER, DIMENSION(:,:) :: XHC_BED        ! River bed depth              [
 REAL, POINTER, DIMENSION(:,:) :: XWEFF          ! Porosité efficace
 REAL, POINTER, DIMENSION(:,:) :: XTRANS         ! Transmissivité
 REAL, POINTER, DIMENSION(:,:) :: XNUM_AQUI      ! Numéro aquifère
-REAL, POINTER, DIMENSION(:,:) :: XELEV          ! Elevation                    [m]
 REAL, POINTER, DIMENSION(:,:) :: XTOPO_RIV      ! River elevation              [m]
 !
 !-------------------------------------------------------------------------------
@@ -126,7 +125,6 @@ IF (LHOOK) CALL DR_HOOK("MODD_TRIP:TRIP_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YTRIP%XWEFF)
   NULLIFY(YTRIP%XTRANS)
   NULLIFY(YTRIP%XNUM_AQUI)
-  NULLIFY(YTRIP%XELEV)
   NULLIFY(YTRIP%XTOPO_RIV)
   NULLIFY(YTRIP%XTABGW_H)
   NULLIFY(YTRIP%XHGROUND)

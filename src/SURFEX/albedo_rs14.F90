@@ -123,7 +123,8 @@ DO JWL=1,NNWL           ! loop over the wavelength
     !---------------------------------------------------------------------------------
     ! Diffuse albedo from Jin et al., 2006 + estimation from diffuse fraction of
     ! light (relying later on AOD)
-    ZRDF=-0.1482-0.012*ZSIG+0.1609*ZREFM-0.0244*ZSIG*ZREFM ! surface diffuse (Eq 5a-5b)
+    ! old: ZRDF=-0.1482-0.012*ZSIG+0.1609*ZREFM-0.0244*ZSIG*ZREFM ! surface diffuse (Eq 5a)
+    ZRDF = -0.1479 + 0.1502*ZREFM - 0.0176*ZSIG*ZREFM      ! surface diffuse (Eq 5b)
     !
     !---------------------------------------------------------------------------------
     ! *- Determine absorption and backscattering
