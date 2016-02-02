@@ -20,6 +20,9 @@ PROGRAM OFFLINE
 ! 04/2013 P. Lemoigne Add XDELTA_OROG to fix the maximum difference allowed between
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
+!
+! 02/2016: replace DOUBLE PRECISION by REAL to handle problem for promotion of real with GMKPACK or IBM SP
+!
 ! -------------------------------------------------
 !
 USE MODD_OFF_SURFEX_n
@@ -282,7 +285,7 @@ CHARACTER(LEN=100) :: YNAME
 CHARACTER(LEN=10)  :: YRANK
 INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
-DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
+REAL :: XTIME0, XTIME1, XTIME
 !
 ! SFX - OASIS coupling variables
 !

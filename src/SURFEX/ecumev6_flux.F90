@@ -17,12 +17,10 @@
 !       The estimation of the transfer coefficients relies on the iterative 
 !       computation of the scaling parameters U*/Teta*/q*. The convergence is
 !       supposed to be reached in NITERFL iterations maximum.
-!       The neutral transfer coefficients for momentum/temperature/humidity
+!       Neutral transfer coefficients for momentum/temperature/humidity
 !       are computed as a function of the 10m-height neutral wind speed using
 !       the ECUME_V6 formulation based on the multi-campaign (POMME,FETCH,CATCH,
-!       SEMAPHORE,EQUALANT) ALBATROS dataset. See MERSEA reports [1,2] for more
-!       details on the ECUME formulation.
-!       [1] MERSEA IP, Deliverable D4.1.2 ; [2]  MERSEA IP, Deliverable D4.1.3
+!       SEMAPHORE,EQUALANT) ALBATROS dataset.
 !!
 !!    EXTERNAL
 !!    --------
@@ -58,6 +56,11 @@
 !!      Modified        01/2014  S. Belamari: new formulation for pure water
 !!                                specific heat (ZCPWA)
 !!      Modified        01/2014  S. Belamari: 4 choices for PZ0SEA computation
+!!      Modified        12/2015  S. Belamari: ECUME now provides parameterisations
+!!                                for:  U10n*sqrt(CDN)          instead of CDN
+!!                                      U10n*CHN/sqrt(CDN)         "       CHN
+!!                                      U10n*CEN/sqrt(CDN)         "       CEN
+!!      Modified        01/2016  S. Belamari: New ECUME formulation
 !!
 !!      To be done:
 !!      include gustiness computation following Mondon & Redelsperger (1998)
@@ -163,7 +166,6 @@ REAL, DIMENSION(SIZE(PTA))        :: ZTSR       ! temperature scaling param. (K)
 REAL, DIMENSION(SIZE(PTA))        :: ZQSR       ! humidity scaling param. (kg/kg)
 REAL, DIMENSION(SIZE(PTA))        :: ZDELTAU10N,ZDELTAT10N,ZDELTAQ10N
                                                 ! U,T,Q vert.grad. (10m, neutral atm)
-REAL, DIMENSION(SIZE(PTA))        :: ZCHN,ZCEN  ! neutral coef. for T,Q
 REAL, DIMENSION(SIZE(PTA))        :: ZUSR0,ZTSR0,ZQSR0    ! ITERATIVE PROCESS
 REAL, DIMENSION(SIZE(PTA))        :: ZDUSTO,ZDTSTO,ZDQSTO ! ITERATIVE PROCESS
 REAL, DIMENSION(SIZE(PTA))        :: ZPSIU,ZPSIT! PSI funct for U, T/Q (Z0 comp)
@@ -173,6 +175,8 @@ REAL, DIMENSION(SIZE(PTA))        :: ZUSTAR2    ! square of friction velocity
 REAL, DIMENSION(SIZE(PTA))        :: ZAC        ! aerodynamical conductance
 REAL, DIMENSION(SIZE(PTA))        :: ZDIRCOSZW  ! orography slope cosine
                                                 ! (=1 on water!)
+REAL, DIMENSION(SIZE(PTA))        :: ZPARUN,ZPARTN,ZPARQN ! neutral parameter for U,T,Q
+REAL, DIMENSION(0:5)              :: ZCOEFU,ZCOEFT,ZCOEFQ
 
 ! local constants
 LOGICAL :: OPCVFLX              ! to force convergence
@@ -185,6 +189,9 @@ REAL    :: ZLMOMIN,ZLMOMAX      ! min/max value of Obukhovs stability param. z/l
 REAL    :: ZBTA,ZGMA            ! parameters of the stability functions
 REAL    :: ZDUSR0,ZDTSR0,ZDQSR0 ! maximum gap for USR/TSR/QSR between 2 steps
 REAL    :: ZP00                 ! [OPRECIP] - water vap. diffusiv.ref.press.(Pa)
+REAL    :: ZUTU,ZUTT,ZUTQ       ! U10n threshold in ECUME parameterisation
+REAL    :: ZCDIRU,ZCDIRT,ZCDIRQ ! coef directeur pour fonction affine U,T,Q
+REAL    :: ZORDOU,ZORDOT,ZORDOQ ! ordonnee a l'origine pour fonction affine U,T,Q
 
 INTEGER :: JJ                                   ! for ITERATIVE PROCESS
 INTEGER :: JLON,JK
@@ -200,15 +207,36 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ECUMEV6_FLUX',0,ZHOOK_HANDLE)
 !
-ZDUSR0   = 1.E-03
-ZDTSR0   = 1.E-03
-ZDQSR0   = 1.E-06
+ZDUSR0   = 1.E-06
+ZDTSR0   = 1.E-06
+ZDQSR0   = 1.E-09
+!
 NITERMAX = 5
 NITERSUP = 5
 OPCVFLX  = .TRUE.
 !
 NITERFL = NITERMAX
 IF (OPCVFLX) NITERFL = NITERMAX+NITERSUP
+!
+ZCOEFU = (/ 1.00E-03, 3.66E-02, -1.92E-03, 2.32E-04, -7.02E-06,  6.40E-08 /)
+ZCOEFT = (/ 5.36E-03, 2.90E-02, -1.24E-03, 4.50E-04, -2.06E-05,       0.0 /)
+ZCOEFQ = (/ 1.00E-03, 3.59E-02, -2.87E-04,      0.0,       0.0,       0.0 /)
+!
+ZUTU = 40.0
+ZUTT = 14.4
+ZUTQ = 10.0
+!
+ZCDIRU = ZCOEFU(1) + 2.0*ZCOEFU(2)*ZUTU + 3.0*ZCOEFU(3)*ZUTU**2   &
+                   + 4.0*ZCOEFU(4)*ZUTU**3 + 5.0*ZCOEFU(5)*ZUTU**4
+ZCDIRT = ZCOEFT(1) + 2.0*ZCOEFT(2)*ZUTT + 3.0*ZCOEFT(3)*ZUTT**2   &
+                   + 4.0*ZCOEFT(4)*ZUTT**3
+ZCDIRQ = ZCOEFQ(1) + 2.0*ZCOEFQ(2)*ZUTQ
+!
+ZORDOU = ZCOEFU(0) + ZCOEFU(1)*ZUTU + ZCOEFU(2)*ZUTU**2 + ZCOEFU(3)*ZUTU**3   &
+                   + ZCOEFU(4)*ZUTU**4 + ZCOEFU(5)*ZUTU**5
+ZORDOT = ZCOEFT(0) + ZCOEFT(1)*ZUTT + ZCOEFT(2)*ZUTT**2 + ZCOEFT(3)*ZUTT**3   &
+                   + ZCOEFT(4)*ZUTT**4
+ZORDOQ = ZCOEFQ(0) + ZCOEFQ(1)*ZUTQ + ZCOEFQ(2)*ZUTQ**2
 !
 !-------------------------------------------------------------------------------
 !
@@ -336,52 +364,44 @@ DO JJ=1,NITERFL
     ZDTSTO(JLON) = ZDELTAT10N(JLON)
     ZDQSTO(JLON) = ZDELTAQ10N(JLON)
 !
-!       3.1. Neutral coefficient for wind speed (ECUME_V6 formulation)
+!       3.1. Neutral parameter for wind speed (ECUME_V6 formulation)
 !
-    IF (ZDELTAU10N(JLON) <= 35.8) THEN
-      PCDN(JLON) =  1.31413E-03                         &
-                   -2.05361E-04 * ZDELTAU10N(JLON)      &
-                   +2.52747E-05 * ZDELTAU10N(JLON)**2   &
-                   -8.10130E-07 * ZDELTAU10N(JLON)**3   &
-                   +8.01936E-09 * ZDELTAU10N(JLON)**4
+    IF (ZDELTAU10N(JLON) <= ZUTU) THEN
+      ZPARUN(JLON) = ZCOEFU(0) + ZCOEFU(1)*ZDELTAU10N(JLON)      &
+                               + ZCOEFU(2)*ZDELTAU10N(JLON)**2   &
+                               + ZCOEFU(3)*ZDELTAU10N(JLON)**3   &
+                               + ZCOEFU(4)*ZDELTAU10N(JLON)**4   &
+                               + ZCOEFU(5)*ZDELTAU10N(JLON)**5
     ELSE
-      PCDN(JLON) =  3.74538E-03                         &
-                   -3.87850E-05 * ZDELTAU10N(JLON)
+      ZPARUN(JLON) = ZCDIRU*(ZDELTAU10N(JLON)-ZUTU) + ZORDOU
+    ENDIF
+    PCDN(JLON) = (ZPARUN(JLON)/ZDELTAU10N(JLON))**2
+!
+!       3.2. Neutral parameter for temperature (ECUME_V6 formulation)
+!
+    IF (ZDELTAU10N(JLON) <= ZUTT) THEN
+      ZPARTN(JLON) = ZCOEFT(0) + ZCOEFT(1)*ZDELTAU10N(JLON)      &
+                               + ZCOEFT(2)*ZDELTAU10N(JLON)**2   &
+                               + ZCOEFT(3)*ZDELTAU10N(JLON)**3   &
+                               + ZCOEFT(4)*ZDELTAU10N(JLON)**4
+    ELSE
+      ZPARTN(JLON) = ZCDIRT*(ZDELTAU10N(JLON)-ZUTT) + ZORDOT
     ENDIF
 !
-!       3.2. Neutral coefficient for temperature (ECUME_V6 formulation)
+!       3.3. Neutral parameter for humidity (ECUME_V6 formulation)
 !
-    IF (ZDELTAU10N(JLON) <= 13.9) THEN
-      ZCHN(JLON) =  1.29783E-03                         &
-                   -1.73753E-04 * ZDELTAU10N(JLON)      &
-                   -1.16594E-05 * ZDELTAU10N(JLON)**2   &
-                   +7.51959E-06 * ZDELTAU10N(JLON)**3   &
-                   -6.51968E-07 * ZDELTAU10N(JLON)**4   &
-                   +1.68942E-08 * ZDELTAU10N(JLON)**5
+    IF (ZDELTAU10N(JLON) <= ZUTQ) THEN
+      ZPARQN(JLON) = ZCOEFQ(0) + ZCOEFQ(1)*ZDELTAU10N(JLON)      &
+                               + ZCOEFQ(2)*ZDELTAU10N(JLON)**2
     ELSE
-      ZCHN(JLON) =  1.10987E-03                         &
-                   +1.02873E-05 * ZDELTAU10N(JLON)
+      ZPARQN(JLON) = ZCDIRQ*(ZDELTAU10N(JLON)-ZUTQ) + ZORDOQ
     ENDIF
-!
-!       3.3. Neutral coefficient for humidity (ECUME_V6 formulation)
-!
-    IF (ZDELTAU10N(JLON) <= 7.4) THEN
-      ZCEN(JLON) =  1.29981E-03                         &
-                   -5.71430E-04 * ZDELTAU10N(JLON)      &
-                   +1.65296E-04 * ZDELTAU10N(JLON)**2   &
-                   -1.67439E-05 * ZDELTAU10N(JLON)**3   &
-                   +5.55700E-07 * ZDELTAU10N(JLON)**4
-    ELSE
-      ZCEN(JLON) =  8.19209E-04                         &
-                   +2.49968E-05 * ZDELTAU10N(JLON)
-    ENDIF
-    ZCEN(JLON) = ZCEN(JLON)*(1.0-PICHCE)+ZCHN(JLON)*PICHCE
 !
 !       3.4. Scaling parameters U*, T*, Q*
 !
-    ZUSR(JLON) = ZDELTAU10N(JLON)*SQRT(PCDN(JLON))              !>>0
-    ZTSR(JLON) = ZDELTAT10N(JLON)*ZCHN(JLON)/SQRT(PCDN(JLON))   !/=0
-    ZQSR(JLON) = ZDELTAQ10N(JLON)*ZCEN(JLON)/SQRT(PCDN(JLON))   !/=0
+    ZUSR(JLON) = ZPARUN(JLON)
+    ZTSR(JLON) = ZPARTN(JLON)*ZDELTAT10N(JLON)/ZDELTAU10N(JLON)
+    ZQSR(JLON) = ZPARQN(JLON)*ZDELTAQ10N(JLON)/ZDELTAU10N(JLON)
 !
 !       3.4b Gustiness factor (Deardorff 1970)
 !
@@ -488,7 +508,7 @@ DO JLON=1,SIZE(PTA)
   PCE(JLON) = (ZUSR(JLON)*ZQSR(JLON))/(ZDDU(JLON)*ZDDQ(JLON))
 !
 !       4.3. Stochastic perturbation of turbulent fluxes
-
+!
   IF( OPERTFLUX )THEN
     ZTAU(JLON) = ZTAU(JLON)* ( 1. + PPERTFLUX(JLON) / 2. )
     ZHF (JLON) = ZHF(JLON)*  ( 1. + PPERTFLUX(JLON) / 2. )

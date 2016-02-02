@@ -37,6 +37,7 @@ PROGRAM SODA
 !!
 !! 03/2014 E. Martin change indices names in OMP module according to GMAP changes
 !  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
+!  02/2016 B. Decharme MODD_IO_SURF_ARO not used
 !----------------------------------------------------------------------------
 !
 USE MODD_OFF_SURFEX_n
@@ -68,10 +69,6 @@ USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, X
                                 XZENITH, XAZIM, XCO2, XRHOA, XTSURF
 !
 USE MODD_WRITE_BIN,  ONLY : NWRITE
-!
-#ifdef SFX_ARO
-USE MODD_IO_SURF_ARO,ONLY : NGPTOT, NGPTOT_CAP, NPROMA, NINDX1, NINDX2, NBLOCK, NKPROMA
-#endif
 !
 #ifdef SFX_OL
 USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE, XSTARTW, XCOUNTW, LTIME_WRITTEN,  &
