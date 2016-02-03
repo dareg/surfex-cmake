@@ -44,6 +44,9 @@ USE MODI_OUTER_PRODUCT
 USE MODE_EKF
 USE MODE_RANDOM
 !
+USE MODI_CHOLDC
+USE MODI_CHOLSL
+!
 ! -----------------------------------------------------------
 !
 IMPLICIT NONE
