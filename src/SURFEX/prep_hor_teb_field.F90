@@ -24,6 +24,7 @@ SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, IG, U, TG, T, TOP, &
 !!    -------------
 !!      Original    01/2004
 !!      P. Le Moigne 10/2005, Phasage Arome
+!!    M. Dumont, 11/2016, snow impurity
 !!------------------------------------------------------------------
 !
 !
@@ -95,6 +96,7 @@ INTEGER,            INTENT(IN)  :: KPATCH
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, DIMENSION(:), ALLOCATABLE :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
+REAL, DIMENSION(:), ALLOCATABLE :: ZIMPURSNOW
 REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN  ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:) :: ZFIELDOUT ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:) :: ZPS !surface pressure
@@ -127,6 +129,7 @@ IF (HSURF=='SN_ROOF') THEN
   IF (LEN_TRIM(YFILE)>0 .AND. LEN_TRIM(YFILETYPE)>0) GUNIF = .FALSE.                                   
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROOF)))
+  ALLOCATE(ZIMPURSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROOF)))                                 
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
@@ -140,11 +143,12 @@ IF (HSURF=='SN_ROOF') THEN
                             XTSNOW_ROOF, XLWCSNOW_ROOF,  &
                             XASNOW_ROOF,                 &
                             LSNOW_IDEAL_TEB, ZSG1SNOW,   &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW)
+                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW, ZIMPURSNOW)
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)
-  DEALLOCATE(ZAGESNOW)                            
+  DEALLOCATE(ZAGESNOW)         
+  DEALLOCATE(ZIMPURSNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_FIELD',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (HSURF=='SN_ROAD') THEN
@@ -155,6 +159,7 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROAD)))
+  ALLOCATE(ZIMPURSNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROAD)))                                   
   CALL PREP_HOR_SNOW_FIELDS(DTCO, &
                             IG, U, &
@@ -167,11 +172,13 @@ ELSE IF (HSURF=='SN_ROAD') THEN
                             XTSNOW_ROAD, XLWCSNOW_ROAD,  &
                             XASNOW_ROAD,                 &
                             LSNOW_IDEAL_TEB, ZSG1SNOW,   &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW)
+                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW,&
+                            ZIMPURSNOW)
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)
-  DEALLOCATE(ZAGESNOW)                               
+  DEALLOCATE(ZAGESNOW)                           
+  DEALLOCATE(ZIMPURSNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_FIELD',1,ZHOOK_HANDLE)
   RETURN
 END IF

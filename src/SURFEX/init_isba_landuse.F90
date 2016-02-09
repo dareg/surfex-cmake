@@ -152,6 +152,9 @@ DO JLAYER=1,I%TSNOW%NLAYER
                          HPROGRAM,ILUOUT,'GRANSNOW', I%TSNOW%GRAN2(:,JLAYER,:),0)
       CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
                          HPROGRAM,ILUOUT,'HISTSNOW', I%TSNOW%HIST (:,JLAYER,:),0)
+      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
+                         HPROGRAM,ILUOUT,'IMPURSNOW', I%TSNOW%IMPUR (:,JLAYER,:),0)
+                         
    ENDIF
    !
 ENDDO

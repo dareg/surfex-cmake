@@ -31,6 +31,7 @@ SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IG, I, UG, U, USS, &
 !!      B. Decharme  03/2014, external init with FA files
 !!                            new vertical interpolation
 !!      P Samuelsson 10/2014, MEB
+!!     M. Dumont 02/2016 , snow impurity content
 !!------------------------------------------------------------------
 !
 !
@@ -49,7 +50,7 @@ USE MODD_PREP,     ONLY : XZS_LS, LINTERP, CMASK
 
 USE MODD_PREP_ISBA, ONLY : XGRID_SOIL, NGRID_LEVEL, LSNOW_IDEAL,    &
                            XWSNOW, XRSNOW, XTSNOW, XLWCSNOW, XASNOW,          &
-                           XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+                           XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW, XIMPURSNOW
 
 
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
@@ -164,6 +165,7 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
+                            XIMPURSNOW, &
                             I%XVEGTYPE, I%XVEGTYPE_PATCH, I%XPATCH,    &
                             OKEY                                 )
   DEALLOCATE(XWSNOW)
@@ -173,6 +175,7 @@ IF (HSURF=='SN_VEG ') THEN
   DEALLOCATE(XSG1SNOW)
   DEALLOCATE(XSG2SNOW)
   DEALLOCATE(XHISTSNOW)
+  DEALLOCATE(XIMPURSNOW)
   DEALLOCATE(XAGESNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',1,ZHOOK_HANDLE)
   RETURN

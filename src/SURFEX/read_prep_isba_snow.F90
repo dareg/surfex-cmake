@@ -63,7 +63,8 @@ USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
                            XLWCSNOW_p=>XLWCSNOW, &
                            XRSNOW_p=>XRSNOW, XASNOW,            &
                            XSG1SNOW_p=>XSG1SNOW, XSG2SNOW_p=>XSG2SNOW, &
-                           XHISTSNOW_p=>XHISTSNOW, XAGESNOW_p=>XAGESNOW
+                           XHISTSNOW_p=>XHISTSNOW, XAGESNOW_p=>XAGESNOW, &
+                           XIMPURSNOW_p=>XIMPURSNOW
                            
 !
 USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX , LSNOW_PREP_PERM
@@ -89,7 +90,8 @@ LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
 !              -------------------------------
 !
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, &
-                                    XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+                                    XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW, &
+                                    XIMPURSNOW
 INTEGER           :: JLAYER
 !
 LOGICAL           :: LFILE
@@ -104,7 +106,7 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,LSNOW_PREP_PERM, &
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
-                            LSWEMAX,XSWEMAX
+                            XIMPURSNOW, LSWEMAX,XSWEMAX
 !-------------------------------------------------------------------------------
 !* default
 !  -------
@@ -132,6 +134,7 @@ IF (LNAM_READ) THEN
   XASNOW = XANSMIN
   XSG1SNOW(:) = XUNDEF
   XSG2SNOW(:) = XUNDEF
+  XIMPURSNOW(:) = XUNDEF
   XHISTSNOW(:) = XUNDEF
   XAGESNOW(:) = XUNDEF  
   !
@@ -231,18 +234,22 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (NSNOW_LAYER))
     ALLOCATE(XSG2SNOW_p (NSNOW_LAYER))
     ALLOCATE(XHISTSNOW_p(NSNOW_LAYER))
+    ALLOCATE(XIMPURSNOW_p(NSNOW_LAYER))
     !
     XSG1SNOW_p =XSG1SNOW (1:NSNOW_LAYER)
     XSG2SNOW_p =XSG2SNOW (1:NSNOW_LAYER)
     XHISTSNOW_p=XHISTSNOW(1:NSNOW_LAYER)
+    XIMPURSNOW_p=XIMPURSNOW(1:NSNOW_LAYER)
     !
     DO JLAYER=1,NSNOW_LAYER
       IF ((XSG1SNOW_p (JLAYER)==XUNDEF .OR. XSG2SNOW_p(JLAYER)==XUNDEF .OR. &
-           XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF) &
+           XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF .OR. &
+           XIMPURSNOW_p(JLAYER)==XUNDEF) &
            .AND. XWSNOW_p(JLAYER).NE.0. .AND. XWSNOW_p(JLAYER)/=XUNDEF ) THEN
         WRITE(ILUOUT,*) '----------------------------'
         WRITE(ILUOUT,*) 'WSNOW/=0 AND ONE OF SG1SNOW,'
         WRITE(ILUOUT,*) 'SG2SNOW, HISTSNOW OR AGESNOW'
+        WRITE(ILUOUT,*) 'OR IMPURSNOW'
         WRITE(ILUOUT,*) '         ==XUNDEF           '
         WRITE(ILUOUT,*) '    PLEASE CORRECT THAT     '
         WRITE(ILUOUT,*) '----------------------------'
@@ -255,6 +262,7 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (0))
     ALLOCATE(XSG2SNOW_p (0))
     ALLOCATE(XHISTSNOW_p(0))
+    ALLOCATE(XIMPURSNOW_p(0))
     !
   ENDIF
   !

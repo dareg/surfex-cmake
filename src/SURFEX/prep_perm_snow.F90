@@ -27,6 +27,7 @@ SUBROUTINE PREP_PERM_SNOW (I, &
 !!                                          snow/ice treatment
 !!      B. Decharme 07/2012: 3-L or Crocus adjustments
 !!      M. Lafaysse 09/2012: adaptation with new snow age in Crocus
+!!      M. dumont 02/2016 : snow impurity content
 !!------------------------------------------------------------------
 !
 
@@ -205,6 +206,8 @@ IF (TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO') THEN
     WHERE(GWORK(:,JLAYER))
              TPSNOW%AGE(:,JLAYER,KSNOW) = 365.0*FLOAT(JLAYER-1)/ &
                                           FLOAT(TPSNOW%NLAYER)
+
+              
     END WHERE
   END DO
   DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
@@ -227,6 +230,7 @@ DO JLAYER=1,TPSNOW%NLAYER/4
                   (1.-4*FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER))) 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 50. 
            TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
+           TPSNOW%IMPUR(:,JLAYER,KSNOW)=0.
   END WHERE
 END DO
 DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
@@ -234,6 +238,7 @@ DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
            TPSNOW%GRAN1(:,JLAYER,KSNOW) = 99. 
            TPSNOW%GRAN2(:,JLAYER,KSNOW) = 0.0003 
            TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
+           TPSNOW%IMPUR(:,JLAYER,KSNOW)=0.
   END WHERE
 END DO
 END IF

@@ -133,6 +133,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZF        ! work array (x, output soil gr
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZDG       ! out T grid (x, output soil grid)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZPATCH    ! work array for patches
 REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW
+REAL, ALLOCATABLE, DIMENSION(:)      :: ZIMPURSNOW
 INTEGER                             :: ILUOUT    ! output listing logical unit
 !
 LOGICAL                             :: GUNIF     ! flag for prescribed uniform field
@@ -178,6 +179,7 @@ IF (HSURF=='SN_VEG ') THEN
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_GD)))
+  ALLOCATE(ZIMPURSNOW(SIZE(XWSNOW_GD)))
   ALLOCATE(ZPATCH(SIZE(TGDP%XVEGTYPE,1),1))
   ALLOCATE(ZVEGTYPE_PATCH (SIZE(TGDP%XVEGTYPE,1),SIZE(TGDP%XVEGTYPE,2),1))
   !
@@ -193,11 +195,13 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
                             XLWCSNOW_GD, XASNOW_GD,         &
                             LSNOW_IDEAL_GD, ZSG1SNOW,       &
-                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GD,  &
+                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GD,&
+                            ZIMPURSNOW, &
                             TGDP%XVEGTYPE,ZVEGTYPE_PATCH, ZPATCH )
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)  
+  DEALLOCATE(ZIMPURSNOW)
   DEALLOCATE(ZPATCH)
   DEALLOCATE(ZVEGTYPE_PATCH)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GARDEN_FIELD',1,ZHOOK_HANDLE)

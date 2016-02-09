@@ -172,7 +172,7 @@ IF (DGU%LSNOWDIMNC .AND. (HPROGRAM=='OFFLIN')) THEN
   CALL WRITE_SURF(DGU, U, HPROGRAM,'SNOWGRAN1',TPSNOW%GRAN1(:,:,:),IRESP,HCOMMENT=YCOMMENT)
   
   WRITE(YFMT,'(A5,I1,A4)') '(A9,A',ISURFTYPE_LEN,',A8)'
-  WRITE(YCOMMENT,YFMT) 'X_Y_SIMPU',HSURFTYPE,' (g/g)  '
+  WRITE(YCOMMENT,YFMT) 'X_Y_SIMP',HSURFTYPE,' (g/g)  '
   CALL WRITE_SURF(DGU, U, HPROGRAM,'SNOWIMPUR',TPSNOW%IMPUR(:,:,:),IRESP,HCOMMENT=YCOMMENT)
 
   
@@ -275,17 +275,15 @@ ELSE
 ! !                  !*       11.b    Snow impur
 ! !     !              ----------
 !      !
-!      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-!      WRITE(YRECFM,YFMT) 'SIMP_',HSURFTYPE,JLAYER
-!      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-!      WRITE(YFMT,'(A6,I1,A9)')     '(A11,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
-!      WRITE(YCOMMENT,YFMT) 'X_Y_SNOWIM_',HSURFTYPE,JLAYER,' (-)'
-!      CALL WRITE_SURF(DGU, U, &
-!                   HPROGRAM,YRECFM,TPSNOW%IMPUR(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
+      WRITE(YRECFM,YFMT) 'SIM_',HSURFTYPE,JLAYER
+      YRECFM=ADJUSTL(HPREFIX//YRECFM)
+      WRITE(YFMT,'(A6,I1,A9)')     '(A9,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
+      WRITE(YCOMMENT,YFMT) 'X_Y_SIMP_',HSURFTYPE,JLAYER,' (-)'
+      CALL WRITE_SURF(DGU, U, &
+                   HPROGRAM,YRECFM,TPSNOW%IMPUR(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
                   
-                 
-                 
-                 
+                   
                  
     !
     !*       12.    Snow Gran2
