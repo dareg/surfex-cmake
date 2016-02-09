@@ -105,6 +105,10 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 ! dependence of melt when snow fraction < unity.
 !
 REAL, SAVE       :: XTAU_SMELT
+! for snow impurity
+REAL, SAVE :: XIMPUR_COEFF !1.E-8 !deposition intensity at top of snowpack (unitless)
+REAL, SAVE     :: XIMPUR_INIT !0.5E-7 !g/g
+
 !
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
@@ -176,9 +180,9 @@ REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
 REAL, PARAMETER       :: X_RI_MAX = 0.20
-REAL, PARAMETER      :: XIMPUR_COEFF=1.E-8 !deposition intensity at top of snowpack (unitless)
+!REAL, PARAMETER      :: XIMPUR_COEFF=1.E-8 !deposition intensity at top of snowpack (unitless)
 REAL, PARAMETER      :: XIMPUR_EFOLD=0.05 !(m) e folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer for the deposition of snow impurity
-REAL, PARAMETER     :: XIMPUR_INIT=0.5E-7 !g/g
+!REAL, PARAMETER     :: XIMPUR_INIT=0.5E-7 !g/g
 !                                       
 ! ISBA-ES Maximum snow liquid water holding capacity (fraction by mass) parameters:
 !

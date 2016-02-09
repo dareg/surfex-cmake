@@ -798,6 +798,7 @@ SELECT CASE (HSNOWRAD)
     ZSNOWIMP_CONTENT(:,:,1) = 2. * PSNOWAGE(:,:) * 1E-9
   CASE("TA3")
     ! Increase impurity content following parameterization from S. Morin
+
     DO JJ=1, size(ZSNOW)
       PSNOWIMPUR(JJ,1)=PSNOWIMPUR(JJ,1)+ZTSTEPDAYS*XIMPUR_COEFF*&
       EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD)
