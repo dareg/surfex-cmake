@@ -32,6 +32,7 @@
 !!      Original    01/2003 
 !!      P. Le Moigne 12/2004 : add type of photosynthesis 
 !!      P. Samuelsson 02/2012 : MEB
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -197,6 +198,10 @@ IF ((IVERSION<8.AND..NOT.I%LECOCLIMAP).OR.ISIZE_LMEB_PATCH==0.0) THEN
   !
 ENDIF
 !
+DTI%LIMP_VEG=.FALSE.
+DTI%LIMP_Z0=.FALSE.
+DTI%LIMP_EMIS=.FALSE.
+!
 IF (.NOT.OLAND_USE) THEN
   !
   IF (IVERSION>=7) THEN
@@ -211,7 +216,10 @@ IF (.NOT.OLAND_USE) THEN
     YCOMMENT=YRECFM
     CALL READ_SURF(&
                HPROGRAM,YRECFM,DTI%LDATA_VEG,IRESP,HCOMMENT=YCOMMENT)
-    IF (DTI%LDATA_VEG) DTI%LDATA_MIXPAR = .TRUE.
+    IF (DTI%LDATA_VEG) THEN
+        DTI%LDATA_MIXPAR = .TRUE.
+        DTI%LIMP_VEG     = .TRUE.
+    ENDIF
     YRECFM='L_LAI'
     YCOMMENT=YRECFM
     CALL READ_SURF(&
@@ -221,12 +229,18 @@ IF (.NOT.OLAND_USE) THEN
     YCOMMENT=YRECFM
     CALL READ_SURF(&
                HPROGRAM,YRECFM,DTI%LDATA_Z0,IRESP,HCOMMENT=YCOMMENT)
-    IF (DTI%LDATA_Z0) DTI%LDATA_MIXPAR = .TRUE.
+    IF (DTI%LDATA_Z0) THEN
+        DTI%LDATA_MIXPAR = .TRUE.
+        DTI%LIMP_Z0      = .TRUE.
+    ENDIF
     YRECFM='L_EMIS'
     YCOMMENT=YRECFM
     CALL READ_SURF(&
                HPROGRAM,YRECFM,DTI%LDATA_EMIS,IRESP,HCOMMENT=YCOMMENT)
-    IF (DTI%LDATA_EMIS) DTI%LDATA_MIXPAR = .TRUE.
+    IF (DTI%LDATA_EMIS) THEN
+        DTI%LDATA_MIXPAR = .TRUE.
+        DTI%LIMP_EMIS    = .TRUE.
+    ENDIF
     !
     YRECFM='L_RSMIN'
     YCOMMENT=YRECFM

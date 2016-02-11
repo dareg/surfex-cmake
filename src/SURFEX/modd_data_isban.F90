@@ -23,6 +23,7 @@
 !!    -------------
 !!      Original       05/2005
 !!      P Samuelsson   02/2012  MEB
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -101,6 +102,9 @@ TYPE DATA_ISBA_t
   LOGICAL                        :: LDATA_ROOT_EXTINCTIONGV
   LOGICAL                        :: LDATA_H_VEG
 !
+  LOGICAL                        :: LIMP_VEG
+  LOGICAL                        :: LIMP_Z0
+  LOGICAL                        :: LIMP_EMIS
 !  
 ! Input Parameters, per patch:
 !
@@ -335,6 +339,11 @@ YDATA_ISBA%LDATA_ROOTFRACGV=.FALSE.
 YDATA_ISBA%LDATA_ROOT_DEPTHGV=.FALSE.
 YDATA_ISBA%LDATA_ROOT_EXTINCTIONGV=.FALSE.
 YDATA_ISBA%LDATA_H_VEG=.FALSE.
+!
+YDATA_ISBA%LIMP_VEG=.FALSE.
+YDATA_ISBA%LIMP_Z0=.FALSE.
+YDATA_ISBA%LIMP_EMIS=.FALSE.
+!
 IF (LHOOK) CALL DR_HOOK("MODD_DATA_ISBA_N:DATA_ISBA_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DATA_ISBA_INIT
 

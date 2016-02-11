@@ -1,7 +1,7 @@
 !     #########
     SUBROUTINE VEGETATION_EVOL(HISBA, HPHOTO, HRESPSL, HALBEDO, OAGRIP,   &
                                OTR_ML, ONITRO_DILU, OAGRI_TO_GRASS,       &
-                               ODATA_VEG, ODATA_Z0, ODATA_EMIS,           &
+                               OIMP_VEG, OIMP_Z0, OIMP_EMIS,              &
                                PTSTEP, KMONTH, KDAY, KSPINW,              &
                                PTIME, PLAT, PRHOA,                        &
                                PDG, PDZG, KWG_LAYER,                      &
@@ -117,9 +117,9 @@ LOGICAL,              INTENT(IN)    :: OTR_ML  ! new radiative transfert
 LOGICAL,              INTENT(IN)    :: ONITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 LOGICAL,              INTENT(IN)    :: OAGRI_TO_GRASS
 !
-LOGICAL,              INTENT(IN)    :: ODATA_VEG
-LOGICAL,              INTENT(IN)    :: ODATA_Z0
-LOGICAL,              INTENT(IN)    :: ODATA_EMIS
+LOGICAL,              INTENT(IN)    :: OIMP_VEG
+LOGICAL,              INTENT(IN)    :: OIMP_Z0
+LOGICAL,              INTENT(IN)    :: OIMP_EMIS
 !
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 INTEGER,              INTENT(IN)    :: KMONTH  ! current month
@@ -492,15 +492,15 @@ ENDIF
 IF (GMASK) THEN
   !
   ! Evolution of vegetation fraction and roughness length due to LAI change
-  IF(.NOT.ODATA_Z0) THEN
+  IF(.NOT.OIMP_Z0) THEN
     WHERE( PVEG(:) > 0. ) PZ0 (:) = Z0V_FROM_LAI(PLAI(:),PH_TREE(:),PVEGTYPE(:,:),OAGRI_TO_GRASS) 
   ENDIF
-  IF(.NOT.ODATA_VEG) THEN
+  IF(.NOT.OIMP_VEG) THEN
     WHERE( PVEG(:) > 0. ) PVEG(:) = VEG_FROM_LAI(PLAI(:),PVEGTYPE(:,:),OAGRI_TO_GRASS)
   ENDIF
   !
   ! Evolution of radiative parameters due to vegetation fraction change
-  IF(.NOT.ODATA_EMIS) THEN
+  IF(.NOT.OIMP_EMIS) THEN
     WHERE( PVEG(:) > 0. ) PEMIS(:)= EMIS_FROM_VEG(PVEG(:),PVEGTYPE(:,:))
   ENDIF
   !

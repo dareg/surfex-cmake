@@ -71,6 +71,7 @@
 !!                  10/12    B.Decharme: EVAPCOR snow correction in DIF
 !!                  04/13    B.Decharme: Subsurface runoff if SGH (DIF option only)
 !!                  07/2013  B.Decharme: Surface / Water table depth coupling
+!!                  01/2016  B.Decharme: Bug : if no surface runoff (HRUNOFF=WSAT) then no Horton
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -305,7 +306,7 @@ ENDDO
 ! Surface fluxes are limited a Green-Ampt approximation from Abramopoulos et al
 ! (1988) and Entekhabi and Eagleson (1989).
 ! Note : when Horton option is used, infiltration already calculated in hydro_sgh
-IF(HHORT/='SGH')THEN
+IF(HRUNOFF/='WSAT'.AND.HHORT/='SGH')THEN
 !  Green-Ampt approximation for maximum infiltration (derived form)
    ZINFILTMAX(:) = INFMAX_FUNC(PWG,ZWSAT,ZFRZ,PCONDSAT,PMPOTSAT,PBCOEF,PDZG,PDG,KLAYER_HORT)
 !  Fast(temporal)-response runoff (surface excess) (m s-1):
