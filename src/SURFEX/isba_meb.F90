@@ -227,7 +227,7 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PSOILCONDZ    ! ISBA-DF Soil conductivity
 !                                                    ! profile  [W/(m K)]
 REAL, DIMENSION(:),   INTENT(IN)    :: PFROZEN1      ! surface frozen fraction (-)
 REAL, DIMENSION(:),   INTENT(IN)    :: PLAI          ! vegetation Leaf Area Index (m2/m2)
-REAL, DIMENSION(:), INTENT(IN)      :: PGNDLITTER    ! litter thickness (MEB option) (m).
+REAL, DIMENSION(:),   INTENT(IN)    :: PGNDLITTER    ! litter thickness (MEB option) (m).
 REAL, DIMENSION(:),   INTENT(IN)    :: PRGL          ! maximum solar radiation
 !                                                    ! usable in photosynthesis
 REAL, DIMENSION(:),   INTENT(IN)    :: PRSMIN        ! minimum stomatal resistance (s/m)
@@ -716,7 +716,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 INTEGER :: INI, INL, JJ, JL
 REAL, DIMENSION(SIZE(PWR))         :: ZPHASEL  ! Phase changement in litter (W/m2)
-REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC 
+REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC
+REAL, DIMENSION(SIZE(PFROZEN1))     :: ZFROZEN1SFC
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -746,6 +747,10 @@ ZALBVIS_TSOIL(:)   = XUNDEF
 ZALBNIR_TSOIL(:)   = XUNDEF
 ZSWNET_S(:)        = XUNDEF
 ZQSAT(:)           = XUNDEF
+ZWORK(:)           = XUNDEF
+ZWORK2(:)          = XUNDEF
+ZWORK3(:)          = XUNDEF
+ZWORK4(:)          = XUNDEF
 !
 !*      1.1    Preliminaries for litter parameters
 !              -----------------------------------
@@ -762,10 +767,10 @@ CALL ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
 !
 ! Concatenate PTL and PTG and the parameters linked to heat transfer into the soil
 !
-
 CALL PREP_MEB_SOIL(OMEB_LITTER,PSOILHCAPZ,PSOILCONDZ,PWSAT,PWFC,PD_G,PDZG,PTG,   &
                    PWG(:,1),PWGI(:,1),PWRL,PWRLI,PTL,PGNDLITTER,ZD_G,ZDZG,ZTGL,  &
-                   ZSOILHCAPZ,ZSOILCONDZ,ZWSAT,ZWFC,ZWSFC,ZWISFC,ZCTSFC,PCT      )
+                   ZSOILHCAPZ,ZSOILCONDZ,ZWSAT,ZWFC,ZWSFC,ZWISFC,ZCTSFC,PCT,     &
+                   PFROZEN1,ZFROZEN1SFC                                          )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -862,7 +867,7 @@ PSWDOWN_GN(:) = ZSWNET_S(:)/(1.-ZALBG(:))
 !
 CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
         PEMISNOW,PFEMIS,PFF,                                            &
-        PTV,ZTGL(:,1),PSNOWTEMP(:,1),                                    &
+        PTV,ZTGL(:,1),PSNOWTEMP(:,1),                                   &
         PLW_RAD,PLWNET_N,PLWNET_V,PLWNET_G,                             &
         ZDLWNET_V_DTV,ZDLWNET_V_DTG,ZDLWNET_V_DTN,                      &
         ZDLWNET_G_DTV,ZDLWNET_G_DTG,ZDLWNET_G_DTN,                      &
@@ -1018,7 +1023,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !              ----------------------------------------
 !
    CALL E_BUDGET_MEB(HISBA,HCPSURF,ZTSTEP,                                             &
-              PPS,PCG,ZCTSFC,PCV,PWRVN,PWR,                                               &
+              PPS,PCG,ZCTSFC,PCV,PWRVN,PWR,                                            &
               PTDEEP_A,PTDEEP_B,ZD_G,ZSOILCONDZ,ZSOILHCAPZ,                            &
               PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,                                             &
               PSWNET_V,PSWNET_G,PSWNET_NS,ZTAU_N,                                      &
@@ -1032,10 +1037,10 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               ZQSATG,ZQSATV,ZQSATN,                                                    &
               PFF,PFFROZEN,PPSN,PPALPHAN,ZPSNCV,                                       &
               ZCHEATV,ZCHEATG,ZCHEATN,                                                 &
-              ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,PFROZEN1,                    &
+              ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,ZFROZEN1SFC,                 &
               ZFLXC_C_A,ZFLXC_G_C,ZFLXC_VG_C,ZFLXC_VN_C,ZFLXC_N_C,ZFLXC_N_A,           &
               ZFLXC_MOM,                                                               &
-              ZTGL,PTV,PSNOWTEMP,                                                       &
+              ZTGL,PTV,PSNOWTEMP,                                                      &
               ZFLXC_V_C,ZHVGS,ZHVNS,                                                   &
               ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,                                             &
               PTC,PQC,ZTA_IC,ZQA_IC,ZUSTAR2_IC,ZVMOD,                                  &
@@ -1057,7 +1062,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               ZTHRMA_TA,ZTHRMB_TA,ZTHRMA_TC,ZTHRMB_TC,                                 &
               ZTHRMA_TG,ZTHRMB_TG,ZTHRMA_TV,ZTHRMB_TV,ZTHRMA_TN,ZTHRMB_TN,             &
               ZQSATG,ZQSATV,ZQSATN,                                                    &
-              PFF,PPSN,PPALPHAN,ZPSNCV,PFROZEN1,PFFROZEN,                              &
+              PFF,PPSN,PPALPHAN,ZPSNCV,ZFROZEN1SFC,PFFROZEN,                           &
               ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,                             &
               ZFLXC_C_A,ZFLXC_G_C,ZFLXC_VG_C,ZFLXC_VN_C,ZFLXC_N_C,ZFLXC_N_A,           &
               ZFLXC_MOM,ZFLXC_V_C,ZHVGS,ZHVNS,                                         &
@@ -1739,7 +1744,6 @@ IF (LHOOK) CALL DR_HOOK('SNOW3LRADTRANS',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOW3LRADTRANS
 !===============================================================================
-
 SUBROUTINE ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
 !
 IMPLICIT NONE
@@ -1758,11 +1762,11 @@ INLL = INL
 IF(OMEB_LITTER)INLL = INL + 1
 
 ALLOCATE ( ZTGL        (INI, INLL ))
-ALLOCATE ( ZSOILHCAPZ (INI, INLL ))
-ALLOCATE ( ZSOILCONDZ (INI, INLL ))
-ALLOCATE ( ZD_G       (INI, INLL ))
-ALLOCATE ( ZDZG       (INI, INLL ))
-ALLOCATE ( ZWFC       (INI, INLL ))
+ALLOCATE ( ZSOILHCAPZ  (INI, INLL ))
+ALLOCATE ( ZSOILCONDZ  (INI, INLL ))
+ALLOCATE ( ZD_G        (INI, INLL ))
+ALLOCATE ( ZDZG        (INI, INLL ))
+ALLOCATE ( ZWFC        (INI, INLL ))
 ALLOCATE ( ZWSAT       (INI, INLL ))
 
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL ',1,ZHOOK_HANDLE)
@@ -1855,9 +1859,11 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB:FINISH_MEB_SOIL ',1,ZHOOK_HANDLE)
 END SUBROUTINE RESHIFT_MEB_SOIL
 !===============================================================================
 SUBROUTINE PREP_MEB_SOIL(OMEB_LITTER,PSOILHCAPZ,PSOILCONDZ,PWSAT,PWFC,PD_G,PDZG,PTG,PWG,PWGI,PWRL,PWRLI, &
-                         PTL,PGNDLITTER,PD_GL,PDZGL,PTGL,PSOILHCAPL,PSOILCONDL,PWSATL,PWFCL,PWSFC,PWISFC,PCTSFC,PCT)
+                         PTL,PGNDLITTER,PD_GL,PDZGL,PTGL,PSOILHCAPL,PSOILCONDL,PWSATL,PWFCL,PWSFC,PWISFC,&
+                         PCTSFC,PCT,PFROZEN1,PFROZEN1SFC                                                  )
 !
 USE MODD_CSTS,       ONLY : XRHOLW
+USE MODD_ISBA_PAR,   ONLY : XWGMIN
 !
 IMPLICIT NONE
 !
@@ -1877,6 +1883,7 @@ REAL,   DIMENSION(:),   INTENT(IN)    :: PCT
 REAL,   DIMENSION(:),   INTENT(IN)    :: PWRL
 REAL,   DIMENSION(:),   INTENT(IN)    :: PWRLI
 REAL,   DIMENSION(:),   INTENT(IN)    :: PTL
+REAL,   DIMENSION(:),   INTENT(IN)    :: PFROZEN1
 REAL,   DIMENSION(:),   INTENT(IN)    :: PGNDLITTER
 REAL,   DIMENSION(:,:), INTENT(OUT)   :: PD_GL
 REAL,   DIMENSION(:,:), INTENT(OUT)   :: PDZGL
@@ -1888,6 +1895,7 @@ REAL,   DIMENSION(:,:), INTENT(OUT)   :: PWFCL
 REAL,   DIMENSION(:),   INTENT(OUT)   :: PWSFC
 REAL,   DIMENSION(:),   INTENT(OUT)   :: PWISFC
 REAL,   DIMENSION(:),   INTENT(OUT)   :: PCTSFC
+REAL,   DIMENSION(:),   INTENT(OUT)   :: PFROZEN1SFC
 !
 !*      0.2    declarations of local variables
 !
@@ -1901,7 +1909,7 @@ REAL, PARAMETER                       :: Z1 = 1900.0     !massic organic matter 
 REAL, PARAMETER                       :: Z2 = 45.0       !litter bulk density (kg/m3)
 REAL, PARAMETER                       :: Z3 = 4180.0     !massic water heat capacity (J/kg/K)
 REAL, PARAMETER                       :: Z4 = 0.1        !coeff for litter conductivity (K/m)
-REAL, PARAMETER                       :: Z5 = 0.03        !coeff for litter conductivity
+REAL, PARAMETER                       :: Z5 = 0.03       !coeff for litter conductivity
 REAL, PARAMETER                       :: Z6 = 0.95       !litter porosity       (m3/m3)
 REAL, PARAMETER                       :: Z7 = 0.12       !litter field capacity (m3/m3)
 
@@ -1917,13 +1925,14 @@ ZWORK(:) = 0.0
 IF(OMEB_LITTER)THEN
    PTGL(:,1)                  = PTL(:)
    ZWORK(:)                   = PWRL(:)/PGNDLITTER(:)
-   PSOILHCAPL(:,1)            = Z1*Z2 + Z3*1000/XRHOLW*ZWORK(:)
-   PSOILCONDL(:,1)            = Z4 +  (Z5/XRHOLW)     *ZWORK(:)
+   PSOILHCAPL(:,1)            = Z1*Z2 + (Z3*1000/XRHOLW)*ZWORK(:) 
+   PSOILCONDL(:,1)            = Z4 + Z5 * ZWORK(:)
    PWSATL(:,1)                = Z6
    PWFCL(:,1)                 = Z7
    PD_GL(:,1)                 = PGNDLITTER(:)
    PDZGL(:,1)                 = PGNDLITTER(:)
    PCTSFC(:)                  = 1. / (PSOILHCAPL(:,1) * PGNDLITTER(:))
+   PFROZEN1SFC(:)             = PWRLI(:) / ( PWRLI(:) + MAX(PWRL(:), (XWGMIN*XRHOLW)*PGNDLITTER(:) ))
 
    DO JL=1,INL
       DO JJ=1,INI
@@ -1950,6 +1959,7 @@ ELSE
    PCTSFC(:)                  = PCT(:)
    PWSFC(:)                   = PWG(:)
    PWISFC(:)                  = PWGI(:)
+   PFROZEN1SFC(:)             = PFROZEN1(:)             
 ENDIF
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:PREP_MEB_SOIL',1,ZHOOK_HANDLE)
 
@@ -1961,7 +1971,6 @@ SUBROUTINE ICE_LITTER(PTSTEP, PLELITTERI,                 &
                      PDZG,PWRL,PWRLI,PGNDLITTER,PPHASEL,PCTSFC   )
 !
 USE MODD_CSTS,     ONLY : XLMTT, XTT, XCI, XRHOLI, XRHOLW, XLSTT
-USE MODD_ISBA_PAR, ONLY : XWGMIN
 !
 IMPLICIT NONE
 !
@@ -2001,21 +2010,24 @@ INTEGER                             :: JL     ! loop control
 !
 INTEGER                             :: INL    ! Number of explicit soil layers
 !
-REAL, DIMENSION(SIZE(PTG,1))             :: ZEXCESS, ZK,ZTAUICE,ZHCAPL,ZELITTERI, &
-                                            ZDELTAT,ZPHASE,ZPHASEM,ZPHASEF,ZPHASEX,&
-                                            ZWRL,ZWRLI,Z0,ZWRLSAT,ZPHASEC
+REAL, DIMENSION(SIZE(PTG,1))        :: ZEXCESS, ZK, ZHCAPL,ZELITTERI,               &
+                                            ZDELTAT,ZPHASE,ZPHASEM,ZPHASEF,ZPHASEX, &
+                                            ZWRL,ZWRLI,Z0,ZPHASEC
 !
-REAL                                     :: ZPSIMAX, ZPSI,  &
-                                            ZTGM,ZWGIM,   &
-                                            ZEFFIC, ZWORK, &
-                                            ZAPPHEATCAP
-!                                            !
+REAL                                :: ZPSIMAX, ZPSI, ZTGM,ZWGIM, ZEFFIC, ZWORK,    &
+                                       ZAPPHEATCAP
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.3    declaration of local parameters
 !
-REAL, PARAMETER                     :: ZERTOL = 1.E-6 ! error tolerance
+REAL, PARAMETER                     :: ZERTOL     = 1.E-6 ! (-)     error tolerance
+REAL, PARAMETER                     :: ZTAUICE    = 3300. ! (s)     litter phase change characteristic time scale
+REAL, PARAMETER                     :: ZWRLSAT    = 0.85  ! (m3/m3) litter porosity
 !
 !-------------------------------------------------------------------------------
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:ICE_LITTER',0,ZHOOK_HANDLE) 
 !
 ! Initialization:
 ! ---------------
@@ -2023,26 +2035,21 @@ REAL, PARAMETER                     :: ZERTOL = 1.E-6 ! error tolerance
 !
 INL = MAXVAL(KWG_LAYER(:))
 !
-ZEXCESS(:)  =0.0
-ZPHASEC(:)  =0.0
-
+ZEXCESS(:)  = 0.0
+ZPHASEC(:)  = 0.0
 !
-ZTAUICE = 3300.
-ZWRLSAT(:) = 0.95
-ZHCAPL(:)  = 1/(PCTSFC*PGNDLITTER)
-
+ZHCAPL(:)   = 1/(PCTSFC(:)*PGNDLITTER(:))
+!
 !-------------------------------------------------------------------------------
 !
 ! 1. Surface layer vegetation insulation coefficient (-)
 !    ---------------------------------------------------
 !
-      ZK(:) = 1.0 
-!
 ! 1.1 Convert to m3/m3
 !    -----------------
 !
-ZWRL(:)= PWRL(:) /(XRHOLW*PGNDLITTER(:))    
-ZWRLI(:)=PWRLI(:)/(XRHOLW*PGNDLITTER(:)) 
+ZWRL(:)  = PWRL(:) /(XRHOLW*PGNDLITTER(:))    
+ZWRLI(:) = PWRLI(:)/(XRHOLW*PGNDLITTER(:)) 
 !
 ! 2. Litter ice evolution computation:
 !    --------------------------------
@@ -2051,20 +2058,23 @@ ZDELTAT(:) = PTL(:) - XTT
 !
 !     
 !     *Melt* ice if energy and ice available:
-ZPHASEM(:)  = (PTSTEP/ZTAUICE(:))*MIN((XCI*XRHOLI)*MAX(0.0,ZDELTAT),ZWRLI(:)*(XLMTT*XRHOLW))
+!
+ZPHASEM(:)  = (PTSTEP/ZTAUICE)*MIN((XCI*XRHOLI)*MAX(0.0,ZDELTAT(:)),ZWRLI(:)*(XLMTT*XRHOLW))
 !
 !     *Freeze* liquid water if energy and water available and do not exceed porosity:
-ZPHASEF(:)  = (PTSTEP/ZTAUICE(:))*MIN(ZK(:)*(XCI*XRHOLI)*MAX(0.0,-ZDELTAT),ZWRL(:)*(XLMTT*XRHOLW))
-ZPHASEF(:)  = min(ZPHASEF(:) , (ZWRLSAT(:) - 0.1 - ZWRLI(:)) * (XLMTT*XRHOLW) ) !!!!! LOOK!!!!!!!!
 !
-ZPHASE(:) = ZPHASEF(:) - ZPHASEM(:)
+ZPHASEF(:)  = (PTSTEP/ZTAUICE)*MIN((XCI*XRHOLI)*MAX(0.0,-ZDELTAT(:)),ZWRL(:)*(XLMTT*XRHOLW))
+ZPHASEF(:)  = min(ZPHASEF(:) , (ZWRLSAT - ZWRLI(:)) * (XLMTT*XRHOLW) )
+!
+ZPHASE(:)   = ZPHASEF(:) - ZPHASEM(:)
 
 !     Update heat content if melting or freezing
-PTL(:) = PTL(:) + ZPHASE(:)/ZHCAPL(:)                                    
+!
+PTL(:)      = PTL(:) + ZPHASE(:)/ZHCAPL(:)                                    
 !
 !     Get estimate of actual total phase change (J/m3) for equivalent litter water changes:
 
-ZPHASEX(:) = ZPHASE(:)
+ZPHASEX(:)  = ZPHASE(:)
 !
 !     Adjust ice and liquid water conents (m3/m3) accordingly :
 !   
@@ -2080,45 +2090,44 @@ PWRLI(:)= ZWRLI(:) * PGNDLITTER(:) * XRHOLW
 ! 3. Adjust litter ice content for sublimation
 !    -----------------------------------------
 !
-!ZELITTERI  = PLELITTERI /XLSTT * PTSTEP                    
-ZELITTERI  = PLELITTERI * (PTSTEP/XLSTT)                    
-ZEXCESS(:) = MAX( 0.0 , ZELITTERI - PWRLI )       
-PWRLI  (:) = PWRLI(:) - ( ZELITTERI - ZEXCESS )                    
+ZELITTERI(:) = PLELITTERI(:) * (PTSTEP/XLSTT)                    
+ZEXCESS(:)   = MAX( 0.0 , ZELITTERI(:) - PWRLI(:) )       
+PWRLI  (:)   = PWRLI(:) - ( ZELITTERI(:) - ZEXCESS(:) )                    
 !
 ! 4. Prevent some possible problems
 !    ------------------------------
 !
-PWGI (:,1) = PWGI(:,1)- ZEXCESS / (XRHOLW * PDZG(:,1))             
+PWGI (:,1)     = PWGI(:,1)- ZEXCESS(:) / (XRHOLW * PDZG(:,1))             
 !
-ZEXCESS(:) = max( 0.0, - PWGI(:,1) )
-PWGI(:,1)  = PWGI(:,1) + ZEXCESS(:)                                
-PWG (:,1)  = PWG (:,1) - ZEXCESS(:)                                
-PTG (:,1)  = PTG (:,1) + ZEXCESS(:) * (XLMTT*XRHOLW)/PSOILHCAPZ(:,1) 
+ZEXCESS(:)     = MAX( 0.0, - PWGI(:,1) )
+PWGI(:,1)      = PWGI(:,1) + ZEXCESS(:)                                
+PWG (:,1)      = PWG (:,1) - ZEXCESS(:)                                
+PTG (:,1)      = PTG (:,1) + ZEXCESS(:) * (XLMTT*XRHOLW)/PSOILHCAPZ(:,1) 
 !
 DO JL=1,INL-1                 
-   ZEXCESS = max(0.0,-PWG(:,JL))
-   PWG(:,JL+1) = PWG(:,JL+1) - ZEXCESS*PDZG(:,JL)/PDZG(:,JL+1)
-   PWG(:,JL)   = PWG(:,JL)   + ZEXCESS
+   ZEXCESS(:)  = MAX(0.0,-PWG(:,JL))
+   PWG(:,JL+1) = PWG(:,JL+1) - ZEXCESS(:)*PDZG(:,JL)/PDZG(:,JL+1)
+   PWG(:,JL)   = PWG(:,JL)   + ZEXCESS(:)
 ENDDO
 !
 ! 5. Prevent from keeping track of ice in litter
 !    -------------------------------------------
 !
-DO JJ=1,INI
-   IF (PWRLI(JJ) < ZERTOL ) THEN 
-      PWRL(JJ)= PWRL(JJ) + PWRLI(JJ) 
-      PTL(JJ)= PTL(JJ) + PWRLI(JJ) * XLMTT / PGNDLITTER(JJ) / ZHCAPL(JJ)
-      ZPHASEC(:) = PWRLI(JJ) * XLMTT / PGNDLITTER(JJ)
-      PWRLI(JJ) = 0.0
-   ELSE
-      ZPHASEC(:) = 0.0
-   ENDIF
-ENDDO
+WHERE (PWRLI(:) < ZERTOL ) 
+   PWRL(:)    = PWRL(:) + PWRLI(:) 
+   PTL(:)     = PTL(:)  + PWRLI(:) * XLMTT / PGNDLITTER(:) / ZHCAPL(:)
+   ZPHASEC(:) = PWRLI(:) * XLMTT / PGNDLITTER(:)
+   PWRLI(:)   = 0.0
+ELSEWHERE
+   ZPHASEC(:) = 0.0
+END WHERE
 !
-PPHASEL(:)=(ZPHASE(:) + ZPHASEC(:))/PTSTEP*PGNDLITTER
+PPHASEL(:)=(ZPHASE(:) + ZPHASEC(:))/PTSTEP*PGNDLITTER(:)
+!
+!
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:ICE_LITTER',1,ZHOOK_HANDLE) 
 !
 END SUBROUTINE ICE_LITTER
-
 !===============================================================================
 
 END SUBROUTINE ISBA_MEB
