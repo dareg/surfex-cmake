@@ -665,7 +665,12 @@ ENDIF
          ELSE
            !Prognostic variables forced to XUNDEF for correct outputs
            PSNOWDZ(JJ,JWRK)=XUNDEF
-           PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
+           ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
+           ! (vanishing snowpack)
+           IF (.NOT.((PPSN(JJ)>0.0).AND.(JWRK==1))) THEN
+               PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ENDIF
            PSNOWLIQ(JJ,JWRK)=XUNDEF
            PSNOWHEAT(JJ,JWRK)=XUNDEF
            PSNOWRHO(JJ,JWRK)=XUNDEF

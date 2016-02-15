@@ -1231,6 +1231,9 @@ CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                             &
 ! All output fluxes and radiative variables have recovered the same physical
 ! meaning, that is they are aggregated quantities (snow + snow-free)
 !***************************************************************************
+WHERE(PSNOWSWE(:,1)==0)
+ PSNOWTEMP(:,1)=XUNDEF
+ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA',1,ZHOOK_HANDLE)
 !
