@@ -995,12 +995,16 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   ENDIF
   
   IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
-  
+    IF (DGMI%LVOLUMETRIC_SNOWLIQ) THEN
+      YATT = "kg/m3"
+    ELSE
+      YATT = "m"
+    ENDIF
     IF (DGU%LSNOWDIMNC) THEN
       CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SNOWTEMP',  'Snow_Temp_layer'         , IDDIMALL, YATT_TITLE, (/'K'/))
       CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWLIQ',   'Snow_liquid_water_layer', IDDIMALL, YATT_TITLE, (/'m'/))    
+                      IFILE_ID, 'SNOWLIQ',   'Snow_liquid_water_layer', IDDIMALL, YATT_TITLE, YATT)    
                       
       IF (DGMI%LPROSNOW) THEN
         ! Variables with layer dimension
@@ -1029,7 +1033,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID, 'SNOWTEMP'//YLVL,  'Snow_Temp_layer'//YLVL         , IDDIM, YATT_TITLE, (/'K'/))
         CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID, 'SNOWLIQ'//YLVL,   'Snow_liquid_water_layer_'//YLVL, IDDIM, YATT_TITLE, (/'m'/))
+                      IFILE_ID, 'SNOWLIQ'//YLVL,   'Snow_liquid_water_layer_'//YLVL, IDDIM, YATT_TITLE, YATT)
       END DO
 
     ENDIF
