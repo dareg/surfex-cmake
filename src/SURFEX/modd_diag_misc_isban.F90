@@ -53,6 +53,7 @@ TYPE DIAG_MISC_ISBA_t
   LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo
   LOGICAL :: LSURF_MISC_DIF      ! flag for miscellaneous terms of isba-dif scheme
   LOGICAL :: LPROSNOW            ! flag for Crocus-MEPRA outputs
+  LOGICAL :: LVOLUMETRIC_SNOWLIQ ! volumetric snow liquid water content (kg m-3)
 !
 !* variables for each patch
 !

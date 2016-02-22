@@ -4,7 +4,8 @@
                                    OSURF_MISC_BUDGET,OSURF_DIAG_ALBEDO,     &
                                    OSURF_BUDGETC,OSURF_MISC_DIF,            &
                                    OPATCH_BUDGET,OPGD,ORESET_BUDGETC,       &
-                                   OWATER_BUDGET,OPROSNOW, PDIAG_TSTEP      )  
+                                   OWATER_BUDGET,OPROSNOW,                  &
+                                   OVOLUMETRIC_SNOWLIQ,PDIAG_TSTEP      )  
 !     #################################################################################################################
 !
 !!****  *DEFAULT_DIAG_ISBA* - routine to set default values for the choice of diagnostics
@@ -39,7 +40,7 @@
 !!      Modified by B. Decharme , 05/2012: move carbon spinup to NAM_SPINUP_CARB
 !!                                         add miscellaneous field key for dif
 !!                                         add isba water budget key
-!!      Modif M. Lafaysse 09/2015: OPROSNOW
+!!      Modif M. Lafaysse 09/2015: OPROSNOW, OVOLUMETRIC_SNOWLIQ
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -73,6 +74,7 @@ LOGICAL,  INTENT(OUT) :: OPGD               ! flag for PGD fields
 LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC     ! flag for cumulated surface budget
 LOGICAL,  INTENT(OUT) :: OWATER_BUDGET      ! flag for isba water budget
 LOGICAL,  INTENT(OUT) :: OPROSNOW           ! flag for Crocus-MEPRA diagnostics
+LOGICAL,  INTENT(OUT) :: OVOLUMETRIC_SNOWLIQ ! volumetric snow liquid water content (kg m-3)
 REAL,     INTENT(OUT) :: PDIAG_TSTEP        ! time-step for writing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -107,6 +109,8 @@ ORESET_BUDGETC    = .FALSE.
 OWATER_BUDGET     = .FALSE.
 !
 OPROSNOW          = .FALSE.
+!
+OVOLUMETRIC_SNOWLIQ = .FALSE.
 !
 PDIAG_TSTEP       = XUNDEF
 IF (LHOOK) CALL DR_HOOK('DEFAULT_DIAG_ISBA',1,ZHOOK_HANDLE)
