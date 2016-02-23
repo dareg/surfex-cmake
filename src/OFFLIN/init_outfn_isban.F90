@@ -983,6 +983,18 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
                       IFILE_ID,'TSRAD_P' ,'total_radiative_surface_Temperature_(isba+snow3l)',IDDIM,YATT_TITLE,YATT)
     ENDIF
   ENDIF
+!!
+  IF (I%TSNOW%SCHEME=='CRO') THEN
+    YATT = 's'          
+    CALL DEF_VAR_NETCDF(DGU, &
+		      IFILE_ID,'AVG_PCOUNT' ,'Snow production counter (s)' ,JDIM, YATT_TITLE,YATT)
+    IF(DGI%LPATCH_BUDGET) THEN
+      YATT = 's'          
+      CALL DEF_VAR_NETCDF(DGU, &
+		      IFILE_ID,'PCOUNT_P' ,'Snow production counter (s)' ,IDDIM, YATT_TITLE,YATT)
+    ENDIF
+  ENDIF
+!!
   !
   IF (I%TSNOW%SCHEME=='CRO' .AND. I%LSNOWSYTRON) THEN
     YATT = 'kg/m2/s'          

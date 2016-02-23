@@ -85,7 +85,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                        
                                 XDATA_GC_ST, XDATA_DMAX_ST
 !
 !
-
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_AGRI,           ONLY : LAGRIP
 !
@@ -224,8 +223,11 @@ IF (LNAM_READ) THEN
                         IM%DGMI%LPROSNOW,IM%DGI%XDIAG_TSTEP                                )  
  !
  CALL DEFAULT_CROCUS(IM%I%LSNOWDRIFT,IM%I%LSNOWDRIFT_SUBLIM,IM%I%LSNOW_ABS_ZENITH,&
-                     IM%I%CSNOWMETAMO,IM%I%CSNOWRAD,IM%I%LSNOWSYTRON)
- ! 
+                     IM%I%CSNOWMETAMO,IM%I%CSNOWRAD,IM%I%LSNOWSYTRON, 		&
+		     IM%I%LSNOWCOMPACT_BOOL,IM%I%LSNOWMAK_BOOL, 	    	&
+		     IM%I%LPRODSNOWMAK, IM%I%LSNOWMAK_PROP, IM%I%LSNOWTILLER, 	&
+		     IM%I%LSELF_PROD)
+! 
 ENDIF
 !
 !        0.2. Defaults from file header

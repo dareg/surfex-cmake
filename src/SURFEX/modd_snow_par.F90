@@ -106,6 +106,16 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 !
 REAL, SAVE       :: XTAU_SMELT
 !
+!	 Grooming and Snowmaking option by P.Spandre 20160211
+REAL,SAVE 			:: XPSR_SNOWMAK
+REAL,SAVE 			:: XRHO_SNOWMAK
+REAL, SAVE			:: XTIMESNOWMAK
+REAL, SAVE			:: XPTA_SEUIL
+REAL, DIMENSION(5), SAVE	:: XPROD_SCHEME
+REAL, DIMENSION(9500), SAVE	:: XPROD_COUNT
+REAL, DIMENSION(4), SAVE	:: XSM_END
+INTEGER,SAVE			:: XFREQ_GRO
+!
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
 !--------------------------------------------------------------------------------

@@ -69,7 +69,11 @@
                       PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                       PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                       PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-                      PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)
+                      PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS, 	&
+		      PSNOW_REFROZENTHICKNESS, PPRODCOUNT, 			&
+		      OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,		&
+		      OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
+!
 !     ##########################################################################
 !
 !
@@ -585,6 +589,10 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFWTD    ! grid-cell fraction of water table
 REAL, DIMENSION(:), INTENT(IN)   :: PWTD     ! water table depth from hydrological model (m)
 !                                            ! negative below the soil surface
 !
+LOGICAL, INTENT(IN)              :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &		! Snowmaking and grooming options by PierreS 20160211
+				       OSELF_PROD, OSNOWMAK_PROP
+LOGICAL, DIMENSION(:), INTENT(INOUT):: OPRODSNOWMAK
+!
 !* prognostic variables
 !  --------------------
 !
@@ -618,6 +626,7 @@ REAL, DIMENSION(:), INTENT(INOUT)  :: PFSAT   ! Topmodel saturated fraction
 !
 !* ISBA-SNOW3L variables/parameters:
 !  ---------------------------------
+!
 !
 ! Prognostic variables:
 !
@@ -665,7 +674,6 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWTEMP  ! snow layer temperatures (K)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ   ! snow layer liquid water content (m)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ    ! snow layer thickness (m)
 REAL, DIMENSION(:), INTENT(OUT)     :: PSYTMASS   ! eroded/accumulated snow (SYTRON) (kg/m2/s)
-
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDEND
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSPHER
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSIZE
@@ -684,7 +692,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWSWE_7DAYS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRAM_SONDE
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_WETTHICKNESS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_REFROZENTHICKNESS
-
+REAL, DIMENSION(:), INTENT(OUT) :: PPRODCOUNT	   ! snow production counter (s)
 !
 !
 !* output soil parameters
@@ -922,6 +930,10 @@ LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
 !
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL, DIMENSION(SIZE(PWR)) :: PSNOWMAK !PWR was PSNOWMAK
+
+! INTEGER                      :: JJ ! debug
+
 !
 !-------------------------------------------------------------------------------
 !
@@ -972,8 +984,12 @@ ELSE
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
-!
+!snow3L_
 ZALB3L(:)=PSNOWALB(:)
+
+! DO JJ=1, SIZE(PSNOWALB)			!debug
+!   WRITE(*,*) 'before isba.f90 PSNOWALB', PSNOWALB(JJ)
+! ENDDO
 !
 !-------------------------------------------------------------------------------
 !
@@ -1064,8 +1080,10 @@ IF(OMEB)THEN
         PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,       &
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
-        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)
-
+        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,		       &
+	PSNOW_REFROZENTHICKNESS, PPRODCOUNT, 				       &
+	OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			       &
+	OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
 ELSE
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -1114,10 +1132,14 @@ ELSE
            PLAT, PLON, ZQS3L,                                                   &
            OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
            HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,                  &
-           PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
-           PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
-           PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)  
+           PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,     &
+           PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,       &
+           PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,       &
+           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS, 			&
+	   PSNOW_REFROZENTHICKNESS, 						&
+	   PSNOWMAK, PPRODCOUNT, 						&
+	   OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			&
+	   OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)  
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
@@ -1236,4 +1258,7 @@ IF (LHOOK) CALL DR_HOOK('ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
+! DO JJ=1, SIZE(PSNOWALB)			!debug
+!   WRITE(*,*) 'after isba.f90 PSNOWALB', PSNOWALB(JJ)
+! ENDDO
 END SUBROUTINE ISBA

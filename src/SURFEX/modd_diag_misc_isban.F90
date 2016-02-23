@@ -88,7 +88,9 @@ TYPE DIAG_MISC_ISBA_t
 !
   REAL, POINTER, DIMENSION(:,:) :: XSYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
   REAL, POINTER, DIMENSION(:,:) :: XSYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
-  
+!
+  REAL, POINTER, DIMENSION(:,:) :: XPRODCOUNT    ! Snow production counter (s)
+!
   REAL, POINTER, DIMENSION(:,:) :: XDPSNG         ! Snow fraction over ground, diag at time t
   REAL, POINTER, DIMENSION(:,:) :: XDPSNV         ! Snow fraction over vegetation, diag at time t
   REAL, POINTER, DIMENSION(:,:) :: XDPSN          ! Total Snow fraction, diag at time t
@@ -151,6 +153,8 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XAVG_SYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
   REAL, POINTER, DIMENSION(:) :: XAVG_SYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
 !
+  REAL, POINTER, DIMENSION(:) :: XAVG_PRODCOUNT  ! Snow production counter (s)
+!
   REAL, POINTER, DIMENSION(:) :: XFRD2_TSWI      ! ISBA-FR-DG2 comparable soil wetness index (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWG       ! ISBA-FR-DG2 comparable soil water content (liquid+ice) (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWGI      ! ISBA-FR-DG2 comparable soil ice content (DIF option)  
@@ -160,20 +164,11 @@ TYPE DIAG_MISC_ISBA_t
 !
 !------------------------------------------------------------------------------
 !
-
 END TYPE DIAG_MISC_ISBA_t
-
-
-
+!
 CONTAINS
-
 !
 !
-
-
-!
-
-
 SUBROUTINE DIAG_MISC_ISBA_INIT(YDIAG_MISC_ISBA)
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: YDIAG_MISC_ISBA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -219,7 +214,9 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWSWE_7DAYS)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOWRAM_SONDE)
   NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_REFROZENTHICKNESS)
-  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_WETTHICKNESS)  
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_SNOW_WETTHICKNESS)
+  NULLIFY(YDIAG_MISC_ISBA%XPRODCOUNT)
+  NULLIFY(YDIAG_MISC_ISBA%XAVG_PRODCOUNT)
   NULLIFY(YDIAG_MISC_ISBA%XDPSNG)
   NULLIFY(YDIAG_MISC_ISBA%XDPSNV)
   NULLIFY(YDIAG_MISC_ISBA%XDPSN)
@@ -270,6 +267,5 @@ YDIAG_MISC_ISBA%LSURF_DIAG_ALBEDO=.FALSE.
 YDIAG_MISC_ISBA%LSURF_MISC_DIF=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_MISC_ISBA_INIT
-
 
 END MODULE MODD_DIAG_MISC_ISBA_n

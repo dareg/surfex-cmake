@@ -1,6 +1,9 @@
 !     #########
       SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
-                 HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON)  
+                 HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON, &
+		 OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, &
+		 OPRODSNOWMAK, OSNOWMAK_PROP, OSNOWTILLER, OSELF_PROD)  
+!
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for Crocus
@@ -55,6 +58,14 @@ LOGICAL, INTENT(OUT)          :: OSNOWSYTRON
 ! Snow metamorphism scheme and radiative transfer scheme
  CHARACTER(*), INTENT(OUT) :: HSNOWMETAMO,HSNOWRAD
 !
+! Snowmaking option p.spandre 19/11/2013                                          
+!
+LOGICAL, INTENT(OUT)         	  :: OSNOWCOMPACT_BOOL
+LOGICAL, DIMENSION(:), INTENT(OUT):: OPRODSNOWMAK
+LOGICAL, INTENT(OUT)        	  :: OSNOWMAK_BOOL
+LOGICAL, INTENT(OUT)     	  :: OSNOWMAK_PROP
+LOGICAL, INTENT(OUT)       	  :: OSNOWTILLER
+LOGICAL, INTENT(OUT)        	  :: OSELF_PROD
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -69,6 +80,15 @@ OSNOWDRIFT_SUBLIM = .FALSE.
 OSNOW_ABS_ZENITH = .FALSE.
 OSNOWSYTRON=.FALSE.
 !
+! Snowmaking and Grooming default option and pressure default value | P.Spandre     20160211                                    
+OSNOWCOMPACT_BOOL=.FALSE.                                    
+OSNOWMAK_BOOL =.FALSE.
+OPRODSNOWMAK = .FALSE.
+OSNOWMAK_PROP =.FALSE.
+OSNOWTILLER =.FALSE.
+OSELF_PROD =.FALSE.
+!
+! 
 HSNOWMETAMO = 'B92'
 HSNOWRAD    = 'B92'
 !

@@ -89,6 +89,7 @@ TYPE PACK_DIAG_ISBA_t
   
   REAL, POINTER, DIMENSION(:) :: XP_SYTMASS  ! Eroded/accumulated snow fluxes (Crocus+SYTRON) (kg/m2/s)
   REAL, POINTER, DIMENSION(:) :: XP_RN_ISBA   ! net radiative flux from snow-free surface 
+  REAL, POINTER, DIMENSION(:) :: XP_PRODCOUNT ! snow production counter (Crocus)			(s)
 !                                               ! (ISBA-ES:3-L)                                 (W/m2) 
   REAL, POINTER, DIMENSION(:) :: XP_H_ISBA    ! sensible heat flux from snow-free surface 
 !                                               ! (ISBA-ES:3-L)                                 (W/m2) 
@@ -327,7 +328,8 @@ IF (LHOOK) CALL DR_HOOK("MODD_PACK_DIAG_ISBA_N:PACK_DIAG_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YPACK_DIAG_ISBA%XP_SNOWRAM_SONDE)
   NULLIFY(YPACK_DIAG_ISBA%XP_SNOW_REFROZENTHICKNESS)
   NULLIFY(YPACK_DIAG_ISBA%XP_SNOW_WETTHICKNESS)
-  NULLIFY(YPACK_DIAG_ISBA%XP_SYTMASS)  
+  NULLIFY(YPACK_DIAG_ISBA%XP_SYTMASS)
+  NULLIFY(YPACK_DIAG_ISBA%XP_PRODCOUNT) 
   NULLIFY(YPACK_DIAG_ISBA%XP_RN_ISBA)
   NULLIFY(YPACK_DIAG_ISBA%XP_H_ISBA)
   NULLIFY(YPACK_DIAG_ISBA%XP_LEG_ISBA)

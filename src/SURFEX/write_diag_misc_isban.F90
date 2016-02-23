@@ -421,6 +421,11 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
       CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XAVG_SYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      YRECFM='AVG_PCOUNT'
+      YCOMMENT='Snow production counter (s)'
+      CALL WRITE_SURF(DGU, U, &
+		  HPROGRAM,YRECFM,DGMI%XAVG_PRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF
   !
   !        2.6    SGH scheme
@@ -721,8 +726,14 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         YCOMMENT='Total_Sytron_erosion_accumulation_mass (kg/m2) patch'
         CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XSYTMASSC(:,:),IRESP,HCOMMENT=YCOMMENT)
+	!
+        YRECFM='PCOUNT_P'
+        YCOMMENT='Snow production counter (s) per patch'
+        CALL WRITE_SURF(DGU, U, &
+		  HPROGRAM,YRECFM,DGMI%XPRODCOUNT(:,:),IRESP,HCOMMENT=YCOMMENT)
     ENDIF
-    !
+  !
+  !
   END IF
   !
   IF (LAGRIP) THEN

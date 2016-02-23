@@ -256,6 +256,16 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
     END DO
   ENDIF
 !
+!!	p.s	20150311	Creation of PRODCOUNT
+  IF (HSNOW=='CRO') THEN
+    DO JJ=1,KSIZE
+      JI                      =  KMASK         (JJ)
+      !
+      DGMI%XPRODCOUNT (JI,KPATCH)  =  PKDI%XP_PRODCOUNT    (JJ)
+      !
+    END DO
+  ENDIF
+!
 ! cosine of solar zenith angle 
 !
 

@@ -146,6 +146,12 @@ TYPE ISBA_t
   LOGICAL                        :: LSNOWSYTRON ! Logicals to activate Sytron wind-induced snow redistribution scheme 
                                                 ! Work only in the conceptual representation of the topography of the French
                                                 ! operational chain for avalanche hazard forecasting
+!-------------------------------------------------------------------------------
+! Snow management options	20160211
+  LOGICAL                        :: LSNOWCOMPACT_BOOL, LSNOWMAK_BOOL, LSNOWMAK_PROP, &
+				    LSNOWTILLER, LSELF_PROD
+  LOGICAL,  DIMENSION(9500) :: LPRODSNOWMAK
+!
 ! Scheme of snow metamorphism (Crocus)
   CHARACTER(3)                   :: CSNOWMETAMO ! B92 (historical version, Brun et al 92), C13, T07, F06 (see Carmagnola et al 2014)
 !
@@ -947,6 +953,15 @@ YISBA%LSNOWDRIFT=.TRUE.
 YISBA%LSNOWDRIFT_SUBLIM=.FALSE.
 YISBA%LSNOW_ABS_ZENITH=.FALSE.
 YISBA%LSNOWSYTRON=.FALSE.
+!
+! 20160211
+YISBA%LSNOWCOMPACT_BOOL=.FALSE.
+YISBA%LSNOWMAK_BOOL=.FALSE.
+YISBA%LPRODSNOWMAK=.FALSE.
+YISBA%LSNOWMAK_PROP=.FALSE.
+YISBA%LSNOWTILLER=.FALSE.
+YISBA%LSELF_PROD=.FALSE.
+!
 YISBA%CSNOWMETAMO='B92'
 YISBA%CSNOWRAD='B92'
 YISBA%LECOCLIMAP=.FALSE.
