@@ -128,10 +128,10 @@ DO JJ=1,SIZE(PRI)
 !
   ZSTA(JJ) = PRI(JJ)*ZWORK3(JJ)
 
-
 ! 
-! !
-! !
+! ! 
+! ! !
+! ! !
   IF ( PRI(JJ) < 0.0 ) THEN
     ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
                    +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
@@ -152,30 +152,30 @@ DO JJ=1,SIZE(PRI)
 
 
 ! !!<bber
-!   ZCDN_M98(JJ)= XKARMAN*XKARMAN/(LOG(PUREF(JJ)/ZZ0(JJ))*LOG(PZREF(JJ)/ZZ0(JJ)))
-!    
+!  ZCDN_M98(JJ)= XKARMAN*XKARMAN/(LOG(PUREF(JJ)/ZZ0(JJ))*LOG(PZREF(JJ)/ZZ0(JJ)))
 ! !    
-! !   IF(HSNOWRES=='RIL' .OR. HSNOWRES=='DEF') THEN
-! ! !
-! !       IF ( PRI(JJ) < 0.0 ) THEN
-! !         ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
-! !                        +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
-! !                                     *ZWORK2(JJ)**ZPH(JJ)  &
-! !                                     *ZFH(JJ) * SQRT(-ZSTA(JJ))           &
-! !                       ) 
-! !         PAC(JJ) = ZCDN(JJ)*  (  ZVMOD(JJ)-15.* ZSTA(JJ)*ZDI(JJ)  )  *  ZFH(JJ)
-! ! 
-! !       ELSE
-! !         ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTA(JJ) )
-! !         PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
-! !                  / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
-! !       ENDIF
-! !     !
-! !       PRA(JJ) = 1. / PAC(JJ)
-! !     !
-! !       PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
-! !   ELSE IF (HSNOWRES=='M98')THEN
-!   
+! ! !    
+! ! !   IF(HSNOWRES=='RIL' .OR. HSNOWRES=='DEF') THEN
+! ! ! !
+! ! !       IF ( PRI(JJ) < 0.0 ) THEN
+! ! !         ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
+! ! !                        +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
+! ! !                                     *ZWORK2(JJ)**ZPH(JJ)  &
+! ! !                                     *ZFH(JJ) * SQRT(-ZSTA(JJ))           &
+! ! !                       ) 
+! ! !         PAC(JJ) = ZCDN(JJ)*  (  ZVMOD(JJ)-15.* ZSTA(JJ)*ZDI(JJ)  )  *  ZFH(JJ)
+! ! ! 
+! ! !       ELSE
+! ! !         ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTA(JJ) )
+! ! !         PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
+! ! !                  / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
+! ! !       ENDIF
+! ! !     !
+! ! !       PRA(JJ) = 1. / PAC(JJ)
+! ! !     !
+! ! !       PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
+! ! !   ELSE IF (HSNOWRES=='M98')THEN
+! !   
 !     IF (PRI(JJ)<0.0) THEN
 !         IF (ZCDN_M98(JJ)==0.) THEN
 !             ZMARTIN(JJ)=1.
@@ -198,7 +198,7 @@ DO JJ=1,SIZE(PRI)
 ! 
 !     PAC(JJ)=1./(PRA(JJ))
 !   !ENDIF
-!     !bber>
+! !     !bber>
 
 
 
