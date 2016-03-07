@@ -23,6 +23,7 @@ SUBROUTINE PREP_VER_ISBA (I)
 !!      Original    01/2004
 !!      Modified by B. Decharme  (01/2009), Optional Arpege deep soil temperature initialization
 !!      S. Riette   04/2010 Modification of XTG corrections after freezing
+!!      Y. Seity    02/2016 Add limits in Force-Restore case (WG2 contains WG1)
 !!------------------------------------------------------------------
 !
 
@@ -179,9 +180,14 @@ DO JP=1,SIZE(I%XWG,3)
   END DO
   !
 END DO
+
 !
 !* limits in force-restore case
 !
+IF (I%CISBA=='2-L'.OR.I%CISBA=='3-L') THEN
+I%XWG(:,2,:)=MAX(I%XWG(:,1,:)*I%XDG(:,1,:),I%XWG(:,2,:)*I%XDG(:,2,:))/I%XDG(:,2,:)
+I%XWGI(:,2,:)=MAX(I%XWGI(:,1,:)*I%XDG(:,1,:),I%XWGI(:,2,:)*I%XDG(:,2,:))/I%XDG(:,2,:)
+ENDIF
 IF (I%CISBA=='3-L') THEN 
   DO JP=1,SIZE(I%XWG,3)
      WHERE (I%XWGI(:,3,JP) /= XUNDEF)
