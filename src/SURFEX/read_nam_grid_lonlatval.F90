@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE READ_NAM_GRID_LONLATVAL(UG,U,HPROGRAM,KGRID_PAR,KL,PGRID_PAR,HDIR)
+      SUBROUTINE READ_NAM_GRID_LONLATVAL(PGRID_FULL_PAR,KDIM_FULL,HPROGRAM,KGRID_PAR,KL,PGRID_PAR,HDIR)
 !     ################################################################
 !
 !!****  *READ_NAM_GRID_LONLATVAL* - routine to read in namelist the horizontal grid
@@ -33,9 +33,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK
 !
 USE MODE_POS_SURF
@@ -55,8 +52,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+REAL, DIMENSION(:), POINTER :: PGRID_FULL_PAR
+INTEGER, INTENT(IN) :: KDIM_FULL
 !
  CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
@@ -142,9 +139,9 @@ IF (HDIR/='H') THEN
   !
 ELSE
   !
-  ALLOCATE(ZX0(U%NDIM_FULL),ZY0(U%NDIM_FULL),ZDX0(U%NDIM_FULL),ZDY0(U%NDIM_FULL))
+  ALLOCATE(ZX0(KDIM_FULL),ZY0(KDIM_FULL),ZDX0(KDIM_FULL),ZDY0(KDIM_FULL))
   !
-  CALL GET_GRIDTYPE_LONLATVAL(UG%XGRID_FULL_PAR,&
+  CALL GET_GRIDTYPE_LONLATVAL(PGRID_FULL_PAR,&
                               PX=ZX0,PY=ZY0,PDX=ZDX0,PDY=ZDY0)
   !
   KL = NSIZE_TASK(NRANK)

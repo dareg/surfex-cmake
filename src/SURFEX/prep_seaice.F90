@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_SEAICE (UG, &
-                         DTCO, DTS, O, OR, SG, S, U, &
+SUBROUTINE PREP_SEAICE (UG, DTCO, DTS, O, OR, KLAT, S, U, &
                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -37,7 +36,6 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -69,7 +67,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(GRID_t), INTENT(INOUT) :: SG
+INTEGER, INTENT(IN) :: KLAT
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -116,8 +114,7 @@ ENDIF
 !*      2.     Reading and horizontal interpolations of Seaice cover
 !
 IF (S%LHANDLE_SIC) THEN 
-   CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
-                               DTS, O, OR, SG, S, &
+   CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, DTS, O, OR, KLAT, S, &
                                HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 ENDIF
 !
@@ -163,8 +160,7 @@ ENDIF
 !*      Creating default initial state for Gelato 
 !
 !
-CALL GET_TYPE_DIM_n(DTCO, U, &
-                    'SEA   ',nx)
+CALL GET_TYPE_DIM_n(DTCO, U, 'SEA   ',nx)
 ny=1
 nyglo=1
 nxglo=nx

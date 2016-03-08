@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE FLAG_TEB_GARDEN_n (TGDR, TGDO, TGDPE, T,  &
-                                    KFLAG)
+      SUBROUTINE FLAG_TEB_GARDEN_n (VR, VO, PLAI, PGARDEN, KFLAG)
 !     ##################################
 !
 !!****  *FLAG_TEB_GARDEN_n* - routine to flag ISBA variables where gardens are
@@ -39,10 +38,8 @@
 !
 !
 !
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_TEB_VEG_PARAM_n, ONLY : TEB_VEG_PARAM_TIME_t
-USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 !                                
@@ -59,10 +56,10 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TGDR
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGDO
-TYPE(TEB_VEG_PARAM_TIME_t), INTENT(INOUT) :: TGDPE
-TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: VR
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: VO
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PLAI
+REAL, DIMENSION(:), INTENT(IN) :: PGARDEN
 !
 INTEGER, INTENT(IN) :: KFLAG ! 1 : to put physical values to run ISBA afterwards
 !                            ! 2 : to flag with XUNDEF value for points wihtout garden
@@ -100,38 +97,38 @@ ENDIF
 !-------------------------------------------------------------------------------
 !     
   !
-  DO JL1=1,TGDO%NGROUND_LAYER
-    WHERE (T%CUR%XGARDEN(:)==0.) 
-      TGDR%CUR%XTG (:,JL1,1) = ZTG
-      TGDR%CUR%XWG (:,JL1,1) = ZWG
-      TGDR%CUR%XWGI(:,JL1,1) = ZDEF
+  DO JL1=1,VO%NGROUND_LAYER
+    WHERE (PGARDEN(:)==0.) 
+      VR%XTG (:,JL1,1) = ZTG
+      VR%XWG (:,JL1,1) = ZWG
+      VR%XWGI(:,JL1,1) = ZDEF
     END WHERE
   END DO
   !
-  WHERE (T%CUR%XGARDEN(:)==0.) 
-    TGDR%CUR%XWR  (:,1) = ZWR
-    TGDR%CUR%XRESA(:,1) = ZRESA
+  WHERE (PGARDEN(:)==0.) 
+    VR%XWR  (:,1) = ZWR
+    VR%XRESA(:,1) = ZRESA
   END WHERE
   !
-  IF (TGDO%CPHOTO/='NON') THEN
+  IF (VO%CPHOTO/='NON') THEN
     !
-    WHERE (T%CUR%XGARDEN(:)==0.)
-      TGDR%CUR%XANFM (:,1) = ZANFM              
-      TGDR%CUR%XAN   (:,1) = ZDEF
-      TGDR%CUR%XANDAY(:,1) = ZDEF
-      TGDR%CUR%XLE   (:,1) = ZDEF
+    WHERE (PGARDEN(:)==0.)
+      VR%XANFM (:,1) = ZANFM              
+      VR%XAN   (:,1) = ZDEF
+      VR%XANDAY(:,1) = ZDEF
+      VR%XLE   (:,1) = ZDEF
     END WHERE
     !
-    IF (TGDO%CPHOTO=='LAI' .OR. TGDO%CPHOTO=='LST' .OR. TGDO%CPHOTO=='NIT' .OR. TGDO%CPHOTO=='NCB') THEN
+    IF (VO%CPHOTO=='LAI' .OR. VO%CPHOTO=='LST' .OR. VO%CPHOTO=='NIT' .OR. VO%CPHOTO=='NCB') THEN
       !
-      WHERE (T%CUR%XGARDEN(:)==0.) TGDPE%CUR%XLAI(:,1) = ZDEF
+      WHERE (PGARDEN(:)==0.) PLAI(:,1) = ZDEF
       !
-    ELSE IF (TGDO%CPHOTO=='AGS' .OR. TGDO%CPHOTO=='AST') THEN
+    ELSE IF (VO%CPHOTO=='AGS' .OR. VO%CPHOTO=='AST') THEN
       !
-      DO JL1=1,SIZE(TGDR%CUR%XBIOMASS,2)
-        WHERE (T%CUR%XGARDEN(:)==0.)
-          TGDR%CUR%XBIOMASS     (:,JL1,1) = ZDEF
-          TGDR%CUR%XRESP_BIOMASS(:,JL1,1) = ZDEF
+      DO JL1=1,SIZE(VR%XBIOMASS,2)
+        WHERE (PGARDEN(:)==0.)
+          VR%XBIOMASS     (:,JL1,1) = ZDEF
+          VR%XRESP_BIOMASS(:,JL1,1) = ZDEF
         END WHERE
       END DO
       !
@@ -144,19 +141,19 @@ ENDIF
 !
 !* Flag snow characteristics
 !
- CALL FLAG_GR_SNOW(KFLAG,T%CUR%XGARDEN(:)==0.,TGDR%CUR%TSNOW)
+ CALL FLAG_GR_SNOW(KFLAG,PGARDEN(:)==0.,VR%TSNOW)
 !
 !
 !* snow-free characteristics
 !
 IF (KFLAG==1) THEN
-  WHERE (T%CUR%XGARDEN==0.) TGDR%CUR%XSNOWFREE_ALB(:,1)      = 0.2
-  WHERE (T%CUR%XGARDEN==0.) TGDR%CUR%XSNOWFREE_ALB_VEG(:,1)  = 0.2
-  WHERE (T%CUR%XGARDEN==0.) TGDR%CUR%XSNOWFREE_ALB_SOIL(:,1) = 0.2
+  WHERE (PGARDEN==0.) VR%XSNOWFREE_ALB(:,1)      = 0.2
+  WHERE (PGARDEN==0.) VR%XSNOWFREE_ALB_VEG(:,1)  = 0.2
+  WHERE (PGARDEN==0.) VR%XSNOWFREE_ALB_SOIL(:,1) = 0.2
 ELSEIF (KFLAG==2) THEN
-  WHERE (T%CUR%XGARDEN==0.) TGDR%CUR%XSNOWFREE_ALB(:,1)      = XUNDEF
-  WHERE (T%CUR%XGARDEN==0.) TGDR%CUR%XSNOWFREE_ALB_VEG(:,1)  = XUNDEF
-  WHERE (T%CUR%XGARDEN==0.) TGDR%CUR%XSNOWFREE_ALB_SOIL(:,1) = XUNDEF
+  WHERE (PGARDEN==0.) VR%XSNOWFREE_ALB(:,1)      = XUNDEF
+  WHERE (PGARDEN==0.) VR%XSNOWFREE_ALB_VEG(:,1)  = XUNDEF
+  WHERE (PGARDEN==0.) VR%XSNOWFREE_ALB_SOIL(:,1) = XUNDEF
 END IF
 !
 !-------------------------------------------------------------------------------

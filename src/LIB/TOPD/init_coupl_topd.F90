@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     #######################
-      SUBROUTINE INIT_COUPL_TOPD (DGEIC, I, UG, U, &
-                                  HPROGRAM,KI)
+      SUBROUTINE INIT_COUPL_TOPD (DGEIC, I, UG, U, HPROGRAM,KI)
 !     #######################
 !
 !!****  *INIT_COUPL_TOPD*  
@@ -137,13 +136,12 @@ NMASKT(:,:) = NUNDEF
 ALLOCATE(NMASKT_PATCH(SIZE(I%R%XWG,1)))
 !
 IF (I%O%CISBA=='DIF') THEN
- CALL DG_DFTO3L(I, &
-                SIZE(I%R%XWG,1),ZDG_3L)
+ CALL DG_DFTO3L(I%O, I%M%X, I%IP, SIZE(I%R%XWG,1),ZDG_3L)
 ELSEIF (I%O%CISBA=='3-L') THEN
- CALL AVG_PATCH_WG(I, &
-                   SIZE(I%R%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
+ CALL AVG_PATCH_WG(I%M%X, I%IP, I%R, SIZE(I%R%XWG,1),ZWG_3L,ZWGI_3L,ZDG_3L)
 ENDIF
-! la surface saturee, à l'initialisation est nulle, donc on initialise les lambdas de telle sorte qu'aucun pixel ne soit sature
+! la surface saturee, à l'initialisation est nulle, donc on initialise 
+!les lambdas de telle sorte qu'aucun pixel ne soit sature
 ALLOCATE(XKA_PRE (NNCAT,NMESHT))
 ALLOCATE(XKAC_PRE(NNCAT))
 XKA_PRE(:,:) = 0.0
@@ -226,12 +224,14 @@ DO JMESH=1,KI
 !    ZRTOP_D2(JMESH) = 0.
     DO JCAT=1,NNCAT
      !moyenne ponderee pour cas ou plusieurs BV sur maille
-       ZRTOP_D2(JMESH) = ZRTOP_D2(JMESH) + XRTOP_D2(JCAT)*MIN(XBV_IN_MESH(JMESH,JCAT)/XTOTBV_IN_MESH(JMESH),1.)    
+       ZRTOP_D2(JMESH) = ZRTOP_D2(JMESH) + &
+               XRTOP_D2(JCAT)*MIN(XBV_IN_MESH(JMESH,JCAT)/XTOTBV_IN_MESH(JMESH),1.)    
     END DO
   ENDIF   
 ENDDO
 !ZTOP_D2 * D2 < D3 : the depth concerned by lateral transfers is lower than D2
-WHERE( ZDG2_FULL/=XUNDEF .AND. ZRTOP_D2*ZDG2_FULL>ZDG3_FULL ) ZRTOP_D2(:) = ZDG3_FULL(:)/ZDG2_FULL(:)
+WHERE( ZDG2_FULL/=XUNDEF .AND. ZRTOP_D2*ZDG2_FULL>ZDG3_FULL ) &
+                ZRTOP_D2(:) = ZDG3_FULL(:)/ZDG2_FULL(:)
 !
 DEALLOCATE(ZFRAC)
 !
@@ -358,7 +358,8 @@ CALL UNPACK_SAME_RANK(U%NR_NATURE,ZWG_3L(:,2),ZWG2_FULL)
 CALL UNPACK_SAME_RANK(U%NR_NATURE,ZWG_3L(:,3),ZWG3_FULL)
 !
 WHERE ( ZDG_FULL/=XUNDEF .AND. ZDG_FULL/=0. )
-  XWG_FULL = XFRAC_D2*(ZDG2_FULL/ZDG_FULL)*ZWG2_FULL + XFRAC_D3*((ZDG3_FULL-ZDG2_FULL)/ZDG_FULL)*ZWG3_FULL
+  XWG_FULL = XFRAC_D2*(ZDG2_FULL/ZDG_FULL)*ZWG2_FULL + &
+                XFRAC_D3*((ZDG3_FULL-ZDG2_FULL)/ZDG_FULL)*ZWG3_FULL
 ELSEWHERE
   XWG_FULL = XUNDEF
 END WHERE
@@ -396,8 +397,7 @@ XDR_TOROUT (:,:) = 0.
 !
 IF (HPROGRAM=='POST  ') GOTO 20
 !
-IF (LSTOCK_TOPD) CALL RESTART_COUPL_TOPD(UG, U, &
-                                         HPROGRAM,KI)
+IF (LSTOCK_TOPD) CALL RESTART_COUPL_TOPD(UG, U%NR_NATURE, HPROGRAM,KI)
 !
 !*      7.0     deallocate
 !               ----------

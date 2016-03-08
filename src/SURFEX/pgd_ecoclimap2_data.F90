@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE PGD_ECOCLIMAP2_DATA (DTCO, &
+      SUBROUTINE PGD_ECOCLIMAP2_DATA (KYEAR, PDATA_VEGTYPE, &
                                       HPROGRAM)
 !     #########################
 !
@@ -35,9 +35,6 @@
 !
 !*    0.     DECLARATION
 !            -----------
-
-!
-USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
@@ -70,7 +67,8 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+INTEGER, INTENT(INOUT) :: KYEAR
+REAL, DIMENSION(:,:), INTENt(IN) :: PDATA_VEGTYPE
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
@@ -110,7 +108,7 @@ NAMELIST/NAM_ECOCLIMAP2/  YIRRIG, LCLIM_LAI
 IF (LHOOK) CALL DR_HOOK('PGD_ECOCLIMAP2_DATA',0,ZHOOK_HANDLE)
 YIRRIG         = '                          '
 LCLIM_LAI      = .TRUE.
-DTCO%NYEAR          = NUNDEF
+KYEAR          = NUNDEF
 !
 !* Reading
 !
@@ -189,7 +187,7 @@ END IF
 !    4.    Computes LAI evolution for the chosen year
 !          ------------------------------------------
 !
- CALL ECOCLIMAP2_LAI(DTCO)
+ CALL ECOCLIMAP2_LAI(KYEAR,PDATA_VEGTYPE)
 IF (LHOOK) CALL DR_HOOK('PGD_ECOCLIMAP2_DATA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

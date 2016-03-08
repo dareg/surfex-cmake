@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_SEAFLUX_DATE (O, &
+      SUBROUTINE READ_SEAFLUX_DATE (OMERCATOR, &
                                     HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
                                      KYEAR,KMONTH,KDAY,PTIME,TPTIME)  
 !     #######################################################
@@ -60,8 +60,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(OCEAN_t), INTENT(INOUT) :: O
+LOGICAL, INTENT(IN) :: OMERCATOR
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
@@ -115,7 +114,7 @@ END IF
 IF (TPTIME%TDATE%YEAR==NUNDEF.OR.TPTIME%TDATE%MONTH==NUNDEF &
       .OR.TPTIME%TDATE%DAY==NUNDEF.OR.TPTIME%TIME==XUNDEF) THEN  
   !
-  CALL READ_PREP_SEAFLUX_CONF(O, &
+  CALL READ_PREP_SEAFLUX_CONF(OMERCATOR, &
                               HPROGRAM,'DATE   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                               HATMFILE,HATMFILETYPE,YFILEPGDIN,YFILEPGDINTYPE,KLUOUT,GUNIF)
   !

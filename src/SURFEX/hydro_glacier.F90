@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE HYDRO_GLACIER (HSNOW_SCHEME, &
-                                 PTSTEP,PSR,PSNOWRHO,PSNOWSWE,PGLASTO,PICEFLUX)
+      SUBROUTINE HYDRO_GLACIER (HSNOW_SCHEME, PTSTEP, PSR, IR, PICEFLUX)
 !     ########################################################################
 !
 !!****  *HYDRO_GLACIER*  
@@ -40,6 +39,8 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+!
 USE MODD_CSTS,     ONLY : XDAY
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX, XHGLA, XSNOWDMIN, XRHOSMAX_ES
 !
@@ -51,7 +52,6 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
  CHARACTER(LEN=*), INTENT(IN) :: HSNOW_SCHEME
 !
 REAL, INTENT(IN)                     :: PTSTEP
@@ -60,14 +60,7 @@ REAL, INTENT(IN)                     :: PTSTEP
 REAL, DIMENSION(:), INTENT(IN)       :: PSR
 !                                       PSR      = Snowfall    [kg/m²s]
 !
-REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWRHO
-!                                       PSNOWRHO = Snow density [kg/m3]
-!
-REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWSWE
-!                                       PSNOWSWE = Snow water equivalent [kg/m²]
-!
-REAL, DIMENSION(:), INTENT(INOUT)    :: PGLASTO
-!                                       PGLASTO  = Glacier storage      [kg/m²]
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
 !
 REAL, DIMENSION(:), INTENT(OUT)      :: PICEFLUX
 !                                       PICEFLUX = Ice flux from the Snowfall reservoir [kg/m²s]
@@ -91,7 +84,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO_GLACIER',0,ZHOOK_HANDLE)
 !
-ZGLASTO (:) = PGLASTO(:)
+ZGLASTO (:) = IR%XICE_STO(:,1)
 ZSTOMAX (:) = 0.0
 ZFLUX   (:) = 0.0
 ZSR     (:) = 0.0
@@ -103,12 +96,12 @@ PICEFLUX(:) = 0.0
 !Ice accumulation only if snow amount is > to 33.3 meters of aged snow
 !
 IF(HSNOW_SCHEME/='3-L' .AND. HSNOW_SCHEME/='CRO')THEN
-  ZRHOSMAX=XRHOSMAX
-  ZSWE(:)=PSNOWSWE(:,1)
+  ZRHOSMAX = XRHOSMAX
+  ZSWE(:)  = IR%TSNOW%WSNOW(:,1,1)
 ELSE
   ZRHOSMAX=XRHOSMAX_ES
-  DO JWRK=1,SIZE(PSNOWSWE,2)
-     ZSWE  (:) = ZSWE  (:) + PSNOWSWE(:,JWRK)
+  DO JWRK=1,SIZE(IR%TSNOW%WSNOW,2)
+     ZSWE(:) = ZSWE(:) + IR%TSNOW%WSNOW(:,JWRK,1)
   END DO
 ENDIF
 !
@@ -120,32 +113,32 @@ ENDWHERE
 !
 !Snow storage calculation
 !
-PGLASTO(:)=(ZGLASTO(:)+PTSTEP*ZSR(:))/(1.0+PTSTEP/(ZTAU*XDAY))
+IR%XICE_STO(:,1) = (ZGLASTO(:)+PTSTEP*ZSR(:))/(1.0+PTSTEP/(ZTAU*XDAY))
 !
 !supress numerical artifacs
 !
-ZSTOMAX(:)=ZSR(:)*PTSTEP+ZGLASTO(:)
+ZSTOMAX(:) = ZSR(:)*PTSTEP+ZGLASTO(:)
 !
-PGLASTO(:)=MIN(ZSTOMAX(:),PGLASTO(:))
+IR%XICE_STO(:,1) = MIN(ZSTOMAX(:),IR%XICE_STO(:,1))
 !
 !Ice flux calculation                
 !
-ZFLUX(:)=(ZGLASTO(:)-PGLASTO(:))/PTSTEP+ZSR(:)
+ZFLUX(:) = (ZGLASTO(:)-IR%XICE_STO(:,1))/PTSTEP+ZSR(:)
 !      
 !supress numerical artifacs
 !
 PICEFLUX(:) = MAX(0.0,ZFLUX(:))
-PGLASTO (:) = PGLASTO(:) + PICEFLUX(:)-ZFLUX(:)             
+IR%XICE_STO(:,1) = IR%XICE_STO(:,1) + PICEFLUX(:)-ZFLUX(:)             
 !
-WHERE(PGLASTO(:)<=1.E-10)PGLASTO(:)=0.0
+WHERE(IR%XICE_STO(:,1)<=1.E-10)IR%XICE_STO(:,1)=0.0
 !
 !-------------------------------------------------------------------------------
 !Snow pack update
 !
 IF(HSNOW_SCHEME/='3-L' .AND. HSNOW_SCHEME/='CRO')THEN
 !
-  WHERE(PSNOWSWE(:,1)<=XHGLA*ZRHOSMAX)PICEFLUX(:)=0.0
-  PSNOWSWE(:,1)=PSNOWSWE(:,1)-PICEFLUX(:)*PTSTEP
+  WHERE(IR%TSNOW%WSNOW(:,1,1)<=XHGLA*ZRHOSMAX)PICEFLUX(:)=0.0
+  IR%TSNOW%WSNOW(:,1,1)=IR%TSNOW%WSNOW(:,1,1)-PICEFLUX(:)*PTSTEP
 !
 ELSE
 !
@@ -153,15 +146,15 @@ ELSE
 !
 ! Snow total depth
   ZSNOWD(:) = 0.
-  DO JWRK=1,SIZE(PSNOWSWE,2)
-     ZSNOWD(:) = ZSNOWD(:) + PSNOWSWE(:,JWRK)/PSNOWRHO(:,JWRK)
+  DO JWRK=1,SIZE(IR%TSNOW%WSNOW,2)
+     ZSNOWD(:) = ZSNOWD(:) + IR%TSNOW%WSNOW(:,JWRK,1)/IR%TSNOW%RHO(:,JWRK,1)
   END DO
 !
 ! Flux
-  DO JWRK=1,SIZE(PSNOWSWE,2)
-     ZFLUX(:) = PICEFLUX(:)*(PSNOWSWE(:,JWRK)/PSNOWRHO(:,JWRK)) &
+  DO JWRK=1,SIZE(IR%TSNOW%WSNOW,2)
+     ZFLUX(:) = PICEFLUX(:)*(IR%TSNOW%WSNOW(:,JWRK,1)/IR%TSNOW%RHO(:,JWRK,1)) &
                 /MAX(ZSNOWD(:),0.0001)
-     PSNOWSWE(:,JWRK)=PSNOWSWE(:,JWRK)-ZFLUX(:)*PTSTEP
+     IR%TSNOW%WSNOW(:,JWRK,1)=IR%TSNOW%WSNOW(:,JWRK,1)-ZFLUX(:)*PTSTEP
   END DO
 !
 ENDIF

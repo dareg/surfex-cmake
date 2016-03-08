@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE HOR_INTERPOL (DTCO, U, &
-                         KLUOUT,PFIELDIN,PFIELDOUT)
+SUBROUTINE HOR_INTERPOL (DTCO, U, KLUOUT,PFIELDIN,PFIELDOUT)
 !     #################################################################################
 !
 !!****  *HOR_INTERPOL * - Call the interpolation of a surface field
@@ -123,8 +122,7 @@ SELECT CASE (CINTERP_TYPE)
 !              ------------------------------
 !
   CASE('BUFFER')
-    CALL HOR_INTERPOL_BUFFER(DTCO, U, &
-                             KLUOUT,PFIELDIN,PFIELDOUT)
+    CALL HOR_INTERPOL_BUFFER(DTCO, U, KLUOUT,PFIELDIN,PFIELDOUT)
 
 !
 !*      4.     no interpolation

@@ -1,10 +1,5 @@
 !     #########
-      SUBROUTINE COTWOINIT_n (OAGRI_TO_GRASS, OTR_ML, &
-                              HPHOTO,PVEGTYPE,PGMES,PCO2,PGC,PDMAX,            &
-                            PABC,PPOI,PANMAX,                                 &
-                            PFZERO,PEPSO,PGAMM,PQDGAMM,PQDGMES,PT1GMES,       &
-                            PT2GMES,PAMAX,PQDAMAX,PT1AMAX,PT2AMAX,PAH,PBH,    &
-                            PTAU_WOOD                                         )  
+      SUBROUTINE COTWOINIT_n (IO,PGMES,PCO2,PGC,PDMAX, IP  )  
 !     #######################################################################
 !
 !!****  *COTWOINIT*  
@@ -43,7 +38,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    27/10/97
-!!      (V. Rivalland) 10/04/02  Add: PAH and PBH coefficients for
+!!      (V. Rivalland) 10/04/02  Add: IP%XAH and IP%XBH coefficients for
 !!                               herbaceous water stress response
 !!      (P. LeMoigne) 03/2004:   computation of zgmest in SI units
 !!      (P. LeMoigne) 10/2004:   possibility of 2 different FZERO
@@ -59,6 +54,9 @@
 !!
 !-------------------------------------------------------------------------------
 !
+!
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_C3, NVT_C4, NVT_IRR, NVT_TROG,     &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,&
@@ -83,14 +81,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-LOGICAL, INTENT(IN) :: OAGRI_TO_GRASS
-LOGICAL, INTENT(IN) :: OTR_ML
-!
- CHARACTER(LEN=3),   INTENT(IN)   :: HPHOTO      ! type of photosynthesis
-REAL,DIMENSION(:,:),INTENT(IN)   :: PVEGTYPE
-!                                     PVEGTYPE = fraction of each
-!                                     vegetation classification index;
-!                                     C3 =>1, C4 => 2
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
 !
 REAL,DIMENSION(:),INTENT(IN)  :: PGMES, PCO2
 !                                     PGMES     = mesophyll conductance (m s-1)
@@ -101,45 +93,6 @@ REAL,DIMENSION(:),INTENT(IN)   :: PDMAX, PGC
 !                                                 by vegetation
 !                                     PGC       = cuticular conductance (m s-1)
 !
-REAL, DIMENSION(:), INTENT(OUT)  :: PABC, PPOI
-!                                     ZABC      = abscissa needed for integration
-!                                     of net assimilation and stomatal conductance
-!                                     over canopy depth
-!                                     ZPOI      = Gaussian weights (as above)
-!
-REAL,DIMENSION(:),INTENT(OUT)  :: PANMAX
-!                                     PANMAX    = maximum net assimilation
-!
-REAL,DIMENSION(:),INTENT(OUT)  :: PFZERO, PEPSO, PGAMM, PQDGAMM, PQDGMES,  &
-                                    PT1GMES, PT2GMES, PAMAX, PQDAMAX,       &
-                                    PT1AMAX, PT2AMAX, PTAU_WOOD  
-!                                     PFZERO    = ideal value of F, no photorespiration or 
-!                                                 saturation deficit
-!                                     PEPSO     = maximum initial quantum use efficiency 
-!                                                 (kgCO2 kgAir-1 J-1 PAR)
-!                                     PGAMM     = CO2 conpensation concentration (kgCO2 kgAir-1)
-!                                     PQDGAMM   = Log of Q10 function for CO2 conpensation 
-!                                                 concentration
-!                                     PQDGMES   = Log of Q10 function for mesophyll conductance 
-!                                     PT1GMES   = reference temperature for computing 
-!                                                 compensation concentration function for 
-!                                                 mesophyll conductance: minimum temperature 
-!                                     PT2GMES   = reference temperature for computing 
-!                                                 compensation concentration function for 
-!                                                 mesophyll conductance: maximum temperature
-!                                     PAMAX     = leaf photosynthetic capacity (Units of kgCO2 kgAir-1 m s-1)
-!                                     PQDAMAX   = Log of Q10 function for leaf photosynthetic capacity
-!                                     PT1AMAX   = reference temperature for computing 
-!                                                 compensation concentration function for leaf 
-!                                                 photosynthetic capacity: minimum temperature
-!                                     PT2AMAX   = reference temperature for computing 
-!                                                 compensation concentration function for leaf 
-!                                                 photosynthetic capacity: maximum temperature
-!                                     PTAU_WOOD = residence time in woody biomass (s)
-!
-REAL,DIMENSION(:),INTENT(OUT)  :: PAH, PBH
-!                                     PAH       = coeficient of universal relationship for herbaceous
-!                                     PBH       = coeficient of universal relationship for herbaceous
 !
 !*      0.2    declaration of local variables
 !
@@ -148,7 +101,7 @@ INTEGER                           :: ICLASS    ! indexes for loops
 INTEGER                           :: ICO2TYPE  ! type of CO2 vegetation
 INTEGER                           :: IRAD      ! with or without new radiative transfer
 !
-REAL, DIMENSION(SIZE(PANMAX))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZGPP, ZRDK, ZEPSO
+REAL, DIMENSION(SIZE(IP%XANMAX,1))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZGPP, ZRDK, ZEPSO
 !                                    ZTOPT     = optimum  temperature for compensation 
 !                                                point
 !                                    ZANMAX    = maximum photosynthesis rate
@@ -158,7 +111,7 @@ REAL, DIMENSION(SIZE(PANMAX))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZGPP, Z
 !                                    ZRDK      = dark respiration
 !
 !
-REAL, DIMENSION(SIZE(PANMAX))     :: ZCO2INIT3, ZCO2INIT4, ZCO2INIT5, ZCO2INIT2,ZCO2INIT1
+REAL, DIMENSION(SIZE(IP%XANMAX,1))     :: ZCO2INIT3, ZCO2INIT4, ZCO2INIT5, ZCO2INIT2,ZCO2INIT1
 !                                    working arrays for initializing surface 
 !                                    temperature, saturation deficit, global radiation,
 !                                    optimum temperature for determining maximum 
@@ -174,21 +127,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('COTWOINIT_N',0,ZHOOK_HANDLE)
 !
 ZTOPT  (:) = 0.
-PFZERO (:) = 0.
-PEPSO  (:) = 0.
-PGAMM  (:) = 0.
-PQDGAMM(:) = 0.
-PQDGMES(:) = 0.
-PT1GMES(:) = 0.
-PT2GMES(:) = 0.
-PAMAX  (:) = 0.
-PQDAMAX(:) = 0.
-PT1AMAX(:) = 0.
-PT2AMAX(:) = 0.
-PTAU_WOOD(:) = 0.
+IP%XFZERO (:,1) = 0.
+IP%XEPSO  (:,1) = 0.
+IP%XGAMM  (:,1) = 0.
+IP%XQDGAMM(:,1) = 0.
+IP%XQDGMES(:,1) = 0.
+IP%XT1GMES(:,1) = 0.
+IP%XT2GMES(:,1) = 0.
+IP%XAMAX  (:,1) = 0.
+IP%XQDAMAX(:,1) = 0.
+IP%XT1AMAX(:,1) = 0.
+IP%XT2AMAX(:,1) = 0.
+IP%XTAU_WOOD(:,1) = 0.
 !
-PAH    (:) = 0.
-PBH    (:) = 0.
+IP%XAH    (:,1) = 0.
+IP%XBH    (:,1) = 0.
 !
 ZEPSO (:) = 0.
 ZGPP (:) = 0.
@@ -207,7 +160,7 @@ ZCO2INIT5(:) = 0.
 ! DETERMINE GAUSSIAN WEIGHTS NEEDED FOR CO2 MODEL 
 ! -----------------------------------------------
 !
- CALL GAULEG(0.0,1.0,PABC,PPOI,SIZE(PABC))
+ CALL GAULEG(0.0,1.0,IP%XABC,IP%XPOI,SIZE(IP%XABC))
 !
 !
 ! INITIALIZE VARIOUS PARAMETERS FOR CO2 MODEL:
@@ -221,54 +174,54 @@ DO JCLASS=1,NVEGTYPE
   ELSE
     ICO2TYPE = 1   ! C3 type
   END IF
-  IF(OAGRI_TO_GRASS.AND.(JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR)) ICO2TYPE = 1
-  IF (OTR_ML) THEN
+  IF(IO%LAGRI_TO_GRASS.AND.(JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR)) ICO2TYPE = 1
+  IF (IO%LTR_ML) THEN
     IRAD = 1   ! running with new radiative transfer
   ELSE
     IRAD = 2
   ENDIF
   !
-  ZTOPT  (:) = ZTOPT  (:) + XTOPT  (ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  IF (HPHOTO == 'AGS' .OR. HPHOTO == 'LAI') THEN
-     PFZERO (:) = PFZERO (:) + XFZERO1 (ICO2TYPE) * PVEGTYPE(:,JCLASS)
+  ZTOPT  (:) = ZTOPT  (:) + XTOPT  (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IF (IO%CPHOTO == 'AGS' .OR. IO%CPHOTO == 'LAI') THEN
+     IP%XFZERO (:,1) = IP%XFZERO (:,1) + XFZERO1 (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
   ELSE
      IF((JCLASS==NVT_TEBD) .OR. (JCLASS==NVT_BONE) .OR.                         &
         (JCLASS==NVT_TRBD) .OR. (JCLASS==NVT_TEBE) .OR. (JCLASS==NVT_TENE) .OR. &
         (JCLASS==NVT_BOBD) .OR. (JCLASS==NVT_BOND) .OR. (JCLASS==NVT_SHRB)) THEN
-        PFZERO (:) = PFZERO (:) + ((XAW - LOG(PGMES(:)*1000.0))/XBW)*PVEGTYPE(:,JCLASS)
+        IP%XFZERO (:,1) = IP%XFZERO (:,1) + ((XAW - LOG(PGMES(:)*1000.0))/XBW)*IP%XVEGTYPE_PATCH(:,JCLASS,1)
      ELSE IF (JCLASS==NVT_TRBE) THEN
-        PFZERO (:) = PFZERO (:) + XFZEROTROP(IRAD) * PVEGTYPE(:,JCLASS)
+        IP%XFZERO (:,1) = IP%XFZERO (:,1) + XFZEROTROP(IRAD) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
      ELSE
-        PFZERO (:) = PFZERO (:) + XFZERO2 (ICO2TYPE) * PVEGTYPE(:,JCLASS)
+        IP%XFZERO (:,1) = IP%XFZERO (:,1) + XFZERO2 (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
      ENDIF
   ENDIF
   !
-  PEPSO  (:) = PEPSO  (:) + XEPSO  (ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PGAMM  (:) = PGAMM  (:) + XGAMM  (ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PQDGAMM(:) = PQDGAMM(:) + XQDGAMM(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PQDGMES(:) = PQDGMES(:) + XQDGMES(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PT1GMES(:) = PT1GMES(:) + XT1GMES(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PT2GMES(:) = PT2GMES(:) + XT2GMES(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PQDAMAX(:) = PQDAMAX(:) + XQDAMAX(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PT1AMAX(:) = PT1AMAX(:) + XT1AMAX(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PT2AMAX(:) = PT2AMAX(:) + XT2AMAX(ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PAH    (:) = PAH    (:) + XAH    (ICO2TYPE) * PVEGTYPE(:,JCLASS)
-  PBH    (:) = PBH    (:) + XBH    (ICO2TYPE) * PVEGTYPE(:,JCLASS)
+  IP%XEPSO  (:,1) = IP%XEPSO  (:,1) + XEPSO  (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XGAMM  (:,1) = IP%XGAMM  (:,1) + XGAMM  (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XQDGAMM(:,1) = IP%XQDGAMM(:,1) + XQDGAMM(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XQDGMES(:,1) = IP%XQDGMES(:,1) + XQDGMES(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XT1GMES(:,1) = IP%XT1GMES(:,1) + XT1GMES(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XT2GMES(:,1) = IP%XT2GMES(:,1) + XT2GMES(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XQDAMAX(:,1) = IP%XQDAMAX(:,1) + XQDAMAX(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XT1AMAX(:,1) = IP%XT1AMAX(:,1) + XT1AMAX(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XT2AMAX(:,1) = IP%XT2AMAX(:,1) + XT2AMAX(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XAH    (:,1) = IP%XAH    (:,1) + XAH    (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XBH    (:,1) = IP%XBH    (:,1) + XBH    (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
   !
-  IF(OAGRI_TO_GRASS.AND.(JCLASS==NVT_C3 .OR. JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR))THEN
+  IF(IO%LAGRI_TO_GRASS.AND.(JCLASS==NVT_C3 .OR. JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR))THEN
     ICLASS=NVT_GRAS
   ELSE
     ICLASS=JCLASS
   ENDIF    
   !
-  PTAU_WOOD(:) = PTAU_WOOD(:) + XTAU_WOOD(ICLASS) * PVEGTYPE(:,JCLASS)
-  PAMAX    (:) = PAMAX    (:) + XAMAX    (ICLASS) * PVEGTYPE(:,JCLASS)
+  IP%XTAU_WOOD(:,1) = IP%XTAU_WOOD(:,1) + XTAU_WOOD(ICLASS) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  IP%XAMAX    (:,1) = IP%XAMAX    (:,1) + XAMAX    (ICLASS) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
   !
 END DO
 !
-PQDGAMM(:)=LOG(PQDGAMM(:))
-PQDGMES(:)=LOG(PQDGMES(:))
-PQDAMAX(:)=LOG(PQDAMAX(:))
+IP%XQDGAMM(:,1)=LOG(IP%XQDGAMM(:,1))
+IP%XQDGMES(:,1)=LOG(IP%XQDGMES(:,1))
+IP%XQDAMAX(:,1)=LOG(IP%XQDAMAX(:,1))
 !
 !
 ! INITIALIZE VARIOUS VARIABLES FOR CO2 MODEL:
@@ -277,24 +230,24 @@ PQDAMAX(:)=LOG(PQDAMAX(:))
 !
 ! compute temperature responses:
 !
-!before optimization (with non log PQDGAMM) : 
-!ZGAMMT(:) = PGAMM(:)*(PQDGAMM(:)**(0.1*(ZTOPT(:)-25.0)))
-ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PQDGAMM(:)
-ZGAMMT(:) = PGAMM(:)*EXP(ZWORK(:))
+!before optimization (with non log IP%XQDGAMM) : 
+!ZGAMMT(:) = IP%XGAMM(:)*(IP%XQDGAMM(:)**(0.1*(ZTOPT(:)-25.0)))
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * IP%XQDGAMM(:,1)
+ZGAMMT(:) = IP%XGAMM(:,1)*EXP(ZWORK(:))
 !
-!before optimization (with non log PQDAMAX) :
-!ZANMAX(:) = ( PAMAX(:)*PQDAMAX(:)**(0.1*(ZTOPT(:)-25.0)) ) / ...
-ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PQDAMAX(:)
-ZANMAX(:) = ( PAMAX(:)*EXP(ZWORK(:)) )                   &
-               /( (1.0+EXP(0.3*(PT1AMAX(:)-ZTOPT(:))))*  &
-                  (1.0+EXP(0.3*(ZTOPT(:)-PT2AMAX(:)))) )  
+!before optimization (with non log IP%XQDAMAX) :
+!ZANMAX(:) = ( IP%XAMAX(:)*IP%XQDAMAX(:)**(0.1*(ZTOPT(:)-25.0)) ) / ...
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * IP%XQDAMAX(:,1)
+ZANMAX(:) = ( IP%XAMAX(:,1)*EXP(ZWORK(:)) )                   &
+               /( (1.0+EXP(0.3*(IP%XT1AMAX(:,1)-ZTOPT(:))))*  &
+                  (1.0+EXP(0.3*(ZTOPT(:)-IP%XT2AMAX(:,1)))) )  
 !
-!before optimization (with non log PQDGMES) :
-!ZGMEST(:) = ( PGMES(:)*PQDGMES(:)**(0.1*(ZTOPT(:)-25.0)) )    &
-ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PQDGMES(:)
+!before optimization (with non log IP%XQDGMES) :
+!ZGMEST(:) = ( PGMES(:)*IP%XQDGMES(:)**(0.1*(ZTOPT(:)-25.0)) )    &
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * IP%XQDGMES(:,1)
 ZGMEST(:) = ( PGMES(:)*EXP(ZWORK(:)) )                   &
-               /( (1.0+EXP(0.3*(PT1GMES(:)-ZTOPT(:))))*  &
-                  (1.0+EXP(0.3*(ZTOPT(:)-PT2GMES(:)))) )  
+               /( (1.0+EXP(0.3*(IP%XT1GMES(:,1)-ZTOPT(:))))*  &
+                  (1.0+EXP(0.3*(ZTOPT(:)-IP%XT2GMES(:,1)))) )  
 !
 !
 ! initialize other variables: (using optimum values for some variables)
@@ -314,8 +267,8 @@ ZGMEST(:) = ZGMEST(:)*ZCO2INIT5(:)
 !
 ! Initialise DMAX following Calvet (2000) in the case of 'AST' or 'LST' photosynthesis option
 !
-IF((HPHOTO=='AST').OR.(HPHOTO=='LST').OR.(HPHOTO=='NIT').OR.(HPHOTO=='NCB')) THEN
-   ZDMAX(:) = EXP((LOG(ZGMEST(:)*1000.)-PAH(:))/PBH(:))/1000.
+IF((IO%CPHOTO=='AST').OR.(IO%CPHOTO=='LST').OR.(IO%CPHOTO=='NIT').OR.(IO%CPHOTO=='NCB')) THEN
+   ZDMAX(:) = EXP((LOG(ZGMEST(:)*1000.)-IP%XAH(:,1))/IP%XBH(:,1))/1000.
 ELSE
    ZDMAX(:) = PDMAX(:)
 ENDIF
@@ -326,13 +279,13 @@ ENDIF
 ! ZANMAX and ZEPSO from kgCO2/m2/s to kgCO2/kgair m/s by dividing by RHOA (kgair/m3)
 ! ZGAMMT from ppm to kgCO2/kgair
 ZANMAX(:)=ZANMAX(:)/1.2
-ZEPSO(:)=PEPSO(:)/1.2
+ZEPSO(:)=IP%XEPSO(:,1)/1.2
 ZGAMMT(:)=ZGAMMT(:)*XMCO2/XMD*1e-6
 !
 CALL COTWO(PCO2, ZCO2INIT5, ZCO2INIT4, ZCO2INIT3, ZGAMMT, &
-           PFZERO, ZEPSO, ZANMAX, ZGMEST, PGC, ZDMAX,     &
-           PANMAX, ZGS, ZRDK, ZCO2INIT2, ZCO2INIT1        )                     
-! change by sebastien PEPSO change into ZEPSO for units consistency
+           IP%XFZERO(:,1), ZEPSO, ZANMAX, ZGMEST, PGC, ZDMAX,     &
+           IP%XANMAX(:,1), ZGS, ZRDK, ZCO2INIT2, ZCO2INIT1        )                     
+! change by sebastien IP%XEPSO change into ZEPSO for units consistency
 !
 !
 !

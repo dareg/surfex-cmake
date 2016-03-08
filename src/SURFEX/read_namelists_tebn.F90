@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_TEB_n (TM, TGRO, TGDO, &
-                                 HPROGRAM, HINIT)
+SUBROUTINE READ_NAMELISTS_TEB_n (TM, TGRO, TGDO, HPROGRAM, HINIT)
 !     #######################################################
 !
 !---------------------------------------------------------------------------
@@ -52,13 +51,12 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_TEB_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_TEB(CZ0H,XTSTEP,XOUT_TSTEP, CCH_BEM, XDT_RES, XDT_OFF)
 !
  CALL DEFAULT_TEB_VEG(CROUGH,CRUNOFF,CALBEDO,CSCOND,            &
-                     CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,   &
-                     CCPSURF, XCGMAX, CKSAT,                   &
-                     CRAIN, CHORT, LGLACIER,                   &
-                     LCANOPY_DRAG, LVEGUPD, LNITRO_DILU        )
+                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,   &
+                      CCPSURF, XCGMAX, CKSAT,                   &
+                      CRAIN, CHORT, LGLACIER,                   &
+                      LCANOPY_DRAG, LVEGUPD, LNITRO_DILU        )
 !
- CALL DEFAULT_GREENROOF(CRUNOFF_GR,CSCOND_GR,                   &
-                       CKSAT_GR,CHORT_GR)
+ CALL DEFAULT_GREENROOF(CRUNOFF_GR,CSCOND_GR, CKSAT_GR,CHORT_GR)
 !
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
 !
@@ -66,14 +64,13 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_TEB_N',0,ZHOOK_HANDLE)
                       LCOEF,LSURF_VARS,LSURF_MISC_BUDGET,&
                       LSURF_DIAG_ALBEDO,LUTCI,LPGD,XDIAG_TSTEP)   
 !               
- CALL READ_DEFAULT_TEB_n(TM%CHT, TM%DGMTO, TM%DGT, TM%DGUT, TGRO, TM%T, TM%TOP, &
+ CALL READ_DEFAULT_TEB_n(TM%CHT, TM%TD%MO, TM%TD%O, TM%TD%U, TGRO, TM%T, TM%TOP, &
                          HPROGRAM)
 !
- CALL READ_TEB_CONF_n(TM%CHT, TM%DGMTO, TM%DGT, TM%DGUT, TM%T, TM%TOP, &
+ CALL READ_TEB_CONF_n(TM%CHT, TM%TD%MO, TM%TD%O, TM%TD%U, TM%T, TM%TOP, &
                       HPROGRAM) 
 !  
- CALL READ_TEB_VEG_CONF_n(TM%CHT, TGDO, &
-                          HPROGRAM) 
+ CALL READ_TEB_VEG_CONF_n(TM%CHT, TGDO, HPROGRAM) 
 !
 IF (HINIT=='PRE') THEN
         CALL READ_NAM_PREP_TEB_n(HPROGRAM)

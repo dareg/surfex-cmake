@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     ##########################
-      SUBROUTINE WRITE_FILE_ISBAMAP (UG, &
-                                     KUNIT,PVAR,KI)
+      SUBROUTINE WRITE_FILE_ISBAMAP (UG, KUNIT,PVAR,KI)
 !     ##########################
 !
 !!

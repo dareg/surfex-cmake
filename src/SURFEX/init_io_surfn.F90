@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_n (DTCO, DGU, U, &
+      SUBROUTINE INIT_IO_SURF_n (DTCO, U, &
                                  HPROGRAM,HMASK,HSCHEME,HACTION)
 !     #######################################################
 !
@@ -40,7 +40,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 #ifdef SFX_ASC
@@ -78,7 +77,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! main program
@@ -101,7 +99,7 @@ END IF
 !
 IF (HPROGRAM=='OFFLIN' ) THEN
 #ifdef SFX_OL
-  CALL INIT_IO_SURF_OL_n(DTCO, DGU, U, &
+  CALL INIT_IO_SURF_OL_n(DTCO, U, &
                          HPROGRAM,HMASK,HSCHEME,HACTION)
 #endif
 ENDIF

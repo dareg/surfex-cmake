@@ -1,6 +1,5 @@
 !######
-SUBROUTINE RESTART_COUPL_TOPD (UG, U, &
-                               HPROGRAM,KI)
+SUBROUTINE RESTART_COUPL_TOPD (UG, KR_NATURE, HPROGRAM,KI)
 !###################################################################
 !
 !!****  *RESTART_COUPL_TOPDn*  
@@ -27,7 +26,6 @@ SUBROUTINE RESTART_COUPL_TOPD (UG, U, &
 !
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : XUNDEF,NUNDEF
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
@@ -60,7 +58,8 @@ IMPLICIT NONE
 !
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+INTEGER, DIMENSION(:), INTENT(IN) :: KR_NATURE
 !
  CHARACTER(LEN=6), INTENT(IN)         :: HPROGRAM ! program calling surf. schemes
 INTEGER,          INTENT(IN)         :: KI       ! Surfex grid dimension
@@ -190,10 +189,9 @@ ELSE
   WRITE(*,*) 'Read Asat files'
   ALLOCATE(ZAS(KI))
   CALL OPEN_FILE('ASCII ',NUNIT,'surfcont_init.map','FORMATTED',HACTION='READ ')
-  CALL READ_FILE_ISBAMAP(UG, &
-                         NUNIT,ZAS,KI)
+  CALL READ_FILE_ISBAMAP(UG, NUNIT,ZAS,KI)
   CALL CLOSE_FILE('ASCII ',NUNIT)
-  CALL PACK_SAME_RANK(U%NR_NATURE,ZAS,XAS_NATURE)
+  CALL PACK_SAME_RANK(KR_NATURE,ZAS,XAS_NATURE)
   !
 ENDIF
 !

@@ -1,6 +1,5 @@
 !     ################################################################
-      SUBROUTINE UPDATE_ESM_ISBA_n (I, &
-                                    KI,KSW,PZENITH,PSW_BANDS,PDIR_ALB,& 
+      SUBROUTINE UPDATE_ESM_ISBA_n (I, KI,KSW,PZENITH,PSW_BANDS,PDIR_ALB,& 
                                    PSCA_ALB,PEMIS,PTSRAD,PTSURF      )
 !     ################################################################
 !
@@ -110,11 +109,8 @@ ZTSURF_PATCH (:,:) = I%R%XTG(:,1,:)
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(I, &
-                        I%O%LFLOOD,I%R%TSNOW%SCHEME,PZENITH,PSW_BANDS,I%M%T%XVEG,I%M%T%XLAI,I%M%T%XZ0, &
-                         I%O%LMEB_PATCH,I%M%M%XLAIGV,I%M%M%XGNDLITTER,I%M%M%XZ0LITTER,I%M%M%XH_VEG,      &
-                         I%M%T%XALBNIR,I%M%T%XALBVIS,I%M%T%XALBUV,I%M%T%XEMIS,                       &
-                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH           )
+ CALL UPDATE_RAD_ISBA_n(I%O, I%M%T, I%M%M, I%M%A, I%IP, I%I, I%R, &
+                        I%M%X%XVEGTYPE,PZENITH, PSW_BANDS, ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH  )
 !
 !*       3.     radiative surface temperature
 !               -----------------------------

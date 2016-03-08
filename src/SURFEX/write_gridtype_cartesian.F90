@@ -1,6 +1,5 @@
 !     #################################################################
-      SUBROUTINE WRITE_GRIDTYPE_CARTESIAN (DGU, U, &
-                                           HPROGRAM,KLU,KGRID_PAR,PGRID_PAR,KRESP,HDIR)
+      SUBROUTINE WRITE_GRIDTYPE_CARTESIAN (HSELECT,HPROGRAM,KLU,KGRID_PAR,PGRID_PAR,KRESP,HDIR)
 !     #################################################################
 !
 !!****  *WRITE_GRIDTYPE_CARTESIAN* - routine to write the horizontal grid
@@ -34,11 +33,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
 USE MODI_WRITE_SURF
 !
 USE MODE_GRIDTYPE_CARTESIAN
@@ -52,9 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(IN)  :: KLU        ! number of points
@@ -94,7 +86,7 @@ ALLOCATE(ZDX(KLU))
 ALLOCATE(ZDY(KLU))
 !
  CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0,           &
-                              IIMAX,IJMAX,ZX,ZY,ZDX,ZDY        )  
+                             IIMAX,IJMAX,ZX,ZY,ZDX,ZDY        )  
 !
 !---------------------------------------------------------------------------
 !
@@ -102,32 +94,20 @@ ALLOCATE(ZDY(KLU))
 !              -----------------------------------------
 !
 YCOMMENT=' '
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'LAT0',ZLAT0,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'LON0',ZLON0,KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'IMAX ',IIMAX, KRESP,YCOMMENT)
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'JMAX ',IJMAX, KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,'LAT0',ZLAT0,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,'LON0',ZLON0,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,'IMAX ',IIMAX, KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,'JMAX ',IJMAX, KRESP,YCOMMENT)
 IF (PRESENT(HDIR)) THEN
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'XX',ZX,KRESP,YCOMMENT,HDIR)
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'YY',ZY,KRESP,YCOMMENT,HDIR)
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'DX',ZDX,KRESP,YCOMMENT,HDIR)
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'DY',ZDY,KRESP,YCOMMENT,HDIR)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'XX',ZX,KRESP,YCOMMENT,HDIR)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'YY',ZY,KRESP,YCOMMENT,HDIR)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'DX',ZDX,KRESP,YCOMMENT,HDIR)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'DY',ZDY,KRESP,YCOMMENT,HDIR)
 ELSE
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'YY',ZY,KRESP,YCOMMENT)
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'YY',ZY,KRESP,YCOMMENT)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
 END IF
 !
 !---------------------------------------------------------------------------

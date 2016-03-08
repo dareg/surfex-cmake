@@ -1,7 +1,6 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_TOWN (B, DGCT, DGMT, T, TGDR, TGDPE, TGRR, TGRPE, &
-                                BOP, BDD, DTB, DTCO, DTT, UG, U, TGDO, TGDP, TG, &
-                                TOP, &
+      SUBROUTINE ZOOM_PGD_TOWN (B, DGCT, DGMT, T, TGDR, TGDPE, TGRR, TGRPE, BOP, BDD, &
+                                DTB, DTCO, DTT, UG, U, TGDO, TGDP, TG, TOP, &
                                 HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP,OGARDEN)
 !     ###########################################################
 
@@ -114,9 +113,8 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_TOWN',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (U%CTOWN=='TEB   ') THEN
-  CALL ZOOM_PGD_TEB(B, DGCT, DGMT, T, TGDR, TGDPE, TGRR, TGRPE, &
-                    BOP, BDD, DTB, DTCO, DTT, UG, U, TGDO, TGDP, TG, &
-                               TOP,  &
+  CALL ZOOM_PGD_TEB(B, DGCT, DGMT, T, TGDR, TGDPE, TGRR, TGRPE, BOP, BDD, DTB, &
+                    DTCO, DTT, UG, U, TGDO, TGDP, TG, TOP,  &
                     HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP,OGARDEN)
 END IF
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_TOWN',1,ZHOOK_HANDLE)

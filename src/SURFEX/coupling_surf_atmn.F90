@@ -1,14 +1,12 @@
 !     #################################################################################
-SUBROUTINE COUPLING_SURF_ATM_n (YSC, &
-                                HPROGRAM, HCOUPLING, PTIMEC,                                &
-               PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH,           &
-               PZENITH2,PAZIM,PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,       &
-               HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,              &
-               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-               PPEW_A_COEF, PPEW_B_COEF,                                                   &
-               PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-               HTEST                                                                       )
+SUBROUTINE COUPLING_SURF_ATM_n (YSC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH,  &
+                                KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2,      &
+                                PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV,   &
+                                PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS,& 
+                                PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, &
+                                PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,     &
+                                PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,       &
+                                PPET_B_COEF, PPEQ_B_COEF, HTEST           )
 !     #################################################################################
 !
 !!****  *COUPLING_INLAND_WATER_n * - Driver to call the schemes for the 
@@ -358,12 +356,8 @@ XTIME_TOWN = XTIME_TOWN + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_TOWN)
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
- CALL AVERAGE_FLUX(ZFRAC_TILE,                              &
-                  ZSFTH_TILE, ZSFTQ_TILE,                  &
-                  ZSFTS_TILE, ZSFCO2_TILE,                 &
-                  ZSFU_TILE, ZSFV_TILE,                    &
-                  PSFTH, PSFTQ, PSFTS, PSFCO2,             &
-                  PSFU, PSFV                               )
+ CALL AVERAGE_FLUX(ZFRAC_TILE, ZSFTH_TILE, ZSFTQ_TILE, ZSFTS_TILE, ZSFCO2_TILE, &
+                   ZSFU_TILE, ZSFV_TILE, PSFTH, PSFTQ, PSFTS, PSFCO2, PSFU, PSFV )
 !
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Chemical Emissions:                  
@@ -380,13 +374,11 @@ IF ((YSC%SV%NBEQ > 0).AND.(YSC%CHU%LCH_SURF_EMIS)) THEN
     DO JI=1,SIZE(YSC%CHE%TSEMISS)
       IF (SIZE(YSC%CHE%TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(YSC%CHE%TSEMISS(JI)%NETIMES)
     ENDDO
-    CALL CH_EMISSION_FLUX_n(YSC, &
-                            HPROGRAM,PTIME,PSFTS(:,YSC%SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+    CALL CH_EMISSION_FLUX_n(YSC%DTCO, YSC%U, YSC%CHE, YSC%SV, YSC%CHU, &
+                        HPROGRAM,PTIME,PSFTS(:,YSC%SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (YSC%CHU%CCH_EMIS=='SNAP') THEN
-    CALL CH_EMISSION_SNAP_n(YSC%CHN, &
-                            HPROGRAM,YSC%U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,YSC%UG%G%XLON)
-    CALL CH_EMISSION_TO_ATM_n(YSC%CHN, YSC%SV, &
-                              PSFTS,PRHOA)
+    CALL CH_EMISSION_SNAP_n(YSC%CHN, HPROGRAM,YSC%U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,YSC%UG%G%XLON)
+    CALL CH_EMISSION_TO_ATM_n(YSC%CHN, YSC%SV, PSFTS,PRHOA)
   END IF
 END IF
 !
@@ -410,23 +402,20 @@ END DO
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Radiative fluxes
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
- CALL AVERAGE_RAD(ZFRAC_TILE,                                           &
-                 ZDIR_ALB_TILE, ZSCA_ALB_TILE, ZEMIS_TILE, ZTRAD_TILE, &
-                 PDIR_ALB,      PSCA_ALB,      PEMIS,      PTRAD       )
+ CALL AVERAGE_RAD(ZFRAC_TILE, ZDIR_ALB_TILE, ZSCA_ALB_TILE, &
+                  ZEMIS_TILE, ZTRAD_TILE, PDIR_ALB, PSCA_ALB,&
+                  PEMIS, PTRAD)
 !
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Physical properties
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
- CALL AVERAGE_PHY(ZFRAC_TILE,                              &
-                  ZTSURF_TILE, ZZ0_TILE,                   &
+ CALL AVERAGE_PHY(ZFRAC_TILE, ZTSURF_TILE, ZZ0_TILE,       &
                   ZZ0H_TILE, ZQSURF_TILE,                  &    
-                  PUREF, PZREF,                            &
-                  PTSURF, PZ0, PZ0H, PQSURF                )
+                  PUREF, PZREF, PTSURF, PZ0, PZ0H, PQSURF  )
 !
 ! store these field to write in restart file (important for AGCM)
 !
-IF(LCPL_GCM) CALL CPL_GCM_n(YSC%U, &
-   KI,PZ0=PZ0,PZ0H=PZ0H,PQSURF=PQSURF)
+IF(LCPL_GCM) CALL CPL_GCM_n(YSC%U, KI,PZ0=PZ0,PZ0H=PZ0H,PQSURF=PQSURF)
 !
 ! - - - - -- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Orographic friction
@@ -436,18 +425,16 @@ IF(LCPL_GCM) CALL CPL_GCM_n(YSC%U, &
 !  but only over continental area
 !
 IF (YSC%USS%CROUGH=="Z01D" .OR. YSC%USS%CROUGH=="Z04D") THEN
-  CALL SSO_Z0_FRICTION_n(YSC%USS, &
-                         YSC%U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
+  CALL SSO_Z0_FRICTION_n(YSC%USS, YSC%U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
 ELSE IF (YSC%USS%CROUGH=="BE04") THEN
-  CALL SSO_BE04_FRICTION_n(YSC%SSCP, YSC%USS, &
-                           PTSTEP,YSC%U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+  CALL SSO_BE04_FRICTION_n(YSC%SSCP, YSC%USS, PTSTEP,YSC%U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Inline diagnostics for full surface
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
- CALL DIAG_INLINE_SURF_ATM_n(YSC%DGU, &
+ CALL DIAG_INLINE_SURF_ATM_n(YSC%DUO, YSC%DGU, &
                              PUREF, PZREF, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',1,ZHOOK_HANDLE)
@@ -584,65 +571,54 @@ ENDDO
 !
 IF (KTILE==1) THEN
   !
-  CALL COUPLING_SEA_n(YSC%SM, YSC%DGL, YSC%DGLC, YSC%U, YSC%DST, YSC%SLT,  &
-                      HPROGRAM, HCOUPLING, PTIMEC,                                           &
-              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-              YSC%U%NSIZE_SEA, KSV, KSW,                                                      &
-              ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
-              ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
-              ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
-              ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV,                           &
-              ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF,   &
-              ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                                  &
-              ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,                    &
-              'OK'                                                                           )
+  CALL COUPLING_SEA_n(YSC%SM, YSC%DLO, YSC%DGL, YSC%DGLC, YSC%U, YSC%DST, YSC%SLT,           &
+                      HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, PTIME,       &
+                      YSC%U%NSIZE_SEA, KSV, KSW,  ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,    &
+                      ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV,     &
+                      ZP_CO2, HSV, ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, &
+                      ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV,     &
+                      ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H,     &
+                      ZP_QSURF, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,  &
+                      ZP_PET_B_COEF, ZP_PEQ_B_COEF, 'OK'        )
   !
 ELSEIF (KTILE==2) THEN
   !
-  CALL COUPLING_INLAND_WATER_n(YSC%FM, YSC%WM, YSC%DGL, YSC%DGLC, YSC%U, YSC%DST, YSC%SLT, &
-                               HPROGRAM, HCOUPLING, PTIMEC,                                   &
-               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-               YSC%U%NSIZE_WATER, KSV, KSW,                                                   &
-               ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
-               ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
-               ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
-               ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV,                           &
-               ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF,   &
-               ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                                  &
-               ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,                    &
-               'OK'                                                                           )
+  CALL COUPLING_INLAND_WATER_n(YSC%FM, YSC%WM, YSC%DLO, YSC%DGL, YSC%DGLC, YSC%U,            &
+                               YSC%DST, YSC%SLT, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP,        &
+                               KYEAR, KMONTH, KDAY, PTIME, YSC%U%NSIZE_WATER, KSV, KSW,      &
+                               ZP_TSUN, ZP_ZENITH, ZP_ZENITH2, ZP_AZIM, ZP_ZREF, ZP_UREF,    &
+                               ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV, &
+                               ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS,     &
+                               ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU,    &
+                               ZP_SFV, ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF,   &
+                               ZP_Z0, ZP_Z0H, ZP_QSURF, ZP_PEW_A_COEF, ZP_PEW_B_COEF,        &
+                               ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,   &
+                               'OK'                      )
   !
 ELSEIF (KTILE==3) THEN
   !
-  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, &
-                         YSC%GDM%DTI, YSC%GRM%DTI, YSC%DGL, YSC%DGLC, YSC%DST, YSC%SLT, &
-                         HPROGRAM, HCOUPLING, PTIMEC,                                         &
-               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-               YSC%U%NSIZE_NATURE, KSV, KSW,                                                  &
-               ZP_TSUN, ZP_ZENITH, ZP_ZENITH2,ZP_AZIM,                                        &
-               ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
-               ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
-               ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV,                           &
-               ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF,   &
-               ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                                  &
-               ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,                    &
-               'OK'                                                                           )
+  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DGL, &
+                         YSC%DGLC, YSC%DST, YSC%SLT, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP,     &
+                         KYEAR, KMONTH, KDAY, PTIME, YSC%U%NSIZE_NATURE, KSV, KSW, ZP_TSUN,   &
+                         ZP_ZENITH, ZP_ZENITH2, ZP_AZIM, ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, &
+                         ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV, ZP_RAIN, ZP_SNOW, ZP_LW,  &
+                         ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH,     &
+                         ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV, ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB,  &
+                         ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF, ZP_PEW_A_COEF,           &
+                         ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF,          &
+                         ZP_PEQ_B_COEF, 'OK'        )
   !
 ELSEIF (KTILE==4) THEN
   !
-  CALL COUPLING_TOWN_n(YSC%DTCO, YSC%U, YSC%DGL, YSC%DGLC, &
-                       YSC%DST, YSC%SLT, YSC%TM, YSC%GDM, YSC%GRM,  &
-                       HPROGRAM, HCOUPLING, PTIMEC,                                           &
-               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                            &
-               YSC%U%NSIZE_TOWN, KSV, KSW,                                                    &
-               ZP_TSUN, ZP_ZENITH, ZP_AZIM,                                                   &
-               ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV,&
-               ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA,        &
-               ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV,                           &
-               ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF,   &
-               ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                                  &
-               ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,                    &
-               'OK'                                                                           )
+  CALL COUPLING_TOWN_n(YSC%DTCO, YSC%U, YSC%DLO, YSC%DGL, YSC%DGLC, YSC%DST, YSC%SLT, YSC%TM, &
+                       YSC%GDM, YSC%GRM, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH,  &
+                       KDAY, PTIME, YSC%U%NSIZE_TOWN, KSV, KSW, ZP_TSUN, ZP_ZENITH, ZP_AZIM,  &
+                       ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, ZP_QA, ZP_TA, ZP_RHOA, ZP_SV,     &
+                       ZP_CO2, HSV, ZP_RAIN, ZP_SNOW, ZP_LW, ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, &
+                       ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV,     &
+                       ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H,     &
+                       ZP_QSURF, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,  &
+                       ZP_PET_B_COEF, ZP_PEQ_B_COEF, 'OK'            )
   !
 ENDIF
 !

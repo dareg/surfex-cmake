@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE SOILTEMP_ARP_PAR (HISBA, PSODELX, &
-                                   HPROGRAM,OTEMP_ARP,KTEMPLAYER_ARP)
+      SUBROUTINE SOILTEMP_ARP_PAR (IO, HPROGRAM)
 !     ##############################################################
 !
 !!**** *SOILTEMP_ARP_PAR* Impose special pseudo depth for "force-restore"
@@ -38,6 +37,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+!
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 !
@@ -62,12 +63,10 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
- CHARACTER(LEN=*),  INTENT(IN) :: HISBA
-REAL, DIMENSION(:), POINTER :: PSODELX
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
+
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-LOGICAL,             INTENT(OUT)   :: OTEMP_ARP
-INTEGER,             INTENT(OUT)   :: KTEMPLAYER_ARP
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -116,7 +115,7 @@ ENDIF
 !*    3.      Consistency
 !             -----------
 !
-IF(LTEMP_ARP.AND.HISBA=='DIF')THEN
+IF(LTEMP_ARP.AND.IO%CISBA=='DIF')THEN
    LTEMP_ARP=.FALSE.
    WRITE(ILUOUT,*)'LTEMP_ARP put at False because you use the ISBA-DF scheme'
 ENDIF
@@ -144,31 +143,31 @@ ENDIF
 !
 IF(LTEMP_ARP)THEN
 !
-  ALLOCATE(PSODELX(NTEMPLAYER_ARP))
+  ALLOCATE(IO%XSODELX(NTEMPLAYER_ARP))
 !
   IF(ALL(SODELX(:)==XUNDEF))THEN
 !          
-    PSODELX(1)=0.5
-    PSODELX(2)=1.5
-    PSODELX(3)=4.5
-    PSODELX(4)=13.5
-    WRITE(ILUOUT,*)'SODELX default values : ',PSODELX(:)
+    IO%XSODELX(1)=0.5
+    IO%XSODELX(2)=1.5
+    IO%XSODELX(3)=4.5
+    IO%XSODELX(4)=13.5
+    WRITE(ILUOUT,*)'SODELX default values : ',IO%XSODELX(:)
 !    
   ELSE
 !          
-    PSODELX(:)=SODELX(1:NTEMPLAYER_ARP)
-    WRITE(ILUOUT,*)'SODELX imposed to : ',PSODELX(:)
+    IO%XSODELX(:)=SODELX(1:NTEMPLAYER_ARP)
+    WRITE(ILUOUT,*)'SODELX imposed to : ',IO%XSODELX(:)
 !    
   ENDIF
 !
 ELSE
 !
-  ALLOCATE(PSODELX(0))
+  ALLOCATE(IO%XSODELX(0))
 !
 ENDIF
 !
-OTEMP_ARP     =LTEMP_ARP
-KTEMPLAYER_ARP=NTEMPLAYER_ARP
+IO%LTEMP_ARP     =LTEMP_ARP
+IO%NTEMPLAYER_ARP=NTEMPLAYER_ARP
 IF (LHOOK) CALL DR_HOOK('SOILTEMP_ARP_PAR',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

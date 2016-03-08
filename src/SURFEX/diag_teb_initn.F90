@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_TEB_INIT_n (DGT, DGUT, &
-                                  HPROGRAM,KLU,KSW)
+      SUBROUTINE DIAG_TEB_INIT_n (DTO, DGT, DGUT, HPROGRAM,KLU,KSW)
 !     #####################
 !
 !!****  *DIAG_TEB_INIT_n* - routine to initialize TEB diagnostic variables
@@ -37,7 +36,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_DIAG_UTCI_TEB_n, ONLY : DIAG_UTCI_TEB_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -58,6 +57,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DTO
 TYPE(DIAG_t), INTENT(INOUT) :: DGT
 TYPE(DIAG_UTCI_TEB_t), INTENT(INOUT) :: DGUT
 !
@@ -81,10 +81,11 @@ IF (LHOOK) CALL DR_HOOK('DIAG_TEB_INIT_N',0,ZHOOK_HANDLE)
 ALLOCATE(DGT%XTS(KLU))
 DGT%XTS = XUNDEF
 !
-IF (DGT%LSURF_BUDGET) THEN
+IF (DTO%LSURF_BUDGET) THEN
   ALLOCATE(DGT%XRN     (KLU))
   ALLOCATE(DGT%XH      (KLU))
   ALLOCATE(DGT%XLE     (KLU))
+  ALLOCATE(DGT%XLEI    (KLU))
   ALLOCATE(DGT%XGFLUX  (KLU))
   ALLOCATE(DGT%XSWD    (KLU))
   ALLOCATE(DGT%XSWU    (KLU))
@@ -99,6 +100,7 @@ IF (DGT%LSURF_BUDGET) THEN
   DGT%XRN      = XUNDEF
   DGT%XH       = XUNDEF
   DGT%XLE      = XUNDEF
+  DGT%XLEI     = XUNDEF
   DGT%XGFLUX   = XUNDEF
   DGT%XSWD     = XUNDEF
   DGT%XSWU     = XUNDEF
@@ -113,6 +115,7 @@ ELSE
   ALLOCATE(DGT%XRN     (0))
   ALLOCATE(DGT%XH      (0))
   ALLOCATE(DGT%XLE     (0))
+  ALLOCATE(DGT%XLEI    (0))
   ALLOCATE(DGT%XGFLUX  (0))
   ALLOCATE(DGT%XSWD    (0))
   ALLOCATE(DGT%XSWU    (0))
@@ -127,7 +130,7 @@ END IF
 !
 !* parameters at 2m
 !
-IF (DGT%N2M>=1) THEN
+IF (DTO%N2M>=1) THEN
   ALLOCATE(DGT%XRI     (KLU))
   ALLOCATE(DGT%XT2M    (KLU))
   ALLOCATE(DGT%XT2M_MIN (KLU))
@@ -170,7 +173,7 @@ END IF
 !!
 !* miscellaneous fields
 !
-IF (DGT%N2M>0 .AND. DGUT%LUTCI) THEN
+IF (DTO%N2M>0 .AND. DGUT%LUTCI) THEN
   !
   ALLOCATE(DGUT%XUTCI_IN       (KLU))
   ALLOCATE(DGUT%XUTCI_OUTSUN   (KLU))
@@ -203,7 +206,7 @@ ENDIF
 !
 !* transfer coefficients
 !
-IF (DGT%LCOEF) THEN
+IF (DTO%LCOEF) THEN
   ALLOCATE(DGT%XCD     (KLU))
   ALLOCATE(DGT%XCH     (KLU))
   ALLOCATE(DGT%XCE     (KLU))
@@ -226,7 +229,7 @@ END IF
 !
 !* surface humidity
 !
-IF (DGT%LSURF_VARS) THEN
+IF (DTO%LSURF_VARS) THEN
   ALLOCATE(DGT%XQS     (KLU))
   !
   DGT%XQS      = XUNDEF

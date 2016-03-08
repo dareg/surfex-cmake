@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_BUFFER (IG, U, &
-                             HPROGRAM,HSURF,KLUOUT,PFIELD)
+SUBROUTINE PREP_ISBA_BUFFER (IG, U, HPROGRAM,HSURF,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_BUFFER* - initializes ISBA fields from operational BUFFER

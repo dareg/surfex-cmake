@@ -1,11 +1,11 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_FLAKE_n (DGF, DGFC, F, &
-                                        PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,  &
-                                         PMERA, PHT, PHW, PRAIN, PSNOW,                &
-                                         PCD, PCDN, PCH, PRI, PHU,                &
-                                         PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
-                                         PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,    &
-                                         PLE, PLEI, PSUBL, PLWUP, PALB, PSWE           )  
+       SUBROUTINE DIAG_INLINE_FLAKE_n (DFO, DGF, DGFC, F, &
+                                       PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,  &
+                                       PMERA, PHT, PHW, PRAIN, PSNOW,             &
+                                       PCD, PCDN, PCH, PRI, PHU,                  &
+                                       PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER, &
+                                       PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB, &
+                                       PLE, PLEI, PSUBL, PLWUP, PALB, PSWE        )  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_FLAKE_n * - computes diagnostics during FLAKE time-step
@@ -37,7 +37,7 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODD_CSTS,         ONLY : XTT
@@ -60,6 +60,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DFO
 TYPE(DIAG_t), INTENT(INOUT) :: DGF
 TYPE(DIAG_t), INTENT(INOUT) :: DGFC
 TYPE(FLAKE_t), INTENT(INOUT) :: F
@@ -114,23 +115,18 @@ DGF%XTS(:) = F%XTS(:)
 !
 IF (.NOT. F%LSBL) THEN
 !
-  IF (DGF%N2M==1) THEN
-    CALL PARAM_CLS(PTA, F%XTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
-                     PSFTH, PSFTQ, PSFZON, PSFMER,                       &
-                     DGF%XT2M, DGF%XQ2M, DGF%XHU2M, DGF%XZON10M, DGF%XMER10M                       )  
-  ELSE IF (DGF%N2M==2) THEN
+  IF (DFO%N2M==1) THEN
+    CALL PARAM_CLS(DGF, PTA, F%XTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+                   PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER           )  
+  ELSE IF (DFO%N2M==2) THEN
     ZH(:)=2.          
-    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
-                  PCD, PCH, PRI,                   &
-                  F%XTS, PHU, PZ0H, ZH,              &
-                  DGF%XT2M, DGF%XQ2M, DGF%XHU2M                )  
+    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
+                  F%XTS, PHU, PZ0H, ZH, DGF%XT2M, DGF%XQ2M, DGF%XHU2M )  
     ZH(:)=10.                
-    CALL CLS_WIND(PZONA, PMERA, PHW,             &
-                    PCD, PCDN, PRI, ZH,            &
-                    DGF%XZON10M, DGF%XMER10M               )  
+    CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, DGF%XZON10M, DGF%XMER10M )  
   END IF
 !
-  IF (DGF%N2M>=1) THEN
+  IF (DFO%N2M>=1) THEN
     !
     DGF%XT2M_MIN(:) = MIN(DGF%XT2M_MIN(:),DGF%XT2M(:))
     DGF%XT2M_MAX(:) = MAX(DGF%XT2M_MAX(:),DGF%XT2M(:))
@@ -148,7 +144,7 @@ IF (.NOT. F%LSBL) THEN
 !
 ELSE
   !
-  IF (DGF%N2M>=1) THEN
+  IF (DFO%N2M>=1) THEN
     DGF%XT2M    = XUNDEF
     DGF%XQ2M    = XUNDEF
     DGF%XHU2M   = XUNDEF
@@ -158,7 +154,7 @@ ELSE
   ENDIF
 ENDIF
 !
-IF (DGF%LSURF_BUDGET.OR.DGF%LSURF_BUDGETC) THEN
+IF (DFO%LSURF_BUDGET.OR.DFO%LSURF_BUDGETC) THEN
   !
   DGF%XLE  (:) = PLE  (:)
   DGF%XLEI (:) = PLEI (:)
@@ -167,23 +163,16 @@ IF (DGF%LSURF_BUDGET.OR.DGF%LSURF_BUDGETC) THEN
   DGF%XALBT(:) = PALB (:)
   DGF%XSWE (:) = PSWE (:)
   !
-  CALL  DIAG_SURF_BUDGET_FLAKE ( PRHOA, PSFTH,                          &
-                                  PDIR_SW, PSCA_SW, PLW,                &
-                                  PDIR_ALB, PSCA_ALB, PLWUP,            &
-                                  PSFZON, PSFMER, DGF%XLE, DGF%XRN, DGF%XH, DGF%XGFLUX, &
-                                  DGF%XSWD, DGF%XSWU, DGF%XSWBD, DGF%XSWBU, DGF%XLWD, DGF%XLWU, &
-                                  DGF%XFMU, DGF%XFMV )  
+  CALL  DIAG_SURF_BUDGET_FLAKE (DGF, PRHOA, PSFTH, PDIR_SW, PSCA_SW, PLW, &
+                                PDIR_ALB, PSCA_ALB, PLWUP, PSFZON, PSFMER )  
   !
 END IF
 !
-IF(DGF%LSURF_BUDGETC)THEN
-  CALL DIAG_SURF_BUDGETC_FLAKE(DGFC, &
-                               PTSTEP, DGF%XRN, DGF%XH, DGF%XLE, DGF%XLEI, DGF%XGFLUX,  &
-                                 DGF%XSWD, DGF%XSWU, DGF%XLWD, DGF%XLWU, DGF%XFMU, DGF%XFMV,&
-                                 DGF%XEVAP, DGF%XSUBL                       )  
+IF(DFO%LSURF_BUDGETC)THEN
+  CALL DIAG_SURF_BUDGETC_FLAKE(DGF, DGFC, PTSTEP )  
 ENDIF
 !
-IF (DGF%LCOEF) THEN
+IF (DFO%LCOEF) THEN
   !
   !* Transfer coefficients
   !
@@ -198,7 +187,7 @@ IF (DGF%LCOEF) THEN
   !
 END IF
 !
-IF (DGF%LSURF_VARS) THEN
+IF (DFO%LSURF_VARS) THEN
   !
   !* Humidity at saturation
   !
@@ -210,8 +199,7 @@ END IF
 !
 IF (LCPL_LAKE) THEN
 !
-  CALL DIAG_CPL_ESM_FLAKE(F, &
-                          PTSTEP,PRAIN,PSNOW,PSFTQ)
+  CALL DIAG_CPL_ESM_FLAKE(F,PTSTEP,PRAIN,PSNOW,PSFTQ)
 ! 
 ENDIF
 !

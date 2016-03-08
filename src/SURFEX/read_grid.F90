@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE READ_GRID (&
-                            HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR)
+      SUBROUTINE READ_GRID (HPROGRAM,G,KRESP,PDIR)
 !     #########################################
 !
 !!****  *READ_GRID* - routine to initialise the horizontal grid of a scheme
@@ -35,7 +34,7 @@
 !              ------------
 !
 !
-!
+USE MODD_GRID_n, ONLY : GRID_t
 !
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
@@ -55,11 +54,7 @@ IMPLICIT NONE
 !
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! calling program
- CHARACTER(LEN=10),  INTENT(OUT) :: HGRID      ! type of horizontal grid
-REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
-REAL, DIMENSION(:), INTENT(OUT) :: PLAT       ! latitude  (degrees)
-REAL, DIMENSION(:), INTENT(OUT) :: PLON       ! longitude (degrees)
-REAL, DIMENSION(:), INTENT(OUT) :: PMESH_SIZE ! horizontal mesh size (m2)
+TYPE(GRID_t), INTENT(INOUT) :: G
 INTEGER,            INTENT(OUT) :: KRESP      ! error return code
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDIR ! heading of main axis of grid compared to North (degrees)
 !
@@ -83,7 +78,7 @@ IF (LASSIM) THEN
 ENDIF
 !
  CALL READ_SURF(&
-                HPROGRAM,'GRID_TYPE',HGRID,KRESP)
+                HPROGRAM,'GRID_TYPE',G%CGRID,KRESP)
 !
 !---------------------------------------------------------------------------
 !
@@ -91,11 +86,11 @@ ENDIF
 !              ------------------------------
 !
  CALL READ_GRIDTYPE(&
-                    HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.FALSE.)
+                    HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.FALSE.)
 !
-ALLOCATE(PGRID_PAR(IGRID_PAR))
+ALLOCATE(G%XGRID_PAR(IGRID_PAR))
  CALL READ_GRIDTYPE(&
-                    HPROGRAM,HGRID,IGRID_PAR,SIZE(PLAT),.TRUE.,PGRID_PAR,KRESP)
+                    HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.TRUE.,G%XGRID_PAR,KRESP)
 !
 !---------------------------------------------------------------------------
 !
@@ -104,28 +99,28 @@ ALLOCATE(PGRID_PAR(IGRID_PAR))
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-SELECT CASE (HGRID)
+SELECT CASE (G%CGRID)
   CASE("NONE      ")
     IF (PRESENT(PDIR)) PDIR(:) = 0.
     !
     CALL READ_SURF(&
-                HPROGRAM,'LON',      PLON,KRESP)
+                HPROGRAM,'LON',      G%XLON,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
     CALL READ_SURF(&
-                HPROGRAM,'LAT',      PLAT,KRESP)
+                HPROGRAM,'LAT',      G%XLAT,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
     CALL READ_SURF(&
-                HPROGRAM,'MESH_SIZE',PMESH_SIZE,KRESP)
+                HPROGRAM,'MESH_SIZE',G%XMESH_SIZE,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
 
   CASE DEFAULT
     IF (PRESENT(PDIR)) THEN
-      CALL LATLON_GRID(HGRID,SIZE(PGRID_PAR),SIZE(PLAT),ILUOUT,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
+      CALL LATLON_GRID(G,SIZE(G%XLAT),PDIR)
     ELSE
-      CALL LATLON_GRID(HGRID,SIZE(PGRID_PAR),SIZE(PLAT),ILUOUT,PGRID_PAR,PLAT,PLON,PMESH_SIZE)
+      CALL LATLON_GRID(G,SIZE(G%XLAT))
     END IF
 
 END SELECT

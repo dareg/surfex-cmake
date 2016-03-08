@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE WRITE_DIAG_SEAFLUX_n (DTCO, DGU, U, SM, &   
-                                 HPROGRAM,HWRITE)
+SUBROUTINE WRITE_DIAG_SEAFLUX_n (DTCO, DUO, U, SM, HPROGRAM,HWRITE)
 !     ###############################################################################
 !
 !!****  *WRITE_DIAG_SEAFLUX_n * - diagnostics for SEAFLUX
@@ -28,7 +27,7 @@ SUBROUTINE WRITE_DIAG_SEAFLUX_n (DTCO, DGU, U, SM, &
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
@@ -49,7 +48,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DUO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
@@ -65,16 +64,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEAFLUX_N',0,ZHOOK_HANDLE)
 IF (HWRITE/='PGD') THEN
 !        
-   IF (SM%DGS%XDIAG_TSTEP==XUNDEF .OR. &
-           ABS(NINT(SM%S%TTIME%TIME/SM%DGS%XDIAG_TSTEP)*SM%DGS%XDIAG_TSTEP-SM%S%TTIME%TIME)<1.E-3 ) THEN
-      CALL WRITE_DIAG_SEB_SEAFLUX_n(DTCO, DGU, U, SM%CHS, SM%DGS, SM%DGSC, SM%DGMSI, SM%S, &
-                                    HPROGRAM)
-      IF (SM%DGO%LDIAG_OCEAN)  CALL WRITE_DIAG_SEB_OCEAN_n(DTCO, DGU, U, SM%DGO, &
-                                                        HPROGRAM)
-      IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) CALL WRITE_DIAG_SEB_SEAICE_n(DTCO, DGU, U, SM%DGS, SM%DGSI, SM%DGSIC, SM%S, &
-                                                          HPROGRAM)                                                
-      IF (SM%DGMSI%LDIAG_MISC_SEAICE) CALL WRITE_DIAG_MISC_SEAICE_n(DTCO, DGU, U, SM%DGMSI, SM%S, &
-                                                          HPROGRAM)
+   IF (SM%DGS%O%XDIAG_TSTEP==XUNDEF .OR. &
+           ABS(NINT(SM%S%TTIME%TIME/SM%DGS%O%XDIAG_TSTEP)*SM%DGS%O%XDIAG_TSTEP-SM%S%TTIME%TIME)<1.E-3 ) THEN
+      CALL WRITE_DIAG_SEB_SEAFLUX_n(DTCO, DUO, U, SM%CHS, SM%DGS%O, SM%DGS%D, SM%DGS%DC,  &
+                                     SM%S%LHANDLE_SIC, HPROGRAM)
+      IF (SM%DGS%GO%LDIAG_OCEAN)  CALL WRITE_DIAG_SEB_OCEAN_n(DTCO, DUO%CSELECT, U, SM%DGS%GO, HPROGRAM)
+      IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) CALL WRITE_DIAG_SEB_SEAICE_n(DTCO, DUO, U, SM%DGS%O, &
+                                                        SM%DGS%DI, SM%DGS%DIC, HPROGRAM)                                                
+      IF (SM%DGS%DMI%LDIAG_MISC_SEAICE) &
+                CALL WRITE_DIAG_MISC_SEAICE_n(DTCO, DUO%CSELECT, U, SM%DGS%DMI, SM%S, HPROGRAM)
    END IF
 !        
 ENDIF

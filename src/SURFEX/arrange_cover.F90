@@ -1,5 +1,5 @@
 !     #########################
-      SUBROUTINE ARRANGE_COVER (DTCO, U, &
+      SUBROUTINE ARRANGE_COVER (DTCO, OWATER_TO_NATURE, OTOWN_TO_ROCK, &
                                 PDATA_NATURE,PDATA_TOWN,PDATA_SEA,PDATA_WATER,PDATA_VEGTYPE, &
                                PDATA_GARDEN, OGARDEN, PDATA_BLD, PDATA_WALL_O_HOR           )
 !     #########################
@@ -42,7 +42,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -65,8 +64,9 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
+LOGICAL, INTENT(IN) :: OWATER_TO_NATURE
+LOGICAL, INTENT(IN) :: OTOWN_TO_ROCK
 REAL, DIMENSION(:), INTENT(IN)  :: PDATA_NATURE
 REAL, DIMENSION(:), INTENT(IN)  :: PDATA_TOWN
 REAL, DIMENSION(:), INTENT(IN)  :: PDATA_SEA
@@ -129,7 +129,7 @@ DTCO%XDATA_WALL_O_HOR = PDATA_WALL_O_HOR
 ! Change water (not lake) to nature
 !-------------------------------------------------------------------------------
 !
-IF(U%LWATER_TO_NATURE)THEN
+IF(OWATER_TO_NATURE)THEN
   DO JCOVER=1,JPCOVER
      IF(DTCO%XDATA_WATER(JCOVER)>0.0.AND.DTCO%XDATA_WATER(JCOVER)<1.0)THEN
        DTCO%XDATA_NATURE(JCOVER)=DTCO%XDATA_NATURE(JCOVER)+DTCO%XDATA_WATER(JCOVER)
@@ -142,7 +142,7 @@ ENDIF
 ! Change town to rock but keep other natural fraction
 !-------------------------------------------------------------------------------
 !
-IF(U%LTOWN_TO_ROCK)THEN
+IF(OTOWN_TO_ROCK)THEN
 !        
   DO JCOVER=1,JPCOVER
      IF(DTCO%XDATA_TOWN(JCOVER)>0.0.OR.DTCO%XDATA_GARDEN(JCOVER)>0.0)THEN

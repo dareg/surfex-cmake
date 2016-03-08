@@ -64,24 +64,6 @@ REAL, POINTER, DIMENSION(:)      :: XFERT          ! soil fertilisation rate (kg
 REAL, POINTER, DIMENSION(:)      :: XRUNOFFB       ! sub-grid dt92 surface runoff slope parameter (-)  
 REAL, POINTER, DIMENSION(:)      :: XWDRAIN        ! continuous drainage parameter           (-)
 !
-! Subgrid orography parameters
-!
-! directional A/S quantities in 4 coordinate directions
-! (IP: i index up;  IM: i index down;  JP: j index up;  JM: j index down)
-! They are used in soil routines to compute effective roughness length
-!
-REAL, DIMENSION(:), POINTER :: XAOSIP,XAOSIM,XAOSJP,XAOSJM
-!
-! directional h/2 quantities in 4 coordinate directions
-! (IP: i index up;  IM: i index down;  JP: j index up;  JM: j index down)
-! They are used in soil routines to compute effective roughness length
-!
-REAL, DIMENSION(:), POINTER :: XHO2IP,XHO2IM,XHO2JP,XHO2JM
-!
-REAL, DIMENSION(:), POINTER   :: XZ0EFFJPDIR    ! heading of J direction (deg from N clockwise)
-REAL, DIMENSION(:), POINTER   :: XSSO_SLOPE     ! slope of S.S.O.                         (-)
-REAL, DIMENSION(:), POINTER   :: XSSO_STDEV     ! relief  standard deviation              (m)
-!
 END TYPE ISBA_PGD_t
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -112,18 +94,6 @@ NULLIFY(YISBA_PGD%XPH)
 NULLIFY(YISBA_PGD%XFERT)
 NULLIFY(YISBA_PGD%XRUNOFFB)
 NULLIFY(YISBA_PGD%XWDRAIN)
-!
-NULLIFY(YISBA_PGD%XAOSIP)
-NULLIFY(YISBA_PGD%XAOSIM)
-NULLIFY(YISBA_PGD%XAOSJP)
-NULLIFY(YISBA_PGD%XAOSJM)
-NULLIFY(YISBA_PGD%XHO2IP)
-NULLIFY(YISBA_PGD%XHO2IM)
-NULLIFY(YISBA_PGD%XHO2JP)
-NULLIFY(YISBA_PGD%XHO2JM)
-NULLIFY(YISBA_PGD%XZ0EFFJPDIR)
-NULLIFY(YISBA_PGD%XSSO_SLOPE)
-NULLIFY(YISBA_PGD%XSSO_STDEV)
 !
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_PGD_N:ISBA_PGD_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_PGD_INIT

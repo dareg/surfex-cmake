@@ -1,18 +1,6 @@
 !     #########
-      SUBROUTINE AVG_ALBEDO_EMIS_GARDEN (TVR, &
-                                         HALBEDO,          &
-                                 PVEG,PZ0,PLAI,PTG1,        &
-                                 PSW_BANDS,                 &
-                                 PALBNIR_VEG,PALBVIS_VEG,   &
-                                 PALBUV_VEG,                &
-                                 PALBNIR_SOIL,PALBVIS_SOIL, &
-                                 PALBUV_SOIL,               &
-                                 PEMIS_ECO,                 &
-                                 TPSNOW,                    &
-                                 PALBNIR_ECO,PALBVIS_ECO,   &
-                                 PALBUV_ECO,                &
-                                 PDIR_ALB,PSCA_ALB,         &
-                                 PEMIS,PTSRAD               )  
+      SUBROUTINE AVG_ALBEDO_EMIS_GARDEN (GDR, HALBEDO, GDMT, GDMA, &
+                                 PTG1, PSW_BANDS, PDIR_ALB,PSCA_ALB, PEMIS, PTSRAD         )  
 !     ###################################################
 !
 !!**** ** computes radiative fields used in GARDEN
@@ -50,7 +38,8 @@
 !            -----------
 !
 !
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t, ISBA_PARAM_ALB_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -74,7 +63,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TVR
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: GDR
 !
  CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
 ! Albedo dependance with surface soil water content
@@ -83,24 +72,11 @@ TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TVR
 !   "WET " = constant albedo value for wet soil
 !   "MEAN" = constant albedo value for medium soil wetness
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PVEG        ! vegetation fraction
-REAL, DIMENSION(:),   INTENT(IN)   :: PZ0         ! roughness length
-REAL, DIMENSION(:),   INTENT(IN)   :: PLAI        ! leaf area index
+TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: GDMT
+TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: GDMA
+!
 REAL, DIMENSION(:),   INTENT(IN)   :: PTG1        ! soil surface temperature
 REAL, DIMENSION(:),     INTENT(IN)   :: PSW_BANDS   ! middle wavelength of each band 
-
-REAL, DIMENSION(:),   INTENT(IN)   :: PALBNIR_VEG ! near-infra-red albedo of vegetation
-REAL, DIMENSION(:),   INTENT(IN)   :: PALBVIS_VEG ! visible albedo of vegetation
-REAL, DIMENSION(:),   INTENT(IN)   :: PALBUV_VEG  ! UV albedo of vegetation
-REAL, DIMENSION(:),   INTENT(IN)   :: PALBNIR_SOIL! near-infra-red albedo of soil
-REAL, DIMENSION(:),   INTENT(IN)   :: PALBVIS_SOIL! visible albedo of soil
-REAL, DIMENSION(:),   INTENT(IN)   :: PALBUV_SOIL ! UV albedo of soil
-REAL, DIMENSION(:),   INTENT(IN)   :: PEMIS_ECO   ! emissivity (soil+vegetation)
-TYPE(SURF_SNOW),        INTENT(IN)   :: TPSNOW      ! prognostic snow cover
-!
-REAL, DIMENSION(:),   INTENT(OUT)  :: PALBNIR_ECO ! near-infra-red albedo (soil+vegetation)
-REAL, DIMENSION(:),   INTENT(OUT)  :: PALBVIS_ECO ! visible albedo (soil+vegetation)
-REAL, DIMENSION(:),   INTENT(OUT)  :: PALBUV_ECO  ! UV albedo (soil+vegetation)
 !
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PDIR_ALB    ! averaged direct albedo  (per wavelength)
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PSCA_ALB    ! averaged diffuse albedo (per wavelength)
@@ -112,9 +88,9 @@ REAL, DIMENSION(:),     INTENT(OUT)  :: PTSRAD      ! averaged radiaitve temp.
 !            ------------------------------
 !
 !
-REAL, DIMENSION(SIZE(PALBNIR_VEG)) :: ZALBNIR ! near-infra-red albedo with snow
-REAL, DIMENSION(SIZE(PALBVIS_VEG)) :: ZALBVIS ! visible albedo with snow
-REAL, DIMENSION(SIZE(PALBUV_VEG )) :: ZALBUV  ! UV albedo with snow
+REAL, DIMENSION(SIZE(GDMT%XALBNIR_VEG(:,1))) :: ZALBNIR ! near-infra-red albedo with snow
+REAL, DIMENSION(SIZE(GDMT%XALBVIS_VEG(:,1))) :: ZALBVIS ! visible albedo with snow
+REAL, DIMENSION(SIZE(GDMT%XALBUV_VEG(:,1) )) :: ZALBUV  ! UV albedo with snow
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -124,10 +100,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             -----------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVG_ALBEDO_EMIS_GARDEN',0,ZHOOK_HANDLE)
- CALL ALBEDO(HALBEDO,                                    &
-              PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,    &
-              PALBVIS_SOIL,PALBNIR_SOIL,PALBUV_SOIL,      &
-              PALBVIS_ECO,PALBNIR_ECO,PALBUV_ECO          )  
+ CALL ALBEDO(HALBEDO, GDMT, GDMA )  
 
 !
 !*    2.      averaged albedo and emis. on natural continental surfaces (with prognostic snow)
@@ -143,25 +116,20 @@ PEMIS   (:)  =0.
 PTSRAD  (:)  =0.
 !   
 !
-  CALL ISBA_SNOW_FRAC(TVR%CUR%TSNOW%SCHEME,           &
-         TVR%CUR%TSNOW%WSNOW(:,:,1), TVR%CUR%TSNOW%RHO(:,:,1),&
-         TVR%CUR%TSNOW%ALB  (:,1),                    &
-         PVEG(:), PLAI(:), PZ0(:),            &
-         TVR%CUR%XPSN(:,1), TVR%CUR%XPSNV_A(:,1),                 &
-         TVR%CUR%XPSNG(:,1), TVR%CUR%XPSNV(:,1)                   )
+  CALL ISBA_SNOW_FRAC(GDR%TSNOW%SCHEME,           &
+         GDR%TSNOW%WSNOW(:,:,1), GDR%TSNOW%RHO(:,:,1), GDR%TSNOW%ALB  (:,1),  &
+         GDMT%XVEG(:,1), GDMT%XLAI(:,1), GDMT%XZ0(:,1),            &
+         GDR%XPSN(:,1), GDR%XPSNV_A(:,1), GDR%XPSNG(:,1), GDR%XPSNV(:,1)      )
 !
- WHERE (PVEG(:)/=XUNDEF)
+ WHERE (GDMT%XVEG(:,1)/=XUNDEF)
 !
 ! albedo on this tile
 !
-    ZALBNIR(:) = (1.-TVR%CUR%XPSN(:,1))*PALBNIR_ECO(:) &
-                +    TVR%CUR%XPSN(:,1) *TPSNOW%ALB (:,1)  
+    ZALBNIR(:) = (1.-GDR%XPSN(:,1))*GDMT%XALBNIR(:,1) + GDR%XPSN(:,1) *GDR%TSNOW%ALB (:,1)  
       
-    ZALBVIS(:) = (1.-TVR%CUR%XPSN(:,1))*PALBVIS_ECO(:) &
-                +    TVR%CUR%XPSN(:,1) *TPSNOW%ALB (:,1)  
+    ZALBVIS(:) = (1.-GDR%XPSN(:,1))*GDMT%XALBVIS(:,1) + GDR%XPSN(:,1) *GDR%TSNOW%ALB (:,1)  
       
-    ZALBUV(:)  = (1.-TVR%CUR%XPSN(:,1))*PALBUV_ECO (:) &
-                +    TVR%CUR%XPSN(:,1) *TPSNOW%ALB (:,1)  
+    ZALBUV(:)  = (1.-GDR%XPSN(:,1))*GDMT%XALBUV(:,1) + GDR%XPSN(:,1) *GDR%TSNOW%ALB (:,1)  
   END WHERE
 !
 !* albedo for each wavelength
@@ -171,19 +139,18 @@ PTSRAD  (:)  =0.
 !
 ! emissivity
 !
-  WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PEMIS(:)   = (1.-TVR%CUR%XPSN(:,1))*PEMIS_ECO  (:) &
-                +    TVR%CUR%XPSN(:,1) *XEMISSN  
+  WHERE (GDMT%XEMIS(:,1)/=XUNDEF)
+    PEMIS(:)   = (1.-GDR%XPSN(:,1))*GDMT%XEMIS(:,1) + GDR%XPSN(:,1) *XEMISSN  
   END WHERE
 !
 !* radiative surface temperature
 !
-  IF (TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA') THEN
+  IF (GDR%TSNOW%SCHEME=='D95' .OR. GDR%TSNOW%SCHEME=='EBA') THEN
     PTSRAD(:) = PTG1(:)
-  ELSE IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
-    WHERE (PEMIS_ECO(:)/=XUNDEF)
-    PTSRAD(:) =( ( (1.-TVR%CUR%XPSN(:,1))*PEMIS      (:)       *PTG1     (:)**4         &
-                  +    TVR%CUR%XPSN(:,1) *TPSNOW%EMIS(:,1)*TPSNOW%TS(:,1)**4 ) )**0.25  &
+  ELSE IF (GDR%TSNOW%SCHEME=='3-L' .OR. GDR%TSNOW%SCHEME=='CRO') THEN
+    WHERE (GDMT%XEMIS(:,1)/=XUNDEF)
+    PTSRAD(:) =( ( (1.-GDR%XPSN(:,1))*PEMIS      (:)       *PTG1     (:)**4         &
+                  +    GDR%XPSN(:,1) *GDR%TSNOW%EMIS(:,1)*GDR%TSNOW%TS(:,1)**4 ) )**0.25  &
                              / PEMIS(:)**0.25  
     END WHERE
   END IF

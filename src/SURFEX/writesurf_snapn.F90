@@ -1,19 +1,11 @@
 !     #########
-      SUBROUTINE WRITESURF_SNAP_n (DGU, U, &
-                                    CHN, &
-                                   HPROGRAM)
+      SUBROUTINE WRITESURF_SNAP_n (HSELECT, CHN, HPROGRAM)
 !     #######################################################################
 !
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !
-!
-!
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
 !
@@ -27,10 +19,7 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
-!
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
 TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
@@ -54,18 +43,18 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_SNAP_n',0,ZHOOK_HANDLE)
 YCOMMENT = ""
 !
 YRECFM='EMISPEC_NBR'
- CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%NEMIS_NBR,IRESP,YCOMMENT)
 YRECFM='SNAP_NBR'
- CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%NEMIS_SNAP,IRESP,YCOMMENT)
 YRECFM='SNAP_TIME'
- CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%CSNAP_TIME_REF,IRESP,YCOMMENT)
 !
 IF (CHN%CSNAP_TIME_REF=='LEGAL') THEN
   YRECFM='LEGALTIME'
-  CALL WRITE_SURF(DGU, U, &
+  CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%XDELTA_LEGAL_TIME(:),IRESP,YCOMMENT)
 END IF
 !-------------------------------------------------------------------------------
@@ -74,26 +63,26 @@ DO JSPEC=1,CHN%NEMIS_NBR
 ! Writes the name of species
   WRITE(YRECFM,'("EMISNAME",I3.3)') JSPEC
   YCOMMENT = CHN%CEMIS_COMMENT(JSPEC)
-  CALL WRITE_SURF(DGU, U, &
+  CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%CEMIS_NAME(JSPEC),IRESP,YCOMMENT)
 !
 ! Writes the temporal profiles of all snaps
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))//"_M"
-  CALL WRITE_SURF(DGU, U, &
+  CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%XSNAP_MONTHLY(:,:,JSPEC),IRESP,YCOMMENT,&
         HDIR='-',HNAM_DIM="Nemis_snap      ")
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))//"_D"
-  CALL WRITE_SURF(DGU, U, &
+  CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%XSNAP_DAILY(:,:,JSPEC),IRESP,YCOMMENT,&
         HDIR='-',HNAM_DIM="Nemis_snap        ")
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))//"_H"
-  CALL WRITE_SURF(DGU, U, &
+  CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%XSNAP_HOURLY(:,:,JSPEC),IRESP,YCOMMENT,&
         HDIR='-',HNAM_DIM="Nemis_snap       ")
 ! Writes the potential emission of species for each snap
   DO JSNAP=1,CHN%NEMIS_SNAP
     WRITE(YRECFM,'("SNAP",I2.2,"_",A3)') JSNAP,CHN%CEMIS_NAME(JSPEC)
-    CALL WRITE_SURF(DGU, U, &
+    CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%XEMIS_FIELDS_SNAP(:,JSNAP,JSPEC),IRESP,YCOMMENT)
   END DO
 !

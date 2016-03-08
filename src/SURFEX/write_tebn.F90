@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_TEB_n (DTCO, DGU, U, TM, GDM, GRM, &
-                              HPROGRAM,HWRITE)
+      SUBROUTINE WRITE_TEB_n (DTCO, HSELECT, U, TM, GDM, GRM, HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_TEB_n* - routine to write surface variables in their respective files
@@ -37,7 +36,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
@@ -62,7 +60,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT 
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
@@ -82,27 +80,24 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_TEB_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'TOWN  ','TEB   ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_TEB_CONF_n(TM%CHT, TM%DGMTO, TM%DGT, TM%DGUT, TM%T, TM%TOP, &
-                           HPROGRAM)
+ CALL WRITESURF_TEB_CONF_n(TM%CHT, TM%TD%MO, TM%TD%O, TM%TD%U, TM%T, TM%TOP,HPROGRAM)
 !
 DO JPATCH=1,TM%TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
-                                GRM%TV%R, GRM%TV%M%T, JPATCH)
-  CALL WRITESURF_TEB_n(DGU, U, TM, GDM, GRM, &
-                       HPROGRAM,JPATCH,HWRITE)
+  CALL GOTO_WRAPPER_TEB_PATCH(JPATCH, B=TM%B, DGCT=TM%TD%C, DGMT=TM%TD%M, T=TM%T, &
+                              TGDR=GDM%TV%R, TGDMT=GDM%TV%M%T, TGRR=GRM%TV%R, TGRMT=GRM%TV%M%T)
+  CALL WRITESURF_TEB_n(HSELECT, TM%TOP, TM%BOP, TM%T%CUR, TM%B%CUR, TM%DTT%LDATA_ROAD_DIR, TM%TPN, &
+                       GDM%TV%O, GDM%TV%R%CUR, GDM%TV%M%T%CUR, GRM%TV%O, GRM%TV%R%CUR, &
+                       GRM%TV%M%T%CUR, HPROGRAM,JPATCH,HWRITE)
 END DO
 !     
- CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
-                                GRM%TV%R, GRM%TV%M%T, 1)
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_TEB_CANOPY_n(DGU, U, &
-                                                                       TM%TCP, TM%TOP, &
-                                                                       HPROGRAM,HWRITE)
+IF ((.NOT.LNOWRITE_CANOPY).OR.SIZE(HSELECT)>0) THEN
+  CALL WRITESURF_TEB_CANOPY_n(HSELECT, TM%TCP, TM%TOP%LCANOPY, HPROGRAM,HWRITE)
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

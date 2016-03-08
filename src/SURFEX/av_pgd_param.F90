@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE AV_PGD_PARAM (DTI, &
+      SUBROUTINE AV_PGD_PARAM (PLAI_IN, PVEG_IN, &
                                PFIELD,PVEGTYPE,PDATA,HSFTYPE,HATYPE,PDZ,KDECADE)
 !     ################################################################
 !
@@ -52,9 +52,6 @@
 !*    0.     DECLARATION
 !            -----------
 !
-!
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,  &
                                 NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVEGTYPE,  &
@@ -76,7 +73,8 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PLAI_IN
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PVEG_IN
 !
 REAL, DIMENSION(:,:), INTENT(OUT) :: PFIELD  ! secondary field to construct
 REAL, DIMENSION(:,:), INTENT(IN)  :: PVEGTYPE  ! fraction of each cover class
@@ -163,23 +161,23 @@ SELECT CASE (HSFTYPE)
 
    CASE('VEG','GRV')
      DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*DTI%XPAR_VEG(:,KDECADE,JVEGTYPE)
+       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*PVEG_IN(:,KDECADE,JVEGTYPE)
      END DO
 
    CASE('BAR','GRB')
      DO JVEGTYPE=1,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*(1.-DTI%XPAR_VEG(:,KDECADE,JVEGTYPE))
+       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*(1.-PVEG_IN(:,KDECADE,JVEGTYPE))
      END DO
      
     CASE('DVG','GDV') ! for diffusion scheme only, average only on vegetated area
      DO JVEGTYPE=1,NVEGTYPE
-       WHERE ( SUM(DTI%XPAR_LAI(:,:,JVEGTYPE),2) .GT. 0.0) &
+       WHERE ( SUM(PLAI_IN(:,:,JVEGTYPE),2) .GT. 0.0) &
         ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)
      END DO
 
    CASE('LAI','GRL')
      DO JVEGTYPE=4,NVEGTYPE
-       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*DTI%XPAR_LAI(:,KDECADE,JVEGTYPE)
+       ZWEIGHT(:,JVEGTYPE)=PVEGTYPE(:,JVEGTYPE)*PLAI_IN(:,KDECADE,JVEGTYPE)
      END DO
 
     CASE('TRE','GRT')

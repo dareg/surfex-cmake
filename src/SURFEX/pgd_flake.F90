@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_FLAKE (DTCO, FG, F, UG, U, USS, &
-                            HPROGRAM,OECOCLIMAP,ORM_RIVER)
+      SUBROUTINE PGD_FLAKE (DTCO, FG, F, UG, U, USS, HPROGRAM,ORM_RIVER)
 !     ##############################################################
 !
 !!**** *PGD_FLAKE* monitor for averaging and interpolations of FLAKE physiographic fields
@@ -45,7 +44,7 @@ USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -85,10 +84,9 @@ TYPE(GRID_t), INTENT(INOUT) :: FG
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-LOGICAL,             INTENT(IN)    :: OECOCLIMAP
 LOGICAL,             INTENT(IN)    :: ORM_RIVER    ! delete river coverage (default = false)
 !
 !
@@ -183,20 +181,15 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_FLAKE)
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n(DTCO, U, &
-                      'WATER ',FG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',FG%NDIM)
 !
-ALLOCATE(F%LCOVER     (JPCOVER))
-ALLOCATE(F%XZS        (FG%NDIM))
+ALLOCATE(F%LCOVER      (JPCOVER))
+ALLOCATE(F%XZS         (FG%NDIM))
 ALLOCATE(FG%XLAT       (FG%NDIM))
 ALLOCATE(FG%XLON       (FG%NDIM))
 ALLOCATE(FG%XMESH_SIZE (FG%NDIM))
 !
- CALL PACK_PGD(DTCO, U, &
-               HPROGRAM, 'WATER ',                    &
-                FG%CGRID,  FG%XGRID_PAR,                     &
-                F%LCOVER, F%XCOVER, F%XZS,                   &
-                FG%XLAT, FG%XLON, FG%XMESH_SIZE                 )  
+ CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', FG, F%LCOVER, F%XCOVER, F%XZS  )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -222,7 +215,7 @@ IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT
   !
 ELSE
   !
-  IF(OECOCLIMAP.AND.(.NOT.ORM_RIVER))THEN
+  IF(U%LECOCLIMAP.AND.(.NOT.ORM_RIVER))THEN
      WRITE(ILUOUT,*)'With this version of Flake, river must be removed'
      WRITE(ILUOUT,*)'Indeed, river energy budget can not be computed  '
      WRITE(ILUOUT,*)'using static lake scheme without 2D informations.'

@@ -105,8 +105,7 @@ ELSE
     LOPEN=.TRUE.
   ENDIF
   ! NFULL must be known in every case. 
-  CALL GET_DIM_FULL_n(U, &
-                      NFULL)
+  CALL GET_DIM_FULL_n(U%NDIM_FULL, NFULL)
   CMASK = HMASK
   CFILE = CFILEOUT
 ENDIF
@@ -117,14 +116,13 @@ IF (.NOT.ALLOCATED(NINDEX) .AND. NRANK==NPIO) THEN
   ALLOCATE(NINDEX(NFULL))
   NINDEX(:) = 0
 ELSE
-  CALL GET_DIM_FULL_n(U,NFULL)  
+  CALL GET_DIM_FULL_n(U%NDIM_FULL,NFULL)  
 ENDIF
 !
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
- CALL GET_SIZE_FULL_n(U, &
-                      'ASCII ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n('ASCII ',NFULL,U%NSIZE_FULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU

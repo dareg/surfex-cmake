@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_QS_n (DGU, &
+      SUBROUTINE GET_QS_n (DUO, DGU, &
                            HPROGRAM,KI,PQS)
 !     #########################################
 !
@@ -35,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
@@ -51,6 +51,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DUO
 TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -69,7 +70,7 @@ IF (LHOOK) CALL DR_HOOK('GET_QS_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGU%LSURF_VARS)      THEN 
+IF (DUO%LSURF_VARS)      THEN 
   PQS      = DGU%XQS      
 ELSE 
   PQS      = XUNDEF      

@@ -102,7 +102,7 @@ IF (PRESENT(PDEF)) ZDEF = PDEF
 !*    2.     Miscellaneous Initializations
 !            -----------------------------
 !
- CALL GET_GRID_COORD(UG, U, &
+ CALL GET_GRID_COORD(UG%G%CGRID, UG%G%NGRID_PAR, UG%G%XGRID_PAR, U%NSIZE_FULL, &
                      KLUOUT,KL=U%NDIM_FULL,HGRID=UG%G%CGRID,PGRID_PAR=UG%XGRID_FULL_PAR,&
                         PX=ZX,PY=ZY)
 !

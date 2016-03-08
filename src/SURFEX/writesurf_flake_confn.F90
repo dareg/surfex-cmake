@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_FLAKE_CONF_n (CHF, DGMF, F, &
-                                         HPROGRAM)
+      SUBROUTINE WRITESURF_FLAKE_CONF_n (CHF, DGMF, F, HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_FLAKE_CONF* - routine to read the configuration for FLAKE

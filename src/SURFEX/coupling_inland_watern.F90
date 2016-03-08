@@ -1,14 +1,13 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_INLAND_WATER_n (FM, WM, DGL, DGLC, U, DST, SLT, &
-                                    HPROGRAM, HCOUPLING, PTIMEC,                              &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 HTEST                                                                       )  
+SUBROUTINE COUPLING_INLAND_WATER_n (FM, WM, DLO, DGL, DGLC, U, DST, SLT, &
+                                    HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, &
+                                    PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM,     & 
+                                    PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,    &
+                                    HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, &
+                                    PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD,      &
+                                    PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,     &
+                                    PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,       &
+                                    PPET_B_COEF, PPEQ_B_COEF, HTEST                    )  
 !     ###############################################################################
 !
 !!****  *COUPLING_INLAND_WATER_n * - Chooses the surface schemes for lakes   
@@ -37,7 +36,7 @@ SUBROUTINE COUPLING_INLAND_WATER_n (FM, WM, DGL, DGLC, U, DST, SLT, &
 USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 USE MODD_SURFEX_n, ONLY : FLAKE_MODEL_t
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
@@ -63,6 +62,7 @@ IMPLICIT NONE
 !
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -146,44 +146,33 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_INLAND_WATER_N',0,ZHOOK_HANDLE)
 IF (U%CWATER=='WATFLX') THEN
-  CALL COUPLING_WATFLUX_OROG_n(WM, DST, SLT, &
-                               HPROGRAM, HCOUPLING, PTIMEC,                                 &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
-                 KI, KSV, KSW,                                                              &
-                 PTSUN, PZENITH, PZENITH2, PAZIM,                                           &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                  &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                   &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,               &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                  &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
-                 HTEST                                                                      )  
+  CALL COUPLING_WATFLUX_OROG_n(WM, DST, SLT, HPROGRAM, HCOUPLING, PTIMEC,                   &
+                               PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,            &
+                               PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,  &
+                               PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, &
+                               PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2,   &
+                               PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0,   &
+                               PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,         &
+                               PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST       )  
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(DGL, DGLC, &
-                           HPROGRAM, HCOUPLING, PTIMEC,                                     &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
-                 KI, KSV, KSW,                                                              &
-                 PTSUN, PZENITH, PAZIM,                                                     &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                  &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                   &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,               &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                  &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
-                 HTEST                                                                       )  
+  CALL COUPLING_IDEAL_FLUX(DLO, DGL, DGLC, HPROGRAM, HCOUPLING, PTIMEC,                     &
+                           PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,                &
+                           PTSUN, PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA,      &
+                           PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW,      &
+                           PSW_BANDS, PPS, PPA,  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,   &
+                           PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,     &
+                           PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, &
+                           PPEQ_B_COEF, HTEST                                     )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL COUPLING_FLAKE_OROGRAPHY_n(FM, DST, SLT,                 &
-                                  HPROGRAM, HCOUPLING,                             &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                        &
-                 KI, KSV, KSW,                                                              &
-                 PTSUN, PZENITH, PZENITH2, PAZIM,                                           &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                  &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                   &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,               &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                  &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                        &
-                 HTEST                                                                    )  
+  CALL COUPLING_FLAKE_OROGRAPHY_n(FM, DST, SLT, HPROGRAM, HCOUPLING,                        &
+                                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,         &
+                                  PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS,       &
+                                  PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW,    &
+                                  PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, &
+                                  PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,     &
+                                  PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,            &
+                                  PPEW_B_COEF,  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
+                                  PPEQ_B_COEF, HTEST                               )  
 ELSE IF (U%CWATER=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.

@@ -1,6 +1,5 @@
 !#################################################
-SUBROUTINE TEST_RECORD_LEN (DGU, &
-                            HPROGRAM,HREC,ONOWRITE)
+SUBROUTINE TEST_RECORD_LEN (HPROGRAM,HREC,HSELECT,ONOWRITE)
 !#################################################
 !
 !!
@@ -8,9 +7,6 @@ SUBROUTINE TEST_RECORD_LEN (DGU, &
 !!    -------------
 !!      B. Decharme 07/2013 write 'time' in netcdf output files
 !-------------------------------------------------------------------------------
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODI_GET_LUOUT
 !
@@ -22,11 +18,9 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-!
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be written
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 LOGICAL,            INTENT(OUT) :: ONOWRITE ! flag for article to be written
 !
  CHARACTER(LEN=12) :: YREC
@@ -53,11 +47,11 @@ CASE("TEB1","TEB2","TEB3","TEB4","TEB5","TEB6","TEB7","TEB8","TEB9")
         YREC=HREC(6:LEN(HREC))
 END SELECT
 ! if output fields selection is active, test if this field is to be written
-IF (DGU%LSELECT)  THEN
-   IFIELD=COUNT(DGU%CSELECT /= '            ')
+IF (SIZE(HSELECT)>0)  THEN
+   IFIELD=COUNT(HSELECT /= '            ')
    ONOWRITE=.TRUE.
    DO JFIELD=1,IFIELD
-      IF ( TRIM(DGU%CSELECT(JFIELD))==TRIM(YREC) ) THEN
+      IF ( TRIM(HSELECT(JFIELD))==TRIM(YREC) ) THEN
          ONOWRITE=.FALSE.
       ENDIF
    ENDDO

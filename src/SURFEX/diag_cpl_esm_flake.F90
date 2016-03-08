@@ -1,6 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_FLAKE (F, &
-                                       PTSTEP,PRAIN,PSNOW,PSFTQ)  
+       SUBROUTINE DIAG_CPL_ESM_FLAKE (F,PTSTEP,PRAIN,PSNOW,PSFTQ)  
 !     #####################################################################
 !
 !!****  *DIAG_CPL_ESM_FLAKE * - Computes diagnostics over sea for 

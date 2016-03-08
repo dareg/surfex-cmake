@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CARBON_INIT(KNBIOMASS,KNLITTER, KNLITTLEVS, KNSOILCARB)  
+      SUBROUTINE CARBON_INIT(IO)  
 !     #####################
 !
 !!****  *CARBON_INIT* - routine to initialize soil carbon parameters
@@ -37,6 +37,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+!
 USE MODD_CO2V_PAR,       ONLY : XCN, XLC, XFRAC_LITTER, XTAU_LITTER,  &
                                   XFRAC_SOILCARB, XTAU_SOILCARB  
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -47,13 +49,11 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-INTEGER,              INTENT(IN)    :: KNBIOMASS           ! number of biomass pools
-INTEGER,              INTENT(IN)    :: KNLITTER            ! number of litter pools
-INTEGER,              INTENT(IN)    :: KNLITTLEVS          ! number of litter levels
-INTEGER,              INTENT(IN)    :: KNSOILCARB          ! number of soil carbon pools
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

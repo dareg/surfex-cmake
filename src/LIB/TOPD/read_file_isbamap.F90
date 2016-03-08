@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     ##########################
-      SUBROUTINE READ_FILE_ISBAMAP (UG, &
-                                    KUNIT,PVAR,KI)
+      SUBROUTINE READ_FILE_ISBAMAP (UG, KUNIT,PVAR,KI)
 !     ##########################
 !
 !!

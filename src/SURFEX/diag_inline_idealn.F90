@@ -1,10 +1,10 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_IDEAL_n (DGL, DGLC, PTSTEP, PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA,  &
-                                         PMERA, PHT, PHW, PRAIN, PSNOW,                &
-                                         PCD, PCDN, PCH, PRI, PHU, PZ0,                &
-                                         PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
-                                         PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,    &
-                                         PLE, PLEI, PSUBL, PLWUP)  
+       SUBROUTINE DIAG_INLINE_IDEAL_n (DLO, DGL, DGLC, PTSTEP, PTA, PTS,             &
+                                       PQA, PPA, PPS, PRHOA, PZONA, PMERA, PHT, PHW, &
+                                       PRAIN, PSNOW, PCD, PCDN, PCH, PRI, PHU, PZ0,  &
+                                       PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
+                                       PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,    &
+                                       PLE, PLEI, PSUBL, PLWUP)  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_IDEAL_n * - computes diagnostics during IDEAL time-step
@@ -29,7 +29,7 @@
 !!------------------------------------------------------------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODD_CSTS,         ONLY : XTT, XLVTT
 USE MODD_SURF_PAR,     ONLY : XUNDEF
@@ -48,6 +48,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
@@ -98,23 +99,22 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_IDEAL_N',0,ZHOOK_HANDLE)
 !
 DGL%XTS(:) = PTS(:)
 !
-  IF (DGL%N2M==1) THEN
-    CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
-                     PSFTH, PSFTQ, PSFZON, PSFMER,                    &
-                     DGL%XT2M, DGL%XQ2M, DGL%XHU2M, DGL%XZON10M, DGL%XMER10M )  
-  ELSE IF (DGL%N2M==2) THEN
+  IF (DLO%N2M==1) THEN
+    CALL PARAM_CLS(DGL, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+                   PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER )  
+  ELSE IF (DLO%N2M==2) THEN
     ZH(:)=2.          
     CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
-                  PCD, PCH, PRI,                 &
-                  PTS, PHU, PZ0H, ZH,            &
-                  DGL%XT2M, DGL%XQ2M, DGL%XHU2M  )  
+                PCD, PCH, PRI,                 &
+                PTS, PHU, PZ0H, ZH,            &
+                DGL%XT2M, DGL%XQ2M, DGL%XHU2M  )  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,        &
                   PCD, PCDN, PRI, ZH,       &
                   DGL%XZON10M, DGL%XMER10M  )  
   END IF
 !
-  IF (DGL%N2M>=1) THEN
+  IF (DLO%N2M>=1) THEN
     !
     DGL%XT2M_MIN(:) = MIN(DGL%XT2M_MIN(:),DGL%XT2M(:))
     DGL%XT2M_MAX(:) = MAX(DGL%XT2M_MAX(:),DGL%XT2M(:))
@@ -130,7 +130,7 @@ DGL%XTS(:) = PTS(:)
     !
   ENDIF
 !
-IF (DGL%LSURF_BUDGET) THEN
+IF (DLO%LSURF_BUDGET) THEN
   !
   DGL%XLE  (:) = PLE  (:)
   DGL%XLEI (:) = PLEI (:)
@@ -138,23 +138,23 @@ IF (DGL%LSURF_BUDGET) THEN
   DGL%XSUBL(:) = PSUBL(:)
   !
   CALL  DIAG_SURF_BUDGET_IDEAL ( PRHOA, PSFTH,                     &
-                                  PDIR_SW, PSCA_SW, PLW,                &
-                                  PDIR_ALB, PSCA_ALB, PLWUP,            &
-                                  PSFZON, PSFMER, DGL%XLE, DGL%XRN,     &
-                                  DGL%XH, DGL%XGFLUX, DGL%XSWD,         &
-                                  DGL%XSWU, DGL%XSWBD, DGL%XSWBU,       &
-                                  DGL%XLWD, DGL%XLWU, DGL%XFMU, DGL%XFMV )  
+                                 PDIR_SW, PSCA_SW, PLW,                &
+                                 PDIR_ALB, PSCA_ALB, PLWUP,            &
+                                 PSFZON, PSFMER, DGL%XLE, DGL%XRN,     &
+                                 DGL%XH, DGL%XGFLUX, DGL%XSWD,         &
+                                 DGL%XSWU, DGL%XSWBD, DGL%XSWBU,       &
+                                 DGL%XLWD, DGL%XLWU, DGL%XFMU, DGL%XFMV )  
   !
 END IF
 !
-IF( DGL%LSURF_BUDGETC)THEN
+IF( DLO%LSURF_BUDGETC)THEN
   CALL DIAG_SURF_BUDGETC_IDEAL(DGL, DGLC, PTSTEP,  DGL%XRN,  DGL%XH,  DGL%XLE,  &
                                DGL%XLEI,  DGL%XGFLUX, DGL%XSWD,  DGL%XSWU, &
                                DGL%XLWD,  DGL%XLWU,  DGL%XFMU,  DGL%XFMV,  &
                                DGL%XEVAP, DGL%XSUBL                    )  
 ENDIF
 !
-IF (DGL%LCOEF) THEN
+IF (DLO%LCOEF) THEN
   !
   !* Transfer coefficients
   !
@@ -169,7 +169,7 @@ IF (DGL%LCOEF) THEN
   !
 END IF
 !
-IF (DGL%LSURF_VARS) THEN
+IF (DLO%LSURF_VARS) THEN
   !
   !* Humidity at saturation
   !

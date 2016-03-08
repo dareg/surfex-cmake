@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE FLAG_TEB_GREENROOF_n (TGRR, TGRO, TGRPE, T,  &
-                                       KFLAG)
+      SUBROUTINE FLAG_TEB_GREENROOF_n (VR, VO, PLAI, PGREENROOF, KFLAG)
 !     ##################################
 !
 !!****  *FLAG_TEB_GREENROOF_n* - routine to flag ISBA variables where green roofs are
@@ -38,11 +37,8 @@
 !              ------------
 !
 !
-!
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_PARAM_TIME_t
-USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_CO2V_PAR,       ONLY : XANFMINIT, XCONDCTMIN
 !                                
@@ -59,10 +55,10 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(TEB_VEG_PROG_t), INTENT(INOUT) :: TGRR
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGRO
-TYPE(TEB_VEG_PARAM_TIME_t), INTENT(INOUT) :: TGRPE
-TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: VR
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: VO
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PLAI
+REAL, DIMENSION(:), INTENT(IN) :: PGREENROOF
 !
 INTEGER, INTENT(IN) :: KFLAG ! 1 : to put physical values to run ISBA afterwards
 !                            ! 2 : to flag with XUNDEF value for points without green roof
@@ -100,38 +96,38 @@ ENDIF
 !-------------------------------------------------------------------------------
 !     
   !
-  DO JL1=1,TGRO%NGROUND_LAYER
-    WHERE (T%CUR%XGREENROOF(:)==0.) 
-      TGRR%CUR%XTG (:,JL1,1) = ZTG
-      TGRR%CUR%XWG (:,JL1,1) = ZWG
-      TGRR%CUR%XWGI(:,JL1,1) = ZDEF
+  DO JL1=1,VO%NGROUND_LAYER
+    WHERE (PGREENROOF(:)==0.) 
+      VR%XTG (:,JL1,1) = ZTG
+      VR%XWG (:,JL1,1) = ZWG
+      VR%XWGI(:,JL1,1) = ZDEF
     END WHERE
   END DO
   !
-  WHERE (T%CUR%XGREENROOF(:)==0.) 
-    TGRR%CUR%XWR  (:,1) = ZWR
-    TGRR%CUR%XRESA(:,1) = ZRESA
+  WHERE (PGREENROOF(:)==0.) 
+    VR%XWR  (:,1) = ZWR
+    VR%XRESA(:,1) = ZRESA
   END WHERE
   !
-  IF (TGRO%CPHOTO/='NON') THEN
+  IF (VO%CPHOTO/='NON') THEN
     !
-    WHERE (T%CUR%XGREENROOF(:)==0.)
-      TGRR%CUR%XANFM (:,1) = ZANFM              
-      TGRR%CUR%XAN   (:,1) = ZDEF
-      TGRR%CUR%XANDAY(:,1) = ZDEF
-      TGRR%CUR%XLE   (:,1) = ZDEF
+    WHERE (PGREENROOF(:)==0.)
+      VR%XANFM (:,1) = ZANFM              
+      VR%XAN   (:,1) = ZDEF
+      VR%XANDAY(:,1) = ZDEF
+      VR%XLE   (:,1) = ZDEF
     END WHERE
     !
-  ELSE IF (TGRO%CPHOTO=='LAI' .OR. TGRO%CPHOTO=='LST' .OR. TGRO%CPHOTO=='NIT' .OR. TGRO%CPHOTO=='NCB') THEN
+  ELSE IF (VO%CPHOTO=='LAI' .OR. VO%CPHOTO=='LST' .OR. VO%CPHOTO=='NIT' .OR. VO%CPHOTO=='NCB') THEN
     !
-    WHERE (T%CUR%XGREENROOF(:)==0.) TGRPE%CUR%XLAI(:,1) = ZDEF
+    WHERE (PGREENROOF(:)==0.) PLAI(:,1) = ZDEF
     !
-  ELSE IF (TGRO%CPHOTO=='AGS' .OR. TGRO%CPHOTO=='AST') THEN
+  ELSE IF (VO%CPHOTO=='AGS' .OR. VO%CPHOTO=='AST') THEN
     !
-    DO JL1=1,SIZE(TGRR%CUR%XBIOMASS,2)
-      WHERE (T%CUR%XGREENROOF(:)==0.)
-        TGRR%CUR%XBIOMASS     (:,JL1,1) = ZDEF
-        TGRR%CUR%XRESP_BIOMASS(:,JL1,1) = ZDEF
+    DO JL1=1,SIZE(VR%XBIOMASS,2)
+      WHERE (PGREENROOF(:)==0.)
+        VR%XBIOMASS     (:,JL1,1) = ZDEF
+        VR%XRESP_BIOMASS(:,JL1,1) = ZDEF
       END WHERE
     END DO
       !
@@ -144,19 +140,19 @@ ENDIF
 !
 !* Flag snow characteristics
 !
- CALL FLAG_GR_SNOW(KFLAG,T%CUR%XGREENROOF(:)==0.,TGRR%CUR%TSNOW)
+ CALL FLAG_GR_SNOW(KFLAG,PGREENROOF(:)==0.,VR%TSNOW)
 !
 !
 !* snow-free characteristics
 !
 IF (KFLAG==1) THEN
-  WHERE (T%CUR%XGREENROOF==0.) TGRR%CUR%XSNOWFREE_ALB(:,1)      = 0.2
-  WHERE (T%CUR%XGREENROOF==0.) TGRR%CUR%XSNOWFREE_ALB_VEG(:,1)  = 0.2
-  WHERE (T%CUR%XGREENROOF==0.) TGRR%CUR%XSNOWFREE_ALB_SOIL(:,1) = 0.2
+  WHERE (PGREENROOF==0.) VR%XSNOWFREE_ALB(:,1)      = 0.2
+  WHERE (PGREENROOF==0.) VR%XSNOWFREE_ALB_VEG(:,1)  = 0.2
+  WHERE (PGREENROOF==0.) VR%XSNOWFREE_ALB_SOIL(:,1) = 0.2
 ELSEIF (KFLAG==2) THEN
-  WHERE (T%CUR%XGREENROOF==0.) TGRR%CUR%XSNOWFREE_ALB(:,1)      = XUNDEF
-  WHERE (T%CUR%XGREENROOF==0.) TGRR%CUR%XSNOWFREE_ALB_VEG(:,1)  = XUNDEF
-  WHERE (T%CUR%XGREENROOF==0.) TGRR%CUR%XSNOWFREE_ALB_SOIL(:,1) = XUNDEF
+  WHERE (PGREENROOF==0.) VR%XSNOWFREE_ALB(:,1)      = XUNDEF
+  WHERE (PGREENROOF==0.) VR%XSNOWFREE_ALB_VEG(:,1)  = XUNDEF
+  WHERE (PGREENROOF==0.) VR%XSNOWFREE_ALB_SOIL(:,1) = XUNDEF
 END IF
 !
 !-------------------------------------------------------------------------------

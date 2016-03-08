@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG(PFRAC_TILE, DGU, DGUP, DGUC, DGUPC      )                                
+      SUBROUTINE AVERAGE_DIAG(PFRAC_TILE, DUO, DGU, DGUP, DGUC, DGUPC      )                                
 !     ######################################################################
 !
 !
@@ -40,7 +40,7 @@
 !
 USE MODD_DATA_COVER_PAR, ONLY : NTILESFC
 !
-USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_PATCH_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_PATCH_t, DIAG_OPTIONS_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -51,6 +51,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:,:), INTENT(IN) :: PFRAC_TILE   ! Fraction in a mesh-area of 
 !
+TYPE(DIAG_OPTIONS_t), INTENt(INOUT) :: DUO
 TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DGUP
 TYPE(DIAG_t), INTENT(INOUT) :: DGUC
@@ -68,7 +69,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG',0,ZHOOK_HANDLE)
 !
-IF (DGU%LSURF_BUDGET) THEN
+IF (DUO%LSURF_BUDGET) THEN
 !
   DO JT = 1,NTILESFC
   !
@@ -136,7 +137,7 @@ IF (DGU%LSURF_BUDGET) THEN
   !
 END IF
 !
-IF (DGU%LSURF_BUDGETC) THEN
+IF (DUO%LSURF_BUDGETC) THEN
 !
   DO JT = 1,NTILESFC
   !
@@ -201,7 +202,7 @@ END IF
 !       2.     Richardson number
 !              -----------------
 !
-IF (DGU%N2M>=1) THEN
+IF (DUO%N2M>=1) THEN
 !
   DO JT = 1,NTILESFC
     !
@@ -217,7 +218,7 @@ ENDIF
 !              --------------------------------------------------
 !
 !
-IF (DGU%N2M>=1.OR.DGU%LSURF_BUDGET.OR.DGU%LSURF_BUDGETC) THEN
+IF (DUO%N2M>=1.OR.DUO%LSURF_BUDGET.OR.DUO%LSURF_BUDGETC) THEN
 !
   DO JT = 1,NTILESFC
     !
@@ -229,11 +230,11 @@ IF (DGU%N2M>=1.OR.DGU%LSURF_BUDGET.OR.DGU%LSURF_BUDGETC) THEN
   !
 ENDIF
 !
-IF (DGU%N2M>=1) THEN
+IF (DUO%N2M>=1) THEN
 !
 ! Temperature at 2 meters
 !
-  IF (DGU%LT2MMW) THEN
+  IF (DUO%LT2MMW) THEN
     DO JT=1,NTILESFC
 ! Modified weighting giving increased weight to LAND temperature
       CALL  MAKE_AVERAGE_MW(PFRAC_TILE(:,JT),DGUP%AL(JT)%XT2M,DGU%XT2M,JT,ZLAND,ZSEA,ZFRL)
@@ -280,7 +281,7 @@ END IF
 !       4.     Transfer coeffients and roughness lengths
 !              -----------------------------------------
 !
-IF (DGU%LCOEF) THEN
+IF (DUO%LCOEF) THEN
 !
   DO JT=1,NTILESFC
   !
@@ -298,7 +299,7 @@ IF (DGU%LCOEF) THEN
   !
 ENDIF
 !
-IF (DGU%LSURF_VARS) THEN
+IF (DUO%LSURF_VARS) THEN
 !
   DO JT=1,NTILESFC
     CALL MAKE_AVERAGE(PFRAC_TILE(:,JT),DGUP%AL(JT)%XQS,DGU%XQS,JT)

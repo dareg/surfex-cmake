@@ -37,8 +37,6 @@ TYPE DIAG_EVAP_ISBA_t
 !------------------------------------------------------------------------------
 !
   LOGICAL :: LSURF_EVAP_BUDGET   ! flag for all terms of evaporation
-  LOGICAL :: LSURF_BUDGETC       ! flag for surface cumulated energy budget
-  LOGICAL :: LRESET_BUDGETC      ! flag for surface cumulated energy budget
   LOGICAL :: LWATER_BUDGET       ! flag for isba water budget including input  
                                  ! fluxes (rain and snow) and reservoir tendencies
 !
@@ -239,8 +237,6 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(YDIAG_EVAP_ISBA%XSNOWFALL)
 !
 YDIAG_EVAP_ISBA%LSURF_EVAP_BUDGET=.FALSE.
-YDIAG_EVAP_ISBA%LSURF_BUDGETC=.FALSE.
-YDIAG_EVAP_ISBA%LRESET_BUDGETC=.FALSE.
 YDIAG_EVAP_ISBA%LWATER_BUDGET=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_EVAP_ISBA_INIT

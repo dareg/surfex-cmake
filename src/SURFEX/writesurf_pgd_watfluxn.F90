@@ -1,7 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_WATFLUX_n (DGU, U, &
-                                           WG, W, &
-                                          HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_WATFLUX_n (HSELECT, WG, W, HPROGRAM)
 !     ###################################################
 !
 !!****  *WRITESURF_PGD_WATFLUX_n* - writes WATFLUX fields
@@ -38,11 +36,6 @@
 !
 !
 !
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
 USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
@@ -63,9 +56,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
 TYPE(GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
@@ -92,20 +83,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='COVER_LIST'
 YCOMMENT='(LOGICAL LIST)'
- CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,W%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 !* orography
 !
 YRECFM='ZS'
 YCOMMENT='ZS'
- CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,W%XZS(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* latitude, longitude
 !
- CALL WRITE_GRID(DGU, U, &
+ CALL WRITE_GRID(HSELECT, &
                  HPROGRAM,WG%CGRID,WG%XGRID_PAR,WG%XLAT,WG%XLON,WG%XMESH_SIZE,IRESP)
+!
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

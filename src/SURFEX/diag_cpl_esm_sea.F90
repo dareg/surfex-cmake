@@ -1,10 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_SEA (S, &
-                                     PTSTEP,PZON10M,PMER10M,PSFU,PSFV,     &
-                                      PSWD,PSWU,PGFLUX,PSFTQ,PRAIN,PSNOW, &
-                                      PLW,PTICE,PSFTH_ICE,PSFTQ_ICE,      &
-                                      PDIR_SW,PSCA_SW,PSWU_ICE,PLWU_ICE,  &
-                                      OSIC                                )  
+       SUBROUTINE DIAG_CPL_ESM_SEA (S, DGS, DGSI, PTSTEP, PSFTQ, PRAIN, PSNOW, &
+                                    PLW, PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW, OSIC)  
 !     ###################################################################
 !
 !!****  *DIAG_CPL_ESM_SEA * - Computes diagnostics over sea for 
@@ -32,7 +28,7 @@
 !!      A.Voldoire  04/2015  Add LCPL_SEAICE test
 !!------------------------------------------------------------------
 !
-!
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS,      ONLY : XSTEFAN, XLSTT
@@ -49,26 +45,18 @@ IMPLICIT NONE
 !
 !
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+TYPE(DIAG_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: DGSI
 !
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
-REAL, DIMENSION(:), INTENT(IN) :: PZON10M   ! zonal wind
-REAL, DIMENSION(:), INTENT(IN) :: PMER10M   ! meridian wind
-REAL, DIMENSION(:), INTENT(IN) :: PSFU      ! zonal wind stress
-REAL, DIMENSION(:), INTENT(IN) :: PSFV      ! meridian wind stress
-REAL, DIMENSION(:), INTENT(IN) :: PSWD      ! total incoming short wave radiation
-REAL, DIMENSION(:), INTENT(IN) :: PSWU      ! total upward short wave radiation
-REAL, DIMENSION(:), INTENT(IN) :: PGFLUX    ! storage flux
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ     ! water flux
 REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall
 REAL, DIMENSION(:), INTENT(IN) :: PLW       ! longwave radiation (on horizontal surf.)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH_ICE ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ_ICE ! water flux (kg/m2/s)
-REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Ice Surface Temperature
 REAL, DIMENSION(:,:),INTENT(IN):: PDIR_SW   ! direct  solar radiation (on horizontal surf.)
 REAL, DIMENSION(:,:),INTENT(IN):: PSCA_SW   ! diffuse solar radiation (on horizontal surf.)
-REAL, DIMENSION(:), INTENT(IN) :: PSWU_ICE  ! upward short wave radiation on seaice
-REAL, DIMENSION(:), INTENT(IN) :: PLWU_ICE  ! upward long  wave radiation on seaice
 LOGICAL,            INTENT(IN) :: OSIC
 !
 !*      0.2    declarations of local variables
@@ -90,21 +78,21 @@ IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_SEA',0,ZHOOK_HANDLE)
 !
 !* 10m wind speed (m)
 !
-S%XCPL_SEA_WIND(:) = S%XCPL_SEA_WIND(:) + PTSTEP * SQRT(PZON10M(:)**2+PMER10M(:)**2)
+S%XCPL_SEA_WIND(:) = S%XCPL_SEA_WIND(:) + PTSTEP * SQRT(DGS%XZON10M(:)**2+DGS%XMER10M(:)**2)
 ! 
 !* wind stress (Pa.s)
 !
-S%XCPL_SEA_FWSU(:) = S%XCPL_SEA_FWSU(:) + PTSTEP * PSFU(:)
-S%XCPL_SEA_FWSV(:) = S%XCPL_SEA_FWSV(:) + PTSTEP * PSFV(:)
-S%XCPL_SEA_FWSM(:) = S%XCPL_SEA_FWSM(:) + PTSTEP * SQRT(PSFU(:)**2+PSFV(:)**2)
+S%XCPL_SEA_FWSU(:) = S%XCPL_SEA_FWSU(:) + PTSTEP * DGS%XFMU(:)
+S%XCPL_SEA_FWSV(:) = S%XCPL_SEA_FWSV(:) + PTSTEP * DGS%XFMV(:)
+S%XCPL_SEA_FWSM(:) = S%XCPL_SEA_FWSM(:) + PTSTEP * SQRT(DGS%XFMU(:)**2+DGS%XFMV(:)**2)
 !
 !* Solar net heat flux (J/m2)
 !
-S%XCPL_SEA_SNET(:) = S%XCPL_SEA_SNET(:) + PTSTEP * (PSWD(:) - PSWU(:))
+S%XCPL_SEA_SNET(:) = S%XCPL_SEA_SNET(:) + PTSTEP * (DGS%XSWD(:) - DGS%XSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-S%XCPL_SEA_HEAT(:) = S%XCPL_SEA_HEAT(:) + PTSTEP * (PGFLUX(:) + PSWU(:) - PSWD(:)) 
+S%XCPL_SEA_HEAT(:) = S%XCPL_SEA_HEAT(:) + PTSTEP * (DGS%XGFLUX(:) + DGS%XSWU(:) - DGS%XSWD(:)) 
 !
 !* Evaporation (kg/m2)
 !
@@ -126,7 +114,7 @@ IF (LCPL_SEAICE.OR.OSIC) THEN
 !* Solar net heat flux (J/m2)
 !
   IF (OSIC) THEN
-    ZSWU(:)=PSWU_ICE(:)
+    ZSWU(:)=DGSI%XSWU(:)
   ELSE
     ZSWU(:)=0.0
     DO JSWB=1,ISWB
@@ -136,15 +124,15 @@ IF (LCPL_SEAICE.OR.OSIC) THEN
     ENDDO
   ENDIF
 !
-  S%XCPL_SEAICE_SNET(:) = S%XCPL_SEAICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
+  S%XCPL_SEAICE_SNET(:) = S%XCPL_SEAICE_SNET(:) + PTSTEP * (DGS%XSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
   IF (OSIC) THEN
     S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * &
-              ( PLW(:) - PLWU_ICE(:) - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:) )
+              ( PLW(:) - DGSI%XLWU(:) - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:) )
   ELSE
-    ZTICE4(:)=PTICE(:)**4
+    ZTICE4(:)=S%XTICE(:)**4
     S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &
                                                          - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)      ) 
   ENDIF 

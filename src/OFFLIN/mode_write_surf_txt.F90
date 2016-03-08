@@ -176,15 +176,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_TXT:WRITE_SURFL0_TXT',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL0_TXT
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_TXT (DGU, &
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_TXT (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -206,7 +203,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -242,8 +239,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-  CALL INIT_WRITE_TXT(DGU, &
-                      HREC,LWFL)
+  CALL INIT_WRITE_TXT(HSELECT, HREC,LWFL)
   !
   IF (LWFL) WRITE(NIND,FMT='(50D14.6)',IOSTAT=KRESP) ZWORK(1:ISIZE)
   !
@@ -260,15 +256,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_TXT:WRITE_SURFX1_TXT',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_TXT
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_TXT (DGU, &
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_TXT (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -290,7 +283,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
@@ -326,8 +319,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !  
-  CALL INIT_WRITE_TXT(DGU, &
-                      HREC,LWFL)
+  CALL INIT_WRITE_TXT(HSELECT, HREC,LWFL)
   !
   IF (LWFL) WRITE(NIND,FMT='(50D14.6)',IOSTAT=KRESP) ZWORK(1:ISIZE,:)
   !

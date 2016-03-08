@@ -1,6 +1,5 @@
 !     ############################################################
-      SUBROUTINE UPDATE_ESM_FLAKE_n (F, &
-                                     KI,KSW,PZENITH,PDIR_ALB,     &
+      SUBROUTINE UPDATE_ESM_FLAKE_n (F,KI,KSW,PZENITH,PDIR_ALB,     &
                                     PSCA_ALB,PEMIS,PTSRAD,PTSURF )
 !     ############################################################
 !
@@ -81,8 +80,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_FLAKE_N',0,ZHOOK_HANDLE)
 !
- CALL UPDATE_RAD_FLAKE(F%CFLK_ALB,F%XTS,PZENITH,F%XH_ICE,F%XH_SNOW,F%XICE_ALB,F%XSNOW_ALB,&
-                       F%XDIR_ALB,F%XSCA_ALB,F%XEMIS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )
+ CALL UPDATE_RAD_FLAKE(F,PZENITH,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )
 !
 PTSURF(:) = F%XTS(:)
 !                         

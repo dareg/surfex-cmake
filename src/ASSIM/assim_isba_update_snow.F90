@@ -1,5 +1,4 @@
-SUBROUTINE ASSIM_ISBA_UPDATE_SNOW (I, &
-                                   HPROGRAM, KI, PSWE, PSWE_ORIG, OINITSNOW, OINC, HTEST )
+SUBROUTINE ASSIM_ISBA_UPDATE_SNOW (I, HPROGRAM, KI, PSWE, PSWE_ORIG, OINITSNOW, OINC, HTEST )
 
 ! ------------------------------------------------------------------------------------------
 !  *****************************************************************************************

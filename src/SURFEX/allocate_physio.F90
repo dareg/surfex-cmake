@@ -1,16 +1,5 @@
 !     #########
-    SUBROUTINE ALLOCATE_PHYSIO (I, &
-                                HPHOTO, HISBA, KLU, KVEGTYPE, KGROUND_LAYER, KPATCH, &
-                               PVEGTYPE, PLAI, PVEG, PZ0, PEMIS, PDG, PD_ICE, &
-                               PRSMIN, PGAMMA, PWRMAX_CF, PRGL, PCV, &
-                               PZ0_O_Z0H, PALBNIR_VEG, PALBVIS_VEG, PALBUV_VEG, &
-                               PH_TREE, PRE25, PLAIMIN, PBSLAI, PSEFOLD, &
-                               PGMES, PGC, PF2I, PDMAX, OSTRESS, &
-                               PCE_NITRO, PCF_NITRO, PCNA_NITRO, &
-                               PTSEED, PTREAP, PWATSUP, PIRRIG, &
-                               PROOTFRAC, KWG_LAYER, PDROOT, PDG2, &
-                               PGNDLITTER,PRGLGV,PGAMMAGV,PRSMINGV,        &
-                               PROOTFRACGV,PWRMAX_CFGV,PLAIGV,PZ0LITTER,PH_VEG         )
+    SUBROUTINE ALLOCATE_PHYSIO (IO, IM, KLU, KVEGTYPE )
 !   ##########################################################################
 !
 !!****  *ALLOCATE_PHYSIO* - 
@@ -42,7 +31,8 @@
 !!      Modified 10/2014 P. Samuelsson  MEB
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -56,71 +46,14 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
-!
-INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
-!
- CHARACTER(LEN=3),INTENT(IN)  :: HPHOTO
- CHARACTER(LEN=3),INTENT(IN)  :: HISBA
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PARAM_t), INTENT(INOUT) :: IM
 !
 INTEGER, INTENT(IN) :: KLU
 INTEGER, INTENT(IN) :: KVEGTYPE
-INTEGER, INTENT(IN) :: KGROUND_LAYER
-INTEGER, INTENT(IN) :: KPATCH
 !
-REAL, DIMENSION(:,:), POINTER :: PVEGTYPE
+INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
-REAL, DIMENSION(:,:), POINTER :: PLAI
-REAL, DIMENSION(:,:), POINTER :: PVEG
-REAL, DIMENSION(:,:), POINTER :: PZ0
-REAL, DIMENSION(:,:), POINTER :: PEMIS
-!
-REAL, DIMENSION(:,:,:), POINTER :: PDG
-REAL, DIMENSION(:,:)  , POINTER :: PD_ICE
-!
-REAL, DIMENSION(:,:), POINTER :: PRSMIN
-REAL, DIMENSION(:,:), POINTER :: PGAMMA
-REAL, DIMENSION(:,:), POINTER :: PWRMAX_CF
-REAL, DIMENSION(:,:), POINTER :: PRGL
-REAL, DIMENSION(:,:), POINTER :: PCV
-REAL, DIMENSION(:,:), POINTER :: PZ0_O_Z0H
-REAL, DIMENSION(:,:), POINTER :: PALBNIR_VEG
-REAL, DIMENSION(:,:), POINTER :: PALBVIS_VEG
-REAL, DIMENSION(:,:), POINTER :: PALBUV_VEG
-!
-REAL, DIMENSION(:,:), POINTER :: PH_TREE
-REAL, DIMENSION(:,:), POINTER :: PRE25
-REAL, DIMENSION(:,:), POINTER :: PLAIMIN
-REAL, DIMENSION(:,:), POINTER :: PBSLAI
-REAL, DIMENSION(:,:), POINTER :: PSEFOLD
-REAL, DIMENSION(:,:), POINTER :: PGMES
-REAL, DIMENSION(:,:), POINTER :: PGC
-REAL, DIMENSION(:,:), POINTER :: PF2I
-REAL, DIMENSION(:,:), POINTER :: PDMAX
-LOGICAL, DIMENSION(:,:), POINTER :: OSTRESS
-REAL, DIMENSION(:,:), POINTER :: PCE_NITRO
-REAL, DIMENSION(:,:), POINTER :: PCF_NITRO
-REAL, DIMENSION(:,:), POINTER :: PCNA_NITRO
-!
-TYPE(DATE_TIME), DIMENSION(:,:), POINTER :: PTSEED
-TYPE(DATE_TIME), DIMENSION(:,:), POINTER :: PTREAP
-REAL, DIMENSION(:,:), POINTER :: PWATSUP
-REAL, DIMENSION(:,:), POINTER :: PIRRIG
-!
-REAL, DIMENSION(:,:,:), POINTER :: PROOTFRAC
-INTEGER, DIMENSION(:,:), POINTER :: KWG_LAYER
-REAL, DIMENSION(:,:), POINTER :: PDROOT
-REAL, DIMENSION(:,:), POINTER :: PDG2
-!
-REAL, DIMENSION(:,:), POINTER :: PGNDLITTER
-REAL, DIMENSION(:,:), POINTER :: PRGLGV
-REAL, DIMENSION(:,:), POINTER :: PGAMMAGV
-REAL, DIMENSION(:,:), POINTER :: PRSMINGV
-REAL, DIMENSION(:,:,:), POINTER :: PROOTFRACGV
-REAL, DIMENSION(:,:), POINTER :: PWRMAX_CFGV
-REAL, DIMENSION(:,:), POINTER :: PLAIGV
-REAL, DIMENSION(:,:), POINTER :: PZ0LITTER
-REAL, DIMENSION(:,:), POINTER :: PH_VEG
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -130,119 +63,120 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_PHYSIO',0,ZHOOK_HANDLE)
 !
-ISIZE_LMEB_PATCH=COUNT(I%O%LMEB_PATCH(:))
+ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 !
-ALLOCATE(PVEGTYPE                (KLU,KVEGTYPE            ))
+ALLOCATE(IM%X%XVEGTYPE                (KLU,KVEGTYPE            ))
 !
-ALLOCATE(PLAI                    (KLU,KPATCH              )) 
-ALLOCATE(PVEG                    (KLU,KPATCH              )) 
-ALLOCATE(PZ0                     (KLU,KPATCH              )) 
-ALLOCATE(PEMIS                   (KLU,KPATCH              )) 
+ALLOCATE(IM%X%XDG                     (KLU,IO%NGROUND_LAYER,IO%NPATCH)) 
+ALLOCATE(IM%X%XD_ICE                  (KLU,IO%NPATCH              )) 
 !
-ALLOCATE(PDG                     (KLU,KGROUND_LAYER,KPATCH)) 
-ALLOCATE(PD_ICE                  (KLU,KPATCH              )) 
+ALLOCATE(IM%T%XLAI                    (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XVEG                    (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XZ0                     (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XEMIS                   (KLU,IO%NPATCH              )) 
 !
-ALLOCATE(PRSMIN                  (KLU,KPATCH              )) 
-ALLOCATE(PGAMMA                  (KLU,KPATCH              )) 
-ALLOCATE(PWRMAX_CF               (KLU,KPATCH              )) 
-ALLOCATE(PRGL                    (KLU,KPATCH              )) 
-ALLOCATE(PCV                     (KLU,KPATCH              )) 
-ALLOCATE(PZ0_O_Z0H               (KLU,KPATCH              )) 
-ALLOCATE(PALBNIR_VEG             (KLU,KPATCH              )) 
-ALLOCATE(PALBVIS_VEG             (KLU,KPATCH              )) 
-ALLOCATE(PALBUV_VEG              (KLU,KPATCH              )) 
+ALLOCATE(IM%T%XRSMIN                  (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XGAMMA                  (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XWRMAX_CF               (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XRGL                    (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XCV                     (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XALBNIR_VEG             (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XALBVIS_VEG             (KLU,IO%NPATCH              )) 
+ALLOCATE(IM%T%XALBUV_VEG              (KLU,IO%NPATCH              )) 
 !
-IF (ISIZE_LMEB_PATCH>0 .OR. HPHOTO/='NON') THEN
-  ALLOCATE(PBSLAI                  (KLU,KPATCH              )) 
+ALLOCATE(IM%X%XZ0_O_Z0H               (KLU,IO%NPATCH              )) 
+!
+IF (ISIZE_LMEB_PATCH>0 .OR. IO%CPHOTO/='NON') THEN
+  ALLOCATE(IM%T%XBSLAI                  (KLU,IO%NPATCH              )) 
 ELSE
-  ALLOCATE(PBSLAI     (0,0))  
+  ALLOCATE(IM%T%XBSLAI     (0,0))  
 ENDIF
 ! - vegetation: Ags parameters ('AGS', 'LAI', 'AST', 'LST', 'NIT' options)
 !
-IF (HPHOTO/='NON'.OR.LTREEDRAG) THEN
-  ALLOCATE(PH_TREE                 (KLU,KPATCH              ))
+IF (IO%CPHOTO/='NON'.OR.LTREEDRAG) THEN
+  ALLOCATE(IM%X%XH_TREE                 (KLU,IO%NPATCH              ))
 ELSE
-  ALLOCATE(PH_TREE                 (0,0                     ))
+  ALLOCATE(IM%X%XH_TREE                 (0,0                     ))
 ENDIF
 !
-IF (HPHOTO/='NON') THEN
-  ALLOCATE(PRE25                   (KLU,KPATCH              )) 
-  ALLOCATE(PLAIMIN                 (KLU,KPATCH              )) 
-  ALLOCATE(PSEFOLD                 (KLU,KPATCH              )) 
-  ALLOCATE(PGMES                   (KLU,KPATCH              )) 
-  ALLOCATE(PGC                     (KLU,KPATCH              )) 
-  ALLOCATE(PDMAX                   (KLU,KPATCH              ))
-  IF (HPHOTO/='AGS' .AND. HPHOTO/='LAI') THEN
-    ALLOCATE(PF2I                    (KLU,KPATCH              ))
-    ALLOCATE(OSTRESS                 (KLU,KPATCH              )) 
-    IF (HPHOTO=='NIT' .OR. HPHOTO=='NCB') THEN
-      ALLOCATE(PCE_NITRO               (KLU,KPATCH              )) 
-      ALLOCATE(PCF_NITRO               (KLU,KPATCH              )) 
-      ALLOCATE(PCNA_NITRO              (KLU,KPATCH              ))  
+IF (IO%CPHOTO/='NON') THEN
+  ALLOCATE(IM%X%XRE25                   (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%X%XDMAX                   (KLU,IO%NPATCH              ))  
+  ALLOCATE(IM%T%XLAIMIN                 (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%T%XSEFOLD                 (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%T%XGMES                   (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%T%XGC                     (KLU,IO%NPATCH              )) 
+  IF (IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='LAI') THEN
+    ALLOCATE(IM%T%XF2I                    (KLU,IO%NPATCH              ))
+    ALLOCATE(IM%T%LSTRESS                 (KLU,IO%NPATCH              )) 
+    IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+      ALLOCATE(IM%T%XCE_NITRO               (KLU,IO%NPATCH              )) 
+      ALLOCATE(IM%T%XCF_NITRO               (KLU,IO%NPATCH              )) 
+      ALLOCATE(IM%T%XCNA_NITRO              (KLU,IO%NPATCH              ))  
     ELSE
-      ALLOCATE(PCE_NITRO    (0,0))
-      ALLOCATE(PCF_NITRO    (0,0))
-      ALLOCATE(PCNA_NITRO   (0,0))
+      ALLOCATE(IM%T%XCE_NITRO    (0,0))
+      ALLOCATE(IM%T%XCF_NITRO    (0,0))
+      ALLOCATE(IM%T%XCNA_NITRO   (0,0))
  
     ENDIF
   ELSE
-    ALLOCATE(PF2I   (0,0))
-    ALLOCATE(OSTRESS(0,0))
-    ALLOCATE(PCE_NITRO    (0,0))
-    ALLOCATE(PCF_NITRO    (0,0))
-    ALLOCATE(PCNA_NITRO   (0,0))
+    ALLOCATE(IM%T%XF2I   (0,0))
+    ALLOCATE(IM%T%LSTRESS(0,0))
+    ALLOCATE(IM%T%XCE_NITRO    (0,0))
+    ALLOCATE(IM%T%XCF_NITRO    (0,0))
+    ALLOCATE(IM%T%XCNA_NITRO   (0,0))
   ENDIF
 ELSE
-  ALLOCATE(PRE25      (0,0))
-  ALLOCATE(PLAIMIN    (0,0))
-  ALLOCATE(PSEFOLD    (0,0))  
-  ALLOCATE(PGMES      (0,0))
-  ALLOCATE(PGC        (0,0))
-  ALLOCATE(PF2I   (0,0))
-  ALLOCATE(PDMAX  (0,0))
-  ALLOCATE(OSTRESS(0,0))
-  ALLOCATE(PCE_NITRO    (0,0))
-  ALLOCATE(PCF_NITRO    (0,0))
-  ALLOCATE(PCNA_NITRO   (0,0))
+  ALLOCATE(IM%X%XRE25      (0,0))
+  ALLOCATE(IM%X%XDMAX      (0,0))  
+  ALLOCATE(IM%T%XLAIMIN    (0,0))
+  ALLOCATE(IM%T%XSEFOLD    (0,0))  
+  ALLOCATE(IM%T%XGMES      (0,0))
+  ALLOCATE(IM%T%XGC        (0,0))
+  ALLOCATE(IM%T%XF2I   (0,0))
+  ALLOCATE(IM%T%LSTRESS(0,0))
+  ALLOCATE(IM%T%XCE_NITRO    (0,0))
+  ALLOCATE(IM%T%XCF_NITRO    (0,0))
+  ALLOCATE(IM%T%XCNA_NITRO   (0,0))
 ENDIF  
 !
 ! - Irrigation, seeding and reaping
 !
-IF (LAGRIP .AND. (HPHOTO == 'LAI' .OR. HPHOTO == 'LST' .OR. HPHOTO == 'NIT' .OR. HPHOTO == 'NCB'))  THEN
-  ALLOCATE(PTSEED                  (KLU,KPATCH              )) 
-  ALLOCATE(PTREAP                  (KLU,KPATCH              )) 
-  ALLOCATE(PWATSUP                 (KLU,KPATCH              )) 
-  ALLOCATE(PIRRIG                  (KLU,KPATCH              ))
+IF (LAGRIP .AND. (IO%CPHOTO == 'LAI' .OR. IO%CPHOTO == 'LST' .OR. IO%CPHOTO == 'NIT' .OR. IO%CPHOTO == 'NCB'))  THEN
+  ALLOCATE(IM%I%TSEED                  (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%I%TREAP                  (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%I%XWATSUP                 (KLU,IO%NPATCH              )) 
+  ALLOCATE(IM%I%XIRRIG                  (KLU,IO%NPATCH              ))
 ELSE
-  ALLOCATE(PTSEED     (0,0))
-  ALLOCATE(PTREAP     (0,0))
-  ALLOCATE(PWATSUP    (0,0))
-  ALLOCATE(PIRRIG     (0,0))        
+  ALLOCATE(IM%I%TSEED     (0,0))
+  ALLOCATE(IM%I%TREAP     (0,0))
+  ALLOCATE(IM%I%XWATSUP    (0,0))
+  ALLOCATE(IM%I%XIRRIG     (0,0))        
 ENDIF
 !
 ! - ISBA-DF scheme
 !
-IF(HISBA=='DIF')THEN
-  ALLOCATE(PROOTFRAC  (KLU,KGROUND_LAYER,KPATCH))
-  ALLOCATE(KWG_LAYER  (KLU,KPATCH))
-  ALLOCATE(PDROOT     (KLU,KPATCH))
-  ALLOCATE(PDG2       (KLU,KPATCH))
+IF(IO%CISBA=='DIF')THEN
+  ALLOCATE(IM%X%XROOTFRAC  (KLU,IO%NGROUND_LAYER,IO%NPATCH))
+  ALLOCATE(IM%X%NWG_LAYER  (KLU,IO%NPATCH))
+  ALLOCATE(IM%X%XDROOT     (KLU,IO%NPATCH))
+  ALLOCATE(IM%X%XDG2       (KLU,IO%NPATCH))
 ELSE  
-  ALLOCATE(PROOTFRAC  (0,0,0))
-  ALLOCATE(KWG_LAYER  (0,0)  )
-  ALLOCATE(PDROOT     (0,0)  )        
-  ALLOCATE(PDG2       (0,0)  )        
+  ALLOCATE(IM%X%XROOTFRAC  (0,0,0))
+  ALLOCATE(IM%X%NWG_LAYER  (0,0)  )
+  ALLOCATE(IM%X%XDROOT     (0,0)  )        
+  ALLOCATE(IM%X%XDG2       (0,0)  )        
 ENDIF
 !
-ALLOCATE(PGNDLITTER (KLU,KPATCH))
-ALLOCATE(PRGLGV     (KLU,KPATCH))
-ALLOCATE(PGAMMAGV   (KLU,KPATCH))
-ALLOCATE(PRSMINGV   (KLU,KPATCH))
-ALLOCATE(PROOTFRACGV(KLU,KGROUND_LAYER,KPATCH))
-ALLOCATE(PWRMAX_CFGV(KLU,KPATCH))
-ALLOCATE(PLAIGV     (KLU,KPATCH))
-ALLOCATE(PZ0LITTER  (KLU,KPATCH))
-ALLOCATE(PH_VEG     (KLU,KPATCH))
+ALLOCATE(IM%M%XGNDLITTER (KLU,IO%NPATCH))
+ALLOCATE(IM%M%XRGLGV     (KLU,IO%NPATCH))
+ALLOCATE(IM%M%XGAMMAGV   (KLU,IO%NPATCH))
+ALLOCATE(IM%M%XRSMINGV   (KLU,IO%NPATCH))
+ALLOCATE(IM%M%XROOTFRACGV(KLU,IO%NGROUND_LAYER,IO%NPATCH))
+ALLOCATE(IM%M%XWRMAX_CFGV(KLU,IO%NPATCH))
+ALLOCATE(IM%M%XLAIGV     (KLU,IO%NPATCH))
+ALLOCATE(IM%M%XZ0LITTER  (KLU,IO%NPATCH))
+ALLOCATE(IM%M%XH_VEG     (KLU,IO%NPATCH))
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_PHYSIO',1,ZHOOK_HANDLE)
 !

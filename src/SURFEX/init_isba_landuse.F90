@@ -1,6 +1,6 @@
 !#############################################################
-SUBROUTINE INIT_ISBA_LANDUSE (DTCO, IG, I, UG, U, &
-                               HPROGRAM)  
+SUBROUTINE INIT_ISBA_LANDUSE (DTCO, UG, U, IO, IR, PMESH_SIZE, PDG, PDG_OLD, PLAI, &
+                              PPATCH, PPATCH_OLD, HPROGRAM)  
 !#############################################################
 !
 !!****  *INIT_ISBA_LANDUSE* - routine to initialize land use for ISBA field
@@ -45,10 +45,10 @@ SUBROUTINE INIT_ISBA_LANDUSE (DTCO, IG, I, UG, U, &
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_SURF_PAR,ONLY : XUNDEF                 
@@ -67,10 +67,17 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+!
+REAL, DIMENSION(:), INTENT(IN) :: PMESH_SIZE
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PDG
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PDG_OLD
+REAL, DIMENSION(:,:), INTENT(IN) :: PLAI
+REAL, DIMENSION(:,:), INTENT(IN) :: PPATCH
+REAL, DIMENSION(:,:), INTENT(IN) :: PPATCH_OLD
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 !
@@ -78,11 +85,11 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZZDG     ! Actual layer thicknesses
-REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZZDG_OLD ! Old layer thicknesses
-REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZWG_OLD  ! Old XWG
-REAL, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,2),SIZE(I%M%X%XDG,3)) :: ZWGI_OLD ! Old XWGI
-REAL, DIMENSION(SIZE(I%M%X%XDG,1),1,SIZE(I%M%X%XDG,3)) :: ZTEST
+REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3)) :: ZZDG     ! Actual layer thicknesses
+REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3)) :: ZZDG_OLD ! Old layer thicknesses
+REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3)) :: ZWG_OLD  ! Old XWG
+REAL, DIMENSION(SIZE(PDG,1),SIZE(PDG,2),SIZE(PDG,3)) :: ZWGI_OLD ! Old XWGI
+REAL, DIMENSION(SIZE(PDG,1),1,SIZE(PDG,3)) :: ZTEST
 !
 INTEGER :: ILUOUT
 INTEGER :: JLAYER, JNBIOMASS, JNLITTER, JNLITTLEVS, JNSOILCARB
@@ -95,7 +102,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_ISBA_LANDUSE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-IF(ALL(I%M%X%XDG(:,I%O%NGROUND_LAYER,:)==I%M%X%XDG_OLD(:,I%O%NGROUND_LAYER,:)))THEN
+IF(ALL(PDG(:,IO%NGROUND_LAYER,:)==PDG_OLD(:,IO%NGROUND_LAYER,:)))THEN
   IF (LHOOK) CALL DR_HOOK('INIT_ISBA_LANDUSE',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
@@ -104,54 +111,54 @@ ENDIF
 ! Conserve mass in the cell
 !-------------------------------------------------------------------------------
 !
- CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WR      ', I%R%XWR     (:,:),0)
+ CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'WR      ', IR%XWR     (:,:),0)
 
-IF (I%O%LGLACIER) CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ICE_STO ', I%R%XICE_STO(:,:),0)
+IF (IO%LGLACIER) CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'ICE_STO ', IR%XICE_STO(:,:),0)
 !
-DO JLAYER=1,SIZE(I%R%XTG,2)
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TEMP GRO', I%R%XTG(:,JLAYER,:),0)
+DO JLAYER=1,SIZE(IR%XTG,2)
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'TEMP GRO', IR%XTG(:,JLAYER,:),0)
 END DO
 !
 !
- CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ALBSNOW ', I%R%TSNOW%ALB(:,:),0)
+ CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'ALBSNOW ', IR%TSNOW%ALB(:,:),0)
 !
-IF (I%R%TSNOW%SCHEME=='1-L'  .OR. I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'EMISSNOW', I%R%TSNOW%EMIS(:,:),0)    
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TSSNOW  ', I%R%TSNOW%TS  (:,:),0)
+IF (IR%TSNOW%SCHEME=='1-L'  .OR. IR%TSNOW%SCHEME=='3-L' .OR. IR%TSNOW%SCHEME=='CRO') THEN
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'EMISSNOW', IR%TSNOW%EMIS(:,:),0)    
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'TSSNOW  ', IR%TSNOW%TS  (:,:),0)
 ENDIF
 !
-DO JLAYER=1,I%R%TSNOW%NLAYER
+DO JLAYER=1,IR%TSNOW%NLAYER
    !
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WSNOW   ', I%R%TSNOW%WSNOW(:,JLAYER,:),0)
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'WSNOW   ', IR%TSNOW%WSNOW(:,JLAYER,:),0)
    !
-   IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN            
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TEMPSNOW', I%R%TSNOW%TEMP(:,JLAYER,:),0)
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'HEATSNOW', I%R%TSNOW%HEAT(:,JLAYER,:),0)     
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'AGESNOW ', I%R%TSNOW%AGE (:,JLAYER,:),0)
+   IF (IR%TSNOW%SCHEME=='3-L' .OR. IR%TSNOW%SCHEME=='CRO') THEN            
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'TEMPSNOW', IR%TSNOW%TEMP(:,JLAYER,:),0)
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'HEATSNOW', IR%TSNOW%HEAT(:,JLAYER,:),0)     
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'AGESNOW ', IR%TSNOW%AGE (:,JLAYER,:),0)
    ENDIF
    !
-   IF (I%R%TSNOW%SCHEME=='1-L') THEN
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'TSNOW   ', I%R%TSNOW%T(:,JLAYER,:),0)
+   IF (IR%TSNOW%SCHEME=='1-L') THEN
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'TSNOW   ', IR%TSNOW%T(:,JLAYER,:),0)
    ENDIF
    !
-   IF(I%R%TSNOW%SCHEME=='CRO') THEN
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'GRANSNOW', I%R%TSNOW%GRAN1(:,JLAYER,:),0)
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'GRANSNOW', I%R%TSNOW%GRAN2(:,JLAYER,:),0)
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'HISTSNOW', I%R%TSNOW%HIST (:,JLAYER,:),0)
+   IF(IR%TSNOW%SCHEME=='CRO') THEN
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'GRANSNOW', IR%TSNOW%GRAN1(:,JLAYER,:),0)
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'GRANSNOW', IR%TSNOW%GRAN2(:,JLAYER,:),0)
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'HISTSNOW', IR%TSNOW%HIST (:,JLAYER,:),0)
    ENDIF
    !
 ENDDO
@@ -160,84 +167,84 @@ ENDDO
 ! Conserve mass globaly because soil depth change
 !-------------------------------------------------------------------------------
 !
-ZWG_OLD(:,:,:) =I%R%XWG (:,:,:)
-ZWGI_OLD(:,:,:)=I%R%XWGI(:,:,:)
+ZWG_OLD(:,:,:) =IR%XWG (:,:,:)
+ZWGI_OLD(:,:,:)=IR%XWGI(:,:,:)
 !
-DO JLAYER=1,I%O%NGROUND_LAYER
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WG      ', I%R%XWG (:,JLAYER,:),0)
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'WGI     ', I%R%XWGI(:,JLAYER,:),0)
+DO JLAYER=1,IO%NGROUND_LAYER
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'WG      ', IR%XWG (:,JLAYER,:),0)
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'WGI     ', IR%XWGI(:,JLAYER,:),0)
 ENDDO
 !
-ZZDG    (:,1,:)=I%M%X%XDG    (:,1,:)
-ZZDG_OLD(:,1,:)=I%M%X%XDG_OLD(:,1,:)
-IF(I%O%CISBA=='DIF')THEN
-  DO JLAYER=2,I%O%NGROUND_LAYER
-     ZZDG    (:,JLAYER,:)=I%M%X%XDG    (:,JLAYER,:)-I%M%X%XDG    (:,JLAYER-1,:)
-     ZZDG_OLD(:,JLAYER,:)=I%M%X%XDG_OLD(:,JLAYER,:)-I%M%X%XDG_OLD(:,JLAYER-1,:)
+ZZDG    (:,1,:)=PDG    (:,1,:)
+ZZDG_OLD(:,1,:)=PDG_OLD(:,1,:)
+IF(IO%CISBA=='DIF')THEN
+  DO JLAYER=2,IO%NGROUND_LAYER
+     ZZDG    (:,JLAYER,:)=PDG    (:,JLAYER,:)-PDG    (:,JLAYER-1,:)
+     ZZDG_OLD(:,JLAYER,:)=PDG_OLD(:,JLAYER,:)-PDG_OLD(:,JLAYER-1,:)
   ENDDO
 ELSE     
-  ZZDG    (:,2,:)=I%M%X%XDG    (:,2,:)
-  ZZDG_OLD(:,2,:)=I%M%X%XDG_OLD(:,2,:)
-  IF(I%O%CISBA=='3-L' )THEN
-    ZZDG    (:,3,:)=I%M%X%XDG    (:,3,:)-I%M%X%XDG    (:,2,:)
-    ZZDG_OLD(:,3,:)=I%M%X%XDG_OLD(:,3,:)-I%M%X%XDG_OLD(:,2,:)
+  ZZDG    (:,2,:)=PDG    (:,2,:)
+  ZZDG_OLD(:,2,:)=PDG_OLD(:,2,:)
+  IF(IO%CISBA=='3-L' )THEN
+    ZZDG    (:,3,:)=PDG    (:,3,:)-PDG    (:,2,:)
+    ZZDG_OLD(:,3,:)=PDG_OLD(:,3,:)-PDG_OLD(:,2,:)
   ENDIF 
 ENDIF
 !
 WHERE(ZZDG(:,:,:)    >1.E+10)ZZDG    (:,:,:)=0.
 WHERE(ZZDG_OLD(:,:,:)>1.E+10)ZZDG_OLD(:,:,:)=0.
 !
- CALL CONSERV_GLOBAL_MASS(DTCO, IG, I, U, &
-                          ILUOUT,ZZDG,ZZDG_OLD,I%R%XWG, ZWG_OLD )
- CALL CONSERV_GLOBAL_MASS(DTCO, IG, I, U, &
-                          ILUOUT,ZZDG,ZZDG_OLD,I%R%XWGI,ZWGI_OLD)
+ CALL CONSERV_GLOBAL_MASS(DTCO, U, PMESH_SIZE, PPATCH, PPATCH_OLD, &
+                          ILUOUT,ZZDG,ZZDG_OLD,IR%XWG, ZWG_OLD )
+ CALL CONSERV_GLOBAL_MASS(DTCO, U, PMESH_SIZE, PPATCH, PPATCH_OLD, &
+                          ILUOUT,ZZDG,ZZDG_OLD,IR%XWGI,ZWGI_OLD)
 !
 !-------------------------------------------------------------------------------
 ! Extrapolation with 3 pts 
 !-------------------------------------------------------------------------------
 !
- CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'RESA    ', I%R%XRESA(:,:),3)
+ CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'RESA    ', IR%XRESA(:,:),3)
 !
-DO JLAYER=1,I%R%TSNOW%NLAYER
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'RHOSNOW ', I%R%TSNOW%RHO  (:,JLAYER,:),3)
+DO JLAYER=1,IR%TSNOW%NLAYER
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'RHOSNOW ', IR%TSNOW%RHO  (:,JLAYER,:),3)
 ENDDO
 !
-IF (I%O%CPHOTO/='NON') THEN
+IF (IO%CPHOTO/='NON') THEN
    !
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'AN      ', I%R%XAN   (:,:),3)
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ANDAY   ', I%R%XANDAY(:,:),3)   
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'ANFM    ', I%R%XANFM (:,:),3)
-   CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'LE      ', I%R%XLE   (:,:),3)
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'AN      ', IR%XAN   (:,:),3)
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'ANDAY   ', IR%XANDAY(:,:),3)   
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'ANFM    ', IR%XANFM (:,:),3)
+   CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'LE      ', IR%XLE   (:,:),3)
    !
-   DO JNBIOMASS=1,I%O%NNBIOMASS
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'RESPBIOM', I%R%XRESP_BIOMASS(:,JNBIOMASS,:),3)
-      CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'BIOMASS ', I%R%XBIOMASS     (:,JNBIOMASS,:),3)
+   DO JNBIOMASS=1,IO%NNBIOMASS
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'RESPBIOM', IR%XRESP_BIOMASS(:,JNBIOMASS,:),3)
+      CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'BIOMASS ', IR%XBIOMASS     (:,JNBIOMASS,:),3)
    ENDDO
    !
-   IF (I%O%CRESPSL=='CNT') THEN
+   IF (IO%CRESPSL=='CNT') THEN
       !
-      DO JNLITTLEVS=1,I%O%NNLITTLEVS
-         CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'LIGNINST',I%R%XLIGNIN_STRUC(:,JNLITTLEVS,:),3)
-         DO JNLITTER=1,I%O%NNLITTER
-            CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'LITTER  ',I%R%XLITTER(:,JNLITTER,JNLITTLEVS,:),3)
+      DO JNLITTLEVS=1,IO%NNLITTLEVS
+         CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'LIGNINST',IR%XLIGNIN_STRUC(:,JNLITTLEVS,:),3)
+         DO JNLITTER=1,IO%NNLITTER
+            CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'LITTER  ',IR%XLITTER(:,JNLITTER,JNLITTLEVS,:),3)
          ENDDO
       ENDDO
       !
-      DO JNSOILCARB=1,I%O%NNSOILCARB
-         CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'SOILCARB',I%R%XSOILCARB(:,JNSOILCARB,:),3)
+      DO JNSOILCARB=1,IO%NNSOILCARB
+         CALL INI_VAR_FROM_PATCH(DTCO, UG, U, PPATCH, PPATCH_OLD, PLAI, &
+                         HPROGRAM,ILUOUT,'SOILCARB',IR%XSOILCARB(:,JNSOILCARB,:),3)
       ENDDO
       !
    ENDIF

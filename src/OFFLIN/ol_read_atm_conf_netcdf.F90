@@ -1,10 +1,9 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF_NETCDF (YSC, &
-                                    HSURF_FILETYPE,                &
-                                     PDURATION, PTSTEP_FORC, KNI, &
-                                     KYEAR, KMONTH, KDAY, PTIME,  &
-                                     PLAT, PLON, PZS,             &
-                                     PZREF, PUREF                 )  
+SUBROUTINE OL_READ_ATM_CONF_NETCDF (DTCO, U, HSURF_FILETYPE,     &
+                                    PDURATION, PTSTEP_FORC, KNI, &
+                                    KYEAR, KMONTH, KDAY, PTIME,  &
+                                    PLAT, PLON, PZS,             &
+                                    PZREF, PUREF                 )  
 !
 !==================================================================
 !!****  *OL_READ_ATM_CONF* - Initialization routine
@@ -40,7 +39,8 @@ SUBROUTINE OL_READ_ATM_CONF_NETCDF (YSC, &
 !==================================================================
 !
 !
-USE MODD_SURFEX_n, ONLY : SURFEX_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -65,7 +65,8 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-TYPE(SURFEX_t), INTENT(INOUT) :: YSC
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
 INTEGER,          INTENT(OUT) :: KNI
@@ -130,13 +131,10 @@ PDURATION = ( INB_FORC - 1 ) * PTSTEP_FORC
 !*      2.    Read full grid dimension and date
 !
  CALL SET_SURFEX_FILEIN(HSURF_FILETYPE,'PREP')
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
-                      HSURF_FILETYPE,'FULL  ','SURF  ','READ ')  
+CALL INIT_IO_SURF_n(DTCO, U, HSURF_FILETYPE,'FULL  ','SURF  ','READ ')  
 !
- CALL READ_SURF(&
-                HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
- CALL READ_SURF(&
-                HSURF_FILETYPE,'DTCUR',TTIME,IRET)
+ CALL READ_SURF(HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
+ CALL READ_SURF(HSURF_FILETYPE,'DTCUR',TTIME,IRET)
 !
 KYEAR  = TTIME%TDATE%YEAR
 KMONTH = TTIME%TDATE%MONTH
@@ -147,8 +145,7 @@ PTIME  = TTIME%TIME
 !
 !*      5.    Geographical initialization
 !
- CALL GET_SIZE_FULL_n(YSC%U, &
-                      'OFFLIN ',IDIM_FULL,KNI) 
+ CALL GET_SIZE_FULL_n('OFFLIN ',IDIM_FULL,U%NSIZE_FULL,KNI) 
 !
 ALLOCATE(PLON(KNI))
 ALLOCATE(PLAT(KNI))
@@ -156,16 +153,11 @@ ALLOCATE(PZS(KNI))
 ALLOCATE(PZREF(KNI))
 ALLOCATE(PUREF(KNI))
 !
- CALL READ_SURF(&
-                'OFFLIN','LAT',PLAT,IRET)
- CALL READ_SURF(&
-                'OFFLIN','LON',PLON,IRET)
- CALL READ_SURF(&
-                'OFFLIN','ZS',PZS,IRET)
- CALL READ_SURF(&
-                'OFFLIN','ZREF',PZREF,IRET)
- CALL READ_SURF(&
-                'OFFLIN','UREF',PUREF,IRET)
+ CALL READ_SURF('OFFLIN','LAT',PLAT,IRET)
+ CALL READ_SURF('OFFLIN','LON',PLON,IRET)
+ CALL READ_SURF('OFFLIN','ZS',PZS,IRET)
+ CALL READ_SURF('OFFLIN','ZREF',PZREF,IRET)
+ CALL READ_SURF('OFFLIN','UREF',PUREF,IRET)
 !
 !*      6.    Check the consistency
 !

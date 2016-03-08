@@ -1,10 +1,9 @@
 !     #########
-SUBROUTINE OL_READ_ATM_CONF (YSC, &
-                             HSURF_FILETYPE, HFORCING_FILETYPE,  &
-                              PDURATION,                          &
-                              PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
-                              KDAY, PTIME, PLAT, PLON,            &
-                              PZS, PZREF, PUREF                   )  
+SUBROUTINE OL_READ_ATM_CONF (DTCO, U, HSURF_FILETYPE,            &
+                             HFORCING_FILETYPE, PDURATION,       &
+                             PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
+                             KDAY, PTIME, PLAT, PLON,            &
+                             PZS, PZREF, PUREF                   )  
 !
 !==================================================================
 !!****  *OL_READ_ATM_CONF* - Initialization routine
@@ -39,7 +38,8 @@ SUBROUTINE OL_READ_ATM_CONF (YSC, &
 !==================================================================
 !
 !
-USE MODD_SURFEX_n, ONLY : SURFEX_t
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_OL_READ_ATM_CONF_NETCDF
 USE MODI_OL_READ_ATM_CONF_ASCII
@@ -51,7 +51,8 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-TYPE(SURFEX_t), INTENT(INOUT) :: YSC
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
  CHARACTER(LEN=6), INTENT(IN)  :: HFORCING_FILETYPE
@@ -71,21 +72,19 @@ CPROGNAME = HSURF_FILETYPE
 !
 IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !
- CALL OL_READ_ATM_CONF_NETCDF(YSC, &
-                              HSURF_FILETYPE,                     &
-                                PDURATION,                          &
-                                PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
-                                KDAY, PTIME, PLAT, PLON,            &
-                                PZS, PZREF, PUREF                   )  
+ CALL OL_READ_ATM_CONF_NETCDF(DTCO, U, HSURF_FILETYPE,          &
+                              PDURATION,                        &
+                              PTSTEP_FORC, KNI, KYEAR,KMONTH,   &
+                              KDAY, PTIME, PLAT, PLON,          &
+                              PZS, PZREF, PUREF                 )  
 !
 ELSE IF (HFORCING_FILETYPE == 'ASCII ' .OR. HFORCING_FILETYPE == 'BINARY') THEN
 !
- CALL OL_READ_ATM_CONF_ASCII(YSC, &
-                              HSURF_FILETYPE,HFORCING_FILETYPE,   &
-                                PDURATION,                          &
-                                PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
-                                KDAY, PTIME, PLAT, PLON,            &
-                                PZS, PZREF, PUREF                   )  
+ CALL OL_READ_ATM_CONF_ASCII(DTCO, U, HSURF_FILETYPE,            &
+                             HFORCING_FILETYPE, PDURATION,       &
+                             PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
+                             KDAY, PTIME, PLAT, PLON,            &
+                             PZS, PZREF, PUREF                   )  
 !                              
 ENDIF
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_CONF',1,ZHOOK_HANDLE)

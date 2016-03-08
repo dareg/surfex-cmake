@@ -1,6 +1,5 @@
 !     #########
-    SUBROUTINE DEEPSOIL_UPDATE (I, &
-                                KMONTH)
+    SUBROUTINE DEEPSOIL_UPDATE (PTDEEP, PGAMMAT, KMONTH)
 !   ###############################################################
 !!****  *DEEPSOIL_UPDATE*
 !!
@@ -39,9 +38,6 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
-!
 USE MODD_DEEPSOIL, ONLY : XTDEEP_CLI, XGAMMAT_CLI
 !
 !
@@ -53,8 +49,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
+REAL, DIMENSION(:), INTENT(INOUT) :: PTDEEP
+REAL, DIMENSION(:), INTENT(INOUT) :: PGAMMAT
 !
 INTEGER,              INTENT(IN)    :: KMONTH   ! current month
 !
@@ -65,11 +61,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',0,ZHOOK_HANDLE)
-DO IP=1,SIZE(I%IP%XTDEEP)
+DO IP=1,SIZE(PTDEEP)
    !
-   I%IP%XTDEEP (IP) = XTDEEP_CLI (KMONTH)
+   PTDEEP (IP) = XTDEEP_CLI (KMONTH)
    !
-   I%IP%XGAMMAT(IP) = 1. / XGAMMAT_CLI(KMONTH)
+   PGAMMAT(IP) = 1. / XGAMMAT_CLI(KMONTH)
    !
 ENDDO
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',1,ZHOOK_HANDLE)

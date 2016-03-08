@@ -97,26 +97,20 @@ USE MODD_OFF_SURFEX_n
 
          CALL GOTO_MODEL(1)
 
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'ASCII ','FULL  ','SURF  ','READ ')          
+         CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'ASCII ','FULL  ','SURF  ','READ ')          
 
-        CALL READ_SURF(&
-                       'ASCII ','DIM_FULL', INI, IRET)
-        CALL READ_SURF(&
-                       'ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
-        CALL READ_SURF(&
-                       'ASCII ','DIM_NATURE', INI_N, IRET)        
+        CALL READ_SURF('ASCII ','DIM_FULL', INI, IRET)
+        CALL READ_SURF('ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
+        CALL READ_SURF('ASCII ','DIM_NATURE', INI_N, IRET)        
            
         CALL END_IO_SURF_n('ASCII ')
 
         NFULL = INI
 
         IF (INI_N.NE.0) THEN
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'ASCII ','NATURE','SURF  ','READ ')                   
+           CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'ASCII ','NATURE','SURF  ','READ ')                   
 
-          CALL READ_SURF(&
-                       'ASCII ','PATCH_NUMBER', IPATCH, IRET)
+          CALL READ_SURF('ASCII ','PATCH_NUMBER', IPATCH, IRET)
 
           CALL END_IO_SURF_n('ASCII ')
         ENDIF
@@ -126,8 +120,7 @@ CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
         !** get domain size and read latitudes and longitudes 
         !*
         !=====================================================================
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'ASCII ','FULL  ','SURF  ','READ ')          
+        CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'ASCII ','FULL  ','SURF  ','READ ')          
 
         OPEN(UNIT=45,FILE='SXPOST.nam',FORM='FORMATTED')
         READ(45,*)IFIELD
@@ -213,15 +206,13 @@ CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
          IC=IC+1
          
          IF (LINITP) CFILEIN = 'PREP.txt'
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'ASCII ',CMASK_SAVE,'SURF  ','READ ')           
+         CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'ASCII ',CMASK_SAVE,'SURF  ','READ ')           
          CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
          IF (.NOT.GFOUND .AND. LINITP)THEN
            ! Search now in PGD file
            CALL END_IO_SURF_n('ASCII ')
            CFILEIN = 'PGD.txt'
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'ASCII ',CMASK_SAVE,'SURF  ','READ ')            
+           CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'ASCII ',CMASK_SAVE,'SURF  ','READ ')            
            CALL POSNAM(NUNIT,CMASK//' '//HREC,GFOUND,NLUOUT)
          ENDIF
          IF (.NOT.GFOUND) CALL ERR_STOP(HREC,CFILEIN,NLUOUT)

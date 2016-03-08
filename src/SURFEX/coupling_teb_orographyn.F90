@@ -1,14 +1,13 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_TEB_OROGRAPHY_n (DTCO, DST, SLT, TM, GDM, GRM,  &
-                                     HPROGRAM, HCOUPLING,                                   &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 HTEST                                                                       )  
+SUBROUTINE COUPLING_TEB_OROGRAPHY_n (DTCO, DST, SLT, TM, GDM, GRM, HPROGRAM, HCOUPLING,      &
+                                     PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,&
+                                     PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA,    &
+                                     PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW,      &
+                                     PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS,      &
+                                     PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,   &
+                                     PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF,    &
+                                     PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,     &
+                                     HTEST               )  
 !     ###############################################################################
 !
 !!****  *COUPLING_TEB_OROGRAPHY_n * - Modifies the input forcing if not
@@ -173,8 +172,8 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,TM%TOP%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
-                           ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
+   CALL FORCING_VERT_SHIFT(PZS, TM%TOP%XZS, PTA, PQA, PPA, PRHOA, PLW, PRAIN, PSNOW, &
+                           ZTA, ZQA, ZPA, ZRHOA, ZLW, ZRAIN, ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
 !
@@ -196,18 +195,15 @@ ELSE
 !
 ENDIF
 !
- CALL COUPLING_TEB_n(DTCO, DST, SLT, TM, GDM, GRM, &
-                     HPROGRAM, HCOUPLING,                                                   &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
-                 KI, KSV, KSW,                                                               &
-                 PTSUN, PZENITH, PAZIM,                                                      &
-                 PZREF, PUREF, TM%TOP%XZS, PU, PV, ZQA, ZTA, ZRHOA,PSV, PCO2, HSV,           &
-                 ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, PSW_BANDS, ZPS, ZPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+ CALL COUPLING_TEB_n(DTCO, DST, SLT, TM%TOP, TM%TCP, TM%TG, TM%CHT, TM%T, TM%TPN, TM%BOP,   &
+                     TM%B, TM%TD, GDM, GRM,HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY,&
+                     PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM, PZREF, PUREF, TM%TOP%XZS,  &
+                     PU, PV, ZQA, ZTA, ZRHOA,PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW, PDIR_SW,    &
+                     PSCA_SW, PSW_BANDS, ZPS, ZPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, &
+                     PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,           &
+                     PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF,       &
+                     ZPEQ_B_COEF, 'OK'         )
+!
 IF (LHOOK) CALL DR_HOOK('COUPLING_TEB_OROGRAPHY_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

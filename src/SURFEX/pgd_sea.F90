@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_SEA (DTCO, DTS, SG, S, UG, U, USS, &
-                          HPROGRAM)
+      SUBROUTINE PGD_SEA (DTCO, DTS, SG, S, UG, U, USS, HPROGRAM)
 !     #############################################################
 !
 !!****  *PGD_SEA* - routine to choose initialization of sea scheme
@@ -42,7 +41,7 @@ USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODI_PGD_SEAFLUX
 !
@@ -63,7 +62,7 @@ TYPE(GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),                INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -85,8 +84,7 @@ ELSE IF (U%CSEA=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('PGD_SEA',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (U%CSEA=='SEAFLX') THEN
-  CALL PGD_SEAFLUX(DTCO, DTS, SG, S, UG, U, USS, &
-                   HPROGRAM)
+  CALL PGD_SEAFLUX(DTCO, DTS, SG, S, UG, U, USS, HPROGRAM)
 END IF
 IF (LHOOK) CALL DR_HOOK('PGD_SEA',1,ZHOOK_HANDLE)
 !

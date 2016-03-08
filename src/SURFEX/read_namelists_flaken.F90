@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_FLAKE_n (FM, &
-                                   HPROGRAM, HINIT)
+SUBROUTINE READ_NAMELISTS_FLAKE_n (FM, HPROGRAM, HINIT)
 !     #######################################################
 !
 !---------------------------    
@@ -43,11 +42,9 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_FLAKE_N',0,ZHOOK_HANDLE)
                          LWATER_PROFILE,LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP,  &
                          XZWAT_PROFILE             )  
 !
- CALL READ_DEFAULT_FLAKE_n(FM%CHF, FM%DGF, FM%DGMF, FM%F, &
-                           HPROGRAM)
+ CALL READ_DEFAULT_FLAKE_n(FM%CHF, FM%DFO, FM%DGMF, FM%F, HPROGRAM)
 !
- CALL READ_FLAKE_CONF_n(FM%CHF, FM%DGF, FM%DGMF, FM%F, &
-                        HPROGRAM)
+ CALL READ_FLAKE_CONF_n(FM%CHF, FM%DFO, FM%DGMF, FM%F, HPROGRAM)
 !
 !----------------------------------------------------------------------------
 !

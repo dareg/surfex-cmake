@@ -1,6 +1,5 @@
 !     ################################################################
-      SUBROUTINE FIX_MEB_VEG (DTI, IG, OMEB_PATCH, &
-                              KPATCH)
+      SUBROUTINE FIX_MEB_VEG (DTI, KDIM, OMEB_PATCH, KPATCH)
 !     ################################################################
 !
 !!    PURPOSE
@@ -52,7 +51,6 @@
 !
 !
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_GRID_n, ONLY : GRID_t
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
@@ -71,7 +69,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(GRID_t), INTENT(INOUT) :: IG
+INTEGER, INTENT(IN) :: KDIM
 LOGICAL, DIMENSION(:), INTENT(IN) :: OMEB_PATCH
 !
 INTEGER, INTENT(IN) :: KPATCH
@@ -81,7 +79,7 @@ INTEGER, INTENT(IN) :: KPATCH
 !
 INTEGER :: IPATCH
 !
-REAL, DIMENSION(IG%NDIM,DTI%NTIME)                          :: ZWORKPAR
+REAL, DIMENSION(KDIM,DTI%NTIME)                          :: ZWORKPAR
 REAL, DIMENSION(SIZE(XDATA_VEG,1),SIZE(XDATA_VEG,2)) :: ZWORKDATA
 !
 INTEGER :: JVEGTYPE! loop on vegtype

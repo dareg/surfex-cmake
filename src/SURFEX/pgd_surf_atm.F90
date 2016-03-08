@@ -94,6 +94,7 @@ LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed b
 !
 LOGICAL :: LRM_RIVER   !delete inland river coverage. Default is false
 !
+INTEGER :: ISIZE_FULL
 INTEGER :: ILUOUT ! logical unit of output listing file
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -133,19 +134,19 @@ ENDIF
 !*    2.      Grid
 !             ----
 !
-CALL GET_SIZE_FULL_n(YSC%U,HPROGRAM,YSC%U%NDIM_FULL,YSC%U%NSIZE_FULL)
+CALL GET_SIZE_FULL_n(HPROGRAM,YSC%U%NDIM_FULL,YSC%U%NSIZE_FULL,ISIZE_FULL)
+YSC%U%NSIZE_FULL=ISIZE_FULL
 !
-ALLOCATE(YSC%UG%G%XLAT(YSC%U%NSIZE_FULL))
-ALLOCATE(YSC%UG%G%XLON(YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XLAT      (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XLON      (YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%UG%G%XMESH_SIZE(YSC%U%NSIZE_FULL))
-ALLOCATE(YSC%UG%XJPDIR(YSC%U%NSIZE_FULL))
- CALL LATLON_GRID(YSC%UG%G%CGRID,YSC%UG%G%NGRID_PAR,YSC%U%NSIZE_FULL,ILUOUT,&
-                  YSC%UG%G%XGRID_PAR,YSC%UG%G%XLAT,YSC%UG%G%XLON,YSC%UG%G%XMESH_SIZE,YSC%UG%XJPDIR)
+ALLOCATE(YSC%UG%XJPDIR      (YSC%U%NSIZE_FULL))
+ CALL LATLON_GRID(YSC%UG%G, YSC%U%NSIZE_FULL, YSC%UG%XJPDIR)
 !
 !
 !*    2.3     Stores the grid in the module MODD_PGD_GRID
 !
- CALL PUT_PGD_GRID(YSC%UG%G%CGRID,YSC%U%NSIZE_FULL,YSC%UG%G%NGRID_PAR,YSC%UG%G%XGRID_PAR)
+ CALL PUT_PGD_GRID(YSC%UG%G%CGRID, YSC%U%NSIZE_FULL,YSC%UG%G%NGRID_PAR, YSC%UG%G%XGRID_PAR)
 !
 IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
   ALLOCATE(YSC%UG%XGRID_FULL_PAR(SIZE(YSC%UG%G%XGRID_PAR)))
@@ -154,24 +155,23 @@ IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
 ENDIF
 !
 !*    2.4     mask to limit the number of input data to read
- CALL LATLONMASK      (YSC%UG%G%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%UG%XGRID_FULL_PAR,LLATLONMASK)
+ CALL LATLONMASK      (YSC%UG%G%CGRID, YSC%UG%NGRID_FULL_PAR, YSC%UG%XGRID_FULL_PAR, LLATLONMASK)
 !
 !-------------------------------------------------------------------------------
 !
 !*    3.      surface cover
 !             -------------
 !
- CALL PGD_FRAC(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
-               HPROGRAM,YSC%U%LECOCLIMAP)
-IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
-                                 HPROGRAM,LRM_RIVER)
+ CALL PGD_FRAC(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM)
+!
+IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM,LRM_RIVER)
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Orography
 !             ---------
 !
- CALL PGD_OROGRAPHY(YSC%DGU, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
+ CALL PGD_OROGRAPHY(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
                     HPROGRAM,YSC%U%XSEA,YSC%U%XWATER,HFILE,HFILETYPE,OZS)
 !
 !_______________________________________________________________________________
@@ -179,39 +179,35 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DGU, YSC%DTCO, YSC%UG, YSC%U, YSC%USS, 
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%IM%DTI, YSC%DTZ, YSC%DGU, YSC%IM%IG, &
-                                         YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
-                                         HPROGRAM,YSC%U%LECOCLIMAP)  
+IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%IM%DTI, YSC%DTZ, YSC%IM%IG, YSC%IM%ISS, &
+                                         YSC%IM%I, YSC%UG, YSC%U, YSC%USS, HPROGRAM)  
 !_______________________________________________________________________________
 !
 !*    6.      Additionnal fields for town scheme
 !             ----------------------------------
 !
 IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%USS, &
-                                     YSC%IM%DTI, YSC%TM, YSC%GDM, YSC%GRM, &
-                                 HPROGRAM,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
+                                     YSC%IM%DTI, YSC%TM, YSC%GDM, YSC%GRM, HPROGRAM)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
 !             ------------------------------------------
 !
 IF (YSC%U%NDIM_WATER>0) CALL PGD_INLAND_WATER(YSC%DTCO, YSC%FM%FG, YSC%FM%F, YSC%UG, YSC%U, &
-                                           YSC%USS, YSC%WM%WG, YSC%WM%W, &
-                                          HPROGRAM,YSC%U%LECOCLIMAP,LRM_RIVER)   
+                                         YSC%USS, YSC%WM%WG, YSC%WM%W, HPROGRAM,LRM_RIVER)   
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme
 !             ---------------------------------
 !
-IF (YSC%U%NDIM_SEA>0) CALL PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%SG, YSC%SM%S, YSC%UG, YSC%U, YSC%USS, &
-                               HPROGRAM)  
+IF (YSC%U%NDIM_SEA>0) CALL PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%SG, YSC%SM%S, &
+                              YSC%UG, YSC%U, YSC%USS, HPROGRAM)  
 !_______________________________________________________________________________
 !
 !*    9.      Dummy fields
 !             ------------
 !
- CALL PGD_DUMMY(YSC%DTCO, YSC%DUU, YSC%UG, YSC%U, YSC%USS, &
-                HPROGRAM)
+ CALL PGD_DUMMY(YSC%DTCO, YSC%DUU, YSC%UG, YSC%U, YSC%USS, HPROGRAM)
 !_______________________________________________________________________________
 !
 !*   10.      Chemical Emission fields
@@ -231,6 +227,7 @@ ENDIF
 !            ---------------------------
 !
 IF (NRANK==NPIO) CALL WRITE_COVER_TEX_END(HPROGRAM)
+!
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',1,ZHOOK_HANDLE)
 !_______________________________________________________________________________
 !

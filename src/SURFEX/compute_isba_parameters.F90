@@ -1,11 +1,10 @@
 !#############################################################
-SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, UG, U, IM, DST, SLT, SV, &
-                                    HPROGRAM,HINIT,OLAND_USE,            &
-                             KI,KSV,KSW,                                &
-                             HSV,PCO2,PRHOA,                            &
-                             PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                             PEMIS,PTSRAD,PTSURF,                       &
-                             HTEST                                      )  
+SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, OREAD_BUDGETC, UG, U, AG, CHI, DTI,  &
+                                    DGI, GB, ICP, ISS, IG, I, DST, SLT, SV,    &
+                                    HPROGRAM,HINIT,OLAND_USE,                  &
+                                    KI,KSV,KSW,HSV,PCO2,PRHOA,                 &
+                                    PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
+                                    PEMIS,PTSRAD,PTSURF, HTEST             )  
 !#############################################################
 !
 !!****  *COMPUTE_ISBA_PARAMETERS_n* - routine to initialize ISBA
@@ -59,10 +58,19 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, UG, U, IM, DST, SLT, SV, &
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+USE MODD_SURFEX_n, ONLY : ISBA_DIAG_t
+!
+USE MODD_AGRI_n, ONLY : AGRI_t
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
+USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_CANOPY_n, ONLY : CANOPY_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DST_n, ONLY : DST_t
@@ -112,6 +120,12 @@ USE MODI_READ_ISBA_n
 USE MODI_INIT_ISBA_LANDUSE
 USE MODI_READ_ISBA_CANOPY_n
 USE MODI_INIT_VEG_n
+USE MODI_INIT_CHEMICAL_n
+USE MODI_OPEN_NAMELIST
+USE MODI_CH_INIT_DEP_ISBA_n
+USE MODI_CLOSE_NAMELIST
+USE MODI_INIT_DST
+USE MODI_INIT_SLT
 USE MODI_AVERAGED_ALBEDO_EMIS_ISBA
 USE MODI_DIAG_ISBA_INIT_n
 USE MODI_INIT_SURF_TOPD
@@ -131,10 +145,18 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+TYPE(AGRI_t), INTENT(INOUT) :: AG
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_DIAG_t), INTENT(INOUT) :: DGI
+TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
+TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(SSO_t), INTENT(INOUT) :: ISS 
+TYPE(GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -169,12 +191,13 @@ REAL, DIMENSION(U%NDIM_FULL)   :: ZF_PARAM, ZC_DEPTH_RATIO
 REAL, DIMENSION(KI)     :: ZTSRAD_NAT !radiative temperature
 REAL, DIMENSION(KI)     :: ZTSURF_NAT !effective temperature
 !
-REAL, DIMENSION(KI,IM%I%O%NPATCH)  :: ZWG1 ! work array for surface water content
-REAL, DIMENSION(KI,IM%I%O%NPATCH)  :: ZTG1 ! work array for surface temperature
+REAL, DIMENSION(KI,I%O%NPATCH)  :: ZWG1 ! work array for surface water content
+REAL, DIMENSION(KI,I%O%NPATCH)  :: ZTG1 ! work array for surface temperature
 !
 REAL, DIMENSION(KI)         :: ZM, ZWORK
-REAL, DIMENSION(KI,IM%I%O%NPATCH)  :: ZF, ZPERTBUF
+REAL, DIMENSION(KI,I%O%NPATCH)  :: ZF, ZPERTBUF
 !
+INTEGER :: ICH     ! unit of input chemistry file
 INTEGER :: IDIM_FULL, JL
 INTEGER           :: JILU     ! loop increment
 INTEGER           :: ILUOUT   ! unit of output listing file
@@ -206,98 +229,80 @@ ZWORK(:)   = XUNDEF
 !*       2.3    Physiographic data fields from land cover:
 !               -----------------------------------------
 !
- CALL ALLOCATE_PHYSIO(IM%I, &
-                      IM%I%O%CPHOTO, IM%I%O%CISBA, KI, NVEGTYPE, IM%I%O%NGROUND_LAYER, IM%I%O%NPATCH, &
-                     IM%I%M%X%XVEGTYPE, IM%I%M%T%XLAI, IM%I%M%T%XVEG, IM%I%M%T%XZ0, IM%I%M%T%XEMIS, &
-                     IM%I%M%X%XDG, IM%I%M%X%XD_ICE,      &
-                     IM%I%M%T%XRSMIN, IM%I%M%T%XGAMMA, IM%I%M%T%XWRMAX_CF, IM%I%M%T%XRGL, IM%I%M%T%XCV,               &
-                     IM%I%M%X%XZ0_O_Z0H, IM%I%M%T%XALBNIR_VEG, IM%I%M%T%XALBVIS_VEG, IM%I%M%T%XALBUV_VEG,    &
-                     IM%I%M%X%XH_TREE, IM%I%M%X%XRE25, IM%I%M%T%XLAIMIN, IM%I%M%T%XBSLAI, IM%I%M%T%XSEFOLD,           &
-                     IM%I%M%T%XGMES, IM%I%M%T%XGC, IM%I%M%T%XF2I, IM%I%M%X%XDMAX, IM%I%M%T%LSTRESS,                   &
-                     IM%I%M%T%XCE_NITRO, IM%I%M%T%XCF_NITRO, IM%I%M%T%XCNA_NITRO,                   &
-                     IM%I%M%I%TSEED, IM%I%M%I%TREAP, IM%I%M%I%XWATSUP, IM%I%M%I%XIRRIG,                      &
-                     IM%I%M%X%XROOTFRAC, IM%I%M%X%NWG_LAYER, IM%I%M%X%XDROOT, IM%I%M%X%XDG2,                 &
-                     IM%I%M%M%XGNDLITTER,IM%I%M%M%XRGLGV,IM%I%M%M%XGAMMAGV,IM%I%M%M%XRSMINGV,    &
-                     IM%I%M%M%XROOTFRACGV,IM%I%M%M%XWRMAX_CFGV,IM%I%M%M%XLAIGV,IM%I%M%M%XZ0LITTER,IM%I%M%M%XH_VEG     )
+ CALL ALLOCATE_PHYSIO(I%O, I%M, KI, NVEGTYPE  )
 !
-IF (IM%I%I%TTIME%TDATE%MONTH /= NUNDEF) THEN
-  IDECADE = 3 * ( IM%I%I%TTIME%TDATE%MONTH - 1 ) + MIN(IM%I%I%TTIME%TDATE%DAY-1,29) / 10 + 1
+IF (I%I%TTIME%TDATE%MONTH /= NUNDEF) THEN
+  IDECADE = 3 * ( I%I%TTIME%TDATE%MONTH - 1 ) + MIN(I%I%TTIME%TDATE%DAY-1,29) / 10 + 1
 ELSE
   IDECADE = 1
 END IF
 !
 IDECADE2 = IDECADE
 !
- CALL INIT_ISBA_MIXPAR(DTCO, IM%DTI, IM%IG, IM%I%O, &
-                       IM%I%O%CISBA,IDECADE,IDECADE2,IM%I%P%XCOVER,IM%I%P%LCOVER,IM%I%O%CPHOTO,'NAT')
+ CALL INIT_ISBA_MIXPAR(DTCO, DTI, IG%NDIM, I%O, IDECADE,IDECADE2,I%P%XCOVER,I%P%LCOVER,'NAT')
 !
-ISIZE_LMEB_PATCH=COUNT(IM%I%O%LMEB_PATCH(:))
+ISIZE_LMEB_PATCH=COUNT(I%O%LMEB_PATCH(:))
 IF (ISIZE_LMEB_PATCH>0)  THEN
-  CALL FIX_MEB_VEG(IM%DTI, IM%IG, IM%I%O%LMEB_PATCH, &
-                   IM%I%O%NPATCH)
+  CALL FIX_MEB_VEG(DTI, IG%NDIM, I%O%LMEB_PATCH, I%O%NPATCH)
 ENDIF
 !
- CALL CONVERT_PATCH_ISBA(DTCO, IM%DTI, IM%I%O, &
-                         IM%I%O%CISBA,IDECADE,IDECADE2,IM%I%P%XCOVER,IM%I%P%LCOVER,IM%I%O%CPHOTO,LAGRIP,   &
-                        IM%I%O%LPERM,IM%I%O%LTR_ML,'NAT',PVEG=IM%I%M%T%XVEG,PLAI=IM%I%M%T%XLAI,                &
-                        PRSMIN=IM%I%M%T%XRSMIN,PGAMMA=IM%I%M%T%XGAMMA,PWRMAX_CF=IM%I%M%T%XWRMAX_CF,       &
-                        PRGL=IM%I%M%T%XRGL,PCV=IM%I%M%T%XCV,PSOILGRID=IM%I%O%XSOILGRID,                 &
-                        PDG=IM%I%M%X%XDG,KWG_LAYER=IM%I%M%X%NWG_LAYER,PDROOT=IM%I%M%X%XDROOT,PDG2=IM%I%M%X%XDG2,   &
-                        PZ0=IM%I%M%T%XZ0,PZ0_O_Z0H=IM%I%M%X%XZ0_O_Z0H,                           &
-                        PALBNIR_VEG=IM%I%M%T%XALBNIR_VEG,PALBVIS_VEG=IM%I%M%T%XALBVIS_VEG,       &
-                        PALBUV_VEG=IM%I%M%T%XALBUV_VEG,PEMIS_ECO=IM%I%M%T%XEMIS,                 &
-                        PVEGTYPE=IM%I%M%X%XVEGTYPE,PROOTFRAC=IM%I%M%X%XROOTFRAC,                 &
-                        PGMES=IM%I%M%T%XGMES,PBSLAI=IM%I%M%T%XBSLAI,PLAIMIN=IM%I%M%T%XLAIMIN,             &
-                        PSEFOLD=IM%I%M%T%XSEFOLD,PGC=IM%I%M%T%XGC, PPERM=IM%I%P%XPERM,               &
-                        PDMAX=IM%I%M%X%XDMAX,PF2I=IM%I%M%T%XF2I,OSTRESS=IM%I%M%T%LSTRESS,PH_TREE=IM%I%M%X%XH_TREE, &
-                        PRE25=IM%I%M%X%XRE25,PCE_NITRO=IM%I%M%T%XCE_NITRO,PCF_NITRO=IM%I%M%T%XCF_NITRO,   &
-                        PCNA_NITRO=IM%I%M%T%XCNA_NITRO,PD_ICE=IM%I%M%X%XD_ICE,TPSEED=IM%I%M%I%TSEED,      &
-                        TPREAP=IM%I%M%I%TREAP,PWATSUP=IM%I%M%I%XWATSUP,PIRRIG=IM%I%M%I%XIRRIG,            &
-                        PGNDLITTER=IM%I%M%M%XGNDLITTER,                                           &
-                        PRGLGV=IM%I%M%M%XRGLGV,   &
-                        PGAMMAGV=IM%I%M%M%XGAMMAGV,PRSMINGV=IM%I%M%M%XRSMINGV,                   &
-                        PROOTFRACGV=IM%I%M%M%XROOTFRACGV,PWRMAX_CFGV=IM%I%M%M%XWRMAX_CFGV,       &
-                        PLAIGV=IM%I%M%M%XLAIGV,PZ0LITTER=IM%I%M%M%XZ0LITTER,PH_VEG=IM%I%M%M%XH_VEG        )
+ CALL CONVERT_PATCH_ISBA(DTCO, DTI, I%O, IDECADE, IDECADE2, I%P%XCOVER, I%P%LCOVER, &
+                        LAGRIP, 'NAT', .FALSE., IMX=I%M%X, IMT=I%M%T, IMM=I%M%M, IMI=I%M%I, &
+                        PSOILGRID=I%O%XSOILGRID, PPERM=I%P%XPERM  )
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_VEG_PGD_n(IM%CHI, DTCO, DST, SLT, U, &
-                    IM%I%O%LAGRI_TO_GRASS, IM%I%P%LCOVER, IM%I%P%XCOVER, & 
-                    HPROGRAM, 'NATURE', ILUOUT, KI, IM%I%O%NPATCH, IM%I%O%NGROUND_LAYER,      &
-                    IM%I%I%TTIME%TDATE%MONTH,                                          &
-                    IM%I%M%X%XVEGTYPE, IM%I%IP%XPATCH, IM%I%IP%XVEGTYPE_PATCH, IM%I%IP%NSIZE_NATURE_P,           &
-                    IM%I%IP%NR_NATURE_P, IM%I%O%XRM_PATCH,                                     &
-                    LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI, IM%I%IP%XTDEEP,      &
-                    IM%I%IP%XGAMMAT, LAGRIP, XTHRESHOLD, IM%AG%NIRRINUM, IM%AG%LIRRIDAY, IM%AG%LIRRIGATE, &
-                    IM%AG%XTHRESHOLDSPT,                                              &
-                    IM%I%O%CPHOTO, HINIT, IM%I%O%LTR_ML, IM%I%O%NNBIOMASS, PCO2, PRHOA, IM%I%IP%XABC, IM%I%IP%XPOI,  &
-                    IM%I%M%T%XGMES, IM%I%M%T%XGC, IM%I%M%X%XDMAX, IM%I%IP%XANMAX, IM%I%IP%XFZERO, &
-                    IM%I%IP%XEPSO, IM%I%IP%XGAMM, IM%I%IP%XQDGAMM,   & 
-                    IM%I%IP%XQDGMES, IM%I%IP%XT1GMES, IM%I%IP%XT2GMES, IM%I%IP%XAMAX, &
-                    IM%I%IP%XQDAMAX, IM%I%IP%XT1AMAX, IM%I%IP%XT2AMAX,&
-                    IM%I%IP%XAH, IM%I%IP%XBH, IM%I%IP%XTAU_WOOD, IM%I%IP%XINCREASE, IM%I%IP%XTURNOVER,                  &
-                    KSV, HSV, IM%CHI%SVI, IM%CHI%CCH_NAMES, IM%CHI%CAER_NAMES, &
-                    IM%CHI%CDSTNAMES, IM%CHI%CSLTNAMES, IM%CHI%CCHEM_SURF_FILE,                      &
-                    DST%XSFDST, DST%XSFDSTM, SLT%XSFSLT,                                    &
-                    IM%I%P%XAOSIP, IM%I%P%XAOSIM, IM%I%P%XAOSJP, IM%I%P%XAOSJM, IM%I%P%XHO2IP, &
-                    IM%I%P%XHO2IM, IM%I%P%XHO2JP,     &
-                    IM%I%P%XHO2JM, IM%I%M%T%XZ0, IM%I%IP%XZ0EFFIP, IM%I%IP%XZ0EFFIM, IM%I%IP%XZ0EFFJP, &
-                    IM%I%IP%XZ0EFFJM, IM%I%IP%XZ0REL,&
-                    IM%I%P%XCLAY, IM%I%P%XSAND, IM%I%O%CPEDOTF,                                      &
-                    IM%I%IP%XCONDSAT, IM%I%IP%XMPOTSAT, IM%I%IP%XBCOEF, IM%I%IP%XWWILT, IM%I%IP%XWFC, &
-                    IM%I%IP%XWSAT, IM%I%IP%XWD0,      &
-                    IM%I%IP%XKANISO, IM%I%O%CRUNOFF,                                           &
-                    IM%I%IP%XTAUICE, IM%I%IP%XCGSAT, IM%I%IP%XC1SAT, IM%I%IP%XC2REF, IM%I%IP%XC3, &
-                    IM%I%IP%XC4B, IM%I%IP%XACOEF, IM%I%IP%XPCOEF, &
-                    IM%I%IP%XC4REF, IM%I%IP%XPCPS, IM%I%IP%XPLVTT, IM%I%IP%XPLSTT,                              &
-                    IM%I%O%CSCOND, IM%I%O%CISBA, IM%I%IP%XHCAPSOIL, IM%I%IP%XCONDDRY, IM%I%IP%XCONDSLD, &
-                    IM%I%O%CCPSURF,      &
-                    IM%I%M%X%XDG, IM%I%M%X%XDROOT, IM%I%M%X%XDG2, IM%I%M%X%XROOTFRAC, IM%I%IP%XRUNOFFD, &
-                    IM%I%IP%XDZG, IM%I%IP%XDZDIF,       &
-                    IM%I%IP%XSOILWGHT, IM%I%M%X%NWG_LAYER, IM%I%O%NLAYER_HORT, IM%I%O%NLAYER_DUN, IM%I%M%X%XD_ICE,      &
-                    IM%I%IP%XKSAT_ICE, IM%I%IP%XALBNIR_DRY, IM%I%IP%XALBVIS_DRY, IM%I%IP%XALBUV_DRY,            &
-                    IM%I%IP%XALBNIR_WET, IM%I%IP%XALBVIS_WET, IM%I%IP%XALBUV_WET, IM%I%IP%XBSLAI_NITRO,         &
-                    IM%I%M%T%XCE_NITRO, IM%I%M%T%XCNA_NITRO, IM%I%M%T%XCF_NITRO, IM%I%IP%XFWTD, IM%I%IP%XWTD               )  
+CALL INIT_VEG_PGD_n(ISS, DTCO, U, I%O, I%IP, I%P, I%M%X, I%M%T, AG, &
+                    HPROGRAM, 'NATURE', ILUOUT, KI, I%I%TTIME%TDATE%MONTH, &
+                    LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI,   & 
+                    LAGRIP, XTHRESHOLD, HINIT, PCO2, PRHOA        )  
+!
+!-------------------------------------------------------------------------------
+!
+!        3.  Initialize Chemical Deposition
+!            ------------------------------
+!
+!        3.1 Chemical gazes
+!            --------------
+!
+    !* for the time being, chemistry on vegetation works only for
+    ! ISBA on nature tile (not for gardens), because subroutine INIT_CHEMICAL_n
+    ! contains explicitely modules from ISBAn. It should be cleaned in a future
+    ! version.
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, CHI%SVI, CHI%CCH_NAMES, CHI%CAER_NAMES,  &
+                     HDSTNAMES=CHI%CDSTNAMES, HSLTNAMES=CHI%CSLTNAMES        )
+!
+IF (KSV /= 0) THEN
+  !
+  IF (CHI%SVI%NBEQ > 0) THEN
+    !* for the time being, chemistry deposition on vegetation works only for
+    ! ISBA on nature tile (not for gardens), because subroutine CH_INIT_DEP_ISBA_n
+    ! contains explicitely modules from ISBAn. It should be cleaned in a future
+    ! version.
+    CALL OPEN_NAMELIST(HPROGRAM, ICH, HFILE=CHI%CCHEM_SURF_FILE)
+    CALL CH_INIT_DEP_ISBA_n(CHI, DTCO, I%O%NPATCH, I%P%LCOVER, I%P%XCOVER, ICH, ILUOUT, KI)
+    CALL CLOSE_NAMELIST(HPROGRAM, ICH)
+  END IF
+  !
+  IF (CHI%SVI%NDSTEQ >=1) THEN
+    ALLOCATE (DST%XSFDST (KI, CHI%SVI%NDSTEQ, I%O%NPATCH))  !Output array
+    ALLOCATE (DST%XSFDSTM(KI, CHI%SVI%NDSTEQ, I%O%NPATCH))  !Output array
+    DST%XSFDST(:,:,:)  = 0.
+    DST%XSFDSTM(:,:,:) = 0.     
+    CALL INIT_DST(DST, U, HPROGRAM,I%IP%NSIZE_NATURE_P,I%IP%NR_NATURE_P, I%O%NPATCH,I%IP%XVEGTYPE_PATCH)    
+  ELSE
+    ALLOCATE(DST%XSFDST (0,0,0))
+    ALLOCATE(DST%XSFDSTM(0,0,0))
+  END IF
+  !
+  IF (CHI%SVI%NSLTEQ >=1) THEN
+    ALLOCATE (SLT%XSFSLT(KI,CHI%SVI%NSLTEQ,I%O%NPATCH))  !Output array
+    CALL INIT_SLT(SLT, HPROGRAM)   
+  ELSE
+    ALLOCATE(SLT%XSFSLT(0,0,0))
+  END IF
+  !
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
@@ -307,63 +312,56 @@ CALL INIT_VEG_PGD_n(IM%CHI, DTCO, DST, SLT, U, &
 !    Must be call before INIT_TOP
 !
 !
-IF(IM%I%O%CISBA=='DIF') THEN
+IF(I%O%CISBA=='DIF') THEN
   !
-  IF( IM%I%O%CKSAT=='SGH' )THEN
+  IF( I%O%CKSAT=='SGH' )THEN
     WRITE(ILUOUT,*)'THE KSAT EXP PROFILE WITH ISBA-DF IS NOT PHYSIC AND HAS BEEN REMOVED FOR NOW' 
     WRITE(ILUOUT,*)'A NEW PHYSICAL APPROACH WILL BE DEVELLOPED ACCOUNTING FOR COMPACTION IN ALL ' 
     WRITE(ILUOUT,*)'HYDRODYNAMIC PARAMETERS (WSAT, PSISAT, KSAT, B) AND NOT ONLY IN KSAT        ' 
     CALL ABOR1_SFX('CKSAT=SGH is not physic with ISBA-DF and has been removed for now')    
   ENDIF
   !  
-  IF(IM%I%O%LSOC)THEN   
-    IF(.NOT.IM%I%O%LSOCP)THEN
+  IF(I%O%LSOC)THEN   
+    IF(.NOT.I%O%LSOCP)THEN
       WRITE(ILUOUT,*)'LSOC = T can be activated only if SOC data given in PGD fields'
       CALL ABOR1_SFX('LSOC = T can be activated only if SOC data given in PGD fields')
     ENDIF
-    ALLOCATE(IM%I%I%XFRACSOC(KI,IM%I%O%NGROUND_LAYER))
-    IM%I%I%XFRACSOC(:,:)=0.0
-    CALL ISBA_SOC_PARAMETERS(IM%I%O%CRUNOFF,IM%I%IP%XPATCH,IM%I%M%X%XDG,IM%I%P%XSOC,IM%I%IP%XBCOEF,IM%I%IP%XMPOTSAT,   &
-                             IM%I%IP%XCONDSAT,IM%I%IP%XWSAT,IM%I%IP%XHCAPSOIL,IM%I%IP%XCONDDRY,         &
-                             IM%I%IP%XCONDSLD,IM%I%IP%XWFC,IM%I%IP%XWWILT,IM%I%IP%XWD0,IM%I%IP%XKANISO,IM%I%I%XFRACSOC )
+    ALLOCATE(I%I%XFRACSOC(KI,I%O%NGROUND_LAYER))
+    I%I%XFRACSOC(:,:)=0.0
+    CALL ISBA_SOC_PARAMETERS(I%O%CRUNOFF,I%M%X%XDG,I%P%XSOC,I%IP,I%I%XFRACSOC )
   ELSE
-    ALLOCATE(IM%I%I%XFRACSOC(0,0))
+    ALLOCATE(I%I%XFRACSOC(0,0))
   ENDIF
 !
 ELSE
-  ALLOCATE(IM%I%I%XFRACSOC(0,0))
+  ALLOCATE(I%I%XFRACSOC(0,0))
 ENDIF
 !
 !Topmodel
 !
 !CRUNOFF used in hydro_sgh and isba_sgh_update
-IF( IM%I%O%CRUNOFF=='SGH ') THEN 
+IF( I%O%CRUNOFF=='SGH ') THEN 
 !
-  ALLOCATE(IM%I%I%XTAB_FSAT(KI,NDIMTAB))
-  ALLOCATE(IM%I%I%XTAB_WTOP(KI,NDIMTAB))
-  ALLOCATE(IM%I%I%XTAB_QTOP(KI,NDIMTAB))
+  ALLOCATE(I%I%XTAB_FSAT(KI,NDIMTAB))
+  ALLOCATE(I%I%XTAB_WTOP(KI,NDIMTAB))
+  ALLOCATE(I%I%XTAB_QTOP(KI,NDIMTAB))
 !
-  IM%I%I%XTAB_FSAT(:,:) = 0.0
-  IM%I%I%XTAB_WTOP(:,:) = 0.0
-  IM%I%I%XTAB_QTOP(:,:) = 0.0
+  I%I%XTAB_FSAT(:,:) = 0.0
+  I%I%XTAB_WTOP(:,:) = 0.0
+  I%I%XTAB_QTOP(:,:) = 0.0
 !
   IF(HINIT/='PRE' .AND. .NOT.LASSIM)THEN
 !
-    WHERE(IM%I%P%XCLAY(:,1)==XUNDEF.AND.IM%I%P%XTI_MEAN(:)/=XUNDEF) IM%I%P%XTI_MEAN(:)=XUNDEF
+    WHERE(I%P%XCLAY(:,1)==XUNDEF.AND.I%P%XTI_MEAN(:)/=XUNDEF) I%P%XTI_MEAN(:)=XUNDEF
 !
-    CALL INIT_TOP(IM%I%O%NPATCH, IM%I%IP%NSIZE_NATURE_P, &
-                   IM%I%O%CISBA, ILUOUT, IM%I%IP%XPATCH, IM%I%IP%XRUNOFFD,          &
-                   IM%I%IP%XWD0, IM%I%IP%XWSAT, IM%I%P%XTI_MIN,                     &
-                   IM%I%P%XTI_MAX, IM%I%P%XTI_MEAN, IM%I%P%XTI_STD, IM%I%P%XTI_SKEW,     &
-                   IM%I%IP%XSOILWGHT, IM%I%I%XTAB_FSAT, IM%I%I%XTAB_WTOP,          &
-                   IM%I%I%XTAB_QTOP, ZM                             )  
+    CALL INIT_TOP(I%O, I%IP, I%P, I%I, ILUOUT, ZM           )  
 !
 !
-    IF (IM%I%O%CKSAT=='SGH' .AND. IM%I%O%CISBA/='DIF') THEN
+    IF (I%O%CKSAT=='SGH' .AND. I%O%CISBA/='DIF') THEN
 !     Exponential decay factor calculate using soil properties 
 !     (eq. 11, Decharme et al., J. Hydrometeor, 2006)
       DO JILU=1,KI
-        IF (ZM(JILU)/=XUNDEF) ZF(JILU,:) = (IM%I%IP%XWSAT(JILU,1)-IM%I%IP%XWD0(JILU,1))/ZM(JILU)
+        IF (ZM(JILU)/=XUNDEF) ZF(JILU,:) = (I%IP%XWSAT(JILU,1)-I%IP%XWD0(JILU,1))/ZM(JILU)
       ENDDO
 !       
     ENDIF
@@ -371,47 +369,42 @@ IF( IM%I%O%CRUNOFF=='SGH ') THEN
   ENDIF
 !
 ! Subsurface flow by layer (m/s)
-  IF(IM%I%O%CISBA=='DIF') THEN
-    ALLOCATE(IM%I%I%XTOPQS(KI,IM%I%O%NGROUND_LAYER,IM%I%O%NPATCH))
-    IM%I%I%XTOPQS(:,:,:)=0.0
+  IF(I%O%CISBA=='DIF') THEN
+    ALLOCATE(I%I%XTOPQS(KI,I%O%NGROUND_LAYER,I%O%NPATCH))
+    I%I%XTOPQS(:,:,:)=0.0
   ELSE
-    ALLOCATE(IM%I%I%XTOPQS(0,0,0))
+    ALLOCATE(I%I%XTOPQS(0,0,0))
   ENDIF
 !
 ELSE                  
 !  
-  ALLOCATE(IM%I%I%XTAB_FSAT(0,0))
-  ALLOCATE(IM%I%I%XTAB_WTOP(0,0))
-  ALLOCATE(IM%I%I%XTAB_QTOP(0,0))
-  ALLOCATE(IM%I%I%XTOPQS(0,0,0))  
+  ALLOCATE(I%I%XTAB_FSAT(0,0))
+  ALLOCATE(I%I%XTAB_WTOP(0,0))
+  ALLOCATE(I%I%XTAB_QTOP(0,0))
+  ALLOCATE(I%I%XTOPQS(0,0,0))  
 !                  
 ENDIF  
 !
 !Exponential decay for ISBA-FR option
 !CKSAT used in hydro_soil.F90 and soil.F90
-IF(HINIT/='PRE'.AND.IM%I%O%CISBA/='DIF')THEN 
+IF(HINIT/='PRE'.AND.I%O%CISBA/='DIF')THEN 
   !
-  IF(IM%I%O%CKSAT=='SGH') THEN
+  IF(I%O%CKSAT=='SGH') THEN
     !
-    WHERE(ZF(:,:)==XUNDEF.AND.IM%I%M%X%XDG(:,2,:)/=XUNDEF) 
-      ZF(:,:) = 4.0/IM%I%M%X%XDG(:,2,:)
+    WHERE(ZF(:,:)==XUNDEF.AND.I%M%X%XDG(:,2,:)/=XUNDEF) 
+      ZF(:,:) = 4.0/I%M%X%XDG(:,2,:)
     ENDWHERE
     ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
     !
-    ALLOCATE(IM%I%I%XF_PARAM (KI))
-    IM%I%I%XF_PARAM(:) = ZF(:,1)
+    ALLOCATE(I%I%XF_PARAM (KI))
+    I%I%XF_PARAM(:) = ZF(:,1)
     !
-    DO JPATCH=1,IM%I%O%NPATCH
-      IF (IM%I%IP%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-        CALL EXP_DECAY_SOIL_FR(IM%I%O%CISBA, ZF(:,JPATCH),IM%I%IP%XC1SAT(:,JPATCH),IM%I%IP%XC2REF(:,JPATCH),   &
-                                IM%I%M%X%XDG(:,:,JPATCH),IM%I%M%X%XD_ICE(:,JPATCH),IM%I%IP%XC4REF(:,JPATCH),      &
-                                IM%I%IP%XC3(:,:,JPATCH),IM%I%IP%XCONDSAT(:,:,JPATCH),IM%I%IP%XKSAT_ICE(:,JPATCH))  
-    ENDDO                       
+    CALL EXP_DECAY_SOIL_FR(I%O%CISBA, ZF,I%IP, I%M%X )                 
     !
-  ELSEIF ( IM%I%O%CKSAT=='EXP' .AND. IM%I%O%CISBA=='3-L' ) THEN
+  ELSEIF ( I%O%CKSAT=='EXP' .AND. I%O%CISBA=='3-L' ) THEN
     !
-    ALLOCATE(IM%I%I%XF_PARAM (KI))
-    IM%I%I%XF_PARAM(:) = XUNDEF
+    ALLOCATE(I%I%XF_PARAM (KI))
+    I%I%XF_PARAM(:) = XUNDEF
     !
     IF (HPROGRAM/='AROME ' .AND. HPROGRAM/='MESONH ') THEN
       !
@@ -420,7 +413,7 @@ IF(HINIT/='PRE'.AND.IM%I%O%CISBA/='DIF')THEN
         READ(NUNIT,*) ZF_PARAM(JILU), ZC_DEPTH_RATIO(JILU)
       ENDDO
       CALL CLOSE_FILE('ASCII ',NUNIT)
-      CALL READ_AND_SEND_MPI(ZF_PARAM,IM%I%I%XF_PARAM,U%NR_NATURE)
+      CALL READ_AND_SEND_MPI(ZF_PARAM,I%I%XF_PARAM,U%NR_NATURE)
 #ifdef TOPD
 IF (.NOT.ALLOCATED(XC_DEPTH_RATIO))    ALLOCATE(XC_DEPTH_RATIO (KI))
     XC_DEPTH_RATIO(:) = XUNDEF
@@ -432,21 +425,16 @@ IF (.NOT.ALLOCATED(XC_DEPTH_RATIO))    ALLOCATE(XC_DEPTH_RATIO (KI))
                       "MODE, TOPMODEL FILE FOR F_PARAM IS NOT READ "
     ENDIF
     !
-    DO JPATCH=1,IM%I%O%NPATCH
-      WHERE (IM%I%I%XF_PARAM(:)==XUNDEF.AND.IM%I%M%X%XDG(:,2,JPATCH)/=XUNDEF)
-        ZF(:,JPATCH) = 4.0/IM%I%M%X%XDG(:,2,JPATCH)
+    DO JPATCH=1,I%O%NPATCH
+      WHERE (I%I%XF_PARAM(:)==XUNDEF.AND.I%M%X%XDG(:,2,JPATCH)/=XUNDEF)
+        ZF(:,JPATCH) = 4.0/I%M%X%XDG(:,2,JPATCH)
       ELSEWHERE
-        ZF(:,JPATCH) = IM%I%I%XF_PARAM(:)
+        ZF(:,JPATCH) = I%I%XF_PARAM(:)
       ENDWHERE
     ENDDO
      ZF(:,:) = MIN(ZF(:,:),XF_DECAY)
     !
-    DO JPATCH=1,IM%I%O%NPATCH
-      CALL EXP_DECAY_SOIL_FR(IM%I%O%CISBA, ZF(:,JPATCH),IM%I%IP%XC1SAT(:,JPATCH),IM%I%IP%XC2REF(:,JPATCH), &
-                             IM%I%M%X%XDG(:,:,JPATCH),IM%I%M%X%XD_ICE(:,JPATCH),IM%I%IP%XC4REF(:,JPATCH),   &
-                             IM%I%IP%XC3(:,:,JPATCH),IM%I%IP%XCONDSAT(:,:,JPATCH),                &
-                             IM%I%IP%XKSAT_ICE(:,JPATCH))  
-    ENDDO    
+    CALL EXP_DECAY_SOIL_FR(I%O%CISBA, ZF,I%IP, I%M%X)  
     !    
   ENDIF
   ! 
@@ -456,21 +444,21 @@ ENDIF
 !*       2.10   Soil carbon
 !               -----------                        
 !
-IF (HINIT == 'ALL' .AND. IM%I%O%CRESPSL=='CNT' .AND. IM%I%O%CPHOTO == 'NCB') THEN
-  CALL CARBON_INIT(IM%I%O%NNBIOMASS, IM%I%O%NNLITTER, IM%I%O%NNLITTLEVS, IM%I%O%NNSOILCARB)
+IF (HINIT == 'ALL' .AND. I%O%CRESPSL=='CNT' .AND. I%O%CPHOTO == 'NCB') THEN
+  CALL CARBON_INIT(I%O)
 ENDIF
 !
 !Rainfall spatial distribution
 !CRAIN used in HYDRO_VEG and HYDRO_SGH and ISBA_SGH_UPDATE
-IF(IM%I%O%CRAIN=='SGH')THEN
-  ALLOCATE(IM%I%I%XMUF(KI))
-  IM%I%I%XMUF(:)=0.0
+IF(I%O%CRAIN=='SGH')THEN
+  ALLOCATE(I%I%XMUF(KI))
+  I%I%XMUF(:)=0.0
 ELSE
-  ALLOCATE(IM%I%I%XMUF(0))
+  ALLOCATE(I%I%XMUF(0))
 ENDIF
 !
-ALLOCATE(IM%I%I%XFSAT(KI))  
-IM%I%I%XFSAT(:) = 0.0
+ALLOCATE(I%I%XFSAT(KI))  
+I%I%XFSAT(:) = 0.0
 !
 !-------------------------------------------------------------------------------
 !
@@ -480,68 +468,68 @@ IM%I%I%XFSAT(:) = 0.0
 ! * Check some key :
 !
 IF(LCPL_CALVING)THEN
-   IF(.NOT.IM%I%O%LGLACIER)THEN
+   IF(.NOT.I%O%LGLACIER)THEN
      CALL ABOR1_SFX('COMPUTE_ISBA_PARAMETERS: LGLACIER MUST BE ACTIVATED IF LCPL_CALVING')
    ENDIF
 ENDIF
 !
 ! * Initialize required coupling fields :
 !
-IM%I%O%LCPL_RRM = .FALSE.
-IM%I%O%LFLOOD   = .FALSE.
-IM%I%O%LWTD     = .FALSE.
+I%O%LCPL_RRM = .FALSE.
+I%O%LFLOOD   = .FALSE.
+I%O%LWTD     = .FALSE.
 !
 IF(LCPL_LAND)THEN
 !    
-  IM%I%O%LCPL_RRM = .TRUE.
+  I%O%LCPL_RRM = .TRUE.
 !
-  ALLOCATE(IM%I%I%XCPL_DRAIN (KI))
-  ALLOCATE(IM%I%I%XCPL_RUNOFF(KI))
-  IM%I%I%XCPL_DRAIN (:) = 0.0
-  IM%I%I%XCPL_RUNOFF(:) = 0.0
+  ALLOCATE(I%I%XCPL_DRAIN (KI))
+  ALLOCATE(I%I%XCPL_RUNOFF(KI))
+  I%I%XCPL_DRAIN (:) = 0.0
+  I%I%XCPL_RUNOFF(:) = 0.0
 !
-  IF(IM%I%O%LGLACIER)THEN
-     ALLOCATE(IM%I%I%XCPL_ICEFLUX(KI))
-     IM%I%I%XCPL_ICEFLUX(:) = 0.0
+  IF(I%O%LGLACIER)THEN
+     ALLOCATE(I%I%XCPL_ICEFLUX(KI))
+     I%I%XCPL_ICEFLUX(:) = 0.0
   ELSE
-     ALLOCATE(IM%I%I%XCPL_ICEFLUX(0))
+     ALLOCATE(I%I%XCPL_ICEFLUX(0))
   ENDIF
 !
   IF(LCPL_GW)THEN
-    IM%I%O%LWTD = .TRUE.
-    ALLOCATE(IM%I%I%XCPL_RECHARGE(KI))
-    IM%I%I%XCPL_RECHARGE(:) = 0.0
+    I%O%LWTD = .TRUE.
+    ALLOCATE(I%I%XCPL_RECHARGE(KI))
+    I%I%XCPL_RECHARGE(:) = 0.0
   ELSE
-    ALLOCATE(IM%I%I%XCPL_RECHARGE(0))
+    ALLOCATE(I%I%XCPL_RECHARGE(0))
   ENDIF
 !
   IF(LCPL_FLOOD)THEN
-     IM%I%O%LFLOOD = .TRUE.
-     ALLOCATE(IM%I%I%XCPL_EFLOOD(KI))
-     ALLOCATE(IM%I%I%XCPL_PFLOOD(KI))
-     ALLOCATE(IM%I%I%XCPL_IFLOOD(KI))
-     IM%I%I%XCPL_EFLOOD(:)= 0.0
-     IM%I%I%XCPL_PFLOOD(:)= 0.0
-     IM%I%I%XCPL_IFLOOD(:)= 0.0    
+     I%O%LFLOOD = .TRUE.
+     ALLOCATE(I%I%XCPL_EFLOOD(KI))
+     ALLOCATE(I%I%XCPL_PFLOOD(KI))
+     ALLOCATE(I%I%XCPL_IFLOOD(KI))
+     I%I%XCPL_EFLOOD(:)= 0.0
+     I%I%XCPL_PFLOOD(:)= 0.0
+     I%I%XCPL_IFLOOD(:)= 0.0    
   ELSE
-    ALLOCATE(IM%I%I%XCPL_EFLOOD(0))
-    ALLOCATE(IM%I%I%XCPL_PFLOOD(0))
-    ALLOCATE(IM%I%I%XCPL_IFLOOD(0))     
+    ALLOCATE(I%I%XCPL_EFLOOD(0))
+    ALLOCATE(I%I%XCPL_PFLOOD(0))
+    ALLOCATE(I%I%XCPL_IFLOOD(0))     
   ENDIF     
 !
 ELSE
 !
-  ALLOCATE(IM%I%I%XCPL_RUNOFF  (0))
-  ALLOCATE(IM%I%I%XCPL_DRAIN   (0))
-  ALLOCATE(IM%I%I%XCPL_ICEFLUX (0))
-  ALLOCATE(IM%I%I%XCPL_RECHARGE(0))
-  ALLOCATE(IM%I%I%XCPL_EFLOOD  (0))
-  ALLOCATE(IM%I%I%XCPL_PFLOOD  (0))
-  ALLOCATE(IM%I%I%XCPL_IFLOOD  (0))
+  ALLOCATE(I%I%XCPL_RUNOFF  (0))
+  ALLOCATE(I%I%XCPL_DRAIN   (0))
+  ALLOCATE(I%I%XCPL_ICEFLUX (0))
+  ALLOCATE(I%I%XCPL_RECHARGE(0))
+  ALLOCATE(I%I%XCPL_EFLOOD  (0))
+  ALLOCATE(I%I%XCPL_PFLOOD  (0))
+  ALLOCATE(I%I%XCPL_IFLOOD  (0))
 !
 ENDIF
 !
-IF(IM%I%O%LWTD.AND..NOT.IM%I%O%LGW)THEN
+IF(I%O%LWTD.AND..NOT.I%O%LGW)THEN
   WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: Groundwater map is required by SFX - Groundwater coupling '
   WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: Please check your pgd namelist where this map must be     '
   WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: specified (YGW and YGWFILETYPE, or XUNIF_GW, or LIMP_GW)  '
@@ -550,32 +538,32 @@ ENDIF
 !
 ! * Initialize flood scheme :
 !
-IF(IM%I%O%LFLOOD)THEN
-  ALLOCATE(IM%I%I%XFFLOOD (KI))
-  ALLOCATE(IM%I%I%XPIFLOOD(KI))
-  ALLOCATE(IM%I%I%XFF     (KI,IM%I%O%NPATCH))
-  ALLOCATE(IM%I%I%XFFG    (KI,IM%I%O%NPATCH))
-  ALLOCATE(IM%I%I%XFFV    (KI,IM%I%O%NPATCH))
-  ALLOCATE(IM%I%I%XFFROZEN(KI,IM%I%O%NPATCH))
-  ALLOCATE(IM%I%I%XALBF   (KI,IM%I%O%NPATCH))
-  ALLOCATE(IM%I%I%XEMISF  (KI,IM%I%O%NPATCH)) 
-  IM%I%I%XFFLOOD       = 0.0
-  IM%I%I%XPIFLOOD      = 0.0
-  IM%I%I%XFF           = 0.0
-  IM%I%I%XFFG          = 0.0
-  IM%I%I%XFFV          = 0.0
-  IM%I%I%XFFROZEN      = 0.0
-  IM%I%I%XALBF         = 0.0
-  IM%I%I%XEMISF        = 0.0  
+IF(I%O%LFLOOD)THEN
+  ALLOCATE(I%I%XFFLOOD (KI))
+  ALLOCATE(I%I%XPIFLOOD(KI))
+  ALLOCATE(I%I%XFF     (KI,I%O%NPATCH))
+  ALLOCATE(I%I%XFFG    (KI,I%O%NPATCH))
+  ALLOCATE(I%I%XFFV    (KI,I%O%NPATCH))
+  ALLOCATE(I%I%XFFROZEN(KI,I%O%NPATCH))
+  ALLOCATE(I%I%XALBF   (KI,I%O%NPATCH))
+  ALLOCATE(I%I%XEMISF  (KI,I%O%NPATCH)) 
+  I%I%XFFLOOD       = 0.0
+  I%I%XPIFLOOD      = 0.0
+  I%I%XFF           = 0.0
+  I%I%XFFG          = 0.0
+  I%I%XFFV          = 0.0
+  I%I%XFFROZEN      = 0.0
+  I%I%XALBF         = 0.0
+  I%I%XEMISF        = 0.0  
 ELSE
-  ALLOCATE(IM%I%I%XFFLOOD   (0))
-  ALLOCATE(IM%I%I%XPIFLOOD  (0))
-  ALLOCATE(IM%I%I%XFF     (0,0))
-  ALLOCATE(IM%I%I%XFFG    (0,0))
-  ALLOCATE(IM%I%I%XFFV    (0,0))
-  ALLOCATE(IM%I%I%XFFROZEN(0,0))
-  ALLOCATE(IM%I%I%XALBF   (0,0))
-  ALLOCATE(IM%I%I%XEMISF  (0,0))
+  ALLOCATE(I%I%XFFLOOD   (0))
+  ALLOCATE(I%I%XPIFLOOD  (0))
+  ALLOCATE(I%I%XFF     (0,0))
+  ALLOCATE(I%I%XFFG    (0,0))
+  ALLOCATE(I%I%XFFV    (0,0))
+  ALLOCATE(I%I%XFFROZEN(0,0))
+  ALLOCATE(I%I%XALBF   (0,0))
+  ALLOCATE(I%I%XEMISF  (0,0))
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -583,8 +571,7 @@ ENDIF
 !*      7.     ISBA time-varying deep force-restore temperature initialization
 !              ---------------------------------------------------------------
 !
- CALL SOILTEMP_ARP_PAR(IM%I%O%CISBA, IM%I%O%XSODELX, &
-                       HPROGRAM,IM%I%O%LTEMP_ARP,IM%I%O%NTEMPLAYER_ARP)
+ CALL SOILTEMP_ARP_PAR(I%O, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -606,14 +593,12 @@ IF (CASSIM_ISBA=="ENKF ") THEN
   !
 ENDIF
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                    HPROGRAM,'NATURE','ISBA  ','READ ')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !*      10.     Prognostic and semi-prognostic fields
 !               -------------------------------------
 !
- CALL READ_ISBA_n(DTCO, IM%I, U, &
-                  HPROGRAM)
+ CALL READ_ISBA_n(DTCO, I%O, I%R, I%P%XCLAY, I%M%T%XLAI, I%M%T%XBSLAI, U, HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -621,8 +606,8 @@ IF (HINIT/='ALL') THEN
   RETURN
 END IF
 !
-IF (HINIT=='PRE' .AND. IM%I%R%TSNOW%SCHEME.NE.'3-L' .AND. &
-        IM%I%R%TSNOW%SCHEME.NE.'CRO' .AND. IM%I%O%CISBA=='DIF') THEN
+IF (HINIT=='PRE' .AND. I%R%TSNOW%SCHEME.NE.'3-L' .AND. &
+        I%R%TSNOW%SCHEME.NE.'CRO' .AND. I%O%CISBA=='DIF') THEN
     CALL ABOR1_SFX("INIT_ISBAN: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
 ENDIF
 !
@@ -633,8 +618,9 @@ ENDIF
 !               -------------------------------------
 !
 IF (OLAND_USE) THEN
-   CALL INIT_ISBA_LANDUSE(DTCO, IM%IG, IM%I, UG, U, &
-                          HPROGRAM)  
+   CALL INIT_ISBA_LANDUSE(DTCO, UG, U, I%O, I%R, IG%XMESH_SIZE, &
+                          I%M%X%XDG, I%M%X%XDG_OLD, I%M%T%XLAI, &
+                          I%IP%XPATCH, I%IP%XPATCH_OLD, HPROGRAM)  
 END IF
 !
 !-------------------------------------------------------------------------------
@@ -642,81 +628,63 @@ END IF
 !*      12.     Canopy air fields:
 !               -----------------
 !
- CALL READ_ISBA_CANOPY_n(DTCO, IM%ICP, IM%I%O%LCANOPY, U, &
-                         HPROGRAM)
+ CALL READ_ISBA_CANOPY_n(DTCO, ICP, I%O%LCANOPY, U, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*      13.     initialize radiative and physical properties
 !               --------------------------------------------
 !
-ALLOCATE(IM%I%I%XDIR_ALB_WITH_SNOW(KI,KSW,IM%I%O%NPATCH))
-ALLOCATE(IM%I%I%XSCA_ALB_WITH_SNOW(KI,KSW,IM%I%O%NPATCH))
-IM%I%I%XDIR_ALB_WITH_SNOW = 0.0
-IM%I%I%XSCA_ALB_WITH_SNOW = 0.0
+ALLOCATE(I%I%XDIR_ALB_WITH_SNOW(KI,KSW,I%O%NPATCH))
+ALLOCATE(I%I%XSCA_ALB_WITH_SNOW(KI,KSW,I%O%NPATCH))
+I%I%XDIR_ALB_WITH_SNOW = 0.0
+I%I%XSCA_ALB_WITH_SNOW = 0.0
 !
- CALL INIT_VEG_n(IM%I%O%NPATCH, KI, IM%I%O%LCANOPY, IM%I%O%CROUGH, IM%I%O%LAGRI_TO_GRASS, IM%I%R%TSNOW, &
-                 IM%I%O%CPHOTO, IM%I%M%T%XLAIMIN, IM%I%M%X%XH_TREE, IM%I%IP%XVEGTYPE_PATCH, IM%I%M%T%XLAI, &
-                 IM%I%M%T%XZ0, IM%I%M%T%XVEG, IM%I%M%T%XEMIS, &
-                 IM%I%O%LTR_ML, IM%I%R%XFAPARC, IM%I%R%XFAPIRC, IM%I%R%XLAI_EFFC, IM%I%R%XMUS, &
-                 IM%I%M%A%XALBNIR_SOIL, IM%I%M%A%XALBVIS_SOIL, IM%I%M%A%XALBUV_SOIL, IM%I%M%T%XALBNIR, &
-                 IM%I%M%T%XALBVIS, IM%I%M%T%XALBUV, &
-                 IM%DGMI%LSURF_DIAG_ALBEDO, IM%I%R%XPSN, IM%I%R%XPSNG, IM%I%R%XPSNV, IM%I%R%XPSNV_A, &
+ CALL INIT_VEG_n(I%O, I%O%LCANOPY, KI, I%M%T, I%M%A, I%M%X%XH_TREE, I%R, I%IP%XVEGTYPE_PATCH, &
+                 DGI%DM%LSURF_DIAG_ALBEDO,  &
                  PDIR_ALB, PSCA_ALB, PEMIS, PTSRAD )
 !
-DO JPATCH=1,IM%I%O%NPATCH
-  ZWG1(:,JPATCH) = IM%I%R%XWG(:,1,JPATCH)
-  ZTG1(:,JPATCH) = IM%I%R%XTG(:,1,JPATCH)
+DO JPATCH=1,I%O%NPATCH
+  ZWG1(:,JPATCH) = I%R%XWG(:,1,JPATCH)
+  ZTG1(:,JPATCH) = I%R%XTG(:,1,JPATCH)
 END DO
 !
- CALL CONVERT_PATCH_ISBA(DTCO, IM%DTI, IM%I%O, &
-                         IM%I%O%CISBA,IDECADE,IDECADE2,IM%I%P%XCOVER,IM%I%P%LCOVER,&
-                          IM%I%O%CPHOTO,LAGRIP,IM%I%O%LPERM,IM%I%O%LTR_ML,'NAT',   &
-                          PWG1=ZWG1, PWSAT=IM%I%IP%XWSAT,        &
-                          PALBNIR_SOIL=IM%I%M%A%XALBNIR_SOIL, PALBVIS_SOIL=IM%I%M%A%XALBVIS_SOIL, &
-                          PALBUV_SOIL=IM%I%M%A%XALBUV_SOIL ,&
-                          PALBVIS_DRY=IM%I%IP%XALBVIS_DRY, PALBNIR_DRY=IM%I%IP%XALBNIR_DRY, &
-                          PALBUV_DRY=IM%I%IP%XALBUV_DRY,  PALBVIS_WET=IM%I%IP%XALBVIS_WET, &
-                          PALBNIR_WET=IM%I%IP%XALBNIR_WET, PALBUV_WET=IM%I%IP%XALBUV_WET)
+ CALL CONVERT_PATCH_ISBA(DTCO, DTI, I%O, IDECADE,IDECADE2, I%P%XCOVER, I%P%LCOVER,&
+                         LAGRIP, 'NAT', .FALSE., IMA=I%M%A, IP=I%IP, PWG1=ZWG1, PWSAT=I%IP%XWSAT)
 !
 ! Load randomly perturbed fields. Perturbation ratios are saved in case fields are reset later.
-IF(IM%I%O%LPERTSURF) THEN
+IF(I%O%LPERTSURF) THEN
 !
-  CALL READ_SURF(&
-                 HPROGRAM,'VEG',IM%I%M%T%XVEG(:,:),IRESP)
-  ALLOCATE(IM%I%I%XPERTVEG(KI))
-  IM%I%I%XPERTVEG(:)=IM%I%M%T%XVEG(:,1)
+  CALL READ_SURF(HPROGRAM,'VEG',I%M%T%XVEG(:,:),IRESP)
+  ALLOCATE(I%I%XPERTVEG(KI))
+  I%I%XPERTVEG(:)=I%M%T%XVEG(:,1)
 !
-  CALL READ_SURF(&
-                 HPROGRAM,'LAI',IM%I%M%T%XLAI(:,:),IRESP)
-  ALLOCATE(IM%I%I%XPERTLAI(KI))
-  IM%I%I%XPERTLAI(:)=IM%I%M%T%XLAI(:,1)
+  CALL READ_SURF(HPROGRAM,'LAI',I%M%T%XLAI(:,:),IRESP)
+  ALLOCATE(I%I%XPERTLAI(KI))
+  I%I%XPERTLAI(:)=I%M%T%XLAI(:,1)
 !
-  CALL READ_SURF(&
-                 HPROGRAM,'CV',IM%I%M%T%XCV(:,:),IRESP)
-  ALLOCATE(IM%I%I%XPERTCV(KI))
-  IM%I%I%XPERTCV(:)=IM%I%M%T%XCV(:,1)
+  CALL READ_SURF(HPROGRAM,'CV',I%M%T%XCV(:,:),IRESP)
+  ALLOCATE(I%I%XPERTCV(KI))
+  I%I%XPERTCV(:)=I%M%T%XCV(:,1)
 !
-  CALL READ_SURF(&
-                 HPROGRAM,'PERTALB',ZPERTBUF(:,:),IRESP)
-  ALLOCATE(IM%I%I%XPERTALB(KI))
-  IM%I%I%XPERTALB(:)=ZPERTBUF(:,1)
-  WHERE(IM%I%M%T%XALBNIR_VEG(:,1)/=XUNDEF)  IM%I%M%T%XALBNIR_VEG(:,1) = IM%I%M%T%XALBNIR_VEG(:,1) *( 1.+ IM%I%I%XPERTALB(:) )
-  WHERE(IM%I%M%T%XALBVIS_VEG(:,1)/=XUNDEF)  IM%I%M%T%XALBVIS_VEG(:,1) = IM%I%M%T%XALBVIS_VEG(:,1) *( 1.+ IM%I%I%XPERTALB(:) )
-  WHERE(IM%I%M%T%XALBUV_VEG(:,1)/=XUNDEF)   IM%I%M%T%XALBUV_VEG(:,1)  = IM%I%M%T%XALBUV_VEG(:,1)  *( 1.+ IM%I%I%XPERTALB(:) )
-  WHERE(IM%I%M%A%XALBNIR_SOIL(:,1)/=XUNDEF) IM%I%M%A%XALBNIR_SOIL(:,1)= IM%I%M%A%XALBNIR_SOIL(:,1)*( 1.+ IM%I%I%XPERTALB(:) )
-  WHERE(IM%I%M%A%XALBVIS_SOIL(:,1)/=XUNDEF) IM%I%M%A%XALBVIS_SOIL(:,1)= IM%I%M%A%XALBVIS_SOIL(:,1)*( 1.+ IM%I%I%XPERTALB(:) )
-  WHERE(IM%I%M%A%XALBUV_SOIL(:,1)/=XUNDEF)  IM%I%M%A%XALBUV_SOIL(:,1) = IM%I%M%A%XALBUV_SOIL(:,1) *( 1.+ IM%I%I%XPERTALB(:) )
+  CALL READ_SURF(HPROGRAM,'PERTALB',ZPERTBUF(:,:),IRESP)
+  ALLOCATE(I%I%XPERTALB(KI))
+  I%I%XPERTALB(:)=ZPERTBUF(:,1)
+  WHERE(I%M%T%XALBNIR_VEG(:,1)/=XUNDEF)  I%M%T%XALBNIR_VEG(:,1) = I%M%T%XALBNIR_VEG(:,1) *( 1.+ I%I%XPERTALB(:) )
+  WHERE(I%M%T%XALBVIS_VEG(:,1)/=XUNDEF)  I%M%T%XALBVIS_VEG(:,1) = I%M%T%XALBVIS_VEG(:,1) *( 1.+ I%I%XPERTALB(:) )
+  WHERE(I%M%T%XALBUV_VEG(:,1)/=XUNDEF)   I%M%T%XALBUV_VEG(:,1)  = I%M%T%XALBUV_VEG(:,1)  *( 1.+ I%I%XPERTALB(:) )
+  WHERE(I%M%A%XALBNIR_SOIL(:,1)/=XUNDEF) I%M%A%XALBNIR_SOIL(:,1)= I%M%A%XALBNIR_SOIL(:,1)*( 1.+ I%I%XPERTALB(:) )
+  WHERE(I%M%A%XALBVIS_SOIL(:,1)/=XUNDEF) I%M%A%XALBVIS_SOIL(:,1)= I%M%A%XALBVIS_SOIL(:,1)*( 1.+ I%I%XPERTALB(:) )
+  WHERE(I%M%A%XALBUV_SOIL(:,1)/=XUNDEF)  I%M%A%XALBUV_SOIL(:,1) = I%M%A%XALBUV_SOIL(:,1) *( 1.+ I%I%XPERTALB(:) )
 !
-  CALL READ_SURF(&
-                 HPROGRAM,'PERTZ0LAND',ZPERTBUF(:,:),IRESP)
-  ALLOCATE(IM%I%I%XPERTZ0(KI))
-  IM%I%I%XPERTZ0(:)=ZPERTBUF(:,1)
-  WHERE(IM%I%M%T%XZ0(:,1)/=XUNDEF)      IM%I%M%T%XZ0(:,1)     =IM%I%M%T%XZ0(:,1)     *( 1.+ IM%I%I%XPERTZ0(:) )
-  WHERE(IM%I%IP%XZ0EFFIP(:,1)/=XUNDEF) IM%I%IP%XZ0EFFIP(:,1)=IM%I%IP%XZ0EFFIP(:,1)*( 1.+ IM%I%I%XPERTZ0(:) )
-  WHERE(IM%I%IP%XZ0EFFIM(:,1)/=XUNDEF) IM%I%IP%XZ0EFFIM(:,1)=IM%I%IP%XZ0EFFIM(:,1)*( 1.+ IM%I%I%XPERTZ0(:) )
-  WHERE(IM%I%IP%XZ0EFFJP(:,1)/=XUNDEF) IM%I%IP%XZ0EFFJP(:,1)=IM%I%IP%XZ0EFFJP(:,1)*( 1.+ IM%I%I%XPERTZ0(:) )
-  WHERE(IM%I%IP%XZ0EFFJM(:,1)/=XUNDEF) IM%I%IP%XZ0EFFJM(:,1)=IM%I%IP%XZ0EFFJM(:,1)*( 1.+ IM%I%I%XPERTZ0(:) )
+  CALL READ_SURF(HPROGRAM,'PERTZ0LAND',ZPERTBUF(:,:),IRESP)
+  ALLOCATE(I%I%XPERTZ0(KI))
+  I%I%XPERTZ0(:)=ZPERTBUF(:,1)
+  WHERE(I%M%T%XZ0(:,1)/=XUNDEF)      I%M%T%XZ0(:,1)     =I%M%T%XZ0(:,1)     *( 1.+ I%I%XPERTZ0(:) )
+  WHERE(ISS%XZ0EFFIP(:,1)/=XUNDEF) ISS%XZ0EFFIP(:,1)=ISS%XZ0EFFIP(:,1)*( 1.+ I%I%XPERTZ0(:) )
+  WHERE(ISS%XZ0EFFIM(:,1)/=XUNDEF) ISS%XZ0EFFIM(:,1)=ISS%XZ0EFFIM(:,1)*( 1.+ I%I%XPERTZ0(:) )
+  WHERE(ISS%XZ0EFFJP(:,1)/=XUNDEF) ISS%XZ0EFFJP(:,1)=ISS%XZ0EFFJP(:,1)*( 1.+ I%I%XPERTZ0(:) )
+  WHERE(ISS%XZ0EFFJM(:,1)/=XUNDEF) ISS%XZ0EFFJM(:,1)=ISS%XZ0EFFJM(:,1)*( 1.+ I%I%XPERTZ0(:) )
 !
 ENDIF
 !
@@ -725,27 +693,14 @@ ENDIF
 !*       14.    Output radiative fields
 !               -----------------------
 !
-ALLOCATE(IM%I%I%XEMIS_NAT   (KI))
-IM%I%I%XEMIS_NAT (:) = XUNDEF
+ALLOCATE(I%I%XEMIS_NAT   (KI))
+I%I%XEMIS_NAT (:) = XUNDEF
 !
- CALL AVERAGED_ALBEDO_EMIS_ISBA(IM%I, &
-                                IM%I%O%LFLOOD, IM%I%O%CALBEDO, PZENITH,                &
-                                 IM%I%M%T%XVEG,IM%I%M%T%XZ0,IM%I%M%T%XLAI,                          &
-                                 IM%I%O%LMEB_PATCH,IM%I%M%M%XGNDLITTER,&
-                                 IM%I%M%M%XZ0LITTER,IM%I%M%M%XLAIGV, &
-                                 IM%I%M%M%XH_VEG, IM%I%R%XTV,               &
-                                 ZTG1,                                   &
-                                 IM%I%IP%XPATCH,                                 &
-                                 PSW_BANDS,                              &
-                                 IM%I%M%T%XALBNIR_VEG,IM%I%M%T%XALBVIS_VEG,IM%I%M%T%XALBUV_VEG,     &
-                                 IM%I%M%A%XALBNIR_SOIL,IM%I%M%A%XALBVIS_SOIL,IM%I%M%A%XALBUV_SOIL,  &
-                                 IM%I%M%T%XEMIS,                                  &
-                                 IM%I%R%TSNOW,                                  &
-                                 IM%I%M%T%XALBNIR,IM%I%M%T%XALBVIS,IM%I%M%T%XALBUV,                 &
-                                 PDIR_ALB, PSCA_ALB,                     &
-                                 IM%I%I%XEMIS_NAT,ZTSRAD_NAT,ZTSURF_NAT         )  
+ CALL AVERAGED_ALBEDO_EMIS_ISBA(I%O, I%M%T, I%M%M, I%M%A, I%IP, I%I, I%R, I%M%X%XVEGTYPE, &
+                                PZENITH, ZTG1, PSW_BANDS, PDIR_ALB, PSCA_ALB, &
+                                I%I%XEMIS_NAT,ZTSRAD_NAT,ZTSURF_NAT         )  
 !
-PEMIS  = IM%I%I%XEMIS_NAT
+PEMIS  = I%I%XEMIS_NAT
 PTSRAD = ZTSRAD_NAT
 PTSURF = ZTSURF_NAT
 !
@@ -754,19 +709,16 @@ PTSURF = ZTSURF_NAT
 !*      15.     ISBA diagnostics initialization
 !               -------------------------------
 !
-IF(IM%I%O%NPATCH<=1) IM%DGI%LPATCH_BUDGET=.FALSE.
+IF(I%O%NPATCH<=1) DGI%O%LPATCH_BUDGET=.FALSE.
 !
- CALL DIAG_ISBA_INIT_n(&
-                       IM%CHI, IM%DGEI, IM%DGEIC, IM%DGEIP, IM%DGEIPC, &
-                       IM%DGI, IM%DGIC, IM%DGIP, IM%DGIPC, &
-                       IM%DGMI, IM%DGMIP, DGU, IM%GB, IM%I%O, &
-                       IM%I%R%TSNOW%SCHEME, IM%I%R%TSNOW%NLAYER, SIZE(IM%I%IP%XABC), &
-                       HPROGRAM,KI,KSW)
+ CALL DIAG_ISBA_INIT_n(CHI, DGI%DE, DGI%DEC, DGI%DEP, DGI%DEPC, DGI%O, &
+                       DGI%D, DGI%DC, DGI%DP, DGI%DPC, DGI%DM, DGI%DMP, &
+                       OREAD_BUDGETC, GB, I%O, I%R%TSNOW%SCHEME, I%R%TSNOW%NLAYER, &
+                       SIZE(I%IP%XABC), HPROGRAM,KI,KSW)
 !
 !-------------------------------------------------------------------------------
 !
- CALL INIT_SURF_TOPD(IM%DGEIC, IM%I, UG, U, &
-                     HPROGRAM,U%NDIM_FULL)
+ CALL INIT_SURF_TOPD(DGI%DEC, I, UG, U, HPROGRAM,U%NDIM_FULL)
 !
 !-------------------------------------------------------------------------------
 !

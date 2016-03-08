@@ -1,6 +1,5 @@
 !     ################################################################################
-SUBROUTINE SSO_Z0_FRICTION_n (USS, &
-                              PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
+SUBROUTINE SSO_Z0_FRICTION_n (USS, PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
 !     ################################################################################
 !
 !!****  *SSO_Z0_FRICTION_n * - Computes subgrid-scale orography friction
@@ -34,7 +33,7 @@ SUBROUTINE SSO_Z0_FRICTION_n (USS, &
 !----------------------------------------------------------------
 !
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
@@ -49,7 +48,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PSEA      ! Sea fraction                          (-)
 REAL, DIMENSION(:), INTENT(IN)    :: PUREF     ! Wind forcing height                   (m)
@@ -126,15 +125,15 @@ IF (USS%CROUGH=="Z04D") THEN
             ZCOS2(II) = COS(ZALFA(II))**2
             !
             IF (ZALFA(II)<0.) THEN
-               ZZ0EFF(II)=USS%XZ0EFFIM(II)*ZSIN2(II)
+               ZZ0EFF(II)=USS%XZ0EFFIM(II,1)*ZSIN2(II)
             ELSE
-               ZZ0EFF(II)=USS%XZ0EFFIP(II)*ZSIN2(II)
+               ZZ0EFF(II)=USS%XZ0EFFIP(II,1)*ZSIN2(II)
             END IF
             !
             IF (ZALFA(II)>=-XPI/2. .AND. ZALFA(II)<XPI/2.) THEN
-               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJP(II)*ZCOS2(II)
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJP(II,1)*ZCOS2(II)
             ELSE
-               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJM(II)*ZCOS2(II)
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJM(II,1)*ZCOS2(II)
             END IF
             !
          END IF

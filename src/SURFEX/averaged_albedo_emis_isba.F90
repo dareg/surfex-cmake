@@ -1,23 +1,7 @@
 !     #########
-      SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA (I, &
-                                            OFLOOD, HALBEDO, &
-                                 PZENITH,PVEG,PZ0,PLAI,     &
-                                 OMEB_PATCH,PGNDLITTER,     &
-                                 PZ0LITTER,PLAIGV,          &
-                                 PH_VEG, PTV,               &
-                                 PTG1,PPATCH,               &
-                                 PSW_BANDS,                 &
-                                 PALBNIR_VEG,PALBVIS_VEG,   &
-                                 PALBUV_VEG,                &
-                                 PALBNIR_SOIL,PALBVIS_SOIL, &
-                                 PALBUV_SOIL,               &
-                                 PEMIS_ECO,                 &
-                                 TPSNOW,                    &
-                                 PALBNIR_ECO,PALBVIS_ECO,   &
-                                 PALBUV_ECO,                &
-                                 PDIR_ALB,PSCA_ALB,         &
-                                 PEMIS,PTSRAD,PTSURF,       &
-                                 PDIR_SW, PSCA_SW           )
+      SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA (IO, MT, MM, MA, IP, I, IR, PVEGTYPE, &
+                                 PZENITH, PTG1, PSW_BANDS, PDIR_ALB, PSCA_ALB,     &
+                                 PEMIS, PTSRAD, PTSURF, PDIR_SW, PSCA_SW           )
 !     ###################################################
 !
 !!**** ** computes radiative fields used in ISBA
@@ -57,7 +41,10 @@
 !            -----------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t, ISBA_PARAM_MEB_t, ISBA_PARAM_ALB_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
+USE MODD_ISBA_n, ONLY: ISBA_PROG_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
@@ -81,42 +68,18 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: MT
+TYPE(ISBA_PARAM_MEB_t), INTENT(INOUT) :: MM
+TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: MA
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_INIT_t), INTENT(INOUT) :: I
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
 !
-LOGICAL,                INTENT(IN)   :: OFLOOD
- CHARACTER(LEN=4),       INTENT(IN)   :: HALBEDO     ! albedo type
-! Albedo dependance with surface soil water content
-!   "EVOL" = albedo evolves with soil wetness
-!   "DRY " = constant albedo value for dry soil
-!   "WET " = constant albedo value for wet soil
-!   "MEAN" = constant albedo value for medium soil wetness
-!
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PVEG        ! vegetation fraction
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0         ! roughness length
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAI        ! leaf area index
-LOGICAL, DIMENSION(:),  INTENT(IN)   :: OMEB_PATCH  ! multi-energy balance logical vector
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PGNDLITTER  ! Ground litter fraction
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PLAIGV      ! Understory leaf area index
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PZ0LITTER   ! Ground litter roughness length
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PH_VEG      ! Height of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PTV         ! canopy vegetation temperature
+REAL, DIMENSION(:,:), INTENT(IN) :: PVEGTYPE
 REAL, DIMENSION(:,:),   INTENT(IN)   :: PTG1        ! soil surface temperature
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PPATCH      ! tile fraction
-REAL, DIMENSION(:),     INTENT(IN)   :: PSW_BANDS   ! middle wavelength of each band
 REAL, DIMENSION(:),     INTENT(IN)   :: PZENITH     
-
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBNIR_VEG ! near-infra-red albedo of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS_VEG ! visible albedo of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV_VEG  ! UV albedo of vegetation
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBNIR_SOIL! near-infra-red albedo of soil
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBVIS_SOIL! visible albedo of soil
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PALBUV_SOIL ! UV albedo of soil
-REAL, DIMENSION(:,:),   INTENT(IN)   :: PEMIS_ECO   ! emissivity (soil+vegetation)
-TYPE(SURF_SNOW),        INTENT(IN)   :: TPSNOW      ! prognostic snow cover
-!
-REAL, DIMENSION(:,:),   INTENT(OUT)  :: PALBNIR_ECO ! near-infra-red albedo (soil+vegetation)
-REAL, DIMENSION(:,:),   INTENT(OUT)  :: PALBVIS_ECO ! visible albedo (soil+vegetation)
-REAL, DIMENSION(:,:),   INTENT(OUT)  :: PALBUV_ECO  ! UV albedo (soil+vegetation)
+REAL, DIMENSION(:),     INTENT(IN)   :: PSW_BANDS   ! middle wavelength of each band
 !
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PDIR_ALB    ! averaged direct albedo  (per wavelength)
 REAL, DIMENSION(:,:),   INTENT(OUT)  :: PSCA_ALB    ! averaged diffuse albedo (per wavelength)
@@ -132,25 +95,25 @@ REAL, DIMENSION(:,:),   INTENT(IN), OPTIONAL   :: PSCA_SW ! Downwelling diffuse 
 !            ------------------------------
 !
 !
-REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZDIR_ALB_PATCH 
+REAL, DIMENSION(SIZE(MT%XALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(MT%XALBVIS_VEG,2)) :: ZDIR_ALB_PATCH 
 !                                                     ! direct albedo
-REAL, DIMENSION(SIZE(PALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(PALBVIS_VEG,2)) :: ZSCA_ALB_PATCH 
+REAL, DIMENSION(SIZE(MT%XALBNIR_VEG,1),SIZE(PSW_BANDS),SIZE(MT%XALBVIS_VEG,2)) :: ZSCA_ALB_PATCH 
 !                                                     ! diffuse albedo
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSRAD_PATCH  ! Tsrad
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1),SIZE(PALBVIS_VEG,2)) :: ZTSURF_PATCH  ! Tsurf
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMIS         ! emissivity with flood
+REAL, DIMENSION(SIZE(MT%XEMIS,  1),SIZE(MT%XALBVIS_VEG,2)) :: ZEMIS_PATCH   ! emissivity with snow-flood
+REAL, DIMENSION(SIZE(MT%XEMIS,  1),SIZE(MT%XALBVIS_VEG,2)) :: ZTSRAD_PATCH  ! Tsrad
+REAL, DIMENSION(SIZE(MT%XEMIS,  1),SIZE(MT%XALBVIS_VEG,2)) :: ZTSURF_PATCH  ! Tsurf
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZEMIS         ! emissivity with flood
 !
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZSNOWDEPTH    ! Total snow depth
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZPALPHAN      ! Snow/canopy ratio factor 
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLW_RAD       ! Fake downwelling LW rad
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLW_UP        ! Upwelling LW rad
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_N      ! LW net for snow surface
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_V      ! LW net for canopy veg
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZLWNET_G      ! LW net for ground
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZDUMMY
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZEMISF
-REAL, DIMENSION(SIZE(PEMIS_ECO,  1)) :: ZFF
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZSNOWDEPTH    ! Total snow depth
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZPALPHAN      ! Snow/canopy ratio factor 
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZLW_RAD       ! Fake downwelling LW rad
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZLW_UP        ! Upwelling LW rad
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZLWNET_N      ! LW net for snow surface
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZLWNET_V      ! LW net for canopy veg
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZLWNET_G      ! LW net for ground
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZDUMMY
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZEMISF
+REAL, DIMENSION(SIZE(MT%XEMIS,  1)) :: ZFF
 !
 LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
@@ -166,8 +129,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGED_ALBEDO_EMIS_ISBA',0,ZHOOK_HANDLE)
 !
-INI=SIZE(PPATCH,1)
-INP=SIZE(PPATCH,2)
+INI=SIZE(IP%XPATCH,1)
+INP=SIZE(IP%XPATCH,2)
 !
 PDIR_ALB(:,:)=0.
 PSCA_ALB(:,:)=0.
@@ -179,7 +142,7 @@ ZDIR_ALB_PATCH(:,:,:)=0.
 ZSCA_ALB_PATCH(:,:,:)=0.
 ZEMIS_PATCH   (:,:  )=0.
 !
-LEXPLICIT_SNOW = (TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO')
+LEXPLICIT_SNOW = (IR%TSNOW%SCHEME=='3-L'.OR.IR%TSNOW%SCHEME=='CRO')
 !
 ZTSRAD_PATCH (:,:) = PTG1(:,:)
 ZTSURF_PATCH (:,:) = PTG1(:,:)
@@ -188,11 +151,7 @@ ZTSURF_PATCH (:,:) = PTG1(:,:)
 !*    1.      averaged albedo on natural continental surfaces (except prognostic snow)
 !             -----------------------------------------------
 !
- CALL ALBEDO(HALBEDO,                                    &
-              PALBVIS_VEG,PALBNIR_VEG,PALBUV_VEG,PVEG,    &
-              PALBVIS_SOIL,PALBNIR_SOIL,PALBUV_SOIL,      &
-              PALBVIS_ECO,PALBNIR_ECO,PALBUV_ECO          )  
-
+ CALL ALBEDO(IO%CALBEDO, MT, MA )
 !
 !*    2.      averaged albedo and emis. on natural continental surfaces (with prognostic snow)
 !             ---------------------------------------------------------
@@ -207,55 +166,45 @@ IF(PRESENT(PDIR_SW))THEN
 !
 ! For the case when MEB patch albedo is requested downweeling SW is needed
 !
-  CALL UPDATE_RAD_ISBA_n(I, &
-                         OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                         OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG,        &
-                         PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
-                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH,             &
-                         PDIR_SW, PSCA_SW,                                      &
-                         PALBNIR_VEG, PALBNIR_SOIL,                             &
-                         PALBVIS_VEG, PALBVIS_SOIL                              )
+  CALL UPDATE_RAD_ISBA_n(IO, MT, MM, MA, IP, I, IR, PVEGTYPE, &
+                         PZENITH,PSW_BANDS,ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH,        &
+                         PDIR_SW, PSCA_SW    )
 ELSE
 !
 ! For cases when MEB patch albedo is not requested no downweeling SW is needed
 !
-  CALL UPDATE_RAD_ISBA_n(I, &
-                         OFLOOD, TPSNOW%SCHEME,PZENITH,PSW_BANDS,PVEG,PLAI,PZ0, &
-                         OMEB_PATCH,PLAIGV,PGNDLITTER,PZ0LITTER, PH_VEG,        &
-                         PALBNIR_ECO,PALBVIS_ECO,PALBUV_ECO,PEMIS_ECO,          &
-                         ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH              )
+  CALL UPDATE_RAD_ISBA_n(IO, MT, MM, MA, IP, I, IR, PVEGTYPE, &
+                         PZENITH,PSW_BANDS, ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH  )
 ENDIF
 !
 !
 !* radiative surface temperature
 !
-DO JPATCH=1,SIZE(PALBVIS_VEG,2)
+DO JPATCH=1,SIZE(MT%XALBVIS_VEG,2)
 !
-  IF(OMEB_PATCH(JPATCH))THEN  ! MEB patches
+  IF(IO%LMEB_PATCH(JPATCH))THEN  ! MEB patches
 !
 !   ZPALPHAN is needed as input to ISBA_LWNET_MEB
 !
-    ZSNOWDEPTH(:) = SUM(TPSNOW%WSNOW(:,:,JPATCH)/TPSNOW%RHO(:,:,JPATCH),2)
-    ZPALPHAN(:)   = MEBPALPHAN(ZSNOWDEPTH,PH_VEG(:,JPATCH))
+    ZSNOWDEPTH(:) = SUM(IR%TSNOW%WSNOW(:,:,JPATCH)/IR%TSNOW%RHO(:,:,JPATCH),2)
+    ZPALPHAN(:)   = MEBPALPHAN(ZSNOWDEPTH,MM%XH_VEG(:,JPATCH))
 !
 !   ZLWNET_N,ZLWNET_V,ZLWNET_G are needed for ZLW_UP and ZTSRAD_PATCH
 !
-    IF(OFLOOD)THEN
-      ZEMISF(:) = I%I%XEMISF(:,JPATCH)
-      ZFF   (:) = I%I%XFF   (:,JPATCH)
+    IF(IO%LFLOOD)THEN
+      ZEMISF(:) = I%XEMISF(:,JPATCH)
+      ZFF   (:) = I%XFF   (:,JPATCH)
     ELSE
       ZEMISF(:) = XUNDEF
       ZFF   (:) = 0.0
     ENDIF
 !
-    CALL ISBA_LWNET_MEB(PLAI(:,JPATCH),I%R%XPSN(:,JPATCH),ZPALPHAN,   &
-        TPSNOW%EMIS(:,JPATCH),ZEMISF(:),ZFF(:),                   &
-        PTV(:,JPATCH),PTG1(:,JPATCH),TPSNOW%TS(:,JPATCH),         &
-        ZLW_RAD,ZLWNET_N,ZLWNET_V,ZLWNET_G,                       &
-        ZDUMMY,ZDUMMY,ZDUMMY,                                     &
-        ZDUMMY,ZDUMMY,ZDUMMY,                                     &
-        ZDUMMY,ZDUMMY,ZDUMMY,                                     &
-        ZDUMMY,ZDUMMY,ZDUMMY                                      )
+    CALL ISBA_LWNET_MEB(MT%XLAI(:,JPATCH),IR%XPSN(:,JPATCH),ZPALPHAN,   &
+                     IR%TSNOW%EMIS(:,JPATCH),ZEMISF(:),ZFF(:),          &
+                     IR%XTV(:,JPATCH),PTG1(:,JPATCH),IR%TSNOW%TS(:,JPATCH),  &
+                     ZLW_RAD,ZLWNET_N,ZLWNET_V,ZLWNET_G,                     &
+                     ZDUMMY,ZDUMMY,ZDUMMY, ZDUMMY,ZDUMMY,ZDUMMY,             &
+                     ZDUMMY,ZDUMMY,ZDUMMY, ZDUMMY,ZDUMMY,ZDUMMY            )
 !
     ZLW_UP(:)   = ZLW_RAD(:) - (ZLWNET_V(:) + ZLWNET_G(:) + ZLWNET_N(:))
 !
@@ -268,21 +217,21 @@ DO JPATCH=1,SIZE(PALBVIS_VEG,2)
 !
   ELSE   ! Non-MEB patches
 
-    ZEMIS(:) = PEMIS_ECO(:,JPATCH)
+    ZEMIS(:) = MT%XEMIS(:,JPATCH)
 !
-    IF(OFLOOD.AND.LEXPLICIT_SNOW)THEN
-      WHERE(I%R%XPSN(:,JPATCH)<1.0.AND.PEMIS_ECO(:,JPATCH)/=XUNDEF)          
-        ZEMIS(:) = ((1.-I%I%XFF(:,JPATCH)-I%R%XPSN(:,JPATCH))*PEMIS_ECO(:,JPATCH) + I%I%XFF(:,JPATCH)*I%I%XEMISF(:,JPATCH)) &
-                   /(1.-I%R%XPSN(:,JPATCH))
+    IF(IO%LFLOOD.AND.LEXPLICIT_SNOW)THEN
+      WHERE(IR%XPSN(:,JPATCH)<1.0.AND.MT%XEMIS(:,JPATCH)/=XUNDEF)          
+        ZEMIS(:) = ((1.-I%XFF(:,JPATCH)-IR%XPSN(:,JPATCH))*MT%XEMIS(:,JPATCH) + I%XFF(:,JPATCH)*I%XEMISF(:,JPATCH)) &
+                   /(1.-IR%XPSN(:,JPATCH))
       ENDWHERE   
     ENDIF
 !
     IF (.NOT.LEXPLICIT_SNOW) THEN
       ZTSRAD_PATCH(:,JPATCH) = PTG1(:,JPATCH)
     ELSE IF (LEXPLICIT_SNOW) THEN
-      WHERE (PEMIS_ECO(:,JPATCH)/=XUNDEF .AND. ZEMIS_PATCH(:,JPATCH)/=0.)
-        ZTSRAD_PATCH(:,JPATCH) =( ( (1.-I%R%XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
-                                    +    I%R%XPSN(:,JPATCH) *TPSNOW%EMIS(:,JPATCH)*TPSNOW%TS(:,JPATCH)**4 ) )**0.25  &
+      WHERE (MT%XEMIS(:,JPATCH)/=XUNDEF .AND. ZEMIS_PATCH(:,JPATCH)/=0.)
+        ZTSRAD_PATCH(:,JPATCH) =( ( (1.-IR%XPSN(:,JPATCH))*ZEMIS      (:)       *PTG1     (:,JPATCH)**4            &
+                                    +    IR%XPSN(:,JPATCH) *IR%TSNOW%EMIS(:,JPATCH)*IR%TSNOW%TS(:,JPATCH)**4 ) )**0.25  &
                                  / ZEMIS_PATCH(:,JPATCH)**0.25  
       END WHERE
     END IF
@@ -291,19 +240,19 @@ END DO
 !
 !* averaged radiative fields
 !
- CALL AVERAGE_RAD(PPATCH,                                                     &
+ CALL AVERAGE_RAD(IP%XPATCH,                                                     &
                    ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTSRAD_PATCH, &
                    PDIR_ALB,       PSCA_ALB,       PEMIS,       PTSRAD        )  
 !
 !* averaged effective temperature
 !
 IF(LEXPLICIT_SNOW)THEN
-  ZTSURF_PATCH(:,:) = PTG1(:,:)*(1.-I%R%XPSN(:,:)) + TPSNOW%TS(:,:)*I%R%XPSN(:,:)
+  ZTSURF_PATCH(:,:) = PTG1(:,:)*(1.-IR%XPSN(:,:)) + IR%TSNOW%TS(:,:)*IR%XPSN(:,:)
 ENDIF
 !
 DO JP=1,INP
   DO JI=1,INI
-     PTSURF(JI) = PTSURF(JI) + PPATCH(JI,JP) * ZTSURF_PATCH(JI,JP)
+     PTSURF(JI) = PTSURF(JI) + IP%XPATCH(JI,JP) * ZTSURF_PATCH(JI,JP)
   ENDDO
 ENDDO
 !

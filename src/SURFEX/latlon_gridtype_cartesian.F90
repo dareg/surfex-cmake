@@ -1,5 +1,5 @@
 !     #########################################################################
-      SUBROUTINE LATLON_GRIDTYPE_CARTESIAN(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
+      SUBROUTINE LATLON_GRIDTYPE_CARTESIAN(G,KL,PDIR)
 !     #########################################################################
 !
 !!****  *LATLON_GRIDTYPE_CARTESIAN* - routine to compute the horizontal geographic fields
@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_GRID_n, ONLY : GRID_t
+!
 USE MODD_CSTS,     ONLY : XPI
 !
 USE MODE_GRIDTYPE_CARTESIAN
@@ -47,12 +49,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
+TYPE(GRID_t), INTENT(INOUT) :: G
+!
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
-REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
-REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT       ! latitude  (degrees)
-REAL, DIMENSION(KL),        INTENT(OUT) :: PLON       ! longitude (degrees)
-REAL, DIMENSION(KL),        INTENT(OUT) :: PMESH_SIZE ! mesh size (m2)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
 !
 !*       0.2   Declarations of local variables
@@ -70,10 +69,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_CARTESIAN',0,ZHOOK_HANDLE)
-ALLOCATE(ZDX(SIZE(PLAT)))
-ALLOCATE(ZDY(SIZE(PLAT)))
+ALLOCATE(ZDX(SIZE(G%XLAT)))
+ALLOCATE(ZDY(SIZE(G%XLAT)))
 !
- CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0, &
+ CALL GET_GRIDTYPE_CARTESIAN(G%XGRID_PAR,ZLAT0,ZLON0, &
                               PDX=ZDX,PDY=ZDY        )  
 !
 !---------------------------------------------------------------------------
@@ -81,14 +80,14 @@ ALLOCATE(ZDY(SIZE(PLAT)))
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
- CALL LATLON_CARTESIAN(ZLAT0,ZLON0,PLAT,PLON)
+ CALL LATLON_CARTESIAN(ZLAT0,ZLON0,G%XLAT,G%XLON)
 !
 !-----------------------------------------------------------------------------
 !
 !*       3.    Compute grid size (2D array)
 !              -----------------
 !
-PMESH_SIZE(:) = ZDX(:) * ZDY(:)
+G%XMESH_SIZE(:) = ZDX(:) * ZDY(:)
 !
 !-----------------------------------------------------------------------------
 !

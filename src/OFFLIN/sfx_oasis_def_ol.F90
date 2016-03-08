@@ -1,7 +1,5 @@
 !#########
-SUBROUTINE SFX_OASIS_DEF_OL (I, &
-                              U, &
-                             HPROGRAM,HALG_MPI)
+SUBROUTINE SFX_OASIS_DEF_OL (IO, U, HPROGRAM,HALG_MPI)
 !#############################################
 !
 !!****  *SFX_OASIS_DEF_OL* - Offline driver for definitions for exchange of coupling fields
@@ -38,7 +36,7 @@ SUBROUTINE SFX_OASIS_DEF_OL (I, &
 !
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -63,7 +61,7 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -157,8 +155,7 @@ DEALLOCATE(ISEG_OFFSET)
 !*       2.     Put definitions for exchange of coupling fields :
 !               -------------------------------------------------
 !
-CALL SFX_OASIS_DEFINE(I, U, &
-                      HPROGRAM,INPTS,IPARAL)
+CALL SFX_OASIS_DEFINE(IO, U, HPROGRAM,INPTS,IPARAL)
 !
 DEALLOCATE(IPARAL)
 !

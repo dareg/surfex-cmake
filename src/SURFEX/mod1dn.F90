@@ -1,7 +1,7 @@
 !     #########
-    SUBROUTINE MOD1D_n (DGO, O, OR, SG, S, &
-                        HPROGRAM,PTIME,PEMIS,PDIR_ALB,PSCA_ALB,PLW,PSCA_SW,&
-                       PDIR_SW, PSFTH,PSFTQ,PSFU,PSFV,PRAIN,PSST )           
+    SUBROUTINE MOD1D_n (DGO, O, OR, PLAT, S, &
+                        HPROGRAM, PTIME, PEMIS, PDIR_ALB, PSCA_ALB, &
+                        PLW, PSCA_SW, PDIR_SW, PSFTH, PSFTQ, PSFU, PSFV, PRAIN )           
 !     #######################################################################
 !
 !!****  *MOD1D_n*  
@@ -71,7 +71,7 @@ IMPLICIT NONE
 TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(GRID_t), INTENT(INOUT) :: SG
+REAL, DIMENSION(:), INTENT(IN) :: PLAT
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
@@ -87,8 +87,6 @@ REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFTQ   ! flux of water vapor (kg/m2/s)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFU    ! zonal stress (Pa)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PSFV    ! meridian stress (Pa)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PRAIN   ! liquid precipitation (kg/s/m2)
-!
-REAL, DIMENSION(:)  ,INTENT(INOUT)    :: PSST    ! sea surface temperature (K)
 !
 !*      0.2    declarations of local variables
 !
@@ -133,13 +131,13 @@ IF (GCALLMIXT) THEN
  !Net solar flux  
     ZFSOL(JPT)=(SUM(PDIR_SW(JPT,:))+SUM(PSCA_SW(JPT,:))-SUM(ZSWU(JPT,:)))/(XRHOSW*XCPSW)
  !Calcul flux LW UP
-    ZLWU(JPT)= PEMIS(JPT)*XSTEFAN*PSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
+    ZLWU(JPT)= PEMIS(JPT)*XSTEFAN*S%XSST(JPT)**4 + (1-PEMIS(JPT))*PLW(JPT)
    
-    IF (PSST(JPT)<=(XTT-2)) THEN
+    IF (S%XSST(JPT)<=(XTT-2)) THEN
       ZFNSOL(JPT)=(PLW(JPT)-ZLWU(JPT)-PSFTH(JPT)-(XLSTT*PSFTQ(JPT)))/(XRHOSW*XCPSW)
       ZSFTEAU(JPT)=PSFTQ(JPT)/XRHOSWREF
     ELSE
-      ZLV(JPT)=XLVTT+(XCPV-XCL)*(PSST(JPT)-XTT)
+      ZLV(JPT)=XLVTT+(XCPV-XCL)*(S%XSST(JPT)-XTT)
       ZFNSOL(JPT)=(PLW(JPT)-ZLWU(JPT)-PSFTH(JPT)-(ZLV(JPT)*PSFTQ(JPT)))/(XRHOSW*XCPSW)
       ZSFTEAU(JPT)=(PSFTQ(JPT)-PRAIN(JPT))/XRHOSWREF
     ENDIF  
@@ -156,22 +154,21 @@ IF (GCALLMIXT) THEN
      ZSFTEAU(:) = 0.
   END IF
 
-  CALL MIXTL_n(O, OR, SG, &
-               ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP)
+  CALL MIXTL_n(O, OR, PLAT, ZFSOL,ZFNSOL,ZSFTEAU,PSFU,PSFV,ZSEATEMP)
 !
 !---------------------------------------------------------------------------
 !        3. Coupling with SURFEX by SST (and relative wind) evolution
 !
   IF (O%LPROGSST) THEN 
-    PSST(:)=ZSEATEMP(:)
+    S%XSST(:)=ZSEATEMP(:)
     !WRITE(ILUOUT,*) '**SST CHANGED FOR THE ',NOCTCOUNT,'TIME BY FIRST LEVEL OCEANIC MODEL TEMPERATURE AT ', ITIME,' s **'
   ENDIF
   !
 ENDIF
 !
 IF (GTIMEOK) THEN
-  CALL DIAG_INLINE_OCEAN_n(DGO, O, S)
-  O%NOCTCOUNT=O%NOCTCOUNT+1
+  CALL DIAG_INLINE_OCEAN_n(DGO, O, S%XSEABATHY)
+  O%NOCTCOUNT = O%NOCTCOUNT+1
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MOD1D_N',1,ZHOOK_HANDLE)

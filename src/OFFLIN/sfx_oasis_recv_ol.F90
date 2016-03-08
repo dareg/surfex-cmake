@@ -1,8 +1,8 @@
 !#########
 SUBROUTINE SFX_OASIS_RECV_OL (F, I, S, U, W, &
                               HPROGRAM,KI,KSW,PTIMEC,PTSTEP_SURF,   &
-                             PZENITH,PSW_BANDS,          &
-                             PTSRAD,PDIR_ALB,PSCA_ALB,PEMIS,PTSURF )
+                              PZENITH,PSW_BANDS,          &
+                              PTSRAD,PDIR_ALB,PSCA_ALB,PEMIS,PTSURF )
 !#############################################
 !
 !!****  *SFX_OASIS_RECV_OL* - Offline driver that receive coupling fields from oasis
@@ -151,7 +151,7 @@ CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,PTIMEC-PTSTEP_SURF,&
 IF(GOASIS_PUT)THEN
 !
   CALL PUT_SFXCPL_n(F, I, S, U, W, &
-                     HPROGRAM,KI,KSW,PSW_BANDS,                             &
+                     HPROGRAM,KI,KSW,PSW_BANDS,       &
                      PZENITH      (:),ZLAND_WTD   (:),&
                      ZLAND_FWTD   (:),ZLAND_FFLOOD(:),&
                      ZLAND_PIFLOOD(:),ZSEA_SST    (:),&

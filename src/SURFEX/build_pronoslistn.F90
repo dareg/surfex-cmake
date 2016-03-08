@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE BUILD_PRONOSLIST_n (SV, &
-                                     KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
+      SUBROUTINE BUILD_PRONOSLIST_n (HSV, KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
 !!    #######################################################################
 !!
 !!*** *BUILD_PRONOSLIST*
@@ -28,8 +27,6 @@
 !!    EXTERNAL
 !!    --------
 !
-USE MODD_SV_n, ONLY : SV_t
-!
 USE MODI_CH_OPEN_INPUTB
 !!
 !!    IMPLICIT ARGUMENTS
@@ -51,7 +48,7 @@ IMPLICIT NONE
 !*       0.1  declaration of arguments
 !
 !
-TYPE(SV_t), INTENT(INOUT) :: SV
+ CHARACTER(LEN=*), DIMENSION(:), POINTER :: HSV
 !
 INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
  CHARACTER(LEN=12), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
@@ -83,8 +80,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
 !
 ! CNAMES points on chemical variables name
-CNAMES => SV%CSV
-IEQ = SIZE(SV%CSV)
+CNAMES => HSV
+IEQ = SIZE(HSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !

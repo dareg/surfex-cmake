@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_NETCDF (DTCO, U, &
-                             HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
+SUBROUTINE PREP_ISBA_NETCDF (DTCO, U, HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_NETCDF* - prepares ISBA fields from initialization files in NETCDF
@@ -93,8 +92,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_NETCDF',0,ZHOOK_HANDLE)
 
 !*      1.    get nature dimension
 !
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     'NATURE',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',IL)
 !
 !*      2.     Reading of field
 !              ----------------

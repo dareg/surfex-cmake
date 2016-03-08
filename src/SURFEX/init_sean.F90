@@ -1,13 +1,12 @@
 !     #############################################################
-      SUBROUTINE INIT_SEA_n (DTCO, DGU, UG, U, SM, DGL, DGLC, &
-                             HPROGRAM,HINIT,                            &
-                              KI,KSV,KSW,                                &
-                              HSV,PCO2,PRHOA,                            &
-                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                              PEMIS,PTSRAD,PTSURF,                       &
-                              KYEAR, KMONTH,KDAY, PTIME,                 &
-                              HATMFILE,HATMFILETYPE,                     &
-                              HTEST                                      )  
+      SUBROUTINE INIT_SEA_n (DTCO, OREAD_BUDGETC, UG, U, SM, &
+                             DLO, DGL, DGLC, HPROGRAM,HINIT,KI,KSV,KSW,  &
+                             HSV,PCO2,PRHOA,                            &
+                             PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
+                             PEMIS,PTSRAD,PTSURF,                       &
+                             KYEAR, KMONTH,KDAY, PTIME,                 &
+                             HATMFILE,HATMFILETYPE,                     &
+                             HTEST                                      )  
 !     #############################################################
 !
 !!****  *INIT_SEA_n* - routine to initialize SEA
@@ -49,7 +48,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -68,10 +67,11 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
@@ -119,17 +119,16 @@ IF (U%CSEA=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CSEA=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DGL, DGLC, DGU%LREAD_BUDGETC, &
-                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                           PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
-                           PEMIS,PTSRAD,PTSURF,'OK'                    )  
+  CALL INIT_IDEAL_FLUX(DLO, DGL, DGLC, OREAD_BUDGETC, &
+                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
+                       PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CSEA=='SEAFLX') THEN
-  CALL INIT_SEAFLUX_n(DTCO, DGU, UG, U, SM, &
-                      HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                        PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                        PEMIS,PTSRAD,PTSURF,                          &
-                        KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
-                        'OK'                                          )  
+ CALL INIT_SEAFLUX_n(DTCO, OREAD_BUDGETC, UG, U, SM, &
+                     HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
+                     PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
+                     PEMIS,PTSRAD,PTSURF,                          &
+                     KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
+                     'OK'                                          )  
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_SEA_N',1,ZHOOK_HANDLE)
 !

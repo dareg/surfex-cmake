@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_ISBA (DTCO, DTI, DGU, IG, I, UG, U, USS, &
-                           HPROGRAM,OECOCLIMAP)
+      SUBROUTINE PGD_ISBA (DTCO, DTI, IG, IO, IP, ISS, UG, U, USS, PVEGTYPE, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_ISBA* monitor for averaging and interpolations of ISBA physiographic fields
@@ -53,12 +52,13 @@ USE MODN_IO_OFFLINE,     ONLY : LWR_VEGTYPE
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_COVER,     ONLY : XDATA_VEGTYPE
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
+USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
@@ -116,16 +116,17 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PGD_t), INTENT(INOUT) :: IP
+TYPE(SSO_t), INTENT(INOUT) :: ISS
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
+!
+ REAL, DIMENSION(:,:), POINTER :: PVEGTYPE
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
-LOGICAL,          INTENT(IN)  :: OECOCLIMAP ! T if parameters are computed with ecoclimap
-!                                           ! F if all parameters must be specified
 !
 !
 !*    0.2    Declaration of local variables
@@ -226,13 +227,13 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,         &
                        XUNIF_FERT                          )  
 !
-I%O%NPATCH        = IPATCH
-I%O%NGROUND_LAYER = IGROUND_LAYER
-I%O%CISBA         = YISBA
-I%O%CPEDOTF       = YPEDOTF
-I%O%CPHOTO        = YPHOTO
-I%O%LTR_ML        = GTR_ML
-I%O%XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
+IO%NPATCH        = IPATCH
+IO%NGROUND_LAYER = IGROUND_LAYER
+IO%CISBA         = YISBA
+IO%CPEDOTF       = YPEDOTF
+IO%CPHOTO        = YPHOTO
+IO%LTR_ML        = GTR_ML
+IO%XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
 !
 !
 !-------------------------------------------------------------------------------
@@ -240,26 +241,26 @@ I%O%XRM_PATCH     = MAX(MIN(ZRM_PATCH,1.),0.)
 !*    2.2      Reading of ISBA MEB namelist
 !             -----------------------------
 !
-IF (I%O%NPATCH<1 .OR. I%O%NPATCH>NVEGTYPE) THEN
+IF (IO%NPATCH<1 .OR. IO%NPATCH>NVEGTYPE) THEN
   WRITE(ILUOUT,*) '*****************************************'
   WRITE(ILUOUT,*) '* Number of patch must be between 1 and ', NVEGTYPE
-  WRITE(ILUOUT,*) '* You have chosen NPATCH = ', I%O%NPATCH
+  WRITE(ILUOUT,*) '* You have chosen NPATCH = ', IO%NPATCH
   WRITE(ILUOUT,*) '*****************************************'
   CALL ABOR1_SFX('PGD_ISBA: NPATCH MUST BE BETWEEN 1 AND NVEGTYPE')
 END IF
 !
-ALLOCATE(I%O%LMEB_PATCH(I%O%NPATCH))
+ALLOCATE(IO%LMEB_PATCH(IO%NPATCH))
 !
-I%O%LMEB_PATCH(:) = .FALSE.
-I%O%LFORC_MEASURE = .FALSE.
-I%O%LMEB_LITTER   = .FALSE.
+IO%LMEB_PATCH(:) = .FALSE.
+IO%LFORC_MEASURE = .FALSE.
+IO%LMEB_LITTER   = .FALSE.
 
 IF(GMEB)THEN
 
-  I%O%LTR_ML      = .TRUE. ! Always use this SW radiative transfer option with MEB
+  IO%LTR_ML      = .TRUE. ! Always use this SW radiative transfer option with MEB
 
-  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,GMEB_PATCH,I%O%LFORC_MEASURE,I%O%LMEB_LITTER)
-  I%O%LMEB_PATCH(1:I%O%NPATCH) = GMEB_PATCH(1:I%O%NPATCH)
+  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,GMEB_PATCH,IO%LFORC_MEASURE,IO%LMEB_LITTER)
+  IO%LMEB_PATCH(1:IO%NPATCH) = GMEB_PATCH(1:IO%NPATCH)
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -267,37 +268,37 @@ ENDIF
 !*    3.      Coherence of options
 !             --------------------
 !
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CISBA',I%O%CISBA,'2-L','3-L','DIF')
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CPEDOTF',I%O%CPEDOTF,'CH78','CO84')
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CPHOTO',I%O%CPHOTO,'NON','AGS','LAI','AST','LST','NIT','NCB')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CISBA',IO%CISBA,'2-L','3-L','DIF')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CPEDOTF',IO%CPEDOTF,'CH78','CO84')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CPHOTO',IO%CPHOTO,'NON','AGS','LAI','AST','LST','NIT','NCB')
 !
-SELECT CASE (I%O%CISBA)
+SELECT CASE (IO%CISBA)
 !
   CASE ('2-L')
 !          
-    I%O%NGROUND_LAYER = 2
-    I%O%CPEDOTF       ='CH78'   
+    IO%NGROUND_LAYER = 2
+    IO%CPEDOTF       ='CH78'   
     WRITE(ILUOUT,*) '*****************************************'
-    WRITE(ILUOUT,*) '* With option CISBA = ',I%O%CISBA,'         *'
+    WRITE(ILUOUT,*) '* With option CISBA = ',IO%CISBA,'         *'
     WRITE(ILUOUT,*) '* the number of soil layers is set to 2 *'
     WRITE(ILUOUT,*) '* Pedo transfert function = CH78        *'    
     WRITE(ILUOUT,*) '*****************************************'
 !    
   CASE ('3-L')
 !          
-    I%O%NGROUND_LAYER = 3
-    I%O%CPEDOTF       ='CH78'    
+    IO%NGROUND_LAYER = 3
+    IO%CPEDOTF       ='CH78'    
     WRITE(ILUOUT,*) '*****************************************'
-    WRITE(ILUOUT,*) '* With option CISBA = ',I%O%CISBA,'         *'
+    WRITE(ILUOUT,*) '* With option CISBA = ',IO%CISBA,'         *'
     WRITE(ILUOUT,*) '* the number of soil layers is set to 3 *'
     WRITE(ILUOUT,*) '* Pedo transfert function = CH78        *'    
     WRITE(ILUOUT,*) '*****************************************'
 !    
   CASE ('DIF')
 !          
-    IF(I%O%NGROUND_LAYER==NUNDEF)THEN
-      IF(OECOCLIMAP)THEN
-        I%O%NGROUND_LAYER=NOPTIMLAYER
+    IF(IO%NGROUND_LAYER==NUNDEF)THEN
+      IF(U%LECOCLIMAP)THEN
+        IO%NGROUND_LAYER=NOPTIMLAYER
       ELSE
         WRITE(ILUOUT,*) '****************************************'
         WRITE(ILUOUT,*) '* Number of ground layer not specified *'
@@ -306,54 +307,54 @@ SELECT CASE (I%O%CISBA)
       ENDIF
     ENDIF
 ! 
-    ALLOCATE(I%O%XSOILGRID(I%O%NGROUND_LAYER))
-    I%O%XSOILGRID(:)=XUNDEF
-    I%O%XSOILGRID(:)=ZSOILGRID(1:I%O%NGROUND_LAYER) 
+    ALLOCATE(IO%XSOILGRID(IO%NGROUND_LAYER))
+    IO%XSOILGRID(:)=XUNDEF
+    IO%XSOILGRID(:)=ZSOILGRID(1:IO%NGROUND_LAYER) 
     IF (ALL(ZSOILGRID(:)==XUNDEF)) THEN
-      IF(OECOCLIMAP) I%O%XSOILGRID(1:I%O%NGROUND_LAYER)=XOPTIMGRID(1:I%O%NGROUND_LAYER)
-    ELSEIF (COUNT(I%O%XSOILGRID/=XUNDEF)/=I%O%NGROUND_LAYER) THEN
+      IF(U%LECOCLIMAP) IO%XSOILGRID(1:IO%NGROUND_LAYER)=XOPTIMGRID(1:IO%NGROUND_LAYER)
+    ELSEIF (COUNT(IO%XSOILGRID/=XUNDEF)/=IO%NGROUND_LAYER) THEN
       WRITE(ILUOUT,*) '********************************************************'
       WRITE(ILUOUT,*) '* Soil grid reference values /= number of ground layer *'
       WRITE(ILUOUT,*) '********************************************************'
       CALL ABOR1_SFX('PGD_ISBA: XSOILGRID must be coherent with NGROUND_LAYER in NAM_ISBA') 
-    ELSEIF (I%O%XSOILGRID(1).GT.0.01) THEN
+    ELSEIF (IO%XSOILGRID(1).GT.0.01) THEN
       CALL ABOR1_SFX('PGD_ISBA: First layer of XSOILGRID must be lower than 1cm')
     ENDIF
 !
     WRITE(ILUOUT,*) '*****************************************'
-    WRITE(ILUOUT,*) '* Option CISBA            = ',I%O%CISBA
-    WRITE(ILUOUT,*) '* Pedo transfert function = ',I%O%CPEDOTF    
-    WRITE(ILUOUT,*) '* Number of soil layers   = ',I%O%NGROUND_LAYER
-    IF(OECOCLIMAP)THEN
-      WRITE(ILUOUT,*) '* Soil layers grid (m)    = ',I%O%XSOILGRID(1:I%O%NGROUND_LAYER)
+    WRITE(ILUOUT,*) '* Option CISBA            = ',IO%CISBA
+    WRITE(ILUOUT,*) '* Pedo transfert function = ',IO%CPEDOTF    
+    WRITE(ILUOUT,*) '* Number of soil layers   = ',IO%NGROUND_LAYER
+    IF(U%LECOCLIMAP)THEN
+      WRITE(ILUOUT,*) '* Soil layers grid (m)    = ',IO%XSOILGRID(1:IO%NGROUND_LAYER)
     ENDIF
     WRITE(ILUOUT,*) '*****************************************'
 !    
 END SELECT
 !
-SELECT CASE (I%O%CPHOTO)
+SELECT CASE (IO%CPHOTO)
   CASE ('AGS','LAI','AST','LST')
-    I%O%NNBIOMASS = 1
+    IO%NNBIOMASS = 1
   CASE ('NIT')
-    I%O%NNBIOMASS = 3
+    IO%NNBIOMASS = 3
   CASE ('NCB')
-    I%O%NNBIOMASS = 6
+    IO%NNBIOMASS = 6
 END SELECT
 WRITE(ILUOUT,*) '*****************************************'
-WRITE(ILUOUT,*) '* With option CPHOTO = ',I%O%CPHOTO,'               *'
-WRITE(ILUOUT,*) '* the number of biomass pools is set to ', I%O%NNBIOMASS
+WRITE(ILUOUT,*) '* With option CPHOTO = ',IO%CPHOTO,'               *'
+WRITE(ILUOUT,*) '* the number of biomass pools is set to ', IO%NNBIOMASS
 WRITE(ILUOUT,*) '*****************************************'
 !
-IF ( I%O%CPHOTO/='NON' .AND. I%O%NPATCH/=12 .AND. I%O%NPATCH/=19 ) THEN
+IF ( IO%CPHOTO/='NON' .AND. IO%NPATCH/=12 .AND. IO%NPATCH/=19 ) THEN
   WRITE(ILUOUT,*) '*****************************************'
-  WRITE(ILUOUT,*) '* With option CPHOTO = ', I%O%CPHOTO
+  WRITE(ILUOUT,*) '* With option CPHOTO = ', IO%CPHOTO
   WRITE(ILUOUT,*) '* Number of patch must be equal to 12 or 19'
-  WRITE(ILUOUT,*) '* But you have chosen NPATCH = ', I%O%NPATCH
+  WRITE(ILUOUT,*) '* But you have chosen NPATCH = ', IO%NPATCH
   WRITE(ILUOUT,*) '*****************************************'
-  CALL ABOR1_SFX('PGD_ISBA: CPHOTO='//I%O%CPHOTO//' REQUIRES NPATCH=12 or 19')
+  CALL ABOR1_SFX('PGD_ISBA: CPHOTO='//IO%CPHOTO//' REQUIRES NPATCH=12 or 19')
 END IF
 !
-IF ( I%O%CPHOTO=='NON' .AND. I%O%LTR_ML .AND. .NOT. GMEB) THEN
+IF ( IO%CPHOTO=='NON' .AND. IO%LTR_ML .AND. .NOT. GMEB) THEN
   WRITE(ILUOUT,*) '*****************************************'
   WRITE(ILUOUT,*) '* With option CPHOTO == NON      '
   WRITE(ILUOUT,*) '* And With MEB = F               '
@@ -368,34 +369,26 @@ END IF
 !*    4.      Number of points and packing of general fields
 !             ----------------------------------------------
 !
- CALL GET_SURF_SIZE_n(DTCO, U, &
-                      'NATURE',ILU)
+ CALL GET_SURF_SIZE_n(DTCO, U, 'NATURE',ILU)
 !
-ALLOCATE(I%P%LCOVER     (JPCOVER))
-ALLOCATE(I%P%XZS        (ILU))
+ALLOCATE(IP%LCOVER     (JPCOVER))
+ALLOCATE(IP%XZS        (ILU))
 ALLOCATE(IG%XLAT       (ILU))
 ALLOCATE(IG%XLON       (ILU))
 ALLOCATE(IG%XMESH_SIZE (ILU))
-ALLOCATE(I%P%XZ0EFFJPDIR(ILU))
+ALLOCATE(ISS%XZ0EFFJPDIR(ILU))
 !
- CALL PACK_PGD(DTCO, U, &
-               HPROGRAM, 'NATURE',                    &
-                IG%CGRID,  IG%XGRID_PAR,                     &
-                I%P%LCOVER, I%P%XCOVER, I%P%XZS,                   &
-                IG%XLAT, IG%XLON, IG%XMESH_SIZE, I%P%XZ0EFFJPDIR    )  
+ CALL PACK_PGD(DTCO, U, HPROGRAM, 'NATURE',  IG, IP%LCOVER, IP%XCOVER, IP%XZS  )  
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.      Packing of ISBA specific fields
 !             -------------------------------
 !
- CALL GET_AOS_n(USS, &
-                HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
- CALL GET_SSO_n(USS, &
-                HPROGRAM,NL,ZSSO_SLOPE)
+ CALL GET_AOS_n(USS, HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
+ CALL GET_SSO_n(USS, HPROGRAM,NL,ZSSO_SLOPE)
 !
- CALL PACK_PGD_ISBA(DTCO, IG, I%P, U, &
-                    HPROGRAM,                                    &
+ CALL PACK_PGD_ISBA(DTCO, IG%NDIM, ISS, U, HPROGRAM,               &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
                      ZSSO_SLOPE                                   )  
@@ -405,34 +398,33 @@ ALLOCATE(I%P%XZ0EFFJPDIR(ILU))
 !*   15.      ISBA specific fields
 !             --------------------
 !
-I%O%LECOCLIMAP = OECOCLIMAP
+IO%LECOCLIMAP = U%LECOCLIMAP
 !
- CALL PGD_ISBA_PAR(DTCO, DGU, UG, U, USS, DTI, I, IG, &
-                   HPROGRAM)
+ CALL PGD_ISBA_PAR(DTCO, UG, U, USS, DTI, IO, IP, IG%NDIM, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 #ifdef SFX_OL
 IF (LWR_VEGTYPE) THEN
-  ALLOCATE(I%M%X%XVEGTYPE(ILU,NVEGTYPE))
+  ALLOCATE(PVEGTYPE(ILU,NVEGTYPE))
   IF (DTI%LDATA_VEGTYPE) THEN
-    I%M%X%XVEGTYPE(:,:) = DTI%XPAR_VEGTYPE(:,:)
+    PVEGTYPE(:,:) = DTI%XPAR_VEGTYPE(:,:)
   ELSE
     DO JVEGTYPE=1,NVEGTYPE
-      CALL AV_PGD(DTCO,I%M%X%XVEGTYPE(:,JVEGTYPE),I%P%XCOVER,XDATA_VEGTYPE(:,JVEGTYPE),'NAT','ARI',I%P%LCOVER)
+      CALL AV_PGD(DTCO,PVEGTYPE(:,JVEGTYPE),IP%XCOVER,XDATA_VEGTYPE(:,JVEGTYPE),'NAT','ARI',IP%LCOVER)
     ENDDO
   ENDIF
 ENDIF
 #endif
 !
-DEALLOCATE(I%P%XCOVER)
+DEALLOCATE(IP%XCOVER)
 !
 !-------------------------------------------------------------------------------
 !
 !*    6.      Topographic index for TOPMODEL
 !             ------------------------------
 !
- CALL PGD_TOPO_INDEX(DGU, DTCO, UG, U, USS, I, &
+ CALL PGD_TOPO_INDEX(DTCO, UG, U, USS, IP, IO%LCTI, &
                      HPROGRAM,ILU,YCTI,YCTIFILETYPE,LIMP_CTI)
 !
 !-------------------------------------------------------------------------------
@@ -442,76 +434,24 @@ DEALLOCATE(I%P%XCOVER)
 !
 CATYPE='ARI'
 !
-ALLOCATE(I%P%XSAND(ILU,I%O%NGROUND_LAYER))
+ALLOCATE(IP%XSAND(ILU,IO%NGROUND_LAYER))
 !
-IF(LIMP_SAND)THEN
+ CALL GET_FIELD(YSANDFILETYPE,YSAND,"SAND",LIMP_SAND,XUNIF_SAND,IP%XSAND(:,1))
 !
-  IF(YSANDFILETYPE=='NETCDF')THEN
-     CALL ABOR1_SFX('Use another format than netcdf for sand input file with LIMP_SAND')
-  ELSE
-#ifdef SFX_ASC
-     CFILEIN     = ADJUSTL(ADJUSTR(YSAND)//'.txt')
-#endif
-#ifdef SFX_FA
-     CFILEIN_FA  = ADJUSTL(ADJUSTR(YSAND)//'.fa')
-#endif
-#ifdef SFX_LFI
-     CFILEIN_LFI = ADJUSTL(YSAND)
-#endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YSANDFILETYPE,'NATURE','ISBA  ','READ ')
-  ENDIF     
-!   
-  CALL READ_SURF(&
-                 YSANDFILETYPE,'SAND',I%P%XSAND(:,1),IRESP) 
-!
-  CALL END_IO_SURF_n(YSANDFILETYPE)
-!
-ELSE
-   CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'sand fraction','NAT',YSAND,YSANDFILETYPE,XUNIF_SAND,I%P%XSAND(:,1))
-ENDIF
-!
-DO JLAYER=1,I%O%NGROUND_LAYER
-  I%P%XSAND(:,JLAYER) = I%P%XSAND(:,1)
+DO JLAYER=1,IO%NGROUND_LAYER
+  IP%XSAND(:,JLAYER) = IP%XSAND(:,1)
 END DO
 !-------------------------------------------------------------------------------
 !
 !*    8.      Clay fraction
 !             -------------
 !
-ALLOCATE(I%P%XCLAY(ILU,I%O%NGROUND_LAYER))
+ALLOCATE(IP%XCLAY(ILU,IO%NGROUND_LAYER))
 !
-IF(LIMP_CLAY)THEN
+ CALL GET_FIELD(YCLAYFILETYPE,YCLAY,"CLAY",LIMP_CLAY,XUNIF_CLAY,IP%XCLAY(:,1))
 !
-  IF(YCLAYFILETYPE=='NETCDF')THEN
-     CALL ABOR1_SFX('Use another format than netcdf for clay input file with LIMP_CLAY')
-  ELSE
-#ifdef SFX_ASC
-     CFILEIN     = ADJUSTL(ADJUSTR(YSAND)//'.txt')
-#endif
-#ifdef SFX_FA
-     CFILEIN_FA  = ADJUSTL(ADJUSTR(YSAND)//'.fa')
-#endif
-#ifdef SFX_LFI
-     CFILEIN_LFI = ADJUSTL(YSAND)
-#endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YCLAYFILETYPE,'NATURE','ISBA  ','READ ')
-  ENDIF     
-!   
-  CALL READ_SURF(&
-                 YCLAYFILETYPE,'CLAY',I%P%XCLAY(:,1),IRESP) 
-!
-  CALL END_IO_SURF_n(YCLAYFILETYPE)
-!
-ELSE
-  CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'clay fraction','NAT',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,I%P%XCLAY(:,1))
-ENDIF
-!
-DO JLAYER=1,I%O%NGROUND_LAYER
-  I%P%XCLAY(:,JLAYER) = I%P%XCLAY(:,1)
+DO JLAYER=1,IO%NGROUND_LAYER
+  IP%XCLAY(:,JLAYER) = IP%XCLAY(:,1)
 END DO
 !
 !-------------------------------------------------------------------------------
@@ -521,9 +461,9 @@ END DO
 !
 IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF))THEN
 !
-  ALLOCATE(I%P%XSOC(ILU,I%O%NGROUND_LAYER))
+  ALLOCATE(IP%XSOC(ILU,IO%NGROUND_LAYER))
 !
-  I%O%LSOCP=.TRUE.
+  IO%LSOCP=.TRUE.
 !
   IF((LEN_TRIM(YSOC_TOP)==0.AND.LEN_TRIM(YSOC_SUB)/=0).OR.(LEN_TRIM(YSOC_TOP)/=0.AND.LEN_TRIM(YSOC_SUB)==0))THEN
     WRITE(ILUOUT,*) ' '
@@ -535,69 +475,18 @@ IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF
     CALL ABOR1_SFX('PGD_ISBA: TOP AND SUB SOC INPUT FILE REQUIRED')        
   ENDIF
 !
-  IF(LIMP_SOC)THEN
+ CALL GET_FIELD(YSOCFILETYPE,YSOC_TOP,"SOC_TOP",LIMP_SOC,XUNIF_SOC_TOP,IP%XSOC(:,1))
 !
-!   Topsoil
+ CALL GET_FIELD(YSOCFILETYPE,YSOC_SUB,"SOC_SUB",LIMP_SOC,XUNIF_SOC_SUB,IP%XSOC(:,2))
 !
-    IF(YSOCFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOC')
-    ELSE
-#ifdef SFX_ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YSOC_TOP)//'.txt')
-#endif
-#ifdef SFX_FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOC_TOP)//'.fa')
-#endif
-#ifdef SFX_LFI
-       CFILEIN_LFI = ADJUSTL(YSOC_TOP)
-#endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YSOCFILETYPE,'NATURE','ISBA  ','READ ')
-    ENDIF     
-!   
-    CALL READ_SURF(&
-                 YSOCFILETYPE,'SOC_TOP',I%P%XSOC(:,1),IRESP) 
-!
-    CALL END_IO_SURF_n(YSOCFILETYPE)
-!
-!   Subsoil
-!
-    IF(YSOCFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for organic carbon input file with LIMP_SOC')
-    ELSE
-#ifdef SFX_ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YSOC_SUB)//'.txt')
-#endif
-#ifdef SFX_FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YSOC_SUB)//'.fa')
-#endif
-#ifdef SFX_LFI
-       CFILEIN_LFI = ADJUSTL(YSOC_SUB)
-#endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YSOCFILETYPE,'NATURE','ISBA  ','READ ')
-    ENDIF     
-!   
-    CALL READ_SURF(&
-                 YSOCFILETYPE,'SOC_SUB',I%P%XSOC(:,2),IRESP) 
-!
-    CALL END_IO_SURF_n(YSOCFILETYPE)
-!
-  ELSE
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'organic carbon','NAT',YSOC_TOP,YSOCFILETYPE,XUNIF_SOC_TOP,I%P%XSOC(:,1))
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'organic carbon','NAT',YSOC_SUB,YSOCFILETYPE,XUNIF_SOC_SUB,I%P%XSOC(:,2))
-  ENDIF
-!
-  DO JLAYER=2,I%O%NGROUND_LAYER
-    I%P%XSOC(:,JLAYER) = I%P%XSOC(:,2)
+  DO JLAYER=2,IO%NGROUND_LAYER
+    IP%XSOC(:,JLAYER) = IP%XSOC(:,2)
   END DO
 !
 ELSE
 !
-  I%O%LSOCP=.FALSE.
-  ALLOCATE(I%P%XSOC(0,0))
+  IO%LSOCP=.FALSE.
+  ALLOCATE(IP%XSOC(0,0))
 !
 ENDIF
 !
@@ -606,41 +495,16 @@ ENDIF
 !
 IF(LEN_TRIM(YPERM)/=0.OR.XUNIF_PERM/=XUNDEF)THEN
 !
-  ALLOCATE(I%P%XPERM(ILU))
+  ALLOCATE(IP%XPERM(ILU))
 !
-  I%O%LPERM=.TRUE.
-!
-  IF(LIMP_PERM)THEN
-!
-    IF(YPERMFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for permafrost input file with LIMP_PERM')
-    ELSE
-#ifdef SFX_ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YPERM)//'.txt')
-#endif
-#ifdef SFX_FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YPERM)//'.fa')
-#endif
-#ifdef SFX_LFI
-       CFILEIN_LFI = ADJUSTL(YPERM)
-#endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YPERMFILETYPE,'NATURE','ISBA  ','READ ')
-    ENDIF     
-!   
-    CALL READ_SURF(&
-                 YPERMFILETYPE,'PERM',I%P%XPERM(:),IRESP) 
-!
-    CALL END_IO_SURF_n(YPERMFILETYPE)
-  ELSE
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'permafrost mask','NAT',YPERM,YPERMFILETYPE,XUNIF_PERM,I%P%XPERM(:))
-  ENDIF
+  IO%LPERM=.TRUE.
+! 
+ CALL GET_FIELD(YPERMFILETYPE,YPERM,"PERM",LIMP_PERM,XUNIF_PERM,IP%XPERM(:))
 !
 ELSE
 !
-  I%O%LPERM=.FALSE.  
-  ALLOCATE(I%P%XPERM(0))
+  IO%LPERM=.FALSE.  
+  ALLOCATE(IP%XPERM(0))
 !
 ENDIF
 !
@@ -649,41 +513,16 @@ ENDIF
 !
 IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
 !
-  ALLOCATE(I%P%XGW(ILU))
+  ALLOCATE(IP%XGW(ILU))
 !
-  I%O%LGW=.TRUE.
+  IO%LGW=.TRUE.
 !
-  IF(LIMP_GW)THEN
-!
-    IF(YGWFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for groundwater input file with LIMP_GW')
-    ELSE
-#ifdef SFX_ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YGW)//'.txt')
-#endif
-#ifdef SFX_FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YGW)//'.fa')
-#endif
-#ifdef SFX_LFI
-       CFILEIN_LFI = ADJUSTL(YGW)
-#endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YGWFILETYPE,'NATURE','ISBA  ','READ ')
-    ENDIF     
-!   
-    CALL READ_SURF(&
-                 YGWFILETYPE,'GW',I%P%XGW(:),IRESP) 
-!
-    CALL END_IO_SURF_n(YGWFILETYPE)
-  ELSE
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'Groundwater bassin','NAT',YGW,YGWFILETYPE,XUNIF_GW,I%P%XGW(:))
-  ENDIF
+ CALL GET_FIELD(YGWFILETYPE,YGW,"GW",LIMP_GW,XUNIF_GW,IP%XGW(:))
 !
 ELSE
 !
-  I%O%LGW=.FALSE.  
-  ALLOCATE(I%P%XGW(0))
+  IO%LGW=.FALSE.  
+  ALLOCATE(IP%XGW(0))
 !
 ENDIF
 !
@@ -692,17 +531,18 @@ ENDIF
 !*    12.  pH and fertlisation data
 !             --------------------------
 !
-IF((LEN_TRIM(YPHFILETYPE)/=0.OR.XUNIF_PH/=XUNDEF) .AND. (LEN_TRIM(YFERTFILETYPE)/=0.OR.XUNIF_FERT/=XUNDEF)) THEN
+IF((LEN_TRIM(YPHFILETYPE)/=0.OR.XUNIF_PH/=XUNDEF) .AND. &
+   (LEN_TRIM(YFERTFILETYPE)/=0.OR.XUNIF_FERT/=XUNDEF)) THEN
   !
-  ALLOCATE(I%P%XPH(ILU))
-  ALLOCATE(I%P%XFERT(ILU))
+  ALLOCATE(IP%XPH(ILU))
+  ALLOCATE(IP%XFERT(ILU))
   !
-  I%O%LNOF = .TRUE.
+  IO%LNOF = .TRUE.
   !
   CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'pH value','NAT',YPH,YPHFILETYPE,XUNIF_PH,I%P%XPH(:))
+                  HPROGRAM,'pH value','NAT',YPH,YPHFILETYPE,XUNIF_PH,IP%XPH(:))
   CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'fertilisation','NAT',YFERT,YFERTFILETYPE,XUNIF_FERT,I%P%XFERT(:))
+                  HPROGRAM,'fertilisation','NAT',YFERT,YFERTFILETYPE,XUNIF_FERT,IP%XFERT(:))
   !
 ENDIF
 !
@@ -711,35 +551,81 @@ ENDIF
 !*    13.      Subgrid runoff 
 !             --------------
 !
-ALLOCATE(I%P%XRUNOFFB(ILU))
- CALL PGD_FIELD(DTCO, UG, U, USS, &
-                HPROGRAM,'subgrid runoff','NAT',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,I%P%XRUNOFFB(:))  
+ALLOCATE(IP%XRUNOFFB(ILU))
+ CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'subgrid runoff','NAT',YRUNOFFB,YRUNOFFBFILETYPE,&
+                        XUNIF_RUNOFFB,IP%XRUNOFFB(:))  
 !
 !-------------------------------------------------------------------------------
 !
 !*    14.     Drainage coefficient
 !             --------------------
 !
-ALLOCATE(I%P%XWDRAIN(ILU))
- CALL PGD_FIELD(DTCO, UG, U, USS, &
-                HPROGRAM,'subgrid drainage','NAT',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,I%P%XWDRAIN(:))
+ALLOCATE(IP%XWDRAIN(ILU))
+ CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'subgrid drainage','NAT',YWDRAIN,YWDRAINFILETYPE,&
+                        XUNIF_WDRAIN,IP%XWDRAIN(:))
 !
 !-------------------------------------------------------------------------------
 !
- CALL PGD_TOPD(I, UG, U, USS, &
-               HPROGRAM)
+ CALL PGD_TOPD(IO%CISBA, UG%G%CGRID, UG%G%XGRID_PAR, U%NDIM_FULL, USS%XSSO_SLOPE, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*   16.     Prints of cover parameters in a tex file
 !            ----------------------------------------
 !
-IF (OECOCLIMAP) THEN
-  CALL WRITE_COVER_TEX_ISBA    (I%O%NPATCH,I%O%NGROUND_LAYER,I%O%CISBA)
-  CALL WRITE_COVER_TEX_ISBA_PAR(DTCO, I, &
-                                I%O%NPATCH,I%O%NGROUND_LAYER,I%O%CISBA,I%O%CPHOTO,I%O%XSOILGRID)
+IF (U%LECOCLIMAP) THEN
+  CALL WRITE_COVER_TEX_ISBA    (IO%NPATCH,IO%NGROUND_LAYER,IO%CISBA)
+  CALL WRITE_COVER_TEX_ISBA_PAR(DTCO, IO%CALBEDO, IO%LTR_ML, &
+                                IO%NPATCH,IO%NGROUND_LAYER,IO%CISBA,IO%CPHOTO,IO%XSOILGRID)
 END IF
 IF (LHOOK) CALL DR_HOOK('PGD_ISBA',1,ZHOOK_HANDLE)
+!
+CONTAINS
+!
+SUBROUTINE GET_FIELD(HFILETYPE,HFILE,HFIELD,OIMP,PUNIF,PFIELD)
+!
+IMPLICIT NONE
+!
+ CHARACTER(LEN=*), INTENT(IN) :: HFILETYPE
+ CHARACTER(LEN=*), INTENT(IN) :: HFILE
+ CHARACTER(LEN=*), INTENT(IN) :: HFIELD
+LOGICAL, INTENT(IN) :: OIMP
+REAL, INTENT(IN) :: PUNIF
+REAL, DIMENSION(:), INTENT(OUT) :: PFIELD
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('PGD_ISBA:GET_FIELD',0,ZHOOK_HANDLE)
+!
+IF(OIMP)THEN
+!
+  IF(HFILETYPE=='NETCDF')THEN
+     CALL ABOR1_SFX('Use another format than netcdf for '//TRIM(HFIELD)//' input file with LIMP ')
+  ELSE
+#ifdef SFX_ASC
+     CFILEIN     = ADJUSTL(ADJUSTR(HFILE)//'.txt')
+#endif
+#ifdef SFX_FA
+     CFILEIN_FA  = ADJUSTL(ADJUSTR(HFILE)//'.fa')
+#endif
+#ifdef SFX_LFI
+     CFILEIN_LFI = ADJUSTL(HFILE)
+#endif
+CALL INIT_IO_SURF_n(DTCO, U, HFILETYPE,'NATURE','ISBA  ','READ ')
+  ENDIF     
+!   
+  CALL READ_SURF(HFILETYPE,TRIM(HFIELD),PFIELD,IRESP) 
+!
+  CALL END_IO_SURF_n(HFILETYPE)
+!
+ELSE
+   CALL PGD_FIELD(DTCO, UG, U, USS, &
+                  HPROGRAM,HFIELD,'NAT',HFILE,HFILETYPE,PUNIF,PFIELD)
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('PGD_ISBA:GET_FIELD',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE GET_FIELD
 !
 !-------------------------------------------------------------------------------
 !

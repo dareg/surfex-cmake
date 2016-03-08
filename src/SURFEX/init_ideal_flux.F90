@@ -1,11 +1,8 @@
 !     ############################################################
-      SUBROUTINE INIT_IDEAL_FLUX (DGL, DGLC, OREAD_BUDGETC, &
-                                  HPROGRAM,HINIT,                            &
-                                   KI,KSV,KSW,                                &
-                                   HSV,PCO2,PRHOA,                            &
-                                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                   PEMIS,PTSRAD,PTSURF,                       &
-                                   HTEST                                      )  
+      SUBROUTINE INIT_IDEAL_FLUX (DLO, DGL, DGLC, OREAD_BUDGETC, &
+                                  HPROGRAM,HINIT,KI,KSV,KSW,     &
+                                  HSV,PDIR_ALB,PSCA_ALB,        &
+                                  PEMIS,PTSRAD,PTSURF, HTEST    )  
 !     ############################################################
 !
 !!****  *INIT_IDEAL_FLUX * - Prescription of the surface fluxes for the temperature, 
@@ -50,7 +47,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODD_IDEAL_FLUX, ONLY : XSFTS, XALB, XEMIS
 USE MODN_IDEAL_FLUX
@@ -72,6 +69,7 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 ! 
 !
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
@@ -83,11 +81,6 @@ INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
-REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
-REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
@@ -120,8 +113,9 @@ IF (LNAM_READ) THEN
  !*       0.1    defaults
  !               --------
  !
- CALL DEFAULT_DIAG_IDEAL(DGL%N2M,DGL%LSURF_BUDGET,DGL%L2M_MIN_ZS,DGL%LRAD_BUDGET,DGL%LCOEF,DGL%LSURF_VARS,&
-                         DGL%LSURF_BUDGETC,DGL%LRESET_BUDGETC,DGL%XDIAG_TSTEP           )  
+ CALL DEFAULT_DIAG_IDEAL(DLO%N2M, DLO%LSURF_BUDGET, DLO%L2M_MIN_ZS, DLO%LRAD_BUDGET,&
+                         DLO%LCOEF, DLO%LSURF_VARS, DLO%LSURF_BUDGETC, &
+                         DLO%LRESET_BUDGETC,DLO%XDIAG_TSTEP           )  
 
 ENDIF
 !----------------------------------------------------------------------------------
@@ -129,10 +123,8 @@ ENDIF
 !*       0.2    configuration
 !               -------------
 !
- CALL READ_DEFAULT_IDEAL_n(DGL, &
-                           HPROGRAM)
- CALL READ_IDEAL_CONF_n(DGL, &
-                        HPROGRAM)
+ CALL READ_DEFAULT_IDEAL_n(DLO, HPROGRAM)
+ CALL READ_IDEAL_CONF_n(DLO, HPROGRAM)
 !
 IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 
@@ -169,12 +161,11 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !               -------
 !
   IF (HINIT=='PRE') THEN
-    CALL PREP_CTRL_IDEAL(DGL%N2M,DGL%LSURF_BUDGET,DGL%L2M_MIN_ZS,DGL%LRAD_BUDGET,DGL%LCOEF,DGL%LSURF_VARS,&
-                          ILUOUT,DGL%LSURF_BUDGETC)  
+    CALL PREP_CTRL_IDEAL(DLO,ILUOUT)  
   ENDIF
 !
 !----------------------------------------------------------------------------------
-!
+!i
 !*       3.    HOURLY surface scalar mixing ratio fluxes (NFORCF+1 values per scalar from 00UTC to 24UTC)
 !              -----------------------------------------
 !
@@ -186,7 +177,8 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   XSFTS = 0.
 !
- CALL DIAG_IDEAL_INIT_n(DGL, DGLC, HPROGRAM, OREAD_BUDGETC, &
+ CALL DIAG_IDEAL_INIT_n(DLO, DGL, DGLC, &
+                        HPROGRAM, OREAD_BUDGETC, &
                         KI,KSW)
 !
 ENDIF

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_Z0_n (DGU, &
+      SUBROUTINE GET_Z0_n (DUO, DGU, &
                            HPROGRAM,KI,PZ0,PZ0H)
 !     #########################################
 !
@@ -35,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
@@ -50,7 +50,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DUO
 TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -70,7 +70,7 @@ IF (LHOOK) CALL DR_HOOK('GET_Z0_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGU%LCOEF)      THEN 
+IF (DUO%LCOEF)      THEN 
         PZ0      = DGU%XZ0      
         PZ0H     = DGU%XZ0H
    ELSE 

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX_SBL (SG, SSB)
+SUBROUTINE PREP_SEAFLUX_SBL (KDIM, SSB)
 !     #################################################################################
 !
 !!****  *PREP_SEAFLUX_SBL* - prepares SEAFLUX SBL fields
@@ -28,7 +28,6 @@ SUBROUTINE PREP_SEAFLUX_SBL (SG, SSB)
 !
 !
 !
-USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -42,7 +41,7 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: SG
+INTEGER, INTENT(IN) :: KDIM
 TYPE(CANOPY_t), INTENT(INOUT) :: SSB
 !
 INTEGER :: JLAYER
@@ -62,7 +61,7 @@ SSB%NLVL = 6
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(SG%NDIM,SSB%NLVL))
+ALLOCATE(ZZF(KDIM,SSB%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1
 ZZF(:,3) = 3.
@@ -70,7 +69,7 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(SSB%XZ(SG%NDIM,SSB%NLVL))
+ALLOCATE(SSB%XZ(KDIM,SSB%NLVL))
 DO JLAYER=1,SSB%NLVL-1
   SSB%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO

@@ -1,9 +1,6 @@
 !     #########
- SUBROUTINE DIAG_INLINE_ISBA_n (DGI, PKD, OSURF_BUDGETC, OCANOPY, &
-                                 PTA, PTS, PQA, PPA, PPS, PRHOA, PZONA, PMERA,  &
-                                  PHT, PHW, PCD, PCDN, PCH, PRI, PHU, PZ0, PZ0H, &
-                                  PZ0EFF, PSFTH, PSFTQ, PSFZON, PSFMER, PQS,     &
-                                  PDIR_ALB, PSCA_ALB, PDIR_SW, PSCA_SW, PLW, PRN )  
+ SUBROUTINE DIAG_INLINE_ISBA_n (DIO, INI, DGIP, OCANOPY, PTA, PQA, PPA, PPS, PRHOA, PZONA, PMERA, &
+                                  PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER, PDIR_SW, PSCA_SW, PLW )  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_ISBA_n * - computes diagnostics during ISBA time-step
@@ -33,8 +30,8 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_t
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 !
@@ -52,14 +49,13 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGI
-TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DIO
+TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
+TYPE(DIAG_t), INTENT(INOUT) :: DGIP
 !
-LOGICAL, INTENT(IN) :: OSURF_BUDGETC
 LOGICAL, INTENT(IN) :: OCANOPY
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PTA      ! atmospheric temperature
-REAL, DIMENSION(:), INTENT(IN)       :: PTS      ! surface temperature
 REAL, DIMENSION(:), INTENT(IN)       :: PQA      ! atmospheric specific humidity
 REAL, DIMENSION(:), INTENT(IN)       :: PPA      ! atmospheric level pressure
 REAL, DIMENSION(:), INTENT(IN)       :: PPS      ! surface pressure
@@ -68,21 +64,9 @@ REAL, DIMENSION(:), INTENT(IN)       :: PZONA    ! zonal wind
 REAL, DIMENSION(:), INTENT(IN)       :: PMERA    ! meridian wind
 REAL, DIMENSION(:), INTENT(IN)       :: PHT      ! atmospheric level height
 REAL, DIMENSION(:), INTENT(IN)       :: PHW      ! atmospheric level height for wind
-REAL, DIMENSION(:), INTENT(IN)       :: PCD      ! drag coefficient for momentum
-REAL, DIMENSION(:), INTENT(IN)       :: PCDN     ! neutral drag coefficient
-REAL, DIMENSION(:), INTENT(IN)       :: PCH      ! drag coefficient for heat
-REAL, DIMENSION(:), INTENT(IN)       :: PRI      ! Richardson number
-REAL, DIMENSION(:), INTENT(IN)       :: PHU      ! near-surface humidity
-REAL, DIMENSION(:), INTENT(IN)       :: PZ0      ! roughness length for momentum
-REAL, DIMENSION(:), INTENT(IN)       :: PZ0H     ! roughness length for heat
-REAL, DIMENSION(:), INTENT(IN)       :: PZ0EFF   ! effective roughness length (z0+z0rel)
-REAL, DIMENSION(:), INTENT(IN)       :: PQS      ! humidity at surface 
-REAL, DIMENSION(:,:), INTENT(IN)     :: PDIR_ALB ! direct albedo for each spectral band
-REAL, DIMENSION(:,:), INTENT(IN)     :: PSCA_ALB ! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(:,:), INTENT(IN)     :: PDIR_SW  ! direct  solar radiation (on horizontal surf.)
 REAL, DIMENSION(:,:), INTENT(IN)     :: PSCA_SW  ! diffuse solar radiation (on horizontal surf.)
 REAL, DIMENSION(:), INTENT(IN)       :: PLW      ! longwave radiation (on horizontal surf.)
-REAL, DIMENSION(:), INTENT(IN)       :: PRN      ! Surface net radiation
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PSFZON   ! zonal friction
 REAL, DIMENSION(:), INTENT(IN)       :: PSFMER   ! meridian friction
@@ -97,79 +81,66 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_ISBA_N',0,ZHOOK_HANDLE)
 !
-! * Richardson number
-!
-IF (DGI%N2M>=1) THEN
-    PKD%DGIP%XRI     = PRI        
-ENDIF
-!
 ! * Near surface atmospheric variables
 !
 IF (.NOT. OCANOPY) THEN
 !        
-  IF (DGI%N2M==1) THEN
-    CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW,  &
-                     PSFTH, PSFTQ, PSFZON, PSFMER,                     &
-                     PKD%DGIP%XT2M, PKD%DGIP%XQ2M, PKD%DGIP%XHU2M, PKD%DGIP%XZON10M, PKD%DGIP%XMER10M     )  
-  ELSE IF (DGI%N2M==2) THEN
+  IF (DIO%N2M==1) THEN
+    CALL PARAM_CLS(DGIP, PTA, DGIP%XTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+                   PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER    )  
+  ELSE IF (DIO%N2M==2) THEN
     ZH(:)=2.          
-    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,           &
-                  PCD, PCH, PRI,                   &
-                  PTS, PHU, PZ0H, ZH,              &
-                  PKD%DGIP%XT2M, PKD%DGIP%XQ2M, PKD%DGIP%XHU2M          )  
+    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DGIP%XCD, DGIP%XCH, DGIP%XRI, &
+                DGIP%XTS, DGIP%XHU, DGIP%XZ0H, ZH, DGIP%XT2M, DGIP%XQ2M, DGIP%XHU2M )  
     ZH(:)=10.                
-    CALL CLS_WIND(PZONA, PMERA, PHW,               &
-                    PCD, PCDN, PRI, ZH,            &
-                    PKD%DGIP%XZON10M, PKD%DGIP%XMER10M           )  
+    CALL CLS_WIND(PZONA, PMERA, PHW, DGIP%XCD, DGIP%XCDN, DGIP%XRI, ZH, &
+                 DGIP%XZON10M, DGIP%XMER10M  )  
   END IF
 !
 ELSE
   !        
-  IF (DGI%N2M>=1) THEN
-    PKD%DGIP%XT2M    = XUNDEF
-    PKD%DGIP%XQ2M    = XUNDEF
-    PKD%DGIP%XHU2M   = XUNDEF
-    PKD%DGIP%XZON10M = XUNDEF
-    PKD%DGIP%XMER10M = XUNDEF
+  IF (DIO%N2M>=1) THEN
+    DGIP%XT2M    = XUNDEF
+    DGIP%XQ2M    = XUNDEF
+    DGIP%XHU2M   = XUNDEF
+    DGIP%XZON10M = XUNDEF
+    DGIP%XMER10M = XUNDEF
   ENDIF
   !        
 ENDIF
 !
 ! * Surface energy budget
 !
-IF (DGI%LSURF_BUDGET.OR.OSURF_BUDGETC) THEN
+IF (DIO%LSURF_BUDGET.OR.DIO%LSURF_BUDGETC) THEN
    !
-   CALL DIAG_SURF_BUDGET_ISBA(PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB,  &
-                                PLW, PRN,                              &
-                                PKD%DGIP%XSWD, PKD%DGIP%XSWU, PKD%DGIP%XSWBD, PKD%DGIP%XSWBU,      &
-                                PKD%DGIP%XLWD, PKD%DGIP%XLWU   )          
+   CALL DIAG_SURF_BUDGET_ISBA(PDIR_SW, PSCA_SW, PLW, INI, DGIP)          
    !
-   PKD%DGIP%XFMU = PSFZON
-   PKD%DGIP%XFMV = PSFMER
+   DGIP%XFMU = PSFZON
+   DGIP%XFMV = PSFMER
    !
 END IF
 !
-IF (DGI%LCOEF) THEN
+IF (DIO%LCOEF) THEN
   !
   !* Transfer coefficient
   !
-  PKD%DGIP%XCD = PCD
-  PKD%DGIP%XCH = PCH
-  PKD%DGIP%XCE = PCH
+  DGIP%XCD = DGIP%XCD
+  DGIP%XCH = DGIP%XCH
+  DGIP%XCE = DGIP%XCH
   !
   !* Roughness lengths
   !
-  PKD%DGIP%XZ0  = PZ0
-  PKD%DGIP%XZ0H = PZ0H
-  PKD%DGIP%XZ0EFF         = PZ0EFF
+  DGIP%XZ0    = DGIP%XZ0
+  DGIP%XZ0H   = DGIP%XZ0H
+  DGIP%XZ0EFF = DGIP%XZ0EFF
   !
 ENDIF
 !
-IF (DGI%LSURF_VARS) THEN
+IF (DIO%LSURF_VARS) THEN
   !
   !* Humidity at surface
   !
-  PKD%DGIP%XQS = PQS
+  DGIP%XQS = DGIP%XQS
   !
 ENDIF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_ISBA_N',1,ZHOOK_HANDLE)

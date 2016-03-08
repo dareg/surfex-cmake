@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA (I, UG, U, &
-                               KI,KSTEP,GTOPD)
+      SUBROUTINE TOPD_TO_ISBA (IP, UG, U, KI,KSTEP,GTOPD)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -50,7 +49,7 @@
 !
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -78,7 +77,7 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -187,7 +186,7 @@ ENDDO
 XWG_FULL(:) = MAX(ZW(:),XWGMIN)
 !
 !
- CALL UNPACK_SAME_RANK(U%NR_NATURE,I%IP%XWSAT(:,2),ZWSAT_FULL)
+ CALL UNPACK_SAME_RANK(U%NR_NATURE,IP%XWSAT(:,2),ZWSAT_FULL)
 !
 XWSUPSAT=0.
 !ludo glace Wsat varie
@@ -213,8 +212,7 @@ IF ( (NFREQ_MAPS_WG/=0 .AND. MOD(KSTEP,NFREQ_MAPS_WG)==0) .OR.&
   ENDIF
   !
   CALL OPEN_FILE('ASCII ',NUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')
-  CALL WRITE_FILE_ISBAMAP(UG, &
-                          NUNIT,XWG_FULL,KI)
+  CALL WRITE_FILE_ISBAMAP(UG, NUNIT,XWG_FULL,KI)
   CALL CLOSE_FILE('ASCII ',NUNIT)
   !
 ENDIF

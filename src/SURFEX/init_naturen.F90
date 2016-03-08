@@ -1,14 +1,11 @@
 !     #############################################################
-      SUBROUTINE INIT_NATURE_n (DTCO, DGU, UG, U, USS, IM, DTZ, DGL, DGLC, &
-                                DST, SLT, SV, &
-                                  HPROGRAM,HINIT,OLAND_USE,                    &
-                                   KI,KSV,KSW,                                &
-                                   HSV,PCO2,PRHOA,                            &
-                                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                   PEMIS,PTSRAD,PTSURF,                       &
-                                   KYEAR, KMONTH,KDAY, PTIME,                 &
-                                   HATMFILE,HATMFILETYPE,                     &
-                                   HTEST                                      )  
+      SUBROUTINE INIT_NATURE_n (DTCO, OREAD_BUDGETC, UG, U, USS, IM, DTZ, &
+                                DLO, DGL, DGLC, DST, SLT, SV,             &
+                                HPROGRAM,HINIT,OLAND_USE, KI,KSV,KSW,     &
+                                HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,   &
+                                PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,PTSURF,    &
+                                KYEAR, KMONTH,KDAY, PTIME,                &
+                                HATMFILE,HATMFILETYPE,HTEST              )  
 !     #############################################################
 !
 !!****  *INIT_NATURE_n* - routine to choose initialization of vegetation scheme
@@ -50,10 +47,10 @@
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
@@ -79,11 +76,12 @@ IMPLICIT NONE
 !
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -135,17 +133,18 @@ IF (U%CNATURE=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CNATURE=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DGL, DGLC, DGU%LREAD_BUDGETC, &
-                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                           PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
+  CALL INIT_IDEAL_FLUX(DLO, DGL, DGLC, OREAD_BUDGETC, &
+                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
                            PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
-  CALL INIT_ISBA_n(DTCO, DGU, UG, U, USS, IM, DTZ, DST, SLT, SV, &
-                   HPROGRAM,HINIT,OLAND_USE,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                     PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                     PEMIS,PTSRAD,PTSURF,                          &
-                     KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
-                     'OK'                                          )  
+  CALL INIT_ISBA_n(DTCO, OREAD_BUDGETC, UG, U, USS, &
+                   IM%AG, IM%CHI, IM%DTI, IM%DGI, IM%GB, IM%ICP, IM%ISS, &
+                   IM%IG, IM%I, DTZ, DST, SLT, SV, &
+                   HPROGRAM,HINIT,OLAND_USE,KI,KSV,KSW,HSV,PCO2,PRHOA,  &
+                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
+                   PEMIS,PTSRAD,PTSURF,                          &
+                   KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
+                   'OK'                                          )  
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_NATURE_N',1,ZHOOK_HANDLE)
 !

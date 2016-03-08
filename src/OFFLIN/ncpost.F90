@@ -84,13 +84,10 @@ USE MODD_OFF_SURFEX_n
               CFILEIN='PGD.txt'
            ENDIF
 
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'ASCII ','FULL  ','SURF  ','READ ')
+           CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'ASCII ','FULL  ','SURF  ','READ ')
 
-           CALL READ_SURF(&
-                          'ASCII ','DIM_FULL', INI, IRET)
-           CALL READ_SURF(&
-                          'ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
+           CALL READ_SURF('ASCII ','DIM_FULL', INI, IRET)
+           CALL READ_SURF('ASCII ','GRID_TYPE', CGRID_TYPE, IRET)
 
         
            ALLOCATE(XLON(INI))
@@ -140,11 +137,9 @@ CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
         READ(46,'(A1,1X,A6,1X,A16,1X,A40)')PATCHFLAG,CMASK,HREC,CFILE
 
         CALL OPEN_FILEIN_OL
-CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
-                        'OFFLIN','FULL  ','SURF  ','READ ')
+        CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, 'OFFLIN','FULL  ','SURF  ','READ ')
         
-        CALL READ_SURF(&
-                       'OFFLIN','DIM_FULL', INI, IRET)
+        CALL READ_SURF('OFFLIN','DIM_FULL', INI, IRET)
         ALLOCATE(XLON(INI))
         ALLOCATE(XLAT(INI))
         OPEN(UNIT=30,FILE='LONLAT.dat',FORM='FORMATTED')
@@ -152,33 +147,28 @@ CALL INIT_IO_SURF_n(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%U, &
            READ(30,*)XLON(IP),XLAT(IP)
         ENDDO
 
-        CALL READ_SURF(&
-                       'OFFLIN','NB_TIMESTP', INB_FORC, IRET)
-        CALL READ_SURF(&
-                          'OFFLIN','PATCH_NUMBER', IPATCH, IRET)
+        CALL READ_SURF('OFFLIN','NB_TIMESTP', INB_FORC, IRET)
+        CALL READ_SURF('OFFLIN','PATCH_NUMBER', IPATCH, IRET)
         CALL system('rm SXPOST.nc')
         comlink='ln -s '//CFILE//' SXPOST.nc'
         CALL system(comlink)
 
         IF (CMASK == 'FORC') THEN
            allocate(zfield2d(inb_forc-1,ini))
-           CALL READ_SURF(&
-                          'OFFLIN',HREC,zfield2d(:,:), IRET)
+           CALL READ_SURF('OFFLIN',HREC,zfield2d(:,:), IRET)
            do ji=1,ini
               write(50,*)xlon(ji),xlat(ji),zfield2d(1,ji)
            enddo
         ELSEIF (CMASK == 'SIMU') THEN
            IF (PATCHFLAG == '+') THEN
               allocate(zfield3d(ini,ipatch,inb_forc-1))
-              CALL READ_SURF(&
-                             'OFFLIN',HREC,zfield3d(:,:,:), IRET)
+              CALL READ_SURF('OFFLIN',HREC,zfield3d(:,:,:), IRET)
               do ji=1,ini
                  write(50,*)xlon(ji),xlat(ji),zfield3d(ji,1,1)
               enddo
            ELSE IF (PATCHFLAG == '-') THEN
               allocate(zfield2d(ini,inb_forc-1))
-              CALL READ_SURF(&
-                             'OFFLIN',HREC,zfield2d(:,:), IRET)
+              CALL READ_SURF('OFFLIN',HREC,zfield2d(:,:), IRET)
               do ji=1,ini
                  write(50,*)xlon(ji),xlat(ji),zfield2d(ji,1)
               enddo

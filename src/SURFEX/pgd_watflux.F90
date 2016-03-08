@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_WATFLUX (DTCO, U, WG, W, &
-                              HPROGRAM)
+      SUBROUTINE PGD_WATFLUX (DTCO, U, WG, W, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_WATFLUX* monitor for averaging and interpolations of WATFLUX physiographic fields
@@ -97,8 +96,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',0,ZHOOK_HANDLE)
- CALL GET_SURF_SIZE_n(DTCO, U, &
-                      'WATER ',WG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',WG%NDIM)
 !
 ALLOCATE(W%LCOVER     (JPCOVER))
 ALLOCATE(W%XZS        (WG%NDIM))
@@ -106,11 +104,7 @@ ALLOCATE(WG%XLAT       (WG%NDIM))
 ALLOCATE(WG%XLON       (WG%NDIM))
 ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
 !
- CALL PACK_PGD(DTCO, U, &
-               HPROGRAM, 'WATER ',                    &
-                WG%CGRID,  WG%XGRID_PAR,                     &
-                W%LCOVER, W%XCOVER, W%XZS,                   &
-                WG%XLAT, WG%XLON, WG%XMESH_SIZE                 )  
+ CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', WG, W%LCOVER, W%XCOVER, W%XZS )  
 !
 !-------------------------------------------------------------------------------
 IF (NRANK==NPIO) CALL WRITE_COVER_TEX_WATER

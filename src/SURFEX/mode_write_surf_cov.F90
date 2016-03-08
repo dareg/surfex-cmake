@@ -8,16 +8,13 @@ PUBLIC :: WRITE_SURF_COV
 CONTAINS
 
 !     #############################################################
-      SUBROUTINE WRITE_SURF_COV (DGU, U, &
+      SUBROUTINE WRITE_SURF_COV (HSELECT, &
                                  HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODI_WRITE_SURF, ONLY: WRITE_SURF
 #ifdef SFX_MNH
@@ -32,8 +29,7 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
  CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be read
@@ -75,8 +71,7 @@ ELSE
       YREC = 'COVER_PACKED'
       YCOMMENT='-'
 !!    YCOMMENT=HCOMMENT
-      CALL WRITE_SURF(DGU, U, &
-                      HPROGRAM,YREC,.FALSE.,KRESP,YCOMMENT)
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YREC,.FALSE.,KRESP,YCOMMENT)
     ENDIF
   ENDIF
   !
@@ -88,8 +83,7 @@ ELSE
     IF (.NOT. OFLAG(JCOVER)) CYCLE
     ICOVER = ICOVER+1
     !
-    CALL WRITE_SURF(DGU, U, &
-                    HPROGRAM,YREC,PFIELD(:,ICOVER),KRESP,YCOMMENT,YDIR)
+    CALL WRITE_SURF(HSELECT, HPROGRAM,YREC,PFIELD(:,ICOVER),KRESP,YCOMMENT,YDIR)
     !
   END DO
 END IF

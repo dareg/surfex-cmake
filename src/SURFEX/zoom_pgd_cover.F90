@@ -125,8 +125,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
  CALL PREP_GRID_EXTERN(&
                        HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
- CALL PREP_OUTPUT_GRID(UG, U, &
-                       ILUOUT,UG%G%CGRID,UG%G%XGRID_PAR,UG%G%XLAT,UG%G%XLON)
+ CALL PREP_OUTPUT_GRID(UG%G, UG%G, U%NSIZE_FULL, ILUOUT)
 !
 !------------------------------------------------------------------------------
 !

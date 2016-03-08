@@ -1,6 +1,5 @@
 !     ##############################################################
-      SUBROUTINE UPDATE_ESM_WATFLUX_n (W, &
-                                       KI,KSW,PZENITH,PDIR_ALB,     &
+      SUBROUTINE UPDATE_ESM_WATFLUX_n (W, KI,KSW,PZENITH,PDIR_ALB,     &
                                       PSCA_ALB,PEMIS,PTSRAD,PTSURF )
 !     ##############################################################
 !
@@ -83,8 +82,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_WATFLUX_N',0,ZHOOK_HANDLE)
 !
-CALL UPDATE_RAD_WATER(W%CWAT_ALB,W%XTS,PZENITH,XTT,W%XEMIS,W%XDIR_ALB,&
-                      W%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD ) 
+CALL UPDATE_RAD_WATER(W,PZENITH,XTT,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD ) 
 !
 PTSURF(:) = W%XTS(:)
 !

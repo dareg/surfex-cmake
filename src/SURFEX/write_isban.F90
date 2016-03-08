@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_ISBA_n (DTCO, DGU, U, IM, DST, &
-                               HPROGRAM,HWRITE,OLAND_USE)
+      SUBROUTINE WRITE_ISBA_n (DTCO, HSELECT, U, CHI, DGI, ICP, I, DST, HPROGRAM,HWRITE,OLAND_USE)
 !     ####################################
 !
 !!****  *WRITE_ISBA_n* - routine to write surface variables in their respective files
@@ -38,10 +37,13 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_DST_n, ONLY : DST_t
+!
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_DIAG_t
+USE MODD_CANOPY_n, ONLY : CANOPY_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
 USE MODI_INIT_IO_SURF_n
@@ -61,9 +63,12 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT 
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(ISBA_DIAG_t), INTENT(INOUT) :: DGI
+TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(DST_t), INTENT(INOUT) :: DST
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -80,21 +85,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_ISBA_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'NATURE','ISBA  ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !        
- CALL WRITESURF_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I%O, &
-                            HPROGRAM)
- CALL WRITESURF_ISBA_n(DGU, U, &
-                       IM%CHI, DST, IM%I, &
-                       HPROGRAM,OLAND_USE)
+ CALL WRITESURF_ISBA_CONF_n(CHI, DGI%DE, DGI%O, DGI%DM, I%O, HPROGRAM)
+ CALL WRITESURF_ISBA_n(HSELECT, CHI, DST, I%O, I%IP%XPATCH, I%R, I%M%T%XLAI, &
+                       I%M%X%XDG, I%I%TTIME, HPROGRAM,OLAND_USE)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_ISBA_CANOPY_n(DGU, U, &
-                                                                        IM%ICP, IM%I%O%LCANOPY, &
-                                                                        HPROGRAM,HWRITE)
+IF ((.NOT.LNOWRITE_CANOPY).OR.SIZE(HSELECT)>0) THEN
+  CALL WRITESURF_ISBA_CANOPY_n(HSELECT, ICP, I%O%LCANOPY, HPROGRAM,HWRITE)
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,6 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_SURF_ATM_n (DGU, &
-                                           PHW, PHT, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
+       SUBROUTINE DIAG_INLINE_SURF_ATM_n (DUO, DGU, PHW, PHT, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 !     ###############################################################################!
 !!****  *DIAG_INLINE_SURF_ATM_n * - Computes diagnostics during SURF_ATM time-step
 !!
@@ -28,7 +27,7 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -38,6 +37,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DUO
 TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PHW    ! atmospheric level height for wind
@@ -56,7 +56,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SURF_ATM_N',0,ZHOOK_HANDLE)
-IF (DGU%LCOEF) THEN
+IF (DUO%LCOEF) THEN
   DGU%XUREF = PHW
   DGU%XZREF = PHT
 END IF

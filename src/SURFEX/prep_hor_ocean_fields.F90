@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_OCEAN_FIELDS (DTCO, UG, U, &
-                                   O, OR, SG, S, &
+SUBROUTINE PREP_HOR_OCEAN_FIELDS (DTCO, UG, U, O, OR, KLAT, PSEABATHY, &
                                   HPROGRAM,HSURF,HFILE,HFILETYPE,KLUOUT,OUNIF)
 !     #######################################################
 !
@@ -38,8 +37,6 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_OCEAN_CSTS,     ONLY : XRHOSWREF
@@ -63,8 +60,8 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(GRID_t), INTENT(INOUT) :: SG
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+REAL, DIMENSION(:), INTENT(IN) :: PSEABATHY
+INTEGER, INTENT(IN) :: KLAT
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -93,29 +90,25 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_OCEAN_FIELDS',0,ZHOOK_HANDLE)
 YSURF='TEMP_OC'
 YNCVARNAME='temperature'
- CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
-                           O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, O, OR, KLAT, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 !*      4.     Treatment of oceanic salinity
 YSURF='SALT_OC'
 YNCVARNAME='salinity'
- CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
-                           O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, O, OR, KLAT, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
 !*      5.     Treatment of oceanic current
 YSURF='UCUR_OC'
 YNCVARNAME='u'
- CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
-                           O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, O, OR, KLAT, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 YSURF='VCUR_OC'
 YNCVARNAME='v'
- CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, &
-                           O, OR, SG, &
+ CALL PREP_HOR_OCEAN_FIELD(DTCO, UG, U, O, OR, KLAT, &
                            HPROGRAM,HFILE,HFILETYPE,KLUOUT,OUNIF,YSURF,YNCVARNAME)
 !---------------------------------------------------------------------------
 !
@@ -149,7 +142,7 @@ IF (IL/=0) THEN
 !!              apply bathy mask
   DO J=1,IL
     DO JLEV=IK1+1,NOCKMAX
-      IF (S%XSEABATHY(J)-XZHOC(JLEV)>0.) THEN
+      IF (PSEABATHY(J)-XZHOC(JLEV)>0.) THEN
         O%XSEABATH(J,JLEV)=0.
         O%XSEAE(J,JLEV)  = XUNDEF
         O%XSEAU(J,JLEV)  = XUNDEF

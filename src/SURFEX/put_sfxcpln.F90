@@ -135,8 +135,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_LAND)THEN
-  CALL PUT_SFX_LAND(I, U, &
-                    ILUOUT,LCPL_GW,LCPL_FLOOD,PLAND_WTD(:),       &
+  CALL PUT_SFX_LAND(I, U, ILUOUT,LCPL_GW,LCPL_FLOOD,PLAND_WTD(:), &
                     PLAND_FWTD(:),PLAND_FFLOOD(:),PLAND_PIFLOOD(:))        
 ENDIF
 !
@@ -146,8 +145,7 @@ ENDIF
 !
 IF(LCPL_SEA)THEN
 !
-  CALL PUT_SFX_SEA(S, U, W, &
-                   ILUOUT,LCPL_SEAICE,LWATER,PSEA_SST(:),PSEA_UCU(:),       &
+  CALL PUT_SFX_SEA(S, U, W, ILUOUT,LCPL_SEAICE,LWATER,PSEA_SST(:),PSEA_UCU(:), &
                    PSEA_VCU(:),PSEAICE_SIT(:),PSEAICE_CVR(:),PSEAICE_ALB(:) )
 !
 ENDIF
@@ -157,8 +155,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_SEA.OR.LCPL_FLOOD)THEN
-  CALL UPDATE_ESM_SURF_ATM_n(F, I, S, U, W, &
-                             HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,    &
+  CALL UPDATE_ESM_SURF_ATM_n(F, I, S, U, W, HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,  &
                              PTSRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )
 ENDIF
 !

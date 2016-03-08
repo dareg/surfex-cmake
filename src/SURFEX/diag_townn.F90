@@ -1,13 +1,5 @@
 !     #########
-SUBROUTINE DIAG_TOWN_n (DGL, DGLC, DGT, U, &
-                        HPROGRAM,                                           &
-                         PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
-                         PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
-                         PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, PFMU, PFMV,   &
-                         PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,      &
-                         PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
-                         PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
-                         PEVAP, PEVAPC, PSUBL, PSUBLC                        )
+SUBROUTINE DIAG_TOWN_n (DLO, DGL, DGLC, DTO, DGT, U, HPROGRAM, DGUP, DGUPC, KMASK )
 !     ######################################################################
 !
 !!****  *DIAG_TOWN_n * - Chooses the surface schemes for town diagnostics
@@ -35,12 +27,9 @@ SUBROUTINE DIAG_TOWN_n (DGL, DGLC, DGT, U, &
 !       B. decharme 04/2013 : Add EVAP and SUBL diag
 !!------------------------------------------------------------------
 !
-
+USE MODE_DIAG
 !
-!
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -57,77 +46,31 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DTO
 TYPE(DIAG_t), INTENT(INOUT) :: DGT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
-REAL, DIMENSION(:), INTENT(OUT) :: PRN      ! Net radiation       (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PH       ! Sensible heat flux  (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLE      ! Total latent heat flux    (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLEI     ! Sublimation latent heat flux (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PGFLUX   ! Storage flux        (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PEVAP    ! Total evapotranspiration  (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PSUBL    ! Sublimation (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PRI      ! Richardson number   (-)
-REAL, DIMENSION(:), INTENT(OUT) :: PCD      ! drag coefficient    (W/s2)
-REAL, DIMENSION(:), INTENT(OUT) :: PCH      ! transf. coef heat   (W/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PCE      ! transf. coef vapor  (W/s/K)
-REAL, DIMENSION(:), INTENT(OUT) :: PQS
-REAL, DIMENSION(:), INTENT(OUT) :: PZ0      ! rough. length wind  (m)
-REAL, DIMENSION(:), INTENT(OUT) :: PZ0H     ! rough. length heat  (m)
-REAL, DIMENSION(:), INTENT(OUT) :: PTS      ! surface temperature (K)
-REAL, DIMENSION(:), INTENT(OUT) :: PT2M     ! temperature at 2m   (K)
-REAL, DIMENSION(:), INTENT(OUT) :: PQ2M     ! humidity at 2m      (kg/kg)
-REAL, DIMENSION(:), INTENT(OUT) :: PHU2M    ! relative humidity at 2m (-)
-REAL, DIMENSION(:), INTENT(OUT) :: PZON10M  ! zonal wind at 10m   (m/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PMER10M  ! meridian wind at 10m(m/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PSWD     ! incoming short wave radiation (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PSWU     ! outgoing short wave radiation (W/m2)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSWBD  ! incoming short wave radiation by spectral band(W/m2)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSWBU  ! outgoing short wave radiation by spectral band(W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLWD     ! incoming long wave radiation (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLWU     ! outgoing long wave radiation (W/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PFMU     ! zonal friction
-REAL, DIMENSION(:), INTENT(OUT) :: PFMV     ! meridian friction 
-REAL, DIMENSION(:), INTENT(OUT) :: PRNC     ! Net radiation       (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PHC      ! Sensible heat flux  (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLEC     ! Total latent heat flux       (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLEIC    ! Sublimation latent heat flux (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PGFLUXC  ! Storage flux        (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PEVAPC   ! Total evapotranspiration  (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PSUBLC   ! Sublimation (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PSWDC    ! incoming short wave radiation (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PSWUC    ! outgoing short wave radiation (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLWDC    ! incoming long wave radiation (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PLWUC    ! outgoing long wave radiation (J/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PFMUC    ! zonal friction
-REAL, DIMENSION(:), INTENT(OUT) :: PFMVC    ! meridian friction 
-REAL, DIMENSION(:), INTENT(OUT) :: PT2M_MIN ! Minimum temperature at 2m   (K)
-REAL, DIMENSION(:), INTENT(OUT) :: PT2M_MAX ! Maximum temperature at 2m   (K)
-REAL, DIMENSION(:), INTENT(OUT) :: PHU2M_MIN! Minimum relative humidity at 2m (-)
-REAL, DIMENSION(:), INTENT(OUT) :: PHU2M_MAX! Maximum relative humidity at 2m (-)
-REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M ! wind at 10m (m/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M_MAX! Maximum wind at 10m (m/s)
+TYPE(DIAG_t), INTENT(INOUT) :: DGUP
+TYPE(DIAG_t), INTENT(INOUT) :: DGUPC
+!
+INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PRN)) :: ZDELTA
+REAL, DIMENSION(SIZE(DGUP%XRN)) :: ZDELTA
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
 IF (U%CTOWN=='TEB   ') THEN
-  CALL DIAG_TEB_n(DGT, &
-                  HPROGRAM,                                           &
-                    PRN, PH, PLE, PGFLUX, PRI, PCD, PCH, PCE, PQS,      &
-                    PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
-                    PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,  &
-                    PT2M_MIN, PT2M_MAX, PHU2M_MIN, PHU2M_MAX,          &
-                    PWIND10M, PWIND10M_MAX                             )
+
+  CALL DIAG(DTO, DGT, HPROGRAM, DGUP, KMASK)
 !
 !!!!! important, diagd should be computed in teb !!!!!!
 !
@@ -137,91 +80,26 @@ IF (U%CTOWN=='TEB   ') THEN
 ! and SUBL (sublimation kg/m2/s) must by implemented in TEB as well as theirs cumulative values
 ! Not good if LCPL_ARP = TRUE in ISBA (ALARO)
 !
-  IF (SIZE(PLEI)>0) THEN
-    PLEI (:) = XUNDEF
-    PEVAP(:) = XUNDEF
-    PSUBL(:) = XUNDEF
-    WHERE(PLE(:)/=XUNDEF)
-      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-PTS(:)))
-      PEVAP (:) = (PLE(:) * ZDELTA(:))/XLSTT + (PLE(:) * (1.0-ZDELTA(:)))/XLVTT
-      PLEI  (:) = PLE(:) * ZDELTA(:)
-      PSUBL (:) = PLEI(:)/XLSTT
+  IF (SIZE(DGUP%XLEI)>0) THEN
+    DGUP%XLEI (:) = XUNDEF
+    DGUP%XEVAP(:) = XUNDEF
+    DGUP%XSUBL(:) = XUNDEF
+    WHERE(DGUP%XLE(:)/=XUNDEF)
+      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-DGUP%XTS(:)))
+      DGUP%XEVAP (:) = (DGUP%XLE(:) * ZDELTA(:))/XLSTT + (DGUP%XLE(:) * (1.0-ZDELTA(:)))/XLVTT
+      DGUP%XLEI  (:) = DGUP%XLE(:) * ZDELTA(:)
+      DGUP%XSUBL (:) = DGUP%XLEI(:)/XLSTT
     ENDWHERE
   ENDIF
 !
-  PLEC     = XUNDEF
-  PLEIC    = XUNDEF
-  PEVAPC   = XUNDEF
-  PSUBLC   = XUNDEF
-  PRNC     = XUNDEF
-  PHC      = XUNDEF
-  PGFLUXC  = XUNDEF
-  PSWDC    = XUNDEF
-  PSWUC    = XUNDEF
-  PLWDC    = XUNDEF
-  PLWUC    = XUNDEF
-  PFMUC    = XUNDEF
-  PFMVC    = XUNDEF
+  IF (DTO%LSURF_BUDGETC) CALL INIT_SURF_BUD(DGUPC,XUNDEF)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL DIAG_IDEAL_n(DGL, DGLC, HPROGRAM,                                         &
-                        PRN, PH, PLE, PLEI, PGFLUX, PRI, PCD, PCH, PCE, PQS,&
-                        PZ0, PZ0H, PT2M, PTS, PQ2M, PHU2M, PZON10M, PMER10M,&
-                        PSWD, PSWU, PLWD, PLWU, PSWBD, PSWBU, PFMU, PFMV,   &
-                        PRNC, PHC, PLEC, PGFLUXC, PSWDC, PSWUC, PLWDC,      &
-                        PLWUC, PFMUC, PFMVC, PT2M_MIN, PT2M_MAX, PLEIC,     &
-                        PHU2M_MIN, PHU2M_MAX, PWIND10M, PWIND10M_MAX,       &
-                        PEVAP, PEVAPC, PSUBL, PSUBLC                        )
+  CALL DIAG_EVAP(DLO, DGL, DGLC, HPROGRAM, DGUP, DGUPC, KMASK)          
 ELSE IF (U%CTOWN=='NONE  ') THEN
-  PRN      = XUNDEF
-  PH       = XUNDEF
-  PLE      = XUNDEF
-  PLEI     = XUNDEF
-  PEVAP    = XUNDEF
-  PSUBL    = XUNDEF  
-  PGFLUX   = XUNDEF
-  PRI      = XUNDEF
-  PCD      = XUNDEF
-  PCH      = XUNDEF
-  PCE      = XUNDEF
-  PQS      = XUNDEF
-  PZ0      = XUNDEF
-  PZ0H     = XUNDEF
-  PTS      = XUNDEF
-  PT2M     = XUNDEF
-  PQ2M     = XUNDEF
-  PHU2M    = XUNDEF
-  PZON10M  = XUNDEF
-  PMER10M  = XUNDEF
-  PSWD     = XUNDEF
-  PSWU     = XUNDEF
-  PSWBD    = XUNDEF
-  PSWBU    = XUNDEF
-  PLWD     = XUNDEF
-  PLWU     = XUNDEF
-  PFMU     = XUNDEF
-  PFMV     = XUNDEF
-  PRNC     = XUNDEF
-  PHC      = XUNDEF
-  PLEC     = XUNDEF
-  PLEIC    = XUNDEF
-  PEVAPC   = XUNDEF
-  PSUBLC   = XUNDEF
-  PGFLUXC  = XUNDEF
-  PSWDC    = XUNDEF
-  PSWUC    = XUNDEF
-  PLWDC    = XUNDEF
-  PLWUC    = XUNDEF
-  PFMUC    = XUNDEF
-  PFMVC    = XUNDEF 
-  PT2M_MIN = XUNDEF
-  PT2M_MAX = XUNDEF
-  PHU2M_MIN= XUNDEF
-  PHU2M_MAX= XUNDEF  
-  PWIND10M = XUNDEF
-  PWIND10M_MAX = XUNDEF
+  CALL INIT_BUD(DTO,DGUP,DGUPC,XUNDEF)         
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',1,ZHOOK_HANDLE)
 !

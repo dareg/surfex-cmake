@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE DIAG_IDEAL_INIT_n (DGL, DGLC, HPROGRAM, OREAD_BUDGETC, &
-                                    KLU,KSW)
+      SUBROUTINE DIAG_IDEAL_INIT_n (DLO, DGL, DGLC, HPROGRAM, OREAD_BUDGETC, KLU, KSW)
 !     #####################
 !
 !!****  *DIAG_IDEAL_INIT_n* - routine to initialize IDEAL diagnostic variables
@@ -36,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -51,6 +50,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
@@ -77,7 +77,7 @@ IF (LHOOK) CALL DR_HOOK('DIAG_IDEAL_INIT_N',0,ZHOOK_HANDLE)
 ALLOCATE(DGL%XTS(KLU))
 DGL%XTS = XUNDEF
 !
-IF (DGL%LSURF_BUDGET .OR. DGL%LSURF_BUDGETC) THEN
+IF (DLO%LSURF_BUDGET .OR. DLO%LSURF_BUDGETC) THEN
   ALLOCATE(DGL%XRN     (KLU))
   ALLOCATE(DGL%XH      (KLU))
   ALLOCATE(DGL%XLE     (KLU))
@@ -135,7 +135,7 @@ END IF
 !
 !* cumulative surface energy budget
 !
-IF (DGL%LSURF_BUDGETC) THEN
+IF (DLO%LSURF_BUDGETC) THEN
 !    
   ALLOCATE(DGLC%XRN   (KLU))
   ALLOCATE(DGLC%XH    (KLU))
@@ -165,7 +165,7 @@ IF (DGL%LSURF_BUDGETC) THEN
      DGLC%XLWU  = 0.0
      DGLC%XFMU  = 0.0
      DGLC%XFMV  = 0.0
-  ELSEIF (OREAD_BUDGETC.AND.DGLC%LRESET_BUDGETC) THEN
+  ELSEIF (OREAD_BUDGETC.AND.DLO%LRESET_BUDGETC) THEN
      DGLC%XRN   = 0.0
      DGLC%XH    = 0.0
      DGLC%XLE   = 0.0
@@ -243,7 +243,7 @@ ENDIF
 !
 !* parameters at 2m
 !
-IF (DGL%N2M>=1) THEN
+IF (DLO%N2M>=1) THEN
   ALLOCATE(DGL%XRI     (KLU))
   ALLOCATE(DGL%XT2M    (KLU))
   ALLOCATE(DGL%XT2M_MIN(KLU))
@@ -286,7 +286,7 @@ END IF
 !
 !* transfer coefficients
 !
-IF (DGL%LCOEF) THEN
+IF (DLO%LCOEF) THEN
   ALLOCATE(DGL%XCD     (KLU))
   ALLOCATE(DGL%XCH     (KLU))
   ALLOCATE(DGL%XCE     (KLU))
@@ -309,7 +309,7 @@ END IF
 !
 !* surface humidity
 !
-IF (DGL%LSURF_VARS) THEN
+IF (DLO%LSURF_VARS) THEN
   ALLOCATE(DGL%XQS     (KLU))
   !
   DGL%XQS      = XUNDEF

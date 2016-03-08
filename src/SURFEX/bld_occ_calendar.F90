@@ -1,6 +1,5 @@
 !#####################################################################################
-SUBROUTINE BLD_OCC_CALENDAR(KYEAR, KMONTH, KDAY, PTSUN, PRESIDENTIAL, PTCOOL_TARGET_IN, PTHEAT_TARGET_IN, &
-                            PQIN_IN, PDT_RES, PDT_OFF, PQIN_FRAC, PTCOOL_TARGET, PTHEAT_TARGET, PQIN)
+SUBROUTINE BLD_OCC_CALENDAR(TPTIME, PTSUN, T, B, PQIN_FRAC, PTCOOL_TARGET, PTHEAT_TARGET, PQIN)
 !#####################################################################################
 !! **** BLD_OCC_CALENDAR *
 !!
@@ -17,6 +16,11 @@ SUBROUTINE BLD_OCC_CALENDAR(KYEAR, KMONTH, KDAY, PTSUN, PRESIDENTIAL, PTCOOL_TAR
 !! -------------
 !! Original  02/2013
 !
+USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_BEM_n, ONLY : BEM_1P_t
+!
+USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+!
 USE MODD_CSTS,         ONLY : XTT
 !
 USE MODI_DAY_OF_WEEK
@@ -28,17 +32,12 @@ IMPLICIT NONE
 !
 !! 1. declaration of arguments
 !
-INTEGER,INTENT(IN)                :: KYEAR         ! current year  (UTC)
-INTEGER,INTENT(IN)                :: KMONTH        ! current month (UTC)
-INTEGER,INTENT(IN)                :: KDAY          ! current day   (UTC)
+TYPE(DATE_TIME), INTENT(INOUT) :: TPTIME
 REAL,   DIMENSION(:) , INTENT(IN) :: PTSUN         ! current solar time  (s, UTC)
 !
-REAL, DIMENSION(:) , INTENT(IN)  :: PRESIDENTIAL     ! Residential use fraction
-REAL, DIMENSION(:) , INTENT(IN)  :: PTCOOL_TARGET_IN ! Cooling setpoint of HVAC system [K] input
-REAL, DIMENSION(:) , INTENT(IN)  :: PTHEAT_TARGET_IN ! Heating setpoint of HVAC system [K] input
-REAL, DIMENSION(:) , INTENT(IN)  :: PQIN_IN          ! Internal heat gains [W m-2(floor)] input
-REAL,                INTENT(IN)  :: PDT_RES          ! Target temperature change when unoccupied (K) (residential buildings)
-REAL,                INTENT(IN)  :: PDT_OFF          ! Target temperature change when unoccupied (K) (offices and commercial buildings)
+TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(BEM_1P_t), INTENT(INOUT) :: B
+!
 REAL,                INTENT(IN)  :: PQIN_FRAC        ! Fraction of internal gains when unoccupied (-)
 !
 REAL, DIMENSION(:) , INTENT(OUT)  :: PTCOOL_TARGET ! Cooling setpoint of HVAC system [K]
@@ -63,10 +62,10 @@ IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',0,ZTODOOK_HANDLE)
 !  3. determine the day of the week and the local time scheme in France
 !--------------------------------------------------------------------------------------
 !
-CALL DAY_OF_WEEK(KYEAR, KMONTH, KDAY, JDOW)
+CALL DAY_OF_WEEK(TPTIME%TDATE%YEAR, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, JDOW)
 !
 CTIME = 'WINTER'
-IF (KMONTH >= 4 .AND. KMONTH <= 10) CTIME = 'SUMMER'
+IF (TPTIME%TDATE%MONTH >= 4 .AND. TPTIME%TDATE%MONTH <= 10) CTIME = 'SUMMER'
 !
 !--------------------------------------------------------------------------------------
 !  4. initialisation of parameters
@@ -74,11 +73,11 @@ IF (KMONTH >= 4 .AND. KMONTH <= 10) CTIME = 'SUMMER'
 !
 ! Parameters assigned to the occupied values - read in namelist via BATI.csv :
 !
-PTHEAT_TARGET(:) = PTHEAT_TARGET_IN(:)
+PTHEAT_TARGET(:) = B%XTHEAT_TARGET(:)
 !  
-PTCOOL_TARGET(:) = PTCOOL_TARGET_IN(:)
+PTCOOL_TARGET(:) = B%XTCOOL_TARGET(:)
 ! 
-PQIN(:)          = PQIN_IN(:)
+PQIN(:)          = B%XQIN(:)
 !
 ZTOD_BEG(:) = 0.
 ZTOD_END(:) = 0.
@@ -89,13 +88,13 @@ ZTOD_END(:) = 0.
 !
 DO JJ =1,SIZE(PTSUN)
 !
- IF (PRESIDENTIAL(JJ) > 0.5) THEN ! RESIDENTIAL
+ IF (T%XRESIDENTIAL(JJ) > 0.5) THEN ! RESIDENTIAL
    !
    IF (JDOW >= 2 .AND. JDOW <=6) THEN ! week days
      ZTOD_BEG(JJ) =  9. * 3600.       !  9 UTC - WINTER time
      ZTOD_END(JJ) = 17. * 3600.       ! 17 UTC - WINTER time
    END IF
-   ZDT(JJ) = PDT_RES
+   ZDT(JJ) = T%XDT_RES
    !
  ELSE
    !     
@@ -106,7 +105,7 @@ DO JJ =1,SIZE(PTSUN)
      ZTOD_BEG(JJ) =  0. * 3600.       !   0 UTC
      ZTOD_END(JJ) = 24. * 3600.       !  24 UTC
    END IF
-   ZDT(JJ) = PDT_OFF
+   ZDT(JJ) = T%XDT_OFF
    !
  END IF
 ! adjustment of unoccupied TOD based on time scheme
@@ -128,8 +127,8 @@ DO JJ =1,SIZE(PTSUN)
          ( (ZTOD_BEG(JJ) > ZTOD_END(JJ)) .AND. ((PTSUN(JJ) > 0 .AND. PTSUN(JJ) < ZTOD_END(JJ)) .OR.            &
                                         (PTSUN(JJ) > ZTOD_BEG(JJ) .AND. PTSUN(JJ) < 24 * 3600.)))) THEN             
          !
-            PTHEAT_TARGET(JJ) = PTHEAT_TARGET_IN(JJ) - ZDT(JJ)
-            PTCOOL_TARGET(JJ) = PTCOOL_TARGET_IN(JJ) + ZDT(JJ)
+            PTHEAT_TARGET(JJ) = B%XTHEAT_TARGET(JJ) - ZDT(JJ)
+            PTCOOL_TARGET(JJ) = B%XTCOOL_TARGET(JJ) + ZDT(JJ)
             PQIN         (JJ) = PQIN_FRAC * PQIN(JJ)
       ENDIF
 !

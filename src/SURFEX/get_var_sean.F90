@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_SEA_n (DGS, &
+      SUBROUTINE GET_VAR_SEA_n (DSO, DGS, &
                                 HPROGRAM,KI,PQS,PZ0,PZ0H)
 !     ##################################################
 !
@@ -36,7 +36,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
@@ -52,6 +52,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DSO
 TYPE(DIAG_t), INTENT(INOUT) :: DGS
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -72,12 +73,12 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_SEA_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGS%LSURF_VARS) THEN 
+IF (DSO%LSURF_VARS) THEN 
         PQS      = DGS%XQS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DGS%LCOEF) THEN 
+IF (DSO%LCOEF) THEN 
         PZ0      = DGS%XZ0      
         PZ0H     = DGS%XZ0H
    ELSE 

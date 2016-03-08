@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PUT_SFX_SEA (S, U, W, &
-                              KLUOUT,OCPL_SEAICE,OWATER,PSEA_SST,PSEA_UCU,        &
+      SUBROUTINE PUT_SFX_SEA (S, U, W, KLUOUT,OCPL_SEAICE,OWATER,PSEA_SST,PSEA_UCU, &
                              PSEA_VCU,PSEAICE_SIT,PSEAICE_CVR,PSEAICE_ALB )  
 !     ####################################################
 !

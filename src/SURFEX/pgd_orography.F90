@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_OROGRAPHY (DGU, DTCO, UG, U, USS, &
+      SUBROUTINE PGD_OROGRAPHY (DTCO, UG, U, USS, &
                                 HPROGRAM,PSEA,PWATER,HFILE,HFILETYPE,OZS)
 !     ##############################################################
 !
@@ -39,11 +39,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
@@ -93,11 +92,10 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 REAL, DIMENSION(:),   INTENT(IN)  :: PSEA     ! sea  fraction
@@ -230,8 +228,7 @@ IF (OZS) THEN
                         HFILE,HFILETYPE,'FULL  ')
   CALL READ_SURF(&
                  HFILETYPE,'DIM_FULL  ',IDIM_FULL,IRESP)
-  CALL GET_SIZE_FULL_n(U, &
-                       HPROGRAM,IDIM_FULL,IZS)
+  CALL GET_SIZE_FULL_n(HPROGRAM,IDIM_FULL,U%NSIZE_FULL,IZS)
   IF (IZS /= NL) THEN
     WRITE(ILUOUT,*) ' '
     WRITE(ILUOUT,*) '***********************************************************'
@@ -360,15 +357,11 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YZS)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YFILETYPE,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(DTCO, U, YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF     
 !   
-  CALL READ_SURF(&
-                 YFILETYPE,'ZS',U%XZS(:),IRESP) 
-  CALL READ_SSO_n(&
-                  U, USS, &
-                  YFILETYPE)
+  CALL READ_SURF(YFILETYPE,'ZS',U%XZS(:),IRESP) 
+  CALL READ_SSO_n(U%NSIZE_FULL, U%XSEA, USS, YFILETYPE)
 !
   CALL END_IO_SURF_n(YFILETYPE)
 !

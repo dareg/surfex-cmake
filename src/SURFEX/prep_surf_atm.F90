@@ -1,6 +1,5 @@
 !     #################################################################################
-SUBROUTINE PREP_SURF_ATM (YSC, &
-                          HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+SUBROUTINE PREP_SURF_ATM (YSC, HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
 !!****  *PREP_SURF_ATM* - driver for surface fields preparation
@@ -97,31 +96,29 @@ IF (ASSOCIATED(YSC%U%XCOVER)) DEALLOCATE(YSC%U%XCOVER)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF(YSC%U%NDIM_SEA>0) CALL PREP_SEA(YSC%DTCO, YSC%UG, YSC%U, YSC%SM,  &
-   HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+                                HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! INLAND WATER Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_WATER>0) CALL PREP_INLAND_WATER(YSC%DTCO, YSC%USS, &
-                                    YSC%UG, YSC%U, YSC%FM, YSC%WM, &
-   HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(YSC%U%NDIM_WATER>0) CALL PREP_INLAND_WATER(YSC%DTCO, YSC%USS, YSC%UG, YSC%U, YSC%FM, YSC%WM, &
+                                        HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF(YSC%U%NDIM_NATURE>0) CALL PREP_NATURE(YSC%DTCO, YSC%IM%ICP, YSC%IM%IG, &
-                                          YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
-                                    HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+                                         YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
+                                         HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
-                      YSC%TM, YSC%GDM, YSC%GRM, &
-                      HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
+IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%TM, YSC%GDM, YSC%GRM, &
+                                     HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE)
 !
  CALL CLEAR_GRIB_INDEX
 !

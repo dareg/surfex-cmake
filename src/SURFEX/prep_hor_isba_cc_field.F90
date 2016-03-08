@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_ISBA_CC_FIELD (DTCO, U, &
-                                    IG, I, &
+SUBROUTINE PREP_HOR_ISBA_CC_FIELD (DTCO, U, KLAT, IP, O, R, PLAI, PVEGTYPE, &
                                    HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -34,8 +33,9 @@ SUBROUTINE PREP_HOR_ISBA_CC_FIELD (DTCO, U, &
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
 !
 USE MODD_CO2V_PAR,  ONLY : XCA_NIT, XCC_NIT
 !
@@ -65,8 +65,12 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
+INTEGER, INTENT(IN) :: KLAT
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: O
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PLAI
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PVEGTYPE
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: R
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=8),   INTENT(IN)  :: HSURF     ! type of field
@@ -94,7 +98,7 @@ LOGICAL                       :: GPREP_AGS ! flag to prepare ags field (only ext
 !
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
-INTEGER                       :: INI, INL, INP, JJ, JL ! Work integer
+INTEGER                       :: INL, INP, JJ, JL ! Work integer
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -110,8 +114,6 @@ CALL READ_PREP_ISBA_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,  
 !
 CMASK = 'NATURE'
 !
-INI=SIZE(IG%XLAT)
-!
 GPREP_AGS = .TRUE.
 !
 !-------------------------------------------------------------------------------------
@@ -125,8 +127,7 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
    GPREP_AGS = .FALSE.
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
-   CALL PREP_ISBA_CC_EXTERN(&
-                            HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,GPREP_AGS)
+   CALL PREP_ISBA_CC_EXTERN(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,GPREP_AGS)
 ELSE IF (YFILETYPE=='BUFFER') THEN
    GPREP_AGS = .FALSE.
 ELSE IF (YFILETYPE=='NETCDF') THEN
@@ -144,27 +145,26 @@ IF(GPREP_AGS)THEN
   INL = SIZE(ZFIELDIN,2)
   INP = SIZE(ZFIELDIN,3)
 !
-  ALLOCATE(ZFIELDOUTP(INI,INL,INP))
+  ALLOCATE(ZFIELDOUTP(KLAT,INL,INP))
   ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
 !
   DO JPATCH = 1, INP
     ZFIELD(:,:)=ZFIELDIN(:,:,JPATCH)
     IF (INP==NVEGTYPE) THEN
-       LINTERP = (I%M%X%XVEGTYPE(:,JPATCH) > 0.)
-    ELSEIF(INP==I%O%NPATCH)THEN
-       LINTERP = (I%IP%XPATCH(:,JPATCH) > 0.)
+       LINTERP = (PVEGTYPE(:,JPATCH) > 0.)
+    ELSEIF(INP==O%NPATCH)THEN
+       LINTERP = (IP%XPATCH(:,JPATCH) > 0.)
     ENDIF
-    CALL HOR_INTERPOL(DTCO, U, &
-                      ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
+    CALL HOR_INTERPOL(DTCO, U, ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
     LINTERP = .TRUE.
   END DO
 !
   DEALLOCATE(ZFIELD)
   DEALLOCATE(ZFIELDIN)
 !
-  ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
+  ALLOCATE(ZFIELDOUTV(KLAT,INL,NVEGTYPE))
 !
-  CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+  CALL PUT_ON_ALL_VEGTYPES(KLAT,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
 !
   DEALLOCATE(ZFIELDOUTP)
 !
@@ -177,10 +177,10 @@ ENDIF
 !
 IF(GPREP_AGS)THEN
 !
-  ALLOCATE(ZW (INI,SIZE(ZFIELDOUTV,2),I%O%NPATCH))
+  ALLOCATE(ZW (KLAT,SIZE(ZFIELDOUTV,2),O%NPATCH))
 !
   ZW(:,:,:) = 0.
-  CALL VEGTYPE_GRID_TO_PATCH_GRID(I%O%NPATCH,I%IP%XVEGTYPE_PATCH,I%IP%XPATCH,ZFIELDOUTV,ZW)
+  CALL VEGTYPE_GRID_TO_PATCH_GRID(O%NPATCH,IP%XVEGTYPE_PATCH,IP%XPATCH,ZFIELDOUTV,ZW)
 !
 ELSE
 !
@@ -189,10 +189,10 @@ ELSE
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !  
     CASE('BIOMASS') 
-     ALLOCATE(ZW(INI,I%O%NNBIOMASS,I%O%NPATCH))
+     ALLOCATE(ZW(KLAT,O%NNBIOMASS,O%NPATCH))
      ZW(:,:,:) = 0.
-     WHERE(I%M%T%XLAI(:,:)/=XUNDEF)
-       ZW(:,1,:) = I%M%T%XLAI(:,:) * I%IP%XBSLAI_NITRO(:,:)
+     WHERE(PLAI(:,:)/=XUNDEF)
+       ZW(:,1,:) = PLAI(:,:) * IP%XBSLAI_NITRO(:,:)
      ENDWHERE
      ZW(:,2,:) = MAX( 0., (ZW(:,1,:)/ (XCC_NIT/10.**XCA_NIT))  &
                           **(1.0/(1.0-XCA_NIT)) - ZW(:,1,:) )
@@ -200,19 +200,19 @@ ELSE
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !
     CASE('LITTER') 
-     ALLOCATE(ZW(INI,I%O%NNLITTER*I%O%NNLITTLEVS,I%O%NPATCH))
+     ALLOCATE(ZW(KLAT,O%NNLITTER*O%NNLITTLEVS,O%NPATCH))
      ZW(:,:,:) = 0.0
     !
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !
     CASE('SOILCARB') 
-     ALLOCATE(ZW(INI,I%O%NNSOILCARB,I%O%NPATCH))
+     ALLOCATE(ZW(KLAT,O%NNSOILCARB,O%NPATCH))
      ZW(:,:,:) = 0.0
     !
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     !
     CASE('LIGNIN') 
-     ALLOCATE(ZW(INI,I%O%NNLITTLEVS,I%O%NPATCH))
+     ALLOCATE(ZW(KLAT,O%NNLITTLEVS,O%NPATCH))
      ZW(:,:,:) = 0.0
     !
     !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -230,21 +230,21 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('BIOMASS') 
-  ALLOCATE(I%R%XBIOMASS(INI,I%O%NNBIOMASS,I%O%NPATCH))
-  INL=MIN(I%O%NNBIOMASS,SIZE(ZW,2))
+  ALLOCATE(R%XBIOMASS(KLAT,O%NNBIOMASS,O%NPATCH))
+  INL=MIN(O%NNBIOMASS,SIZE(ZW,2))
   DO JL=1,INL
      WHERE(ZW(:,JL,:)/=XUNDEF)
-       I%R%XBIOMASS(:,JL,:) = ZW(:,JL,:)
+       R%XBIOMASS(:,JL,:) = ZW(:,JL,:)
      ELSEWHERE
-       I%R%XBIOMASS(:,JL,:) = 0.0
+       R%XBIOMASS(:,JL,:) = 0.0
      ENDWHERE
   ENDDO
-  IF(I%O%NNBIOMASS>INL)THEN
-    DO JL=INL+1,I%O%NNBIOMASS
+  IF(O%NNBIOMASS>INL)THEN
+    DO JL=INL+1,O%NNBIOMASS
        WHERE(ZW(:,JL,:)/=XUNDEF)
-         I%R%XBIOMASS(:,JL,:) = ZW(:,INL,:)
+         R%XBIOMASS(:,JL,:) = ZW(:,INL,:)
        ELSEWHERE
-         I%R%XBIOMASS(:,JL,:) = 0.0
+         R%XBIOMASS(:,JL,:) = 0.0
        ENDWHERE
     ENDDO          
   ENDIF
@@ -252,16 +252,16 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LITTER') 
-  ALLOCATE(I%R%XLITTER(INI,I%O%NNLITTER,I%O%NNLITTLEVS,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
+  ALLOCATE(R%XLITTER(KLAT,O%NNLITTER,O%NNLITTLEVS,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
     INL=0
-    DO JJ=1,I%O%NNLITTER
-       DO JL=1,I%O%NNLITTLEVS
+    DO JJ=1,O%NNLITTER
+       DO JL=1,O%NNLITTLEVS
           INL=INL+1
           WHERE(ZW(:,INL,JPATCH)/=XUNDEF)
-             I%R%XLITTER(:,JJ,JL,JPATCH) = ZW(:,INL,JPATCH)
+             R%XLITTER(:,JJ,JL,JPATCH) = ZW(:,INL,JPATCH)
           ELSEWHERE
-             I%R%XLITTER(:,JJ,JL,JPATCH) = 0.0
+             R%XLITTER(:,JJ,JL,JPATCH) = 0.0
           ENDWHERE
        ENDDO
     ENDDO
@@ -270,21 +270,21 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('SOILCARB') 
-  ALLOCATE(I%R%XSOILCARB(INI,I%O%NNSOILCARB,I%O%NPATCH))
+  ALLOCATE(R%XSOILCARB(KLAT,O%NNSOILCARB,O%NPATCH))
   WHERE(ZW(:,:,:)/=XUNDEF)
-    I%R%XSOILCARB(:,:,:) = ZW(:,:,:)
+    R%XSOILCARB(:,:,:) = ZW(:,:,:)
   ELSEWHERE
-    I%R%XSOILCARB(:,:,:) = 0.0
+    R%XSOILCARB(:,:,:) = 0.0
   ENDWHERE
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LIGNIN') 
-  ALLOCATE(I%R%XLIGNIN_STRUC(INI,I%O%NNLITTLEVS,I%O%NPATCH))
+  ALLOCATE(R%XLIGNIN_STRUC(KLAT,O%NNLITTLEVS,O%NPATCH))
   WHERE(ZW(:,:,:)/=XUNDEF)
-    I%R%XLIGNIN_STRUC(:,:,:) = ZW(:,:,:)
+    R%XLIGNIN_STRUC(:,:,:) = ZW(:,:,:)
   ELSEWHERE
-    I%R%XLIGNIN_STRUC(:,:,:) = 0.0
+    R%XLIGNIN_STRUC(:,:,:) = 0.0
   ENDWHERE
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

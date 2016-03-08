@@ -1,7 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_n (DGU, U, &
-                                       W, &
-                                      HPROGRAM)
+      SUBROUTINE WRITESURF_WATFLUX_n (HSELECT, W, HPROGRAM)
 !     ########################################
 !
 !!****  *WRITESURF_WATFLUX_n* - writes WATFLUX fields
@@ -35,11 +33,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -56,9 +49,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT 
 !
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
@@ -93,16 +84,14 @@ IF(W%LINTERPOL_TS)THEN
      WRITE(YMTH,'(I2)') (JMTH-1)
      YRECFM='TS_WATER'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
      YCOMMENT='TS_WATER month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-     CALL WRITE_SURF(DGU, U, &
-                     HPROGRAM,YRECFM,W%XTS_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
+     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,W%XTS_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
   ENDDO
 !
 ENDIF
 !
 YRECFM='TS_WATER'
 YCOMMENT='TS_WATER (K)'
- CALL WRITE_SURF(DGU, U, &
-                     HPROGRAM,YRECFM,W%XTS(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,W%XTS(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -113,8 +102,7 @@ YCOMMENT='TS_WATER (K)'
 !
 YRECFM='Z0WATER'
 YCOMMENT='Z0WATER (m)'
- CALL WRITE_SURF(DGU, U, &
-                     HPROGRAM,YRECFM,W%XZ0(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,W%XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !
 !-------------------------------------------------------------------------------
@@ -124,8 +112,7 @@ YCOMMENT='Z0WATER (m)'
 !
 YRECFM='DTCUR'
 YCOMMENT='s'
- CALL WRITE_SURF(DGU, U, &
-                     HPROGRAM,YRECFM,W%TTIME,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,W%TTIME,IRESP,HCOMMENT=YCOMMENT)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 

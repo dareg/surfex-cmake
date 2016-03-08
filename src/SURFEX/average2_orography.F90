@@ -35,7 +35,7 @@
 !            -----------
 !
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_SURFEX_MPI, ONLY : NRANK
@@ -55,7 +55,7 @@ IMPLICIT NONE
 !            ------------------------------------
 !
 !
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER                  :: JL
 REAL,    DIMENSION(NSSO) :: ZMAXX

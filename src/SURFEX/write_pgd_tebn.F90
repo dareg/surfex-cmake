@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_TEB_n (DTCO, DGU, U, TM, GDM, GRM, &
-                                  HPROGRAM)
+      SUBROUTINE WRITE_PGD_TEB_n (DTCO, HSELECT, U, TM, GDM, GRM, HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_TEB_n* - routine to write pgd surface variables in their respective files
@@ -36,7 +35,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
@@ -45,7 +43,6 @@ USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_TEB_n
 USE MODI_END_IO_SURF_n
-USE MODI_GOTO_WRAPPER_TEB_PATCH
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,7 +54,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
@@ -76,16 +73,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_TEB_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'TOWN  ','TEB   ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL GOTO_WRAPPER_TEB_PATCH(TM%B, TM%DGCT, TM%DGMT, TM%T, GDM%TV%R, GDM%TV%M%T, &
-                                GRM%TV%R, GRM%TV%M%T, 1)
- CALL WRITESURF_PGD_TEB_n(DGU, U, TM, GDM, GRM, &
-                          HPROGRAM)
+ CALL WRITESURF_PGD_TEB_n(HSELECT, TM%TOP, TM%BOP, TM%TG, TM%BDD, TM%DTB, TM%DTT, &
+                          GDM%TV%O, GDM%TV%P, GDM%DTI, GDM%TIR, &
+                          GRM%TV%O, GRM%TV%P, GRM%DTI, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

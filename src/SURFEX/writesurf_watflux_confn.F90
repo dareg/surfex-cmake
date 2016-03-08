@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_WATFLUX_CONF_n (CHW, W, &
-                                           HPROGRAM)
+      SUBROUTINE WRITESURF_WATFLUX_CONF_n (CHW, W, HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_WATFLUX_CONF* - routine to read the configuration for WATFLUX

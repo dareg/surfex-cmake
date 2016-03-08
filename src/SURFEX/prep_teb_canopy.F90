@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_TEB_CANOPY (TCP, TG)
+SUBROUTINE PREP_TEB_CANOPY (TCP, KDIM)
 !     #################################################################################
 !
 !!****  *PREP_TEB_CANOPY* - prepares TEB canopy fields
@@ -30,7 +30,6 @@ SUBROUTINE PREP_TEB_CANOPY (TCP, TG)
 !
 !
 USE MODD_CANOPY_n, ONLY : CANOPY_t
-USE MODD_GRID_n, ONLY : GRID_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -44,7 +43,7 @@ IMPLICIT NONE
 !
 !
 TYPE(CANOPY_t), INTENT(INOUT) :: TCP
-TYPE(GRID_t), INTENT(INOUT) :: TG
+INTEGER, INTENT(IN) :: KDIM
 !
 INTEGER :: JLAYER
 !
@@ -64,7 +63,7 @@ TCP%NLVL = 6
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(TG%NDIM,TCP%NLVL))
+ALLOCATE(ZZF(KDIM,TCP%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1.
 ZZF(:,3) = 3.
@@ -72,7 +71,7 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(TCP%XZ(TG%NDIM,TCP%NLVL))
+ALLOCATE(TCP%XZ(KDIM,TCP%NLVL))
 DO JLAYER=1,TCP%NLVL-1
   TCP%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO

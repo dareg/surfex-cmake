@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE INI_VAR_FROM_DATA_0D (DTCO, DGU, UG, U, USS, &
+      SUBROUTINE INI_VAR_FROM_DATA_0D (DTCO, UG, U, USS, &
                                        HPROGRAM, HATYPE,  HNAME, HTYPE, HFNAM, &
                                         HFTYP, PUNIF, PFIELD, OPRESENT)
 !     ##############################################################
@@ -39,10 +39,9 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -61,10 +60,9 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
@@ -99,20 +97,15 @@ IF (HFTYP.EQ.'FA    ' .OR. HFTYP.EQ.'ASCII ' .OR. HFTYP.EQ.'LFI   ') THEN
   OPRESENT=.TRUE.
   SELECT CASE (HTYPE)
     CASE ('LAN')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
-                                 HFTYP,HFNAM,'SURF  ','      ',PFIELD)
+      CALL READ_FROM_SURFEX_FILE(DTCO, U, HFTYP,HFNAM,'SURF  ','      ',PFIELD)
     CASE ('TWN')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
-                                 HFTYP,HFNAM,'TOWN  ','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(DTCO, U, HFTYP,HFNAM,'TOWN  ','      ',PFIELD)              
     CASE ('NAT')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
-                                 HFTYP,HFNAM,'NATURE','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(DTCO, U, HFTYP,HFNAM,'NATURE','      ',PFIELD)              
     CASE ('SEA')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
-                                 HFTYP,HFNAM,'SEA   ','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(DTCO, U, HFTYP,HFNAM,'SEA   ','      ',PFIELD)              
     CASE ('WAT')
-      CALL READ_FROM_SURFEX_FILE(DTCO, DGU, U, &
-                                 HFTYP,HFNAM,'WATER ','      ',PFIELD)              
+      CALL READ_FROM_SURFEX_FILE(DTCO, U, HFTYP,HFNAM,'WATER ','      ',PFIELD)              
    END SELECT
 
 ELSE

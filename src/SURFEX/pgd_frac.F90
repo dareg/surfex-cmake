@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_FRAC (DTCO, UG, U, USS, &
-                           HPROGRAM,OECOCLIMAP)
+      SUBROUTINE PGD_FRAC (DTCO, UG, U, USS, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_FRAC* monitor for averaging and interpolations of cover fractions
@@ -43,7 +42,7 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL, CGRID
@@ -74,11 +73,9 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-LOGICAL,             INTENT(OUT)   :: OECOCLIMAP   ! F if fractions prescribed by user
-!                                                  ! T if fractions will be computed from ecoclimap
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -145,7 +142,7 @@ CFTYP_WATER (:)= '      '
 CFTYP_NATURE(:)= '      '
 CFTYP_TOWN  (:)= '      '
 !
-OECOCLIMAP = .TRUE.
+U%LECOCLIMAP = .TRUE.
 !
 !-------------------------------------------------------------------------------
 !
@@ -261,7 +258,7 @@ U%XTOWN(:)   = U%XTOWN(:)   / ZSUM(:)
 WRITE(ILUOUT,*) ' '
 !-------------------------------------------------------------------------------
 !
-OECOCLIMAP = LECOCLIMAP
+U%LECOCLIMAP = LECOCLIMAP
 !
 !*    5.      List of cover present
 !             ---------------------

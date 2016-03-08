@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_CANOPY (ICP, IG)
+SUBROUTINE PREP_ISBA_CANOPY (ICP, KDIM)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_CANOPY* - prepares ISBA canopy fields
@@ -29,7 +29,6 @@ SUBROUTINE PREP_ISBA_CANOPY (ICP, IG)
 !
 !
 USE MODD_CANOPY_n, ONLY : CANOPY_t
-USE MODD_GRID_n, ONLY : GRID_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -43,7 +42,7 @@ IMPLICIT NONE
 !
 !
 TYPE(CANOPY_t), INTENT(INOUT) :: ICP
-TYPE(GRID_t), INTENT(INOUT) :: IG
+INTEGER, INTENT(IN) :: KDIM
 !
 INTEGER :: JLAYER
 !
@@ -63,7 +62,7 @@ ICP%NLVL = 6
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(IG%NDIM,ICP%NLVL))
+ALLOCATE(ZZF(KDIM,ICP%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1
 ZZF(:,3) = 3.
@@ -71,7 +70,7 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(ICP%XZ(IG%NDIM,ICP%NLVL))
+ALLOCATE(ICP%XZ(KDIM,ICP%NLVL))
 DO JLAYER=1,ICP%NLVL-1
   ICP%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO

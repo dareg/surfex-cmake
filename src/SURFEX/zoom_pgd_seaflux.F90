@@ -115,16 +115,14 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SEAFLUX',0,ZHOOK_HANDLE)
 !  Their value must be defined as XUNDEF.
 !
 !
- CALL OPEN_AUX_IO_SURF(&
-                       HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n(DTCO, U, &
-                      'SEA   ',SG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, 'SEA   ',SG%NDIM)
 !
 ALLOCATE(S%LCOVER     (JPCOVER))
 ALLOCATE(S%XZS        (SG%NDIM))
@@ -132,22 +130,16 @@ ALLOCATE(SG%XLAT       (SG%NDIM))
 ALLOCATE(SG%XLON       (SG%NDIM))
 ALLOCATE(SG%XMESH_SIZE (SG%NDIM))
 !
- CALL PACK_PGD(DTCO, U, &
-               HPROGRAM, 'SEA   ',                      &
-                SG%CGRID,  SG%XGRID_PAR, S%LCOVER,             &
-                S%XCOVER, S%XZS,                           &
-                SG%XLAT, SG%XLON, SG%XMESH_SIZE                 )  
+ CALL PACK_PGD(DTCO, U, HPROGRAM, 'SEA   ', SG, S%LCOVER,  S%XCOVER, S%XZS )  
 !
 !------------------------------------------------------------------------------
 !
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(&
-                       HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ CALL PREP_GRID_EXTERN(HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
- CALL PREP_OUTPUT_GRID(UG, U, &
-                       ILUOUT,SG%CGRID,SG%XGRID_PAR,SG%XLAT,SG%XLON)
+ CALL PREP_OUTPUT_GRID(UG%G, SG, U%NSIZE_FULL, ILUOUT)
 !
 !* mask where interpolations must be done
 !
@@ -159,12 +151,10 @@ LINTERP(:) = .TRUE.
 !              -----------------
 !
 ALLOCATE(ZSEABATHY(INI,1))
- CALL READ_SURF(&
-                HPROGRAM,'BATHY',ZSEABATHY(:,1),IRESP,HDIR='A')
+ CALL READ_SURF(HPROGRAM,'BATHY',ZSEABATHY(:,1),IRESP,HDIR='A')
 !
 ALLOCATE(ZWORK(SG%NDIM,1))
- CALL HOR_INTERPOL(DTCO, U, &
-                   ILUOUT,ZSEABATHY(:,1:1),ZWORK(:,1:1)) 
+ CALL HOR_INTERPOL(DTCO, U, ILUOUT,ZSEABATHY(:,1:1),ZWORK(:,1:1)) 
 ALLOCATE(S%XSEABATHY (SG%NDIM))
 S%XSEABATHY(:) = ZWORK(:,1)
 DEALLOCATE(ZSEABATHY,ZWORK)
@@ -172,10 +162,9 @@ DEALLOCATE(ZSEABATHY,ZWORK)
 !============================================================
 ! G. TANGUY 03/2009
 ! reading of fields for SST_DATA
- CALL READ_SURF(&
-                HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
+ CALL READ_SURF(HPROGRAM,'SST_DATA',DTS%LSST_DATA,IRESP)
 !
-IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTCO, U, DTS, SG, &
+IF (DTS%LSST_DATA) CALL READ_PGD_SEAFLUX_PAR_n(DTCO, U, DTS, SG%NDIM, &
                                                HPROGRAM,INI,HDIR='A')
 !
 !============================================================

@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE UNPACK_ISBA_PATCH_n (AG, I, PK, &
-                                KMASK,KSIZE,KPATCH)
+SUBROUTINE UNPACK_ISBA_PATCH_n (AG, IO, IP, IMT, IMA, IR, ISS, PK, KMASK,KSIZE,KPATCH)
 !##############################################
 !
 !!****  *UNPACK_ISBA_PATCH_n* - unpacks ISBA prognostic variables
@@ -38,8 +37,12 @@ SUBROUTINE UNPACK_ISBA_PATCH_n (AG, I, PK, &
 
 !
 USE MODD_AGRI_n, ONLY : AGRI_t, AGRI_INIT
-USE MODD_ISBA_n, ONLY : ISBA_t, ISBA_INIT
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t, ISBA_PARAM_ALB_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t, ISBA_INIT
 USE MODD_GRID_n, ONLY : GRID_INIT
+USE MODD_SSO_n, ONLY : SSO_INIT, SSO_t
 USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
 !
 USE MODD_AGRI,     ONLY :  LAGRIP
@@ -55,7 +58,12 @@ IMPLICIT NONE
 !
 !
 TYPE(AGRI_t), INTENT(INOUT) :: AG
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
+TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: IMA
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(SSO_t), INTENT(INOUT) :: ISS
 TYPE(PACK_ISBA_t), INTENT(INOUT) :: PK
 !
 INTEGER, INTENT(IN)               :: KSIZE, KPATCH
@@ -68,107 +76,107 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('UNPACK_ISBA_PATCH_N',0,ZHOOK_HANDLE)
-IF (I%O%NPATCH==1) THEN
+IF (IO%NPATCH==1) THEN
 !  I = PK%I
   !
-  IF(LAGRIP .AND. (I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NCB') ) THEN
+  IF(LAGRIP .AND. (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NCB') ) THEN
     AG%LIRRIDAY (:,1)  =    PK%AG%LIRRIDAY (:,1)
   END IF
 
-  I%R%TSNOW%WSNOW     (:, :, 1) = PK%I%R%TSNOW%WSNOW    (:, :,1)
-  I%R%TSNOW%RHO       (:, :, 1) = PK%I%R%TSNOW%RHO    (:, :,1)
-  I%R%TSNOW%ALB       (:, 1)    = PK%I%R%TSNOW%ALB    (:,1)
-  I%R%XWR             (:, 1)    = PK%I%R%XWR         (:,1)
-  I%R%XTG             (:, :, 1) = PK%I%R%XTG         (:, :,1)
-  I%R%XWG             (:, :, 1) = PK%I%R%XWG         (:, :,1)
-  I%R%XWGI            (:, :, 1) = PK%I%R%XWGI        (:, :,1)
-  I%R%XRESA           (:, 1)    = PK%I%R%XRESA       (:,1) 
-  I%IP%XPCPS           (:, 1)    = PK%I%IP%XPCPS        (:,1) 
-  I%IP%XPLVTT          (:, 1)    = PK%I%IP%XPLVTT       (:,1) 
-  I%IP%XPLSTT          (:, 1)    = PK%I%IP%XPLSTT       (:,1) 
-  I%M%T%XALBNIR         (:, 1)    = PK%I%M%T%XALBNIR     (:,1) 
-  I%M%T%XALBVIS         (:, 1)    = PK%I%M%T%XALBVIS     (:,1) 
-  I%M%T%XALBUV          (:, 1)    = PK%I%M%T%XALBUV      (:,1) 
-  I%M%T%XALBNIR_VEG     (:, 1)    = PK%I%M%T%XALBNIR_VEG (:,1) 
-  I%M%T%XALBVIS_VEG     (:, 1)    = PK%I%M%T%XALBVIS_VEG (:,1) 
-  I%M%T%XALBUV_VEG      (:, 1)    = PK%I%M%T%XALBUV_VEG  (:,1) 
-  I%M%A%XALBNIR_SOIL    (:, 1)    = PK%I%M%A%XALBNIR_SOIL(:,1) 
-  I%M%A%XALBVIS_SOIL    (:, 1)    = PK%I%M%A%XALBVIS_SOIL(:,1) 
-  I%M%A%XALBUV_SOIL     (:, 1)    = PK%I%M%A%XALBUV_SOIL (:,1) 
-  I%M%T%XEMIS           (:, 1)    = PK%I%M%T%XEMIS       (:,1) 
-  I%IP%XZ0EFFIP        (:, 1)    = PK%I%IP%XZ0EFFIP    (:,1) 
-  I%IP%XZ0EFFIM        (:, 1)    = PK%I%IP%XZ0EFFIM    (:,1) 
-  I%IP%XZ0EFFJP        (:, 1)    = PK%I%IP%XZ0EFFJP    (:,1) 
-  I%IP%XZ0EFFJM        (:, 1)    = PK%I%IP%XZ0EFFJM    (:,1) 
-  I%R%XLE             (:, 1)    = PK%I%R%XLE         (:,1)
+  IR%TSNOW%WSNOW     (:, :, 1) = PK%I%R%TSNOW%WSNOW    (:, :,1)
+  IR%TSNOW%RHO       (:, :, 1) = PK%I%R%TSNOW%RHO    (:, :,1)
+  IR%TSNOW%ALB       (:, 1)    = PK%I%R%TSNOW%ALB    (:,1)
+  IR%XWR             (:, 1)    = PK%I%R%XWR         (:,1)
+  IR%XTG             (:, :, 1) = PK%I%R%XTG         (:, :,1)
+  IR%XWG             (:, :, 1) = PK%I%R%XWG         (:, :,1)
+  IR%XWGI            (:, :, 1) = PK%I%R%XWGI        (:, :,1)
+  IR%XRESA           (:, 1)    = PK%I%R%XRESA       (:,1) 
+  IP%XPCPS           (:, 1)    = PK%I%IP%XPCPS        (:,1) 
+  IP%XPLVTT          (:, 1)    = PK%I%IP%XPLVTT       (:,1) 
+  IP%XPLSTT          (:, 1)    = PK%I%IP%XPLSTT       (:,1) 
+  IMT%XALBNIR         (:, 1)    = PK%I%M%T%XALBNIR     (:,1) 
+  IMT%XALBVIS         (:, 1)    = PK%I%M%T%XALBVIS     (:,1) 
+  IMT%XALBUV          (:, 1)    = PK%I%M%T%XALBUV      (:,1) 
+  IMT%XALBNIR_VEG     (:, 1)    = PK%I%M%T%XALBNIR_VEG (:,1) 
+  IMT%XALBVIS_VEG     (:, 1)    = PK%I%M%T%XALBVIS_VEG (:,1) 
+  IMT%XALBUV_VEG      (:, 1)    = PK%I%M%T%XALBUV_VEG  (:,1) 
+  IMA%XALBNIR_SOIL    (:, 1)    = PK%I%M%A%XALBNIR_SOIL(:,1) 
+  IMA%XALBVIS_SOIL    (:, 1)    = PK%I%M%A%XALBVIS_SOIL(:,1) 
+  IMA%XALBUV_SOIL     (:, 1)    = PK%I%M%A%XALBUV_SOIL (:,1) 
+  IMT%XEMIS           (:, 1)    = PK%I%M%T%XEMIS       (:,1) 
+  ISS%XZ0EFFIP        (:, 1)    = PK%ISS%XZ0EFFIP    (:,1) 
+  ISS%XZ0EFFIM        (:, 1)    = PK%ISS%XZ0EFFIM    (:,1) 
+  ISS%XZ0EFFJP        (:, 1)    = PK%ISS%XZ0EFFJP    (:,1) 
+  ISS%XZ0EFFJM        (:, 1)    = PK%ISS%XZ0EFFJM    (:,1) 
+  IR%XLE             (:, 1)    = PK%I%R%XLE         (:,1)
   !
-   IF(I%O%LMEB_PATCH(KPATCH))THEN
-     I%R%XWRL            (:, 1)    = PK%I%R%XWRL        (:,1)
-     I%R%XWRLI           (:, 1)    = PK%I%R%XWRLI       (:,1)
-     I%R%XWRVN           (:, 1)    = PK%I%R%XWRVN       (:,1)
-     I%R%XTV             (:, 1)    = PK%I%R%XTV         (:,1)
-     I%R%XTL             (:, 1)    = PK%I%R%XTL         (:,1)
-     I%R%XTC             (:, 1)    = PK%I%R%XTC         (:,1)
-     I%R%XQC             (:, 1)    = PK%I%R%XQC         (:,1)
+   IF(IO%LMEB_PATCH(KPATCH))THEN
+     IR%XWRL            (:, 1)    = PK%I%R%XWRL        (:,1)
+     IR%XWRLI           (:, 1)    = PK%I%R%XWRLI       (:,1)
+     IR%XWRVN           (:, 1)    = PK%I%R%XWRVN       (:,1)
+     IR%XTV             (:, 1)    = PK%I%R%XTV         (:,1)
+     IR%XTL             (:, 1)    = PK%I%R%XTL         (:,1)
+     IR%XTC             (:, 1)    = PK%I%R%XTC         (:,1)
+     IR%XQC             (:, 1)    = PK%I%R%XQC         (:,1)
    ELSE
 ! Please note that XLAI, XVEG, and XZ0 are not unpacked
 ! in the case of MEB.
-     I%M%T%XLAI            (:, 1)    = PK%I%M%T%XLAI        (:,1) 
-     I%M%T%XVEG            (:, 1)    = PK%I%M%T%XVEG        (:,1) 
-     I%M%T%XZ0             (:, 1)    = PK%I%M%T%XZ0         (:,1) 
+     IMT%XLAI            (:, 1)    = PK%I%M%T%XLAI        (:,1) 
+     IMT%XVEG            (:, 1)    = PK%I%M%T%XVEG        (:,1) 
+     IMT%XZ0             (:, 1)    = PK%I%M%T%XZ0         (:,1) 
    ENDIF
   !
-  IF (I%O%LTR_ML) THEN
-    I%R%XFAPARC         (:, 1)    = PK%I%R%XFAPARC     (:,1)
-    I%R%XFAPIRC         (:, 1)    = PK%I%R%XFAPIRC     (:,1)
-    I%R%XLAI_EFFC       (:, 1)    = PK%I%R%XLAI_EFFC   (:,1)
-    I%R%XMUS            (:, 1)    = PK%I%R%XMUS        (:,1)
+  IF (IO%LTR_ML) THEN
+    IR%XFAPARC         (:, 1)    = PK%I%R%XFAPARC     (:,1)
+    IR%XFAPIRC         (:, 1)    = PK%I%R%XFAPIRC     (:,1)
+    IR%XLAI_EFFC       (:, 1)    = PK%I%R%XLAI_EFFC   (:,1)
+    IR%XMUS            (:, 1)    = PK%I%R%XMUS        (:,1)
   ENDIF   
   !
-  IF (I%O%CPHOTO/='NON') THEN
-     I%R%XAN             (:, 1)    = PK%I%R%XAN         (:,1)
-     I%R%XANDAY          (:, 1)    = PK%I%R%XANDAY      (:,1)
-     I%R%XANFM           (:, 1)    = PK%I%R%XANFM       (:,1)
-     I%R%XBIOMASS        (:,:,1)   = PK%I%R%XBIOMASS        (:,:,1)
-     I%R%XRESP_BIOMASS   (:,:,1)   = PK%I%R%XRESP_BIOMASS   (:,:,1)
+  IF (IO%CPHOTO/='NON') THEN
+     IR%XAN             (:, 1)    = PK%I%R%XAN         (:,1)
+     IR%XANDAY          (:, 1)    = PK%I%R%XANDAY      (:,1)
+     IR%XANFM           (:, 1)    = PK%I%R%XANFM       (:,1)
+     IR%XBIOMASS        (:,:,1)   = PK%I%R%XBIOMASS        (:,:,1)
+     IR%XRESP_BIOMASS   (:,:,1)   = PK%I%R%XRESP_BIOMASS   (:,:,1)
   END IF
   !
-  IF(I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN
-     I%IP%XBSLAI_NITRO    (:,1)    =    PK%I%IP%XBSLAI_NITRO    (:,1)          
+  IF(IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+     IP%XBSLAI_NITRO    (:,1)    =    PK%I%IP%XBSLAI_NITRO    (:,1)          
   END IF
   !
-    IF(I%O%CPHOTO=='NCB') THEN
-     I%IP%XINCREASE       (:,:,1)   =    PK%I%IP%XINCREASE       (:,:,1)
+    IF(IO%CPHOTO=='NCB') THEN
+     IP%XINCREASE       (:,:,1)   =    PK%I%IP%XINCREASE       (:,:,1)
   END IF
   !
-  IF(I%O%CRESPSL=='CNT') THEN
-     I%R%XLITTER         (:,:,:,1) =    PK%I%R%XLITTER         (:,:,:,1)
-     I%R%XSOILCARB       (:,:,1)   =    PK%I%R%XSOILCARB       (:,:,1)
-     I%R%XLIGNIN_STRUC   (:,:,1)   =    PK%I%R%XLIGNIN_STRUC   (:,:,1)
-     I%IP%XTURNOVER       (:,:,1)   =    PK%I%IP%XTURNOVER       (:,:,1)
+  IF(IO%CRESPSL=='CNT') THEN
+     IR%XLITTER         (:,:,:,1) =    PK%I%R%XLITTER         (:,:,:,1)
+     IR%XSOILCARB       (:,:,1)   =    PK%I%R%XSOILCARB       (:,:,1)
+     IR%XLIGNIN_STRUC   (:,:,1)   =    PK%I%R%XLIGNIN_STRUC   (:,:,1)
+     IP%XTURNOVER       (:,:,1)   =    PK%I%IP%XTURNOVER       (:,:,1)
   END IF
   !
-  IF(LAGRIP .AND. (I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NCB') ) THEN
+  IF(LAGRIP .AND. (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NCB') ) THEN
     AG%LIRRIDAY (:,1)  =    PK%AG%LIRRIDAY (:,1)
   END IF
   !
-  IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
-     I%R%TSNOW%HEAT      (:, :, 1) = PK%I%R%TSNOW%HEAT   (:, :,1)
-     I%R%TSNOW%EMIS      (:, 1)    = PK%I%R%TSNOW%EMIS   (:,1)
-     I%R%TSNOW%AGE       (:, :, 1) = PK%I%R%TSNOW%AGE    (:, :,1)
-     I%R%TSNOW%ALBVIS    (:, 1)    = PK%I%R%TSNOW%ALBVIS (:,1)
-     I%R%TSNOW%ALBNIR    (:, 1)    = PK%I%R%TSNOW%ALBNIR (:,1)
-     I%R%TSNOW%ALBFIR    (:, 1)    = PK%I%R%TSNOW%ALBFIR (:,1)     
+  IF (IR%TSNOW%SCHEME=='3-L' .OR. IR%TSNOW%SCHEME=='CRO') THEN
+     IR%TSNOW%HEAT      (:, :, 1) = PK%I%R%TSNOW%HEAT   (:, :,1)
+     IR%TSNOW%EMIS      (:, 1)    = PK%I%R%TSNOW%EMIS   (:,1)
+     IR%TSNOW%AGE       (:, :, 1) = PK%I%R%TSNOW%AGE    (:, :,1)
+     IR%TSNOW%ALBVIS    (:, 1)    = PK%I%R%TSNOW%ALBVIS (:,1)
+     IR%TSNOW%ALBNIR    (:, 1)    = PK%I%R%TSNOW%ALBNIR (:,1)
+     IR%TSNOW%ALBFIR    (:, 1)    = PK%I%R%TSNOW%ALBFIR (:,1)     
   END IF
 
-  IF (I%R%TSNOW%SCHEME=='CRO') THEN
-     I%R%TSNOW%GRAN1     (:, :, 1) = PK%I%R%TSNOW%GRAN1   (:, :,1)
-     I%R%TSNOW%GRAN2     (:, :, 1) = PK%I%R%TSNOW%GRAN2   (:, :,1)
-     I%R%TSNOW%HIST      (:, :, 1) = PK%I%R%TSNOW%HIST    (:, :,1)
+  IF (IR%TSNOW%SCHEME=='CRO') THEN
+     IR%TSNOW%GRAN1     (:, :, 1) = PK%I%R%TSNOW%GRAN1   (:, :,1)
+     IR%TSNOW%GRAN2     (:, :, 1) = PK%I%R%TSNOW%GRAN2   (:, :,1)
+     IR%TSNOW%HIST      (:, :, 1) = PK%I%R%TSNOW%HIST    (:, :,1)
   END IF
   !
-  IF(I%O%LGLACIER)THEN
-     I%R%XICE_STO        (:,1)     = PK%I%R%XICE_STO    (:,1)
+  IF(IO%LGLACIER)THEN
+     IR%XICE_STO        (:,1)     = PK%I%R%XICE_STO    (:,1)
   ENDIF
 
 ELSE
@@ -177,40 +185,40 @@ ELSE
 !
   DO JJ=1,KSIZE
     JI                              = KMASK         (JJ)
-    I%R%TSNOW%ALB       (JI, KPATCH)    = PK%I%R%TSNOW%ALB    (JJ,1)
-    I%R%XWR             (JI, KPATCH)    = PK%I%R%XWR         (JJ,1)
-    I%R%XRESA           (JI, KPATCH)    = PK%I%R%XRESA       (JJ,1) 
-    I%IP%XPCPS           (JI, KPATCH)    = PK%I%IP%XPCPS        (JJ,1) 
-    I%IP%XPLVTT          (JI, KPATCH)    = PK%I%IP%XPLVTT       (JJ,1) 
-    I%IP%XPLSTT          (JI, KPATCH)    = PK%I%IP%XPLSTT       (JJ,1) 
-    I%M%T%XALBNIR         (JI, KPATCH)    = PK%I%M%T%XALBNIR     (JJ,1) 
-    I%M%T%XALBVIS         (JI, KPATCH)    = PK%I%M%T%XALBVIS     (JJ,1) 
-    I%M%T%XALBUV          (JI, KPATCH)    = PK%I%M%T%XALBUV      (JJ,1) 
-    I%M%T%XALBNIR_VEG     (JI, KPATCH)    = PK%I%M%T%XALBNIR_VEG (JJ,1) 
-    I%M%T%XALBVIS_VEG     (JI, KPATCH)    = PK%I%M%T%XALBVIS_VEG (JJ,1) 
-    I%M%T%XALBUV_VEG      (JI, KPATCH)    = PK%I%M%T%XALBUV_VEG  (JJ,1) 
-    I%M%A%XALBNIR_SOIL    (JI, KPATCH)    = PK%I%M%A%XALBNIR_SOIL(JJ,1) 
-    I%M%A%XALBVIS_SOIL    (JI, KPATCH)    = PK%I%M%A%XALBVIS_SOIL(JJ,1) 
-    I%M%A%XALBUV_SOIL     (JI, KPATCH)    = PK%I%M%A%XALBUV_SOIL (JJ,1) 
-    I%M%T%XEMIS           (JI, KPATCH)    = PK%I%M%T%XEMIS       (JJ,1) 
-    I%IP%XZ0EFFIP        (JI, KPATCH)    = PK%I%IP%XZ0EFFIP    (JJ,1) 
-    I%IP%XZ0EFFIM        (JI, KPATCH)    = PK%I%IP%XZ0EFFIM    (JJ,1) 
-    I%IP%XZ0EFFJP        (JI, KPATCH)    = PK%I%IP%XZ0EFFJP    (JJ,1) 
-    I%IP%XZ0EFFJM        (JI, KPATCH)    = PK%I%IP%XZ0EFFJM    (JJ,1) 
-    I%R%XLE             (JI, KPATCH)    = PK%I%R%XLE         (JJ,1)
+    IR%TSNOW%ALB       (JI, KPATCH)    = PK%I%R%TSNOW%ALB    (JJ,1)
+    IR%XWR             (JI, KPATCH)    = PK%I%R%XWR         (JJ,1)
+    IR%XRESA           (JI, KPATCH)    = PK%I%R%XRESA       (JJ,1) 
+    IP%XPCPS           (JI, KPATCH)    = PK%I%IP%XPCPS        (JJ,1) 
+    IP%XPLVTT          (JI, KPATCH)    = PK%I%IP%XPLVTT       (JJ,1) 
+    IP%XPLSTT          (JI, KPATCH)    = PK%I%IP%XPLSTT       (JJ,1) 
+    IMT%XALBNIR         (JI, KPATCH)    = PK%I%M%T%XALBNIR     (JJ,1) 
+    IMT%XALBVIS         (JI, KPATCH)    = PK%I%M%T%XALBVIS     (JJ,1) 
+    IMT%XALBUV          (JI, KPATCH)    = PK%I%M%T%XALBUV      (JJ,1) 
+    IMT%XALBNIR_VEG     (JI, KPATCH)    = PK%I%M%T%XALBNIR_VEG (JJ,1) 
+    IMT%XALBVIS_VEG     (JI, KPATCH)    = PK%I%M%T%XALBVIS_VEG (JJ,1) 
+    IMT%XALBUV_VEG      (JI, KPATCH)    = PK%I%M%T%XALBUV_VEG  (JJ,1) 
+    IMA%XALBNIR_SOIL    (JI, KPATCH)    = PK%I%M%A%XALBNIR_SOIL(JJ,1) 
+    IMA%XALBVIS_SOIL    (JI, KPATCH)    = PK%I%M%A%XALBVIS_SOIL(JJ,1) 
+    IMA%XALBUV_SOIL     (JI, KPATCH)    = PK%I%M%A%XALBUV_SOIL (JJ,1) 
+    IMT%XEMIS           (JI, KPATCH)    = PK%I%M%T%XEMIS       (JJ,1) 
+    ISS%XZ0EFFIP        (JI, KPATCH)    = PK%ISS%XZ0EFFIP    (JJ,1) 
+    ISS%XZ0EFFIM        (JI, KPATCH)    = PK%ISS%XZ0EFFIM    (JJ,1) 
+    ISS%XZ0EFFJP        (JI, KPATCH)    = PK%ISS%XZ0EFFJP    (JJ,1) 
+    ISS%XZ0EFFJM        (JI, KPATCH)    = PK%ISS%XZ0EFFJM    (JJ,1) 
+    IR%XLE             (JI, KPATCH)    = PK%I%R%XLE         (JJ,1)
   !
   END DO
   !
-  IF(I%O%LMEB_PATCH(KPATCH))THEN
+  IF(IO%LMEB_PATCH(KPATCH))THEN
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
-      I%R%XWRL            (JI, KPATCH)    = PK%I%R%XWRL        (JJ,1)
-      I%R%XWRLI           (JI, KPATCH)    = PK%I%R%XWRLI       (JJ,1)
-      I%R%XWRVN           (JI, KPATCH)    = PK%I%R%XWRVN       (JJ,1)
-      I%R%XTV             (JI, KPATCH)    = PK%I%R%XTV         (JJ,1)
-      I%R%XTL             (JI, KPATCH)    = PK%I%R%XTL         (JJ,1)
-      I%R%XTC             (JI, KPATCH)    = PK%I%R%XTC         (JJ,1)
-      I%R%XQC             (JI, KPATCH)    = PK%I%R%XQC         (JJ,1)
+      IR%XWRL            (JI, KPATCH)    = PK%I%R%XWRL        (JJ,1)
+      IR%XWRLI           (JI, KPATCH)    = PK%I%R%XWRLI       (JJ,1)
+      IR%XWRVN           (JI, KPATCH)    = PK%I%R%XWRVN       (JJ,1)
+      IR%XTV             (JI, KPATCH)    = PK%I%R%XTV         (JJ,1)
+      IR%XTL             (JI, KPATCH)    = PK%I%R%XTL         (JJ,1)
+      IR%XTC             (JI, KPATCH)    = PK%I%R%XTC         (JJ,1)
+      IR%XQC             (JI, KPATCH)    = PK%I%R%XQC         (JJ,1)
     END DO
   ELSE
 ! Please note that XLAI, XVEG, and XZ0 are not unpacked
@@ -218,145 +226,145 @@ ELSE
 ! vegetation is activated for MEB.
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
-      I%M%T%XLAI            (JI, KPATCH)    = PK%I%M%T%XLAI        (JJ,1) 
-      I%M%T%XVEG            (JI, KPATCH)    = PK%I%M%T%XVEG        (JJ,1) 
-      I%M%T%XZ0             (JI, KPATCH)    = PK%I%M%T%XZ0         (JJ,1) 
+      IMT%XLAI            (JI, KPATCH)    = PK%I%M%T%XLAI        (JJ,1) 
+      IMT%XVEG            (JI, KPATCH)    = PK%I%M%T%XVEG        (JJ,1) 
+      IMT%XZ0             (JI, KPATCH)    = PK%I%M%T%XZ0         (JJ,1) 
     END DO
   ENDIF
   !
-  DO JK=1,SIZE(I%R%XTG,2)
+  DO JK=1,SIZE(IR%XTG,2)
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      I%R%XTG             (JI, JK, KPATCH) = PK%I%R%XTG         (JJ, JK,1)
+      IR%XTG             (JI, JK, KPATCH) = PK%I%R%XTG         (JJ, JK,1)
     ENDDO
   ENDDO
 !  
-  DO JK=1,SIZE(I%R%XWG,2)
+  DO JK=1,SIZE(IR%XWG,2)
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      I%R%XWG             (JI, JK, KPATCH) = PK%I%R%XWG         (JJ, JK,1)
-      I%R%XWGI            (JI, JK, KPATCH) = PK%I%R%XWGI        (JJ, JK,1)
+      IR%XWG             (JI, JK, KPATCH) = PK%I%R%XWG         (JJ, JK,1)
+      IR%XWGI            (JI, JK, KPATCH) = PK%I%R%XWGI        (JJ, JK,1)
     ENDDO
   ENDDO
 !  
   DO JK=1,SIZE(PK%I%R%TSNOW%WSNOW,2)
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)
-      I%R%TSNOW%WSNOW     (JI, JK, KPATCH) = PK%I%R%TSNOW%WSNOW    (JJ, JK,1)
-      I%R%TSNOW%RHO       (JI, JK, KPATCH) = PK%I%R%TSNOW%RHO    (JJ, JK,1)
+      IR%TSNOW%WSNOW     (JI, JK, KPATCH) = PK%I%R%TSNOW%WSNOW    (JJ, JK,1)
+      IR%TSNOW%RHO       (JI, JK, KPATCH) = PK%I%R%TSNOW%RHO    (JJ, JK,1)
     ENDDO
   ENDDO
   !
-  IF (I%O%LTR_ML) THEN
+  IF (IO%LTR_ML) THEN
     DO JJ=1,KSIZE
       JI                      =    KMASK(JJ)          
-      I%R%XFAPARC         (JI, KPATCH)    = PK%I%R%XFAPARC     (JJ,1)
-      I%R%XFAPIRC         (JI, KPATCH)    = PK%I%R%XFAPIRC     (JJ,1)
-      I%R%XLAI_EFFC       (JI, KPATCH)    = PK%I%R%XLAI_EFFC   (JJ,1)
-      I%R%XMUS            (JI, KPATCH)    = PK%I%R%XMUS        (JJ,1)
+      IR%XFAPARC         (JI, KPATCH)    = PK%I%R%XFAPARC     (JJ,1)
+      IR%XFAPIRC         (JI, KPATCH)    = PK%I%R%XFAPIRC     (JJ,1)
+      IR%XLAI_EFFC       (JI, KPATCH)    = PK%I%R%XLAI_EFFC   (JJ,1)
+      IR%XMUS            (JI, KPATCH)    = PK%I%R%XMUS        (JJ,1)
     ENDDO
   ENDIF  
   !
-  IF (I%O%CPHOTO/='NON') THEN
+  IF (IO%CPHOTO/='NON') THEN
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
-      I%R%XAN             (JI, KPATCH)    = PK%I%R%XAN         (JJ,1)
-      I%R%XANDAY          (JI, KPATCH)    = PK%I%R%XANDAY      (JJ,1)
-      I%R%XANFM           (JI, KPATCH)    = PK%I%R%XANFM       (JJ,1)
+      IR%XAN             (JI, KPATCH)    = PK%I%R%XAN         (JJ,1)
+      IR%XANDAY          (JI, KPATCH)    = PK%I%R%XANDAY      (JJ,1)
+      IR%XANFM           (JI, KPATCH)    = PK%I%R%XANFM       (JJ,1)
     ENDDO
-    DO JK=1,SIZE(I%R%XBIOMASS,2)
+    DO JK=1,SIZE(IR%XBIOMASS,2)
       DO JJ=1,KSIZE
         JI                              = KMASK         (JJ)       
-        I%R%XBIOMASS        (JI, JK, KPATCH) = PK%I%R%XBIOMASS        (JJ, JK,1)
-        I%R%XRESP_BIOMASS   (JI, JK, KPATCH) = PK%I%R%XRESP_BIOMASS   (JJ, JK,1)
+        IR%XBIOMASS        (JI, JK, KPATCH) = PK%I%R%XBIOMASS        (JJ, JK,1)
+        IR%XRESP_BIOMASS   (JI, JK, KPATCH) = PK%I%R%XRESP_BIOMASS   (JJ, JK,1)
       ENDDO
     END DO
   END IF
   !
-  IF (I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='NCB') THEN
+  IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
     DO JJ=1,KSIZE
       JI                                 = KMASK             (JJ)
-      I%IP%XBSLAI_NITRO    (JI, KPATCH)       = PK%I%IP%XBSLAI_NITRO    (JJ,1)
+      IP%XBSLAI_NITRO    (JI, KPATCH)       = PK%I%IP%XBSLAI_NITRO    (JJ,1)
     END DO
   END IF
   !
-  IF (I%O%CPHOTO=='NCB') THEN
-    DO JK=1,SIZE(I%IP%XINCREASE,2)
+  IF (IO%CPHOTO=='NCB') THEN
+    DO JK=1,SIZE(IP%XINCREASE,2)
       DO JJ=1,KSIZE
         JI                                 = KMASK             (JJ)
-        I%IP%XINCREASE       (JI, JK, KPATCH)   = PK%I%IP%XINCREASE       (JJ, JK,1)
+        IP%XINCREASE       (JI, JK, KPATCH)   = PK%I%IP%XINCREASE       (JJ, JK,1)
       ENDDO
     END DO
   END IF
   !
-  IF (I%O%CRESPSL=='CNT') THEN
+  IF (IO%CRESPSL=='CNT') THEN
     DO JL=1,SIZE(PK%I%R%XLITTER,3)
       DO JK=1,SIZE(PK%I%R%XLITTER,2)
         DO JJ=1,KSIZE
           JI                                 = KMASK             (JJ)
-          I%R%XLITTER       (JI, JK, JL, KPATCH) = PK%I%R%XLITTER         (JJ, JK, JL,1)
+          IR%XLITTER       (JI, JK, JL, KPATCH) = PK%I%R%XLITTER         (JJ, JK, JL,1)
         ENDDO
       ENDDO
     ENDDO
     DO JK=1,SIZE(PK%I%R%XSOILCARB,2)
       DO JJ=1,KSIZE
         JI                                 = KMASK             (JJ)
-        I%R%XSOILCARB       (JI, JK, KPATCH)   = PK%I%R%XSOILCARB       (JJ, JK,1)
+        IR%XSOILCARB       (JI, JK, KPATCH)   = PK%I%R%XSOILCARB       (JJ, JK,1)
       ENDDO
     ENDDO
     DO JK=1,SIZE(PK%I%R%XLIGNIN_STRUC,2)
       DO JJ=1,KSIZE
         JI                                  = KMASK             (JJ)
-        I%R%XLIGNIN_STRUC   (JI, JK, KPATCH)    = PK%I%R%XLIGNIN_STRUC   (JJ, JK,1)
+        IR%XLIGNIN_STRUC   (JI, JK, KPATCH)    = PK%I%R%XLIGNIN_STRUC   (JJ, JK,1)
       ENDDO
     ENDDO
     DO JK=1,SIZE(PK%I%IP%XTURNOVER,2)
       DO JJ=1,KSIZE
         JI                      =    KMASK(JJ)
-        I%IP%XTURNOVER       (JI, JK, KPATCH)    = PK%I%IP%XTURNOVER       (JJ, JK,1)
+        IP%XTURNOVER       (JI, JK, KPATCH)    = PK%I%IP%XTURNOVER       (JJ, JK,1)
       ENDDO
     END DO
   END IF
   !
-  IF(LAGRIP .AND. (I%O%CPHOTO=='NIT' .OR. I%O%CPHOTO=='LAI' .OR. I%O%CPHOTO=='LST' .OR. I%O%CPHOTO=='NCB') ) THEN
+  IF(LAGRIP .AND. (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NCB') ) THEN
      DO JJ=1,KSIZE
        JI                    =  KMASK             (JJ)
        AG%LIRRIDAY (JI,KPATCH)  =  PK%AG%LIRRIDAY       (JJ,1)
      END DO
   END IF
   !
-  IF (I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO') THEN
+  IF (IR%TSNOW%SCHEME=='3-L' .OR. IR%TSNOW%SCHEME=='CRO') THEN
     DO JK=1,SIZE(PK%I%R%TSNOW%HEAT,2)
       DO JJ=1,KSIZE
         JI                              = KMASK         (JJ)
-        I%R%TSNOW%HEAT      (JI, JK, KPATCH) = PK%I%R%TSNOW%HEAT  (JJ, JK,1)
-        I%R%TSNOW%AGE       (JI, JK, KPATCH) = PK%I%R%TSNOW%AGE   (JJ, JK,1)
+        IR%TSNOW%HEAT      (JI, JK, KPATCH) = PK%I%R%TSNOW%HEAT  (JJ, JK,1)
+        IR%TSNOW%AGE       (JI, JK, KPATCH) = PK%I%R%TSNOW%AGE   (JJ, JK,1)
       ENDDO
     ENDDO
     DO JJ=1,KSIZE
       JI                              = KMASK         (JJ)
-      I%R%TSNOW%EMIS      (JI, KPATCH)    = PK%I%R%TSNOW%EMIS   (JJ,1)
-      I%R%TSNOW%ALBVIS    (JI, KPATCH)    = PK%I%R%TSNOW%ALBVIS (JJ,1)
-      I%R%TSNOW%ALBNIR    (JI, KPATCH)    = PK%I%R%TSNOW%ALBNIR (JJ,1)
-      I%R%TSNOW%ALBFIR    (JI, KPATCH)    = PK%I%R%TSNOW%ALBFIR (JJ,1)     
+      IR%TSNOW%EMIS      (JI, KPATCH)    = PK%I%R%TSNOW%EMIS   (JJ,1)
+      IR%TSNOW%ALBVIS    (JI, KPATCH)    = PK%I%R%TSNOW%ALBVIS (JJ,1)
+      IR%TSNOW%ALBNIR    (JI, KPATCH)    = PK%I%R%TSNOW%ALBNIR (JJ,1)
+      IR%TSNOW%ALBFIR    (JI, KPATCH)    = PK%I%R%TSNOW%ALBFIR (JJ,1)     
     END DO
   END IF
 
-  IF (I%R%TSNOW%SCHEME=='CRO') THEN
+  IF (IR%TSNOW%SCHEME=='CRO') THEN
     DO JK=1,SIZE(PK%I%R%TSNOW%GRAN1,2)
       DO JJ=1,KSIZE
         JI                              = KMASK         (JJ)
-        I%R%TSNOW%GRAN1     (JI, JK, KPATCH) = PK%I%R%TSNOW%GRAN1   (JJ, JK,1)
-        I%R%TSNOW%GRAN2     (JI, JK, KPATCH) = PK%I%R%TSNOW%GRAN2   (JJ, JK,1)
-        I%R%TSNOW%HIST      (JI, JK, KPATCH) = PK%I%R%TSNOW%HIST    (JJ, JK,1)
+        IR%TSNOW%GRAN1     (JI, JK, KPATCH) = PK%I%R%TSNOW%GRAN1   (JJ, JK,1)
+        IR%TSNOW%GRAN2     (JI, JK, KPATCH) = PK%I%R%TSNOW%GRAN2   (JJ, JK,1)
+        IR%TSNOW%HIST      (JI, JK, KPATCH) = PK%I%R%TSNOW%HIST    (JJ, JK,1)
       ENDDO
     END DO
   END IF
   !
-  IF(I%O%LGLACIER)THEN
+  IF(IO%LGLACIER)THEN
     DO JJ=1,KSIZE
        JI                   = KMASK     (JJ)
-       I%R%XICE_STO(JI, KPATCH) = PK%I%R%XICE_STO(JJ,1)
+       IR%XICE_STO(JI, KPATCH) = PK%I%R%XICE_STO(JJ,1)
     ENDDO
   ENDIF
 !
@@ -367,6 +375,7 @@ END IF
 CALL ISBA_INIT(PK%I)
 CALL GRID_INIT(PK%G)
 CALL AGRI_INIT(PK%AG)
+CALL SSO_INIT(PK%ISS)
 !
 !PK%I%M%X%XZ0_O_Z0H     => NULL()
 !PK%I%M%T%XEMIS         => NULL()

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_WATER_n (DGF, DGW, &
+      SUBROUTINE GET_VAR_WATER_n (DFO, DGF, DWO, DGW, &
                                   HPROGRAM,KI,HWATER,PQS,PZ0,PZ0H)
 !     ###########################################################
 !
@@ -34,7 +34,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
@@ -49,7 +49,9 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DFO
 TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DWO
 TYPE(DIAG_t), INTENT(INOUT) :: DGW
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -90,12 +92,12 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_WATFLX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGW%LSURF_VARS) THEN 
+IF (DWO%LSURF_VARS) THEN 
         PQS      = DGW%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DGW%LCOEF) THEN 
+IF (DWO%LCOEF) THEN 
         PZ0      = DGW%XZ0
         PZ0H     = DGW%XZ0H
 ELSE 
@@ -119,12 +121,12 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_FLAKE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGF%LSURF_VARS) THEN 
+IF (DFO%LSURF_VARS) THEN 
         PQS      = DGF%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DGF%LCOEF) THEN 
+IF (DFO%LCOEF) THEN 
         PZ0      = DGF%XZ0
         PZ0H     = DGF%XZ0H
 ELSE 

@@ -1,5 +1,5 @@
 !     #########################################################################
-      SUBROUTINE LATLON_GRIDTYPE_IGN(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
+      SUBROUTINE LATLON_GRIDTYPE_IGN(G,KL,PDIR)
 !     #########################################################################
 !
 !!****  *LATLON_GRIDTYPE_IGN* - routine to compute the horizontal geographic fields
@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_GRID_n, ONLY : GRID_t
+!
 USE MODD_CSTS,     ONLY : XPI
 USE MODD_IGN, ONLY : XA, XDELTY
 !
@@ -48,12 +50,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
+TYPE(GRID_t), INTENT(INOUT) :: G
+!
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
-REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
-REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT       ! latitude  (degrees)
-REAL, DIMENSION(KL),        INTENT(OUT) :: PLON       ! longitude (degrees)
-REAL, DIMENSION(KL),        INTENT(OUT) :: PMESH_SIZE ! mesh size (m2)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
 !
 !*       0.2   Declarations of local variables
@@ -76,19 +75,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
-ALLOCATE(ZX (SIZE(PLAT)))
-ALLOCATE(ZY (SIZE(PLAT)))
-ALLOCATE(ZDX(SIZE(PLAT)))
-ALLOCATE(ZDY(SIZE(PLAT)))
+ALLOCATE(ZX (SIZE(G%XLAT)))
+ALLOCATE(ZY (SIZE(G%XLAT)))
+ALLOCATE(ZDX(SIZE(G%XLAT)))
+ALLOCATE(ZDY(SIZE(G%XLAT)))
 !
- CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
+ CALL GET_GRIDTYPE_IGN(G%XGRID_PAR,KLAMBERT=ILAMBERT,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
- CALL LATLON_IGN(ILAMBERT,ZX,ZY,PLAT,PLON)
+ CALL LATLON_IGN(ILAMBERT,ZX,ZY,G%XLAT,G%XLON)
 !
 !-----------------------------------------------------------------------------
 !
@@ -98,14 +97,14 @@ ALLOCATE(ZDY(SIZE(PLAT)))
 !        3.1   Map factor
 !              ----------
 !
-ALLOCATE(ZMAP(SIZE(PLAT)))
+ALLOCATE(ZMAP(SIZE(G%XLAT)))
 !
  CALL MAP_FACTOR_IGN(ILAMBERT,ZX,ZY,ZMAP)
 !
 !        3.2   Grid size
 !              ---------
 !
-PMESH_SIZE(:) = ZDX(:) * ZDY(:) / ZMAP(:)**2
+G%XMESH_SIZE(:) = ZDX(:) * ZDY(:) / ZMAP(:)**2
 !
 !-----------------------------------------------------------------------------
 !
@@ -113,13 +112,13 @@ PMESH_SIZE(:) = ZDX(:) * ZDY(:) / ZMAP(:)**2
 !              ----------------------------------------------------
 !
 !* the following formulae is given for clockwise angles.
-ALLOCATE(ZYDELTY(SIZE(PLAT)))
-ALLOCATE(ZLATDY (SIZE(PLAT)))
-ALLOCATE(ZLONDY (SIZE(PLAT)))
+ALLOCATE(ZYDELTY(SIZE(G%XLAT)))
+ALLOCATE(ZLATDY (SIZE(G%XLAT)))
+ALLOCATE(ZLONDY (SIZE(G%XLAT)))
 ZYDELTY=ZY+XDELTY
  CALL LATLON_IGN(ILAMBERT,ZX,ZYDELTY,ZLATDY,ZLONDY)
 
-PDIR(:)= ATAN( (XA*(ZLONDY(:)-PLON(:))*XPI/180.) / XDELTY) * XPI/180.
+PDIR(:)= ATAN( (XA*(ZLONDY(:)-G%XLON(:))*XPI/180.) / XDELTY) * XPI/180.
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

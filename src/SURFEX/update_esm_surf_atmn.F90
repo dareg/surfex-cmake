@@ -1,6 +1,5 @@
 !     #################################################################################
-SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, I, S, U, W, &
-                                  HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
+SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, I, S, U, W, HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
                                    PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )  
 !     #################################################################################
 !
@@ -238,8 +237,7 @@ ENDDO
 IF (KTILE==1) THEN
   !
   IF (U%CSEA=='SEAFLX') THEN
-    CALL UPDATE_ESM_SEAFLUX_n(S, &
-                              U%NSIZE_SEA,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_SEAFLUX_n(S, U%NSIZE_SEA,KSW,ZP_ZENITH,ZP_DIR_ALB, &
                               ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: SEA SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
@@ -248,12 +246,10 @@ IF (KTILE==1) THEN
 ELSEIF (KTILE==2) THEN
   !
   IF (U%CWATER=='WATFLX') THEN   
-    CALL UPDATE_ESM_WATFLUX_n(W, &
-                              U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_WATFLUX_n(W, U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
                               ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF   )
   ELSEIF (U%CWATER=='FLAKE ') THEN
-    CALL UPDATE_ESM_FLAKE_n(F, &
-                            U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_FLAKE_n(F, U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
                             ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF   )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: INLAND WATER SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
@@ -262,8 +258,7 @@ ELSEIF (KTILE==2) THEN
 ELSEIF (KTILE==3) THEN
   !          
   IF (U%CNATURE=='ISBA') THEN   
-    CALL UPDATE_ESM_ISBA_n(I, &
-                           U%NSIZE_NATURE,KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_ISBA_n(I, U%NSIZE_NATURE,KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB, &
                            ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF              )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: NATURE SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')

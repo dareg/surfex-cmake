@@ -1,14 +1,12 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DTGD, DTGR, DGL, DGLC, DST, SLT,  &
-                              HPROGRAM, HCOUPLING, PTIMEC,                                    &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 HTEST                                                                       )  
+SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DLO, DGL, DGLC, DST, SLT, &
+                              HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, &
+                              KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS,&
+                              PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,      &
+                              PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS,      &
+                              PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF,    &
+                              PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,        &
+                              PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST  )  
 !     ###############################################################################
 !
 !!****  *COUPLING_NATURE_n * - Chooses the surface schemes for natural continental parts  
@@ -34,17 +32,14 @@ SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DTGD, DTGR, DGL, DGLC, 
 !!      P. Le Moigne 03/2015 tsz0 time management
 !!--------------------------------------------------------------------
 !
-!
-!
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
@@ -63,15 +58,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -153,44 +146,32 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_NATURE_N',0,ZHOOK_HANDLE)
 IF (U%CNATURE=='ISBA  ') THEN
-  CALL COUPLING_ISBA_SVAT_n(DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,    &
-                                 HPROGRAM, HCOUPLING,                                             &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
-                 KI,KSV,KSW,                                                                 &
-                 PTSUN, PZENITH, PZENITH2, PAZIM,                                            &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+  CALL COUPLING_ISBA_SVAT_n(DTCO, UG, U, USS, IM, DST, SLT, HPROGRAM, HCOUPLING,  PTSTEP,    &
+                            KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,  PTSUN, PZENITH,       &
+                            PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV,&
+                            PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS,  &
+                            PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB,   &
+                            PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,         &
+                            PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,'OK')  
 ELSE IF (U%CNATURE=='TSZ0  ') THEN
-  CALL COUPLING_TSZ0_n(DTCO, UG, U, USS, IM, DTZ, DTGD, DTGR, DST, SLT,  &
-                       HPROGRAM, HCOUPLING,                                                  &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIMEC,                                        &
-                 KI,KSV,KSW,                                                                 &
-                 PTSUN, PZENITH,  PZENITH2, PAZIM,                                           &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+  CALL COUPLING_TSZ0_n(DTCO, UG, U, USS, IM%ICP, IM%AG, IM%CHI, IM%DTI, IM%DGI, IM%GB,  &
+                       IM%ISS, IM%IG, IM%I, IM%PKCI, IM%PKD, IM%PK, DTZ,  DST, SLT,     &
+                       HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIMEC, KI,    &
+                       KSV, KSW, PTSUN, PZENITH,  PZENITH2, PAZIM, PZREF, PUREF, PZS,   &
+                       PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,      &
+                       PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS,      &
+                       PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF,    &
+                       PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF,  PPET_A_COEF,       &
+                       PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, 'OK'    )  
 ELSE IF (U%CNATURE=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(DGL, DGLC, &
-                           HPROGRAM, HCOUPLING, PTIMEC,                                      &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                         &
-                 KI,KSV,KSW,                                                                 &
-                 PTSUN, PZENITH, PAZIM,                                                      &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 'OK'                                                                        )  
+  CALL COUPLING_IDEAL_FLUX(DLO, DGL, DGLC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, &
+                           KMONTH, KDAY, PTIME, KI, KSV, KSW,  PTSUN, PZENITH, PAZIM,  &
+                           PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, &
+                           PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,   &
+                           PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB,   &
+                           PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,    &
+                           PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,         &
+                           PPEQ_B_COEF, 'OK'   )  
 ELSE IF (U%CNATURE=='NONE  ') THEN
   PSFTH = 0.
   PSFTQ = 0.

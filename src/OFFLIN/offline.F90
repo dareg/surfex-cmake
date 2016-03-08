@@ -412,11 +412,10 @@ IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
 !
 !     Allocations of Surfex Types
  CALL SURFEX_ALLOC_LIST(1)
- YSURF_CUR => YSURF_LIST(1)
+ YSC => YSURF_LIST(1)
 !
 !     Reading all namelist (also assimilation)
- CALL READ_ALL_NAMELISTS(YSURF_CUR, &
-                         CSURF_FILETYPE,'ALL',.FALSE.)
+ CALL READ_ALL_NAMELISTS(YSC, CSURF_FILETYPE,'ALL',.FALSE.)
 !
 !
 !*      0.5.   Reads SFX - OASIS coupling namelists
@@ -461,8 +460,7 @@ XTIME0 = MPI_WTIME()
 !       splitting of the grid
 !
 GSHADOWS = LSHADOWS_SLOPE .OR. LSHADOWS_OTHER
-CALL INIT_INDEX_MPI(YSURF_CUR, &
-                    CSURF_FILETYPE, 'OFF', YALG_MPI, XIO_FRAC, GSHADOWS)
+CALL INIT_INDEX_MPI(YSC, CSURF_FILETYPE, 'OFF', YALG_MPI, XIO_FRAC, GSHADOWS)
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ init_index ',PLOG=XTIME_NPIO_READ)
@@ -487,8 +485,7 @@ IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !
 !       configuration of run
 !
- CALL OL_READ_ATM_CONF(YSURF_CUR, &
-                       CSURF_FILETYPE, CFORCING_FILETYPE,            &
+ CALL OL_READ_ATM_CONF(YSC%DTCO, YSC%U, CSURF_FILETYPE, CFORCING_FILETYPE,  &
                       ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
                       ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF     )
 !
@@ -557,8 +554,7 @@ XUREF = ZUREF
 !
 !       compare orography
 !
- CALL COMPARE_OROGRAPHY(YSURF_CUR, &
-                         CSURF_FILETYPE, LSET_FORC_ZS, XDELTA_OROG)
+ CALL COMPARE_OROGRAPHY(YSC%DTCO, YSC%U, CSURF_FILETYPE, LSET_FORC_ZS, XDELTA_OROG)
 !
 !       miscellaneous initialization
 !
@@ -616,12 +612,12 @@ XTIME0 = MPI_WTIME()
 !
 !* opens forcing files (if ASCII or BINARY)
 !
-IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
+IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
+        CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
- CALL OL_READ_ATM(&
-                  CSURF_FILETYPE, CFORCING_FILETYPE, 1,             &
-                   ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
-                   ZCO2,ZDIR,LLIMIT_QAIR                           ) 
+ CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, 1,             &
+                  ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
+                  ZCO2,ZDIR,LLIMIT_QAIR                           ) 
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
@@ -660,8 +656,7 @@ XTIME0 = MPI_WTIME()
 !
 CALL GOTO_MODEL(1)
 !
- CALL INIT_SURF_ATM_n(YSURF_CUR, &
-                     CSURF_FILETYPE, YINIT, LLAND_USE,                      &
+ CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE,           &
                      INI, NSCAL, IBANDS,                               &
                      CSV,XCO2(:),XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,  &
                      XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
@@ -671,8 +666,7 @@ CALL GOTO_MODEL(1)
 ! initialization routines to compute shadows
 IF (GSHADOWS) THEN
   IF (IBLOCK==0) THEN
-    CALL INIT_SLOPE_PARAM(YSURF_CUR%UG, &
-                          ZZS_FORC,INI,ZLAT)
+    CALL INIT_SLOPE_PARAM(YSC%UG%G, YSC%UG%XGRID_FULL_PAR,ZZS_FORC,INI,ZLAT)
   END IF 
   CALL LOCAL_SLOPE_PARAM(1,INI)
 END IF
@@ -693,9 +687,9 @@ XTIME_COMM_READ = 0.
 !
 !   Land use or/and vegetation dynamic
 !                  
- CALL INIT_SURF_LANDUSE_n(YSURF_CUR, &
-                          CSURF_FILETYPE,YINIT,LLAND_USE,         &
-                          INI, NSCAL, IBANDS,                     &
+CALL INIT_SURF_LANDUSE_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%UG, YSC%IM, &
+                         YSC%SV, YSC%SLT, YSC%DST, CSURF_FILETYPE, &
+                         YINIT, LLAND_USE, INI, NSCAL, IBANDS,    &
                           CSV,XCO2(:),XRHOA(:), XZENITH(:),XAZIM(:),  &
                           XSW_BANDS,XDIR_ALB(:,:),  XSCA_ALB(:,:),    &
                           XEMIS(:),XTSRAD(:), XTSURF(:),              &
@@ -706,19 +700,16 @@ XTIME_COMM_READ = 0.
 XTIME0 = MPI_WTIME()
 #endif
 !
- CALL INIT_CRODEBUG(YSURF_CUR%IM%I)
+ CALL INIT_CRODEBUG(YSC%IM%I%R%TSNOW%SCHEME)
 !
 ! * SURFEX - OASIS  grid, partitions and local field definitions
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_DEF_OL(YSURF_CUR%IM%I, &
-                        YSURF_CUR%U, &
-                        CSURF_FILETYPE,YALG_MPI)
+  CALL SFX_OASIS_DEF_OL(YSC%IM%I%O, YSC%U, CSURF_FILETYPE,YALG_MPI)
 ENDIF
 !
-IF (CTIMESERIES_FILETYPE=="OFFLIN") THEN
-  CALL INIT_OUTPUT_OL_n (YSURF_CUR)
-ENDIF
+IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
+!
 ! --------------------------------------------------------------------------------------
 !
 INW = 1
@@ -767,8 +758,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZCO2(:,IDMAX)=ZCO2(:,SIZE(ZTA,2))
       ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
     ENDIF
-    CALL OL_READ_ATM(&
-                  CSURF_FILETYPE, CFORCING_FILETYPE, JFORC_STEP,    &
+    CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, JFORC_STEP,    &
                      ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX), &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),&
@@ -856,10 +846,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Receive fields to other models proc by proc
-     CALL SFX_OASIS_RECV_OL(YSURF_CUR%FM%F, YSURF_CUR%IM%I, YSURF_CUR%SM%S, YSURF_CUR%U, YSURF_CUR%WM%W, &
-                            CSURF_FILETYPE,INI,IBANDS,ZTIMEC,       &
-                            XTSTEP_SURF,XZENITH,XSW_BANDS,&
-                            XTSRAD,XDIR_ALB,XSCA_ALB,XEMIS,XTSURF   )
+     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM%I, YSC%SM%S, YSC%U, YSC%WM%W, &
+                            CSURF_FILETYPE, INI, IBANDS, ZTIMEC, XTSTEP_SURF, XZENITH, &
+                            XSW_BANDS, XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF   )
     ENDIF
     !
 #ifdef SFX_MPI
@@ -867,22 +856,17 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #endif
     !
     IF(GSHADOWS) THEN 
-      CALL SLOPE_RADIATIVE_EFFECT(XTSTEP_SURF,XZENITH(:),&
-      XAZIM(:),XPS(:),XTA(:),XRAIN(:),XDIR_SW(:,:),XLW(:),&
-      XZS_THREAD,XZS_XY_THREAD, XSLOPANG_THREAD,XSLOPAZI_THREAD,XSURF_TRIANGLE_THREAD)
+      CALL SLOPE_RADIATIVE_EFFECT(XTSTEP_SURF, XZENITH, XAZIM, XPS, XTA, XRAIN, XDIR_SW, XLW, &
+                                  XZS_THREAD, XZS_XY_THREAD, XSLOPANG_THREAD, XSLOPAZI_THREAD,&
+                                  XSURF_TRIANGLE_THREAD)
     END IF
     !
-    CALL COUPLING_SURF_ATM_n(YSURF_CUR, &
-                             CSURF_FILETYPE, 'E', ZTIMEC,                    &
-           XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INI, NSCAL, IBANDS, &
-           XTSUN(:), XZENITH(:), XZENITH2(:), XAZIM(:), XZREF(:), XUREF(:),  &
-           XZS(:), XU(:), XV(:), XQA(:), XTA(:), XRHOA(:), XSV(:,:), XCO2(:),&
-           CSV, XRAIN(:), XSNOW(:), XLW(:), XDIR_SW(:,:), XSCA_SW(:,:),      &
-           XSW_BANDS, XPS(:), XPA(:), XSFTQ(:), XSFTH(:), XSFTS(:,:),        &
-           XSFCO2(:), XSFU(:), XSFV(:), XTSRAD(:), XDIR_ALB(:,:), XSCA_ALB(:,:), &
-           XEMIS(:), XTSURF(:), XZ0(:), XZ0H(:), XQSURF(:), XPEW_A_COEF(:), &
-           XPEW_B_COEF(:),XPET_A_COEF(:),XPEQ_A_COEF(:),XPET_B_COEF(:),&
-           XPEQ_B_COEF(:),YTEST                                            )
+    CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, &
+                             INI, NSCAL, IBANDS, XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,  &
+                             XZS, XU, XV, XQA, XTA, XRHOA, XSV, XCO2, CSV, XRAIN, XSNOW, XLW, XDIR_SW, &
+                             XSCA_SW, XSW_BANDS, XPS, XPA, XSFTQ, XSFTH, XSFTS, XSFCO2, XSFU, XSFV, &
+                             XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF, XPEW_A_COEF, &
+                             XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,XPET_B_COEF,XPEQ_B_COEF, YTEST      )
     !
 #ifdef SFX_MPI
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
@@ -894,7 +878,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Send fields to other models proc by proc
-     CALL SFX_OASIS_SEND_OL(YSURF_CUR%FM%F, YSURF_CUR%IM%I, YSURF_CUR%SM%S, YSURF_CUR%U, YSURF_CUR%WM%W, &
+     CALL SFX_OASIS_SEND_OL(YSC%FM%F, YSC%IM%I, YSC%SM%S, YSC%U, YSC%WM%W, &
                             CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF)
     ENDIF
     !
@@ -1036,7 +1020,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
             IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
             IDATEF(7:11) = 0
             IF (CSURF_FILETYPE/='FA    ') THEN
-              CALL WRITE_HEADER_FA(YSURF_CUR%UG, &
+              CALL WRITE_HEADER_FA(YSC%UG%G%CGRID, YSC%UG%XGRID_FULL_PAR, &
                                    CSURF_FILETYPE,'ALL')
             ELSE
               CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
@@ -1059,21 +1043,11 @@ DO JFORC_STEP=1,INB_STEP_ATM
       LDEF = .TRUE.
       !
       IF (CTIMESERIES_FILETYPE=="NC    ") THEN
-        CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                               YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
-                               YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)                   
+        CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, &
+                               YSC%TM%DTT, YSC%DTZ, YSC%IM%I, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
       ENDIF
       !
       IDX_W = 0
-      !
-      CALL DIAG_SURF_ATM_n(YSURF_CUR%IM%DGEI, YSURF_CUR%IM%DGEIC, YSURF_CUR%FM%DGF, &
-                           YSURF_CUR%FM%DGFC, YSURF_CUR%DGL, &
-                           YSURF_CUR%DGLC, YSURF_CUR%IM%DGI, YSURF_CUR%IM%DGIC, &
-                           YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGSC, &
-                           YSURF_CUR%DGU, YSURF_CUR%DGUP, YSURF_CUR%DGUC, YSURF_CUR%DGUPC, &
-                           YSURF_CUR%TM%DGT, YSURF_CUR%WM%DGW, &
-                           YSURF_CUR%WM%DGWC, YSURF_CUR%U, YSURF_CUR%USS, &
-                           CTIMESERIES_FILETYPE)
       !
       DO JNW = 1,INW
         ! 
@@ -1082,18 +1056,20 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifdef SFX_MPI
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL WRITE_SURF_ATM_n(YSURF_CUR, &
-                              CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+        CALL WRITE_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
+        CALL DIAG_SURF_ATM_n(YSC%IM%DGI, YSC%SM%DGS, YSC%TM%TD, YSC%FM%DFO, YSC%FM%DGF, YSC%FM%DGFC, &
+                             YSC%WM%DWO, YSC%WM%DGW, YSC%WM%DGWC, YSC%DLO, YSC%DGL, YSC%DGLC, &
+                             YSC%DUO, YSC%DGU, YSC%DGUP, YSC%DGUC, YSC%DGUPC, YSC%U, YSC%USS, &
+                             CTIMESERIES_FILETYPE)
 #ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL WRITE_DIAG_SURF_ATM_n(YSURF_CUR, &
-                                   CTIMESERIES_FILETYPE,'ALL')
+        CALL WRITE_DIAG_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL')
 #ifdef SFX_MPI
         XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
 #endif
@@ -1193,7 +1169,8 @@ XTIME = (MPI_WTIME() - XTIME0)
 !$OMP END PARALLEL
 !
 !
-IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('CLOSE',CFORCING_FILETYPE,'R')
+IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
+        CALL OPEN_CLOSE_BIN_ASC_FORC('CLOSE',CFORCING_FILETYPE,'R')
 !
 IF (CFORCING_FILETYPE=='NETCDF') CALL CLOSE_FILEIN_OL
 IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
@@ -1219,7 +1196,7 @@ IF ( LRESTART ) THEN
       IDATEF(2)= IMONTH
       IDATEF(3)= IDAY
       IDATEF(4)= FLOOR(ZTIME/3600.)
-      IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
+      IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60  
       IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
       IDATEF(7:11) = 0   
       NUNIT_FA = 19 
@@ -1235,17 +1212,15 @@ IF ( LRESTART ) THEN
   LDEF = .TRUE.
   !
   IF (CSURF_FILETYPE=="NC    ") THEN
-    CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                         YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
-                         YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)
+    CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, YSC%TM%DTT, &
+                           YSC%DTZ, YSC%IM%I, YSC%UG, YSC%U, YSC%DUO%CSELECT)
   ENDIF
   !
   DO JNW = 1,INW
     !
     CALL IO_BUFF_CLEAN
     !
-    CALL FLAG_UPDATE(YSURF_CUR%IM%DGI, YSURF_CUR%DGU, &
-                     .FALSE.,.TRUE.,.FALSE.,.FALSE.)
+    CALL FLAG_UPDATE(YSC%IM%DGI%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
     !
     IF (LRESTART_2M) THEN
       I2M       = 1
@@ -1272,23 +1247,17 @@ IF ( LRESTART ) THEN
     GPGD_TEB               = .FALSE.
     GSURF_MISC_BUDGET_TEB  = .FALSE.  
     !
-    CALL FLAG_DIAG_UPDATE(YSURF_CUR%FM%CHF, YSURF_CUR%IM%CHI, YSURF_CUR%SM%CHS, YSURF_CUR%TM%CHT, &
-                          YSURF_CUR%WM%CHW, YSURF_CUR%IM%DGEI, YSURF_CUR%FM%DGF, YSURF_CUR%IM%DGI, &
-                          YSURF_CUR%FM%DGMF, YSURF_CUR%IM%DGMI, YSURF_CUR%TM%DGMTO, YSURF_CUR%SM%DGO, &
-                          YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGMSI, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, &
-                          YSURF_CUR%WM%DGW, YSURF_CUR%IM%I, YSURF_CUR%U, &
+    CALL FLAG_DIAG_UPDATE(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%U,    &
                           GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                           GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
-                          GWATER_PROFILE,                                            &                          
-                          GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
-                          GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
+                          GWATER_PROFILE, GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA,     &
+                          GCH_NO_FLUX_ISBA, GSURF_MISC_BUDGET_ISBA, GPGD_TEB,        &
+                          GSURF_MISC_BUDGET_TEB    )
     !
     !* writes into the file
-    CALL WRITE_SURF_ATM_n(YSURF_CUR, &
-                              CSURF_FILETYPE,'ALL',LLAND_USE)
+    CALL WRITE_SURF_ATM_n(YSC, CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
-       CALL WRITE_DIAG_SURF_ATM_n(YSURF_CUR, &
-                                   CSURF_FILETYPE,'ALL')
+       CALL WRITE_DIAG_SURF_ATM_n(YSC, CSURF_FILETYPE,'ALL')
     ENDIF
     !
     LDEF = .FALSE.
@@ -1305,8 +1274,8 @@ IF ( LRESTART ) THEN
     !
   ENDIF
   !
-  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) CALL PREP_RESTART_COUPL_TOPD(YSURF_CUR%UG, YSURF_CUR%U, &
-                                                                                 CSURF_FILETYPE,INI)
+  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) &
+          CALL PREP_RESTART_COUPL_TOPD(YSC%UG, YSC%U, CSURF_FILETYPE,INI)
   !
 END IF
 !
@@ -1336,13 +1305,11 @@ IF ( LINQUIRE ) THEN
   ALLOCATE( ZZS        ( INI ) )
   !
   ISERIES = 0
-  CALL GET_SURF_VAR_n(YSURF_CUR%FM%DGF, YSURF_CUR%IM%I, YSURF_CUR%IM%DGI, YSURF_CUR%IM%DGMI, &
-                      YSURF_CUR%SM%DGS, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, YSURF_CUR%WM%DGW, &
-                      YSURF_CUR%FM%F, YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%USS, &
+  CALL GET_SURF_VAR_n(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%DGU,  YSC%UG, YSC%U, YSC%USS, &
                       CSURF_FILETYPE,INI,ISERIES,PSEA=ZSEA,PWATER=ZWATER,PNATURE=ZNATURE,PTOWN=ZTOWN, &
-                        PT2M=ZT2M,PQ2M=ZQ2M,PQS=ZQS,PZ0=ZZ0,PZ0H=ZZ0H,PZ0EFF=ZZ0EFF,PQS_SEA=ZQS_SEA,  &
-                        PQS_WATER=ZQS_WATER,PQS_NATURE=ZQS_NATURE,PQS_TOWN=ZQS_TOWN,                  &
-                        PPSNG=ZPSNG,PPSNV=ZPSNV,PZS=ZZS                                         )  
+                      PT2M=ZT2M,PQ2M=ZQ2M,PQS=ZQS,PZ0=ZZ0,PZ0H=ZZ0H,PZ0EFF=ZZ0EFF,PQS_SEA=ZQS_SEA,  &
+                      PQS_WATER=ZQS_WATER,PQS_NATURE=ZQS_NATURE,PQS_TOWN=ZQS_TOWN,                  &
+                      PPSNG=ZPSNG,PPSNV=ZPSNV,PZS=ZZS                                         )  
   !
   ISIZE = SIZE(NINDEX)
   IF (NRANK==NPIO) THEN

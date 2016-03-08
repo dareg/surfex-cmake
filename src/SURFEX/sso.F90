@@ -27,7 +27,7 @@
 !
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
@@ -54,7 +54,7 @@ IMPLICIT NONE
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OSSO   ! .T. : the SSO coefficients
 !                                            ! are computed at grid point

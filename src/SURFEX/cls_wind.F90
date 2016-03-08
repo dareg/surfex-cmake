@@ -1,7 +1,5 @@
 !     #########
-       SUBROUTINE CLS_WIND( PZONA, PMERA, PHW,                 &
-                            PCD, PCDN, PRI, PHV,               &
-                            PZON10M, PMER10M                   )  
+       SUBROUTINE CLS_WIND( PZONA, PMERA, PHW, PCD, PCDN, PRI, PHV, PZON10M, PMER10M  )  
 !     ###############################################################
 !
 !!****  *PARAMCLS*  

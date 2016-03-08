@@ -188,8 +188,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFC0_BIN',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0_BIN
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_BIN (DGU, U, &
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_BIN (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
@@ -197,8 +196,6 @@ END SUBROUTINE WRITE_SURFC0_BIN
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -221,8 +218,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -251,8 +247,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-  CALL INIT_WRITE_BIN(DGU, U, &
-                      HREC,1,LWFL)
+  CALL INIT_WRITE_BIN(HSELECT, NFULL, HREC,1,LWFL)
   !
   IF (LWFL) THEN 
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
@@ -271,17 +266,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_BIN
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_BIN (DGU, U, &
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_BIN (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -304,8 +295,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
@@ -334,8 +324,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-  CALL INIT_WRITE_BIN(DGU, U, &
-                      HREC,SIZE(PFIELD,2),LWFL)
+  CALL INIT_WRITE_BIN(HSELECT, NFULL, HREC,SIZE(PFIELD,2),LWFL)
   !
   IF (LWFL) THEN
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK

@@ -1,9 +1,5 @@
 !     #########
-      SUBROUTINE PACK_PGD (DTCO, U, &
-                           HPROGRAM, HSURF,                 &
-                            HGRID,  PGRID_PAR,               &
-                            OCOVER, PCOVER, PZS,             &
-                            PLAT, PLON, PMESH_SIZE, PDIR     )  
+      SUBROUTINE PACK_PGD (DTCO, U, HPROGRAM, HSURF, G, OCOVER, PCOVER, PZS, PDIR     )  
 !     ##############################################################
 !
 !!**** *PACK_PGD* packs ISBA physiographic fields from all surface points to ISBA points
@@ -41,7 +37,7 @@
 !            -----------
 !
 !
-!
+USE MODD_GRID_n, ONLY : GRID_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -73,18 +69,14 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_t), INTENT(INOUT) :: G
 !
  CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM  ! Type of program
  CHARACTER(LEN=6),        INTENT(IN) :: HSURF     ! surface type
 !
- CHARACTER(LEN=10),       INTENT(OUT):: HGRID     ! grid used
-REAL,    DIMENSION(:),   POINTER    :: PGRID_PAR ! grid definition
 LOGICAL, DIMENSION(:),   INTENT(OUT):: OCOVER    ! list of present cover
 REAL,    DIMENSION(:,:), POINTER :: PCOVER    ! cover fraction
 REAL,    DIMENSION(:),   INTENT(OUT):: PZS       ! zs
-REAL,    DIMENSION(:),   INTENT(OUT):: PLAT      ! latitude
-REAL,    DIMENSION(:),   INTENT(OUT):: PLON      ! longitude
-REAL,    DIMENSION(:),   INTENT(OUT):: PMESH_SIZE! mesh size
 REAL,    DIMENSION(:),   INTENT(OUT), OPTIONAL :: PDIR ! angle of grid axis with N.
 !
 !
@@ -96,7 +88,7 @@ INTEGER                        :: IL     ! number of points
 INTEGER                        :: ILU    ! expected physical size of full surface array
 INTEGER                        :: JCOVER
 INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field to nature field
-REAL,    DIMENSION(SIZE(PLAT)) :: ZDIR
+REAL,    DIMENSION(SIZE(G%XLAT)) :: ZDIR
 !
 REAL, DIMENSION(NL)    :: ZCOVER ! cover  on all surface points
 LOGICAL, DIMENSION(JPCOVER)    :: GCOVER ! list of existing cover
@@ -110,19 +102,17 @@ IF (LHOOK) CALL DR_HOOK('PACK_PGD',0,ZHOOK_HANDLE)
 !*    1.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     HSURF,IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, HSURF,IL)
 ALLOCATE(IMASK(IL))
 ILU=0
- CALL GET_SURF_MASK_n(DTCO, U, &
-                      HSURF,IL,IMASK,ILU,ILUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, HSURF,IL,IMASK,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.      Packing of grid
 !             ---------------
 !
- CALL PACK_GRID(IMASK,CGRID,HGRID,XGRID_PAR,PGRID_PAR)
+ CALL PACK_GRID(IMASK,CGRID,G%CGRID,XGRID_PAR,G%XGRID_PAR)
 !
 !-------------------------------------------------------------------------------
 !
@@ -133,7 +123,7 @@ ILU=0
 !
 IF (HSURF=='NATURE') THEN
   !
-  ALLOCATE(PCOVER(SIZE(PLAT),COUNT(GCOVER)))
+  ALLOCATE(PCOVER(SIZE(G%XLAT),COUNT(GCOVER)))
   !
   DO JCOVER=1,COUNT(GCOVER)
     CALL GET_COVER_n(U,HPROGRAM,JCOVER,ZCOVER)
@@ -146,8 +136,7 @@ ELSE
   !
 ENDIF
 !
- CALL GET_ZS_n(U, &
-               HPROGRAM,NL,ZZS)
+ CALL GET_ZS_n(U, HPROGRAM,NL,ZZS)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
@@ -160,6 +149,7 @@ OCOVER=GCOVER
 !-------------------------------------------------------------------------------
 !
 DEALLOCATE(IMASK)
+!
 IF (LHOOK) CALL DR_HOOK('PACK_PGD',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

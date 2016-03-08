@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA_SLOPE (USS, &
-                                     KI)
+      SUBROUTINE TOPD_TO_ISBA_SLOPE (PSSO_SLOPE, KI)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -47,8 +46,6 @@
 !               ------------
 !
 !
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
-!
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XTANB
 USE MODD_COUPLING_TOPD, ONLY : NMASKT,NNPIX
 USE MODD_SURF_PAR,        ONLY : NUNDEF
@@ -61,8 +58,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+REAL, DIMENSION(:), INTENT(INOUT) :: PSSO_SLOPE
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 !
@@ -83,7 +79,7 @@ IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA_SLOPE',0,ZHOOK_HANDLE)
 !
 !write(*,*) 'pente avt topmodel',MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)
 !
-ZSSO_SLOPE = USS%XSSO_SLOPE
+ZSSO_SLOPE = PSSO_SLOPE
 !
 ZCOUNT(:) = REAL(NNPIX(:))
 
@@ -103,7 +99,7 @@ WHERE (ZCOUNT /= 0.0)
    ZSSO_SLOPE = ZSSO_SLOPE / ZCOUNT
 ENDWHERE
 !
-USS%XSSO_SLOPE = ZSSO_SLOPE
+PSSO_SLOPE = ZSSO_SLOPE
 !
 !write(*,*) 'pente apres modification', &
 !           MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),COUNT(ZCOUNT/=0.0),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)

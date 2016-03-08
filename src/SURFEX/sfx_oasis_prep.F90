@@ -1,6 +1,5 @@
 !#########
-SUBROUTINE SFX_OASIS_PREP (I, UG, U, &
-                           HPROGRAM)
+SUBROUTINE SFX_OASIS_PREP (I, UG, U, HPROGRAM)
 !###################################################
 !
 !!****  *SFX_OASIS_PREP* - Prepare grid areas and mask file for SFX-OASIS coupling
@@ -126,22 +125,20 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_PREP',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(I, U, &
-                     ILUOUT)
+CALL SFX_OASIS_CHECK(I%O, U, ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*       2.     Get grid definition :
 !               ---------------------
 !
-CALL GET_MESH_CORNER(UG, &
-                     ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
+CALL GET_MESH_CORNER(UG, ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 !
 ZLON(:,1)=UG%G%XLON(:)
 ZLAT(:,1)=UG%G%XLAT(:)
 !
-IF(I%LGW)THEN
-  CALL UNPACK_SAME_RANK(U%NR_NATURE(:),I%XGW(:),ZGW(:))
+IF(I%O%LGW)THEN
+  CALL UNPACK_SAME_RANK(U%NR_NATURE(:),I%PXGW(:),ZGW(:))
   WHERE(ZGW(:)==XUNDEF)ZGW(:)=0.0
 ELSE
   ZGW(:) = 0.0

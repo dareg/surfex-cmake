@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_ASCLLV (DTCO, UG, U, USS, &
-                             HPROGRAM,HSURF,KLUOUT,PFIELD)
+SUBROUTINE PREP_ISBA_ASCLLV (DTCO, UG, U, USS, HPROGRAM,HSURF,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_ASCLLV* - prepares ISBA field from prescribed values
@@ -32,7 +31,7 @@ USE MODD_SURFEX_MPI, ONLY : NPROC, NINDEX, NNUM, NCOMM, NPIO, NRANK
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_PREP,           ONLY : CINTERP_TYPE
 USE MODD_PGD_GRID,       ONLY : NL,LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR
@@ -65,7 +64,7 @@ INCLUDE "mpif.h"
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -115,20 +114,17 @@ CATYPE = 'ARI'
 !
 !*      1.    get full dimension of grid
 !
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     'FULL  ',NL)
+ CALL GET_TYPE_DIM_n(DTCO, U, 'FULL  ',NL)
 !
 !*      2.    get nature dimension
 !
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     'NATURE',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',IL)
 !
 ALLOCATE(ZFIELD(IL,3))
 !
 !*      3.    get grid informations known over full grid
 !
- CALL GET_LATLONMASK_n(UG, &
-                       LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
+ CALL GET_LATLONMASK_n(UG, LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
 !
 !
 SELECT CASE(HSURF)
@@ -138,14 +134,11 @@ SELECT CASE(HSURF)
 !
   CASE('WG     ')
 
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                   HPROGRAM,'HUG_SURF: relative humidity','NAT',CFILE_HUG_SURF,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'HUG_SURF: relative humidity','NAT',CFILE_HUG_SURF,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,1))  
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                   HPROGRAM,'HUG_ROOT: relative humidity','NAT',CFILE_HUG_ROOT,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'HUG_ROOT: relative humidity','NAT',CFILE_HUG_ROOT,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,2))  
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                   HPROGRAM,'HUG_DEEP: relative humidity','NAT',CFILE_HUG_DEEP,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'HUG_DEEP: relative humidity','NAT',CFILE_HUG_DEEP,   &
                         CTYPE_HUG,XUNDEF,ZFIELD(:,3))  
 
     ALLOCATE(PFIELD(IL,3,NVEGTYPE))
@@ -159,14 +152,11 @@ SELECT CASE(HSURF)
 
   CASE('TG     ')
 
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                   HPROGRAM,'TG_SURF: temperature','NAT',CFILE_TG_SURF,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'TG_SURF: temperature','NAT',CFILE_TG_SURF,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,1))  
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                   HPROGRAM,'TG_ROOT: temperature','NAT',CFILE_TG_ROOT,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'TG_ROOT: temperature','NAT',CFILE_TG_ROOT,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,2))  
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                   HPROGRAM,'TG_DEEP: temperature','NAT',CFILE_TG_DEEP,   &
+    CALL PGD_FIELD(DTCO, UG, U, USS, HPROGRAM,'TG_DEEP: temperature','NAT',CFILE_TG_DEEP,   &
                         CTYPE_TG,XUNDEF,ZFIELD(:,3))  
 
     ALLOCATE(PFIELD(IL,3,NVEGTYPE))

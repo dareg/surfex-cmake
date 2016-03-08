@@ -1,7 +1,5 @@
 !     #################################################################################
-SUBROUTINE PREP_OCEAN_ASCLLV (DTCO, UG, U, &
-                              HPROGRAM,HSURF,HFILE, & 
-     &                       KLUOUT,PFIELD)
+SUBROUTINE PREP_OCEAN_ASCLLV (DTCO, UG, U, HPROGRAM,HSURF,HFILE, KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_OCEAN_ASCLLDV* - prepares oceanic fields from personal data in ascii
@@ -99,17 +97,14 @@ IF (LHOOK) CALL DR_HOOK('PREP_OCEAN_ASCLLV',0,ZHOOK_HANDLE)
 CINGRID_TYPE='CONF PROJ '
 
 !*      1.    get full dimension of grid
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     'FULL  ',NL)
+ CALL GET_TYPE_DIM_n(DTCO, U, 'FULL  ',NL)
 !*      2.    get Ocean dimension
 !
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     'SEA   ',IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, 'SEA   ',IL)
 
 !*      3.    get grid informations known over full grid
 !
- CALL GET_LATLONMASK_n(UG, &
-                       LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
+ CALL GET_LATLONMASK_n(UG, LLATLONMASK,CGRID,XGRID_PAR,NGRID_PAR)
 !
 !!
 
@@ -177,8 +172,7 @@ CINTERP_TYPE='NONE  '
 !
 
 YMASK = 'SEA   '
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     YMASK,IDIM)
+ CALL GET_TYPE_DIM_n(DTCO, U, YMASK,IDIM)
 WRITE(KLUOUT,*) "IDIM (dim sea) =", IDIM
 
 ALLOCATE(PFIELD(1:IDIM,1:SIZE(ZFIELD,2),1:SIZE(ZFIELD,3)))
@@ -190,8 +184,7 @@ ENDIF
 
 ALLOCATE(IMASK(IDIM))
 ILU=0
- CALL GET_SURF_MASK_n(DTCO, U, &
-                      YMASK,IDIM,IMASK,ILU,KLUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, YMASK,IDIM,IMASK,ILU,KLUOUT)
 DO JK=1,NOCKMAX
   CALL PACK_SAME_RANK(IMASK,ZFIELD(:,JK,1),PFIELD(:,JK,1))
 END DO

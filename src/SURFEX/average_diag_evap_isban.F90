@@ -1,6 +1,6 @@
 !#############################
-SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n (DGEI, DGEIC, DGEIP, DGEIPC, OGLACIER, OMEB_PATCH, PPATCH, &
-                                     PTSTEP,PRAIN,PSNOW)
+SUBROUTINE AVERAGE_DIAG_EVAP_ISBA_n (OSURF_BUDGETC, DGEI, DGEIC, DGEIP, DGEIPC, &
+                                     OGLACIER, OMEB_PATCH, PPATCH, PTSTEP, PRAIN, PSNOW)
 !#############################
 !
 !
@@ -54,6 +54,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+LOGICAL, INTENT(IN) :: OSURF_BUDGETC
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIC 
 TYPE(DIAG_EVAP_ISBA_PATCH_t), INTENT(INOUT) :: DGEIP
@@ -320,7 +321,7 @@ END IF
 !       2.     Surface Cumulated Energy fluxes
 !              -------------------------------
 !
-IF (DGEI%LSURF_BUDGETC) THEN
+IF (OSURF_BUDGETC) THEN
    DGEIC%XLEG       (:) = 0.
    DGEIC%XLEGI      (:) = 0.
    DGEIC%XLEV       (:) = 0.

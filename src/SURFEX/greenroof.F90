@@ -1,16 +1,15 @@
 !     #########
-    SUBROUTINE GREENROOF (DTCO, TG, T, TOP, DTGD, TIR, GRM,  &
-                          HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,    &
-                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
-                PTSTEP, PZREF, PUREF,                                                &
-                PTA, PQA, PEXNS, PEXNA,PRHOA, PCO2, PPS, PRR, PSR, PZENITH,          &
-                PSW,PLW, PVMOD,                                                      &
-                PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,            &                
-                PRN_GREENROOF,PH_GREENROOF,PLE_GREENROOF,PGFLUX_GREENROOF,           &
-                PSFCO2,PEVAP_GREENROOF, PUW_GREENROOF,                               &
-                PAC_GREENROOF,PQSAT_GREENROOF,PTS_GREENROOF,                         &
-                PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,PDEEP_FLUX,                     &
-                PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PIRRIG_GREENROOF                )  
+    SUBROUTINE GREENROOF (DTCO, TG, T, TOP, DTGD, TIR, DTI, GB, VD, TV,            &
+                          HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
+                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
+                          PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,     &
+                          PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,           &
+                          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,&                
+                          PRN_GREENROOF, PH_GREENROOF, PLE_GREENROOF,              &
+                          PGFLUX_GREENROOF, PSFCO2, PEVAP_GREENROOF, PUW_GREENROOF,&
+                          PAC_GREENROOF, PQSAT_GREENROOF, PTS_GREENROOF,           &
+                          PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, PDEEP_FLUX,        &
+                          PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PIRRIG_GREENROOF )  
 !   ##################################################################################
 !
 !!****  *GREENROOF*  
@@ -58,17 +57,21 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_SSO_n, ONLY : SSO_t, SSO_INIT
+USE MODD_TEB_n, ONLY : TEB_1P_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
-USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
 !
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
+USE MODD_SURFEX_n, ONLY : TEB_VEG_DIAG_t
+USE MODD_TEB_VEG_n, ONLY : TEB_VEG_t
+!
+USE MODD_AGRI_n, ONLY : AGRI_t, AGRI_INIT
 !
 USE MODD_SURF_PAR,             ONLY: XUNDEF
 USE MODD_TYPE_DATE_SURF,       ONLY: DATE_TIME
 USE MODD_CSTS,                 ONLY: XCPD
-
-
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE
@@ -77,7 +80,6 @@ USE MODI_CARBON_EVOL
 USE MODE_THERMOS
 USE MODI_ROOF_IMPL_COEF
 USE MODI_TEB_IRRIG
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -90,12 +92,15 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(GRID_t), INTENT(INOUT) :: TG
-TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
-TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
-
+!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
+TYPE(TEB_VEG_DIAG_t), INTENT(INOUT) :: VD
+TYPE(TEB_VEG_t), INTENT(INOUT) :: TV
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -149,209 +154,33 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GREENROOF      ! greenroof summer 
 !
 !*      0.2    Declarations of local variables
 !
- CHARACTER(LEN=3)                     :: HRAIN               ! Rainfall spatial distribution ('DEF','SGH')
-LOGICAL                              :: OFLOOD              ! Activation of the flooding scheme
-LOGICAL                              :: OTEMP_ARP           ! True  = time-varying force-restore soil temperature (as in ARPEGE)
-                                                            ! False = No time-varying force-restore soil temperature (Default)
-LOGICAL                              :: OGLACIER            ! True = Over permanent snow and ice, 
-!                                                             initialise WGI=WSAT,
-!                                                             Hsnow>=10m and allow 0.8<SNOALB<0.85
-                                                            ! False = No specific treatment
-REAL, DIMENSION(0)                   :: ZSODELX             ! Pulsation for each layer (Only used if LTEMP_ARP=True)
-REAL, DIMENSION(SIZE(PPS))           :: ZMUF                ! fraction of the grid cell reached by the rainfall
-REAL, DIMENSION(SIZE(PPS))           :: ZFSAT               ! Topmodel saturated fraction
-REAL, DIMENSION(SIZE(PPS),GRM%TV%O%NGROUND_LAYER) :: ZTOPQS ! Topmodel (SGH not used in TEB) lateral subsurface flow by layer
-REAL, DIMENSION(SIZE(PPS))           :: ZQSB                ! Topmodel (SGH not used in TEB) output lateral subsurface
-REAL, DIMENSION(SIZE(PPS))           :: ZFWTD               ! grid-cell fraction of water table to rise
-REAL, DIMENSION(SIZE(PPS))           :: ZWTD                ! water table depth from TRIP or MODCOU
+TYPE(SSO_t) :: YGRSS
+TYPE(AGRI_t) :: YAG
 !
-REAL, DIMENSION(SIZE(PPS))           :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
-REAL, DIMENSION(SIZE(PPS),GRM%TV%O%NNBIOMASS) :: ZRESP_BIOMASS_INST  ! instantaneous biomass respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
+REAL, DIMENSION(SIZE(PPS),TV%O%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
 !
-!  temperatures & thermal conductivities
+!  temperatures
 !
-REAL, DIMENSION(SIZE(PPS))           :: ZTA          ! estimate of air temperature at future time
-!                                                    ! step as if modified by ISBA flux alone.
-!
-!   desactivated diag
-!
-REAL, DIMENSION(SIZE(PPS))   :: ZRN_ISBA      ! net radiative flux from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZH_ISBA       ! sensible heat flux from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZLEI_ISBA     ! baresoil evaporation from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZLEG_ISBA     ! baresoil evaporation from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZLEGI_ISBA    ! baresoil sublimation from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZLEV_ISBA     ! total evapotranspiration from vegetation over 
-REAL, DIMENSION(SIZE(PPS))   :: ZLETR_ISBA    ! transpiration from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZUSTAR_ISBA   ! friction velocity from snow-free surface
-REAL, DIMENSION(SIZE(PPS))   :: ZLER_ISBA     ! evaporation from canopy water interception 
-REAL, DIMENSION(SIZE(PPS))   :: ZLE_ISBA      ! latent heat flux from snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZGFLUX_ISBA   ! net energy flux into the snow-free surface 
-REAL, DIMENSION(SIZE(PPS))   :: ZRNSNOW       ! net radiative flux from snow (ISBA-ES:3-L)    (W/m2)
-REAL, DIMENSION(SIZE(PPS))   :: ZHSNOW        ! sensible heat flux from snow (ISBA-ES:3-L)    (W/m2)
-REAL, DIMENSION(SIZE(PPS))   :: ZHPSNOW       ! heat release from rainfall (ISBA-ES:3-L)      (W/m2)
-REAL, DIMENSION(SIZE(PPS))   :: ZGFLUXSNOW    ! net surface energy flux into snowpack (ISBA-ES:3-L)(W/m2)
-REAL, DIMENSION(SIZE(PPS))   :: ZUSTARSNOW    ! friction velocity  over snow (ISBA-ES:3-L)    (m/s)
-REAL, DIMENSION(SIZE(PPS))   :: ZGRNDFLUX     ! soil/snow interface heat flux (ISBA-ES:3-L)   (W/m2)
-REAL, DIMENSION(SIZE(PPS))   :: ZSRSFC        ! snowfall over snowpack (ISBA-ES:3-L)          (kg/m2/s)
-REAL, DIMENSION(SIZE(PPS))   :: ZRRSFC        ! rainfall over snowpack (ISBA-ES:3-L)          (kg/m2/s)
-REAL, DIMENSION(SIZE(PPS))   :: ZLESL         ! snowpack evaporation (ISBA-ES:3-L)            (W/m2)
-REAL, DIMENSION(SIZE(PPS))   :: ZCDSNOW       ! snow drag coefficient (ISBA-ES:3-L)           (-)
-REAL, DIMENSION(SIZE(PPS))   :: ZCHSNOW       ! heat turbulent transfer coefficient           (-)
-!
-REAL, DIMENSION(SIZE(PPS))   :: ZCG
-REAL, DIMENSION(SIZE(PPS))   :: ZC1
-REAL, DIMENSION(SIZE(PPS))   :: ZC2
-REAL, DIMENSION(SIZE(PPS))   :: ZWGEQ
-REAL, DIMENSION(SIZE(PPS))   :: ZCT
-REAL, DIMENSION(SIZE(PPS))   :: ZRS
-REAL, DIMENSION(SIZE(PPS))   :: ZCH
-REAL, DIMENSION(SIZE(PPS))   :: ZCD
-REAL, DIMENSION(SIZE(PPS))   :: ZCDN
-REAL, DIMENSION(SIZE(PPS))   :: ZRI
-REAL, DIMENSION(SIZE(PPS))   :: ZHU
-REAL, DIMENSION(SIZE(PPS))   :: ZHUG
-REAL, DIMENSION(SIZE(PPS))   :: ZRN
-REAL, DIMENSION(SIZE(PPS))   :: ZH
-REAL, DIMENSION(SIZE(PPS))   :: ZLEI
-REAL, DIMENSION(SIZE(PPS))   :: ZLEG
-REAL, DIMENSION(SIZE(PPS))   :: ZLEGI
-REAL, DIMENSION(SIZE(PPS))   :: ZLEV
-REAL, DIMENSION(SIZE(PPS))   :: ZLES
-REAL, DIMENSION(SIZE(PPS))   :: ZLER
-REAL, DIMENSION(SIZE(PPS))   :: ZLETR
-REAL, DIMENSION(SIZE(PPS))   :: ZEVAP
-REAL, DIMENSION(SIZE(PPS))   :: ZSUBL
-REAL, DIMENSION(SIZE(PPS))   :: ZGFLUX
-REAL, DIMENSION(SIZE(PPS))   :: ZRESTORE
-REAL, DIMENSION(SIZE(PPS))   :: ZUSTAR
-!REAL, DIMENSION(SIZE(PPS))   :: ZDRAIN
-!REAL, DIMENSION(SIZE(PPS))   :: ZRUNOFF
-REAL, DIMENSION(SIZE(PPS))   :: ZMELT
-REAL, DIMENSION(SIZE(PPS),GRM%TV%R%CUR%TSNOW%NLAYER) :: ZSNOWTEMP
-REAL, DIMENSION(SIZE(PPS),GRM%TV%R%CUR%TSNOW%NLAYER) :: ZSNOWLIQ
-REAL, DIMENSION(SIZE(PPS),GRM%TV%R%CUR%TSNOW%NLAYER) :: ZSNOWDZ
-REAL, DIMENSION(SIZE(PPS))   :: ZSNOWHMASS
-REAL, DIMENSION(SIZE(PPS))   :: ZMELTADV
-REAL, DIMENSION(SIZE(PPS),3) :: ZIACAN
-REAL, DIMENSION(SIZE(PPS))   :: ZQS
-REAL, DIMENSION(SIZE(PPS))   :: ZHV
-REAL, DIMENSION(SIZE(PPS))   :: ZHORT
-REAL, DIMENSION(SIZE(PPS))   :: ZDRIP
-REAL, DIMENSION(SIZE(PPS))   :: ZTS
-REAL, DIMENSION(SIZE(PPS))   :: ZRRVEG
-REAL, DIMENSION(SIZE(PPS))   :: ZALBT
-REAL, DIMENSION(SIZE(PPS))   :: ZEMIST
-REAL, DIMENSION(SIZE(PPS))   :: ZGPP
-REAL, DIMENSION(SIZE(PPS))   :: ZRESP_AUTO
-REAL, DIMENSION(SIZE(PPS))   :: ZRESP_ECO
-REAL, DIMENSION(SIZE(PPS)) :: ZFAPAR
-REAL, DIMENSION(SIZE(PPS)) :: ZFAPIR
-REAL, DIMENSION(SIZE(PPS)) :: ZFAPARC
-REAL, DIMENSION(SIZE(PPS)) :: ZFAPIRC
-REAL, DIMENSION(SIZE(PPS)) :: ZLAI_EFFC
-REAL, DIMENSION(SIZE(PPS)) :: ZMUS
-REAL, DIMENSION(SIZE(PPS)) :: ZFAPAR_BS
-REAL, DIMENSION(SIZE(PPS)) :: ZFAPIR_BS
-REAL, DIMENSION(SIZE(PPS)) :: ZIRRIG_FLUX
-REAL, DIMENSION(0,0,0)     :: ZLITTER
-REAL, DIMENSION(0,0)       :: ZSOILCARB, ZLIGNIN_STRUC, ZTURNOVER
-!
-REAL, DIMENSION(SIZE(PPS)) :: ZSNDRIFT
+REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
+!                                 ! step as if modified by ISBA flux alone.
 !
 !  surfaces relative fractions
-!
-REAL, DIMENSION(SIZE(PPS)) :: ZFFG
-REAL, DIMENSION(SIZE(PPS)) :: ZFFV
-REAL, DIMENSION(SIZE(PPS)) :: ZFF
-REAL, DIMENSION(SIZE(PPS)) :: ZALBF
+!  for flood
 REAL, DIMENSION(SIZE(PPS)) :: ZEMISF
-REAL, DIMENSION(SIZE(PPS)) :: ZFFROZEN
-REAL, DIMENSION(SIZE(PPS)) :: ZFFLOOD
-REAL, DIMENSION(SIZE(PPS)) :: ZPIFLOOD
-REAL, DIMENSION(SIZE(PPS)) :: ZIFLOOD
-REAL, DIMENSION(SIZE(PPS)) :: ZPFLOOD
-REAL, DIMENSION(SIZE(PPS)) :: ZLEFLOOD
-REAL, DIMENSION(SIZE(PPS)) :: ZLEIFLOOD
-REAL, DIMENSION(SIZE(PPS)) :: ZFFG_NOSNOW
-REAL, DIMENSION(SIZE(PPS)) :: ZFFV_NOSNOW
 !
-!  variables for irrigation
-REAL, DIMENSION(SIZE(PPS),1) :: ZIRRIG
-REAL, DIMENSION(SIZE(PPS),1) :: ZWATSUP
-REAL, DIMENSION(SIZE(PPS)) :: ZTHRESHOLDSPT
-LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIGATE
-LOGICAL, DIMENSION(SIZE(PPS)) :: GIRRIDAY
-!
-!  variables for deep soil
-!
-REAL, DIMENSION(SIZE(PPS)) :: ZGAMMAT  ! not used
+!  variables for deep soil temperature
 REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
-REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_B
-!
-REAL, DIMENSION(0) :: ZAOSIP  ! A/S for increasing x
-REAL, DIMENSION(0) :: ZAOSIM  ! A/S for decreasing x
-REAL, DIMENSION(0) :: ZAOSJP  ! A/S for increasing y
-REAL, DIMENSION(0) :: ZAOSJM  ! A/S for decreasing y
-REAL, DIMENSION(0) :: ZHO2IP  ! h/2 for increasing x
-REAL, DIMENSION(0) :: ZHO2IM  ! h/2 for decreasing x
-REAL, DIMENSION(0) :: ZHO2JP  ! h/2 for increasing y
-REAL, DIMENSION(0) :: ZHO2JM  ! h/2 for decreasing y
-REAL, DIMENSION(0,1) :: ZZ0EFFIP! roughness length for increasing x
-REAL, DIMENSION(0,1) :: ZZ0EFFIM! roughness length for decreasing x
-REAL, DIMENSION(0,1) :: ZZ0EFFJP! roughness length for increasing y
-REAL, DIMENSION(0,1) :: ZZ0EFFJM! roughness length for decreasing y
-REAL, DIMENSION(0) :: ZTAU_WOOD  ! residence time in wood (s)
-REAL, DIMENSION(0,0) :: ZINCREASE
 !
 ! Dummy variables for MEB:
-LOGICAL,PARAMETER::OMEB=.FALSE.
-LOGICAL,PARAMETER::OFORC_MEASURE=.FALSE.
-LOGICAL,PARAMETER::OMEB_LITTER=.FALSE.
-REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, &
-          ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                                                  &
-          ZP_WRMAX_CFV, ZP_LAIV,                                                          &
-          ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                                           &
-          ZZ0G_WITHOUT_SNOW,                                                              &
-          ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                                                 &
-          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN,                                                 &
-          ZP_ALBNIR_VEG, ZP_ALBVIS_VEG,                                                   &
-          ZP_ALBNIR_SOIL, ZP_ALBVIS_SOIL, ZP_GNDLITTER
-REAL, DIMENSION(SIZE(GRM%TV%M%X%XROOTFRAC,1),SIZE(GRM%TV%M%X%XROOTFRAC,2)) :: ZP_ROOTFRACV
-REAL, DIMENSION(SIZE(PPS)) :: ZP_WRL,ZP_WRLI,ZP_WRVN,ZP_TV,ZP_TL
-REAL, DIMENSION(SIZE(PPS)) :: ZP_TC,ZP_QC
-REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,       &
-          ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                    &
-          ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                          &
-          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LELITTER, ZP_LELITTERI,      &
-          ZP_DRIPLIT,ZP_RRLIT, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
-          ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                     &
-          ZP_EVAP_N_C, ZP_EVAP_G_C,                                       & 
-          ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                                  &
-          ZP_SWDOWN_GN, ZP_LWDOWN_GN
+REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, ZPALPHAN, ZZ0G_WITHOUT_SNOW, &
+                              ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN, &
+                              ZZ0H_MEBN, ZZ0EFF_MEBN
 !
-TYPE (DATE_TIME),   DIMENSION(0) :: TPSEED ! seeding date
-TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
 INTEGER                    :: ILU
-!
-LOGICAL :: GAGRI_TO_GRASS
-!
-REAL, DIMENSION(0,0) :: ZGNDLITTER
-REAL, DIMENSION(0,0) :: ZRGLGV
-REAL, DIMENSION(0,0) :: ZGAMMAGV
-REAL, DIMENSION(0,0) :: ZRSMINGV
-REAL, DIMENSION(0,0) :: ZWRMAX_CFGV
-REAL, DIMENSION(0,0) :: ZH_VEG
-REAL, DIMENSION(0,0) :: ZLAIGV
-REAL, DIMENSION(0,0) :: ZZ0LITTER
-!
-TYPE (DATE_TIME),  DIMENSION(0,0) :: TZSEED
-TYPE (DATE_TIME), DIMENSION(0,0) :: TZREAP
-!
-!Snow options
-LOGICAL :: GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH
-CHARACTER(3) :: YSNOWMETAMO,YSNOWRAD
-LOGICAL :: GUPDATED
+LOGICAL :: GUPDATED, GALB
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -365,54 +194,9 @@ ILU = SIZE(PPS)
 !
 ZDIRCOSZW = 1.
 !
-HRAIN     = 'DEF'
-OFLOOD    = .FALSE.
-OTEMP_ARP = .FALSE.
-OGLACIER  = .FALSE.
-ZMUF      = 0.
-ZFSAT     = 0.
-ZTOPQS    = 0.
-ZQSB      = 0.
-ZFWTD     = 0.
-ZWTD      = XUNDEF
-ZSNDRIFT  = 0.
+ CALL SSO_INIT(YGRSS)
 !
-GAGRI_TO_GRASS = .FALSE.
-!
-! Snow options
-GSNOWDRIFT=.TRUE.
-GSNOWDRIFT_SUBLIM=.FALSE.
-GSNOW_ABS_ZENITH=.FALSE.
-YSNOWMETAMO="B92"
-YSNOWRAD="B92"
-!
-! Van genuchten parameter (not yet inplemented)
-!
-!*      1.3    flood
-!              -----
-!
-ZFFG          = 0.
-ZFFV          = 0.
-ZFF           = 0.
-ZFFROZEN      = 0.
-ZALBF         = 0.
-ZEMISF        = 0.
-ZIFLOOD       = 0.
-ZPFLOOD       = 0.
-ZFFLOOD       = 0.
-ZPIFLOOD      = 0.
-ZLEFLOOD      = 0.
-ZLEIFLOOD     = 0.
-ZFFG_NOSNOW   = 0.
-ZFFV_NOSNOW   = 0.
-!
-!* irrigation (not implemented)
-!
-ZIRRIG        = 0.
-ZWATSUP       = 0.
-ZTHRESHOLDSPT = 0.
-GIRRIGATE     = .FALSE.
-GIRRIDAY      = .FALSE.
+ CALL AGRI_INIT(YAG)
 !
 !* automatic summer irrigation 
 !
@@ -420,18 +204,7 @@ PIRRIG_GREENROOF(:) = 0.
 !
 !* deep soil implicitation with roof
 !
-ZGAMMAT = XUNDEF
- CALL ROOF_IMPL_COEF(PTSTEP,TOP%NROOF_LAYER, T%CUR%XD_ROOF, T%CUR%XTC_ROOF, T%CUR%XHC_ROOF, &
-                     T%CUR%XT_ROOF, ZTDEEP_A,ZTDEEP_B)
-!
-!-------------------------------------------------------------------------------
-!
-!* Variables required in TEB to allow coupling
-!  with AROME/ALADIN/ARPEGE as LE or EVAP
-!
-ZLEI  = 0.0 ! sublimation heat flux (W/m2)
-ZSUBL = 0.0 ! sublimation (kg/m2/s)
-ZTS   = 0.0 ! surface temperature (K) (non-radiative)
+ CALL ROOF_IMPL_COEF(T, PTSTEP, ZTDEEP_A, TV%IP%XTDEEP)
 !
 !-------------------------------------------------------------------------------
 !
@@ -454,123 +227,47 @@ CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
-GUPDATED=.FALSE.
-IF (GRM%TV%O%CPHOTO=='NON' .OR. GRM%TV%O%CPHOTO=='AGS' .OR. GRM%TV%O%CPHOTO=='AST') THEN
-     CALL VEGETATION_UPDATE(DTCO, GRM%DTI, TG, GRM%TV%O,  &
-                            PTSTEP,TPTIME,TOP%XCOVER,TOP%LCOVER,                 &
-                         GRM%TV%O%CISBA,(.NOT. GRM%TV%O%LPAR), &
-                         GRM%TV%O%CPHOTO, .FALSE.,     &
-                         GRM%TV%O%LTR_ML, 'GNR',                                  &
-                         GRM%TV%M%T%CUR%XLAI,GRM%TV%M%T%CUR%XVEG,GRM%TV%M%T%CUR%XZ0,         &
-                         GRM%TV%M%T%CUR%XALBNIR,GRM%TV%M%T%CUR%XALBVIS,GRM%TV%M%T%CUR%XALBUV,&
-                         GRM%TV%M%T%CUR%XEMIS,                   &
-                         GRM%TV%M%T%CUR%XRSMIN,GRM%TV%M%T%CUR%XGAMMA,GRM%TV%M%T%CUR%XWRMAX_CF,   &
-                         GRM%TV%M%T%CUR%XRGL,GRM%TV%M%T%CUR%XCV,                          &
-                         GRM%TV%M%T%CUR%XGMES,GRM%TV%M%T%CUR%XBSLAI,GRM%TV%M%T%CUR%XLAIMIN,&
-                         GRM%TV%M%T%CUR%XSEFOLD,GRM%TV%M%T%CUR%XGC,      &
-                         GRM%TV%M%T%CUR%XF2I, GRM%TV%M%T%CUR%LSTRESS,                         &
-                         ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,                    &
-                         ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM,                    &
-                         ZZ0EFFIP,ZZ0EFFIM,ZZ0EFFJP,ZZ0EFFJM,            &
-                         GRM%TV%O%CALBEDO, GRM%TV%M%T%CUR%XALBNIR_VEG, &
-                         GRM%TV%M%T%CUR%XALBVIS_VEG, GRM%TV%M%T%CUR%XALBUV_VEG,  &
-                         GRM%TV%M%A%XALBNIR_SOIL, GRM%TV%M%A%XALBVIS_SOIL, GRM%TV%M%A%XALBUV_SOIL,    &
-                         GRM%TV%M%T%CUR%XCE_NITRO, GRM%TV%M%T%CUR%XCF_NITRO, GRM%TV%M%T%CUR%XCNA_NITRO,  &
-                         TZSEED, TZREAP, ZWATSUP, ZIRRIG,                &
-                         ZGNDLITTER,ZRGLGV,ZGAMMAGV,                     &
-                         ZRSMINGV, ZWRMAX_CFGV,                          &
-                         ZH_VEG, ZLAIGV, ZZ0LITTER,                      &
-                         GUPDATED, OABSENT=(T%CUR%XGREENROOF==0.)                 ) 
-END IF
+TV%I%TTIME = TPTIME
+TV%O%LECOCLIMAP = (.NOT. TV%O%LPAR)
 !
+GUPDATED=.FALSE.
+GALB = .FALSE. 
+!print*,TV%O%CPHOTO,TV%M%T%CUR%XLAI(1,1)
+IF (TV%O%CPHOTO=='LAI'.OR.TV%O%CPHOTO=='LST'.OR.TV%O%CPHOTO=='NIT'.OR.TV%O%CPHOTO=='NCB') GALB = .TRUE.
+!
+CALL VEGETATION_UPDATE(DTCO, DTI, TG%NDIM, TV%O, TV%M%T%CUR, TV%M%M, TV%M%I, TV%M%A, &
+                       PTSTEP, TV%I%TTIME, TOP%XCOVER, TOP%LCOVER, .FALSE.,'GNR',  &
+                       GALB, YGRSS, GUPDATED, OABSENT=(T%XGREENROOF==0.)     )
+!
+!print*,'update',TV%M%T%CUR%XLAI(1,1)
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
 !
- CALL ISBA(GRM%TV%O%CISBA, GRM%TV%O%CPHOTO, GRM%TV%O%LTR_ML, 'WSAT', &
-           GRM%TV%O%CKSAT, HRAIN, GRM%TV%O%CHORT,       &
-          GRM%TV%O%CC1DRY, GRM%TV%O%CSCOND, GRM%TV%R%CUR%TSNOW%SCHEME, &
-          GRM%TV%O%CSNOWRES, GRM%TV%O%CCPSURF, GRM%TV%O%CSOILFRZ,  &
-          GRM%TV%O%CDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER,        &
-          OMEB, OFORC_MEASURE,OMEB_LITTER, PTSTEP, HIMPLICIT_WIND, GAGRI_TO_GRASS,&
-          GSNOWDRIFT,GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,              &
-          YSNOWMETAMO,YSNOWRAD,                                       &
-          GRM%TV%O%XCGMAX, PZREF, PUREF, ZDIRCOSZW, PTA,         &
-          PQA, PEXNA, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
-          ZP_MEB_SCA_SW,                                              &
-          PSW, PLW, PVMOD, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &
-          PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, GRM%TV%M%T%CUR%XRSMIN(:,1), &
-          GRM%TV%M%T%CUR%XRGL(:,1), GRM%TV%M%T%CUR%XGAMMA(:,1),&
-          GRM%TV%M%T%CUR%XCV(:,1), GRM%TV%IP%XRUNOFFD(:,1), GRM%TV%IP%XSOILWGHT(:,:,1), &
-          GRM%TV%O%NLAYER_HORT, GRM%TV%O%NLAYER_DUN,          &
-          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,   &
-          GRM%TV%R%CUR%XSNOWFREE_ALB(:,1), GRM%TV%M%T%CUR%XWRMAX_CF(:,1), GRM%TV%M%T%CUR%XVEG(:,1), &
-          GRM%TV%M%T%CUR%XLAI(:,1), GRM%TV%M%T%CUR%XEMIS(:,1), GRM%TV%M%T%CUR%XZ0(:,1),       &
-          GRM%TV%M%T%CUR%XZ0(:,1)/GRM%TV%M%X%XZ0_O_Z0H(:,1), GRM%TV%M%X%XVEGTYPE, GRM%TV%M%T%CUR%XZ0(:,1),  &
-          ZP_RGLV, ZP_GAMMAV, ZP_RSMINV,                               &
-          ZP_ROOTFRACV, ZP_WRMAX_CFV, ZP_LAIV,                        &
-          ZP_BSLAI,ZP_LAIMIN,ZP_H_VEG,ZPALPHAN,                       &
-          ZZ0G_WITHOUT_SNOW,                                          &
-          ZZ0_MEBV,ZZ0H_MEBV,ZZ0EFF_MEBV,                             &
-          ZZ0_MEBN,ZZ0H_MEBN,ZZ0EFF_MEBN, ZP_GNDLITTER,               &
-          GRM%TV%P%XRUNOFFB, GRM%TV%IP%XCGSAT, GRM%TV%IP%XC1SAT(:,1),      &
-          GRM%TV%IP%XC2REF(:,1), GRM%TV%IP%XC3(:,:,1), GRM%TV%IP%XC4B, GRM%TV%IP%XC4REF(:,1), &
-          GRM%TV%IP%XACOEF, GRM%TV%IP%XPCOEF, GRM%TV%IP%XTAUICE, GRM%TV%P%XWDRAIN,&
-          ZTDEEP_A, ZTDEEP_B, ZGAMMAT, GRM%TV%R%CUR%XPSN(:,1), GRM%TV%R%CUR%XPSNG(:,1), &
-          GRM%TV%R%CUR%XPSNV(:,1), GRM%TV%R%CUR%XPSNV_A(:,1),   &
-          GRM%TV%R%CUR%XSNOWFREE_ALB_VEG(:,1), GRM%TV%R%CUR%XSNOWFREE_ALB_SOIL(:,1), ZIRRIG(:,1), ZWATSUP(:,1),     &
-          ZTHRESHOLDSPT, GIRRIGATE, GIRRIDAY, GRM%TV%M%T%CUR%LSTRESS(:,1), GRM%TV%M%T%CUR%XGC(:,1), GRM%TV%M%T%CUR%XF2I(:,1),     &
-          GRM%TV%M%X%XDMAX(:,1), GRM%TV%IP%XAH(:,1), GRM%TV%IP%XBH(:,1), PCO2, GRM%TV%M%T%CUR%XGMES(:,1), GRM%TV%IP%XPOI, &
-          GRM%TV%IP%XFZERO(:,1), GRM%TV%IP%XEPSO(:,1), GRM%TV%IP%XGAMM(:,1),   &
-          GRM%TV%IP%XQDGAMM(:,1), GRM%TV%IP%XQDGMES(:,1), GRM%TV%IP%XT1GMES(:,1), GRM%TV%IP%XT2GMES(:,1), &
-          GRM%TV%IP%XAMAX(:,1), GRM%TV%IP%XQDAMAX(:,1), GRM%TV%IP%XT1AMAX(:,1),&
-          GRM%TV%IP%XT2AMAX(:,1), GRM%TV%IP%XABC, GRM%TV%M%X%XDG(:,:,1), GRM%TV%IP%XDZG(:,:,1), GRM%TV%IP%XDZDIF(:,:,1), &
-          GRM%TV%M%X%NWG_LAYER(:,1), GRM%TV%M%X%XROOTFRAC(:,:,1),     &
-          GRM%TV%IP%XWFC, GRM%TV%IP%XWWILT, GRM%TV%IP%XWSAT, GRM%TV%IP%XBCOEF,  &
-          GRM%TV%IP%XCONDSAT(:,:,1), GRM%TV%IP%XMPOTSAT,           &
-          GRM%TV%IP%XHCAPSOIL, GRM%TV%IP%XCONDDRY, GRM%TV%IP%XCONDSLD, GRM%TV%M%X%XD_ICE(:,1), &
-          GRM%TV%IP%XKSAT_ICE(:,1), ZMUF, ZFF,&
-          ZFFG, ZFFV, ZFFG_NOSNOW, ZFFV_NOSNOW, ZFFROZEN,  ZALBF,     &
-          ZEMISF, ZFFLOOD, ZPIFLOOD, ZIFLOOD, ZPFLOOD, ZLEFLOOD,      &
-          ZLEIFLOOD, ZSODELX, TG%XLAT, TG%XLON, GRM%TV%R%CUR%XTG(:,:,1), GRM%TV%R%CUR%XWG(:,:,1), &
-          GRM%TV%R%CUR%XWGI(:,:,1), GRM%TV%IP%XPCPS(:,1),      &
-          GRM%TV%IP%XPLVTT(:,1), GRM%TV%IP%XPLSTT(:,1), GRM%TV%R%CUR%XWR(:,1),                             &
-          ZP_WRL,ZP_WRLI,ZP_WRVN,ZP_TV, ZP_TL,                                &
-          GRM%TV%R%CUR%XRESA(:,1), GRM%TV%R%CUR%XANFM(:,1), ZFSAT, GRM%TV%R%CUR%TSNOW%ALB(:,1),          &
-          GRM%TV%R%CUR%TSNOW%ALBVIS(:,1), GRM%TV%R%CUR%TSNOW%ALBNIR(:,1), GRM%TV%R%CUR%TSNOW%ALBFIR(:,1),    &
-          GRM%TV%R%CUR%TSNOW%WSNOW(:,:,1), GRM%TV%R%CUR%TSNOW%HEAT(:,:,1), GRM%TV%R%CUR%TSNOW%RHO(:,:,1),    &
-          GRM%TV%R%CUR%TSNOW%GRAN1(:,:,1), GRM%TV%R%CUR%TSNOW%GRAN2(:,:,1), GRM%TV%R%CUR%TSNOW%HIST(:,:,1),  &
-          GRM%TV%R%CUR%TSNOW%AGE(:,:,1), ZGRNDFLUX, ZHPSNOW, ZSNOWHMASS,           &
-          ZRNSNOW, ZHSNOW,  ZGFLUXSNOW, ZUSTARSNOW,                   &
-          ZSRSFC, ZRRSFC, ZLESL, GRM%TV%R%CUR%TSNOW%EMIS(:,1), ZCDSNOW, ZCHSNOW,   &
-          PTS_GREENROOF, ZTS, ZHV, ZQS, ZSNOWTEMP, ZSNOWLIQ, ZSNOWDZ,    &
-          ZCG, ZC1, ZC2, ZWGEQ, ZCT, ZCH, ZCD, ZCDN, ZRI, ZHU, ZHUG,  &
-          ZEMIST, ZALBT, ZRS, GRM%TV%R%CUR%XLE(:,1),  ZRN, ZH, ZLEI, ZLEGI, ZLEG, ZLEV, &
-          ZLES, ZLER, ZLETR, ZEVAP, ZGFLUX, ZRESTORE, ZUSTAR,         &
-          PDRAIN_GREENROOF, PRUNOFF_GREENROOF,                              &
-          ZMELT, ZMELTADV,                                            &
-          ZP_TC,ZP_QC,                                                &
-          ZRN_ISBA, ZH_ISBA, ZLEG_ISBA,                               &
-          ZLEGI_ISBA, ZLEV_ISBA, ZLETR_ISBA, ZUSTAR_ISBA, ZLER_ISBA,  &
-          ZLE_ISBA, ZLEI_ISBA, ZGFLUX_ISBA, ZHORT, ZDRIP, ZRRVEG,     &
-          PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, ZFAPARC, ZFAPIRC, ZMUS,     &
-          ZLAI_EFFC, GRM%TV%R%CUR%XAN(:,1), GRM%TV%R%CUR%XANDAY(:,1), ZRESP_BIOMASS_INST, ZIACAN,  &
-          ZGPP, ZFAPAR, ZFAPIR, ZFAPAR_BS, ZFAPIR_BS, ZIRRIG_FLUX,    &
-          PDEEP_FLUX,                                                 &
-          ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,            &
-          ZP_LWNET_V, ZP_LWNET_G, ZP_LWNET_N,                         &
-          ZP_LEVCV, ZP_LESC, ZP_H_V_C, ZP_H_G_C,                      &
-          ZP_LETRGV, ZP_LETRCV, ZP_LERGV, ZP_LELITTER,ZP_LELITTERI,   &
-          ZP_DRIPLIT,ZP_RRLIT, ZP_LERCV, ZP_H_C_A, ZP_H_N_C,   &
-          ZP_LE_C_A, ZP_LE_V_C, ZP_LE_G_C, ZP_LE_N_C,                 &
-          ZP_EVAP_N_C, ZP_EVAP_G_C,                                   & 
-          ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                              &
-          ZP_SWDOWN_GN, ZP_LWDOWN_GN,                                 &
-          PIRRIG_GREENROOF, ZTOPQS, ZQSB, ZSUBL, ZFWTD, ZWTD, ZSNDRIFT   )
+VD%DP%XZ0(:) = TV%M%T%CUR%XZ0(:,1)
+VD%DP%XZ0H(:) = TV%M%T%CUR%XZ0(:,1) / TV%M%X%XZ0_O_Z0H(:,1)
 !
-!PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
-!PDRAIN_GREENROOF(:)  = ZDRAIN(:)
+VD%DP%XZ0EFF(:) =  TV%M%T%CUR%XZ0(:,1)
 !
-IF (GRM%TV%R%CUR%TSNOW%SCHEME=='3-L' .OR. GRM%TV%R%CUR%TSNOW%SCHEME=='CRO') GRM%TV%R%CUR%TSNOW%TS(:,1)=ZSNOWTEMP(:,1)
+ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(TV%IP%XABC),1))
+!
+ CALL ISBA(TV%O, TV%M%X, TV%M%T%CUR, TV%M%M, TV%M%I, TV%P, TV%IP, TV%I, TV%R%CUR, &
+           TG, YAG, VD%D, VD%DP, VD%E, VD%EP, VD%M, TV%R%CUR%TSNOW%SCHEME, TPTIME,&
+           TV%IP%XPOI, TV%IP%XABC, GB%XIACAN(:,:,1), .FALSE., PTSTEP,             &
+           HIMPLICIT_WIND, PZREF, PUREF, ZDIRCOSZW, PTA, PQA, PEXNA, PRHOA, PPS,  &
+           PEXNS,  PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF,&
+           PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
+           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, ZPALPHAN,    &
+           ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN,         &
+           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, TV%I%XFFG(:,1), TV%I%XFFV(:,1),&
+           ZEMISF, ZUSTAR, PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,                  &
+           ZRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG_GREENROOF )
+!
+PTS_GREENROOF(:) = VD%DP%XTSRAD(:)
+PRUNOFF_GREENROOF(:) = VD%EP%XRUNOFF(:)
+PDRAIN_GREENROOF (:) = VD%EP%XDRAIN(:)
+!
+IF (TV%R%CUR%TSNOW%SCHEME=='3-L' .OR. TV%R%CUR%TSNOW%SCHEME=='CRO') &
+        TV%R%CUR%TSNOW%TS(:,1) = VD%M%XSNOWTEMP(:,1)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
@@ -579,45 +276,29 @@ IF (GRM%TV%R%CUR%TSNOW%SCHEME=='3-L' .OR. GRM%TV%R%CUR%TSNOW%SCHEME=='CRO') GRM%
 ! Vegetation evolution for interactive LAI
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (GRM%TV%O%CPHOTO=='LAI' .OR. GRM%TV%O%CPHOTO=='LST' .OR. GRM%TV%O%CPHOTO=='NIT') THEN
-  CALL VEGETATION_EVOL(GRM%TV%O%CISBA, GRM%TV%O%CPHOTO, GRM%TV%O%CRESPSL, &
-                       GRM%TV%O%CALBEDO, .FALSE., GRM%TV%O%LTR_ML,   &
-                       GRM%TV%O%LNITRO_DILU, GAGRI_TO_GRASS,                        &
-                       PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, 1,    &
-                       TPTIME%TIME, TG%XLAT, PRHOA, GRM%TV%M%X%XDG(:,:,1), GRM%TV%IP%XDZG(:,:,1), GRM%TV%M%X%NWG_LAYER(:,1),  & 
-                       GRM%TV%R%CUR%XTG(:,:,1), GRM%TV%M%T%CUR%XALBNIR_VEG(:,1), GRM%TV%M%T%CUR%XALBVIS_VEG(:,1), &
-                       GRM%TV%M%T%CUR%XALBUV_VEG(:,1), GRM%TV%M%A%XALBNIR_SOIL(:,1), GRM%TV%M%A%XALBVIS_SOIL(:,1), &
-                       GRM%TV%M%A%XALBUV_SOIL(:,1), GRM%TV%M%X%XVEGTYPE, GRM%TV%M%T%CUR%XSEFOLD(:,1), GRM%TV%IP%XANMAX(:,1), &
-                       GRM%TV%M%X%XH_TREE(:,1), GRM%TV%M%T%CUR%XBSLAI(:,1), GRM%TV%M%T%CUR%XLAIMIN(:,1), PCO2, &
-                       GRM%TV%M%T%CUR%XCE_NITRO(:,1), GRM%TV%M%T%CUR%XCF_NITRO(:,1), GRM%TV%M%T%CUR%XCNA_NITRO(:,1),    &
-                       GRM%TV%IP%XBSLAI_NITRO(:,1), GRM%TV%M%T%CUR%XGMES(:,1), ZTAU_WOOD, TPSEED,        &
-                       TPREAP, ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,             &
-                       ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM, ZZ0EFFIP(:,1),           &
-                       ZZ0EFFIM(:,1), ZZ0EFFJP(:,1), ZZ0EFFJM(:,1), GRM%TV%M%T%CUR%XLAI(:,1), GRM%TV%M%T%CUR%XVEG(:,1),   &
-                       GRM%TV%M%T%CUR%XZ0(:,1), GRM%TV%M%T%CUR%XALBNIR(:,1), GRM%TV%M%T%CUR%XALBVIS(:,1), &
-                       GRM%TV%M%T%CUR%XALBUV(:,1), GRM%TV%M%T%CUR%XEMIS(:,1), GRM%TV%R%CUR%XANFM(:,1), &
-                       GRM%TV%R%CUR%XANDAY(:,1), GRM%TV%R%CUR%XBIOMASS(:,:,1), GRM%TV%R%CUR%XRESP_BIOMASS(:,:,1),        &
-                       ZRESP_BIOMASS_INST, ZINCREASE, ZTURNOVER             )             
+!
+IF (TV%O%CPHOTO=='LAI' .OR. TV%O%CPHOTO=='LST' .OR. TV%O%CPHOTO=='NIT') THEN
+        !print*,'LAI evol ',TV%M%T%CUR%XLAI(1,1)
+  CALL VEGETATION_EVOL(TV%O, TV%IP, TV%M%X, TV%M%T%CUR, TV%M%A, TV%M%I, TV%R%CUR, &
+                       .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY,     &
+                       TPTIME%TIME, TG%XLAT, PRHOA, PCO2, YGRSS, ZRESP_BIOMASS_INST )
+        !print*,'LAI evol2 ',TV%M%T%CUR%XLAI(1,1)        
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 PSFCO2    (:)=0.
-ZRESP_ECO (:)=0.
-ZRESP_AUTO(:)=0.
+VD%EP%XRESP_ECO (:)=0.
+VD%EP%XRESP_AUTO(:)=0.
 !
-IF (GRM%TV%O%CPHOTO/='NON' .AND. GRM%TV%O%CRESPSL/='NON' .AND. ANY(GRM%TV%M%T%CUR%XLAI(:,1)/=XUNDEF)) THEN
+!
+IF (TV%O%CPHOTO/='NON' .AND. TV%O%CRESPSL/='NON' .AND. ANY(TV%M%T%CUR%XLAI(:,1)/=XUNDEF)) THEN
   ! faire intervenir le type de vegetation du greenroof ? (CTYP_GR)
-  CALL CARBON_EVOL(GRM%TV%O%CISBA, GRM%TV%O%CRESPSL, GRM%TV%O%CPHOTO, PTSTEP, 1,             &
-                   PRHOA, GRM%TV%R%CUR%XTG(:,:,1), GRM%TV%R%CUR%XWG(:,:,1), GRM%TV%IP%XWFC, &
-                   GRM%TV%IP%XWWILT, GRM%TV%IP%XWSAT, GRM%TV%P%XSAND,   &
-                   GRM%TV%M%X%XDG(:,:,1), GRM%TV%IP%XDZG(:,:,1), GRM%TV%M%X%NWG_LAYER(:,1),           &                   
-                   GRM%TV%M%X%XRE25(:,1), GRM%TV%M%T%CUR%XLAI(:,1), ZRESP_BIOMASS_INST, ZTURNOVER,    &
-                   ZLITTER, ZLIGNIN_STRUC , ZSOILCARB,            &
-                   ZRESP_AUTO, ZRESP_ECO                          )
+  CALL CARBON_EVOL(TV%O, TV%P, TV%IP, TV%M%X, TV%M%T%CUR, TV%R%CUR, VD%EP, &
+                   PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
   ! calculation of vegetation CO2 flux
   ! Positive toward the atmosphere
-  PSFCO2(:) = ZRESP_ECO(:) - ZGPP(:)
+  PSFCO2(:) = VD%EP%XRESP_ECO(:) - VD%EP%XGPP(:)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -627,11 +308,11 @@ END IF
 !
 ! energy balance
 !
- PRN_GREENROOF    (:) = ZRN    (:)
- PH_GREENROOF     (:) = ZH     (:)
- PLE_GREENROOF    (:) = GRM%TV%R%CUR%XLE    (:,1)
- PGFLUX_GREENROOF (:) = ZGFLUX (:)
- PEVAP_GREENROOF  (:) = ZEVAP  (:)
+ PRN_GREENROOF    (:) = VD%DP%XRN    (:)
+ PH_GREENROOF     (:) = VD%DP%XH     (:)
+ PLE_GREENROOF    (:) = TV%R%CUR%XLE (:,1)
+ PGFLUX_GREENROOF (:) = VD%DP%XGFLUX (:)
+ PEVAP_GREENROOF  (:) = VD%DP%XEVAP  (:)
 !
 !
 ! Estimate of green area aerodynamic conductance recomputed from heat flux,
@@ -643,7 +324,7 @@ END IF
  ENDWHERE
 !
 ! Humidity of saturation for green areas
- PQSAT_GREENROOF(:) = QSAT(GRM%TV%R%CUR%XTG(:,1,1),PPS(:))
+ PQSAT_GREENROOF(:) = QSAT(TV%R%CUR%XTG(:,1,1),PPS(:))
 !
 !* friction flux
   PUW_GREENROOF(:)    = -ZUSTAR(:)**2

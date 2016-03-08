@@ -1,23 +1,14 @@
 !   ############################################################################
 !
-SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
-                    PTG, PTC, PTV, PSNOWTEMP, PTA, PQC, PQA, PVMOD,    &
-                    PWG, PWGI, PWSAT, PWFC,                            &
-                    PEXNS, PEXNA, PPS,                                 &
-                    PRR, PSR, PRHOA, PZ0G_WITHOUT_SNOW,                &
-                    PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,                  &
-                    PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                  &
-                    PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF,             &
-                    PSNOWSWE,                                          &
-                    PWR, PCHIP, PTSTEP, PRS_VG, PRS_VN,                &
-                    PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,   &
-                    PPSNCV, PDELTA, PLAI, OMEB_LITTER,                 &
-                    PCH, PCD, PCDN, PRI, PRA, PVELC,                   &
-                    PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW,            &
-                    PHUG, PHUGI, PHV, PHVG, PHVN, PHU, PQS, PRS,       &
-                    PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF,             &
-                    PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C,        &    
-                    PFLXC_VG_C, PFLXC_VN_C, PFLXC_MOM,                 &
+SUBROUTINE DRAG_MEB(IO, IR, DGMI, DGIP, PLAI, PH_VEG, PTG, PTA, PQA, PVMOD, &
+                    PWG, PWGI, PWSAT, PWFC, PEXNS, PEXNA, PPS,  PRR, PSR,   &
+                    PRHOA, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,          &
+                    PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PSNOWSWE,&
+                    PCHIP, PTSTEP, PRS_VG, PRS_VN, PPALPHAN, PZREF, PUREF,  &
+                    PDIRCOSZW, PSNCV, PDELTA,  PVELC,                       &
+                    PRISNOW, PUSTAR2SNOW, PHUGI, PHVG, PHVN, PLEG_DELTA,    &
+                    PLEGI_DELTA, PHSGL, PHSGF, PFLXC_C_A, PFLXC_N_A,        &
+                    PFLXC_G_C, PFLXC_N_C, PFLXC_VG_C, PFLXC_VN_C, PFLXC_MOM,&
                     PQSATG, PQSATV, PQSATC, PQSATN, PDELTAVK           )
 !                    
 !   ############################################################################
@@ -65,6 +56,11 @@ SUBROUTINE DRAG_MEB(LFORC_MEASURE,                                     &
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+!
 USE MODD_CSTS,     ONLY : XPI
 USE MODD_SNOW_PAR, ONLY : XZ0SN
 USE MODD_ISBA_PAR, ONLY : XWGMIN, XFLXMAX
@@ -87,22 +83,19 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-LOGICAL, INTENT(IN)              ::   LFORC_MEASURE
-!                                       LFORC_MEASURE = switch for using measured data
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(DIAG_t), INTENT(INOUT) :: DGIP
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 !
 REAL, INTENT(IN)                 ::   PTSTEP 
 !                                     PTSTEP = Model time step (s)        
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PTG, PTC, PTV, PSNOWTEMP, PTA, PQC, PQA, PVMOD, &
-                                    PWG, PWGI, PWSAT, PWFC, PEXNS, PEXNA, PPS,      &
-                                    PSNOWSWE
+REAL, DIMENSION(:), INTENT(IN)   :: PTG, PTA, PQA, PVMOD, PWG, PWGI, PWSAT, PWFC, &
+                                    PEXNS, PEXNA, PPS, PSNOWSWE
 !                                     PTG     = surface temperature
-!                                     PTC     = canopy air temperature
-!                                     PTV     = canopy temperature
-!                                     PSNOWTEMP = sfc layer snow temperature (K)
 !                                     PSNOWSWE  = sfc layer snow water equiv (SWE) kg m-2
 !                                     PTA     = temperature of the atmosphere/forcing-level
-!                                     PQC     = canopy air humidity
 !                                     PQA = specific humidity of the atmosphere/forcing-level
 !                                     PVMOD = module of the horizontal wind
 !                                             NOTE it should be input as >= 1. (m)
@@ -121,34 +114,23 @@ REAL, DIMENSION(:), INTENT(IN)   ::  PRR, PSR, PRHOA
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PZ0G_WITHOUT_SNOW, &
                                     PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV, &
-                                    PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, &
-                                    PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF
+                                    PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN
 !
 !                    PZ0G_WITHOUT_SNOW  ! roughness length for momentum at snow-free canopy floor
 !                    PZ0_MEBV           ! roughness length for momentum over MEB vegetation part of patch
 !                    PZ0H_MEBV          ! roughness length for heat over MEB vegetataion part of path
-!                    PZ0EFF_MEBV        ! roughness length for momentum over MEB vegetation part of patch
-!                                         eventuelly including orograhic roughness
 !                    PZ0_MEBN           ! roughness length for momentum over MEB snow part of patch
 !                    PZ0H_MEBN          ! roughness length for heat over MEB snow part of path
-!                    PZ0EFF_MEBN        ! roughness length for momentum over MEB snow part of patch
-!                                         eventuelly including orograhic roughness
-!                    PZ0_WITH_SNOW      ! roughness length for momentum over MEB total patch
-!                    PZ0H_WITH_SNOW     ! roughness length for heat over MEB total path
-!                    PZ0EFF             ! roughness length for momentum over MEB total patch
-!                                         eventuelly including orograhic roughness
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PWR,PCHIP
-!                                     PWR  = intercepted water for the canopy
+REAL, DIMENSION(:), INTENT(IN)   :: PCHIP
 !                                     PCHIP = view factor (for LW) 
 !
-REAL, DIMENSION(:), INTENT(IN)   :: PRS_VG, PRS_VN, PPSN, PPSNCV,  &
+REAL, DIMENSION(:), INTENT(IN)   :: PRS_VG, PRS_VN, PSNCV,  &
                                     PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW
 !
 !                                     PRS_VG   = surface resistance for canopy (1-png)
 !                                     PRS_VN   = surface resistance for canopy (png)
-!                                     PPSN     = fraction of the patch covered by snow
-!                                     PPSNCV   = fraction of the canopy vegetation covered by snow
+!                                     PSNCV   = fraction of the canopy vegetation covered by snow
 !                                     PPALPHAN = weight between canopy air flow and direct flow 
 !                                                 between snow and atmosphere
 !                                     PZREF    = reference height of the first
@@ -166,34 +148,20 @@ REAL, DIMENSION(:), INTENT(IN)    :: PDELTA, PLAI
 !                                                by intercepted water (-)
 !                                     PLAI     = vegetation LAI (m2 m-2)
 !
-LOGICAL,              INTENT(IN)    :: OMEB_LITTER   ! Flag for litter
 REAL, DIMENSION(:), INTENT(OUT)  :: PDELTAVK
 !                                     PDELTAVK = fraction of the canopy foliage covered
 !                                                by intercepted water *including* K-factor (-)
 !                                                (i.e. that the intercepted water fraction is not 
 !                                                 necessarily reaching 100%)
 !
-REAL, DIMENSION(:), INTENT(OUT)  :: PCH, PCD, PCDN, PRI, PRA, PVELC
-!                                     PCH = drag coefficient for heat, averaged over whole patch
-!                                     PCD = drag coefficient for momentum, averaged over whole patch
-!                                     PCDN= neutral drag coefficient for momentum, 
-!                                           averaged over whole patch
-!                                     PRI = Richardson number, averaged over whole patch
-!                                     PRA = aerodynamic resistance between 
-!                                           the whole patch and atmosphere
+REAL, DIMENSION(:), INTENT(OUT)  :: PVELC
 !                                     PVELC = wind speed at top of vegetation
 !
-REAL, DIMENSION(:), INTENT(OUT)  :: PHUG, PHUGI, PHVG, PHVN, PHV,                        &
-                                    PHU, PQS, PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF, PRS
+REAL, DIMENSION(:), INTENT(OUT)  :: PHUGI, PHVG, PHVN, PLEG_DELTA, PLEGI_DELTA, PHSGL, PHSGF
 !
-!                                    PRS   = total effective stomatal resistance (under and overstory) diagnostic (s m-1)
-!                                    PHUG  = ground relative humidity
 !                                    PHUGI = ground (ice) relative humidity
-!                                    PHV   = Total effective Halstead coefficient 
 !                                    PHVN  = Halstead coefficient vegetation canopy above snow
 !                                    PHVG  = Halstead coefficient vegetation canopy above ground
-!                                    PHU   = effective relative humidity at the surface
-!                                    PQS   = effective specific humidity at surface
 !                                    PLEG_DELTA  = soil evaporation delta fn
 !                                    PLEGI_DELTA = soil sublimation delta fn
 !                                    PHSGL = surface halstead cofficient for bare soil (currently==1)
@@ -214,13 +182,11 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C, 
 REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_MOM, PQSATG, PQSATV, PQSATC, PQSATN
 !                                    PFLXC_MOM = effective drag coefficient for momentum [kg/m2/s]
 !                                    PQSATG = qsat for PTG
-!                                    PQSATV = qsat for PTV
-!                                    PQSATC = qsat for PTC
-!                                    PQSATN = qsat for PSNOWTEMP
+!                                    PQSATV = qsat for IR%XTV(:,1)
+!                                    PQSATC = qsat for IR%XTC(:,1)
+!                                    PQSATN = qsat for DGMI%XSNOWTEMP(:,1)
 !
-REAL, DIMENSION(:), INTENT(OUT)  :: PCDSNOW, PCHSNOW, PRISNOW, PUSTAR2SNOW 
-!                                    PCDSNOW     = drag coefficient over snow (-)
-!                                    PCHSNOW     = heat/mass exchange coefficient over snow (-)
+REAL, DIMENSION(:), INTENT(OUT)  :: PRISNOW, PUSTAR2SNOW 
 !                                    PRISNOW     = Richardson number over snow (-)
 !                                    PUSTAR2SNOW = Surface friction velocity squared  (m2 s-2)
 !                                                   Just a diagnostic, not used in coupling
@@ -291,16 +257,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',0,ZHOOK_HANDLE)
 !
-PCH(:)   = 0.
-PCD(:)   = 0.
-PCDN(:)  = 0.
-PRI(:)   = 0.
-PHUG(:)  = 0.
+DGIP%XCH(:)   = 0.
+DGIP%XCD(:)   = 0.
+DGIP%XCDN(:)  = 0.
+DGIP%XRI(:)   = 0.
+DGIP%XHUG(:)  = 0.
+!
+DGMI%XHV(:)   = 0.
+DGIP%XHU(:)   = 0.
+!
 PHUGI(:) = 0.
-PHV(:)   = 0.
 PHVN(:)  = 0.
 PHVG(:)  = 0.
-PHU(:)   = 0.
 PHSGL(:) = 0.
 PHSGF(:) = 0.
 !
@@ -326,19 +294,21 @@ ZZ0SN(:) = XZ0SN
 ! field capacity of the ground
 !
 ZWSAT(:) = PWSAT(:)-PWGI(:)
-ZWFC(:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
-PHUG(:)  = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
+ZWFC (:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
+!
+DGIP%XHUG(:) = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
+!
 ZWSAT(:) = MAX(XWGMIN, ZWSAT(:))
-ZWFC(:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
+ZWFC (:) = PWFC(:)*ZWSAT(:)/PWSAT(:)
 PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 !
 ! there is a specific treatment for dew
 ! (see Mahfouf and Noilhan, jam, 1991)
 !
 PQSATG(:) = QSAT(PTG(:),PPS(:)) 
-PQSATV(:) = QSAT(PTV(:),PPS(:)) 
-PQSATC(:) = QSAT(PTC(:),PPS(:)) 
-PQSATN(:) = QSATI(PSNOWTEMP(:),PPS(:)) 
+PQSATV(:) = QSAT(IR%XTV(:,1),PPS(:)) 
+PQSATC(:) = QSAT(IR%XTC(:,1),PPS(:)) 
+PQSATN(:) = QSATI(DGMI%XSNOWTEMP(:,1),PPS(:)) 
 !
 !-------------------------------------------------------------------------------
 !
@@ -347,8 +317,8 @@ PQSATN(:) = QSATI(PSNOWTEMP(:),PPS(:))
 !       average of canopy air humidity and saturation humidity of snowpack
 !
 !
-   PQS(:) =(1.-PPSN(:)*PPALPHAN(:))*PQC(:)+ PPSN(:)*PPALPHAN(:)*PQSATN(:)
-   PHU(:) =(1.-PPSN(:)*PPALPHAN(:))*PQC(:)/PQSATC(:)+ PPSN(:)*PPALPHAN(:)
+DGIP%XQS(:) =(1.-IR%XPSN(:,1)*PPALPHAN(:))*IR%XQC(:,1)+ IR%XPSN(:,1)*PPALPHAN(:)*PQSATN(:)
+DGIP%XHU(:) =(1.-IR%XPSN(:,1)*PPALPHAN(:))*IR%XQC(:,1)/PQSATC(:)+ IR%XPSN(:,1)*PPALPHAN(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -377,13 +347,10 @@ CALL DISPH_FOR_MEB(ZCHIL,PLAI,ZLW,PH_VEG,PZREF,PZ0_MEBV,ZDISPH)
 !
 ! Here ZRICN,ZRA_C_A,ZCHCN,ZCDNCN,ZCDCN are valid for the snow free part in meb:
 !
-CALL PREPS_FOR_MEB_DRAG(.TRUE.,LFORC_MEASURE,            &
-                   PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,     &
-                   PH_VEG, PZREF,                        &
-                   PTC, PTA, PQC, PQA, PUREF, PVMOD,     &
-                   PEXNA, PEXNS, PDIRCOSZW, ZDISPH,      &
-                   PVELC, ZVMOD, ZRICN, ZRA_C_A,         &
-                   ZCHCN,ZCDNCN,ZCDCN                    )
+CALL PREPS_FOR_MEB_DRAG(.TRUE.,IO%LFORC_MEASURE, PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,  &
+                        PH_VEG, PZREF, IR%XTC(:,1), PTA, IR%XQC(:,1), PQA, PUREF,   &
+                        PVMOD, PEXNA, PEXNS, PDIRCOSZW, ZDISPH, PVELC, ZVMOD, ZRICN,&
+                        ZRA_C_A, ZCHCN, ZCDNCN, ZCDCN                    )
 !
 IF (LRRGUST_ARP) THEN
 
@@ -408,10 +375,8 @@ PFLXC_MOM(:)=ZCDCN(:)*ZVMOD(:)*PRHOA(:)
 !and canopy air, ZRA_G_C, and the conductance between the canopy and canopy air, ZG_VG_C
 !  
 CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAI,   &
-                     PTG, PTC, PTV, PVELC, ZLW,                              &
-                     ZDISPH,                                                 &
-                     ZRA_G_C, ZG_VG_C,                                       &
-                     ZUSTAR2G, ZCDG, ZCHG, ZRIG                              )
+                     PTG, IR%XTC(:,1), IR%XTV(:,1), PVELC, ZLW, ZDISPH,      &
+                     ZRA_G_C, ZG_VG_C, ZUSTAR2G, ZCDG, ZCHG, ZRIG         )
 !
 !Compute the lai of the canopy that is above snow
 !
@@ -422,26 +387,24 @@ ZLAISN(:)=PLAI(:)*(1.-PPALPHAN(:))
 ! The same as ZRA_G_C/ZG_VG_C but for the snow part (png) =>ZRA_N_C/ZG_VN_C
 !
 CALL SURFACE_AIR_MEB(PZ0_MEBN, PZ0H_MEBN, ZZ0SN, PH_VEG, ZLAISN,     &
-                     PSNOWTEMP, PTC, PTV, PVELC, ZLW,                &
-                     ZDISPH,                                         &
-                     ZRA_N_C, ZG_VN_C,                               &
+                     DGMI%XSNOWTEMP(:,1), IR%XTC(:,1), IR%XTV(:,1),  &
+                     PVELC, ZLW, ZDISPH, ZRA_N_C, ZG_VN_C,           &
                      ZUSTAR2G, ZCDG, ZCHG, ZRIG                      )
 
 ! save values over snow for diagnostic purposes:
 
 PUSTAR2SNOW(:) = ZUSTAR2G(:)
-PCDSNOW(:)     = ZCDG(:)  
-PCHSNOW(:)     = ZCHG(:)
+DGMI%XCDSNOW(:)     = ZCDG(:)  
+DGMI%XCHSNOW(:)     = ZCHG(:)
 PRISNOW(:)     = ZRIG(:)
 !
 !------------------------------------------------------------------------------
 ! Now calculate the aerodynamic resistance for the completely snow covered part,
 ! i.e. between the snow surface and atmosphere directly
 !
-CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,                           &
-                   PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                     &
-                   PH_VEG, PZREF,                                        &
-                   PSNOWTEMP, PTA, PQSATN, PQA, PUREF, PVMOD,            &
+CALL PREPS_FOR_MEB_DRAG(.FALSE.,IO%LFORC_MEASURE,                        &
+                   PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PH_VEG, PZREF,      &
+                   DGMI%XSNOWTEMP(:,1), PTA, PQSATN, PQA, PUREF, PVMOD,  &
                    PEXNA, PEXNS, PDIRCOSZW, ZDISPH,                      &
                    ZVELC, ZVMOD, ZRINN, ZRANN,                           &
                    ZCHNN,ZCDNNN,ZCDNN                                    )
@@ -449,7 +412,7 @@ CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,                           &
 IF (LRRGUST_ARP) THEN
 
    ZRRCOR(:)=SQRT(1.0+((((ZFP(:)/(ZFP(:)+XRRSCALE))**XRRGAMMA)*XUTILGUST)**2) &
-    & /(ZCDNN(:)*ZVMOD(:)**2))
+          /(ZCDNN(:)*ZVMOD(:)**2))
 
    ZCDNN(:)  = ZCDNN(:)  * ZRRCOR(:)
    ZCHNN(:)  = ZCHNN(:)  * ZRRCOR(:)
@@ -461,42 +424,39 @@ PFLXC_N_A(:)=ZCHNN(:)*ZVMOD(:)*PRHOA(:)
 !
 ! The effective momentum drag: 
 !
-PFLXC_MOM(:)=(1.-PPSN(:)*PPALPHAN(:))*PFLXC_MOM(:) +  &
-            PPSN(:)*PPALPHAN(:)*ZCDNN(:)*ZVMOD(:)*PRHOA(:)
+PFLXC_MOM(:)=(1.-IR%XPSN(:,1)*PPALPHAN(:))*PFLXC_MOM(:) +  &
+              IR%XPSN(:,1)*PPALPHAN(:)*ZCDNN(:)*ZVMOD(:)*PRHOA(:)
 !
 ! Now calculate the aerodynamic resistance for  the whole meb-patch
 !
 ! Calculate  the effective temperature
 !
-ZPSNA(:)   = PPSN(:)*PPALPHAN(:)
+ZPSNA(:)   = IR%XPSN(:,1)*PPALPHAN(:)
 !
-ZTEFF(:)   = (1.-ZPSNA(:))*PTC(:)+ ZPSNA(:)*PSNOWTEMP(:)
+ZTEFF(:)   = (1.-ZPSNA(:))*IR%XTC(:,1)+ ZPSNA(:)*DGMI%XSNOWTEMP(:,1)
 !
 ! Some additional diagnostics:
 !
 PUSTAR2SNOW(:) = (1.-ZPSNA(:))*PUSTAR2SNOW(:) + ZPSNA(:)*ZCDNN(:)*ZVMOD(:)**2
-PCDSNOW(:)     = (1.-ZPSNA(:))*PCDSNOW(:)     + ZPSNA(:)*ZCDNN(:)
-PCHSNOW(:)     = (1.-ZPSNA(:))*PCHSNOW(:)     + ZPSNA(:)*ZCHNN(:)
+DGMI%XCDSNOW(:)     = (1.-ZPSNA(:))*DGMI%XCDSNOW(:)     + ZPSNA(:)*ZCDNN(:)
+DGMI%XCHSNOW(:)     = (1.-ZPSNA(:))*DGMI%XCHSNOW(:)     + ZPSNA(:)*ZCHNN(:)
 PRISNOW(:)     = (1.-ZPSNA(:))*PRISNOW(:)     + ZPSNA(:)*ZRINN(:)
 !
 !-------------------------------------------------------------------------------
 !
-CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,            & 
-                   PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF, &
-                   PH_VEG, PZREF,                         &
-                   ZTEFF, PTA, PQS, PQA, PUREF, PVMOD,    &
-                   PEXNA, PEXNS, PDIRCOSZW, ZDISPH,       &
-                   ZVELC, ZVMOD, PRI, PRA,                &
-                   PCH,PCDN,PCD                           )
+CALL PREPS_FOR_MEB_DRAG(.FALSE.,IO%LFORC_MEASURE, DGIP%XZ0, DGIP%XZ0H, DGIP%XZ0EFF, &
+                        PH_VEG, PZREF, ZTEFF, PTA, DGIP%XQS, PQA, PUREF, PVMOD,     &
+                        PEXNA, PEXNS, PDIRCOSZW, ZDISPH, ZVELC, ZVMOD, DGIP%XRI,    &
+                        IR%XRESA(:,1), DGIP%XCH,DGIP%XCDN,DGIP%XCD               )
 !
 IF (LRRGUST_ARP) THEN
 
    ZRRCOR(:)=SQRT(1.0+((((ZFP(:)/(ZFP(:)+XRRSCALE))**XRRGAMMA)*XUTILGUST)**2) &
-    & /(PCD(:)*ZVMOD(:)**2))
+                 /(DGIP%XCD(:)*ZVMOD(:)**2))
 
-   PCD(:)  = PCD(:)  * ZRRCOR(:)
-   PCH(:)  = PCH(:)  * ZRRCOR(:)
-   PCDN(:) = PCDN(:) * ZRRCOR(:)
+   DGIP%XCD(:)  = DGIP%XCD(:)  * ZRRCOR(:)
+   DGIP%XCH(:)  = DGIP%XCH(:)  * ZRRCOR(:)
+   DGIP%XCDN(:) = DGIP%XCDN(:) * ZRRCOR(:)
 
 ENDIF
 
@@ -552,26 +512,26 @@ PFLXC_VN_C(:) = PRHOA(:)*ZG_VN_C(:)
 !*       5.     HALSTEAD COEFFICIENT (RELATIVE HUMIDITY OF THE VEGETATION)
 !               ----------------------------------------------------------
 !
-ZDELTAMAX(:) = (1.-PCHIP(:))*(1.-PPSN(:)*PPALPHAN(:))*PRR(:)+ PWR(:)/PTSTEP
-ZDENOM(:)    = (1.-PPSNCV(:))*XKDELTA_WR*                                               &
-               ( PPSN(:)*(1.-PPALPHAN(:))*PFLXC_VN_C(:) + (1.-PPSN(:))*PFLXC_VG_C(:) )* &
-               ( PQSATV(:)-PQC(:))
+ZDELTAMAX(:) = (1.-PCHIP(:))*(1.-IR%XPSN(:,1)*PPALPHAN(:))*PRR(:)+ IR%XWR(:,1)/PTSTEP
+ZDENOM(:)    = (1.-PSNCV(:))*XKDELTA_WR *                                               &
+               ( IR%XPSN(:,1)*(1.-PPALPHAN(:))*PFLXC_VN_C(:) + (1.-IR%XPSN(:,1))*PFLXC_VG_C(:) )* &
+               ( PQSATV(:)-IR%XQC(:,1))
 ZDELTAMAX(:) = MAX(0., MIN(1.0, ZDELTAMAX(:)/MAX(1.E-10,ZDENOM(:))))
 !
 ZDELTAV(:)   = XKDELTA_WR*MIN(ZDELTAMAX(:),PDELTA(:))
 PDELTAVK(:)  = XKDELTA_WR*PDELTA(:)                    ! delta including K factor
 !
-PHVG(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PQC(:)))             &
+PHVG(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-IR%XQC(:,1)))             &
           *(1.-ZDELTAV(:))*PRS_VG(:)*ZG_VG_C(:) / (1.+PRS_VG(:)*ZG_VG_C(:))
 !
-PHVN(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PQC(:)))             &
+PHVN(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-IR%XQC(:,1)))             &
           *(1.-ZDELTAV(:))*PRS_VN(:)*ZG_VN_C(:) / (1.+PRS_VN(:)*ZG_VN_C(:))
 
 ! Diagnostics:
 ! Compute an effective canopy stomatal resistance (s m-1) and Halstead Coef: 
 !
-PRS(:)  = PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)
-PHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
+DGMI%XRS(:)  = PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)
+DGMI%XHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 !
 !
 !-------------------------------------------------------------------------
@@ -582,7 +542,7 @@ PHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 ! We use the existing LEG_DELTA (formerly a delta function) as a Beta-type-function
 ! (based on Sellers et al., 1992, J Geophys Res)
 !
-IF (OMEB_LITTER) THEN
+IF (IO%LMEB_LITTER) THEN
 PLEG_DELTA(:)  = 1.0
 PLEGI_DELTA(:) = 1.0
 ELSE
@@ -602,19 +562,19 @@ ENDIF
 ! here are needed owing to linearization 
 ! of Qsat in the surface energy budget.
 !
-WHERE ( PHUG(:)*PQSATG(:)  < PQC(:) .AND. PQSATG(:) > PQC(:) )
-  PHUG(:)        = PQC(:) / PQSATG(:)
+WHERE ( DGIP%XHUG(:)*PQSATG(:)  < IR%XQC(:,1) .AND. PQSATG(:) > IR%XQC(:,1) )
+  DGIP%XHUG(:)        = IR%XQC(:,1) / PQSATG(:)
   PLEG_DELTA(:)  = 0.0
 END WHERE
-WHERE ( PHUGI(:)*PQSATG(:) < PQC(:) .AND. PQSATG(:) > PQC(:) )
-  PHUGI(:)       = PQC(:) / PQSATG(:)
+WHERE ( PHUGI(:)*PQSATG(:) < IR%XQC(:,1) .AND. PQSATG(:) > IR%XQC(:,1) )
+  PHUGI(:)       = IR%XQC(:,1) / PQSATG(:)
   PLEGI_DELTA(:) = 0.0
 END WHERE
 !
 ! b) low-level air is humid, i.e., qa >= qsat (condensation)
 !
-WHERE ( PHUG*PQSATG  < PQC .AND. PQSATG <= PQC )PHUG(:)  = 1.0
-WHERE ( PHUGI*PQSATG < PQC .AND. PQSATG <= PQC )PHUGI(:) = 1.0
+WHERE ( DGIP%XHUG*PQSATG  < IR%XQC(:,1) .AND. PQSATG <= IR%XQC(:,1) )DGIP%XHUG(:)  = 1.0
+WHERE ( PHUGI*PQSATG < IR%XQC(:,1) .AND. PQSATG <= IR%XQC(:,1) )PHUGI(:) = 1.0
 !
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',1,ZHOOK_HANDLE)

@@ -1,9 +1,6 @@
 !     #########
-    SUBROUTINE INIT_ISBA_SBL(HISBA, HCPSURF, KLVL, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV,   &
-                               PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW,                       &
-                               PZREF, PUREF, PTG, PPATCH, PWG, PWGI, PZ0, PSSO_SLOPE,           &
-                               PRESA, PVEG, PLAI, PWR, PRGL, PRSMIN, PGAMMA, PWRMAX_CF,         &
-                               PZ0_O_Z0H, PWFC, PWSAT, PTSNOW, PZ, PT, PQ, PWIND, PTKE, PP)  
+    SUBROUTINE INIT_ISBA_SBL(IO, IP, IMX, IMT, IR, ICP, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, &
+                             PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW, PZREF, PUREF, PSSO_SLOPE )  
 !     #################################################################################
 !
 !!****  *INIT_WATER_SBL* - inits water SBL profiles
@@ -27,6 +24,12 @@
 !!      Original    03/2010
 !!------------------------------------------------------------------
 !
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t, ISBA_PARAM_TIME_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_CANOPY_n, ONLY : CANOPY_t
+!
 USE MODD_TYPE_SNOW
 !
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00, XG, XLVTT
@@ -47,10 +50,14 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=*)  , INTENT(IN)  :: HISBA     ! type of ISBA version
- CHARACTER(LEN=*)  , INTENT(IN)  :: HCPSURF   ! specific heat at surface
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
+TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+!
 REAL,               INTENT(IN)   :: PTSTEP   ! timestep of the integration
-INTEGER           , INTENT(IN)  :: KLVL      ! number      of levels in canopy
 REAL, DIMENSION(:), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
 REAL, DIMENSION(:), INTENT(IN)  :: PTA       ! air temperature forcing               (K)
@@ -67,40 +74,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PSNOW     ! snow precipitation               
 REAL, DIMENSION(:), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN)  :: PZREF     ! height of T,q forcing                 (m)
 REAL, DIMENSION(:), INTENT(IN)  :: PUREF     ! height of wind forcing                (m)
-REAL, DIMENSION(:,:), INTENT(IN):: PTG       ! surface and sub-surface soil temperature profile (K)   
-REAL, DIMENSION(:,:), INTENT(IN):: PPATCH    ! fraction of each tile/patch 
-REAL, DIMENSION(:,:), INTENT(IN):: PWG       ! soil volumetric water content profile   (m3/m3)
-REAL, DIMENSION(:,:), INTENT(IN):: PWGI      ! soil liquid water equivalent volumetric
-REAL, DIMENSION(:,:), INTENT(IN):: PZ0       ! roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PSSO_SLOPE! slope of S.S.O.                         (-)
-REAL, DIMENSION(:,:), INTENT(IN):: PRESA     ! aerodynamic resistance                  (s/m)
-REAL, DIMENSION(:,:), INTENT(IN):: PVEG      ! vegetation cover fraction               (-)
-REAL, DIMENSION(:,:), INTENT(IN):: PLAI      ! Leaf Area Index                         (m2/m2)
-REAL, DIMENSION(:,:), INTENT(IN):: PWR       ! liquid water retained on the
-!                                            ! foliage of the vegetation
 !                                            ! canopy       
-REAL, DIMENSION(:,:), INTENT(IN):: PRGL      ! maximum solar radiation
-!                                            ! usable in photosynthesis                (W/m2)
-REAL, DIMENSION(:,:), INTENT(IN):: PRSMIN    ! minimum stomatal resistance             (s/m)
-REAL, DIMENSION(:,:), INTENT(IN):: PGAMMA    ! coefficient for the calculation
-!                                            ! of the surface stomatal
-!                                            ! resistance
-REAL, DIMENSION(:,:), INTENT(IN):: PWRMAX_CF ! coefficient for maximum water 
-!                                            ! interception 
-!                                            ! storage capacity on the vegetation      (-)
-REAL, DIMENSION(:,:), INTENT(IN):: PZ0_O_Z0H ! ratio of surface roughness lengths
-!                                            ! (momentum to heat)                      (-)
-REAL, DIMENSION(:,:), INTENT(IN):: PWFC      ! field capacity volumetric water content
-!                                            ! profile                                 (m3/m3)
-REAL, DIMENSION(:,:), INTENT(IN):: PWSAT     ! porosity profile                        (m3/m3) 
-TYPE(SURF_SNOW)     , INTENT(IN):: PTSNOW    ! snow state
-REAL, DIMENSION(:,:), INTENT(IN):: PZ        ! height of middle of each level grid   (m)
-!
-REAL, DIMENSION(:,:), INTENT(OUT) :: PT   ! temperature at each level in SBL      (m/s)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PQ   ! humidity    at each level in SBL      (kg/m3)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PWIND! wind        at each level in SBL      (m/s)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PTKE ! Tke         at each level in SBL      (m2/s2)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PP   ! pressure    at each level in SBL      (kg/m3)
 !
 !*      0.2    declarations of local variables
 !
@@ -143,8 +118,8 @@ REAL, DIMENSION(SIZE(PTA))   ::ZPSNV
 REAL, DIMENSION(SIZE(PTA))   ::ZPSNV_A
 REAL, DIMENSION(SIZE(PTA))   ::ZPSN
 REAL, DIMENSION(SIZE(PTA))   ::ZSNOWALB
-REAL, DIMENSION(SIZE(PTA),SIZE(PTSNOW%WSNOW,2)) ::ZSNOWSWE
-REAL, DIMENSION(SIZE(PTA),SIZE(PTSNOW%WSNOW,2)) ::ZSNOWRHO
+REAL, DIMENSION(SIZE(PTA),SIZE(IR%TSNOW%WSNOW,2)) ::ZSNOWSWE
+REAL, DIMENSION(SIZE(PTA),SIZE(IR%TSNOW%WSNOW,2)) ::ZSNOWRHO
 REAL, DIMENSION(SIZE(PTA))   ::ZFFG
 REAL, DIMENSION(SIZE(PTA))   ::ZFFGNOS
 REAL, DIMENSION(SIZE(PTA))   ::ZFFV
@@ -162,7 +137,7 @@ REAL, DIMENSION(SIZE(PTA))   ::ZDELTA
 REAL, DIMENSION(SIZE(PTA))   ::ZWRMAX
 REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_ZON
 REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_MER
-REAL, DIMENSION(SIZE(PTA),SIZE(PTSNOW%WSNOW,2))   ::ZSUM_LAYER
+REAL, DIMENSION(SIZE(PTA),SIZE(IR%TSNOW%WSNOW,2))   ::ZSUM_LAYER
 REAL, DIMENSION(SIZE(PTA))   ::ZSUM
 REAL, DIMENSION(SIZE(PTA))   :: ZLEG_DELTA  ! soil evaporation delta fn
 REAL, DIMENSION(SIZE(PTA))   :: ZLEGI_DELTA ! soil sublimation delta fn
@@ -172,70 +147,73 @@ INTEGER                     :: JSWB
 INTEGER                     :: JLAYER
 INTEGER                     :: JPATCH
 !
-REAL, DIMENSION(SIZE(PTA),SIZE(PPATCH,2)) ::ZWSNOW
+REAL, DIMENSION(SIZE(PTA),SIZE(IP%XPATCH,2)) ::ZWSNOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_SBL',0,ZHOOK_HANDLE)
 !    
 !Means over patches
-ZTS     = SUM(PTG(:,:)*PPATCH(:,:) ,DIM=2)
-ZWG     = SUM(PWG(:,:)*PPATCH(:,:) ,DIM=2)
-ZWGI    = SUM(PWGI(:,:)*PPATCH(:,:),DIM=2)
-ZZ0     = SUM(PPATCH(:,:)*PZ0(:,:) ,DIM=2)
+ZTS     = SUM(IR%XTG (:,1,:)*IP%XPATCH(:,:),DIM=2)
+ZWG     = SUM(IR%XWG (:,1,:)*IP%XPATCH(:,:),DIM=2)
+ZWGI    = SUM(IR%XWGI(:,1,:)*IP%XPATCH(:,:),DIM=2)
+ZZ0     = SUM(IP%XPATCH(:,:)*IMT%XZ0(:,:)  ,DIM=2)
 !
 !We choose to set ZZ0EFF and ZZ0_WITH_SNOW equal to ZZ0
 ZZ0EFF        = ZZ0
 ZZ0_WITH_SNOW = ZZ0
-ZZ0H(:) = SUM(PPATCH(:,:) * PZ0(:,:)/PZ0_O_Z0H(:,:),DIM=2)
-ZVEG(:) = SUM(PPATCH(:,:) * PVEG(:,:)              ,DIM=2)
+ZZ0H(:) = SUM(IP%XPATCH(:,:) * IMT%XZ0(:,:)/IMX%XZ0_O_Z0H(:,:),DIM=2)
+ZVEG(:) = SUM(IP%XPATCH(:,:) * IMT%XVEG(:,:)                  ,DIM=2)
 !
 ZP_SLOPE_COS(:) = 1./SQRT(1.+PSSO_SLOPE(:)**2)
 IF (LNOSOF) ZP_SLOPE_COS(:) = 1.0
 !
-ZRESA(:) = SUM(PPATCH(:,:)*PRESA(:,:),DIM=2)
+ZRESA(:) = SUM(IP%XPATCH(:,:)*IR%XRESA(:,:),DIM=2)
 WHERE(ZVEG(:)>0)
-  ZLAI     (:)= SUM(PPATCH(:,:)*PVEG(:,:)*PLAI(:,:)     ,DIM=2,MASK=PVEG(:,:)>0) / ZVEG(:)
-  ZWRMAX_CF(:)= SUM(PPATCH(:,:)*PVEG(:,:)*PWRMAX_CF(:,:),DIM=2,MASK=PVEG(:,:)>0) / ZVEG(:)
-  ZWR      (:)= SUM(PPATCH(:,:)*PVEG(:,:)*PWR(:,:)      ,DIM=2,MASK=PVEG(:,:)>0) / ZVEG(:)
+  ZLAI     (:)= SUM(IP%XPATCH(:,:)*IMT%XVEG(:,:)*IMT%XLAI(:,:)     ,&
+                DIM=2,MASK=IMT%XVEG(:,:)>0) / ZVEG(:)
+  ZWRMAX_CF(:)= SUM(IP%XPATCH(:,:)*IMT%XVEG(:,:)*IMT%XWRMAX_CF(:,:),&
+                DIM=2,MASK=IMT%XVEG(:,:)>0) / ZVEG(:)
+  ZWR      (:)= SUM(IP%XPATCH(:,:)*IMT%XVEG(:,:)*IR%XWR(:,:)       ,&
+                DIM=2,MASK=IMT%XVEG(:,:)>0) / ZVEG(:)
 ELSEWHERE
-  ZLAI     (:) = PLAI     (:,1)
-  ZWRMAX_CF(:) = PWRMAX_CF(:,1)
-  ZWR      (:) = PWR      (:,1)
+  ZLAI     (:) = IMT%XLAI     (:,1)
+  ZWRMAX_CF(:) = IMT%XWRMAX_CF(:,1)
+  ZWR      (:) = IR%XWR       (:,1)
 ENDWHERE
 !
 ZSUM_LAYER(:,:) = 0.
 ZSUM        (:) = 0.
 !
-DO JLAYER=1,SIZE(PTSNOW%WSNOW,2)
-  ZSNOWSWE  (:,JLAYER) = SUM(PPATCH(:,:)*PTSNOW%WSNOW(:,JLAYER,:),DIM=2)
-  ZSUM_LAYER(:,JLAYER) = SUM(PPATCH(:,:),DIM=2,MASK=PTSNOW%WSNOW(:,JLAYER,:)>0)
+DO JLAYER=1,SIZE(IR%TSNOW%WSNOW,2)
+  ZSNOWSWE  (:,JLAYER) = SUM(IP%XPATCH(:,:)*IR%TSNOW%WSNOW(:,JLAYER,:),DIM=2)
+  ZSUM_LAYER(:,JLAYER) = SUM(IP%XPATCH(:,:),DIM=2,MASK=IR%TSNOW%WSNOW(:,JLAYER,:)>0)
   WHERE(ZSUM_LAYER(:,JLAYER)>0)      
-    ZSNOWRHO(:,JLAYER)= SUM( PPATCH(:,:)*PTSNOW%RHO(:,JLAYER,:), DIM=2, &
-                             MASK=PTSNOW%WSNOW(:,JLAYER,:)>0) / ZSUM_LAYER(:,JLAYER)
+    ZSNOWRHO(:,JLAYER)= SUM( IP%XPATCH(:,:)*IR%TSNOW%RHO(:,JLAYER,:), DIM=2, &
+                             MASK=IR%TSNOW%WSNOW(:,JLAYER,:)>0) / ZSUM_LAYER(:,JLAYER)
   ELSEWHERE
-    ZSNOWRHO(:,JLAYER)=PTSNOW%RHO(:,JLAYER,1)
+    ZSNOWRHO(:,JLAYER)=IR%TSNOW%RHO(:,JLAYER,1)
   ENDWHERE
 END DO
 !
 ZSUM(:)=SUM(ZSUM_LAYER(:,:),DIM=2)
 !
 ZWSNOW(:,:) = 0.
-DO JPATCH=1,SIZE(PTSNOW%WSNOW,3)
-  DO JLAYER=1,SIZE(PTSNOW%WSNOW,2)
-    ZWSNOW(:,JPATCH) = ZWSNOW(:,JPATCH) + PTSNOW%WSNOW(:,JLAYER,JPATCH)
+DO JPATCH=1,SIZE(IR%TSNOW%WSNOW,3)
+  DO JLAYER=1,SIZE(IR%TSNOW%WSNOW,2)
+    ZWSNOW(:,JPATCH) = ZWSNOW(:,JPATCH) + IR%TSNOW%WSNOW(:,JLAYER,JPATCH)
   ENDDO
 ENDDO    
 !
 WHERE(ZSUM(:)>0)         
-  ZSNOWALB(:) = SUM(PPATCH(:,:)*PTSNOW%ALB(:,:),DIM=2,MASK=ZWSNOW(:,:)>0) / ZSUM(:)      
+  ZSNOWALB(:) = SUM(IP%XPATCH(:,:)*IR%TSNOW%ALB(:,:),DIM=2,MASK=ZWSNOW(:,:)>0) / ZSUM(:)      
 ELSEWHERE
-  ZSNOWALB(:) = PTSNOW%ALB(:,1)
+  ZSNOWALB(:) = IR%TSNOW%ALB(:,1)
 ENDWHERE
 !
-ZRGL  (:) = SUM(PPATCH(:,:) * PRGL  (:,:),DIM=2)
-ZRSMIN(:) = SUM(PPATCH(:,:) * PRSMIN(:,:),DIM=2)
-ZGAMMA(:) = SUM(PPATCH(:,:) * PGAMMA(:,:),DIM=2)
+ZRGL  (:) = SUM(IP%XPATCH(:,:) * IMT%XRGL  (:,:),DIM=2)
+ZRSMIN(:) = SUM(IP%XPATCH(:,:) * IMT%XRSMIN(:,:),DIM=2)
+ZGAMMA(:) = SUM(IP%XPATCH(:,:) * IMT%XGAMMA(:,:),DIM=2)
 !
 ZEXNA(:) = (PPA(:)/XP00)**(XRD/XCPD)
 ZEXNS(:) = (PPS(:)/XP00)**(XRD/XCPD)
@@ -243,10 +221,8 @@ ZQA  (:) = PQA(:) / PRHOA(:)
 ZWIND(:) = SQRT(PU**2+PV**2)
 !
 !We compute the snow fractions
- CALL ISBA_SNOW_FRAC(PTSNOW%SCHEME,                      &
-                    ZSNOWSWE, ZSNOWRHO, ZSNOWALB,       &
-                    ZVEG, ZLAI, ZZ0,                    &
-                    ZPSN, ZPSNV_A, ZPSNG, ZPSNV         )  
+ CALL ISBA_SNOW_FRAC(IR%TSNOW%SCHEME, ZSNOWSWE, ZSNOWRHO, ZSNOWALB,   &
+                     ZVEG, ZLAI, ZZ0, ZPSN, ZPSNV_A, ZPSNG, ZPSNV   )  
 !
 !We compute total shortwave incoming radiation needed by veg
 ZP_GLOBAL_SW(:) = 0.
@@ -270,30 +246,28 @@ ZFF    (:) = 0.0
 ZF5    (:) = 1.0
 ZLVTT  (:) = XLVTT
 !We compute ZCD, ZCH and ZRI
- CALL DRAG(HISBA, PTSNOW%SCHEME, HCPSURF,  PTSTEP,                            &
-          ZTS, ZWG, ZWGI, ZEXNS, ZEXNA, PTA,                                  &
-          ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS,                                 &
-          ZVEG, ZZ0, ZZ0EFF, ZZ0H, PWFC(:,1), PWSAT(:,1),                     &
-          ZPSNG, ZPSNV, PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5,              &
-          ZRESA, ZCH, ZCD, ZCDN, ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS,            &
-          ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS, ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA,    &
-          ZWR, PRHOA, ZLVTT                                                   )  
+ CALL DRAG(IO%CISBA, IR%TSNOW%SCHEME, IO%CCPSURF,  PTSTEP, ZTS, ZWG, ZWGI, &
+           ZEXNS, ZEXNA, PTA, ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS, ZVEG,    &
+           ZZ0, ZZ0EFF, ZZ0H, IP%XWFC(:,1), IP%XWSAT(:,1), ZPSNG, ZPSNV,   &
+           PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5, ZRESA, ZCH, ZCD, ZCDN, &
+           ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS, ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS,&
+           ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA, ZWR, PRHOA, ZLVTT            )  
 !
 !Initialisation of T, Q, Wind and TKE on all canopy levels
-DO JLAYER=1,KLVL
+DO JLAYER=1,ICP%NLVL
   !
   CALL CLS_TQ(PTA, ZQA, PPA, PPS, PZREF, ZCD, ZCH, ZRI, ZTS, ZHU, ZZ0H, &
-              PZ(:,JLAYER), ZTNM, ZQNM, ZHUNM                           ) 
+              ICP%XZ(:,JLAYER), ZTNM, ZQNM, ZHUNM           ) 
   ! 
-  PT(:,JLAYER)=ZTNM
-  PQ(:,JLAYER)=ZQNM
+  ICP%XT(:,JLAYER)=ZTNM
+  ICP%XQ(:,JLAYER)=ZQNM
   !
-  CALL CLS_WIND(PU, PV, PUREF, ZCD, ZCDN, ZRI, PZ(:,JLAYER), &
+  CALL CLS_WIND(PU, PV, PUREF, ZCD, ZCDN, ZRI, ICP%XZ(:,JLAYER), &
                 ZCLS_WIND_ZON, ZCLS_WIND_MER                 )
   !
-  PWIND(:,JLAYER) = SQRT( ZCLS_WIND_ZON(:)**2 + ZCLS_WIND_MER(:)**2 )
-  PTKE (:,JLAYER) = XALPSBL * ZCD(:) * ( PU(:)**2 + PV(:)**2 )
-  PP   (:,JLAYER) = PPA(:) + XG * PRHOA(:) * (PZ(:,KLVL) - PZ(:,JLAYER))
+  ICP%XU(:,JLAYER) = SQRT( ZCLS_WIND_ZON(:)**2 + ZCLS_WIND_MER(:)**2 )
+  ICP%XTKE (:,JLAYER) = XALPSBL * ZCD(:) * ( PU(:)**2 + PV(:)**2 )
+  ICP%XP   (:,JLAYER) = PPA(:) + XG * PRHOA(:) * (ICP%XZ(:,ICP%NLVL) - ICP%XZ(:,JLAYER))
   !
 ENDDO
 !

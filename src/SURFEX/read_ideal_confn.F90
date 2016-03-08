@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE READ_IDEAL_CONF_n (DGL, &
-                                    HPROGRAM)
+      SUBROUTINE READ_IDEAL_CONF_n (DLO, HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_IDEAL_CONF* - routine to read the configuration for IDEAL
@@ -37,7 +36,7 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
 !
@@ -61,7 +60,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 
@@ -84,7 +83,7 @@ IF (LHOOK) CALL DR_HOOK('READ_IDEAL_CONF_N',0,ZHOOK_HANDLE)
 !
 IMI=GET_CURRENT_MODEL_INDEX_SURFEX()
 !
-IF (IMI.NE.-1 .AND. LNAM_READ) CALL INIT_NAM_DIAG_SURFn(DGL)
+IF (IMI.NE.-1 .AND. LNAM_READ) CALL INIT_NAM_DIAG_SURFn(DLO)
 ! 
 IF (LNAM_READ) THEN
  !        
@@ -104,7 +103,7 @@ IF (LNAM_READ) THEN
 !
 ENDIF
 !
-IF (IMI.NE.-1) CALL UPDATE_NAM_DIAG_SURFn(DGL)
+IF (IMI.NE.-1) CALL UPDATE_NAM_DIAG_SURFn(DLO)
 IF (LHOOK) CALL DR_HOOK('READ_IDEAL_CONF_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

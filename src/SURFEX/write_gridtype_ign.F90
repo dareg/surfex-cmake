@@ -1,6 +1,5 @@
 !     #################################################################
-      SUBROUTINE WRITE_GRIDTYPE_IGN (DGU, U, &
-                                     HPROGRAM,KLU,KGRID_PAR,PGRID_PAR,KRESP)
+      SUBROUTINE WRITE_GRIDTYPE_IGN (HSELECT,HPROGRAM,KLU,KGRID_PAR,PGRID_PAR,KRESP)
 !     #################################################################
 !
 !!****  *WRITE_GRIDTYPE_IGN* - routine to write the horizontal grid
@@ -34,11 +33,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
 USE MODI_WRITE_SURF
 !
 USE MODE_GRIDTYPE_IGN
@@ -52,9 +46,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(IN)  :: KLU        ! number of points
@@ -107,24 +99,19 @@ SELECT CASE (ILAMBERT)
      CASE (6)
      YCOMMENT='LAMBERT 93'
 END SELECT
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'LAMBERT ',ILAMBERT, KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT,HPROGRAM,'LAMBERT ',ILAMBERT, KRESP,YCOMMENT)
 !
 YCOMMENT='XX'
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT,HPROGRAM,'XX',ZX,KRESP,YCOMMENT)
 !
 YCOMMENT='XY'
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'XY',ZY,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT,HPROGRAM,'XY',ZY,KRESP,YCOMMENT)
 !
 YCOMMENT='XDX'
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT,HPROGRAM,'DX',ZDX,KRESP,YCOMMENT)
 !
 YCOMMENT='XDY'
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
+ CALL WRITE_SURF(HSELECT,HPROGRAM,'DY',ZDY,KRESP,YCOMMENT)
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

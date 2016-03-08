@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_WATFLUX_n (WM, &
-                                     HPROGRAM,HINIT)
+SUBROUTINE READ_NAMELISTS_WATFLUX_n (WM, HPROGRAM,HINIT)
 !     #######################################################
 !
 ! --------------------------------------------------------------------------
@@ -43,11 +42,9 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_WATFLUX_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_DIAG_WATFLUX(N2M,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET,LCOEF,LSURF_VARS, &
                            LSURF_BUDGETC,LRESET_BUDGETC,XDIAG_TSTEP        )
 !
- CALL READ_DEFAULT_WATFLUX_n(WM%CHW, WM%DGW, WM%W, &
-                             HPROGRAM)
+ CALL READ_DEFAULT_WATFLUX_n(WM%CHW, WM%DWO, WM%W, HPROGRAM)
 !
- CALL READ_WATFLUX_CONF_n(WM%CHW, WM%DGW, WM%W, &
-                          HPROGRAM)
+ CALL READ_WATFLUX_CONF_n(WM%CHW, WM%DWO, WM%W, HPROGRAM)
 !
 !----------------------------------------------------------------------------
 !

@@ -132,8 +132,7 @@ IF (HACTION == 'READ ') THEN
   !
 ELSE
   ! NFULL must be known in every case. 
-  CALL GET_DIM_FULL_n(U, &
-                      NFULL)
+  CALL GET_DIM_FULL_n(U%NDIM_FULL, NFULL)
   !
   CFILE_FA = CFILEOUT_FA
 ENDIF
@@ -165,7 +164,7 @@ IF (.NOT.ALLOCATED(NINDEX).AND.NRANK==NPIO) THEN
   ALLOCATE(NINDEX(NFULL))
   NINDEX(:) = 0
 ELSEIF (HMASK /= 'EXTZON') THEN
-  CALL GET_DIM_FULL_n(U,NFULL)  
+  CALL GET_DIM_FULL_n(U%NDIM_FULL,NFULL)  
 ENDIF
 !
 !------------------------------------------------------------------------------
@@ -178,8 +177,7 @@ IF (HPROGRAM=='AROME ') THEN
   IL     = NFULL
   NSIZE  = NFULL
 ELSE
-  CALL GET_SIZE_FULL_n(U, &
-                       HPROGRAM,NFULL,ILU)
+  CALL GET_SIZE_FULL_n(HPROGRAM,NFULL,U%NSIZE_FULL,ILU)
   IF (ILU>NSIZE) NSIZE = ILU
   IL = ILU
   CALL GET_TYPE_DIM_n(DTCO, U, &

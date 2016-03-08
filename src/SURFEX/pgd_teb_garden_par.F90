@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TEB_GARDEN_PAR (DTCO, UG, U, USS, TG, GDM, &
-                                     HPROGRAM)
+      SUBROUTINE PGD_TEB_GARDEN_PAR (DTCO, UG, U, USS, KDIM, GDO, GDTI, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB_GARDEN_PAR* monitor for averaging and interpolations of cover fractions
@@ -41,9 +40,10 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
-USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
+USE MODD_SSO_n, ONLY : SSO_t
+!
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 !
 USE MODD_DATA_COVER_PAR,    ONLY : NVEGTYPE
 USE MODD_SURF_PAR,          ONLY : XUNDEF
@@ -71,9 +71,10 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
-TYPE(GRID_t), INTENT(INOUT) :: TG
-TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
+TYPE(SSO_t), INTENT(INOUT) :: USS
+INTEGER, INTENT(IN) :: KDIM
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: GDTI
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 !
@@ -178,7 +179,7 @@ CFTYP_LAI_LVEG     = '      '
 CFTYP_H_HVEG       = '      '
 !
 !-------------------------------------------------------------------------------
-GDM%DTI%NTIME = 12
+GDTI%NTIME = 12
 !-------------------------------------------------------------------------------
 !
 !*    2.      Input file for cover types
@@ -203,7 +204,7 @@ END IF
 !*    3.      Coherence check
 !             ---------------
 !
-GDM%TV%O%LPAR =  (XUNIF_FRAC_HVEG /= XUNDEF .OR. LEN_TRIM(CFNAM_FRAC_HVEG) >0 )&
+GDO%LPAR =  (XUNIF_FRAC_HVEG /= XUNDEF .OR. LEN_TRIM(CFNAM_FRAC_HVEG) >0 )&
          .AND. (XUNIF_FRAC_LVEG /= XUNDEF .OR. LEN_TRIM(CFNAM_FRAC_LVEG) >0 )&
          .AND. (XUNIF_FRAC_NVEG /= XUNDEF .OR. LEN_TRIM(CFNAM_FRAC_NVEG) >0 )
 
@@ -211,7 +212,7 @@ GNO_PAR_GARDEN = (XUNIF_FRAC_HVEG == XUNDEF .AND. LEN_TRIM(CFNAM_FRAC_HVEG)==0)&
            .AND. (XUNIF_FRAC_LVEG == XUNDEF .AND. LEN_TRIM(CFNAM_FRAC_LVEG)==0)&
            .AND. (XUNIF_FRAC_NVEG == XUNDEF .AND. LEN_TRIM(CFNAM_FRAC_NVEG)==0)
 
-IF ( .NOT. GDM%TV%O%LPAR .AND. .NOT. GNO_PAR_GARDEN ) THEN
+IF ( .NOT. GDO%LPAR .AND. .NOT. GNO_PAR_GARDEN ) THEN
   WRITE(ILUOUT,*) ' Error for fraction of high, low and no vegetation fractions in gardens '
   WRITE(ILUOUT,*) ' You need to specify the three of them ... or none. '
   CALL ABOR1_SFX( 'Namelist NAM_DATA_TEB_GARDEN: you need to specify all of  HVEG, LVEG, NVEG fractions or NONE of them')
@@ -224,18 +225,18 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
-GDM%DTI%NTIME = NTIME_GD
+GDTI%NTIME = NTIME_GD
 !
-ALLOCATE(GDM%DTI%XPAR_FRAC_HVEG   (TG%NDIM        ))
-ALLOCATE(GDM%DTI%XPAR_FRAC_LVEG   (TG%NDIM        ))
-ALLOCATE(GDM%DTI%XPAR_FRAC_NVEG   (TG%NDIM        ))
-ALLOCATE(GDM%DTI%XPAR_LAI_HVEG    (TG%NDIM,GDM%DTI%NTIME))
-ALLOCATE(GDM%DTI%XPAR_LAI_LVEG    (TG%NDIM,GDM%DTI%NTIME))
-ALLOCATE(GDM%DTI%XPAR_H_HVEG      (TG%NDIM        ))
+ALLOCATE(GDTI%XPAR_FRAC_HVEG   (KDIM        ))
+ALLOCATE(GDTI%XPAR_FRAC_LVEG   (KDIM        ))
+ALLOCATE(GDTI%XPAR_FRAC_NVEG   (KDIM        ))
+ALLOCATE(GDTI%XPAR_LAI_HVEG    (KDIM,GDTI%NTIME))
+ALLOCATE(GDTI%XPAR_LAI_LVEG    (KDIM,GDTI%NTIME))
+ALLOCATE(GDTI%XPAR_H_HVEG      (KDIM        ))
 !
-GDM%TV%O%CTYPE_HVEG = CTYP_GARDEN_HVEG
-GDM%TV%O%CTYPE_LVEG = CTYP_GARDEN_LVEG
-GDM%TV%O%CTYPE_NVEG = CTYP_GARDEN_NVEG
+GDO%CTYPE_HVEG = CTYP_GARDEN_HVEG
+GDO%CTYPE_LVEG = CTYP_GARDEN_LVEG
+GDO%CTYPE_NVEG = CTYP_GARDEN_NVEG
 !
 !-------------------------------------------------------------------------------
 !
@@ -246,26 +247,26 @@ CATYPE = 'ARI'
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'FRAC_HVEG: fraction of high vegetation','TWN',CFNAM_FRAC_HVEG,   &
-                 CFTYP_FRAC_HVEG,XUNIF_FRAC_HVEG,GDM%DTI%XPAR_FRAC_HVEG(:))  
+                 CFTYP_FRAC_HVEG,XUNIF_FRAC_HVEG,GDTI%XPAR_FRAC_HVEG(:))  
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'FRAC_LVEG: fraction of low vegetation' ,'TWN',CFNAM_FRAC_LVEG,   &
-                 CFTYP_FRAC_LVEG,XUNIF_FRAC_LVEG,GDM%DTI%XPAR_FRAC_LVEG(:))  
+                 CFTYP_FRAC_LVEG,XUNIF_FRAC_LVEG,GDTI%XPAR_FRAC_LVEG(:))  
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'FRAC_NVEG: fraction of bare soil'      ,'TWN',CFNAM_FRAC_NVEG,   &
-                 CFTYP_FRAC_NVEG,XUNIF_FRAC_NVEG,GDM%DTI%XPAR_FRAC_NVEG(:))  
+                 CFTYP_FRAC_NVEG,XUNIF_FRAC_NVEG,GDTI%XPAR_FRAC_NVEG(:))  
 !
 !
-DO JTIME=1,GDM%DTI%NTIME
+DO JTIME=1,GDTI%NTIME
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'LAI_HVEG: LAI of high vegetation','TWN',CFNAM_LAI_HVEG(JTIME),  &
-                  CFTYP_LAI_HVEG(JTIME),XUNIF_LAI_HVEG(JTIME),GDM%DTI%XPAR_LAI_HVEG(:,JTIME))  
+                  CFTYP_LAI_HVEG(JTIME),XUNIF_LAI_HVEG(JTIME),GDTI%XPAR_LAI_HVEG(:,JTIME))  
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'LAI_LVEG: LAI of low  vegetation','TWN',CFNAM_LAI_LVEG(JTIME),  &
-                  CFTYP_LAI_LVEG(JTIME),XUNIF_LAI_LVEG(JTIME),GDM%DTI%XPAR_LAI_LVEG(:,JTIME))  
+                  CFTYP_LAI_LVEG(JTIME),XUNIF_LAI_LVEG(JTIME),GDTI%XPAR_LAI_LVEG(:,JTIME))  
 !
 !
 ENDDO
@@ -273,7 +274,7 @@ ENDDO
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'H_HVEG: height of trees','TWN',CFNAM_H_HVEG,                     &
-                 CFTYP_H_HVEG,XUNIF_H_HVEG,GDM%DTI%XPAR_H_HVEG(:))  
+                 CFTYP_H_HVEG,XUNIF_H_HVEG,GDTI%XPAR_H_HVEG(:))  
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN_PAR',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -1,7 +1,6 @@
 !     #########
-       SUBROUTINE PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PH, PHW, &
-                              PSFTH, PSFTQ, PSFZON, PSFMER,                      &
-                              PT2M, PQ2M, PHU2M, PZON10M, PMER10M               )  
+       SUBROUTINE PARAM_CLS(DGS, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+                            PH, PHW, PSFTH, PSFTQ, PSFZON, PSFMER        )  
 !     #####################################################################
 !
 !!****  *PARAMCLS*  interpolates wind at 10m and temperature/humidity at 2m
@@ -48,6 +47,8 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_DIAG_n, ONLY : DIAG_t
+!
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XKARMAN, XRD, XCPD, XP00, XRV, XG
 !
@@ -62,7 +63,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
+TYPE(DIAG_t), INTENT(INOUT) :: DGS
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PTA    ! atmospheric temperature
 REAL, DIMENSION(:), INTENT(IN)       :: PTS    ! surface temperature
@@ -77,12 +78,6 @@ REAL, DIMENSION(:), INTENT(IN)       :: PSFZON ! zonal friction
 REAL, DIMENSION(:), INTENT(IN)       :: PSFMER ! meridian friction
 REAL, DIMENSION(:), INTENT(IN)       :: PSFTH  ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN)       :: PSFTQ  ! vapor flux (kg/m2/s)
-!
-REAL, DIMENSION(:), INTENT(OUT)      :: PT2M   ! temperature at 2 meters
-REAL, DIMENSION(:), INTENT(OUT)      :: PQ2M   ! specific humidity at 2 meters
-REAL, DIMENSION(:), INTENT(OUT)      :: PHU2M  ! relative humidity at 2 meters
-REAL, DIMENSION(:), INTENT(OUT)      :: PZON10M! zonal wind component at 10 meters
-REAL, DIMENSION(:), INTENT(OUT)      :: PMER10M! meridian wind component at 10 meters
 !
 !*      0.2    declarations of local variables
 !
@@ -103,6 +98,7 @@ REAL                       :: Z2M        ! 2m
 REAL, DIMENSION(SIZE(PTA)) :: ZWT        ! potential temperature flux (Km/s)
 REAL, DIMENSION(SIZE(PTA)) :: ZWQ        ! water vapor flux           (kg/kg*m/s)
 REAL, DIMENSION(SIZE(PTA)) :: ZEXN       ! Exner function
+REAL, DIMENSION(SIZE(PTA)) :: ZFACT
 REAL                       :: ZLMOMIN    ! Minimum value of ZLMO for unstable cases
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -170,36 +166,28 @@ END WHERE
 !* note : is set to zero value where the law does not apply correctly
 !  (e.g. over high mountains)
 !         and is set to XUNDEF when forcing level is below 10m diagnostic level
-PZON10M(:) = XUNDEF
-PMER10M(:) = XUNDEF
+DGS%XZON10M(:) = XUNDEF
+DGS%XMER10M(:) = XUNDEF
+!
 WHERE(PHW(:)>=Z10M)
-WHERE (PSFZON(:)>=0.) 
-  PZON10M(:) = PZONA(:) - SQRT( PSFZON(:))/XKARMAN *(   LOG ( Z10M/PHW)           &
-                                                        - PAULSON_PSIM(Z10M_O_LMO)  &
-                                                        + PAULSON_PSIM(ZH_O_LMO)    )  
-  PZON10M(:) = MIN ( 0., PZON10M(:) )
-END WHERE
-!
-WHERE (PSFZON(:)< 0.) 
-  PZON10M(:) = PZONA(:) + SQRT(-PSFZON(:))/XKARMAN *(   LOG ( Z10M/PHW)           &
-                                                        - PAULSON_PSIM(Z10M_O_LMO)  &
-                                                        + PAULSON_PSIM(ZH_O_LMO)    )  
-  PZON10M(:) = MAX ( 0., PZON10M(:) )
-END WHERE
-!
-WHERE (PSFMER(:)>=0.) 
-  PMER10M(:) = PMERA(:) - SQRT( PSFMER(:))/XKARMAN *(   LOG ( Z10M/PHW)           &
-                                                        - PAULSON_PSIM(Z10M_O_LMO)  &
-                                                        + PAULSON_PSIM(ZH_O_LMO)    )  
-  PMER10M(:) = MIN ( 0., PMER10M(:) )
-END WHERE
-!
-WHERE (PSFMER(:)< 0.) 
-  PMER10M(:) = PMERA(:) + SQRT(-PSFMER(:))/XKARMAN *(   LOG ( Z10M/PHW)           &
-                                                        - PAULSON_PSIM(Z10M_O_LMO)  &
-                                                        + PAULSON_PSIM(ZH_O_LMO)    )  
-  PMER10M(:) = MAX ( 0., PMER10M(:) )
-END WHERE
+  !
+  ZFACT(:) = LOG(Z10M/PHW) - PAULSON_PSIM(Z10M_O_LMO)  + PAULSON_PSIM(ZH_O_LMO)
+  !
+  WHERE (PSFZON(:)>=0.) 
+    DGS%XZON10M(:) = PZONA(:) - SQRT( PSFZON(:))/XKARMAN * ZFACT(:)  
+    DGS%XZON10M(:) = MIN ( 0., DGS%XZON10M(:) )
+  ELSEWHERE
+    DGS%XZON10M(:) = PZONA(:) + SQRT(-PSFZON(:))/XKARMAN * ZFACT(:)   
+    DGS%XZON10M(:) = MAX ( 0., DGS%XZON10M(:) )
+  END WHERE
+  !
+  WHERE (PSFMER(:)>=0.) 
+    DGS%XMER10M(:) = PMERA(:) - SQRT( PSFMER(:))/XKARMAN * ZFACT(:)  
+    DGS%XMER10M(:) = MIN ( 0., DGS%XMER10M(:) )
+  ELSEWHERE
+    DGS%XMER10M(:) = PMERA(:) + SQRT(-PSFMER(:))/XKARMAN * ZFACT(:)  
+    DGS%XMER10M(:) = MAX ( 0., DGS%XMER10M(:) )
+  END WHERE
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -210,15 +198,15 @@ WHERE (ZLMO/=XUNDEF)
   ZH_O_LMO   = PH/ZLMO
 END WHERE
 !
+ZFACT(:) = LOG(Z2M/PH) - PAULSON_PSIH(Z2M_O_LMO)  + PAULSON_PSIH(ZH_O_LMO)
+!
 !* Temperature scale
 !
 ZTSTAR(:) = - ZWT(:) / MAX(ZUSTAR,0.01)
 !
 !* Potential Temperature at 2m
 !
-ZTH2M(:) = ZTH(:) + 0.74 * ZTSTAR(:)/XKARMAN *(  LOG ( Z2M/PH)             &
-                                                 - PAULSON_PSIH(Z2M_O_LMO)   &
-                                                 + PAULSON_PSIH(ZH_O_LMO)    )  
+ZTH2M(:) = ZTH(:) + 0.74 * ZTSTAR(:)/XKARMAN * ZFACT(:)  
 !
 !* Pressure at 2m
 !
@@ -228,10 +216,10 @@ ZP2M(:) = PPA(:) - XG * PRHOA(:) * (Z2M-PH(:))
 !
 WHERE (ZWT(:) > 0. .OR. PTS(:) == XUNDEF)
   ! Businger formulation in unstable case
-  PT2M(:) = ZTH2M(:) * (ZP2M(:)/XP00)**(XRD/XCPD)
+  DGS%XT2M(:) = ZTH2M(:) * (ZP2M(:)/XP00)**(XRD/XCPD)
 ELSEWHERE 
   ! Linear interpolation between Ts and Ta in stable case
-  PT2M(:) = PTS(:) + (PTA(:)-PTS(:))*Z2M/PH(:)
+  DGS%XT2M(:) = PTS(:) + (PTA(:)-PTS(:))*Z2M/PH(:)
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -242,16 +230,16 @@ ZQSTAR(:) = - ZWQ(:) / MAX(ZUSTAR,0.01)
 !
 !* Specific humidity at 2m
 !
-PQ2M(:) = PQA(:) + 0.74 * ZQSTAR(:)/XKARMAN *(  LOG ( Z2M/PH)             &
-                                                - PAULSON_PSIH(Z2M_O_LMO)   &
-                                                + PAULSON_PSIH(ZH_O_LMO)    )  
+DGS%XQ2M(:) = PQA(:) + 0.74 * ZQSTAR(:)/XKARMAN * ZFACT(:)  
 !
 !* must be below saturation
 !
-ZQSAT2M(:) = QSAT(PT2M(:),ZP2M(:))
-PQ2M(:) = MIN (ZQSAT2M(:),PQ2M(:))
+ZQSAT2M(:) = QSAT(DGS%XT2M(:),ZP2M(:))
 !
-PHU2M(:) = PQ2M(:) / ZQSAT2M(:)
+DGS%XQ2M(:) = MIN (ZQSAT2M(:),DGS%XQ2M(:))
+!
+DGS%XHU2M(:) = DGS%XQ2M(:) / ZQSAT2M(:)
+!
 IF (LHOOK) CALL DR_HOOK('PARAM_CLS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

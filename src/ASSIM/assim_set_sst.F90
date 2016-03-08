@@ -99,8 +99,8 @@ IF ( LREAD_SST_FROM_FILE ) THEN
   !
   IF ( TRIM(CFILE_FORMAT_SST) == "ASCII" ) THEN
     !
-    ALLOCATE(ZSEA(U%NDIM_FULL))
-    ALLOCATE(ZWORK(U%NDIM_FULL,2))
+    ALLOCATE(ZSEA  (U%NDIM_FULL))
+    ALLOCATE(ZWORK (U%NDIM_FULL,2))
     ALLOCATE(ZWORK2(U%NSIZE_FULL,2))
     !
     IF (NPROC>1) CALL GATHER_AND_WRITE_MPI(U%XSEA,ZSEA)
@@ -157,19 +157,16 @@ IF ( LREAD_SST_FROM_FILE ) THEN
     !
     !  Open FA file
     !
-    CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                        YPROGRAM2,'EXTZON','SURF  ','READ ')
+    CALL INIT_IO_SURF_n(DTCO, U, YPROGRAM2,'EXTZON','SURF  ','READ ')
     !
     !  Read SST_SIC 
     !
     IF ( LECSST ) THEN
       ! SST field interpolated from ECMWF SST ANALYSIS to model domain
-      CALL READ_SURF(&
-                     YPROGRAM2,'SURFSEA.TEMPERA',PSST,IRESP)
+      CALL READ_SURF(YPROGRAM2,'SURFSEA.TEMPERA',PSST,IRESP)
     ELSE
       ! Surface temperature from boundary in SST_SIC
-      CALL READ_SURF(&
-                     YPROGRAM2,'SURFTEMPERATURE',PSST,IRESP)
+      CALL READ_SURF(YPROGRAM2,'SURFTEMPERATURE',PSST,IRESP)
     ENDIF
     !
     !  Close SST_SIC file

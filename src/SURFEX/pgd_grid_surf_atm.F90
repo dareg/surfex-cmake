@@ -1,5 +1,5 @@
 !     ###########################################################
-      SUBROUTINE PGD_GRID_SURF_ATM (UG, U, &
+      SUBROUTINE PGD_GRID_SURF_ATM (UG, KDIM_FULL, &
                                     HPROGRAM,HFILE,HFILETYPE,OGRID,HDIR)
 !     ###########################################################
 !!
@@ -38,7 +38,6 @@
 USE MODD_SURFEX_MPI, ONLY : NRANK
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,        ONLY : NVERSION, NBUGFIX
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
@@ -62,8 +61,8 @@ IMPLICIT NONE
 !
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
+INTEGER, INTENT(INOUT) :: KDIM_FULL
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
  CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
  CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
@@ -98,8 +97,7 @@ CPROGNAME=HPROGRAM
 !*    2.      Initialisation of output grid
 !             -----------------------------
 !
- CALL PGD_GRID(UG, U, &
-               HPROGRAM,HFILE,HFILETYPE,OGRID,UG%G%CGRID,UG%G%NGRID_PAR,UG%G%XGRID_PAR,YDIR)
+ CALL PGD_GRID(UG, KDIM_FULL, HPROGRAM,HFILE,HFILETYPE,OGRID,YDIR)
 ! 
 !
 !-------------------------------------------------------------------------------

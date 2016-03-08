@@ -22,16 +22,11 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX0_NC (DGU, &
-                                  HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFX0_NC ( HSELECT, HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEX0* - routine to read a real scalar
 !
-!
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LDEF
 !
@@ -48,8 +43,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-!
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 REAL,               INTENT(IN)  :: PFIELD   ! the real scalar to be read
@@ -83,7 +77,7 @@ IF (NID_NC /= 0) THEN
   !----------------------------
   IF (LDEF) THEN
     !
-    CALL DEF_VAR_NETCDF(DGU, &
+    CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT,  IVAR_ID, NF_DOUBLE)
     !
   ELSE
@@ -103,16 +97,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFX0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFN0_NC (DGU, &
-                                  HREC,KFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFN0_NC ( HSELECT, HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC,LDEF
 !
@@ -130,7 +121,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -166,7 +157,7 @@ IF (NID_NC /= 0) THEN
   ! 1. Find id of the variable
   !----------------------------
   IF (LDEF) THEN
-    CALL DEF_VAR_NETCDF(DGU, &
+    CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF_INT)
     ! 
     ! 2. Get variable
@@ -186,16 +177,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFN0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFC0_NC (DGU, &
-                                  HREC,HFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFC0_NC ( HSELECT, HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEC0* - routine to read a STRING
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LDEF
 !
@@ -213,7 +201,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
  CHARACTER(LEN=40),  INTENT(IN)  :: HFIELD   ! the integer scalar to be read
@@ -248,7 +236,7 @@ IF (NID_NC /= 0) THEN
   IF (LDEF) THEN
     IRET = NF_INQ_DIMID(NID_NC,'char_len',IDIMS(1))
     !
-    CALL DEF_VAR_NETCDF(DGU, &
+    CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF_CHAR,LEN_TRIM(HFIELD))
     !
   ELSE
@@ -272,16 +260,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFC0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL0_NC (DGU, &
-                                  HREC,OFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFL0_NC ( HSELECT, HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEL0* - routine to read a logical
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC,LDEF
 !
@@ -301,7 +286,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL,             INTENT(IN) :: OFIELD   ! array containing the data field
@@ -340,7 +325,7 @@ YATT(1) = HCOMMENT
 IF (NID_NC /= 0) THEN        
   !
   IF (LDEF) THEN
-    CALL DEF_VAR_NETCDF(DGU, &
+    CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF_CHAR)
     !
   ELSE
@@ -365,16 +350,13 @@ END SUBROUTINE WRITE_SURFL0_NC
 !
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_NC (DGU, &
-                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX1_NC ( HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 ! 
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -399,7 +381,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -503,7 +485,7 @@ ENDIF
 IF (YNAME.NE.'lon' .AND. YNAME.NE.'xx') THEN
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF_DOUBLE,1)
     ENDIF
   ELSE
@@ -513,7 +495,7 @@ IF (YNAME.NE.'lon' .AND. YNAME.NE.'xx') THEN
 ELSE
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF_DOUBLE)
     ENDIF 
   ELSE  
@@ -579,16 +561,13 @@ END SUBROUTINE WRITE_DATAX1_NC
 END SUBROUTINE WRITE_SURFX1_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_NC (DGU, &
-                                  HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX2_NC ( HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -612,7 +591,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),    INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:), INTENT(IN) :: PFIELD   ! array containing the data field
@@ -725,7 +704,7 @@ ENDIF
 IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF_DOUBLE)
     ENDIF
   ELSE
@@ -735,7 +714,7 @@ IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
 ELSE
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:3), YATT_TITLE, YATT, IVAR_ID, NF_DOUBLE)
     ENDIF
   ELSE
@@ -801,16 +780,13 @@ END SUBROUTINE WRITE_DATAX2_NC
 END SUBROUTINE WRITE_SURFX2_NC
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1_NC (DGU, &
-                                  HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFN1_NC ( HSELECT, HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -834,7 +810,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -935,7 +911,7 @@ ENDIF
 IF (YNAME.NE.'lon' .AND. YNAME.NE.'xx') THEN
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF_INT)
     ENDIF
   ELSE
@@ -945,7 +921,7 @@ IF (YNAME.NE.'lon' .AND. YNAME.NE.'xx') THEN
 ELSE
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF_INT)
     ENDIF  
   ELSE
@@ -1010,16 +986,13 @@ END SUBROUTINE WRITE_SURFN1_NC
 !
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN2_NC (DGU, &
-                                  HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFN2_NC ( HSELECT, HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to read an integer
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
@@ -1043,7 +1016,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),      INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:),  INTENT(IN)  :: KFIELD   ! the integer scalar to be read
@@ -1152,7 +1125,7 @@ ENDIF
 IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF_INT)
     ENDIF
   ELSE
@@ -1162,7 +1135,7 @@ IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
 ELSE
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:3), YATT_TITLE, YATT, IVAR_ID, NF_INT)
     ENDIF 
   ELSE
@@ -1225,16 +1198,13 @@ END SUBROUTINE WRITE_DATAN2_NC
 END SUBROUTINE WRITE_SURFN2_NC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFL1_NC (DGU, &
-                                  HREC,OFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFL1_NC ( HSELECT, HREC,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  *WRITEL1* - routine to read a logical array
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
@@ -1260,7 +1230,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=*),      INTENT(IN) :: HREC     ! name of the article to be read
 LOGICAL, DIMENSION(:), INTENT(IN) :: OFIELD   ! array containing the data field
@@ -1306,7 +1276,7 @@ IF (NID_NC /= 0) THEN
     IRET(2) = NF_INQ_DIMLEN(NID_NC,IDIMIDS(1),IDIMLEN(1))
     !
     IF (LDEF) THEN
-      CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF_CHAR, 1)
     !
     ELSE
@@ -1354,16 +1324,13 @@ END SUBROUTINE WRITE_SURFL1_NC
 !
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFT0_NC (DGU, &
-                                  HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFT0_NC ( HSELECT, HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
 !
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN, LDEF
 !
@@ -1381,7 +1348,7 @@ INCLUDE "netcdf.inc"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
@@ -1433,7 +1400,7 @@ DO JWRK=1,4
     !
     IF (JWRK==1) THEN
       IF (LDEF) THEN
-        CALL DEF_VAR_NETCDF(DGU, &
+        CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF_INT)
       ELSE
         JRET = NF_INQ_VARID(NID_NC,YRECFM,IVAR_ID)
@@ -1441,7 +1408,7 @@ DO JWRK=1,4
       ENDIF
     ELSEIF (JWRK==2) THEN
       IF (LDEF) THEN    
-        CALL DEF_VAR_NETCDF(DGU, &
+        CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF_INT)
       ELSE
         JRET = NF_INQ_VARID(NID_NC,YRECFM,IVAR_ID)        
@@ -1449,7 +1416,7 @@ DO JWRK=1,4
       ENDIF        
     ELSEIF (JWRK==3) THEN
       IF (LDEF) THEN    
-        CALL DEF_VAR_NETCDF(DGU, &
+        CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF_INT)
       ELSE
         JRET = NF_INQ_VARID(NID_NC,YRECFM,IVAR_ID)        
@@ -1457,7 +1424,7 @@ DO JWRK=1,4
       ENDIF        
     ELSEIF (JWRK==4) THEN
       IF (LDEF) THEN    
-        CALL DEF_VAR_NETCDF(DGU, &
+        CALL DEF_VAR_NETCDF( HSELECT, &
                         NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF_DOUBLE)
       ELSE
         JRET = NF_INQ_VARID(NID_NC,YRECFM,IVAR_ID)        
@@ -1478,13 +1445,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFT0_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT0_NC
 !
 !     #############################################################
-      SUBROUTINE    WRITE_SURFT1_NC (DGU, &
-                                     HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE    WRITE_SURFT1_NC ( HSELECT, HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN
 !
@@ -1497,7 +1461,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:), INTENT(IN)  :: KYEAR    ! year
@@ -1535,30 +1499,30 @@ DO JWRK=1,4
   !
   IF (JRET==0) THEN
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN1_NC(DGU, &
+      CALL WRITE_SURFN1_NC( HSELECT, &
                            YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN1_NC(DGU, &
+      CALL WRITE_SURFN1_NC( HSELECT, &
                            YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN1_NC(DGU, &
+      CALL WRITE_SURFN1_NC( HSELECT, &
                            YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX1_NC(DGU, &
+      CALL WRITE_SURFX1_NC( HSELECT, &
                            YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ENDIF
   ELSE
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN1_NC(DGU, &
+      CALL WRITE_SURFN1_NC( HSELECT, &
                            YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN1_NC(DGU, &
+      CALL WRITE_SURFN1_NC( HSELECT, &
                            YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN1_NC(DGU, &
+      CALL WRITE_SURFN1_NC( HSELECT, &
                            YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX1_NC(DGU, &
+      CALL WRITE_SURFX1_NC( HSELECT, &
                            YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
     ENDIF
   ENDIF    
@@ -1576,13 +1540,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFT1_NC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT1_NC
 !
 !     #############################################################
-      SUBROUTINE    WRITE_SURFT2_NC (DGU, &
-                                     HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+      SUBROUTINE    WRITE_SURFT2_NC ( HSELECT, HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITET0* - routine to read a NETCDF  date_time scalar
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : NID_NC, LMASK, NMASK, NMASK_IGN
 !
@@ -1595,7 +1556,7 @@ INCLUDE "netcdf.inc"
 !
 !*      0.1   Declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER, DIMENSION(:,:), INTENT(IN)  :: KYEAR    ! year
@@ -1633,30 +1594,30 @@ DO JWRK=1,4
   !
   IF (JRET==0) THEN
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN2_NC(DGU, &
+      CALL WRITE_SURFN2_NC( HSELECT, &
                            YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN2_NC(DGU, &
+      CALL WRITE_SURFN2_NC( HSELECT, &
                            YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN2_NC(DGU, &
+      CALL WRITE_SURFN2_NC( HSELECT, &
                            YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX2_NC(DGU, &
+      CALL WRITE_SURFX2_NC( HSELECT, &
                            YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ENDIF
   ELSE
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN2_NC(DGU, &
+      CALL WRITE_SURFN2_NC( HSELECT, &
                            YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN2_NC(DGU, &
+      CALL WRITE_SURFN2_NC( HSELECT, &
                            YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN2_NC(DGU, &
+      CALL WRITE_SURFN2_NC( HSELECT, &
                            YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX2_NC(DGU, &
+      CALL WRITE_SURFX2_NC( HSELECT, &
                            YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
     ENDIF
   ENDIF          

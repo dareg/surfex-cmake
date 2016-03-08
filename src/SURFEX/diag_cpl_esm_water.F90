@@ -1,8 +1,6 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_WATER (W, &
-                                      OCPL_SEAICE,PTSTEP,PZON10M,PMER10M,PSFU,PSFV,   &
-                                      PSWD,PSWU,PGFLUX,PSFTQ,PRAIN,PSNOW,PLW,PTICE,   &
-                                      PSFTH_ICE,PSFTQ_ICE,PDIR_SW,PSCA_SW             )  
+       SUBROUTINE DIAG_CPL_ESM_WATER (W, DGW, OCPL_SEAICE, PTSTEP, PSFTQ, PRAIN, PSNOW, PLW,   &
+                                      PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW    )  
 !     #####################################################################
 !
 !!****  *DIAG_CPL_ESM_WATER * - Computes diagnostics over sea for 
@@ -28,6 +26,7 @@
 !!------------------------------------------------------------------
 !
 !
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_CSTS,      ONLY : XSTEFAN, XLSTT
@@ -43,24 +42,17 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_t), INTENT(INOUT) :: DGW
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 LOGICAL,            INTENT(IN) :: OCPL_SEAICE ! sea-ice / ocean key
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
-REAL, DIMENSION(:), INTENT(IN) :: PZON10M   ! zonal wind
-REAL, DIMENSION(:), INTENT(IN) :: PMER10M   ! meridian wind
-REAL, DIMENSION(:), INTENT(IN) :: PSFU      ! zonal wind stress
-REAL, DIMENSION(:), INTENT(IN) :: PSFV      ! meridian wind stress
-REAL, DIMENSION(:), INTENT(IN) :: PSWD      ! total incoming short wave radiation
-REAL, DIMENSION(:), INTENT(IN) :: PSWU      ! total upward short wave radiation
-REAL, DIMENSION(:), INTENT(IN) :: PGFLUX    ! storage flux
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ     ! water flux
 REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall
 REAL, DIMENSION(:), INTENT(IN) :: PLW       ! longwave radiation (on horizontal surf.)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH_ICE ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ_ICE ! water flux (kg/m2/s)
-REAL, DIMENSION(:), INTENT(IN) :: PTICE     ! Ice Surface Temperature
 REAL, DIMENSION(:,:),INTENT(IN):: PDIR_SW   ! direct  solar radiation (on horizontal surf.)
 REAL, DIMENSION(:,:),INTENT(IN):: PSCA_SW   ! diffuse solar radiation (on horizontal surf.)
 !
@@ -83,21 +75,21 @@ IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',0,ZHOOK_HANDLE)
 !
 !* 10m wind speed (m)
 !
-W%XCPL_WATER_WIND(:) = W%XCPL_WATER_WIND(:) + PTSTEP * SQRT(PZON10M(:)**2+PMER10M(:)**2)
+W%XCPL_WATER_WIND(:) = W%XCPL_WATER_WIND(:) + PTSTEP * SQRT(DGW%XZON10M(:)**2+DGW%XMER10M(:)**2)
 ! 
 !* wind stress (Pa.s)
 !
-W%XCPL_WATER_FWSU(:) = W%XCPL_WATER_FWSU(:) + PTSTEP * PSFU(:)
-W%XCPL_WATER_FWSV(:) = W%XCPL_WATER_FWSV(:) + PTSTEP * PSFV(:)
-W%XCPL_WATER_FWSM(:) = W%XCPL_WATER_FWSM(:) + PTSTEP * SQRT(PSFU(:)**2+PSFV(:)**2)
+W%XCPL_WATER_FWSU(:) = W%XCPL_WATER_FWSU(:) + PTSTEP * DGW%XFMU(:)
+W%XCPL_WATER_FWSV(:) = W%XCPL_WATER_FWSV(:) + PTSTEP * DGW%XFMV(:)
+W%XCPL_WATER_FWSM(:) = W%XCPL_WATER_FWSM(:) + PTSTEP * SQRT(DGW%XFMU(:)**2+DGW%XFMV(:)**2)
 !
 !* Solar net heat flux (J/m2)
 !
-W%XCPL_WATER_SNET(:) = W%XCPL_WATER_SNET(:) + PTSTEP * (PSWD(:) - PSWU(:))
+W%XCPL_WATER_SNET(:) = W%XCPL_WATER_SNET(:) + PTSTEP * (DGW%XSWD(:) - DGW%XSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-W%XCPL_WATER_HEAT(:) = W%XCPL_WATER_HEAT(:) + PTSTEP * (PGFLUX(:) + PSWU(:) - PSWD(:)) 
+W%XCPL_WATER_HEAT(:) = W%XCPL_WATER_HEAT(:) + PTSTEP * (DGW%XGFLUX(:) + DGW%XSWU(:) - DGW%XSWD(:)) 
 !
 !* Evaporation (kg/m2)
 !
@@ -126,11 +118,11 @@ IF (OCPL_SEAICE) THEN
      ENDDO
   ENDDO
 !
-  W%XCPL_WATERICE_SNET(:) = W%XCPL_WATERICE_SNET(:) + PTSTEP * (PSWD(:) - ZSWU(:))
+  W%XCPL_WATERICE_SNET(:) = W%XCPL_WATERICE_SNET(:) + PTSTEP * (DGW%XSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-  ZTICE4(:)=PTICE(:)**4
+  ZTICE4(:)=W%XTICE(:)**4
 !
   W%XCPL_WATERICE_HEAT(:) = W%XCPL_WATERICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &
                                                              - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:)  )  

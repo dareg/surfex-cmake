@@ -1,5 +1,5 @@
 !     #########################################################################
-      SUBROUTINE LATLON_GRIDTYPE_LONLAT_ROT(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
+      SUBROUTINE LATLON_GRIDTYPE_LONLAT_ROT(G,KL,PDIR)
 !     #########################################################################
 !
 !!****  *LATLON_GRIDTYPE_LONLAT_ROT* - routine to compute the horizontal geographic fields
@@ -33,6 +33,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_GRID_n, ONLY : GRID_t
+!
 USE MODD_CSTS,     ONLY : XPI, XRADIUS
 !
 USE MODE_GRIDTYPE_LONLAT_ROT
@@ -49,12 +51,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
+TYPE(GRID_t), INTENT(INOUT) :: G
+!
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
-REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
-REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT       ! latitude  (degrees)
-REAL, DIMENSION(KL),        INTENT(OUT) :: PLON       ! longitude (degrees)
-REAL, DIMENSION(KL),        INTENT(OUT) :: PMESH_SIZE ! mesh size (m2)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
 !
 !*       0.2   Declarations of local variables
@@ -80,20 +79,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_LONLAT_ROT',0,ZHOOK_HANDLE)
 !
- CALL GET_GRIDTYPE_LONLAT_ROT(PGRID_PAR,                                 &
+ CALL GET_GRIDTYPE_LONLAT_ROT(G%XGRID_PAR,                             &
                                ZWEST,ZSOUTH,ZDLON,ZDLAT,ZPOLON,ZPOLAT,  &
-                               ILON,ILAT,PLON=PLON,PLAT=PLAT            )  
+                               ILON,ILAT,PLON=G%XLON,PLAT=G%XLAT            )  
 !
 !-----------------------------------------------------------------------------
 !
 !*       2.    Compute grid size
 !              -----------------
 !
- CALL REGROT_LONLAT_ROT(PLON,PLAT,ZLON,ZLAT,    &
+ CALL REGROT_LONLAT_ROT(G%XLON,G%XLAT,ZLON,ZLAT,    &
                              KL,1,KL,1,        &
                              ZPOLON,ZPOLAT,1   )  
 !
-PMESH_SIZE(:) = ( XPI * XRADIUS /180. )**2 * ZDLAT * ZDLON * COS(ZLAT(:)*XPI/180.)
+G%XMESH_SIZE(:) = ( XPI * XRADIUS /180. )**2 * ZDLAT * ZDLON * COS(ZLAT(:)*XPI/180.)
 !
 !-----------------------------------------------------------------------------
 !

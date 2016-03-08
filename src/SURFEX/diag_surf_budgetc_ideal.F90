@@ -1,7 +1,7 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGETC_IDEAL(DGL, DGLC, PTSTEP, PRN, PH, PLE, PLEI, PGFLUX,  &
-                                            PSWD, PSWU, PLWD, PLWU, PFMU, PFMV,&  
-                                            PEVAP, PSUBL                       )  
+       SUBROUTINE DIAG_SURF_BUDGETC_IDEAL(DGL, DGLC, PTSTEP, PRN, PH,          &
+                                          PLE, PLEI, PGFLUX, PSWD, PSWU, PLWD, &
+                                          PLWU, PFMU, PFMV, PEVAP, PSUBL       )  
 !     #########################################################################
 !
 !!****  *DIAG_SURF_BUDGETC_IDEAL * - Computes cumulated diagnostics in IDEAL case

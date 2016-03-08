@@ -1,9 +1,7 @@
 !     #########
     SUBROUTINE Z0EFF (HSNOW_SCHEME, &
                       HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
-                      PPALPHAN,PZ0LITTER, PWSNOW,                               &
-                      PZ0EFFIP,PZ0EFFIM,PZ0EFFJP,PZ0EFFJM,PFF,PZ0_FLOOD,        &
-                      PAOSIP,PAOSIM,PAOSJP,PAOSJM,PHO2IP,PHO2IM,PHO2JP,PHO2JM,  &
+                      PPALPHAN,PZ0LITTER, PWSNOW, MSS,PFF,PZ0_FLOOD,        &
                       PZ0_O_Z0H, PZ0_WITH_SNOW, PZ0H_WITH_SNOW,PZ0EFF,          &
                       PZ0G_WITHOUT_SNOW,                                        &
                       PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                           &
@@ -62,6 +60,8 @@
 !               ------------
 !
 !
+USE MODD_SSO_n, ONLY : SSO_t
+!
 USE MODD_CSTS,     ONLY : XPI, XG
 USE MODD_SNOW_PAR, ONLY : XZ0SN, XWCRN, XZ0HSN
 !
@@ -90,18 +90,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZ0            ! vegetation roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0REL         ! 1d orographic roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PPSN           ! fraction of snow
 REAL, DIMENSION(:), INTENT(IN)  :: PPALPHAN       ! snow/canopy transition coefficient
-REAL, DIMENSION(:), INTENT(IN)  :: PZ0EFFIP       ! z0eff for increasing x
-REAL, DIMENSION(:), INTENT(IN)  :: PZ0EFFIM       ! z0eff for decreasing x
-REAL, DIMENSION(:), INTENT(IN)  :: PZ0EFFJP       ! z0eff for increasing y
-REAL, DIMENSION(:), INTENT(IN)  :: PZ0EFFJM       ! z0eff for decreasing y
-REAL, DIMENSION(:), INTENT(IN)  :: PAOSIP         ! A/S for increasing x
-REAL, DIMENSION(:), INTENT(IN)  :: PAOSIM         ! A/S for decreasing x
-REAL, DIMENSION(:), INTENT(IN)  :: PAOSJP         ! A/S for increasing y
-REAL, DIMENSION(:), INTENT(IN)  :: PAOSJM         ! A/S for decreasing y
-REAL, DIMENSION(:), INTENT(IN)  :: PHO2IP         ! h/2 for increasing x
-REAL, DIMENSION(:), INTENT(IN)  :: PHO2IM         ! h/2 for decreasing x
-REAL, DIMENSION(:), INTENT(IN)  :: PHO2JP         ! h/2 for increasing y
-REAL, DIMENSION(:), INTENT(IN)  :: PHO2JM         ! h/2 for decreasing y
+TYPE(SSO_t), INTENT(INOUT) :: MSS
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0_O_Z0H      ! ratio between heat and momentum z0
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PFF            ! fraction of flood
@@ -265,33 +254,41 @@ ENDIF
 !                                     Snow and Flood effects are yet taken
 !                                     into account through ZZ0EFF
 !
+!print*,HROUGH
 IF (HROUGH=='Z04D') THEN
 !
 ! For multi-energy balance (MEB): the HROUGH=='Z04D' option is not considered yet!
   !
-  ZZ0EFFIP(:) = PZ0EFFIP(:)
-  ZZ0EFFIM(:) = PZ0EFFIM(:)
-  ZZ0EFFJP(:) = PZ0EFFJP(:)
-  ZZ0EFFJM(:) = PZ0EFFJM(:)
+  ZZ0EFFIP(:) = MSS%XZ0EFFIP(:,1)
+  ZZ0EFFIM(:) = MSS%XZ0EFFIM(:,1)
+  ZZ0EFFJP(:) = MSS%XZ0EFFJP(:,1)
+  ZZ0EFFJM(:) = MSS%XZ0EFFJM(:,1)
   !
-  CALL SUBSCALE_Z0EFF(PAOSIP,PAOSIM,PAOSJP,PAOSJM,               &
-                        PHO2IP,PHO2IM,PHO2JP,PHO2JM,PZ0_WITH_SNOW, &
-                        ZZ0EFFIP,ZZ0EFFIM,ZZ0EFFJP,ZZ0EFFJM,       &
-                        OMASK=(PPSN>0..OR.PFF(:)>0.)               )  
+  CALL SUBSCALE_Z0EFF(MSS,SPREAD(PZ0_WITH_SNOW,2,1),.FALSE.,OMASK=(PPSN>0..OR.PFF(:)>0.)   )  
   !
+  !print*,'ALFA ',ZALFA(1)
+  !print*,'Z0EFFIP ',MSS%XZ0EFFIP(1,1)
+  !print*,'Z0EFFJP ',MSS%XZ0EFFJP(1,1)
+  !print*,'Z0EFFJM ',MSS%XZ0EFFJM(1,1)
+  !print*,'Z0EFFIM ',MSS%XZ0EFFIM(1,1)
   WHERE(ZALFA(:)>=0. .AND. ZALFA(:)<XPI/2.)
-    PZ0EFF(:)=ZZ0EFFIP(:)*SIN(ZALFA(:))**2 + ZZ0EFFJP(:)*COS(ZALFA(:))**2
+    PZ0EFF(:)=MSS%XZ0EFFIP(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJP(:,1)*COS(ZALFA(:))**2
   END WHERE
   WHERE(ZALFA(:)>=XPI/2. .AND. ZALFA(:)<=XPI)
-    PZ0EFF(:)=ZZ0EFFIP(:)*SIN(ZALFA(:))**2 + ZZ0EFFJM(:)*COS(ZALFA(:))**2
+    PZ0EFF(:)=MSS%XZ0EFFIP(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJM(:,1)*COS(ZALFA(:))**2
   END WHERE
   WHERE (ZALFA(:)>=-XPI/2 .AND. ZALFA(:)<0.)
-    PZ0EFF(:)=ZZ0EFFIM(:)*SIN(ZALFA(:))**2 + ZZ0EFFJP(:)*COS(ZALFA(:))**2
+    PZ0EFF(:)=MSS%XZ0EFFIM(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJP(:,1)*COS(ZALFA(:))**2
   END WHERE
   WHERE (ZALFA(:)>=-XPI .AND. ZALFA(:)<-XPI/2.)
-    PZ0EFF(:)=ZZ0EFFIM(:)*SIN(ZALFA(:))**2 + ZZ0EFFJM(:)*COS(ZALFA(:))**2
+    PZ0EFF(:)=MSS%XZ0EFFIM(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJM(:,1)*COS(ZALFA(:))**2
   END WHERE
-!
+  !
+  MSS%XZ0EFFIP(:,1) = ZZ0EFFIP(:)
+  MSS%XZ0EFFIM(:,1) = ZZ0EFFIM(:)
+  MSS%XZ0EFFJP(:,1) = ZZ0EFFJP(:)
+  MSS%XZ0EFFJM(:,1) = ZZ0EFFJM(:)
+  !
 ELSE IF (HROUGH=='Z01D') THEN
   PZ0EFF(:) = PZ0_WITH_SNOW(:) + PZ0REL(:)
   IF(OMEB)THEN
@@ -314,6 +311,7 @@ ELSE
     PZ0EFF_MEBN(:) = PZ0_MEBN(:)
   ENDIF
 END IF
+!print*,'z0eff ',PZ0EFF(1)
 IF (LHOOK) CALL DR_HOOK('Z0EFF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

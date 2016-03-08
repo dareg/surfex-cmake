@@ -1,5 +1,4 @@
-SUBROUTINE ASSIM_NATURE_ISBA_OI (I, &
-                                 HPROGRAM, KI,                     &
+SUBROUTINE ASSIM_NATURE_ISBA_OI (I, HPROGRAM, KI,                 &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,   PUCLS, PVCLS,   &

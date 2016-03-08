@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE INIT_WRITE_TXT (DGU, &
-                                 HREC,OWFL)
+      SUBROUTINE INIT_WRITE_TXT (HSELECT, HREC,OWFL)
 !     ######################
 !
 !!****  *INIT_WRITE_TXT_n* Initialize array name to be written and associated
@@ -29,9 +28,6 @@
 !             ------------
 !
 !
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
-!
 USE MODD_IO_SURF_TXT,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_TXT,  ONLY:NUNIT0, NVAR, CVAR, CVARN, JPVAR, NIND
 !
@@ -43,8 +39,8 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 LOGICAL,             INTENT(INOUT)  :: OWFL
@@ -81,7 +77,7 @@ ELSE
   IF (CVAR(1).NE.'                ') IVAR=MAXVAL(NVAR(:))
 !
 !
-  IF (.NOT.DGU%LSELECT) THEN
+  IF (SIZE(HSELECT)==0) THEN
 !
     IF ( (HREC(5:7)/='_OC'                          ) .AND.  & 
           (HREC(4:6)/='_OC'                          ) .AND.  &           
@@ -156,13 +152,12 @@ ELSE
   ELSE
 !        
     IFIELD=0
-    DO JFIELD=1,SIZE(DGU%CSELECT)
-      IF (DGU%CSELECT(JFIELD)== '            ') EXIT
+    DO JFIELD=1,SIZE(HSELECT)
+      IF (HSELECT(JFIELD)== '            ') EXIT
       IFIELD=IFIELD+1
     ENDDO
   
-    CALL TEST_RECORD_LEN(DGU, &
-                         "ASCII ",HREC,LMATCH)
+    CALL TEST_RECORD_LEN("ASCII ",HREC,HSELECT,LMATCH)
 
     IF (.NOT. LMATCH ) THEN
 

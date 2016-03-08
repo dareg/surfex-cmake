@@ -1,6 +1,5 @@
 !     ##########
-      SUBROUTINE EXP_DECAY_SOIL_FR (HISBA, PF, PC1SAT, PC2REF, PD_G, PD_ICE, &
-                                      PC4REF, PC3, PCONDSAT, PKSAT_ICE       )  
+      SUBROUTINE EXP_DECAY_SOIL_FR (HISBA, PF, IP, MX    )  
 !     ##########################################################################
 !
 !!****  *EXP_DECAY_SOIL_FR*  
@@ -41,6 +40,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
+!
 USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_SGH_PAR, ONLY : X2                                
 USE MODD_CSTS,    ONLY : XDAY
@@ -60,37 +62,15 @@ IMPLICIT NONE
 !                                            ! '3-L'  = root zone/baseflow layer
 !                                            ! 'DIF'  = N-layer diffusion: Richard's Eq.
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PF
+REAL, DIMENSION(:,:), INTENT(IN)    :: PF
 !                                    PF = exponential decay factor (1/m)
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PC2REF,PC1SAT
-!                                    PC1SAT  = C1 at saturation
-!                                    PC2REF  = reference value of C2
-!
-REAL, DIMENSION(:,:),INTENT(INOUT):: PCONDSAT
-!                                    PCONDSAT  = hydraulic conductivity at saturation (m s-1)
-!
-REAL, DIMENSION(:,:), INTENT(IN)  :: PD_G 
-!                                    PD_G   = Depth of bottom of Soil layers (m)
-!
-REAL, DIMENSION(:), INTENT(IN)    :: PD_ICE 
-!                                    PD_ICE = depth of the soil column for
-!                                             fraction of frozen soil calculation (m)
-
-REAL, DIMENSION(:,:),INTENT(INOUT):: PC3
-!                                    PC3 = C3 coef with exponential decay of hydraulic soil profil 
-!
-REAL, DIMENSION(:), INTENT(INOUT) :: PC4REF
-!                                    PC4REF = fiiting soil paramater for vertical diffusion (C4)
-!                                             with exponential decay of hydraulic soil profil 
-!
-REAL, DIMENSION(:), INTENT(OUT)   :: PKSAT_ICE
-!                                    PKSAT_ICE = hydraulic conductivity at saturation (m s-1)
-!                                                on frozen soil depth (Horton calculation)
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: MX
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PF))         :: ZD_G_TOT, ZC_DEPTH, ZKSAT_NOEXP, ZC_DEPTH_RATIO
+REAL, DIMENSION(SIZE(PF,1))         :: ZD_G_TOT, ZC_DEPTH, ZKSAT_NOEXP, ZC_DEPTH_RATIO
 !                                    ZD_G_TOT = depth of the soil column (m)
 !                                    ZC_DEPTH = assumed as the depth where the vertical 
 !                                               satured hydraulic conductivities reach
@@ -98,75 +78,84 @@ REAL, DIMENSION(SIZE(PF))         :: ZD_G_TOT, ZC_DEPTH, ZKSAT_NOEXP, ZC_DEPTH_R
 !                                               Hornberger. (m)
 !                                               For ISBA-FR, we take the root depth.
 !
+INTEGER :: JP
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('EXP_DECAY_SOIL_FR',0,ZHOOK_HANDLE)
 !
-ZD_G_TOT(:) = PD_G(:,2)
-IF(HISBA=='3-L')ZD_G_TOT(:) = PD_G(:,3)
-!
-ZKSAT_NOEXP(:) = PCONDSAT(:,2)
-!
-ZC_DEPTH_RATIO(:) = 1.
-!
+DO JP=1,SIZE(MX%XDG,3)
+  !
+  IF (IP%NSIZE_NATURE_P(JP) == 0 ) CYCLE
+  !
+  ZD_G_TOT(:) = MX%XDG(:,2,JP)
+  IF(HISBA=='3-L')ZD_G_TOT(:) = MX%XDG(:,3,JP)
+  !
+  ZKSAT_NOEXP(:) = IP%XCONDSAT(:,2,JP)
+  !
+  ZC_DEPTH_RATIO(:) = 1.
+  !
 #ifdef TOPD
-IF (ALLOCATED(XC_DEPTH_RATIO)) ZC_DEPTH_RATIO(:) = XC_DEPTH_RATIO(:)
+  IF (ALLOCATED(XC_DEPTH_RATIO)) ZC_DEPTH_RATIO(:) = XC_DEPTH_RATIO(:)
 #endif
-!
-WHERE(ZD_G_TOT(:)/=XUNDEF)
-!
-!compacted depth
-!
-ZC_DEPTH(:) = PD_G(:,2)*ZC_DEPTH_RATIO(:)
-!ZC_DEPTH(:) = PD_G(:,2)
-!
-!surface hydraulic conductivity at saturation
-!
-PCONDSAT(:,1) = PCONDSAT(:,1)*EXP(PF(:)*ZC_DEPTH(:))
-!
-!mean hydraulic conductivity at saturation over the root zone
-!   
-PCONDSAT(:,2) = ZKSAT_NOEXP(:)*( EXP(PF(:)*ZC_DEPTH)-EXP(PF(:)*(ZC_DEPTH(:)-PD_G(:,2))) )   &
-                  /(PF(:)*PD_G(:,2))
-!   
-!mean hydraulic conductivity at saturation over the first soil centimeters
-!   
-PKSAT_ICE(:) = ZKSAT_NOEXP(:)*( EXP(PF(:)*ZC_DEPTH)-EXP(PF(:)*(ZC_DEPTH(:)-PD_ICE(:))) )   &
-                 /(PF(:)*PD_ICE(:))  
-!
-!decay factor for C1 coef
-!   
-PC1SAT(:) = PC1SAT(:)*SQRT( EXP(-PF(:)*ZC_DEPTH(:)) )
-!
-!decay factor for C2 coef 
-!
-PC2REF(:)=PC2REF(:)+( PCONDSAT(:,2)-ZKSAT_NOEXP(:) ) * XDAY/PD_G(:,2) 
-!
-!C3 coef with exponential decay in root soil layer 
-!
-PC3(:,1)=PC3(:,1)*( EXP(PF(:)*ZC_DEPTH(:))-EXP(PF(:)*(ZC_DEPTH(:)-PD_G(:,2))) ) / (PF(:)*PD_G(:,2))
-!
-ENDWHERE
-!
-IF(HISBA=='3-L')THEN
-! 
-   WHERE(PD_G(:,2)< ZD_G_TOT(:).AND.PD_G(:,2)/=XUNDEF)
-!           
-!  C3 coef with exponential decay in deep soil layer 
-!
-   PC3(:,2)=PC3(:,2)*( EXP(PF(:)*(ZC_DEPTH(:)-PD_G(:,2)))-EXP(PF(:)*(ZC_DEPTH(:)-ZD_G_TOT(:))) )      &
-                       / (PF(:)*(ZD_G_TOT(:)-PD_G(:,2)))  
-! 
-!  decay factor for C4 coef
-!      
-   PC4REF(:)=PC4REF(:)*( EXP(PF(:)*(ZC_DEPTH(:)-PD_G(:,2)/X2))-EXP(PF(:)*(ZC_DEPTH(:)&
-                         -((PD_G(:,2)+ZD_G_TOT(:))/2.))) ) * X2/(PF(:)*ZD_G_TOT(:))        
-!
-   ENDWHERE
-!
-ENDIF
+  !
+  WHERE(ZD_G_TOT(:)/=XUNDEF)
+    !
+    !compacted depth
+    !
+    ZC_DEPTH(:) = MX%XDG(:,2,JP)*ZC_DEPTH_RATIO(:)
+    !ZC_DEPTH(:) = MX%XDG(:,2)
+    !
+    !surface hydraulic conductivity at saturation
+    !
+    IP%XCONDSAT(:,1,JP) = IP%XCONDSAT(:,1,JP)*EXP(PF(:,JP)*ZC_DEPTH(:))
+    !
+    !mean hydraulic conductivity at saturation over the root zone
+    !   
+    IP%XCONDSAT(:,2,JP) = ZKSAT_NOEXP(:)*( EXP(PF(:,JP)*ZC_DEPTH)-EXP(PF(:,JP)*(ZC_DEPTH(:)-MX%XDG(:,2,JP))) )   &
+                      /(PF(:,JP)*MX%XDG(:,2,JP))
+    !   
+    !mean hydraulic conductivity at saturation over the first soil centimeters
+    !   
+    IP%XKSAT_ICE(:,JP) = ZKSAT_NOEXP(:)*( EXP(PF(:,JP)*ZC_DEPTH)-EXP(PF(:,JP)*(ZC_DEPTH(:)-MX%XD_ICE(:,JP))) )   &
+                     /(PF(:,JP)*MX%XD_ICE(:,JP))  
+    !
+    !decay factor for C1 coef
+    !   
+    IP%XC1SAT(:,JP) = IP%XC1SAT(:,JP)*SQRT( EXP(-PF(:,JP)*ZC_DEPTH(:)) )
+    !
+    !decay factor for C2 coef 
+    !
+    IP%XC2REF(:,JP)=IP%XC2REF(:,JP)+( IP%XCONDSAT(:,2,JP)-ZKSAT_NOEXP(:) ) * XDAY/MX%XDG(:,2,JP) 
+    !
+    !C3 coef with exponential decay in root soil layer 
+    !
+    IP%XC3(:,1,JP)=IP%XC3(:,1,JP)*( EXP(PF(:,JP)*ZC_DEPTH(:))-EXP(PF(:,JP)*(ZC_DEPTH(:)-MX%XDG(:,2,JP))) ) / &
+            (PF(:,JP)*MX%XDG(:,2,JP))
+    !
+  ENDWHERE
+  !
+  IF(HISBA=='3-L')THEN
+    ! 
+    WHERE(MX%XDG(:,2,JP)< ZD_G_TOT(:).AND.MX%XDG(:,2,JP)/=XUNDEF)
+      !           
+      !  C3 coef with exponential decay in deep soil layer 
+      !
+      IP%XC3(:,2,JP)=IP%XC3(:,2,JP)*( EXP(PF(:,JP)*(ZC_DEPTH(:)-MX%XDG(:,2,JP)))-EXP(PF(:,JP)*(ZC_DEPTH(:)-ZD_G_TOT(:))) )      &
+                       / (PF(:,JP)*(ZD_G_TOT(:)-MX%XDG(:,2,JP)))  
+      ! 
+      !  decay factor for C4 coef
+      !      
+      IP%XC4REF(:,JP)=IP%XC4REF(:,JP)*( EXP(PF(:,JP)*(ZC_DEPTH(:)-MX%XDG(:,2,JP)/X2))-EXP(PF(:,JP)*(ZC_DEPTH(:)&
+                           -((MX%XDG(:,2,JP)+ZD_G_TOT(:))/2.))) ) * X2/(PF(:,JP)*ZD_G_TOT(:))        
+      !
+    ENDWHERE
+    !
+  ENDIF
+  !
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('EXP_DECAY_SOIL_FR',1,ZHOOK_HANDLE)
 !

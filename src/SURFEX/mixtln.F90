@@ -1,6 +1,5 @@
 !     #########
-    SUBROUTINE MIXTL_n (O, OR, SG, &
-                        PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
+    SUBROUTINE MIXTL_n (O, OR, PLAT, PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
 !     #######################################################################
 !
 !!****  *MIXTLN (1D MODEL)*  
@@ -50,7 +49,6 @@
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_GRID_n, ONLY : GRID_t
 !
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
@@ -72,7 +70,8 @@ IMPLICIT NONE
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(GRID_t), INTENT(INOUT) :: SG
+!
+REAL, DIMENSION(:), INTENT(IN) :: PLAT
 !
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSOL   ! solar flux (W/m2)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFNSOL  ! non solar flux (W/m2)
@@ -230,7 +229,7 @@ DO JPT=1,SIZE(PFSOL)
   IKHML=1
 !
   !simplified variables inside this loop
-  ZLAT    = SG%XLAT   (JPT)
+  ZLAT    = PLAT   (JPT)
   ZFSOL   = PFSOL  (JPT)
   ZFNSOL  = PFNSOL (JPT)
   ZSFTEAU = PSFTEAU(JPT)

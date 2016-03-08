@@ -1,8 +1,6 @@
 !     #########
-       SUBROUTINE CLS_TQ( PTA, PQA, PPA, PPS, PHT,    &
-                            PCD, PCH, PRI,              &
-                            PTS, PHU, PZ0H, PH,         &
-                            PTNM, PQNM, PHUNM           )  
+       SUBROUTINE CLS_TQ( PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
+                          PTS, PHU, PZ0H, PH, PTNM, PQNM, PHUNM  )  
 !     #####################################################################
 !
 !!****  *PARAMCLS*  

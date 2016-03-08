@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_SEAFLUX_CONF_n (CHS, DGO, DGMSI, O, S, &
-                                           HPROGRAM)
+      SUBROUTINE WRITESURF_SEAFLUX_CONF_n (CHS, DGO, DGMSI, O, S, HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_SEAFLUX_CONF* - routine to read the configuration for SEAFLUX

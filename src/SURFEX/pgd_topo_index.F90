@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TOPO_INDEX (DGU, DTCO, UG, U, USS, I, &
+      SUBROUTINE PGD_TOPO_INDEX (DTCO, UG, U, USS, IP, OCTI, &
                                  HPROGRAM,KLU,HCTI,HCTIFILETYPE,OIMP_CTI)
 !     ##################################################################
 !
@@ -38,12 +38,11 @@
 !            -----------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
@@ -94,12 +93,14 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(SSO_t), INTENT(INOUT) :: USS
+!
+TYPE(ISBA_PGD_t), INTENT(INOUT) :: IP
+!
+LOGICAL, INTENT(INOUT) :: OCTI
 !
 CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM     ! program calling
 INTEGER,              INTENT(IN)  :: KLU          ! number of nature points
@@ -135,17 +136,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX',0,ZHOOK_HANDLE)
 IF(LEN_TRIM(HCTI)==0)THEN
 !
-  ALLOCATE(I%P%XTI_MIN (0))
-  ALLOCATE(I%P%XTI_MAX (0))
-  ALLOCATE(I%P%XTI_MEAN(0))
-  ALLOCATE(I%P%XTI_STD (0))
-  ALLOCATE(I%P%XTI_SKEW(0))
+  ALLOCATE(IP%XTI_MIN (0))
+  ALLOCATE(IP%XTI_MAX (0))
+  ALLOCATE(IP%XTI_MEAN(0))
+  ALLOCATE(IP%XTI_STD (0))
+  ALLOCATE(IP%XTI_SKEW(0))
 !        
 !-------------------------------------------------------------------------------
 ELSE
 !-------------------------------------------------------------------------------
 !
-  I%O%LCTI = .TRUE.
+  OCTI = .TRUE.
 !
 !*    2.      Find LUOUT
 !             ----------
@@ -159,25 +160,24 @@ ELSE
 !*    3.      Allocations of statistics arrays
 !             --------------------------------
 !
-  ALLOCATE(I%P%XTI_MIN (KLU))
-  ALLOCATE(I%P%XTI_MAX (KLU))
-  ALLOCATE(I%P%XTI_MEAN(KLU))
-  ALLOCATE(I%P%XTI_STD (KLU))
-  ALLOCATE(I%P%XTI_SKEW(KLU))
+  ALLOCATE(IP%XTI_MIN (KLU))
+  ALLOCATE(IP%XTI_MAX (KLU))
+  ALLOCATE(IP%XTI_MEAN(KLU))
+  ALLOCATE(IP%XTI_STD (KLU))
+  ALLOCATE(IP%XTI_SKEW(KLU))
 !
-  I%P%XTI_MIN (:) = XUNDEF
-  I%P%XTI_MAX (:) = XUNDEF
-  I%P%XTI_MEAN(:) = XUNDEF
-  I%P%XTI_STD (:) = XUNDEF
-  I%P%XTI_SKEW(:) = XUNDEF
+  IP%XTI_MIN (:) = XUNDEF
+  IP%XTI_MAX (:) = XUNDEF
+  IP%XTI_MEAN(:) = XUNDEF
+  IP%XTI_STD (:) = XUNDEF
+  IP%XTI_SKEW(:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Allocations of work arrays
 !             --------------------------
 !
-  CALL GET_TYPE_DIM_n(DTCO, U, &
-                      'NATURE',I_DIM)
+  CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',I_DIM)
   IF (I_DIM/=KLU) THEN
      WRITE(ILUOUT,*)'PGD_TOPO_INDEX: Wrong dimension of MASK: ',I_DIM,KLU
      CALL ABOR1_SFX('PGD_TOPO_INDEX: WRONG DIMENSION OF MASK')
@@ -224,20 +224,15 @@ ELSE
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(HCTI)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+CALL INIT_IO_SURF_n(DTCO, U, &
                            YFILETYPE,'FULL  ','SURF  ','READ ')
      ENDIF     
 !   
-     CALL READ_SURF(&
-                    YFILETYPE,'TI_MIN' ,XMIN_WORK ,IRET) 
-     CALL READ_SURF(&
-                    YFILETYPE,'TI_MAX' ,XMAX_WORK ,IRET)
-     CALL READ_SURF(&
-                    YFILETYPE,'TI_MEAN',XMEAN_WORK,IRET)
-     CALL READ_SURF(&
-                    YFILETYPE,'TI_STD' ,XSTD_WORK ,IRET) 
-     CALL READ_SURF(&
-                    YFILETYPE,'TI_SKEW',XSKEW_WORK,IRET) 
+     CALL READ_SURF(YFILETYPE,'TI_MIN' ,XMIN_WORK ,IRET) 
+     CALL READ_SURF(YFILETYPE,'TI_MAX' ,XMAX_WORK ,IRET)
+     CALL READ_SURF(YFILETYPE,'TI_MEAN',XMEAN_WORK,IRET)
+     CALL READ_SURF(YFILETYPE,'TI_STD' ,XSTD_WORK ,IRET) 
+     CALL READ_SURF(YFILETYPE,'TI_SKEW',XSKEW_WORK,IRET) 
 !
      CALL END_IO_SURF_n(YFILETYPE)
 !
@@ -387,7 +382,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
     WRITE(ILUOUT,*) '*********************************************'
 !
     ALLOCATE(ZLAT(NL))
-    CALL GET_GRID_COORD(UG, U, &
+    CALL GET_GRID_COORD(UG%G%CGRID, UG%G%NGRID_PAR, UG%G%XGRID_PAR, U%NSIZE_FULL, &
                         ILUOUT,PY=ZLAT)
 !
     WHERE (U%XNATURE(:)==0..AND.NSIZE(:)==0) NSIZE(:) = -1
@@ -425,11 +420,11 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !*    11.     Asign parameters
 !             ----------------
 !
-  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,I%P%XTI_MIN)
-  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,I%P%XTI_MAX)
-  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,I%P%XTI_MEAN)
-  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,I%P%XTI_STD)
-  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,I%P%XTI_SKEW)
+  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,IP%XTI_MIN)
+  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,IP%XTI_MAX)
+  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,IP%XTI_MEAN)
+  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,IP%XTI_STD)
+  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,IP%XTI_SKEW)
 !  
 !-------------------------------------------------------------------------------
 !

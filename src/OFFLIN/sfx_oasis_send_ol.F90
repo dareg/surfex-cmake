@@ -190,7 +190,7 @@ IF(GSEND_LAND)THEN
 ! * Get river output fields
 !
   CALL GET_SFX_LAND(I, U, &
-                    LCPL_GW,LCPL_FLOOD,LCPL_CALVING,                           &
+                    LCPL_GW,LCPL_FLOOD,LCPL_CALVING,  &
                     ZLAND_RUNOFF (:),ZLAND_DRAIN   (:),&
                     ZLAND_CALVING(:),ZLAND_RECHARGE(:),&
                     ZLAND_WATFLD (:))

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_NATURE_n (I, DGI, DGMI, &
+      SUBROUTINE GET_VAR_NATURE_n (I, DIO, DGI, DGMI, &
                                    HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW,PBARE)
 !     ######################################################################
 !
@@ -39,7 +39,7 @@
 !
 !
 USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODI_GET_LUOUT
@@ -57,6 +57,7 @@ IMPLICIT NONE
 !
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DIO
 TYPE(DIAG_t), INTENT(INOUT) :: DGI
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 !
@@ -83,7 +84,7 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_NATURE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGI%LSURF_VARS) THEN 
+IF (DIO%LSURF_VARS) THEN 
         PQS      = DGI%XQS      
    ELSE 
         PQS      = XUNDEF      
@@ -99,7 +100,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         PTWSNOW  = XUNDEF
 ENDIF           
 !
-IF (DGI%LCOEF) THEN
+IF (DIO%LCOEF) THEN
    PZ0EFF   = DGI%XZ0EFF
    PZ0      = DGI%XZ0      
    PZ0H     = DGI%XZ0H

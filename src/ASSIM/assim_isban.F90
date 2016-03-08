@@ -125,8 +125,7 @@ IF ( CASSIM_ISBA /= 'OI   ' ) THEN
   ! Snow analysis/update
   IF (LAESNM) THEN
     IF (NRANK==NPIO) WRITE(*,*) 'UPDATE SNOW FROM ANALYSED VALUES'
-    CALL ASSIM_ISBA_UPDATE_SNOW(I, &
-                                HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.TRUE.,HTEST)
+    CALL ASSIM_ISBA_UPDATE_SNOW(I,HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.TRUE.,HTEST)
   ELSE
     IF (NRANK==NPIO) WRITE(*,*) 'SNOW IS NOT UPDATED FROM ANALYSED VALUES'
   ENDIF
@@ -148,15 +147,13 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
   ! Snow analysis/update. Store the original field in the surfex file
   IF (LAESNM) THEN
     IF (NRANK==NPIO) WRITE(*,*) 'UPDATE SNOW FROM ANALYSED VALUES'
-    CALL ASSIM_ISBA_UPDATE_SNOW(I, &
-                                HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.FALSE.,HTEST)
+    CALL ASSIM_ISBA_UPDATE_SNOW(I,HPROGRAM,KI,ZSWE,ZSWE_ORIG,.TRUE.,.FALSE.,HTEST)
   ELSE
     IF (NRANK==NPIO) WRITE(*,*) 'SNOW IS NOT UPDATED FROM ANALYSED VALUES'
   ENDIF
   !
   ! Run OI for soil
-  CALL ASSIM_NATURE_ISBA_OI(I, &
-                            HPROGRAM, KI,                                  &
+  CALL ASSIM_NATURE_ISBA_OI(I,HPROGRAM, KI,                                &
                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                             PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
                             PSWEC,     PTSC,        PUCLS,     PVCLS,      &
@@ -166,8 +163,7 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
   ! Snow analysis/update (changed in oi_cacsts). Get the full increment
   IF (LAESNM) THEN
     IF (NRANK==NPIO) WRITE(*,*) 'UPDATE SNOW FROM ANALYSED OI_CACSTS VALUES'
-    CALL ASSIM_ISBA_UPDATE_SNOW(I, &
-                                HPROGRAM,KI,ZSWE,ZSWE_ORIG,.FALSE.,.TRUE.,HTEST)
+    CALL ASSIM_ISBA_UPDATE_SNOW(I,HPROGRAM,KI,ZSWE,ZSWE_ORIG,.FALSE.,.TRUE.,HTEST)
   ELSE
     IF (NRANK==NPIO) WRITE(*,*) 'SNOW IS NOT UPDATED FROM ANALYSED OI_CACSTS VALUES'
   ENDIF
@@ -283,7 +279,7 @@ IF (LAESNM) THEN
 ENDIF
 !
 !to be improved later - needed for surfex course
- CALL AVERAGE_DIAG_MISC_ISBA_n(DGMI, DGMIP, I)
+ CALL AVERAGE_DIAG_MISC_ISBA_n(DGMI, DGMIP, I%O, I%IP, I%M%X, I%M%T%XLAI, I%R)
  !
 IF (LHOOK) CALL DR_HOOK('ASSIM_ISBA_N',1,ZHOOK_HANDLE)
 !

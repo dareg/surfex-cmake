@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE READ_PGD_WATFLUX_n (DTCO, U, UG, WG, W, &
-                                     HPROGRAM)
+      SUBROUTINE READ_PGD_WATFLUX_n (DTCO, U, UG, WG, W, HPROGRAM)
 !     #########################################
 !
 !!****  *READ_PGD_WATFLUX_n* - read WATFLUX physiographic fields
@@ -83,9 +82,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_WATER'
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     'WATER ',WG%NDIM)
-!
+ CALL GET_TYPE_DIM_n(DTCO, U, 'WATER ',WG%NDIM)
 !
 !
 !*       2.     Physiographic data fields:
@@ -98,8 +95,7 @@ ALLOCATE(W%XZS(WG%NDIM))
 ALLOCATE(WG%XLAT       (WG%NDIM))
 ALLOCATE(WG%XLON       (WG%NDIM))
 ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
-CALL PACK_INIT(DTCO, U, UG, HPROGRAM,'WATER ',WG%CGRID,WG%XGRID_PAR,     &
-               W%LCOVER,W%XCOVER,W%XZS,WG%XLAT,WG%XLON,WG%XMESH_SIZE )
+CALL PACK_INIT(DTCO, U, UG, HPROGRAM,'WATER ',WG,W%LCOVER,W%XCOVER,W%XZS)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_WATFLUX_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

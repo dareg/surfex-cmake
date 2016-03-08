@@ -1,9 +1,8 @@
 !     #########
-SUBROUTINE UNPACK_DIAG_PATCH_n (DGI, DGIP, GB, I, PKD, PK, &
-                                KMASK,KSIZE,KNPATCH,KPATCH,    &
-                                 PCPL_DRAIN,PCPL_RUNOFF,      &
-                                 PCPL_EFLOOD,PCPL_PFLOOD,     &
-                                 PCPL_IFLOOD,PCPL_ICEFLUX     )  
+SUBROUTINE UNPACK_DIAG_PATCH_n(DIO, DGIP, GB, IO, TPSNOW, PKD, PK,  &
+                               KMASK, KSIZE, KNPATCH, KPATCH,       &
+                               PCPL_DRAIN, PCPL_RUNOFF, PCPL_EFLOOD,&
+                               PCPL_PFLOOD, PCPL_IFLOOD, PCPL_ICEFLUX )  
 !##############################################
 !
 !!****  *UNPACK_DIAG_PATCH_n* - unpacks ISBA diagnostics
@@ -38,12 +37,13 @@ SUBROUTINE UNPACK_DIAG_PATCH_n (DGI, DGIP, GB, I, PKD, PK, &
 !!
 !!------------------------------------------------------------------
 !
+USE MODD_TYPE_SNOW
 !
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_INIT
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_INIT
-USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_PATCH_t, DIAG_INIT
+USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t, DIAG_PATCH_t, DIAG_INIT
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
 USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
 !
@@ -53,10 +53,11 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGI
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DIO
 TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DGIP
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(SURF_SNOW), INTENT(INOUT) :: TPSNOW
 TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
 TYPE(PACK_ISBA_t), INTENT(INOUT) :: PK
 !
@@ -79,10 +80,11 @@ IF (LHOOK) CALL DR_HOOK('UNPACK_DIAG_PATCH_N',0,ZHOOK_HANDLE)
 !
 IF (KNPATCH==1) THEN
   !
-  DGIP%AL(KPATCH)%XTS(:) = PKD%DGIP%XTS(:)
+  DGIP%AL(KPATCH)%XTS   (:) = PKD%DGIP%XTS   (:)
   DGIP%AL(KPATCH)%XTSRAD(:) = PKD%DGIP%XTSRAD(:)
-  DGIP%AL(KPATCH)%XALBT (:) = PKD%DGIP%XALBT (:)  
-  IF (DGI%N2M>=1) THEN
+  DGIP%AL(KPATCH)%XALBT (:) = PKD%DGIP%XALBT (:)
+  !
+  IF (DIO%N2M>=1) THEN
     DGIP%AL(KPATCH)%XT2M    (:)    = PKD%DGIP%XT2M    (:)
     DGIP%AL(KPATCH)%XQ2M    (:)    = PKD%DGIP%XQ2M    (:)
     DGIP%AL(KPATCH)%XHU2M   (:)    = PKD%DGIP%XHU2M   (:)
@@ -90,11 +92,11 @@ IF (KNPATCH==1) THEN
     DGIP%AL(KPATCH)%XMER10M (:)    = PKD%DGIP%XMER10M (:)
     DGIP%AL(KPATCH)%XRI     (:)    = PKD%DGIP%XRI     (:)
 !    
-    DGIP%AL(KPATCH)%XWIND10M(:)  = SQRT(PKD%DGIP%XZON10M(:)**2+PKD%DGIP%XMER10M(:)**2)
+    DGIP%AL(KPATCH)%XWIND10M(:) = SQRT(PKD%DGIP%XZON10M(:)**2+PKD%DGIP%XMER10M(:)**2)
 !    
   END IF
   !
-  IF (DGI%LSURF_BUDGET) THEN
+  IF (DIO%LSURF_BUDGET) THEN
     DGIP%AL(KPATCH)%XRN    (:)    = PKD%DGIP%XRN         (:)
     DGIP%AL(KPATCH)%XH     (:)    = PKD%DGIP%XH          (:)
     DGIP%AL(KPATCH)%XGFLUX (:)    = PKD%DGIP%XGFLUX      (:)
@@ -113,41 +115,41 @@ IF (KNPATCH==1) THEN
     !
   END IF
   !
-  IF (DGI%LCOEF) THEN
-    DGIP%AL(KPATCH)%XCD            (:)    = PKD%DGIP%XCD             (:)
-    DGIP%AL(KPATCH)%XCH            (:)    = PKD%DGIP%XCH             (:)
-    DGIP%AL(KPATCH)%XCE            (:)    = PKD%DGIP%XCE             (:)
-    DGIP%AL(KPATCH)%XZ0  (:)    = PKD%DGIP%XZ0   (:)
-    DGIP%AL(KPATCH)%XZ0H (:)    = PKD%DGIP%XZ0H  (:)
-    DGIP%AL(KPATCH)%XZ0EFF         (:)    = PKD%DGIP%XZ0EFF          (:)
+  IF (DIO%LCOEF) THEN
+    DGIP%AL(KPATCH)%XCD  (:) = PKD%DGIP%XCD (:)
+    DGIP%AL(KPATCH)%XCH  (:) = PKD%DGIP%XCH (:)
+    DGIP%AL(KPATCH)%XCE  (:) = PKD%DGIP%XCE (:)
+    DGIP%AL(KPATCH)%XZ0  (:) = PKD%DGIP%XZ0 (:)
+    DGIP%AL(KPATCH)%XZ0H (:) = PKD%DGIP%XZ0H(:)
+    DGIP%AL(KPATCH)%XZ0EFF(:)= PKD%DGIP%XZ0EFF(:)
   END IF
   !
-  IF (DGI%LSURF_VARS) THEN
-    DGIP%AL(KPATCH)%XQS            (:)    = PKD%DGIP%XQS             (:)
+  IF (DIO%LSURF_VARS) THEN
+    DGIP%AL(KPATCH)%XQS(:)    = PKD%DGIP%XQS(:)
   END IF
   !
-  IF (I%O%LCPL_RRM) THEN
-    PCPL_DRAIN     (:,KPATCH)    = PKD%DGEIP%XDRAIN         (:)
-    PCPL_RUNOFF    (:,KPATCH)    = PKD%DGEIP%XRUNOFF        (:)
+  IF (IO%LCPL_RRM) THEN
+    PCPL_DRAIN (:,KPATCH) = PKD%DGEIP%XDRAIN (:)
+    PCPL_RUNOFF(:,KPATCH) = PKD%DGEIP%XRUNOFF(:)
   END IF
   !
-  IF (I%O%LFLOOD) THEN
-    PCPL_EFLOOD    (:,KPATCH)    = PKD%DGEIP%XLE_FLOOD (:) / PK%I%IP%XPLVTT(:,1) &
-                                  + PKD%DGEIP%XLEI_FLOOD(:) / PK%I%IP%XPLSTT(:,1)
-    PCPL_PFLOOD    (:,KPATCH)    = PKD%DGEIP%XPFLOOD                (:)
-    PCPL_IFLOOD    (:,KPATCH)    = PKD%DGEIP%XIFLOOD                (:)
+  IF (IO%LFLOOD) THEN
+    PCPL_EFLOOD(:,KPATCH) = PKD%DGEIP%XLE_FLOOD (:) / PK%I%IP%XPLVTT(:,1) &
+                          + PKD%DGEIP%XLEI_FLOOD(:) / PK%I%IP%XPLSTT(:,1)
+    PCPL_PFLOOD(:,KPATCH) = PKD%DGEIP%XPFLOOD(:)
+    PCPL_IFLOOD(:,KPATCH) = PKD%DGEIP%XIFLOOD(:)
   END IF    
   !
-  IF(I%O%LCPL_RRM.AND.I%O%LGLACIER)THEN
+  IF(IO%LCPL_RRM.AND.IO%LGLACIER)THEN
     PCPL_ICEFLUX   (:,KPATCH)    = PKD%DGEIP%XICEFLUX       (:)
   ENDIF
   !
-  IF(I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO')THEN
-    I%R%TSNOW%TEMP(:,:,KPATCH) = PKD%DGMI%XSNOWTEMP(:,:)
-    I%R%TSNOW%TS  (:,KPATCH)   = PKD%DGMI%XSNOWTEMP(:,1)
+  IF(TPSNOW%SCHEME=='3-L' .OR.TPSNOW%SCHEME=='CRO')THEN
+   TPSNOW%TEMP(:,:,KPATCH) = PKD%DGMI%XSNOWTEMP(:,:)
+   TPSNOW%TS  (:,KPATCH)   = PKD%DGMI%XSNOWTEMP(:,1)
   ENDIF
   !
-  IF (I%O%CPHOTO/='NON') THEN
+  IF (IO%CPHOTO/='NON') THEN
     GB%XIACAN(:,:,KPATCH) = PKD%GB%XIACAN(:,:,1)
   ENDIF
   !
@@ -159,7 +161,7 @@ ELSE
      DGIP%AL(KPATCH)%XTS    (JI)     = PKD%DGIP%XTS    (JJ)  
      DGIP%AL(KPATCH)%XTSRAD (JI)     = PKD%DGIP%XTSRAD    (JJ)  
   END DO
-  IF (DGI%N2M>=1) THEN
+  IF (DIO%N2M>=1) THEN
     DO JJ=1,KSIZE
       JI                      = KMASK     (JJ)
       DGIP%AL(KPATCH)%XT2M    (JI)    = PKD%DGIP%XT2M    (JJ)
@@ -174,7 +176,7 @@ ELSE
     END DO
   END IF
   !
-  IF (DGI%LSURF_BUDGET) THEN
+  IF (DIO%LSURF_BUDGET) THEN
     DO JJ=1,KSIZE
       JI                     = KMASK         (JJ)
       DGIP%AL(KPATCH)%XRN    (JI)    = PKD%DGIP%XRN         (JJ)
@@ -198,7 +200,7 @@ ELSE
     END DO
   END IF
   !
-  IF (DGI%LCOEF) THEN
+  IF (DIO%LCOEF) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
       DGIP%AL(KPATCH)%XCD              (JI)    = PKD%DGIP%XCD             (JJ)
@@ -210,14 +212,14 @@ ELSE
     END DO
   END IF
   !
-  IF (DGI%LSURF_VARS) THEN
+  IF (DIO%LSURF_VARS) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
       DGIP%AL(KPATCH)%XQS              (JI)    = PKD%DGIP%XQS             (JJ)
     END DO
   END IF
   !
-  IF (I%O%LCPL_RRM) THEN
+  IF (IO%LCPL_RRM) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK             (JJ)
       PCPL_DRAIN       (JI,KPATCH)    = PKD%DGEIP%XDRAIN          (JJ)
@@ -225,7 +227,7 @@ ELSE
     END DO
   END IF
   !
-  IF (I%O%LFLOOD) THEN
+  IF (IO%LFLOOD) THEN
     DO JJ=1,KSIZE
       JI                               = KMASK                     (JJ)
       PCPL_EFLOOD      (JI,KPATCH)    = PKD%DGEIP%XLE_FLOOD (JJ) / PK%I%IP%XPLVTT(JJ,1) &
@@ -235,24 +237,24 @@ ELSE
     END DO
   END IF
   !
-  IF(I%O%LGLACIER)THEN
+  IF(IO%LGLACIER)THEN
     DO JJ=1,KSIZE
       JI                              = KMASK             (JJ)
       PCPL_ICEFLUX    (JI,KPATCH)    = PKD%DGEIP%XICEFLUX        (JJ)
     END DO          
   ENDIF
   !
-  IF(I%R%TSNOW%SCHEME=='3-L' .OR. I%R%TSNOW%SCHEME=='CRO')THEN
+  IF(TPSNOW%SCHEME=='3-L' .OR.TPSNOW%SCHEME=='CRO')THEN
     DO JJ=1,KSIZE
       JI                       = KMASK             (JJ)
-      I%R%TSNOW%TS    (JI,KPATCH)  = PKD%DGMI%XSNOWTEMP(JJ,1)
-      DO JSW=1,SIZE(I%R%TSNOW%TEMP,2)
-        I%R%TSNOW%TEMP(JI,JSW,KPATCH)  = PKD%DGMI%XSNOWTEMP(JJ,JSW)
+     TPSNOW%TS    (JI,KPATCH)  = PKD%DGMI%XSNOWTEMP(JJ,1)
+      DO JSW=1,SIZE(TPSNOW%TEMP,2)
+       TPSNOW%TEMP(JI,JSW,KPATCH)  = PKD%DGMI%XSNOWTEMP(JJ,JSW)
       ENDDO
     ENDDO          
   ENDIF
   !  
-  IF (I%O%CPHOTO/='NON') THEN
+  IF (IO%CPHOTO/='NON') THEN
     DO JJ=1,KSIZE
       JI                  = KMASK   (JJ)
       DO JSW=1,SIZE(GB%XIACAN,2)
@@ -359,11 +361,11 @@ CALL DIAG_EVAP_ISBA_INIT(PKD%DGEIP)
 !PKD%DGMI%XCHSNOW       => NULL()
 !PKD%DGMI%XSNOWHMASS    => NULL()
 !
-!PKD%DGI%XRN      => NULL()
-!PKD%DGI%XH       => NULL()
-!PKD%DGI%XLE      => NULL()
-!PKD%DGI%XLEI     => NULL()
-!PKD%DGI%XGFLUX   => NULL()
+!PKD%DIO%XRN      => NULL()
+!PKD%DIO%XH       => NULL()
+!PKD%DIO%XLE      => NULL()
+!PKD%DIO%XLEI     => NULL()
+!PKD%DIO%XGFLUX   => NULL()
 !!
 !PKD%DGEI%XLEG     => NULL()
 !PKD%DGEI%XLEGI    => NULL()

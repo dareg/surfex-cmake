@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_WATFLUX_n (DTCO, DGU, U, WM, &
-                                  HPROGRAM,HWRITE)
+      SUBROUTINE WRITE_WATFLUX_n (DTCO, HSELECT, U, WM, HPROGRAM,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_WATFLUX_n* - routine to write surface variables in their respective files
@@ -41,7 +40,7 @@
 USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY
@@ -63,7 +62,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
@@ -78,21 +77,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_WATFLUX_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'WATER ','WATFLX','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_WATFLUX_CONF_n(WM%CHW, WM%W, &
-                               HPROGRAM)
- CALL WRITESURF_WATFLUX_n(DGU, U, &
-                          WM%W, &
-                          HPROGRAM)
+ CALL WRITESURF_WATFLUX_CONF_n(WM%CHW, WM%W, HPROGRAM)
+ CALL WRITESURF_WATFLUX_n(HSELECT, WM%W, HPROGRAM)
 !
-IF ((.NOT.LNOWRITE_CANOPY).OR.DGU%LSELECT) CALL WRITESURF_WATFLUX_SBL_n(DGU, U, &
-                                                                        WM%W, WM%WSB, &
-                                                                        HPROGRAM,HWRITE)
+IF ((.NOT.LNOWRITE_CANOPY).OR.SIZE(HSELECT)>0) THEN
+  CALL WRITESURF_WATFLUX_SBL_n(HSELECT, WM%W%LSBL, WM%WSB, HPROGRAM,HWRITE)
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

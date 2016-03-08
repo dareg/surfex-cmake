@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_FLAKE_SBL (FG, FSB)
+SUBROUTINE PREP_FLAKE_SBL (KDIM, FSB)
 !     #################################################################################
 !
 !!****  *PREP_FLAKE_SBL* - prepares FLAKE SBL fields
@@ -29,7 +29,6 @@ SUBROUTINE PREP_FLAKE_SBL (FG, FSB)
 !
 !
 !
-USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -42,8 +41,7 @@ IMPLICIT NONE
 !
 !*      0.2    declarations of local variables
 !
-!
-TYPE(GRID_t), INTENT(INOUT) :: FG
+INTEGER, INTENT(IN) :: KDIM
 TYPE(CANOPY_t), INTENT(INOUT) :: FSB
 !
 INTEGER :: JLAYER
@@ -65,7 +63,7 @@ FSB%NLVL = 6
 !             ---------------------
 !
 !* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(FG%NDIM,FSB%NLVL))
+ALLOCATE(ZZF(KDIM,FSB%NLVL))
 ZZF(:,1) = 0.
 ZZF(:,2) = 1
 ZZF(:,3) = 3.
@@ -73,7 +71,7 @@ ZZF(:,4) = 5.
 ZZF(:,5) = 8.
 ZZF(:,6) = 12.
 
-ALLOCATE(FSB%XZ(FG%NDIM,FSB%NLVL))
+ALLOCATE(FSB%XZ(KDIM,FSB%NLVL))
 DO JLAYER=1,FSB%NLVL-1
   FSB%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
 END DO

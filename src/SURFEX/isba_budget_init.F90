@@ -1,7 +1,5 @@
 !     #########
-SUBROUTINE ISBA_BUDGET_INIT (OWATER_BUDGET, &
-                             HISBA, HSNOW_ISBA,                   &
-                            PWG, PWGI, PWR, PSNOWSWE, PDG, PDZG, &
+SUBROUTINE ISBA_BUDGET_INIT (OWATER_BUDGET, HISBA, IR, PDG, PDZG, &
                             PWG_INI, PWGI_INI, PWR_INI, PSWE_INI )
 !     ###############################################################################
 !
@@ -29,6 +27,7 @@ SUBROUTINE ISBA_BUDGET_INIT (OWATER_BUDGET, &
 !
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XRHOLW
@@ -48,16 +47,8 @@ LOGICAL, INTENT(IN) :: OWATER_BUDGET
 !                                               ! '2-L' (default)
 !                                               ! '3-L'
 !                                               ! 'DIF'
- CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
-!                                               !         (Douville et al. 1995)
-!                                               ! '3-L' = 3-L snow scheme (option)
-!                                               !         (Boone and Etchevers 2000)
-!                                               ! 'CRO' = Crocus snow scheme
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
 !
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWG        ! liquid water content by layer  (m3/m3)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWGI       ! ice content by layer           (m3/m3)
-REAL, DIMENSION(:),    INTENT(IN) :: PWR        ! liquid water on veg canopy     (kg m-2)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PSNOWSWE   ! snow water equivalent by layer (kg m-2)
 REAL, DIMENSION(:,:),  INTENT(IN) :: PDG        ! soil layer depth               (m)
 REAL, DIMENSION(:,:),  INTENT(IN) :: PDZG       ! soil layer thickness           (m)
 !
@@ -76,9 +67,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_BUDGET_INIT',0,ZHOOK_HANDLE)
 !
-INI =SIZE(PWG,1)
-INL =SIZE(PWG,2)
-INLS=SIZE(PSNOWSWE,2)
+INI =SIZE(IR%XWG,1)
+INL =SIZE(IR%XWG,2)
+INLS=SIZE(IR%TSNOW%WSNOW,2)
 !
 PWG_INI (:) = XUNDEF
 PWGI_INI(:) = XUNDEF
@@ -92,13 +83,13 @@ PWR_INI (:) = XUNDEF
 IF(OWATER_BUDGET)THEN
 !
 ! total wr at t-1
-  PWR_INI(:)=PWR(:)
+  PWR_INI(:)=IR%XWR(:,1)
 !
 ! total swe at t-1
   PSWE_INI(:)=0.0
   DO JL=1,INLS
      DO JI=1,INI
-        PSWE_INI(JI)=PSWE_INI(JI)+PSNOWSWE(JI,JL)
+        PSWE_INI(JI)=PSWE_INI(JI)+IR%TSNOW%WSNOW(JI,JL,1)
      ENDDO
   ENDDO
 !
@@ -108,17 +99,17 @@ IF(OWATER_BUDGET)THEN
   IF(HISBA=='DIF')THEN
     DO JL=1,INL
        DO JI=1,INI
-          IF(PWG(JI,JL)/=XUNDEF)THEN
-             PWG_INI (JI)=PWG_INI (JI)+PWG (JI,JL)*PDZG(JI,JL)*XRHOLW
-             PWGI_INI(JI)=PWGI_INI(JI)+PWGI(JI,JL)*PDZG(JI,JL)*XRHOLW
+          IF(IR%XWG(JI,JL,1)/=XUNDEF)THEN
+             PWG_INI (JI)=PWG_INI (JI)+IR%XWG (JI,JL,1)*PDZG(JI,JL)*XRHOLW
+             PWGI_INI(JI)=PWGI_INI(JI)+IR%XWGI(JI,JL,1)*PDZG(JI,JL)*XRHOLW
           ENDIF
        ENDDO
     ENDDO
   ELSE
-    PWG_INI (:)=PWG (:,2)*PDG(:,2)*XRHOLW
-    PWGI_INI(:)=PWGI(:,2)*PDG(:,2)*XRHOLW
+    PWG_INI (:)=IR%XWG (:,2,1)*PDG(:,2)*XRHOLW
+    PWGI_INI(:)=IR%XWGI(:,2,1)*PDG(:,2)*XRHOLW
     IF(HISBA=='3-L')THEN
-      PWG_INI(:)=PWG_INI(:)+PWG(:,3)*(PDG(:,3)-PDG(:,2))*XRHOLW
+      PWG_INI(:)=PWG_INI(:)+IR%XWG(:,3,1)*(PDG(:,3)-PDG(:,2))*XRHOLW
     ENDIF
   ENDIF
 !

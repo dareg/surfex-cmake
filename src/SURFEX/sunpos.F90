@@ -204,7 +204,6 @@ ENDDO
 IF (LHOOK) CALL DR_HOOK('SUNPOS_2',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
 !
-IF (LHOOK) CALL DR_HOOK('SUNPOS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE SUNPOS

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_SURF_n (CHU, DGU, USS, &
+SUBROUTINE READ_NAMELISTS_SURF_n (CHU, DUO, USS, &
                                   HPROGRAM,HINIT)
 !     #######################################################
 !
@@ -8,8 +8,8 @@ SUBROUTINE READ_NAMELISTS_SURF_n (CHU, DGU, USS, &
 !
 !
 USE MODD_CH_SURF_n, ONLY : CH_SURF_t
-USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODN_SURF_ATM_n
 !
@@ -37,8 +37,8 @@ IMPLICIT NONE
 !
 !
 TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DUO
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -51,16 +51,14 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_SURF_N',0,ZHOOK_HANDLE)
 !
  CALL DEFAULT_CH_SURF_ATM(CCHEM_SURF_FILE,LCH_SURF_EMIS)
 !
-CALL DEFAULT_DIAG_SURF_ATM(N2M,LT2MMW,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET, &
-                            LCOEF,LSURF_VARS,LSURF_BUDGETC,          &
-                            LRESET_BUDGETC,LSELECT, LPROVAR_TO_DIAG, &
-                            LDIAG_GRID,LFRAC, XDIAG_TSTEP, CSELECT   )   
+CALL DEFAULT_DIAG_SURF_ATM(N2M, LT2MMW, LSURF_BUDGET, L2M_MIN_ZS, LRAD_BUDGET, &
+                           LCOEF, LSURF_VARS, LSURF_BUDGETC, LRESET_BUDGETC, &
+                           LSELECT, LPROVAR_TO_DIAG, LDIAG_GRID, LFRAC, &
+                           XDIAG_TSTEP, CSELECT )   
 !      
- CALL READ_DEFAULT_SURF_ATM_n(CHU, DGU, USS, &
-                              HPROGRAM) 
+ CALL READ_DEFAULT_SURF_ATM_n(CHU, DUO, USS, HPROGRAM) 
 !
- CALL READ_SURF_ATM_CONF_n(CHU, DGU, USS, &
-                           HPROGRAM)    
+ CALL READ_SURF_ATM_CONF_n(CHU, DUO, USS, HPROGRAM)    
 !       
 !---------------------------------------------------------------------------
 !PREP

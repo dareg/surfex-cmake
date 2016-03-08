@@ -105,12 +105,6 @@ REAL, POINTER, DIMENSION(:,:)    :: XTAU_WOOD      ! residence time in woody bio
 REAL, POINTER, DIMENSION(:,:,:)   :: XINCREASE     ! biomass increase                     (kg/m2/day)
 REAL, POINTER, DIMENSION(:,:,:)   :: XTURNOVER     ! turnover rates from biomass to litter (gC/m2/s)
 !
-! directional total roughness lenghts in 4 coordinate directions
-! (IP: i index up;  IM: i index down;  JP: j index up;  JM: j index down)
-!
-REAL, DIMENSION(:,:), POINTER :: XZ0EFFIP,XZ0EFFIM,XZ0EFFJP,XZ0EFFJM
-REAL, DIMENSION(:), POINTER   :: XZ0REL         ! relief roughness length                 (m)
-!
 ! *Soil hydraulic characteristics
 !
 REAL, POINTER, DIMENSION(:,:,:)  :: XCONDSAT       ! hydraulic conductivity at saturation    (m/s)
@@ -317,12 +311,7 @@ NULLIFY(YISBA_INIT_PGD%XAH)
 NULLIFY(YISBA_INIT_PGD%XBH)
 NULLIFY(YISBA_INIT_PGD%XTAU_WOOD)
 NULLIFY(YISBA_INIT_PGD%XINCREASE)
-NULLIFY(YISBA_INIT_PGD%XTURNOVER)
-NULLIFY(YISBA_INIT_PGD%XZ0EFFIP)
-NULLIFY(YISBA_INIT_PGD%XZ0EFFIM)
-NULLIFY(YISBA_INIT_PGD%XZ0EFFJP)
-NULLIFY(YISBA_INIT_PGD%XZ0EFFJM)  
-NULLIFY(YISBA_INIT_PGD%XZ0REL)  
+NULLIFY(YISBA_INIT_PGD%XTURNOVER) 
 NULLIFY(YISBA_INIT_PGD%XCONDSAT)
 NULLIFY(YISBA_INIT_PGD%XMPOTSAT)
 NULLIFY(YISBA_INIT_PGD%XBCOEF)

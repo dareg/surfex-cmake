@@ -2215,7 +2215,7 @@ ENDIF
 !*    9.     Arrange cover (optional nam_pgd_arrange_cover & option to use !gardens or not)
 !            ------------------------------------------------------------------------------
 !
- CALL ARRANGE_COVER(DTCO, U, &
+ CALL ARRANGE_COVER(DTCO, U%LWATER_TO_NATURE, U%LTOWN_TO_ROCK, &
                     XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
                     XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
@@ -2226,31 +2226,32 @@ XDATA_ROOT_DEPTHGV(:,:) = XDATA_ROOT_DEPTH(:,:)
 !*   10.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
- CALL ECOCLIMAP2_LAI(DTCO)
+ CALL ECOCLIMAP2_LAI(DTCO%NYEAR,DTCO%XDATA_VEGTYPE)
 !
 !-------------------------------------------------------------------------------
 !
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
- CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
-                                  PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
-                                  PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
-                                  PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
-                                  PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
-                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
-                                  PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
-                                  PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
-                                  PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
-                                  PROOT_LIN=XDATA_ROOT_LIN, PROOT_EXTINCTION=XDATA_ROOT_EXTINCTION,              &
-                                  PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
-                                  PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
-                                  PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
-                                  PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST,                            &
-                                  PGNDLITTER=XDATA_GNDLITTER,                                                    &
-                                  PRGLGV=XDATA_RGLGV,PGAMMAGV=XDATA_GAMMAGV, PRSMINGV=XDATA_RSMINGV,             &
-                                  PROOT_EXTINCTIONGV=XDATA_ROOT_EXTINCTIONGV, PWRMAX_CFGV=XDATA_WRMAX_CFGV,      &
-                                  PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0LITTER=XDATA_Z0LITTER           )
+ CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, &
+                     PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+                     PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
+                     PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
+                     PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
+                     PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
+                     PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
+                     PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
+                     PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
+                     PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
+                     PROOT_LIN=XDATA_ROOT_LIN, PROOT_EXTINCTION=XDATA_ROOT_EXTINCTION,              &
+                     PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
+                     PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
+                     PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
+                     PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST,                            &
+                     PGNDLITTER=XDATA_GNDLITTER,                                                    &
+                     PRGLGV=XDATA_RGLGV,PGAMMAGV=XDATA_GAMMAGV, PRSMINGV=XDATA_RSMINGV,             &
+                     PROOT_EXTINCTIONGV=XDATA_ROOT_EXTINCTIONGV, PWRMAX_CFGV=XDATA_WRMAX_CFGV,      &
+                     PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0LITTER=XDATA_Z0LITTER           )
 !
 IDC = 1
 !

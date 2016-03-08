@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DEF_VAR_NETCDF (DGU, &
+      SUBROUTINE DEF_VAR_NETCDF (HSELECT, &
                                  KFILE_ID,HNAME,HLONG_NAME,KDIM_ID,HATT_TITLE,HATT_TEXT,KVAR_ID,KTYPE,KLEN)
 !
 !!
@@ -7,9 +7,6 @@
 !!    -------------
 !!      B. Decharme 07/2013 special case for time in netcdf output files
 !-------------------------------------------------------------------------------
-!
-!
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_IO_SURF_NC, ONLY : CFILEOUT_NC, NID_NC
 USE MODD_OL_FILEID,      ONLY : XVAR_TO_FILEOUT, XOUT
@@ -23,7 +20,7 @@ IMPLICIT NONE
 INCLUDE "netcdf.inc"
 
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
 INTEGER,               INTENT(IN) :: KFILE_ID
  CHARACTER(LEN=*),      INTENT(IN) :: HNAME
@@ -63,11 +60,11 @@ DEALLOCATE(YTEMP)
 !
 ! if output fields selection is active, test if this field is to be written
 IF ( HNAME/='xx'  .AND. HNAME/='yy' .AND. HNAME/='lon' .AND. &
-     HNAME/='lat' .AND. HNAME/='time' .AND. DGU%LSELECT )  THEN
-  IFIELD=COUNT(DGU%CSELECT /= '            ')
+     HNAME/='lat' .AND. HNAME/='time' .AND. SIZE(HSELECT)>0 )  THEN
+  IFIELD=COUNT(HSELECT /= '            ')
   NOWRITE=.TRUE.
   DO JFIELD=1,IFIELD
-    IF ( TRIM(DGU%CSELECT(JFIELD))==TRIM(HNAME) ) THEN
+    IF ( TRIM(HSELECT(JFIELD))==TRIM(HNAME) ) THEN
       NOWRITE=.FALSE.
     ENDIF
   ENDDO

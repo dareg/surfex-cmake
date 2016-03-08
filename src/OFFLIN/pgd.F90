@@ -191,16 +191,14 @@ XTIME0 = MPI_WTIME()
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
 !
- CALL INIT_INDEX_MPI(YSURF_CUR,CSURF_FILETYPE,'PGD',YALG_MPI,XIO_FRAC)
+ CALL INIT_INDEX_MPI(YSC,CSURF_FILETYPE,'PGD',YALG_MPI,XIO_FRAC)
  !
- CALL PGD_GRID_SURF_ATM(YSURF_CUR%UG, YSURF_CUR%U,&
-                CSURF_FILETYPE,'                            ','      ',.FALSE.,HDIR='H')
+ CALL PGD_GRID_SURF_ATM(YSC%UG, YSC%U%NDIM_FULL,CSURF_FILETYPE,&
+                        '                            ','      ',.FALSE.,HDIR='H')
 !
- CALL PGD_SURF_ATM(YSURF_CUR,&
-                   CSURF_FILETYPE,'                            ','      ',.FALSE.)
+ CALL PGD_SURF_ATM(YSC,CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
- CALL PGD_OROG_FILTER(YSURF_CUR%U,YSURF_CUR%UG,&
-                      CSURF_FILETYPE)
+ CALL PGD_OROG_FILTER(YSC%U,YSC%UG%XGRID_FULL_PAR,CSURF_FILETYPE)
 !
 !*    3.      writing of surface physiographic fields
 !             ---------------------------------------
@@ -209,17 +207,18 @@ XTIME0 = MPI_WTIME()
 IF (NRANK==NPIO) THEN
   IF (CSURF_FILETYPE=='FA    ') THEN
     LFANOCOMPACT = .TRUE.
-    CALL WRITE_HEADER_FA(YSURF_CUR%UG, &
-                       CSURF_FILETYPE,'PGD') 
+    CALL WRITE_HEADER_FA(YSC%UG%G%CGRID, YSC%UG%XGRID_FULL_PAR,CSURF_FILETYPE,'PGD') 
   END IF
 END IF
+!
+ALLOCATE(YSC%DUO%CSELECT(0))
 !
 LDEF = .TRUE.
 !
 IF (CSURF_FILETYPE=="NC    ") THEN
-  CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                         YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
-                         YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)
+  CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, &
+                         YSC%SM%DTS, YSC%TM%DTT, YSC%DTZ, YSC%IM%I, &
+                         YSC%UG, YSC%U, YSC%DUO%CSELECT)
 ENDIF
 !
 INW = 1
@@ -227,14 +226,13 @@ IF (CSURF_FILETYPE=="NC    ") INW = 2
 !
 DO JNW = 1,INW
   !
-  IF (LWRITE_COORD) CALL GET_LONLAT_n(YSURF_CUR, &
-                                      CSURF_FILETYPE)
+  IF (LWRITE_COORD) CALL GET_LONLAT_n(YSC%DTCO, YSC%U, YSC%UG, &
+                                      YSC%DUO%CSELECT, CSURF_FILETYPE)
   !
   !* writing of the fields
  CALL IO_BUFF_CLEAN
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
-  CALL WRITE_PGD_SURF_ATM_n(YSURF_CUR, &
-                            CSURF_FILETYPE)
+  CALL WRITE_PGD_SURF_ATM_n(YSC, CSURF_FILETYPE)
   !
   LDEF = .FALSE.
   CALL IO_BUFF_CLEAN  

@@ -1,7 +1,5 @@
 !     #########
-      SUBROUTINE READ_SEAICE_n (&
-                                 SG, S, &
-                                HPROGRAM,KLU,KLUOUT)
+      SUBROUTINE READ_SEAICE_n (SG, S, HPROGRAM,KLU,KLUOUT)
 !     #########################################
 !
 !!****  *READ_SEAICE_n* - read seaice scheme variables
@@ -136,13 +134,11 @@ IF(S%LINTERPOL_SIC)THEN
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIC_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(&
-                     HPROGRAM,YRECFM,S%XSIC_MTH(:,JMTH),IRESP)
+      CALL READ_SURF(HPROGRAM,YRECFM,S%XSIC_MTH(:,JMTH),IRESP)
       CALL CHECK_SEAICE(YRECFM,S%XSIC_MTH(:,JMTH))
    ENDDO
    !
-   CALL INTERPOL_SST_MTH(S, &
-                         S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
+   CALL INTERPOL_SST_MTH(S,'C')
    !
    IF (ANY(S%XFSIC(:)>1.0).OR.ANY(S%XFSIC(:)<0.0)) THEN
      CALL ABOR1_SFX('READ_SEAICE_n: FSIC should be >=0 and <=1') 
@@ -161,8 +157,7 @@ ENDIF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-CALL READ_SURF(&
-                     HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP)
+CALL READ_SURF(HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP)
 !
 IF (TRIM(S%CSEAICE_SCHEME) == 'NONE' ) THEN
    IF (S%LINTERPOL_SIC ) THEN
@@ -233,14 +228,12 @@ CALL GLTOOLS_ALLOC(S%TGLT)
 !
 !*       0.     Check dimensions : number of layers and ice categories
 !
-CALL READ_SURF(&
-                     HPROGRAM,'ICENL',inl_in_file,IRESP)
+CALL READ_SURF(HPROGRAM,'ICENL',inl_in_file,IRESP)
 IF (inl_in_file /= nl) THEN 
    WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, nl
    CALL ABOR1_SFX(YMESS)
 END IF
-CALL READ_SURF(&
-                     HPROGRAM,'ICENT',int_in_file,IRESP)
+CALL READ_SURF(HPROGRAM,'ICENT',int_in_file,IRESP)
 IF (int_in_file /= nt) THEN
    WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, nt
    CALL ABOR1_SFX(YMESS)
@@ -248,8 +241,7 @@ END IF
 !
 !*       1.     (Semi-)prognostic fields with only space dimension(s) :
 !
-CALL READ_SURF(&
-                     HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
+CALL READ_SURF(HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
 !
 !*       2.     Prognostic fields with space and ice-category dimension(s) :
 !
@@ -257,32 +249,23 @@ DO JK=1,nt
    WRITE(YLVL,'(I2)') JK
    YCATEG='_'//ADJUSTL(YLVL)
    ! .. Read sea ice age for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICEAGE'//YCATEG,S%TGLT%sit(JK,:,1)%age,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEAGE'//YCATEG,S%TGLT%sit(JK,:,1)%age,IRESP)
    ! .. Read melt pond volume for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICEVMP'//YCATEG,S%TGLT%sit(JK,:,1)%vmp,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEVMP'//YCATEG,S%TGLT%sit(JK,:,1)%vmp,IRESP)
    ! .. Read sea ice surface albedo for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICEASN'//YCATEG,S%TGLT%sit(JK,:,1)%asn,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEASN'//YCATEG,S%TGLT%sit(JK,:,1)%asn,IRESP)
    ! .. Read sea ice fraction for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICEFSI'//YCATEG, S%TGLT%sit(JK,:,1)%fsi,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEFSI'//YCATEG, S%TGLT%sit(JK,:,1)%fsi,IRESP)
    ! .. Read sea ice thickness for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICEHSI'//YCATEG, S%TGLT%sit(JK,:,1)%hsi,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEHSI'//YCATEG, S%TGLT%sit(JK,:,1)%hsi,IRESP)
    ! .. Read sea ice salinity for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICESSI'//YCATEG, S%TGLT%sit(JK,:,1)%ssi,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICESSI'//YCATEG, S%TGLT%sit(JK,:,1)%ssi,IRESP)
    ! .. Read sea ice surface temperature for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICETSF'//YCATEG, S%TGLT%sit(JK,:,1)%tsf,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICETSF'//YCATEG, S%TGLT%sit(JK,:,1)%tsf,IRESP)
    ! .. Read snow thickness for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICEHSN'//YCATEG, S%TGLT%sit(JK,:,1)%hsn,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICEHSN'//YCATEG, S%TGLT%sit(JK,:,1)%hsn,IRESP)
    ! .. Read snow density for type JK
-   CALL READ_SURF(&
-                     HPROGRAM,'ICERSN'//YCATEG, S%TGLT%sit(JK,:,1)%rsn,IRESP)
+   CALL READ_SURF(HPROGRAM,'ICERSN'//YCATEG, S%TGLT%sit(JK,:,1)%rsn,IRESP)
    !
    !*       3.     Prognostic fields with space, ice-category and layer dimensions :
    !
@@ -290,8 +273,7 @@ DO JK=1,nt
       WRITE(YLVL,'(I2)') JL
       YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)   
       ! .. Read sea ice vertical gltools_enthalpy profile for type JK and level JL  
-      CALL READ_SURF(&
-                     HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP)
+      CALL READ_SURF(HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP)
    END DO
 END DO
 !
@@ -401,13 +383,11 @@ IF(S%LINTERPOL_SIT)THEN
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIT_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(&
-                     HPROGRAM,YRECFM,S%XSIT_MTH(:,JMTH),IRESP)
+      CALL READ_SURF(HPROGRAM,YRECFM,S%XSIT_MTH(:,JMTH),IRESP)
       CALL CHECK_SEAICE(YRECFM,S%XSIT_MTH(:,JMTH))
    ENDDO
    !
-   CALL INTERPOL_SST_MTH(S, &
-                         S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
+   CALL INTERPOL_SST_MTH(S,'H')
    !
 ELSE
    ! 

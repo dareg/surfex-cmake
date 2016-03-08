@@ -1,12 +1,9 @@
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n (DGMI, DGMIP, IG, I, S, U, T, TOP, W, &
-                             HPROGRAM, KI,                                               &
-                            PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,             &
-                            PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
-                            PSWEC,     PTSC,                                            &
-                            PTS,       PT2M,        PHU2M,     PSWE,                    &
-                            PSST,      PSIC,  PUCLS, PVCLS,                             &
-                            HTEST , OD_MASKEXT, PLON, PLAT, OLKEEPEXTZONE )
+SUBROUTINE ASSIM_SURF_ATM_n (DGMI, DGMIP, IG, I, S, U, T, TOP, W, HPROGRAM, KI,        &
+                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, PCLOUDS,  &
+                             PLSM, PEVAPTR, PEVAP, PSWEC, PTSC, PTS, PT2M, PHU2M, PSWE,&
+                             PSST, PSIC, PUCLS, PVCLS, HTEST, OD_MASKEXT, PLON, PLAT,  &
+                             OLKEEPEXTZONE )
 !     #################################################################################
 !
 !

@@ -1,6 +1,5 @@
 !     #########
-    SUBROUTINE COARE30_FLUX (S, &
-                             PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
+    SUBROUTINE COARE30_FLUX (S,PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
             PVMOD,PZREF,PUREF,PPS,PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE,PRI,&
             PRESA,PRAIN,PZ0HSEA)  
 !     #######################################################################

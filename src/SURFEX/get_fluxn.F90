@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_FLUX_n (DGU, &
+      SUBROUTINE GET_FLUX_n (DUO, DGU, &
                              HPROGRAM,KI,PRN,PH,PLE,PLEI,PGFLUX,PT2M,PQ2M,   &
                             PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET,PCD,&  
                             PEVAP, PSUBL                                    )  
@@ -38,7 +38,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,        ONLY   : XUNDEF
@@ -53,6 +53,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DUO
 TYPE(DIAG_t), INTENT(INOUT) :: DGU
 !
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -85,7 +86,7 @@ IF (LHOOK) CALL DR_HOOK('GET_FLUX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGU%LSURF_BUDGET)      THEN 
+IF (DUO%LSURF_BUDGET)      THEN 
         PRN       = DGU%XRN      
         PH        = DGU%XH  
         PLE       = DGU%XLE 
@@ -107,7 +108,7 @@ IF (DGU%LSURF_BUDGET)      THEN
         PSUBL     = XUNDEF        
 ENDIF           
 !
-IF (DGU%N2M>0)      THEN 
+IF (DUO%N2M>0)      THEN 
         PT2M      = DGU%XT2M
         PQ2M      = DGU%XQ2M
         PHU2M     = DGU%XHU2M
@@ -121,7 +122,7 @@ IF (DGU%N2M>0)      THEN
         PMER10M  = XUNDEF
 ENDIF   
 !
-IF (DGU%LCOEF) THEN
+IF (DUO%LCOEF) THEN
   PCD      = DGU%XCD
 ELSE
   PCD      = XUNDEF

@@ -1,5 +1,5 @@
 !     ########################################################################
-      SUBROUTINE GET_SURF_ATM_SSO_ROUGH(HROUGH)
+      SUBROUTINE GET_SSO_ROUGH(HROUGH)
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to get value of the
@@ -48,8 +48,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! General switch
 !
-IF (LHOOK) CALL DR_HOOK('GET_SURF_ATM_SSO_ROUGH',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('GET_SSO_ROUGH',0,ZHOOK_HANDLE)
 HROUGH = CROUGH
-IF (LHOOK) CALL DR_HOOK('GET_SURF_ATM_SSO_ROUGH',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('GET_SSO_ROUGH',1,ZHOOK_HANDLE)
 !
-END SUBROUTINE GET_SURF_ATM_SSO_ROUGH
+END SUBROUTINE GET_SSO_ROUGH

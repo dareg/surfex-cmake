@@ -1,11 +1,6 @@
 !     #########
-SUBROUTINE DIAG_MISC_ISBA_n (DGMIP, PKD, OSURF_MISC_BUDGET, &
-                             PTSTEP, HISBA, HPHOTO, HSNOW, OAGRIP, OTR_ML, &
-                            PTIME, KSIZE, KPATCH, KMASK, PSEUIL,          &
-                            PPSN, PPSNG, PPSNV, PFF, PFFG, PFFV,          &
-                            PWG, PWGI, PWFC, PWWILT, PWSNOW, PRSNOW,      &
-                            PFAPARC, PFAPIRC, PLAI_EFFC, PMUS, PFSAT,     &
-                            PDG, PTG                                      )  
+SUBROUTINE DIAG_MISC_ISBA_n (DGMIP, DGMIK, IPK, INIK, IMXK, IRK, AGK, IO, OSURF_MISC_BUDGET, &
+                             PTSTEP, HSNOW, OAGRIP, PTIME, KSIZE, KPATCH, KMASK     )  
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-ISBA_n * - additional diagnostics for ISBA
@@ -41,8 +36,12 @@ SUBROUTINE DIAG_MISC_ISBA_n (DGMIP, PKD, OSURF_MISC_BUDGET, &
 !!------------------------------------------------------------------
 !
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_PATCH_t
-USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_PATCH_t, DIAG_MISC_ISBA_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_AGRI_n, ONLY : AGRI_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_CSTS,       ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -59,52 +58,28 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
 TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
-TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMIK
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IPK
+TYPE(ISBA_INIT_t), INTENT(INOUT) :: INIK
+TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMXK
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: IRK
+TYPE(AGRI_t), INTENT(INOUT) :: AGK
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 LOGICAL, INTENT(IN) :: OSURF_MISC_BUDGET
 REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
- CHARACTER(LEN=*), INTENT(IN)      :: HISBA         ! ISBA scheme
- CHARACTER(LEN=*), INTENT(IN)      :: HPHOTO        ! type of photosynthesis
  CHARACTER(LEN=*), INTENT(IN)      :: HSNOW         ! snow scheme
 LOGICAL, INTENT(IN)               :: OAGRIP
-LOGICAL, INTENT(IN)               :: OTR_ML
 REAL,    INTENT(IN)               :: PTIME   ! current time since midnight
 INTEGER, INTENT(IN)               :: KSIZE, KPATCH
 INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
-REAL, DIMENSION(:), INTENT(IN)    :: PSEUIL
 !    
-!Snow/flood fraction at t
-REAL, DIMENSION(:), INTENT(IN)    :: PPSN
-REAL, DIMENSION(:), INTENT(IN)    :: PPSNG
-REAL, DIMENSION(:), INTENT(IN)    :: PPSNV
-REAL, DIMENSION(:), INTENT(IN)    :: PFF
-REAL, DIMENSION(:), INTENT(IN)    :: PFFG
-REAL, DIMENSION(:), INTENT(IN)    :: PFFV
-!
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWG           ! soil water content profile (m3/m3)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWGI          ! soil solid water content profile (m3/m3)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWFC          ! field capacity profile (m3/m3)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWWILT        ! wilting point  profile (m3/m3)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PWSNOW        ! snow reservoir (kg/m2)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PRSNOW        ! snow density (kg/m3)
-!
-REAL, DIMENSION(:,:),  INTENT(IN) :: PDG           ! soil layer depth
-REAL, DIMENSION(:,:),  INTENT(IN) :: PTG           ! soil temperature
-!
-REAL, DIMENSION(:), INTENT(INOUT) :: PFAPARC
-REAL, DIMENSION(:), INTENT(INOUT) :: PFAPIRC
-REAL, DIMENSION(:), INTENT(INOUT) :: PLAI_EFFC
-REAL, DIMENSION(:), INTENT(INOUT) :: PMUS
-!
-REAL, DIMENSION(:), INTENT(IN)    :: PFSAT
-!
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PPSN))    :: ZSNOWTEMP
-REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORK
-REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORKTEMP
+REAL, DIMENSION(SIZE(IRK%XPSN,1))    :: ZSNOWTEMP
+REAL, DIMENSION(SIZE(IRK%TSNOW%WSNOW,1),SIZE(IRK%TSNOW%WSNOW,2)) :: ZWORK
+REAL, DIMENSION(SIZE(IRK%TSNOW%WSNOW,1),SIZE(IRK%TSNOW%WSNOW,2)) :: ZWORKTEMP
 !
 REAL, DIMENSION(KSIZE) :: ZALT, ZFLT
 !
@@ -118,59 +93,59 @@ IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
 !
 IF (OSURF_MISC_BUDGET) THEN
   !
-  PKD%DGMI%XSWI (:,:)=XUNDEF
-  PKD%DGMI%XTSWI(:,:)=XUNDEF  
-  DO JJ=1,SIZE(PWG,2)
-    DO JI=1,SIZE(PWG,1)
-      IF(PWG (JI,JJ)/=XUNDEF)THEN    
-        PKD%DGMI%XSWI (JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
-        PKD%DGMI%XTSWI(JI,JJ) = (PWG (JI,JJ) - PWWILT(JI,JJ)) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+  DGMIK%XSWI (:,:)=XUNDEF
+  DGMIK%XTSWI(:,:)=XUNDEF  
+  DO JJ=1,SIZE(IRK%XWG,2)
+    DO JI=1,SIZE(IRK%XWG,1)
+      IF(IRK%XWG (JI,JJ,1)/=XUNDEF)THEN    
+        DGMIK%XSWI (JI,JJ) = (IRK%XWG (JI,JJ,1) - IPK%XWWILT(JI,JJ)) / (IPK%XWFC(JI,JJ) - IPK%XWWILT(JI,JJ))
+        DGMIK%XTSWI(JI,JJ) = (IRK%XWG (JI,JJ,1) - IPK%XWWILT(JI,JJ)) / (IPK%XWFC(JI,JJ) - IPK%XWWILT(JI,JJ))
       ENDIF
-      IF(PWGI (JI,JJ)/=XUNDEF)THEN    
-        PKD%DGMI%XTSWI(JI,JJ) = PKD%DGMI%XTSWI(JI,JJ) +  PWGI(JI,JJ) / (PWFC(JI,JJ) - PWWILT(JI,JJ))
+      IF(IRK%XWGI (JI,JJ,1)/=XUNDEF)THEN    
+        DGMIK%XTSWI(JI,JJ) = DGMIK%XTSWI(JI,JJ) +  IRK%XWGI(JI,JJ,1) / (IPK%XWFC(JI,JJ) - IPK%XWWILT(JI,JJ))
       ENDIF
     ENDDO
   ENDDO
   !
-  DO JK=1,SIZE(PKD%DGMI%XSWI,2)
+  DO JK=1,SIZE(DGMIK%XSWI,2)
 !cdir nodep
     DO JJ=1,KSIZE
       JI                      =  KMASK         (JJ)
       !
-      DGMIP%AL(KPATCH)%XSWI     (JI,JK)  =  PKD%DGMI%XSWI        (JJ,JK)
-      DGMIP%AL(KPATCH)%XTSWI    (JI,JK)  =  PKD%DGMI%XTSWI       (JJ,JK)
+      DGMIP%AL(KPATCH)%XSWI     (JI,JK)  =  DGMIK%XSWI        (JJ,JK)
+      DGMIP%AL(KPATCH)%XTSWI    (JI,JK)  =  DGMIK%XTSWI       (JJ,JK)
       !
     END DO
   ENDDO  
   !
-  DO JI = 1,SIZE(PWSNOW,2)
+  DO JI = 1,SIZE(IRK%TSNOW%WSNOW,2)
 !cdir nodep 
-    DO JJ = 1,SIZE(PWSNOW,1)
-      ZWORK(JJ,JI)  = PWSNOW(JJ,JI) / PRSNOW(JJ,JI)
+    DO JJ = 1,SIZE(IRK%TSNOW%WSNOW,1)
+      ZWORK(JJ,JI)  = IRK%TSNOW%WSNOW(JJ,JI,1) / IRK%TSNOW%RHO(JJ,JI,1)
     ENDDO
   ENDDO
   !
-  PKD%DGMI%XTWSNOW=0.
-  PKD%DGMI%XTDSNOW=0.
+  DGMIK%XTWSNOW=0.
+  DGMIK%XTDSNOW=0.
   ZSNOWTEMP=0.  
   !
   IF (HSNOW/='EBA')THEN
-     ZWORKTEMP(:,:) = PKD%DGMI%XSNOWTEMP(:,:)
+     ZWORKTEMP(:,:) = DGMIK%XSNOWTEMP(:,:)
   ELSE
-     ZWORKTEMP(:,1) = MIN(PTG(:,1),XTT)
+     ZWORKTEMP(:,1) = MIN(IRK%XTG(:,1,1),XTT)
   ENDIF
   !
-  DO JI = 1,SIZE(PWSNOW,2)
+  DO JI = 1,SIZE(IRK%TSNOW%WSNOW,2)
 !cdir nodep 
-    DO JJ = 1,SIZE(PWSNOW,1)
-      PKD%DGMI%XTWSNOW(JJ) = PKD%DGMI%XTWSNOW(JJ) + PWSNOW(JJ,JI)      
-      PKD%DGMI%XTDSNOW(JJ) = PKD%DGMI%XTDSNOW(JJ) + ZWORK (JJ,JI)
+    DO JJ = 1,SIZE(IRK%TSNOW%WSNOW,1)
+      DGMIK%XTWSNOW(JJ) = DGMIK%XTWSNOW(JJ) + IRK%TSNOW%WSNOW(JJ,JI,1)      
+      DGMIK%XTDSNOW(JJ) = DGMIK%XTDSNOW(JJ) + ZWORK (JJ,JI)
       ZSNOWTEMP(JJ) = ZSNOWTEMP(JJ) + ZWORKTEMP(JJ,JI) * ZWORK(JJ,JI)
     ENDDO
   ENDDO
   !
-  WHERE(PKD%DGMI%XTDSNOW(:)>0.0)
-        ZSNOWTEMP(:)=ZSNOWTEMP(:)/PKD%DGMI%XTDSNOW(:)
+  WHERE(DGMIK%XTDSNOW(:)>0.0)
+        ZSNOWTEMP(:)=ZSNOWTEMP(:)/DGMIK%XTDSNOW(:)
   ELSEWHERE
         ZSNOWTEMP(:)=XUNDEF
   ENDWHERE
@@ -179,29 +154,29 @@ IF (OSURF_MISC_BUDGET) THEN
   DO JJ=1,KSIZE
      JI                     =  KMASK       (JJ)
      !
-     DGMIP%AL(KPATCH)%XHV      (JI)  =  PKD%DGMI%XHV       (JJ)
-     DGMIP%AL(KPATCH)%XPSNG   (JI)  =  PPSNG       (JJ)
-     DGMIP%AL(KPATCH)%XPSNV   (JI)  =  PPSNV       (JJ)
-     DGMIP%AL(KPATCH)%XPSN    (JI)  =  PPSN        (JJ)     
-     DGMIP%AL(KPATCH)%XFF     (JI)  =  PFF         (JJ)
-     DGMIP%AL(KPATCH)%XFFG    (JI)  =  PFFG        (JJ)
-     DGMIP%AL(KPATCH)%XFFV    (JI)  =  PFFV        (JJ)     
-     DGMIP%AL(KPATCH)%XTWSNOW  (JI)  =  PKD%DGMI%XTWSNOW   (JJ)
-     DGMIP%AL(KPATCH)%XTDSNOW  (JI)  =  PKD%DGMI%XTDSNOW   (JJ)
-     DGMIP%AL(KPATCH)%XTTSNOW  (JI)  =  ZSNOWTEMP   (JJ)
-     DGMIP%AL(KPATCH)%XFSAT   (JI)  =  PFSAT       (JJ)     
+     DGMIP%AL(KPATCH)%XPSNG  (JI) = IRK%XPSNG     (JJ,1)
+     DGMIP%AL(KPATCH)%XPSNV  (JI) = IRK%XPSNV     (JJ,1)
+     DGMIP%AL(KPATCH)%XPSN   (JI) = IRK%XPSN      (JJ,1)     
+     DGMIP%AL(KPATCH)%XFF    (JI) = INIK%XFF      (JJ,1)
+     DGMIP%AL(KPATCH)%XFFG   (JI) = INIK%XFFG     (JJ,1)
+     DGMIP%AL(KPATCH)%XFFV   (JI) = INIK%XFFV     (JJ,1)   
+     DGMIP%AL(KPATCH)%XFSAT  (JI) = INIK%XFSAT    (JJ)       
+     DGMIP%AL(KPATCH)%XHV    (JI) = DGMIK%XHV     (JJ)     
+     DGMIP%AL(KPATCH)%XTWSNOW(JI) = DGMIK%XTWSNOW (JJ)
+     DGMIP%AL(KPATCH)%XTDSNOW(JI) = DGMIK%XTDSNOW (JJ)
+     DGMIP%AL(KPATCH)%XTTSNOW(JI) = ZSNOWTEMP     (JJ)
      !
   END DO
 !
   IF (HSNOW=='3-L' .OR. HSNOW=='CRO') THEN
      !
-    DO JK=1,SIZE(PKD%DGMI%XSNOWLIQ,2)
+    DO JK=1,SIZE(DGMIK%XSNOWLIQ,2)
 !cdir nodep
       DO JJ=1,KSIZE
         JI                      =  KMASK         (JJ)
         !
-        DGMIP%AL(KPATCH)%XSNOWLIQ (JI,JK)  =  PKD%DGMI%XSNOWLIQ    (JJ,JK)
-        DGMIP%AL(KPATCH)%XSNOWTEMP(JI,JK)  =  PKD%DGMI%XSNOWTEMP   (JJ,JK)
+        DGMIP%AL(KPATCH)%XSNOWLIQ (JI,JK)  =  DGMIK%XSNOWLIQ    (JJ,JK)
+        DGMIP%AL(KPATCH)%XSNOWTEMP(JI,JK)  =  DGMIK%XSNOWTEMP   (JJ,JK)
         !
       END DO
     ENDDO
@@ -211,16 +186,16 @@ IF (OSURF_MISC_BUDGET) THEN
 ! cosine of solar zenith angle 
 !
 
-  IF (HPHOTO/='NON'.AND.OTR_ML) THEN
+  IF (IO%CPHOTO/='NON'.AND.IO%LTR_ML) THEN
        !
 !cdir nodep
        DO JJ=1,KSIZE
          JI = KMASK(JJ)
          !
-         DGMIP%AL(KPATCH)%XFAPAR      (JI) = PKD%DGMI%XFAPAR      (JJ)
-         DGMIP%AL(KPATCH)%XFAPIR      (JI) = PKD%DGMI%XFAPIR      (JJ)
-         DGMIP%AL(KPATCH)%XFAPAR_BS   (JI) = PKD%DGMI%XFAPAR_BS   (JJ)
-         DGMIP%AL(KPATCH)%XFAPIR_BS   (JI) = PKD%DGMI%XFAPIR_BS   (JJ)
+         DGMIP%AL(KPATCH)%XFAPAR      (JI) = DGMIK%XFAPAR      (JJ)
+         DGMIP%AL(KPATCH)%XFAPIR      (JI) = DGMIK%XFAPIR      (JJ)
+         DGMIP%AL(KPATCH)%XFAPAR_BS   (JI) = DGMIK%XFAPAR_BS   (JJ)
+         DGMIP%AL(KPATCH)%XFAPIR_BS   (JI) = DGMIK%XFAPIR_BS   (JJ)
          !
        ENDDO
        !
@@ -231,28 +206,28 @@ IF (OSURF_MISC_BUDGET) THEN
          DO JJ=1,KSIZE
            JI = KMASK(JJ)
            !
-           IF (PMUS(JJ).NE.0.) THEN
-             DGMIP%AL(KPATCH)%XDFAPARC   (JI) = PFAPARC   (JJ) / PMUS(JJ) 
-             DGMIP%AL(KPATCH)%XDFAPIRC   (JI) = PFAPIRC   (JJ) / PMUS(JJ)
-             DGMIP%AL(KPATCH)%XDLAI_EFFC (JI) = PLAI_EFFC (JJ) / PMUS(JJ)
+           IF (IRK%XMUS(JJ,1).NE.0.) THEN
+             DGMIP%AL(KPATCH)%XDFAPARC   (JI) = IRK%XFAPARC   (JJ,1) / IRK%XMUS(JJ,1) 
+             DGMIP%AL(KPATCH)%XDFAPIRC   (JI) = IRK%XFAPIRC   (JJ,1) / IRK%XMUS(JJ,1)
+             DGMIP%AL(KPATCH)%XDLAI_EFFC (JI) = IRK%XLAI_EFFC (JJ,1) / IRK%XMUS(JJ,1)
            ENDIF
            !
          ENDDO
 !cdir nodep         
          DO JJ=1,KSIZE   
-           PFAPARC(JJ)   = 0.
-           PFAPIRC(JJ)   = 0.
-           PLAI_EFFC(JJ) = 0.
-           PMUS(JJ)      = 0.
+           IRK%XFAPARC(JJ,1)   = 0.
+           IRK%XFAPIRC(JJ,1)   = 0.
+           IRK%XLAI_EFFC(JJ,1) = 0.
+           IRK%XMUS(JJ,1)      = 0.
          ENDDO
        ENDIF
        !
   ENDIF
   !
-  IF(HISBA=='DIF')THEN
+  IF(IO%CISBA=='DIF')THEN
     ZALT(:)=0.0
     ZFLT(:)=0.0
-    CALL COMPUT_COLD_LAYERS_THICK(PDG,PTG,ZALT,ZFLT)
+    CALL COMPUT_COLD_LAYERS_THICK(IMXK%XDG(:,:,1),IRK%XTG(:,:,1),ZALT,ZFLT)
     DO JJ=1,KSIZE
        JI              =  KMASK(JJ)
        DGMIP%AL(KPATCH)%XALT(JI) =  ZALT(JJ) 
@@ -268,7 +243,7 @@ IF (OAGRIP) THEN
   DO JJ=1,KSIZE
      JI                     =  KMASK         (JJ)
      !
-     DGMIP%AL(KPATCH)%XSEUIL   (JI)  =  PSEUIL (JJ)
+     DGMIP%AL(KPATCH)%XSEUIL   (JI)  =  AGK%XTHRESHOLDSPT (JJ,1)
      !
   END DO
 !

@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_MISC_FLAKE_n ( DTCO, DGU, U, DGMF, &
-                                          HPROGRAM)
+      SUBROUTINE WRITE_DIAG_MISC_FLAKE_n ( DTCO, HSELECT, U, DGMF, HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_MISC_FLAKE* - writes the FLAKE miscellaneous diagnostic fields
@@ -30,7 +29,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DIAG_MISC_FLAKE_n, ONLY : DIAG_MISC_FLAKE_t
 !
@@ -48,7 +46,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
 !
@@ -69,8 +67,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_FLAKE_N',0,ZHOOK_HANDLE)
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                    HPROGRAM,'WATER ','FLAKE   ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','FLAKE   ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -81,8 +78,7 @@ IF (DGMF%LWATER_PROFILE) THEN
       WRITE(YRECFM,'(F5.1)') DGMF%XZW_PROFILE(IZ)
       YRECFM='TW_'//TRIM(ADJUSTL(YRECFM))
       YCOMMENT='X_Y_'//YRECFM//' (K)'
-      CALL WRITE_SURF(DGU, U, &
-                      HPROGRAM,YRECFM,DGMF%XTW_PROFILE(IZ,:),IRESP,HCOMMENT=YCOMMENT)
+      CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,DGMF%XTW_PROFILE(IZ,:),IRESP,HCOMMENT=YCOMMENT)
    END DO
 END IF
 !

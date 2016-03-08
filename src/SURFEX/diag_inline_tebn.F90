@@ -1,12 +1,12 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_TEB_n (DGT, TCP, T, &
-                                      OCANOPY, PTA, PTS, PQA, PPA, PPS, PRHOA,                  &
-                                       PZONA, PMERA, PWIND, PHT, PHW,                          &
-                                       PCD, PCDN, PRI, PCH, PZ0,                               &
-                                       PTRAD, PEMIS, PDIR_ALB, PSCA_ALB,                       &
-                                       PLW, PDIR_SW, PSCA_SW,                                  &
-                                       PSFTH, PSFTQ, PSFZON, PSFMER, PSFCO2,                   &
-                                       PRN, PH, PLE, PGFLUX                                    )  
+       SUBROUTINE DIAG_INLINE_TEB_n (DTO, DGT, TCP, T, &
+                                     OCANOPY, PTA, PTS, PQA, PPA, PPS, PRHOA,                &
+                                     PZONA, PMERA, PWIND, PHT, PHW,                          &
+                                     PCD, PCDN, PRI, PCH, PZ0,                               &
+                                     PTRAD, PEMIS, PDIR_ALB, PSCA_ALB,                       &
+                                     PLW, PDIR_SW, PSCA_SW,                                  &
+                                     PSFTH, PSFTQ, PSFZON, PSFMER, PSFCO2,                   &
+                                     PRN, PH, PLE, PGFLUX                                    )  
 !     ###############################################################################!
 !!****  *DIAG_INLINE_TEB_n * - Computes diagnostics during TEB time-step
 !!
@@ -36,7 +36,7 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 USE MODD_TEB_n, ONLY : TEB_t
 !
@@ -58,6 +58,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DTO
 TYPE(DIAG_t), INTENT(INOUT) :: DGT
 TYPE(CANOPY_t), INTENT(INOUT) :: TCP
 TYPE(TEB_t), INTENT(INOUT) :: T
@@ -131,22 +132,17 @@ ZZ0_O_Z0H = 200.
 !* 2m and 10m variables interpolated from canopy if used
 !
 IF (OCANOPY) THEN
-  ZT2M_MIN(:) = XUNDEF
-  ZT2M_MAX(:) = XUNDEF
-  ZHU2M_MIN(:) = XUNDEF
-  ZHU2M_MAX(:) = XUNDEF
+  ZT2M_MIN    (:) = XUNDEF
+  ZT2M_MAX    (:) = XUNDEF
+  ZHU2M_MIN   (:) = XUNDEF
+  ZHU2M_MAX   (:) = XUNDEF
   ZWIND10M_MAX(:) = XUNDEF
-  IF (DGT%N2M>0) CALL INIT_2M_10M( TCP%XP(:,2), TCP%XT(:,2), TCP%XQ(:,2),  TCP%XU, TCP%XZ, &
-                               PZONA, PMERA, PWIND, PRHOA,         &
-                               DGT%XT2M, DGT%XQ2M, DGT%XHU2M, DGT%XZON10M, DGT%XMER10M,&
-                               ZU10, ZWIND10M_MAX, ZT2M_MIN,       &
-                               ZT2M_MAX, ZHU2M_MIN, ZHU2M_MAX )
+  IF (DTO%N2M>0) CALL INIT_2M_10M( TCP, DGT, PZONA, PMERA, PWIND, PRHOA )
 ELSE
 !* 2m and 10m variables using CLS laws
- IF (DGT%N2M==1) THEN
-  CALL PARAM_CLS(PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, PHT, PHW, &
-                   PSFTH, PSFTQ, PSFZON, PSFMER,                       &
-                   DGT%XT2M, DGT%XQ2M, DGT%XHU2M, DGT%XZON10M, DGT%XMER10M                )  
+ IF (DTO%N2M==1) THEN
+  CALL PARAM_CLS(DGT, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+                 PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER          )  
   !
   !* erases temperature and humidity 2m above roof level bu canyon air values
   !
@@ -157,37 +153,32 @@ ELSE
   !
   DGT%XRI = PRI
   DGT%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
- ELSE IF (DGT%N2M==2) THEN
+ ELSE IF (DTO%N2M==2) THEN
   ZH(:)=10.
-  CALL CLS_WIND(PZONA, PMERA, PHW,  &
-                  PCD, PCDN, PRI, ZH, &
-                  DGT%XZON10M, DGT%XMER10M    )  
+  CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, DGT%XZON10M, DGT%XMER10M    )  
   DGT%XT2M  = T%CUR%XT_CANYON
   DGT%XQ2M  = T%CUR%XQ_CANYON
   DGT%XRI   = PRI
   DGT%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
  END IF
-END IF
-!
-IF (DGT%N2M>=1) THEN
-  !
-  DGT%XT2M_MIN(:) = MIN(DGT%XT2M_MIN(:),DGT%XT2M(:))
-  DGT%XT2M_MAX(:) = MAX(DGT%XT2M_MAX(:),DGT%XT2M(:))
-  !
-  DGT%XHU2M_MIN(:) = MIN(DGT%XHU2M_MIN(:),DGT%XHU2M(:))
-  DGT%XHU2M_MAX(:) = MAX(DGT%XHU2M_MAX(:),DGT%XHU2M(:))
-  !
-  DGT%XWIND10M    (:) = SQRT(DGT%XZON10M**2+DGT%XMER10M**2)
-  DGT%XWIND10M_MAX(:) = MAX(DGT%XWIND10M_MAX(:),DGT%XWIND10M(:))
-  !
-END IF
-
-!
-IF (DGT%LSURF_BUDGET) THEN
+ !
+ IF (DTO%N2M>=1) THEN
    !
-   CALL DIAG_SURF_BUDGET_TEB(PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB,  &
-                               PLW, PEMIS, PTRAD,                     &
-                               DGT%XSWD, DGT%XSWU, DGT%XSWBD, DGT%XSWBU, DGT%XLWD, DGT%XLWU   )  
+   DGT%XT2M_MIN(:) = MIN(DGT%XT2M_MIN(:),DGT%XT2M(:))
+   DGT%XT2M_MAX(:) = MAX(DGT%XT2M_MAX(:),DGT%XT2M(:))
+   !
+   DGT%XHU2M_MIN(:) = MIN(DGT%XHU2M_MIN(:),DGT%XHU2M(:))
+   DGT%XHU2M_MAX(:) = MAX(DGT%XHU2M_MAX(:),DGT%XHU2M(:))
+   !
+   DGT%XWIND10M    (:) = SQRT(DGT%XZON10M**2+DGT%XMER10M**2)
+   DGT%XWIND10M_MAX(:) = MAX(DGT%XWIND10M_MAX(:),DGT%XWIND10M(:))
+   !
+ END IF
+ENDIF
+!
+IF (DTO%LSURF_BUDGET) THEN
+   !
+   CALL DIAG_SURF_BUDGET_TEB(DGT, PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB, PLW, PEMIS, PTRAD   )  
    !                             
    DGT%XRN    = PRN
    DGT%XH     = PH
@@ -199,7 +190,7 @@ IF (DGT%LSURF_BUDGET) THEN
    !
 END IF
 !
-IF (DGT%LCOEF) THEN
+IF (DTO%LCOEF) THEN
   DGT%XCD    = PCD
   DGT%XCH    = PCH
   DGT%XCE    = PCH
@@ -207,7 +198,7 @@ IF (DGT%LCOEF) THEN
   DGT%XZ0H   = PZ0 / ZZ0_O_Z0H
 END IF
 !
-IF (DGT%LSURF_VARS) THEN
+IF (DTO%LSURF_VARS) THEN
   DGT%XQS    = T%CUR%XQ_CANYON
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',1,ZHOOK_HANDLE)

@@ -1,8 +1,8 @@
 !     #########
-      SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M,OT2MMW,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET, &
-                                         OCOEF,OSURF_VARS,OSURF_BUDGETC,          &
-                                         ORESET_BUDGETC, OSELECT, OPROVAR_TO_DIAG,&
-                                         ODIAG_GRID, OFRAC, PDIAG_TSTEP, CSELECT  )                                         
+      SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M, OT2MMW, OSURF_BUDGET, O2M_MIN_ZS, ORAD_BUDGET, &
+                                       OCOEF, OSURF_VARS, OSURF_BUDGETC, ORESET_BUDGETC, &
+                                       OSELECT, OPROVAR_TO_DIAG, ODIAG_GRID, OFRAC, &
+                                       PDIAG_TSTEP, CSELECT  )                                         
 !     ########################################################################
 !
 !!****  *DEFAULT_DIAG_SURF_ATM* - routine to set default values for the choice of diagnostics

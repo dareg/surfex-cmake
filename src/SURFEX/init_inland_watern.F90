@@ -1,6 +1,6 @@
 !     #############################################################
-      SUBROUTINE INIT_INLAND_WATER_n (DTCO, DGU, UG, U, WM, FM, DGL, DGLC,    &
-                                      HPROGRAM,HINIT,                         &
+      SUBROUTINE INIT_INLAND_WATER_n (DTCO, OREAD_BUDGETC, UG, U, WM, FM,     &
+                                   DLO, DGL, DGLC, HPROGRAM,HINIT,            &
                                    KI,KSV,KSW,                                &
                                    HSV,PCO2,PRHOA,                            &
                                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
@@ -49,7 +49,7 @@ USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t, DIAG_t
 !
 !
 USE MODD_CSTS,       ONLY : XTT
@@ -71,11 +71,12 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DGL
 TYPE(DIAG_t), INTENT(INOUT) :: DGLC
 !
@@ -122,23 +123,22 @@ IF (U%CWATER=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DGL, DGLC, DGU%LREAD_BUDGETC, &
-                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,   &
-                         PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,  &
+  CALL INIT_IDEAL_FLUX(DLO, DGL, DGLC, OREAD_BUDGETC, &
+                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
                          PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CWATER=='WATFLX') THEN
-  CALL INIT_WATFLUX_n(DTCO, DGU, UG, U, WM, &
+  CALL INIT_WATFLUX_n(DTCO, OREAD_BUDGETC, UG, U, WM, &
                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                        PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                        PEMIS,PTSRAD,PTSURF,                          &
-                        KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
-                        'OK'                                          )  
+                      PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
+                      PEMIS,PTSRAD,PTSURF,                          &
+                      KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
+                      'OK'                                          )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL INIT_FLAKE_n(DTCO, DGU, UG, U, FM, &
-                    HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,       &
-                        PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                        PEMIS,PTSRAD,PTSURF,                          &
-                        KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
+  CALL INIT_FLAKE_n(DTCO, OREAD_BUDGETC, UG, U, FM, &
+                    HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
+                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
+                    PEMIS,PTSRAD,PTSURF,                          &
+                    KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
                         'OK')          
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_INLAND_WATER_N',1,ZHOOK_HANDLE)

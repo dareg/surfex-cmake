@@ -1,14 +1,14 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,   &
-                                      HPROGRAM, HCOUPLING,                                    &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
-                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
-                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
-                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
-                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 HTEST                                                                       )  
+SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, ICP, AG, CHI, DTI, DGI, GB, ISS, IG,  &
+                                      I, PKCI, PKD, PK, DST, SLT, HPROGRAM, HCOUPLING, PTSTEP,&
+                                      KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
+                                      PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
+                                      PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
+                                      PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH,    &
+                                      PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,   &
+                                      PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,          &
+                                      PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,     &
+                                      PPEQ_B_COEF, HTEST   )  
 !     ###############################################################################
 !
 !!****  *COUPLING_ISBA_OROGRAPHY_n * - Parameterizes effects of subgrid 
@@ -38,13 +38,23 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT
 !!                           improve forcing vertical shift
 !----------------------------------------------------------------
 !
-!
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+USE MODD_AGRI_n, ONLY : AGRI_t
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_DIAG_t
+USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
+USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_PACK_CH_ISBA, ONLY : PACK_CH_ISBA_t
+USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
+USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
+USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
@@ -64,14 +74,23 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+TYPE(AGRI_t), INTENT(INOUT) :: AG
+TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(ISBA_DIAG_t), INTENT(INOUT) :: DGI
+TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
+TYPE(SSO_t), INTENT(INOUT) :: ISS 
+TYPE(GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(PACK_CH_ISBA_t), INTENT(INOUT) :: PKCI
+TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
+TYPE(PACK_ISBA_t), INTENT(INOUT) :: PK
+TYPE(CANOPY_t), INTENT(INOUT) :: ICP
 !
-TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
+TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
@@ -192,7 +211,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,IM%I%P%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,I%P%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -248,7 +267,7 @@ ELSE
 !
 !  The subgrid slope comes from the XSSO_SLOPE field.
 !
-   Z3D_TOT_SURF(:) = SQRT(1.+IM%I%P%XSSO_SLOPE(:)**2)
+   Z3D_TOT_SURF(:) = SQRT(1.+ISS%XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
 !
 !  number of spectral shortwave bands
@@ -270,8 +289,8 @@ ELSE
 !
 !  incoming LW radiation per m2 of actual surface
 !
-   ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
-          + XSTEFAN*IM%I%I%XEMIS_NAT(:)*IM%I%R%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
+   ZLW(:) =  ZLW(:)                                       *     Z3D_TOT_SURF_INV(:) &
+          + XSTEFAN*I%I%XEMIS_NAT(:)*I%R%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !  liquid precipitation per m2 of actual surface
 !
@@ -288,18 +307,15 @@ ENDIF
 !*      3.     Call of ISBA
 !              ------------
 !
- CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, IM, DTGD, DTGR, DST, SLT,   &
-                             HPROGRAM, HCOUPLING,                                           &
-               PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
-               KI, KSV, KSW,                                                                 &
-               PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
-               PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                   &
-               ZRAIN, ZSNOW, ZLW, ZDIR_SW, ZSCA_SW, PSW_BANDS, ZPS, ZPA,                     &
-               PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
-               PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &
-               PPEW_A_COEF, PPEW_B_COEF,                                                     &
-               PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,                           &
-               'OK'                                                                          )  
+ CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, ICP, AG, CHI, DTI, DGI, GB, ISS, IG, I, &
+                             PKCI, PKD, PK, DST, SLT, HPROGRAM, HCOUPLING, PTSTEP,     &
+                             KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
+                             PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, ZQA, ZTA,     &
+                             ZRHOA, PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW, ZDIR_SW,        &
+                             ZSCA_SW, PSW_BANDS, ZPS, ZPA, PSFTQ, PSFTH, PSFTS, PSFCO2,&
+                             PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0,&
+                             PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,      &
+                             PPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF, 'OK'   )  
 !
 !-------------------------------------------------------------------------------------
 !

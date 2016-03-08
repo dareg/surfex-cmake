@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_ISBA_n (IM, &
-                                  HPROGRAM, HINIT)
+SUBROUTINE READ_NAMELISTS_ISBA_n (IM, HPROGRAM, HINIT)
 !     #######################################################
 !
 !---------------------------    
@@ -72,10 +71,10 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_CROCUS(LSNOWDRIFT,LSNOWDRIFT_SUBLIM,LSNOW_ABS_ZENITH,&
                      CSNOWMETAMO,CSNOWRAD)
 !
- CALL READ_DEFAULT_ISBA_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I%O, &
+ CALL READ_DEFAULT_ISBA_n(IM%CHI, IM%DGI%DE, IM%DGI%O, IM%DGI%DM, IM%I%O, &
                           HPROGRAM)
 !
- CALL READ_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I%O, &
+ CALL READ_ISBA_CONF_n(IM%CHI, IM%DGI%DE, IM%DGI%O, IM%DGI%DM, IM%I%O, &
                        HPROGRAM)
 !
 !

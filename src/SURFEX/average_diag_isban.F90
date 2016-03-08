@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE AVERAGE_DIAG_ISBA_n (DGI, DGIC, DGIP, DGIPC, OSURF_BUDGETC, OCANOPY, PPATCH, PLE, &
-                                      PHW,PHT,PSFCO2,PTRAD)
+      SUBROUTINE AVERAGE_DIAG_ISBA_n (DIO, DGI, DGIC, DGIP, DGIPC, OSURF_BUDGETC, &
+                                      OCANOPY, PPATCH, PLE, PHW, PHT ,PSFCO2, PTRAD)
 !     #######################################
 !
 !
@@ -47,7 +47,7 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_PATCH_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_PATCH_t, DIAG_OPTIONS_t
 !
 USE MODD_SURF_PAR,    ONLY : XUNDEF
 !
@@ -59,7 +59,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DIO
 TYPE(DIAG_t), INTENT(INOUT) :: DGI
 TYPE(DIAG_t), INTENT(INOUT) :: DGIC
 TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DGIP
@@ -88,6 +88,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              --------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG_ISBA_N',0,ZHOOK_HANDLE)
+!
 ZSUMPATCH(:) = 0.
 DO JPATCH=1,SIZE(PPATCH,2)
   ZSUMPATCH(:) = ZSUMPATCH(:) + PPATCH(:,JPATCH)
@@ -96,7 +97,7 @@ END DO
 !       1.     Energy fluxes
 !              -------------
 !
-IF (DGI%LSURF_BUDGET) THEN
+IF (DIO%LSURF_BUDGET) THEN
   DGI%XRN(:)     = 0.
   DGI%XH (:)     = 0.
   DGI%XLE(:)     = 0.
@@ -138,11 +139,11 @@ IF (DGI%LSURF_BUDGET) THEN
 !
 ! Evapotranspiration
 !
-        DGI%XEVAP(:)  = DGI%XEVAP(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XEVAP(:)
+      DGI%XEVAP(:)  = DGI%XEVAP(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XEVAP(:)
 !
 ! Sublimation
 !
-        DGI%XSUBL(:)  = DGI%XSUBL(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XSUBL(:)
+      DGI%XSUBL(:)  = DGI%XSUBL(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XSUBL(:)
       
 !
 ! Downwards SW radiation
@@ -281,7 +282,7 @@ DO JPATCH=1,SIZE(PPATCH,2)
   END WHERE
 END DO
 !
-IF (.NOT. OCANOPY .AND. DGI%N2M>=1) THEN
+IF (.NOT. OCANOPY .AND. DIO%N2M>=1) THEN
 
   DGI%XT2M(:)  = 0.
   DGI%XQ2M(:)  = 0.
@@ -330,7 +331,7 @@ END IF
 !
 ! Richardson number
 !
-IF (DGI%N2M>=1) THEN
+IF (DIO%N2M>=1) THEN
 
   DGI%XRI(:)  = 0.
   !
@@ -354,7 +355,7 @@ END IF
 !       3.     Transfer coefficients
 !              ---------------------
 !
-IF (DGI%LCOEF) THEN
+IF (DIO%LCOEF) THEN
   !
   DGI%XCD   (:) = 0.
   DGI%XCH   (:) = 0.
@@ -364,12 +365,11 @@ IF (DGI%LCOEF) THEN
   DGI%XZ0EFF(:) = 0.
   !
   DO JPATCH=1,SIZE(PPATCH,2)
-    !
     WHERE (ZSUMPATCH(:) > 0.)
       !
-            DGI%XCD(:)  = DGI%XCD(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XCD(:)
+      DGI%XCD(:)  = DGI%XCD(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XCD(:)
       !
-            DGI%XCH(:)  = DGI%XCH(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XCH(:)
+      DGI%XCH(:)  = DGI%XCH(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XCH(:)
       !
       DGI%XCE(:)  = DGI%XCE(:) + PPATCH(:,JPATCH) * DGIP%AL(JPATCH)%XCE(:)
       !
@@ -378,7 +378,7 @@ IF (DGI%LCOEF) THEN
       !      
       DGI%XZ0H(:)   = DGI%XZ0H(:)   + PPATCH(:,JPATCH) * 1./(LOG(PHT(:)/DGIP%AL(JPATCH)%XZ0H(:)))**2
       !      
-      DGI%XZ0EFF(:) = DGI%XZ0EFF(:) + PPATCH(:,JPATCH) * 1./(LOG(PHW(:)/DGIP%AL(JPATCH)%XZ0EFF        (:)))**2
+      DGI%XZ0EFF(:) = DGI%XZ0EFF(:) + PPATCH(:,JPATCH) * 1./(LOG(PHW(:)/DGIP%AL(JPATCH)%XZ0EFF(:)))**2
       !      
     END WHERE
   END DO
@@ -391,7 +391,7 @@ IF (DGI%LCOEF) THEN
   !
 END IF
 !
-IF (DGI%LSURF_VARS) THEN
+IF (DIO%LSURF_VARS) THEN
   DGI%XQS(:)  = 0.
   !
   DO JPATCH=1,SIZE(PPATCH,2)

@@ -1,6 +1,5 @@
 !     #################################################################################
-SUBROUTINE INIT_PGD_SURF_ATM (YSC, &
-                              HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
+SUBROUTINE INIT_PGD_SURF_ATM (YSC, HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
                                KYEAR, KMONTH, KDAY, PTIME            )  
 !     #################################################################################
 !
@@ -72,10 +71,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* initialization of PGD fields of output domain
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',0,ZHOOK_HANDLE)
- CALL INIT_SURF_ATM_n(YSC, &
-                      HPROGRAM,HINIT,.FALSE.,                     &
-                      0,0,1,                                     &
-                      YSV,ZCO2,ZRHOA,                            &
+ CALL INIT_SURF_ATM_n(YSC, HPROGRAM,HINIT,.FALSE.,               &
+                      0,0,1,YSV,ZCO2,ZRHOA,                      &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &
                       ZEMIS,ZTSRAD,ZTSURF,                       &
                       KYEAR, KMONTH, KDAY, PTIME,                &

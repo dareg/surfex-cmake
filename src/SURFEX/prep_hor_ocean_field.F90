@@ -1,7 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, &
-                                  O, OR, SG, &
-                                 HPROGRAM,                       &
+SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, O, OR, KLAT, HPROGRAM,   &
                                  HFILE,HFILETYPE,KLUOUT,OUNIF,   &
                                  HSURF,HNCVARNAME                )
 !     #######################################################
@@ -37,7 +35,6 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_GRID_n, ONLY : GRID_t
 !
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -67,7 +64,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(GRID_t), INTENT(INOUT) :: SG
+INTEGER, INTENT(IN) :: KLAT
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
@@ -98,13 +95,11 @@ IF (OUNIF) THEN
    WRITE(KLUOUT,*) '*****warning*****: you ask for uniform oceanic variables'
    CALL PREP_OCEAN_UNIF(KLUOUT,HSURF,ZFIELDIN)
 ELSE IF (HFILETYPE=='NETCDF') THEN
-   CALL PREP_OCEAN_NETCDF(HPROGRAM,HSURF,HFILE,HFILETYPE,KLUOUT,&
-                         HNCVARNAME,ZFIELDIN)
+   CALL PREP_OCEAN_NETCDF(HPROGRAM,HSURF,HFILE,HFILETYPE,KLUOUT,HNCVARNAME,ZFIELDIN)
 ELSE IF (HFILETYPE=='ASCII') THEN
    WRITE(KLUOUT,*) 'PERSONAL LIB TEST FOR READING ',HFILETYPE,'file type'
    WRITE(KLUOUT,*) 'ASCII FILE MUST CONTAIN LAT,LON,DEPTH,T,S,U,V'
-   CALL PREP_OCEAN_ASCLLV(DTCO, UG, U, &
-                          HPROGRAM,HSURF,HFILE,KLUOUT,ZFIELDIN)                         
+   CALL PREP_OCEAN_ASCLLV(DTCO, UG, U, HPROGRAM,HSURF,HFILE,KLUOUT,ZFIELDIN)                         
 ELSE
   CALL ABOR1_SFX('PREP_OCEAN_HOR_FIELD: data file type not supported : '//HFILETYPE)
 END IF
@@ -113,13 +108,12 @@ END IF
 !
 !*      3.     Horizontal interpolation
 !
-ALLOCATE(ZFIELDOUT  (SIZE(SG%XLAT),SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)) )
+ALLOCATE(ZFIELDOUT  (KLAT,SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)) )
 ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,3)))
 !
 DO JLEV=1,SIZE(ZFIELDIN,2)
   ZFIELD(:,:)=ZFIELDIN(:,JLEV,:)
-  CALL HOR_INTERPOL(DTCO, U, &
-                    KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
+  CALL HOR_INTERPOL(DTCO, U, KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
 ENDDO
 !
 !*      5.     Return to historical variable

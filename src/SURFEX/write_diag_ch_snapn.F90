@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_DIAG_CH_SNAP_n (DTCO, DGU, U, CHN, &
-                                       HPROGRAM)
+      SUBROUTINE WRITE_DIAG_CH_SNAP_n (DTCO, HSELECT, U, CHN, HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_CH_SNAP_n* - writes surface chemical emissions diagnostics
@@ -32,7 +31,6 @@
 !              ------------
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
 !
@@ -52,7 +50,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
@@ -74,8 +72,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_CH_SNAP_n',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'FULL  ','SURF  ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 !-------------------------------------------------------------------------------
 !
@@ -84,8 +81,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 DO JSPEC=1,CHN%NEMIS_NBR
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))
   YCOMMENT = "Emission data at time t (ppm*m/s)"
-  CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,CHN%XEMIS_FIELDS(:,JSPEC),IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,CHN%XEMIS_FIELDS(:,JSPEC),IRESP,HCOMMENT=YCOMMENT)
 END DO
 !
 !-------------------------------------------------------------------------------

@@ -1,13 +1,10 @@
 !     #############################################################
-      SUBROUTINE INIT_SEAFLUX_n (DTCO, DGU, UG, U, SM, &
-                                 HPROGRAM,HINIT,                            &
-                                  KI,KSV,KSW,                                &
-                                  HSV,PCO2,PRHOA,                            &
-                                  PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                  PEMIS,PTSRAD,PTSURF,                       &
-                                  KYEAR, KMONTH,KDAY, PTIME,                 &
-                                  HATMFILE,HATMFILETYPE,                     &
-                                  HTEST                                      )  
+      SUBROUTINE INIT_SEAFLUX_n (DTCO, OREAD_BUDGETC, UG, U, SM, &
+                                 HPROGRAM,HINIT,KI,KSV,KSW,                 &
+                                 HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,    &
+                                 PDIR_ALB,PSCA_ALB, PEMIS,PTSRAD,PTSURF,    &
+                                 KYEAR, KMONTH,KDAY,PTIME,                  &
+                                 HATMFILE,HATMFILETYPE,HTEST                )  
 !     #############################################################
 !
 !!****  *INIT_SEAFLUX_n* - routine to initialize SEAFLUX
@@ -53,7 +50,6 @@
 USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -108,8 +104,8 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
@@ -153,6 +149,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_SEAFLUX_N',0,ZHOOK_HANDLE)
+!
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HTEST/='OK') THEN
@@ -179,42 +176,41 @@ IF (LNAM_READ) THEN
  !        0.1. Hard defaults
  !      
  
- CALL DEFAULT_SEAFLUX(SM%S%XTSTEP,SM%S%XOUT_TSTEP,SM%S%CSEA_ALB,SM%S%CSEA_FLUX,SM%S%LPWG, &
-                      SM%S%LPRECIP,SM%S%LPWEBB,SM%S%NZ0,SM%S%NGRVWAVES,SM%O%LPROGSST,   &
+ CALL DEFAULT_SEAFLUX(SM%S%XTSTEP,SM%S%XOUT_TSTEP,SM%S%CSEA_ALB,SM%S%CSEA_FLUX,SM%S%LPWG,  &
+                      SM%S%LPRECIP,SM%S%LPWEBB,SM%S%NZ0,SM%S%NGRVWAVES,SM%O%LPROGSST,      &
                       SM%O%NTIME_COUPLING,SM%O%XOCEAN_TSTEP,SM%S%XICHCE,SM%S%CINTERPOL_SST,&
                       SM%S%CINTERPOL_SSS                            )
- CALL DEFAULT_SEAICE(HPROGRAM,                                   &
+ CALL DEFAULT_SEAICE(HPROGRAM,                                                  &
                      SM%S%CINTERPOL_SIC,SM%S%CINTERPOL_SIT, SM%S%XFREEZING_SST, &
-                     SM%S%XSEAICE_TSTEP, SM%S%XSIC_EFOLDING_TIME,          &
+                     SM%S%XSEAICE_TSTEP, SM%S%XSIC_EFOLDING_TIME,               &
                      SM%S%XSIT_EFOLDING_TIME, SM%S%XCD_ICE_CST, SM%S%XSI_FLX_DRV)     
  !                     
  CALL DEFAULT_CH_DEP(SM%CHS%CCH_DRY_DEP) 
  !            
- CALL DEFAULT_DIAG_SEAFLUX(SM%DGS%N2M,SM%DGS%LSURF_BUDGET,SM%DGS%L2M_MIN_ZS,&
-                        SM%DGS%LRAD_BUDGET,SM%DGS%LCOEF,SM%DGS%LSURF_VARS,&
-                           SM%DGO%LDIAG_OCEAN,SM%DGMSI%LDIAG_MISC_SEAICE,SM%DGS%LSURF_BUDGETC,&
-                          SM%DGS%LRESET_BUDGETC,SM%DGS%XDIAG_TSTEP )  
+ CALL DEFAULT_DIAG_SEAFLUX(SM%DGS%O%N2M,SM%DGS%O%LSURF_BUDGET,SM%DGS%O%L2M_MIN_ZS,&
+                           SM%DGS%O%LRAD_BUDGET,SM%DGS%O%LCOEF,SM%DGS%O%LSURF_VARS,&
+                           SM%DGS%GO%LDIAG_OCEAN,SM%DGS%DMI%LDIAG_MISC_SEAICE,&
+                           SM%DGS%O%LSURF_BUDGETC,SM%DGS%O%LRESET_BUDGETC,SM%DGS%O%XDIAG_TSTEP )  
 
 ENDIF
 !
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_SEAFLUX_n(SM%CHS, SM%DGO, SM%DGS, SM%DGMSI, SM%O, SM%S, &
-                             HPROGRAM)
+ CALL READ_DEFAULT_SEAFLUX_n(SM%CHS, SM%DGS%GO, SM%DGS%O, SM%DGS%DMI, SM%O, SM%S, HPROGRAM)
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
- CALL READ_SEAFLUX_CONF_n(SM%CHS, SM%DGO, SM%DGS, SM%DGMSI, SM%O, SM%S, &
-                          HPROGRAM)
+ CALL READ_SEAFLUX_CONF_n(SM%CHS, SM%DGS%GO, SM%DGS%O, SM%DGS%DMI, SM%O, SM%S, HPROGRAM)
 !
 SM%S%LINTERPOL_SST=.FALSE.
 SM%S%LINTERPOL_SSS=.FALSE.
 SM%S%LINTERPOL_SIC=.FALSE.
 SM%S%LINTERPOL_SIT=.FALSE.
+!
 IF(LCPL_SEA)THEN 
-  IF(SM%DGS%N2M<1)THEN
+  IF(SM%DGS%O%N2M<1)THEN
      CALL ABOR1_SFX('INIT_SEAFLUX_n: N2M must be set >0 in case of LCPL_SEA')
   ENDIF
 ! No STT / SSS interpolation in Earth System Model
@@ -252,19 +248,15 @@ SELECT CASE (HINIT)
 !
   CASE ('PRE')
 !
-    CALL PREP_CTRL_SEAFLUX(SM%DGS%N2M,SM%DGS%LSURF_BUDGET,SM%DGS%L2M_MIN_ZS,&
-                                SM%DGS%LRAD_BUDGET,SM%DGS%LCOEF,SM%DGS%LSURF_VARS,&
-                             SM%DGO%LDIAG_OCEAN,SM%DGMSI%LDIAG_MISC_SEAICE,ILUOUT,SM%DGS%LSURF_BUDGETC ) 
+    CALL PREP_CTRL_SEAFLUX(SM%DGS%O,SM%DGS%GO%LDIAG_OCEAN,SM%DGS%DMI%LDIAG_MISC_SEAICE,ILUOUT ) 
     IF (LNAM_READ) CALL READ_NAM_PREP_SEAFLUX_n(HPROGRAM)      
-    CALL READ_SEAFLUX_DATE(SM%O, &
-                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,SM%S%TTIME)
+    CALL READ_SEAFLUX_DATE(SM%O%LMERCATOR,HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,&
+                           KYEAR,KMONTH,KDAY,PTIME,SM%S%TTIME)
 !
   CASE DEFAULT
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                        HPROGRAM,'SEA   ','SEAFLX','READ ')
-    CALL READ_SURF(&
-                   HPROGRAM,'DTCUR',SM%S%TTIME,IRESP)
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','READ ')
+    CALL READ_SURF(HPROGRAM,'DTCUR',SM%S%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 !
 END SELECT
@@ -276,15 +268,15 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                        HPROGRAM,'SEA   ','SEAFLX','READ ')
+!
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%SG, SM%S, U, UG, &
-                         HPROGRAM)
+ CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%SG, SM%S, U, UG, HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
+!
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
 !-------------------------------------------------------------------------------
 !
@@ -299,8 +291,7 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                        HPROGRAM,'SEA   ','SEAFLX','READ ')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !*       2.     Prognostic fields:
 !               ----------------
@@ -313,8 +304,7 @@ IF(SM%S%LINTERPOL_SST.OR.SM%S%LINTERPOL_SSS.OR.SM%S%LINTERPOL_SIC.OR.SM%S%LINTER
    SM%S%TZTIME%TIME        = SM%S%TTIME%TIME        
 ENDIF
 !
- CALL READ_SEAFLUX_n(DTCO, SM%SG, SM%S, U, &
-                     HPROGRAM,ILUOUT)
+ CALL READ_SEAFLUX_n(DTCO, SM%SG, SM%S, U, HPROGRAM,ILUOUT)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -326,8 +316,7 @@ END IF
 !*       2.1    Ocean fields:
 !               -------------
 !
- CALL READ_OCEAN_n(DTCO, SM%O, SM%OR, U, &
-                   HPROGRAM)
+ CALL READ_OCEAN_n(DTCO, SM%O, SM%OR, U, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -378,9 +367,7 @@ ENDIF
 !
 !*       4.     Seaice prognostic variables and forcings :
 !
-CALL READ_SEAICE_n(&
-                   SM%SG, SM%S, &
-                   HPROGRAM,ILU,ILUOUT)
+CALL READ_SEAICE_n(SM%SG, SM%S, HPROGRAM,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -390,9 +377,7 @@ CALL READ_SEAICE_n(&
 ALLOCATE(SM%S%XEMIS    (ILU))
 SM%S%XEMIS    = 0.0
 !
-CALL UPDATE_RAD_SEA(SM%S%CSEA_ALB,SM%S%XSST,PZENITH,XTTS,SM%S%XEMIS,SM%S%XDIR_ALB,&
-                    SM%S%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,  &
-                    SM%S%LHANDLE_SIC,SM%S%XTICE,SM%S%XSIC,SM%S%XICE_ALB           )  
+CALL UPDATE_RAD_SEA(SM%S,PZENITH,XTTS,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
 !
 IF (SM%S%LHANDLE_SIC) THEN
    PTSURF(:) = SM%S%XSST(:) * ( 1 - SM%S%XSIC(:)) + SM%S%XTICE(:) * SM%S%XSIC(:)
@@ -405,15 +390,14 @@ ENDIF
 !*       6.     SBL air fields:
 !               --------------
 !
- CALL READ_SEAFLUX_SBL_n(DTCO, SM%S, SM%SSB, U, &
-                         HPROGRAM)
+ CALL READ_SEAFLUX_SBL_n(DTCO, SM%S%LSBL, SM%SSB, U, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*       7.     Chemistry /dust
 !               ---------
 !
- CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, SM%CHS%SVS,     &
+ CALL INIT_CHEMICAL_n(ILUOUT, KSV, HSV, SM%CHS%SVS,           &
                      SM%CHS%CCH_NAMES, SM%CHS%CAER_NAMES,     &
                      HDSTNAMES=SM%CHS%CDSTNAMES, HSLTNAMES=SM%CHS%CSLTNAMES        )
 !
@@ -431,15 +415,14 @@ END IF
 !               --------------------------
 !
 IF(.NOT.(SM%S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
-  SM%DGMSI%LDIAG_MISC_SEAICE=.FALSE.
+  SM%DGS%DMI%LDIAG_MISC_SEAICE=.FALSE.
 ENDIF
 !
- CALL DIAG_SEAFLUX_INIT_n(&
-                         SM%DGO, SM%DGS, SM%DGSC, SM%DGMSI, DGU, SM%S, &
-                         HPROGRAM,ILU,KSW)
-IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) CALL DIAG_SEAICE_INIT_n(&
-                         SM%DGO, SM%DGS, SM%DGSI, SM%DGSIC, SM%DGMSI, DGU, SM%S, &
-                         HPROGRAM,ILU,KSW)
+ CALL DIAG_SEAFLUX_INIT_n(SM%DGS%GO, SM%DGS%O, SM%DGS%D, SM%DGS%DC, OREAD_BUDGETC, SM%S, &
+                          HPROGRAM,ILU,KSW)
+IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) &
+        CALL DIAG_SEAICE_INIT_n(SM%DGS%GO, SM%DGS%O, SM%DGS%DI, SM%DGS%DIC, SM%DGS%DMI, &
+                               OREAD_BUDGETC, SM%S, HPROGRAM,ILU,KSW)
                  
 !
 !-------------------------------------------------------------------------------

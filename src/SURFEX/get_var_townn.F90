@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_TOWN_n (DGT, &
+      SUBROUTINE GET_VAR_TOWN_n (DTO, DGT, &
                                  HPROGRAM,KI,PQS,PZ0,PZ0H)
 !     ###################################################
 !
@@ -36,7 +36,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,   ONLY   : XUNDEF
@@ -51,6 +51,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DTO
 TYPE(DIAG_t), INTENT(IN) :: DGT
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
@@ -71,12 +72,12 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_TOWN_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DGT%LSURF_VARS) THEN 
+IF (DTO%LSURF_VARS) THEN 
         PQS      = DGT%XQS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DGT%LCOEF) THEN 
+IF (DTO%LCOEF) THEN 
         PZ0      = DGT%XZ0      
         PZ0H     = DGT%XZ0H
    ELSE 

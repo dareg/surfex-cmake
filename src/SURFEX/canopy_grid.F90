@@ -1,5 +1,5 @@
 !     #########################################
-      SUBROUTINE CANOPY_GRID(KI,KLVL,PZ,PZF,PDZ,PDZF)
+      SUBROUTINE CANOPY_GRID(KI,CP)
 !     #########################################
 !
 !!****  *CANOPY_GRID* - computation of vertical grid coordinatesa at 
@@ -52,6 +52,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -62,14 +63,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 INTEGER,                  INTENT(IN)    :: KI     ! number of horizontal points
-INTEGER,                  INTENT(IN)    :: KLVL   ! number of levels in canopy
-REAL, DIMENSION(KI,KLVL), INTENT(IN)    :: PZ     ! heights of canopy levels              (m)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PZF    ! heights of surface between canopy lev.(m)
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDZF   ! depth between 2 full canopy levels    (m)
-!                                                 ! PDZF is located at half levels
-REAL, DIMENSION(KI,KLVL), INTENT(OUT)   :: PDZ    ! depth between 2 half canopy levels    (m)
-!                                                 ! PDZ is located at full levels
 !
+TYPE(CANOPY_t), INTENT(INOUT) :: CP
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -79,6 +74,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('CANOPY_GRID',0,ZHOOK_HANDLE)
+!
 !*    1. Geometric computations
 !        ----------------------
 !
@@ -86,31 +83,32 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.1 layer depths (variable located at half levels below full levels)
 !         ------------
 !
-IF (LHOOK) CALL DR_HOOK('CANOPY_GRID',0,ZHOOK_HANDLE)
-PDZF(:,:) = -999.
-PDZF(:,1) = 2.*PZ(:,1)
-DO JLAYER=2,KLVL
-  PDZF(:,JLAYER) = PZ(:,JLAYER) - PZ(:,JLAYER-1)
+CP%XDZF(:,:) = -999.
+CP%XDZF(:,1) = 2.*CP%XZ(:,1)
+DO JLAYER=2,CP%NLVL
+  CP%XDZF(:,JLAYER) = CP%XZ(:,JLAYER) - CP%XZ(:,JLAYER-1)
 END DO
 !
 !*    1.2 Layer heights (variable located at half levels below full levels)
 !         -------------
 !
-PZF(:,:) = -999.
-PZF(:,1) = 0.
-DO JLAYER=2,KLVL
-  PZF(:,JLAYER) = 2.*PZ(:,JLAYER-1) - PZF(:,JLAYER-1)
+CP%XZF(:,:) = -999.
+CP%XZF(:,1) = 0.
+DO JLAYER=2,CP%NLVL
+  CP%XZF(:,JLAYER) = 2.*CP%XZ(:,JLAYER-1) - CP%XZF(:,JLAYER-1)
 END DO
 !
 !
 !*    1.3 layer depths (variable located at full levels)
 !         ------------
 !
-PDZ(:,:) = -999.
-DO JLAYER=1,KLVL-1
-  PDZ(:,JLAYER) = PZF(:,JLAYER+1) - PZF(:,JLAYER)
+CP%XDZ(:,:) = -999.
+DO JLAYER=1,CP%NLVL-1
+  CP%XDZ(:,JLAYER) = CP%XZF(:,JLAYER+1) - CP%XZF(:,JLAYER)
 END DO
-PDZ(:,KLVL) = 2.*(PZ(:,KLVL)-PZF(:,KLVL))
+!
+CP%XDZ(:,CP%NLVL) = 2.*(CP%XZ(:,CP%NLVL)-CP%XZF(:,CP%NLVL))
+!
 IF (LHOOK) CALL DR_HOOK('CANOPY_GRID',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

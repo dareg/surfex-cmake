@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_WATFLUX_n (DTCO, DGU, U, WG, W, &
-                                      HPROGRAM)
+      SUBROUTINE WRITE_PGD_WATFLUX_n (DTCO, HSELECT, U, WG, W, HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_WATFLUX_n* - routine to write pgd surface variables in their respective files
@@ -36,7 +35,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -56,7 +54,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
@@ -72,15 +70,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                     HPROGRAM,'WATER ','WATFLX','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','WRITE')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_WATFLUX_n(DGU, U, &
-                              WG, W, &
-                              HPROGRAM)
+ CALL WRITESURF_PGD_WATFLUX_n(HSELECT, WG, W, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

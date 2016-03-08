@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_COVER ( DGU, DTCO, UG, U, USS, &
-                            HPROGRAM,ORM_RIVER)
+      SUBROUTINE PGD_COVER ( DTCO, UG, U, USS, HPROGRAM,ORM_RIVER)
 !     ##############################################################
 !
 !!**** *PGD_COVER* monitor for averaging and interpolations of cover fractions
@@ -41,11 +40,10 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -100,11 +98,10 @@ INCLUDE "mpif.h"
 !            ------------------------
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: ORM_RIVER    ! delete river coverage (default = false)
@@ -255,7 +252,7 @@ ELSEIF(LIMP_COVER)THEN !LIMP_COVER (impose cover from input file at the same res
 #ifdef SFX_LFI
     CFILEIN_LFI = ADJUSTL(YCOVER)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+CALL INIT_IO_SURF_n(DTCO, U, &
                         YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF
 !
@@ -490,7 +487,7 @@ IF(.NOT.LIMP_COVER)THEN
 !             ---------------------
 !
   IF (IECO2/=0) THEN
-      CALL PGD_ECOCLIMAP2_DATA(DTCO, HPROGRAM)
+      CALL PGD_ECOCLIMAP2_DATA(DTCO%NYEAR, DTCO%XDATA_VEGTYPE, HPROGRAM)
   ENDIF
 !
 !-------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IG, I, UG, U, USS, &
+SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, UG, U, USS, IG, IP, O, R, TPTIME, PLAI, MX,  &
                                 HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,OKEY)
 !     #################################################################################
 !
@@ -37,11 +37,16 @@ USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+!
 USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
+USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_PREP,     ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, &
                           XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT, &
@@ -86,11 +91,18 @@ INCLUDE "mpif.h"
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+!
 TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: O
+TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(DATE_TIME), INTENT(IN) :: TPTIME
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PLAI
+TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: MX
+TYPE(ISBA_PROG_t), INTENT(INOUT) :: R
+!
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -127,7 +139,7 @@ INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: INI, INL, INP, JJ, JL! Work integer
 INTEGER                       :: INFOMPI
-INTEGER, DIMENSION(SIZE(I%M%X%XDG,1),SIZE(I%M%X%XDG,3)) :: IWORK
+INTEGER, DIMENSION(SIZE(MX%XDG,1),SIZE(MX%XDG,3)) :: IWORK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -149,7 +161,7 @@ INI=SIZE(IG%XLAT)
 !*      2.     Snow variables case?
 !
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_ISBA_SNOW(HPROGRAM,I%R%TSNOW%SCHEME,I%R%TSNOW%NLAYER,YFILE_SNOW,YFILETYPE_SNOW,&
+  CALL READ_PREP_ISBA_SNOW(HPROGRAM,R%TSNOW%SCHEME,R%TSNOW%NLAYER,YFILE_SNOW,YFILETYPE_SNOW,&
                                 YFILEPGD_SNOW,YFILEPGDTYPE_SNOW,GUNIF_SNOW)
   IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE_SNOW)==0.AND.LEN_TRIM(YFILETYPE_SNOW)==0)THEN
     IF(LEN_TRIM(YFILE)/=0.AND.LEN_TRIM(YFILETYPE)/=0)THEN
@@ -162,18 +174,16 @@ IF (HSURF=='SN_VEG ') THEN
        IF(ALL(XWSNOW==XUNDEF))XWSNOW=0.0
     ENDIF
   ENDIF
-  CALL PREP_HOR_SNOW_FIELDS(DTCO, &
-                            IG, U, &
-                            HPROGRAM, HSURF,                     &
+  CALL PREP_HOR_SNOW_FIELDS(DTCO, IG, U, HPROGRAM, HSURF,        &
                             YFILE_SNOW, YFILETYPE_SNOW,          &
                             YFILEPGD_SNOW, YFILEPGDTYPE_SNOW,    &
-                            ILUOUT, GUNIF_SNOW, I%O%NPATCH, 1,     &
-                            INI,I%R%TSNOW, I%I%TTIME,                &
+                            ILUOUT, GUNIF_SNOW, O%NPATCH, 1,    &
+                            INI,R%TSNOW, TPTIME,                &
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
-                            I%M%X%XVEGTYPE, I%IP%XVEGTYPE_PATCH, I%IP%XPATCH,    &
-                            OKEY                                 )
+                            MX%XVEGTYPE, IP%XVEGTYPE_PATCH, &
+                            IP%XPATCH, OKEY                 )
   DEALLOCATE(XWSNOW)
   DEALLOCATE(XRSNOW)
   DEALLOCATE(XTSNOW)
@@ -193,20 +203,16 @@ END IF
 IF (GUNIF) THEN
   CALL PREP_ISBA_UNIF(ILUOUT,HSURF,ZFIELDIN)
 ELSE IF (YFILETYPE=='ASCLLV') THEN
-  CALL PREP_ISBA_ASCLLV(DTCO, UG, U, USS, &
-                        HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
+  CALL PREP_ISBA_ASCLLV(DTCO, UG, U, USS, HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)        
   IF (NRANK==NPIO) CALL PREP_ISBA_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)        
 ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
-   CALL PREP_ISBA_EXTERN(DTCO, I%O, U, &
-                         HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,OKEY)
+   CALL PREP_ISBA_EXTERN(DTCO, O, U, HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,OKEY)
 ELSE IF (YFILETYPE=='BUFFER') THEN
-   CALL PREP_ISBA_BUFFER(IG, U, &
-                         HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
+   CALL PREP_ISBA_BUFFER(IG, U, HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
 ELSE IF (YFILETYPE=='NETCDF') THEN
-   CALL PREP_ISBA_NETCDF(DTCO, U, &
-                         HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
+   CALL PREP_ISBA_NETCDF(DTCO, U, HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)
 ELSE
    CALL ABOR1_SFX('PREP_HOR_ISBA_FIELD: data file type not supported : '//YFILETYPE)
 END IF
@@ -232,30 +238,32 @@ ALLOCATE(ZFIELDOUTP(INI,INL,INP))
 !
 DO JPATCH = 1, INP
   IF (INP==NVEGTYPE) THEN
-     LINTERP = (I%M%X%XVEGTYPE(:,JPATCH) > 0.)
-  ELSEIF(INP==I%O%NPATCH)THEN
-     LINTERP = (I%IP%XPATCH(:,JPATCH) > 0.)
+     LINTERP = (MX%XVEGTYPE(:,JPATCH) > 0.)
+  ELSEIF(INP==O%NPATCH)THEN
+     LINTERP = (IP%XPATCH(:,JPATCH) > 0.)
   ENDIF
-  CALL HOR_INTERPOL(DTCO, U, &
-                    ILUOUT,ZFIELDIN(:,:,JPATCH),ZFIELDOUTP(:,:,JPATCH))
+  CALL HOR_INTERPOL(DTCO, U, ILUOUT,ZFIELDIN(:,:,JPATCH),ZFIELDOUTP(:,:,JPATCH))
   LINTERP = .TRUE.
 END DO
 !
 DEALLOCATE(ZFIELDIN)
 !
-ALLOCATE(ZW (INI,INL,I%O%NPATCH))
-ZW = 0.
-IF (I%O%NPATCH/=INP) THEN
+IF (O%NPATCH/=INP .AND. TRIM(HSURF)/="ZS") THEN
   !
   ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
   CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
   !
   !*      6.     Transformation from vegtype grid to patch grid
   !
-  CALL VEGTYPE_GRID_TO_PATCH_GRID(I%O%NPATCH,I%IP%XVEGTYPE_PATCH,I%IP%XPATCH,ZFIELDOUTV,ZW)
+  ALLOCATE(ZW (INI,INL,O%NPATCH))
+  ZW = 0.
+  !
+  CALL VEGTYPE_GRID_TO_PATCH_GRID(O%NPATCH,IP%XVEGTYPE_PATCH,IP%XPATCH,ZFIELDOUTV,ZW)
   DEALLOCATE(ZFIELDOUTV)
   !
 ELSE
+  !
+  ALLOCATE(ZW(INI,INL,INP))
   !
   ZW(:,:,:) = ZFIELDOUTP(:,:,:)
   !
@@ -279,84 +287,84 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WG     ') 
-  ALLOCATE(ZF (INI,I%O%NGROUND_LAYER,I%O%NPATCH))
+  ALLOCATE(ZF (INI,O%NGROUND_LAYER,O%NPATCH))
   !
   !* interpolates on output levels
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,I%M%X%XDG,ZF)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,MX%XDG,ZF)
   !
   !* retrieves soil water content from soil relative humidity
-  ALLOCATE(I%R%XWG(INI,I%O%NGROUND_LAYER,I%O%NPATCH))
-  I%R%XWG(:,:,:)=XUNDEF
-  IF(I%O%CISBA=='DIF')THEN
-     IWORK(:,:)=I%M%X%NWG_LAYER(:,:)
+  ALLOCATE(R%XWG(INI,O%NGROUND_LAYER,O%NPATCH))
+  R%XWG(:,:,:)=XUNDEF
+  IF(O%CISBA=='DIF')THEN
+     IWORK(:,:)=MX%NWG_LAYER(:,:)
   ELSE
-     IWORK(:,:)=SIZE(I%R%XWG,2)
+     IWORK(:,:)=SIZE(R%XWG,2)
   ENDIF
-  DO JPATCH=1,I%O%NPATCH
+  DO JPATCH=1,O%NPATCH
     DO JJ=1,INI
        IF(IWORK(JJ,JPATCH)==NUNDEF)CYCLE
        INL=IWORK(JJ,JPATCH)
        DO JL=1,INL
-          I%R%XWG(JJ,JL,JPATCH) = I%IP%XWWILT(JJ,JL) + ZF(JJ,JL,JPATCH) * (I%IP%XWFC(JJ,JL)-I%IP%XWWILT(JJ,JL))
-          I%R%XWG(JJ,JL,JPATCH) = MAX(MIN(I%R%XWG(JJ,JL,JPATCH),I%IP%XWSAT(JJ,JL)),XWGMIN)
+          R%XWG(JJ,JL,JPATCH) = IP%XWWILT(JJ,JL) + ZF(JJ,JL,JPATCH) * (IP%XWFC(JJ,JL)-IP%XWWILT(JJ,JL))
+          R%XWG(JJ,JL,JPATCH) = MAX(MIN(R%XWG(JJ,JL,JPATCH),IP%XWSAT(JJ,JL)),XWGMIN)
        ENDDO
     ENDDO
   ENDDO
   !
-  WHERE(ZF(:,:,:)==XUNDEF)I%R%XWG(:,:,:)=XUNDEF
+  WHERE(ZF(:,:,:)==XUNDEF)R%XWG(:,:,:)=XUNDEF
   !
   DEALLOCATE(ZF)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WGI    ')
-  ALLOCATE(ZF (INI,I%O%NGROUND_LAYER,I%O%NPATCH))
+  ALLOCATE(ZF (INI,O%NGROUND_LAYER,O%NPATCH))
   !
   !* interpolates on output levels
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,I%M%X%XDG,ZF)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,MX%XDG,ZF)
   !
   !* retrieves soil ice content from soil relative humidity
-  ALLOCATE(I%R%XWGI(INI,I%O%NGROUND_LAYER,I%O%NPATCH))
-  I%R%XWGI(:,:,:)=0.0
-  IF(I%O%CISBA=='DIF')THEN
-     IWORK(:,:)=I%M%X%NWG_LAYER(:,:)
+  ALLOCATE(R%XWGI(INI,O%NGROUND_LAYER,O%NPATCH))
+  R%XWGI(:,:,:)=0.0
+  IF(O%CISBA=='DIF')THEN
+     IWORK(:,:)=MX%NWG_LAYER(:,:)
   ELSE
      IWORK(:,:)=2
   ENDIF  
-  DO JPATCH=1,I%O%NPATCH
+  DO JPATCH=1,O%NPATCH
     DO JJ=1,INI
        IF(IWORK(JJ,JPATCH)==NUNDEF)CYCLE
        INL=IWORK(JJ,JPATCH)
        DO JL=1,INL
-          I%R%XWGI(JJ,JL,JPATCH) = ZF(JJ,JL,JPATCH) * I%IP%XWSAT(JJ,JL)
-          I%R%XWGI(JJ,JL,JPATCH) = MAX(MIN(I%R%XWGI(JJ,JL,JPATCH),I%IP%XWSAT(JJ,JL)),0.)
+          R%XWGI(JJ,JL,JPATCH) = ZF(JJ,JL,JPATCH) * IP%XWSAT(JJ,JL)
+          R%XWGI(JJ,JL,JPATCH) = MAX(MIN(R%XWGI(JJ,JL,JPATCH),IP%XWSAT(JJ,JL)),0.)
        ENDDO
     ENDDO
   END DO
   !
-  WHERE(ZF  (:,:,:)==XUNDEF )I%R%XWGI(:,:,:)=XUNDEF
-  WHERE(I%R%XWGI(:,:,:)<=1.0E-10)I%R%XWGI(:,:,:)=0.0
+  WHERE(ZF  (:,:,:)==XUNDEF )R%XWGI(:,:,:)=XUNDEF
+  WHERE(R%XWGI(:,:,:)<=1.0E-10)R%XWGI(:,:,:)=0.0
   !
   DEALLOCATE(ZF)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TG     ') 
-  IF(I%O%LTEMP_ARP)THEN
-    INL=I%O%NTEMPLAYER_ARP
+  IF(O%LTEMP_ARP)THEN
+    INL=O%NTEMPLAYER_ARP
   ELSE
-    INL=I%O%NGROUND_LAYER
+    INL=O%NGROUND_LAYER
   ENDIF
-  ALLOCATE(I%R%XTG(INI,INL,I%O%NPATCH))
-  ALLOCATE(ZDG(SIZE(I%M%X%XDG,1),INL,SIZE(I%M%X%XDG,3)))
-  IF (I%O%CISBA=='2-L'.OR.I%O%CISBA=='3-L') THEN
-     DO JPATCH=1,I%O%NPATCH
+  ALLOCATE(R%XTG(INI,INL,O%NPATCH))
+  ALLOCATE(ZDG(SIZE(MX%XDG,1),INL,SIZE(MX%XDG,3)))
+  IF (O%CISBA=='2-L'.OR.O%CISBA=='3-L') THEN
+     DO JPATCH=1,O%NPATCH
         ZDG(:,1,JPATCH) = 0.01
         ZDG(:,2,JPATCH) = 0.40                    ! deep temperature for force-restore taken at 20cm
-        IF(I%O%CISBA=='3-L') ZDG(:,3,JPATCH) = 5.00   ! climatological temperature, usually not used
+        IF(O%CISBA=='3-L') ZDG(:,3,JPATCH) = 5.00   ! climatological temperature, usually not used
      ENDDO         
-     IF(I%O%LTEMP_ARP)THEN
-       DO JPATCH=1,I%O%NPATCH
+     IF(O%LTEMP_ARP)THEN
+       DO JPATCH=1,O%NPATCH
           ZDG(:,3,JPATCH) = 1.0
           DO JL=4,INL
              ZDG(:,JL,JPATCH) = ZDG(:,JL-1,JPATCH)+1.0
@@ -365,73 +373,73 @@ SELECT CASE (HSURF)
      ENDIF
   ELSE
     !* diffusion method, the soil grid is the same as for humidity
-    ZDG(:,:,:) = I%M%X%XDG(:,:,:)
+    ZDG(:,:,:) = MX%XDG(:,:,:)
   END IF
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,I%R%XTG)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,R%XTG)
   DEALLOCATE(ZDG)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WR     ') 
-  ALLOCATE(I%R%XWR(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XWR(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XWR(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XWR(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
   CASE('WRL    ') 
-  ALLOCATE(I%R%XWRL(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XWRL(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XWRL(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XWRL(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
   CASE('WRLI   ') 
-  ALLOCATE(I%R%XWRLI(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XWRLI(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XWRLI(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XWRLI(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WRVN   ') 
-  ALLOCATE(I%R%XWRVN(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XWRVN(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XWRVN(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XWRVN(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TV     ') 
-  ALLOCATE(I%R%XTV(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XTV(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XTV(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XTV(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TL     ') 
-  ALLOCATE(I%R%XTL(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XTL(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XTL(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XTL(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TC     ') 
-  ALLOCATE(I%R%XTC(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XTC(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XTC(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XTC(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('QC     ') 
-  ALLOCATE(I%R%XQC(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XQC(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XQC(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XQC(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -439,17 +447,17 @@ SELECT CASE (HSURF)
  CASE('LAI    ') 
   !* LAI is updated only if present and pertinent (evolutive LAI) in input file
   IF (ANY(ZW(:,:,:)/=XUNDEF)) THEN
-    DO JPATCH=1,I%O%NPATCH
-      I%M%T%XLAI(:,JPATCH) = ZW(:,1,JPATCH)
+    DO JPATCH=1,O%NPATCH
+      PLAI(:,JPATCH) = ZW(:,1,JPATCH)
     END DO
   END IF
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('ICE_STO') 
-  ALLOCATE(I%R%XICE_STO(INI,I%O%NPATCH))
-  DO JPATCH=1,I%O%NPATCH
-    I%R%XICE_STO(:,JPATCH) = ZW(:,1,JPATCH)
+  ALLOCATE(R%XICE_STO(INI,O%NPATCH))
+  DO JPATCH=1,O%NPATCH
+    R%XICE_STO(:,JPATCH) = ZW(:,1,JPATCH)
   END DO
   !
 END SELECT
@@ -496,7 +504,7 @@ IF (SIZE(PT1,2)==3) THEN
 !* 1. case with only 3 input levels (typically coming from 'UNIF')
 !     -----------------------------
 !
-  IF (I%O%CISBA=='2-L' .OR. I%O%CISBA=='3-L') THEN
+  IF (O%CISBA=='2-L' .OR. O%CISBA=='3-L') THEN
     !* Possible LTEMP_ARP case
     IF(SIZE(PT2,2)>3)THEN
       ILAYER1=3
@@ -506,7 +514,7 @@ IF (SIZE(PT1,2)==3) THEN
       ILAYER2=0
     ENDIF
     !* historical 2L or 3L ISBA version
-    DO JPATCH=1,I%O%NPATCH
+    DO JPATCH=1,O%NPATCH
       PT2(:,1:ILAYER1,JPATCH) = PT1(:,1:ILAYER1,JPATCH) 
       !* Possible LTEMP_ARP case
       IF(ILAYER2>0)THEN
@@ -515,16 +523,16 @@ IF (SIZE(PT1,2)==3) THEN
         ENDDO
       ENDIF
     END DO
-  ELSEIF(I%O%CISBA=='DIF')THEN
-    DO JPATCH=1,I%O%NPATCH
+  ELSEIF(O%CISBA=='DIF')THEN
+    DO JPATCH=1,O%NPATCH
        !surface layer (generally 0.01m imposed)
        PT2(:,1,JPATCH) = PT1(:,1,JPATCH) 
        !second layer
        PT2(:,2,JPATCH) = 0.25*PT1(:,1,JPATCH)+0.75*PT1(:,2,JPATCH)
        !others layers
        DO JI=1,SIZE(PT1,1)
-         DO JL=3,I%O%NGROUND_LAYER
-           IF(PD2(JI,JL,JPATCH)<=I%M%X%XDG2(JI,JPATCH))THEN 
+         DO JL=3,O%NGROUND_LAYER
+           IF(PD2(JI,JL,JPATCH)<=MX%XDG2(JI,JPATCH))THEN 
             !root layers
              PT2(JI,JL,JPATCH) = PT1(JI,2,JPATCH)
            ELSE
@@ -547,7 +555,7 @@ ELSE
      ZD1(:,JL) = PGRID1(JL)
   ENDDO
 !
-  DO JPATCH=1,I%O%NPATCH
+  DO JPATCH=1,O%NPATCH
      ZD2(:,:) = PD2(:,:,JPATCH)
      CALL INTERP_GRID_NAT(ZD1,PT1(:,:,JPATCH),ZD2,PT2(:,:,JPATCH))
   ENDDO

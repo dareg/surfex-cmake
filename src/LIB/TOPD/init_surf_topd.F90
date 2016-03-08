@@ -1,7 +1,6 @@
 !-------------------------------------------------------------------------------
 !     #############################################################
-      SUBROUTINE INIT_SURF_TOPD (DGEIC, I, UG, U, &
-                                 HPROGRAM,KI)
+      SUBROUTINE INIT_SURF_TOPD (DGEIC, I, UG, U, HPROGRAM,KI)
 !     #############################################################
 !
 !!****  *INIT_SURF_TOPD* - routine to initialize variables needed for coupling with Topmodel
@@ -111,8 +110,7 @@ IF (LCOUPL_TOPD) THEN
   !         4.   Initialises variables nedded for coupling with Topmodel
   !              -------------------------------------------------------
   !
-  CALL INIT_COUPL_TOPD(DGEIC, I, UG, U, &
-                       HPROGRAM,KI)
+  CALL INIT_COUPL_TOPD(DGEIC, I, UG, U, HPROGRAM,KI)
   !
   WRITE(ILUOUT,*) 'Couplage avec TOPMODEL active'
   !

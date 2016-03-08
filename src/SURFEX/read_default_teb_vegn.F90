@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE READ_DEFAULT_TEB_VEG_n (CHT, TVO, &
-                                         HPROGRAM)
+      SUBROUTINE READ_DEFAULT_TEB_VEG_n (CHT, TVO, HPROGRAM)
 !     #######################################################
 !
 !!****  *READ_DEFAULT_TEB_VEG* - routine to read the configuration for VEGs
