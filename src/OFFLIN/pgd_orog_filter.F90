@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE PGD_OROG_FILTER (U, UG, &
-                                  HPROGRAM)
+      SUBROUTINE PGD_OROG_FILTER (U, UG, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_OROGRAPHY* monitor for averaging and interpolations of cover fractions

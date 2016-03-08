@@ -198,7 +198,7 @@ XTIME0 = MPI_WTIME()
 !
  CALL PGD_SURF_ATM(YSC,CSURF_FILETYPE,'                            ','      ',.FALSE.)
 !
- CALL PGD_OROG_FILTER(YSC%U,YSC%UG%XGRID_FULL_PAR,CSURF_FILETYPE)
+ CALL PGD_OROG_FILTER(YSC%U,YSC%UG,CSURF_FILETYPE)
 !
 !*    3.      writing of surface physiographic fields
 !             ---------------------------------------
