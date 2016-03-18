@@ -674,10 +674,12 @@ ENDIF
            PSNOWLIQ(JJ,JWRK)=XUNDEF
            PSNOWHEAT(JJ,JWRK)=XUNDEF
            PSNOWRHO(JJ,JWRK)=XUNDEF
-           PSNOWGRAN1(JJ,JWRK)=XUNDEF
-           PSNOWGRAN2(JJ,JWRK)=XUNDEF
-           PSNOWHIST(JJ,JWRK)=XUNDEF
            PSNOWAGE(JJ,JWRK)=XUNDEF
+           IF (HSNOW_ISBA=='CRO') THEN
+               PSNOWGRAN1(JJ,JWRK)=XUNDEF
+               PSNOWGRAN2(JJ,JWRK)=XUNDEF
+               PSNOWHIST(JJ,JWRK)=XUNDEF
+           END IF
          ENDIF
          
       ENDDO
