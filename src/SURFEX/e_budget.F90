@@ -605,10 +605,12 @@ IF(HISBA == 'DIF')THEN
 !
 ! Determine the soil temperatures:
 !
+! WRITE(*,*) 'PTG(:,1) before SOIL_HEATDIF', PTG(:,1)
    CALL SOIL_HEATDIF(PTSTEP,PDZG,PDZDIF,PSOILCONDZ,      &
                      PSOILHCAPZ,PCG,ZTERM1,ZTERM2,       &
                      PTDEEP_A,PTDEEP_B,PTG,PDEEP_FLUX,   &
                      PFLUX_COR                           )
+! WRITE(*,*) 'PTG(:,1) after SOIL_HEATDIF', PTG(:,1)
 !
 !
 ! "Restore" flux here is actually the heat flux between the surface
@@ -620,7 +622,9 @@ ELSE
 !
    IF(OTEMP_ARP)THEN
 !
+!       WRITE(*,*) 'PTG(:,1) before SOIL_TEMP_ARP', PTG(:,1)
       CALL SOIL_TEMP_ARP(PTSTEP,ZA,ZB,ZC,PGAMMAT,PTDEEP_B,PSODELX,PTG)
+!       WRITE(*,*) 'PTG(:,1) after SOIL_TEMP_ARP', PTG(:,1)
 !
 !     "Restore" flux between surface and deep layer(W m-2):
       PRESTORE(:)=2.0*XPI*(PTG(:,1)-PTG(:,2))/(PCT(:)*XDAY*PSODELX(1)*(PSODELX(1)+PSODELX(2)))

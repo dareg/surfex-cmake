@@ -510,13 +510,15 @@ DO JSPLIT=1,ITSPLIT
 !*      3.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !  
+!    WRITE(*,*) 'before CALL DRAG',JSPLIT, ZQSAT,  PTG(:,1)
    CALL DRAG(HISBA, HSNOW_ISBA, HCPSURF, ZTSTEP,                                         &
              PTG(:,1), PWG(:,1), PWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,     &
              PPS, PRS, PVEG, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW,                      &
              PWFC(:,1), PWSAT(:,1), PPSNG, PPSNV, PZREF, PUREF,                          &
              PDIRCOSZW, PDELTA, PF5, PRESA,  PCH, PCD, PCDN, PRI, PHUG, PHUGI,           &
              PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF, PFFG_NOSNOW, PFFV_NOSNOW,             &
-             ZLEG_DELTA, ZLEGI_DELTA, PWR, PRHOA, PLVTT, PQSAT=ZQSAT                     )  
+             ZLEG_DELTA, ZLEGI_DELTA, PWR, PRHOA, PLVTT, PQSAT=ZQSAT                     )
+!    WRITE(*,*) 'after CALL DRAG',JSPLIT, ZQSAT ,  PTG(:,1)
 !
 !
 !
@@ -535,6 +537,7 @@ DO JSPLIT=1,ITSPLIT
                  ZTA_IC, ZQA_IC, ZUSTAR2_IC,                                             &
                  PSNOWFREE_ALB_VEG, PPSNV_A, PSNOWFREE_ALB_SOIL,                         &
                  PFFG, PFFV, PFF, PFFROZEN, PFALB, PFEMIS, ZDEEP_FLUX, ZRESTORE          )
+!    WRITE(*,*) 'after E_BUDGET',JSPLIT, ZQSAT ,  PTG(:,1)
 !
 !
 !*      5.0    Energy and momentum fluxes
@@ -559,6 +562,7 @@ DO JSPLIT=1,ITSPLIT
                     PSOILCONDZ,  PD_G, PDZG, PTG,                                        &
                     PSRSFC, PPSNV_A, PFFG, PFFV, PFF, PFFROZEN,                          &
                     ZLE_FLOOD, ZLEI_FLOOD, PSNOWTEMP                                     ) 
+!    WRITE(*,*) 'after ISBA_FLUXES',JSPLIT, ZQSAT ,  PTG(:,1)
 !
 !
 !*      6.0    Aggregated coefficients

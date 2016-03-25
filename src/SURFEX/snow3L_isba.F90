@@ -547,19 +547,20 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !        Snow redistribution scheme Sytron
 ! 
 ! 
-IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
+!   WRITE(*,*) OSNOWSYTRON
+  IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
 
-  CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
-                        PSNOWHEAT,PSNOWSWE,PSNOWRHO,                       &
-                        PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,KTAB_SYT, &
-                        ZBLOWSNW,PSYTMASS)
-!
-! Calculate maximum snow depth (m) of deposited blown snow particles
-!
-  WHERE(ZBLOWSNW(:,1)> 0.)
-     ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
-  END WHERE
-ENDIF
+    CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
+			  PSNOWHEAT,PSNOWSWE,PSNOWRHO,                       &
+			  PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,KTAB_SYT, &
+			  ZBLOWSNW,PSYTMASS)
+  !
+  ! Calculate maximum snow depth (m) of deposited blown snow particles
+  !
+    WHERE(ZBLOWSNW(:,1)> 0.)
+      ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
+    END WHERE
+  ENDIF
 !
 ! Calculate preliminary snow depth (m)
 ! Now after SNOW_SYTRON to account for cases of total snowpack erosion 
@@ -783,7 +784,7 @@ ENDIF
    NMASK(:) = 0
 !
    DO JJ=1,SIZE(ZSNOW)
-      IF (ZSNOW(JJ) >= XSNOWDMIN .OR. ZSNOWFALL(JJ) >= XSNOWDMIN .OR.ZBLOWSNW_ACC(JJ) >= XSNOWDMIN) THEN
+      IF (ZSNOW(JJ) >= XSNOWDMIN .OR. ZSNOWFALL(JJ) >= XSNOWDMIN .OR. ZBLOWSNW_ACC(JJ) >= XSNOWDMIN) THEN
          ISIZE_SNOW = ISIZE_SNOW + 1
          NMASK(ISIZE_SNOW) = JJ
       ENDIF
@@ -1183,9 +1184,9 @@ DO JJ=1,KSIZE1
    ZP_SWNETSNOW   (JJ) = PSWNETSNOW   (JI) 
    ZP_SWNETSNOWS  (JJ) = PSWNETSNOWS  (JI) 
    ZP_LWNETSNOW   (JJ) = PLWNETSNOW   (JI) 
-
+!
    ZP_SNOWMAK (JJ) = PSNOWMAK  (JI)
-  !  
+!  
 ENDDO
 !
 DO JJ=1,KSIZE1

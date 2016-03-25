@@ -4291,7 +4291,7 @@ DO JJ = 1,SIZE(PSNOW(:))
   IF (PSR(JJ)>XUEPSI .OR. PBLOWSNW(JJ,1) > XUEPSI  .OR. ZPSR_SNOWMAK(JJ) > XUEPSI) THEN  		!20160211
     !    
     ! newly fallen snow characteristics:
-    IF ( KNLVLS_USE(JJ)>0 ) THEN !Case of new snowfall on a previously snow-free surface 
+    IF ( KNLVLS_USE(JJ)>0 ) THEN 		!Case of new snowfall on a previously snow-free surface 
       ZSCAP    (JJ) = XCI*PSNOWRHO(JJ,1)
       ZSNOWTEMP(JJ) = XTT + ( PSNOWHEAT(JJ,1) + XLMTT*PSNOWRHO(JJ,1)*PSNOWDZ(JJ,1) ) / &
                             ( ZSCAP(JJ) * MAX( XSNOWDMIN/INLVLS, PSNOWDZ(JJ,1) ) ) 
@@ -4316,7 +4316,8 @@ DO JJ = 1,SIZE(PSNOW(:))
     ZWIND_GRAIN(JJ) = PVMOD(JJ)*LOG(PPHREF_WIND_GRAIN/ZZ0EFF)/        &
                                LOG(PUREF(JJ)/ZZ0EFF)    
     
-    PSNOWHMASS(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))*(XCI*(ZSNOWTEMP(JJ)-XTT)-XLMTT)*PTSTEP	!20160211
+    PSNOWHMASS(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))*&
+		      (XCI*(ZSNOWTEMP(JJ)-XTT)-XLMTT)*PTSTEP	!20160211
     !
     !  Density of fresh snow following Pahaut (1976)
     !
@@ -4336,18 +4337,21 @@ DO JJ = 1,SIZE(PSNOW(:))
     ENDIF
 !!modifs par VV
 !
-    IF (OSNOWMAK_PROP) THEN
+    ZSNOWFALL (JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
+!
+    IF (OSNOWMAK_PROP .AND. ZPSR_SNOWMAK(JJ) > XUEPSI) THEN
       PSNOWRHOF(JJ) = ((PSR(JJ)+PBLOWSNW(JJ,1))*PSNOWRHOF(JJ)+ ZPSR_SNOWMAK(JJ)*XRHO_SNOWMAK)/ &	! Additionnal boolean to use modified properties of machine made snow (MMS) or not p.spandre 2014/07/15
 		      (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))						! NB : ZPSR_SNOWMAK = XPSR_SNOWMAK si prod de neige. =0 sinon. 
+    ELSE
+      ZSNOWMAK(JJ) = ZSNOWMAK(JJ)*XRHO_SNOWMAK/PSNOWRHOF(JJ)						! if we do not use MMS properties then snowmaking thickness = snowfall thickness at SNOWRHOF density
     ENDIF
 !
-    ZSNOWFALL (JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
-													! if we do not use MMS properties then snowmaking thickness = snowfall thickness at SNOWRHOF density
+!    WRITE(*,*) ZPSR_SNOWMAK
 !
 !End of Snowmaking option 
 !! 20160211
-    PSNOW(JJ)      = PSNOW(JJ) + ZSNOWFALL(JJ)
-    PSNOWDZF(JJ)   = ZSNOWFALL(JJ)
+    PSNOW(JJ)      = PSNOW(JJ) + ZSNOWFALL(JJ) + ZSNOWMAK(JJ) 
+    PSNOWDZF(JJ)   = ZSNOWFALL(JJ) + ZSNOWMAK(JJ) 
 !
     IF ( HSNOWMETAMO=='B92' ) THEN
       !
@@ -4409,7 +4413,7 @@ ELSE
   ZANSMAX(:) = XANSMAX
 ENDIF
 !
-WHERE( GSNOWFALL(:) .AND. ABS(PSNOW(:)-ZSNOWFALL(:))< 0.000001 )	!! 20160211 Normalement ZSNOWFALL inclut ZSNOWMAK donc plus besoin de le retrancher ici.
+WHERE( GSNOWFALL(:) .AND. ABS(PSNOW(:)-ZSNOWFALL(:)-ZSNOWMAK(:))< 0.000001 )	!! 20160211 Normalement ZSNOWFALL inclut ZSNOWMAK donc plus besoin de le retrancher ici.
   PSNOWALB(:) = ZANSMAX(:)
 END WHERE
 !

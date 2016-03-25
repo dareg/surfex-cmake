@@ -1112,6 +1112,8 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
+! WRITE(*,*) 'PTG(:,1) before snow_3Lisba', PTG(:,1)	!(location,layer)
+
    CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,&
            TPTIME, PTSTEP, PVEGTYPE,                                            &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                             &
@@ -1168,6 +1170,8 @@ ELSE
 !*      9.0    ISBA Composit Energy Budget
 !              -----------------------------------------------
 !
+! WRITE(*,*) 'PTG(:,1) before ISBA_CEB', PTG(:,1)
+
   CALL ISBA_CEB(HISBA, HSNOW_ISBA, HCPSURF, OFLOOD, OTEMP_ARP, HIMPLICIT_WIND, &
                 PTSTEP, PSODELX, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,        &
                 PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, PSNOWALB,               &
@@ -1187,6 +1191,7 @@ ELSE
                 PLEI_FLOOD, PSNOWTEMP(:,1), PAC_AGG, PHU_AGG                   )
 !
 ENDIF
+! WRITE(*,*) 'PTG(:,1) after ISBA_CEB', PTG(:,1)
 !
 !*******************************************************************************
 ! WARNING: at this stage, all fluxes have two different meanings according
