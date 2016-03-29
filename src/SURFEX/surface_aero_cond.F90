@@ -128,10 +128,10 @@ DO JJ=1,SIZE(PRI)
 !
   ZSTA(JJ) = PRI(JJ)*ZWORK3(JJ)
 
+
 ! 
-! ! 
-! ! !
-! ! !
+! !
+! !
   IF ( PRI(JJ) < 0.0 ) THEN
     ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
                    +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
@@ -151,7 +151,7 @@ DO JJ=1,SIZE(PRI)
   PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
 
 
-! !!<bber
+! ! !!<bber
 !  ZCDN_M98(JJ)= XKARMAN*XKARMAN/(LOG(PUREF(JJ)/ZZ0(JJ))*LOG(PZREF(JJ)/ZZ0(JJ)))
 ! !    
 ! ! !    
@@ -197,10 +197,10 @@ DO JJ=1,SIZE(PRI)
 !     PRA(JJ)=1./(PCH(JJ)*ZVMOD(JJ))!/!\ be careful bber, checked in noilhan and mahfouf seems ok
 ! 
 !     PAC(JJ)=1./(PRA(JJ))
-!   !ENDIF
-! !     !bber>
-
-
+! !   !ENDIF
+! ! !     !bber>
+! 
+! 
 
 
 
