@@ -297,7 +297,11 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   IF (I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO') THEN
     !
     IF (DGU%LSNOWDIMNC) THEN
-      YCOMMENT='snow liquid water (m)'
+      IF (DGMI%LVOLUMETRIC_SNOWLIQ) THEN
+        YCOMMENT='snow liquid water (kg m-3)'
+      ELSE
+        YCOMMENT='snow liquid water (m)'
+      ENDIF
       CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,'SNOWLIQ',DGMI%XSNOWLIQ(:,:,:),IRESP,HCOMMENT=YCOMMENT)
       !

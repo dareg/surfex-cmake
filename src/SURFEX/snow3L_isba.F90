@@ -652,16 +652,39 @@ ENDIF
 !
    DO JWRK=1,INLVLS
       DO JJ=1,SIZE(PSNOWSWE,1)
-         IF(PSNOWSWE(JJ,JWRK)>0.0.AND.PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
-            WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
-            WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
-            WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
-            WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
-            WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
-            WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
-            WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
-            WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
-            CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+
+         IF(PSNOWSWE(JJ,JWRK)>0.0) THEN
+           IF (PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
+              WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
+              WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
+              WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
+              WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
+              WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
+              WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
+              WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
+              WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
+              CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+            ENDIF
+            
+         ELSE
+           !Prognostic variables forced to XUNDEF for correct outputs
+           PSNOWDZ(JJ,JWRK)=XUNDEF
+           ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
+           ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
+           ! (vanishing snowpack)
+           IF (.NOT.((PPSN(JJ)>0.0).AND.(JWRK==1))) THEN
+               PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ENDIF
+           PSNOWLIQ(JJ,JWRK)=XUNDEF
+           PSNOWHEAT(JJ,JWRK)=XUNDEF
+           PSNOWRHO(JJ,JWRK)=XUNDEF
+           PSNOWAGE(JJ,JWRK)=XUNDEF
+
+           IF (HSNOW_ISBA=='CRO') THEN
+               PSNOWGRAN1(JJ,JWRK)=XUNDEF
+               PSNOWGRAN2(JJ,JWRK)=XUNDEF
+               PSNOWHIST(JJ,JWRK)=XUNDEF
+           END IF
          ENDIF
       ENDDO
    ENDDO

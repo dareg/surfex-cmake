@@ -340,10 +340,12 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
                                          ! HSNOWMETAMO=F06 Flanner et al 2006
                                          !-----------------------
                                          ! Radiative transfer scheme
-                                         ! HSNOWMETAMO=B92 Brun et al 1992
-                                         ! HSNOWMETAMO=TAR TARTES  with constant impurities as function of ageing
-                                         ! HSNOWMETAMO=TA1 TARTES (Libois et al 2013) no impurities
-                                         ! HSNOWMETAMO=TA2 TARTES with constant impurities
+
+                                         ! HSNOWRAD=B92 Brun et al 1992
+                                         ! HSNOWRAD=TAR TARTES (Libois et al 2013)
+                                         ! HSNOWRAD=TA1 TARTES with constant impurities
+                                         ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
+
                                          !-----------------------                                         
 !*      0.2    declarations of local variables
 !

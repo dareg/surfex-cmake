@@ -130,8 +130,8 @@ DO JJ=1,SIZE(PRI)
 
 
 ! 
-! !
-! !
+! ! !
+! ! !
   IF ( PRI(JJ) < 0.0 ) THEN
     ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
                    +ZCHSTAR(JJ)*ZCDN(JJ)*15.                         &
