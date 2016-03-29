@@ -343,10 +343,10 @@ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO, HSNOWRAD
                                          ! HSNOWMETAMO=F06 Flanner et al 2006
                                          !-----------------------
                                          ! Radiative transfer scheme
-                                         ! HSNOWMETAMO=B92 Brun et al 1992
-                                         ! HSNOWMETAMO=TAR TARTES (Libois et al 2013)
-                                         ! HSNOWMETAMO=TA1 TARTES with constant impurities
-                                         ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
+                                         ! HSNOWRAD=B92 Brun et al 1992
+                                         ! HSNOWRAD=TAR TARTES (Libois et al 2013)
+                                         ! HSNOWRAD=TA1 TARTES with constant impurities
+                                         ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
                                          !-----------------------                                         
 !*      0.2    declarations of local variables
 !
@@ -4337,7 +4337,7 @@ DO JJ = 1,SIZE(PSNOW(:))
     ENDIF
 !!modifs par VV
 !
-    ZSNOWFALL (JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
+    ZSNOWFALL(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
 !
     IF (OSNOWMAK_PROP .AND. ZPSR_SNOWMAK(JJ) > XUEPSI) THEN
       PSNOWRHOF(JJ) = ((PSR(JJ)+PBLOWSNW(JJ,1))*PSNOWRHOF(JJ)+ ZPSR_SNOWMAK(JJ)*XRHO_SNOWMAK)/ &	! Additionnal boolean to use modified properties of machine made snow (MMS) or not p.spandre 2014/07/15
@@ -4346,7 +4346,7 @@ DO JJ = 1,SIZE(PSNOW(:))
       ZSNOWMAK(JJ) = ZSNOWMAK(JJ)*XRHO_SNOWMAK/PSNOWRHOF(JJ)						! if we do not use MMS properties then snowmaking thickness = snowfall thickness at SNOWRHOF density
     ENDIF
 !
-!    WRITE(*,*) ZPSR_SNOWMAK
+!    WRITE(*,*) 'ZPSR_SNOWMAK', ZPSR_SNOWMAK(JJ), 'ZSNOWFALL(JJ)',ZSNOWFALL(JJ),'PSNOW(JJ)',PSNOW(JJ)	!20160325
 !
 !End of Snowmaking option 
 !! 20160211
@@ -4423,6 +4423,8 @@ END WHERE
 ! 
 ! cases with fresh snow
 !
+! WRITE(*,*) 'ZPSR_SNOWMAK', ZPSR_SNOWMAK(:), 'ZSNOWFALL(JJ)',ZSNOWFALL(:),'PSNOW(JJ)',PSNOW(:)	!20160325
+
 DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
   !
   IF( .NOT.GSNOWFALL(JJ) .AND. PSNOW(JJ)>=XSNOWCRITD .AND. KNLVLS_USE(JJ)>=INLVLSMIN ) THEN 
@@ -4434,7 +4436,9 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
     ! too shallow snowpack or too few layers or only fresh snow
     ! ==> uniform grid and identical snow layers / number depends on snow depth 
     OMODIF_GRID(JJ) = .TRUE.
+!     WRITE(*,*) 'INLVLSMIN', INLVLSMIN, 'KNLVLS_USE(JJ)', KNLVLS_USE(JJ), 'ZSNOWFALL(JJ)',ZSNOWFALL(JJ), 'PSNOW(JJ)',PSNOW(JJ)	!20160325
     KNLVLS_USE (JJ) = MAX( INLVLSMIN, MIN( INLVLSMAX, INT(PSNOW(JJ)*XSCALE_CM) ) )
+!     WRITE(*,*) 'INLVLSMIN', INLVLSMIN, 'KNLVLS_USE(JJ)', KNLVLS_USE(JJ), 'ZSNOWFALL(JJ)',ZSNOWFALL(JJ), 'PSNOW(JJ)',PSNOW(JJ)
     PSNOWDZN(JJ,1:KNLVLS_USE(JJ)) = PSNOW(JJ) / KNLVLS_USE(JJ)
     !
   ELSE

@@ -67,7 +67,7 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
                        LSURF_MISC_BUDGET,LSURF_DIAG_ALBEDO,       &
                        LSURF_BUDGETC,LSURF_MISC_DIF,LPATCH_BUDGET,&
                        LPGD,LRESET_BUDGETC,LWATER_BUDGET,LPROSNOW,&
-                       XDIAG_TSTEP                                )     
+                       LVOLUMETRIC_SNOWLIQ,XDIAG_TSTEP            )     
 !      
  CALL DEFAULT_CROCUS(LSNOWDRIFT,LSNOWDRIFT_SUBLIM,LSNOW_ABS_ZENITH,&
                      CSNOWMETAMO,CSNOWRAD,LSNOWSYTRON, 		   &

@@ -455,6 +455,7 @@ PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
+PSNOWMAK(:) = 0.0
 !
 ZTC(:)         = 0.0			! Atmospheric temp (°C)							p.spandre 2014/03/27
 ZTW(:)         = 0.0			! Wet bulb temperature (K)						p.spandre 2014/03/27
@@ -915,14 +916,21 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
          ELSE
            !Prognostic variables forced to XUNDEF for correct outputs
            PSNOWDZ(JJ,JWRK)=XUNDEF
-           PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
+           ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
+           ! (vanishing snowpack)
+           IF (.NOT.((PPSN(JJ)>0.0).AND.(JWRK==1))) THEN
+               PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ENDIF
            PSNOWLIQ(JJ,JWRK)=XUNDEF
            PSNOWHEAT(JJ,JWRK)=XUNDEF
            PSNOWRHO(JJ,JWRK)=XUNDEF
-           PSNOWGRAN1(JJ,JWRK)=XUNDEF
-           PSNOWGRAN2(JJ,JWRK)=XUNDEF
-           PSNOWHIST(JJ,JWRK)=XUNDEF
            PSNOWAGE(JJ,JWRK)=XUNDEF
+           IF (HSNOW_ISBA=='CRO') THEN
+               PSNOWGRAN1(JJ,JWRK)=XUNDEF
+               PSNOWGRAN2(JJ,JWRK)=XUNDEF
+               PSNOWHIST(JJ,JWRK)=XUNDEF
+           END IF
          ENDIF
          
       ENDDO
