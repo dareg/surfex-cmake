@@ -565,7 +565,10 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
 ! Calculate preliminary snow depth (m)
 ! Now after SNOW_SYTRON to account for cases of total snowpack erosion 
-
+!
+  ZSNOW(:) = 0.
+  ZSNOWSWE_1D(:) = 0.	! Initialisation avant calcul p.s. 20160331
+!
   DO JWRK=1,SIZE(PSNOWSWE,2)
     DO JJ=1,SIZE(PSNOWSWE,1)
       ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)!+PSNOWMAK(JJ) 	!debug
@@ -578,6 +581,8 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !																	|
 ! A.Timing conditions for snowmaking
 !	A.1. Theoretical production
+!
+!
 !
   IF (OSNOWMAK_BOOL) THEN
   !
@@ -758,6 +763,9 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !!	Creation of XPROD_COUNT (p.s 20150305)
 	XPROD_COUNT(JJ) = XPROD_COUNT(JJ)+PTSTEP
 !!	End of Creation of XPROD_COUNT (p.s 20150305)
+! 	WRITE(*,*) TPTIME%TDATE%DAY,'/', TPTIME%TDATE%MONTH,'   ',ZSNOW(JJ),'   ', LCONDSNOWMAK(JJ), ' ',&
+! 	LTIMESNOWMAK(JJ), '   ', XPROD_COUNT(JJ)
+
 !
       ELSE
 	PSNOWMAK(JJ)=0.
