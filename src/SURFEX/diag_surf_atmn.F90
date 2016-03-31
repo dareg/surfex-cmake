@@ -474,9 +474,13 @@ IF (DGU%LCOEF) THEN
    DGU%XCD_TILE      (KMASK(JJ),KTILE)  = ZP_CD       (JJ)
    DGU%XCH_TILE      (KMASK(JJ),KTILE)  = ZP_CH       (JJ)
    DGU%XCE_TILE      (KMASK(JJ),KTILE)  = ZP_CE       (JJ)
-   DGU%XQS_TILE      (KMASK(JJ),KTILE)  = ZP_QS       (JJ)
    DGU%XZ0_TILE      (KMASK(JJ),KTILE)  = ZP_Z0       (JJ)
    DGU%XZ0H_TILE     (KMASK(JJ),KTILE)  = ZP_Z0H      (JJ)
+  ENDDO
+END IF
+IF (DGU%LSURF_VARS) THEN      
+  DO JJ=1,KSIZE
+   DGU%XQS_TILE      (KMASK(JJ),KTILE)  = ZP_QS       (JJ)
   ENDDO
 END IF
 !----------------------------------------------------------------------

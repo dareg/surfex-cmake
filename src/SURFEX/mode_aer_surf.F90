@@ -5,6 +5,9 @@ MODULE MODE_AER_SURF
 !! MODULE DUST PSD (Particle Size Distribution)
 !! Purpose: Contains subroutines to convert from transported variables (ppp)
 !! to understandable aerosol variables, e.g. #/m3, kg/m3, sigma, R_{n}
+!!
+!! Modifications
+!!    M.Leriche 2015 : masse molaire Black carbon à 12 g/mol
 !-------------------------------------------------------------------------------
 !!    MODIFICATIONS
 !!    -------------
@@ -62,6 +65,7 @@ ZMI(JP_AER_SO4)  = 98.
 ZMI(JP_AER_NO3)  = 63.
 ZMI(JP_AER_NH3)  = 17.
 ZMI(JP_AER_H2O)  = 18.
+ZMI(JP_AER_BC)  = 12.
 ZMI(JP_AER_DST)  = 100.
 IF (NSOA .EQ. 10) THEN
   ZMI(JP_AER_SOA1) = 88. 
