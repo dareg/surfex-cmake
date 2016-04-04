@@ -468,20 +468,20 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
    ENDDO
 !
 ! Calculate preliminary snow depth (m)
-
-   ZSNOW(:)=0.
-   ZSNOWH(:)=0.
-   ZSNOWSWE_1D(:)=0.
-   ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
-!
-   DO JWRK=1,SIZE(PSNOWSWE,2)
-      DO JJ=1,SIZE(PSNOWSWE,1)
-         ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
-         ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-         ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-      END DO
-   ENDDO
-!
+! 
+!    ZSNOW(:)=0.
+!    ZSNOWH(:)=0.
+!    ZSNOWSWE_1D(:)=0.
+!    ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
+! !
+!    DO JWRK=1,SIZE(PSNOWSWE,2)
+!       DO JJ=1,SIZE(PSNOWSWE,1)
+!          ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
+!          ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+!          ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+!       END DO
+!    ENDDO
+! !
    IF(HISBA == 'DIF')THEN
       ZSOILCOND(:)   = PSOILCONDZ(:)
    ELSE
@@ -515,11 +515,19 @@ ENDIF
 !
 ! Calculate preliminary snow depth (m)
 ! Now after SNOW_SYTRON to account for cases of total snowpack erosion 
+ ZSNOW(:)=0.
+ ZSNOWH(:)=0.
+ ZSNOWSWE_1D(:)=0.
+ ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
+
+
+
 
   DO JWRK=1,SIZE(PSNOWSWE,2)
     DO JJ=1,SIZE(PSNOWSWE,1)
-      ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-      ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
+     ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
+     ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+     ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
     END DO
   ENDDO
 
