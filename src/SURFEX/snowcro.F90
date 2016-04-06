@@ -2981,8 +2981,8 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     !
     ! Difference with ISBA-ES: a possible cooling of current refreezing water
     !                          is taken into account to calculate temperature change
-    CALL GET_RHO(ZSNOWRHO(JJ,JST),ZSNOWDZ(JJ,JST),PSNOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZNUMER)
-    CALL GET_RHO(ZSNOWRHO(JJ,JST),ZSNOWDZ(JJ,JST),ZSNOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZDENOM)
+    ZNUMER = ( ZSNOWRHO(JJ,JST) * ZSNOWDZ(JJ,JST) - ( PSNOWLIQ(JJ,JST) - ZFLOWLIQ(JJ,JST-1) ) * XRHOLW )
+    ZDENOM = ( ZSNOWRHO(JJ,JST) * ZSNOWDZ(JJ,JST) - ( ZSNOWLIQ(JJ,JST) - ZFLOWLIQ(JJ,JST-1) ) * XRHOLW )
     !
     PSNOWTEMP(JJ,JST) = XTT + ( ZSNOWTEMP(JJ,JST)-XTT )*ZNUMER/ZDENOM + ZPHASE(JJ,JST)/( XCI*ZDENOM ) 
     !
@@ -2997,7 +2997,7 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     !
     ! 5. Density is adjusted to conserve the mass
     !    --------------------------------------------------------------
-    CALL GET_RHO(ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZNUMER)
+    ZNUMER = ( ZSNOWRHO(JJ,JST) * PSNOWDZ(JJ,JST) - ( ZFLOWLIQ(JJ,JST) - ZFLOWLIQ(JJ,JST-1) ) * XRHOLW )
     !
     ZSNOWRHO(JJ,JST) = ZNUMER / ZSNOWDZ(JJ,JST) 
     !
