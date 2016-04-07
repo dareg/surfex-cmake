@@ -73,6 +73,8 @@ IF (LHOOK) CALL DR_HOOK('OCEAN_MERCATORVERGRID',0,ZHOOK_HANDLE)
 !       2.     Ocean Secondary Grids 
 !              ---------------------
 !
+!$OMP SINGLE
+!
 ALLOCATE(XK1        (NOCKMIN:NOCKMAX))
 ALLOCATE(XK2        (NOCKMIN:NOCKMAX))
 ALLOCATE(XK3        (NOCKMIN:NOCKMAX))
@@ -120,6 +122,8 @@ ENDDO
 !
 XK2(NOCKMAX) = XK2(NOCKMAX-1)
 XK3(NOCKMAX) = 0.
+!
+!$OMP END SINGLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('OCEAN_MERCATORVERGRID',1,ZHOOK_HANDLE)
