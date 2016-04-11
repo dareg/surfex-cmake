@@ -70,6 +70,7 @@ USE MODI_PREP_HOR_SNOW_FIELDS
 USE MODI_GET_LUOUT
 USE MODI_PREP_ISBA_EXTERN
 USE MODI_PREP_ISBA_NETCDF
+USE MODI_VEGTYPE_TO_PATCH
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -106,7 +107,7 @@ LOGICAL, OPTIONAL,  INTENT(INOUT):: OKEY
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizontally
-REAL, POINTER, DIMENSION(:,:)       :: ZFIELD ! field to interpolate horizontally
+REAL, POINTER, DIMENSION(:,:)       :: ZFIELD, ZPATCH ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   soil grid, npatch)
@@ -118,7 +119,7 @@ LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
 LOGICAL                       :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
-INTEGER                       :: INI, INL, INP, JJ, JL! Work integer
+INTEGER                       :: INI, INL, INP, JJ, JL, IP_I, IP_O, JP, JVEG ! Work integer
 INTEGER, DIMENSION(SIZE(I%XDG,1),SIZE(I%XDG,3)) :: IWORK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -212,16 +213,53 @@ INP = SIZE(ZFIELDIN,3)
 ALLOCATE(ZFIELDOUTP(INI,INL,INP))
 ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),INL))
 !
+ALLOCATE(ZPATCH(INI,INP))
+ZPATCH(:,:) = 0.
+!
+IF (INP==NVEGTYPE) THEN
+  ZPATCH(:,:) = I%XVEGTYPE(:,:)
+ELSEIF (INP==I%NPATCH) THEN
+  ZPATCH(:,:) = I%XPATCH(:,:)
+ELSEIF (INP<I%NPATCH) THEN
+  DO JP = 1,I%NPATCH
+    DO JVEG = 1,NVEGTYPE
+      IP_I = VEGTYPE_TO_PATCH(JVEG,INP)
+      IP_O = VEGTYPE_TO_PATCH(JVEG,I%NPATCH)
+      !
+      ! pour chaque patch d'entrée à interpoler, le masque
+      ! est la somme des patchs de sortie (plus détaillés) présent sur 
+      ! chaque point
+      IF (IP_O==JP) THEN
+        ZPATCH(:,IP_I) = ZPATCH(:,IP_I) + I%XPATCH(:,IP_O)
+        EXIT
+      ENDIF
+    ENDDO
+  ENDDO
+ELSEIF (INP>I%NPATCH) THEN
+  DO JP = 1,INP
+    DO JVEG = 1,NVEGTYPE
+      IP_I = VEGTYPE_TO_PATCH(JVEG,INP)
+      IP_O = VEGTYPE_TO_PATCH(JVEG,I%NPATCH)
+      !
+      ! pour chaque patch d'entrée à interpoler, le masque
+      ! est le patch de sortie (moins détaillé) présent 
+      ! sur ce point
+      IF (IP_I==JP) THEN
+        ZPATCH(:,IP_I) = I%XPATCH(:,IP_O)
+        EXIT
+      ENDIF
+    ENDDO
+  ENDDO
+ENDIF
+!
 DO JPATCH = 1, INP
+
   ZFIELD=ZFIELDIN(:,:,JPATCH)
-  IF (INP==NVEGTYPE) THEN
-     LINTERP = (I%XVEGTYPE(:,JPATCH) > 0.)
-  ELSEIF(INP==I%NPATCH)THEN
-     LINTERP = (I%XPATCH(:,JPATCH) > 0.)
-  ENDIF
+  LINTERP(:) = (ZPATCH(:,JPATCH) > 0.)
   CALL HOR_INTERPOL(DTCO, U, &
                     ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
   LINTERP = .TRUE.
+
 END DO
 !
 DEALLOCATE(ZFIELD)
