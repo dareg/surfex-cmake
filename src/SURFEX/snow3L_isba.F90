@@ -465,20 +465,6 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
    ENDDO
 !
-! Calculate preliminary snow depth (m)
-
-   ZSNOW(:)=0.
-   ZSNOWH(:)=0.
-   ZSNOWSWE_1D(:)=0.
-   ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
-!
-   DO JWRK=1,SIZE(PSNOWSWE,2)
-      DO JJ=1,SIZE(PSNOWSWE,1)
-         ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
-         ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-         ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-      END DO
-   ENDDO
 !
    IF(HISBA == 'DIF')THEN
       ZSOILCOND(:)   = PSOILCONDZ(:)
@@ -497,30 +483,35 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !        Snow redistribution scheme Sytron
 ! 
 ! 
-IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
+  IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
 
-  CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
+    CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
                         PSNOWHEAT,PSNOWSWE,PSNOWRHO,                       &
                         PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,KTAB_SYT, &
                         ZBLOWSNW,PSYTMASS)
 !
 ! Calculate maximum snow depth (m) of deposited blown snow particles
 !
-  WHERE(ZBLOWSNW(:,1)> 0.)
-     ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
-  END WHERE
-ENDIF
+    WHERE(ZBLOWSNW(:,1)> 0.)
+      ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
+    END WHERE
+  ENDIF
 !
 ! Calculate preliminary snow depth (m)
-! Now after SNOW_SYTRON to account for cases of total snowpack erosion 
 
+  ZSNOW(:)=0.
+  ZSNOWH(:)=0.
+  ZSNOWSWE_1D(:)=0.
+  ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
+!
   DO JWRK=1,SIZE(PSNOWSWE,2)
     DO JJ=1,SIZE(PSNOWSWE,1)
-      ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-      ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
+        ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
+        ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+        ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
     END DO
   ENDDO
-
+!
 ! ===============================================================
 ! === Packing: Only call snow model when there is snow on the surface
 !              exceeding a minimum threshold OR if the equivalent
