@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_SURF_LANDUSE_n (DTCO, DUO, U, UG, IM, SV, SLT, DST, &
+SUBROUTINE INIT_SURF_LANDUSE_n (DTCO, OREAD_BUDGETC, U, UG, IM, SV, SLT, NDST, &
                                HPROGRAM,HINIT,OLAND_USE,                  &
                                KI,KSV,KSW,                                &
                                HSV,PCO2,PRHOA,                            &
@@ -45,9 +45,8 @@ SUBROUTINE INIT_SURF_LANDUSE_n (DTCO, DUO, U, UG, IM, SV, SLT, DST, &
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
-USE MODD_DST_n, ONLY : DST_t
+USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SV_n, ONLY : SV_t
 !
@@ -58,12 +57,13 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
-!
+USE MODI_PACK_SAME_RANK
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
 !
 USE MODI_GET_TYPE_DIM_n
 USE MODI_READ_SURF
+USE MODI_MAKE_CHOICE_ARRAY
 !
 USE MODI_SET_VEGTYPES_FRACTIONS
 USE MODI_COMPUTE_ISBA_PARAMETERS
@@ -79,12 +79,12 @@ INCLUDE "mpif.h"
 !              -------------------------
 !
 TYPE(DATA_COVER_t) :: DTCO
-TYPE(DIAG_OPTIONS_t) :: DUO
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_t) :: U
 TYPE(SURF_ATM_GRID_t) :: UG
 TYPE(ISBA_MODEL_t) :: IM
 TYPE(SV_t), INTENT(INOUT) :: SV
-TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -118,12 +118,9 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
-REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
 INTEGER           :: JLAYER, INFOMPI
-INTEGER           :: ILU          ! 1D physical dimension
+INTEGER           :: ILU, JP         ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=4)  :: YLVL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -139,7 +136,7 @@ IF (.NOT. OLAND_USE)THEN
    RETURN
 ENDIF
 !
-IF (IM%I%O%CISBA=='DIF') THEN
+IF (IM%O%CISBA=='DIF') THEN
    CALL ABOR1_SFX('INIT_SURF_LANDUSEN: LAND USE NOT IMPLEMENTED WITH DIF')
 ENDIF
 !
@@ -157,7 +154,10 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
 !* 1D physical dimension
 !
  CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',ILU)
-ALLOCATE(ZWORK(ILU,IM%I%O%NPATCH))
+!
+!* End of IO
+!
+ CALL END_IO_SURF_n(HPROGRAM)
 !
 IM%DTI%LDATA_MIXPAR = .TRUE.
 IF (.NOT.ASSOCIATED(IM%DTI%XPAR_VEGTYPE)) ALLOCATE(IM%DTI%XPAR_VEGTYPE(ILU,NVEGTYPE))
@@ -169,44 +169,20 @@ IF (.NOT.ASSOCIATED(IM%DTI%XPAR_GROUND_DEPTH)) ALLOCATE(IM%DTI%XPAR_GROUND_DEPTH
 IF (.NOT.ASSOCIATED(IM%DTI%XPAR_IRRIG)) ALLOCATE(IM%DTI%XPAR_IRRIG(ILU,IM%DTI%NTIME,NVEGTYPE))
 IF (.NOT.ASSOCIATED(IM%DTI%XPAR_WATSUP)) ALLOCATE(IM%DTI%XPAR_WATSUP(ILU,IM%DTI%NTIME,NVEGTYPE))
 !
-!* read old patch fraction
-!       
-ALLOCATE(IM%I%IP%XPATCH_OLD(ILU,IM%I%O%NPATCH))       
-YRECFM = 'PATCH'
- CALL READ_SURF(HPROGRAM,YRECFM,IM%I%IP%XPATCH_OLD(:,:),IRESP)
-!
-!* read old soil layer thicknesses (m)
-!
-ALLOCATE(IM%I%M%X%XDG_OLD(ILU,IM%I%O%NGROUND_LAYER,IM%I%O%NPATCH))
-!
-DO JLAYER=1,IM%I%O%NGROUND_LAYER
-  WRITE(YLVL,'(I4)') JLAYER
-  YRECFM='OLD_DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-  CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-  IM%I%M%X%XDG_OLD(:,JLAYER,:)=ZWORK
-END DO
-DEALLOCATE(ZWORK)
-!
-!* End of IO
-!
- CALL END_IO_SURF_n(HPROGRAM)
-!
 !-------------------------------------------------------------------------------
 !
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
- CALL SET_VEGTYPES_FRACTIONS(DTCO, IM%DTI, IM%IG%NDIM, IM%I%O, IM%I%P, UG, U, HPROGRAM)
+ CALL SET_VEGTYPES_FRACTIONS(DTCO, IM%DTI, IM%G%NDIM, IM%O, IM%S, UG, U, HPROGRAM)
 !
 !* re-initialize ISBA with new parameters
-!       ²
- CALL COMPUTE_ISBA_PARAMETERS(DTCO, DUO%LREAD_BUDGETC, UG, U, &
-                              IM%AG, IM%CHI, IM%DTI, IM%DGI, IM%GB, &
-                              IM%ICP, IM%ISS, IM%IG, IM%I, DST, &
+!       
+ CALL COMPUTE_ISBA_PARAMETERS(DTCO, OREAD_BUDGETC, UG, U, IM, NDST,&
                               SLT, SV, HPROGRAM, HINIT, OLAND_USE, &
-                              ILU,KSV,KSW, HSV,PCO2,PRHOA,  &
-                             PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,      &
-                             PEMIS,PTSRAD,PTSURF,HTEST                 )
+                              ILU, KSV, KSW, HSV, PCO2, PRHOA,     &
+                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
+                              PEMIS,PTSRAD,PTSURF,HTEST            )
 !-------------------------------------------------------------------------------
 !                       
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_LANDUSE_N',1,ZHOOK_HANDLE)

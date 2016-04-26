@@ -1,6 +1,5 @@
 !     ########################################
-      SUBROUTINE PUT_ZS_n (F, I, S, U, TOP, W, &
-                           HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_n (F, IS, S, U, TOP, W, HPROGRAM,KI,PZS)
 !     ########################################
 !
 !!****  *PUT_ZS_n* - routine to modify surface oropgraphy of each tile using atmospheric
@@ -32,19 +31,12 @@
 !!      Original     01/2004
 !!      P. Le Moigne 05/2007: write model orography over each tile
 !-------------------------------------------------------------------------------
-!      
-!
-!
-!
-!
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
 USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
@@ -72,7 +64,7 @@ IMPLICIT NONE
 !
 !
 TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_S_t), INTENT(INOUT) :: IS
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
@@ -94,8 +86,7 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_N',0,ZHOOK_HANDLE)
 !*       1. Full surface
 !           ------------
 !
- CALL PUT_ZS_SURF_ATM_n(U, &
-                        HPROGRAM,KI,PZS)
+ CALL PUT_ZS_SURF_ATM_n(U, HPROGRAM,KI,PZS)
 !
 !*       2. inland water
 !           ------------
@@ -157,17 +148,13 @@ DO JJ=1,KSIZE
 ENDDO
 !
 IF (YTYPE=='W') THEN
-  CALL PUT_ZS_INLAND_WATER_n(F, W, &
-                             HPROGRAM,KSIZE,ZP_ZS,U%CWATER)
+  CALL PUT_ZS_INLAND_WATER_n(F, W, HPROGRAM,KSIZE,ZP_ZS,U%CWATER)
 ELSEIF (YTYPE=='N') THEN
-  CALL PUT_ZS_NATURE_n(I, &
-                       HPROGRAM,KSIZE,ZP_ZS)
+  CALL PUT_ZS_NATURE_n(IS, HPROGRAM,KSIZE,ZP_ZS)
 ELSEIF (YTYPE=='T') THEN
-  CALL PUT_ZS_TOWN_n(TOP, &
-                     HPROGRAM,KSIZE,ZP_ZS)
+  CALL PUT_ZS_TOWN_n(TOP, HPROGRAM,KSIZE,ZP_ZS)
 ELSEIF (YTYPE=='S') THEN
-  CALL PUT_ZS_SEA_n(S, &
-                    HPROGRAM,KSIZE,ZP_ZS)
+  CALL PUT_ZS_SEA_n(S, HPROGRAM,KSIZE,ZP_ZS)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_N:PACK_ZS',1,ZHOOK_HANDLE)

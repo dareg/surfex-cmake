@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_PGD_FLAKE_n (HSELECT, FG, F, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_FLAKE_n (HSELECT, G, F, HPROGRAM)
 !     ###################################################
 !
 !!****  *WRITESURF_PGD_FLAKE_n* - writes FLAKE fields
@@ -57,7 +57,7 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
-TYPE(GRID_t), INTENT(INOUT) :: FG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
@@ -95,7 +95,7 @@ YCOMMENT='ZS'
 !* latitude, longitude
 !
  CALL WRITE_GRID(HSELECT, &
-                 HPROGRAM,FG%CGRID,FG%XGRID_PAR,FG%XLAT,FG%XLON,FG%XMESH_SIZE,IRESP)
+                 HPROGRAM,G%CGRID,G%XGRID_PAR,G%XLAT,G%XLON,G%XMESH_SIZE,IRESP)
 !
 !* FLake parameters
 !

@@ -1,8 +1,7 @@
-SUBROUTINE COUPLING_DST_n (DST, P, IP, IR, DGIP, &
+SUBROUTINE COUPLING_DST_n (DSTK, KK, PK, PEK, DK, &
        HPROGRAM,                 &!I [char] Type of ISBA version
        KI,                       &!I [nbr] number of points in patch
        KDST,                     &!I Number of dust emission variables
-       KPATCH,                   &!I [nbr] number of patch in question
        PPS,                      &!I [Pa] surface pressure
        PQA,                      &!I [kg/kg] atmospheric specific humidity
        PRHOA,                    &!I [kg/m3] atmospheric density
@@ -31,9 +30,7 @@ SUBROUTINE COUPLING_DST_n (DST, P, IP, IR, DGIP, &
 !!      Modified    09/2012  : J. Escobar , SIZE(PTA) not allowed without-interface , replace by KI
 !
 !
-USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_DST_n, ONLY : DST_t
@@ -57,16 +54,15 @@ IMPLICIT NONE
 
 !INPUT
 !
-TYPE(DST_t), INTENT(INOUT) :: DST
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: P
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_t), INTENT(INOUT) :: DGIP
+TYPE(DST_t), INTENT(INOUT) :: DSTK
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_t), INTENT(INOUT) :: DK
 !
  CHARACTER(LEN=*), INTENT(IN)       :: HPROGRAM       !I Name of program
 INTEGER, INTENT(IN)                :: KI             !I Number of points in patch
 INTEGER, INTENT(IN)                :: KDST           !I Number of dust emission variables
-INTEGER, INTENT(IN)                :: KPATCH         !I Number of patch we are working on 
 REAL, DIMENSION(KI), INTENT(IN)    :: PPS            !I [Pa] surface pressure
 REAL, DIMENSION(KI), INTENT(IN)    :: PQA            !I [kg/kg] atmospheric specific humidity
 REAL, DIMENSION(KI), INTENT(IN)    :: PRHOA          !I [kg/m3] atmospheric density
@@ -95,11 +91,11 @@ ZSFDST_TILE(:,:,:)=0.d0
 DO JVEG=1,NVEGNO_DST
 
   !Jump out of loop if no dust emitter points
-  IF (DST%NSIZE_PATCH_DST(JVEG,KPATCH)==0) CYCLE
+  IF (DSTK%NSIZE_PATCH_DST(JVEG)==0) CYCLE
 
    CALL TREAT_SURF(  &
-      DST%NSIZE_PATCH_DST(JVEG,KPATCH),  &!I[idx] number of dust emitter points in patch
-      DST%NR_PATCH_DST (:,JVEG,KPATCH)   &!I[idx] index translator from patch to dustemitter
+      DSTK%NSIZE_PATCH_DST(JVEG),  &!I[idx] number of dust emitter points in patch
+      DSTK%NR_PATCH_DST (:,JVEG)   &!I[idx] index translator from patch to dustemitter
             )  
    
 ENDDO  !Loop on dust emitter vegetation
@@ -153,7 +149,6 @@ REAL, DIMENSION(KSIZE) :: ZP_INTER ![%] dust mode fraction of emitted mass
 REAL, DIMENSION(KSIZE) :: ZP_CD_DST     ! drag coefficient uses by DEAD
 REAL, DIMENSION(KSIZE) :: ZH               ! 10m (wind altitude)
 !
-TYPE(DIAG_t) :: YZP
 REAL, DIMENSION(KSIZE) :: ZP_MER10M     ![m/s] meridional wind at 10m
 REAL, DIMENSION(KSIZE) :: ZP_WIND10M    ![m/s] wind at 10m
 REAL, DIMENSION(KSIZE) :: ZP_ZON10M     ![m/s] zonal wind at 10m
@@ -182,30 +177,30 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_DST_n:TREAT_SURF',0,ZHOOK_HANDLE)
 !Pack patch-vectors to dust emitter vectors
 !i.e. allocate memory for the packed (dust emitter) vectors
 DO JJ=1,KSIZE
-  ZP_CLAY(JJ) = P%XCLAY  (KMASK(JJ),1)  
-  ZP_PS  (JJ) = PPS      (KMASK(JJ))
-  ZP_TS  (JJ) = DGIP%XTS (KMASK(JJ))
-  ZP_QA  (JJ) = PQA      (KMASK(JJ))
-  ZP_RHOA(JJ) = PRHOA    (KMASK(JJ))
-  ZP_SAND(JJ) = P%XSAND  (KMASK(JJ),1)
-  ZP_PA  (JJ) = PPA      (KMASK(JJ)) 
-  ZP_TA  (JJ) = PTA      (KMASK(JJ)) 
-  ZP_TG  (JJ) = IR%XTG   (KMASK(JJ),1,1)
-  ZP_U   (JJ) = PU       (KMASK(JJ))
-  ZP_UREF(JJ) = PUREF    (KMASK(JJ)) 
-  ZP_V   (JJ) = PV       (KMASK(JJ))
-  ZP_WG  (JJ) = IR%XWG   (KMASK(JJ),1,1)
-  ZP_WSAT(JJ) = IP%XWSAT (KMASK(JJ),1)                      
-  ZP_ZREF(JJ) = PZREF    (KMASK(JJ))    
-  ZP_CD  (JJ) = DGIP%XCD (KMASK(JJ))
-  ZP_CDN (JJ) = DGIP%XCDN(KMASK(JJ))
-  ZP_CH  (JJ) = DGIP%XCH (KMASK(JJ))
-  ZP_RI  (JJ) = DGIP%XRI (KMASK(JJ))
-  ZP_Z0H (JJ) = DGIP%XZ0H(KMASK(JJ))
+  ZP_CLAY(JJ) = KK%XCLAY(KMASK(JJ),1)  
+  ZP_PS  (JJ) = PPS     (KMASK(JJ))
+  ZP_TS  (JJ) = DK%XTS  (KMASK(JJ))
+  ZP_QA  (JJ) = PQA     (KMASK(JJ))
+  ZP_RHOA(JJ) = PRHOA   (KMASK(JJ))
+  ZP_SAND(JJ) = KK%XSAND(KMASK(JJ),1)
+  ZP_PA  (JJ) = PPA     (KMASK(JJ)) 
+  ZP_TA  (JJ) = PTA     (KMASK(JJ)) 
+  ZP_TG  (JJ) = PEK%XTG (KMASK(JJ),1)
+  ZP_U   (JJ) = PU      (KMASK(JJ))
+  ZP_UREF(JJ) = PUREF   (KMASK(JJ)) 
+  ZP_V   (JJ) = PV      (KMASK(JJ))
+  ZP_WG  (JJ) = PEK%XWG (KMASK(JJ),1)
+  ZP_WSAT(JJ) = KK%XWSAT(KMASK(JJ),1)                      
+  ZP_ZREF(JJ) = PZREF   (KMASK(JJ))    
+  ZP_CD  (JJ) = DK%XCD  (KMASK(JJ))
+  ZP_CDN (JJ) = DK%XCDN (KMASK(JJ))
+  ZP_CH  (JJ) = DK%XCH  (KMASK(JJ))
+  ZP_RI  (JJ) = DK%XRI  (KMASK(JJ))
+  ZP_Z0H (JJ) = DK%XZ0H (KMASK(JJ))
 ENDDO
 !
 !Manipulate some variables since we assume dust emission occurs over flat surface
-ZP_Z0_EROD(:) = DST%Z0_EROD_DST(JVEG)   !Set z0 to roughness of erodible surface
+ZP_Z0_EROD(:) = DSTK%Z0_EROD_DST(JVEG)   !Set z0 to roughness of erodible surface
 !
 IF (JVEG ==1) THEN
   ZP_DST_EROD(:) = 1.
@@ -361,7 +356,7 @@ IF (CEMISPARAM_DST == "EXPLI" .OR. CEMISPARAM_DST == "AMMA ") THEN
 
 ELSE 
   DO JMODE = 1,NDSTMDE
-    ZP_MSS_FRC_SRC(:,JORDER_DST(JMODE)) = DST%XMSS_FRC_SRC(JMODE)
+    ZP_MSS_FRC_SRC(:,JORDER_DST(JMODE)) = DSTK%XMSS_FRC_SRC(JMODE)
   ENDDO
 END IF
 
@@ -428,13 +423,13 @@ DO JMODE=1,NDSTMDE
                
       !Get sum of vegetation fraction in this patch
       !fxm: VERY BAD LOOP ORDER
-      VEGFRAC_IN_PATCH = SUM(IP%XVEGTYPE_PATCH(II,:,1))
+      VEGFRAC_IN_PATCH = SUM(PK%XVEGTYPE_PATCH(II,:))
                
       !Get production of flux by adding up the contribution 
       !from the different tiles (here, "tiles" are dust emitter surfaces)
       PSFDST(II,JSV_IDX) = PSFDST(II,JSV_IDX)                  & ![kg/m^2_{patch}/sec] dust flux per patch 
                            + (ZSFDST_TILE(II,JJ,JMODE)         & ![kg/m^2_{emittersurface}/sec] Dust flux per surface area of dust emitter surface
-                           * IP%XVEGTYPE_PATCH(II,DST%NVT_DST(JJ),1)  & ![frc] m^2_{emittersurface}/m^2_{nature}
+                           * PK%XVEGTYPE_PATCH(II,DSTK%NVT_DST(JJ))  & ![frc] m^2_{emittersurface}/m^2_{nature}
                            / VEGFRAC_IN_PATCH )                  ![frc] m^2_{patch}/m^2_{nature}  
     ENDDO !loop on point in patch
   ENDDO    !loop on different dust emitter surfaces

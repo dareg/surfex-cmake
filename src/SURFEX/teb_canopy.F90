@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE TEB_CANOPY(KI, TCP, PBLD, PBLD_HEIGHT, PWALL_O_HOR, PPA, PRHOA, PDUWDU_ROAD, PUW_ROOF, &
+SUBROUTINE TEB_CANOPY(KI, SB, PBLD, PBLD_HEIGHT, PWALL_O_HOR, PPA, PRHOA, PDUWDU_ROAD, PUW_ROOF, &
                       PDUWDU_ROOF, PH_WALL, PH_ROOF, PE_ROOF, PAC_ROAD, PAC_ROAD_WAT, PFORC_U,    &
                       PDFORC_UDU, PFORC_E, PDFORC_EDE, PFORC_T, PDFORC_TDT, PFORC_Q, PDFORC_QDQ)
 !     ###############################################################################
@@ -40,7 +40,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
-TYPE(CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 REAL, DIMENSION(KI),      INTENT(IN)    :: PBLD        ! building density                    (-)
 REAL, DIMENSION(KI),      INTENT(IN)    :: PBLD_HEIGHT ! building height                     (m)
@@ -58,33 +58,33 @@ REAL, DIMENSION(KI),      INTENT(IN)    :: PE_ROOF   ! flux of vapor for roof su
 REAL, DIMENSION(KI),      INTENT(IN)    :: PAC_ROAD  ! road aerodynamical conductance        ()
 REAL, DIMENSION(KI),      INTENT(IN)    :: PAC_ROAD_WAT ! road water aerodynamical conductance        ()
 !
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PFORC_T   ! tendency of Temp due to canopy drag   (T/s)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PDFORC_TDT! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_T   ! tendency of Temp due to canopy drag   (T/s)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_TDT! formal derivative of the tendency of
 !                                                    ! Temp due to canopy drag               (1/s)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PFORC_Q   ! tendency of Temp due to canopy drag   (kg/m3/s)
-REAL, DIMENSION(KI,TCP%NLVL), INTENT(OUT)   :: PDFORC_QDQ! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_Q   ! tendency of Temp due to canopy drag   (kg/m3/s)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_QDQ! formal derivative of the tendency of
 !                                                    ! Temp due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
 !
 INTEGER                  :: JLAYER    ! loop counter on canopy heights
 !         
-REAL, DIMENSION(KI,TCP%NLVL) :: ZCDRAG    ! drag coefficient in canopy
-REAL, DIMENSION(KI,TCP%NLVL) :: ZSH       ! horizontal surface of building
+REAL, DIMENSION(KI,SB%NLVL) :: ZCDRAG    ! drag coefficient in canopy
+REAL, DIMENSION(KI,SB%NLVL) :: ZSH       ! horizontal surface of building
                                       ! (road&roof) for each canopy level
-REAL, DIMENSION(KI,TCP%NLVL) :: ZSV       ! vertical surface of building
+REAL, DIMENSION(KI,SB%NLVL) :: ZSV       ! vertical surface of building
                                       ! (walls) for each canopy level
-REAL, DIMENSION(KI,TCP%NLVL) :: ZFORC
-REAL, DIMENSION(KI,TCP%NLVL) :: ZDENSITY
-REAL, DIMENSION(KI,TCP%NLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
-REAL, DIMENSION(KI,TCP%NLVL) :: ZP        ! pressure              at full levels
-REAL, DIMENSION(KI,TCP%NLVL) :: ZEXN      ! Exner function        at full levels
+REAL, DIMENSION(KI,SB%NLVL) :: ZFORC
+REAL, DIMENSION(KI,SB%NLVL) :: ZDENSITY
+REAL, DIMENSION(KI,SB%NLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
+REAL, DIMENSION(KI,SB%NLVL) :: ZP        ! pressure              at full levels
+REAL, DIMENSION(KI,SB%NLVL) :: ZEXN      ! Exner function        at full levels
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -99,12 +99,12 @@ IF (LHOOK) CALL DR_HOOK('TEB_CANOPY',0,ZHOOK_HANDLE)
 ZSH(:,:) = 0.
 ZSH(:,1) = (1.-PBLD(:))
 !
-WHERE( TCP%XZF(:,2)>=PBLD_HEIGHT(:) ) ZSH(:,2) = PBLD(:) ! the roofs cannot be at the same level as roads
-DO JLAYER = 2,TCP%NLVL-1
-  WHERE( TCP%XZF(:,JLAYER)<PBLD_HEIGHT(:) .AND. &
-         TCP%XZF(:,JLAYER+1)>=PBLD_HEIGHT(:) ) ZSH(:,JLAYER) = PBLD(:)
+WHERE( SB%XZF(:,2)>=PBLD_HEIGHT(:) ) ZSH(:,2) = PBLD(:) ! the roofs cannot be at the same level as roads
+DO JLAYER = 2,SB%NLVL-1
+  WHERE( SB%XZF(:,JLAYER)<PBLD_HEIGHT(:) .AND. &
+         SB%XZF(:,JLAYER+1)>=PBLD_HEIGHT(:) ) ZSH(:,JLAYER) = PBLD(:)
 END DO
-WHERE( TCP%XZF(:,TCP%NLVL)<PBLD_HEIGHT(:) ) ZSH(:,TCP%NLVL) = PBLD(:)
+WHERE( SB%XZF(:,SB%NLVL)<PBLD_HEIGHT(:) ) ZSH(:,SB%NLVL) = PBLD(:)
 !
 !*      2.1    Drag coefficient by walls
 !              -------------------------
@@ -125,11 +125,11 @@ ZAIRVOL = 1.
 !
 !*      1.2    Discretization on each canopy level
 !
-DO JLAYER=1,TCP%NLVL
+DO JLAYER=1,SB%NLVL
   ZDENSITY(:,JLAYER) = PWALL_O_HOR(:)
 ENDDO  
 !
- CALL CANOPY(KI, TCP, PBLD_HEIGHT, ZDENSITY, ZCDRAG, ZAIRVOL, &
+ CALL CANOPY(KI, SB, PBLD_HEIGHT, ZDENSITY, ZCDRAG, ZAIRVOL, &
             ZSV, ZFORC, PFORC_U, PDFORC_UDU, PFORC_E, PDFORC_EDE      )
 !
 !-------------------------------------------------------------------------------------
@@ -148,14 +148,14 @@ ENDDO
 !* Note that for the time being, air is assumed to occupy all the space of the grid
 ! (buildings have no volume), so that Vair = Vtot
 !
-ZFORC(:,:) = ZSH(:,:)/ZAIRVOL(:,:)/TCP%XDZ(:,:)
+ZFORC(:,:) = ZSH(:,:)/ZAIRVOL(:,:)/SB%XDZ(:,:)
 !
 !*      2.3    Drag force by roof surfaces
 !              ---------------------------
 !
 !* drag force by horizontal surfaces
 !
-DO JLAYER=2,TCP%NLVL
+DO JLAYER=2,SB%NLVL
   PFORC_U   (:,JLAYER) = PFORC_U   (:,JLAYER) + PUW_ROOF   (:) * ZFORC(:,JLAYER)
   PDFORC_UDU(:,JLAYER) = PDFORC_UDU(:,JLAYER) + PDUWDU_ROOF(:) * ZFORC(:,JLAYER)
 END DO
@@ -163,9 +163,9 @@ END DO
 !*      2.4    Drag force by road surfaces
 !              ---------------------------
 !
-!PFORC_U(:,1)    = PUW_ROAD(:) / TCP%XDZ(:,1) * ZSH(:,1)
+!PFORC_U(:,1)    = PUW_ROAD(:) / SB%XDZ(:,1) * ZSH(:,1)
 PFORC_U   (:,1) = PFORC_U   (:,1)    
-PDFORC_UDU(:,1) = PDFORC_UDU(:,1) + PDUWDU_ROAD(:) * ZSH(:,1)/TCP%XDZ(:,1)
+PDFORC_UDU(:,1) = PDFORC_UDU(:,1) + PDUWDU_ROAD(:) * ZSH(:,1)/SB%XDZ(:,1)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -195,8 +195,8 @@ PDFORC_TDT(:,1) = PDFORC_TDT(:,1) - PAC_ROAD(:)
 !*      4.2    Heating from the walls surface flux
 !              -----------------------------------
 !
-DO JLAYER=1,TCP%NLVL
-  ZFORC(:,JLAYER) = 1. / ZAIRVOL(:,JLAYER) / TCP%XDZ(:,JLAYER) / PRHOA(:) / XCPD 
+DO JLAYER=1,SB%NLVL
+  ZFORC(:,JLAYER) = 1. / ZAIRVOL(:,JLAYER) / SB%XDZ(:,JLAYER) / PRHOA(:) / XCPD 
   PFORC_T   (:,JLAYER) = PFORC_T(:,JLAYER) + PH_WALL * ZSV(:,JLAYER) * ZFORC(:,JLAYER)
   PDFORC_TDT(:,JLAYER) = PDFORC_TDT(:,JLAYER) + 0.
 END DO
@@ -204,7 +204,7 @@ END DO
 !*      4.3    Heating from the roof surface flux
 !              ----------------------------------
 !
-DO JLAYER=2,TCP%NLVL
+DO JLAYER=2,SB%NLVL
   PFORC_T   (:,JLAYER) = PFORC_T(:,JLAYER) + PH_ROOF * ZSH(:,JLAYER) * ZFORC(:,JLAYER)
   PDFORC_TDT(:,JLAYER) = PDFORC_TDT(:,JLAYER) + 0.
 END DO
@@ -214,8 +214,8 @@ END DO
 !*      5.     Conversion into temperature tendency
 !              ------------------------------------
 !
-DO JLAYER=1,TCP%NLVL
-  ZP(:,JLAYER) = PPA(:) + XG * PRHOA(:) * (TCP%XZ(:,TCP%NLVL) - TCP%XZ(:,JLAYER))
+DO JLAYER=1,SB%NLVL
+  ZP(:,JLAYER) = PPA(:) + XG * PRHOA(:) * (SB%XZ(:,SB%NLVL) - SB%XZ(:,JLAYER))
 END DO
 ZEXN = (ZP/XP00)**(XRD/XCPD)
 !
@@ -252,8 +252,8 @@ PDFORC_QDQ(:,1) = PDFORC_QDQ(:,1) - PAC_ROAD_WAT(:)
 !*      4.2    Evaporation from the roof surface flux
 !              --------------------------------------
 !
-DO JLAYER=2,TCP%NLVL
-  PFORC_Q   (:,JLAYER) = PFORC_Q   (:,JLAYER) + PE_ROOF * ZSH(:,JLAYER)/ZAIRVOL(:,JLAYER)/TCP%XDZ(:,JLAYER)
+DO JLAYER=2,SB%NLVL
+  PFORC_Q   (:,JLAYER) = PFORC_Q   (:,JLAYER) + PE_ROOF * ZSH(:,JLAYER)/ZAIRVOL(:,JLAYER)/SB%XDZ(:,JLAYER)
   PDFORC_QDQ(:,JLAYER) = PDFORC_QDQ(:,JLAYER) + 0.
 END DO
 IF (LHOOK) CALL DR_HOOK('TEB_CANOPY',1,ZHOOK_HANDLE)

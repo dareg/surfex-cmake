@@ -74,10 +74,10 @@ USE MODI_READ_SURF
 USE MODI_READ_WATFLUX_DATE
 USE MODI_READ_NAM_PREP_WATFLUX_n
 USE MODI_INIT_CHEMICAL_n
-USE MODI_PREP_CTRL_WATFLUX
+USE MODI_PREP_CTRL
 USE MODI_UPDATE_RAD_WATER
 !
-USE MODI_READ_WATFLUX_SBL_n
+USE MODI_READ_SBL_n
 USE MODI_SET_SURFEX_FILEIN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -202,7 +202,7 @@ SELECT CASE (HINIT)
     WM%W%TTIME%TIME       = XUNDEF
 
   CASE ('PRE')
-    CALL PREP_CTRL_WATFLUX(WM%DWO,ILUOUT )  
+    CALL PREP_CTRL(WM%DWO,ILUOUT )  
     IF (LNAM_READ) CALL READ_NAM_PREP_WATFLUX_n(HPROGRAM)                 
     CALL READ_WATFLUX_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,WM%W%TTIME)
 
@@ -225,7 +225,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_WATFLUX_n(DTCO, U, UG, WM%WG, WM%W, HPROGRAM)
+ CALL READ_PGD_WATFLUX_n(DTCO, U, UG, WM%G, WM%W, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -298,7 +298,7 @@ PTSURF(:) = WM%W%XTS(:)
 !*       5.     SBL air fields:
 !               --------------
 !
- CALL READ_WATFLUX_SBL_n(DTCO, U, WM%W%LSBL, WM%WSB,HPROGRAM)
+ CALL READ_SBL_n(DTCO, U, WM%SB, WM%W%LSBL, HPROGRAM, "WATER ")
 !
 !-------------------------------------------------------------------------------
 !
@@ -323,7 +323,7 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_WATFLUX_INIT_n(OREAD_BUDGETC, WM%DWO, WM%DGW, WM%DGWC, WM%W, &
+ CALL DIAG_WATFLUX_INIT_n(OREAD_BUDGETC, WM%DWO, WM%DW, WM%DWC, WM%W, &
                           HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

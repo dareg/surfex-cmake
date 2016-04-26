@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE SOLAR_PANEL(TPN, DGMT, PTSTEP, PTSUN, PRESIDENTIAL, PEMIT_LW_ROOF, &
+    SUBROUTINE SOLAR_PANEL(TPN, DMT, PTSTEP, PTSUN, PRESIDENTIAL, PEMIT_LW_ROOF, &
                            PEMIT_LWDN_PANEL, PLW_RAD, PTA, PN_FLOOR, PPROD_BLD )
 !   ##########################################################################
 !
@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
-TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
 !
 REAL,               INTENT(IN)  :: PTSTEP          ! time step  (s)
 REAL, DIMENSION(:), INTENT(IN)  :: PTSUN           ! solar time (s since solar midnight)
@@ -117,14 +117,14 @@ IF (LHOOK) CALL DR_HOOK('SOLAR_PANEL',0,ZHOOK_HANDLE)
 !*      0.4    Default values for output variables
 !              -----------------------------------
 !
-DGMT%XABS_LW_PANEL   = XUNDEF ! Absorbed LW enerby by solar panel         (W/m2)
-DGMT%XH_PANEL        = XUNDEF ! Sensible heat released by the solar panel (W/m2)
-DGMT%XRN_PANEL       = XUNDEF ! Net radiation     of the solar panel      (W/m2)
-DGMT%XTHER_PROD_PANEL= XUNDEF ! Thermal      Energy production of the solar panel      (W/m2)
-DGMT%XPHOT_PROD_PANEL= XUNDEF ! Photovoltaic Energy production of the solar panel      (W/m2)
-DGMT%XPROD_PANEL     = XUNDEF ! Averaged     Energy production of the solar panel      (W/m2)
-DGMT%XTHER_PROD_BLD  = 0.     ! Thermal      Energy production of the solar panel      (W/m2)
-DGMT%XPHOT_PROD_BLD  = 0.     ! Photovoltaic Energy production of the solar panel      (W/m2)
+DMT%XABS_LW_PANEL   = XUNDEF ! Absorbed LW enerby by solar panel         (W/m2)
+DMT%XH_PANEL        = XUNDEF ! Sensible heat released by the solar panel (W/m2)
+DMT%XRN_PANEL       = XUNDEF ! Net radiation     of the solar panel      (W/m2)
+DMT%XTHER_PROD_PANEL= XUNDEF ! Thermal      Energy production of the solar panel      (W/m2)
+DMT%XPHOT_PROD_PANEL= XUNDEF ! Photovoltaic Energy production of the solar panel      (W/m2)
+DMT%XPROD_PANEL     = XUNDEF ! Averaged     Energy production of the solar panel      (W/m2)
+DMT%XTHER_PROD_BLD  = 0.     ! Thermal      Energy production of the solar panel      (W/m2)
+DMT%XPHOT_PROD_BLD  = 0.     ! Photovoltaic Energy production of the solar panel      (W/m2)
 PPROD_BLD       = 0.     ! Averaged     Energy production of the solar panel      (W/m2)
 !
 !-------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ WHERE (TPN%XFRAC_PANEL(:)>0.)
 !*      2.     Irradiance on panel
 !              -------------------
 !
-  ZIRRADIANCE(:) = XFT * DGMT%XABS_SW_PANEL(:) / (1.-TPN%XALB_PANEL(:) ) 
+  ZIRRADIANCE(:) = XFT * DMT%XABS_SW_PANEL(:) / (1.-TPN%XALB_PANEL(:) ) 
 !
 !-------------------------------------------------------------------------------
 !
@@ -175,14 +175,14 @@ WHERE (TPN%XFRAC_PANEL(:)>0.)
 !*      5.     Solar panel LW budget
 !              ---------------------
 !
-  DGMT%XABS_LW_PANEL(:)= PLW_RAD(:) + PEMIT_LW_ROOF(:) - PEMIT_LWDN_PANEL(:) - ZLWU_PANEL(:)
+  DMT%XABS_LW_PANEL(:)= PLW_RAD(:) + PEMIT_LW_ROOF(:) - PEMIT_LWDN_PANEL(:) - ZLWU_PANEL(:)
 !
 !-------------------------------------------------------------------------------
 !
 !*      6.     Solar panel Net radiation
 !              -------------------------
 !
-  DGMT%XRN_PANEL(:)    = DGMT%XABS_SW_PANEL(:) + DGMT%XABS_LW_PANEL(:)
+  DMT%XRN_PANEL(:)    = DMT%XABS_SW_PANEL(:) + DMT%XABS_LW_PANEL(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -207,13 +207,13 @@ WHERE (TPN%XFRAC_PANEL(:)>0.)
 !*      8.1    Instantaneous production
 !              ------------------------
 !
-  DGMT%XTHER_PROD_PANEL(:)= XTHER_EFF * ZIRRADIANCE(:)                       ! (W/m2)
-!  DGMT%XTHER_PROD_PANEL(:) = XTHER_RATE * XWATER_DT * (1000. / 24. / 365.)
+  DMT%XTHER_PROD_PANEL(:)= XTHER_EFF * ZIRRADIANCE(:)                       ! (W/m2)
+!  DMT%XTHER_PROD_PANEL(:) = XTHER_RATE * XWATER_DT * (1000. / 24. / 365.)
 !
 !*      8.2    Integrated daily production
 !              ---------------------------
 !
-  ZTHER_PRODC_DAY(:) = TPN%XTHER_PRODC_DAY(:) + PTSTEP * DGMT%XTHER_PROD_PANEL(:) ! (J/m2)
+  ZTHER_PRODC_DAY(:) = TPN%XTHER_PRODC_DAY(:) + PTSTEP * DMT%XTHER_PROD_PANEL(:) ! (J/m2)
 !
 !*      8.3    Daily production limited by daily target
 !              ----------------------------------------
@@ -223,7 +223,7 @@ WHERE (TPN%XFRAC_PANEL(:)>0.)
 !*      8.4     Instantaneous production taking into account target limit if reached
 !               --------------------------------------------------------------------
 !
-  DGMT%XTHER_PROD_PANEL(:)= ( ZTHER_PRODC_DAY(:) - TPN%XTHER_PRODC_DAY(:) ) / PTSTEP
+  DMT%XTHER_PROD_PANEL(:)= ( ZTHER_PRODC_DAY(:) - TPN%XTHER_PRODC_DAY(:) ) / PTSTEP
 !
 !*      8.5    Updates daily production
 !              ------------------------
@@ -235,31 +235,31 @@ WHERE (TPN%XFRAC_PANEL(:)>0.)
 !*      9.     Photovoltaic Production  (W/m2 photovoltaic panel)
 !              -----------------------
 !
-  DGMT%XPHOT_PROD_PANEL(:) = TPN%XEFF_PANEL(:) * ZIRRADIANCE(:) * MIN(1.,1.-XT_LOSS*(ZTS_PANEL(:)-XT_OPT))
+  DMT%XPHOT_PROD_PANEL(:) = TPN%XEFF_PANEL(:) * ZIRRADIANCE(:) * MIN(1.,1.-XT_LOSS*(ZTS_PANEL(:)-XT_OPT))
 !
 !-------------------------------------------------------------------------------
 !
 !*     10.     Averaged Production  (W/m2 panel)
 !              -------------------
 !
-  DGMT%XPROD_PANEL(:) =  DGMT%XTHER_PROD_PANEL(:) * (ZTHER_FRAC(:) / TPN%XFRAC_PANEL(:)) &
-                  + DGMT%XPHOT_PROD_PANEL(:) * (ZPHOT_FRAC(:) / TPN%XFRAC_PANEL(:))
+  DMT%XPROD_PANEL(:) =  DMT%XTHER_PROD_PANEL(:) * (ZTHER_FRAC(:) / TPN%XFRAC_PANEL(:)) &
+                  + DMT%XPHOT_PROD_PANEL(:) * (ZPHOT_FRAC(:) / TPN%XFRAC_PANEL(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*     11.     Sensible heat flux  (W/m2 panel)
 !              ------------------
 !
-  DGMT%XH_PANEL(:) = DGMT%XRN_PANEL(:) - DGMT%XPROD_PANEL(:)
+  DMT%XH_PANEL(:) = DMT%XRN_PANEL(:) - DMT%XPROD_PANEL(:)
 !
 !-------------------------------------------------------------------------------
 !
 !*     12.     Productions per building (W/m2 bld)
 !              ------------------------
 !
-  DGMT%XTHER_PROD_BLD(:) = DGMT%XTHER_PROD_PANEL(:) * ZTHER_FRAC(:)
-  DGMT%XPHOT_PROD_BLD(:) = DGMT%XPHOT_PROD_PANEL(:) * ZPHOT_FRAC(:)
-  PPROD_BLD     (:) = DGMT%XTHER_PROD_BLD  (:) + DGMT%XPHOT_PROD_PANEL(:)
+  DMT%XTHER_PROD_BLD(:) = DMT%XTHER_PROD_PANEL(:) * ZTHER_FRAC(:)
+  DMT%XPHOT_PROD_BLD(:) = DMT%XPHOT_PROD_PANEL(:) * ZPHOT_FRAC(:)
+  PPROD_BLD     (:) = DMT%XTHER_PROD_BLD  (:) + DMT%XPHOT_PROD_PANEL(:)
 !
 !-------------------------------------------------------------------------------
 END WHERE

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CH_INIT_DEP_ISBA_n (CHI, DTCO, KPATCH, OCOVER, PCOVER, &
+      SUBROUTINE CH_INIT_DEP_ISBA_n (CHI, NCHI, NP, DTCO, KPATCH, OCOVER, PCOVER, &
                                      KCH,KLUOUT,KLU)
 !!    ##################################################
 !!
@@ -59,11 +59,12 @@
 !!    --------
 !
 !
-USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t, CH_ISBA_NP_t
+USE MODD_ISBA_n, ONLY : ISBA_NP_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODI_CH_OPEN_INPUTB  ! open the general purpose ASCII input file
-USE MODI_CONVERT_COVER_CH_ISBA
+USE MODI_CONVERT_COVER_CH_ISBA_1P
 !
 USE MODD_CH_ISBA,        ONLY: XRCCLAYSO2, XRCCLAYO3, XRCSANDSO2, XRCSANDO3, &
                                  XRCSNOWSO2, XRCSNOWO3, XLANDREXT  
@@ -85,6 +86,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(CH_ISBA_NP_t), INTENT(INOUT) :: NCHI
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 !
 INTEGER, INTENT(IN) :: KPATCH
@@ -106,7 +109,7 @@ INTEGER :: IRESIS         ! number of chemical reactivity factor to be read
 REAL             , DIMENSION(:), ALLOCATABLE :: ZRESISVAL 
 ! chemical reactivity factor value
 !
-INTEGER :: JI, JNREAL ! loop control variables
+INTEGER :: JI, JNREAL, JP ! loop control variables
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !=============================================================================
@@ -130,18 +133,22 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
     !
     !*       2.    Physiographic fields
     !
-    ALLOCATE(CHI%XSOILRC_SO2(KLU,KPATCH))
-    ALLOCATE(CHI%XSOILRC_O3(KLU,KPATCH))
-
-    CALL CONVERT_COVER_CH_ISBA(DTCO, &
-                               PCOVER,OCOVER,CHI%XSOILRC_SO2,CHI%XSOILRC_O3)
-    !
-    !---------------------------------------------------------------------------
-    !
-    !
-    !*       3.    read surface resistance SURF_RES
-    !
-    ALLOCATE(CHI%XDEP(KLU,CHI%SVI%NBEQ,KPATCH))
+    DO JP = 1,KPATCH
+      !
+      ALLOCATE(NCHI%AL(JP)%XSOILRC_SO2(NP%AL(JP)%NSIZE_P))
+      ALLOCATE(NCHI%AL(JP)%XSOILRC_O3 (NP%AL(JP)%NSIZE_P))
+      !
+      CALL CONVERT_COVER_CH_ISBA_1P(DTCO, PCOVER, OCOVER, KPATCH, JP, NP%AL(JP), &
+                               NCHI%AL(JP)%XSOILRC_SO2, NCHI%AL(JP)%XSOILRC_O3)
+      !
+      !---------------------------------------------------------------------------
+      !
+      !
+      !*       3.    read surface resistance SURF_RES
+      !
+      ALLOCATE(NCHI%AL(JP)%XDEP(KLU,CHI%SVI%NBEQ))
+      !
+    ENDDO
     !
     ! open input file
     WRITE(KLUOUT,*) &
@@ -193,7 +200,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
    DEALLOCATE(YRESISNAME)
    DEALLOCATE(ZRESISVAL)
   ELSE
-    ALLOCATE(CHI%XDEP(0,0,0))
+    DO JP = 1,KPATCH
+      ALLOCATE(NCHI%AL(JP)%XDEP(0,0))
+    ENDDO
   END IF
 IF (LHOOK) CALL DR_HOOK('CH_INIT_DEP_ISBA_N',1,ZHOOK_HANDLE)
   !

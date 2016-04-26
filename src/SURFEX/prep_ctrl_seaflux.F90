@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PREP_CTRL_SEAFLUX(DSO,ODIAG_OCEAN,ODIAG_MISC_SEAICE,KLUOUT)  
+      SUBROUTINE PREP_CTRL_SEAFLUX(DGO,ODIAG_OCEAN,ODIAG_MISC_SEAICE,KLUOUT)  
 !     #################################################################################################################
 !
 !!****  *PREP_CTRL_SEAFLUX* - routine to check that diagnostics are switched off
@@ -36,6 +36,8 @@
 !
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
+USE MODI_PREP_CTRL
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -45,7 +47,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DSO
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 !
 LOGICAL, INTENT(INOUT) :: ODIAG_OCEAN
 LOGICAL,  INTENT(INOUT) :: ODIAG_MISC_SEAICE       ! flag for seaice variables
@@ -58,19 +60,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_SEAFLUX',0,ZHOOK_HANDLE)
-DSO%N2M = 0
 !
-DSO%LSURF_BUDGET  = .FALSE.
-DSO%L2M_MIN_ZS    = .FALSE.
-DSO%LRAD_BUDGET   = .FALSE.
-DSO%LCOEF         = .FALSE.
-DSO%LSURF_VARS    = .FALSE.
+ CALL PREP_CTRL(DGO,KLUOUT)
 !
 ODIAG_OCEAN   = .FALSE.
 !
 ODIAG_MISC_SEAICE  = .FALSE.
-!
-DSO%LSURF_BUDGETC = .FALSE.
 !
 WRITE(KLUOUT,*)'SEAFLUX DIAGNOSTICS DESACTIVATED'
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_SEAFLUX',1,ZHOOK_HANDLE)

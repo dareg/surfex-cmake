@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_SFXCPL_n (I, S, U, W, &
+      SUBROUTINE GET_SFXCPL_n (IM, S, U, W, &
                                HPROGRAM,KI,PRUI,PWIND,PFWSU,PFWSV,PSNET, &
                                 PHEAT,PEVAP,PRAIN,PSNOW,PICEFLUX,PFWSM,   &
                                 PHEAT_ICE,PEVAP_ICE,PSNET_ICE)  
@@ -45,7 +45,7 @@
 !
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -73,7 +73,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
@@ -153,7 +153,7 @@ IF(LCPL_LAND)THEN
 !
 ! * Get land output fields
 !       
-  CALL GET_SFX_LAND(I, U, &
+  CALL GET_SFX_LAND(IM%O, IM%S, U, &
                     LCPL_GW,LCPL_FLOOD,LCPL_CALVING,    &
                     ZRUNOFF,ZDRAIN,ZCALVING,ZRECHARGE,  &
                     ZSRCFLOOD             )

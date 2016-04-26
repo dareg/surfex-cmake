@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE PGD_TEB (DTCO, UG, U, USS, TOP, BOP, TG, BDD, DTT, DTB, &
-                          GDO, GDP, GDTI, GDIR, GRO, GRP, GRTI, HPROGRAM)
+                          GDO, GDK, DTGD, GDIR, GRO, GRS, GRK, DTGR, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB* monitor for averaging and interpolations of TEB physiographic fields
@@ -53,7 +53,7 @@ USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
 USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
@@ -93,12 +93,13 @@ TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: GDP
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: GDTI
+TYPE(ISBA_K_t), INTENT(INOUT) :: GDK
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: GDIR
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GRO
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: GRP
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: GRTI
+TYPE(ISBA_S_t), INTENT(INOUT) :: GRS
+TYPE(ISBA_K_t), INTENT(INOUT) :: GRK
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
 !
@@ -187,8 +188,8 @@ IF (U%LECOCLIMAP .AND. NRANK==NPIO) CALL WRITE_COVER_TEX_TEB
 !
 TOP%LGARDEN       = U%LGARDEN
 !
-IF (TOP%LGARDEN) CALL PGD_TEB_VEG(DTCO, UG, U, USS, GDO, GDP, GDTI, GDIR, &
-                              GRO, GRP, GRTI, TOP, TG%NDIM, HPROGRAM)
+IF (TOP%LGARDEN) CALL PGD_TEB_VEG(DTCO, UG, U, USS, GDO, GDK, DTGD, GDIR, &
+                              GRO, GRS, GRK, DTGR, TOP, TG%NDIM, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

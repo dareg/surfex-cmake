@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE HYDRO_GLACIER (HSNOW_SCHEME, PTSTEP, PSR, IR, PICEFLUX)
+      SUBROUTINE HYDRO_GLACIER (PTSTEP, PSR, PEK, PICEFLUX)
 !     ########################################################################
 !
 !!****  *HYDRO_GLACIER*  
@@ -39,7 +39,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t
 !
 USE MODD_CSTS,     ONLY : XDAY
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX, XHGLA, XSNOWDMIN, XRHOSMAX_ES
@@ -52,15 +52,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=*), INTENT(IN) :: HSNOW_SCHEME
-!
 REAL, INTENT(IN)                     :: PTSTEP
 !                                       KTSTEP = timestep [s]
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PSR
 !                                       PSR      = Snowfall    [kg/m²s]
 !
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 REAL, DIMENSION(:), INTENT(OUT)      :: PICEFLUX
 !                                       PICEFLUX = Ice flux from the Snowfall reservoir [kg/m²s]
@@ -84,7 +82,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO_GLACIER',0,ZHOOK_HANDLE)
 !
-ZGLASTO (:) = IR%XICE_STO(:,1)
+ZGLASTO (:) = PEK%XICE_STO(:)
 ZSTOMAX (:) = 0.0
 ZFLUX   (:) = 0.0
 ZSR     (:) = 0.0
@@ -95,13 +93,13 @@ PICEFLUX(:) = 0.0
 !-------------------------------------------------------------------------------
 !Ice accumulation only if snow amount is > to 33.3 meters of aged snow
 !
-IF(HSNOW_SCHEME/='3-L' .AND. HSNOW_SCHEME/='CRO')THEN
+IF(PEK%TSNOW%SCHEME/='3-L' .AND. PEK%TSNOW%SCHEME/='CRO')THEN
   ZRHOSMAX = XRHOSMAX
-  ZSWE(:)  = IR%TSNOW%WSNOW(:,1,1)
+  ZSWE(:)  = PEK%TSNOW%WSNOW(:,1)
 ELSE
   ZRHOSMAX=XRHOSMAX_ES
-  DO JWRK=1,SIZE(IR%TSNOW%WSNOW,2)
-     ZSWE(:) = ZSWE(:) + IR%TSNOW%WSNOW(:,JWRK,1)
+  DO JWRK=1,SIZE(PEK%TSNOW%WSNOW,2)
+     ZSWE(:) = ZSWE(:) + PEK%TSNOW%WSNOW(:,JWRK)
   END DO
 ENDIF
 !
@@ -113,32 +111,32 @@ ENDWHERE
 !
 !Snow storage calculation
 !
-IR%XICE_STO(:,1) = (ZGLASTO(:)+PTSTEP*ZSR(:))/(1.0+PTSTEP/(ZTAU*XDAY))
+PEK%XICE_STO(:) = (ZGLASTO(:)+PTSTEP*ZSR(:))/(1.0+PTSTEP/(ZTAU*XDAY))
 !
 !supress numerical artifacs
 !
 ZSTOMAX(:) = ZSR(:)*PTSTEP+ZGLASTO(:)
 !
-IR%XICE_STO(:,1) = MIN(ZSTOMAX(:),IR%XICE_STO(:,1))
+PEK%XICE_STO(:) = MIN(ZSTOMAX(:),PEK%XICE_STO(:))
 !
 !Ice flux calculation                
 !
-ZFLUX(:) = (ZGLASTO(:)-IR%XICE_STO(:,1))/PTSTEP+ZSR(:)
+ZFLUX(:) = (ZGLASTO(:)-PEK%XICE_STO(:))/PTSTEP+ZSR(:)
 !      
 !supress numerical artifacs
 !
 PICEFLUX(:) = MAX(0.0,ZFLUX(:))
-IR%XICE_STO(:,1) = IR%XICE_STO(:,1) + PICEFLUX(:)-ZFLUX(:)             
+PEK%XICE_STO(:) = PEK%XICE_STO(:) + PICEFLUX(:)-ZFLUX(:)             
 !
-WHERE(IR%XICE_STO(:,1)<=1.E-10)IR%XICE_STO(:,1)=0.0
+WHERE(PEK%XICE_STO(:)<=1.E-10)PEK%XICE_STO(:)=0.0
 !
 !-------------------------------------------------------------------------------
 !Snow pack update
 !
-IF(HSNOW_SCHEME/='3-L' .AND. HSNOW_SCHEME/='CRO')THEN
+IF(PEK%TSNOW%SCHEME/='3-L' .AND. PEK%TSNOW%SCHEME/='CRO')THEN
 !
-  WHERE(IR%TSNOW%WSNOW(:,1,1)<=XHGLA*ZRHOSMAX)PICEFLUX(:)=0.0
-  IR%TSNOW%WSNOW(:,1,1)=IR%TSNOW%WSNOW(:,1,1)-PICEFLUX(:)*PTSTEP
+  WHERE(PEK%TSNOW%WSNOW(:,1)<=XHGLA*ZRHOSMAX)PICEFLUX(:)=0.0
+  PEK%TSNOW%WSNOW(:,1)=PEK%TSNOW%WSNOW(:,1)-PICEFLUX(:)*PTSTEP
 !
 ELSE
 !
@@ -146,15 +144,15 @@ ELSE
 !
 ! Snow total depth
   ZSNOWD(:) = 0.
-  DO JWRK=1,SIZE(IR%TSNOW%WSNOW,2)
-     ZSNOWD(:) = ZSNOWD(:) + IR%TSNOW%WSNOW(:,JWRK,1)/IR%TSNOW%RHO(:,JWRK,1)
+  DO JWRK=1,SIZE(PEK%TSNOW%WSNOW,2)
+     ZSNOWD(:) = ZSNOWD(:) + PEK%TSNOW%WSNOW(:,JWRK)/PEK%TSNOW%RHO(:,JWRK)
   END DO
 !
 ! Flux
-  DO JWRK=1,SIZE(IR%TSNOW%WSNOW,2)
-     ZFLUX(:) = PICEFLUX(:)*(IR%TSNOW%WSNOW(:,JWRK,1)/IR%TSNOW%RHO(:,JWRK,1)) &
+  DO JWRK=1,SIZE(PEK%TSNOW%WSNOW,2)
+     ZFLUX(:) = PICEFLUX(:)*(PEK%TSNOW%WSNOW(:,JWRK)/PEK%TSNOW%RHO(:,JWRK)) &
                 /MAX(ZSNOWD(:),0.0001)
-     IR%TSNOW%WSNOW(:,JWRK,1)=IR%TSNOW%WSNOW(:,JWRK,1)-ZFLUX(:)*PTSTEP
+     PEK%TSNOW%WSNOW(:,JWRK)=PEK%TSNOW%WSNOW(:,JWRK)-ZFLUX(:)*PTSTEP
   END DO
 !
 ENDIF

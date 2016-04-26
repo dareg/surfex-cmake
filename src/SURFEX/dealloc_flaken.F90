@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_FLAKE_n (CHF, FG, F)
+SUBROUTINE DEALLOC_FLAKE_n (CHF, G, F)
 !     #################################################################################
 !
 !!****  *DEALLOC_FLAKE_n * - Deallocate all arrays
@@ -49,7 +49,7 @@ IMPLICIT NONE
 
 !
 TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(GRID_t), INTENT(INOUT) :: FG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -87,10 +87,10 @@ IF (ASSOCIATED(F%XZ0           ))  DEALLOCATE(F%XZ0           )
 !
 !-------------------------------------------------------------------------------------
 !
-IF (ASSOCIATED(FG%XGRID_PAR )) DEALLOCATE(FG%XGRID_PAR )
-IF (ASSOCIATED(FG%XLAT      )) DEALLOCATE(FG%XLAT      )
-IF (ASSOCIATED(FG%XLON      )) DEALLOCATE(FG%XLON      )
-IF (ASSOCIATED(FG%XMESH_SIZE)) DEALLOCATE(FG%XMESH_SIZE)
+IF (ASSOCIATED(G%XGRID_PAR )) DEALLOCATE(G%XGRID_PAR )
+IF (ASSOCIATED(G%XLAT      )) DEALLOCATE(G%XLAT      )
+IF (ASSOCIATED(G%XLON      )) DEALLOCATE(G%XLON      )
+IF (ASSOCIATED(G%XMESH_SIZE)) DEALLOCATE(G%XMESH_SIZE)
 !
 !-------------------------------------------------------------------------------------
 !

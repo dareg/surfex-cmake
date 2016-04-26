@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, TCP, TG, CHT, T, TPN, BOP, B, TD, GDM, GRM, &
+SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, T, TPN, BOP, B, TD, GDM, GRM, &
                            HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV,&
                            KSW, PTSUN, PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, &
                            PRHOA, PSV, PCO2, HSV, PRAIN, PSN, PLW, PDIR_SW, PSCA_SW,        &
@@ -101,8 +101,8 @@ TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
 TYPE(CH_TEB_t), INTENT(INOUT) :: CHT 
-TYPE(CANOPY_t), INTENT(INOUT) :: TCP
-TYPE(GRID_t), INTENT(INOUT) :: TG
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
 TYPE(TEB_t), INTENT(INOUT) :: T
@@ -372,21 +372,21 @@ REAL, DIMENSION(KI) :: ZF1_o_B
 REAL, DIMENSION(KI) :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
 REAL, DIMENSION(KI) :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
 REAL, DIMENSION(KI) :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_Q   ! tendency due to drag force for hum
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                           ! tendency due to drag force for hum.
 REAL, DIMENSION(KI) :: ZLAMBDA_F  ! frontal density (-)
 REAL, DIMENSION(KI) :: ZLMO       ! Monin-Obukhov length at canopy height (m)
-REAL, DIMENSION(KI,TCP%NLVL)   :: ZL         ! Mixing length generic profile at mid levels
+REAL, DIMENSION(KI,SB%NLVL)   :: ZL         ! Mixing length generic profile at mid levels
 !
 REAL, DIMENSION(KI) :: ZCOEF
 !
@@ -502,59 +502,59 @@ IF (TOP%LCANOPY) THEN
   !
   !* determines where is the forcing level and modifies the upper levels of the canopy grid
   !
-  CALL CANOPY_GRID_UPDATE(KI, ZAVG_BLD_HEIGHT, ZAVG_BLD_HEIGHT+PUREF, TCP)
+  CALL CANOPY_GRID_UPDATE(KI, ZAVG_BLD_HEIGHT, ZAVG_BLD_HEIGHT+PUREF, SB)
   !
   !* Initialisations of T, Q, TKE and wind at first time step
   !
-  IF(ANY(TCP%XT(:,:) == XUNDEF)) THEN
-    DO JLAYER=1,TCP%NLVL
-      TCP%XT(:,JLAYER) = PTA(:)
-      TCP%XQ(:,JLAYER) = PQA(:)
-      TCP%XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
+  IF(ANY(SB%XT(:,:) == XUNDEF)) THEN
+    DO JLAYER=1,SB%NLVL
+      SB%XT(:,JLAYER) = PTA(:)
+      SB%XQ(:,JLAYER) = PQA(:)
+      SB%XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
               * LOG( (          2.* T%CUR%XBLD_HEIGHT(:)/3.) / T%CUR%XZ0_TOWN(:))   &
               / LOG( (PUREF(:)+ 2.* T%CUR%XBLD_HEIGHT(:)/3.) / T%CUR%XZ0_TOWN(:))
     END  DO
-    TCP%XTKE(:,:) = 1.
+    SB%XTKE(:,:) = 1.
   ENDIF
   !
   !* default forcing above roof: forcing level
   ZUREF(:) = PUREF(:)
   ZZREF(:) = PZREF(:)
-  ZUA(:)   = TCP%XU(:,TCP%NLVL)
-  ZTA(:)   = TCP%XT(:,TCP%NLVL)
-  ZQA(:)   = TCP%XQ(:,TCP%NLVL)/PRHOA(:)
-  ZPA(:)   = TCP%XP(:,TCP%NLVL)
+  ZUA(:)   = SB%XU(:,SB%NLVL)
+  ZTA(:)   = SB%XT(:,SB%NLVL)
+  ZQA(:)   = SB%XQ(:,SB%NLVL)/PRHOA(:)
+  ZPA(:)   = SB%XP(:,SB%NLVL)
   !* for the time being, only one value is kept for wall in-canyon forcing, in the middle of the canyon
   ZU_CANYON(:) = ZUA(:)
   ZT_CANYON(:) = ZTA(:)
   ZQ_CANYON(:) = ZQA(:)
-  DO JLAYER=1,TCP%NLVL-1
+  DO JLAYER=1,SB%NLVL-1
     DO JI=1,KI
       !* finds middle canyon layer
-      IF (TCP%XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)/2. .AND. TCP%XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)/2.) THEN
-        ZCOEF(JI) = (ZAVG_BLD_HEIGHT(JI)/2.-TCP%XZ(JI,JLAYER))/(TCP%XZ(JI,JLAYER+1)-TCP%XZ(JI,JLAYER))
-        ZU_CANYON(JI) = TCP%XU(JI,JLAYER) + ZCOEF(JI) * (TCP%XU(JI,JLAYER+1)-TCP%XU(JI,JLAYER))
-        ZT_CANYON(JI) = TCP%XT(JI,JLAYER) + ZCOEF(JI) * (TCP%XT(JI,JLAYER+1)-TCP%XT(JI,JLAYER))
-        ZQ_CANYON(JI) =(TCP%XQ(JI,JLAYER) + ZCOEF(JI) * (TCP%XQ(JI,JLAYER+1)-TCP%XQ(JI,JLAYER)))/PRHOA(JI)
+      IF (SB%XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)/2. .AND. SB%XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)/2.) THEN
+        ZCOEF(JI) = (ZAVG_BLD_HEIGHT(JI)/2.-SB%XZ(JI,JLAYER))/(SB%XZ(JI,JLAYER+1)-SB%XZ(JI,JLAYER))
+        ZU_CANYON(JI) = SB%XU(JI,JLAYER) + ZCOEF(JI) * (SB%XU(JI,JLAYER+1)-SB%XU(JI,JLAYER))
+        ZT_CANYON(JI) = SB%XT(JI,JLAYER) + ZCOEF(JI) * (SB%XT(JI,JLAYER+1)-SB%XT(JI,JLAYER))
+        ZQ_CANYON(JI) =(SB%XQ(JI,JLAYER) + ZCOEF(JI) * (SB%XQ(JI,JLAYER+1)-SB%XQ(JI,JLAYER)))/PRHOA(JI)
       END IF
       !* finds layer just above roof (at least 1m above roof)
-      IF (TCP%XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)+1. .AND. TCP%XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)+1.) THEN
-        ZUREF(JI) = TCP%XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
-        ZZREF(JI) = TCP%XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
-        ZTA  (JI) = TCP%XT(JI,JLAYER+1)
-        ZQA  (JI) = TCP%XQ(JI,JLAYER+1)/PRHOA(JI)
+      IF (SB%XZ(JI,JLAYER)<ZAVG_BLD_HEIGHT(JI)+1. .AND. SB%XZ(JI,JLAYER+1)>=ZAVG_BLD_HEIGHT(JI)+1.) THEN
+        ZUREF(JI) = SB%XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
+        ZZREF(JI) = SB%XZ(JI,JLAYER+1) - ZAVG_BLD_HEIGHT(JI)
+        ZTA  (JI) = SB%XT(JI,JLAYER+1)
+        ZQA  (JI) = SB%XQ(JI,JLAYER+1)/PRHOA(JI)
         !ZUA  (JI) = XU(JI,JLAYER+1)
-        ZUA  (JI) = MAX(TCP%XU(JI,JLAYER+1) - 2.*SQRT(TCP%XTKE(JI,JLAYER+1)) , TCP%XU(JI,JLAYER+1)/3.)
-        ZPA  (JI) = TCP%XP(JI,JLAYER+1)
-        ZLMO (JI) = TCP%XLMO(JI,JLAYER+1)
+        ZUA  (JI) = MAX(SB%XU(JI,JLAYER+1) - 2.*SQRT(SB%XTKE(JI,JLAYER+1)) , SB%XU(JI,JLAYER+1)/3.)
+        ZPA  (JI) = SB%XP(JI,JLAYER+1)
+        ZLMO (JI) = SB%XLMO(JI,JLAYER+1)
       END IF
     END DO
   END DO
   ZU_CANYON= MAX(ZU_CANYON,0.2)
-  ZU_LOWCAN=TCP%XU(:,1)
-  ZT_LOWCAN=TCP%XT(:,1)
-  ZQ_LOWCAN=TCP%XQ(:,1) / PRHOA(:)
-  ZZ_LOWCAN=TCP%XZ(:,1)
+  ZU_LOWCAN=SB%XU(:,1)
+  ZT_LOWCAN=SB%XT(:,1)
+  ZQ_LOWCAN=SB%XQ(:,1) / PRHOA(:)
+  ZZ_LOWCAN=SB%XZ(:,1)
   WHERE(ZPA==XUNDEF) ZPA = PPA   ! security for first time step
   !
   !-------------------------------------------------------------------------------------
@@ -564,7 +564,7 @@ IF (TOP%LCANOPY) THEN
   ! frontal density
   ZLAMBDA_F(:) = ZAVG_CAN_HW_RATIO*ZAVG_BLD / (0.5*XPI)
   !
-  CALL SM10(TCP%XZ, ZAVG_BLD_HEIGHT, ZLAMBDA_F, ZL)
+  CALL SM10(SB%XZ, ZAVG_BLD_HEIGHT, ZLAMBDA_F, ZL)
   !
   !-------------------------------------------------------------------------------------
   ! computes coefficients for implicitation
@@ -585,24 +585,24 @@ IF (TOP%LCANOPY) THEN
   ZSFLUX_T(:)        = 0.
   ZSFLUX_Q(:)        = 0.
   !
-  DO JLAYER=1,TCP%NLVL-1
+  DO JLAYER=1,SB%NLVL-1
     !* Monin-Obuhkov theory not used inside the urban canopy
     ! => neutral mixing  if layer is below : (roof level +1 meter)
-    WHERE (TCP%XZ(:,JLAYER)<=ZAVG_BLD_HEIGHT(:)+1.) TCP%XLMO(:,JLAYER) = XUNDEF
+    WHERE (SB%XZ(:,JLAYER)<=ZAVG_BLD_HEIGHT(:)+1.) SB%XLMO(:,JLAYER) = XUNDEF
   ENDDO
   !
   !* computes tendencies on wind and Tke due to canopy
-  CALL TEB_CANOPY(KI, TCP, ZAVG_BLD, ZAVG_BLD_HEIGHT, ZAVG_WL_O_HOR, PPA, PRHOA, &
+  CALL TEB_CANOPY(KI, SB, ZAVG_BLD, ZAVG_BLD_HEIGHT, ZAVG_WL_O_HOR, PPA, PRHOA, &
                   ZAVG_DUWDU_GRND, ZAVG_UW_RF, ZAVG_DUWDU_RF, ZAVG_H_WL,         &
                   ZAVG_H_RF, ZAVG_E_RF, ZAVG_AC_GRND, ZAVG_AC_GRND_WAT, ZFORC_U, &
                   ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, ZFORC_T, ZDFORC_TDT, ZFORC_Q, &
                   ZDFORC_QDQ )
   !
   !* computes coefficients for implicitation
-  CALL CANOPY_EVOL(TCP, KI, PTSTEP, 1, ZL, ZWIND, PTA, PQA, PPA, PRHOA, &
+  CALL CANOPY_EVOL(SB, KI, PTSTEP, 1, ZL, ZWIND, PTA, PQA, PPA, PRHOA, &
                    ZSFLUX_U, ZSFLUX_T, ZSFLUX_Q, ZFORC_U, ZDFORC_UDU,   &
                    ZFORC_E, ZDFORC_EDE, ZFORC_T, ZDFORC_TDT, ZFORC_Q,   &
-                   ZDFORC_QDQ, TCP%XLM, TCP%XLEPS, ZAVG_USTAR, ZALFAU,  &
+                   ZDFORC_QDQ, SB%XLM, SB%XLEPS, ZAVG_USTAR, ZALFAU,  &
                    ZBETAU, ZALFAT, ZBETAT, ZALFAQ, ZBETAQ)
   !
   ZPEW_A_COEF_LOWCAN = - ZALFAU / PRHOA
@@ -637,7 +637,6 @@ ELSE              ! no canopy case
   ZU_LOWCAN = ZU_CANYON
 
   CALL GOTO_WRAPPER_TEB_PATCH(1, T=T)
-  !print*,'LOWCAN ',T%CUR%XT_CANYON(1)
   ZT_LOWCAN = T%CUR%XT_CANYON
   ZQ_LOWCAN = T%CUR%XQ_CANYON
   ZT_CANYON = T%CUR%XT_CANYON
@@ -664,8 +663,7 @@ ZEXNA     (:) = (ZPA(:)/XP00)**(XRD/XCPD)
 !
 DO JTEB_PATCH = 1,TOP%NTEB_PATCH
 
-  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_PATCH, B=B, DGCT=TD%C, DGMT=TD%M, T=T, TGDR=GDM%TV%R, &
-                              TGDMT=GDM%TV%M%T, TGRR=GRM%TV%R, TGRMT=GRM%TV%M%T)
+  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_PATCH, B=B, DMTC=TD%DMTC, DMT=TD%DMT, T=T)
   !
   ZT_CAN = ZT_CANYON
   ZQ_CAN = ZQ_CANYON
@@ -677,14 +675,13 @@ DO JTEB_PATCH = 1,TOP%NTEB_PATCH
   !
   ZLESN_RF(:) = 0.
   ZLESN_RD(:) = 0.
-  TD%M%CUR%XG_GREENROOF_ROOF(:) = 0.
+  TD%DMT%CUR%XG_GREENROOF_ROOF(:) = 0.
   !
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   ! Call the physical routines of TEB (including gardens & greenroofs)
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
-  !print*,'ZT_CAN2 ',ZT_CAN(1)
-  CALL TEB_GARDEN(DTCO, TG, TOP, T%CUR, BOP, B%CUR, TPN, TD%M%CUR, GDM, GRM,              &
+  CALL TEB_GARDEN(DTCO, G, TOP, T%CUR, BOP, B%CUR, TPN, TD%DMT%CUR, GDM, GRM, JTEB_PATCH, &
                   CIMPLICIT_WIND, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON, ZT_LOWCAN, ZQ_LOWCAN, &
                   ZU_LOWCAN, ZZ_LOWCAN, ZPEW_A_COEF, ZPEW_B_COEF, ZPEW_A_COEF_LOWCAN,     &
                   ZPEW_B_COEF_LOWCAN, PPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, PRHOA, PCO2, PLW, &
@@ -698,8 +695,9 @@ DO JTEB_PATCH = 1,TOP%NTEB_PATCH
                   ZFLX_BLD, ZAC_RD, ZAC_GD, ZAC_GRF, ZAC_RD_WAT, ZAC_GD_WAT, ZAC_GRF_WAT, &
                   KDAY, ZEMIT_LW_FAC, ZEMIT_LW_GRND, ZT_RAD_IND, ZREF_SW_GRND, ZREF_SW_FAC,&
                   ZHU_BLD, PTIME, ZPROD_BLD       )
+
+
   !
-  !print*,'ZT_CAN ',ZT_CAN(1)
   IF (.NOT. TOP%LCANOPY) THEN
 
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_T_CANYON,ZT_CAN)
@@ -765,12 +763,12 @@ DO JTEB_PATCH = 1,TOP%NTEB_PATCH
   ! Diagnostics on each patch
   !-------------------------------------------------------------------------------------
   !
-  IF (TD%MO%LSURF_MISC_BUDGET) THEN
+  IF (TD%MTO%LSURF_MISC_BUDGET) THEN
     !
     ! cumulated diagnostics 
     ! ---------------------
     !
-    CALL CUMUL_DIAG_TEB_n(TD%C%CUR, TD%M%CUR, TOP, PTSTEP)
+    CALL CUMUL_DIAG_TEB_n(TD%DMTC%CUR, TD%DMT%CUR, TOP, PTSTEP)
     !
   END IF
   !
@@ -779,7 +777,7 @@ DO JTEB_PATCH = 1,TOP%NTEB_PATCH
   ! Computes averaged parameters necessary for UTCI
   !-------------------------------------------------------------------------------------
   !
-  IF (TD%O%N2M >0 .AND. TD%U%LUTCI) THEN
+  IF (TD%O%N2M >0 .AND. TD%DUT%LUTCI) THEN
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_REF_SW_GRND ,ZREF_SW_GRND )
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_REF_SW_FAC  ,ZREF_SW_FAC  )
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_SCA_SW      ,ZSCA_SW      )
@@ -803,9 +801,9 @@ DO JTEB_PATCH = 1,TOP%NTEB_PATCH
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_GRND, ZDUWDU_GRND )
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_UW_RF     , ZUW_RF)
     CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_DUWDU_RF  , ZDUWDU_RF)
-    CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WL      , 0.5*(TD%M%CUR%XH_WALL_A+TD%M%CUR%XH_WALL_B))
-    CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_RF      , (TD%M%CUR%XH_ROOF + T%CUR%XH_INDUSTRY))
-    CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_RF      , (TD%M%CUR%XLE_ROOF+ T%CUR%XLE_INDUSTRY)/XLVTT)
+    CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_WL      , 0.5*(TD%DMT%CUR%XH_WALL_A+TD%DMT%CUR%XH_WALL_B))
+    CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_H_RF      , (TD%DMT%CUR%XH_ROOF + T%CUR%XH_INDUSTRY))
+    CALL ADD_PATCH_CONTRIB(JTEB_PATCH,ZAVG_E_RF      , (TD%DMT%CUR%XLE_ROOF+ T%CUR%XLE_INDUSTRY)/XLVTT)
     !
     !-------------------------------------------------------------------------------------
     ! Computes the impact of canopy and surfaces on air
@@ -839,7 +837,7 @@ IF (TOP%LCANOPY) THEN
   !* Impact of TEB fluxes on the air
   !-------------------------------------------------------------------------------------
   !
-  CALL TEB_CANOPY(KI, TCP, ZAVG_BLD, ZAVG_BLD_HEIGHT, ZAVG_WL_O_HOR, PPA, PRHOA, &
+  CALL TEB_CANOPY(KI, SB, ZAVG_BLD, ZAVG_BLD_HEIGHT, ZAVG_WL_O_HOR, PPA, PRHOA, &
                   ZAVG_DUWDU_GRND, ZAVG_UW_RF, ZAVG_DUWDU_RF, ZAVG_H_WL,         &
                   ZAVG_H_RF, ZAVG_E_RF, ZAVG_AC_GRND, ZAVG_AC_GRND_WAT, ZFORC_U, &
                   ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, ZFORC_T, ZDFORC_TDT, ZFORC_Q, &
@@ -849,10 +847,10 @@ IF (TOP%LCANOPY) THEN
   !* Evolution of canopy air due to these impacts
   !-------------------------------------------------------------------------------------
   !
-  CALL CANOPY_EVOL(TCP, KI, PTSTEP, 2, ZL, ZWIND, PTA, PQA, PPA, PRHOA,  &
+  CALL CANOPY_EVOL(SB, KI, PTSTEP, 2, ZL, ZWIND, PTA, PQA, PPA, PRHOA,  &
                    ZSFLUX_U, ZSFLUX_T, ZSFLUX_Q, ZFORC_U, ZDFORC_UDU,    &
                    ZFORC_E, ZDFORC_EDE, ZFORC_T, ZDFORC_TDT, ZFORC_Q,    &
-                   ZDFORC_QDQ, TCP%XLM, TCP%XLEPS, ZAVG_USTAR, ZALFAU,   &
+                   ZDFORC_QDQ, SB%XLM, SB%XLEPS, ZAVG_USTAR, ZALFAU,   &
                    ZBETAU, ZALFAT, ZBETAT, ZALFAQ, ZBETAQ      )
   !
   !-------------------------------------------------------------------------------------
@@ -1008,7 +1006,7 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_TEB_n(TD%O, TD%D, TCP, T,TOP%LCANOPY, &
+ CALL DIAG_INLINE_TEB_n(TD%O, TD%D, SB, T,TOP%LCANOPY, &
                         PTA, PTRAD, ZQA, PPA, PPS, PRHOA, PU, PV, ZWIND, PZREF, PUREF, &
                         ZAVG_CD, ZAVG_CDN, ZAVG_RI, ZAVG_CH, ZAVG_Z0, PTRAD, PEMIS,    &
                         PDIR_ALB, PSCA_ALB, PLW, ZDIR_SWB, ZSCA_SWB,  PSFTH, PSFTQ,    &
@@ -1030,7 +1028,7 @@ END IF
 ! Thermal confort index
 !-------------------------------------------------------------------------------------
 !
-IF (TD%U%LUTCI .AND. TD%O%N2M >0) THEN
+IF (TD%DUT%LUTCI .AND. TD%O%N2M >0) THEN
   DO JJ=1,KI
     IF (TD%D%XZON10M(JJ)/=XUNDEF) THEN
       ZU_UTCI(JJ) = SQRT(TD%D%XZON10M(JJ)**2+TD%D%XMER10M(JJ)**2)
@@ -1038,21 +1036,21 @@ IF (TD%U%LUTCI .AND. TD%O%N2M >0) THEN
       ZU_UTCI(JJ) = ZWIND(JJ)
     ENDIF
   ENDDO
- CALL UTCI_TEB(T%CUR, TD%U, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND, &
+ CALL UTCI_TEB(T%CUR, TD%DUT, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND, &
                ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC,  &
                ZAVG_EMIT_LW_GRND, PLW, ZAVG_T_RAD_IND    )
- CALL UTCIC_STRESS(PTSTEP,TD%U%XUTCI_IN      ,TD%U%XUTCIC_IN      )
- CALL UTCIC_STRESS(PTSTEP,TD%U%XUTCI_OUTSUN  ,TD%U%XUTCIC_OUTSUN  )
- CALL UTCIC_STRESS(PTSTEP,TD%U%XUTCI_OUTSHADE,TD%U%XUTCIC_OUTSHADE)
-ELSE IF (TD%U%LUTCI) THEN
-  TD%U%XUTCI_IN         (:) = XUNDEF
-  TD%U%XUTCI_OUTSUN     (:) = XUNDEF
-  TD%U%XUTCI_OUTSHADE   (:) = XUNDEF
-  TD%U%XTRAD_SUN        (:) = XUNDEF
-  TD%U%XTRAD_SHADE      (:) = XUNDEF
-  TD%U%XUTCIC_IN      (:,:) = XUNDEF
-  TD%U%XUTCIC_OUTSUN  (:,:) = XUNDEF
-  TD%U%XUTCIC_OUTSHADE(:,:) = XUNDEF
+ CALL UTCIC_STRESS(PTSTEP,TD%DUT%XUTCI_IN      ,TD%DUT%XUTCIC_IN      )
+ CALL UTCIC_STRESS(PTSTEP,TD%DUT%XUTCI_OUTSUN  ,TD%DUT%XUTCIC_OUTSUN  )
+ CALL UTCIC_STRESS(PTSTEP,TD%DUT%XUTCI_OUTSHADE,TD%DUT%XUTCIC_OUTSHADE)
+ELSE IF (TD%DUT%LUTCI) THEN
+  TD%DUT%XUTCI_IN         (:) = XUNDEF
+  TD%DUT%XUTCI_OUTSUN     (:) = XUNDEF
+  TD%DUT%XUTCI_OUTSHADE   (:) = XUNDEF
+  TD%DUT%XTRAD_SUN        (:) = XUNDEF
+  TD%DUT%XTRAD_SHADE      (:) = XUNDEF
+  TD%DUT%XUTCIC_IN      (:,:) = XUNDEF
+  TD%DUT%XUTCIC_OUTSUN  (:,:) = XUNDEF
+  TD%DUT%XUTCIC_OUTSHADE(:,:) = XUNDEF
 ENDIF
 
 !

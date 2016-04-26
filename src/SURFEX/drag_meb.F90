@@ -1,6 +1,6 @@
 !   ############################################################################
 !
-SUBROUTINE DRAG_MEB(IO, IR, DGMI, DGIP, PLAI, PH_VEG, PTG, PTA, PQA, PVMOD, &
+SUBROUTINE DRAG_MEB(IO, PEK, DMK, DK, PTG, PTA, PQA, PVMOD, &
                     PWG, PWGI, PWSAT, PWFC, PEXNS, PEXNA, PPS,  PRR, PSR,   &
                     PRHOA, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,          &
                     PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PSNOWSWE,&
@@ -57,7 +57,7 @@ SUBROUTINE DRAG_MEB(IO, IR, DGMI, DGIP, PLAI, PH_VEG, PTG, PTA, PQA, PVMOD, &
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t
 USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
@@ -84,9 +84,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_t), INTENT(INOUT) :: DGIP
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_t), INTENT(INOUT) :: DK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 REAL, INTENT(IN)                 ::   PTSTEP 
 !                                     PTSTEP = Model time step (s)        
@@ -126,7 +126,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PCHIP
 !                                     PCHIP = view factor (for LW) 
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PRS_VG, PRS_VN, PSNCV,  &
-                                    PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW
+                                    PPALPHAN, PZREF, PUREF, PDIRCOSZW
 !
 !                                     PRS_VG   = surface resistance for canopy (1-png)
 !                                     PRS_VN   = surface resistance for canopy (png)
@@ -139,14 +139,12 @@ REAL, DIMENSION(:), INTENT(IN)   :: PRS_VG, PRS_VN, PSNCV,  &
 !                                                NOTE this is different from ZZREF
 !                                                ONLY in stand-alone/forced mode,
 !                                                NOT when coupled to a model (MesoNH)
-!                                     PH_VEG   = height of the vegetation
 !                                     PDIRCOSZW= Cosinus of the angle between 
 !                                                the normal to the surface and the vertical
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PDELTA, PLAI
+REAL, DIMENSION(:), INTENT(IN)    :: PDELTA
 !                                     PDELTA   = fraction of the canopy foliage covered
 !                                                by intercepted water (-)
-!                                     PLAI     = vegetation LAI (m2 m-2)
 !
 REAL, DIMENSION(:), INTENT(OUT)  :: PDELTAVK
 !                                     PDELTAVK = fraction of the canopy foliage covered
@@ -182,9 +180,9 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_C_A, PFLXC_N_A, PFLXC_G_C, PFLXC_N_C, 
 REAL, DIMENSION(:), INTENT(OUT)  :: PFLXC_MOM, PQSATG, PQSATV, PQSATC, PQSATN
 !                                    PFLXC_MOM = effective drag coefficient for momentum [kg/m2/s]
 !                                    PQSATG = qsat for PTG
-!                                    PQSATV = qsat for IR%XTV(:,1)
-!                                    PQSATC = qsat for IR%XTC(:,1)
-!                                    PQSATN = qsat for DGMI%XSNOWTEMP(:,1)
+!                                    PQSATV = qsat for PEK%XTV(:)
+!                                    PQSATC = qsat for PEK%XTC(:)
+!                                    PQSATN = qsat for DMK%XSNOWTEMP(:)
 !
 REAL, DIMENSION(:), INTENT(OUT)  :: PRISNOW, PUSTAR2SNOW 
 !                                    PRISNOW     = Richardson number over snow (-)
@@ -257,14 +255,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',0,ZHOOK_HANDLE)
 !
-DGIP%XCH(:)   = 0.
-DGIP%XCD(:)   = 0.
-DGIP%XCDN(:)  = 0.
-DGIP%XRI(:)   = 0.
-DGIP%XHUG(:)  = 0.
+DK%XCH(:)   = 0.
+DK%XCD(:)   = 0.
+DK%XCDN(:)  = 0.
+DK%XRI(:)   = 0.
+DK%XHUG(:)  = 0.
 !
-DGMI%XHV(:)   = 0.
-DGIP%XHU(:)   = 0.
+DMK%XHV(:)   = 0.
+DK%XHU(:)   = 0.
 !
 PHUGI(:) = 0.
 PHVN(:)  = 0.
@@ -296,7 +294,7 @@ ZZ0SN(:) = XZ0SN
 ZWSAT(:) = PWSAT(:)-PWGI(:)
 ZWFC (:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
 !
-DGIP%XHUG(:) = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
+DK%XHUG(:) = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
 !
 ZWSAT(:) = MAX(XWGMIN, ZWSAT(:))
 ZWFC (:) = PWFC(:)*ZWSAT(:)/PWSAT(:)
@@ -306,9 +304,9 @@ PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 ! (see Mahfouf and Noilhan, jam, 1991)
 !
 PQSATG(:) = QSAT(PTG(:),PPS(:)) 
-PQSATV(:) = QSAT(IR%XTV(:,1),PPS(:)) 
-PQSATC(:) = QSAT(IR%XTC(:,1),PPS(:)) 
-PQSATN(:) = QSATI(DGMI%XSNOWTEMP(:,1),PPS(:)) 
+PQSATV(:) = QSAT(PEK%XTV(:),PPS(:)) 
+PQSATC(:) = QSAT(PEK%XTC(:),PPS(:)) 
+PQSATN(:) = QSATI(DMK%XSNOWTEMP(:,1),PPS(:)) 
 !
 !-------------------------------------------------------------------------------
 !
@@ -317,8 +315,8 @@ PQSATN(:) = QSATI(DGMI%XSNOWTEMP(:,1),PPS(:))
 !       average of canopy air humidity and saturation humidity of snowpack
 !
 !
-DGIP%XQS(:) =(1.-IR%XPSN(:,1)*PPALPHAN(:))*IR%XQC(:,1)+ IR%XPSN(:,1)*PPALPHAN(:)*PQSATN(:)
-DGIP%XHU(:) =(1.-IR%XPSN(:,1)*PPALPHAN(:))*IR%XQC(:,1)/PQSATC(:)+ IR%XPSN(:,1)*PPALPHAN(:)
+DK%XQS(:) =(1.-PEK%XPSN(:)*PPALPHAN(:))*PEK%XQC(:)          + PEK%XPSN(:)*PPALPHAN(:)*PQSATN(:)
+DK%XHU(:) =(1.-PEK%XPSN(:)*PPALPHAN(:))*PEK%XQC(:)/PQSATC(:)+ PEK%XPSN(:)*PPALPHAN(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -343,12 +341,12 @@ ZLW(:)=0.02
 !
 ! Calculate the displacement height
 !
-CALL DISPH_FOR_MEB(ZCHIL,PLAI,ZLW,PH_VEG,PZREF,PZ0_MEBV,ZDISPH)
+CALL DISPH_FOR_MEB(ZCHIL,PEK%XLAI,ZLW,PEK%XH_VEG,PZREF,PZ0_MEBV,ZDISPH)
 !
 ! Here ZRICN,ZRA_C_A,ZCHCN,ZCDNCN,ZCDCN are valid for the snow free part in meb:
 !
 CALL PREPS_FOR_MEB_DRAG(.TRUE.,IO%LFORC_MEASURE, PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,  &
-                        PH_VEG, PZREF, IR%XTC(:,1), PTA, IR%XQC(:,1), PQA, PUREF,   &
+                        PEK%XH_VEG, PZREF, PEK%XTC, PTA, PEK%XQC, PQA, PUREF,   &
                         PVMOD, PEXNA, PEXNS, PDIRCOSZW, ZDISPH, PVELC, ZVMOD, ZRICN,&
                         ZRA_C_A, ZCHCN, ZCDNCN, ZCDCN                    )
 !
@@ -374,28 +372,28 @@ PFLXC_MOM(:)=ZCDCN(:)*ZVMOD(:)*PRHOA(:)
 !Calculate the aerodynamic resistance between the snowfree part of the ground
 !and canopy air, ZRA_G_C, and the conductance between the canopy and canopy air, ZG_VG_C
 !  
-CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAI,   &
-                     PTG, IR%XTC(:,1), IR%XTV(:,1), PVELC, ZLW, ZDISPH,      &
+CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PEK%XH_VEG, PEK%XLAI,   &
+                     PTG, PEK%XTC, PEK%XTV, PVELC, ZLW, ZDISPH,      &
                      ZRA_G_C, ZG_VG_C, ZUSTAR2G, ZCDG, ZCHG, ZRIG         )
 !
 !Compute the lai of the canopy that is above snow
 !
-ZLAISN(:)=PLAI(:)*(1.-PPALPHAN(:))
+ZLAISN(:)= PEK%XLAI(:)*(1.-PPALPHAN(:))
 !
 ! Note that we use the same displacement height also for the snow covered part
 !
 ! The same as ZRA_G_C/ZG_VG_C but for the snow part (png) =>ZRA_N_C/ZG_VN_C
 !
-CALL SURFACE_AIR_MEB(PZ0_MEBN, PZ0H_MEBN, ZZ0SN, PH_VEG, ZLAISN,     &
-                     DGMI%XSNOWTEMP(:,1), IR%XTC(:,1), IR%XTV(:,1),  &
+CALL SURFACE_AIR_MEB(PZ0_MEBN, PZ0H_MEBN, ZZ0SN, PEK%XH_VEG, ZLAISN,     &
+                     DMK%XSNOWTEMP(:,1), PEK%XTC, PEK%XTV,  &
                      PVELC, ZLW, ZDISPH, ZRA_N_C, ZG_VN_C,           &
                      ZUSTAR2G, ZCDG, ZCHG, ZRIG                      )
 
 ! save values over snow for diagnostic purposes:
 
 PUSTAR2SNOW(:) = ZUSTAR2G(:)
-DGMI%XCDSNOW(:)     = ZCDG(:)  
-DGMI%XCHSNOW(:)     = ZCHG(:)
+DMK%XCDSNOW(:)     = ZCDG(:)  
+DMK%XCHSNOW(:)     = ZCHG(:)
 PRISNOW(:)     = ZRIG(:)
 !
 !------------------------------------------------------------------------------
@@ -403,8 +401,8 @@ PRISNOW(:)     = ZRIG(:)
 ! i.e. between the snow surface and atmosphere directly
 !
 CALL PREPS_FOR_MEB_DRAG(.FALSE.,IO%LFORC_MEASURE,                        &
-                   PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PH_VEG, PZREF,      &
-                   DGMI%XSNOWTEMP(:,1), PTA, PQSATN, PQA, PUREF, PVMOD,  &
+                   PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PEK%XH_VEG, PZREF,  &
+                   DMK%XSNOWTEMP(:,1), PTA, PQSATN, PQA, PUREF, PVMOD,   &
                    PEXNA, PEXNS, PDIRCOSZW, ZDISPH,                      &
                    ZVELC, ZVMOD, ZRINN, ZRANN,                           &
                    ZCHNN,ZCDNNN,ZCDNN                                    )
@@ -424,39 +422,39 @@ PFLXC_N_A(:)=ZCHNN(:)*ZVMOD(:)*PRHOA(:)
 !
 ! The effective momentum drag: 
 !
-PFLXC_MOM(:)=(1.-IR%XPSN(:,1)*PPALPHAN(:))*PFLXC_MOM(:) +  &
-              IR%XPSN(:,1)*PPALPHAN(:)*ZCDNN(:)*ZVMOD(:)*PRHOA(:)
+PFLXC_MOM(:)=(1.-PEK%XPSN(:)*PPALPHAN(:))*PFLXC_MOM(:) +  &
+                 PEK%XPSN(:)*PPALPHAN(:)*ZCDNN(:)*ZVMOD(:)*PRHOA(:)
 !
 ! Now calculate the aerodynamic resistance for  the whole meb-patch
 !
 ! Calculate  the effective temperature
 !
-ZPSNA(:)   = IR%XPSN(:,1)*PPALPHAN(:)
+ZPSNA(:)   = PEK%XPSN(:)*PPALPHAN(:)
 !
-ZTEFF(:)   = (1.-ZPSNA(:))*IR%XTC(:,1)+ ZPSNA(:)*DGMI%XSNOWTEMP(:,1)
+ZTEFF(:)   = (1.-ZPSNA(:))*PEK%XTC(:)+ ZPSNA(:)*DMK%XSNOWTEMP(:,1)
 !
 ! Some additional diagnostics:
 !
 PUSTAR2SNOW(:) = (1.-ZPSNA(:))*PUSTAR2SNOW(:) + ZPSNA(:)*ZCDNN(:)*ZVMOD(:)**2
-DGMI%XCDSNOW(:)     = (1.-ZPSNA(:))*DGMI%XCDSNOW(:)     + ZPSNA(:)*ZCDNN(:)
-DGMI%XCHSNOW(:)     = (1.-ZPSNA(:))*DGMI%XCHSNOW(:)     + ZPSNA(:)*ZCHNN(:)
+DMK%XCDSNOW(:) = (1.-ZPSNA(:))*DMK%XCDSNOW(:) + ZPSNA(:)*ZCDNN(:)
+DMK%XCHSNOW(:) = (1.-ZPSNA(:))*DMK%XCHSNOW(:) + ZPSNA(:)*ZCHNN(:)
 PRISNOW(:)     = (1.-ZPSNA(:))*PRISNOW(:)     + ZPSNA(:)*ZRINN(:)
 !
 !-------------------------------------------------------------------------------
 !
-CALL PREPS_FOR_MEB_DRAG(.FALSE.,IO%LFORC_MEASURE, DGIP%XZ0, DGIP%XZ0H, DGIP%XZ0EFF, &
-                        PH_VEG, PZREF, ZTEFF, PTA, DGIP%XQS, PQA, PUREF, PVMOD,     &
-                        PEXNA, PEXNS, PDIRCOSZW, ZDISPH, ZVELC, ZVMOD, DGIP%XRI,    &
-                        IR%XRESA(:,1), DGIP%XCH,DGIP%XCDN,DGIP%XCD               )
+CALL PREPS_FOR_MEB_DRAG(.FALSE.,IO%LFORC_MEASURE, DK%XZ0, DK%XZ0H, DK%XZ0EFF, &
+                        PEK%XH_VEG, PZREF, ZTEFF, PTA, DK%XQS, PQA, PUREF, PVMOD, &
+                        PEXNA, PEXNS, PDIRCOSZW, ZDISPH, ZVELC, ZVMOD, DK%XRI,    &
+                        PEK%XRESA(:), DK%XCH,DK%XCDN,DK%XCD               )
 !
 IF (LRRGUST_ARP) THEN
 
    ZRRCOR(:)=SQRT(1.0+((((ZFP(:)/(ZFP(:)+XRRSCALE))**XRRGAMMA)*XUTILGUST)**2) &
-                 /(DGIP%XCD(:)*ZVMOD(:)**2))
+                 /(DK%XCD(:)*ZVMOD(:)**2))
 
-   DGIP%XCD(:)  = DGIP%XCD(:)  * ZRRCOR(:)
-   DGIP%XCH(:)  = DGIP%XCH(:)  * ZRRCOR(:)
-   DGIP%XCDN(:) = DGIP%XCDN(:) * ZRRCOR(:)
+   DK%XCD(:)  = DK%XCD(:)  * ZRRCOR(:)
+   DK%XCH(:)  = DK%XCH(:)  * ZRRCOR(:)
+   DK%XCDN(:) = DK%XCDN(:) * ZRRCOR(:)
 
 ENDIF
 
@@ -512,26 +510,26 @@ PFLXC_VN_C(:) = PRHOA(:)*ZG_VN_C(:)
 !*       5.     HALSTEAD COEFFICIENT (RELATIVE HUMIDITY OF THE VEGETATION)
 !               ----------------------------------------------------------
 !
-ZDELTAMAX(:) = (1.-PCHIP(:))*(1.-IR%XPSN(:,1)*PPALPHAN(:))*PRR(:)+ IR%XWR(:,1)/PTSTEP
+ZDELTAMAX(:) = (1.-PCHIP(:))*(1.-PEK%XPSN(:)*PPALPHAN(:))*PRR(:)+ PEK%XWR(:)/PTSTEP
 ZDENOM(:)    = (1.-PSNCV(:))*XKDELTA_WR *                                               &
-               ( IR%XPSN(:,1)*(1.-PPALPHAN(:))*PFLXC_VN_C(:) + (1.-IR%XPSN(:,1))*PFLXC_VG_C(:) )* &
-               ( PQSATV(:)-IR%XQC(:,1))
+               ( PEK%XPSN(:)*(1.-PPALPHAN(:))*PFLXC_VN_C(:) + (1.-PEK%XPSN(:))*PFLXC_VG_C(:) )* &
+               ( PQSATV(:)-PEK%XQC(:))
 ZDELTAMAX(:) = MAX(0., MIN(1.0, ZDELTAMAX(:)/MAX(1.E-10,ZDENOM(:))))
 !
 ZDELTAV(:)   = XKDELTA_WR*MIN(ZDELTAMAX(:),PDELTA(:))
 PDELTAVK(:)  = XKDELTA_WR*PDELTA(:)                    ! delta including K factor
 !
-PHVG(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-IR%XQC(:,1)))             &
+PHVG(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PEK%XQC(:)))             &
           *(1.-ZDELTAV(:))*PRS_VG(:)*ZG_VG_C(:) / (1.+PRS_VG(:)*ZG_VG_C(:))
 !
-PHVN(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-IR%XQC(:,1)))             &
+PHVN(:) = 1. - MAX(0.,SIGN(1.,PQSATV(:)-PEK%XQC(:)))             &
           *(1.-ZDELTAV(:))*PRS_VN(:)*ZG_VN_C(:) / (1.+PRS_VN(:)*ZG_VN_C(:))
 
 ! Diagnostics:
 ! Compute an effective canopy stomatal resistance (s m-1) and Halstead Coef: 
 !
-DGMI%XRS(:)  = PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)
-DGMI%XHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
+DMK%XRS(:)  = PPALPHAN(:)*PRS_VN(:) + (1.0-PPALPHAN(:))*PRS_VG(:)
+DMK%XHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 !
 !
 !-------------------------------------------------------------------------
@@ -562,19 +560,19 @@ ENDIF
 ! here are needed owing to linearization 
 ! of Qsat in the surface energy budget.
 !
-WHERE ( DGIP%XHUG(:)*PQSATG(:)  < IR%XQC(:,1) .AND. PQSATG(:) > IR%XQC(:,1) )
-  DGIP%XHUG(:)        = IR%XQC(:,1) / PQSATG(:)
+WHERE ( DK%XHUG(:)*PQSATG(:)  < PEK%XQC(:) .AND. PQSATG(:) > PEK%XQC(:) )
+  DK%XHUG(:)        = PEK%XQC(:) / PQSATG(:)
   PLEG_DELTA(:)  = 0.0
 END WHERE
-WHERE ( PHUGI(:)*PQSATG(:) < IR%XQC(:,1) .AND. PQSATG(:) > IR%XQC(:,1) )
-  PHUGI(:)       = IR%XQC(:,1) / PQSATG(:)
+WHERE ( PHUGI(:)*PQSATG(:) < PEK%XQC(:) .AND. PQSATG(:) > PEK%XQC(:) )
+  PHUGI(:)       = PEK%XQC(:) / PQSATG(:)
   PLEGI_DELTA(:) = 0.0
 END WHERE
 !
 ! b) low-level air is humid, i.e., qa >= qsat (condensation)
 !
-WHERE ( DGIP%XHUG*PQSATG  < IR%XQC(:,1) .AND. PQSATG <= IR%XQC(:,1) )DGIP%XHUG(:)  = 1.0
-WHERE ( PHUGI*PQSATG < IR%XQC(:,1) .AND. PQSATG <= IR%XQC(:,1) )PHUGI(:) = 1.0
+WHERE ( DK%XHUG*PQSATG  < PEK%XQC(:) .AND. PQSATG <= PEK%XQC(:) )DK%XHUG(:)  = 1.0
+WHERE ( PHUGI*PQSATG < PEK%XQC(:) .AND. PQSATG <= PEK%XQC(:) )PHUGI(:) = 1.0
 !
 !
 IF (LHOOK) CALL DR_HOOK('DRAG_MEB',1,ZHOOK_HANDLE)

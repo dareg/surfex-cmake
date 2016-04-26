@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_SURF_n (CHU, DUO, USS, &
-                                  HPROGRAM,HINIT)
+SUBROUTINE READ_NAMELISTS_SURF_n (CHU, DGO, USS, HPROGRAM,HINIT)
 !     #######################################################
 !
 !---------------------------    
@@ -37,7 +36,7 @@ IMPLICIT NONE
 !
 !
 TYPE(CH_SURF_t), INTENT(INOUT) :: CHU
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DUO
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
@@ -56,9 +55,9 @@ CALL DEFAULT_DIAG_SURF_ATM(N2M, LT2MMW, LSURF_BUDGET, L2M_MIN_ZS, LRAD_BUDGET, &
                            LSELECT, LPROVAR_TO_DIAG, LDIAG_GRID, LFRAC, &
                            XDIAG_TSTEP, CSELECT )   
 !      
- CALL READ_DEFAULT_SURF_ATM_n(CHU, DUO, USS, HPROGRAM) 
+ CALL READ_DEFAULT_SURF_ATM_n(CHU, DGO, USS, HPROGRAM) 
 !
- CALL READ_SURF_ATM_CONF_n(CHU, DUO, USS, HPROGRAM)    
+ CALL READ_SURF_ATM_CONF_n(CHU, DGO, USS, HPROGRAM)    
 !       
 !---------------------------------------------------------------------------
 !PREP

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE  DIAG_SURF_BUDGET_SEA(DGS, DGSI, S, PTT, PRHOA, PSFTH, PSFTH_ICE, &
+SUBROUTINE  DIAG_SURF_BUDGET_SEA(D, DI, S, PTT, PRHOA, PSFTH, PSFTH_ICE, &
                                  PSFTQ, PSFTQ_ICE, PDIR_SW, PSCA_SW, PLW,    &
                                  PDIR_ALB, PSCA_ALB, PEMIS, PTRAD,           &
                                  PSFZON, PSFZON_ICE, PSFMER, PSFMER_ICE   ) 
@@ -45,8 +45,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGS
-TYPE(DIAG_t), INTENT(INOUT) :: DGSI
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_t), INTENT(INOUT) :: DI
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL,               INTENT(IN) :: PTT       ! freezing temperature of water surface
@@ -88,50 +88,50 @@ ISWB = SIZE(PDIR_SW,2)
 !* total incoming and outgoing SW
 !
 DO JSWB=1,ISWB
-  DGS%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
-  DGS%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
+  D%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
+  D%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
 ENDDO
 !
-DGS%XSWD(:) = 0.
-DGS%XSWU(:) = 0.
+D%XSWD(:) = 0.
+D%XSWU(:) = 0.
 DO JSWB=1,ISWB
-   DGS%XSWD(:) = DGS%XSWD(:) + DGS%XSWBD(:,JSWB)
-   DGS%XSWU(:) = DGS%XSWU(:) + DGS%XSWBU(:,JSWB)
+   D%XSWD(:) = D%XSWD(:) + D%XSWBD(:,JSWB)
+   D%XSWU(:) = D%XSWU(:) + D%XSWBU(:,JSWB)
 ENDDO
 !
 !*incoming outgoing LW
 !
-DGS%XLWD(:)=PLW(:)
-DGS%XLWU(:)=PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
+D%XLWD(:)=PLW(:)
+D%XLWU(:)=PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
 !
 !* net radiation
 !
-DGS%XRN(:)    =   DGS%XSWD(:) - DGS%XSWU(:)     + DGS%XLWD(:) - DGS%XLWU    (:)
+D%XRN(:)    =   D%XSWD(:) - D%XSWU(:)     + D%XLWD(:) - D%XLWU    (:)
 !
 IF (.NOT.S%LHANDLE_SIC) THEN
   !
   !* sensible heat flux
   !
-  DGS%XH     = PSFTH
+  D%XH     = PSFTH
   !
   !* latent heat flux
   !
   WHERE (S%XSST<PTT  )
-     DGS%XLE    = PSFTQ * XLSTT
-     DGS%XLEI   = PSFTQ * XLSTT
-     DGS%XEVAP  = PSFTQ
-     DGS%XSUBL  = PSFTQ
+     D%XLE    = PSFTQ * XLSTT
+     D%XLEI   = PSFTQ * XLSTT
+     D%XEVAP  = PSFTQ
+     D%XSUBL  = PSFTQ
   ELSEWHERE
-     DGS%XLE    = PSFTQ * XLVTT
-     DGS%XLEI   = 0.0
-     DGS%XEVAP  = PSFTQ
-     DGS%XSUBL  = 0.0
+     D%XLE    = PSFTQ * XLVTT
+     D%XLEI   = 0.0
+     D%XEVAP  = PSFTQ
+     D%XSUBL  = 0.0
   END WHERE
   !
   !* wind stress
   !
-  DGS%XFMU = PSFZON
-  DGS%XFMV = PSFMER
+  D%XFMU = PSFZON
+  D%XFMV = PSFMER
   !
 ELSE
   !
@@ -143,50 +143,50 @@ ELSE
   !* total incoming and outgoing SW
   !
   DO JSWB=1,ISWB
-    DGSI%XSWBU(:,JSWB) = (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)) * S%XICE_ALB(:) 
+    DI%XSWBU(:,JSWB) = (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)) * S%XICE_ALB(:) 
   ENDDO
   !
-  DGSI%XSWU(:) = 0.
+  DI%XSWU(:) = 0.
   DO JSWB=1,ISWB
-     DGSI%XSWU(:) = DGSI%XSWU(:) + DGSI%XSWBU(:,JSWB)
+     DI%XSWU(:) = DI%XSWU(:) + DI%XSWBU(:,JSWB)
   ENDDO
   !
   !*incoming outgoing LW
   !
-  DGSI%XLWU(:)=XEMISWATICE*XSTEFAN*S%XTICE(:)**4 + (1.-XEMISWATICE)*PLW(:)
+  DI%XLWU(:)=XEMISWATICE*XSTEFAN*S%XTICE(:)**4 + (1.-XEMISWATICE)*PLW(:)
   !
   !* net radiation
   !
-  DGSI%XRN(:) =   DGS%XSWD(:) - DGSI%XSWU(:) + DGS%XLWD(:) - DGSI%XLWU(:)
+  DI%XRN(:) =   D%XSWD(:) - DI%XSWU(:) + D%XLWD(:) - DI%XLWU(:)
   !
   !* sensible heat flux
   !
-  DGS%XH     = (1 - S%XSIC) * PSFTH + S%XSIC * PSFTH_ICE 
-  DGSI%XH    =                                 PSFTH_ICE
+  D%XH     = (1 - S%XSIC) * PSFTH + S%XSIC * PSFTH_ICE 
+  DI%XH    =                                 PSFTH_ICE
   !
   !* latent heat flux
   !
-  DGS%XLE     = (1 - S%XSIC) * PSFTQ * XLVTT + S%XSIC * PSFTQ_ICE * XLSTT
-  DGS%XLEI    =                                         PSFTQ_ICE * XLSTT
-  DGS%XEVAP   = (1 - S%XSIC) * PSFTQ         + S%XSIC * PSFTQ_ICE 
-  DGS%XSUBL   =                                S%XSIC * PSFTQ_ICE 
+  D%XLE     = (1 - S%XSIC) * PSFTQ * XLVTT + S%XSIC * PSFTQ_ICE * XLSTT
+  D%XLEI    =                                         PSFTQ_ICE * XLSTT
+  D%XEVAP   = (1 - S%XSIC) * PSFTQ         + S%XSIC * PSFTQ_ICE 
+  D%XSUBL   =                                S%XSIC * PSFTQ_ICE 
   !
   !* ice storage flux
   !
-  DGSI%XGFLUX = DGSI%XRN - DGSI%XH - DGS%XLEI
+  DI%XGFLUX = DI%XRN - DI%XH - D%XLEI
   !
   !* wind stress
   !
-  DGS%XFMU  = (1 - S%XSIC) * PSFZON + S%XSIC * PSFZON_ICE
-  DGSI%XFMU =                                  PSFZON_ICE
-  DGS%XFMV  = (1 - S%XSIC) * PSFMER + S%XSIC * PSFMER_ICE
-  DGSI%XFMV =                                  PSFMER_ICE
+  D%XFMU  = (1 - S%XSIC) * PSFZON + S%XSIC * PSFZON_ICE
+  DI%XFMU =                                  PSFZON_ICE
+  D%XFMV  = (1 - S%XSIC) * PSFMER + S%XSIC * PSFMER_ICE
+  DI%XFMV =                                  PSFMER_ICE
 !  
 ENDIF
 !
 !* total storage flux
 !
-DGS%XGFLUX = DGS%XRN - DGS%XH - DGS%XLE
+D%XGFLUX = D%XRN - D%XH - D%XLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_SEA',1,ZHOOK_HANDLE)

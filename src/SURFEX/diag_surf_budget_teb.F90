@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGET_TEB (DGT, PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB,  &
+       SUBROUTINE DIAG_SURF_BUDGET_TEB (D, PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB,  &
                                         PLW, PEMIS, PTRAD   )  
 !     ###############################################################################
 !
@@ -35,7 +35,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 REAL, DIMENSION(:,:),INTENT(IN)  :: PDIR_SW   ! direct  solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
@@ -61,21 +61,21 @@ ISWB = SIZE(PDIR_SW,2)
 !* total incoming and outgoing SW
 !
 DO JSWB=1,ISWB
-  DGT%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
-  DGT%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
+  D%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
+  D%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
 ENDDO
 !
-DGT%XSWD(:) = 0.
-DGT%XSWU(:) = 0.
+D%XSWD(:) = 0.
+D%XSWU(:) = 0.
 DO JSWB=1,ISWB
-   DGT%XSWD(:)=DGT%XSWD(:)+DGT%XSWBD(:,JSWB)
-   DGT%XSWU(:)=DGT%XSWU(:)+DGT%XSWBU(:,JSWB)
+   D%XSWD(:)=D%XSWD(:)+D%XSWBD(:,JSWB)
+   D%XSWU(:)=D%XSWU(:)+D%XSWBU(:,JSWB)
 ENDDO
 !
 !*incoming outgoing LW
 !
-DGT%XLWD(:)=PLW(:)
-DGT%XLWU(:)=PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
+D%XLWD(:)=PLW(:)
+D%XLWU(:)=PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_TEB',1,ZHOOK_HANDLE)
 !

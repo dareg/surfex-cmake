@@ -1,0 +1,304 @@
+!     ################################################################
+      SUBROUTINE AV_PGD_PARAM_1P (PLAI_IN, PVEG_IN, &
+                               PFIELD,PVEGTYPE,PDATA,HSFTYPE,HATYPE,KMASK,KNPATCH,KPATCH,PDZ,KDECADE)
+!     ################################################################
+!
+!!**** *AV_PATCH_PGD* average for each surface patch a secondary physiographic 
+!!                    variable from the
+!!              fractions of coverage class.
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!    METHOD
+!!    ------
+!!
+!!    The averaging is performed with one way into three:
+!!
+!!    - arithmetic averaging (HATYPE='ARI')
+!!
+!!    - inverse    averaging (HATYPE='INV')
+!!
+!!    - inverse of square logarithm averaging (HATYPE='CDN') :
+!!
+!!      1 / ( ln (dz/data) )**2
+!!
+!!      This latest uses (if available) the height of the first model mass
+!!      level. In the other case, 20m is chosen. It works for roughness lengths.
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!    AUTHOR
+!!    ------
+!!
+!!    F.Solmon /V. Masson       
+!!
+!!    MODIFICATION
+!!    ------------
+!!
+!!    Original    15/12/97
+!!    V. Masson   01/2004  Externalization
+!!    R. Alkama   04/2012  add 6 new tree vegtype (9 instead 3)
+!
+!----------------------------------------------------------------------------
+!
+!*    0.     DECLARATION
+!            -----------
+!
+USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,  &
+                                NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVEGTYPE,  &
+                                XCDREF
+
+!
+USE MODI_VEGTYPE_TO_PATCH 
+!
+!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+USE MODI_ABOR1_SFX
+!
+IMPLICIT NONE
+!
+!*    0.1    Declaration of arguments
+!            ------------------------
+!
+!
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PLAI_IN
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PVEG_IN
+!
+REAL, DIMENSION(:), INTENT(OUT) :: PFIELD  ! secondary field to construct
+REAL, DIMENSION(:,:), INTENT(IN)  :: PVEGTYPE  ! fraction of each cover class
+REAL, DIMENSION(:,:), INTENT(IN)  :: PDATA   ! secondary field value for each class
+ CHARACTER(LEN=3),     INTENT(IN)  :: HSFTYPE ! Type of surface where the field
+                                               ! is defined
+ CHARACTER(LEN=3),     INTENT(IN) :: HATYPE  ! Type of averaging
+INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
+INTEGER, INTENT(IN) :: KNPATCH
+INTEGER, INTENT(IN) :: KPATCH
+REAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: PDZ    ! first model half level
+INTEGER,              INTENT(IN), OPTIONAL :: KDECADE ! current month
+!
+!*    0.2    Declaration of local variables
+!            ------------------------------
+!
+!
+INTEGER :: ICOVER  ! number of cover classes
+INTEGER :: JCOVER  ! loop on cover classes
+!
+! nbe of vegtype
+! nbre of patches
+INTEGER :: JVEGTYPE! loop on vegtype
+INTEGER :: JJ, JI, JP, IMASK
+!
+REAL, DIMENSION(SIZE(PFIELD,1),NVEGTYPE)  :: ZWEIGHT
+!
+REAL, DIMENSION(SIZE(PFIELD,1))   :: ZSUM_WEIGHT_PATCH
+!
+REAL, DIMENSION(SIZE(PFIELD,1))   :: ZWORK
+REAL, DIMENSION(SIZE(PFIELD,1))   :: ZDZ
+!
+INTEGER, DIMENSION(SIZE(PFIELD,1))  :: NMASK
+INTEGER ::  PATCH_LIST(NVEGTYPE)
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+
+!-------------------------------------------------------------------------------
+!
+!*    1.1    field does not exist
+!            --------------------
+!
+IF (LHOOK) CALL DR_HOOK('AV_PGD_PARAM_1P',0,ZHOOK_HANDLE)
+IF (SIZE(PFIELD)==0 .AND. LHOOK) CALL DR_HOOK('AV_PGD_PARAM_1P',1,ZHOOK_HANDLE)
+IF (SIZE(PFIELD)==0) RETURN
+!
+!-------------------------------------------------------------------------------
+!
+!*    1.2    Initializations
+!            ---------------
+!
+!
+IF (PRESENT(PDZ)) THEN
+  ZDZ(:)=PDZ(:)
+ELSE
+  ZDZ(:)=XCDREF
+END IF
+!
+PFIELD(:)=XUNDEF
+!
+ZWORK(:)=0.
+ZWEIGHT(:,:)=0.
+ZSUM_WEIGHT_PATCH(:)=0.
+!
+DO JVEGTYPE=1,NVEGTYPE
+  PATCH_LIST(JVEGTYPE) = VEGTYPE_TO_PATCH (JVEGTYPE, KNPATCH)
+ENDDO
+
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!
+!*    2.     Selection of the weighting function for vegtype
+!            -----------------------------------
+!
+DO JVEGTYPE=1,NVEGTYPE
+  JP= PATCH_LIST(JVEGTYPE)
+  IF (JP/=KPATCH) CYCLE
+  DO JI=1,SIZE(PFIELD)
+    IMASK = KMASK(JI)
+    
+    IF (HSFTYPE=='NAT'.OR.HSFTYPE=='GRD') THEN
+      ZWEIGHT(JI,JVEGTYPE) = PVEGTYPE(IMASK,JVEGTYPE)
+    ELSEIF (HSFTYPE=='VEG'.OR.HSFTYPE=='GRV') THEN
+      ZWEIGHT(JI,JVEGTYPE) = PVEGTYPE(IMASK,JVEGTYPE)*PVEG_IN(IMASK,KDECADE,JVEGTYPE)
+    ELSEIF (HSFTYPE=='BAR'.OR.HSFTYPE=='GRB') THEN
+      ZWEIGHT(JI,JVEGTYPE)=PVEGTYPE(IMASK,JVEGTYPE)*(1.-PVEG_IN(IMASK,KDECADE,JVEGTYPE))
+    ELSEIF (HSFTYPE=='DVG'.OR.HSFTYPE=='GDV') THEN
+      IF (SUM(PLAI_IN(JI,:,JVEGTYPE)).GT.0.) ZWEIGHT(JI,JVEGTYPE) = PVEGTYPE(IMASK,JVEGTYPE)
+    ELSEIF (HSFTYPE=='LAI'.OR.HSFTYPE=='GRL') THEN
+      IF (JVEGTYPE>=4) ZWEIGHT(JI,JVEGTYPE)=PVEGTYPE(IMASK,JVEGTYPE)*PLAI_IN(IMASK,KDECADE,JVEGTYPE)
+    ELSEIF (HSFTYPE=='TRE'.OR.HSFTYPE=='GRT') THEN
+      IF (JVEGTYPE==NVT_TEBD.OR.JVEGTYPE==NVT_BONE.OR.JVEGTYPE==NVT_TRBE.OR.JVEGTYPE==NVT_TRBD.OR.&
+          JVEGTYPE==NVT_TEBE.OR.JVEGTYPE==NVT_TENE.OR.JVEGTYPE==NVT_BOBD.OR.JVEGTYPE==NVT_BOND.OR.&
+          JVEGTYPE==NVT_SHRB) ZWEIGHT(JI,JVEGTYPE) = PVEGTYPE(JI,JVEGTYPE)
+    ELSE
+      CALL ABOR1_SFX('AV_PGD_PARAM_1D: WEIGHTING FUNCTION FOR VEGTYPE NOT ALLOWED')
+    ENDIF
+
+  ENDDO
+ENDDO
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.     Averaging
+!            ---------
+!
+!*    3.1    Work arrays given for each patch
+!            -----------
+!
+!*    3.2    Selection of averaging type
+!            ---------------------------
+!
+SELECT CASE (HATYPE)
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.3    Arithmetic averaging
+!            --------------------
+!
+  CASE ('ARI')
+!
+    DO JVEGTYPE=1,NVEGTYPE
+      JP= PATCH_LIST(JVEGTYPE)
+      IF (JP/=KPATCH) CYCLE
+      DO JJ=1,SIZE(PFIELD)
+        IMASK = KMASK(JJ)
+        ZSUM_WEIGHT_PATCH(JJ) = ZSUM_WEIGHT_PATCH(JJ) + ZWEIGHT(JJ,JVEGTYPE)
+        ZWORK(JJ) =  ZWORK(JJ) + PDATA(IMASK,JVEGTYPE)  * ZWEIGHT(JJ,JVEGTYPE)
+      ENDDO
+    END DO
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.4    Inverse averaging
+!            -----------------
+!
+  CASE('INV' )
+!
+   DO JVEGTYPE=1,NVEGTYPE 
+     JP=PATCH_LIST(JVEGTYPE) 
+     IF (JP/=KPATCH) CYCLE
+     DO JJ=1,SIZE(PFIELD)
+       IMASK = KMASK(JJ)     
+       ZSUM_WEIGHT_PATCH(JJ) = ZSUM_WEIGHT_PATCH(JJ)+ZWEIGHT(JJ,JVEGTYPE)
+       IF (PDATA(IMASK,JVEGTYPE).NE.0.) THEN
+         ZWORK(JJ)= ZWORK(JJ) + 1./ PDATA(IMASK,JVEGTYPE) * ZWEIGHT(JJ,JVEGTYPE)
+       ENDIF
+     ENDDO
+   END DO
+!
+!-------------------------------------------------------------------------------!
+!
+!*    3.5    Roughness length averaging
+!            --------------------------
+
+!
+  CASE('CDN')
+!
+    DO JVEGTYPE=1,NVEGTYPE
+      JP=PATCH_LIST(JVEGTYPE)
+      IF (JP/=KPATCH) CYCLE
+      DO JJ=1,SIZE(PFIELD)
+        IMASK = KMASK(JJ)        
+        ZSUM_WEIGHT_PATCH(JJ) =  ZSUM_WEIGHT_PATCH(JJ)+ ZWEIGHT(JJ,JVEGTYPE)
+        IF (PDATA(JJ,JVEGTYPE).NE.0.) THEN
+          ZWORK(JJ)= ZWORK(JJ) + 1./(LOG(ZDZ(JJ)/ PDATA(IMASK,JVEGTYPE)))**2    &
+                            * ZWEIGHT(JJ,JVEGTYPE)
+        ENDIF
+      ENDDO
+    END DO   
+!
+!-------------------------------------------------------------------------------
+!
+  CASE DEFAULT
+    CALL ABOR1_SFX('AV_PGD_PARAM_1D: (1) AVERAGING TYPE NOT ALLOWED')
+!
+END SELECT
+!
+!*    4.1    Selection of averaging type
+!            ---------------------------
+!
+SELECT CASE (HATYPE)
+!
+!-------------------------------------------------------------------------------
+!
+!*    4.2    Arithmetic averaging
+!            --------------------
+!
+  CASE ('ARI')
+!   
+    DO JI=1,SIZE(PFIELD)
+      IF (ZSUM_WEIGHT_PATCH(JI)>0.) PFIELD(JI) = ZWORK(JI) / ZSUM_WEIGHT_PATCH(JI)
+    ENDDO
+!
+!-------------------------------------------------------------------------------
+!
+!*    4.3    Inverse averaging
+!            -----------------
+!
+  CASE('INV' )
+!
+    DO JI=1,SIZE(PFIELD)
+      IF (ZSUM_WEIGHT_PATCH(JI)>0.) PFIELD(JI) = ZSUM_WEIGHT_PATCH(JI) / ZWORK(JI)
+    ENDDO
+!-------------------------------------------------------------------------------!
+!
+!*    4.4    Roughness length averaging
+!            --------------------------
+
+!
+  CASE('CDN')
+!
+    DO JI=1,SIZE(PFIELD)
+      IF (ZSUM_WEIGHT_PATCH(JI)>0.) THEN
+        PFIELD(JI) = ZDZ(JI) * EXP( - SQRT(ZSUM_WEIGHT_PATCH(JI)/ZWORK(JI)) )
+      ENDIF
+    ENDDO
+!
+!-------------------------------------------------------------------------------
+!
+  CASE DEFAULT
+    CALL ABOR1_SFX('AV_PGD_PARAM_1D: (2) AVERAGING TYPE NOT ALLOWED')
+!
+END SELECT
+IF (LHOOK) CALL DR_HOOK('AV_PGD_PARAM_1P',1,ZHOOK_HANDLE)
+!-------------------------------------------------------------------------------
+!   
+END SUBROUTINE AV_PGD_PARAM_1P

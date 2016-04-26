@@ -1,13 +1,10 @@
 !     #############################################################
       SUBROUTINE INIT_INLAND_WATER_n (DTCO, OREAD_BUDGETC, UG, U, WM, FM,     &
-                                   DLO, DGL, DGLC, HPROGRAM,HINIT,            &
-                                   KI,KSV,KSW,                                &
-                                   HSV,PCO2,PRHOA,                            &
-                                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
-                                   PEMIS,PTSRAD,PTSURF,                       &
-                                   KYEAR, KMONTH,KDAY, PTIME,                 &
-                                   HATMFILE,HATMFILETYPE,                     &
-                                   HTEST                                      )  
+                                      DGO, DL, DLC, HPROGRAM,HINIT, KI, KSV,&
+                                      KSW, HSV, PCO2, PRHOA, PZENITH, PAZIM,  &
+                                      PSW_BANDS, PDIR_ALB, PSCA_ALB, PEMIS,   &
+                                      PTSRAD, PTSURF, KYEAR, KMONTH, KDAY,    &
+                                      PTIME, HATMFILE, HATMFILETYPE, HTEST   )  
 !     #############################################################
 !
 !!****  *INIT_INLAND_WATER_n* - routine to initialize inland water
@@ -76,9 +73,9 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -123,23 +120,21 @@ IF (U%CWATER=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DLO, DGL, DGLC, OREAD_BUDGETC, &
-                       HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
-                         PEMIS,PTSRAD,PTSURF,'OK'                    )  
+  CALL INIT_IDEAL_FLUX(DGO, DL, DLC, OREAD_BUDGETC, HPROGRAM, HINIT, &
+                       KI, KSV, KSW, HSV, PDIR_ALB, PSCA_ALB, PEMIS,   &
+                       PTSRAD, PTSURF, 'OK'     )  
 ELSE IF (U%CWATER=='WATFLX') THEN
   CALL INIT_WATFLUX_n(DTCO, OREAD_BUDGETC, UG, U, WM, &
-                      HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                      PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                      PEMIS,PTSRAD,PTSURF,                          &
-                      KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
-                      'OK'                                          )  
+                      HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2, PRHOA,&
+                      PZENITH, PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB,  &
+                      PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH, KDAY,     &
+                      PTIME, HATMFILE, HATMFILETYPE, 'OK'  )  
 ELSE IF (U%CWATER=='FLAKE ') THEN
   CALL INIT_FLAKE_n(DTCO, OREAD_BUDGETC, UG, U, FM, &
-                    HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
-                    PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
-                    PEMIS,PTSRAD,PTSURF,                          &
-                    KYEAR,KMONTH,KDAY,PTIME,HATMFILE,HATMFILETYPE,&
-                        'OK')          
+                    HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2, PRHOA, &
+                    PZENITH, PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB,   &
+                    PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH, KDAY,      &
+                    PTIME, HATMFILE, HATMFILETYPE, 'OK')          
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_INLAND_WATER_N',1,ZHOOK_HANDLE)
 !

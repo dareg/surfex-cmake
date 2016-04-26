@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_SURF_ATM_n (DUO, DGU, PHW, PHT, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
+       SUBROUTINE DIAG_INLINE_SURF_ATM_n (DGO, D, PHW, PHT, PPS, PRHOA, PTRAD, PEMIS, PSFU, PSFV, PSFCO2)
 !     ###############################################################################!
 !!****  *DIAG_INLINE_SURF_ATM_n * - Computes diagnostics during SURF_ATM time-step
 !!
@@ -37,8 +37,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DUO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PHW    ! atmospheric level height for wind
 REAL, DIMENSION(:), INTENT(IN)       :: PHT    ! atmospheric level height
@@ -56,20 +56,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SURF_ATM_N',0,ZHOOK_HANDLE)
-IF (DUO%LCOEF) THEN
-  DGU%XUREF = PHW
-  DGU%XZREF = PHT
+IF (DGO%LCOEF) THEN
+  D%XUREF = PHW
+  D%XZREF = PHT
 END IF
 !
-DGU%XRHOA = PRHOA
-DGU%XPS   = PPS
-DGU%XTRAD = PTRAD
-DGU%XEMIS = PEMIS
+D%XRHOA = PRHOA
+D%XPS   = PPS
+D%XTRAD = PTRAD
+D%XEMIS = PEMIS
 !
-DGU%XSSO_FMU   = PSFU
-DGU%XSSO_FMV   = PSFV
+D%XSSO_FMU   = PSFU
+D%XSSO_FMV   = PSFV
 !
-DGU%XSFCO2 = PSFCO2
+D%XSFCO2 = PSFCO2
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SURF_ATM_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

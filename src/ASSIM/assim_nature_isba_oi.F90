@@ -1,4 +1,4 @@
-SUBROUTINE ASSIM_NATURE_ISBA_OI (I, HPROGRAM, KI,                 &
+SUBROUTINE ASSIM_NATURE_ISBA_OI (IO, S, K, NP, NPE, HPROGRAM, KI, &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,   PUCLS, PVCLS,   &
@@ -29,7 +29,8 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI (I, HPROGRAM, KI,                 &
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
 !
 USE MODD_CSTS,            ONLY : XDAY, XPI, XRHOLW, XLVTT, NDAYSEC
 USE MODD_SURF_PAR,        ONLY : XUNDEF 
@@ -48,7 +49,11 @@ USE MODI_OI_CACSTS
 !
 IMPLICIT NONE
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
@@ -93,7 +98,7 @@ INTEGER  :: IYEAR                      ! current year (UTC)
 INTEGER  :: IMONTH                     ! current month (UTC)
 INTEGER  :: IDAY                       ! current day (UTC)
 INTEGER  :: ISSSSS                     ! current time since start of the run (s)
-INTEGER  :: JI, JJ, JP, JL
+INTEGER  :: JI, JJ, JP, JL, IMASK
 INTEGER  :: INOBS   ! number of observations
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 !
@@ -123,10 +128,10 @@ NITRAD = NECHGU*1800
 !
 !   Time initializations 
 !
-IYEAR  = I%I%TTIME%TDATE%YEAR
-IMONTH = I%I%TTIME%TDATE%MONTH
-IDAY   = I%I%TTIME%TDATE%DAY
-ISSSSS = I%I%TTIME%TIME
+IYEAR  = S%TTIME%TDATE%YEAR
+IMONTH = S%TTIME%TDATE%MONTH
+IDAY   = S%TTIME%TDATE%DAY
+ISSSSS = S%TTIME%TIME
 IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 !
@@ -145,26 +150,46 @@ JP = 1
 JL = 1
 !
 !
-ZSAB  (:) = I%P%XSAND(:,JP)*100.
-ZARG  (:) = I%P%XCLAY(:,JP)*100.
-!
-ZTS0  (:) = I%R%XTG  (:,1,JP)
-ZTP0  (:) = I%R%XTG  (:,2,JP)
-!
-ZWS0  (:) = I%R%XWG  (:,1,JP)
-ZWP0  (:) = I%R%XWG  (:,2,JP)
-ZTL0  (:) = I%R%XWGI (:,2,JP)
-!
-ZSNS0(:) = I%R%TSNOW%WSNOW(:,JL,JP)
-ZSNS (:) = ZSNS0(:)
+ZSAB  (:) = K%XSAND(:,JP)*100.
+ZARG  (:) = K%XCLAY(:,JP)*100.
 !
 ZTCLS (:) = XAT2M_ISBA   (:,JP)
 ZHCLS (:) = XAHU2M_ISBA  (:,JP)
 !
-ZD2   (:) = I%M%X%XDG   (:,2,JP)
-ZRSMIN(:) = I%M%T%XRSMIN(:,JP)
-ZLAI  (:) = I%M%T%XLAI  (:,JP)
-ZVEG  (:) = I%M%T%XVEG  (:,JP)
+ZD2   (:) = XUNDEF
+ZTS0  (:) = XUNDEF
+ZTP0  (:) = XUNDEF
+ZWS0  (:) = XUNDEF
+ZWP0  (:) = XUNDEF
+ZTL0  (:) = XUNDEF
+ZSNS0 (:) = XUNDEF
+ZRSMIN(:) = XUNDEF
+ZLAI  (:) = XUNDEF
+ZVEG  (:) = XUNDEF
+!
+DO JP = 1,IO%NPATCH
+  DO JI = 1,NP%AL(JP)%NSIZE_P
+    IMASK = NP%AL(JP)%NR_P(JI)
+    !
+    ZD2   (IMASK) = NP%AL(JP)%XDG   (JI,2)
+    !
+    ZTS0  (IMASK) = NPE%AL(JP)%XTG  (JI,1)
+    ZTP0  (IMASK) = NPE%AL(JP)%XTG  (JI,2)
+    !
+    ZWS0  (IMASK) = NPE%AL(JP)%XWG  (JI,1)
+    ZWP0  (IMASK) = NPE%AL(JP)%XWG  (JI,2)
+    ZTL0  (IMASK) = NPE%AL(JP)%XWGI (JI,2)
+    !
+    ZSNS0(IMASK) = NPE%AL(JP)%TSNOW%WSNOW(JI,JL)
+    !
+    ZRSMIN(IMASK) = NPE%AL(JP)%XRSMIN(JI)
+    ZLAI  (IMASK) = NPE%AL(JP)%XLAI  (JI)
+    ZVEG  (IMASK) = NPE%AL(JP)%XVEG  (JI)
+    !
+  ENDDO
+ENDDO
+!
+ZSNS (:) = ZSNS0(:)
 !
 ZUCLS(:) = PUCLS(:)
 ZVCLS(:) = PVCLS(:)
@@ -344,12 +369,18 @@ WRITE(*,*) 'Mean TL increments over NATURE ',SUM(ZTLINC)/KI
 WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
-I%R%XWG (:,1,JP) = ZWS0(:)
-I%R%XWG (:,2,JP) = ZWP0(:)
-I%R%XTG (:,1,JP) = ZTS0(:)
-I%R%XTG (:,2,JP) = ZTP0(:)
-I%R%XWGI(:,2,JP) = ZTL0(:)
-
+DO JP = 1,IO%NPATCH
+  DO JI = 1,NP%AL(JP)%NSIZE_P
+    IMASK = NP%AL(JP)%NR_P(JI)
+    !
+    NPE%AL(JP)%XWG (JI,1) = ZWS0(IMASK)
+    NPE%AL(JP)%XWG (JI,2) = ZWP0(IMASK)
+    NPE%AL(JP)%XTG (JI,1) = ZTS0(IMASK)
+    NPE%AL(JP)%XTG (JI,2) = ZTP0(IMASK)
+    NPE%AL(JP)%XWGI(JI,2) = ZTL0(IMASK)
+    !
+  ENDDO
+ENDDO
 !
 ! -------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_OI',1,ZHOOK_HANDLE)

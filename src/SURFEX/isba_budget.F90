@@ -1,6 +1,6 @@
 !     #########
-SUBROUTINE ISBA_BUDGET (IO, IR, DGEIP, OWATER_BUDGET, HSNOW_ISBA, PTSTEP,&
-                       PDG, PDZG, PWG_INI, PWGI_INI, PWR_INI, PSWE_INI, PRAIN, PSNOW, PEVAP  )
+SUBROUTINE ISBA_BUDGET (IO, PK, PEK, DEP, OWATER_BUDGET, PTSTEP,&
+                       PWG_INI, PWGI_INI, PWR_INI, PSWE_INI, PRAIN, PSNOW, PEVAP  )
 !     ###############################################################################
 !
 !!****  *ISBA_BUDGET * - water and energy budget for ISBA
@@ -26,7 +26,7 @@ SUBROUTINE ISBA_BUDGET (IO, IR, DGEIP, OWATER_BUDGET, HSNOW_ISBA, PTSTEP,&
 !!------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -41,20 +41,13 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIP
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEP
 !
 LOGICAL, INTENT(IN) :: OWATER_BUDGET
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
-!                                               !         (Douville et al. 1995)
-!                                               ! '3-L' = 3-L snow scheme (option)
-!                                               !         (Boone and Etchevers 2000)
-!                                               ! 'CRO' = Crocus snow scheme
 REAL,                  INTENT(IN) :: PTSTEP     ! timestep of the integration    (s)
-!
-REAL, DIMENSION(:,:),  INTENT(IN) :: PDG        ! soil layer depth               (m)
-REAL, DIMENSION(:,:),  INTENT(IN) :: PDZG       ! soil layer thickness           (m)
 !
 REAL, DIMENSION(:),    INTENT(IN) :: PWG_INI    ! total wg at t-1                (kg m-2)
 REAL, DIMENSION(:),    INTENT(IN) :: PWGI_INI   ! total wgi at t-1               (kg m-2)
@@ -67,14 +60,14 @@ REAL, DIMENSION(:),    INTENT(IN)  :: PEVAP     ! total evaporative flux        
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZINPUT
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZOUTPUT
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZTENDENCY
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZICEFLUX
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZSWE_T
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZWG_T
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZWGI_T
-REAL, DIMENSION(SIZE(IR%XWR,1)) :: ZSNDRIFT
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZINPUT
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZOUTPUT
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZTENDENCY
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZICEFLUX
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSWE_T
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZWG_T
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZWGI_T
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNDRIFT
 !
 INTEGER :: INI, INL, INLS
 INTEGER :: JI, JL
@@ -87,17 +80,17 @@ IF (LHOOK) CALL DR_HOOK('ISBA_BUDGET',0,ZHOOK_HANDLE)
 !*      1.0    Init
 !       -----------
 !
-INI =SIZE(IR%XWG,1)
-INL =SIZE(IR%XWG,2)
-INLS=SIZE(IR%TSNOW%WSNOW,2)
+INI =SIZE(PEK%XWG,1)
+INL =SIZE(PEK%XWG,2)
+INLS=SIZE(PEK%TSNOW%WSNOW,2)
 !
-DGEIP%XDWG (:) = XUNDEF
-DGEIP%XDWGI(:) = XUNDEF
-DGEIP%XDWR (:) = XUNDEF
-DGEIP%XDSWE(:) = XUNDEF
+DEP%XDWG (:) = XUNDEF
+DEP%XDWGI(:) = XUNDEF
+DEP%XDWR (:) = XUNDEF
+DEP%XDSWE(:) = XUNDEF
 !
-IF (HSNOW_ISBA=='3-L'.OR.HSNOW_ISBA=='CRO') THEN
-  ZSNDRIFT(:) = DGEIP%XSNDRIFT(:)
+IF (PEK%TSNOW%SCHEME=='3-L'.OR.PEK%TSNOW%SCHEME=='CRO') THEN
+  ZSNDRIFT(:) = DEP%XSNDRIFT(:)
 ELSE
   ZSNDRIFT(:) = 0.0
 ENDIF
@@ -111,7 +104,7 @@ IF(OWATER_BUDGET)THEN
   ZSWE_T(:)=0.0
   DO JL=1,INLS
     DO JI=1,INI
-      ZSWE_T(JI) = ZSWE_T(JI)+IR%TSNOW%WSNOW(JI,JL,1)
+      ZSWE_T(JI) = ZSWE_T(JI)+PEK%TSNOW%WSNOW(JI,JL)
     ENDDO
   ENDDO
 !
@@ -121,45 +114,45 @@ IF(OWATER_BUDGET)THEN
   IF(IO%CISBA=='DIF')THEN
     DO JL=1,INL
       DO JI=1,INI
-        IF(IR%XWG(JI,JL,1)/=XUNDEF)THEN
-          ZWG_T (JI) = ZWG_T (JI)+IR%XWG(JI,JL,1) *PDZG(JI,JL)*XRHOLW
-          ZWGI_T(JI) = ZWGI_T(JI)+IR%XWGI(JI,JL,1)*PDZG(JI,JL)*XRHOLW
+        IF(PEK%XWG(JI,JL)/=XUNDEF)THEN
+          ZWG_T (JI) = ZWG_T (JI)+PEK%XWG(JI,JL) *PK%XDZG(JI,JL)*XRHOLW
+          ZWGI_T(JI) = ZWGI_T(JI)+PEK%XWGI(JI,JL)*PK%XDZG(JI,JL)*XRHOLW
         ENDIF
       ENDDO
     ENDDO
   ELSE
-    ZWG_T (:) = IR%XWG (:,2,1)*PDG(:,2)*XRHOLW
-    ZWGI_T(:) = IR%XWGI(:,2,1)*PDG(:,2)*XRHOLW
+    ZWG_T (:) = PEK%XWG (:,2)*PK%XDG(:,2)*XRHOLW
+    ZWGI_T(:) = PEK%XWGI(:,2)*PK%XDG(:,2)*XRHOLW
     IF(IO%CISBA=='3-L')THEN
-      ZWG_T(:)=ZWG_T(:)+IR%XWG(:,3,1)*(PDG(:,3)-PDG(:,2))*XRHOLW
+      ZWG_T(:)=ZWG_T(:)+PEK%XWG(:,3)*(PK%XDG(:,3)-PK%XDG(:,2))*XRHOLW
     ENDIF
   ENDIF
 !
 ! Comptut reservoir time tendencies in kg/m2/s
-  DGEIP%XDWG (:) = (ZWG_T   (:)-PWG_INI (:))/PTSTEP
-  DGEIP%XDWGI(:) = (ZWGI_T  (:)-PWGI_INI(:))/PTSTEP
-  DGEIP%XDWR (:) = (IR%XWR(:,1)-PWR_INI (:))/PTSTEP
-  DGEIP%XDSWE(:) = (ZSWE_T  (:)-PSWE_INI(:))/PTSTEP
+  DEP%XDWG (:) = (ZWG_T   (:)-PWG_INI (:))/PTSTEP
+  DEP%XDWGI(:) = (ZWGI_T  (:)-PWGI_INI(:))/PTSTEP
+  DEP%XDWR (:) = (PEK%XWR(:)-PWR_INI (:))/PTSTEP
+  DEP%XDSWE(:) = (ZSWE_T  (:)-PSWE_INI(:))/PTSTEP
 !
 ! ice calving flux if used
   IF(IO%LGLACIER)THEN
-    ZICEFLUX(:)=DGEIP%XICEFLUX(:)
+    ZICEFLUX(:)=DEP%XICEFLUX(:)
   ELSE
     ZICEFLUX(:)=0.0
   ENDIF
 !
 ! total input water in the system at t
-  ZINPUT(:)=PRAIN(:)+PSNOW(:)+DGEIP%XIFLOOD(:)+DGEIP%XIRRIG_FLUX(:)
+  ZINPUT(:)=PRAIN(:)+PSNOW(:)+DEP%XIFLOOD(:)+DEP%XIRRIG_FLUX(:)
 !
 ! total output water in the system at t
-  ZOUTPUT(:) = PEVAP  (:)+DGEIP%XDRAIN  (:)+DGEIP%XRUNOFF (:) &
-             + DGEIP%XPFLOOD(:)+ZICEFLUX(:)+ZSNDRIFT(:)
+  ZOUTPUT(:) = PEVAP  (:)+DEP%XDRAIN  (:)+DEP%XRUNOFF (:) &
+             + DEP%XPFLOOD(:)+ZICEFLUX(:)+ZSNDRIFT(:)
 !
 ! total reservoir time tendencies at "t - (t-1)"
-  ZTENDENCY(:) = DGEIP%XDWG(:)+DGEIP%XDWGI(:)+DGEIP%XDWR(:)+DGEIP%XDSWE(:)
+  ZTENDENCY(:) = DEP%XDWG(:)+DEP%XDWGI(:)+DEP%XDWR(:)+DEP%XDSWE(:)
 !
 ! isba water budget (dw/dt=in-out) in kg/m2/s
-  DGEIP%XWATBUD(:)=ZTENDENCY(:)-(ZINPUT(:)-ZOUTPUT(:))
+  DEP%XWATBUD(:)=ZTENDENCY(:)-(ZINPUT(:)-ZOUTPUT(:))
 !
 ENDIF
 !

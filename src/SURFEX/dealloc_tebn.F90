@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_TEB_n (B, CHT, DTT, TG, T, TOP, TPN)
+SUBROUTINE DEALLOC_TEB_n (B, CHT, DTT, G, T, TOP, TPN)
 !     #################################################################################
 !
 !!****  *DEALLOC_TEB_n * - Deallocate all arrays
@@ -58,7 +58,7 @@ IMPLICIT NONE
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
-TYPE(GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
@@ -72,10 +72,10 @@ IF (ASSOCIATED(TOP%XZS    ))  DEALLOCATE(TOP%XZS    )
 !
 !-------------------------------------------------------------------------------------
 !
-IF (ASSOCIATED(TG%XGRID_PAR )) DEALLOCATE(TG%XGRID_PAR )
-IF (ASSOCIATED(TG%XLAT      )) DEALLOCATE(TG%XLAT      )
-IF (ASSOCIATED(TG%XLON      )) DEALLOCATE(TG%XLON      )
-IF (ASSOCIATED(TG%XMESH_SIZE)) DEALLOCATE(TG%XMESH_SIZE)
+IF (ASSOCIATED(G%XGRID_PAR )) DEALLOCATE(G%XGRID_PAR )
+IF (ASSOCIATED(G%XLAT      )) DEALLOCATE(G%XLAT      )
+IF (ASSOCIATED(G%XLON      )) DEALLOCATE(G%XLON      )
+IF (ASSOCIATED(G%XMESH_SIZE)) DEALLOCATE(G%XMESH_SIZE)
 !
 !-------------------------------------------------------------------------------------
 !

@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEA_n (SM, DLO, DGL, DGLC, U, DST, SLT, HPROGRAM, HCOUPLING, PTIMEC,     &
+SUBROUTINE COUPLING_SEA_n (SM, DGO, DL, DLC, U, DST, SLT, HPROGRAM, HCOUPLING, PTIMEC,     &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
                  PAZIM,PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,           &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
@@ -55,9 +55,9 @@ IMPLICIT NONE
 !
 !
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
@@ -148,7 +148,7 @@ IF (U%CSEA=='SEAFLX') THEN
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
                  PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST                 )  
 ELSE IF (U%CSEA=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(DLO, DGL, DGLC, HPROGRAM, HCOUPLING, PTIMEC,                      &
+  CALL COUPLING_IDEAL_FLUX(DGO, DL, DLC, HPROGRAM, HCOUPLING, PTIMEC,                      &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,                           &
                  PTSUN, PZENITH, PAZIM,                                                      &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &

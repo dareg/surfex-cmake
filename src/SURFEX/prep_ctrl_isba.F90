@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_CTRL_ISBA(DIO,OSURF_EVAP_BUDGET,OSURF_MISC_BUDGET,OSURF_MISC_DIF,KLUOUT )  
+SUBROUTINE PREP_CTRL_ISBA(DGO,OSURF_EVAP_BUDGET,OSURF_MISC_BUDGET,OSURF_MISC_DIF,KLUOUT )  
 !     #################################################################################################################
 !
 !!****  *PREP_CTRL_ISBA* - routine to check that diagnostics are switched off
@@ -37,6 +37,8 @@ SUBROUTINE PREP_CTRL_ISBA(DIO,OSURF_EVAP_BUDGET,OSURF_MISC_BUDGET,OSURF_MISC_DIF
 !
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
+USE MODI_PREP_CTRL
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -45,7 +47,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DIO
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 !
 LOGICAL,  INTENT(INOUT) :: OSURF_EVAP_BUDGET  ! flag for surface evaporation budget
 LOGICAL,  INTENT(INOUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
@@ -59,17 +61,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_ISBA',0,ZHOOK_HANDLE)
-DIO%N2M = 0
 !
-DIO%LSURF_BUDGET  = .FALSE.
-DIO%L2M_MIN_ZS    = .FALSE.
-DIO%LRAD_BUDGET   = .FALSE.
-DIO%LCOEF         = .FALSE.
-DIO%LSURF_VARS    = .FALSE.
+ CALL PREP_CTRL(DGO,KLUOUT)
 !
-DIO%LSURF_BUDGETC     = .FALSE.
+DGO%N2M = 0
 !
-DIO%LPATCH_BUDGET     = .FALSE.
+DGO%LPATCH_BUDGET     = .FALSE.
 !
 OSURF_EVAP_BUDGET = .FALSE.
 OSURF_MISC_BUDGET = .FALSE.

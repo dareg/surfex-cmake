@@ -1,5 +1,5 @@
 !     #########################################
-      SUBROUTINE CANOPY_GRID_UPDATE(KI,PH,PZFORC,CP)
+      SUBROUTINE CANOPY_GRID_UPDATE(KI,PH,PZFORC,SB)
 !     #########################################
 !
 !!****  *CANOPY_GRID_UPDATE* - set the upper levels at and just below forcing level
@@ -52,13 +52,13 @@ INTEGER,                  INTENT(IN)    :: KI        ! number of horizontal poin
 REAL, DIMENSION(KI),      INTENT(IN)    :: PH        ! maximum canopy height                 (m)
 REAL, DIMENSION(KI),      INTENT(IN)    :: PZFORC    ! height of wind forcing                (m)
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: CP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER, DIMENSION(KI)      :: IL     ! latest level below forcing height
-INTEGER, DIMENSION(KI,CP%NLVL) :: ILEVEL ! to test if level is high enough
+INTEGER, DIMENSION(KI,SB%NLVL) :: ILEVEL ! to test if level is high enough
 !
 INTEGER :: ICOUNT                 ! number of layers above forcing height, these must be changed
 INTEGER :: JLAYER                 ! loop counter on layers
@@ -72,15 +72,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('CANOPY_GRID_UPDATE',0,ZHOOK_HANDLE)
 !
-IF(ALL(CP%XZ(:,CP%NLVL)==PZFORC(:)) .AND. LHOOK) CALL DR_HOOK('CANOPY_GRID_UPDATE',1,ZHOOK_HANDLE)
-IF(ALL(CP%XZ(:,CP%NLVL)==PZFORC(:))) RETURN
+IF(ALL(SB%XZ(:,SB%NLVL)==PZFORC(:)) .AND. LHOOK) CALL DR_HOOK('CANOPY_GRID_UPDATE',1,ZHOOK_HANDLE)
+IF(ALL(SB%XZ(:,SB%NLVL)==PZFORC(:))) RETURN
 !
 !-------------------------------------------------------------------------------
 !
 !*    1.  set upper level to forcing height
 !         ---------------------------------
 !
-CP%XZ(:,CP%NLVL) = PZFORC(:)
+SB%XZ(:,SB%NLVL) = PZFORC(:)
 !
 !*    2.  all canopy levels remaining above forcing height are relocated below
 !         --------------------------------------------------------------------
@@ -89,27 +89,27 @@ CP%XZ(:,CP%NLVL) = PZFORC(:)
 !
 ILEVEL=0
 DO JI=1,KI
-  DO JLAYER=1,CP%NLVL-1
-    IF( PZFORC(JI) > CP%XZF(JI,JLAYER+1) + 0.25 * CP%XDZ(JI,JLAYER) .AND. &
-        CP%XZ(JI,JLAYER) < PZFORC(JI) ) ILEVEL(JI,JLAYER) = JLAYER
+  DO JLAYER=1,SB%NLVL-1
+    IF( PZFORC(JI) > SB%XZF(JI,JLAYER+1) + 0.25 * SB%XDZ(JI,JLAYER) .AND. &
+        SB%XZ(JI,JLAYER) < PZFORC(JI) ) ILEVEL(JI,JLAYER) = JLAYER
   ENDDO
   ! determination of latest level from the ones selected before
-  IL(JI)=MAXVAL(ILEVEL(JI,1:CP%NLVL-1))
+  IL(JI)=MAXVAL(ILEVEL(JI,1:SB%NLVL-1))
   !
-  ICOUNT = CP%NLVL-IL(JI)-1
+  ICOUNT = SB%NLVL-IL(JI)-1
   !
   !* determination grid top of this level
-  ZZTOP = CP%XZF(JI,IL(JI)+1) ! ZZTOP=0 for IL=0
-  ZDZ   = 2. * ( CP%XZ(JI,CP%NLVL)-ZZTOP ) / ( 2*ICOUNT+1 )
+  ZZTOP = SB%XZF(JI,IL(JI)+1) ! ZZTOP=0 for IL=0
+  ZDZ   = 2. * ( SB%XZ(JI,SB%NLVL)-ZZTOP ) / ( 2*ICOUNT+1 )
   DO JLAYER=1,ICOUNT
-    CP%XZ(JI,JLAYER+IL(JI)) = ZZTOP + (JLAYER-0.5) * ZDZ
+    SB%XZ(JI,JLAYER+IL(JI)) = ZZTOP + (JLAYER-0.5) * ZDZ
   END DO
 END DO
 !
 !*    3.  New grid characteristics
 !         ------------------------
 !
- CALL CANOPY_GRID(KI,CP)
+ CALL CANOPY_GRID(KI,SB)
 !
 !
 !*    5.  at least one canopy level in addition to forcing level must be above canopy top
@@ -118,23 +118,23 @@ END DO
 DO JI=1,KI
   !
   !* tests if the level below forcing height is high enough above canopy
-  IF(CP%XZF(JI,CP%NLVL-1) < PH(JI) ) THEN
+  IF(SB%XZF(JI,SB%NLVL-1) < PH(JI) ) THEN
     !
     !* sets bottom of grid box that is below the forcing level one at canopy height
     !
-    CP%XZF(JI,CP%NLVL-1) = PH(JI)
+    SB%XZF(JI,SB%NLVL-1) = PH(JI)
     !
     !* rebuilds vertical grid from the bottom of each grid
     !
-    CP%XZ(JI,CP%NLVL-2) = 0.5 * ( CP%XZF(JI,CP%NLVL-2) + CP%XZF(JI,CP%NLVL-1) )
-    CP%XZ(JI,CP%NLVL-1) = ( 2.* CP%XZF(JI,CP%NLVL-1) + CP%XZ (JI,CP%NLVL) ) /3.
+    SB%XZ(JI,SB%NLVL-2) = 0.5 * ( SB%XZF(JI,SB%NLVL-2) + SB%XZF(JI,SB%NLVL-1) )
+    SB%XZ(JI,SB%NLVL-1) = ( 2.* SB%XZF(JI,SB%NLVL-1) + SB%XZ (JI,SB%NLVL) ) /3.
   END IF
 END DO
 !
 !*    6.  Final grid characteristics
 !         --------------------------
 !
- CALL CANOPY_GRID(KI,CP)
+ CALL CANOPY_GRID(KI,SB)
 !
 IF (LHOOK) CALL DR_HOOK('CANOPY_GRID_UPDATE',1,ZHOOK_HANDLE)
 !

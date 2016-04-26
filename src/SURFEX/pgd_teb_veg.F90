@@ -1,6 +1,6 @@
 !     #########
-      SUBROUTINE PGD_TEB_VEG (DTCO, UG, U, USS, GDO, GDP, GDTI, GDIR, &
-                              GRO, GRP, GRTI, TOP, KDIM, HPROGRAM)
+      SUBROUTINE PGD_TEB_VEG (DTCO, UG, U, USS, GDO, GDK, DTGD, GDIR, &
+                              GRO, GRS, GRK, DTGR, TOP, KDIM, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB_VEG* monitor for averaging and interpolations of physiographic fields
@@ -50,7 +50,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
@@ -86,12 +86,13 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: GDP
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: GDTI
+TYPE(ISBA_K_t), INTENT(INOUT) :: GDK
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: GDIR
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GRO
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: GRP
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: GRTI
+TYPE(ISBA_S_t), INTENT(INOUT) :: GRS
+TYPE(ISBA_K_t), INTENT(INOUT) :: GRK
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 INTEGER, INTENT(IN) :: KDIM
@@ -171,11 +172,6 @@ IF (LHOOK) CALL DR_HOOK('PGD_TEB_VEG',0,ZHOOK_HANDLE)
 !*    1.      Reading of namelist NAM_ISBA for general options of vegetation
 !             --------------------------------------------------------------
 !
-GDO%NGROUND_LAYER = 0
-GDO%CISBA         = '   '
-GDO%CPEDOTF       = '   '
-GDO%CPHOTO        = '   '
-!
 CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
                        YISBA, YPEDOTF, YPHOTO,  GTR_ML, ZRM_PATCH,              &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,             &
@@ -189,6 +185,7 @@ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,        &
                        XUNIF_FERT                                               )  
 !
+GDO%NPATCH = 1
 GDO%NGROUND_LAYER = IGROUND_LAYER
 GDO%CISBA         = YISBA
 GDO%CPEDOTF       = YPEDOTF
@@ -282,7 +279,7 @@ GDO%LTR_ML        = GTR_ML
 !*    3.      Sand fraction
 !             -------------
 !
-ALLOCATE(GDP%XSAND(KDIM,GDO%NGROUND_LAYER))
+ALLOCATE(GDK%XSAND(KDIM,GDO%NGROUND_LAYER))
 !
 IF(LIMP_SAND)THEN
 !
@@ -291,18 +288,18 @@ IF(LIMP_SAND)THEN
 ELSE
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
-                HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,GDP%XSAND(:,1))
+                HPROGRAM,'sand fraction','TWN',YSAND,YSANDFILETYPE,XUNIF_SAND,GDK%XSAND(:,1))
 ENDIF
 !
 DO JLAYER=1,GDO%NGROUND_LAYER
-  GDP%XSAND(:,JLAYER) = GDP%XSAND(:,1)
+  GDK%XSAND(:,JLAYER) = GDK%XSAND(:,1)
 END DO
 !-------------------------------------------------------------------------------
 !
 !*    4.      Clay fraction
 !             -------------
 !
-ALLOCATE(GDP%XCLAY(KDIM,GDO%NGROUND_LAYER))
+ALLOCATE(GDK%XCLAY(KDIM,GDO%NGROUND_LAYER))
 !
 IF(LIMP_CLAY)THEN
 !
@@ -310,44 +307,44 @@ IF(LIMP_CLAY)THEN
 !
 ELSE
  CALL PGD_FIELD(DTCO, UG, U, USS, &
-                HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,GDP%XCLAY(:,1))
+                HPROGRAM,'clay fraction','TWN',YCLAY,YCLAYFILETYPE,XUNIF_CLAY,GDK%XCLAY(:,1))
 ENDIF
 !
 DO JLAYER=1,GDO%NGROUND_LAYER
-  GDP%XCLAY(:,JLAYER) = GDP%XCLAY(:,1)
+  GDK%XCLAY(:,JLAYER) = GDK%XCLAY(:,1)
 END DO
 !-------------------------------------------------------------------------------
 !
 !*    5.      Subgrid runoff 
 !             --------------
 !
-ALLOCATE(GDP%XRUNOFFB(KDIM))
+ALLOCATE(GDK%XRUNOFFB(KDIM))
  CALL PGD_FIELD(DTCO, UG, U, USS, &
-                HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,GDP%XRUNOFFB(:))
+                HPROGRAM,'subgrid runoff','TWN',YRUNOFFB,YRUNOFFBFILETYPE,XUNIF_RUNOFFB,GDK%XRUNOFFB(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*    6.      Drainage coefficient
 !             --------------------
 !
-ALLOCATE(GDP%XWDRAIN(KDIM))
+ALLOCATE(GDK%XWDRAIN(KDIM))
  CALL PGD_FIELD(DTCO, UG, U, USS, &
-                HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,GDP%XWDRAIN(:))
+                HPROGRAM,'subgrid drainage','TWN',YWDRAIN,YWDRAINFILETYPE,XUNIF_WDRAIN,GDK%XWDRAIN(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*    7.      Interpolation of GARDEN physiographic fields
 !             --------------------------------------------
 !
-GDTI%NTIME = 12
- CALL PGD_TEB_GARDEN_PAR(DTCO, UG, U, USS, KDIM, GDO, GDTI, HPROGRAM)
+DTGD%NTIME = 12
+ CALL PGD_TEB_GARDEN_PAR(DTCO, UG, U, USS, KDIM, GDO, DTGD, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 !*    8.      Case of greenroofs
 !             ------------------
 !
-IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(DTCO, UG, U, USS, GRO, GRP, GRTI, KDIM, HPROGRAM)
+IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(DTCO, UG, U, USS, GRO, GRS, GRK, DTGR, KDIM, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -250,29 +250,6 @@ ENDDO
 !*      3.    Outer wall layer coefficients
 !             ------------------------------
 !
-!!print*,'LW_S_TO_W ',PLW_S_TO_W(1)
-!!print*,'WA_TO_WB ',PLW_WA_TO_WB(1)
-!!print*,'DF_RD ',ZDF_RD(1)
-!!print*,'LW_R_TO_W ',PLW_R_TO_W(1)
-!!print*,'LW_G_TO_W ',PLW_G_TO_W(1)
-!!print*,'DN_RD ',PDN_RD(1)
-!!print*,'LW_NR_TO_W ',PLW_NR_TO_W(1)
-!!print*,'LW_WIN_TO_W ',PLW_WIN_TO_W(1)
-!print*,'LW_S_TO_W ',PLW_S_TO_W(1)
-!print*,'T_SKY ',ZT_SKY(1)
-!print*,'TS_WL ',ZTS_WL(1)
-!print*,'LW_WA_TO_WB ',PLW_WA_TO_WB(1)
-!print*,'TS_WL_B ',PTS_WL_B(1)
-!print*,'DF_RD ',ZDF_RD(1)
-!print*,'LW_R_TO_W ',PLW_R_TO_W(1)
-!print*,'TS_RD ',PTS_RD(1)
-!print*,'DN_RD ',PDN_RD(1)
-!print*,'LW_NR_TO_W ',PLW_NR_TO_W(1)
-!print*,'TSNOW_RD ',PTSNOW_RD(1)
-!print*,'LW_WIN_TO_W ',PLW_WIN_TO_W(1)
-!print*,'T_WIN1 ',B%XT_WIN1(1)
-!print*,'LW_G_TO_W ',PLW_G_TO_W(1)
-!print*,'TS_GD ',PTS_GD(1)
 DO JJ=1,SIZE(PT_WL,1)
   !
   ZB(JJ,1) = ZB(JJ,1) + ZIMPL * XCPD/PEXNS(JJ) * ZRHO_ACF_W(JJ)
@@ -345,10 +322,6 @@ END DO
 !*      5.    heat conduction calculation
 !             ---------------------------
 !
-!!print*,'ZA ',ZA(1,:)
-!!print*,'ZB ',ZB(1,:)
-!!print*,'ZC ',ZC(1,:)
-!!print*,'ZY ',ZY(1,:)
  CALL LAYER_E_BUDGET( PT_WL, PTSTEP, ZIMPL, T%XHC_WALL, T%XTC_WALL, T%XD_WALL, &
                      ZA, ZB, ZC, ZY, PDQS_WL )
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_WATFLUX_n (DTCO, HSELECT, U, WG, W, HPROGRAM)
+      SUBROUTINE WRITE_PGD_WATFLUX_n (DTCO, HSELECT, U, G, W, HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_WATFLUX_n* - routine to write pgd surface variables in their respective files
@@ -56,7 +56,7 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(GRID_t), INTENT(INOUT) :: WG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -75,7 +75,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','WRITE')
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_WATFLUX_n(HSELECT, WG, W, HPROGRAM)
+ CALL WRITESURF_PGD_WATFLUX_n(HSELECT, G, W, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -1025,46 +1025,49 @@ INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (n
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PEPROFILE ! energy absorbed by each layer (W/m^2) npoints,nlayer,nbands)
 !
-REAL :: ZDEXP, ZFDU, ZFDD, ZSTAR
+REAL, DIMENSION(SIZE(PKESTAR,1),SIZE(PKESTAR,2),SIZE(PKESTAR,3)) :: ZSTAR, ZINT1, ZINT2, ZINT3, ZINT4
+REAL :: ZDEXP, ZFDU, ZFDD
 !
 INTEGER::JB,JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ENERGY_PROFILE',0,ZHOOK_HANDLE)
-
+!
+ZSTAR(:,:,:) = PKESTAR(:,:,:) * PDTAUSTAR(:,:,:)
+ZINT1(:,:,:) = EXP(-ZSTAR(:,:,:))
+ZINT2(:,:,:) = EXP(ZSTAR(:,:,:))
+DO JJ = 1,SIZE(PEPROFILE,1)
+  ZINT3(JJ,:,:) = EXP( -PDTAUSTAR(JJ,:,:)/PCOSZEN(JJ))
+  ZINT4(JJ,:,:) = EXP( -PTAUSTAR (JJ,:,:)/PCOSZEN(JJ))
+ENDDO
+!
 DO JB = 1,NPNBANDS
   !
-  DO JJ =1,SIZE(PEPROFILE,1)
+  DO JL = 1,KMAX_EFF(JB)
     !
-    ZSTAR = PKESTAR(JJ,1,JB) * PDTAUSTAR(JJ,1,JB)
-    !
-    !surface layer doc equation 64
-    PEPROFILE(JJ,1,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
-                            ( PXC(JJ,1,JB) * EXP(-ZSTAR) + PXD(JJ,1,JB) * EXP(ZSTAR) + &
-                              PGP(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSZEN(JJ)) ) - &
-                            ( PXA(JJ,1,JB) * EXP(-ZSTAR) + PXB(JJ,1,JB) * EXP(ZSTAR) + &
-                              PGM(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSZEN(JJ)) + &
-                               PCOSZEN(JJ) * EXP( -PTAUSTAR (JJ,1,JB)/PCOSZEN(JJ)) ) 
-    !
-    !internal layers
-    ! 
-    DO JL = 2,KMAX_EFF(JB)
-      !  
-      ZSTAR = PKESTAR(JJ,JL,JB) * PDTAUSTAR(JJ,JL,JB)
+    DO JJ =1,SIZE(PEPROFILE,1)
       !
-      IF ( JL<=KNLVLS_EFF(JJ,JB) ) THEN
+      IF (JL==1) THEN     
         !
+        !surface layer doc equation 64
+        PEPROFILE(JJ,JL,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,JL,JB)+PXD(JJ,JL,JB)+PGP(JJ,JL,JB) ) ) + &
+             ( PXC(JJ,JL,JB)*ZINT1(JJ,JL,JB) + PXD(JJ,JL,JB)*ZINT2(JJ,JL,JB) + PGP(JJ,JL,JB)*ZINT3(JJ,JL,JB) ) - &
+             ( PXA(JJ,JL,JB)*ZINT1(JJ,JL,JB) + PXB(JJ,JL,JB)*ZINT2(JJ,JL,JB) + PGM(JJ,JL,JB)*ZINT3(JJ,JL,JB) &
+             + PCOSZEN(JJ)*ZINT4(JJ,JL,JB) ) 
+        !
+      ELSEIF ( JL<=KNLVLS_EFF(JJ,JB) ) THEN
+        !
+        !internal layers
+        ! 
         !last factor in equations 62 and 63
-        ZDEXP = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSZEN(JJ) ) - EXP( -PTAUSTAR(JJ,JL-1,JB)/PCOSZEN(JJ) )
+        ZDEXP = ZINT4(JJ,JL,JB) - ZINT4(JJ,JL-1,JB)
         !
         !doc equation 62
-        ZFDU = PXC(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
-               PXD(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + PGP(JJ,JL,JB) * ZDEXP
+        ZFDU = PXC(JJ,JL,JB) * (ZINT1(JJ,JL,JB) -1.) + PXD(JJ,JL,JB) * (ZINT2(JJ,JL,JB) -1.) + PGP(JJ,JL,JB) * ZDEXP
         !
         !doc equation 63
-        ZFDD = PXA(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
-               PXB(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + ( PGM(JJ,JL,JB) + PCOSZEN(JJ) ) * ZDEXP
+        ZFDD = PXA(JJ,JL,JB) * (ZINT1(JJ,JL,JB) -1.) + PXB(JJ,JL,JB) * (ZINT2(JJ,JL,JB) -1.) + (PGM(JJ,JL,JB) + PCOSZEN(JJ)) * ZDEXP
         !      
         PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
         !

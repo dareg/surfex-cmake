@@ -1,12 +1,12 @@
 !     #########
-SUBROUTINE READ_NAMELISTS_TEB_n (TM, TGRO, TGDO, HPROGRAM, HINIT)
+SUBROUTINE READ_NAMELISTS_TEB_n (TM, GRO, GDO, HPROGRAM, HINIT)
 !     #######################################################
 !
 !---------------------------------------------------------------------------
 !
 !
 USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
-USE MODD_ISBA_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODN_TEB_n                          
 USE MODN_TEB_VEG_n,            ONLY: CROUGH,CRUNOFF,CALBEDO,CSCOND,                &
@@ -38,8 +38,8 @@ IMPLICIT NONE
 !
 !
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGRO
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: TGDO
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GRO
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),   INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -64,13 +64,13 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_TEB_N',0,ZHOOK_HANDLE)
                       LCOEF,LSURF_VARS,LSURF_MISC_BUDGET,&
                       LSURF_DIAG_ALBEDO,LUTCI,LPGD,XDIAG_TSTEP)   
 !               
- CALL READ_DEFAULT_TEB_n(TM%CHT, TM%TD%MO, TM%TD%O, TM%TD%U, TGRO, TM%T, TM%TOP, &
+ CALL READ_DEFAULT_TEB_n(TM%CHT, TM%TD%MTO, TM%TD%O, TM%TD%DUT, GRO, TM%T, TM%TOP, &
                          HPROGRAM)
 !
- CALL READ_TEB_CONF_n(TM%CHT, TM%TD%MO, TM%TD%O, TM%TD%U, TM%T, TM%TOP, &
+ CALL READ_TEB_CONF_n(TM%CHT, TM%TD%MTO, TM%TD%O, TM%TD%DUT, TM%T, TM%TOP, &
                       HPROGRAM) 
 !  
- CALL READ_TEB_VEG_CONF_n(TM%CHT, TGDO, HPROGRAM) 
+ CALL READ_TEB_VEG_CONF_n(TM%CHT, GDO, HPROGRAM) 
 !
 IF (HINIT=='PRE') THEN
         CALL READ_NAM_PREP_TEB_n(HPROGRAM)

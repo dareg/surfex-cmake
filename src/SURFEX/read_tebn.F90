@@ -89,6 +89,7 @@ INTEGER,           INTENT(IN)  :: KPATCH   ! current patch number
 LOGICAL           :: GTOWN          ! town variables written in the file
 INTEGER           :: ILU          ! 1D physical dimension
 !
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK
 INTEGER           :: IRESP          ! Error code after redding
 !
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
@@ -98,7 +99,7 @@ INTEGER           :: IVERSION, IBUGFIX
 LOGICAL           :: GOLD_NAME      ! name of temperatures in old versions of SURFEX
 LOGICAL           :: GKNOWN
 !
-INTEGER :: JLAYER  ! loop counter on layers
+INTEGER :: JLAYER, JI  ! loop counter on layers
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -275,17 +276,22 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
 IF (.NOT. GTOWN) THEN
   T%TSNOW_ROAD%SCHEME='1-L'
-  CALL ALLOCATE_GR_SNOW(T%TSNOW_ROAD,ILU,1)
+  CALL ALLOCATE_GR_SNOW(T%TSNOW_ROAD,ILU)
   T%TSNOW_ROOF%SCHEME='1-L'
-  CALL ALLOCATE_GR_SNOW(T%TSNOW_ROOF,ILU,1)  
+  CALL ALLOCATE_GR_SNOW(T%TSNOW_ROOF,ILU)  
 ELSE
+  ALLOCATE(IMASK(ILU))
+  DO JI = 1,ILU
+    IMASK(JI) = JI
+  ENDDO 
   IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
-    CALL READ_GR_SNOW(HPROGRAM,'RD',YPATCH,ILU,1,T%TSNOW_ROAD  )
-    CALL READ_GR_SNOW(HPROGRAM,'RF',YPATCH,ILU,1,T%TSNOW_ROOF  )
+    CALL READ_GR_SNOW(HPROGRAM,'RD',YPATCH,ILU,ILU,IMASK,0,T%TSNOW_ROAD  )
+    CALL READ_GR_SNOW(HPROGRAM,'RF',YPATCH,ILU,ILU,IMASK,0,T%TSNOW_ROOF  )
   ELSE
-    CALL READ_GR_SNOW(HPROGRAM,'ROAD',YPATCH,ILU,1,T%TSNOW_ROAD  )
-    CALL READ_GR_SNOW(HPROGRAM,'ROOF',YPATCH,ILU,1,T%TSNOW_ROOF  )
-  ENDIF    
+    CALL READ_GR_SNOW(HPROGRAM,'ROAD',YPATCH,ILU,ILU,IMASK,0,T%TSNOW_ROAD  )
+    CALL READ_GR_SNOW(HPROGRAM,'ROOF',YPATCH,ILU,ILU,IMASK,0,T%TSNOW_ROOF  )
+  ENDIF
+  DEALLOCATE(IMASK)  
 END IF
 !
 !-------------------------------------------------------------------------------

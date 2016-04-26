@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE COTWORES(PTSTEP, IO, OSHADE, IP, IMT, IR, PDMAX, PPOI, PCSP, &
+SUBROUTINE COTWORES(PTSTEP, IO, OSHADE, PK, PEK, PDMAX, PPOI, PCSP, &
                     PTG, PF2, PSW_RAD, PQA, PQSAT, PPSNV, PDELTA, PRHOA, &
                     PZENITH, PFFV, PIACAN_SUNLIT, PIACAN_SHADE, PFRAC_SUN, &
                     PIACAN, PABC, PRS, PGPP, PRESP_LEAF     ) 
@@ -47,7 +47,7 @@ SUBROUTINE COTWORES(PTSTEP, IO, OSHADE, IP, IMT, IR, PDMAX, PPOI, PCSP, &
 !!      L. Jarlan   27/10/04 : add of T2 to calculate soil respiration and use
 !!                              of CRESPSL key to manage the calculation of soil
 !!                              respiration
-!!                             IR%XAN et PPST in kgCO2 m-2 s-1 to be fully
+!!                             PEK%XAN et PPST in kgCO2 m-2 s-1 to be fully
 !!                              compatible with vegetation growth module (lailoss.f90)
 !!      P Le Moigne 09/2005 AGS modifs of L. Jarlan
 !!      S. Lafont      03/09 : change units of EPSO GAMM ANDAY
@@ -71,9 +71,7 @@ SUBROUTINE COTWORES(PTSTEP, IO, OSHADE, IP, IMT, IR, PDMAX, PPOI, PCSP, &
 !-------------------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
 !
 USE MODD_CSTS,           ONLY : XMD, XTT, XLVTT
 USE MODD_ISBA_PAR,       ONLY : XRS_MAX, XDENOM_MIN
@@ -102,9 +100,8 @@ IMPLICIT NONE
 REAL,                INTENT(IN)  :: PTSTEP      ! time step
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 LOGICAL, DIMENSION(:),INTENT(IN) :: OSHADE
 !
@@ -126,7 +123,7 @@ REAL,DIMENSION(:),   INTENT(IN)  :: PQA, PQSAT, PPSNV, PDELTA, PRHOA
 !                                    PPSNV = snow cover fraction
 !                                    PDELTA= fraction of the foliage covered
 !                                        by intercepted water
-!                                    IR%XRESA = air density
+!                                    PEK%XRESA = air density
 !
 REAL,DIMENSION(:),    INTENT(IN)  :: PZENITH
 !                                    PZENITH = solar zenith angle needed 
@@ -155,23 +152,23 @@ REAL, PARAMETER                :: ZRS_MIN     = 1.E-4  ! minimum canopy resistan
 !
 INTEGER                     :: JINT, JJ ! index for loops
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZANF ! ZANF  = total assimilation over canopy
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZCONVE1, ZTSPC, ZIA
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZANF ! ZANF  = total assimilation over canopy
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZCONVE1, ZTSPC, ZIA
 !                                 ZTSPC = temperature conversion (K to C) 
 !                                 ZIA   = absorbed PAR
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZLAI, ZGMEST, ZFZERO, ZDMAX
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZLAI, ZGMEST, ZFZERO, ZDMAX
 !                                 ZLAI = LAI 
 !                                 ZFZERO  = ideal value of F, no photorespiration or 
 !                                            saturation deficit
 !                                 ZDMAX   = maximum saturation deficit of atmosphere
 !                                           tolerate by vegetation
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZGAMMT, ZDSP, ZANMAX
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZGAMMT, ZDSP, ZANMAX
 !                                 ZGAMMT  = compensation point 
 !                                 ZDSP    = saturation deficit of atmosphere 
 !                                           verses the leaf surface (with correction)
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZXMUS, ZTAN, ZTGS, ZXIA, ZAN0, ZGS0, ZXTGS, ZRDK,ZLAITOP,ZTRDK,ZZLAI  
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZXMUS, ZTAN, ZTGS, ZXIA, ZAN0, ZGS0, ZXTGS, ZRDK,ZLAITOP,ZTRDK,ZZLAI  
 !                                           ZXMUS = cosine of solar zenith angle
 !                                           ZTAN  = canopy integrated net assimilation 
 !                                           ZTGS  = canopy integrated  leaf conductance
@@ -186,12 +183,12 @@ REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZXMUS, ZTAN, ZTGS, ZXIA, ZAN0, ZGS0, ZXTGS,
 !                                           ZTRDK = canopy integrated dark respiration
 !                                           ZZLAI = LAI, used for dark respiration profile
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZAN0_,ZGS0_,ZRDK_ ! parameters for shaded leaves
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZAN0_,ZGS0_,ZRDK_ ! parameters for shaded leaves
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZEPSO
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZEPSO
 !                                           ZEPSO conversion of PEPSO in kgCO2/kgair m/s
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1)) :: ZDMAXSTAR, ZFZEROSTAR, ZFZERON, ZGMESTN  
+REAL, DIMENSION(SIZE(PEK%XLAI,1)) :: ZDMAXSTAR, ZFZEROSTAR, ZFZERON, ZGMESTN  
 !                                 ZDMAXSTAR  = maximum saturation deficit of atmosphere
 !                                              tolerate by vegetation without soil water stress
 !                                 ZFZEROSTAR = initial optimal ratio Ci/Cs for woody vegetation
@@ -205,9 +202,9 @@ REAL :: ZABC, ZWEIGHT
 !                                                     conductance over canopy depth 
 !                                                     (working scalar)
 !
-REAL, DIMENSION(SIZE(IMT%XLAI,1))    :: ZWORK !Work array
+REAL, DIMENSION(SIZE(PEK%XLAI,1))    :: ZWORK !Work array
 !
-LOGICAL, DIMENSION(SIZE(IMT%XLAI,1)) :: GHERB, GWOOD, GF2_INF_F2I, GTROP
+LOGICAL, DIMENSION(SIZE(PEK%XLAI,1)) :: GHERB, GWOOD, GF2_INF_F2I, GTROP
 !
 INTEGER, DIMENSION(1)          :: IDMAX
 !
@@ -230,17 +227,17 @@ ZCONVE1(:) = XMCO2*PRHOA/XMD
 !
 ZTSPC(:)  = PTG(:) - XTT               
 !
-ZLAI(:)   = IMT%XLAI(:,1)
-ZGMEST(:) = IMT%XGMES(:,1)
-ZFZERO(:) = IP%XFZERO(:,1)
+ZLAI(:)   = PEK%XLAI(:)
+ZGMEST(:) = PEK%XGMES(:)
+ZFZERO(:) = PK%XFZERO(:)
 !
 !GTROP = linear stress in case of tropical evergreen forest 
 !        (with fixed f0=0.74 for Carrer rad. transf., f0=0.7 with Calvet rad. transf.)
-GTROP (:) = (IP%XVEGTYPE_PATCH(:,NVT_TRBE,1) > 0.8) 
+GTROP (:) = (PK%XVEGTYPE_PATCH(:,NVT_TRBE) > 0.8) 
 !
-GHERB(:) = (IP%XVEGTYPE_PATCH(:,NVT_TEBD,1) + IP%XVEGTYPE_PATCH(:,NVT_TRBE,1) + IP%XVEGTYPE_PATCH(:,NVT_BONE,1)   &
-           +IP%XVEGTYPE_PATCH(:,NVT_TRBD,1) + IP%XVEGTYPE_PATCH(:,NVT_TEBE,1) + IP%XVEGTYPE_PATCH(:,NVT_TENE,1)   & 
-           +IP%XVEGTYPE_PATCH(:,NVT_BOBD,1) + IP%XVEGTYPE_PATCH(:,NVT_BOND,1) + IP%XVEGTYPE_PATCH(:,NVT_SHRB,1)<0.5)
+GHERB(:) = (PK%XVEGTYPE_PATCH(:,NVT_TEBD) + PK%XVEGTYPE_PATCH(:,NVT_TRBE) + PK%XVEGTYPE_PATCH(:,NVT_BONE)   &
+           +PK%XVEGTYPE_PATCH(:,NVT_TRBD) + PK%XVEGTYPE_PATCH(:,NVT_TEBE) + PK%XVEGTYPE_PATCH(:,NVT_TENE)   & 
+           +PK%XVEGTYPE_PATCH(:,NVT_BOBD) + PK%XVEGTYPE_PATCH(:,NVT_BOND) + PK%XVEGTYPE_PATCH(:,NVT_SHRB)<0.5)
 GWOOD      (:) = (.NOT.GHERB (:))
 !
 IF (IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='LAI') THEN
@@ -255,7 +252,7 @@ IF (IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='LAI') THEN
   !
 ELSEIF (IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
   !
-  WHERE (IMT%XLAI(:,1)==XUNDEF) ZLAI(:)=0.0
+  WHERE (PEK%XLAI(:)==XUNDEF) ZLAI(:)=0.0
   !
   !    See (Varlet-Granchet C., M. Chartier, G. Gosse,  and R. Bonhomme, 1981: 
   !    Rayonnement utilise pour la photosynthese des vegetaux en
@@ -268,38 +265,38 @@ ELSEIF (IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPH
   !  
   ZDMAX(:)  = PDMAX(:)
   !
-  GF2_INF_F2I(:) = (PF2(:)<IMT%XF2I(:,1))
+  GF2_INF_F2I(:) = (PF2(:)<PEK%XF2I(:))
   !
   ! -HERBACEOUS-
   !
-  WHERE(GHERB(:).AND.IMT%LSTRESS(:,1))
+  WHERE(GHERB(:).AND.PEK%LSTRESS(:))
     ZDMAX(:) = XDMAXN
   ENDWHERE
-  WHERE(GHERB(:).AND..NOT.IMT%LSTRESS(:,1))
+  WHERE(GHERB(:).AND..NOT.PEK%LSTRESS(:))
     ZDMAX(:) = XDMAXX
   ENDWHERE
   !
   ! PAH and PBH are original coefficients of Calvet 2000
   WHERE(GHERB(:).AND.(.NOT.GF2_INF_F2I(:)))
-    ZDMAXSTAR(:) = EXP((LOG(ZGMEST(:)*1000.)-IP%XAH(:,1))/IP%XBH(:,1))/1000.
-    ZDMAX(:) = ZDMAXSTAR(:) - (ZDMAXSTAR(:)-ZDMAX(:))*(1.-PF2(:))/(1.-IMT%XF2I(:,1))
+    ZDMAXSTAR(:) = EXP((LOG(ZGMEST(:)*1000.)-PK%XAH(:))/PK%XBH(:))/1000.
+    ZDMAX(:) = ZDMAXSTAR(:) - (ZDMAXSTAR(:)-ZDMAX(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))
   ENDWHERE
   !
   WHERE(GHERB(:))
-        ZGMEST(:) = EXP(IP%XAH(:,1)+IP%XBH(:,1)*LOG(ZDMAX(:)*1000.))/1000.
+        ZGMEST(:) = EXP(PK%XAH(:)+PK%XBH(:)*LOG(ZDMAX(:)*1000.))/1000.
   ENDWHERE
   !
-  WHERE (GHERB(:).AND.GF2_INF_F2I(:).AND.IMT%LSTRESS(:,1))
-      ZGMEST(:) = ZGMEST(:) * PF2(:)/IMT%XF2I(:,1)
+  WHERE (GHERB(:).AND.GF2_INF_F2I(:).AND.PEK%LSTRESS(:))
+      ZGMEST(:) = ZGMEST(:) * PF2(:)/PEK%XF2I(:)
   ENDWHERE
-  WHERE(GHERB(:).AND.GF2_INF_F2I(:).AND.(.NOT.IMT%LSTRESS(:,1)))
-      ZDMAX(:) = ZDMAX(:) * PF2(:)/IMT%XF2I(:,1)
+  WHERE(GHERB(:).AND.GF2_INF_F2I(:).AND.(.NOT.PEK%LSTRESS(:)))
+      ZDMAX(:) = ZDMAX(:) * PF2(:)/PEK%XF2I(:)
   ENDWHERE
   !
   ! to limit photosynthesis under wilting point
-  WHERE (GHERB(:).AND.(.NOT.IMT%LSTRESS(:,1)).AND.ZDMAX(:)<=XDMAXN)
+  WHERE (GHERB(:).AND.(.NOT.PEK%LSTRESS(:)).AND.ZDMAX(:)<=XDMAXN)
     ZDMAX(:)  = XDMAXN
-    ZGMEST(:) = (EXP(IP%XAH(:,1)+IP%XBH(:,1)*LOG(XDMAXN*1000.))/1000.)*PF2(:)/IMT%XF2I(:,1)
+    ZGMEST(:) = (EXP(PK%XAH(:)+PK%XBH(:)*LOG(XDMAXN*1000.))/1000.)*PF2(:)/PEK%XF2I(:)
   ENDWHERE
   !
   ! -WOODY but not tropical forest-
@@ -308,15 +305,15 @@ ELSEIF (IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPH
     ZFZEROSTAR(:) = ( XAW  - LOG(ZGMEST(:)*1000.) )/XBW
   ENDWHERE
   !
-  WHERE (GWOOD(:).AND.IMT%LSTRESS(:,1))
+  WHERE (GWOOD(:).AND.PEK%LSTRESS(:))
     ZGMESTN(:) = ZGMEST(:)
   ENDWHERE
-  WHERE(GWOOD(:).AND.(.NOT.IMT%LSTRESS(:,1)))
+  WHERE(GWOOD(:).AND.(.NOT.PEK%LSTRESS(:)))
     ZGMESTN(:) = EXP(XASW - XBW*ZFZEROSTAR(:))/1000.
   ENDWHERE
   !
   WHERE (GWOOD(:).AND.GF2_INF_F2I(:)) 
-    ZGMESTN(:) = ZGMESTN(:)*PF2(:)/IMT%XF2I(:,1)
+    ZGMESTN(:) = ZGMESTN(:)*PF2(:)/PEK%XF2I(:)
   ENDWHERE
   !
   WHERE(GWOOD(:))
@@ -324,13 +321,13 @@ ELSEIF (IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPH
     ZFZERON(:) = (XASW - LOG(ZWORK(:)*1000.))/XBW
   ENDWHERE
   !
-  WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.IMT%LSTRESS(:,1))
+  WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.PEK%LSTRESS(:))
     ZFZERO(:) = ZFZEROSTAR(:)
-    ZFZERO(:) = ZFZERO(:) - (ZFZERO(:)-ZFZERON(:))*(1.-PF2(:))/(1.-IMT%XF2I(:,1))  
+    ZFZERO(:) = ZFZERO(:) - (ZFZERO(:)-ZFZERON(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))  
   ENDWHERE    
-  WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.(.NOT.IMT%LSTRESS(:,1)))
+  WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.(.NOT.PEK%LSTRESS(:)))
     ZFZERO(:) = ZFZEROSTAR(:)
-    ZGMEST(:) = ZGMEST(:) - (ZGMEST(:)-ZGMESTN(:))*(1.-PF2(:))/(1.-IMT%XF2I(:,1))  
+    ZGMEST(:) = ZGMEST(:) - (ZGMEST(:)-ZGMESTN(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))  
   ENDWHERE    
   !
   WHERE(GWOOD(:).AND.GF2_INF_F2I(:))
@@ -341,8 +338,8 @@ ELSEIF (IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPH
   ! -Tropical Forest-
   !
   WHERE(GTROP(:))
-   ZFZERO(:) = IP%XFZERO(:,1)
-   ZGMEST(:) = IMT%XGMES(:,1)*PF2(:)
+   ZFZERO(:) = PK%XFZERO(:)
+   ZGMEST(:) = PEK%XGMES(:)*PF2(:)
   ENDWHERE
   !
 ENDIF
@@ -353,12 +350,12 @@ ENDIF
 !
 !before optimization (with non log PQDGAMM) : 
 !ZGAMMT(:) = PGAMM(:)*PQDGAMM(:)**(0.1*(ZTSPC(:)-25.0))
-ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * IP%XQDGAMM(:,1)
-ZGAMMT(:) = IP%XGAMM(:,1) * EXP(ZWORK(:))
+ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * PK%XQDGAMM(:)
+ZGAMMT(:) = PK%XGAMM(:) * EXP(ZWORK(:))
 !
 ! specific humidity deficit (kg kg-1)
 !
-ZDSP(:)   = MAX( 0.0, PQSAT(:) - PQA(:) - IR%XLE(:,1)*IR%XRESA(:,1)/(PRHOA*XLVTT) )
+ZDSP(:)   = MAX( 0.0, PQSAT(:) - PQA(:) - PEK%XLE(:)*PEK%XRESA(:)/(PRHOA*XLVTT) )
 !
 ! cosine of solar zenith angle 
 !
@@ -370,16 +367,16 @@ ZXMUS(:) = MAX(COS(PZENITH(:)),0.01)
 ! kg/m2/s
 !before optimization (with non log PQDAMAX) : 
 !ZANMAX(:) = ( PAMAX(:)*PQDAMAX(:)**(0.1*(ZTSPC(:)-25.0)) ) / ...
-ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * IP%XQDAMAX(:,1)
-ZANMAX(:) = ( IP%XAMAX(:,1) * EXP(ZWORK(:))  ) &
-          / ( (1.0+EXP(0.3*(IP%XT1AMAX(:,1)-ZTSPC(:))))* (1.0+EXP(0.3*(ZTSPC(:)-IP%XT2AMAX(:,1)))) )
+ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * PK%XQDAMAX(:)
+ZANMAX(:) = ( PK%XAMAX(:) * EXP(ZWORK(:))  ) &
+          / ( (1.0+EXP(0.3*(PK%XT1AMAX(:)-ZTSPC(:))))* (1.0+EXP(0.3*(ZTSPC(:)-PK%XT2AMAX(:)))) )
 !
 ! m/s
 !before optimization (with non log PQDGMES) : 
 !ZGMEST(:) = ( ZGMEST(:)*PQDGMES(:)**(0.1*(ZTSPC(:)-25.0)) ) / ...
-ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * IP%XQDGMES(:,1)
+ZWORK (:) = (0.1*(ZTSPC(:)-25.0)) * PK%XQDGMES(:)
 ZGMEST(:) = ( ZGMEST(:) * EXP(ZWORK(:)) ) &
-          / ( (1.0+EXP(0.3*(IP%XT1GMES(:,1)-ZTSPC(:))))*  (1.0+EXP(0.3*(ZTSPC(:)-IP%XT2GMES(:,1)))) )  
+          / ( (1.0+EXP(0.3*(PK%XT1GMES(:)-ZTSPC(:))))*  (1.0+EXP(0.3*(ZTSPC(:)-PK%XT2GMES(:)))) )  
 !
 !
 ! Integration over the canopy: SIZE(PABC) increments
@@ -394,7 +391,7 @@ ZTRDK(:)= 0.0
 ! ZGAMMT from ppm to kgCO2/kgair
 ZGAMMT(:)  = ZGAMMT(:) * XMCO2 / XMD * 1e-6
 ZANMAX(:) = ZANMAX(:) / PRHOA
-ZEPSO(:)  = IP%XEPSO(:,1)  / PRHOA
+ZEPSO(:)  = PK%XEPSO(:)  / PRHOA
 !
 ZIA(:)     = PSW_RAD(:)*XPARCF
 !
@@ -434,14 +431,14 @@ DO JINT = 1, SIZE(PABC)
     ENDWHERE
   ENDIF
   CALL COTWO(PCSP, PF2, ZXIA, ZDSP, ZGAMMT,             &
-             ZFZERO, ZEPSO, ZANMAX, ZGMEST, IMT%XGC(:,1), ZDMAX, &  
+             ZFZERO, ZEPSO, ZANMAX, ZGMEST, PEK%XGC(:), ZDMAX, &  
              ZAN0, ZGS0, ZRDK, ZLAITOP, ZZLAI           )
   !
   IF (IO%LTR_ML) THEN
     !
     ZXIA(:) = PIACAN_SHADE(:,JINT)
     CALL COTWO(PCSP, PF2, ZXIA, ZDSP, ZGAMMT,             &
-               ZFZERO, ZEPSO, ZANMAX, ZGMEST, IMT%XGC(:,1), ZDMAX, &  
+               ZFZERO, ZEPSO, ZANMAX, ZGMEST, PEK%XGC(:), ZDMAX, &  
                ZAN0_, ZGS0_, ZRDK_, ZLAITOP, ZZLAI        )
     !
     WHERE (OSHADE(:))
@@ -467,7 +464,7 @@ ZANF(:)= ZTAN(:)
 !
 ! Net assimilation over canopy
 !
-IR%XAN(:,1) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*ZANF(:)*ZLAI(:)
+PEK%XAN(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*ZANF(:)*ZLAI(:)
 !
 ! Dark respiration over canopy (does not depend on radiation, 
 ! no need to integrate over vertical dimension)
@@ -476,15 +473,15 @@ PRESP_LEAF(:) = (1.0-PDELTA(:))*(1.0-PPSNV(:)-PFFV(:))*ZTRDK(:)*ZLAI(:)
 !
 ! Gross primary production over canopy
 !
-PGPP(:) = IR%XAN(:,1) + PRESP_LEAF(:)
+PGPP(:) = PEK%XAN(:) + PRESP_LEAF(:)
 !
 ! Cumulated daily net assimilation over canopy (kgCO2/m2/day)
 !
-IR%XANDAY(:,1) = IR%XANDAY(:,1) + IR%XAN(:,1) * PTSTEP * PRHOA
+PEK%XANDAY(:) = PEK%XANDAY(:) + PEK%XAN(:) * PTSTEP * PRHOA
 !
 ! Adjust maximum leaf assimilation:
 !
-IR%XANFM(:,1) = MAX( ZANF(:), IR%XANFM(:,1) )
+PEK%XANFM(:) = MAX( ZANF(:), PEK%XANFM(:) )
 !
 ! Total conductance over canopy 
 !

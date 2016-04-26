@@ -1,5 +1,5 @@
 !     ####################################################################
-      SUBROUTINE SOIL_ALBEDO(HALBEDO, PWSAT, PWG1, IP, IMA, HBAND)  
+      SUBROUTINE SOIL_ALBEDO(HALBEDO, PWSAT, PWG1, KK, PEK, HBAND)  
 !     ####################################################################
 !
 !!****  *SOIL_ALBEDO*  
@@ -39,8 +39,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_ALB_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_PE_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -60,11 +59,10 @@ IMPLICIT NONE
 !   "MEAN" = constant SOIL_ALBEDO value for medium soil wetness
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PWSAT       ! saturation water content
-REAL, DIMENSION(:,:), INTENT(IN)  :: PWG1        ! surface water content
+REAL, DIMENSION(:), INTENT(IN)  :: PWG1        ! surface water content
 !
-!
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: IMA
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
  CHARACTER(LEN=*), INTENT(IN) :: HBAND
 !
@@ -73,8 +71,6 @@ TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: IMA
 !
 REAL,    DIMENSION(SIZE(PWSAT)) :: ZX
 !
-INTEGER :: IPATCH     ! number of patches
-INTEGER :: JPATCH     !loop index for patches
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -82,66 +78,59 @@ IF (LHOOK) CALL DR_HOOK('SOIL_ALBEDO',0,ZHOOK_HANDLE)
 IF (HALBEDO=='USER' .AND. LHOOK) CALL DR_HOOK('SOIL_ALBEDO',1,ZHOOK_HANDLE)
 IF (HALBEDO=='USER') RETURN
 !
-IPATCH = SIZE(PWG1,2)
-
-IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") IMA%XALBVIS_SOIL = XUNDEF
-IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") IMA%XALBNIR_SOIL = XUNDEF
-IF (TRIM(HBAND)=="UV" .OR.TRIM(HBAND)=="ALL") IMA%XALBUV_SOIL  = XUNDEF
+IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") PEK%XALBVIS_SOIL = XUNDEF
+IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") PEK%XALBNIR_SOIL = XUNDEF
+IF (TRIM(HBAND)=="UV" .OR.TRIM(HBAND)=="ALL") PEK%XALBUV_SOIL  = XUNDEF
 !
 SELECT CASE ( HALBEDO )
 CASE ('EVOL')
 
-  DO JPATCH=1,IPATCH
-    ZX = MIN( PWG1(:,JPATCH)/PWSAT(:) , 1. )
+    ZX = MIN( PWG1(:)/PWSAT(:) , 1. )
 
     IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") &
-      WHERE (PWG1(:,JPATCH)/=XUNDEF) &
-        IMA%XALBVIS_SOIL(:,JPATCH) = IP%XALBVIS_WET(:) + &
-           (0.25*IP%XALBVIS_DRY(:)-IP%XALBVIS_WET(:))           &
-             * (1. - ZX(:)) * ( ZX(:) + (IP%XALBVIS_DRY(:)-IP%XALBVIS_WET(:)) &
-             /(0.25*IP%XALBVIS_DRY(:)-IP%XALBVIS_WET(:)) )  
+      WHERE (PWG1(:)/=XUNDEF) &
+        PEK%XALBVIS_SOIL(:) = KK%XALBVIS_WET(:) + &
+           (0.25*KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:))           &
+             * (1. - ZX(:)) * ( ZX(:) + (KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) &
+             /(0.25*KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) )  
     IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") &
-      WHERE (PWG1(:,JPATCH)/=XUNDEF) &      
-        IMA%XALBNIR_SOIL(:,JPATCH) = IP%XALBNIR_WET(:) + &
-           (0.25*IP%XALBNIR_DRY(:)-IP%XALBNIR_WET(:))           &
-             * (1. - ZX(:)) * ( ZX(:) + (IP%XALBNIR_DRY(:)-IP%XALBNIR_WET(:)) &
-             /(0.25*IP%XALBNIR_DRY(:)-IP%XALBNIR_WET(:)) )  
+      WHERE (PWG1(:)/=XUNDEF) &      
+        PEK%XALBNIR_SOIL(:) = KK%XALBNIR_WET(:) + &
+           (0.25*KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:))           &
+             * (1. - ZX(:)) * ( ZX(:) + (KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) &
+             /(0.25*KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) )  
     IF (TRIM(HBAND)=="UV".OR.TRIM(HBAND)=="ALL") &
-      WHERE (PWG1(:,JPATCH)/=XUNDEF) &      
-        IMA%XALBUV_SOIL (:,JPATCH) = IP%XALBUV_WET (:) + &
-             (0.25*IP%XALBUV_DRY (:)-IP%XALBUV_WET (:))           &
-             * (1. - ZX(:)) * ( ZX(:) + (IP%XALBUV_DRY (:)-IP%XALBUV_WET (:)) &
-             /(0.25*IP%XALBUV_DRY (:)-IP%XALBUV_WET (:)) )  
+      WHERE (PWG1(:)/=XUNDEF) &      
+        PEK%XALBUV_SOIL (:) = KK%XALBUV_WET (:) + &
+             (0.25*KK%XALBUV_DRY (:)-KK%XALBUV_WET (:))           &
+             * (1. - ZX(:)) * ( ZX(:) + (KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) &
+             /(0.25*KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) )  
 
     !END WHERE
-  END DO
 
 CASE ('DRY ')
   IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBVIS_SOIL(:,:) = SPREAD(IP%XALBVIS_DRY(:),2,IPATCH)
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBVIS_SOIL(:) = KK%XALBVIS_DRY(:)
   IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBNIR_SOIL(:,:) = SPREAD(IP%XALBNIR_DRY(:),2,IPATCH)
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBNIR_SOIL(:) = KK%XALBNIR_DRY(:)
   IF (TRIM(HBAND)=="UV".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBUV_SOIL (:,:) = SPREAD(IP%XALBUV_DRY (:),2,IPATCH)
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBUV_SOIL (:) = KK%XALBUV_DRY (:)
 
 CASE ('WET ')
   IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBVIS_SOIL(:,:) = SPREAD(IP%XALBVIS_WET(:),2,IPATCH)
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBVIS_SOIL(:) = KK%XALBVIS_WET(:)
   IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBNIR_SOIL(:,:) = SPREAD(IP%XALBNIR_WET(:),2,IPATCH)
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBNIR_SOIL(:) = KK%XALBNIR_WET(:)
   IF (TRIM(HBAND)=="UV".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBUV_SOIL (:,:) = SPREAD(IP%XALBUV_WET (:),2,IPATCH)
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBUV_SOIL (:) = KK%XALBUV_WET (:)
 
 CASE ('MEAN')
   IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBVIS_SOIL(:,:) = 0.5 * ( SPREAD(IP%XALBVIS_DRY(:),2,IPATCH) + &
-                                  SPREAD(IP%XALBVIS_WET(:),2,IPATCH) )
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBVIS_SOIL(:) = 0.5 * ( KK%XALBVIS_DRY(:) + KK%XALBVIS_WET(:) )
   IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBNIR_SOIL(:,:) = 0.5 * ( SPREAD(IP%XALBNIR_DRY(:),2,IPATCH) + &
-                                  SPREAD(IP%XALBNIR_WET(:),2,IPATCH) )
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBNIR_SOIL(:) = 0.5 * ( KK%XALBNIR_DRY(:) + KK%XALBNIR_WET(:) )
   IF (TRIM(HBAND)=="UV".OR.TRIM(HBAND)=="ALL") &
-          IMA%XALBUV_SOIL (:,:) = 0.5 * ( SPREAD(IP%XALBUV_DRY (:),2,IPATCH) + &
-                                  SPREAD(IP%XALBUV_WET (:),2,IPATCH) )
+    WHERE (PWG1(:)/=XUNDEF) PEK%XALBUV_SOIL (:) = 0.5 * ( KK%XALBUV_DRY (:) + KK%XALBUV_WET (:) )
 
 END SELECT
 IF (LHOOK) CALL DR_HOOK('SOIL_ALBEDO',1,ZHOOK_HANDLE)

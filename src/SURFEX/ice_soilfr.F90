@@ -1,4 +1,4 @@
-      SUBROUTINE ICE_SOILFR(IO, IP, INI, IMX, IR, DGMI, HSNOW_ISBA, PTSTEP, PKSFC_IVEG, PDWGI1, PDWGI2 )   
+      SUBROUTINE ICE_SOILFR(IO, KK, PK, PEK, DMK, PTSTEP, PKSFC_IVEG, PDWGI1, PDWGI2 )   
 !!     ##########################################################################
 !
 !!****  *ICE_SOILFR*  
@@ -53,9 +53,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_CSTS,       ONLY : XCL, XTT, XPI, XDAY, XCI, XRHOLI,     &
@@ -71,16 +69,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-!
-CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
-!                                               !         (Douville et al. 1995)
-!                                               ! '3-L' = 3-L snow scheme (option)
-!                                               !         (Boone and Etchevers 2001)
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 REAL, INTENT (IN)                   :: PTSTEP     ! model time step (s)
 !
@@ -97,7 +89,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PDWGI1, PDWGI2
 !
 REAL                        ::   ZKSOIL     ! coefficient for soil freeze/thaw
 !
-REAL, DIMENSION(SIZE(DGMI%XCG)) ::   ZKSFC_FRZ, ZFREEZING, ZICE_MELT, ZWIM,       &
+REAL, DIMENSION(SIZE(DMK%XCG)) ::   ZKSFC_FRZ, ZFREEZING, ZICE_MELT, ZWIM,       &
                                  ZWIT, ZWGI1, ZWGI2, ZWM, ZSOILHEATCAP,       &
                                  ZICEEFF, ZEFFIC, ZTAUICE,                    &
                                  ZWGMIN, ZTGMAX, ZMATPOT, ZDELTAT
@@ -118,18 +110,18 @@ REAL, DIMENSION(SIZE(DGMI%XCG)) ::   ZKSFC_FRZ, ZFREEZING, ZICE_MELT, ZWIM,     
 !                                ZDELTAT      = Freezing or melting temperature depression (K) after 
 !                                               possible flux correction
 !
-REAL, DIMENSION(SIZE(DGMI%XCG)) ::  ZWSAT_AVGZ
+REAL, DIMENSION(SIZE(DMK%XCG)) ::  ZWSAT_AVGZ
 !                               ZWSAT_AVGZ = soil column average porosity (m3 m-3)
 !
-REAL, DIMENSION(SIZE(DGMI%XCG)) :: ZPSNG
+REAL, DIMENSION(SIZE(DMK%XCG)) :: ZPSNG
 !                               ZPSNG = snow fractions corresponding to
-!                                       dummy argument IR%XPSNG(:,1)
-!                                       if HSNOW_ISBA = 'DEF' (composite
+!                                       dummy argument PEK%XPSNG(:)
+!                                       if PEK%TSNOW%SCHEME = 'DEF' (composite
 !                                       or Force-Restore snow scheme), else
 !                                       they are zero for explicit snow case
 !                                       as snow fluxes calculated outside of
 !                                       this routine using the 
-!                                       HSNOW_ISBA = '3-L' or 'CRO' option.
+!                                       PEK%TSNOW%SCHEME = '3-L' or 'CRO' option.
 !
 !*      0.3    declarations of local parameters
 !
@@ -149,7 +141,7 @@ REAL, PARAMETER             :: ZEFFIC_MIN    = 0.01  ! (-)   (0 <= ZEFFIC_MIN <<
 !
 INTEGER         :: INJ, JJ
 !
-REAL, DIMENSION(SIZE(DGMI%XCG))          :: ZWORK1, ZWORK2, ZTDIURN
+REAL, DIMENSION(SIZE(DMK%XCG))          :: ZWORK1, ZWORK2, ZTDIURN
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -174,7 +166,7 @@ ZWSAT_AVGZ(:)   = XUNDEF
 ZDELTAT(:)      = 0.0
 ZTDIURN(:)      = 0.0
 !
-INJ = SIZE(IR%XTG(:,:,1),1)
+INJ = SIZE(PEK%XTG,1)
 !
 !-------------------------------------------------------------------------------
 !
@@ -182,10 +174,10 @@ INJ = SIZE(IR%XTG(:,:,1),1)
 ! fluxes calculated outside of this routine, so set
 ! the local snow fractions here to zero:
 ! 
-IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')THEN
+IF(PEK%TSNOW%SCHEME == '3-L' .OR. PEK%TSNOW%SCHEME == 'CRO')THEN
   ZPSNG(:)     = 0.0
 ELSE
-  ZPSNG(:)     = IR%XPSNG(:,1)+INI%XFFG(:,1)
+  ZPSNG(:)     = PEK%XPSNG(:)+KK%XFFG(:)
 ENDIF
 !
 !*       1.    Melting/freezing normalized coefficient
@@ -193,7 +185,7 @@ ENDIF
 !
 ZKSOIL      = (0.5 * SQRT(XCONDI*XCI*XRHOLI*XDAY/XPI))/XLMTT
 !
-ZTAUICE (:) = MAX(PTSTEP,IP%XTAUICE(:))
+ZTAUICE (:) = MAX(PTSTEP,PK%XTAUICE(:))
 !
 DO JJ=1,INJ
 !-------------------------------------------------------------------------------
@@ -208,7 +200,7 @@ DO JJ=1,INJ
 !               profiles of soil hydrological parameters are constant,
 !               so use the values in uppermost element (arbitrary)
 !
-  ZWSAT_AVGZ(JJ) = IP%XWSAT(JJ,1)
+  ZWSAT_AVGZ(JJ) = KK%XWSAT(JJ,1)
 !
 !               Influence of vegetation insolation on surface:
 !
@@ -227,10 +219,10 @@ IF(IO%CSOILFRZ == 'LWT')THEN
 ! Giard and Bazile (2000) is the default. 
 !
   DO JJ=1,INJ
-    ZMATPOT(JJ)   = MIN(IP%XMPOTSAT(JJ,1), XLMTT*(IR%XTG(JJ,1,1)-XTT)/(XG*IR%XTG(JJ,1,1)) )
-    ZWGMIN(JJ)    = ZWSAT_AVGZ(JJ)*( (ZMATPOT(JJ)/IP%XMPOTSAT(JJ,1))**(-1./IP%XBCOEF(JJ,1)) )
+    ZMATPOT(JJ)   = MIN(KK%XMPOTSAT(JJ,1), XLMTT*(PEK%XTG(JJ,1)-XTT)/(XG*PEK%XTG(JJ,1)) )
+    ZWGMIN(JJ)    = ZWSAT_AVGZ(JJ)*( (ZMATPOT(JJ)/KK%XMPOTSAT(JJ,1))**(-1./KK%XBCOEF(JJ,1)) )
 
-    ZMATPOT(JJ)   = IP%XMPOTSAT(JJ,1)*( (IR%XWG(JJ,1,1)/ZWSAT_AVGZ(JJ))**(-IP%XBCOEF(JJ,1)) )
+    ZMATPOT(JJ)   = KK%XMPOTSAT(JJ,1)*( (PEK%XWG(JJ,1)/ZWSAT_AVGZ(JJ))**(-KK%XBCOEF(JJ,1)) )
     ZTGMAX(JJ)    = XLMTT*XTT/(XLMTT - XG* ZMATPOT(JJ))
   ENDDO
 ELSE
@@ -240,18 +232,18 @@ ENDIF
 !
 DO JJ=1,INJ
 ! 
-  ZDELTAT(JJ)  = IR%XTG(JJ,1,1) - ZTGMAX(JJ) ! initial temperature depression
+  ZDELTAT(JJ)  = PEK%XTG(JJ,1) - ZTGMAX(JJ) ! initial temperature depression
 !
-  ZWORK2(JJ) = XRHOLW*IMX%XDG(JJ,1,1)
-  ZEFFIC(JJ)    = MAX(ZEFFIC_MIN,(IR%XWG(JJ,1,1)-XWGMIN)/ZWSAT_AVGZ(JJ))
-  ZFREEZING(JJ) = MIN( MAX(0.0,IR%XWG(JJ,1,1)-ZWGMIN(JJ))*ZWORK2(JJ),    &  
+  ZWORK2(JJ) = XRHOLW*PK%XDG(JJ,1)
+  ZEFFIC(JJ)    = MAX(ZEFFIC_MIN,(PEK%XWG(JJ,1)-XWGMIN)/ZWSAT_AVGZ(JJ))
+  ZFREEZING(JJ) = MIN( MAX(0.0,PEK%XWG(JJ,1)-ZWGMIN(JJ))*ZWORK2(JJ),    &  
                   ZKSFC_FRZ(JJ)*ZEFFIC(JJ)*MAX( -ZDELTAT(JJ), 0.) )
 !
 !*       2.3    Ground Ice melt
 !               ---------------
 !
-  ZEFFIC(JJ)    =  MAX(ZEFFIC_MIN,IR%XWGI(JJ,1,1)/(ZWSAT_AVGZ(JJ)-XWGMIN))
-  ZICE_MELT(JJ) = MIN( IR%XWGI(JJ,1,1)*ZWORK2(JJ),                      &
+  ZEFFIC(JJ)    =  MAX(ZEFFIC_MIN,PEK%XWGI(JJ,1)/(ZWSAT_AVGZ(JJ)-XWGMIN))
+  ZICE_MELT(JJ) = MIN( PEK%XWGI(JJ,1)*ZWORK2(JJ),                      &
                   ZKSFC_FRZ(JJ)*ZEFFIC(JJ)*MAX( ZDELTAT(JJ), 0. ) )
 !
 !*       2.4    Ice reservoir evolution
@@ -259,7 +251,7 @@ DO JJ=1,INJ
 !
 ! Melting of ice/freezing of water:
 !
-  ZWGI1(JJ) = IR%XWGI(JJ,1,1) + (PTSTEP/ZTAUICE(JJ))*(1.0-ZPSNG(JJ))*        &
+  ZWGI1(JJ) = PEK%XWGI(JJ,1) + (PTSTEP/ZTAUICE(JJ))*(1.0-ZPSNG(JJ))*        &
               (ZFREEZING(JJ) - ZICE_MELT(JJ))/ZWORK2(JJ) 
 !
 !
@@ -268,13 +260,13 @@ DO JJ=1,INJ
 !
 ! Time tendency:
 !
-  PDWGI1(JJ) = ZWGI1(JJ) - IR%XWGI(JJ,1,1)
+  PDWGI1(JJ) = ZWGI1(JJ) - PEK%XWGI(JJ,1)
 !
 !
 !*       2.5    Effect on temperature
 !               ---------------------
 !
-  IR%XTG(JJ,1,1)   = IR%XTG(JJ,1,1) + PDWGI1(JJ)*XLMTT*DGMI%XCT(JJ)*ZWORK2(JJ)
+  PEK%XTG(JJ,1)   = PEK%XTG(JJ,1) + PDWGI1(JJ)*XLMTT*DMK%XCT(JJ)*ZWORK2(JJ)
 !
 !-------------------------------------------------------------------------------
 !
@@ -283,37 +275,37 @@ DO JJ=1,INJ
 !               ('DEF' or Force-Restore soil option)
 !               --------------------------------------
 !
-  ZWORK1(JJ) = IMX%XDG(JJ,1,1)/IMX%XDG(JJ,2,1)
+  ZWORK1(JJ) = PK%XDG(JJ,1)/PK%XDG(JJ,2)
 !*       3.1  Available Deep ice content
 !             --------------------------
 !
-  ZWIM(JJ) = ( IR%XWGI(JJ,2,1) - ZWORK1(JJ) * IR%XWGI(JJ,1,1) )  / ( 1. - ZWORK1(JJ) )
+  ZWIM(JJ) = ( PEK%XWGI(JJ,2) - ZWORK1(JJ) * PEK%XWGI(JJ,1) )  / ( 1. - ZWORK1(JJ) )
 !
   ZWIM(JJ) = MAX(0.,ZWIM(JJ))  ! Just in case of round-off errors
 !
 !*       3.2  Deep liquid water content
 !             -------------------------
 !
-  ZWM(JJ)  = ( IR%XWG(JJ,2,1) - ZWORK1(JJ) * IR%XWG(JJ,1,1) )  / ( 1. - ZWORK1(JJ) )
+  ZWM(JJ)  = ( PEK%XWG(JJ,2) - ZWORK1(JJ) * PEK%XWG(JJ,1) )  / ( 1. - ZWORK1(JJ) )
 !
 !*       3.3    Water freezing
 !               --------------
 !
 ! Total soil volumetric heat capacity [J/(m3 K)]:
 !
-  ZSOILHEATCAP(JJ) = XCL*XRHOLW*IR%XWG(JJ,2,1)  +                           &
-                     XCI*XRHOLI*IR%XWGI(JJ,2,1) +                           &
+  ZSOILHEATCAP(JJ) = XCL*XRHOLW*PEK%XWG(JJ,2)  +                           &
+                     XCI*XRHOLI*PEK%XWGI(JJ,2) +                           &
                      XSPHSOIL*XDRYWGHT*(1.0-ZWSAT_AVGZ(JJ))*(1.0-ZWSAT_AVGZ(JJ))
 !
 ! Soil thickness which corresponds to T2 (m): 2 times the diurnal
 ! surface temperature wave penetration depth as T2 is the average
 ! temperature for this layer:
 !
-  ZTDIURN(JJ)   = MIN(IMX%XDG(JJ,2,1), 4./(ZSOILHEATCAP(JJ)*DGMI%XCG(JJ)))
+  ZTDIURN(JJ)   = MIN(PK%XDG(JJ,2), 4./(ZSOILHEATCAP(JJ)*DMK%XCG(JJ)))
 !
 ! Effective soil ice penetration depth (m):
 !
-  ZICEEFF(JJ)   = (IR%XWGI(JJ,2,1)/(IR%XWGI(JJ,2,1)+IR%XWG(JJ,2,1)))*IMX%XDG(JJ,2,1)
+  ZICEEFF(JJ)   = (PEK%XWGI(JJ,2)/(PEK%XWGI(JJ,2)+PEK%XWG(JJ,2)))*PK%XDG(JJ,2)
 !
 ENDDO
 !
@@ -327,10 +319,10 @@ IF(IO%CSOILFRZ == 'LWT')THEN
 !
   DO JJ=1,INJ
 
-    ZMATPOT(JJ)   = MIN(IP%XMPOTSAT(JJ,1), XLMTT*(IR%XTG(JJ,2,1)-XTT)/(XG*IR%XTG(JJ,2,1)) )
-    ZWGMIN(JJ)    = ZWSAT_AVGZ(JJ)*( (ZMATPOT(JJ)/IP%XMPOTSAT(JJ,1))**(-1./IP%XBCOEF(JJ,1)) )
+    ZMATPOT(JJ)   = MIN(KK%XMPOTSAT(JJ,1), XLMTT*(PEK%XTG(JJ,2)-XTT)/(XG*PEK%XTG(JJ,2)) )
+    ZWGMIN(JJ)    = ZWSAT_AVGZ(JJ)*( (ZMATPOT(JJ)/KK%XMPOTSAT(JJ,1))**(-1./KK%XBCOEF(JJ,1)) )
 
-    ZMATPOT(JJ)   = IP%XMPOTSAT(JJ,1)*( (IR%XWG(JJ,2,1)/ZWSAT_AVGZ(JJ))**(-IP%XBCOEF(JJ,1)) )
+    ZMATPOT(JJ)   = KK%XMPOTSAT(JJ,1)*( (PEK%XWG(JJ,2)/ZWSAT_AVGZ(JJ))**(-KK%XBCOEF(JJ,1)) )
     ZTGMAX(JJ)    = XLMTT*XTT/(XLMTT - XG* ZMATPOT(JJ))
   ENDDO
 ELSE
@@ -344,10 +336,10 @@ ENDIF
 !
 DO JJ=1,INJ
 !
-  ZDELTAT(JJ)  = IR%XTG(JJ,2,1) - ZTGMAX(JJ) ! initial temperature depression 
+  ZDELTAT(JJ)  = PEK%XTG(JJ,2) - ZTGMAX(JJ) ! initial temperature depression 
 !  
-  ZWORK1(JJ) = IMX%XDG(JJ,1,1)/IMX%XDG(JJ,2,1)
-  ZWORK2(JJ) = XRHOLW*(IMX%XDG(JJ,2,1)-IMX%XDG(JJ,1,1))
+  ZWORK1(JJ) = PK%XDG(JJ,1)/PK%XDG(JJ,2)
+  ZWORK2(JJ) = XRHOLW*(PK%XDG(JJ,2)-PK%XDG(JJ,1))
 
   ZFREEZING(JJ) = 0.0
   IF (ZICEEFF(JJ) <= ZTDIURN(JJ)) THEN
@@ -381,13 +373,13 @@ DO JJ=1,INJ
 !
   ZWGI2(JJ)  = (1.-ZWORK1(JJ))*ZWIT(JJ) +  ZWORK1(JJ)*ZWGI1(JJ)
 !
-  PDWGI2(JJ) = ZWGI2(JJ) - IR%XWGI(JJ,2,1)
+  PDWGI2(JJ) = ZWGI2(JJ) - PEK%XWGI(JJ,2)
 !
 !
 !*       3.7    Effect on temperature
 !               ---------------------
 !
-  IR%XTG(JJ,2,1) = IR%XTG(JJ,2,1) + PDWGI2(JJ)*XLMTT*DGMI%XCG(JJ)*XRHOLW*IMX%XDG(JJ,2,1)
+  PEK%XTG(JJ,2) = PEK%XTG(JJ,2) + PDWGI2(JJ)*XLMTT*DMK%XCG(JJ)*XRHOLW*PK%XDG(JJ,2)
 !
 ENDDO
 !

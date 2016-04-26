@@ -1,6 +1,6 @@
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA (IP, UG, U, KI,KSTEP,GTOPD)
+      SUBROUTINE TOPD_TO_ISBA (K, UG, U, KI,KSTEP,GTOPD)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -47,9 +47,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -75,9 +73,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-!
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -186,7 +182,7 @@ ENDDO
 XWG_FULL(:) = MAX(ZW(:),XWGMIN)
 !
 !
- CALL UNPACK_SAME_RANK(U%NR_NATURE,IP%XWSAT(:,2),ZWSAT_FULL)
+ CALL UNPACK_SAME_RANK(U%NR_NATURE,K%XWSAT(:,2),ZWSAT_FULL)
 !
 XWSUPSAT=0.
 !ludo glace Wsat varie

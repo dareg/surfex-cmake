@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGET_ISBA (PDIR_SW, PSCA_SW, PLW, INI, DGIP )  
+       SUBROUTINE DIAG_SURF_BUDGET_ISBA (PDIR_SW, PSCA_SW, PLW, K, DK )  
 !     ###############################################################################
 !
 !!****  *DIAG_SURF_BUDGET_ISBA * - Computes diagnostics over ISBA
@@ -25,7 +25,7 @@
 !!------------------------------------------------------------------
 !
 USE MODD_DIAG_n, ONLY : DIAG_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t
 !
 USE MODD_CSTS,           ONLY : XSTEFAN
 !
@@ -42,8 +42,8 @@ REAL, DIMENSION(:,:),INTENT(IN)  :: PSCA_SW   ! diffuse solar radiation (on hori
 !                                             !                                       (W/m2)
 REAL, DIMENSION(:), INTENT(IN)   :: PLW       ! longwave radiation (on horizontal surf.)
 !
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(DIAG_t), INTENT(INOUT) :: DGIP
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(DIAG_t), INTENT(INOUT) :: DK
 !
 !*      0.2    declarations of local variables
 !
@@ -59,16 +59,16 @@ ISWB = SIZE(PDIR_SW,2)
 !* total incoming and outgoing SW
 !
 DO JSWB=1,ISWB
-  DGIP%XSWBD(:,JSWB) = PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)
-  DGIP%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * INI%XDIR_ALB_WITH_SNOW(:,JSWB,1) + &
-                       PSCA_SW(:,JSWB) * INI%XSCA_ALB_WITH_SNOW(:,JSWB,1) 
+  DK%XSWBD(:,JSWB) = PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB)
+  DK%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * K%XDIR_ALB_WITH_SNOW(:,JSWB) + &
+                     PSCA_SW(:,JSWB) * K%XSCA_ALB_WITH_SNOW(:,JSWB) 
 ENDDO
 !
-DGIP%XSWD(:) = 0.
-DGIP%XSWU(:) = 0.
+DK%XSWD(:) = 0.
+DK%XSWU(:) = 0.
 DO JSWB=1,ISWB
-   DGIP%XSWD(:) = DGIP%XSWD(:) + DGIP%XSWBD(:,JSWB)
-   DGIP%XSWU(:) = DGIP%XSWU(:) + DGIP%XSWBU(:,JSWB)
+   DK%XSWD(:) = DK%XSWD(:) + DK%XSWBD(:,JSWB)
+   DK%XSWU(:) = DK%XSWU(:) + DK%XSWBU(:,JSWB)
 ENDDO
 !
 !*incoming outgoing LW
@@ -76,8 +76,8 @@ ENDDO
 !Wrong old diag : LWU=EMIS*STEFAN*Ts**4 + (1.-EMIS)*LW
 !Due to e_budget.f90 linearization, LWU can not be calculated using actual Ts
 !
-DGIP%XLWD(:) = PLW(:)
-DGIP%XLWU(:) = DGIP%XSWD(:) - DGIP%XSWU(:) + DGIP%XLWD(:) - DGIP%XRN(:)
+DK%XLWD(:) = PLW(:)
+DK%XLWU(:) = DK%XSWD(:) - DK%XSWU(:) + DK%XLWD(:) - DK%XRN(:)
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_ISBA',1,ZHOOK_HANDLE)
 !

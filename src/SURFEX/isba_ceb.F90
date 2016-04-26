@@ -1,6 +1,6 @@
 !#########
-SUBROUTINE ISBA_CEB(IO, IP, INI, IMX, IMT, IR, DGIP, DGEIP, DGMI,      &
-                    HSNOW_ISBA, HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,   &
+SUBROUTINE ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,      &
+                    HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,   &
                     PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,&
                     PPEQ_B_COEF, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA,  &
                     PVMOD, PQA, PRR, PSR, PPS, PZREF, PUREF, PDIRCOSZW,&
@@ -46,9 +46,7 @@ SUBROUTINE ISBA_CEB(IO, IP, INI, IMX, IMT, IR, DGIP, DGEIP, DGMI,      &
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t, ISBA_PARAM_TIME_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
@@ -72,19 +70,13 @@ IMPLICIT NONE
 !              -------------------------
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_t), INTENT(INOUT) :: DGIP
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIP
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_t), INTENT(INOUT) :: DK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
-CHARACTER(LEN=*),     INTENT(IN) :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
-!                                              !         (Douville et al. 1995)
-!                                              ! '3-L' = 3-L snow scheme (option)
-!                                              !         (Boone and Etchevers 2000)
  CHARACTER(LEN=*),    INTENT(IN) :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                    ! 'OLD' = direct
 !                                                    ! 'NEW' = Taylor serie, order 1
@@ -179,8 +171,8 @@ REAL, DIMENSION(:),  INTENT(OUT) :: PHU_AGG  ! aggregated relative humidity
 !
 !*      0.2    declarations of local parameters
 !
-REAL, PARAMETER            :: ZDEPTH_COR = 0.6
-!                             ZDEPTH_COR = depth over which the correction flux is applied
+REAL, PARAMETER            :: ZDEKTH_COR = 0.6
+!                             ZDEKTH_COR = depth over which the correction flux is applied
 !
 REAL, PARAMETER            :: ZDTG1_COR = 10.0 
 !                             ZDTG1_COR = Delta temperature limit to comput the correction flux (K)
@@ -201,7 +193,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZLEGI_DELTA ! soil sublimation delta fn
 REAL, DIMENSION(SIZE(PTA)) :: ZT2M     ! restore temperature before time integration (K)
 REAL, DIMENSION(SIZE(PTA)) :: ZTSM     ! surface temperature before time integration (K)
 !
-REAL, DIMENSION(SIZE(IR%XTG(:,:,1),1),SIZE(IR%XTG(:,:,1),2)) :: ZFLUX_COR, ZLAYERHCAP
+REAL, DIMENSION(SIZE(PEK%XTG,1),SIZE(PEK%XTG,2)) :: ZFLUX_COR, ZLAYERHCAP
 !                                           ZFLUX_COR = correction flux by layer to conserve energy (W/m2)
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZGRNDFLUX, ZTOTALHCAP, ZWORK
@@ -242,8 +234,8 @@ IF (LHOOK) CALL DR_HOOK('ISBA_CEB',0,ZHOOK_HANDLE)
 !*      1.0    Preliminaries
 !              -------------
 !
-INJ=SIZE(IR%XTG(:,:,1),1)
-INL=SIZE(IR%XTG(:,:,1),2)
+INJ=SIZE(PEK%XTG,1)
+INL=SIZE(PEK%XTG,2)
 !
 !local init
 !
@@ -310,11 +302,11 @@ ZFLUX_COR(:,:) = 0.0
 !*      2.0    Correction flux to conserv energy budget
 !              ----------------------------------------
 !
-LEXPLICIT_SNOW=(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO')
+LEXPLICIT_SNOW=(PEK%TSNOW%SCHEME == '3-L' .OR. PEK%TSNOW%SCHEME == 'CRO')
 !
 IF(LEXPLICIT_SNOW.AND.IO%CISBA/='DIF')THEN
 !
-  ZFLUX_COR(:,1)=IR%XPSN(:,1)*PFLSN_COR(:)
+  ZFLUX_COR(:,1)=PEK%XPSN(:)*PFLSN_COR(:)
 !
 ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
 !
@@ -322,17 +314,17 @@ ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
   ZTOTALHCAP    (:) = 0.0
 !
 ! To conserv energy, the correction flux is distributed at least
-! over the first layers of the soil, ZDEPTH_COR. This method prevent 
+! over the first layers of the soil, ZDEKTH_COR. This method prevent 
 ! numerical oscillations especially when explicit snow vanishes
 !
-  ZWORK(:) = MIN(IMX%XDG(:,INL,1),ZDEPTH_COR)
+  ZWORK(:) = MIN(PK%XDG(:,INL),ZDEKTH_COR)
 !
-  ZLAYERHCAP(:,1)= 1.0/DGMI%XCT(:)
-  ZTOTALHCAP(:  )= 1.0/DGMI%XCT(:)
+  ZLAYERHCAP(:,1)= 1.0/DMK%XCT(:)
+  ZTOTALHCAP(:  )= 1.0/DMK%XCT(:)
   DO JL=2,INL
     DO JI=1,INJ
-      ZLAYERHCAP(JI,JL) = PSOILHCAPZ(JI,JL) * MIN( IP%XDZG(JI,JL,1), &
-                MAX(0.0,ZWORK(JI)-IMX%XDG(JI,JL,1)+IP%XDZG(JI,JL,1)) )
+      ZLAYERHCAP(JI,JL) = PSOILHCAPZ(JI,JL) * MIN( PK%XDZG(JI,JL), &
+                MAX(0.0,ZWORK(JI)-PK%XDG(JI,JL) +PK%XDZG(JI,JL)) )
       ZTOTALHCAP(JI   ) = ZTOTALHCAP(JI) + ZLAYERHCAP(JI,JL)
     ENDDO
   ENDDO
@@ -340,7 +332,7 @@ ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
   DO JL=1,INL
     DO JI=1,INJ
       IF(ZTOTALHCAP(JI)>0.0)THEN
-        ZFLUX_COR(JI,JL) = IR%XPSN(JI,1)*PFLSN_COR(JI)*ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
+        ZFLUX_COR(JI,JL) = PEK%XPSN(JI)*PFLSN_COR(JI)*ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
       ENDIF
     ENDDO
   ENDDO
@@ -349,7 +341,7 @@ ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
 ! due to snow/soil ground flux is superior to ZDTG1_COR (K)
 ! Especially relevant when PPSN ~ 1 over vegetated area
 !
-  ZWORK(:)=PTSTEP*DGMI%XCT(:)*IR%XPSN(:,1)*ABS(PGRNDFLUX(:))
+  ZWORK(:)=PTSTEP*DMK%XCT(:)*PEK%XPSN(:)*ABS(PGRNDFLUX(:))
 !
   WHERE(ZTOTALHCAP(:)>0.0.AND.ZWORK(:)>=ZDTG1_COR)
     ZGRNDFLUX(:) = PGRNDFLUX(:)*ZLAYERHCAP(:,1)/ZTOTALHCAP(:)
@@ -358,7 +350,7 @@ ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
   DO JL=2,INL
     DO JI=1,INJ
       IF(ZTOTALHCAP(JI)>0.0.AND.ZWORK(JI)>=ZDTG1_COR)THEN
-        ZFLUX_COR(JI,JL)=ZFLUX_COR(JI,JL)+IR%XPSN(JI,1)*PGRNDFLUX(JI) &
+        ZFLUX_COR(JI,JL)=ZFLUX_COR(JI,JL)+PEK%XPSN(JI)*PGRNDFLUX(JI) &
                                          *ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
       ENDIF
     ENDDO
@@ -385,30 +377,25 @@ DO JSPLIT=1,ITSPLIT
 !  Save surface and sub-surface temperature values at beginning of time step for 
 !  budget and flux calculations:
 !
-   ZTSM(:) = IR%XTG(:,1,1)
-   ZT2M(:) = IR%XTG(:,2,1)
+   ZTSM(:) = PEK%XTG(:,1)
+   ZT2M(:) = PEK%XTG(:,2)
 !
 !
 !*      3.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
-!
-  !print*,JSPLIT,'tgc1 ',IR%XTG(1,1,1)
-   CALL DRAG(IO%CISBA, HSNOW_ISBA, IO%CCPSURF, ZTSTEP, IR%XTG(:,1,1), IR%XWG(:,1,1), &
-             IR%XWGI(:,1,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR, PPS, DGMI%XRS, &
-             IMT%XVEG(:,1), DGIP%XZ0, DGIP%XZ0EFF, DGIP%XZ0H, IP%XWFC(:,1),          &
-             IP%XWSAT(:,1), IR%XPSNG(:,1), IR%XPSNV(:,1), PZREF, PUREF, PDIRCOSZW,   &
-             PDELTA, PF5, IR%XRESA(:,1), DGIP%XCH, DGIP%XCD, DGIP%XCDN, DGIP%XRI,    &
-             DGIP%XHUG, PHUGI, DGMI%XHV, DGIP%XHU, IP%XPCPS(:,1), DGIP%XQS,          &
-             INI%XFFG(:,1), INI%XFFV(:,1), INI%XFF(:,1), PFFG_NOSNOW, PFFV_NOSNOW,   &
-             ZLEG_DELTA, ZLEGI_DELTA, IR%XWR(:,1), PRHOA, IP%XPLVTT(:,1), PQSAT=ZQSAT )  
-!
-!
-  !print*,JSPLIT,'tgc2 ',IR%XTG(1,1,1)
+! 
+   CALL DRAG(IO%CISBA, PEK%TSNOW%SCHEME, IO%CCPSURF, ZTSTEP, PEK%XTG(:,1), PEK%XWG(:,1), &
+             PEK%XWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR, PPS, DMK%XRS, &
+             PEK%XVEG, DK%XZ0, DK%XZ0EFF, DK%XZ0H, KK%XWFC(:,1), KK%XWSAT(:,1),    &
+             PEK%XPSNG, PEK%XPSNV, PZREF, PUREF, PDIRCOSZW, PDELTA, PF5, PEK%XRESA,&
+             DK%XCH, DK%XCD, DK%XCDN, DK%XRI, DK%XHUG, PHUGI, DMK%XHV, DK%XHU,     &
+             PK%XPCPS, DK%XQS, KK%XFFG, KK%XFFV, KK%XFF, PFFG_NOSNOW, PFFV_NOSNOW, &
+             ZLEG_DELTA, ZLEGI_DELTA, PEK%XWR, PRHOA, PK%XPLVTT, PQSAT=ZQSAT ) 
 !
 !*      4.0    Resolution of the surface and soil energy budget
 !              ------------------------------------------------
 !
-   CALL E_BUDGET(IO, IP, INI, IMT, IR, DGIP, DGMI, HSNOW_ISBA, HIMPLICIT_WIND,  &
+   CALL E_BUDGET(IO, KK, PK, PEK, DK, DMK, HIMPLICIT_WIND,  &
                  ZTSTEP, PUREF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,          &
                  PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, PVMOD, ZTSM, ZT2M,      &
                  PSW_RAD, PLW_RAD, PTA, PQA, PPS, PRHOA, PEXNS, PEXNA,          &
@@ -416,8 +403,6 @@ DO JSPLIT=1,ITSPLIT
                  PSOILCONDZ, PSOILHCAPZ, PALBT, PEMIST, ZQSAT, ZDQSAT,          &
                  PFROZEN1, PTDEEP_A, ZTA_IC, ZQA_IC, ZUSTAR2_IC, ZDEEP_FLUX,    &
                  ZRESTORE          )
-!
- !print*,JSPLIT,'tgc3 ',IR%XTG(1,1,1)
 !
 !*      5.0    Energy and momentum fluxes
 !              --------------------------
@@ -429,15 +414,14 @@ DO JSPLIT=1,ITSPLIT
 !  '3-L' : they represent                    flood + snow-flood-free  albedo and emissivity
 !*******************************************************************************
 !
-   CALL ISBA_FLUXES(IO, IP, INI, IMT, IR, DGMI, HSNOW_ISBA, ZTSTEP,           &
+   CALL ISBA_FLUXES(IO, KK, PK, PEK, DMK, ZTSTEP,           &
                     PSW_RAD, PLW_RAD, ZTA_IC, ZQA_IC, PRHOA, PEXNS, PEXNA,    &
-                    DGIP%XHUG, PHUGI, ZLEG_DELTA, ZLEGI_DELTA, PDELTA, PF5,   &
+                    DK%XHUG, PHUGI, ZLEG_DELTA, ZLEGI_DELTA, PDELTA, PF5,   &
                     PCS, ZTSM, ZT2M, PFROZEN1, PALBT, PEMIST, ZQSAT, ZDQSAT,  &
                     PSNOW_THRUFAL, ZRN, ZH, ZLE, ZLEG, ZLEGI, ZLEV, ZLES,     &
                     ZLER, ZLETR, ZEVAP, ZGFLUX, ZMELTADV, ZMELT, PSOILCONDZ,  &
-                    ZLE_FLOOD, ZLEI_FLOOD ) 
+                    ZLE_FLOOD, ZLEI_FLOOD )
 !
- !print*,JSPLIT,'tgc4 ',IR%XTG(1,1,1)
 !
 !*      6.0    Aggregated coefficients
 !              -----------------------
@@ -445,18 +429,18 @@ DO JSPLIT=1,ITSPLIT
 !  Compute aggregated coefficients for evaporation
 !  Sum(LEV+LEG+LEGI+LES) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
 !
-   ZAC_AGG(:) =   1. / IR%XRESA(:,1) / IP%XPLVTT(:,1)     &
-             * ( IP%XPLVTT(:,1) *    IMT%XVEG(:,1) * (1.-IR%XPSNV(:,1)) * DGMI%XHV(:)   &
-               + IP%XPLVTT(:,1) *(1.-IMT%XVEG(:,1))* (1.-IR%XPSNG(:,1)) * (1.-PFROZEN1(:))  &
-               + IP%XPLSTT(:,1) *(1.-IMT%XVEG(:,1))* (1.-IR%XPSNG(:,1)) * PFROZEN1(:)  &
-               + IP%XPLSTT(:,1) *                         IR%XPSN(:,1)   )  
+   ZAC_AGG(:) =   1. / PEK%XRESA(:) / PK%XPLVTT(:)     &
+             * ( PK%XPLVTT(:) *    PEK%XVEG(:) * (1.-PEK%XPSNV(:)) * DMK%XHV(:)   &
+               + PK%XPLVTT(:) *(1.-PEK%XVEG(:))* (1.-PEK%XPSNG(:)) * (1.-PFROZEN1(:))  &
+               + PK%XPLSTT(:) *(1.-PEK%XVEG(:))* (1.-PEK%XPSNG(:)) * PFROZEN1(:)  &
+               + PK%XPLSTT(:) *                      PEK%XPSN (:)   )  
 !
    WHERE(ZAC_AGG(:)>0.0)
-     ZHU_AGG(:) =   1. / (IR%XRESA(:,1) * ZAC_AGG(:)) / IP%XPLVTT(:,1)         &
-                  * ( IP%XPLVTT(:,1)*    IMT%XVEG(:,1) *(1.-IR%XPSNV(:,1))                 *DGMI%XHV(:)   &
-                    + IP%XPLVTT(:,1)*(1.-IMT%XVEG(:,1))*(1.-IR%XPSNG(:,1))*(1.-PFROZEN1(:))*DGIP%XHUG(:)  &
-                    + IP%XPLSTT(:,1)*(1.-IMT%XVEG(:,1))*(1.-IR%XPSNG(:,1))*    PFROZEN1(:) *PHUGI(:) &
-                    + IP%XPLSTT(:,1)*                 IR%XPSN(:,1)                            )  
+     ZHU_AGG(:) =   1. / (PEK%XRESA(:) * ZAC_AGG(:)) / PK%XPLVTT(:)         &
+                  * ( PK%XPLVTT(:)*    PEK%XVEG(:) *(1.-PEK%XPSNV(:))                 *DMK%XHV(:)   &
+                    + PK%XPLVTT(:)*(1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:))*(1.-PFROZEN1(:))*DK%XHUG(:)  &
+                    + PK%XPLSTT(:)*(1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:))*    PFROZEN1(:) *PHUGI(:) &
+                    + PK%XPLSTT(:)*                     PEK%XPSN  (:)                )  
    ENDWHERE
 !
    ZUSTAR2_SUM   (:) = ZUSTAR2_SUM   (:) + ZUSTAR2_IC(:)
@@ -490,26 +474,26 @@ ENDDO
 !
 PUSTAR    (:) = SQRT(ZUSTAR2_SUM(:)/ZNSPLIT)
 !
-DGIP%XEVAP     (:) = ZEVAP_SUM     (:) / ZNSPLIT
+DK%XEVAP     (:) = ZEVAP_SUM     (:) / ZNSPLIT
 !
-DGIP%XRN       (:) = ZRN_SUM       (:) / ZNSPLIT
-DGIP%XH        (:) = ZH_SUM        (:) / ZNSPLIT
-DGIP%XGFLUX    (:) = ZGFLUX_SUM    (:) / ZNSPLIT
-IR%XLE       (:,1) = ZLE_SUM       (:) / ZNSPLIT
+DK%XRN       (:) = ZRN_SUM       (:) / ZNSPLIT
+DK%XH        (:) = ZH_SUM        (:) / ZNSPLIT
+DK%XGFLUX    (:) = ZGFLUX_SUM    (:) / ZNSPLIT
+PEK%XLE      (:) = ZLE_SUM       (:) / ZNSPLIT
 !
-DGEIP%XLEG      (:) = ZLEG_SUM      (:) / ZNSPLIT
-DGEIP%XLEGI     (:) = ZLEGI_SUM     (:) / ZNSPLIT
-DGEIP%XLEV      (:) = ZLEV_SUM      (:) / ZNSPLIT
-DGEIP%XLES      (:) = ZLES_SUM      (:) / ZNSPLIT
-DGEIP%XLER      (:) = ZLER_SUM      (:) / ZNSPLIT
-DGEIP%XLETR     (:) = ZLETR_SUM     (:) / ZNSPLIT
-DGEIP%XLE_FLOOD (:) = ZLE_FLOOD_SUM (:) / ZNSPLIT
-DGEIP%XLEI_FLOOD(:) = ZLEI_FLOOD_SUM(:) / ZNSPLIT
+DEK%XLEG      (:) = ZLEG_SUM      (:) / ZNSPLIT
+DEK%XLEGI     (:) = ZLEGI_SUM     (:) / ZNSPLIT
+DEK%XLEV      (:) = ZLEV_SUM      (:) / ZNSPLIT
+DEK%XLES      (:) = ZLES_SUM      (:) / ZNSPLIT
+DEK%XLER      (:) = ZLER_SUM      (:) / ZNSPLIT
+DEK%XLETR     (:) = ZLETR_SUM     (:) / ZNSPLIT
+DEK%XLE_FLOOD (:) = ZLE_FLOOD_SUM (:) / ZNSPLIT
+DEK%XLEI_FLOOD(:) = ZLEI_FLOOD_SUM(:) / ZNSPLIT
 !
 PDEEP_FLUX(:) = ZDEEP_FLUX_SUM(:) / ZNSPLIT
-DGEIP%XMELTADV  (:) = ZMELTADV_SUM  (:) / ZNSPLIT
-DGEIP%XMELT     (:) = ZMELT_SUM     (:) / ZNSPLIT
-DGEIP%XRESTORE  (:) = ZRESTORE_SUM  (:) / ZNSPLIT
+DEK%XMELTADV  (:) = ZMELTADV_SUM  (:) / ZNSPLIT
+DEK%XMELT     (:) = ZMELT_SUM     (:) / ZNSPLIT
+DEK%XRESTORE  (:) = ZRESTORE_SUM  (:) / ZNSPLIT
 PAC_AGG   (:) = ZAC_AGG_SUM   (:) / ZNSPLIT
 PHU_AGG   (:) = ZHU_AGG_SUM   (:) / ZNSPLIT
 !

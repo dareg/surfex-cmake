@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_WATFLUX (DTCO, U, WG, W, HPROGRAM)
+      SUBROUTINE PGD_WATFLUX (DTCO, U, G, W, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_WATFLUX* monitor for averaging and interpolations of WATFLUX physiographic fields
@@ -62,7 +62,7 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(GRID_t), INTENT(INOUT) :: WG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
@@ -96,15 +96,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',0,ZHOOK_HANDLE)
- CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',WG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',G%NDIM)
 !
 ALLOCATE(W%LCOVER     (JPCOVER))
-ALLOCATE(W%XZS        (WG%NDIM))
-ALLOCATE(WG%XLAT       (WG%NDIM))
-ALLOCATE(WG%XLON       (WG%NDIM))
-ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
+ALLOCATE(W%XZS        (G%NDIM))
+ALLOCATE(G%XLAT       (G%NDIM))
+ALLOCATE(G%XLON       (G%NDIM))
+ALLOCATE(G%XMESH_SIZE (G%NDIM))
 !
- CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', WG, W%LCOVER, W%XCOVER, W%XZS )  
+ CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', G, W%LCOVER, W%XCOVER, W%XZS )  
 !
 !-------------------------------------------------------------------------------
 IF (NRANK==NPIO) CALL WRITE_COVER_TEX_WATER

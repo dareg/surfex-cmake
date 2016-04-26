@@ -1,15 +1,12 @@
 !     #########
-    SUBROUTINE GREENROOF (DTCO, TG, T, TOP, DTGD, TIR, DTI, GB, VD, TV,            &
+    SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, DTI, GB, VD, GRO, S, K, P, PEK,    &
                           HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
                           PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
                           PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,     &
                           PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,           &
                           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,&                
-                          PRN_GREENROOF, PH_GREENROOF, PLE_GREENROOF,              &
-                          PGFLUX_GREENROOF, PSFCO2, PEVAP_GREENROOF, PUW_GREENROOF,&
-                          PAC_GREENROOF, PQSAT_GREENROOF, PTS_GREENROOF,           &
-                          PAC_AGG_GREENROOF, PHU_AGG_GREENROOF, PDEEP_FLUX,        &
-                          PRUNOFF_GREENROOF, PDRAIN_GREENROOF, PIRRIG_GREENROOF )  
+                          PRN, PH, PLE, PGFLUX, PSFCO2, PEVAP, PUW, PAC, PQSAT,    &
+                          PTS, PAC_AGG, PHU_AGG, PDEEP_FLUX, PRUNOFF, PDRAIN, PIRRIG )  
 !   ##################################################################################
 !
 !!****  *GREENROOF*  
@@ -65,7 +62,9 @@ USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
 USE MODD_SURFEX_n, ONLY : TEB_VEG_DIAG_t
-USE MODD_TEB_VEG_n, ONLY : TEB_VEG_t
+!
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_AGRI_n, ONLY : AGRI_t, AGRI_INIT
 !
@@ -80,6 +79,7 @@ USE MODI_CARBON_EVOL
 USE MODE_THERMOS
 USE MODI_ROOF_IMPL_COEF
 USE MODI_TEB_IRRIG
+USE MODI_FLAG_TEB_VEG_n
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -91,16 +91,21 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGD
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
 TYPE(TEB_VEG_DIAG_t), INTENT(INOUT) :: VD
-TYPE(TEB_VEG_t), INTENT(INOUT) :: TV
+!
+!
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GRO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_P_t), INTENT(INOUT) :: P
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -134,31 +139,31 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TVEG       ! visible veg tot albe
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TSOIL      ! visible soil tot albedo
 !
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GREENROOF         ! net radiation over greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GREENROOF          ! sensible heat flux over greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GREENROOF         ! latent heat flux over greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX_GREENROOF      ! flux through the greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2                ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP_GREENROOF       ! total evaporation over greenroofs (kg/m2/s)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GREENROOF         ! friction flux (m2/s2)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GREENROOF         ! greenroof aerodynamical conductance
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT_GREENROOF       ! saturation humidity
-REAL, DIMENSION(:)  , INTENT(INOUT) :: PTS_GREENROOF         ! greenroof radiative surface temp. (snow free)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG_GREENROOF     ! aggreg. aeodynamic resistance for greenroofs for latent heat flux
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG_GREENROOF     ! aggreg. relative humidity for greenroofs for latent heat flux
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over greenroofs (kg/m2/s)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC         ! greenroof aerodynamical conductance
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT       ! saturation humidity
+REAL, DIMENSION(:)  , INTENT(INOUT) :: PTS         ! greenroof radiative surface temp. (snow free)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG     ! aggreg. aeodynamic resistance for greenroofs for latent heat flux
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG     ! aggreg. relative humidity for greenroofs for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF_GREENROOF     ! greenroof surface runoff
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN_GREENROOF      ! greenroof total (vertical) drainage
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GREENROOF      ! greenroof summer irrigation rate
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! greenroof surface runoff
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN      ! greenroof total (vertical) drainage
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! greenroof summer irrigation rate
 !
 !
 !*      0.2    Declarations of local variables
 !
-TYPE(SSO_t) :: YGRSS
+TYPE(SSO_t) :: YSS
 TYPE(AGRI_t) :: YAG
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
-REAL, DIMENSION(SIZE(PPS),TV%O%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PPS),GRO%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
 !
 !  temperatures
@@ -194,17 +199,17 @@ ILU = SIZE(PPS)
 !
 ZDIRCOSZW = 1.
 !
- CALL SSO_INIT(YGRSS)
+ CALL SSO_INIT(YSS)
 !
  CALL AGRI_INIT(YAG)
 !
 !* automatic summer irrigation 
 !
-PIRRIG_GREENROOF(:) = 0.
+PIRRIG(:) = 0.
 !
 !* deep soil implicitation with roof
 !
- CALL ROOF_IMPL_COEF(T, PTSTEP, ZTDEEP_A, TV%IP%XTDEEP)
+ CALL ROOF_IMPL_COEF(T, PTSTEP, ZTDEEP_A, K%XTDEEP)
 !
 !-------------------------------------------------------------------------------
 !
@@ -219,55 +224,50 @@ PIRRIG_GREENROOF(:) = 0.
 !
 !* irrigation automatique de type goutte à goutte (arrosage du sol seulement)
 !
-CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
+CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN,         &
                TIR%XGR_START_MONTH, TIR%XGR_END_MONTH, TIR%XGR_START_HOUR,   &
-               TIR%XGR_END_HOUR, TIR%XGR_24H_IRRIG, PIRRIG_GREENROOF     )
+               TIR%XGR_END_HOUR, TIR%XGR_24H_IRRIG, PIRRIG     )
 !
 ! --------------------------------------------------------------------------------------
 ! Vegetation update (in case of non-interactive vegetation):
 ! --------------------------------------------------------------------------------------
 !
-TV%I%TTIME = TPTIME
-TV%O%LECOCLIMAP = (.NOT. TV%O%LPAR)
+S%TTIME = TPTIME
 !
 GUPDATED=.FALSE.
 GALB = .FALSE. 
-!print*,TV%O%CPHOTO,TV%M%T%CUR%XLAI(1,1)
-IF (TV%O%CPHOTO=='LAI'.OR.TV%O%CPHOTO=='LST'.OR.TV%O%CPHOTO=='NIT'.OR.TV%O%CPHOTO=='NCB') GALB = .TRUE.
+IF (GRO%CPHOTO=='LAI'.OR.GRO%CPHOTO=='LST'.OR.GRO%CPHOTO=='NIT'.OR.GRO%CPHOTO=='NCB') GALB = .TRUE.
 !
-CALL VEGETATION_UPDATE(DTCO, DTI, TG%NDIM, TV%O, TV%M%T%CUR, TV%M%M, TV%M%I, TV%M%A, &
-                       PTSTEP, TV%I%TTIME, TOP%XCOVER, TOP%LCOVER, .FALSE.,'GNR',  &
-                       GALB, YGRSS, GUPDATED, OABSENT=(T%XGREENROOF==0.)     )
+  CALL VEGETATION_UPDATE(DTCO, DTI, G%NDIM, GRO, K, P, PEK, 1,              &
+                         PTSTEP, S%TTIME, TOP%XCOVER, TOP%LCOVER,  .FALSE., &
+                         'GNR', GALB, YSS, GUPDATED, OABSENT=(T%XGREENROOF==0.)  )
 !
-!print*,'update',TV%M%T%CUR%XLAI(1,1)
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
 !
-VD%DP%XZ0(:) = TV%M%T%CUR%XZ0(:,1)
-VD%DP%XZ0H(:) = TV%M%T%CUR%XZ0(:,1) / TV%M%X%XZ0_O_Z0H(:,1)
+VD%DP%XZ0(:) = PEK%XZ0(:)
+VD%DP%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
 !
-VD%DP%XZ0EFF(:) =  TV%M%T%CUR%XZ0(:,1)
+VD%DP%XZ0EFF(:) =  PEK%XZ0(:)
 !
-ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(TV%IP%XABC),1))
+ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
- CALL ISBA(TV%O, TV%M%X, TV%M%T%CUR, TV%M%M, TV%M%I, TV%P, TV%IP, TV%I, TV%R%CUR, &
-           TG, YAG, VD%D, VD%DP, VD%E, VD%EP, VD%M, TV%R%CUR%TSNOW%SCHEME, TPTIME,&
-           TV%IP%XPOI, TV%IP%XABC, GB%XIACAN(:,:,1), .FALSE., PTSTEP,             &
+ CALL ISBA(GRO, K, P, PEK, G, YAG, VD%DP, VD%DEP, VD%DM,                          &
+           TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,                    &
            HIMPLICIT_WIND, PZREF, PUREF, ZDIRCOSZW, PTA, PQA, PEXNA, PRHOA, PPS,  &
-           PEXNS,  PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF,&
+           PEXNS, PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF, &
            PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
            PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, ZPALPHAN,    &
            ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN,         &
-           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, TV%I%XFFG(:,1), TV%I%XFFV(:,1),&
-           ZEMISF, ZUSTAR, PAC_AGG_GREENROOF, PHU_AGG_GREENROOF,                  &
-           ZRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG_GREENROOF )
+           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
+           ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG )
 !
-PTS_GREENROOF(:) = VD%DP%XTSRAD(:)
-PRUNOFF_GREENROOF(:) = VD%EP%XRUNOFF(:)
-PDRAIN_GREENROOF (:) = VD%EP%XDRAIN(:)
+PTS(:) = VD%DP%XTSRAD(:)
 !
-IF (TV%R%CUR%TSNOW%SCHEME=='3-L' .OR. TV%R%CUR%TSNOW%SCHEME=='CRO') &
-        TV%R%CUR%TSNOW%TS(:,1) = VD%M%XSNOWTEMP(:,1)
+PRUNOFF(:) = VD%DEP%XRUNOFF(:)
+PDRAIN (:) = VD%DEP%XDRAIN(:)
+!
+IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:) = VD%DM%XSNOWTEMP(:,1)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
@@ -277,57 +277,78 @@ IF (TV%R%CUR%TSNOW%SCHEME=='3-L' .OR. TV%R%CUR%TSNOW%SCHEME=='CRO') &
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !
-IF (TV%O%CPHOTO=='LAI' .OR. TV%O%CPHOTO=='LST' .OR. TV%O%CPHOTO=='NIT') THEN
-        !print*,'LAI evol ',TV%M%T%CUR%XLAI(1,1)
-  CALL VEGETATION_EVOL(TV%O, TV%IP, TV%M%X, TV%M%T%CUR, TV%M%A, TV%M%I, TV%R%CUR, &
-                       .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY,     &
-                       TPTIME%TIME, TG%XLAT, PRHOA, PCO2, YGRSS, ZRESP_BIOMASS_INST )
-        !print*,'LAI evol2 ',TV%M%T%CUR%XLAI(1,1)        
+IF (GRO%CPHOTO=='LAI' .OR. GRO%CPHOTO=='LST' .OR. GRO%CPHOTO=='NIT') THEN
+  CALL VEGETATION_EVOL(GRO, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, &
+                       TPTIME%TIME, G%XLAT, PRHOA, PCO2, YSS, ZRESP_BIOMASS_INST )          
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 PSFCO2    (:)=0.
-VD%EP%XRESP_ECO (:)=0.
-VD%EP%XRESP_AUTO(:)=0.
+VD%DEP%XRESP_ECO (:)=0.
+VD%DEP%XRESP_AUTO(:)=0.
 !
-!
-IF (TV%O%CPHOTO/='NON' .AND. TV%O%CRESPSL/='NON' .AND. ANY(TV%M%T%CUR%XLAI(:,1)/=XUNDEF)) THEN
+IF (GRO%CPHOTO/='NON' .AND. GRO%CRESPSL/='NON' .AND. ANY(PEK%XLAI(:)/=XUNDEF)) THEN
   ! faire intervenir le type de vegetation du greenroof ? (CTYP_GR)
-  CALL CARBON_EVOL(TV%O, TV%P, TV%IP, TV%M%X, TV%M%T%CUR, TV%R%CUR, VD%EP, &
-                   PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
+  CALL CARBON_EVOL(GRO, K, P, PEK, VD%DEP, PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
   ! calculation of vegetation CO2 flux
   ! Positive toward the atmosphere
-  PSFCO2(:) = VD%EP%XRESP_ECO(:) - VD%EP%XGPP(:)
+  PSFCO2(:) = VD%DEP%XRESP_ECO(:) - VD%DEP%XGPP(:)
 END IF
+!
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!
+!*      4.     Set undefined values for points where there is no garden
+!              --------------------------------------------------------
+!
+! This way, these points are clearly flaged, and one will not try to interpret
+! the values for those points
+!
+ CALL FLAG_TEB_VEG_n(PEK, GRO, T%XGREENROOF, 2)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 !*      9.     Fields required for TEB
 !              -----------------------
 !
-! energy balance
+WHERE (T%XGREENROOF/=0.)
+  !
+  ! energy balance
+  !
+  PRN    (:) = VD%DP%XRN    (:)
+  PH     (:) = VD%DP%XH     (:)
+  PLE    (:) = PEK%XLE      (:)
+  PGFLUX (:) = VD%DP%XGFLUX (:)
+  PEVAP  (:) = VD%DP%XEVAP  (:)
+  !
+  !
+  ! Estimate of green area aerodynamic conductance recomputed from heat flux,
+  ! surface (radiative) temp. and forcing air temperature (estimated at future time step)
+  ZTA = PPET_B_COEF + PPET_A_COEF * PH
+  PAC = 0.
+  WHERE (PTS /= ZTA)
+    PAC(:)   = MAX(PH(:) / XCPD / PRHOA(:) / (PTS - ZTA) , 0.)
+  ENDWHERE
+  !
+  ! Humidity of saturation for green areas
+  PQSAT(:) = QSAT(PEK%XTG(:,1),PPS(:))
+  !
+  !* friction flux
+  PUW(:)    = -ZUSTAR(:)**2
+  !
+ELSEWHERE
+  !
+  PRN    (:) = XUNDEF
+  PH     (:) = XUNDEF
+  PLE    (:) = XUNDEF
+  PGFLUX (:) = XUNDEF
+  PEVAP  (:) = XUNDEF
+  PAC    (:) = XUNDEF
+  PQSAT  (:) = XUNDEF
+  PUW    (:) = XUNDEF  
+  !
+END WHERE
 !
- PRN_GREENROOF    (:) = VD%DP%XRN    (:)
- PH_GREENROOF     (:) = VD%DP%XH     (:)
- PLE_GREENROOF    (:) = TV%R%CUR%XLE (:,1)
- PGFLUX_GREENROOF (:) = VD%DP%XGFLUX (:)
- PEVAP_GREENROOF  (:) = VD%DP%XEVAP  (:)
-!
-!
-! Estimate of green area aerodynamic conductance recomputed from heat flux,
-! surface (radiative) temp. and forcing air temperature (estimated at future time step)
- ZTA = PPET_B_COEF + PPET_A_COEF * PH_GREENROOF
- PAC_GREENROOF = 0.
- WHERE (PTS_GREENROOF /= ZTA)
-   PAC_GREENROOF(:)   = MAX(PH_GREENROOF(:) / XCPD / PRHOA(:) / (PTS_GREENROOF - ZTA) , 0.)
- ENDWHERE
-!
-! Humidity of saturation for green areas
- PQSAT_GREENROOF(:) = QSAT(TV%R%CUR%XTG(:,1,1),PPS(:))
-!
-!* friction flux
-  PUW_GREENROOF(:)    = -ZUSTAR(:)**2
 IF (LHOOK) CALL DR_HOOK('GREENROOF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

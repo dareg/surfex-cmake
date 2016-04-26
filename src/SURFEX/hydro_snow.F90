@@ -119,7 +119,7 @@ ZANSMAX(:)    = XANSMAX
 !*       2.     Fields at time t-dt
 !               -------------------
 !
-ZSNOWSWEM (:) = TPSNOW%WSNOW(:,1,1)    
+ZSNOWSWEM (:) = TPSNOW%WSNOW(:,1)    
 !
 !*       3.     EVOLUTION OF THE SNOWPACK ('DEF' OPTION)
 !               ----------------------------------------
@@ -129,7 +129,7 @@ ZSNOWSWEM (:) = TPSNOW%WSNOW(:,1,1)
 !
 !                                           evolution of Ws (without melting)
 !
-TPSNOW%WSNOW(:,1,1) = ZSNOWSWEM(:) + PTSTEP * ( PSR(:) - PLES(:)/XLSTT - PMELT(:))
+TPSNOW%WSNOW(:,1) = ZSNOWSWEM(:) + PTSTEP * ( PSR(:) - PLES(:)/XLSTT - PMELT(:))
 !
 !                                           melting of snow: more liquid water
 !                                                            reaches the surface
@@ -138,7 +138,7 @@ PPG_MELT(:)     = PPG_MELT(:) + PMELT(:)
 !   
 ! removes very small values due to computation precision
 !
-WHERE(TPSNOW%WSNOW(:,1,1) < 1.0E-10) TPSNOW%WSNOW(:,1,1) = 0.
+WHERE(TPSNOW%WSNOW(:,1) < 1.0E-10) TPSNOW%WSNOW(:,1) = 0.
 !
 !-------------------------------------------------------------------------------
 !
@@ -155,29 +155,29 @@ ENDIF
 !                                       the evolution of the snow albedo differs
 !                                       if there is melting or not
 !
-WHERE (TPSNOW%WSNOW(:,1,1) > 0.0 )
+WHERE (TPSNOW%WSNOW(:,1) > 0.0 )
   !
   WHERE ( ZSNOWSWEM > 0.0)
     !
     ! when there is melting 
     WHERE ( PMELT > 0.0 )
-      TPSNOW%ALB(:,1) = (TPSNOW%ALB(:,1)-ZANSMIN(:))*EXP(-XANS_T*PTSTEP/XDAY) + ZANSMIN(:) &
+      TPSNOW%ALB(:) = (TPSNOW%ALB(:)-ZANSMIN(:))*EXP(-XANS_T*PTSTEP/XDAY) + ZANSMIN(:) &
                        + PSR(:)*PTSTEP/XWCRN*(ZANSMAX(:)-ZANSMIN(:))  
       ! when there is no melting
     ELSEWHERE 
-      TPSNOW%ALB(:,1) = TPSNOW%ALB(:,1) - XANS_TODRY*PTSTEP/XDAY   &
+      TPSNOW%ALB(:) = TPSNOW%ALB(:) - XANS_TODRY*PTSTEP/XDAY   &
                        + PSR(:)*PTSTEP/XWCRN*(ZANSMAX(:)-ZANSMIN(:))  
     END WHERE
     !
   ELSEWHERE (ZSNOWSWEM == 0.0)
     !
     ! new snow covered surface
-    TPSNOW%ALB(:,1) = ZANSMAX(:)
+    TPSNOW%ALB(:) = ZANSMAX(:)
   END WHERE
   !
   ! limits of the albedo
-  TPSNOW%ALB(:,1) = MIN( ZANSMAX(:), TPSNOW%ALB(:,1) )
-  TPSNOW%ALB(:,1) = MAX( ZANSMIN(:), TPSNOW%ALB(:,1) )
+  TPSNOW%ALB(:) = MIN( ZANSMAX(:), TPSNOW%ALB(:) )
+  TPSNOW%ALB(:) = MAX( ZANSMIN(:), TPSNOW%ALB(:) )
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -189,14 +189,14 @@ END WHERE
 !                                      evolution will depend whether or not
 !                                      the snow is melting
 !
-WHERE ( TPSNOW%WSNOW(:,1,1) > 0.0 ) 
+WHERE ( TPSNOW%WSNOW(:,1) > 0.0 ) 
   WHERE ( ZSNOWSWEM > 0.0 ) 
-    ZWSX(:)     = MAX( TPSNOW%WSNOW(:,1,1),PSR(:)*PTSTEP)
-    TPSNOW%RHO(:,1,1) = (TPSNOW%RHO(:,1,1)-XRHOSMAX)*EXP(-XANS_T*PTSTEP/XDAY) + XRHOSMAX
-    TPSNOW%RHO(:,1,1) = ( (ZWSX(:)-PSR(:)*PTSTEP) * TPSNOW%RHO(:,1,1)     &
+    ZWSX(:)     = MAX( TPSNOW%WSNOW(:,1),PSR(:)*PTSTEP)
+    TPSNOW%RHO(:,1) = (TPSNOW%RHO(:,1)-XRHOSMAX)*EXP(-XANS_T*PTSTEP/XDAY) + XRHOSMAX
+    TPSNOW%RHO(:,1) = ( (ZWSX(:)-PSR(:)*PTSTEP) * TPSNOW%RHO(:,1)     &
                          + (PSR(:)*PTSTEP) * XRHOSMIN ) / ZWSX(:)  
   ELSEWHERE ( ZSNOWSWEM == 0.0) 
-    TPSNOW%RHO(:,1,1) = XRHOSMIN
+    TPSNOW%RHO(:,1) = XRHOSMIN
   END WHERE
 END WHERE
 !
@@ -205,9 +205,9 @@ END WHERE
 !*       4.     No SNOW
 !               -------
 !
-WHERE ( TPSNOW%WSNOW(:,1,1) == 0.0 ) 
-  TPSNOW%RHO(:,1,1) = XUNDEF 
-  TPSNOW%ALB(:,1) = XUNDEF 
+WHERE ( TPSNOW%WSNOW(:,1) == 0.0 ) 
+  TPSNOW%RHO(:,1) = XUNDEF 
+  TPSNOW%ALB(:) = XUNDEF 
 END WHERE
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO_SNOW',1,ZHOOK_HANDLE)

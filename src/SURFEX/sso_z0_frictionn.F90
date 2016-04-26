@@ -125,15 +125,15 @@ IF (USS%CROUGH=="Z04D") THEN
             ZCOS2(II) = COS(ZALFA(II))**2
             !
             IF (ZALFA(II)<0.) THEN
-               ZZ0EFF(II)=USS%XZ0EFFIM(II,1)*ZSIN2(II)
+               ZZ0EFF(II)=USS%XZ0EFFIM(II)*ZSIN2(II)
             ELSE
-               ZZ0EFF(II)=USS%XZ0EFFIP(II,1)*ZSIN2(II)
+               ZZ0EFF(II)=USS%XZ0EFFIP(II)*ZSIN2(II)
             END IF
             !
             IF (ZALFA(II)>=-XPI/2. .AND. ZALFA(II)<XPI/2.) THEN
-               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJP(II,1)*ZCOS2(II)
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJP(II)*ZCOS2(II)
             ELSE
-               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJM(II,1)*ZCOS2(II)
+               ZZ0EFF(II) = ZZ0EFF(II) + USS%XZ0EFFJM(II)*ZCOS2(II)
             END IF
             !
          END IF

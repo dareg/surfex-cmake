@@ -1,7 +1,7 @@
 !     #########
     SUBROUTINE Z0EFF (HSNOW_SCHEME, &
                       HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
-                      PPALPHAN,PZ0LITTER, PWSNOW, MSS,PFF,PZ0_FLOOD,        &
+                      PPALPHAN,PZ0LITTER, PWSNOW, ISS, PFF, PZ0_FLOOD,           &
                       PZ0_O_Z0H, PZ0_WITH_SNOW, PZ0H_WITH_SNOW,PZ0EFF,          &
                       PZ0G_WITHOUT_SNOW,                                        &
                       PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                           &
@@ -90,7 +90,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZ0            ! vegetation roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0REL         ! 1d orographic roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PPSN           ! fraction of snow
 REAL, DIMENSION(:), INTENT(IN)  :: PPALPHAN       ! snow/canopy transition coefficient
-TYPE(SSO_t), INTENT(INOUT) :: MSS
+TYPE(SSO_t), INTENT(INOUT) :: ISS
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0_O_Z0H      ! ratio between heat and momentum z0
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PFF            ! fraction of flood
@@ -254,40 +254,34 @@ ENDIF
 !                                     Snow and Flood effects are yet taken
 !                                     into account through ZZ0EFF
 !
-!print*,HROUGH
 IF (HROUGH=='Z04D') THEN
 !
 ! For multi-energy balance (MEB): the HROUGH=='Z04D' option is not considered yet!
   !
-  ZZ0EFFIP(:) = MSS%XZ0EFFIP(:,1)
-  ZZ0EFFIM(:) = MSS%XZ0EFFIM(:,1)
-  ZZ0EFFJP(:) = MSS%XZ0EFFJP(:,1)
-  ZZ0EFFJM(:) = MSS%XZ0EFFJM(:,1)
+  ZZ0EFFIP(:) = ISS%XZ0EFFIP(:)
+  ZZ0EFFIM(:) = ISS%XZ0EFFIM(:)
+  ZZ0EFFJP(:) = ISS%XZ0EFFJP(:)
+  ZZ0EFFJM(:) = ISS%XZ0EFFJM(:)
   !
-  CALL SUBSCALE_Z0EFF(MSS,SPREAD(PZ0_WITH_SNOW,2,1),.FALSE.,OMASK=(PPSN>0..OR.PFF(:)>0.)   )  
+  CALL SUBSCALE_Z0EFF(ISS,PZ0_WITH_SNOW,.FALSE.,OMASK=(PPSN>0..OR.PFF(:)>0.)   )  
   !
-  !print*,'ALFA ',ZALFA(1)
-  !print*,'Z0EFFIP ',MSS%XZ0EFFIP(1,1)
-  !print*,'Z0EFFJP ',MSS%XZ0EFFJP(1,1)
-  !print*,'Z0EFFJM ',MSS%XZ0EFFJM(1,1)
-  !print*,'Z0EFFIM ',MSS%XZ0EFFIM(1,1)
   WHERE(ZALFA(:)>=0. .AND. ZALFA(:)<XPI/2.)
-    PZ0EFF(:)=MSS%XZ0EFFIP(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJP(:,1)*COS(ZALFA(:))**2
+    PZ0EFF(:)=ISS%XZ0EFFIP(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJP(:)*COS(ZALFA(:))**2
   END WHERE
   WHERE(ZALFA(:)>=XPI/2. .AND. ZALFA(:)<=XPI)
-    PZ0EFF(:)=MSS%XZ0EFFIP(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJM(:,1)*COS(ZALFA(:))**2
+    PZ0EFF(:)=ISS%XZ0EFFIP(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJM(:)*COS(ZALFA(:))**2
   END WHERE
   WHERE (ZALFA(:)>=-XPI/2 .AND. ZALFA(:)<0.)
-    PZ0EFF(:)=MSS%XZ0EFFIM(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJP(:,1)*COS(ZALFA(:))**2
+    PZ0EFF(:)=ISS%XZ0EFFIM(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJP(:)*COS(ZALFA(:))**2
   END WHERE
   WHERE (ZALFA(:)>=-XPI .AND. ZALFA(:)<-XPI/2.)
-    PZ0EFF(:)=MSS%XZ0EFFIM(:,1)*SIN(ZALFA(:))**2 + MSS%XZ0EFFJM(:,1)*COS(ZALFA(:))**2
+    PZ0EFF(:)=ISS%XZ0EFFIM(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJM(:)*COS(ZALFA(:))**2
   END WHERE
   !
-  MSS%XZ0EFFIP(:,1) = ZZ0EFFIP(:)
-  MSS%XZ0EFFIM(:,1) = ZZ0EFFIM(:)
-  MSS%XZ0EFFJP(:,1) = ZZ0EFFJP(:)
-  MSS%XZ0EFFJM(:,1) = ZZ0EFFJM(:)
+  ISS%XZ0EFFIP(:) = ZZ0EFFIP(:)
+  ISS%XZ0EFFIM(:) = ZZ0EFFIM(:)
+  ISS%XZ0EFFJP(:) = ZZ0EFFJP(:)
+  ISS%XZ0EFFJM(:) = ZZ0EFFJM(:)
   !
 ELSE IF (HROUGH=='Z01D') THEN
   PZ0EFF(:) = PZ0_WITH_SNOW(:) + PZ0REL(:)
@@ -311,7 +305,6 @@ ELSE
     PZ0EFF_MEBN(:) = PZ0_MEBN(:)
   ENDIF
 END IF
-!print*,'z0eff ',PZ0EFF(1)
 IF (LHOOK) CALL DR_HOOK('Z0EFF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

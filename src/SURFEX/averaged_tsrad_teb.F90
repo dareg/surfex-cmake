@@ -127,8 +127,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGED_TSRAD_TEB',0,ZHOOK_HANDLE)
 GMASK(:) = .FALSE.
- CALL SNOW_FRAC_ROAD(T%TSNOW_ROAD%WSNOW(:,1,1),GMASK,ZDN_ROAD,ZDF_ROAD)
- CALL SNOW_FRAC_ROOF(T%TSNOW_ROOF%WSNOW(:,1,1),GMASK,ZDN_ROOF,ZDF_ROOF)
+ CALL SNOW_FRAC_ROAD(T%TSNOW_ROAD%WSNOW(:,1),GMASK,ZDN_ROAD,ZDF_ROAD)
+ CALL SNOW_FRAC_ROOF(T%TSNOW_ROOF%WSNOW(:,1),GMASK,ZDN_ROOF,ZDF_ROOF)
 !
 ! fixed incoming LW (W/m2)
 ZLW_RAD(:)= XSTEFAN * (T%XT_ROAD(:,1) ** 4)
@@ -137,11 +137,11 @@ ZLW_RAD(:)= XSTEFAN * (T%XT_ROAD(:,1) ** 4)
 ZABS_LW_ROOF(:) = T%XEMIS_ROOF(:) * (ZLW_RAD(:) - XSTEFAN * T%XT_ROOF(:,1)**4)
 !
 !* LW absorbed by snow on roof
-ZABS_LW_SNOW_ROOF(:) = T%TSNOW_ROOF%EMIS(:,1) * (ZLW_RAD(:) - XSTEFAN * T%TSNOW_ROOF%TS(:,1)**4)
+ZABS_LW_SNOW_ROOF(:) = T%TSNOW_ROOF%EMIS(:) * (ZLW_RAD(:) - XSTEFAN * T%TSNOW_ROOF%TS(:)**4)
 !
 !* town averaged emissivity
 PEMIS(:) = T%XBLD(:) * (1.-T%XGREENROOF(:)) * (ZDF_ROOF(:)*T%XEMIS_ROOF     (:)    &
-                                       + ZDN_ROOF(:)*T%TSNOW_ROOF%EMIS(:,1)) &
+                                       + ZDN_ROOF(:)*T%TSNOW_ROOF%EMIS(:)) &
          + T%XBLD(:) *     T%XGREENROOF(:)  *              PEMIS_GREENROOF(:)
 
 !
@@ -170,7 +170,7 @@ PEMIS(:) = T%XBLD(:) * (1.-T%XGREENROOF(:)) * (ZDF_ROOF(:)*T%XEMIS_ROOF     (:) 
    !
    PEMIS(:) =  PEMIS(:)                                                      &
               + T%XROAD(:)*T%XSVF_ROAD(:)* (ZDF_ROAD(:)* T%XEMIS_ROAD(:)     &
-                                      + ZDN_ROAD(:)* T%TSNOW_ROAD%EMIS(:,1)) &
+                                      + ZDN_ROAD(:)* T%TSNOW_ROAD%EMIS(:)) &
               + T%XWALL_O_HOR(:)       * T%XSVF_WALL(:)   * T%XEMIS_WALL(:)  &
               + T%XGARDEN(:)           * T%XSVF_GARDEN(:) * PEMIS_GARDEN(:)
    
@@ -195,10 +195,10 @@ PEMIS(:) = T%XBLD(:) * (1.-T%XGREENROOF(:)) * (ZDF_ROOF(:)*T%XEMIS_ROOF     (:) 
    
    !
    !* LW absorbed by snow on road
-   ZABS_LW_SNOW_ROAD(:) =  ZLW_S_TO_R   (:) * (ZT_SKY(:)        - T%TSNOW_ROAD%TS(:,1)) &
-                         + ZLW_WA_TO_NR (:) * (T%XT_WALL_A(:,1) - T%TSNOW_ROAD%TS(:,1)) &
-                         + ZLW_WB_TO_NR (:) * (T%XT_WALL_B(:,1) - T%TSNOW_ROAD%TS(:,1)) &
-                         + ZLW_WIN_TO_NR(:) * (B%XT_WIN1(:)     - T%TSNOW_ROAD%TS(:,1))
+   ZABS_LW_SNOW_ROAD(:) =  ZLW_S_TO_R   (:) * (ZT_SKY(:)        - T%TSNOW_ROAD%TS(:)) &
+                         + ZLW_WA_TO_NR (:) * (T%XT_WALL_A(:,1) - T%TSNOW_ROAD%TS(:)) &
+                         + ZLW_WB_TO_NR (:) * (T%XT_WALL_B(:,1) - T%TSNOW_ROAD%TS(:)) &
+                         + ZLW_WIN_TO_NR(:) * (B%XT_WIN1(:)     - T%TSNOW_ROAD%TS(:))
    !
    !* LW absorbed by gardens
    ZABS_LW_GARDEN(:) =  ZLW_S_TO_G  (:)*(ZT_SKY       (:)-PTS_GARDEN(:)) &

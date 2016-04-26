@@ -1,5 +1,5 @@
 !   ############################################################################
-SUBROUTINE SNOW_LOAD_MEB(IR, DGEIP, PTSTEP, PSR, PWRVNMAX, PKVN, PCHEATV, PMELTVN, &
+SUBROUTINE SNOW_LOAD_MEB(PEK, DEK, PTSTEP, PSR, PWRVNMAX, PKVN, PCHEATV, PMELTVN, &
                          PVELC, PSUBVCOR)
 !   ############################################################################
 !
@@ -41,7 +41,7 @@ SUBROUTINE SNOW_LOAD_MEB(IR, DGEIP, PTSTEP, PSR, PWRVNMAX, PKVN, PCHEATV, PMELTV
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 !
 USE MODD_CSTS,     ONLY : XTT, XLMTT, XLVTT, XLSTT
@@ -55,8 +55,8 @@ IMPLICIT NONE
 !
 !*      0.1    Declaration of Arguments
 !
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIP
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 !
 REAL,               INTENT(IN)    :: PTSTEP
 !
@@ -98,13 +98,13 @@ ZUNLOAD(:)     = 0.0
 !
 WHERE(PWRVNMAX(:) == 0.0)
 !
-   DGEIP%XSR_GN(:) = IR%XWR(:,1)/PTSTEP    ! kg m-2 s-1
-   IR%XWR(:,1)       = 0.0
+   DEK%XSR_GN(:) = PEK%XWR(:)/PTSTEP    ! kg m-2 s-1
+   PEK%XWR(:)       = 0.0
 
 ! for a totally buried canopy, the following are zero:
 
-   DGEIP%XMELTCV(:)     = 0.0
-   DGEIP%XFRZCV(:)      = 0.0
+   DEK%XMELTCV(:)     = 0.0
+   DEK%XFRZCV(:)      = 0.0
    PSUBVCOR(:)    = 0.0
 !
 !
@@ -118,26 +118,26 @@ ELSEWHERE
 !
 ! Interception: gain
 
-   ZSRINT(:)      = MAX(0.0,PWRVNMAX(:)-IR%XWR(:,1))*(1.0-EXP(-PKVN(:)*PSR(:)*PTSTEP)) ! kg m-2
+   ZSRINT(:)      = MAX(0.0,PWRVNMAX(:)-PEK%XWR(:))*(1.0-EXP(-PKVN(:)*PSR(:)*PTSTEP)) ! kg m-2
    ZSRINT(:)      = MIN(PSR(:)*PTSTEP, ZSRINT(:))  ! kg m-2 
-   ZWRVN(:)       = IR%XWR(:,1) + ZSRINT(:)           ! kg m-2 
+   ZWRVN(:)       = PEK%XWR(:) + ZSRINT(:)           ! kg m-2 
 
-   DGEIP%XSR_GN(:) = MAX(0.0, PSR(:) - ZSRINT(:)/PTSTEP) ! kg m-2 s-1
+   DEK%XSR_GN(:) = MAX(0.0, PSR(:) - ZSRINT(:)/PTSTEP) ! kg m-2 s-1
 
 ! Sublimation: gain or loss
 ! NOTE for the rare case that sublimation exceeds snow mass (possible as traces of snow disappear)
 ! compute a mass correction to be removed from soil (to conserve mass): PSUBVCOR
 
-   ZSUB(:)        = DGEIP%XLESC(:)*(PTSTEP/XLSTT)              ! kg m-2
+   ZSUB(:)        = DEK%XLESC(:)*(PTSTEP/XLSTT)              ! kg m-2
    PSUBVCOR(:)    = MAX(0.0, ZSUB(:) - ZWRVN(:))/PTSTEP  ! kg m-2 s-1
    ZWRVN(:)       = MAX(0.0, ZWRVN(:) - ZSUB(:))         ! kg m-2
 
 ! Phase change: loss (melt of snow mass)
 
-   DGEIP%XMELTCV(:)     = PTSTEP*MAX(0.0, PMELTVN(:))         ! kg m-2  
-   DGEIP%XMELTCV(:)     = MIN(DGEIP%XMELTCV(:), ZWRVN(:))
-   ZWRVN(:)       = ZWRVN(:) - DGEIP%XMELTCV(:)
-   IR%XWR(:,1)        = IR%XWR(:,1)  + DGEIP%XMELTCV(:)               ! NOTE...liq reservoir can exceed maximum holding
+   DEK%XMELTCV(:)     = PTSTEP*MAX(0.0, PMELTVN(:))         ! kg m-2  
+   DEK%XMELTCV(:)     = MIN(DEK%XMELTCV(:), ZWRVN(:))
+   ZWRVN(:)       = ZWRVN(:) - DEK%XMELTCV(:)
+   PEK%XWR(:)        = PEK%XWR(:)  + DEK%XMELTCV(:)               ! NOTE...liq reservoir can exceed maximum holding
                                                         !        capacity here, but this is accounted for
                                                         !        in main prognostic PWRV routine.
 
@@ -146,30 +146,30 @@ ELSEWHERE
 ! estimation of water for freezing:
 ! Also, update liquid water stored on the canopy here:
 
-   DGEIP%XFRZCV(:)      = PTSTEP*MAX(0.0, -PMELTVN(:))        ! kg m-2  
-   DGEIP%XFRZCV(:)      = MIN(DGEIP%XFRZCV(:), MAX(0.0,IR%XWR(:,1)-DGEIP%XLERCV(:)*(PTSTEP/XLVTT)))
-   ZWRVN(:)       = ZWRVN(:) + DGEIP%XFRZCV(:)
-   IR%XWR(:,1)        = IR%XWR(:,1)  - DGEIP%XFRZCV(:)
+   DEK%XFRZCV(:)      = PTSTEP*MAX(0.0, -PMELTVN(:))        ! kg m-2  
+   DEK%XFRZCV(:)      = MIN(DEK%XFRZCV(:), MAX(0.0,PEK%XWR(:)-DEK%XLERCV(:)*(PTSTEP/XLVTT)))
+   ZWRVN(:)       = ZWRVN(:) + DEK%XFRZCV(:)
+   PEK%XWR(:)        = PEK%XWR(:)  - DEK%XFRZCV(:)
 
 ! Unloading (falling off branches, etc...): loss
 ! Note, the temperature effect is assumed to vanish for cold temperatures.
 
-   ZUNLOAD(:)     = MIN(ZWRVN(:), IR%XWR(:,1)*( PVELC(:)*(PTSTEP/ZUNLOAD_V)          &
-                     + MAX(0.0, IR%XTV(:,1)-ZUNLOAD_TT)*(PTSTEP/ZUNLOAD_T) ))            ! kg m-2 
+   ZUNLOAD(:)     = MIN(ZWRVN(:), PEK%XWR(:)*( PVELC(:)*(PTSTEP/ZUNLOAD_V)          &
+                     + MAX(0.0, PEK%XTV(:)-ZUNLOAD_TT)*(PTSTEP/ZUNLOAD_T) ))            ! kg m-2 
    ZWRVN(:)       = ZWRVN(:) - ZUNLOAD(:)                                           ! kg m-2 
-   DGEIP%XSR_GN(:) = DGEIP%XSR_GN(:) + ZUNLOAD(:)/PTSTEP
+   DEK%XSR_GN(:) = DEK%XSR_GN(:) + ZUNLOAD(:)/PTSTEP
 
 ! Diagnostic updates:
 ! final phase change (units)
 
-   DGEIP%XMELTCV(:)     = DGEIP%XMELTCV(:)/PTSTEP ! kg m-2 s-1
-   DGEIP%XFRZCV(:)      = DGEIP%XFRZCV(:) /PTSTEP ! kg m-2 s-1
+   DEK%XMELTCV(:)     = DEK%XMELTCV(:)/PTSTEP ! kg m-2 s-1
+   DEK%XFRZCV(:)      = DEK%XFRZCV(:) /PTSTEP ! kg m-2 s-1
 
 ! Prognostic Updates:
 
-   IR%XWR(:,1)       = ZWRVN(:)
+   PEK%XWR(:)       = ZWRVN(:)
 
-   IR%XTV(:,1)         = IR%XTV(:,1) + (DGEIP%XFRZCV(:) - DGEIP%XMELTCV(:))*(XLMTT*PTSTEP)/PCHEATV(:) ! K
+   PEK%XTV(:)         = PEK%XTV(:) + (DEK%XFRZCV(:) - DEK%XMELTCV(:))*(XLMTT*PTSTEP)/PCHEATV(:) ! K
 
 END WHERE
 !

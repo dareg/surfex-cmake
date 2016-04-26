@@ -87,7 +87,6 @@ ZSNOWSWE(:) = 0.
 DO JLAYER=1,SIZE(PWSNOW,2)
   ZSNOWSWE(:) = ZSNOWSWE(:) + PWSNOW(:,JLAYER)
 END DO
-!if (size(pwsnow,1)>31) print*,'SNOWSWE ',ZSNOWSWE(32)
 !
 IF (HSNOW == '3-L' .OR. HSNOW == 'CRO') THEN                  
    ZSNOWD  (:) = 0.
@@ -99,7 +98,6 @@ IF (HSNOW == '3-L' .OR. HSNOW == 'CRO') THEN
 ELSE
    ZSNOWRHO(:) = PRSNOW(:,1)
 END IF
-!if (size(pwsnow,1)>31) print*,'SNOWD ',ZSNOWD(32)
 !
 !*      2.     Snow fraction over ground
 !              -------------------------
@@ -113,8 +111,6 @@ ENDIF
 !*      3.     Snow fraction over vegetation
 !              -----------------------------
 !
-!if (size(pwsnow,1)>31) print*,'Z0 ',PZ0(32)
-!if (size(pwsnow,1)>31) print*,'SNOWRHO ',ZSNOWRHO(32)
 IF (HSNOW == 'EBA' ) THEN
    PPSNV_A(:) = SNOW_FRAC_VEG_A (PPSNG,PLAI,PASNOW)
    PPSNV  (:) = PPSNV_A(:)
@@ -125,7 +121,6 @@ ENDIF
 !*      4.     Total snow fraction
 !              -------------------
 !
-!if (size(pwsnow,1)>31) print*,'VEG ',PVEG(32)
 PPSN(:)       = SNOW_FRAC_NAT(ZSNOWSWE,PPSNG,PPSNV,PVEG)
 !
 IF (LSNOW_FRAC_TOT) THEN

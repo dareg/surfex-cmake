@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_CTRL_FLAKE(DFO, KLUOUT,OWATER_PROFILE)  
+SUBROUTINE PREP_CTRL_FLAKE(DGO, KLUOUT,OWATER_PROFILE)  
 !     #################################################################################################################
 !
 !!****  *PREP_CTRL_FLAKE* - routine to check that diagnostics are switched off
@@ -35,6 +35,8 @@ SUBROUTINE PREP_CTRL_FLAKE(DFO, KLUOUT,OWATER_PROFILE)
 !
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
+USE MODI_PREP_CTRL
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -44,7 +46,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DFO
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 !
 INTEGER,  INTENT(IN)    :: KLUOUT             ! unit number
 LOGICAL,  INTENT(INOUT) :: OWATER_PROFILE     !
@@ -57,14 +59,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_FLAKE',0,ZHOOK_HANDLE)
 !
-DFO%N2M = 0
-!
-DFO%LSURF_BUDGET  = .FALSE.
-DFO%L2M_MIN_ZS    = .FALSE.
-DFO%LRAD_BUDGET   = .FALSE.
-DFO%LCOEF         = .FALSE.
-DFO%LSURF_VARS    = .FALSE.
-DFO%LSURF_BUDGETC = .FALSE.
+ CALL PREP_CTRL(DGO,KLUOUT)
 !
 OWATER_PROFILE = .FALSE.
 !

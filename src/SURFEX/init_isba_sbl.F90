@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE INIT_ISBA_SBL(IO, IP, IMX, IMT, IR, ICP, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, &
+    SUBROUTINE INIT_ISBA_SBL(IO, K, NP, NPE, SB, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, &
                              PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW, PZREF, PUREF, PSSO_SLOPE )  
 !     #################################################################################
 !
@@ -25,9 +25,7 @@
 !!------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t, ISBA_PARAM_TIME_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODD_TYPE_SNOW
@@ -51,11 +49,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 REAL,               INTENT(IN)   :: PTSTEP   ! timestep of the integration
 REAL, DIMENSION(:), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
@@ -78,6 +75,9 @@ REAL, DIMENSION(:), INTENT(IN)  :: PSSO_SLOPE! slope of S.S.O.                  
 !                                            ! canopy       
 !
 !*      0.2    declarations of local variables
+!
+TYPE(ISBA_PE_t), POINTER :: PEK
+TYPE(ISBA_P_t), POINTER :: PK
 !
 !* forcing variables
 !
@@ -118,8 +118,6 @@ REAL, DIMENSION(SIZE(PTA))   ::ZPSNV
 REAL, DIMENSION(SIZE(PTA))   ::ZPSNV_A
 REAL, DIMENSION(SIZE(PTA))   ::ZPSN
 REAL, DIMENSION(SIZE(PTA))   ::ZSNOWALB
-REAL, DIMENSION(SIZE(PTA),SIZE(IR%TSNOW%WSNOW,2)) ::ZSNOWSWE
-REAL, DIMENSION(SIZE(PTA),SIZE(IR%TSNOW%WSNOW,2)) ::ZSNOWRHO
 REAL, DIMENSION(SIZE(PTA))   ::ZFFG
 REAL, DIMENSION(SIZE(PTA))   ::ZFFGNOS
 REAL, DIMENSION(SIZE(PTA))   ::ZFFV
@@ -137,83 +135,188 @@ REAL, DIMENSION(SIZE(PTA))   ::ZDELTA
 REAL, DIMENSION(SIZE(PTA))   ::ZWRMAX
 REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_ZON
 REAL, DIMENSION(SIZE(PTA))   ::ZCLS_WIND_MER
-REAL, DIMENSION(SIZE(PTA),SIZE(IR%TSNOW%WSNOW,2))   ::ZSUM_LAYER
 REAL, DIMENSION(SIZE(PTA))   ::ZSUM
 REAL, DIMENSION(SIZE(PTA))   :: ZLEG_DELTA  ! soil evaporation delta fn
 REAL, DIMENSION(SIZE(PTA))   :: ZLEGI_DELTA ! soil sublimation delta fn
 REAL, DIMENSION(SIZE(PTA))   :: ZLVTT
 !
-INTEGER                     :: JSWB
-INTEGER                     :: JLAYER
-INTEGER                     :: JPATCH
+REAL, DIMENSION(:,:), ALLOCATABLE ::ZSNOWSWE
+REAL, DIMENSION(:,:), ALLOCATABLE ::ZSNOWRHO
+REAL, DIMENSION(:,:), ALLOCATABLE ::ZSUM_LAYER
 !
-REAL, DIMENSION(SIZE(PTA),SIZE(IP%XPATCH,2)) ::ZWSNOW
+INTEGER                     :: JSWB
+INTEGER                     :: JL, JI, JP, IMASK
+INTEGER :: ISNOW_LAYER
+!
+REAL, DIMENSION(SIZE(PTA),IO%NPATCH) ::ZWSNOW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_SBL',0,ZHOOK_HANDLE)
-!    
+!
+ZTS (:) = 0.
+ZWG (:) = 0.
+ZWGI(:) = 0.
+ZZ0 (:) = 0.
+!
+ZZ0H(:) = 0.
+ZVEG(:) = 0.
+!
+ZRESA(:) = 0.
+!
+ZRGL  (:) = 0.
+ZRSMIN(:) = 0.
+ZGAMMA(:) = 0.
+!
 !Means over patches
-ZTS     = SUM(IR%XTG (:,1,:)*IP%XPATCH(:,:),DIM=2)
-ZWG     = SUM(IR%XWG (:,1,:)*IP%XPATCH(:,:),DIM=2)
-ZWGI    = SUM(IR%XWGI(:,1,:)*IP%XPATCH(:,:),DIM=2)
-ZZ0     = SUM(IP%XPATCH(:,:)*IMT%XZ0(:,:)  ,DIM=2)
+DO JP = 1,IO%NPATCH
+  PK => NP%AL(JP)
+  PEK => NPE%AL(JP)
+
+  DO JI=1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
+    !
+    ZTS (IMASK) = ZTS (IMASK) + PEK%XTG (JI,1) * PK%XPATCH(JI)
+    ZWG (IMASK) = ZWG (IMASK) + PEK%XWG (JI,1) * PK%XPATCH(JI)
+    ZWGI(IMASK) = ZWGI(IMASK) + PEK%XWGI(JI,1) * PK%XPATCH(JI)
+    ZZ0 (IMASK) = ZZ0 (IMASK) + PEK%XZ0(JI)    * PK%XPATCH(JI)
+    !
+    ZZ0H(IMASK) = ZZ0H(IMASK) + PK%XPATCH(JI) * PEK%XZ0 (JI) / PK%XZ0_O_Z0H(JI)
+    ZVEG(IMASK) = ZVEG(IMASK) + PK%XPATCH(JI) * PEK%XVEG(JI) 
+    !    
+    ZRESA(IMASK) = ZRESA(IMASK) + PK%XPATCH(JI) * PEK%XRESA(JI)
+    !
+    ZRGL  (IMASK) = ZRGL  (IMASK) + PK%XPATCH(JI) * PEK%XRGL  (JI)
+    ZRSMIN(IMASK) = ZRSMIN(IMASK) + PK%XPATCH(JI) * PEK%XRSMIN(JI)
+    ZGAMMA(IMASK) = ZGAMMA(IMASK) + PK%XPATCH(JI) * PEK%XGAMMA(JI)
+    !  
+  ENDDO
+ENDDO
 !
 !We choose to set ZZ0EFF and ZZ0_WITH_SNOW equal to ZZ0
-ZZ0EFF        = ZZ0
-ZZ0_WITH_SNOW = ZZ0
-ZZ0H(:) = SUM(IP%XPATCH(:,:) * IMT%XZ0(:,:)/IMX%XZ0_O_Z0H(:,:),DIM=2)
-ZVEG(:) = SUM(IP%XPATCH(:,:) * IMT%XVEG(:,:)                  ,DIM=2)
+ZZ0EFF(:)        = ZZ0(:)
+ZZ0_WITH_SNOW(:) = ZZ0(:)
 !
-ZP_SLOPE_COS(:) = 1./SQRT(1.+PSSO_SLOPE(:)**2)
-IF (LNOSOF) ZP_SLOPE_COS(:) = 1.0
 !
-ZRESA(:) = SUM(IP%XPATCH(:,:)*IR%XRESA(:,:),DIM=2)
-WHERE(ZVEG(:)>0)
-  ZLAI     (:)= SUM(IP%XPATCH(:,:)*IMT%XVEG(:,:)*IMT%XLAI(:,:)     ,&
-                DIM=2,MASK=IMT%XVEG(:,:)>0) / ZVEG(:)
-  ZWRMAX_CF(:)= SUM(IP%XPATCH(:,:)*IMT%XVEG(:,:)*IMT%XWRMAX_CF(:,:),&
-                DIM=2,MASK=IMT%XVEG(:,:)>0) / ZVEG(:)
-  ZWR      (:)= SUM(IP%XPATCH(:,:)*IMT%XVEG(:,:)*IR%XWR(:,:)       ,&
-                DIM=2,MASK=IMT%XVEG(:,:)>0) / ZVEG(:)
-ELSEWHERE
-  ZLAI     (:) = IMT%XLAI     (:,1)
-  ZWRMAX_CF(:) = IMT%XWRMAX_CF(:,1)
-  ZWR      (:) = IR%XWR       (:,1)
+ZLAI(:) = 0.
+ZWRMAX_CF(:) = 0.
+ZWR(:) = 0.
+!
+DO JP = 1,IO%NPATCH
+  PK => NP%AL(JP)
+  PEK => NPE%AL(JP)
+
+  DO JI=1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
+    !
+    IF (ZVEG(JI)>0.) THEN
+      ZLAI     (IMASK) = ZLAI     (IMASK) + PK%XPATCH(JI) * PEK%XVEG(JI) *  PEK%XLAI(JI)
+      ZWRMAX_CF(IMASK) = ZWRMAX_CF(IMASK) + PK%XPATCH(JI) * PEK%XVEG(JI) *  PEK%XWRMAX_CF(JI)
+      ZWR      (IMASK) = ZWR      (IMASK) + PK%XPATCH(JI) * PEK%XVEG(JI) *  PEK%XWR(JI)
+    ELSEIF (JP==1) THEN
+      ZLAI     (IMASK) = PEK%XLAI     (JI)
+      ZWRMAX_CF(IMASK) = PEK%XWRMAX_CF(JI)
+      ZWR      (IMASK) = PEK%XWR      (JI)
+    ENDIF
+    !
+  ENDDO
+ENDDO
+!
+WHERE (ZVEG(:)>0)
+  ZLAI     (:)= ZLAI     (:) / ZVEG(:)
+  ZWRMAX_CF(:)= ZWRMAX_CF(:) / ZVEG(:)
+  ZWR      (:)= ZWR      (:) / ZVEG(:)
 ENDWHERE
 !
-ZSUM_LAYER(:,:) = 0.
-ZSUM        (:) = 0.
 !
-DO JLAYER=1,SIZE(IR%TSNOW%WSNOW,2)
-  ZSNOWSWE  (:,JLAYER) = SUM(IP%XPATCH(:,:)*IR%TSNOW%WSNOW(:,JLAYER,:),DIM=2)
-  ZSUM_LAYER(:,JLAYER) = SUM(IP%XPATCH(:,:),DIM=2,MASK=IR%TSNOW%WSNOW(:,JLAYER,:)>0)
-  WHERE(ZSUM_LAYER(:,JLAYER)>0)      
-    ZSNOWRHO(:,JLAYER)= SUM( IP%XPATCH(:,:)*IR%TSNOW%RHO(:,JLAYER,:), DIM=2, &
-                             MASK=IR%TSNOW%WSNOW(:,JLAYER,:)>0) / ZSUM_LAYER(:,JLAYER)
-  ELSEWHERE
-    ZSNOWRHO(:,JLAYER)=IR%TSNOW%RHO(:,JLAYER,1)
-  ENDWHERE
+ISNOW_LAYER = NPE%AL(1)%TSNOW%NLAYER
+ALLOCATE(ZSNOWSWE  (SIZE(PTA),ISNOW_LAYER))
+ALLOCATE(ZSUM_LAYER(SIZE(PTA),ISNOW_LAYER))
+ALLOCATE(ZSNOWRHO  (SIZE(PTA),ISNOW_LAYER))
+ZSNOWSWE  (:,:) = 0.
+ZSUM_LAYER(:,:) = 0.
+ZSNOWRHO  (:,:) = 0.
+!
+DO JL=1,ISNOW_LAYER
+  !
+  DO JP = 1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+
+    DO JI=1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI)
+      !
+      IF (PEK%TSNOW%WSNOW(JI,JL)>0.) THEN
+        ZSNOWSWE  (IMASK,JL) = ZSNOWSWE  (IMASK,JL) + PK%XPATCH(JI) * PEK%TSNOW%WSNOW(JI,JL)
+        ZSUM_LAYER(IMASK,JL) = ZSUM_LAYER(IMASK,JL) + PK%XPATCH(JI)
+      ENDIF
+      !
+    ENDDO
+  ENDDO
+  !
+  DO JP = 1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+
+    DO JI=1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI)
+      !
+      IF (ZSUM_LAYER(IMASK,JL)>0.) THEN  
+        ZSNOWRHO(IMASK,JL) = ZSNOWRHO(IMASK,JL) + PK%XPATCH(JI) * PEK%TSNOW%RHO(JI,JL)
+      ELSEIF (JP==1) THEN
+        ZSNOWRHO(IMASK,JL) = PEK%TSNOW%RHO(JI,JL)
+      ENDIF
+      !
+    ENDDO
+  ENDDO
+  !
 END DO
 !
-ZSUM(:)=SUM(ZSUM_LAYER(:,:),DIM=2)
+WHERE (ZSUM_LAYER(:,:)>0.) 
+  ZSNOWRHO(:,:) = ZSNOWRHO(:,:) / ZSUM_LAYER(:,:)
+END WHERE
 !
+ZSUM(:)=SUM(ZSUM_LAYER(:,:),DIM=2)
+DEALLOCATE(ZSUM_LAYER)
+! 
 ZWSNOW(:,:) = 0.
-DO JPATCH=1,SIZE(IR%TSNOW%WSNOW,3)
-  DO JLAYER=1,SIZE(IR%TSNOW%WSNOW,2)
-    ZWSNOW(:,JPATCH) = ZWSNOW(:,JPATCH) + IR%TSNOW%WSNOW(:,JLAYER,JPATCH)
+DO JL = 1,ISNOW_LAYER
+  DO JP = 1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+
+    DO JI=1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI)
+      !
+      ZWSNOW(IMASK,JP) = ZWSNOW(IMASK,JP) + PEK%TSNOW%WSNOW(JI,JL)
+      !
+    ENDDO
   ENDDO
 ENDDO    
 !
+ZSNOWALB(:) = 0.
+DO JP = 1,IO%NPATCH
+  PK => NP%AL(JP)
+  PEK => NPE%AL(JP)
+
+  DO JI=1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
+    !
+    IF (ZSUM(JI)>0.) THEN
+      IF (ZWSNOW(JI,JP)>0.) THEN
+        ZSNOWALB(IMASK) = ZSNOWALB(IMASK) + PK%XPATCH(JI) * PEK%TSNOW%ALB(JI)
+      ENDIF
+    ELSEIF (JP==1) THEN
+      ZSNOWALB(IMASK) = PEK%TSNOW%ALB(JI)
+    ENDIF
+    !
+  ENDDO
+ENDDO
+!
 WHERE(ZSUM(:)>0)         
-  ZSNOWALB(:) = SUM(IP%XPATCH(:,:)*IR%TSNOW%ALB(:,:),DIM=2,MASK=ZWSNOW(:,:)>0) / ZSUM(:)      
-ELSEWHERE
-  ZSNOWALB(:) = IR%TSNOW%ALB(:,1)
+  ZSNOWALB(:) = ZSNOWALB(:) / ZSUM(:)      
 ENDWHERE
 !
-ZRGL  (:) = SUM(IP%XPATCH(:,:) * IMT%XRGL  (:,:),DIM=2)
-ZRSMIN(:) = SUM(IP%XPATCH(:,:) * IMT%XRSMIN(:,:),DIM=2)
-ZGAMMA(:) = SUM(IP%XPATCH(:,:) * IMT%XGAMMA(:,:),DIM=2)
 !
 ZEXNA(:) = (PPA(:)/XP00)**(XRD/XCPD)
 ZEXNS(:) = (PPS(:)/XP00)**(XRD/XCPD)
@@ -221,14 +324,17 @@ ZQA  (:) = PQA(:) / PRHOA(:)
 ZWIND(:) = SQRT(PU**2+PV**2)
 !
 !We compute the snow fractions
- CALL ISBA_SNOW_FRAC(IR%TSNOW%SCHEME, ZSNOWSWE, ZSNOWRHO, ZSNOWALB,   &
+ CALL ISBA_SNOW_FRAC(PEK%TSNOW%SCHEME, ZSNOWSWE, ZSNOWRHO, ZSNOWALB,   &
                      ZVEG, ZLAI, ZZ0, ZPSN, ZPSNV_A, ZPSNG, ZPSNV   )  
+!
+DEALLOCATE(ZSNOWSWE, ZSNOWRHO)
 !
 !We compute total shortwave incoming radiation needed by veg
 ZP_GLOBAL_SW(:) = 0.
 DO JSWB=1,SIZE(PSW_BANDS)
   ZP_GLOBAL_SW(:)   = ZP_GLOBAL_SW(:) + (PDIR_SW(:,JSWB) + PSCA_SW(:,JSWB))
 END DO
+!
 !
 !We choose the case HPHOTO=='NON' and a humid soil (ZF2=1) to compute ZRS
 ZF2(:)=1.0
@@ -245,29 +351,33 @@ ZFF    (:) = 0.0
 !
 ZF5    (:) = 1.0
 ZLVTT  (:) = XLVTT
+!
+ZP_SLOPE_COS(:) = 1./SQRT(1.+PSSO_SLOPE(:)**2)
+IF (LNOSOF) ZP_SLOPE_COS(:) = 1.0
+!
 !We compute ZCD, ZCH and ZRI
- CALL DRAG(IO%CISBA, IR%TSNOW%SCHEME, IO%CCPSURF,  PTSTEP, ZTS, ZWG, ZWGI, &
+ CALL DRAG(IO%CISBA, PEK%TSNOW%SCHEME, IO%CCPSURF,  PTSTEP, ZTS, ZWG, ZWGI, &
            ZEXNS, ZEXNA, PTA, ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS, ZVEG,    &
-           ZZ0, ZZ0EFF, ZZ0H, IP%XWFC(:,1), IP%XWSAT(:,1), ZPSNG, ZPSNV,   &
+           ZZ0, ZZ0EFF, ZZ0H, K%XWFC(:,1), K%XWSAT(:,1), ZPSNG, ZPSNV,   &
            PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5, ZRESA, ZCH, ZCD, ZCDN, &
            ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS, ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS,&
            ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA, ZWR, PRHOA, ZLVTT            )  
 !
 !Initialisation of T, Q, Wind and TKE on all canopy levels
-DO JLAYER=1,ICP%NLVL
+DO JL=1,SB%NLVL
   !
   CALL CLS_TQ(PTA, ZQA, PPA, PPS, PZREF, ZCD, ZCH, ZRI, ZTS, ZHU, ZZ0H, &
-              ICP%XZ(:,JLAYER), ZTNM, ZQNM, ZHUNM           ) 
+              SB%XZ(:,JL), ZTNM, ZQNM, ZHUNM           ) 
   ! 
-  ICP%XT(:,JLAYER)=ZTNM
-  ICP%XQ(:,JLAYER)=ZQNM
+  SB%XT(:,JL)=ZTNM
+  SB%XQ(:,JL)=ZQNM
   !
-  CALL CLS_WIND(PU, PV, PUREF, ZCD, ZCDN, ZRI, ICP%XZ(:,JLAYER), &
+  CALL CLS_WIND(PU, PV, PUREF, ZCD, ZCDN, ZRI, SB%XZ(:,JL), &
                 ZCLS_WIND_ZON, ZCLS_WIND_MER                 )
   !
-  ICP%XU(:,JLAYER) = SQRT( ZCLS_WIND_ZON(:)**2 + ZCLS_WIND_MER(:)**2 )
-  ICP%XTKE (:,JLAYER) = XALPSBL * ZCD(:) * ( PU(:)**2 + PV(:)**2 )
-  ICP%XP   (:,JLAYER) = PPA(:) + XG * PRHOA(:) * (ICP%XZ(:,ICP%NLVL) - ICP%XZ(:,JLAYER))
+  SB%XU   (:,JL) = SQRT( ZCLS_WIND_ZON(:)**2 + ZCLS_WIND_MER(:)**2 )
+  SB%XTKE (:,JL) = XALPSBL * ZCD(:) * ( PU(:)**2 + PV(:)**2 )
+  SB%XP   (:,JL) = PPA(:) + XG * PRHOA(:) * (SB%XZ(:,SB%NLVL) - SB%XZ(:,JL))
   !
 ENDDO
 !

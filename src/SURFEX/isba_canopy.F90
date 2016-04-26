@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE ISBA_CANOPY (PCDRAG, KI, ICP, PHEIGHT, PCANOPY_DENSITY, PUW_GROUND, PDUWDU_GROUND, &
+SUBROUTINE ISBA_CANOPY (PCDRAG, KI, SB, PHEIGHT, PCANOPY_DENSITY, PUW_GROUND, PDUWDU_GROUND, &
                         PFORC_U, PDFORC_UDU, PFORC_E, PDFORC_EDE)  
 !     ###############################################################################
 !
@@ -25,7 +25,6 @@ SUBROUTINE ISBA_CANOPY (PCDRAG, KI, ICP, PHEIGHT, PCANOPY_DENSITY, PUW_GROUND, P
 !!---------------------------------------------------------------
 !
 USE MODD_CANOPY_n, ONLY : CANOPY_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XG
 USE MODD_SURF_PAR,     ONLY : XUNDEF
@@ -43,29 +42,29 @@ IMPLICIT NONE
 REAL, INTENT(IN) :: PCDRAG
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
-TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 REAL, DIMENSION(KI),      INTENT(IN)    :: PHEIGHT     ! canopy height                       (m)
 REAL, DIMENSION(KI),      INTENT(IN)    :: PCANOPY_DENSITY ! canopy density                  (-)
 !
 REAL, DIMENSION(KI),      INTENT(IN)    :: PUW_GROUND  ! friction flux for ground surface       (m2/s2)
 REAL, DIMENSION(KI),      INTENT(IN)    :: PDUWDU_GROUND  ! derivative of ground friction flux   (m/s)
 !
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
 !
 INTEGER                  :: JLAYER, JJ    ! loop counter on canopy heights
 !         
-REAL, DIMENSION(KI,ICP%NLVL) :: ZCDRAG    ! drag coefficient in canopy
-REAL, DIMENSION(KI,ICP%NLVL) :: ZDENSITY  ! vegetation density for each canopy level
-REAL, DIMENSION(KI,ICP%NLVL) :: ZSV       ! vertical surface for each canopy level
-REAL, DIMENSION(KI,ICP%NLVL) :: ZFORC
-REAL, DIMENSION(KI,ICP%NLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
+REAL, DIMENSION(KI,SB%NLVL) :: ZCDRAG    ! drag coefficient in canopy
+REAL, DIMENSION(KI,SB%NLVL) :: ZDENSITY  ! vegetation density for each canopy level
+REAL, DIMENSION(KI,SB%NLVL) :: ZSV       ! vertical surface for each canopy level
+REAL, DIMENSION(KI,SB%NLVL) :: ZFORC
+REAL, DIMENSION(KI,SB%NLVL) :: ZAIRVOL   ! Fraction of air for each canopy level total volume
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -80,11 +79,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_CANOPY',0,ZHOOK_HANDLE)
 ZDENSITY(:,:) = 0.
-DO JLAYER = 1,ICP%NLVL
+DO JLAYER = 1,SB%NLVL
   DO JJ = 1,KI
     IF (PHEIGHT(JJ)>0.) THEN
       ZDENSITY(JJ,JLAYER) = 1.5 * &
-       MAX(PCANOPY_DENSITY(JJ)*4.*ICP%XZ(JJ,JLAYER)*(PHEIGHT(JJ)-ICP%XZ(JJ,JLAYER))/PHEIGHT(JJ)**2, 0.)
+       MAX(PCANOPY_DENSITY(JJ)*4.*SB%XZ(JJ,JLAYER)*(PHEIGHT(JJ)-SB%XZ(JJ,JLAYER))/PHEIGHT(JJ)**2, 0.)
     ENDIF
   ENDDO
 END DO
@@ -106,15 +105,15 @@ ZAIRVOL(:,:) = 1.
 !
 !*      1.2    Discretization on each canopy level
 !
- CALL CANOPY(KI, ICP, PHEIGHT, ZDENSITY, ZCDRAG, ZAIRVOL, ZSV, &
+ CALL CANOPY(KI, SB, PHEIGHT, ZDENSITY, ZCDRAG, ZAIRVOL, ZSV, &
              ZFORC, PFORC_U, PDFORC_UDU, PFORC_E, PDFORC_EDE )
 !
 !
 !*      2.4    Drag force by ground surface
 !              ----------------------------
 !
-PFORC_U   (:,1) = PUW_GROUND(:) / ICP%XDZ(:,1)
-PDFORC_UDU(:,1) = PDFORC_UDU(:,1) + PDUWDU_GROUND(:) / ICP%XDZ(:,1)
+PFORC_U   (:,1) = PUW_GROUND(:) / SB%XDZ(:,1)
+PDFORC_UDU(:,1) = PDFORC_UDU(:,1) + PDUWDU_GROUND(:) / SB%XDZ(:,1)
 
 !-------------------------------------------------------------------------------------
 !
@@ -125,7 +124,7 @@ PDFORC_UDU(:,1) = PDFORC_UDU(:,1) + PDUWDU_GROUND(:) / ICP%XDZ(:,1)
 !
 ! Ext = - Cd * e * u  * Sv        trees
 !
-PFORC_E   (:,:) = PFORC_E    - 2.*ICP%XTKE(:,:)*ZFORC(:,:)
+PFORC_E   (:,:) = PFORC_E    - 2.*SB%XTKE(:,:)*ZFORC(:,:)
 PDFORC_EDE(:,:) = PDFORC_EDE - 2.*ZFORC(:,:)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_CANOPY',1,ZHOOK_HANDLE)

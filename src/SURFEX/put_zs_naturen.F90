@@ -1,6 +1,5 @@
 !     ###########################################
-      SUBROUTINE PUT_ZS_NATURE_n (I, &
-                                  HPROGRAM,KI,PZS)
+      SUBROUTINE PUT_ZS_NATURE_n (S, HPROGRAM,KI,PZS)
 !     ###########################################
 !
 !!****  *PUT_ZS_SURF_ATM_n* - routine to modify nature oropgraphy using atmospheric
@@ -36,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t
 !
 USE MODI_GET_LUOUT
 !
@@ -53,7 +52,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI      ! horizontal dim. of cover
@@ -71,13 +70,13 @@ IF (LHOOK) CALL DR_HOOK('PUT_ZS_NATURE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF ( SIZE(PZS) /= SIZE(I%P%XZS) ) THEN
+IF ( SIZE(PZS) /= SIZE(S%XZS) ) THEN
   WRITE(ILUOUT,*) 'try to get ZS field from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PZS) :', SIZE(PZS)
-  WRITE(ILUOUT,*) 'size of field over nature                       (XZS) :', SIZE(I%P%XZS)
+  WRITE(ILUOUT,*) 'size of field over nature                       (XZS) :', SIZE(S%XZS)
   CALL ABOR1_SFX('PUT_ZS_NATUREN: GET ZS FROM ATMOSPHERIC MODEL: SIZE NOT CORRECT')
 ELSE
-  I%P%XZS = PZS
+  S%XZS = PZS
 END IF
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_NATURE_N',1,ZHOOK_HANDLE)
 !

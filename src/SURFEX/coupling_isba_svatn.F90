@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, DST, SLT, HPROGRAM, HCOUPLING, PTSTEP, &
+SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, NDST, SLT, HPROGRAM, HCOUPLING, PTSTEP, &
                                  KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH,    &
                                  PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, &
                                  PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW,         &
@@ -42,7 +42,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
-USE MODD_DST_n, ONLY : DST_t
+USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -61,7 +61,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
-TYPE(DST_t), INTENT(INOUT) :: DST
+TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -172,14 +172,14 @@ IF (HCOUPLING=='I') THEN
   ZTSTEP=PTSTEP
 !
 !* same timestep as atmospheric timestep as default
-ELSE IF (IM%I%O%XTSTEP==XUNDEF) THEN
+ELSE IF (IM%O%XTSTEP==XUNDEF) THEN
   IT=1
   ZT=1.
   ZTSTEP=PTSTEP
 !
 !* case of specified SVAT time-step
 ELSE
-  IT=MAX(NINT(PTSTEP/IM%I%O%XTSTEP),1)
+  IT=MAX(NINT(PTSTEP/IM%O%XTSTEP),1)
   ZT=FLOAT(IT)
   ZTSTEP=PTSTEP/ZT
 ENDIF
@@ -226,8 +226,9 @@ ZWORK_Z0H= 0.0 ! work array for mean roughness length for heat
 !
 DO JT=1,IT
 !
-  CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM%ICP, IM%AG, IM%CHI, IM%DTI, IM%DGI,      &
-                                 IM%GB, IM%ISS, IM%IG, IM%I, IM%PKCI, IM%PKD, IM%PK, DST, SLT, &
+  CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM%SB, IM%NAG, IM%CHI, IM%NCHI, IM%DTI, IM%ID, &
+                                 IM%NGB, IM%GB, IM%ISS, IM%NISS, IM%G, IM%NG, IM%O, IM%S, IM%K, &
+                                 IM%NK, IM%NP, IM%NPE, IM%PKD, NDST, SLT, &
                                  HPROGRAM, HCOUPLING, ZTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI,  &
                                  KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, &
                                  PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,   &

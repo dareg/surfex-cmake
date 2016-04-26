@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_FLAKE_CONF_n (CHF, DGMF, F, HPROGRAM)
+      SUBROUTINE WRITESURF_FLAKE_CONF_n (CHF, DMF, F, HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_FLAKE_CONF* - routine to read the configuration for FLAKE
@@ -57,7 +57,7 @@ IMPLICIT NONE
 !
 !
 TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DMF
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM ! program calling FLAKE
@@ -81,7 +81,7 @@ IF (ILUDES==0) RETURN
 !-------------------------------------------------------------------------------
 !
  CALL INIT_NAM_FLAKEn(F)
- CALL INIT_NAM_DIAG_FLAKEn(DGMF)
+ CALL INIT_NAM_DIAG_FLAKEn(DMF)
  CALL INIT_NAM_CH_FLAKEn(CHF)
 !
 WRITE(UNIT=ILUDES,NML=NAM_FLAKEn)

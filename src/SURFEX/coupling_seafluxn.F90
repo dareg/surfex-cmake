@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_SEAFLUX_n (CHS, DTS, DGS, O, OR, SG, S, DST, SLT, &
+SUBROUTINE COUPLING_SEAFLUX_n (CHS, DTS, DGS, O, OR, G, S, DST, SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, &
                                KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF,     &
                                PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,      &
@@ -108,7 +108,7 @@ TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 TYPE(SEAFLUX_DIAG_t), INTENT(INOUT) :: DGS
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(GRID_t), INTENT(INOUT) :: SG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S 
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
@@ -614,7 +614,7 @@ IF (O%LMERCATOR) THEN
     OR%XSEAT_REL(:,NOCKMIN+1) = OR%XSEAT_REL(:,NOCKMIN+1) - XTT
   ENDIF
   !
-  CALL MOD1D_n(DGS%GO, O, OR, SG%XLAT, S, &
+  CALL MOD1D_n(DGS%GO, O, OR, G%XLAT, S, &
                HPROGRAM,PTIME,ZEMIS(:),ZDIR_ALB(:,1:KSW),ZSCA_ALB(:,1:KSW),&
                PLW(:),PSCA_SW(:,1:KSW),PDIR_SW(:,1:KSW),PSFTH(:),          &
                PSFTQ(:),PSFU(:),PSFV(:),PRAIN(:))

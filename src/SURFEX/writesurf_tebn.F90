@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE WRITESURF_TEB_n (HSELECT, TOP, BOP, T, B, ODATA_ROAD_DIR, TPN, &
-                                  GDO, GDR, GDMT, GRO, GRR, GRMT, HPROGRAM,KPATCH,HWRITE)
+                                  GDO, GDPEK, GRO, GRPEK, HPROGRAM,KPATCH,HWRITE)
 !     ####################################
 !
 !!****  *WRITE_TEB_n* - writes TEB fields
@@ -40,8 +40,7 @@ USE MODD_TEB_n, ONLY : TEB_1P_t
 USE MODD_BEM_n, ONLY : BEM_1P_t
 USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t
 !
 USE MODN_PREP_SURF_ATM, ONLY : LWRITE_EXTERN
 !
@@ -73,11 +72,9 @@ TYPE(BEM_1P_t), INTENT(IN) :: B
 LOGICAL, INTENT(IN) :: ODATA_ROAD_DIR
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
 TYPE(ISBA_OPTIONS_t), INTENT(IN) :: GDO
-TYPE(ISBA_PROG_t), INTENT(IN) :: GDR
-TYPE(ISBA_PARAM_TIME_t), INTENT(IN) :: GDMT
+TYPE(ISBA_PE_t), INTENT(IN) :: GDPEK
 TYPE(ISBA_OPTIONS_t), INTENT(IN) :: GRO
-TYPE(ISBA_PROG_t), INTENT(IN) :: GRR
-TYPE(ISBA_PARAM_TIME_t), INTENT(IN) :: GRMT
+TYPE(ISBA_PE_t), INTENT(IN) :: GRPEK
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
@@ -87,6 +84,7 @@ INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+INTEGER, DIMENSION(SIZE(T%XT_ROOF,1)) :: IMASK
 INTEGER           :: IRESP           ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
@@ -94,7 +92,7 @@ INTEGER           :: IRESP           ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=7)  :: YDIR           ! Direction identificator
  CHARACTER(LEN=100):: YSTRING        ! Comment string
 !
-INTEGER :: JLAYER ! loop on surface layers
+INTEGER :: JLAYER, JI ! loop on surface layers
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -137,7 +135,7 @@ YCOMMENT='WS_ROOF (kg/m2)'
 !
 !* road temperatures
 !
- ! print*,'TROAD ',T%XT_ROAD(31:40,1)
+
 DO JLAYER=1,TOP%NROAD_LAYER
   WRITE(YRECFM,'(A3,A5,I1.1,A1)') YPATCH,'TROAD',JLAYER,' '
   YRECFM=ADJUSTL(YRECFM)
@@ -291,12 +289,16 @@ YCOMMENT='TI_ROAD (K)'
  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,T%XTI_ROAD(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* snow mantel
+!*  
+DO JI = 1,SIZE(T%XT_ROOF,1)
+ IMASK(JI) = JI
+ENDDO 
 !
 YRECFM='RF'
- CALL WRITESURF_GR_SNOW(HSELECT,HPROGRAM,YRECFM,YPATCH,T%TSNOW_ROOF  )
+ CALL WRITESURF_GR_SNOW(HSELECT,HPROGRAM,YRECFM,YPATCH,SIZE(T%XT_ROOF,1),IMASK,0,T%TSNOW_ROOF  )
 !
 YRECFM='RD'
- CALL WRITESURF_GR_SNOW(HSELECT,HPROGRAM,YRECFM,YPATCH,T%TSNOW_ROAD  )
+ CALL WRITESURF_GR_SNOW(HSELECT,HPROGRAM,YRECFM,YPATCH,SIZE(T%XT_ROOF,1),IMASK,0,T%TSNOW_ROAD  )
 !
 !-------------------------------------------------------------------------------
 !
@@ -349,10 +351,10 @@ END IF
 !            ------------------
 !
 ! Gardens
-IF (TOP%LGARDEN) CALL WRITESURF_TEB_GARDEN_n(HSELECT, GDO, GDR, GDMT%XLAI, HPROGRAM,YPATCH)
+IF (TOP%LGARDEN) CALL WRITESURF_TEB_GARDEN_n(HSELECT, GDO, GDPEK, HPROGRAM,YPATCH)
 !
 ! Grenn roofs
-IF (TOP%LGREENROOF) CALL WRITESURF_TEB_GREENROOF_n(HSELECT, GRO, GRR, GRMT%XLAI, HPROGRAM,YPATCH)
+IF (TOP%LGREENROOF) CALL WRITESURF_TEB_GREENROOF_n(HSELECT, GRO, GRPEK, HPROGRAM,YPATCH)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_N',1,ZHOOK_HANDLE)
 !

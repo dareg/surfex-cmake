@@ -1,5 +1,5 @@
 !     #######
-SUBROUTINE CLI_LAKE (FG, F)
+SUBROUTINE CLI_LAKE (G, F)
 !     ###############
 !
 !!****  *CLI_LAKE* - prepares input for lake variables from climate data
@@ -43,7 +43,7 @@ IMPLICIT NONE
 !*      0.2    declarations of local variables
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: FG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 INTEGER :: JI
@@ -52,8 +52,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('CLI_LAKE',0,ZHOOK_HANDLE)
 
-DO JI=1,SIZE(FG%XLAT)
-  CALL START_LAKE_OF(F%TTIME%TDATE%DAY,F%TTIME%TDATE%MONTH,FG%XLON(JI),FG%XLAT(JI),&
+DO JI=1,SIZE(G%XLAT)
+  CALL START_LAKE_OF(F%TTIME%TDATE%DAY,F%TTIME%TDATE%MONTH,G%XLON(JI),G%XLAT(JI),&
         F%XWATER_DEPTH(JI), F%XT_SNOW(JI),F%XT_ICE(JI),F%XT_MNW(JI),F%XT_WML(JI), &
         F%XT_BOT(JI),F%XT_B1(JI),F%XCT(JI), &
         F%XH_SNOW(JI),F%XH_ICE(JI),F%XH_ML(JI),F%XH_B1(JI),F%XTS(JI))

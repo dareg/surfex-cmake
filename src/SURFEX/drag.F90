@@ -289,10 +289,6 @@ END WHERE
 !
 ZZHV(:)       = MAX(0.,SIGN(1.,ZQSAT(:)-PQA(:))) ! condensation on foilage if = 1
 !
-!print*,'DELTA ',PDELTA(1)
-!print*,'RA ',PRA(1)
-!print*,'RS ',PRS(1)
-!print*,'F5 ',PF5(1)
 PHV(:)        = PDELTA(:) + (1.- PDELTA(:))*                                    &
                 ( PRA(:) + PRS(:)*(1.0 - ZZHV(:)) )*                            &
                 ( (1/(PRA(:)+PRS(:))) - (ZZHV(:)*(1.-PF5(:))/(PRA(:)+XRS_MAX)) )
@@ -306,22 +302,6 @@ ENDWHERE
 !*       4.     GRID-AVERAGED HUMIDITY OF THE SURFACE
 !               -------------------------------------
 !
-!print*,'HSNOW_ISBA ',HSNOW_ISBA
-!print*,'VEG ',PVEG(1)
-!print*,'FFG_NOSNOW ',PFFG_NOSNOW(1)
-!print*,'WG ',PWG(1)
-!print*,'WGI ',PWGI(1)
-!print*,'HUG ',PHUG(1)
-!print*,'HUGI ',PHUGI(1)
-!print*,'FFV_NOSNOW ',PFFV_NOSNOW(1)
-!print*,'HV ',PHV(1)
-!print*,'QSAT ',ZQSAT(1)
-!print*,'QA ',PQA(1)
-!print*,'PSNG ',PPSNG(1)
-!print*,'FFG ',PFFG(1)
-!print*,'PSNV ',PPSNV(1)
-!print*,'FFV ',PFFV(1)
-!print*,'FF ',PFF(1)
 IF(HSNOW_ISBA == '3-L' .OR. HSNOW_ISBA == 'CRO' .OR. HISBA == 'DIF')THEN
 !
 ! For explicit snow, humidity HERE only over snow-free region:
@@ -362,16 +342,6 @@ ENDIF
 !*       6.     COMPUTATION OF RESISTANCE AND DRAG COEFFICIENT
 !               ----------------------------------------------
 !
-!print*,'PTG ',PTG(1)
-!print*,'QS ',PQS(1)
-!print*,'EXNS ',PEXNS(1)
-!print*,'EXNA ',PEXNA(1)
-!print*,'PTA ',PTA(1)
-!print*,'PQA ',PQA(1)
-!print*,'PZREF ',PZREF(1)
-!print*,'PUREF ',PUREF(1)
-!print*,'PDIRCOSZW ',PDIRCOSZW(1)
-!print*,'VMOD ',PVMOD(1)
 CALL SURFACE_RI(PTG, PQS, PEXNS, PEXNA, PTA, PQA,                    &
                 PZREF, PUREF, PDIRCOSZW, PVMOD, PRI                  )  
 !
@@ -398,16 +368,7 @@ ELSE
 !*       7.1    SURFACE AERODYNAMIC RESISTANCE FOR HEAT TRANSFERS
 !               -------------------------------------------------
 !
-   !print*,'avant RA ',PRA(1)
-   !print*,'RI ',PRI(1)
-   !print*,'ZREF ',PZREF(1)
-   !print*,'UREF ',PUREF(1)
-   !print*,'VMOD ',ZVMOD(1)
-   !print*,'Z0 ',PZ0(1)
-   !print*,'Z0H ',PZ0H(1)
-   !print*,'AC ',ZAC(1)
    CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0, PZ0H, ZAC, PRA, PCH)
-   !print*,'après RA ',PRA(1)
 !
 !-------------------------------------------------------------------------------
 !
@@ -415,11 +376,6 @@ ELSE
 !               ---------------------------------------
 !
 !
-   !print*,'RI ',PRI(1)
-   !print*,'ZREF ',PZREF(1)
-   !print*,'UREF ',PUREF(1)
-   !print*,'Z0EFF ',PZ0EFF(1)
-   !print*,'Z0H ',PZ0H(1)
    CALL SURFACE_CD(PRI, PZREF, PUREF, PZ0EFF, PZ0H, PCD, PCDN)
 !
 ENDIF

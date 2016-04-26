@@ -1,5 +1,5 @@
 !     ##################################################################
-      SUBROUTINE DRY_WET_SOIL_ALBEDOS(PSAND, PCLAY, PVEGTYPE, IP  )  
+      SUBROUTINE DRY_WET_SOIL_ALBEDOS( KK  )  
 !     ##################################################################
 !
 !!****  *DRY_WET_SOIL_ALBEDOS*  
@@ -41,7 +41,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVT_PARK, NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, &
@@ -56,42 +56,39 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !              -------------------------
 !
-REAL, DIMENSION(:), INTENT(IN)  :: PSAND       ! sand fraction
-REAL, DIMENSION(:), INTENT(IN)  :: PCLAY       ! clay fraction
-REAL, DIMENSION(:,:), INTENT(IN):: PVEGTYPE    ! vegetation type
-!
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DRY_WET_SOIL_ALBEDOS',0,ZHOOK_HANDLE)
-IP%XALBVIS_DRY(:) = 0.05 +  (   0.05 + MAX(0.30 * PSAND(:), 0.10) )  &
-                         * ( 1. - 0.9 * ( PVEGTYPE(:,NVT_C3)        &
-                                        + PVEGTYPE(:,NVT_C4)        &
-                                        + PVEGTYPE(:,NVT_IRR)       &
-                                        + PVEGTYPE(:,NVT_GRAS)      &
-                                        + PVEGTYPE(:,NVT_TROG)      &
-                                        + PVEGTYPE(:,NVT_PARK)      &
-                                        + PVEGTYPE(:,NVT_TRBE)      &
-                                        + PVEGTYPE(:,NVT_BONE)      &
-                                        + PVEGTYPE(:,NVT_TEBD)      &
-                                        + PVEGTYPE(:,NVT_TRBD)      & 
-                                        + PVEGTYPE(:,NVT_TEBE)      &
-                                        + PVEGTYPE(:,NVT_TENE)      &
-                                        + PVEGTYPE(:,NVT_BOBD)      &
-                                        + PVEGTYPE(:,NVT_BOND)      &
-                                        + PVEGTYPE(:,NVT_BOGR)      &
-                                        + PVEGTYPE(:,NVT_SHRB))**2 )  
+KK%XALBVIS_DRY(:) = 0.05 +  (   0.05 + MAX(0.30 * KK%XSAND(:,1), 0.10) )  &
+                         * ( 1. - 0.9 * ( KK%XVEGTYPE(:,NVT_C3)        &
+                                        + KK%XVEGTYPE(:,NVT_C4)        &
+                                        + KK%XVEGTYPE(:,NVT_IRR)       &
+                                        + KK%XVEGTYPE(:,NVT_GRAS)      &
+                                        + KK%XVEGTYPE(:,NVT_TROG)      &
+                                        + KK%XVEGTYPE(:,NVT_PARK)      &
+                                        + KK%XVEGTYPE(:,NVT_TRBE)      &
+                                        + KK%XVEGTYPE(:,NVT_BONE)      &
+                                        + KK%XVEGTYPE(:,NVT_TEBD)      &
+                                        + KK%XVEGTYPE(:,NVT_TRBD)      & 
+                                        + KK%XVEGTYPE(:,NVT_TEBE)      &
+                                        + KK%XVEGTYPE(:,NVT_TENE)      &
+                                        + KK%XVEGTYPE(:,NVT_BOBD)      &
+                                        + KK%XVEGTYPE(:,NVT_BOND)      &
+                                        + KK%XVEGTYPE(:,NVT_BOGR)      &
+                                        + KK%XVEGTYPE(:,NVT_SHRB))**2 )  
 !
-IP%XALBNIR_DRY(:) = IP%XALBVIS_DRY(:) + 0.10
+KK%XALBNIR_DRY(:) = KK%XALBVIS_DRY(:) + 0.10
 !
-IP%XALBUV_DRY (:) = 0.06 + 0.14 * PSAND(:)
+KK%XALBUV_DRY (:) = 0.06 + 0.14 * KK%XSAND(:,1)
 !
-IP%XALBVIS_WET(:) = IP%XALBVIS_DRY(:) / 2.
-IP%XALBNIR_WET(:) = IP%XALBNIR_DRY(:) / 2.
-IP%XALBUV_WET (:) = IP%XALBUV_DRY (:) / 2.
+KK%XALBVIS_WET(:) = KK%XALBVIS_DRY(:) / 2.
+KK%XALBNIR_WET(:) = KK%XALBNIR_DRY(:) / 2.
+KK%XALBUV_WET (:) = KK%XALBUV_DRY (:) / 2.
+!
 IF (LHOOK) CALL DR_HOOK('DRY_WET_SOIL_ALBEDOS',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

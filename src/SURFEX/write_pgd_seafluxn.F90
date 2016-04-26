@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_SEAFLUX_n (DTCO, HSELECT, U, DTS, SG, S, HPROGRAM)
+      SUBROUTINE WRITE_PGD_SEAFLUX_n (DTCO, HSELECT, U, DTS, G, S, HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_SEAFLUX_n* - routine to write pgd surface variables in their respective files
@@ -60,7 +60,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-TYPE(GRID_t), INTENT(INOUT) :: SG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -81,7 +81,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_SEAFLUX_n(HSELECT, DTS, SG, S, HPROGRAM)
+ CALL WRITESURF_PGD_SEAFLUX_n(HSELECT, DTS, G, S, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

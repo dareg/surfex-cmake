@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE GET_Z0_n (DUO, DGU, &
-                           HPROGRAM,KI,PZ0,PZ0H)
+      SUBROUTINE GET_Z0_n (DGO, D, HPROGRAM,KI,PZ0,PZ0H)
 !     #########################################
 !
 !!****  *GET_Z0_n* - routine to get roughness lengths
@@ -50,8 +49,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DUO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -70,9 +69,9 @@ IF (LHOOK) CALL DR_HOOK('GET_Z0_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DUO%LCOEF)      THEN 
-        PZ0      = DGU%XZ0      
-        PZ0H     = DGU%XZ0H
+IF (DGO%LCOEF)      THEN 
+        PZ0      = D%XZ0      
+        PZ0H     = D%XZ0H
    ELSE 
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF

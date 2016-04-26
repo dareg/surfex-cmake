@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_SEA_n (DSO, DGS, &
-                                HPROGRAM,KI,PQS,PZ0,PZ0H)
+      SUBROUTINE GET_VAR_SEA_n (DGO, D, HPROGRAM,KI,PQS,PZ0,PZ0H)
 !     ##################################################
 !
 !!****  *GET_VAR_SEA_n* - routine to get variables defined only over sea
@@ -52,8 +51,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DSO
-TYPE(DIAG_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -73,14 +72,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_SEA_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DSO%LSURF_VARS) THEN 
-        PQS      = DGS%XQS      
+IF (DGO%LSURF_VARS) THEN 
+        PQS      = D%XQS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DSO%LCOEF) THEN 
-        PZ0      = DGS%XZ0      
-        PZ0H     = DGS%XZ0H
+IF (DGO%LCOEF) THEN 
+        PZ0      = D%XZ0      
+        PZ0H     = D%XZ0H
    ELSE 
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF      

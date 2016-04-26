@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_TOWN_n (DTO, DGT, &
-                                 HPROGRAM,KI,PQS,PZ0,PZ0H)
+      SUBROUTINE GET_VAR_TOWN_n (DGO, D, HPROGRAM,KI,PQS,PZ0,PZ0H)
 !     ###################################################
 !
 !!****  *GET_VAR_TOWN_n* - routine to get variables defined only over town
@@ -51,8 +50,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DTO
-TYPE(DIAG_t), INTENT(IN) :: DGT
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
+TYPE(DIAG_t), INTENT(IN) :: D
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -72,14 +71,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_TOWN_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DTO%LSURF_VARS) THEN 
-        PQS      = DGT%XQS      
+IF (DGO%LSURF_VARS) THEN 
+        PQS      = D%XQS      
    ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DTO%LCOEF) THEN 
-        PZ0      = DGT%XZ0      
-        PZ0H     = DGT%XZ0H
+IF (DGO%LCOEF) THEN 
+        PZ0      = D%XZ0      
+        PZ0H     = D%XZ0H
    ELSE 
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF

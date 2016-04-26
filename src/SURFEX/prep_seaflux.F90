@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_SEAFLUX (DTCO, UG, U, SG, SSB, S, DTS, O, OR, &
+SUBROUTINE PREP_SEAFLUX (DTCO, UG, U, SG, SB, S, DTS, O, OR, &
                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -42,7 +42,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODI_PREP_HOR_SEAFLUX_FIELD
 USE MODI_PREP_VER_SEAFLUX
 USE MODI_PREP_OUTPUT_GRID
-USE MODI_PREP_SEAFLUX_SBL
+USE MODI_PREP_SBL
 USE MODI_PREP_SEAICE
 USE MODI_GET_LUOUT
 !
@@ -69,7 +69,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(GRID_t), INTENT(INOUT) :: SG
-TYPE(CANOPY_t), INTENT(INOUT) :: SSB
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 TYPE(OCEAN_t), INTENT(INOUT) :: O
@@ -220,7 +220,7 @@ ENDIF
 !*      6.     Preparation of SBL air variables
 !
 !
-IF (S%LSBL) CALL PREP_SEAFLUX_SBL(SG%NDIM, SSB)
+IF (S%LSBL) CALL PREP_SBL(SG%NDIM, SB)
 !
 !-------------------------------------------------------------------------------------
 !

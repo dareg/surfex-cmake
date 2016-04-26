@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE CARBON_EVOL(IO, P, IP, IMX, IMT, IR, DGEIP, PTSTEP, PRHOA, PRESP_BIOMASS_INST )
+    SUBROUTINE CARBON_EVOL(IO, KK, PK, PEK, DEK, PTSTEP, PRHOA, PRESP_BIOMASS_INST )
 !   ###############################################################
 !!****  *CARBON EVOL*
 !!
@@ -46,10 +46,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t, ISBA_PARAM_TIME_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 !
 USE MODD_CO2V_PAR,       ONLY : XMC, XMCO2, XPCCO2
@@ -71,12 +68,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PGD_t), INTENT(INOUT) ::  P
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIP
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 !
 REAL, INTENT(IN)             :: PTSTEP                 ! time step
 REAL, DIMENSION(:), INTENT(IN)        :: PRHOA         ! air density (kg/m3)
@@ -93,48 +88,48 @@ REAL, PARAMETER                  :: ZCOEF5 = 25.0
 REAL, PARAMETER                  :: ZDTOP  = 0.1   !Top depth m
 REAL, PARAMETER                  :: ZDSUB  = 1.0   !Sub depth m
 !
-REAL, DIMENSION(SIZE(IR%XTG,1))     :: ZRESP_SOIL_TOT     ! total soil respiration (kgCO2/kgair m/s)
-REAL, DIMENSION(SIZE(IR%XTG,1))     :: ZRESP_AUTO_ABOVE   ! total above ground biomass respiration (kgCO2/kgair m/s)
-REAL, DIMENSION(SIZE(IR%XTG,1))     :: ZRESP_HETERO       ! total heterotrophic respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PEK%XTG,1))     :: ZRESP_SOIL_TOT     ! total soil respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PEK%XTG,1))     :: ZRESP_AUTO_ABOVE   ! total above ground biomass respiration (kgCO2/kgair m/s)
+REAL, DIMENSION(SIZE(PEK%XTG,1))     :: ZRESP_HETERO       ! total heterotrophic respiration (kgCO2/kgair m/s)
 !
 !
-REAL, DIMENSION(SIZE(IR%XSOILCARB,1),SIZE(IR%XSOILCARB,2)) :: ZSOILCARBON_INPUT
+REAL, DIMENSION(SIZE(PEK%XSOILCARB,1),SIZE(PEK%XSOILCARB,2)) :: ZSOILCARBON_INPUT
 !                  quantity of carbon going into carbon pools 
 !                  from litter decomposition (gC/m2/day)
 !
-REAL, DIMENSION(SIZE(IR%XSOILCARB,1)) :: ZRESP_HETERO_DAY_LITTER 
+REAL, DIMENSION(SIZE(PEK%XSOILCARB,1)) :: ZRESP_HETERO_DAY_LITTER 
 !                  litter heterotrophic respiration (gC/m2/day)
-REAL, DIMENSION(SIZE(IR%XSOILCARB,1)) :: ZRESP_HETERO_DAY_SOIL   
+REAL, DIMENSION(SIZE(PEK%XSOILCARB,1)) :: ZRESP_HETERO_DAY_SOIL   
 !                  soil heterotrophic respiration (gC/m2/day)
 !
-REAL, DIMENSION(SIZE(IR%XLIGNIN_STRUC,1),SIZE(IR%XLIGNIN_STRUC,2)) :: ZCONTROL_MOIST, &
+REAL, DIMENSION(SIZE(PEK%XLIGNIN_STRUC,1),SIZE(PEK%XLIGNIN_STRUC,2)) :: ZCONTROL_MOIST, &
                                                                 ZCONTROL_TEMP
 !                  ZCONTROL_MOIST = moisture control of heterotrophic respiration
 !                  ZCONTROL_TEMP = temperature control of heterotrophic respiration
 !
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZTG_TOP     ! Top soil temperature   (C)
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZTG_SUB     ! Sub soil temperature   (C)
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZSAND_SUB   ! Sub soil sand fraction (-)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZTG_TOP     ! Top soil temperature   (C)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZTG_SUB     ! Sub soil temperature   (C)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZSAND_SUB   ! Sub soil sand fraction (-)
 !
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZMOIST_TOP  ! Top soil moisture index (-)
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZMOIST_SUB  ! Sub soil moisture index (-)
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZSAT_TOP    ! Top soil saturated index(-)
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZSAT_SUB    ! Sub soil saturated index(-)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZMOIST_TOP  ! Top soil moisture index (-)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZMOIST_SUB  ! Sub soil moisture index (-)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZSAT_TOP    ! Top soil saturated index(-)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZSAT_SUB    ! Sub soil saturated index(-)
 !
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZDG_TOP     ! Top soil depth for DIF (m)
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZDG_SUB     ! Sub soil depth for DIF (m)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZDG_TOP     ! Top soil depth for DIF (m)
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZDG_SUB     ! Sub soil depth for DIF (m)
 !
-REAL, DIMENSION(SIZE(IR%XTG,1),SIZE(IR%XTG,2))  :: ZWGHT_TOP   ! Weight top for DIF (m)    
-REAL, DIMENSION(SIZE(IR%XTG,1),SIZE(IR%XTG,2))  :: ZWGHT_SUB   ! Weight sub for DIF (m)  
+REAL, DIMENSION(SIZE(PEK%XTG,1),SIZE(PEK%XTG,2))  :: ZWGHT_TOP   ! Weight top for DIF (m)    
+REAL, DIMENSION(SIZE(PEK%XTG,1),SIZE(PEK%XTG,2))  :: ZWGHT_SUB   ! Weight sub for DIF (m)  
 !
-REAL, DIMENSION(SIZE(IR%XTG,1))              :: ZWORK  ! work array
+REAL, DIMENSION(SIZE(PEK%XTG,1))              :: ZWORK  ! work array
 !
 REAL     :: ZMOISTL, ZSATL, ZLOG2
 !
 INTEGER  :: JNBIOMASS
 INTEGER  :: ITCSPIN
 !
-INTEGER  :: INI, INL, JI, JL, IDEPTH, INBIOMASS
+INTEGER  :: INI, INL, JI, JL, IDEKTH, INBIOMASS
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -145,11 +140,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('CARBON_EVOL',0,ZHOOK_HANDLE)
 !
-DGEIP%XRESP_AUTO    = 0.0
-DGEIP%XRESP_ECO     = 0.0
-!
-INI=SIZE(IR%XTG,1)
-INL=SIZE(IR%XTG,2)
+INI=SIZE(PEK%XTG,1)
+INL=SIZE(PEK%XTG,2)
 INBIOMASS=SIZE(PRESP_BIOMASS_INST,2)
 !
 ZRESP_SOIL_TOT(:)          = XUNDEF
@@ -171,20 +163,20 @@ ZLOG2  = LOG(2.0)
 ! convert soil temperature from K to C (over 1m depth for DIF)
 !
 IF(IO%CISBA/='DIF')THEN        
-  ZTG_TOP   (:) = IR%XTG(:,1,1)-XTT  
-  ZTG_SUB   (:) = IR%XTG(:,2,1)-XTT  
+  ZTG_TOP   (:) = PEK%XTG(:,1)-XTT  
+  ZTG_SUB   (:) = PEK%XTG(:,2)-XTT  
 ELSE       
   DO JI=1,INI
-     IDEPTH=IMX%NWG_LAYER(JI,1)
-     ZDG_TOP(JI)=MIN(ZDTOP,IMX%XDG(JI,IDEPTH,1))
-     ZDG_SUB(JI)=MIN(ZDSUB,IMX%XDG(JI,IDEPTH,1))
+     IDEKTH=PK%NWG_LAYER(JI)
+     ZDG_TOP(JI)=MIN(ZDTOP,PK%XDG(JI,IDEKTH))
+     ZDG_SUB(JI)=MIN(ZDSUB,PK%XDG(JI,IDEKTH))
   ENDDO  
   DO JL=1,INL
      DO JI=1,INI     
-        ZWGHT_TOP(JI,JL)=MIN(IP%XDZG(JI,JL,1),MAX(0.0,ZDG_TOP(JI)-IMX%XDG(JI,JL,1)+IP%XDZG(JI,JL,1)))
-        ZWGHT_SUB(JI,JL)=MIN(IP%XDZG(JI,JL,1),MAX(0.0,ZDG_SUB(JI)-IMX%XDG(JI,JL,1)+IP%XDZG(JI,JL,1)))        
-        ZTG_TOP(JI)=ZTG_TOP(JI)+(IR%XTG(JI,JL,1)-XTT)*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
-        ZTG_SUB(JI)=ZTG_SUB(JI)+(IR%XTG(JI,JL,1)-XTT)*ZWGHT_SUB(JI,JL)/ZDG_SUB(JI)
+        ZWGHT_TOP(JI,JL)=MIN(PK%XDZG(JI,JL),MAX(0.0,ZDG_TOP(JI)-PK%XDG(JI,JL)+PK%XDZG(JI,JL)))
+        ZWGHT_SUB(JI,JL)=MIN(PK%XDZG(JI,JL),MAX(0.0,ZDG_SUB(JI)-PK%XDG(JI,JL)+PK%XDZG(JI,JL)))        
+        ZTG_TOP(JI)=ZTG_TOP(JI)+(PEK%XTG(JI,JL)-XTT)*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
+        ZTG_SUB(JI)=ZTG_SUB(JI)+(PEK%XTG(JI,JL)-XTT)*ZWGHT_SUB(JI,JL)/ZDG_SUB(JI)
      ENDDO
   ENDDO 
 ENDIF
@@ -214,7 +206,7 @@ ELSE IF (IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LAI' .OR. IO%CP
 ENDIF
 !
 DO JNBIOMASS=1,INBIOMASS
-   DGEIP%XRESP_AUTO(:) = DGEIP%XRESP_AUTO (:) + PRESP_BIOMASS_INST(:,JNBIOMASS)
+   DEK%XRESP_AUTO(:) = DEK%XRESP_AUTO (:) + PRESP_BIOMASS_INST(:,JNBIOMASS)
 ENDDO
 !
 !
@@ -226,39 +218,39 @@ IF (IO%CRESPSL == 'DEF') THEN
    ZWORK(:)=0.0
 !   
    IF(IO%CISBA/='DIF')THEN            
-      ZWORK (:) = IR%XWG(:,1,1)  
+      ZWORK (:) = PEK%XWG(:,1)  
    ELSE
       DO JL=1,INL
          DO JI=1,INI        
-            ZWORK(JI)=ZWORK(JI)+IR%XWG(JI,JL,1)*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
+            ZWORK(JI)=ZWORK(JI)+PEK%XWG(JI,JL)*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
          ENDDO
       ENDDO  
    ENDIF
 !
 ! Soil respiration from Norman et al 1992 (kgCO2/kgair m/s)
 !
-  WHERE (IMT%XLAI(:,1) == XUNDEF)
+  WHERE (PEK%XLAI(:) == XUNDEF)
     ZRESP_SOIL_TOT(:) = 0.0
   ELSEWHERE
-! Before optimization = (ZCOEF1/PRHOA)*(ZCOEF2+ZCOEF3*IMT%XLAI(:,1))*IR%XWG(:,1,1)*2.**(ZCOEF4*(ZT2(:)-ZCOEF5))        
-    ZRESP_SOIL_TOT(:) = (ZCOEF1/PRHOA)*(ZCOEF2+ZCOEF3*IMT%XLAI(:,1)) * &
+! Before optimization = (ZCOEF1/PRHOA)*(ZCOEF2+ZCOEF3*PEK%XLAI(:))*PEK%XWG(:,1)*2.**(ZCOEF4*(ZT2(:)-ZCOEF5))        
+    ZRESP_SOIL_TOT(:) = (ZCOEF1/PRHOA)*(ZCOEF2+ZCOEF3*PEK%XLAI(:)) * &
                        ZWORK(:)*EXP(ZLOG2*(ZCOEF4*(ZTG_SUB(:)-ZCOEF5)))
   ENDWHERE
 !
 ! RESP_ECO is diagnosed from RESP_SOIL_TOT and RESP_AUTO_ABOVE
 !
-  DGEIP%XRESP_ECO(:) = ZRESP_SOIL_TOT(:) + ZRESP_AUTO_ABOVE(:)
+  DEK%XRESP_ECO(:) = ZRESP_SOIL_TOT(:) + ZRESP_AUTO_ABOVE(:)
 !  
 ELSE IF (IO%CRESPSL == 'PRM') THEN
 !
    ZWORK(:)=0.0
 !   
    IF(IO%CISBA/='DIF')THEN            
-      ZWORK (:) = IR%XWG(:,1,1)  
+      ZWORK (:) = PEK%XWG(:,1)  
    ELSE
       DO JL=1,INL
          DO JI=1,INI        
-            ZWORK(JI)=ZWORK(JI)+MIN(1.0,IR%XWG(JI,JL,1)/IP%XWFC(JI,JL))*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
+            ZWORK(JI)=ZWORK(JI)+MIN(1.0,PEK%XWG(JI,JL)/KK%XWFC(JI,JL))*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
          ENDDO
       ENDDO  
    ENDIF
@@ -268,8 +260,8 @@ ELSE IF (IO%CRESPSL == 'PRM') THEN
 ! RESP_ECO is directly calculated by the parameterization
 !
 ! Before optimization 
-! DGEIP%XRESP_ECO(:) = IMX%XRE25(:,1)/PRHOA(:) * MIN(IR%XWG(:,1,1)/IP%XWFC(:,1),1.)*2.**(ZCOEF4*(ZT2(:)-ZCOEF5))        
-  DGEIP%XRESP_ECO(:) = IMX%XRE25(:,1)/PRHOA(:) * ZWORK(:)*EXP(ZLOG2*(ZCOEF4*(ZTG_SUB(:)-ZCOEF5)))
+! DEK%XRESP_ECO(:) = PK%XRE25(:)/PRHOA(:) * MIN(PEK%XWG(:,1)/KK%XWFC(:),1.)*2.**(ZCOEF4*(ZT2(:)-ZCOEF5))        
+  DEK%XRESP_ECO(:) = PK%XRE25(:)/PRHOA(:) * ZWORK(:)*EXP(ZLOG2*(ZCOEF4*(ZTG_SUB(:)-ZCOEF5)))
 !
 ELSE IF (IO%CRESPSL == 'CNT') THEN
 !
@@ -283,27 +275,27 @@ ELSE IF (IO%CRESPSL == 'CNT') THEN
 !
   IF(IO%CISBA/='DIF')THEN
 !          
-    ZMOIST_TOP(:) = MIN(1.0,MAX(0.0,(IR%XWG(:,1,1)-IP%XWWILT(:,1))/(IP%XWFC (:,1)-IP%XWWILT(:,1))))
-    ZSAT_TOP  (:) = MIN(1.0,MAX(0.0,(IR%XWG(:,1,1)-IP%XWFC  (:,1))/(IP%XWSAT(:,1)-IP%XWFC  (:,1))))
-    ZMOIST_SUB(:) = MIN(1.0,MAX(0.0,(IR%XWG(:,2,1)-IP%XWWILT(:,2))/(IP%XWFC (:,2)-IP%XWWILT(:,2))))
-    ZSAT_SUB  (:) = MIN(1.0,MAX(0.0,(IR%XWG(:,2,1)-IP%XWFC  (:,2))/(IP%XWSAT(:,2)-IP%XWFC  (:,2))))
+    ZMOIST_TOP(:) = MIN(1.0,MAX(0.0,(PEK%XWG(:,1)-KK%XWWILT(:,1))/(KK%XWFC (:,1)-KK%XWWILT(:,1))))
+    ZSAT_TOP  (:) = MIN(1.0,MAX(0.0,(PEK%XWG(:,1)-KK%XWFC  (:,1))/(KK%XWSAT(:,1)-KK%XWFC  (:,1))))
+    ZMOIST_SUB(:) = MIN(1.0,MAX(0.0,(PEK%XWG(:,2)-KK%XWWILT(:,2))/(KK%XWFC (:,2)-KK%XWWILT(:,2))))
+    ZSAT_SUB  (:) = MIN(1.0,MAX(0.0,(PEK%XWG(:,2)-KK%XWFC  (:,2))/(KK%XWSAT(:,2)-KK%XWFC  (:,2))))
 !    
-    ZSAND_SUB (:) = P%XSAND (:,2)
+    ZSAND_SUB (:) = KK%XSAND (:,2)
 !    
   ELSE
 !          
     DO JL=1,INL
        DO JI=1,INI
 !       
-          ZMOISTL=MIN(1.0,MAX(0.0,(IR%XWG(JI,JL,1)-IP%XWWILT(JI,JL))/(IP%XWFC (JI,JL)-IP%XWWILT(JI,JL))))
-          ZSATL  =MIN(1.0,MAX(0.0,(IR%XWG(JI,JL,1)-IP%XWFC  (JI,JL))/(IP%XWSAT(JI,JL)-IP%XWFC  (JI,JL)))) 
+          ZMOISTL=MIN(1.0,MAX(0.0,(PEK%XWG(JI,JL)-KK%XWWILT(JI,JL))/(KK%XWFC (JI,JL)-KK%XWWILT(JI,JL))))
+          ZSATL  =MIN(1.0,MAX(0.0,(PEK%XWG(JI,JL)-KK%XWFC  (JI,JL))/(KK%XWSAT(JI,JL)-KK%XWFC  (JI,JL)))) 
 ! 
           ZMOIST_TOP(JI)=ZMOIST_TOP(JI)+ZMOISTL*ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
           ZSAT_TOP  (JI)=ZSAT_TOP  (JI)+ZSATL  *ZWGHT_TOP(JI,JL)/ZDG_TOP(JI)
           ZMOIST_SUB(JI)=ZMOIST_SUB(JI)+ZMOISTL*ZWGHT_SUB(JI,JL)/ZDG_SUB(JI)
           ZSAT_SUB  (JI)=ZSAT_SUB  (JI)+ZSATL  *ZWGHT_SUB(JI,JL)/ZDG_SUB(JI)          
 !
-          ZSAND_SUB(JI)=ZSAND_SUB(JI)+P%XSAND(JI,JL)*ZWGHT_SUB(JI,JL)/ZDG_SUB(JI)
+          ZSAND_SUB(JI)=ZSAND_SUB(JI)+KK%XSAND(JI,JL)*ZWGHT_SUB(JI,JL)/ZDG_SUB(JI)
 !          
        ENDDO
     ENDDO 
@@ -315,12 +307,12 @@ ELSE IF (IO%CRESPSL == 'CNT') THEN
   ZCONTROL_MOIST(:,1) = CONTROL_MOIST_FUNC(ZMOIST_TOP(:),ZSAT_TOP(:))
   ZCONTROL_MOIST(:,2) = CONTROL_MOIST_FUNC(ZMOIST_SUB(:),ZSAT_SUB(:))
 !
-  CALL CARBON_LITTER (PTSTEP, IP%XTURNOVER(:,:,1), IR%XLITTER(:,:,:,1), IR%XLIGNIN_STRUC(:,:,1), &
+  CALL CARBON_LITTER (PTSTEP, PK%XTURNOVER, PEK%XLITTER, PEK%XLIGNIN_STRUC, &
                      ZCONTROL_TEMP, ZCONTROL_MOIST, ZRESP_HETERO_DAY_LITTER,ZSOILCARBON_INPUT)  
 !
   DO ITCSPIN = 1,IO%NSPINS
      CALL CARBON_SOIL (PTSTEP, ZSAND_SUB, ZSOILCARBON_INPUT, ZCONTROL_TEMP,&
-                       ZCONTROL_MOIST, IR%XSOILCARB(:,:,1), ZRESP_HETERO_DAY_SOIL   )  
+                       ZCONTROL_MOIST, PEK%XSOILCARB, ZRESP_HETERO_DAY_SOIL   )  
   ENDDO
 !
 ! Transform units : gC/m2/day -> kgCO2/kgair m/s
@@ -330,7 +322,7 @@ ELSE IF (IO%CRESPSL == 'CNT') THEN
 !  
 ! RESP_ECO is diagnosed from RESP_HETERO and RESP_AUTO
 !
-  DGEIP%XRESP_ECO(:) = ZRESP_HETERO(:) + DGEIP%XRESP_AUTO(:)
+  DEK%XRESP_ECO(:) = ZRESP_HETERO(:) + DEK%XRESP_AUTO(:)
 !  
 ENDIF
 !

@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE LAILOSS(IMT, IP, IR, PBIOMASS)  
+    SUBROUTINE LAILOSS(PK, PEK, PBIOMASS)  
 !   ###############################################################
 !!****  *LAILOSS*  
 !!
@@ -45,17 +45,13 @@
 !!
 !-------------------------------------------------------------------------------
 !
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
 !
 USE MODD_CSTS,  ONLY : XDAY
 USE MODD_CO2V_PAR, ONLY: XMC, XMCO2, XPCCO2
 !
 !*       0.     DECLARATIONS
 !               ------------
-!
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -64,15 +60,14 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 REAL,   DIMENSION(:), INTENT(INOUT) :: PBIOMASS ! total dry canopy biomass 
 !
 !*      0.2    declarations of local variables
 !
-REAL,    DIMENSION(SIZE(IMT%XSEFOLD,1))  :: ZXSEFOLD, ZXM
+REAL,    DIMENSION(SIZE(PEK%XSEFOLD,1))  :: ZXSEFOLD, ZXM
 REAL                               :: ZBMCOEF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -84,11 +79,11 @@ ZBMCOEF     = XMC/(XMCO2*XPCCO2)
 ! Once a day (at midnight), adjust biomass:
 ! ----------------------------------------
 !
-WHERE((IMT%XVEG(:,1)>0) )
+WHERE((PEK%XVEG(:)>0) )
   !
   ! leaf life expectancy
   !
-  ZXSEFOLD(:) = IMT%XSEFOLD(:,1)*MIN(1.0, IR%XANFM(:,1)/IP%XANMAX(:,1))/XDAY
+  ZXSEFOLD(:) = PEK%XSEFOLD(:)*MIN(1.0, PEK%XANFM(:)/PK%XANMAX(:))/XDAY
   !
   ! avoid possible but unlikely division by zero
   !
@@ -109,11 +104,11 @@ WHERE((IMT%XVEG(:,1)>0) )
   ! same modification than nitro_decline.f90
   ! now the assimilation is added here
   ! in that way laigain.f90 is consistant between the different carbon options.
-  PBIOMASS(:) =  PBIOMASS(:) + IR%XANDAY(:,1)*ZBMCOEF
+  PBIOMASS(:) =  PBIOMASS(:) + PEK%XANDAY(:)*ZBMCOEF
   !
   ! maximum leaf assimilation (kgCO2 kgAir-1 m s-1):
   !
-  IR%XANFM(:,1)    = 0.0
+  PEK%XANFM(:)    = 0.0
   !
 END WHERE
 !

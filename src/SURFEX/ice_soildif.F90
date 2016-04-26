@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE ICE_SOILDIF(IP, IMX, IR, PTSTEP, PKSFC_IVEG, PLEGI, PSOILHCAPZ, PWGI_EXCESS)  
+      SUBROUTINE ICE_SOILDIF(KK, PK, PEK, PTSTEP, PKSFC_IVEG, PLEGI, PSOILHCAPZ, PWGI_EXCESS)  
 !     ##########################################################################
 !
 !!****  *ICE_SOILDIF*  
@@ -70,9 +70,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_CSTS,     ONLY : XLMTT, XTT, XG, XCI, XRHOLI, XRHOLW
 USE MODD_ISBA_PAR, ONLY : XWGMIN
@@ -84,9 +82,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 REAL, INTENT(IN)                   :: PTSTEP  ! Model time step (s)
 !
@@ -109,9 +107,9 @@ INTEGER                             :: INI    ! Number of point
 INTEGER                             :: INL    ! Number of explicit soil layers
 INTEGER                             :: IDEPTH ! Total moisture soil depth
 !
-REAL, DIMENSION(SIZE(IR%XTG(:,:,1),1),SIZE(IR%XTG(:,:,1),2)) :: ZK, ZEXCESSFC
+REAL, DIMENSION(SIZE(PEK%XTG,1),SIZE(PEK%XTG,2)) :: ZK, ZEXCESSFC
 !
-REAL, DIMENSION(SIZE(IR%XTG(:,:,1),1))             :: ZEXCESS
+REAL, DIMENSION(SIZE(PEK%XTG,1))             :: ZEXCESS
 !
 REAL                                     :: ZWGMAX, ZPSIMAX, ZPSI, ZDELTAT,  &
                                             ZPHASE, ZTGM, ZWGM, ZWGIM, ZLOG, &
@@ -126,8 +124,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ICE_SOILDIF',0,ZHOOK_HANDLE)
 !
-INI = SIZE(IR%XTG(:,:,1),1)
-INL = MAXVAL(IMX%NWG_LAYER(:,1))
+INI = SIZE(PEK%XTG,1)
+INL = MAXVAL(PK%NWG_LAYER)
 !
 ZEXCESSFC  (:,:)=0.0
 ZEXCESS    (:  )=0.0
@@ -146,32 +144,32 @@ ZK(:,1) = PKSFC_IVEG(:)
 !
 DO JL=1,INL
   DO JJ=1,INI                 
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<=IDEPTH)THEN
 !
-      ZWGIM = IR%XWGI(JJ,JL,1)
-      ZWGM  = IR%XWG (JJ,JL,1)
-      ZTGM  = IR%XTG (JJ,JL,1)
+      ZWGIM = PEK%XWGI(JJ,JL)
+      ZWGM  = PEK%XWG (JJ,JL)
+      ZTGM  = PEK%XTG (JJ,JL)
 
 !     The maximum liquid water content as
 !     as function of temperature (sub-freezing)
 !     based on Gibbs free energy (Fuchs et al., 1978):
 !
-      ZPSIMAX = MIN(IP%XMPOTSAT(JJ,JL),XLMTT*(IR%XTG(JJ,JL,1)-XTT)/(XG*IR%XTG(JJ,JL,1)))
+      ZPSIMAX = MIN(KK%XMPOTSAT(JJ,JL),XLMTT*(PEK%XTG(JJ,JL)-XTT)/(XG*PEK%XTG(JJ,JL)))
 !        
-      ZWORK  = ZPSIMAX/IP%XMPOTSAT(JJ,JL)
-      ZLOG   = LOG(ZWORK)/IP%XBCOEF(JJ,JL)
-      ZWGMAX = IP%XWSAT(JJ,JL)*EXP(-ZLOG)
+      ZWORK  = ZPSIMAX/KK%XMPOTSAT(JJ,JL)
+      ZLOG   = LOG(ZWORK)/KK%XBCOEF(JJ,JL)
+      ZWGMAX = KK%XWSAT(JJ,JL)*EXP(-ZLOG)
 !
 !     Calculate maximum temperature for ice based on Gibbs free energy: first
 !     compute soil water potential using Brook and Corey (1966) model:
 !     psi=mpotsat*(w/wsat)**(-bcoef)
 !
-      ZWORK = IR%XWG(JJ,JL,1)/IP%XWSAT(JJ,JL)
-      ZLOG  = IP%XBCOEF(JJ,JL)*LOG(ZWORK)
-      ZPSI  = IP%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
+      ZWORK = PEK%XWG(JJ,JL)/KK%XWSAT(JJ,JL)
+      ZLOG  = KK%XBCOEF(JJ,JL)*LOG(ZWORK)
+      ZPSI  = KK%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
 !
-      ZDELTAT = IR%XTG(JJ,JL,1) - XLMTT*XTT/(XLMTT-XG*ZPSI)
+      ZDELTAT = PEK%XTG(JJ,JL) - XLMTT*XTT/(XLMTT-XG*ZPSI)
 !
 !     Compute apparent heat capacity. This is considered
 !     only when there is available energy (cold) and liquid water
@@ -185,24 +183,24 @@ DO JL=1,INL
 !        
       ZAPPHEATCAP=0.0
       IF(ZDELTAT<0.0.AND.ZWGM>=ZWGMAX.AND.ZWORK>=MAX(0.0,ZWGM-ZWGMAX))THEN
-        ZAPPHEATCAP = -(XTT*XRHOLW*XLMTT*XLMTT/XG)*ZWGMAX/(ZPSIMAX*IP%XBCOEF(JJ,JL)*ZTGM*ZTGM)
+        ZAPPHEATCAP = -(XTT*XRHOLW*XLMTT*XLMTT/XG)*ZWGMAX/(ZPSIMAX*KK%XBCOEF(JJ,JL)*ZTGM*ZTGM)
       ENDIF
 !
 !     *Melt* ice if energy and ice available:
-      ZPHASEM  = (PTSTEP/IP%XTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.0,ZDELTAT),ZWGIM*XLMTT*XRHOLW)
+      ZPHASEM  = (PTSTEP/PK%XTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.0,ZDELTAT),ZWGIM*XLMTT*XRHOLW)
 !
 !     *Freeze* liquid water if energy and water available:
-      ZPHASEF  = (PTSTEP/IP%XTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.0,-ZDELTAT),MAX(0.0,ZWGM-ZWGMAX)*XLMTT*XRHOLW)
+      ZPHASEF  = (PTSTEP/PK%XTAUICE(JJ))*MIN(ZK(JJ,JL)*XCI*XRHOLI*MAX(0.0,-ZDELTAT),MAX(0.0,ZWGM-ZWGMAX)*XLMTT*XRHOLW)
 !
 !     Update heat content if melting or freezing
-      IR%XTG(JJ,JL,1) = ZTGM + (ZPHASEF - ZPHASEM)/(PSOILHCAPZ(JJ,JL)+ZAPPHEATCAP)
+      PEK%XTG(JJ,JL) = ZTGM + (ZPHASEF - ZPHASEM)/(PSOILHCAPZ(JJ,JL)+ZAPPHEATCAP)
 !
 !     Get estimate of actual total phase change (J/m3) for equivalent soil water changes:
-      ZPHASE = (PSOILHCAPZ(JJ,JL)+ZAPPHEATCAP)*(IR%XTG(JJ,JL,1)-ZTGM)
+      ZPHASE = (PSOILHCAPZ(JJ,JL)+ZAPPHEATCAP)*(PEK%XTG(JJ,JL)-ZTGM)
 !
 !     Adjust ice and liquid water conents (m3/m3) accordingly :
-      IR%XWGI(JJ,JL,1) = ZWGIM + ZPHASE/(XLMTT*XRHOLW)     
-      IR%XWG(JJ,JL,1) = ZWGM  - ZPHASE/(XLMTT*XRHOLW) 
+      PEK%XWGI(JJ,JL) = ZWGIM + ZPHASE/(XLMTT*XRHOLW)     
+      PEK%XWG(JJ,JL) = ZWGM  - ZPHASE/(XLMTT*XRHOLW) 
 !
     ENDIF
   ENDDO
@@ -211,7 +209,7 @@ ENDDO
 ! 3. Adjust surface soil ice content for sublimation
 !    -----------------------------------------------
 !
-IR%XWGI(:,1,1) = IR%XWGI(:,1,1) - PLEGI(:)*PTSTEP/IP%XDZG(:,1,1)
+PEK%XWGI(:,1) = PEK%XWGI(:,1) - PLEGI(:)*PTSTEP/PK%XDZG(:,1)
 !
 ! The remaining code in this block are merely constraints to ensure a highly
 ! accurate water budget: most of the time this code will not have any
@@ -220,10 +218,10 @@ IR%XWGI(:,1,1) = IR%XWGI(:,1,1) - PLEGI(:)*PTSTEP/IP%XDZG(:,1,1)
 ! some of the liquid (a correction): NOTE that latent heating already accounted
 ! for in sublimation term, so no need to alter soil temperature.
 !
-ZEXCESS(:)  = MAX(0.0,  - IR%XWGI(:,1,1))
-IR%XWG(:,1,1)   = IR%XWG(:,1,1) - ZEXCESS(:)
-IR%XWGI(:,1,1)   = IR%XWGI(:,1,1) + ZEXCESS(:)
-ZEXCESSFC(:,1)= ZEXCESSFC(:,1) - ZEXCESS(:)
+ZEXCESS(:)  = MAX(0.0,  - PEK%XWGI(:,1))
+PEK%XWG(:,1)   = PEK%XWG  (:,1) - ZEXCESS(:)
+PEK%XWGI(:,1)  = PEK%XWGI (:,1) + ZEXCESS(:)
+ZEXCESSFC(:,1) = ZEXCESSFC(:,1) - ZEXCESS(:)
 !
 ! 4. Prevent some possible problems
 !    ------------------------------
@@ -236,16 +234,16 @@ ZEXCESSFC(:,1)= ZEXCESSFC(:,1) - ZEXCESS(:)
 !
 DO JL=1,INL
   DO JJ=1,INI
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<=IDEPTH)THEN
-      ZEXCESS(JJ)       = MAX(0.0, IR%XWGI(JJ,JL,1) - (IP%XWSAT(JJ,JL)-XWGMIN) )
-      IR%XWGI(JJ,JL,1)  = IR%XWGI(JJ,JL,1) - ZEXCESS(JJ)
+      ZEXCESS(JJ)       = MAX(0.0, PEK%XWGI(JJ,JL) - (KK%XWSAT(JJ,JL)-XWGMIN) )
+      PEK%XWGI(JJ,JL)   = PEK%XWGI(JJ,JL)  - ZEXCESS(JJ)
       ZEXCESSFC(JJ,JL)  = ZEXCESSFC(JJ,JL) + ZEXCESS(JJ)
       IF(JL<IDEPTH)THEN
-        IR%XWGI(JJ,JL+1,1) = IR%XWGI(JJ,JL+1,1) + ZEXCESS(JJ)*(IP%XDZG(JJ,JL,1)/IP%XDZG(JJ,JL+1,1))
-        ZEXCESSFC(JJ,JL+1) = ZEXCESSFC(JJ,JL+1) - ZEXCESS(JJ)*(IP%XDZG(JJ,JL,1)/IP%XDZG(JJ,JL+1,1))
+        PEK%XWGI(JJ,JL+1)  = PEK%XWGI(JJ,JL+1)  + ZEXCESS(JJ)*(PK%XDZG(JJ,JL)/PK%XDZG(JJ,JL+1))
+        ZEXCESSFC(JJ,JL+1) = ZEXCESSFC(JJ,JL+1) - ZEXCESS(JJ)*(PK%XDZG(JJ,JL)/PK%XDZG(JJ,JL+1))
       ELSE
-        PWGI_EXCESS(JJ)    = ZEXCESS(JJ)*IP%XDZG(JJ,IDEPTH,1)*XRHOLW/PTSTEP
+        PWGI_EXCESS(JJ)    = ZEXCESS(JJ)*PK%XDZG(JJ,IDEPTH)*XRHOLW/PTSTEP
       ENDIF
     ENDIF
   ENDDO
@@ -256,13 +254,13 @@ ENDDO
 !
 DO JL=1,INL
   DO JJ=1,INI 
-    IDEPTH=IMX%NWG_LAYER(JJ,1)  
-    IF(JL<=IDEPTH.AND.IR%XWGI(JJ,JL,1)>0.0.AND.IR%XWGI(JJ,JL,1)<1.0E-6)THEN
-      IR%XWG   (JJ,JL,1) = IR%XWG(JJ,JL,1) + IR%XWGI(JJ,JL,1)
-      ZEXCESSFC(JJ,JL) = ZEXCESSFC(JJ,JL) + IR%XWGI(JJ,JL,1)
-      IR%XWGI(JJ,JL,1) = 0.0
+    IDEPTH=PK%NWG_LAYER(JJ)  
+    IF(JL<=IDEPTH.AND.PEK%XWGI(JJ,JL)>0.0.AND.PEK%XWGI(JJ,JL)<1.0E-6)THEN
+      PEK%XWG   (JJ,JL)  = PEK%XWG(JJ,JL) + PEK%XWGI(JJ,JL)
+      ZEXCESSFC(JJ,JL) = ZEXCESSFC(JJ,JL) + PEK%XWGI(JJ,JL)
+      PEK%XWGI(JJ,JL) = 0.0
     ENDIF
-    IR%XTG(JJ,JL,1) = IR%XTG(JJ,JL,1) - ZEXCESSFC(JJ,JL)*XLMTT*XRHOLW/PSOILHCAPZ(JJ,JL)           
+    PEK%XTG(JJ,JL) = PEK%XTG(JJ,JL) - ZEXCESSFC(JJ,JL)*XLMTT*XRHOLW/PSOILHCAPZ(JJ,JL)           
   ENDDO
 ENDDO
 !

@@ -687,25 +687,23 @@ XTIME_COMM_READ = 0.
 !
 !   Land use or/and vegetation dynamic
 !                  
-CALL INIT_SURF_LANDUSE_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%UG, YSC%IM, &
-                         YSC%SV, YSC%SLT, YSC%DST, CSURF_FILETYPE, &
-                         YINIT, LLAND_USE, INI, NSCAL, IBANDS,    &
-                          CSV,XCO2(:),XRHOA(:), XZENITH(:),XAZIM(:),  &
-                          XSW_BANDS,XDIR_ALB(:,:),  XSCA_ALB(:,:),    &
-                          XEMIS(:),XTSRAD(:), XTSURF(:),              &
-                          IYEAR, IMONTH, IDAY, ZTIME,                 &
-                          YATMFILE, YATMFILETYPE, YTEST                 )
+CALL INIT_SURF_LANDUSE_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%U, YSC%UG,   &
+                         YSC%IM, YSC%SV, YSC%SLT, YSC%NDST, CSURF_FILETYPE, &
+                         YINIT, LLAND_USE, INI, NSCAL, IBANDS, CSV,        &
+                         XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS, XDIR_ALB, &
+                         XSCA_ALB, XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH,   &
+                         IDAY, ZTIME, YATMFILE, YATMFILETYPE, YTEST )
 !
 #ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
- CALL INIT_CRODEBUG(YSC%IM%I%R%TSNOW%SCHEME)
+ CALL INIT_CRODEBUG(YSC%IM%NPE%AL(1)%TSNOW%SCHEME)
 !
 ! * SURFEX - OASIS  grid, partitions and local field definitions
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_DEF_OL(YSC%IM%I%O, YSC%U, CSURF_FILETYPE,YALG_MPI)
+  CALL SFX_OASIS_DEF_OL(YSC%IM%O, YSC%U, CSURF_FILETYPE,YALG_MPI)
 ENDIF
 !
 IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
@@ -846,7 +844,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Receive fields to other models proc by proc
-     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM%I, YSC%SM%S, YSC%U, YSC%WM%W, &
+     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W, &
                             CSURF_FILETYPE, INI, IBANDS, ZTIMEC, XTSTEP_SURF, XZENITH, &
                             XSW_BANDS, XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF   )
     ENDIF
@@ -878,7 +876,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Send fields to other models proc by proc
-     CALL SFX_OASIS_SEND_OL(YSC%FM%F, YSC%IM%I, YSC%SM%S, YSC%U, YSC%WM%W, &
+     CALL SFX_OASIS_SEND_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W, &
                             CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF)
     ENDIF
     !
@@ -1044,7 +1042,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       IF (CTIMESERIES_FILETYPE=="NC    ") THEN
         CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, &
-                               YSC%TM%DTT, YSC%DTZ, YSC%IM%I, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
+                               YSC%TM%DTT, YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
       ENDIF
       !
       IDX_W = 0
@@ -1061,9 +1059,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL DIAG_SURF_ATM_n(YSC%IM%DGI, YSC%SM%DGS, YSC%TM%TD, YSC%FM%DFO, YSC%FM%DGF, YSC%FM%DGFC, &
-                             YSC%WM%DWO, YSC%WM%DGW, YSC%WM%DGWC, YSC%DLO, YSC%DGL, YSC%DGLC, &
-                             YSC%DUO, YSC%DGU, YSC%DGUP, YSC%DGUC, YSC%DGUPC, YSC%U, YSC%USS, &
+        CALL DIAG_SURF_ATM_n(YSC%IM%ID, YSC%SM%SD, YSC%TM%TD, YSC%FM%DFO, YSC%FM%DF, YSC%FM%DFC, &
+                             YSC%WM%DWO, YSC%WM%DW, YSC%WM%DWC, YSC%DLO, YSC%DL, YSC%DLC, &
+                             YSC%DUO, YSC%DU, YSC%DUP, YSC%DUC, YSC%DUPC, YSC%U, YSC%USS, &
                              CTIMESERIES_FILETYPE)
 #ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
@@ -1213,14 +1211,14 @@ IF ( LRESTART ) THEN
   !
   IF (CSURF_FILETYPE=="NC    ") THEN
     CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, YSC%TM%DTT, &
-                           YSC%DTZ, YSC%IM%I, YSC%UG, YSC%U, YSC%DUO%CSELECT)
+                           YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)
   ENDIF
   !
   DO JNW = 1,INW
     !
     CALL IO_BUFF_CLEAN
     !
-    CALL FLAG_UPDATE(YSC%IM%DGI%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
+    CALL FLAG_UPDATE(YSC%IM%ID%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
     !
     IF (LRESTART_2M) THEN
       I2M       = 1
@@ -1247,7 +1245,7 @@ IF ( LRESTART ) THEN
     GPGD_TEB               = .FALSE.
     GSURF_MISC_BUDGET_TEB  = .FALSE.  
     !
-    CALL FLAG_DIAG_UPDATE(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%U,    &
+    CALL FLAG_DIAG_UPDATE(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%U, YSC%SV, &
                           GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                           GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
                           GWATER_PROFILE, GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA,     &
@@ -1305,7 +1303,7 @@ IF ( LINQUIRE ) THEN
   ALLOCATE( ZZS        ( INI ) )
   !
   ISERIES = 0
-  CALL GET_SURF_VAR_n(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%DGU,  YSC%UG, YSC%U, YSC%USS, &
+  CALL GET_SURF_VAR_n(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%DU,  YSC%UG, YSC%U, YSC%USS, &
                       CSURF_FILETYPE,INI,ISERIES,PSEA=ZSEA,PWATER=ZWATER,PNATURE=ZNATURE,PTOWN=ZTOWN, &
                       PT2M=ZT2M,PQ2M=ZQ2M,PQS=ZQS,PZ0=ZZ0,PZ0H=ZZ0H,PZ0EFF=ZZ0EFF,PQS_SEA=ZQS_SEA,  &
                       PQS_WATER=ZQS_WATER,PQS_NATURE=ZQS_NATURE,PQS_TOWN=ZQS_TOWN,                  &

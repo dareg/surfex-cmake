@@ -1,6 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SET_SST (DTCO, DGU, S, U, &
-                          KI,PITM,PSST,PSIC,HTEST)
+SUBROUTINE ASSIM_SET_SST (DTCO, S, U, KI, PITM, PSST, PSIC, HTEST)
 
 !     ###############################################################################
 !
@@ -58,7 +57,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !

@@ -74,7 +74,7 @@ IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%SM
 IF (YSC%U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(YSC%DTCO, YSC%DUO, YSC%U, &
                                                          YSC%WM, YSC%FM, HPROGRAM,HWRITE)
 IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%IM, &
-                                                   YSC%DST, HPROGRAM,HWRITE)
+                                                   YSC%NDST, HPROGRAM,HWRITE)
 IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%TM, &
                                                  YSC%GDM, YSC%GRM, HPROGRAM,HWRITE)
 !
@@ -97,7 +97,7 @@ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','WRITE')
   END IF
   !
   IF (HWRITE/='PGD'.AND.YSC%DUO%LDIAG_GRID) &
-          CALL WRITE_DIAG_SEB_SURF_ATM_n(YSC%DTCO, YSC%DUO, YSC%DGU, YSC%DGUC, YSC%U, &
+          CALL WRITE_DIAG_SEB_SURF_ATM_n(YSC%DTCO, YSC%DUO, YSC%DU, YSC%DUC, YSC%U, &
                                          YSC%UG%G%CGRID, HPROGRAM)
   !
   IF (YSC%CHU%LCH_EMIS .AND. YSC%SV%NBEQ>0 .AND. YSC%CHU%LCH_SURF_EMIS) THEN

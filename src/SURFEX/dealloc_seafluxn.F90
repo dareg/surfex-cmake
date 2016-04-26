@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_SEAFLUX_n (CHS, SG, S)
+SUBROUTINE DEALLOC_SEAFLUX_n (CHS, G, S)
 !     #################################################################################
 !
 !!****  *DEALLOC_SEAFLUX_n * - Deallocate all arrays
@@ -46,7 +46,7 @@ IMPLICIT NONE
 !
 !
 TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(GRID_t), INTENT(INOUT) :: SG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -72,10 +72,10 @@ IF (ASSOCIATED(S%XSCA_ALB))  DEALLOCATE(S%XSCA_ALB)
 !
 !-------------------------------------------------------------------------------------
 !
-IF (ASSOCIATED(SG%XGRID_PAR )) DEALLOCATE(SG%XGRID_PAR )
-IF (ASSOCIATED(SG%XLAT      )) DEALLOCATE(SG%XLAT      )
-IF (ASSOCIATED(SG%XLON      )) DEALLOCATE(SG%XLON      )
-IF (ASSOCIATED(SG%XMESH_SIZE)) DEALLOCATE(SG%XMESH_SIZE)
+IF (ASSOCIATED(G%XGRID_PAR )) DEALLOCATE(G%XGRID_PAR )
+IF (ASSOCIATED(G%XLAT      )) DEALLOCATE(G%XLAT      )
+IF (ASSOCIATED(G%XLON      )) DEALLOCATE(G%XLON      )
+IF (ASSOCIATED(G%XMESH_SIZE)) DEALLOCATE(G%XMESH_SIZE)
 !
 !-------------------------------------------------------------------------------------
 !

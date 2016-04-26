@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n (DGMI, DGMIP, IG, I, S, U, T, TOP, W, HPROGRAM, KI,        &
+SUBROUTINE ASSIM_SURF_ATM_n (DMI, DMIP, IG, IO, IS, IK, INP, INPE, S, U, T, TOP, W, HPROGRAM, KI,   &
                              PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, PCLOUDS,  &
                              PLSM, PEVAPTR, PEVAP, PSWEC, PTSC, PTS, PT2M, PHU2M, PSWE,&
                              PSST, PSIC, PUCLS, PVCLS, HTEST, OD_MASKEXT, PLON, PLAT,  &
@@ -36,7 +36,10 @@ SUBROUTINE ASSIM_SURF_ATM_n (DGMI, DGMIP, IG, I, S, U, T, TOP, W, HPROGRAM, KI, 
 !
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
 USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+!
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
+!
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_TEB_n, ONLY : TEB_t
@@ -65,10 +68,16 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
+TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DMIP
 TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
+!
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: IS
+TYPE(ISBA_K_t), INTENT(INOUT) :: IK
+TYPE(ISBA_NP_t), INTENT(INOUT) :: INP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: INPE
+!
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_t), INTENT(INOUT) :: T
@@ -271,7 +280,7 @@ ELSEIF (KTILE==2) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_INLAND_WATER_n(I, U, W, &
+  CALL ASSIM_INLAND_WATER_n(INPE, U, W, &
                             HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
                             OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
 
@@ -283,7 +292,7 @@ ELSEIF (KTILE==3) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_NATURE_n(DGMI, DGMIP, IG, I, U, &
+  CALL ASSIM_NATURE_n(DMI, DMIP, IG, IO, IS, IK, INP, INPE, U, &
                       HPROGRAM,KSIZE,                                             &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 

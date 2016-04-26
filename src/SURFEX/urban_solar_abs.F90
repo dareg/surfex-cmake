@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE URBAN_SOLAR_ABS(TOP, T, B, DGMT, PDIR_SW, PSCA_SW, PZENITH, PAZIM,   &
+    SUBROUTINE URBAN_SOLAR_ABS(TOP, T, B, DMT, PDIR_SW, PSCA_SW, PZENITH, PAZIM,   &
                                PFRAC_PANEL, PALB_PANEL, PALB_GD, PSVF_GD, PALB_GRF, &
                                PDN_RF, PDF_RF, PDN_RD, PDF_RD, PREC_SW_RD,          &
                                PREC_SW_SN_RD, PREC_SW_WL_A, PREC_SW_WL_B,           &
@@ -196,7 +196,7 @@ TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
               ! 'TWO ' : the two opposite walls are different & receive different solar energy
 TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
-TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PDIR_SW           ! incoming direct solar radiation
 REAL, DIMENSION(:), INTENT(IN)    :: PSCA_SW           ! scattered incoming solar rad.
@@ -337,12 +337,12 @@ DO JJ=1,SIZE(T%XROAD)
   ZABS_SCA_SW_PANEL    (JJ) = ZSCA_SW(JJ) * (1. - PALB_PANEL    (JJ))
 !
 !* solar energy received by the surfaces below solar panels
-  ZABS_DIR_SW_RF   (JJ) = ZDIR_SW(JJ) * (1. - T%XALB_ROOF       (JJ)) * (1.-PFRAC_PANEL(JJ))
-  ZABS_DIR_SW_SN_RF(JJ) = ZDIR_SW(JJ) * (1. - T%TSNOW_ROOF%ALB(JJ,1)) * (1.-PFRAC_PANEL(JJ))
-  ZABS_DIR_SW_GRF  (JJ) = ZDIR_SW(JJ) * (1. - PALB_GRF          (JJ)) * (1.-PFRAC_PANEL(JJ))
-  ZABS_SCA_SW_RF   (JJ) = ZSCA_SW(JJ) * (1. - T%XALB_ROOF       (JJ)) * (1.-PFRAC_PANEL(JJ))
-  ZABS_SCA_SW_SN_RF(JJ) = ZSCA_SW(JJ) * (1. - T%TSNOW_ROOF%ALB(JJ,1)) * (1.-PFRAC_PANEL(JJ))
-  ZABS_SCA_SW_GRF  (JJ) = ZSCA_SW(JJ) * (1. - PALB_GRF          (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_DIR_SW_RF   (JJ) = ZDIR_SW(JJ) * (1. - T%XALB_ROOF     (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_DIR_SW_SN_RF(JJ) = ZDIR_SW(JJ) * (1. - T%TSNOW_ROOF%ALB(JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_DIR_SW_GRF  (JJ) = ZDIR_SW(JJ) * (1. - PALB_GRF        (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_SCA_SW_RF   (JJ) = ZSCA_SW(JJ) * (1. - T%XALB_ROOF     (JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_SCA_SW_SN_RF(JJ) = ZSCA_SW(JJ) * (1. - T%TSNOW_ROOF%ALB(JJ)) * (1.-PFRAC_PANEL(JJ))
+  ZABS_SCA_SW_GRF  (JJ) = ZSCA_SW(JJ) * (1. - PALB_GRF        (JJ)) * (1.-PFRAC_PANEL(JJ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -443,8 +443,7 @@ END IF
 !*      2.7    averaged albedos when snow is present
 !              -------------------------------------
 !
-  ZAALB_RD   (JJ) =  PDF_RD (JJ) * T%XALB_ROAD   (JJ) &
-                   + PDN_RD (JJ) * T%TSNOW_ROAD%ALB (JJ,1)  
+  ZAALB_RD   (JJ) =  PDF_RD (JJ) * T%XALB_ROAD   (JJ) + PDN_RD (JJ) * T%TSNOW_ROAD%ALB (JJ)  
 !
 !
 ENDDO
@@ -569,16 +568,16 @@ WHERE(PSCA_SW(:)==0.)
   ZABS_SCA_SW_SN_RD(:) = 0.
 END WHERE
 !
-DGMT%XABS_SW_ROOF      (:) = 0.
-DGMT%XABS_SW_ROAD      (:) = 0.
-DGMT%XABS_SW_WALL_A    (:) = 0.
-DGMT%XABS_SW_WALL_B    (:) = 0.
-DGMT%XABS_SW_GARDEN    (:) = 0.
-DGMT%XABS_SW_GREENROOF (:) = 0.
-DGMT%XABS_SW_SNOW_ROOF (:) = 0.
-DGMT%XABS_SW_SNOW_ROAD (:) = 0.
+DMT%XABS_SW_ROOF      (:) = 0.
+DMT%XABS_SW_ROAD      (:) = 0.
+DMT%XABS_SW_WALL_A    (:) = 0.
+DMT%XABS_SW_WALL_B    (:) = 0.
+DMT%XABS_SW_GARDEN    (:) = 0.
+DMT%XABS_SW_GREENROOF (:) = 0.
+DMT%XABS_SW_SNOW_ROOF (:) = 0.
+DMT%XABS_SW_SNOW_ROAD (:) = 0.
 IF (TOP%CBEM=="BEM") THEN
-  DGMT%XABS_SW_WIN  (:) = 0.
+  DMT%XABS_SW_WIN  (:) = 0.
 ENDIF
 !
 PREC_SW_WIN   (:) = 0.
@@ -603,9 +602,9 @@ IF (TOP%CBEM=='BEM') THEN
     !
     PREC_SW_WIN     (JJ) = ZREC_DIR_SW_WIN(JJ) + ZREC_SCA_SW_WIN(JJ)
     !
-    DGMT%XABS_SW_WIN(JJ) = (ZREC_DIR_SW_WIN  (JJ) + ZREC_SCA_SW_WIN   (JJ)) * ZABS_WIN(JJ)
+    DMT%XABS_SW_WIN(JJ) = (ZREC_DIR_SW_WIN  (JJ) + ZREC_SCA_SW_WIN   (JJ)) * ZABS_WIN(JJ)
     !
-    DGMT%XTR_SW_WIN (JJ) = PREC_SW_WIN(JJ) * ZTRAN_WIN(JJ)
+    DMT%XTR_SW_WIN (JJ) = PREC_SW_WIN(JJ) * ZTRAN_WIN(JJ)
     !
   ENDDO
   !
@@ -618,47 +617,47 @@ DO JJ=1,SIZE(T%XROAD)
 !
 ! solar radiation absorbed by roofs
 !
-  DGMT%XABS_SW_ROOF     (JJ) = ZABS_DIR_SW_RF     (JJ) + ZABS_SCA_SW_RF     (JJ)
+  DMT%XABS_SW_ROOF     (JJ) = ZABS_DIR_SW_RF     (JJ) + ZABS_SCA_SW_RF     (JJ)
 !
 ! solar radiation absorbed by roads
 !
-  DGMT%XABS_SW_ROAD     (JJ) = ZABS_DIR_SW_RD     (JJ) + ZABS_SCA_SW_RD     (JJ)
+  DMT%XABS_SW_ROAD     (JJ) = ZABS_DIR_SW_RD     (JJ) + ZABS_SCA_SW_RD     (JJ)
 !
 ! solar radiation absorbed by GARDEN areas
 !
-  DGMT%XABS_SW_GARDEN   (JJ) = ZABS_DIR_SW_GD   (JJ) + ZABS_SCA_SW_GD   (JJ)
+  DMT%XABS_SW_GARDEN   (JJ) = ZABS_DIR_SW_GD   (JJ) + ZABS_SCA_SW_GD   (JJ)
 !
 ! solar radiation absorbed by GRF areas
 !
-  DGMT%XABS_SW_GREENROOF(JJ) = ZABS_DIR_SW_GRF(JJ) + ZABS_SCA_SW_GRF(JJ)
+  DMT%XABS_SW_GREENROOF(JJ) = ZABS_DIR_SW_GRF(JJ) + ZABS_SCA_SW_GRF(JJ)
 !
 ! solar radiation absorbed by walls
 !
-  DGMT%XABS_SW_WALL_A (JJ) = ZABS_DIR_SW_WL_A   (JJ) + ZABS_SCA_SW_WL     (JJ)
-  DGMT%XABS_SW_WALL_B (JJ) = ZABS_DIR_SW_WL_B   (JJ) + ZABS_SCA_SW_WL     (JJ)
+  DMT%XABS_SW_WALL_A (JJ) = ZABS_DIR_SW_WL_A   (JJ) + ZABS_SCA_SW_WL     (JJ)
+  DMT%XABS_SW_WALL_B (JJ) = ZABS_DIR_SW_WL_B   (JJ) + ZABS_SCA_SW_WL     (JJ)
 !
 !
 ! solar radiation absorbed by snow on roofs
 !
-  DGMT%XABS_SW_SNOW_ROOF (JJ) = ZABS_DIR_SW_SN_RF (JJ) + ZABS_SCA_SW_SN_RF (JJ)
+  DMT%XABS_SW_SNOW_ROOF (JJ) = ZABS_DIR_SW_SN_RF (JJ) + ZABS_SCA_SW_SN_RF (JJ)
 !
 ! solar radiation absorbed by snow on roads
 !
-  DGMT%XABS_SW_SNOW_ROAD (JJ) = ZABS_DIR_SW_SN_RD (JJ) + ZABS_SCA_SW_SN_RD (JJ)
+  DMT%XABS_SW_SNOW_ROAD (JJ) = ZABS_DIR_SW_SN_RD (JJ) + ZABS_SCA_SW_SN_RD (JJ)
 !
 !-------------------------------------------------------------------------------
 !
 !*      6.     total solar radiation received by roads and GARDEN areas
 !              -------------------------------------------------------
 !
-  PREC_SW_RD      (JJ) = DGMT%XABS_SW_ROAD      (JJ)/(1.-T%XALB_ROAD   (JJ))
+  PREC_SW_RD      (JJ) = DMT%XABS_SW_ROAD      (JJ)/(1.-T%XALB_ROAD   (JJ))
 !
-  PREC_SW_SN_RD   (JJ) = DGMT%XABS_SW_SNOW_ROAD (JJ)/(1.-T%TSNOW_ROAD%ALB(JJ,1))
+  PREC_SW_SN_RD   (JJ) = DMT%XABS_SW_SNOW_ROAD (JJ)/(1.-T%TSNOW_ROAD%ALB(JJ))
 !
-  PREC_SW_WL_A    (JJ) = DGMT%XABS_SW_WALL_A    (JJ)/(1.-T%XALB_WALL   (JJ))
-  PREC_SW_WL_B    (JJ) = DGMT%XABS_SW_WALL_B    (JJ)/(1.-T%XALB_WALL   (JJ))
+  PREC_SW_WL_A    (JJ) = DMT%XABS_SW_WALL_A    (JJ)/(1.-T%XALB_WALL   (JJ))
+  PREC_SW_WL_B    (JJ) = DMT%XABS_SW_WALL_B    (JJ)/(1.-T%XALB_WALL   (JJ))
 !
-  PREC_SW_GD      (JJ) = DGMT%XABS_SW_GARDEN    (JJ)/(1.-PALB_GD (JJ))
+  PREC_SW_GD      (JJ) = DMT%XABS_SW_GARDEN    (JJ)/(1.-PALB_GD (JJ))
 !
 !*      6.2    total solar radiation received by roof surfaces below solar panels
 !
@@ -682,7 +681,7 @@ IF (TOP%LSOLAR_PANEL) THEN
     !
     ! solar radiation absorbed by solar panels
     !
-    DGMT%XABS_SW_PANEL(JJ) = ZABS_DIR_SW_PANEL    (JJ) + ZABS_SCA_SW_PANEL    (JJ)
+    DMT%XABS_SW_PANEL(JJ) = ZABS_DIR_SW_PANEL    (JJ) + ZABS_SCA_SW_PANEL    (JJ)
     !
   ENDDO
   !
@@ -760,7 +759,7 @@ DO JJ=1,SIZE(ZSW_RD)
 !
   ZABS_SW_RD(JJ)    = (1.-T%XALB_ROAD(JJ)) * (ZSW_RD(JJ) + ZSREF_SW_WL(JJ) * (1.- T%XSVF_ROAD(JJ)))  
 !
-  ZABS_SW_SN_RD(JJ) = (1.-T%TSNOW_ROAD%ALB(JJ,1)) * &
+  ZABS_SW_SN_RD(JJ) = (1.-T%TSNOW_ROAD%ALB(JJ)) * &
                         (ZSW_RD(JJ) + ZSREF_SW_WL(JJ) * (1.- T%XSVF_ROAD(JJ)))  
 !
   ZABS_SW_GD(JJ)    = (1.-PALB_GD(JJ)) * (ZSW_GD(JJ) + ZSREF_SW_WL(JJ)  * (1.- PSVF_GD(JJ)))  

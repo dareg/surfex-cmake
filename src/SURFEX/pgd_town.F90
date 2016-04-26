@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TOWN (DTCO, DGU, UG, U, USS, DTI, TM, GDM, GRM, HPROGRAM)
+      SUBROUTINE PGD_TOWN (DTCO, UG, U, USS, DTI, TM, GDM, GRM, HPROGRAM)
 !     #############################################################
 !
 !!****  *PGD_TOWN* - routine to choose initialization of urban scheme
@@ -35,7 +35,6 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
@@ -58,7 +57,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
@@ -87,9 +85,9 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('PGD_TOWN',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (U%CTOWN=='TEB   ') THEN
-  CALL PGD_TEB(DTCO, UG, U, USS, TM%TOP, TM%BOP, TM%TG, TM%BDD, TM%DTT, TM%DTB, &
-                          GDM%TV%O, GDM%TV%P, GDM%DTI, GDM%TIR, &
-                          GRM%TV%O, GRM%TV%P, GRM%DTI, HPROGRAM)
+  CALL PGD_TEB(DTCO, UG, U, USS, TM%TOP, TM%BOP, TM%G, TM%BDD, TM%DTT, TM%DTB, &
+                          GDM%O, GDM%K, GDM%DTI, GDM%TIR, &
+                          GRM%O, GRM%S, GRM%K, GRM%DTI, HPROGRAM)
 END IF
 IF (LHOOK) CALL DR_HOOK('PGD_TOWN',1,ZHOOK_HANDLE)
 !

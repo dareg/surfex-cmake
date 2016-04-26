@@ -1,5 +1,5 @@
 !     #############################
-      SUBROUTINE AVERAGE_DIAG_MISC_ISBA_n (DGMI, DGMIP, IO, IP, IMX, PLAI, IR)
+      SUBROUTINE AVERAGE_DIAG_MISC_ISBA_n (DM, DMP, IO, NP, NPE)
 !     #############################
 !
 !
@@ -43,18 +43,15 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK
 !
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t, ISBA_NP_t, ISBA_NPE_t
 !
 USE MODD_SURF_PAR,         ONLY : XUNDEF, NUNDEF
 !
 USE MODD_CSTS,             ONLY : XRHOLW
-!
-!
 !
 USE MODI_COMPUT_COLD_LAYERS_THICK
 !
@@ -64,24 +61,23 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DGMIP
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DM
+TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DMP
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PLAI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
-INTEGER                         :: JJ        ! grid-cell loop counter
-INTEGER                         :: JPATCH    ! tile loop counter
-INTEGER                         :: JLAYER    ! layer loop counter
-REAL, DIMENSION(SIZE(IP%XPATCH,1)) :: ZSUMPATCH
-REAL, DIMENSION(SIZE(IP%XPATCH,1)) :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3, ZPONDF2
-REAL, DIMENSION(SIZE(IP%XPATCH,1),SIZE(IP%XPATCH,2)) :: ZLAI
+TYPE(DIAG_MISC_ISBA_t), POINTER :: DMK
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
+INTEGER                         :: JI    ! grid-cell loop counter
+INTEGER                         :: JP    ! tile loop counter
+INTEGER                         :: JL    ! layer loop counter
+REAL, DIMENSION(SIZE(DM%XHV)) :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3, IDEPTH_MAX
 REAL                            :: ZWORK
-INTEGER                         :: INI,INP,IDEPTH,IWORK
+INTEGER                         :: INI,IDEPTH,IWORK,IMASK
 !
-REAL, DIMENSION(SIZE(IMX%XDG,1),SIZE(IMX%XDG,2)) :: ZPOND, ZTG, ZDG
+REAL, DIMENSION(SIZE(DM%XHV),IO%NGROUND_LAYER) :: ZPOND, ZTG, ZDG
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -92,118 +88,71 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
 !
-IF (.NOT.DGMI%LSURF_MISC_BUDGET) THEN
+IF (.NOT.DM%LSURF_MISC_BUDGET) THEN
    IF (LHOOK) CALL DR_HOOK('AVERAGE_DIAG_MISC_ISBA_N',1,ZHOOK_HANDLE)
    RETURN
 ENDIF
 !
-INI=SIZE(IP%XPATCH,1)
-INP=SIZE(IP%XPATCH,2)
-!
-ZSUMPATCH(:) = 0.0
-DO JPATCH=1,INP
-   DO JJ=1,INI
-      ZSUMPATCH(JJ) = ZSUMPATCH(JJ) + IP%XPATCH(JJ,JPATCH)
-   END DO
-END DO
-!
-ZSUMFRD2(:)=0.0
-ZSUMFRD3(:)=0.0
-ZSUMDG  (:)=0.0
-ZSNOW   (:)=0.0
-ZPONDF2 (:)=0.0
-!
-WHERE(PLAI(:,:)/=XUNDEF)
-      ZLAI(:,:)=PLAI(:,:)
-ELSEWHERE
-      ZLAI(:,:)=0.0
-ENDWHERE
+INI=SIZE(DM%XHV)
 !
 !-------------------------------------------------------------------------------
 !
 !       1.     Surface Miscellaneous terms
 !              ---------------------------
 !
-DGMI%XHV  (:)   = 0.
-DGMI%XPSNG(:)   = 0.
-DGMI%XPSNV(:)   = 0.
-DGMI%XPSN (:)   = 0.
-DGMI%XSWI (:,:) = 0.
-DGMI%XTSWI(:,:) = 0.
-DGMI%XFSAT(:)   = 0.
-DGMI%XFFG (:)   = 0.
-DGMI%XFFV (:)   = 0.
-DGMI%XFF  (:)   = 0.
-DGMI%XTWSNOW(:) = 0.
-DGMI%XTDSNOW(:) = 0.  
-DGMI%XTTSNOW(:) = 0.
-DGMI%XLAI   (:) = 0.
-!   
-DGMI%XSOIL_SWI  (:)  = 0.
-DGMI%XSOIL_TSWI (:)  = 0.
-DGMI%XSOIL_TWG  (:) = 0.
-DGMI%XSOIL_TWGI (:) = 0.
-DGMI%XSOIL_WG   (:) = 0.
-DGMI%XSOIL_WGI  (:) = 0.
-! 
-IF(IO%CISBA=='DIF')THEN
-!        
-  DGMI%XALT   (:) = 0. 
-  DGMI%XFLT   (:) = 0. 
+DM%XHV  (:)   = 0.
+DM%XPSNG(:)   = 0.
+DM%XPSNV(:)   = 0.
+DM%XPSN (:)   = 0.
+DM%XFSAT(:)   = 0.
+DM%XFFG (:)   = 0.
+DM%XFFV (:)   = 0.
+DM%XFF  (:)   = 0.
+DM%XLAI   (:) = 0.
+DM%XTWSNOW(:) = 0.
+DM%XTDSNOW(:) = 0.  
+DM%XTTSNOW(:) = 0.
 !
-ENDIF
+ZSNOW   (:)=0.0
+!
+DO JP=1,IO%NPATCH
+  PK => NP%AL(JP)
+  DMK => DMP%AL(JP)
+  PEK => NPE%AL(JP)
 
-IF(IO%CISBA=='DIF'.AND.DGMI%LSURF_MISC_DIF)THEN
-!   
-  DGMI%XFRD2_TSWI (:) = 0.
-  DGMI%XFRD2_TWG  (:) = 0.
-  DGMI%XFRD2_TWGI (:) = 0.
-!   
-  DGMI%XFRD3_TSWI (:) = 0.
-  DGMI%XFRD3_TWG  (:) = 0.
-  DGMI%XFRD3_TWGI (:) = 0.
-!  
-ENDIF
-!
-DO JPATCH=1,INP
-!
-!cdir nodep
-  DO JJ=1,INI
-!
-    IF (ZSUMPATCH(JJ) > 0.) THEN
-!
-!     Halstead coefficient
-      DGMI%XHV(JJ) = DGMI%XHV(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XHV(JJ)
-!
-!     Snow fractions
-      DGMI%XPSNG(JJ) = DGMI%XPSNG(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XPSNG(JJ)
-      DGMI%XPSNV(JJ) = DGMI%XPSNV(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XPSNV(JJ)
-      DGMI%XPSN (JJ) = DGMI%XPSN (JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XPSN (JJ)
-!
-!     Saturated fraction
-      DGMI%XFSAT (JJ) = DGMI%XFSAT (JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XFSAT (JJ)
-!
-!     Flood fractions
-      DGMI%XFFG(JJ) = DGMI%XFFG(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XFFG(JJ)
-      DGMI%XFFV(JJ) = DGMI%XFFV(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XFFV(JJ)
-      DGMI%XFF (JJ) = DGMI%XFF (JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XFF (JJ)
-!
-!     Total LAI
-      DGMI%XLAI (JJ) = DGMI%XLAI(JJ)  + IP%XPATCH(JJ,JPATCH) * ZLAI (JJ,JPATCH)
-!      
-!     Snow total outputs
-      DGMI%XTWSNOW(JJ) = DGMI%XTWSNOW(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTWSNOW(JJ)
-      DGMI%XTDSNOW(JJ) = DGMI%XTDSNOW(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTDSNOW(JJ)
-!      
-      IF (DGMIP%AL(JPATCH)%XTWSNOW(JJ)>0.0) THEN
-         DGMI%XTTSNOW(JJ) = DGMI%XTTSNOW(JJ) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTTSNOW(JJ)
-         ZSNOW      (JJ) = ZSNOW      (JJ) + IP%XPATCH(JJ,JPATCH)
-      ENDIF
-!
+  DO JI=1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
+
+    !     Halstead coefficient
+    DM%XHV  (IMASK) = DM%XHV   (IMASK) + PK%XPATCH(JI) * DMK%XHV(JI)
+    !
+    !     Snow fractions
+    DM%XPSNG(IMASK) = DM%XPSNG (IMASK) + PK%XPATCH(JI) * DMK%XPSNG(JI)
+    DM%XPSNV(IMASK) = DM%XPSNV (IMASK) + PK%XPATCH(JI) * DMK%XPSNV(JI)
+    DM%XPSN (IMASK) = DM%XPSN  (IMASK) + PK%XPATCH(JI) * DMK%XPSN (JI)
+    !
+    !     Saturated fraction
+    DM%XFSAT (IMASK) = DM%XFSAT(IMASK) + PK%XPATCH(JI) * DMK%XFSAT(JI)
+    !
+    !     Flood fractions
+    DM%XFFG  (IMASK) = DM%XFFG (IMASK) + PK%XPATCH(JI) * DMK%XFFG(JI)
+    DM%XFFV  (IMASK) = DM%XFFV (IMASK) + PK%XPATCH(JI) * DMK%XFFV(JI)
+    DM%XFF   (IMASK) = DM%XFF  (IMASK) + PK%XPATCH(JI) * DMK%XFF (JI)
+    !
+    !     Total LAI
+    IF (PEK%XLAI(JI)/=XUNDEF) DM%XLAI(IMASK) = DM%XLAI(IMASK) + PK%XPATCH(JI) * PEK%XLAI(JI)
+    !      
+    !     Snow total outputs
+    DM%XTWSNOW(IMASK) = DM%XTWSNOW(IMASK) + PK%XPATCH(JI) * DMK%XTWSNOW(JI)
+    DM%XTDSNOW(IMASK) = DM%XTDSNOW(IMASK) + PK%XPATCH(JI) * DMK%XTDSNOW(JI)
+    !      
+    IF (DMK%XTWSNOW(JI)>0.0) THEN
+      DM%XTTSNOW(IMASK) = DM%XTTSNOW(IMASK) + PK%XPATCH(JI) * DMK%XTTSNOW(JI)
+      ZSNOW      (IMASK) = ZSNOW    (IMASK) + PK%XPATCH(JI)
     ENDIF
-!
+    !
   ENDDO
-!
+  !
 ENDDO
 !
 !-------------------------------------------------------------------------------
@@ -214,85 +163,138 @@ ENDDO
 !   Soil Wetness Index profile, Total Soil Wetness Index and 
 !   Total Soil Water Content (Liquid+Solid) and Total Frozen Content
 !
+DM%XSWI (:,:) = 0.
+DM%XTSWI(:,:) = 0.
+!   
+DM%XSOIL_SWI  (:) = 0.
+DM%XSOIL_TSWI (:) = 0.
+DM%XSOIL_TWG  (:) = 0.
+DM%XSOIL_TWGI (:) = 0.
+DM%XSOIL_WG   (:) = 0.
+DM%XSOIL_WGI  (:) = 0.
+!
+ZSUMDG  (:)=0.0
+!
 !---------------------------------------------
 IF(IO%CISBA=='DIF')THEN ! DIF case
 !---------------------------------------------
-!
+!   
+  DM%XALT   (:) = 0. 
+  DM%XFLT   (:) = 0. 
+
 ! Active and Frozen layers thickness
   ZTG(:,:)=0.0
   ZDG(:,:)=0.0
-  DO JPATCH=1,INP
-     DO JLAYER=1,IO%NGROUND_LAYER
-        DO JJ=1,INI 
-           ZTG(JJ,JLAYER) = ZTG(JJ,JLAYER) + IP%XPATCH(JJ,JPATCH) * IR%XTG(JJ,JLAYER,JPATCH)
-           ZDG(JJ,JLAYER) = ZDG(JJ,JLAYER) + IP%XPATCH(JJ,JPATCH) * IMX%XDG(JJ,JLAYER,JPATCH)
-        ENDDO
-     ENDDO
+  DO JP=1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+
+    DO JL=1,IO%NGROUND_LAYER
+      DO JI=1,PK%NSIZE_P
+        IMASK = PK%NR_P(JI)
+        ZTG(IMASK,JL) = ZTG(IMASK,JL) + PK%XPATCH(JI) * PEK%XTG(JI,JL)
+        ZDG(IMASK,JL) = ZDG(IMASK,JL) + PK%XPATCH(JI) * PK%XDG (JI,JL)
+      ENDDO
+    ENDDO
+
   ENDDO
-  CALL COMPUT_COLD_LAYERS_THICK(ZDG,ZTG,DGMI%XALT,DGMI%XFLT)
+  CALL COMPUT_COLD_LAYERS_THICK(ZDG,ZTG,DM%XALT,DM%XFLT)
 !    
   ZPOND(:,:)=0.0
-  DO JPATCH=1,INP      
-     IF(IP%NSIZE_NATURE_P(JPATCH) > 0 )THEN
-       DO JLAYER = 1,IO%NGROUND_LAYER
-!         cdir nodep 
-          DO JJ=1,INI
-             IDEPTH=IMX%NWG_LAYER(JJ,JPATCH)
-             IF(JLAYER<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
-               ZWORK=IP%XDZG(JJ,JLAYER,JPATCH)
-               !Soil Wetness Index profile
-               DGMI%XSWI (JJ,JLAYER) = DGMI%XSWI (JJ,JLAYER)+ZWORK*IP%XPATCH(JJ,JPATCH)*DGMIP%AL(JPATCH)%XSWI (JJ,JLAYER) 
-               DGMI%XTSWI(JJ,JLAYER) = DGMI%XTSWI(JJ,JLAYER)+ZWORK*IP%XPATCH(JJ,JPATCH)*DGMIP%AL(JPATCH)%XTSWI(JJ,JLAYER)
-               ZPOND     (JJ,JLAYER) = ZPOND     (JJ,JLAYER)+ZWORK*IP%XPATCH(JJ,JPATCH)
-               !Total soil wetness index, total water and ice contents
-               DGMI%XSOIL_SWI (JJ) = DGMI%XSOIL_SWI (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XSWI (JJ,JLAYER)
-               DGMI%XSOIL_TSWI(JJ) = DGMI%XSOIL_TSWI(JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTSWI(JJ,JLAYER)
-               ZSUMDG         (JJ) = ZSUMDG         (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH)
-               DGMI%XSOIL_TWG (JJ) = DGMI%XSOIL_TWG (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * (IR%XWG(JJ,JLAYER,JPATCH) &
-                                                         + IR%XWGI(JJ,JLAYER,JPATCH))
-               DGMI%XSOIL_TWGI(JJ) = DGMI%XSOIL_TWGI(JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * IR%XWGI(JJ,JLAYER,JPATCH)
-             ENDIF
-          ENDDO
-       ENDDO
-     ENDIF
+  IDEPTH_MAX(:) = 0
+  DO JP=1,IO%NPATCH   
+    DMK => DMP%AL(JP)
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+
+    DO JI=1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI)
+
+      DO JL = 1,IO%NGROUND_LAYER
+
+        IDEPTH = PK%NWG_LAYER(JI)
+        IF (IDEPTH>IDEPTH_MAX(IMASK) .AND. IDEPTH/=NUNDEF) IDEPTH_MAX(IMASK) = IDEPTH
+
+        IF(JL<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
+
+          ZWORK = PK%XDZG(JI,JL)
+          !Soil Wetness Index profile
+          DM%XSWI (IMASK,JL) = DM%XSWI (IMASK,JL) + ZWORK*PK%XPATCH(JI) * DMK%XSWI (JI,JL) 
+          DM%XTSWI(IMASK,JL) = DM%XTSWI(IMASK,JL) + ZWORK*PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
+          ZPOND   (IMASK,JL) = ZPOND   (IMASK,JL) + ZWORK*PK%XPATCH(JI)
+          !Total soil wetness index, total water and ice contents
+          DM%XSOIL_SWI (IMASK) = DM%XSOIL_SWI (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XSWI (JI,JL)
+          DM%XSOIL_TSWI(IMASK) = DM%XSOIL_TSWI(IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
+          ZSUMDG       (IMASK) = ZSUMDG       (IMASK) + ZWORK * PK%XPATCH(JI)
+          DM%XSOIL_TWG (IMASK) = DM%XSOIL_TWG (IMASK) + ZWORK * PK%XPATCH(JI) * (PEK%XWG(JI,JL) + PEK%XWGI(JI,JL))
+          DM%XSOIL_TWGI(IMASK) = DM%XSOIL_TWGI(IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWGI(JI,JL)
+
+        ENDIF
+
+      ENDDO
+
+    ENDDO
+    !
   ENDDO
-!  
+
+  DO JI = 1,SIZE(DM%XSWI,1)
+    DO JL = 1,IO%NGROUND_LAYER
+      IF (JL>IDEPTH_MAX(JI)) THEN
+        DM%XSWI (JI,JL) = XUNDEF
+        DM%XTSWI(JI,JL) = XUNDEF
+      ENDIF
+    ENDDO
+  ENDDO
+  !  
   WHERE(ZPOND(:,:)> 0.)
-        DGMI%XSWI (:,:) = DGMI%XSWI (:,:) / ZPOND(:,:)
-        DGMI%XTSWI(:,:) = DGMI%XTSWI(:,:) / ZPOND(:,:)
+    DM%XSWI (:,:) = DM%XSWI (:,:) / ZPOND(:,:)
+    DM%XTSWI(:,:) = DM%XTSWI(:,:) / ZPOND(:,:)
   ELSEWHERE
-        DGMI%XSWI (:,:) = XUNDEF
-        DGMI%XTSWI(:,:) = XUNDEF
+    DM%XSWI (:,:) = XUNDEF
+    DM%XTSWI(:,:) = XUNDEF
   ENDWHERE
 !
 ! ---------------------------------------------
-  IF(DGMI%LSURF_MISC_DIF)THEN ! LSURF_MISC_DIF case
+  IF(DM%LSURF_MISC_DIF)THEN ! LSURF_MISC_DIF case
 ! ---------------------------------------------
-!    
-    DO JPATCH=1,INP
-!  
-      IF (IP%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
 !     
-      DO JLAYER = 1,IO%NGROUND_LAYER
-!       cdir nodep 
-        DO JJ=1,INI
-          IDEPTH=IMX%NWG_LAYER(JJ,JPATCH)
-          IF(JLAYER<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
+    ZSUMFRD2(:)=0.0
+    ZSUMFRD3(:)=0.0
+!
+    DM%XFRD2_TSWI (:) = 0.
+    DM%XFRD2_TWG  (:) = 0.
+    DM%XFRD2_TWGI (:) = 0.
+!   
+    DM%XFRD3_TSWI (:) = 0.
+    DM%XFRD3_TWG  (:) = 0.
+    DM%XFRD3_TWGI (:) = 0.
+
+    DO JP=1,IO%NPATCH
+      PK => NP%AL(JP)
+      PEK => NPE%AL(JP)
+      DMK => DMP%AL(JP)
+
+      DO JI=1,PK%NSIZE_P
+        IMASK = PK%NR_P(JI)
+     
+        DO JL = 1,IO%NGROUND_LAYER
+          IDEPTH= PK%NWG_LAYER(JI)
+
+          IF(JL<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
             !
             ! ISBA-FR-DG2 comparable soil wetness index, liquid water and ice contents
-            ZWORK=MIN(IP%XDZG(JJ,JLAYER,JPATCH),MAX(0.0,IMX%XDG2(JJ,JPATCH)-IMX%XDG(JJ,JLAYER,JPATCH)&
-                    +IP%XDZG(JJ,JLAYER,JPATCH)))
-            DGMI%XFRD2_TSWI (JJ) = DGMI%XFRD2_TSWI (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTSWI(JJ,JLAYER)
-            DGMI%XFRD2_TWG  (JJ) = DGMI%XFRD2_TWG  (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * IR%XWG  (JJ,JLAYER,JPATCH)
-            DGMI%XFRD2_TWGI (JJ) = DGMI%XFRD2_TWGI (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * IR%XWGI (JJ,JLAYER,JPATCH)
-            ZSUMFRD2        (JJ) = ZSUMFRD2        (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH)
+            ZWORK = MIN(PK%XDZG(JI,JL),MAX(0.0,PK%XDG2(JI)-PK%XDG(JI,JL)+PK%XDZG(JI,JL)))
+            DM%XFRD2_TSWI (IMASK) = DM%XFRD2_TSWI (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
+            DM%XFRD2_TWG  (IMASK) = DM%XFRD2_TWG  (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWG  (JI,JL)
+            DM%XFRD2_TWGI (IMASK) = DM%XFRD2_TWGI (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWGI (JI,JL)
+            ZSUMFRD2       (IMASK) = ZSUMFRD2       (IMASK) + ZWORK * PK%XPATCH(JI)
             !
             ! ISBA-FR-DG3 comparable soil wetness index, liquid water and ice contents
-            ZWORK=MIN(IP%XDZG(JJ,JLAYER,JPATCH),MAX(0.0,IMX%XDG(JJ,JLAYER,JPATCH)-IMX%XDG2(JJ,JPATCH)))
-            DGMI%XFRD3_TSWI (JJ) = DGMI%XFRD3_TSWI (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTSWI(JJ,JLAYER)
-            DGMI%XFRD3_TWG  (JJ) = DGMI%XFRD3_TWG  (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * IR%XWG  (JJ,JLAYER,JPATCH)
-            DGMI%XFRD3_TWGI (JJ) = DGMI%XFRD3_TWGI (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH) * IR%XWGI (JJ,JLAYER,JPATCH)
-            ZSUMFRD3        (JJ) = ZSUMFRD3        (JJ) + ZWORK * IP%XPATCH(JJ,JPATCH)
+            ZWORK  =MIN(PK%XDZG(JI,JL),MAX(0.0,PK%XDG(JI,JL)-PK%XDG2(JI)))
+            DM%XFRD3_TSWI (IMASK) = DM%XFRD3_TSWI (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
+            DM%XFRD3_TWG  (IMASK) = DM%XFRD3_TWG  (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWG  (JI,JL)
+            DM%XFRD3_TWGI (IMASK) = DM%XFRD3_TWGI (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWGI (JI,JL)
+            ZSUMFRD3      (IMASK) = ZSUMFRD3      (IMASK) + ZWORK * PK%XPATCH(JI)
             !
           ENDIF
         ENDDO
@@ -301,19 +303,19 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
     ENDDO
 !    
     WHERE(ZSUMFRD2(:)>0.0) 
-          DGMI%XFRD2_TSWI (:) = DGMI%XFRD2_TSWI (:) / ZSUMFRD2(:)
-          DGMI%XFRD2_TWG  (:) = DGMI%XFRD2_TWG  (:) / ZSUMFRD2(:)
-          DGMI%XFRD2_TWGI (:) = DGMI%XFRD2_TWGI (:) / ZSUMFRD2(:)          
+          DM%XFRD2_TSWI (:) = DM%XFRD2_TSWI (:) / ZSUMFRD2(:)
+          DM%XFRD2_TWG  (:) = DM%XFRD2_TWG  (:) / ZSUMFRD2(:)
+          DM%XFRD2_TWGI (:) = DM%XFRD2_TWGI (:) / ZSUMFRD2(:)          
     ELSEWHERE
-          DGMI%XFRD2_TSWI (:) = XUNDEF
+          DM%XFRD2_TSWI (:) = XUNDEF
     ENDWHERE 
 !    
     WHERE(ZSUMFRD3(:)>0.0) 
-          DGMI%XFRD3_TSWI (:) = DGMI%XFRD3_TSWI (:) / ZSUMFRD3(:)
-          DGMI%XFRD3_TWG  (:) = DGMI%XFRD3_TWG  (:) / ZSUMFRD3(:)
-          DGMI%XFRD3_TWGI (:) = DGMI%XFRD3_TWGI (:) / ZSUMFRD3(:) 
+          DM%XFRD3_TSWI (:) = DM%XFRD3_TSWI (:) / ZSUMFRD3(:)
+          DM%XFRD3_TWG  (:) = DM%XFRD3_TWG  (:) / ZSUMFRD3(:)
+          DM%XFRD3_TWGI (:) = DM%XFRD3_TWGI (:) / ZSUMFRD3(:) 
     ELSEWHERE
-          DGMI%XFRD3_TSWI (:) = XUNDEF
+          DM%XFRD3_TSWI (:) = XUNDEF
     ENDWHERE
 !
 ! ---------------------------------------------
@@ -324,64 +326,67 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
 ELSE ! Force-restore case
 !---------------------------------------------
 ! 
-  DO JPATCH=1,INP
-     DO JJ=1,INI     
-        IF(ZSUMPATCH(JJ) > 0.)THEN
+  DO JP=1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    DMK => DMP%AL(JP)
+
+    DO JI=1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI)    
 !
-          DGMI%XSWI (JJ,1) = DGMI%XSWI (JJ,1) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XSWI (JJ,1)
-          DGMI%XSWI (JJ,2) = DGMI%XSWI (JJ,2) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XSWI (JJ,2)
-          DGMI%XTSWI(JJ,1) = DGMI%XTSWI(JJ,1) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTSWI(JJ,1)
-          DGMI%XTSWI(JJ,2) = DGMI%XTSWI(JJ,2) + IP%XPATCH(JJ,JPATCH) * DGMIP%AL(JPATCH)%XTSWI(JJ,2)
+      DM%XSWI (IMASK,1) = DM%XSWI (IMASK,1) + PK%XPATCH(JI) * DMK%XSWI (JI,1)
+      DM%XSWI (IMASK,2) = DM%XSWI (IMASK,2) + PK%XPATCH(JI) * DMK%XSWI (JI,2)
+      DM%XTSWI(IMASK,1) = DM%XTSWI(IMASK,1) + PK%XPATCH(JI) * DMK%XTSWI(JI,1)
+      DM%XTSWI(IMASK,2) = DM%XTSWI(IMASK,2) + PK%XPATCH(JI) * DMK%XTSWI(JI,2)
 !
-          DGMI%XSOIL_SWI (JJ) = DGMI%XSOIL_SWI (JJ) + &
-                  IP%XPATCH(JJ,JPATCH) * IMX%XDG (JJ,2,JPATCH) * DGMIP%AL(JPATCH)%XSWI (JJ,2)
-          DGMI%XSOIL_TSWI(JJ) = DGMI%XSOIL_TSWI(JJ) + IP%XPATCH(JJ,JPATCH) * &
-                  IMX%XDG (JJ,2,JPATCH) * DGMIP%AL(JPATCH)%XTSWI(JJ,2)
-          DGMI%XSOIL_TWG (JJ) = DGMI%XSOIL_TWG (JJ) + IP%XPATCH(JJ,JPATCH) * &
-                  IMX%XDG (JJ,2,JPATCH) * (IR%XWG(JJ,2,JPATCH) + IR%XWGI(JJ,2,JPATCH))
-          DGMI%XSOIL_TWGI(JJ) = DGMI%XSOIL_TWGI(JJ) + &
-                  IP%XPATCH(JJ,JPATCH) * IMX%XDG (JJ,2,JPATCH) * IR%XWGI(JJ,2,JPATCH) 
-! 
-          ZSUMDG         (JJ) = ZSUMDG        (JJ) + IP%XPATCH(JJ,JPATCH) * IMX%XDG(JJ,IO%NGROUND_LAYER,JPATCH)        
+      DM%XSOIL_SWI (IMASK) = DM%XSOIL_SWI (IMASK) + PK%XPATCH(JI) * PK%XDG (JI,2) * DMK%XSWI (JI,2)
+      DM%XSOIL_TSWI(IMASK) = DM%XSOIL_TSWI(IMASK) + PK%XPATCH(JI) * PK%XDG (JI,2) * DMK%XTSWI(JI,2)
+      DM%XSOIL_TWG (IMASK) = DM%XSOIL_TWG (IMASK) + PK%XPATCH(JI) * PK%XDG (JI,2) * (PEK%XWG(JI,2) + PEK%XWGI(JI,2))
+      DM%XSOIL_TWGI(IMASK) = DM%XSOIL_TWGI(IMASK) + PK%XPATCH(JI) * PK%XDG (JI,2) * PEK%XWGI(JI,2) 
+!        
+      ZSUMDG       (IMASK) = ZSUMDG(IMASK) + PK%XPATCH(JI) * PK%XDG(JI,IO%NGROUND_LAYER)        
 !          
-       ENDIF
-     ENDDO
+    ENDDO
   ENDDO     
 !     
   IF(IO%CISBA=='3-L')THEN
 !          
     ZPOND(:,:)=0.0
-    DO JPATCH=1,INP
-       DO JJ=1,SIZE(IP%XPATCH,1)        
-          IF(ZSUMPATCH(JJ) > 0.)THEN
+    DO JP=1,IO%NPATCH
+      DMK => DMP%AL(JP)
+      PK => NP%AL(JP)
+      PEK => NPE%AL(JP)    
+     
+      DO JI=1,PK%NSIZE_P
+        IMASK = PK%NR_P(JI)       
 !
-            ZWORK=MAX(0.0,IMX%XDG(JJ,3,JPATCH)-IMX%XDG(JJ,2,JPATCH))
+        ZWORK=MAX(0.0,PK%XDG(JI,3)-PK%XDG(JI,2))
 !
-!           Remenber: no ice in the third layer of 3-L
-            ZPOND          (JJ,3) = ZPOND          (JJ,3) + IP%XPATCH(JJ,JPATCH) * ZWORK
-            DGMI%XSWI      (JJ,3) = DGMI%XSWI      (JJ,3) + IP%XPATCH(JJ,JPATCH) * ZWORK * DGMIP%AL(JPATCH)%XSWI (JJ,3)
-            DGMI%XSOIL_SWI (JJ  ) = DGMI%XSOIL_SWI (JJ  ) + IP%XPATCH(JJ,JPATCH) * ZWORK * DGMIP%AL(JPATCH)%XSWI (JJ,3)  
-            DGMI%XTSWI     (JJ,3) = DGMI%XTSWI     (JJ,3) + IP%XPATCH(JJ,JPATCH) * ZWORK * DGMIP%AL(JPATCH)%XTSWI(JJ,3)
-            DGMI%XSOIL_TSWI(JJ  ) = DGMI%XSOIL_TSWI(JJ  ) + IP%XPATCH(JJ,JPATCH) * ZWORK * DGMIP%AL(JPATCH)%XTSWI(JJ,3)  
-            DGMI%XSOIL_TWG (JJ  ) = DGMI%XSOIL_TWG (JJ  ) + IP%XPATCH(JJ,JPATCH) * ZWORK * IR%XWG  (JJ,3,JPATCH)  
+!       Remenber: no ice in the third layer of 3-L
+        ZPOND         (IMASK,3) = ZPOND       (IMASK,3) + PK%XPATCH(JI) * ZWORK
+        DM%XSWI      (IMASK,3) = DM%XSWI      (IMASK,3) + PK%XPATCH(JI) * ZWORK * DMK%XSWI (JI,3)
+        DM%XSOIL_SWI (IMASK  ) = DM%XSOIL_SWI (IMASK  ) + PK%XPATCH(JI) * ZWORK * DMK%XSWI (JI,3)  
+        DM%XTSWI     (IMASK,3) = DM%XTSWI     (IMASK,3) + PK%XPATCH(JI) * ZWORK * DMK%XTSWI(JI,3)
+        DM%XSOIL_TSWI(IMASK  ) = DM%XSOIL_TSWI(IMASK  ) + PK%XPATCH(JI) * ZWORK * DMK%XTSWI(JI,3)  
+        DM%XSOIL_TWG (IMASK  ) = DM%XSOIL_TWG (IMASK  ) + PK%XPATCH(JI) * ZWORK * PEK%XWG  (JI,3)  
 !
-          ENDIF
-       ENDDO
+      ENDDO
     ENDDO
 !
     WHERE(ZPOND(:,3)>0.0)
-          DGMI%XSWI (:,3) = DGMI%XSWI (:,3) / ZPOND(:,3)
-          DGMI%XTSWI(:,3) = DGMI%XTSWI(:,3) / ZPOND(:,3)
+          DM%XSWI (:,3) = DM%XSWI (:,3) / ZPOND(:,3)
+          DM%XTSWI(:,3) = DM%XTSWI(:,3) / ZPOND(:,3)
     ELSEWHERE
-          DGMI%XSWI (:,3) = XUNDEF
-          DGMI%XTSWI(:,3) = XUNDEF
+          DM%XSWI (:,3) = XUNDEF
+          DM%XTSWI(:,3) = XUNDEF
     ENDWHERE
 !
   ENDIF
   
 !
 !---------------------------------------------
-ENDIF ! End ISBA soil scheme case   
+ENDIF ! End ISBA soil scheme case   !
+!
 !---------------------------------------------
 !
 !       3.     Final computation for grid-cell diag
@@ -389,21 +394,21 @@ ENDIF ! End ISBA soil scheme case
 !
 !Total Soil Wetness Index and Soil Water Content (m3.m-3)
 WHERE(ZSUMDG(:)>0.0)
-      DGMI%XSOIL_SWI (:) = DGMI%XSOIL_SWI (:)/ZSUMDG(:)
-      DGMI%XSOIL_TSWI(:) = DGMI%XSOIL_TSWI(:)/ZSUMDG(:)
-      DGMI%XSOIL_WG  (:) = DGMI%XSOIL_TWG (:)/ZSUMDG(:)
-      DGMI%XSOIL_WGI (:) = DGMI%XSOIL_TWGI(:)/ZSUMDG(:)
+  DM%XSOIL_SWI (:) = DM%XSOIL_SWI (:)/ZSUMDG(:)
+  DM%XSOIL_TSWI(:) = DM%XSOIL_TSWI(:)/ZSUMDG(:)
+  DM%XSOIL_WG  (:) = DM%XSOIL_TWG (:)/ZSUMDG(:)
+  DM%XSOIL_WGI (:) = DM%XSOIL_TWGI(:)/ZSUMDG(:)
 ENDWHERE
 !       
 !Total Soil Water Content (Liquid+Solid) and Total Frozen Content (kg/m2)
-DGMI%XSOIL_TWG (:)= DGMI%XSOIL_TWG (:) * XRHOLW
-DGMI%XSOIL_TWGI(:)= DGMI%XSOIL_TWGI(:) * XRHOLW
+DM%XSOIL_TWG (:)= DM%XSOIL_TWG (:) * XRHOLW
+DM%XSOIL_TWGI(:)= DM%XSOIL_TWGI(:) * XRHOLW
 !
 ! Snow temperature  
 WHERE(ZSNOW(:)>0.0)
-      DGMI%XTTSNOW(:) = DGMI%XTTSNOW(:)/ZSNOW(:)
+      DM%XTTSNOW(:) = DM%XTTSNOW(:)/ZSNOW(:)
 ELSEWHERE
-      DGMI%XTTSNOW(:) = XUNDEF
+      DM%XTTSNOW(:) = XUNDEF
 ENDWHERE
 !
 !-------------------------------------------------------------------------------

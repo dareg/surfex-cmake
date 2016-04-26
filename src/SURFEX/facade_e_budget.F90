@@ -1,4 +1,4 @@
-SUBROUTINE FACADE_E_BUDGET(TOP, T, B, DGMT, PTSTEP, PDN_RD, PRHOA, PAC_WL, PAC_BLD, &
+SUBROUTINE FACADE_E_BUDGET(TOP, T, B, DMT, PTSTEP, PDN_RD, PRHOA, PAC_WL, PAC_BLD, &
                            PLW_RAD, PPS, PEXNS, PT_CANYON, PTS_RD, PTSN_RD, PTS_GD, &
                            PTS_FL, PLW_WA_TO_WB, PLW_R_TO_WA, PLW_R_TO_WB,          &
                            PLW_G_TO_WA, PLW_G_TO_WB, PLW_S_TO_WA, PLW_S_TO_WB,      &
@@ -73,7 +73,7 @@ IMPLICIT NONE
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
-TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
 !
 REAL,               INTENT(IN)    :: PTSTEP       ! time step
 REAL, DIMENSION(:), INTENT(IN)    :: PDN_RD     ! snow-covered fraction on roads
@@ -183,11 +183,11 @@ ZTI_WL_B(:) = T%XT_WALL_B(:,IWL)
 !  ---------------------------------------
 !
  CALL WALL_LAYER_E_BUDGET(TOP, T, B, T%XT_WALL_A, ZTS_WL_B, ZTI_WL_B, PTSTEP, PDN_RD, &
-                          PRHOA, PAC_WL, PAC_BLD, PLW_RAD, PPS, PEXNS, DGMT%XABS_SW_WALL_A,&
+                          PRHOA, PAC_WL, PAC_BLD, PLW_RAD, PPS, PEXNS, DMT%XABS_SW_WALL_A,&
                           PT_CANYON, PTS_RD, PTSN_RD, PTS_GD, PTS_FL, PLW_WA_TO_WB,   &
                           PLW_R_TO_WA, PLW_G_TO_WA, PLW_NR_TO_WA, PLW_WIN_TO_WA,      &
-                          PLW_S_TO_WA, PFLX_BLD_WL_A, PDQS_WL_A, DGMT%XABS_LW_WALL_A, &
-                          ZEMIT_LW_WL_A, DGMT%XH_WALL_A, ZIMB_WL, PRADHT_IN, PRAD_RF_WL, &
+                          PLW_S_TO_WA, PFLX_BLD_WL_A, PDQS_WL_A, DMT%XABS_LW_WALL_A, &
+                          ZEMIT_LW_WL_A, DMT%XH_WALL_A, ZIMB_WL, PRADHT_IN, PRAD_RF_WL, &
                           ZRAD_WL_A_WIN, ZRAD_WL_FL, ZRAD_WL_MA, ZCONV_WL_BLD,        &
                           PLOAD_IN_WL)
 !
@@ -202,17 +202,17 @@ ZRAD_WL_WIN  = 0.5 * ZRAD_WL_A_WIN
 !
 IF (TOP%CWALL_OPT/='UNIF') THEN
  CALL WALL_LAYER_E_BUDGET(TOP, T, B, T%XT_WALL_B, ZTS_WL_A, ZTI_WL_A, PTSTEP, PDN_RD, &
-                          PRHOA, PAC_WL, PAC_BLD, PLW_RAD, PPS, PEXNS, DGMT%XABS_SW_WALL_B, &
+                          PRHOA, PAC_WL, PAC_BLD, PLW_RAD, PPS, PEXNS, DMT%XABS_SW_WALL_B, &
                           PT_CANYON, PTS_RD, PTSN_RD, PTS_GD, PTS_FL, PLW_WA_TO_WB,   &
                           PLW_R_TO_WB, PLW_G_TO_WB, PLW_NR_TO_WB, PLW_WIN_TO_WB,      &
-                          PLW_S_TO_WB, PFLX_BLD_WL_B, PDQS_WL_B, DGMT%XABS_LW_WALL_B,   &
-                          ZEMIT_LW_WL_B, DGMT%XH_WALL_B, ZIMB_WL, PRADHT_IN, PRAD_RF_WL,&
+                          PLW_S_TO_WB, PFLX_BLD_WL_B, PDQS_WL_B, DMT%XABS_LW_WALL_B,   &
+                          ZEMIT_LW_WL_B, DMT%XH_WALL_B, ZIMB_WL, PRADHT_IN, PRAD_RF_WL,&
                           ZRAD_WL_A_WIN, ZRAD_WL_FL, ZRAD_WL_MA, ZCONV_WL_BLD,        & 
                           PLOAD_IN_WL                                                )
 ELSE
   T%XT_WALL_B    = T%XT_WALL_A
-  DGMT%XH_WALL_B        = DGMT%XH_WALL_A
-  DGMT%XABS_LW_WALL_B   = DGMT%XABS_LW_WALL_A
+  DMT%XH_WALL_B        = DMT%XH_WALL_A
+  DMT%XABS_LW_WALL_B   = DMT%XABS_LW_WALL_A
   PDQS_WL_B      = PDQS_WL_A
   PFLX_BLD_WL_B  = PFLX_BLD_WL_A
   ZEMIT_LW_WL_B  = ZEMIT_LW_WL_A
@@ -241,10 +241,10 @@ IF (TOP%CBEM == 'BEM') THEN
    WHERE (ZLW_W_TO_WIN(:)>0.) &
    ZTS_WL(:) = ( PLW_WA_TO_WIN(:)*T%XT_WALL_A(:,1)+PLW_WB_TO_WIN(:)*T%XT_WALL_B(:,1) ) / ZLW_W_TO_WIN(:)
    CALL WINDOW_E_BUDGET(B, ZEMIS_WIN, ZLW_W_TO_WIN, PLW_R_TO_WIN, PLW_G_TO_WIN, PLW_NR_TO_WIN, &
-                        PLW_S_TO_WIN, PRAD_RF_WIN, ZRAD_WL_WIN, DGMT%XABS_SW_WIN, PLW_RAD, PAC_WIN, &
+                        PLW_S_TO_WIN, PRAD_RF_WIN, ZRAD_WL_WIN, DMT%XABS_SW_WIN, PLW_RAD, PAC_WIN, &
                         PRADHT_IN, PTS_FL, PRHOA, PDN_RD,  PT_CANYON, ZTS_WL, PTS_RD, PTSN_RD, &
                         PTS_GD, PRAD_WIN_FL, PRAD_WIN_MA, PCONV_WIN_BLD, ZEMIT_LW_WIN,          &
-                        DGMT%XABS_LW_WIN, PLOAD_IN_WIN                                   )
+                        DMT%XABS_LW_WIN, PLOAD_IN_WIN                                   )
 ENDIF
 
 !*        wall, and win emitted LW radiation on snow-free surfaces

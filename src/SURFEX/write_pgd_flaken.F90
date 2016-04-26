@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_FLAKE_n (DTCO, HSELECT, U, FG, F, &
+      SUBROUTINE WRITE_PGD_FLAKE_n (DTCO, HSELECT, U, G, F, &
                                     HPROGRAM)
 !     ####################################
 !
@@ -57,7 +57,7 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(GRID_t), INTENT(INOUT) :: FG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -77,7 +77,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_FLAKE_n(HSELECT, FG, F, HPROGRAM)
+ CALL WRITESURF_PGD_FLAKE_n(HSELECT, G, F, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_ISBA_BUFFER (IG, U, HPROGRAM,HSURF,KLUOUT,PFIELD)
+SUBROUTINE PREP_ISBA_BUFFER (G, U, HPROGRAM,HSURF,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_BUFFER* - initializes ISBA fields from operational BUFFER
@@ -57,7 +57,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: IG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -142,8 +142,8 @@ SELECT CASE(HSURF)
 
               ZFIELD_EP_IN(:) = ZFIELD_EP(:)
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,IG%XLAT,IG%XLON,ZFIELD_EP_IN(:), &
-                                        IG%XLAT,IG%XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
+                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
 #endif
 
               ! Unpack to full rank
@@ -199,8 +199,8 @@ SELECT CASE(HSURF)
 
               ZFIELD_EP_IN(:) = ZFIELD_EP
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,IG%XLAT,IG%XLON,ZFIELD_EP_IN(:), &
-                                        IG%XLAT,IG%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
+                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 #endif
 
               ! Unpack to full rank
@@ -259,8 +259,8 @@ SELECT CASE(HSURF)
           
               ZFIELD_EP_IN(:) = ZFIELD_EP
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,IG%XLAT,IG%XLON,ZFIELD_EP_IN(:), &
-                                        IG%XLAT,IG%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
+                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 #endif
 
               ! Unpack to full rank

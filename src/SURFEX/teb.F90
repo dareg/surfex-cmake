@@ -1,5 +1,5 @@
 !   ##########################################################################
-    SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DGMT, HIMPLICIT_WIND, PTSUN, PT_CANYON, PQ_CANYON,  &
+    SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DMT, HIMPLICIT_WIND, PTSUN, PT_CANYON, PQ_CANYON,  &
                      PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN, PPEW_A_COEF,&
                      PPEW_B_COEF, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, PPS, PPA,     &
                      PEXNS, PEXNA, PTA, PQA, PRHOA, PLW_RAD, PRR, PSR, PZREF, PUREF,    &
@@ -214,7 +214,7 @@ TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
-TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DGMT
+TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -433,7 +433,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TEB',0,ZHOOK_HANDLE)
 !
-!print*,'teb1 ',T%XT_ROOF(1,1)
 !*      1.     Initializations
 !              ---------------
 !
@@ -446,7 +445,7 @@ ZWS_RD_MAX =  1. ! (1mm) maximum deepness of road water reservoir
 !*      1.2    radiative snow variables at previous time-step
 !              ----------------------------------------------
 !
-ZTSSN_RD(:) = T%TSNOW_ROAD%TS(:,1)
+ZTSSN_RD(:) = T%TSNOW_ROAD%TS(:)
 !
 !
 !*      1.3    indoor aerodynamique conductance for DEF case
@@ -472,26 +471,17 @@ ZTS_RF    (:)=T%XT_ROOF     (:,1)
 !*      1.4    load on indoor walls
 !              -------------------------
 !
-!print*,'F_FLOOR_WIN ',B%XF_FLOOR_WIN(1)
-!print*,'TR_SW_WIN ',DGMT%XTR_SW_WIN(1)
-!print*,'QIN ',DGMT%XQIN(1)
-!print*,'N_FLOOR ',B%XN_FLOOR(1)
-!print*,'QIN_FLAT ',B%XQIN_FLAT(1)
-!print*,'QIN_FRAD ',B%XQIN_FRAD(1)
-!print*,'WALL_O_BLD ',T%XWALL_O_BLD(1)
-!print*,'GLAZ_O_BLD ',B%XGLAZ_O_BLD(1)
-!print*,'MASS_O_BLD ',B%XMASS_O_BLD(1)
 IF (TOP%CBEM=='BEM') THEN
   !
-  ZLOAD_IN_RF = B%XF_FLOOR_WIN * DGMT%XTR_SW_WIN + DGMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
+  ZLOAD_IN_RF = B%XF_FLOOR_WIN * DMT%XTR_SW_WIN + DMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
            / (2 + T%XWALL_O_BLD + B%XGLAZ_O_BLD + B%XMASS_O_BLD ) ! W/m2 [ROOF]
-  ZLOAD_IN_FL = B%XF_FLOOR_WIN * DGMT%XTR_SW_WIN + DGMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
+  ZLOAD_IN_FL = B%XF_FLOOR_WIN * DMT%XTR_SW_WIN + DMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
            / (2 + T%XWALL_O_BLD + B%XGLAZ_O_BLD + B%XMASS_O_BLD )
-  ZLOAD_IN_MA = B%XF_MASS_WIN * DGMT%XTR_SW_WIN + DGMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
+  ZLOAD_IN_MA = B%XF_MASS_WIN * DMT%XTR_SW_WIN + DMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
            / (2 + T%XWALL_O_BLD + B%XGLAZ_O_BLD + B%XMASS_O_BLD )
-  ZLOAD_IN_WL = B%XF_WALL_WIN * DGMT%XTR_SW_WIN + DGMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
+  ZLOAD_IN_WL = B%XF_WALL_WIN * DMT%XTR_SW_WIN + DMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
            / (2 + T%XWALL_O_BLD + B%XGLAZ_O_BLD + B%XMASS_O_BLD )
-  ZLOAD_IN_WIN = B%XF_WIN_WIN * DGMT%XTR_SW_WIN + DGMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
+  ZLOAD_IN_WIN = B%XF_WIN_WIN * DMT%XTR_SW_WIN + DMT%XQIN * B%XN_FLOOR * (1-B%XQIN_FLAT) * B%XQIN_FRAD  &
            / (2 + T%XWALL_O_BLD + B%XGLAZ_O_BLD + B%XMASS_O_BLD )
 ELSE
   ZLOAD_IN_RF = 0.
@@ -516,7 +506,6 @@ ZWS_RD_MAX(:) = ZWS_RD_MAX(:) * PDF_RD(:)
 !*      3.     Surface drag
 !              ------------
 !
-!print*,'teb2 ',T%XT_ROOF(1,1)
  CALL URBAN_DRAG(TOP, T, B, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON, &
                  PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN, &
                  ZTS_RF, ZTS_RD, ZTS_WL, PTS_GARDEN, PDN_RF, PDN_RD,    &
@@ -552,17 +541,15 @@ ZQA(:) = PQA(:) * QSAT(PTA(:),PPS(:)) / QSAT(ZTA(:),PPA(:))
 !*      5.     Snow mantel model
 !              -----------------
 !
-!print*,'teb3 ',T%XT_ROOF(1,1)
  CALL URBAN_SNOW_EVOL(T, B, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, ZTS_RF, ZTS_RD, ZTS_WL_A,    &
                       ZTS_WL_B, PPS, ZTA, ZQA, PRHOA, PLW_RAD, PSR, PZREF, PUREF, PVMOD,  &
-                      PTSTEP,  PZ_LOWCAN, PDN_RF, DGMT%XABS_SW_SNOW_ROOF,                 &
-                      DGMT%XABS_LW_SNOW_ROOF, PDN_RD, DGMT%XABS_SW_SNOW_ROAD,             &
-                      DGMT%XABS_LW_SNOW_ROAD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF,       &
+                      PTSTEP,  PZ_LOWCAN, PDN_RF, DMT%XABS_SW_SNOW_ROOF,                 &
+                      DMT%XABS_LW_SNOW_ROOF, PDN_RD, DMT%XABS_SW_SNOW_ROAD,             &
+                      DMT%XABS_LW_SNOW_ROAD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF,       &
                       PMELT_RF, PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD,           &
                       PLW_WA_TO_NR, PLW_WB_TO_NR, PLW_S_TO_NR, PLW_WIN_TO_NR, ZDQS_SN_RF, &
                       ZDQS_SN_RD      )
 !
-!print*,'teb4 ',T%XT_ROOF(1,1)
 !-------------------------------------------------------------------------------
 !
 !*      6.    LW properties
@@ -602,14 +589,13 @@ END SELECT
 
  CALL ROOF_LAYER_E_BUDGET(TOP, T, B, PQSAT_RF, ZAC_BLD, PTSTEP, PDN_RF, PRHOA,    &
                           PAC_RF, PAC_RF_WAT, PLW_RAD, PPS, PDELT_RF, ZTA, ZQA,   &
-                          PEXNA, PEXNS, DGMT%XABS_SW_ROOF, PGSN_RF,  ZFLX_BLD_RF, &
-                          ZDQS_RF, DGMT%XABS_LW_ROOF, DGMT%XH_ROOF, PLEW_RF, ZIMB_RF, &
-                          DGMT%XG_GREENROOF_ROOF, ZRADHT_IN, ZTS_FL, ZT_WL(:,IWL),&
+                          PEXNA, PEXNS, DMT%XABS_SW_ROOF, PGSN_RF,  ZFLX_BLD_RF, &
+                          ZDQS_RF, DMT%XABS_LW_ROOF, DMT%XH_ROOF, PLEW_RF, ZIMB_RF, &
+                          DMT%XG_GREENROOF_ROOF, ZRADHT_IN, ZTS_FL, ZT_WL(:,IWL),&
                           ZRAD_RF_WL, ZRAD_RF_WIN, ZRAD_RF_FL, ZRAD_RF_MA, ZCONV_RF_BLD, &
                           PRR, & !modif to add heating/cooling of rain
                           ZLOAD_IN_RF )
 !
-!print*,'teb5 ',T%XT_ROOF(1,1)
 !-------------------------------------------------------------------------------
 !
 !*      8.    Road Ts computations
@@ -619,25 +605,24 @@ END SELECT
 
  CALL TEB_IRRIG(TIR%LPAR_RD_IRRIG, PTSTEP, TOP%TTIME%TDATE%MONTH, PTSUN,   &
                TIR%XRD_START_MONTH, TIR%XRD_END_MONTH, TIR%XRD_START_HOUR, &
-               TIR%XRD_END_HOUR, TIR%XRD_24H_IRRIG, DGMT%XIRRIG_ROAD      )
+               TIR%XRD_END_HOUR, TIR%XRD_24H_IRRIG, DMT%XIRRIG_ROAD      )
 
 !* ts_road, ts_wall, qsat_road, t_canyon and q_canyon are updated
 !
  CALL ROAD_LAYER_E_BUDGET(T, B, PTSTEP, PDN_RD, PRHOA, PAC_RD, PAC_RD_WAT, &
                           PLW_RAD, PPS, PQSAT_RD, PDELT_RD, PEXNS,         &
-                          DGMT%XABS_SW_ROAD, PGSN_RD, PQ_LOWCAN, PT_LOWCAN,&
+                          DMT%XABS_SW_ROAD, PGSN_RD, PQ_LOWCAN, PT_LOWCAN,&
                           ZTS_WL_A, ZTS_WL_B, ZTSSN_RD,  PTS_GARDEN,       &
                           PLW_WA_TO_R, PLW_WB_TO_R, PLW_S_TO_R,            &
-                          PLW_WIN_TO_R, PEMIT_LW_RD, ZDQS_RD, DGMT%XABS_LW_ROAD,  &
-                          DGMT%XH_ROAD, PLEW_RD, ZIMB_RD, PRR+DGMT%XIRRIG_ROAD    )
+                          PLW_WIN_TO_R, PEMIT_LW_RD, ZDQS_RD, DMT%XABS_LW_ROAD,  &
+                          DMT%XH_ROAD, PLEW_RD, ZIMB_RD, PRR+DMT%XIRRIG_ROAD    )
 !
 !-------------------------------------------------------------------------------
 !
 !*      8.     Wall Ts computations
 !              -----------------------------
 !
-!print*,'T_WIN1 ',B%XT_WIN1(32)
- CALL FACADE_E_BUDGET(TOP, T, B, DGMT, PTSTEP, PDN_RD, PRHOA, PAC_WL, ZAC_BLD,   &
+ CALL FACADE_E_BUDGET(TOP, T, B, DMT, PTSTEP, PDN_RD, PRHOA, PAC_WL, ZAC_BLD,   &
                       PLW_RAD, PPS, PEXNS, PT_CANYON, ZTS_RD, ZTSSN_RD, PTS_GARDEN, &
                       ZTS_FL, PLW_WA_TO_WB, PLW_R_TO_WA, PLW_R_TO_WB,      &
                       PLW_G_TO_WA, PLW_G_TO_WB, PLW_S_TO_WA, PLW_S_TO_WB,  &
@@ -650,7 +635,6 @@ END SELECT
                       ZRAD_WL_MA, ZRAD_WIN_FL, ZRAD_WIN_MA, ZCONV_WL_BLD,  &
                       ZCONV_WIN_BLD, ZAC_WIN, ZLOAD_IN_WL, ZLOAD_IN_WIN   )
 !
-!print*,'T_WIN1b ',B%XT_WIN1(32)
 !-------------------------------------------------------------------------------
 !
 !*      9.     Evolution of interior building air temperature
@@ -674,17 +658,15 @@ CASE("DEF")
    PHU_BLD(:)     = XUNDEF
 
 CASE("BEM")
-    !    print*,'ti_bld avant ',B%XTI_BLD(1)
-  CALL BEM(BOP, T, B, DGMT, PTSTEP, PTSUN, KDAY, PPS, PRHOA, PT_CANYON, &
+  CALL BEM(BOP, T, B, DMT, PTSTEP, PTSUN, KDAY, PPS, PRHOA, PT_CANYON, &
            PQ_CANYON, PU_CANYON, PHU_BLD, PT_RAD_IND, ZFLX_BLD_FL,&
            ZFLX_BLD_MA, ZRADHT_IN, ZRAD_RF_MA, ZRAD_RF_FL,        &
            ZRAD_WL_MA, ZRAD_WL_FL, ZRAD_WIN_MA, ZRAD_WIN_FL,      &
            ZCONV_RF_BLD, ZCONV_WL_BLD, ZCONV_WIN_BLD, ZLOAD_IN_FL,&
            ZLOAD_IN_MA                                 )
-   !print*,'ti_bld après ',B%XTI_BLD(1)
 
-   DGMT%XH_WASTE  = DGMT%XH_WASTE  * T%XBLD
-   DGMT%XLE_WASTE = DGMT%XLE_WASTE * T%XBLD
+   DMT%XH_WASTE  = DMT%XH_WASTE  * T%XBLD
+   DMT%XLE_WASTE = DMT%XLE_WASTE * T%XBLD
 END SELECT
 !
 !-------------------------------------------------------------------------------
@@ -692,7 +674,7 @@ END SELECT
 !*      10.    Fluxes over built surfaces
 !              --------------------------
 !
- CALL URBAN_FLUXES   (TOP, T, B, DGMT, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
+ CALL URBAN_FLUXES   (TOP, T, B, DMT, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
                       PEXNS, PRHOA, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,PAC_WL, PCD, PDF_RF, &
                       PDN_RF, PDF_RD, PDN_RD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, &
                       PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RF, ZDQS_RF, PMELT_RD, &
@@ -717,11 +699,11 @@ ENDWHERE
 !              ----------------------------------
 !
  CALL URBAN_HYDRO(ZWS_RF_MAX, ZWS_RD_MAX, T%XWS_ROOF, T%XWS_ROAD, PRR, &
-                  DGMT%XIRRIG_ROAD, PTSTEP, T%XBLD, DGMT%XLE_ROOF, DGMT%XLE_ROAD,  &
-                  DGMT%XRUNOFF_STRLROOF, DGMT%XRUNOFF_ROAD   )
+                  DMT%XIRRIG_ROAD, PTSTEP, T%XBLD, DMT%XLE_ROOF, DMT%XLE_ROAD,  &
+                  DMT%XRUNOFF_STRLROOF, DMT%XRUNOFF_ROAD   )
 !
-DGMT%XRUNOFF_ROOF(:) =  ( 1. - T%XGREENROOF(:) ) *   DGMT%XRUNOFF_STRLROOF(:)              &
-                      +        T%XGREENROOF(:)   * ( DGMT%XRUNOFF_GREENROOF(:) + DGMT%XDRAIN_GREENROOF(:) )
+DMT%XRUNOFF_ROOF(:) =  ( 1. - T%XGREENROOF(:) ) *   DMT%XRUNOFF_STRLROOF(:)              &
+                      +        T%XGREENROOF(:)   * ( DMT%XRUNOFF_GREENROOF(:) + DMT%XDRAIN_GREENROOF(:) )
                                                            
 !
 !-------------------------------------------------------------------------------

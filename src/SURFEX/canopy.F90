@@ -1,11 +1,11 @@
 !     #########
-SUBROUTINE CANOPY(KI, ICP, PHEIGHT, PDENSITY, PCDRAG, PAIRVOL, PSV, &
+SUBROUTINE CANOPY(KI, SB, PHEIGHT, PDENSITY, PCDRAG, PAIRVOL, PSV, &
                   PFORC, PFORC_U, PDFORC_UDU, PFORC_E, PDFORC_EDE   )  
 !     ###############################################################################
 !
 !!****  *ISBA_CANOPY_n * - prepares forcing for canopy air model
 !!
-!!    ICP%XURPOSE
+!!    SB%XURPOSE
 !!    -------
 !
 !!**  METHOD
@@ -38,22 +38,22 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
-TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 REAL, DIMENSION(KI), INTENT(IN)    :: PHEIGHT   ! canopy height                       (m)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(IN)    :: PDENSITY  ! canopy density                  (-)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(IN)    :: PCDRAG
+REAL, DIMENSION(KI,SB%NLVL), INTENT(IN)    :: PDENSITY  ! canopy density                  (-)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(IN)    :: PCDRAG
 !
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(IN)    :: PAIRVOL   ! Fraction of air for each canopy level total volume
+REAL, DIMENSION(KI,SB%NLVL), INTENT(IN)    :: PAIRVOL   ! Fraction of air for each canopy level total volume
 !
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PSV       ! vertical surface of building
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PSV       ! vertical surface of building
                                                      ! (walls) for each canopy level
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PFORC     !
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC     !
 !
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
-REAL, DIMENSION(KI,ICP%NLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PFORC_E   ! tendency of TKE  due to canopy drag   (m2/s3)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(OUT)   :: PDFORC_EDE! formal derivative of the tendency of
 !                                                    ! TKE  due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
@@ -72,20 +72,20 @@ IF (LHOOK) CALL DR_HOOK('CANOPY',0,ZHOOK_HANDLE)
 !*      1.2    Discretization on each canopy level
 !
 PSV(:,:) = 0.
-DO JLAYER = 1,ICP%NLVL-1
+DO JLAYER = 1,SB%NLVL-1
   !
-  WHERE ( ICP%XZF(:,JLAYER) < PHEIGHT(:) )
+  WHERE ( SB%XZF(:,JLAYER) < PHEIGHT(:) )
     PSV(:,JLAYER) = PDENSITY(:,JLAYER) / PHEIGHT(:)
-    WHERE ( ICP%XZF(:,JLAYER+1) > PHEIGHT(:) )
-      PSV(:,JLAYER) = PSV(:,JLAYER) * ( PHEIGHT(:) - ICP%XZF(:,JLAYER) )
+    WHERE ( SB%XZF(:,JLAYER+1) > PHEIGHT(:) )
+      PSV(:,JLAYER) = PSV(:,JLAYER) * ( PHEIGHT(:) - SB%XZF(:,JLAYER) )
     ELSEWHERE
-      PSV(:,JLAYER) = PSV(:,JLAYER) *  ICP%XDZ(:,JLAYER)
+      PSV(:,JLAYER) = PSV(:,JLAYER) *  SB%XDZ(:,JLAYER)
     END WHERE
   END WHERE
   !
 END DO
 !
-PFORC(:,:) = PCDRAG(:,:) * ICP%XU(:,:) * PSV(:,:)/PAIRVOL(:,:)/ICP%XDZ(:,:)
+PFORC(:,:) = PCDRAG(:,:) * SB%XU(:,:) * PSV(:,:)/PAIRVOL(:,:)/SB%XDZ(:,:)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -104,7 +104,7 @@ PDFORC_UDU = 0.
 !
 !* drag force by vertical surfaces
 !
-PFORC_U   (:,:) = PFORC_U    -      PFORC(:,:) * ICP%XU(:,:)
+PFORC_U   (:,:) = PFORC_U    -      PFORC(:,:) * SB%XU(:,:)
 PDFORC_UDU(:,:) = PDFORC_UDU - 2. * PFORC(:,:)
 !
 !-------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ PDFORC_EDE(:,:) = 0.
 ! with Vair = Vair/Vtot * Vtot = (Vair/Vtot) * Stot * Dz
 ! and  Sv/Vair = (Sv/Stot) * Stot/Vair = (Sv/Stot) / (Vair/Vtot) / Dz
 !
-PFORC_E    = PFORC_E    + PFORC(:,:) * ICP%XU(:,:)**2
+PFORC_E    = PFORC_E    + PFORC(:,:) * SB%XU(:,:)**2
 PDFORC_EDE = PDFORC_EDE + 0.
 !
 !

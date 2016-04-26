@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_WATFLUX_n (CHW, DWO, DGW, DGWC, W, DST, SLT, &
+SUBROUTINE COUPLING_WATFLUX_n (CHW, DGO, D, DC, W, DST, SLT, &
                                HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, &
                                KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF,     &
                                PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,      &
@@ -79,9 +79,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DWO
-TYPE(DIAG_t), INTENT(INOUT) :: DGW 
-TYPE(DIAG_t), INTENT(INOUT) :: DGWC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D 
+TYPE(DIAG_t), INTENT(INOUT) :: DC
 TYPE(WATFLUX_t), INTENT(INOUT) :: W 
 !
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -401,7 +401,7 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 ! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_INLINE_WATFLUX_n(DWO, DGW, DGWC, W, &
+ CALL DIAG_INLINE_WATFLUX_n(DGO, D, DC, W, &
                             PTSTEP,PTA, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
                             PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, ZZ0H, ZQSAT,     &
                             PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,  &

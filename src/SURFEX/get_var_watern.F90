@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_VAR_WATER_n (DFO, DGF, DWO, DGW, &
+      SUBROUTINE GET_VAR_WATER_n (DFO, DF, DWO, DW, &
                                   HPROGRAM,KI,HWATER,PQS,PZ0,PZ0H)
 !     ###########################################################
 !
@@ -50,9 +50,9 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DFO
-TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: DF
 TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DWO
-TYPE(DIAG_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: DW
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
  CHARACTER(LEN=6),     INTENT(IN)     :: HWATER
@@ -93,13 +93,13 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_WATFLX_N',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 IF (DWO%LSURF_VARS) THEN 
-        PQS      = DGW%XQS      
+        PQS      = DW%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
 IF (DWO%LCOEF) THEN 
-        PZ0      = DGW%XZ0
-        PZ0H     = DGW%XZ0H
+        PZ0      = DW%XZ0
+        PZ0H     = DW%XZ0H
 ELSE 
         PZ0      = XUNDEF
         PZ0H     = XUNDEF
@@ -122,13 +122,13 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_FLAKE_N',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 IF (DFO%LSURF_VARS) THEN 
-        PQS      = DGF%XQS      
+        PQS      = DF%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
 IF (DFO%LCOEF) THEN 
-        PZ0      = DGF%XZ0
-        PZ0H     = DGF%XZ0H
+        PZ0      = DF%XZ0
+        PZ0H     = DF%XZ0H
 ELSE 
         PZ0      = XUNDEF
         PZ0H     = XUNDEF

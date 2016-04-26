@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_NC_n (DTCO, U, &
-                                    HMASK,HACTION)
+      SUBROUTINE INIT_IO_SURF_NC_n (DTCO, U, HMASK,HACTION)
 !     ######################
 !
 !!****  *INIT_IO_SURF_NC* Keep in memory the netcdf ID of the output files
@@ -78,8 +77,7 @@ IF (HACTION=='READ ') THEN
   CFILE_NC = CFILEIN_NC
   IF (GEXIST) THEN 
     IRET = NF_OPEN(CFILEIN_NC,NF_NOWRITE,NID_NC)
-    CALL READ_SURF(&
-                   'NC    ','DIM_FULL',NFULL,IRET,HDIR='A')
+    CALL READ_SURF('NC    ','DIM_FULL',NFULL,IRET,HDIR='A')
   ENDIF
 ELSE 
   CALL GET_DIM_FULL_n(U%NDIM_FULL, NFULL)
@@ -107,11 +105,9 @@ ENDIF
  CALL GET_SIZE_FULL_n('OFFLIN',NFULL,U%NSIZE_FULL,ILU)
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     HMASK,IL)
+ CALL GET_TYPE_DIM_n(DTCO, U, HMASK,IL)
 !
- CALL INIT_IO_SURF_MASK_n(DTCO, U, &
-                          HMASK, IL, ILUOUT, ILU, NMASK)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, HMASK, IL, ILUOUT, ILU, NMASK)
 !
 CMASK = HMASK
 !

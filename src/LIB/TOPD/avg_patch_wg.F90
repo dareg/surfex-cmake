@@ -1,6 +1,6 @@
 !
 !     ##########################
-      SUBROUTINE AVG_PATCH_WG (IMX, IP, IR, KI, PWG, PWGI, PDG)
+      SUBROUTINE AVG_PATCH_WG (IO, NP, NPE, PWG, PWGI, PDG)
 !     ##########################
 !
 !!
@@ -37,9 +37,8 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 USE YOMHOOK   ,     ONLY : LHOOK,   DR_HOOK
@@ -49,81 +48,86 @@ USE PARKIND1  ,     ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
-
 !
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_OPTIONS_t), INTENT(IN) :: IO
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
- INTEGER, INTENT(IN)               :: KI
  REAL, DIMENSION(:,:), INTENT(OUT) :: PWG
  REAL, DIMENSION(:,:), INTENT(OUT) :: PWGI
  REAL, DIMENSION(:,:), INTENT(OUT) :: PDG
 !      
 !*      0.2    declarations of local variables
- INTEGER                         :: JJ, JLAYER, JPATCH ! loop indexes
- INTEGER                         :: IDEPTH 
- INTEGER                         :: INI, INP
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
+ INTEGER                         :: JI, JP ! loop indexes
+ INTEGER                         :: IMASK
  REAL                            :: ZWORK 
-REAL, DIMENSION(SIZE(IP%XPATCH,1)) :: ZSUMPATCH
+REAL, DIMENSION(SIZE(PWG,1)) :: ZSUMPATCH
  !
  REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('AVG_PATCH_WG',0,ZHOOK_HANDLE)
 !
-INI=SIZE(IP%XPATCH,1)
-INP=SIZE(IP%XPATCH,2)
-
 ZSUMPATCH(:) = 0.0
-DO JPATCH=1,INP
-   DO JJ=1,INI
-      ZSUMPATCH(JJ) = ZSUMPATCH(JJ) + IP%XPATCH(JJ,JPATCH)
-   END DO
+DO JP=1,IO%NPATCH
+  DO JI=1,NP%AL(JP)%NSIZE_P
+    IMASK = NP%AL(JP)%NR_P(JI)
+    ZSUMPATCH(IMASK) = ZSUMPATCH(IMASK) + NP%AL(JP)%XPATCH(JI)
+  END DO
 END DO
 
-PWG(:,:) =0.0
+PWG (:,:) =0.0
 PWGI(:,:)=0.0
-PDG(:,:) =0.0
+PDG (:,:) =0.0
 !
 ! 
-IF (INP/=1)THEN
-  DO JPATCH=1,INP
-     DO JJ=1,INI     
-        IF(ZSUMPATCH(JJ) > 0.)THEN
-!
-          ZWORK=MAX(0.0,IMX%XDG(JJ,3,JPATCH)-IMX%XDG(JJ,2,JPATCH))
-          PWG(JJ,1)  = PWG(JJ,1)  + IP%XPATCH(JJ,JPATCH) * IR%XWG(JJ,1,JPATCH)  * IMX%XDG (JJ,1,JPATCH) 
-          PWG(JJ,2)  = PWG(JJ,2)  + IP%XPATCH(JJ,JPATCH) * IR%XWG(JJ,2,JPATCH)  * IMX%XDG (JJ,2,JPATCH) 
-          PWG(JJ,3)  = PWG(JJ,3)  + IP%XPATCH(JJ,JPATCH) * IR%XWG(JJ,3,JPATCH)  * ZWORK
-          PWGI(JJ,1) = PWGI(JJ,1) + IP%XPATCH(JJ,JPATCH) * IR%XWGI(JJ,1,JPATCH) * IMX%XDG (JJ,1,JPATCH) 
-          PWGI(JJ,2) = PWGI(JJ,2) + IP%XPATCH(JJ,JPATCH) * IR%XWGI(JJ,2,JPATCH) * IMX%XDG (JJ,2,JPATCH) 
-          PWGI(JJ,3) = PWGI(JJ,3) + IP%XPATCH(JJ,JPATCH) * IR%XWGI(JJ,3,JPATCH) * ZWORK
-          ! 
-          PDG(JJ,1) = PDG(JJ,1) + IP%XPATCH(JJ,JPATCH) * IMX%XDG(JJ,1,JPATCH)
-          PDG(JJ,2) = PDG(JJ,2) + IP%XPATCH(JJ,JPATCH) * IMX%XDG (JJ,2,JPATCH)
-          PDG(JJ,3) = PDG(JJ,3) + IP%XPATCH(JJ,JPATCH) * IMX%XDG (JJ,3,JPATCH)
-          !
-!          
-       ENDIF
-     ENDDO
+IF (IO%NPATCH/=1)THEN
+  DO JP=1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    DO JI=1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI) 
+      IF(ZSUMPATCH(IMASK) > 0.)THEN
+        !
+        ZWORK=MAX(0.0,PK%XDG(JI,3)-PK%XDG(JI,2))
+        PWG(IMASK,1)  = PWG(IMASK,1)  + PK%XPATCH(JI) * PEK%XWG(JI,1)  * PK%XDG (JI,1) 
+        PWG(IMASK,2)  = PWG(IMASK,2)  + PK%XPATCH(JI) * PEK%XWG(JI,2)  * PK%XDG (JI,2) 
+        PWG(IMASK,3)  = PWG(IMASK,3)  + PK%XPATCH(JI) * PEK%XWG(JI,3)  * ZWORK
+        PWGI(IMASK,1) = PWGI(IMASK,1) + PK%XPATCH(JI) * PEK%XWGI(JI,1) * PK%XDG (JI,1) 
+        PWGI(IMASK,2) = PWGI(IMASK,2) + PK%XPATCH(JI) * PEK%XWGI(JI,2) * PK%XDG (JI,2) 
+        PWGI(IMASK,3) = PWGI(IMASK,3) + PK%XPATCH(JI) * PEK%XWGI(JI,3) * ZWORK
+        ! 
+        PDG(IMASK,1) = PDG(IMASK,1) + PK%XPATCH(JI) * PK%XDG(JI,1)
+        PDG(IMASK,2) = PDG(IMASK,2) + PK%XPATCH(JI) * PK%XDG(JI,2)
+        PDG(IMASK,3) = PDG(IMASK,3) + PK%XPATCH(JI) * PK%XDG(JI,3)
+        !          
+      ENDIF
+    ENDDO
   ENDDO     
-!     
- WHERE (PDG(:,1)>0.0)
+  !     
+  WHERE (PDG(:,1)>0.0)
     PWG(:,1)  = PWG(:,1)  / PDG(:,1)
-    PWGI(:,1)  = PWGI(:,1)  / PDG(:,1)
- ENDWHERE
- WHERE (PDG(:,2)>0.0)
+    PWGI(:,1) = PWGI(:,1) / PDG(:,1)
+  ENDWHERE
+  WHERE (PDG(:,2)>0.0)
     PWG(:,2)  = PWG(:,2)  / PDG(:,2)
-    PWGI(:,2)  = PWGI(:,2)  / PDG(:,2)
- ENDWHERE
- WHERE (PDG(:,3)-PDG(:,2)>0.0)
+    PWGI(:,2) = PWGI(:,2) / PDG(:,2)
+  ENDWHERE
+  WHERE (PDG(:,3)-PDG(:,2)>0.0)
     PWG(:,3)  = PWG(:,3)  / (PDG(:,3)-PDG(:,2))
-    PWGI(:,3)  = PWGI(:,3)  / (PDG(:,3)-PDG(:,2))
- ENDWHERE
+    PWGI(:,3) = PWGI(:,3) / (PDG(:,3)-PDG(:,2))
+  ENDWHERE
 ELSE
-    PWG(:,:)  = IR%XWG(:,:,1)
-    PWGI(:,:) = IR%XWGI(:,:,1)
-    PDG (:,:) = IMX%XDG (:,:,1)
+
+  DO JP=1,IO%NPATCH
+    DO JI=1,NP%AL(JP)%NSIZE_P
+       IMASK = NP%AL(JP)%NR_P(JI)         
+       PWG (IMASK,:) = NPE%AL(1)%XWG (JI,:)
+       PWGI(IMASK,:) = NPE%AL(1)%XWGI(JI,:)
+       PDG (IMASK,:) = NP%AL (1)%XDG (JI,:)
+     ENDDO
+  ENDDO
 
 ENDIF 
 !

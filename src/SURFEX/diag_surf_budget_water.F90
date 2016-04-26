@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGET_WATER (DGW, PTT, PTS, PRHOA, PSFTH, PSFTQ,  PDIR_SW, PSCA_SW, PLW, &
+       SUBROUTINE DIAG_SURF_BUDGET_WATER (D, PTT, PTS, PRHOA, PSFTH, PSFTQ,  PDIR_SW, PSCA_SW, PLW, &
                                           PDIR_ALB, PSCA_ALB, PEMIS, PTRAD, PSFZON, PSFMER   )  
 !     ###############################################################################
 !
@@ -39,7 +39,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 REAL,               INTENT(IN) :: PTT       ! freezing temperature of water surface
 REAL, DIMENSION(:), INTENT(IN) :: PTS       ! surface temperature (K)
@@ -72,53 +72,53 @@ ISWB = SIZE(PDIR_SW,2)
 !* total incoming and outgoing SW
 !
 DO JSWB=1,ISWB
-  DGW%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
-  DGW%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
+  D%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
+  D%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
 ENDDO
 !
-DGW%XSWD(:) = 0.
-DGW%XSWU(:) = 0.
+D%XSWD(:) = 0.
+D%XSWU(:) = 0.
 DO JSWB=1,ISWB
-   DGW%XSWD(:)=DGW%XSWD(:)+DGW%XSWBD(:,JSWB)
-   DGW%XSWU(:)=DGW%XSWU(:)+DGW%XSWBU(:,JSWB)
+   D%XSWD(:)=D%XSWD(:)+D%XSWBD(:,JSWB)
+   D%XSWU(:)=D%XSWU(:)+D%XSWBU(:,JSWB)
 ENDDO
 !
 !*incoming outgoing LW
 !
-DGW%XLWD(:) = PLW(:)
-DGW%XLWU(:) = PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
+D%XLWD(:) = PLW(:)
+D%XLWU(:) = PEMIS(:)*XSTEFAN*PTRAD(:)**4 + (1.-PEMIS(:))*PLW(:)
 !
 !* net radiation
 !
-DGW%XRN    =   DGW%XSWD(:) - DGW%XSWU(:) + DGW%XLWD(:) - DGW%XLWU(:)
+D%XRN    =   D%XSWD(:) - D%XSWU(:) + D%XLWD(:) - D%XLWU(:)
 !
 !* sensible heat flux
 !
-DGW%XH     = PSFTH(:)
+D%XH     = PSFTH(:)
 !
 !* latent heat flux
 !
 WHERE (PTS<PTT  )
-  DGW%XLE    = PSFTQ * XLSTT
-  DGW%XLEI   = PSFTQ * XLSTT
-  DGW%XEVAP  = PSFTQ
-  DGW%XSUBL  = PSFTQ
+  D%XLE    = PSFTQ * XLSTT
+  D%XLEI   = PSFTQ * XLSTT
+  D%XEVAP  = PSFTQ
+  D%XSUBL  = PSFTQ
 ELSEWHERE
-  DGW%XLE    = PSFTQ * XLVTT
-  DGW%XLEI   = 0.0
-  DGW%XEVAP  = PSFTQ
-  DGW%XSUBL  = 0.0
+  D%XLE    = PSFTQ * XLVTT
+  D%XLEI   = 0.0
+  D%XEVAP  = PSFTQ
+  D%XSUBL  = 0.0
 END WHERE
 !
 !* storage flux
 !
-DGW%XGFLUX = DGW%XRN - DGW%XH - DGW%XLE
+D%XGFLUX = D%XRN - D%XH - D%XLE
 !
 !* wind stress
 !
-DGW%XFMU = PSFZON
+D%XFMU = PSFZON
 !
-DGW%XFMV = PSFMER
+D%XFMV = PSFMER
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

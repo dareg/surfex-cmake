@@ -1,5 +1,5 @@
 !     #########################################
-      SUBROUTINE CANOPY_GRID(KI,CP)
+      SUBROUTINE CANOPY_GRID(KI,SB)
 !     #########################################
 !
 !!****  *CANOPY_GRID* - computation of vertical grid coordinatesa at 
@@ -64,7 +64,7 @@ IMPLICIT NONE
 !
 INTEGER,                  INTENT(IN)    :: KI     ! number of horizontal points
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: CP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -83,31 +83,31 @@ IF (LHOOK) CALL DR_HOOK('CANOPY_GRID',0,ZHOOK_HANDLE)
 !*    1.1 layer depths (variable located at half levels below full levels)
 !         ------------
 !
-CP%XDZF(:,:) = -999.
-CP%XDZF(:,1) = 2.*CP%XZ(:,1)
-DO JLAYER=2,CP%NLVL
-  CP%XDZF(:,JLAYER) = CP%XZ(:,JLAYER) - CP%XZ(:,JLAYER-1)
+SB%XDZF(:,:) = -999.
+SB%XDZF(:,1) = 2.*SB%XZ(:,1)
+DO JLAYER=2,SB%NLVL
+  SB%XDZF(:,JLAYER) = SB%XZ(:,JLAYER) - SB%XZ(:,JLAYER-1)
 END DO
 !
 !*    1.2 Layer heights (variable located at half levels below full levels)
 !         -------------
 !
-CP%XZF(:,:) = -999.
-CP%XZF(:,1) = 0.
-DO JLAYER=2,CP%NLVL
-  CP%XZF(:,JLAYER) = 2.*CP%XZ(:,JLAYER-1) - CP%XZF(:,JLAYER-1)
+SB%XZF(:,:) = -999.
+SB%XZF(:,1) = 0.
+DO JLAYER=2,SB%NLVL
+  SB%XZF(:,JLAYER) = 2.*SB%XZ(:,JLAYER-1) - SB%XZF(:,JLAYER-1)
 END DO
 !
 !
 !*    1.3 layer depths (variable located at full levels)
 !         ------------
 !
-CP%XDZ(:,:) = -999.
-DO JLAYER=1,CP%NLVL-1
-  CP%XDZ(:,JLAYER) = CP%XZF(:,JLAYER+1) - CP%XZF(:,JLAYER)
+SB%XDZ(:,:) = -999.
+DO JLAYER=1,SB%NLVL-1
+  SB%XDZ(:,JLAYER) = SB%XZF(:,JLAYER+1) - SB%XZF(:,JLAYER)
 END DO
 !
-CP%XDZ(:,CP%NLVL) = 2.*(CP%XZ(:,CP%NLVL)-CP%XZF(:,CP%NLVL))
+SB%XDZ(:,SB%NLVL) = 2.*(SB%XZ(:,SB%NLVL)-SB%XZF(:,SB%NLVL))
 !
 IF (LHOOK) CALL DR_HOOK('CANOPY_GRID',1,ZHOOK_HANDLE)
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE COTWOINIT_n (IO,PGMES,PCO2,PGC,PDMAX, IP  )  
+      SUBROUTINE COTWOINIT_n (IO, S, PK, PEK, PCO2  )  
 !     #######################################################################
 !
 !!****  *COTWOINIT*  
@@ -38,7 +38,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    27/10/97
-!!      (V. Rivalland) 10/04/02  Add: IP%XAH and IP%XBH coefficients for
+!!      (V. Rivalland) 10/04/02  Add: PK%XAH and PK%XBH coefficients for
 !!                               herbaceous water stress response
 !!      (P. LeMoigne) 03/2004:   computation of zgmest in SI units
 !!      (P. LeMoigne) 10/2004:   possibility of 2 different FZERO
@@ -56,7 +56,7 @@
 !
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
+USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_S_t, ISBA_PE_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_C3, NVT_C4, NVT_IRR, NVT_TROG,     &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,&
@@ -82,17 +82,13 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
 !
-REAL,DIMENSION(:),INTENT(IN)  :: PGMES, PCO2
-!                                     PGMES     = mesophyll conductance (m s-1)
+REAL,DIMENSION(:),INTENT(IN)  :: PCO2
+!                                     PK%XGMES     = mesophyll conductance (m s-1)
 !                                     PCO2      = atmospheric CO2 concentration
-!
-REAL,DIMENSION(:),INTENT(IN)   :: PDMAX, PGC    
-!                                     PDMAX     = maximum air saturation deficit tolerate
-!                                                 by vegetation
-!                                     PGC       = cuticular conductance (m s-1)
-!
 !
 !*      0.2    declaration of local variables
 !
@@ -101,7 +97,7 @@ INTEGER                           :: ICLASS    ! indexes for loops
 INTEGER                           :: ICO2TYPE  ! type of CO2 vegetation
 INTEGER                           :: IRAD      ! with or without new radiative transfer
 !
-REAL, DIMENSION(SIZE(IP%XANMAX,1))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZGPP, ZRDK, ZEPSO
+REAL, DIMENSION(SIZE(PK%XANMAX))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZGPP, ZRDK, ZEPSO
 !                                    ZTOPT     = optimum  temperature for compensation 
 !                                                point
 !                                    ZANMAX    = maximum photosynthesis rate
@@ -111,13 +107,13 @@ REAL, DIMENSION(SIZE(IP%XANMAX,1))     :: ZGS, ZGAMMT, ZTOPT, ZANMAX, ZGMEST, ZG
 !                                    ZRDK      = dark respiration
 !
 !
-REAL, DIMENSION(SIZE(IP%XANMAX,1))     :: ZCO2INIT3, ZCO2INIT4, ZCO2INIT5, ZCO2INIT2,ZCO2INIT1
+REAL, DIMENSION(SIZE(PK%XANMAX))     :: ZCO2INIT3, ZCO2INIT4, ZCO2INIT5, ZCO2INIT2,ZCO2INIT1
 !                                    working arrays for initializing surface 
 !                                    temperature, saturation deficit, global radiation,
 !                                    optimum temperature for determining maximum 
 !                                    photosynthesis rate, and soil water stress (none)
-REAL, DIMENSION(SIZE(PDMAX))      :: ZDMAX
-REAL, DIMENSION(SIZE(PDMAX))      :: ZWORK
+REAL, DIMENSION(SIZE(PK%XDMAX))      :: ZDMAX
+REAL, DIMENSION(SIZE(PK%XDMAX))      :: ZWORK
 !                                    Local variable in order to initialise DMAX
 !                                    following Calvet, 2000 (AST or LST cases)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -127,21 +123,21 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('COTWOINIT_N',0,ZHOOK_HANDLE)
 !
 ZTOPT  (:) = 0.
-IP%XFZERO (:,1) = 0.
-IP%XEPSO  (:,1) = 0.
-IP%XGAMM  (:,1) = 0.
-IP%XQDGAMM(:,1) = 0.
-IP%XQDGMES(:,1) = 0.
-IP%XT1GMES(:,1) = 0.
-IP%XT2GMES(:,1) = 0.
-IP%XAMAX  (:,1) = 0.
-IP%XQDAMAX(:,1) = 0.
-IP%XT1AMAX(:,1) = 0.
-IP%XT2AMAX(:,1) = 0.
-IP%XTAU_WOOD(:,1) = 0.
+PK%XFZERO (:) = 0.
+PK%XEPSO  (:) = 0.
+PK%XGAMM  (:) = 0.
+PK%XQDGAMM(:) = 0.
+PK%XQDGMES(:) = 0.
+PK%XT1GMES(:) = 0.
+PK%XT2GMES(:) = 0.
+PK%XAMAX  (:) = 0.
+PK%XQDAMAX(:) = 0.
+PK%XT1AMAX(:) = 0.
+PK%XT2AMAX(:) = 0.
+PK%XTAU_WOOD(:) = 0.
 !
-IP%XAH    (:,1) = 0.
-IP%XBH    (:,1) = 0.
+PK%XAH    (:) = 0.
+PK%XBH    (:) = 0.
 !
 ZEPSO (:) = 0.
 ZGPP (:) = 0.
@@ -160,7 +156,7 @@ ZCO2INIT5(:) = 0.
 ! DETERMINE GAUSSIAN WEIGHTS NEEDED FOR CO2 MODEL 
 ! -----------------------------------------------
 !
- CALL GAULEG(0.0,1.0,IP%XABC,IP%XPOI,SIZE(IP%XABC))
+ CALL GAULEG(0.0,1.0,S%XABC,S%XPOI,SIZE(S%XABC))
 !
 !
 ! INITIALIZE VARIOUS PARAMETERS FOR CO2 MODEL:
@@ -181,32 +177,32 @@ DO JCLASS=1,NVEGTYPE
     IRAD = 2
   ENDIF
   !
-  ZTOPT  (:) = ZTOPT  (:) + XTOPT  (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  ZTOPT  (:) = ZTOPT  (:) + XTOPT  (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
   IF (IO%CPHOTO == 'AGS' .OR. IO%CPHOTO == 'LAI') THEN
-     IP%XFZERO (:,1) = IP%XFZERO (:,1) + XFZERO1 (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+     PK%XFZERO (:) = PK%XFZERO (:) + XFZERO1 (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
   ELSE
      IF((JCLASS==NVT_TEBD) .OR. (JCLASS==NVT_BONE) .OR.                         &
         (JCLASS==NVT_TRBD) .OR. (JCLASS==NVT_TEBE) .OR. (JCLASS==NVT_TENE) .OR. &
         (JCLASS==NVT_BOBD) .OR. (JCLASS==NVT_BOND) .OR. (JCLASS==NVT_SHRB)) THEN
-        IP%XFZERO (:,1) = IP%XFZERO (:,1) + ((XAW - LOG(PGMES(:)*1000.0))/XBW)*IP%XVEGTYPE_PATCH(:,JCLASS,1)
+        PK%XFZERO (:) = PK%XFZERO (:) + ((XAW - LOG(PEK%XGMES(:)*1000.0))/XBW)*PK%XVEGTYPE_PATCH(:,JCLASS)
      ELSE IF (JCLASS==NVT_TRBE) THEN
-        IP%XFZERO (:,1) = IP%XFZERO (:,1) + XFZEROTROP(IRAD) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+        PK%XFZERO (:) = PK%XFZERO (:) + XFZEROTROP(IRAD) * PK%XVEGTYPE_PATCH(:,JCLASS)
      ELSE
-        IP%XFZERO (:,1) = IP%XFZERO (:,1) + XFZERO2 (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+        PK%XFZERO (:) = PK%XFZERO (:) + XFZERO2 (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
      ENDIF
   ENDIF
   !
-  IP%XEPSO  (:,1) = IP%XEPSO  (:,1) + XEPSO  (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XGAMM  (:,1) = IP%XGAMM  (:,1) + XGAMM  (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XQDGAMM(:,1) = IP%XQDGAMM(:,1) + XQDGAMM(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XQDGMES(:,1) = IP%XQDGMES(:,1) + XQDGMES(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XT1GMES(:,1) = IP%XT1GMES(:,1) + XT1GMES(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XT2GMES(:,1) = IP%XT2GMES(:,1) + XT2GMES(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XQDAMAX(:,1) = IP%XQDAMAX(:,1) + XQDAMAX(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XT1AMAX(:,1) = IP%XT1AMAX(:,1) + XT1AMAX(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XT2AMAX(:,1) = IP%XT2AMAX(:,1) + XT2AMAX(ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XAH    (:,1) = IP%XAH    (:,1) + XAH    (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XBH    (:,1) = IP%XBH    (:,1) + XBH    (ICO2TYPE) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  PK%XEPSO  (:) = PK%XEPSO  (:) + XEPSO  (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XGAMM  (:) = PK%XGAMM  (:) + XGAMM  (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XQDGAMM(:) = PK%XQDGAMM(:) + XQDGAMM(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XQDGMES(:) = PK%XQDGMES(:) + XQDGMES(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XT1GMES(:) = PK%XT1GMES(:) + XT1GMES(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XT2GMES(:) = PK%XT2GMES(:) + XT2GMES(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XQDAMAX(:) = PK%XQDAMAX(:) + XQDAMAX(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XT1AMAX(:) = PK%XT1AMAX(:) + XT1AMAX(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XT2AMAX(:) = PK%XT2AMAX(:) + XT2AMAX(ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XAH    (:) = PK%XAH    (:) + XAH    (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XBH    (:) = PK%XBH    (:) + XBH    (ICO2TYPE) * PK%XVEGTYPE_PATCH(:,JCLASS)
   !
   IF(IO%LAGRI_TO_GRASS.AND.(JCLASS==NVT_C3 .OR. JCLASS==NVT_C4 .OR. JCLASS==NVT_IRR))THEN
     ICLASS=NVT_GRAS
@@ -214,14 +210,14 @@ DO JCLASS=1,NVEGTYPE
     ICLASS=JCLASS
   ENDIF    
   !
-  IP%XTAU_WOOD(:,1) = IP%XTAU_WOOD(:,1) + XTAU_WOOD(ICLASS) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
-  IP%XAMAX    (:,1) = IP%XAMAX    (:,1) + XAMAX    (ICLASS) * IP%XVEGTYPE_PATCH(:,JCLASS,1)
+  PK%XTAU_WOOD(:) = PK%XTAU_WOOD(:) + XTAU_WOOD(ICLASS) * PK%XVEGTYPE_PATCH(:,JCLASS)
+  PK%XAMAX    (:) = PK%XAMAX    (:) + XAMAX    (ICLASS) * PK%XVEGTYPE_PATCH(:,JCLASS)
   !
 END DO
 !
-IP%XQDGAMM(:,1)=LOG(IP%XQDGAMM(:,1))
-IP%XQDGMES(:,1)=LOG(IP%XQDGMES(:,1))
-IP%XQDAMAX(:,1)=LOG(IP%XQDAMAX(:,1))
+PK%XQDGAMM(:)=LOG(PK%XQDGAMM(:))
+PK%XQDGMES(:)=LOG(PK%XQDGMES(:))
+PK%XQDAMAX(:)=LOG(PK%XQDAMAX(:))
 !
 !
 ! INITIALIZE VARIOUS VARIABLES FOR CO2 MODEL:
@@ -230,24 +226,24 @@ IP%XQDAMAX(:,1)=LOG(IP%XQDAMAX(:,1))
 !
 ! compute temperature responses:
 !
-!before optimization (with non log IP%XQDGAMM) : 
-!ZGAMMT(:) = IP%XGAMM(:)*(IP%XQDGAMM(:)**(0.1*(ZTOPT(:)-25.0)))
-ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * IP%XQDGAMM(:,1)
-ZGAMMT(:) = IP%XGAMM(:,1)*EXP(ZWORK(:))
+!before optimization (with non log PK%XQDGAMM) : 
+!ZGAMMT(:) = PK%XGAMM(:)*(PK%XQDGAMM(:)**(0.1*(ZTOPT(:)-25.0)))
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PK%XQDGAMM(:)
+ZGAMMT(:) = PK%XGAMM(:)*EXP(ZWORK(:))
 !
-!before optimization (with non log IP%XQDAMAX) :
-!ZANMAX(:) = ( IP%XAMAX(:)*IP%XQDAMAX(:)**(0.1*(ZTOPT(:)-25.0)) ) / ...
-ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * IP%XQDAMAX(:,1)
-ZANMAX(:) = ( IP%XAMAX(:,1)*EXP(ZWORK(:)) )                   &
-               /( (1.0+EXP(0.3*(IP%XT1AMAX(:,1)-ZTOPT(:))))*  &
-                  (1.0+EXP(0.3*(ZTOPT(:)-IP%XT2AMAX(:,1)))) )  
+!before optimization (with non log PK%XQDAMAX) :
+!ZANMAX(:) = ( PK%XAMAX(:)*PK%XQDAMAX(:)**(0.1*(ZTOPT(:)-25.0)) ) / ...
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PK%XQDAMAX(:)
+ZANMAX(:) = ( PK%XAMAX(:)*EXP(ZWORK(:)) )                   &
+               /( (1.0+EXP(0.3*(PK%XT1AMAX(:)-ZTOPT(:))))*  &
+                  (1.0+EXP(0.3*(ZTOPT(:)-PK%XT2AMAX(:)))) )  
 !
-!before optimization (with non log IP%XQDGMES) :
-!ZGMEST(:) = ( PGMES(:)*IP%XQDGMES(:)**(0.1*(ZTOPT(:)-25.0)) )    &
-ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * IP%XQDGMES(:,1)
-ZGMEST(:) = ( PGMES(:)*EXP(ZWORK(:)) )                   &
-               /( (1.0+EXP(0.3*(IP%XT1GMES(:,1)-ZTOPT(:))))*  &
-                  (1.0+EXP(0.3*(ZTOPT(:)-IP%XT2GMES(:,1)))) )  
+!before optimization (with non log PK%XQDGMES) :
+!ZGMEST(:) = ( PEK%XGMES(:)*PK%XQDGMES(:)**(0.1*(ZTOPT(:)-25.0)) )    &
+ZWORK (:) = (0.1*(ZTOPT(:)-25.0)) * PK%XQDGMES(:)
+ZGMEST(:) = ( PEK%XGMES(:)*EXP(ZWORK(:)) )                   &
+               /( (1.0+EXP(0.3*(PK%XT1GMES(:)-ZTOPT(:))))*  &
+                  (1.0+EXP(0.3*(ZTOPT(:)-PK%XT2GMES(:)))) )  
 !
 !
 ! initialize other variables: (using optimum values for some variables)
@@ -268,9 +264,9 @@ ZGMEST(:) = ZGMEST(:)*ZCO2INIT5(:)
 ! Initialise DMAX following Calvet (2000) in the case of 'AST' or 'LST' photosynthesis option
 !
 IF((IO%CPHOTO=='AST').OR.(IO%CPHOTO=='LST').OR.(IO%CPHOTO=='NIT').OR.(IO%CPHOTO=='NCB')) THEN
-   ZDMAX(:) = EXP((LOG(ZGMEST(:)*1000.)-IP%XAH(:,1))/IP%XBH(:,1))/1000.
+   ZDMAX(:) = EXP((LOG(ZGMEST(:)*1000.)-PK%XAH(:))/PK%XBH(:))/1000.
 ELSE
-   ZDMAX(:) = PDMAX(:)
+   ZDMAX(:) = PK%XDMAX(:)
 ENDIF
 !
 ! Compute maximum/initial/optimum net assimilation of CO2:
@@ -279,13 +275,13 @@ ENDIF
 ! ZANMAX and ZEPSO from kgCO2/m2/s to kgCO2/kgair m/s by dividing by RHOA (kgair/m3)
 ! ZGAMMT from ppm to kgCO2/kgair
 ZANMAX(:)=ZANMAX(:)/1.2
-ZEPSO(:)=IP%XEPSO(:,1)/1.2
+ZEPSO(:)=PK%XEPSO(:)/1.2
 ZGAMMT(:)=ZGAMMT(:)*XMCO2/XMD*1e-6
 !
 CALL COTWO(PCO2, ZCO2INIT5, ZCO2INIT4, ZCO2INIT3, ZGAMMT, &
-           IP%XFZERO(:,1), ZEPSO, ZANMAX, ZGMEST, PGC, ZDMAX,     &
-           IP%XANMAX(:,1), ZGS, ZRDK, ZCO2INIT2, ZCO2INIT1        )                     
-! change by sebastien IP%XEPSO change into ZEPSO for units consistency
+           PK%XFZERO(:), ZEPSO, ZANMAX, ZGMEST, PEK%XGC, ZDMAX,     &
+           PK%XANMAX(:), ZGS, ZRDK, ZCO2INIT2, ZCO2INIT1        )                     
+! change by sebastien PK%XEPSO change into ZEPSO for units consistency
 !
 !
 !

@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE PARAM_CLS(DGS, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+       SUBROUTINE PARAM_CLS(D, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
                             PH, PHW, PSFTH, PSFTQ, PSFZON, PSFMER        )  
 !     #####################################################################
 !
@@ -63,7 +63,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGS
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 REAL, DIMENSION(:), INTENT(IN)       :: PTA    ! atmospheric temperature
 REAL, DIMENSION(:), INTENT(IN)       :: PTS    ! surface temperature
@@ -166,27 +166,27 @@ END WHERE
 !* note : is set to zero value where the law does not apply correctly
 !  (e.g. over high mountains)
 !         and is set to XUNDEF when forcing level is below 10m diagnostic level
-DGS%XZON10M(:) = XUNDEF
-DGS%XMER10M(:) = XUNDEF
+D%XZON10M(:) = XUNDEF
+D%XMER10M(:) = XUNDEF
 !
 WHERE(PHW(:)>=Z10M)
   !
   ZFACT(:) = LOG(Z10M/PHW) - PAULSON_PSIM(Z10M_O_LMO)  + PAULSON_PSIM(ZH_O_LMO)
   !
   WHERE (PSFZON(:)>=0.) 
-    DGS%XZON10M(:) = PZONA(:) - SQRT( PSFZON(:))/XKARMAN * ZFACT(:)  
-    DGS%XZON10M(:) = MIN ( 0., DGS%XZON10M(:) )
+    D%XZON10M(:) = PZONA(:) - SQRT( PSFZON(:))/XKARMAN * ZFACT(:)  
+    D%XZON10M(:) = MIN ( 0., D%XZON10M(:) )
   ELSEWHERE
-    DGS%XZON10M(:) = PZONA(:) + SQRT(-PSFZON(:))/XKARMAN * ZFACT(:)   
-    DGS%XZON10M(:) = MAX ( 0., DGS%XZON10M(:) )
+    D%XZON10M(:) = PZONA(:) + SQRT(-PSFZON(:))/XKARMAN * ZFACT(:)   
+    D%XZON10M(:) = MAX ( 0., D%XZON10M(:) )
   END WHERE
   !
   WHERE (PSFMER(:)>=0.) 
-    DGS%XMER10M(:) = PMERA(:) - SQRT( PSFMER(:))/XKARMAN * ZFACT(:)  
-    DGS%XMER10M(:) = MIN ( 0., DGS%XMER10M(:) )
+    D%XMER10M(:) = PMERA(:) - SQRT( PSFMER(:))/XKARMAN * ZFACT(:)  
+    D%XMER10M(:) = MIN ( 0., D%XMER10M(:) )
   ELSEWHERE
-    DGS%XMER10M(:) = PMERA(:) + SQRT(-PSFMER(:))/XKARMAN * ZFACT(:)  
-    DGS%XMER10M(:) = MAX ( 0., DGS%XMER10M(:) )
+    D%XMER10M(:) = PMERA(:) + SQRT(-PSFMER(:))/XKARMAN * ZFACT(:)  
+    D%XMER10M(:) = MAX ( 0., D%XMER10M(:) )
   END WHERE
 END WHERE
 !
@@ -216,10 +216,10 @@ ZP2M(:) = PPA(:) - XG * PRHOA(:) * (Z2M-PH(:))
 !
 WHERE (ZWT(:) > 0. .OR. PTS(:) == XUNDEF)
   ! Businger formulation in unstable case
-  DGS%XT2M(:) = ZTH2M(:) * (ZP2M(:)/XP00)**(XRD/XCPD)
+  D%XT2M(:) = ZTH2M(:) * (ZP2M(:)/XP00)**(XRD/XCPD)
 ELSEWHERE 
   ! Linear interpolation between Ts and Ta in stable case
-  DGS%XT2M(:) = PTS(:) + (PTA(:)-PTS(:))*Z2M/PH(:)
+  D%XT2M(:) = PTS(:) + (PTA(:)-PTS(:))*Z2M/PH(:)
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -230,15 +230,15 @@ ZQSTAR(:) = - ZWQ(:) / MAX(ZUSTAR,0.01)
 !
 !* Specific humidity at 2m
 !
-DGS%XQ2M(:) = PQA(:) + 0.74 * ZQSTAR(:)/XKARMAN * ZFACT(:)  
+D%XQ2M(:) = PQA(:) + 0.74 * ZQSTAR(:)/XKARMAN * ZFACT(:)  
 !
 !* must be below saturation
 !
-ZQSAT2M(:) = QSAT(DGS%XT2M(:),ZP2M(:))
+ZQSAT2M(:) = QSAT(D%XT2M(:),ZP2M(:))
 !
-DGS%XQ2M(:) = MIN (ZQSAT2M(:),DGS%XQ2M(:))
+D%XQ2M(:) = MIN (ZQSAT2M(:),D%XQ2M(:))
 !
-DGS%XHU2M(:) = DGS%XQ2M(:) / ZQSAT2M(:)
+D%XHU2M(:) = D%XQ2M(:) / ZQSAT2M(:)
 !
 IF (LHOOK) CALL DR_HOOK('PARAM_CLS',1,ZHOOK_HANDLE)
 !

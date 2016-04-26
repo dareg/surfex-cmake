@@ -217,7 +217,7 @@ LDEF = .TRUE.
 !
 IF (CSURF_FILETYPE=="NC    ") THEN
   CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, &
-                         YSC%SM%DTS, YSC%TM%DTT, YSC%DTZ, YSC%IM%I, &
+                         YSC%SM%DTS, YSC%TM%DTT, YSC%DTZ, YSC%IM, &
                          YSC%UG, YSC%U, YSC%DUO%CSELECT)
 ENDIF
 !

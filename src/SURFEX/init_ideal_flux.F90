@@ -1,5 +1,5 @@
 !     ############################################################
-      SUBROUTINE INIT_IDEAL_FLUX (DLO, DGL, DGLC, OREAD_BUDGETC, &
+      SUBROUTINE INIT_IDEAL_FLUX (DGO, D, DC, OREAD_BUDGETC, &
                                   HPROGRAM,HINIT,KI,KSV,KSW,     &
                                   HSV,PDIR_ALB,PSCA_ALB,        &
                                   PEMIS,PTSRAD,PTSURF, HTEST    )  
@@ -56,7 +56,7 @@ USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 USE MODI_DIAG_IDEAL_INIT_n
 USE MODI_READ_IDEAL_CONF_n
 USE MODI_READ_DEFAULT_IDEAL_n
-USE MODI_PREP_CTRL_IDEAL
+USE MODI_PREP_CTRL
 USE MODI_DEFAULT_DIAG_IDEAL
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
@@ -69,9 +69,9 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 ! 
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_t), INTENT(INOUT) :: DC
 !
 LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 !
@@ -113,9 +113,9 @@ IF (LNAM_READ) THEN
  !*       0.1    defaults
  !               --------
  !
- CALL DEFAULT_DIAG_IDEAL(DLO%N2M, DLO%LSURF_BUDGET, DLO%L2M_MIN_ZS, DLO%LRAD_BUDGET,&
-                         DLO%LCOEF, DLO%LSURF_VARS, DLO%LSURF_BUDGETC, &
-                         DLO%LRESET_BUDGETC,DLO%XDIAG_TSTEP           )  
+ CALL DEFAULT_DIAG_IDEAL(DGO%N2M, DGO%LSURF_BUDGET, DGO%L2M_MIN_ZS, DGO%LRAD_BUDGET,&
+                         DGO%LCOEF, DGO%LSURF_VARS, DGO%LSURF_BUDGETC, &
+                         DGO%LRESET_BUDGETC,DGO%XDIAG_TSTEP           )  
 
 ENDIF
 !----------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ ENDIF
 !*       0.2    configuration
 !               -------------
 !
- CALL READ_DEFAULT_IDEAL_n(DLO, HPROGRAM)
- CALL READ_IDEAL_CONF_n(DLO, HPROGRAM)
+ CALL READ_DEFAULT_IDEAL_n(DGO, HPROGRAM)
+ CALL READ_IDEAL_CONF_n(DGO, HPROGRAM)
 !
 IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 
@@ -161,7 +161,7 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !               -------
 !
   IF (HINIT=='PRE') THEN
-    CALL PREP_CTRL_IDEAL(DLO,ILUOUT)  
+    CALL PREP_CTRL(DGO,ILUOUT)  
   ENDIF
 !
 !----------------------------------------------------------------------------------
@@ -177,9 +177,7 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   XSFTS = 0.
 !
- CALL DIAG_IDEAL_INIT_n(DLO, DGL, DGLC, &
-                        HPROGRAM, OREAD_BUDGETC, &
-                        KI,KSW)
+ CALL DIAG_IDEAL_INIT_n(DGO, D, DC, HPROGRAM, OREAD_BUDGETC, KI, KSW)
 !
 ENDIF
 !-------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_BEM_n ( DTCO, TOP, BOP, DTT, DTB, BDD, TG, &
+      SUBROUTINE INIT_BEM_n ( DTCO, TOP, BOP, DTT, DTB, BDD, G, &
                               T, B, KLUOUT)
 !     #############################################################
 !
@@ -69,7 +69,7 @@ TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
-TYPE(GRID_t), INTENT(INOUT) :: TG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 !
@@ -221,7 +221,7 @@ END SELECT
 !*       8.     Building HVAC automatic sizing:
 !               -------------------------------  
 IF (TOP%CBEM=='BEM' .AND. BOP%LAUTOSIZE) THEN
-  CALL HVAC_AUTOSIZE(B, BOP, TG, T, TOP, ILU,KLUOUT)
+  CALL HVAC_AUTOSIZE(B, BOP, G, T, TOP, ILU,KLUOUT)
   !* stores the real systems characteristics in physiographic data 
   !  for further use
   CALL STORES_HVAC_AUTOSIZE(B, BOP, DTB)

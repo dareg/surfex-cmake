@@ -1,5 +1,5 @@
 !     ################################################################
-      SUBROUTINE UPDATE_ESM_ISBA_n (I, KI,KSW,PZENITH,PSW_BANDS,PDIR_ALB,& 
+      SUBROUTINE UPDATE_ESM_ISBA_n (IO, S, K, NK, NP, NPE, KI,KSW,PZENITH,PSW_BANDS,PDIR_ALB,& 
                                    PSCA_ALB,PEMIS,PTSRAD,PTSURF      )
 !     ################################################################
 !
@@ -39,8 +39,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_P_t, ISBA_PE_t, ISBA_NK_t, &
+                        ISBA_NP_t, ISBA_NPE_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -58,8 +59,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
 INTEGER,                            INTENT(IN)  :: KI        ! number of points
 INTEGER,                            INTENT(IN)  :: KSW       ! number of short-wave spectral bands
@@ -77,14 +82,20 @@ REAL,             DIMENSION(KI),    INTENT(OUT) :: PTSURF    ! surface effective
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(KI,KSW,I%O%NPATCH) :: ZDIR_ALB_PATCH
-REAL, DIMENSION(KI,KSW,I%O%NPATCH) :: ZSCA_ALB_PATCH
-REAL, DIMENSION(KI,I%O%NPATCH)     :: ZEMIS_PATCH
-REAL, DIMENSION(KI,I%O%NPATCH)     :: ZTSRAD_PATCH
-REAL, DIMENSION(KI,I%O%NPATCH)     :: ZTSURF_PATCH
-REAL, DIMENSION(KI,I%O%NPATCH)     :: ZEMIS          ! emissivity with flood
+TYPE(ISBA_K_t), POINTER :: KK
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
+!
+REAL, DIMENSION(KI,KSW,IO%NPATCH) :: ZDIR_ALB_PATCH
+REAL, DIMENSION(KI,KSW,IO%NPATCH) :: ZSCA_ALB_PATCH
+REAL, DIMENSION(KI,IO%NPATCH)     :: ZEMIS_PATCH
+REAL, DIMENSION(KI,IO%NPATCH)     :: ZTSRAD_PATCH
+REAL, DIMENSION(KI,IO%NPATCH)     :: ZTSURF_PATCH
+REAL, DIMENSION(KI,IO%NPATCH)     :: ZEMIS          ! emissivity with flood
 !
 LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
+!
+INTEGER :: IMASK, JI, JP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -98,56 +109,72 @@ IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_ISBA_N',0,ZHOOK_HANDLE)
 ZDIR_ALB_PATCH(:,:,:) = 0.0
 ZSCA_ALB_PATCH(:,:,:) = 0.0
 ZEMIS_PATCH   (:,:  ) = 0.0
-ZEMIS         (:,:  ) = I%M%T%XEMIS(:,:)
 !
-LEXPLICIT_SNOW = (I%R%TSNOW%SCHEME=='3-L'.OR.I%R%TSNOW%SCHEME=='CRO')
+LEXPLICIT_SNOW = (NPE%AL(1)%TSNOW%SCHEME=='3-L'.OR.NPE%AL(1)%TSNOW%SCHEME=='CRO')
 !
-ZTSRAD_PATCH (:,:) = I%R%XTG(:,1,:)
-ZTSURF_PATCH (:,:) = I%R%XTG(:,1,:)
 !
 !
 !*       2.     Update nature albedo and emissivity
 !               -----------------------------------
 !
- CALL UPDATE_RAD_ISBA_n(I%O, I%M%T, I%M%M, I%M%A, I%IP, I%I, I%R, &
-                        I%M%X%XVEGTYPE,PZENITH, PSW_BANDS, ZDIR_ALB_PATCH,ZSCA_ALB_PATCH,ZEMIS_PATCH  )
+ZEMIS(:,:) = 0.0
+ZTSRAD_PATCH(:,:) = 0.0
+ZTSURF_PATCH(:,:) = 0.0
 !
-!*       3.     radiative surface temperature
-!               -----------------------------
-!
-IF(LEXPLICIT_SNOW.AND.I%O%LFLOOD)THEN
-  WHERE(I%R%XPSN(:,:)<1.0.AND.I%M%T%XEMIS(:,:)/=XUNDEF)
-       ZEMIS(:,:) = ((1.-I%I%XFF(:,:)-I%R%XPSN(:,:))*I%M%T%XEMIS(:,:) + &
-                I%I%XFF(:,:)*I%I%XEMISF(:,:)) / (1.-I%R%XPSN(:,:))
-  ENDWHERE
-ENDIF
-!
-IF(LEXPLICIT_SNOW)THEN
-  WHERE(I%M%T%XEMIS(:,:)/=XUNDEF.AND.ZEMIS_PATCH(:,:)/=0.)
-       ZTSRAD_PATCH(:,:) = ( ( (1.-I%R%XPSN(:,:))*ZEMIS     (:,:)*I%R%XTG   (:,1,:)**4     &
-                             +     I%R%XPSN(:,:) *I%R%TSNOW%EMIS(:,:)*I%R%TSNOW%TS(:,:)**4 )   &
-                           / ZEMIS_PATCH(:,:) )**0.25         
-  ENDWHERE
-ENDIF        
-!
+DO JP = 1,IO%NPATCH
+  PK => NP%AL(JP)
+  PEK => NPE%AL(JP)
+  KK => NK%AL(JP)
+
+  CALL UPDATE_RAD_ISBA_n(IO, S, KK, PK, PEK, JP, PZENITH, PSW_BANDS, &
+                        ZDIR_ALB_PATCH(:,:,JP),ZSCA_ALB_PATCH(:,:,JP),ZEMIS_PATCH(:,JP)  )
+  !
+  !*       3.     radiative surface temperature
+  !               -----------------------------
+  !
+  DO JI = 1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
+
+    ZEMIS (IMASK,JP) = PEK%XEMIS(JI)
+
+    IF(LEXPLICIT_SNOW.AND.IO%LFLOOD)THEN
+      IF (PEK%XPSN(JI)<1.0.AND.PEK%XEMIS(JI)/=XUNDEF) THEN
+        ZEMIS(IMASK,JP) = ((1.-KK%XFF(JI)-PEK%XPSN(JI))*PEK%XEMIS(JI) + &
+                           KK%XFF(JI)*KK%XEMISF(JI)) / (1.-PEK%XPSN(JI))
+      ENDIF
+    ENDIF
+    !
+    ZTSRAD_PATCH (IMASK,JP) = PEK%XTG(JI,1)
+    ZTSURF_PATCH (IMASK,JP) = PEK%XTG(JI,1)
+    !
+    IF(LEXPLICIT_SNOW)THEN
+      IF(PEK%XEMIS(JI)/=XUNDEF.AND.ZEMIS_PATCH(IMASK,JP)/=0.) THEN
+        ZTSRAD_PATCH(IMASK,JP) = ( ( (1.-PEK%XPSN(JI))*ZEMIS(IMASK,JP)*PEK%XTG(JI,1)**4     &
+                               +  PEK%XPSN(JI) *PEK%TSNOW%EMIS(JI)*PEK%TSNOW%TS(JI)**4 )   &
+                             / ZEMIS_PATCH(IMASK,JP) )**0.25     
+      ENDIF
+      ZTSURF_PATCH(IMASK,JP) = PEK%XTG(JI,1)*(1.-PEK%XPSN(JI)) + PEK%TSNOW%TS(JI)*PEK%XPSN(JI)
+
+    ENDIF
+    !
+  ENDDO    
+  !
+ENDDO
 !
 !*       4.     averaged fields
 !               ---------------
 !
- CALL AVERAGE_RAD(I%IP%XPATCH,                                                     &
+ CALL AVERAGE_RAD(S%XPATCH,                                                   &
                    ZDIR_ALB_PATCH, ZSCA_ALB_PATCH, ZEMIS_PATCH, ZTSRAD_PATCH, &
-                   PDIR_ALB,       PSCA_ALB,       I%I%XEMIS_NAT,   I%R%XTSRAD_NAT    )  
+                   PDIR_ALB,       PSCA_ALB,       S%XEMIS_NAT,   S%XTSRAD_NAT    )  
 !
-PEMIS = I%I%XEMIS_NAT
-PTSRAD = I%R%XTSRAD_NAT
+PEMIS = S%XEMIS_NAT
+PTSRAD = S%XTSRAD_NAT
 !
 !* averaged effective temperature
 !
-IF(LEXPLICIT_SNOW)THEN
-  ZTSURF_PATCH(:,:) = I%R%XTG(:,1,:)*(1.-I%R%XPSN(:,:)) + I%R%TSNOW%TS(:,:)*I%R%XPSN(:,:)
-ENDIF
 !
- CALL AVERAGE_TSURF(I%IP%XPATCH, ZTSURF_PATCH, PTSURF)
+ CALL AVERAGE_TSURF(S%XPATCH, ZTSURF_PATCH, PTSURF)
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_ISBA_N',1,ZHOOK_HANDLE)
 !

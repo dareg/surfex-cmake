@@ -191,7 +191,7 @@ ELSE
 !
 ENDIF
 !
- CALL COUPLING_SEAFLUX_SBL_n(SM%CHS, SM%DTS, SM%DGS, SM%O, SM%OR, SM%SG, SM%S, SM%SSB, &
+ CALL COUPLING_SEAFLUX_SBL_n(SM%CHS, SM%DTS, SM%SD, SM%O, SM%OR, SM%G, SM%S, SM%SB, &
                              DST, SLT, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP,         &
                              KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,              &
                              PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PU, PV, &

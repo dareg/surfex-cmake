@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE PGD_OROGRAPHY (DTCO, UG, U, USS, &
-                                HPROGRAM,PSEA,PWATER,HFILE,HFILETYPE,OZS)
+                                HPROGRAM, PSEA, PWATER, HFILE, HFILETYPE, OZS)
 !     ##############################################################
 !
 !!**** *PGD_OROGRAPHY* monitor for averaging and interpolations of cover fractions

@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE SSO_BE04_FRICTION_n (SSCP, USS, PTSTEP,PSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+SUBROUTINE SSO_BE04_FRICTION_n (SB, USS, PTSTEP,PSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 !     ###############################################################################
 !
 !!****  *SSO_BE04_FRICTION_n * - Computes subgrid-scale orography friction
@@ -49,7 +49,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: SSCP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 REAL,               INTENT(IN)    :: PTSTEP    ! time step
@@ -72,25 +72,25 @@ REAL, DIMENSION(SIZE(PU))    :: ZUSTAR  ! friction velocity
 REAL, DIMENSION(SIZE(PU))     :: ZTA      ! temperature                                   (K)
 REAL, DIMENSION(SIZE(PU))     :: ZQA      ! specific humidity                             (kg/m3)
 REAL, DIMENSION(SIZE(PU))     :: ZPA      ! pressure                                      (Pa)
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZLM
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZLEPS
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZP
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZLM
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZLEPS
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZP
 REAL, DIMENSION(SIZE(PU))     :: ZSFLUX_T
 REAL, DIMENSION(SIZE(PU))     :: ZSFLUX_Q
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZFORC_T
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZDFORC_TDT
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZFORC_Q
-REAL, DIMENSION(SIZE(PU),SSCP%NLVL) :: ZDFORC_QDQ
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZFORC_T
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZDFORC_TDT
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZFORC_Q
+REAL, DIMENSION(SIZE(PU),SB%NLVL) :: ZDFORC_QDQ
 REAL, DIMENSION(SIZE(PU)) :: ZALFATH
 REAL, DIMENSION(SIZE(PU)) :: ZBETATH
 REAL, DIMENSION(SIZE(PU)) :: ZALFAQ
 REAL, DIMENSION(SIZE(PU)) :: ZBETAQ
 !
-REAL,    DIMENSION(SIZE(PU), SSCP%NLVL) :: ZFORC_U      ! tendency due to drag force for wind
-REAL,    DIMENSION(SIZE(PU), SSCP%NLVL) :: ZDFORC_UDU   ! formal derivative of
+REAL,    DIMENSION(SIZE(PU), SB%NLVL) :: ZFORC_U      ! tendency due to drag force for wind
+REAL,    DIMENSION(SIZE(PU), SB%NLVL) :: ZDFORC_UDU   ! formal derivative of
 !                                                  ! tendency due to drag force for wind
-REAL,    DIMENSION(SIZE(PU), SSCP%NLVL) :: ZFORC_E      ! tendency due to drag force for TKE
-REAL,    DIMENSION(SIZE(PU), SSCP%NLVL) :: ZDFORC_EDE   ! formal derivative of
+REAL,    DIMENSION(SIZE(PU), SB%NLVL) :: ZFORC_E      ! tendency due to drag force for TKE
+REAL,    DIMENSION(SIZE(PU), SB%NLVL) :: ZDFORC_EDE   ! formal derivative of
 !                                                  ! tendency due to drag force for TKE
 INTEGER                            :: INI          ! number of points
 INTEGER                            :: JI           ! number of points loop counter
@@ -113,7 +113,7 @@ IF (LHOOK) CALL DR_HOOK('SSO_BE04_FRICTION_N',0,ZHOOK_HANDLE)
 INI = SIZE(PU)
 !
 ZH = 0.
- CALL CANOPY_GRID_UPDATE(INI,ZH,PUREF,SSCP)
+ CALL CANOPY_GRID_UPDATE(INI,ZH,PUREF,SB)
 !
 !*      1.2    Wind
 !              ----
@@ -126,12 +126,12 @@ ZSFLUX_U = - SQRT(PSFU**2+PSFV**2)
 !*      1.3    Canopy profiles at first time step (neutral case)
 !              ----------------------------------
 !
-IF (ANY(SSCP%XU(:,SSCP%NLVL)==XUNDEF)) THEN
-  DO JLAYER=1,SSCP%NLVL
+IF (ANY(SB%XU(:,SB%NLVL)==XUNDEF)) THEN
+  DO JLAYER=1,SB%NLVL
      DO JI=1,INI
-        SSCP%XU  (JI,JLAYER) = MAX ( ZWIND(JI) + SQRT(-ZSFLUX_U(JI)) / XKARMAN      &
-                                  * LOG(SSCP%XZ(JI,JLAYER)/SSCP%XZ(JI,SSCP%NLVL))   , 0.)
-        SSCP%XTKE(JI,JLAYER) = - XALPSBL * ZSFLUX_U(JI)
+        SB%XU  (JI,JLAYER) = MAX ( ZWIND(JI) + SQRT(-ZSFLUX_U(JI)) / XKARMAN      &
+                                  * LOG(SB%XZ(JI,JLAYER)/SB%XZ(JI,SB%NLVL))   , 0.)
+        SB%XTKE(JI,JLAYER) = - XALPSBL * ZSFLUX_U(JI)
      ENDDO
   ENDDO
 ENDIF
@@ -151,12 +151,12 @@ ZFORC_E   (:,:) = 0.
 ZDFORC_EDE(:,:) = 0.
 !
 !* computes tendencies on wind and Tke due to subgridscale orography
- CALL SSO_BELJAARS04(USS, SSCP, INI, ZSSO_STDEV, ZFORC_U, ZDFORC_UDU )
+ CALL SSO_BELJAARS04(USS, SB, INI, ZSSO_STDEV, ZFORC_U, ZDFORC_UDU )
 !
-DO JLAYER=1,SSCP%NLVL
+DO JLAYER=1,SB%NLVL
    DO JI=1,INI
-      ZFORC_U   (JI,SSCP%NLVL) = ZFORC_U   (JI,SSCP%NLVL) * (1.0-PSEA(JI))
-      ZDFORC_UDU(JI,SSCP%NLVL) = ZDFORC_UDU(JI,SSCP%NLVL) * (1.0-PSEA(JI))
+      ZFORC_U   (JI,SB%NLVL) = ZFORC_U   (JI,SB%NLVL) * (1.0-PSEA(JI))
+      ZDFORC_UDU(JI,SB%NLVL) = ZDFORC_UDU(JI,SB%NLVL) * (1.0-PSEA(JI))
    ENDDO
 ENDDO
 !
@@ -176,7 +176,7 @@ ZDFORC_TDT(:,:) = XUNDEF
 ZFORC_Q   (:,:) = XUNDEF
 ZDFORC_QDQ(:,:) = XUNDEF
 !
- CALL CANOPY_EVOL(SSCP, INI, PTSTEP, 2, SSCP%XZ, ZWIND, ZTA, ZQA, ZPA, PRHOA, &
+ CALL CANOPY_EVOL(SB, INI, PTSTEP, 2, SB%XZ, ZWIND, ZTA, ZQA, ZPA, PRHOA, &
                   ZSFLUX_U, ZSFLUX_T, ZSFLUX_Q, ZFORC_U, ZDFORC_UDU, &
                   ZFORC_E, ZDFORC_EDE, ZFORC_T, ZDFORC_TDT, &
                   ZFORC_Q, ZDFORC_QDQ, ZLM, ZLEPS, ZUSTAR,  &

@@ -28,7 +28,7 @@
 !
 IMPLICIT NONE
 
- CHARACTER(LEN=12), DIMENSION(3000) :: CREC   ! list of records already read/written
+ CHARACTER(LEN=12), DIMENSION(5000) :: CREC   ! list of records already read/written
 INTEGER                            :: NREC   ! number of records read/written
 
 !

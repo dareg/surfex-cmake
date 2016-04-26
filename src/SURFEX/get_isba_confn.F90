@@ -37,10 +37,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-USE MODD_ISBA_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

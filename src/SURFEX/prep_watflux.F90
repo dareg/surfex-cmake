@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_WATFLUX (DTCO, UG, U, WG, W, WSB,  &
+SUBROUTINE PREP_WATFLUX (DTCO, UG, U, WG, W, SB,  &
                          HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -40,7 +40,7 @@ USE MODI_PREP_HOR_WATFLUX_FIELD
 USE MODI_PREP_VER_WATFLUX
 USE MODI_PREP_OUTPUT_GRID
 USE MODI_GET_LUOUT
-USE MODI_PREP_WATFLUX_SBL
+USE MODI_PREP_SBL
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODN_PREP_WATFLUX
@@ -65,7 +65,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
-TYPE(CANOPY_t), INTENT(INOUT) :: WSB
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -148,7 +148,7 @@ ENDIF
 !*      5.     Preparation of SBL air variables
 !
 W%LSBL = LWAT_SBL
-IF (W%LSBL) CALL PREP_WATFLUX_SBL(WG%NDIM, WSB)
+IF (W%LSBL) CALL PREP_SBL(WG%NDIM, SB)
 IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

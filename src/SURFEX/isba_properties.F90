@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE ISBA_PROPERTIES(VO, VR, VMT, VMA, KPATCH,   &
-                                 PDIR_SW, PSCA_SW, PSW_BANDS, KSW,     &
+      SUBROUTINE ISBA_PROPERTIES(IO, PEK, PDIR_SW, PSCA_SW, PSW_BANDS, KSW,  &
                                  PASNOW, PANOSNOW, PESNOW, PENOSNOW,      &
                                  PTSSNOW, PTSNOSNOW,                      &
                                  PALBNIR_TVEG, PALBVIS_TVEG,              &
@@ -38,8 +37,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t, ISBA_PARAM_ALB_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_SNOW_PAR   , ONLY : XEMISSN, XEMCRIN, XSNOWDMIN, &
@@ -57,12 +55,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: VO
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: VR
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: VMT
-TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: VMA
-!
-INTEGER,              INTENT(IN)   :: KPATCH     ! patch being treated
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PDIR_SW            ! direct incoming solar radiation
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSCA_SW            ! diffus incoming solar radiation
@@ -84,9 +78,9 @@ REAL, DIMENSION(:)  , INTENT(OUT)  :: PALBVIS_TSOIL      ! visible soil tot albe
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PDIR_SW,1)) :: ZGLOBAL_SW                 ! global incoming SW rad.
-REAL, DIMENSION(SIZE(VMT%XALBNIR))   :: ZALBF
-REAL, DIMENSION(SIZE(VMT%XALBNIR))   :: ZFFV
-REAL, DIMENSION(SIZE(VMT%XALBNIR))   :: ZFFG
+REAL, DIMENSION(SIZE(PEK%XALBNIR))   :: ZALBF
+REAL, DIMENSION(SIZE(PEK%XALBNIR))   :: ZFFV
+REAL, DIMENSION(SIZE(PEK%XALBNIR))   :: ZFFG
 !
 LOGICAL, PARAMETER :: GMEB=.FALSE.
 REAL, DIMENSION(SIZE(PDIR_SW,1))   :: ZP_MEB_SCA_SW, ZALBNIR_TSNOW, ZALBVIS_TSNOW
@@ -95,10 +89,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_PROPERTIES',0,ZHOOK_HANDLE)
 !
- CALL ISBA_SNOW_FRAC(VR%TSNOW%SCHEME, VR%TSNOW%WSNOW(:,:,KPATCH),  &
-                     VR%TSNOW%RHO(:,:,KPATCH), VR%TSNOW%ALB(:,KPATCH), &
-                     VMT%XVEG(:,1), VMT%XLAI(:,1), VMT%XZ0(:,1),       &
-                     VR%XPSN(:,1), VR%XPSNV_A(:,1), VR%XPSNG(:,1), VR%XPSNV(:,1)  )  
+ CALL ISBA_SNOW_FRAC(PEK%TSNOW%SCHEME, PEK%TSNOW%WSNOW, PEK%TSNOW%RHO, PEK%TSNOW%ALB, &
+                     PEK%XVEG, PEK%XLAI, PEK%XZ0, &
+                     PEK%XPSN, PEK%XPSNV_A, PEK%XPSNG, PEK%XPSNV )  
 !
 !-------------------------------------------------------------------------------
 !*      2.     Compute snow-free albedo
@@ -110,48 +103,48 @@ ZALBF         = 0.
 ZFFV          = 0.
 ZFFG          = 0.
 !
- CALL ISBA_ALBEDO(VR%TSNOW%SCHEME, VO%LTR_ML, GMEB, PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
-                  VMT, VMA, VR, ZALBF, ZFFV, ZFFG, ZGLOBAL_SW, ZP_MEB_SCA_SW, &
+ CALL ISBA_ALBEDO(PEK, IO%LTR_ML, GMEB, PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
+                  ZALBF, ZFFV, ZFFG, ZGLOBAL_SW, ZP_MEB_SCA_SW, &
                   PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL)
 
-PANOSNOW(:) = VR%XSNOWFREE_ALB(:,1)
+PANOSNOW(:) = PEK%XSNOWFREE_ALB(:)
 !-------------------------------------------------------------------------------
 !
 !*      3.     Compute aggeragted albedo and emissivity
 !              ----------------------------------------
 !
-IF(VR%TSNOW%SCHEME == '3-L' .OR. VR%TSNOW%SCHEME == 'CRO' .OR. VO%CISBA == 'DIF')THEN
+IF(PEK%TSNOW%SCHEME == '3-L' .OR. PEK%TSNOW%SCHEME == 'CRO' .OR. IO%CISBA == 'DIF')THEN
 !
 ! NON-SNOW covered Grid averaged albedo and emissivity for explicit snow scheme:
 !
-  PASNOW(:) = VR%TSNOW%ALB(:,KPATCH)
-  PESNOW(:) = VR%TSNOW%EMIS(:,KPATCH)
-  PENOSNOW(:) = VMT%XEMIS(:,1)
+  PASNOW  (:) = PEK%TSNOW%ALB(:)
+  PESNOW  (:) = PEK%TSNOW%EMIS(:)
+  PENOSNOW(:) = PEK%XEMIS(:)
 
-  PTSSNOW(:)   = VR%TSNOW%TS(:,KPATCH)
-  PTSNOSNOW(:) = VR%XTG(:,1,1)
+  PTSSNOW(:)   = PEK%TSNOW%TS(:)
+  PTSNOSNOW(:) = PEK%XTG(:,1)
 
 ELSE
 !
 ! Grid averaged albedo and emissivity for composite snow scheme:
 !
-  IF(VR%TSNOW%SCHEME =='EBA') THEN
+  IF(PEK%TSNOW%SCHEME =='EBA') THEN
 !
-    PASNOW(:) = VR%TSNOW%ALB(:,KPATCH)
-    PESNOW(:) = XEMCRIN
-    PENOSNOW(:) = VMT%XEMIS(:,1)
+    PASNOW  (:) = PEK%TSNOW%ALB(:)
+    PESNOW  (:) = XEMCRIN
+    PENOSNOW(:) = PEK%XEMIS(:)
 
-    PTSSNOW(:)   = VR%XTG(:,1,1)
-    PTSNOSNOW(:) = VR%XTG(:,1,1)
+    PTSSNOW  (:) = PEK%XTG(:,1)
+    PTSNOSNOW(:) = PEK%XTG(:,1)
 
   ELSE
 
-    PASNOW(:) = VR%TSNOW%ALB(:,KPATCH)
-    PESNOW(:) = XEMISSN
-    PENOSNOW(:) = VMT%XEMIS(:,1)
+    PASNOW  (:) = PEK%TSNOW%ALB(:)
+    PESNOW  (:) = XEMISSN
+    PENOSNOW(:) = PEK%XEMIS(:)
 
-    PTSSNOW(:)   = VR%XTG(:,1,1)
-    PTSNOSNOW(:) = VR%XTG(:,1,1)
+    PTSSNOW  (:) = PEK%XTG(:,1)
+    PTSNOSNOW(:) = PEK%XTG(:,1)
 
   ENDIF
 !

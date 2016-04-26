@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_INLINE_TEB_n (DTO, DGT, TCP, T, &
+       SUBROUTINE DIAG_INLINE_TEB_n (DGO, D, SB, T, &
                                      OCANOPY, PTA, PTS, PQA, PPA, PPS, PRHOA,                &
                                      PZONA, PMERA, PWIND, PHT, PHW,                          &
                                      PCD, PCDN, PRI, PCH, PZ0,                               &
@@ -58,9 +58,9 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DTO
-TYPE(DIAG_t), INTENT(INOUT) :: DGT
-TYPE(CANOPY_t), INTENT(INOUT) :: TCP
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(TEB_t), INTENT(INOUT) :: T
 !
 LOGICAL,            INTENT(IN)       :: OCANOPY  ! Flag for canopy
@@ -123,7 +123,7 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',0,ZHOOK_HANDLE)
 !It should be the arithmetic mean of the surface temperature
 !of each independant energy budget, if there is. See ISBA for more detail.
 !
-DGT%XTS(:) = PTS(:)
+D%XTS(:) = PTS(:)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
@@ -137,69 +137,69 @@ IF (OCANOPY) THEN
   ZHU2M_MIN   (:) = XUNDEF
   ZHU2M_MAX   (:) = XUNDEF
   ZWIND10M_MAX(:) = XUNDEF
-  IF (DTO%N2M>0) CALL INIT_2M_10M( TCP, DGT, PZONA, PMERA, PWIND, PRHOA )
+  IF (DGO%N2M>0) CALL INIT_2M_10M( SB, D, PZONA, PMERA, PWIND, PRHOA )
 ELSE
 !* 2m and 10m variables using CLS laws
- IF (DTO%N2M==1) THEN
-  CALL PARAM_CLS(DGT, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
+ IF (DGO%N2M==1) THEN
+  CALL PARAM_CLS(D, PTA, PTS, PQA, PPA, PRHOA, PZONA, PMERA, &
                  PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER          )  
   !
   !* erases temperature and humidity 2m above roof level bu canyon air values
   !
-  DGT%XT2M  = T%CUR%XT_CANYON
-  DGT%XQ2M  = T%CUR%XQ_CANYON
+  D%XT2M  = T%CUR%XT_CANYON
+  D%XQ2M  = T%CUR%XQ_CANYON
   !
   !* Richardson number
   !
-  DGT%XRI = PRI
-  DGT%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
- ELSE IF (DTO%N2M==2) THEN
+  D%XRI = PRI
+  D%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
+ ELSE IF (DGO%N2M==2) THEN
   ZH(:)=10.
-  CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, DGT%XZON10M, DGT%XMER10M    )  
-  DGT%XT2M  = T%CUR%XT_CANYON
-  DGT%XQ2M  = T%CUR%XQ_CANYON
-  DGT%XRI   = PRI
-  DGT%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
+  CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M    )  
+  D%XT2M  = T%CUR%XT_CANYON
+  D%XQ2M  = T%CUR%XQ_CANYON
+  D%XRI   = PRI
+  D%XHU2M = MIN(T%CUR%XQ_CANYON /QSAT(T%CUR%XT_CANYON,PPA),1.)
  END IF
  !
- IF (DTO%N2M>=1) THEN
+ IF (DGO%N2M>=1) THEN
    !
-   DGT%XT2M_MIN(:) = MIN(DGT%XT2M_MIN(:),DGT%XT2M(:))
-   DGT%XT2M_MAX(:) = MAX(DGT%XT2M_MAX(:),DGT%XT2M(:))
+   D%XT2M_MIN(:) = MIN(D%XT2M_MIN(:),D%XT2M(:))
+   D%XT2M_MAX(:) = MAX(D%XT2M_MAX(:),D%XT2M(:))
    !
-   DGT%XHU2M_MIN(:) = MIN(DGT%XHU2M_MIN(:),DGT%XHU2M(:))
-   DGT%XHU2M_MAX(:) = MAX(DGT%XHU2M_MAX(:),DGT%XHU2M(:))
+   D%XHU2M_MIN(:) = MIN(D%XHU2M_MIN(:),D%XHU2M(:))
+   D%XHU2M_MAX(:) = MAX(D%XHU2M_MAX(:),D%XHU2M(:))
    !
-   DGT%XWIND10M    (:) = SQRT(DGT%XZON10M**2+DGT%XMER10M**2)
-   DGT%XWIND10M_MAX(:) = MAX(DGT%XWIND10M_MAX(:),DGT%XWIND10M(:))
+   D%XWIND10M    (:) = SQRT(D%XZON10M**2+D%XMER10M**2)
+   D%XWIND10M_MAX(:) = MAX(D%XWIND10M_MAX(:),D%XWIND10M(:))
    !
  END IF
 ENDIF
 !
-IF (DTO%LSURF_BUDGET) THEN
+IF (DGO%LSURF_BUDGET) THEN
    !
-   CALL DIAG_SURF_BUDGET_TEB(DGT, PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB, PLW, PEMIS, PTRAD   )  
+   CALL DIAG_SURF_BUDGET_TEB(D, PDIR_SW, PSCA_SW, PDIR_ALB, PSCA_ALB, PLW, PEMIS, PTRAD   )  
    !                             
-   DGT%XRN    = PRN
-   DGT%XH     = PH
-   DGT%XLE    = PLE
-   DGT%XGFLUX = PGFLUX
-   DGT%XFMU   = PSFZON
-   DGT%XFMV   = PSFMER
-   DGT%XSFCO2 = PSFCO2
+   D%XRN    = PRN
+   D%XH     = PH
+   D%XLE    = PLE
+   D%XGFLUX = PGFLUX
+   D%XFMU   = PSFZON
+   D%XFMV   = PSFMER
+   D%XSFCO2 = PSFCO2
    !
 END IF
 !
-IF (DTO%LCOEF) THEN
-  DGT%XCD    = PCD
-  DGT%XCH    = PCH
-  DGT%XCE    = PCH
-  DGT%XZ0    = PZ0
-  DGT%XZ0H   = PZ0 / ZZ0_O_Z0H
+IF (DGO%LCOEF) THEN
+  D%XCD    = PCD
+  D%XCH    = PCH
+  D%XCE    = PCH
+  D%XZ0    = PZ0
+  D%XZ0H   = PZ0 / ZZ0_O_Z0H
 END IF
 !
-IF (DTO%LSURF_VARS) THEN
-  DGT%XQS    = T%CUR%XQ_CANYON
+IF (DGO%LSURF_VARS) THEN
+  D%XQS    = T%CUR%XQ_CANYON
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

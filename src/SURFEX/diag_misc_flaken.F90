@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_MISC_FLAKE_n (DGMF, F)
+       SUBROUTINE DIAG_MISC_FLAKE_n (DMF, F)
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-FLAKE_n * - additional diagnostics for FLake
@@ -39,12 +39,12 @@ IMPLICIT NONE
 !
 !
 TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DMF
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(DGMF%XZW_PROFILE),SIZE(F%XT_WML)) :: ZCSI      ! Vertical normalized coordinate
-REAL, DIMENSION(SIZE(DGMF%XZW_PROFILE),SIZE(F%XT_WML)) :: ZSHAPE    ! Shape function
+REAL, DIMENSION(SIZE(DMF%XZW_PROFILE),SIZE(F%XT_WML)) :: ZCSI      ! Vertical normalized coordinate
+REAL, DIMENSION(SIZE(DMF%XZW_PROFILE),SIZE(F%XT_WML)) :: ZSHAPE    ! Shape function
 !
 INTEGER         :: IZW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -55,25 +55,25 @@ IF (LHOOK) CALL DR_HOOK('DIAG_MISC_FLAKE_N',0,ZHOOK_HANDLE)
 !
 !* Flake temperature profile
 !
-DGMF%XTW_PROFILE(:,:) = XUNDEF
+DMF%XTW_PROFILE(:,:) = XUNDEF
 !
-IF (DGMF%LWATER_PROFILE) THEN
+IF (DMF%LWATER_PROFILE) THEN
 !
-   DO IZW=1,SIZE(DGMF%XZW_PROFILE)
+   DO IZW=1,SIZE(DMF%XZW_PROFILE)
       WHERE (F%XWATER_DEPTH(:)==F%XH_ML(:))
          ZCSI(IZW,:) = 0.
       ELSEWHERE
-         ZCSI(IZW,:) = (DGMF%XZW_PROFILE(IZW) - F%XH_ML(:))/(F%XWATER_DEPTH(:) - F%XH_ML(:))
+         ZCSI(IZW,:) = (DMF%XZW_PROFILE(IZW) - F%XH_ML(:))/(F%XWATER_DEPTH(:) - F%XH_ML(:))
       END WHERE
       ZSHAPE(IZW,:) = (40./3.*F%XCT-20./3.)*ZCSI(IZW,:)   +     (18.-30.*F%XCT)*ZCSI(IZW,:)**2 &
                        + (20.*F%XCT-12.)   *ZCSI(IZW,:)**3+(5./3.-10./3.*F%XCT)*ZCSI(IZW,:)**4  
    END DO
 !
-   DO IZW=1,SIZE(DGMF%XZW_PROFILE)
-      WHERE (F%XH_ML(:) >= DGMF%XZW_PROFILE(IZW))
-         DGMF%XTW_PROFILE(IZW,:) =  F%XT_WML(:) 
-      ELSEWHERE (F%XWATER_DEPTH(:) >= DGMF%XZW_PROFILE(IZW)) 
-         DGMF%XTW_PROFILE(IZW,:) = F%XT_WML(:) - (F%XT_WML(:) - F%XT_BOT(:)) * ZSHAPE(IZW,:)
+   DO IZW=1,SIZE(DMF%XZW_PROFILE)
+      WHERE (F%XH_ML(:) >= DMF%XZW_PROFILE(IZW))
+         DMF%XTW_PROFILE(IZW,:) =  F%XT_WML(:) 
+      ELSEWHERE (F%XWATER_DEPTH(:) >= DMF%XZW_PROFILE(IZW)) 
+         DMF%XTW_PROFILE(IZW,:) = F%XT_WML(:) - (F%XT_WML(:) - F%XT_BOT(:)) * ZSHAPE(IZW,:)
       END WHERE
    END DO
 !

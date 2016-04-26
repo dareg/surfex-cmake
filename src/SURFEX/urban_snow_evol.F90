@@ -169,8 +169,8 @@ PABS_LW_SN_RD(:)=0.
 !
 !-------------------------------------------------------------------------------
 !
-GSN_RF = ANY( PSR(:)>0. .OR. T%TSNOW_ROOF%WSNOW(:,1,1)>0. )
-GSN_RD = ANY( PSR(:)>0. .OR. T%TSNOW_ROAD%WSNOW(:,1,1)>0. )
+GSN_RF = ANY( PSR(:)>0. .OR. T%TSNOW_ROOF%WSNOW(:,1)>0. )
+GSN_RD = ANY( PSR(:)>0. .OR. T%TSNOW_ROAD%WSNOW(:,1)>0. )
 !
 !-------------------------------------------------------------------------------
 !
@@ -184,15 +184,15 @@ IF ( GSN_RF ) THEN
 !
 !* initializes LW radiative coefficients
 !
-  ZLW1_RF(:) =   T%TSNOW_ROOF%EMIS(:,1) * PLW_RAD(:)
-  ZLW2_RF(:) = - T%TSNOW_ROOF%EMIS(:,1) * XSTEFAN
+  ZLW1_RF(:) =   T%TSNOW_ROOF%EMIS(:) * PLW_RAD(:)
+  ZLW2_RF(:) = - T%TSNOW_ROOF%EMIS(:) * XSTEFAN
 !
 !* The global amount of snow on roofs is supposed located on a
 !  fraction of the roof surface. All computations are then
 !  done only for each m2 of snow, and not for each m2 of roof.
 !
   DO JL=1,SIZE(T%TSNOW_ROOF%WSNOW,2)
-    WHERE (PDN_RF(:)>0.) T%TSNOW_ROOF%WSNOW(:,JL,1) = T%TSNOW_ROOF%WSNOW(:,JL,1) / PDN_RF(:)
+    WHERE (PDN_RF(:)>0.) T%TSNOW_ROOF%WSNOW(:,JL) = T%TSNOW_ROOF%WSNOW(:,JL) / PDN_RF(:)
   END DO
   ZSR_RF=0.
   WHERE (PDN_RF(:)>0.) ZSR_RF   (:) = PSR   (:) / PDN_RF(:)
@@ -218,7 +218,7 @@ IF ( GSN_RF ) THEN
 !* The global amount of snow on roofs is reported to total roof surface.
 !
   DO JL=1,SIZE(T%TSNOW_ROOF%WSNOW,2)
-    T%TSNOW_ROOF%WSNOW(:,JL,1) = T%TSNOW_ROOF%WSNOW(:,JL,1) * PDN_RF(:)
+    T%TSNOW_ROOF%WSNOW(:,JL) = T%TSNOW_ROOF%WSNOW(:,JL) * PDN_RF(:)
   END DO
 !           
 END IF
@@ -230,10 +230,10 @@ IF ( GSN_RD ) THEN
   !
   ZT_SKY(:) = (PLW_RAD(:)/XSTEFAN)**0.25
 !
-  ZLW1_RD(:) = PLW_S_TO_NR  (:)   * (ZT_SKY   (:) - T%TSNOW_ROAD%TS(:,1)) &
-               + PLW_WA_TO_NR (:) * (PTS_WL_A (:) - T%TSNOW_ROAD%TS(:,1)) &
-               + PLW_WB_TO_NR (:) * (PTS_WL_B (:) - T%TSNOW_ROAD%TS(:,1)) &
-               + PLW_WIN_TO_NR(:) * (B%XT_WIN1(:) - T%TSNOW_ROAD%TS(:,1))
+  ZLW1_RD(:) = PLW_S_TO_NR  (:)   * (ZT_SKY   (:) - T%TSNOW_ROAD%TS(:)) &
+               + PLW_WA_TO_NR (:) * (PTS_WL_A (:) - T%TSNOW_ROAD%TS(:)) &
+               + PLW_WB_TO_NR (:) * (PTS_WL_B (:) - T%TSNOW_ROAD%TS(:)) &
+               + PLW_WIN_TO_NR(:) * (B%XT_WIN1(:) - T%TSNOW_ROAD%TS(:))
   ZLW2_RD(:) =  0.0
   !
   !* The global amount of snow on roads is supposed located on a
@@ -241,7 +241,7 @@ IF ( GSN_RD ) THEN
   !  done only for each m2 of snow, and not for each m2 of road.
   !
   DO JL=1,SIZE(T%TSNOW_ROAD%WSNOW,2)
-    WHERE (PDN_RD(:)>0.) T%TSNOW_ROAD%WSNOW(:,JL,1) = T%TSNOW_ROAD%WSNOW(:,JL,1) / PDN_RD(:)
+    WHERE (PDN_RD(:)>0.) T%TSNOW_ROAD%WSNOW(:,JL) = T%TSNOW_ROAD%WSNOW(:,JL) / PDN_RD(:)
   END DO
   ZSR_RD=0.
   WHERE (PDN_RD(:)>0.) ZSR_RD   (:) = PSR   (:) / PDN_RD(:)
@@ -265,10 +265,10 @@ IF ( GSN_RD ) THEN
 !* The global amount of snow on roads is reported to total road surface.
 !
   DO JL=1,SIZE(T%TSNOW_ROAD%WSNOW,2)
-    T%TSNOW_ROAD%WSNOW(:,JL,1) = T%TSNOW_ROAD%WSNOW(:,JL,1) * PDN_RD(:)
+    T%TSNOW_ROAD%WSNOW(:,JL) = T%TSNOW_ROAD%WSNOW(:,JL) * PDN_RD(:)
   END DO
 !
-  WHERE (T%TSNOW_ROAD%T(:,1,1) .EQ. XUNDEF) PDN_RD(:) = 0.0
+  WHERE (T%TSNOW_ROAD%T(:,1) .EQ. XUNDEF) PDN_RD(:) = 0.0
 !
 END IF
 IF (LHOOK) CALL DR_HOOK('URBAN_SNOW_EVOL',1,ZHOOK_HANDLE)

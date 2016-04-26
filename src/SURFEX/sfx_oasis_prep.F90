@@ -1,5 +1,5 @@
 !#########
-SUBROUTINE SFX_OASIS_PREP (I, UG, U, HPROGRAM)
+SUBROUTINE SFX_OASIS_PREP (IO, S, UG, U, HPROGRAM)
 !###################################################
 !
 !!****  *SFX_OASIS_PREP* - Prepare grid areas and mask file for SFX-OASIS coupling
@@ -33,15 +33,12 @@ SUBROUTINE SFX_OASIS_PREP (I, UG, U, HPROGRAM)
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-!
-!
-!
 !
 USE MODN_SFX_OASIS
 USE MODD_SFX_OASIS
@@ -64,8 +61,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -125,7 +122,7 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_PREP',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(I%O, U, ILUOUT)
+CALL SFX_OASIS_CHECK(IO, U, ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -137,8 +134,8 @@ CALL GET_MESH_CORNER(UG, ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 ZLON(:,1)=UG%G%XLON(:)
 ZLAT(:,1)=UG%G%XLAT(:)
 !
-IF(I%O%LGW)THEN
-  CALL UNPACK_SAME_RANK(U%NR_NATURE(:),I%PXGW(:),ZGW(:))
+IF(IO%LGW)THEN
+  CALL UNPACK_SAME_RANK(U%NR_NATURE(:),S%XGW(:),ZGW(:))
   WHERE(ZGW(:)==XUNDEF)ZGW(:)=0.0
 ELSE
   ZGW(:) = 0.0

@@ -1,5 +1,5 @@
 !     #################################################################################
-SUBROUTINE DEALLOC_WATFLUX_n (CHW, WG, W)
+SUBROUTINE DEALLOC_WATFLUX_n (CHW, G, W)
 !     #################################################################################
 !
 !!****  *DEALLOC_WATFLUX_n * - Deallocate all arrays
@@ -48,7 +48,7 @@ IMPLICIT NONE
 
 !
 TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(GRID_t), INTENT(INOUT) :: WG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -66,10 +66,10 @@ IF (ASSOCIATED(W%XSCA_ALB))  DEALLOCATE(W%XSCA_ALB)
 !
 !-------------------------------------------------------------------------------------
 !
-IF (ASSOCIATED(WG%XGRID_PAR )) DEALLOCATE(WG%XGRID_PAR )
-IF (ASSOCIATED(WG%XLAT      )) DEALLOCATE(WG%XLAT      )
-IF (ASSOCIATED(WG%XLON      )) DEALLOCATE(WG%XLON      )
-IF (ASSOCIATED(WG%XMESH_SIZE)) DEALLOCATE(WG%XMESH_SIZE)
+IF (ASSOCIATED(G%XGRID_PAR )) DEALLOCATE(G%XGRID_PAR )
+IF (ASSOCIATED(G%XLAT      )) DEALLOCATE(G%XLAT      )
+IF (ASSOCIATED(G%XLON      )) DEALLOCATE(G%XLON      )
+IF (ASSOCIATED(G%XMESH_SIZE)) DEALLOCATE(G%XMESH_SIZE)
 !
 !-------------------------------------------------------------------------------------
 !

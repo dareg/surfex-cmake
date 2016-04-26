@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PUT_SFX_LAND (I, U, &
+      SUBROUTINE PUT_SFX_LAND (S, K, U, &
                                KLUOUT,OCPL_WTD,OCPL_FLOOD, &
                               PWTD,PFWTD,PFFLOOD,PPIFLOOD )  
 !     #####################################################
@@ -35,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -52,8 +52,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,           INTENT(IN)  :: KLUOUT
@@ -89,44 +89,44 @@ ENDIF
 !
 IF(OCPL_WTD)THEN
 !    
-  I%IP%XWTD    (:) = XUNDEF
-  I%IP%XFWTD   (:) = XUNDEF
+  K%XWTD    (:) = XUNDEF
+  K%XFWTD   (:) = XUNDEF
 !
   YCOMMENT='water table depth'
-  CALL PACK_SAME_RANK(U%NR_NATURE(:),PWTD(:),I%IP%XWTD(:))
-  CALL CHECK_LAND(YCOMMENT,I%IP%XWTD)
+  CALL PACK_SAME_RANK(U%NR_NATURE(:),PWTD(:),K%XWTD(:))
+  CALL CHECK_LAND(YCOMMENT,K%XWTD)
 !  
   YCOMMENT='fraction of water table rise'
-  CALL PACK_SAME_RANK(U%NR_NATURE(:),PFWTD(:),I%IP%XFWTD(:))
-  CALL CHECK_LAND(YCOMMENT,I%IP%XFWTD)
+  CALL PACK_SAME_RANK(U%NR_NATURE(:),PFWTD(:),K%XFWTD(:))
+  CALL CHECK_LAND(YCOMMENT,K%XFWTD)
 !
-  WHERE(I%P%XGW(:)==0.0)
-        I%IP%XWTD    (:) = XUNDEF
-        I%IP%XFWTD   (:) = 0.0
+  WHERE(S%XGW(:)==0.0)
+        K%XWTD    (:) = XUNDEF
+        K%XFWTD   (:) = 0.0
   ELSEWHERE
-        I%IP%XFWTD(:)=I%IP%XFWTD(:)*I%P%XGW(:)
+        K%XFWTD(:)=K%XFWTD(:)*S%XGW(:)
   ENDWHERE
 !
 ENDIF
 !
 IF(OCPL_FLOOD)THEN
 !
-  I%I%XFFLOOD (:) = XUNDEF
-  I%I%XPIFLOOD(:) = XUNDEF
+  K%XFFLOOD (:) = XUNDEF
+  K%XPIFLOOD(:) = XUNDEF
 !
   YCOMMENT='Flood fraction'
-  CALL PACK_SAME_RANK(U%NR_NATURE(:),PFFLOOD(:),I%I%XFFLOOD(:))
-  CALL CHECK_LAND(YCOMMENT,I%I%XFFLOOD)
+  CALL PACK_SAME_RANK(U%NR_NATURE(:),PFFLOOD(:),K%XFFLOOD(:))
+  CALL CHECK_LAND(YCOMMENT,K%XFFLOOD)
 !  
   YCOMMENT='Potential flood infiltration'
-  CALL PACK_SAME_RANK(U%NR_NATURE(:),PPIFLOOD(:),I%I%XPIFLOOD(:))
-  CALL CHECK_LAND(YCOMMENT,I%I%XPIFLOOD)
+  CALL PACK_SAME_RANK(U%NR_NATURE(:),PPIFLOOD(:),K%XPIFLOOD(:))
+  CALL CHECK_LAND(YCOMMENT,K%XPIFLOOD)
 !
 ! No flood for very smal flooded area (<0.1% of grid-cell)
 !
-  WHERE(I%I%XFFLOOD (:)<0.001)
-        I%I%XFFLOOD (:)=0.0
-        I%I%XPIFLOOD(:)=0.0
+  WHERE(K%XFFLOOD (:)<0.001)
+        K%XFFLOOD (:)=0.0
+        K%XPIFLOOD(:)=0.0
   ENDWHERE
 !
 ENDIF

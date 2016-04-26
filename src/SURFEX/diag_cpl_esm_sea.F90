@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_SEA (S, DGS, DGSI, PTSTEP, PSFTQ, PRAIN, PSNOW, &
+       SUBROUTINE DIAG_CPL_ESM_SEA (S, D, DI, PTSTEP, PSFTQ, PRAIN, PSNOW, &
                                     PLW, PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW, OSIC)  
 !     ###################################################################
 !
@@ -45,8 +45,8 @@ IMPLICIT NONE
 !
 !
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
-TYPE(DIAG_t), INTENT(INOUT) :: DGS
-TYPE(DIAG_t), INTENT(INOUT) :: DGSI
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_t), INTENT(INOUT) :: DI
 !
 REAL,               INTENT(IN) :: PTSTEP    ! atmospheric time-step
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ     ! water flux
@@ -78,21 +78,21 @@ IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_SEA',0,ZHOOK_HANDLE)
 !
 !* 10m wind speed (m)
 !
-S%XCPL_SEA_WIND(:) = S%XCPL_SEA_WIND(:) + PTSTEP * SQRT(DGS%XZON10M(:)**2+DGS%XMER10M(:)**2)
+S%XCPL_SEA_WIND(:) = S%XCPL_SEA_WIND(:) + PTSTEP * SQRT(D%XZON10M(:)**2+D%XMER10M(:)**2)
 ! 
 !* wind stress (Pa.s)
 !
-S%XCPL_SEA_FWSU(:) = S%XCPL_SEA_FWSU(:) + PTSTEP * DGS%XFMU(:)
-S%XCPL_SEA_FWSV(:) = S%XCPL_SEA_FWSV(:) + PTSTEP * DGS%XFMV(:)
-S%XCPL_SEA_FWSM(:) = S%XCPL_SEA_FWSM(:) + PTSTEP * SQRT(DGS%XFMU(:)**2+DGS%XFMV(:)**2)
+S%XCPL_SEA_FWSU(:) = S%XCPL_SEA_FWSU(:) + PTSTEP * D%XFMU(:)
+S%XCPL_SEA_FWSV(:) = S%XCPL_SEA_FWSV(:) + PTSTEP * D%XFMV(:)
+S%XCPL_SEA_FWSM(:) = S%XCPL_SEA_FWSM(:) + PTSTEP * SQRT(D%XFMU(:)**2+D%XFMV(:)**2)
 !
 !* Solar net heat flux (J/m2)
 !
-S%XCPL_SEA_SNET(:) = S%XCPL_SEA_SNET(:) + PTSTEP * (DGS%XSWD(:) - DGS%XSWU(:))
+S%XCPL_SEA_SNET(:) = S%XCPL_SEA_SNET(:) + PTSTEP * (D%XSWD(:) - D%XSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-S%XCPL_SEA_HEAT(:) = S%XCPL_SEA_HEAT(:) + PTSTEP * (DGS%XGFLUX(:) + DGS%XSWU(:) - DGS%XSWD(:)) 
+S%XCPL_SEA_HEAT(:) = S%XCPL_SEA_HEAT(:) + PTSTEP * (D%XGFLUX(:) + D%XSWU(:) - D%XSWD(:)) 
 !
 !* Evaporation (kg/m2)
 !
@@ -114,7 +114,7 @@ IF (LCPL_SEAICE.OR.OSIC) THEN
 !* Solar net heat flux (J/m2)
 !
   IF (OSIC) THEN
-    ZSWU(:)=DGSI%XSWU(:)
+    ZSWU(:)=DI%XSWU(:)
   ELSE
     ZSWU(:)=0.0
     DO JSWB=1,ISWB
@@ -124,13 +124,13 @@ IF (LCPL_SEAICE.OR.OSIC) THEN
     ENDDO
   ENDIF
 !
-  S%XCPL_SEAICE_SNET(:) = S%XCPL_SEAICE_SNET(:) + PTSTEP * (DGS%XSWD(:) - ZSWU(:))
+  S%XCPL_SEAICE_SNET(:) = S%XCPL_SEAICE_SNET(:) + PTSTEP * (D%XSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
   IF (OSIC) THEN
     S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * &
-              ( PLW(:) - DGSI%XLWU(:) - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:) )
+              ( PLW(:) - DI%XLWU(:) - PSFTH_ICE(:) - XLSTT*PSFTQ_ICE(:) )
   ELSE
     ZTICE4(:)=S%XTICE(:)**4
     S%XCPL_SEAICE_HEAT(:) = S%XCPL_SEAICE_HEAT(:) + PTSTEP * ( XEMISWATICE*(PLW(:)-XSTEFAN*ZTICE4(:)) &

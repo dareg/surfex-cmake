@@ -58,18 +58,18 @@ IF (LHOOK) CALL DR_HOOK('MODE_EKF:GET_FILE_NAME',1,ZHOOK_HANDLE)
 END SUBROUTINE GET_FILE_NAME
 !
 !
-SUBROUTINE B_BIG_LOOP (I, &
+SUBROUTINE B_BIG_LOOP (IO, &
                        HACTION,HFILE,PTAB,PTAB_IN)
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_ASSIM, ONLY : NVAR
 !
 IMPLICIT NONE
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 CHARACTER(LEN=4), INTENT(IN) :: HACTION
 CHARACTER(LEN=*), INTENT(IN) :: HFILE
@@ -94,11 +94,11 @@ IKI = SIZE(PTAB,1)
 DO JL = 1,NVAR   ! control variable (x at previous time step)
   DO JK = 1,NVAR
     DO JI = 1,IKI
-      DO JJ = 1,I%O%NPATCH   
-        DO JJJ = 1,I%O%NPATCH
+      DO JJ = 1,IO%NPATCH   
+        DO JJJ = 1,IO%NPATCH
           !
-          L1 = JJ+I%O%NPATCH*(JL-1)
-          K1 = JJJ+I%O%NPATCH*(JK-1)
+          L1 = JJ+IO%NPATCH*(JL-1)
+          K1 = JJJ+IO%NPATCH*(JK-1)
           !
           IF ( HACTION=="READ" ) THEN
             READ (111) PTAB(JI,L1,K1)

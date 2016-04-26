@@ -1,6 +1,6 @@
 !     ########
-SUBROUTINE DIAG_SURF_ATM_n (DGI, DGS, TD, DFO, DGF, DGFC, DWO, DGW, DGWC, &
-                            DLO, DGL, DGLC, DUO, DGU, DGUP, DGUC, DGUPC,  U, USS, HPROGRAM)
+SUBROUTINE DIAG_SURF_ATM_n (ID, DS, TD, DFO, DF, DFC, DWO, DW, DWC, &
+                            DLO, DL, DLC, DUO, DU, DUP, DUC, DUPC,  U, USS, HPROGRAM)
 !     #################################################################################
 !
 !!****  *DIAG_SURF_ATM_n * - Chooses the surface schemes for diagnostics
@@ -53,25 +53,25 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_DIAG_t), INTENT(INOUT) :: DGI
-TYPE(SEAFLUX_DIAG_t), INTENT(INOUT) :: DGS
+TYPE(ISBA_DIAG_t), INTENT(INOUT) :: ID
+TYPE(SEAFLUX_DIAG_t), INTENT(INOUT) :: DS
 TYPE(TEB_DIAG_t), INTENT(INOUT) :: TD
 !
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DFO
-TYPE(DIAG_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_t), INTENT(INOUT) :: DGFC
+TYPE(DIAG_t), INTENT(INOUT) :: DF
+TYPE(DIAG_t), INTENT(INOUT) :: DFC
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DWO
-TYPE(DIAG_t), INTENT(INOUT) :: DGW
-TYPE(DIAG_t), INTENT(INOUT) :: DGWC
+TYPE(DIAG_t), INTENT(INOUT) :: DW
+TYPE(DIAG_t), INTENT(INOUT) :: DWC
 !
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DUO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
-TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DGUP
-TYPE(DIAG_t), INTENT(INOUT) :: DGUC
-TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DGUPC
+TYPE(DIAG_t), INTENT(INOUT) :: DU
+TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DUP
+TYPE(DIAG_t), INTENT(INOUT) :: DUC
+TYPE(DIAG_PATCH_t), INTENT(INOUT) :: DUPC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
 !
@@ -109,7 +109,7 @@ JTILE     = 0
 ZFRAC_TILE(:,:)    = 0.0
 !
 ! Number of spectral short wave bands for detailed radiation budget
-JSW = SIZE(DGUP%AL(1)%XSWBD,2)
+JSW = SIZE(DUP%AL(1)%XSWBD,2)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
@@ -123,8 +123,8 @@ IF(GSEA)THEN
 ! 
   ZFRAC_TILE(:,JTILE) = U%XSEA(:)
 !
-  CALL DIAG_SEA_n(DLO, DGL, DGLC, DGS%O, DGS%D, DGS%DC, U, &
-                  HPROGRAM, DGUP%AL(1), DGUPC%AL(1), U%NR_SEA)
+  CALL DIAG_SEA_n(DLO, DL, DLC, DS%O, DS%D, DS%DC, U, &
+                  HPROGRAM, DUP%AL(1), DUPC%AL(1), U%NR_SEA)
 !
 ENDIF
 !
@@ -138,8 +138,8 @@ IF(GWATER)THEN
 !
   ZFRAC_TILE(:,JTILE) = U%XWATER(:)
 !
-  CALL DIAG_INLAND_WATER_n(DFO, DGF, DGFC, DLO, DGL, DGLC, DWO, DGW, DGWC, &
-                           U, HPROGRAM, DGUP%AL(2), DGUPC%AL(2), U%NR_WATER)
+  CALL DIAG_INLAND_WATER_n(DFO, DF, DFC, DLO, DL, DLC, DWO, DW, DWC, &
+                           U, HPROGRAM, DUP%AL(2), DUPC%AL(2), U%NR_WATER)
 !
 ENDIF 
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -152,8 +152,8 @@ IF(GNATURE)THEN
 !
     ZFRAC_TILE(:,JTILE) = U%XNATURE(:)
 !
-  CALL DIAG_NATURE_n(DGI%DE, DLO, DGL, DGLC, DGI%O, DGI%D, DGI%DC, U, &
-                     HPROGRAM, DGUP%AL(3), DGUPC%AL(3), U%NR_NATURE)   
+  CALL DIAG_NATURE_n(ID%DE, DLO, DL, DLC, ID%O, ID%D, ID%DC, U, &
+                     HPROGRAM, DUP%AL(3), DUPC%AL(3), U%NR_NATURE)   
 !
 ENDIF 
 !
@@ -167,8 +167,8 @@ IF(GTOWN)THEN
 !
     ZFRAC_TILE(:,JTILE) = U%XTOWN(:)
 !
-  CALL DIAG_TOWN_n(DLO, DGL, DGLC, TD%O, TD%D, U, HPROGRAM, &
-                   DGUP%AL(4), DGUPC%AL(4), U%NR_TOWN)  
+  CALL DIAG_TOWN_n(DLO, DL, DLC, TD%O, TD%D, U, HPROGRAM, &
+                   DUP%AL(4), DUPC%AL(4), U%NR_TOWN)  
 !
 ENDIF 
 !
@@ -176,7 +176,7 @@ ENDIF
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL AVERAGE_DIAG(ZFRAC_TILE, DUO, DGU, DGUP, DGUC, DGUPC)              
+CALL AVERAGE_DIAG(ZFRAC_TILE, DUO, DU, DUP, DUC, DUPC)              
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Quantities at 2 meters above the minimum orography of the grid mesh
@@ -195,8 +195,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',0,ZHOOK_HANDLE)
 !
-CALL MINZS_VERT_SHIFT(DGU, U%XZS, USS%XMIN_ZS, ZPS, ZRHOA)  
-DGU%XHU2M_MIN_ZS = DGU%XHU2M
+CALL MINZS_VERT_SHIFT(DU, U%XZS, USS%XMIN_ZS, ZPS, ZRHOA)  
+DU%XHU2M_MIN_ZS = DU%XHU2M
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',1,ZHOOK_HANDLE)
 !

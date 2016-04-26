@@ -261,13 +261,13 @@ CALL INIT_INDEX_MPI(YSC,CSURF_FILETYPE,'PRE',YALG_MPI,XIO_FRAC)
 !             ------------------------------------------------
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_PREP(YSC%IM%I, YSC%UG, YSC%U, CSURF_FILETYPE)
+  CALL SFX_OASIS_PREP(YSC%IM%O, YSC%IM%S, YSC%UG, YSC%U, CSURF_FILETYPE)
 ENDIF
 !
 !*    4.      Store of surface physiographic fields
 !             -------------------------------------
 !
-CALL FLAG_UPDATE(YSC%IM%DGI%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
+CALL FLAG_UPDATE(YSC%IM%ID%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !* opens the file
 IF (NRANK==NPIO) THEN
@@ -290,7 +290,7 @@ LDEF = .TRUE.
 !
 IF (CSURF_FILETYPE=="NC    ") THEN
   CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, &
-                         YSC%SM%DTS, YSC%TM%DTT, YSC%DTZ, YSC%IM%I, &
+                         YSC%SM%DTS, YSC%TM%DTT, YSC%DTZ, YSC%IM, &
                          YSC%UG, YSC%U, YSC%DUO%CSELECT)
 ENDIF
 !

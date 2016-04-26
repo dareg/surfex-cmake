@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE READ_SEAICE_n (SG, S, HPROGRAM,KLU,KLUOUT)
+      SUBROUTINE READ_SEAICE_n (G, S, HPROGRAM,KLU,KLUOUT)
 !     #########################################
 !
 !!****  *READ_SEAICE_n* - read seaice scheme variables
@@ -76,7 +76,7 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: SG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
@@ -334,15 +334,15 @@ S%TGLT%dom(:,1)%vmk=1
 !
 !    lat,lon,srf are inherited from seaflux grid
 !
-S%TGLT%dom(:,1)%lon=SG%XLON(:)*XPI/180.
-S%TGLT%dom(:,1)%lat=SG%XLAT(:)*XPI/180.
+S%TGLT%dom(:,1)%lon=G%XLON(:)*XPI/180.
+S%TGLT%dom(:,1)%lat=G%XLAT(:)*XPI/180.
 !
 !    Except in Gelato dynamics, mesh lengths are used only to compute mesh area
 !    Hence, a simple setting can be used
 !
-S%TGLT%dom(:,1)%dxc=SG%XMESH_SIZE(:)**0.5
+S%TGLT%dom(:,1)%dxc=G%XMESH_SIZE(:)**0.5
 S%TGLT%dom(:,1)%dyc=S%TGLT%dom(:,1)%dxc
-S%TGLT%dom(:,1)%srf=SG%XMESH_SIZE(:)
+S%TGLT%dom(:,1)%srf=G%XMESH_SIZE(:)
 !
 !    Surface of local and global ocean domain (ghost points are masked out)
 !
@@ -437,7 +437,7 @@ DO JI=1,KLU
    IF(PFIELD(JI)>ZMAX.OR.PFIELD(JI)<ZMIN)THEN
       IERRC=IERRC+1
       WRITE(KLUOUT,*)'PROBLEM FIELD '//TRIM(HFIELD)//' =',PFIELD(JI),&
-                     'NOT REALISTIC AT LOCATION (LAT/LON)',SG%XLAT(JI),SG%XLON(JI)
+                     'NOT REALISTIC AT LOCATION (LAT/LON)',G%XLAT(JI),G%XLON(JI)
    ENDIF
 ENDDO
 !         

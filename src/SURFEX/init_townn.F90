@@ -1,5 +1,5 @@
 !     #############################################################
-      SUBROUTINE INIT_TOWN_n (DTCO, OREAD_BUDGETC, UG, U, TM, GDM, GRM, DLO, DGL, DGLC,  &                        
+      SUBROUTINE INIT_TOWN_n (DTCO, OREAD_BUDGETC, UG, U, TM, GDM, GRM, DGO, DL, DLC,  &                        
                               HPROGRAM,HINIT,KI,KSV,KSW, HSV,PCO2,PRHOA,       &
                               PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
                               PEMIS,PTSRAD,PTSURF,KYEAR,KMONTH,KDAY,PTIME,     &
@@ -72,9 +72,9 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 !
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -122,14 +122,13 @@ IF (U%CTOWN=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DLO, DGL, DGLC, OREAD_BUDGETC, &
+  CALL INIT_IDEAL_FLUX(DGO, DL, DLC, OREAD_BUDGETC, &
                        HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
                        PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CTOWN=='TEB   ') THEN
-  CALL INIT_TEB_n(DTCO, UG, U, TM%CHT, TM%DTT, TM%TCP, TM%TG, TM%TOP, &
+  CALL INIT_TEB_n(DTCO, UG, U, TM%CHT, TM%DTT, TM%SB, TM%G, TM%TOP, &
                   TM%TPN, TM%T, TM%TD, TM%BDD, TM%BOP, TM%DTB, TM%B,  &
-                  GDM%TV, GDM%DTI, GDM%GB, GDM%VD, GDM%TIR, GRM%TV, GRM%DTI,  &
-                  GRM%GB, GRM%VD, HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,   &
+                  GDM, GRM, HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,   &
                   PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,         &
                   PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,     &
                   KDAY, PTIME, HATMFILE, HATMFILETYPE, 'OK'   )  

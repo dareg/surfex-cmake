@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_CPL_ESM_WATER (W, DGW, OCPL_SEAICE, PTSTEP, PSFTQ, PRAIN, PSNOW, PLW,   &
+       SUBROUTINE DIAG_CPL_ESM_WATER (W, D, OCPL_SEAICE, PTSTEP, PSFTQ, PRAIN, PSNOW, PLW,   &
                                       PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW    )  
 !     #####################################################################
 !
@@ -42,7 +42,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGW
+TYPE(DIAG_t), INTENT(INOUT) :: D
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 LOGICAL,            INTENT(IN) :: OCPL_SEAICE ! sea-ice / ocean key
@@ -75,21 +75,21 @@ IF (LHOOK) CALL DR_HOOK('DIAG_CPL_ESM_WATER',0,ZHOOK_HANDLE)
 !
 !* 10m wind speed (m)
 !
-W%XCPL_WATER_WIND(:) = W%XCPL_WATER_WIND(:) + PTSTEP * SQRT(DGW%XZON10M(:)**2+DGW%XMER10M(:)**2)
+W%XCPL_WATER_WIND(:) = W%XCPL_WATER_WIND(:) + PTSTEP * SQRT(D%XZON10M(:)**2+D%XMER10M(:)**2)
 ! 
 !* wind stress (Pa.s)
 !
-W%XCPL_WATER_FWSU(:) = W%XCPL_WATER_FWSU(:) + PTSTEP * DGW%XFMU(:)
-W%XCPL_WATER_FWSV(:) = W%XCPL_WATER_FWSV(:) + PTSTEP * DGW%XFMV(:)
-W%XCPL_WATER_FWSM(:) = W%XCPL_WATER_FWSM(:) + PTSTEP * SQRT(DGW%XFMU(:)**2+DGW%XFMV(:)**2)
+W%XCPL_WATER_FWSU(:) = W%XCPL_WATER_FWSU(:) + PTSTEP * D%XFMU(:)
+W%XCPL_WATER_FWSV(:) = W%XCPL_WATER_FWSV(:) + PTSTEP * D%XFMV(:)
+W%XCPL_WATER_FWSM(:) = W%XCPL_WATER_FWSM(:) + PTSTEP * SQRT(D%XFMU(:)**2+D%XFMV(:)**2)
 !
 !* Solar net heat flux (J/m2)
 !
-W%XCPL_WATER_SNET(:) = W%XCPL_WATER_SNET(:) + PTSTEP * (DGW%XSWD(:) - DGW%XSWU(:))
+W%XCPL_WATER_SNET(:) = W%XCPL_WATER_SNET(:) + PTSTEP * (D%XSWD(:) - D%XSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !
-W%XCPL_WATER_HEAT(:) = W%XCPL_WATER_HEAT(:) + PTSTEP * (DGW%XGFLUX(:) + DGW%XSWU(:) - DGW%XSWD(:)) 
+W%XCPL_WATER_HEAT(:) = W%XCPL_WATER_HEAT(:) + PTSTEP * (D%XGFLUX(:) + D%XSWU(:) - D%XSWD(:)) 
 !
 !* Evaporation (kg/m2)
 !
@@ -118,7 +118,7 @@ IF (OCPL_SEAICE) THEN
      ENDDO
   ENDDO
 !
-  W%XCPL_WATERICE_SNET(:) = W%XCPL_WATERICE_SNET(:) + PTSTEP * (DGW%XSWD(:) - ZSWU(:))
+  W%XCPL_WATERICE_SNET(:) = W%XCPL_WATERICE_SNET(:) + PTSTEP * (D%XSWD(:) - ZSWU(:))
 !
 !* Non solar heat flux (J/m2)
 !

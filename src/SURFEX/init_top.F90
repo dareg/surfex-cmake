@@ -1,5 +1,5 @@
 !     ######spl
-      SUBROUTINE INIT_TOP (IO, IP, P, I, KLUOUT, PM    )
+      SUBROUTINE INIT_TOP (IO, S, K, NK, NP, KLUOUT, PM    )
 !
 !     #####################################################################
 !
@@ -30,10 +30,8 @@
 !
 !-------------------------------------------------------------------------------
 !
-!
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY: ISBA_INIT_t, ISBA_INIT_PGD_t
-USE MODD_ISBA_PGD_n, ONLY: ISBA_PGD_t
+USE MODD_ISBA_n, ONLY: ISBA_S_t, ISBA_NP_t, ISBA_NK_t, ISBA_P_t, ISBA_K_t
 !
 USE MODD_SURF_PAR,ONLY : XUNDEF
 !
@@ -56,9 +54,10 @@ IMPLICIT NONE
 !
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: P
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: I
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 !
 INTEGER, INTENT(IN)                  :: KLUOUT
 !
@@ -66,6 +65,9 @@ REAL,    DIMENSION(:), INTENT(INOUT) :: PM
 !                                       PM = exponential decay factor of the local deficit
 !
 !*      0.2    declarations of local variables
+!
+TYPE(ISBA_K_t), POINTER :: KK
+TYPE(ISBA_P_t), POINTER :: PK
 !
 REAL, DIMENSION(SIZE(PM)) :: ZD_TOP, ZWSAT_AVG, ZWD0_AVG
 !                            ZD_TOP  = Topmodel active layer
@@ -114,7 +116,7 @@ REAL                  :: ZFUP, ZFDOWN, ZQUP, ZQDOWN, ZSLOPEQ, ZWUP, ZWDOWN, ZSLO
 INTEGER, DIMENSION (1):: ID
 !
 INTEGER               :: INI, JI, IND, JSI_MIN, JSI_MAX, IPAS, &
-                         JL, INL, JPATCH
+                         JL, INL, JP, IMASK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -128,9 +130,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Grid cells number
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TOP',0,ZHOOK_HANDLE)
+!
 INI = SIZE(PM(:))
-INL = SIZE(IP%XWSAT,2)
-IPAS = SIZE(I%XTAB_FSAT,2)
+INL = IO%NGROUND_LAYER
+IPAS = SIZE(S%XTAB_FSAT,2)
 !
 ! GAM result (not use here !)
 !
@@ -138,40 +141,55 @@ ZG  = 0.0
 !
 ZD_TOP    (:) = 0.0
 ZWSAT_AVG (:) = 0.0
-ZWD0_AVG(:) = 0.0
+ZWD0_AVG  (:) = 0.0
 !
 ! soil properties for runoff (m)
 !
 IF (IO%CISBA == 'DIF') THEN                                   
 !
-  DO JPATCH=1,IO%NPATCH
-    IF (IP%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
+  DO JP=1,IO%NPATCH
+
+    PK => NP%AL(JP)
+    KK => NK%AL(JP)
+
+    IF (PK%NSIZE_P == 0 ) CYCLE
+
     DO JL=1,INL
-       DO JI=1,INI
-          ZD_TOP   (JI) = ZD_TOP   (JI) + IP%XPATCH(JI,JPATCH)*IP%XSOILWGHT(JI,JL,JPATCH)
-          ZWSAT_AVG(JI) = ZWSAT_AVG(JI) + IP%XPATCH(JI,JPATCH)*IP%XSOILWGHT(JI,JL,JPATCH)*IP%XWSAT(JI,JL)
-          ZWD0_AVG (JI) = ZWD0_AVG (JI) + IP%XPATCH(JI,JPATCH)*IP%XSOILWGHT(JI,JL,JPATCH)*IP%XWD0 (JI,JL)
-       ENDDO
+      DO JI=1,PK%NSIZE_P
+        ! 
+        IMASK = PK%NR_P(JI)
+        !
+        ZD_TOP   (IMASK) = ZD_TOP   (IMASK) + PK%XPATCH(JI) * PK%XSOILWGHT(JI,JL)
+        ZWSAT_AVG(IMASK) = ZWSAT_AVG(IMASK) + PK%XPATCH(JI) * PK%XSOILWGHT(JI,JL) * K%XWSAT(IMASK,JL)
+        ZWD0_AVG (IMASK) = ZWD0_AVG (IMASK) + PK%XPATCH(JI) * PK%XSOILWGHT(JI,JL) * K%XWD0 (IMASK,JL)
+        !
+      ENDDO
     ENDDO
   ENDDO
 !
   WHERE(ZD_TOP(:)>0.0)
-        ZWSAT_AVG(:)=ZWSAT_AVG(:)/ZD_TOP(:)
-        ZWD0_AVG (:)=ZWD0_AVG (:)/ZD_TOP(:)
+    ZWSAT_AVG(:)=ZWSAT_AVG(:)/ZD_TOP(:)
+    ZWD0_AVG (:)=ZWD0_AVG (:)/ZD_TOP(:)
   ENDWHERE
 !
 ELSE
 !     
-  DO JPATCH=1,IO%NPATCH
-     IF (IP%NSIZE_NATURE_P(JPATCH) == 0 ) CYCLE
-     DO JI=1,INI
-        ZD_TOP(JI)=ZD_TOP(JI)+IP%XRUNOFFD(JI,JPATCH)*IP%XPATCH(JI,JPATCH)
+  DO JP=1,IO%NPATCH
+    PK => NP%AL(JP)
+    !
+     IF (PK%NSIZE_P == 0 ) CYCLE
+     !
+     DO JI=1,PK%NSIZE_P
+       IMASK = PK%NR_P(JI)
+       !
+       ZD_TOP(IMASK)=ZD_TOP(IMASK) + PK%XRUNOFFD(JI) * PK%XPATCH(JI)
      ENDDO
+     !
   ENDDO
-!     
-  ZWSAT_AVG(:) = IP%XWSAT(:,1)
-  ZWD0_AVG (:) = IP%XWD0 (:,1)
-!      
+  !
+  ZWSAT_AVG(:) = K%XWSAT(:,1)
+  ZWD0_AVG (:) = K%XWD0 (:,1)
+  !      
 ENDIF
 !
 !
@@ -186,16 +204,16 @@ ZNO = 0.0
 !
 DO JI=1,INI
 !   
-   IF(P%XTI_MEAN(JI)==XUNDEF)THEN
+   IF(S%XTI_MEAN(JI)==XUNDEF)THEN
 !
 !    *Case where the Topographics index are not defined.
 !    --------------------------------------------------------         
      ZNO=ZNO+1.0
-     I%XTAB_FSAT(JI,:)=0.0     
-     I%XTAB_WTOP(JI,:)=XUNDEF
-     I%XTAB_QTOP(JI,:)=0.0
+     S%XTAB_FSAT(JI,:) = 0.0     
+     S%XTAB_WTOP(JI,:) = XUNDEF
+     S%XTAB_QTOP(JI,:) = 0.0
 !     
-     PM(JI) =XUNDEF
+     PM(JI) = XUNDEF
 !
    ELSE 
 !
@@ -211,11 +229,11 @@ DO JI=1,INI
 !    New version : Regressions directly in the pgd
 !    1000 meter DEM to 2m DEM (PAN AND KING 2012)
 !             
-     ZTI_MEAN=P%XTI_MEAN(JI)
-     ZTI_MIN =P%XTI_MIN (JI)
-     ZTI_MAX =P%XTI_MAX (JI)
-     ZTI_STD =P%XTI_STD (JI)
-     ZTI_SKEW=P%XTI_SKEW(JI)
+     ZTI_MEAN = S%XTI_MEAN(JI)
+     ZTI_MIN  = S%XTI_MIN (JI)
+     ZTI_MAX  = S%XTI_MAX (JI)
+     ZTI_STD  = S%XTI_STD (JI)
+     ZTI_SKEW = S%XTI_SKEW(JI)
 !
 !    Calculate topographic index pdf parameters 
 !
@@ -312,13 +330,13 @@ DO JI=1,INI
 !
 !    initialization water content and fraction
 !
-     I%XTAB_WTOP(JI,1) = ZWSAT_AVG(JI)
-     I%XTAB_FSAT(JI,1) = 1.0
-     I%XTAB_QTOP(JI,1) = 0.0
+     S%XTAB_WTOP(JI,1) = ZWSAT_AVG(JI)
+     S%XTAB_FSAT(JI,1) = 1.0
+     S%XTAB_QTOP(JI,1) = 0.0
 !     
-     I%XTAB_WTOP(JI,IPAS) = ZWD0_AVG(JI)
-     I%XTAB_FSAT(JI,IPAS) = 0.0
-     I%XTAB_QTOP(JI,IPAS) = 0.0
+     S%XTAB_WTOP(JI,IPAS) = ZWD0_AVG(JI)
+     S%XTAB_FSAT(JI,IPAS) = 0.0
+     S%XTAB_QTOP(JI,IPAS) = 0.0
 !
 !    Define the new limits for the satured index loop
 !
@@ -387,7 +405,7 @@ DO JI=1,INI
 !
 !       compute satured fraction as FSAT = F(0 --> ymax) - F(0 --> ysat)
 !       
-        I%XTAB_FSAT(JI,IND)=MAX(0.0,(ZGYMAX-ZGYSAT)/ZFTOT)
+        S%XTAB_FSAT(JI,IND)=MAX(0.0,(ZGYMAX-ZGYSAT)/ZFTOT)
 !
 !       Compute driest fraction
 !
@@ -395,7 +413,7 @@ DO JI=1,INI
 !
 !       Calculate FMED
 !        
-        ZFMED=(1.0-I%XTAB_FSAT(JI,IND)-ZF0)
+        ZFMED=(1.0-S%XTAB_FSAT(JI,IND)-ZF0)
 !
         IF (ZFMED/=0.0) THEN
 !
@@ -420,11 +438,11 @@ DO JI=1,INI
 !
 !       Solves Dbar = (Wsat-WT)*d_top with Dbar/M (=ZDMOY) = (Wsat-WT)*d_top/M
 !
-        I%XTAB_WTOP(JI,IND) = ZWSAT_AVG(JI)-(PM(JI)*ZDMOY/ZD_TOP(JI))
-!
+        S%XTAB_WTOP(JI,IND) = ZWSAT_AVG(JI)-(PM(JI)*ZDMOY/ZD_TOP(JI))
+
 !       Solves Qs = FMED * M * Ks * exp(-Xsat) / Ks (dimentionless)
 !
-        I%XTAB_QTOP(JI,IND) = ZFMED*PM(JI)*EXP(-ZXSAT_IND)
+        S%XTAB_QTOP(JI,IND) = ZFMED*PM(JI)*EXP(-ZXSAT_IND)
 !        
       ENDDO
 !
@@ -438,37 +456,37 @@ DO JI=1,INI
 !
 !  Upper boundary
 !
-   IF(I%XTAB_WTOP(JI,2)==ZWSAT_AVG(JI))THEN
+   IF(S%XTAB_WTOP(JI,2)==ZWSAT_AVG(JI))THEN
 !
-     ZFUP=I%XTAB_FSAT(JI,1)
-     ZWUP=I%XTAB_WTOP(JI,1)
-     ZQUP=I%XTAB_QTOP(JI,1)
+     ZFUP=S%XTAB_FSAT(JI,1)
+     ZWUP=S%XTAB_WTOP(JI,1)
+     ZQUP=S%XTAB_QTOP(JI,1)
 !   
-     ID(:)=MAXLOC(I%XTAB_WTOP(JI,:),I%XTAB_WTOP(JI,:)<ZWSAT_AVG(JI))
+     ID(:)=MAXLOC(S%XTAB_WTOP(JI,:),S%XTAB_WTOP(JI,:)<ZWSAT_AVG(JI))
 !   
-     ZFDOWN=I%XTAB_FSAT(JI,ID(1))
-     ZWDOWN=I%XTAB_WTOP(JI,ID(1))
-     ZQDOWN=I%XTAB_QTOP(JI,ID(1))
+     ZFDOWN=S%XTAB_FSAT(JI,ID(1))
+     ZWDOWN=S%XTAB_WTOP(JI,ID(1))
+     ZQDOWN=S%XTAB_QTOP(JI,ID(1))
 !     
      ZSLOPEW=(ZWUP-ZWDOWN)/(ZFUP-ZFDOWN)   
      ZSLOPEQ=(ZQUP-ZQDOWN)/(ZFUP-ZFDOWN)   
 !
      DO IND=2,ID(1)-1
-        I%XTAB_WTOP(JI,IND)=ZWDOWN+(I%XTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEW
-        I%XTAB_QTOP(JI,IND)=ZQDOWN+(I%XTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEQ
+        S%XTAB_WTOP(JI,IND)=ZWDOWN+(S%XTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEW
+        S%XTAB_QTOP(JI,IND)=ZQDOWN+(S%XTAB_FSAT(JI,IND)-ZFDOWN)*ZSLOPEQ
      ENDDO
 !   
    ENDIF
 !
 !  Lower boundary
 !
-   WHERE(I%XTAB_FSAT(JI,:)<=0.0      )
-         I%XTAB_WTOP(JI,:)=ZWD0_AVG(JI)
-         I%XTAB_QTOP(JI,:)=0.0
+   WHERE(S%XTAB_FSAT(JI,:)<=0.0      )
+         S%XTAB_WTOP(JI,:)=ZWD0_AVG(JI)
+         S%XTAB_QTOP(JI,:)=0.0
    ENDWHERE
-   WHERE(I%XTAB_WTOP(JI,:)<=ZWD0_AVG(JI))
-         I%XTAB_FSAT(JI,:)=0.0
-         I%XTAB_QTOP(JI,:)=0.0
+   WHERE(S%XTAB_WTOP(JI,:)<=ZWD0_AVG(JI))
+         S%XTAB_FSAT(JI,:)=0.0
+         S%XTAB_QTOP(JI,:)=0.0
    ENDWHERE
 !   
 ENDDO

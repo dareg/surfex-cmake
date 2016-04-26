@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE PREP_HOR_ISBA_CC_FIELD (DTCO, U, KLAT, IP, O, R, PLAI, PVEGTYPE, &
+SUBROUTINE PREP_HOR_ISBA_CC_FIELD (DTCO, U, KLAT, IO, S, NK, NP, NPE,  &
                                    HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !     #################################################################################
 !
@@ -34,8 +34,8 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_NK_t, ISBA_NP_t, ISBA_NPE_t, ISBA_K_t, ISBA_S_t, &
+                        ISBA_PE_t, ISBA_P_t
 !
 USE MODD_CO2V_PAR,  ONLY : XCA_NIT, XCC_NIT
 !
@@ -66,11 +66,11 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER, INTENT(IN) :: KLAT
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: O
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PLAI
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PVEGTYPE
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: R
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=8),   INTENT(IN)  :: HSURF     ! type of field
@@ -81,6 +81,18 @@ TYPE(ISBA_PROG_t), INTENT(INOUT) :: R
 !
 !*      0.2    declarations of local variables
 !
+TYPE FOUT
+  REAL, DIMENSION(:,:), ALLOCATABLE :: ZOUT
+END TYPE FOUT
+TYPE NFOUT
+  TYPE(FOUT), DIMENSION(:), ALLOCATABLE :: AL
+END TYPE NFOUT
+TYPE (NFOUT) :: ZW
+TYPE(NFOUT) :: ZF
+!
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
+!
  CHARACTER(LEN=6)              :: YFILETYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILE     ! name of file
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
@@ -89,7 +101,6 @@ REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN  ! field to interpolate horizont
 REAL, POINTER, DIMENSION(:,:)       :: ZFIELD    ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZFIELDOUTV ! field interpolated   horizontally
-REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZW        ! work array (x, fine   soil grid, npatch)
 !
 INTEGER                       :: ILUOUT    ! output listing logical unit
 !
@@ -98,7 +109,7 @@ LOGICAL                       :: GPREP_AGS ! flag to prepare ags field (only ext
 !
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
-INTEGER                       :: INL, INP, JJ, JL ! Work integer
+INTEGER                       :: INL, INP, JJ, JL, JP ! Work integer
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -151,9 +162,9 @@ IF(GPREP_AGS)THEN
   DO JPATCH = 1, INP
     ZFIELD(:,:)=ZFIELDIN(:,:,JPATCH)
     IF (INP==NVEGTYPE) THEN
-       LINTERP = (PVEGTYPE(:,JPATCH) > 0.)
-    ELSEIF(INP==O%NPATCH)THEN
-       LINTERP = (IP%XPATCH(:,JPATCH) > 0.)
+       LINTERP = (S%XVEGTYPE(:,JPATCH) > 0.)
+    ELSEIF(INP==IO%NPATCH)THEN
+       LINTERP = (S%XPATCH(:,JPATCH) > 0.)
     ENDIF
     CALL HOR_INTERPOL(DTCO, U, ILUOUT,ZFIELD,ZFIELDOUTP(:,:,JPATCH))
     LINTERP = .TRUE.
@@ -175,49 +186,63 @@ ENDIF
 !
 !*      6.     Transformation from vegtype grid to patch grid
 !
+ALLOCATE(ZW%AL(IO%NPATCH))
+!
 IF(GPREP_AGS)THEN
 !
-  ALLOCATE(ZW (KLAT,SIZE(ZFIELDOUTV,2),O%NPATCH))
-!
-  ZW(:,:,:) = 0.
-  CALL VEGTYPE_GRID_TO_PATCH_GRID(O%NPATCH,IP%XVEGTYPE_PATCH,IP%XPATCH,ZFIELDOUTV,ZW)
-!
+  DO JP = 1,IO%NPATCH
+    PK => NP%AL(JP)
+    !
+    ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,INL))
+    !
+    CALL VEGTYPE_GRID_TO_PATCH_GRID(JP,IO%NPATCH,PK%XVEGTYPE_PATCH,PK%XPATCH,&
+                                    PK%NR_P,ZFIELDOUTV,ZW%AL(JP)%ZOUT)
+  ENDDO
+  !
+  DEALLOCATE(ZFIELDOUTV)
+  !
 ELSE
 !
-  SELECT CASE (HSURF)
+  DO JP = 1,IO%NPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
     !
-    !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    !  
-    CASE('BIOMASS') 
-     ALLOCATE(ZW(KLAT,O%NNBIOMASS,O%NPATCH))
-     ZW(:,:,:) = 0.
-     WHERE(PLAI(:,:)/=XUNDEF)
-       ZW(:,1,:) = PLAI(:,:) * IP%XBSLAI_NITRO(:,:)
-     ENDWHERE
-     ZW(:,2,:) = MAX( 0., (ZW(:,1,:)/ (XCC_NIT/10.**XCA_NIT))  &
-                          **(1.0/(1.0-XCA_NIT)) - ZW(:,1,:) )
+    SELECT CASE (HSURF)
+      !
+      !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      !  
+      CASE('BIOMASS') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNBIOMASS))
+        ZW%AL(JP)%ZOUT(:,:) = 0.
+        WHERE(PEK%XLAI(:)/=XUNDEF)
+          ZW%AL(JP)%ZOUT(:,1) = PEK%XLAI(:) * PK%XBSLAI_NITRO(:)
+        ENDWHERE
+        ZW%AL(JP)%ZOUT(:,2) = MAX( 0., (ZW%AL(JP)%ZOUT(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
+                             **(1.0/(1.0-XCA_NIT)) - ZW%AL(JP)%ZOUT(:,1) )
+      !
+      !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      !
+      CASE('LITTER') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNLITTER*IO%NNLITTLEVS))
+        ZW%AL(JP)%ZOUT(:,:) = 0.0
+      !
+      !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      !
+      CASE('SOILCARB') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNSOILCARB))
+        ZW%AL(JP)%ZOUT(:,:) = 0.0
+      !
+      !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      !
+      CASE('LIGNIN') 
+        ALLOCATE(ZW%AL(JP)%ZOUT(PK%NSIZE_P,IO%NNLITTLEVS))
+        ZW%AL(JP)%ZOUT(:,:) = 0.0
+      !
+      !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      !
+    END SELECT
     !
-    !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    !
-    CASE('LITTER') 
-     ALLOCATE(ZW(KLAT,O%NNLITTER*O%NNLITTLEVS,O%NPATCH))
-     ZW(:,:,:) = 0.0
-    !
-    !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    !
-    CASE('SOILCARB') 
-     ALLOCATE(ZW(KLAT,O%NNSOILCARB,O%NPATCH))
-     ZW(:,:,:) = 0.0
-    !
-    !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    !
-    CASE('LIGNIN') 
-     ALLOCATE(ZW(KLAT,O%NNLITTLEVS,O%NPATCH))
-     ZW(:,:,:) = 0.0
-    !
-    !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    !
-  END SELECT
+  ENDDO
 !
 ENDIF
 !-------------------------------------------------------------------------------------
@@ -230,73 +255,93 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('BIOMASS') 
-  ALLOCATE(R%XBIOMASS(KLAT,O%NNBIOMASS,O%NPATCH))
-  INL=MIN(O%NNBIOMASS,SIZE(ZW,2))
-  DO JL=1,INL
-     WHERE(ZW(:,JL,:)/=XUNDEF)
-       R%XBIOMASS(:,JL,:) = ZW(:,JL,:)
-     ELSEWHERE
-       R%XBIOMASS(:,JL,:) = 0.0
-     ENDWHERE
-  ENDDO
-  IF(O%NNBIOMASS>INL)THEN
-    DO JL=INL+1,O%NNBIOMASS
-       WHERE(ZW(:,JL,:)/=XUNDEF)
-         R%XBIOMASS(:,JL,:) = ZW(:,INL,:)
+   DO JP = 1,IO%NPATCH
+     PEK => NPE%AL(JP)
+     PK => NP%AL(JP)
+
+     ALLOCATE(PEK%XBIOMASS(PK%NSIZE_P,IO%NNBIOMASS))
+     INL=MIN(IO%NNBIOMASS,SIZE(ZW%AL(JP)%ZOUT,2))
+     DO JL=1,INL
+       WHERE(ZW%AL(JP)%ZOUT(:,JL)/=XUNDEF)
+         PEK%XBIOMASS(:,JL) = ZW%AL(JP)%ZOUT(:,JL)
        ELSEWHERE
-         R%XBIOMASS(:,JL,:) = 0.0
+         PEK%XBIOMASS(:,JL) = 0.0
        ENDWHERE
-    ENDDO          
-  ENDIF
+     ENDDO
+     IF(IO%NNBIOMASS>INL)THEN
+       DO JL=INL+1,IO%NNBIOMASS
+         WHERE(ZW%AL(JP)%ZOUT(:,JL)/=XUNDEF)
+           PEK%XBIOMASS(:,JL) = ZW%AL(JP)%ZOUT(:,INL)
+         ELSEWHERE
+           PEK%XBIOMASS(:,JL) = 0.0
+         ENDWHERE
+       ENDDO          
+     ENDIF
+   ENDDO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
- CASE('LITTER') 
-  ALLOCATE(R%XLITTER(KLAT,O%NNLITTER,O%NNLITTLEVS,O%NPATCH))
-  DO JPATCH=1,O%NPATCH
-    INL=0
-    DO JJ=1,O%NNLITTER
-       DO JL=1,O%NNLITTLEVS
-          INL=INL+1
-          WHERE(ZW(:,INL,JPATCH)/=XUNDEF)
-             R%XLITTER(:,JJ,JL,JPATCH) = ZW(:,INL,JPATCH)
-          ELSEWHERE
-             R%XLITTER(:,JJ,JL,JPATCH) = 0.0
-          ENDWHERE
+ CASE('LITTER')
+   DO JP = 1,IO%NPATCH
+     PEK => NPE%AL(JP)
+     PK => NP%AL(JP)
+
+     ALLOCATE(PEK%XLITTER(PK%NSIZE_P,IO%NNLITTER,IO%NNLITTLEVS))
+     INL=0
+     DO JJ=1,IO%NNLITTER
+       DO JL=1,IO%NNLITTLEVS
+         INL=INL+1
+         WHERE(ZW%AL(JP)%ZOUT(:,INL)/=XUNDEF)
+           PEK%XLITTER(:,JJ,JL) = ZW%AL(JP)%ZOUT(:,INL)
+         ELSEWHERE
+           PEK%XLITTER(:,JJ,JL) = 0.0
+         ENDWHERE
        ENDDO
-    ENDDO
-  END DO
+     ENDDO
+   END DO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('SOILCARB') 
-  ALLOCATE(R%XSOILCARB(KLAT,O%NNSOILCARB,O%NPATCH))
-  WHERE(ZW(:,:,:)/=XUNDEF)
-    R%XSOILCARB(:,:,:) = ZW(:,:,:)
-  ELSEWHERE
-    R%XSOILCARB(:,:,:) = 0.0
-  ENDWHERE
+   DO JP = 1,IO%NPATCH
+     PEK => NPE%AL(JP)
+     PK => NP%AL(JP)
+
+     ALLOCATE(PEK%XSOILCARB(PK%NSIZE_P,IO%NNSOILCARB))
+     WHERE(ZW%AL(JP)%ZOUT(:,:)/=XUNDEF)
+       PEK%XSOILCARB(:,:) = ZW%AL(JP)%ZOUT(:,:)
+     ELSEWHERE
+       PEK%XSOILCARB(:,:) = 0.0
+     ENDWHERE
+   ENDDO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('LIGNIN') 
-  ALLOCATE(R%XLIGNIN_STRUC(KLAT,O%NNLITTLEVS,O%NPATCH))
-  WHERE(ZW(:,:,:)/=XUNDEF)
-    R%XLIGNIN_STRUC(:,:,:) = ZW(:,:,:)
-  ELSEWHERE
-    R%XLIGNIN_STRUC(:,:,:) = 0.0
-  ENDWHERE
+   DO JP = 1,IO%NPATCH
+     PEK => NPE%AL(JP)
+     PK => NP%AL(JP)
+
+     ALLOCATE(PEK%XLIGNIN_STRUC(PK%NSIZE_P,IO%NNLITTLEVS))
+     WHERE(ZW%AL(JP)%ZOUT(:,:)/=XUNDEF)
+       PEK%XLIGNIN_STRUC(:,:) = ZW%AL(JP)%ZOUT(:,:)
+     ELSEWHERE
+       PEK%XLIGNIN_STRUC(:,:) = 0.0
+     ENDWHERE
+   ENDDO
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
 END SELECT
 !
-DEALLOCATE(ZW)
+DO JP = 1,IO%NPATCH
+  DEALLOCATE(ZW%AL(JP)%ZOUT)
+ENDDO
+DEALLOCATE(ZW%AL)
 !-------------------------------------------------------------------------------------
 !
 !*      8.     Deallocations
 !
-IF (ALLOCATED(ZFIELDOUTV)) DEALLOCATE(ZFIELDOUTV)
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_CC_FIELD',1,ZHOOK_HANDLE)
 !

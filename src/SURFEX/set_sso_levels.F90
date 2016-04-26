@@ -1,6 +1,5 @@
 !     #################################################################################
-SUBROUTINE SET_SSO_LEVELS (SSCP, &
-                           KDIM)
+SUBROUTINE SET_SSO_LEVELS (SB, KDIM)
 !     #################################################################################
 !
 !!****  *SET_SSO_LEVELS* - prepares SSO canopy fields
@@ -32,6 +31,8 @@ USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
+USE MODI_PREP_SBL
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -40,7 +41,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: SSCP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 INTEGER, INTENT(IN) :: KDIM ! 1D physical dimension
 
@@ -50,7 +51,6 @@ INTEGER, INTENT(IN) :: KDIM ! 1D physical dimension
 INTEGER :: JLAYER
 INTEGER :: ILU      ! number of points
 !
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZZF    ! altitudes at half levels
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -59,39 +59,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------
 !
 IF (LHOOK) CALL DR_HOOK('SET_SSO_LEVELS',0,ZHOOK_HANDLE)
-SSCP%NLVL = 6
 !
-!*      2.    height of half levels (where turbulent fluxes will be)
-!             ---------------------
-!
-!* Warning :   ZZF(:,1)   MUST BE ZERO
-ALLOCATE(ZZF(KDIM,SSCP%NLVL))
-ZZF(:,1) = 0.
-ZZF(:,2) = 1
-ZZF(:,3) = 3.
-ZZF(:,4) = 5.
-ZZF(:,5) = 8.
-ZZF(:,6) = 12.
-
-ALLOCATE(SSCP%XZ(KDIM,SSCP%NLVL))
-DO JLAYER=1,SSCP%NLVL-1
-  SSCP%XZ(:,JLAYER) = 0.5 * (ZZF(:,JLAYER)+ZZF(:,JLAYER+1))
-END DO
-SSCP%XZ(:,SSCP%NLVL) = 1.5 * ZZF(:,SSCP%NLVL) - 0.5 * ZZF(:,SSCP%NLVL-1)
-!
-DEALLOCATE(ZZF)
+ CALL PREP_SBL(KDIM, SB)
 !
 !*      3.    wind in canopy (m/s)
 !             --------------
 !
-ALLOCATE(SSCP%XU(KDIM,SSCP%NLVL))
-SSCP%XU(:,:) = XUNDEF
+ALLOCATE(SB%XU(KDIM,SB%NLVL))
+SB%XU(:,:) = XUNDEF
 !
 !*      4.    Tke in canopy (m2/s2)
 !             -------------
 !
-ALLOCATE(SSCP%XTKE(KDIM,SSCP%NLVL))
-SSCP%XTKE(:,:) = XUNDEF
+ALLOCATE(SB%XTKE(KDIM,SB%NLVL))
+SB%XTKE(:,:) = XUNDEF
 !
 IF (LHOOK) CALL DR_HOOK('SET_SSO_LEVELS',1,ZHOOK_HANDLE)
 !

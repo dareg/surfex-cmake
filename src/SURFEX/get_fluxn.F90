@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_FLUX_n (DUO, DGU, &
+      SUBROUTINE GET_FLUX_n (DGO, D, &
                              HPROGRAM,KI,PRN,PH,PLE,PLEI,PGFLUX,PT2M,PQ2M,   &
                             PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET,PCD,&  
                             PEVAP, PSUBL                                    )  
@@ -53,8 +53,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DUO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI        ! Number of points
@@ -86,16 +86,16 @@ IF (LHOOK) CALL DR_HOOK('GET_FLUX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DUO%LSURF_BUDGET)      THEN 
-        PRN       = DGU%XRN      
-        PH        = DGU%XH  
-        PLE       = DGU%XLE 
-        PLEI      = DGU%XLEI 
-        PGFLUX    = DGU%XGFLUX 
-        PSURFLWNET= DGU%XLWD-DGU%XLWU
-        PSURFSWNET= DGU%XSWD-DGU%XSWU
-        PEVAP     = DGU%XEVAP
-        PSUBL     = DGU%XSUBL
+IF (DGO%LSURF_BUDGET)      THEN 
+        PRN       = D%XRN      
+        PH        = D%XH  
+        PLE       = D%XLE 
+        PLEI      = D%XLEI 
+        PGFLUX    = D%XGFLUX 
+        PSURFLWNET= D%XLWD-D%XLWU
+        PSURFSWNET= D%XSWD-D%XSWU
+        PEVAP     = D%XEVAP
+        PSUBL     = D%XSUBL
    ELSE 
         PRN       = XUNDEF
         PH        = XUNDEF
@@ -108,12 +108,12 @@ IF (DUO%LSURF_BUDGET)      THEN
         PSUBL     = XUNDEF        
 ENDIF           
 !
-IF (DUO%N2M>0)      THEN 
-        PT2M      = DGU%XT2M
-        PQ2M      = DGU%XQ2M
-        PHU2M     = DGU%XHU2M
-        PZON10M   = DGU%XZON10M
-        PMER10M   = DGU%XMER10M
+IF (DGO%N2M>0)      THEN 
+        PT2M      = D%XT2M
+        PQ2M      = D%XQ2M
+        PHU2M     = D%XHU2M
+        PZON10M   = D%XZON10M
+        PMER10M   = D%XMER10M
    ELSE 
         PT2M     = XUNDEF
         PQ2M     = XUNDEF
@@ -122,8 +122,8 @@ IF (DUO%N2M>0)      THEN
         PMER10M  = XUNDEF
 ENDIF   
 !
-IF (DUO%LCOEF) THEN
-  PCD      = DGU%XCD
+IF (DGO%LCOEF) THEN
+  PCD      = D%XCD
 ELSE
   PCD      = XUNDEF
 ENDIF

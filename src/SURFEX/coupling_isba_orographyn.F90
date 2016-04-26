@@ -1,6 +1,7 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, ICP, AG, CHI, DTI, DGI, GB, ISS, IG,  &
-                                      I, PKCI, PKD, PK, DST, SLT, HPROGRAM, HCOUPLING, PTSTEP,&
+SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTI, ID, NGB, GB, &
+                                      ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, PKD, NDST, SLT, &
+                                      HPROGRAM, HCOUPLING, PTSTEP,&
                                       KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                       PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
                                       PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
@@ -38,25 +39,27 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, ICP, AG, CHI, DTI, DGI, 
 !!                           improve forcing vertical shift
 !----------------------------------------------------------------
 !
-USE MODD_AGRI_n, ONLY : AGRI_t
-USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
+USE MODD_AGRI_n, ONLY : AGRI_NP_t
+USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t, CH_ISBA_NP_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_SURFEX_n, ONLY : ISBA_DIAG_t
-USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
-USE MODD_SSO_n, ONLY : SSO_t
-USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_PACK_CH_ISBA, ONLY : PACK_CH_ISBA_t
+USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t, GR_BIOG_NP_t
+USE MODD_SSO_n, ONLY : SSO_t, SSO_NP_t
+USE MODD_GRID_n, ONLY : GRID_t, GRID_NP_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NK_t, ISBA_NP_t, ISBA_NPE_t
+!
 USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
-USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
+!
+USE MODD_DST_n, ONLY : DST_NP_t
+!
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SSO_n, ONLY : SSO_t, SSO_NP_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_DST_n, ONLY : DST_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
 USE MODD_SURF_PAR,ONLY : XUNDEF
@@ -74,24 +77,34 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(AGRI_t), INTENT(INOUT) :: AG
+TYPE(AGRI_NP_t), INTENT(INOUT) :: NAG
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
+TYPE(CH_ISBA_NP_t), INTENT(INOUT) :: NCHI
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(ISBA_DIAG_t), INTENT(INOUT) :: DGI
+TYPE(ISBA_DIAG_t), INTENT(INOUT) :: ID
+TYPE(GR_BIOG_NP_t), INTENT(INOUT) :: NGB
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
 TYPE(SSO_t), INTENT(INOUT) :: ISS 
+TYPE(SSO_NP_t), INTENT(INOUT) :: NISS
 TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(PACK_CH_ISBA_t), INTENT(INOUT) :: PKCI
+TYPE(GRID_NP_t), INTENT(INOUT) :: NIG
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) ::NPE
+!
 TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
-TYPE(PACK_ISBA_t), INTENT(INOUT) :: PK
-TYPE(CANOPY_t), INTENT(INOUT) :: ICP
+!
+TYPE(DST_NP_t), INTENT(INOUT) :: NDST
+!
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
-TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -211,7 +224,7 @@ IF(LVERTSHIFT)THEN
   ZRAIN(:) = XUNDEF
   ZSNOW(:) = XUNDEF
 !     
-   CALL FORCING_VERT_SHIFT(PZS,I%P%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
+   CALL FORCING_VERT_SHIFT(PZS,S%XZS,PTA,PQA,PPA,PRHOA,PLW,PRAIN,PSNOW,&
                            ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
@@ -290,7 +303,7 @@ ELSE
 !  incoming LW radiation per m2 of actual surface
 !
    ZLW(:) =  ZLW(:)                                       *     Z3D_TOT_SURF_INV(:) &
-          + XSTEFAN*I%I%XEMIS_NAT(:)*I%R%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
+          + XSTEFAN*S%XEMIS_NAT(:)*S%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !  liquid precipitation per m2 of actual surface
 !
@@ -307,8 +320,9 @@ ENDIF
 !*      3.     Call of ISBA
 !              ------------
 !
- CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, ICP, AG, CHI, DTI, DGI, GB, ISS, IG, I, &
-                             PKCI, PKD, PK, DST, SLT, HPROGRAM, HCOUPLING, PTSTEP,     &
+ CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTI, ID, NGB, GB, &
+                             ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, PKD, NDST, SLT, &
+                             HPROGRAM, HCOUPLING, PTSTEP,     &
                              KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
                              PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, ZQA, ZTA,     &
                              ZRHOA, PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW, ZDIR_SW,        &

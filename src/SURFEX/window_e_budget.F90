@@ -138,21 +138,6 @@ ZA21(:) = - PAC_WL       (:) * PRHOA(:)*XCPD   &
           - PLW_NR_TO_WIN(:) * PDN_RD(:)    &
           - B%XUGG_WIN(:)
 !
-!print*,'AC_WL ',PAC_WL(32)
-!print*,'RHOA ',PRHOA(32)
-!print*,'T_CANYON ',PT_CANYON(32)
-!print*,'LW_S_TO_WIn ',PLW_S_TO_WIN(32)
-!print*,'T_SKY ',ZT_SKY(32)
-!print*,'LW_W_TO_WIN ',PLW_W_TO_WIN(32)
-!print*,'TS_WL ',PTS_WL(32)
-!print*,'LW_R_TO_WIN ',PLW_R_TO_WIN(32)
-!print*,'DN_RD ',PDN_RD(32)
-!print*,'TS_RD ',PTS_RD(32)
-!print*,'LW_NR_TO_WIN ',PLW_NR_TO_WIN(32)
-!print*,'TSN_RD ',PTSN_RD(32)
-!print*,'ABS_SW_WIN ',PABS_SW_WIN(32)
-!print*,'LW_G_TO_WIN ',PLW_G_TO_WIN(32)
-!print*,'TS_GD ',PTS_GD(32)
 ZB2(:)  = - PAC_WL       (:) * PRHOA(:)*XCPD*PT_CANYON(:)   &
           - PLW_S_TO_WIN (:) * ZT_SKY(:)                     &
           - PLW_W_TO_WIN (:) * PTS_WL(:)                   &
@@ -165,11 +150,6 @@ IF (SIZE(PTS_GD)>0) THEN
 ENDIF
 !
 ! compute outdoor temperature
-!print*,'ZB2 ',ZB2(32)
-!print*,'B1 ',ZB1(32)
-!print*,'UGG_WIN ',B%XUGG_WIN(32)
-!print*,'A12 ',ZA12(32)
-!print*,'A21 ',ZA21(32)
 B%XT_WIN1(:) = ( ZB2(:) - ZB1(:)*B%XUGG_WIN(:)/ZA12(:) ) / &
                   ( ZA21(:) + B%XUGG_WIN(:)**2/ZA12(:) )
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE HYDRO_SOILDIF(IO, IP, INI, IMX, IR, PTSTEP, PPG, PLETR, PLEG, PEVAPCOR, &
+      SUBROUTINE HYDRO_SOILDIF(IO, KK, PK, PEK, PTSTEP, PPG, PLETR, PLEG, PEVAPCOR, &
                                PF2WGHT, PPS, PQSAT, PQSATI, PDRAIN, PHORTON, KMAX_LAYER, PQSB)
 !     ##########################################################################
 !
@@ -73,9 +73,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF, NUNDEF
 USE MODD_CSTS,     ONLY : XRHOLW
@@ -89,10 +87,9 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 REAL, INTENT(IN)                    :: PTSTEP ! Model time step (s)
 !
@@ -128,7 +125,7 @@ INTEGER                             :: JJ, JL    ! loop control
 !
 INTEGER                             :: INJ, INL, IDEPTH ! Number of point and grid layers
 !
-REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
+REAL, DIMENSION(SIZE(PK%XDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
 !                                      ZINFILTMAX = maximum allowable infiltration rate
 !                                                   (from Darcy's Law) (m s-1)
 !                                      ZEXCESS    = working variable: excess soil water
@@ -139,16 +136,15 @@ REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, 
 !                                      ZPSIWTD   = matric potential at saturation for water table depth coupling
 !                                      ZWTD      = water table depth positive below soil surface (m)
 !
-REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1),SIZE(IP%XDZG(:,:,1),2)) :: ZWFLUX, ZDFLUXDT1, ZDFLUXDT2, ZWFLUXN
+REAL, DIMENSION(SIZE(PK%XDZG,1),SIZE(PK%XDZG,2)) :: ZWFLUX, ZDFLUXDT1, ZDFLUXDT2, ZWFLUXN
 !                                      ZWFLUX    = vertical soil water flux (+ up) (m s-1)
 !                                      ZDFLUXDT  = total vertical flux derrivative
 !                                      ZDFLUXDT1 = vertical flux derrivative: dF_j/dw_j
 !                                      ZDFLUXDT2 = vertical flux derrivative: dF_j/dw_j+1
 !                                      ZWFLUXN   = vertical soil water flux at end of time 
-!
-REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1),SIZE(IP%XDZG(:,:,1),2)) :: ZPSI, ZK, ZNU, ZWSAT, ZHEAD, &
-                                              ZVAPCOND, ZFRZ, ZKI,         &
-                                              ZCAPACITY, ZINFNEG
+
+REAL, DIMENSION(SIZE(PK%XDZG,1),SIZE(PK%XDZG,2)) :: ZPSI, ZK, ZNU, ZWSAT, ZHEAD, &
+                                              ZVAPCOND, ZFRZ, ZKI, ZCAPACITY, ZINFNEG
 !                                      ZNU       = interfacial total conductivity (m s-1)
 !                                                  at level z_j
 !                                      ZK        = hydraulic conductivity (m s-1)
@@ -161,7 +157,7 @@ REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1),SIZE(IP%XDZG(:,:,1),2)) :: ZPSI, ZK, ZNU,
 !                                                  wetting front penetration (-) 
 !                                      ZINFNEG   = Negative infiltration (m s-1)
 !
-REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1),SIZE(IP%XDZG(:,:,1),2)) :: ZAMTRX, ZBMTRX, ZCMTRX, ZFRC, ZSOL, &
+REAL, DIMENSION(SIZE(PK%XDZG,1),SIZE(PK%XDZG,2)) :: ZAMTRX, ZBMTRX, ZCMTRX, ZFRC, ZSOL, &
                                               ZTOPQS
 !                                      ZAMTRX    = leftmost diagonal element of tri-diagonal
 !                                                  coefficient matrix 
@@ -170,7 +166,7 @@ REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1),SIZE(IP%XDZG(:,:,1),2)) :: ZAMTRX, ZBMTRX
 !                                      ZFRC      = forcing function (vector)
 !                                      ZSOL      = solution vector
 !
-REAL, DIMENSION(SIZE(IP%XDZG(:,:,1),1),SIZE(IP%XDZG(:,:,1),2))  :: ZINFLAYER
+REAL, DIMENSION(SIZE(PK%XDZG,1),SIZE(PK%XDZG,2))  :: ZINFLAYER
 !
 REAL, PARAMETER                     :: ZWGHT = 0.5  ! time scheme weight for calculating flux.
 !                                                     varies from 0 (explicit time scheme)
@@ -196,7 +192,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('HYDRO_SOILDIF',0,ZHOOK_HANDLE)
 !
-INJ = SIZE(IP%XDZG(:,:,1),1)
+INJ = SIZE(PK%XDZG,1)
 INL = KMAX_LAYER
 !
 ZLOG10 = LOG(10.0)
@@ -240,19 +236,19 @@ ZCMTRX   (:,:) = XUNDEF
 DO JL=1,INL
   DO JJ=1,INJ
 !
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<=IDEPTH)THEN
 !
 !     Modify soil porosity as ice assumed to become part
 !     of solid soil matrix (with respect to liquid flow):
-      ZWSAT (JJ,JL) = MAX(XWGMIN, IP%XWSAT(JJ,JL)-IR%XWGI(JJ,JL,1))   
+      ZWSAT (JJ,JL) = MAX(XWGMIN, KK%XWSAT(JJ,JL)-PEK%XWGI(JJ,JL))   
 !
 !     Factor from (Johnsson and Lundin 1991), except here it is normalized so that it
 !     goes to zero in the limit as all available pore space is filled up with ice.
 !     For now, a simple constant is used for all soils. Further modifications
 !     will be made as research warrents.
-!     Old : 10.**(-ZEICE*(IR%XWGI(JJ,JL,1)/(IR%XWGI(JJ,JL,1)+IR%XWG(JJ,JL,1))))
-      ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(IR%XWGI(JJ,JL,1)/(IR%XWGI(JJ,JL,1)+IR%XWG(JJ,JL,1)))))
+!     Old : 10.**(-ZEICE*(PEK%XWGI(JJ,JL)/(PEK%XWGI(JJ,JL)+PEK%XWG(JJ,JL))))
+      ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PEK%XWGI(JJ,JL)/(PEK%XWGI(JJ,JL)+PEK%XWG(JJ,JL)))))
 !
     ENDIF
 !
@@ -263,7 +259,7 @@ ENDDO
 ! --------------------------------------------
 !
 IF(IO%CRUNOFF=='SGH')THEN
-  ZTOPQS(:,:)=ZFRZ(:,:)*INI%XTOPQS(:,:,1)
+  ZTOPQS(:,:)=ZFRZ(:,:)*PK%XTOPQS(:,:)
 ELSE
   ZTOPQS(:,:)=0.0
 ENDIF
@@ -277,10 +273,10 @@ ENDIF
 ! Note : when Horton option is used, infiltration already calculated in hydro_sgh
 IF(IO%CHORT/='SGH')THEN
 !  Green-Ampt approximation for maximum infiltration (derived form)
-  ZINFILTMAX(:) = INFMAX_FUNC(IR%XWG(:,:,1), ZWSAT, ZFRZ, IP%XCONDSAT(:,:,1), IP%XMPOTSAT, &
-                               IP%XBCOEF, IP%XDZG(:,:,1), IMX%XDG(:,:,1), IO%NLAYER_HORT)
+  ZINFILTMAX(:) = INFMAX_FUNC(PEK%XWG, ZWSAT, ZFRZ, PK%XCONDSAT, KK%XMPOTSAT, &
+                               KK%XBCOEF, PK%XDZG, PK%XDG, IO%NLAYER_HORT)
 !  Fast(temporal)-response runoff (surface excess) (m s-1):
-  PHORTON   (:) = (1.-INI%XFSAT(:)) * MAX(0.0,PPG(:)-ZINFILTMAX(:))
+  PHORTON   (:) = (1.-KK%XFSAT(:)) * MAX(0.0,PPG(:)-ZINFILTMAX(:))
 ENDIF
 !
 !
@@ -292,14 +288,14 @@ ZINFILTC(:) = MAX(0.0,PPG(:)-PHORTON(:))*PTSTEP
 !
 DO JL=1,INL
   DO JJ=1,INJ
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<=IDEPTH)THEN
 !     Simple volumetric water holding capacity estimate for wetting front penetration
-      ZCAPACITY(JJ,JL) = MAX(0.0,ZWSAT(JJ,JL)-IR%XWG(JJ,JL,1))*IP%XDZG(JJ,JL,1)
+      ZCAPACITY(JJ,JL) = MAX(0.0,ZWSAT(JJ,JL)-PEK%XWG(JJ,JL))*PK%XDZG(JJ,JL)
 !     Infiltration terms (m) :
       ZINFLAYER(JJ,JL) = MIN(ZINFILTC(JJ),ZCAPACITY(JJ,JL))
 !     Soil moisture (m3/m3) :
-      IR%XWG(JJ,JL,1) = IR%XWG(JJ,JL,1)+ZINFLAYER(JJ,JL)/IP%XDZG(JJ,JL,1)
+      PEK%XWG(JJ,JL) = PEK%XWG(JJ,JL)+ZINFLAYER(JJ,JL)/PK%XDZG(JJ,JL)
 !     Put remainding infiltration into the next layer (m)
       ZINFILTC(JJ) = ZINFILTC(JJ) - ZINFLAYER(JJ,JL)
     ENDIF
@@ -313,10 +309,10 @@ ENDDO
 ZWGTOT(:)=0.0 
 DO JL=1,INL
   DO JJ=1,INJ
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<IDEPTH)THEN
-      ZINFNEG(JJ,JL) = (MIN(0.0,PPG(JJ))-PEVAPCOR(JJ))*IP%XDZG(JJ,JL,1)*IR%XWG(JJ,JL,1)
-      ZWGTOT (JJ   ) = ZWGTOT(JJ)+IP%XDZG(JJ,JL,1)*IR%XWG(JJ,JL,1)
+      ZINFNEG(JJ,JL) = (MIN(0.0,PPG(JJ))-PEVAPCOR(JJ))*PK%XDZG(JJ,JL)*PEK%XWG(JJ,JL)
+      ZWGTOT (JJ   ) = ZWGTOT(JJ)+PK%XDZG(JJ,JL)*PEK%XWG(JJ,JL)
     ENDIF
   ENDDO
 ENDDO
@@ -336,17 +332,17 @@ PHORTON(:)=(PHORTON(:)+ZINFILTC(:)/PTSTEP)*XRHOLW
 !
 DO JL=1,INL
   DO JJ=1,INJ    
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<=IDEPTH)THEN
 !     Matric potential (m) :
 !     psi=mpotsat*(w/wsat)**(-bcoef)
-      ZS          = MIN(1.0,IR%XWG(JJ,JL,1)/ZWSAT(JJ,JL))
-      ZLOG        = IP%XBCOEF(JJ,JL)*LOG(ZS)
-      ZPSI(JJ,JL) = IP%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
+      ZS          = MIN(1.0,PEK%XWG(JJ,JL)/ZWSAT(JJ,JL))
+      ZLOG        = KK%XBCOEF(JJ,JL)*LOG(ZS)
+      ZPSI(JJ,JL) = KK%XMPOTSAT(JJ,JL)*EXP(-ZLOG)
 !     Hydraulic conductivity from matric potential (m s-1):
 !     k=frz*condsat*(psi/mpotsat)**(-2-3/bcoef)
-      ZLOG      = -ZLOG*(2.0+3.0/IP%XBCOEF(JJ,JL))
-      ZK(JJ,JL) = ZFRZ(JJ,JL)*IP%XCONDSAT(JJ,JL,1)*EXP(-ZLOG)
+      ZLOG      = -ZLOG*(2.0+3.0/KK%XBCOEF(JJ,JL))
+      ZK(JJ,JL) = ZFRZ(JJ,JL)*PK%XCONDSAT(JJ,JL)*EXP(-ZLOG)
     ENDIF
   ENDDO
 ENDDO    
@@ -355,25 +351,25 @@ ENDDO
 ! ----------------------------------
 !
 DO JJ=1,INJ
-  IDEPTH=IMX%NWG_LAYER(JJ,1)   
+  IDEPTH=PK%NWG_LAYER(JJ)   
 ! Depth of the last node
-  ZDGN   (JJ) = 0.5*(IMX%XDG(JJ,IDEPTH,1)+IMX%XDG(JJ,IDEPTH-1,1))
+  ZDGN   (JJ) = 0.5*(PK%XDG(JJ,IDEPTH)+PK%XDG(JJ,IDEPTH-1))
   ZPSIWTD(JJ) = ZPSI(JJ,IDEPTH)
-  IF(IP%XWTD(JJ)/=XUNDEF)THEN  
+  IF(KK%XWTD(JJ)/=XUNDEF)THEN  
 !   Water table depth
-    ZWTD(JJ)    = MAX(IMX%XDG(JJ,IDEPTH,1),-IP%XWTD(JJ))
+    ZWTD(JJ)    = MAX(PK%XDG(JJ,IDEPTH),-KK%XWTD(JJ))
 !   Modify matric potential at saturation for water table coupling
-    ZS          = MIN(1.0,ZWSAT(JJ,IDEPTH)/IP%XWSAT(JJ,IDEPTH))
-    ZLOG        = IP%XBCOEF(JJ,IDEPTH)*LOG(ZS)
-    ZPSIWTD(JJ) = IP%XMPOTSAT(JJ,IDEPTH)*EXP(-ZLOG)
+    ZS          = MIN(1.0,ZWSAT(JJ,IDEPTH)/KK%XWSAT(JJ,IDEPTH))
+    ZLOG        = KK%XBCOEF(JJ,IDEPTH)*LOG(ZS)
+    ZPSIWTD(JJ) = KK%XMPOTSAT(JJ,IDEPTH)*EXP(-ZLOG)
   ENDIF
 ENDDO
 !
 ! 5. Vapor diffusion conductivity (m s-1)
 !    ------------------------------------
 !
-ZVAPCOND(:,:) = VAPCONDCF(IR%XTG(:,:,1), PPS, IR%XWG(:,:,1), IR%XWGI(:,:,1), ZPSI,&
-                          IP%XWSAT, IP%XWFC, PQSAT, PQSATI, IMX%NWG_LAYER(:,1), INL)
+ZVAPCOND(:,:) = VAPCONDCF(PEK%XTG, PPS, PEK%XWG, PEK%XWGI, ZPSI,&
+                          KK%XWSAT, KK%XWFC, PQSAT, PQSATI, PK%NWG_LAYER, INL)
 ZVAPCOND(:,:) = ZFRZ(:,:)*ZVAPCOND(:,:)
 !
 ! 6. Linearized water flux: values at "t"
@@ -383,13 +379,13 @@ ZVAPCOND(:,:) = ZFRZ(:,:)*ZVAPCOND(:,:)
 DO JL=1,INL
   DO JJ=1,INJ
 !
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<IDEPTH)THEN
 !
 !     Total interfacial conductivity (m s-1) And Potential gradient (dimensionless):
       ZKI  (JJ,JL) = SQRT(ZK(JJ,JL)*ZK(JJ,JL+1))
       ZNU  (JJ,JL) = ZKI(JJ,JL) + SQRT(ZVAPCOND(JJ,JL)*ZVAPCOND(JJ,JL+1))
-      ZHEAD(JJ,JL) = (ZPSI(JJ,JL)-ZPSI(JJ,JL+1))/IP%XDZDIF(JJ,JL,1)
+      ZHEAD(JJ,JL) = (ZPSI(JJ,JL)-ZPSI(JJ,JL+1))/PK%XDZDIF(JJ,JL)
 !
 !     Total Sub-surface soil water fluxes (m s-1): (+ up, - down) using Darcy's
 !     Law with an added linear drainage term:
@@ -399,7 +395,7 @@ DO JL=1,INL
 !        
 !     Total interfacial conductivity (m s-1) And Potential gradient (dimensionless):
       ZKI  (JJ,IDEPTH) = ZK(JJ,IDEPTH)
-      ZNU  (JJ,IDEPTH) = ZK(JJ,IDEPTH) * IP%XFWTD(JJ)
+      ZNU  (JJ,IDEPTH) = ZK(JJ,IDEPTH) * KK%XFWTD(JJ)
       ZHEAD(JJ,IDEPTH) = (ZPSI(JJ,IDEPTH)-ZPSIWTD(JJ))/(ZWTD(JJ)-ZDGN(JJ))
 !
 !     Total Sub-surface soil water fluxes (m s-1): (+ up, - down) using Darcy's
@@ -418,24 +414,24 @@ ENDDO
 !
 DO JL=1,INL
   DO JJ=1,INJ
-    IDEPTH=IMX%NWG_LAYER(JJ,1)        
+    IDEPTH=PK%NWG_LAYER(JJ)        
     IF(JL<IDEPTH)THEN                
-      ZDHEADDT1 = -IP%XBCOEF(JJ,JL  )*ZPSI(JJ,JL  )/(IR%XWG(JJ,JL  ,1)*IP%XDZDIF(JJ,JL,1))
-      ZDHEADDT2 = -IP%XBCOEF(JJ,JL+1)*ZPSI(JJ,JL+1)/(IR%XWG(JJ,JL+1,1)*IP%XDZDIF(JJ,JL,1))
-      ZDKDT1    = (2.*IP%XBCOEF(JJ,JL  )+3.)*ZKI(JJ,JL)/(2.0*IR%XWG(JJ,JL  ,1))
-      ZDKDT2    = (2.*IP%XBCOEF(JJ,JL+1)+3.)*ZKI(JJ,JL)/(2.0*IR%XWG(JJ,JL+1,1))
+      ZDHEADDT1 = -KK%XBCOEF(JJ,JL  )*ZPSI(JJ,JL  )/(PEK%XWG(JJ,JL  )*PK%XDZDIF(JJ,JL))
+      ZDHEADDT2 = -KK%XBCOEF(JJ,JL+1)*ZPSI(JJ,JL+1)/(PEK%XWG(JJ,JL+1)*PK%XDZDIF(JJ,JL))
+      ZDKDT1    = (2.*KK%XBCOEF(JJ,JL  )+3.)*ZKI(JJ,JL)/(2.0*PEK%XWG(JJ,JL  ))
+      ZDKDT2    = (2.*KK%XBCOEF(JJ,JL+1)+3.)*ZKI(JJ,JL)/(2.0*PEK%XWG(JJ,JL+1))
 !     Total Flux derrivative terms:
       ZDFLUXDT1(JJ,JL) = -ZDKDT1*ZHEAD(JJ,JL) - ZNU(JJ,JL)*ZDHEADDT1 - ZDKDT1
       ZDFLUXDT2(JJ,JL) = -ZDKDT2*ZHEAD(JJ,JL) + ZNU(JJ,JL)*ZDHEADDT2 - ZDKDT2  
     ELSEIF(JL==IDEPTH)THEN !Last layers
-      ZDHEADDT1 = -IP%XBCOEF(JJ,IDEPTH)*ZPSI   (JJ,IDEPTH)/(IR%XWG  (JJ,IDEPTH,1)*(ZWTD(JJ)-ZDGN(JJ))) &
-                  +IP%XBCOEF(JJ,IDEPTH)*ZPSIWTD(JJ       )/(ZWSAT(JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ)))
+      ZDHEADDT1 = -KK%XBCOEF(JJ,IDEPTH)*ZPSI   (JJ,IDEPTH)/(PEK%XWG  (JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ))) &
+                  +KK%XBCOEF(JJ,IDEPTH)*ZPSIWTD(JJ       )/(ZWSAT(JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ)))
       ZDHEADDT2 = 0.0
-      ZDKDT1    = (2.*IP%XBCOEF(JJ,IDEPTH)+3.)*ZK(JJ,IDEPTH)/IR%XWG(JJ,IDEPTH,1)
+      ZDKDT1    = (2.*KK%XBCOEF(JJ,IDEPTH)+3.)*ZK(JJ,IDEPTH)/PEK%XWG(JJ,IDEPTH)
       ZDKDT2    = 0.0                
 !     Total Flux derrivative terms:
-      ZDFLUXDT1(JJ,IDEPTH) = -ZDKDT1*ZHEAD(JJ,IDEPTH)*IP%XFWTD(JJ) - ZNU(JJ,IDEPTH)*ZDHEADDT1 - ZDKDT1
-      ZDFLUXDT2(JJ,IDEPTH) = -ZDKDT2*ZHEAD(JJ,IDEPTH)*IP%XFWTD(JJ) + ZNU(JJ,IDEPTH)*ZDHEADDT2 - ZDKDT2  
+      ZDFLUXDT1(JJ,IDEPTH) = -ZDKDT1*ZHEAD(JJ,IDEPTH)*KK%XFWTD(JJ) - ZNU(JJ,IDEPTH)*ZDHEADDT1 - ZDKDT1
+      ZDFLUXDT2(JJ,IDEPTH) = -ZDKDT2*ZHEAD(JJ,IDEPTH)*KK%XFWTD(JJ) + ZNU(JJ,IDEPTH)*ZDHEADDT2 - ZDKDT2  
     ENDIF
   ENDDO
 ENDDO
@@ -446,17 +442,17 @@ ENDDO
 !surface layer:
 ZFRC  (:,1) = ZWFLUX(:,1) - PLEG(:) - PF2WGHT(:,1)*PLETR(:) + ZINFNEG(:,1) - ZTOPQS(:,1)
 ZAMTRX(:,1) = 0.0
-ZBMTRX(:,1) = (IP%XDZG(:,1,1)/PTSTEP) - ZWGHT*ZDFLUXDT1(:,1)
+ZBMTRX(:,1) = (PK%XDZG(:,1)/PTSTEP) - ZWGHT*ZDFLUXDT1(:,1)
 ZCMTRX(:,1) = -ZWGHT*ZDFLUXDT2(:,1)
 !
 !Other sub-surface layers:       
 DO JL=2,INL
   DO JJ=1,INJ   
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<=IDEPTH)THEN
       ZFRC  (JJ,JL) = ZWFLUX (JJ,JL) - ZWFLUX(JJ,JL-1) - PF2WGHT(JJ,JL)*PLETR(JJ) + ZINFNEG(JJ,JL) - ZTOPQS(JJ,JL)
       ZAMTRX(JJ,JL) = ZWGHT*ZDFLUXDT1(JJ,JL-1)
-      ZBMTRX(JJ,JL) = (IP%XDZG(JJ,JL,1)/PTSTEP) - ZWGHT*(ZDFLUXDT1(JJ,JL)-ZDFLUXDT2(JJ,JL-1))       
+      ZBMTRX(JJ,JL) = (PK%XDZG(JJ,JL)/PTSTEP) - ZWGHT*(ZDFLUXDT1(JJ,JL)-ZDFLUXDT2(JJ,JL-1))       
       ZCMTRX(JJ,JL) = -ZWGHT*ZDFLUXDT2(JJ,JL)
     ENDIF
   ENDDO
@@ -465,7 +461,7 @@ ENDDO
 !Solve Matrix Equation: tridiagonal system: solve for soil
 !water (volumetric water content) tendencies:
 !
-CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,IMX%NWG_LAYER(:,1),INL,ZSOL)
+CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,PK%NWG_LAYER(:),INL,ZSOL)
 !
 ! 9. Final calculations and diagnostics:
 !    -----------------------------------
@@ -474,16 +470,16 @@ CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,IMX%NWG_LAYER(:,1),INL,ZSOL)
 DO JL=1,INL
   DO JJ=1,INJ
 !   
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<IDEPTH)THEN
 ! 
 !     Update liquid water content (m3 m-3):
-      IR%XWG(JJ,JL,1)   = IR%XWG(JJ,JL,1) + ZSOL(JJ,JL)    
+      PEK%XWG(JJ,JL)   = PEK%XWG(JJ,JL) + ZSOL(JJ,JL)    
 !
 !     Supersaturated drainage (kg m-2 s-1):
-      ZEXCESS(JJ)  = MAX(0.0, IR%XWG(JJ,JL,1) - ZWSAT(JJ,JL))
-      IR%XWG(JJ,JL  ,1) = MIN(IR%XWG(JJ,JL,1),ZWSAT(JJ,JL))
-      IR%XWG(JJ,JL+1,1) = IR%XWG(JJ,JL+1,1) + ZEXCESS(JJ)*(IP%XDZG(JJ,JL,1)/IP%XDZG(JJ,JL+1,1))
+      ZEXCESS(JJ)  = MAX(0.0, PEK%XWG(JJ,JL) - ZWSAT(JJ,JL))
+      PEK%XWG(JJ,JL  ) = MIN(PEK%XWG(JJ,JL),ZWSAT(JJ,JL))
+      PEK%XWG(JJ,JL+1) = PEK%XWG(JJ,JL+1) + ZEXCESS(JJ)*(PK%XDZG(JJ,JL)/PK%XDZG(JJ,JL+1))
 !
 !     final fluxes (at end of time step) (m s-1):
       ZWFLUXN(JJ,JL) = ZWFLUX(JJ,JL) + ZDFLUXDT1(JJ,JL)*ZSOL(JJ,JL) + ZDFLUXDT2(JJ,JL)*ZSOL(JJ,JL+1)
@@ -494,12 +490,12 @@ DO JL=1,INL
     ELSEIF(JL==IDEPTH)THEN
 ! 
 !     Update liquid water content (m3 m-3):
-      IR%XWG(JJ,IDEPTH,1)   = IR%XWG(JJ,IDEPTH,1) + ZSOL(JJ,IDEPTH) 
+      PEK%XWG(JJ,IDEPTH)   = PEK%XWG(JJ,IDEPTH) + ZSOL(JJ,IDEPTH)    
 !        
 !     Supersaturated drainage (kg m-2 s-1):
-      ZEXCESS(JJ)    = MAX(0.0, IR%XWG(JJ,IDEPTH,1) - ZWSAT(JJ,IDEPTH))
-      IR%XWG(JJ,IDEPTH,1) = MIN(IR%XWG(JJ,IDEPTH,1),ZWSAT(JJ,IDEPTH))   
-      PDRAIN (JJ)    = PDRAIN(JJ) + ZEXCESS(JJ)*IP%XDZG(JJ,IDEPTH,1)*XRHOLW/PTSTEP
+      ZEXCESS(JJ)    = MAX(0.0, PEK%XWG(JJ,IDEPTH) - ZWSAT(JJ,IDEPTH))
+      PEK%XWG(JJ,IDEPTH) = MIN(PEK%XWG(JJ,IDEPTH),ZWSAT(JJ,IDEPTH))   
+      PDRAIN (JJ)    = PDRAIN(JJ) + ZEXCESS(JJ)*PK%XDZG(JJ,IDEPTH)*XRHOLW/PTSTEP
 !   
 !     final fluxes (at end of time step) (m s-1):
       ZWFLUXN(JJ,IDEPTH) = ZWFLUX(JJ,IDEPTH) + ZDFLUXDT1(JJ,IDEPTH)*ZSOL(JJ,IDEPTH)
@@ -521,22 +517,22 @@ ENDDO
 !
 DO JL=1,INL
   DO JJ=1,INJ   
-    IDEPTH=IMX%NWG_LAYER(JJ,1)
+    IDEPTH=PK%NWG_LAYER(JJ)
     IF(JL<IDEPTH)THEN
 !     if the soil water happens to fall below the minimum, then
 !     extract needed water from the layer below: this should
 !     generally be non-existant: but added to ensure conservation
 !     even for the most extreme events.              
-      ZEXCESS(JJ)  = MAX(0., XWGMIN  - IR%XWG(JJ,JL,1))
-      IR%XWG(JJ,JL,1)   = IR%XWG(JJ,JL,1)   + ZEXCESS(JJ) 
-      IR%XWG(JJ,JL+1,1) = IR%XWG(JJ,JL+1,1) - ZEXCESS(JJ)*IP%XDZG(JJ,JL,1)/IP%XDZG(JJ,JL+1,1)
-    ELSEIF(JL==IDEPTH.AND.IR%XWG(JJ,IDEPTH,1)<XWGMIN)THEN
+      ZEXCESS(JJ)  = MAX(0., XWGMIN  - PEK%XWG(JJ,JL))
+      PEK%XWG(JJ,JL)   = PEK%XWG(JJ,JL)   + ZEXCESS(JJ) 
+      PEK%XWG(JJ,JL+1) = PEK%XWG(JJ,JL+1) - ZEXCESS(JJ)*PK%XDZG(JJ,JL)/PK%XDZG(JJ,JL+1)
+    ELSEIF(JL==IDEPTH.AND.PEK%XWG(JJ,IDEPTH)<XWGMIN)THEN
 !     NOTE, negative moisture can arise for *completely* dry/dessicated soils 
 !     owing to the above check because vertical fluxes
 !     can be *very* small but nonzero. Here correct owing to
 !     small numerical drainage.
-      PDRAIN(JJ)     = PDRAIN(JJ) + MIN(0.0,IR%XWG(JJ,IDEPTH,1)-XWGMIN)*IP%XDZG(JJ,IDEPTH,1)*XRHOLW/PTSTEP
-      IR%XWG(JJ,IDEPTH,1) = XWGMIN
+      PDRAIN(JJ)     = PDRAIN(JJ) + MIN(0.0,PEK%XWG(JJ,IDEPTH)-XWGMIN)*PK%XDZG(JJ,IDEPTH)*XRHOLW/PTSTEP
+      PEK%XWG(JJ,IDEPTH) = XWGMIN
     ENDIF
   ENDDO
 ENDDO

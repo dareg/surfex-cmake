@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DEALLOC_SEA_n (CHS, SG, S, U)
+SUBROUTINE DEALLOC_SEA_n (CHS, G, S, U)
 !     ###############################################################################
 !
 !!****  *DEALLOC_SEA_n * - Deallocate all arrays
@@ -53,7 +53,7 @@ IMPLICIT NONE
 
 !
 TYPE(CH_SEAFLUX_t), INTENT(INOUT) :: CHS
-TYPE(GRID_t), INTENT(INOUT) :: SG
+TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -61,7 +61,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('DEALLOC_SEA_N',0,ZHOOK_HANDLE)
 IF (U%CSEA=='SEAFLX') THEN
-  CALL DEALLOC_SEAFLUX_n(CHS, SG, S)
+  CALL DEALLOC_SEAFLUX_n(CHS, G, S)
 ELSE IF (U%CSEA=='FLUX  ') THEN
   CALL DEALLOC_IDEAL_FLUX
 END IF

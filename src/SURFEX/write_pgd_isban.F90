@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE WRITE_PGD_ISBA_n (DTCO, HSELECT, U, DTI, DTZ, IG, ISS, I, HPROGRAM)
+      SUBROUTINE WRITE_PGD_ISBA_n (DTCO, HSELECT, U, DTZ, IM, HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_ISBA_n* - routine to write pgd surface variables in their respective files
@@ -36,11 +36,8 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
-USE MODD_GRID_n, ONLY : GRID_t
-USE MODD_SSO_n, ONLY : SSO_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITESURF_PGD_ISBA_n
@@ -61,11 +58,8 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
-TYPE(GRID_t), INTENT(INOUT) :: IG
-TYPE(SSO_t), INTENT(INOUT) :: ISS
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -84,8 +78,8 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_ISBA_n(HSELECT, U%CNATURE, DTI, DTZ, IG, ISS, I%O, I%P, &
-                           I%M%X%XVEGTYPE, HPROGRAM)
+ CALL WRITESURF_PGD_ISBA_n(HSELECT, U%CNATURE, IM%DTI, DTZ, IM%G, IM%ISS, &
+                          IM%O, IM%S, IM%K, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

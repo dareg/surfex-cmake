@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_INLAND_WATER_n (FM, WM, DLO, DGL, DGLC, U, DST, SLT, &
+SUBROUTINE COUPLING_INLAND_WATER_n (FM, WM, DGO, DL, DLC, U, DST, SLT, &
                                     HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, &
                                     PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM,     & 
                                     PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,    &
@@ -62,9 +62,9 @@ IMPLICIT NONE
 !
 TYPE(FLAKE_MODEL_t), INTENT(INOUT) :: FM
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
@@ -155,7 +155,7 @@ IF (U%CWATER=='WATFLX') THEN
                                PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,         &
                                PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST       )  
 ELSE IF (U%CWATER=='FLUX  ') THEN
-  CALL COUPLING_IDEAL_FLUX(DLO, DGL, DGLC, HPROGRAM, HCOUPLING, PTIMEC,                     &
+  CALL COUPLING_IDEAL_FLUX(DGO, DL, DLC, HPROGRAM, HCOUPLING, PTIMEC,                     &
                            PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,                &
                            PTSUN, PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA,      &
                            PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW,      &

@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE SOILDIF(IO, IP, IMX, IR, DGMI, PVEG, PCV, PPIFLOOD, &
-                         PFROZEN1, PFFG, PFFV, PSOILCONDZ, PSOILHCAPZ   )
+      SUBROUTINE SOILDIF(IO, KK, PK, PEK, DMI, PVEG, PFROZEN1, PFFG, PFFV, PSOILCONDZ, PSOILHCAPZ   )
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -59,9 +58,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_CSTS,       ONLY : XCL, XCI, XRHOLW, XRHOLI, XPI, XDAY, XCONDI, XTT, XLMTT, XG
@@ -79,17 +76,15 @@ IMPLICIT NONE
 !
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PCV
+REAL, DIMENSION(:), INTENT(IN)    :: PVEG
 !                                      Soil and vegetation parameters
 !                                      PVEG = fraction of vegetation
-!                                      PCV  = the heat capacity of the vegetation
-!
-REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD ! Floodplain potential infiltration or water mass (kg m-2)
+
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PFROZEN1
 !                                      PFROZEN1 = fraction of ice in superficial soil
@@ -106,7 +101,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSOILCONDZ, PSOILHCAPZ
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(IR%XTG,1),SIZE(IR%XTG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
+REAL, DIMENSION(SIZE(PEK%XTG,1),SIZE(PEK%XTG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
 !                                           ZMATPOT    = soil matric potential (m)
 !
 REAL                         :: ZFROZEN2DF, ZUNFROZEN2DF, ZCONDSATDF, ZLOG_CONDI, ZLOG_CONDWTR,  &
@@ -131,8 +126,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SOILDIF',0,ZHOOK_HANDLE)
 !
-INI=SIZE(IR%XWG,1)
-INL=SIZE(IR%XWG,2)
+INI=SIZE(PEK%XWG,1)
+INL=SIZE(PEK%XWG,2)
 !
 ZFF (:) = 0.0
 ZCF (:) = XUNDEF
@@ -142,11 +137,11 @@ ZCF (:) = XUNDEF
 !*       1.     WATER TABLE DETH ADJUSTMENT FOR ISBA (m)
 !               -----------------------------------------
 !
-WHERE(IP%XWTD(:)==XUNDEF)
+WHERE(KK%XWTD(:)==XUNDEF)
 ! no water table / surface coupling over some regions        
   ZWTD     (:) = XWTD_MAXDEPTH 
 ELSEWHERE
-  ZWTD     (:) = IP%XFWTD(:)/MAX(-IP%XWTD(:),0.001) + (1.0-IP%XFWTD(:))/MAX(-IP%XWTD(:),XWTD_MAXDEPTH)
+  ZWTD     (:) = KK%XFWTD(:)/MAX(-KK%XWTD(:),0.001) + (1.0-KK%XFWTD(:))/MAX(-KK%XWTD(:),XWTD_MAXDEPTH)
   ZWTD     (:) = 1.0/ZWTD(:)
 ENDWHERE
 !
@@ -158,37 +153,37 @@ ENDWHERE
 DO JL=1,INL
    DO JJ=1,INI
 !   
-      IDEPTH=IMX%NWG_LAYER(JJ,1)
+      IDEPTH=PK%NWG_LAYER(JJ)
       IF(JL>IDEPTH)THEN
 !                           
 !       total matric potential
-        ZWORK1  = MIN(1.0,(IR%XWG(JJ,IDEPTH,1)+IR%XWGI(JJ,IDEPTH,1))/IP%XWSAT(JJ,IDEPTH))
-        ZLOG    = IP%XBCOEF(JJ,IDEPTH)*LOG(ZWORK1)
-        ZMATPOT(JJ,IDEPTH) = IP%XMPOTSAT(JJ,IDEPTH)*EXP(-ZLOG)
+        ZWORK1  = MIN(1.0,(PEK%XWG(JJ,IDEPTH)+PEK%XWGI(JJ,IDEPTH))/KK%XWSAT(JJ,IDEPTH))
+        ZLOG    = KK%XBCOEF(JJ,IDEPTH)*LOG(ZWORK1)
+        ZMATPOT(JJ,IDEPTH) = KK%XMPOTSAT(JJ,IDEPTH)*EXP(-ZLOG)
 
 !       extrapolation of total matric potential
-        ZWORK1         = 0.5*(IMX%XDG(JJ,IDEPTH,1) + IMX%XDG(JJ,IDEPTH-1,1))
-        ZWORK2         = 0.5*(IMX%XDG(JJ,JL,    1) + IMX%XDG(JJ,JL-1,1))
+        ZWORK1         = 0.5*(PK%XDG(JJ,IDEPTH) + PK%XDG(JJ,IDEPTH-1))
+        ZWORK2         = 0.5*(PK%XDG(JJ,JL    ) + PK%XDG(JJ,JL-1))
         ZWORK3         = MAX(0.0,(ZWTD(JJ)-ZWORK2)/(ZWORK2-ZWORK1))
-        ZMATPOT(JJ,JL) = (IP%XMPOTSAT(JJ,JL)+ZWORK3*ZMATPOT(JJ,IDEPTH))/(1.0+ZWORK3)
+        ZMATPOT(JJ,JL) = (KK%XMPOTSAT(JJ,JL)+ZWORK3*ZMATPOT(JJ,IDEPTH))/(1.0+ZWORK3)
 !
 !       total soil water content computation
-        ZWORK1      = MAX(1.0,ZMATPOT(JJ,JL)/IP%XMPOTSAT(JJ,JL))
-        ZLOG        = LOG(ZWORK1)/IP%XBCOEF(JJ,JL)
-        ZWTOT       = IP%XWSAT(JJ,JL)*EXP(-ZLOG)
+        ZWORK1      = MAX(1.0,ZMATPOT(JJ,JL)/KK%XMPOTSAT(JJ,JL))
+        ZLOG        = LOG(ZWORK1)/KK%XBCOEF(JJ,JL)
+        ZWTOT       = KK%XWSAT(JJ,JL)*EXP(-ZLOG)
         ZWTOT       = MAX(XWGMIN,ZWTOT)
 !
 !       soil liquid water content computation
-        ZMATPOT(JJ,JL) = MIN(IP%XMPOTSAT(JJ,JL),XLMTT*(IR%XTG(JJ,JL,1)-XTT)/(XG*IR%XTG(JJ,JL,1)))
+        ZMATPOT(JJ,JL) = MIN(KK%XMPOTSAT(JJ,JL),XLMTT*(PEK%XTG(JJ,JL)-XTT)/(XG*PEK%XTG(JJ,JL)))
 !        
-        ZWORK1      = MAX(1.0,ZMATPOT(JJ,JL)/IP%XMPOTSAT(JJ,JL))
-        ZLOG        = LOG(ZWORK1)/IP%XBCOEF(JJ,JL)
-        ZWL         = IP%XWSAT(JJ,JL)*EXP(-ZLOG)
+        ZWORK1      = MAX(1.0,ZMATPOT(JJ,JL)/KK%XMPOTSAT(JJ,JL))
+        ZLOG        = LOG(ZWORK1)/KK%XBCOEF(JJ,JL)
+        ZWL         = KK%XWSAT(JJ,JL)*EXP(-ZLOG)
         ZWL         = MAX(ZWL,XWGMIN)
-        IR%XWG (JJ,JL,1) = MIN(ZWL,ZWTOT )
+        PEK%XWG (JJ,JL) = MIN(ZWL,ZWTOT )
 !        
 !       soil ice computation        
-        IR%XWGI(JJ,JL,1) = MAX(0.0,ZWTOT-IR%XWG(JJ,JL,1))
+        PEK%XWGI(JJ,JL) = MAX(0.0,ZWTOT-PEK%XWG(JJ,JL))
 !        
       ENDIF
    ENDDO
@@ -202,7 +197,7 @@ ENDDO
 !
 ! Surface soil water reservoir frozen fraction:
 !
-PFROZEN1(:) = IR%XWGI(:,1,1)/(IR%XWGI(:,1,1) + MAX(IR%XWG(:,1,1),XWGMIN))
+PFROZEN1(:) = PEK%XWGI(:,1)/(PEK%XWGI(:,1) + MAX(PEK%XWG(:,1),XWGMIN))
 !
 !-------------------------------------------------------------------------------
 !
@@ -213,20 +208,19 @@ PFROZEN1(:) = IR%XWGI(:,1,1)/(IR%XWGI(:,1,1) + MAX(IR%XWG(:,1,1),XWGMIN))
 ! uppermost soil layers thermal properties. Use organic matter thermal properties.
 !
 !
-ZCONDDRYZ (:,:) = IP%XCONDDRY (:,:)
-ZCONDSLDZ (:,:) = IP%XCONDSLD (:,:)
+ZCONDDRYZ (:,:) = KK%XCONDDRY (:,:)
+ZCONDSLDZ (:,:) = KK%XCONDSLD (:,:)
 !
 IF(IO%CDIFSFCOND == 'MLCH') THEN
 !  
   DO JL=1,INL
      DO JJ=1,INI  
 !
-        ZVEGMULCH(JJ,JL) = PVEG(JJ)*MIN(IP%XDZG(JJ,JL,1),&
-                MAX(0.0,ZTHICKM-IMX%XDG(JJ,JL,1)+IP%XDZG(JJ,JL,1)))/IP%XDZG(JJ,JL,1)     
+        ZVEGMULCH(JJ,JL) = PVEG(JJ)*MIN(PK%XDZG(JJ,JL),MAX(0.0,ZTHICKM-PK%XDG(JJ,JL)+PK%XDZG(JJ,JL)))/PK%XDZG(JJ,JL)     
 !
         IF(ZVEGMULCH(JJ,JL)>0.0)THEN
-           ZCONDDRYZ (JJ,JL) = 1.0/((1.0-ZVEGMULCH(JJ,JL))/IP%XCONDDRY(JJ,JL)+ZVEGMULCH(JJ,JL)/XOMCONDDRY)
-           ZCONDSLDZ (JJ,JL) = 1.0/((1.0-ZVEGMULCH(JJ,JL))/IP%XCONDSLD(JJ,JL)+ZVEGMULCH(JJ,JL)/XOMCONDSLD)
+           ZCONDDRYZ (JJ,JL) = 1.0/((1.0-ZVEGMULCH(JJ,JL))/KK%XCONDDRY(JJ,JL)+ZVEGMULCH(JJ,JL)/XOMCONDDRY)
+           ZCONDSLDZ (JJ,JL) = 1.0/((1.0-ZVEGMULCH(JJ,JL))/KK%XCONDSLD(JJ,JL)+ZVEGMULCH(JJ,JL)/XOMCONDSLD)
         ENDIF
 !
      ENDDO
@@ -247,16 +241,16 @@ ZLOG_CONDWTR = LOG(XCONDWTR)
 DO JL=1,INL
    DO JJ=1,INI
 !     
-      ZFROZEN2DF   = IR%XWGI(JJ,JL,1)/(IR%XWGI(JJ,JL,1) + MAX(IR%XWG(JJ,JL,1),XWGMIN))
-      ZUNFROZEN2DF = (1.0-ZFROZEN2DF)*IP%XWSAT(JJ,JL)
+      ZFROZEN2DF   = PEK%XWGI(JJ,JL)/(PEK%XWGI(JJ,JL) + MAX(PEK%XWG(JJ,JL),XWGMIN))
+      ZUNFROZEN2DF = (1.0-ZFROZEN2DF)*KK%XWSAT(JJ,JL)
 !
 !Old: CONDSATDF=(CONDSLDZ**(1.0-WSAT))*(CONDI**(WSAT-UNFROZEN2DF))*(CONDWTR**UNFROZEN2DF)  
-      ZWORK1      = LOG(ZCONDSLDZ(JJ,JL))*(1.0-IP%XWSAT(JJ,JL))
-      ZWORK2      = ZLOG_CONDI*(IP%XWSAT(JJ,JL)-ZUNFROZEN2DF)
+      ZWORK1      = LOG(ZCONDSLDZ(JJ,JL))*(1.0-KK%XWSAT(JJ,JL))
+      ZWORK2      = ZLOG_CONDI*(KK%XWSAT(JJ,JL)-ZUNFROZEN2DF)
       ZWORK3      = ZLOG_CONDWTR*ZUNFROZEN2DF
       ZCONDSATDF  = EXP(ZWORK1+ZWORK2+ZWORK3)
 !
-      ZSATDEGDF   = MAX(0.1, (IR%XWGI(JJ,JL,1)+IR%XWG(JJ,JL,1))/IP%XWSAT(JJ,JL))
+      ZSATDEGDF   = MAX(0.1, (PEK%XWGI(JJ,JL)+PEK%XWG(JJ,JL))/KK%XWSAT(JJ,JL))
       ZSATDEGDF   = MIN(1.0,ZSATDEGDF)
       ZKERSTENDF  = LOG10(ZSATDEGDF) + 1.0
       ZKERSTENDF  = (1.0-ZFROZEN2DF)*ZKERSTENDF + ZFROZEN2DF *ZSATDEGDF  
@@ -277,17 +271,16 @@ ENDDO
 !
 DO JL=1,INL
    DO JJ=1,INI
-      PSOILHCAPZ(JJ,JL) = (1.0-IP%XWSAT(JJ,JL))*IP%XHCAPSOIL(JJ,JL) +         &
-                               IR%XWG  (JJ,JL,1) *XCL*XRHOLW        +       &
-                               IR%XWGI (JJ,JL,1) *XCI*XRHOLI    
+      PSOILHCAPZ(JJ,JL) = (1.0-KK%XWSAT(JJ,JL))*KK%XHCAPSOIL(JJ,JL) +       &
+                           PEK%XWG  (JJ,JL) *XCL*XRHOLW + PEK%XWGI (JJ,JL) *XCI*XRHOLI    
    ENDDO
 ENDDO
 !
 ! Surface soil thermal inertia [(m2 K)/J]
 !
-DGMI%XCG(:) = 1.0 / ( IMX%XDG(:,1,1) * PSOILHCAPZ(:,1) )
+DMI%XCG(:) = 1.0 / ( PK%XDG(:,1) * PSOILHCAPZ(:,1) )
 !
-DGMI%XCG(:) = MIN(ZCTMAX,DGMI%XCG(:))
+DMI%XCG(:) = MIN(ZCTMAX,DMI%XCG(:))
 !
 !-------------------------------------------------------------------------------
 !
@@ -296,7 +289,7 @@ DGMI%XCG(:) = MIN(ZCTMAX,DGMI%XCG(:))
 !
 ! Vegetation thermal inertia [(m2 K)/J]
 !
-ZCV(:) = 1.0 / ( XCVHEATF/PCV(:) +  XCL * IR%XWR(:,1) )
+ZCV(:) = 1.0 / ( XCVHEATF/PEK%XCV(:) +  XCL * PEK%XWR(:) )
 !
 ZCV(:) = MIN(ZCTMAX,ZCV(:))
 !
@@ -310,7 +303,7 @@ IF(IO%LFLOOD)THEN
   ZFF(:) = PVEG(:)*PFFV(:) + (1.-PVEG(:))*PFFG(:)
 !
   WHERE(ZFF(:)>0.0)
-    ZCF(:) = 1.0 / ( XCL * PPIFLOOD(:) )
+    ZCF(:) = 1.0 / ( XCL * KK%XPIFLOOD(:) )
   ENDWHERE
 !
   ZCF(:) = MIN(ZCTMAX,ZCF(:))
@@ -325,9 +318,8 @@ ENDIF
 ! With contribution from the ground, flood and vegetation for explicit
 ! (ISBA-ES) snow scheme option (i.e. no snow effects included here):
 !
-DGMI%XCT(:) = 1. / ( (1.-PVEG(:))*(1.-PFFG(:)) / DGMI%XCG(:)     &
-                 +  PVEG(:) *(1.-PFFV(:)) / ZCV(:)     &
-                 +  ZFF (:)               / ZCF(:)     )  
+DMI%XCT(:) = 1. / ( (1.-PVEG(:))*(1.-PFFG(:)) / DMI%XCG(:)     &
+                 +  PVEG(:) *(1.-PFFV(:)) / ZCV(:)  +  ZFF (:)  / ZCF(:)     )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -338,10 +330,10 @@ DGMI%XCT(:) = 1. / ( (1.-PVEG(:))*(1.-PFFG(:)) / DGMI%XCG(:)     &
 !
 DO JL=1,INL
    DO JJ=1,INI
-      IDEPTH=IMX%NWG_LAYER(JJ,1)
+      IDEPTH=PK%NWG_LAYER(JJ)
       IF(JL>IDEPTH)THEN
-        IR%XWG (JJ,JL,1) = XUNDEF
-        IR%XWGI(JJ,JL,1) = XUNDEF
+        PEK%XWG (JJ,JL) = XUNDEF
+        PEK%XWGI(JJ,JL) = XUNDEF
       ENDIF
    ENDDO
 ENDDO

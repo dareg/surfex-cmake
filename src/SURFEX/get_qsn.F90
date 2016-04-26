@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE GET_QS_n (DUO, DGU, &
-                           HPROGRAM,KI,PQS)
+      SUBROUTINE GET_QS_n (DGO, D, HPROGRAM,KI,PQS)
 !     #########################################
 !
 !!****  *GET_QS_n* - routine to get roughness lengths
@@ -51,8 +50,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DUO
-TYPE(DIAG_t), INTENT(INOUT) :: DGU
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
@@ -70,8 +69,8 @@ IF (LHOOK) CALL DR_HOOK('GET_QS_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DUO%LSURF_VARS)      THEN 
-  PQS      = DGU%XQS      
+IF (DGO%LSURF_VARS)      THEN 
+  PQS      = D%XQS      
 ELSE 
   PQS      = XUNDEF      
 ENDIF           

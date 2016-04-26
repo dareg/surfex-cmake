@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE HYDRO_SGH(IO, P, IP, INI, IMX, IR, DGEIP, DGMI, PTSTEP, PPG, PPG_MELT, PDUNNE )  
+      SUBROUTINE HYDRO_SGH(IO, KK, PK, PEK, DEK, DMK, PTSTEP, PPG, PPG_MELT, PDUNNE )  
 !
 !     #####################################################################
 !
@@ -21,10 +21,7 @@
 !        ===================
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t
-USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
@@ -49,13 +46,11 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: P
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIP
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 REAL, INTENT(IN)                 :: PTSTEP
 !                                   timestep of the integration
@@ -81,7 +76,7 @@ REAL, DIMENSION(SIZE(PPG))                 :: ZWG2_AVG, ZWGI2_AVG, ZWSAT_AVG, ZW
 !                                             Average water and ice content
 !                                             values over the soil depth D2 (for calculating surface runoff)
 !
-REAL, DIMENSION(SIZE(IMX%XDG(:,:,1),1),SIZE(IMX%XDG(:,:,1),2)) :: ZWSAT, ZFRZ
+REAL, DIMENSION(SIZE(PK%XDG,1),SIZE(PK%XDG,2)) :: ZWSAT, ZFRZ
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPTH
 !
@@ -122,7 +117,7 @@ ZWWILT_AVG(:) = 0.0
 ZHORT_R(:) = 0.0
 ZHORT_M(:) = 0.0
 !
-!DGEIP%XIFLOOD calculation
+!DEK%XIFLOOD calculation
 ZSOILMAX(:) = 0.0
 ZIF_MAX(:)  = 0.0
 !
@@ -137,8 +132,8 @@ ZRUNOFF_TOPD(:) = 0.0
 ZPG_INI(:) = PPG(:) + PPG_MELT(:)
 !
 !
-INJ=SIZE(IMX%XDG(:,:,1),1)
-INL=MAXVAL(IMX%NWG_LAYER(:,1))
+INJ=SIZE(PK%XDG,1)
+INL=MAXVAL(PK%NWG_LAYER)
 !
 !-------------------------------------------------------------------------------
 !
@@ -148,7 +143,7 @@ INL=MAXVAL(IMX%NWG_LAYER(:,1))
 IF( IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF == 'TOPD' )THEN
 !
 ! Calculate the layer average water content for the sub-grid
-! surface runoff computation: use IP%XRUNOFFD(:,1) as the depth over which
+! surface runoff computation: use PK%XRUNOFFD(:,1) as the depth over which
 ! runoff is calculated.
 !
 ! First, determine a weight for each layer's contribution
@@ -160,22 +155,22 @@ IF( IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF == 'TOPD' )THEN
 !
     DO JL=1,IO%NLAYER_DUN
       DO JJ=1,INJ
-        IDEPTH=IMX%NWG_LAYER(JJ,1)
+        IDEPTH=PK%NWG_LAYER(JJ)
         IF(JL<=IDEPTH)THEN
-          ZWG2_AVG  (JJ) = ZWG2_AVG  (JJ) + IP%XSOILWGHT(JJ,JL,1)*IR%XWG (JJ,JL,1)/MAX(1.E-6,IP%XRUNOFFD(JJ,1))
-          ZWGI2_AVG (JJ) = ZWGI2_AVG (JJ) + IP%XSOILWGHT(JJ,JL,1)*IR%XWGI(JJ,JL,1)/MAX(1.E-6,IP%XRUNOFFD(JJ,1))
-          ZWSAT_AVG (JJ) = ZWSAT_AVG (JJ) + IP%XSOILWGHT(JJ,JL,1)*IP%XWSAT (JJ,JL)/MAX(1.E-6,IP%XRUNOFFD(JJ,1))
-          ZWWILT_AVG(JJ) = ZWWILT_AVG(JJ) + IP%XSOILWGHT(JJ,JL,1)*IP%XWWILT(JJ,JL)/MAX(1.E-6,IP%XRUNOFFD(JJ,1))
+          ZWG2_AVG  (JJ) = ZWG2_AVG  (JJ) + PK%XSOILWGHT(JJ,JL)*PEK%XWG (JJ,JL) /MAX(1.E-6,PK%XRUNOFFD(JJ))
+          ZWGI2_AVG (JJ) = ZWGI2_AVG (JJ) + PK%XSOILWGHT(JJ,JL)*PEK%XWGI(JJ,JL) /MAX(1.E-6,PK%XRUNOFFD(JJ))
+          ZWSAT_AVG (JJ) = ZWSAT_AVG (JJ) + PK%XSOILWGHT(JJ,JL)*KK%XWSAT (JJ,JL)/MAX(1.E-6,PK%XRUNOFFD(JJ))
+          ZWWILT_AVG(JJ) = ZWWILT_AVG(JJ) + PK%XSOILWGHT(JJ,JL)*KK%XWWILT(JJ,JL)/MAX(1.E-6,PK%XRUNOFFD(JJ))
         ENDIF
       ENDDO
     ENDDO
 !
   ELSE
 !           
-    ZWG2_AVG(:)   = IR%XWG(:,2,1)
-    ZWGI2_AVG(:)  = IR%XWGI(:,2,1)
-    ZWSAT_AVG(:)  = IP%XWSAT(:,1)
-    ZWWILT_AVG(:) = IP%XWWILT(:,1)
+    ZWG2_AVG(:)   = PEK%XWG (:,2)
+    ZWGI2_AVG(:)  = PEK%XWGI(:,2)
+    ZWSAT_AVG(:)  = KK%XWSAT (:,1)
+    ZWWILT_AVG(:) = KK%XWWILT(:,1)
 !      
   ENDIF
 !
@@ -186,7 +181,7 @@ IF( IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF == 'TOPD' )THEN
 !
    DO JJ=1,INJ
      ZS = MIN(1.0,(ZWG2_AVG(JJ)+ZWGI2_AVG(JJ)-ZWWILT_AVG(JJ))/(ZWSAT_AVG(JJ)-ZWWILT_AVG(JJ)))
-     INI%XFSAT(JJ) = 1.0-(1.0-MAX(0.0,ZS))**(P%XRUNOFFB(JJ)/(P%XRUNOFFB(JJ)+1.))
+     KK%XFSAT(JJ) = 1.0-(1.0-MAX(0.0,ZS))**(KK%XRUNOFFB(JJ)/(KK%XRUNOFFB(JJ)+1.))
    ENDDO        
 !
 ENDIF
@@ -206,17 +201,17 @@ IF(IO%CHORT=='SGH'.OR.IO%LFLOOD)THEN
 !              
 !       Modify soil porosity as ice assumed to become part
 !       of solid soil matrix (with respect to liquid flow):                
-        ZWSAT(JJ,JL) = MAX(XWGMIN, IP%XWSAT(JJ,JL)-IR%XWGI(JJ,JL,1)) 
+        ZWSAT(JJ,JL) = MAX(XWGMIN, KK%XWSAT(JJ,JL)-PEK%XWGI(JJ,JL)) 
 !        
 !       Impedance Factor from (Johnsson and Lundin 1991).
-        ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(IR%XWGI(JJ,JL,1)/(IR%XWGI(JJ,JL,1)+IR%XWG(JJ,JL,1)))))
+        ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PEK%XWGI(JJ,JL)/(PEK%XWGI(JJ,JL)+PEK%XWG(JJ,JL)))))
 !
       ENDDO
     ENDDO    
 !
 !   Calculate infiltration MAX using green-ampt approximation (derived form)
-    ZIMAX(:) = INFMAX_FUNC(IR%XWG(:,:,1), ZWSAT, ZFRZ, IP%XCONDSAT(:,:,1), IP%XMPOTSAT, IP%XBCOEF, &
-                           IP%XDZG(:,:,1), IMX%XDG(:,:,1), IO%NLAYER_HORT)
+    ZIMAX(:) = INFMAX_FUNC(PEK%XWG, ZWSAT, ZFRZ, PK%XCONDSAT, KK%XMPOTSAT, KK%XBCOEF, &
+                           PK%XDZG, PK%XDG, IO%NLAYER_HORT)
 !  
   ELSE
 !
@@ -224,44 +219,44 @@ IF(IO%CHORT=='SGH'.OR.IO%LFLOOD)THEN
 !
 !    Total soil volumetric heat capacity [J/(m3 K)]:
 !
-      ZSOILHEATCAP = XCL*XRHOLW*IR%XWG (JJ,2,1) +                           &
-                     XCI*XRHOLI*IR%XWGI(JJ,2,1) +                           &
-                     XSPHSOIL*XDRYWGHT*(1.0-IP%XWSAT(JJ,1))
+      ZSOILHEATCAP = XCL*XRHOLW*PEK%XWG (JJ,2) +                           &
+                     XCI*XRHOLI*PEK%XWGI(JJ,2) +                           &
+                     XSPHSOIL*XDRYWGHT*(1.0-KK%XWSAT(JJ,1))
 !                     
 !     Soil thickness which corresponds to the diurnal surface temperature
 !     wave penetration depth as T2 is the average temperature for this layer:
 !
-      ZTDIURN   = MIN(IMX%XDG(JJ,2,1), 4./(ZSOILHEATCAP*DGMI%XCG(JJ)))
+      ZTDIURN   = MIN(PK%XDG(JJ,2), 4./(ZSOILHEATCAP*DMK%XCG(JJ)))
 !    
 !     Effective frozen depth penetration 
 !
-      ZEFFICE = IMX%XDG(JJ,2,1)*IR%XWGI(JJ,2,1)/(IR%XWGI(JJ,2,1)+IR%XWG(JJ,2,1))
+      ZEFFICE = PK%XDG(JJ,2)*PEK%XWGI(JJ,2)/(PEK%XWGI(JJ,2)+PEK%XWG(JJ,2))
 !
 !     Modify soil porosity as ice assumed to become part
 !     of solid soil matrix (with respect to liquid flow):
 !
-      ZWSAT(JJ,1) = MAX(XWGMIN, IP%XWSAT(JJ,1)-IR%XWGI(JJ,2,1)) 
+      ZWSAT(JJ,1) = MAX(XWGMIN, KK%XWSAT(JJ,1)-PEK%XWGI(JJ,2)) 
 !
 !     calculate the subgrid frozen soil fraction of the grid cells
 !
-      ZFROZEN (JJ) = MIN(1.,ZEFFICE/MAX(IMX%XD_ICE(JJ,1),ZTDIURN))
+      ZFROZEN (JJ) = MIN(1.,ZEFFICE/MAX(PK%XD_ICE(JJ),ZTDIURN))
 !
 !     Impedance Factor from (Johnsson and Lundin 1991).
 !
       ZFRZ(JJ,1) = EXP(ZLOG10*(-ZEICE*MIN(1.,ZEFFICE/ZTDIURN)))
 !
 !     Calculate infiltration MAX on frozen soil as Johnsson and Lundin (1991).
-!     The max infiltration is equal to the unsaturated conductivity function at a
-!     water content corresponding to the total porosity less the ice-filled volume.
+!     The max infiltration is equal ,1to the unsaturated conductivity function at a
+!     water content c,1orresponding to the total porosity less the ice-filled volume.
 !
-      ZS =MIN(1.,ZWSAT(JJ,1)/IP%XWSAT(JJ,1))
-      ZIMAX_ICE(JJ)=ZFRZ(JJ,1)*IP%XKSAT_ICE(JJ,1)*(ZS**(2*IP%XBCOEF(JJ,1)+3.))
+      ZS =MIN(1.,ZWSAT(JJ,1)/KK%XWSAT(JJ,1))
+      ZIMAX_ICE(JJ)=ZFRZ(JJ,1)*PK%XKSAT_ICE(JJ)*(ZS**(2*KK%XBCOEF(JJ,1)+3.))
 !
 !     Calculate infiltration MAX on unfrozen soil using green-ampt approximation
 !    
-      ZS   =MIN(1.,IR%XWG(JJ,2,1)/ZWSAT(JJ,1))
-      ZD_H =MIN(0.10,IMX%XDG(JJ,2,1))
-      ZIMAX(JJ)=IP%XCONDSAT(JJ,1,1)*(IP%XBCOEF(JJ,1)*IP%XMPOTSAT(JJ,1)*(ZS-1.0)/ZD_H+1.0)
+      ZS   =MIN(1.,PEK%XWG(JJ,2)/ZWSAT(JJ,1))
+      ZD_H =MIN(0.10,PK%XDG(JJ,2))
+      ZIMAX(JJ)=PK%XCONDSAT(JJ,1)*(KK%XBCOEF(JJ,1)*KK%XMPOTSAT(JJ,1)*(ZS-1.0)/ZD_H+1.0)
 !
     ENDDO
 !
@@ -276,8 +271,8 @@ IF(IO%CHORT=='SGH')THEN
   IF(IO%CRAIN=='SGH')THEN
 !
     WHERE(PPG(:)>0.)
-       ZHORT_R(:) = (1.- ZFROZEN(:))* PPG(:)/((ZIMAX    (:)*XRHOLW*INI%XMUF(:)/PPG(:)) + 1.) & !unfrozen soil
-                  +      ZFROZEN(:) * PPG(:)/((ZIMAX_ICE(:)*XRHOLW*INI%XMUF(:)/PPG(:)) + 1.)   !frozen soil
+       ZHORT_R(:) = (1.- ZFROZEN(:))* PPG(:)/((ZIMAX    (:)*XRHOLW*KK%XMUF(:)/PPG(:)) + 1.) & !unfrozen soil
+                  +      ZFROZEN(:) * PPG(:)/((ZIMAX_ICE(:)*XRHOLW*KK%XMUF(:)/PPG(:)) + 1.)   !frozen soil
     END WHERE        
 !
   ELSE
@@ -294,21 +289,21 @@ IF(IO%CHORT=='SGH')THEN
 !
 ! calculate the  total Horton runoff 
 !
-  WHERE(INI%XFFLOOD(:)<=INI%XFSAT(:))
-        DGEIP%XHORT(:) = (1. - INI%XFSAT(:))   * (ZHORT_R(:) + ZHORT_M(:))
+  WHERE(KK%XFFLOOD(:)<=KK%XFSAT(:))
+        DEK%XHORT(:) = (1. - KK%XFSAT(:))   * (ZHORT_R(:) + ZHORT_M(:))
   ELSEWHERE
-        DGEIP%XHORT(:) = (1. - INI%XFFLOOD(:)) * (ZHORT_R(:) + ZHORT_M(:))
+        DEK%XHORT(:) = (1. - KK%XFFLOOD(:)) * (ZHORT_R(:) + ZHORT_M(:))
   ENDWHERE
 !
 ELSE
 !
-  DGEIP%XHORT(:) = 0.0
+  DEK%XHORT(:) = 0.0
 !
 ENDIF
 !
 ! calculate all water reaching the ground
 !
-PPG  (:) = PPG(:) + PPG_MELT(:)   
+PPG  (:) = PPG(:) + PPG_MELT(:)        
 !
 !
 !*           3. Dunne runoff and flood interception
@@ -317,16 +312,16 @@ PPG  (:) = PPG(:) + PPG_MELT(:)
 ! Interception by the flooplains
 !
 IF(IO%LFLOOD)THEN
-  DGEIP%XPFLOOD(:)=INI%XFFLOOD(:)*MAX(0.0,PPG(:))
+  DEK%XPFLOOD(:)=KK%XFFLOOD(:)*MAX(0.0,PPG(:))
 ELSE
-  DGEIP%XPFLOOD(:)=0.0
+  DEK%XPFLOOD(:)=0.0
 ENDIF
 !
 IF(IO%CRUNOFF=='SGH ')THEN
 !        
 ! calculate the Dunne runoff with TOPMODEL
 !
-  PDUNNE(:) = MAX(PPG(:),0.0) * MAX(INI%XFSAT(:)-INI%XFFLOOD(:),0.0)
+  PDUNNE(:) = MAX(PPG(:),0.0) * MAX(KK%XFSAT(:)-KK%XFFLOOD(:),0.0)
 !
 ELSEIF (IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF=='TOPD')THEN
 !
@@ -335,7 +330,7 @@ ELSEIF (IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF=='TOPD')THEN
 !
 ! surface runoff done only on the Fsat-Fflood fraction
 !
-  ZPG_WORK(:) = PPG(:) - DGEIP%XHORT(:) - DGEIP%XPFLOOD(:)
+  ZPG_WORK(:) = PPG(:) - DEK%XHORT(:) - DEK%XPFLOOD(:)
 !
 #ifdef TOPD
   IF ( LCOUPL_TOPD.AND.IO%CRUNOFF == 'TOPD' )THEN
@@ -351,10 +346,10 @@ ELSEIF (IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF=='TOPD')THEN
   ENDIF
 #endif
   !
-  CALL HYDRO_DT92(PTSTEP, P%XRUNOFFB, ZWWILT_AVG,  IP%XRUNOFFD(:,1), ZWSAT_AVG, &
+  CALL HYDRO_DT92(PTSTEP, KK%XRUNOFFB, ZWWILT_AVG,  PK%XRUNOFFD, ZWSAT_AVG, &
                   ZWG2_AVG, ZWGI2_AVG, ZPG_WORK, ZRUISDT           )
 !
-  PDUNNE(:) = ZRUISDT(:)*IP%XRUNOFFD(:,1)*XRHOLW/PTSTEP
+  PDUNNE(:) = ZRUISDT(:)*PK%XRUNOFFD(:)*XRHOLW/PTSTEP
   !
 #ifdef TOPD
   IF (LCOUPL_TOPD.AND.IO%CRUNOFF == 'TOPD') THEN
@@ -363,29 +358,29 @@ ELSEIF (IO%CRUNOFF=='DT92' .OR. IO%CRUNOFF=='TOPD')THEN
 #endif
   !
   IF(IO%LFLOOD)THEN
-    WHERE(INI%XFFLOOD(:)>=INI%XFSAT(:).AND.INI%XFFLOOD(:)>0.0)PDUNNE(:) = 0.0
+    WHERE(KK%XFFLOOD(:)>=KK%XFSAT(:).AND.KK%XFFLOOD(:)>0.0)PDUNNE(:) = 0.0
   ENDIF   
   !
 ELSE
 ! 
 ! Default case (no subgrid runoff)
 !
-  INI%XFSAT (:) = 0.0
+  KK%XFSAT (:) = 0.0
   PDUNNE(:) = 0.0
 !
 ENDIF
 !
 ! calculate the infiltration rate after runoff
 !
-PPG  (:) = PPG(:) - PDUNNE(:) - DGEIP%XHORT(:) - DGEIP%XPFLOOD(:)
+PPG  (:) = PPG(:) - PDUNNE(:) - DEK%XHORT(:) - DEK%XPFLOOD(:)
 !
 ! Supress numerical artifacts:
 !
 WHERE (ZPG_INI(:)<0.0)
   PPG(:)     = ZPG_INI(:)
-  DGEIP%XHORT(:) = 0.0
-  PDUNNE (:) = 0.0
-  DGEIP%XPFLOOD(:) = 0.0
+  DEK%XHORT(:) = 0.0
+  PDUNNE   (:) = 0.0
+  DEK%XPFLOOD(:) = 0.0
 ENDWHERE
 !
 !*           4. infiltration rate from floodplains (à revoir pour DF !!!)
@@ -398,36 +393,36 @@ IF(IO%LFLOOD)THEN
   ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX    (:)*XRHOLW &   !unfrozen soil
              +             ZFROZEN(:)   * ZIMAX_ICE(:)*XRHOLW     !frozen soil
 !
-  DGEIP%XIFLOOD(:)=MAX(0.0,(INI%XFFLOOD(:)-INI%XFSAT(:)))*MIN(INI%XPIFLOOD(:)/PTSTEP,ZIF_MAX(:))
+  DEK%XIFLOOD(:)=MAX(0.0,(KK%XFFLOOD(:)-KK%XFSAT(:)))*MIN(KK%XPIFLOOD(:)/PTSTEP,ZIF_MAX(:))
 !
   IF(IO%CISBA == 'DIF')THEN
     ZDEPTH(:)=0.0
     DO JL=1,IO%NLAYER_HORT
       DO JJ=1,INJ
         IF(ZDEPTH(JJ)<XHORT_DEPTH)THEN
-          ZSOILMAX(JJ) = ZSOILMAX(JJ)+MAX(0.0,ZWSAT(JJ,JL)-IR%XWG(JJ,JL,1))*IP%XDZG(JJ,JL,1)*XRHOLW/PTSTEP
-          ZDEPTH  (JJ) = IMX%XDG(JJ,JL,1)
+          ZSOILMAX(JJ) = ZSOILMAX(JJ)+MAX(0.0,ZWSAT(JJ,JL)-PEK%XWG(JJ,JL))*PK%XDZG(JJ,JL)*XRHOLW/PTSTEP
+          ZDEPTH  (JJ) = PK%XDG(JJ,JL)
         ENDIF
       ENDDO
     ENDDO
   ELSE
     DO JJ=1,INJ
-      ZWSAT(JJ,1)  = MAX(XWGMIN, IP%XWSAT(JJ,1)-IR%XWGI(JJ,2,1)) 
-      ZSOILMAX(JJ) = MAX(0.0,ZWSAT(JJ,1)-IR%XWG(JJ,2,1))*IMX%XDG(JJ,2,1)*XRHOLW/PTSTEP
+      ZWSAT(JJ,1)  = MAX(XWGMIN, KK%XWSAT(JJ,1)-PEK%XWGI(JJ,2)) 
+      ZSOILMAX(JJ) = MAX(0.0,ZWSAT(JJ,1)-PEK%XWG(JJ,2))*PK%XDG(JJ,2)*XRHOLW/PTSTEP
     ENDDO
   ENDIF
 !
-  DGEIP%XIFLOOD(:)=MIN(DGEIP%XIFLOOD(:),ZSOILMAX(:))
+  DEK%XIFLOOD(:)=MIN(DEK%XIFLOOD(:),ZSOILMAX(:))
 !
 ELSE
 !
-  DGEIP%XIFLOOD(:)=0.0
+  DEK%XIFLOOD(:)=0.0
 !
 ENDIF
 !
 !calculate the infiltration rate
 !
-PPG  (:) = PPG(:) + DGEIP%XIFLOOD(:)
+PPG  (:) = PPG(:) + DEK%XIFLOOD(:)
 !
 !-------------------------------------------------------------------------------
 !

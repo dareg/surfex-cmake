@@ -1,5 +1,5 @@
 !     ####################################################################
-      SUBROUTINE ALBEDO(HALBEDO, IMT, IMA, PVEGTYPE, OMASK    )  
+      SUBROUTINE ALBEDO(HALBEDO, PEK, PSNOW, OMASK    )  
 !     ####################################################################
 !
 !!****  *ALBEDO*  
@@ -40,14 +40,11 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t, ISBA_PARAM_ALB_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODD_SNOW_PAR,       ONLY : XANSMAX
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-!
-USE MODI_VEGTYPE_TO_PATCH
-USE MODI_SURF_PATCH
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -65,21 +62,18 @@ IMPLICIT NONE
 !   "WET " = constant albedo value for wet soil
 !   "MEAN" = constant albedo value for medium soil wetness
 !
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: IMA
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
-REAL,    DIMENSION(:,:), INTENT(IN), OPTIONAL :: PVEGTYPE ! vegetation type
+REAL,    DIMENSION(:), INTENT(IN), OPTIONAL  :: PSNOW ! fraction of permanent snow and ice
 LOGICAL, DIMENSION(:),   INTENT(IN), OPTIONAL :: OMASK    ! mask where computations are done
 !
 !*      0.2    declarations of local variables
 !              -------------------------------
 !
-LOGICAL, DIMENSION(SIZE(IMT%XVEG,1)) :: GMASK
+LOGICAL, DIMENSION(SIZE(PEK%XVEG)) :: GMASK
 !
-REAL, DIMENSION(SIZE(IMT%XVEG,1),SIZE(IMT%XVEG,2))  ::ZPATCH, ZSNOWPATCH 
-INTEGER :: ISNOWPATCH !patch index for snow 
-INTEGER :: IPATCH     ! number of patches
-INTEGER :: JPATCH     !loop index for patches
+REAL, DIMENSION(SIZE(PEK%XVEG)) :: ZSNOW
+INTEGER :: JP     !loop index for patches
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -90,46 +84,27 @@ IF (HALBEDO=='USER') RETURN
 GMASK(:) = .TRUE.
 IF (PRESENT(OMASK)) GMASK(:) = OMASK(:)
 !
-IPATCH = SIZE(IMT%XVEG,2)
+WHERE (GMASK(:))
+  PEK%XALBVIS (:) = XUNDEF
+  PEK%XALBNIR (:) = XUNDEF
+  PEK%XALBUV  (:) = XUNDEF
+END WHERE
+!
+ZSNOW(:) = 0.
+IF (PRESENT(PSNOW)) ZSNOW(:) = PSNOW(:)
+!
+WHERE (GMASK(:) .AND. PEK%XVEG(:)/=XUNDEF)
 
-DO JPATCH=1,IPATCH
-  WHERE (GMASK(:))
-    IMT%XALBVIS (:,JPATCH) = XUNDEF
-    IMT%XALBNIR (:,JPATCH) = XUNDEF
-    IMT%XALBUV  (:,JPATCH) = XUNDEF
-  END WHERE
-END DO
+  PEK%XALBVIS(:) = ( (1.-PEK%XVEG(:)) * PEK%XALBVIS_SOIL(:) + PEK%XVEG(:)  * PEK%XALBVIS_VEG (:)) &
+         * (1-ZSNOW(:)) + XANSMAX  * ZSNOW(:)   
+  !
+  PEK%XALBNIR(:) = ( (1.-PEK%XVEG(:)) * PEK%XALBNIR_SOIL(:) + PEK%XVEG(:)  * PEK%XALBNIR_VEG (:)) &
+         * (1-ZSNOW(:)) + XANSMAX  * ZSNOW(:)   
+  !
+  PEK%XALBUV (:) = ( (1.-PEK%XVEG(:)) * PEK%XALBUV_SOIL (:) + PEK%XVEG(:)  * PEK%XALBUV_VEG  (:)) &
+         * (1-ZSNOW(:)) + XANSMAX  * ZSNOW(:)   
+END WHERE
 !
-!
-!
-ZSNOWPATCH (:,:) =0.
-!
-IF (PRESENT(PVEGTYPE)) THEN
-  ! calculation of patch surfaces  (weights for average)
-  CALL SURF_PATCH(IPATCH,PVEGTYPE,ZPATCH)
-  ! permanent snow fraction in the corresponding patch
-  ISNOWPATCH= VEGTYPE_TO_PATCH (NVT_SNOW,IPATCH)
-  WHERE(GMASK(:) .AND. ZPATCH(:,ISNOWPATCH)>0.)
-    ZSNOWPATCH (:,ISNOWPATCH) = PVEGTYPE(:,NVT_SNOW)/ZPATCH(:,ISNOWPATCH)
-  END WHERE
-END IF
-!
-DO JPATCH=1,IPATCH
-  WHERE (GMASK(:) .AND. IMT%XVEG(:,JPATCH)/=XUNDEF)
-
-    IMT%XALBVIS(:,JPATCH) = ( (1.-IMT%XVEG(:,JPATCH)) * IMA%XALBVIS_SOIL(:,JPATCH)  &
-                                + IMT%XVEG(:,JPATCH)  * IMT%XALBVIS_VEG (:,JPATCH)) &
-           * (1-ZSNOWPATCH(:,JPATCH)) + XANSMAX  * ZSNOWPATCH(:,JPATCH)   
-    !
-    IMT%XALBNIR(:,JPATCH) = ( (1.-IMT%XVEG(:,JPATCH)) * IMA%XALBNIR_SOIL(:,JPATCH)  &
-                                + IMT%XVEG(:,JPATCH)  * IMT%XALBNIR_VEG (:,JPATCH)) &
-           * (1-ZSNOWPATCH(:,JPATCH)) + XANSMAX  * ZSNOWPATCH(:,JPATCH)   
-    !
-    IMT%XALBUV (:,JPATCH) = ( (1.-IMT%XVEG(:,JPATCH)) * IMA%XALBUV_SOIL (:,JPATCH)  &
-                                + IMT%XVEG(:,JPATCH)  * IMT%XALBUV_VEG  (:,JPATCH)) &
-           * (1-ZSNOWPATCH(:,JPATCH)) + XANSMAX  * ZSNOWPATCH(:,JPATCH)   
-  END WHERE
-END DO
 IF (LHOOK) CALL DR_HOOK('ALBEDO',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

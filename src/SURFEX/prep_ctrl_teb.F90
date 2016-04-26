@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PREP_CTRL_TEB (DTO, OSURF_EVAP_BUDGET,OSURF_MISC_BUDGET,OUTCI,KLUOUT)  
+      SUBROUTINE PREP_CTRL_TEB (DGO, OSURF_EVAP_BUDGET,OSURF_MISC_BUDGET,OUTCI,KLUOUT)  
 !     #################################################################################################################
 !
 !!****  *PREP_CTRL_TEB * - routine to check that diagnostics are switched off
@@ -35,6 +35,8 @@
 !
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
 !
+USE MODI_PREP_CTRL
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -43,7 +45,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DTO
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 !
 LOGICAL,  INTENT(INOUT) :: OSURF_EVAP_BUDGET  ! flag for surface evaporation budget
 LOGICAL,  INTENT(INOUT) :: OSURF_MISC_BUDGET  ! flag for surface miscellaneous budget
@@ -57,13 +59,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_CTRL_TEB',0,ZHOOK_HANDLE)
-DTO%N2M = 0
 !
-DTO%LSURF_BUDGET  = .FALSE.
-DTO%L2M_MIN_ZS    = .FALSE.
-DTO%LRAD_BUDGET   = .FALSE.
-DTO%LCOEF         = .FALSE.
-DTO%LSURF_VARS    = .FALSE.
+ CALL PREP_CTRL(DGO,KLUOUT)
 !
 OSURF_EVAP_BUDGET = .FALSE.
 OSURF_MISC_BUDGET = .FALSE.

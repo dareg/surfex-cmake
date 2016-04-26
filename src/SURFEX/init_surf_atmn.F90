@@ -205,7 +205,7 @@ REAL, DIMENSION(:),     ALLOCATABLE :: ZP_EMIS     ! emissivity
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSRAD    ! radiative temperature
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_TSURF    ! surface effective temperature
 !
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZZ0VEG
+REAL, DIMENSION(:), ALLOCATABLE :: ZZ0VEG
 REAL :: XTIME0
 !
 INTEGER :: ISIZE_FULL
@@ -429,14 +429,14 @@ END IF
 !
 !*       2.6 Orographic roughness length
 !
-ALLOCATE(YSC%USS%XZ0EFFIP(YSC%U%NSIZE_FULL,1))
-ALLOCATE(YSC%USS%XZ0EFFIM(YSC%U%NSIZE_FULL,1))
-ALLOCATE(YSC%USS%XZ0EFFJP(YSC%U%NSIZE_FULL,1))
-ALLOCATE(YSC%USS%XZ0EFFJM(YSC%U%NSIZE_FULL,1))
+ALLOCATE(YSC%USS%XZ0EFFIP(YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%USS%XZ0EFFIM(YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%USS%XZ0EFFJP(YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%USS%XZ0EFFJM(YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%USS%XZ0REL  (YSC%U%NSIZE_FULL))
 !
-ALLOCATE(ZZ0VEG(YSC%U%NSIZE_FULL,1))
-ZZ0VEG(:,:) = 0.
+ALLOCATE(ZZ0VEG(YSC%U%NSIZE_FULL))
+ZZ0VEG(:) = 0.
 !
  CALL SUBSCALE_Z0EFF(YSC%USS,ZZ0VEG,.TRUE.)
 !
@@ -464,14 +464,14 @@ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
 !*       2.8 Allocations and Initialization of diagnostics
 !
 IF (HINIT=='ALL') THEN
-  CALL ALLOC_DIAG_SURF_ATM_n(YSC%DUO, YSC%DGU, YSC%DGUC, YSC%DGUP, YSC%DGUPC, &
+  CALL ALLOC_DIAG_SURF_ATM_n(YSC%DUO, YSC%DU, YSC%DUC, YSC%DUP, YSC%DUPC, &
                              YSC%U%NSIZE_FULL, YSC%U%TTIME, HPROGRAM,KSW)
 ENDIF
 !
 !*       Canopy fields if Beljaars et al 2004 parameterization is used
 !
 IF (YSC%USS%CROUGH=='BE04') THEN
-  CALL READ_SSO_CANOPY_n(YSC%DTCO, YSC%SSCP, YSC%U, HPROGRAM, HINIT)
+  CALL READ_SSO_CANOPY_n(YSC%DTCO, YSC%SB, YSC%U, HPROGRAM, HINIT)
 ENDIF
 !
 !*       Physical fields need for ARPEGE/ALADIN climate run
@@ -536,7 +536,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XSEA(:)
 ! initialization
 IF (YSC%U%NDIM_SEA>0) &
   CALL INIT_SEA_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U, &
-                  YSC%SM, YSC%DLO, YSC%DGL, YSC%DGLC, &
+                  YSC%SM, YSC%DLO, YSC%DL, YSC%DLC, &
                   HPROGRAM,HINIT,YSC%U%NSIZE_SEA,KSV,KSW,            &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -565,7 +565,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XWATER(:)
 ! initialization
 IF (YSC%U%NDIM_WATER>0) &
   CALL INIT_INLAND_WATER_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, &
-                           YSC%U, YSC%WM, YSC%FM, YSC%DLO, YSC%DGL, YSC%DGLC,    &
+                           YSC%U, YSC%WM, YSC%FM, YSC%DLO, YSC%DL, YSC%DLC,    &
                            HPROGRAM,HINIT,YSC%U%NSIZE_WATER,KSV,KSW,          &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -593,8 +593,8 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XNATURE(:)
 ! initialization
 IF (YSC%U%NDIM_NATURE>0) &
   CALL INIT_NATURE_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U,   &
-                     YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DGL,       &
-                     YSC%DGLC, YSC%DST, YSC%SLT, YSC%SV,               &
+                     YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL,       &
+                     YSC%DLC, YSC%NDST, YSC%SLT, YSC%SV,               &
                      HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,      &
                      KSV,KSW, HSV,ZP_CO2,ZP_RHOA,                       &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -622,7 +622,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XTOWN(:)
 ! initialization
 IF (YSC%U%NDIM_TOWN>0) &
   CALL INIT_TOWN_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U, &
-                   YSC%TM, YSC%GDM, YSC%GRM, YSC%DLO, YSC%DGL, YSC%DGLC,  &
+                   YSC%TM, YSC%GDM, YSC%GRM, YSC%DLO, YSC%DL, YSC%DLC,  &
                    HPROGRAM,HINIT,YSC%U%NSIZE_TOWN,KSV,KSW,             &
                    HSV,ZP_CO2,ZP_RHOA,                                &
                    ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &

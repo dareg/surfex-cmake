@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_FLAKE_n (CHF, DFO, DGF, DGFC, DGMF, F, DST, SLT, &
+SUBROUTINE COUPLING_FLAKE_n (CHF, DGO, D, DC, DMF, F, DST, SLT, &
                              HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME,  &
                              KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF,     &
                              PUREF, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN,    &
@@ -86,10 +86,10 @@ IMPLICIT NONE
 !
 !
 TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DFO
-TYPE(DIAG_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_t), INTENT(INOUT) :: DGFC
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_t), INTENT(INOUT) :: DC
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DMF
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -479,7 +479,7 @@ IF (F%CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake cod
 !
 ENDIF
 !
- CALL DIAG_INLINE_FLAKE_n(DFO, DGF, DGFC, F, &
+ CALL DIAG_INLINE_FLAKE_n(DGO, D, DC, F, &
                           PTSTEP, PTA,  ZQA, PPA, PPS, PRHOA, PU,    &
                           PV, PZREF, PUREF, PRAIN, PSNOW,            &
                           ZCD, ZCDN, ZCH, ZRI, ZHU,                  &
@@ -489,7 +489,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
- CALL DIAG_MISC_FLAKE_n(DGMF, F)
+ CALL DIAG_MISC_FLAKE_n(DMF, F)
 !
 !-------------------------------------------------------------------------------
 !Physical properties see by the atmosphere in order to close the energy budget 

@@ -199,7 +199,7 @@ PABS_LW(:) = XUNDEF
 !
 !* snow reservoir before evolution
 !
-ZWSNOW(:) = TPSNOW%WSNOW(:,1,1)
+ZWSNOW(:) = TPSNOW%WSNOW(:,1)
 ZTS_SNOW(:) = MIN(XTT,PTG(:))
 !
 ZSNOW_D (:) = 0.
@@ -254,7 +254,7 @@ DO JJ=1,SIZE(ZWSNOW)
   IF (ZWSNOW(JJ)>0.) THEN
     GSNOWMASK(JJ)=.TRUE.
     !* surface temperature
-    ZTS_SNOW(JJ) = TPSNOW%TS(JJ,1)
+    ZTS_SNOW(JJ) = TPSNOW%TS(JJ)
     GFLUXMASK(JJ)=.TRUE.
     !gsnowmask=t
     JCOMPT_SNOW1=JCOMPT_SNOW1+1
@@ -269,10 +269,10 @@ DO JJ=1,SIZE(ZWSNOW)
     ELSE
       !lower limit of snow cover for prognostic computations
       !0.1 kg/m2 of snow water content
-      TPSNOW%T(JJ,1,1) = MIN(PTG(JJ),XTT)
+      TPSNOW%T(JJ,1) = MIN(PTG(JJ),XTT)
     ENDIF
   ELSE
-    TPSNOW%T(JJ,1,1) = MIN(PTG(JJ),XTT)
+    TPSNOW%T(JJ,1) = MIN(PTG(JJ),XTT)
     !gsnowmask=false
     JCOMPT_SNOW2=JCOMPT_SNOW2+1
     JSNOWMASK2(JCOMPT_SNOW2) = JJ
@@ -318,13 +318,13 @@ DO JJ=1,JCOMPT_SNOW1
   JI = JSNOWMASK1(JJ)
   !
   !*      2.1    snow heat capacity
-  ZSNOW_HC(JI) = TPSNOW%RHO(JI,1,1) * XCI * XRHOLI / XRHOLW
+  ZSNOW_HC(JI) = TPSNOW%RHO(JI,1) * XCI * XRHOLI / XRHOLW
 !*      2.2    snow depth
-  ZSNOW_D(JI) = ZWSNOW(JI) / TPSNOW%RHO(JI,1,1)
+  ZSNOW_D(JI) = ZWSNOW(JI) / TPSNOW%RHO(JI,1)
 !*      2.3    snow thermal conductivity
-  ZSNOW_TC(JI) = XCONDI * (TPSNOW%RHO(JI,1,1)/XRHOLW)**1.885
+  ZSNOW_TC(JI) = XCONDI * (TPSNOW%RHO(JI,1)/XRHOLW)**1.885
 !*      2.4    internal energy of snow
-  ZEI_SNOW(JI) = ZSNOW_HC(JI)*ZSNOW_D(JI)*TPSNOW%T(JI,1,1)
+  ZEI_SNOW(JI) = ZSNOW_HC(JI)*ZSNOW_D(JI)*TPSNOW%T(JI,1)
   !
 ENDDO
 !
@@ -372,17 +372,17 @@ DO JJ=1,JCOMPT_SNOW3
 !*      3.2    coefficients from solar radiation
 !          ---------------------------------
 !    
-  ZY(JI) = ZY(JI) + ZWORK1(JI) * TPSNOW%T(JI,1,1) + PABS_SW(JI)
+  ZY(JI) = ZY(JI) + ZWORK1(JI) * TPSNOW%T(JI,1) + PABS_SW(JI)
 !
 !
 !*      3.3    coefficients from infra-red radiation
 !              -------------------------------------
 !
-  ZWORK1(JI) = PLW2(JI) * TPSNOW%T(JI,1,1)**3
+  ZWORK1(JI) = PLW2(JI) * TPSNOW%T(JI,1)**3
 !
   ZB(JI) = ZB(JI) - 4 * ZIMPL * ZWORK1(JI)
 !
-  ZY(JI) = ZY(JI) + PLW1(JI) + ZWORK1(JI) * (ZEXPL-3.*ZIMPL) * TPSNOW%T(JI,1,1)
+  ZY(JI) = ZY(JI) + PLW1(JI) + ZWORK1(JI) * (ZEXPL-3.*ZIMPL) * TPSNOW%T(JI,1)
 !
 !
 !*      3.4    coefficients from sensible heat flux
@@ -392,7 +392,7 @@ DO JJ=1,JCOMPT_SNOW3
 ! 
   ZB(JI) = ZB(JI) + ZWORK1(JI) *   ZIMPL
 !
-  ZY(JI) = ZY(JI) - ZWORK1(JI) * ( ZEXPL * TPSNOW%T(JI,1,1) - PTA(JI) )
+  ZY(JI) = ZY(JI) - ZWORK1(JI) * ( ZEXPL * TPSNOW%T(JI,1) - PTA(JI) )
 !
 !
 !*      3.6    coefficients from latent heat flux
@@ -402,7 +402,7 @@ DO JJ=1,JCOMPT_SNOW3
 !
   ZB(JI) = ZB(JI) + ZWORK1(JI) *  ZIMPL * ZDQSAT(JI)
 !
-  ZY(JI) = ZY(JI) - ZWORK1(JI) * (  ZQSAT(JI) - PQA(JI) - ZIMPL * ZDQSAT(JI)*TPSNOW%T(JI,1,1) )
+  ZY(JI) = ZY(JI) - ZWORK1(JI) * (  ZQSAT(JI) - PQA(JI) - ZIMPL * ZDQSAT(JI)*TPSNOW%T(JI,1) )
 !
 !*      3.7    coefficients from conduction flux at snow base
 !              ----------------------------------------------
@@ -411,13 +411,13 @@ DO JJ=1,JCOMPT_SNOW3
 !
   ZB(JI) = ZB(JI) + ZWORK1(JI) *  ZIMPL / ( 1. + ZWORK1(JI)*PTG_COEFA(JI) )
 !
-  ZY(JI) = ZY(JI) - ZWORK1(JI) * (ZEXPL * TPSNOW%T(JI,1,1) - PTG_COEFB(JI)) &
+  ZY(JI) = ZY(JI) - ZWORK1(JI) * (ZEXPL * TPSNOW%T(JI,1) - PTG_COEFB(JI)) &
                    / ( 1. + ZWORK1(JI)*PTG_COEFA(JI) )
 !
 !*      3.8    guess of snow temperature before accumulation and melting
 !              ---------------------------------------------------------
 !
-  TPSNOW%T(JI,1,1) = ZY(JI) / ZB(JI)
+  TPSNOW%T(JI,1) = ZY(JI) / ZB(JI)
 !
 ENDDO
 !
@@ -434,11 +434,11 @@ DO JJ=1,JCOMPT_SNOW1
 !
   JI = JSNOWMASK1(JJ)
 !
-  ZMELT(JI)  = MAX( TPSNOW%T(JI,1,1) - XTT , 0. ) * ZSNOW_HC(JI) /  XLMTT / PTSTEP
+  ZMELT(JI)  = MAX( TPSNOW%T(JI,1) - XTT , 0. ) * ZSNOW_HC(JI) /  XLMTT / PTSTEP
 !
   ZMELT(JI)  = MIN( ZMELT(JI) , ZWSNOW(JI) / ZSNOW_D(JI) / PTSTEP )
 !
-  TPSNOW%T(JI,1,1) = MIN( TPSNOW%T(JI,1,1) , XTT )
+  TPSNOW%T(JI,1) = MIN( TPSNOW%T(JI,1) , XTT )
 !
 ENDDO
 !
@@ -466,7 +466,7 @@ PMELT(:) = ZMELT(:) * ZSNOW_D(:)
 !*      5.3    qsat (Tsnow)
 !              ------------
 !
-ZQSATI = QSATI(TPSNOW%T(:,1,1),PPS(:))
+ZQSATI = QSATI(TPSNOW%T(:,1),PPS(:))
 WHERE (GFLUXMASK(:)) 
    ZQSAT(:) = ZQSATI(:)
 END WHERE
@@ -479,7 +479,7 @@ DO JJ = 1, JCOMPT_FLUX
 !
   JI = JFLUXMASK(JJ)
 !
-  PABS_LW(JI) =  PLW1(JI) + PLW2(JI) * TPSNOW%T(JI,1,1)**4
+  PABS_LW(JI) =  PLW1(JI) + PLW2(JI) * TPSNOW%T(JI,1)**4
 !
   PRNSNOW(JI) = PABS_SW(JI) + PABS_LW(JI)
 !
@@ -487,7 +487,7 @@ DO JJ = 1, JCOMPT_FLUX
 !*      5.2    sensible heat flux
 !              ------------------
 !
-  PHSNOW(JI) = XCPD * PRHOA(JI) * ZAC(JI) * ( TPSNOW%T(JI,1,1) - PTA(JI) )
+  PHSNOW(JI) = XCPD * PRHOA(JI) * ZAC(JI) * ( TPSNOW%T(JI,1) - PTA(JI) )
 !
 !
 !*      5.4    latent heat flux
@@ -499,8 +499,8 @@ DO JJ = 1, JCOMPT_FLUX
 !*      5.5    Conduction heat flux
 !              --------------------
 !
-  !PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( TPSNOW%T(JI,1,1) - PTG(JI) )
-  PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( TPSNOW%T(JI,1,1) - PTG_COEFB(JI) ) &
+  !PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( TPSNOW%T(JI,1) - PTG(JI) )
+  PGSNOW(JI) = ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI)) * ( TPSNOW%T(JI,1) - PTG_COEFB(JI) ) &
              / ( 1. + ZSNOW_TC(JI)/(0.5*ZSNOW_D(JI))*PTG_COEFA(JI) )
 !
 !
@@ -522,28 +522,28 @@ DO JJ = 1, SIZE(TPSNOW%WSNOW,1)
 !*      6.1    snow fall
 !              ---------
 !
-  TPSNOW%WSNOW(JJ,1,1) = TPSNOW%WSNOW(JJ,1,1) + PTSTEP * PSR(JJ)
+  TPSNOW%WSNOW(JJ,1) = TPSNOW%WSNOW(JJ,1) + PTSTEP * PSR(JJ)
 !
 !
 !*      6.2    sublimation
 !              -----------
 !
-  PLESNOW(JJ) = MIN( PLESNOW(JJ), XLSTT*TPSNOW%WSNOW(JJ,1,1)/PTSTEP )
+  PLESNOW(JJ) = MIN( PLESNOW(JJ), XLSTT*TPSNOW%WSNOW(JJ,1)/PTSTEP )
 !
-  TPSNOW%WSNOW(JJ,1,1)  = MAX( TPSNOW%WSNOW(JJ,1,1) - PTSTEP * PLESNOW(JJ)/XLSTT , 0.)
+  TPSNOW%WSNOW(JJ,1)  = MAX( TPSNOW%WSNOW(JJ,1) - PTSTEP * PLESNOW(JJ)/XLSTT , 0.)
 !
-  IF ( TPSNOW%WSNOW(JJ,1,1)<1.E-8 * PTSTEP ) TPSNOW%WSNOW(JJ,1,1) = 0.
+  IF ( TPSNOW%WSNOW(JJ,1)<1.E-8 * PTSTEP ) TPSNOW%WSNOW(JJ,1) = 0.
 !
 !*      6.3    melting
 !              -------
 !
-  PMELT(JJ) = MIN( PMELT(JJ), TPSNOW%WSNOW(JJ,1,1)/PTSTEP )
+  PMELT(JJ) = MIN( PMELT(JJ), TPSNOW%WSNOW(JJ,1)/PTSTEP )
 !
-  TPSNOW%WSNOW(JJ,1,1)= MAX( TPSNOW%WSNOW(JJ,1,1) - PTSTEP * PMELT(JJ) , 0.)
+  TPSNOW%WSNOW(JJ,1)= MAX( TPSNOW%WSNOW(JJ,1) - PTSTEP * PMELT(JJ) , 0.)
 !
-  IF ( TPSNOW%WSNOW(JJ,1,1)<1.E-8 * PTSTEP ) TPSNOW%WSNOW(JJ,1,1) = 0.
+  IF ( TPSNOW%WSNOW(JJ,1)<1.E-8 * PTSTEP ) TPSNOW%WSNOW(JJ,1) = 0.
 !
-  IF (TPSNOW%WSNOW(JJ,1,1)==0.) PGSNOW(JJ) = MAX ( PGSNOW(JJ), - PMELT(JJ)*XLMTT )
+  IF (TPSNOW%WSNOW(JJ,1)==0.) PGSNOW(JJ) = MAX ( PGSNOW(JJ), - PMELT(JJ)*XLMTT )
 !
 ENDDO
 !
@@ -551,21 +551,21 @@ ENDDO
 !              -----------------------
 !
 IF (PDRAIN_TIME>0.) THEN
-  WHERE ( TPSNOW%WSNOW(:,1,1)>0.)
-    TPSNOW%WSNOW(:,1,1) = TPSNOW%WSNOW(:,1,1) * EXP(-PTSTEP/PDRAIN_TIME/XDAY)
+  WHERE ( TPSNOW%WSNOW(:,1)>0.)
+    TPSNOW%WSNOW(:,1) = TPSNOW%WSNOW(:,1) * EXP(-PTSTEP/PDRAIN_TIME/XDAY)
   END WHERE
 END IF
 !
 !*      6.5    melting of last 1mm of snow depth
 !              ---------------------------------
 !
-WHERE ( TPSNOW%WSNOW(:,1,1)<ZWSNOW_MIN .AND. PMELT(:)>0. .AND. PSR(:)==0. )
-  PMELT(:) = PMELT(:) + TPSNOW%WSNOW(:,1,1) / PTSTEP
-  TPSNOW%WSNOW(:,1,1)=0.
+WHERE ( TPSNOW%WSNOW(:,1)<ZWSNOW_MIN .AND. PMELT(:)>0. .AND. PSR(:)==0. )
+  PMELT(:) = PMELT(:) + TPSNOW%WSNOW(:,1) / PTSTEP
+  TPSNOW%WSNOW(:,1)=0.
 END WHERE
 !
-WHERE ( TPSNOW%WSNOW(:,1,1)<1.E-8 * PTSTEP ) 
-   TPSNOW%WSNOW(:,1,1) = 0.
+WHERE ( TPSNOW%WSNOW(:,1)<1.E-8 * PTSTEP ) 
+   TPSNOW%WSNOW(:,1) = 0.
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -584,11 +584,11 @@ DO JJ=1,JCOMPT_SNOW1
 !
   IF (PMELT(JI) > 0. ) THEN
 !
-    TPSNOW%ALB(JI,1) = (TPSNOW%ALB(JI,1)-PANSMIN)*EXP(-PRHOFOLD*PTSTEP/XDAY) + PANSMIN   &
+    TPSNOW%ALB(JI) = (TPSNOW%ALB(JI)-PANSMIN)*EXP(-PRHOFOLD*PTSTEP/XDAY) + PANSMIN   &
                      + PSR(JI)*PTSTEP/PWCRN*PANSMAX  
 !
   ELSEIF (PMELT(JI)==0.) THEN 
-    TPSNOW%ALB(JI,1) = TPSNOW%ALB(JI,1) - PTODRY*PTSTEP/XDAY  + PSR(JI)*PTSTEP/PWCRN*PANSMAX  
+    TPSNOW%ALB(JI) = TPSNOW%ALB(JI) - PTODRY*PTSTEP/XDAY  + PSR(JI)*PTSTEP/PWCRN*PANSMAX  
 !
   ENDIF
 !
@@ -607,12 +607,12 @@ DO JJ = 1, JCOMPT_SNOW1
 ! 
   JI = JSNOWMASK1(JJ)
 !
-  IF (TPSNOW%WSNOW(JI,1,1)>0. ) THEN
+  IF (TPSNOW%WSNOW(JI,1)>0. ) THEN
 !
-    ZSR1(JI) = MAX( TPSNOW%WSNOW(JI,1,1) , PSR(JI) * PTSTEP )
+    ZSR1(JI) = MAX( TPSNOW%WSNOW(JI,1) , PSR(JI) * PTSTEP )
 !
-    TPSNOW%RHO(JI,1,1) = (TPSNOW%RHO(JI,1,1)-PRHOSMAX)*EXP(-PRHOFOLD*PTSTEP/XDAY) + PRHOSMAX
-    TPSNOW%RHO(JI,1,1) = ( (ZSR1(JI)-PSR(JI)*PTSTEP) * TPSNOW%RHO(JI,1,1)    &
+    TPSNOW%RHO(JI,1) = (TPSNOW%RHO(JI,1)-PRHOSMAX)*EXP(-PRHOFOLD*PTSTEP/XDAY) + PRHOSMAX
+    TPSNOW%RHO(JI,1) = ( (ZSR1(JI)-PSR(JI)*PTSTEP) * TPSNOW%RHO(JI,1)    &
                   + (PSR(JI)*PTSTEP) * PRHOSMIN ) / ZSR1(JI)  
   ENDIF
 !
@@ -623,13 +623,13 @@ ENDDO
 !
 !cdir nodep
 DO JJ=1,SIZE(TPSNOW%WSNOW,1)
-  IF (  TPSNOW%WSNOW(JJ,1,1)>0. ) THEN
-    TPSNOW%ALB(JJ,1) = MAX(TPSNOW%ALB(JJ,1),PANSMIN)
-    TPSNOW%ALB(JJ,1) = MIN(TPSNOW%ALB(JJ,1),PANSMAX)
+  IF (  TPSNOW%WSNOW(JJ,1)>0. ) THEN
+    TPSNOW%ALB(JJ) = MAX(TPSNOW%ALB(JJ),PANSMIN)
+    TPSNOW%ALB(JJ) = MIN(TPSNOW%ALB(JJ),PANSMAX)
     IF (ZWSNOW(JJ)==0.) THEN
-      TPSNOW%ALB  (JJ,1) = PANSMAX
-      TPSNOW%EMIS (JJ,1) = XEMISSN
-      TPSNOW%RHO(JJ,1,1) = PRHOSMIN
+      TPSNOW%ALB  (JJ) = PANSMAX
+      TPSNOW%EMIS (JJ) = XEMISSN
+      TPSNOW%RHO(JJ,1) = PRHOSMIN
     ENDIF
   ENDIF
     ENDDO
@@ -644,12 +644,12 @@ DO JJ=1,JCOMPT_SNOW3
 !
   JI = JSNOWMASK3(JJ)
 !
-  IF (PSR(JI)>0. .AND. TPSNOW%WSNOW(JI,1,1)>0.) THEN
+  IF (PSR(JI)>0. .AND. TPSNOW%WSNOW(JI,1)>0.) THEN
 !
-    ZSR2(JI) = MIN( TPSNOW%WSNOW(JI,1,1) , PSR(JI) * PTSTEP )
+    ZSR2(JI) = MIN( TPSNOW%WSNOW(JI,1) , PSR(JI) * PTSTEP )
 !
-    TPSNOW%T(JI,1,1) =( ( TPSNOW%WSNOW(JI,1,1) - ZSR2(JI) ) *  TPSNOW%T(JI,1,1)        &
-              +   ZSR2(JI)  * MIN( PTA   (JI) ,XTT )) / ( TPSNOW%WSNOW(JI,1,1) )  
+    TPSNOW%T(JI,1) =( ( TPSNOW%WSNOW(JI,1) - ZSR2(JI) ) *  TPSNOW%T(JI,1)        &
+              +   ZSR2(JI)  * MIN( PTA   (JI) ,XTT )) / ( TPSNOW%WSNOW(JI,1) )  
   ENDIF
 !
 ENDDO
@@ -664,7 +664,7 @@ ENDDO
 !  subroutine init_snow_lw.f90
 !
 WHERE (GSNOWMASK(:) )
-  TPSNOW%TS(:,1) = TPSNOW%T(:,1,1)
+  TPSNOW%TS(:) = TPSNOW%T(:,1)
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -675,12 +675,12 @@ END WHERE
 !*     11.1    snow characteristics where snow IS present at current time-step
 !              ---------------------------------------------------------------
 !
-WHERE (TPSNOW%WSNOW(:,1,1)==0.)
-  TPSNOW%T(:,1,1)   = XUNDEF
-  TPSNOW%RHO(:,1,1) = XUNDEF
-  TPSNOW%ALB(:,1)   = XUNDEF
-  TPSNOW%TS(:,1)    = XUNDEF
-  TPSNOW%EMIS(:,1)  = XUNDEF
+WHERE (TPSNOW%WSNOW(:,1)==0.)
+  TPSNOW%T(:,1)   = XUNDEF
+  TPSNOW%RHO(:,1) = XUNDEF
+  TPSNOW%ALB(:)   = XUNDEF
+  TPSNOW%TS(:)    = XUNDEF
+  TPSNOW%EMIS(:)  = XUNDEF
 END WHERE
 !
 !
@@ -689,7 +689,7 @@ END WHERE
 !*     12.     Heat storage inside snow pack
 !
 WHERE (GSNOWMASK(:))
-  ZPEI_SNOW(:) = ZSNOW_HC(:)*ZSNOW_D(:)*TPSNOW%T(:,1,1)
+  ZPEI_SNOW(:) = ZSNOW_HC(:)*ZSNOW_D(:)*TPSNOW%T(:,1)
 ELSEWHERE
   ZPEI_SNOW(:) = 0.
 END WHERE

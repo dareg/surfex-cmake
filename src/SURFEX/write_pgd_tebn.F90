@@ -78,9 +78,8 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_TEB_n(HSELECT, TM%TOP, TM%BOP, TM%TG, TM%BDD, TM%DTB, TM%DTT, &
-                          GDM%TV%O, GDM%TV%P, GDM%DTI, GDM%TIR, &
-                          GRM%TV%O, GRM%TV%P, GRM%DTI, HPROGRAM)
+ CALL WRITESURF_PGD_TEB_n(HSELECT, TM%TOP, TM%BOP, TM%G, TM%BDD, TM%DTB, TM%DTT, &
+                          GDM, GRM, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

@@ -89,7 +89,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 CPROGNAME = HPROGRAM
 !
- CALL FLAG_UPDATE(YSC%IM%DGI%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
+ CALL FLAG_UPDATE(YSC%IM%ID%O, YSC%DUO, .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !*       1.     Configuration and cover fields:
 !               ------------------------------
@@ -157,22 +157,22 @@ ENDIF
 !               ---
 !
 IF (YSC%U%NDIM_SEA>0) CALL WRITE_PGD_SEA_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U,  &
-                                YSC%SM%DTS, YSC%SM%SG, YSC%SM%S, HPROGRAM)
+                                YSC%SM%DTS, YSC%SM%G, YSC%SM%S, HPROGRAM)
 !
 !
 !*       3.     Inland water
 !               ------------
 !
 IF (YSC%U%NDIM_WATER>0) CALL WRITE_PGD_INLAND_WATER_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, &
-                                                      YSC%WM%WG, YSC%WM%W, YSC%FM%FG, YSC%FM%F, &
+                                                      YSC%WM%G, YSC%WM%W, YSC%FM%G, YSC%FM%F, &
                                                       HPROGRAM)
 !
 !
 !*       4.     Vegetation scheme
 !               -----------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%IM%DTI, &
-                                                 YSC%DTZ, YSC%IM%IG, YSC%IM%ISS, YSC%IM%I, HPROGRAM)
+IF (YSC%U%NDIM_NATURE>0) CALL WRITE_PGD_NATURE_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U,  &
+                                                 YSC%DTZ, YSC%IM, HPROGRAM)
 !
 !
 !*       5.     Urban scheme

@@ -1,7 +1,7 @@
 !     #########
-    SUBROUTINE VEGETATION_UPDATE (DTCO, DTI, KDIM, IO, IMT, IMM, IMI, IMA, &
+    SUBROUTINE VEGETATION_UPDATE (DTCO, DTI, KDIM, IO, KK, PK, PEK, KPATCH,  &
                                   PTSTEP,TTIME,PCOVER,OCOVER,       &
-                                  OAGRIP, HSFTYPE, OALB, MSS,       &
+                                  OAGRIP, HSFTYPE, OALB, ISSK,       &
                                   ODUPDATED, OABSENT              )
 !   ###############################################################
 !!****  *VEGETATION EVOL*
@@ -44,22 +44,18 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_TIME_t, ISBA_PARAM_MEB_t, &
-                              ISBA_PARAM_ALB_t, ISBA_PARAM_IRRIG_t
-!
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
+USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODD_TYPE_DATE_SURF
 !
 USE MODI_INIT_ISBA_MIXPAR
-USE MODI_CONVERT_PATCH_ISBA
-USE MODI_INIT_FROM_DATA_GRDN_n
-USE MODI_INIT_FROM_DATA_GREENROOF_n
+USE MODI_CONVERT_PATCH_ISBA_1P
+USE MODI_INIT_FROM_DATA_TEB_VEG_1P_n
 USE MODI_SUBSCALE_Z0EFF
 USE MODI_ALBEDO
 USE MODI_UPDATE_DATA_COVER
@@ -78,11 +74,11 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 INTEGER, INTENT(IN) :: KDIM
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_PARAM_MEB_t), INTENT(INOUT) :: IMM
-TYPE(ISBA_PARAM_ALB_t), INTENT(INOUT) :: IMA
-TYPE(ISBA_PARAM_IRRIG_t), INTENT(INOUT) :: IMI
+INTEGER, INTENT(IN) :: KPATCH
 !
 REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
@@ -93,14 +89,14 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 LOGICAL, INTENT(IN) :: OALB
 !
-TYPE(SSO_t), INTENT(INOUT) :: MSS
+TYPE(SSO_t), INTENT(INOUT) :: ISSK
 !
 LOGICAL,              INTENT(OUT)   :: ODUPDATED  ! T if parameters are being reset
 LOGICAL,DIMENSION(:), INTENT(IN), OPTIONAL :: OABSENT ! T where field is not defined
 !
 !*      0.2    declarations of local variables
 !
-INTEGER                                  :: IDECADE, IDECADE2  ! decade of simulation
+INTEGER :: IDECADE, IDECADE2, JI, ISNOWPATCH  ! decade of simulation
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
@@ -120,30 +116,32 @@ ODUPDATED=.FALSE.
 !              --------------
 !
 !* new decade?
-  IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
-    ODUPDATED=.TRUE.
+IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
+  ODUPDATED=.TRUE.
 !* time varying parameters
-    IF (IO%LECOCLIMAP .OR. HSFTYPE=='NAT') THEN
+  IF (IO%LECOCLIMAP .OR. HSFTYPE=='NAT') THEN
 !* new year ? --> recomputes data LAI and derivated parameters (usefull in case of ecoclimap2)
-      CALL UPDATE_DATA_COVER(DTCO, DTI, KDIM, IO%NPATCH, IO%LMEB_PATCH, TTIME%TDATE%YEAR)  
-      IF (HSFTYPE=='NAT') THEN
-        CALL INIT_ISBA_MIXPAR(DTCO, DTI, KDIM, IO, IDECADE,IDECADE2,PCOVER,OCOVER,HSFTYPE)
-        CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, IDECADE, IDECADE2, PCOVER, OCOVER,&
-                              OAGRIP, HSFTYPE, OALB, IMT=IMT, IMM=IMM, IMI=IMI   )
+    IF (KPATCH==1) CALL UPDATE_DATA_COVER(DTCO, DTI, KDIM, IO%NPATCH, IO%LMEB_PATCH, TTIME%TDATE%YEAR)  
+    IF (HSFTYPE=='NAT') THEN
+      IF (KPATCH==1) CALL INIT_ISBA_MIXPAR(DTCO, DTI, KDIM, IO, IDECADE,IDECADE2,PCOVER,OCOVER,HSFTYPE)
+        CALL CONVERT_PATCH_ISBA_1P(DTCO, DTI, IO, IDECADE, IDECADE2, PCOVER, OCOVER,&
+                         OAGRIP, HSFTYPE, KPATCH, KK, PK, PEK, &
+                         .FALSE., .TRUE., .TRUE., .TRUE., .FALSE., OALB)
       ELSE
-        CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, IDECADE, IDECADE2, PCOVER, OCOVER,&
-                              OAGRIP, HSFTYPE, OALB, IMT=IMT   )
+        CALL CONVERT_PATCH_ISBA_1P(DTCO, DTI, IO, IDECADE, IDECADE2, PCOVER, OCOVER,&
+                         OAGRIP, HSFTYPE, KPATCH, KK, PK, PEK, &
+                         .FALSE., .TRUE., .FALSE., .FALSE., .FALSE., OALB)
       ENDIF
       IF ( IO%CALBEDO=='CM13') THEN
-        CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, IDECADE, IDECADE2, PCOVER, OCOVER,&
-                                OAGRIP,HSFTYPE, .FALSE., IMA=IMA )
+        CALL CONVERT_PATCH_ISBA_1P(DTCO, DTI, IO, IDECADE, IDECADE2, PCOVER, OCOVER,&
+                         OAGRIP, HSFTYPE, KPATCH, KK, PK, PEK, &
+                         .FALSE., .FALSE., .FALSE., .FALSE., .TRUE., .FALSE.)
       ENDIF
     ELSEIF (.NOT.OALB) THEN
 
-      IF (HSFTYPE=='GRD') THEN
-        CALL INIT_FROM_DATA_GRDN_n(DTI, IDECADE, IO%CPHOTO, .TRUE.,  VMT=IMT  )  
-      ELSEIF (HSFTYPE=='GNR') THEN
-        CALL INIT_FROM_DATA_GREENROOF_n(DTI,  IDECADE,IO%CPHOTO, .TRUE.,  VMT=IMT )
+      IF (HSFTYPE=='GRD'.OR.HSFTYPE=='GNR') THEN
+        CALL INIT_FROM_DATA_TEB_VEG_1P_n(DTI, KK, PK, PEK, &
+                  IDECADE, IO%CPHOTO, .FALSE., .FALSE., .TRUE., .FALSE. )
       ENDIF
 
     ENDIF
@@ -151,35 +149,35 @@ ODUPDATED=.FALSE.
 !* default values to avoid problems in physical routines
 !  for points where there is no vegetation or soil to be simulated by ISBA.
     IF (PRESENT(OABSENT) .AND. .NOT.OALB) THEN
-        WHERE (OABSENT(:))
-          IMT%XVEG       (:,1) = 0.
-          IMT%XLAI       (:,1) = 0.
-          IMT%XRSMIN     (:,1) = 40.
-          IMT%XGAMMA     (:,1) = 0.
-          IMT%XWRMAX_CF  (:,1) = 0.2
-          IMT%XRGL       (:,1) = 100.
-          IMT%XCV        (:,1) = 2.E-5
-          IMT%XZ0        (:,1) = 0.013
-          IMT%XALBNIR_VEG(:,1) = 0.30
-          IMT%XALBVIS_VEG(:,1) = 0.30
-          IMT%XALBUV_VEG (:,1) = 0.06
-          IMT%XEMIS      (:,1) = 0.94                
+       WHERE (OABSENT(:))
+          PEK%XVEG       (:) = 0.
+          PEK%XLAI       (:) = 0.
+          PEK%XRSMIN     (:) = 40.
+          PEK%XGAMMA     (:) = 0.
+          PEK%XWRMAX_CF  (:) = 0.2
+          PEK%XRGL       (:) = 100.
+          PEK%XCV        (:) = 2.E-5
+          PEK%XZ0        (:) = 0.013
+          PEK%XALBNIR_VEG(:) = 0.30
+          PEK%XALBVIS_VEG(:) = 0.30
+          PEK%XALBUV_VEG (:) = 0.06
+          PEK%XEMIS      (:) = 0.94                
         END WHERE
         IF (IO%CPHOTO/='NON') THEN
           WHERE (OABSENT(:))
-            IMT%XGMES      (:,1) = 0.020
-            IMT%XBSLAI     (:,1) = 0.36
-            IMT%XLAIMIN    (:,1) = 0.3
-            IMT%XSEFOLD    (:,1) = 90*86400.
-            IMT%XGC        (:,1) = 0.00025                  
+            PEK%XGMES      (:) = 0.020
+            PEK%XBSLAI     (:) = 0.36
+            PEK%XLAIMIN    (:) = 0.3
+            PEK%XSEFOLD    (:) = 90*86400.
+            PEK%XGC        (:) = 0.00025                  
           END WHERE
           IF (IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='LAI') THEN
-            WHERE (OABSENT(:)) IMT%XF2I       (:,1) = 0.3
+            WHERE (OABSENT(:)) PEK%XF2I       (:) = 0.3
             IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
               WHERE (OABSENT(:))
-                IMT%XCE_NITRO  (:,1) = 7.68
-                IMT%XCF_NITRO  (:,1) = -4.33
-                IMT%XCNA_NITRO (:,1) = 1.3                      
+                PEK%XCE_NITRO  (:) = 7.68
+                PEK%XCF_NITRO  (:) = -4.33
+                PEK%XCNA_NITRO (:) = 1.3                      
               END WHERE
             ENDIF
           ENDIF
@@ -188,10 +186,13 @@ ODUPDATED=.FALSE.
 
     IF (HSFTYPE=='NAT') THEN
 !* albedo
-      CALL ALBEDO(IO%CALBEDO, IMT,IMA )  
+      CALL ALBEDO(IO%CALBEDO, PEK )
 !
 !* effective roughness length
-      IF (.NOT.OALB) CALL SUBSCALE_Z0EFF(MSS,IMT%XZ0,.FALSE.  )  
+      IF (.NOT.OALB) THEN
+        CALL SUBSCALE_Z0EFF(ISSK,PEK%XZ0,.FALSE.  )  
+      ENDIF
+
     ENDIF
 
   END IF

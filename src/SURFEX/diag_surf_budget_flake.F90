@@ -1,5 +1,5 @@
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGET_FLAKE (DGF, PRHOA, PSFTH, PDIR_SW, PSCA_SW, PLW,  &
+       SUBROUTINE DIAG_SURF_BUDGET_FLAKE (D, PRHOA, PSFTH, PDIR_SW, PSCA_SW, PLW,  &
                                           PDIR_ALB, PSCA_ALB, PLWUP, PSFZON, PSFMER  )  
 !     ###############################################################################
 !
@@ -33,7 +33,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 REAL, DIMENSION(:), INTENT(IN) :: PRHOA     ! air density
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH     ! heat flux
@@ -62,39 +62,39 @@ ISWB = SIZE(PDIR_SW,2)
 !* total incoming and outgoing SW
 !
 DO JSWB=1,ISWB
-  DGF%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
-  DGF%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
+  D%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
+  D%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
 ENDDO
 !
-DGF%XSWD(:) = 0.
-DGF%XSWU(:) = 0.
+D%XSWD(:) = 0.
+D%XSWU(:) = 0.
 DO JSWB=1,ISWB
-   DGF%XSWD(:)=DGF%XSWD(:)+DGF%XSWBD(:,JSWB)
-   DGF%XSWU(:)=DGF%XSWU(:)+DGF%XSWBU(:,JSWB)
+   D%XSWD(:)=D%XSWD(:)+D%XSWBD(:,JSWB)
+   D%XSWU(:)=D%XSWU(:)+D%XSWBU(:,JSWB)
 ENDDO
 !
 !*incoming outgoing LW
 !
-DGF%XLWD(:)=PLW  (:)
-DGF%XLWU(:)=PLWUP(:)
+D%XLWD(:)=PLW  (:)
+D%XLWU(:)=PLWUP(:)
 !
 !* net radiation
 !
-DGF%XRN    =   DGF%XSWD(:) - DGF%XSWU(:) + DGF%XLWD(:) - DGF%XLWU(:)
+D%XRN    =   D%XSWD(:) - D%XSWU(:) + D%XLWD(:) - D%XLWU(:)
 !
 !* sensible heat flux
 !
-DGF%XH     = PSFTH(:)
+D%XH     = PSFTH(:)
 !
 !* storage flux
 !
-DGF%XGFLUX = DGF%XRN - DGF%XH - DGF%XLE
+D%XGFLUX = D%XRN - D%XH - D%XLE
 !
 !* wind stress
 !
-DGF%XFMU = PSFZON
+D%XFMU = PSFZON
 !
-DGF%XFMV = PSFMER
+D%XFMV = PSFMER
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_FLAKE',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

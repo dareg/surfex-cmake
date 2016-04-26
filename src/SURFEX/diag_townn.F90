@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_TOWN_n (DLO, DGL, DGLC, DTO, DGT, U, HPROGRAM, DGUP, DGUPC, KMASK )
+SUBROUTINE DIAG_TOWN_n (DLO, DL, DLC, DTO, DT, U, HPROGRAM, DUP, DUPC, KMASK )
 !     ######################################################################
 !
 !!****  *DIAG_TOWN_n * - Chooses the surface schemes for town diagnostics
@@ -44,22 +44,22 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DTO
-TYPE(DIAG_t), INTENT(INOUT) :: DGT
+TYPE(DIAG_t), INTENT(INOUT) :: DT
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
-TYPE(DIAG_t), INTENT(INOUT) :: DGUP
-TYPE(DIAG_t), INTENT(INOUT) :: DGUPC
+TYPE(DIAG_t), INTENT(INOUT) :: DUP
+TYPE(DIAG_t), INTENT(INOUT) :: DUPC
 !
 INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(DGUP%XRN)) :: ZDELTA
+REAL, DIMENSION(SIZE(DUP%XRN)) :: ZDELTA
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
 IF (U%CTOWN=='TEB   ') THEN
 
-  CALL DIAG(DTO, DGT, HPROGRAM, DGUP, KMASK)
+  CALL DIAG(DTO, DT, HPROGRAM, DUP, KMASK)
 !
 !!!!! important, diagd should be computed in teb !!!!!!
 !
@@ -77,26 +77,30 @@ IF (U%CTOWN=='TEB   ') THEN
 ! and SUBL (sublimation kg/m2/s) must by implemented in TEB as well as theirs cumulative values
 ! Not good if LCPL_ARP = TRUE in ISBA (ALARO)
 !
-  IF (SIZE(DGUP%XLEI)>0) THEN
-    DGUP%XLEI (:) = XUNDEF
-    DGUP%XEVAP(:) = XUNDEF
-    DGUP%XSUBL(:) = XUNDEF
-    WHERE(DGUP%XLE(:)/=XUNDEF)
-      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-DGUP%XTS(:)))
-      DGUP%XEVAP (:) = (DGUP%XLE(:) * ZDELTA(:))/XLSTT + (DGUP%XLE(:) * (1.0-ZDELTA(:)))/XLVTT
-      DGUP%XLEI  (:) = DGUP%XLE(:) * ZDELTA(:)
-      DGUP%XSUBL (:) = DGUP%XLEI(:)/XLSTT
+  IF (SIZE(DUP%XLEI)>0) THEN
+    DUP%XLEI (:) = XUNDEF
+    DUP%XEVAP(:) = XUNDEF
+    DUP%XSUBL(:) = XUNDEF
+    WHERE(DUP%XLE(:)/=XUNDEF)
+      ZDELTA(:) = MAX(0.0,SIGN(1.0,XTT-DUP%XTS(:)))
+      DUP%XEVAP (:) = (DUP%XLE(:) * ZDELTA(:))/XLSTT + (DUP%XLE(:) * (1.0-ZDELTA(:)))/XLVTT
+      DUP%XLEI  (:) = DUP%XLE(:) * ZDELTA(:)
+      DUP%XSUBL (:) = DUP%XLEI(:)/XLSTT
     ENDWHERE
   ENDIF
 !
-  IF (DTO%LSURF_BUDGETC) CALL INIT_SURF_BUD(DGUPC,XUNDEF)
+  IF (DTO%LSURF_BUDGETC) THEN
+    CALL INIT_SURF_BUD(DUPC,XUNDEF)
+    DUPC%XEVAP = XUNDEF
+    DUPC%XSUBL = XUNDEF
+  ENDIF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
 ELSE IF (U%CTOWN=='FLUX  ') THEN
-  CALL DIAG_EVAP(DLO, DGL, DGLC, HPROGRAM, DGUP, DGUPC, KMASK)          
+  CALL DIAG_EVAP(DLO, DL, DLC, HPROGRAM, DUP, DUPC, KMASK)          
 ELSE IF (U%CTOWN=='NONE  ') THEN
-  CALL INIT_BUD(DTO,DGUP,DGUPC,XUNDEF)         
+  CALL INIT_BUD(DTO,DUP,DUPC,XUNDEF)         
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',1,ZHOOK_HANDLE)
 !

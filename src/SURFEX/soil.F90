@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE SOIL( IO, HSNOW_ISBA, IP, INI, IR, DGMI, PVEG, PCV, PCS, PFROZEN1,    &
-                       PFFG_NOSNOW, PFFV_NOSNOW               )  
+      SUBROUTINE SOIL( IO, KK, PK, PEK, DMI, PVEG, PCS, PFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW               )  
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -52,7 +51,7 @@
 !!                                          option to explicitly compute CG
 !!                  25/05/08     (Decharme) Added flood properties 
 !!                  22/06/10     (Chauvin)  XWGMIN added as a limit value of ZWG2              
-!!                                          Modification of the formula for DGMI%XWGEQ                                      
+!!                                          Modification of the formula for DMI%XWGEQ                                      
 !!                                          to solve numerical problem
 !!                     10/10     (Decharme) The previous computation of WGEQ as ( 1.-ZX(JJ)**(IP%XPCOEF(JJ)*8.) )
 !!                                          can introduced some model explosions for heavy clay soil
@@ -63,8 +62,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_CSTS,       ONLY : XPI, XCI, XRHOLI, XDAY, XCL, XRHOLW, XCONDI
@@ -81,20 +79,12 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-!
-CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
-!                                               !         (Douville et al. 1995)
-!                                               ! '3-L' = 3-L snow scheme (option)
-!                                               !         (Boone and Etchevers 2000)
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PVEG
-REAL, DIMENSION(:), INTENT(IN)    :: PCV
-!                                      Soil and vegetation parameters
-!                                      PCV = the heat capacity of the vegetation
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PCS, PFROZEN1
 !                                      soil and snow coefficients
@@ -113,12 +103,12 @@ REAL, DIMENSION(SIZE(PVEG))   :: ZLAMS,                         &
                                   ZLYMY1, ZZA, ZZB, ZDELTA,   &
                                   ZA, ZB,                          &
 !                                              temporary variables for the 
-!                                              calculation of DGMI%XC1 in the case
+!                                              calculation of DMI%XC1 in the case
 !                                              where PWG < PWWILT (i.e., dry soils)
 !
                                   ZX,                              &
 !                                              temporary variable for the 
-!                                              calculation of DGMI%XWGEQ
+!                                              calculation of DMI%XWGEQ
                                   ZWSAT,                           &
 !                                              Wsat when ice is present in ground 
                                   ZWSAT1,                          &
@@ -189,17 +179,17 @@ PCS(:)       = XUNDEF
 !               ---------------------------------
 !
 PFROZEN1(:) = 0.
-WHERE (IR%XWGI(:,1,1) + IR%XWG(:,1,1) .NE. 0.) 
-  PFROZEN1(:) = IR%XWGI(:,1,1) / (IR%XWGI(:,1,1) + IR%XWG(:,1,1))
+WHERE (PEK%XWGI(:,1) + PEK%XWG(:,1) .NE. 0.) 
+  PFROZEN1(:) = PEK%XWGI(:,1) / (PEK%XWGI(:,1) + PEK%XWG(:,1))
 END WHERE
 !
-DO JJ=1,SIZE(IP%XWSAT,1)
+DO JJ=1,SIZE(KK%XWSAT,1)
 !
-  ZWSAT(JJ)    = MAX(IP%XWSAT(JJ,1) - IR%XWGI(JJ,2,1),XWGMIN)
+  ZWSAT(JJ)    = MAX(KK%XWSAT(JJ,1) - PEK%XWGI(JJ,2),XWGMIN)
 !
-  ZWSAT1(JJ)   = MAX(IP%XWSAT(JJ,1) - IR%XWGI(JJ,1,1),XWGMIN)
+  ZWSAT1(JJ)   = MAX(KK%XWSAT(JJ,1) - PEK%XWGI(JJ,1),XWGMIN)
 !
-  ZWWILT(JJ)   = IP%XWWILT(JJ,1) * (ZWSAT1(JJ) / IP%XWSAT(JJ,1))
+  ZWWILT(JJ)   = KK%XWWILT(JJ,1) * (ZWSAT1(JJ) / KK%XWSAT(JJ,1))
 !
 ENDDO
 !-------------------------------------------------------------------------------
@@ -223,9 +213,8 @@ IF(IO%CSCOND == 'NP89')THEN
 ! Now calculate the thermal inertia of the soil weighted
 ! by soil ice content (including the soil ice thermal inertia):
 !
-  DGMI%XCG(:) = (1.-IR%XWGI(:,2,1)) * IP%XCGSAT(:) * ( ZWSAT(:)/IR%XWG(:,2,1) )     &
-                                            **( 0.5*IP%XBCOEF(:,1)/LOG(10.) )       &
-              +  IR%XWGI(:,2,1)  * 2. * SQRT(XPI/(XCONDI*XCI*XRHOLI*XDAY))  
+  DMI%XCG(:) = (1.-PEK%XWGI(:,2)) * KK%XCGSAT(:) * ( ZWSAT(:)/PEK%XWG(:,2) ) **( 0.5*KK%XBCOEF(:,1)/LOG(10.) )  &
+              +  PEK%XWGI(:,2)  * 2. * SQRT(XPI/(XCONDI*XCI*XRHOLI*XDAY))  
 !
 !
 ELSE
@@ -238,25 +227,24 @@ ELSE
 !                                      method of McCumber and Pielke (1981)
 !                                      with parameters of Clapp and Hornberger (1978).
 !
-  DO JJ=1,SIZE(IR%XWG,1)
+  DO JJ=1,SIZE(PEK%XWG,1)
 !
 ! Total fraction of soil frozen:
 !
-    ZFROZEN2(JJ)   = IR%XWGI(JJ,2,1)/(IR%XWGI(JJ,2,1) + IR%XWG(JJ,2,1))
+    ZFROZEN2(JJ)   = PEK%XWGI(JJ,2)/(PEK%XWGI(JJ,2) + PEK%XWG(JJ,2))
 !
 ! Unfrozen fraction:
 !
-    ZUNFROZEN2(JJ) = (1.0-ZFROZEN2(JJ))*IP%XWSAT(JJ,1)
+    ZUNFROZEN2(JJ) = (1.0-ZFROZEN2(JJ))*KK%XWSAT(JJ,1)
 !
 ! Saturated thermal conductivity:
 !
-    ZCONDSAT(JJ)   = (IP%XCONDSLD(JJ,1)**(1.0-IP%XWSAT(JJ,1)))*             &
-                      (XCONDI**(IP%XWSAT(JJ,1)-ZUNFROZEN2(JJ)))*         &
+    ZCONDSAT(JJ)   = (KK%XCONDSLD(JJ,1)**(1.0-KK%XWSAT(JJ,1)))* (XCONDI**(KK%XWSAT(JJ,1)-ZUNFROZEN2(JJ)))*   &
                       (XCONDWTR**ZUNFROZEN2(JJ))  
 !
 ! Degree of saturation of soil:
 !
-    ZSATDEG(JJ)   = MAX(0.1, (IR%XWGI(JJ,2,1)+IR%XWG(JJ,2,1))/IP%XWSAT(JJ,1))
+    ZSATDEG(JJ)   = MAX(0.1, (PEK%XWGI(JJ,2)+PEK%XWG(JJ,2))/KK%XWSAT(JJ,1))
 !
 ! Kersten number:
 !
@@ -271,17 +259,17 @@ ELSE
 !
 ! Thermal conductivity of soil:
 !
-    ZCOND(JJ)     = ZKERSTEN(JJ)*(ZCONDSAT(JJ)-IP%XCONDDRY(JJ,1)) + IP%XCONDDRY(JJ,1)
+    ZCOND(JJ)     = ZKERSTEN(JJ)*(ZCONDSAT(JJ)-KK%XCONDDRY(JJ,1)) + KK%XCONDDRY(JJ,1)
 !
 ! Heat capacity of soil:
 !
-    ZHCAP(JJ)     = (1.0-IP%XWSAT(JJ,1)) * IP%XHCAPSOIL(JJ,1) +     &
-                         IR%XWG (JJ,2,1) * XCL * XRHOLW   +     &
-                         IR%XWGI(JJ,2,1) * XCI * XRHOLI       
+    ZHCAP(JJ)     = (1.0-KK%XWSAT(JJ,1)) * KK%XHCAPSOIL(JJ,1) +     &
+                         PEK%XWG (JJ,2) * XCL * XRHOLW   +     &
+                         PEK%XWGI(JJ,2) * XCI * XRHOLI       
 !
 ! Explicit CG calculation:
 !
-    DGMI%XCG(JJ)       = 2.*SQRT(XPI/ZCOND(JJ)/ZHCAP(JJ)/XDAY)
+    DMI%XCG(JJ)       = 2.*SQRT(XPI/ZCOND(JJ)/ZHCAP(JJ)/XDAY)
 !
   ENDDO
 !
@@ -289,23 +277,23 @@ ENDIF
 !
 !                                              Cg must be smaller than 2.E-5
 !
-DGMI%XCG(:) = MIN( DGMI%XCG(:), IO%XCGMAX )
+DMI%XCG(:) = MIN( DMI%XCG(:), IO%XCGMAX )
 !
 !-------------------------------------------------------------------------------
 !
 !*       4.     THE HEAT CAPACITY OF THE SNOW AND FLOOD
 !               ---------------------------------------
 !
-WHERE (INI%XFF(:,1) > 0.)                                                 
+WHERE (KK%XFF(:) > 0.)                                                 
        ZCF(:) = 2.0 * SQRT( XPI/(XCONDWTR*XRHOLW*XCL*XDAY) )
 END WHERE  
 !
-IF(HSNOW_ISBA == 'D95' .OR. (HSNOW_ISBA == 'EBA' .AND. IO%LGLACIER) )THEN
+IF(PEK%TSNOW%SCHEME == 'D95' .OR. (PEK%TSNOW%SCHEME == 'EBA' .AND. IO%LGLACIER) )THEN
 !
-   WHERE (IR%XPSN(:,1) > 0.)
-      ZLAMS(:) = XCONDI * (IR%TSNOW%RHO(:,1,1)/XRHOLW)**1.885              ! first calculate the
+   WHERE (PEK%XPSN(:) > 0.)
+      ZLAMS(:) = XCONDI * (PEK%TSNOW%RHO(:,1)/XRHOLW)**1.885              ! first calculate the
 !                                                                   ! conductivity of snow
-      PCS(:)   = 2.0 * SQRT( XPI/(ZLAMS(:)*IR%TSNOW%RHO(:,1,1)*XCI*XDAY) )
+      PCS(:)   = 2.0 * SQRT( XPI/(ZLAMS(:)*PEK%TSNOW%RHO(:,1)*XCI*XDAY) )
    END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -316,10 +304,10 @@ IF(HSNOW_ISBA == 'D95' .OR. (HSNOW_ISBA == 'EBA' .AND. IO%LGLACIER) )THEN
 ! With contribution from the ground, vegetation, flood and snow areas
 ! for composite (Force-Restore) snow scheme option:
 !
-   DGMI%XCT(:) = 1. / ( (1.-PVEG(:))*(1.-IR%XPSNG(:,1)-INI%XFFG(:,1)) / DGMI%XCG(:)     &
-                      +  PVEG(:) *(1.-IR%XPSNV(:,1)-INI%XFFV(:,1)) / PCV(:)     &
-                      +                INI%XFF(:,1)          / ZCF(:)     &
-                      +                IR%XPSN(:,1)          / PCS(:)     )  
+   DMI%XCT(:) = 1. / ( (1.-PVEG(:))*(1.-PEK%XPSNG(:)-KK%XFFG(:)) / DMI%XCG(:)     &
+                      +  PVEG(:)   *(1.-PEK%XPSNV(:)-KK%XFFV(:)) / PEK%XCV(:)     &
+                      +                KK%XFF(:)                 / ZCF(:)     &
+                      +                PEK%XPSN(:)               / PCS(:)     )  
 
 !
 ELSE
@@ -331,9 +319,9 @@ ELSE
 ! With contribution from the ground and vegetation for explicit
 ! (ISBA-ES) snow scheme option:
 !
-     DGMI%XCT(JJ) = 1. / ( (1.-PVEG(JJ))*(1.-PFFG_NOSNOW(JJ)) / DGMI%XCG(JJ)     &
-                      +  PVEG(JJ) *(1.-PFFV_NOSNOW(JJ)) / PCV(JJ)     &
-                      +  ZFF (JJ)                      / ZCF(JJ)     )  
+     DMI%XCT(JJ) = 1. / ( (1.-PVEG(JJ))*(1.-PFFG_NOSNOW(JJ)) / DMI%XCG(JJ)     &
+                      +  PVEG(JJ)      *(1.-PFFV_NOSNOW(JJ)) / PEK%XCV(JJ)     &
+                      +  ZFF (JJ)                            / ZCF(JJ)     )  
   ENDDO
 !
 ENDIF
@@ -346,19 +334,19 @@ ENDIF
 !                                      Scale the C1SAT coefficient as a function 
 !                                      of the soil ice content
 !
-ZC1SAT(:) = IP%XC1SAT(:,1)*SQRT(ZWSAT1(:)/IP%XWSAT(:,1))
+ZC1SAT(:) = PK%XC1SAT(:)*SQRT(ZWSAT1(:)/KK%XWSAT(:,1))
 !
 !
 !                                      The coefficient C1 is calculated two
 !                                      different ways depending on the humidity
 !                                      of the soil
 !
-WHERE (IR%XWG(:,1,1) > ZWWILT(:))
+WHERE (PEK%XWG(:,1) > ZWWILT(:))
 !                                    ! First situation:  humid soil
 !                                      Then the calculation follows eq. (19)
 !                                      of Noilhan and Planton(1989)
 !
-   DGMI%XC1(:)    = ZC1SAT(:) * ( ZWSAT1(:)/IR%XWG(:,1,1) )**( 0.5*IP%XBCOEF(:,1) + 1 )
+   DMI%XC1(:)    = ZC1SAT(:) * ( ZWSAT1(:)/PEK%XWG(:,1) )**( 0.5*KK%XBCOEF(:,1) + 1 )
 !
 END WHERE
 !
@@ -376,9 +364,9 @@ END WHERE
 !
 IF(IO%CC1DRY=='GB93')THEN
 !
-  DO JJ=1,SIZE(IR%XWG,1)
+  DO JJ=1,SIZE(PEK%XWG,1)
 !  
-    IF (IR%XWG(JJ,1,1) <= ZWWILT(JJ)) THEN
+    IF (PEK%XWG(JJ,1) <= ZWWILT(JJ)) THEN
 !
 !                                   ! Second situation: dry soil
 !                                      We use the Gaussian formulation of
@@ -386,19 +374,16 @@ IF(IO%CC1DRY=='GB93')THEN
 !
 !* maximum of C1 curve (computed with true Wwilt)
 !
-       ZCW1MAX(JJ)    = ( 1.19*ZWWILT(JJ)-5.09 )*IR%XTG(JJ,1,1)  + (-146.4*ZWWILT(JJ)+1786.)
+       ZCW1MAX(JJ)    = ( 1.19*ZWWILT(JJ)-5.09 )*PEK%XTG(JJ,1)  + (-146.4*ZWWILT(JJ)+1786.)
 !
 !* Giordanni (1993) and Braud et al. (1993)
 !
-       ZA(JJ)         =   (-1.815E-2*IR%XTG(JJ,1,1)+6.41)*ZWWILT(JJ)            &
-                          + (6.5E-3*IR%XTG(JJ,1,1)-1.4)  
+       ZA(JJ)         =   (-1.815E-2*PEK%XTG(JJ,1)+6.41)*ZWWILT(JJ) + (6.5E-3*PEK%XTG(JJ,1)-1.4)  
        ZB(JJ)         = ZA(JJ)*ZWWILT(JJ)
-       ZDELTA(JJ)     = ( ZB(JJ)*ZB(JJ) )  /                               &
-                         ( 2.*LOG( ZCW1MAX(JJ) ) )  
+       ZDELTA(JJ)     = ( ZB(JJ)*ZB(JJ) )  / ( 2.*LOG( ZCW1MAX(JJ) ) )  
 !
-       DGMI%XC1(JJ) = ZCW1MAX(JJ)*(1. - 2.*PVEG(JJ)*( 1.-PVEG(JJ) ))             &
-                  *EXP( -(IR%XWG(JJ,1,1)-ZB(JJ))*(IR%XWG(JJ,1,1)-ZB(JJ)) /              &
-                  (2.*ZDELTA(JJ)) )  
+       DMI%XC1(JJ) = ZCW1MAX(JJ)*(1. - 2.*PVEG(JJ)*( 1.-PVEG(JJ) ))             &
+                  *EXP( -(PEK%XWG(JJ,1)-ZB(JJ))*(PEK%XWG(JJ,1)-ZB(JJ)) / (2.*ZDELTA(JJ)) )  
 !
     ENDIF
 !
@@ -406,13 +391,13 @@ IF(IO%CC1DRY=='GB93')THEN
 !
 ELSE
 !
-  DO JJ=1,SIZE(IR%XWG,1)
+  DO JJ=1,SIZE(PEK%XWG,1)
 !
-    IF (IR%XWG(JJ,1,1) <= ZWWILT(JJ)) THEN
+    IF (PEK%XWG(JJ,1) <= ZWWILT(JJ)) THEN
 !
 !* maximum of C1 curve (computed with true Wwilt)
 !
-       ZCW1MAX(JJ)    = ( 1.19*ZWWILT(JJ)-5.09 )*IR%XTG(JJ,1,1)  + (-146.4*ZWWILT(JJ)+1786.)
+       ZCW1MAX(JJ)    = ( 1.19*ZWWILT(JJ)-5.09 )*PEK%XTG(JJ,1)  + (-146.4*ZWWILT(JJ)+1786.)
 !
 !* C1 value at Wg = zero
 !
@@ -421,7 +406,7 @@ ELSE
 !* C1 value at Wg = wwilt
 !
        ZX2(JJ) = ZWWILT(JJ)
-       ZY2(JJ) = ZC1SAT(JJ)*(ZWSAT1(JJ)/ZWWILT(JJ))**( 0.5*IP%XBCOEF(JJ,1) + 1)
+       ZY2(JJ) = ZC1SAT(JJ)*(ZWSAT1(JJ)/ZWWILT(JJ))**( 0.5*KK%XBCOEF(JJ,1) + 1)
 !
 !* correction of maximum of C1 curve for frozen soils
 !
@@ -439,7 +424,7 @@ ELSE
        ZB    (JJ) = ZA(JJ)**2 / ZLYMY1(JJ)
 !
 !
-       DGMI%XC1(JJ) = ZCW1MAX(JJ) * EXP( - (IR%XWG(JJ,1,1)-ZA(JJ))**2 / ZB(JJ) )
+       DMI%XC1(JJ) = ZCW1MAX(JJ) * EXP( - (PEK%XWG(JJ,1)-ZA(JJ))**2 / ZB(JJ) )
 !
     ENDIF
 !
@@ -456,14 +441,14 @@ IF(IO%CKSAT=='SGH' .OR. IO%CKSAT=='EXP')THEN
 !
 ! Adjusted root-zone soil water content
 !
-  DO JJ=1,SIZE(IR%XWG,1)
-     ZWG2(JJ)=IR%XWG(JJ,2,1)*(IP%XCONDSAT(JJ,2,1)/IP%XCONDSAT(JJ,1,1))**(1./(2.*IP%XBCOEF(JJ,1)+3))
+  DO JJ=1,SIZE(PEK%XWG,1)
+     ZWG2(JJ)=PEK%XWG(JJ,2)*(PK%XCONDSAT(JJ,2)/PK%XCONDSAT(JJ,1))**(1./(2.*KK%XBCOEF(JJ,1)+3))
   ENDDO
   ZWG2(:)=MAX(ZWG2(:),XWGMIN)
 !
 ELSE
 !
-   ZWG2(:)=IR%XWG(:,2,1)
+   ZWG2(:)=PEK%XWG(:,2)
 !
 ENDIF
 !
@@ -471,8 +456,8 @@ DO JJ=1,SIZE(ZWSAT)
 !
 !Including vertical diffusion limiting factor for surface soil ice:
 !
-  DGMI%XC2(JJ) = (IP%XC2REF(JJ,1)*ZWG2(JJ) / ( ZWSAT(JJ)-ZWG2(JJ) + 0.01 ))           &
-              *(1.0-(IR%XWGI(JJ,1,1)/(IP%XWSAT(JJ,1)-XWGMIN)))  
+  DMI%XC2(JJ) = (PK%XC2REF(JJ)*ZWG2(JJ) / ( ZWSAT(JJ)-ZWG2(JJ) + 0.01 ))           &
+              *(1.0-(PEK%XWGI(JJ,1)/(KK%XWSAT(JJ,1)-XWGMIN)))  
 !
 !-------------------------------------------------------------------------------
 !
@@ -481,9 +466,8 @@ DO JJ=1,SIZE(ZWSAT)
 !
   ZX(JJ) = ZWG2(JJ)/ZWSAT(JJ)
 !
-  DGMI%XWGEQ(JJ) = ZWG2(JJ) - ZWSAT(JJ)*IP%XACOEF(JJ)                      & 
-                               *     ZX(JJ)** IP%XPCOEF(JJ)           &
-                               *( 1.-EXP(IP%XPCOEF(JJ)*8.*LOG(ZX(JJ))))  
+  DMI%XWGEQ(JJ) = ZWG2(JJ) - ZWSAT(JJ)*KK%XACOEF(JJ) *  ZX(JJ)**KK%XPCOEF(JJ)           &
+                               *( 1.-EXP(KK%XPCOEF(JJ)*8.*LOG(ZX(JJ))))  
 !
 ENDDO
 !-------------------------------------------------------------------------------
@@ -492,7 +476,7 @@ ENDDO
 !               -----------------------------
 !
 IF (LPHYSDOMC) THEN
-   DGMI%XCT(:) = 9.427757E-6   ! corresponds to a density of 350kg/m3 for snow
+   DMI%XCT(:) = 9.427757E-6   ! corresponds to a density of 350kg/m3 for snow
 ENDIF        
 IF (LHOOK) CALL DR_HOOK('SOIL',1,ZHOOK_HANDLE)
 !

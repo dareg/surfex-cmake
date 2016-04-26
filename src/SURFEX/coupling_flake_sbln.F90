@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_FLAKE_SBL_n (FSB, CHF, DFO, DGF, DGFC, DGMF, F, DST, SLT, &
+SUBROUTINE COUPLING_FLAKE_SBL_n (SB, CHF, DGO, D, DC, DMF, F, DST, SLT, &
                                  HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME,             &
                                  KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PU, PV, &
                                  PQA, PTA, PRHOA, PSV, PCO2, HSV,PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, &
@@ -65,12 +65,12 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: FSB
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(CH_FLAKE_t), INTENT(INOUT) :: CHF
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DFO
-TYPE(DIAG_t), INTENT(INOUT) :: DGF
-TYPE(DIAG_t), INTENT(INOUT) :: DGFC
-TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DGMF
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_t), INTENT(INOUT) :: DC
+TYPE(DIAG_MISC_FLAKE_t), INTENT(INOUT) :: DMF
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 TYPE(DST_t), INTENT(INOUT) :: DST
@@ -165,20 +165,20 @@ REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
 REAL, DIMENSION(KI)        :: ZSFLUX_U  ! Surface flux u'w' (m2/s2)
 REAL, DIMENSION(KI)        :: ZSFLUX_T  ! Surface flux w'T' (mK/s)
 REAL, DIMENSION(KI)        :: ZSFLUX_Q  ! Surface flux w'q' (kgm2/s)
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZDFORC_UDU! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_U   ! tendency due to drag force for wind
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_UDU! formal derivative of
 !                                              ! tendency due to drag force for wind
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZDFORC_EDE! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_E   ! tendency due to drag force for TKE
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_EDE! formal derivative of
 !                                              ! tendency due to drag force for TKE
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZDFORC_TDT! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_T   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_TDT! formal derivative of
 !                                              ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZDFORC_QDQ! formal derivative of
+REAL, DIMENSION(KI,SB%NLVL)   :: ZFORC_Q   ! tendency due to drag force for Temp
+REAL, DIMENSION(KI,SB%NLVL)   :: ZDFORC_QDQ! formal derivative of
 !                                              ! tendency due to drag force for hum.
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZLM       ! mixing length
-REAL, DIMENSION(KI,FSB%NLVL)   :: ZLEPS     ! dissipative length
+REAL, DIMENSION(KI,SB%NLVL)   :: ZLM       ! mixing length
+REAL, DIMENSION(KI,SB%NLVL)   :: ZLEPS     ! dissipative length
 REAL, DIMENSION(KI)     :: ZH           ! canopy height (m)
 REAL, DIMENSION(KI)     :: ZUSTAR       ! friction velocity (m/s)
 !
@@ -212,15 +212,15 @@ IF (F%LSBL) THEN
 !* determines where is the forcing level and modifies the upper levels of the canopy grid
 !
   ZH = 0.
-  CALL CANOPY_GRID_UPDATE(KI,ZH,PUREF,FSB)
+  CALL CANOPY_GRID_UPDATE(KI,ZH,PUREF,SB)
 !
 !
 !
 !*     1.2     Initialisation at first time step
 !              ---------------------------------
 !
-  IF(ANY(FSB%XT(:,:) == XUNDEF)) THEN
-    CALL INIT_WATER_SBL(FSB, PPA, PPS, PTA, PQA, PRHOA, PU, PV, PRAIN, PSNOW,  &
+  IF(ANY(SB%XT(:,:) == XUNDEF)) THEN
+    CALL INIT_WATER_SBL(SB, PPA, PPS, PTA, PQA, PRHOA, PU, PV, PRAIN, PSNOW,  &
                         PSFTH, PSFTQ, PZREF, PUREF, F%XTS, F%XZ0)
   ENDIF
 !
@@ -239,7 +239,7 @@ IF (F%LSBL) THEN
 !             ---------------------------------------
 !
   ZWIND = SQRT(PU**2+PV**2)
-  CALL CANOPY_EVOL(FSB,KI,PTSTEP,1,FSB%XZ,ZWIND,PTA,PQA,PPA,PRHOA,   &
+  CALL CANOPY_EVOL(SB,KI,PTSTEP,1,SB%XZ,ZWIND,PTA,PQA,PPA,PRHOA,   &
                    ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,ZFORC_U,ZDFORC_UDU,    &
                    ZFORC_E,ZDFORC_EDE,ZFORC_T,ZDFORC_TDT,            &
                    ZFORC_Q,ZDFORC_QDQ,ZLM,ZLEPS,ZUSTAR,              &
@@ -251,7 +251,7 @@ IF (F%LSBL) THEN
 !
   GCOUPLING = 'E'
 !
-  CALL INIT_COUPLING_CANOPY(FSB, PPA, PU, PV,                &
+  CALL INIT_COUPLING_CANOPY(SB, PPA, PU, PV,                &
                            PRHOA, ZALFAU, ZBETAU, ZALFATH,   &
                            ZBETATH, ZALFAQ, ZBETAQ,          &
                            ZPA, ZTA, ZQA, ZU, ZV,            &
@@ -288,7 +288,7 @@ END IF
 !*      2.     Call of SEAFLUX
 !              ------------
 !
-  CALL COUPLING_FLAKE_n(CHF, DFO, DGF, DGFC, DGMF, F, DST, SLT, &
+  CALL COUPLING_FLAKE_n(CHF, DGO, D, DC, DMF, F, DST, SLT, &
                         HPROGRAM, GCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME,     &
                         KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, ZZREF, ZUREF, &
                         ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,  &
@@ -323,14 +323,14 @@ ZSFLUX_Q(:) = PSFTQ(:)
 !             --------------------------------------------
 !
 ZWIND = SQRT(PU**2+PV**2)
- CALL CANOPY_EVOL(FSB, KI, PTSTEP, 2,FSB%XZ,ZWIND,PTA,PQA,PPA,PRHOA,   &
+ CALL CANOPY_EVOL(SB, KI, PTSTEP, 2,SB%XZ,ZWIND,PTA,PQA,PPA,PRHOA,   &
                   ZSFLUX_U,ZSFLUX_T,ZSFLUX_Q,ZFORC_U,ZDFORC_UDU,       &
                   ZFORC_E,ZDFORC_EDE,ZFORC_T,ZDFORC_TDT,               &
                   ZFORC_Q,ZDFORC_QDQ,ZLM,ZLEPS,ZUSTAR,                 &
                   ZALFAU,ZBETAU,ZALFATH,ZBETATH,ZALFAQ,ZBETAQ      )
 !
-DO JLAYER = 1,FSB%NLVL-1
-  FSB%XLMO(:,JLAYER) = FSB%XLMO(:,FSB%NLVL)
+DO JLAYER = 1,SB%NLVL-1
+  SB%XLMO(:,JLAYER) = SB%XLMO(:,SB%NLVL)
 ENDDO
 !
 !-------------------------------------------------------------------------------------
@@ -339,7 +339,7 @@ ENDDO
 !             ----------------------------------------
 !
 !
-IF (F%LSBL .AND. DFO%N2M>=1) CALL INIT_2M_10M( FSB, DGF, PU, PV, ZWIND, PRHOA )
+IF (F%LSBL .AND. DGO%N2M>=1) CALL INIT_2M_10M( SB, D, PU, PV, ZWIND, PRHOA )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_FLAKE_SBL_N',1,ZHOOK_HANDLE)
 !

@@ -1,10 +1,10 @@
 !     ###########################################################################
-SUBROUTINE SSO_BELJAARS04 (USS, CP, KI, PSSO_STDEV, PFORC_U, PDFORC_UDU)
+SUBROUTINE SSO_BELJAARS04 (USS, SB, KI, PSSO_STDEV, PFORC_U, PDFORC_UDU)
 !     ###############################################################################
 !
 !!****  *SSO_BELJAARS04_n * - prepares forcing for canopy air model
 !!
-!!    CP%XURPOSE
+!!    SB%XURPOSE
 !!    -------
 !
 !!**  METHOD
@@ -34,13 +34,13 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(SSO_t), INTENT(INOUT) :: USS
-TYPE(CANOPY_t), INTENT(INOUT) :: CP
+TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 INTEGER,                  INTENT(IN)    :: KI        ! number of points
 REAL, DIMENSION(KI),      INTENT(IN)    :: PSSO_STDEV! Subgrid scale orography standard dev. (m)
 !
-REAL, DIMENSION(KI,CP%NLVL), INTENT(INOUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
-REAL, DIMENSION(KI,CP%NLVL), INTENT(INOUT)   :: PDFORC_UDU! formal derivative of the tendency of
+REAL, DIMENSION(KI,SB%NLVL), INTENT(INOUT)   :: PFORC_U   ! tendency of wind due to canopy drag   (m/s2)
+REAL, DIMENSION(KI,SB%NLVL), INTENT(INOUT)   :: PDFORC_UDU! formal derivative of the tendency of
 !                                                    ! wind due to canopy drag               (1/s)
 !
 !*      0.2    declarations of local variables
@@ -61,7 +61,7 @@ REAL            :: C_AVAR                 ! = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT
 !                                         ! (unit: m^{1+C_N2}  =  m^-1.8)
 !
 INTEGER                  :: JL            ! loop counter on canopy heights
-REAL, DIMENSION(KI,CP%NLVL) :: ZSSO_DRAG     ! drag due to subgrid-scale orogaphy
+REAL, DIMENSION(KI,SB%NLVL) :: ZSSO_DRAG     ! drag due to subgrid-scale orogaphy
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -80,9 +80,9 @@ C_AVAR    = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT**C_N1)   ! (unit: m^{1+C_N2}  =  
 ! unit : m-1    (m^-1.8 . m ^2 . m^-1.2) 
 !
 ZSSO_DRAG = 0.
-DO JL=1,CP%NLVL
+DO JL=1,SB%NLVL
   ZSSO_DRAG(:,JL) = USS%XCOEFBE * C_ALPHA * C_BETA * C_COR * C_CMD * 2.109 * &
-         EXP( -(CP%XZ(:,JL)/1500.)**1.5) * C_AVAR * PSSO_STDEV(:)**2 * CP%XZ(:,JL)**(-1.2)
+         EXP( -(SB%XZ(:,JL)/1500.)**1.5) * C_AVAR * PSSO_STDEV(:)**2 * SB%XZ(:,JL)**(-1.2)
 END DO
 !
 !
@@ -91,9 +91,9 @@ END DO
 !
 ! Ext = - Cdrag(z)  * u- * u-       (unit :  m s-2)   subscale orgraphy drag
 !
-PFORC_U(:,:)    = PFORC_U(:,:)    -       ZSSO_DRAG (:,:) * CP%XU(:,:)**2
+PFORC_U(:,:)    = PFORC_U(:,:)    -       ZSSO_DRAG (:,:) * SB%XU(:,:)**2
 !
-PDFORC_UDU(:,:) = PDFORC_UDU(:,:) -  2. * ZSSO_DRAG (:,:) * CP%XU(:,:)
+PDFORC_UDU(:,:) = PDFORC_UDU(:,:) -  2. * ZSSO_DRAG (:,:) * SB%XU(:,:)
 !
 IF (LHOOK) CALL DR_HOOK('SSO_BELJAARS04',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

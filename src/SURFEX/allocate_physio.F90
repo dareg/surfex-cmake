@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE ALLOCATE_PHYSIO (IO, IM, KLU, KVEGTYPE )
+    SUBROUTINE ALLOCATE_PHYSIO (IO, KK, PK, PEK, KVEGTYPE )
 !   ##########################################################################
 !
 !!****  *ALLOCATE_PHYSIO* - 
@@ -32,7 +32,7 @@
 !
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -47,11 +47,13 @@ IMPLICIT NONE
 !
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_t), INTENT(INOUT) :: IM
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
-INTEGER, INTENT(IN) :: KLU
 INTEGER, INTENT(IN) :: KVEGTYPE
 !
+INTEGER :: ISIZE
 INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
 !
@@ -63,120 +65,120 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_PHYSIO',0,ZHOOK_HANDLE)
 !
+ISIZE = PK%NSIZE_P
+!
 ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 !
-ALLOCATE(IM%X%XVEGTYPE                (KLU,KVEGTYPE            ))
+ALLOCATE(PK%XDG                     (ISIZE,IO%NGROUND_LAYER)) 
+ALLOCATE(PK%XD_ICE                  (ISIZE              )) 
 !
-ALLOCATE(IM%X%XDG                     (KLU,IO%NGROUND_LAYER,IO%NPATCH)) 
-ALLOCATE(IM%X%XD_ICE                  (KLU,IO%NPATCH              )) 
+ALLOCATE(PEK%XLAI                    (ISIZE              )) 
+ALLOCATE(PEK%XVEG                    (ISIZE              )) 
+ALLOCATE(PEK%XZ0                     (ISIZE              )) 
+ALLOCATE(PEK%XEMIS                   (ISIZE              )) 
 !
-ALLOCATE(IM%T%XLAI                    (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XVEG                    (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XZ0                     (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XEMIS                   (KLU,IO%NPATCH              )) 
+ALLOCATE(PEK%XRSMIN                  (ISIZE              )) 
+ALLOCATE(PEK%XGAMMA                  (ISIZE              )) 
+ALLOCATE(PEK%XWRMAX_CF               (ISIZE              )) 
+ALLOCATE(PEK%XRGL                    (ISIZE              )) 
+ALLOCATE(PEK%XCV                     (ISIZE              )) 
+ALLOCATE(PEK%XALBNIR_VEG             (ISIZE              )) 
+ALLOCATE(PEK%XALBVIS_VEG             (ISIZE              )) 
+ALLOCATE(PEK%XALBUV_VEG              (ISIZE              )) 
 !
-ALLOCATE(IM%T%XRSMIN                  (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XGAMMA                  (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XWRMAX_CF               (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XRGL                    (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XCV                     (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XALBNIR_VEG             (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XALBVIS_VEG             (KLU,IO%NPATCH              )) 
-ALLOCATE(IM%T%XALBUV_VEG              (KLU,IO%NPATCH              )) 
-!
-ALLOCATE(IM%X%XZ0_O_Z0H               (KLU,IO%NPATCH              )) 
+ALLOCATE(PK%XZ0_O_Z0H               (ISIZE              )) 
 !
 IF (ISIZE_LMEB_PATCH>0 .OR. IO%CPHOTO/='NON') THEN
-  ALLOCATE(IM%T%XBSLAI                  (KLU,IO%NPATCH              )) 
+  ALLOCATE(PEK%XBSLAI                  (ISIZE              )) 
 ELSE
-  ALLOCATE(IM%T%XBSLAI     (0,0))  
+  ALLOCATE(PEK%XBSLAI     (0))  
 ENDIF
 ! - vegetation: Ags parameters ('AGS', 'LAI', 'AST', 'LST', 'NIT' options)
 !
 IF (IO%CPHOTO/='NON'.OR.LTREEDRAG) THEN
-  ALLOCATE(IM%X%XH_TREE                 (KLU,IO%NPATCH              ))
+  ALLOCATE(PK%XH_TREE                 (ISIZE              ))
 ELSE
-  ALLOCATE(IM%X%XH_TREE                 (0,0                     ))
+  ALLOCATE(PK%XH_TREE                 (0                 ))
 ENDIF
 !
 IF (IO%CPHOTO/='NON') THEN
-  ALLOCATE(IM%X%XRE25                   (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%X%XDMAX                   (KLU,IO%NPATCH              ))  
-  ALLOCATE(IM%T%XLAIMIN                 (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%T%XSEFOLD                 (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%T%XGMES                   (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%T%XGC                     (KLU,IO%NPATCH              )) 
+  ALLOCATE(PK%XRE25                   (ISIZE              )) 
+  ALLOCATE(PK%XDMAX                   (ISIZE              ))  
+  ALLOCATE(PEK%XLAIMIN                 (ISIZE              )) 
+  ALLOCATE(PEK%XSEFOLD                 (ISIZE              )) 
+  ALLOCATE(PEK%XGMES                   (ISIZE              )) 
+  ALLOCATE(PEK%XGC                     (ISIZE              )) 
   IF (IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='LAI') THEN
-    ALLOCATE(IM%T%XF2I                    (KLU,IO%NPATCH              ))
-    ALLOCATE(IM%T%LSTRESS                 (KLU,IO%NPATCH              )) 
+    ALLOCATE(PEK%XF2I                    (ISIZE              ))
+    ALLOCATE(PEK%LSTRESS                 (ISIZE              )) 
     IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
-      ALLOCATE(IM%T%XCE_NITRO               (KLU,IO%NPATCH              )) 
-      ALLOCATE(IM%T%XCF_NITRO               (KLU,IO%NPATCH              )) 
-      ALLOCATE(IM%T%XCNA_NITRO              (KLU,IO%NPATCH              ))  
+      ALLOCATE(PEK%XCE_NITRO               (ISIZE              )) 
+      ALLOCATE(PEK%XCF_NITRO               (ISIZE              )) 
+      ALLOCATE(PEK%XCNA_NITRO              (ISIZE              ))  
     ELSE
-      ALLOCATE(IM%T%XCE_NITRO    (0,0))
-      ALLOCATE(IM%T%XCF_NITRO    (0,0))
-      ALLOCATE(IM%T%XCNA_NITRO   (0,0))
+      ALLOCATE(PEK%XCE_NITRO    (0))
+      ALLOCATE(PEK%XCF_NITRO    (0))
+      ALLOCATE(PEK%XCNA_NITRO   (0))
  
     ENDIF
   ELSE
-    ALLOCATE(IM%T%XF2I   (0,0))
-    ALLOCATE(IM%T%LSTRESS(0,0))
-    ALLOCATE(IM%T%XCE_NITRO    (0,0))
-    ALLOCATE(IM%T%XCF_NITRO    (0,0))
-    ALLOCATE(IM%T%XCNA_NITRO   (0,0))
+    ALLOCATE(PEK%XF2I   (0))
+    ALLOCATE(PEK%LSTRESS(0))
+    ALLOCATE(PEK%XCE_NITRO    (0))
+    ALLOCATE(PEK%XCF_NITRO    (0))
+    ALLOCATE(PEK%XCNA_NITRO   (0))
   ENDIF
 ELSE
-  ALLOCATE(IM%X%XRE25      (0,0))
-  ALLOCATE(IM%X%XDMAX      (0,0))  
-  ALLOCATE(IM%T%XLAIMIN    (0,0))
-  ALLOCATE(IM%T%XSEFOLD    (0,0))  
-  ALLOCATE(IM%T%XGMES      (0,0))
-  ALLOCATE(IM%T%XGC        (0,0))
-  ALLOCATE(IM%T%XF2I   (0,0))
-  ALLOCATE(IM%T%LSTRESS(0,0))
-  ALLOCATE(IM%T%XCE_NITRO    (0,0))
-  ALLOCATE(IM%T%XCF_NITRO    (0,0))
-  ALLOCATE(IM%T%XCNA_NITRO   (0,0))
+  ALLOCATE(PK%XRE25      (0))
+  ALLOCATE(PK%XDMAX      (0))  
+  ALLOCATE(PEK%XLAIMIN    (0))
+  ALLOCATE(PEK%XSEFOLD    (0))  
+  ALLOCATE(PEK%XGMES      (0))
+  ALLOCATE(PEK%XGC        (0))
+  ALLOCATE(PEK%XF2I   (0))
+  ALLOCATE(PEK%LSTRESS(0))
+  ALLOCATE(PEK%XCE_NITRO    (0))
+  ALLOCATE(PEK%XCF_NITRO    (0))
+  ALLOCATE(PEK%XCNA_NITRO   (0))
 ENDIF  
 !
 ! - Irrigation, seeding and reaping
 !
 IF (LAGRIP .AND. (IO%CPHOTO == 'LAI' .OR. IO%CPHOTO == 'LST' .OR. IO%CPHOTO == 'NIT' .OR. IO%CPHOTO == 'NCB'))  THEN
-  ALLOCATE(IM%I%TSEED                  (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%I%TREAP                  (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%I%XWATSUP                 (KLU,IO%NPATCH              )) 
-  ALLOCATE(IM%I%XIRRIG                  (KLU,IO%NPATCH              ))
+  ALLOCATE(PEK%TSEED                  (ISIZE              )) 
+  ALLOCATE(PEK%TREAP                  (ISIZE              )) 
+  ALLOCATE(PEK%XWATSUP                 (ISIZE              )) 
+  ALLOCATE(PEK%XIRRIG                  (ISIZE              ))
 ELSE
-  ALLOCATE(IM%I%TSEED     (0,0))
-  ALLOCATE(IM%I%TREAP     (0,0))
-  ALLOCATE(IM%I%XWATSUP    (0,0))
-  ALLOCATE(IM%I%XIRRIG     (0,0))        
+  ALLOCATE(PEK%TSEED     (0))
+  ALLOCATE(PEK%TREAP     (0))
+  ALLOCATE(PEK%XWATSUP    (0))
+  ALLOCATE(PEK%XIRRIG     (0))        
 ENDIF
 !
 ! - ISBA-DF scheme
 !
 IF(IO%CISBA=='DIF')THEN
-  ALLOCATE(IM%X%XROOTFRAC  (KLU,IO%NGROUND_LAYER,IO%NPATCH))
-  ALLOCATE(IM%X%NWG_LAYER  (KLU,IO%NPATCH))
-  ALLOCATE(IM%X%XDROOT     (KLU,IO%NPATCH))
-  ALLOCATE(IM%X%XDG2       (KLU,IO%NPATCH))
+  ALLOCATE(PK%XROOTFRAC  (ISIZE,IO%NGROUND_LAYER))
+  ALLOCATE(PK%NWG_LAYER  (ISIZE))
+  ALLOCATE(PK%XDROOT     (ISIZE))
+  ALLOCATE(PK%XDG2       (ISIZE))
 ELSE  
-  ALLOCATE(IM%X%XROOTFRAC  (0,0,0))
-  ALLOCATE(IM%X%NWG_LAYER  (0,0)  )
-  ALLOCATE(IM%X%XDROOT     (0,0)  )        
-  ALLOCATE(IM%X%XDG2       (0,0)  )        
+  ALLOCATE(PK%XROOTFRAC  (0,0))
+  ALLOCATE(PK%NWG_LAYER  (0)  )
+  ALLOCATE(PK%XDROOT     (0)  )        
+  ALLOCATE(PK%XDG2       (0)  )        
 ENDIF
 !
-ALLOCATE(IM%M%XGNDLITTER (KLU,IO%NPATCH))
-ALLOCATE(IM%M%XRGLGV     (KLU,IO%NPATCH))
-ALLOCATE(IM%M%XGAMMAGV   (KLU,IO%NPATCH))
-ALLOCATE(IM%M%XRSMINGV   (KLU,IO%NPATCH))
-ALLOCATE(IM%M%XROOTFRACGV(KLU,IO%NGROUND_LAYER,IO%NPATCH))
-ALLOCATE(IM%M%XWRMAX_CFGV(KLU,IO%NPATCH))
-ALLOCATE(IM%M%XLAIGV     (KLU,IO%NPATCH))
-ALLOCATE(IM%M%XZ0LITTER  (KLU,IO%NPATCH))
-ALLOCATE(IM%M%XH_VEG     (KLU,IO%NPATCH))
+ALLOCATE(PEK%XGNDLITTER (ISIZE))
+!ALLOCATE(PEK%XRGLGV     (ISIZE))
+!ALLOCATE(PEK%XGAMMAGV   (ISIZE))
+!ALLOCATE(PEK%XRSMINGV   (ISIZE))
+!ALLOCATE(PEK%XROOTFRACGV(ISIZE,IO%NGROUND_LAYER))
+!ALLOCATE(PEK%XWRMAX_CFGV(ISIZE))
+!ALLOCATE(PEK%XLAIGV     (ISIZE))
+ALLOCATE(PEK%XZ0LITTER  (ISIZE))
+ALLOCATE(PEK%XH_VEG     (ISIZE))
 !
 IF (LHOOK) CALL DR_HOOK('ALLOCATE_PHYSIO',1,ZHOOK_HANDLE)
 !

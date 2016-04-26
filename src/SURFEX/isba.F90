@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE ISBA(IO, IMX, IMT, IMM, IMI, P, IP, INI, IR, G, AG, DGI, DGIP,  &
-                      DGEI, DGEIP, DGMI, HSNOW_ISBA, TPTIME, PPOI, PABC, PIACAN, &
+      SUBROUTINE ISBA(IO, KK, PK, PEK, G, AG, DK, DEK, DMK, TPTIME, PPOI, PABC, PIACAN, &
                       OMEB, PTSTEP, HIMPLICIT_WIND, PZREF, PUREF, PDIRCOSZW,     &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,&
@@ -61,7 +60,7 @@
 !!                            New variables WGI1, WGI2
 !!      (A.Boone)  18/01/00   ISBA-ES (3-layer explicit snow scheme option)
 !!                            (Boone and Etchevers 2000)
-!!                            New variable IR%TSNOW%HEAT(:,:,1)
+!!                            New variable IPEK%TSNOW%HEAT(:,:,1)
 !!      (V. Masson) 01/2004   wet leaves fraction computed in separate routine
 !!                            all vegetation stress (ISBA, AGS, AST) routines
 !!                            called at the same point
@@ -101,11 +100,7 @@
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_PARAM_n, ONLY : ISBA_PARAM_FIX_t, ISBA_PARAM_TIME_t, ISBA_PARAM_MEB_t, &
-                              ISBA_PARAM_IRRIG_t
-USE MODD_ISBA_PGD_n, ONLY : ISBA_PGD_t
-USE MODD_ISBA_INIT_n, ONLY : ISBA_INIT_PGD_t, ISBA_INIT_t
-USE MODD_ISBA_n, ONLY : ISBA_PROG_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_AGRI_n, ONLY : AGRI_t
 USE MODD_DIAG_n, ONLY : DIAG_t
@@ -154,27 +149,15 @@ IMPLICIT NONE
 !  -----------------
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_PARAM_FIX_t), INTENT(INOUT) :: IMX
-TYPE(ISBA_PARAM_TIME_t), INTENT(INOUT) :: IMT
-TYPE(ISBA_PARAM_MEB_t), INTENT(INOUT) :: IMM
-TYPE(ISBA_PARAM_IRRIG_t), INTENT(INOUT) :: IMI
-TYPE(ISBA_PGD_t), INTENT(INOUT) :: P
-TYPE(ISBA_INIT_PGD_t), INTENT(INOUT) :: IP
-TYPE(ISBA_INIT_t), INTENT(INOUT) :: INI
-TYPE(ISBA_PROG_t), INTENT(INOUT) :: IR
+TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(AGRI_t), INTENT(INOUT) :: AG
-TYPE(DIAG_t), INTENT(INOUT) :: DGI
-TYPE(DIAG_t), INTENT(INOUT) :: DGIP
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEIP
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
+TYPE(DIAG_t), INTENT(INOUT) :: DK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
-!                                               !         (Douville et al. 1995)
-!                                               ! '3-L' = 3-L snow scheme (option)
-!                                               !         (Boone and Etchevers 2000)
-!                                               ! 'DEF' = no mulch effect
 TYPE(DATE_TIME), INTENT(IN)       :: TPTIME     ! current date and time
 !
 REAL, DIMENSION(:),    INTENT(IN) :: PPOI       ! Gaussian weights (as above)
@@ -306,56 +289,56 @@ REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZCS       ! heat capacity of the snow
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZFROZEN1  ! ice fraction in superficial soil
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZDELTA    ! fraction of the foliage
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZCS       ! heat capacity of the snow
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZFROZEN1  ! ice fraction in superficial soil
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZDELTA    ! fraction of the foliage
 !                                       ! covered with intercepted
 !                                       ! water
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZQSAT     ! expression for the saturation 
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZQSAT     ! expression for the saturation 
 !                                       ! specific humidity 
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZWRMAX    ! maximum canopy water interception
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZWRMAX    ! maximum canopy water interception
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZF2       ! water stress coefficient
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZF2       ! water stress coefficient
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZF5       ! water stress coefficient (based on F2)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZF5       ! water stress coefficient (based on F2)
 !                                       ! to enforce Etv=>0 as F2=>0
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZHUGI    ! humidity over frozen bare ground
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZHUGI    ! humidity over frozen bare ground
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZEVAPCOR ! evaporation correction as last traces of snow
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZEVAPCOR ! evaporation correction as last traces of snow
 !                                      ! cover ablate
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZLES3L   ! sublimation from ISBA-ES(3L)
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZLEL3L   ! evaporation heat flux of water in the snow (W/m2)
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZEVAP3L  ! evaporation flux over snow from ISBA-ES (kg/m2/s)
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow pack: 
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZLES3L   ! sublimation from ISBA-ES(3L)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZLEL3L   ! evaporation heat flux of water in the snow (W/m2)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZEVAP3L  ! evaporation flux over snow from ISBA-ES (kg/m2/s)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow pack: 
 !                                           ! ISBA-ES [kg/(m2 s)]
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
 !
-REAL, DIMENSION(SIZE(IR%XWR)) :: ZVEG
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZVEG
 !
-REAL, DIMENSION(SIZE(IR%XWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
+REAL, DIMENSION(SIZE(PEK%XWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
 !                                      ! absorbed PAR of each level within the
 !                                      ! canopy - Split into shaded and SUNLIT
-REAL, DIMENSION(SIZE(IR%XWR),SIZE(PABC)) :: ZFRAC_SUN  ! fraction of sunlit leaves
+REAL, DIMENSION(SIZE(PEK%XWR),SIZE(PABC)) :: ZFRAC_SUN  ! fraction of sunlit leaves
 !
 ! ISBA-DF:
 !                                                              
-REAL, DIMENSION(SIZE(IR%XWG,1),SIZE(IR%XWG,2)) :: ZSOILHCAPZ ! ISBA-DF Soil heat capacity 
+REAL, DIMENSION(SIZE(PEK%XWG,1),SIZE(PEK%XWG,2)) :: ZSOILHCAPZ ! ISBA-DF Soil heat capacity 
 !                                                      ! profile [J/(m3 K)]
-REAL, DIMENSION(SIZE(IR%XWG,1),SIZE(IR%XWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
+REAL, DIMENSION(SIZE(PEK%XWG,1),SIZE(PEK%XWG,2)) :: ZSOILCONDZ ! ISBA-DF Soil conductivity  
 !                                                      ! profile  [W/(m K)]
 !
-REAL, DIMENSION(SIZE(IR%XWG,1),SIZE(IR%XWG,2)) :: ZF2WGHT    ! water stress factor
+REAL, DIMENSION(SIZE(PEK%XWG,1),SIZE(PEK%XWG,2)) :: ZF2WGHT    ! water stress factor
 !
-REAL, DIMENSION(SIZE(IR%XWR))               :: ZGRNDFLUX  ! snow/soil-biomass interface flux (W/m2)
-REAL, DIMENSION(SIZE(IR%XWR))               :: ZFLSN_COR  ! snow/soil-biomass correction flux (W/m2)
+REAL, DIMENSION(SIZE(PEK%XWR))               :: ZGRNDFLUX  ! snow/soil-biomass interface flux (W/m2)
+REAL, DIMENSION(SIZE(PEK%XWR))               :: ZFLSN_COR  ! snow/soil-biomass correction flux (W/m2)
 !
 ! MEB:
 !
-REAL, DIMENSION(SIZE(IR%XWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
+REAL, DIMENSION(SIZE(PEK%XWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
 !                                                       (to be potentially removed from soil) when MEB activated (kg/m2/s)
 !
 ! Misc :
@@ -363,26 +346,26 @@ REAL, DIMENSION(SIZE(IR%XWR))               :: ZSUBVCOR   ! A possible snow (int
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
 ! Budget: Add to arguments, diags
 
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELHEATV_SFC  ! Change in heat storage of the explicit vegetation (MEB) layer over the current time step (W m-2)
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELHEATG      ! change in heat storage of the entire soil column over the current time step (W m-2) 
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELHEATG_SFC  ! change in heat storage of the surface soil layer over the current time step (W m-2)
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELPHASEG     ! latent heating due to soil freeze-thaw in the entire soil column            (W m-2) 
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELPHASEG_SFC ! latent heating due to soil freeze-thaw in the surface soil layer            (W m-2) 
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELHEATN      ! change in heat storage of the entire snow column over the current time step (W m-2)
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZDELHEATN_SFC  ! change in heat storage of the surface snow layer over the current time step (W m-2)
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZSNOWSFCH      ! snow surface layer pseudo-heating term owing to
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELHEATV_SFC  ! Change in heat storage of the explicit vegetation (MEB) layer over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELHEATG      ! change in heat storage of the entire soil column over the current time step (W m-2) 
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELHEATG_SFC  ! change in heat storage of the surface soil layer over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELPHASEG     ! latent heating due to soil freeze-thaw in the entire soil column            (W m-2) 
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELPHASEG_SFC ! latent heating due to soil freeze-thaw in the surface soil layer            (W m-2) 
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELHEATN      ! change in heat storage of the entire snow column over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZDELHEATN_SFC  ! change in heat storage of the surface snow layer over the current time step (W m-2)
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZSNOWSFCH      ! snow surface layer pseudo-heating term owing to
 !                                                              !  changes in grid thickness            (W m-2)
-REAL, DIMENSION(SIZE(IR%XWR))                   :: ZGSFCSNOW      ! conductive heat flux between the surface and sub-surface soil layers 
+REAL, DIMENSION(SIZE(PEK%XWR))                   :: ZGSFCSNOW      ! conductive heat flux between the surface and sub-surface soil layers 
 !                                                              ! for the multi-layer snow schemes..for composite snow, it is 
-!                                                              ! equal to DGEIP%XRESTORE (W m-2)
+!                                                              ! equal to DEK%XRESTORE (W m-2)
 !
 !
 ! Necessary to close the energy budget between surfex and the atmosphere:
 !
-REAL, DIMENSION(SIZE(IR%XWR))   :: ZEMIST, ZZHV
-REAL, DIMENSION(SIZE(IR%XWR))   :: ZALBT, ZEV, ZETR, ZER
+REAL, DIMENSION(SIZE(PEK%XWR))   :: ZEMIST, ZZHV
+REAL, DIMENSION(SIZE(PEK%XWR))   :: ZALBT, ZEV, ZETR, ZER
 !
-LOGICAL, DIMENSION(SIZE(IR%XTG,1))  :: GSHADE         ! mask where evolution occurs
+LOGICAL, DIMENSION(SIZE(PEK%XTG,1))  :: GSHADE         ! mask where evolution occurs
 !
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -394,10 +377,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA',0,ZHOOK_HANDLE)
 !
-!print*,'tg1 ',IR%XTG(1,1,1)
-DGMI%XC1(:)          = XUNDEF
-DGMI%XC2(:)          = XUNDEF
-DGMI%XWGEQ(:)        = XUNDEF
+DMK%XC1(:)          = XUNDEF
+DMK%XC2(:)          = XUNDEF
+DMK%XWGEQ(:)        = XUNDEF
 ZCS(:)          = XUNDEF
 !
 ZEMIST      (:) = XUNDEF
@@ -408,11 +390,11 @@ ZSOILHCAPZ(:,:) = XUNDEF
 ZSOILCONDZ(:,:) = XUNDEF
 ZF2WGHT   (:,:) = XUNDEF
 !
-DGMI%XRS    (:)   = 0.0
+DMK%XRS    (:)   = 0.0
 PAC_AGG     (:)   = 0.0
 PHU_AGG     (:)   = 0.0
-DGMI%XSNOWTEMP   (:,:) = XTT
-DGEIP%XMELT       (:)   = 0.0
+DMK%XSNOWTEMP   (:,:) = XTT
+DEK%XMELT       (:)   = 0.0
 !
 !
 !
@@ -433,12 +415,12 @@ ZSUBVCOR(:)     = 0.0
 IF(OMEB)THEN
    ZVEG(:) = 0.0
 ELSE
-   ZVEG(:) = IMT%XVEG(:,1)
+   ZVEG(:) = PEK%XVEG(:)
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
 !
-ZALB3L(:)=IR%TSNOW%ALB(:,1)
+ZALB3L(:)=PEK%TSNOW%ALB(:)
 !
 !-------------------------------------------------------------------------------
 !
@@ -447,33 +429,29 @@ ZALB3L(:)=IR%TSNOW%ALB(:,1)
 !
 IF(IO%CISBA =='2-L' .OR. IO%CISBA == '3-L')THEN
 !
-   CALL SOIL (IO, HSNOW_ISBA, IP, INI, IR, DGMI, ZVEG, IMT%XCV(:,1), &
-              ZCS, ZFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW  )  
+   CALL SOIL (IO, KK, PK, PEK, DMK, ZVEG, ZCS, ZFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW  )  
 !
 ELSE
 !
-   CALL SOILDIF (IO, IP, IMX, IR, DGMI, ZVEG, IMT%XCV(:,1), INI%XPIFLOOD, &
-                 ZFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW, ZSOILCONDZ, ZSOILHCAPZ  )
+   CALL SOILDIF (IO, KK, PK, PEK, DMK, ZVEG, ZFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW, ZSOILCONDZ, ZSOILHCAPZ  )
 !
 ENDIF
 !
-!print*,'tg2 ',IR%XTG(1,1,1)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      3.0    Plant stress due to soil water deficit
 !              --------------------------------------
 !
-CALL SOILSTRESS(IO%CISBA, ZF2, IP, IMX, IR, ZF2WGHT, ZF5 )  
+CALL SOILSTRESS(IO%CISBA, ZF2, KK, PK, PEK, ZF2WGHT, ZF5 )  
 !
-!print*,'tg3 ',IR%XTG(1,1,1)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      4.0    Explicit Canopy Vegetation Option
 !              ---------------------------------
 !
 IF(OMEB)THEN
-   CALL ISBA_MEB(IO, IMX, IMT, IMM, IMI, IP, INI, IR, DGIP, DGEIP, DGMI, G, AG, &
-                 TPTIME, OMEB, GSHADE, HSNOW_ISBA, HIMPLICIT_WIND, PTSTEP, &
+   CALL ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG, &
+                 TPTIME, OMEB, GSHADE, HIMPLICIT_WIND, PTSTEP, &
                  ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1, PPS, PZENITH,      &
                  PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,  &
                  PDIRCOSZW, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF,   &
@@ -495,67 +473,59 @@ ELSE
 !              -------------------
 !
   IF (IO%LTR_ML) THEN
-    CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, IP%XVEGTYPE_PATCH(:,:,1), PALBVIS_TVEG, &
-                             PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, PSW_RAD,       &
-                             IMT%XLAI(:,1), PZENITH, PABC, IR%XFAPARC(:,1),             &
-                             IR%XFAPIRC(:,1), IR%XMUS(:,1), IR%XLAI_EFFC(:,1), GSHADE,  &
-                             PIACAN, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN,            &
-                             DGMI%XFAPAR, DGMI%XFAPIR, DGMI%XFAPAR_BS, DGMI%XFAPIR_BS  )
+    CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH, PALBVIS_TVEG,   &
+                             PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, PSW_RAD,  &
+                             PEK%XLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
+                             PEK%XMUS, PEK%XLAI_EFFC, GSHADE, PIACAN, ZIACAN_SUNLIT,&
+                             ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,     &
+                             DMK%XFAPAR_BS, DMK%XFAPIR_BS  )
    ENDIF
 !
-!print*,'tg4 ',IR%XTG(1,1,1)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      6.0    Fraction of leaves occupied by intercepted water
 !              ------------------------------------------------
 !
-   CALL WET_LEAVES_FRAC(IR%XWR(:,1), IMT%XVEG(:,1), IMT%XWRMAX_CF(:,1), DGIP%XZ0, &
-                        IMT%XLAI(:,1), ZWRMAX, ZDELTA)
+   CALL WET_LEAVES_FRAC(PEK%XWR, PEK%XVEG, PEK%XWRMAX_CF, DK%XZ0, PEK%XLAI, ZWRMAX, ZDELTA)
 !
-!print*,'tg5 ',IR%XTG(1,1,1)
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
-   CALL SNOW3L_ISBA(IO, G, IR, DGIP, DGEIP, DGMI, HSNOW_ISBA, OMEB, HIMPLICIT_WIND,    &
-                    TPTIME, PTSTEP, IP%XVEGTYPE_PATCH(:,:,1), IR%XTG(:,:,1), DGMI%XCT, &
-                    ZSOILHCAPZ, ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD,        &
-                    PLW_RAD, PRR, PSR, PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PZREF,   &
-                    IR%XSNOWFREE_ALB(:,1), IMX%XDG(:,:,1), IP%XDZG(:,:,1), PPEW_A_COEF,&
-                    PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,   &
-                    ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR, ZGSFCSNOW, ZEVAPCOR, ZLES3L,  &
-                    ZLEL3L, ZEVAP3L, ZSNOWSFCH, ZDELHEATN, ZDELHEATN_SFC, ZRI3L,       &
-                    PZENITH, ZDELHEATG, ZDELHEATG_SFC, ZQS3L                   ) 
-!print*,'tg6 ',IR%XTG(1,1,1)            
+   CALL SNOW3L_ISBA(IO, G, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,    &
+                    TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,&
+                    ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR,   &
+                    PSR, PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PZREF, PEK%XSNOWFREE_ALB, &
+                    PK%XDG, PK%XDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,&
+                    PPET_B_COEF, PPEQ_B_COEF, ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR, &
+                    ZGSFCSNOW, ZEVAPCOR, ZLES3L, ZLEL3L, ZEVAP3L, ZSNOWSFCH, ZDELHEATN, &
+                    ZDELHEATN_SFC, ZRI3L,PZENITH, ZDELHEATG, ZDELHEATG_SFC, ZQS3L      )  
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
 !              --------------------------------------------------------------------
 !
-!print*,'HPHOTO ',IO%CPHOTO
    IF (IO%CPHOTO=='NON') THEN
-      CALL VEG(PSW_RAD, PTA, PQA, PPS, IMT%XRGL(:,1), IMT%XLAI(:,1), &
-                IMT%XRSMIN(:,1), IMT%XGAMMA(:,1), ZF2, DGMI%XRS)
-   ELSE IF (MAXVAL(IMT%XGMES(:,1)).NE.XUNDEF .OR. MINVAL(IMT%XGMES(:,1)).NE.XUNDEF) THEN
-      ZQSAT(:)=QSAT(IR%XTG(:,1,1),PPS(:))  
-      CALL COTWORES(PTSTEP, IO, GSHADE, IP, IMT, IR, IMX%XDMAX(:,1), PPOI, PCSP,    &
-                    IR%XTG(:,1,1), ZF2, PSW_RAD, PQA, ZQSAT, IR%XPSNV(:,1), ZDELTA, &
-                    PRHOA, PZENITH, INI%XFFV(:,1), ZIACAN_SUNLIT, ZIACAN_SHADE,     &
-                    ZFRAC_SUN, PIACAN, PABC, DGMI%XRS, DGEIP%XGPP, PRESP_BIOMASS_INST(:,1))
+      CALL VEG(PSW_RAD, PTA, PQA, PPS, PEK%XRGL, PEK%XLAI, PEK%XRSMIN, PEK%XGAMMA, ZF2, DMK%XRS)
+   ELSE IF (MAXVAL(PEK%XGMES(:)).NE.XUNDEF .OR. MINVAL(PEK%XGMES(:)).NE.XUNDEF) THEN
+      ZQSAT(:)=QSAT(PEK%XTG(:,1),PPS(:))  
+      CALL COTWORES(PTSTEP, IO, GSHADE, PK, PEK, PK%XDMAX, PPOI, PCSP, PEK%XTG(:,1), &
+                    ZF2, PSW_RAD, PQA, ZQSAT, PEK%XPSNV, ZDELTA, PRHOA, PZENITH, &
+                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN, PABC, &
+                    DMK%XRS, DEK%XGPP, PRESP_BIOMASS_INST(:,1))
    ELSE
       PRESP_BIOMASS_INST(:,1) = 0.0
-      DGEIP%XGPP(:) = 0.0
+      DEK%XGPP(:) = 0.0
    ENDIF
 !
-!print*,'tg7 ',IR%XTG(1,1,1)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      9.0    ISBA Composit Energy Budget
 !              -----------------------------------------------
 !
-  CALL ISBA_CEB(IO, IP, INI, IMX, IMT, IR, DGIP, DGEIP, DGMI,       &
-                HSNOW_ISBA, HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,    &
+  CALL ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,       &
+                HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,    &
                 PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, &
                 PPEQ_B_COEF, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA,   &
                 PVMOD, PQA, PRR, PSR, PPS, PZREF, PUREF, PDIRCOSZW, &
@@ -564,7 +534,6 @@ ELSE
                 ZGRNDFLUX, ZFLSN_COR, ZSNOW_THRUFAL, ZDELTA, ZHUGI, &
                 ZALBT, ZEMIST, PDEEP_FLUX, PUSTAR, PAC_AGG, PHU_AGG )
 !
-!print*,'tg8 ',IR%XTG(1,1,1)
 ENDIF
 !
 !*******************************************************************************
@@ -573,19 +542,18 @@ ENDIF
 !  'D95' : they represent aggregated (snow + flood + snow-flood-free) fluxes
 !  '3-L' : they represent                    flood + snow-flood-free  fluxes
 !
-! The variables concerned by this are: PRN, PH, PLE, PLEI, DGEIP%XLEG, DGEIP%XLEGI, DGEIP%XLEV, DGEIP%XLES, 
-!                                      DGEIP%XLER, DGEIP%XLETR, PEVAP, PUSTAR, PGFLUX
+! The variables concerned by this are: PRN, PH, PLE, PLEI, DEK%XLEG, DEK%XLEGI, DEK%XLEV, DEK%XLES, 
+!                                      DEK%XLER, DEK%XLETR, PEVAP, PUSTAR, PGFLUX
 !*******************************************************************************
 !
 !*     12.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
-CALL HYDRO(IO, P, IP, INI, IMX, IMT, IMI, AG, IR, DGEIP, DGMI, &
-           HSNOW_ISBA, OMEB, PTSTEP, ZVEG, ZWRMAX, ZSNOW_THRUFAL, &
+CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK, &
+           OMEB, PTSTEP, ZVEG, ZWRMAX, ZSNOW_THRUFAL, &
            ZEVAPCOR, ZSUBVCOR, ZSOILHCAPZ, ZF2WGHT, ZF2, PPS,  &
            PIRRIG_GR, ZDELHEATG, ZDELHEATG_SFC,  ZDELPHASEG,   &
            ZDELPHASEG_SFC                                )
-!print*,'tg9 ',IR%XTG(1,1,1)   
 !-------------------------------------------------------------------------------
 !
 !*     13.0    Aggregated output fluxes and diagnostics
@@ -594,14 +562,13 @@ CALL HYDRO(IO, P, IP, INI, IMX, IMT, IMI, AG, IR, DGEIP, DGMI, &
 !* add snow component to output radiative parameters and fluxes in case 
 !  of ES or CROCUS snow schemes
 !
-CALL ISBA_SNOW_AGR(IP, INI, IR, DGI, DGEI, DGMI, DGIP, DGEIP, &
-                   HSNOW_ISBA, OMEB, PEXNS, PEXNA, PTA, PQA,  &
+CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK, &
+                   OMEB, PEXNS, PEXNA, PTA, PQA,  &
                    PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,  &
                    ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L,     &
                    ZEVAP3L, ZQS3L, ZALB3L, ZGSFCSNOW,         &
                    ZGRNDFLUX, ZFLSN_COR, PEMIST, PPALPHAN    )  
 !
-!print*,'tg10 ',IR%XTG(1,1,1)
 !***************************************************************************
 ! All output fluxes and radiative variables have recovered the same physical
 ! meaning, that is they are aggregated quantities (snow + snow-free)

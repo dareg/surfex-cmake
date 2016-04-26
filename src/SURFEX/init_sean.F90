@@ -1,6 +1,6 @@
 !     #############################################################
       SUBROUTINE INIT_SEA_n (DTCO, OREAD_BUDGETC, UG, U, SM, &
-                             DLO, DGL, DGLC, HPROGRAM,HINIT,KI,KSV,KSW,  &
+                             DGO, DL, DLC, HPROGRAM,HINIT,KI,KSV,KSW,  &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
                              PEMIS,PTSRAD,PTSURF,                       &
@@ -71,9 +71,9 @@ LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
-TYPE(DIAG_t), INTENT(INOUT) :: DGL
-TYPE(DIAG_t), INTENT(INOUT) :: DGLC
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: DL
+TYPE(DIAG_t), INTENT(INOUT) :: DLC
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -119,7 +119,7 @@ IF (U%CSEA=='NONE  ') THEN
   PTSRAD  =XTT
   PTSURF  =XTT
 ELSE IF (U%CSEA=='FLUX  ') THEN
-  CALL INIT_IDEAL_FLUX(DLO, DGL, DGLC, OREAD_BUDGETC, &
+  CALL INIT_IDEAL_FLUX(DGO, DL, DLC, OREAD_BUDGETC, &
                        HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
                        PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CSEA=='SEAFLX') THEN
