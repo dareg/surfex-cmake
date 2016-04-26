@@ -69,6 +69,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
 !!      Modified by B. Decharme  (04/2010): check suspicious low temperature for ES and CROCUS
 !!      Modified by B. Decharme  (08/2013): Qsat as argument (needed for coupling with atm)
 !!      Modified by A. Boone     (10/2014): MEB: pass in fluxes when using MEB
+!!      Modified by B. Decharme  (03/2016): No snowdrift under forest
 !!
 !-------------------------------------------------------------------------------
 !
@@ -77,7 +78,10 @@ USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
+USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW,                       &
+                                NVT_TEBD, NVT_TRBE, NVT_BONE,   &
+                                NVT_TRBD, NVT_TEBE, NVT_TENE,   &
+                                NVT_BOBD, NVT_BOND, NVT_SHRB
 !
 USE MODI_SNOW3L
 USE MODI_SNOWCRO
@@ -283,7 +287,7 @@ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
 
 !*      0.2    declarations of local variables
 !
-REAL, PARAMETER                     :: ZCHECK_TEMP = 100.0 
+REAL, PARAMETER                     :: ZCHECK_TEMP = 50.0 
 !                                      Limit to check suspicious low temperature (K)
 !
 INTEGER                             :: JWRK, JJ ! Loop control
@@ -653,6 +657,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_USTARSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_CHSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_SNOWHMASS
 REAL, DIMENSION(KSIZE1)        :: ZP_VEGTYPE
+REAL, DIMENSION(KSIZE1)        :: ZP_FOREST
 REAL, DIMENSION(KSIZE1)        :: ZP_PEW_A_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEW_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PET_A_COEF
@@ -787,7 +792,10 @@ ENDDO
 !
 DO JJ=1,KSIZE1
    JI = KMASK(JJ)
-   ZP_VEGTYPE (JJ) = PVEGTYPE (JI,NVT_SNOW)
+   ZP_VEGTYPE (JJ) = PVEGTYPE(JI,NVT_SNOW)
+   ZP_FOREST  (JJ) = PVEGTYPE(JI,NVT_TEBD) + PVEGTYPE(JI,NVT_TRBE) + PVEGTYPE(JI,NVT_BONE)   &
+                   + PVEGTYPE(JI,NVT_TRBD) + PVEGTYPE(JI,NVT_TEBE) + PVEGTYPE(JI,NVT_TENE)   & 
+                   + PVEGTYPE(JI,NVT_BOBD) + PVEGTYPE(JI,NVT_BOND) + PVEGTYPE(JI,NVT_SHRB)
 ENDDO
 !
 !
@@ -880,8 +888,8 @@ ELSE
              ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,       &
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
-             ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
-             ZP_LAT, ZP_LON, OSNOWDRIFT, OSNOWDRIFT_SUBLIM                 )
+             ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_FOREST,        &
+             ZP_ZENITH, ZP_LAT, ZP_LON, OSNOWDRIFT, OSNOWDRIFT_SUBLIM      )
 !
   IF(OMEB)THEN
 !

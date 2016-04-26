@@ -192,13 +192,23 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
               ;;
-'Linux beaufixlogin'*|'Linux prolixlogin'*) #BEAUFIX
+'Linux beaufixlogin'*) #BEAUFIX
 
                 export     ARCH=${ARCH:-LXifort}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFBOFX}
+                export NEED_NCARG=${NEED_NCARG:-NO}
+                export NEED_TOOLS=NO
+              ;;
+'Linux prolixlogin'*) #PROLIX
+
+                export     ARCH=${ARCH:-LXifort}
+                export  VER_MPI=${VER_MPI:-MPIAUTO}
+                export OPTLEVEL=${OPTLEVEL:-O2}
+                export MVWORK=${MVWORK:-NO}
+                export VER_CDF=${VER_CDF:-CDFPROLX}
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
               ;;

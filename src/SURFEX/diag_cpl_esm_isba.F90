@@ -34,7 +34,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!
-!!      B. Decharme    01/16 : Bug with flood budget
+!!      B. Decharme    01/16 : Bug with flood budget and add cpl keys
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -43,6 +43,8 @@
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODN_SFX_OASIS, ONLY : XTSTEP_CPL_LAND
+!
+USE MODD_SFX_OASIS,  ONLY : LCPL_FLOOD, LCPL_GW
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -104,7 +106,7 @@ ENDIF
 !* groundwater case
 !  ----------------
 !
-IF(I%LWTD)THEN
+IF(LCPL_GW.AND.I%LWTD)THEN
   DO JPATCH=1,INP
     DO JI=1,INI
       IF(I%XGW(JI)>0.0.AND.ZSUMPATCH(JI)>0.0)THEN
@@ -131,11 +133,11 @@ DO JPATCH=1,INP
         I%XCPL_ICEFLUX(JI) = I%XCPL_ICEFLUX(JI) + PTSTEP * PCPL_ICEFLUX(JI,JPATCH) * I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
      ENDIF
 !
-     IF(I%LWTD.AND.ZSUMPATCH(JI)>0.0)THEN
+     IF(LCPL_GW.AND.I%LWTD.AND.ZSUMPATCH(JI)>0.0)THEN
         I%XCPL_RECHARGE(JI) = I%XCPL_RECHARGE(JI) + PTSTEP * ZCPL_RECHARGE(JI,JPATCH) * I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
      ENDIF
 !   
-     IF(I%LFLOOD.AND.ZSUMPATCH(JI)>0.0)THEN
+     IF(LCPL_FLOOD.AND.I%LFLOOD.AND.ZSUMPATCH(JI)>0.0)THEN
         I%XCPL_EFLOOD  (JI) = I%XCPL_EFLOOD  (JI) + PTSTEP * PCPL_EFLOOD  (JI,JPATCH)*I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
         I%XCPL_PFLOOD  (JI) = I%XCPL_PFLOOD  (JI) + PTSTEP * PCPL_PFLOOD  (JI,JPATCH)*I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
         I%XCPL_IFLOOD  (JI) = I%XCPL_IFLOOD  (JI) + PTSTEP * PCPL_IFLOOD  (JI,JPATCH)*I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
@@ -147,7 +149,7 @@ ENDDO
 !* update ISBA Floodplains variable for mass conservation (kg/m2)
 !  --------------------------------------------------------------
 !
-IF(I%LFLOOD)THEN
+IF(LCPL_FLOOD.AND.I%LFLOOD)THEN
   ZBUDGET(:)=(I%XPIFLOOD(:)*XTSTEP_CPL_LAND)+I%XCPL_PFLOOD(:)-I%XCPL_IFLOOD(:)-I%XCPL_EFLOOD(:)
   WHERE(ZBUDGET (:)<=0.0)
         I%XPIFLOOD(:)=0.0

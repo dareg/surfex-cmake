@@ -137,8 +137,8 @@ IF(LCPL_LAND)THEN
   IF(LCPL_GW)THEN
 !
     CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,&
-                        TP%XTOPO_RIV,TP%XHGROUND,ZHG_OLD,    &
-                        ZWTD,ZFWTD                           )
+                        TP%XTOPO_RIV,TP%XHC_BED,TP%XHGROUND, &
+                        ZHG_OLD,ZWTD,ZFWTD                   )
 !
     WHERE(TPG%GMASK_GW(:,:))
           TP%XCPL_WTD (:,:) = ZWTD (:,:)

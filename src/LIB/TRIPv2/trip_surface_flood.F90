@@ -108,7 +108,6 @@ REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZDELTA
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF_IN
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF_OUT
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZFLD_LEN
-REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMASS_SG
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZAREA_SG
 !
 REAL    :: ZAREA
@@ -141,9 +140,12 @@ ZDELTA     (:,:) = 0.0
 ZMF_IN     (:,:) = 0.0
 ZMF_OUT    (:,:) = 0.0
 ZFLD_LEN   (:,:) = 0.0
-ZMASS_SG   (:,:) = 0.0
 !
-ZAREA_SG   (:,:) = PAREA(:,:)
+WHERE(OMASK_FLD(:,:))
+   ZAREA_SG(:,:) = PAREA(:,:)-(PLEN(:,:)*PWIDTH(:,:))
+ELSEWHERE
+   ZAREA_SG(:,:) = PAREA(:,:)
+ENDWHERE
 !
 !-------------------------------------------------------------------------------
 ! * Update the floodplain storage due to source (Precip inter - LEf - Infil)
@@ -157,13 +159,8 @@ ENDWHERE
 ! * Update the floodplain geomorphological properties
 !------------------------------------------------------------------
 ! 
-WHERE(OMASK_FLD(:,:))
-   ZAREA_SG(:,:) = PAREA(:,:)-(PLEN(:,:)*PWIDTH(:,:))
-   ZMASS_SG(:,:) = PFLOOD_STO2(:,:)+MAX(0.0,PHS(:,:)-PHC(:,:))*PLEN(:,:)*PWIDTH(:,:)*XRHOLW
-ENDWHERE
-!
 CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
-                  ZAREA_SG(:,:),ZMASS_SG(:,:),PHFLOOD(:,:),   &
+                  ZAREA_SG(:,:),PFLOOD_STO2(:,:),PHFLOOD(:,:),&
                   PFFLOOD(:,:),PFLOOD_LEN(:,:),PWFLOOD(:,:)   ) 
 !   
 ZFLD_LEN(:,:)=MAX(ZLEN_MIN,PFLOOD_LEN(:,:))
@@ -246,12 +243,8 @@ ENDDO
 ! * Update the floodplain geomorphological properties
 !------------------------------------------------------------------
 ! 
-WHERE(OMASK_FLD(:,:))
-   ZMASS_SG(:,:) = PFLOOD_STO2(:,:)+MAX(0.0,PHS(:,:)-PHC(:,:))*PLEN(:,:)*PWIDTH(:,:)*XRHOLW
-ENDWHERE
-!
 CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
-                  ZAREA_SG(:,:),ZMASS_SG(:,:),PHFLOOD(:,:),   &
+                  ZAREA_SG(:,:),PFLOOD_STO2(:,:),PHFLOOD(:,:),&
                   PFFLOOD(:,:),PFLOOD_LEN(:,:),PWFLOOD(:,:)   ) 
 !
 !-------------------------------------------------------------------------------

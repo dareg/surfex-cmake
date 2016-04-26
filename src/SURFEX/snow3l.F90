@@ -16,7 +16,7 @@
                 PRNSNOW,PHSNOW,PGFLUXSNOW,                                &
                 PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                 PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
-                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,                        &
+                PPERMSNOWFRAC,PFORESTFRAC, PZENITH,PXLAT,PXLON,           &
                 OSNOWDRIFT,OSNOWDRIFT_SUBLIM                              )  
 !     ##########################################################################
 !
@@ -85,6 +85,7 @@
 !!      Modified by A. Boone     (10/2014): MEB modifs: permit option to impose fluxes at sfc  
 !!      Modified by A. Boone     (10/2014): SNOW3LREFRZ and SNOW3LEVAPN edited to give
 !!                                          better enthalpy conservation.
+!!      Modified by B. Decharme  (03/2016): No snowdrift under forest
 !!
 !!
 !-------------------------------------------------------------------------------
@@ -149,7 +150,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PSOILCOND, PD_G, PPSN3L
 !                                      PPSN3L    = snow fraction
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0, PZ0EFF, &
-                                       PALB, PZ0H, PPERMSNOWFRAC  
+                                       PALB, PZ0H, PPERMSNOWFRAC, PFORESTFRAC 
 !                                      PZ0EFF    = roughness length for momentum
 !                                      PZ0       = grid box average roughness length
 !                                      PZ0H      = grid box average roughness length for heat
@@ -163,6 +164,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHO
 !                                                  normal to the surface and the vertical
 !                                      PALB      = soil/vegetation albedo
 !                                      PPERMSNOWFRAC  = fraction of permanet snow/ice
+!                                      PFORESTFRAC = fraction of forest
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                   &
                                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
@@ -452,8 +454,8 @@ CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,PSNOWLIQ)
 !
 PSNDRIFT(:) = 0.0
 IF (OSNOWDRIFT) THEN
-   CALL SNOW3LDRIFT(PTSTEP,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
-                    PSNOWDZ,ZSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
+   CALL SNOW3LDRIFT(PTSTEP,PFORESTFRAC,PVMOD,PTA,PQA,PPS,PRHOA,      &
+                    PSNOWRHO,PSNOWDZ,ZSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
 ENDIF
 !
 ! Update snow heat content (J/m2):
@@ -1063,8 +1065,8 @@ END SUBROUTINE SNOW3LCOMPACTN
 !####################################################################
 !####################################################################
 !####################################################################
-SUBROUTINE SNOW3LDRIFT(PTSTEP,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
-                       PSNOWDZ,PSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
+SUBROUTINE SNOW3LDRIFT(PTSTEP,PFORESTFRAC,PVMOD,PTA,PQA,PPS,PRHOA,      &
+                       PSNOWRHO,PSNOWDZ,PSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
@@ -1103,6 +1105,7 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                    :: PTSTEP
 !
+REAL, DIMENSION(:), INTENT(IN)      :: PFORESTFRAC
 REAL, DIMENSION(:), INTENT(IN)      :: PVMOD
 REAL, DIMENSION(:), INTENT(IN)      :: PTA
 REAL, DIMENSION(:), INTENT(IN)      :: PQA
@@ -1133,6 +1136,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZQS
 REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZW
 REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZT
 REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZSNOWDZ1
+REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZFOREST_EFFECT
 !
 LOGICAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: GDRIFT
 !
@@ -1161,13 +1165,17 @@ ZQS_EFFECT   (:,:) = 0.0
 ZDRIFT_EFFECT(:,:) = 0.0
 GDRIFT       (:,:) = .FALSE.
 !
+ZPROFEQU     (:)   = 0.0
+!
 ZSNOWDZ1(:) = PSNOWDZ(:,1)
 !
 ! 1. Initialazation of drift and induced settling
 ! -----------------------------------------------
 !
-ZWIND    (:) = XCOEF_FF * PVMOD(:)
-ZPROFEQU (:) = 0.0
+!Limitation of wind speed in Forest : ~ 15% of wind in open area
+ZFOREST_EFFECT(:) = 1.0 - 0.85 * PFORESTFRAC(:)
+!
+ZWIND(:) = XCOEF_FF * ZFOREST_EFFECT(:) * PVMOD(:)
 !
 DO JJ=1,INLVLS
    DO JI=1,INI

@@ -47,7 +47,8 @@ USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
-                      XCVEL, XRATMED, XTSTEP
+                      XCVEL, XRATMED, XTSTEP,  &
+                      LGWSUBF, XGWSUBD 
 !
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
@@ -246,6 +247,11 @@ IF(ZGRID_RES<0.5.AND.XRATMED==1.4)THEN
      WRITE(NLISTING,*)'! meandering ratio is 1.4 at 0.5° or 1° resolution !!!'   
      WRITE(NLISTING,*)'! for other resolution change XRATMED in namelist  !!!' 
      CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5° or 1° resolution !!!')
+ENDIF
+!
+IF(LGWSUBF.AND.XGWSUBD>30.)THEN
+     WRITE(NLISTING,*)'!! XGWSUBD too large (must be <=30), check your namelist  !!!' 
+     CALL ABORT_TRIP('INIT_TRIP: XGWSUBD too large (must be <=30), check your namelist !!!')
 ENDIF
 !
 !-------------------------------------------------------------------------------

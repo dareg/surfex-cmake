@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE HYDRO_SGH  (HISBA,HRUNOFF,HRAIN,HHORT,PTSTEP,           &
-                               PD_G,PDZG,PWSAT,PWWILT,PWG,PWGI,          &
+                               PD_G,PDZG,PWSAT,PWFC,PWWILT,PWG,PWGI,     &
                                KWG_LAYER,PPG,PPG_MELT,PMUF,              &
                                PCONDSAT,PBCOEF,PMPOTSAT,                 &
                                PKSAT_ICE,PD_ICE,PFSAT,PHORTON,PDUNNE,    &
@@ -22,6 +22,11 @@
 !     4. Determine the infiltration rate.
 !     5. Determine the flooplains interception and infiltration rate.
 !
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!         03/16    (B. Decharme) Limit flood infiltration
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -83,7 +88,7 @@ REAL, DIMENSION(:,:), INTENT(IN) :: PWG,PWGI
 INTEGER, DIMENSION(:),INTENT(IN) :: KWG_LAYER  
 !                                   KWG_LAYER = Number of soil moisture layers (DIF option)
 !
-REAL, DIMENSION(:,:), INTENT(IN) :: PD_G,PDZG,PWSAT,PWWILT
+REAL, DIMENSION(:,:), INTENT(IN) :: PD_G,PDZG,PWSAT,PWFC,PWWILT
 REAL, DIMENSION(:,:), INTENT(IN) :: PCONDSAT
 !                                   PD_G  = layer depth (m)
 !                                   PDZG= layer thickness (m)
@@ -138,15 +143,18 @@ REAL, DIMENSION(:), INTENT(IN)    :: PCG
 REAL, PARAMETER                            :: ZEICE = 6.0  ! Ice vertical diffusion impedence factor 
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_INI, ZFROZEN, ZIMAX_ICE, ZIMAX, &
-                                              ZHORT_R, ZHORT_M, ZSOILMAX, ZIF_MAX
+                                              ZHORT_R, ZHORT_M, ZSOILMAX, ZIF_MAX,&
+                                              ZPIFLDMAX
 !                                             ZFROZEN  = frozen soil fraction for runoff
 !                                             ZIMAX_ICE    = maximum infiltration rate for frozen soil
 !                                             ZIMAX     = maximum infiltration rate for unfrozen soil
+!                                             ZPIFLDMAX    = maximum floodplains infiltration during 1 day (kg/m2/s)
+!
 REAL, DIMENSION(SIZE(PPG))                 :: ZWG2_AVG, ZWGI2_AVG, ZWSAT_AVG, ZWWILT_AVG
 !                                             Average water and ice content
 !                                             values over the soil depth D2 (for calculating surface runoff)
 !
-REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)) :: ZWSAT, ZFRZ
+REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)) :: ZWSAT, ZWFC, ZFRZ
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPTH
 !
@@ -174,6 +182,7 @@ ZIMAX_ICE(:)  = 0.0
 ZIMAX    (:)  = 0.0
 !
 ZWSAT  (:,:)  = 0.0
+ZWFC   (:,:)  = 0.0
 !
 ZLOG10 = LOG(10.0)
 !
@@ -188,8 +197,9 @@ ZHORT_R(:) = 0.0
 ZHORT_M(:) = 0.0
 !
 !PIFLOOD calculation
-ZSOILMAX(:) = 0.0
-ZIF_MAX(:)  = 0.0
+ZSOILMAX (:) = 0.0
+ZIF_MAX  (:) = 0.0
+ZPIFLDMAX(:) = 0.0
 !
 !HRUNOFF = DT92 DUNNE calculation
 ZPG_WORK(:)   = 0.0
@@ -272,6 +282,7 @@ IF(HHORT=='SGH'.OR.OFLOOD)THEN
 !       Modify soil porosity as ice assumed to become part
 !       of solid soil matrix (with respect to liquid flow):                
         ZWSAT(JJ,JL) = MAX(XWGMIN, PWSAT(JJ,JL)-PWGI(JJ,JL)) 
+        ZWFC (JJ,JL) = PWFC(JJ,JL)*ZWSAT(JJ,JL)/PWSAT(JJ,JL)
 !        
 !       Impedance Factor from (Johnsson and Lundin 1991).
         ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PWGI(JJ,JL)/(PWGI(JJ,JL)+PWG(JJ,JL)))))
@@ -462,17 +473,17 @@ IF(OFLOOD)THEN
 !
 ! calculate the maximum flood infiltration
 !
+  ZPIFLDMAX(:) = MIN(PPIFLOOD(:),XRHOLW/XDAY) ! no more than 1 meter of water per days
+!
   ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX    (:)*XRHOLW &   !unfrozen soil
              +             ZFROZEN(:)   * ZIMAX_ICE(:)*XRHOLW     !frozen soil
-!
-  PIFLOOD(:)=MAX(0.0,(PFFLOOD(:)-PFSAT(:)))*MIN(PPIFLOOD(:),ZIF_MAX(:))
 !
   IF(HISBA == 'DIF')THEN
     ZDEPTH(:)=0.0
     DO JL=1,KLAYER_HORT
        DO JJ=1,INI
           IF(ZDEPTH(JJ)<XHORT_DEPTH)THEN
-            ZSOILMAX(JJ) = ZSOILMAX(JJ)+MAX(0.0,ZWSAT(JJ,JL)-PWG(JJ,JL))*PDZG(JJ,JL)*XRHOLW/PTSTEP
+            ZSOILMAX(JJ) = ZSOILMAX(JJ)+MAX(0.0,ZWFC(JJ,JL)-PWG(JJ,JL))*PDZG(JJ,JL)*XRHOLW/PTSTEP
             ZDEPTH  (JJ) = PD_G(JJ,JL)
           ENDIF
        ENDDO
@@ -484,7 +495,9 @@ IF(OFLOOD)THEN
     ENDDO
   ENDIF
 !
-  PIFLOOD(:)=MIN(PIFLOOD(:),ZSOILMAX(:))
+  ZSOILMAX(:) = MIN(ZSOILMAX(:),ZIF_MAX(:))
+!
+  PIFLOOD(:) = MAX(0.0,(PFFLOOD(:)-PFSAT(:))) * MIN(ZPIFLDMAX(:),ZSOILMAX(:))
 !
 ELSE
 !

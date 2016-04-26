@@ -44,7 +44,8 @@ USE MODD_TRIP, ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
-                      XCVEL, XRATMED, XTSTEP
+                      XCVEL, XRATMED, XTSTEP,  &
+                      LGWSUBF, XGWSUBD
 
 USE MODN_TRIP_PREP, ONLY : XTAUG_UNIF, LGWEQ,  &
                            XTAUG_UP, XTAUG_DOWN
@@ -207,6 +208,11 @@ IF(CGROUNDW=='DIF')THEN
     WRITE(NLISTING,*)'! Downstream transfert time value XTAUG_DOWN must be lower than 365 days !!!'
     CALL ABORT_TRIP('PREP_TRIP_RUN: Downstream transfert time value must be lower than 365 days')
   ENDIF  
+ENDIF
+!
+IF(LGWSUBF.AND.XGWSUBD>30.)THEN
+     WRITE(NLISTING,*)'!! XGWSUBD too large (must be <=30), check your namelist  !!!' 
+     CALL ABORT_TRIP('PREP_TRIP_RUN: XGWSUBD too large (must be <=30), check your namelist !!!')
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -808,11 +814,14 @@ IF(LFLOOD)THEN
         TP%XN_FLOOD(:,:)=XUNDEF
   ENDWHERE
 !
+  LWORK=(ILAT*ILON>ZMINCELL)
+!  
   DO JLAT=1,ILAT
      DO JLON=1,ILON
         JBAS=TPG%NBASID(JLON,JLAT)
         IF(JBAS==0)CYCLE
-        IF(INCELL_BAS(JBAS)<=ZMINCELL)THEN
+        
+        IF(LWORK.AND.INCELL_BAS(JBAS)<=ZMINCELL)THEN
            TP%XN_FLOOD(JLON,JLAT)=XUNDEF
         ENDIF
      ENDDO

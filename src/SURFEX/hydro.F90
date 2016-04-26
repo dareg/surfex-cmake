@@ -87,6 +87,7 @@
 !!                  02/2013  (C. de Munck) specified irrigation rate of ground added
 !!                  10/2014  (A. Boone)    MEB added
 !!                  07/15    (B. Decharme) Numerical adjustement for F2 soilstress function
+!!                  03/16    (B. Decharme) Limit flood infiltration
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -549,7 +550,8 @@ ENDIF
 ! - Floodplains interception and infiltration
 !
  CALL HYDRO_SGH(HISBA,HRUNOFF,HRAIN,HHORT,         &
-                 PTSTEP,PD_G,PDZG,PWSAT,PWWILT,   &
+                 PTSTEP,PD_G,PDZG,                &
+                 PWSAT,PWFC,PWWILT,               &
                  PWG, PWGI, KWG_LAYER,            &
                  ZPG, ZPG_MELT, PMUF,             &
                  PCONDSAT, PBCOEF,                &

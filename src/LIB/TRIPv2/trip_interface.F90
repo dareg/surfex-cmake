@@ -126,8 +126,38 @@ IF (LHOOK) CALL DR_HOOK('TRIP_INTERFACE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-!*       0.     Initialize :
-!               ------------
+!*       0.     Initialize local variables:
+!               ---------------------------
+!
+ZRUNOFF         (:,:) = 0.0
+ZDRAIN          (:,:) = 0.0
+ZSRC_FLOOD      (:,:) = 0.0
+ZSOUT           (:,:) = 0.0
+ZSIN            (:,:) = 0.0
+ZVEL            (:,:) = 0.0
+ZHS             (:,:) = 0.0
+ZGOUT           (:,:) = 0.0
+ZGNEG           (:,:) = 0.0
+ZWTD            (:,:) = 0.0
+ZFWTD           (:,:) = 0.0
+ZQGCELL         (:,:) = 0.0
+ZHGHS           (:,:) = 0.0
+ZQFR            (:,:) = 0.0
+ZQRF            (:,:) = 0.0
+ZVFIN           (:,:) = 0.0
+ZVFOUT          (:,:) = 0.0
+ZHSF            (:,:) = 0.0
+ZDISCHARGE      (:,:) = 0.0
+ZHG_OLD         (:,:) = 0.0
+!
+!-------------------------------------------------------------------------------
+!
+ZGSTO_ALL  = 0.0
+ZGSTO2_ALL = 0.0
+ZGIN_ALL   = 0.0
+ZGOUT_ALL  = 0.0
+!
+!-------------------------------------------------------------------------------
 !
 !Surface runoff treatment
 !
@@ -230,8 +260,9 @@ DO JTSTEP=1,ITSTEP !TRIP time step loop
 !  * Actualisation of diagnostic  
 !
    IF(CGROUNDW=='DIF')THEN
-      CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,       &
-                          TP%XTOPO_RIV,TP%XHGROUND,ZHG_OLD,ZWTD,ZFWTD )          
+      CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,&
+                          TP%XTOPO_RIV,TP%XHC_BED,TP%XHGROUND, &
+                          ZHG_OLD,ZWTD,ZFWTD                   )   
    ENDIF
 !
    CALL TRIP_DIAG(TPDG, TP, TPG, &
