@@ -42,7 +42,7 @@ USE MODD_GRID_n, ONLY : GRID_NP_t, GRID_NP_INIT
 USE MODD_AGRI1_n
 USE MODD_SSO1_n
 !
-USE MODD_TYPE_SNOW1
+USE MODD_TYPE_SNOW
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -68,7 +68,7 @@ REAL, POINTER, DIMENSION(:,:) :: XTG           ! surface and sub-surface soil
 !
 ! - Snow Cover:
 !
-TYPE(SURF_SNOW1) :: TSNOW                         ! snow state: 
+TYPE(SURF_SNOW) :: TSNOW                         ! snow state: 
 !                                                ! scheme type/option                      (-)
 !                                                ! number of layers                        (-)
 !                                                ! snow (& liq. water) content             (kg/m2)
