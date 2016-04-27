@@ -653,7 +653,7 @@ TYPE(DIAG_t), INTENT(INOUT) :: DCK
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DECK
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
-TYPE(GR_BIOG_t), INTENT(IN) :: GBK
+TYPE(GR_BIOG_t), INTENT(INOUT) :: GBK
 !
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_ZREF    ! height of T,q forcing                 (m)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_UREF    ! height of wind forcing                (m)
