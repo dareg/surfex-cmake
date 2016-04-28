@@ -4339,7 +4339,7 @@ DO JJ = 1,SIZE(PSNOW(:))
 !
     ZSNOWFALL(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
 !
-    IF (OSNOWMAK_PROP .AND. ZPSR_SNOWMAK(JJ) > XUEPSI) THEN
+    IF (OSNOWMAK_PROP) THEN
       PSNOWRHOF(JJ) = ((PSR(JJ)+PBLOWSNW(JJ,1))*PSNOWRHOF(JJ)+ ZPSR_SNOWMAK(JJ)*XRHO_SNOWMAK)/ &	! Additionnal boolean to use modified properties of machine made snow (MMS) or not p.spandre 2014/07/15
 		      (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))						! NB : ZPSR_SNOWMAK = XPSR_SNOWMAK si prod de neige. =0 sinon. 
     ELSE
