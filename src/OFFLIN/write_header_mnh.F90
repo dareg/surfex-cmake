@@ -38,7 +38,9 @@
 !*      0.    DECLARATIONS
 !             ------------
 !
+#ifdef SFX_LFI
 USE MODI_FMWRIT
+#endif
 !
 USE MODD_IO_SURF_LFI,        ONLY : CFILEOUT_LFI, CLUOUT_LFI, LMNH_COMPATIBLE, LCARTESIAN
 !
@@ -61,6 +63,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_HEADER_MNH',0,ZHOOK_HANDLE)
+#ifdef SFX_LFI
  CALL FMOPEN(CFILEOUT_LFI,'UNKNOWN',CLUOUT_LFI,0,1,1,INB,IRESP)
 !
  CALL FMWRITN0(CFILEOUT_LFI,'MASDEV',CLUOUT_LFI,1,47,4,100,YCOMMENT,IRESP)
@@ -77,6 +80,7 @@ YNAME=' '
  CALL FMWRITL0(CFILEOUT_LFI,'THINSHELL       ',CLUOUT_LFI,1,.TRUE.,4,100,YCOMMENT,IRESP)
 !
  CALL FMCLOS(CFILEOUT_LFI,'KEEP',CLUOUT_LFI,IRESP)
+#endif
 IF (LHOOK) CALL DR_HOOK('WRITE_HEADER_MNH',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

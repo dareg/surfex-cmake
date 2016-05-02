@@ -1112,6 +1112,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
           CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')
           !
           IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA
             LFANOCOMPACT = LDIAG_FA_NOCOMPACT
             IDATEF(1)= IYEAR!_OUT
             IDATEF(2)= IMONTH!_OUT
@@ -1128,6 +1129,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
               CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
             ENDIF
             CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+#endif
           END IF
           !
         END IF
@@ -1226,7 +1228,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       IF (NRANK==NPIO) THEN
         IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA
           CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+#endif
         END IF
         !* add informations in the file
         IF (CTIMESERIES_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
@@ -1319,6 +1323,7 @@ IF ( LRESTART ) THEN
 
     !* opens the file
     IF (CSURF_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA
       LFANOCOMPACT = .TRUE.
       IDATEF(1)= IYEAR
       IDATEF(2)= IMONTH
@@ -1329,6 +1334,7 @@ IF ( LRESTART ) THEN
       IDATEF(7:11) = 0    
       CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
       CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+#endif
     END IF
     !
   ENDIF
@@ -1423,7 +1429,9 @@ IF ( LRESTART ) THEN
   !* closes the file
   IF (NRANK==0 ) THEN
     IF (CSURF_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA
       CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+#endif
     END IF
     !* add informations in the file
     IF (CSURF_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
