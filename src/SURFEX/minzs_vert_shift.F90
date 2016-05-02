@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
        SUBROUTINE MINZS_VERT_SHIFT(PZS_MOY,PZS_MIN,PTA_2M,PQA_2M,PPA_2M,PRHOA_2M, &
                                    PTA_2M_MIN,PQA_2M_MIN,PPA_2M_MIN,PRHOA_2M_MIN  )  
