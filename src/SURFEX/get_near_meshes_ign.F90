@@ -62,7 +62,7 @@ INTEGER,DIMENSION(KL) :: INDZDIS
 
 REAL :: ZMAXVALDIS
 
-INTEGER :: JP
+INTEGER :: ISIZE, JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
@@ -72,6 +72,8 @@ IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_IGN_1',0,ZHOOK_HANDLE)
  CALL GET_GRIDTYPE_IGN(PGRID_PAR,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY)
 !
 KNEAR(:,:) = 0
+!
+ISIZE = MIN(KNEAR_NBR,KL)
 !
 ! calcul de la distance de tous les points 2 à 2
 !
@@ -90,7 +92,7 @@ DO JP=1,KL
     ZDIS(JP) = ZMAXVALDIS
 
     CALL QUICK_SORT(ZDIS, INDZDIS)
-    KNEAR(JP,:) = INDZDIS(1:KNEAR_NBR)
+    KNEAR(JP,1:ISIZE) = INDZDIS(1:ISIZE)
   !
 ENDDO
 !$OMP END PARALLEL DO
