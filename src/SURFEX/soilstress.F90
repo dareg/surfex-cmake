@@ -52,6 +52,8 @@ SUBROUTINE SOILSTRESS( HISBA, PF2,                                   &
 !               ------------
 !
 !
+USE MODD_ISBA_PAR,  ONLY : XDENOM_MIN
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -95,7 +97,7 @@ REAL, DIMENSION(SIZE(PWFC,1)) ::  ZWFC_AVGZ, ZWSAT_AVGZ, ZWWILT_AVGZ
 !
 ! ISBA-DF:
 !
-REAL, DIMENSION(SIZE(PWG,1)) :: ZWSAT, ZWFC, ZWWILT
+REAL, DIMENSION(SIZE(PWG,1)) :: ZWSAT, ZWFC, ZWWILT,ZF2WGHT
 !                               ZWSAT     = ice-adjusted porosity profile (m3/m3)
 !                               ZWFC      = ice-adjusted field capacity profile (m3/m3)
 !                               ZWWILT    = ice-adjusted wilting point profile (m3/m3)
@@ -127,6 +129,8 @@ ZWFC_AVGZ(:)    = 0.
 ZWSAT_AVGZ(:)   = 0.
 ZWWILT_AVGZ(:)  = 0.
 !
+ZF2WGHT(:)      = 0.
+!
 !-------------------------------------------------------------------------------
 !
 !*       2.     THE 'PF2' FACTOR
@@ -155,13 +159,15 @@ IF(HISBA =='DIF')THEN
   ZWWILT(:) = PWWILT(:,1) * ZWSAT(:)/PWSAT(:,1)
 !
 ! Calculate the soil water stress factor for each layer:
-  PF2WGHT(:,1) = MAX(0.0,MIN(1.0,(PWG(:,1)-ZWWILT(:))/(ZWFC(:)-ZWWILT(:))))
+  PF2WGHT(:,1) = MAX(XDENOM_MIN,MIN(1.0,(PWG(:,1)-ZWWILT(:))/(ZWFC(:)-ZWWILT(:))))
+  ZF2WGHT(:)   = MAX(       0.0,MIN(1.0,(PWG(:,1)-ZWWILT(:))/(ZWFC(:)-ZWWILT(:))))
 !
 ! Normalize the transpiration weights by root fraction:
   PF2WGHT(:,1) = PROOTFRAC(:,1)*PF2WGHT(:,1)
+  ZF2WGHT(:)   = PROOTFRAC(:,1)*ZF2WGHT(:)
 !
 ! Net soil water stress for entire root zone:
-  PF2(:) = PF2WGHT(:,1)
+  PF2(:)       = ZF2WGHT(:)
 !
 !---------------------------------------------------------
 ! Other layers
@@ -182,13 +188,17 @@ IF(HISBA =='DIF')THEN
         ZROOTFRACN = PROOTFRAC(JJ,JL) - PROOTFRAC(JJ,JL-1)
 !
 !       Calculate the soil water stress factor for each layer:
-        PF2WGHT(JJ,JL) = MAX(0.0,MIN(1.0,(PWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ))))
+!!        PF2WGHT(JJ,JL) = MAX(0.0,MIN(1.0,(PWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ))))
+
+        PF2WGHT(JJ,JL) = MAX(XDENOM_MIN,MIN(1.0,(PWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ))))
+        ZF2WGHT(JJ)    = MAX(       0.0,MIN(1.0,(PWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ))))
 !
 !       Normalize the transpiration weights by root fraction:                                                
         PF2WGHT(JJ,JL) = ZROOTFRACN*PF2WGHT(JJ,JL)
+        ZF2WGHT(JJ)    = ZROOTFRACN*ZF2WGHT(JJ)
 !
 !       Net soil water stress for entire root zone:
-        PF2(JJ) = PF2(JJ) + PF2WGHT(JJ,JL)
+        PF2(JJ)        = PF2(JJ) + ZF2WGHT(JJ)
 !        
       ENDIF
 !

@@ -103,6 +103,8 @@ IF (I%NPATCH==1) THEN
      I%XTL             (:, 1)    = PKI%XP_TL         (:)
      I%XTC             (:, 1)    = PKI%XP_TC         (:)
      I%XQC             (:, 1)    = PKI%XP_QC         (:)
+     I%XLAI            (:, 1)    = PKI%XP_LAI        (:) 
+     I%XZ0             (:, 1)    = PKI%XP_Z0         (:) 
    ELSE
 ! Please note that XLAI, XVEG, and XZ0 are not unpacked
 ! in the case of MEB.
@@ -204,6 +206,8 @@ ELSE
       I%XTL             (JI, KPATCH)    = PKI%XP_TL         (JJ)
       I%XTC             (JI, KPATCH)    = PKI%XP_TC         (JJ)
       I%XQC             (JI, KPATCH)    = PKI%XP_QC         (JJ)
+      I%XLAI            (JI, KPATCH)    = PKI%XP_LAI        (JJ) 
+      I%XZ0             (JI, KPATCH)    = PKI%XP_Z0         (JJ) 
     END DO
   ELSE
 ! Please note that XLAI, XVEG, and XZ0 are not unpacked

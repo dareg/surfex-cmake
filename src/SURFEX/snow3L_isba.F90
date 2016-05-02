@@ -5,7 +5,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                         &
                          PTG, PCG, PCT, PSOILHCAPZ, PSOILCONDZ,                              &
                          PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR, PSR,                   &
-                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,                              &
+                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PLVTT, PLSTT,                &
                          PZREF, PZ0NAT, PZ0EFF, PZ0HNAT, PALB, PD_G, PDZG,                   &
                          PPEW_A_COEF, PPEW_B_COEF,                                           &
                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                 &
@@ -153,7 +153,8 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA,                  
 !                                      PQA     = atmospheric specific humidity
 !                                                at level za
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0NAT, PZ0EFF, PZ0HNAT, PALB
+REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0NAT, PZ0EFF, PZ0HNAT, PALB, &
+                                       PLVTT, PLSTT
 !                                      PZ0EFF    = roughness length for momentum 
 !                                      PZ0NAT    = grid box average roughness length
 !                                      PZ0HNAT   = grid box average roughness length
@@ -166,6 +167,8 @@ REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PR
 !                                      PDIRCOSZW = Cosinus of the angle between the 
 !                                                  normal to the surface and the vertical
 !                                      PALB      = soil/vegetation albedo
+!                                      PLVTT     = latent heat of vaporization-hydrology (J/kg)
+!                                      PLSTT     = latent heat of sublimation-hydrology  (J/kg)
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PPSN
 !                                      PPSN     = Snow cover fraction (total) 
@@ -485,7 +488,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZSNOWSWE_OUT(:)     = 0.0
       PLES3L(:)           = MIN(PLES3L(:), XLSTT*(ZSNOWSWE_1D(:)/PTSTEP + PSR(:)))
       PLEL3L(:)           = 0.0
-      PEVAP(:)            = PLES3L(:)/XLSTT
+      PEVAP(:)            = PLES3L(:)/PLSTT(:)
       PTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)*ZPSN(:) + ZRRSNOW(:)) ! kg m-2 s-1
       ZTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)         + ZRRSNOW(:)) ! kg m-2 s-1
       PSRSFC(:)           = 0.0
@@ -618,6 +621,8 @@ REAL, DIMENSION(KSIZE1)        :: ZP_DELHEATG
 REAL, DIMENSION(KSIZE1)        :: ZP_DELHEATG_SFC
 REAL, DIMENSION(KSIZE1)        :: ZP_SW_RAD
 REAL, DIMENSION(KSIZE1)        :: ZP_QA
+REAL, DIMENSION(KSIZE1)        :: ZP_LVTT
+REAL, DIMENSION(KSIZE1)        :: ZP_LSTT
 REAL, DIMENSION(KSIZE1)        :: ZP_VMOD
 REAL, DIMENSION(KSIZE1)        :: ZP_LW_RAD
 REAL, DIMENSION(KSIZE1)        :: ZP_RHOA
@@ -755,6 +760,8 @@ DO JJ=1,KSIZE1
    ZP_UREF    (JJ) = PUREF    (JI)
    ZP_EXNS    (JJ) = PEXNS    (JI)
    ZP_EXNA    (JJ) = PEXNA    (JI)
+   ZP_LVTT    (JJ) = PLVTT    (JI)
+   ZP_LSTT    (JJ) = PLSTT    (JI)
    ZP_DIRCOSZW(JJ) = PDIRCOSZW(JI)
    ZP_ZREF    (JJ) = PZREF    (JI)
    ZP_Z0NAT   (JJ) = PZ0NAT   (JI)
@@ -792,10 +799,10 @@ ENDDO
 !
 DO JJ=1,KSIZE1
    JI = KMASK(JJ)
-   ZP_VEGTYPE (JJ) = PVEGTYPE(JI,NVT_SNOW)
+   ZP_VEGTYPE (JJ) = PVEGTYPE (JI,NVT_SNOW)
    ZP_FOREST  (JJ) = PVEGTYPE(JI,NVT_TEBD) + PVEGTYPE(JI,NVT_TRBE) + PVEGTYPE(JI,NVT_BONE)   &
                    + PVEGTYPE(JI,NVT_TRBD) + PVEGTYPE(JI,NVT_TEBE) + PVEGTYPE(JI,NVT_TENE)   & 
-                   + PVEGTYPE(JI,NVT_BOBD) + PVEGTYPE(JI,NVT_BOND) + PVEGTYPE(JI,NVT_SHRB)
+                   + PVEGTYPE(JI,NVT_BOBD) + PVEGTYPE(JI,NVT_BOND) + PVEGTYPE(JI,NVT_SHRB)   
 ENDDO
 !
 !
@@ -823,6 +830,9 @@ IF(OMEB)THEN
    ZP_SWNETSNOWS(:)  = ZP_SWNETSNOWS(:)  *ZP_PSN_INV(:)
    ZP_LWNETSNOW(:)   = ZP_LWNETSNOW(:)   *ZP_PSN_INV(:)
    ZP_HSNOW(:)       = ZP_HSNOW(:)       *ZP_PSN_INV(:)
+   ZP_GFLUXSNOW(:)   = ZP_GFLUXSNOW(:)   *ZP_PSN_INV(:) 
+   ZP_GSFCSNOW(:)    = ZP_GSFCSNOW(:)    *ZP_PSN_INV(:) 
+   ZP_SNOWHMASS(:)   = ZP_SNOWHMASS(:)   *ZP_PSN_INV(:)
    ZP_LES3L(:)       = ZP_LES3L(:)       *ZP_PSN_INV(:)
    ZP_LEL3L(:)       = ZP_LEL3L(:)       *ZP_PSN_INV(:)
    ZP_GRNDFLUX(:)    = ZP_GRNDFLUX(:)    *ZP_PSN_INV(:)
@@ -880,7 +890,8 @@ ELSE
              ZP_PS, ZP_SRSNOW, ZP_RRSNOW, ZP_PSN3L, ZP_TA, ZP_TG(:,1),     &
              ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,       &
              ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,   &
-             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G(:,1), ZP_SNOWLIQ,      &
+             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G(:,1),                  &
+             ZP_LVTT, ZP_LSTT, ZP_SNOWLIQ,                                 &
              ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX ,             &
              ZP_EVAPCOR, ZP_SOILCOR, ZP_GFLXCOR, ZP_SNOWSFCH,              &
              ZP_DELHEATN, ZP_DELHEATN_SFC,                                 &
@@ -889,7 +900,7 @@ ELSE
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_FOREST,        &
-             ZP_ZENITH, ZP_LAT, ZP_LON, OSNOWDRIFT, OSNOWDRIFT_SUBLIM      )
+             ZP_ZENITH, ZP_LAT, ZP_LON, OSNOWDRIFT, OSNOWDRIFT_SUBLIM     )
 !
   IF(OMEB)THEN
 !

@@ -595,8 +595,8 @@ DO JLOOP=1,SIZE(PTYPE,1)
     ENDIF 
 !--------------------------------------------------------------------
 !
-!*    7.16   Fraction of ground litter
-!            -------------------------
+!*    7.16   Thickness of ground litter
+!            --------------------------
 ! 	 
     IF (PRESENT(PGNDLITTER)) THEN
       PGNDLITTER (JLOOP,:,:) = 0.

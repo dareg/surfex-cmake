@@ -129,6 +129,7 @@ TYPE ISBA_t
 !                                                         ! False = Forcing data from atmospheric model (default)
 !
   LOGICAL                        :: LMEB_LITTER ! Activate Litter
+  LOGICAL                        :: LMEB_GNDRES ! Activate Ground Resistance
 !
   LOGICAL                        :: LVEGUPD  ! True = update vegetation parameters every decade
                                              ! False = keep vegetation parameters constant in time
@@ -933,6 +934,7 @@ YISBA%LTEMP_ARP=.FALSE.
 YISBA%LGLACIER=.FALSE.
 YISBA%LFORC_MEASURE=.FALSE.
 YISBA%LMEB_LITTER=.FALSE.
+YISBA%LMEB_GNDRES=.FALSE.
 YISBA%LVEGUPD=.FALSE.
 YISBA%LNITRO_DILU=.FALSE.
 YISBA%LCANOPY=.FALSE.

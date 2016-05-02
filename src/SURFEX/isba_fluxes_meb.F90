@@ -28,7 +28,7 @@
            PEVAP_C_A,PLEV_V_C,PEVAP_G_C,PEVAP_N_C,PEVAP_N_A,                                  &
            PEVAP,PSUBL,PLETR_V_C,PLER_V_C,PLEG,PLEGI,                                         &
            PLE_FLOOD,PLEI_FLOOD,PLES,PLEL,                                                    &
-           PEVAPN,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,PTS_RAD,PEMIS                             )
+           PEVAPN,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,PTS_RAD,PEMIS,PLSTT                       )
 !     ##########################################################################
 !
 !!****  *ISBA_FLXUES_MEB*  
@@ -131,13 +131,14 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PQSAT_G, PQSAT_V, PQSATI_N
 !                                     PQSAT_V  = saturation specific humidity for the vegetation canopy (kg kg-1)
 !                                     PQSATI_N = saturation specific humidity over ice for the snowpack (kg kg-1)
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PFF, PPSN, PPSNA, PPSNCV, PFROZEN1, PFFROZEN
+REAL, DIMENSION(:),   INTENT(IN)   :: PFF, PPSN, PPSNA, PPSNCV, PFROZEN1, PFFROZEN, PLSTT
 !                                     PFF      = total flooded fraction                                        (-) 
 !                                     PPSN     = fraction of snow on ground and understory vegetation          (-)
 !                                     PPSNA    = fraction of vegetation canopy buried by ground-based snowpack (-)
 !                                     PPSNCV   = fraction of vegetation canopy covered by intercepted snow     (-)
 !                                     PFROZEN1 = frozen fraction of surface ground layer                       (-)
 !                                     PFFROZEN = frozen fraction of flooded zone                               (-)
+!                                     PLSTT    = effecitve latent heat of sublimation                       (J/kg)
 !
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PLEG_DELTA, PLEGI_DELTA, PHUGI, PHUG, PHVG, PHVN
@@ -501,7 +502,7 @@ PLEI(:)      = PLES(:) + PLEGI(:) + PLEI_FLOOD(:)
 !
 ! Total sublimation from the surface/snow/vegetation: kg m-2 s-1
 !
-PSUBL(:)     = PLEI(:)/XLSTT
+PSUBL(:)     = PLEI(:)/PLSTT(:)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_FLUXES_MEB',1,ZHOOK_HANDLE)
 !

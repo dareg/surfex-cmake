@@ -1,5 +1,6 @@
 !     #########
-      SUBROUTINE ISBA_MEB(TPTIME, OMEB, OMEB_LITTER, PGNDLITTER, OFORC_MEASURE, OGLACIER, &
+      SUBROUTINE ISBA_MEB(TPTIME, OMEB, OMEB_LITTER, OMEB_GNDRES, PGNDLITTER,  &
+        OFORC_MEASURE, OGLACIER,                                               &
         OTR_ML, OAGRI_TO_GRASS, OSHADE, OSTRESSDEF,                            &
         OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD, HPHOTO,                                         &           
@@ -37,7 +38,7 @@
         PSR_GN, PMELTCV, PFRZCV, PMELTADV,                                     &
         PLE_FLOOD, PLEI_FLOOD,                                                 &
         PLE, PH, PRN, PLEI, PLEGI, PLEG,PLELITTERI,PLELITTER,PDRIPLIT,PRRLIT,  &
-        PLEV, PLER, PLETR, PEVAP,                                              &
+        PLEV, PLER, PLETR, PEVAP, PLES, PLESL,                                 &
         PSUBL, PRESTORE, PGRNDFLUX, PFLSN_COR, PUSTAR,                         &
         PHPSNOW, PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                      &
         PUSTARSNOW, PSRSFC, PRRSFC, PEMISNOW, PCDSNOW, PCHSNOW,                &
@@ -46,7 +47,8 @@
         PDELHEATN, PDELHEATN_SFC, PRESTOREN,                                   &
         PD_G, PDZG, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,               &
         PTDEEP_A, PTDEEP_B, PDEEP_FLUX, PMUF, PDRIP, PRRVEG,                   &
-        PRISNOW, PSNOW_THRUFAL, PEVAPCOR, PSUBVCOR, PSNOWSFCH, PSNDRIFT, PQSNOW)
+        PRISNOW, PSNOW_THRUFAL, PSNOW_THRUFAL_SOIL, PEVAPCOR, PSUBVCOR,PLITCOR,&
+        PSNOWSFCH, PSNDRIFT, PQSNOW                                            )
 !     ##########################################################################
 !
 !                             
@@ -136,6 +138,7 @@ TYPE(DATE_TIME),      INTENT(IN)    :: TPTIME        ! current date and time
 LOGICAL,              INTENT(IN)    :: OMEB          ! True = patch with multi-energy balance 
 !                                                    ! False = patch with classical ISBA 
 LOGICAL,              INTENT(IN)    :: OMEB_LITTER   ! Flag for litter
+LOGICAL,              INTENT(IN)    :: OMEB_GNDRES   ! Flag for ground resistance
 LOGICAL,              INTENT(IN)    :: OFORC_MEASURE ! switch for using measured data (drag scheme)
 LOGICAL,              INTENT(IN)    :: OGLACIER      ! True = Over permanent snow and ice, 
 !                                                    ! initialise WGI=WSAT,
@@ -444,7 +447,9 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PLER          ! latent heat of the fracti
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLETR         ! evapotranspiration of the rest
 !                                                    ! of the vegetation
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEVAP         ! total evaporative flux (kg/m2/s)
-REAL, DIMENSION(:),   INTENT(OUT)   :: PSUBL         ! sublimation flux (kg/m2/s)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLES          ! sublimation from ground-based snowpack [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLESL         ! evaporation from ground-based snowpack [W/m2]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSUBL         ! total sublimation flux soil/snow/vegtation interception (kg/m2/s)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PRESTORE      ! surface restore flux for Force-Restore, diffusive flux between uppermost and second soil layers
 !                                                    ! when using the DIF soil option (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PUSTAR        ! friction velocity
@@ -513,11 +518,17 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PRRVEG        ! Water intercepted by the 
 REAL, DIMENSION(:),   INTENT(OUT)   :: PRISNOW       ! Richarson number over ground-based snowpack (-)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOW_THRUFAL ! rate that liquid water leaves (explicit) snow pack: 
 !                                                    ! ISBA-ES or CROCUS [kg/(m2 s)]
+REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOW_THRUFAL_SOIL !liquid water leaving the snowpack directly to the 
+!                                                         !soil, ISBA-ES: [kg/(m2 s)] (equal to ZSNOW_THRUFAL
+!                                                         !if OMEB_LITTER=False and zero if OMEB_LITTER=True)
+!                                                    ! ISBA-ES or CROCUS [kg/(m2 s)]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEVAPCOR      !  evaporation correction as last traces of snow
 !                                                    ! cover ablate..if sublimation exceeds trace amounts
                                                      ! of snow during time step, required residual mass taken 
                                                      ! from sfc soil layer [kg/(m2 s)]
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSUBVCOR      ! A possible snow mass correction (to be potentially    
+!                                                    !  removed from soil)  (kg/m2/s)
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLITCOR       ! A possible ice mass correction in litter layer (to be potentially    
 !                                                    !  removed from soil)  (kg/m2/s)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWSFCH     ! snow surface layer pseudo-heating term owing to
 !                                                    !  changes in grid thickness            (W/m2)
@@ -642,7 +653,8 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZH_N_A               ! Sen
 REAL, DIMENSION(SIZE(PPS))                         :: ZVEGFACT             ! Fraction of canopy vegetation possibly receiving 
 !                                                                          !  rainfall                                              (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZRRSFC               ! The sum of all non-intercepted rain and canopy drip    (kg/m2/s)
-REAL, DIMENSION(SIZE(PPS))                         :: ZRRSFCL              ! The sum of all non-intercepted rain and litter drip    (kg/m2/s)
+REAL, DIMENSION(SIZE(PPS))                         :: ZRRSFCL              ! The sum of all non-intercepted rain and drip from      (kg/m2/s)
+                                                                           ! litter
 REAL, DIMENSION(SIZE(PPS))                         :: ZLES3L               ! latent heat flux - sublimation of ice from the ground 
 !                                                                          !  based snowpack (W/m2)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLEL3L               ! latent heat flux - evaporation of liquid water from the 
@@ -703,7 +715,7 @@ REAL, DIMENSION(SIZE(PPS))   :: ZLE_SUM, ZLE_C_A_SUM, ZLE_V_C_SUM, ZLE_G_C_SUM, 
                                 ZLES_V_C_SUM, ZLETR_SUM, ZLER_SUM, ZLEV_SUM,              &
                                 ZLEI_SUM, ZLES3L_SUM, ZLEL3L_SUM, ZEVAP3L_SUM,            &
                                 ZUSTAR2_SUM, ZUSTAR2SNOW_SUM, ZCDSNOW_SUM,                &
-                                ZCHSNOW_SUM, ZRISNOW_SUM
+                                ZCHSNOW_SUM, ZRISNOW_SUM, ZEVAP_SUM
 
 REAL, DIMENSION(SIZE(PPS))   :: ZGRNDFLUX_SUM, ZRESTORE_SUM
 
@@ -1008,7 +1020,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               ZSNOWSWE(:,1),                                            &
               PWR, ZCHIP, ZTSTEP, ZRS, ZRSN,                            &
               PPSN, PPALPHAN, PZREF, PUREF, PH_VEG, PDIRCOSZW,          &
-              ZPSNCV, ZDELTA, PLAI, OMEB_LITTER,                        &
+              ZPSNCV, ZDELTA, PLAI, OMEB_GNDRES,                        &
               PCH, PCD, PCDN, PRI, PRESA, ZVELC,                        &
               PCDSNOW, PCHSNOW, PRISNOW, ZUSTAR2SNOW,                   &
               PHUG, ZHUGI, PHV, ZHVG, ZHVN, PHU, PQS, PRS,              &
@@ -1079,7 +1091,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PEVAP,PSUBL,PLETR_V_C,PLER_V_C,ZLESFC,ZLESFCI,                           &
               PLE_FLOOD,PLEI_FLOOD,ZLES3L,ZLEL3L,                                      &
               ZEVAP3L,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,                               &
-              PTS_RAD,PEMIST                                                           )
+              PTS_RAD,PEMIST,PLSTT                                                     )
 !
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEC+LES+LEL) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
@@ -1106,7 +1118,7 @@ CALL AVG_FLUXES_MEB_TSPLIT     ! average fluxes over time split
 !             ------------------------------------------
 !
 CALL SNOW_LOAD_MEB(PTSTEP,PSR,PTV,ZWRVNMAX,ZKVN,ZCHEATV,PLER_V_C,PLES_V_C,ZMELTVN, &
-     ZVELC,PMELTCV,PFRZCV,PSR_GN,PWR,PWRVN,PSUBVCOR)
+     ZVELC,PMELTCV,PFRZCV,PSR_GN,PWR,PWRVN,PSUBVCOR,PLVTT,PLSTT)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -1141,7 +1153,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
 !
 CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
         ZRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
-        PWR, ZWRMAX, ZRRSFC, PDRIP, PRRVEG               )
+        PWR, ZWRMAX, ZRRSFC, PDRIP, PRRVEG, PLVTT        )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -1153,14 +1165,14 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                                    &
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                                 &
            ZTGL, PCG, ZCTSFC, ZSOILHCAPZ, ZSOILCONDZ(:,1),                             &
-           PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, ZRRSFC, PSR_GN,                    &
-           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,                                      &
+           PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, ZRRSFC, PSR_GN,                     &
+           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PLVTT, PLSTT,                        &
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, ZALBG, ZD_G, ZDZG,            &
            PPEW_A_COEF, PPEW_B_COEF,                                                   &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
            PSNOW_THRUFAL, PGRNDFLUX, PFLSN_COR, PRESTOREN, PEVAPCOR,                   &
            PSWNET_N, PSWNET_NS, PLWNET_N,                                              &
-           PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, ZLES3L, ZLEL3L, ZEVAP3L,              &
+           PRNSNOW, PHSNOW, PGFLUXSNOW, PHPSNOW, PLES, PLESL, ZEVAP3L,                 &
            PSNDRIFT, PUSTARSNOW,                                                       & 
            PPSN, PSRSFC, PRRSFC, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC,                  &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
@@ -1175,17 +1187,20 @@ IF(OMEB_LITTER)THEN
    ZWORK(:)   = 0.
    ZWORK2(:)  = PWRL(:)
    ZWORK3(:)  = 1.
-   ZWORK4(:)  = PSNOW_THRUFAL(:) + PRRSFC(:)
+   ZWORK4(:)  = PSNOW_THRUFAL(:) + ZRRSFC(:)*(1-PPSN)
    ZWRLMAX(:) = PGNDLITTER(:)*ZWFC(:,1)*XRHOLW
 
    CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
-        ZWORK4(:), ZLESFC,ZWORK, ZWORK3, ZWORK,      &
-        PWRL , ZWRLMAX, ZRRSFCL, PDRIPLIT, PRRLIT    )
-
+        ZWORK4(:), ZLESFC,ZWORK, ZWORK3, ZWORK,&
+        PWRL , ZWRLMAX, ZRRSFCL, PDRIPLIT, PRRLIT, PLVTT)
+!
+   PRRSFC(:)        = ZRRSFCL(:)
+   PSNOW_THRUFAL_SOIL(:) = 0.0
+!
 ELSE
-
-   ZRRSFCL(:) = ZRRSFC(:)
-
+!
+   PSNOW_THRUFAL_SOIL(:) = PSNOW_THRUFAL(:)
+!
 ENDIF
 !
 !*      11.0    Separate litter and soil temperature
@@ -1205,7 +1220,8 @@ IF(OMEB_LITTER)THEN
 CALL ICE_LITTER(PTSTEP, PLELITTERI,                  &
                 PSOILHCAPZ,                          &
                 PTG, PTL, PWGI, PWG, KWG_LAYER,      &
-                PDZG,PWRL,PWRLI,PGNDLITTER,ZPHASEL,ZCTSFC   )
+                PDZG,PWRL,PWRLI,PGNDLITTER,ZPHASEL,  &
+                ZCTSFC,PLSTT,PLITCOR)
 !
 ENDIF
 !
@@ -1263,6 +1279,7 @@ ZLEI_SUM(:)      = 0.0
 ZLES3L_SUM(:)    = 0.0
 ZLEL3L_SUM(:)    = 0.0
 ZEVAP3L_SUM(:)   = 0.0
+ZEVAP_SUM(:)     = 0.0
 !
 ZHU_AGG_SUM(:)   = 0.0
 ZAC_AGG_SUM(:)   = 0.0
@@ -1350,6 +1367,7 @@ ZLEI_SUM(:)      = ZLEI_SUM(:)      + PLEI(:)
 ZLES3L_SUM(:)    = ZLES3L_SUM(:)    + ZLES3L(:) 
 ZLEL3L_SUM(:)    = ZLEL3L_SUM(:)    + ZLEL3L(:) 
 ZEVAP3L_SUM(:)   = ZEVAP3L_SUM(:)   + ZEVAP3L(:) 
+ZEVAP_SUM(:)     = ZEVAP_SUM(:)     + PEVAP(:) 
 !
 ZHU_AGG_SUM(:)   = ZHU_AGG_SUM(:)   + PHU_AGG(:)
 ZAC_AGG_SUM(:)   = ZAC_AGG_SUM(:)   + PAC_AGG(:)
@@ -1436,9 +1454,10 @@ PLETR(:)     = ZLETR_SUM(:)     /JTSPLIT_EB
 PLER(:)      = ZLER_SUM(:)      /JTSPLIT_EB
 PLEV(:)      = ZLEV_SUM(:)      /JTSPLIT_EB
 PLEI(:)      = ZLEI_SUM(:)      /JTSPLIT_EB
-ZLES3L(:)    = ZLES3L_SUM(:)    /JTSPLIT_EB
-ZLEL3L(:)    = ZLEL3L_SUM(:)    /JTSPLIT_EB
+PLES(:)      = ZLES3L_SUM(:)    /JTSPLIT_EB
+PLESL(:)     = ZLEL3L_SUM(:)    /JTSPLIT_EB
 ZEVAP3L(:)   = ZEVAP3L_SUM(:)   /JTSPLIT_EB
+PEVAP(:)     = ZEVAP_SUM(:)     /JTSPLIT_EB
 !
 PHU_AGG(:)   = ZHU_AGG_SUM(:)   /JTSPLIT_EB
 PAC_AGG(:)   = ZAC_AGG_SUM(:)   /JTSPLIT_EB
@@ -1484,6 +1503,8 @@ ZRNET_G(:)   = PSWNET_G(:) + PLWNET_G(:)
 PRNSNOW(:)   = PSWNET_N(:) + PLWNET_N(:)
 !
 PRN(:)       = ZRNET_V(:) + ZRNET_G(:) + PRNSNOW(:) 
+!
+PLEV_V_C(:)  = PLE_V_C(:) - PLES_V_C(:)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 !
@@ -1968,9 +1989,10 @@ END SUBROUTINE PREP_MEB_SOIL
 SUBROUTINE ICE_LITTER(PTSTEP, PLELITTERI,                 &
                      PSOILHCAPZ,                          &
                      PTG, PTL, PWGI, PWG, KWG_LAYER,      &
-                     PDZG,PWRL,PWRLI,PGNDLITTER,PPHASEL,PCTSFC   )
+                     PDZG,PWRL,PWRLI,PGNDLITTER,PPHASEL,  &
+                     PCTSFC,PLSTT,PLITCOR)
 !
-USE MODD_CSTS,     ONLY : XLMTT, XTT, XCI, XRHOLI, XRHOLW, XLSTT
+USE MODD_CSTS,     ONLY : XLMTT, XTT, XCI, XRHOLI, XRHOLW
 !
 IMPLICIT NONE
 !
@@ -1982,6 +2004,7 @@ REAL, INTENT(IN)                    :: PTSTEP
 REAL, DIMENSION(:), INTENT(IN)      :: PLELITTERI
 !                                      PLELITTERI = ice sublimation (m s-1)
 REAL, DIMENSION(:), INTENT(IN)      :: PCTSFC
+REAL, DIMENSION(:), INTENT(IN)      :: PLSTT
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PTL, PWRL, PWRLI
 !                                      PTL        = litter temperature (K)
@@ -2003,6 +2026,9 @@ INTEGER, DIMENSION(:), INTENT(IN)   :: KWG_LAYER
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PPHASEL
 !                                      PPHASEL = Phase changement in litter (W/m2)
+REAL, DIMENSION(:), INTENT(OUT)     :: PLITCOR
+!                                      PLITCOR = A possible ice mass correction (to be potentially    
+!                                                removed from soil)  (kg/m2/s)
 !
 !*      0.2    declarations of local variables
 !
@@ -2014,8 +2040,7 @@ REAL, DIMENSION(SIZE(PTG,1))        :: ZEXCESS, ZK, ZHCAPL,ZELITTERI,           
                                             ZDELTAT,ZPHASE,ZPHASEM,ZPHASEF,ZPHASEX, &
                                             ZWRL,ZWRLI,Z0,ZPHASEC
 !
-REAL                                :: ZPSIMAX, ZPSI, ZTGM,ZWGIM, ZEFFIC, ZWORK,    &
-                                       ZAPPHEATCAP
+REAL                                :: ZPSI
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -2037,6 +2062,7 @@ INL = MAXVAL(KWG_LAYER(:))
 !
 ZEXCESS(:)  = 0.0
 ZPHASEC(:)  = 0.0
+PLITCOR (:)  = 0.0
 !
 ZHCAPL(:)   = 1/(PCTSFC(:)*PGNDLITTER(:))
 !
@@ -2090,9 +2116,11 @@ PWRLI(:)= ZWRLI(:) * PGNDLITTER(:) * XRHOLW
 ! 3. Adjust litter ice content for sublimation
 !    -----------------------------------------
 !
-ZELITTERI(:) = PLELITTERI(:) * (PTSTEP/XLSTT)                    
-ZEXCESS(:)   = MAX( 0.0 , ZELITTERI(:) - PWRLI(:) )       
-PWRLI  (:)   = PWRLI(:) - ( ZELITTERI(:) - ZEXCESS(:) )                    
+!
+ZELITTERI(:) = PLELITTERI(:) * (PTSTEP/PLSTT)
+ZEXCESS(:)   = MAX( 0.0 , ZELITTERI(:) - PWRLI(:) )
+PLITCOR=ZEXCESS/PTSTEP
+PWRLI  (:)   = PWRLI(:) - ( ZELITTERI(:) - ZEXCESS(:) )
 !
 ! 4. Prevent some possible problems
 !    ------------------------------

@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE HYDRO_VEG(HRAIN, PTSTEP, PMUF, PRR, PLEV, PLETR,    &
                               PVEG, PPSNV, PWR, PWRMAX, PPG, PDRIP,    &
-                              PRRVEG  )    
+                              PRRVEG, PLVTT  )    
 !     #####################################################################
 !
 !!****  *HYDRO_VEG*  
@@ -62,8 +62,6 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,ONLY : XLVTT
-!
 USE MODD_SGH_PAR, ONLY : X001
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -81,11 +79,12 @@ IMPLICIT NONE
 REAL, INTENT(IN)                    :: PTSTEP
 !                                      timestep of the integration
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PRR,  PLEV, PLETR, PMUF
+REAL, DIMENSION(:), INTENT(IN)    :: PRR,  PLEV, PLETR, PMUF, PLVTT
 !                                      PRR   = rain rate
 !                                      PLEV = latent heat of evaporation over vegetation
 !                                      PLETR = evapotranspiration of the vegetation
 !                                      PMUF   = fraction of the grid cell reached by the precipitation
+!                                      PLVTT  = latent heat of vaporization (J/kg)
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PVEG, PWRMAX
 !                                      PVEG   = fraction of vegetation
@@ -132,7 +131,7 @@ ZWR   (:) = 0.
 !
 !evaporation rates
 !
-ZER(:)    = (PLEV(:)-PLETR(:))  / XLVTT
+ZER(:)    = (PLEV(:)-PLETR(:))  / PLVTT(:)
 !
 !intercepted rainfall rate
 !

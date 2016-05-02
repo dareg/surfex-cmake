@@ -207,6 +207,13 @@ IF (ISIZE_LMEB_PATCH>0)THEN
    CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,I%LMEB_LITTER,IRESP,HCOMMENT=YCOMMENT)
 !
+!* flag indicating if ground resistance is used or not
+!
+   YRECFM='MEB_GNDRES'
+   YCOMMENT=YRECFM
+   CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,YRECFM,I%LMEB_GNDRES,IRESP,HCOMMENT=YCOMMENT)
+!
 ENDIF
 !
 !*       2.     Physiographic data fields:

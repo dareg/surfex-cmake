@@ -20,7 +20,7 @@
                          PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,   &
                          PIRRIG_GR, PQSB, PFWTD, PWTD,                      &
                          PDELHEATG, PDELHEATG_SFC,                          &
-                         PDELPHASEG, PDELPHASEG_SFC                         )
+                         PDELPHASEG, PDELPHASEG_SFC, PLVTT, PLSTT           )
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -93,7 +93,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT, XLMTT
+USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLSTT, XLMTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN, XDENOM_MIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
@@ -158,8 +158,9 @@ REAL, DIMENSION(:), INTENT(IN)    :: PRR, PSR, PLEV, PLETR, PLEG, PLES
 !                                      PLEG = latent heat of evaporation over the ground
 !                                      PLES = latent heat of sublimation over the snow
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFB ! slope of the runoff curve
-REAL, DIMENSION(:), INTENT(IN)    :: PWDRAIN  ! minimum Wg for drainage (m3/m3)
+REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFB      ! slope of the runoff curve
+REAL, DIMENSION(:), INTENT(IN)    :: PLVTT, PLSTT  ! latent heat of vaporization and sublimation (J/kg)  
+REAL, DIMENSION(:), INTENT(IN)    :: PWDRAIN       ! minimum Wg for drainage (m3/m3)
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PC1, PC2, PWGEQ, PCG, PCT
 REAL, DIMENSION(:,:), INTENT(IN)  :: PC3
@@ -489,7 +490,7 @@ IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
 !
    CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
                    ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
-                   PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
+                   PWR, PWRMAX, ZPG, PDRIP, PRRVEG, PLVTT ) 
 !
 !
 !
@@ -549,7 +550,7 @@ ENDIF
 ! - Horton runoff : Direct or exponential precipitation distribution
 ! - Floodplains interception and infiltration
 !
- CALL HYDRO_SGH(HISBA,HRUNOFF,HRAIN,HHORT,         &
+ CALL HYDRO_SGH(HISBA,HRUNOFF,HRAIN,HHORT,        &
                  PTSTEP,PD_G,PDZG,                &
                  PWSAT,PWFC,PWWILT,               &
                  PWG, PWGI, KWG_LAYER,            &
@@ -640,10 +641,10 @@ IF (HISBA=='DIF') THEN
 ! ------------------------------------------------------------------
 !
   ZPG     (:) =  ZPG    (:)        / XRHOLW
-  ZEVAPCOR(:) = PEVAPCOR(:)        / XRHOLW
-  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*XLVTT)
-  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*XLVTT)
-  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*XLSTT)
+  ZEVAPCOR(:) = ZEVAPCOR(:)        / XRHOLW
+  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*PLVTT(:))
+  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*PLVTT(:))
+  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*PLSTT(:))
 !
   DO JDT = 1,INDT
 !                      

@@ -21,7 +21,8 @@
                          PLETR_ISBA, PUSTAR_ISBA, PLER_ISBA, PLE_ISBA,           &
                          PLEI_ISBA, PGFLUX_ISBA, PMELTADV, PTG,                  &
                          PEMIST, PALBT, PLE_FLOOD, PLEI_FLOOD,                   &
-                         PFFG, PFFV, PFF, PPALPHAN, PTC                          )
+                         PFFG, PFFV, PFF, PPALPHAN, PTC, OMEB_LITTER, PLELITTER, &
+                         PLELITTERI                                              )
 !     ##########################################################################
 !
 !
@@ -197,6 +198,9 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PLE      ! total latent heat flux
 REAL, DIMENSION(:), INTENT(OUT)   :: PLEI     ! sublimation latent heat flux
 REAL, DIMENSION(:), INTENT(INOUT) :: PLEGI    ! latent heat of sublimation over frozen soil
 REAL, DIMENSION(:), INTENT(INOUT) :: PLEG     ! latent heat of evaporation
+REAL, DIMENSION(:), INTENT(IN)    :: PLELITTERI! sublimation of water in litter reservoir
+REAL, DIMENSION(:), INTENT(IN)    :: PLELITTER !sublimation of water in litter reservoir
+LOGICAL, INTENT(IN)               :: OMEB_LITTER !True = litter option activated
 !                                             ! over the ground
 REAL, DIMENSION(:), INTENT(INOUT) :: PLEV     ! latent heat of evaporation
 !                                             ! over the vegetation
@@ -254,34 +258,21 @@ ZWORK(:) = 0.
 !
 IF(OMEB)THEN
 !
-! MEB uses only an explicit scheme option.
-! Fluxes enter here as "snow relative", here we
-! transform back to "patch or grid box relative" (by incorporating
-! the notion of fractional coverage)
-!
-   PLES(:)        =  PPSN(:) * PLES3L(:)
-   PLESL(:)       =  PPSN(:) * PLEL3L(:)
-   PEVAP3L(:)     =  PPSN(:) * PEVAP3L(:)
-   PRNSNOW(:)     =  PPSN(:) * PRNSNOW(:)
-   PHSNOW(:)      =  PPSN(:) * PHSNOW(:)
-   PGFLUXSNOW(:)  =  PPSN(:) * PGFLUXSNOW(:)
-   PGSFCSNOW(:)   =  PPSN(:) * PGSFCSNOW(:)
-   PSNOWHMASS(:)  =  PPSN(:) * PSNOWHMASS(:)  
-   PHPSNOW(:)     =  PPSN(:) * PHPSNOW(:)
-   PLWNETSNOW(:)  =  PPSN(:) * PLWNETSNOW(:)
-   PSWNETSNOW(:)  =  PPSN(:) * PSWNETSNOW(:)
-   PSWNETSNOWS(:) =  PPSN(:) * PSWNETSNOWS(:)
-   PGRNDFLUX(:)   =  PPSN(:) * (PZGRNDFLUX(:)+PFLSN_COR(:))
-   PMELTADV(:)    =  PPSN(:) * PMELTADV(:)
-
 ! Snow free (ground-based snow) diagnostics: canopy and ground blended (W m-2):
 ! NOTE that the effects of snow cover *fraction* are implicitly *included* in these fluxes 
 ! so do NOT multiply by snow fraction.
 
    PRN_ISBA(:)    = PSWNET_V(:) + PSWNET_G(:) + PLWNET_V(:) + PLWNET_G(:)
    PH_ISBA(:)     = PH_V(:) + PH_G(:)
-   PLEG_ISBA(:)   = PLEG(:)
-   PLEGI_ISBA(:)  = PLEGI(:)
+   IF (OMEB_LITTER) THEN
+    PLEG_ISBA(:)   = PLELITTER(:)
+    PLEGI_ISBA(:)  = PLELITTERI(:)
+    PLEG(:)        = PLELITTER(:)
+    PLEGI(:)       = PLELITTERI(:)
+   ELSE
+    PLEG_ISBA(:)   = PLEG(:)
+    PLEGI_ISBA(:)  = PLEGI(:)
+   ENDIF
    PLEI_ISBA(:)   = PLEGI(:) + PLEI_FLOOD(:) + PLES(:) + PLES_V_C(:)
    PLEV_ISBA(:)   = PLEV_V_C(:)
    PLETR_ISBA(:)  = PLETR_V_C(:) 
@@ -291,7 +282,6 @@ IF(OMEB)THEN
 ! LE includes intercepted snow sublimation
    PLE_ISBA(:)    = PLEG_ISBA(:) + PLEGI_ISBA(:) + PLEV_ISBA(:) + PLE_FLOOD(:) + PLES_V_C(:) + PLEI_FLOOD(:)
    PGFLUX_ISBA(:) = PRN_ISBA(:) - PH_ISBA(:) - PLE_ISBA(:)
-   PLEI_ISBA(:)   = PLEGI(:) + PLEI_FLOOD(:) 
 !
    PEMIST(:)      = PEMIS(:)
 !
