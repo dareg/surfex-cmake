@@ -32,6 +32,8 @@ MODULE MODE_READ_SURF_LFI
 !!      original                                                     01/08/03
 !----------------------------------------------------------------------------
 !
+#ifdef SFX_LFI
+!
 INTERFACE READ_SURF0_LFI
         MODULE PROCEDURE READ_SURFX0_LFI
         MODULE PROCEDURE READ_SURFN0_LFI
@@ -1188,5 +1190,7 @@ YREC=TRIM(HREC)//'%TIME'
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_LFI:READ_SURFT2_LFI',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT2_LFI
+!
+#endif
 !
 END MODULE MODE_READ_SURF_LFI
