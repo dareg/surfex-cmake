@@ -220,16 +220,8 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_TC_FLOOR     ! thermal conductivity o
 REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_D_FLOOR      ! thickness of floor layers [m]
 !
 ! For multi-energy balance (MEB)
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RGLGV              ! 
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_GAMMAGV            !
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_RSMINGV            ! Understory minimum
-!                                                               ! stomatal resistance 
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_ROOT_EXTINCTIONGV  ! Understory Jackson coefficient
-REAL, DIMENSION(:,:),   ALLOCATABLE :: XDATA_WRMAX_CFGV
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_LAIGV              ! Understory LAI
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_GNDLITTER          ! Ground litter coverage
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_Z0LITTER           ! Ground litter roughness length
-REAL, DIMENSION(:,:), ALLOCATABLE :: XDATA_ROOT_DEPTHGV       ! Understory root depth
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: XDATA_H_VEG              ! Height of canopy vegetation
 !
 REAL, DIMENSION(:),   ALLOCATABLE :: XDATA_TCOOL_TARGET ! cooling setpoint of indoor air

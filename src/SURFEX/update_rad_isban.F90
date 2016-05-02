@@ -120,7 +120,7 @@ ISWB   = SIZE(PSW_BANDS)
 !
 IF(IO%LMEB_PATCH(KPATCH))THEN
   !
-  CALL PACK_SAME_RANK(PK%NR_P,PZENITH(:),       ZZENITH(:))
+  CALL PACK_SAME_RANK(PK%NR_P,PZENITH(:),ZZENITH(:))
   !
   ZVEG(:)=0.   ! Set veg=0 for MEB to get bare soil conditions for snow cover and
   !            ! flood fraction
@@ -226,8 +226,7 @@ IF(IO%LMEB_PATCH(KPATCH))THEN
       ! albedo: diagnosed from shortwave energy budget closure.
       ! Final note: purely diagnostic - apply limits for night time
 
-      ZALBT(:)      = 1. - (XSW_WGHT_VIS*(ZFAPAR(:)+ZFAPAR_BS(:)) +      &
-                            XSW_WGHT_NIR*(ZFAPIR(:)+ZFAPIR_BS(:)))
+      ZALBT(:)      = 1. - (XSW_WGHT_VIS*(ZFAPAR(:)+ZFAPAR_BS(:)) + XSW_WGHT_NIR*(ZFAPIR(:)+ZFAPIR_BS(:)))
       ZSWUP(:)      = ZGLOBAL_SW(:)*ZALBT(:)
       ZALBT(:)      = ZSWUP(:)/MAX(1.E-5, ZGLOBAL_SW(:))
       !

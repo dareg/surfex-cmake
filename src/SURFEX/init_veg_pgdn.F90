@@ -130,148 +130,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_VEG_PGD_n',0,ZHOOK_HANDLE)
 !
-!*       2.4    Fraction of each tile
-!               ---------------------
+!------------------------------------------------------------------------------------
+!------------------------------------------------------------------------------------
 !
-
+!        PART 1: fields that are needed unpacked and packed: defined unpacked
+!        -------------------------------------------------------------------
 !
-!*       2.6    Miscellaneous fields for ISBA:
-!               -----------------------------
-!
-!* default value for:
-! lateral water flux, deep soil temperature climatology and its relaxation time-scale
-!
-ALLOCATE(KK%XTDEEP (KSIZE))
-ALLOCATE(KK%XGAMMAT(KSIZE))
-KK%XTDEEP (:) = XUNDEF
-KK%XGAMMAT(:) = XUNDEF
-!
-IF (ODEEPSOIL) THEN
-  DO JILU = 1, KSIZE
-    KK%XTDEEP (JILU) = PTDEEP_CLI (KMONTH)
-    KK%XGAMMAT(JILU) = 1. / PGAMMAT_CLI(KMONTH)
-  END DO
-  !
-  WRITE(KLUOUT,*)' LDEEPSOIL = ',ODEEPSOIL,' LPHYSDOMC = ',OPHYSDOMC
-  WRITE(KLUOUT,*)' XTDEEP    = ',MINVAL(KK%XTDEEP(:)),MAXVAL(KK%XTDEEP(:))
-  WRITE(KLUOUT,*)' XGAMMAT   = ',MINVAL(KK%XGAMMAT(:)),MAXVAL(KK%XGAMMAT(:))
-ENDIF
-!
-!
-!*       2.7    Irrigation
-!               ----------
-!
-IF (OAGRIP) THEN
-  !
-  ALLOCATE(AGK%NIRRINUM     (KSIZE))
-  ALLOCATE(AGK%LIRRIDAY     (KSIZE))
-  ALLOCATE(AGK%LIRRIGATE    (KSIZE))
-  ALLOCATE(AGK%XTHRESHOLDSPT(KSIZE))
-  !
-  AGK%NIRRINUM (:) = 1
-  AGK%LIRRIDAY (:) = .FALSE.                          
-  AGK%LIRRIGATE(:) = .FALSE.                          
-  !
-  DO JILU = 1, KSIZE
-    AGK%XTHRESHOLDSPT(JILU) = PTHRESHOLD(AGK%NIRRINUM(JILU))
-  END DO
-ELSE
-  ALLOCATE(AGK%NIRRINUM     (0))
-  ALLOCATE(AGK%LIRRIDAY     (0))
-  ALLOCATE(AGK%LIRRIGATE    (0))
-  ALLOCATE(AGK%XTHRESHOLDSPT(0))
-ENDIF
-!
-!
-!*       2.8    Additional fields for ISBA-AGS:
-!               ------------------------------                        
-!
-IF(IO%CPHOTO /= 'NON' .AND. HINIT == 'ALL') THEN
-  IF (IO%LTR_ML) THEN
-    IABC = 10
-  ELSE
-    IABC = 3
-  ENDIF
-  ALLOCATE(S%XABC(IABC))
-  ALLOCATE(S%XPOI(IABC))
-  S%XABC(:) = 0.
-  S%XPOI(:) = 0.          
-  ZCO2(:) = PCO2(:) / PRHOA(:)
-  ALLOCATE(PK%XANMAX        (KSIZE))
-  ALLOCATE(PK%XFZERO        (KSIZE))
-  ALLOCATE(PK%XEPSO         (KSIZE))
-  ALLOCATE(PK%XGAMM         (KSIZE))
-  ALLOCATE(PK%XQDGAMM       (KSIZE))
-  ALLOCATE(PK%XQDGMES       (KSIZE))
-  ALLOCATE(PK%XT1GMES       (KSIZE))
-  ALLOCATE(PK%XT2GMES       (KSIZE))
-  ALLOCATE(PK%XAMAX         (KSIZE))
-  ALLOCATE(PK%XQDAMAX       (KSIZE))
-  ALLOCATE(PK%XT1AMAX       (KSIZE))
-  ALLOCATE(PK%XT2AMAX       (KSIZE))
-  ALLOCATE(PK%XAH           (KSIZE))
-  ALLOCATE(PK%XBH           (KSIZE))
-  ALLOCATE(PK%XTAU_WOOD     (KSIZE))
-  ALLOCATE(PK%XINCREASE     (KSIZE,IO%NNBIOMASS))
-  ALLOCATE(PK%XTURNOVER     (KSIZE,IO%NNBIOMASS))
-  CALL CO2_INIT_n(IO, S, PK, PEK, KSIZE, ZCO2  )
-
-ELSEIF(IO%CPHOTO == 'NON' .AND. IO%LTR_ML)THEN ! Case for MEB
-   IABC = 10
-   ALLOCATE (S%XABC(IABC))
-   ALLOCATE (S%XPOI(IABC)) ! Working
-   S%XABC(:) = 0.
-   S%XPOI(:) = 0.
-   CALL GAULEG(0.0,1.0,S%XABC,S%XPOI,IABC)
-   DEALLOCATE (S%XPOI)
-   ALLOCATE   (S%XPOI(0))
-ELSE
-  ALLOCATE(S%XABC(0))
-  ALLOCATE(S%XPOI(0))
-  !
-  ALLOCATE(PK%XANMAX        (0))
-  ALLOCATE(PK%XFZERO        (0))
-  ALLOCATE(PK%XEPSO         (0))
-  ALLOCATE(PK%XGAMM         (0))
-  ALLOCATE(PK%XQDGAMM       (0))
-  ALLOCATE(PK%XQDGMES       (0))
-  ALLOCATE(PK%XT1GMES       (0))
-  ALLOCATE(PK%XT2GMES       (0))
-  ALLOCATE(PK%XAMAX         (0))
-  ALLOCATE(PK%XQDAMAX       (0))
-  ALLOCATE(PK%XT1AMAX       (0))
-  ALLOCATE(PK%XT2AMAX       (0))
-  ALLOCATE(PK%XAH           (0))
-  ALLOCATE(PK%XBH           (0))
-  ALLOCATE(PK%XTAU_WOOD     (0))
-  ALLOCATE(PK%XINCREASE     (0,0))
-  ALLOCATE(PK%XTURNOVER     (0,0))  
-END IF
-!
-!
-!-------------------------------------------------------------------------------
-!
-!*       4.     Orographic roughness length
-!               ---------------------------
-!
-ALLOCATE(ISSK%XZ0EFFIP(KSIZE))
-ALLOCATE(ISSK%XZ0EFFIM(KSIZE))
-ALLOCATE(ISSK%XZ0EFFJP(KSIZE))
-ALLOCATE(ISSK%XZ0EFFJM(KSIZE))
-!
-ISSK%XZ0EFFIP(:) = XUNDEF
-ISSK%XZ0EFFIM(:) = XUNDEF
-ISSK%XZ0EFFJP(:) = XUNDEF
-ISSK%XZ0EFFJM(:) = XUNDEF
-!
-ALLOCATE(ISSK%XZ0REL  (KSIZE))
-!
-IF (SIZE(ISSK%XAOSIP)>0) CALL SUBSCALE_Z0EFF(ISSK,PEK%XZ0,.FALSE.) 
-!
-!-------------------------------------------------------------------------------
-!
-!*       5.1     Soil hydraulic characteristics:
-!                -------------------------------
+!*          Soil hydraulic characteristics:
+!           -------------------------------
 !
 IF (.NOT.ASSOCIATED(K%XMPOTSAT)) THEN
   !
@@ -309,7 +175,7 @@ IF (.NOT.ASSOCIATED(K%XMPOTSAT)) THEN
     ALLOCATE(K%XCGSAT (0))
     ALLOCATE(K%XC4B   (0))
     ALLOCATE(K%XACOEF (0))
-    ALLOCATE(K%XPCOEF (0))    
+    ALLOCATE(K%XPCOEF (0))
   ENDIF
   !
   IF(IO%CRUNOFF=='SGH')THEN
@@ -331,7 +197,229 @@ IF (.NOT.ASSOCIATED(K%XMPOTSAT)) THEN
     !
   ENDIF
   !
+  IF (IO%CSCOND=='PL98'.OR.IO%CISBA=='DIF') THEN
+    ALLOCATE(K%XHCAPSOIL(KI,IO%NGROUND_LAYER))
+    ALLOCATE(K%XCONDDRY (KI,IO%NGROUND_LAYER))
+    ALLOCATE(K%XCONDSLD (KI,IO%NGROUND_LAYER))
+    ! 
+    CALL HEATCAPZ(K%XSAND,K%XHCAPSOIL)
+    CALL THRMCONDZ(K%XSAND,K%XWSAT,K%XCONDDRY,K%XCONDSLD)
+  ELSE
+    ALLOCATE(K%XHCAPSOIL(0,0))
+    ALLOCATE(K%XCONDDRY (0,0))
+    ALLOCATE(K%XCONDSLD (0,0))
+  END IF
+  !
 ENDIF
+!
+!CSCOND used in soil.F90 and soildif.F90
+!
+IF (IO%CSCOND=='NP89'.AND.IO%CISBA=='DIF') THEN
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(KLUOUT,*)'IF CISBA=DIF, CSCOND=NP89 is not available'
+   WRITE(KLUOUT,*)'because not physic. CSCOND is put to PL98 '
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+ENDIF
+!
+!CPSURF used in drag.F90
+!CPL_ARP used in drag.F90 and e_budget.F90
+IF(IO%CCPSURF=='DRY'.AND.LCPL_ARP) THEN
+  CALL ABOR1_SFX('CCPSURF=DRY must not be used with LCPL_ARP')
+ENDIF
+!
+!------------------------------------------------------------------------------------
+!------------------------------------------------------------------------------------
+!
+!        PART 2: fields that are needed only packed: defined packed directly
+!        -------------------------------------------------------------------
+!
+!        PART 2: A: fields that don't depend on patches: KK, AGK, ISSK
+!        -------------------------------------------------------------
+!
+!*       2.A.1.    Miscellaneous fields for ISBA:
+!        ----------------------------------------
+!
+!* default value for:
+! lateral water flux, deep soil temperature climatology and its relaxation time-scale
+!
+!these arrays are used only packed: we define them directly packed
+ALLOCATE(KK%XTDEEP (KSIZE))
+ALLOCATE(KK%XGAMMAT(KSIZE))
+KK%XTDEEP (:) = XUNDEF
+KK%XGAMMAT(:) = XUNDEF
+!
+IF (ODEEPSOIL) THEN
+  DO JILU = 1, KSIZE
+    KK%XTDEEP (JILU) = PTDEEP_CLI (KMONTH)
+    KK%XGAMMAT(JILU) = 1. / PGAMMAT_CLI(KMONTH)
+  END DO
+  !
+  WRITE(KLUOUT,*)' LDEEPSOIL = ',ODEEPSOIL,' LPHYSDOMC = ',OPHYSDOMC
+  WRITE(KLUOUT,*)' XTDEEP    = ',MINVAL(KK%XTDEEP(:)) ,MAXVAL(KK%XTDEEP(:))
+  WRITE(KLUOUT,*)' XGAMMAT   = ',MINVAL(KK%XGAMMAT(:)),MAXVAL(KK%XGAMMAT(:))
+ENDIF
+!
+!
+!*         2.A.2. Initialize hydrology
+!          ---------------------------
+!
+IF (IO%CISBA == 'DIF') THEN
+  !
+  ALLOCATE(KK%XFWTD(KSIZE))
+  ALLOCATE(KK%XWTD (KSIZE))
+  KK%XFWTD(:) = 0.0
+  KK%XWTD (:) = XUNDEF
+  !
+ELSE
+  !    
+  IO%NLAYER_DUN=2
+  IO%NLAYER_HORT=2
+  !
+  ALLOCATE(KK%XFWTD(0))
+  ALLOCATE(KK%XWTD (0))
+  !   
+ENDIF
+!
+!
+!*         Physiographic Radiative fields:  
+!               ------------------------------
+!
+!
+!*        2.A.3. dry and wet bare soil albedos
+!         ------------------------------------
+!
+ALLOCATE(KK%XALBNIR_DRY  (KSIZE))
+ALLOCATE(KK%XALBVIS_DRY  (KSIZE))
+ALLOCATE(KK%XALBUV_DRY   (KSIZE))
+ALLOCATE(KK%XALBNIR_WET  (KSIZE))
+ALLOCATE(KK%XALBVIS_WET  (KSIZE))
+ALLOCATE(KK%XALBUV_WET   (KSIZE))
+!
+ CALL DRY_WET_SOIL_ALBEDOS(KK )
+!
+
+!
+!*       2.A.4. Irrigation
+!        -----------------
+!
+IF (OAGRIP) THEN
+  !
+  ALLOCATE(AGK%NIRRINUM     (KSIZE))
+  ALLOCATE(AGK%LIRRIDAY     (KSIZE))
+  ALLOCATE(AGK%LIRRIGATE    (KSIZE))
+  ALLOCATE(AGK%XTHRESHOLDSPT(KSIZE))
+  !
+  AGK%NIRRINUM (:) = 1
+  AGK%LIRRIDAY (:) = .FALSE.                          
+  AGK%LIRRIGATE(:) = .FALSE.                          
+  !
+  DO JILU = 1, KSIZE
+    AGK%XTHRESHOLDSPT(JILU) = PTHRESHOLD(AGK%NIRRINUM(JILU))
+  END DO
+ELSE
+  ALLOCATE(AGK%NIRRINUM     (0))
+  ALLOCATE(AGK%LIRRIDAY     (0))
+  ALLOCATE(AGK%LIRRIGATE    (0))
+  ALLOCATE(AGK%XTHRESHOLDSPT(0))
+ENDIF
+!
+!*       2.A.5. Orographic roughness length
+!        ----------------------------------
+!
+ALLOCATE(ISSK%XZ0EFFIP(KSIZE))
+ALLOCATE(ISSK%XZ0EFFIM(KSIZE))
+ALLOCATE(ISSK%XZ0EFFJP(KSIZE))
+ALLOCATE(ISSK%XZ0EFFJM(KSIZE))
+!
+ISSK%XZ0EFFIP(:) = XUNDEF
+ISSK%XZ0EFFIM(:) = XUNDEF
+ISSK%XZ0EFFJP(:) = XUNDEF
+ISSK%XZ0EFFJM(:) = XUNDEF
+!
+IF (SIZE(ISSK%XAOSIP)>0) CALL SUBSCALE_Z0EFF(ISSK,PEK%XZ0,.FALSE.)
+!
+!-----------------------------------------------------------------------
+!
+!        PART 2: B: fields that depend on patches: PK, PEK
+!        -------------------------------------------------
+!
+!
+!*       2.B.1. Additional fields for ISBA-AGS:
+!        --------------------------------------                 
+!
+IF(IO%CPHOTO /= 'NON' .AND. HINIT == 'ALL') THEN
+  !
+  IF (IO%LTR_ML) THEN
+    IABC = 10
+  ELSE
+    IABC = 3
+  ENDIF
+  ALLOCATE(S%XABC(IABC))
+  ALLOCATE(S%XPOI(IABC))
+  S%XABC(:) = 0.
+  S%XPOI(:) = 0.          
+  ZCO2(:) = PCO2(:) / PRHOA(:)
+  ALLOCATE(PK%XANMAX        (KSIZE))
+  ALLOCATE(PK%XFZERO        (KSIZE))
+  ALLOCATE(PK%XEPSO         (KSIZE))
+  ALLOCATE(PK%XGAMM         (KSIZE))
+  ALLOCATE(PK%XQDGAMM       (KSIZE))
+  ALLOCATE(PK%XQDGMES       (KSIZE))
+  ALLOCATE(PK%XT1GMES       (KSIZE))
+  ALLOCATE(PK%XT2GMES       (KSIZE))
+  ALLOCATE(PK%XAMAX         (KSIZE))
+  ALLOCATE(PK%XQDAMAX       (KSIZE))
+  ALLOCATE(PK%XT1AMAX       (KSIZE))
+  ALLOCATE(PK%XT2AMAX       (KSIZE))
+  ALLOCATE(PK%XAH           (KSIZE))
+  ALLOCATE(PK%XBH           (KSIZE))
+  ALLOCATE(PK%XTAU_WOOD     (KSIZE))
+  ALLOCATE(PK%XINCREASE     (KSIZE,IO%NNBIOMASS))
+  ALLOCATE(PK%XTURNOVER     (KSIZE,IO%NNBIOMASS))
+  CALL CO2_INIT_n(IO, S, PK, PEK, KSIZE, ZCO2  )
+  !
+ELSEIF(IO%CPHOTO == 'NON' .AND. IO%LTR_ML) THEN ! Case for MEB
+   !
+   IABC = 10
+   ALLOCATE (S%XABC(IABC))
+   ALLOCATE (S%XPOI(IABC)) ! Working
+   S%XABC(:) = 0.
+   S%XPOI(:) = 0.
+   CALL GAULEG(0.0,1.0,S%XABC,S%XPOI,IABC)
+   DEALLOCATE (S%XPOI)
+   ALLOCATE   (S%XPOI(0))
+   !
+ELSE
+  !
+  ALLOCATE(S%XABC(0))
+  ALLOCATE(S%XPOI(0))
+  !
+  ALLOCATE(PK%XANMAX        (0))
+  ALLOCATE(PK%XFZERO        (0))
+  ALLOCATE(PK%XEPSO         (0))
+  ALLOCATE(PK%XGAMM         (0))
+  ALLOCATE(PK%XQDGAMM       (0))
+  ALLOCATE(PK%XQDGMES       (0))
+  ALLOCATE(PK%XT1GMES       (0))
+  ALLOCATE(PK%XT2GMES       (0))
+  ALLOCATE(PK%XAMAX         (0))
+  ALLOCATE(PK%XQDAMAX       (0))
+  ALLOCATE(PK%XT1AMAX       (0))
+  ALLOCATE(PK%XT2AMAX       (0))
+  ALLOCATE(PK%XAH           (0))
+  ALLOCATE(PK%XBH           (0))
+  ALLOCATE(PK%XTAU_WOOD     (0))
+  ALLOCATE(PK%XINCREASE     (0,0))
+  ALLOCATE(PK%XTURNOVER     (0,0))
+  !
+END IF
+!
+!
+!*          2.B.2. Soil hydraulic characteristics (rest) :
+!           --------------------------------------------
+!
 !
 ALLOCATE(PK%XCONDSAT (KSIZE,IO%NGROUND_LAYER))
 ALLOCATE(PK%XTAUICE  (KSIZE))
@@ -345,28 +433,24 @@ IF (IO%CISBA=='2-L' .OR. IO%CISBA=='3-L') THEN
   !
   ALLOCATE(PK%XC1SAT (KSIZE))
   ALLOCATE(PK%XC2REF (KSIZE))
-  ALLOCATE(PK%XC4REF (KSIZE))    
   ALLOCATE(PK%XC3    (KSIZE,2))  
+  ALLOCATE(PK%XC4REF (KSIZE))      
   PK%XC1SAT(:) = C1SAT_FUNC(KK%XCLAY(:,1))
   PK%XC2REF(:) = C2REF_FUNC(KK%XCLAY(:,1))
-  PK%XC3     (:,1) = C3_FUNC(KK%XCLAY(:,1))
-  PK%XC3     (:,2) = C3_FUNC(KK%XCLAY(:,2))
+  PK%XC3 (:,1) = C3_FUNC   (KK%XCLAY(:,1))
+  PK%XC3 (:,2) = C3_FUNC   (KK%XCLAY(:,2))
   !
   PK%XC4REF(:) = C4REF_FUNC(KK%XCLAY(:,1),KK%XSAND(:,1),PK%XDG(:,2), &
                                         PK%XDG(:,IO%NGROUND_LAYER)  )
-
   !
 ELSE IF (IO%CISBA=='DIF') THEN
   !
   ALLOCATE(PK%XC1SAT (0))
   ALLOCATE(PK%XC2REF (0))
+  ALLOCATE(PK%XC3    (0,0))  
   ALLOCATE(PK%XC4REF (0))  
-  ALLOCATE(PK%XC3    (0,0))
   !
 END IF
-!
-!*       5.2     Soil thermal characteristics:
-!               --------------------------------
 !
 ALLOCATE(PK%XPCPS (KSIZE))
 ALLOCATE(PK%XPLVTT(KSIZE))
@@ -375,40 +459,9 @@ PK%XPCPS (:) = XCPD
 PK%XPLVTT(:) = XLVTT
 PK%XPLSTT(:) = XLSTT
 !
-!CSCOND used in soil.F90 and soildif.F90
 !
-IF (IO%CSCOND=='NP89'.AND.IO%CISBA=='DIF') THEN
-   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(KLUOUT,*)'IF CISBA=DIF, CSCOND=NP89 is not available'
-   WRITE(KLUOUT,*)'because not physic. CSCOND is put to PL98 '
-   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-   WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-ENDIF
-!
-IF (IO%CSCOND=='PL98'.OR.IO%CISBA=='DIF') THEN
-  ALLOCATE(K%XHCAPSOIL(KI,IO%NGROUND_LAYER))
-  ALLOCATE(K%XCONDDRY (KI,IO%NGROUND_LAYER))
-  ALLOCATE(K%XCONDSLD (KI,IO%NGROUND_LAYER))
-  ! 
-  CALL HEATCAPZ(K%XSAND,K%XHCAPSOIL)
-  CALL THRMCONDZ(K%XSAND,K%XWSAT,K%XCONDDRY,K%XCONDSLD)
-  !
-ELSE
-  ALLOCATE(K%XHCAPSOIL(0,0))
-  ALLOCATE(K%XCONDDRY (0,0))
-  ALLOCATE(K%XCONDSLD (0,0))
-END IF
-!
-!-------------------------------------------------------------------------------
-!CPSURF used in drag.F90
-!CPL_ARP used in drag.F90 and e_budget.F90
-IF(IO%CCPSURF=='DRY'.AND.LCPL_ARP) THEN
-  CALL ABOR1_SFX('CCPSURF=DRY must not be used with LCPL_ARP')
-ENDIF
-!
-!*       6.1    Initialize hydrology
-!               --------------------
+!*       2.B.3.  Initialize hydrology
+!        ----------------------------
 !
 ALLOCATE(PK%XRUNOFFD (KSIZE))
 PK%XRUNOFFD(:)=XUNDEF
@@ -420,25 +473,15 @@ IF (IO%CISBA == 'DIF') THEN
   ALLOCATE(PK%XSOILWGHT  (KSIZE,IO%NGROUND_LAYER))
   CALL DIF_LAYER(KSIZE, IO, PK )
 !
-   ALLOCATE(KK%XFWTD(KSIZE))
-   ALLOCATE(KK%XWTD (KSIZE))
-   KK%XFWTD(:) = 0.0
-   KK%XWTD (:) = XUNDEF
-!
 ELSE
 !   
   ALLOCATE(PK%XDZG       (0,0))
   ALLOCATE(PK%XDZDIF     (0,0))
   ALLOCATE(PK%XSOILWGHT  (0,0))
+  !
   WHERE(PK%XPATCH(:)>0.0)
     PK%XRUNOFFD(:) = PK%XDG(:,2)
   ENDWHERE
-!  
-  IO%NLAYER_DUN=2
-  IO%NLAYER_HORT=2
-!
-  ALLOCATE(KK%XFWTD(0))
-  ALLOCATE(KK%XWTD (0))
 !   
 ENDIF
 !
@@ -447,39 +490,27 @@ ENDIF
 ALLOCATE(PK%XKSAT_ICE(KSIZE))
 !
 IF(IO%CISBA/='DIF')THEN
-  PK%XD_ICE   (:)=MIN(PK%XDG(:,2),PK%XD_ICE(:))
-  PK%XD_ICE   (:)=MAX(XICE_DEPH_MAX,PK%XD_ICE(:))
-  PK%XKSAT_ICE(:)=PK%XCONDSAT(:,1)
+  PK%XD_ICE   (:) = MIN(PK%XDG(:,2),PK%XD_ICE(:))
+  PK%XD_ICE   (:) = MAX(XICE_DEPH_MAX,PK%XD_ICE(:))
+  PK%XKSAT_ICE(:) = PK%XCONDSAT(:,1)
 ELSE
-  PK%XD_ICE   (:)=0.0
-  PK%XKSAT_ICE(:)=0.0
+  PK%XD_ICE   (:) = 0.0
+  PK%XKSAT_ICE(:) = 0.0
 ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!*       8.     Physiographic Radiative fields:  
-!               ------------------------------
+!*        Physiographic Radiative fields:  
+!         ------------------------------
 !
+
 !
-!* dry and wet bare soil albedos
-!
-ALLOCATE(KK%XALBNIR_DRY  (KSIZE))
-ALLOCATE(KK%XALBVIS_DRY  (KSIZE))
-ALLOCATE(KK%XALBUV_DRY   (KSIZE))
-ALLOCATE(KK%XALBNIR_WET  (KSIZE))
-ALLOCATE(KK%XALBVIS_WET  (KSIZE))
-ALLOCATE(KK%XALBUV_WET   (KSIZE))
-!
- CALL DRY_WET_SOIL_ALBEDOS(KK)  
-!
-!
-!
-!*       2.9    Nitrogen version for isbaAgs
-!               ------------------------------                        
+!*       2.B.4.  Nitrogen version for isbaAgs
+!        ------------------------------------                        
 !
 IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
   ALLOCATE(PK%XBSLAI_NITRO (KSIZE ))
-  WHERE ((PEK%XCE_NITRO (:)*PEK%XCNA_NITRO(:)+PEK%XCF_NITRO (:)) /= 0. )
+  WHERE ((PEK%XCE_NITRO(:) * PEK%XCNA_NITRO(:) + PEK%XCF_NITRO (:)) /= 0. )
       PK%XBSLAI_NITRO(:) = 1. / (PEK%XCE_NITRO (:)*PEK%XCNA_NITRO(:)+PEK%XCF_NITRO (:))
   ELSEWHERE
       PK%XBSLAI_NITRO(:) = XUNDEF

@@ -20,16 +20,16 @@ SUBROUTINE ASSIM_NATURE_ISBA_ENKF(IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, 
 ! -----------------------------------------------------------------------------
 !
 USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
-USE MODD_ASSIM,         ONLY : NOBSTYPE, XERROBS, NVAR, NPRINTLEV, CVAR, &
-                               XF_PATCH, XF,COBS,CFILE_FORMAT_OBS,NENS, &
+USE MODD_ASSIM,         ONLY : NOBSTYPE, XERROBS, NVAR, NPRINTLEV, CVAR,   &
+                               XF_PATCH, XF,COBS,CFILE_FORMAT_OBS,NENS,    &
                                NECHGU, NBOUTPUT, NOBS, XYO, LENKF, LDENKF, &
-                               LPB_CORRELATIONS, LPERTURBATION_RUN, &
+                               LPB_CORRELATIONS, LPERTURBATION_RUN,        &
                                LBIAS_CORRECTION, XINFL
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
 #ifdef SFX_ARO
 USE YOMMP0,             ONLY : MYPROC 
@@ -62,6 +62,9 @@ REAL, DIMENSION(:), INTENT(IN) :: PHU2M
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
+!
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
 !
  CHARACTER(LEN=30)  :: YBGFILE
  CHARACTER(LEN=17)  :: YLFNAME
@@ -110,7 +113,7 @@ INTEGER :: IMYPROC
 INTEGER :: IOBS, IENS
 INTEGER :: ISTAT, ICPT, IUNIT
 !
-INTEGER :: JI,JP,JK,JJ,L,K1,L1
+INTEGER :: JI,JP,JK,JJ,L,K1,L1,INPATCH
 !
 LOGICAL :: GBEXISTS
 !
@@ -149,6 +152,8 @@ IMYPROC = NRANK+1
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
 IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
+!
+INPATCH = IO%NPATCH
 !
 !############################# INITIALISATIONS ###############################
 !
@@ -201,10 +206,13 @@ ENDIF
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
 DO JI = 1,KI
   ZMIN = XUNDEF
-  DO JP = 1,IO%NPATCH
-    DO JJ = 1,NP%AL(JP)%NSIZE_P
-      IF (NP%AL(JP)%NR_P(JJ) == JI) THEN
-        IF (NPE%AL(JP)%XWGI(JJ,1)<ZMIN) ZMIN = NPE%AL(JP)%XWGI(JJ,1)
+  DO JP = 1,INPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    !
+    DO JJ = 1,PK%NSIZE_P
+      IF (PK%NR_P(JJ) == JI) THEN
+        IF (PEK%XWGI(JJ,1)<ZMIN) ZMIN = PEK%XWGI(JJ,1)
         EXIT
       ENDIF
     ENDDO
@@ -221,11 +229,11 @@ IF ( NPRINTLEV > 0 ) CLOSE(111)
 ! Recentering THE FORECAST ENSEMBLE MEMBERS
 IF ( LBIAS_CORRECTION ) THEN
   !
-  ALLOCATE(ZF_MEAN0(KI,IO%NPATCH,NVAR))
-  ALLOCATE(ZF_PATCH_MEAN(KI,IO%NPATCH,NOBS))
+  ALLOCATE(ZF_MEAN0(KI,INPATCH,NVAR))
+  ALLOCATE(ZF_PATCH_MEAN(KI,INPATCH,NOBS))
   !
   DO JI = 1,KI
-    DO JP=1,IO%NPATCH
+    DO JP=1,INPATCH
       DO L = 1,NVAR
         ZF_MEAN0(JI,JP,L) = SUM(XF(JI,JP,1:NENS,L))/REAL(NENS)
       ENDDO
@@ -236,7 +244,7 @@ IF ( LBIAS_CORRECTION ) THEN
   ENDDO
   !
   DO JI = 1,KI
-    DO JP = 1,IO%NPATCH
+    DO JP = 1,INPATCH
       DO IENS = 1,NENS
         !
         DO L = 1,NVAR
@@ -289,7 +297,7 @@ DO JI=1,KI
   !
   !---------------- MEAN SIMULATED OBS AVERAGED OVER TILES-----------------------
   ZYF(:,:) = 0.
-  DO JP = 1,IO%NPATCH 
+  DO JP = 1,INPATCH 
     IF (S%XPATCH(JI,JP) > 0.0) THEN
       WHERE ( XF_PATCH(JI,JP,:,:)/=XUNDEF ) 
         ZYF(:,:) = ZYF(:,:) + S%XPATCH(JI,JP)*XF_PATCH(JI,JP,:,:)
@@ -368,7 +376,7 @@ DO JI=1,KI
   !
   IF (.NOT.LPERTURBATION_RUN) THEN
     !
-    DO JP = 1,IO%NPATCH
+    DO JP = 1,INPATCH
       !
       CALL OUTER_PRODUCT(NENS,NVAR,NOBS,ZF(JP,:,:),S%XPATCH(JI,JP)*ZF_PATCH(JP,:,:),&
                          ZBHT(:,:),ZHBHT(:,:),LPB_CORRELATIONS,CVAR,COBS)
@@ -401,7 +409,7 @@ DO JI=1,KI
       !
       DO L = 1,NVAR
         !
-        DO JP = 1,IO%NPATCH       
+        DO JP = 1,INPATCH       
           !
           IF ( LDENKF .AND. CVAR(L)/="WG3" .AND. CVAR(L)/="TG3" ) THEN
             !
@@ -437,7 +445,7 @@ DO JI=1,KI
   ZF_AGG(:) = 0.
   ZA_AGG(:) = 0.
   DO L = 1,NVAR
-    DO JP = 1,IO%NPATCH
+    DO JP = 1,INPATCH
       IF (ZA_MEAN(JP,L)/=XUNDEF .AND. ZF_MEAN(JP,L)/=XUNDEF) THEN
         ZF_AGG(L) = ZF_AGG(L) + S%XPATCH(JI,JP) * ZF_MEAN(JP,L)
         ZA_AGG(L) = ZA_AGG(L) + S%XPATCH(JI,JP) * ZA_MEAN(JP,L)

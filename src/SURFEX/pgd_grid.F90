@@ -208,7 +208,7 @@ ENDIF
 ALLOCATE(UG%G%XLAT       (NL))
 ALLOCATE(UG%G%XLON       (NL))
 ALLOCATE(UG%G%XMESH_SIZE (NL))
-ALLOCATE(UG%XJPDIR     (NL))
+ALLOCATE(UG%XJPDIR       (NL))
  CALL LATLON_GRID(UG%G,NL, UG%XJPDIR)
 !
 !------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ ALLOCATE(UG%XJPDIR     (NL))
 !             --------------------------------
 !
 !* in meters
-XMESHLENGTH = SUM ( SQRT(UG%G%XMESH_SIZE) ) / NL
+XMESHLENGTH = SUM ( SQRT(UG%G%XMESH_SIZE) ) / MAX(NL,1)
 !
 !* in degrees (of latitude)
 XMESHLENGTH = XMESHLENGTH *180. / XPI / XRADIUS

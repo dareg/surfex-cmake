@@ -38,11 +38,6 @@ INTEGER, DIMENSION(:),POINTER :: NMASK
 INTEGER                       :: NSTEP_OUTPUT
 LOGICAL                       :: LMASK = .FALSE.
 LOGICAL                       :: LPARTR,LPARTW
-LOGICAL                       :: LDEFINED_NATURE
-LOGICAL                       :: LDEFINED_SEA
-LOGICAL                       :: LDEFINED_WATER
-LOGICAL                       :: LDEFINED_TOWN
-LOGICAL                       :: LDEFINED_SURF_ATM
 LOGICAL,DIMENSION(5)          :: LTIME_WRITTEN
 INTEGER                       :: XTYPE
 INTEGER                       :: XSTART,XCOUNT,XSTRIDE

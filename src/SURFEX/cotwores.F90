@@ -58,7 +58,7 @@ SUBROUTINE COTWORES(PTSTEP, IO, OSHADE, PK, PEK, PDMAX, PPOI, PCSP, &
 !!      A.L. Gibelin   07/09 : Suppress PPST and PPSTF as outputs, and diagnose GPP
 !!        S. Lafont    03/11 : Correct a bug fopr grassland below wilting point
 !!      D. Carrer      04/11 : new radiative transfert 
-!!      A. Boone       11/11 : add rsmax to MODD_ISBA_PAR
+!!      A. Boone       11/11 : add rsmax to MODD_VEG_PAR
 !!      B. Decharme    05/12 : Bug : flood fraction in COTWORES
 !!                                   Optimization
 !!      R. Alkama      04/12 : add 6 new tree vegtype (9 instead 3)

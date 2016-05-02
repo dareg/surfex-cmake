@@ -1,7 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_SEA_n (S, U, &
-                        HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
-                       OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
+SUBROUTINE ASSIM_SEA_n (S, U, HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
+                        OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
 !

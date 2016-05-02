@@ -1,6 +1,5 @@
 !     ###########################################################
-      SUBROUTINE PGD_SURF_ATM (YSC, &
-                               HPROGRAM,HFILE,HFILETYPE,OZS)
+      SUBROUTINE PGD_SURF_ATM (YSC,HPROGRAM,HFILE,HFILETYPE,OZS)
 !     ###########################################################
 !!
 !!    PURPOSE
@@ -111,16 +110,16 @@ CPROGNAME=HPROGRAM
 !*    1.      Set default constant values 
 !             ---------------------------
 !
- CALL READ_PGD_ARRANGE_COVER(HPROGRAM,YSC%U%LWATER_TO_NATURE,YSC%U%LTOWN_TO_ROCK)
+ CALL READ_PGD_ARRANGE_COVER(HPROGRAM, YSC%U%LWATER_TO_NATURE, YSC%U%LTOWN_TO_ROCK)
 !
- CALL READ_PGD_COVER_GARDEN(HPROGRAM,YSC%U%LGARDEN)
+ CALL READ_PGD_COVER_GARDEN(HPROGRAM, YSC%U%LGARDEN)
 !
  CALL INIT_READ_DATA_COVER(HPROGRAM)
 !
  CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
 !
 !*    1.2     surface schemes
- CALL READ_PGD_SCHEMES(HPROGRAM,YSC%U%CNATURE,YSC%U%CSEA,YSC%U%CTOWN,YSC%U%CWATER)
+ CALL READ_PGD_SCHEMES(HPROGRAM, YSC%U%CNATURE, YSC%U%CSEA, YSC%U%CTOWN, YSC%U%CWATER)
 !
 !*    1.3     prints all parameters in a Latex file
  CALL READ_NAM_WRITE_COVER_TEX(HPROGRAM)
@@ -134,8 +133,8 @@ ENDIF
 !*    2.      Grid
 !             ----
 !
-CALL GET_SIZE_FULL_n(HPROGRAM,YSC%U%NDIM_FULL,YSC%U%NSIZE_FULL,ISIZE_FULL)
-YSC%U%NSIZE_FULL=ISIZE_FULL
+CALL GET_SIZE_FULL_n(HPROGRAM, YSC%U%NDIM_FULL, YSC%U%NSIZE_FULL,ISIZE_FULL)
+YSC%U%NSIZE_FULL = ISIZE_FULL
 !
 ALLOCATE(YSC%UG%G%XLAT      (YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%UG%G%XLON      (YSC%U%NSIZE_FULL))
@@ -155,7 +154,7 @@ IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
 ENDIF
 !
 !*    2.4     mask to limit the number of input data to read
- CALL LATLONMASK      (YSC%UG%G%CGRID, YSC%UG%NGRID_FULL_PAR, YSC%UG%XGRID_FULL_PAR, LLATLONMASK)
+ CALL LATLONMASK(YSC%UG%G%CGRID, YSC%UG%NGRID_FULL_PAR, YSC%UG%XGRID_FULL_PAR, LLATLONMASK)
 !
 !-------------------------------------------------------------------------------
 !
@@ -171,8 +170,7 @@ IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM,
 !*    4.      Orography
 !             ---------
 !
- CALL PGD_OROGRAPHY(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
-                    HPROGRAM,YSC%U%XSEA,YSC%U%XWATER,HFILE,HFILETYPE,OZS)
+ CALL PGD_OROGRAPHY(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM, HFILE, HFILETYPE, OZS)
 !
 !_______________________________________________________________________________
 !
@@ -186,21 +184,21 @@ IF (YSC%U%NDIM_NATURE>0) CALL PGD_NATURE(YSC%DTCO, YSC%DTZ, YSC%IM, YSC%UG, YSC%
 !             ----------------------------------
 !
 IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
-                                     YSC%IM%DTI, YSC%TM, YSC%GDM, YSC%GRM, HPROGRAM)  
+                                     YSC%IM%DTV, YSC%TM, YSC%GDM, YSC%GRM, HPROGRAM)  
 !_______________________________________________________________________________
 !
 !*    7.      Additionnal fields for inland water scheme
 !             ------------------------------------------
 !
 IF (YSC%U%NDIM_WATER>0) CALL PGD_INLAND_WATER(YSC%DTCO, YSC%FM%G, YSC%FM%F, YSC%UG, YSC%U, &
-                                         YSC%USS, YSC%WM%G, YSC%WM%W, HPROGRAM,LRM_RIVER)   
+                                              YSC%USS, YSC%WM%G, YSC%WM%W, HPROGRAM,LRM_RIVER)   
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme
 !             ---------------------------------
 !
 IF (YSC%U%NDIM_SEA>0) CALL PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%G, YSC%SM%S, &
-                              YSC%UG, YSC%U, YSC%USS, HPROGRAM)  
+                                   YSC%UG, YSC%U, YSC%USS, HPROGRAM)  
 !_______________________________________________________________________________
 !
 !*    9.      Dummy fields

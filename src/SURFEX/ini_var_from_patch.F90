@@ -1,6 +1,5 @@
-      SUBROUTINE INI_VAR_FROM_PATCH (DTCO, UG, U, NP, NPE, KPATCH, &
-                                     HPROGRAM,KLUOUT,HNAME,KPTS,&
-                                     KLAYER,KLAYER2,PDEF)
+      SUBROUTINE INI_VAR_FROM_PATCH (DTCO, UG, U, NP, NPE, KPATCH,& 
+                           HPROGRAM,KLUOUT,HNAME,KPTS,KLAYER,KLAYER2,PDEF)
 !!
 !!    PURPOSE
 !!    -------
@@ -35,9 +34,6 @@
 !!*    0.     DECLARATION
 !            -----------
 !
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -69,15 +65,15 @@ TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
 INTEGER, INTENT(IN) :: KPATCH
 !
- CHARACTER(LEN=6),             INTENT(IN)    :: HPROGRAM  ! host model
-INTEGER,                      INTENT(IN   ) :: KLUOUT
-INTEGER,                      INTENT(IN   ) :: KPTS
- CHARACTER(LEN=*),             INTENT(IN   ) :: HNAME
+ CHARACTER(LEN=6),            INTENT(IN) :: HPROGRAM  ! host model
+INTEGER,                      INTENT(IN) :: KLUOUT
+INTEGER,                      INTENT(IN) :: KPTS
+ CHARACTER(LEN=*),            INTENT(IN) :: HNAME
 !
 INTEGER, INTENT(IN), OPTIONAL :: KLAYER
 INTEGER, INTENT(IN), OPTIONAL :: KLAYER2
 !
-REAL, DIMENSION(:  ), OPTIONAL, INTENT(IN) :: PDEF 
+REAL, DIMENSION(:), OPTIONAL, INTENT(IN) :: PDEF 
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------

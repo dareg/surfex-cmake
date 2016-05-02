@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE DIAG_TOWN_n (DLO, DL, DLC, DTO, DT, U, HPROGRAM, DUP, DUPC, KMASK )
+SUBROUTINE DIAG_TOWN_n (DLO, DL, DLC, TD, HTOWN, HPROGRAM, DUP, DUPC, KMASK )
 !     ######################################################################
 !
 !!****  *DIAG_TOWN_n * - Chooses the surface schemes for town diagnostics
@@ -30,7 +30,7 @@ SUBROUTINE DIAG_TOWN_n (DLO, DL, DLC, DTO, DT, U, HPROGRAM, DUP, DUPC, KMASK )
 USE MODE_DIAG
 !
 USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURFEX_n, ONLY : TEB_DIAG_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XTT, XLSTT, XLVTT
@@ -46,10 +46,9 @@ IMPLICIT NONE
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DLO
 TYPE(DIAG_t), INTENT(INOUT) :: DL
 TYPE(DIAG_t), INTENT(INOUT) :: DLC
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DTO
-TYPE(DIAG_t), INTENT(INOUT) :: DT
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(TEB_DIAG_t), INTENT(INOUT) :: TD
 !
+ CHARACTER(LEN=*), INTENT(IN) :: HTOWN
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM ! program calling surf. schemes
 !
 TYPE(DIAG_t), INTENT(INOUT) :: DUP
@@ -65,9 +64,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',0,ZHOOK_HANDLE)
-IF (U%CTOWN=='TEB   ') THEN
+IF (HTOWN=='TEB   ') THEN
 
-  CALL DIAG(DTO, DT, HPROGRAM, DUP, KMASK)
+  CALL DIAG(TD%O, TD%D, HPROGRAM, DUP, KMASK)
 !
 !!!!! important, diagd should be computed in teb !!!!!!
 !
@@ -89,7 +88,7 @@ IF (U%CTOWN=='TEB   ') THEN
     ENDWHERE
   ENDIF
 !
-  IF (DTO%LSURF_BUDGETC) THEN
+  IF (TD%O%LSURF_BUDGETC) THEN
     CALL INIT_SURF_BUD(DUPC,XUNDEF)
     DUPC%XEVAP = XUNDEF
     DUPC%XSUBL = XUNDEF
@@ -97,10 +96,10 @@ IF (U%CTOWN=='TEB   ') THEN
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !      
-ELSE IF (U%CTOWN=='FLUX  ') THEN
+ELSE IF (HTOWN=='FLUX  ') THEN
   CALL DIAG_EVAP(DLO, DL, DLC, HPROGRAM, DUP, DUPC, KMASK)          
-ELSE IF (U%CTOWN=='NONE  ') THEN
-  CALL INIT_BUD(DTO,DUP,DUPC,XUNDEF)         
+ELSE IF (HTOWN=='NONE  ') THEN
+  CALL INIT_BUD(TD%O, DUP, DUPC, XUNDEF)         
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_TOWN_N',1,ZHOOK_HANDLE)
 !

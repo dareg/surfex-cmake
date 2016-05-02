@@ -1,6 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_TEB_GREENROOF_PGD_n (DTCO, U, OCH_BIO_FLUX, G, PGREENROOF, TOP, &
-                                     IO, S, K, P, PEK, DTI, GB,  &
+SUBROUTINE INIT_TEB_GREENROOF_PGD_n (DTCO, U, OCH_BIO_FLUX, G, PGREENROOF, TOP, IO, S, K, P, PEK, DTV, GB, &
                                      HPROGRAM, HINIT, OPATCH1, KI, KVERSION, PCO2, PRHOA)
 !#############################################################
 !
@@ -36,7 +35,6 @@ SUBROUTINE INIT_TEB_GREENROOF_PGD_n (DTCO, U, OCH_BIO_FLUX, G, PGREENROOF, TOP, 
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t, SSO_INIT
@@ -62,8 +60,8 @@ USE MODD_SGH_PAR,              ONLY: XF_DECAY
 USE MODI_GET_LUOUT
 USE MODI_ALLOCATE_TEB_VEG_PGD
 USE MODI_READ_PGD_TEB_GREENROOF_n
-USE MODI_CONVERT_PATCH_ISBA_1P
-USE MODI_INIT_FROM_DATA_TEB_VEG_1P_n
+USE MODI_CONVERT_PATCH_ISBA
+USE MODI_INIT_FROM_DATA_TEB_VEG_n
 USE MODI_INIT_VEG_PGD_n
 USE MODI_EXP_DECAY_SOIL_FR
 USE MODI_ABOR1_SFX
@@ -93,7 +91,7 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_P_t), INTENT(INOUT) :: P
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
 !
  CHARACTER(LEN=6),                   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -169,12 +167,12 @@ END IF
 !
 IF (OPATCH1) THEN
 
-  CALL READ_PGD_TEB_GREENROOF_n(OCH_BIO_FLUX, DTCO, DTI, GB, U, &
+  CALL READ_PGD_TEB_GREENROOF_n(OCH_BIO_FLUX, DTCO, DTV, GB, U, &
                                 IO, S, K, G%NDIM, HPROGRAM,KVERSION)
   !
   ALLOCATE(S%XVEGTYPE(KI,NVEGTYPE))
   IF (IO%LPAR) THEN
-    S%XVEGTYPE = DTI%XPAR_VEGTYPE
+    S%XVEGTYPE = DTV%XPAR_VEGTYPE
   ELSE
     !classical ecoclimap case
     DO JVEG=1,NVEGTYPE
@@ -200,12 +198,12 @@ IF (OPATCH1) THEN
   ENDDO  
   !
   IF (.NOT. IO%LPAR) THEN
-    CALL CONVERT_PATCH_ISBA_1P(DTCO, DTI, IO, IDECADE, IDECADE, TOP%XCOVER, TOP%LCOVER,&
+    CALL CONVERT_PATCH_ISBA(DTCO, DTV, IO, IDECADE, IDECADE, TOP%XCOVER, TOP%LCOVER,&
                         .FALSE.,'GRD', 1, K, P, PEK, &
                         .TRUE., .FALSE., .FALSE., .FALSE., .FALSE., .FALSE., &
                         PSOILGRID=IO%XSOILGRID  )   
   ELSE
-    CALL INIT_FROM_DATA_TEB_VEG_1P_n(DTI, K, P, PEK, IDECADE, IO%CPHOTO, .FALSE., .TRUE., .FALSE.,.FALSE.)
+    CALL INIT_FROM_DATA_TEB_VEG_n(DTV, K, P, PEK, IDECADE, IO%CPHOTO, .FALSE., .TRUE., .FALSE.,.FALSE.)
   ENDIF
   !
 END IF
@@ -214,12 +212,12 @@ END IF
 !               -----------------------------------------
 !
 IF (.NOT. IO%LPAR) THEN
-  CALL CONVERT_PATCH_ISBA_1P(DTCO, DTI, IO, IDECADE, IDECADE, TOP%XCOVER, TOP%LCOVER,&
+  CALL CONVERT_PATCH_ISBA(DTCO, DTV, IO, IDECADE, IDECADE, TOP%XCOVER, TOP%LCOVER,&
                         .FALSE.,'GRD', 1, K, P, PEK, &
                         .FALSE., .TRUE., .FALSE., .FALSE., .FALSE., .FALSE.  )   
 ELSE
 
-  CALL INIT_FROM_DATA_TEB_VEG_1P_n(DTI, K, P, PEK, IDECADE, IO%CPHOTO, .FALSE., .FALSE., .TRUE.,.FALSE.)
+  CALL INIT_FROM_DATA_TEB_VEG_n(DTV, K, P, PEK, IDECADE, IO%CPHOTO, .FALSE., .FALSE., .TRUE.,.FALSE.)
 
   IF (IO%CISBA=='DIF') CALL INIT_IF_DIF(IO%NGROUND_LAYER, PGREENROOF, P)
 
@@ -232,44 +230,48 @@ K%XVEGTYPE = S%XVEGTYPE
 !
 ALLOCATE(YSS%XAOSIP(0))
 !
-  CALL INIT_VEG_PGD_n(YSS, IO, S, K, K, P, PEK, YAG, KI, &
-                      HPROGRAM, 'TOWN  ',ILUOUT, KI, TOP%TTIME%TDATE%MONTH,    &
-                      .FALSE., .FALSE., ZTDEEP_CLI, ZGAMMAT_CLI, &
+ CALL INIT_VEG_PGD_n(YSS, IO, S, K, K, P, PEK, YAG, KI,                     &
+                      HPROGRAM, 'TOWN  ',ILUOUT, KI, TOP%TTIME%TDATE%MONTH, &
+                      .FALSE., .FALSE., ZTDEEP_CLI, ZGAMMAT_CLI,            &
                       .FALSE., ZTHRESHOLD, HINIT, PCO2, PRHOA  )
 !
 !-------------------------------------------------------------------------------
 !
-!*       5.1     Soil thermal characteristics for greenroofs:
-!               ----------------------------------------------
-!
-! WARNING: must be done before soil hydraulic characteristics (because of WSAT)
-! Estimation of WSAT_MI for use in HEATCAPZ and THRMCONDZ for mineral fraction
-! and allow weighted combination with regard to OM & no-OM fractions:
-!
-IF (IO%CSCOND=='PL98' .OR. IO%CISBA=='DIF') THEN
-  DO JL=1,IO%NGROUND_LAYER
-    K%XHCAPSOIL(:,JL) = S%XSOC(:,JL) * ZHCAPSOIL_OM + (1-S%XSOC(:,JL)) * K%XHCAPSOIL(:,JL)  
-    K%XCONDDRY(:,JL) = (ZCONDDRY_OM * K%XCONDDRY(:,JL)) / &
-                      ( S%XSOC(:,JL) * K%XCONDDRY(:,JL) + (1-S%XSOC(:,JL)) * ZCONDDRY_OM )
-    K%XCONDSLD(:,JL) = (ZCONDSLD_OM * K%XCONDSLD(:,JL)) / &
-                      ( S%XSOC(:,JL) * K%XCONDSLD(:,JL) + (1-S%XSOC(:,JL)) * ZCONDSLD_OM )
-  ENDDO
-END IF
-!
-! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-! Validation case : experimental values for Nancy 2011 case
-! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-! Substrate layer
-DO JL=1,4
+IF (OPATCH1) THEN
+  !
+  !*       5.1     Soil thermal characteristics for greenroofs:
+  !               ----------------------------------------------
+  !
+  ! WARNING: must be done before soil hydraulic characteristics (because of WSAT)
+  ! Estimation of WSAT_MI for use in HEATCAPZ and THRMCONDZ for mineral fraction
+  ! and allow weighted combination with regard to OM & no-OM fractions:
+  !
+  IF (IO%CSCOND=='PL98' .OR. IO%CISBA=='DIF') THEN
+    DO JL=1,IO%NGROUND_LAYER
+      K%XHCAPSOIL(:,JL) = S%XSOC(:,JL) * ZHCAPSOIL_OM + (1-S%XSOC(:,JL)) * K%XHCAPSOIL(:,JL)  
+      K%XCONDDRY (:,JL) = (ZCONDDRY_OM * K%XCONDDRY(:,JL)) / &
+                        ( S%XSOC(:,JL) * K%XCONDDRY(:,JL) + (1-S%XSOC(:,JL)) * ZCONDDRY_OM )
+      K%XCONDSLD (:,JL) = (ZCONDSLD_OM * K%XCONDSLD(:,JL)) / &
+                        ( S%XSOC(:,JL) * K%XCONDSLD(:,JL) + (1-S%XSOC(:,JL)) * ZCONDSLD_OM )
+    ENDDO
+  END IF
+  !
+  ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ! Validation case : experimental values for Nancy 2011 case
+  ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ! Substrate layer
+  DO JL=1,4
     K%XCONDDRY (:,JL) = 0.15
     K%XHCAPSOIL(:,JL) = 1342000.
-ENDDO
-! Drainage layer
-DO JL=5,6
+  ENDDO
+  ! Drainage layer
+  DO JL=5,6
     K%XCONDDRY (:,JL) = 0.09
     K%XHCAPSOIL(:,JL) = 331500.
-ENDDO
-! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ENDDO
+  ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  !
+ENDIF
 !
 !*       5.2     Soil thermal characteristics:
 !               --------------------------------
@@ -278,41 +280,54 @@ DO JL=1,IO%NGROUND_LAYER
   P%XCONDSAT(:,JL) = S%XSOC(:,JL)* ZCONDSAT_OM + (1-S%XSOC(:,JL)) * P%XCONDSAT(:,JL)
 END DO
 !
-! Note that if ISBA/=DIF, always CDIF = 'BC' and CPEDOTF = 'CH78'
-DO JL=1,IO%NGROUND_LAYER
-  K%XBCOEF  (:,JL) = S%XSOC(:,JL) * ZBCOEF_OM   + (1-S%XSOC(:,JL)) * K%XBCOEF(:,JL)
-  K%XMPOTSAT(:,JL) = S%XSOC(:,JL) * ZMPOTSAT_OM + (1-S%XSOC(:,JL)) * K%XMPOTSAT(:,JL)
-END DO
-!        
-DO JL=1,IO%NGROUND_LAYER
-   K%XWSAT (:,JL) =  S%XSOC(:,JL)* ZWSAT_OM +(1-S%XSOC(:,JL))* K%XWSAT(:,JL)
-   K%XWWILT(:,JL) = EXP(((LOG(-1*ZMPOT_WWILT)-LOG(-1*K%XMPOTSAT(:,JL)))   &
-                    / (-1*K%XBCOEF(:,JL)))+LOG(K%XWSAT(:,JL)))
-   K%XWFC  (:,JL) = EXP(((LOG(ZHYDCOND_WFC)-LOG(P%XCONDSAT(:,JL)))      &
-                    / (2*K%XBCOEF(:,JL)+3))+LOG(K%XWSAT(:,JL)))
-END DO
 !
-! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-! Validation case : experimental values for Nancy 2011 case
-! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF (OPATCH1) THEN
+  !
+  ! Note that if ISBA/=DIF, always CDIF = 'BC' and CPEDOTF = 'CH78'
+  DO JL=1,IO%NGROUND_LAYER
+    K%XBCOEF  (:,JL) = S%XSOC(:,JL) * ZBCOEF_OM   + (1-S%XSOC(:,JL)) * K%XBCOEF(:,JL)
+    K%XMPOTSAT(:,JL) = S%XSOC(:,JL) * ZMPOTSAT_OM + (1-S%XSOC(:,JL)) * K%XMPOTSAT(:,JL)
+  END DO
+  !        
+  DO JL=1,IO%NGROUND_LAYER
+    K%XWSAT (:,JL) =  S%XSOC(:,JL)* ZWSAT_OM +(1-S%XSOC(:,JL))* K%XWSAT(:,JL)
+    K%XWWILT(:,JL) = EXP(((LOG(-1*ZMPOT_WWILT)-LOG(-1*K%XMPOTSAT(:,JL)))   &
+                    / (-1*K%XBCOEF(:,JL)))+LOG(K%XWSAT(:,JL)))
+    K%XWFC  (:,JL) = EXP(((LOG(ZHYDCOND_WFC)-LOG(P%XCONDSAT(:,JL)))      &
+                    / (2*K%XBCOEF(:,JL)+3))+LOG(K%XWSAT(:,JL)))
+  END DO
+  !
+  ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ! Validation case : experimental values for Nancy 2011 case
+  ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ! Substrate layer
+  DO JL=1,4
+    K%XWSAT   (:,JL) = 0.674     ! Value tested
+    K%XMPOTSAT(:,JL) = -0.932    ! Value tested
+    K%XBCOEF  (:,JL) = 3.9       ! Value tested
+    K%XWWILT  (:,JL) = 0.15      ! from OBS-NANCY
+    K%XWFC    (:,JL) = 0.37      ! from OBS-NANCY
+  ENDDO
+  ! Drainage layer
+  DO JL=5,6
+    K%XWSAT   (:,JL) = 0.9       ! Value tested
+    K%XMPOTSAT(:,JL) = -0.121    ! Value tested
+    K%XBCOEF  (:,JL) = 2.7       ! Value tested
+    K%XWWILT  (:,JL) = 0.15      ! sert à initialiser le WG ds la couche
+    K%XWFC    (:,JL) = 0.37      ! sert à initialiser le WG ds la couche
+  ENDDO
+  !
+ENDIF
+!
 ! Substrate layer
 DO JL=1,4
-  K%XWSAT   (:,JL) = 0.674     ! Value tested
   P%XCONDSAT(:,JL) = 2.162E-3  ! Value tested
-  K%XMPOTSAT(:,JL) = -0.932    ! Value tested
-  K%XBCOEF  (:,JL) = 3.9       ! Value tested
-  K%XWWILT  (:,JL) = 0.15      ! from OBS-NANCY
-  K%XWFC    (:,JL) = 0.37      ! from OBS-NANCY
 ENDDO
 ! Drainage layer
 DO JL=5,6
-   K%XWSAT   (:,JL) = 0.9       ! Value tested
-   P%XCONDSAT(:,JL) = 3.32E-3   ! Value tested
-   K%XMPOTSAT(:,JL) = -0.121    ! Value tested
-   K%XBCOEF  (:,JL) = 2.7       ! Value tested
-   K%XWWILT  (:,JL) = 0.15      ! sert à initialiser le WG ds la couche
-   K%XWFC    (:,JL) = 0.37      ! sert à initialiser le WG ds la couche
+  P%XCONDSAT(:,JL) = 3.32E-3   ! Value tested
 ENDDO
+!
 !-------------------------------------------------------------------------------
 !
 !*       6.1    Initialize of the SGH scheme:'

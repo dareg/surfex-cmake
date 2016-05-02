@@ -102,8 +102,8 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
-REAL :: ZMAX
-INTEGER           :: JL, JJ, IDEPTH, JVAR, JP, JI, ISIZE
+REAL, DIMENSION(SIZE(DM%XSWI,1)) :: ZMAX
+INTEGER           :: JL, JJ, JVAR, JP, JI, ISIZE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -112,6 +112,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
+!
 CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
@@ -163,28 +164,28 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   !               --------------------------------------------------------
   !  
   IF(IO%CISBA=='DIF')THEN
-
+    ZMAX(:) = 0.
+    !
+    DO JP = 1,IO%NPATCH
+      DO JI = 1,NP%AL(JP)%NSIZE_P
+        JJ = NP%AL(JP)%NR_P(JI)
+        !
+        IF (NP%AL(JP)%NWG_LAYER(JI)/=NUNDEF.AND.NP%AL(JP)%NWG_LAYER(JI)>ZMAX(JJ)) THEN
+          ZMAX(JJ) = NP%AL(JP)%NWG_LAYER(JI)
+        ENDIF
+      ENDDO
+    ENDDO
+    !
     DO JJ=1,SIZE(DM%XSWI,1)
 
-      ZMAX = 0
-      DO JP = 1,IO%NPATCH
-        DO JI = 1,NP%AL(JP)%NSIZE_P
-          IF (NP%AL(JP)%NR_P(JI) == JI) THEN
-            IF (NP%AL(JP)%NWG_LAYER(JI)/=NUNDEF.AND.NP%AL(JP)%NWG_LAYER(JI)>ZMAX) &
-                   ZMAX = NP%AL(JP)%NWG_LAYER(JI)
-          ENDIF 
-        ENDDO
-      ENDDO
-      IDEPTH = ZMAX
       DO JL = 1,IO%NGROUND_LAYER
-        IF(JL>IDEPTH)THEN  
+        IF(JL>ZMAX(JJ))THEN  
           DM%XSWI (JJ,JL) = XUNDEF
           DM%XTSWI(JJ,JL) = XUNDEF
         ENDIF
       ENDDO 
 
     ENDDO
-
   ENDIF         
   !
   DO JL=1,IO%NGROUND_LAYER
@@ -358,7 +359,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   !
   !----------------------------------------------------------------------------
   !User wants (or not) patch output
-  IF(OPATCH_BUDGET)THEN
+  IF(OPATCH_BUDGET .AND. IO%NPATCH>1)THEN
     !----------------------------------------------------------------------------
     !
     !        3.1    Soil Wetness Index and active layer depth
@@ -644,6 +645,7 @@ ENDIF
 !
 !
  CALL END_IO_SURF_n(HPROGRAM)
+!
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_DIAG_MISC_ISBA_n

@@ -90,21 +90,18 @@ CASE ('EVOL')
     IF (TRIM(HBAND)=="VIS".OR.TRIM(HBAND)=="ALL") &
       WHERE (PWG1(:)/=XUNDEF) &
         PEK%XALBVIS_SOIL(:) = KK%XALBVIS_WET(:) + &
-           (0.25*KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:))           &
-             * (1. - ZX(:)) * ( ZX(:) + (KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) &
-             /(0.25*KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) )  
+            (0.25*KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) * (1. - ZX(:)) * &
+       ( ZX(:) + (KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) / (0.25*KK%XALBVIS_DRY(:)-KK%XALBVIS_WET(:)) )  
     IF (TRIM(HBAND)=="NIR".OR.TRIM(HBAND)=="ALL") &
       WHERE (PWG1(:)/=XUNDEF) &      
         PEK%XALBNIR_SOIL(:) = KK%XALBNIR_WET(:) + &
-           (0.25*KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:))           &
-             * (1. - ZX(:)) * ( ZX(:) + (KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) &
-             /(0.25*KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) )  
+           (0.25*KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) * (1. - ZX(:)) * &
+      ( ZX(:) + (KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) / (0.25*KK%XALBNIR_DRY(:)-KK%XALBNIR_WET(:)) )  
     IF (TRIM(HBAND)=="UV".OR.TRIM(HBAND)=="ALL") &
       WHERE (PWG1(:)/=XUNDEF) &      
         PEK%XALBUV_SOIL (:) = KK%XALBUV_WET (:) + &
-             (0.25*KK%XALBUV_DRY (:)-KK%XALBUV_WET (:))           &
-             * (1. - ZX(:)) * ( ZX(:) + (KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) &
-             /(0.25*KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) )  
+           (0.25*KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) * (1. - ZX(:)) * &
+      ( ZX(:) + (KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) / (0.25*KK%XALBUV_DRY (:)-KK%XALBUV_WET (:)) )  
 
     !END WHERE
 

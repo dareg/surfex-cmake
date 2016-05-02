@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE WRITESURF_GR_SNOW (HSELECT, HPROGRAM, HSURFTYPE, HPREFIX, &
-                                    KI, KMASK_P, KPATCH, TPSNOW  )
+      SUBROUTINE WRITESURF_GR_SNOW (HSELECT, HPROGRAM, HSURFTYPE, HPREFIX, KI, KMASK_P, KPATCH, TPSNOW  )
 !     ##########################################################
 !
 !!****  *WRITESURF_GR_SNOW* - routine to write snow surface fields

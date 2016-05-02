@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE CARBON_INIT(IO)  
+      SUBROUTINE CARBON_INIT 
 !     #####################
 !
 !!****  *CARBON_INIT* - routine to initialize soil carbon parameters
@@ -37,8 +37,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-!
 USE MODD_CO2V_PAR,       ONLY : XCN, XLC, XFRAC_LITTER, XTAU_LITTER,  &
                                   XFRAC_SOILCARB, XTAU_SOILCARB  
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -48,8 +46,6 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
-!
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 !*       0.1   Declarations of arguments
 !              -------------------------

@@ -3,8 +3,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI (IO, S, K, NP, NPE, HPROGRAM, KI, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,   PUCLS, PVCLS,   &
                                 PTS_O,    PT2M_O, PHU2M_O, PSWE,  &
-                                HTEST, OD_MASKEXT,      &
-                                PLON_IN, PLAT_IN )
+                                HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
 
 ! ------------------------------------------------------------------------------------------
 !  *****************************************************************************************
@@ -30,7 +29,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI (IO, S, K, NP, NPE, HPROGRAM, KI, &
 ! ------------------------------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_CSTS,            ONLY : XDAY, XPI, XRHOLW, XLVTT, NDAYSEC
 USE MODD_SURF_PAR,        ONLY : XUNDEF 
@@ -54,6 +53,9 @@ TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
+!
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
 !
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
@@ -168,23 +170,26 @@ ZLAI  (:) = XUNDEF
 ZVEG  (:) = XUNDEF
 !
 DO JP = 1,IO%NPATCH
-  DO JI = 1,NP%AL(JP)%NSIZE_P
-    IMASK = NP%AL(JP)%NR_P(JI)
+  PK => NP%AL(JP)
+  PEK => NPE%AL(JP)
+  !
+  DO JI = 1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
     !
-    ZD2   (IMASK) = NP%AL(JP)%XDG   (JI,2)
+    ZD2   (IMASK) = PK%XDG   (JI,2)
     !
-    ZTS0  (IMASK) = NPE%AL(JP)%XTG  (JI,1)
-    ZTP0  (IMASK) = NPE%AL(JP)%XTG  (JI,2)
+    ZTS0  (IMASK) = PEK%XTG  (JI,1)
+    ZTP0  (IMASK) = PEK%XTG  (JI,2)
     !
-    ZWS0  (IMASK) = NPE%AL(JP)%XWG  (JI,1)
-    ZWP0  (IMASK) = NPE%AL(JP)%XWG  (JI,2)
-    ZTL0  (IMASK) = NPE%AL(JP)%XWGI (JI,2)
+    ZWS0  (IMASK) = PEK%XWG  (JI,1)
+    ZWP0  (IMASK) = PEK%XWG  (JI,2)
+    ZTL0  (IMASK) = PEK%XWGI (JI,2)
     !
-    ZSNS0(IMASK) = NPE%AL(JP)%TSNOW%WSNOW(JI,JL)
+    ZSNS0 (IMASK) = PEK%TSNOW%WSNOW(JI,JL)
     !
-    ZRSMIN(IMASK) = NPE%AL(JP)%XRSMIN(JI)
-    ZLAI  (IMASK) = NPE%AL(JP)%XLAI  (JI)
-    ZVEG  (IMASK) = NPE%AL(JP)%XVEG  (JI)
+    ZRSMIN(IMASK) = PEK%XRSMIN(JI)
+    ZLAI  (IMASK) = PEK%XLAI  (JI)
+    ZVEG  (IMASK) = PEK%XVEG  (JI)
     !
   ENDDO
 ENDDO
@@ -370,14 +375,17 @@ WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
 DO JP = 1,IO%NPATCH
-  DO JI = 1,NP%AL(JP)%NSIZE_P
-    IMASK = NP%AL(JP)%NR_P(JI)
+  PK => NP%AL(JP)
+  PEK => NPE%AL(JP)
+  !
+  DO JI = 1,PK%NSIZE_P
+    IMASK = PK%NR_P(JI)
     !
-    NPE%AL(JP)%XWG (JI,1) = ZWS0(IMASK)
-    NPE%AL(JP)%XWG (JI,2) = ZWP0(IMASK)
-    NPE%AL(JP)%XTG (JI,1) = ZTS0(IMASK)
-    NPE%AL(JP)%XTG (JI,2) = ZTP0(IMASK)
-    NPE%AL(JP)%XWGI(JI,2) = ZTL0(IMASK)
+    PEK%XWG (JI,1) = ZWS0(IMASK)
+    PEK%XWG (JI,2) = ZWP0(IMASK)
+    PEK%XTG (JI,1) = ZTS0(IMASK)
+    PEK%XTG (JI,2) = ZTP0(IMASK)
+    PEK%XWGI(JI,2) = ZTL0(IMASK)
     !
   ENDDO
 ENDDO

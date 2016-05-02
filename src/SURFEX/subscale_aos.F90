@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE SUBSCALE_AOS (U, UG, USS, &
-                               OZ0EFFI,OZ0EFFJ,PSEA)
+      SUBROUTINE SUBSCALE_AOS (U, UG, USS, OZ0EFFI, OZ0EFFJ)
 !     #############################################
 !
 !!*SUBSCALE_AOS  computes the sum of the ratio: (h'-h)/L when  h'/L >h/L  
@@ -70,8 +69,6 @@ LOGICAL, DIMENSION(:), INTENT(OUT) :: OZ0EFFJ! .T. : the z0eff coefficients
 !                                            ! .F. : not enough sub-grid
 !                                            ! information avalaible to
 !                                            ! compute the coefficients
-REAL,    DIMENSION(:), INTENT(IN)  :: PSEA   ! sea fraction
-
 !
 !*    0.2    Declaration of indexes
 !            ----------------------
@@ -157,7 +154,7 @@ ELSE
   ALLOCATE(ZSSQO(0,0,0))
 ENDIF
 !
- CALL GATHER_AND_WRITE_MPI(PSEA,ZSEA)
+ CALL GATHER_AND_WRITE_MPI(U%XSEA,ZSEA)
  CALL GATHER_AND_WRITE_MPI(USS%XAVG_ZS,ZAVG_ZS)
  CALL GATHER_AND_WRITE_MPI(XSSQO,ZSSQO)
 !

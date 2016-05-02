@@ -1,7 +1,6 @@
 !-----------------------------------------------------------------
 !     #####################
-      SUBROUTINE CONTROL_WATER_BUDGET_TOPD (IO, S, U, PWGM,PWG,PDG,PMESH_SIZE,&
-                                           PAVG_MESH_SIZE,PWSAT)
+      SUBROUTINE CONTROL_WATER_BUDGET_TOPD (IO, S, U, PWGM, PWG, PDG, PMESH_SIZE, PAVG_MESH_SIZE, PWSAT)
 !     #####################
 !
 !!****  *CONTROL_WATER_BUDGET_TOPD*  
@@ -100,99 +99,97 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('CONTROL_WATER_BUDGET_TOPD',0,ZHOOK_HANDLE)
 !
 IF(IO%NPATCH/=1) THEN
- ZSUMPATCH(:) = 0.0
- DO JP=1,IO%NPATCH
-   DO JJ=1,SIZE(S%XPATCH,1)
-      ZSUMPATCH(JJ) = ZSUMPATCH(JJ) + S%XPATCH(JJ,JP)
-   ENDDO
- ENDDO
-ZAVG_WGM(:)  = 0.
-ZAVG_WG(:)  = 0.
-ZAVG_DG(:)  = 0.
-!
+  !
+  ZSUMPATCH(:) = 0.0
   DO JP=1,IO%NPATCH
-     DO JJ=1,SIZE(S%XPATCH,1)     
-        IF(ZSUMPATCH(JJ) > 0..AND.PWGM(JJ,JP)/=XUNDEF.AND.PWG(JJ,JP)/=XUNDEF.AND.PDG (JJ,JP)/=XUNDEF)THEN
-!
-          ZAVG_WGM(JJ) = ZAVG_WGM(JJ) + S%XPATCH(JJ,JP) * PWGM(JJ,JP) * PDG (JJ,JP) 
-          ZAVG_WG (JJ) = ZAVG_WG (JJ) + S%XPATCH(JJ,JP) * PWG (JJ,JP) * PDG (JJ,JP) 
-          ZAVG_DG (JJ) = ZAVG_DG (JJ) + S%XPATCH(JJ,JP) * PDG (JJ,JP)
-!          
-       ENDIF
-     ENDDO
+    DO JJ=1,SIZE(S%XPATCH,1)
+      ZSUMPATCH(JJ) = ZSUMPATCH(JJ) + S%XPATCH(JJ,JP)
+    ENDDO
+  ENDDO
+  ZAVG_WGM(:)  = 0.
+  ZAVG_WG(:)  = 0.
+  ZAVG_DG(:)  = 0.
+  !
+  DO JP=1,IO%NPATCH
+    DO JJ=1,SIZE(S%XPATCH,1)     
+      IF(ZSUMPATCH(JJ) > 0..AND.PWGM(JJ,JP)/=XUNDEF.AND.PWG(JJ,JP)/=XUNDEF.AND.PDG (JJ,JP)/=XUNDEF)THEN
+        !
+        ZAVG_WGM(JJ) = ZAVG_WGM(JJ) + S%XPATCH(JJ,JP) * PWGM(JJ,JP) * PDG(JJ,JP) 
+        ZAVG_WG (JJ) = ZAVG_WG (JJ) + S%XPATCH(JJ,JP) * PWG (JJ,JP) * PDG(JJ,JP) 
+        ZAVG_DG (JJ) = ZAVG_DG (JJ) + S%XPATCH(JJ,JP) * PDG (JJ,JP)
+        !          
+      ENDIF
+    ENDDO
   ENDDO     
-!     
- WHERE (ZAVG_DG(:)>0.0.AND.ZSUMPATCH(:)>0.)
+  !     
+  WHERE (ZAVG_DG(:)>0.0.AND.ZSUMPATCH(:)>0.)
     ZAVG_WGM(:) = ZAVG_WGM(:) / ZAVG_DG(:)
     ZAVG_WG(:)  = ZAVG_WG(:)  / ZAVG_DG(:)
- ENDWHERE
-!
+  ENDWHERE
+  !
 ELSE
-ZAVG_WGM(:)= PWGM(:,1)
-ZAVG_WG(:) = PWG(:,1) 
-ZAVG_DG(:) = PDG(:,1)
-ZSUMPATCH(:) = 1.0
+  ZAVG_WGM (:) = PWGM(:,1)
+  ZAVG_WG  (:) = PWG (:,1) 
+  ZAVG_DG  (:) = PDG (:,1)
+  !
+  ZSUMPATCH(:) = 1.0
 ENDIF
 !
 !
 ZSTOCK_WGM = SUM(ZAVG_WGM(:)*ZAVG_DG(:)*PMESH_SIZE(:),&
-            MASK=(ZAVG_WGM(:)/=XUNDEF.AND.&
-                  ZAVG_DG(:)/=XUNDEF.AND.&
-                  PMESH_SIZE(:)/=XUNDEF.AND.&
-                  ZSUMPATCH(:)>0.))    ! water stocked in the ground (m3)
+            MASK=(ZAVG_WGM(:)/=XUNDEF.AND.ZAVG_DG(:)/=XUNDEF.AND.&
+                  PMESH_SIZE(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.))    ! water stocked in the ground (m3)
 !
 ZSTOCK_WG  = SUM(ZAVG_WG(:)*ZAVG_DG(:)*PMESH_SIZE(:),&
-            MASK=(ZAVG_WG(:)/=XUNDEF.AND.&
-                  ZAVG_DG(:)/=XUNDEF.AND.&
-                  PMESH_SIZE(:)/=XUNDEF.AND.&
-                  ZSUMPATCH(:)>0.))    ! water stocked in the ground (m3)
+            MASK=(ZAVG_WG(:)/=XUNDEF.AND.ZAVG_DG(:)/=XUNDEF.AND.&
+                  PMESH_SIZE(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.))    ! water stocked in the ground (m3)
 !
-IF ( COUNT(ZAVG_DG(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.)/=0. )&
-ZAVG_DGALL = SUM(ZAVG_DG(:),MASK=(ZAVG_DG(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.))&
-          / COUNT(ZAVG_DG(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.)
+IF ( COUNT(ZAVG_DG(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.)/=0. )  &
+  ZAVG_DGALL = SUM(ZAVG_DG(:),MASK=(ZAVG_DG(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.))&
+              / COUNT(ZAVG_DG(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.)
 
 IF (ZAVG_DGALL/=0.) THEN
+  !
   ZCONTROL_WATER_BUDGET_TOPD = ( ZSTOCK_WG - ZSTOCK_WGM )/ ZAVG_DGALL / PAVG_MESH_SIZE
-!
- IF (ZCONTROL_WATER_BUDGET_TOPD==0.0) GOTO 66
- !
- ZTMP  = COUNT( ZAVG_WG(:)/=ZAVG_WGM(:).AND.ZAVG_WG(:)/=XUNDEF.AND.ZAVG_WGM(:)/=XUNDEF.AND.ZSUMPATCH(:)>0. )
-!
- LMODIF(:)=.FALSE.
+  !
+  IF (ZCONTROL_WATER_BUDGET_TOPD==0.0) GOTO 66
+  !
+  ZTMP  = COUNT( ZAVG_WG(:)/=ZAVG_WGM(:).AND.ZAVG_WG(:)/=XUNDEF.AND.ZAVG_WGM(:)/=XUNDEF.AND.ZSUMPATCH(:)>0. )
+  !
+  LMODIF(:)=.FALSE.
 
- CALL PACK_SAME_RANK(U%NR_NATURE,XTOTBV_IN_MESH,ZTOTBV_IN_MESH)
- IF (ZTMP/=0.) THEN
-   WHERE (ZTOTBV_IN_MESH(:)/=0.0.AND.ZAVG_WGM(:)/=XUNDEF.AND.ZAVG_WG(:)/=XUNDEF.AND.&
-       ZAVG_WG(:)/=ZAVG_WGM(:) .AND. ZAVG_WG(:)>XWGMIN+(ZCONTROL_WATER_BUDGET_TOPD/ZTMP).AND.&
-       ZAVG_WG(:)<=PWSAT(:)+(ZCONTROL_WATER_BUDGET_TOPD/ZTMP).AND.ZSUMPATCH(:)>0.)
-       LMODIF(:)=.TRUE.
-   ENDWHERE
-!
- WHERE (LMODIF)
-   ZAVG_WG(:) = MIN(MAX(ZAVG_WG(:) - (ZCONTROL_WATER_BUDGET_TOPD/ZTMP),XWGMIN),PWSAT(:))
- ENDWHERE
-! 
- ENDIF
+  CALL PACK_SAME_RANK(U%NR_NATURE,XTOTBV_IN_MESH,ZTOTBV_IN_MESH)
+
+  IF (ZTMP/=0.) THEN
+    WHERE (ZTOTBV_IN_MESH(:)/=0.0.AND.ZAVG_WGM(:)/=XUNDEF.AND.ZAVG_WG(:)/=XUNDEF.AND.&
+      ZAVG_WG(:)/=ZAVG_WGM(:) .AND. ZAVG_WG(:)>XWGMIN+(ZCONTROL_WATER_BUDGET_TOPD/ZTMP).AND.&
+      ZAVG_WG(:)<=PWSAT(:)+(ZCONTROL_WATER_BUDGET_TOPD/ZTMP).AND.ZSUMPATCH(:)>0.)
+      LMODIF(:)=.TRUE.
+    ENDWHERE
+    !
+    WHERE (LMODIF)
+      ZAVG_WG(:) = MIN(MAX(ZAVG_WG(:) - (ZCONTROL_WATER_BUDGET_TOPD/ZTMP),XWGMIN),PWSAT(:))
+    ENDWHERE
+    ! 
+  ENDIF
+ !
 ENDIF
 
 DO JP=1,IO%NPATCH
- WHERE ((PWG(:,JP)/=XUNDEF).AND.(S%XPATCH(:,JP)>0.)&
-         .AND.(S%XPATCH(:,JP)/=XUNDEF).AND.(ZTOTBV_IN_MESH(:)/=0.0))
-  PWG(:,JP)=MIN(MAX(ZAVG_WG(:),XWGMIN),PWSAT(:))
- ENDWHERE
+  WHERE ((PWG(:,JP)/=XUNDEF).AND.(S%XPATCH(:,JP)>0.).AND.(S%XPATCH(:,JP)/=XUNDEF).AND.(ZTOTBV_IN_MESH(:)/=0.0))
+    PWG(:,JP)=MIN(MAX(ZAVG_WG(:),XWGMIN),PWSAT(:))
+  ENDWHERE
 ENDDO
 
 
 ZSTOCK_WG  = SUM(ZAVG_WG(:)*ZAVG_DG(:)*PMESH_SIZE(:),&
-            MASK=(ZAVG_WG(:)/=XUNDEF.AND.&
-                  ZAVG_DG(:)/=XUNDEF.AND.&
-                  PMESH_SIZE(:)/=XUNDEF.AND.&
-                  ZSUMPATCH(:)>0.))    ! water stocked in the ground (m3)
+            MASK=(ZAVG_WG(:)/=XUNDEF.AND.ZAVG_DG(:)/=XUNDEF.AND.&
+                  PMESH_SIZE(:)/=XUNDEF.AND.ZSUMPATCH(:)>0.))    ! water stocked in the ground (m3)
 
 
- IF (ZAVG_DGALL/=0) THEN
+IF (ZAVG_DGALL/=0) THEN
   ZCONTROL_WATER_BUDGET_TOPD = ( ZSTOCK_WG - ZSTOCK_WGM )/ ZAVG_DGALL / PAVG_MESH_SIZE
- ENDIF
+ENDIF
 
 66 CONTINUE
 !

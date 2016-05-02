@@ -1,12 +1,12 @@
 !     #########
-    SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, DTI, GB, VD, GRO, S, K, P, PEK,    &
+    SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GRO, S, K, P, PEK,    &
                           HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
                           PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
                           PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,     &
                           PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,           &
                           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,&                
-                          PRN, PH, PLE, PGFLUX, PSFCO2, PEVAP, PUW, PAC, PQSAT,    &
-                          PTS, PAC_AGG, PHU_AGG, PDEEP_FLUX, PRUNOFF, PDRAIN, PIRRIG )  
+                          PSFCO2, PUW, PAC, PQSAT, PTS, PAC_AGG, PHU_AGG,          &
+                          PDEEP_FLUX, PIRRIG )  
 !   ##################################################################################
 !
 !!****  *GREENROOF*  
@@ -61,7 +61,10 @@ USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
-USE MODD_SURFEX_n, ONLY : TEB_VEG_DIAG_t
+!
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_P_t, ISBA_PE_t
@@ -96,10 +99,12 @@ TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
-TYPE(TEB_VEG_DIAG_t), INTENT(INOUT) :: VD
 !
+TYPE(DIAG_t), INTENT(INOUT) :: DK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GRO
 TYPE(ISBA_S_t), INTENT(INOUT) :: S
@@ -139,12 +144,7 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TVEG       ! visible veg tot albe
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TSOIL      ! visible soil tot albedo
 !
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2                ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over greenroofs (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC         ! greenroof aerodynamical conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT       ! saturation humidity
@@ -152,8 +152,6 @@ REAL, DIMENSION(:)  , INTENT(INOUT) :: PTS         ! greenroof radiative surface
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG     ! aggreg. aeodynamic resistance for greenroofs for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG     ! aggreg. relative humidity for greenroofs for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! greenroof surface runoff
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN      ! greenroof total (vertical) drainage
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! greenroof summer irrigation rate
 !
 !
@@ -238,21 +236,21 @@ GUPDATED=.FALSE.
 GALB = .FALSE. 
 IF (GRO%CPHOTO=='LAI'.OR.GRO%CPHOTO=='LST'.OR.GRO%CPHOTO=='NIT'.OR.GRO%CPHOTO=='NCB') GALB = .TRUE.
 !
-  CALL VEGETATION_UPDATE(DTCO, DTI, G%NDIM, GRO, K, P, PEK, 1,              &
+  CALL VEGETATION_UPDATE(DTCO, DTV, G%NDIM, GRO, K, P, PEK, 1,              &
                          PTSTEP, S%TTIME, TOP%XCOVER, TOP%LCOVER,  .FALSE., &
                          'GNR', GALB, YSS, GUPDATED, OABSENT=(T%XGREENROOF==0.)  )
 !
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
 !
-VD%DP%XZ0(:) = PEK%XZ0(:)
-VD%DP%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
+DK%XZ0(:) = PEK%XZ0(:)
+DK%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
 !
-VD%DP%XZ0EFF(:) =  PEK%XZ0(:)
+DK%XZ0EFF(:) =  PEK%XZ0(:)
 !
 ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
- CALL ISBA(GRO, K, P, PEK, G, YAG, VD%DP, VD%DEP, VD%DM,                          &
+ CALL ISBA(GRO, K, P, PEK, G, YAG, DK, DEK, DMK,                                  &
            TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,                    &
            HIMPLICIT_WIND, PZREF, PUREF, ZDIRCOSZW, PTA, PQA, PEXNA, PRHOA, PPS,  &
            PEXNS, PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF, &
@@ -262,12 +260,9 @@ ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
            ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
            ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG )
 !
-PTS(:) = VD%DP%XTSRAD(:)
+PTS(:) = DK%XTSRAD(:)
 !
-PRUNOFF(:) = VD%DEP%XRUNOFF(:)
-PDRAIN (:) = VD%DEP%XDRAIN(:)
-!
-IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:) = VD%DM%XSNOWTEMP(:,1)
+IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:) = DMK%XSNOWTEMP(:,1)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
@@ -278,22 +273,22 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:) = VD%D
 !
 !
 IF (GRO%CPHOTO=='LAI' .OR. GRO%CPHOTO=='LST' .OR. GRO%CPHOTO=='NIT') THEN
-  CALL VEGETATION_EVOL(GRO, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, &
+  CALL VEGETATION_EVOL(GRO, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY,     &
                        TPTIME%TIME, G%XLAT, PRHOA, PCO2, YSS, ZRESP_BIOMASS_INST )          
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2    (:)=0.
-VD%DEP%XRESP_ECO (:)=0.
-VD%DEP%XRESP_AUTO(:)=0.
+PSFCO2          (:) = 0.
+DEK%XRESP_ECO (:) = 0.
+DEK%XRESP_AUTO(:) = 0.
 !
 IF (GRO%CPHOTO/='NON' .AND. GRO%CRESPSL/='NON' .AND. ANY(PEK%XLAI(:)/=XUNDEF)) THEN
   ! faire intervenir le type de vegetation du greenroof ? (CTYP_GR)
-  CALL CARBON_EVOL(GRO, K, P, PEK, VD%DEP, PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
+  CALL CARBON_EVOL(GRO, K, P, PEK, DEK, PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
   ! calculation of vegetation CO2 flux
   ! Positive toward the atmosphere
-  PSFCO2(:) = VD%DEP%XRESP_ECO(:) - VD%DEP%XGPP(:)
+  PSFCO2(:) = DEK%XRESP_ECO(:) - DEK%XGPP(:)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -315,19 +310,14 @@ WHERE (T%XGREENROOF/=0.)
   !
   ! energy balance
   !
-  PRN    (:) = VD%DP%XRN    (:)
-  PH     (:) = VD%DP%XH     (:)
-  PLE    (:) = PEK%XLE      (:)
-  PGFLUX (:) = VD%DP%XGFLUX (:)
-  PEVAP  (:) = VD%DP%XEVAP  (:)
-  !
+  DK%XLE(:) = PEK%XLE(:)
   !
   ! Estimate of green area aerodynamic conductance recomputed from heat flux,
   ! surface (radiative) temp. and forcing air temperature (estimated at future time step)
-  ZTA = PPET_B_COEF + PPET_A_COEF * PH
+  ZTA = PPET_B_COEF + PPET_A_COEF * DK%XH
   PAC = 0.
   WHERE (PTS /= ZTA)
-    PAC(:)   = MAX(PH(:) / XCPD / PRHOA(:) / (PTS - ZTA) , 0.)
+    PAC(:)   = MAX(DK%XH(:) / XCPD / PRHOA(:) / (PTS - ZTA) , 0.)
   ENDWHERE
   !
   ! Humidity of saturation for green areas
@@ -338,11 +328,12 @@ WHERE (T%XGREENROOF/=0.)
   !
 ELSEWHERE
   !
-  PRN    (:) = XUNDEF
-  PH     (:) = XUNDEF
-  PLE    (:) = XUNDEF
-  PGFLUX (:) = XUNDEF
-  PEVAP  (:) = XUNDEF
+  DK%XRN    (:) = XUNDEF
+  DK%XH     (:) = XUNDEF
+  DK%XLE    (:) = XUNDEF
+  DK%XGFLUX (:) = XUNDEF
+  DK%XEVAP  (:) = XUNDEF
+  !
   PAC    (:) = XUNDEF
   PQSAT  (:) = XUNDEF
   PUW    (:) = XUNDEF  

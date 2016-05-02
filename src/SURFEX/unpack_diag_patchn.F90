@@ -1,7 +1,6 @@
 !     #########
-SUBROUTINE UNPACK_DIAG_PATCH_n(IO, DEK, PK,  &
-                               KMASK, KSIZE, KNPATCH, KPATCH,       &
-                               PCPL_DRAIN, PCPL_RUNOFF, PCPL_EFLOOD,&
+SUBROUTINE UNPACK_DIAG_PATCH_n(IO, DEK, PK, KMASK, KSIZE, KNPATCH, KPATCH, &
+                               PCPL_DRAIN, PCPL_RUNOFF, PCPL_EFLOOD,       &
                                PCPL_PFLOOD, PCPL_IFLOOD, PCPL_ICEFLUX )  
 !##############################################
 !

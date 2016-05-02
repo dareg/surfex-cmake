@@ -1,8 +1,6 @@
 !     #########
-      SUBROUTINE ISBA_SNOW_FRAC(HSNOW,                                &
-                                PWSNOW, PRSNOW, PASNOW,               &
-                                PVEG, PLAI, PZ0,                      &
-                                PPSN, PPSNV_A, PPSNG, PPSNV            )  
+      SUBROUTINE ISBA_SNOW_FRAC(HSNOW, PWSNOW, PRSNOW, PASNOW,       &
+                                PVEG, PLAI, PZ0, PPSN, PPSNV_A, PPSNG, PPSNV )  
 !     ##########################################################################
 !
 !!****  *ISBA_SNOW_FRAC*  

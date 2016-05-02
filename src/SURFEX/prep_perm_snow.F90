@@ -172,9 +172,9 @@ DO JL=1,PEK%TSNOW%NLAYER
   GWORK(:,JL)=.FALSE.
 !
   IF(IO%LGLACIER)THEN
-      WHERE(ZWSNOW_PERM(:)>0.)GWORK(:,JL)=.TRUE.
+    WHERE(ZWSNOW_PERM(:)>0.)GWORK(:,JL)=.TRUE.
   ELSE
-      WHERE(ZWSNOW_PERM(:)>0..AND.PEK%TSNOW%WSNOW(:,JL)==0.)GWORK(:,JL)=.TRUE.
+    WHERE(ZWSNOW_PERM(:)>0..AND.PEK%TSNOW%WSNOW(:,JL)==0.)GWORK(:,JL)=.TRUE.
   ENDIF
 !
 !* rho
@@ -187,11 +187,11 @@ DO JL=1,PEK%TSNOW%NLAYER
 !
   IF(IO%LGLACIER)THEN
     WHERE(GWORK(:,JL))
-         PEK%TSNOW%ALB(:) = (XAGLAMAX+XAGLAMIN)/2.0
+      PEK%TSNOW%ALB(:) = (XAGLAMAX+XAGLAMIN)/2.0
     END WHERE
   ELSE
     WHERE(GWORK(:,JL))
-         PEK%TSNOW%ALB(:) = (XANSMAX+XANSMIN)/2.0
+      PEK%TSNOW%ALB(:) = (XANSMAX+XANSMIN)/2.0
     END WHERE
   ENDIF
 !
@@ -214,9 +214,9 @@ IF (PEK%TSNOW%SCHEME=='3-L'.OR.PEK%TSNOW%SCHEME=='CRO') THEN
       END WHERE 
     ELSE
       DO JL=2,PEK%TSNOW%NLAYER
-         WHERE(GWORK(:,JL))
-              PEK%TSNOW%RHO(:,JL) = MIN(ZRHOSMAX,PEK%TSNOW%RHO(:,JL-1)+100.)
-         END WHERE     
+        WHERE(GWORK(:,JL))
+          PEK%TSNOW%RHO(:,JL) = MIN(ZRHOSMAX,PEK%TSNOW%RHO(:,JL-1)+100.)
+        END WHERE     
       ENDDO
     ENDIF
   ENDIF
@@ -373,11 +373,11 @@ IF(IO%LGLACIER)THEN
 !
   DO JL=1,IWORK
      WHERE(PK%XVEGTYPE_PATCH(:,NVT_SNOW)>0.0)
-           PEK%XWGI(:,JL) = MAX(PEK%XWGI(:,JL),ZWAT(:,JL)*ZPSN(:))
-           PEK%XWG (:,JL) = MIN(PEK%XWG (:,JL), MAX(KK%XWSAT(:,JL)-PEK%XWGI(:,JL),XWGMIN))
+       PEK%XWGI(:,JL) = MAX(PEK%XWGI(:,JL),ZWAT(:,JL)*ZPSN(:))
+       PEK%XWG (:,JL) = MIN(PEK%XWG (:,JL), MAX(KK%XWSAT(:,JL)-PEK%XWGI(:,JL),XWGMIN))
      END WHERE
      WHERE(PEK%XWG(:,JL) /= XUNDEF .AND. (PEK%XWG(:,JL) + PEK%XWGI(:,JL)) > KK%XWSAT(:,JL) )
-           PEK%XWGI(:,JL) = KK%XWSAT(:,JL)-PEK%XWG (:,JL) !WGT<=WSAT
+       PEK%XWGI(:,JL) = KK%XWSAT(:,JL)-PEK%XWG (:,JL) !WGT<=WSAT
      END WHERE
   ENDDO
 !
@@ -392,6 +392,7 @@ DEALLOCATE(ZPSN)
 !              ------------------------------
 !
  CALL MKFLAG_SNOW(PEK%TSNOW)
+!
 IF (LHOOK) CALL DR_HOOK('PREP_PERM_SNOW',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

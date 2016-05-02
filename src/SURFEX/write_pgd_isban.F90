@@ -78,7 +78,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
 !*       1.     Selection of surface scheme
 !               ---------------------------
 !
- CALL WRITESURF_PGD_ISBA_n(HSELECT, U%CNATURE, IM%DTI, DTZ, IM%G, IM%ISS, &
+ CALL WRITESURF_PGD_ISBA_n(HSELECT, U%CNATURE, IM%DTV, DTZ, IM%G, IM%ISS, &
                           IM%O, IM%S, IM%K, HPROGRAM)
 !
 !-------------------------------------------------------------------------------

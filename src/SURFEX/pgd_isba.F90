@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_ISBA (DTCO, DTI, IG, IO, S, K, ISS, UG, U, USS, HPROGRAM)
+      SUBROUTINE PGD_ISBA (DTCO, DTV, IG, IO, S, K, ISS, UG, U, USS, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_ISBA* monitor for averaging and interpolations of ISBA physiographic fields
@@ -114,7 +114,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_S_t), INTENT(INOUT) :: S
@@ -398,15 +398,15 @@ ALLOCATE(ISS%XZ0EFFJPDIR(ILU))
 !
 IO%LECOCLIMAP = U%LECOCLIMAP
 !
- CALL PGD_ISBA_PAR(DTCO, UG, U, USS, DTI, IO, S, IG%NDIM, HPROGRAM)
+ CALL PGD_ISBA_PAR(DTCO, UG, U, USS, DTV, IO, S, IG%NDIM, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
 #ifdef SFX_OL
 IF (LWR_VEGTYPE) THEN
   ALLOCATE(K%XVEGTYPE(ILU,NVEGTYPE))
-  IF (DTI%LDATA_VEGTYPE) THEN
-    K%XVEGTYPE(:,:) = DTI%XPAR_VEGTYPE(:,:)
+  IF (DTV%LDATA_ISBATYPE) THEN
+    K%XVEGTYPE(:,:) = DTV%XPAR_VEGTYPE(:,:)
   ELSE
     DO JVEGTYPE=1,NVEGTYPE
       CALL AV_PGD(DTCO,K%XVEGTYPE(:,JVEGTYPE),S%XCOVER,XDATA_VEGTYPE(:,JVEGTYPE),'NAT','ARI',S%LCOVER)

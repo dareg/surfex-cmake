@@ -43,7 +43,6 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK
 !
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -73,7 +72,7 @@ TYPE(ISBA_PE_t), POINTER :: PEK
 INTEGER                         :: JI    ! grid-cell loop counter
 INTEGER                         :: JP    ! tile loop counter
 INTEGER                         :: JL    ! layer loop counter
-REAL, DIMENSION(SIZE(DM%XHV)) :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3, IDEPTH_MAX
+REAL, DIMENSION(SIZE(DM%XHV)) :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3
 REAL                            :: ZWORK
 INTEGER                         :: INI,IDEPTH,IWORK,IMASK
 !
@@ -201,21 +200,18 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
   CALL COMPUT_COLD_LAYERS_THICK(ZDG,ZTG,DM%XALT,DM%XFLT)
 !    
   ZPOND(:,:)=0.0
-  IDEPTH_MAX(:) = 0
   DO JP=1,IO%NPATCH   
     DMK => DMP%AL(JP)
     PK => NP%AL(JP)
     PEK => NPE%AL(JP)
 
-    DO JI=1,PK%NSIZE_P
-      IMASK = PK%NR_P(JI)
+    DO JL = 1,IO%NGROUND_LAYER
 
-      DO JL = 1,IO%NGROUND_LAYER
-
+      DO JI=1,PK%NSIZE_P
         IDEPTH = PK%NWG_LAYER(JI)
-        IF (IDEPTH>IDEPTH_MAX(IMASK) .AND. IDEPTH/=NUNDEF) IDEPTH_MAX(IMASK) = IDEPTH
-
         IF(JL<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
+
+          IMASK = PK%NR_P(JI)
 
           ZWORK = PK%XDZG(JI,JL)
           !Soil Wetness Index profile
@@ -236,16 +232,7 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
     ENDDO
     !
   ENDDO
-
-  DO JI = 1,SIZE(DM%XSWI,1)
-    DO JL = 1,IO%NGROUND_LAYER
-      IF (JL>IDEPTH_MAX(JI)) THEN
-        DM%XSWI (JI,JL) = XUNDEF
-        DM%XTSWI(JI,JL) = XUNDEF
-      ENDIF
-    ENDDO
-  ENDDO
-  !  
+  !
   WHERE(ZPOND(:,:)> 0.)
     DM%XSWI (:,:) = DM%XSWI (:,:) / ZPOND(:,:)
     DM%XTSWI(:,:) = DM%XTSWI(:,:) / ZPOND(:,:)

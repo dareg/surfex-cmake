@@ -1,9 +1,7 @@
 !     #########
-      SUBROUTINE TEB_VEG_PROPERTIES (PMASK, IO, PEK, &
-                                    PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
-                                   PTS, PEMIS, PALB, PTA,            &
-                                   PALBNIR_TVEG, PALBVIS_TVEG,       &
-                                   PALBNIR_TSOIL, PALBVIS_TSOIL      )  
+      SUBROUTINE TEB_VEG_PROPERTIES (PMASK, IO, PEK, PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
+                                     PTS, PEMIS, PALB, PTA, PALBNIR_TVEG, PALBVIS_TVEG,&
+                                     PALBNIR_TSOIL, PALBVIS_TSOIL      )  
 !     ##########################################################################
 !
 !!****  *GARDEN_PROPERTIES*  
@@ -103,7 +101,7 @@ IF (LHOOK) CALL DR_HOOK('TEB_VEG_PROPERTIES',0,ZHOOK_HANDLE)
 !*      2.     Computes several properties of gardens
 !              --------------------------------------
 !
- CALL ISBA_PROPERTIES(IO, PEK, PDIR_SW, PSCA_SW, PSW_BANDS, KSW,        &
+ CALL ISBA_PROPERTIES(IO, PEK, PDIR_SW, PSCA_SW, PSW_BANDS, KSW,                &
                       ZASNOW, ZANOSNOW, ZESNOW, ZENOSNOW, ZTSSNOW, ZTSNOSNOW,   &
                       ZALBNIR_TVEG, ZALBVIS_TVEG, ZALBNIR_TSOIL, ZALBVIS_TSOIL)         
 !
@@ -117,10 +115,10 @@ PEMIS=  PEK%XPSN(:) * ZESNOW              + (1.-PEK%XPSN(:)) * ZENOSNOW
 !  (recomputed from emitted long wave)
 PTS  =((PEK%XPSN(:) * ZESNOW * ZTSSNOW**4 + (1.-PEK%XPSN(:)) * ZENOSNOW * ZTSNOSNOW**4) / PEMIS)**0.25
 !
-IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG(:)=ZALBNIR_TVEG(:)
-IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG(:)=ZALBVIS_TVEG(:)
-IF(PRESENT(PALBNIR_TSOIL))PALBNIR_TSOIL(:)=ZALBNIR_TSOIL(:)
-IF(PRESENT(PALBVIS_TSOIL))PALBVIS_TSOIL(:)=ZALBVIS_TSOIL(:)
+IF(PRESENT(PALBNIR_TVEG))PALBNIR_TVEG  (:) = ZALBNIR_TVEG (:)
+IF(PRESENT(PALBVIS_TVEG))PALBVIS_TVEG  (:) = ZALBVIS_TVEG (:)
+IF(PRESENT(PALBNIR_TSOIL))PALBNIR_TSOIL(:) = ZALBNIR_TSOIL(:)
+IF(PRESENT(PALBVIS_TSOIL))PALBVIS_TSOIL(:) = ZALBVIS_TSOIL(:)
 !
 IF (LHOOK) CALL DR_HOOK('TEB_VEG_PROPERTIES',1,ZHOOK_HANDLE)
 !

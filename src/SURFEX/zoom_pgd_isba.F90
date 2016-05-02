@@ -1,5 +1,5 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_ISBA (CHI, DTCO, DTI, IG, IO, S, K, ISS, UG, U, USS, &
+      SUBROUTINE ZOOM_PGD_ISBA (CHI, DTCO, DTV, IG, IO, S, K, ISS, UG, U, USS, &
                                 HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP)
 !     ###########################################################
 
@@ -81,7 +81,7 @@ IMPLICIT NONE
 !
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(SSO_t), INTENT(INOUT) :: ISS
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
@@ -208,7 +208,7 @@ ALLOCATE(K%XSAND(ILU,IO%NGROUND_LAYER))
 ALLOCATE(K%XCLAY(ILU,IO%NGROUND_LAYER))
 ALLOCATE(K%XRUNOFFB(ILU))
 ALLOCATE(K%XWDRAIN (ILU))
- CALL ZOOM_PGD_ISBA_FULL(CHI, DTCO, DTI, IG, IO, S, K, UG, U, &
+ CALL ZOOM_PGD_ISBA_FULL(CHI, DTCO, DTV, IG, IO, S, K, UG, U, &
                          HPROGRAM,HINIFILE,HINIFILETYPE)
 !
 !-------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_CANOPY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTI, ID, NGB, GB, &
-                                   ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, PKD, NDST, &
-                                   SLT, HPROGRAM, HCOUPLING, PTSTEP,&
+SUBROUTINE COUPLING_ISBA_CANOPY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID, NGB, GB, &
+                                   ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,   &
+                                   HPROGRAM, HCOUPLING, PTSTEP,                            &
                                    KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                    PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
                                    PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
@@ -47,8 +47,6 @@ USE MODD_GRID_n, ONLY : GRID_t, GRID_NP_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_P_t, ISBA_PE_t, ISBA_NK_t, ISBA_NP_t, ISBA_NPE_t
 !
-USE MODD_PACK_DIAG_ISBA, ONLY : PACK_DIAG_ISBA_t
-!
 USE MODD_DST_n, ONLY : DST_NP_t
 
 USE MODD_CANOPY_n, ONLY : CANOPY_t
@@ -87,7 +85,7 @@ IMPLICIT NONE
 TYPE(AGRI_NP_t), INTENT(INOUT) :: NAG
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(CH_ISBA_NP_t), INTENT(INOUT) :: NCHI
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(ISBA_DIAG_t), INTENT(INOUT) :: ID
 TYPE(GR_BIOG_NP_t), INTENT(INOUT) :: NGB
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
@@ -101,8 +99,6 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) ::NPE
-!
-TYPE(PACK_DIAG_ISBA_t), INTENT(INOUT) :: PKD
 !
 TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 !
@@ -276,15 +272,13 @@ IF (IO%LCANOPY) THEN
   IF(ANY(SB%XT(:,:) == XUNDEF)) THEN
     CALL INIT_ISBA_SBL(IO, K, NP, NPE, SB, &
                        PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, PDIR_SW,  &
-                       PSCA_SW, PSW_BANDS, PRAIN, PSNOW, PZREF, PUREF,      &
-                       ISS%XSSO_SLOPE)
+                       PSCA_SW, PSW_BANDS, PRAIN, PSNOW, PZREF, PUREF, ISS%XSSO_SLOPE )
   ENDIF
 !
 !*      1.3    Allocations
 !              -----------
 !
-  CALL INIT_FORC(ZFORC_U, ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, &
-                 ZFORC_T, ZDFORC_TDT, ZFORC_Q, ZDFORC_QDQ )
+  CALL INIT_FORC(ZFORC_U, ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, ZFORC_T, ZDFORC_TDT, ZFORC_Q, ZDFORC_QDQ )
 !
   ZSFLUX_U = 0.
   ZSFLUX_T = 0.
@@ -392,8 +386,8 @@ END IF
 !*      2.     Call of ISBA
 !              ------------
 !
- CALL COUPLING_ISBA_n(DTCO, UG, U, USS, NAG, CHI, NCHI, DTI, ID, NGB, GB, ISS,NISS, IG, NIG, &
-                      IO, S, K, NK, NP, NPE, PKD, NDST, SLT, HPROGRAM, GCOUPLING,      &
+ CALL COUPLING_ISBA_n(DTCO, UG, U, USS, NAG, CHI, NCHI, DTV, ID, NGB, GB, ISS,NISS, IG, &
+                      NIG, IO, S, K, NK, NP, NPE, NDST, SLT, HPROGRAM, GCOUPLING,       &
                       PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
                       PZENITH2, ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2,  &
                       HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,    &

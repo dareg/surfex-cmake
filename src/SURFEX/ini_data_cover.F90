@@ -68,7 +68,6 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_EMIS_ECO, XDATA_WRMAX_CF,                   &
                                   XDATA_CE_NITRO,XDATA_CF_NITRO,XDATA_CNA_NITRO,    &
                                   XDATA_GROUND_DEPTH, XDATA_ROOT_DEPTH,             &
-                                  XDATA_ROOT_DEPTHGV, &
                                   XDATA_ROOT_EXTINCTION, XDATA_ROOT_LIN,            &
                                   XDATA_SOILRC_SO2, XDATA_SOILRC_O3,                &
                                   XDATA_Z0_TOWN, XDATA_Z0H_TOWN, XDATA_ALB_ROOF,    &
@@ -98,10 +97,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_ROUGH_WALL, XDATA_FRAC_GR,XDATA_RESIDENTIAL,&
                                   XDATA_EMIS_PANEL, XDATA_ALB_PANEL,                &
                                   XDATA_EFF_PANEL, XDATA_FRAC_PANEL,                &
-                                  XDATA_GNDLITTER,                                  &
-                                  XDATA_RGLGV, XDATA_GAMMAGV, XDATA_RSMINGV,        &
-                                  XDATA_ROOT_EXTINCTIONGV, XDATA_WRMAX_CFGV,        &
-                                  XDATA_LAIGV, XDATA_Z0LITTER, XDATA_H_VEG
+                                  XDATA_GNDLITTER, XDATA_Z0LITTER, XDATA_H_VEG
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
                                   NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_C3,   &
@@ -314,10 +310,6 @@ XDATA_GROUND_DEPTH(:,:) = XUNDEF
 !
 ALLOCATE(XDATA_ROOT_DEPTH(JPCOVER,NVEGTYPE))
 XDATA_ROOT_DEPTH(:,:) = XUNDEF
-!
-!
-ALLOCATE(XDATA_ROOT_DEPTHGV(JPCOVER,NVEGTYPE))
-XDATA_ROOT_DEPTHGV(:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -656,24 +648,6 @@ XDATA_WATSUP (:,:) = 0.
 !
 !*    2.26   For multi-energy balance (MEB)
 !            ------------------------------                     
-!
-ALLOCATE(XDATA_RGLGV(JPCOVER,NVEGTYPE))
-XDATA_RGLGV (:,:) = XUNDEF                                
-!
-ALLOCATE(XDATA_GAMMAGV(JPCOVER,NVEGTYPE))
-XDATA_GAMMAGV (:,:) = XUNDEF
-!
-ALLOCATE(XDATA_RSMINGV(JPCOVER,NVEGTYPE))
-XDATA_RSMINGV (:,:) = XUNDEF
-!
-ALLOCATE(XDATA_ROOT_EXTINCTIONGV(JPCOVER,NVEGTYPE))
-XDATA_ROOT_EXTINCTIONGV (:,:) = XUNDEF
-!
-ALLOCATE(XDATA_WRMAX_CFGV(JPCOVER,NVEGTYPE))
-XDATA_WRMAX_CFGV (:,:) = XUNDEF
-!
-ALLOCATE(XDATA_LAIGV(JPCOVER,36,NVEGTYPE))
-XDATA_LAIGV (:,:,:) = XUNDEF
 !
 ALLOCATE(XDATA_GNDLITTER(JPCOVER,36,NVEGTYPE))
 XDATA_GNDLITTER (:,:,:) = XUNDEF
@@ -2219,14 +2193,12 @@ ENDIF
                     XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
                     XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
-XDATA_ROOT_DEPTHGV(:,:) = XDATA_ROOT_DEPTH(:,:)
-!
 !-------------------------------------------------------------------------------
 !
 !*   10.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
- CALL ECOCLIMAP2_LAI(DTCO%NYEAR,DTCO%XDATA_VEGTYPE)
+ CALL ECOCLIMAP2_LAI(DTCO%NYEAR, DTCO%XDATA_VEGTYPE)
 !
 !-------------------------------------------------------------------------------
 !
@@ -2248,10 +2220,7 @@ XDATA_ROOT_DEPTHGV(:,:) = XDATA_ROOT_DEPTH(:,:)
                      PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
                      PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
                      PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST,                            &
-                     PGNDLITTER=XDATA_GNDLITTER,                                                    &
-                     PRGLGV=XDATA_RGLGV,PGAMMAGV=XDATA_GAMMAGV, PRSMINGV=XDATA_RSMINGV,             &
-                     PROOT_EXTINCTIONGV=XDATA_ROOT_EXTINCTIONGV, PWRMAX_CFGV=XDATA_WRMAX_CFGV,      &
-                     PH_VEG=XDATA_H_VEG, PLAIGV_OUT=XDATA_LAIGV, PZ0LITTER=XDATA_Z0LITTER           )
+                     PGNDLITTER=XDATA_GNDLITTER, PH_VEG=XDATA_H_VEG, PZ0LITTER=XDATA_Z0LITTER      )
 !
 IDC = 1
 !

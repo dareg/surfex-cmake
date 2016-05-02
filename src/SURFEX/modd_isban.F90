@@ -278,7 +278,7 @@ REAL, POINTER, DIMENSION(:)    :: XPLSTT
 !
 REAL, POINTER, DIMENSION(:,:)  :: XDZG           ! soil layers thicknesses (DIF option)
 REAL, POINTER, DIMENSION(:,:)  :: XDZDIF         ! distance between consecuative layer mid-points (DIF option)
-REAL, POINTER, DIMENSION(:,:)  :: XSOILWGHT      ! ISBA-DIF: weights for vertical
+REAL, POINTER, DIMENSION(:,:)  :: XSOILWGHT      ! VEG-DIF: weights for vertical
 !                                                ! integration of soil water and properties
 !
 REAL, POINTER, DIMENSION(:)  :: XKSAT_ICE        ! hydraulic conductivity at saturation

@@ -1,12 +1,11 @@
 !     #########
-    SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, DTI, GB, VD, GDO, S, K, P, PEK,  &
+    SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GDO, S, K, P, PEK,    &
                        HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
                        PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
-                       PTSTEP, PZREF, PTA, PQA, PEXNS, PRHOA,                   &
-                       PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,           &
-                       PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,&                
-                       PRN, PH, PLE, PGFLUX, PSFCO2, PEVAP, PUW, PAC,PQSAT,     &
-                       PAC_AGG, PHU_AGG, PRUNOFF, PDRAIN, PIRRIG         )  
+                       PTSTEP, PZREF, PTA, PQA, PEXNS, PRHOA, PCO2, PPS, PRR,   &
+                       PSR, PZENITH, PSW, PLW, PVMOD, PALBNIR_TVEG,             &
+                       PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, PSFCO2, PUW, &
+                       PAC, PQSAT, PAC_AGG, PHU_AGG, PIRRIG         )  
 !   ##########################################################################
 !
 !!****  *GARDEN*  
@@ -57,7 +56,11 @@ USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
-USE MODD_SURFEX_n, ONLY : TEB_VEG_DIAG_t
+!
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
+!
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -93,9 +96,12 @@ TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
-TYPE(TEB_VEG_DIAG_t), INTENT(INOUT) :: VD
+!
+TYPE(DIAG_t), INTENT(INOUT) :: DK
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: GDO
 TYPE(ISBA_S_t), INTENT(INOUT) :: S
@@ -135,20 +141,12 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TVEG       ! visible veg tot albe
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TSOIL      ! visible soil tot albedo
 !
-!
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over green areas
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over green areas
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over green areas
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over gardens (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! runoff over garden (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC         ! aerodynamical conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT       ! saturation humidity
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG     ! aggreg. aeodynamic resistance for green areas for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG     ! aggreg. relative humidity for green areas for latent heat flux
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN      ! garden total (vertical) drainage
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! garden summer irrigation rate
 !
 !
@@ -219,44 +217,40 @@ GUPDATED=.FALSE.
 GALB = .FALSE. 
 IF (GDO%CPHOTO=='LAI'.OR.GDO%CPHOTO=='LST'.OR.GDO%CPHOTO=='NIT'.OR.GDO%CPHOTO=='NCB') GALB = .TRUE.
 !
-  CALL VEGETATION_UPDATE(DTCO, DTI, G%NDIM, GDO, K, P, PEK, 1, &
+  CALL VEGETATION_UPDATE(DTCO, DTV, G%NDIM, GDO, K, P, PEK, 1,              &
                          PTSTEP, S%TTIME, TOP%XCOVER, TOP%LCOVER,  .FALSE., &
                          'GRD', GALB, YSS, GUPDATED, OABSENT=(T%XGARDEN==0.)  )
 !
 !
-VD%DP%XZ0 (:) = PEK%XZ0(:)
-VD%DP%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
+DK%XZ0 (:) = PEK%XZ0(:)
+DK%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
 !
-VD%DP%XZ0EFF(:) =  PEK%XZ0(:)
+DK%XZ0EFF(:) =  PEK%XZ0(:)
 !
 !*      2.2    Call ISBA for green areas
 !              -------------------------
 !
 ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
- CALL ISBA(GDO, K, P, PEK, G, YAG, VD%DP, VD%DEP, VD%DM, &
-           TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,             &
+ CALL ISBA(GDO, K, P, PEK, G, YAG, DK, DEK, DMK,                                  &
+           TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,                    &
            HIMPLICIT_WIND, PZREF, PZREF, ZDIRCOSZW, PTA, PQA, PEXNS, PRHOA, PPS,  &
            PEXNS, PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF, &
            PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
            PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, ZPALPHAN,    &
            ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN,         &
-           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),&
+           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
            ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, ZDEEP_FLUX, PIRRIG )     
 !
-PRUNOFF(:) = VD%DEP%XRUNOFF(:)
-PDRAIN (:) = VD%DEP%XDRAIN(:)
-!
-IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') &
-    PEK%TSNOW%TS(:)= VD%DM%XSNOWTEMP(:,1)
+IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:)= DMK%XSNOWTEMP(:,1)
 !
 IF (GDO%LTR_ML) THEN
   GMASK = ( TPTIME%TIME - PTSTEP < 0. ) .AND. ( TPTIME%TIME >= 0. )
   IF (GMASK) THEN
-    ALLOCATE(VD%DM%XDFAPARC(ILU),VD%DM%XDFAPIRC(ILU),VD%DM%XDLAI_EFFC(ILU))
-    VD%DM%XDFAPARC  (:) = PEK%XFAPARC   (:) / PEK%XMUS (:)
-    VD%DM%XDFAPIRC  (:) = PEK%XFAPIRC   (:) / PEK%XMUS (:)
-    VD%DM%XDLAI_EFFC(:) = PEK%XLAI_EFFC (:) / PEK%XMUS (:)
+    ALLOCATE(DMK%XDFAPARC(ILU),DMK%XDFAPIRC(ILU),DMK%XDLAI_EFFC(ILU))
+    DMK%XDFAPARC  (:) = PEK%XFAPARC   (:) / PEK%XMUS (:)
+    DMK%XDFAPIRC  (:) = PEK%XFAPIRC   (:) / PEK%XMUS (:)
+    DMK%XDLAI_EFFC(:) = PEK%XLAI_EFFC (:) / PEK%XMUS (:)
   ENDIF
 ENDIF
 !
@@ -265,8 +259,7 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (GDO%CPHOTO=='LAI' .OR. GDO%CPHOTO=='LST' .OR. GDO%CPHOTO=='NIT') THEN
-  CALL VEGETATION_EVOL(GDO, P, PEK, .FALSE., PTSTEP, &
-                       TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY,     &
+  CALL VEGETATION_EVOL(GDO, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, &
                        TPTIME%TIME, G%XLAT, PRHOA, PCO2, YSS, ZRESP_BIOMASS_INST )         
 END IF
 !
@@ -274,15 +267,14 @@ END IF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2(:)=0.
-VD%DEP%XRESP_ECO (:)=0.
-VD%DEP%XRESP_AUTO(:)=0.
+PSFCO2          (:) = 0.
+DEK%XRESP_ECO (:) = 0.
+DEK%XRESP_AUTO(:) = 0.
 !
 IF (GDO%CPHOTO/='NON' .AND. GDO%CRESPSL/='NON' .AND. ANY(PEK%XLAI(:)/=XUNDEF)) THEN
-  CALL CARBON_EVOL(GDO, K, P, PEK, VD%DEP, &
-                   PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
+  CALL CARBON_EVOL(GDO, K, P, PEK, DEK, PTSTEP, PRHOA, ZRESP_BIOMASS_INST  )
   ! calculation of vegetation CO2 flux
-  PSFCO2(:) = - VD%DEP%XGPP(:) + VD%DEP%XRESP_ECO(:)
+  PSFCO2(:) = - DEK%XGPP(:) + DEK%XRESP_ECO(:)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -304,19 +296,14 @@ WHERE (T%XGARDEN/=0.)
   !
   ! energy balance
   !
-  PRN    (:) = VD%DP%XRN    (:)
-  PH     (:) = VD%DP%XH     (:)
-  PLE    (:) = PEK%XLE(:)
-  PGFLUX (:) = VD%DP%XGFLUX (:)
-  PEVAP  (:) = VD%DP%XEVAP  (:)
-  !
+  DK%XLE(:) = PEK%XLE(:)
   !
   ! Estimate of green area aerodynamic conductance recomputed from heat flux,
   ! surface (radiative) temp. and forcing air temperature (estimated at future time step)
-  ZTA = PPET_B_COEF + PPET_A_COEF * PH
+  ZTA = PPET_B_COEF + PPET_A_COEF * DK%XH
   PAC = 0.
-  WHERE (VD%DP%XTSRAD /= ZTA)
-    PAC(:)   = MAX(PH(:) / XCPD / PRHOA(:) / (VD%DP%XTSRAD - ZTA) , 0.)
+  WHERE (DK%XTSRAD /= ZTA)
+    PAC(:)   = MAX(DK%XH(:) / XCPD / PRHOA(:) / (DK%XTSRAD - ZTA) , 0.)
   ENDWHERE
   !
   ! Humidity of saturation for green areas
@@ -327,11 +314,12 @@ WHERE (T%XGARDEN/=0.)
   !
 ELSEWHERE
   !
-  PRN    (:) = XUNDEF
-  PH     (:) = XUNDEF
-  PLE    (:) = XUNDEF
-  PGFLUX (:) = XUNDEF
-  PEVAP  (:) = XUNDEF
+  DK%XRN   (:) = XUNDEF
+  DK%XH    (:) = XUNDEF
+  DK%XLE   (:) = XUNDEF
+  DK%XGFLUX(:) = XUNDEF
+  DK%XEVAP (:) = XUNDEF  
+  !
   PAC    (:) = XUNDEF
   PQSAT  (:) = XUNDEF
   PUW    (:) = XUNDEF

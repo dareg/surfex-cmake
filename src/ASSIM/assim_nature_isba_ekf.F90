@@ -21,7 +21,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF (IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, 
 !
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
 USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
 !
@@ -63,6 +63,9 @@ REAL, DIMENSION(:), INTENT(IN) :: PHU2M
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
+!
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
 !
  CHARACTER(LEN=30)  :: YBGFILE
  CHARACTER(LEN=19)  :: YLFNAME
@@ -122,7 +125,7 @@ INTEGER :: IMYPROC
 INTEGER :: IOBS
 INTEGER :: ISTAT, ICPT, IUNIT
 !
-INTEGER :: JI,JJ,JP,JK,JJP,JL,K1,L1,IMASK
+INTEGER :: JI,JJ,JP,JK,JJP,JL,K1,L1,IMASK,INPATCH
 !
 LOGICAL :: GBEXISTS
 !
@@ -132,7 +135,6 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',0,ZHOOK_HANDLE)
 
 #ifdef USE_SODA
-
 !
 !############################# BEGINNING ###############################
 !
@@ -162,6 +164,8 @@ WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
 IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
 !
+INPATCH = IO%NPATCH
+!
 !############################# INITIALISATIONS ###############################
 !
 !   Read CLAY fraction to  compute the SWI range (Wfc - Wwilt)
@@ -180,8 +184,8 @@ IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',IO%NPAT
 ZIDENT(:,:) = 0.                   ! identity matrix
 DO JL = 1,NVAR
   !
-  DO JP = 1,IO%NPATCH
-    ZIDENT(JP+IO%NPATCH*(JL-1),JP+IO%NPATCH*(JL-1)) = 1.0
+  DO JP = 1,INPATCH
+    ZIDENT(JP+INPATCH*(JL-1),JP+INPATCH*(JL-1)) = 1.0
   ENDDO
   !
   WHERE ( XI(:,:,JL)/=XUNDEF )
@@ -199,7 +203,7 @@ DO JL = 1,NVAR
   ELSEIF ( TRIM(CVAR(JL))=='LAI' .AND. LBFIXED ) THEN
     !
     DO JI = 1,KI
-      DO JP = 1,IO%NPATCH
+      DO JP = 1,INPATCH
         IF ( XLAI_PASS(JI,JP)/=XUNDEF .AND. XLAI_PASS(JI,JP)>=2. ) THEN
           ZCOEF(JI,JP,JL) = XLAI_PASS(JI,JP)*XLAI_PASS(JI,JP)
         ELSE 
@@ -239,9 +243,9 @@ ELSEIF ( LBEV .OR. LBFIXED ) THEN
   ZB(:,:,:) = 0.
   DO JI = 1,KI
     DO JL = 1,NVAR
-      DO JP = 1,IO%NPATCH   
+      DO JP = 1,INPATCH   
         !
-        L1 = JP + IO%NPATCH *(JL-1)
+        L1 = JP + INPATCH *(JL-1)
         ZB(JI,L1,L1) = XSIGMA(JL)*XSIGMA(JL) * ZCOEF(JI,JP,JL)
         !
       ENDDO
@@ -255,12 +259,12 @@ ELSEIF ( LBEV .OR. LBFIXED ) THEN
     ICPT = 0
     !
     DO JI = 1,KI
-      DO JP = 1,IO%NPATCH
-        DO JJP = 1,IO%NPATCH
+      DO JP = 1,INPATCH
+        DO JJP = 1,INPATCH
           DO JL = 1,NVAR
             DO JK = 1,NVAR
               !
-              L1 = JP + IO%NPATCH * (JL-1)
+              L1 = JP + INPATCH * (JL-1)
               !
               ICPT = ICPT + 1
               ZBLONG(ICPT) = ZB(JI,L1,L1)
@@ -306,10 +310,10 @@ IF ( LBEV ) THEN
     DO JL = 1,NVAR    ! control variable (x at previous time step)
       DO JK = 1,NVAR 
         IUNIT = IUNIT + 1
-        DO JP = 1,IO%NPATCH 
+        DO JP = 1,INPATCH 
           !
-          L1 = JP + IO%NPATCH*(JL-1)
-          K1 = JP + IO%NPATCH*(JK-1)
+          L1 = JP + INPATCH*(JL-1)
+          K1 = JP + INPATCH*(JK-1)
           !
           IF ( S%XPATCH(JI,JP)>0.0 .AND. XF(JI,JP,JL+1,JK).NE.XUNDEF .AND. XF(JI,JP,1,JK).NE.XUNDEF ) THEN
             !
@@ -347,9 +351,9 @@ IF ( LBEV ) THEN
     !   Adding model error to background error matrix 
     ZQ(:,:) = 0.0
     DO JL=1,NVAR
-      DO JP=1,IO%NPATCH
+      DO JP=1,INPATCH
         !
-        L1 = JP+IO%NPATCH*(JL-1)
+        L1 = JP+INPATCH*(JL-1)
         !
         ZQ(L1,L1) = XSIGMA(JL)*XSIGMA(JL)
         !
@@ -424,10 +428,13 @@ ENDIF
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//TRIM(YMYPROC),STATUS='unknown',IOSTAT=ISTAT)
 DO JI = 1,KI
   ZMIN = XUNDEF
-  DO JP = 1,IO%NPATCH
-    DO JJ = 1,NP%AL(JP)%NSIZE_P
-      IF (NP%AL(JP)%NR_P(JJ) == JI) THEN
-        IF (NPE%AL(JP)%XWGI(JJ,1)<ZMIN) ZMIN = NPE%AL(JP)%XWGI(JJ,1)
+  DO JP = 1,INPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    !
+    DO JJ = 1,PK%NSIZE_P
+      IF (PK%NR_P(JJ) == JI) THEN
+        IF (PEK%XWGI(JJ,1)<ZMIN) ZMIN = PEK%XWGI(JJ,1)
         EXIT
       ENDIF
     ENDDO
@@ -469,13 +476,13 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
 !
-IF (IO%NPATCH==12) THEN
+IF (INPATCH==12) THEN
   ZVLAIMIN = (/0.3,0.3,0.3,0.3,1.0,1.0,0.3,0.3,0.3,0.3,0.3,0.3/)
 ELSE
   ZVLAIMIN = (/0.3/)
 ENDIF
 !
-DO JP = 1,IO%NPATCH
+DO JP = 1,INPATCH
   ALLOCATE(NP%AL(JP)%XINCR(KI,NVAR))
   NP%AL(JP)%XINCR(:,:) = 0.
 ENDDO
@@ -485,7 +492,7 @@ DO JI=1,KI
   !
 !---------------- MEAN SIMULATED OBS AVERAGED OVER TILES-----------------------
   ZYF(:,:) = 0. 
-  DO JP=1,IO%NPATCH
+  DO JP=1,INPATCH
     IF (S%XPATCH(JI,JP) > 0.0) THEN
       WHERE ( XF_PATCH(JI,JP,:,:)/=XUNDEF ) 
         ZYF(:,:) = ZYF(:,:) + S%XPATCH(JI,JP)*XF_PATCH(JI,JP,:,:)
@@ -523,9 +530,9 @@ DO JI=1,KI
       !      
 !--------------------- CALCULATE JACOBIANS ------------------         
       DO JL=1,NVAR
-        DO JP=1,IO%NPATCH
+        DO JP=1,INPATCH
           !
-          L1 = JP + IO%NPATCH*(JL-1)
+          L1 = JP + INPATCH*(JL-1)
           !
           IF ( S%XPATCH(JI,JP)>0.0 .AND. XF_PATCH(JI,JP,JL+1,JK).NE.XUNDEF .AND. XF_PATCH(JI,JP,1,JK).NE.XUNDEF ) THEN 
             ZHOWR(K1,L1) = S%XPATCH(JI,JP)*(XF_PATCH(JI,JP,JL+1,JK) - XF_PATCH(JI,JP,1,JK))/ZEPS(JI,JP,JL)
@@ -570,9 +577,9 @@ DO JI=1,KI
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
   ZINCR(JI,:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
   DO JL=1,NVAR
-    DO JP=1,IO%NPATCH
+    DO JP=1,INPATCH
       !
-      L1 = JP+IO%NPATCH*(JL-1)
+      L1 = JP+INPATCH*(JL-1)
       !
       ! Update the modified values
       IF ( TRIM(CVAR(JL))=="LAI" ) THEN
@@ -593,8 +600,8 @@ DO JI=1,KI
   ENDDO
   !
   IF ( NPRINTLEV > 0 ) THEN
-    DO JP=1,IO%NPATCH
-      WRITE(113,*) (XF(JI,JP,1,JL),JL=1,NVAR), (ZINCR(JI,JP+IO%NPATCH*(JL-1)),JL=1,NVAR)
+    DO JP=1,INPATCH
+      WRITE(113,*) (XF(JI,JP,1,JL),JL=1,NVAR), (ZINCR(JI,JP+INPATCH*(JL-1)),JL=1,NVAR)
     ENDDO
   ENDIF
   
@@ -619,8 +626,8 @@ DO JI=1,KI
     DO JL = 1,NVAR
       DO JK = 1,NOBSTYPE
         IUNIT = IUNIT + 1
-        DO JP=1,IO%NPATCH
-          WRITE(IUNIT,*) ZHOWR(JK,JP+IO%NPATCH*(JL-1)),ZGAIN(JP+IO%NPATCH*(JL-1),JK)
+        DO JP=1,INPATCH
+          WRITE(IUNIT,*) ZHOWR(JK,JP+INPATCH*(JL-1)),ZGAIN(JP+INPATCH*(JL-1),JK)
         ENDDO
       ENDDO
     ENDDO
@@ -651,7 +658,7 @@ IF (LBEV .OR. NPRINTLEV>0) THEN
 ENDIF
 !
 IF ( NPRINTLEV > 0 ) THEN
-  IOBSCOUNT = IOBSCOUNT / IO%NPATCH / NVAR
+  IOBSCOUNT = IOBSCOUNT / INPATCH / NVAR
   IF (NRANK==NPIO) THEN
     WRITE(*,*)
     WRITE(*,*) '   ---------------------------------------'
@@ -665,44 +672,46 @@ ENDIF
 !
 !############################# GET VARIABLES FOR OUTPUT WRITING ###############################
 DO JL=1,NVAR
- DO JP = 1,IO%NPATCH
-  !
-  DO JI = 1,NP%AL(JP)%NSIZE_P
-   IMASK = NP%AL(JP)%NR_P(JI)
-   !
-   NP%AL(JP)%XINCR(JI,JL) = ZINCR(IMASK,JP+IO%NPATCH*(JL-1))
-   !
-   ! Update the modified values
-   SELECT CASE (TRIM(CVAR(JL)))
-    CASE("TG1")
-      NPE%AL(JP)%XTG(JI,1) = XF(IMASK,JP,1,JL)
-    CASE("TG2")
-      NPE%AL(JP)%XTG(JI,2) = XF(IMASK,JP,1,JL)
-    CASE("WG1")
-      NPE%AL(JP)%XWG(JI,1) = XF(IMASK,JP,1,JL)
-    CASE("WG2")
-      NPE%AL(JP)%XWG(JI,2) = XF(IMASK,JP,1,JL)
-    CASE("LAI") 
-      NPE%AL(JP)%XLAI(JI) = XF(IMASK,JP,1,JL)
-      SELECT CASE (TRIM(CBIO))
-        CASE("BIOMA1","BIOMASS1")
-          NPE%AL(JP)%XBIOMASS(JI,1) = XBIO_PASS(IMASK,JP)
-        CASE("BIOMA2","BIOMASS2")
-          NPE%AL(JP)%XBIOMASS(JI,2) = XBIO_PASS(IMASK,JP)
-        CASE("RESPI1","RESP_BIOM1")
-          NPE%AL(JP)%XRESP_BIOMASS(JI,1) = XBIO_PASS(IMASK,JP)
-        CASE("RESPI2","RESP_BIOM2")
-          NPE%AL(JP)%XRESP_BIOMASS(JI,2) = XBIO_PASS(IMASK,JP)
-        CASE("LAI")
-          NPE%AL(JP)%XLAI(JI) = XBIO_PASS(IMASK,JP)
+  DO JP = 1,INPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    !
+    DO JI = 1,PK%NSIZE_P
+      IMASK = PK%NR_P(JI)
+      !
+      PK%XINCR(JI,JL) = ZINCR(IMASK,JP+INPATCH*(JL-1))
+      !
+      ! Update the modified values
+      SELECT CASE (TRIM(CVAR(JL)))
+        CASE("TG1")
+          PEK%XTG(JI,1) = XF(IMASK,JP,1,JL)
+        CASE("TG2")
+          PEK%XTG(JI,2) = XF(IMASK,JP,1,JL)
+        CASE("WG1")
+          PEK%XWG(JI,1) = XF(IMASK,JP,1,JL)
+        CASE("WG2")
+          PEK%XWG(JI,2) = XF(IMASK,JP,1,JL)
+        CASE("LAI") 
+          PEK%XLAI(JI) = XF(IMASK,JP,1,JL)
+          SELECT CASE (TRIM(CBIO))
+            CASE("BIOMA1","BIOMASS1")
+              PEK%XBIOMASS(JI,1) = XBIO_PASS(IMASK,JP)
+            CASE("BIOMA2","BIOMASS2")
+              PEK%XBIOMASS(JI,2) = XBIO_PASS(IMASK,JP)
+            CASE("RESPI1","RESP_BIOM1")
+              PEK%XRESP_BIOMASS(JI,1) = XBIO_PASS(IMASK,JP)
+            CASE("RESPI2","RESP_BIOM2")
+              PEK%XRESP_BIOMASS(JI,2) = XBIO_PASS(IMASK,JP)
+            CASE("LAI")
+              PEK%XLAI(JI) = XBIO_PASS(IMASK,JP)
+            CASE DEFAULT
+              CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
+          END SELECT
         CASE DEFAULT
-          CALL ABOR1_SFX("Mapping of "//CBIO//" is not defined in EKF!")
+          CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in EKF!")
       END SELECT
-    CASE DEFAULT
-      CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in EKF!")
-   END SELECT
+    ENDDO
   ENDDO
- ENDDO
 ENDDO
 !
 #endif

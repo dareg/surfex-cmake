@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE AVERAGED_ALBEDO_EMIS_ISBA (IO, S, NK, NP, NPE, &
-                                 PZENITH, PTG1, PSW_BANDS, PDIR_ALB, PSCA_ALB,     &
-                                 PEMIS, PTSRAD, PTSURF, PDIR_SW, PSCA_SW           )
+                                 PZENITH, PTG1, PSW_BANDS, PDIR_ALB, PSCA_ALB, &
+                                 PEMIS, PTSRAD, PTSURF, PDIR_SW, PSCA_SW        )
 !     ###################################################
 !
 !!**** ** computes radiative fields used in ISBA
@@ -173,7 +173,7 @@ DO JP = 1,IO%NPATCH
     !
     ! For the case when MEB patch albedo is requested downweeling SW is needed
     !
-    CALL UPDATE_RAD_ISBA_n(IO, S, NK%AL(JP), NP%AL(JP), NPE%AL(JP), JP, PZENITH, PSW_BANDS, &
+    CALL UPDATE_RAD_ISBA_n(IO, S, NK%AL(JP), NP%AL(JP), NPE%AL(JP), JP, PZENITH, PSW_BANDS,   &
                            ZDIR_ALB_PATCH(:,:,JP), ZSCA_ALB_PATCH(:,:,JP), ZEMIS_PATCH(:,JP), &
                            PDIR_SW, PSCA_SW    )
   ELSE
@@ -216,7 +216,7 @@ DO JP  =  1,IO%NPATCH
     ENDIF
     !
     CALL ISBA_LWNET_MEB(PEK%XLAI, PEK%XPSN, ZPALPHAN, PEK%TSNOW%EMIS, &
-                        ZEMISF(1:ISIZE), ZFF(1:ISIZE), &
+                        ZEMISF(1:ISIZE), ZFF(1:ISIZE),           &
                         PEK%XTV, PTG1(:,JP), PEK%TSNOW%TS,       &
                         ZLW_RAD, ZLWNET_N, ZLWNET_V, ZLWNET_G,   &
                         ZDUMMY, ZDUMMY, ZDUMMY, ZDUMMY, ZDUMMY,ZDUMMY,  &

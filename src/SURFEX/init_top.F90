@@ -30,6 +30,7 @@
 !
 !-------------------------------------------------------------------------------
 !
+!
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY: ISBA_S_t, ISBA_NP_t, ISBA_NK_t, ISBA_P_t, ISBA_K_t
 !
@@ -141,7 +142,7 @@ ZG  = 0.0
 !
 ZD_TOP    (:) = 0.0
 ZWSAT_AVG (:) = 0.0
-ZWD0_AVG  (:) = 0.0
+ZWD0_AVG(:) = 0.0
 !
 ! soil properties for runoff (m)
 !
@@ -175,14 +176,18 @@ IF (IO%CISBA == 'DIF') THEN
 ELSE
 !     
   DO JP=1,IO%NPATCH
+    !
     PK => NP%AL(JP)
+    KK => NK%AL(JP)    
     !
      IF (PK%NSIZE_P == 0 ) CYCLE
      !
      DO JI=1,PK%NSIZE_P
+       !
        IMASK = PK%NR_P(JI)
        !
        ZD_TOP(IMASK)=ZD_TOP(IMASK) + PK%XRUNOFFD(JI) * PK%XPATCH(JI)
+       !
      ENDDO
      !
   ENDDO
@@ -209,11 +214,11 @@ DO JI=1,INI
 !    *Case where the Topographics index are not defined.
 !    --------------------------------------------------------         
      ZNO=ZNO+1.0
-     S%XTAB_FSAT(JI,:) = 0.0     
-     S%XTAB_WTOP(JI,:) = XUNDEF
-     S%XTAB_QTOP(JI,:) = 0.0
+     S%XTAB_FSAT(JI,:)=0.0     
+     S%XTAB_WTOP(JI,:)=XUNDEF
+     S%XTAB_QTOP(JI,:)=0.0
 !     
-     PM(JI) = XUNDEF
+     PM(JI) =XUNDEF
 !
    ELSE 
 !
@@ -229,11 +234,11 @@ DO JI=1,INI
 !    New version : Regressions directly in the pgd
 !    1000 meter DEM to 2m DEM (PAN AND KING 2012)
 !             
-     ZTI_MEAN = S%XTI_MEAN(JI)
-     ZTI_MIN  = S%XTI_MIN (JI)
-     ZTI_MAX  = S%XTI_MAX (JI)
-     ZTI_STD  = S%XTI_STD (JI)
-     ZTI_SKEW = S%XTI_SKEW(JI)
+     ZTI_MEAN=S%XTI_MEAN(JI)
+     ZTI_MIN =S%XTI_MIN (JI)
+     ZTI_MAX =S%XTI_MAX (JI)
+     ZTI_STD =S%XTI_STD (JI)
+     ZTI_SKEW=S%XTI_SKEW(JI)
 !
 !    Calculate topographic index pdf parameters 
 !

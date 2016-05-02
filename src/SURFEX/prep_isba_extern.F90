@@ -163,16 +163,17 @@ SELECT CASE(HSURF)
       DO JPATCH=1,SIZE(ZFIELD,3)
         CALL INTERP_GRID_NAT(ZD(:,:,JPATCH),ZFIELD(:,:,JPATCH),XGRID_SOIL,PFIELD(:,:,JPATCH))
       END DO
+      !
+      DO JPATCH=1,SIZE(PFIELD,3)
+        DO JL=1,SIZE(PFIELD,2)
+          WHERE (ZMASK(:)==0.) PFIELD(:,JL,JPATCH) = XUNDEF
+        ENDDO
+      ENDDO
+      !
     ENDIF
-     !
-     DO JPATCH=1,SIZE(PFIELD,3)
-       DO JL=1,SIZE(PFIELD,2)
-         WHERE (ZMASK(:)==0.) PFIELD(:,JL,JPATCH) = XUNDEF
-       ENDDO
-     ENDDO
-     !
-     DEALLOCATE(ZFIELD)
-     DEALLOCATE(ZD)
+    !
+    DEALLOCATE(ZFIELD)
+    DEALLOCATE(ZD)
 !
 !--------------------------------------------------------------------------
 !

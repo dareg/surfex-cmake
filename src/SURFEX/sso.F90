@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE SSO (U, UG, USS, &
-                      OSSO,OSSO_ANIS,PSEA)
+      SUBROUTINE SSO (U, UG, USS, OSSO, OSSO_ANIS)
 !     #########################
 !
 !!*SSO  computes the SSO anisotropy, direction and slope
@@ -66,7 +65,6 @@ LOGICAL, DIMENSION(:), INTENT(OUT) :: OSSO_ANIS ! .T. : the SSO anisotropy
 !                                            ! .F. : not enough sub-grid
 !                                            ! information avalaible to
 !                                            ! compute the coefficients
-REAL,    DIMENSION(:), INTENT(IN)  :: PSEA   ! sea fraction
 !
 !*    0.2    Declaration of indexes
 !            ----------------------
@@ -148,7 +146,7 @@ ELSE
   ALLOCATE(ISSQOT(0,0,0))
 ENDIF
 !
- CALL GATHER_AND_WRITE_MPI(PSEA,ZSEA)
+ CALL GATHER_AND_WRITE_MPI(U%XSEA,ZSEA)
  CALL GATHER_AND_WRITE_MPI(XSSQO,ZSSQO)
 !
 ALLOCATE(ISSQO(SIZE(XSSQO,1),NSSO,NSSO))

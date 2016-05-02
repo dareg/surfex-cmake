@@ -39,7 +39,6 @@ USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
-
 !
 USE MODI_PGD_ISBA
 USE MODI_PGD_TSZ0_PAR
@@ -63,8 +62,6 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!                                           ! F if all parameters must be specified
-!
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -82,7 +79,7 @@ ELSE IF (U%CNATURE=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('PGD_NATURE',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
-  CALL PGD_ISBA(DTCO, IM%DTI, IM%G, IM%O, IM%S, IM%K, IM%ISS, UG, U, USS, HPROGRAM)
+  CALL PGD_ISBA(DTCO, IM%DTV, IM%G, IM%O, IM%S, IM%K, IM%ISS, UG, U, USS, HPROGRAM)
   IF (U%CNATURE=='TSZ0') CALL PGD_TSZ0_PAR(DTZ, HPROGRAM)
 END IF
 IF (LHOOK) CALL DR_HOOK('PGD_NATURE',1,ZHOOK_HANDLE)

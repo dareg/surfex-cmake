@@ -1,7 +1,6 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_INLAND_WATER_n (NPE, U, W, &
-                                 HPROGRAM,KI,PTS_IN,PITM,HTEST, &
-                                OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
+SUBROUTINE ASSIM_INLAND_WATER_n (NPE, W, U, HPROGRAM, KI, PTS_IN, PITM, HTEST, &
+                                 OLKEEPEXTZONE, OD_MASKEXT, PLON_IN, PLAT_IN)
 
 !     ###############################################################################
 !

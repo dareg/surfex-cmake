@@ -32,6 +32,8 @@ USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t, TEB_IRRIG_INIT
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_1P_t, DIAG_MISC_TEB_1P_INIT
 USE MODD_DIAG_MISC_TEB_OPTION_n, ONLY : DIAG_MISC_TEB_OPTIONS_t, DIAG_MISC_TEB_OPTIONS_INIT
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_INIT
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t, DIAG_EVAP_ISBA_INIT
 !
 USE MODD_CSTS,  ONLY : XCPD, XPI, XP00, XRD, XSTEFAN
 !
@@ -73,7 +75,8 @@ INTEGER,       INTENT(IN)    :: KLUOUT ! output listing logical unit
 !
 !-------------------------------------------------------------------------
 !
-
+TYPE(DIAG_t) :: YGRD
+TYPE(DIAG_EVAP_ISBA_t) :: YGRDE
 TYPE(DIAG_MISC_TEB_1P_t) :: YDMTC
 TYPE(DIAG_MISC_TEB_1P_t) :: YDMT
 TYPE(DIAG_MISC_TEB_OPTIONS_t) :: YDMTO
@@ -538,6 +541,17 @@ YIR%XRD_24H_IRRIG   = 0.
 !
 !----------------------------------------------
 !
+ CALL DIAG_INIT(YGRD)
+ CALL DIAG_EVAP_ISBA_INIT(YGRDE)
+!
+! greenroofs   are not taken into account in the building's HVAC equipment sizing process
+YGRD%XRN     (:) = 0.
+YGRD%XH      (:) = 0.
+YGRD%XLE     (:) = 0.
+YGRD%XGFLUX  (:) = 0.
+YGRDE%XRUNOFF(:) = 0.
+YGRDE%XDRAIN (:) = 0.
+!
  CALL DIAG_MISC_TEB_1P_INIT(YDMT)
 !
 ZUW_GREENROOF    (:) = 0.
@@ -559,13 +573,6 @@ ZE_SHADING(:) = 0.
  YDMTO%LSURF_MISC_BUDGET = .TRUE.
  CALL DIAG_MISC_TEB_INIT_n(YDMTC, YDMT, YDMTO, TOP, KI, 0)
 !
-! greenroofs   are not taken into account in the building's HVAC equipment sizing process
-YDMT%XRN_GREENROOF    (:) = 0.
-YDMT%XH_GREENROOF     (:) = 0.
-YDMT%XLE_GREENROOF    (:) = 0.
-YDMT%XGFLUX_GREENROOF (:) = 0.
-YDMT%XRUNOFF_GREENROOF(:) = 0.
-YDMT%XDRAIN_GREENROOF (:) = 0.
 !* one supposes zero conduction heat flux between the greenroof and the nnroof.
 YDMT%XG_GREENROOF_ROOF(:) = 0.
 !
@@ -619,7 +626,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !
   ZEMIS_GARDEN = 1.0
   CALL URBAN_LW_COEF(B, T, ZLW_RAD, ZEMIS_GARDEN,                       &
-                     T%TSNOW_ROAD%TS, ZTS_GARDEN,                  &  
+                     T%TSNOW_ROAD%TS, ZTS_GARDEN,                       &  
                      ZLW_WA_TO_WB, ZLW_WA_TO_R, ZLW_WB_TO_R,            &
                      ZLW_WA_TO_NR,ZLW_WB_TO_NR,                         &
                      ZLW_WA_TO_G, ZLW_WB_TO_G,                          &
@@ -635,7 +642,7 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !*      B.3     TEB simulation
 !               -------------
 !
-  CALL TEB  (TOP, T, BOP, B, YIR, YDMT, YIMPLICIT_WIND, ZTSUN,        &
+  CALL TEB  (TOP, T, BOP, B, YIR, YDMT, YGRD, YGRDE, YIMPLICIT_WIND, ZTSUN,  &
              ZT_CANYON, ZQ_CANYON, ZU_CANYON, ZT_CANYON, ZQ_CANYON,    &
              ZU_CANYON, ZZ_LOWCAN, ZPEW_A_COEF, ZPEW_B_COEF,           &
              ZPEW_A_COEF, ZPEW_B_COEF, ZPS, ZPA, ZEXNS, ZEXNA, ZTA,    &

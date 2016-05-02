@@ -31,12 +31,6 @@ CONTAINS
                                    KPATCH,PSOILGRID,PDEPTH,KVERSION,KWG_LAYER          )
 !     #######################
 !
-!
-!
-!
-!
-!
-!
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -58,8 +52,6 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-!
-!
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -291,7 +283,6 @@ IF (GECOCLIMAP .AND. .NOT.GREAD_OK ) THEN
     YRECFM='BUG'
     CALL READ_SURF(HFILETYPE,YRECFM,IBUGFIX,IRESP)
     GDIM = (IVERSION>8 .OR. IVERSION==8 .AND. IBUGFIX>0)
-    IF (TRIM(YSURF)=="TOWN") GDIM=.FALSE.
     DO JL=1,KLAYER
       WRITE(YLVL,'(I4)') JL
       YRECFM='DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
@@ -654,11 +645,11 @@ ELSE
   YNAT='NAT'
   IF (GTEB) YNAT='GRD'
   !
-  CALL READ_EXTERN_DEPTH(U, DTCO, IO, &
-                         HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                         KLUOUT,YISBA,YNAT,HFIELD,KNI,  &
+  CALL READ_EXTERN_DEPTH(U, DTCO, IO,                            &
+                         HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,  &
+                         KLUOUT,YISBA,YNAT,HFIELD,KNI,           &
                          ILAYER,IPATCH,ZSOILGRID,PDEPTH,IVERSION,IWG_LAYER)
-                 !
+  !
 END IF
 !
 DEALLOCATE(ZSOILGRID)
@@ -683,14 +674,14 @@ IF (GTEB) GDIM=.FALSE.
 IWORK=ILAYER
 IF(YISBA=='2-L'.OR.YISBA=='3-L') THEN
   SELECT CASE(HFIELD)
-         CASE('TG    ')
-             IF(GTEMP_ARP)THEN
-               IWORK=ILAYER
-             ELSE
-               IWORK=2
-             ENDIF
-         CASE('WGI   ')
-             IWORK=2
+    CASE('TG    ')
+      IF(GTEMP_ARP)THEN
+        IWORK=ILAYER
+      ELSE
+        IWORK=2
+      ENDIF
+    CASE('WGI   ')
+      IWORK=2
   END SELECT
 ENDIF
 !
@@ -709,10 +700,10 @@ DEALLOCATE (ZNAT)
 !
 IF(YISBA=='3-L') THEN
   SELECT CASE(HFIELD)
-         CASE('TG    ')
-         IF(.NOT.GTEMP_ARP)PFIELD(:,3,:)=PFIELD(:,2,:)
-         CASE('WGI   ')       
-         PFIELD(:,3,:)=PFIELD(:,2,:)
+    CASE('TG    ')
+      IF(.NOT.GTEMP_ARP)PFIELD(:,3,:)=PFIELD(:,2,:)
+    CASE('WGI   ')       
+     PFIELD(:,3,:)=PFIELD(:,2,:)
   END SELECT
 ENDIF
 !

@@ -218,7 +218,7 @@ ELSE
           ZW%AL(JP)%ZOUT(:,1) = PEK%XLAI(:) * PK%XBSLAI_NITRO(:)
         ENDWHERE
         ZW%AL(JP)%ZOUT(:,2) = MAX( 0., (ZW%AL(JP)%ZOUT(:,1)/ (XCC_NIT/10.**XCA_NIT))  &
-                             **(1.0/(1.0-XCA_NIT)) - ZW%AL(JP)%ZOUT(:,1) )
+                                      **(1.0/(1.0-XCA_NIT)) - ZW%AL(JP)%ZOUT(:,1) )
       !
       !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       !

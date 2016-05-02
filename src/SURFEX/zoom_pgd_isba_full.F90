@@ -1,5 +1,5 @@
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_ISBA_FULL (CHI, DTCO, DTI, IG, IO, S, K, UG, U, &
+      SUBROUTINE ZOOM_PGD_ISBA_FULL (CHI, DTCO, DTV, IG, IO, S, K, UG, U, &
                                      HPROGRAM,HINIFILE,HINIFILETYPE)
 !     ###########################################################
 
@@ -79,7 +79,7 @@ IMPLICIT NONE
 !
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_S_t), INTENT(INOUT) :: S
@@ -275,7 +275,7 @@ K%XWDRAIN(:) = ZOUTW(:,1)
 DEALLOCATE(ZOUTW)
 !
  CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',IG%NDIM)
- CALL READ_PGD_ISBA_PAR_n(DTCO, U, DTI, IG%NDIM, IO, &
+ CALL READ_PGD_ISBA_PAR_n(DTCO, U, DTV, IG%NDIM, IO, &
                           HPROGRAM,INI,.FALSE.,HDIR='A')
 !
  CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)

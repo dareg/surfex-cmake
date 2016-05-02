@@ -133,18 +133,6 @@ IF (IO%CPHOTO=='NON' .OR. IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='AST') THEN
                 NP%AL(JP)%NR_P,NPE%AL(JP)%XLAI(:),ILU)
   ENDDO  
   !
-  !IF (ISIZE_LMEB_PATCH>0) THEN
-  !  !
-  !  YRECFM='LAIGV'
-  !  YCOMMENT='MEB: understory leaf area index (-)'
-  !  !
-  !  DO JP = 1,IO%NPATCH
-  !    CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-  !                NP%AL(JP)%NR_P,NPE%AL(JP)%XLAIGV(:),ILU)
-  !  ENDDO  
-  !  !
-  !ENDIF
-  !
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -325,28 +313,6 @@ IF(IO%CISBA=='DIF')THEN
   END DO
   DEALLOCATE(ZWORK1)
   !
-  !IF (ISIZE_LMEB_PATCH>0) THEN
-  !  DO JP = 1,IO%NPATCH
-  !    PK => NP%AL(JP)
-  !    DO JL=1,SIZE(PK%XROOTFRACGV,2)
-  !      IF (JL<10) THEN
-  !        WRITE(YRECFM,FMT='(A10,I1)') 'ROOTFRACGV',JL
-  !      ELSE
-  !        WRITE(YRECFM,FMT='(A10,I2)') 'ROOTFRACGV',JL          
-  !      ENDIF  
-  !      YCOMMENT='MEB: understory root fraction by layer (-)'
-  !      ZWORK1(:)=XUNDEF
-  !      DO JI=1,SIZE(PK%XDG,1)
-  !        WHERE(JL<=PK%NWG_LAYER(JI).AND.PK%NWG_LAYER(JI)/=NUNDEF)
-  !          ZWORK1(JI) = PK%XROOTFRACGV(JI,JL)
-  !        ENDWHERE
-  !      ENDDO
-  !      CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-  !            NP%AL(JP)%NR_P,ZWORK1(1:PK%NSIZE_P,ILU)
-  !    ENDDO
-  !  END DO
-  !ENDIF
-  !
   !* SOC fraction for each layer
   !
   IF(IO%LSOC)THEN
@@ -501,34 +467,6 @@ DO JP = 1,IO%NPATCH
 ENDDO
 !
 IF (ISIZE_LMEB_PATCH>0) THEN
-!  !
-!  YRECFM='RSMINGV'
-!  YCOMMENT='MEB: understory minimum stomatal resistance (sm-1)'
-!  DO JP = 1,IO%NPATCH
-!    CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-!                NP%AL(JP)%NR_P,NPE%AL(JP)%XRSMINGV(:),ILU)
-!  ENDDO
-!  !
-!  YRECFM='GAMMAGV'
-!  YCOMMENT='MEB: understory coefficient for RSMIN calculation (-)'
-!  DO JP = 1,IO%NPATCH
-!    CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-!                NP%AL(JP)%NR_P,NPE%AL(JP)%XGAMMAGV(:),ILU)
-!  ENDDO
-!  !
-!  YRECFM='RGLGV'
-!  YCOMMENT='MEB: understory maximum solar radiation usable in photosynthesis (-)'
-!  DO JP = 1,IO%NPATCH
-!    CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-!                NP%AL(JP)%NR_P,NPE%AL(JP)%XRGLGV(:),ILU)
-!  ENDDO
-!  !
-!  YRECFM='WRMAX_CFGV'
-!  YCOMMENT='MEB: understory coefficient for maximum water interception (-)'
-!  DO JP = 1,IO%NPATCH
-!    CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-!                NP%AL(JP)%NR_P,NPE%AL(JP)%XWRMAX_CFGV(:),ILU)
-!  ENDDO
   !
   YRECFM='H_VEG'
   YCOMMENT='MEB: height of vegetation (m)'

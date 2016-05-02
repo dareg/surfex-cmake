@@ -1,6 +1,5 @@
 !     #########
-      SUBROUTINE INIT_IO_SURF_ASC_n (DTCO, U, &
-                                     HMASK,HACTION)
+      SUBROUTINE INIT_IO_SURF_ASC_n (DTCO, U, HMASK,HACTION)
 !     ######################
 !
 !!****  *INIT_IO_SURF_ASC* Keep in memory the output files
@@ -126,10 +125,8 @@ ENDIF
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU
- CALL GET_TYPE_DIM_n(DTCO, U, &
-                     HMASK,IL)
- CALL INIT_IO_SURF_MASK_n(DTCO, U, &
-                          HMASK, IL, NLUOUT, ILU, NMASK)
+ CALL GET_TYPE_DIM_n(DTCO, U,HMASK,IL)
+ CALL INIT_IO_SURF_MASK_n(DTCO, U, HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !
 !------------------------------------------------------------------------------

@@ -1,15 +1,16 @@
 !   ##########################################################################
-    SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DMT, HIMPLICIT_WIND, PTSUN, PT_CANYON, PQ_CANYON,  &
-                     PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN, PPEW_A_COEF,&
-                     PPEW_B_COEF, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, PPS, PPA,     &
-                     PEXNS, PEXNA, PTA, PQA, PRHOA, PLW_RAD, PRR, PSR, PZREF, PUREF,    &
-                     PVMOD, PH_TRAFFIC, PLE_TRAFFIC, PTSTEP, PDF_RF, PDN_RF, PDF_RD,    &
-                     PDN_RD, PQSAT_RF, PQSAT_RD, PDELT_RF, PDELT_RD, PTS_GARDEN, PLEW_RF,&
-                     PUW_GR, PLEW_RD, PLE_WL_A, PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF,  &
-                     PGSN_RF, PMELT_RF, PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, &
-                     PUW_RD, PUW_RF, PDUWDU_RD, PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN,&
-                     PRI_TWN, PRESA_TWN, PDQS_TWN, PQF_TWN, PQF_BLD, PFLX_BLD, PAC_RF,  &
-                     PAC_RD, PAC_WL, PAC_TOP, PAC_GARDEN, PAC_RF_WAT, PAC_RD_WAT, PLW_WA_TO_WB, &
+    SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DMT, GRD, GRDE, HIMPLICIT_WIND, PTSUN,        &
+                     PT_CANYON, PQ_CANYON, PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,  &
+                     PZ_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPEW_A_COEF_LOWCAN,           &
+                     PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA,       &
+                     PLW_RAD, PRR, PSR, PZREF, PUREF, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,   &
+                     PTSTEP, PDF_RF, PDN_RF, PDF_RD, PDN_RD, PQSAT_RF, PQSAT_RD,        &
+                     PDELT_RF, PDELT_RD, PTS_GARDEN, PLEW_RF, PUW_GR, PLEW_RD, PLE_WL_A,&
+                     PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRNSN_RD,&
+                     PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, PUW_RD, PUW_RF, PDUWDU_RD,   &
+                     PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN,     &
+                     PDQS_TWN, PQF_TWN, PQF_BLD, PFLX_BLD, PAC_RF, PAC_RD, PAC_WL,      &
+                     PAC_TOP, PAC_GARDEN, PAC_RF_WAT, PAC_RD_WAT, PLW_WA_TO_WB,         &
                      PLW_WA_TO_R, PLW_WB_TO_R, PLW_WA_TO_NR, PLW_WB_TO_NR, PLW_R_TO_WA, &
                      PLW_R_TO_WB, PLW_G_TO_WA, PLW_G_TO_WB, PLW_S_TO_WA, PLW_S_TO_WB,   &
                      PLW_S_TO_R, PLW_S_TO_NR, PLW_NR_TO_WA, PLW_NR_TO_WB, PLW_NR_TO_WIN,&
@@ -179,6 +180,8 @@ USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BEM_n, ONLY : BEM_1P_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_1P_t
+USE MODD_DIAG_n, ONLY : DIAG_t
+USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 !
 USE MODD_TYPE_DATE_SURF,ONLY: DATE_TIME
 USE MODD_CSTS,         ONLY : XTT, XSTEFAN, XCPD, XLVTT
@@ -215,6 +218,8 @@ TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
+TYPE(DIAG_t), INTENT(INOUT) :: GRD
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: GRDE
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -674,12 +679,12 @@ END SELECT
 !*      10.    Fluxes over built surfaces
 !              --------------------------
 !
- CALL URBAN_FLUXES   (TOP, T, B, DMT, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
-                      PEXNS, PRHOA, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,PAC_WL, PCD, PDF_RF, &
-                      PDN_RF, PDF_RD, PDN_RD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, &
-                      PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RF, ZDQS_RF, PMELT_RD, &
-                      ZDQS_RD, ZDQS_WL_A, ZDQS_WL_B, ZFLX_BLD_RF, ZFLX_BLD_WL_A, &
-                      ZFLX_BLD_WL_B, ZFLX_BLD_FL, ZFLX_BLD_MA, PE_SHADING, PLEW_RF, &
+ CALL URBAN_FLUXES   (TOP, T, B, DMT, GRD, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
+                      PEXNS, PRHOA, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,PAC_WL, PCD, PDF_RF,         &
+                      PDN_RF, PDF_RD, PDN_RD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF,             &
+                      PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RF, ZDQS_RF, PMELT_RD,        &
+                      ZDQS_RD, ZDQS_WL_A, ZDQS_WL_B, ZFLX_BLD_RF, ZFLX_BLD_WL_A,                &
+                      ZFLX_BLD_WL_B, ZFLX_BLD_FL, ZFLX_BLD_MA, PE_SHADING, PLEW_RF,             &
                       PLEW_RD, PLE_WL_A, PLE_WL_B, ZMELT_BLT, PUSTAR_TWN      )
 !
 !
@@ -698,13 +703,16 @@ ENDWHERE
 !*      11.    Roof ans road reservoirs evolution
 !              ----------------------------------
 !
- CALL URBAN_HYDRO(ZWS_RF_MAX, ZWS_RD_MAX, T%XWS_ROOF, T%XWS_ROAD, PRR, &
+ CALL URBAN_HYDRO(ZWS_RF_MAX, ZWS_RD_MAX, T%XWS_ROOF, T%XWS_ROAD, PRR,          &
                   DMT%XIRRIG_ROAD, PTSTEP, T%XBLD, DMT%XLE_ROOF, DMT%XLE_ROAD,  &
                   DMT%XRUNOFF_STRLROOF, DMT%XRUNOFF_ROAD   )
 !
-DMT%XRUNOFF_ROOF(:) =  ( 1. - T%XGREENROOF(:) ) *   DMT%XRUNOFF_STRLROOF(:)              &
-                      +        T%XGREENROOF(:)   * ( DMT%XRUNOFF_GREENROOF(:) + DMT%XDRAIN_GREENROOF(:) )
-                                                           
+IF (TOP%LGREENROOF) THEN
+  DMT%XRUNOFF_ROOF(:) =  (1.-T%XGREENROOF(:)) * DMT%XRUNOFF_STRLROOF(:) &
+                        + T%XGREENROOF(:) * (GRDE%XRUNOFF(:) + GRDE%XDRAIN(:))
+ELSE
+  DMT%XRUNOFF_ROOF(:) =  DMT%XRUNOFF_STRLROOF(:)
+ENDIF                                                      
 !
 !-------------------------------------------------------------------------------
 !

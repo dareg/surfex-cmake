@@ -1,10 +1,10 @@
 !     #########
-    SUBROUTINE URBAN_FLUXES(TOP, T, B, DMT, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
-                            PEXNS, PRHOA, PVMOD, PH_TRAFFIC, PLE_TRAFFIC, PAC_WL, PCD, PDF_RF, &
-                            PDN_RF, PDF_RD, PDN_RD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, &
-                            PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RF, PDQS_RF, PMELT_RD, &
-                            PDQS_RD, PDQS_WL_A, PDQS_WL_B, PFLX_BLD_RF, PFLX_BLD_WL_A, &
-                            PFLX_BLD_WL_B, PFLX_BLD_FL, PFLX_BLD_MA, PE_SHADING, PLEW_RF, PLEW_RD, &
+    SUBROUTINE URBAN_FLUXES(TOP, T, B, DMT, GRD, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
+                            PEXNS, PRHOA, PVMOD, PH_TRAFFIC, PLE_TRAFFIC, PAC_WL, PCD, PDF_RF,        &
+                            PDN_RF, PDF_RD, PDN_RD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF,             &
+                            PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RF, PDQS_RF, PMELT_RD,        &
+                            PDQS_RD, PDQS_WL_A, PDQS_WL_B, PFLX_BLD_RF, PFLX_BLD_WL_A,                &
+                            PFLX_BLD_WL_B, PFLX_BLD_FL, PFLX_BLD_MA, PE_SHADING, PLEW_RF, PLEW_RD,    &
                             PLE_WL_A, PLE_WL_B, PMELT_BLT, PUSTAR_TWN     )
 !   ##########################################################################
 !
@@ -57,6 +57,7 @@ USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_n, ONLY : TEB_1P_t
 USE MODD_BEM_n, ONLY : BEM_1P_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_1P_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,     ONLY : XCPD
@@ -72,6 +73,7 @@ TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_1P_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
+TYPE(DIAG_t), INTENT(INOUT) :: GRD
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -140,10 +142,24 @@ REAL, DIMENSION(SIZE(PRHOA)) :: ZUSTAR2 ! square of friction velocity (m2/s2)
 REAL, DIMENSION(SIZE(PRHOA)) :: ZVMOD   ! Wind
 REAL, DIMENSIOn(SIZE(PRHOA)) :: ZINTER
 !
+REAL, DIMENSIOn(SIZE(PRHOA)) :: ZRN_GR, ZH_GR, ZLE_GR, ZGFLUX_GR
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('URBAN_FLUXES',0,ZHOOK_HANDLE)
+!
+IF (TOP%LGREENROOF) THEN
+  ZRN_GR   (:) = GRD%XRN(:)
+  ZH_GR    (:) = GRD%XH (:)
+  ZLE_GR   (:) = GRD%XLE(:)
+  ZGFLUX_GR(:) = GRD%XGFLUX(:)
+ELSE
+  ZRN_GR   (:) = 0.
+  ZH_GR    (:) = 0.
+  ZLE_GR   (:) = 0.
+  ZGFLUX_GR(:) = 0.       
+ENDIF
 !
 !*      1.     Fluxes at snow-free roofs
 !              -------------------------
@@ -244,13 +260,13 @@ DMT%XLE_ROAD (:) = PLEW_RD(:) * PDF_RD(:) + PLESN_RD(:) * PDN_RD(:)
 !                                            heat flux into the ground
 !
 DMT%XGFLUX_STRLROOF(:) =  PDF_RF(:) * (ZRN_RF_SNFREE(:) - ZH_RF_SNFREE(:) - PLEW_RF(:)) + PDN_RF(:) *  PGSN_RF(:)  
-DMT%XGFLUX_ROOF    (:) = (1.-T%XGREENROOF(:)) * DMT%XGFLUX_STRLROOF(:) + T%XGREENROOF(:) * DMT%XGFLUX_GREENROOF(:)
+DMT%XGFLUX_ROOF    (:) = (1.-T%XGREENROOF(:)) * DMT%XGFLUX_STRLROOF(:) + T%XGREENROOF(:) * ZGFLUX_GR(:)
 !
 !
 !                                            net radiation
 ! 
 DMT%XRN_STRLROOF   (:) = ZRN_RF_SNFREE(:) * PDF_RF(:) + PRNSN_RF(:) * PDN_RF(:)
-DMT%XRN_ROOF       (:) = (1.-T%XGREENROOF(:)) * DMT%XRN_STRLROOF(:) + T%XGREENROOF(:) * DMT%XRN_GREENROOF(:)
+DMT%XRN_ROOF       (:) = (1.-T%XGREENROOF(:)) * DMT%XRN_STRLROOF(:) + T%XGREENROOF(:) * ZRN_GR(:)
 !
 !                                            sensible heat flux
 !                                            total latent heat of evaporation from
@@ -259,13 +275,13 @@ DMT%XRN_ROOF       (:) = (1.-T%XGREENROOF(:)) * DMT%XRN_STRLROOF(:) + T%XGREENRO
 ! sensible heat flux
 !
 DMT%XH_STRLROOF    (:) = DMT%XH_ROOF(:) * PDF_RF(:) + PHSN_RF(:)  * PDN_RF(:)
-DMT%XH_ROOF        (:) = (1.-T%XGREENROOF(:)) * DMT%XH_STRLROOF(:) + T%XGREENROOF(:) * DMT%XH_GREENROOF(:)
+DMT%XH_ROOF        (:) = (1.-T%XGREENROOF(:)) * DMT%XH_STRLROOF(:) + T%XGREENROOF(:) * ZH_GR(:)
 !
 !
 ! total latent heat of evaporation from the roof (snow free + snow)
 !
 DMT%XLE_STRLROOF   (:) = PLEW_RF(:) * PDF_RF(:)  + PLESN_RF(:) * PDN_RF(:)
-DMT%XLE_ROOF       (:) = (1.-T%XGREENROOF(:)) * DMT%XLE_STRLROOF(:) + T%XGREENROOF(:) * DMT%XLE_GREENROOF(:) 
+DMT%XLE_ROOF       (:) = (1.-T%XGREENROOF(:)) * DMT%XLE_STRLROOF(:) + T%XGREENROOF(:) * ZLE_GR(:) 
 !
 IF (TOP%CBEM=="BEM") THEN
   DMT%XH_ROOF (:) = DMT%XH_ROOF (:) + (1 - B%XF_WASTE_CAN(:)) * DMT%XH_WASTE (:)/T%XBLD(:)

@@ -191,7 +191,7 @@ XTIME0 = MPI_WTIME()
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
 !
- CALL INIT_INDEX_MPI(YSC,CSURF_FILETYPE,'PGD',YALG_MPI,XIO_FRAC)
+ CALL INIT_INDEX_MPI(YSC%DTCO,YSC%U,YSC%UG,CSURF_FILETYPE,'PGD',YALG_MPI,XIO_FRAC)
  !
  CALL PGD_GRID_SURF_ATM(YSC%UG, YSC%U%NDIM_FULL,CSURF_FILETYPE,&
                         '                            ','      ',.FALSE.,HDIR='H')
@@ -216,7 +216,7 @@ ALLOCATE(YSC%DUO%CSELECT(0))
 LDEF = .TRUE.
 !
 IF (CSURF_FILETYPE=="NC    ") THEN
-  CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, &
+  CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU,   &
                          YSC%SM%DTS, YSC%TM%DTT, YSC%DTZ, YSC%IM, &
                          YSC%UG, YSC%U, YSC%DUO%CSELECT)
 ENDIF
@@ -226,16 +226,15 @@ IF (CSURF_FILETYPE=="NC    ") INW = 2
 !
 DO JNW = 1,INW
   !
-  IF (LWRITE_COORD) CALL GET_LONLAT_n(YSC%DTCO, YSC%U, YSC%UG, &
-                                      YSC%DUO%CSELECT, CSURF_FILETYPE)
+  IF (LWRITE_COORD) CALL GET_LONLAT_n(YSC%DTCO, YSC%U, YSC%UG, YSC%DUO%CSELECT, CSURF_FILETYPE)
   !
   !* writing of the fields
- CALL IO_BUFF_CLEAN
+  CALL IO_BUFF_CLEAN
   ! FLAG_UPDATE now in WRITE_PGD_SURF_ATM_n
   CALL WRITE_PGD_SURF_ATM_n(YSC, CSURF_FILETYPE)
   !
   LDEF = .FALSE.
-  CALL IO_BUFF_CLEAN  
+  CALL IO_BUFF_CLEAN
   !
 ENDDO
 !

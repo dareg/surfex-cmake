@@ -1,6 +1,5 @@
 !###################################################################
-SUBROUTINE COUPLING_SURF_TOPD (DE, DEC, DC, DMI, G, &
-                               IO, S, K, NK, NP, NPE, UG, U, HPROGRAM, KI)
+SUBROUTINE COUPLING_SURF_TOPD (DE, DEC, DC, DMI, G, IO, S, K, NK, NP, NPE, UG, U, HPROGRAM, KI)
 !###################################################################
 !
 !!****  *COUPLING_SURF_TOPD*  

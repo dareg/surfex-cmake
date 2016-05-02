@@ -46,19 +46,16 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_TEBD, NVT_BONE, NVT_TRBE, &
                                 NVT_BOND, NVT_SHRB, NVT_BOGR, NVT_GRAS, & 
                                 NVT_TROG, NVT_PARK, NVT_C3, NVT_C4,     &
                                 NVT_IRR 
-!!
-!!
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
 !        -----------------
 !
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
 IMPLICIT NONE
-
 !
 TYPE(SV_t), INTENT(INOUT) :: SV
 TYPE(GR_BIOG_NP_t), INTENT(INOUT) :: NGB
@@ -75,8 +72,6 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSFTS
 !*       0.1  declaration of arguments
 !
 !*   0.1 Declaration of local variables
-!
-REAL, DIMENSION(SIZE(PSW_FORBIO,1),NVEGTYPE) :: ZVEGTYPE
 !
 REAL, DIMENSION(SIZE(PSW_FORBIO,1)) :: ZRAD_PAR,  ZLCOR_RAD
 !                            PAR radiation in case of ISBA-STD use
@@ -145,11 +140,9 @@ CALL BY_PATCH(NVT_C4  , ZTCOR(:,NVT_C4)  , ZTCORM(:,NVT_C4)  )
 CALL BY_PATCH(NVT_IRR , ZTCOR(:,NVT_IRR) , ZTCORM(:,NVT_IRR) )
 !
 !
-ZVEGTYPE(:,:) = S%XVEGTYPE(:,:)
-
-ZRATIO (:) = ZVEGTYPE(:,NVT_TEBD) + ZVEGTYPE(:,NVT_BONE) + ZVEGTYPE(:,NVT_TRBE) + &
-             ZVEGTYPE(:,NVT_TRBD) + ZVEGTYPE(:,NVT_TEBE) + ZVEGTYPE(:,NVT_TENE) + &
-             ZVEGTYPE(:,NVT_BOBD) + ZVEGTYPE(:,NVT_BOND) + ZVEGTYPE(:,NVT_SHRB)
+ZRATIO (:) = S%XVEGTYPE(:,NVT_TEBD) + S%XVEGTYPE(:,NVT_BONE) + S%XVEGTYPE(:,NVT_TRBE) + &
+             S%XVEGTYPE(:,NVT_TRBD) + S%XVEGTYPE(:,NVT_TEBE) + S%XVEGTYPE(:,NVT_TENE) + &
+             S%XVEGTYPE(:,NVT_BOBD) + S%XVEGTYPE(:,NVT_BOND) + S%XVEGTYPE(:,NVT_SHRB)
 !
 WHERE (ZRATIO(:)/=0.)
   ZISOPOT (:) = GB%XISOPOT (:) / ZRATIO(:)
@@ -224,11 +217,13 @@ IPATCH = VEGTYPE_TO_PATCH(NVT_VEGTYPE, IO%NPATCH)
 PTCOR  (:) = 0.
 PTCORM (:) = 0.
 ZBVOCPAR(:,:) = 0.
+!
 DO IT=1,SIZE(NPE%AL(IPATCH)%XTG,1)
+  !
   IMASK = NP%AL(IPATCH)%NR_P(IT)
   IF (NPE%AL(IPATCH)%XTG(IT,1).LE.1000.) THEN
-    PTCORM(IMASK)=ZTCORM0_FUNC(NPE%AL(IPATCH)%XTG(IT,1))
-    PTCOR (IMASK)=ZTCOR0_FUNC (NPE%AL(IPATCH)%XTG(IT,1))
+    PTCORM(IMASK) = ZTCORM0_FUNC(NPE%AL(IPATCH)%XTG(IT,1))
+    PTCOR (IMASK) = ZTCOR0_FUNC (NPE%AL(IPATCH)%XTG(IT,1))
   ENDIF
   !PAR over Forest canopies, in micro-molE.m-2.s-1
   IF (IO%CPHOTO/='NON') THEN
@@ -271,17 +266,17 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG3',0,ZHOOK_HANDLE)
 !isoprene flux 
 !!
 !! warning, XISOPOT external map accounts for the total forest fraction
-WHERE ( ZVEGTYPE(:,NVT_V1) + ZVEGTYPE(:,NVT_V2) + ZVEGTYPE(:,NVT_V3) > 0. )
+WHERE ( S%XVEGTYPE(:,NVT_V1) + S%XVEGTYPE(:,NVT_V2) + S%XVEGTYPE(:,NVT_V3) > 0. )
   !
   PFISO(:) = PISOPOT(:) *                   &
-     ( ZTCOR(:,NVT_V1) * ZVEGTYPE(:,NVT_V1) &
-      +ZTCOR(:,NVT_V2) * ZVEGTYPE(:,NVT_V2) &
-      +ZTCOR(:,NVT_V3) * ZVEGTYPE(:,NVT_V3) )
+     ( ZTCOR(:,NVT_V1) * S%XVEGTYPE(:,NVT_V1) &
+      +ZTCOR(:,NVT_V2) * S%XVEGTYPE(:,NVT_V2) &
+      +ZTCOR(:,NVT_V3) * S%XVEGTYPE(:,NVT_V3) )
   !
   PFMONO(:) = PMONOPOT(:) *                  &
-     ( ZTCORM(:,NVT_V1) * ZVEGTYPE(:,NVT_V1) &
-      +ZTCORM(:,NVT_V2) * ZVEGTYPE(:,NVT_V2) &
-      +ZTCORM(:,NVT_V3) * ZVEGTYPE(:,NVT_V3) )          
+     ( ZTCORM(:,NVT_V1) * S%XVEGTYPE(:,NVT_V1) &
+      +ZTCORM(:,NVT_V2) * S%XVEGTYPE(:,NVT_V2) &
+      +ZTCORM(:,NVT_V3) * S%XVEGTYPE(:,NVT_V3) )          
   !
 ELSEWHERE
   !
@@ -315,20 +310,20 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG4',0,ZHOOK_HANDLE)
 !isoprene flux 
 !!
 !! warning, XISOPOT external map accounts for the total forest fraction
-WHERE ( ZVEGTYPE(:,NVT_V1) + ZVEGTYPE(:,NVT_V2) + ZVEGTYPE(:,NVT_V3) &
-       +ZVEGTYPE(:,NVT_V4) > 0. )
+WHERE ( S%XVEGTYPE(:,NVT_V1) + S%XVEGTYPE(:,NVT_V2) + S%XVEGTYPE(:,NVT_V3) &
+       +S%XVEGTYPE(:,NVT_V4) > 0. )
   !
   PFISO(:) = PISOPOT(:) *                   &
-     ( ZTCOR(:,NVT_V1) * ZVEGTYPE(:,NVT_V1) &
-      +ZTCOR(:,NVT_V2) * ZVEGTYPE(:,NVT_V2) &
-      +ZTCOR(:,NVT_V3) * ZVEGTYPE(:,NVT_V3) &
-      +ZTCOR(:,NVT_V4) * ZVEGTYPE(:,NVT_V4) )
+     ( ZTCOR(:,NVT_V1) * S%XVEGTYPE(:,NVT_V1) &
+      +ZTCOR(:,NVT_V2) * S%XVEGTYPE(:,NVT_V2) &
+      +ZTCOR(:,NVT_V3) * S%XVEGTYPE(:,NVT_V3) &
+      +ZTCOR(:,NVT_V4) * S%XVEGTYPE(:,NVT_V4) )
   !
   PFMONO(:) = PMONOPOT(:) *                  &
-     ( ZTCORM(:,NVT_V1) * ZVEGTYPE(:,NVT_V1) &
-      +ZTCORM(:,NVT_V2) * ZVEGTYPE(:,NVT_V2) &
-      +ZTCORM(:,NVT_V3) * ZVEGTYPE(:,NVT_V3) &
-      +ZTCORM(:,NVT_V4) * ZVEGTYPE(:,NVT_V4) )            
+     ( ZTCORM(:,NVT_V1) * S%XVEGTYPE(:,NVT_V1) &
+      +ZTCORM(:,NVT_V2) * S%XVEGTYPE(:,NVT_V2) &
+      +ZTCORM(:,NVT_V3) * S%XVEGTYPE(:,NVT_V3) &
+      +ZTCORM(:,NVT_V4) * S%XVEGTYPE(:,NVT_V4) )            
   !
 ELSEWHERE
   !
@@ -367,31 +362,31 @@ IF (LHOOK) CALL DR_HOOK('CH_BVOCEM_N:BY_VEG9',0,ZHOOK_HANDLE)
 !isoprene flux 
 !!
 !! warning, XISOPOT external map accounts for the total forest fraction
-WHERE ( ZVEGTYPE(:,NVT_V1) + ZVEGTYPE(:,NVT_V2) + ZVEGTYPE(:,NVT_V3) &
-       +ZVEGTYPE(:,NVT_V4) + ZVEGTYPE(:,NVT_V5) + ZVEGTYPE(:,NVT_V6) &
-       +ZVEGTYPE(:,NVT_V7) + ZVEGTYPE(:,NVT_V8) + ZVEGTYPE(:,NVT_V9) > 0. )
+WHERE ( S%XVEGTYPE(:,NVT_V1) + S%XVEGTYPE(:,NVT_V2) + S%XVEGTYPE(:,NVT_V3) &
+       +S%XVEGTYPE(:,NVT_V4) + S%XVEGTYPE(:,NVT_V5) + S%XVEGTYPE(:,NVT_V6) &
+       +S%XVEGTYPE(:,NVT_V7) + S%XVEGTYPE(:,NVT_V8) + S%XVEGTYPE(:,NVT_V9) > 0. )
   !
   PFISO(:) = PISOPOT(:) *                   &
-     ( ZTCOR(:,NVT_V1) * ZVEGTYPE(:,NVT_V1) &
-      +ZTCOR(:,NVT_V2) * ZVEGTYPE(:,NVT_V2) &
-      +ZTCOR(:,NVT_V3) * ZVEGTYPE(:,NVT_V3) &
-      +ZTCOR(:,NVT_V4) * ZVEGTYPE(:,NVT_V4) &
-      +ZTCOR(:,NVT_V5) * ZVEGTYPE(:,NVT_V5) &
-      +ZTCOR(:,NVT_V6) * ZVEGTYPE(:,NVT_V6) &
-      +ZTCOR(:,NVT_V7) * ZVEGTYPE(:,NVT_V7) &
-      +ZTCOR(:,NVT_V8) * ZVEGTYPE(:,NVT_V8) &
-      +ZTCOR(:,NVT_V9) * ZVEGTYPE(:,NVT_V9) )
+     ( ZTCOR(:,NVT_V1) * S%XVEGTYPE(:,NVT_V1) &
+      +ZTCOR(:,NVT_V2) * S%XVEGTYPE(:,NVT_V2) &
+      +ZTCOR(:,NVT_V3) * S%XVEGTYPE(:,NVT_V3) &
+      +ZTCOR(:,NVT_V4) * S%XVEGTYPE(:,NVT_V4) &
+      +ZTCOR(:,NVT_V5) * S%XVEGTYPE(:,NVT_V5) &
+      +ZTCOR(:,NVT_V6) * S%XVEGTYPE(:,NVT_V6) &
+      +ZTCOR(:,NVT_V7) * S%XVEGTYPE(:,NVT_V7) &
+      +ZTCOR(:,NVT_V8) * S%XVEGTYPE(:,NVT_V8) &
+      +ZTCOR(:,NVT_V9) * S%XVEGTYPE(:,NVT_V9) )
   !
   PFMONO(:) = PMONOPOT(:) *                  &
-     ( ZTCORM(:,NVT_V1) * ZVEGTYPE(:,NVT_V1) &
-      +ZTCORM(:,NVT_V2) * ZVEGTYPE(:,NVT_V2) &
-      +ZTCORM(:,NVT_V3) * ZVEGTYPE(:,NVT_V3) &
-      +ZTCORM(:,NVT_V4) * ZVEGTYPE(:,NVT_V4) & 
-      +ZTCORM(:,NVT_V5) * ZVEGTYPE(:,NVT_V5) & 
-      +ZTCORM(:,NVT_V6) * ZVEGTYPE(:,NVT_V6) & 
-      +ZTCORM(:,NVT_V7) * ZVEGTYPE(:,NVT_V7) & 
-      +ZTCORM(:,NVT_V8) * ZVEGTYPE(:,NVT_V8) &
-      +ZTCORM(:,NVT_V9) * ZVEGTYPE(:,NVT_V9) ) 
+     ( ZTCORM(:,NVT_V1) * S%XVEGTYPE(:,NVT_V1) &
+      +ZTCORM(:,NVT_V2) * S%XVEGTYPE(:,NVT_V2) &
+      +ZTCORM(:,NVT_V3) * S%XVEGTYPE(:,NVT_V3) &
+      +ZTCORM(:,NVT_V4) * S%XVEGTYPE(:,NVT_V4) & 
+      +ZTCORM(:,NVT_V5) * S%XVEGTYPE(:,NVT_V5) & 
+      +ZTCORM(:,NVT_V6) * S%XVEGTYPE(:,NVT_V6) & 
+      +ZTCORM(:,NVT_V7) * S%XVEGTYPE(:,NVT_V7) & 
+      +ZTCORM(:,NVT_V8) * S%XVEGTYPE(:,NVT_V8) &
+      +ZTCORM(:,NVT_V9) * S%XVEGTYPE(:,NVT_V9) ) 
   !
 ELSEWHERE
   !

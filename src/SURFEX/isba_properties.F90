@@ -1,9 +1,8 @@
 !     #########
       SUBROUTINE ISBA_PROPERTIES(IO, PEK, PDIR_SW, PSCA_SW, PSW_BANDS, KSW,  &
-                                 PASNOW, PANOSNOW, PESNOW, PENOSNOW,      &
-                                 PTSSNOW, PTSNOSNOW,                      &
-                                 PALBNIR_TVEG, PALBVIS_TVEG,              &
-                                 PALBNIR_TSOIL, PALBVIS_TSOIL         )  
+                                 PASNOW, PANOSNOW, PESNOW, PENOSNOW,         &
+                                 PTSSNOW, PTSNOSNOW,                         &
+                                 PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL )  
 !     ##########################################################################
 !
 !!****  *ISBA_PROPERTIES*  
@@ -104,7 +103,7 @@ ZFFV          = 0.
 ZFFG          = 0.
 !
  CALL ISBA_ALBEDO(PEK, IO%LTR_ML, GMEB, PDIR_SW, PSCA_SW, PSW_BANDS, KSW, &
-                  ZALBF, ZFFV, ZFFG, ZGLOBAL_SW, ZP_MEB_SCA_SW, &
+                  ZALBF, ZFFV, ZFFG, ZGLOBAL_SW, ZP_MEB_SCA_SW,           &
                   PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL)
 
 PANOSNOW(:) = PEK%XSNOWFREE_ALB(:)

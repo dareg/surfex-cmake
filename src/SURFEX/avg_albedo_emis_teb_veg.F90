@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE AVG_ALBEDO_EMIS_TEB_VEG (PEK, HALBEDO, PTG1, PSW_BANDS, PDIR_ALB,PSCA_ALB, PEMIS, PTSRAD         )  
+      SUBROUTINE AVG_ALBEDO_EMIS_TEB_VEG (PEK, HALBEDO, PTG1, PSW_BANDS, PDIR_ALB,PSCA_ALB, PEMIS, PTSRAD )  
 !     ###################################################
 !
 !!**** ** computes radiative fields used in TEB_VEG
@@ -95,6 +95,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             -----------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVG_ALBEDO_EMIS_TEB_VEG',0,ZHOOK_HANDLE)
+!
  CALL ALBEDO(HALBEDO, PEK )  
 
 !
@@ -111,43 +112,41 @@ PEMIS   (:)  =0.
 PTSRAD  (:)  =0.
 !   
 !
-  CALL ISBA_SNOW_FRAC(PEK%TSNOW%SCHEME, PEK%TSNOW%WSNOW, PEK%TSNOW%RHO, PEK%TSNOW%ALB,  &
-                      PEK%XVEG, PEK%XLAI, PEK%XZ0, &
-                      PEK%XPSN, PEK%XPSNV_A, PEK%XPSNG, PEK%XPSNV      )
+ CALL ISBA_SNOW_FRAC(PEK%TSNOW%SCHEME, PEK%TSNOW%WSNOW, PEK%TSNOW%RHO, PEK%TSNOW%ALB,  &
+                     PEK%XVEG, PEK%XLAI, PEK%XZ0,PEK%XPSN, PEK%XPSNV_A, PEK%XPSNG, PEK%XPSNV )
 !
- WHERE (PEK%XVEG/=XUNDEF)
-!
-! albedo on this tile
-!
-    ZALBNIR(:) = (1.-PEK%XPSN)*PEK%XALBNIR + PEK%XPSN *PEK%TSNOW%ALB   
+WHERE (PEK%XVEG/=XUNDEF)
+  !
+  ! albedo on this tile
+  !
+  ZALBNIR(:) = (1.-PEK%XPSN)*PEK%XALBNIR + PEK%XPSN * PEK%TSNOW%ALB   
       
-    ZALBVIS(:) = (1.-PEK%XPSN)*PEK%XALBVIS + PEK%XPSN *PEK%TSNOW%ALB   
+  ZALBVIS(:) = (1.-PEK%XPSN)*PEK%XALBVIS + PEK%XPSN * PEK%TSNOW%ALB   
       
-    ZALBUV(:)  = (1.-PEK%XPSN)*PEK%XALBUV + PEK%XPSN *PEK%TSNOW%ALB   
-  END WHERE
+  ZALBUV(:)  = (1.-PEK%XPSN)*PEK%XALBUV  + PEK%XPSN * PEK%TSNOW%ALB   
+END WHERE
 !
 !* albedo for each wavelength
 !
-  CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS,ZALBNIR, ZALBVIS, ZALBUV,  &
-                           PDIR_ALB, PSCA_ALB       )  
+ CALL ALBEDO_FROM_NIR_VIS(PSW_BANDS,ZALBNIR, ZALBVIS, ZALBUV, PDIR_ALB, PSCA_ALB)  
 !
 ! emissivity
 !
-  WHERE (PEK%XEMIS/=XUNDEF)
-    PEMIS(:)   = (1.-PEK%XPSN)*PEK%XEMIS + PEK%XPSN *XEMISSN  
-  END WHERE
+WHERE (PEK%XEMIS/=XUNDEF)
+  PEMIS(:)   = (1.-PEK%XPSN)*PEK%XEMIS + PEK%XPSN *XEMISSN  
+END WHERE
 !
 !* radiative surface temperature
 !
-  IF (PEK%TSNOW%SCHEME=='D95' .OR. PEK%TSNOW%SCHEME=='EBA') THEN
-    PTSRAD(:) = PTG1(:)
-  ELSE IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') THEN
-    WHERE (PEK%XEMIS/=XUNDEF)
-    PTSRAD(:) =( ( (1.-PEK%XPSN)*PEMIS      (:)       *PTG1     (:)**4         &
+IF (PEK%TSNOW%SCHEME=='D95' .OR. PEK%TSNOW%SCHEME=='EBA') THEN
+  PTSRAD(:) = PTG1(:)
+ELSE IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') THEN
+  WHERE (PEK%XEMIS/=XUNDEF)
+    PTSRAD(:) =( ( (1.-PEK%XPSN)*PEMIS(:)       *PTG1(:)      **4            &
                   +    PEK%XPSN *PEK%TSNOW%EMIS * PEK%TSNOW%TS**4 ) )**0.25  &
                              / PEMIS(:)**0.25  
-    END WHERE
-  END IF
+  END WHERE
+END IF
 !
 IF (LHOOK) CALL DR_HOOK('AVG_ALBEDO_EMIS_TEB_VEG',1,ZHOOK_HANDLE)
 !

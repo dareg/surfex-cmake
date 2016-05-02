@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE ALLOCATE_TEB_VEG_PGD (PEK, S, K, P, OALLOC,KLU,KVEGTYPE,KGROUND_LAYER)  
+    SUBROUTINE ALLOCATE_TEB_VEG_PGD (PEK, S, K, P, OALLOC, KLU, KVEGTYPE, KGROUND_LAYER)  
 !   ##########################################################################
 !
 !
@@ -100,32 +100,32 @@ ALLOCATE(P%XRE25                (KLU))
 ALLOCATE(P%XAH                 (KLU)) 
 ALLOCATE(P%XBH                 (KLU)) 
 !
-ALLOCATE(P%XDMAX                (KLU)) 
+ALLOCATE(P%XDMAX               (KLU)) 
 !
 !-------------------------------------------------------------------------------
 !
 ! - soil: primary parameters
 !
-ALLOCATE(S%XSOC                 (KLU,KGROUND_LAYER       ))  
+ALLOCATE(S%XSOC               (KLU,KGROUND_LAYER       ))  
 !
-ALLOCATE(K%XSAND                (KLU,KGROUND_LAYER       )) 
-ALLOCATE(K%XCLAY                (KLU,KGROUND_LAYER       )) 
-ALLOCATE(K%XRUNOFFB             (KLU                     )) 
-ALLOCATE(K%XWDRAIN              (KLU                     )) 
+ALLOCATE(K%XSAND              (KLU,KGROUND_LAYER       )) 
+ALLOCATE(K%XCLAY              (KLU,KGROUND_LAYER       )) 
+ALLOCATE(K%XRUNOFFB           (KLU                     )) 
+ALLOCATE(K%XWDRAIN            (KLU                     )) 
 !
-ALLOCATE(P%XTAUICE             (KLU                    ))
+ALLOCATE(P%XTAUICE            (KLU                    ))
 !
-ALLOCATE(P%XDG                  (KLU,KGROUND_LAYER)) 
+ALLOCATE(P%XDG                (KLU,KGROUND_LAYER)) 
 !
-ALLOCATE(P%XRUNOFFD            (KLU)) 
+ALLOCATE(P%XRUNOFFD           (KLU)) 
 !
 !-------------------------------------------------------------------------------
 !
 ! - SGH scheme
 !                                   
-ALLOCATE(P%XD_ICE               (KLU)) 
+ALLOCATE(P%XD_ICE             (KLU)) 
 !
-ALLOCATE(K%XGAMMAT             (KLU )) 
+ALLOCATE(K%XGAMMAT            (KLU )) 
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE PGD_TEB_GREENROOF_PAR (DTCO, DTI, UG, U, USS, IO, S, K, KDIM, HPROGRAM)
+      SUBROUTINE PGD_TEB_GREENROOF_PAR (DTCO, DTV, UG, U, USS, IO, S, K, KDIM, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB_GREENROOF_PAR* monitor for averaging and interpolations of cover fractions
@@ -69,7 +69,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
@@ -162,7 +162,7 @@ YFTYP_LAI_GR     = '      '
                                 YFNAM_OM_GR, YFNAM_CLAY_GR, YFNAM_SAND_GR, YFNAM_LAI_GR,  &
                                 YFTYP_OM_GR, YFTYP_CLAY_GR, YFTYP_SAND_GR, YFTYP_LAI_GR)
 !
-DTI%NTIME              = ITIME_GR
+DTV%NTIME              = ITIME_GR
 IO%NGROUND_LAYER      = ILAYER_GR
 IO%CTYP_COV           = YTYP_GR
 !
@@ -175,7 +175,7 @@ IO%CTYP_COV           = YTYP_GR
 ALLOCATE(S%XSOC       (KDIM,IO%NGROUND_LAYER))
 ALLOCATE(K%XCLAY      (KDIM,IO%NGROUND_LAYER))
 ALLOCATE(K%XSAND      (KDIM,IO%NGROUND_LAYER))
-ALLOCATE(DTI%XPAR_LAI   (KDIM,DTI%NTIME ,1))
+ALLOCATE(DTV%XPAR_LAI   (KDIM,DTV%NTIME ,1))
 !
 !-------------------------------------------------------------------------------
 !
@@ -203,10 +203,10 @@ DO JLAYER_GR=1,IO%NGROUND_LAYER
                YFTYP_SAND_GR(JLAYER_GR), ZUNIF_SAND_GR(JLAYER_GR), K%XSAND(:,JLAYER_GR))
 ENDDO
 !
-DO JTIME=1,DTI%NTIME
+DO JTIME=1,DTV%NTIME
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'LAI_GR: LAI of green roof','BLD',YFNAM_LAI_GR(JTIME),  &
-                YFTYP_LAI_GR(JTIME),ZUNIF_LAI_GR(JTIME),DTI%XPAR_LAI(:,JTIME,1))
+                YFTYP_LAI_GR(JTIME),ZUNIF_LAI_GR(JTIME),DTV%XPAR_LAI(:,JTIME,1))
 !
 ENDDO
 !

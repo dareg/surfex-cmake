@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE ASSIM_NATURE_n (DMI, DMIP, G, IO, S, K, NP, NPE, U, HPROGRAM,KI,  &
+SUBROUTINE ASSIM_NATURE_n (IM, U, HPROGRAM, KI, &
                           PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
                           PSWEC,     PTSC,   PUCLS, PVCLS,                &
@@ -29,13 +29,7 @@ SUBROUTINE ASSIM_NATURE_n (DMI, DMIP, G, IO, S, K, NP, NPE, U, HPROGRAM,KI,  &
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
-!
-!
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
-USE MODD_GRID_n, ONLY : GRID_t
-!
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -49,16 +43,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
-TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DMIP
-TYPE(GRID_t), INTENT(INOUT) :: G
-!
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_S_t), INTENT(INOUT) :: S
-TYPE(ISBA_K_t), INTENT(INOUT) :: K
-TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
-TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -99,7 +84,7 @@ END IF
 !
 IF (U%CNATURE=='ISBA  ') THEN
   !
-  CALL ASSIM_ISBA_n(DMI, DMIP, G, IO, S, K, NP, NPE, U, HPROGRAM,KI,&
+  CALL ASSIM_ISBA_n(IM, U, HPROGRAM, KI,  &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
                     PSWEC,     PTSC,     PUCLS, PVCLS,              &

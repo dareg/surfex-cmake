@@ -11,7 +11,7 @@ SUBROUTINE ASSIM_ISBA_UPDATE_SNOW (IO, NP, NPE, HPROGRAM, KI, PSWE, PSWE_ORIG, O
 ! ------------------------------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_NPE_t, ISBA_NP_t
+USE MODD_ISBA_n, ONLY : ISBA_NPE_t, ISBA_NP_t, ISBA_PE_t, ISBA_P_t
 !
 USE MODD_CSTS,        ONLY : XTT
 USE MODD_SURF_PAR,    ONLY : XUNDEF
@@ -39,6 +39,9 @@ CHARACTER(LEN=2),    INTENT(IN)    :: HTEST     ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
+!
 REAL, DIMENSION(KI) :: ZSWE     ! Snow before update
 REAL, DIMENSION(KI) :: ZSWEINC
 REAL, DIMENSION(KI) :: ZTS
@@ -59,6 +62,8 @@ END IF
 IF ( NPE%AL(1)%TSNOW%SCHEME=='D95' ) THEN
   JL = 1
   JP = 1
+  PK => NP%AL(1)
+  PEK => NPE%AL(1)
   IF ( IO%NPATCH > 1 ) CALL ABOR1_SFX("Update of snow is only implemented for D95 and one patch")
 ELSE
   CALL ABOR1_SFX("Update of snow is only implemented for D95")
@@ -69,13 +74,13 @@ ZSWE(:) = XUNDEF
 !
 IF ( OINITSNOW ) THEN
   !
-  DO JI = 1,NP%AL(JP)%NSIZE_P
+  DO JI = 1,PK%NSIZE_P
    !
-   IMASK = NP%AL(JP)%NR_P(JI)
+   IMASK = PK%NR_P(JI)
    !
-   PSWE_ORIG(IMASK) = NPE%AL(JP)%TSNOW%WSNOW(JI,JL)
+   PSWE_ORIG(IMASK) = PEK%TSNOW%WSNOW(JI,JL)
    !
-   ZTS(IMASK) = NPE%AL(JP)%XTG(JI,1)
+   ZTS(IMASK) = PEK%XTG(JI,1)
    !
    ZSWE(IMASK) = PSWE(IMASK)
    ! Set snow=0 where 1. guess = 0 and Ts>0, to avoid that the snow analysis introduce snow where it is no snow.
@@ -83,7 +88,7 @@ IF ( OINITSNOW ) THEN
      ZSWE(IMASK)   = 0.0
    ENDIF
    !
-   NPE%AL(JP)%TSNOW%WSNOW(JI,JL) = ZSWE(IMASK)
+   PEK%TSNOW%WSNOW(JI,JL) = ZSWE(IMASK)
    !
   ENDDO
   !
@@ -93,13 +98,13 @@ ENDIF
 ! Update snow
 IF ( OINC ) THEN
 
- DO JI = 1,NP%AL(JP)%NSIZE_P
+ DO JI = 1,PK%NSIZE_P
   !
-  IMASK = NP%AL(JP)%NR_P(JI)
+  IMASK = PK%NR_P(JI)
 
-  ZSWE(IMASK) = NPE%AL(JP)%TSNOW%WSNOW(JI,JL)  
-  ZSNA(IMASK) = NPE%AL(JP)%TSNOW%ALB  (JI)
-  ZSNR(IMASK) = NPE%AL(JP)%TSNOW%RHO  (JI,JL)
+  ZSWE(IMASK) = PEK%TSNOW%WSNOW(JI,JL)  
+  ZSNA(IMASK) = PEK%TSNOW%ALB  (JI)
+  ZSNR(IMASK) = PEK%TSNOW%RHO  (JI,JL)
   !
  ENDDO
 
@@ -118,13 +123,13 @@ IF ( OINC ) THEN
     ZSNR(:)    = 0.5 * ( XRHOSMIN + XRHOSMAX )
   END WHERE 
   !
- DO JI = 1,NP%AL(JP)%NSIZE_P
+ DO JI = 1,PK%NSIZE_P
   !
-  IMASK = NP%AL(JP)%NR_P(JI)
+  IMASK = PK%NR_P(JI)
   !
-  NPE%AL(JP)%TSNOW%WSNOW(JI,JL) = ZSWE(IMASK)
-  NPE%AL(JP)%TSNOW%ALB  (JI)    = ZSNA(IMASK)
-  NPE%AL(JP)%TSNOW%RHO  (JI,JL) = ZSNR(IMASK)
+  PEK%TSNOW%WSNOW(JI,JL) = ZSWE(IMASK)
+  PEK%TSNOW%ALB  (JI)    = ZSNA(IMASK)
+  PEK%TSNOW%RHO  (JI,JL) = ZSNR(IMASK)
   !
  ENDDO
  !

@@ -85,9 +85,7 @@ IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
   WHERE(TPSNOW%WSNOW(:,1)==0. .OR. TPSNOW%WSNOW(:,1)==XUNDEF )
     TPSNOW%TS (:)= XUNDEF
   ELSEWHERE
-    TPSNOW%TS(:) = XTT +  (TPSNOW%HEAT(:,1)              &
-                                    +  XLMTT * TPSNOW%RHO(:,1) )  &
-                                    /  SNOW3LSCAP(TPSNOW%RHO(:,1))  
+    TPSNOW%TS(:) = XTT + (TPSNOW%HEAT(:,1) + XLMTT * TPSNOW%RHO(:,1)) / SNOW3LSCAP(TPSNOW%RHO(:,1))  
     TPSNOW%TS(:) = MIN(XTT, TPSNOW%TS(:))
   END WHERE
 END IF

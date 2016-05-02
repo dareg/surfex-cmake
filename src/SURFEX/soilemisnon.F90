@@ -49,7 +49,6 @@
 !       0. DECLARATIONS
 !          ------------
 !
-!
 USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
 !
@@ -76,10 +75,6 @@ TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
 REAL, DIMENSION(:), INTENT(IN)                :: PUA        ! wind module
 REAL, DIMENSION(:), INTENT(IN)                :: PVA
-!INTEGER,             INTENT(IN)               :: KSV       ! number of scalars
-!CHARACTER(LEN=6), DIMENSION(KSV),  INTENT(IN) :: HSV        ! chemical species name
-!REAL, DIMENSION(:,:), INTENT(INOUT)           :: PFLUX      ! NO flux from soil
-!                                                control switch for the first call
 INTEGER                                       :: JI         ! index
 INTEGER                                       :: JSV
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -117,8 +112,8 @@ IF (.NOT.ASSOCIATED(GB%XNOFLUX))  ALLOCATE(GB%XNOFLUX(SIZE(PUA,1)))
 ! Calculation of WFPS
 ! coefficients obtenus a partir des donnees Grignon+Hombori+Escompte(0.536 0.4 0.43)
 ZWFPS_S(:) = XUNDEF
-ZTG_D(:) = XUNDEF
-ZSAND(:) = XUNDEF
+ZTG_D  (:) = XUNDEF
+ZSAND  (:) = XUNDEF
 !
 DO JI = 1,NP%AL(1)%NSIZE_P
   !
@@ -126,8 +121,8 @@ DO JI = 1,NP%AL(1)%NSIZE_P
   !
   ZWFPS_S(IMASK) = (NPE%AL(1)%XWG(JI,1) / 0.45) * 100.      
   ! Change unity of temperatures from Kelvin to Celsius
-  ZTG_D(IMASK) = NPE%AL(1)%XTG(JI,2)  - 273.15
-  ZTG_S(IMASK) = NPE%AL(1)%XTG(JI,1)  - 273.15
+  ZTG_D  (IMASK) = NPE%AL(1)%XTG(JI,2)  - 273.15
+  ZTG_S  (IMASK) = NPE%AL(1)%XTG(JI,1)  - 273.15
   !
 ENDDO
 !
@@ -141,13 +136,13 @@ ZWIND(:) = SQRT( PUA(:)**2 + PVA(:)**2 )
 !------------------------------------
 ! 1- Normalized centered entries
 !
-ZN_ZTG_S(:)   = XCOEF_TG_S(1)   + XCOEF_TG_S(2) * ZTG_S(:)
+ZN_ZTG_S  (:) = XCOEF_TG_S  (1) + XCOEF_TG_S  (2) * ZTG_S  (:)
 ZN_ZWFPS_S(:) = XCOEF_WFPS_S(1) + XCOEF_WFPS_S(2) * ZWFPS_S(:)
-ZN_ZTG_D(:)   = XCOEF_TG_D(1)   + XCOEF_TG_D(2) * ZTG_D(:)
-ZN_FERT(:)    = XCOEF_FERT(1)   + XCOEF_FERT(2) * S%XFERT(:)
-ZN_ZSAND(:)   = XCOEF_SAND(1)   + XCOEF_SAND(2) * ZSAND(:)
-ZN_PH(:)      = XCOEF_PH(1)     + XCOEF_PH(2) * S%XPH(:)
-ZN_WIND(:)    = XCOEF_WIND(1)   + XCOEF_WIND(2) * ZWIND(:)
+ZN_ZTG_D  (:) = XCOEF_TG_D  (1) + XCOEF_TG_D  (2) * ZTG_D  (:)
+ZN_FERT   (:) = XCOEF_FERT  (1) + XCOEF_FERT  (2) * S%XFERT(:)
+ZN_ZSAND  (:) = XCOEF_SAND  (1) + XCOEF_SAND  (2) * ZSAND  (:)
+ZN_PH     (:) = XCOEF_PH    (1) + XCOEF_PH    (2) * S%XPH  (:)
+ZN_WIND   (:) = XCOEF_WIND  (1) + XCOEF_WIND  (2) * ZWIND  (:)
 !
 ! 2- weighted sums
 !

@@ -450,8 +450,8 @@ CALL SOILSTRESS(IO%CISBA, ZF2, KK, PK, PEK, ZF2WGHT, ZF5 )
 !              ---------------------------------
 !
 IF(OMEB)THEN
-   CALL ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG, &
-                 TPTIME, OMEB, GSHADE, HIMPLICIT_WIND, PTSTEP, &
+   CALL ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG,                &
+                 TPTIME, OMEB, GSHADE, HIMPLICIT_WIND, PTSTEP,        &
                  ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1, PPS, PZENITH,      &
                  PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,  &
                  PDIRCOSZW, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF,   &
@@ -493,13 +493,13 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
-   CALL SNOW3L_ISBA(IO, G, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,    &
-                    TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,&
-                    ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR,   &
+   CALL SNOW3L_ISBA(IO, G, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,                       &
+                    TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,      &
+                    ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR,         &
                     PSR, PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PZREF, PEK%XSNOWFREE_ALB, &
-                    PK%XDG, PK%XDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,&
-                    PPET_B_COEF, PPEQ_B_COEF, ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR, &
-                    ZGSFCSNOW, ZEVAPCOR, ZLES3L, ZLEL3L, ZEVAP3L, ZSNOWSFCH, ZDELHEATN, &
+                    PK%XDG, PK%XDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,  &
+                    PPET_B_COEF, PPEQ_B_COEF, ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR,        &
+                    ZGSFCSNOW, ZEVAPCOR, ZLES3L, ZLEL3L, ZEVAP3L, ZSNOWSFCH, ZDELHEATN,   &
                     ZDELHEATN_SFC, ZRI3L,PZENITH, ZDELHEATG, ZDELHEATG_SFC, ZQS3L      )  
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -511,8 +511,8 @@ ELSE
    ELSE IF (MAXVAL(PEK%XGMES(:)).NE.XUNDEF .OR. MINVAL(PEK%XGMES(:)).NE.XUNDEF) THEN
       ZQSAT(:)=QSAT(PEK%XTG(:,1),PPS(:))  
       CALL COTWORES(PTSTEP, IO, GSHADE, PK, PEK, PK%XDMAX, PPOI, PCSP, PEK%XTG(:,1), &
-                    ZF2, PSW_RAD, PQA, ZQSAT, PEK%XPSNV, ZDELTA, PRHOA, PZENITH, &
-                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN, PABC, &
+                    ZF2, PSW_RAD, PQA, ZQSAT, PEK%XPSNV, ZDELTA, PRHOA, PZENITH,     &
+                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN, PABC,   &
                     DMK%XRS, DEK%XGPP, PRESP_BIOMASS_INST(:,1))
    ELSE
       PRESP_BIOMASS_INST(:,1) = 0.0
@@ -524,8 +524,8 @@ ELSE
 !*      9.0    ISBA Composit Energy Budget
 !              -----------------------------------------------
 !
-  CALL ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,       &
-                HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,    &
+  CALL ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,                      &
+                HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,                &
                 PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, &
                 PPEQ_B_COEF, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA,   &
                 PVMOD, PQA, PRR, PSR, PPS, PZREF, PUREF, PDIRCOSZW, &
@@ -549,8 +549,8 @@ ENDIF
 !*     12.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
-CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK, &
-           OMEB, PTSTEP, ZVEG, ZWRMAX, ZSNOW_THRUFAL, &
+CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK,                      &
+           OMEB, PTSTEP, ZVEG, ZWRMAX, ZSNOW_THRUFAL,          &
            ZEVAPCOR, ZSUBVCOR, ZSOILHCAPZ, ZF2WGHT, ZF2, PPS,  &
            PIRRIG_GR, ZDELHEATG, ZDELHEATG_SFC,  ZDELPHASEG,   &
            ZDELPHASEG_SFC                                )
@@ -562,8 +562,8 @@ CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK, &
 !* add snow component to output radiative parameters and fluxes in case 
 !  of ES or CROCUS snow schemes
 !
-CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK, &
-                   OMEB, PEXNS, PEXNA, PTA, PQA,  &
+CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK,                 &
+                   OMEB, PEXNS, PEXNA, PTA, PQA,              &
                    PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,  &
                    ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L,     &
                    ZEVAP3L, ZQS3L, ZALB3L, ZGSFCSNOW,         &
