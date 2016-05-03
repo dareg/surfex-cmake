@@ -103,9 +103,11 @@ TYPE ISBA_t
   CHARACTER(LEN=3)               :: CSNOWRES ! Turbulent exchanges over snow
 !                                          ! 'DEF' = Default: Louis (ISBA)
 !                                          ! 'RIL' = Maximum Richardson number limit
-!                                          !         for stable conditions ISBA-SNOW3L
-!                                          !         turbulent exchange option
-!                                           
+                                       !
+!                                      !         for stable conditions ISBA-SNOW3L
+!                                      !         turbulent exchange option
+!                                      !<bber
+                                       ! 'M98' = previous computation in Crocus from Martin & Lejeune 1998
   CHARACTER(LEN=3)               :: CRESPSL  ! Soil respiration
 !                                          ! 'DEF' = Default: Norman (1992)
 !                                          ! 'PRM' = New Parameterization
@@ -151,6 +153,12 @@ TYPE ISBA_t
 !
 ! radiative transfer scheme in snow (Crocus)
   CHARACTER(3)                   :: CSNOWRAD ! B92 (historical version, Brun et al 92), TAR, TA1, TA2 (see Libois et al 2013)
+! New multiphysics Crocus options, Cluzet et al 2016
+  CHARACTER(3)                   :: CSNOWFALL ! V12 (Vionnet et al. 2012) , A76 (Anderson 1976), S02 (Lehning and al. 2002), P75 (Pahaut 1975)
+  CHARACTER(3)                   :: CSNOWCOND ! Y81 (Yen 1981), I02 (Boone et al. 2002) C11 (Calonne et al. 2011)
+  CHARACTER(3)                   :: CSNOWHOLD ! B92 (Brun et al. 1992) O04 (Oleson et al., 2004) S02 (SNOWPACK, Lehning et al, 2002) B02 (ISBA_ES, Boone et al. 2002)
+  CHARACTER(3)                   :: CSNOWCOMP ! B92 snow compaction basis version and B93 for slightly different parameters
+  
 !-------------------------------------------------------------------------------
 !
   LOGICAL                        :: LCANOPY ! T: SBL scheme within the canopy
@@ -949,6 +957,10 @@ YISBA%LSNOW_ABS_ZENITH=.FALSE.
 YISBA%LSNOWSYTRON=.FALSE.
 YISBA%CSNOWMETAMO='B92'
 YISBA%CSNOWRAD='B92'
+YISBA%CSNOWFALL='V12'
+YISBA%CSNOWCOND='Y81'
+YISBA%CSNOWHOLD='B92'
+YISBA%CSNOWCOMP='B92'
 YISBA%LECOCLIMAP=.FALSE.
 YISBA%LCTI=.FALSE.
 YISBA%LSOCP=.FALSE.
@@ -990,5 +1002,6 @@ YISBA%LWTD=.FALSE.
 YISBA%LCPL_RRM=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_INIT
+
 
 END MODULE MODD_ISBA_n

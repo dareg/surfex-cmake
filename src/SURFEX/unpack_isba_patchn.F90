@@ -158,6 +158,7 @@ IF (I%NPATCH==1) THEN
      I%TSNOW%GRAN1     (:, :, 1) = PKI%XP_SNOWGRAN1   (:, :)
      I%TSNOW%GRAN2     (:, :, 1) = PKI%XP_SNOWGRAN2   (:, :)
      I%TSNOW%HIST      (:, :, 1) = PKI%XP_SNOWHIST    (:, :)
+     I%TSNOW%IMPUR     (:, :, 1) = PKI%XP_SNOWIMPUR   (:, :)
   END IF
   !
   IF(I%LGLACIER)THEN
@@ -342,6 +343,7 @@ ELSE
         I%TSNOW%GRAN1     (JI, JK, KPATCH) = PKI%XP_SNOWGRAN1   (JJ, JK)
         I%TSNOW%GRAN2     (JI, JK, KPATCH) = PKI%XP_SNOWGRAN2   (JJ, JK)
         I%TSNOW%HIST      (JI, JK, KPATCH) = PKI%XP_SNOWHIST    (JJ, JK)
+        I%TSNOW%IMPUR     (JI, JK, KPATCH) = PKI%XP_SNOWIMPUR   (JJ, JK)
       ENDDO
     END DO
   END IF
@@ -458,6 +460,7 @@ PKI%XP_SNOWGRAN1    => NULL()
 PKI%XP_SNOWGRAN2    => NULL()
 PKI%XP_SNOWHIST     => NULL()
 PKI%XP_SNOWAGE      => NULL()
+PKI%XP_SNOWIMPUR    => NULL()
 !
 PKI%XP_ICE_STO      => NULL()
 !

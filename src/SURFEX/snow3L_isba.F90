@@ -2,7 +2,7 @@
 SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
                          TPTIME, PTSTEP, PVEGTYPE,                                           &
                          PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                            &
-                         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                         &
+                         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,             &
                          PTG, PCG, PCT, PSOILHCAPZ, PSOILCONDZ,                              &
                          PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,            &
                          PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR,                    &
@@ -17,7 +17,8 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
                          PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
-                         HSNOWMETAMO, HSNOWRAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,                &
+                         HSNOWMETAMO, HSNOWRAD,OSNOWSYTRON,                                  &
+                         HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,KTAB_SYT,PSYTMASS,       &
                          PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                          PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
@@ -122,6 +123,7 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PVEGTYPE ! fraction of each vegetation
 !                                      'DEF' = Default: Louis (ISBA: Noilhan and Mahfouf 1996)
 !                                      'RIL' = Limit Richarson number under very stable 
 !                                              conditions (currently testing)
+!                                      'M98' older Crocus computation for Martin and Lejeune 1998
 !
 LOGICAL, INTENT(IN)                 :: OMEB       ! True = coupled to MEB. This means surface fluxes ae IMPOSED
 !                                                 ! as an upper boundary condition to the explicit snow schemes. 
@@ -211,6 +213,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST
 !                                      PSNOWGRAN2 = Snow layer(s) grain parameter 2
 !                                      PSNOWHIST  = Snow layer(s) grain historical parameter
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE  ! Snow grain age
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR
 !
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PRNSNOW, PHSNOW, PLES3L, PLEL3L,     &
@@ -304,7 +307,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
 LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
+CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP !bber added HSNOWFALL HSNOWHOLD and HSNOWCOND bber
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -546,6 +549,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       DO JJ=1,SIZE(PSNOWSWE,1)
          ZSNOWD      (JJ) = ZSNOWD      (JJ) + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
          ZSNOWSWE_OUT(JJ) = ZSNOWSWE_OUT(JJ) + PSNOWSWE(JJ,JWRK)
+        PSNOWIMPUR (JJ,JWRK)   = (1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR (JJ,JWRK)        
       ENDDO
    END DO
 !
@@ -706,6 +710,7 @@ REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWGRAN2
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWHIST
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWAGE
 REAL, DIMENSION(KSIZE1,KSIZE4) :: ZP_BLOWSNW
+REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWIMPUR
 REAL, DIMENSION(KSIZE1)        :: ZP_SNOWALB
 REAL, DIMENSION(KSIZE1)        :: ZP_SWNETSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_SWNETSNOWS
@@ -833,7 +838,8 @@ IF (HSNOW_ISBA=='CRO') THEN
          JI = KMASK(JJ)
          ZP_SNOWGRAN1(JJ,JWRK) = PSNOWGRAN1 (JI,JWRK)
          ZP_SNOWGRAN2(JJ,JWRK) = PSNOWGRAN2 (JI,JWRK)
-         ZP_SNOWHIST (JJ,JWRK) = PSNOWHIST  (JI,JWRK)        
+         ZP_SNOWHIST (JJ,JWRK) = PSNOWHIST  (JI,JWRK)
+         ZP_SNOWIMPUR(JJ,JWRK) = PSNOWIMPUR (JI,JWRK)       
       ENDDO
    ENDDO
 
@@ -850,6 +856,7 @@ ELSE
          ZP_SNOWGRAN1(JJ,JWRK) = XUNDEF
          ZP_SNOWGRAN2(JJ,JWRK) = XUNDEF
          ZP_SNOWHIST (JJ,JWRK) = XUNDEF
+         ZP_SNOWIMPUR(JJ,JWRK) = XUNDEF
       ENDDO
    ENDDO
 
@@ -875,6 +882,7 @@ IF (OMEB) THEN
     DO JJ=1,KSIZE1
       JI                    = KMASK           (JJ)
       ZP_DZG      (JJ,JWRK) = PDZG       (JI,JWRK)
+      ZP_SNOWIMPUR(JJ,JWRK) = XUNDEF
     ENDDO
   ENDDO
 ENDIF
@@ -993,7 +1001,8 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
              ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,   &
              ZP_SNOWSWE,ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,               &
-             ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWHIST, ZP_SNOWAGE, PTSTEP,  &
+             ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWHIST, ZP_SNOWAGE,          &
+             ZP_SNOWIMPUR, PTSTEP,                                         &
              ZP_PS, ZP_SRSNOW, ZP_RRSNOW ,ZP_PSN3L, ZP_TA, ZP_TG(:,1),     &
              ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,       &
              ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,   &
@@ -1005,7 +1014,8 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
-             OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD                        )
+             OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,                       &
+             HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP                    )
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0
@@ -1176,6 +1186,7 @@ IF (HSNOW_ISBA=='CRO') THEN
       PSNOWGRAN1(JI,JWRK) = ZP_SNOWGRAN1(JJ,JWRK)
       PSNOWGRAN2(JI,JWRK) = ZP_SNOWGRAN2(JJ,JWRK)
       PSNOWHIST (JI,JWRK) = ZP_SNOWHIST (JJ,JWRK)
+      PSNOWIMPUR(JI,JWRK) = ZP_SNOWIMPUR(JJ,JWRK)
     ENDDO
   ENDDO      
   
