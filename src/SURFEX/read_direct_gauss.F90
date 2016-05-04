@@ -369,7 +369,11 @@ DO
       ZVALUE(:)=YVALUE16(:)
       !
       IF (ICPT==0) THEN      
-        IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
+        IF ( (HFIELD(1:5)=="COVER" .AND. (ANY(ZVALUE>573.) .OR. ANY(ZVALUE<0.)) ) .OR. & 
+            ((HFIELD(1:4)=="SAND" .OR. HFIELD(1:4)=="CLAY") .AND. (ANY(ZVALUE>100.) .OR. ANY(ZVALUE<0.)) ) .OR. &
+             (HFIELD(1:3)=="SOC" .AND. (ANY(ZVALUE>15000.) .OR. ANY(ZVALUE<0.)) )  .OR. &
+             ((HFIELD(1:5)/="COVER" .AND. HFIELD(1:4)/="SAND" .AND. HFIELD(1:4)/="CLAY" .AND. &
+              HFIELD(1:3)/="SOC" .AND. ANY(ZVALUE>15000.) ) ) ) THEN
           GFLAG = .FALSE.
           ICPT = ICPT + 1      
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
