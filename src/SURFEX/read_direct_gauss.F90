@@ -143,7 +143,7 @@ INTEGER, DIMENSION(2) :: ICOL1, ICOL2 ! limits of index of columns
 INTEGER (KIND=4), DIMENSION(:), ALLOCATABLE :: IVALUE32 ! value of a data point
 INTEGER (KIND=8), DIMENSION(:), ALLOCATABLE :: IVALUE64 ! value of a data point
 !
-LOGICAL                           :: GSWAP              ! T: swap has been done
+LOGICAL                           :: GSWAP, GFLAG              ! T: swap has been done
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
@@ -309,6 +309,8 @@ IDEB = IPAS*NRANK
 !
 DO 
   !
+  GFLAG = .TRUE.
+  !
   !the file is read from the top to the bottom (quicker)
   JL = JL - 1
   IF (JL==0) THEN
@@ -368,6 +370,7 @@ DO
       !
       IF (ICPT==0) THEN      
         IF (      ANY(ABS(ZVALUE)>15000)   ) THEN
+          GFLAG = .FALSE.
           ICPT = ICPT + 1      
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
           LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
@@ -400,6 +403,7 @@ DO
         IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
              .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
           ICPT = ICPT + 1 
+          GFLAG = .FALSE.
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
           LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
           GSWAP = .TRUE.
@@ -422,7 +426,8 @@ DO
       IF (ICPT==0) THEN      
         IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
                .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
-          ICPT = ICPT + 1 
+          ICPT = ICPT + 1
+          GFLAG = .FALSE. 
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
           LITTLE_ENDIAN_ARCH = .NOT. LITTLE_ENDIAN_ARCH
           GSWAP = .TRUE.
@@ -532,7 +537,7 @@ DO
   !*   12.     Call to the adequate subroutine (point by point treatment)
   !            ----------------------------------------------------------
   !
-  IF (IWORK>0) &
+  IF (IWORK>0 .AND. GFLAG) &
     CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                             ILUOUT, ZLAT_WORK(1:IWORK),ZLON_WORK(1:IWORK), &
                             ZVALUE_WORK(1:IWORK),                          &
