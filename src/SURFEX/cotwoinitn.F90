@@ -153,11 +153,6 @@ ZCO2INIT5(:) = 0.
 !
 !-------------------------------------------------------------------------------
 !
-! DETERMINE GAUSSIAN WEIGHTS NEEDED FOR CO2 MODEL 
-! -----------------------------------------------
-!
- CALL GAULEG(0.0,1.0,S%XABC,S%XPOI,SIZE(S%XABC))
-!
 !
 ! INITIALIZE VARIOUS PARAMETERS FOR CO2 MODEL:
 ! --------------------------------------------

@@ -333,7 +333,6 @@ IF (HINIT == 'ALL' .AND. IO%CRESPSL=='CNT' .AND. IO%CPHOTO == 'NCB') CALL CARBON
 !    PART 3 : Loop on patches for general initialization
 !    --------------------------------------------------
 !
-!
 ! loop on patches
 DO JP = 1, IO%NPATCH
   !

@@ -266,9 +266,9 @@ IF (HINIT=='PRE') THEN
   ENDIF
 
 ELSEIF (HINIT=='ALL') THEN
-!
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
-!
+  !
+  CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
+  !
   IF (IVERSION<6) THEN
     IM%O%CRESPSL='DEF'
   ELSE  
@@ -282,9 +282,14 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
       IM%O%NNBYEARSOLD=NUNDEF
     ENDIF
   ENDIF
-!
+  !
   CALL END_IO_SURF_n(HPROGRAM)
+  !
+ENDIF
 !
+IF (IM%O%CISBA/="DIF") THEN
+  IM%O%NLAYER_DUN  = 2
+  IM%O%NLAYER_HORT = 2        
 ENDIF
 !
 !-------------------------------------------------------------------------------
