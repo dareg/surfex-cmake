@@ -98,7 +98,7 @@ ENDIF
 !
 !*    2.     Loop on all input data points
 !            -----------------------------
-!     
+! 
 bloop: &
 DO JLOOP = 1 , SIZE(PLAT)
 !

@@ -135,7 +135,7 @@ IF(IO%CRAIN=='SGH')THEN
     ZBETA (:) = XMUREGA + XMUREGP * EXP(-X001*ZDIST(:))
 !
 !       calculate mu, precip is in mm/hr
-!         
+!   
     K%XMUF (:) = 1.0 - EXP(-ZBETA(:)*(PRAIN(:)*XSTOHR))
 !
   ENDWHERE
