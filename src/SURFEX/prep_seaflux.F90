@@ -119,20 +119,20 @@ SM%OR%LDIAPYCNAL = LDIAPYC
 !
 !*      2.0    Large scale orography
 !
-CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
+ CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
                             SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.1    Temperature
 !
-CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
+ CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
                             SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !
 !*      2.1.2    Salinity
 !
 
-CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
+ CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, &
                             SM%DTS, SM%O, SM%OR, SM%SG, SM%S, &
                             HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
 !

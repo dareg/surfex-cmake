@@ -86,7 +86,7 @@ IMPLICIT NONE
 TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KLU      ! number of sea patch point
 INTEGER,           INTENT(IN)  :: KLUOUT
 !
@@ -96,13 +96,13 @@ INTEGER,           INTENT(IN)  :: KLUOUT
 INTEGER           :: IRESP          ! Error code after reading
 !
 INTEGER           :: JMTH, INMTH
-CHARACTER(LEN=2 ) :: YMTH
-CHARACTER(LEN=5)  :: YLVL
+ CHARACTER(LEN=2 ) :: YMTH
+ CHARACTER(LEN=5)  :: YLVL
 !
-CHARACTER(LEN=12) :: YCATEG         ! category to read
-CHARACTER(LEN=12) :: YLEVEL         ! Level to read
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=200) :: YMESS         ! Error Message
+ CHARACTER(LEN=12) :: YCATEG         ! category to read
+ CHARACTER(LEN=12) :: YLEVEL         ! Level to read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=200) :: YMESS         ! Error Message
 !
 INTEGER :: JX,JK,JL                 ! loop counter on ice categories and layers and grid points
 INTEGER :: inl_in_file,int_in_file  ! file values for ice catgories and layers numbers
@@ -166,7 +166,7 @@ ENDIF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-CALL READ_SURF(&
+ CALL READ_SURF(&
                      HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP)
 !
 IF (TRIM(S%CSEAICE_SCHEME) == 'GELATO' .AND. (NBLOCKTOT>1)) THEN 
@@ -201,7 +201,7 @@ IF(LCPL_SEAICE)THEN
 ENDIF
 nxglo=nx
 #if ! defined in_arpege
-CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
+ CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
 #else
 IF (NPRINTO > 0) THEN
    WRITE(KLUOUT,*)'Gelato cannot yet compute global averages when running in Arpege (because of collective comm vs. NPROMA blocks)'
@@ -234,21 +234,21 @@ ENDIF
 !
 ! Supersedes Gelato hard defaults with a Gelato genuine namelist 
 ! if available (for Gelato wizzards !)
-CALL GLTOOLS_READNAM(.FALSE.,KLUOUT)  
+ CALL GLTOOLS_READNAM(.FALSE.,KLUOUT)  
 !
 ny=1
 nyglo=1
-CALL GLTOOLS_ALLOC(S%TGLT)
+ CALL GLTOOLS_ALLOC(S%TGLT)
 !
 !*       0.     Check dimensions : number of layers and ice categories
 !
-CALL READ_SURF(&
+ CALL READ_SURF(&
                      HPROGRAM,'ICENL',inl_in_file,IRESP)
 IF (inl_in_file /= nl) THEN 
    WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, nl
    CALL ABOR1_SFX(YMESS)
 END IF
-CALL READ_SURF(&
+ CALL READ_SURF(&
                      HPROGRAM,'ICENT',int_in_file,IRESP)
 IF (int_in_file /= nt) THEN
    WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, nt
@@ -257,7 +257,7 @@ END IF
 !
 !*       1.     (Semi-)prognostic fields with only space dimension(s) :
 !
-CALL READ_SURF(&
+ CALL READ_SURF(&
                      HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
 !
 !*       2.     Prognostic fields with space and ice-category dimension(s) :
@@ -376,7 +376,7 @@ S%TGLT%dom(:,1)%srf=SG%XMESH_SIZE(:)
 xdomsrf = SUM( S%TGLT%dom(:,1)%srf, MASK=(S%TGLT%dom(:,1)%tmk==1) )
 xdomsrf_g = xdomsrf
 #if ! defined in_arpege
-CALL mpp_sum(xdomsrf_g) 
+ CALL mpp_sum(xdomsrf_g) 
 #else
 ! Avoid zero divide in Gelato computation of global area averages
 xdomsrf_g = MAX(xdomsrf_g, 1.e-9)
@@ -428,7 +428,7 @@ ENDIF
 !! Initialize the coupling variables with 'snapshot' prognostic variables
 ! (for now, averaged over ice categories)  
 !
-CALL GLT_SNDATMF( S%TGLT, XTTSI - XTT )
+ CALL GLT_SNDATMF( S%TGLT, XTTSI - XTT )
 S%XSIC(:)     = S%TGLT%ice_atm(1,:,1)%fsi 
 S%XTICE(:)    = S%TGLT%ice_atm(1,:,1)%tsf 
 S%XICE_ALB(:) = S%TGLT%ice_atm(1,:,1)%alb 
@@ -439,7 +439,7 @@ S%TGLT%oce_all(:,1)%tml=S%XSST(:)
 IF (LHOOK) CALL DR_HOOK('READ_SEAICE_n',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_SEAICE(HFIELD,PFIELD)
@@ -447,7 +447,7 @@ SUBROUTINE CHECK_SEAICE(HFIELD,PFIELD)
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HFIELD
+ CHARACTER(LEN=12),  INTENT(IN) :: HFIELD
 REAL, DIMENSION(:), INTENT(IN) :: PFIELD
 !
 REAL            :: ZMAX,ZMIN

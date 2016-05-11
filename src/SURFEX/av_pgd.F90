@@ -1713,7 +1713,7 @@ END DO
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:MAJOR_PATCH_PGD_1D',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 
 SUBROUTINE DATE2DOY(TPDATA, KDOY)
 TYPE (DATE_TIME), DIMENSION(:,:), INTENT(IN) :: TPDATA

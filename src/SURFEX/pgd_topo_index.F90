@@ -103,10 +103,10 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM     ! program calling
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM     ! program calling
 INTEGER,              INTENT(IN)  :: KLU          ! number of nature points
-CHARACTER(LEN=28),    INTENT(IN)  :: HCTI         ! topographic index file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HCTIFILETYPE ! topographic index file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HCTI         ! topographic index file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HCTIFILETYPE ! topographic index file type
 LOGICAL,              INTENT(IN)  :: OIMP_CTI     ! .true. if topographic index statistics is imposed
 !
 !
@@ -125,8 +125,8 @@ INTEGER :: I_DIM
 INTEGER :: IRET      ! error code
 INTEGER :: ILUOUT    ! output listing logical unit
 !
-CHARACTER(LEN=6  ) :: YFILETYPE, YSCHEME, YSUBROUTINE
-CHARACTER(LEN=20)  :: YFIELD        ! Name of the field.
+ CHARACTER(LEN=6  ) :: YFILETYPE, YSCHEME, YSUBROUTINE
+ CHARACTER(LEN=20)  :: YFIELD        ! Name of the field.
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -226,7 +226,7 @@ ELSE
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(HCTI)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                            YFILETYPE,'FULL  ','SURF  ','READ ')
      ENDIF     
 !   
@@ -453,7 +453,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE CTIREG(OREG,OREG10,OREG2)  
 !      
@@ -483,7 +483,7 @@ REAL    :: ZGLBLONMIN                 ! minimum longitude of data box in the fil
 REAL    :: ZGLBLATMAX                 ! maximum latitude of data box in the file
 REAL    :: ZGLBLONMAX                 ! maximum longitude of data box in the file
 !
-CHARACTER(LEN=28)  :: YFILEHDR        ! Name of the field file header
+ CHARACTER(LEN=28)  :: YFILEHDR        ! Name of the field file header
 !
 INTEGER                    :: INBLAT
 INTEGER                    :: INBLON
@@ -495,15 +495,15 @@ INTEGER                    :: IEINDEX    ! index of character 'E' in YSTRING1
 INTEGER                    :: IWINDEX    ! index of character 'W' in YSTRING1
 REAL, DIMENSION(7)         :: ZVAL       ! values of the head data
 INTEGER                    :: IHEAD      ! index of the data in the array ZVAL
-CHARACTER(LEN=100)         :: YSTRING    ! total string in the head
-CHARACTER(LEN=100)         :: YSTRING1   ! string less the begining line descriptor
-CHARACTER(LEN=100)         :: YVAL       ! absolute value of the data of the line
+ CHARACTER(LEN=100)         :: YSTRING    ! total string in the head
+ CHARACTER(LEN=100)         :: YSTRING1   ! string less the begining line descriptor
+ CHARACTER(LEN=100)         :: YVAL       ! absolute value of the data of the line
 INTEGER                    :: IPOINT     ! index of '.' in the string YVAL
 INTEGER                    :: ILENGTH    ! length of the string YVAL
 INTEGER                    :: IFRACLENGTH! length of the fractional part in string YVAL
-CHARACTER(LEN=2)           :: YLENGTH    ! length of the string YVAL
-CHARACTER(LEN=2)           :: YFRACLENGTH! length of the fractional part in string YVAL
-CHARACTER(LEN=10)          :: YINTERNALFORMAT ! format to read YVAL in real ZVAL
+ CHARACTER(LEN=2)           :: YLENGTH    ! length of the string YVAL
+ CHARACTER(LEN=2)           :: YFRACLENGTH! length of the fractional part in string YVAL
+ CHARACTER(LEN=10)          :: YINTERNALFORMAT ! format to read YVAL in real ZVAL
 !
 REAL    :: Z1000M, Z100M, Z10M
 !
@@ -519,7 +519,7 @@ OREG2 =.FALSE.
 !
 IGLB=11
 YFILEHDR =ADJUSTL(ADJUSTR(HCTI)//'.hdr')
-CALL OPEN_NAMELIST(HPROGRAM,IGLB,YFILEHDR)
+ CALL OPEN_NAMELIST(HPROGRAM,IGLB,YFILEHDR)
 !
 !*         1.    Line of comments
 !                ----------------
@@ -631,12 +631,12 @@ IF(SQRT(ZDLAT*ZDLON)>=Z10M.AND.SQRT(ZDLAT*ZDLON)<=Z100M)THEN
    OREG2 =.TRUE.
 ENDIF
 !
-CALL CLOSE_NAMELIST(HPROGRAM,IGLB)
+ CALL CLOSE_NAMELIST(HPROGRAM,IGLB)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX:CTIREG',1,ZHOOK_HANDLE)
 RETURN
 99 CONTINUE
-CALL ABOR1_SFX('CTIREG: PB READING TOPO INDEX FILE HEADER')
+ CALL ABOR1_SFX('CTIREG: PB READING TOPO INDEX FILE HEADER')
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX:CTIREG',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE CTIREG

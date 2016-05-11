@@ -121,14 +121,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD',0,ZHOOK_HANDLE)
 !
  CALL SURFEX_ALLOC_LIST(1)
-CSOFTWARE='PGD    '
+ CSOFTWARE='PGD    '
  CALL GOTO_MODEL(1)
 !
 !*    1.      Set default names and parallelized I/O
 !             --------------------------------------
 !
  CALL GET_LUOUT('ASCII ',ILUOUT)
-CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
+ CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
 OPEN(UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 !
 !     1.3     output file name read in namelist
@@ -140,10 +140,10 @@ IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_WRITE_SURF_ATM)
  CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !
-CFILEOUT     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')      ! output of PGD program
-CFILEOUT_FA  = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
-CFILEOUT_LFI = CPGDFILE
-CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+ CFILEOUT     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')      ! output of PGD program
+ CFILEOUT_FA  = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+ CFILEOUT_LFI = CPGDFILE
+ CFILEOUT_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
 !
 !*    2.      Preparation of surface physiographic fields
 !             -------------------------------------------
@@ -221,7 +221,7 @@ WRITE(*,*) '    ----------------------'
 WRITE(*,*) '    | PGD ENDS CORRECTLY |'
 WRITE(*,*) '    ----------------------'
       !
-CLOSE(ILUOUT)
+ CLOSE(ILUOUT)
  CALL SURFEX_DEALLO_LIST
 !
 IF (ASSOCIATED(NWORK)) DEALLOCATE(NWORK)

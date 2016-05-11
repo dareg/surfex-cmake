@@ -77,11 +77,11 @@ TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
-CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
-CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
 !
 !*      0.2    declarations of local variables
 !
@@ -99,7 +99,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',0,ZHOOK_HANDLE)
 !*      0.     Default of configuration
 !
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -167,12 +167,12 @@ ENDIF
 !*      Creating default initial state for Gelato 
 !
 !
-CALL GET_TYPE_DIM_n(DTCO, U, &
+ CALL GET_TYPE_DIM_n(DTCO, U, &
                     'SEA   ',nx)
 ny=1
 nyglo=1
 nxglo=nx
-CALL GLTOOLS_ALLOC(S%TGLT)
+ CALL GLTOOLS_ALLOC(S%TGLT)
 !
 !*       G1    Prognostic fields with only space dimension(s) :
 !

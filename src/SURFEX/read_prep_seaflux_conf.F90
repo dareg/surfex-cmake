@@ -70,16 +70,16 @@ IMPLICIT NONE
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
-CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
-CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
-CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
-CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
-CHARACTER(LEN=6),  INTENT(OUT) :: HFILEPGDTYPE! file type
-CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=28), INTENT(IN)  :: HPGDFILE    ! atmospheric file name
-CHARACTER(LEN=6),  INTENT(IN)  :: HPGDFILETYPE! atmospheric file type
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
+ CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
+ CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
+ CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
+ CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
+ CHARACTER(LEN=6),  INTENT(OUT) :: HFILEPGDTYPE! file type
+ CHARACTER(LEN=28), INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=28), INTENT(IN)  :: HPGDFILE    ! atmospheric file name
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPGDFILETYPE! atmospheric file type
 INTEGER,           INTENT(IN)  :: KLUOUT   ! logical unit of output listing
 LOGICAL,           INTENT(OUT) :: OUNIF    ! flag for prescribed uniform field
 

@@ -71,7 +71,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PPIFLOOD ! Potential floodplain infiltration (
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=50)     :: YCOMMENT
+ CHARACTER(LEN=50)     :: YCOMMENT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -128,7 +128,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('PUT_SFX_LAND',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_LAND(HCOMMENT,PFIELD)
@@ -137,7 +137,7 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=*),   INTENT(IN) :: HCOMMENT
 REAL, DIMENSION(:), INTENT(IN) :: PFIELD
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

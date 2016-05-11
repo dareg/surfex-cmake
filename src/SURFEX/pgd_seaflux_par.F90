@@ -126,9 +126,9 @@ IF (LHOOK) CALL DR_HOOK('PGD_SEAFLUX_PAR',0,ZHOOK_HANDLE)
 NTIME_SST         = 12
 XUNIF_SST (:)     = XUNDEF ! sea surface temperature
 !
-CFNAM_SST (:)     = '                            '
+ CFNAM_SST (:)     = '                            '
 !
-CFTYP_SST (:)     = '      '
+ CFTYP_SST (:)     = '      '
 !
 NYEAR_SST  (:)    = NUNDEF
 NMONTH_SST (:)    = NUNDEF
@@ -165,7 +165,7 @@ ALLOCATE(DTS%TDATA_SST     (NTIME_SST))
 !*    3.      Uniform fields are prescribed
 !             -----------------------------
 !
-CATYPE = 'ARI'
+ CATYPE = 'ARI'
 !
 DO JTIME=1,NTIME_SST
   CALL PGD_FIELD(DTCO, UG, U, USS, &

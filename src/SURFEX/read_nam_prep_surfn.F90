@@ -40,10 +40,10 @@ NYEAR=NUNDEF
 NMONTH=NUNDEF
 NDAY=NUNDEF
 XTIME=XUNDEF
-CFILE     = '                         '
-CFILETYPE = '      '
-CFILEPGD     = '                         '
-CFILEPGDTYPE = '      '
+ CFILE     = '                         '
+ CFILETYPE = '      '
+ CFILEPGD     = '                         '
+ CFILEPGDTYPE = '      '
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !

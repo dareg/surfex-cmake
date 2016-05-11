@@ -60,7 +60,7 @@ IMPLICIT NONE
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)  :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(IN)  :: KLU        ! number of points
 INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
@@ -81,7 +81,7 @@ INTEGER :: IL      ! number of points
 REAL, DIMENSION(:), ALLOCATABLE :: ZLON ! longitude of points
 REAL, DIMENSION(:), ALLOCATABLE :: ZLAT ! latitude  of points
 !
-CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
+ CHARACTER(LEN=100)                :: YCOMMENT ! comment written in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !

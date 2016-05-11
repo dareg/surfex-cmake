@@ -158,7 +158,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPET_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !
 !*      0.2    declarations of local variables
@@ -201,7 +201,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',0,ZHOOK_HANDLE)
-CPROGNAME=HPROGRAM
+ CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('COUPLING_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -457,7 +457,7 @@ END IF
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
-CONTAINS
+ CONTAINS
 !=======================================================================================
 SUBROUTINE TREAT_SURF(KTILE,KSIZE,KMASK)
 !

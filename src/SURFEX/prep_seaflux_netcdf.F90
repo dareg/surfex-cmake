@@ -62,7 +62,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.     Grid type
 !              ---------
 IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_NETCDF',0,ZHOOK_HANDLE)
-CINGRID_TYPE='LATLON '
+ CINGRID_TYPE='LATLON '
 !
 !*      2.     Reading of field
 !              ----------------

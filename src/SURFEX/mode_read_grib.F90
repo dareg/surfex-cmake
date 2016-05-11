@@ -13,7 +13,7 @@ USE GRIB_API
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------
 !     ####################
       SUBROUTINE MAKE_GRIB_INDEX(HGRIB)
@@ -33,7 +33,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:MAKE_GRIB_INDEX',0,ZHOOK_HANDLE)
 IF (CGRIB_FILE==HGRIB) CALL DR_HOOK('MODE_READ_GRIB:MAKE_GRIB_INDEX',1,ZHOOK_HANDLE)
 IF (CGRIB_FILE==HGRIB) RETURN
 !
-CGRIB_FILE=HGRIB
+ CGRIB_FILE=HGRIB
 !
  CALL GRIB_INDEX_CREATE(NIDX,HGRIB,'indicatorOfParameter',IRET)
 IF (IRET/=0) CALL ABOR1_SFX("MODE_READ_GRIB:MAKE_GRIB_INDEX: error while creating the grib index")
@@ -136,7 +136,7 @@ ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:GET_GRIB_MESSAGE',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !       ##############
         SUBROUTINE TEST_IRET(KLUOUT,VAL1,VAL0,KRET)
@@ -259,9 +259,9 @@ END SUBROUTINE READ_GRIB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
+ CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
-CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
+ CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
 REAL, DIMENSION(:), POINTER       :: PMASK     ! Land mask
 !
 INTEGER(KIND=kindOfInt)                 :: IRET      ! return code
@@ -1830,7 +1830,7 @@ IF (IRET /= 0 ) THEN
   CALL ABOR1_SFX('MODE_READ_GRIB: SNOW AND VEG DEPTH MISSING (READ_GRIB_SNOW_VEG_AND_DEPTH)')
 END IF
 !
-CALL READ_GRIB_SNOW_DEN(HGRIB,KLUOUT,HINMODEL,PMASK,ZRHO)
+ CALL READ_GRIB_SNOW_DEN(HGRIB,KLUOUT,HINMODEL,PMASK,ZRHO)
 !
 IF (PRESENT(PSNV)) THEN
   ALLOCATE(PSNV(SIZE(ZFIELD)))
@@ -1874,9 +1874,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB    ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB    ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT   ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK    ! grib land mask
 REAL, DIMENSION(:), POINTER         :: PSNVA    ! field to initialize
 !
@@ -1922,9 +1922,9 @@ IMPLICIT NONE
 !
 !* dummy arguments
 !  ---------------
-CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB    ! Grib file name
+ CHARACTER(LEN=*),     INTENT(IN)    :: HGRIB    ! Grib file name
 INTEGER,              INTENT(IN)    :: KLUOUT   ! logical unit of output listing
-CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL ! Grib originating model
+ CHARACTER(LEN=6),     INTENT(IN)    :: HINMODEL ! Grib originating model
 REAL, DIMENSION(:),   INTENT(IN)    :: PMASK    ! grib land mask
 REAL, DIMENSION(:), POINTER         :: PSNV    ! field to initialize
 !

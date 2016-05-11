@@ -184,7 +184,7 @@ ALLOCATE(DTGR%XPAR_LAI_GR      (TG%NDIM,TGRO%NTIME_GR ))
 !*    3.2      Uniform fields are prescribed
 !             -----------------------------
 !
-CATYPE = 'ARI'
+ CATYPE = 'ARI'
 !
 !
 DO JLAYER_GR=1,TGRO%NLAYER_GR

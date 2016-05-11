@@ -79,7 +79,7 @@ NUNIT=9
 !
 OPEN(UNIT=NUNIT,FILE=TRIM(HFILE)//'.txt',FORM='FORMATTED')
 !
-CMASK = 'FULL  '
+ CMASK = 'FULL  '
  CALL READ_SURF(&
                 'ASCII ','DIM_FULL',NFULL,IRET)
 ALLOCATE(NMASK(NFULL))
@@ -89,7 +89,7 @@ ZFULL=1.
 DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------
-CMASK = HMASK
+ CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_ASC',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

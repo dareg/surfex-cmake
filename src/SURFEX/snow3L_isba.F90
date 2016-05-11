@@ -129,7 +129,7 @@ LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow a
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                       ! 'OLD' = direct
 !                                                       ! 'NEW' = Taylor serie, order 1
 !
@@ -278,7 +278,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
 LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
+ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -584,7 +584,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !================================================================
 SUBROUTINE CALL_MODEL(KSIZE1,KSIZE2,KSIZE3,KMASK)

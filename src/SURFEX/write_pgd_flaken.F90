@@ -76,7 +76,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_FLAKE_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'WATER ','FLAKE ','WRITE')
 !
 !*       1.     Selection of surface scheme

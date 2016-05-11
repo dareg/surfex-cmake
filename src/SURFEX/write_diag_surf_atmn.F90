@@ -72,7 +72,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
-CPROGNAME = HPROGRAM
+ CPROGNAME = HPROGRAM
 !
 IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DGU, YSC%U, YSC%SM, & 
                                                 HPROGRAM,HWRITE)
@@ -93,7 +93,7 @@ IF (YSC%DGU%XDIAG_TSTEP==XUNDEF .OR. &
         ABS(NINT(YSC%U%TTIME%TIME/YSC%DGU%XDIAG_TSTEP)*YSC%DGU%XDIAG_TSTEP-YSC%U%TTIME%TIME)<1.E-3 ) THEN
   !
   IF (YSC%DGU%LFRAC) THEN
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','WRITE')          
     YCOMMENT = '(-)'
     CALL WRITE_SURF(YSC%DGU, YSC%U, &

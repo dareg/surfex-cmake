@@ -117,9 +117,9 @@ END IF
 ! Number of instants for each temporal profile.
 ! For the time being, they are constant (even for the diurnal cycle)
 !
-CHN%NSNAP_M=12 ! 12 months
-CHN%NSNAP_D=7  !  7 day a week
-CHN%NSNAP_H=24 ! 24 hours a day (=> temporal resolution = 1 hour)
+ CHN%NSNAP_M=12 ! 12 months
+ CHN%NSNAP_D=7  !  7 day a week
+ CHN%NSNAP_H=24 ! 24 hours a day (=> temporal resolution = 1 hour)
 !
 !
 !*      2.     Chemical Emission fields
@@ -209,7 +209,7 @@ IF (HINIT=='ALL') THEN
   READ(KCH,'(A3)') YCONVERSION
 !$OMP END SINGLE COPYPRIVATE(YCONVERSION)
 !
-CHN%CCONVERSION = YCONVERSION
+ CHN%CCONVERSION = YCONVERSION
 !
   ALLOCATE (CHN%XCONVERSION(KLU))
 ! determine the conversion factor

@@ -135,7 +135,7 @@ IMPLICIT NONE
 !                                             ! 'WSAT'
 !                                             ! 'DT92'
 !                                             ! 'SGH ' Topmodel
-CHARACTER(LEN=*),   INTENT(IN)      :: HSOILFRZ   ! soil freezing-physics option
+ CHARACTER(LEN=*),   INTENT(IN)      :: HSOILFRZ   ! soil freezing-physics option
 !                                                 ! 'DEF'   Default (Boone et al. 2000; Giard and Bazile 2000)
 !                                                 ! 'LWT'   phase changes as above, but relation between unfrozen 
 !                                                         water and temperature considered

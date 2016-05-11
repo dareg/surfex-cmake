@@ -68,7 +68,7 @@ IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST_LFI',0,ZHOOK_HANDLE)
 #ifdef SFX_LFI
  CALL FMFREE(CNAMFI(KLUNAM),CLUOUT_LFI,IRESP)
 #endif
-CLOSE(KLUNAM)
+ CLOSE(KLUNAM)
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST_LFI',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

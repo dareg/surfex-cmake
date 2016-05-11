@@ -100,7 +100,7 @@ GRESET=.TRUE.
 GRESET=(NBLOCK>0)
 #endif
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                     HPROGRAM,'WATER ','WATFLX','WRITE')
 !
 !

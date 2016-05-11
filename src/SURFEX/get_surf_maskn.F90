@@ -101,7 +101,7 @@ END IF
 !
 IF (LHOOK) CALL DR_HOOK('GET_SURF_MASK_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE GET_MASK(KLU,YTYPE,IMASK)
 !

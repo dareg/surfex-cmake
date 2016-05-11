@@ -151,28 +151,28 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !
 INTEGER                  :: IPATCH           ! number of patches
 INTEGER                  :: IGROUND_LAYER    ! number of soil layers
-CHARACTER(LEN=3)         :: YISBA            ! ISBA option
-CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo transfert function for DIF
-CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
+ CHARACTER(LEN=3)         :: YISBA            ! ISBA option
+ CHARACTER(LEN=4)         :: YPEDOTF          ! Pedo transfert function for DIF
+ CHARACTER(LEN=3)         :: YPHOTO           ! photosynthesis option
 LOGICAL                  :: GTR_ML           ! new radiative transfert
 REAL                     :: ZRM_PATCH        ! threshold to remove little fractions of patches
-CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
-CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
-CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon top soil
-CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon sub soil
-CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
-CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
-CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
-CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
-CHARACTER(LEN=28)        :: YGW               ! file name for groundwater map
-CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
-CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
-CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
-CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
-CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
-CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
-CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
-CHARACTER(LEN=6)         :: YGWFILETYPE      ! groundwater distribution data file type
+ CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
+ CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
+ CHARACTER(LEN=28)        :: YSOC_TOP         ! file name for organic carbon top soil
+ CHARACTER(LEN=28)        :: YSOC_SUB         ! file name for organic carbon sub soil
+ CHARACTER(LEN=28)        :: YCTI             ! file name for topographic index
+ CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
+ CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
+ CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
+ CHARACTER(LEN=28)        :: YGW               ! file name for groundwater map
+ CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
+ CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
+ CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
+ CHARACTER(LEN=6)         :: YCTIFILETYPE     ! topographic index data file type
+ CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
+ CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
+ CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
+ CHARACTER(LEN=6)         :: YGWFILETYPE      ! groundwater distribution data file type
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction  (-)
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction  (-)
 REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon top soil (kg/m2)
@@ -188,10 +188,10 @@ LOGICAL                  :: LIMP_CTI         ! Imposed maps of topographic index
 LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
 LOGICAL                  :: LIMP_GW          ! Imposed maps of groundwater distribution
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil grid reference for DIF
-CHARACTER(LEN=28)        :: YPH           ! file name for pH
-CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
-CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
-CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
+ CHARACTER(LEN=28)        :: YPH           ! file name for pH
+ CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
+ CHARACTER(LEN=6)         :: YPHFILETYPE   ! pH data file type
+ CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
 REAL                     :: XUNIF_PH      ! uniform value of pH
 REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 LOGICAL, DIMENSION(19)   :: GMEB_PATCH
@@ -203,14 +203,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
 !*    2.1      Reading of ISBA namelist
 !             -------------------------
 !
-CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
+ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                          &
                        YISBA,  YPEDOTF, YPHOTO, GTR_ML, ZRM_PATCH,               &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,              &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
@@ -457,7 +457,7 @@ ALLOCATE(I%XZ0EFFJPDIR(ILU))
 !*    7.      Sand fraction
 !             -------------
 !
-CATYPE='ARI'
+ CATYPE='ARI'
 !
 ALLOCATE(I%XSAND(ILU,I%NGROUND_LAYER))
 !
@@ -475,7 +475,7 @@ IF(LIMP_SAND)THEN
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YSAND)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YSANDFILETYPE,'NATURE','ISBA  ','READ ')
   ENDIF     
 !   
@@ -513,7 +513,7 @@ IF(LIMP_CLAY)THEN
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YCLAY)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YCLAYFILETYPE,'NATURE','ISBA  ','READ ')
   ENDIF     
 !   
@@ -568,7 +568,7 @@ IF(LEN_TRIM(YSOCFILETYPE)/=0.OR.(XUNIF_SOC_TOP/=XUNDEF.AND.XUNIF_SOC_SUB/=XUNDEF
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YSOC_TOP)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YSOCFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
@@ -591,7 +591,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YSOC_SUB)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YSOCFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
@@ -641,7 +641,7 @@ IF(LEN_TRIM(YPERM)/=0.OR.XUNIF_PERM/=XUNDEF)THEN
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YPERM)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YPERMFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   
@@ -684,7 +684,7 @@ IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(YGW)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YGWFILETYPE,'NATURE','ISBA  ','READ ')
     ENDIF     
 !   

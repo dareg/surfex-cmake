@@ -86,7 +86,7 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
-CHARACTER(LEN=6),        INTENT(IN)  :: HPROGRAM
+ CHARACTER(LEN=6),        INTENT(IN)  :: HPROGRAM
 INTEGER,                 INTENT(IN)  :: KI      ! number of points
 INTEGER,                 INTENT(IN)  :: KSW     ! number of bands
 !
@@ -123,7 +123,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PUT_SFXCL_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
 ! Global argument

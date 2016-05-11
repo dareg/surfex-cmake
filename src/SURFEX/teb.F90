@@ -956,7 +956,7 @@ END SELECT
 ZT_WALL   (:,:)=0.5 * (PT_WALL_A(:,:)+PT_WALL_B(:,:))
 !
 SELECT CASE(HBEM)
-CASE("DEF")
+ CASE("DEF")
 !
    CALL BLD_E_BUDGET(.TRUE., PTSTEP, PBLD, PWALL_O_HOR,        &
                      PRHOA, PT_ROOF, ZT_WALL, PTI_BLD, ZTS_FLOOR(:) )
@@ -983,7 +983,7 @@ CASE("DEF")
    PFAN_POWER(:)  = XUNDEF
    PHU_BLD(:)     = XUNDEF
 
-CASE("BEM")
+ CASE("BEM")
   CALL BEM(PTSTEP, PTSUN, HCOOL_COIL, HHEAT_COIL,                 &
     OAUTOSIZE, KDAY, HNATVENT,                                    &
     PPS, PRHOA, PT_CANYON, PQ_CANYON, PU_CANYON,                  &

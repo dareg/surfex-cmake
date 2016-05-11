@@ -96,7 +96,7 @@ END TYPE DIAG_TEB_t
 
 
 
-CONTAINS
+ CONTAINS
 
 !
 

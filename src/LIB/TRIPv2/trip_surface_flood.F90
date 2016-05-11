@@ -159,7 +159,7 @@ ENDWHERE
 ! * Update the floodplain geomorphological properties
 !------------------------------------------------------------------
 ! 
-CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
+ CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
                   ZAREA_SG(:,:),PFLOOD_STO2(:,:),PHFLOOD(:,:),&
                   PFFLOOD(:,:),PFLOOD_LEN(:,:),PWFLOOD(:,:)   ) 
 !   
@@ -243,7 +243,7 @@ ENDDO
 ! * Update the floodplain geomorphological properties
 !------------------------------------------------------------------
 ! 
-CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
+ CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
                   ZAREA_SG(:,:),PFLOOD_STO2(:,:),PHFLOOD(:,:),&
                   PFFLOOD(:,:),PFLOOD_LEN(:,:),PWFLOOD(:,:)   ) 
 !

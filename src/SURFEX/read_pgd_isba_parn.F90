@@ -81,10 +81,10 @@ TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 INTEGER,           INTENT(IN)  :: KSIZE
 LOGICAL,           INTENT(IN)  :: OLAND_USE ! 
-CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 !                                                   ! 'H' : field with
 !                                                   !       horizontal spatial dim.
 !                                                   ! '-' : no horizontal dim.
@@ -97,10 +97,10 @@ REAL,    DIMENSION(:,:), ALLOCATABLE :: ZWORK
 INTEGER           :: ILUOUT
 INTEGER           :: ITIME
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=16) :: YRECFM2
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=1)  :: YDIR
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=16) :: YRECFM2
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=1)  :: YDIR
 INTEGER           :: JTIME          ! loop index
 INTEGER           :: JLAYER         ! loop index
 INTEGER           :: JPATCH         ! loop index
@@ -116,7 +116,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_ISBA_PAR_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
@@ -127,12 +127,12 @@ IF (LASSIM) THEN
 ENDIF
 !
 YRECFM='VERSION'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HPROGRAM,YRECFM,IVERSION,IRESP)
 WRITE(ILUOUT,*) 'read version ',IVERSION
 !
 YRECFM='BUG'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HPROGRAM,YRECFM,IBUGFIX,IRESP)
 !
 ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))

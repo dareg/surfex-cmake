@@ -140,14 +140,14 @@ XUNIF_WATER    = XUNDEF
 XUNIF_NATURE   = XUNDEF
 XUNIF_TOWN     = XUNDEF
 LECOCLIMAP     = .TRUE.
-CFNAM_SEA   (:)= '                            '
-CFNAM_WATER (:)= '                            '
-CFNAM_NATURE(:)= '                            '
-CFNAM_TOWN  (:)= '                            '
-CFTYP_SEA   (:)= '      '
-CFTYP_WATER (:)= '      '
-CFTYP_NATURE(:)= '      '
-CFTYP_TOWN  (:)= '      '
+ CFNAM_SEA   (:)= '                            '
+ CFNAM_WATER (:)= '                            '
+ CFNAM_NATURE(:)= '                            '
+ CFNAM_TOWN  (:)= '                            '
+ CFTYP_SEA   (:)= '      '
+ CFTYP_WATER (:)= '      '
+ CFTYP_NATURE(:)= '      '
+ CFTYP_TOWN  (:)= '      '
 !
 OECOCLIMAP = .TRUE.
 !

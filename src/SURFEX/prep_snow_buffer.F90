@@ -68,8 +68,8 @@ IMPLICIT NONE
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=10),  INTENT(IN)   :: HSURF     ! type of field
+ CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=10),  INTENT(IN)   :: HSURF     ! type of field
 INTEGER,            INTENT(IN)   :: KLUOUT    ! logical unit of output listing
 INTEGER,            INTENT(IN)  :: KLAYER        ! Number of layer of output snow scheme
 REAL,DIMENSION(:,:,:), POINTER   :: PFIELD    ! field to interpolate horizontally
@@ -77,7 +77,7 @@ REAL,DIMENSION(:,:,:), POINTER   :: PFIELD    ! field to interpolate horizontall
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                 :: TZTIME_BUFFER    ! current date and time
-CHARACTER(LEN=6)                 :: YINMODEL       ! model from which GRIB file originates
+ CHARACTER(LEN=6)                 :: YINMODEL       ! model from which GRIB file originates
 REAL, DIMENSION(:),   POINTER    :: ZFIELD1D       ! field read
 REAL, DIMENSION(:),   POINTER    :: ZHEAT          ! heat in snow
 REAL, DIMENSION(:),   POINTER    :: ZRHO           ! density of snow
@@ -98,7 +98,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SNOW_BUFFER',0,ZHOOK_HANDLE)
-CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
+ CALL PREP_BUFFER_GRID(KLUOUT,YINMODEL,TZTIME_BUFFER)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -284,7 +284,7 @@ END IF
 !*      4.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='BUFFER'
+ CINTERP_TYPE='BUFFER'
 IF (LHOOK) CALL DR_HOOK('PREP_SNOW_BUFFER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

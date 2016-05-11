@@ -747,7 +747,7 @@ WRITE(KLUOUT,*) '    --------------------------------'
 WRITE(KLUOUT,*) ' '
 IF (LHOOK) CALL DR_HOOK('HVAC_AUTOSIZE',1,ZHOOK_HANDLE)
 !
-CONTAINS 
+ CONTAINS 
 !
 SUBROUTINE INTERP_PROFTWALL(PT1, PTN, PD, PT)
 !interpolation of vertical profile for 'wall' : roof/wall

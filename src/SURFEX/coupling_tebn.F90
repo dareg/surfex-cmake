@@ -1240,7 +1240,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('COUPLING_TEB_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 SUBROUTINE ADD_PATCH_CONTRIB(JP,PAVG,PFIELD)
 INTEGER, INTENT(IN) :: JP
 REAL, DIMENSION(:), INTENT(INOUT) :: PAVG

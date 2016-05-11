@@ -273,7 +273,7 @@ SELECT CASE (HINIT)
                        HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,TM%TOP%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')
     CALL READ_SURF(&
                    HPROGRAM,'DTCUR',TM%TOP%TTIME,IRESP)
@@ -287,7 +287,7 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
  CALL READ_SURF(&
@@ -314,7 +314,7 @@ ALLOCATE(TM%TOP%XTEB_PATCH(ILU,TM%TOP%NTEB_PATCH))
                   TM%TOP%XCOVER,TM%TOP%XTEB_PATCH)
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
  CALL READ_SURF(&
@@ -468,7 +468,7 @@ DO JPATCH=1,TM%TOP%NTEB_PATCH
   IF (TM%TOP%LGARDEN) THEN
   !
     CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')     
     IF (JPATCH==1) CALL INIT_TEB_VEG_OPTIONS_n(&
                                                TM%CHT, TM%DGMTO, GDM%TGDO, GDM%TVG, &
@@ -489,7 +489,7 @@ END DO ! end of loop on TEB patches
 !* Read irrigation parameters for TEB
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')     
  CALL READ_PGD_TEB_IRRIG_n(&
                            TM%TG, GDM%TIR, &
@@ -510,7 +510,7 @@ END IF
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PREP') ! restore input file name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
 !*       9.     Prognostic fields:

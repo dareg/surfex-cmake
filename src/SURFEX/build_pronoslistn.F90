@@ -87,7 +87,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
 !
 ! CNAMES points on chemical variables name
-CNAMES => SV%CSV
+ CNAMES => SV%CSV
 IEQ = SIZE(SV%CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
@@ -211,7 +211,7 @@ END IF
 !
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',1,ZHOOK_HANDLE)
 !
-CONTAINS 
+ CONTAINS 
 !!
 !!    ###########################
       SUBROUTINE TAB2SPACE(HTEXT)

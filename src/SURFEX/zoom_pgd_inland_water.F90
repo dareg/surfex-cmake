@@ -76,11 +76,11 @@ TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HINIFILETYPE! input atmospheric file type
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE       ! output file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE   ! output file type
 LOGICAL,              INTENT(IN)  :: OECOCLIMAP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

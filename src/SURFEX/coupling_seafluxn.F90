@@ -417,7 +417,7 @@ IF (SM%S%LHANDLE_SIC) CALL COMPLEMENT_EACH_OTHER_FLUX
 ! Momentum fluxes over sea or se-ice
 !-------------------------------------------------------------------------------------
 !
-CALL SEA_MOMENTUM_FLUXES(ZCD, ZSFU, ZSFV)
+ CALL SEA_MOMENTUM_FLUXES(ZCD, ZSFU, ZSFV)
 !
 ! Momentum fluxes over sea-ice if embedded seaice scheme is used
 !
@@ -517,7 +517,7 @@ ENDIF
 ! Inline diagnostics at time t for SST and TRAD
 !-------------------------------------------------------------------------------
 !
-CALL DIAG_INLINE_SEAFLUX_n(SM%DGS, SM%DGSI, SM%S, &
+ CALL DIAG_INLINE_SEAFLUX_n(SM%DGS, SM%DGSI, SM%S, &
                            PTSTEP, PTA, ZQA, PPA, PPS, PRHOA, PU, &
      PV, PZREF, PUREF, ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU,       &
      ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,            &
@@ -670,7 +670,7 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SEAFLUX_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE SEA_MOMENTUM_FLUXES(PCD, PSFU, PSFV)
 !

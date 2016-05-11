@@ -1013,7 +1013,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_TEB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE ALLOCATE_THERMAL_WORK(KPAR)
 INTEGER, INTENT(IN) :: KPAR

@@ -9,7 +9,7 @@
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-CONTAINS
+ CONTAINS
 !
 !     ###############################################################################
 SUBROUTINE INIT_FORC( PFORC_U, PDFORC_UDU, PFORC_E, PDFORC_EDE, &

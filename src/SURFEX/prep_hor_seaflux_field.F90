@@ -117,7 +117,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_SEAFLUX_FIELD',0,ZHOOK_HANDLE)
                              HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                             HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
 !
-CMASK = 'SEA'
+ CMASK = 'SEA'
 !--------------------------------------------------------------------- ----------------
 !
 !*      2.     Reading of input  configuration (Grid and interpolation type)
@@ -142,7 +142,7 @@ END IF
 !
 ALLOCATE(ZFIELDOUT(SIZE(SG%XLAT),SIZE(ZFIELDIN,2)))
 !
-CALL HOR_INTERPOL(DTCO, U, &
+ CALL HOR_INTERPOL(DTCO, U, &
                   ILUOUT,ZFIELDIN,ZFIELDOUT)
 !
 !*      5.     Return to historical variable

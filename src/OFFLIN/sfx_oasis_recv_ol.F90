@@ -91,7 +91,7 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
-CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
 !
 INTEGER,                INTENT(IN)  :: KI          ! number of points on this proc
 INTEGER,                INTENT(IN)  :: KSW         ! number of short-wave spectral bands
@@ -152,7 +152,7 @@ IF(.NOT.(GRECV_LAND.OR.GRECV_SEA))THEN
   RETURN
 ENDIF
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF(GRECV_LAND)THEN
   ZLAND_WTD    (:) = XUNDEF
@@ -173,7 +173,7 @@ ENDIF
 !*       2.     Receive fields to other models proc by proc:
 !               --------------------------------------------
 !
-CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,ZTIME_CPL,         &
+ CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,ZTIME_CPL,         &
                     GRECV_LAND, GRECV_SEA,             &
                     ZLAND_WTD    (:),ZLAND_FWTD   (:), &
                     ZLAND_FFLOOD (:),ZLAND_PIFLOOD(:), &
@@ -237,7 +237,7 @@ IF(GRECV_SEA.OR.GRECV_FLOOD)THEN
                              PTSURF(NINDX1SFX:NINDX2SFX)                                       )                    
 ENDIF
 !
-CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
+ CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !
 !$OMP END PARALLEL
 !

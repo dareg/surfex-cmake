@@ -180,7 +180,7 @@ YCOMMENT='X_Y_WR (kg/m2)'
 !
 YRECFM = 'GLACIER'
 YCOMMENT='LGLACIER key for external prep'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,I%LGLACIER,IRESP,HCOMMENT=YCOMMENT)
 !
 IF(I%LGLACIER)THEN
@@ -316,7 +316,7 @@ ENDIF
 !
 YRECFM='PATCH'
 YCOMMENT='fraction for each patch (-)'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,I%XPATCH(:,:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* patch averaged radiative temperature (K)

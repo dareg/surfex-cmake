@@ -31,15 +31,15 @@
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6), SAVE  :: CDNOMC ='header'     ! Name of the header
-CHARACTER(LEN=28),SAVE  :: CFILEIN_FA       ='SURFIN.fa'  ! Name of the input
-CHARACTER(LEN=28),SAVE  :: CFILEIN_FA_SAVE  ='SURFIN.fa'  ! Name of the input
-CHARACTER(LEN=28),SAVE  :: CFILEOUT_FA      ='SURFOUT.fa' ! Name of the input
-CHARACTER(LEN=28),SAVE  :: CFILEPGD_FA      ='PGD.fa'     ! Name of the pgd file
-CHARACTER(LEN=4), SAVE  :: CPREFIX1D        ='SFX.'       ! Prefix name in fa file
-CHARACTER(LEN=1), SAVE  :: CPREFIX2D        ='X'          ! Prefix name in fa file
+ CHARACTER(LEN=6), SAVE  :: CDNOMC ='header'     ! Name of the header
+ CHARACTER(LEN=28),SAVE  :: CFILEIN_FA       ='SURFIN.fa'  ! Name of the input
+ CHARACTER(LEN=28),SAVE  :: CFILEIN_FA_SAVE  ='SURFIN.fa'  ! Name of the input
+ CHARACTER(LEN=28),SAVE  :: CFILEOUT_FA      ='SURFOUT.fa' ! Name of the input
+ CHARACTER(LEN=28),SAVE  :: CFILEPGD_FA      ='PGD.fa'     ! Name of the pgd file
+ CHARACTER(LEN=4), SAVE  :: CPREFIX1D        ='SFX.'       ! Prefix name in fa file
+ CHARACTER(LEN=1), SAVE  :: CPREFIX2D        ='X'          ! Prefix name in fa file
 !
-CHARACTER(LEN=6)        :: CMASK     ! surface mask type
+ CHARACTER(LEN=6)        :: CMASK     ! surface mask type
 !$OMP THREADPRIVATE(CMASK)
 !
 INTEGER                 :: NUNIT_FA         =19           ! logical unit of surface file (FA part)

@@ -631,7 +631,7 @@ ENDIF
 !==========================================================================================
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_N',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !
 !=======================================================================================
 SUBROUTINE TREAT_PATCH(KSIZE,KMASK)
@@ -1046,7 +1046,7 @@ ENDIF
 ! Calculation of ISBA water and energy budget (and time tendencies of each reservoir)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-CALL ISBA_BUDGET(IM%DGEI, &
+ CALL ISBA_BUDGET(IM%DGEI, &
                  IM%I%CISBA,IM%I%TSNOW%SCHEME,IM%I%LGLACIER,PTSTEP,          &
                  IM%PKI%XP_WG,IM%PKI%XP_WGI,IM%PKI%XP_WR,IM%PKI%XP_SNOWSWE,  &
                  IM%PKI%XP_DG,IM%PKI%XP_DZG,ZP_WG_INI,ZP_WGI_INI,ZP_WR_INI,  &

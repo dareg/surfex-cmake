@@ -59,7 +59,7 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 INTEGER,          INTENT(IN) :: KYEAR  ! year of date
 INTEGER,          INTENT(IN) :: KMONTH ! month of date
 INTEGER,          INTENT(IN) :: KDAY   ! day of date
-CHARACTER(LEN=1), INTENT(IN) :: HFLAG  ! 'T' for SST, 'S' for SSS, 'H' for SIT, 'C' for SIC
+ CHARACTER(LEN=1), INTENT(IN) :: HFLAG  ! 'T' for SST, 'S' for SSS, 'H' for SIT, 'C' for SIC
 !
 REAL, DIMENSION(:), INTENT(OUT) :: POUT   ! Sea surface temperature or salinity, or SIC or SIT at time t 
 !
@@ -136,7 +136,7 @@ IF (LHOOK) CALL DR_HOOK('INTERPOL_SST_MTH',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
 !
-CONTAINS
+ CONTAINS
 !
 !=======================================================================================
 !
@@ -147,7 +147,7 @@ USE MODI_INTERPOL_LINEAR
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),    INTENT(IN) :: HMETHOD
+ CHARACTER(LEN=6),    INTENT(IN) :: HMETHOD
 REAL, DIMENSION(:) , INTENT(IN) :: PMTH0
 REAL, DIMENSION(:) , INTENT(IN) :: PMTH1
 REAL, DIMENSION(:) , INTENT(IN) :: PMTH2

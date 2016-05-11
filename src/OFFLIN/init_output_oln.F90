@@ -126,7 +126,7 @@ ENDIF
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_OUTPUT_OL_N',1,ZHOOK_HANDLE)
-CONTAINS 
+ CONTAINS 
 !------------------------------------------------------------------------------
 SUBROUTINE ALLOCATE_FILL_VAR(HVAR, NVAR)
   

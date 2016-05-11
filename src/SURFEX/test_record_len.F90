@@ -53,7 +53,7 @@ END IF
 !
 YREC = HREC
 SELECT CASE(HREC(1:4))
-CASE("TEB1","TEB2","TEB3","TEB4","TEB5","TEB6","TEB7","TEB8","TEB9")
+ CASE("TEB1","TEB2","TEB3","TEB4","TEB5","TEB6","TEB7","TEB8","TEB9")
         YREC=HREC(6:LEN(HREC))
 END SELECT
 ! if output fields selection is active, test if this field is to be written

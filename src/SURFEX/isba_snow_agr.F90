@@ -425,7 +425,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE COMPUT_RI_DRAG
@@ -451,7 +451,7 @@ IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR:COMPUT_RI_DRAG',0,ZHOOK_HANDLE)
 !
 ! * Richardson number
 !
-CALL SURFACE_RI(PTS, PQS, PEXNS, PEXNA, PTA, PQA,  &
+ CALL SURFACE_RI(PTS, PQS, PEXNS, PEXNA, PTA, PQA,  &
                 PZREF, PUREF, PDIRCOSZW, PVMOD, PRI)  
 !
 ! * Wind check

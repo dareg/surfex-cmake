@@ -729,7 +729,7 @@ ENDDO
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('URBAN_SOLAR_ABS',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------
 SUBROUTINE SOLAR_REFLECTIONS(ZSW_ROAD,ZSW_WALL,ZSW_GARDEN,             &

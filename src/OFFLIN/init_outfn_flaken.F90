@@ -80,21 +80,21 @@ TYPE(FLAKE_SBL_t), INTENT(INOUT) :: FSB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM
+ CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM
 INTEGER,           INTENT(IN) :: KLUOUT
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
+ CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
 !
-CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
-CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
-CHARACTER(LEN=100)               :: YCOMMENT 
-CHARACTER(LEN=50)                :: YFILE
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
-CHARACTER(LEN=12)                :: YRECFM 
-CHARACTER(LEN=2)                 :: YLVLV
+ CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
+ CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
+ CHARACTER(LEN=100)               :: YCOMMENT 
+ CHARACTER(LEN=50)                :: YFILE
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=12)                :: YRECFM 
+ CHARACTER(LEN=2)                 :: YLVLV
 !
 INTEGER, DIMENSION(:), POINTER   :: IDIMS, IDDIM
 INTEGER                          :: INI
@@ -251,7 +251,7 @@ IF (CHW%SVW%NBEQ>0 .AND. CHW%CCH_DRY_DEP=="WES89 ") THEN
   !
 END IF
 !
-CALL OL_WRITE_COORD(DGU, &
+ CALL OL_WRITE_COORD(DGU, &
                     YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !
 IF (DGF%LSURF_BUDGETC) THEN
@@ -297,40 +297,33 @@ IF (DGF%LSURF_BUDGETC) THEN
 ENDIF
 !
 YFILE='FLAKE_PROGNOSTIC.OUT.nc'
-CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
+ CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIM)
 JRET=NF_REDEF(IFILE_ID)
 YATT='dimensionless'
 !
 YATT='K'
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'TS_WATER'   , 'Averaged_Water_S_Temperature'                 ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'T_MNW'      , 'Averaged_Water_Temperature  '                 ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'T_WML'      , 'Mixed_layer_wat_temperature '                 ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'T_BOT'      , 'Bottom_Water_Temperature    '                 ,IDDIM,YATT_TITLE,YATT)
 YATT='m' 
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'H_ML'       , 'Mixed_Layer_Depth           '                 ,IDDIM,YATT_TITLE,YATT)
 YATT=' '
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'CT'         , 'Termocline_Shape_Factor        '              ,IDDIM,YATT_TITLE,YATT)
 YATT='K'
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'T_SNOW'     , 'Temperature at the air-snow interface'        ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'T_ICE'      , 'Ice_surface_Temperature  '                    ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'T_B1'       , 'Temperature of the upper layer of sediments ' ,IDDIM,YATT_TITLE,YATT)
 YATT='m'
-CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'H_SNOW'     , 'Snow thickness'              ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'H_ICE'      , 'Ice thickness'               ,IDDIM,YATT_TITLE,YATT)
-CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'H_B1'       , 'Thickness of the upper layer of sediments'     ,IDDIM,YATT_TITLE,YATT)
-YATT='m'
  CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'H_SNOW'     , 'Snow thickness'              ,IDDIM,YATT_TITLE,YATT)
  CALL DEF_VAR_NETCDF(DGU, &
@@ -338,10 +331,17 @@ YATT='m'
  CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'H_B1'       , 'Thickness of the upper layer of sediments'     ,IDDIM,YATT_TITLE,YATT)
 YATT='m'
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'H_SNOW'     , 'Snow thickness'              ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'H_ICE'      , 'Ice thickness'               ,IDDIM,YATT_TITLE,YATT)
+ CALL DEF_VAR_NETCDF(DGU, &
+                      IFILE_ID,'H_B1'       , 'Thickness of the upper layer of sediments'     ,IDDIM,YATT_TITLE,YATT)
+YATT='m'
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'Z0WATER'    ,'Roughness length            '       ,IDDIM,YATT_TITLE,YATT)
 YATT='m/s'
-CALL DEF_VAR_NETCDF(DGU, &
+ CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'USTAR_WATER','friction velocity           '       ,IDDIM,YATT_TITLE,YATT)
 !
 !
@@ -361,7 +361,7 @@ IF (F%LSBL) THEN
   END DO
 ENDIF
 !
-CALL OL_WRITE_COORD(DGU, &
+ CALL OL_WRITE_COORD(DGU, &
                     YFILE,IFILE_ID,IDDIM,YATT_TITLE,YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY)
 !
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_FLAKE_N',1,ZHOOK_HANDLE)

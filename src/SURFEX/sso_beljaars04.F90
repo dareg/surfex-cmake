@@ -80,7 +80,7 @@ IF (LHOOK) CALL DR_HOOK('SSO_BELJAARS04',0,ZHOOK_HANDLE)
 !*      2.     Computations of wind tendency due to orographic drag
 !              ----------------------------------------------------
 !
-C_AVAR    = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT**C_N1)   ! (unit: m^{1+C_N2}  =  m^-1.8)
+ C_AVAR    = C_K1**(C_N1-C_N2) / (C_IH * C_KFLT**C_N1)   ! (unit: m^{1+C_N2}  =  m^-1.8)
 !
 !
 !*      2.1    Drag coefficient in  drag force by subscale orography 

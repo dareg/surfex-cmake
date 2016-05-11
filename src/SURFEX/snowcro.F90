@@ -279,7 +279,7 @@ REAL, DIMENSION(:), INTENT(IN)        :: PXLAT,PXLON ! LAT/LON after packing
 !
 LOGICAL, INTENT(IN)                   :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO, HSNOWRAD
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO, HSNOWRAD
                                          !-----------------------
                                          ! Metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -1120,7 +1120,7 @@ PQS(:) = ZQSAT(:)
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !####################################################################
 !####################################################################
@@ -1176,7 +1176,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PSNOW        ! Snowheight UNIT : m
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, &!Snowtype variables
                                         PSNOWLIQ     ! Snow liquid water content UNIT ??? 
 INTEGER, DIMENSION(:), INTENT(IN)   :: INLVLS_USE   ! Number of snow layers used
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
 !
 !*      0.2    declarations of local variables
 !
@@ -1466,7 +1466,7 @@ INTEGER, DIMENSION(:), INTENT(IN)   :: INLVLS_USE
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWAGE
 !
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
 !
 !     0.2 declaration of local variables      
 !     
@@ -1914,7 +1914,7 @@ INTEGER, DIMENSION(:), INTENT(IN) :: KNLVLS_USE
 ! 
 REAL, DIMENSION(:), INTENT(IN)    :: PZENITH ! solar zenith angle for future use
 !
-CHARACTER(3),INTENT(IN)           :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3),INTENT(IN)           :: HSNOWMETAMO ! metamorphism scheme
 !
 !*      0.2    declarations of local variables
 !
@@ -2035,7 +2035,7 @@ REAL, INTENT(IN) :: PVAGE1
 REAL, INTENT(IN) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE
 REAL, DIMENSION(3), INTENT(OUT) :: PALB
 !
-CHARACTER(3),INTENT(IN)::HSNOWMETAMO
+ CHARACTER(3),INTENT(IN)::HSNOWMETAMO
 !
 REAL :: ZDIAM, ZDIAM_SQRT
 !
@@ -2111,7 +2111,7 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWRHO, PSNOWDZ
 !
 LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! parametrization for polar regions (not physic but better results)
 !                                                       ! default FALSE
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO
+ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PRADXS
 !
@@ -3476,7 +3476,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWTEMP  ! snow temperature profile  
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWLIQ   ! snow liquid water profile           (m)
 ! 
 INTEGER, DIMENSION(:), INTENT(IN)      :: KNLVLS_USE
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
 !
 !*      0.2    declarations of local variables
 !
@@ -3668,7 +3668,7 @@ LOGICAL, DIMENSION(:), INTENT(OUT)   :: OMODIF_GRID
 INTEGER, DIMENSION(:), INTENT(INOUT) :: KNLVLS_USE
 
 LOGICAL,INTENT(IN) :: OSNOWDRIFT ! if snowdrift then grain types are not modified by wind
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
 !*      0.2    declarations of local variables
 !
 !
@@ -4501,7 +4501,7 @@ INTEGER, INTENT(IN)               :: KNLVLS_USE
 !
 LOGICAL, INTENT(IN)               :: GSNOWFALL
 !
-CHARACTER(3),INTENT(IN)           :: HSNOWMETAMO
+ CHARACTER(3),INTENT(IN)           :: HSNOWMETAMO
 !
 !*      0.2    declarations of local variables
 !
@@ -4733,7 +4733,7 @@ REAL, DIMENSION(:),INTENT(IN)       :: PZ0EFF,PUREF
 !
 LOGICAL,INTENT(IN)                  :: OSNOWDRIFT_SUBLIM
 !
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO ! metamorphism scheme
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO, PSNOWDZ,PSNOWGRAN1, &
                                        PSNOWGRAN2,PSNOWHIST
@@ -5117,7 +5117,7 @@ INTEGER,       INTENT(IN) :: KLAYERS
 REAL, DIMENSION(:), INTENT(IN) :: PSNOWDZ,PSNOWRHO,PSNOWTEMP,PSNOWLIQ, &
                                   PSNOWHEAT,PSNOWGRAN1,PSNOWGRAN2,     &
                                   PSNOWHIST,PSNOWAGE
-CHARACTER(3), INTENT(IN)       :: HSNOWMETAMO
+ CHARACTER(3), INTENT(IN)       :: HSNOWMETAMO
 !
 REAL, DIMENSION(KLAYERS) :: ZSNOWSSA
 REAL :: ZDIAM

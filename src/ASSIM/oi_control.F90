@@ -135,13 +135,13 @@ LOGICAL,         OPTIONAL, DIMENSION (:) ::  LD_MASKEXT
 INTEGER :: IGPCOMP
 INTEGER :: IDAT
 
-CHARACTER(LEN=28) :: YNAMELIST = 'OPTIONS.nam                 '
+ CHARACTER(LEN=28) :: YNAMELIST = 'OPTIONS.nam                 '
 
 !    Declarations of local variables
 
-CHARACTER(LEN=6)            :: YPROGRAM
-CHARACTER(LEN=6), PARAMETER :: YPROGRAM2 = 'FA    '
-CHARACTER(LEN=2)            :: CMONTH
+ CHARACTER(LEN=6)            :: YPROGRAM
+ CHARACTER(LEN=6), PARAMETER :: YPROGRAM2 = 'FA    '
+ CHARACTER(LEN=2)            :: CMONTH
 INTEGER                     :: IYEAR                ! current year (UTC)
 INTEGER                     :: IMONTH               ! current month (UTC)
 INTEGER                     :: IDAY                 ! current day (UTC)
@@ -167,8 +167,8 @@ REAL, DIMENSION (:),   ALLOCATABLE :: ZSST1, ZLST1, PSST1, PLST1, PLAT1, PLON1, 
 
 INTEGER                            :: IVERSION, IBUGFIX
 INTEGER                            :: JJ,J1
-CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
-CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
+ CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
+ CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                            :: ILUOUT  ! ascii output unit number
 INTEGER                            :: INOBS   ! number of observations
 INTEGER :: ILUNAM
@@ -190,13 +190,13 @@ PRINT *,'|                             ENTER OI_ASSIM                           
 PRINT *,'|                                                                        |'
 PRINT *,'--------------------------------------------------------------------------'
 
-CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
-CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
+ CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
+ CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
-CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+ CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 
 !
-CALL READ_ALL_NAMELISTS(YSC,CSURF_FILETYPE,'ALL',.FALSE.)
+ CALL READ_ALL_NAMELISTS(YSC,CSURF_FILETYPE,'ALL',.FALSE.)
 !
 IF (LDINLINE) THEN
 
@@ -232,7 +232,7 @@ XRSCALDW = REAL(NECHGU)/6.0_JPRB
 !  half assimilation window in sec
 NITRAD   = NECHGU*1800
 
-CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
+ CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
 
 !   File handling definition
 
@@ -246,12 +246,12 @@ ENDIF
 
 !   Read grid dimension for allocation
 
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         YPROGRAM,'FULL  ','SURF  ','READ ')
 
 !   Find current time
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DTCUR',TTIME,IRESP)
 
 !   Time initializations
@@ -264,34 +264,34 @@ IF (NSSSSS > NDAYSEC) NSSSSS = NSSSSS - NDAYSEC
 
 !   Reading grid characteristics to perform nature mask
 
-CALL END_IO_SURF_n(YPROGRAM)
-CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         YPROGRAM,'FULL  ','SURF  ','READ ')
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'SEA   ',YSC%U%CSEA   ,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'WATER ',YSC%U%CWATER ,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'NATURE',YSC%U%CNATURE,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'TOWN  ',YSC%U%CTOWN  ,IRESP)
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
 NINDX2SFX = YSC%U%NDIM_FULL
-CALL END_IO_SURF_n(YPROGRAM)
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         YPROGRAM,'FULL  ','SURF  ','READ ')
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DIM_SEA   ',YSC%U%NDIM_SEA,   IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DIM_NATURE',YSC%U%NDIM_NATURE,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DIM_WATER ',YSC%U%NDIM_WATER, IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DIM_TOWN  ',YSC%U%NDIM_TOWN,  IRESP)
 
 ALLOCATE(NWORK(YSC%U%NDIM_FULL))
@@ -313,7 +313,7 @@ ENDIF
 !
 !   Get total dimension of domain (excluding extension zone)
 
-CALL GET_SIZE_FULL_n(YSC%U, &
+ CALL GET_SIZE_FULL_n(YSC%U, &
                      YPROGRAM,YSC%U%NDIM_FULL,YSC%U%NSIZE_FULL)
 
 IF (LDINLINE) THEN
@@ -326,14 +326,14 @@ ALLOCATE (PSAB(ISIZE))
 ALLOCATE (PARG(ISIZE))
 ALLOCATE (ZALT(ISIZE))
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'SAND',      PSAB,  IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'CLAY',      PARG,  IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'ZS',        ZALT,  IRESP)
 
-CALL READ_COVER_n(YSC%DTCO, YSC%U, &
+ CALL READ_COVER_n(YSC%DTCO, YSC%U, &
                   YPROGRAM)
 
 !   Perform masks (only nature used)
@@ -343,7 +343,7 @@ ALLOCATE(YSC%U%XNATURE(ISIZE))
 ALLOCATE(YSC%U%XWATER (ISIZE))
 ALLOCATE(YSC%U%XTOWN  (ISIZE))
 
-CALL CONVERT_COVER_FRAC(YSC%DTCO, &
+ CALL CONVERT_COVER_FRAC(YSC%DTCO, &
                         YSC%U%XCOVER,YSC%U%LCOVER,YSC%U%XSEA,YSC%U%XNATURE,YSC%U%XTOWN,YSC%U%XWATER)
 
 YSC%U%NSIZE_NATURE = COUNT(YSC%U%XNATURE(:) > 0.0)
@@ -356,10 +356,10 @@ ALLOCATE(YSC%U%NR_TOWN   (YSC%U%NSIZE_TOWN  ))
 ALLOCATE(YSC%U%NR_WATER  (YSC%U%NSIZE_WATER ))
 ALLOCATE(YSC%U%NR_SEA    (YSC%U%NSIZE_SEA   ))
 
-CALL GET_1D_MASK( YSC%U%NSIZE_SEA,    ISIZE, YSC%U%XSEA   , YSC%U%NR_SEA   )
-CALL GET_1D_MASK( YSC%U%NSIZE_WATER,  ISIZE, YSC%U%XWATER , YSC%U%NR_WATER )
-CALL GET_1D_MASK( YSC%U%NSIZE_TOWN,   ISIZE, YSC%U%XTOWN  , YSC%U%NR_TOWN  )
-CALL GET_1D_MASK( YSC%U%NSIZE_NATURE, ISIZE, YSC%U%XNATURE, YSC%U%NR_NATURE)
+ CALL GET_1D_MASK( YSC%U%NSIZE_SEA,    ISIZE, YSC%U%XSEA   , YSC%U%NR_SEA   )
+ CALL GET_1D_MASK( YSC%U%NSIZE_WATER,  ISIZE, YSC%U%XWATER , YSC%U%NR_WATER )
+ CALL GET_1D_MASK( YSC%U%NSIZE_TOWN,   ISIZE, YSC%U%XTOWN  , YSC%U%NR_TOWN  )
+ CALL GET_1D_MASK( YSC%U%NSIZE_NATURE, ISIZE, YSC%U%XNATURE, YSC%U%NR_NATURE)
 
 ! Allocate arrays
 
@@ -391,9 +391,9 @@ ALLOCATE (ZSST(ISIZE))
 
 !  Read prognostic variables
 
-CALL END_IO_SURF_n(YPROGRAM)
-CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         YPROGRAM,'FULL  ','SURF  ','READ ')
 
 IF (YSC%U%NSIZE_NATURE>0 .AND. YSC%U%CNATURE/='NONE') THEN
@@ -447,20 +447,20 @@ ELSE
   PTRD3(:) = XUNDEF
 ENDIF
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'T2M',       PTCLS, IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'HU2M',      PHCLS, IRESP)
 
 ! Read constant surface fields
 
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'RSMIN',     PRSMIN,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'DG2',       PD2,   IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'LAI',       PLAI,  IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                YPROGRAM,'VEG',       PVEG,  IRESP)
 
 IF (NPRINTLEV>0) THEN
@@ -481,8 +481,8 @@ IF (NPRINTLEV>0) THEN
   PRINT *,'value in PREP file => ZS        ',ZALT(JJ)
 ENDIF
 
-CALL END_IO_SURF_n(YPROGRAM)
-CALL IO_BUFF_CLEAN
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL IO_BUFF_CLEAN
 
 !  Interface (allocate arrays)
 
@@ -545,7 +545,7 @@ IF (.NOT. LDINLINE) THEN
   CFILEIN_FA_SAVE  = CFILEIN_FA
 #endif
 !  Open FA file (LAM version with extension zone)
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                      YPROGRAM2,'EXTZON','SURF  ','READ ')
 ENDIF
 
@@ -622,7 +622,7 @@ IF (.NOT. LDINLINE) THEN
   CFILEIN_FA_SAVE  = CFILEIN_FA
 #endif
 !  Open FA file 
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                      YPROGRAM2,'EXTZON','SURF  ','READ ')
 ENDIF
 
@@ -677,7 +677,7 @@ INOBS = 0
 
 ! Perform bias correction of SM observations
 
-CALL OI_BC_SOIL_MOISTURE(ISIZE,PSM_O,PSAB,PWS_O)
+ CALL OI_BC_SOIL_MOISTURE(ISIZE,PSM_O,PSAB,PWS_O)
 
 IF (.NOT. LDINLINE) THEN
 !  Define FA file name for surface climatology
@@ -687,7 +687,7 @@ IF (.NOT. LDINLINE) THEN
   CDNOMC     = 'climat'                  ! new frame name
 #endif
 !  Open FA file 
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                      YPROGRAM2,'EXTZON','SURF  ','READ ')
 ENDIF
 
@@ -1052,7 +1052,7 @@ ENDIF
 
  CALL FLAG_UPDATE(YSC%IM%DGI, YSC%DGU, &
                   .FALSE.,.FALSE.,.TRUE.,.FALSE.)
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         YPROGRAM,'FULL  ','SURF  ','WRITE')
 
 IF (LDINLINE) THEN
@@ -1072,8 +1072,8 @@ ENDIF
 
  CALL WRITE
 
-CALL END_IO_SURF_n(YPROGRAM)
-CALL IO_BUFF_CLEAN
+ CALL END_IO_SURF_n(YPROGRAM)
+ CALL IO_BUFF_CLEAN
 
 DEALLOCATE(NWORK)
 DEALLOCATE(XWORK)
@@ -1092,7 +1092,7 @@ ENDIF
 ! -------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL', 1, ZHOOK_HANDLE)
 
-CONTAINS
+ CONTAINS
 
 SUBROUTINE WRITE 
 
@@ -1100,53 +1100,53 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 0, ZHOOK_HANDLE)
 
-CALL DD ('WG1', PWS (:,1))
+ CALL DD ('WG1', PWS (:,1))
 
 YVAR='WG1'
 YPREFIX='X_Y_WG1 (m3/m3)                                   '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PWS,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('WG2', PWP (:,1))
+ CALL DD ('WG2', PWP (:,1))
 
 YVAR='WG2'
 YPREFIX='X_Y_WG2 (m3/m3)                                   '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PWP,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('WGI2', PTL (:,1))
+ CALL DD ('WGI2', PTL (:,1))
 
 YVAR='WGI2'
 YPREFIX='X_Y_WGI2 (m3/m3)                                  '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PTL,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('TG1', PTS (:,1))
+ CALL DD ('TG1', PTS (:,1))
 
 YVAR='TG1'
 YPREFIX='X_Y_TG1 (K)                                       '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PTS,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('TG2', PTP (:,1))
+ CALL DD ('TG2', PTP (:,1))
 
 YVAR='TG2'
 YPREFIX='X_Y_TG2 (K)                                       '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PTP,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('SST', PSST)
+ CALL DD ('SST', PSST)
 
 YVAR='SST'
 YPREFIX='X_Y_SST (K)                                       '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PSST,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('TS_WATER', PLST)
+ CALL DD ('TS_WATER', PLST)
 
 YVAR='TS_WATER'
 YPREFIX='X_Y_TS_WATER (K)                                  '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PLST,IRESP,HCOMMENT=YPREFIX)
 
 IF (YSC%U%NSIZE_TOWN > 0 .AND. LAROME) THEN
@@ -1158,11 +1158,11 @@ IF (YSC%U%NSIZE_TOWN > 0 .AND. LAROME) THEN
                 YPROGRAM,YVAR,PTRD3,IRESP,HCOMMENT=YPREFIX)
 ENDIF
 
-CALL DD ('WSNOW_VEG1', PSNS (:,1))
+ CALL DD ('WSNOW_VEG1', PSNS (:,1))
 
 YVAR='WSN_VEG1'
 YPREFIX='X_Y_WSNOW_VEG1 (kg/m2)                            '
-CALL WRITE_SURF(YSC%DGU, YSC%U, &
+ CALL WRITE_SURF(YSC%DGU, YSC%U, &
                 YPROGRAM,YVAR,PSNS,IRESP,HCOMMENT=YPREFIX)
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 1, ZHOOK_HANDLE)
@@ -1170,7 +1170,7 @@ IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 1, ZHOOK_HANDLE)
 END SUBROUTINE WRITE
 
 SUBROUTINE DD (CDN, PX)
-CHARACTER(LEN=*), INTENT (IN) :: CDN
+ CHARACTER(LEN=*), INTENT (IN) :: CDN
 REAL, INTENT (IN) :: PX (:)
 
 REAL :: ZX (SIZE (PX))

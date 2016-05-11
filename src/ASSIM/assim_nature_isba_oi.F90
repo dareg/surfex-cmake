@@ -55,7 +55,7 @@ IMPLICIT NONE
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PRRCL
 REAL, DIMENSION(KI), INTENT(IN) :: PRRSL
@@ -73,7 +73,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PTS_O
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M_O
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M_O
 REAL, DIMENSION(KI), INTENT(OUT):: PSWE
-CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 LOGICAL,  DIMENSION (KI) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
@@ -246,7 +246,7 @@ ENDIF
 IF ( NPRINTLEV > 0 ) WRITE(*,*) ' NUMBER OF ASCAT OBSERVATIONS AFTER INITIAL CHECKS  :: ',INOBS
 !
 ! Perform bias correction of SM observations
-CALL OI_BC_SOIL_MOISTURE(KI,ZSM_O,ZSAB,ZWS_O)
+ CALL OI_BC_SOIL_MOISTURE(KI,ZSM_O,ZSAB,ZWS_O)
 !
 !
 ! Screen-level innovations
@@ -292,7 +292,7 @@ ENDIF
 ZTS(:) = ZTS0(:)
 ZTP(:) = ZTP0(:)
 write(*,*) 'PERFORMING OI SOIL ANALYSIS'
-CALL OI_CACSTS(KI, ZT2INC, ZH2INC, ZWGINC, ZWS_O,                   &
+ CALL OI_CACSTS(KI, ZT2INC, ZH2INC, ZWGINC, ZWS_O,                   &
                IDAT, ISSSSS,                                        &
                ZTP, ZWP, ZTL, ZSNS, ZTS, ZWS,                       &
                ZTCLS, ZHCLS, ZUCLS, ZVCLS, ZSSTC,                   &

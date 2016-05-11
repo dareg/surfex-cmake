@@ -80,7 +80,7 @@ TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 !
 !
 !*      0.2    declarations of local variables
@@ -97,7 +97,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
-CPROGNAME = HPROGRAM
+ CPROGNAME = HPROGRAM
 !
 ! FLAGS for the various surfaces:
 !
@@ -118,7 +118,7 @@ ZFRAC_TILE(:,:)    = 0.0
 JSW = SIZE(DGU%XSWBD_TILE,3)
 !
 !
-CALL GET_DIMS(IFACT)
+ CALL GET_DIMS(IFACT)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
@@ -181,7 +181,7 @@ ENDIF
 ! Grid box average fluxes/properties:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL AVERAGE_DIAG(DGU%N2M, DGU%LT2MMW, DGU%LSURF_BUDGET, DGU%LSURF_BUDGETC, DGU%LCOEF, DGU%LSURF_VARS,   &
+ CALL AVERAGE_DIAG(DGU%N2M, DGU%LT2MMW, DGU%LSURF_BUDGET, DGU%LSURF_BUDGETC, DGU%LCOEF, DGU%LSURF_VARS,   &
                     ZFRAC_TILE, DGU%XRN_TILE, DGU%XH_TILE, DGU%XLE_TILE, DGU%XLEI_TILE , &
                     DGU%XGFLUX_TILE,DGU%XRI_TILE, DGU%XCD_TILE, DGU%XCH_TILE, DGU%XCE_TILE,  &
                     DGU%XT2M_TILE, DGU%XTS_TILE, DGU%XQ2M_TILE, DGU%XHU2M_TILE,          &
@@ -218,7 +218,7 @@ CALL AVERAGE_DIAG(DGU%N2M, DGU%LT2MMW, DGU%LSURF_BUDGET, DGU%LSURF_BUDGETC, DGU%
 IF (DGU%L2M_MIN_ZS) CALL GET_2M
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_N',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !=======================================================================================
 SUBROUTINE GET_2M
 !
@@ -228,7 +228,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_ATM_n:GET_2M',0,ZHOOK_HANDLE)
 !
-CALL MINZS_VERT_SHIFT(U%XZS,USS%XMIN_ZS,DGU%XAVG_T2M,DGU%XAVG_Q2M,DGU%XPS,DGU%XRHOA, &
+ CALL MINZS_VERT_SHIFT(U%XZS,USS%XMIN_ZS,DGU%XAVG_T2M,DGU%XAVG_Q2M,DGU%XPS,DGU%XRHOA, &
                       DGU%XAVG_T2M_MIN_ZS,DGU%XAVG_Q2M_MIN_ZS,ZPS,ZRHOA)  
 DGU%XAVG_HU2M_MIN_ZS = DGU%XAVG_HU2M
 !

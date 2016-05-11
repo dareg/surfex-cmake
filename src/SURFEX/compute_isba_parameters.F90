@@ -265,7 +265,7 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_VEG_PGD_n(IM%CHI, DTCO, DST, IM%I, SLT, U, &
+ CALL INIT_VEG_PGD_n(IM%CHI, DTCO, DST, IM%I, SLT, U, &
                     HPROGRAM, 'NATURE', ILUOUT, KI, IM%I%NPATCH, IM%I%NGROUND_LAYER,      &
                     IM%I%TTIME%TDATE%MONTH,                                          &
                     IM%I%XVEGTYPE, IM%I%XPATCH, IM%I%XVEGTYPE_PATCH, IM%I%NSIZE_NATURE_P,           &
@@ -601,7 +601,7 @@ IF (CASSIM_ISBA=="ENKF ") THEN
   !
 ENDIF
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                     HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !*      10.     Prognostic and semi-prognostic fields

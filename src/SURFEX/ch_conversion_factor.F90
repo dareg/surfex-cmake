@@ -58,7 +58,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('CH_CONVERSION_FACTOR',0,ZHOOK_HANDLE)
 !
 ! determine the conversion factor
-CHN%XCONVERSION(:) = 1.
+ CHN%XCONVERSION(:) = 1.
 SELECT CASE (HCONVERSION)
   CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
     CHN%XCONVERSION(:) = XAVOGADRO * PRHOA(:) / XMD

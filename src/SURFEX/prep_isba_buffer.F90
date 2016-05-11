@@ -73,7 +73,7 @@ REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontal
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_BUF    ! current date and time
-CHARACTER(LEN=6)                 :: YINMODEL       ! model from which buffer originates
+ CHARACTER(LEN=6)                 :: YINMODEL       ! model from which buffer originates
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD         ! field read
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D       ! field read
 REAL, DIMENSION(:,:), POINTER   :: ZD             ! depth of field in the soil
@@ -312,14 +312,14 @@ END SELECT
 !*      4.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='BUFFER'
+ CINTERP_TYPE='BUFFER'
 !
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA_BUFFER',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------

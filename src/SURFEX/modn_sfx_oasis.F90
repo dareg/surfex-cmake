@@ -45,18 +45,18 @@ REAL             :: XTSTEP_CPL_LAKE = -1.0  ! Coupling time step for lake
 !
 ! Output variables
 !
-CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff 
-CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
-CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux 
-CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge 
-CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
+ CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff 
+ CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
+ CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux 
+ CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge 
+ CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
 !
 ! Input variables
 !
-CHARACTER(LEN=8) :: CWTD        = '        '   ! water table depth
-CHARACTER(LEN=8) :: CFWTD       = '        '   ! grid-cell fraction of water table rise
-CHARACTER(LEN=8) :: CFFLOOD     = '        '   ! Floodplains fraction
-CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion
+ CHARACTER(LEN=8) :: CWTD        = '        '   ! water table depth
+ CHARACTER(LEN=8) :: CFWTD       = '        '   ! grid-cell fraction of water table rise
+ CHARACTER(LEN=8) :: CFFLOOD     = '        '   ! Floodplains fraction
+ CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion
 !
 !-------------------------------------------------------------------------------
 !
@@ -66,10 +66,10 @@ CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion
 !
 ! Input variables
 !
-CHARACTER(LEN=8) :: CLAKE_EVAP  = '        '   ! Evaporation over lake area
-CHARACTER(LEN=8) :: CLAKE_RAIN  = '        '   ! Rainfall over lake area
-CHARACTER(LEN=8) :: CLAKE_SNOW  = '        '   ! Snowfall over lake area
-CHARACTER(LEN=8) :: CLAKE_WATF  = '        '   ! Net freshwater flux
+ CHARACTER(LEN=8) :: CLAKE_EVAP  = '        '   ! Evaporation over lake area
+ CHARACTER(LEN=8) :: CLAKE_RAIN  = '        '   ! Rainfall over lake area
+ CHARACTER(LEN=8) :: CLAKE_SNOW  = '        '   ! Snowfall over lake area
+ CHARACTER(LEN=8) :: CLAKE_WATF  = '        '   ! Net freshwater flux
 !
 !-------------------------------------------------------------------------------
 !
@@ -79,34 +79,34 @@ CHARACTER(LEN=8) :: CLAKE_WATF  = '        '   ! Net freshwater flux
 !
 ! Sea Output variables
 !
-CHARACTER(LEN=8) :: CSEA_FWSU = '        '   ! zonal wind stress 
-CHARACTER(LEN=8) :: CSEA_FWSV = '        '   ! meridian wind stress 
-CHARACTER(LEN=8) :: CSEA_HEAT = '        '   ! Non solar net heat flux
-CHARACTER(LEN=8) :: CSEA_SNET = '        '   ! Solar net heat flux
-CHARACTER(LEN=8) :: CSEA_WIND = '        '   ! module of 10m wind speed 
-CHARACTER(LEN=8) :: CSEA_FWSM = '        '   ! module of wind stress 
-CHARACTER(LEN=8) :: CSEA_EVAP = '        '   ! Evaporation 
-CHARACTER(LEN=8) :: CSEA_RAIN = '        '   ! Rainfall 
-CHARACTER(LEN=8) :: CSEA_SNOW = '        '   ! Snowfall 
-CHARACTER(LEN=8) :: CSEA_WATF = '        '   ! Net freshwater flux
+ CHARACTER(LEN=8) :: CSEA_FWSU = '        '   ! zonal wind stress 
+ CHARACTER(LEN=8) :: CSEA_FWSV = '        '   ! meridian wind stress 
+ CHARACTER(LEN=8) :: CSEA_HEAT = '        '   ! Non solar net heat flux
+ CHARACTER(LEN=8) :: CSEA_SNET = '        '   ! Solar net heat flux
+ CHARACTER(LEN=8) :: CSEA_WIND = '        '   ! module of 10m wind speed 
+ CHARACTER(LEN=8) :: CSEA_FWSM = '        '   ! module of wind stress 
+ CHARACTER(LEN=8) :: CSEA_EVAP = '        '   ! Evaporation 
+ CHARACTER(LEN=8) :: CSEA_RAIN = '        '   ! Rainfall 
+ CHARACTER(LEN=8) :: CSEA_SNOW = '        '   ! Snowfall 
+ CHARACTER(LEN=8) :: CSEA_WATF = '        '   ! Net freshwater flux
 !
 ! Sea-ice Output variables
 !  
-CHARACTER(LEN=8) :: CSEAICE_HEAT = '        '   ! Sea-ice non solar net heat flux
-CHARACTER(LEN=8) :: CSEAICE_SNET = '        '   ! Sea-ice solar net heat flux 
-CHARACTER(LEN=8) :: CSEAICE_EVAP = '        '   ! Sea-ice sublimation 
+ CHARACTER(LEN=8) :: CSEAICE_HEAT = '        '   ! Sea-ice non solar net heat flux
+ CHARACTER(LEN=8) :: CSEAICE_SNET = '        '   ! Sea-ice solar net heat flux 
+ CHARACTER(LEN=8) :: CSEAICE_EVAP = '        '   ! Sea-ice sublimation 
 !
 ! Sea Input variables
 !
-CHARACTER(LEN=8) :: CSEA_SST    = '        ' ! Sea surface temperature
-CHARACTER(LEN=8) :: CSEA_UCU    = '        ' ! Sea u-current stress
-CHARACTER(LEN=8) :: CSEA_VCU    = '        ' ! Sea v-current stress
+ CHARACTER(LEN=8) :: CSEA_SST    = '        ' ! Sea surface temperature
+ CHARACTER(LEN=8) :: CSEA_UCU    = '        ' ! Sea u-current stress
+ CHARACTER(LEN=8) :: CSEA_VCU    = '        ' ! Sea v-current stress
 !
 ! Sea-ice Input variables
 !
-CHARACTER(LEN=8) :: CSEAICE_SIT = '        ' ! Sea-ice temperature
-CHARACTER(LEN=8) :: CSEAICE_CVR = '        ' ! Sea-ice cover
-CHARACTER(LEN=8) :: CSEAICE_ALB = '        ' ! Sea-ice albedo
+ CHARACTER(LEN=8) :: CSEAICE_SIT = '        ' ! Sea-ice temperature
+ CHARACTER(LEN=8) :: CSEAICE_CVR = '        ' ! Sea-ice cover
+ CHARACTER(LEN=8) :: CSEAICE_ALB = '        ' ! Sea-ice albedo
 !
 ! Switch to add water into sea oasis mask
 !

@@ -75,7 +75,7 @@ TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
-CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 LOGICAL,             INTENT(IN)  :: OECOCLIMAP
 LOGICAL,             INTENT(IN)  :: ORM_RIVER ! delete river coverage (default = false)
 !

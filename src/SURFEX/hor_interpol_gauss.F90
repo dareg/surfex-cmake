@@ -107,7 +107,7 @@ DEALLOCATE(IMASKOUT)
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('HOR_INTERPOL_GAUSS',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !
 !     ##########################################################################
 SUBROUTINE ARPEGE_STRETCH_A(KN,PLAP,PLOP,PCOEF,PLAR,PLOR,PLAC,PLOC)

@@ -32,14 +32,14 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM      ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM      ! program calling surf. schemes
 REAL(KIND=JPRB)                 :: ZHOOK_HANDLE
 
 !---------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ASSIM',0,ZHOOK_HANDLE)
 
 ! Set default assimilation options/schemes
-CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,      &
+ CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,      &
                    LAROME,LECSST,LAESST,LAESNM,              &
                    LALADSURF,LREAD_SST_FROM_FILE,            &
                    CFILE_FORMAT_SST,LEXTRAP_SEA,             &
@@ -60,10 +60,10 @@ CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,      &
                    LENKF,LDENKF,'OK')
 !
 ! Set default assimilations values/constants
-CALL INI_ASSIM
+ CALL INI_ASSIM
 !
 ! Override with namelist values
-CALL READ_ASSIM_CONF(HPROGRAM)
+ CALL READ_ASSIM_CONF(HPROGRAM)
 
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ASSIM',1,ZHOOK_HANDLE)
 !---------------------------------------------------------

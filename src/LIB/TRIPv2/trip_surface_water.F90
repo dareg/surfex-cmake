@@ -130,7 +130,7 @@ ZSTOMAX    (:,:) = 0.0
 !-------------------------------------------------------------------------------
 !
 ISEQ=1
-CALL SEQUENCE_LOOP(ISEQ)
+ CALL SEQUENCE_LOOP(ISEQ)
 !
 IF(KSEQMAX>2)THEN
   ISEQ=2
@@ -190,7 +190,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE SEQUENCE_LOOP(KNUM)

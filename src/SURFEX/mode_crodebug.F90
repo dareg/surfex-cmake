@@ -53,7 +53,7 @@ REAL :: XLONCRODEBUG = -999.
 REAL :: XWARNING_MASSBALANCE=1.E-4
 REAL :: XWARNING_ENERGYBALANCE=1.E-4
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE INIT_CRODEBUG (I)
 ! Check environment variables to activate crocus debugging mode if required

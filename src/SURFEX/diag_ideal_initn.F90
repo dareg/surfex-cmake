@@ -57,7 +57,7 @@ IMPLICIT NONE
 !
 TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
-CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
+ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
@@ -68,7 +68,7 @@ INTEGER, INTENT(IN) :: KSW   ! spectral bands
 !
 INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
+ CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

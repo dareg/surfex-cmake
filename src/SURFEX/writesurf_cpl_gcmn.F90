@@ -78,8 +78,8 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 !
 INTEGER           :: IRESP          ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_PRECIP_N',0,ZHOOK_HANDLE)
 !
 YRECFM='LCPL_GCM'
 YCOMMENT='flag to store physical fields in restart file'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,LCPL_GCM,IRESP,HCOMMENT=YCOMMENT)
 !
 IF(LCPL_GCM)THEN

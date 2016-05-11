@@ -71,7 +71,7 @@ INCLUDE "netcdf.inc"
 REAL, DIMENSION(:),ALLOCATABLE :: ZFULL  ! total cover
 INTEGER                        :: ILU,IRET, IL
 INTEGER                        :: INB ! number of articles in the file
-CHARACTER(LEN=28) :: YFILE
+ CHARACTER(LEN=28) :: YFILE
 LOGICAL :: GOPENED
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -86,8 +86,8 @@ ENDIF
 
  CALL GET_LUOUT('NC    ',NLUOUT)
 !
-CMASK = HMASK
-CFILEIN_NC = YFILE
+ CMASK = HMASK
+ CFILEIN_NC = YFILE
  CALL READ_SURF(&
                 'NC    ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
@@ -102,7 +102,7 @@ ZFULL=1.
  CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
 !
 !------------------------------------------------------------------------------
-CMASK = HMASK
+ CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_NC',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

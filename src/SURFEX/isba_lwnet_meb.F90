@@ -139,7 +139,7 @@ ZFRAC(:)      = 1.-PPSN(:)
 ZPN(:)        = PPSN(:)*(1.-PPSNA(:))
 ZSIGMA_FA(: ) = (1.-ZPN(:))*PSIGMA_F(:) + ZPN(:)*PSIGMA_FN(:)
 
-CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_F,ZSIGMA_FA,       &
+ CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_F,ZSIGMA_FA,       &
      ZEMIS_G,PTV,PTG,                                         & 
      ZLW_G_A,ZLW_G_B,ZLW_G_C,ZLW_G_D,ZLW_G_E,ZLW_G_F,         &
      ZLW_G_G,ZLW_G_H,ZLW_G_I,ZLW_G_J,ZLW_G_K,ZLW_G_L          )
@@ -150,7 +150,7 @@ ZFRAC(:)      = PPSN(:)
 ZPN(:)        = PPSN(:) + PPSNA(:)*(1.-PPSN(:))
 ZSIGMA_FA(: ) = (1.-ZPN(:))*PSIGMA_F(:) + ZPN(:)*PSIGMA_FN(:)
 
-CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_FN,ZSIGMA_FA,      &
+ CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_FN,ZSIGMA_FA,      &
      PEMIS_N,PTV,PTN,                                         & 
      ZLW_N_A,ZLW_N_B,ZLW_N_C,ZLW_N_D,ZLW_N_E,ZLW_N_F,         &
      ZLW_N_G,ZLW_N_H,ZLW_N_I,ZLW_N_J,ZLW_N_K,ZLW_N_L          )
@@ -207,7 +207,7 @@ PLWNET_V(:)  = PLW_RAD(:) - ZLWUP(:) - PLWNET_G(:) - PLWNET_N(:)
 
 IF (LHOOK) CALL DR_HOOK('ISBA_LWNET_MEB',1,ZHOOK_HANDLE)
 
-CONTAINS
+ CONTAINS
 !=========================================================
 SUBROUTINE LW_FLUX_COMP(PPN,PLW_RAD,PFRAC,PSIGMA_F,PSIGMA_FA,      &
      PEMIS_S,PTV,PTEMP_S,                                          & 

@@ -361,7 +361,7 @@ ZLWUP(:)=(1.-PEMIS(:))*PLW(:)+PEMIS(:)*XSTEFAN*PTSURF(:)**4
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE TEMP_FORC_DISTS (PTIMEIN,PSTEP,KFORC,PTIMES,KHOUR,PALPHA)
 !

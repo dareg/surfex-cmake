@@ -51,9 +51,9 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=6),   INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=7),   INTENT(IN)    :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)    :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=7),   INTENT(IN)    :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)    :: HFILE     ! name of file
 INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 LOGICAL, OPTIONAL,  INTENT(INOUT) :: OKEY
@@ -197,13 +197,13 @@ DEALLOCATE(ZMASK)
 !*      4.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='HORIBL'
+ CINTERP_TYPE='HORIBL'
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA_GRIB',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------

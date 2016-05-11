@@ -91,7 +91,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(IN)    :: OECOCLIMAP
 LOGICAL,             INTENT(IN)    :: ORM_RIVER    ! delete river coverage (default = false)
 !
@@ -255,8 +255,8 @@ WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
 !
 ALLOCATE(F%XWATER_FETCH  (FG%NDIM)) 
 !
-CATYPE='ARI'
-CALL PGD_FIELD(DTCO, UG, U, USS, &
+ CATYPE='ARI'
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,F%XWATER_FETCH(:))
 !
 !-------------------------------------------------------------------------------
@@ -266,8 +266,8 @@ CALL PGD_FIELD(DTCO, UG, U, USS, &
 !
 ALLOCATE(F%XT_BS         (FG%NDIM)) 
 !
-CATYPE='ARI'
-CALL PGD_FIELD(DTCO, UG, U, USS, &
+ CATYPE='ARI'
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,F%XT_BS(:))
 !
 !-------------------------------------------------------------------------------
@@ -277,8 +277,8 @@ CALL PGD_FIELD(DTCO, UG, U, USS, &
 !
 ALLOCATE(F%XDEPTH_BS     (FG%NDIM)) 
 !
-CATYPE='INV'
-CALL PGD_FIELD(DTCO, UG, U, USS, &
+ CATYPE='INV'
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,F%XDEPTH_BS(:))
 !
 !-------------------------------------------------------------------------------
@@ -288,8 +288,8 @@ CALL PGD_FIELD(DTCO, UG, U, USS, &
 
 ALLOCATE(F%XEXTCOEF_WATER(FG%NDIM)) 
 !
-CATYPE='ARI'
-CALL PGD_FIELD(DTCO, UG, U, USS, &
+ CATYPE='ARI'
+ CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'water extinction coefficient','WAT', &
                  YEXTCOEF_WATER,YEXTCOEF_WATERFILETYPE,XUNIF_EXTCOEF_WATER, &
                  F%XEXTCOEF_WATER(:))  
@@ -299,7 +299,7 @@ CALL PGD_FIELD(DTCO, UG, U, USS, &
 !*   10.     Prints of flake parameters in a tex file
 !            ----------------------------------------
 !
-CALL WRITE_COVER_TEX_WATER
+ CALL WRITE_COVER_TEX_WATER
 !
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

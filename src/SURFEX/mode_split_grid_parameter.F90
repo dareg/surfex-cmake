@@ -6,7 +6,7 @@
 MODULE MODE_SPLIT_GRID_PARAMETER
 !##################
 !
-CONTAINS
+ CONTAINS
 !
 !     #############################################################
       SUBROUTINE SPLIT_GRID_PARAMETERX1(HPROGRAM,HGRID,HREC,KDIM,KSIZE,PFIELD,PFIELD_SPLIT)

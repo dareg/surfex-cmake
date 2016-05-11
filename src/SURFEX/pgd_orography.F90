@@ -135,8 +135,8 @@ INTEGER                  :: IZS         ! size of orographic array in atmospheri
 !
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
  CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
-CHARACTER(LEN=28)        :: YSLOPE         ! file name for orography
-CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
+ CHARACTER(LEN=28)        :: YSLOPE         ! file name for orography
+ CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
 !                                       ! 'AVG' : average orography
@@ -380,7 +380,7 @@ ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution
 #ifdef SFX_LFI
      CFILEIN_LFI = ADJUSTL(YZS)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                          YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF     
 !   

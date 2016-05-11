@@ -107,12 +107,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),   INTENT(IN)      :: HISBA      ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*),   INTENT(IN)      :: HISBA      ! type of soil (Force-Restore OR Diffusion)
 !                                                 ! '2-L'
 !                                                 ! '3-L'
 !                                                 ! 'DIF'   ISBA-DF
 !
-CHARACTER(LEN=*), INTENT(IN)        :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+ CHARACTER(LEN=*), INTENT(IN)        :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
 !                                                 !         (Douville et al. 1995)
 !                                                 ! '3-L' = 3-L snow scheme (option)
 !                                                 !         (Boone and Etchevers 2001)

@@ -128,7 +128,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('WRITESURF_CH_EMIS_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE WRITE_EMIS_SPEC(KSIZE)
 !

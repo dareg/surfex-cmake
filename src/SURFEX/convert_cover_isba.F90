@@ -527,7 +527,7 @@ IF (ASSOCIATED(DTCO%XDATA_WEIGHT)) DEALLOCATE(DTCO%XDATA_WEIGHT)
 IF (LHOOK) CALL DR_HOOK('CONVERT_COVER_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE SET_COVER_DG(KNI,KGROUND,KPATCH,LPERM,LDG2,LDROOT,LWG_LAYER,LROOTFRAC, &

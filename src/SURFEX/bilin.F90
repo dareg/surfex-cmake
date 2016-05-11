@@ -423,7 +423,7 @@ WRITE(KLUOUT,*) ' Number of points to interpolate: ',COUNT(PFIELD2(:)==XUNDEF .A
 !
 !* input grid coordinates
 !
-CALL HOR_EXTRAPOL_SURF_CHEAP(KLUOUT,'XY  ',PY1,PX1,PFIELD1,PY2,PX2,PFIELD2,OINTERP)
+ CALL HOR_EXTRAPOL_SURF_CHEAP(KLUOUT,'XY  ',PY1,PX1,PFIELD1,PY2,PX2,PFIELD2,OINTERP)
 !
 IF (LHOOK) CALL DR_HOOK('BILIN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

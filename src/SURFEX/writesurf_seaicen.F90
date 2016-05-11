@@ -82,15 +82,15 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 INTEGER           :: IRESP           ! Error code after reading
 !
 INTEGER           :: JMTH, INMTH
-CHARACTER(LEN=2 ) :: YMTH
-CHARACTER(LEN=5)  :: YLVL
+ CHARACTER(LEN=2 ) :: YMTH
+ CHARACTER(LEN=5)  :: YLVL
 !
-CHARACTER(LEN=6)  :: YICECAT
-CHARACTER(LEN=20) :: YFORM
-CHARACTER(LEN=12) :: YRECFM           ! Name of the article to be read
-CHARACTER(LEN=12) :: YCATEG           ! Category to write
-CHARACTER(LEN=12) :: YLEVEL           ! Level to write
-CHARACTER(LEN=100):: YCOMMENT         ! Error Message
+ CHARACTER(LEN=6)  :: YICECAT
+ CHARACTER(LEN=20) :: YFORM
+ CHARACTER(LEN=12) :: YRECFM           ! Name of the article to be read
+ CHARACTER(LEN=12) :: YCATEG           ! Category to write
+ CHARACTER(LEN=12) :: YLEVEL           ! Level to write
+ CHARACTER(LEN=100):: YCOMMENT         ! Error Message
 !
 INTEGER :: JK,JL                   ! loop counter on ice categories and layes 
 !
@@ -101,7 +101,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAICE_n',0,ZHOOK_HANDLE)
 !
 !
 YCOMMENT='(-)'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP,YCOMMENT)
 !
 !
@@ -199,7 +199,7 @@ ENDIF
 !
 YRECFM='SIC'
 YCOMMENT='Sea ice coverage'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSIC(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !

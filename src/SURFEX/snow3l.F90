@@ -120,7 +120,7 @@ REAL, INTENT(IN)                    :: PTSTEP
 !                                      PTSTEP    = time step of the integration
 TYPE(DATE_TIME), INTENT(IN)         :: TPTIME      ! current date and time
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES
 !                                      HSNOWRES  = ISBA-SNOW3L turbulant exchange option
 !                                      'DEF' = Default: Louis (ISBA: Noilhan and Mahfouf 1996)
 !                                      'RIL' = Limit Richarson number under very stable
@@ -131,7 +131,7 @@ LOGICAL, INTENT(IN)                 :: OMEB       ! True = coupled to MEB. This 
 !                                                 ! If = False, then energy
 !                                                 ! budget and fluxes are computed herein.
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -389,7 +389,7 @@ ZWORK(:)=ZSNOW(:)
 !
 ZWORK2(:)=PSNOWALB(:)
 !
-CALL SNOW3LALB(ZWORK2,ZSPECTRALALBEDO,PSNOWRHO(:,1),PSNOWAGE(:,1),PPERMSNOWFRAC,PPS)
+ CALL SNOW3LALB(ZWORK2,ZSPECTRALALBEDO,PSNOWRHO(:,1),PSNOWAGE(:,1),PPERMSNOWFRAC,PPS)
 ZWORK3(:) = PSNOWALB(:)/ZWORK2(:)
 DO JJ=1,SIZE(ZSPECTRALALBEDO,2)
    DO JI=1,INI
@@ -408,7 +408,7 @@ ENDDO
 !
 ! Caluclate new snow albedo at time t if snowfall
 !
-CALL SNOW3LALB(ZWORK2,ZSPECTRALWORK,PSNOWRHO(:,1),PSNOWAGE(:,1),PPERMSNOWFRAC,PPS)
+ CALL SNOW3LALB(ZWORK2,ZSPECTRALWORK,PSNOWRHO(:,1),PSNOWAGE(:,1),PPERMSNOWFRAC,PPS)
 !
 DO JJ=1,SIZE(ZSPECTRALALBEDO,2)
    DO JI=1,INI
@@ -425,11 +425,11 @@ ENDWHERE
 !               --------------------------
 ! Reset grid to conform to model specifications:
 !
-CALL SNOW3LGRID(ZSNOWDZN,ZSNOW,PSNOWDZ_OLD=PSNOWDZ)
+ CALL SNOW3LGRID(ZSNOWDZN,ZSNOW,PSNOWDZ_OLD=PSNOWDZ)
 !
 ! Mass/Heat redistribution:
 !
-CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,PSNOWHEAT,PSNOWAGE)
+ CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,PSNOWHEAT,PSNOWAGE)
 !
 !
 !*       4.     Liquid water content and snow temperature
@@ -454,7 +454,7 @@ ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
 !
 ! Calculate snow density: compaction/aging: density increases
 !
-CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,PSNOWLIQ)
+ CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,PSNOWLIQ)
 !
 ! Snow compaction and metamorphism due to drift
 !
@@ -477,7 +477,7 @@ PSNOWHEAT(:,:) = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
 ! Heat source (-sink) term due to shortwave
 ! radiation transmission within the snowpack:
 !
-CALL SNOW3LRAD(OMEB,XSNOWDZMIN,PSW_RAD,PSNOWALB,      &
+ CALL SNOW3LRAD(OMEB,XSNOWDZMIN,PSW_RAD,PSNOWALB,      &
                ZSPECTRALALBEDO,PSNOWDZ,PSNOWRHO,PALB, &
                PPERMSNOWFRAC,PZENITH,PSWNETSNOW,      &
                PSWNETSNOWS,ZRADSINK,ZRADXS,PSNOWAGE)  
@@ -487,7 +487,7 @@ CALL SNOW3LRAD(OMEB,XSNOWDZMIN,PSW_RAD,PSNOWALB,      &
 !               ---------------------------------------
 ! Snow thermal conductivity:
 !
-CALL SNOW3LTHRM(PSNOWRHO,ZSCOND,ZSNOWTEMP,PPS)
+ CALL SNOW3LTHRM(PSNOWRHO,ZSCOND,ZSNOWTEMP,PPS)
 !
 ! Precipitation heating term:
 ! Rainfall renders it's heat to the snow when it enters
@@ -546,7 +546,7 @@ ZSNOWTEMPO1(:) = ZSNOWTEMP(:,1) ! save surface snow temperature before update
 !
 ZGRNDFLUXI(:)  = ZGRNDFLUX(:)
 !
-CALL SNOW3LSOLVT(OMEB,PTSTEP,XSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,              &
+ CALL SNOW3LSOLVT(OMEB,PTSTEP,XSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,              &
                    PSOILCOND,PD_G,ZRADSINK,ZCT,ZTSTERM1,ZTSTERM2,              &
                    ZPET_A_COEF_T,ZPEQ_A_COEF_T,ZPET_B_COEF_T,ZPEQ_B_COEF_T,    &
                    ZTA_IC,ZQA_IC,ZGRNDFLUX,ZGRNDFLUXO,ZSNOWTEMP,PSNOWFLUX      )  
@@ -578,14 +578,14 @@ ENDIF
 !
 ! First Test to see if snow pack vanishes during this time step:
 !
-CALL SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,                            &
+ CALL SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,                            &
                 PSNOWHEAT,ZRADSINK(:,INLVLS),PEVAPCOR,PTHRUFAL,ZGRNDFLUX, &
                 PGFLUXSNOW,ZGRNDFLUXO,PSNOWDZ,PSNOWLIQ,ZSNOWTEMP,         &
                 PLVTT,PLSTT,ZRADXS   )  
 !
 ! For "normal" melt: transform excess heat content into snow liquid:
 !
-CALL SNOW3LMELT(PTSTEP,ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,PSNOWLIQ,ZMELTXS)  
+ CALL SNOW3LMELT(PTSTEP,ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,PSNOWLIQ,ZMELTXS)  
 !
 !
 !*      10.     Snow water flow and refreezing
@@ -593,7 +593,7 @@ CALL SNOW3LMELT(PTSTEP,ZSCAP,ZSNOWTEMP,PSNOWDZ,PSNOWRHO,PSNOWLIQ,ZMELTXS)
 ! Liquid water vertical transfer and possible snowpack runoff
 ! And refreezing/freezing of meltwater/rainfall (ripening of the snow)
 !
-CALL SNOW3LREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL)
+ CALL SNOW3LREFRZ(PTSTEP,PRR,PSNOWRHO,ZSNOWTEMP,PSNOWDZ,PSNOWLIQ,PTHRUFAL)
 !
 ZSCAP(:,:)        = SNOW3LSCAP(PSNOWRHO)
 PSNOWHEAT(:,:)    = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
@@ -603,7 +603,7 @@ PSNOWHEAT(:,:)    = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
 !*      11.     Snow Evaporation/Sublimation mass updates:
 !               ------------------------------------------
 !
-CALL SNOW3LEVAPN(ZPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1), &
+ CALL SNOW3LEVAPN(ZPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1), &
                    PSNOWDZ,PSNOWLIQ(:,1),PTA,PLVTT,PLSTT,PSNOWHEAT,PSOILCOR )
 !
 ! Update snow temperatures and liquid
@@ -622,7 +622,7 @@ ZSNOWTEMP(:,:) = MIN(XTT,ZSNOWTEMP(:,:))
 ! If all snow in uppermost layer evaporates/sublimates, re-distribute
 ! grid (below could be evoked for vanishingly thin snowpacks):
 !
-CALL SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ)
+ CALL SNOW3LEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,ZSNOWTEMP,PSNOWLIQ)
 !
 !
 !*      12.     Update surface albedo:
@@ -771,7 +771,7 @@ PSNOWSFCH(:)     = PDELHEATN_SFC(:) - (PSWNETSNOWS(:) +PLWNETSNOW(:) - PHSNOW(:)
 IF (LHOOK) CALL DR_HOOK('SNOW3L',1,ZHOOK_HANDLE)
 !
 !
-CONTAINS
+ CONTAINS
 !
 !
 !

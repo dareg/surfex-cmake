@@ -99,13 +99,13 @@ TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 INTEGER           :: IVERSION, IBUGFIX  ! surface version
 INTEGER           :: ILUOUT   ! unit of output listing file
 INTEGER           :: IRESP    ! Error code after redding
-CHARACTER(LEN=12) :: YRECFM   ! Name of the article to be read
-CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=12) :: YRECFM   ! Name of the article to be read
+ CHARACTER(LEN=4 ) :: YLVL
 !
 INTEGER :: JLAYER ! loop counter on layers
 !
 REAL                              :: ZOUT_TSTEP
-CHARACTER(LEN=3)                  :: YRAIN 
+ CHARACTER(LEN=3)                  :: YRAIN 
 LOGICAL                           :: GCANOPY_DRAG
 LOGICAL                           :: GGLACIER
 LOGICAL                           :: GFLOOD

@@ -86,9 +86,9 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
@@ -107,7 +107,7 @@ GRESET=.TRUE.
 GRESET=(NBLOCK>0)
 #endif
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                     HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !
 !
@@ -491,7 +491,7 @@ ENDIF
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SEAFLUX_N',1,ZHOOK_HANDLE)
 !

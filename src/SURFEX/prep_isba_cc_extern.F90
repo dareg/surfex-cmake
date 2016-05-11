@@ -65,13 +65,13 @@ LOGICAL,            INTENT(INOUT):: OPREP_AGS
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: INI            ! total 1D dimension
 INTEGER           :: IPATCH         ! number of patch
-CHARACTER(LEN=3)  :: YPHOTO
-CHARACTER(LEN=3)  :: YRESPSL
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=3)  :: YPHOTO
+ CHARACTER(LEN=3)  :: YRESPSL
+ CHARACTER(LEN=4)  :: YLVL
 !
 INTEGER           :: JNBIOMASS             ! loop counter
 INTEGER           :: JNLITTER              ! loop counter
@@ -99,32 +99,32 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_CC_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(&
+ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
-CALL PREP_GRID_EXTERN(&
+ CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 YRECFM='VERSION'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,IVERSION,IRESP)
 !
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 !---------------------------------------------------------------------------------------
 !
 !*      3.     Transformation into physical quantity to be interpolated
 !              --------------------------------------------------------
 !
-CALL OPEN_AUX_IO_SURF(&
+ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'NATURE')
 YRECFM='PHOTO'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,YPHOTO,IRESP)  
 YRECFM='PATCH_NUMBER'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,YRECFM,IPATCH,IRESP)
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 IF(IVERSION<8.OR.(YPHOTO/='NIT'.AND.YPHOTO/='NCB'))THEN
   OPREP_AGS = .FALSE.

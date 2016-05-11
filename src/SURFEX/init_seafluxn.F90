@@ -116,12 +116,12 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 !
-CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+ CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -138,9 +138,9 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                            !  midnight (UTC, s)
 !
-CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
-CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
-CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
+ CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
+ CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
+ CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
 !
 !
 !*       0.2   Declarations of local variables
@@ -264,7 +264,7 @@ SELECT CASE (HINIT)
 !
   CASE DEFAULT
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
     CALL READ_SURF(&
                    HPROGRAM,'DTCUR',SM%S%TTIME,IRESP)
@@ -279,7 +279,7 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !         Reading of the fields
@@ -302,7 +302,7 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !*       2.     Prognostic fields:
@@ -381,7 +381,7 @@ ENDIF
 !
 !*       4.     Seaice prognostic variables and forcings :
 !
-CALL READ_SEAICE_n(&
+ CALL READ_SEAICE_n(&
                    SM%SG, SM%S, &
                    HPROGRAM,ILU,ILUOUT)
 !
@@ -393,7 +393,7 @@ CALL READ_SEAICE_n(&
 ALLOCATE(SM%S%XEMIS    (ILU))
 SM%S%XEMIS    = 0.0
 !
-CALL UPDATE_RAD_SEA(SM%S%CSEA_ALB,SM%S%XSST,PZENITH,XTTS,SM%S%XEMIS,SM%S%XDIR_ALB,&
+ CALL UPDATE_RAD_SEA(SM%S%CSEA_ALB,SM%S%XSST,PZENITH,XTTS,SM%S%XEMIS,SM%S%XDIR_ALB,&
                     SM%S%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,  &
                     SM%S%LHANDLE_SIC,SM%S%XTICE,SM%S%XSIC,SM%S%XICE_ALB           )  
 !
@@ -437,7 +437,7 @@ IF(.NOT.(SM%S%LHANDLE_SIC.OR.LCPL_SEAICE))THEN
   SM%DGSI%LDIAG_SEAICE=.FALSE.
 ENDIF
 !
-CALL DIAG_SEAFLUX_INIT_n(&
+ CALL DIAG_SEAFLUX_INIT_n(&
                          SM%DGO, SM%DGS, SM%DGSI, DGU, SM%S, &
                          HPROGRAM,ILU,KSW)
 !

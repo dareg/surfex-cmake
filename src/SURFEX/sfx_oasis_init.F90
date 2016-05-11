@@ -60,26 +60,26 @@ INCLUDE 'mpif.h'
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=28), INTENT(IN )           :: HNAMELIST
+ CHARACTER(LEN=28), INTENT(IN )           :: HNAMELIST
 INTEGER,           INTENT(OUT)           :: KLOCAL_COMM ! value of local communicator
-CHARACTER(LEN=3),  INTENT(IN ), OPTIONAL :: HINIT       ! choice of fields to initialize
+ CHARACTER(LEN=3),  INTENT(IN ), OPTIONAL :: HINIT       ! choice of fields to initialize
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=9)   :: YWORD, YTIMERUN
-CHARACTER(LEN=1000):: YLINE, YFOUND
+ CHARACTER(LEN=9)   :: YWORD, YTIMERUN
+ CHARACTER(LEN=1000):: YLINE, YFOUND
 INTEGER            :: IERR, IWORK, IRANK
 INTEGER            :: ICOMP_ID
 INTEGER            :: ITIMERUN
 LOGICAL            :: GFOUND
-CHARACTER(LEN=3)   :: YINIT
+ CHARACTER(LEN=3)   :: YINIT
 !
 !
 !*       0.3   Declarations of namelist variables
 !              ----------------------------------
 !
-CHARACTER(LEN=6)      :: CMODEL_NAME ! component model name
+ CHARACTER(LEN=6)      :: CMODEL_NAME ! component model name
 !
 NAMELIST/NAM_OASIS/LOASIS,CMODEL_NAME
 !
@@ -91,7 +91,7 @@ NAMELIST/NAM_OASIS/LOASIS,CMODEL_NAME
 !               ---------------
 !
 LOASIS      = .FALSE.
-CMODEL_NAME = 'surfex'
+ CMODEL_NAME = 'surfex'
 XRUNTIME    = 0.0
 !
 YINIT = 'ALL'
@@ -157,7 +157,7 @@ ENDIF
 !               ----------------------
 !
 #ifdef CPLOASIS
-CALL OASIS_GET_LOCALCOMM(KLOCAL_COMM,IERR) 
+ CALL OASIS_GET_LOCALCOMM(KLOCAL_COMM,IERR) 
 IF (IERR/=OASIS_OK) THEN
    IF(IRANK==0)THEN
      WRITE(*,'(A)'   )'SFX : Error getting local communicator from OASIS'
@@ -231,14 +231,14 @@ DO WHILE (ITIMERUN==-1)
       ENDIF
    ENDIF
 ENDDO
-CLOSE(11)
+ CLOSE(11)
 !
 XRUNTIME = REAL(ITIMERUN)
 !
 WRITE(*,'(A)' )'-----------------------------'
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE FOUND_TIMERUN(HIN, HOUT, KLEN, OFOUND)
@@ -246,17 +246,17 @@ SUBROUTINE FOUND_TIMERUN(HIN, HOUT, KLEN, OFOUND)
 IMPLICIT NONE
 !
 INTEGER ,          INTENT (IN   ) :: KLEN
-CHARACTER (LEN=*), INTENT (INOUT) :: HIN 
-CHARACTER (LEN=*), INTENT (INOUT) :: HOUT
+ CHARACTER (LEN=*), INTENT (INOUT) :: HIN 
+ CHARACTER (LEN=*), INTENT (INOUT) :: HOUT
 LOGICAL,           INTENT (OUT  ) :: OFOUND
 !
 !* ---------------------------- Local declarations -------------------
 !
-CHARACTER(LEN=1), PARAMETER :: YBLANK = ' '
-CHARACTER(LEN=1), PARAMETER :: YNADA  = '#'
+ CHARACTER(LEN=1), PARAMETER :: YBLANK = ' '
+ CHARACTER(LEN=1), PARAMETER :: YNADA  = '#'
 
-CHARACTER(LEN=KLEN) :: YLINE
-CHARACTER(LEN=KLEN) :: YWORK
+ CHARACTER(LEN=KLEN) :: YLINE
+ CHARACTER(LEN=KLEN) :: YWORK
 !
 INTEGER             :: ILEN
 INTEGER             :: IERR

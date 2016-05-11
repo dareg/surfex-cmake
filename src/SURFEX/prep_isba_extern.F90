@@ -78,12 +78,12 @@ LOGICAL, OPTIONAL,  INTENT(INOUT):: OKEY
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: INI            ! total 1D dimension
 INTEGER           :: IPATCH         ! number of patch
 LOGICAL           :: GGLACIER
-CHARACTER(LEN=3)  :: YPHOTO
+ CHARACTER(LEN=3)  :: YPHOTO
 !
 REAL, DIMENSION(:,:,:), POINTER     :: ZFIELD         ! field read on initial MNH vertical soil grid, all patches
 REAL, DIMENSION(:,:),   POINTER     :: ZFIELD1        ! field read on initial MNH vertical soil grid, one patch

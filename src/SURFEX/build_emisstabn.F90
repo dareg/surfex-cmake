@@ -116,17 +116,17 @@ ALLOCATE (CHU%XCONVERSION(SIZE(PRHODREF,1)))
 ! determine the conversion factor
   CHU%XCONVERSION(:) = 1.
 SELECT CASE (YUNIT)
-CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
+ CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
 ! where 1 molecule/cm2/s = (224.14/6.022136E23) ppp*m/s
   CHU%XCONVERSION(:) = XAVOGADRO * PRHODREF(:) / XMD
-CASE ('CON') ! flux given in molecules/cm2/s, conversion to molec/m2/s 
+ CASE ('CON') ! flux given in molecules/cm2/s, conversion to molec/m2/s 
   CHU%XCONVERSION(:) =  1E4
-CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s  
+ CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s  
 ! where 1 microMol/m2/day = (22.414/86.400)*1E-12 ppp*m/s
   !XCONVERSION(:) = (22.414/86.400)*1E-12 * XAVOGADRO * PRHODREF(:) / XMD
   CHU%XCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
 
-CASE DEFAULT
+ CASE DEFAULT
   CALL ABOR1_SFX('CH_BUILDEMISSN: UNKNOWN CONVERSION FACTOR')
 END SELECT
 !

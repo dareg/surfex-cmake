@@ -50,7 +50,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM    
+ CHARACTER(LEN=6),   INTENT(IN)   :: HPROGRAM    
 INTEGER,            INTENT(IN)   :: KI         ! number of points
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -78,7 +78,7 @@ INTEGER:: IPATCH_TRBE, IPATCH_TRBD, IPATCH_TEBE, IPATCH_TEBD, IPATCH_TENE, &
 !
 !*   0. Logical unit for writing out
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !

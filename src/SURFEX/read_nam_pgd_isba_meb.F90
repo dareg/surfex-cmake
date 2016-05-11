@@ -55,7 +55,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM      ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM      ! Type of program
 INTEGER,             INTENT(IN)    :: KLUOUT
 !
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OMEB_PATCH
@@ -100,9 +100,9 @@ LMEB_GNDRES   =.FALSE.
 !*    2.      Reading of namelist
 !             -------------------
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
-CALL POSNAM(ILUNAM,'NAM_MEB_ISBA',GFOUND,KLUOUT)
+ CALL POSNAM(ILUNAM,'NAM_MEB_ISBA',GFOUND,KLUOUT)
 IF (GFOUND) THEN
    READ(UNIT=ILUNAM,NML=NAM_MEB_ISBA)
 ELSE
@@ -114,7 +114,7 @@ ELSE
   CALL ABOR1_SFX('PGD_ISBA: NAM_MEB_ISBA and LMEB_PATCH not defined')
 ENDIF          
 !
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
 !-------------------------------------------------------------------------------
 !

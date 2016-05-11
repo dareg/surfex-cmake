@@ -19,7 +19,7 @@ MODULE PROCEDURE POSKEY
 END INTERFACE
 !!
 !!
-CONTAINS
+ CONTAINS
 !!
 !!    ##############################################
       SUBROUTINE POSNAM(KULNAM,HDNAML,OFOUND,KLUOUT)

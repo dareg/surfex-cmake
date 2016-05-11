@@ -167,7 +167,7 @@ ENDDO
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CO2_INIT_N',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 SUBROUTINE PACK_CO2_INIT(KMASK,KSIZE,KPATCH)
 IMPLICIT NONE

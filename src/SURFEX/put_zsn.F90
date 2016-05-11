@@ -123,7 +123,7 @@ IF (U%NSIZE_SEA > 0 .AND. U%CSEA/='NONE' .AND. U%CSEA/='FLUX') CALL PACK_ZS(U%NS
 !
 IF (LHOOK) CALL DR_HOOK('PUT_ZS_N',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !=======================================================================================
 SUBROUTINE PACK_ZS(KSIZE,KMASK,YTYPE)
 !

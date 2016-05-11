@@ -495,7 +495,7 @@ ENDDO
 !             
 !
 ZDIRCOSZW(:) = 1.
-CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,ZTA,ZQASAT,&
+ CALL SURFACE_RI(PSST,PQSAT,PEXNS,PEXNA,ZTA,ZQASAT,&
                 PZREF,PUREF,ZDIRCOSZW,PVMOD,PRI   )  
 !
 !       5.2     Aerodynamical conductance and resistance

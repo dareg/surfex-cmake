@@ -199,7 +199,7 @@ DEALLOCATE(ZWORK)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_BLD_DESCRIPTION_n',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 SUBROUTINE UP_DESC_IND_W(K)
 INTEGER, INTENT(IN) :: K
 I1=I2+1

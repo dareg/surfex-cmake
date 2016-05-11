@@ -92,7 +92,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_PGD_SURF_ATM_N',0,ZHOOK_HANDLE)
 !*       0.     Initialize some options:
 !               ------------------------
 !
-CPROGNAME = HPROGRAM
+ CPROGNAME = HPROGRAM
 !
  CALL FLAG_UPDATE(YSC%IM%DGI, YSC%DGU, &
                   .FALSE.,.TRUE.,.FALSE.,.FALSE.)
@@ -103,7 +103,7 @@ CPROGNAME = HPROGRAM
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 YWRITE='PGD'

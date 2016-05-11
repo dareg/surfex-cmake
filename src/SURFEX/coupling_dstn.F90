@@ -134,7 +134,7 @@ ENDDO  !Loop on dust emitter vegetation
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 IF (LHOOK) CALL DR_HOOK('COUPLING_DST_N',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
     
 SUBROUTINE TREAT_SURF(KSIZE,KMASK)
 

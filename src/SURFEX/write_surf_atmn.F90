@@ -95,7 +95,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_SURF_ATM_N',0,ZHOOK_HANDLE)
-CPROGNAME = HPROGRAM
+ CPROGNAME = HPROGRAM
 !
 !*       1.     Configuration and cover fields:
 !               ------------------------------
@@ -103,7 +103,7 @@ CPROGNAME = HPROGRAM
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 LSAVE_SELECT=YSC%DGU%LSELECT

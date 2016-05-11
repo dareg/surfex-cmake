@@ -71,8 +71,8 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
-CHARACTER(LEN=4),   INTENT(IN)  :: HALG_MPI   ! decomposition algorithm
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
+ CHARACTER(LEN=4),   INTENT(IN)  :: HALG_MPI   ! decomposition algorithm
 !
 !
 !*       0.2   Declarations of local variables
@@ -161,7 +161,7 @@ DEALLOCATE(ISEG_OFFSET)
 !*       2.     Put definitions for exchange of coupling fields :
 !               -------------------------------------------------
 !
-CALL SFX_OASIS_DEFINE(I, U, &
+ CALL SFX_OASIS_DEFINE(I, U, &
                       HPROGRAM,INPTS,IPARAL)
 !
 DEALLOCATE(IPARAL)

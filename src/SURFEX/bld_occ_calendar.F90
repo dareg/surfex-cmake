@@ -51,7 +51,7 @@ REAL, DIMENSION(:) , INTENT(OUT)  :: PQIN          ! Internal heat gains [W m-2(
 !
 !! 2. declaration of local variables
 !
-CHARACTER(LEN = 6)                :: CTIME         ! Local time scheme (winter or summer time)
+ CHARACTER(LEN = 6)                :: CTIME         ! Local time scheme (winter or summer time)
 INTEGER                           :: JDOW          ! day of week
 INTEGER                           :: JJ
 !
@@ -67,9 +67,9 @@ IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',0,ZTODOOK_HANDLE)
 !  3. determine the day of the week and the local time scheme in France
 !--------------------------------------------------------------------------------------
 !
-CALL DAY_OF_WEEK(KYEAR, KMONTH, KDAY, JDOW)
+ CALL DAY_OF_WEEK(KYEAR, KMONTH, KDAY, JDOW)
 !
-CTIME = 'WINTER'
+ CTIME = 'WINTER'
 IF (KMONTH >= 4 .AND. KMONTH <= 10) CTIME = 'SUMMER'
 !
 !--------------------------------------------------------------------------------------

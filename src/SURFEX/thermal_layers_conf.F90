@@ -156,7 +156,7 @@ PTC_OUT=XUNDEF
 WHERE (ZW_OUT/=XUNDEF) PTC_OUT=1./ZW_OUT
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 SUBROUTINE AV_THERMAL_DATA(PF1,PF2,PF1_OUT,PF2_OUT)
 REAL, DIMENSION(:,:), INTENT(IN)  :: PF1

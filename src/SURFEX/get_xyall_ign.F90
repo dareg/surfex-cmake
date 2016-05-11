@@ -74,7 +74,7 @@ KDIMY = 0
 !
 IF (LHOOK) CALL DR_HOOK('GET_XYALL_IGN',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE GET_COORD(PIN,PDIN,POUT,KSIZE)
 !

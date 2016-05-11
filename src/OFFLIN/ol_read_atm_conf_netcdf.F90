@@ -134,7 +134,7 @@ PDURATION = ( INB_FORC - 1 ) * PTSTEP_FORC
 !*      2.    Read full grid dimension and date
 !
  CALL SET_SURFEX_FILEIN(HSURF_FILETYPE,'PREP')
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                       HSURF_FILETYPE,'FULL  ','SURF  ','READ ')  
 !
  CALL READ_SURF(&
@@ -200,7 +200,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_CONF_NETCDF',1,ZHOOK_HANDLE)
 !==================================================================
-CONTAINS
+ CONTAINS
 !
 !     #############################################################
       SUBROUTINE READ_SURF_DIM_OL(HUNITS,KSIZE,KNI,PFIRSTTIMEFILE,KRESP)

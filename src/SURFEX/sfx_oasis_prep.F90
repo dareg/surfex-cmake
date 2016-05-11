@@ -74,7 +74,7 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
 !
 !
 !*       0.2   Declarations of local parameter
@@ -82,11 +82,11 @@ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schem
 !
 INTEGER,           PARAMETER  :: INC = 4    ! Number of grid-cell corners
 !
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAND = 'slan'
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_QSB  = 'sdra'
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_GW   = 'sgw '
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_SEA  = 'ssea'
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAKE = 'slak'
+ CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAND = 'slan'
+ CHARACTER(LEN=4),  PARAMETER  :: YSFX_QSB  = 'sdra'
+ CHARACTER(LEN=4),  PARAMETER  :: YSFX_GW   = 'sgw '
+ CHARACTER(LEN=4),  PARAMETER  :: YSFX_SEA  = 'ssea'
+ CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAKE = 'slak'
 !
 !*       0.3   Declarations of local variables
 !              -------------------------------
@@ -127,9 +127,9 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_PREP',0,ZHOOK_HANDLE)
 !*       0.     Initialize :
 !               ------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(I, U, &
+ CALL SFX_OASIS_CHECK(I, U, &
                      ILUOUT)
 !
 !-------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ CALL SFX_OASIS_CHECK(I, U, &
 !*       2.     Get grid definition :
 !               ---------------------
 !
-CALL GET_MESH_CORNER(UG, &
+ CALL GET_MESH_CORNER(UG, &
                      ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 !
 ZLON(:,1)=UG%XLON(:)
@@ -177,7 +177,7 @@ ENDIF
 !
 !
 !
-CALL OASIS_START_GRIDS_WRITING(IFLAG)
+ CALL OASIS_START_GRIDS_WRITING(IFLAG)
 !
 !*       1.1    Grid definition for Land surface :
 !               ----------------------------------
@@ -260,9 +260,9 @@ IF(LCPL_SEA)THEN
   CALL OASIS_WRITE_MASK  (YSFX_SEA,U%NDIM_FULL,1,IMASK(:,:))
 ENDIF
 !
-CALL OASIS_TERMINATE_GRIDS_WRITING()
+ CALL OASIS_TERMINATE_GRIDS_WRITING()
 !
-CALL OASIS_ENDDEF(IERR)
+ CALL OASIS_ENDDEF(IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(ILUOUT,*)'SFX_OASIS_PREP: OASIS enddef problem, err = ',IERR

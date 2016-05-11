@@ -167,7 +167,7 @@ IHOUR(:,2)=NINT(ZTIME(:,2))/3600
 !*  3.  Emission at the begining of the current hour
 !       --------------------------------------------
 !
-CHN%XEMIS_FIELDS(:,:)=0.
+ CHN%XEMIS_FIELDS(:,:)=0.
 !
 DO JSPEC=1,CHN%NEMIS_NBR
   !
@@ -200,7 +200,7 @@ END DO
 IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE DAY_OF_WEEK(DATE, MONTH, YEAR, DOW)
 !!    AUTHOR

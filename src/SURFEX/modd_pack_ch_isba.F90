@@ -50,7 +50,7 @@ END TYPE PACK_CH_ISBA_t
 !
 
 
-CONTAINS
+ CONTAINS
 
 !
 !

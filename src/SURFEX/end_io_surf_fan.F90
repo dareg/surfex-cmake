@@ -65,7 +65,7 @@ IF (LHOOK) CALL DR_HOOK('END_IO_SURF_FA_N',0,ZHOOK_HANDLE)
 !
 NFULL = 0
 !
-CMASK = '      '
+ CMASK = '      '
 !
 IF (NRANK==NPIO .AND. LOPEN) THEN
 !$OMP SINGLE         

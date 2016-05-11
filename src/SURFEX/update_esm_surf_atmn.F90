@@ -205,7 +205,7 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_SURF_ATM_N',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !=======================================================================================
 SUBROUTINE TREAT_SURF(KSIZE,KMASK,KTILE)
 !

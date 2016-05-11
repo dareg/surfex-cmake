@@ -131,7 +131,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_SFXCPL_N',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 ! Global argument

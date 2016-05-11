@@ -49,7 +49,7 @@ MODULE MODE_GEO_GAUSS
      MODULE PROCEDURE MAP_FAC_V, MAP_FAC_S
   END INTERFACE
   !
-CONTAINS
+ CONTAINS
   !==========================GAUSS_TR=========================================
   TYPE(LOLA) FUNCTION GAUSS_TR_S (PT_REEL,PT_POLE,PCODIL) RESULT (PT_G)
     TYPE (LOLA), INTENT(IN)          :: PT_REEL

@@ -68,7 +68,7 @@ REAL, DIMENSION(:),     INTENT(IN)  :: PSOILRC_SO2  ! bare soil resistance for S
 REAL, DIMENSION(:),     INTENT(IN)  :: PSOILRC_O3   ! bare soil resistance for O3
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PDEP         ! deposition dry velocity (m/s)
 REAL, DIMENSION(:),     INTENT(IN)  :: PNO, PROCK   ! fractions of bare soil, rock
-CHARACTER(LEN=6), DIMENSION(:), INTENT(IN)  :: HSV  ! name of chemical
+ CHARACTER(LEN=6), DIMENSION(:), INTENT(IN)  :: HSV  ! name of chemical
                                                     ! species
 !
 !*       0.2   Declarations of local variables :

@@ -353,7 +353,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_N',1,ZHOOK_HANDLE)
 !
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 SUBROUTINE ROAD_DIR(PDIR,HDIR)
 REAL,             INTENT(IN)  :: PDIR
  CHARACTER(LEN=7), INTENT(OUT) :: HDIR

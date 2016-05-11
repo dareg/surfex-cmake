@@ -76,7 +76,7 @@ IL = ILU
  CALL INIT_IO_SURF_MASK_n(DTCO, U, &
                           HMASK, IL, ILUOUT, ILU, NMASK)
 !
-CMASK = HMASK
+ CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_BIN_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
 END SUBROUTINE INIT_IO_SURF_BIN_n

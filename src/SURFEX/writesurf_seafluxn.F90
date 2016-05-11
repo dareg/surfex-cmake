@@ -94,7 +94,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_SEAFLUX_N',0,ZHOOK_HANDLE)
 !
-CALL WRITESURF_OCEAN_n(DGU, U, &
+ CALL WRITESURF_OCEAN_n(DGU, U, &
                        O, OR, &
                        HPROGRAM)
 !
@@ -104,7 +104,7 @@ CALL WRITESURF_OCEAN_n(DGU, U, &
 !* flag to tell if Sea Ice model is used
 !
 YCOMMENT='flag to handle sea ice cover'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,'HANDLE_SIC',S%LHANDLE_SIC,IRESP,YCOMMENT)
 !
 IF (S%LHANDLE_SIC) CALL WRITESURF_SEAICE_n(DGU, U, &
@@ -133,7 +133,7 @@ ENDIF
 !
 YRECFM='SST'
 YCOMMENT='SST'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSST(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !-------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ CALL WRITE_SURF(DGU, U, &
 !
 YRECFM='Z0SEA'
 YCOMMENT='Z0SEA (m)'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XZ0(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !
@@ -167,7 +167,7 @@ ENDIF
 !
 YRECFM='SSS'
 YCOMMENT='Sea Surface Salinity'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,YRECFM,S%XSSS(:),IRESP,HCOMMENT=YCOMMENT)  
 !
 !

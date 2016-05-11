@@ -33,7 +33,7 @@ END TYPE DST_t
 
 
 
-CONTAINS
+ CONTAINS
 
 !
 

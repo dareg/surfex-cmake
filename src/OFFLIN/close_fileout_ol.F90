@@ -61,7 +61,7 @@ IF (NRANK==NPIO) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_FILEOUT_OL',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 
 !-----------------------------------------------
 

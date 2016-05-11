@@ -72,7 +72,7 @@ NFULL = 0
 !
 NUNIT = 0
 !
-CMASK = '      '
+ CMASK = '      '
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_ASC_N',1,ZHOOK_HANDLE)
 !

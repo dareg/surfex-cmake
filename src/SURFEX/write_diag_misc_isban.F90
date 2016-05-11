@@ -105,7 +105,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------

@@ -93,8 +93,8 @@ TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !              -------------------------------
 !
 INTEGER                               :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
+ CHARACTER(LEN=12)                     :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100)                    :: YCOMMENT       ! Comment string
 INTEGER                               :: JI, JLAYER     ! loop index
 INTEGER                               :: JTIME          ! loop index
 !
@@ -136,7 +136,7 @@ DTGD%NTIME= 12
 GAGRI_TO_GRASS=.FALSE.
 !
 YRECFM='GD_NTIME'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HPROGRAM,YRECFM,DTGD%NTIME,IRESP,HCOMMENT=YCOMMENT)
 !
 ALLOCATE(DTGD%XDATA_FRAC_HVEG (TG%NDIM))
@@ -300,7 +300,7 @@ IF (TGDP%CTYPE_LVEG == 'PARK') DTGD%XDATA_VEGTYPE(:, NVT_PARK) = DTGD%XDATA_FRAC
 
 !
 ! Dry/Wet soil albedo
-CALL DRY_WET_SOIL_ALBEDOS(TGDP%XSAND(:,1),TGDP%XCLAY(:,1),                             &
+ CALL DRY_WET_SOIL_ALBEDOS(TGDP%XSAND(:,1),TGDP%XCLAY(:,1),                             &
                           DTGD%XDATA_VEGTYPE,                                     &
                           DTGD%XDATA_ALBNIR_DRY,DTGD%XDATA_ALBVIS_DRY,DTGD%XDATA_ALBUV_DRY, &
                           DTGD%XDATA_ALBNIR_WET,DTGD%XDATA_ALBVIS_WET,DTGD%XDATA_ALBUV_WET  )  

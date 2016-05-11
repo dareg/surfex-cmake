@@ -72,15 +72,15 @@ TYPE(TEB_GARDEN_OPTIONS_t), INTENT(INOUT) :: TGDO
 TYPE(TEB_GARDEN_PGD_t), INTENT(INOUT) :: TGDP
 TYPE(TEB_VEG_OPTIONS_t), INTENT(INOUT) :: TVG
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=4 ) :: YLVL
 !
 INTEGER :: JJ, JLAYER
 !

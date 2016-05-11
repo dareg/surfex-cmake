@@ -57,7 +57,7 @@ IMPLICIT NONE
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=3), INTENT(OUT) :: HISBA
+ CHARACTER(LEN=3), INTENT(OUT) :: HISBA
 INTEGER, INTENT(OUT) :: KPATCH        ! number of patchs
 INTEGER, INTENT(OUT) :: KGROUND_LAYER ! number of ground layers
 INTEGER, INTENT(OUT) :: KSNOW_LAYER   ! number of snow layers

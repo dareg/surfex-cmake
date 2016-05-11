@@ -118,21 +118,21 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN_EXTERN',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(&
+ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
 !* reading of version of the file being read
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL PREP_GRID_EXTERN(&
+ CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !* reads if TEB fields exist in the input file
-CALL TOWN_PRESENCE(&
+ CALL TOWN_PRESENCE(&
                    HFILEPGDTYPE,GTEB)
 !
 IF (GTEB) THEN

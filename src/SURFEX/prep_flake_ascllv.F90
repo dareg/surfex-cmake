@@ -77,7 +77,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_ASCLLV',0,ZHOOK_HANDLE)
-CATYPE = 'ARI'
+ CATYPE = 'ARI'
 !
 !*      1.    get full dimension of grid
 !
@@ -116,7 +116,7 @@ END SELECT
 !*      6.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='NONE  '
+ CINTERP_TYPE='NONE  '
 DEALLOCATE(ZFIELD)
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_ASCLLV',1,ZHOOK_HANDLE)
 !

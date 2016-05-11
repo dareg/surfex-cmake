@@ -69,8 +69,8 @@ IMPLICIT NONE
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=28) :: YFILE
-CHARACTER(LEN=16), PARAMETER :: YCADRE='external'
+ CHARACTER(LEN=28) :: YFILE
+ CHARACTER(LEN=16), PARAMETER :: YCADRE='external'
 !
 INTEGER                :: INB ! number of articles in the file
 INTEGER, DIMENSION(:),POINTER  :: IMASK
@@ -80,18 +80,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_FA',0,ZHOOK_HANDLE)
-CALL IO_BUFF_CLEAN
-CALL GET_LUOUT(HFILETYPE,NLUOUT)
+ CALL IO_BUFF_CLEAN
+ CALL GET_LUOUT(HFILETYPE,NLUOUT)
 !
 ILU  =0
 !
 YFILE=HFILE(1:LEN_TRIM(HFILE))//'.fa'
 !
-CALL FAITOU(IRET,NUNIT_FA,.TRUE.,YFILE,'OLD',.TRUE.,.FALSE.,IVERBFA,0,INB,YCADRE)
+ CALL FAITOU(IRET,NUNIT_FA,.TRUE.,YFILE,'OLD',.TRUE.,.FALSE.,IVERBFA,0,INB,YCADRE)
 WRITE(NLUOUT,*)'HFILETYPE ',HFILETYPE,'READ EXTERNAL',NUNIT_FA,YFILE
 !
-CMASK = 'FULL  '
-CALL READ_SURF(&
+ CMASK = 'FULL  '
+ CALL READ_SURF(&
                HFILETYPE,'DIM_FULL',ILU,IRET)
 NFULL = ILU
 !
@@ -100,11 +100,11 @@ NFULL = ILU
 ALLOCATE(NMASK(NFULL))
 ALLOCATE(ZFULL(NFULL))
 ZFULL=1.
-CALL GET_1D_MASK(NFULL,NFULL,ZFULL,NMASK)
+ CALL GET_1D_MASK(NFULL,NFULL,ZFULL,NMASK)
 DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------
-CMASK = HMASK
+ CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_FA',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

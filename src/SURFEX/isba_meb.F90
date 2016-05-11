@@ -160,38 +160,38 @@ LOGICAL, DIMENSION(:),INTENT(IN)    :: OSTRESSDEF    ! Ags: vegetation response 
 LOGICAL, DIMENSION(:),INTENT(INOUT) :: OSHADE        ! where vegetation evolution occurs
 LOGICAL, DIMENSION(:),INTENT(INOUT) :: OIRRIDAY      ! Irrigation time 
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HISBA         ! type of ISBA version:
+ CHARACTER(LEN=*),     INTENT(IN)    :: HISBA         ! type of ISBA version:
 !                                                    ! '2-L' (default)
 !                                                    ! '3-L'
 !                                                    ! 'DIF'
-CHARACTER(LEN=*),     INTENT(IN)    :: HCPSURF       ! Specific heat
+ CHARACTER(LEN=*),     INTENT(IN)    :: HCPSURF       ! Specific heat
 !                                                    ! 'DRY' = dry Cp
 !                                                    ! 'HUM' = humid Cp fct of qs
-CHARACTER(LEN=*),     INTENT(IN)    :: HRAIN         ! Rainfall spatial distribution
+ CHARACTER(LEN=*),     INTENT(IN)    :: HRAIN         ! Rainfall spatial distribution
                                                      ! 'DEF' = No rainfall spatial distribution
                                                      ! 'SGH' = Rainfall exponential spatial distribution
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ISBA    ! 'DEF' = Default F-R snow scheme
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ISBA    ! 'DEF' = Default F-R snow scheme
 !                                                    !         (Douville et al. 1995)
 !                                                    ! '3-L' = 3-L snow scheme (option)
 !                                                    !         (Boone and Etchevers 2000)
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES      ! 'DEF' = Default: Louis (ISBA)
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRES      ! 'DEF' = Default: Louis (ISBA)
 !                                                    ! 'RIL' = CROCUS (Martin) method
 !                                                    !  ISBA-SNOW3L turbulant exchange option
-CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND! wind implicitation option
 !                                                    ! 'OLD' = direct
 !                                                    ! 'NEW' = Taylor serie, order 1
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWMETAMO   ! Crocus metamorphism scheme:
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWMETAMO   ! Crocus metamorphism scheme:
 !                                                    ! HSNOWMETAMO = B92 Brun et al 1992
 !                                                    ! HSNOWMETAMO = C13 Carmagnola et al 2014
 !                                                    ! HSNOWMETAMO = T07 Taillandier et al 2007
 !                                                    ! HSNOWMETAMO = F06 Flanner et al 2006
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD      ! Crocus radiative transfer scheme:
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD      ! Crocus radiative transfer scheme:
 !                                                    ! HSNOWMETAMO = B92 Brun et al 1992
 !                                                    ! HSNOWMETAMO = TAR TARTES (Libois et al 2013)
 !                                                    ! HSNOWMETAMO = TA1 TARTES with constant impurities
 !                                                    ! HSNOWMETAMO = TA2 TARTES with constant impurities as a 
 !                                                    !                   function of ageing
-CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO        ! Kind of photosynthesis;
+ CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO        ! Kind of photosynthesis;
 !                                                    ! 'NON' NOTE: this option currently supported (Jarvis)
 !                                                    ! 'AGS'
 !                                                    ! 'LAI'
@@ -774,7 +774,7 @@ ZWORK4(:)          = XUNDEF
 INI=SIZE(PWG,1)
 INL=SIZE(PWG,2)
 !
-CALL ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
+ CALL ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -783,7 +783,7 @@ CALL ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
 !
 ! Concatenate PTL and PTG and the parameters linked to heat transfer into the soil
 !
-CALL PREP_MEB_SOIL(OMEB_LITTER,PSOILHCAPZ,PSOILCONDZ,PWSAT,PWFC,PD_G,PDZG,PTG,   &
+ CALL PREP_MEB_SOIL(OMEB_LITTER,PSOILHCAPZ,PSOILCONDZ,PWSAT,PWFC,PD_G,PDZG,PTG,   &
                    PWG(:,1),PWGI(:,1),PWRL,PWRLI,PTL,PGNDLITTER,ZD_G,ZDZG,ZTGL,  &
                    ZSOILHCAPZ,ZSOILCONDZ,ZWSAT,ZWFC,ZWSFC,ZWISFC,ZCTSFC,PCT,     &
                    PFROZEN1,ZFROZEN1SFC                                          )
@@ -802,7 +802,7 @@ ZSNOWRHO(:,:)    = PSNOWRHO(:,:)
 ZSNOWAGE(:,:)    = PSNOWAGE(:,:)
 ZSNOWSWE(:,:)    = PSNOWSWE(:,:)
 !
-CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
+ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
         PLAI,ZSNOWRHO,ZSNOWSWE,PSNOWHEAT,                            &
         PSNOWTEMP,PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,PEMISNOW,              &
         ZSIGMA_F,ZCHIP,                                              &
@@ -815,7 +815,7 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
 !
 ! Calculate snow albedo: split into spectral bands:
 !
-CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,ZSNOWRHO,ZSNOWAGE,PPS,   &
+ CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,ZSNOWRHO,ZSNOWAGE,PPS,   &
                                 PPSN,PSNOWDZ,PZENITH,                      &
                                 PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,ZTAU_N)
 !
@@ -833,7 +833,7 @@ ELSEWHERE
    ZALBNIR_TSOIL(:) = PALBNIR_TSOIL(:)
 END WHERE
 !
-CALL RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,                        &
+ CALL RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,                        &
      PALBVIS_TVEG, ZALBVIS_TSOIL, PALBNIR_TVEG, ZALBNIR_TSOIL,            &
      PSW_RAD, ZLAI, PZENITH, PABC,                                        &
      PFAPARC, PFAPIRC, PMUS, PLAI_EFFC, OSHADE, ZIACAN,                   &              
@@ -881,7 +881,7 @@ PSWDOWN_GN(:) = ZSWNET_S(:)/(1.-ZALBG(:))
 !*      4.0    Longwave radiative transfer
 !              ---------------------------  
 !
-CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
+ CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
         PEMISNOW,PFEMIS,PFF,                                            &
         PTV,ZTGL(:,1),PSNOWTEMP(:,1),                                   &
         PLW_RAD,PLWNET_N,PLWNET_V,PLWNET_G,                             &
@@ -901,7 +901,7 @@ CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
 !
 ZWORK(:) = (1.0 - PPSN(:) + PPSN(:)*(1.0 - PPALPHAN(:))) 
 ! 
-CALL WET_LEAVES_FRAC(PWR, ZWORK, PWRMAX_CF, PZ0_MEBV, PLAI, ZWRMAX, ZDELTA) 
+ CALL WET_LEAVES_FRAC(PWR, ZWORK, PWRMAX_CF, PZ0_MEBV, PLAI, ZWRMAX, ZDELTA) 
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -952,7 +952,7 @@ ZRSN(:) = ZRS(:)/( 1.0 - MIN(PPALPHAN(:), 1.0 - (ZRS(:)/XRS_MAX)) )
 !*      6.0    Canopy snow (intercepted) needed diagnostics:
 !              ---------------------------------------------
 !
-CALL SNOW_LEAVES_FRAC_MEB(PPSN,PPALPHAN,PWRVN,PTV,ZCHIP,PLAI,        &
+ CALL SNOW_LEAVES_FRAC_MEB(PPSN,PPALPHAN,PWRVN,PTV,ZCHIP,PLAI,        &
                              ZWRVNMAX,ZPSNCV,ZMELTVN)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -994,7 +994,7 @@ ZTSTEP          = PTSTEP/JTSPLIT_EB          ! split time step...for relatively 
 !
 ! initialize time split sums for fluxes:
 !
-CALL INIT_SUM_FLUXES_MEB_TSPLIT 
+ CALL INIT_SUM_FLUXES_MEB_TSPLIT 
 !
 !
 ! Note, when implicitly coupled to the atmosphere, these
@@ -1114,14 +1114,14 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 
 ENDDO LOOP_TIME_SPLIT_EB
 !
-CALL AVG_FLUXES_MEB_TSPLIT     ! average fluxes over time split
+ CALL AVG_FLUXES_MEB_TSPLIT     ! average fluxes over time split
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*     8.0    Snow explicit canopy loading/interception 
 !             ------------------------------------------
 !
-CALL SNOW_LOAD_MEB(PTSTEP,PSR,PTV,ZWRVNMAX,ZKVN,ZCHEATV,PLER_V_C,PLES_V_C,ZMELTVN, &
+ CALL SNOW_LOAD_MEB(PTSTEP,PSR,PTV,ZWRVNMAX,ZKVN,ZCHEATV,PLER_V_C,PLES_V_C,ZMELTVN, &
      ZVELC,PMELTCV,PFRZCV,PSR_GN,PWR,PWRVN,PSUBVCOR,PLVTT,PLSTT)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -1155,7 +1155,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
 ! snowpack and part falling onto snow-free understory.
 !
 !
-CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
+ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
         ZRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
         PWR, ZWRMAX, ZRRSFC, PDRIP, PRRVEG, PLVTT        )
 !
@@ -1164,7 +1164,7 @@ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
 !*      10.0    Explicit snow scheme (MEB: impose surface fluxes as upper BC)
 !              ----------------------------------------------------------------
 !
-CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
+ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
            TPTIME, PTSTEP, PVEGTYPE,                                                   &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                                    &
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,                                 &
@@ -1211,17 +1211,17 @@ ENDIF
 !              ------------------------------------
 !
 
-CALL RESHIFT_MEB_SOIL(OMEB_LITTER,ZTGL,PTL,PTG,ZLESFC,ZLESFCI,           &
+ CALL RESHIFT_MEB_SOIL(OMEB_LITTER,ZTGL,PTL,PTG,ZLESFC,ZLESFCI,           &
                             PLEG,PLEGI,PLELITTER,PLELITTERI)              
 !
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-CALL DEALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
+ CALL DEALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
 !
 IF(OMEB_LITTER)THEN
 !
-CALL ICE_LITTER(PTSTEP, PLELITTERI,                  &
+ CALL ICE_LITTER(PTSTEP, PLELITTERI,                  &
                 PSOILHCAPZ,                          &
                 PTG, PTL, PWGI, PWG, KWG_LAYER,      &
                 PDZG,PWRL,PWRLI,PGNDLITTER,ZPHASEL,  &
@@ -1233,7 +1233,7 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 !===============================================================================
 !
@@ -1577,7 +1577,7 @@ ZWORK(:)         = 0.0
 ZWORKA(:)        = PSNOWALB(:)
 ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
 !
-CALL SNOW3LALB(ZWORKA,ZSPECTRALALBEDO,PSNOWRHO(:,1),PSNOWAGE(:,1),ZPERMSNOWFRAC,PPS)
+ CALL SNOW3LALB(ZWORKA,ZSPECTRALALBEDO,PSNOWRHO(:,1),PSNOWAGE(:,1),ZPERMSNOWFRAC,PPS)
 !
 ! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
 ! (also note, here PSNOWALB doesn't evolve...we just diagnose spectral components).
@@ -1630,7 +1630,7 @@ DO JJ=1,INLVLS
    ENDDO
 ENDDO
 !
-CALL SNOW3LRADTRANS(XSNOWDZMIN, ZSPECTRALALBEDO, ZSNOWDZ, PSNOWRHO, &
+ CALL SNOW3LRADTRANS(XSNOWDZMIN, ZSPECTRALALBEDO, ZSNOWDZ, PSNOWRHO, &
                            ZPERMSNOWFRAC, PZENITH,  PSNOWAGE, PTAU_N)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)

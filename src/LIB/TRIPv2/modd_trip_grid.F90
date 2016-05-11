@@ -69,7 +69,7 @@ END TYPE TRIP_GRID_t
 !
 
 
-CONTAINS
+ CONTAINS
 
 !
 

@@ -157,7 +157,7 @@ IL = ILU
                           HMASK, IL, NLUOUT, ILU, NMASK)
 !
 !------------------------------------------------------------------------------
-CMASK = HMASK
+ CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_LFI_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
 !

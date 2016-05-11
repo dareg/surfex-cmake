@@ -995,7 +995,7 @@ ENDIF
 !*      Irrigation of gardens or greenroofs
 !       -----------------------------------
 !
-CALL WRITESURF_PGD_TEB_IRRIG_n(DGU, U, &
+ CALL WRITESURF_PGD_TEB_IRRIG_n(DGU, U, &
                                TIR, &
                                HPROGRAM)
 !

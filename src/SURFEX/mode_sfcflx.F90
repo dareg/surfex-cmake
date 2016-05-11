@@ -198,7 +198,7 @@ REAL , PARAMETER ::     &
 ! Procedures 
 !==============================================================================
 
-CONTAINS
+ CONTAINS
 
 !==============================================================================
 !  The codes of the sfcflx procedures are stored in separate "*.incf" files

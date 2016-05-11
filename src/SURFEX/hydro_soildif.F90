@@ -92,12 +92,12 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HRUNOFF ! surface runoff formulation
+ CHARACTER(LEN=*),     INTENT(IN)    :: HRUNOFF ! surface runoff formulation
 !                                              ! 'WSAT'
 !                                              ! 'DT92'
 !                                              ! 'SGH ' Topmodel
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HHORT    ! Hortonian runoff
+ CHARACTER(LEN=*),     INTENT(IN)    :: HHORT    ! Hortonian runoff
 !
 REAL, INTENT(IN)                    :: PTSTEP ! Model time step (s)
 !
@@ -498,7 +498,7 @@ ENDDO
 !Solve Matrix Equation: tridiagonal system: solve for soil
 !water (volumetric water content) tendencies:
 !
-CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,KWG_LAYER,INL,ZSOL)
+ CALL TRIDIAG_DIF(ZAMTRX,ZBMTRX,ZCMTRX,ZFRC,KWG_LAYER,INL,ZSOL)
 !
 ! 9. Final calculations and diagnostics:
 !    -----------------------------------

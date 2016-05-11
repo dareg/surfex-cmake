@@ -132,7 +132,7 @@ ENDIF
 !
 !* initialization for I/O
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !* 1D physical dimension

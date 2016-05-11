@@ -838,7 +838,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_PAR_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE READ_FIELD(HRECFM,PFIELD,YDIR)

@@ -85,9 +85,9 @@ IMPLICIT NONE
 !
 TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
-CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
-CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
-CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+ CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
+ CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
 LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed by atm. model
 !
 !*    0.2    Declaration of local variables
@@ -104,7 +104,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !
 LRM_RIVER = .FALSE.
 !
-CPROGNAME=HPROGRAM
+ CPROGNAME=HPROGRAM
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !

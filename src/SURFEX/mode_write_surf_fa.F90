@@ -21,7 +21,7 @@ INTERFACE WRITE_SURFT_FA
         MODULE PROCEDURE WRITE_SURFT2_FA
 END INTERFACE
 !
-CONTAINS
+ CONTAINS
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFX0_FA (&
@@ -466,8 +466,8 @@ INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a pro
                                                  ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 ! 
-CHARACTER(LEN=4)  :: YPREFIX
-CHARACTER(LEN=3)  :: YPATCH
+ CHARACTER(LEN=4)  :: YPREFIX
+ CHARACTER(LEN=3)  :: YPATCH
 INTEGER           :: I, JL ! loop counter
 INTEGER           :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 REAL  :: XTIME0
@@ -907,7 +907,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT2_FA',0,ZHOOK_HANDLE)
 !$OMP SINGLE
 NWORKB = 0
 !
-CALL IO_BUFF(&
+ CALL IO_BUFF(&
                 HREC,'W',LWORK0)
 !$OMP END SINGLE
 !

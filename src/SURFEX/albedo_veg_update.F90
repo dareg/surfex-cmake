@@ -82,11 +82,11 @@ REAL,                 INTENT(IN)    :: PTSTEP  ! time step
 TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
 REAL,   DIMENSION(:,:), INTENT(IN)  :: PCOVER  ! cover types
 LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER
-CHARACTER(LEN=*),     INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
-CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),     INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,              INTENT(IN)    :: OAGRIP
 LOGICAL,              INTENT(IN)    :: OTR_ML
-CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
 LOGICAL,              INTENT(IN)    :: OECOCLIMAP ! T if ecoclimap is used
 !
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PVEG    ! vegetation fraction

@@ -240,7 +240,7 @@ ENDIF
  CALL READ_ISBA_CONF_n(IM%CHI, IM%DGEI, IM%DGI, IM%DGMI, IM%I, &
                        HPROGRAM)
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','ISBA  ','READ ')
  CALL READ_SURF(&
                 HPROGRAM,'VERSION',IVERSION,IRESP)
@@ -274,7 +274,7 @@ IF (HINIT=='PRE') THEN
 
 ELSEIF (HINIT=='ALL') THEN
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','READ ')
 !
   IF (IVERSION<6) THEN
@@ -325,7 +325,7 @@ SELECT CASE (HINIT)
                         HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,IM%I%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','READ ')
     CALL READ_SURF(&
                 HPROGRAM,'DTCUR',IM%I%TTIME,IRESP)
@@ -339,7 +339,7 @@ END SELECT
 ! initialization for I/O
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !
@@ -460,7 +460,7 @@ IF (OLAND_USE .OR. HINIT=='PGD') THEN
   RETURN
 END IF
 !
-CALL COMPUTE_ISBA_PARAMETERS(DTCO, DGU, UG, U, IM, DST, SLT, SV, &
+ CALL COMPUTE_ISBA_PARAMETERS(DTCO, DGU, UG, U, IM, DST, SLT, SV, &
                              HPROGRAM,HINIT,OLAND_USE,                  &
                              KI,KSV,KSW,                                &
                              HSV,ZCO2,PRHOA,                            &

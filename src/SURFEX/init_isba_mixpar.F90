@@ -77,13 +77,13 @@ TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=*), INTENT(IN)          :: HISBA 
+ CHARACTER(LEN=*), INTENT(IN)          :: HISBA 
 INTEGER,                INTENT(IN)    :: KDECADE
 INTEGER,                INTENT(OUT)   :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:),  INTENT(IN)    :: OCOVER
-CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
-CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 !
 !*    0.2    Declaration of local variables
@@ -92,7 +92,7 @@ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 REAL, DIMENSION(19)   :: XSTRESS   ! 1. if defensive /0. if offensive
 REAL, DIMENSION(19)   :: XSTRESS_NOAGRI   ! 1. if defensive /0. if offensive
 !
-CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG
+ CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG
 !
 INTEGER               :: JVEGTYPE
 !

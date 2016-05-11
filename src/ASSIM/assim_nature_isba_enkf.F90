@@ -54,11 +54,11 @@ IMPLICIT NONE
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL, DIMENSION(:), INTENT(IN) :: PT2M
 REAL, DIMENSION(:), INTENT(IN) :: PHU2M
-CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !
@@ -273,7 +273,7 @@ ENDIF
 !
 IOBSCOUNT = 0
 !
-CALL INIT_RANDOM_SEED()
+ CALL INIT_RANDOM_SEED()
 !
 DO II=1,KI
   !

@@ -70,9 +70,9 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 INTEGER           :: JSV, JSW
 !
 REAL(KIND=JPRB)   :: ZHOOK_HANDLE
@@ -83,7 +83,7 @@ REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SEAICE_N',0,ZHOOK_HANDLE)
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                     HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !
 IF(LCPL_SEAICE.OR.S%LHANDLE_SIC)THEN      

@@ -87,7 +87,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! * 0. MPI and OASIS must be initialized before any DR_HOOK call
 ! --------------------------------------------------------------------------------------
 !
-CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM,ZRUNTIME)
+ CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM,ZRUNTIME)
 !
 ! --------------------------------------------------------------------------------------
 ! * 1. Alloc trip variables and open listing
@@ -97,7 +97,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_MASTER',0,ZHOOK_HANDLE)
 !
  CALL TRIP_ALLOC_LIST(1)
 !
-CALL INIT_TRIP_PAR
+ CALL INIT_TRIP_PAR
 !
 OPEN(UNIT=NLISTING,FILE=CLISTING,FORM='FORMATTED',ACTION='WRITE')
 !
@@ -114,8 +114,8 @@ IRANK  = NUNDEF
 IF(.NOT.GOASIS)THEN
   ILOCAL_COMM=MPI_COMM_WORLD
 ENDIF
-CALL MPI_COMM_SIZE(ILOCAL_COMM,INPROC,IERR)
-CALL MPI_COMM_RANK(ILOCAL_COMM,IRANK,IERR)  
+ CALL MPI_COMM_SIZE(ILOCAL_COMM,INPROC,IERR)
+ CALL MPI_COMM_RANK(ILOCAL_COMM,IRANK,IERR)  
 IF(INPROC==NUNDEF.OR.IRANK==NUNDEF)THEN
   WRITE(NLISTING,*)'TRIP_MASTER: PROBLEM WITH MPI, INPROC = ',INPROC
   WRITE(NLISTING,*)'TRIP_MASTER: PROBLEM WITH MPI, IRANK  = ',IRANK
@@ -148,9 +148,9 @@ ENDIF
 ! * 3. read namelists
 ! --------------------------------------------------------------------------------------
 !
-CALL READ_NAM_TRIP_RUN(NLISTING)
+ CALL READ_NAM_TRIP_RUN(NLISTING)
 !
-CALL READ_NAM_TRIP(NLISTING)
+ CALL READ_NAM_TRIP(NLISTING)
 !
 IF(GOASIS)THEN
   CALL TRIP_OASIS_READ_NAM(NLISTING,ZRUNTIME)
@@ -162,10 +162,10 @@ ENDIF
 !
 YTRIP_CUR => YTRIP_LIST(1)
 !
-CALL READ_NAM_TRIP_GRID(YTRIP_CUR%TPG, &
+ CALL READ_NAM_TRIP_GRID(YTRIP_CUR%TPG, &
                         NLISTING)
 !
-CALL INIT_TRIP(YTRIP_CUR%TPDG, YTRIP_CUR%TP, YTRIP_CUR%TPG, &
+ CALL INIT_TRIP(YTRIP_CUR%TPDG, YTRIP_CUR%TP, YTRIP_CUR%TPG, &
                IYEAR,IMONTH,IDAY,ZTIME,ILON,ILAT,XTSTEP_RUN,XTSTEP_DIAG,LRESTART)
 !
 ! --------------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ ENDIF
 ! * 6. Get run configuration
 ! --------------------------------------------------------------------------------------
 !
-CALL TRIP_RUN_CONF(NLISTING,GOASIS,IYEAR,IMONTH,IDAY,ZTIME, &
+ CALL TRIP_RUN_CONF(NLISTING,GOASIS,IYEAR,IMONTH,IDAY,ZTIME, &
                    ILON,ILAT,INB_TSTEP_RUN,ZRUNTIME         )
 !
 IF(GOASIS)THEN
@@ -197,7 +197,7 @@ ENDIF
 ! * 7. Read and prepare drainage and runoff if offline
 ! --------------------------------------------------------------------------------------
 !
-CALL TRIP_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TP, YTRIP_CUR%TPG, &
+ CALL TRIP_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TP, YTRIP_CUR%TPG, &
               GOASIS,                           &
               NLISTING,ILON,ILAT,INB_TSTEP_RUN, &
               ZRUNTIME,ILON_OL,ILAT_OL,INB_OL,  &
@@ -207,7 +207,7 @@ CALL TRIP_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TP, YTRIP_CUR%TPG, &
 ! * 9. Store run mean diagnostic and write restart
 !-------------------------------------------------------------------------------
 !
-CALL TRIP_DIAG_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TPG, &
+ CALL TRIP_DIAG_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TPG, &
                    NLISTING,ILON,ILAT,ZRUNTIME)
 !
 IF(LRESTART)THEN
@@ -219,7 +219,7 @@ ENDIF
 ! * 10. End of run
 ! --------------------------------------------------------------------------------------
 !
-CLOSE(NLISTING)
+ CLOSE(NLISTING)
 !
 WRITE(*,*) ' '
 WRITE(*,*) '    ------------------------------'
@@ -227,7 +227,7 @@ WRITE(*,*) '    | TRIP MASTER ENDS CORRECTLY |'
 WRITE(*,*) '    ------------------------------'
 WRITE(*,*) ' '
 !
-CALL TRIP_DEALLO_LIST
+ CALL TRIP_DEALLO_LIST
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_MASTER',1,ZHOOK_HANDLE)
 !

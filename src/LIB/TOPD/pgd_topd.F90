@@ -86,9 +86,9 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
-CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
+ CHARACTER(LEN=*),  INTENT(IN)     :: HPROGRAM    !
 !
-CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
+ CHARACTER(LEN=50),DIMENSION(NNCAT) :: CNAME
 INTEGER                   :: IL                     ! number of points
 INTEGER                   :: JJ,JI,JK,JWRK ! loop control 
 INTEGER                   :: JCAT,JMESH,JPIX ! loop control 
@@ -119,9 +119,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_TOPD',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !  
-CALL READ_NAM_PGD_TOPD(HPROGRAM,LCOUPL_TOPD,CCAT,XF_PARAM_BV,XC_DEPTH_RATIO_BV)
+ CALL READ_NAM_PGD_TOPD(HPROGRAM,LCOUPL_TOPD,CCAT,XF_PARAM_BV,XC_DEPTH_RATIO_BV)
 !
 IF (LCOUPL_TOPD .AND. (I%CISBA/='3-L'.AND. I%CISBA/='DIF')) &
   CALL ABOR1_SFX("PGD_TOPD: coupling with topmodel only runs with CISBA=3-L or CISBA=DIF  ")
@@ -335,7 +335,7 @@ IF (LCOUPL_TOPD) THEN
   !
   !*        3.0 Compute Mean slope over each ISBA_MESH
 !            ----------------------------------------------------------------------
-CALL TOPD_TO_ISBA_SLOPE(USS, &
+ CALL TOPD_TO_ISBA_SLOPE(USS, &
                         U%NDIM_FULL)
 !
 !*        4.0  Compute F and DC for each ISBA mesh

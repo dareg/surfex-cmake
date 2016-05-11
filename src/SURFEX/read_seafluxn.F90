@@ -72,20 +72,20 @@ TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KLUOUT
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: JMTH, INMTH
-CHARACTER(LEN=2 ) :: YMTH
+ CHARACTER(LEN=2 ) :: YMTH
 !
 INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
 INTEGER           :: IVERSION       ! surface version
 !
@@ -98,7 +98,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_SEAFLUX_N',0,ZHOOK_HANDLE)
 !
 YRECFM='SIZE_SEA'
-CALL GET_TYPE_DIM_n(DTCO, U, &
+ CALL GET_TYPE_DIM_n(DTCO, U, &
                     'SEA   ',ILU)
 !
 !*       2.     Prognostic fields:
@@ -154,12 +154,12 @@ ENDIF
 ALLOCATE(S%XZ0(ILU))
 YRECFM='Z0SEA'
 S%XZ0(:) = 0.001
-CALL READ_SURF(&
+ CALL READ_SURF(&
                     HPROGRAM,YRECFM,S%XZ0(:),IRESP)
 !
 !* flag to use or not the SeaIce model 
 !
-CALL READ_SURF(&
+ CALL READ_SURF(&
                     HPROGRAM,'VERSION',IVERSION,IRESP)
 IF (IVERSION <8) THEN
    S%LHANDLE_SIC=.FALSE.
@@ -231,7 +231,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('READ_SEAFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_SEA(HFIELD,PFIELD)
@@ -239,7 +239,7 @@ SUBROUTINE CHECK_SEA(HFIELD,PFIELD)
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=12),  INTENT(IN) :: HFIELD
+ CHARACTER(LEN=12),  INTENT(IN) :: HFIELD
 REAL, DIMENSION(:), INTENT(IN) :: PFIELD
 !
 REAL            :: ZMAX,ZMIN

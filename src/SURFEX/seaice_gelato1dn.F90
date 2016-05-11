@@ -89,7 +89,7 @@ IMPLICIT NONE
 !
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
-CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
 REAL,                INTENT(IN)       :: PTIMEC    ! current duration since start of the run (s)
 REAL,                INTENT(IN)       :: PTSTEP    ! surface time-step (s)
 TYPE(T_GLT)         ,INTENT(INOUT)    :: TPGLT     ! Gelato state variable
@@ -124,7 +124,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SEAICE_GELATO1D',0,ZHOOK_HANDLE)
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! Must restore Gelato problem size (nx) to the correct value for the NPROMA block
 ! 

@@ -86,7 +86,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 INTEGER :: IRESP ! error return code
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_GRID_SURF_ATM',0,ZHOOK_HANDLE)
-CPROGNAME=HPROGRAM
+ CPROGNAME=HPROGRAM
 !
 !*    1.      Set default constant values 
 !             ---------------------------

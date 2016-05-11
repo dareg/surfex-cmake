@@ -100,7 +100,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PREP_OCEAN_ASCLLV',0,ZHOOK_HANDLE)
 !
-CINGRID_TYPE='CONF PROJ '
+ CINGRID_TYPE='CONF PROJ '
 
 !*      1.    get full dimension of grid
  CALL GET_TYPE_DIM_n(DTCO, U, &
@@ -154,7 +154,7 @@ END DO
 !      3. Close the file
 
 99 CONTINUE
-CALL CLOSE_FILE (HPROGRAM,IGLB)
+ CALL CLOSE_FILE (HPROGRAM,IGLB)
 
 WRITE(KLUOUT,*) MINVAL(ZFIELDR), MAXVAL(ZFIELDR)
 
@@ -176,7 +176,7 @@ END SELECT
 !*      3.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='NONE  '
+ CINTERP_TYPE='NONE  '
 !CINTERP_TYPE='HORIBL'
 !
 

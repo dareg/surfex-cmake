@@ -23,7 +23,7 @@ INTERFACE WRITE_SURFT_NC
         MODULE PROCEDURE WRITE_SURFT2_NC
 END INTERFACE
 !
-CONTAINS
+ CONTAINS
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFX0_NC (DGU, &
@@ -64,7 +64,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(0) :: IDIMS
 INTEGER :: IRET
 INTEGER :: IVAR_ID,JRET
@@ -146,7 +146,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(0) :: IDIMS
 INTEGER              :: IVAR_ID, JRET
 INTEGER :: IRET
@@ -319,9 +319,9 @@ INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem 
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(0) :: IDIMS
-CHARACTER(LEN=1)    :: YFIELD   ! work array read in the file
+ CHARACTER(LEN=1)    :: YFIELD   ! work array read in the file
 INTEGER              :: IVAR_ID
 INTEGER :: IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -422,7 +422,7 @@ INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem 
  CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                           
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(2) :: IDIMIDS
 INTEGER, DIMENSION(2) :: IDIMLEN
  CHARACTER(LEN=100)    :: YNAME
@@ -454,7 +454,7 @@ ENDIF
 !
 NWORKDIMS = 0
 NWORKLEN(:) = 0
-CWORK0 = ""
+ CWORK0 = ""
 NWORKB=0
 !
  CALL IO_BUFF(&
@@ -561,7 +561,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFX1_NC',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE WRITE_DATAX1_NC(KDIM,KNDIMS)
 !
@@ -667,7 +667,7 @@ INTEGER,              INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem
  CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                              
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(3) :: IDIMIDS
 INTEGER, DIMENSION(3) :: IDIMLEN
  CHARACTER(LEN=100)    :: YNAME
@@ -688,7 +688,7 @@ IRET(:) = 0
 !
 NWORKDIMS = 0
 NWORKLEN(:) = 0
-CWORK0 = ""
+ CWORK0 = ""
 NWORKB=0
 !
  CALL IO_BUFF(&
@@ -813,7 +813,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFX2_NC',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE WRITE_DATAX2_NC(KDIM1,KDIM2,KNDIMS)
 !
@@ -917,7 +917,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
 ! 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(2) :: IDIMIDS
 INTEGER, DIMENSION(2) :: IDIMLEN
  CHARACTER(LEN=100)    :: YNAME
@@ -946,7 +946,7 @@ ENDIF
 !$OMP SINGLE
 !
 NWORKLEN(:) = 0
-CWORK0 = ""
+ CWORK0 = ""
 NWORKB=0
 !
  CALL IO_BUFF(&
@@ -1048,7 +1048,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFN1_NC',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE WRITE_DATAN1_NC(KDIM)
 !
@@ -1153,7 +1153,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
  CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                                 
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(3) :: IDIMIDS
 INTEGER, DIMENSION(3) :: IDIMLEN
  CHARACTER(LEN=100)    :: YNAME
@@ -1174,7 +1174,7 @@ IRET(:) = 0
 !
 NWORKDIMS = 0
 NWORKLEN(:) = 0
-CWORK0 = ""
+ CWORK0 = ""
 NWORKB=0
 !
  CALL IO_BUFF(&
@@ -1295,7 +1295,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFN2_NC',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE WRITE_DATAN2_NC(KDIM1,KDIM2,KNDIMS)
 !
@@ -1398,7 +1398,7 @@ INTEGER,               INTENT(OUT):: KRESP    ! KRESP  : return-code if a proble
                                               ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(1) :: IDIMIDS
 INTEGER, DIMENSION(1) :: IDIMLEN
 INTEGER               :: IVAR_ID, JDIM, INDIMS
@@ -1451,7 +1451,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFL1_NC',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE WRITE_DATAL1_NC(KDIM)
 !
@@ -1526,7 +1526,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 !*      0.2   Declarations of local variables
 !
-CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
 INTEGER, DIMENSION(0) :: IDIMIDS
  CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be written
 INTEGER :: IVAR_ID, JRET, JWRK

@@ -145,8 +145,8 @@ NAMELIST/NAM_LAND_USE/CFNAM_VEGTYPE,CFTYP_VEGTYPE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('SET_VEGTYPES_FRACTIONS',0,ZHOOK_HANDLE)
-CFNAM_VEGTYPE     = '                            '
-CFTYP_VEGTYPE     = '      '
+ CFNAM_VEGTYPE     = '                            '
+ CFTYP_VEGTYPE     = '      '
 !
 !-------------------------------------------------------------------------------
 !

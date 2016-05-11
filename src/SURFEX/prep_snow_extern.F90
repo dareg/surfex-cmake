@@ -76,12 +76,12 @@ IMPLICIT NONE
 !
 !
 !
-CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-CHARACTER(LEN=10),  INTENT(IN)  :: HSURF     ! type of field
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of file
-CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
-CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=10),  INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of file
+ CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
+ CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER  :: PFIELD    ! field to interpolate horizontally
 LOGICAL,            INTENT(IN)  :: OSNOW_IDEAL
@@ -101,7 +101,7 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZDEPTH       ! thickness of each layer (m
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZGRID        ! normalized input grid
 !
 LOGICAL                           :: GTOWN          ! town variables written in the file
-CHARACTER(LEN=12)                 :: YRECFM         ! record name
+ CHARACTER(LEN=12)                 :: YRECFM         ! record name
 INTEGER                           :: IRESP          ! error return code
 INTEGER                           :: IVERSION       ! SURFEX version
 LOGICAL                           :: GOLD_NAME      ! old name flag 
@@ -110,12 +110,12 @@ INTEGER                           :: IVEGTYPE       ! actual number of vegtypes
 INTEGER                           :: JLAYER         ! loop on snow vertical grids
 INTEGER                           :: JI             ! loop on pts
 INTEGER                           :: INI
-CHARACTER(LEN=8)                  :: YAREA          ! area treated ('ROOF','ROAD','VEG ')
-CHARACTER(LEN=3)                  :: YPREFIX        ! prefix to identify patch
+ CHARACTER(LEN=8)                  :: YAREA          ! area treated ('ROOF','ROAD','VEG ')
+ CHARACTER(LEN=3)                  :: YPREFIX        ! prefix to identify patch
 INTEGER                           :: IPATCH         ! number of input patch
 INTEGER                           :: ITEB_PATCH     ! number of input patch for TEB
 INTEGER                           :: JPATCH         ! loop on patch
-CHARACTER(LEN=6)                  :: YMASK          ! type of tile mask
+ CHARACTER(LEN=6)                  :: YMASK          ! type of tile mask
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -149,17 +149,17 @@ END IF
 !  Their value must be defined as XUNDEF.
 !
 !* reading of version of the file being read
-CALL OPEN_AUX_IO_SURF(&
+ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 !
 GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL OPEN_AUX_IO_SURF(&
+ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,YMASK)
 !
 IF (YAREA(1:4)=='VEG ') THEN
@@ -186,10 +186,10 @@ END IF
 !*      2.     Reading of grid
 !              ---------------
 !
-CALL OPEN_AUX_IO_SURF(&
+ CALL OPEN_AUX_IO_SURF(&
                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
-CALL PREP_GRID_EXTERN(&
+ CALL PREP_GRID_EXTERN(&
                       HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !-------------------------------------------------------------------------------------

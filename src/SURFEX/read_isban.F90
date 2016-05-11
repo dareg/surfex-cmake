@@ -99,9 +99,9 @@ INTEGER           :: ILU          ! 1D physical dimension
 !
 INTEGER           :: IRESP          ! Error code after redding
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 !
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=4)  :: YLVL
 !
 REAL, DIMENSION(:,:,:),ALLOCATABLE :: ZLAI
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
@@ -628,7 +628,7 @@ DEALLOCATE(ZWORK)
 !
 IF (LHOOK) CALL DR_HOOK('READ_ISBA_N',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE MAKE_ENS_ENKF(KWORK,KLU,HREC,PCOFSWI,PVAR,PRED_NOISE)
 !

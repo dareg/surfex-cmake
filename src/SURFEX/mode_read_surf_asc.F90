@@ -55,7 +55,7 @@ INTERFACE READ_SURFT_ASC
         MODULE PROCEDURE READ_SURFT2_ASC
 END INTERFACE
 !
-CONTAINS
+ CONTAINS
 !
 !     #############################################################
       SUBROUTINE READ_SURFX0_ASC (&

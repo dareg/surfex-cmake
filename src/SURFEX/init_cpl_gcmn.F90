@@ -80,7 +80,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER           :: IRESP      ! Error code after redding
 ! 
-CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM     ! Name of the article to be read
 !
 INTEGER           :: IVERSION   ! surface version
 !
@@ -119,7 +119,7 @@ ELSE
 ENDIF
 !
 YRECFM='VERSION'
-CALL READ_SURF(&
+ CALL READ_SURF(&
                HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 LREAD=(HINIT/='PGD'.AND.HINIT/='PRE'.AND.IVERSION>=8)

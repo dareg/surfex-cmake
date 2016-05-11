@@ -122,16 +122,16 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
+ CHARACTER(LEN=*),       INTENT(IN)    :: HISBA   ! type of soil (Force-Restore OR Diffusion)
 INTEGER,                INTENT(IN)    :: KDECADE
 INTEGER,                INTENT(IN)    :: KDECADE2
 REAL, DIMENSION(:,:),   INTENT(IN)    :: PCOVER
 LOGICAL, DIMENSION(:),  INTENT(IN)    :: OCOVER
-CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
+ CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,                INTENT(IN)    :: OAGRIP
 LOGICAL,                INTENT(IN)    :: OPERM
 LOGICAL,                INTENT(IN)    :: OTR_ML
-CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !
 REAL, DIMENSION(:,:),   OPTIONAL, INTENT(IN)   :: PWG1
 !
@@ -831,7 +831,7 @@ IF (ASSOCIATED(DTCO%XDATA_WEIGHT)) DEALLOCATE(DTCO%XDATA_WEIGHT)
 IF (LHOOK) CALL DR_HOOK('CONVERT_PATCH_ISBA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE SET_STRESS(KSIZE1,KSIZE2)

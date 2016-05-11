@@ -177,7 +177,7 @@ IF (.NOT.ALLOCATED(NINDEX)) THEN
 ENDIF
 !
 !------------------------------------------------------------------------------
-CMASK=HMASK
+ CMASK=HMASK
 !------------------------------------------------------------------------------
 !
 IF (HPROGRAM=='AROME ') THEN
@@ -217,7 +217,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_FA_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE GET_MASK(KLU,KL)
 !

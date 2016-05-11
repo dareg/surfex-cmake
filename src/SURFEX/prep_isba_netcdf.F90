@@ -156,7 +156,7 @@ END DO
 DEALLOCATE(ZFIELD)
 !
 !Interpolation method
-CINTERP_TYPE='NONE'
+ CINTERP_TYPE='NONE'
 !
 IF (LHOOK) CALL DR_HOOK('PREP_ISBA_NETCDF',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

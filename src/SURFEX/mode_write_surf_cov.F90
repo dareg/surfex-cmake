@@ -9,7 +9,7 @@ MODULE MODE_WRITE_SURF_COV
 !RJ: all safety compatibility checks should be done here
 PUBLIC :: WRITE_SURF_COV
 
-CONTAINS
+ CONTAINS
 
 !     #############################################################
       SUBROUTINE WRITE_SURF_COV (DGU, U, &

@@ -57,7 +57,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 
 
-CONTAINS
+ CONTAINS
 
 SUBROUTINE TARTES(PSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_DENSITY,&
                   PSNOWIMP_CONTENT,PALB,PSW_RAD_DIF,PSW_RAD_DIR,PCOSZEN,KNLVLS_USE,PSNOWALB, &
@@ -193,7 +193,7 @@ END DO
 !
 !4 Diagnostics
 !4.1 Albedo
-CALL SNOWPACK_ALBEDO(ZXC_DIR(:,1,:),ZXC_DIF(:,1,:),ZXD_DIR(:,1,:),ZXD_DIF(:,1,:),  &
+ CALL SNOWPACK_ALBEDO(ZXC_DIR(:,1,:),ZXC_DIF(:,1,:),ZXD_DIR(:,1,:),ZXD_DIF(:,1,:),  &
                      ZGP_DIR(:,1,:),ZGP_DIF(:,1,:),PCOSZEN,ZMUDIFF,PSW_RAD_DIR,    &
                      PSW_RAD_DIF,PSNOWALB)
 !
@@ -471,7 +471,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SINGLE_SCATTERING_OPTICAL_PARAMETERS',0,ZHOOK_HANDLE)
 !
-CALL SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,ZSNOWG00,ZSNOWY,ZSNOWW,ZSNOWB)
+ CALL SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,ZSNOWG00,ZSNOWY,ZSNOWW,ZSNOWB)
 !
 DO JL = 1,KMAX_USE
   !
@@ -499,7 +499,7 @@ DO JL = 1,KMAX_USE
 ENDDO
 !
 !adding co- single scattering albedo for impureties
-CALL IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO(PSNOWSSA,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,&
+ CALL IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO(PSNOWSSA,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,&
                                             KNLVLS_USE,KMAX_USE,ZIMPCOSSALB)
 !
 ZSNOWCOSSALB = ZSNOWCOSSALB + ZIMPCOSSALB
@@ -930,11 +930,11 @@ IF (LHOOK) CALL DR_HOOK('SOLVES_TWO_STREAM2',0,ZHOOK_HANDLE)
 !
 ! for now we inverse the matrix twice :
 ! to be improved by adding a dimension in tridiag_ground_snowcro
-CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
+ CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
                             PVECT_DIR(:,:,:),ZX0_DIR(:,:,:),  &
                             2*KNLVLS_EFF(:,:),0)
 !
-CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
+ CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
                             PVECT_DIF(:,:,:),ZX0_DIF(:,:,:),  &
                             2*KNLVLS_EFF(:,:),0)
 !
@@ -1206,7 +1206,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
 !
 LOGICAL, INTENT(IN) :: ODEBUG ! Print for debugging
-CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 !
 !packed variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_DENSITY_P !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
@@ -1405,7 +1405,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
 
 LOGICAL,INTENT(IN) :: ODEBUG ! Print for debugging
-CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 
 !Local variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNBANDS) :: ZSNOWENERGY !(npoints,nlayer,nbands)

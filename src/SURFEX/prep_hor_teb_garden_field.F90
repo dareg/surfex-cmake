@@ -157,7 +157,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GARDEN_FIELD',0,ZHOOK_HANDLE)
  CALL READ_PREP_TEB_GARDEN_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                                HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
 !
-CMASK = 'TOWN  '
+ CMASK = 'TOWN  '
 !
 INI=SIZE(TG%XLAT)
 !-------------------------------------------------------------------------------------
@@ -250,7 +250,7 @@ DEALLOCATE(ZFIELD)
 !
 ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
 !
-CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+ CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
 !
 DEALLOCATE(ZFIELDOUTP)
 !
@@ -360,7 +360,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GARDEN_FIELD',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------

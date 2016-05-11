@@ -135,7 +135,7 @@ INTEGER         :: NI,NJ                  ! Domain size
 !
 REAL            :: XIO_FRAC = 1.          ! fraction of ISIZE deduced to I/O
 !
-CHARACTER(LEN=4) :: YALG_MPI = "LIN "     ! type of distribution algorithm for MPI
+ CHARACTER(LEN=4) :: YALG_MPI = "LIN "     ! type of distribution algorithm for MPI
 !
 !-------------------------------------------------------------------------------
 !

@@ -265,7 +265,7 @@ LOGICAL, INTENT(IN)               :: OMEB_LITTER       ! explicit litter layer (
 LOGICAL, INTENT(IN)               :: OMEB_GNDRES       ! ground resistance (MEB option)
 LOGICAL, INTENT(IN)               :: OFORC_MEASURE
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -273,14 +273,14 @@ LOGICAL,              INTENT(IN)  :: OAGRI_TO_GRASS
 LOGICAL,              INTENT(IN)  :: OSNOWDRIFT          ! activate snowdrift
 LOGICAL,              INTENT(IN)  :: OSNOWDRIFT_SUBLIM   ! activate sublimation during drift
 LOGICAL,              INTENT(IN)  :: OSNOW_ABS_ZENITH    ! activate parametrization of solar absorption for polar regions
-CHARACTER(3),         INTENT(IN)  :: HSNOWMETAMO
+ CHARACTER(3),         INTENT(IN)  :: HSNOWMETAMO
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
                                          ! HSNOWMETAMO=C13 Carmagnola et al 2014
                                          ! HSNOWMETAMO=T07 Taillandier et al 2007
                                          ! HSNOWMETAMO=F06 Flanner et al 2006
-CHARACTER(3),         INTENT(IN)  :: HSNOWRAD
+ CHARACTER(3),         INTENT(IN)  :: HSNOWRAD
                                          !-----------------------
                                          ! Crocus radiative transfer scheme
                                          ! HSNOWRAD=B92 Brun et al 1992
@@ -991,7 +991,7 @@ ENDIF
 !*      3.0    Plant stress due to soil water deficit
 !              --------------------------------------
 !
-CALL SOILSTRESS(HISBA, ZF2,                 &
+ CALL SOILSTRESS(HISBA, ZF2,                 &
          PROOTFRAC, PWSAT, PWFC, PWWILT,    &
          PWG, PWGI, KWG_LAYER, ZF2WGHT, ZF5 )  
 !
@@ -1161,7 +1161,7 @@ ENDIF
 !*     12.0    Water transfers and phase change in the soil
 !              --------------------------------------------
 !
-CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                &
+ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                &
      OFLOOD, PTSTEP, PVEGTYPE,                                                  &
      PRRSFC, PSRSFC, PLEV, PLETR, PLEG, PLES, PRUNOFFB, PWDRAIN,                &
      PC1, PC2, PC3, PC4B, PC4REF, PWGEQ, PCG, PCT, ZVEG, PLAI, ZWRMAX, PMELT,   &
@@ -1185,7 +1185,7 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                
 !* add snow component to output radiative parameters and fluxes in case 
 !  of ES or CROCUS snow schemes
 !
-CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                             &
+ CALL ISBA_SNOW_AGR( HSNOW_ISBA, OMEB,                             &
           PEXNS, PEXNA, PTA, PQA, PZREF, PUREF, PDIRCOSZW, PVMOD, &
           PZ0EFF, PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PRR, PSR,        &
           ZEMIST, ZALBT, PPSN, PPSNG, PPSNV,                      &

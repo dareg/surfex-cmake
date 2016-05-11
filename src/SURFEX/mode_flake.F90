@@ -219,7 +219,7 @@ REAL :: dMsnowdt_flk=Z_                      ! The rate of snow accumulation [kg
 ! Procedures 
 !==============================================================================
 
-CONTAINS
+ CONTAINS
 
 !==============================================================================
 !  The codes of the FLake procedures are stored in separate "*.incf" files
@@ -555,7 +555,7 @@ h_snow_n_flk = h_snow_p_flk
 h_ice_n_flk  = h_ice_p_flk   
 h_ML_n_flk   = h_ML_p_flk    
 H_B1_n_flk   = H_B1_p_flk   
-C_T_n_flk    = C_T_p_flk    
+ C_T_n_flk    = C_T_p_flk    
 
 !------------------------------------------------------------------------------
 !  Compute fluxes, using variables from the previous time step.

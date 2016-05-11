@@ -243,14 +243,14 @@ ZQA(:) = PQA(:) / PRHOA(:)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 WM%W%TTIME%TIME = WM%W%TTIME%TIME + PTSTEP
-CALL ADD_FORECAST_TO_DATE_SURF(WM%W%TTIME%TDATE%YEAR,WM%W%TTIME%TDATE%MONTH,WM%W%TTIME%TDATE%DAY,WM%W%TTIME%TIME)
+ CALL ADD_FORECAST_TO_DATE_SURF(WM%W%TTIME%TDATE%YEAR,WM%W%TTIME%TDATE%MONTH,WM%W%TTIME%TDATE%DAY,WM%W%TTIME%TIME)
 !
 !--------------------------------------------------------------------------------------
 ! Fluxes over water according to Charnock formulae
 !--------------------------------------------------------------------------------------
 !
 !
-CALL WATER_FLUX(WM%W%XZ0, PTA, ZEXNA, PRHOA, WM%W%XTS, ZEXNS, ZQA, PRAIN,    &
+ CALL WATER_FLUX(WM%W%XZ0, PTA, ZEXNA, PRHOA, WM%W%XTS, ZEXNS, ZQA, PRAIN,    &
                 PSNOW, XTT, ZWIND, PZREF, PUREF, PPS, GHANDLE_SIC, &
                 ZQSAT, PSFTH, PSFTQ, ZUSTAR, ZCD, ZCDN, ZCH, ZRI,  &
                 ZRESA_WATER, ZZ0H                                  )  

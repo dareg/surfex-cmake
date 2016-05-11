@@ -75,14 +75,14 @@ TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
 INTEGER, INTENT(IN) :: KLU   ! size of arrays
 INTEGER, INTENT(IN) :: KSW   ! number of SW spectral bands
-CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
+ CHARACTER(LEN=6), INTENT(IN):: HPROGRAM  ! program calling
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 INTEGER           :: IVERSION
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
+ CHARACTER(LEN=12) :: YREC           ! Name of the article to be read
 REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------

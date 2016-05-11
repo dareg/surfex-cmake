@@ -63,13 +63,13 @@ REAL, DIMENSION(SIZE(XZS,1))     :: ZS1       ! orography read from FORCING.nc
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COMPARE_OROGRAPHY',0,ZHOOK_HANDLE)
-CPROGNAME = HPROGRAM
+ CPROGNAME = HPROGRAM
 !
 ! read orography
 ! 
 !  orography from initial file
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ') 
  CALL READ_SURF(&
                 HPROGRAM,'ZS', ZS1, IRET)

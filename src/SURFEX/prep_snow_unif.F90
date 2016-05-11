@@ -224,7 +224,7 @@ END SELECT
 !*      2.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='UNIF  '
+ CINTERP_TYPE='UNIF  '
 DEALLOCATE(ZTSNOW)
 DEALLOCATE(ZRSNOW)
 DEALLOCATE(ZLWCSNOW)

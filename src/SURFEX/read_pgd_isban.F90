@@ -108,7 +108,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SV_t), INTENT(INOUT) :: SV
 !
-CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 LOGICAL,           INTENT(IN)  :: OLAND_USE ! 
 !
 !*       0.2   Declarations of local variables
@@ -118,8 +118,8 @@ INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field 
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK
 !
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=4 ) :: YLVL
 !
 INTEGER :: ILU    ! expected physical size of full surface array
 INTEGER :: ILUOUT ! output listing logical unit
@@ -580,7 +580,7 @@ IF (CHI%LCH_BIO_FLUX) THEN
   ALLOCATE(ZWORK(U%NSIZE_FULL,1))
   !
   CALL END_IO_SURF_n(HPROGRAM)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                       HPROGRAM,'FULL  ','SURF  ','READ ')
   !
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
@@ -604,7 +604,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
   CALL PACK_SAME_RANK(IMASK,ZWORK(:,1),GB%XMONOPOT(:))
   !
   CALL END_IO_SURF_n(HPROGRAM)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                       HPROGRAM,'NATURE','ISBA  ','READ ')
   !
   DEALLOCATE(ZWORK)

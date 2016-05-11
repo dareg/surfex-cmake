@@ -64,7 +64,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -180,7 +180,7 @@ INLOPA(1:INLATI/2) = NRGRI(1:INLATI/2)
 INLOPA(INLATI/2+1:INLATI) = NRGRI(INLATI/2:1:-1)
 !
 !---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !---------------------------------------------------------------------------
 !
 !*       5.    Computes pseudo-latitudes and pseudo-longitudes of all points
@@ -202,7 +202,7 @@ ALLOCATE(ZLON_XY(KL))
 ZLAT_XY(:) = XUNDEF
 ZLON_XY(:) = XUNDEF
 !
-CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
+ CALL COMP_GRIDTYPE_GAUSS(INLATI,INLOPA,KL,ITYP,ZLAT_XY,ZLON_XY)
 !
 !---------------------------------------------------------------------------
 !
@@ -247,7 +247,7 @@ ZLATINF(:) = XUNDEF
 ZLONSUP(:) = XUNDEF
 ZLATSUP(:) = XUNDEF
 !
-CALL GAUSS_GRID_LIMITS(INLATI,INLOPA,ZXINF,ZXSUP,ZYINF,ZYSUP)
+ CALL GAUSS_GRID_LIMITS(INLATI,INLOPA,ZXINF,ZXSUP,ZYINF,ZYSUP)
 !
 IF(ZCODIL==1.0.AND.ITYP==0)THEN
   ZLONINF(:) = ZXINF(:)

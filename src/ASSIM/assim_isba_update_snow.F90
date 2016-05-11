@@ -31,13 +31,13 @@ IMPLICIT NONE
 !
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN)    :: KI
 REAL, DIMENSION(KI), INTENT(IN)    :: PSWE
 REAL, DIMENSION(KI), INTENT(INOUT) :: PSWE_ORIG
 LOGICAL,             INTENT(IN)    :: OINITSNOW
 LOGICAL,             INTENT(IN)    :: OINC
-CHARACTER(LEN=2),    INTENT(IN)    :: HTEST     ! must be equal to 'OK'
+ CHARACTER(LEN=2),    INTENT(IN)    :: HTEST     ! must be equal to 'OK'
 !
 !    Declarations of local variables
 !

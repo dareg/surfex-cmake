@@ -104,7 +104,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: ORM_RIVER    ! delete river coverage (default = false)
 !
 !
@@ -251,7 +251,7 @@ ELSEIF(LIMP_COVER)THEN !LIMP_COVER (impose cover from input file at the same res
 #ifdef SFX_LFI
     CFILEIN_LFI = ADJUSTL(YCOVER)
 #endif
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF
 !
@@ -676,7 +676,7 @@ U%NDIM_TOWN      = SUM_ON_ALL_PROCS(HPROGRAM,CGRID,U%XTOWN  (:) > 0., 'DIM')
 !
 IF (LHOOK) CALL DR_HOOK('PGD_COVER',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE FIT_COVERS(PDATA_SURF,PSURF,KSURF,KCOVER,KC_SURF)
 !

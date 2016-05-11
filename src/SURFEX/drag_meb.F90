@@ -377,11 +377,11 @@ ZLW(:)=0.02
 !
 ! Calculate the displacement height
 !
-CALL DISPH_FOR_MEB(ZCHIL,PLAI,ZLW,PH_VEG,PZREF,PZ0_MEBV,ZDISPH)
+ CALL DISPH_FOR_MEB(ZCHIL,PLAI,ZLW,PH_VEG,PZREF,PZ0_MEBV,ZDISPH)
 !
 ! Here ZRICN,ZRA_C_A,ZCHCN,ZCDNCN,ZCDCN are valid for the snow free part in meb:
 !
-CALL PREPS_FOR_MEB_DRAG(.TRUE.,LFORC_MEASURE,            &
+ CALL PREPS_FOR_MEB_DRAG(.TRUE.,LFORC_MEASURE,            &
                    PZ0_MEBV, PZ0H_MEBV, PZ0EFF_MEBV,     &
                    PH_VEG, PZREF,                        &
                    PTC, PTA, PQC, PQA, PUREF, PVMOD,     &
@@ -411,7 +411,7 @@ PFLXC_MOM(:)=ZCDCN(:)*ZVMOD(:)*PRHOA(:)
 !Calculate the aerodynamic resistance between the snowfree part of the ground
 !and canopy air, ZRA_G_C, and the conductance between the canopy and canopy air, ZG_VG_C
 !  
-CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAI,   &
+ CALL SURFACE_AIR_MEB(PZ0_MEBV, PZ0H_MEBV, PZ0G_WITHOUT_SNOW, PH_VEG, PLAI,   &
                      PTG, PTC, PTV, PVELC, ZLW,                              &
                      ZDISPH,                                                 &
                      ZRA_G_C, ZG_VG_C,                                       &
@@ -425,7 +425,7 @@ ZLAISN(:)=PLAI(:)*(1.-PPALPHAN(:))
 !
 ! The same as ZRA_G_C/ZG_VG_C but for the snow part (png) =>ZRA_N_C/ZG_VN_C
 !
-CALL SURFACE_AIR_MEB(PZ0_MEBN, PZ0H_MEBN, ZZ0SN, PH_VEG, ZLAISN,     &
+ CALL SURFACE_AIR_MEB(PZ0_MEBN, PZ0H_MEBN, ZZ0SN, PH_VEG, ZLAISN,     &
                      PSNOWTEMP, PTC, PTV, PVELC, ZLW,                &
                      ZDISPH,                                         &
                      ZRA_N_C, ZG_VN_C,                               &
@@ -442,7 +442,7 @@ PRISNOW(:)     = ZRIG(:)
 ! Now calculate the aerodynamic resistance for the completely snow covered part,
 ! i.e. between the snow surface and atmosphere directly
 !
-CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,                           &
+ CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,                           &
                    PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                     &
                    PH_VEG, PZREF,                                        &
                    PSNOWTEMP, PTA, PQSATN, PQA, PUREF, PVMOD,            &
@@ -485,7 +485,7 @@ PRISNOW(:)     = (1.-ZPSNA(:))*PRISNOW(:)     + ZPSNA(:)*ZRINN(:)
 !
 !-------------------------------------------------------------------------------
 !
-CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,            & 
+ CALL PREPS_FOR_MEB_DRAG(.FALSE.,LFORC_MEASURE,            & 
                    PZ0_WITH_SNOW, PZ0H_WITH_SNOW, PZ0EFF, &
                    PH_VEG, PZREF,                         &
                    ZTEFF, PTA, PQS, PQA, PUREF, PVMOD,    &

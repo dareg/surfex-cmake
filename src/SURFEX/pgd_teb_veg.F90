@@ -171,7 +171,7 @@ GDM%TVG%CISBA         = '   '
 GDM%TVG%CPEDOTF       = '   '
 GDM%TVG%CPHOTO        = '   '
 !
-CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
+ CALL READ_NAM_PGD_ISBA(HPROGRAM, IPATCH, IGROUND_LAYER,                         &
                        YISBA, YPEDOTF, YPHOTO,  GTR_ML, ZRM_PATCH,              &
                        YCLAY, YCLAYFILETYPE, XUNIF_CLAY, LIMP_CLAY,             &
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,             &
@@ -351,7 +351,7 @@ IF (TOP%LGREENROOF) CALL PGD_TEB_GREENROOF(DTCO, UG, U, USS, GRM, TG, &
 !*    9.      Irrigation of gardens and greenroofs
 !             ------------------------------------
 !
-CALL PGD_TEB_IRRIG(DTCO, UG, U, USS, TG, GDM%TIR, &
+ CALL PGD_TEB_IRRIG(DTCO, UG, U, USS, TG, GDM%TIR, &
                    HPROGRAM)
 !
 !-------------------------------------------------------------------------------

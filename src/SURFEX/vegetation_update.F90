@@ -113,7 +113,7 @@ LOGICAL, DIMENSION(:), INTENT(IN)   :: OCOVER
  CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 LOGICAL,              INTENT(IN)    :: OAGRIP
 LOGICAL,              INTENT(IN)    :: OTR_ML
-CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
+ CHARACTER(LEN=*),     INTENT(IN)    :: HSFTYPE ! nature / garden
 LOGICAL,              INTENT(IN)    :: OECOCLIMAP ! T if ecoclimap is used
 !
 REAL,   DIMENSION(:,:), INTENT(INOUT) :: PLAI    ! leaf area index (LAI) 

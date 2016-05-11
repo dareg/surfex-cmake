@@ -83,7 +83,7 @@ REAL, DIMENSION(KLON,KLAT) :: ZSRC_FLOOD
 REAL, DIMENSION(KLON,KLAT) :: ZWORK
 REAL, DIMENSION(KLON,KLAT) :: ZRESIDU
 !
-CHARACTER(LEN=50)          :: YCOMMENT
+ CHARACTER(LEN=50)          :: YCOMMENT
 INTEGER                    :: IDATE  ! current coupling time step (s)
 INTEGER                    :: IERR   ! Error info
 INTEGER                    :: JVAR
@@ -175,7 +175,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_TRIP_RECV(KERR,HCOMMENT)
@@ -185,7 +185,7 @@ USE MODI_ABORT_TRIP
 IMPLICIT NONE
 !
 INTEGER,          INTENT(IN) :: KERR
-CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

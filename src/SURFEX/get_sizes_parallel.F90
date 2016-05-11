@@ -81,7 +81,7 @@ IF (GSHADOWS) THEN
   IF (NIX==0) THEN
 
     !CALL SET_SURFEX_FILEIN(CSURF_FILETYPE,'PREP ') ! not necessary, it works with PGD or PREP file
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         CSURF_FILETYPE,'FULL  ','SURF  ','READ ')
     CALL READ_SURF(&
                    CSURF_FILETYPE,'GRID_TYPE',UG%CGRID,IRESP,HDIR='A')

@@ -118,7 +118,7 @@ DEALLOCATE(ZMASK)
 !*      4.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='HORIBL'
+ CINTERP_TYPE='HORIBL'
 IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_GRIB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

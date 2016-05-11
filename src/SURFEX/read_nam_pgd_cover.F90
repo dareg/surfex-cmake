@@ -57,9 +57,9 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !                                   
-CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM    ! Type of program
-CHARACTER(LEN=28),   INTENT(OUT)   :: HCOVER      ! file name for cover types
-CHARACTER(LEN=6),    INTENT(OUT)   :: HFILETYPE   ! data file type
+ CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM    ! Type of program
+ CHARACTER(LEN=28),   INTENT(OUT)   :: HCOVER      ! file name for cover types
+ CHARACTER(LEN=6),    INTENT(OUT)   :: HFILETYPE   ! data file type
 REAL, DIMENSION(:),  INTENT(OUT)   :: PUNIF_COVER ! value of each cover (cover will be uniform on the horizontal)
 REAL,                INTENT(OUT)   :: PRM_COVER   ! limit of coverage under which the cover is removed. Default is 1.E-6
 REAL,                INTENT(OUT)   :: PRM_COAST   ! limit of coast coverage
@@ -84,8 +84,8 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 REAL, DIMENSION(JPCOVER) :: XUNIF_COVER ! value of each cover (cover will be
 !                                                   uniform on the horizontal)
 !
-CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
-CHARACTER(LEN=6)         :: YCOVERFILETYPE   ! data file type
+ CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
+ CHARACTER(LEN=6)         :: YCOVERFILETYPE   ! data file type
 REAL                     :: XRM_COVER   ! limit of coverage under which the
                                         ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST   ! limit of coast coverage under which

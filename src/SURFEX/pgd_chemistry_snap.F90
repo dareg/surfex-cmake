@@ -133,22 +133,22 @@ NAMELIST/NAM_CH_SNAP_EMIS_PGD/ NEMIS_NBR, NEMIS_SNAP, CEMIS_NAME,&
 !
 IF (LHOOK) CALL DR_HOOK('PGD_CHEMISTRY_SNAP',0,ZHOOK_HANDLE)
 NEMIS_NBR  = 0
-CEMIS_NAME(:)              = '                           '
-CEMIS_COMMENT(:)           = ''
+ CEMIS_NAME(:)              = '                           '
+ CEMIS_COMMENT(:)           = ''
 !
 NEMIS_SNAP = 0
-CHN%NSNAP_M   = 12
-CHN%NSNAP_D   = 7
-CHN%NSNAP_H   = 24
+ CHN%NSNAP_M   = 12
+ CHN%NSNAP_D   = 7
+ CHN%NSNAP_H   = 24
 XUNIF_SNAP             = XUNDEF
 XUNIF_DELTA_LEGAL_TIME = XUNDEF
-CSNAP_MONTHLY_FILE(:)      = '                           '
-CSNAP_DAILY_FILE(:)        = '                           '
-CSNAP_HOURLY_FILE(:)       = '                           '
-CSNAP_POTENTIAL_FILETYPE(:)= '      '
-CSNAP_POTENTIAL_FILE(:,:)  = '                           '
-CDELTA_LEGAL_TIME_FILETYPE = '      '
-CDELTA_LEGAL_TIME_FILE     = '                           '
+ CSNAP_MONTHLY_FILE(:)      = '                           '
+ CSNAP_DAILY_FILE(:)        = '                           '
+ CSNAP_HOURLY_FILE(:)       = '                           '
+ CSNAP_POTENTIAL_FILETYPE(:)= '      '
+ CSNAP_POTENTIAL_FILE(:,:)  = '                           '
+ CDELTA_LEGAL_TIME_FILETYPE = '      '
+ CDELTA_LEGAL_TIME_FILE     = '                           '
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
@@ -170,8 +170,8 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CH_SNAP_EMIS_PGD)
 !*    3.      Allocation
 !             ----------
 !
-CHN%NEMIS_NBR  = NEMIS_NBR
-CHN%NEMIS_SNAP = NEMIS_SNAP
+ CHN%NEMIS_NBR  = NEMIS_NBR
+ CHN%NEMIS_SNAP = NEMIS_SNAP
 !
 ALLOCATE(CHN%CEMIS_NAME(NEMIS_NBR))
 ALLOCATE(CHN%CEMIS_COMMENT(NEMIS_NBR))
@@ -180,8 +180,8 @@ ALLOCATE(CHN%XSNAP_MONTHLY (CHN%NSNAP_M,NEMIS_SNAP,NEMIS_NBR))
 ALLOCATE(CHN%XSNAP_DAILY   (CHN%NSNAP_D,NEMIS_SNAP,NEMIS_NBR))
 ALLOCATE(CHN%XSNAP_HOURLY  (CHN%NSNAP_H,NEMIS_SNAP,NEMIS_NBR))
 !
-CHN%CEMIS_NAME         (:) = CEMIS_NAME   (1:NEMIS_NBR)
-CHN%CEMIS_COMMENT      (:) = CEMIS_COMMENT(1:NEMIS_NBR)
+ CHN%CEMIS_NAME         (:) = CEMIS_NAME   (1:NEMIS_NBR)
+ CHN%CEMIS_COMMENT      (:) = CEMIS_COMMENT(1:NEMIS_NBR)
 !
 ALLOCATE(CHN%XEMIS_FIELDS_SNAP(NL,NEMIS_SNAP,NEMIS_NBR))
 !

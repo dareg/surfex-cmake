@@ -89,10 +89,10 @@ REAL, DIMENSION(SIZE(I%XDG,1)            ) :: ZDG2
 REAL, DIMENSION(SIZE(I%XDG,1)            ) :: ZDTOT
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YLVLV, YPAS
-CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YLVLV, YPAS
+ CHARACTER(LEN=4)  :: YLVL
 !
 INTEGER         :: JJ, JL, JP, ILAYER
 INTEGER           :: ISIZE_LMEB_PATCH   ! Number of patches where multi-energy balance should be applied
@@ -105,7 +105,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_PGD_ISBA_N',0,ZHOOK_HANDLE)
 !
 ISIZE_LMEB_PATCH=COUNT(I%LMEB_PATCH(:))
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------

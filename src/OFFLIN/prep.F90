@@ -104,11 +104,11 @@ REAL               :: ZTIME
 LOGICAL            :: GFOUND
 
 REAL, DIMENSION(0) :: ZZS
-CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
-CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
-CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
-CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
-CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
+ CHARACTER(LEN=28)  :: YATMFILE  ='                            '  ! name of the Atmospheric file
+ CHARACTER(LEN=6)   :: YATMFILETYPE ='      '                     ! type of the Atmospheric file
+ CHARACTER(LEN=28)  :: YPGDFILE  ='                            '  ! name of the pgd file
+ CHARACTER(LEN=6)   :: YPGDFILETYPE ='      '                     ! type of the pgd file
+ CHARACTER(LEN=28)  :: YLUOUT    ='LISTING_PREP                '  ! name of listing
 !
 INTEGER, DIMENSION(11)  :: IDATEF
 !
@@ -127,7 +127,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 #ifdef CPLOASIS
 !Must be call before DRHOOK !
-CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM,'PRE')
+ CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM,'PRE')
 #else
 LOASIS = .FALSE.
 #endif
@@ -146,7 +146,7 @@ ENDIF
 !    Allocations of Surfex Types
  CALL SURFEX_ALLOC_LIST(1)
 !
-CSOFTWARE='PREP'
+ CSOFTWARE='PREP'
 !
 !     1.1     initializations
 !             ---------------
@@ -160,8 +160,8 @@ LPREP    = .TRUE.
 !
 !     1.2     output listing
 !             --------------
-CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
-CALL GET_LUOUT('ASCII ',ILUOUT)
+ CLUOUT_LFI =  ADJUSTL(ADJUSTR(YLUOUT)//'.txt')
+ CALL GET_LUOUT('ASCII ',ILUOUT)
 OPEN (UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 !
 !     1.3     output file name read in namelist
@@ -172,27 +172,27 @@ OPEN (UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YLUOUT)//'.txt'),FORM='FORMATTED',ACTION=
  CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
 !
-CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
-CFILEIN      = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')      ! output of PGD program
-CFILEIN_SAVE = CFILEIN
-CFILEOUT     = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
+ CFILEPGD     = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
+ CFILEIN      = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')      ! output of PGD program
+ CFILEIN_SAVE = CFILEIN
+ CFILEOUT     = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
 !
-CFILEPGD_FA  = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
-CFILEIN_FA   = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
-CFILEIN_FA_SAVE = CFILEIN_FA
-CFILEOUT_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
+ CFILEPGD_FA  = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+ CFILEIN_FA   = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+ CFILEIN_FA_SAVE = CFILEIN_FA
+ CFILEOUT_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
 !
-CFILEPGD_LFI = CPGDFILE
-CFILEIN_LFI  = CPGDFILE
-CFILEIN_LFI_SAVE = CFILEIN_LFI
-CFILEOUT_LFI = CPREPFILE
+ CFILEPGD_LFI = CPGDFILE
+ CFILEIN_LFI  = CPGDFILE
+ CFILEIN_LFI_SAVE = CFILEIN_LFI
+ CFILEOUT_LFI = CPREPFILE
 !
-CFILEPGD_NC = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
-CFILEIN_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
-CFILEIN_NC_SAVE  = CFILEIN_NC
-CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+ CFILEPGD_NC = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+ CFILEIN_NC  = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+ CFILEIN_NC_SAVE  = CFILEIN_NC
+ CFILEOUT_NC = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
 !
-CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
+ CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !
 ! Reading all namelist (also assimilation)
  YSURF_CUR => YSURF_LIST(1)
@@ -202,7 +202,7 @@ CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !*      1.4.   Reads SFX - OASIS coupling namelists
 !              ------------------------------------
 !
-CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF,'PRE')
+ CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF,'PRE')
 !
 !*      1.5.   Goto model of Surfex Types
 !              ---------------------------
@@ -236,7 +236,7 @@ ENDIF
 !*    4.      Store of surface physiographic fields
 !             -------------------------------------
 !
-CALL FLAG_UPDATE(YSURF_CUR%IM%DGI, YSURF_CUR%DGU, &
+ CALL FLAG_UPDATE(YSURF_CUR%IM%DGI, YSURF_CUR%DGU, &
                  .FALSE.,.TRUE.,.FALSE.,.FALSE.)
 !
 !* opens the file
@@ -309,7 +309,7 @@ WRITE(*,*) '    -----------------------'
 WRITE(*,*) '    | PREP ENDS CORRECTLY |'
 WRITE(*,*) '    -----------------------'
 !
-CLOSE(ILUOUT)
+ CLOSE(ILUOUT)
 !
  CALL SURFEX_DEALLO_LIST
 !

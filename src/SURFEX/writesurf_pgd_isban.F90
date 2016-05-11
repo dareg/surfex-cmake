@@ -97,9 +97,9 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=4 ) :: YLVL
 !
 INTEGER :: JJ, JLAYER
 INTEGER :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
@@ -190,7 +190,7 @@ YCOMMENT=YRECFM
 !
 YRECFM='MEB_PATCH'
 YCOMMENT='(LOGICAL LIST)'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,I%LMEB_PATCH(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
 ISIZE_LMEB_PATCH = COUNT(I%LMEB_PATCH(:))

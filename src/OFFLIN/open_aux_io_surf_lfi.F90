@@ -79,8 +79,8 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',0,ZHOOK_HANDLE)
 !
  CALL FMOPEN(HFILE,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
 !
-CMASK = HMASK
-CFILE_LFI=HFILE
+ CMASK = HMASK
+ CFILE_LFI=HFILE
  CALL READ_SURF(&
                 'LFI   ','DIM_FULL',ILU,IRET)
 NFULL_AUX = ILU
@@ -95,7 +95,7 @@ ZFULL=1.
  CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
 !
 !------------------------------------------------------------------------------
-CMASK = HMASK
+ CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_LFI',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

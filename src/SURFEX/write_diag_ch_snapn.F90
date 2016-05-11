@@ -78,7 +78,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_CH_SNAP_n',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
 !
 !-------------------------------------------------------------------------------

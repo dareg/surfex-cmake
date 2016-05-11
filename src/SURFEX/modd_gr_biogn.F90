@@ -55,7 +55,7 @@ END TYPE GR_BIOG_t
 
 
 
-CONTAINS
+ CONTAINS
 
 !
 

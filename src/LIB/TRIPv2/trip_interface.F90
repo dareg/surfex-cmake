@@ -189,7 +189,7 @@ ENDIF
 !*       1.     Initialize local diag :
 !               -----------------------
 !
-CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
+ CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
                     ZWTD,ZFWTD,ZQGCELL,ZHGHS,                  &
                     ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZDISCHARGE,    &
                     ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL    )
@@ -199,7 +199,7 @@ CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
 !*       2.     Initialize river height and velocity :
 !               --------------------------------------
 !
-CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
+ CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
                  TP%XSLOPEBED,TP%XN,TP%XSURF_STO,ZHS,ZVEL )
 !
 !-------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ ENDDO ! * End TRIP time step loop
 !*       5.      Actualisation of coupling diagnostic:
 !               --------------------------------------
 !
-CALL TRIP_DIAG_CPL_ESM(TP, TPG, &
+ CALL TRIP_DIAG_CPL_ESM(TP, TPG, &
                        PTSTEP_RUN,ZDISCHARGE,PCALVING,ZWTD,ZFWTD)
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_INTERFACE',1,ZHOOK_HANDLE)

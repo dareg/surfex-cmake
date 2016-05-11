@@ -46,7 +46,7 @@ END TYPE TRIP_DIAG_t
 !
 
 
-CONTAINS
+ CONTAINS
 !
 !
 

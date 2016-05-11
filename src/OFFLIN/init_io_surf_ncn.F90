@@ -124,7 +124,7 @@ IL = ILU
  CALL INIT_IO_SURF_MASK_n(DTCO, U, &
                           HMASK, IL, ILUOUT, ILU, NMASK)
 !
-CMASK = HMASK
+ CMASK = HMASK
 !
 !$OMP BARRIER
 !------------------------------------------------------------------------------

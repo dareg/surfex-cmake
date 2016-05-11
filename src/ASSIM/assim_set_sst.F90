@@ -70,7 +70,7 @@ INTEGER,            INTENT(IN)  :: KI
 REAL,DIMENSION(KI), INTENT(IN)  :: PITM
 REAL,DIMENSION(KI), INTENT(OUT) :: PSST
 REAL,DIMENSION(KI), INTENT(OUT) :: PSIC  ! Not used at the moment
-CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
@@ -78,8 +78,8 @@ CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
 !
 REAL,ALLOCATABLE, DIMENSION(:,:) :: ZWORK,ZWORK2
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZSEA
-CHARACTER(LEN=200)   :: YMFILE     ! Name of the SST file
-CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
+ CHARACTER(LEN=200)   :: YMFILE     ! Name of the SST file
+ CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
 REAL, DIMENSION(SIZE(PSST)) :: ZSST
 REAL                 :: ZFMAX, ZFMIN, ZFMEAN
 INTEGER              :: IRESP,ISTAT

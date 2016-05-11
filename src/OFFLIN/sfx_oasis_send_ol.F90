@@ -93,7 +93,7 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
-CHARACTER(LEN=*),      INTENT(IN) :: HPROGRAM
+ CHARACTER(LEN=*),      INTENT(IN) :: HPROGRAM
 INTEGER,               INTENT(IN) :: KI            ! number of points
 REAL,                  INTENT(IN) :: PTIMEC        ! Cumulated run time step (s)
 REAL,                  INTENT(IN) :: PSTEP_SURF    ! Model time step (s)
@@ -148,7 +148,7 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_SEND_OL',0,ZHOOK_HANDLE)
 !*       1.     Initialize proc by proc :
 !               -------------------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IDATE = INT(PTIMEC-PSTEP_SURF)
 !
@@ -254,7 +254,7 @@ IF(GSEND_SEA)THEN
 !
 ENDIF
 !
-CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
+ CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !
 !$OMP END PARALLEL
 !    
@@ -264,7 +264,7 @@ CALL RESET_DIM(KI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !               ----------------------------------
 !
 !
-CALL SFX_OASIS_SEND(ILUOUT,KI,IDATE,GSEND_LAND,GSEND_LAKE,GSEND_SEA,      &
+ CALL SFX_OASIS_SEND(ILUOUT,KI,IDATE,GSEND_LAND,GSEND_LAKE,GSEND_SEA,      &
                     ZLAND_RUNOFF,ZLAND_DRAIN,ZLAND_CALVING,ZLAND_RECHARGE,&
                     ZLAND_WATFLD,                                         &
                     ZLAKE_EVAP,ZLAKE_RAIN,ZLAKE_SNOW,ZLAKE_WATF,          &

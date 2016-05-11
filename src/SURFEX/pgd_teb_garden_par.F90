@@ -156,9 +156,9 @@ IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN_PAR',0,ZHOOK_HANDLE)
 
 NTIME_GD = 12
 !
-CTYP_GARDEN_HVEG   = 'TEBD'           ! Temperate broadleaf trees (forest)
-CTYP_GARDEN_LVEG   = 'PARK'           ! Grassland
-CTYP_GARDEN_NVEG   = 'NO  '           ! No vegetation
+ CTYP_GARDEN_HVEG   = 'TEBD'           ! Temperate broadleaf trees (forest)
+ CTYP_GARDEN_LVEG   = 'PARK'           ! Grassland
+ CTYP_GARDEN_NVEG   = 'NO  '           ! No vegetation
 !
 XUNIF_FRAC_HVEG    = XUNDEF
 XUNIF_FRAC_LVEG    = XUNDEF
@@ -167,19 +167,19 @@ XUNIF_LAI_HVEG     = XUNDEF
 XUNIF_LAI_LVEG     = XUNDEF
 XUNIF_H_HVEG       = XUNDEF
 !
-CFNAM_FRAC_HVEG    = '                            '
-CFNAM_FRAC_LVEG    = '                            '
-CFNAM_FRAC_NVEG    = '                            '
-CFNAM_LAI_HVEG     = '                            '
-CFNAM_LAI_LVEG     = '                            '
-CFNAM_H_HVEG       = '                            '
+ CFNAM_FRAC_HVEG    = '                            '
+ CFNAM_FRAC_LVEG    = '                            '
+ CFNAM_FRAC_NVEG    = '                            '
+ CFNAM_LAI_HVEG     = '                            '
+ CFNAM_LAI_LVEG     = '                            '
+ CFNAM_H_HVEG       = '                            '
 !
-CFTYP_FRAC_HVEG    = '      '
-CFTYP_FRAC_LVEG    = '      '
-CFTYP_FRAC_NVEG    = '      '
-CFTYP_LAI_HVEG     = '      '
-CFTYP_LAI_LVEG     = '      '
-CFTYP_H_HVEG       = '      '
+ CFTYP_FRAC_HVEG    = '      '
+ CFTYP_FRAC_LVEG    = '      '
+ CFTYP_FRAC_NVEG    = '      '
+ CFTYP_LAI_HVEG     = '      '
+ CFTYP_LAI_LVEG     = '      '
+ CFTYP_H_HVEG       = '      '
 !
 !-------------------------------------------------------------------------------
 GDM%DTGD%NTIME = 12
@@ -246,7 +246,7 @@ GDM%TGDP%CTYPE_NVEG = CTYP_GARDEN_NVEG
 !*    3.      Uniform fields are prescribed
 !             -----------------------------
 !
-CATYPE = 'ARI'
+ CATYPE = 'ARI'
 !
  CALL PGD_FIELD(DTCO, UG, U, USS, &
                 HPROGRAM,'FRAC_HVEG: fraction of high vegetation','TWN',CFNAM_FRAC_HVEG,   &

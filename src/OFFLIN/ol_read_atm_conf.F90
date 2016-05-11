@@ -71,7 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !==================================================================
 !
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_CONF',0,ZHOOK_HANDLE)
-CPROGNAME = HSURF_FILETYPE
+ CPROGNAME = HSURF_FILETYPE
 !
 IF (HFORCING_FILETYPE == 'NETCDF') THEN
 !

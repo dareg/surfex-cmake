@@ -52,10 +52,10 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
-CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+ CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL,DIMENSION(KI), INTENT(IN) :: PT2M_O
-CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !

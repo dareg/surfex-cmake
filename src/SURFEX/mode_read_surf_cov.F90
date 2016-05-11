@@ -9,7 +9,7 @@ MODULE MODE_READ_SURF_COV
 !RJ: all safety compatibility checks should be done here
 PUBLIC :: READ_SURF_COV
 
-CONTAINS
+ CONTAINS
 
 !     #############################################################
       SUBROUTINE READ_SURF_COV (&

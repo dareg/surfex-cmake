@@ -216,7 +216,7 @@ SELECT CASE (HINIT)
                            HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,WM%W%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
     CALL READ_SURF(&
                    HPROGRAM,'DTCUR',WM%W%TTIME,IRESP)
@@ -232,7 +232,7 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !         Reading of the fields
@@ -262,7 +262,7 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                         HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !

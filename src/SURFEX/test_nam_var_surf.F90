@@ -66,7 +66,7 @@ END SUBROUTINE TEST_NAM_VARN0_SURF
                                      PVALUE7,PVALUE8,PVALUE9  )  
 !
 INTEGER,          INTENT(IN)          ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)          ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)          ::HNAME    ! name of the variable to test
 REAL             ,INTENT(IN)          ::PVAR     ! variable to test
 
 REAL             ,INTENT(IN), OPTIONAL ::PVALUE1  ! first possible value
@@ -528,7 +528,7 @@ IMPLICIT NONE
 !*      0.1   Declarations of arguments
 !
 INTEGER,          INTENT(IN)           ::KLUOUT   ! output listing logical unit
-CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
+ CHARACTER(LEN=*) ,INTENT(IN)           ::HNAME    ! name of the variable to test
 REAL             ,INTENT(IN)           ::PVAR     ! variable to test
 
 REAL             ,INTENT(IN), OPTIONAL ::PVALUE1  ! first possible value

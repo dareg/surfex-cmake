@@ -153,7 +153,7 @@ ENDIF
 !*      2.    Read full grid dimension and date
 !
  CALL SET_SURFEX_FILEIN(HSURF_FILETYPE,'PREP')
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                      HSURF_FILETYPE,'FULL  ','SURF  ','READ ') 
 !
  CALL READ_SURF(&

@@ -81,9 +81,9 @@ TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
@@ -99,7 +99,7 @@ GRESET=.TRUE.
 GRESET=(NBLOCK>0)
 #endif
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'WATER ','FLAKE ','WRITE')
 !
 !

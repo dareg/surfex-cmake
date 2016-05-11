@@ -60,8 +60,8 @@ REAL   , INTENT(OUT), OPTIONAL :: PRUNTIME    ! total simulated time (s)
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=9)   :: YWORD, YTIMERUN
-CHARACTER(LEN=1000):: YLINE, YFOUND
+ CHARACTER(LEN=9)   :: YWORD, YTIMERUN
+ CHARACTER(LEN=1000):: YLINE, YFOUND
 INTEGER            :: IERR
 INTEGER            :: ICOMP_ID
 INTEGER            :: ITIMERUN
@@ -72,7 +72,7 @@ LOGICAL            :: GFOUND
 !              ----------------------------------
 !
 LOGICAL               :: LOASIS      ! key to use OASIS
-CHARACTER(LEN=6)      :: CMODEL_NAME ! component model name
+ CHARACTER(LEN=6)      :: CMODEL_NAME ! component model name
 !
 NAMELIST/NAM_OASIS/LOASIS,CMODEL_NAME
 !
@@ -84,7 +84,7 @@ NAMELIST/NAM_OASIS/LOASIS,CMODEL_NAME
 !               ---------------
 !
 LOASIS             = .FALSE.
-CMODEL_NAME        = 'trip'
+ CMODEL_NAME        = 'trip'
 !
 IF(PRESENT(PRUNTIME)) PRUNTIME = 0.0
 !
@@ -105,7 +105,7 @@ ENDIF
 !
 READ (UNIT=11,NML=NAM_OASIS,IOSTAT=IERR)
 !
-CLOSE(UNIT=11)
+ CLOSE(UNIT=11)
 !
 !-------------------------------------------------------------------------------
 !
@@ -138,7 +138,7 @@ ENDIF
 !*       3.     Setup OASIS
 !               -----------
 !
-CALL OASIS_INIT_COMP(ICOMP_ID,CMODEL_NAME,IERR) 
+ CALL OASIS_INIT_COMP(ICOMP_ID,CMODEL_NAME,IERR) 
 !   
 IF (IERR/=OASIS_OK) THEN
    WRITE(*,'(A)'   )'TRIP : Error initializing OASIS'
@@ -153,7 +153,7 @@ ENDIF
 !*       4.     Get local communicator
 !               ----------------------
 !
-CALL OASIS_GET_LOCALCOMM(KLOCAL_COMM,IERR)
+ CALL OASIS_GET_LOCALCOMM(KLOCAL_COMM,IERR)
 !   
 IF (IERR/=OASIS_OK) THEN
    WRITE(*,'(A)'   )'TRIP : Error getting local communicator from OASIS'
@@ -218,14 +218,14 @@ DO WHILE (ITIMERUN==-1)
       ENDIF
    ENDIF
 ENDDO
-CLOSE(11)
+ CLOSE(11)
 !
 PRUNTIME = REAL(ITIMERUN)
 !
 WRITE(*,'(A)' )'-----------------------------'
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE TRIP_FOUND_TIMERUN(HIN, HOUT, KLEN, OFOUND)
@@ -233,17 +233,17 @@ SUBROUTINE TRIP_FOUND_TIMERUN(HIN, HOUT, KLEN, OFOUND)
 IMPLICIT NONE
 !
 INTEGER ,          INTENT (IN   ) :: KLEN
-CHARACTER (LEN=*), INTENT (INOUT) :: HIN 
-CHARACTER (LEN=*), INTENT (INOUT) :: HOUT
+ CHARACTER (LEN=*), INTENT (INOUT) :: HIN 
+ CHARACTER (LEN=*), INTENT (INOUT) :: HOUT
 LOGICAL,           INTENT (OUT  ) :: OFOUND
 !
 !* ---------------------------- Local declarations -------------------
 !
-CHARACTER(LEN=1), PARAMETER :: YBLANK = ' '
-CHARACTER(LEN=1), PARAMETER :: YNADA  = '#'
+ CHARACTER(LEN=1), PARAMETER :: YBLANK = ' '
+ CHARACTER(LEN=1), PARAMETER :: YNADA  = '#'
 
-CHARACTER(LEN=KLEN) :: YLINE
-CHARACTER(LEN=KLEN) :: YWORK
+ CHARACTER(LEN=KLEN) :: YLINE
+ CHARACTER(LEN=KLEN) :: YWORK
 !
 INTEGER             :: ILEN
 INTEGER             :: IERR

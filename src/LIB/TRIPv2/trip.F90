@@ -57,7 +57,7 @@ INTEGER, INTENT(IN)                  :: KTRIP
 INTEGER, INTENT(IN)                  :: KTSEPT
 INTEGER, INTENT(IN)                  :: KTSTEP_END
 !
-CHARACTER(LEN=3), INTENT(IN)         :: HGROUNDW !Groundwater scheme key
+ CHARACTER(LEN=3), INTENT(IN)         :: HGROUNDW !Groundwater scheme key
 !
 LOGICAL, INTENT(IN)                  :: OFLOOD   !Flood scheme key
 LOGICAL, INTENT(IN)                  :: OPRINT   !Printable budget key 
@@ -201,7 +201,7 @@ ENDIF
 ! * Surface water storage
 !-------------------------------------------------------------------------------
 !       
-CALL TRIP_SURFACE_WATER(KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
+ CALL TRIP_SURFACE_WATER(KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
                         OPRINT,OMASK_VEL,PLEN,PRUNOFF,                    &
                         PVEL,PHS,PSURF_STO,ZSURF_STO2,PGOUT,PSIN,PSOUT,   &
                         PAREA,ZQFR,ZQRF,                                  &
@@ -212,7 +212,7 @@ CALL TRIP_SURFACE_WATER(KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
 ! * Update all reservoir and conserve water mass as possible
 !-------------------------------------------------------------------------------
 !
-CALL TRIP_UPDATE_AND_CONSERV(OPRINT,OFLOOD,HGROUNDW,PAREA,PWEFF,   &
+ CALL TRIP_UPDATE_AND_CONSERV(OPRINT,OFLOOD,HGROUNDW,PAREA,PWEFF,   &
                              ZSURF_STO2,ZFLOOD_STO2,ZGROUND_STO2,  &
                              PSURF_STO,PFLOOD_STO,PGROUND_STO,     &
                              OMASK_GW,PHGROUND,ZRECUP_ALL          )

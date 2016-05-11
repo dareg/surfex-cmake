@@ -150,13 +150,13 @@ ALLOCATE(TM%B%CUR%XF_MASS_WIN(ILU))
 
 SELECT CASE(TM%TOP%CBEM)
 !----------
-CASE("DEF")
+ CASE("DEF")
 !-----------
    !parameters that needs to be 0 for calculation
    TM%B%CUR%XGR  (:)         = 0.
    TM%B%CUR%XF_WASTE_CAN(:)  = 0.
 !----------
-CASE("BEM")
+ CASE("BEM")
 !----------
 
   TM%B%CUR%XAUX_MAX(:) = 5.

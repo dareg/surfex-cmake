@@ -116,7 +116,7 @@ REAL(KIND=JPRB)  :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------ 
 IF (LHOOK) CALL DR_HOOK('INIT_OUTPUT_NC_N',0,ZHOOK_HANDLE)
 !
-CALL GET_DIM_FULL_n(U, &
+ CALL GET_DIM_FULL_n(U, &
                     IFULL)
 
 IF (NRANK==NPIO) THEN

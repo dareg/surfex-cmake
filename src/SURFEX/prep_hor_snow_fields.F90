@@ -128,7 +128,7 @@ REAL,DIMENSION(:,:,:), ALLOCATABLE  :: ZVEGTYPE_PATCH    ! fraction of each vegt
 INTEGER                             :: JPATCH    ! loop counter on patches
 INTEGER                             :: JLAYER    ! loop counter on layers
 INTEGER                             :: IVERSION  ! surface version
-CHARACTER(LEN=16)                   :: YRECFM    ! record name
+ CHARACTER(LEN=16)                   :: YRECFM    ! record name
 INTEGER                             :: IRESP     ! error return code
 LOGICAL                             :: GGLACIER
 !
@@ -159,7 +159,7 @@ ENDIF
 !
 !*      1.     Allocation of output field
 !
-CALL ALLOCATE_GR_SNOW(TPSNOW,KL,KPATCH)
+ CALL ALLOCATE_GR_SNOW(TPSNOW,KL,KPATCH)
 !
 !---------------------------------------------------------------------------
 !
@@ -200,7 +200,7 @@ ENDIF
 ALLOCATE(ZW(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='WWW'//HSURF
-CALL PREP_HOR_SNOW_FIELD(DTCO, &
+ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE,  &
                          KLUOUT, OUNIF, YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,  &
@@ -217,7 +217,7 @@ CALL PREP_HOR_SNOW_FIELD(DTCO, &
 ALLOCATE(ZD(KL,TPSNOW%NLAYER,KPATCH))
 !
 YSNSURF='DEP'//HSURF
-CALL PREP_HOR_SNOW_FIELD(DTCO, &
+ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM, HFILE, HFILETYPE, HFILEPGD, HFILEPGDTYPE,  &
                          KLUOUT, OUNIF, YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,  &
@@ -260,7 +260,7 @@ ENDIF
 !
 !* density profile
 YSNSURF='RHO'//HSURF
-CALL PREP_HOR_SNOW_FIELD(DTCO, &
+ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          IG, U, &
                          HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,           &
                          KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TPSNOW, TPTIME,         &

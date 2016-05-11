@@ -68,7 +68,7 @@ IMPLICIT NONE
 TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
-CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
+ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
 INTEGER,                 INTENT(IN) :: KNPTS  ! Number of grid point on this proc
 INTEGER, DIMENSION(:),   INTENT(IN) :: KPARAL
 !
@@ -103,9 +103,9 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !*       0.     Initialize :
 !               ------------
 !
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(I, U, &
+ CALL SFX_OASIS_CHECK(I, U, &
                      ILUOUT)
 !
 !-------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ CALL SFX_OASIS_CHECK(I, U, &
 !*       1.     Define parallel partitions:
 !               ---------------------------
 !
-CALL OASIS_DEF_PARTITION(IPART_ID,KPARAL(:),IERR)
+ CALL OASIS_DEF_PARTITION(IPART_ID,KPARAL(:),IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(ILUOUT,*)'SFX_OASIS_DEFINE: OASIS def partition problem, err = ',IERR
@@ -369,7 +369,7 @@ ENDIF
 !*       6.     End of declaration phase:
 !               --------------
 !
-CALL OASIS_ENDDEF(IERR)
+ CALL OASIS_ENDDEF(IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(ILUOUT,*)'SFX_OASIS_DEFINE: OASIS enddef problem, err = ',IERR

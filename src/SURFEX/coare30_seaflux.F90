@@ -158,7 +158,7 @@ IF ( (KSIZE_ICE > 0 ) .AND. (.NOT. S%LHANDLE_SIC) ) CALL TREAT_SURF(IR_ICE,'I')
 IF (LHOOK) CALL DR_HOOK('MODI_COARE30_SEAFLUX:COARE30_SEAFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE TREAT_SURF(KMASK,YTYPE)
 !

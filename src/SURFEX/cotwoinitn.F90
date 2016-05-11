@@ -336,7 +336,7 @@ ZANMAX(:)=ZANMAX(:)/1.2
 ZEPSO(:)=PEPSO(:)/1.2
 ZGAMMT(:)=ZGAMMT(:)*XMCO2/XMD*1e-6
 !
-CALL COTWO(PCO2, ZCO2INIT5, ZCO2INIT4, ZCO2INIT3, ZGAMMT, &
+ CALL COTWO(PCO2, ZCO2INIT5, ZCO2INIT4, ZCO2INIT3, ZGAMMT, &
            PFZERO, ZEPSO, ZANMAX, ZGMEST, PGC, ZDMAX,     &
            PANMAX, ZGS, ZRDK, ZCO2INIT2, ZCO2INIT1        )                     
 ! change by sebastien PEPSO change into ZEPSO for units consistency

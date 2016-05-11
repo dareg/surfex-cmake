@@ -113,7 +113,7 @@ DEALLOCATE(ZMASK)
 !*      4.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='HORIBL'
+ CINTERP_TYPE='HORIBL'
 !
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE_GRIB',1,ZHOOK_HANDLE)
 !

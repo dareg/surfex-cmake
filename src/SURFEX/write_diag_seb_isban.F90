@@ -101,9 +101,9 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
@@ -123,7 +123,7 @@ GRESET=.TRUE.
 GRESET=(NBLOCK>0)
 #endif
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                     HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !-------------------------------------------------------------------------------
@@ -1985,7 +1985,7 @@ ENDIF
  CALL END_IO_SURF_n(HPROGRAM)
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------
 !
@@ -2003,7 +2003,7 @@ REAL, DIMENSION(SIZE(I%XDG,1),I%NNSOILCARB)  :: ZSOILCARB
 REAL, DIMENSION(SIZE(I%XDG,1),I%NNLITTLEVS)  :: ZLIGNIN_STRUC
 REAL, DIMENSION(SIZE(I%XDG,1),I%NNLITTER,I%NNLITTLEVS)  :: ZLITTER
 !
-CHARACTER(LEN=4 ) :: YLVL
+ CHARACTER(LEN=4 ) :: YLVL
 REAL              :: ZMISS
 INTEGER           :: JLAYER, JPATCH, JJ, INI, IWORK, IDEPTH
 !
@@ -2137,7 +2137,7 @@ ENDDO
 !
 YRECFM='WR_ISBA'
 YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
 !
 ! * Glacier ice storage (semi-prognostic) (kg/m2)
@@ -2179,7 +2179,7 @@ ENDWHERE
 !
 YRECFM='ASN_ISBA'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
-CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
 !  
 IF(I%TSNOW%SCHEME=='3-L' .OR. I%TSNOW%SCHEME=='CRO')THEN

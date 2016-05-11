@@ -189,7 +189,7 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=3)  :: YREAD
+ CHARACTER(LEN=3)  :: YREAD
 !
 INTEGER           :: ISWB     ! number of shortwave bands
 INTEGER           :: JTILE    ! loop counter on tiles
@@ -230,7 +230,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 !
-CPROGNAME=HPROGRAM
+ CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
    CALL ABOR1_SFX('INIT_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -307,7 +307,7 @@ SELECT CASE (HINIT)
                             HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,YSC%U%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
     CALL READ_SURF(&
                    HPROGRAM,'DTCUR',YSC%U%TTIME,IRESP)
@@ -324,7 +324,7 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
 !
  CALL READ_SURF(&
@@ -356,7 +356,7 @@ IF (HINIT=='PRE') THEN
   !Initialize full mask with good dimension
   IF (ALLOCATED(NMASK_FULL)) DEALLOCATE(NMASK_FULL)
   CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ')
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
   ALLOCATE(NWORK(YSC%U%NDIM_FULL))
   ALLOCATE(XWORK(YSC%U%NDIM_FULL))
@@ -539,7 +539,7 @@ ALLOCATE(YSC%USS%XZ0REL  (YSC%U%NSIZE_FULL))
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
                         HPROGRAM,'FULL  ','SURF  ','READ ')
 !
 !*       2.8 Allocations and Initialization of diagnostics
@@ -736,7 +736,7 @@ DEALLOCATE(ZFRAC_TILE)
 !-------------------------------------------------------------------------------
 !==============================================================================
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !==============================================================================
 SUBROUTINE PACK_SURF_INIT_ARG(KSIZE,KMASK)
 !

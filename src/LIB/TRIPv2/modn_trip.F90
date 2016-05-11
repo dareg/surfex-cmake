@@ -38,7 +38,7 @@ IMPLICIT NONE
 !
 !Stream flow velocity scheme
 !
-CHARACTER(LEN=3) :: CVIT  = 'DEF'     !Type of stream flow velocity
+ CHARACTER(LEN=3) :: CVIT  = 'DEF'     !Type of stream flow velocity
                                       !'DEF' = Constant velocit = 0.5m/s
                                       !'VAR' = variable velocity
 !
@@ -46,7 +46,7 @@ REAL             :: XCVEL = 0.5       ! Constant velocity value
 !
 !Groundwater scheme
 !
-CHARACTER(LEN=3) :: CGROUNDW = 'DEF'  !Use groundwater scheme
+ CHARACTER(LEN=3) :: CGROUNDW = 'DEF'  !Use groundwater scheme
                                       !'DEF' = No groundwater scheme
                                       !'CST' = Constant transfert time
                                       !'DIF' = Groundwater diffusive scheme 

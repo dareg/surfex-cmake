@@ -63,7 +63,7 @@ IF (LHOOK) CALL DR_HOOK('READWRITE_EMIS_FIELD_N',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','READ ')
 !* ascendant compatibility
 YRECFM='VERSION'
@@ -80,7 +80,7 @@ IF (IRESP/=0) THEN
   CALL ABOR1_SFX('READWRITE_EMIS_FIELDN: PROBLEM READING NUMBER OF 2D CHEMICAL EMISSION FIELDS')
 END IF
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
@@ -88,7 +88,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','READ ')
 YRECFM='EMISPEC_NBR'
 IF (IVERSION<4) YRECFM='EMISPEC_GR_NBR'
@@ -100,7 +100,7 @@ IF (IRESP/=0) THEN
   CALL ABOR1_SFX('READWRITE_EMIS_FIELDN: PROBLEM READING NUMBER OF EMITTED CHEMICAL SPECIES')
 END IF
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,IEMISPEC_NBR,IRESP,YCOMMENT)
@@ -109,7 +109,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !-------------------------------------------------------------------------------
 !
 DO JSPEC=1,IEMISPEC_NBR
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','READ ')
   WRITE(YRECFM,'("EMISNAME",I3.3)') JSPEC
   CALL READ_SURF(&
@@ -121,7 +121,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
   END IF
   READ(YCOMMENT,'(A3,24x,I5)') YSURF, IEMISPEC_NTIMES
   !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
   CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,YEMISPEC_NAME,IRESP,YCOMMENT)
@@ -134,7 +134,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','READ ')
   YRECFM='E_'//TRIM(YEMISPEC_NAME)
   CALL READ_SURF(&
@@ -145,7 +145,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
     CALL ABOR1_SFX('READWRITE_EMIS_FIELDN: PROBLEM WHEN READING THE EMISSION DATA '//YRECFM)
   END IF
   !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
   CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,ZWORK,IRESP,YCOMMENT)
@@ -153,7 +153,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
 !
 !-------------------------------------------------------------------------------
 !
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','READ ')
   WRITE(YRECFM,'("EMISTIMES",I3.3)') JSPEC
   CALL READ_SURF(&
@@ -164,7 +164,7 @@ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
     CALL ABOR1_SFX('READWRITE_EMIS_FIELDN: PROBLEM WHEN READING THE EMISSION TIMES '//YRECFM)
   END IF
 
-CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+ CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                      HPROGRAM,'FULL  ','SURF  ','WRITE')
   CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,ITIMES,IRESP,YCOMMENT,'-')

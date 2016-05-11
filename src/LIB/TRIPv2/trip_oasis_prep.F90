@@ -77,13 +77,13 @@ INTEGER,               PARAMETER  :: IG_PARSIZE   = 3       ! Size of array deco
 INTEGER,               PARAMETER  :: IG_NSEGMENTS = 1       ! Number of segments of process decomposition
 INTEGER, DIMENSION(2), PARAMETER  :: IVAR_NODIMS  = (/2,1/) ! rank and number of bundles in coupling field
 !
-CHARACTER(LEN=4)                  :: YCPL_LAND = 'tlan'
-CHARACTER(LEN=4)                  :: YCPL_QSB  = 'tdra'
-CHARACTER(LEN=4)                  :: YCPL_GW   = 'tgw '
-CHARACTER(LEN=4)                  :: YCPL_FLD  = 'tfld'
-CHARACTER(LEN=4)                  :: YCPL_SEA  = 'tsea'
-CHARACTER(LEN=4)                  :: YCPL_GRE  = 'tgre'
-CHARACTER(LEN=4)                  :: YCPL_ANT  = 'tant'
+ CHARACTER(LEN=4)                  :: YCPL_LAND = 'tlan'
+ CHARACTER(LEN=4)                  :: YCPL_QSB  = 'tdra'
+ CHARACTER(LEN=4)                  :: YCPL_GW   = 'tgw '
+ CHARACTER(LEN=4)                  :: YCPL_FLD  = 'tfld'
+ CHARACTER(LEN=4)                  :: YCPL_SEA  = 'tsea'
+ CHARACTER(LEN=4)                  :: YCPL_GRE  = 'tgre'
+ CHARACTER(LEN=4)                  :: YCPL_ANT  = 'tant'
 !
 !*       0.3   Declarations of local variables
 !              -------------------------------
@@ -124,7 +124,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_PREP',0,ZHOOK_HANDLE)
 !*       1.     Grid definition :
 !               -----------------
 !
-CALL GET_TRIP_GRID(TPG%XTRIP_GRID,PRES=ZRES,PLON=ZLON1D,PLAT=ZLAT1D)
+ CALL GET_TRIP_GRID(TPG%XTRIP_GRID,PRES=ZRES,PLON=ZLON1D,PLAT=ZLAT1D)
 !
 ZRES = ZRES / 2.0
 !
@@ -160,7 +160,7 @@ ZCORNER_LAT(:,:,4) = ZCORNER_LAT(:,:,3)
 ZCORNER_LON(:,:,2) = ZCORNER_LON(:,:,3)
 ZCORNER_LAT(:,:,2) = ZCORNER_LAT(:,:,1)
 !
-CALL OASIS_START_GRIDS_WRITING(IFLAG)
+ CALL OASIS_START_GRIDS_WRITING(IFLAG)
 !
 !
 !*       1.1    Grid definition for Land surface :
@@ -304,9 +304,9 @@ IF(LCPL_CALVSEA)THEN
 !
 ENDIF
 !
-CALL OASIS_TERMINATE_GRIDS_WRITING()
+ CALL OASIS_TERMINATE_GRIDS_WRITING()
 !
-CALL OASIS_ENDDEF(IERR)
+ CALL OASIS_ENDDEF(IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(KLISTING,*)'TRIP_OASIS_PREP: OASIS enddef problem, err = ',IERR

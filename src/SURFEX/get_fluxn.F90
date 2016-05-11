@@ -59,7 +59,7 @@ IMPLICIT NONE
 !
 TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
-CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
+ CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI        ! Number of points
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PRN       ! Net radiation at surface    (W/m2)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PH        ! Sensible heat flux          (W/m2)

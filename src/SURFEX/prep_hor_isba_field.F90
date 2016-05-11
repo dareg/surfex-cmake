@@ -137,7 +137,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',0,ZHOOK_HANDLE)
  CALL READ_PREP_ISBA_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
 !
-CMASK = 'NATURE'
+ CMASK = 'NATURE'
 !
 INI=SIZE(IG%XLAT)
 !
@@ -270,7 +270,7 @@ DEALLOCATE(ZFIELD)
 !
 ALLOCATE(ZFIELDOUTV(INI,INL,NVEGTYPE))
 !
-CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
+ CALL PUT_ON_ALL_VEGTYPES(INI,INL,INP,NVEGTYPE,ZFIELDOUTP,ZFIELDOUTV)
 !
 DEALLOCATE(ZFIELDOUTP)
 !
@@ -281,7 +281,7 @@ DEALLOCATE(ZFIELDOUTP)
 ALLOCATE(ZW (INI,SIZE(ZFIELDOUTV,2),I%NPATCH))
 !
 ZW = 0.
-CALL VEGTYPE_GRID_TO_PATCH_GRID(I%NPATCH,I%XVEGTYPE_PATCH,I%XPATCH,ZFIELDOUTV,ZW)
+ CALL VEGTYPE_GRID_TO_PATCH_GRID(I%NPATCH,I%XVEGTYPE_PATCH,I%XPATCH,ZFIELDOUTV,ZW)
 !
 !-------------------------------------------------------------------------------------
 !
@@ -487,7 +487,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------

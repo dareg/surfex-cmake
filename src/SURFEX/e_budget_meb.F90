@@ -110,12 +110,12 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HISBA     ! type of ISBA version:
+ CHARACTER(LEN=*),      INTENT(IN)  :: HISBA     ! type of ISBA version:
 !                                               ! '2-L' (default)
 !                                               ! '3-L'
 !                                               ! 'DIF'
 !
-CHARACTER(LEN=*),      INTENT(IN)  :: HCPSURF   ! Specific heat
+ CHARACTER(LEN=*),      INTENT(IN)  :: HCPSURF   ! Specific heat
 !                                               ! 'DRY' = dry Cp
 !                                               ! 'HUM' = humid Cp fct of qc for MEB
 !
@@ -856,7 +856,7 @@ END WHERE
 ! computed within the snow routine.
 !
 
-CALL TRIDIAG_GROUND_RM_SOLN(ZT,ZCOEF_A,ZCOEF_B)
+ CALL TRIDIAG_GROUND_RM_SOLN(ZT,ZCOEF_A,ZCOEF_B)
 DO JK=2,JNSNOW
    WHERE(PPSN(:) > 0.0)
       PTN(:,JK) = MIN(XTT,ZT(:,JK))

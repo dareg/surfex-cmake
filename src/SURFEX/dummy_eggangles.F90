@@ -45,76 +45,76 @@ INTERFACE SIZE_W2E
   MODULE PROCEDURE SIZE_W2E_S, SIZE_W2E_L
 END INTERFACE
 
-CONTAINS
+ CONTAINS
 REAL(KIND=JPRB) FUNCTION ANGLE_DOMAIN_RS(ALPHA,PI,DOM,UNIT) RESULT (BETA)
 REAL(KIND=JPRB), INTENT(IN)                           :: ALPHA
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL               :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL               :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL               :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL               :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                 :: PI
 END FUNCTION ANGLE_DOMAIN_RS
 TYPE (LOLA) FUNCTION ANGLE_DOMAIN_LOLAS(ALPHA,PI,DOM,UNIT) RESULT (BETA)
 TYPE (LOLA), INTENT(IN)                                :: ALPHA
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL                :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL                :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL                :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL                :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                  :: PI
 END FUNCTION ANGLE_DOMAIN_LOLAS
 ! -------------------------------------------------------------------------------
 FUNCTION ANGLE_DOMAIN_RV(ALPHA,PI,DOM,UNIT) RESULT (BETA)
 REAL(KIND=JPRB), DIMENSION(:), INTENT(IN)             :: ALPHA
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL               :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL               :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL               :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL               :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                 :: PI
 END FUNCTION ANGLE_DOMAIN_RV
 ! -------------------------------------------------------------------------------
 FUNCTION ANGLE_DOMAIN_LOLAV(YL_ALPHA,PI,DOM,UNIT) RESULT (YD_BETA)
 TYPE (LOLA), DIMENSION(:), INTENT(IN)               :: YL_ALPHA
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL             :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL             :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL             :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL             :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL               :: PI
 END FUNCTION ANGLE_DOMAIN_LOLAV
 ! -------------------------------------------------------------------------------
 INTEGER(KIND=JPIM) FUNCTION VAL_LAT_S(LAT,NUM_ERR,PI,UNIT) RESULT(ETAT)
 REAL(KIND=JPRB), INTENT(IN)                          :: LAT
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL              :: UNIT
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL              :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                :: PI
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL             :: NUM_ERR
 END FUNCTION VAL_LAT_S
 ! -------------------------------------------------------------------------------
 INTEGER(KIND=JPIM) FUNCTION VAL_LAT_V(P_LAT,NUM_ERR,PI,UNIT) RESULT(ETAT)
 REAL(KIND=JPRB), DIMENSION(:), INTENT(IN)                 :: P_LAT
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL                   :: UNIT
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL                   :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                     :: PI
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL                  :: NUM_ERR
 END FUNCTION VAL_LAT_V
 ! -------------------------------------------------------------------------------
 INTEGER(KIND=JPIM) FUNCTION VAL_LON_S(LON,NUM_ERR,PI,DOM,UNIT) RESULT(ETAT)
 REAL(KIND=JPRB), INTENT(IN)                                :: LON
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL                    :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL                    :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL                    :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL                    :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                      :: PI
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL                   :: NUM_ERR
 END FUNCTION VAL_LON_S
 ! -------------------------------------------------------------------------------
 INTEGER(KIND=JPIM) FUNCTION VAL_LON_V(LON,NUM_ERR,PI,DOM,UNIT) RESULT(ETAT)
 REAL(KIND=JPRB), DIMENSION(:), INTENT(IN)                       :: LON
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL                         :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL                         :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL                         :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL                         :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                           :: PI
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL                        :: NUM_ERR
 END FUNCTION VAL_LON_V
 ! -------------------------------------------------------------------------------
 INTEGER(KIND=JPIM) FUNCTION VAL_COORD_S(PT_COORD,NUM_ERR,PI,DOM,UNIT) RESULT(ETAT)
 TYPE (LOLA), INTENT(IN)                               :: PT_COORD
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL               :: DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL               :: UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL               :: DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL               :: UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                 :: PI
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL              :: NUM_ERR
 END FUNCTION VAL_COORD_S
 ! -------------------------------------------------------------------------------
 INTEGER(KIND=JPIM) FUNCTION VAL_COORD_V(YD_PT_COORD,K_NUM_ERR,PI,CD_DOM,CD_UNIT) RESULT(ETAT)
 TYPE (LOLA), DIMENSION(:), INTENT(IN)                   :: YD_PT_COORD
-CHARACTER (LEN=2), INTENT(IN), OPTIONAL                 :: CD_DOM
-CHARACTER (LEN=1), INTENT(IN), OPTIONAL                 :: CD_UNIT
+ CHARACTER (LEN=2), INTENT(IN), OPTIONAL                 :: CD_DOM
+ CHARACTER (LEN=1), INTENT(IN), OPTIONAL                 :: CD_UNIT
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL                   :: PI
 INTEGER(KIND=JPIM), INTENT(IN), OPTIONAL                :: K_NUM_ERR
 END FUNCTION VAL_COORD_V

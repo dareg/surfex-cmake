@@ -82,7 +82,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
+ CHARACTER(LEN=*),     INTENT(IN)  :: HDIFSFCOND ! NOTE: Only used when HISBA = DIF
 !                                               ! MLCH' = include the insulating effect of leaf
 !                                               !         litter/mulch on the surface thermal cond.
 !                                               ! 'DEF' = no mulch effect

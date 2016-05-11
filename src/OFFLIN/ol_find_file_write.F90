@@ -69,7 +69,7 @@ IF (IFILE_ID==0 .AND. ASSOCIATED(XVAR_TOWN)) CALL SEARCH_VAR(XVAR_TOWN,XID_TOWN,
 !------------------------------------------------
 
 IF (LHOOK) CALL DR_HOOK('OL_FIND_FILE_WRITE',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 
 !------------------------------------------------
 

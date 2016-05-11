@@ -23,7 +23,7 @@ END TYPE SLT_t
 
 
 
-CONTAINS
+ CONTAINS
 
 !
 

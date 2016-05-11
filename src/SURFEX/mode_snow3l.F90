@@ -134,7 +134,7 @@ INTERFACE SNOW3LALB
 END INTERFACE
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !
 !####################################################################
       FUNCTION SNOW3LWLIQMAX_3D(PSNOWRHO) RESULT(PWLIQMAX)
@@ -1647,7 +1647,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LAGREG',1,ZHOOK_HANDLE)
 !        PSNOWGRAN1(KL1)=ZSNOWGRAN1(KL1)
 !        PSNOWGRAN2(KL1)=ZSNOWGRAN2(KL1)
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE GET_AGREG(KID1,KID2,PFIELD1,PFIELD2,PFIELD)
 !
@@ -1693,7 +1693,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PNDENT, PNVIEU          
 !
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
 !       0.2 declaration of local variables
 !
 REAL, DIMENSION(SIZE(PSNOWGRAN1,1)) :: ZGRAN1, ZGRAN2, ZHIST 
@@ -1791,7 +1791,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !*      0.1    declarations of arguments
 REAL, INTENT(IN) :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
 REAL :: ZDIFTYPE, ZCOEF3, ZCOEF4
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -1851,7 +1851,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSNOWZTOP_NEW, PSNOWZBOT_NEW
 REAL, DIMENSION(:), INTENT(IN) :: PSNOWRHOO, PSNOWDZO, PSNOWGRAN1O, PSNOWGRAN2O, &
                                   PSNOWHISTO, PSNOWAGEO, PSNOWHEATO
 REAL, DIMENSION(:), INTENT(IN) :: PSNOWDZN
-CHARACTER(3), INTENT(IN)       :: HSNOWMETAMO
+ CHARACTER(3), INTENT(IN)       :: HSNOWMETAMO
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRHON, PSNOWGRAN1N, PSNOWGRAN2N, &
                                    PSNOWHISTN, PSNOWAGEN, PSNOWHEATN
 !
@@ -2019,7 +2019,7 @@ REAL, INTENT(IN) :: PSNOWGRAN1
 REAL, INTENT(IN) :: PSNOWGRAN2
 REAL, INTENT(OUT) :: PDIAM
 !
-CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
+ CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -2318,7 +2318,7 @@ INTEGER                              :: JJ, JI
 INTEGER                              :: INI
 INTEGER                              :: INLVLS
 !
-CHARACTER(LEN=5)                     :: YSNOWCOND !should be in namelist
+ CHARACTER(LEN=5)                     :: YSNOWCOND !should be in namelist
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------

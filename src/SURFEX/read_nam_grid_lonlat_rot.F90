@@ -54,7 +54,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
+ CHARACTER(LEN=6),           INTENT(IN)    :: HPROGRAM   ! calling program
 INTEGER,                    INTENT(INOUT) :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(OUT)   :: KL         ! number of points
 REAL, DIMENSION(KGRID_PAR), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
@@ -92,16 +92,16 @@ NAMELIST/NAM_LONLAT_ROT/XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT,NLON,NLAT
 !*       1.    opening of namelist
 ! 
 IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_LONLAT_ROT',0,ZHOOK_HANDLE)
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
+ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading of projection parameters
 !              --------------------------------
 !
-CALL POSNAM(ILUNAM,'NAM_LONLAT_ROT',GFOUND,ILUOUT)
+ CALL POSNAM(ILUNAM,'NAM_LONLAT_ROT',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LONLAT_ROT)
 !
 !---------------------------------------------------------------------------
@@ -112,7 +112,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_LONLAT_ROT)
 KL = NLON * NLAT
 !
 !---------------------------------------------------------------------------
-CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !---------------------------------------------------------------------------
 !
 !*       4.    All this information stored into pointer PGRID_PAR
@@ -121,10 +121,10 @@ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 ALLOCATE(ZLAT(KL))
 ALLOCATE(ZLON(KL))
 !
-CALL LATLON_LONLAT_ROT(XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT, &
+ CALL LATLON_LONLAT_ROT(XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT, &
                          NLON,NLAT,ZLON,ZLAT                   )  
 !
-CALL PUT_GRIDTYPE_LONLAT_ROT(ZGRID_PAR,                                 &
+ CALL PUT_GRIDTYPE_LONLAT_ROT(ZGRID_PAR,                                 &
                                XWEST,XSOUTH,XDLON,XDLAT,XPOLON,XPOLAT,  &
                                NLON,NLAT,KL,ZLON,ZLAT                   )  
 !

@@ -94,7 +94,7 @@ LOGICAL,            INTENT(IN)    :: OPWG   !
 LOGICAL,            INTENT(IN)    :: OPERTFLUX !
 INTEGER,            INTENT(IN)    :: KZ0
 LOGICAL,            INTENT(IN)    :: OHANDLE_SIC ! Do we weight seaice and open sea fluxes
-CHARACTER(LEN=6),   INTENT(IN)    :: HECUME      ! type of ecume scheme
+ CHARACTER(LEN=6),   INTENT(IN)    :: HECUME      ! type of ecume scheme
 !
 !
 REAL, DIMENSION(:), INTENT(INOUT)    :: PZ0SEA! roughness length over the ocean
@@ -169,7 +169,7 @@ IF ( (KSIZE_ICE > 0 ) .AND. (.NOT. OHANDLE_SIC) ) CALL TREAT_SURF(IR_ICE,'I')
 IF (LHOOK) CALL DR_HOOK('ECUME_SEAFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 
 SUBROUTINE TREAT_SURF(KMASK,YTYPE)
 !

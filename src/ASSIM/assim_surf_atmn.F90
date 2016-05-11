@@ -80,7 +80,7 @@ TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
-CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
+ CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PCON_RAIN
 REAL, DIMENSION(KI), INTENT(IN) :: PSTRAT_RAIN
@@ -100,7 +100,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PSST
 REAL, DIMENSION(KI), INTENT(IN) :: PSIC
 REAL, DIMENSION(KI), INTENT(IN) :: PUCLS
 REAL, DIMENSION(KI), INTENT(IN) :: PVCLS
-CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
+ CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
@@ -115,7 +115,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ASSIM_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
-CPROGNAME = HPROGRAM
+ CPROGNAME = HPROGRAM
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -197,7 +197,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('ASSIM_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
-CONTAINS
+ CONTAINS
 !
 !=======================================================================================
 SUBROUTINE ASSIM_TREAT_SURF(KTILE,KSIZE,KMASK)

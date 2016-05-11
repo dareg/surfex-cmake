@@ -118,7 +118,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_FIELD',0,ZHOOK_HANDLE)
  CALL READ_PREP_TEB_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                         HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
 !
-CMASK = 'TOWN'
+ CMASK = 'TOWN'
 !
 !-------------------------------------------------------------------------------------
 !
@@ -281,7 +281,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_FIELD',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------
