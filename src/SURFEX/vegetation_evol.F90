@@ -389,6 +389,8 @@ IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB') THEN
   !
   ! * Respiration of structural biomass pools
   !
+  print*,'size ',size(GWOOD)
+  print*,GWOOD
   WHERE(GWOOD(:))
   ! IBIS respiration with either respiration factor rwood=0.0125 - otherwise rroot=1.25 
   ! (Kucharik et al, 2000, eq 6-8) Soil temp in K         

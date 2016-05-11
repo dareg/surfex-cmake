@@ -452,7 +452,7 @@ DO NIFIC = INB,1,-1
   !
   CALL DEALLOC_SURF_ATM_n(YSURF_CUR)
   !
-  IF ( CASSIM_ISBA=='EKF  ' .AND. NIFIC==1 ) LREAD_ALL = .TRUE.
+  IF ( (CASSIM_ISBA=='EKF  '.OR.CASSIM_ISBA=='ENKF ') .AND. NIFIC==1 ) LREAD_ALL = .TRUE.
   !    
   ! Initialize the SURFEX interface
   CALL IO_BUFF_CLEAN

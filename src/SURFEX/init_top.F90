@@ -478,8 +478,10 @@ DO JI=1,INI
      ZFUP=PTAB_FSAT(JI,1)
      ZWUP=PTAB_WTOP(JI,1)
      ZQUP=PTAB_QTOP(JI,1)
-!   
+!  
+     
      ID(:)=MAXLOC(PTAB_WTOP(JI,:),PTAB_WTOP(JI,:)<ZWSAT_AVG(JI))
+     IF (ID(1)==0) ID(1) = 2
 !   
      ZFDOWN=PTAB_FSAT(JI,ID(1))
      ZWDOWN=PTAB_WTOP(JI,ID(1))

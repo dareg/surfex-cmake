@@ -1887,8 +1887,8 @@ SUBROUTINE PREP_MEB_SOIL(OMEB_LITTER,PSOILHCAPZ,PSOILCONDZ,PWSAT,PWFC,PD_G,PDZG,
                          PTL,PGNDLITTER,PD_GL,PDZGL,PTGL,PSOILHCAPL,PSOILCONDL,PWSATL,PWFCL,PWSFC,PWISFC,&
                          PCTSFC,PCT,PFROZEN1,PFROZEN1SFC                                                  )
 !
-USE MODD_CSTS,       ONLY : XRHOLW
-USE MODD_ISBA_PAR,   ONLY : XWGMIN
+USE MODD_CSTS,       ONLY : XRHOLW,XRHOLI, XCL, XCI 
+USE MODD_ISBA_PAR,   ONLY : XWGMIN, XOMSPH 
 !
 IMPLICIT NONE
 !
@@ -1930,14 +1930,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.3    declarations of local parameters
 !
-REAL, PARAMETER                       :: Z1 = 1900.0     !massic organic matter heat capacity (J/kg/K)
-REAL, PARAMETER                       :: Z2 = 45.0       !litter bulk density (kg/m3)
-REAL, PARAMETER                       :: Z3 = 4180.0     !massic water heat capacity (J/kg/K)
-REAL, PARAMETER                       :: Z4 = 0.1        !coeff for litter conductivity (K/m)
-REAL, PARAMETER                       :: Z5 = 0.03       !coeff for litter conductivity
-REAL, PARAMETER                       :: Z6 = 0.95       !litter porosity       (m3/m3)
-REAL, PARAMETER                       :: Z7 = 0.12       !litter field capacity (m3/m3)
-
+REAL, PARAMETER                       :: Z1 = 45.0       !litter bulk density (kg/m3)
+REAL, PARAMETER                       :: Z2 = 0.1        !coeff for litter conductivity (K/m)
+REAL, PARAMETER                       :: Z3 = 0.03       !coeff for litter conductivity
+REAL, PARAMETER                       :: Z4 = 0.95       !litter porosity       (m3/m3)
+REAL, PARAMETER                       :: Z5 = 0.12       !litter field capacity (m3/m3)
+!
+REAL, DIMENSION(SIZE(PWG))            :: ZWORK
 !
 !-------------------------------------------------------------------------------
 !
@@ -1949,11 +1948,11 @@ INL  = SIZE(PTG,2)
 ZWORK(:) = 0.0
 IF(OMEB_LITTER)THEN
    PTGL(:,1)                  = PTL(:)
-   ZWORK(:)                   = PWRL(:)/PGNDLITTER(:)
-   PSOILHCAPL(:,1)            = Z1*Z2 + (Z3*1000/XRHOLW)*ZWORK(:) 
-   PSOILCONDL(:,1)            = Z4 + Z5 * ZWORK(:)
-   PWSATL(:,1)                = Z6
-   PWFCL(:,1)                 = Z7
+   ZWORK(:)                   = PWRL(:)/(XRHOLW*PGNDLITTER(:))
+   PSOILHCAPL(:,1)            = XOMSPH*Z1 + (XCL*XRHOLW)*ZWORK(:) + (XCI*XRHOLI/XRHOLW)*PWRLI(:)/PGNDLITTER(:)
+   PSOILCONDL(:,1)            = Z2 + Z3 * ZWORK(:)
+   PWSATL(:,1)                = Z4
+   PWFCL(:,1)                 = Z5
    PD_GL(:,1)                 = PGNDLITTER(:)
    PDZGL(:,1)                 = PGNDLITTER(:)
    PCTSFC(:)                  = 1. / (PSOILHCAPL(:,1) * PGNDLITTER(:))
