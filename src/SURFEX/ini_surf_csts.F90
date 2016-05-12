@@ -90,9 +90,10 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
                         XTAU_LW, XRAGNC_FACTOR
 !
-NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0SN, XZ0HSN, XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
+NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
-                             XVAGING_NOGLACIER, XVAGING_GLACIER, XPERCENTAGEPORE
+                             XVAGING_NOGLACIER, XVAGING_GLACIER,       &
+                             XPERCENTAGEPORE
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -165,12 +166,11 @@ XCFFV = 3.0
 !
 ! Roughness length of pure snow surface (m)
 !
-!XZ0SN = 0.001
-
+XZ0SN = 0.001
 !
 ! Roughness length for heat of pure snow surface (m)
 !
-!XZ0HSN = 0.0001
+XZ0HSN = 0.0001
 !
 ! Snow Melt timescale with D95 (s): needed to prevent time step 
 ! dependence of melt when snow fraction < unity.
