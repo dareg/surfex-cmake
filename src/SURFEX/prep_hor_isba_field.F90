@@ -79,6 +79,7 @@ USE MODI_PREP_ISBA_EXTERN
 USE MODI_PREP_ISBA_NETCDF
 USE MODI_PACK_SAME_RANK
 USE MODI_ALLOCATE_GR_SNOW
+USE MODI_GET_PREP_INTERP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -158,7 +159,7 @@ INTEGER                       :: ILUOUT    ! output listing logical unit
 LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
 LOGICAL                       :: GUNIF_SNOW! flag for prescribed uniform field
 INTEGER                       :: JP    ! loop on patches
-INTEGER                       :: JVEGTYPE  ! loop on vegtypes
+INTEGER                       :: JVEG  ! loop on vegtypes
 INTEGER                       :: INI, INL, INP, JI, JL! Work integer
 INTEGER                       :: INFOMPI
 INTEGER, DIMENSION(SIZE(IG%XLAT)) :: IWORK
@@ -308,17 +309,20 @@ IF (NPROC>1) THEN
 ENDIF
 ALLOCATE(ZFIELDOUTP(INI,INL,INP))
 !
+! ZPATCH is the array of output patches put on the input patches
+ALLOCATE(ZPATCH(INI,INP))
+ZPATCH(:,:) = 0.
+!
+ CALL GET_PREP_INTERP(INP,IO%NPATCH,S%XVEGTYPE,S%XPATCH,ZPATCH)
+!
 DO JP = 1, INP
-  IF (INP==NVEGTYPE) THEN
-     LINTERP = (S%XVEGTYPE(:,JP) > 0.)
-  ELSEIF(INP==IO%NPATCH)THEN
-     LINTERP = (S%XPATCH(:,JP) > 0.)
-  ENDIF
+  ! we interpolate each point the output patch is present
+  LINTERP(:) = (ZPATCH(:,JP) > 0.)
   CALL HOR_INTERPOL(DTCO, U, ILUOUT,ZFIELDIN(:,:,JP),ZFIELDOUTP(:,:,JP))
   LINTERP = .TRUE.
 END DO
 !
-DEALLOCATE(ZFIELDIN)
+DEALLOCATE(ZFIELDIN,ZPATCH)
 !
 IF (TRIM(HSURF)/="ZS") THEN
   !

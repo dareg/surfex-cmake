@@ -10,8 +10,8 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, G, U, HPROGRAM,           &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,   &                                
-                                PVEGTYPE_PATCH, PPATCH, KSIZE_P,&
-                                KR_P, PDEPTH  )
+                                PVEGTYPE_PATCH, PPATCH,         &
+                                KSIZE_P, KR_P, PDEPTH  )
 !     #######################################################
 !
 !!****  *PREP_HOR_SNOW_FIELD* - reads, interpolates and prepares a snow field
@@ -71,6 +71,7 @@ USE MODI_VEGTYPE_GRID_TO_PATCH_GRID
 USE MODI_SNOW_HEAT_TO_T_WLIQ
 USE MODI_VEGTYPE_TO_PATCH
 USE MODI_PACK_SAME_RANK
+USE MODI_GET_PREP_INTERP
 !
 USE MODI_ABOR1_SFX
 !
@@ -141,9 +142,10 @@ REAL, ALLOCATABLE, DIMENSION(:)   :: ZD        ! snow depth (x, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:) :: ZHEAT     ! work array (x, output snow grid, kpatch)
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZGRID     ! grid array (x, output snow grid, kpatch)
 !
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZDEPTH, ZPATCH
+!
 TYPE (DATE_TIME)              :: TZTIME_GRIB    ! current date and time
-INTEGER                       :: JP    ! loop on patches
-INTEGER                       :: JVEGTYPE  ! loop on vegtypes
+INTEGER                       :: JP, IP    ! loop on patches
 INTEGER                       :: JL    ! loop on layers
 INTEGER :: INFOMPI, INL, INP, ISNOW_NLAYER, IMASK, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -198,39 +200,54 @@ ENDIF
 !    
 ALLOCATE(ZFIELDOUTP(KL,INL,INP))
 !
-DO JVEGTYPE = 1, INP
+!
+! ZPATCH is the array of output patches put on the input patches
+ALLOCATE(ZPATCH(KL,INP))
+ZPATCH(:,:) = 0.
+!
+! if the number of input patches is NVEGTYPE
+IF (INP==NVEGTYPE) THEN
+  DO JP = 1,NVEGTYPE
+    ! each vegtype takes the output contribution of the patch it is in
+    IP = VEGTYPE_TO_PATCH(JP,KPATCH)
+    ZPATCH(:,JP) = PVEGTYPE_PATCH(:,JP,IP)
+  ENDDO
+ENDIF
+!
+ CALL GET_PREP_INTERP(INP,KPATCH,ZPATCH,PPATCH,ZPATCH,KR_P)
+!
+! the same for depth that is defined on the output patches
+IF (PRESENT(PDEPTH)) THEN
+  !
+  ALLOCATE(ZDEPTH(KL,INP))
+  ZDEPTH(:,:) = 0.
+  !
   IF (INP==NVEGTYPE) THEN
-    JP = 1
-    IF (KPATCH>1) JP = VEGTYPE_TO_PATCH(JVEGTYPE,KPATCH)
-    !* does not interpolates snow caracteristics on points without snow
-    IF (PRESENT(PDEPTH)) THEN
-      DO JI = 1,KSIZE_P(JP)
-        IMASK = KR_P(JI,JP)       
-        LINTERP(IMASK) = ( PDEPTH(JI,1,JP) /= 0. .AND. PDEPTH(JI,1,JP) /= XUNDEF )
-      ENDDO
-    ENDIF
-    DO JI = 1,KSIZE_P(JP)
-      IMASK = KR_P(JI,JP)
-      LINTERP(IMASK) = (LINTERP(IMASK) .AND. PPATCH(JI,JP)>0.)
+    DO JP = 1,NVEGTYPE
+      IP = VEGTYPE_TO_PATCH(JP,KPATCH)
+      ZDEPTH(:,JP) = PDEPTH(:,1,IP)
     ENDDO
-  ELSE
-    IF (PRESENT(PDEPTH)) THEN
-      LINTERP(:) = .FALSE.
-      DO JP = 1,KPATCH
-        DO JI = 1,KSIZE_P(JP)
-          IMASK = KR_P(JI,JP)
-          LINTERP(IMASK) = LINTERP(IMASK) .OR. (PDEPTH(JI,1,JP)/=0. .AND. PDEPTH(JI,1,JP)/=XUNDEF)
-        ENDDO
-      ENDDO
-    ENDIF
   ENDIF
+  ! 
+  CALL GET_PREP_INTERP(INP,KPATCH,ZDEPTH,PDEPTH(:,1,:),ZDEPTH,KR_P)
+  !
+ENDIF
+!
+DO JP = 1, INP
+  ! ZDEPTH and ZPATCH are defined on the size on the patch for the snow: use of
+  ! the mask
+  IF (PRESENT(PDEPTH)) THEN
+    LINTERP(:) = ( ZDEPTH(:,JP) /= 0. .AND. ZDEPTH(:,JP) /= XUNDEF )
+  ENDIF
+  LINTERP(:) = (LINTERP(:) .AND. ZPATCH(:,JP)>0.)
   !* horizontal interpolation
-  CALL HOR_INTERPOL(DTCO, U, KLUOUT,ZFIELDIN(:,:,JVEGTYPE),ZFIELDOUTP(:,:,JVEGTYPE))
+  CALL HOR_INTERPOL(DTCO, U, KLUOUT,ZFIELDIN(:,:,JP),ZFIELDOUTP(:,:,JP))
   !
   LINTERP(:) = .TRUE.
 END DO
 !
-DEALLOCATE(ZFIELDIN )
+DEALLOCATE(ZFIELDIN, ZPATCH )
+IF (PRESENT(PDEPTH)) DEALLOCATE(ZDEPTH)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
