@@ -915,13 +915,13 @@ ENDIF
 ! (just a diagnostic here):
 !
 IF (IO%CCPSURF=='DRY') THEN
-   PK%XPCPS(:) = XCPD
+   PK%XCPS(:) = XCPD
 ELSEIF(.NOT.LCPL_ARP)THEN
-   PK%XPCPS(:) = XCPD + ( XCPV - XCPD ) * PEK%XQC(:)
+   PK%XCPS(:) = XCPD + ( XCPV - XCPD ) * PEK%XQC(:)
 ENDIF
 !
-PK%XPLVTT(:)   = XLVTT
-PK%XPLSTT(:)   = XLSTT
+PK%XLVTT(:)   = XLVTT
+PK%XLSTT(:)   = XLSTT
 !
 !
 IF (LHOOK) CALL DR_HOOK('E_BUDGET_MEB',1,ZHOOK_HANDLE)

@@ -296,7 +296,7 @@ ZFFRZ(:)  = KK%XFFROZEN(:)     *KK%XFF(:) +       ZFG(:)*PFROZEN1(:)      + PEK%
 !
 ZSNOW      = 1.
 ZFNSNOW(:) = 1.
-ZCPS(:)    = PK%XPCPS(:)
+ZCPS(:)    = PK%XCPS(:)
 !
 IF (LCPL_ARP) THEN
 
@@ -306,7 +306,7 @@ IF (LCPL_ARP) THEN
   PLEG_DELTA(:)  = 1.0
   PLEGI_DELTA(:) = 1.0
 
-  ZLAVG(:)        = PK%XPLVTT(:)*ZFNFRZ(:) + PK%XPLSTT(:)*ZFFRZ(:)
+  ZLAVG(:)        = PK%XLVTT(:)*ZFNFRZ(:) + PK%XLSTT(:)*ZFFRZ(:)
   ZXCPV_XCL_AVG(:)=   (XCPV-XCL)*ZFNFRZ(:) + (XCPV-XCI)  *ZFFRZ(:) 
 
   ZLVTT(:) = ZLAVG(:)
@@ -587,18 +587,18 @@ PUSTAR2_IC(:) =  ZUSTAR2(:)
 IF (LCPL_ARP) THEN
 
   IF (.NOT.LQVNPLUS) THEN
-    PK%XPCPS(:) =  PK%XPCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PEK%XTG(:,1)-PTSM(:))
+    PK%XCPS(:) =  PK%XCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PEK%XTG(:,1)-PTSM(:))
   ENDIF
 
 
   IF (LQVNPLUS) THEN
-    PK%XPCPS(:) =  PK%XPCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PEK%XTG(:,1)-PTSM(:))  &
+    PK%XCPS(:) =  PK%XCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PEK%XTG(:,1)-PTSM(:))  &
                        + (XCPV-XCPD) *(1-ZHUMA(:))*(PQA_IC(:)-PQA(:))  
   ENDIF
 
-  PK%XPLSTT(:) = PK%XPLSTT(:) + (XCPV-XCI)*(PEK%XTG(:,1)-PTSM(:))
+  PK%XLSTT(:) = PK%XLSTT(:) + (XCPV-XCI)*(PEK%XTG(:,1)-PTSM(:))
 
-  PK%XPLVTT(:) = PK%XPLVTT(:) + (XCPV-XCL)*(PEK%XTG(:,1)-PTSM(:))
+  PK%XLVTT(:) = PK%XLVTT(:) + (XCPV-XCL)*(PEK%XTG(:,1)-PTSM(:))
 
 
 ENDIF

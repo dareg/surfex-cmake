@@ -257,7 +257,7 @@ DO JJ=1,SIZE(PEK%XTG,1)
 !
 !                                            sensible heat flux
 !
-  PH(JJ) = PRHOA(JJ) * PK%XPCPS(JJ) * (PEK%XTG(JJ,1) - PTA(JJ)*PEXNS(JJ)/PEXNA(JJ)) &
+  PH(JJ) = PRHOA(JJ) * PK%XCPS(JJ) * (PEK%XTG(JJ,1) - PTA(JJ)*PEXNS(JJ)/PEXNA(JJ)) &
            / PEK%XRESA(JJ) / PEXNS(JJ)
 !
   ZWORK1(JJ) = PRHOA(JJ) * (1.-PEK%XVEG(JJ))*(1.-ZPSNG(JJ)) / PEK%XRESA(JJ)
@@ -265,29 +265,29 @@ DO JJ=1,SIZE(PEK%XTG,1)
 !                                            latent heat of sublimation from
 !                                            the ground
 !
-  PLEGI(JJ) = ZWORK1(JJ) * PK%XPLSTT(JJ) * ( PHUI(JJ) * ZWORK2(JJ) - PQA(JJ)) * PFROZEN1(JJ) * PLEGI_DELTA(JJ)
+  PLEGI(JJ) = ZWORK1(JJ) * PK%XLSTT(JJ) * ( PHUI(JJ) * ZWORK2(JJ) - PQA(JJ)) * PFROZEN1(JJ) * PLEGI_DELTA(JJ)
 !
 !                                            total latent heat of evaporation from
 !                                            the ground
 !
-  PLEG(JJ) = ZWORK1(JJ) * PK%XPLVTT(JJ) * ( PHUG(JJ) * ZWORK2(JJ) - PQA(JJ)) * (1.-PFROZEN1(JJ)) * PLEG_DELTA(JJ)
+  PLEG(JJ) = ZWORK1(JJ) * PK%XLVTT(JJ) * ( PHUG(JJ) * ZWORK2(JJ) - PQA(JJ)) * (1.-PFROZEN1(JJ)) * PLEG_DELTA(JJ)
 !
   ZWORK2(JJ) = PRHOA(JJ) * (ZWORK2(JJ) - PQA(JJ))
   ZWORK3(JJ) = ZWORK2(JJ) / PEK%XRESA(JJ)
 !                                            latent heat of evaporation from 
 !                                            the snow canopy
 !
-  PLES(JJ)     = PK%XPLSTT(JJ) * ZPSN(JJ) * ZWORK3(JJ)
+  PLES(JJ)     = PK%XLSTT(JJ) * ZPSN(JJ) * ZWORK3(JJ)
 !
 !                                            latent heat of evaporation from
 !                                            evaporation
 !
-  PLEV(JJ)     = PK%XPLVTT(JJ) * PEK%XVEG(JJ)*(1.-ZPSNV(JJ)) * DMK%XHV(JJ) * ZWORK3(JJ)
+  PLEV(JJ)     = PK%XLVTT(JJ) * PEK%XVEG(JJ)*(1.-ZPSNV(JJ)) * DMK%XHV(JJ) * ZWORK3(JJ)
 !
 !                                            latent heat of evapotranspiration
 !                                            
   ZZHV (JJ) = MAX(0., SIGN(1.,PQSAT(JJ) - PQA(JJ)))
-  PLETR(JJ) = ZZHV(JJ) * (1. - PDELTA(JJ)) * PK%XPLVTT(JJ) * PEK%XVEG(JJ)*(1-ZPSNV(JJ))          &
+  PLETR(JJ) = ZZHV(JJ) * (1. - PDELTA(JJ)) * PK%XLVTT(JJ) * PEK%XVEG(JJ)*(1-ZPSNV(JJ))          &
               * ZWORK2(JJ) *( (1/(PEK%XRESA(JJ) + DMK%XRS(JJ))) - ((1.-PF5(JJ))/(PEK%XRESA(JJ) + XRS_MAX)) )
 !               
 !
@@ -295,9 +295,9 @@ DO JJ=1,SIZE(PEK%XTG,1)
 !
 !                                            latent heat of free water (floodplains)
 !
-  PLE_FLOOD(JJ)  = PK%XPLVTT(JJ) * (1.-KK%XFFROZEN(JJ)) * KK%XFF(JJ) * ZWORK3(JJ) 
+  PLE_FLOOD(JJ)  = PK%XLVTT(JJ) * (1.-KK%XFFROZEN(JJ)) * KK%XFF(JJ) * ZWORK3(JJ) 
 !
-  PLEI_FLOOD(JJ) = PK%XPLSTT(JJ) * KK%XFFROZEN(JJ) * KK%XFF(JJ) * ZWORK3(JJ) 
+  PLEI_FLOOD(JJ) = PK%XLSTT(JJ) * KK%XFFROZEN(JJ) * KK%XFF(JJ) * ZWORK3(JJ) 
 !
 !                                            total latent heat of evaporation
 !                                            without flood
@@ -319,7 +319,7 @@ DO JJ=1,SIZE(PEK%XTG,1)
 !                                            flux using the DIF mode.
 !
 !
-  PEVAP(JJ)    = ((PLEV(JJ) + PLEG(JJ))/PK%XPLVTT(JJ)) + ((PLEGI(JJ) + PLES(JJ))/PK%XPLSTT(JJ))
+  PEVAP(JJ)    = ((PLEV(JJ) + PLEG(JJ))/PK%XLVTT(JJ)) + ((PLEGI(JJ) + PLES(JJ))/PK%XLSTT(JJ))
 !                                            total evaporative flux (kg/m2/s)
 !                                            without flood
 !
@@ -331,7 +331,7 @@ IF(PEK%TSNOW%SCHEME == 'D95')THEN
   DO JJ=1,SIZE(PEK%XTG,1)
     PLE    (JJ)  = PLE    (JJ) + PLE_FLOOD(JJ) + PLEI_FLOOD(JJ)
     PGFLUX (JJ)  = PGFLUX (JJ) - PLE_FLOOD(JJ) - PLEI_FLOOD(JJ)
-    PEVAP  (JJ)  = PEVAP  (JJ) + PLE_FLOOD(JJ)/PK%XPLVTT(JJ) + PLEI_FLOOD(JJ)/PK%XPLSTT(JJ)
+    PEVAP  (JJ)  = PEVAP  (JJ) + PLE_FLOOD(JJ)/PK%XLVTT(JJ) + PLEI_FLOOD(JJ)/PK%XLSTT(JJ)
   ENDDO
 ENDIF
 !
@@ -362,7 +362,7 @@ IF( (PEK%TSNOW%SCHEME == 'D95' .OR. PEK%TSNOW%SCHEME == 'EBA') .AND. IO%CISBA /=
 !                                            close the energy budget: cannot melt 
 !                                            more than the futur available snow
 !      
-      ZNEXTSNOW(:) = PEK%TSNOW%WSNOW(:,1) + PTSTEP * (DMK%XSRSFC(:) - PLES(:) / PK%XPLSTT(:))
+      ZNEXTSNOW(:) = PEK%TSNOW%WSNOW(:,1) + PTSTEP * (DMK%XSRSFC(:) - PLES(:) / PK%XLSTT(:))
 !
       WHERE ( PMELT(:) > 0.0 )
 !              
@@ -379,7 +379,7 @@ IF( (PEK%TSNOW%SCHEME == 'D95' .OR. PEK%TSNOW%SCHEME == 'EBA') .AND. IO%CISBA /=
 !    
     ELSEIF (PEK%TSNOW%SCHEME == 'EBA') THEN
 !    
-      PMELT(:)=MIN( PEK%TSNOW%WSNOW(:,1)/PTSTEP + DMK%XSRSFC(:) - PLES(:)/ PK%XPLSTT(:) , &
+      PMELT(:)=MIN( PEK%TSNOW%WSNOW(:,1)/PTSTEP + DMK%XSRSFC(:) - PLES(:)/ PK%XLSTT(:) , &
                   MAX(0.0,(PEK%XTG(:,1)-XTT))  / MAX(ZEPS1,DMK%XCT*PTSTEP) / XLMTT )
 !
     ENDIF

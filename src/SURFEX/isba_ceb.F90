@@ -389,8 +389,8 @@ DO JSPLIT=1,ITSPLIT
              PEK%XVEG, DK%XZ0, DK%XZ0EFF, DK%XZ0H, KK%XWFC(:,1), KK%XWSAT(:,1),    &
              PEK%XPSNG, PEK%XPSNV, PZREF, PUREF, PDIRCOSZW, PDELTA, PF5, PEK%XRESA,&
              DK%XCH, DK%XCD, DK%XCDN, DK%XRI, DK%XHUG, PHUGI, DMK%XHV, DK%XHU,     &
-             PK%XPCPS, DK%XQS, KK%XFFG, KK%XFFV, KK%XFF, PFFG_NOSNOW, PFFV_NOSNOW, &
-             ZLEG_DELTA, ZLEGI_DELTA, PEK%XWR, PRHOA, PK%XPLVTT, PQSAT=ZQSAT ) 
+             PK%XCPS, DK%XQS, KK%XFFG, KK%XFFV, KK%XFF, PFFG_NOSNOW, PFFV_NOSNOW, &
+             ZLEG_DELTA, ZLEGI_DELTA, PEK%XWR, PRHOA, PK%XLVTT, PQSAT=ZQSAT ) 
 !
 !*      4.0    Resolution of the surface and soil energy budget
 !              ------------------------------------------------
@@ -429,18 +429,18 @@ DO JSPLIT=1,ITSPLIT
 !  Compute aggregated coefficients for evaporation
 !  Sum(LEV+LEG+LEGI+LES) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
 !
-   ZAC_AGG(:) =   1. / PEK%XRESA(:) / PK%XPLVTT(:)     &
-             * ( PK%XPLVTT(:) *    PEK%XVEG(:) * (1.-PEK%XPSNV(:)) * DMK%XHV(:)   &
-               + PK%XPLVTT(:) *(1.-PEK%XVEG(:))* (1.-PEK%XPSNG(:)) * (1.-PFROZEN1(:))  &
-               + PK%XPLSTT(:) *(1.-PEK%XVEG(:))* (1.-PEK%XPSNG(:)) * PFROZEN1(:)  &
-               + PK%XPLSTT(:) *                      PEK%XPSN (:)   )  
+   ZAC_AGG(:) =   1. / PEK%XRESA(:) / PK%XLVTT(:)     &
+             * ( PK%XLVTT(:) *    PEK%XVEG(:) * (1.-PEK%XPSNV(:)) * DMK%XHV(:)   &
+               + PK%XLVTT(:) *(1.-PEK%XVEG(:))* (1.-PEK%XPSNG(:)) * (1.-PFROZEN1(:))  &
+               + PK%XLSTT(:) *(1.-PEK%XVEG(:))* (1.-PEK%XPSNG(:)) * PFROZEN1(:)  &
+               + PK%XLSTT(:) *                      PEK%XPSN (:)   )  
 !
    WHERE(ZAC_AGG(:)>0.0)
-     ZHU_AGG(:) =   1. / (PEK%XRESA(:) * ZAC_AGG(:)) / PK%XPLVTT(:)         &
-                  * ( PK%XPLVTT(:)*    PEK%XVEG(:) *(1.-PEK%XPSNV(:))                 *DMK%XHV(:)   &
-                    + PK%XPLVTT(:)*(1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:))*(1.-PFROZEN1(:))*DK%XHUG(:)  &
-                    + PK%XPLSTT(:)*(1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:))*    PFROZEN1(:) *PHUGI(:) &
-                    + PK%XPLSTT(:)*                     PEK%XPSN  (:)                )  
+     ZHU_AGG(:) =   1. / (PEK%XRESA(:) * ZAC_AGG(:)) / PK%XLVTT(:)         &
+                  * ( PK%XLVTT(:)*    PEK%XVEG(:) *(1.-PEK%XPSNV(:))                 *DMK%XHV(:)   &
+                    + PK%XLVTT(:)*(1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:))*(1.-PFROZEN1(:))*DK%XHUG(:)  &
+                    + PK%XLSTT(:)*(1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:))*    PFROZEN1(:) *PHUGI(:) &
+                    + PK%XLSTT(:)*                     PEK%XPSN  (:)                )  
    ENDWHERE
 !
    ZUSTAR2_SUM   (:) = ZUSTAR2_SUM   (:) + ZUSTAR2_IC(:)

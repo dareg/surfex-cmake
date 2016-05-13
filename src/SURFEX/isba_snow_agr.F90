@@ -255,8 +255,8 @@ ELSE
 !
 !     Total evapotranspiration flux (kg/m2/s):
 !
-      DK%XEVAP(:) = (DEK%XLEV(:) + DEK%XLEG(:))/PK%XPLVTT(:) + DEK%XLEGI(:)/PK%XPLSTT(:) + &
-                                   DEK%XLE_FLOOD(:)/PK%XPLVTT(:) + DEK%XLEI_FLOOD(:)/PK%XPLSTT(:) + &
+      DK%XEVAP(:) = (DEK%XLEV(:) + DEK%XLEG(:))/PK%XLVTT(:) + DEK%XLEGI(:)/PK%XLSTT(:) + &
+                                   DEK%XLE_FLOOD(:)/PK%XLVTT(:) + DEK%XLEI_FLOOD(:)/PK%XLSTT(:) + &
                                    PEK%XPSN(:) * PEVAP3L(:)
 !
 !     ISBA-ES/SNOW3L fluxes:
@@ -287,7 +287,7 @@ ELSE
 !
 !     Total sublimation flux (kg/m2/s):
 !
-      DK%XSUBL (:) = DK%XLEI(:)/PK%XPLSTT(:)
+      DK%XSUBL (:) = DK%XLEI(:)/PK%XLSTT(:)
 !
 !     Total FLUX into snow/soil/vegetation surface:
 !
@@ -321,7 +321,7 @@ ELSE
       DK%XLEI   (:)  = DEK%XLES(:) + DEK%XLEGI(:) + DEK%XLEI_FLOOD(:)
 !
 !     Total sublimation flux (kg/m2/s):
-      DK%XSUBL  (:)  = DK%XLEI(:)/PK%XPLSTT(:)
+      DK%XSUBL  (:)  = DK%XLEI(:)/PK%XLSTT(:)
 !
    ENDIF
 !
