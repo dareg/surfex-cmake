@@ -86,6 +86,7 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_ASSIM += ASSIM
+FPPFLAGS_ASSIM = -DUSE_SODA
 #FPPFLAGS_ASSIM=
 #
 ifdef DIR_ASSIM
@@ -107,7 +108,7 @@ endif
 #DIR_SURFEX += ARCH_SRC/bug_surfex
 # PRE_BUG TEST !!!
 #
-FUNDEFS += -USFXOASIS -UTRIPOASIS
+FUNDEFS += -UCPLOASIS
 #
 DIR_TRIP += LIB/TRIPv2
 #FPPFLAGS_TRIP=
@@ -213,8 +214,8 @@ endif
 ifeq "$(VER_DRHOOK)" "SIMPLE"
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
-FPPFLAGS_HOOK += -DLINUX
-CPPFLAGS_HOOK += -DLINUX
+FPPFLAGS_HOOK += -DLINUX -DLITTLE -fno-second-underscore
+CPPFLAGS_HOOK += -DLINUX -DLITTLE -DHAS_XMOTIF -DINTEGER_IS_INT
 
 OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o getcurheap.o 
 OBJS_LISTE_MASTER += gethwm.o getpag.o getrss.o  getstackusage.o getstatm.o getstk.o 
@@ -287,14 +288,14 @@ LIB_OASIS?=-L${OASIS_PATH}/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
 INC_OASIS?=-I${OASIS_PATH}/build/lib/psmile.MPI1
 OASIS_KEY?=${OASIS_PATH}/build/lib/psmile.MPI1/mod_oasis.mod
 #
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DCPLOASIS
 VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
 endif
 endif
 #
 ifeq "$(VER_OASIS)" "mct_EXT"
 ifneq "$(VER_MPI)" "NOMPI"
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DCPLOASIS
 VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
 endif
 endif
@@ -569,10 +570,18 @@ LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf
 endif
 
 #
-# Linux with gfortran Beaufix
+# Linux on Beaufix
 #
 ifeq "$(VER_CDF)" "CDFBOFX"
 CDF_PATH       ?= /opt/softs/libraries/ICC13.1.4.183/netcdf-4.3.0
+INC_NETCDF     ?= -I${CDF_PATH}/include 
+LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
+endif
+#
+# Linux on prolix
+#
+ifeq "$(VER_CDF)" "CDFPROLX"
+CDF_PATH       ?= /opt/softs/libraries/ICC16.1.150/netcdf-4.4.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
 endif
@@ -588,6 +597,10 @@ endif
 #           Number of NESTED MODEL                       #
 ##########################################################
 NSOURCE=8
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 # PROG_LIST : Main program liste to compile              #
@@ -599,8 +612,9 @@ TRIP_LIST += TRIP_PREP TRIP_MASTER TRIP_CHANGE_DATE
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE SODA
-PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
+PROG_LIST += PGD PREP OFFLINE SODA SXPOST
+#PGD PREP OFFLINE SODA SXPOST
+#PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 endif
 #
