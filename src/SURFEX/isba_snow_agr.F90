@@ -1,9 +1,9 @@
 !     #########
       SUBROUTINE ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK, &
-                               OMEB, PEXNS, PEXNA, PTA, PQA,  &
-                               PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,  &
-                               PEMIS, PALB, PUSTAR, PLES3L, PLEL3L,      &
-                               PEVAP3L, PQS3L, PALB3L, PGSFCSNOW,        &
+                               OMEB, OMEB_LITTER, PEXNS, PEXNA, PTA, PQA,  &
+                               PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,   &
+                               PEMIS, PALB, PUSTAR, PLES3L, PLEL3L,        &
+                               PEVAP3L, PQS3L, PALB3L, PGSFCSNOW,          &
                                PZGRNDFLUX, PFLSN_COR, PEMIST, PPALPHAN )
 !     ##########################################################################
 !
@@ -74,7 +74,9 @@ TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 LOGICAL,              INTENT(IN)  :: OMEB       ! True = patch with multi-energy balance 
-!                                               ! False = patch with classical ISBA 
+!                                               ! False = patch with classical ISBA
+LOGICAL, INTENT(IN)               :: OMEB_LITTER !True = litter option activated
+!                                                 ! over the ground
 !
 !* surface and atmospheric parameters
 !  ----------------------------------
@@ -147,60 +149,47 @@ IF (LHOOK) CALL DR_HOOK('ISBA_SNOW_AGR',0,ZHOOK_HANDLE)
 ZWORK(:) = 0.
 !
 IF(OMEB)THEN
-!
-! MEB uses only an explicit scheme option.
-! Fluxes enter here as "snow relative", here we
-! transform back to "patch or grid box relative" (by incorporating
-! the notion of fractional coverage)
-!
-   DEK%XLES     (:) = PEK%XPSN(:) * PLES3L(:)
-   DEK%XLESL    (:) = PEK%XPSN(:) * PLEL3L(:)
-   DEK%XLWNET_N (:) = PEK%XPSN(:) * DEK%XLWNET_N (:)
-   DEK%XSWNET_N (:) = PEK%XPSN(:) * DEK%XSWNET_N (:)
-   DEK%XSWNET_NS(:) = PEK%XPSN(:) * DEK%XSWNET_NS(:)  
-   DEK%XMELTADV (:) = PEK%XPSN(:) * DEK%XMELTADV (:) 
-   DMK%XRNSNOW   (:) = PEK%XPSN(:) * DMK%XRNSNOW   (:)
-   DMK%XHSNOW    (:) = PEK%XPSN(:) * DMK%XHSNOW    (:)
-   DMK%XGFLUXSNOW(:) = PEK%XPSN(:) * DMK%XGFLUXSNOW(:)
-   DMK%XSNOWHMASS(:) = PEK%XPSN(:) * DMK%XSNOWHMASS(:)  
-   DMK%XHPSNOW   (:) = PEK%XPSN(:) * DMK%XHPSNOW   (:)  
-   DMK%XGRNDFLUX (:) = PEK%XPSN(:) * (PZGRNDFLUX(:)+PFLSN_COR(:)) 
-   PEVAP3L  (:) = PEK%XPSN(:) * PEVAP3L(:)   
-   PGSFCSNOW(:) = PEK%XPSN(:) * PGSFCSNOW(:)
+  !
+  ! Snow free (ground-based snow) diagnostics: canopy and ground blended (W m-2):
+  ! NOTE that the effects of snow cover *fraction* are implicitly *included* in these fluxes 
+  ! so do NOT multiply by snow fraction.
+  !
+  DEK%XRN_SN_FR   (:) = DEK%XSWNET_V(:) + DEK%XSWNET_G(:) + DEK%XLWNET_V(:) + DEK%XLWNET_G(:)
+  DEK%XH_SN_FR    (:) = DEK%XH_V_C(:) + DEK%XH_G_C(:)
+  IF (OMEB_LITTER) THEN
+    DEK%XLEG_SN_FR (:) = DEK%XLELITTER (:)
+    DEK%XLEGI_SN_FR(:) = DEK%XLELITTERI(:)
+    DEK%XLEG (:) = DEK%XLELITTER (:)
+    DEK%XLEGI(:) = DEK%XLELITTERI(:)
+  ELSE
+    DEK%XLEG_SN_FR (:) = DEK%XLEG (:)
+    DEK%XLEGI_SN_FR(:) = DEK%XLEGI(:)
+  ENDIF
 
-! Snow free (ground-based snow) diagnostics: canopy and ground blended (W m-2):
-! NOTE that the effects of snow cover *fraction* are implicitly *included* in these fluxes 
-! so do NOT multiply by snow fraction.
-!
-   DEK%XLEG_SN_FR (:) = DEK%XLEG   (:)
-   DEK%XLEGI_SN_FR(:) = DEK%XLEGI  (:)
-   DEK%XLEV_SN_FR (:) = DEK%XLEVCV (:)
-   DEK%XLETR_SN_FR(:) = DEK%XLETRCV(:) 
-! NOTE for now, this is same as total Ustar (includes snow)   
-   DEK%XUSTAR_SN_FR(:) = PUSTAR       (:)        
-! LER does not include intercepted snow sublimation
-   DEK%XLER_SN_FR  (:) = DEK%XLEVCV(:) - DEK%XLETRCV(:) 
+  DEK%XLEV_SN_FR (:) = DEK%XLEVCV (:)
+  DEK%XLETR_SN_FR(:) = DEK%XLETRCV(:) 
+  ! NOTE for now, this is same as total Ustar (includes snow)   
+  DEK%XUSTAR_SN_FR(:) = PUSTAR       (:)        
+  ! LER does not include intercepted snow sublimation
+  DEK%XLER_SN_FR  (:) = DEK%XLEVCV(:) - DEK%XLETRCV(:) 
 
-   DEK%XRN_SN_FR   (:) = DEK%XSWNET_V(:) + DEK%XSWNET_G(:) + DEK%XLWNET_V(:) + DEK%XLWNET_G(:)
-   DEK%XH_SN_FR    (:) = DEK%XH_V_C(:) + DEK%XH_G_C(:)
-   DEK%XLEI_SN_FR  (:) = DEK%XLEGI(:) + DEK%XLEI_FLOOD(:) + DEK%XLES(:) + DEK%XLESC(:)
+  DEK%XLEI_SN_FR  (:) = DEK%XLEGI(:) + DEK%XLEI_FLOOD(:) + DEK%XLES(:) + DEK%XLESC(:)
   ! LE includes intercepted snow sublimation
-   DEK%XLE_SN_FR   (:) = DEK%XLEG_SN_FR(:) + DEK%XLEGI_SN_FR(:) + DEK%XLEV_SN_FR(:) + &
+  DEK%XLE_SN_FR   (:) = DEK%XLEG_SN_FR(:) + DEK%XLEGI_SN_FR(:) + DEK%XLEV_SN_FR(:) + &
                  DEK%XLESC(:) + DEK%XLE_FLOOD(:) + DEK%XLEI_FLOOD(:)
-   DEK%XGFLUX_SN_FR(:) = DEK%XRN_SN_FR(:) - DEK%XH_SN_FR(:) - DEK%XLE_SN_FR(:)
-   DEK%XLEI_SN_FR  (:) = DEK%XLEGI(:) + DEK%XLEI_FLOOD(:) 
-!
-   PEMIST(:) = PEMIS(:)
-!
-! Effective surface temperature (for diag): for MEB:
+  DEK%XGFLUX_SN_FR(:) = DEK%XRN_SN_FR(:) - DEK%XH_SN_FR(:) - DEK%XLE_SN_FR(:)
+  !
+  PEMIST(:) = PEMIS(:)
+  !
+  ! Effective surface temperature (for diag): for MEB:
 
-   ZWORK   (:) =  PPALPHAN(:)*PEK%XPSN(:)
-   DK%XTS(:) = (1.0 - ZWORK(:))*PEK%XTC(:) + ZWORK(:)*DMK%XSNOWTEMP(:,1)
-!
-! Total heat FLUX into snow/soil/vegetation surface:
-!
-   DK%XGFLUX(:) = DK%XRN(:) - DK%XH(:) - PEK%XLE(:) + DMK%XHPSNOW(:) 
-!
+  ZWORK   (:) =  PPALPHAN(:)*PEK%XPSN(:)
+  DK%XTS(:) = (1.0 - ZWORK(:))*PEK%XTC(:) + ZWORK(:)*DMK%XSNOWTEMP(:,1)
+  !
+  ! Total heat FLUX into snow/soil/vegetation surface:
+  !
+  DK%XGFLUX(:) = DK%XRN(:) - DK%XH(:) - PEK%XLE(:) + DMK%XHPSNOW(:) 
+  !
 ELSE
 !
 ! * 2. Using an explicit snow scheme option with composite soil/veg ISBA:

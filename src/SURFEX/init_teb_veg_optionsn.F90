@@ -159,6 +159,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 GDO%NPATCH = 1
 GDO%CRESPSL = 'DEF'
+GDO%LMEB_GNDRES = .FALSE.
 !-------------------------------------------------------------------------------
 !
 !         Initialisation for IO
@@ -295,6 +296,7 @@ IF (OGREENROOF) THEN
   GRO%CSNOWMETAMO = GDO%CSNOWMETAMO
   GRO%CSNOWRAD = GDO%CSNOWRAD
   !
+  GRO%LMEB_GNDRES = GDO%LMEB_GNDRES
 ENDIF
 !
 !-------------------------------------------------------------------------------

@@ -540,14 +540,12 @@ DMK%XHV(:)  = PPALPHAN(:)*PHVN(:)   + (1.0-PPALPHAN(:))*PHVG(:)
 ! We use the existing LEG_DELTA (formerly a delta function) as a Beta-type-function
 ! (based on Sellers et al., 1992, J Geophys Res)
 !
-IF (IO%LMEB_LITTER) THEN
-PLEG_DELTA(:)  = 1.0
-PLEGI_DELTA(:) = 1.0
+IF (IO%LMEB_GNDRES) THEN
+  PLEG_DELTA (:) = ZRA_G_C(:) / ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWG(:) / ZWSAT(:) ) ) 
+  PLEGI_DELTA(:) = ZRA_G_C(:) / ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWGI(:)/ ZWSAT(:) ) ) 
 ELSE
-PLEG_DELTA(:)  = ZRA_G_C(:) /                             &
-                ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWG(:) / ZWSAT(:) ) ) 
-PLEGI_DELTA(:) =ZRA_G_C(:) /                             &
-                ( ZRA_G_C(:) + EXP(ZRG_COEF1 - ZRG_COEF2 * PWGI(:)/ ZWSAT(:) ) ) 
+  PLEG_DELTA (:) = 1.0
+  PLEGI_DELTA(:) = 1.0
 ENDIF
 !
 ! when hu*qsat < qa, there are two

@@ -14,15 +14,11 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    03/2004
+!!      P.Tulet     2015  Bug depassement de tableau YRECFM
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
-!
-!
-!
-!
-!
 !
 USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
 !
@@ -83,7 +79,7 @@ DUU%CDUMMY_AREA(:) = '   '
 !
 DO JDUMMY=1,DUU%NDUMMY_NBR
   !
-  WRITE(YRECFM,FMT='(A8,I3.3,A5)') 'DUMMY_GR',JDUMMY,'     '
+  WRITE(YRECFM,FMT='(A8,I3.3,A1)') 'DUMMY_GR',JDUMMY,' '
   CALL READ_SURF(HPROGRAM,YRECFM,DUU%XDUMMY_FIELDS(:,JDUMMY),IRESP,HCOMMENT=YCOMMENT)
   !
   !

@@ -156,6 +156,7 @@ IF (LHOOK) CALL DR_HOOK('INI_DATA_PARAM',0,ZHOOK_HANDLE)
 GSURF          = .TRUE.
 GAGRI_TO_GRASS = .FALSE.
 !
+!When set, C3 and C4 crop values are replaced by value for C3 grass
 IF(PRESENT(OAGRI_TO_GRASS))GAGRI_TO_GRASS=OAGRI_TO_GRASS
 !
 DO JLOOP=1,SIZE(PTYPE,1)
@@ -316,11 +317,11 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !            -----------------------------
 !            Uptdated values using Kattge et al. 2009 median values of Vcmax at 25C
 !            (For TRBE, used median + 1 standard deviation)
-!            For C3 PFTs : 
+!            For C3 tree PFTs : 
 !              gmes = Vcmax / (gamma + Kc*(1 + O2/Ko))    
 !              from Jacobs eq [A8.5] and Farquhar, 1980 eq 42 : gm = dA/dC estimated at Ci=Gamma 
-!            For C4 grass : Vcmax_C4 = Vcmax_C3
-!                   crop :  Vcmax_C4 = Vcmax_C3 * 1.7 / 2.2   (Jacobs ratio between C3 and C4)   
+!            For grasses (C3 and C4): used V7 value
+!                crops :  used N. Canal's PhD thesis 
 !            --------------------------------------------------------------------
     IF (PRESENT(PGMES)) THEN
       PGMES(JLOOP,:)=0.020
@@ -356,18 +357,18 @@ DO JLOOP=1,SIZE(PTYPE,1)
       IF(PTYPE(JLOOP,NVT_BOND)>0. )  PGMES_ST(JLOOP,NVT_BOND)= 0.0012
       IF(PTYPE(JLOOP,NVT_TRBE)>0. )  PGMES_ST(JLOOP,NVT_TRBE)= 0.0012
       IF(GAGRI_TO_GRASS)THEN
-        IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.0024
-        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.0024
-        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.0024
+        IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.001
+        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.006
+        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.006
       ELSE
-        IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.003
-        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.017
-        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.017
+        IF(PTYPE(JLOOP,NVT_C3  )>0. )  PGMES_ST(JLOOP,NVT_C3  )= 0.00175
+        IF(PTYPE(JLOOP,NVT_C4  )>0. )  PGMES_ST(JLOOP,NVT_C4  )= 0.0098
+        IF(PTYPE(JLOOP,NVT_IRR )>0. )  PGMES_ST(JLOOP,NVT_IRR )= 0.0098
       ENDIF
-      IF(PTYPE(JLOOP,NVT_GRAS)>0. ) PGMES_ST(JLOOP,NVT_GRAS )= 0.0024
-      IF(PTYPE(JLOOP,NVT_BOGR)>0. ) PGMES_ST(JLOOP,NVT_BOGR )= 0.0024
-      IF(PTYPE(JLOOP,NVT_TROG)>0. ) PGMES_ST(JLOOP,NVT_TROG )= 0.017
-      IF(PTYPE(JLOOP,NVT_PARK)>0. ) PGMES_ST(JLOOP,NVT_PARK )= 0.0024
+      IF(PTYPE(JLOOP,NVT_GRAS)>0. ) PGMES_ST(JLOOP,NVT_GRAS )= 0.001
+      IF(PTYPE(JLOOP,NVT_BOGR)>0. ) PGMES_ST(JLOOP,NVT_BOGR )= 0.001
+      IF(PTYPE(JLOOP,NVT_TROG)>0. ) PGMES_ST(JLOOP,NVT_TROG )= 0.006
+      IF(PTYPE(JLOOP,NVT_PARK)>0. ) PGMES_ST(JLOOP,NVT_PARK )= 0.001
     ENDIF    
 !-------------------------------------------------------------------------------
 !*    7.11   Ecosystem Respiration (kg m-2 s-1)

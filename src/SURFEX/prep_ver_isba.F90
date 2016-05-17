@@ -23,6 +23,7 @@ SUBROUTINE PREP_VER_ISBA (IO, NPE, PZS, NP)
 !!      Original    01/2004
 !!      Modified by B. Decharme  (01/2009), Optional Arpege deep soil temperature initialization
 !!      S. Riette   04/2010 Modification of XTG corrections after freezing
+!!      Y. Seity    02/2016 Add limits in Force-Restore case (WG2 contains WG1)
 !!------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -200,6 +201,11 @@ DO JP = 1,IO%NPATCH
   !
   !* limits in force-restore case
   !
+  IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
+    PEK%XWG (:,2) = MAX(PEK%XWG (:,1)*PK%XDG(:,1),PEK%XWG (:,2)*PK%XDG(:,2))/PK%XDG(:,2)
+    PEK%XWGI(:,2) = MAX(PEK%XWGI(:,1)*PK%XDG(:,1),PEK%XWGI(:,2)*PK%XDG(:,2))/PK%XDG(:,2)
+  ENDIF
+  !  
   IF (IO%CISBA=='3-L') THEN 
     !
     WHERE (PEK%XWGI(:,3) /= XUNDEF)

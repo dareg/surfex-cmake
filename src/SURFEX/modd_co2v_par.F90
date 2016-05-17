@@ -266,12 +266,12 @@ REAL, PARAMETER, DIMENSION(19) :: XDILUDEC = &
 (/ 0., 0., 0., 1., 0., 0., 1., 1., 1., 1., 1., 0., 1., 0., 0., 1., 1., 0., 1. /)
 !
 ! Maximum Leaf photosynthetic capacity (kgCO2 m-2 s-1)
-! Modified according to Kattge et al., 2009 median Vcmax at 25C  values
+! Modified according to Kattge et al., 2009 median Vcmax at 25C values, except for TRBE : median-std
 ! For C3 PFTs : Ammax = Vcmax / 2.     (Jacobs, p 150)
 ! For C4 PFTs : Ammax = Vcmax
 ! Units : [Vcmax]=micromols_CO2 m-2 s-1, [Ammax]=kgCO2 m-2 s-1 --> [Ammax] = [Vcmax] * 44e-3 * 1e-6
 REAL, PARAMETER, DIMENSION(19) :: XAMAX   = &
-(/ 1., 1., 1., 1.3E-6, 1.4E-6, 0.64E-6, 2.2E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, &
+(/ 1., 1., 1., 1.3E-6, 1.4E-6, 0.484E-6, 2.2E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, &
    0.9E-6, 1.3E-6, 1.4E-6, 1.3E-6, 0.9E-6, 1.7E-6, 1.2E-6/)
 !                                       
 END MODULE MODD_CO2V_PAR

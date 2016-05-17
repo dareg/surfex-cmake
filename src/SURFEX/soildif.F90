@@ -303,10 +303,8 @@ IF(IO%LFLOOD)THEN
   ZFF(:) = PVEG(:)*PFFV(:) + (1.-PVEG(:))*PFFG(:)
 !
   WHERE(ZFF(:)>0.0)
-    ZCF(:) = 1.0 / ( XCL * KK%XPIFLOOD(:) )
+    ZCF(:) = 2.0 * SQRT( XPI/(XCONDWTR*XRHOLW*XCL*XDAY) )
   ENDWHERE
-!
-  ZCF(:) = MIN(ZCTMAX,ZCF(:))
 !
 ENDIF
 !

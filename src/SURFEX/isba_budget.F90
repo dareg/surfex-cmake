@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE ISBA_BUDGET (IO, PK, PEK, DEP, OWATER_BUDGET, PTSTEP,&
+SUBROUTINE ISBA_BUDGET (IO, PK, PEK, DEK, OWATER_BUDGET, PTSTEP,&
                        PWG_INI, PWGI_INI, PWR_INI, PSWE_INI, PRAIN, PSNOW, PEVAP  )
 !     ###############################################################################
 !
@@ -22,7 +22,7 @@ SUBROUTINE ISBA_BUDGET (IO, PK, PEK, DEP, OWATER_BUDGET, PTSTEP,&
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    07/2012
-!!
+!!      B. Decharme    01/16 : Bug with flood budget
 !!------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -43,7 +43,7 @@ IMPLICIT NONE
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_P_t), INTENT(INOUT) :: PK
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEP
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 !
 LOGICAL, INTENT(IN) :: OWATER_BUDGET
 !
@@ -68,6 +68,7 @@ REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSWE_T
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZWG_T
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZWGI_T
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNDRIFT
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZEFLOOD
 !
 INTEGER :: INI, INL, INLS
 INTEGER :: JI, JL
@@ -84,13 +85,13 @@ INI =SIZE(PEK%XWG,1)
 INL =SIZE(PEK%XWG,2)
 INLS=SIZE(PEK%TSNOW%WSNOW,2)
 !
-DEP%XDWG (:) = XUNDEF
-DEP%XDWGI(:) = XUNDEF
-DEP%XDWR (:) = XUNDEF
-DEP%XDSWE(:) = XUNDEF
+DEK%XDWG (:) = XUNDEF
+DEK%XDWGI(:) = XUNDEF
+DEK%XDWR (:) = XUNDEF
+DEK%XDSWE(:) = XUNDEF
 !
 IF (PEK%TSNOW%SCHEME=='3-L'.OR.PEK%TSNOW%SCHEME=='CRO') THEN
-  ZSNDRIFT(:) = DEP%XSNDRIFT(:)
+  ZSNDRIFT(:) = DEK%XSNDRIFT(:)
 ELSE
   ZSNDRIFT(:) = 0.0
 ENDIF
@@ -129,30 +130,33 @@ IF(OWATER_BUDGET)THEN
   ENDIF
 !
 ! Comptut reservoir time tendencies in kg/m2/s
-  DEP%XDWG (:) = (ZWG_T   (:)-PWG_INI (:))/PTSTEP
-  DEP%XDWGI(:) = (ZWGI_T  (:)-PWGI_INI(:))/PTSTEP
-  DEP%XDWR (:) = (PEK%XWR(:)-PWR_INI (:))/PTSTEP
-  DEP%XDSWE(:) = (ZSWE_T  (:)-PSWE_INI(:))/PTSTEP
+  DEK%XDWG (:) = (ZWG_T   (:)-PWG_INI (:))/PTSTEP
+  DEK%XDWGI(:) = (ZWGI_T  (:)-PWGI_INI(:))/PTSTEP
+  DEK%XDWR (:) = (PEK%XWR(:)-PWR_INI (:))/PTSTEP
+  DEK%XDSWE(:) = (ZSWE_T  (:)-PSWE_INI(:))/PTSTEP
 !
 ! ice calving flux if used
   IF(IO%LGLACIER)THEN
-    ZICEFLUX(:)=DEP%XICEFLUX(:)
+    ZICEFLUX(:)=DEK%XICEFLUX(:)
   ELSE
     ZICEFLUX(:)=0.0
   ENDIF
 !
+! Floodplains evaporation (kg/m2/s)
+  ZEFLOOD(:) = DEK%XLE_FLOOD(:)/PK%XLVTT(:)+DEK%XLEI_FLOOD(:)/PK%XLSTT(:)
+!
 ! total input water in the system at t
-  ZINPUT(:)=PRAIN(:)+PSNOW(:)+DEP%XIFLOOD(:)+DEP%XIRRIG_FLUX(:)
+  ZINPUT(:)=PRAIN(:)+PSNOW(:)+DEK%XIFLOOD(:)+DEK%XIRRIG_FLUX(:)
 !
 ! total output water in the system at t
-  ZOUTPUT(:) = PEVAP  (:)+DEP%XDRAIN  (:)+DEP%XRUNOFF (:) &
-             + DEP%XPFLOOD(:)+ZICEFLUX(:)+ZSNDRIFT(:)
+  ZOUTPUT(:) = PEVAP  (:)+DEK%XDRAIN  (:)+DEK%XRUNOFF (:) &
+             + DEK%XPFLOOD(:)+ZICEFLUX(:)+ZSNDRIFT(:) - ZEFLOOD(:)
 !
 ! total reservoir time tendencies at "t - (t-1)"
-  ZTENDENCY(:) = DEP%XDWG(:)+DEP%XDWGI(:)+DEP%XDWR(:)+DEP%XDSWE(:)
+  ZTENDENCY(:) = DEK%XDWG(:)+DEK%XDWGI(:)+DEK%XDWR(:)+DEK%XDSWE(:)
 !
 ! isba water budget (dw/dt=in-out) in kg/m2/s
-  DEP%XWATBUD(:)=ZTENDENCY(:)-(ZINPUT(:)-ZOUTPUT(:))
+  DEK%XWATBUD(:)=ZTENDENCY(:)-(ZINPUT(:)-ZOUTPUT(:))
 !
 ENDIF
 !

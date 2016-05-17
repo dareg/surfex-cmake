@@ -49,7 +49,7 @@ USE MODI_GET_MESH_CORNER
 USE MODI_UNPACK_SAME_RANK
 USE MODI_SFX_OASIS_CHECK
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -85,7 +85,6 @@ CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAKE = 'slak'
 !
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZGW        ! frac groundwater
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_LAND ! land-sea mask for rrm coupling
-REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_GW   ! groundwater mask for rrm coupling
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_LAKE ! lake mask for ogcm coupling
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_SEA  ! sea-land mask for ogcm coupling
 !
@@ -113,7 +112,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_PREP',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !
@@ -134,9 +133,13 @@ CALL GET_MESH_CORNER(UG, ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 ZLON(:,1)=UG%G%XLON(:)
 ZLAT(:,1)=UG%G%XLAT(:)
 !
-IF(IO%LGW)THEN
+IF(LCPL_GW.AND.IO%LGW)THEN
   CALL UNPACK_SAME_RANK(U%NR_NATURE(:),S%XGW(:),ZGW(:))
-  WHERE(ZGW(:)==XUNDEF)ZGW(:)=0.0
+  WHERE(ZGW(:)==XUNDEF)
+    ZGW(:)=0.0
+  ELSEWHERE(ZGW(:)>0.0)
+    ZGW(:)=1.0
+  ENDWHERE  
 ELSE
   ZGW(:) = 0.0
 ENDIF
@@ -148,7 +151,6 @@ ENDIF
 !
 ZMASK_LAND(:) = U%XNATURE(:)+U%XTOWN(:)
 ZMASK_SEA (:) = U%XSEA   (:)
-ZMASK_GW  (:) = ZGW    (:)
 IF(U%CWATER=='FLAKE ')THEN
   ZMASK_LAKE(:) = U%XWATER (:)
 ELSE
@@ -183,33 +185,26 @@ IF(LCPL_LAND)THEN
   CALL OASIS_WRITE_CORNER(YSFX_LAND,U%NDIM_FULL,1,INC,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
   CALL OASIS_WRITE_AREA  (YSFX_LAND,U%NDIM_FULL,1,ZAREA(:,:))
   CALL OASIS_WRITE_MASK  (YSFX_LAND,U%NDIM_FULL,1,IMASK(:,:))
-!
-  IF(LCPL_GW)THEN
-    WHERE(ZMASK_LAND(:)>0.0)
-          ZAREA(:,1) = UG%G%XMESH_SIZE(:) * (1.0-ZMASK_GW(:))
-    ELSEWHERE
-          ZAREA(:,1) = 0.0
-    ENDWHERE
-  ELSE
-    ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_LAND(:)
-  ENDIF
+  !
+  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_LAND(:) * (1.0-ZGW(:))
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
-        IMASK(:,1) = 0
+    IMASK(:,1) = 0
   ELSEWHERE
-        IMASK(:,1) = 1
-  ENDWHERE
+    IMASK(:,1) = 1
+  ENDWHERE  
+  !
   CALL OASIS_WRITE_GRID  (YSFX_QSB,U%NDIM_FULL,1,ZLON(:,:),ZLAT(:,:))  
   CALL OASIS_WRITE_CORNER(YSFX_QSB,U%NDIM_FULL,1,INC,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
   CALL OASIS_WRITE_AREA  (YSFX_QSB,U%NDIM_FULL,1,ZAREA(:,:))
   CALL OASIS_WRITE_MASK  (YSFX_QSB,U%NDIM_FULL,1,IMASK(:,:))
-!
+  !
 ENDIF
 !
 ! groundwater surface coupling case
 !
 IF(LCPL_GW)THEN       
-  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_GW(:)
+  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZGW(:)
   !0 = not masked ; 1 = masked
   WHERE(ZAREA(:,1)>0.0)
         IMASK(:,1) = 0

@@ -25,8 +25,9 @@
 !!      Modified    01/2006 : sea flux parameterization.
 !!      P.LeMoigne    04/2013 : Add accumulated diagnostics
 !!      Modified    04/2013, P. Le Moigne: FLake chemistry
-!!      S. Belamari 06/2014 : Introduce LCOUNTW to avoid errors due to NBLOCK=0
+!!      S. Belamari 06/2014 : Introduce NBLOCK to avoid errors due to NBLOCK=0
 !!                            when coupled with ARPEGE/ALADIN/AROME
+!!      B. Decharme 02/2016 : NBLOCK instead of LCOUNTW for compilation in AAA
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -43,7 +44,7 @@ USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 !
 #ifdef SFX_ARO
-USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+USE MODD_IO_SURF_ARO,   ONLY : NBLOCK
 #endif
 !
 USE MODI_INIT_IO_SURF_n
@@ -90,7 +91,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_FLAKE_N',0,ZHOOK_HANDLE)
 !
 GRESET=.TRUE.
 #ifdef SFX_ARO
-GRESET=(.NOT.LCOUNTW)
+GRESET=(NBLOCK>0)
 #endif
 !
 CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','FLAKE ','WRITE')

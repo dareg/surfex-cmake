@@ -259,7 +259,7 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (GDO%CPHOTO=='LAI' .OR. GDO%CPHOTO=='LST' .OR. GDO%CPHOTO=='NIT') THEN
-  CALL VEGETATION_EVOL(GDO, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, &
+  CALL VEGETATION_EVOL(GDO, DTV, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, &
                        TPTIME%TIME, G%XLAT, PRHOA, PCO2, YSS, ZRESP_BIOMASS_INST )         
 END IF
 !

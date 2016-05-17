@@ -921,7 +921,7 @@ ELSEIF(.NOT.LCPL_ARP)THEN
 ENDIF
 !
 PK%XLVTT(:)   = XLVTT
-PK%XLSTT(:)   = XLSTT
+PK%XLSTT(:)   = XLVTT ! latent heat of sublimation already accounted for
 !
 !
 IF (LHOOK) CALL DR_HOOK('E_BUDGET_MEB',1,ZHOOK_HANDLE)

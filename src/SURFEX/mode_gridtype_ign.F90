@@ -29,6 +29,9 @@ CONTAINS
 !!      Original    10/2007
 !!      02/2011     Correction de la longitude d'origine pourle cas L93 (A. Lemonsu)
 !!      07/2011     add maximum domain dimension for output (B. Decharme)
+!       01/2016     Correction de la valeur de l'excentricite pour L93 (V. Masson)
+!       01/2016     Correction de la valeur du rayon terrestre pour Lamberts 1 a 4 (V. Masson)
+!       01/2016     Correction d'une boucle pour parallelisation (V. Masson)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -231,9 +234,9 @@ REAL, DIMENSION(:),   INTENT(OUT):: PLAT,PLON
 REAL, DIMENSION(SIZE(PX)) :: ZGAMMA
 REAL, DIMENSION(SIZE(PX)) :: ZR               ! length of arc meridian line projection
 REAL, DIMENSION(SIZE(PX)) :: ZLATISO          ! Isometric latitude
-REAL, DIMENSION(SIZE(PX)) :: ZLAT0            ! For iteration
+REAL :: ZLAT0            ! For iteration
 ! 
-INTEGER                         :: J
+INTEGER                         :: J, JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -251,16 +254,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       3.     LATITUDE
 !               --------
       ZLATISO(:)=-1./XN(KLAMBERT) * ALOG(ABS(ZR(:)/XC(KLAMBERT)))
-      ZLAT0(:)  =2. * ATAN (EXP(ZLATISO(:))) - XPI/2.
-!      
-      DO J=1, 1000
-         PLAT(:) = 2. * ATAN(                                               &
-           ( (1+XECC*SIN(ZLAT0(:)))/(1-XECC*SIN(ZLAT0(:))) )**(XECC/2.)       &
-             *EXP(ZLATISO(:)) )  -XPI/2.  
+!   
+!$OMP PARALLEL DO PRIVATE(JJ,J,ZLAT0)
+      DO JJ=1,SIZE(PLAT)
+        ZLAT0  =2. * ATAN (EXP(ZLATISO(JJ))) - XPI/2.
+        DO J=1, 1000
+         PLAT(JJ) = 2. * ATAN(                                               &
+           ( (1+XECC(KLAMBERT)*SIN(ZLAT0))/(1-XECC(KLAMBERT)*SIN(ZLAT0)) )**(XECC(KLAMBERT)/2.)       &
+             *EXP(ZLATISO(JJ)) )  -XPI/2.  
 !
-         IF (MAXVAL(ABS(PLAT(:) - ZLAT0(:))) < XCVGLAT ) EXIT
-         ZLAT0(:)=PLAT(:)
+         IF (ABS(PLAT(JJ) - ZLAT0) < XCVGLAT ) EXIT
+         ZLAT0=PLAT(JJ)
+        ENDDO
       ENDDO
+!$OMP END PARALLEL DO
 !      
       PLAT(:)=PLAT(:) *180./XPI
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:LATLON_IGN',1,ZHOOK_HANDLE)
@@ -350,7 +357,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_1',0,ZHOOK_HANDLE)
 !
 ZPI180 = XPI / 180.
 ZPI4 = XPI / 4.
-ZECC2 = XECC / 2. 
+ZECC2 = XECC(KLAMBERT) / 2.
 !
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_1',1,ZHOOK_HANDLE)
 !
@@ -370,7 +377,7 @@ DO JJ=1,SIZE(PLON)
 !*       2.     Calcul of the isometric latitude :
 !               ----------------------------------
   !
-  ZWRK   = SIN(ZLATRAD) * XECC 
+  ZWRK   = SIN(ZLATRAD) * XECC(KLAMBERT)  
   !
   ZLATFI  = LOG(TAN(ZPI4 + ZLATRAD / 2.)) + ( (LOG(1-ZWRK)-LOG(1+ZWRK)) * ZECC2)
   !
@@ -464,7 +471,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      
       DO J=1, 100
          ZLAT(:) = 2. * ATAN(                                               &
-           ( (1+XECC*SIN(ZLAT0(:)))/(1-XECC*SIN(ZLAT0(:))) )**(XECC/2.)       &
+           ( (1+XECC(KLAMBERT)*SIN(ZLAT0(:))) / (1-XECC(KLAMBERT)*SIN(ZLAT0(:))) )**(XECC(KLAMBERT)/2.)  &
              *EXP(ZLATISO(:)) )  -XPI/2.  
 !
          IF (MAXVAL(ABS(ZLAT(:) - ZLAT0(:))) < XCVGLAT ) EXIT
@@ -475,7 +482,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       2.     MAP FACTOR
 !               ----------
 !
-      ZGRANDN = XA / SQRT(1-(XECC*SIN(ZLAT(:)))**2)
+      ZGRANDN = XA(KLAMBERT) / SQRT(1-(XECC(KLAMBERT)*SIN(ZLAT(:)))**2)
       PMAP(:)=XN(KLAMBERT)* ZR(:) / ( ZGRANDN(:)*COS(ZLAT(:)) )
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:MAP_FACTOR_IGN',1,ZHOOK_HANDLE)
 !

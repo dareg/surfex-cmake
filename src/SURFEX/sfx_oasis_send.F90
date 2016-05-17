@@ -55,7 +55,7 @@ USE MODI_GET_LUOUT
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -108,7 +108,7 @@ INTEGER               :: IERR   ! Error info
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_SEND',0,ZHOOK_HANDLE)

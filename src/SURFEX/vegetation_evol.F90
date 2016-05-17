@@ -1,5 +1,5 @@
 !     #########
-    SUBROUTINE VEGETATION_EVOL(IO, PK, PEK, OAGRIP, PTSTEP, KMONTH, KDAY, PTIME, &
+    SUBROUTINE VEGETATION_EVOL(IO, DTI, PK, PEK, OAGRIP, PTSTEP, KMONTH, KDAY, PTIME, &
                                PLAT, PRHOA, P_CO2, ISSK, PRESP_BIOMASS_INST, PSWDIR)  
 !   ###############################################################
 !!****  *VEGETATION EVOL*
@@ -43,12 +43,14 @@
 !!      C. Delire    01/2014 : IBIS respiration for tropical evergreen
 !!      R. Seferian  05/2015 : expanding of Nitrogen dilution option to the complete formulation proposed by Yin et al. GCB 2002 
 !!Seferian & Delire  06/2015 : accouting for living woody biomass respiration (expanding work of E Joetzjer to all woody PFTs) 
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
 !
 USE MODD_SSO_n, ONLY : SSO_t
@@ -83,6 +85,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_P_t), INTENT(INOUT) :: PK
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
@@ -397,14 +400,20 @@ ENDIF
 !
 IF (GMASK) THEN
   !
-  WHERE( PEK%XVEG(:) > 0. )
-    ! Evolution of vegetation fraction and roughness length due to LAI change
-    PEK%XZ0(:) = Z0V_FROM_LAI(PEK%XLAI(:),PK%XH_TREE(:),PK%XVEGTYPE_PATCH(:,:),IO%LAGRI_TO_GRASS) 
-    PEK%XVEG(:) = VEG_FROM_LAI(PEK%XLAI(:),PK%XVEGTYPE_PATCH(:,:),IO%LAGRI_TO_GRASS)
-    !
-    ! Evolution of radiative parameters due to vegetation fraction change
-    PEK%XEMIS(:)= EMIS_FROM_VEG(PEK%XVEG(:),PK%XVEGTYPE_PATCH(:,:))
-  END WHERE
+  ! Evolution of vegetation fraction and roughness length due to LAI change
+  IF(.NOT.DTI%LIMP_Z0) THEN
+    WHERE( PEK%XVEG(:) > 0. ) &
+      PEK%XZ0 (:) = Z0V_FROM_LAI(PEK%XLAI(:),PK%XH_TREE(:),PK%XVEGTYPE_PATCH(:,:),IO%LAGRI_TO_GRASS) 
+  ENDIF
+  IF(.NOT.DTI%LIMP_VEG) THEN
+    WHERE( PEK%XVEG(:) > 0. ) &
+      PEK%XVEG(:) = VEG_FROM_LAI(PEK%XLAI(:),PK%XVEGTYPE_PATCH(:,:),IO%LAGRI_TO_GRASS)
+  ENDIF
+  !
+  ! Evolution of radiative parameters due to vegetation fraction change
+  IF(.NOT.DTI%LIMP_EMIS) THEN
+    WHERE( PEK%XVEG(:) > 0. ) PEK%XEMIS(:)= EMIS_FROM_VEG(PEK%XVEG(:),PK%XVEGTYPE_PATCH(:,:))
+  ENDIF
   !
   CALL ALBEDO(IO%CALBEDO, PEK )  
   !

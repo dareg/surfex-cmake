@@ -25,6 +25,7 @@
 !!      Original    01/2004
 !!      Modified    01/2006 : TEB flux parameterization.
 !!       V. Masson  10/2013 : Adds heat/cold stress ranges diagnostics
+!!      B. Decharme 02/2016 : NBLOCK instead of LCOUNTW for compilation in AAA
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -42,7 +43,7 @@ USE MODD_SURF_PAR,  ONLY : XUNDEF
 USE MODD_UTCI
 !
 #ifdef SFX_ARO
-USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+USE MODD_IO_SURF_ARO,   ONLY : NBLOCK
 #endif
 !
 USE MODI_INIT_IO_SURF_n
@@ -89,7 +90,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_TEB_N',0,ZHOOK_HANDLE)
 !
 GRESET=.TRUE.
 #ifdef SFX_ARO
-GRESET=(.NOT.LCOUNTW)
+GRESET=(NBLOCK>0)
 #endif
 !
 CALL INIT_IO_SURF_n(DTCO, U,   HPROGRAM,'TOWN  ','TEB   ','WRITE')

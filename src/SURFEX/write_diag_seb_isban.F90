@@ -35,6 +35,7 @@
 !!      S. Belamari 06/2014 : Introduce GRESET to avoid errors due to NBLOCK=0
 !!                            when coupled with ARPEGE/ALADIN/AROME
 !!      P. Samuelsson 10/2014 MEB
+!!      B. Decharme 02/2016 : NBLOCK instead of LCOUNTW for compilation in AAA
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -52,7 +53,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_NP_t, ISBA_P_t, ISBA_NPE_t, ISBA_PE_t
 !
 #ifdef SFX_ARO
-USE MODD_IO_SURF_ARO,   ONLY : LCOUNTW
+USE MODD_IO_SURF_ARO,   ONLY : NBLOCK
 #endif
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
@@ -117,7 +118,7 @@ ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 !
 GRESET=.TRUE.
 #ifdef SFX_ARO
-GRESET=(.NOT.LCOUNTW)
+GRESET=(NBLOCK>0)
 #endif
 
 !

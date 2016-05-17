@@ -490,7 +490,7 @@ SELECT CASE (NVARDIMS)
 !CAS 1D
   CASE (1) 
     HACTION='get variable dimensions length'
-    status=nf_inq_dimlen(kcdf_id,NVARDIMS,KDIM)
+    status=nf_inq_dimlen(kcdf_id,ID_VARTOGET,KDIM)
     if (status/=NF_NOERR) CALL HANDLE_ERR_MER(status,HACTION)
 !
 !CAS 2D
@@ -498,7 +498,7 @@ SELECT CASE (NVARDIMS)
     KDIM=1
     DO JLOOP=1,NVARDIMS
       HACTION='get variable dimensions length'
-      status=nf_inq_dimlen(kcdf_id,JLOOP,NLEN2D(JLOOP))
+      status=nf_inq_dimlen(kcdf_id,ID_VARTOGET,NLEN2D(JLOOP))
       if (status/=NF_NOERR) CALL HANDLE_ERR_MER(status,HACTION)
       KDIM=KDIM*NLEN2D(JLOOP)
     ENDDO
@@ -673,7 +673,7 @@ IF (NRANK==NPIO) THEN
   !CAS 1D
     CASE (1) 
       HACTION='get variable dimensions length'
-      status=nf_inq_dimlen(kcdf_id,INVARDIMS,IDIM)
+      status=nf_inq_dimlen(kcdf_id,ID_VARTOGET,IDIM)
       if (status/=NF_NOERR) CALL HANDLE_ERR_MER(status,HACTION)
   !
   !CAS 2D,3D
@@ -865,7 +865,7 @@ SELECT CASE (NVARDIMS)
 !CAS 1D
   CASE (1) 
     HACTION='get variable dimensions length'
-    status=nf_inq_dimlen(kcdf_id,NVARDIMS,NLEN)
+    status=nf_inq_dimlen(kcdf_id,ID_VARTOGET,NLEN)
     if (status/=NF_NOERR) CALL HANDLE_ERR_MER(status,HACTION)
     ALLOCATE(ZVALU(NLEN))
     !write(0,*) 'call GET1DCDF'
@@ -1007,7 +1007,7 @@ SELECT CASE (NVARDIMS)
 !CAS 1D
   CASE (1) 
     HACTION='get variable dimensions length'
-    status=nf_inq_dimlen(kcdf_id,NVARDIMS,NLEN)
+    status=nf_inq_dimlen(kcdf_id,ID_VARTOGET,NLEN)
     if (status/=NF_NOERR) CALL HANDLE_ERR_MER(status,HACTION)
     ALLOCATE(ZVALU(NLEN))
     !write(0,*) 'call GET1DCDF'
@@ -1017,7 +1017,7 @@ SELECT CASE (NVARDIMS)
   CASE (2)
     DO JLOOP=1,NVARDIMS
       HACTION='get variable dimensions length'
-      status=nf_inq_dimlen(kcdf_id,JLOOP,NLEN2D(JLOOP))
+      status=nf_inq_dimlen(kcdf_id,ID_VARTOGET,NLEN2D(JLOOP))
       if (status/=NF_NOERR) CALL HANDLE_ERR_MER(status,HACTION)
     ENDDO
     ALLOCATE(ZVALU2D(NLEN2D(1),NLEN2D(2)))

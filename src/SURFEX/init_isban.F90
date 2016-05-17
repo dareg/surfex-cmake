@@ -81,6 +81,7 @@ USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                        
                                 XDATA_GMES_ST, XDATA_BSLAI_ST, XDATA_SEFOLD_ST,   &
                                 XDATA_GC_ST, XDATA_DMAX_ST
 !
+USE MODD_SURF_ATM,       ONLY : LCPL_GCM
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_AGRI,           ONLY : LAGRIP
 !
@@ -435,6 +436,16 @@ ENDIF
 !
 !-----------------------------------------------------------------------------------------------------
 ! END READ PGD FILE
+!-----------------------------------------------------------------------------------------------------
+!
+!-----------------------------------------------------------------------------------------------------
+! Make sure some diags are conputed when coupled with atmosphere
+!-----------------------------------------------------------------------------------------------------
+!
+IF(LCPL_GCM.AND.IM%ID%O%LSURF_BUDGET) THEN
+  IM%ID%DE%LSURF_EVAP_BUDGET=.TRUE.
+ENDIF
+!
 !-----------------------------------------------------------------------------------------------------
 !
 IF (OLAND_USE .OR. HINIT=='PGD') THEN

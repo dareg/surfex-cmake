@@ -1,5 +1,5 @@
 !     ###############################################################################
-SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, NAG, CHI, NCHI, DTV, ID, NGB, GB,         &
+SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, NAG, CHI, NCHI, DTI, ID, NGB, GB,         &
                             ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,       &
                             HPROGRAM, HCOUPLING, PTSTEP,  KYEAR, KMONTH, KDAY, PTIME,   &
                             KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PZREF, PUREF, PZS,  &
@@ -160,7 +160,7 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(AGRI_NP_t), INTENT(INOUT) :: NAG
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(CH_ISBA_NP_t), INTENT(INOUT) :: NCHI
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(ISBA_DIAG_t), INTENT(INOUT) :: ID
 TYPE(GR_BIOG_NP_t), INTENT(INOUT) :: NGB
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
@@ -499,7 +499,7 @@ IF (IO%LVEGUPD) THEN
   GALB = .FALSE. 
   IF (IO%CPHOTO=='LAI'.OR.IO%CPHOTO=='LST'.OR.IO%CPHOTO=='NIT'.OR.IO%CPHOTO=='NCB') GALB = .TRUE.
   DO JP = 1,IO%NPATCH
-    CALL VEGETATION_UPDATE(DTCO, DTV, IG%NDIM, IO, NK%AL(JP), NP%AL(JP), NPE%AL(JP), JP, &
+    CALL VEGETATION_UPDATE(DTCO, DTI, IG%NDIM, IO, NK%AL(JP), NP%AL(JP), NPE%AL(JP), JP, &
                          PTSTEP, S%TTIME, S%XCOVER, S%LCOVER,  LAGRIP,                   &
                          'NAT', GALB, NISS%AL(JP), GUPDATED             )  
   ENDDO
@@ -964,7 +964,7 @@ END IF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 IF (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
-  CALL VEGETATION_EVOL(IO, PK, PEK, LAGRIP, PTSTEP, KMONTH, KDAY, PTIME, GK%XLAT, &
+  CALL VEGETATION_EVOL(IO, DTI, PK, PEK, LAGRIP, PTSTEP, KMONTH, KDAY, PTIME, GK%XLAT, &
                        ZP_RHOA, ZP_CO2, ISSK, ZP_RESP_BIOMASS_INST,  &
                        ! add optional for accurate dependency to nitrogen
                        ! limitation

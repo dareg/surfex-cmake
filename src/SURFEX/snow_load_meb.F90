@@ -1,5 +1,5 @@
 !   ############################################################################
-SUBROUTINE SNOW_LOAD_MEB(PEK, DEK, PTSTEP, PSR, PWRVNMAX, PKVN, PCHEATV, PMELTVN, &
+SUBROUTINE SNOW_LOAD_MEB(PK, PEK, DEK, PTSTEP, PSR, PWRVNMAX, PKVN, PCHEATV, PMELTVN, &
                          PVELC, PSUBVCOR)
 !   ############################################################################
 !
@@ -41,10 +41,10 @@ SUBROUTINE SNOW_LOAD_MEB(PEK, DEK, PTSTEP, PSR, PWRVNMAX, PKVN, PCHEATV, PMELTVN
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n, ONLY : ISBA_PE_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t, ISBA_P_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 !
-USE MODD_CSTS,     ONLY : XTT, XLMTT, XLVTT, XLSTT
+USE MODD_CSTS,     ONLY : XTT, XLMTT
 !
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX_ES
 !
@@ -55,6 +55,7 @@ IMPLICIT NONE
 !
 !*      0.1    Declaration of Arguments
 !
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 !
@@ -128,16 +129,16 @@ ELSEWHERE
 ! NOTE for the rare case that sublimation exceeds snow mass (possible as traces of snow disappear)
 ! compute a mass correction to be removed from soil (to conserve mass): PSUBVCOR
 
-   ZSUB(:)        = DEK%XLESC(:)*(PTSTEP/XLSTT)              ! kg m-2
+   ZSUB(:)        = DEK%XLESC(:)*(PTSTEP/PK%XLSTT(:))    ! kg m-2
    PSUBVCOR(:)    = MAX(0.0, ZSUB(:) - ZWRVN(:))/PTSTEP  ! kg m-2 s-1
    ZWRVN(:)       = MAX(0.0, ZWRVN(:) - ZSUB(:))         ! kg m-2
 
 ! Phase change: loss (melt of snow mass)
 
-   DEK%XMELTCV(:)     = PTSTEP*MAX(0.0, PMELTVN(:))         ! kg m-2  
-   DEK%XMELTCV(:)     = MIN(DEK%XMELTCV(:), ZWRVN(:))
+   DEK%XMELTCV(:) = PTSTEP*MAX(0.0, PMELTVN(:))         ! kg m-2  
+   DEK%XMELTCV(:) = MIN(DEK%XMELTCV(:), ZWRVN(:))
    ZWRVN(:)       = ZWRVN(:) - DEK%XMELTCV(:)
-   PEK%XWR(:)        = PEK%XWR(:)  + DEK%XMELTCV(:)               ! NOTE...liq reservoir can exceed maximum holding
+   PEK%XWR(:)     = PEK%XWR(:)  + DEK%XMELTCV(:)        ! NOTE...liq reservoir can exceed maximum holding
                                                         !        capacity here, but this is accounted for
                                                         !        in main prognostic PWRV routine.
 
@@ -147,7 +148,7 @@ ELSEWHERE
 ! Also, update liquid water stored on the canopy here:
 
    DEK%XFRZCV(:)      = PTSTEP*MAX(0.0, -PMELTVN(:))        ! kg m-2  
-   DEK%XFRZCV(:)      = MIN(DEK%XFRZCV(:), MAX(0.0,PEK%XWR(:)-DEK%XLERCV(:)*(PTSTEP/XLVTT)))
+   DEK%XFRZCV(:)      = MIN(DEK%XFRZCV(:), MAX(0.0,PEK%XWR(:)-DEK%XLERCV(:)*(PTSTEP/PK%XLVTT(:))))
    ZWRVN(:)       = ZWRVN(:) + DEK%XFRZCV(:)
    PEK%XWR(:)        = PEK%XWR(:)  - DEK%XFRZCV(:)
 

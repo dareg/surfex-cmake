@@ -67,6 +67,7 @@
 !!                  10/12    B.Decharme: EVAPCOR snow correction in DIF
 !!                  04/13    B.Decharme: Subsurface runoff if SGH (DIF option only)
 !!                  07/2013  B.Decharme: Surface / Water table depth coupling
+!!                  01/2016  B.Decharme: Bug : if no surface runoff (HRUNOFF=WSAT) then no Horton
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -271,7 +272,7 @@ ENDIF
 ! Surface fluxes are limited a Green-Ampt approximation from Abramopoulos et al
 ! (1988) and Entekhabi and Eagleson (1989).
 ! Note : when Horton option is used, infiltration already calculated in hydro_sgh
-IF(IO%CHORT/='SGH')THEN
+IF(IO%CRUNOFF/='WSAT'.AND.IO%CHORT/='SGH')THEN
 !  Green-Ampt approximation for maximum infiltration (derived form)
   ZINFILTMAX(:) = INFMAX_FUNC(PEK%XWG, ZWSAT, ZFRZ, PK%XCONDSAT, KK%XMPOTSAT, &
                                KK%XBCOEF, PK%XDZG, PK%XDG, IO%NLAYER_HORT)
@@ -425,7 +426,7 @@ DO JL=1,INL
       ZDFLUXDT2(JJ,JL) = -ZDKDT2*ZHEAD(JJ,JL) + ZNU(JJ,JL)*ZDHEADDT2 - ZDKDT2  
     ELSEIF(JL==IDEPTH)THEN !Last layers
       ZDHEADDT1 = -KK%XBCOEF(JJ,IDEPTH)*ZPSI   (JJ,IDEPTH)/(PEK%XWG  (JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ))) &
-                  +KK%XBCOEF(JJ,IDEPTH)*ZPSIWTD(JJ       )/(ZWSAT(JJ,IDEPTH)*(ZWTD(JJ)-ZDGN(JJ)))
+                  +KK%XBCOEF(JJ,IDEPTH)*ZPSIWTD(JJ       )/(ZWSAT(JJ,IDEPTH)    *(ZWTD(JJ)-ZDGN(JJ)))
       ZDHEADDT2 = 0.0
       ZDKDT1    = (2.*KK%XBCOEF(JJ,IDEPTH)+3.)*ZK(JJ,IDEPTH)/PEK%XWG(JJ,IDEPTH)
       ZDKDT2    = 0.0                

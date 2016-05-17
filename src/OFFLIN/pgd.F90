@@ -241,7 +241,9 @@ ENDDO
 !* closes the file
 IF (NRANK==NPIO) THEN
   IF (CSURF_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA
     CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+#endif    
   END IF
 !
   !* add informations in the file

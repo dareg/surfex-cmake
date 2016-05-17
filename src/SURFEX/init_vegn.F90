@@ -1,5 +1,5 @@
 !#############################################################
-SUBROUTINE INIT_VEG_n(IO, KK, PK, PEK, &
+SUBROUTINE INIT_VEG_n(IO, KK, PK, PEK, DTV, &
                       OSURF_DIAG_ALBEDO, PDIR_ALB, PSCA_ALB, PEMIS_OUT, PTSRAD )  
 !#############################################################
 !
@@ -28,6 +28,7 @@ SUBROUTINE INIT_VEG_n(IO, KK, PK, PEK, &
 !!
 !!    MODIFICATIONS
 !!
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -35,6 +36,7 @@ SUBROUTINE INIT_VEG_n(IO, KK, PK, PEK, &
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 !
 USE MODD_TYPE_SNOW
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
@@ -57,6 +59,7 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_K_t), INTENT(INOUT) :: KK
 TYPE(ISBA_P_t), INTENT(INOUT) :: PK
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 !
 LOGICAL, INTENT(OUT) :: OSURF_DIAG_ALBEDO
 !
@@ -89,14 +92,17 @@ IF (LHOOK) CALL DR_HOOK('INIT_VEG_n',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
-!* z0 and vegetation fraction estimated from LAI
+!* z0 and vegetation fraction estimated from LAI if not imposed
 IF (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
   DO JI=1,PK%NSIZE_P    
     IF(PEK%XLAI(JI)/=XUNDEF) THEN
-      IF (PEK%XLAI(JI).LT.PEK%XLAIMIN(JI)) PEK%XLAI(JI) = PEK%XLAIMIN(JI)
-      PEK%XZ0  (JI) = Z0V_FROM_LAI(PEK%XLAI(JI),PK%XH_TREE(JI),PK%XVEGTYPE_PATCH(JI,:),IO%LAGRI_TO_GRASS)
-      PEK%XVEG (JI) = VEG_FROM_LAI(PEK%XLAI(JI),PK%XVEGTYPE_PATCH(JI,:),IO%LAGRI_TO_GRASS)
-      PEK%XEMIS(JI) = EMIS_FROM_VEG(PEK%XVEG(JI),PK%XVEGTYPE_PATCH(JI,:))
+      PEK%XLAI (JI) = MAX(PEK%XLAIMIN(JI),PEK%XLAI(JI))
+      IF (.NOT.DTV%LIMP_Z0)   &
+         PEK%XZ0  (JI) = Z0V_FROM_LAI(PEK%XLAI(JI),PK%XH_TREE(JI),PK%XVEGTYPE_PATCH(JI,:),IO%LAGRI_TO_GRASS)
+      IF (.NOT.DTV%LIMP_VEG)  &
+        PEK%XVEG (JI) = VEG_FROM_LAI(PEK%XLAI(JI),PK%XVEGTYPE_PATCH(JI,:),IO%LAGRI_TO_GRASS)
+      IF (.NOT.DTV%LIMP_EMIS) &
+        PEK%XEMIS(JI) = EMIS_FROM_VEG(PEK%XVEG(JI),PK%XVEGTYPE_PATCH(JI,:))
     END IF  
   END DO
 END IF

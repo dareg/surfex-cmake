@@ -320,11 +320,11 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,DM%XFF(:),IRESP,HCOMMENT=YCOMMENT)
     !
     YRECFM='FFLOOD_ISBA'
-    YCOMMENT='Grdi-cell potential flood fraction (-)'
+    YCOMMENT='Grid-cell potential flood fraction (-)'
     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,K%XFFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
     YRECFM='PIFLOOD_ISBA'
-    YCOMMENT='Grdi-cell Potential_floodplain_infiltration (kg/m2)'
+    YCOMMENT='Grid-cell Potential_floodplain_infiltration (kg/m2/s)'
     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,K%XPIFLOOD(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDIF

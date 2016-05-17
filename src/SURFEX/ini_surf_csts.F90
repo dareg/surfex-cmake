@@ -33,6 +33,7 @@ SUBROUTINE INI_SURF_CSTS
 !!      M Lafaysse 05/2014 : snow parameters
 !!      B. Decharme    05/13 : Add NAM_SURF_REPROD_OPER for versions reproductibility
 !!      P. Samuelsson 10/2014 MEB
+!!      B. Decharme    01/16 : Update XCFFV
 !!
 !-------------------------------------------------------------------------------
 !
@@ -162,7 +163,7 @@ XALBSCA_WAT =  0.06
 
 ! Coefficient for calculation of floodplain fraction over vegetation
 !
-XCFFV = 3.0
+XCFFV = 4.0
 !
 ! Roughness length of pure snow surface (m)
 !

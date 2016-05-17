@@ -69,6 +69,7 @@
 !!                  02/2013  (C. de Munck) specified irrigation rate of ground added
 !!                  10/2014  (A. Boone)    MEB added
 !!                  07/15    (B. Decharme) Numerical adjustement for F2 soilstress function
+!!                  03/16    (B. Decharme) Limit flood infiltration
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -80,7 +81,7 @@ USE MODD_AGRI_n, ONLY : AGRI_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
-USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT, XLMTT
+USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLSTT, XLMTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN, XDENOM_MIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
@@ -336,9 +337,7 @@ IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
 !* interception reservoir and dripping computation
 !
    CALL HYDRO_VEG(IO%CRAIN, PTSTEP, KK%XMUF, ZRR, ZLEV, ZLETR, PVEG, &
-                  ZPSNV,  PEK%XWR(:), PWRMAX, ZPG, DEK%XDRIP, DEK%XRRVEG  ) 
-!
-!
+                  ZPSNV,  PEK%XWR(:), PWRMAX, ZPG, DEK%XDRIP, DEK%XRRVEG, PK%XLVTT  ) 
 !
 ELSE
 !
@@ -476,9 +475,9 @@ IF (IO%CISBA=='DIF') THEN
 !
   ZPG     (:) =  ZPG    (:)        / XRHOLW
   ZEVAPCOR(:) = PEVAPCOR(:)        / XRHOLW
-  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*XLVTT)
-  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*XLVTT)
-  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*XLSTT)
+  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*PK%XLVTT(:))
+  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*PK%XLVTT(:))
+  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*PK%XLSTT(:))
 !
   DO JDT = 1,INDT
 !                      

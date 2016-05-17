@@ -1,6 +1,6 @@
 !#############################################################
 SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, OREAD_BUDGETC, UG, U, &
-                                    IO, DTV, SB, S, IG, K, NK, NIG, NP, NPE,   &
+                                    IO, DTI, SB, S, IG, K, NK, NIG, NP, NPE,   &
                                     NAG, NISS, ISS, NCHI, CHI, ID, GB, NGB,    &
                                     NDST, SLT, SV, HPROGRAM,HINIT,OLAND_USE,   &
                                     KI,KSV,KSW,HSV,PCO2,PRHOA,                 &
@@ -53,6 +53,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, OREAD_BUDGETC, UG, U, &
 !!                                          Delete NWG_LAYER_TOT, NWG_SIZE
 !!                                          water table / Surface coupling
 !!      P. Samuelsson  02/14 : MEB
+!!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
 !!
 !-------------------------------------------------------------------------------
 !
@@ -157,7 +158,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(GRID_t), INTENT(INOUT) :: IG
@@ -262,8 +263,8 @@ END IF
 !
 ! Vegtypes first
 ALLOCATE(S%XVEGTYPE(KI,NVEGTYPE))
-IF (DTV%LDATA_VEGTYPE) THEN
-  S%XVEGTYPE = DTV%XPAR_VEGTYPE
+IF (DTI%LDATA_VEGTYPE) THEN
+  S%XVEGTYPE = DTI%XPAR_VEGTYPE
 ELSE
   !classical ecoclimap case
   DO JVEG=1,NVEGTYPE
@@ -314,11 +315,11 @@ END IF
 IDECADE2 = IDECADE
 !
 ! concern DATA_ISBA, so no dependence on patches
- CALL INIT_ISBA_MIXPAR(DTCO, DTV, IG%NDIM, IO, IDECADE, IDECADE2, S%XCOVER, S%LCOVER, 'NAT')
+ CALL INIT_ISBA_MIXPAR(DTCO, DTI, IG%NDIM, IO, IDECADE, IDECADE2, S%XCOVER, S%LCOVER, 'NAT')
 !
 ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 IF (ISIZE_LMEB_PATCH>0)  THEN
-  CALL FIX_MEB_VEG(DTV, IG%NDIM, IO%LMEB_PATCH, IO%NPATCH)
+  CALL FIX_MEB_VEG(DTI, IG%NDIM, IO%LMEB_PATCH, IO%NPATCH)
 ENDIF
 !
 !
@@ -400,7 +401,7 @@ DO JP = 1, IO%NPATCH
   !
   CALL ALLOCATE_PHYSIO(IO, KK, PK, PEK, NVEGTYPE  )
   !
-  CALL CONVERT_PATCH_ISBA(DTCO, DTV, IO, IDECADE, IDECADE2, S%XCOVER, S%LCOVER, &
+  CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, IDECADE, IDECADE2, S%XCOVER, S%LCOVER, &
                           LAGRIP, 'NAT', JP, KK, PK, PEK, &
                           .TRUE., .TRUE., .TRUE., .TRUE., .FALSE., .FALSE., &
                           PSOILGRID=IO%XSOILGRID, PPERM=KK%XPERM  )
@@ -956,12 +957,12 @@ DO JP=1,IO%NPATCH
   KK%XDIR_ALB_WITH_SNOW = 0.0
   KK%XSCA_ALB_WITH_SNOW = 0.0
   !
-  CALL INIT_VEG_n(IO, KK, PK, PEK, ID%DM%LSURF_DIAG_ALBEDO, PDIR_ALB, PSCA_ALB, PEMIS, PTSRAD )
+  CALL INIT_VEG_n(IO, KK, PK, PEK, DTI, ID%DM%LSURF_DIAG_ALBEDO, PDIR_ALB, PSCA_ALB, PEMIS, PTSRAD )
   !
   ZWG1(1:PK%NSIZE_P)    = PEK%XWG(:,1)
   ZTG1(1:PK%NSIZE_P,JP) = PEK%XTG(:,1)
   !
-  CALL CONVERT_PATCH_ISBA(DTCO, DTV, IO, IDECADE, IDECADE2, S%XCOVER, S%LCOVER,&
+  CALL CONVERT_PATCH_ISBA(DTCO, DTI, IO, IDECADE, IDECADE2, S%XCOVER, S%LCOVER,&
                           LAGRIP, 'NAT', JP, KK, PK, PEK, &
                           .FALSE., .FALSE., .FALSE., .FALSE., .TRUE., .FALSE., &
                           PWG1=ZWG1(1:PK%NSIZE_P), PWSAT=KK%XWSAT)

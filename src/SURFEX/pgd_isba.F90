@@ -198,6 +198,7 @@ CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
 REAL                     :: XUNIF_PH      ! uniform value of pH
 REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 LOGICAL, DIMENSION(19)   :: GMEB_PATCH
+LOGICAL, DIMENSION(19)   :: GMEB_PATCH_REC ! Recommended MEB patch settings
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -252,13 +253,58 @@ ALLOCATE(IO%LMEB_PATCH(IO%NPATCH))
 IO%LMEB_PATCH(:) = .FALSE.
 IO%LFORC_MEASURE = .FALSE.
 IO%LMEB_LITTER   = .FALSE.
+IO%LMEB_GNDRES   = .FALSE.
 
 IF(GMEB)THEN
 
   IO%LTR_ML      = .TRUE. ! Always use this SW radiative transfer option with MEB
 
-  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,GMEB_PATCH,IO%LFORC_MEASURE,IO%LMEB_LITTER)
+  CALL READ_NAM_PGD_ISBA_MEB(HPROGRAM,ILUOUT,GMEB_PATCH,IO%LFORC_MEASURE,IO%LMEB_LITTER,IO%LMEB_GNDRES)
+
+  ! Current recommendation is to use MEB for tree patches only.
+  ! Here follows a test in which non-tree patches in LMEB_PATCH are set to FALSE.
+  ! Thus, if you wish to test MEB for non-tree patches you can set 
+  ! GMEB_PATCH_REC(:)=.TRUE.
+  ! in the following line:
+
+  GMEB_PATCH_REC(:)=.FALSE.
+
+  IF(IO%NPATCH==1 .AND. GMEB_PATCH(1))THEN
+    WRITE(ILUOUT,*) '*****************************************'
+    WRITE(ILUOUT,*) '* WARNING!'
+    WRITE(ILUOUT,*) '* Using MEB for one patch only is not recommended.'
+    WRITE(ILUOUT,*) '* LMEB_PATCH(1) has been set to .FALSE.'
+    WRITE(ILUOUT,*) '*****************************************'
+  ELSEIF(IO%NPATCH>=2 .AND. IO%NPATCH<=6)THEN
+    GMEB_PATCH_REC(2)=.TRUE.  ! Only the tree patch (number 2) is allowed to be TRUE
+  ELSEIF(IO%NPATCH>=7 .AND. IO%NPATCH<=8)THEN
+    GMEB_PATCH_REC(3)=.TRUE.  ! Only the tree patch (number 3) is allowed to be TRUE
+  ELSEIF(IO%NPATCH==9)THEN
+    GMEB_PATCH_REC(3:4)=(/.TRUE.,.TRUE./)  ! Only the tree patches (numbers 3-4) are allowed to be TRUE
+  ELSEIF(IO%NPATCH==10)THEN
+    GMEB_PATCH_REC(3:5)=(/.TRUE.,.TRUE.,.TRUE./)  ! Only the tree patches (numbers 3-5) are allowed to be TRUE
+  ELSEIF(IO%NPATCH>=11 .AND. IO%NPATCH<=12)THEN
+    GMEB_PATCH_REC(4:6)=(/.TRUE.,.TRUE.,.TRUE./)  ! Only the tree patches (numbers 4-6) are allowed to be TRUE
+  ELSEIF(IO%NPATCH==19)THEN
+    GMEB_PATCH_REC(4:6)=(/.TRUE.,.TRUE.,.TRUE./)  ! The "old" tree patches (numbers 4-6) are allowed to be TRUE
+    GMEB_PATCH_REC(13:17)=(/.TRUE.,.TRUE.,.TRUE.,.TRUE.,.TRUE./)  ! The "new" tree patches (numbers 13-17) are allowed to be TRUE
+  ENDIF
+
+  IF(COUNT(.NOT.GMEB_PATCH_REC(:) .AND. GMEB_PATCH(:))>0)THEN
+    WRITE(ILUOUT,*) '*****************************************'
+    WRITE(ILUOUT,*) '* WARNING!'
+    WRITE(ILUOUT,*) '* Using MEB for non-tree patches is not yet recommended.'
+    WRITE(ILUOUT,*) '* Therefor, LMEB_PATCH for non-tree patches has been set to .FALSE.'
+    WRITE(ILUOUT,*) '* The final LMEB_PATCH vector becomes:'
+    WRITE(ILUOUT,*) GMEB_PATCH(1:IO%NPATCH).AND.GMEB_PATCH_REC(1:IO%NPATCH)
+    WRITE(ILUOUT,*) '*****************************************'
+  ENDIF
+  GMEB_PATCH(:)=GMEB_PATCH(:).AND.GMEB_PATCH_REC(:)
+
   IO%LMEB_PATCH(1:IO%NPATCH) = GMEB_PATCH(1:IO%NPATCH)
+
+  IF (IO%LMEB_LITTER) IO%LMEB_GNDRES = .FALSE.
+
 ENDIF
 !
 !-------------------------------------------------------------------------------

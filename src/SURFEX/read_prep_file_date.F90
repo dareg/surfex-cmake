@@ -1,6 +1,5 @@
 !     #########
-SUBROUTINE READ_PREP_FILE_DATE (&
-                                HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
+SUBROUTINE READ_PREP_FILE_DATE (HPROGRAM,HFILE,HFILETYPE,TPTIME,KLUOUT)
 !     #################################################################################
 !
 !!****  *READ_PREP_FILE_DATE* - reads the date for the surface
@@ -77,10 +76,8 @@ ELSE IF(HFILETYPE=='MESONH' .OR. HFILETYPE=='LFI   ' .OR. HFILETYPE=='ASCII '.OR
 !
   HREC = CREC
   IREC = NREC
-  CALL OPEN_AUX_IO_SURF(&
-                        HFILE,HFILETYPE,'FULL  ')
-  CALL READ_SURF(&
-                 HFILETYPE,'DTCUR           ',TPTIME,IRESP)
+  CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+  CALL READ_SURF(HFILETYPE,'DTCUR           ',TPTIME,IRESP)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   CREC = HREC
   NREC = IREC

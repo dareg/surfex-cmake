@@ -1,5 +1,5 @@
 !     ##########################################################################
-      SUBROUTINE ISBA_FLUXES_MEB(KK, PEK, DK, DEK, DMK, PRHOA, PSIGMA_F,PSIGMA_FN, &
+      SUBROUTINE ISBA_FLUXES_MEB(KK, PK, PEK, DK, DEK, DMK, PRHOA, PSIGMA_F,PSIGMA_FN, &
                                  PRN_V, PRN_G, PLWNET_V_DTV, PLWNET_V_DTG, PLWNET_V_DTN, &
                                  PLWNET_G_DTV, PLWNET_G_DTG, PLWNET_G_DTN, PLWNET_N_DTV, &
                                  PLWNET_N_DTG, PLWNET_N_DTN, PTHRMA_TA, PTHRMB_TA,       &
@@ -61,7 +61,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_PE_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_PE_t, ISBA_P_t
 USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
@@ -77,6 +77,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 TYPE(ISBA_K_t), INTENT(INOUT) :: KK
+TYPE(ISBA_P_t), INTENT(INOUT) :: PK
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 TYPE(DIAG_t), INTENT(INOUT) :: DK
 TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
@@ -441,7 +442,7 @@ DK%XLEI(:)      = DEK%XLESC(:) + PLEGI(:) + DEK%XLEI_FLOOD(:)
 !
 ! Total sublimation from the surface/snow/vegetation: kg m-2 s-1
 !
-DK%XSUBL(:)     = DK%XLEI(:)/XLSTT
+DK%XSUBL(:)     = DK%XLEI(:)/ PK%XLSTT(:)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_FLUXES_MEB',1,ZHOOK_HANDLE)
 !

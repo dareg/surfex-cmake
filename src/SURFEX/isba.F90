@@ -93,7 +93,8 @@
 !!                            Routines drag, e_budget and isba_fluxes now in isba_ceb
 !!      (A. Boone & P. Samuelsson) (10/2014) Added MEB v1
 !!      (P. LeMoigne) 12/2014 EBA scheme update
-!!      (A. Boone)    02/2015 Consider spectral band dependence of snow for IO%LTR_ML radiation option 
+!!      (A. Boone)    02/2015 Consider spectral band dependence of snow for IO%LTR_ML radiation option
+!!      B. Decharme    01/16 : Bug with flood budget
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -313,6 +314,9 @@ REAL, DIMENSION(SIZE(PEK%XWR)) :: ZLEL3L   ! evaporation heat flux of water in t
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZEVAP3L  ! evaporation flux over snow from ISBA-ES (kg/m2/s)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow pack: 
 !                                           ! ISBA-ES [kg/(m2 s)]
+REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNOW_THRUFAL_SOIL !liquid water leaving the snowpack directly to the 
+!                                                    !soil, ISBA-ES: [kg/(m2 s)] (equal to ZSNOW_THRUFAL
+!                                                    !if OMEB_LITTER=False and zero if OMEB_LITTER=True)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
@@ -338,8 +342,10 @@ REAL, DIMENSION(SIZE(PEK%XWR))               :: ZFLSN_COR  ! snow/soil-biomass c
 !
 ! MEB:
 !
-REAL, DIMENSION(SIZE(PEK%XWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
+REAL, DIMENSION(SIZE(PEK%XWR))           :: ZSUBVCOR  ! A possible snow (intercepted by the canopy) mass correction 
 !                                                       (to be potentially removed from soil) when MEB activated (kg/m2/s)
+REAL, DIMENSION(SIZE(PEK%XWR))           :: ZLITCOR   ! A possible ice (in litter layer) mass correction 
+!                                                       (to be potentially removed from soil) when litter activated (kg/m2/s)
 !
 ! Misc :
 !
@@ -389,6 +395,7 @@ ZRI3L       (:) = XUNDEF
 ZSOILHCAPZ(:,:) = XUNDEF
 ZSOILCONDZ(:,:) = XUNDEF
 ZF2WGHT   (:,:) = XUNDEF
+ZEVAP3L(:)      = XUNDEF
 !
 DMK%XRS    (:)   = 0.0
 PAC_AGG     (:)   = 0.0
@@ -411,11 +418,20 @@ ZSNOWSFCH     (:) = 0.0
 ZGSFCSNOW     (:) = 0.0
 !
 ZSUBVCOR(:)     = 0.0
+ZLITCOR(:)     = 0.0
+ZLES3L          = 0.0
+ZLEL3L          = 0.0
 !
 IF(OMEB)THEN
-   ZVEG(:) = 0.0
+  ZVEG(:)           = 0.0
+  DEK%XLEG(:)       = 0.0
+  DEK%XLEGI(:)      = 0.0
+  DEK%XLELITTER(:)  = 0.0
+  DEK%XLELITTERI(:) = 0.0
 ELSE
-   ZVEG(:) = PEK%XVEG(:)
+  ZVEG(:)      = PEK%XVEG(:)
+  DEK%XLESC(:) = 0.0
+  PEK%XWRVN(:) = 0.0   
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
@@ -460,10 +476,11 @@ IF(OMEB)THEN
                  PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,       & 
                  PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, &
                  PABC, PIACAN, PPOI, PCSP, PRESP_BIOMASS_INST,  PPALPHAN, &
-                 ZF2, PLW_RAD, ZGRNDFLUX, ZFLSN_COR, PUSTAR, ZEMIST,  &
+                 ZF2, PLW_RAD, ZGRNDFLUX, ZFLSN_COR, PUSTAR, ZEMIST,      &
                  PHU_AGG, PAC_AGG, ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG, &
                  ZDELHEATN, ZDELHEATN_SFC, ZGSFCSNOW, PTDEEP_A, PDEEP_FLUX, &
-                 ZRI3L, ZSNOW_THRUFAL, ZEVAPCOR, ZSUBVCOR, ZSNOWSFCH, ZQS3L   )
+                 ZRI3L, ZSNOW_THRUFAL, ZSNOW_THRUFAL_SOIL, ZEVAPCOR, ZSUBVCOR, &
+                 ZLITCOR, ZSNOWSFCH, ZQS3L   )
 
 ELSE
 !
@@ -493,14 +510,14 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
-   CALL SNOW3L_ISBA(IO, G, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,                       &
+   CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,                   &
                     TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,      &
                     ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR,         &
                     PSR, PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PZREF, PEK%XSNOWFREE_ALB, &
                     PK%XDG, PK%XDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,  &
                     PPET_B_COEF, PPEQ_B_COEF, ZSNOW_THRUFAL, ZGRNDFLUX, ZFLSN_COR,        &
                     ZGSFCSNOW, ZEVAPCOR, ZLES3L, ZLEL3L, ZEVAP3L, ZSNOWSFCH, ZDELHEATN,   &
-                    ZDELHEATN_SFC, ZRI3L,PZENITH, ZDELHEATG, ZDELHEATG_SFC, ZQS3L      )  
+                    ZDELHEATN_SFC, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC, ZQS3L      )  
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
@@ -562,8 +579,8 @@ CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK,                      &
 !* add snow component to output radiative parameters and fluxes in case 
 !  of ES or CROCUS snow schemes
 !
-CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK,                 &
-                   OMEB, PEXNS, PEXNA, PTA, PQA,              &
+CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK,                    &
+                   OMEB, IO%LMEB_LITTER, PEXNS, PEXNA, PTA, PQA, &
                    PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,  &
                    ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L,     &
                    ZEVAP3L, ZQS3L, ZALB3L, ZGSFCSNOW,         &

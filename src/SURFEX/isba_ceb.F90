@@ -40,6 +40,8 @@ SUBROUTINE ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,      &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/03/95 
+!!      (B. Decharme)   03/16 Bug : limitation of Er for Interception reservoir
+!!                                  PTSTEP insted of ZTSTEP in drag.F90
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -384,7 +386,11 @@ DO JSPLIT=1,ITSPLIT
 !*      3.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 ! 
-   CALL DRAG(IO%CISBA, PEK%TSNOW%SCHEME, IO%CCPSURF, ZTSTEP, PEK%XTG(:,1), PEK%XWG(:,1), &
+!  In DRAG, we use the timestep of ISBA (PTSTEP) and not the split time step (ZTSTEP)
+!  because diagnostic canopy evaporation (Er) must be consistent with PWR water
+!  mass to limit negative dripping in hydro_veg
+!
+   CALL DRAG(IO%CISBA, PEK%TSNOW%SCHEME, IO%CCPSURF, PTSTEP, PEK%XTG(:,1), PEK%XWG(:,1), &
              PEK%XWGI(:,1), PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR, PPS, DMK%XRS, &
              PEK%XVEG, DK%XZ0, DK%XZ0EFF, DK%XZ0H, KK%XWFC(:,1), KK%XWSAT(:,1),    &
              PEK%XPSNG, PEK%XPSNV, PZREF, PUREF, PDIRCOSZW, PDELTA, PF5, PEK%XRESA,&

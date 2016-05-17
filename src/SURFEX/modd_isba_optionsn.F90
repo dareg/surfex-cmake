@@ -107,7 +107,7 @@ LOGICAL, POINTER, DIMENSION(:) :: LMEB_PATCH  ! Vector with T/F values
 LOGICAL                        :: LFORC_MEASURE ! True = Forcing data from observations
 !                                               ! False = Forcing data from atmospheric model (default)
 LOGICAL                        :: LMEB_LITTER ! Activate Litter
-!
+LOGICAL                        :: LMEB_GNDRES ! Activate Ground Resistance
 !
 ! * General PREP options
 !
@@ -293,6 +293,7 @@ IO%NNLITTLEVS=0
 IO%NNSOILCARB=0
 IO%LFORC_MEASURE=.FALSE.
 IO%LMEB_LITTER=.FALSE.
+IO%LMEB_GNDRES=.FALSE.
 !
 IO%LCANOPY=.FALSE.
 IO%CRESPSL=' '

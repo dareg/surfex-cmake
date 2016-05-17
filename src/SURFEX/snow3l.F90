@@ -8,7 +8,7 @@
                 PTA,PTG,PSW_RAD,PQA,PVMOD,PLW_RAD, PRHOA,                 &
                 PUREF,PEXNS,PEXNA,PDIRCOSZW,                              &
                 PZREF,PZ0,PZ0EFF,PZ0H,PALB,                               &
-                PSOILCOND,PD_G,                                           &
+                PSOILCOND,PD_G,PLVTT,PLSTT,                               &
                 PSNOWLIQ,PSNOWTEMP,PSNOWDZ,                               &
                 PTHRUFAL,PGRNDFLUX,PEVAPCOR,PSOILCOR,                     &
                 PGFLXCOR,PSNOWSFCH, PDELHEATN, PDELHEATN_SFC,             &
@@ -16,7 +16,7 @@
                 PRNSNOW,PHSNOW,PGFLUXSNOW,                                &
                 PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                 PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
-                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,                        &
+                PPERMSNOWFRAC,PFORESTFRAC,PZENITH,PXLAT,PXLON,            &
                 OSNOWDRIFT,OSNOWDRIFT_SUBLIM                              )  
 !     ##########################################################################
 !
@@ -85,6 +85,7 @@
 !!      Modified by A. Boone     (10/2014): MEB modifs: permit option to impose fluxes at sfc  
 !!      Modified by A. Boone     (10/2014): SNOW3LREFRZ and SNOW3LEVAPN edited to give
 !!                                          better enthalpy conservation.
+!!      Modified by B. Decharme  (03/2016): No snowdrift under forest
 !!
 !!
 !-------------------------------------------------------------------------------
@@ -149,7 +150,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PSOILCOND, PD_G, PPSN3L
 !                                      PPSN3L    = snow fraction
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0, PZ0EFF, &
-                                       PALB, PZ0H, PPERMSNOWFRAC  
+                                       PALB, PZ0H, PPERMSNOWFRAC, PFORESTFRAC  
 !                                      PZ0EFF    = roughness length for momentum
 !                                      PZ0       = grid box average roughness length
 !                                      PZ0H      = grid box average roughness length for heat
@@ -163,6 +164,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHO
 !                                                  normal to the surface and the vertical
 !                                      PALB      = soil/vegetation albedo
 !                                      PPERMSNOWFRAC  = fraction of permanet snow/ice
+!                                      PFORESTFRAC = fraction of forest
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                   &
                                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
@@ -177,6 +179,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                
 REAL, DIMENSION(:), INTENT(IN)    :: PTG
 !                                      PTG       = Surface soil temperature (effective
 !                                                  temperature the of layer lying below snow)
+REAL, DIMENSION(:), INTENT(IN)    :: PLVTT, PLSTT ! = latent heats for hydrology
 REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWALB
 !                                      PSNOWALB = Prognostic surface snow albedo
 !                                                 (does not include anything but
@@ -452,7 +455,7 @@ CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,PSNOWLIQ)
 !
 PSNDRIFT(:) = 0.0
 IF (OSNOWDRIFT) THEN
-   CALL SNOW3LDRIFT(PTSTEP,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
+   CALL SNOW3LDRIFT(PTSTEP,PFORESTFRAC,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
                     PSNOWDZ,ZSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
 ENDIF
 !
@@ -572,7 +575,8 @@ ENDIF
 !
 CALL SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,                            &
                 PSNOWHEAT,ZRADSINK(:,INLVLS),PEVAPCOR,PTHRUFAL,ZGRNDFLUX, &
-                PGFLUXSNOW,ZGRNDFLUXO,PSNOWDZ,PSNOWLIQ,ZSNOWTEMP,ZRADXS   )  
+                PGFLUXSNOW,ZGRNDFLUXO,PSNOWDZ,PSNOWLIQ,ZSNOWTEMP,         &
+                PLVTT,PLSTT,ZRADXS   )  
 !
 ! For "normal" melt: transform excess heat content into snow liquid:
 !
@@ -595,7 +599,7 @@ PSNOWHEAT(:,:)    = PSNOWDZ(:,:)*( ZSCAP(:,:)*(ZSNOWTEMP(:,:)-XTT)        &
 !               ------------------------------------------
 !
 CALL SNOW3LEVAPN(ZPSN3L,PLES3L,PLEL3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1), &
-                   PSNOWDZ,PSNOWLIQ(:,1),PTA,PSNOWHEAT,PSOILCOR            )
+                   PSNOWDZ,PSNOWLIQ(:,1),PTA,PLVTT,PLSTT,PSNOWHEAT,PSOILCOR )
 !
 ! Update snow temperatures and liquid
 ! water portion of the snow from snow heat content
@@ -1063,7 +1067,7 @@ END SUBROUTINE SNOW3LCOMPACTN
 !####################################################################
 !####################################################################
 !####################################################################
-SUBROUTINE SNOW3LDRIFT(PTSTEP,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
+SUBROUTINE SNOW3LDRIFT(PTSTEP,PFORESTFRAC,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
                        PSNOWDZ,PSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -1103,6 +1107,7 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                    :: PTSTEP
 !
+REAL, DIMENSION(:), INTENT(IN)      :: PFORESTFRAC
 REAL, DIMENSION(:), INTENT(IN)      :: PVMOD
 REAL, DIMENSION(:), INTENT(IN)      :: PTA
 REAL, DIMENSION(:), INTENT(IN)      :: PQA
@@ -1133,6 +1138,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZQS
 REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZW
 REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZT
 REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZSNOWDZ1
+REAL, DIMENSION(SIZE(PSNOWRHO,1)                 ) :: ZFOREST_EFFECT
 !
 LOGICAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: GDRIFT
 !
@@ -1161,13 +1167,17 @@ ZQS_EFFECT   (:,:) = 0.0
 ZDRIFT_EFFECT(:,:) = 0.0
 GDRIFT       (:,:) = .FALSE.
 !
+ZPROFEQU (:) = 0.0
+!
 ZSNOWDZ1(:) = PSNOWDZ(:,1)
 !
 ! 1. Initialazation of drift and induced settling
 ! -----------------------------------------------
 !
-ZWIND    (:) = XCOEF_FF * PVMOD(:)
-ZPROFEQU (:) = 0.0
+!Limitation of wind speed in Forest : ~ 15% of wind in open area
+ZFOREST_EFFECT(:) = 1.0 - 0.85 * PFORESTFRAC(:)
+!
+ZWIND(:) = XCOEF_FF * ZFOREST_EFFECT(:) * PVMOD(:)
 !
 DO JJ=1,INLVLS
    DO JI=1,INI
@@ -2713,7 +2723,7 @@ END SUBROUTINE SNOW3LFLUX
 !####################################################################
       SUBROUTINE SNOW3LEVAPN(PPSN3L,PLES3L,PLEL3L,PTSTEP,PSNOWTEMP, &
                                PSNOWRHO,PSNOWDZ,PSNOWLIQ,PTA,       &
-                               PSNOWHEAT,PSOILCOR                   )
+                               PLVTT,PLSTT,PSNOWHEAT,PSOILCOR       )
 !
 !
 !!    PURPOSE
@@ -2722,7 +2732,7 @@ END SUBROUTINE SNOW3LFLUX
 !     evaporation (liquid) and sublimation.
 !
 !
-USE MODD_CSTS,     ONLY : XLVTT, XRHOLW, XLSTT, XLMTT, XCI, XTT
+USE MODD_CSTS,     ONLY : XRHOLW, XLMTT, XCI, XTT
 USE MODD_SNOW_PAR, ONLY : XRHOSMIN_ES, XSNOWDMIN
 !
 IMPLICIT NONE
@@ -2735,7 +2745,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPSN3L
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PLES3L, PLEL3L   ! (W/m2)
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PTA
+REAL, DIMENSION(:), INTENT(IN)      :: PTA, PLVTT, PLSTT
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT, PSNOWDZ
 !
@@ -2803,7 +2813,7 @@ WHERE(PSNOWDZ(:,1) > 0.0)
 ! Evaporation:
 ! Reduce density and liquid water content:
 !
-   ZSNOWEVAP(:)   = PPSN3L(:)*PLEL3L(:)*PTSTEP/(XLVTT*XRHOLW)
+   ZSNOWEVAP(:)   = PPSN3L(:)*PLEL3L(:)*PTSTEP/(PLVTT(:)*XRHOLW)
    ZSNOWEVAPX(:)  = MIN(ZSNOWEVAP(:),PSNOWLIQ(:))
 !
 !  This should not change enthalpy (since already accounted for 
@@ -2846,7 +2856,7 @@ WHERE(PSNOWDZ(:,1) > 0.0)
 ! if sublimation: add to correction term if potential
 ! sublimation exceeds available snow cover.
 !
-   ZSNOWEVAPS(:)  = PPSN3L(:)*PLES3L(:)*PTSTEP/(XLSTT*PSNOWRHO(:))
+   ZSNOWEVAPS(:)  = PPSN3L(:)*PLES3L(:)*PTSTEP/(PLSTT(:)*PSNOWRHO(:))
    ZSNOWDZ(:)     = PSNOWDZ(:,1) - ZSNOWEVAPS(:)
    PSNOWDZ(:,1)   = MAX(0.0, ZSNOWDZ(:))
    PSOILCOR(:)    = PSOILCOR(:) + MAX(0.0,-ZSNOWDZ(:))*PSNOWRHO(:)/PTSTEP
@@ -2907,10 +2917,10 @@ END SUBROUTINE SNOW3LEVAPN
 !####################################################################
 !####################################################################
 !####################################################################
-SUBROUTINE SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,         &
+SUBROUTINE SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,                  &
                    PSNOWHEAT,PRADSINK,PEVAPCOR,PTHRUFAL,PGRNDFLUX,    &
                    PGFLUXSNOW,PGRNDFLUXO,PSNOWDZ,PSNOWLIQ,PSNOWTEMP,  &
-                   PRADXS)  
+                   PLVTT,PLSTT,PRADXS)  
 !
 !
 !
@@ -2921,7 +2931,7 @@ SUBROUTINE SNOW3LGONE(PTSTEP,PLEL3L,PLES3L,PSNOWRHO,         &
 !     snow AND underlying surface.
 !
 !
-USE MODD_CSTS,        ONLY : XTT, XLSTT, XLVTT
+USE MODD_CSTS,        ONLY : XTT
 USE MODD_SNOW_METAMO, ONLY : XSNOWDZMIN
 !
 IMPLICIT NONE
@@ -2931,7 +2941,8 @@ IMPLICIT NONE
 REAL, INTENT(IN)                    :: PTSTEP
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PLEL3L, PLES3L, PGFLUXSNOW, &
-                                       PRADSINK, PGRNDFLUXO  
+                                       PRADSINK, PGRNDFLUXO,       &
+                                       PLVTT, PLSTT  
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWRHO, PSNOWHEAT
 !
@@ -2991,7 +3002,7 @@ ZSNOWGONE_DELTA(:)    = 1.0
 !
 WHERE(PGFLUXSNOW(:) + PRADSINK(:) >= (-ZSNOWHEATC(:)/PTSTEP) )
    PGRNDFLUX(:)       = PGFLUXSNOW(:) + (ZSNOWHEATC(:)/PTSTEP)
-   PEVAPCOR(:)        = (PLEL3L(:)/XLVTT) + (PLES3L(:)/XLSTT)
+   PEVAPCOR(:)        = (PLEL3L(:)/PLVTT(:)) + (PLES3L(:)/PLSTT(:))
    PRADXS(:)          = 0.0
    ZSNOWGONE_DELTA(:) = 0.0          ! FLAG...if=0 then snow vanishes, else=1
 END WHERE

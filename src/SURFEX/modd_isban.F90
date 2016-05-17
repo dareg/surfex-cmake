@@ -155,7 +155,7 @@ REAL, POINTER, DIMENSION(:,:)    :: XCONDSLD       ! soil solids thermal conduct
 ! - Water table depth coupling
 !  
 REAL, POINTER, DIMENSION(:)  :: XFWTD         ! grid-cell fraction of water table rise
-REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (m)
+REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (negative below soil surface) (m)
 !
 ! * Physiographic radiative fields
 !
@@ -175,7 +175,7 @@ REAL, POINTER, DIMENSION(:)    :: XMUF     ! fraction of the grid cell reached b
 REAL, POINTER, DIMENSION(:)    :: XFSAT    ! Topmodel or dt92 saturated fracti
 !
 REAL, POINTER, DIMENSION(:)  :: XFFLOOD      ! Grid-cell flood fraction
-REAL, POINTER, DIMENSION(:)  :: XPIFLOOD     ! flood potential infiltration (kg/m2)
+REAL, POINTER, DIMENSION(:)  :: XPIFLOOD     ! flood potential infiltration (kg/m2/s)
 !
 ! - Flood scheme
 !

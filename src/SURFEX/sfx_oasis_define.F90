@@ -47,7 +47,7 @@ USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 USE MODI_SFX_OASIS_CHECK
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -91,7 +91,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !

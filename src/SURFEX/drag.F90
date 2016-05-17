@@ -69,6 +69,7 @@
 !!      (A.Boone)    21/11/11 Add Rs_max limit for dry conditions with Etv
 !!      (B. Decharme)   09/12 limitation of Ri in surface_ri.F90
 !!      (C. Ardilouze)  09/13 Halstead coef set to 0 for very low values
+!!      (B. Decharme)   03/16 Bug in limitation of Er for Interception reservoir
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -108,7 +109,7 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! option for specific heat Cp:
 !                                               ! 'DRY' = dry Cp
 !                                               ! 'HUM' = Cp as a function of qs
 !
-REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
+REAL,                 INTENT(IN) :: PTSTEP      ! timestep of ISBA (not split time step)
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PTG, PWG, PWGI, PEXNS
 !                                     PTG     = surface temperature
@@ -462,6 +463,9 @@ ENDIF
 !*       2.     Interception reservoir consistency:
 !               -----------------------------------
 !
+!  In DRAG, we use the timestep of ISBA (PTSTEP) and not the split time step (ZTSTEP)
+!  because diagnostic canopy evaporation (Er) must be consistent with PWR to
+!  limit negative dripping in hydro_veg
 !
 ZLEV(:)  = PRHOA(:) * PLVTT(:) * PVEG(:) * (1-ZPSNV(:)) * PHV(:) * (ZQSAT(:) - PQA(:)) / PRA(:)
 !
@@ -476,7 +480,7 @@ ZWR_DELTA(:)=1.0
 !
 WHERE( ZZHV(:)>0.0 .AND. ZER(:)/=0.0 .AND. (PWR(:)+ZRRVEG(:))<ZER(:) )
 !
-       ZWR_DELTA(:) = MAX(0.25,MIN(1.0,(PWR(:)+ZRRVEG(:))/ZER(:)))
+       ZWR_DELTA(:) = MAX(0.01,MIN(1.0,(PWR(:)+ZRRVEG(:))/ZER(:)))
 !       
        PDELTA(:) = PDELTA(:) * ZWR_DELTA(:)
 !

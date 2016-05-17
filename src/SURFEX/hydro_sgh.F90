@@ -15,6 +15,11 @@
 !     4. Determine the infiltration rate.
 !     5. Determine the flooplains interception and infiltration rate.
 !
+!!    MODIFICATIONS
+!!    -------------
+!!
+!!         03/16    (B. Decharme) Limit flood infiltration
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -68,15 +73,17 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PDUNNE
 REAL, PARAMETER                            :: ZEICE = 6.0  ! Ice vertical diffusion impedence factor 
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_INI, ZFROZEN, ZIMAX_ICE, ZIMAX, &
-                                              ZHORT_R, ZHORT_M, ZSOILMAX, ZIF_MAX
+                                              ZHORT_R, ZHORT_M, ZSOILMAX, ZIF_MAX,&
+                                              ZPIFLDMAX
 !                                             ZFROZEN  = frozen soil fraction for runoff
 !                                             ZIMAX_ICE    = maximum infiltration rate for frozen soil
 !                                             ZIMAX     = maximum infiltration rate for unfrozen soil
+!                                             ZPIFLDMAX    = maximum floodplains infiltration during 1 day (kg/m2/s)
 REAL, DIMENSION(SIZE(PPG))                 :: ZWG2_AVG, ZWGI2_AVG, ZWSAT_AVG, ZWWILT_AVG
 !                                             Average water and ice content
 !                                             values over the soil depth D2 (for calculating surface runoff)
 !
-REAL, DIMENSION(SIZE(PK%XDG,1),SIZE(PK%XDG,2)) :: ZWSAT, ZFRZ
+REAL, DIMENSION(SIZE(PK%XDG,1),SIZE(PK%XDG,2)) :: ZWSAT, ZWFC, ZFRZ
 !
 REAL, DIMENSION(SIZE(PPG))                 :: ZPG_WORK, ZRUISDT, ZNL_HORT, ZDEPTH
 !
@@ -104,6 +111,7 @@ ZIMAX_ICE(:)  = 0.0
 ZIMAX    (:)  = 0.0
 !
 ZWSAT  (:,:)  = 0.0
+ZWFC   (:,:)  = 0.0
 !
 ZLOG10 = LOG(10.0)
 !
@@ -118,8 +126,9 @@ ZHORT_R(:) = 0.0
 ZHORT_M(:) = 0.0
 !
 !DEK%XIFLOOD calculation
-ZSOILMAX(:) = 0.0
-ZIF_MAX(:)  = 0.0
+ZSOILMAX(:)  = 0.0
+ZIF_MAX(:)   = 0.0
+ZPIFLDMAX(:) = 0.0
 !
 !IO%CRUNOFF = DT92 DUNNE calculation
 ZPG_WORK(:)   = 0.0
@@ -201,7 +210,8 @@ IF(IO%CHORT=='SGH'.OR.IO%LFLOOD)THEN
 !              
 !       Modify soil porosity as ice assumed to become part
 !       of solid soil matrix (with respect to liquid flow):                
-        ZWSAT(JJ,JL) = MAX(XWGMIN, KK%XWSAT(JJ,JL)-PEK%XWGI(JJ,JL)) 
+        ZWSAT(JJ,JL) = MAX(XWGMIN, KK%XWSAT(JJ,JL)-PEK%XWGI(JJ,JL))
+        ZWFC (JJ,JL) = KK%XWFC(JJ,JL)*ZWSAT(JJ,JL)/KK%XWSAT(JJ,JL) 
 !        
 !       Impedance Factor from (Johnsson and Lundin 1991).
         ZFRZ(JJ,JL) = EXP(ZLOG10*(-ZEICE*(PEK%XWGI(JJ,JL)/(PEK%XWGI(JJ,JL)+PEK%XWG(JJ,JL)))))
@@ -390,17 +400,17 @@ IF(IO%LFLOOD)THEN
 !
 ! calculate the maximum flood infiltration
 !
+  ZPIFLDMAX(:) = MIN(KK%XPIFLOOD(:),XRHOLW/XDAY) ! no more than 1 meter of water per days
+!
   ZIF_MAX(:) = MAX(0.,(1.- ZFROZEN(:))) * ZIMAX    (:)*XRHOLW &   !unfrozen soil
              +             ZFROZEN(:)   * ZIMAX_ICE(:)*XRHOLW     !frozen soil
-!
-  DEK%XIFLOOD(:)=MAX(0.0,(KK%XFFLOOD(:)-KK%XFSAT(:)))*MIN(KK%XPIFLOOD(:)/PTSTEP,ZIF_MAX(:))
 !
   IF(IO%CISBA == 'DIF')THEN
     ZDEPTH(:)=0.0
     DO JL=1,IO%NLAYER_HORT
       DO JJ=1,INJ
         IF(ZDEPTH(JJ)<XHORT_DEPTH)THEN
-          ZSOILMAX(JJ) = ZSOILMAX(JJ)+MAX(0.0,ZWSAT(JJ,JL)-PEK%XWG(JJ,JL))*PK%XDZG(JJ,JL)*XRHOLW/PTSTEP
+          ZSOILMAX(JJ) = ZSOILMAX(JJ)+MAX(0.0,ZWFC(JJ,JL)-PEK%XWG(JJ,JL))*PK%XDZG(JJ,JL)*XRHOLW/PTSTEP
           ZDEPTH  (JJ) = PK%XDG(JJ,JL)
         ENDIF
       ENDDO
@@ -412,7 +422,9 @@ IF(IO%LFLOOD)THEN
     ENDDO
   ENDIF
 !
-  DEK%XIFLOOD(:)=MIN(DEK%XIFLOOD(:),ZSOILMAX(:))
+  ZSOILMAX(:) = MIN(ZSOILMAX(:),ZIF_MAX(:))
+!
+  DEK%XIFLOOD(:) = MAX(0.0,(KK%XFFLOOD(:)-KK%XFSAT(:))) * MIN(ZPIFLDMAX(:),ZSOILMAX(:))
 !
 ELSE
 !
