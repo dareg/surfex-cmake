@@ -393,7 +393,15 @@ IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',0,ZHOOK_HANDLE)
 !*       0.     Initialize variables:
 !               ---------------------
 !
-
+IF (SIZE(PSNOWDEND)>1) THEN
+  PSNOWDEND(:,:)=XUNDEF
+  PSNOWSPHER(:,:)=XUNDEF
+  PSNOWSIZE(:,:)=XUNDEF
+  PSNOWSSA(:,:)=XUNDEF
+  PSNOWTYPEMEPRA(:,:)=XUNDEF
+  PSNOWRAM(:,:)=XUNDEF
+  PSNOWSHEAR(:,:)=XUNDEF
+ENDIF
 
 PFLSN_COR(:)   = 0.0
 PTHRUFAL(:)    = 0.0
@@ -694,6 +702,7 @@ ENDIF
                PSNOWHIST(JJ,JWRK)=XUNDEF
            END IF
          ENDIF
+         
       ENDDO
    ENDDO
 !
@@ -1209,13 +1218,6 @@ IF (HSNOW_ISBA=='CRO') THEN
   
   IF (SIZE(PSNOWDEND)>1) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
-    PSNOWDEND(:,:)=XUNDEF
-    PSNOWSPHER(:,:)=XUNDEF
-    PSNOWSIZE(:,:)=XUNDEF
-    PSNOWSSA(:,:)=XUNDEF
-    PSNOWTYPEMEPRA(:,:)=XUNDEF
-    PSNOWRAM(:,:)=XUNDEF
-    PSNOWSHEAR(:,:)=XUNDEF
     DO JWRK=1,KSIZE2
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)

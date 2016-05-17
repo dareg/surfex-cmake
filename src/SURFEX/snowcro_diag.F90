@@ -74,6 +74,15 @@ INTEGER::JJ,JST
 ! PRINT*,SIZE(PSNOWDEPTH_5DAYS),SIZE(PSNOWDEPTH_7DAYS)
 
 ! Initializations
+
+PSNOWDEND=XUNDEF
+PSNOWSPHER=XUNDEF
+PSNOWSIZE=XUNDEF
+PSNOWSSA=XUNDEF
+PSNOWTYPEMEPRA=XUNDEF
+PSNOWRAM=XUNDEF
+PSNOWSHEAR=XUNDEF
+
 PSNOWDEPTH_1DAYS=0.
 PSNOWDEPTH_3DAYS=0.
 PSNOWDEPTH_5DAYS=0.
@@ -92,43 +101,45 @@ GREFROZEN=.TRUE.
 DO JST=1,SIZE(PSNOWSWE,2)
   DO JJ=1,SIZE(PSNOWSWE,1)
     
-    ! For Crocus diagnostics we always work with depth projected on the vertical
-    ! The same correction is also done in diag_misc_isban for computing total SWE and SD
-    ZSNOWSWE(JJ,JST)=PSNOWSWE(JJ,JST)/PDIRCOSZW(JJ) 
-    PSNOWDZ(JJ,JST)=PSNOWDZ(JJ,JST)/PDIRCOSZW(JJ)
+    IF (PSNOWSWE(JJ,JST)>0) THEN
     
-    ZG1=PSNOWGRAN1(JJ,JST)/99.
-    ZRFIN=0.17*PSNOWRHO(JJ,JST)-31
+      ! For Crocus diagnostics we always work with depth projected on the vertical
+      ! The same correction is also done in diag_misc_isban for computing total SWE and SD
+      ZSNOWSWE(JJ,JST)=PSNOWSWE(JJ,JST)/PDIRCOSZW(JJ) 
+      PSNOWDZ(JJ,JST)=PSNOWDZ(JJ,JST)/PDIRCOSZW(JJ)
     
-    IF (PSNOWGRAN1(JJ,JST)>=0) THEN
-      ! Non dendritic case
-      ZG2=PSNOWGRAN2(JJ,JST)
+      ZG1=PSNOWGRAN1(JJ,JST)/99.
+      ZRFIN=0.17*PSNOWRHO(JJ,JST)-31
+    
+      IF (PSNOWGRAN1(JJ,JST)>=0) THEN
+        ! Non dendritic case
+        ZG2=PSNOWGRAN2(JJ,JST)
       
-      !Sphericity, dendricity, grain size
-      PSNOWDEND(JJ,JST)=0
-      PSNOWSPHER(JJ,JST)=ZG1
-      PSNOWSIZE(JJ,JST)=ZG2
+        !Sphericity, dendricity, grain size
+        PSNOWDEND(JJ,JST)=0
+        PSNOWSPHER(JJ,JST)=ZG1
+        PSNOWSIZE(JJ,JST)=ZG2
 
-      ! optical diameter
-      ZDIAM = PSNOWGRAN2(JJ,JST)*PSNOWGRAN1(JJ,JST)/XX + &
+        ! optical diameter
+        ZDIAM = PSNOWGRAN2(JJ,JST)*PSNOWGRAN1(JJ,JST)/XX + &
                 MAX( 0.0004, 0.5*PSNOWGRAN2(JJ,JST) ) * ( 1.-PSNOWGRAN1(JJ,JST)/XX ) 
-      ! MEPRA grain type
+        ! MEPRA grain type
       
-      ICLASS_HIST=NINT(PSNOWHIST(JJ,JST))+1 ! hist entre 0 et 5 iclass_hist entre 1 et 6
+        ICLASS_HIST=NINT(PSNOWHIST(JJ,JST))+1 ! hist entre 0 et 5 iclass_hist entre 1 et 6
 
-      IF (PSNOWSIZE(JJ,JST)<=0.5) THEN
-        ICLASS_SIZE=0
-      ELSEIF (PSNOWSIZE(JJ,JST)<=1.0) THEN
-        ICLASS_SIZE=1
-      ELSE 
-        ICLASS_SIZE=2
-      ENDIF
+        IF (PSNOWSIZE(JJ,JST)<=0.5) THEN
+          ICLASS_SIZE=0
+        ELSEIF (PSNOWSIZE(JJ,JST)<=1.0) THEN
+          ICLASS_SIZE=1
+        ELSE 
+          ICLASS_SIZE=2
+        ENDIF
       
-      ICLASS_SPHER=MIN(NINT(10*PSNOWSPHER(JJ,JST)),9)
+        ICLASS_SPHER=MIN(NINT(10*PSNOWSPHER(JJ,JST)),9)
       
-      ICLASS=ICLASS_HIST+ICLASS_SIZE*6+ICLASS_SPHER*18
+        ICLASS=ICLASS_HIST+ICLASS_SIZE*6+ICLASS_SPHER*18
       
-      PSNOWTYPEMEPRA(JJ,JST)=ICRIS_NONDEND1D(ICLASS)
+        PSNOWTYPEMEPRA(JJ,JST)=ICRIS_NONDEND1D(ICLASS)
 
 
         ! Ram resistance (non dendritic case)
@@ -151,105 +162,106 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ENDIF
       CASE (IFIN_AR,IGEL,IGOB_FON,IRON_ANG)
       
-        IF (LTHERM) THEN
-          PSNOWRAM(JJ,JST)=MAX(10.,0.103*PSNOWRHO(JJ,JST)-19.666)
-        ELSE
-          IF (PSNOWRHO(JJ,JST)<250) THEN
-            PSNOWRAM(JJ,JST)=1
+          IF (LTHERM) THEN
+            PSNOWRAM(JJ,JST)=MAX(10.,0.103*PSNOWRHO(JJ,JST)-19.666)
           ELSE
-            PSNOWRAM(JJ,JST)=MAX(2.,0.16*PSNOWRHO(JJ,JST)-54)
+            IF (PSNOWRHO(JJ,JST)<250) THEN
+              PSNOWRAM(JJ,JST)=1
+            ELSE
+              PSNOWRAM(JJ,JST)=MAX(2.,0.16*PSNOWRHO(JJ,JST)-54)
+            ENDIF
+          END IF
+      
+        CASE (IPL,IPL_GOB)
+          IF (PSNOWSIZE(JJ,JST)>0.8) THEN
+            PSNOWRAM(JJ,JST)=MAX(3.,ZRFIN)*(0.8-PSNOWSIZE(JJ,JST))+2*PSNOWSIZE(JJ,JST)
+          ELSE
+            PSNOWRAM(JJ,JST)=2
           ENDIF
-        END IF
-      
-      CASE (IPL,IPL_GOB)
-        IF (PSNOWSIZE(JJ,JST)>0.8) THEN
-          PSNOWRAM(JJ,JST)=MAX(3.,ZRFIN)*(0.8-PSNOWSIZE(JJ,JST))+2*PSNOWSIZE(JJ,JST)
-        ELSE
-          PSNOWRAM(JJ,JST)=2
-        ENDIF
-      CASE DEFAULT
-      END SELECT
+        CASE DEFAULT
+        END SELECT
 
-    ELSE
-      ! dendritic case
-      ZG2=PSNOWGRAN2(JJ,JST)/99.
+      ELSE
+        ! dendritic case
+        ZG2=PSNOWGRAN2(JJ,JST)/99.
       
-      !Sphericity, dendricity, grain size
-      PSNOWDEND(JJ,JST)=-ZG1
-      PSNOWSPHER(JJ,JST)=ZG2
-      PSNOWSIZE(JJ,JST)=XUNDEF
+        !Sphericity, dendricity, grain size
+        PSNOWDEND(JJ,JST)=-ZG1
+        PSNOWSPHER(JJ,JST)=ZG2
+        PSNOWSIZE(JJ,JST)=XUNDEF
 
-      ! optical diameter
-      ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
+        ! optical diameter
+        ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
               ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 ) 
-      ZDIAM = ZDIAM/10000.
+        ZDIAM = ZDIAM/10000.
 
-      ! MEPRA grain type
+        ! MEPRA grain type
 
-      ! Calcul différent dans le code snow_pro --> à vérifier avec original
-      ICLASS_DEND=INT(10*PSNOWDEND(JJ,JST))
-      ICLASS_SPHER=MIN(NINT(10*PSNOWSPHER(JJ,JST)),9)+1
+        ! Calcul différent dans le code snow_pro --> à vérifier avec original
+        ICLASS_DEND=INT(10*PSNOWDEND(JJ,JST))
+        ICLASS_SPHER=MIN(NINT(10*PSNOWSPHER(JJ,JST)),9)+1
       
-      ICLASS=ICLASS_SPHER+ICLASS_DEND*10
+        ICLASS=ICLASS_SPHER+ICLASS_DEND*10
       
-      PSNOWTYPEMEPRA(JJ,JST)=ICRIS_DEND1D(ICLASS)
+        PSNOWTYPEMEPRA(JJ,JST)=ICRIS_DEND1D(ICLASS)
 
-      ! Ram resistance (dendritic case)
-      ZRDEN=MAX(1.,0.018*PSNOWRHO(JJ,JST)-1.363)
-      ZRFGF=MAX(2.,ZRFIN*PSNOWSPHER(JJ,JST)+(1-PSNOWSPHER(JJ,JST))*(ZRFIN*(0.8-PSNOWSIZE(JJ,JST))+2*PSNOWSIZE(JJ,JST)))
-      PSNOWRAM(JJ,JST)=ZRDEN*PSNOWDEND(JJ,JST)+ZRFGF*(1-PSNOWDEND(JJ,JST))
+        ! Ram resistance (dendritic case)
+        ZRDEN=MAX(1.,0.018*PSNOWRHO(JJ,JST)-1.363)
+        ZRFGF=MAX(2.,ZRFIN*PSNOWSPHER(JJ,JST)+(1-PSNOWSPHER(JJ,JST))*(ZRFIN*(0.8-PSNOWSIZE(JJ,JST))+2*PSNOWSIZE(JJ,JST)))
+        PSNOWRAM(JJ,JST)=ZRDEN*PSNOWDEND(JJ,JST)+ZRFGF*(1-PSNOWDEND(JJ,JST))
 
-    ENDIF
+      ENDIF
 
-    ! All cases
-    ! Compute depth and SWE of recent snow
-    IF(PSNOWAGE(JJ,JST)<=1)THEN
-      PSNOWDEPTH_1DAYS(JJ)=PSNOWDEPTH_1DAYS(JJ)+PSNOWDZ(JJ,JST)
-      PSNOWSWE_1DAYS(JJ)=PSNOWSWE_1DAYS(JJ)+ZSNOWSWE(JJ,JST)
-    ENDIF
+      ! All cases
+      ! Compute depth and SWE of recent snow
+      IF(PSNOWAGE(JJ,JST)<=1)THEN
+        PSNOWDEPTH_1DAYS(JJ)=PSNOWDEPTH_1DAYS(JJ)+PSNOWDZ(JJ,JST)
+        PSNOWSWE_1DAYS(JJ)=PSNOWSWE_1DAYS(JJ)+ZSNOWSWE(JJ,JST)
+      ENDIF
 
-    IF(PSNOWAGE(JJ,JST)<=3)THEN
-      PSNOWDEPTH_3DAYS(JJ)=PSNOWDEPTH_3DAYS(JJ)+PSNOWDZ(JJ,JST)    
-      PSNOWSWE_3DAYS(JJ)=PSNOWSWE_3DAYS(JJ)+ZSNOWSWE(JJ,JST)
-    ENDIF
+      IF(PSNOWAGE(JJ,JST)<=3)THEN
+        PSNOWDEPTH_3DAYS(JJ)=PSNOWDEPTH_3DAYS(JJ)+PSNOWDZ(JJ,JST)    
+        PSNOWSWE_3DAYS(JJ)=PSNOWSWE_3DAYS(JJ)+ZSNOWSWE(JJ,JST)
+      ENDIF
     
-    IF(PSNOWAGE(JJ,JST)<=5)THEN
-      PSNOWDEPTH_5DAYS(JJ)=PSNOWDEPTH_5DAYS(JJ)+PSNOWDZ(JJ,JST)    
-      PSNOWSWE_5DAYS(JJ)=PSNOWSWE_5DAYS(JJ)+ZSNOWSWE(JJ,JST)
-    ENDIF
+      IF(PSNOWAGE(JJ,JST)<=5)THEN
+        PSNOWDEPTH_5DAYS(JJ)=PSNOWDEPTH_5DAYS(JJ)+PSNOWDZ(JJ,JST)    
+        PSNOWSWE_5DAYS(JJ)=PSNOWSWE_5DAYS(JJ)+ZSNOWSWE(JJ,JST)
+      ENDIF
   
-    IF(PSNOWAGE(JJ,JST)<=7)THEN
-      PSNOWDEPTH_7DAYS(JJ)=PSNOWDEPTH_7DAYS(JJ)+PSNOWDZ(JJ,JST)    
-      PSNOWSWE_7DAYS(JJ)=PSNOWSWE_7DAYS(JJ)+ZSNOWSWE(JJ,JST)
-    END IF
+      IF(PSNOWAGE(JJ,JST)<=7)THEN
+        PSNOWDEPTH_7DAYS(JJ)=PSNOWDEPTH_7DAYS(JJ)+PSNOWDZ(JJ,JST)    
+        PSNOWSWE_7DAYS(JJ)=PSNOWSWE_7DAYS(JJ)+ZSNOWSWE(JJ,JST)
+      END IF
     
-    ! Ram sonde penetration
-    IF ((GRAM(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
-      PSNOWRAM_SONDE(JJ)=PSNOWRAM_SONDE(JJ)+PSNOWDZ(JJ,JST)
-    ELSE
-      GRAM(JJ)=.FALSE.
-    ENDIF
+      ! Ram sonde penetration
+      IF ((GRAM(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
+        PSNOWRAM_SONDE(JJ)=PSNOWRAM_SONDE(JJ)+PSNOWDZ(JJ,JST)
+      ELSE
+        GRAM(JJ)=.FALSE.
+      ENDIF
 
-    ! Depth of wet snow
-    IF ((GWET(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
-      PSNOW_WETTHICKNESS(JJ)=PSNOW_WETTHICKNESS(JJ)+PSNOWDZ(JJ,JST)
-    ELSE
-      GWET(JJ)=.FALSE.
-    ENDIF
-    ! Depth of refrozen snow
-    IF ((GREFROZEN(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
-      PSNOW_REFROZENTHICKNESS(JJ)=PSNOW_REFROZENTHICKNESS(JJ)+PSNOWDZ(JJ,JST)
-    ELSE
-      GREFROZEN(JJ)=.FALSE.
-    ENDIF    
+      ! Depth of wet snow
+      IF ((GWET(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
+        PSNOW_WETTHICKNESS(JJ)=PSNOW_WETTHICKNESS(JJ)+PSNOWDZ(JJ,JST)
+      ELSE
+        GWET(JJ)=.FALSE.
+      ENDIF
+      ! Depth of refrozen snow
+      IF ((GREFROZEN(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
+        PSNOW_REFROZENTHICKNESS(JJ)=PSNOW_REFROZENTHICKNESS(JJ)+PSNOWDZ(JJ,JST)
+      ELSE
+        GREFROZEN(JJ)=.FALSE.
+      ENDIF    
     
-    ! Specific surface area
-    IF ( HSNOWMETAMO=='B92' ) THEN
-      PSNOWSSA(JJ,JST) = 6. / (XRHOLI*ZDIAM)
-    ELSE
-      PSNOWSSA(JJ,JST) = 6. / (XRHOLI*PSNOWGRAN1(JJ,JST))
+      ! Specific surface area
+      IF ( HSNOWMETAMO=='B92' ) THEN
+        PSNOWSSA(JJ,JST) = 6. / (XRHOLI*ZDIAM)
+      ELSE
+        PSNOWSSA(JJ,JST) = 6. / (XRHOLI*PSNOWGRAN1(JJ,JST))
+      END IF
+
     END IF
-    
   END DO
 END DO
   
