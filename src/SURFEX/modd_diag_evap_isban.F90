@@ -82,22 +82,22 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XLETRGV       ! MEB: transpiration from understory vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLETRCV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLERGV        ! MEB: interception evaporation from understory vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLELITTER        ! MEB: interception evaporation from understory vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLELITTERI        ! MEB: interception evaporation from understory vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XDRIPLIT       ! 
-  REAL, POINTER, DIMENSION(:) :: XRRLIT         ! 
+  REAL, POINTER, DIMENSION(:) :: XLELITTER     ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLELITTERI    ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XDRIPLIT      ! 
+  REAL, POINTER, DIMENSION(:) :: XRRLIT        ! 
   REAL, POINTER, DIMENSION(:) :: XLERCV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLE_V_C       ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLE_G_C       ! MEB: latent heat flux from understory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLE_C_A       ! MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
-                                                 !      NOTE total latent heat flux to the atmosphere also possibly 
-                                                 !      includes a contribution from snow covering the canopy
+                                               !      NOTE total latent heat flux to the atmosphere also possibly 
+                                               !      includes a contribution from snow covering the canopy
   REAL, POINTER, DIMENSION(:) :: XLE_N_C       ! MEB: latent heat flux from the snow on the ground [W/m2]
-                                                 !      NOTE total latent heat flux from the snowpack
-                                                 !      possibly includes a contribution from snow covering the canopy
-  REAL, POINTER, DIMENSION(:) :: XEVAP_N_C      ! MEB: Total evap from snow on the ground to canopy air space  [kg/m2/s]
-  REAL, POINTER, DIMENSION(:) :: XEVAP_G_C      ! MEB: Total evap from ground to canopy air space [kg/m2/s]                                                 
-  REAL, POINTER, DIMENSION(:) :: XSWUP       ! MEB: net *total* (surface) upwelling shortwave radiation to atmosphere [W/m2]
+                                               !      NOTE total latent heat flux from the snowpack
+                                               !      possibly includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XEVAP_N_C     ! MEB: Total evap from snow on the ground to canopy air space  [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XEVAP_G_C     ! MEB: Total evap from ground to canopy air space [kg/m2/s]                                                 
+  REAL, POINTER, DIMENSION(:) :: XSWUP         ! MEB: net *total* (surface) upwelling shortwave radiation to atmosphere [W/m2]
 
   REAL, POINTER, DIMENSION(:) :: XSWNET_V      ! MEB: net vegetation canopy shortwave radiation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XSWNET_G      ! MEB: net ground shortwave radiation [W/m2]
@@ -111,18 +111,18 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XH_V_C        ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XH_G_C        ! MEB: sensible heat flux from understory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XH_C_A        ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
-                                                 !      NOTE total sensible heat flux to the atmosphere also possibly 
-                                                 !      includes a contribution from snow covering the canopy
+                                               !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                               !      includes a contribution from snow covering the canopy
   REAL, POINTER, DIMENSION(:) :: XH_N_C        ! MEB: sensible heat flux from the snow on the ground [W/m2]
-                                                 !      NOTE total sensible heat flux from the snowpack
-                                                 !      possibly includes a contribution from snow covering the canopy
+                                               !      NOTE total sensible heat flux from the snowpack
+                                               !      possibly includes a contribution from snow covering the canopy
   REAL, POINTER, DIMENSION(:) :: XSR_GN        ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
   REAL, POINTER, DIMENSION(:) :: XMELTCV       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
   REAL, POINTER, DIMENSION(:) :: XFRZCV        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
   REAL, POINTER, DIMENSION(:) :: XSWDOWN_GN    ! MEB: total shortwave radiation transmitted through the canopy
-                                                 !      reaching the snowpack/ground understory [W/m2]
+                                               !      reaching the snowpack/ground understory [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLWDOWN_GN    ! MEB: total shortwave radiation transmitted through and emitted by the canopy
-                                                 !      reaching the snowpack/ground understory (explicit part) [W/m2]
+                                               !      reaching the snowpack/ground understory (explicit part) [W/m2]
 !
   REAL, POINTER, DIMENSION(:) :: XDWG          ! liquid soil moisture time tendencies         (kg/m2/s)
   REAL, POINTER, DIMENSION(:) :: XDWGI         ! solid soil moisture time tendencies          (kg/m2/s)

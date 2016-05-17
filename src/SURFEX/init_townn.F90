@@ -131,7 +131,7 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
                        PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CTOWN=='TEB   ') THEN
   CALL INIT_TEB_n(DTCO, UG, U, TM%CHT, TM%DTT, TM%SB, TM%G, TM%TOP, &
-                  TM%TPN, TM%T, TM%TD, TM%BDD, TM%BOP, TM%DTB, TM%B,  &
+                  TM%TPN, TM%NT, TM%TD, TM%BDD, TM%BOP, TM%DTB, TM%B,  &
                   GDM, GRM, HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,   &
                   PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,         &
                   PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,     &

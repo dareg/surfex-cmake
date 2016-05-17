@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, T, TPN, BOP, B, TD, GDM, GRM, &
+SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, NT, TPN, BOP, B, TD, GDM, GRM, &
                            HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV,&
                            KSW, PTSUN, PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, &
                            PRHOA, PSV, PCO2, HSV, PRAIN, PSN, PLW, PDIR_SW, PSCA_SW,        &
@@ -52,7 +52,7 @@ USE MODD_CANOPY_n, ONLY: CANOPY_t
 USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
-USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_n, ONLY : TEB_NP_t
 USE MODD_SURFEX_n, ONLY : TEB_DIAG_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BEM_n, ONLY : BEM_t
@@ -109,7 +109,7 @@ TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
-TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_NP_t), INTENT(INOUT) :: NT
 !
 TYPE(TEB_DIAG_t), INTENT(INOUT) :: TD
 !
@@ -473,11 +473,11 @@ TOP%TTIME%TIME = TOP%TTIME%TIME + PTSTEP
 ZBEGIN_TRAFFIC_TIME = 21600.
 ZEND_TRAFFIC_TIME   = 64800.
 !
- CALL GOTO_WRAPPER_TEB_PATCH(1, T=T)
+ CALL GOTO_WRAPPER_TEB_PATCH(1, NT=NT)
 !
 WHERE( PTSUN>ZBEGIN_TRAFFIC_TIME  .AND.  PTSUN<ZEND_TRAFFIC_TIME  )
-  ZH_TRAFFIC  (:) = T%CUR%XH_TRAFFIC   (:)
-  ZLE_TRAFFIC (:) = T%CUR%XLE_TRAFFIC  (:)
+  ZH_TRAFFIC  (:) = NT%CUR%XH_TRAFFIC   (:)
+  ZLE_TRAFFIC (:) = NT%CUR%XLE_TRAFFIC  (:)
 ELSEWHERE
   ZH_TRAFFIC  (:) = 0.
   ZLE_TRAFFIC (:) = 0.   
@@ -491,12 +491,12 @@ END WHERE
 !-------------------------------------------------------------------------------------
 
 DO JTEB_P=1,TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, T=T)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_BLD,         T%CUR%XBLD         )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_BLD_HEIGHT,  T%CUR%XBLD_HEIGHT  )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_WL_O_HOR,    T%CUR%XWALL_O_HOR  )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_CAN_HW_RATIO,T%CUR%XCAN_HW_RATIO)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_Z0,          T%CUR%XZ0_TOWN     )
+  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, NT=NT)
+  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_BLD,         NT%CUR%XBLD         )
+  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_BLD_HEIGHT,  NT%CUR%XBLD_HEIGHT  )
+  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_WL_O_HOR,    NT%CUR%XWALL_O_HOR  )
+  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_CAN_HW_RATIO,NT%CUR%XCAN_HW_RATIO)
+  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_Z0,          NT%CUR%XZ0_TOWN     )
 END DO
 !
 IF (TOP%LCANOPY) THEN
@@ -515,8 +515,8 @@ IF (TOP%LCANOPY) THEN
       SB%XT(:,JLAYER) = PTA(:)
       SB%XQ(:,JLAYER) = PQA(:)
       SB%XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
-              * LOG( (          2.* T%CUR%XBLD_HEIGHT(:)/3.) / T%CUR%XZ0_TOWN(:))   &
-              / LOG( (PUREF(:)+ 2.* T%CUR%XBLD_HEIGHT(:)/3.) / T%CUR%XZ0_TOWN(:))
+              * LOG( (          2.* NT%CUR%XBLD_HEIGHT(:)/3.) / NT%CUR%XZ0_TOWN(:))   &
+              / LOG( (PUREF(:)+ 2.* NT%CUR%XBLD_HEIGHT(:)/3.) / NT%CUR%XZ0_TOWN(:))
     END  DO
     SB%XTKE(:,:) = 1.
   ENDIF
@@ -640,11 +640,11 @@ ELSE              ! no canopy case
   !* Without SBL scheme, canyon air is assumed at mid height
   ZU_LOWCAN = ZU_CANYON
 
-  CALL GOTO_WRAPPER_TEB_PATCH(1, T=T)
-  ZT_LOWCAN = T%CUR%XT_CANYON
-  ZQ_LOWCAN = T%CUR%XQ_CANYON
-  ZT_CANYON = T%CUR%XT_CANYON
-  ZQ_CANYON = T%CUR%XQ_CANYON
+  CALL GOTO_WRAPPER_TEB_PATCH(1, NT=NT)
+  ZT_LOWCAN = NT%CUR%XT_CANYON
+  ZQ_LOWCAN = NT%CUR%XQ_CANYON
+  ZT_CANYON = NT%CUR%XT_CANYON
+  ZQ_CANYON = NT%CUR%XQ_CANYON
 
   ZUREF     = PUREF
   ZZREF     = PZREF
@@ -667,14 +667,14 @@ ZEXNA     (:) = (ZPA(:)/XP00)**(XRD/XCPD)
 !
 DO JTEB_P = 1,TOP%NTEB_PATCH
 
-  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, B=B, DMTC=TD%DMTC, DMT=TD%DMT, T=T)
+  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, B=B, DMTC=TD%DMTC, DMT=TD%DMT, NT=NT)
   !
   ZT_CAN = ZT_CANYON
   ZQ_CAN = ZQ_CANYON
   !
   IF (TOP%LCANOPY) THEN
-    T%CUR%XT_CANYON(:) = ZT_CANYON(:)
-    T%CUR%XQ_CANYON(:) = ZQ_CANYON(:)
+    NT%CUR%XT_CANYON(:) = ZT_CANYON(:)
+    NT%CUR%XQ_CANYON(:) = ZQ_CANYON(:)
   END IF
   !
   ZLESN_RF(:) = 0.
@@ -685,7 +685,7 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
   ! Call the physical routines of TEB (including gardens & greenroofs)
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
-  CALL TEB_GARDEN(DTCO, G, TOP, T%CUR, BOP, B%CUR, TPN, TD%DMT%CUR, GDM, GRM, JTEB_P, &
+  CALL TEB_GARDEN(DTCO, G, TOP, NT%CUR, BOP, B%CUR, TPN, TD%DMT%CUR, GDM, GRM, JTEB_P, &
                   CIMPLICIT_WIND, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON, ZT_LOWCAN, ZQ_LOWCAN, &
                   ZU_LOWCAN, ZZ_LOWCAN, ZPEW_A_COEF, ZPEW_B_COEF, ZPEW_A_COEF_LOWCAN,     &
                   ZPEW_B_COEF_LOWCAN, PPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, PRHOA, PCO2, PLW, &
@@ -807,23 +807,23 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
     CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_UW_RF     , ZUW_RF)
     CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_DUWDU_RF  , ZDUWDU_RF)
     CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_H_WL      , 0.5*(TD%DMT%CUR%XH_WALL_A+TD%DMT%CUR%XH_WALL_B))
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_H_RF      , (TD%DMT%CUR%XH_ROOF + T%CUR%XH_INDUSTRY))
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_E_RF      , (TD%DMT%CUR%XLE_ROOF+ T%CUR%XLE_INDUSTRY)/XLVTT)
+    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_H_RF      , (TD%DMT%CUR%XH_ROOF + NT%CUR%XH_INDUSTRY))
+    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_E_RF      , (TD%DMT%CUR%XLE_ROOF+ NT%CUR%XLE_INDUSTRY)/XLVTT)
     !
     !-------------------------------------------------------------------------------------
     ! Computes the impact of canopy and surfaces on air
     !-------------------------------------------------------------------------------------
     !
-    ZAC_GRND    (:) = (T%CUR%XROAD(:)*ZAC_RD    (:) + T%CUR%XGARDEN(:)*ZAC_GD    (:)) / &
-                      (T%CUR%XROAD(:)+T%CUR%XGARDEN(:))
-    ZAC_GRND_WAT(:) = (T%CUR%XROAD(:)*ZAC_RD_WAT(:) + T%CUR%XGARDEN(:)*ZAC_GD_WAT(:)) / &
-                      (T%CUR%XROAD(:)+T%CUR%XGARDEN(:))
+    ZAC_GRND    (:) = (NT%CUR%XROAD(:)*ZAC_RD    (:) + NT%CUR%XGARDEN(:)*ZAC_GD    (:)) / &
+                      (NT%CUR%XROAD(:)+NT%CUR%XGARDEN(:))
+    ZAC_GRND_WAT(:) = (NT%CUR%XROAD(:)*ZAC_RD_WAT(:) + NT%CUR%XGARDEN(:)*ZAC_GD_WAT(:)) / &
+                      (NT%CUR%XROAD(:)+NT%CUR%XGARDEN(:))
     !
     CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_AC_GRND    , ZAC_GRND    )
     CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_AC_GRND_WAT, ZAC_GRND_WAT)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_U        , ZUW_GRND * (1.-T%CUR%XBLD))
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_T        , ZH_GRND  * (1.-T%CUR%XBLD)/XCPD/PRHOA)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_Q        , ZLE_GRND * (1.-T%CUR%XBLD)/XLVTT)
+    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_U        , ZUW_GRND * (1.-NT%CUR%XBLD))
+    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_T        , ZH_GRND  * (1.-NT%CUR%XBLD)/XCPD/PRHOA)
+    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_Q        , ZLE_GRND * (1.-NT%CUR%XBLD)/XLVTT)
     !
   END IF
   !
@@ -906,7 +906,7 @@ END IF
 PTSURF (:) = PTRAD         (:) ! Should be the surface effective temperature; not radative
 PZ0    (:) = ZAVG_Z0  (:) ! Should account for ISBA (greenroof and garden) Z0
 PZ0H   (:) = PZ0 (:) / 200.    ! Should account for ISBA (greenroof and garden) Z0
-PQSURF (:) = T%CUR%XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
+PQSURF (:) = NT%CUR%XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
 !
 !-------------------------------------------------------------------------------------
 ! Scalar fluxes:
@@ -1011,7 +1011,7 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_TEB_n(TD%O, TD%D, SB, T,TOP%LCANOPY, &
+ CALL DIAG_INLINE_TEB_n(TD%O, TD%D, SB, NT, TOP%LCANOPY, &
                         PTA, PTRAD, ZQA, PPA, PPS, PRHOA, PU, PV, ZWIND, PZREF, PUREF, &
                         ZAVG_CD, ZAVG_CDN, ZAVG_RI, ZAVG_CH, ZAVG_Z0, PTRAD, PEMIS,    &
                         PDIR_ALB, PSCA_ALB, PLW, ZDIR_SWB, ZSCA_SWB,  PSFTH, PSFTQ,    &
@@ -1023,9 +1023,9 @@ ENDIF
 !
 IF (.NOT. TOP%LCANOPY) THEN
   DO JTEB_P=1,TOP%NTEB_PATCH
-    CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, T=T)  
-    T%CUR%XT_CANYON(:) = ZAVG_T_CANYON(:)
-    T%CUR%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
+    CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, NT=NT)  
+    NT%CUR%XT_CANYON(:) = ZAVG_T_CANYON(:)
+    NT%CUR%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
   END DO
 END IF
 !          
@@ -1041,7 +1041,7 @@ IF (TD%DUT%LUTCI .AND. TD%O%N2M >0) THEN
       ZU_UTCI(JJ) = ZWIND(JJ)
     ENDIF
   ENDDO
- CALL UTCI_TEB(T%CUR, TD%DUT, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND, &
+ CALL UTCI_TEB(NT%CUR, TD%DUT, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND, &
                ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC,  &
                ZAVG_EMIT_LW_GRND, PLW, ZAVG_T_RAD_IND    )
  CALL UTCIC_STRESS(PTSTEP,TD%DUT%XUTCI_IN      ,TD%DUT%XUTCIC_IN      )

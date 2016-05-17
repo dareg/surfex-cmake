@@ -44,7 +44,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
@@ -56,7 +56,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling surf. schemes
 !
-TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 !*       0.2   Declarations of local variables
 !

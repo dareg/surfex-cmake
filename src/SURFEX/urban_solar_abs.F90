@@ -177,7 +177,7 @@
 !               ------------
 !
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_BEM_n, ONLY : BEM_1P_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_1P_t
 !
@@ -198,7 +198,7 @@ IMPLICIT NONE
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
               ! 'UNIF' : classical TEB version, all walls are identical
               ! 'TWO ' : the two opposite walls are different & receive different solar energy
-TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
 !

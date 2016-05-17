@@ -40,7 +40,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_BEM_n, ONLY : BEM_1P_t
 !
 USE MODD_TYPE_SNOW
@@ -61,7 +61,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 !
 REAL, DIMENSION(:), INTENT(IN) :: PEMIS_GARDEN   ! green area emissivity (snowfree)

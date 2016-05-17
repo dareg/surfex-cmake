@@ -55,7 +55,7 @@ USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
-USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_n, ONLY : TEB_NP_t
 !
 !
 !---------------------------------------------------------------------------
@@ -216,7 +216,7 @@ TYPE(CANOPY_t) :: SB
 TYPE(GRID_t) :: G
 TYPE(CH_TEB_t) :: CHT 
 TYPE(TEB_PANEL_t) :: TPN
-TYPE(TEB_t) :: T
+TYPE(TEB_NP_t) :: NT
 !
 TYPE(TEB_DIAG_t) :: TD
 !

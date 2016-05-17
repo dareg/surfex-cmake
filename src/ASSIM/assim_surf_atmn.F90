@@ -287,7 +287,7 @@ ELSEIF (KTILE==4) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_TOWN_n(U, TM%T, TM%TOP, HPROGRAM, KSIZE, ZP_PT2M, HTEST)
+  CALL ASSIM_TOWN_n(U, TM%NT, TM%TOP, HPROGRAM, KSIZE, ZP_PT2M, HTEST)
   
 ENDIF
 

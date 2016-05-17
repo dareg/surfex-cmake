@@ -50,7 +50,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_BEM_n, ONLY : BEM_1P_t
 !
 USE MODD_SNOW_PAR, ONLY : XZ0SN, XZ0HSN,                                    &
@@ -76,7 +76,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
 !
 REAL, DIMENSION(:),   INTENT(IN)    :: PT_LWCN  ! LWCN air temperature

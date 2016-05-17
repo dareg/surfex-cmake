@@ -61,7 +61,7 @@
 !               ------------
 !
 USE MODD_BEM_n, ONLY : BEM_1P_t
-USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_CSTS,ONLY : XSTEFAN
 USE MODD_SURF_PAR,ONLY : XUNDEF
@@ -74,7 +74,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(BEM_1P_t), INTENT(INOUT) :: B
-TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PLW_RAD  ! incoming LW radiation
 REAL, DIMENSION(:), INTENT(IN)  :: PEMIS_G  ! GARDEN area emissivity

@@ -48,7 +48,7 @@ SUBROUTINE ROOF_IMPL_COEF(T, PTSTEP, PTDEEP_A, PTDEEP_B)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_TEB_n, ONLY : TEB_1P_t
+USE MODD_TEB_n, ONLY : TEB_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -60,7 +60,7 @@ IMPLICIT NONE
 !
 !*      0.1    Declarations of arguments
 !
-TYPE(TEB_1P_t), INTENT(INOUT) :: T
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 REAL              ,   INTENT(IN)  :: PTSTEP      ! time step
 REAL, DIMENSION(:),   INTENT(OUT) :: PTDEEP_A, PTDEEP_B     

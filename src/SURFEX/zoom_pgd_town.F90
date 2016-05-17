@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_TOWN (B, DMTC, DMT, T, BOP, BDD, &
+      SUBROUTINE ZOOM_PGD_TOWN (B, DMTC, DMT, BOP, BDD, &
                                 DTB, DTCO, DTT, UG, U, IO, K, TG, TOP, &
                                 HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP,OGARDEN)
 !     ###########################################################
@@ -46,7 +46,6 @@
 !
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
-USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_K_t
@@ -75,7 +74,6 @@ IMPLICIT NONE
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMTC
 TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
-TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
@@ -110,7 +108,7 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_TOWN',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (U%CTOWN=='TEB   ') THEN
-  CALL ZOOM_PGD_TEB(B, DMTC, DMT, T, BOP, BDD, DTB, &
+  CALL ZOOM_PGD_TEB(B, DMTC, DMT, BOP, BDD, DTB, &
                     DTCO, DTT, UG, U, IO, K, TG, TOP,  &
                     HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP,OGARDEN)
 END IF
