@@ -4,6 +4,11 @@ use warnings;
 require Exporter;
 use Data::Dumper;
 
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
+#
 $Data::Dumper::Indent = 1;
 
 our($nest_par);
@@ -91,8 +96,6 @@ sub study{
     elsif(/^\t\t\t\t/) {
       $href->{indent}="                ";
     }
-
-    
 
     if($type_def) {
  #     $href->{content}='typedef';
@@ -321,7 +324,7 @@ CRACK:    {
       $exec=0;
       $decl=1;
     }
-#print "cont $content \n \n";
+#print STDERR "cont $content \n \n";
 #    print "BB $unit_count $content $_";
     if($content  eq 'unknown') {
       print STDERR "Failed to crack statement starting at line $href->{first_line}",
@@ -572,18 +575,31 @@ sub study_exec{
   elsif(/^$name\s*%\s*$name\s*=/o) {                     #ZMYTYPE%ICOMP = .....
     $$content='scal_assign';
   }
+  elsif(/^$name\s*%\s*$name\s*%\s*$name\s*=/o) {                     #ZMYTYPE%ICOMP = .....
+    $$content='scal_assign';
+  }  
+  elsif(/^$name\s*%\s*$name\s*%\s*$name\s*%\s*$name\s*=/o) {                     #ZMYTYPE%ICOMP = .....
+    $$content='scal_assign';
+  }    
+  
   elsif(/^$name\s*$nest_par\s*%\s*$name\s*=/o) {         #ZMYTYPE(JK)%ICOMP = .....
     $$content='array_assign';
   }
   elsif(/^$name\s*%\s*$name\s*$nest_par\s*=/o) {         #ZMYTYPE%ICOMP(JL) = .....
     $$content='array_assign';
   }
+  elsif(/^$name\s*%\s*$name\s*%\s*$name\s*$nest_par\s*=/o) {         #ZMYTYPE%ICOMP(JL) = .....
+    $$content='array_assign';
+  }
+  elsif(/^$name\s*%\s*$name\s*%\s*$name\s*%\s*$name\s*$nest_par\s*=/o) {         #ZMYTYPE%ICOMP(JL) = .....
+    $$content='array_assign';
+  }  
   elsif(/^($name\s*($nest_par)*\s*%\s*$name\s*($nest_par)* *)+=/o) { #ZMYTYPE(JK)%ICOMP(JL) = ...
     $$content='array_assign';
   }
   elsif(/^$name\s*($nest_par)($nest_par)\s*=/o) {        #CLNAME(JK)(1:5) = ......
     $$content='array_assign';
-  }
+  }    
 }
 #===================================================================================
 #sub get_indent {
@@ -1834,13 +1850,13 @@ sub parse_prog_unit {
       my $tstatm=$_;
       $tstatm=~ s/\!.*\n/\n/g;   
       $tstatm=~s/\s//g;
-      #print "ok1\n",$tstatm,"\n";
+      #print STDERR "ok1\n",$tstatm,"\n";
       if (/.+\((.+)\).+\((.+)\)/) {
-	      #print "block1\n";
+	      #  print STDERR "block1\n";
       	$tstatm=~s/.+\((.+)\).+\((.+)\)/$1,$2/;
 	}
 	else {
-		# print "block2\n";
+		#	 print  STDERR "block2\n";
 	 $tstatm=~s/.+\((.+)\)/$1/;
 	}
 #      $tstatm=~s/.+\((.+)\)/$1/;	

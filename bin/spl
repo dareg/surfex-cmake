@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/bin/ksh
+#MNH_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#MNH_LIC This is part of the Meso-NH software governed by the CeCILL-C licence
+#MNH_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#MNH_LIC for details. version 1.
 #set -x
 # HP-UX 10
 unset LANG
@@ -89,16 +93,16 @@ if [ "$DEBUGSCRIPT" = 'ON' ] ;then
 fi
 #--------------- 1.b arguments
 if [ $# -lt 1 ] ;then
-   echo "no input file specified">>"$OUTPUT"
+   echo "no input file specified">>$OUTPUT
    exit 1
 fi
 #--------------- 1.c local variables
 FILE=$1
 #--------------- 2. input file is saved to prevent a possible conflict
-cp "$FILE" "/tmp/splfile.${USER}.$$"
-SAVE=$(basename "$FILE" ".f90")
+cp $FILE /tmp/splfile.${USER}.$$
+SAVE=`basename $FILE .f90`
 REST=${SAVE}.f90$$
-mv "$FILE" "$REST"
+mv $FILE $REST
 #--------------- 3. this is the heart of it !
 # a. change all characters to uppercase
 # b. test if a PROGRAM file begins + begin if test is true
@@ -193,18 +197,6 @@ awk '
               n_unit=(n_unit) + 0
             }   
           }
-          { if((substr(u2,1,8)) == "FUNCTION" && 
-		substr(u1,1,1) != "C" && substr(u1,1,1) != "!")
-            { split(u3,p_name,"(");
-              l_name=(tolower(p_name[1]));
-              split((l_name),e_name,"$");
-              f_name=(e_name[1]) (e_name[2]) ".f90"; 
-              print (f_name); i_flag="bof";
-              print "!     ######spl" > (f_name);
-              n_unit=(n_unit) + 0
-            }   
-          }
-	  
         }
         else
         {
@@ -221,12 +213,8 @@ awk '
           { if((substr(u1,1,10)) == "SUBROUTINE")
             { n_unit=(n_unit) + 1 }
           }
-          { if((substr(u1,1,8)) == "FUNCTION" )
+          { if((substr(u1,1,8)) == "FUNCTION")
             { n_unit=(n_unit) + 1 }
-	  else
-          { if((substr(u2,1,8)) == "FUNCTION"  && 
-		substr(u1,1,1) != "C" && substr(u1,1,1) != "!" )
-            { n_unit=(n_unit) + 1 }}
           }
         }
       }
@@ -312,19 +300,19 @@ awk '
     { print $0 >>(f_name) }
 }
 
-' "/tmp/splfile.${USER}.$$"
-rm -f "/tmp/splfile.${USER}.$$"
+' /tmp/splfile.${USER}.$$ 
+rm -f /tmp/splfile.${USER}.$$
 #--------------- 4. it may be that a routine generates the same file name
 #                   than the initial input file. In this case, the input is
 #                   saved in $REST; otherwise we keep it in $FILE.
-rm "$REST"
+rm $REST
 exit
-if [ -f "$FILE" ] ;then
+if [ -f $FILE ] ;then
 #  echo "$FILE was rewritten by spl">>$OUTPUT
 #  echo "spl has however saved the old file in $REST">>$OUTPUT
    exit 1
-  rm "$REST"
+  rm $REST 
 else
-  rm "$REST"
-  mv "$REST" "$FILE"
+  rm $REST 
+  mv $REST $FILE
 fi
