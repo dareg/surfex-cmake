@@ -1,4 +1,8 @@
 #!/bin/sh
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 # ENVIRONEMMENT CONFIGURATION FOR MESONH                 #
@@ -72,6 +76,7 @@ export VERSION_CDF=${VERSION_CDF}
 #
 export VER_GRIBAPI=${VER_GRIBAPI}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI}
+export GRIB_DEFINITION_PATH=\${SRC_SURFEX}"/src/LIB/grib_api-1.9.9/definitions"
 #
 # Version of OASIS
 #
@@ -85,6 +90,10 @@ export VER_DRHOOK=${VER_DRHOOK}
 # Version of Def integer
 #
 export MNH_INT=${MNH_INT}
+#
+#
+export OMP_NUM_THREADS=1
+#
 ##########################################################
 ##########################################################
 ##########################################################
@@ -95,7 +104,7 @@ export MNH_INT=${MNH_INT}
 ##########################################################
 ##########################################################
 #
-export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}\${VER_USER:+-\${VER_USER}}-\${VER_MPI}-\${VER_OMP}-\${OPTLEVEL}"
+export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}-\${VER_MPI}-\${VER_OMP}-\${OPTLEVEL}\${VER_USER:+-\${VER_USER}}"
 #[ "x\${VER_USER}" != "x" ] && export XYZ="\${XYZ}-\${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
 export BIN_TOOLS=${BIN_TOOLS}
