@@ -481,7 +481,6 @@ DO JI=1,INI
 !  
      
      ID(:)=MAXLOC(PTAB_WTOP(JI,:),PTAB_WTOP(JI,:)<ZWSAT_AVG(JI))
-     IF (ID(1)==0) ID(1) = 2
 !   
      ZFDOWN=PTAB_FSAT(JI,ID(1))
      ZWDOWN=PTAB_WTOP(JI,ID(1))
