@@ -104,13 +104,13 @@ ZUNLOAD(:)     = 0.0
 WHERE(PWRVNMAX(:) == 0.0)
 !
    DEK%XSR_GN(:) = PEK%XWR(:)/PTSTEP    ! kg m-2 s-1
-   PEK%XWR(:)       = 0.0
+   PEK%XWR(:)    = 0.0
 
 ! for a totally buried canopy, the following are zero:
 
-   DEK%XMELTCV(:)     = 0.0
-   DEK%XFRZCV(:)      = 0.0
-   PSUBVCOR(:)    = 0.0
+   DEK%XMELT_CV(:) = 0.0
+   DEK%XFRZ_CV(:)  = 0.0
+   PSUBVCOR(:)     = 0.0
 !
 !
 ELSEWHERE
@@ -127,22 +127,22 @@ ELSEWHERE
    ZSRINT(:)      = MIN(PSR(:)*PTSTEP, ZSRINT(:))  ! kg m-2 
    ZWRVN(:)       = PEK%XWR(:) + ZSRINT(:)           ! kg m-2 
 
-   DEK%XSR_GN(:) = MAX(0.0, PSR(:) - ZSRINT(:)/PTSTEP) ! kg m-2 s-1
+   DEK%XSR_GN(:)  = MAX(0.0, PSR(:) - ZSRINT(:)/PTSTEP) ! kg m-2 s-1
 
 ! Sublimation: gain or loss
 ! NOTE for the rare case that sublimation exceeds snow mass (possible as traces of snow disappear)
 ! compute a mass correction to be removed from soil (to conserve mass): PSUBVCOR
 
-   ZSUB(:)        = DEK%XLESC(:)*(PTSTEP/PK%XLSTT(:))    ! kg m-2
+   ZSUB(:)        = DEK%XLES_CV(:)*(PTSTEP/PK%XLSTT(:))    ! kg m-2
    PSUBVCOR(:)    = MAX(0.0, ZSUB(:) - ZWRVN(:))/PTSTEP  ! kg m-2 s-1
    ZWRVN(:)       = MAX(0.0, ZWRVN(:) - ZSUB(:))         ! kg m-2
 
 ! Phase change: loss (melt of snow mass)
 
-   DEK%XMELTCV(:) = PTSTEP*MAX(0.0, PMELTVN(:))         ! kg m-2  
-   DEK%XMELTCV(:) = MIN(DEK%XMELTCV(:), ZWRVN(:))
-   ZWRVN(:)       = ZWRVN(:) - DEK%XMELTCV(:)
-   PEK%XWR(:)     = PEK%XWR(:)  + DEK%XMELTCV(:)        ! NOTE...liq reservoir can exceed maximum holding
+   DEK%XMELT_CV(:) = PTSTEP*MAX(0.0, PMELTVN(:))         ! kg m-2  
+   DEK%XMELT_CV(:) = MIN(DEK%XMELT_CV(:), ZWRVN(:))
+   ZWRVN(:)        = ZWRVN(:)    - DEK%XMELT_CV(:)
+   PEK%XWR(:)      = PEK%XWR(:)  + DEK%XMELT_CV(:)        ! NOTE...liq reservoir can exceed maximum holding
                                                         !        capacity here, but this is accounted for
                                                         !        in main prognostic PWRV routine.
 
@@ -151,30 +151,30 @@ ELSEWHERE
 ! estimation of water for freezing:
 ! Also, update liquid water stored on the canopy here:
 
-   DEK%XFRZCV(:)      = PTSTEP*MAX(0.0, -PMELTVN(:))        ! kg m-2  
-   DEK%XFRZCV(:)      = MIN(DEK%XFRZCV(:), MAX(0.0,PEK%XWR(:)-DEK%XLERCV(:)*(PTSTEP/PK%XLVTT(:))))
-   ZWRVN(:)       = ZWRVN(:) + DEK%XFRZCV(:)
-   PEK%XWR(:)        = PEK%XWR(:)  - DEK%XFRZCV(:)
+   DEK%XFRZ_CV(:) = PTSTEP*MAX(0.0, -PMELTVN(:))        ! kg m-2  
+   DEK%XFRZ_CV(:) = MIN(DEK%XFRZ_CV(:), MAX(0.0,PEK%XWR(:)-DEK%XLER_CV(:)*(PTSTEP/PK%XLVTT(:))))
+   ZWRVN(:)       = ZWRVN(:)   + DEK%XFRZ_CV(:)
+   PEK%XWR(:)     = PEK%XWR(:) - DEK%XFRZ_CV(:)
 
 ! Unloading (falling off branches, etc...): loss
 ! Note, the temperature effect is assumed to vanish for cold temperatures.
 
-   ZUNLOAD(:)     = MIN(ZWRVN(:), PEK%XWR(:)*( PVELC(:)*(PTSTEP/ZUNLOAD_V)          &
+   ZUNLOAD(:)    = MIN(ZWRVN(:), PEK%XWR(:)*( PVELC(:)*(PTSTEP/ZUNLOAD_V)          &
                      + MAX(0.0, PEK%XTV(:)-ZUNLOAD_TT)*(PTSTEP/ZUNLOAD_T) ))            ! kg m-2 
-   ZWRVN(:)       = ZWRVN(:) - ZUNLOAD(:)                                           ! kg m-2 
+   ZWRVN(:)      = ZWRVN(:) - ZUNLOAD(:)                                           ! kg m-2 
    DEK%XSR_GN(:) = DEK%XSR_GN(:) + ZUNLOAD(:)/PTSTEP
 
 ! Diagnostic updates:
 ! final phase change (units)
 
-   DEK%XMELTCV(:)     = DEK%XMELTCV(:)/PTSTEP ! kg m-2 s-1
-   DEK%XFRZCV(:)      = DEK%XFRZCV(:) /PTSTEP ! kg m-2 s-1
+   DEK%XMELT_CV(:) = DEK%XMELT_CV(:)/PTSTEP ! kg m-2 s-1
+   DEK%XFRZ_CV(:)  = DEK%XFRZ_CV(:) /PTSTEP ! kg m-2 s-1
 
 ! Prognostic Updates:
 
    PEK%XWR(:)       = ZWRVN(:)
 
-   PEK%XTV(:)         = PEK%XTV(:) + (DEK%XFRZCV(:) - DEK%XMELTCV(:))*(XLMTT*PTSTEP)/PCHEATV(:) ! K
+   PEK%XTV(:)         = PEK%XTV(:) + (DEK%XFRZ_CV(:) - DEK%XMELT_CV(:))*(XLMTT*PTSTEP)/PCHEATV(:) ! K
 
 END WHERE
 !

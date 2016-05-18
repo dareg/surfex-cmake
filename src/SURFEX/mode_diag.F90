@@ -499,20 +499,37 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DIAG:INIT_MEB_BUD',0,ZHOOK_HANDLE)
 !
-DEA%XLEVCV         = 0.0
-DEA%XLESC          = 0.0
-DEA%XLETRGV        = 0.0
-DEA%XLETRCV        = 0.0
-DEA%XLERGV         = 0.0
 DEA%XLELITTER      = 0.0
 DEA%XLELITTERI     = 0.0
 DEA%XDRIPLIT       = 0.0
 DEA%XRRLIT         = 0.0
-DEA%XLERCV         = 0.0
-DEA%XLE_C_A        = 0.0
-DEA%XLE_V_C        = 0.0
-DEA%XLE_G_C        = 0.0
-DEA%XLE_N_C        = 0.0
+!
+DEA%XLEV_CV        = 0.0
+DEA%XLES_CV        = 0.0
+DEA%XLETR_CV       = 0.0
+DEA%XLE_CV         = 0.0
+DEA%XH_CV          = 0.0
+DEA%XMELT_CV       = 0.0
+DEA%XFRZ_CV        = 0.0
+!
+DEA%XLETR_GV       = 0.0
+DEA%XLER_GV        = 0.0
+DEA%XLE_GV         = 0.0
+DEA%XH_GV          = 0.0
+!
+DEA%XLE_GN         = 0.0
+DEA%XEVAP_GN       = 0.0
+DEA%XH_GN          = 0.0
+DEA%XSR_GN         = 0.0
+DEA%XSWDOWN_GN     = 0.0
+DEA%XLWDOWN_GN     = 0.0
+!
+DEA%XEVAP_G        = 0.0
+DEA%XLE_CA         = 0.0
+DEA%XH_CA          = 0.0
+!
+DEA%XSWUP          = 0.0
+DEA%XLWUP          = 0.0
 !
 DEA%XSWNET_V       = 0.0
 DEA%XSWNET_G       = 0.0
@@ -521,15 +538,6 @@ DEA%XSWNET_NS      = 0.0
 DEA%XLWNET_V       = 0.0
 DEA%XLWNET_G       = 0.0
 DEA%XLWNET_N       = 0.0
-DEA%XSWDOWN_GN     = 0.0
-DEA%XLWDOWN_GN     = 0.0
-DEA%XH_V_C         = 0.0
-DEA%XH_G_C         = 0.0
-DEA%XH_C_A         = 0.0
-DEA%XH_N_C         = 0.0
-DEA%XSR_GN         = 0.0
-DEA%XMELTCV        = 0.0
-DEA%XFRZCV         = 0.0
 !
 IF (LHOOK) CALL DR_HOOK('MODE_DIAG:INIT_MEB_BUD',1,ZHOOK_HANDLE)
 !

@@ -433,9 +433,9 @@ IF(OMEB)THEN
   DEK%XLELITTER(:)  = 0.0
   DEK%XLELITTERI(:) = 0.0
 ELSE
-  ZVEG(:)      = PEK%XVEG(:)
-  DEK%XLESC(:) = 0.0
-  PEK%XWRVN(:) = 0.0   
+  ZVEG       (:) = PEK%XVEG(:)
+  DEK%XLES_CV(:) = 0.0
+  PEK%XWRVN  (:) = 0.0   
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation

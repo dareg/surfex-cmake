@@ -159,7 +159,7 @@ IF(OMEB)THEN
   ! so do NOT multiply by snow fraction.
   !
   DEK%XRN_SN_FR   (:) = DEK%XSWNET_V(:) + DEK%XSWNET_G(:) + DEK%XLWNET_V(:) + DEK%XLWNET_G(:)
-  DEK%XH_SN_FR    (:) = DEK%XH_V_C(:) + DEK%XH_G_C(:)
+  DEK%XH_SN_FR    (:) = DEK%XH_CV(:) + DEK%XH_GN(:)
   IF (OMEB_LITTER) THEN
     DEK%XLEG_SN_FR (:) = DEK%XLELITTER (:)
     DEK%XLEGI_SN_FR(:) = DEK%XLELITTERI(:)
@@ -170,17 +170,17 @@ IF(OMEB)THEN
     DEK%XLEGI_SN_FR(:) = DEK%XLEGI(:)
   ENDIF
 
-  DEK%XLEV_SN_FR (:) = DEK%XLEVCV (:)
-  DEK%XLETR_SN_FR(:) = DEK%XLETRCV(:) 
+  DEK%XLEV_SN_FR (:) = DEK%XLEV_CV (:)
+  DEK%XLETR_SN_FR(:) = DEK%XLETR_CV(:) 
   ! NOTE for now, this is same as total Ustar (includes snow)   
   DEK%XUSTAR_SN_FR(:) = PUSTAR       (:)        
   ! LER does not include intercepted snow sublimation
-  DEK%XLER_SN_FR  (:) = DEK%XLEVCV(:) - DEK%XLETRCV(:) 
+  DEK%XLER_SN_FR  (:) = DEK%XLEV_CV(:) - DEK%XLETR_CV(:) 
 
-  DEK%XLEI_SN_FR  (:) = DEK%XLEGI(:) + DEK%XLEI_FLOOD(:) + DEK%XLES(:) + DEK%XLESC(:)
+  DEK%XLEI_SN_FR  (:) = DEK%XLEGI(:) + DEK%XLEI_FLOOD(:) + DEK%XLES(:) + DEK%XLES_CV(:)
   ! LE includes intercepted snow sublimation
   DEK%XLE_SN_FR   (:) = DEK%XLEG_SN_FR(:) + DEK%XLEGI_SN_FR(:) + DEK%XLEV_SN_FR(:) + &
-                 DEK%XLESC(:) + DEK%XLE_FLOOD(:) + DEK%XLEI_FLOOD(:)
+                 DEK%XLES_CV(:) + DEK%XLE_FLOOD(:) + DEK%XLEI_FLOOD(:)
   DEK%XGFLUX_SN_FR(:) = DEK%XRN_SN_FR(:) - DEK%XH_SN_FR(:) - DEK%XLE_SN_FR(:)
   !
   PEMIST(:) = PEMIS(:)

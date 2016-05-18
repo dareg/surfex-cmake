@@ -76,53 +76,61 @@ TYPE DIAG_EVAP_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XGPP          ! Gross Primary Production                     (kgCO2/m2/s)
   REAL, POINTER, DIMENSION(:) :: XRESP_AUTO    ! Autotrophic respiration                      (kgCO2/m2/s)
   REAL, POINTER, DIMENSION(:) :: XRESP_ECO     ! Ecosystem respiration                        (kgCO2/m2/s)
-
-  REAL, POINTER, DIMENSION(:) :: XLEVCV        ! MEB: total evapotranspiration from vegetation canopy overstory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLESC         ! MEB: total snow sublimation from vegetation canopy overstory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLETRGV       ! MEB: transpiration from understory vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLETRCV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLERGV        ! MEB: interception evaporation from understory vegetation [W/m2]
+!
+!
   REAL, POINTER, DIMENSION(:) :: XLELITTER     ! MEB: interception evaporation from understory vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLELITTERI    ! MEB: interception evaporation from understory vegetation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XDRIPLIT      ! 
   REAL, POINTER, DIMENSION(:) :: XRRLIT        ! 
-  REAL, POINTER, DIMENSION(:) :: XLERCV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLE_V_C       ! MEB: latent heat flux from vegetation canopy overstory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLE_G_C       ! MEB: latent heat flux from understory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLE_C_A       ! MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
-                                               !      NOTE total latent heat flux to the atmosphere also possibly 
-                                               !      includes a contribution from snow covering the canopy
-  REAL, POINTER, DIMENSION(:) :: XLE_N_C       ! MEB: latent heat flux from the snow on the ground [W/m2]
-                                               !      NOTE total latent heat flux from the snowpack
-                                               !      possibly includes a contribution from snow covering the canopy
-  REAL, POINTER, DIMENSION(:) :: XEVAP_N_C     ! MEB: Total evap from snow on the ground to canopy air space  [kg/m2/s]
-  REAL, POINTER, DIMENSION(:) :: XEVAP_G_C     ! MEB: Total evap from ground to canopy air space [kg/m2/s]                                                 
+!
+  REAL, POINTER, DIMENSION(:) :: XLEV_CV        ! MEB: total evapotranspiration from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLES_CV        ! XLESC MEB: total snow sublimation from vegetation canopy overstory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLETR_CV       ! MEB: transpiration from overstory canopy vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLER_CV        ! MEB: interception evaporation from overstory canopy vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLE_CV         ! XLE_V_C MEB: latent heat flux from vegetation canopy overstory [W/m2]  
+  REAL, POINTER, DIMENSION(:) :: XH_CV          ! H_V_C MEB: sensible heat flux from vegetation canopy overstory [W/m2] 
+  REAL, POINTER, DIMENSION(:) :: XMELT_CV       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XFRZ_CV        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]  
+!
+  REAL, POINTER, DIMENSION(:) :: XLETR_GV       ! MEB: transpiration from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLER_GV        ! MEB: interception evaporation from understory vegetation [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLE_GV         ! LEG_C MEB: latent heat flux from understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XH_GV          ! H_G_C MEB: sensible heat flux from understory [W/m2]  
+!
+  REAL, POINTER, DIMENSION(:) :: XLE_GN         ! LE_N_C MEB: latent heat flux from the snow on the ground [W/m2]
+                                                !      NOTE total latent heat flux from the snowpack
+                                                !      possibly includes a contribution from snow covering the canopy  
+  REAL, POINTER, DIMENSION(:) :: XEVAP_GN       ! EVAP_N_C MEB: Total evap from snow on the ground to canopy air space  [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XH_GN          ! H_N_C MEB: sensible heat flux from the snow on the ground [W/m2]
+                                                !      NOTE total sensible heat flux from the snowpack
+                                                !      possibly includes a contribution from snow covering the canopy   
+  REAL, POINTER, DIMENSION(:) :: XSR_GN         ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XSWDOWN_GN     ! MEB: total shortwave radiation transmitted through the canopy
+                                                !      reaching the snowpack/ground understory [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLWDOWN_GN     ! MEB: total shortwave radiation transmitted through and emitted by the canopy
+                                                !      reaching the snowpack/ground understory (explicit part) [W/m2]                                               
+!
+  REAL, POINTER, DIMENSION(:) :: XEVAP_G        ! EVAP_G_C MEB: Total evap from ground to canopy air space [kg/m2/s]
+  REAL, POINTER, DIMENSION(:) :: XLE_CA         ! LE_C_A MEB: latent heat flux from canopy air space to the atmosphere [W/m2] 
+                                                !      NOTE total latent heat flux to the atmosphere also possibly 
+                                                !      includes a contribution from snow covering the canopy
+  REAL, POINTER, DIMENSION(:) :: XH_CA          ! H_C_A MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
+                                                !      NOTE total sensible heat flux to the atmosphere also possibly 
+                                                !      includes a contribution from snow covering the canopy
+                                       
+!
   REAL, POINTER, DIMENSION(:) :: XSWUP         ! MEB: net *total* (surface) upwelling shortwave radiation to atmosphere [W/m2]
+  REAL, POINTER, DIMENSION(:) :: XLWUP         ! MEB: net *total* (surface) upwelling longwave radiation to atmosphere [W/m2]     
 
   REAL, POINTER, DIMENSION(:) :: XSWNET_V      ! MEB: net vegetation canopy shortwave radiation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XSWNET_G      ! MEB: net ground shortwave radiation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XSWNET_N      ! MEB: net snow shortwave radiation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XSWNET_NS     ! MEB: net snow shortwave radiation for *surface* layer 
-                                                 !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLWUP          ! MEB: net *total* (surface) upwelling longwave radiation to atmosphere [W/m2]    
+                                               !     (i.e. net snow shortwave radiation less absorbed radiation) [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLWNET_V      ! MEB: net vegetation canopy longwave radiation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLWNET_G      ! MEB: net ground longwave radiation [W/m2]
   REAL, POINTER, DIMENSION(:) :: XLWNET_N      ! MEB: net snow longwave radiation [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XH_V_C        ! MEB: sensible heat flux from vegetation canopy overstory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XH_G_C        ! MEB: sensible heat flux from understory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XH_C_A        ! MEB: sensible heat flux from canopy air space to the atmosphere [W/m2] 
-                                               !      NOTE total sensible heat flux to the atmosphere also possibly 
-                                               !      includes a contribution from snow covering the canopy
-  REAL, POINTER, DIMENSION(:) :: XH_N_C        ! MEB: sensible heat flux from the snow on the ground [W/m2]
-                                               !      NOTE total sensible heat flux from the snowpack
-                                               !      possibly includes a contribution from snow covering the canopy
-  REAL, POINTER, DIMENSION(:) :: XSR_GN        ! MEB: snow unloading rate from the overstory reservoir [kg/m2/s]
-  REAL, POINTER, DIMENSION(:) :: XMELTCV       ! MEB: snow melt rate from the overstory snow reservoir [kg/m2/s]
-  REAL, POINTER, DIMENSION(:) :: XFRZCV        ! MEB: snow refreeze rate from the overstory snow reservoir [kg/m2/s]
-  REAL, POINTER, DIMENSION(:) :: XSWDOWN_GN    ! MEB: total shortwave radiation transmitted through the canopy
-                                               !      reaching the snowpack/ground understory [W/m2]
-  REAL, POINTER, DIMENSION(:) :: XLWDOWN_GN    ! MEB: total shortwave radiation transmitted through and emitted by the canopy
-                                               !      reaching the snowpack/ground understory (explicit part) [W/m2]
+!
 !
   REAL, POINTER, DIMENSION(:) :: XDWG          ! liquid soil moisture time tendencies         (kg/m2/s)
   REAL, POINTER, DIMENSION(:) :: XDWGI         ! solid soil moisture time tendencies          (kg/m2/s)
@@ -209,44 +217,46 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_EVAP_ISBA_N:DIAG_EVAP_ISBA_INIT",0,ZHOOK_HAND
 !
   NULLIFY(DE%XICEFLUX)  
 !
-  NULLIFY(DE%XLEVCV)
-  NULLIFY(DE%XLESC)
-  NULLIFY(DE%XLETRGV)
-  NULLIFY(DE%XLETRCV)
-  NULLIFY(DE%XLERGV)
-
   NULLIFY(DE%XLELITTER)
   NULLIFY(DE%XLELITTERI)
   NULLIFY(DE%XDRIPLIT)
   NULLIFY(DE%XRRLIT)
 
-  NULLIFY(DE%XLERCV)
-  NULLIFY(DE%XLE_V_C)
-  NULLIFY(DE%XLE_G_C)
-  NULLIFY(DE%XLE_C_A)
-  NULLIFY(DE%XLE_N_C)
-!
-  NULLIFY(DE%XEVAP_N_C)
-  NULLIFY(DE%XEVAP_G_C)
+  NULLIFY(DE%XLEV_CV)
+  NULLIFY(DE%XLES_CV)
+  NULLIFY(DE%XLETR_CV)
+  NULLIFY(DE%XLER_CV)
+  NULLIFY(DE%XLE_CV)
+  NULLIFY(DE%XH_CV)
+  NULLIFY(DE%XMELT_CV)
+  NULLIFY(DE%XFRZ_CV)  
 
+  NULLIFY(DE%XLETR_GV)
+  NULLIFY(DE%XLER_GV)
+  NULLIFY(DE%XLE_GV)  
+  NULLIFY(DE%XH_GV)  
+
+  NULLIFY(DE%XLE_GN)  
+  NULLIFY(DE%XEVAP_GN)
+  NULLIFY(DE%XH_GN)  
+  NULLIFY(DE%XSR_GN)  
+  NULLIFY(DE%XSWDOWN_GN)
+  NULLIFY(DE%XLWDOWN_GN)  
+
+  NULLIFY(DE%XEVAP_G)  
+  NULLIFY(DE%XLE_CA)
+  NULLIFY(DE%XH_CA)
+  
   NULLIFY(DE%XSWUP)
+  NULLIFY(DE%XLWUP)
+  
   NULLIFY(DE%XSWNET_V)
   NULLIFY(DE%XSWNET_G)
   NULLIFY(DE%XSWNET_N)
   NULLIFY(DE%XSWNET_NS)
-  NULLIFY(DE%XLWUP)
   NULLIFY(DE%XLWNET_V)
   NULLIFY(DE%XLWNET_G)
   NULLIFY(DE%XLWNET_N)
-  NULLIFY(DE%XSWDOWN_GN)
-  NULLIFY(DE%XLWDOWN_GN)
-  NULLIFY(DE%XH_V_C)
-  NULLIFY(DE%XH_G_C)
-  NULLIFY(DE%XH_C_A)
-  NULLIFY(DE%XH_N_C)
-  NULLIFY(DE%XSR_GN)
-  NULLIFY(DE%XMELTCV)
-  NULLIFY(DE%XFRZCV)
 !
   NULLIFY(DE%XDRIP)
   NULLIFY(DE%XIRRIG_FLUX)

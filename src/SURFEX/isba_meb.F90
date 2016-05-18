@@ -310,13 +310,13 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZLEG_DELTA           ! soi
 REAL, DIMENSION(SIZE(PPS))                         :: ZLEGI_DELTA          ! soil sublimation delta fn (-) 
 REAL, DIMENSION(SIZE(PPS))                         :: ZHSGL                ! surface halstead cofficient for bare soil (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZHSGF                ! surface halstead cofficient for bare soil ice  (-)
-REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_C_A            ! turb transfer coef between vegetation canopy air and atmosphere (kg/m2/s) 
+REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_CA             ! turb transfer coef between vegetation canopy air and atmosphere (kg/m2/s) 
 REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_N_A            ! ...between the snow on the ground and atmosphere    (kg/m2/s) 
-REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_G_C            ! ...between snow-free ground and canopy air     (kg/m2/s)    
-REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_N_C            ! ...between snow on the ground and canopy air   (kg/m2/s)     
+REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_GV             ! ...between snow-free ground and canopy air     (kg/m2/s)    
+REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_GN             ! ...between snow on the ground and canopy air   (kg/m2/s)     
 REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_VG_C           ! ...between vegetation canopy over snow-free ground and canopy air   (kg/m2/s) 
 REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_VN_C           ! ...between vegetation canopy over the snow on the ground and canopy air  (kg/m2/s)  
-REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_V_C            ! ...between vegetation canopy and canopy air  (kg/m2/s)               
+REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_CV             ! ...between vegetation canopy and canopy air  (kg/m2/s)               
 REAL, DIMENSION(SIZE(PPS))                         :: ZFLXC_MOM            ! Effective drag coefficient for momentum [kg/(m2 s)]    
 REAL, DIMENSION(SIZE(PPS))                         :: ZQSATG               ! saturation specific humidity for PEK%XTG (ground surface: kg kg-1)    
 REAL, DIMENSION(SIZE(PPS))                         :: ZQSATV               ! saturation specific humidity for PEK%XTV (vegetation canopy: kg kg-1) 
@@ -407,15 +407,14 @@ REAL, DIMENSION(:,:), ALLOCATABLE                  :: ZWSAT                ! Tem
 !
 ! Working sums for flux averaging over MEB time split
 !
-REAL, DIMENSION(SIZE(PPS))   :: ZH_SUM, ZH_C_A_SUM, ZH_N_A_SUM, ZH_V_C_SUM, ZH_G_C_SUM, &
-                                ZH_N_C_SUM, ZHSNOW_SUM, ZHPSNOW_SUM
+REAL, DIMENSION(SIZE(PPS))   :: ZH_SUM, ZH_CA_SUM, ZH_N_A_SUM, ZH_CV_SUM, ZH_GV_SUM, &
+                                ZH_GN_SUM, ZHSNOW_SUM, ZHPSNOW_SUM
 REAL, DIMENSION(SIZE(PPS))   :: ZHU_AGG_SUM, ZAC_AGG_SUM
 
-REAL, DIMENSION(SIZE(PPS))   :: ZLE_SUM, ZLE_C_A_SUM, ZLE_V_C_SUM, ZLE_G_C_SUM,           &
-                                ZLE_N_C_SUM, ZLETR_V_C_SUM, ZLEG_SUM,ZLEGI_SUM,ZLESFC_SUM,&
-                                ZLESFCI_SUM,                                              &
-                                ZLER_V_C_SUM, ZLE_FLOOD_SUM, ZLEI_FLOOD_SUM,              &
-                                ZLES_V_C_SUM, ZLETR_SUM, ZLER_SUM, ZLEV_SUM,              &
+REAL, DIMENSION(SIZE(PPS))   :: ZLE_SUM, ZLE_CA_SUM, ZLE_CV_SUM, ZLE_GV_SUM,              &
+                                ZLE_GN_SUM, ZLETR_CV_SUM, ZLEG_SUM,ZLEGI_SUM,ZLESFC_SUM,  &
+                                ZLESFCI_SUM, ZLER_CV_SUM, ZLE_FLOOD_SUM, ZLEI_FLOOD_SUM,  &
+                                ZLES_CV_SUM, ZLETR_SUM, ZLER_SUM, ZLEV_SUM,               &
                                 ZLEI_SUM, ZLES3L_SUM, ZLEL3L_SUM, ZEVAP3L_SUM,            &
                                 ZUSTAR2_SUM, ZUSTAR2SNOW_SUM, ZCDSNOW_SUM,                &
                                 ZCHSNOW_SUM, ZRISNOW_SUM, ZEVAP_SUM
@@ -711,7 +710,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
                  PZREF, PUREF, PDIRCOSZW, ZPSNCV, ZDELTA, ZVELC,     &
                  PRISNOW, ZUSTAR2SNOW, ZHUGI, ZHVG,                  &
                  ZHVN, ZLEG_DELTA, ZLEGI_DELTA, ZHSGL, ZHSGF,        &
-                 ZFLXC_C_A, ZFLXC_N_A, ZFLXC_G_C, ZFLXC_N_C,         &
+                 ZFLXC_CA, ZFLXC_N_A, ZFLXC_GV, ZFLXC_GN,            &
                  ZFLXC_VG_C, ZFLXC_VN_C, ZFLXC_MOM, ZQSATG, ZQSATV,  &
                  ZQSATC, ZQSATN, ZDELTAVK )
 !
@@ -730,9 +729,9 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
                      ZTHRMA_TG, ZTHRMB_TG, ZTHRMA_TV, ZTHRMB_TV, ZTHRMA_TN,      &
                      ZTHRMB_TN, ZQSATG, ZQSATV, ZQSATN, PPALPHAN, ZPSNCV,        &
                      ZCHEATV, ZCHEATG, ZCHEATN, ZLEG_DELTA, ZLEGI_DELTA, ZHUGI,  &
-                     ZHVG, ZHVN, ZFROZEN1SFC, ZFLXC_C_A, ZFLXC_G_C, ZFLXC_VG_C,  &
-                     ZFLXC_VN_C, ZFLXC_N_C, ZFLXC_N_A, ZFLXC_MOM, ZTGL,          &
-                     ZFLXC_V_C, ZHVGS, ZHVNS, ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,       &
+                     ZHVG, ZHVN, ZFROZEN1SFC, ZFLXC_CA, ZFLXC_GV, ZFLXC_VG_C,    &
+                     ZFLXC_VN_C, ZFLXC_GN, ZFLXC_N_A, ZFLXC_MOM, ZTGL,           &
+                     ZFLXC_CV, ZHVGS, ZHVNS, ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,        &
                      ZTA_IC, ZQA_IC, ZUSTAR2_IC, ZVMOD, ZDELTAT_G, ZDELTAT_V,    &
                      ZDELTAT_N, PGRNDFLUX, PDEEP_FLUX, PDELHEATV_SFC,            &
                      PDELHEATG_SFC, PDELHEATG                              )
@@ -748,8 +747,8 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
                         ZTHRMB_TC, ZTHRMA_TG, ZTHRMB_TG, ZTHRMA_TV, ZTHRMB_TV,   &
                         ZTHRMA_TN, ZTHRMB_TN,  ZQSATG, ZQSATV, ZQSATN, PPALPHAN, &
                         ZPSNCV, ZFROZEN1SFC, ZLEG_DELTA, ZLEGI_DELTA, ZHUGI,     &
-                        ZHVG, ZHVN, ZFLXC_C_A, ZFLXC_G_C, ZFLXC_VG_C, ZFLXC_VN_C,&
-                        ZFLXC_N_C, ZFLXC_N_A, ZFLXC_MOM, ZFLXC_V_C, ZHVGS,       &
+                        ZHVG, ZHVN, ZFLXC_CA, ZFLXC_GV, ZFLXC_VG_C, ZFLXC_VN_C,  &
+                        ZFLXC_GN, ZFLXC_N_A, ZFLXC_MOM, ZFLXC_CV, ZHVGS,         &
                         ZHVNS, ZTGL, ZDQSAT_G, ZDQSAT_V, ZDQSATI_N, ZTA_IC,      &
                         ZQA_IC, ZDELTAVK, ZDELTAT_G, ZDELTAT_V, ZDELTAT_N,       &
                         ZSWUP, PSW_RAD, PLW_RAD, ZLWUP, ZH_N_A, ZEVAP_C_A,       &
@@ -759,7 +758,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEC+LES+LEL) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
 !
-   ZFLXC_C_A_F(:) = ZFLXC_C_A(:)*(1.0-PEK%XPSN(:)*PPALPHAN(:))
+   ZFLXC_C_A_F(:) = ZFLXC_CA (:)*(1.0-PEK%XPSN(:)*PPALPHAN(:))
    ZFLXC_N_A_F(:) = ZFLXC_N_A(:)*     PEK%XPSN(:)*PPALPHAN(:)
 
    PHU_AGG(:)     = (ZFLXC_C_A_F(:)*PEK%XQC(:)+ ZFLXC_N_A_F(:)*ZQSATN(:))/   &
@@ -814,7 +813,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PEK%XPSN(:))
 ! snowpack and part falling onto snow-free understory.
 !
 !
-CALL HYDRO_VEG(IO%CRAIN, PTSTEP, KK%XMUF, ZRR, DEK%XLEVCV, DEK%XLETRCV,          &
+CALL HYDRO_VEG(IO%CRAIN, PTSTEP, KK%XMUF, ZRR, DEK%XLEV_CV, DEK%XLETR_CV,          &
                ZVEGFACT, ZPSNCV, PEK%XWR, ZWRMAX, ZRRSFC, DEK%XDRIP, DEK%XRRVEG, &
                PK%XLVTT  )
 !
@@ -896,30 +895,33 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB:INIT_SUM_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
 !
 ! sensible heat fluxes:
 !
-ZH_SUM(:)        = 0.0
-ZH_C_A_SUM(:)    = 0.0
-ZH_N_A_SUM(:)    = 0.0
-ZH_V_C_SUM(:)    = 0.0
-ZH_G_C_SUM(:)    = 0.0
-ZH_N_C_SUM(:)    = 0.0
-ZHSNOW_SUM(:)    = 0.0
+ZH_SUM(:)       = 0.0
+ZH_N_A_SUM(:)   = 0.0
+ZH_CA_SUM(:)    = 0.0
+ZH_CV_SUM(:)    = 0.0
+ZH_GV_SUM(:)    = 0.0
+ZH_GN_SUM(:)    = 0.0
+ZHSNOW_SUM(:)   = 0.0
 !
 ! latent heat/water vapor fluxes:
 !
 ZLE_SUM(:)       = 0.0
-ZLE_C_A_SUM(:)   = 0.0
-ZLE_V_C_SUM(:)   = 0.0
-ZLE_G_C_SUM(:)   = 0.0
-ZLE_N_C_SUM(:)   = 0.0
-ZLETR_V_C_SUM(:) = 0.0
+!
+ZLE_CA_SUM(:)    = 0.0
+ZLE_CV_SUM(:)    = 0.0
+ZLE_GV_SUM(:)    = 0.0
+ZLE_GN_SUM(:)    = 0.0
+!
+ZLETR_CV_SUM(:)  = 0.0
+ZLER_CV_SUM(:)   = 0.0
+ZLES_CV_SUM(:)   = 0.0
+!
 ZLEG_SUM(:)      = 0.0
 ZLEGI_SUM(:)     = 0.0
 ZLESFC_SUM(:)    = 0.0
 ZLESFCI_SUM(:)   = 0.0
-ZLER_V_C_SUM(:)  = 0.0
 ZLE_FLOOD_SUM(:) = 0.0
 ZLEI_FLOOD_SUM(:)= 0.0
-ZLES_V_C_SUM(:)  = 0.0
 ZLETR_SUM(:)     = 0.0
 ZLER_SUM(:)      = 0.0
 ZLEV_SUM(:)      = 0.0
@@ -988,34 +990,38 @@ ZH_N_A_SUM(:) = ZH_N_A_SUM(:) + ZH_N_A(:)
 !
 ZH_SUM(:)     = ZH_SUM(:)     + DK%XH(:)
 !
-ZH_C_A_SUM(:) = ZH_C_A_SUM(:) + DEK%XH_C_A(:)
-ZH_V_C_SUM(:) = ZH_V_C_SUM(:) + DEK%XH_V_C(:)
-ZH_G_C_SUM(:) = ZH_G_C_SUM(:) + DEK%XH_G_C(:)
-ZH_N_C_SUM(:) = ZH_N_C_SUM(:) + DEK%XH_N_C(:)
+ZH_CA_SUM(:)  = ZH_CA_SUM(:)  + DEK%XH_CA(:)
+ZH_CV_SUM(:)  = ZH_CV_SUM(:)  + DEK%XH_CV(:)
+ZH_GV_SUM(:)  = ZH_GV_SUM(:)  + DEK%XH_GV(:)
+ZH_GN_SUM(:)  = ZH_GN_SUM(:)  + DEK%XH_GN(:)
 !
 ZHSNOW_SUM(:) = ZHSNOW_SUM(:) + DMK%XHSNOW(:)
 !
 ! latent heat/water vapor fluxes:
 !
-ZLE_SUM(:)  = ZLE_SUM(:)  + PEK%XLE(:)
+ZLE_SUM(:)   = ZLE_SUM(:)   + PEK%XLE(:)
 !
 ZLEI_SUM(:)  = ZLEI_SUM(:)  + DK%XLEI(:)
 ZEVAP_SUM(:) = ZEVAP_SUM(:) + DK%XEVAP(:)
 !
-ZLE_C_A_SUM(:)    = ZLE_C_A_SUM(:)    + DEK%XLE_C_A(:)
-ZLE_V_C_SUM(:)    = ZLE_V_C_SUM(:)    + DEK%XLE_V_C(:) 
-ZLE_G_C_SUM(:)    = ZLE_G_C_SUM(:)    + DEK%XLE_G_C(:) 
-ZLE_N_C_SUM(:)    = ZLE_N_C_SUM(:)    + DEK%XLE_N_C(:) 
-ZLETR_V_C_SUM(:)  = ZLETR_V_C_SUM(:)  + DEK%XLETRCV(:) 
+ZLE_CA_SUM(:)    = ZLE_CA_SUM(:)    + DEK%XLE_CA(:)
+ZLE_CV_SUM(:)    = ZLE_CV_SUM(:)    + DEK%XLE_CV(:) 
+ZLE_GV_SUM(:)    = ZLE_GV_SUM(:)    + DEK%XLE_GV(:) 
+ZLE_GN_SUM(:)    = ZLE_GN_SUM(:)    + DEK%XLE_GN(:) 
+!
+ZLETR_CV_SUM(:)  = ZLETR_CV_SUM(:)  + DEK%XLETR_CV(:)
+ZLER_CV_SUM(:)   = ZLER_CV_SUM(:)   + DEK%XLER_CV(:) 
+ZLES_CV_SUM(:)   = ZLES_CV_SUM(:)   + DEK%XLES_CV(:)
+!
+ZLETR_SUM(:)     = ZLETR_SUM(:)     + DEK%XLETR(:) 
+ZLER_SUM(:)      = ZLER_SUM(:)      + DEK%XLER(:)
+ZLEV_SUM(:)      = ZLEV_SUM(:)      + DEK%XLEV(:)
+!
 ZLEG_SUM(:)       = ZLEG_SUM(:)       + DEK%XLEG(:) 
 ZLEGI_SUM(:)      = ZLEGI_SUM(:)      + DEK%XLEGI(:) 
-ZLER_V_C_SUM(:)   = ZLER_V_C_SUM(:)   + DEK%XLERCV(:) 
+
 ZLE_FLOOD_SUM(:)  = ZLE_FLOOD_SUM(:)  + DEK%XLE_FLOOD(:)
 ZLEI_FLOOD_SUM(:) = ZLEI_FLOOD_SUM(:) + DEK%XLEI_FLOOD(:) 
-ZLES_V_C_SUM(:)   = ZLES_V_C_SUM(:)   + DEK%XLESC(:)
-ZLETR_SUM(:)      = ZLETR_SUM(:)      + DEK%XLETR(:) 
-ZLER_SUM(:)       = ZLER_SUM(:)       + DEK%XLER(:)
-ZLEV_SUM(:)       = ZLEV_SUM(:)       + DEK%XLEV(:)
 !
 ZLESFC_SUM(:)    = ZLESFC_SUM(:)    + ZLESFC(:) 
 ZLESFCI_SUM(:)   = ZLESFCI_SUM(:)   + ZLESFCI(:) 
@@ -1085,16 +1091,16 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB:AVG_FLUXES_MEB_TSPLIT ',0,ZHOOK_HANDLE)
 !
 ! sensible heat fluxes:
 !
-ZH_N_A(:)       = ZH_N_A_SUM(:) /JTSPLIT_EB
+ZH_N_A(:)    = ZH_N_A_SUM(:) /JTSPLIT_EB
 !
-DK%XH(:)      = ZH_SUM(:)     /JTSPLIT_EB
+DK%XH(:)     = ZH_SUM(:)     /JTSPLIT_EB
 !
-DEK%XH_C_A(:) = ZH_C_A_SUM(:) /JTSPLIT_EB
-DEK%XH_V_C(:) = ZH_V_C_SUM(:) /JTSPLIT_EB
-DEK%XH_G_C(:) = ZH_G_C_SUM(:) /JTSPLIT_EB
-DEK%XH_N_C(:) = ZH_N_C_SUM(:) /JTSPLIT_EB
+DEK%XH_CA(:) = ZH_CA_SUM(:)  /JTSPLIT_EB
+DEK%XH_CV(:) = ZH_CV_SUM(:)  /JTSPLIT_EB
+DEK%XH_GV(:) = ZH_GV_SUM(:)  /JTSPLIT_EB
+DEK%XH_GN(:) = ZH_GN_SUM(:)  /JTSPLIT_EB
 !
-DMK%XHSNOW(:)  = ZHSNOW_SUM(:) /JTSPLIT_EB
+DMK%XHSNOW(:) = ZHSNOW_SUM(:) /JTSPLIT_EB
 !
 ! latent heat/water vapor fluxes:
 !
@@ -1105,20 +1111,24 @@ DK%XLEI(:)        = ZLEI_SUM(:)      /JTSPLIT_EB
 DK%XEVAP(:)       = ZEVAP_SUM(:)     /JTSPLIT_EB
 !
 PEK%XLE(:)        = ZLE_SUM(:)       /JTSPLIT_EB
-DEK%XLE_C_A(:)    = ZLE_C_A_SUM(:)   /JTSPLIT_EB
-DEK%XLE_V_C(:)    = ZLE_V_C_SUM(:)   /JTSPLIT_EB
-DEK%XLE_G_C(:)    = ZLE_G_C_SUM(:)   /JTSPLIT_EB
-DEK%XLE_N_C(:)    = ZLE_N_C_SUM(:)   /JTSPLIT_EB
-DEK%XLETRCV(:)    = ZLETR_V_C_SUM(:) /JTSPLIT_EB
-DEK%XLEG(:)       = ZLEG_SUM(:)      /JTSPLIT_EB
-DEK%XLEGI(:)      = ZLEGI_SUM(:)     /JTSPLIT_EB
-DEK%XLERCV(:)     = ZLER_V_C_SUM(:)  /JTSPLIT_EB
-DEK%XLE_FLOOD(:)  = ZLE_FLOOD_SUM(:) /JTSPLIT_EB
-DEK%XLEI_FLOOD(:) = ZLEI_FLOOD_SUM(:)/JTSPLIT_EB
-DEK%XLESC(:)      = ZLES_V_C_SUM(:)  /JTSPLIT_EB
+!
+DEK%XLE_CA(:)    = ZLE_CA_SUM(:)     /JTSPLIT_EB
+DEK%XLE_CV(:)    = ZLE_CV_SUM(:)     /JTSPLIT_EB
+DEK%XLE_GV(:)    = ZLE_GV_SUM(:)     /JTSPLIT_EB
+DEK%XLE_GN(:)    = ZLE_GN_SUM(:)     /JTSPLIT_EB
+!
+DEK%XLETR_CV(:)  = ZLETR_CV_SUM(:)   /JTSPLIT_EB
+DEK%XLER_CV(:)   = ZLER_CV_SUM(:)    /JTSPLIT_EB
+DEK%XLES_CV(:)   = ZLES_CV_SUM(:)   /JTSPLIT_EB
+!
 DEK%XLETR(:)      = ZLETR_SUM(:)     /JTSPLIT_EB
 DEK%XLER(:)       = ZLER_SUM(:)      /JTSPLIT_EB
 DEK%XLEV(:)       = ZLEV_SUM(:)      /JTSPLIT_EB
+!
+DEK%XLEG(:)       = ZLEG_SUM(:)      /JTSPLIT_EB
+DEK%XLEGI(:)      = ZLEGI_SUM(:)     /JTSPLIT_EB
+DEK%XLE_FLOOD(:)  = ZLE_FLOOD_SUM(:) /JTSPLIT_EB
+DEK%XLEI_FLOOD(:) = ZLEI_FLOOD_SUM(:)/JTSPLIT_EB
 DEK%XLES(:)       = ZLES3L_SUM(:)    /JTSPLIT_EB
 DEK%XLESL(:)      = ZLEL3L_SUM(:)    /JTSPLIT_EB
 !
@@ -1172,7 +1182,7 @@ DMK%XRNSNOW(:) = DEK%XSWNET_N(:) + DEK%XLWNET_N(:)
 !
 DK%XRN(:)     = ZRNET_V(:) + ZRNET_G(:) + DMK%XRNSNOW(:) 
 !
-DEK%XLEVCV(:)  = DEK%XLE_V_C(:) - DEK%XLESC(:)
+DEK%XLEV_CV(:)  = DEK%XLE_CV(:) - DEK%XLES_CV(:)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:AVG_FLUXES_MEB_TSPLIT ',1,ZHOOK_HANDLE)
 !
