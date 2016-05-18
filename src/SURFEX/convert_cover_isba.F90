@@ -308,7 +308,7 @@ IF (PRESENT(PALBUV_VEG)) THEN
 ENDIF
 !  
 ! parameters for "stress option"
-IF (HPHOTO == 'AST' .OR. HPHOTO == 'LST' .OR. HPHOTO == 'NIT' .OR.  HPHOTO == 'NCB')  THEN
+IF (HPHOTO /='NON' )  THEN
 
    IF (PRESENT(PGMES)) THEN
      IF (SIZE(PGMES)>0) CALL AV_PGD(DTCO, PGMES  ,PCOVER ,XDATA_GMES_ST  (:,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE)  
@@ -383,7 +383,7 @@ IF (PRESENT(OSTRESS)) THEN
   END IF
 END IF
 !
-IF (HPHOTO == 'LAI' .OR. HPHOTO == 'LST' .OR. HPHOTO == 'NIT')  THEN
+IF (HPHOTO == 'NIT' .OR. HPHOTO=='NCB')  THEN
    !
    ! date of seeding
    ! ---------------

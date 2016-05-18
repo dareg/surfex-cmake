@@ -49,7 +49,7 @@ ALLOCATE(PEK%XWG                     (KLU,KGROUND_LAYER      ))
 ALLOCATE(PEK%XWGI                    (KLU,KGROUND_LAYER      )) 
 ALLOCATE(PEK%XRESA                   (KLU                    )) 
 !
-! - Vegetation: Ags Prognostic (YPHOTO = 'LAI', 'LST', 'AGS' or 'LST')
+! - Vegetation: Ags Prognostic 
 !
 ALLOCATE(PEK%XAN                     (KLU                    )) 
 ALLOCATE(PEK%XANDAY                  (KLU                    )) 

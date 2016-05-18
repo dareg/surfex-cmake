@@ -70,9 +70,6 @@ INTEGER :: NGROUND_LAYER      ! number of ground layers
 !                             ! 'CO84' = Cosby et al. 1988 for BC
  CHARACTER(LEN=3) :: CPHOTO   ! type of photosynthesis
 !                             ! 'NON'
-!                             ! 'AGS'
-!                             ! 'LAI'
-!                             ! 'LST'
 !                             ! 'AST'
 !                             ! 'NIT'
 !                             ! 'NCB'

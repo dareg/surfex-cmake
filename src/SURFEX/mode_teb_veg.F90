@@ -81,18 +81,16 @@ IF (IO%CPHOTO/='NON') THEN
     P%XRE25(:)=3.6E-7
     PEK%XGC(:)=0.00025
   END WHERE
-  IF (IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='LAI') THEN
-    WHERE (PMASK(:)==0.) 
-      P%XDMAX(:)=0.1
-      PEK%XF2I(:)=0.3
+  WHERE (PMASK(:)==0.) 
+    P%XDMAX(:)=0.1
+    PEK%XF2I(:)=0.3
+  END WHERE
+  IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+    WHERE (PMASK(:)==0.)      
+      PEK%XCE_NITRO(:)=7.68
+      PEK%XCF_NITRO(:)=-4.33
+      PEK%XCNA_NITRO(:)=1.3
     END WHERE
-    IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
-      WHERE (PMASK(:)==0.)      
-        PEK%XCE_NITRO(:)=7.68
-        PEK%XCF_NITRO(:)=-4.33
-        PEK%XCNA_NITRO(:)=1.3
-      END WHERE
-    ENDIF
   ENDIF
 ENDIF
 IF(IO%CISBA/='DIF')THEN

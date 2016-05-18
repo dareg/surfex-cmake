@@ -199,7 +199,7 @@ TYPE DATA_ISBA_t
 !
 !-------------------------------------------------------------------------------
 !
-! - Vegetation: Ags Prognostic (YPHOTO = ('LAI', 'LST', 'NIT', or 'NCB') or prescribed (YPHOTO='NON', 'AGS' or 'AST')
+! - Vegetation: Ags Prognostic (YPHOTO = ('NIT' or 'NCB') or prescribed (YPHOTO='NON' or 'AST')
 !
   REAL, POINTER, DIMENSION(:,:,:)     :: XPAR_LAI          ! Leaf Area Index                         (m2/m2)
 !

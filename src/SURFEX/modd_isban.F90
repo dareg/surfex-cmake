@@ -363,7 +363,7 @@ REAL, POINTER, DIMENSION(:) :: XQC             ! canopy air specific humidity   
 !
 REAL, POINTER, DIMENSION(:)     :: XRESA         ! aerodynamic resistance                  (s/m)
 !
-! - Vegetation: Ags Prognostic (YPHOTO = 'AGS', 'LAI', 'AST', 'LST', 'NIT', 'NCB')
+! - Vegetation: Ags Prognostic (YPHOTO = 'AST', 'NIT', 'NCB')
 !
 REAL, POINTER, DIMENSION(:) :: XAN           ! net CO2 assimilation                    (mg/m2/s)
 REAL, POINTER, DIMENSION(:) :: XANDAY        ! daily net CO2 assimilation              (mg/m2)

@@ -122,11 +122,11 @@ ENDIF
       PEK%XLE   (:) = ZDEF
     END WHERE
     !
-    IF (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+    IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
       !
       WHERE (PMASK(:)==0.) PEK%XLAI(:) = ZDEF
       !
-    ELSE IF (IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='AST') THEN
+    ELSE IF (IO%CPHOTO=='AST') THEN
       !
       DO JL1=1,SIZE(PEK%XBIOMASS,2)
         WHERE (PMASK(:)==0.)

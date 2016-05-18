@@ -108,26 +108,17 @@ ENDIF
 IF (IO%CPHOTO/='NON') THEN
   ALLOCATE(PK%XRE25                   (ISIZE              )) 
   ALLOCATE(PK%XDMAX                   (ISIZE              ))  
-  ALLOCATE(PEK%XLAIMIN                 (ISIZE              )) 
-  ALLOCATE(PEK%XSEFOLD                 (ISIZE              )) 
-  ALLOCATE(PEK%XGMES                   (ISIZE              )) 
-  ALLOCATE(PEK%XGC                     (ISIZE              )) 
-  IF (IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='LAI') THEN
-    ALLOCATE(PEK%XF2I                    (ISIZE              ))
-    ALLOCATE(PEK%LSTRESS                 (ISIZE              )) 
-    IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
-      ALLOCATE(PEK%XCE_NITRO               (ISIZE              )) 
-      ALLOCATE(PEK%XCF_NITRO               (ISIZE              )) 
-      ALLOCATE(PEK%XCNA_NITRO              (ISIZE              ))  
-    ELSE
-      ALLOCATE(PEK%XCE_NITRO    (0))
-      ALLOCATE(PEK%XCF_NITRO    (0))
-      ALLOCATE(PEK%XCNA_NITRO   (0))
- 
-    ENDIF
+  ALLOCATE(PEK%XLAIMIN                (ISIZE              )) 
+  ALLOCATE(PEK%XSEFOLD                (ISIZE              )) 
+  ALLOCATE(PEK%XGMES                  (ISIZE              )) 
+  ALLOCATE(PEK%XGC                    (ISIZE              )) 
+  ALLOCATE(PEK%XF2I                   (ISIZE              ))
+  ALLOCATE(PEK%LSTRESS                (ISIZE              )) 
+  IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+    ALLOCATE(PEK%XCE_NITRO               (ISIZE              )) 
+    ALLOCATE(PEK%XCF_NITRO               (ISIZE              )) 
+    ALLOCATE(PEK%XCNA_NITRO              (ISIZE              ))  
   ELSE
-    ALLOCATE(PEK%XF2I   (0))
-    ALLOCATE(PEK%LSTRESS(0))
     ALLOCATE(PEK%XCE_NITRO    (0))
     ALLOCATE(PEK%XCF_NITRO    (0))
     ALLOCATE(PEK%XCNA_NITRO   (0))
@@ -135,29 +126,29 @@ IF (IO%CPHOTO/='NON') THEN
 ELSE
   ALLOCATE(PK%XRE25      (0))
   ALLOCATE(PK%XDMAX      (0))  
-  ALLOCATE(PEK%XLAIMIN    (0))
-  ALLOCATE(PEK%XSEFOLD    (0))  
-  ALLOCATE(PEK%XGMES      (0))
-  ALLOCATE(PEK%XGC        (0))
-  ALLOCATE(PEK%XF2I   (0))
-  ALLOCATE(PEK%LSTRESS(0))
-  ALLOCATE(PEK%XCE_NITRO    (0))
-  ALLOCATE(PEK%XCF_NITRO    (0))
-  ALLOCATE(PEK%XCNA_NITRO   (0))
+  ALLOCATE(PEK%XLAIMIN   (0))
+  ALLOCATE(PEK%XSEFOLD   (0))  
+  ALLOCATE(PEK%XGMES     (0))
+  ALLOCATE(PEK%XGC       (0))
+  ALLOCATE(PEK%XF2I      (0))
+  ALLOCATE(PEK%LSTRESS   (0))
+  ALLOCATE(PEK%XCE_NITRO (0))
+  ALLOCATE(PEK%XCF_NITRO (0))
+  ALLOCATE(PEK%XCNA_NITRO(0))
 ENDIF  
 !
 ! - Irrigation, seeding and reaping
 !
-IF (LAGRIP .AND. (IO%CPHOTO == 'LAI' .OR. IO%CPHOTO == 'LST' .OR. IO%CPHOTO == 'NIT' .OR. IO%CPHOTO == 'NCB'))  THEN
+IF (LAGRIP .AND. (IO%CPHOTO == 'NIT' .OR. IO%CPHOTO == 'NCB'))  THEN
   ALLOCATE(PEK%TSEED                  (ISIZE              )) 
   ALLOCATE(PEK%TREAP                  (ISIZE              )) 
-  ALLOCATE(PEK%XWATSUP                 (ISIZE              )) 
-  ALLOCATE(PEK%XIRRIG                  (ISIZE              ))
+  ALLOCATE(PEK%XWATSUP                (ISIZE              )) 
+  ALLOCATE(PEK%XIRRIG                 (ISIZE              ))
 ELSE
   ALLOCATE(PEK%TSEED     (0))
   ALLOCATE(PEK%TREAP     (0))
-  ALLOCATE(PEK%XWATSUP    (0))
-  ALLOCATE(PEK%XIRRIG     (0))        
+  ALLOCATE(PEK%XWATSUP   (0))
+  ALLOCATE(PEK%XIRRIG    (0))        
 ENDIF
 !
 ! - ISBA-DF scheme

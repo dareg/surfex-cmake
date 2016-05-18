@@ -79,7 +79,7 @@ USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
 !
 USE MODD_CSTS,           ONLY : XMD, XTT, XLVTT
 USE MODD_ISBA_PAR,       ONLY : XRS_MAX, XDENOM_MIN
-USE MODD_CO2V_PAR,       ONLY : XPARCF, XMCO2, XDMAX_AGS,       &
+USE MODD_CO2V_PAR,       ONLY : XPARCF, XMCO2,       &
                                 XDMAXX, XDMAXN, XAW, XBW, XASW                              
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_TRBE, NVT_BONE,   &
                                 NVT_TRBD, NVT_TEBE, NVT_TENE,   &
@@ -244,109 +244,96 @@ GHERB(:) = (PK%XVEGTYPE_PATCH(:,NVT_TEBD) + PK%XVEGTYPE_PATCH(:,NVT_TRBE) + PK%X
            +PK%XVEGTYPE_PATCH(:,NVT_BOBD) + PK%XVEGTYPE_PATCH(:,NVT_BOND) + PK%XVEGTYPE_PATCH(:,NVT_SHRB)<0.5)
 GWOOD      (:) = (.NOT.GHERB (:))
 !
-IF (IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='LAI') THEN
-  !
-  !  Compute conductance and assimilation of CO2: 
-  !
-  ZDMAX = XDMAX_AGS
-  !
-  ! Add soil moisture stress effect to leaf conductance:
-  !
-  ZGMEST(:) = ZGMEST(:) * PF2(:)
-  !
-ELSEIF (IO%CPHOTO=='AST' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
-  !
-  WHERE (PEK%XLAI(:)==XUNDEF) ZLAI(:)=0.0
-  !
-  !    See (Varlet-Granchet C., M. Chartier, G. Gosse,  and R. Bonhomme, 1981: 
-  !    Rayonnement utilise pour la photosynthese des vegetaux en
-  !    conditions naturelles: caracterisation et variations. 
-  !    Oecol. Plant. 2(16), 189-202.)
-  !
-  !-------------------------------------
-  ! Add soil moisture stress effect to leaf conductance:
-  ! OFFENSIVE and DEFENSIVE water stress response 
-  !  
-  ZDMAX(:)  = PDMAX(:)
-  !
-  GF2_INF_F2I(:) = (PF2(:)<PEK%XF2I(:))
-  !
-  ! -HERBACEOUS-
-  !
-  WHERE(GHERB(:).AND.PEK%LSTRESS(:))
-    ZDMAX(:) = XDMAXN
-  ENDWHERE
-  WHERE(GHERB(:).AND..NOT.PEK%LSTRESS(:))
-    ZDMAX(:) = XDMAXX
-  ENDWHERE
-  !
-  ! PAH and PBH are original coefficients of Calvet 2000
-  WHERE(GHERB(:).AND.(.NOT.GF2_INF_F2I(:)))
-    ZDMAXSTAR(:) = EXP((LOG(ZGMEST(:)*1000.)-PK%XAH(:))/PK%XBH(:))/1000.
-    ZDMAX(:) = ZDMAXSTAR(:) - (ZDMAXSTAR(:)-ZDMAX(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))
-  ENDWHERE
-  !
-  WHERE(GHERB(:))
-        ZGMEST(:) = EXP(PK%XAH(:)+PK%XBH(:)*LOG(ZDMAX(:)*1000.))/1000.
-  ENDWHERE
-  !
-  WHERE (GHERB(:).AND.GF2_INF_F2I(:).AND.PEK%LSTRESS(:))
-      ZGMEST(:) = ZGMEST(:) * PF2(:)/PEK%XF2I(:)
-  ENDWHERE
-  WHERE(GHERB(:).AND.GF2_INF_F2I(:).AND.(.NOT.PEK%LSTRESS(:)))
-      ZDMAX(:) = ZDMAX(:) * PF2(:)/PEK%XF2I(:)
-  ENDWHERE
-  !
-  ! to limit photosynthesis under wilting point
-  WHERE (GHERB(:).AND.(.NOT.PEK%LSTRESS(:)).AND.ZDMAX(:)<=XDMAXN)
-    ZDMAX(:)  = XDMAXN
-    ZGMEST(:) = (EXP(PK%XAH(:)+PK%XBH(:)*LOG(XDMAXN*1000.))/1000.)*PF2(:)/PEK%XF2I(:)
-  ENDWHERE
-  !
-  ! -WOODY but not tropical forest-
-  !
-  WHERE(GWOOD(:))
-    ZFZEROSTAR(:) = ( XAW  - LOG(ZGMEST(:)*1000.) )/XBW
-  ENDWHERE
-  !
-  WHERE (GWOOD(:).AND.PEK%LSTRESS(:))
-    ZGMESTN(:) = ZGMEST(:)
-  ENDWHERE
-  WHERE(GWOOD(:).AND.(.NOT.PEK%LSTRESS(:)))
-    ZGMESTN(:) = EXP(XASW - XBW*ZFZEROSTAR(:))/1000.
-  ENDWHERE
-  !
-  WHERE (GWOOD(:).AND.GF2_INF_F2I(:)) 
-    ZGMESTN(:) = ZGMESTN(:)*PF2(:)/PEK%XF2I(:)
-  ENDWHERE
-  !
-  WHERE(GWOOD(:))
-    ZWORK  (:) = MAX( XDENOM_MIN, ZGMESTN(:) )
-    ZFZERON(:) = (XASW - LOG(ZWORK(:)*1000.))/XBW
-  ENDWHERE
-  !
-  WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.PEK%LSTRESS(:))
-    ZFZERO(:) = ZFZEROSTAR(:)
-    ZFZERO(:) = ZFZERO(:) - (ZFZERO(:)-ZFZERON(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))  
-  ENDWHERE    
-  WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.(.NOT.PEK%LSTRESS(:)))
-    ZFZERO(:) = ZFZEROSTAR(:)
-    ZGMEST(:) = ZGMEST(:) - (ZGMEST(:)-ZGMESTN(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))  
-  ENDWHERE    
-  !
-  WHERE(GWOOD(:).AND.GF2_INF_F2I(:))
-    ZFZERO(:) = MIN(.95, ZFZERON(:))
-    ZGMEST(:) = ZGMESTN(:)
-  ENDWHERE  
-  !
-  ! -Tropical Forest-
-  !
-  WHERE(GTROP(:))
-   ZFZERO(:) = PK%XFZERO(:)
-   ZGMEST(:) = PEK%XGMES(:)*PF2(:)
-  ENDWHERE
-  !
-ENDIF
+!
+WHERE (PEK%XLAI(:)==XUNDEF) ZLAI(:)=0.0
+!
+!    See (Varlet-Granchet C., M. Chartier, G. Gosse,  and R. Bonhomme, 1981: 
+!    Rayonnement utilise pour la photosynthese des vegetaux en
+!    conditions naturelles: caracterisation et variations. 
+!    Oecol. Plant. 2(16), 189-202.)
+!
+!-------------------------------------
+! Add soil moisture stress effect to leaf conductance:
+! OFFENSIVE and DEFENSIVE water stress response 
+!  
+ZDMAX(:)  = PDMAX(:)
+!
+GF2_INF_F2I(:) = (PF2(:)<PEK%XF2I(:))
+!
+! -HERBACEOUS-
+!
+WHERE(GHERB(:).AND.PEK%LSTRESS(:))
+  ZDMAX(:) = XDMAXN
+ENDWHERE
+WHERE(GHERB(:).AND..NOT.PEK%LSTRESS(:))
+  ZDMAX(:) = XDMAXX
+ENDWHERE
+!
+! PAH and PBH are original coefficients of Calvet 2000
+WHERE(GHERB(:).AND.(.NOT.GF2_INF_F2I(:)))
+  ZDMAXSTAR(:) = EXP((LOG(ZGMEST(:)*1000.)-PK%XAH(:))/PK%XBH(:))/1000.
+  ZDMAX(:) = ZDMAXSTAR(:) - (ZDMAXSTAR(:)-ZDMAX(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))
+ENDWHERE
+!
+WHERE(GHERB(:))
+  ZGMEST(:) = EXP(PK%XAH(:)+PK%XBH(:)*LOG(ZDMAX(:)*1000.))/1000.
+ENDWHERE
+!
+WHERE (GHERB(:).AND.GF2_INF_F2I(:).AND.PEK%LSTRESS(:))
+  ZGMEST(:) = ZGMEST(:) * PF2(:)/PEK%XF2I(:)
+ENDWHERE
+WHERE(GHERB(:).AND.GF2_INF_F2I(:).AND.(.NOT.PEK%LSTRESS(:)))
+  ZDMAX(:) = ZDMAX(:) * PF2(:)/PEK%XF2I(:)
+ENDWHERE
+!
+! to limit photosynthesis under wilting point
+WHERE (GHERB(:).AND.(.NOT.PEK%LSTRESS(:)).AND.ZDMAX(:)<=XDMAXN)
+  ZDMAX(:)  = XDMAXN
+  ZGMEST(:) = (EXP(PK%XAH(:)+PK%XBH(:)*LOG(XDMAXN*1000.))/1000.)*PF2(:)/PEK%XF2I(:)
+ENDWHERE
+!
+! -WOODY but not tropical forest-
+!
+WHERE(GWOOD(:))
+  ZFZEROSTAR(:) = ( XAW  - LOG(ZGMEST(:)*1000.) )/XBW
+ENDWHERE
+!
+WHERE (GWOOD(:).AND.PEK%LSTRESS(:))
+  ZGMESTN(:) = ZGMEST(:)
+ENDWHERE
+WHERE(GWOOD(:).AND.(.NOT.PEK%LSTRESS(:)))
+  ZGMESTN(:) = EXP(XASW - XBW*ZFZEROSTAR(:))/1000.
+ENDWHERE
+!
+WHERE (GWOOD(:).AND.GF2_INF_F2I(:)) 
+  ZGMESTN(:) = ZGMESTN(:)*PF2(:)/PEK%XF2I(:)
+ENDWHERE
+!
+WHERE(GWOOD(:))
+  ZWORK  (:) = MAX( XDENOM_MIN, ZGMESTN(:) )
+  ZFZERON(:) = (XASW - LOG(ZWORK(:)*1000.))/XBW
+ENDWHERE
+!
+WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.PEK%LSTRESS(:))
+  ZFZERO(:) = ZFZEROSTAR(:)
+  ZFZERO(:) = ZFZERO(:) - (ZFZERO(:)-ZFZERON(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))  
+ENDWHERE    
+WHERE(GWOOD(:).AND.(.NOT.GF2_INF_F2I(:)).AND.(.NOT.PEK%LSTRESS(:)))
+  ZFZERO(:) = ZFZEROSTAR(:)
+  ZGMEST(:) = ZGMEST(:) - (ZGMEST(:)-ZGMESTN(:))*(1.-PF2(:))/(1.-PEK%XF2I(:))  
+ENDWHERE    
+!
+WHERE(GWOOD(:).AND.GF2_INF_F2I(:))
+  ZFZERO(:) = MIN(.95, ZFZERON(:))
+  ZGMEST(:) = ZGMESTN(:)
+ENDWHERE  
+!
+! -Tropical Forest-
+!
+WHERE(GTROP(:))
+ ZFZERO(:) = PK%XFZERO(:)
+ ZGMEST(:) = PEK%XGMES(:)*PF2(:)
+ENDWHERE
 !
 !-------------------------
 !

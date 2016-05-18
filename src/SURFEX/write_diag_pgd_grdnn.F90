@@ -95,7 +95,7 @@ CALL INIT_IO_SURF_n(DTCO, U,   HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !
 !* Leaf Area Index
 !
-IF (IO%CPHOTO=='NON' .OR. IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='AST') THEN
+IF (IO%CPHOTO=='NON' .OR. IO%CPHOTO=='AST') THEN
   !
   YRECFM='GD_LAI'
   YCOMMENT='leaf area index (-)'

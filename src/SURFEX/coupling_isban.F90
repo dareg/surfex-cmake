@@ -400,7 +400,7 @@ ISWB = KSW
 !
 !* irrigation
 !
-IF (LAGRIP .AND. (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT'.OR. IO%CPHOTO=='NCB') ) THEN
+IF (LAGRIP .AND. (IO%CPHOTO=='NIT'.OR. IO%CPHOTO=='NCB') ) THEN
    CALL IRRIGATION_UPDATE(NAG, NPE, IO%NPATCH, PTSTEP, KMONTH, KDAY, PTIME  )  
 ENDIF
 !
@@ -501,7 +501,7 @@ GUPDATED=.FALSE.
 !
 IF (IO%LVEGUPD) THEN
   GALB = .FALSE. 
-  IF (IO%CPHOTO=='LAI'.OR.IO%CPHOTO=='LST'.OR.IO%CPHOTO=='NIT'.OR.IO%CPHOTO=='NCB') GALB = .TRUE.
+  IF (IO%CPHOTO=='NIT'.OR.IO%CPHOTO=='NCB') GALB = .TRUE.
   DO JP = 1,IO%NPATCH
     CALL VEGETATION_UPDATE(DTCO, DTI, IG%NDIM, IO, NK%AL(JP), NP%AL(JP), NPE%AL(JP), JP, &
                          PTSTEP, S%TTIME, S%XCOVER, S%LCOVER,  LAGRIP,                   &
@@ -967,7 +967,7 @@ END IF
 ! Vegetation evolution for interactive LAI
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
   CALL VEGETATION_EVOL(IO, DTI, PK, PEK, LAGRIP, PTSTEP, KMONTH, KDAY, PTIME, GK%XLAT, &
                        ZP_RHOA, ZP_CO2, ISSK, ZP_RESP_BIOMASS_INST,  &
                        ! add optional for accurate dependency to nitrogen

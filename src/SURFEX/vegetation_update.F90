@@ -151,7 +151,7 @@ IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
     !
   ELSEIF (.NOT.OALB .AND. (HSFTYPE=='GRD'.OR.HSFTYPE=='GNR') ) THEN
     !
-    CALL INIT_FROM_DATA_TEB_VEG_n(DTV, KK, PK, PEK, IDECADE, IO%CPHOTO, .FALSE., .FALSE., .TRUE., .FALSE. )
+    CALL INIT_FROM_DATA_TEB_VEG_n(DTV, KK, PK, PEK, IDECADE, .FALSE., .FALSE., .TRUE., .FALSE. )
     !
   ENDIF
   !
@@ -181,15 +181,13 @@ IF ( MOD(MIN(TTIME%TDATE%DAY,30),10)==1 .AND. TTIME%TIME - PTSTEP < 0.) THEN
         PEK%XSEFOLD    (:) = 90*86400.
         PEK%XGC        (:) = 0.00025                  
       END WHERE
-      IF (IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='LAI') THEN
-        WHERE (OABSENT(:)) PEK%XF2I(:) = 0.3
-        IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
-          WHERE (OABSENT(:))
-            PEK%XCE_NITRO  (:) = 7.68
-            PEK%XCF_NITRO  (:) = -4.33
-            PEK%XCNA_NITRO (:) = 1.3                      
-          END WHERE
-        ENDIF
+      WHERE (OABSENT(:)) PEK%XF2I(:) = 0.3
+      IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+        WHERE (OABSENT(:))
+          PEK%XCE_NITRO  (:) = 7.68
+          PEK%XCF_NITRO  (:) = -4.33
+          PEK%XCNA_NITRO (:) = 1.3                      
+        END WHERE
       ENDIF
     ENDIF
     !

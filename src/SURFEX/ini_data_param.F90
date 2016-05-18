@@ -537,7 +537,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
 !-------------------------------------------------------------------------------
 !*    7.13   e-folding time for senescence (days)
 !            ------------------------------------
-! parameters use in case HPHOTO == 'NONE' 'AGS' 'LAI'
+! parameters use in case HPHOTO == 'NONE'
     IF (PRESENT(PSEFOLD)) THEN
       PSEFOLD(JLOOP,:)=90. * XDAY
       IF(PTYPE(JLOOP,NVT_TEBD)>0. )  PSEFOLD(JLOOP,NVT_TEBD)= 365.* XDAY
@@ -560,7 +560,7 @@ DO JLOOP=1,SIZE(PTYPE,1)
       ENDIF    
     ENDIF    
 !
-! parameters use in case HPHOTO == 'AST','LST' 'NIT', 'NCB'
+! parameters use in case HPHOTO == 'AST', 'NIT', 'NCB'
 
     IF (PRESENT(PSEFOLD_ST)) THEN
       PSEFOLD_ST(JLOOP,:)=150. * XDAY

@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE INIT_FROM_DATA_TEB_VEG_n (DTV, K, P, PEK, KDECADE, HPHOTO, OUPDATE, OFIX, OTIME, OALB)    
+      SUBROUTINE INIT_FROM_DATA_TEB_VEG_n (DTV, K, P, PEK, KDECADE, OUPDATE, OFIX, OTIME, OALB)    
 !     ##############################################################
 !
 !!**** *CONVERT_COVER* convert surface cover classes into secondary 
@@ -57,7 +57,6 @@ IMPLICIT NONE
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 !
 INTEGER,                INTENT(IN)    :: KDECADE
- CHARACTER(LEN=*),       INTENT(IN)    :: HPHOTO  ! type of photosynthesis
 !
 LOGICAL, INTENT(IN) :: OUPDATE
 LOGICAL, INTENT(IN) :: OFIX

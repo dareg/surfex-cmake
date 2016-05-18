@@ -219,7 +219,7 @@ S%TTIME = TPTIME
 !
 GUPDATED=.FALSE.
 GALB = .FALSE. 
-IF (GDO%CPHOTO=='LAI'.OR.GDO%CPHOTO=='LST'.OR.GDO%CPHOTO=='NIT'.OR.GDO%CPHOTO=='NCB') GALB = .TRUE.
+IF (GDO%CPHOTO=='NIT'.OR.GDO%CPHOTO=='NCB') GALB = .TRUE.
 !
   CALL VEGETATION_UPDATE(DTCO, DTV, G%NDIM, GDO, K, P, PEK, 1,              &
                          PTSTEP, S%TTIME, TOP%XCOVER, TOP%LCOVER,  .FALSE., &
@@ -262,7 +262,7 @@ ENDIF
 ! Vegetation evolution for interactive LAI
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-IF (GDO%CPHOTO=='LAI' .OR. GDO%CPHOTO=='LST' .OR. GDO%CPHOTO=='NIT') THEN
+IF (GDO%CPHOTO=='NIT') THEN
   CALL VEGETATION_EVOL(GDO, DTV, P, PEK, .FALSE., PTSTEP, TPTIME%TDATE%MONTH, TPTIME%TDATE%DAY, &
                        TPTIME%TIME, G%XLAT, PRHOA, PCO2, YSS, ZRESP_BIOMASS_INST )         
 END IF

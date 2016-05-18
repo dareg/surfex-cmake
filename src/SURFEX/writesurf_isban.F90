@@ -203,7 +203,7 @@ ENDIF
 !
 !* Leaf Area Index
 !
-IF (IO%CPHOTO/='NON' .AND. IO%CPHOTO/='AGS' .AND. IO%CPHOTO/='AST') THEN
+IF (IO%CPHOTO/='NON' .AND. IO%CPHOTO/='AST') THEN
   !
   YRECFM='LAI'
   !

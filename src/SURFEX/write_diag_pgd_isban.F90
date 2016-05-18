@@ -127,7 +127,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
 !
 !* Leaf Area Index
 !
-IF (IO%CPHOTO=='NON' .OR. IO%CPHOTO=='AGS' .OR. IO%CPHOTO=='AST') THEN
+IF (IO%CPHOTO=='NON' .OR. IO%CPHOTO=='AST') THEN
   !
   YRECFM='LAI'
   YCOMMENT='leaf area index (-)'
@@ -566,7 +566,7 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
-IF (LAGRIP .AND. (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') ) THEN
+IF (LAGRIP .AND. (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') ) THEN
 !
 !* seeding and reaping
 !

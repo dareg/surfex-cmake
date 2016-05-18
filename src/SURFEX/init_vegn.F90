@@ -97,7 +97,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_VEG_n',0,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 !* z0 and vegetation fraction estimated from LAI if not imposed
-IF (IO%CPHOTO=='LAI' .OR. IO%CPHOTO=='LST' .OR. IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
+IF (IO%CPHOTO=='NIT' .OR. IO%CPHOTO=='NCB') THEN
   DO JI=1,PK%NSIZE_P    
     IF(PEK%XLAI(JI)/=XUNDEF) THEN
       PEK%XLAI (JI) = MAX(PEK%XLAIMIN(JI),PEK%XLAI(JI))
