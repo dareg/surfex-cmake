@@ -477,8 +477,8 @@ PATCH_LOOP: DO JP=1,IO%NPATCH
   ENDIF
 #endif
   CALL TREAT_PATCH(NK%AL(JP), NP%AL(JP), NPE%AL(JP), NISS%AL(JP), NAG%AL(JP), &
-                   NIG%AL(JP), NCHI%AL(JP), NDST%AL(JP), ID%DP%AL(JP), ID%DPC%AL(JP), &
-                   ID%DEP%AL(JP), ID%DEPC%AL(JP), ID%DMP%AL(JP), NGB%AL(JP)  )
+                   NIG%AL(JP), NCHI%AL(JP), NDST%AL(JP), ID%ND%AL(JP), ID%NDC%AL(JP), &
+                   ID%NDE%AL(JP), ID%NDEC%AL(JP), ID%NDM%AL(JP), NGB%AL(JP)  )
 !
 ENDDO PATCH_LOOP
 !
@@ -577,17 +577,17 @@ PTRAD = S%XTSRAD_NAT
 !
 ! Any additional diagnostics (stored in MODD_DIAG_ISBA_n)
 !
- CALL AVERAGE_DIAG_ISBA_n(ID%O, ID%D, ID%DC, ID%DP, ID%DPC, NP, IO%NPATCH, &
+ CALL AVERAGE_DIAG_ISBA_n(ID%O, ID%D, ID%DC, ID%ND, ID%NDC, NP, IO%NPATCH, &
                           ID%O%LSURF_BUDGETC, IO%LCANOPY, PUREF, PZREF, PSFCO2, PTRAD)
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
- CALL AVERAGE_DIAG_EVAP_ISBA_n(ID%O%LSURF_BUDGETC, ID%DE, ID%DEC, ID%DEP, ID%DEPC, NP,  &
+ CALL AVERAGE_DIAG_EVAP_ISBA_n(ID%O%LSURF_BUDGETC, ID%DE, ID%DEC, ID%NDE, ID%NDEC, NP,  &
                                IO%NPATCH, IO%LGLACIER, IO%LMEB_PATCH, PTSTEP, PRAIN, PSNOW)
 !
 ! Miscellaneous diagnostics (stored in MODD_DIAG_MISC_ISBA_n)
 !
- CALL AVERAGE_DIAG_MISC_ISBA_n(ID%DM, ID%DMP, IO, NP, NPE)
+ CALL AVERAGE_DIAG_MISC_ISBA_n(ID%DM, ID%NDM, IO, NP, NPE)
 !
 !--------------------------------------------------------------------------------------
 !

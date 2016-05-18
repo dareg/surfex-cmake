@@ -38,7 +38,7 @@ SUBROUTINE BEM_MORPHO(PBLD, PWALL_O_HOR, PBLD_HEIGHT, PWALL_O_BLD, B)
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 IMPLICIT NONE
 !
@@ -49,7 +49,7 @@ REAL, DIMENSION(:),   INTENT(IN)  :: PBLD         ! Urban horizontal building de
 REAL, DIMENSION(:),   INTENT(IN)  :: PWALL_O_HOR  ! Wall to horizontal surface ratio
 REAL, DIMENSION(:),   INTENT(IN)  :: PBLD_HEIGHT  ! Average building height [m]
 REAL, DIMENSION(:),   INTENT(OUT) :: PWALL_O_BLD  ! wall surface per ground building surface [m2(wall)/m2(bld)]
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 !*      0.2    Declarations of local variables 
 !

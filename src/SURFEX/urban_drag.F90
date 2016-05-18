@@ -70,7 +70,7 @@
 !
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,ONLY : XLVTT, XPI, XCPD, XG, XKARMAN
@@ -89,7 +89,7 @@ IMPLICIT NONE
 !
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct

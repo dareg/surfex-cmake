@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #############################
-      SUBROUTINE AVERAGE_DIAG_MISC_ISBA_n (DM, DMP, IO, NP, NPE)
+      SUBROUTINE AVERAGE_DIAG_MISC_ISBA_n (DM, NDM, IO, NP, NPE)
 !     #############################
 !
 !
@@ -48,7 +48,7 @@
 !               ------------
 !
 !
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_PATCH_t
+USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_NP_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t, ISBA_NP_t, ISBA_NPE_t
 !
@@ -65,7 +65,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DM
-TYPE(DIAG_MISC_ISBA_PATCH_t), INTENT(INOUT) :: DMP
+TYPE(DIAG_MISC_ISBA_NP_t), INTENT(INOUT) :: NDM
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
@@ -120,7 +120,7 @@ ZSNOW   (:)=0.0
 !
 DO JP=1,IO%NPATCH
   PK => NP%AL(JP)
-  DMK => DMP%AL(JP)
+  DMK => NDM%AL(JP)
   PEK => NPE%AL(JP)
 
   DO JI=1,PK%NSIZE_P
@@ -205,7 +205,7 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
 !    
   ZPOND(:,:)=0.0
   DO JP=1,IO%NPATCH   
-    DMK => DMP%AL(JP)
+    DMK => NDM%AL(JP)
     PK => NP%AL(JP)
     PEK => NPE%AL(JP)
 
@@ -263,7 +263,7 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
     DO JP=1,IO%NPATCH
       PK => NP%AL(JP)
       PEK => NPE%AL(JP)
-      DMK => DMP%AL(JP)
+      DMK => NDM%AL(JP)
 
       DO JI=1,PK%NSIZE_P
         IMASK = PK%NR_P(JI)
@@ -320,7 +320,7 @@ ELSE ! Force-restore case
   DO JP=1,IO%NPATCH
     PK => NP%AL(JP)
     PEK => NPE%AL(JP)
-    DMK => DMP%AL(JP)
+    DMK => NDM%AL(JP)
 
     DO JI=1,PK%NSIZE_P
       IMASK = PK%NR_P(JI)    
@@ -344,7 +344,7 @@ ELSE ! Force-restore case
 !          
     ZPOND(:,:)=0.0
     DO JP=1,IO%NPATCH
-      DMK => DMP%AL(JP)
+      DMK => NDM%AL(JP)
       PK => NP%AL(JP)
       PEK => NPE%AL(JP)    
      

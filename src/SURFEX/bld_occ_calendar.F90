@@ -21,7 +21,7 @@ SUBROUTINE BLD_OCC_CALENDAR(TPTIME, PTSUN, T, B, PQIN_FRAC, PTCOOL_TARGET, PTHEA
 !! Original  02/2013
 !
 USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
@@ -40,7 +40,7 @@ TYPE(DATE_TIME), INTENT(INOUT) :: TPTIME
 REAL,   DIMENSION(:) , INTENT(IN) :: PTSUN         ! current solar time  (s, UTC)
 !
 TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 REAL,                INTENT(IN)  :: PQIN_FRAC        ! Fraction of internal gains when unoccupied (-)
 !

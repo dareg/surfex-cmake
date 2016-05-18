@@ -130,11 +130,11 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
                        HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
                        PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CTOWN=='TEB   ') THEN
-  CALL INIT_TEB_n(DTCO, UG, U, TM%CHT, TM%DTT, TM%SB, TM%G, TM%TOP, &
-                  TM%TPN, TM%NT, TM%TD, TM%BDD, TM%BOP, TM%DTB, TM%B,  &
+  CALL INIT_TEB_n(DTCO, UG, U, TM%CHT, TM%DTT, TM%SB, TM%G, TM%TOP,     &
+                  TM%TPN, TM%NT, TM%TD, TM%BDD, TM%BOP, TM%DTB, TM%NB,  &
                   GDM, GRM, HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,   &
-                  PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,         &
-                  PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,     &
+                  PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,           &
+                  PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,       &
                   KDAY, PTIME, HATMFILE, HATMFILETYPE, 'OK'   )  
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_TOWN_N',1,ZHOOK_HANDLE)

@@ -38,10 +38,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 !
@@ -60,7 +57,7 @@ IMPLICIT NONE
 !              -------------------------------
 !
 !
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 !

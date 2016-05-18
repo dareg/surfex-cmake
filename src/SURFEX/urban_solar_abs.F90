@@ -178,8 +178,8 @@
 !
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_n, ONLY : BEM_1P_t
-USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 !
 USE MODD_CSTS,     ONLY : XPI
 USE MODD_BEM_CST,  ONLY : XWIN_SW_MAX
@@ -199,8 +199,8 @@ TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
               ! 'UNIF' : classical TEB version, all walls are identical
               ! 'TWO ' : the two opposite walls are different & receive different solar energy
 TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
-TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
+TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PDIR_SW           ! incoming direct solar radiation
 REAL, DIMENSION(:), INTENT(IN)    :: PSCA_SW           ! scattered incoming solar rad.

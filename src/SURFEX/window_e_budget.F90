@@ -57,7 +57,7 @@ SUBROUTINE WINDOW_E_BUDGET(B, PEMIS_WIN, PLW_W_TO_WIN, PLW_R_TO_WIN, PLW_G_TO_WI
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_CSTS,ONLY : XCPD, XSTEFAN
 USE MODE_CONV_DOE
@@ -68,7 +68,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PEMIS_WIN    ! window emissivity
 REAL, DIMENSION(:), INTENT(IN)    :: PLW_W_TO_WIN ! Radiative heat trasfer coeff window-wall outdoor

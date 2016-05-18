@@ -74,7 +74,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODI_LAYER_E_BUDGET_GET_COEF
 USE MODI_LAYER_E_BUDGET
@@ -87,7 +87,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 REAL,                 INTENT(IN)    :: PTSTEP       ! time step
 REAL, DIMENSION(:),   INTENT(OUT)  :: PFLX_BLD_FL !flux from building to floor

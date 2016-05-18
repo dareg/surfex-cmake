@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-     SUBROUTINE CH_DEP_ISBA(KK, PK, PEK, DK, DMK, CHIK, PUSTAR, PTA, PPA, PTRAD, KSIZE  )  
+     SUBROUTINE CH_DEP_ISBA(KK, PK, PEK, D, DM, CHIK, PUSTAR, PTA, PPA, PTRAD, KSIZE  )  
 !###########################################################                      
 !!
 !!    PURPOSE
@@ -59,8 +59,8 @@ TYPE(ISBA_P_t), INTENT(INOUT) :: PK
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHIK
 
-TYPE(DIAG_t), INTENT(INOUT) :: DK
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DM
 !
 REAL, DIMENSION(:),     INTENT(IN)  :: PUSTAR       ! friction velocity
 REAL, DIMENSION(:),     INTENT(IN)  :: PTA          ! air temperature forcing (K)
@@ -211,7 +211,7 @@ DO JI = 1, SIZE(PEK%XVEG)
   ZCOEF1(JI) = 1./298. - 1./PTA(JI)
   !
   ZDIFFMOLH2O(JI)  = 2.22E-05 + 1.46E-07 * (PTA(JI) * (PPA(JI)/XP00)**(XRD/XCPD) - 273.)  
-  ZCOEF2(JI) = DMK%XRS(JI) * ZDIFFMOLH2O(JI)
+  ZCOEF2(JI) = DM%XRS(JI) * ZDIFFMOLH2O(JI)
   !
   ZCOEF3(JI) = 1./ZLANDEXT(JI)
   !
@@ -282,7 +282,7 @@ DO JSV = 1, KSIZE
     !
     ZHENRYVALCOR(JI,JSV) = XSREALHENRYVAL(JSV,1) * EXP(XSREALHENRYVAL(JSV,2) * ZCOEF1(JI))
     !
-    IF (DMK%XRS(JI)>0.) THEN
+    IF (DM%XRS(JI)>0.) THEN
       ! 
       ZSTOMRC(JI,JSV) = ZCOEF2(JI) / ZDIFFMOLVAL(JI,JSV)   
       !
@@ -302,13 +302,13 @@ DO JSV = 1, KSIZE
     !        3.2.4 External leaf uptake resistance (Wesely, 1989)
     !              -------------------------------
     !
-    IF (DK%XHU(JI) >= 1.) THEN ! for dew-wetted surface
+    IF (D%XHU(JI) >= 1.) THEN ! for dew-wetted surface
       !
       ! compute Rext for any species exept O3
       ! taking acount of (Walmsley, Wesely, 95, technical note, Atm Env vol 30)
       ZEXTRC(JI,JSV) = 1./( ZCOEF3(JI) + 1.0E-7*ZHENRYVALCOR(JI,JSV) + ZVAR1(JSV) )
       !
-    ELSEIF ( DMK%XRS(JI) > 0. ) THEN
+    ELSEIF ( DM%XRS(JI) > 0. ) THEN
       !
       ZEXTRC(JI,JSV) = ZLANDEXT(JI) / ( 1.0E-5 * ZHENRYVALCOR(JI,JSV) + XSREALREACTVAL(JSV) )
       !

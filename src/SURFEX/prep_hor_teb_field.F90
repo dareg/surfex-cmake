@@ -30,7 +30,7 @@ SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, U, G, T, TOP, &
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!------------------------------------------------------------------
 !
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -79,7 +79,7 @@ INCLUDE "mpif.h"
 !*      0.1    declarations of arguments
 !
 !
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U

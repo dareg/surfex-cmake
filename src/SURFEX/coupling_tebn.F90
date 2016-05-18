@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, NT, TPN, BOP, B, TD, GDM, GRM, &
+SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, NT, TPN, BOP, NB, TD, GDM, GRM, &
                            HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV,&
                            KSW, PTSUN, PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, &
                            PRHOA, PSV, PCO2, HSV, PRAIN, PSN, PLW, PDIR_SW, PSCA_SW,        &
@@ -55,7 +55,7 @@ USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
 USE MODD_TEB_n, ONLY : TEB_NP_t
 USE MODD_SURFEX_n, ONLY : TEB_DIAG_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
-USE MODD_BEM_n, ONLY : BEM_t
+USE MODD_BEM_n, ONLY : BEM_NP_t
 !
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
@@ -72,7 +72,6 @@ USE MODE_DSLT_SURF
 USE MODE_THERMOS
 USE MODE_SBLS
 !
-USE MODI_GOTO_WRAPPER_TEB_PATCH
 USE MODI_AVERAGE_RAD
 USE MODI_SM10
 USE MODI_ADD_FORECAST_TO_DATE_SURF
@@ -114,7 +113,7 @@ TYPE(TEB_NP_t), INTENT(INOUT) :: NT
 TYPE(TEB_DIAG_t), INTENT(INOUT) :: TD
 !
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP 
-TYPE(BEM_t), INTENT(INOUT) :: B
+TYPE(BEM_NP_t), INTENT(INOUT) :: NB
 !
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
@@ -404,7 +403,7 @@ INTEGER                           :: JJ
 !
 ! number of TEB patches
 !
-INTEGER                    :: JTEB_P, IBEG, IEND ! loop counter
+INTEGER                    :: JP, IBEG, IEND ! loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -473,11 +472,9 @@ TOP%TTIME%TIME = TOP%TTIME%TIME + PTSTEP
 ZBEGIN_TRAFFIC_TIME = 21600.
 ZEND_TRAFFIC_TIME   = 64800.
 !
- CALL GOTO_WRAPPER_TEB_PATCH(1, NT=NT)
-!
 WHERE( PTSUN>ZBEGIN_TRAFFIC_TIME  .AND.  PTSUN<ZEND_TRAFFIC_TIME  )
-  ZH_TRAFFIC  (:) = NT%CUR%XH_TRAFFIC   (:)
-  ZLE_TRAFFIC (:) = NT%CUR%XLE_TRAFFIC  (:)
+  ZH_TRAFFIC  (:) = NT%AL(1)%XH_TRAFFIC   (:)
+  ZLE_TRAFFIC (:) = NT%AL(1)%XLE_TRAFFIC  (:)
 ELSEWHERE
   ZH_TRAFFIC  (:) = 0.
   ZLE_TRAFFIC (:) = 0.   
@@ -490,13 +487,12 @@ END WHERE
 ! Town averaged quantities to force canopy atmospheric layers
 !-------------------------------------------------------------------------------------
 
-DO JTEB_P=1,TOP%NTEB_PATCH
-  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, NT=NT)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_BLD,         NT%CUR%XBLD         )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_BLD_HEIGHT,  NT%CUR%XBLD_HEIGHT  )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_WL_O_HOR,    NT%CUR%XWALL_O_HOR  )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_CAN_HW_RATIO,NT%CUR%XCAN_HW_RATIO)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_Z0,          NT%CUR%XZ0_TOWN     )
+DO JP=1,TOP%NTEB_PATCH
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_BLD,         NT%AL(JP)%XBLD         )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_BLD_HEIGHT,  NT%AL(JP)%XBLD_HEIGHT  )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_WL_O_HOR,    NT%AL(JP)%XWALL_O_HOR  )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_CAN_HW_RATIO,NT%AL(JP)%XCAN_HW_RATIO)
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_Z0,          NT%AL(JP)%XZ0_TOWN     )
 END DO
 !
 IF (TOP%LCANOPY) THEN
@@ -515,8 +511,8 @@ IF (TOP%LCANOPY) THEN
       SB%XT(:,JLAYER) = PTA(:)
       SB%XQ(:,JLAYER) = PQA(:)
       SB%XU(:,JLAYER) = 2./XPI * ZWIND(:)                                  &
-              * LOG( (          2.* NT%CUR%XBLD_HEIGHT(:)/3.) / NT%CUR%XZ0_TOWN(:))   &
-              / LOG( (PUREF(:)+ 2.* NT%CUR%XBLD_HEIGHT(:)/3.) / NT%CUR%XZ0_TOWN(:))
+              * LOG( (          2.* NT%AL(1)%XBLD_HEIGHT(:)/3.) / NT%AL(1)%XZ0_TOWN(:))   &
+              / LOG( (PUREF(:)+ 2.* NT%AL(1)%XBLD_HEIGHT(:)/3.) / NT%AL(1)%XZ0_TOWN(:))
     END  DO
     SB%XTKE(:,:) = 1.
   ENDIF
@@ -640,11 +636,10 @@ ELSE              ! no canopy case
   !* Without SBL scheme, canyon air is assumed at mid height
   ZU_LOWCAN = ZU_CANYON
 
-  CALL GOTO_WRAPPER_TEB_PATCH(1, NT=NT)
-  ZT_LOWCAN = NT%CUR%XT_CANYON
-  ZQ_LOWCAN = NT%CUR%XQ_CANYON
-  ZT_CANYON = NT%CUR%XT_CANYON
-  ZQ_CANYON = NT%CUR%XQ_CANYON
+  ZT_LOWCAN = NT%AL(1)%XT_CANYON
+  ZQ_LOWCAN = NT%AL(1)%XQ_CANYON
+  ZT_CANYON = NT%AL(1)%XT_CANYON
+  ZQ_CANYON = NT%AL(1)%XQ_CANYON
 
   ZUREF     = PUREF
   ZZREF     = PZREF
@@ -665,27 +660,25 @@ ZEXNA     (:) = (ZPA(:)/XP00)**(XRD/XCPD)
 ! Over Urban surfaces/towns:
 !--------------------------------------------------------------------------------------
 !
-DO JTEB_P = 1,TOP%NTEB_PATCH
-
-  CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, B=B, DMTC=TD%DMTC, DMT=TD%DMT, NT=NT)
+DO JP = 1,TOP%NTEB_PATCH
   !
   ZT_CAN = ZT_CANYON
   ZQ_CAN = ZQ_CANYON
   !
   IF (TOP%LCANOPY) THEN
-    NT%CUR%XT_CANYON(:) = ZT_CANYON(:)
-    NT%CUR%XQ_CANYON(:) = ZQ_CANYON(:)
+    NT%AL(JP)%XT_CANYON(:) = ZT_CANYON(:)
+    NT%AL(JP)%XQ_CANYON(:) = ZQ_CANYON(:)
   END IF
   !
   ZLESN_RF(:) = 0.
   ZLESN_RD(:) = 0.
-  TD%DMT%CUR%XG_GREENROOF_ROOF(:) = 0.
+  TD%NDMT%AL(JP)%XG_GREENROOF_ROOF(:) = 0.
   !
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   ! Call the physical routines of TEB (including gardens & greenroofs)
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
-  CALL TEB_GARDEN(DTCO, G, TOP, NT%CUR, BOP, B%CUR, TPN, TD%DMT%CUR, GDM, GRM, JTEB_P, &
+  CALL TEB_GARDEN(DTCO, G, TOP, NT%AL(JP), BOP, NB%AL(JP), TPN, TD%NDMT%AL(JP), GDM, GRM, JP, &
                   CIMPLICIT_WIND, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON, ZT_LOWCAN, ZQ_LOWCAN, &
                   ZU_LOWCAN, ZZ_LOWCAN, ZPEW_A_COEF, ZPEW_B_COEF, ZPEW_A_COEF_LOWCAN,     &
                   ZPEW_B_COEF_LOWCAN, PPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, PRHOA, PCO2, PLW, &
@@ -704,8 +697,8 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
   !
   IF (.NOT. TOP%LCANOPY) THEN
 
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_T_CANYON,ZT_CAN)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_Q_CANYON,ZQ_CAN)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_T_CANYON,ZT_CAN)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_Q_CANYON,ZQ_CAN)
     !
     ! Momentum fluxes
     !
@@ -718,8 +711,8 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
         ZSFV(JJ) = ZCOEF(JJ) * PV(JJ)
       ENDIF
     ENDDO
-    CALL ADD_PATCH_CONTRIB(JTEB_P,PSFU,ZSFU)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,PSFV,ZSFV)
+    CALL ADD_PATCH_CONTRIB(JP,PSFU,ZSFU)
+    CALL ADD_PATCH_CONTRIB(JP,PSFV,ZSFV)
     !
   ENDIF
   !
@@ -729,39 +722,39 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
   !
   ! Grid box average fluxes/properties: Arguments and standard diagnostics
   !
-  CALL ADD_PATCH_CONTRIB(JTEB_P,PSFTH,ZH)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,PSFTQ,ZEVAP)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,PSFCO2,ZSFCO2)
+  CALL ADD_PATCH_CONTRIB(JP,PSFTH,ZH)
+  CALL ADD_PATCH_CONTRIB(JP,PSFTQ,ZEVAP)
+  CALL ADD_PATCH_CONTRIB(JP,PSFCO2,ZSFCO2)
   !
   !
   ! Albedo for each wavelength and patch
   !
   DO JSWB=1,SIZE(PSW_BANDS)
     DO JJ=1,SIZE(ZDIR_ALB)
-      ZDIR_ALB_PATCH(JJ,JSWB,JTEB_P) = ZDIR_ALB(JJ)
-      ZSCA_ALB_PATCH(JJ,JSWB,JTEB_P) = ZSCA_ALB(JJ)
+      ZDIR_ALB_PATCH(JJ,JSWB,JP) = ZDIR_ALB(JJ)
+      ZSCA_ALB_PATCH(JJ,JSWB,JP) = ZSCA_ALB(JJ)
     ENDDO
   END DO
   !
   ! emissivity and radiative temperature
   !
-  ZEMIS_PATCH(:,JTEB_P) = ZEMIS
-  ZTRAD_PATCH(:,JTEB_P) = ZTRAD
+  ZEMIS_PATCH(:,JP) = ZEMIS
+  ZTRAD_PATCH(:,JP) = ZTRAD
   !
   ! computes some aggregated diagnostics
   !
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_CD ,ZCD )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_CDN,ZCDN)
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_RI ,ZRI )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_CH ,ZCH )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_RN ,ZRN )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_H  ,ZH  )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_LE ,ZLE )
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_GFLX ,ZGFLX )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_CD ,ZCD )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_CDN,ZCDN)
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_RI ,ZRI )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_CH ,ZCH )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_RN ,ZRN )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_H  ,ZH  )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_LE ,ZLE )
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_GFLX ,ZGFLX )
   !
   !* warning: aerodynamical resistance does not yet take into account gardens
-  CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_RESA,1./ZRESA)
-  IF (JTEB_P==TOP%NTEB_PATCH) ZAVG_RESA = 1./ZAVG_RESA
+  CALL ADD_PATCH_CONTRIB(JP,ZAVG_RESA,1./ZRESA)
+  IF (JP==TOP%NTEB_PATCH) ZAVG_RESA = 1./ZAVG_RESA
   !
   !-------------------------------------------------------------------------------------
   ! Diagnostics on each patch
@@ -772,8 +765,8 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
     ! cumulated diagnostics 
     ! ---------------------
     !
-    CALL CUMUL_DIAG_TEB_n(TD%DMTC%CUR, TD%DMT%CUR, GDM%VD%DEPC%AL(JTEB_P), GDM%VD%DEP%AL(JTEB_P), &
-                          GRM%VD%DEPC%AL(JTEB_P), GRM%VD%DEP%AL(JTEB_P), TOP, PTSTEP)
+    CALL CUMUL_DIAG_TEB_n(TD%NDMTC%AL(JP), TD%NDMT%AL(JP), GDM%VD%NDEC%AL(JP), GDM%VD%NDE%AL(JP), &
+                          GRM%VD%NDEC%AL(JP), GRM%VD%NDE%AL(JP), TOP, PTSTEP)
     !
   END IF
   !
@@ -783,15 +776,15 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
   !-------------------------------------------------------------------------------------
   !
   IF (TD%O%N2M >0 .AND. TD%DUT%LUTCI) THEN
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_REF_SW_GRND ,ZREF_SW_GRND )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_REF_SW_FAC  ,ZREF_SW_FAC  )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_SCA_SW      ,ZSCA_SW      )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_DIR_SW      ,ZDIR_SW      )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_EMIT_LW_FAC ,ZEMIT_LW_FAC )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_EMIT_LW_GRND,ZEMIT_LW_GRND)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_T_RAD_IND   ,ZT_RAD_IND   )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_TI_BLD      ,B%CUR%XTI_BLD)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_QI_BLD      ,B%CUR%XQI_BLD)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_REF_SW_GRND ,ZREF_SW_GRND )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_REF_SW_FAC  ,ZREF_SW_FAC  )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_SCA_SW      ,ZSCA_SW      )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_DIR_SW      ,ZDIR_SW      )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_EMIT_LW_FAC ,ZEMIT_LW_FAC )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_EMIT_LW_GRND,ZEMIT_LW_GRND)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_T_RAD_IND   ,ZT_RAD_IND   )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_TI_BLD      ,NB%AL(JP)%XTI_BLD)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_QI_BLD      ,NB%AL(JP)%XQI_BLD)
   END IF
   !
   !-------------------------------------------------------------------------------------
@@ -803,27 +796,27 @@ DO JTEB_P = 1,TOP%NTEB_PATCH
     ! Town averaged quantities to force canopy atmospheric layers
     !-------------------------------------------------------------------------------------
 
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_DUWDU_GRND, ZDUWDU_GRND )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_UW_RF     , ZUW_RF)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_DUWDU_RF  , ZDUWDU_RF)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_H_WL      , 0.5*(TD%DMT%CUR%XH_WALL_A+TD%DMT%CUR%XH_WALL_B))
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_H_RF      , (TD%DMT%CUR%XH_ROOF + NT%CUR%XH_INDUSTRY))
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_E_RF      , (TD%DMT%CUR%XLE_ROOF+ NT%CUR%XLE_INDUSTRY)/XLVTT)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_DUWDU_GRND, ZDUWDU_GRND )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_UW_RF     , ZUW_RF)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_DUWDU_RF  , ZDUWDU_RF)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_H_WL      , 0.5*(TD%NDMT%AL(JP)%XH_WALL_A+TD%NDMT%AL(JP)%XH_WALL_B))
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_H_RF      , (TD%NDMT%AL(JP)%XH_ROOF + NT%AL(JP)%XH_INDUSTRY))
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_E_RF      , (TD%NDMT%AL(JP)%XLE_ROOF+ NT%AL(JP)%XLE_INDUSTRY)/XLVTT)
     !
     !-------------------------------------------------------------------------------------
     ! Computes the impact of canopy and surfaces on air
     !-------------------------------------------------------------------------------------
     !
-    ZAC_GRND    (:) = (NT%CUR%XROAD(:)*ZAC_RD    (:) + NT%CUR%XGARDEN(:)*ZAC_GD    (:)) / &
-                      (NT%CUR%XROAD(:)+NT%CUR%XGARDEN(:))
-    ZAC_GRND_WAT(:) = (NT%CUR%XROAD(:)*ZAC_RD_WAT(:) + NT%CUR%XGARDEN(:)*ZAC_GD_WAT(:)) / &
-                      (NT%CUR%XROAD(:)+NT%CUR%XGARDEN(:))
+    ZAC_GRND    (:) = (NT%AL(JP)%XROAD(:)*ZAC_RD    (:) + NT%AL(JP)%XGARDEN(:)*ZAC_GD    (:)) / &
+                      (NT%AL(JP)%XROAD(:)+NT%AL(JP)%XGARDEN(:))
+    ZAC_GRND_WAT(:) = (NT%AL(JP)%XROAD(:)*ZAC_RD_WAT(:) + NT%AL(JP)%XGARDEN(:)*ZAC_GD_WAT(:)) / &
+                      (NT%AL(JP)%XROAD(:)+NT%AL(JP)%XGARDEN(:))
     !
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_AC_GRND    , ZAC_GRND    )
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZAVG_AC_GRND_WAT, ZAC_GRND_WAT)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_U        , ZUW_GRND * (1.-NT%CUR%XBLD))
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_T        , ZH_GRND  * (1.-NT%CUR%XBLD)/XCPD/PRHOA)
-    CALL ADD_PATCH_CONTRIB(JTEB_P,ZSFLUX_Q        , ZLE_GRND * (1.-NT%CUR%XBLD)/XLVTT)
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_AC_GRND    , ZAC_GRND    )
+    CALL ADD_PATCH_CONTRIB(JP,ZAVG_AC_GRND_WAT, ZAC_GRND_WAT)
+    CALL ADD_PATCH_CONTRIB(JP,ZSFLUX_U        , ZUW_GRND * (1.-NT%AL(JP)%XBLD))
+    CALL ADD_PATCH_CONTRIB(JP,ZSFLUX_T        , ZH_GRND  * (1.-NT%AL(JP)%XBLD)/XCPD/PRHOA)
+    CALL ADD_PATCH_CONTRIB(JP,ZSFLUX_Q        , ZLE_GRND * (1.-NT%AL(JP)%XBLD)/XLVTT)
     !
   END IF
   !
@@ -906,7 +899,7 @@ END IF
 PTSURF (:) = PTRAD         (:) ! Should be the surface effective temperature; not radative
 PZ0    (:) = ZAVG_Z0  (:) ! Should account for ISBA (greenroof and garden) Z0
 PZ0H   (:) = PZ0 (:) / 200.    ! Should account for ISBA (greenroof and garden) Z0
-PQSURF (:) = NT%CUR%XQ_CANYON     (:) ! Should account for ISBA (greenroof and garden) Qs
+PQSURF (:) = NT%AL(1)%XQ_CANYON(:) ! Should account for ISBA (greenroof and garden) Qs
 !
 !-------------------------------------------------------------------------------------
 ! Scalar fluxes:
@@ -1011,7 +1004,7 @@ ENDIF
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
- CALL DIAG_INLINE_TEB_n(TD%O, TD%D, SB, NT, TOP%LCANOPY, &
+ CALL DIAG_INLINE_TEB_n(TD%O, TD%D, SB, NT%AL(1), TOP%LCANOPY, &
                         PTA, PTRAD, ZQA, PPA, PPS, PRHOA, PU, PV, ZWIND, PZREF, PUREF, &
                         ZAVG_CD, ZAVG_CDN, ZAVG_RI, ZAVG_CH, ZAVG_Z0, PTRAD, PEMIS,    &
                         PDIR_ALB, PSCA_ALB, PLW, ZDIR_SWB, ZSCA_SWB,  PSFTH, PSFTQ,    &
@@ -1022,10 +1015,9 @@ ENDIF
 !-------------------------------------------------------------------------------------
 !
 IF (.NOT. TOP%LCANOPY) THEN
-  DO JTEB_P=1,TOP%NTEB_PATCH
-    CALL GOTO_WRAPPER_TEB_PATCH(JTEB_P, NT=NT)  
-    NT%CUR%XT_CANYON(:) = ZAVG_T_CANYON(:)
-    NT%CUR%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
+  DO JP=1,TOP%NTEB_PATCH
+    NT%AL(JP)%XT_CANYON(:) = ZAVG_T_CANYON(:)
+    NT%AL(JP)%XQ_CANYON(:) = ZAVG_Q_CANYON(:)
   END DO
 END IF
 !          
@@ -1041,7 +1033,7 @@ IF (TD%DUT%LUTCI .AND. TD%O%N2M >0) THEN
       ZU_UTCI(JJ) = ZWIND(JJ)
     ENDIF
   ENDDO
- CALL UTCI_TEB(NT%CUR, TD%DUT, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND, &
+ CALL UTCI_TEB(NT%AL(1), TD%DUT, ZAVG_TI_BLD, ZAVG_QI_BLD, ZU_UTCI, PPS, ZAVG_REF_SW_GRND, &
                ZAVG_REF_SW_FAC, ZAVG_SCA_SW, ZAVG_DIR_SW, PZENITH, ZAVG_EMIT_LW_FAC,  &
                ZAVG_EMIT_LW_GRND, PLW, ZAVG_T_RAD_IND    )
  CALL UTCIC_STRESS(PTSTEP,TD%DUT%XUTCI_IN      ,TD%DUT%XUTCIC_IN      )
@@ -1068,7 +1060,7 @@ INTEGER, INTENT(IN) :: JP
 REAL, DIMENSION(:), INTENT(INOUT) :: PAVG
 REAL, DIMENSION(:), INTENT(IN)    :: PFIELD
 !
-IF (JTEB_P==1) PAVG = 0.
+IF (JP==1) PAVG = 0.
 PAVG = PAVG + TOP%XTEB_PATCH(:,JP) * PFIELD(:)
 !
 END SUBROUTINE ADD_PATCH_CONTRIB

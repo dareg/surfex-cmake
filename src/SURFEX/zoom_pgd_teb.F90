@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_TEB (B, DMTC, DMT, BOP, &
-                               BDD, DTB, DTCO, DTT, UG, U, IO, K, TG, TOP, &
+      SUBROUTINE ZOOM_PGD_TEB (BOP, BDD, DTB, DTCO, DTT, UG, U, IO, K, TG, TOP, &
                                HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP,OGARDEN)
 !     ###########################################################
 
@@ -41,9 +40,6 @@
 !*    0.     DECLARATION
 !            -----------
 !
-!
-USE MODD_BEM_n, ONLY : BEM_t
-USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_K_t
@@ -84,9 +80,6 @@ IMPLICIT NONE
 !            ------------------------------
 !
 !
-TYPE(BEM_t), INTENT(INOUT) :: B
-TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMTC
-TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB

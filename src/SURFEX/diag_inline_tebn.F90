@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-       SUBROUTINE DIAG_INLINE_TEB_n (DGO, D, SB, NT, &
+       SUBROUTINE DIAG_INLINE_TEB_n (DGO, D, SB, T, &
                                      OCANOPY, PTA, PTS, PQA, PPA, PPS, PRHOA,                &
                                      PZONA, PMERA, PWIND, PHT, PHW,                          &
                                      PCD, PCDN, PRI, PCH, PZ0,                               &
@@ -42,7 +42,7 @@
 !
 USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
-USE MODD_TEB_n, ONLY : TEB_NP_t
+USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -65,7 +65,7 @@ IMPLICIT NONE
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 TYPE(DIAG_t), INTENT(INOUT) :: D
 TYPE(CANOPY_t), INTENT(INOUT) :: SB
-TYPE(TEB_NP_t), INTENT(INOUT) :: NT
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 LOGICAL,            INTENT(IN)       :: OCANOPY  ! Flag for canopy
 REAL, DIMENSION(:), INTENT(IN)       :: PTA      ! atmospheric temperature
@@ -150,20 +150,20 @@ ELSE
   !
   !* erases temperature and humidity 2m above roof level bu canyon air values
   !
-  D%XT2M  = NT%CUR%XT_CANYON
-  D%XQ2M  = NT%CUR%XQ_CANYON
+  D%XT2M  = T%XT_CANYON
+  D%XQ2M  = T%XQ_CANYON
   !
   !* Richardson number
   !
   D%XRI = PRI
-  D%XHU2M = MIN(NT%CUR%XQ_CANYON /QSAT(NT%CUR%XT_CANYON,PPA),1.)
+  D%XHU2M = MIN(T%XQ_CANYON /QSAT(T%XT_CANYON,PPA),1.)
  ELSE IF (DGO%N2M==2) THEN
   ZH(:)=10.
   CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M    )  
-  D%XT2M  = NT%CUR%XT_CANYON
-  D%XQ2M  = NT%CUR%XQ_CANYON
+  D%XT2M  = T%XT_CANYON
+  D%XQ2M  = T%XQ_CANYON
   D%XRI   = PRI
-  D%XHU2M = MIN(NT%CUR%XQ_CANYON /QSAT(NT%CUR%XT_CANYON,PPA),1.)
+  D%XHU2M = MIN(T%XQ_CANYON /QSAT(T%XT_CANYON,PPA),1.)
  END IF
  !
  IF (DGO%N2M>=1) THEN
@@ -203,7 +203,7 @@ IF (DGO%LCOEF) THEN
 END IF
 !
 IF (DGO%LSURF_VARS) THEN
-  D%XQS    = NT%CUR%XQ_CANYON
+  D%XQS    = T%XQ_CANYON
 END IF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_TEB_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

@@ -93,7 +93,7 @@
 !               ------------
 !
 USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_CSTS,ONLY : XCPD, XLVTT, XSTEFAN, XCL
 !
@@ -110,7 +110,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 REAL,               INTENT(IN)    :: PTSTEP       ! time step
 REAL, DIMENSION(:), INTENT(IN)    :: PDN_ROAD     ! road snow fraction

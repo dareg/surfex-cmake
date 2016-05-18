@@ -45,7 +45,7 @@
 !               ------------
 !
 USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
-USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_1P_t
+USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,     ONLY : XSTEFAN
@@ -58,7 +58,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
-TYPE(DIAG_MISC_TEB_1P_t), INTENT(INOUT) :: DMT
+TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
 !
 REAL,               INTENT(IN)  :: PTSTEP          ! time step  (s)
 REAL, DIMENSION(:), INTENT(IN)  :: PTSUN           ! solar time (s since solar midnight)

@@ -77,7 +77,7 @@ WRITE(*,*) 'UPDATING TOWN FOR SCHEME: ',TRIM(U%CTOWN)
 
 IF ( TOP%NROAD_LAYER < 3 ) CALL ABOR1_SFX('ASSIM_TEB_n: Only imlemented with 3 or more layers')
 
-ZTRD3(:) = NT%CUR%XT_ROAD(:,3)  ! T_ROAD3
+ZTRD3(:) = NT%AL(1)%XT_ROAD(:,3)  ! T_ROAD3
 ZTCLS(:) = XAT2M_TEB(:)  ! T2M (TEB)
 
 ! Screen-level innovations
@@ -100,7 +100,7 @@ END WHERE
 IF (KI>0) WRITE(*,*) 'Mean T_ROAD3 increments over TOWN ',SUM(ZT2INC)/KI
 
 ! Update modified variables
-NT%CUR%XT_ROAD(:,3) = ZTRD3  ! T_ROAD3
+NT%AL(1)%XT_ROAD(:,3) = ZTRD3  ! T_ROAD3
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_TEB_N',1,ZHOOK_HANDLE)
 !

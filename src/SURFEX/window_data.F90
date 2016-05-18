@@ -52,7 +52,7 @@ SUBROUTINE WINDOW_DATA(KI, B)
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -61,7 +61,7 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 INTEGER,             INTENT(IN)  :: KI       ! number of points
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 REAL, DIMENSION(KI) :: ZR_IW      ! interior film resistance under winter conditions
 REAL, DIMENSION(KI) :: ZR_OW      ! exterior fild resistance uder winter conditions

@@ -41,7 +41,7 @@
 !            -----------
 !
 USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_n, ONLY : BEM_1P_t
+USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_TYPE_SNOW
 !
@@ -62,7 +62,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(BEM_1P_t), INTENT(INOUT) :: B
+TYPE(BEM_t), INTENT(INOUT) :: B
 !
 REAL, DIMENSION(:), INTENT(IN) :: PEMIS_GARDEN   ! green area emissivity (snowfree)
 REAL, DIMENSION(:), INTENT(IN) :: PTS_GARDEN     ! green area surf. temp.
