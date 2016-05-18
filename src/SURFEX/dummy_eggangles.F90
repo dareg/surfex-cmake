@@ -209,4 +209,4 @@ TYPE (LOLA), INTENT(IN)                       :: WEST_COORD, EAST_COORD
 REAL(KIND=JPRB), INTENT(IN), OPTIONAL         :: PI 
 END FUNCTION SIZE_W2E_S
 ! -------------------------------------------------------------------------------
-END MODULE EGGANGLES      
+END MODULE EGGANGLES
