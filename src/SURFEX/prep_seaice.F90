@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_SEAICE (UG, DTCO, DTS, O, OR, KLAT, S, U, &
-                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_SEAICE* - prepares variables for SEAICE scheme (for now : Gelato only)
@@ -50,6 +50,8 @@ USE MODI_GLTOOLS_READNAM
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
+USE MODD_PREP_CTL, ONLY : PREP_CTL
+!
 USE MODN_PREP_SEAFLUX,   ONLY : CPREP_SEAICE_SCHEME => CSEAICE_SCHEME
 USE MODI_PREP_HOR_SEAFLUX_FIELD
 !
@@ -74,6 +76,7 @@ TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
 INTEGER, INTENT(IN) :: KLAT
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -119,7 +122,7 @@ ENDIF
 !
 IF (S%LHANDLE_SIC) THEN 
    CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, DTS, O, OR, KLAT, S, &
-                               HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                               HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 ENDIF
 !
 !-------------------------------------------------------------------------------------

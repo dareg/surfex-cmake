@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_NATURE (DTCO, IM, UG, U, USS, &
-                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_NATURE* - chooses type of scheme to prepare for nature
@@ -26,11 +26,8 @@ SUBROUTINE PREP_NATURE (DTCO, IM, UG, U, USS, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
-!
-!
-!
-!
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
@@ -38,11 +35,9 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
+USE MODD_PREP_CTL, ONLY : PREP_CTL
+!
 USE MODI_PREP_ISBA
-!
-!USE MODI_PREP_ISBA
-!
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,6 +52,7 @@ TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -73,7 +69,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_NATURE',0,ZHOOK_HANDLE)
 IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0  ' ) THEN
   CALL PREP_ISBA(DTCO, UG, U, USS, IM%SB, IM%G, IM%O, IM%S, IM%NK, IM%NP, IM%NPE, &
-                 HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                 HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 END IF
 IF (LHOOK) CALL DR_HOOK('PREP_NATURE',1,ZHOOK_HANDLE)
 !

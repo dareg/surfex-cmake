@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_WATFLUX (DTCO, UG, U, WG, W, SB,  &
-                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_WATFLUX* - prepares WATFLUX fields
@@ -27,9 +27,8 @@ SUBROUTINE PREP_WATFLUX (DTCO, UG, U, WG, W, SB,  &
 !!    -------------
 !!      Original    01/2004
 !!      S. Riette   06/2009 PREP_WATFLUX_SBL has no more argument
+!!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
-!
-!
 !
 USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -50,7 +49,8 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODN_PREP_WATFLUX
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
-
+!
+USE MODD_PREP_CTL, ONLY : PREP_CTL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -70,6 +70,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 TYPE(CANOPY_t), INTENT(INOUT) :: SB
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -103,56 +104,61 @@ IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',0,ZHOOK_HANDLE)
 !*      2.0    Large scale orography
 !
  CALL PREP_HOR_WATFLUX_FIELD(DTCO, U, SIZE(WG%XLAT), W, &
-                             HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                             HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !
 !*      2.1    Temperature
 !
  CALL PREP_HOR_WATFLUX_FIELD(DTCO, U, SIZE(WG%XLAT), W, &
-                             HPROGRAM,'TSWATER',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                             HPROGRAM,'TSWATER',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !
+ CALL CLEAN_PREP_OUTPUT_GRID
+!
+IF (YDCTL%LPART6) THEN
+
 !*      2.2    Roughness
 !
-ALLOCATE(W%XZ0(SIZE(W%XTS)))
-W%XZ0 = 0.001
+  ALLOCATE(W%XZ0(SIZE(W%XTS)))
+  W%XZ0 = 0.001
 !
-!-------------------------------------------------------------------------------------
- CALL CLEAN_PREP_OUTPUT_GRID
 !-------------------------------------------------------------------------------------
 !
 !*      3.     Vertical interpolations of all variables
 !
-IF(LVERTSHIFT)THEN
-  CALL PREP_VER_WATFLUX(W)
-ENDIF
+  IF(LVERTSHIFT)THEN
+    CALL PREP_VER_WATFLUX(W)
+  ENDIF
 !
-DEALLOCATE(XZS_LS)
+  DEALLOCATE(XZS_LS)
 !-------------------------------------------------------------------------------------
 !
 !*      4.     Preparation of optional interpolation of monthly ts water
 !
-W%LINTERPOL_TS=.FALSE.
-IF(W%CINTERPOL_TS/='NONE  ')THEN
-  W%LINTERPOL_TS=.TRUE.
-ENDIF
+  W%LINTERPOL_TS=.FALSE.
+  IF(W%CINTERPOL_TS/='NONE  ')THEN
+    W%LINTERPOL_TS=.TRUE.
+  ENDIF
 !
-IF(W%LINTERPOL_TS)THEN
+  IF(W%LINTERPOL_TS)THEN
 !
 ! Precedent, Current, Next, and Second-next Monthly TS water
-  INMTH=4
+    INMTH=4
 !
-  ALLOCATE(W%XTS_MTH(SIZE(W%XTS),INMTH))
-  DO JMTH=1,INMTH
-     W%XTS_MTH(:,JMTH)=W%XTS(:)
-  ENDDO
+    ALLOCATE(W%XTS_MTH(SIZE(W%XTS),INMTH))
+    DO JMTH=1,INMTH
+      W%XTS_MTH(:,JMTH)=W%XTS(:)
+    ENDDO
 !
-ENDIF
+  ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
 !*      5.     Preparation of SBL air variables
 !
-W%LSBL = LWAT_SBL
-IF (W%LSBL) CALL PREP_SBL(WG%NDIM, SB)
+  W%LSBL = LWAT_SBL
+  IF (W%LSBL) CALL PREP_SBL(WG%NDIM, SB)
+!
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('PREP_WATFLUX',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

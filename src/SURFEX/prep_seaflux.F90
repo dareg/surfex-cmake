@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_SEAFLUX (DTCO, UG, U, SG, SB, S, DTS, O, OR, &
-                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                        HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_SEAFLUX* - prepares variables for SEAFLUX scheme
@@ -30,6 +30,7 @@ SUBROUTINE PREP_SEAFLUX (DTCO, UG, U, SG, SB, S, DTS, O, OR, &
 !!      Modified    07/2012, P. Le Moigne : CMO1D phasing
 !!      Modified    01/2014, S. Senesi : introduce sea-ice model 
 !!      Modified    01/2015, R. Séférian : introduce ocean surface albedo 
+!!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
 !
 USE MODD_GRID_n, ONLY : GRID_t
@@ -55,6 +56,7 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 USE MODD_PREP,           ONLY : XZS_LS
 USE MODD_SURF_ATM,       ONLY : LVERTSHIFT
 !
+USE MODD_PREP_CTL, ONLY : PREP_CTL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -77,7 +79,8 @@ TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR 
+TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -130,102 +133,104 @@ OR%LDIAPYCNAL = LDIAPYC
 !*      2.0    Large scale orography
 !
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, DTS, O, OR, SIZE(SG%XLAT), S, &
-                            HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                            HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !
 !*      2.1.1    Temperature
 !
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, DTS, O, OR, SIZE(SG%XLAT), S, &
-                            HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
-                    !
+                            HPROGRAM,'SST    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
+!
 !*      2.1.2    Salinity
 !
 
 CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, DTS, O, OR, SIZE(SG%XLAT), S, &
-                            HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                            HPROGRAM,'SSS    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !
 !*      2.1.3   Sea-ice
 !
 IF (CSEAICE_SCHEME /= 'NONE  ') THEN 
    CALL PREP_SEAICE(UG, DTCO, DTS, O, OR, SIZE(SG%XLAT), S, U, &
-                    HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                    HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 ENDIF
 !
+ CALL CLEAN_PREP_OUTPUT_GRID
+
+IF (YDCTL%LPART6) THEN
 !
 !*      2.2    Roughness
 !
-ALLOCATE(S%XZ0(SIZE(S%XSST)))
-S%XZ0 = 0.001
+  ALLOCATE(S%XZ0(SIZE(S%XSST)))
+  S%XZ0 = 0.001
 !
-ALLOCATE(S%XZ0H(SIZE(S%XSST)))
-S%XZ0H = S%XZ0
+  ALLOCATE(S%XZ0H(SIZE(S%XSST)))
+  S%XZ0H = S%XZ0
 !
 !*      2.3   Ocean Surface Albedo
 !
-IF(S%CSEA_ALB=='RS14')THEN
-  ALLOCATE(S%XDIR_ALB(SIZE(S%XSST)))
-  ALLOCATE(S%XSCA_ALB(SIZE(S%XSST)))
-  S%XDIR_ALB = 0.065
-  S%XSCA_ALB = 0.065
-ENDIF
+  IF(S%CSEA_ALB=='RS14')THEN
+    ALLOCATE(S%XDIR_ALB(SIZE(S%XSST)))
+    ALLOCATE(S%XSCA_ALB(SIZE(S%XSST)))
+    S%XDIR_ALB = 0.065
+    S%XSCA_ALB = 0.065
+  ENDIF
 !
-!-------------------------------------------------------------------------------------
- CALL CLEAN_PREP_OUTPUT_GRID
 !-------------------------------------------------------------------------------------
 !
 !*      3.     Vertical interpolations of all variables
 !
-IF(LVERTSHIFT)THEN
-  CALL PREP_VER_SEAFLUX(S)
-ENDIF
+  IF(LVERTSHIFT)THEN
+    CALL PREP_VER_SEAFLUX(S)
+  ENDIF
 !
-DEALLOCATE(XZS_LS)
+  DEALLOCATE(XZS_LS)
 !
 !-------------------------------------------------------------------------------------
 !
 !*      4.     Preparation of optional interpolation of monthly sst
 !
-S%LINTERPOL_SST=.FALSE.
-IF(TRIM(S%CINTERPOL_SST)/='NONE')THEN
+  S%LINTERPOL_SST=.FALSE.
+  IF(TRIM(S%CINTERPOL_SST)/='NONE')THEN
 !
-  S%LINTERPOL_SST=.TRUE.
+    S%LINTERPOL_SST=.TRUE.
 !
 ! Precedent, Current, Next, and Second-next Monthly SST
-  INMTH=4
+    INMTH=4
 !
-  ALLOCATE(S%XSST_MTH(SIZE(S%XSST),INMTH))
-  DO JMTH=1,INMTH
-     S%XSST_MTH(:,JMTH)=S%XSST(:)
-  ENDDO
+    ALLOCATE(S%XSST_MTH(SIZE(S%XSST),INMTH))
+    DO JMTH=1,INMTH
+      S%XSST_MTH(:,JMTH)=S%XSST(:)
+    ENDDO
 !
-ENDIF
+  ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
 !
 !*      5.     Optional preparation of interpolation of monthly Sea Surface salinity
 !
-S%LINTERPOL_SSS=.FALSE.
-IF(TRIM(S%CINTERPOL_SSS)/='NONE')THEN
+  S%LINTERPOL_SSS=.FALSE.
+  IF(TRIM(S%CINTERPOL_SSS)/='NONE')THEN
 !
-   S%LINTERPOL_SSS=.TRUE.
+     S%LINTERPOL_SSS=.TRUE.
    !
    ! Precedent, Current, Next, and Second-next Monthly SSS
-   INMTH=4
+     INMTH=4
    !
-   ALLOCATE(S%XSSS_MTH(SIZE(S%XSSS),INMTH))
-   DO JMTH=1,INMTH
-      S%XSSS_MTH(:,JMTH)=S%XSSS(:)
-   ENDDO
+     ALLOCATE(S%XSSS_MTH(SIZE(S%XSSS),INMTH))
+     DO JMTH=1,INMTH
+       S%XSSS_MTH(:,JMTH)=S%XSSS(:)
+     ENDDO
    !
-ENDIF
+  ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
 !*      6.     Preparation of SBL air variables
 !
 !
-IF (S%LSBL) CALL PREP_SBL(SG%NDIM, SB)
+  IF (S%LSBL) CALL PREP_SBL(SG%NDIM, SB)
 !
+ENDIF
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX',1,ZHOOK_HANDLE)

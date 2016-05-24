@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_FLAKE (DTCO, USS, FG, F, SB, UG, U, &
-                       HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                       HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_FLAKE* - prepares FLAKE fields
@@ -30,6 +30,7 @@ SUBROUTINE PREP_FLAKE (DTCO, USS, FG, F, SB, UG, U, &
 !!      E. Kourzeneva 09/2010 (i)  Change the default initialisation,
 !!                            (ii) Include the possibility to use 
 !!                                 lake climate data
+!!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
 !
 !
@@ -59,9 +60,8 @@ USE MODD_PREP,         ONLY : XZS_LS
 USE MODD_PREP_FLAKE,   ONLY : LCLIM_LAKE
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
-!
 USE MODD_CSTS,       ONLY : XTT
-
+USE MODD_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_CAN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -83,6 +83,7 @@ TYPE(FLAKE_t), INTENT(INOUT) :: F
 TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -103,6 +104,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PREP_FLAKE',0,ZHOOK_HANDLE)
 !
+IF (.NOT. PREP_CTL_CAN (YDCTL)) THEN
+  CALL ABOR1_SFX('PREP_FLAKE: TWO STEP PREP NOT IMPLEMENTED')
+ENDIF
+
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
  CALL PREP_OUTPUT_GRID(UG%G, FG, U%NSIZE_FULL, ILUOUT)

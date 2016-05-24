@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_TOWN (DTCO, UG, U, USS, TM, GDM, GRM, &
-                      HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                      HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_TOWN* - chooses town scheme to prepare
@@ -26,6 +26,7 @@ SUBROUTINE PREP_TOWN (DTCO, UG, U, USS, TM, GDM, GRM, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004
+!!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
 !
 !
@@ -37,9 +38,9 @@ USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
 !
+USE MODD_PREP_CTL, ONLY : PREP_CTL
+!
 USE MODI_PREP_TEB
-!
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -56,6 +57,7 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
@@ -72,7 +74,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_TOWN',0,ZHOOK_HANDLE)
 IF (U%CTOWN=='TEB   ') THEN
   CALL PREP_TEB(DTCO, UG, U, USS, TM%TOP, TM%BOP, TM%NB, TM%G, TM%SB, TM%NT, GDM, GRM, &
-                     HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                     HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 END IF
 IF (LHOOK) CALL DR_HOOK('PREP_TOWN',1,ZHOOK_HANDLE)
 !

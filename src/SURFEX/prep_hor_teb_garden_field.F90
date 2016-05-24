@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, UG, U, USS, IO, S, K, P, PEK, TG, TOP,  &
-                                      HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH)
+                                      HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KPATCH,YDCTL)
 !     #################################################################################
 !
 !!****  *PREP_HOR_TEB_GARDEN_FIELD* - reads, interpolates and prepares an ISBA field
@@ -31,6 +31,7 @@ SUBROUTINE PREP_HOR_TEB_GARDEN_FIELD (DTCO, UG, U, USS, IO, S, K, P, PEK, TG, TO
 !!      B. Decharme  01/2009, Optional Arpege deep soil temperature initialization
 !!      B. Decharme  03/2014, external init with FA files
 !!                            new vertical interpol
+!!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -55,10 +56,12 @@ USE MODD_PREP,            ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,       &
 USE MODD_PREP_TEB_GARDEN, ONLY : XGRID_SOIL, NGRID_LEVEL,                  &
                                  XWSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, &
                                  XAGESNOW_GD, XASNOW_GD, LSNOW_IDEAL_GD
-
+!
 USE MODD_ISBA_PAR,        ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR,  ONLY : NVEGTYPE
 USE MODD_SURF_PAR,        ONLY : XUNDEF
+!
+USE MODD_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_CAN
 !
 USE MODI_PREP_GRIB_GRID
 USE MODI_READ_PREP_TEB_GARDEN_CONF
@@ -101,6 +104,7 @@ TYPE(ISBA_P_t), INTENT(INOUT) :: P
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -151,6 +155,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.     Reading of input file name and type
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GARDEN_FIELD',0,ZHOOK_HANDLE)
+!
+IF (.NOT. PREP_CTL_CAN (YDCTL)) THEN
+  CALL ABOR1_SFX('PREP_HOR_TEB_GARDEN_FIELD: TWO STEP PREP NOT IMPLEMENTED')
+ENDIF
+!
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
  CALL READ_PREP_TEB_GARDEN_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
@@ -196,7 +205,7 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW_GD, XRSNOW_GD, XTSNOW_GD,&
                             XLWCSNOW_GD, XASNOW_GD,         &
                             LSNOW_IDEAL_GD, ZSG1SNOW,       &
-                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GD,  &
+                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GD, YDCTL, &
                             PVEGTYPE_PATCH=S%XVEGTYPE_PATCH, PPATCH=S%XPATCH )
   !
   CALL ALLOCATE_GR_SNOW(PEK%TSNOW,INI)
@@ -233,7 +242,7 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
    IF (NRANK==NPIO) CALL PREP_TEB_GARDEN_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)        
-ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    ') THEN
+ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR.YFILETYPE=='FA    '.OR. YFILETYPE=='AROME ') THEN
    CALL PREP_TEB_GARDEN_EXTERN(DTCO, IO, U, &
                                HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,KPATCH,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
