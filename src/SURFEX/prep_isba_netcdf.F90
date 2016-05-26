@@ -132,8 +132,12 @@ SELECT CASE (INVARDIMS)
 
 END SELECT
 !
-IF(ILENDIM/=IL) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
+IF(ILENDIM/=IL) THEN
+    PRINT*,"Simulation grid dimension for nature:",IL
+    PRINT*,"Netcdf init file dimension:",ILENDIM
+    CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
                                 'in netcdf file for variable '//TRIM(HSURF))
+ENDIF
 !
 ! Read 1D variable
 IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
