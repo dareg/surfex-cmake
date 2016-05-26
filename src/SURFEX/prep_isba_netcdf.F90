@@ -1,6 +1,6 @@
 !     #########
 SUBROUTINE PREP_ISBA_NETCDF (DTCO, U, &
-                             HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
+                             HPROGRAM,HSURF,HFILE,HFILEPGD,HFILEPGDTYPE,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_NETCDF* - prepares ISBA fields from initialization files in NETCDF
@@ -37,6 +37,10 @@ USE MODI_GET_TYPE_DIM_n
 !
 USE MODE_READ_CDF
 !
+USE MODI_READ_SURF
+USE MODI_OPEN_AUX_IO_SURF
+USE MODI_CLOSE_AUX_IO_SURF
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -53,8 +57,11 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
+CHARACTER(LEN=6),   INTENT(IN)  :: HFILEPGDTYPE ! type of input file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
+
 !
 !*      0.2    declarations of local variables
 !
@@ -62,17 +69,23 @@ REAL, DIMENSION(:),       POINTER :: ZFIELD   ! field read
 
 REAL,DIMENSION(:,:),ALLOCATABLE:: ZFIELD_2D
 
+REAL, DIMENSION(:), ALLOCATABLE     :: ZFIELD_FULL
+REAL, DIMENSION(:), ALLOCATABLE     :: ZMASK
+CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+INTEGER           :: IRESP          ! reading return code
+
 ! CHARACTER(LEN=28) :: YNCVAR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 INTEGER::IERROR !error status
-INTEGER::JJ,JK,JLOOP ! loop counters
+INTEGER::JJ,JK,JLOOP,JNATURE ! loop counters
 INTEGER::INLAYERS ! vertical dimension length
 INTEGER::IL ! nature dimension length
 INTEGER::ID_FILE,ID_VAR ! Netcdf IDs for file and variable
 INTEGER::INVARDIMS !number of dimensions of netcdf input variable
 INTEGER,DIMENSION(:),ALLOCATABLE::IVARDIMSID
 INTEGER::ILENDIM,ILENDIM1,ILENDIM2
+
 
 SELECT CASE (TRIM(HSURF))
   CASE ('TG','WG','WGI')
@@ -133,15 +146,56 @@ SELECT CASE (INVARDIMS)
 END SELECT
 !
 IF(ILENDIM/=IL) THEN
-    PRINT*,"Simulation grid dimension for nature:",IL
-    PRINT*,"Netcdf init file dimension:",ILENDIM
-    CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
-                                'in netcdf file for variable '//TRIM(HSURF))
+
+! Partie adaptée de PREP_ISBA_EXTERN
+!------------------------------------------------------------------------------
+!
+!*       Reading of grid
+!              ---------------
+!
+  CALL OPEN_AUX_IO_SURF(&
+                       HFILEPGD,HFILEPGDTYPE,'FULL  ')
+!
+  ALLOCATE(ZMASK(ILENDIM))
+  YRECFM='FRAC_NATURE'
+  CALL READ_SURF(HFILEPGDTYPE,YRECFM,ZMASK,IRESP,HDIR='A')
+  
+  CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+  
+    ! Read 1D variable
+  ALLOCATE(ZFIELD_FULL(ILENDIM))
+  IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD_FULL)
+  CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+  
+  JNATURE=0
+  DO JJ=1,ILENDIM
+    IF (ZMASK(JJ)>0.) THEN
+      JNATURE=JNATURE+1
+      IF (JNATURE>IL) THEN
+        PRINT*,"Simulation grid dimension for nature:",IL
+        PRINT*,"Netcdf init file dimension:",ILENDIM
+        PRINT*,"This is not explained by nature mask."
+        CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
+                                 'in netcdf file for variable '//TRIM(HSURF))
+
+      END IF 
+      ZFIELD(JNATURE)=ZFIELD_FULL(JJ)
+    END IF
+  END DO
+  DEALLOCATE(ZMASK)
+  DEALLOCATE(ZFIELD_FULL)
+  
+ELSE
+  ! Read 1D variable
+  IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
+  CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
 ENDIF
 !
-! Read 1D variable
-IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,ZFIELD)
- CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+!---------------------------------------------------------------------------------------
+
+
+!
+
 !
 ! Close netcdf file
 IERROR=NF_CLOSE(ID_FILE)
