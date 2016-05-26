@@ -92,6 +92,8 @@
 !!                  10/2014  (A. Boone)    MEB added
 !!                  07/15    (B. Decharme) Numerical adjustement for F2 soilstress function
 !!                  03/16    (B. Decharme) Limit flood infiltration
+!!                  05/2016  (B. Decharme) Bug : no Horton runoff in hydr_soildif because is already 
+!!                                               computed in hydro_sgh if required
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -652,12 +654,12 @@ IF (HISBA=='DIF') THEN
 !
   DO JDT = 1,INDT
 !                      
-     CALL HYDRO_SOILDIF(HRUNOFF, HHORT, ZTSTEP,                     &
+     CALL HYDRO_SOILDIF(HRUNOFF, ZTSTEP,                            &
                 PBCOEF, PWSAT, PCONDSAT, PMPOTSAT, PWFC,            &
                 PD_G, PDZG, PDZDIF, ZPG, ZLETR, ZLEG, ZEVAPCOR,     &
                 PF2WGHT, PWG, PWGI, PTG, PPS, ZQSAT, ZQSATI,        &
-                ZDRAIN, ZHORTON, PFSAT, KWG_LAYER, INL,             &
-                KLAYER_HORT, PTOPQS, ZQSB, PFWTD, PWTD              )
+                ZDRAIN, ZHORTON, KWG_LAYER, INL,                    &
+                PTOPQS, ZQSB, PFWTD, PWTD                           )
 !
      CALL ICE_SOILDIF(ZTSTEP, PTAUICE, ZKSFC_IVEG, ZLEGI,    &
                      PSOILHCAPZ, PWSAT, PMPOTSAT, PBCOEF,    &

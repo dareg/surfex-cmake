@@ -3,12 +3,12 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE HYDRO_SOILDIF(HRUNOFF,HHORT,PTSTEP,                         &
+      SUBROUTINE HYDRO_SOILDIF(HRUNOFF,PTSTEP,                               &
                                PBCOEF,PWSAT,PCONDSAT,PMPOTSAT,PWFC,PDG,PDZG, &
                                PDZDIF,PPG,PLETR,PLEG,PEVAPCOR,PF2WGHT,       &
                                PWG,PWGI,PTG,PPS,PQSAT,PQSATI,                &
-                               PDRAIN,PHORTON,PFSAT,KWG_LAYER,               &
-                               KMAX_LAYER,KLAYER_HORT,PTOPQS,PQSB,PFWTD,PWTD )
+                               PDRAIN,PHORTON,KWG_LAYER,                     &
+                               KMAX_LAYER,PTOPQS,PQSB,PFWTD,PWTD             )
 !     ##########################################################################
 !
 !
@@ -75,7 +75,8 @@
 !!                  10/12    B.Decharme: EVAPCOR snow correction in DIF
 !!                  04/13    B.Decharme: Subsurface runoff if SGH (DIF option only)
 !!                  07/2013  B.Decharme: Surface / Water table depth coupling
-!!                  01/2016  B.Decharme: Bug : if no surface runoff (HRUNOFF=WSAT) then no Horton
+!!                  05/2016  B.Decharme: Bug : no Horton runoff because is already 
+!!                                             computed in hydro_sgh if required
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -97,12 +98,9 @@ IMPLICIT NONE
 !                                              ! 'DT92'
 !                                              ! 'SGH ' Topmodel
 !
- CHARACTER(LEN=*),     INTENT(IN)    :: HHORT    ! Hortonian runoff
-!
 REAL, INTENT(IN)                    :: PTSTEP ! Model time step (s)
 !
-REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PEVAPCOR, PFSAT, &
-                                       PFWTD, PWTD
+REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PEVAPCOR, PFWTD, PWTD
 !                                      PPS    = surface pressure (Pa)
 !                                      PPG    = throughfall rate: 
 !                                               rate at which water reaches the surface
@@ -112,7 +110,6 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PPG, PLETR, PLEG, PEVAPCOR, PFSAT, &
 !                                      PLEG   = bare-soil evaporation rate (m/s)
 !                                      PEVAPCOR = correction for any excess evaporation 
 !                                                from snow as it completely ablates (m/s)
-!                                      PFSAT  = Saturated fraction
 !                                      PFWTD  = grid-cell fraction of water table to rise
 !                                      PWTD   = water table depth negative below soil surface (m)
 !
@@ -141,8 +138,6 @@ INTEGER, DIMENSION(:), INTENT(IN)   :: KWG_LAYER
 INTEGER,               INTENT(IN)   :: KMAX_LAYER  
 !                                      KMAX_LAYER = Max number of soil moisture layers (DIF option)
 !
-INTEGER,               INTENT(IN)   :: KLAYER_HORT! DIF optimization
-!
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PWG, PWGI
 !                                      PWG  = volumetric liquid water content (m3 m-3) 
 !                                      PWGI = volumetric ice content (m3 m-3)
@@ -163,9 +158,7 @@ INTEGER                             :: JJ, JL    ! loop control
 !
 INTEGER                             :: INI, INL, IDEPTH ! Number of point and grid layers
 !
-REAL, DIMENSION(SIZE(PDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
-!                                      ZINFILTMAX = maximum allowable infiltration rate
-!                                                   (from Darcy's Law) (m s-1)
+REAL, DIMENSION(SIZE(PDZG,1))       :: ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
 !                                      ZEXCESS    = working variable: excess soil water
 !                                                   which is used as a constraint 
 !                                      ZDGN       = Depth of the last node (m)
@@ -241,7 +234,6 @@ PQSB      (:) = 0.0
 PHORTON   (:) = 0.0
 ZINFILTC  (:) = 0.0
 ZEXCESS   (:) = 0.0
-ZINFILTMAX(:) = 0.0
 !
 ZDGN      (:) = XUNDEF
 ZPSIWTD   (:) = XUNDEF
@@ -310,19 +302,13 @@ ENDDO
 ! Surface fluxes are limited a Green-Ampt approximation from Abramopoulos et al
 ! (1988) and Entekhabi and Eagleson (1989).
 ! Note : when Horton option is used, infiltration already calculated in hydro_sgh
-IF(HRUNOFF/='WSAT'.AND.HHORT/='SGH')THEN
-!  Green-Ampt approximation for maximum infiltration (derived form)
-   ZINFILTMAX(:) = INFMAX_FUNC(PWG,ZWSAT,ZFRZ,PCONDSAT,PMPOTSAT,PBCOEF,PDZG,PDG,KLAYER_HORT)
-!  Fast(temporal)-response runoff (surface excess) (m s-1):
-   PHORTON   (:) = (1.-PFSAT(:)) * MAX(0.0,PPG(:)-ZINFILTMAX(:))
-ENDIF
 !
+!Surface cumulative infiltration  (m)
+ZINFILTC(:) = MAX(0.0,PPG(:))*PTSTEP
 !
 ! 2. Initialise soil moisture profile according to infiltration terms at "t"
 !    ----------------------------------------------------------------------
 !
-!Surface cumulative infiltration  (m)
-ZINFILTC(:) = MAX(0.0,PPG(:)-PHORTON(:))*PTSTEP
 !
 DO JL=1,INL
    DO JJ=1,INI
