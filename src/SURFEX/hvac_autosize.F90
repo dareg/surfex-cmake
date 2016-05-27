@@ -549,6 +549,13 @@ YIR%XRD_24H_IRRIG   = 0.
  CALL DIAG_EVAP_ISBA_INIT(YGRDE)
 !
 ! greenroofs   are not taken into account in the building's HVAC equipment sizing process
+ALLOCATE(YGRD%XRN   (KI))
+ALLOCATE(YGRD%XH    (KI))
+ALLOCATE(YGRD%XLE   (KI))
+ALLOCATE(YGRD%XGFLUX(KI))
+ALLOCATE(YGRDE%XRUNOFF(KI))
+ALLOCATE(YGRDE%XDRAIN (KI))
+!
 YGRD%XRN     (:) = 0.
 YGRD%XH      (:) = 0.
 YGRD%XLE     (:) = 0.
