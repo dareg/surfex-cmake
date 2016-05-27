@@ -32,6 +32,7 @@
 !!    Original    01/2004
 !!    Modification
 !!      A. Alias        07/2013 add MODI_ABOR1_SFX
+!!      A. Alias        05/2016 add MODI_GET_INTERP_HALO
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -45,6 +46,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
 USE MODI_GET_GRID_COORD
+USE MODI_GET_INTERP_HALO
 USE MODI_INTERPOL_NPTS
 USE MODI_SUM_ON_ALL_PROCS
 USE MODI_ABOR1_SFX
