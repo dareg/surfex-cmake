@@ -171,17 +171,20 @@ IF(ILENDIM/=IL) THEN
   DO JJ=1,ILENDIM
     IF (ZMASK(JJ)>0.) THEN
       JNATURE=JNATURE+1
-      IF (JNATURE>IL) THEN
-        PRINT*,"Simulation grid dimension for nature:",IL
-        PRINT*,"Netcdf init file dimension:",ILENDIM
-        PRINT*,"This is not explained by nature mask."
-        CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
-                                 'in netcdf file for variable '//TRIM(HSURF))
-
-      END IF 
+      IF (JNATURE>IL) EXIT ! On va planter proprement après la boucle
       ZFIELD(JNATURE)=ZFIELD_FULL(JJ)
-    END IF
+    END IF  
   END DO
+  
+  IF (JNATURE/=IL) THEN
+
+    PRINT*,"Simulation grid dimension for nature:",IL
+    PRINT*,"Netcdf init file dimension:",ILENDIM
+    PRINT*,"This is not explained by nature mask."
+    CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
+                         'in netcdf file for variable '//TRIM(HSURF))
+  END IF
+  
   DEALLOCATE(ZMASK)
   DEALLOCATE(ZFIELD_FULL)
   
