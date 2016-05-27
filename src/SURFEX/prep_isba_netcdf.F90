@@ -177,7 +177,7 @@ IF(ILENDIM/=IL) THEN
   END DO
   
   IF (JNATURE/=IL) THEN
-
+    PRINT*,"JNATURE=",JNATURE
     PRINT*,"Simulation grid dimension for nature:",IL
     PRINT*,"Netcdf init file dimension:",ILENDIM
     PRINT*,"This is not explained by nature mask."
