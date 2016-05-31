@@ -173,11 +173,10 @@ IF(ILENDIM/=IL) THEN
       JNATURE=JNATURE+1
       IF (JNATURE>IL) EXIT ! On va planter proprement après la boucle
       ZFIELD(JNATURE)=ZFIELD_FULL(JJ)
-    
-    ELSE
-    
-      PRINT*,"NO NATURE:",JJ,ZMASK(JJ)
-     
+      ! For debug :
+      ! PRINT*,"NATURE:",JJ,ZMASK(JJ)
+    !ELSE
+      !PRINT*,"NO NATURE:",JJ,ZMASK(JJ)
     END IF  
   END DO
   
