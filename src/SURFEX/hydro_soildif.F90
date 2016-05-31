@@ -130,9 +130,7 @@ INTEGER                             :: JJ, JL    ! loop control
 !
 INTEGER                             :: INJ, INL, IDEPTH ! Number of point and grid layers
 !
-REAL, DIMENSION(SIZE(PK%XDZG,1))       :: ZINFILTMAX, ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
-!                                      ZINFILTMAX = maximum allowable infiltration rate
-!                                                   (from Darcy's Law) (m s-1)
+REAL, DIMENSION(SIZE(PK%XDZG,1))       :: ZINFILTC, ZEXCESS, ZDGN, ZWGTOT, ZPSIWTD, ZWTD
 !                                      ZEXCESS    = working variable: excess soil water
 !                                                   which is used as a constraint 
 !                                      ZDGN       = Depth of the last node (m)
@@ -207,7 +205,6 @@ PQSB      (:) = 0.0
 PHORTON   (:) = 0.0
 ZINFILTC  (:) = 0.0
 ZEXCESS   (:) = 0.0
-ZINFILTMAX(:) = 0.0
 !
 ZDGN      (:) = XUNDEF
 ZPSIWTD   (:) = XUNDEF
@@ -276,20 +273,13 @@ ENDIF
 ! Surface fluxes are limited a Green-Ampt approximation from Abramopoulos et al
 ! (1988) and Entekhabi and Eagleson (1989).
 ! Note : when Horton option is used, infiltration already calculated in hydro_sgh
-IF(IO%CRUNOFF/='WSAT'.AND.IO%CHORT/='SGH')THEN
-!  Green-Ampt approximation for maximum infiltration (derived form)
-  ZINFILTMAX(:) = INFMAX_FUNC(PEK%XWG, ZWSAT, ZFRZ, PK%XCONDSAT, KK%XMPOTSAT, &
-                               KK%XBCOEF, PK%XDZG, PK%XDG, IO%NLAYER_HORT)
-!  Fast(temporal)-response runoff (surface excess) (m s-1):
-  PHORTON   (:) = (1.-KK%XFSAT(:)) * MAX(0.0,PPG(:)-ZINFILTMAX(:))
-ENDIF
 !
+!Surface cumulative infiltration  (m)
+ZINFILTC(:) = MAX(0.0,PPG(:))*PTSTEP
+
 !
 ! 2. Initialise soil moisture profile according to infiltration terms at "t"
 !    ----------------------------------------------------------------------
-!
-!Surface cumulative infiltration  (m)
-ZINFILTC(:) = MAX(0.0,PPG(:)-PHORTON(:))*PTSTEP
 !
 DO JL=1,INL
   DO JJ=1,INJ
