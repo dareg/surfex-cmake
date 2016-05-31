@@ -120,7 +120,7 @@ X2D_ALL(:,:) = 0.
 !
  CALL TREAT_FIELD(UG, U, USS, &
                   HPROGRAM,'SURF  ','DIRECT','A_LDBD', CLAKELDB,   &
-                 'water depth         ',ZDEPTH,'WAT'              ) 
+                 'water depth         ',ZDEPTH      ) 
 !
 DEALLOCATE(XSUMVAL2)
 DEALLOCATE(NSIZE)
@@ -133,7 +133,7 @@ X2D_ALL (:,:) = 0.
 !
  CALL TREAT_FIELD(UG, U, USS, &
                   HPROGRAM,'SURF  ','DIRECT','A_LDBS', CSTATUSLDB,  &
-                 'water status        ',ZSTATUS,'WAT'              )
+                 'water status        ',ZSTATUS             )
 !
 ISTATUS = NINT(ZSTATUS)
 !

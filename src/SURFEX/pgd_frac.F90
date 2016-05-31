@@ -96,6 +96,7 @@ REAL, DIMENSION(NL)   :: ZSUM      ! sum of 4 tiles fractions
 !            ------------------------
 !
 LOGICAL  :: LECOCLIMAP  ! F if ecoclimap is not used
+LOGICAL  :: LECOSG      ! F if ecosg is not used
 REAL     :: XUNIF_SEA   ! value of sea    fraction
 REAL     :: XUNIF_WATER ! value of water  fraction
 REAL     :: XUNIF_NATURE! value of nature fraction
@@ -115,6 +116,7 @@ REAL     :: XUNIF_TOWN  ! value of town   fraction
  CHARACTER(LEN=6)      :: CFTYP_NATURE ! type of nature file
  CHARACTER(LEN=6)      :: CFTYP_TOWN   ! type of town   file
 !
+INTEGER, DIMENSION(4) :: ID_COV
 INTEGER               :: ICOVER       ! 0 if cover is not present, >1 if present somewhere
 !                                     ! (even on another processor)
 INTEGER               :: ICPT
@@ -122,10 +124,10 @@ INTEGER               :: ICPT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
-NAMELIST/NAM_FRAC/ LECOCLIMAP,                                         &
-                     XUNIF_SEA, XUNIF_WATER, XUNIF_NATURE, XUNIF_TOWN, &
-                     CFNAM_SEA, CFNAM_WATER, CFNAM_NATURE, CFNAM_TOWN, &
-                     CFTYP_SEA, CFTYP_WATER, CFTYP_NATURE, CFTYP_TOWN  
+NAMELIST/NAM_FRAC/ LECOCLIMAP, LECOSG,                               &
+                   XUNIF_SEA, XUNIF_WATER, XUNIF_NATURE, XUNIF_TOWN, &
+                   CFNAM_SEA, CFNAM_WATER, CFNAM_NATURE, CFNAM_TOWN, &
+                   CFTYP_SEA, CFTYP_WATER, CFTYP_NATURE, CFTYP_TOWN  
 !-------------------------------------------------------------------------------
 !
 !*    1.      Initializations
@@ -137,6 +139,7 @@ XUNIF_WATER    = XUNDEF
 XUNIF_NATURE   = XUNDEF
 XUNIF_TOWN     = XUNDEF
 LECOCLIMAP     = .TRUE.
+LECOSG         = .FALSE.
 CFNAM_SEA   (:)= '                            '
 CFNAM_WATER (:)= '                            '
 CFNAM_NATURE(:)= '                            '
@@ -147,6 +150,7 @@ CFTYP_NATURE(:)= '      '
 CFTYP_TOWN  (:)= '      '
 !
 U%LECOCLIMAP = .TRUE.
+U%LECOSG = .FALSE.
 !
 !-------------------------------------------------------------------------------
 !
@@ -160,6 +164,8 @@ U%LECOCLIMAP = .TRUE.
 IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_FRAC)
 !
  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+!
+U%LECOSG = LECOSG
 !
 !-------------------------------------------------------------------------------
 !
@@ -269,46 +275,58 @@ U%LECOCLIMAP = LECOCLIMAP
 !
 IF (.NOT.LECOCLIMAP) THEN
 
+  IF (.NOT.LECOSG) THEN
+    ID_COV(1) = 1
+    ID_COV(2) = 2
+    ID_COV(3) = 4
+    ID_COV(4) = 151
+  ELSE
+    ID_COV(1) = 21
+    ID_COV(2) = 22
+    ID_COV(3) = 1
+    ID_COV(4) = 20         
+  ENDIF
+
   ALLOCATE(U%LCOVER(JPCOVER))
   U%LCOVER(:) = .FALSE.
   ICOVER = 0
   ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,U%XSEA(:)/=0. ,'COV')
   IF (ICPT/=0) THEN
-    U%LCOVER(1) = .TRUE.
+    U%LCOVER(ID_COV(1)) = .TRUE.
     ICOVER=ICOVER+1
   ENDIF
   ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,U%XWATER(:)/=0. ,'COV')
   IF (ICPT/=0) THEN  
-    U%LCOVER(2) = .TRUE.
+    U%LCOVER(ID_COV(2)) = .TRUE.
     ICOVER=ICOVER+1
   ENDIF
   ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,U%XNATURE(:)/=0. ,'COV')
   IF (ICPT/=0) THEN  
-    U%LCOVER(4) = .TRUE.
+    U%LCOVER(ID_COV(3)) = .TRUE.
     ICOVER=ICOVER+1
   ENDIF
   ICPT= SUM_ON_ALL_PROCS(HPROGRAM,CGRID,U%XTOWN(:)/=0. ,'COV')
   IF (ICPT/=0) THEN  
-    U%LCOVER(151) = .TRUE.
+    U%LCOVER(ID_COV(4)) = .TRUE.
     ICOVER=ICOVER+1
   ENDIF
 
   ALLOCATE(U%XCOVER (NL,ICOVER))
 
   ICPT = 0
-  IF (U%LCOVER(1)) THEN
+  IF (U%LCOVER(ID_COV(1))) THEN
     ICPT = ICPT + 1
     U%XCOVER(:,ICPT) = U%XSEA(:)
   ENDIF
-  IF (U%LCOVER(2)) THEN
+  IF (U%LCOVER(ID_COV(2))) THEN
     ICPT = ICPT + 1
     U%XCOVER(:,ICPT) = U%XWATER(:)
   ENDIF
-  IF (U%LCOVER(4)) THEN
+  IF (U%LCOVER(ID_COV(3))) THEN
     ICPT = ICPT + 1
     U%XCOVER(:,ICPT) = U%XNATURE(:)
   ENDIF
-  IF (U%LCOVER(151)) THEN
+  IF (U%LCOVER(ID_COV(4))) THEN
     ICPT = ICPT + 1
     U%XCOVER(:,ICPT) = U%XTOWN(:)
   ENDIF

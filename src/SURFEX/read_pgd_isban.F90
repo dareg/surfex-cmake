@@ -133,6 +133,8 @@ INTEGER :: IRESP  ! Error code after redding
 INTEGER :: JLAYER ! loop counter on layers
 INTEGER :: IVERSION, IBUGFIX   ! surface version
 !
+LOGICAL :: GECOSG
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -183,6 +185,13 @@ IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=2) THEN
 ELSE 
   IO%LTR_ML = .FALSE.
 ENDIF
+!
+IF (IVERSION>8 .OR. IVERSION==8 .AND. IBUGFIX>=1) THEN
+  !
+  YRECFM='ALBEDO'
+  CALL READ_SURF(HPROGRAM,YRECFM,IO%CALBEDO,IRESP)
+  !
+ENDIF 
 !
 !* threshold to remove little fractions of patches
 !
@@ -526,7 +535,7 @@ END IF
 !*       4.     Physiographic data fields not to be computed by ecoclimap
 !               ---------------------------------------------------------
 !
- CALL READ_LECOCLIMAP(HPROGRAM,IO%LECOCLIMAP)
+ CALL READ_LECOCLIMAP(HPROGRAM,IO%LECOCLIMAP,GECOSG)
 !
  CALL READ_PGD_ISBA_PAR_n(DTCO, U, DTV, IG%NDIM, IO, HPROGRAM,IG%NDIM,OLAND_USE)
 IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(DTZ, HPROGRAM)

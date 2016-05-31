@@ -111,6 +111,7 @@ REAL, DIMENSION(SIZE(PFIELD,1))   :: ZSUM_WEIGHT_PATCH
 REAL, DIMENSION(SIZE(PFIELD,1))   :: ZWORK
 REAL, DIMENSION(SIZE(PFIELD,1))   :: ZDZ
 !
+REAL, DIMENSION(31) :: ZCOUNT
 INTEGER, DIMENSION(SIZE(PFIELD,1))  :: NMASK
 INTEGER ::  PATCH_LIST(NVEGTYPE)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -249,6 +250,20 @@ SELECT CASE (HATYPE)
       ENDDO
     END DO   
 !
+  CASE ('MAJ')
+!
+    ZWORK(:) = 0.
+    DO JJ=1,SIZE(PFIELD)
+      ZCOUNT(:) = 0.
+      DO JVEGTYPE=1,NVEGTYPE
+        JP= PATCH_LIST(JVEGTYPE)
+        IF (JP/=KPATCH) CYCLE
+        IMASK = KMASK(JJ)
+        ZCOUNT(NINT(PDATA(IMASK,JVEGTYPE))) = ZCOUNT(NINT(PDATA(IMASK,JVEGTYPE))) + ZWEIGHT(JJ,JVEGTYPE)
+      ENDDO
+      ZWORK(JJ) = FLOAT(MAXLOC(ZCOUNT,1))
+    END DO
+!
 !-------------------------------------------------------------------------------
 !
   CASE DEFAULT
@@ -296,6 +311,11 @@ SELECT CASE (HATYPE)
       ENDIF
     ENDDO
 !
+  CASE ('MAJ')
+!   
+    DO JI=1,SIZE(PFIELD)
+      PFIELD(JI) = ZWORK(JI)
+    ENDDO
 !-------------------------------------------------------------------------------
 !
   CASE DEFAULT

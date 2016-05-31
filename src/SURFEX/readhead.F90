@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE READHEAD(KGLB,PGLBLATMIN,PGLBLATMAX,PGLBLONMIN,PGLBLONMAX,&
-                           KNBLAT,KNBLON,PCUTVAL,PDLAT,PDLON,PLAT,PLON,KERR)  
+                           KNBLAT,KNBLON,PCUTVAL,PDLAT,PDLON,PLAT,PLON,KERR,KFACT)  
 !     ################################################################
 !
 !!**** *READHEAD* writes the head a the local 'latlon' file.
@@ -76,6 +76,7 @@ REAL,              INTENT(OUT) :: PDLON       ! longitude mesh in the data file
 REAL, DIMENSION(:), POINTER    :: PLAT        ! latitude  of data points
 REAL, DIMENSION(:), POINTER    :: PLON        ! longitude of data points
 INTEGER,           INTENT(OUT) :: KERR        ! return code
+INTEGER, INTENT(OUT) :: KFACT
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -87,7 +88,7 @@ INTEGER                    :: ININDEX    ! index of character 'N' in YSTRING1
 INTEGER                    :: ISINDEX    ! index of character 'S' in YSTRING1
 INTEGER                    :: IEINDEX    ! index of character 'E' in YSTRING1
 INTEGER                    :: IWINDEX    ! index of character 'W' in YSTRING1
-REAL, DIMENSION(7)         :: ZVAL       ! values of the head data
+REAL, DIMENSION(8)         :: ZVAL       ! values of the head data
 INTEGER                    :: IHEAD      ! index of the data in the array ZVAL
  CHARACTER(LEN=100)         :: YSTRING    ! total string in the head
  CHARACTER(LEN=100)         :: YSTRING1   ! string less the begining line descriptor
@@ -107,6 +108,8 @@ KERR=0
 !*         1.    Line of comments
 !                ----------------
 !
+ZVAL(:) = 1.
+!
 READ (KGLB,'(A100)',END=99) YSTRING
 !
 !-------------------------------------------------------------------------------
@@ -114,7 +117,7 @@ READ (KGLB,'(A100)',END=99) YSTRING
 !*         2.    Other lines
 !                -----------
 !
-DO JHEAD=1,7
+DO JHEAD=1,8
   READ (KGLB,'(A100)',END=99) YSTRING
   YSTRING=ADJUSTL(YSTRING)
 !
@@ -145,7 +148,10 @@ DO JHEAD=1,7
            YSTRING1=YSTRING(6:100) 
          CASE('cols:')
            IHEAD=7
-           YSTRING1=YSTRING(6:100) 
+           YSTRING1=YSTRING(6:100)
+         CASE('fact:')
+           IHEAD=8
+           YSTRING1=YSTRING(6:100)
   END SELECT
 !
 !*         2.2   Test on presence of geographical descritor (N, E, S or W)
@@ -195,6 +201,7 @@ PGLBLONMIN=ZVAL(5)
 PGLBLONMAX=ZVAL(4)+NINT((ZVAL(5)-ZVAL(4)+180.*(1.0+XSURF_EPSILON))/360.)*360.
 KNBLAT=NINT(ZVAL(6))
 KNBLON=NINT(ZVAL(7))
+KFACT=NINT(ZVAL(8))
 !
 PDLAT=(PGLBLATMAX-PGLBLATMIN)/KNBLAT
 PDLON=(PGLBLONMAX-PGLBLONMIN)/KNBLON

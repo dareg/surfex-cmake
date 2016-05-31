@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE READ_NAM_PGD_ISBA(HPROGRAM, KPATCH, KGROUND_LAYER,                         &
-                                   HISBA, HPEDOTF, HPHOTO, OTR_ML, PRM_PATCH,               &
+                                   HISBA, HPEDOTF, HPHOTO, OTR_ML, HALBEDO, PRM_PATCH,      &
                                    HCLAY, HCLAYFILETYPE, PUNIF_CLAY, OIMP_CLAY,             &
                                    HSAND, HSANDFILETYPE, PUNIF_SAND, OIMP_SAND,             &
                                    HSOC_TOP, HSOC_SUB, HSOCFILETYPE, PUNIF_SOC_TOP,         &
@@ -79,6 +79,7 @@ INTEGER,             INTENT(OUT)   :: KGROUND_LAYER ! number of soil layers
  CHARACTER(LEN=4),    INTENT(OUT)   :: HPEDOTF       ! Pedo-transfert function for DIF
  CHARACTER(LEN=3),    INTENT(OUT)   :: HPHOTO        ! photosynthesis option
 LOGICAL,             INTENT(OUT)   :: OTR_ML        ! new radiative transfert
+ CHARACTER(LEN=4),   INTENT(OUT)    :: HALBEDO
 REAL,                INTENT(OUT)   :: PRM_PATCH     ! threshold to remove little fractions of patches
  CHARACTER(LEN=28),   INTENT(OUT)   :: HSAND         ! file name for sand fraction
  CHARACTER(LEN=28),   INTENT(OUT)   :: HCLAY         ! file name for clay fraction
@@ -137,6 +138,7 @@ INTEGER                  :: NGROUND_LAYER    ! number of soil layers
  CHARACTER(LEN=4)         :: CPEDO_FUNCTION   ! Pedo-transfert function for DIF
  CHARACTER(LEN=3)         :: CPHOTO           ! photosynthesis option
 LOGICAL                  :: LTR_ML           ! new radiative transfert
+ CHARACTER(LEN=4)         :: CALBEDO
 REAL                     :: XRM_PATCH        ! threshold to remove little fractions of patches
  CHARACTER(LEN=28)        :: YSAND            ! file name for sand fraction
  CHARACTER(LEN=28)        :: YCLAY            ! file name for clay fraction
@@ -183,7 +185,7 @@ LOGICAL                  :: LIMP_SOC      ! Imposed maps of organic carbon
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_ISBA/ NPATCH, NGROUND_LAYER, CISBA, CPEDO_FUNCTION, CPHOTO,   &
-                   LTR_ML, XRM_PATCH, YCLAY, YCLAYFILETYPE, XUNIF_CLAY,    &
+                   LTR_ML, CALBEDO, XRM_PATCH, YCLAY, YCLAYFILETYPE, XUNIF_CLAY,  &
                    LIMP_CLAY, YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND, &
                    YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,        &
                    XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,  &
@@ -207,6 +209,7 @@ CISBA          = '3-L'
 CPEDO_FUNCTION = 'CH78'
 CPHOTO         = 'NON'
 LTR_ML         = .FALSE.
+CALBEDO        = 'DRY '
 XSOILGRID(:)   = XUNDEF
 XRM_PATCH      = 0.0
 !#####################
@@ -276,6 +279,7 @@ HISBA            = CISBA            ! ISBA option
 HPEDOTF          = CPEDO_FUNCTION   ! Pedo-transfert function for DIF
 HPHOTO           = CPHOTO           ! photosynthesis option
 OTR_ML           = LTR_ML           ! new radiative transfert
+HALBEDO          = CALBEDO 
 PRM_PATCH        = XRM_PATCH        ! threshol to remove little fractions of patches
 HSAND            = YSAND            ! file name for sand fraction
 HCLAY            = YCLAY            ! file name for clay fraction

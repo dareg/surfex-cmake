@@ -91,11 +91,12 @@ TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: IRESP          ! Error code after redding
-!
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 INTEGER           :: IVERSION
 INTEGER           :: IBUGFIX
+INTEGER           :: IRESP          ! Error code after redding
+!
+LOGICAL :: GECOSG
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -205,7 +206,7 @@ CALL PACK_INIT(DTCO,U,UG,HPROGRAM,'TOWN  ',TG, TOP%LCOVER,TOP%XCOVER,TOP%XZS )
 !*       4.     Physiographic data fields not to be computed by ecoclimap
 !               ---------------------------------------------------------
 !
- CALL READ_LECOCLIMAP(HPROGRAM,TOP%LECOCLIMAP)
+ CALL READ_LECOCLIMAP(HPROGRAM,TOP%LECOCLIMAP,GECOSG)
 !
  CALL READ_PGD_TEB_PAR_n(DTCO, U, BDD, DTB, DTT, TG%NDIM, TOP, &
                          HPROGRAM,TG%NDIM,'-')

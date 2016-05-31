@@ -44,13 +44,20 @@ IMPLICIT NONE
 !------------------------------------------------------------------------------
 !
 ! Maximum number of cover classes
-INTEGER, PARAMETER    :: JPCOVER  = 573
+INTEGER  :: JPCOVER
 !last class number of EUROPE
 INTEGER, PARAMETER    :: NCOVER_ECO1_END    = 255
 !firt class number of EUROPE
 INTEGER, PARAMETER    :: NCOVER_ECO2_START  = 301
 !
-INTEGER                                :: NVEGTYPE = 19
+INTEGER, PARAMETER :: NVEGTYPE = 19
+INTEGER, PARAMETER :: NWATTYPE = 2
+INTEGER, PARAMETER :: NSEATYPE = 1
+INTEGER, PARAMETER :: NTWNTYPE = 10
+INTEGER, DIMENSION(4) :: NTYPE = (/NVEGTYPE,NSEATYPE,NWATTYPE,NTWNTYPE/)
+!
+INTEGER  :: IDX_TWN_ECOSG = 0
+INTEGER               :: NCOVER = 573
 ! number of vegetation types
 !
 INTEGER  :: NVT_C4    ! C4 cultures types
@@ -77,6 +84,17 @@ INTEGER  :: NVT_PARK  ! irrigated PARKs gardens or peat bogs
 !                         C3 CULTures types, NO vegetation, ROCKs,
 !                         IRRigated crops, irrigated PARKs gardens or peat bogs)
 !
+INTEGER :: NUT_DENS
+INTEGER :: NUT_SUB1
+INTEGER :: NUT_SUB2
+INTEGER :: NUT_ZIC
+INTEGER :: NUT_ROAD
+INTEGER :: NUT_PORT
+INTEGER :: NUT_AIR
+INTEGER :: NUT_MINE
+INTEGER :: NUT_PARK
+INTEGER :: NUT_SPOR
+!
 !---------------------------------------------------------------------------------
 !
 ! Ecosystem corresponding to bare soil or permanent snow
@@ -88,8 +106,8 @@ INTEGER                                :: NPERMSNOW
 !
 ! Free water bodies
 !
-INTEGER, DIMENSION(3)                  :: NSEA
-INTEGER, DIMENSION(2)                  :: NWATER
+INTEGER, DIMENSION(:), ALLOCATABLE     :: NSEA
+INTEGER, DIMENSION(:), ALLOCATABLE     :: NWATER
 !
 !---------------------------------------------------------------------------------
 !
@@ -109,7 +127,7 @@ INTEGER                                :: NDATA_FLOOR_LAYER
 !---------------------------------------------------------------------------------
 !* names of all ecosystems
 !
- CHARACTER(LEN=60), DIMENSION(JPCOVER,2) :: CNAMES
+ CHARACTER(LEN=60), DIMENSION(:,:), ALLOCATABLE :: CNAMES
 !---------------------------------------------------------------------------------
 !
 ! reference height for CDN averaging

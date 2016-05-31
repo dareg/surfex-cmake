@@ -93,7 +93,7 @@ INTEGER :: IFILE                      ! logical units
 INTEGER :: ILUOUT                     ! output listing logical unit
 INTEGER :: IERR                       ! return codes
 !
-INTEGER :: JLOOP                      ! loop index
+INTEGER :: JLOOP, IFACT                ! loop index
  CHARACTER(LEN=100):: YSTRING          ! string
 !
 REAL    :: ZDLAT                      ! latitude mesh in the data file
@@ -126,7 +126,7 @@ IF (LHOOK) CALL DR_HOOK('READ_LATLON',0,ZHOOK_HANDLE)
 !            -----------------
 !
  CALL READHEAD(IFILE,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
-                INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR)  
+               INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR,IFACT)  
 IF (IERR/=0) THEN
   CALL ABOR1_SFX('READ_LATLON: PROBLEM IN FILE HEADER')
 END IF
@@ -194,6 +194,8 @@ DO JLINE=1,INBLINE
 !*   10.     Call to the adequate subroutine (point by point treatment)
 !            ----------------------------------------------------------
 !
+    ZVALUE(:) = ZVALUE(:) / FLOAT(IFACT)
+
     CALL PT_BY_PT_TREATMENT(UG, U, USS, &
                             ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&
                               HSUBROUTINE                                              )  

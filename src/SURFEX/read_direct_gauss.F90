@@ -115,7 +115,7 @@ REAL    :: ZLONMAX                    ! maximum longitude of mask mesh
 REAL    :: ZLATMIN                    ! minimum latitude of mask mesh
 REAL    :: ZLATMAX                    ! maximum latitude of mask mesh
 REAL    :: ZSHIFT                     ! shift on longitudes
-REAL    :: ZFACT                      ! Factor integer to real
+INTEGER    :: IFACT                      ! Factor integer to real
 !
 REAL, DIMENSION(:), POINTER :: ZLAT   ! latitude of data points
 REAL, DIMENSION(:), POINTER :: ZLON   ! longitude of data points
@@ -174,7 +174,7 @@ YFILEHDR =ADJUSTL(ADJUSTR(HFILENAME)//'.hdr')
 !*    1.3    Reading in header of direct access characteristics
 !            --------------------------------------------------
 !
-DO JLOOP=1,9
+DO JLOOP=1,10
   READ(IGLBHDR,'(A100)') YSTRING
   IF (YSTRING(1:10)=='recordtype') EXIT
 END DO
@@ -200,18 +200,6 @@ IF (IINDEX/=0) IBITS=32
 IINDEX=INDEX(YSTRING1,'4')
 IF (IINDEX/=0) IBITS=64
 !
-IF(YTYPE=='INTEGER')THEN
-  IF(HFIELD=='CTI'.OR.HFIELD=='SAND'.OR. HFIELD=='CLAY'.OR.HFIELD(1:3)=='SOC')THEN
-    ZFACT=100.0
-  ELSEIF (HFIELD=='water depth') THEN
-    ZFACT=10.0
-  ELSE
-    ZFACT=1.0
-  ENDIF
-ELSE
-  ZFACT=1.0
-ENDIF
-!
 IF (LHOOK) CALL DR_HOOK('READ_DIRECT_GAUSS_1',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('READ_DIRECT_GAUSS_2',0,ZHOOK_HANDLE)
 !----------------------------------------------------------------------------
@@ -223,8 +211,16 @@ IF (LHOOK) CALL DR_HOOK('READ_DIRECT_GAUSS_2',0,ZHOOK_HANDLE)
 !            -----------------
 !
  CALL READHEAD(IGLBHDR,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
-                INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR)  
+               INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR,IFACT)  
 IF (IERR/=0) CALL ABOR1_SFX('READ_DIRECT_GAUSS: PB IN FILE HEADER')
+!
+IF(YTYPE=='INTEGER')THEN
+  IF(HFIELD=='CTI'.OR.HFIELD=='SAND'.OR. HFIELD=='CLAY'.OR.HFIELD(1:3)=='SOC')THEN
+    IFACT=100.0
+  ELSEIF (HFIELD=='water depth') THEN
+    IFACT=10.0
+  ENDIF
+ENDIF
 !
 !*    2.2    Closing of header
 !            -----------------
@@ -393,7 +389,7 @@ DO
             WRITE(ILUOUT,*) '*******************************************************************'
           ENDIF
           JL = IPAS + 1 !back to first lat
-          CALL REFRESH_PGDWORK
+          CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT   ! rereads the file
         END IF
       ENDIF
@@ -425,7 +421,7 @@ DO
             WRITE(ILUOUT,*) '*******************************************************************'
           ENDIF
           JL = IPAS + 1
-          CALL REFRESH_PGDWORK
+          CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT
         ENDIF
       END IF      
@@ -449,7 +445,7 @@ DO
             WRITE(ILUOUT,*) '*******************************************************************'
           ENDIF
           JL = IPAS + 1
-          CALL REFRESH_PGDWORK
+          CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT
         END IF
       ENDIF
@@ -462,7 +458,7 @@ DO
       WHERE(ZVALUE(:)<0.0) ZVALUE(:)=ZNODATA
     ENDIF
     !
-    WHERE(ZVALUE(:)/=ZNODATA)ZVALUE(:)=ZVALUE(:)/ZFACT
+    WHERE(ZVALUE(:)/=ZNODATA)ZVALUE(:)=ZVALUE(:)/FLOAT(IFACT)
     !
     !----------------------------------------------------------------------------
     !

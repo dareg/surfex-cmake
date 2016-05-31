@@ -3,13 +3,9 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #######################
-      SUBROUTINE READ_SURF_ISBA_PAR_n (DTCO, U, KPATCH, &
-                                       HPROGRAM,HREC,KLUOUT,KSIZE,PFIELD,KRESP,KVERSION,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURF_ISBA_PAR_n (DTCO, U, KPATCH, HPROGRAM, HREC, KLUOUT, KSIZE, &
+                                       KVERSION, KBUGFIX, ODATA, PFIELD, KRESP, HCOMMENT, HDIR)
 !     #######################
-!
-!
-!
-!
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -28,9 +24,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-!
-!
-!
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -41,10 +34,13 @@ INTEGER, INTENT(IN) :: KPATCH
 !
 INTEGER,                 INTENT(IN) :: KLUOUT
 INTEGER,                 INTENT(IN) :: KSIZE
+INTEGER,                 INTENT(IN) :: KVERSION
+INTEGER,                 INTENT(IN) :: KBUGFIX
+LOGICAL, DIMENSION(:),   INTENT(IN) :: ODATA
+!
 REAL, DIMENSION(:,:),    INTENT(OUT):: PFIELD ! array containing the data field  
 
 INTEGER                  ,INTENT(OUT) :: KRESP      ! KRESP  : return-code if a problem appears
-INTEGER, INTENT(IN) :: KVERSION
  CHARACTER(LEN=*),OPTIONAL,INTENT(OUT) :: HCOMMENT   ! name of the article to be read
  CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR       ! type of field :
 !                                                   ! 'H' : field with
@@ -54,11 +50,13 @@ INTEGER, INTENT(IN) :: KVERSION
 !* local variables
 !  ---------------
 !
+ CHARACTER(LEN=12) :: YREC
+ CHARACTER(LEN=3) :: YVEG
 REAL, DIMENSION(KSIZE, NVEGTYPE)  :: ZFIELD
 REAL, DIMENSION(SIZE(PFIELD,1),1,KPATCH) :: ZFIELD_PATCH
 REAL, DIMENSION(SIZE(PFIELD,1),1,NVEGTYPE) :: ZFIELD_VEGTYPE
  CHARACTER(LEN=1)   :: YDIR
-INTEGER :: INI, JPATCH, IPATCH, JVEGTYPE
+INTEGER :: INI, JP, IPATCH, JV, JV2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------
@@ -70,36 +68,72 @@ IF (PRESENT(HDIR)) YDIR = HDIR
 INI = SIZE(PFIELD,1)
 !
 IF (KVERSION<7) THEN
-  CALL READ_SURF(&
-                 HPROGRAM,HREC,ZFIELD(:,1:KPATCH),KRESP,HCOMMENT=HCOMMENT,HDIR=YDIR)
+  !
+  ! fields were written by patch
+  CALL READ_SURF(HPROGRAM,HREC,ZFIELD(:,1:KPATCH),KRESP,HCOMMENT=HCOMMENT,HDIR=YDIR)
+  ! case zoom
   IF (INI.NE.KSIZE) THEN
-    CALL HOR_INTERPOL(DTCO, U, &
-                      KLUOUT,ZFIELD(:,1:KPATCH),PFIELD(:,1:KPATCH))
+    CALL HOR_INTERPOL(DTCO, U, KLUOUT,ZFIELD(:,1:KPATCH),PFIELD(:,1:KPATCH))
   ELSE
+    ! classical case
     PFIELD(:,1:KPATCH) = ZFIELD(:,1:KPATCH)
   ENDIF
-  DO JPATCH = 1, KPATCH
-    ZFIELD_PATCH(:,1,JPATCH) = PFIELD(:,JPATCH)
-  ENDDO
-  CALL PUT_ON_ALL_VEGTYPES(INI,1,KPATCH,NVEGTYPE,ZFIELD_PATCH,ZFIELD_VEGTYPE)
-  PFIELD(:,:) = ZFIELD_VEGTYPE(:,1,:)
+  !
+  ! classical case
+  IF (SIZE(PFIELD,2)==NVEGTYPE) THEN
+    DO JP = 1, KPATCH
+      ZFIELD_PATCH(:,1,JP) = PFIELD(:,JP)
+    ENDDO         
+    ! patchs shared on vegtypes
+    CALL PUT_ON_ALL_VEGTYPES(INI,1,KPATCH,NVEGTYPE,ZFIELD_PATCH,ZFIELD_VEGTYPE)
+    PFIELD(:,:) = ZFIELD_VEGTYPE(:,1,:)
+  ENDIF
+  !
 ELSE
-  CALL READ_SURF(&
-                 HPROGRAM,HREC,ZFIELD(:,:),KRESP,HCOMMENT=HCOMMENT,HDIR=YDIR)
-  IF (INI.NE.KSIZE) THEN
-    CALL HOR_INTERPOL(DTCO, U, &
-                      KLUOUT,ZFIELD(:,:),ZFIELD_VEGTYPE(:,1,:))
+  !
+  IF (KVERSION>8 .OR. (KVERSION==8 .AND. KBUGFIX>=1)) THEN
+    !
+    DO JV = 1,NVEGTYPE
+      IF (ODATA(JV)) THEN
+        WRITE(YVEG,FMT='(A1,I2.2)') 'V',JV
+        YREC = TRIM(ADJUSTL(HREC))//YVEG
+        CALL READ_SURF(HPROGRAM,YREC,ZFIELD(:,JV),KRESP,HCOMMENT=HCOMMENT,HDIR=YDIR)
+      ELSE
+        DO JV2=JV,1,-1
+          IF (ODATA(JV2)) THEN
+            ZFIELD(:,JV) = ZFIELD(:,JV2)
+            EXIT
+          ENDIF
+        ENDDO
+      ENDIF
+    ENDDO
+    !
   ELSE
+    !
+    ! field written by vegtype
+    CALL READ_SURF(HPROGRAM,HREC,ZFIELD(:,:),KRESP,HCOMMENT=HCOMMENT,HDIR=YDIR)
+    !
+  ENDIF
+  !
+  ! case zoom
+  IF (INI.NE.KSIZE) THEN
+    CALL HOR_INTERPOL(DTCO, U, KLUOUT,ZFIELD(:,:),ZFIELD_VEGTYPE(:,1,:))
+  ELSE
+    ! classical case
     ZFIELD_VEGTYPE(:,1,:) = ZFIELD(:,:)
-  ENDIF  
+  ENDIF
+  !
+  ! case mode_read_extern
   IF (SIZE(PFIELD,2).NE.NVEGTYPE) THEN
     IPATCH = SIZE(PFIELD,2)
     PFIELD(:,:) = 0.
-    DO JVEGTYPE = 1, NVEGTYPE
-      JPATCH = VEGTYPE_TO_PATCH(JVEGTYPE,IPATCH)
-      IF (JPATCH<=IPATCH) PFIELD(:,JPATCH) = MAX(PFIELD(:,JPATCH),ZFIELD_VEGTYPE(:,1,JVEGTYPE))
+    DO JV = 1, NVEGTYPE
+      JP = VEGTYPE_TO_PATCH(JV,IPATCH)
+      ! artefact to simplify in mode_read_extern: we take the upper value
+      PFIELD(:,JP) = MAX(PFIELD(:,JP),ZFIELD_VEGTYPE(:,1,JV))
     ENDDO
   ELSE
+    ! classical case
     PFIELD(:,:) = ZFIELD_VEGTYPE(:,1,:)
   ENDIF        
 ENDIF

@@ -6,7 +6,7 @@
       SUBROUTINE TREAT_FIELD (UG, U, USS, &
                               HPROGRAM,HSCHEME,HFILETYPE,    &
                               HSUBROUTINE,HFILENAME,HFIELD,   &
-                              PPGDARRAY,HSFTYPE               )  
+                              PPGDARRAY              )  
 !     ##############################################################
 !
 !!**** *TREAT_FIELD* chooses which treatment subroutine to use
@@ -111,7 +111,6 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
  CHARACTER(LEN=28), INTENT(IN) :: HFILENAME     ! Name of the field file.
  CHARACTER(LEN=20), INTENT(IN) :: HFIELD        ! Name of the field.
 REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PPGDARRAY ! field on MESONH grid
- CHARACTER(LEN=3),   INTENT(IN),    OPTIONAL :: HSFTYPE
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -154,27 +153,27 @@ SELECT CASE (HFILETYPE)
     ENDIF
 
   CASE ('BINLLV')
-    CALL INI_SSOWORK
+    IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK
     IF (NRANK==NPIO) CALL READ_BINLLV(UG, U, USS, &
                         HPROGRAM,HSUBROUTINE,HFILENAME)
 
   CASE ('BINLLF')
-    CALL INI_SSOWORK
+    IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK
     IF (NRANK==NPIO) CALL READ_BINLLVFAST(UG, U, USS, &
                             HPROGRAM,HSUBROUTINE,HFILENAME)
 
   CASE ('ASCLLV')
-    CALL INI_SSOWORK
+    IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK
     IF (NRANK==NPIO) CALL READ_ASCLLV(UG, U, USS, &
                         HPROGRAM,HSUBROUTINE,HFILENAME)
 
   CASE ('LATLON')
-    CALL INI_SSOWORK
+    IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK
     IF (NRANK==NPIO) CALL READ_LATLON(UG, U, USS, &
                         HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME)
 
   CASE ('NETCDF')
-    CALL INI_SSOWORK
+    IF (HSUBROUTINE=='A_OROG') CALL INI_SSOWORK
     IF (NRANK==NPIO) CALL READ_PGD_NETCDF(UG, U, USS, &
                             HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD)
 

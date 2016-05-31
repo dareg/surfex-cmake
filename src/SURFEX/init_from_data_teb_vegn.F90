@@ -162,9 +162,9 @@ IF (OTIME) THEN
   PEK%XCV(:) = DTV%XPAR_CV(:,1)
 !
 !---------------------------------------------------------------------------------
-  PEK%XALBNIR_VEG(:) = DTV%XPAR_ALBNIR_VEG(:,1)
-  PEK%XALBVIS_VEG(:) = DTV%XPAR_ALBVIS_VEG(:,1)
-  PEK%XALBUV_VEG(:) = DTV%XPAR_ALBUV_VEG(:,1)
+  PEK%XALBNIR_VEG(:) = DTV%XPAR_ALBNIR_VEG(:,1,1)
+  PEK%XALBVIS_VEG(:) = DTV%XPAR_ALBVIS_VEG(:,1,1)
+  PEK%XALBUV_VEG(:)  = DTV%XPAR_ALBUV_VEG(:,1,1)
 !
   IF (SIZE(PEK%XGMES)>0) PEK%XGMES(:) = DTV%XPAR_GMES(:,1)
 

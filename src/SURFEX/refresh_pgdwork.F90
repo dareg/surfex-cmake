@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ##########################
-      SUBROUTINE REFRESH_PGDWORK
+      SUBROUTINE REFRESH_PGDWORK(HSUBROUTINE)
 !     ##########################
 !
 !!**** *REFRESH_PGDWORK* ! refreshes arrays used in PGD work module
@@ -37,6 +37,7 @@
 !
 USE MODD_PGDWORK,  ONLY : X3D_ALL, N3D_ALL, XSUMVAL, XSUMVAL2, XEXTVAL2, NSIZE
 !
+USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -48,7 +49,8 @@ IMPLICIT NONE
 !*    1.     Cover array
 !            -----------
 !
-
+ CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('REFRESH_PGDWORK',0,ZHOOK_HANDLE)
@@ -76,7 +78,11 @@ END IF
 !            --------------
 !
 IF (ALLOCATED(X3D_ALL) .AND. ALLOCATED(N3D_ALL)) THEN
-  X3D_ALL(:,:,:) = -99999.
+  IF (HSUBROUTINE=='A_OROG') THEN
+    X3D_ALL(:,:,:) = -XUNDEF
+  ELSE
+    X3D_ALL(:,:,:) = 0.
+  ENDIF
   N3D_ALL(:,:,:) = 0
 ENDIF
 IF (LHOOK) CALL DR_HOOK('REFRESH_PGDWORK',1,ZHOOK_HANDLE)

@@ -169,7 +169,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   CALL TREAT_FIELD(UG, U, USS, &
                    HPROGRAM,'SURF  ',HFILETYPE,'A_MESH',HFILE,   &
-                   YFIELD,ZFIELD,HAREA                           )  
+                   YFIELD,ZFIELD                          )  
 !
 !-------------------------------------------------------------------------------
 !
