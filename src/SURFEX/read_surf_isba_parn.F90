@@ -67,6 +67,8 @@ IF (PRESENT(HDIR)) YDIR = HDIR
 !
 INI = SIZE(PFIELD,1)
 !
+ZFIELD(:,:) = 0.
+!
 IF (KVERSION<7) THEN
   !
   ! fields were written by patch
