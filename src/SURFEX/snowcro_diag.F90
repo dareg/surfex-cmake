@@ -105,8 +105,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
     
       ! For Crocus diagnostics we always work with depth projected on the vertical
       ! The same correction is also done in diag_misc_isban for computing total SWE and SD
-      ZSNOWSWE(JJ,JST)=PSNOWSWE(JJ,JST)/PDIRCOSZW(JJ) 
+      PSNOWSWE(JJ,JST)=PSNOWSWE(JJ,JST)/PDIRCOSZW(JJ) 
       PSNOWDZ(JJ,JST)=PSNOWDZ(JJ,JST)/PDIRCOSZW(JJ)
+      PSNOWLIQ(JJ,JST)=PSNOWLIQ(JJ,JST)/PDIRCOSZW(JJ)
     
       ZG1=PSNOWGRAN1(JJ,JST)/99.
       ZRFIN=0.17*PSNOWRHO(JJ,JST)-31
