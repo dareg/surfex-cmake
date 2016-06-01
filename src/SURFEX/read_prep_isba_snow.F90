@@ -67,7 +67,7 @@ USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
                            XIMPURSNOW_p=>XIMPURSNOW
                            
 !
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX , LSNOW_PREP_PERM
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX , LSNOW_PREP_PERM, NIMPUR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -79,7 +79,7 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
  CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
-INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
+ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
@@ -92,6 +92,8 @@ LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, &
                                     XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW, &
                                     XIMPURSNOW
+!INTEGER           :: NIMPUR  ! Number of impurity types                  
+                                    
 INTEGER           :: JLAYER
 !
 LOGICAL           :: LFILE
@@ -106,7 +108,7 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,LSNOW_PREP_PERM, &
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
-                            XIMPURSNOW, LSWEMAX,XSWEMAX
+                            XIMPURSNOW, LSWEMAX,XSWEMAX,NIMPUR
 !-------------------------------------------------------------------------------
 !* default
 !  -------
@@ -116,6 +118,7 @@ IF (LNAM_READ) THEN
   !
   CSNOW = 'D95'
   NSNOW_LAYER = 1
+  NIMPUR = 1    !Number of different type of impurities
   !
   CFILE_SNOW = '                         '
   CTYPE_SNOW = '      '

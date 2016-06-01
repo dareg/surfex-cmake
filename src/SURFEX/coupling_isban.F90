@@ -736,6 +736,8 @@ LOGICAL :: GMEB  ! True if multi-energy balance should be used for the specific 
 INTEGER :: JJ, JI, JK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+!INTEGER :: ILUOUT   ! output listing logical unit
+!
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_n:TREAT_PATCH',0,ZHOOK_HANDLE)
 !
 !--------------------------------------------------------------------------------------
@@ -834,9 +836,10 @@ ENDIF
    GMEB=IM%I%LMEB_PATCH(JPATCH)
 !
 ! Pack ISBA input and prognostic variables (modd_isban) for each patch:
+
 !
  CALL PACK_ISBA_PATCH_GET_SIZE_n(IM%I, IM%PKI, &
-                                 JPATCH)
+                                 JPATCH)                          
 !
  CALL PACK_DIAG_PATCH_GET_SIZE_n(IM%DGEI, IM%DGI, IM%DGMI, IM%I, IM%PKDI, &
                                  JPATCH)

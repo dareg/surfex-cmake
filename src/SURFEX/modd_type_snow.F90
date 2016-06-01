@@ -29,7 +29,7 @@
 !!      P. Samuelsson 07/2014 additional snow albedos
 !-------------------------------------------------------------------------------
 !
-!*       0.   DECLARATIONS
+!*       0.   DECLARATIONSa
 !             ------------
 !
 !

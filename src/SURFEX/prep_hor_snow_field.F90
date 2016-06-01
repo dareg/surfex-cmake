@@ -11,8 +11,8 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, &
                                 PUNIF_TSNOW, PUNIF_LWCSNOW,     &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
-                                PUNIF_HISTSNOW,PUNIF_AGESNOW, &
-                                PUNIF_IMPURSNOW,                &                                
+                                PUNIF_HISTSNOW,PUNIF_AGESNOW,   &
+                                PUNIF_IMPURSNOW,  &                                
                                 PF,PDEPTH,PVEGTYPE,             &
                                 PVEGTYPE_PATCH,PPATCH           )
 !     #######################################################
@@ -113,7 +113,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW !
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW ! 
-REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_IMPURSNOW ! 
+REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_IMPURSNOW !
 
 REAL,DIMENSION(:,:,:),  INTENT(OUT),OPTIONAL :: PF     ! output field (x,kpatch)
 REAL,DIMENSION(:,:,:),INTENT(IN), OPTIONAL :: PDEPTH ! thickness of each snow layer

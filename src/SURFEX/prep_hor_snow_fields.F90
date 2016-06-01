@@ -12,7 +12,7 @@ SUBROUTINE PREP_HOR_SNOW_FIELDS (DTCO, &
                                 PUNIF_ASNOW, OSNOW_IDEAL,    &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,&
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,&
-                                PUNIF_IMPURSNOW,&
+                                PUNIF_IMPURSNOW,          &
                                 PVEGTYPE, PVEGTYPE_PATCH,    &
                                 PPATCH, OKEY                 )  
 !     #######################################################
@@ -131,6 +131,8 @@ INTEGER                             :: IRESP     ! error return code
 LOGICAL                             :: GGLACIER
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+
+
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_SNOW_FIELDS',0,ZHOOK_HANDLE)
@@ -205,7 +207,7 @@ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,&
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,             &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,&
-                         PUNIF_IMPURSNOW, &                      
+                         PUNIF_IMPURSNOW,           &                      
                          PF=ZW, PVEGTYPE=ZVEGTYPE,                            &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH         )  
 !
@@ -223,7 +225,7 @@ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,&
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,             &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,         &
-                         PUNIF_IMPURSNOW,                                     &
+                         PUNIF_IMPURSNOW,                                               &
                          PF=ZD, PVEGTYPE=ZVEGTYPE,                            &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH         )
 !
@@ -267,7 +269,7 @@ CALL PREP_HOR_SNOW_FIELD(DTCO, &
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,     &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                  &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,              &
-                         PUNIF_IMPURSNOW,                                          &
+                         PUNIF_IMPURSNOW,                                                   &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                         &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH              )  
 !
@@ -340,7 +342,7 @@ YSNSURF='ALB'//HSURF
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                         PUNIF_IMPURSNOW,&
+                         PUNIF_IMPURSNOW,            &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             ) 
 !
@@ -355,7 +357,7 @@ IF (TPSNOW%SCHEME/='D95') THEN
                            PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                            PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                            PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                           PUNIF_IMPURSNOW,&
+                           PUNIF_IMPURSNOW,            &
                            PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                            PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )
   !
@@ -372,7 +374,7 @@ IF (TPSNOW%SCHEME=='CRO'.OR. TPSNOW%SCHEME=='3-L') THEN
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                         PUNIF_IMPURSNOW,&
+                         PUNIF_IMPURSNOW,          &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
@@ -398,7 +400,7 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                         PUNIF_IMPURSNOW,&
+                         PUNIF_IMPURSNOW,          &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
@@ -410,7 +412,7 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                         PUNIF_IMPURSNOW,&
+                         PUNIF_IMPURSNOW,          &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
@@ -422,7 +424,7 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                         PUNIF_IMPURSNOW,&
+                         PUNIF_IMPURSNOW,          &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )   
   !
@@ -435,7 +437,7 @@ IF (TPSNOW%SCHEME=='CRO') THEN
                          PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
                          PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
                          PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW,             &
-                         PUNIF_IMPURSNOW,&
+                         PUNIF_IMPURSNOW,          &
                          PDEPTH=ZDEPTH, PVEGTYPE=ZVEGTYPE,                        &
                          PVEGTYPE_PATCH=ZVEGTYPE_PATCH, PPATCH=ZPATCH             )  
   

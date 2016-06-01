@@ -107,7 +107,7 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 REAL, SAVE       :: XTAU_SMELT
 ! for snow impurity
 REAL, SAVE :: XIMPUR_COEFF !1.E-8 !deposition intensity at top of snowpack (unitless)
-REAL, SAVE     :: XIMPUR_INIT !0.5E-7 !g/g
+REAL, SAVE     :: XIMPUR_INIT !0.5E-7 !g/g   !N6K
 REAL, SAVE    :: XMAXIMPUR=1.E-5
 
 !

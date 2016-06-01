@@ -315,7 +315,7 @@ USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XREFIMP_I
 !
 !PPWAVELENGTHS nanometers
 !
-IMPLICIT NONE  
+IMPLICIT NONE  !N6K Definition of the refractive index for the impurities
 !
 REAL, DIMENSION    (NPNBANDS) :: ZWL_UM ! Wavelengths in micrometers (Chang, 1990 formulas)
 REAL, DIMENSION    (NPNBANDS) :: ZINDEX_SOOT_REAL,ZINDEX_SOOT_IMAG ! real and imaginary components of refractive index

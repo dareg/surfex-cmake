@@ -647,7 +647,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST   ! Snow grain historical param
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE    ! Snow grain age
 !                                                   NOTE : methamorphism is only activated if the flag
 !                                                   OSNOW_METAMO=TRUE
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR   !N6K
 ! 
 ! Diagnostics:
 !

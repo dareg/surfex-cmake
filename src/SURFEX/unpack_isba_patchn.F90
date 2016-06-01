@@ -158,7 +158,7 @@ IF (I%NPATCH==1) THEN
      I%TSNOW%GRAN1     (:, :, 1) = PKI%XP_SNOWGRAN1   (:, :)
      I%TSNOW%GRAN2     (:, :, 1) = PKI%XP_SNOWGRAN2   (:, :)
      I%TSNOW%HIST      (:, :, 1) = PKI%XP_SNOWHIST    (:, :)
-     I%TSNOW%IMPUR     (:, :, 1) = PKI%XP_SNOWIMPUR   (:, :)
+     I%TSNOW%IMPUR     (:, :, 1) = PKI%XP_SNOWIMPUR   (:, :)  !N6K
   END IF
   !
   IF(I%LGLACIER)THEN
