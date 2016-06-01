@@ -285,6 +285,25 @@ INLVLS          = SIZE(PEK%TSNOW%WSNOW(:,:),2)
 INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
 !
 !
+IF(.NOT.OMEB)THEN 
+  !
+  ! If MEB activated, these values are input, else initialize here:
+  !
+  PGRNDFLUX(:)      = 0.0
+  PLES3L(:)         = 0.0
+  PLEL3L(:)         = 0.0    
+  PEVAP(:)          = 0.0
+  PRI(:)            = XUNDEF  
+  PEK%TSNOW%EMIS(:) = XEMISSN    
+  DMK%XRNSNOW(:)    = 0.0
+  DMK%XHSNOW(:)     = 0.0
+  DMK%XGFLUXSNOW(:) = 0.0
+  DMK%XHPSNOW(:)    = 0.0
+  DMK%XUSTARSNOW(:) = 0.0
+  DMK%XCDSNOW(:)    = 0.0
+  DMK%XCHSNOW(:)    = 0.0
+  !
+ENDIF
 !
 ! Use ISBA-SNOW3L or NOT: NOTE that if explicit soil diffusion method in use,
 ! then *must* use explicit snow model:
@@ -295,19 +314,6 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
     !
     ! If MEB activated, these values are input, else initialize here:
     !
-    PGRNDFLUX(:)      = 0.0
-    PLES3L(:)         = 0.0
-    PLEL3L(:)         = 0.0    
-    PEVAP(:)          = 0.0
-    PRI(:)            = XUNDEF  
-    PEK%TSNOW%EMIS(:) = XEMISSN    
-    DMK%XRNSNOW(:)    = 0.0
-    DMK%XHSNOW(:)     = 0.0
-    DMK%XGFLUXSNOW(:) = 0.0
-    DMK%XHPSNOW(:)    = 0.0
-    DMK%XUSTARSNOW(:) = 0.0
-    DMK%XCDSNOW(:)    = 0.0
-    DMK%XCHSNOW(:)    = 0.0
     ZSWNET_N(:)       = 0.0 
     ZSWNET_NS(:)      = 0.0
     ZLWNET_N(:)       = 0.0
