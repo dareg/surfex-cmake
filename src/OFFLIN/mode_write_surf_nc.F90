@@ -1261,8 +1261,8 @@ YATT(1) = HCOMMENT
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+print*,HREC
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFL1_NC',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -1273,15 +1273,19 @@ IF (NID_NC /= 0) THEN
     ! 0. find filename
     ! -----------------
     !
-    IRET(1) = NF_INQ_DIMID(NID_NC,'Number_of_covers',IDIMIDS(1))
+    IF (HREC(1:2)=='L_') THEN
+      IRET(1) = NF_INQ_DIMID(NID_NC,'Nb_of_input_data',IDIMIDS(1))
+    ELSE
+      IRET(1) = NF_INQ_DIMID(NID_NC,'Number_of_covers',IDIMIDS(1))
+    ENDIF
     IRET(2) = NF_INQ_DIMLEN(NID_NC,IDIMIDS(1),IDIMLEN(1))
     !
     IF (LDEF) THEN
-      CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF_CHAR, 1)
+      CALL DEF_VAR_NETCDF( HSELECT, NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF_CHAR, 1)
     !
     ELSE
       JRET = NF_INQ_VARID(NID_NC, HREC, IVAR_ID)
+      print*,IDIMLEN(1)
       CALL WRITE_DATAL1_NC(IDIMLEN(1))
     ENDIF
     !
