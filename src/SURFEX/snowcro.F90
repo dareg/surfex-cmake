@@ -242,7 +242,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST
 !                                                   parameter (only for non
 !                                                   dendritic snow)
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWAGE  ! Snow grain age
-REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWIMPUR  ! Snow impurity content !N6K
+REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWIMPUR  ! Snow impurity content
 !
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWTEMP
 !                                      PSNOWTEMP = Snow layer(s) temperature (m)
@@ -349,8 +349,8 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
                                          !-----------------------                                         
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities) !N6K
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities) !N6K
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND, ZRADSINK 
 !                                      ZSNOWTEMP  = Snow layer(s) averaged temperature (K)
@@ -413,7 +413,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZUSTAR2_IC, ZTA_IC, ZQA_IC, &
 !                                      ZPEQ_B_COEF_T = transformed B-air specific humidity coefficient
 !
 REAL, DIMENSION(SIZE(PTA))          :: ZSNOWRHOF, ZSNOWDZF, ZSNOWGRAN1F, ZSNOWGRAN2F, ZSNOWHISTF 
-REAL, DIMENSION(SIZE(PTA))          :: ZSNOWAGEF, ZSNOWIMPURF !N6K
+REAL, DIMENSION(SIZE(PTA))          :: ZSNOWAGEF, ZSNOWIMPURF
 
 ! New roughness lengths in case of glaciers without snow.
 REAL, DIMENSION(SIZE(PTA))          :: ZZ0_SNOWICE, ZZ0H_SNOWICE, ZZ0EFF_SNOWICE
@@ -431,7 +431,7 @@ LOGICAL, DIMENSION(SIZE(PTA))       :: GSNOWFALL,GMODIF_MAILLAGE
 REAL, DIMENSION(SIZE(PTA))          :: ZWORK,ZWORK2
 !
 REAL :: ZTSTEPDAYS ! time step in days
-REAL :: ZMASSICE, ZMASSICENEXT, ZEXCESSIMPUR !N6K
+REAL :: ZMASSICE, ZMASSICENEXT, ZEXCESSIMPUR
 !
 LOGICAL :: GCOND_GRAIN, GCOND_YEN
 
@@ -639,10 +639,10 @@ DO JJ=1,SIZE(ZSNOW)
   IF ( GMODIF_MAILLAGE(JJ) ) THEN    
     CALL SNOWNLGRIDFRESH_1D(JJ,ZSNOW(JJ),PSNOWDZ(JJ,:),ZSNOWDZN(JJ,:),PSNOWRHO(JJ,:),    &
                             PSNOWHEAT(JJ,:),PSNOWGRAN1(JJ,:),PSNOWGRAN2(JJ,:),           &
-                            PSNOWHIST(JJ,:),PSNOWAGE(JJ,:),PSNOWIMPUR(JJ,:),& !N6K
+                            PSNOWHIST(JJ,:),PSNOWAGE(JJ,:),PSNOWIMPUR(JJ,:),&
                             GSNOWFALL(JJ),ZSNOWRHOF(JJ),  &
                             ZSNOWDZF(JJ),PSNOWHMASS(JJ),ZSNOWGRAN1F(JJ),ZSNOWGRAN2F(JJ), &
-                            ZSNOWHISTF(JJ),ZSNOWAGEF(JJ),ZSNOWIMPURF(JJ),&  !N6K
+                            ZSNOWHISTF(JJ),ZSNOWAGEF(JJ),ZSNOWIMPURF(JJ),&
                             INLVLS_USE(JJ),HSNOWMETAMO      ) 
   ENDIF
   !
@@ -799,7 +799,7 @@ SELECT CASE (HSNOWRAD)
     ZSNOWIMP_CONTENT(:,:,1) = 100.0E-9
   CASE ("TAR")
     ZSNOWIMP_CONTENT(:,:,1) = 2. * PSNOWAGE(:,:) * 1E-9
-  CASE("TA3")                        !N6K
+  CASE("TA3")
     ! Increase impurity content following parameterization from S. Morin
 
     DO JJ=1, size(ZSNOW)
@@ -850,7 +850,7 @@ SELECT CASE (HSNOWRAD)
     ENDDO
 
    
-  ZSNOWIMP_CONTENT(:,:,1)= PSNOWIMPUR(:,:)    !N6K
+  ZSNOWIMP_CONTENT(:,:,1)= PSNOWIMPUR(:,:)
   
   CASE DEFAULT
 END SELECT
@@ -3263,7 +3263,7 @@ DO JJ = 1,SIZE(PSNOWDZ,1)
     ! PSNOWIMPUR in g/g of ice --> the impurity content of new liquid water is transfered to ice
     !
     PSNOWIMPUR(JJ,JST)=PSNOWIMPUR(JJ,JST)/ZCMPRSFACT(JJ,JST) !conservation of impurity content
- !  PSNOWIMPUR(JJ,JST)=PSNOWIMPUR(JJ,JST)*(0.95*ZCMPRSFACT(JJ,JST)+0.05) N6K
+ !  PSNOWIMPUR(JJ,JST)=PSNOWIMPUR(JJ,JST)*(0.95*ZCMPRSFACT(JJ,JST)+0.05)
    ! scavenging of 30% of melt
    ! 2. Add snow melt to current snow liquid water content:
     ! ------------------------------------------------------
@@ -3303,7 +3303,7 @@ REAL, INTENT(IN)                      :: PTSTEP
 REAL, DIMENSION(:), INTENT(IN)        :: PRR
 !
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWDZ, PSNOWTEMP, PSNOWLIQ, PSNOWRHO
-REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWIMPUR               !N6K
+REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWIMPUR
 !
 REAL, DIMENSION(:), INTENT(INOUT)     :: PTHRUFAL
 !
@@ -3679,7 +3679,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PSNOWTEMP, PSNOWLIQ
 REAL, DIMENSION(:), INTENT(IN)      :: PLES3L   ! (W/m2)
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PSNOWRHO, PSNOWDZ, PSNOWHMASS, &
-                                        PEVAPCOR, PSNOWIMPUR         !N6K
+                                        PEVAPCOR, PSNOWIMPUR 
 !
 !*      0.2    declarations of local variables
 !
@@ -3724,7 +3724,7 @@ WHERE ( PSNOWDZ>0.0 )
   PSNOWHMASS(:) = PSNOWHMASS(:) &
                   - PLES3L(:) * (PTSTEP/XLSTT) * ( XCI * (PSNOWTEMP(:)-XTT) - XLMTT )
   ! conservation of impurity content
-  PSNOWIMPUR(:)=PSNOWIMPUR(:)*&                   !N6K
+  PSNOWIMPUR(:)=PSNOWIMPUR(:)*&
   (PSNOWRHO(:)*ZSNOWDZ_BEFORE(:)-PSNOWLIQ(:)*XRHOLW)/&
   (PSNOWRHO(:)*PSNOWDZ(:)-PSNOWLIQ(:)*XRHOLW)
   ! 
@@ -3890,7 +3890,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWGRAN1 ! snow grain parameter 1    
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWGRAN2 ! snow grain parameter 2              (-)
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWHIST  ! snow grain historical variable      (-)
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWAGE  ! Snow grain age
-REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWIMPUR ! snow impurity content  N6K
+REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWIMPUR ! snow impurity content
 ! 
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWTEMP  ! snow temperature profile            (K)
 REAL, DIMENSION(:,:), INTENT(INOUT)   :: PSNOWLIQ   ! snow liquid water profile           (m)
@@ -4047,7 +4047,7 @@ USE MODD_SNOW_PAR, ONLY : XRHOSMIN_ES, XSNOWDMIN, XANSMAX, XAGLAMAX, XSNOWCRITD,
                           XDZMAX_INTERNAL, XDZMIN_TOP_EXTREM, XSNOWFALL_THRESHOLD, &
                           XRATIO_NEWLAYER, XDEPTH_THRESHOLD1, XDEPTH_THRESHOLD2,   &
                           XDEPTH_SURFACE, XDIFF_1, XDIFF_MAX, XSCALE_DIFF,         &
-                          XSNOWFALL_A_SN, XSNOWFALL_B_SN, XSNOWFALL_C_SN, XIMPUR_INIT 
+                          XSNOWFALL_A_SN, XSNOWFALL_B_SN, XSNOWFALL_C_SN, XIMPUR_INIT
 !
 USE MODE_SNOW3L
 !
@@ -4083,7 +4083,7 @@ LOGICAL, DIMENSION(:), INTENT(INOUT) :: GSNOWFALL
 ! Fresh snow characteristics
 REAL, DIMENSION(:), INTENT(OUT)      :: PSNOWRHOF, PSNOWDZF 
 REAL, DIMENSION(:), INTENT(OUT)      :: PSNOWGRAN1F, PSNOWGRAN2F, PSNOWHISTF 
-REAL, DIMENSION(:), INTENT(OUT)      :: PSNOWAGEF, PSNOWIMPURF    !N6K
+REAL, DIMENSION(:), INTENT(OUT)      :: PSNOWAGEF, PSNOWIMPURF  
 ! New vertical grid
 REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWDZN
 !
@@ -4154,7 +4154,7 @@ PSNOWDZF   (:) = 0.0
 PSNOWGRAN1F(:) = 0.0 
 PSNOWGRAN2F(:) = 0.0      
 PSNOWHISTF (:) = 0.0
-PSNOWIMPURF(:) =0.0    !N6K
+PSNOWIMPURF(:) =0.0
 PSNOWDZN (:,:) = PSNOWDZ(:,:)
 !
 OMODIF_GRID(:) = .FALSE.
@@ -4425,7 +4425,7 @@ DO JJ = 1,SIZE(PSNOW(:))
     !
     PSNOWHISTF (JJ) = 0.0
     IF (HSNOWRAD=="TA3") THEN
-    PSNOWIMPURF(JJ)=XIMPUR_INIT    !N6K
+    PSNOWIMPURF(JJ)=XIMPUR_INIT
     ENDIF
     PSNOWAGEF  (JJ) = 0.0
     GSNOWFALL  (JJ) = .TRUE. 
@@ -4945,10 +4945,10 @@ REAL, INTENT(IN)                  :: PSNOW
 REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWHEAT, PSNOWRHO, PSNOWDZ,     &
                                      PSNOWDZN, PSNOWGRAN1, PSNOWGRAN2, &
                                      PSNOWHIST 
-REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWAGE, PSNOWIMPUR  !N6K
+REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWAGE, PSNOWIMPUR  
 REAL,  INTENT(IN)                 :: PSNOWRHOF, PSNOWDZF,PSNOWHEATF,   &
                                      PSNOWGRAN1F,PSNOWGRAN2F, PSNOWHISTF 
-REAL, INTENT(IN)                  :: PSNOWAGEF  , PSNOWIMPURF     !N6K                          
+REAL, INTENT(IN)                  :: PSNOWAGEF  , PSNOWIMPURF                               
 !
 INTEGER, INTENT(IN)               :: KNLVLS_USE
 !
@@ -4961,12 +4961,12 @@ CHARACTER(3),INTENT(IN)           :: HSNOWMETAMO
 REAL, DIMENSION(SIZE(PSNOWRHO,1)+1) :: ZSNOWRHOO,ZSNOWGRAN1O,ZSNOWGRAN2O, &
                                        ZSNOWHEATO,ZSNOWHISTO,ZSNOWDZO,    &
                                        ZSNOWZTOP_OLD,ZSNOWZBOT_OLD
-REAL,DIMENSION(SIZE(PSNOWRHO,1)+1)  :: ZSNOWAGEO , ZSNOWIMPURO !N6K
+REAL,DIMENSION(SIZE(PSNOWRHO,1)+1)  :: ZSNOWAGEO , ZSNOWIMPURO 
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWRHON,ZSNOWGRAN1N,ZSNOWGRAN2N,   &
                                      ZSNOWHEATN,ZSNOWHISTN,               &
                                      ZSNOWZTOP_NEW,ZSNOWZBOT_NEW
-REAL,DIMENSION(SIZE(PSNOWRHO,1)) ::ZSNOWAGEN, ZSNOWIMPURN   !N6K
+REAL,DIMENSION(SIZE(PSNOWRHO,1)) ::ZSNOWAGEN, ZSNOWIMPURN
 !
 REAL :: ZMASTOTN, ZMASTOTO, ZSNOWHEAN, ZSNOWHEAO 
 REAL :: ZPSNOW_OLD, ZPSNOW_NEW
@@ -5030,7 +5030,7 @@ IF ( GSNOWFALL ) THEN
     ZSNOWGRAN2O(JST) = PSNOWGRAN2(JST-1)
     ZSNOWHISTO (JST) = PSNOWHIST (JST-1)
     ZSNOWAGEO  (JST) = PSNOWAGE  (JST-1)
-    ZSNOWIMPURO(JST)=PSNOWIMPUR(JST-1)  !N6K
+    ZSNOWIMPURO(JST)=PSNOWIMPUR(JST-1)
   ENDDO
   ZSNOWDZO   (1) = PSNOWDZF
   ZSNOWRHOO  (1) = PSNOWRHOF
@@ -5039,7 +5039,7 @@ IF ( GSNOWFALL ) THEN
   ZSNOWGRAN2O(1) = PSNOWGRAN2F
   ZSNOWHISTO (1) = PSNOWHISTF
   ZSNOWAGEO  (1) = PSNOWAGEF
-  ZSNOWIMPURO (1)=PSNOWIMPURF  !N6K
+  ZSNOWIMPURO (1)=PSNOWIMPURF
 ELSE
   DO JST = 1,INLVLS_OLD
     ZSNOWDZO   (JST) = PSNOWDZ   (JST)
@@ -5049,7 +5049,7 @@ ELSE
     ZSNOWGRAN2O(JST) = PSNOWGRAN2(JST)
     ZSNOWHISTO (JST) = PSNOWHIST (JST)
     ZSNOWAGEO  (JST) = PSNOWAGE  (JST)
-    ZSNOWIMPURO (JST)=PSNOWIMPUR(JST)  !N6K
+    ZSNOWIMPURO (JST)=PSNOWIMPUR(JST)
   ENDDO
 ENDIF    
 !
@@ -5129,7 +5129,7 @@ PSNOWGRAN2(:) = ZSNOWGRAN2N(:)
 PSNOWHIST (:) =  ZSNOWHISTN(:)
 !
 PSNOWAGE  (:) =  ZSNOWAGEN (:)
-PSNOWIMPUR(:)=ZSNOWIMPURN(:)  !N6K
+PSNOWIMPUR(:)=ZSNOWIMPURN(:)
 !
 IF (LHOOK) CALL DR_HOOK('SNOWNLGRIDFRESH_1D',1,ZHOOK_HANDLE)
 !
@@ -5435,7 +5435,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSCAP
 !
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWDZ, PSNOWTEMP, PSNOWRHO, PSNOWLIQ 
 REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE
-REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWIMPUR  !N6K
+REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWIMPUR
 !
 INTEGER, DIMENSION(:), INTENT(INOUT) :: KNLVLS_USE ! 
 !
@@ -5521,7 +5521,7 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
           PSNOWAGE  (JJ,JST) = PSNOWAGE  (JJ,JST+1)
           ! situation where impurities from melting layer are transfered to the layer below
           PSNOWIMPUR(JJ,JST)=(PSNOWDZ(JJ,JST+1)*PSNOWRHO(JJ,JST+1)*PSNOWIMPUR(JJ,JST+1)+&
-          (PSNOWDZ(JJ,JST)*PSNOWRHO(JJ,JST)*PSNOWIMPUR(JJ,JST)))/ZMASS  !N6K
+          (PSNOWDZ(JJ,JST)*PSNOWRHO(JJ,JST)*PSNOWIMPUR(JJ,JST)))/ZMASS
           
           !
           ! Shift the above layers
@@ -5535,7 +5535,7 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
             PSNOWGRAN2(JJ,JST_2) = PSNOWGRAN2(JJ,JST_2+1)
             PSNOWHIST (JJ,JST_2) = PSNOWHIST (JJ,JST_2+1)
             PSNOWAGE  (JJ,JST_2) = PSNOWAGE  (JJ,JST_2+1)
-            PSNOWIMPUR (JJ, JST_2) =PSNOWIMPUR(JJ,JST_2+1)  !N6K
+            PSNOWIMPUR (JJ, JST_2) =PSNOWIMPUR(JJ,JST_2+1)
           ENDDO !  loop JST_2
           !        
           ! Update the shift counter IDIFF_LAYER

@@ -43,6 +43,7 @@ TYPE PACK_DIAG_ISBA_t
   INTEGER :: NSIZE_GROUND
   INTEGER :: NSIZE_SNOW
   INTEGER :: NSIZE_KSW
+  INTEGER :: NSIZE_IMPUR
   INTEGER :: NSIZE_ABC
   INTEGER :: NSIZE_0
   INTEGER :: NSIZE_00
@@ -78,6 +79,7 @@ TYPE PACK_DIAG_ISBA_t
   REAL, POINTER, DIMENSION(:,:)::XP_SNOWSPHER  ! sphericity (Crocus)
   REAL, POINTER, DIMENSION(:,:)::XP_SNOWSIZE  ! grain size (Crocus)
   REAL, POINTER, DIMENSION(:,:)::XP_SNOWSSA    ! snow specific surface area (Crocus)
+  REAL, POINTER, DIMENSION(:,:,:)::XP_SNOWIMPURV2    ! Snow Impur Content
   REAL, POINTER, DIMENSION(:,:)::XP_SNOWTYPEMEPRA ! snow grain type (Crocus-MEPRA)
   REAL, POINTER, DIMENSION(:,:)::XP_SNOWRAM    ! snow ram resistance (Crocus-MEPRA)
   REAL, POINTER, DIMENSION(:,:)::XP_SNOWSHEAR  ! snow shear resistance (Crocus-MEPRA)

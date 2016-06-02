@@ -38,6 +38,7 @@
 !*       0.    DECLARATIONS
 !
 USE MODD_TYPE_SNOW
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
@@ -58,7 +59,7 @@ TYPE(SURF_SNOW), INTENT(INOUT) :: TPSNOW   ! snow characteristics
 !*       0.2   declarations of local variables
 !
 REAL            :: ZVAL
-INTEGER         :: JLAYER, JPATCH
+INTEGER         :: JLAYER, JPATCH,JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FLAG_GR_SNOW',0,ZHOOK_HANDLE)
@@ -93,10 +94,8 @@ DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
         TPSNOW%IMPUR(:,JLAYER,JPATCH) = XUNDEF
           TPSNOW%GRAN1(:,JLAYER,JPATCH) = XUNDEF
           TPSNOW%GRAN2(:,JLAYER,JPATCH) = XUNDEF
-          TPSNOW%IMPUR(:, JLAYER, JPATCH)=XUNDEF
           TPSNOW%HIST (:,JLAYER,JPATCH) = XUNDEF
           TPSNOW%AGE  (:,JLAYER,JPATCH) = XUNDEF
-          TPSNOW%IMPUR(:,JLAYER,JPATCH) = XUNDEF
         END WHERE
       END IF
       !
@@ -121,6 +120,32 @@ DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
   ENDIF
   !
 END DO
+
+DO JIMP=1,NIMPUR
+  DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
+    !
+    DO JLAYER = 1,TPSNOW%NLAYER
+      !
+      IF (KFLAG==1) THEN
+        !
+        IF (SIZE(TPSNOW%GRAN1) >0) THEN
+          WHERE(OMASK(:)) 
+          TPSNOW%IMPURV2(:,JLAYER,JPATCH,JIMP) = XUNDEF
+          END WHERE
+        END IF
+        !
+      ENDIF
+      !
+    ENDDO
+    !
+  END DO
+ENDDO
+
+
+
+
+
+
 !
 IF (LHOOK) CALL DR_HOOK('FLAG_GR_SNOW',1,ZHOOK_HANDLE)
 !

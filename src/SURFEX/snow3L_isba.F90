@@ -2,7 +2,7 @@
 SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
                          TPTIME, PTSTEP, PVEGTYPE,                                           &
                          PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                            &
-                         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,              &
+                         PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,PSNOWIMPURV2, &
                          PTG, PCG, PCT, PSOILHCAPZ, PSOILCONDZ,                              &
                          PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,            &
                          PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR,                    &
@@ -80,6 +80,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
 !
 USE MODD_CSTS,       ONLY : XTT, XPI, XDAY, XLMTT, XLSTT
 USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN
+USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
@@ -215,6 +216,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST
 !                                      PSNOWHIST  = Snow layer(s) grain historical parameter
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE  ! Snow grain age
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR  ! Snow impurity content N6K
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPURV2  ! Snow impurity content N6K
 !
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PRNSNOW, PHSNOW, PLES3L, PLEL3L,     &
@@ -332,7 +334,7 @@ LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
 REAL, PARAMETER                     :: ZCHECK_TEMP = 100.0 
 !                                      Limit to check suspicious low temperature (K)
 !
-INTEGER                             :: JWRK, JJ ! Loop control
+INTEGER                             :: JWRK, JJ,JIMP ! Loop control
 !
 INTEGER                             :: INLVLS   ! maximum number of snow layers
 INTEGER                             :: INLVLG   ! number of ground layers
@@ -635,6 +637,13 @@ ENDIF
          PSNOWIMPUR (JJ,JWRK)=(1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR(JJ,JWRK) !N6K
       ENDDO
    ENDDO
+   DO JIMP=1,NIMPUR
+     DO JWRK=1,INLVLS
+        DO JJ=1,SIZE(PSNOWSWE,1)
+           PSNOWIMPURV2 (JJ,JWRK,NIMPUR)=(1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPURV2(JJ,JWRK,NIMPUR) !N6K
+        ENDDO
+     ENDDO
+   ENDDO
 !  
    IF (HSNOW_ISBA=='CRO') THEN
       DO JWRK=1,INLVLS
@@ -736,6 +745,7 @@ REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWGRAN2
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWHIST
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWAGE
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWIMPUR !N6K
+REAL, DIMENSION(KSIZE1,KSIZE2,NIMPUR) :: ZP_SNOWIMPURV2 !N6K
 REAL, DIMENSION(KSIZE1,KSIZE4) :: ZP_BLOWSNW
 REAL, DIMENSION(KSIZE1)        :: ZP_SNOWALB
 REAL, DIMENSION(KSIZE1)        :: ZP_SWNETSNOW
@@ -869,7 +879,16 @@ IF (HSNOW_ISBA=='CRO') THEN
          ZP_SNOWIMPUR(JJ,JWRK) =PSNOWIMPUR(JI,JWRK)  !N6K
       ENDDO
    ENDDO
-
+   
+   DO JIMP=1,NIMPUR
+     DO JWRK=1,KSIZE2
+        DO JJ=1,KSIZE1
+           JI = KMASK(JJ)
+           ZP_SNOWIMPURV2(JJ,JWRK,JIMP) =PSNOWIMPURV2(JI,JWRK,JIMP)  !N6K
+        ENDDO
+     ENDDO
+   ENDDO
+   
    DO JWRK=1,KSIZE4
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
@@ -885,6 +904,15 @@ ELSE
          ZP_SNOWHIST (JJ,JWRK) = XUNDEF
          ZP_SNOWIMPUR(JJ,JWRK) = XUNDEF         !N6K
       ENDDO
+   ENDDO
+   
+   
+   DO JIMP=1,NIMPUR
+     DO JWRK=1,KSIZE2
+        DO JJ=1,KSIZE1
+           ZP_SNOWIMPURV2(JJ,JWRK,JIMP) = XUNDEF         !N6K
+        ENDDO
+     ENDDO
    ENDDO
 
   DO JWRK=1,KSIZE4
@@ -1213,6 +1241,15 @@ IF (HSNOW_ISBA=='CRO') THEN
       PSNOWGRAN2(JI,JWRK) = ZP_SNOWGRAN2(JJ,JWRK)
       PSNOWHIST (JI,JWRK) = ZP_SNOWHIST (JJ,JWRK)
       PSNOWIMPUR(JI,JWRK) = ZP_SNOWIMPUR(JJ,JWRK)
+    ENDDO
+  ENDDO
+  
+  DO JIMP=1,NIMPUR
+    DO JWRK=1,INLVLS
+      DO JJ=1,SIZE(PSNOWSWE,1)
+        JI = KMASK(JJ)
+        PSNOWIMPURV2(JI,JWRK,JIMP) = ZP_SNOWIMPURV2(JJ,JWRK,JIMP) !N6K
+      ENDDO
     ENDDO
   ENDDO      
   

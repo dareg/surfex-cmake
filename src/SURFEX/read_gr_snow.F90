@@ -51,7 +51,7 @@ USE MODI_READ_SURF
 USE MODI_ALLOCATE_GR_SNOW
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT,NIMPUR
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -149,8 +149,7 @@ ELSE
 END IF
 !
  CALL READ_SURF(&
-                HPROGRAM,YRECFM2,TPSNOW%NLAYER,IRESP)
- CALL READ_SURF(HPROGRAM,'NIMPUR',NIMPUR,IRESP)
+                 HPROGRAM,YRECFM2,TPSNOW%NLAYER,IRESP)
 !
 !*       2.    Presence of snow fields in the file
 !              -----------------------------------
@@ -188,7 +187,7 @@ END IF
 !              ---------------
 !
 IF (IVERSION >= 7 .AND. HSURFTYPE=='VEG') CALL READ_SURF(&
-                HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP)
+                 HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP)
 !
 !-------------------------------------------------------------------------------
 !

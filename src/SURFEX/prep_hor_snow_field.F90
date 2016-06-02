@@ -12,7 +12,7 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,   &
-                                PUNIF_IMPURSNOW,  &                                
+                                PUNIF_IMPURSNOW,PUNIF_IMPURSNOWV2,  &                                
                                 PF,PDEPTH,PVEGTYPE,             &
                                 PVEGTYPE_PATCH,PPATCH           )
 !     #######################################################
@@ -114,6 +114,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW !
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_IMPURSNOW !
+REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOWV2 !
 
 REAL,DIMENSION(:,:,:),  INTENT(OUT),OPTIONAL :: PF     ! output field (x,kpatch)
 REAL,DIMENSION(:,:,:),INTENT(IN), OPTIONAL :: PDEPTH ! thickness of each snow layer
@@ -156,7 +157,7 @@ IF (OUNIF) THEN
                       PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW,              &
                       PUNIF_LWCSNOW, PUNIF_ASNOW, PUNIF_SG1SNOW,          &
                       PUNIF_SG2SNOW, PUNIF_HISTSNOW, PUNIF_AGESNOW,       &
-                      PUNIF_IMPURSNOW, TPSNOW%NLAYER                       )
+                      PUNIF_IMPURSNOW,PUNIF_IMPURSNOWV2, TPSNOW%NLAYER                       )
 ELSE IF (HFILETYPE=='GRIB  ') THEN
   CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)
 ELSE IF (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '.OR. HFILETYPE=='FA    ') THEN

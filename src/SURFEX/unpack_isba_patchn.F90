@@ -42,7 +42,7 @@ USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_PACK_ISBA, ONLY : PACK_ISBA_t
 !
 USE MODD_AGRI,     ONLY :  LAGRIP
-
+USE MODD_PREP_SNOW,   ONLY : NIMPUR
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
@@ -61,7 +61,7 @@ INTEGER, INTENT(IN)               :: KSIZE, KPATCH
 !
 INTEGER, DIMENSION(:), INTENT(IN) :: KMASK
 !
-INTEGER JJ, JI, JK, JL
+INTEGER JJ, JI, JK, JL, JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------
@@ -158,7 +158,8 @@ IF (I%NPATCH==1) THEN
      I%TSNOW%GRAN1     (:, :, 1) = PKI%XP_SNOWGRAN1   (:, :)
      I%TSNOW%GRAN2     (:, :, 1) = PKI%XP_SNOWGRAN2   (:, :)
      I%TSNOW%HIST      (:, :, 1) = PKI%XP_SNOWHIST    (:, :)
-     I%TSNOW%IMPUR     (:, :, 1) = PKI%XP_SNOWIMPUR   (:, :)  !N6K
+     I%TSNOW%IMPUR     (:, :, 1) = PKI%XP_SNOWIMPUR   (:, :)
+     I%TSNOW%IMPURV2   (:, :, :, 1) = PKI%XP_SNOWIMPURV2   (:, :, :)
   END IF
   !
   IF(I%LGLACIER)THEN
@@ -324,7 +325,7 @@ ELSE
       DO JJ=1,KSIZE
         JI                              = KMASK         (JJ)
         I%TSNOW%HEAT      (JI, JK, KPATCH) = PKI%XP_SNOWHEAT  (JJ, JK)
-        I%TSNOW%AGE       (JI, JK, KPATCH) = PKI%XP_SNOWAGE   (JJ, JK)
+        I%TSNOW%AGE       (JI, JK, KPATCH) = PKI%XP_SNOWAGE   (JJ, JK)       
       ENDDO
     ENDDO
     DO JJ=1,KSIZE
@@ -346,6 +347,17 @@ ELSE
         I%TSNOW%IMPUR     (JI, JK, KPATCH) = PKI%XP_SNOWIMPUR    (JJ, JK)
       ENDDO
     END DO
+  END IF
+  ! Block for new dimension of impurities
+  IF (I%TSNOW%SCHEME=='CRO') THEN
+    DO JIMP=1,NIMPUR
+      DO JK=1,SIZE(PKI%XP_SNOWGRAN1,2)
+        DO JJ=1,KSIZE
+          JI                              = KMASK         (JJ)
+          I%TSNOW%IMPURV2     (JI, JK, JIMP,KPATCH) = PKI%XP_SNOWIMPURV2    (JJ, JK, JIMP) 
+        ENDDO
+      ENDDO
+    ENDDO
   END IF
   !
   IF(I%LGLACIER)THEN
@@ -461,6 +473,7 @@ PKI%XP_SNOWGRAN2    => NULL()
 PKI%XP_SNOWHIST     => NULL()
 PKI%XP_SNOWAGE      => NULL()
 PKI%XP_SNOWIMPUR    => NULL()
+PKI%XP_SNOWIMPURV2  => NULL()
 !
 PKI%XP_ICE_STO      => NULL()
 !
