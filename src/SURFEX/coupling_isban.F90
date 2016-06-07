@@ -968,6 +968,7 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ZIRRIG_GR(:)= 0.
 !
+!
  CALL ISBA(IM%I%CISBA, IM%I%CPHOTO, IM%I%LTR_ML, IM%I%CRUNOFF, IM%I%CKSAT, IM%I%CRAIN, &
            IM%I%CHORT, IM%I%CC1DRY, IM%I%CSCOND, IM%I%TSNOW%SCHEME, IM%I%CSNOWRES, &
            IM%I%CCPSURF, IM%I%CSOILFRZ, IM%I%CDIFSFCOND, IM%I%TTIME, IM%I%LFLOOD, &
@@ -1042,6 +1043,7 @@ ZIRRIG_GR(:)= 0.
 !
 ZP_TRAD=IM%PKDI%XP_TSRAD
 !
+
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Glacier : ice runoff flux (especally for Earth System Model)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

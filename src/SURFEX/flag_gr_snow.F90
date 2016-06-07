@@ -70,6 +70,29 @@ ELSEIF (KFLAG==2) THEN
   ZVAL = XUNDEF
 ENDIF
 !
+
+DO JIMP=1,NIMPUR
+
+  DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
+    !
+    DO JLAYER = 1,TPSNOW%NLAYER
+      !
+      IF (KFLAG==1) THEN
+        !
+        IF (SIZE(TPSNOW%GRAN1) >0) THEN
+          WHERE(OMASK(:)) 
+          TPSNOW%IMPURV2(:,JLAYER,JPATCH,JIMP) = XUNDEF
+          END WHERE
+        END IF
+        !
+      ENDIF
+      !
+    ENDDO
+    !
+  END DO
+ENDDO
+
+
 DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
   !
   DO JLAYER = 1,TPSNOW%NLAYER
@@ -91,7 +114,7 @@ DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
       !
       IF (SIZE(TPSNOW%GRAN1) >0) THEN
         WHERE(OMASK(:)) 
-        TPSNOW%IMPUR(:,JLAYER,JPATCH) = XUNDEF
+          TPSNOW%IMPUR(:,JLAYER,JPATCH) = XUNDEF
           TPSNOW%GRAN1(:,JLAYER,JPATCH) = XUNDEF
           TPSNOW%GRAN2(:,JLAYER,JPATCH) = XUNDEF
           TPSNOW%HIST (:,JLAYER,JPATCH) = XUNDEF
@@ -120,26 +143,6 @@ DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
   ENDIF
   !
 END DO
-
-DO JIMP=1,NIMPUR
-  DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
-    !
-    DO JLAYER = 1,TPSNOW%NLAYER
-      !
-      IF (KFLAG==1) THEN
-        !
-        IF (SIZE(TPSNOW%GRAN1) >0) THEN
-          WHERE(OMASK(:)) 
-          TPSNOW%IMPURV2(:,JLAYER,JPATCH,JIMP) = XUNDEF
-          END WHERE
-        END IF
-        !
-      ENDIF
-      !
-    ENDDO
-    !
-  END DO
-ENDDO
 
 
 
