@@ -158,7 +158,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_COVER)
 !
 HCOVER      = YCOVER      ! file name for cover types
 HFILETYPE   = YCOVERFILETYPE   ! data file type
-PUNIF_COVER = XUNIF_COVER ! value of each cover (cover will be uniform on the horizontal)
+PUNIF_COVER = XUNIF_COVER(1:SIZE(PUNIF_COVER)) ! value of each cover (cover will be uniform on the horizontal)
 PRM_COVER   = XRM_COVER   ! limit of coverage under which the cover is removed. Default is 1.E-6
 PRM_COAST   = XRM_COAST   ! limit of coast coverage
 PRM_LAKE    = XRM_LAKE    ! limit of inland lake coverage                                       
