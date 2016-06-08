@@ -41,7 +41,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
+USE MODD_DATA_COVER_PAR, ONLY : NCOVER
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -84,7 +84,7 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 !*    0.3    Declaration of namelists
 !            ------------------------
 !
-REAL, DIMENSION(JPCOVER) :: XUNIF_COVER ! value of each cover (cover will be
+REAL, DIMENSION(NCOVER) :: XUNIF_COVER ! value of each cover (cover will be
 !                                                   uniform on the horizontal)
 !
 CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
