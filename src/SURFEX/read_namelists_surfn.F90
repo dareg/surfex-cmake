@@ -55,7 +55,7 @@ CALL DEFAULT_DIAG_SURF_ATM(N2M,LT2MMW,LSURF_BUDGET,L2M_MIN_ZS,LRAD_BUDGET, &
                             LCOEF,LSURF_VARS,LSURF_BUDGETC,          &
                             LRESET_BUDGETC,LSELECT, LPROVAR_TO_DIAG, &
                             LDIAG_GRID,LFRAC, XDIAG_TSTEP, LSNOWDIMNC, &
-                            CSELECT)
+                            LRESETCUMUL,CSELECT)
 !      
  CALL READ_DEFAULT_SURF_ATM_n(CHU, DGU, USS, &
                               HPROGRAM) 
