@@ -168,7 +168,7 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
-                            XIMPURSNOW,XIMPURSNOWV2, &
+                            XIMPURSNOWV2, &
                             I%XVEGTYPE, I%XVEGTYPE_PATCH, I%XPATCH,    &
                             OKEY                                 )
   DEALLOCATE(XWSNOW)
@@ -178,7 +178,6 @@ IF (HSURF=='SN_VEG ') THEN
   DEALLOCATE(XSG1SNOW)
   DEALLOCATE(XSG2SNOW)
   DEALLOCATE(XHISTSNOW)
-  DEALLOCATE(XIMPURSNOW)
   DEALLOCATE(XIMPURSNOWV2)
   DEALLOCATE(XAGESNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',1,ZHOOK_HANDLE)

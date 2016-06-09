@@ -87,7 +87,7 @@ INTEGER             :: IRESP               ! Error code after redding
  CHARACTER (LEN=100) :: YFMT                ! format for writing
 INTEGER             :: ISURFTYPE_LEN       ! 
 LOGICAL             :: GSNOW               ! snow written in the file
-INTEGER             :: JLAYER              ! loop counter
+INTEGER             :: JLAYER,JIMP              ! loop counter
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK ! 2D array to write data in file
  CHARACTER(LEN=1)    :: YDIR                ! type of reading
  CHARACTER(LEN=4)    :: YNLAYER     !Format depending on the number of layers
@@ -298,18 +298,21 @@ DO JLAYER = 1,TPSNOW%NLAYER
 ! !              ------------
 ! !
   IF (TPSNOW%SCHEME=='CRO') THEN
-    IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
-      WRITE(YFMT,'(A5,I1,A6)')     '(A5,A',ISURFTYPE_LEN,','//YNLAYER//')'      
-      WRITE(YRECFM,YFMT) 'SIMP_',HSURFTYPE,JLAYER
-    ELSE
-      WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
-      WRITE(YRECFM,YFMT) 'SIM_',HSURFTYPE,JLAYER
-      YRECFM=ADJUSTL(HPREFIX//YRECFM)
-    ENDIF      
-    CALL READ_SURF(&
-                 HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
-    TPSNOW%IMPURV2(:,JLAYER,1,:)=ZWORK
-    WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%IMPURV2(:,JLAYER,1,:) = XUNDEF
+    DO JIMP=1, NIMPUR 
+      IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
+        WRITE(YFMT,'(A8,I1,A6)')     '(A5,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'      
+        WRITE(YRECFM,YFMT) 'SIMP_',JIMP,HSURFTYPE,JLAYER
+      ELSE
+        WRITE(YFMT,'(A8,I1,A6)')     '(A4,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'
+        WRITE(YRECFM,YFMT) 'SIM_',JIMP,HSURFTYPE,JLAYER
+        YRECFM=ADJUSTL(HPREFIX//YRECFM)
+      ENDIF      
+      CALL READ_SURF(&
+                   HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
+      TPSNOW%IMPURV2(:,JLAYER,JIMP,:)=ZWORK
+      WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%IMPURV2(:,JLAYER,JIMP,:) = XUNDEF
+      !
+    ENDDO    
   END IF
 
 !*       10.    Snow Gran2

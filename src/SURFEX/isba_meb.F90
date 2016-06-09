@@ -28,7 +28,7 @@
         PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, PF2,                                        &
         PWSAT, PWFC,                                                           &
-        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,PSNOWIMPURV2,     &
+        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPURV2,     &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
         PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
@@ -371,7 +371,6 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1    ! Snow grain parameter 1
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN2    ! Snow grain parameter 2 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST     ! Snow grain historical parameter
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE      ! Snow grain age
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR    ! NOTE : methamorphism is only activated if the flag
 REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPURV2    ! NOTE : methamorphism is only activated if the flag
 !                                                    ! OSNOW_METAMO=TRUE
 !
@@ -1179,7 +1178,7 @@ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
 CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
            TPTIME, PTSTEP, PVEGTYPE,                                                   &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                                    &
-           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,PSNOWIMPURV2,          &
+           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPURV2,          &
            ZTGL, PCG, ZCTSFC, ZSOILHCAPZ, ZSOILCONDZ(:,1),                             &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, ZRRSFC, PSR_GN,              &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                          &

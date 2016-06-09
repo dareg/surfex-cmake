@@ -40,7 +40,7 @@
                       PRESA, PANFM, PFSAT,                                       &
                       PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
                       PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,                 &
-                      PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PSNOWIMPUR,PSNOWIMPURV2,  &
+                      PSNOWGRAN2, PSNOWHIST, PSNOWAGE,PSNOWIMPURV2,  &
                       PGRNDFLUX, PHPSNOW,                                        &
                       PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                   &
                       PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW,      &
@@ -647,7 +647,6 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST   ! Snow grain historical param
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE    ! Snow grain age
 !                                                   NOTE : methamorphism is only activated if the flag
 !                                                   OSNOW_METAMO=TRUE
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR   !N6K
 REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPURV2 
 ! 
 ! Diagnostics:
@@ -1052,7 +1051,7 @@ IF(OMEB)THEN
         PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, ZF2,                                        &
         PWSAT, PWFC,                                                           &
-        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,PSNOWIMPURV2,     &
+        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPURV2,     &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
         PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
@@ -1110,7 +1109,7 @@ ELSE
    CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,&
            TPTIME, PTSTEP, PVEGTYPE,                                            &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                             &
-           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,PSNOWIMPURV2,  &
+           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPURV2,  &
            PTG, PCG, PCT, ZSOILHCAPZ, ZSOILCONDZ(:,1),                          &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,             &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                   &

@@ -6,7 +6,7 @@ SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
                           PUNIF_ASNOW,                  &
                           PUNIF_SG1SNOW, PUNIF_SG2SNOW, &
                           PUNIF_HISTSNOW,PUNIF_AGESNOW, &
-                          PUNIF_IMPURSNOW,PUNIF_IMPURSNOWV2,&
+                          PUNIF_IMPURSNOWV2,&
                           KLAYER                        )  
 !     #################################################################################
 !
@@ -67,7 +67,6 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW !
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW ! 
-REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_IMPURSNOW ! 
 REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOWV2 !
 INTEGER,            INTENT(IN)  :: KLAYER        ! Number of layer of output snow scheme
 !

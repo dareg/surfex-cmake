@@ -24,10 +24,11 @@ MODULE MODD_CONST_TARTES
 !!      Original    19/07/2013
 !!      M Lafaysse  22/08/2013 Spectral distribution of radiation
 !--------------------------------------------------------------------------------
+USE MODD_PREP_SNOW, ONLY: NIMPUR_MAX
 !
 IMPLICIT NONE
 !
-INTEGER, PARAMETER :: NPNIMP = 1 ! number of impurities types
+
 !
 ! INTEGER,PARAMETER::JPNBANDS=106 ! number of bands
 !Wavelength of each band (nanometers)
@@ -116,7 +117,8 @@ REAL, DIMENSION(NPNBANDS) :: XGINF ! parameter used for assymetry parameter, fun
 REAL, DIMENSION(NPNBANDS) :: XCONST_C ! constant used for assymetry parameter
 !
 ! Imaginary component of impurities refractive index
-REAL, DIMENSION(NPNBANDS,NPNIMP) :: XREFIMP_I
+REAL, DIMENSION(NPNBANDS,NIMPUR_MAX) :: XREFIMP_I
+
 
 INTEGER, PARAMETER :: NPNBANDS_REF = 191 ! number of reference bands
 

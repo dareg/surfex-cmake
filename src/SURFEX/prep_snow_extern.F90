@@ -340,8 +340,7 @@ SELECT CASE (HSURF(1:3))
            IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = TZSNOW%GRAN1(:,1:TZSNOW%NLAYER,:)
            IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = TZSNOW%GRAN2(:,1:TZSNOW%NLAYER,:)
            IF (HSURF(1:3)=='HIS') ZFIELD(:,:,:) = TZSNOW%HIST (:,1:TZSNOW%NLAYER,:)
-           IF (HSURF(1:3)=='IMP') ZFIELD(:,:,:) = TZSNOW%IMPUR (:,1:TZSNOW%NLAYER,:)
-         !  IF (HSURF(1:4)=='IMP') ZFIELD(:,:,:,:) = TZSNOW%IMPURV2 (:,1:TZSNOW%NLAYER,:,:)
+           IF (HSURF(1:3)=='IMP') ZFIELD(:,:,:) = TZSNOW%IMPURV2 (:,1:TZSNOW%NLAYER,1,:)
         ELSE
            IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = -20.0
            IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = 80.0

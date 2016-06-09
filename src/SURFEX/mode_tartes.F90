@@ -334,6 +334,9 @@ ZINDEX_SOOT = ZINDEX_SOOT_REAL - CMPLX(0,1) * ZINDEX_SOOT_IMAG
 !
 ! absorption cross section of small particles (Bohren and Huffman, 1983)
 XREFIMP_I(:,1) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
+XREFIMP_I(:,2) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
+XREFIMP_I(:,3) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
+XREFIMP_I(:,4) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
 !
 IF (LHOOK) CALL DR_HOOK('REFSOOT_IMAG',1,ZHOOK_HANDLE)
 !
