@@ -2001,7 +2001,7 @@ ENDIF
 !User want (or not) patch output
 !-------------------------------------------------------------------------------
 
-IF (DGU%LRESETCUMUL) THEN
+IF ((DGU%LRESETCUMUL).AND.(DGEI%LSURF_BUDGETC)) THEN
   DGEI%XLEGC(:,:)=0.
   DGEI%XLEGIC(:,:)=0.
   DGEI%XLEVC(:,:)=0.
