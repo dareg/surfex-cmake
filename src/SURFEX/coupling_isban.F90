@@ -361,7 +361,7 @@ DO JJ=1,SIZE(PQA)
   ZCO2(JJ) = PCO2(JJ) / PRHOA(JJ)
   
 !Impurity forcing with CO2 Variable
-  
+  ZIMPWET(JJ) = PCO2(JJ)
 !
 ! Other forcing variables depending on incoming forcing (argument list)JJ
 !
@@ -649,6 +649,7 @@ REAL, DIMENSION(KSIZE) :: ZP_DIR     ! wind direction                        (ra
 REAL, DIMENSION(KSIZE) :: ZP_QA      ! air specific humidity forcing         (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_TA      ! air temperature forcing               (K)
 REAL, DIMENSION(KSIZE) :: ZP_CO2     ! CO2 concentration in the air          (kg/kg)
+REAL, DIMENSION(KSIZE) :: ZP_IMPWET     ! CO2 concentration in the air          (kg/kg)
 REAL, DIMENSION(KSIZE,KSV) :: ZP_SV      ! scalar concentration in the air       (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH  ! zenithal angle        radian from the vertical)
 REAL, DIMENSION(KSIZE) :: ZP_PEW_A_COEF ! implicit coefficients
@@ -759,6 +760,7 @@ IF (IM%I%NPATCH==1) THEN
    ZP_QA(:)         = ZQA         (:)
    ZP_TA(:)         = PTA         (:)
    ZP_CO2(:)        = ZCO2        (:)
+   ZP_IMPWET(:)     = ZIMPWET     (:)
    ZP_SV(:,:)       = PSV         (:,:)
    ZP_PEW_A_COEF(:) = PPEW_A_COEF (:)
    ZP_PEW_B_COEF(:) = PPEW_B_COEF (:)
@@ -794,6 +796,7 @@ ELSE
    ZP_QA(JJ)         = ZQA         (JI)
    ZP_TA(JJ)         = PTA         (JI)
    ZP_CO2(JJ)        = ZCO2        (JI)
+   ZP_IMPWET(JJ)     = ZIMPWET      (JI)
    ZP_PEW_A_COEF(JJ) = PPEW_A_COEF (JI)
    ZP_PEW_B_COEF(JJ) = PPEW_B_COEF (JI)
    ZP_PET_A_COEF(JJ) = PPET_A_COEF (JI)
@@ -1043,7 +1046,7 @@ ZIRRIG_GR(:)= 0.
            IM%PKDI%XP_SNOWSHEAR,IM%PKDI%XP_SNOWDEPTH_1DAYS,IM%PKDI%XP_SNOWDEPTH_3DAYS,IM%PKDI%XP_SNOWDEPTH_5DAYS,         &
            IM%PKDI%XP_SNOWDEPTH_7DAYS,IM%PKDI%XP_SNOWSWE_1DAYS,IM%PKDI%XP_SNOWSWE_3DAYS,IM%PKDI%XP_SNOWSWE_5DAYS,         &
            IM%PKDI%XP_SNOWSWE_7DAYS,IM%PKDI%XP_SNOWRAM_SONDE,IM%PKDI%XP_SNOW_WETTHICKNESS,IM%PKDI%XP_SNOW_REFROZENTHICKNESS,&
-           ZP_DIR_SW, ZP_SCA_SW,IM%PKDI%XP_SPEC_ALB,IM%PKDI%XP_DIFF_RATIO)
+           ZP_DIR_SW, ZP_SCA_SW,IM%PKDI%XP_SPEC_ALB,IM%PKDI%XP_DIFF_RATIO,ZP_IMPWET)
 !
 ZP_TRAD=IM%PKDI%XP_TSRAD
 !

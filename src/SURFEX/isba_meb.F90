@@ -749,6 +749,7 @@ INTEGER :: INI, INL, JJ, JL
 REAL, DIMENSION(SIZE(PWR))         :: ZPHASEL  ! Phase changement in litter (W/m2)
 REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC 
 REAL, DIMENSION(SIZE(PPS),SIZE(P_DIR_SW)) :: PSPEC_ALB, PDIFF_RATIO
+REAL, DIMENSION(0)         :: ZP_IMPWET
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -1198,7 +1199,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &
            PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO) 
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET) 
 !
 ! If a litter layer exists, compute hydrology:
 !

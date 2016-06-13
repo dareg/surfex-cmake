@@ -18,7 +18,7 @@
                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,PBLOWSNW,               &
                OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
                HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,          &
-               PSPEC_ALB, PDIFF_RATIO) 
+               PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET) 
 !     ##########################################################################
 !
 !!****  *SNOWCRO*
@@ -352,6 +352,7 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1))         :: ZP_IMPWET
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND, ZRADSINK 
 !                                      ZSNOWTEMP  = Snow layer(s) averaged temperature (K)
@@ -504,7 +505,9 @@ IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA
   ZSNOWB0 = XPSNOWB0
   !
   ZSNOWIMP_DENSITY(:,:,1) = 1500.       !Soot density
-  ZSNOWIMP_DENSITY(:,:,2) = 2500.       !Dust Density
+  IF (NIMPUR>1) THEN
+    ZSNOWIMP_DENSITY(:,:,2) = 2500.       !Dust Density
+  ENDIF
   ! ZSNOWIMP_CONTENT=25.0E-9
   !
 END IF
@@ -4470,7 +4473,8 @@ DO JJ = 1,SIZE(PSNOW(:))
     PSNOWHISTF (JJ) = 0.0
     IF (HSNOWRAD=="TA3") THEN
       DO JIMP=1,NIMPUR
-        PSNOWIMPURFV2(JJ,JIMP)=XIMPUR_INIT(JIMP)
+        PSNOWIMPURFV2(JJ,JIMP)=ZP_IMPWET(JJ)
+        !PSNOWIMPURFV2(JJ,JIMP)=XIMPUR_INIT(JIMP)
       ENDDO
     ENDIF
     PSNOWAGEF  (JJ) = 0.0

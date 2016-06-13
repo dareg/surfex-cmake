@@ -22,7 +22,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                          PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
                          PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
-                         P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO)                               
+                         P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET)                               
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -327,6 +327,8 @@ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
                                          ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTROn snow redistribution scheme
 LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
+
+REAL, DIMENSION(:), INTENT(IN)      :: ZP_IMPWET
 
 !*      0.2    declarations of local variables
 !
@@ -1064,7 +1066,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,&
-             PSPEC_ALB, PDIFF_RATIO)
+             PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET)
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0
