@@ -232,6 +232,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_TARTES',0,ZHOOK_HANDLE)
 !
  CALL REFICE() ! Interpolate refractive index for pure ice on the prescribed wavelengths
  CALL REFSOOT_IMAG() ! Compute refractive index of soot according to wavelengths from Chang (1990)
+ CALL REFDUST_IMAG() ! Compute refractive index of dust according to ???
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TARTES',1,ZHOOK_HANDLE)
 !
@@ -334,13 +335,86 @@ ZINDEX_SOOT = ZINDEX_SOOT_REAL - CMPLX(0,1) * ZINDEX_SOOT_IMAG
 !
 ! absorption cross section of small particles (Bohren and Huffman, 1983)
 XREFIMP_I(:,1) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
-XREFIMP_I(:,2) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
-XREFIMP_I(:,3) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
-XREFIMP_I(:,4) = AIMAG( (ZINDEX_SOOT**2-1.) / (ZINDEX_SOOT**2 + 2.) )
 !
 IF (LHOOK) CALL DR_HOOK('REFSOOT_IMAG',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE REFSOOT_IMAG
+!--------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
+SUBROUTINE REFDUST_IMAG()
+!
+! Interpolate refractive index for dust on the prescribed wavelengths
+!
+USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS,NPNBANDS_SKILLES,XREFIMP_I,             &
+                             XPWAVELENGTHS_SKILLES,XPDUSTSKILLES_I,ISMULLER,XPDUSTMULLER_I
+                                                 
+!
+USE MODI_ABOR1_SFX
+!
+IMPLICIT NONE  ! Definition of the refractive index for the impurities    
+!
+! Log of PPWAVELENGTHS PPWAVELENGTHS_REF PPREFICE_I for interpolation
+REAL, DIMENSION(NPNBANDS)         :: ZLOG_WL
+REAL, DIMENSION(NPNBANDS_SKILLES) :: ZLOG_WL_REF
+REAL                              :: ZLOG_REFDUST_R
+REAL, DIMENSION(NPNBANDS_SKILLES) :: ZLOG_REFDUST_I
+LOGICAL :: GINF !logical for interpolation
+
+!
+INTEGER :: JB,JBREF !loop counters (wl band)
+!
+REAL, DIMENSION    (NPNBANDS) :: ZINDEX_DUST_REAL,ZINDEX_DUST_IMAG ! real and imaginary components of refractive index
+ COMPLEX, DIMENSION(NPNBANDS) :: ZINDEX_DUST !complex refractive index
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('REFDUST',0,ZHOOK_HANDLE)
+!
+ZLOG_WL       = LOG(XPWAVELENGTHS)
+ZLOG_WL_REF   = LOG(XPWAVELENGTHS_SKILLES)
+IF(ISMULLER) THEN                   
+  ZLOG_REFDUST_R=1.53                !Using the MULLER parameterization of DUST (high absorption)
+  ZLOG_REFDUST_I = LOG(XPDUSTMULLER_I)
+ELSE 
+  ZLOG_REFDUST_R=1.525               !Using the Skilles parameterization of DUST (low absorption)
+  ZLOG_REFDUST_I = LOG(XPDUSTSKILLES_I)
+ENDIF
+
+! Interpolate retractive index from values in modd_const_tartes
+DO JB = 1,NPNBANDS
+  !
+  GINF = .TRUE.
+  !
+  DO JBREF = 1,NPNBANDS_SKILLES
+    !
+    IF ( XPWAVELENGTHS_SKILLES(JBREF)>XPWAVELENGTHS(JB) ) THEN
+      !
+      IF ( JBREF<2 ) CALL ABOR1_SFX("FATAL ERROR INIT_TARTES (interpolation of Dust refractive indexs)")
+      !
+      GINF = .FALSE.
+      !
+      ZINDEX_DUST_REAL(JB) = ZLOG_REFDUST_R
+      ZINDEX_DUST_IMAG(JB) = EXP( ( (ZLOG_WL    (JB)    - ZLOG_WL_REF(JBREF-1)) * ZLOG_REFDUST_I(JBREF)   +   &
+                             (ZLOG_WL_REF(JBREF) - ZLOG_WL    (JB)     ) * ZLOG_REFDUST_I(JBREF-1) ) / &
+                            ( ZLOG_WL_REF(JBREF) - ZLOG_WL_REF(JBREF-1) ) )
+      !
+      EXIT
+      !
+    END IF
+  !
+  END DO
+  !
+  IF ( GINF ) CALL ABOR1_SFX("FATAL ERROR INIT_TARTES (interpolation of Dust refractive indexs)")
+  !
+END DO
+! Compute Zindex Dust accordind to the model chosen
+ZINDEX_DUST = ZINDEX_DUST_REAL - CMPLX(0,1) * ZINDEX_DUST_IMAG
+! absorption cross section of small particles (Bohren and Huffman, 1983) Not exact for dust because particles are too bigs for that assumption
+XREFIMP_I(:,2) = AIMAG( (ZINDEX_DUST**2-1.) / (ZINDEX_DUST**2 + 2.) )
+!
+IF (LHOOK) CALL DR_HOOK('REFDUST',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE REFDUST_IMAG
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 SUBROUTINE SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWG00,PSNOWY,PSNOWW,PSNOWB)
@@ -403,7 +477,7 @@ REAL, DIMENSION(:,:,:), INTENT(OUT) :: PCOSSALB !co single scattering albedo of 
 !
 REAL,DIMENSION(SIZE(PSNOWSSA,1),SIZE(PSNOWSSA,2)) :: ZABS_IMP
 !
-INTEGER :: JIMP !loop counter
+INTEGER :: JIMP !loop counter on impurities
 INTEGER :: JB, JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE

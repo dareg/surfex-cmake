@@ -47,7 +47,7 @@ LOGICAL :: LSNOW_FRAC_TOT
 INTEGER, PARAMETER :: NSNOW_LAYER_MAX = 50
 LOGICAL :: LSNOW_PREP_PERM ! activate or disactivate initialization over permanent ice areas
 INTEGER, PARAMETER               :: NIMPUR_MAX = 5                     !Maximum number of impurity types
- CHARACTER (len=4), DIMENSION(NIMPUR_MAX),PARAMETER ::IMPTYP=(/'Soot','Sand','Dust','Othr','....'/)
+ CHARACTER (len=4), DIMENSION(NIMPUR_MAX),PARAMETER ::IMPTYP=(/'Soot','Dust','Othr','....','....'/)
 INTEGER                          :: NIMPUR                             ! number of impurity types                          
 !
 !--------------------------------------------------------------------------

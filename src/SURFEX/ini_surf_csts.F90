@@ -224,8 +224,11 @@ XPERCENTAGEPORE = 0.05
 XZ0FLOOD = 0.0002
 
 !!! impurity value 
-XIMPUR_COEFF(1:5)=4.E-9 ! deposition at top of snowpack
-XIMPUR_INIT(1:5)=3.E-9 ! initial content (g/g) of impurity for fresh snow
+XIMPUR_COEFF(1)=4.E-8 ! BC deposition at top of snowpack 
+XIMPUR_INIT(1)=3.E-8 ! BC initial content (g/g) of impurity for fresh snow
+
+XIMPUR_COEFF(2:5)=10.E-6 ! Dust deposition at top of snowpack
+XIMPUR_INIT(2:5)=8.E-6 ! Dust initial content (g/g) of impurity for fresh snow
 
 
 !-------------------------------------------------------------------------------

@@ -253,6 +253,7 @@ REAL, DIMENSION(KI)     :: ZEXNS    ! Exner function at surface                 
 REAL, DIMENSION(KI)     :: ZALFA    ! Wind direction                                (-)
 REAL, DIMENSION(KI)     :: ZQA      ! specific humidity                             (kg/kg)
 REAL, DIMENSION(KI)     :: ZCO2     ! CO2 concentration                             (kg/kg)
+REAL, DIMENSION(KI)     :: ZIMPWET     ! CO2 concentration                             (kg/kg)
 REAL                    :: ZSPINCO2 ! CO2 concentration                             (ppmv)
 REAL, DIMENSION(KI)     :: ZPEQ_A_COEF ! specific humidity implicit
 REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
@@ -358,6 +359,9 @@ DO JJ=1,SIZE(PQA)
   ZPEQ_B_COEF(JJ) = PPEQ_B_COEF(JJ) / PRHOA(JJ)
 !
   ZCO2(JJ) = PCO2(JJ) / PRHOA(JJ)
+  
+!Impurity forcing with CO2 Variable
+  
 !
 ! Other forcing variables depending on incoming forcing (argument list)JJ
 !
