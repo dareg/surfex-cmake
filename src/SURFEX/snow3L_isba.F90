@@ -633,12 +633,13 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 ! 
       ELSE	! SELF_PROD conditions is FALSE
     ! 		A.2.3. Suitable night for snowmaking
-	IF (TPTIME%TIME == 64800. .and. XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN		! condition at 6pm i.e. for each time step, you compare the total.
-	  OPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
-	ELSE														! then up to day+1 one can produce
-	  OPRODSNOWMAK(JJ) = .FALSE.
+	IF (TPTIME%TIME == 64800.) THEN		! condition at 6pm i.e. for each time step, you compare the total.
+	  IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
+	    OPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
+	  ELSE														! then up to day+1 one can produce
+	    OPRODSNOWMAK(JJ) = .FALSE.
+	  ENDIF
 	ENDIF
-!
       ENDIF
 !													|
 !-----------------------	SELFPROD option by p.spandre	----------------------------------------|
