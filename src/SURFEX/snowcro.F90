@@ -4363,13 +4363,6 @@ DO JJ = 1,SIZE(PSNOW(:))
 !
     ZSNOWFALL(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
 !
-    IF(ZPSR_SNOWMAK(JJ)>XUEPSI) THEN
-      WRITE(*,*) 'check nn', (PSR(JJ)+PBLOWSNW(JJ,1))*PTSTEP 	!20160502
-      WRITE(*,*) 'check sm', ZPSR_SNOWMAK(JJ)*PTSTEP	!20160502
-      WRITE(*,*) 'check tot', ZSNOWFALL(JJ)*PSNOWRHOF(JJ)  	!20160502
-    ENDIF
-!
-!
 !End of Snowmaking option 
 !! 20160211
     PSNOW(JJ)      = PSNOW(JJ) + ZSNOWFALL(JJ)
