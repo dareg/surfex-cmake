@@ -612,7 +612,6 @@ ZSNOWBIS(:) = ZSNOW(:)
                         ZSNOWRHOF,ZSNOWDZF,ZSNOWGRAN1F,ZSNOWGRAN2F, ZSNOWHISTF, &
                         ZSNOWAGEF,GMODIF_MAILLAGE,INLVLS_USE,OSNOWDRIFT,PZ0EFF,PUREF,&
                         PBLOWSNW,HSNOWMETAMO,PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP) 
-
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -640,7 +639,8 @@ DO JJ=1,SIZE(ZSNOW)
                             ZSNOWHISTF(JJ),ZSNOWAGEF(JJ),INLVLS_USE(JJ),HSNOWMETAMO      ) 
   ENDIF
   !
-ENDDO 
+ENDDO
+! 
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -664,7 +664,6 @@ DO JJ = 1,SIZE(ZSNOW)
   ! active layers
   DO JST=1,INLVLS_USE(JJ)
     PSNOWSWE (JJ,JST) = PSNOWDZ(JJ,JST) * PSNOWRHO(JJ,JST)
-!       WRITE(*,*) 'swe', PSNOWSWE(JJ, JST), 'dz', PSNOWDZ(JJ, JST), 'rho', PSNOWRHO(JJ,JST) !debug
 !
     ZSCAP    (JJ,JST) = PSNOWRHO(JJ,JST) * XCI
 !
@@ -672,10 +671,10 @@ DO JJ = 1,SIZE(ZSNOW)
                         ( ( PSNOWHEAT(JJ,JST)/PSNOWDZ(JJ,JST) + XLMTT*PSNOWRHO(JJ,JST) )/ZSCAP(JJ,JST) ) 
 !
     PSNOWLIQ (JJ,JST) = MAX( 0.0, ZSNOWTEMP(JJ,JST)-XTT ) * ZSCAP(JJ,JST) * &
-                        PSNOWDZ(JJ,JST) / (XLMTT*XRHOLW) 
+                        PSNOWDZ(JJ,JST) / (XLMTT*XRHOLW)
+!
 !
     ZSNOWTEMP(JJ,JST) = MIN( XTT, ZSNOWTEMP(JJ,JST) )
-!       WRITE(*,*) 'temp', ZSNOWTEMP(JJ, JST)	!debug
   ENDDO  !  end loop active snow layers
   !
   ! unactive layers  
@@ -3337,9 +3336,18 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     !
     ! Difference with ISBA-ES: a possible cooling of current refreezing water
     !                          is taken into account to calculate temperature change
+!     IF (JST==1) THEN
+!       WRITE(*,*) 'ZSNOWRHO(JJ,JST)	PSNOWDZ(JJ,JST)		ZFLOWLIQ(JJ,JST)	ZFLOWLIQ(JJ,JST-1)'
+!       WRITE(*,*) 'before', ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1)
+!     ENDIF
     CALL GET_RHO(ZSNOWRHO(JJ,JST),ZSNOWDZ(JJ,JST),PSNOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZNUMER)
+!     IF (JST==1) THEN
+!       WRITE(*,*) 'after 1', ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1)
+!     ENDIF
     CALL GET_RHO(ZSNOWRHO(JJ,JST),ZSNOWDZ(JJ,JST),ZSNOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZDENOM)
-    !
+!     IF (JST==1) THEN
+!       WRITE(*,*) 'after 2', ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1)
+!     ENDIF    !
     PSNOWTEMP(JJ,JST) = XTT + ( ZSNOWTEMP(JJ,JST)-XTT )*ZNUMER/ZDENOM + ZPHASE(JJ,JST)/( XCI*ZDENOM ) 
     !
     ! 4. Calculate flow from the excess of holding capacity
@@ -3347,16 +3355,27 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     !
     ! Any water in excess of the maximum holding space for liquid water
     ! amount is drained into next layer down.
+!     IF (JST==1) THEN
+!       WRITE(*,*) 'flow calc.', ZWHOLDMAX(JJ,JST),ZSNOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST)
+!     ENDIF    !
     ZFLOWLIQ(JJ,JST) = MAX( 0., ZSNOWLIQ(JJ,JST)-ZWHOLDMAX(JJ,JST) )
     !
     ZSNOWLIQ(JJ,JST) = ZSNOWLIQ(JJ,JST) - ZFLOWLIQ(JJ,JST)
     !
     ! 5. Density is adjusted to conserve the mass
     !    --------------------------------------------------------------
-    CALL GET_RHO(ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZNUMER)
-    !
-    ZSNOWRHO(JJ,JST) = ZNUMER / ZSNOWDZ(JJ,JST) 
-    !
+
+!     ZSNOWRHO(JJ,JST)  = (ZSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)  &						! 20160503 DEBUG
+! 		      -(ZFLOWLIQ(JJ,JST)-ZFLOWLIQ(JJ,JST-1))*XRHOLW)/ZSNOWDZ(JJ,JST)
+    CALL GET_RHO(ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1),ZNUMER)		! 20160503 DEBUG
+
+!     IF (JST==1) THEN
+!       WRITE(*,*) 'after 3', ZSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST),ZFLOWLIQ(JJ,JST),ZFLOWLIQ(JJ,JST-1)
+!     ENDIF    !
+    ZSNOWRHO(JJ,JST) = ZNUMER / ZSNOWDZ(JJ,JST) 							! 20160503 DEBUG
+!     IF (JST==1) THEN
+!       WRITE(*,*) 'finish', ZSNOWRHO(JJ,JST)
+!     ENDIF    !
     ! keeps snow denisty below ice density
     IF ( ZSNOWRHO(JJ,JST)>XRHOLI ) THEN
       PSNOWDZ (JJ,JST) = PSNOWDZ(JJ,JST) * ZSNOWRHO(JJ,JST) / XRHOLI
@@ -4337,21 +4356,24 @@ DO JJ = 1,SIZE(PSNOW(:))
     ENDIF
 !!modifs par VV
 !
-    ZSNOWFALL(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
-!
-    IF (OSNOWMAK_PROP) THEN
+    IF (OSNOWMAK_PROP .and. ZPSR_SNOWMAK(JJ)>XUEPSI) THEN
       PSNOWRHOF(JJ) = ((PSR(JJ)+PBLOWSNW(JJ,1))*PSNOWRHOF(JJ)+ ZPSR_SNOWMAK(JJ)*XRHO_SNOWMAK)/ &	! Additionnal boolean to use modified properties of machine made snow (MMS) or not p.spandre 2014/07/15
 		      (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))						! NB : ZPSR_SNOWMAK = XPSR_SNOWMAK si prod de neige. =0 sinon. 
-    ELSE
-      ZSNOWMAK(JJ) = ZSNOWMAK(JJ)*XRHO_SNOWMAK/PSNOWRHOF(JJ)						! if we do not use MMS properties then snowmaking thickness = snowfall thickness at SNOWRHOF density
     ENDIF
 !
-!    WRITE(*,*) 'ZPSR_SNOWMAK', ZPSR_SNOWMAK(JJ), 'ZSNOWFALL(JJ)',ZSNOWFALL(JJ),'PSNOW(JJ)',PSNOW(JJ)	!20160325
+    ZSNOWFALL(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)    		! snowfall thickness (m)
+!
+    IF(ZPSR_SNOWMAK(JJ)>XUEPSI) THEN
+      WRITE(*,*) 'check nn', (PSR(JJ)+PBLOWSNW(JJ,1))*PTSTEP 	!20160502
+      WRITE(*,*) 'check sm', ZPSR_SNOWMAK(JJ)*PTSTEP	!20160502
+      WRITE(*,*) 'check tot', ZSNOWFALL(JJ)*PSNOWRHOF(JJ)  	!20160502
+    ENDIF
+!
 !
 !End of Snowmaking option 
 !! 20160211
-    PSNOW(JJ)      = PSNOW(JJ) + ZSNOWFALL(JJ) + ZSNOWMAK(JJ) 
-    PSNOWDZF(JJ)   = ZSNOWFALL(JJ) + ZSNOWMAK(JJ) 
+    PSNOW(JJ)      = PSNOW(JJ) + ZSNOWFALL(JJ)
+    PSNOWDZF(JJ)   = ZSNOWFALL(JJ)
 !
     IF ( HSNOWMETAMO=='B92' ) THEN
       !

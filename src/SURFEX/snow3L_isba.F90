@@ -517,22 +517,6 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !							 ! Should i remove it? p.s. 20160209
    ENDDO
 !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  Debut Commentaire 20160331 (proposition V.Vionnet)
-!
-! Calculate preliminary snow depth (m)
-!    ZSNOW(:)=0.
-!    ZSNOWH(:)=0.
-!    ZSNOWSWE_1D(:)=0.
-!    ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
-! !
-!    DO JWRK=1,SIZE(PSNOWSWE,2)
-!       DO JJ=1,SIZE(PSNOWSWE,1)
-!          ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
-!          ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-!          ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
-!       END DO
-!    ENDDO
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  Fin Commentaire 20160331 (proposition V.Vionnet)
 !
    IF(HISBA == 'DIF')THEN
       ZSOILCOND(:)   = PSOILCONDZ(:)
@@ -549,7 +533,6 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
 ! ===============================================================
 !        Snow redistribution scheme Sytron
-! 
 ! 
 !   WRITE(*,*) OSNOWSYTRON
   IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
@@ -582,24 +565,11 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       END DO
    ENDDO
 !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  Debut Commentaire 20160331 (proposition V.Vionnet)
-!   ZSNOW(:) = 0.
-!   ZSNOWSWE_1D(:) = 0.	! Initialisation avant calcul p.s. 20160331
-! !
-!   DO JWRK=1,SIZE(PSNOWSWE,2)
-!     DO JJ=1,SIZE(PSNOWSWE,1)
-!       ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)!+PSNOWMAK(JJ) 	!debug
-!       ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)!+PSNOWMAK(JJ)*XRHO_SNOWMAK 	!debug
-!     END DO
-!   ENDDO
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  Fin Commentaire 20160331 (proposition V.Vionnet)
-!
-!-----------------------	Snowmaking option by p.spandre 19/11/2013	--------------------------------------------------------|
-!																	|
+! ======================================================================================================================
+!-----------------------	Snowmaking option by p.spandre	--------------------------------------------------------|
+!															|
 ! A.Timing conditions for snowmaking
 !	A.1. Theoretical production
-!
-!
 !
   IF (OSNOWMAK_BOOL) THEN
   !
@@ -618,9 +588,9 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
     DO JJ=1, 31
       PRODTHEO(3,JJ) = XPROD_SCHEME(5)*31 + PRODTHEO(2,1)
     ENDDO
-  !
-  !	A.2. Timing conditions
-  !		A.2.1. Month condition
+!
+!	A.2. Timing conditions
+!		A.2.1. Month condition
     IF (TPTIME%TDATE%MONTH < 11. .and. TPTIME%TDATE%MONTH > 3.) THEN				! No production allowed from april to otober included
       PMONTH = .FALSE.
     ELSE
@@ -637,16 +607,15 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
     DO JJ=1,SIZE(PTA)
 !-----------------------	SELFPROD option by p.spandre	----------------------------------------|
 !				20150728								|
-
 !		A.2.4. SELFPROD option
 !
       IF (OSELF_PROD) THEN
-
+!
 !!!!!!!!!!!!!!!			FORMULATION BY HANZER, 2014			!!!!!!!!!!!!!!!!!!!
 !
 	IF (TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY > 307. .and. TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY < 362.) THEN			! i.e. SM possible from 15th of NOV (11*27+6+15=318) ... until 31st of DEC (12*27+6+31=361) => Produce 200kg/m2 MAX
 !																	! i.e. SM possible even during day time on that period
-	  IF(1.5*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 240. .and. MOD(TPTIME%TDATE%DAY, 2) == 0.) THEN					! Max admissible prod in that period 200kg/m2 + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+	  IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 240. .and. MOD(TPTIME%TDATE%DAY, 2) == 0.) THEN					! Max admissible prod in that period 200kg/m2 + Installation capacity 50% of snowguns simultaneously => 1 day / 2
 	    OPRODSNOWMAK(JJ) = .TRUE.
 	  ELSE
 	    OPRODSNOWMAK(JJ) = .FALSE.
@@ -660,52 +629,17 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 	  ENDIF
 	ENDIF
 !!!!!!!!!!!!!!!			FORMULATION BY HANZER, 2014			!!!!!!!!!!!!!!!!!!!
-
-
-!!!!!!!!!!!!!!			MY FORMULATION 20150731 FOR SELFPROD		!!!!!!!!!!!!!!!!!!
-
-! 	IF (TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY >= 318. .and. TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY <= 345.) THEN		! i.e. SM possible from 15th of NOV (11*27+6+15=318) ... until 15th of DEC (12*27+6+15=345) => Produce 200kg/m2 MAX
-! !																	! i.e. SM possible even during day time on that period
-! 	  IF(2*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 200. .and. MOD(TPTIME%TDATE%DAY, 2) == 0.) THEN			!(A)			! Max admissible prod in that period 200kg/m2 + Installation capacity 50% of snowguns simultaneously => 1 day / 2
-! 	    OPRODSNOWMAK(JJ) = .TRUE.
-! 	  ELSE
-! 	    OPRODSNOWMAK(JJ) = .FALSE.
-! 	  ENDIF
-! 	ENDIF
-! !
-! 	IF (TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY > 345. .or. TPTIME%TDATE%MONTH < 4.) THEN				! Case Between 15th of DEC (345) until 31st of March
-! 	  IF (TPTIME%TIME == 64800.) THEN										! Compare production at 19:00
-! 	    IF (2*XPROD_COUNT(JJ)*XPSR_SNOWMAK < XTIMESNOWMAK .and. MOD(TPTIME%TDATE%DAY, 2) == 0.) THEN			! If < XTIMESNOWMAK (kg/m2) keep producing (Installation capacity 50% of snowguns simultaneously => 1 day / 2)
-! 	      OPRODSNOWMAK(JJ) = .TRUE.
-! 	    ELSE
-! 	      OPRODSNOWMAK(JJ) = .FALSE.
-! 	    ENDIF
-! 	  ENDIF
-! 	ENDIF
-! !																	! DATE TEST !
-! 	IF (TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY == 75. .and. TPTIME%TIME == 68400.) THEN						! Situation on the 15th of February (=75)
-! 	  IF ((ZSNOWSWE_1D(JJ)- XPROD_COUNT(JJ)*XPSR_SNOWMAK) < 300.) THEN								! If SWE(GRO)< 300kg/m2 => Produce 100kg/m2 more
-! 	    WRITE(*,*) XTIMESNOWMAK													! SEUIL SWE TEST !
-! 	    XTIMESNOWMAK = 400.
-! 	    WRITE(*,*) XTIMESNOWMAK													! NB TEST 2ALPES: FACTEUR 2 pour simulation du ratio de 50% DANS TOUTES LES CONDITIONS
-! 	    WRITE(*,*) XPSR_SNOWMAK													! A RETIRER !!!
-! 	  ENDIF
-! 	ENDIF
 ! 
 ! 
-      ELSE	! LSELF_PROD conditions is FALSE
-!
+      ELSE	! SELF_PROD conditions is FALSE
     ! 		A.2.3. Suitable night for snowmaking
-	IF (TPTIME%TIME == 64800.) THEN								! removed for test the condition at 6pm i.e. for each time step, you compare the total.
-	  IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
-	    OPRODSNOWMAK(JJ) = .TRUE.								! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
-	  ELSE											! then up to day+1 one can produce
-	    OPRODSNOWMAK(JJ) = .FALSE.
-	  ENDIF
+	IF (TPTIME%TIME == 64800. .and. XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN		! condition at 6pm i.e. for each time step, you compare the total.
+	  OPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
+	ELSE														! then up to day+1 one can produce
+	  OPRODSNOWMAK(JJ) = .FALSE.
 	ENDIF
-!!!!!!!!!!!!!!!			MY FORMULATION 20150731 FOR SELFPROD		!!!!!!!!!!!!!!!!!!
 !
-      ENDIF	! End condition SELF_PROD
+      ENDIF
 !													|
 !-----------------------	SELFPROD option by p.spandre	----------------------------------------|
 
@@ -714,30 +648,10 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ELSE
 	LTIMESNOWMAK(JJ) = .FALSE.
       ENDIF
-  !     WRITE(*,*) LTIMESNOWMAK(JJ)
-  !     LTIMESNOWMAK(JJ) = .TRUE.							! Test for estimating suitable conditions time => to be removed for normal use!!
+
     ENDDO
   ENDIF
-!															|
-!-----------------------	Snowmaking option by p.spandre	--------------------------------------------------------|
-!		
-!
-!   DO JJ=1,SIZE(PSR)
-! 
-!     ZRRSNOW(JJ)        = PPSN(JJ)*PRR(JJ)
-!     PRRSFC(JJ)         = PRR(JJ) - ZRRSNOW(JJ)
-!   ENDDO
-! 
-! ! Calculate preliminary snow depth (m)
-! 
-!   DO JWRK=1,SIZE(PSNOWSWE,2)
-!     DO JJ=1,SIZE(PSNOWSWE,1)
-!       ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)!+PSNOWMAK(JJ) 	!debug
-!       ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)!+PSNOWMAK(JJ)*XRHO_SNOWMAK 	!debug
-!     END DO
-!   ENDDO
-!-----------------------	Snowmaking option by p.spandre 19/11/2013	----------------------------------------|
-!															|
+
   DO JJ=1,SIZE(PTA)
     IF (OSNOWMAK_BOOL) THEN
 !
@@ -777,21 +691,15 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 ! C. Boolean over timing + atmospheric conditions									! Production possible even if natural snow falling P.Spandre 2014/03/04
       IF (LCONDSNOWMAK(JJ) .and. LTIMESNOWMAK(JJ)) THEN
 	PSNOWMAK(JJ)   = XPSR_SNOWMAK*PTSTEP/XRHO_SNOWMAK    								! snowmaking depth by P.S 19/11/2013
-!!	Creation of XPROD_COUNT (p.s 20150305)
 	XPROD_COUNT(JJ) = XPROD_COUNT(JJ)+PTSTEP
-!!	End of Creation of XPROD_COUNT (p.s 20150305)
-! 	WRITE(*,*) TPTIME%TDATE%DAY,'/', TPTIME%TDATE%MONTH,'   ',ZSNOW(JJ),'   ', LCONDSNOWMAK(JJ), ' ',&
-! 	LTIMESNOWMAK(JJ), '   ', XPROD_COUNT(JJ)
-
-!
       ELSE
 	PSNOWMAK(JJ)=0.
       ENDIF
     ENDIF
     ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + PSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
-!!	Creation of XPROD_COUNT (p.s 20150305)
+!
     PPRODCOUNT(JJ) = XPROD_COUNT(JJ)									! PPRODCOUNT will be used to write into a file (DIAG_ISBA) 20150311
-!!	End of Creation of XPROD_COUNT (p.s 20150305)
+!
   ENDDO
 !															|
 !-----------------------	Snowmaking option by p.spandre	--------------------------------------------------------|
