@@ -4428,7 +4428,7 @@ ELSE
   ZANSMAX(:) = XANSMAX
 ENDIF
 !
-WHERE( GSNOWFALL(:) .AND. ABS(PSNOW(:)-ZSNOWFALL(:)-ZSNOWMAK(:))< 0.000001 )	!! 20160211 Normalement ZSNOWFALL inclut ZSNOWMAK donc plus besoin de le retrancher ici.
+WHERE( GSNOWFALL(:) .AND. ABS(PSNOW(:)-ZSNOWFALL(:))< 0.000001)
   PSNOWALB(:) = ZANSMAX(:)
 END WHERE
 !
@@ -4438,8 +4438,6 @@ END WHERE
 ! 
 ! cases with fresh snow
 !
-! WRITE(*,*) 'ZPSR_SNOWMAK', ZPSR_SNOWMAK(:), 'ZSNOWFALL(JJ)',ZSNOWFALL(:),'PSNOW(JJ)',PSNOW(:)	!20160325
-
 DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
   !
   IF( .NOT.GSNOWFALL(JJ) .AND. PSNOW(JJ)>=XSNOWCRITD .AND. KNLVLS_USE(JJ)>=INLVLSMIN ) THEN 
@@ -4451,9 +4449,7 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
     ! too shallow snowpack or too few layers or only fresh snow
     ! ==> uniform grid and identical snow layers / number depends on snow depth 
     OMODIF_GRID(JJ) = .TRUE.
-!     WRITE(*,*) 'INLVLSMIN', INLVLSMIN, 'KNLVLS_USE(JJ)', KNLVLS_USE(JJ), 'ZSNOWFALL(JJ)',ZSNOWFALL(JJ), 'PSNOW(JJ)',PSNOW(JJ)	!20160325
     KNLVLS_USE (JJ) = MAX( INLVLSMIN, MIN( INLVLSMAX, INT(PSNOW(JJ)*XSCALE_CM) ) )
-!     WRITE(*,*) 'INLVLSMIN', INLVLSMIN, 'KNLVLS_USE(JJ)', KNLVLS_USE(JJ), 'ZSNOWFALL(JJ)',ZSNOWFALL(JJ), 'PSNOW(JJ)',PSNOW(JJ)
     PSNOWDZN(JJ,1:KNLVLS_USE(JJ)) = PSNOW(JJ) / KNLVLS_USE(JJ)
     !
   ELSE

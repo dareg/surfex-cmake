@@ -630,9 +630,8 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 	ENDIF
 !!!!!!!!!!!!!!!			FORMULATION BY HANZER, 2014			!!!!!!!!!!!!!!!!!!!
 ! 
-! 
       ELSE	! SELF_PROD conditions is FALSE
-    ! 		A.2.3. Suitable night for snowmaking
+! 		A.2.3. Suitable night for snowmaking
 	IF (TPTIME%TIME == 64800.) THEN		! condition at 6pm i.e. for each time step, you compare the total.
 	  IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
 	    OPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
