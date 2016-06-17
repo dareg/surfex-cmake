@@ -27,7 +27,7 @@ fi
 # SRC_SURFEX : default path to mesonh sources 
 #              MUST BE SET TO YOUR OWN MESONH PATH
 #
-export SRC_SURFEX="/manto/tuzetf/SURFEX/tuzet"   
+export SRC_SURFEX="/manto/tuzetf/SURFEX/tuzet2/tuzet"   
 #
 #  Version MESONH PACKAGE :: PACK-SFX-V8-0-0 : 27/03/2012
 #
@@ -61,7 +61,7 @@ export VER_USER=
 #
 # 'Scandollar' Post Processing default variables
 #
-export CONF_DOLLAR=/manto/tuzetf/SURFEX/tuzet/conf/post/confdollar_aeropc_default
+export CONF_DOLLAR=/manto/tuzetf/SURFEX/tuzet2/tuzet/conf/post/confdollar_aeropc_default
 #
 # Version of NETCDF
 #

@@ -49,6 +49,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !                                     
 USE MODD_TYPE_SNOW
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODI_COMPUT_COLD_LAYERS_THICK
 !
@@ -111,7 +112,7 @@ REAL, DIMENSION(SIZE(PWSNOW,1),SIZE(PWSNOW,2)) :: ZWORKTEMP
 REAL, DIMENSION(KSIZE) :: ZALT, ZFLT
 !
 LOGICAL :: GMASK
-INTEGER :: JJ, JI, JK, JP
+INTEGER :: JJ, JI, JK, JP,JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -279,6 +280,16 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       DGMI%XSYTMASSC(JI,KPATCH)  =  DGMI%XSYTMASSC(JI,KPATCH)+PKDI%XP_SYTMASS(JJ)*PTSTEP
       !
     END DO
+    IF (DGMI%LPROSNOW) THEN
+      DO JIMP=1,NIMPUR
+        DO JK=1,SIZE(PKDI%XP_SNOWLIQ,2)
+          DO JJ=1,KSIZE
+            JI                      =  KMASK         (JJ)
+            DGMI%XIMPURV2(JI,JK,JIMP,KPATCH)  =  PKDI%XP_SNOWIMPURV2(JJ,JK,JIMP)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDIF
   ENDIF
 !
 ! cosine of solar zenith angle 

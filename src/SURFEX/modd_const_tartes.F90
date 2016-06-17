@@ -23,6 +23,7 @@ MODULE MODD_CONST_TARTES
 !!    -------------
 !!      Original    19/07/2013
 !!      M Lafaysse  22/08/2013 Spectral distribution of radiation
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !--------------------------------------------------------------------------------
 USE MODD_PREP_SNOW, ONLY: NIMPUR_MAX
 !
@@ -206,7 +207,7 @@ REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow g
 !
 !######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW) OR MULLER 2011(HIGH) #############################
 !
-LOGICAL, PARAMETER :: ISMULLER= .FALSE. ! Boolean to determine if we use skilles or muller model
+LOGICAL, PARAMETER :: ISMULLER= .TRUE. ! Boolean to determine if we use skilles or muller model
 !
 INTEGER, PARAMETER :: NPNBANDS_SKILLES = 21 ! number of reference bands
 
@@ -222,12 +223,12 @@ REAL, DIMENSION(NPNBANDS_SKILLES), SAVE:: XPDUSTSKILLES_I= &
        0.0007,0.00067,0.00064,0.00062,0.00063,0.00059,0.00057,&
        0.00054,0.00052,0.00055,0.00052,0.0005,0.00048,0.00048/)
 
-!######################## VALUES FOR DUST ACCORDING PATTERSON 2007 #############################
+!######################## VALUES FOR DUST ACCORDING MULLER 2011 #############################
        
 REAL, DIMENSION(NPNBANDS_SKILLES), SAVE:: XPDUSTMULLER_I= &
        (/ 0.038, 0.0312,0.0193,0.011,0.0076,0.0048,0.003,&
        0.0025,0.0021,0.002,0.0018,0.0017,0.0016,0.0016,&
-       0.0016,0.0016,0.0016,0.0016,0.0016,0.0016,0.0016/)
+       0.0016,0.0015,0.0015,0.0015,0.0014,0.0014,0.0014/)
 
 
 END MODULE MODD_CONST_TARTES

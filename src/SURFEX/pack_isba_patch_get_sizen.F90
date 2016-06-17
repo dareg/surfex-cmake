@@ -34,6 +34,7 @@ SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n (I, PKI, &
 !!      B. Decharme  04/2013 : DIF lateral subsurface drainage
 !!                             water table / surface coupling
 !!      P Samuelsson 10/2014 : MEB
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !!
 !!------------------------------------------------------------------
 !

@@ -105,6 +105,7 @@ USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 USE MODD_ISBA_PAR,       ONLY : XRS_MAX 
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
+USE MODD_PREP_SNOW   ,   ONLY : NIMPUR
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE MODE_THERMOS
@@ -579,6 +580,7 @@ REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWRHO             ! sno
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWAGE             ! snow layer grain age
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWSWE             ! snow layer liquid water equivalent (kg/m2)
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZTAU_N               ! snow rad transmission coef at layer base (-)
+REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2),NIMPUR) :: ZIMPUR_CONC              ! Impurity content in g
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZALBG                ! Effective ground albedo
 REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_F             ! LW transmission factor
@@ -749,7 +751,6 @@ INTEGER :: INI, INL, JJ, JL
 REAL, DIMENSION(SIZE(PWR))         :: ZPHASEL  ! Phase changement in litter (W/m2)
 REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC 
 REAL, DIMENSION(SIZE(PPS),SIZE(P_DIR_SW)) :: PSPEC_ALB, PDIFF_RATIO
-REAL, DIMENSION(0)         :: ZP_IMPWET
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -1199,7 +1200,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &
            PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET) 
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZIMPUR_CONC) 
 !
 ! If a litter layer exists, compute hydrology:
 !

@@ -157,7 +157,6 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG_GREENROOF      ! greenroof summer 
 !
 !*      0.2    Declarations of local variables
 !
-REAL, DIMENSION(0)       :: ZP_IMPWET               ! CO2 concentration in the air    (kg/m3)
  CHARACTER(LEN=3)                     :: HRAIN               ! Rainfall spatial distribution ('DEF','SGH')
 LOGICAL                              :: OFLOOD              ! Activation of the flooding scheme
 LOGICAL                              :: OTEMP_ARP           ! True  = time-varying force-restore soil temperature (as in ARPEGE)
@@ -563,7 +562,7 @@ ZP_SCA_SW=XUNDEF
           ZSNOWSHEAR,ZSNOWDEPTH_1DAYS,ZSNOWDEPTH_3DAYS,ZSNOWDEPTH_5DAYS,         &
           ZSNOWDEPTH_7DAYS,ZSNOWSWE_1DAYS,ZSNOWSWE_3DAYS,ZSNOWSWE_5DAYS,         &
           ZSNOWSWE_7DAYS,ZSNOWRAM_SONDE,ZSNOW_WETTHICKNESS,ZSNOW_REFROZENTHICKNESS,&
-          ZP_DIR_SW, ZP_SCA_SW, ZSPEC_ALB, ZDIFF_RATIO,ZP_IMPWET)     
+          ZP_DIR_SW, ZP_SCA_SW, ZSPEC_ALB, ZDIFF_RATIO,GRM%TGR%CUR%TSNOW%IMPURV2(:,:,:,1))     
 !
 PRUNOFF_GREENROOF(:) = ZRUNOFF(:)
 PDRAIN_GREENROOF(:)  = ZDRAIN(:)

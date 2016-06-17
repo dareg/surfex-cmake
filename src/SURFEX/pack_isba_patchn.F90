@@ -35,6 +35,7 @@ SUBROUTINE PACK_ISBA_PATCH_n (AG, IG, I, PKI, &
 !!                             water table / surface coupling
 !!      P Samuelsson 10/2014 : MEB
 !!      P Samuelsson 10/2014 : Additional snow albedos
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !!
 !!------------------------------------------------------------------
 !

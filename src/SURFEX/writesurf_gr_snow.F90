@@ -74,7 +74,7 @@ TYPE(SURF_SNOW),    INTENT(IN) :: TPSNOW     ! snow characteristics
 INTEGER             :: ISURFTYPE_LEN
 !
  CHARACTER (LEN=100) :: YFMT           ! format for writing
- CHARACTER(LEN=12)   :: YRECFM,YREFIMPUR         ! Name of the article to be read
+ CHARACTER(LEN=12)   :: YRECFM        ! Name of the article to be read
  CHARACTER(LEN=100)  :: YCOMMENT       ! Comment string
 INTEGER             :: IRESP          ! IRESP  : return-code if a problem appears
 !
@@ -173,13 +173,6 @@ IF (DGU%LSNOWDIMNC .AND. (HPROGRAM=='OFFLIN')) THEN
   WRITE(YFMT,'(A5,I1,A4)') '(A7,A',ISURFTYPE_LEN,',A8)'
   WRITE(YCOMMENT,YFMT) 'X_Y_SG1',HSURFTYPE,' (kg/m2)'
   CALL WRITE_SURF(DGU, U, HPROGRAM,'SNOWGRAN1',TPSNOW%GRAN1(:,:,:),IRESP,HCOMMENT=YCOMMENT)
-  
-  DO JIMP=1,NIMPUR
-    WRITE(YFMT,'(A8,I1,A4)') '(A9,I1,A',ISURFTYPE_LEN,',A7)'
-    WRITE(YCOMMENT,YFMT) 'X_Y_SIMP',JIMP,HSURFTYPE,' (g/g) '
-    WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
-    CALL WRITE_SURF(DGU, U, HPROGRAM,YREFIMPUR,TPSNOW%IMPURV2(:,:,JIMP,:),IRESP,HCOMMENT=YCOMMENT)
-  ENDDO 
   
   WRITE(YFMT,'(A5,I1,A4)') '(A7,A',ISURFTYPE_LEN,',A8)'  
   WRITE(YCOMMENT,YFMT) 'X_Y_SG2',HSURFTYPE,' (kg/m2)'

@@ -32,6 +32,7 @@ SUBROUTINE UNPACK_ISBA_PATCH_n (AG, I, PKI, &
 !!      B. Decharme  06/2013 : add lateral drainage flux diag for DIF
 !!                             water table / surface coupling
 !!      P. Samuelsson 02/2012 : MEB
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !!
 !!------------------------------------------------------------------
 !

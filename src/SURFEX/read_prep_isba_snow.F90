@@ -38,6 +38,7 @@
 !!      M. Lafaysse 11/2012, possibility to prescribe snow depth instead of snow water equivalent
 !!      M Lafaysse 04/2014 : LSNOW_PREP_PERM
 !      B. Decharme  07/2013 ES snow grid layer can be > to 3 (default 12)
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS

@@ -56,6 +56,7 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
+USE MODD_PREP_SNOW,        ONLY :   NIMPUR
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR
 !                                 
@@ -88,12 +89,12 @@ TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=1) :: YVAR
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM,YREFIMPUR          ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
-INTEGER           :: JLAYER, JJ, IDEPTH, JVAR
+INTEGER           :: JLAYER, JJ, IDEPTH, JVAR,JIMP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -438,6 +439,14 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
       CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XAVG_SYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+        
+      DO JIMP=1,NIMPUR
+        WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
+        WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
+        CALL WRITE_SURF(DGU, U,& 
+                    HPROGRAM,YREFIMPUR,DGMI%XIMPURV2(:,:,JIMP,:),IRESP,HCOMMENT=YCOMMENT)
+      ENDDO             
   ENDIF
   !
   !        2.6    SGH scheme

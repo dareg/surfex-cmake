@@ -157,7 +157,6 @@ LOGICAL              :: OGLACIER   ! True = Over permanent snow and ice,
 !                                      Hsnow>=10m and allow 0.8<SNOALB<0.85
                                    ! False = No specific treatment
 REAL, DIMENSION(0)   ::  ZSODELX   ! Pulsation for each layer (Only used if LTEMP_ARP=True)     
-REAL, DIMENSION(0)       :: ZP_IMPWET               ! CO2 concentration in the air    (kg/m3)
 !
 REAL, DIMENSION(SIZE(PPS))               :: ZMUF    ! fraction of the grid cell reached by the rainfall
 REAL, DIMENSION(SIZE(PPS))               :: ZFSAT   ! Topmodel (SGH not used in TEB) saturated fraction
@@ -552,7 +551,7 @@ ZDIFF_RATIO=XUNDEF
           ZSNOWDEPTH_7DAYS,ZSNOWSWE_1DAYS,ZSNOWSWE_3DAYS,ZSNOWSWE_5DAYS,         &
           ZSNOWSWE_7DAYS,ZSNOWRAM_SONDE,ZSNOW_WETTHICKNESS,&
           ZSNOW_REFROZENTHICKNESS, ZP_DIR_SW, ZP_SCA_SW, &
-          ZSPEC_ALB, ZDIFF_RATIO,ZP_IMPWET)                                                           
+          ZSPEC_ALB, ZDIFF_RATIO,GDM%TGD%CUR%TSNOW%IMPURV2(:,:,:,1))                                                           
 !
 
 IF (GDM%TGD%CUR%TSNOW%SCHEME=='3-L' .OR. GDM%TGD%CUR%TSNOW%SCHEME=='CRO') &

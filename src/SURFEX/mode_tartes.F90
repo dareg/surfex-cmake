@@ -48,6 +48,7 @@ MODULE MODE_TARTES
 !!      Original    24/07/2013
 !!      Matthieu Lafaysse interface with SURFEX 23/08/2013
 !!	Marie Dumont 10/11/2015 add spectral repartition of irradiance from atmo-tartes
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !--------------------------------------------------------------------------------
 
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -359,7 +360,6 @@ REAL, DIMENSION(NPNBANDS_SKILLES) :: ZLOG_WL_REF
 REAL                              :: ZLOG_REFDUST_R
 REAL, DIMENSION(NPNBANDS_SKILLES) :: ZLOG_REFDUST_I
 LOGICAL :: GINF !logical for interpolation
-
 !
 INTEGER :: JB,JBREF !loop counters (wl band)
 !
@@ -409,7 +409,7 @@ DO JB = 1,NPNBANDS
 END DO
 ! Compute Zindex Dust accordind to the model chosen
 ZINDEX_DUST = ZINDEX_DUST_REAL - CMPLX(0,1) * ZINDEX_DUST_IMAG
-! absorption cross section of small particles (Bohren and Huffman, 1983) Not exact for dust because particles are too bigs for that assumption
+! absorption cross section of small particles (Bohren and Huffman, 1983) .Not exact for dust because particles are too bigs for that assumption
 XREFIMP_I(:,2) = AIMAG( (ZINDEX_DUST**2-1.) / (ZINDEX_DUST**2 + 2.) )
 !
 IF (LHOOK) CALL DR_HOOK('REFDUST',1,ZHOOK_HANDLE)

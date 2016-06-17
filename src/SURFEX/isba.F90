@@ -71,7 +71,7 @@
                       PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                       PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
                       PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
-                      P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET)
+                      P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC)
 !     ##########################################################################
 !
 !
@@ -695,6 +695,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRAM_SONDE
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_WETTHICKNESS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_REFROZENTHICKNESS
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO
+REAL, DIMENSION(:,:,:), INTENT(OUT) :: PSNOWIMP_CONC
 !
 !
 !* output soil parameters
@@ -848,8 +849,6 @@ REAL, DIMENSION(:),   INTENT(OUT) :: PLWDOWN_GN     ! MEB: total shortwave radia
 !
 !
 REAL, DIMENSION(:),     INTENT(OUT) :: PDEEP_FLUX ! Heat flux at bottom of ISBA (W/m2)
-
-REAL, DIMENSION(:),     INTENT(IN) :: ZP_IMPWET ! Heat flux at bottom of ISBA (W/m2)
 
 !
 !*      0.2    declarations of local variables
@@ -1132,7 +1131,7 @@ ELSE
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
            PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZP_IMPWET ) 
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC ) 
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
