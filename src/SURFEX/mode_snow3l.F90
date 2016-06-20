@@ -1940,10 +1940,9 @@ DO JST_NEW = 1,KNLVLS_NEW
       ZHISTMOYN = ZHISTMOYN + ZMASDZ_OLD * PSNOWHISTO(JST_OLD)
       ZAGEMOYN  = ZAGEMOYN  + ZMASDZ_OLD * PSNOWAGEO (JST_OLD)
       ! ici il faudrait gérer la présence d'eau liquide pour faire une moyenne pondérée sur le masse de glace
-      IF (ZPROPOR<0.0000000001) THEN
+      IF (ZPROPOR>0.0000000001) THEN
           DO JIMP=1,NIMPUR
-            ZIMPURMOYNV2(JIMP)=ZIMPURMOYNV2(JIMP)+ PSNOWIMPUROV2(JST_OLD,JIMP) *& 
-            (ZPROPOR)
+            ZIMPURMOYNV2(JIMP)=ZIMPURMOYNV2(JIMP)+ PSNOWIMPUROV2(JST_OLD,JIMP) * ZPROPOR
           ENDDO
       ENDIF
       !
