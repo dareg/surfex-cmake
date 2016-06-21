@@ -36,7 +36,7 @@ INTEGER,                 INTENT(IN) :: KLUOUT
 INTEGER,                 INTENT(IN) :: KSIZE
 INTEGER,                 INTENT(IN) :: KVERSION
 INTEGER,                 INTENT(IN) :: KBUGFIX
-LOGICAL, DIMENSION(:),   INTENT(IN) :: ODATA
+LOGICAL, DIMENSION(:),   INTENT(INOUT) :: ODATA
 !
 REAL, DIMENSION(:,:),    INTENT(OUT):: PFIELD ! array containing the data field  
 
@@ -101,12 +101,22 @@ ELSE
         YREC = TRIM(ADJUSTL(HREC))//YVEG
         CALL READ_SURF(HPROGRAM,YREC,ZFIELD(:,JV),KRESP,HCOMMENT=HCOMMENT,HDIR=YDIR)
       ELSE
-        DO JV2=JV,1,-1
-          IF (ODATA(JV2)) THEN
-            ZFIELD(:,JV) = ZFIELD(:,JV2)
-            EXIT
-          ENDIF
-        ENDDO
+
+        IF (HREC(1:3)=='LAI'.OR.HREC(1:10)=='ALBNIR_VEG'.OR.HREC(1:10)=='ALBVIS_VEG' &
+               .OR. HREC(1:6)=='H_TREE') THEN
+          IF (JV<=3) ZFIELD(:,JV) = 0.
+          IF (HREC(1:6)=='H_TREE'.AND.((JV>=7.AND.JV<=12).OR.JV>=18)) ZFIELD(:,JV) = 0.
+          ODATA(JV) = .TRUE.
+        ENDIF
+
+        IF (.NOT.ODATA(JV)) THEN
+          DO JV2=JV,1,-1
+            IF (ODATA(JV2)) THEN
+              ZFIELD(:,JV) = ZFIELD(:,JV2)
+              EXIT
+            ENDIF
+          ENDDO
+        ENDIF
       ENDIF
     ENDDO
     !

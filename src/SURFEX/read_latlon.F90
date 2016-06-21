@@ -104,8 +104,9 @@ INTEGER :: JCOL                       ! index of column
 REAL, DIMENSION(:), ALLOCATABLE :: ZVALUE ! value of a record of data points
 REAL, DIMENSION(:), POINTER     :: ZLAT   ! latitude of data points
 REAL, DIMENSION(:), POINTER     :: ZLON   ! longitude of data points
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+LOGICAL :: GCOMPRESS
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
 !
@@ -126,7 +127,8 @@ IF (LHOOK) CALL DR_HOOK('READ_LATLON',0,ZHOOK_HANDLE)
 !            -----------------
 !
  CALL READHEAD(IFILE,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
-               INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR,IFACT)  
+               INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR,IFACT,&
+               GCOMPRESS)  
 IF (IERR/=0) THEN
   CALL ABOR1_SFX('READ_LATLON: PROBLEM IN FILE HEADER')
 END IF
@@ -197,7 +199,7 @@ DO JLINE=1,INBLINE
     ZVALUE(:) = ZVALUE(:) / FLOAT(IFACT)
 
     CALL PT_BY_PT_TREATMENT(UG, U, USS, &
-                            ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&
+                            ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&            
                               HSUBROUTINE                                              )  
 !
 !-------------------------------------------------------------------------------

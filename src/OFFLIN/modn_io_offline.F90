@@ -85,7 +85,7 @@ LOGICAL          :: LDIAG_FA_NOCOMPACT = .FALSE. ! fa compaction for diagnostic 
 !     ---------
 !
 INTEGER          :: NSCAL = 0                 ! Number of scalar species
-INTEGER          :: NHALO = 2
+INTEGER          :: NHALO = 0
 !
 !*    Time steps
 !     ----------

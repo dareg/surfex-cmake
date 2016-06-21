@@ -51,8 +51,8 @@ USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
-USE MODD_PGDWORK,        ONLY : X2D_ALL, NSIZE_ALL, XSSQO, LSSQO, NSSO, &
-                                XEXTVAL2, XSUMVAL2, NSIZE
+USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, XSSQO, LSSQO, NSSO, &
+                                XEXT_ALL, XSUMVAL, NSIZE
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
 USE MODI_GET_LUOUT
@@ -368,13 +368,13 @@ ELSEIF (LIMP_ZS) THEN !LIMP_ZS (impose topo from input file at the same resoluti
 
 ELSE
   !
-  ALLOCATE(NSIZE_ALL (U%NDIM_FULL))
-  ALLOCATE(X2D_ALL   (U%NDIM_FULL,2))
-  ALLOCATE(XEXTVAL2  (U%NDIM_FULL,2))
-  NSIZE_ALL(:) = 0.
-  X2D_ALL(:,:) = 0.
-  XEXTVAL2 (:,1) = -99999.
-  XEXTVAL2 (:,2) = 99999.
+  ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
+  ALLOCATE(XEXT_ALL (U%NDIM_FULL,2))
+  ALLOCATE(XALL     (U%NDIM_FULL,2,1))  
+  NSIZE_ALL(:,1) = 0.
+  XEXT_ALL (:,1) = -99999.
+  XEXT_ALL (:,2) = 99999.
+  XALL   (:,:,1) = 0.  
   !
   !-------------------------------------------------------------------------------
 !
@@ -385,13 +385,13 @@ ELSE
                   HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS, 'ZS                  ' )  
 !
 
-  DEALLOCATE(XSUMVAL2 )
+  DEALLOCATE(XSUMVAL )
   !
 ENDIF  
 !
 IF (.NOT.ALLOCATED(NSIZE)) THEN
-  ALLOCATE(NSIZE(NL))
-  NSIZE(:) = 0
+  ALLOCATE(NSIZE(NL,1))
+  NSIZE(:,1) = 0
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -399,7 +399,7 @@ ENDIF
 !*    7.      Coherence with land sea mask
 !             ----------------------------
 !
-WHERE (U%XSEA(:)==1. .AND. NSIZE(:)==0) NSIZE(:) = -1
+WHERE (U%XSEA(:)==1. .AND. NSIZE(:,1)==0) NSIZE(:,1) = -1
 !
 !-------------------------------------------------------------------------------
 !
@@ -410,16 +410,16 @@ WHERE (U%XSEA(:)==1. .AND. NSIZE(:)==0) NSIZE(:) = -1
 ! these points are probably small isolated islands, and a default value of 1m is assumed.
 !
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE,USS%XAVG_ZS,   'average orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XAVG_ZS,   'average orography',PDEF=1.)
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE,USS%XSIL_ZS,   'silhouette orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XSIL_ZS,   'silhouette orography',PDEF=1.)
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE,USS%XMIN_ZS,   'minimum orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XMIN_ZS,   'minimum orography',PDEF=1.)
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE,USS%XMAX_ZS,   'maximum orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XMAX_ZS,   'maximum orography',PDEF=1.)
 !
-IFLAG(:) = NSIZE(:)
-WHERE (NSIZE(:)==1) IFLAG(:) = 0 ! only 1 data point was not enough for standard deviation
+IFLAG(:) = NSIZE(:,1)
+WHERE (NSIZE(:,1)==1) IFLAG(:) = 0 ! only 1 data point was not enough for standard deviation
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_STDEV,'standard deviation of orography',PDEF=0.)
 !
@@ -481,7 +481,7 @@ END SELECT
 !
  CALL SSO(U, UG, USS, GSSO, GSSO_ANIS)
 !
-IFLAG(:) = NSIZE(:)
+IFLAG(:) = NSIZE(:,1)
 WHERE(.NOT. GSSO(:))                 IFLAG(:) = 0
 WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
@@ -495,7 +495,7 @@ ELSEIF (LEN_TRIM(YSLOPE)==0) THEN
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_SLOPE,'subgrid orography slope',PDEF=0.)  
 END IF
 !
-IFLAG(:) = NSIZE(:)
+IFLAG(:) = NSIZE(:,1)
 WHERE(.NOT. GSSO_ANIS(:))            IFLAG(:) = 0
 WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
@@ -521,7 +521,7 @@ END WHERE
 !
  CALL SUBSCALE_AOS(U, UG, USS, GZ0EFFI, GZ0EFFJ)
 !
-IFLAG(:) = NSIZE(:)
+IFLAG(:) = NSIZE(:,1)
 WHERE(.NOT. GZ0EFFI(:))              IFLAG(:) = 0
 WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &
@@ -533,7 +533,7 @@ WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XHO2IM, 'subgrid orography h/2, direction i-',PDEF=0.)
 !
-IFLAG(:) = NSIZE(:)
+IFLAG(:) = NSIZE(:,1)
 WHERE(.NOT. GZ0EFFJ(:))              IFLAG(:) = 0
 WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &

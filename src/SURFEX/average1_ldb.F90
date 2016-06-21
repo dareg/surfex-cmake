@@ -41,7 +41,7 @@
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
-USE MODD_PGDWORK, ONLY : X2D_ALL, NSIZE_ALL
+USE MODD_PGDWORK, ONLY : XALL, NSIZE_ALL
 USE MODD_DATA_LAKE, ONLY : XBOUNDGRADDEPTH_LDB, XBOUNDGRADSTATUS_LDB
 !
 USE MODD_POINT_OVERLAY
@@ -79,7 +79,7 @@ REAL, DIMENSION(SIZE(PLAT)) :: ZVALUE
 REAL :: ZNODATA
 !
 REAL    :: ZCUT
-INTEGER :: JLOOP, JGRAD, JOVER        ! loop index on input arrays
+INTEGER :: JL, JGR, JOV        ! loop index on input arrays
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -118,23 +118,23 @@ ENDIF
 !            -----------------------------
 !    
 bloop: &
-DO JLOOP = 1 , SIZE(PLAT)
+DO JL = 1 , SIZE(PLAT)
 !
-  DO JOVER = 1, NOVMX
+  DO JOV = 1, NOVMX
 !
 !*    3.     Tests on position
 !            -----------------
 !     
-    IF (IINDEX(JOVER,JLOOP)==0) CYCLE bloop
+    IF (IINDEX(JOV,JL)==0) CYCLE bloop
 !
 !*    4.     Test on value meaning
 !            ---------------------
 !
-    ZCUT = PVALUE(JLOOP)
+    ZCUT = PVALUE(JL)
 !
-    DO JGRAD = 1, SIZE(ZBOUND)-1
-      IF (ZCUT.GT.ZBOUND(JGRAD) .AND. ZCUT.LE.ZBOUND(JGRAD+1)) THEN
-        X2D_ALL(IINDEX(1,JLOOP),JGRAD) = X2D_ALL(IINDEX(1,JLOOP),JGRAD) + 1
+    DO JGR = 1, SIZE(ZBOUND)-1
+      IF (ZCUT.GT.ZBOUND(JGR) .AND. ZCUT.LE.ZBOUND(JGR+1)) THEN
+        XALL(IINDEX(1,JL),JGR,1) = XALL(IINDEX(1,JL),JGR,1) + 1
         EXIT
       ENDIF
     ENDDO
@@ -142,7 +142,7 @@ DO JLOOP = 1 , SIZE(PLAT)
 !*    5.     Summation
 !            ---------
 !
-    NSIZE_ALL(IINDEX(1,JLOOP))=NSIZE_ALL(IINDEX(1,JLOOP))+1
+    NSIZE_ALL(IINDEX(1,JL),1)=NSIZE_ALL(IINDEX(1,JL),1)+1
 !
   END DO
 !

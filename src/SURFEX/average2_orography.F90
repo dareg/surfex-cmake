@@ -43,7 +43,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_SURFEX_MPI, ONLY : NRANK
-USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL2, LSSQO, XSSQO, NSSO
+USE MODD_PGDWORK,       ONLY : NSIZE, XSUMVAL, LSSQO, XSSQO, NSSO
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -74,8 +74,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !            --------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_OROGRAPHY',0,ZHOOK_HANDLE)
-WHERE (NSIZE(:)/=0)
-  USS%XAVG_ZS(:)=XSUMVAL2(:,1)/NSIZE(:)
+WHERE (NSIZE(:,1)/=0)
+  USS%XAVG_ZS(:) = XSUMVAL(:,1)/NSIZE(:,1)
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -83,8 +83,8 @@ END WHERE
 !*    2.     Standard deviation
 !            ------------------
 !
-WHERE (NSIZE(:)/=0)
-  USS%XSSO_STDEV(:)=SQRT( MAX(0.,XSUMVAL2(:,2)/NSIZE(:) - USS%XAVG_ZS(:)*USS%XAVG_ZS(:)) )
+WHERE (NSIZE(:,1)/=0)
+  USS%XSSO_STDEV(:) = SQRT( MAX(0.,XSUMVAL(:,2)/NSIZE(:,1) - USS%XAVG_ZS(:)*USS%XAVG_ZS(:)) )
 END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -93,23 +93,23 @@ END WHERE
 !            --------------------
 !
 DO JL=1,SIZE(USS%XSIL_ZS)
-  IF (NSIZE(JL)==0) CYCLE
+  IF (NSIZE(JL,1)==0) CYCLE
   ZMAXX(:) = MAXVAL(XSSQO(JL,:,:),DIM=2)
   GSEGX(:) = ANY   (LSSQO(JL,:,:),DIM=2)
   ZMAXY(:) = MAXVAL(XSSQO(JL,:,:),DIM=1)
   GSEGY(:) = ANY   (LSSQO(JL,:,:),DIM=1)
   USS%XSIL_ZS(JL) =0.5*(  SUM(ZMAXX(:),MASK=GSEGX(:)) / COUNT(GSEGX(:)) &
-                      + SUM(ZMAXY(:),MASK=GSEGY(:)) / COUNT(GSEGY(:)) )  
+                        + SUM(ZMAXY(:),MASK=GSEGY(:)) / COUNT(GSEGY(:)) )  
   
 END DO
 !
 WHERE (USS%XAVG_ZS/=XUNDEF) 
   USS%XAVG_ZS(:) = AINT(USS%XAVG_ZS(:)) + &
-              NINT((USS%XAVG_ZS(:)-AINT(USS%XAVG_ZS(:)))*100000000.)/100000000.
+                  NINT((USS%XAVG_ZS(:)-AINT(USS%XAVG_ZS(:)))*100000000.)/100000000.
   USS%XSSO_STDEV(:) = AINT(USS%XSSO_STDEV(:)) + &
-              NINT((USS%XSSO_STDEV(:)-AINT(USS%XSSO_STDEV(:)))*100000000.)/100000000.
+                      NINT((USS%XSSO_STDEV(:)-AINT(USS%XSSO_STDEV(:)))*100000000.)/100000000.
   USS%XSIL_ZS(:) = AINT(USS%XSIL_ZS(:)) + &
-              NINT((USS%XSIL_ZS(:)-AINT(USS%XSIL_ZS(:)))*100000000.)/100000000.
+                  NINT((USS%XSIL_ZS(:)-AINT(USS%XSIL_ZS(:)))*100000000.)/100000000.
 END WHERE
 !    
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_OROGRAPHY',1,ZHOOK_HANDLE)

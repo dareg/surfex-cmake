@@ -28,6 +28,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PGDWORK,        ONLY : NSIZE, XSUMVAL, CATYPE
 USE MODD_DATA_COVER_PAR, ONLY : XCDREF
@@ -41,44 +42,42 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-REAL,    DIMENSION(:), INTENT(INOUT) :: PPGDARRAY ! Mesonh field
+REAL,    DIMENSION(:,:), INTENT(INOUT) :: PPGDARRAY ! Mesonh field
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
-INTEGER :: JLOOP ! loop counter on grid points
-INTEGER :: JVAL  ! loop counter on values encountered in grid mesh
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',0,ZHOOK_HANDLE)
 SELECT CASE (CATYPE)
 
   CASE ('ARI')
-  WHERE (NSIZE(:)/=0)
-    PPGDARRAY(:)=XSUMVAL(:)/NSIZE(:)
+  WHERE (NSIZE(:,:)/=0)
+    PPGDARRAY(:,:) = XSUMVAL(:,:)/NSIZE(:,:)
   ENDWHERE
 
   CASE ('INV')
-  WHERE (NSIZE(:)/=0)
-    PPGDARRAY(:)=NSIZE(:)/XSUMVAL(:)
+  WHERE (NSIZE(:,:)/=0)
+    PPGDARRAY(:,:) = NSIZE(:,:)/XSUMVAL(:,:)
   ENDWHERE
 
   CASE ('CDN')
-  WHERE (NSIZE(:)/=0)
-    PPGDARRAY(:)=XCDREF/EXP(SQRT(NSIZE(:)/XSUMVAL(:)))
+  WHERE (NSIZE(:,:)/=0)
+    PPGDARRAY(:,:) = XCDREF/EXP(SQRT(NSIZE(:,:)/XSUMVAL(:,:)))
   ENDWHERE
 
   CASE ('MAJ')
-  WHERE (NSIZE(:)/=0)
-    PPGDARRAY(:)=XSUMVAL(:)
+  WHERE (NSIZE(:,:)/=0)
+    PPGDARRAY(:,:) = XSUMVAL(:,:)
   ENDWHERE
           
 END SELECT
 !
 WHERE (PPGDARRAY/=XUNDEF) 
-  PPGDARRAY(:) = AINT(PPGDARRAY(:)) + &
-            NINT((PPGDARRAY(:)-AINT(PPGDARRAY(:)))*100000000.)/100000000.
+  PPGDARRAY(:,:) = AINT(PPGDARRAY(:,:)) + &
+            NINT((PPGDARRAY(:,:)-AINT(PPGDARRAY(:,:)))*100000000.)/100000000.
 ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',1,ZHOOK_HANDLE)

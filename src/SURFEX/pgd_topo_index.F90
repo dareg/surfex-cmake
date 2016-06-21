@@ -53,10 +53,10 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_PGD_GRID,       ONLY : NL
 !
 !
-USE MODD_PGDWORK,        ONLY : X2D_ALL, XEXTVAL2, NSIZE_ALL, &
+USE MODD_PGDWORK,        ONLY : XALL, XEXT_ALL, NSIZE_ALL, &
                                 XMIN_WORK, XMAX_WORK,     &
                                 XMEAN_WORK, XSTD_WORK,    &
-                                XSKEW_WORK, NSIZE, XSUMVAL2 
+                                XSKEW_WORK, NSIZE, XSUMVAL 
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -247,14 +247,14 @@ CALL INIT_IO_SURF_n(DTCO, U, &
 !*    6.      Use of cti file
 !             ---------------
 !
-     ALLOCATE(NSIZE_ALL   (U%NDIM_FULL))
-     ALLOCATE(X2D_ALL (U%NDIM_FULL,3))
-     ALLOCATE(XEXTVAL2 (U%NDIM_FULL,2))
+     ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
+     ALLOCATE(XEXT_ALL (U%NDIM_FULL,2))
+     ALLOCATE(XALL     (U%NDIM_FULL,3,1))     
 !
-     NSIZE_ALL  (:) = 0.
-     X2D_ALL  (:,:) = 0.
-     XEXTVAL2 (:,1) = -99999.
-     XEXTVAL2 (:,2) = 99999.
+     NSIZE_ALL(:,1) = 0.
+     XEXT_ALL (:,1) = -99999.
+     XEXT_ALL (:,2) = 99999.
+     XALL   (:,:,1) = 0.     
 !
      XMAX_WORK(:) =-99999.
 !
@@ -269,13 +269,13 @@ CALL INIT_IO_SURF_n(DTCO, U, &
 !*    7.      Coherence
 !             ---------
 !
-     WHERE(NSIZE(:)<36.OR.XSTD_WORK(:)==0.0)
+     WHERE(NSIZE(:,1)<36.OR.XSTD_WORK(:)==0.0)
           XMIN_WORK (:) = XUNDEF
           XMAX_WORK (:) = XUNDEF
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE     (:) = 0
+          NSIZE   (:,1) = 0
      ENDWHERE 
 !
      WHERE(U%XNATURE(:)>0.0.AND.XSKEW_WORK(:)<=-8.0)
@@ -284,7 +284,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE     (:) = 0
+          NSIZE   (:,1) = 0
      ENDWHERE             
 !
      WHERE(U%XNATURE(:)==0.)
@@ -293,7 +293,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE     (:) = 0
+          NSIZE   (:,1) = 0
      ENDWHERE   
 !
 !-------------------------------------------------------------------------------
@@ -363,7 +363,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
               XMEAN_WORK(:) = XUNDEF
               XSTD_WORK (:) = XUNDEF
               XSKEW_WORK(:) = XUNDEF
-              NSIZE     (:) = 0
+              NSIZE   (:,1) = 0
          ENDWHERE
 !
          DEALLOCATE(ZDELTA   )
@@ -389,7 +389,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
     CALL GET_GRID_COORD(UG%G%CGRID, UG%G%NGRID_PAR, UG%G%XGRID_PAR, U%NSIZE_FULL, &
                         ILUOUT,PY=ZLAT)
 !
-    WHERE (U%XNATURE(:)==0..AND.NSIZE(:)==0) NSIZE(:) = -1
+    WHERE (U%XNATURE(:)==0..AND.NSIZE(:,1)==0) NSIZE(:,1) = -1
 !
 !   No Antarctic
     WHERE(U%XNATURE(:)>0..AND.ZLAT(:)<-60.)
@@ -398,24 +398,24 @@ CALL INIT_IO_SURF_n(DTCO, U, &
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE     (:) = -1
+          NSIZE   (:,1) = -1
     ENDWHERE   
 !
-    IF(ALL(NSIZE(:)==0.0))NSIZE(:)=-1
+    IF(ALL(NSIZE(:,1)==0.0))NSIZE(:,1)=-1
 !
     CALL INTERPOL_FIELD(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,XMIN_WORK (:),'TI_MIN ',PDEF=XUNDEF,KNPTS=1)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),XMIN_WORK (:),'TI_MIN ',PDEF=XUNDEF,KNPTS=1)
     CALL INTERPOL_FIELD(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,XMAX_WORK (:),'TI_MAX ',PDEF=XUNDEF,KNPTS=1)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),XMAX_WORK (:),'TI_MAX ',PDEF=XUNDEF,KNPTS=1)
     CALL INTERPOL_FIELD(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,XMEAN_WORK(:),'TI_MEAN',PDEF=XUNDEF,KNPTS=1)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),XMEAN_WORK(:),'TI_MEAN',PDEF=XUNDEF,KNPTS=1)
     CALL INTERPOL_FIELD(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,XSTD_WORK (:),'TI_STD ',PDEF=XUNDEF,KNPTS=1)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),XSTD_WORK (:),'TI_STD ',PDEF=XUNDEF,KNPTS=1)
     CALL INTERPOL_FIELD(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,XSKEW_WORK(:),'TI_SKEW',PDEF=XUNDEF,KNPTS=1)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),XSKEW_WORK(:),'TI_SKEW',PDEF=XUNDEF,KNPTS=1)
 !
     DEALLOCATE(NSIZE     )
-    DEALLOCATE(XSUMVAL2  )
+    DEALLOCATE(XSUMVAL   )
     DEALLOCATE(ZLAT      )
 !
   ENDIF

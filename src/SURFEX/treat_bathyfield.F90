@@ -50,7 +50,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PGDWORK, ONLY : NSIZE, NSIZE_ALL, X1D_ALL, XSUMVAL
+USE MODD_PGDWORK, ONLY : NSIZE, NSIZE_ALL, XALL, XSUMVAL
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NREQ, NINDEX, IDX_R, &
                                 NSIZE_TASK,NREQ, NSIZE_max=>NSIZE
@@ -103,8 +103,9 @@ REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PPGDARRAY ! field on MESONH grid
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZPGDARRAY
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK
-REAL, DIMENSION(:), ALLOCATABLE :: ZEXTVAL
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZVAL
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE
 !
 #ifdef SFX_MPI
@@ -157,7 +158,7 @@ END SELECT
 !-------------------------------------------------------------------------------
 !
 !nsize contains the number of points found for each of the domain, for each task
-ALLOCATE(NSIZE(U%NSIZE_FULL))
+ALLOCATE(NSIZE(U%NSIZE_FULL,1))
 !
 IF (NPROC>1) THEN
   !
@@ -167,9 +168,9 @@ IF (NPROC>1) THEN
   IDX = IDX_SAVE + NRANK
   !each task sends to each other task the part of NSIZE_ALL it got, stored in
   !isize
-  CALL READ_AND_SEND_MPI(NSIZE_ALL,ISIZE(1:NSIZE_TASK(NRANK)),KPIO=NRANK,KDX=IDX)
+  CALL READ_AND_SEND_MPI(NSIZE_ALL(:,1),ISIZE(1:NSIZE_TASK(NRANK)),KPIO=NRANK,KDX=IDX)
   !
-  NSIZE(:) = 0
+  NSIZE(:,1) = 0
   !for each task
   DO JP=0,NPROC-1
    !
@@ -185,20 +186,20 @@ IF (NPROC>1) THEN
       DO JI = 1,SIZE(NINDEX)
         IF (NINDEX(JI)==JP) THEN
           ICPT = ICPT + 1
-          ISIZE(ICPT) = NSIZE_ALL(JI)
+          ISIZE(ICPT) = NSIZE_ALL(JI,1)
         ENDIF
       ENDDO
       !
     ENDIF
     !
     !nsize is the sum of all parts isize
-    NSIZE(:) = NSIZE(:) + ISIZE(1:NSIZE_TASK(NRANK))
+    NSIZE(:,1) = NSIZE(:,1) + ISIZE(1:NSIZE_TASK(NRANK))
     !
   ENDDO
   DEALLOCATE(ISIZE)
   CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS2,INFOMPI)
 ELSE
-  NSIZE(:) = NSIZE_ALL(:)
+  NSIZE(:,1) = NSIZE_ALL(:,1)
 ENDIF
 !
 !
@@ -209,19 +210,19 @@ SELECT CASE (HSUBROUTINE)
 
   CASE ('A_MESH')
     !most simple case
-    ALLOCATE(XSUMVAL(U%NSIZE_FULL))
+    ALLOCATE(XSUMVAL(U%NSIZE_FULL,1))
     IF (NPROC>1) THEN
-      XSUMVAL(:) = 0.
-      ALLOCATE(ZEXTVAL(U%NSIZE_FULL))
+      XSUMVAL(:,:) = 0.
+      ALLOCATE(ZVAL(U%NSIZE_FULL,1))
       DO JP = 0,NPROC-1
-        CALL READ_AND_SEND_MPI(X1D_ALL,ZEXTVAL,KPIO=JP)
-        XSUMVAL(:) = XSUMVAL(:) + ZEXTVAL(:)
+        CALL READ_AND_SEND_MPI(XALL(:,:,1),ZVAL,KPIO=JP)
+        XSUMVAL(:,:) = XSUMVAL(:,:) + ZVAL(:,:)
       ENDDO
-      DEALLOCATE(ZEXTVAL)
+      DEALLOCATE(ZVAL)
     ELSE
-      XSUMVAL(:) = X1D_ALL(:)
+      XSUMVAL(:,:) = XALL(:,:,1)
     ENDIF
-    DEALLOCATE(X1D_ALL)
+    DEALLOCATE(XALL)
     !
 END SELECT
 !
@@ -236,7 +237,10 @@ SELECT CASE (HSUBROUTINE)
       WRITE(ILUOUT,*) 'but you did not give the array to store this field'
       CALL ABOR1_SFX('TREAT_BATHYFIELD: PGD ARRAY IS MISSING')
     END IF
-    CALL AVERAGE2_MESH(PPGDARRAY)
+    ALLOCATE(ZPGDARRAY(SIZE(PPGDARRAY),1))    
+    CALL AVERAGE2_MESH(ZPGDARRAY)
+    PPGDARRAY = ZPGDARRAY(:,1)
+    DEALLOCATE(ZPGDARRAY)
 
 END SELECT
 IF (LHOOK) CALL DR_HOOK('TREAT_BATHYFIELD',1,ZHOOK_HANDLE)

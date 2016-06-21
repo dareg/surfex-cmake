@@ -45,7 +45,7 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK
-USE MODD_PGDWORK, ONLY : X3D_ALL, NSIZE_ALL
+USE MODD_PGDWORK, ONLY : XALL, NSIZE_ALL
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
 USE MODI_GET_MESH_INDEX
@@ -76,10 +76,10 @@ REAL, OPTIONAL, INTENT(IN) :: PNODATA
 INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: IINDEX ! mesh index of all input points
                                          ! 0 indicates the point is out of the domain                              
 !
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: Z3D_ALL
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZALL
 REAL, DIMENSION(SIZE(PLAT)) :: ZVALUE
 REAL :: ZNODATA
-INTEGER :: JLOOP, JOVER, JCOV, IFOUND, ICOV, IND        ! loop index on input arrays
+INTEGER :: JL, JOV, JCOV, IFOUND, ICOV, IND        ! loop index on input arrays
 INTEGER :: ICOVERCLASS  ! class of cover type
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !     
 IF (LHOOK) CALL DR_HOOK('AVERAGE1_COVER',0,ZHOOK_HANDLE)
 !
-ICOV = SIZE(X3D_ALL,2)
+ICOV = SIZE(XALL,2)
 !
 IF (PRESENT(PNODATA)) THEN
   ZVALUE(:) = PVALUE(:)
@@ -106,19 +106,19 @@ ENDIF
 !            -----------------------------
 !     
 bloop: &
-DO JLOOP = 1 , SIZE(PLAT)
+DO JL = 1 , SIZE(PLAT)
 !
 !*    3.     Tests on position
 !            -----------------
 !    
-  DO JOVER = 1, NOVMX
+  DO JOV = 1, NOVMX
 
-    IF (IINDEX(JOVER,JLOOP)==0) CYCLE bloop
+    IF (IINDEX(JOV,JL)==0) CYCLE bloop
 !
 !*    4.     Test on value meaning
 !            ---------------------
 !
-    ICOVERCLASS = NINT(PVALUE(JLOOP))
+    ICOVERCLASS = NINT(PVALUE(JL))
 !
     U%LCOVER(ICOVERCLASS) = .TRUE.
 !
@@ -127,7 +127,7 @@ DO JLOOP = 1 , SIZE(PLAT)
 !*    5.     Summation
 !            ---------
 !
-    NSIZE_ALL(IINDEX(JOVER,JLOOP))=NSIZE_ALL(IINDEX(JOVER,JLOOP))+1
+    NSIZE_ALL(IINDEX(JOV,JL),1)=NSIZE_ALL(IINDEX(JOV,JL),1)+1
 !
 !*    6.     Fraction of cover type
 !            ----------------------
@@ -136,9 +136,9 @@ DO JLOOP = 1 , SIZE(PLAT)
     !ICOV: number of covers already found in the domain
     DO JCOV=1,ICOV
       !if the cover read is already in the array
-      IF (X3D_ALL(IINDEX(JOVER,JLOOP),JCOV,1)==ICOVERCLASS*1.) THEN
+      IF (XALL(IINDEX(JOV,JL),JCOV,1)==ICOVERCLASS*1.) THEN
         !the number of points found is increased of 1
-        X3D_ALL(IINDEX(JOVER,JLOOP),JCOV,2)=X3D_ALL(IINDEX(JOVER,JLOOP),JCOV,2)+1.
+        XALL(IINDEX(JOV,JL),JCOV,2) = XALL(IINDEX(JOV,JL),JCOV,2) + 1.
         IFOUND=1
         EXIT
       ENDIF
@@ -146,24 +146,24 @@ DO JLOOP = 1 , SIZE(PLAT)
     !if the cover is not in the array 
     IF (IFOUND==0) THEN
       !if we already have some covers for this point
-      IF (X3D_ALL(IINDEX(JOVER,JLOOP),ICOV,2)/=0.) THEN
+      IF (XALL(IINDEX(JOV,JL),ICOV,2)/=0.) THEN
         !to save the current array
-        ALLOCATE(Z3D_ALL(SIZE(X3D_ALL,1),ICOV,SIZE(X3D_ALL,3)))
-        Z3D_ALL(:,:,:) = X3D_ALL(:,:,:)
-        DEALLOCATE(X3D_ALL)
+        ALLOCATE(ZALL(SIZE(XALL,1),ICOV,SIZE(XALL,3)))
+        ZALL(:,:,:) = XALL(:,:,:)
+        DEALLOCATE(XALL)
         !we add one cover to the size of the array
-        ALLOCATE(X3D_ALL(SIZE(Z3D_ALL,1),ICOV+1,SIZE(Z3D_ALL,3)))
-        X3D_ALL(:,1:ICOV,:) = Z3D_ALL(:,:,:)
-        DEALLOCATE(Z3D_ALL)
-        X3D_ALL(:,ICOV+1,:) = 0.
+        ALLOCATE(XALL(SIZE(ZALL,1),ICOV+1,SIZE(ZALL,3)))
+        XALL(:,1:ICOV,:) = ZALL(:,:,:)
+        DEALLOCATE(ZALL)
+        XALL(:,ICOV+1,:) = 0.
         !the number of covers already found increases
         ICOV = ICOV + 1
       ENDIF
       !first index for this point where no cover is defined
-      IND = MINLOC(X3D_ALL(IINDEX(JOVER,JLOOP),:,2),1,X3D_ALL(IINDEX(JOVER,JLOOP),:,2)==0.)
+      IND = MINLOC(XALL(IINDEX(JOV,JL),:,2),1,XALL(IINDEX(JOV,JL),:,2)==0.)
       !the new cover is registered
-      X3D_ALL(IINDEX(JOVER,JLOOP),IND,1) = ICOVERCLASS*1.
-      X3D_ALL(IINDEX(JOVER,JLOOP),IND,2) = 1.
+      XALL(IINDEX(JOV,JL),IND,1) = ICOVERCLASS*1.
+      XALL(IINDEX(JOV,JL),IND,2) = 1.
     ENDIF
     !
   ENDDO

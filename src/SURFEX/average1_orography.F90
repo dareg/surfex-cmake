@@ -45,7 +45,7 @@
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
-USE MODD_PGDWORK,       ONLY : X2D_ALL, XEXTVAL2, NSIZE_ALL, X3D_ALL, N3D_ALL, NSSO
+USE MODD_PGDWORK,       ONLY : XALL, XEXT_ALL, NSIZE_ALL, XSSO_ALL, NSSO_ALL, NSSO
 !
 USE MODI_GET_MESH_INDEX
 USE MODD_POINT_OVERLAY, ONLY : NOVMX
@@ -78,7 +78,7 @@ INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: IINDEX ! mesh index of all input points
 INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: ISSOX  ! X submesh index in their mesh of all input points
 INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: ISSOY  ! Y submesh index in their mesh of all input points
 !
-INTEGER :: JLOOP, JOVER        ! loop index on input arrays
+INTEGER :: JL, JOV        ! loop index on input arrays
 REAL, DIMENSION(SIZE(PLAT)) :: ZVALUE
 REAL :: ZNODATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -104,48 +104,48 @@ ENDIF
 !            -----------------------------
 !    
 bloop: &
-DO JLOOP = 1 , SIZE(PLAT)
+DO JL = 1 , SIZE(PLAT)
 !
-  DO JOVER = 1, NOVMX
+  DO JOV = 1, NOVMX
 !
 !*    3.     Tests on position
 !            -----------------
 !     
-    IF (IINDEX(JOVER,JLOOP)==0) CYCLE bloop
+    IF (IINDEX(JOV,JL)==0) CYCLE bloop
 !
 !*    4.     Summation
 !            ---------
 !
-    NSIZE_ALL(IINDEX(JOVER,JLOOP))=NSIZE_ALL(IINDEX(JOVER,JLOOP))+1
+    NSIZE_ALL(IINDEX(JOV,JL),1) = NSIZE_ALL(IINDEX(JOV,JL),1)+1
 !
 !*    5.     Orography
 !            ---------
 !
-    X2D_ALL(IINDEX(JOVER,JLOOP),1)=X2D_ALL(IINDEX(JOVER,JLOOP),1)+PVALUE(JLOOP)
+    XALL(IINDEX(JOV,JL),1,1) = XALL(IINDEX(JOV,JL),1,1)+PVALUE(JL)
 !
 !*    6.     Square of Orography
 !            -------------------
 !
-    X2D_ALL(IINDEX(JOVER,JLOOP),2)=X2D_ALL(IINDEX(JOVER,JLOOP),2)+PVALUE(JLOOP)**2
+    XALL(IINDEX(JOV,JL),2,1) = XALL(IINDEX(JOV,JL),2,1)+PVALUE(JL)**2
 !
 !*    7.     Maximum orography in a subgrid square
 !            -------------------------------------
 !
-    N3D_ALL(IINDEX(JOVER,JLOOP),ISSOX(JOVER,JLOOP),ISSOY(JOVER,JLOOP)) = 1
-    X3D_ALL(IINDEX(JOVER,JLOOP),ISSOX(JOVER,JLOOP),ISSOY(JOVER,JLOOP)) = &
-         MAX (  X3D_ALL(IINDEX(JOVER,JLOOP),ISSOX(JOVER,JLOOP),ISSOY(JOVER,JLOOP)) , PVALUE(JLOOP) )   
+    NSSO_ALL(IINDEX(JOV,JL),ISSOX(JOV,JL),ISSOY(JOV,JL)) = 1
+    XSSO_ALL(IINDEX(JOV,JL),ISSOX(JOV,JL),ISSOY(JOV,JL)) = &
+         MAX (  XSSO_ALL(IINDEX(JOV,JL),ISSOX(JOV,JL),ISSOY(JOV,JL)) , PVALUE(JL) )   
 !
 !
 !*    8.     Maximum orography in the mesh
 !            -----------------------------
 !
-    XEXTVAL2(IINDEX(JOVER,JLOOP),1)=MAX(XEXTVAL2(IINDEX(JOVER,JLOOP),1),PVALUE(JLOOP))
+    XEXT_ALL(IINDEX(JOV,JL),1) = MAX(XEXT_ALL(IINDEX(JOV,JL),1),PVALUE(JL))
 !
 !
 !*    9.     Minimum orography in the mesh
 !            -----------------------------
 !
-    XEXTVAL2(IINDEX(JOVER,JLOOP),2)=MIN(XEXTVAL2(IINDEX(JOVER,JLOOP),2),PVALUE(JLOOP))
+    XEXT_ALL(IINDEX(JOV,JL),2) = MIN(XEXT_ALL(IINDEX(JOV,JL),2),PVALUE(JL))
 !
 !
   END DO

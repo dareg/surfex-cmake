@@ -49,7 +49,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
-USE MODD_PGDWORK,        ONLY : X1D_ALL, NSIZE_ALL, NSIZE, XSUMVAL
+USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, NSIZE, XSUMVAL
 !
 USE MODI_GET_LUOUT
 USE MODI_TREAT_BATHYFIELD
@@ -119,11 +119,11 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    3.      Averages the field
 !             ------------------
 !
-  ALLOCATE(NSIZE_ALL (U%NDIM_FULL))
-  ALLOCATE(X1D_ALL   (U%NDIM_FULL))
+  ALLOCATE(NSIZE_ALL (U%NDIM_FULL,1))
+  ALLOCATE(XALL      (U%NDIM_FULL,1,1))
 !
-  NSIZE_ALL(:) = 0.
-  X1D_ALL  (:) = 0.
+  NSIZE_ALL(:,:) = 0
+  XALL   (:,:,:) = 0.
 !
   YFIELD = '                    '
   YFIELD = HFIELD(1:MIN(LEN(HFIELD),20))
@@ -141,15 +141,15 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   SELECT CASE (HAREA)
     CASE ('LAN')
-      WHERE (U%XTOWN(:)+U%XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XTOWN(:)+U%XNATURE(:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
     CASE ('TWN')
-      WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
     CASE ('NAT')
-      WHERE (U%XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XNATURE(:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
     CASE ('SEA')
-      WHERE (U%XSEA   (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XSEA   (:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
     CASE ('WAT')
-      WHERE (U%XWATER (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
+      WHERE (U%XWATER (:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
 
   END SELECT
 !
@@ -159,7 +159,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !             ------------------------------------------------
 !
   CALL INTERPOL_FIELD(UG, U, &
-                      HPROGRAM,ILUOUT,NSIZE,PFIELD(:),HFIELD)
+                      HPROGRAM,ILUOUT,NSIZE(:,1),PFIELD(:),HFIELD)
 !
   DO JLOOP=1,SIZE(PFIELD)
    PFIELD(JLOOP)=MIN(PFIELD(JLOOP),-1.)

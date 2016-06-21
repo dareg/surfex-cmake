@@ -58,6 +58,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_AGRI,        ONLY : LAGRIP
 !
+USE MODI_AV_PGD
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -100,7 +101,7 @@ INTEGER               :: IHGROUND_LAYER ! Half number of NGROUND_LAYER
 INTEGER               :: IIH       ! Ground layer counter
 LOGICAL               :: GFOUND    ! true if namelist is found
 !
-INTEGER               :: JVEG  ! loop counter on patch
+INTEGER               :: JVEG, JL  ! loop counter on patch
 LOGICAL               :: GPAR_STRESS   ! type of stress
 !
 INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
@@ -526,8 +527,9 @@ CALL INI_VAR_FROM_DATA(DTCO, UG, U, USS, DTV%XPAR_VEGTYPE, &
                        HPROGRAM,'ARI','VEGTYPE: vegetation type','NAT',CFNAM_VEGTYPE,   &
                        CFTYP_VEGTYPE,XUNIF_VEGTYPE,DTV%XPAR_VEGTYPE,DTV%LDATA_VEGTYPE) 
 IF (.NOT. DTV%LDATA_VEGTYPE ) THEN
-  DEALLOCATE(DTV%XPAR_VEGTYPE)
-  ALLOCATE(DTV%XPAR_VEGTYPE(0,0))
+  DO JVEG = 1,NVEGTYPE
+    CALL AV_PGD(DTCO, DTV%XPAR_VEGTYPE(:,JVEG),S%XCOVER,DTCO%XDATA_VEGTYPE(:,JVEG),'NAT','ARI',S%LCOVER)
+  ENDDO
 ENDIF
 !
 IF (.NOT.IO%LECOCLIMAP .AND. .NOT.DTV%LDATA_VEGTYPE) THEN
@@ -674,8 +676,12 @@ ENDIF
 !--------------------------------depths fields-----------------------------------
 !
 ALLOCATE(DTV%XPAR_DG(KDIM,IO%NGROUND_LAYER,NVEGTYPE))
-CALL INI_VAR_FROM_DATA(DTCO, UG, U, USS, DTV%XPAR_VEGTYPE, &
-                        HPROGRAM,'ARI','DG: ground depth','NAT',CFNAM_DG,CFTYP_DG,XUNIF_DG,DTV%XPAR_DG,DTV%LDATA_DG)
+DO JL=1,IO%NGROUND_LAYER 
+  CALL INI_VAR_FROM_DATA(DTCO, UG, U, USS, DTV%XPAR_VEGTYPE, &
+                         HPROGRAM,'ARI','DG: ground depth','NAT',&
+                         CFNAM_DG(:,JL),CFTYP_DG(:,JL),XUNIF_DG(:,JL),&
+                         DTV%XPAR_DG(:,JL,:),DTV%LDATA_DG)
+ENDDO
 IF (ALL(.NOT.DTV%LDATA_DG)) DEALLOCATE(DTV%XPAR_DG)
 !  
 ALLOCATE(DTV%XPAR_ROOT_DEPTH(KDIM,NVEGTYPE))

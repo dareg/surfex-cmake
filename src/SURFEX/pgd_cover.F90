@@ -52,7 +52,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR
-USE MODD_PGDWORK,        ONLY : X3D_ALL, NSIZE_ALL, NSIZE, XSUMVAL2
+USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, NSIZE, XSUMVAL
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW, &
                                 IDX_TWN_ECOSG
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA, XDATA_NATURE, XDATA_WATER
@@ -282,21 +282,21 @@ ELSE
 !*    3.      Averages the field
 !             ------------------
 !
-  ALLOCATE(NSIZE_ALL(U%NDIM_FULL)        )
-  ALLOCATE(X3D_ALL  (U%NDIM_FULL,1,2)    )
+  ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1)      )
+  ALLOCATE(XALL     (U%NDIM_FULL,1,2)    )
 !
-  NSIZE_ALL (:)  = 0.
-  X3D_ALL(:,:,:) = 0.
+  NSIZE_ALL(:,:) = 0
+  XALL   (:,:,:) = 0.
   CALL TREAT_FIELD(UG, U, USS, &
                    HPROGRAM,'SURF  ',YFILETYPE,'A_COVR',YCOVER, 'COVER               ' ) 
 !
-  DEALLOCATE(XSUMVAL2  )
+  DEALLOCATE(XSUMVAL  )
 !
 !*    4.      Interpolation if some points are not initialized (no data for these points) (same time)
 !             ---------------------------------------------------------------------------------------
 !
   WRITE(YFIELD,FMT='(A)') 'covers'
-  CALL INTERPOL_FIELD2D(UG, U, HPROGRAM,ILUOUT,NSIZE, U%XCOVER(:,:),YFIELD)
+  CALL INTERPOL_FIELD2D(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1), U%XCOVER(:,:),YFIELD)
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -320,15 +320,15 @@ ELSE
 !*    3.      Averages the field
 !             ------------------
 !
-    ALLOCATE(NSIZE_ALL(U%NDIM_FULL)        )
-    ALLOCATE(X3D_ALL  (U%NDIM_FULL,1,2)    )
+    ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1)      )
+    ALLOCATE(XALL     (U%NDIM_FULL,1,2)    )
 !
-    NSIZE_ALL (:)  = 0.
-    X3D_ALL(:,:,:) = 0.
+    NSIZE_ALL(:,:) = 0.
+    XALL   (:,:,:) = 0.
     CALL TREAT_FIELD(UG, U, USS, &
                      HPROGRAM,'SURF  ',YCLCFILETYPE,'A_COVR',YCLC, 'COVER               ' ) 
 !
-    DEALLOCATE(XSUMVAL2  )
+    DEALLOCATE(XSUMVAL  )
 !
     ! save LCOVER from CORINE
     ALLOCATE(GCOVER2(JPCOVER))
@@ -644,7 +644,7 @@ ELSE
   ZCOVER_SEA   (:,:) = U%XCOVER(:,:)
   ZCOVER_WATER (:,:) = U%XCOVER(:,:)
   !
-  ALLOCATE(NSIZE(NL))
+  ALLOCATE(NSIZE(NL,1))
   !
   ALLOCATE(ZDEF(ICOVER))
   !
@@ -654,11 +654,11 @@ ELSE
   '*  Coherence computation between covers and imposed nature fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:) = 1
-  WHERE (U%XNATURE(:).NE.0. .AND. ZNATURE(:).EQ.0.) NSIZE(:)=0
+  NSIZE(:,1) = 1
+  WHERE (U%XNATURE(:).NE.0. .AND. ZNATURE(:).EQ.0.) NSIZE(:,1)=0
           
   DO JL=1,SIZE(U%XCOVER,1)
-    IF (U%XNATURE(JL).EQ.0.) NSIZE(JL)=-1
+    IF (U%XNATURE(JL).EQ.0.) NSIZE(JL,1)=-1
   ENDDO
   ZDEF(:)=0.
   DO JCOV=1,ICOVER
@@ -668,7 +668,7 @@ ELSE
     ENDIF
   ENDDO
   CALL INTERPOL_FIELD2D(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_NATURE(:,:),YFIELD,ZDEF)  
+                        HPROGRAM,ILUOUT,NSIZE(:,1),ZCOVER_NATURE(:,:),YFIELD,ZDEF)  
 !
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -676,10 +676,10 @@ ELSE
   '*  Coherence computation between covers and imposed town   fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:) = 1
-  WHERE (U%XTOWN(:).NE.0. .AND. ZTOWN(:).EQ.0.) NSIZE(:)=0
+  NSIZE(:,1) = 1
+  WHERE (U%XTOWN(:).NE.0. .AND. ZTOWN(:).EQ.0.) NSIZE(:,1)=0
   DO JL=1,SIZE(U%XCOVER,1)
-    IF (U%XTOWN(JL).EQ.0.) NSIZE(JL)=-1
+    IF (U%XTOWN(JL).EQ.0.) NSIZE(JL,1)=-1
   ENDDO
   ZDEF(:)=0.
   DO JCOV=1,ICOVER
@@ -689,7 +689,7 @@ ELSE
     ENDIF
   ENDDO  
   CALL INTERPOL_FIELD2D(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_TOWN (:,:),YFIELD,ZDEF) 
+                        HPROGRAM,ILUOUT,NSIZE(:,1),ZCOVER_TOWN (:,:),YFIELD,ZDEF) 
 
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
@@ -697,16 +697,16 @@ ELSE
   '*  Coherence computation between covers and imposed water  fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:) = 1
-  WHERE (U%XWATER(:).NE.0. .AND. ZWATER(:).EQ.0.) NSIZE(:)=0
+  NSIZE(:,1) = 1
+  WHERE (U%XWATER(:).NE.0. .AND. ZWATER(:).EQ.0.) NSIZE(:,1)=0
 ! if water imposed to 1 in a grid cell: no extrapolation
   DO JL=1,SIZE(U%XCOVER,1)
      IF(U%XWATER(JL)==1.0)THEN
         ZCOVER_WATER(JL,:)=0.0             
         ZCOVER_WATER(JL,IC_WAT)=1.0
-        NSIZE(JL)=1
+        NSIZE(JL,1)=1
      ELSEIF(U%XWATER(JL)==0.0)THEN
-        NSIZE(JL)=-1
+        NSIZE(JL,1)=-1
      ENDIF
   ENDDO
   ZDEF(:)=0.
@@ -717,23 +717,23 @@ ELSE
     ENDIF
   ENDDO    
   CALL INTERPOL_FIELD2D(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_WATER (:,:),YFIELD,PDEF=ZDEF)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),ZCOVER_WATER (:,:),YFIELD,PDEF=ZDEF)
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
   WRITE(ILUOUT,FMT=*) &
   '*  Coherence computation between covers and imposed sea    fraction *'
   WRITE(ILUOUT,FMT=*) &
   '*********************************************************************'
-  NSIZE(:) = 1
-  WHERE (U%XSEA(:).NE.0. .AND. ZSEA(:).EQ.0.) NSIZE(:)=0
+  NSIZE(:,1) = 1
+  WHERE (U%XSEA(:).NE.0. .AND. ZSEA(:).EQ.0.) NSIZE(:,1)=0
 ! if sea imposed to 1 in a grid cell: no extrapolation          
   DO JL=1,SIZE(U%XCOVER,1)
      IF(U%XSEA(JL)==1.0)THEN
         ZCOVER_SEA(JL,:)=0.0             
         ZCOVER_SEA(JL,IC_SEA)=1.0
-        NSIZE(JL)=1
+        NSIZE(JL,1)=1
      ELSEIF(U%XSEA(JL)==0.0)THEN
-        NSIZE(JL)=-1
+        NSIZE(JL,1)=-1
      ENDIF
   ENDDO
   ZDEF(:)=0.
@@ -744,7 +744,7 @@ ELSE
     ENDIF
   ENDDO    
   CALL INTERPOL_FIELD2D(UG, U, &
-                        HPROGRAM,ILUOUT,NSIZE,ZCOVER_SEA (:,:),YFIELD,PDEF=ZDEF)
+                        HPROGRAM,ILUOUT,NSIZE(:,1),ZCOVER_SEA (:,:),YFIELD,PDEF=ZDEF)
   !
   U%XCOVER(:,:) = U%XCOVER(:,:) + 0.001 * ( ZCOVER_NATURE(:,:) + ZCOVER_TOWN(:,:) + &
                                             ZCOVER_WATER (:,:) + ZCOVER_SEA (:,:) )

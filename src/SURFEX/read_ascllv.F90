@@ -66,10 +66,17 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
 INTEGER      :: IGLB                       ! logical unit
 !
 INTEGER      :: JLAT, JLON                 ! indexes of OLATLONMASK array
-REAL         :: ZVALUE                     ! values of a data point
-REAL         :: ZLAT                       ! latitude of data point
-REAL         :: ZLON                       ! longitude of data point
 !
+INTEGER, PARAMETER :: ILONG=1000
+!
+REAL*4         :: ZVALUER
+REAL, DIMENSION(ILONG) :: ZVALUE          ! values of a data point
+REAL*4         :: ZLATR
+REAL, DIMENSION(ILONG) :: ZLAT              ! latitude of data point
+REAL*4         :: ZLONR
+REAL, DIMENSION(ILONG) :: ZLON              ! longitude of data point
+!
+INTEGER :: ICPT, ISTAT
 INTEGER      :: ILUOUT                     ! output listing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
@@ -82,6 +89,12 @@ IF (LHOOK) CALL DR_HOOK('READ_ASCLLV',0,ZHOOK_HANDLE)
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
+ICPT = 0
+!
+ZLAT(:) = 0
+ZLON(:) = 0
+ZVALUE(:) = 0
+!
 !----------------------------------------------------------------------------
 DO
 !----------------------------------------------------------------------------
@@ -89,32 +102,56 @@ DO
 !*    3.     Reading of a data point
 !            -----------------------
 !
-  READ(IGLB,*,END=99) ZLAT,ZLON,ZVALUE
+  READ(IGLB,*,IOSTAT=ISTAT) ZLATR,ZLONR,ZVALUER
 !
 !----------------------------------------------------------------------------
 !
 !*    4.     Test if point is in MESO-NH domain
 !            ----------------------------------
 !
-  ZLON=ZLON+NINT((180.-ZLON)/360.)*360.
+  IF (ISTAT==0) THEN
+    !
+    ZLONR=ZLONR+NINT((180.-ZLONR)/360.)*360.
+    !
+    JLAT = 1 + INT( ( ZLATR + 90. ) * 2. )
+    JLAT = MIN(JLAT,360)
+    JLON = 1 + INT( ( ZLONR       ) * 2. )
+    JLON = MIN(JLON,720)
+    !
+    IF (.NOT. LLATLONMASK(JLON,JLAT)) CYCLE
+    !
+    ICPT = ICPT + 1
+    !
+    IF (ICPT<=ILONG) THEN
+      !
+      ZLAT  (ICPT) = ZLATR
+      ZLON  (ICPT) = ZLONR
+      ZVALUE(ICPT) = ZVALUER
+      !
+    ENDIF
+    !
+  ENDIF
+    !
+  IF (ISTAT==-1 .OR. ICPT==ILONG) THEN
+    !
+    !-------------------------------------------------------------------------------
+    !
+    !*    5.     Call to the adequate subroutine (point by point treatment)
+    !            ----------------------------------------------------------
+    !     
+    CALL PT_BY_PT_TREATMENT(UG, U, USS, ILUOUT, &
+            ZLAT(1:ICPT), ZLON(1:ICPT), ZVALUE(1:ICPT), HSUBROUTINE    )  
+    !
+    ICPT = 0
+    ZLAT  (:) = 0.
+    ZLON  (:) = 0.
+    ZVALUE(:) = 0.
+    !
+  ENDIF
   !
-  JLAT = 1 + INT( ( ZLAT + 90. ) * 2. )
-  JLAT = MIN(JLAT,360)
-  JLON = 1 + INT( ( ZLON       ) * 2. )
-  JLON = MIN(JLON,720)
+  IF (ISTAT==-1) EXIT
   !
-  IF (.NOT. LLATLONMASK(JLON,JLAT)) CYCLE
-!
-!-------------------------------------------------------------------------------
-!
-!*    5.     Call to the adequate subroutine (point by point treatment)
-!            ----------------------------------------------------------
-!     
-  CALL PT_BY_PT_TREATMENT(UG, U, USS, &
-                          ILUOUT,  (/ ZLAT /) , (/ ZLON /) , (/ ZVALUE /) , &
-                            HSUBROUTINE                                       )  
-!
-!-------------------------------------------------------------------------------
+  !-------------------------------------------------------------------------------
 ENDDO
 !
 !----------------------------------------------------------------------------

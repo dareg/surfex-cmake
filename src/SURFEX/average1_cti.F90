@@ -42,7 +42,7 @@
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
-USE MODD_PGDWORK,       ONLY : X2D_ALL, NSIZE_ALL, XEXTVAL2
+USE MODD_PGDWORK,       ONLY : XALL, NSIZE_ALL, XEXT_ALL
 !
 USE MODI_GET_MESH_INDEX
 USE MODD_POINT_OVERLAY
@@ -74,7 +74,7 @@ INTEGER, DIMENSION(NOVMX,SIZE(PLAT)) :: IINDEX ! mesh index of all input points
 REAL, DIMENSION(SIZE(PLAT)) :: ZVALUE
 REAL :: ZNODATA
 !
-INTEGER :: JLOOP, JOVER        ! loop index on input arrays
+INTEGER :: JL, JOV        ! loop index on input arrays
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -98,47 +98,47 @@ ENDIF
 !            -----------------------------
 !     
 bloop: &
-DO JLOOP = 1 , SIZE(PLAT)
+DO JL = 1 , SIZE(PLAT)
 !
-  DO JOVER = 1, NOVMX
+  DO JOV = 1, NOVMX
 !
 !*    3.     Tests on position
 !            -----------------
 !
-    IF (IINDEX(JOVER,JLOOP)==0) CYCLE bloop
+    IF (IINDEX(JOV,JL)==0) CYCLE bloop
 !
 !*    4.     Summation
 !            ---------
 !
-    NSIZE_ALL(IINDEX(JOVER,JLOOP))=NSIZE_ALL(IINDEX(JOVER,JLOOP))+1
+    NSIZE_ALL(IINDEX(JOV,JL),1)=NSIZE_ALL(IINDEX(JOV,JL),1)+1
 !
 !*    5.     CTI
 !            ---
 !
-    X2D_ALL(IINDEX(JOVER,JLOOP),1)= X2D_ALL(IINDEX(JOVER,JLOOP),1)+PVALUE(JLOOP)
+    XALL(IINDEX(JOV,JL),1,1) = XALL(IINDEX(JOV,JL),1,1)+PVALUE(JL)
 !
 !*    6.     Square of CTI
 !            -------------
 !
-    X2D_ALL(IINDEX(JOVER,JLOOP),2)= X2D_ALL(IINDEX(JOVER,JLOOP),2)+PVALUE(JLOOP)**2
+    XALL(IINDEX(JOV,JL),2,1) = XALL(IINDEX(JOV,JL),2,1)+PVALUE(JL)**2
 !
 !
 !*    7.     Cube of CTI
 !            -------------
 !
-    X2D_ALL(IINDEX(JOVER,JLOOP),3)= X2D_ALL(IINDEX(JOVER,JLOOP),3)+PVALUE(JLOOP)**3
+    XALL(IINDEX(JOV,JL),3,1) = XALL(IINDEX(JOV,JL),3,1)+PVALUE(JL)**3
 !
 !
 !*    8.     Maximum CTI in the mesh
 !            -----------------------
 !
-    XEXTVAL2(IINDEX(JOVER,JLOOP),1)=MAX(XEXTVAL2(IINDEX(JOVER,JLOOP),1),PVALUE(JLOOP))
+    XEXT_ALL(IINDEX(JOV,JL),1) = MAX(XEXT_ALL(IINDEX(JOV,JL),1),PVALUE(JL))
 !
 !
 !*    9.     Minimum CTI in the mesh
 !            -----------------------
 !
-    XEXTVAL2(IINDEX(JOVER,JLOOP),2)=MIN(XEXTVAL2(IINDEX(JOVER,JLOOP),2),PVALUE(JLOOP))
+    XEXT_ALL(IINDEX(JOV,JL),2) = MIN(XEXT_ALL(IINDEX(JOV,JL),2),PVALUE(JL))
 !
 !
   ENDDO

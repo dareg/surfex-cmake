@@ -102,21 +102,17 @@ INTEGER, INTENT(IN) :: KNEAR_NBR
 !
 INTEGER, DIMENSION(0:NPROC-1) :: ISIZE
 INTEGER :: IP, ICPT
-INTEGER                                     :: IL ! number of points
-INTEGER                                     :: JD ! data point index
-INTEGER                                     :: JS ! loop counter on data points
-INTEGER                                     :: JL, JI ! loop counter on points to initialize
-INTEGER                                     :: JJ, JP, JPP ! loops counter on KNPTS
-REAL :: ZDIST ! square distance between two interpolating and interpolated points
+INTEGER                                     :: IL1 ! number of points
+INTEGER                                     :: JL ! loop counter on points to initialize
+INTEGER                                     :: JP, JK, JKK ! loops counter on KNPTS
+REAL, DIMENSION(:), ALLOCATABLE :: ZDIST ! square distance between two interpolating and interpolated points
 !
-REAL, DIMENSION(:,:), ALLOCATABLE       :: ZNDIST, ZNDIST0 ! 3 nearest square distances
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZNVAL, ZNVAL0  ! 3 corresponding field values
-REAL         :: ZSUM
+REAL, DIMENSION(:,:), ALLOCATABLE       :: ZNDIST  ! 3 nearest square distances
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZNVAL  ! 3 corresponding field values
 REAL, DIMENSION(:,:,:,:), ALLOCATABLE :: ZFIELD, ZFIELD2
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZFIELD3
 REAL, DIMENSION(:), ALLOCATABLE :: ZX, ZY
 !
-INTEGER, DIMENSION(KNEAR_NBR) :: INEAR0
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: INEAR
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: INEAR_ALL
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: ININD
@@ -125,10 +121,10 @@ INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: ININD_ALL
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: ITNUM
 !
+REAL         :: ZSUM, ZMAXVALDIS
 INTEGER                            :: JLIST          ! loop counter on points to interpolate
-INTEGER                            :: ICOUNT, ICOV   ! counter
+INTEGER                            :: ICOUNT, IL2   ! counter
 INTEGER                            :: INPTS
-INTEGER                            :: ISCAN, ID2          ! number of points to scan
 INTEGER, DIMENSION(:), ALLOCATABLE :: IINDEX       ! list of index to scan
 INTEGER                            :: INUM        ! halo available
 #ifdef SFX_MPI
@@ -139,35 +135,11 @@ INTEGER :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',0,ZHOOK_HANDLE)
-!
-IL = SIZE(PFIELD,1)
-ICOV = SIZE(PFIELD,2)
-!
-!PX, PY: coordinates of all the points
-!ZX, ZY: coordinates of the points in this task
-ALLOCATE(ZX(IL),ZY(IL))
- CALL READ_AND_SEND_MPI(PX,ZX)
- CALL READ_AND_SEND_MPI(PY,ZY)
-!
-ALLOCATE(IINDEX(KNEAR_NBR))
-IINDEX    (:) = 0
-!
-IF (KNEAR_NBR/=U%NDIM_FULL) THEN
-  IF (.NOT.ASSOCIATED(UG%NNEAR)) THEN
-    ALLOCATE(UG%NNEAR(IL,KNEAR_NBR))
-    !seach near meshes in the complete grid (xgrid_full_par) for this task
-    CALL GET_NEAR_MESHES(UG%G%CGRID,UG%NGRID_FULL_PAR,U%NDIM_FULL,UG%XGRID_FULL_PAR,KNEAR_NBR,UG%NNEAR)
-  ENDIF
-ELSE
-  DO JL=1,U%NDIM_FULL
-    INEAR0(JL) = JL
-  ENDDO
-ENDIF 
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_1',0,ZHOOK_HANDLE)
 !
 !points to interpolate and that can be used for interpolation on the complete grid
-ALLOCATE(NSIZE_ALL(U%NDIM_FULL))
-CALL GATHER_AND_WRITE_MPI(KCODE,NSIZE_ALL)
+ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
+CALL GATHER_AND_WRITE_MPI(KCODE,NSIZE_ALL(:,1))
 !
 !...known by all tasks
 IF (NPROC>1) THEN
@@ -176,82 +148,128 @@ IF (NPROC>1) THEN
 #endif
 ENDIF
 !
+IF (ALL(NSIZE_ALL/=0)) THEN
+  DEALLOCATE(NSIZE_ALL)
+  CALL DR_HOOK('INTERPOL_NPTS_1',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
+!
+!
 IP = COUNT(KCODE(:)==0)
+!
+IL1 = SIZE(PFIELD,1)
+IL2 = SIZE(PFIELD,2)
+!
+!PX, PY: coordinates of all the points
+!ZX, ZY: coordinates of the points in this task
+ALLOCATE(ZX(IL1),ZY(IL1))
+ CALL READ_AND_SEND_MPI(PX,ZX)
+ CALL READ_AND_SEND_MPI(PY,ZY)
+!
+IF (KNEAR_NBR/=U%NDIM_FULL) THEN
+  IF (.NOT.ASSOCIATED(UG%NNEAR)) THEN
+    ALLOCATE(UG%NNEAR(IL1,KNEAR_NBR))
+    !seach near meshes in the complete grid (xgrid_full_par) for this task
+    CALL GET_NEAR_MESHES(UG%G%CGRID,UG%NGRID_FULL_PAR,U%NDIM_FULL,UG%XGRID_FULL_PAR,KNEAR_NBR,UG%NNEAR)
+  ENDIF
+ENDIF 
+!
+!
+!
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_1',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_2',0,ZHOOK_HANDLE)
+!
+ALLOCATE(IINDEX(KNEAR_NBR))
+IINDEX    (:) = 0
+!
+IF (KNEAR_NBR==U%NDIM_FULL) THEN
+
+  ICOUNT = 0
+  DO JL=1,U%NDIM_FULL
+    !is the neareast point available to interpolation
+    IF (NSIZE_ALL(JL,1)>0) THEN  
+      ICOUNT = ICOUNT+1
+      IINDEX(ICOUNT) = JL
+    END IF
+  END DO
+
+  !did we found enough points for interpolate
+  IF (ICOUNT>=1) THEN
+    INPTS = MIN(KNPTS,ICOUNT)
+  ELSE
+    WHERE(KCODE(:)==0) KCODE(:) = -4
+  END IF
+  ALLOCATE(ZDIST (ICOUNT))
+ELSE
+  ALLOCATE(ZDIST (KNEAR_NBR))
+ENDIF
+!
+ZDIST     (:) = 0.
+!
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_2',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_3',0,ZHOOK_HANDLE)
+!
 !indexes of points used for interpolation, for each point to interpolate
-ALLOCATE(ININD(IP,KNPTS))
+ALLOCATE(ININD (IP,KNPTS))
 ININD(:,:) = 0
 !distances of the points used for interpolation
 ALLOCATE(ZNDIST(IP,0:KNPTS))
 ZNDIST (:,1:KNPTS) = 1.E20
 ZNDIST (:,0) = 0.
-!values of the points used for interpolation
-ALLOCATE(ZNVAL(IP,ICOV))
-ZNVAL(:,:) = XUNDEF
 !
 ICPT=0
 !loop on points for this task
-DO JL=1,IL
-  !
-  IF (KNEAR_NBR/=U%NDIM_FULL) THEN
-    INEAR0(:) = UG%NNEAR(JL,:)
-  ENDIF
+DO JL=1,IL1
   !
   !does this point need to be interpolated? 
   IF (KCODE(JL)/=0) CYCLE
   !
-  ICOUNT = 0
-  DO JD=1,KNEAR_NBR
-    IF (INEAR0(JD)>0) THEN
-      !is the neareast point available to interpolation
-      IF (NSIZE_ALL(INEAR0(JD))>0) THEN  
-        ICOUNT = ICOUNT+1
-        IINDEX(ICOUNT) = INEAR0(JD)
+  IF (KNEAR_NBR/=U%NDIM_FULL) THEN
+
+    ICOUNT = 0
+    DO JK=1,KNEAR_NBR
+      IF (UG%NNEAR(JL,JK)>0) THEN
+        !is the neareast point available to interpolation
+        IF (NSIZE_ALL(UG%NNEAR(JL,JK),1)>0) THEN  
+          ICOUNT = ICOUNT+1
+          IINDEX(ICOUNT) = UG%NNEAR(JL,JK)
+        END IF
       END IF
+    END DO
+    !
+    !did we found enough points for interpolate
+    IF (ICOUNT>=KNPTS) THEN
+      INPTS = KNPTS
+    ELSE
+      KCODE(JL) = -4
+      CYCLE
     END IF
-  END DO
-  !
-  !did we found enough points for interpolate
-  IF (ICOUNT>=KNPTS) THEN
-    ISCAN = ICOUNT
-    INPTS = KNPTS
-  ELSEIF (KNEAR_NBR>=U%NDIM_FULL .AND. ICOUNT>=1) THEN
-    ISCAN = ICOUNT
-    INPTS = ICOUNT
-  ELSE
-    KCODE(JL) = -4
-    CYCLE
-  END IF
+    !
+  ENDIF
   !
   !one point more to interpolate
   ICPT = ICPT + 1
   !
-  !loop on points available to interpolate (max=knpts)
-  DO JS=1,ISCAN
+  ZDIST(1:ICOUNT) = (PX(IINDEX(1:ICOUNT))-ZX(JL))**2 + (PY(IINDEX(1:ICOUNT))-ZY(JL))**2
+  !
+  DO JP = 1,ICOUNT
     !
-    !index of the point in the whole grid
-    JD = IINDEX(JS)
+    IF (ZDIST(JP)>ZNDIST(ICPT,INPTS)) CYCLE
     !
-    !distance between the point to interpolate (Z) and the nearest point (P)
-    ZDIST=  ( ( PX(JD)-ZX(JL) ) ** 2 ) + ( ( PY(JD)-ZY(JL) ) ** 2 )
-    !
-    !if this point nearest than the last other available? 
-    IF ( ZDIST>ZNDIST(ICPT,INPTS) ) CYCLE
-    !
-    !loop on already kept available point to interpolate
-    DO JP = INPTS,1,-1
+    DO JK = INPTS,1,-1
       !
-      IF ( ZDIST>ZNDIST(ICPT,JP-1) ) THEN
+      IF ( ZDIST(JP)>ZNDIST(ICPT,JK-1) ) THEN
         !
-        IF ( JP<INPTS ) THEN
-          DO JPP = INPTS,JP+1,-1
-            ZNDIST(ICPT,JPP)  = ZNDIST(ICPT,JPP-1)
-            ININD(ICPT,JPP) = ININD(ICPT,JPP-1)
+        IF ( JK<INPTS ) THEN
+          DO JKK = INPTS,JK+1,-1
+            ZNDIST(ICPT,JKK) = ZNDIST(ICPT,JKK-1)
+            ININD (ICPT,JKK) = ININD (ICPT,JKK-1)
           ENDDO
         ENDIF
         !
         !distances and indexes of points used to interpolate are saved
-        ZNDIST(ICPT,JP)  = ZDIST
-        ININD(ICPT,JP) = JD
+        ZNDIST(ICPT,JK) = ZDIST (JP)
+        ININD (ICPT,JK) = IINDEX(JP)
         !
         EXIT
         !
@@ -263,7 +281,10 @@ DO JL=1,IL
   !
 ENDDO
 !
-DEALLOCATE(IINDEX,ZX,ZY,NSIZE_ALL)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_3',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_4',0,ZHOOK_HANDLE)
+!
+DEALLOCATE(IINDEX,ZX,ZY,NSIZE_ALL,ZDIST)
 !
 ZNDIST(:,:) = SQRT(ZNDIST(:,:))
 !
@@ -288,9 +309,9 @@ DO JL=1,KNPTS
   !number of points to interpolated
   DO JP=1,ICPT
     !index of the point needed in the whole grid
-    JI = ININD(JP,JL)
+    JK = ININD(JP,JL)
     !inind0 contains the task and the index in this task for this point
-    IF (JI/=0) ININD0(JP,JL,NINDEX(JI)) = NNUM(JI)
+    IF (JK/=0) ININD0(JP,JL,NINDEX(JK)) = NNUM(JK)
   ENDDO
 ENDDO
 !
@@ -313,17 +334,19 @@ ELSE
   ININD_ALL(:,:,:) = ININD0(:,:,:)
 ENDIF
 !
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_4',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_5',0,ZHOOK_HANDLE)
 !
 !zfield contains the values of the points needed located in this task
 !(ie values for indexes of ININD_ALL)
 ALLOCATE(ZFIELD(MAXVAL(ISIZE),KNPTS,SIZE(PFIELD,2),0:NPROC-1))
 ZFIELD(:,:,:,:) = XUNDEF
 DO JP=0,NPROC-1
-  DO JI=1,MAXVAL(ISIZE)
+  DO JK=1,MAXVAL(ISIZE)
     DO JL=1,KNPTS
-      IF (ININD_ALL(JI,JL,JP)/=0) THEN
+      IF (ININD_ALL(JK,JL,JP)/=0) THEN
         !pfield in only on this task
-        ZFIELD(JI,JL,:,JP) = PFIELD(ININD_ALL(JI,JL,JP),:)
+        ZFIELD(JK,JL,:,JP) = PFIELD(ININD_ALL(JK,JL,JP),:)
       ENDIF
     ENDDO
   ENDDO
@@ -352,6 +375,12 @@ DO JP=0,NPROC-1
 ENDDO
 DEALLOCATE(ZFIELD2)
 !
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_5',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_6',0,ZHOOK_HANDLE)
+!
+!values of the points used for interpolation
+ALLOCATE(ZNVAL(IP,IL2))
+ZNVAL(:,:) = XUNDEF
 !
 !znval contains the averaged values for the knpts points
 ZNVAL(:,:) = 0.
@@ -371,7 +400,7 @@ DEALLOCATE(ININD, ZNDIST)
 !
 !finally, pfield contains the interpolated values! 
 ICPT=0
-DO JL=1,IL
+DO JL=1,IL1
 
   IF (KCODE(JL)/=0) CYCLE
 
@@ -382,7 +411,7 @@ ENDDO
 !
 DEALLOCATE(ZNVAL)
 !
-IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('INTERPOL_NPTS_6',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE INTERPOL_NPTS

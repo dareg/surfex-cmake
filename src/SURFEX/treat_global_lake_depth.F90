@@ -49,7 +49,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
-USE MODD_PGDWORK,        ONLY : X2D_ALL, NSIZE_ALL, XSUMVAL2, NSIZE
+USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, XSUMVAL, NSIZE
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB, NGRADDEPTH_LDB, NGRADSTATUS_LDB 
 !
 USE MODI_GET_LUOUT
@@ -90,7 +90,7 @@ INTEGER                        :: JI
 !
  CHARACTER(LEN=6)    :: YMASK
 INTEGER, DIMENSION(NL) :: ISTATUS
-REAL, DIMENSION(NL) :: ZDEPTH, ZSTATUS    ! physiographic field on full grid
+REAL, DIMENSION(NL,1) :: ZDEPTH, ZSTATUS    ! physiographic field on full grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -98,8 +98,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('TREAT_GLOBAL_LAKE_DEPTH',0,ZHOOK_HANDLE)
-ZDEPTH(:) = XUNDEF
-ZSTATUS(:) = XUNDEF
+ZDEPTH (:,:) = XUNDEF
+ZSTATUS(:,:) = XUNDEF
 !-------------------------------------------------------------------------------
 !
 !*    2.      Output listing logical unit
@@ -112,32 +112,32 @@ ZSTATUS(:) = XUNDEF
 !*    4.      Averages the field
 !             ------------------
 !
-ALLOCATE(NSIZE_ALL(U%NDIM_FULL))
-ALLOCATE(X2D_ALL  (U%NDIM_FULL,NGRADDEPTH_LDB))
+ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
+ALLOCATE(XALL     (U%NDIM_FULL,NGRADDEPTH_LDB,1))
 !
-NSIZE_ALL(:) = 0.
-X2D_ALL(:,:) = 0.
+NSIZE_ALL(:,:) = 0.
+XALL   (:,:,:) = 0.
 !
  CALL TREAT_FIELD(UG, U, USS, &
                   HPROGRAM,'SURF  ','DIRECT','A_LDBD', CLAKELDB,   &
                  'water depth         ',ZDEPTH      ) 
 !
-DEALLOCATE(XSUMVAL2)
+DEALLOCATE(XSUMVAL)
 DEALLOCATE(NSIZE)
 !
-ALLOCATE(NSIZE_ALL(U%NDIM_FULL))
-ALLOCATE(X2D_ALL  (U%NDIM_FULL,NGRADSTATUS_LDB))
+ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
+ALLOCATE(XALL    (U%NDIM_FULL,NGRADSTATUS_LDB,1))
 !
-NSIZE_ALL (:) = 0.
-X2D_ALL (:,:) = 0.
+NSIZE_ALL  (:,:) = 0.
+XALL     (:,:,:) = 0.
 !
  CALL TREAT_FIELD(UG, U, USS, &
                   HPROGRAM,'SURF  ','DIRECT','A_LDBS', CSTATUSLDB,  &
                  'water status        ',ZSTATUS             )
 !
-ISTATUS = NINT(ZSTATUS)
+ISTATUS = NINT(ZSTATUS(:,1))
 !
-DEALLOCATE(XSUMVAL2)
+DEALLOCATE(XSUMVAL)
 DEALLOCATE(NSIZE)
 !
 !-------------------------------------------------------------------------------
@@ -145,12 +145,12 @@ DEALLOCATE(NSIZE)
 !*    5.      Consistancy check
 !             ------------------
 !
-DO JI = 1, SIZE(ZDEPTH)
+DO JI = 1, SIZE(ZDEPTH,1)
   IF (U%XWATER(JI).GT.0.) THEN
-    IF (ISTATUS(JI).LE.2) ZDEPTH(JI) = 10.
-    IF (ISTATUS(JI)==3.AND.ZDEPTH(JI)==0.) ZDEPTH(JI) = 10.
+    IF (ISTATUS(JI).LE.2) ZDEPTH(JI,1) = 10.
+    IF (ISTATUS(JI)==3.AND.ZDEPTH(JI,1)==0.) ZDEPTH(JI,1) = 10.
   ELSE
-    ZDEPTH(JI) = 0.
+    ZDEPTH(JI,1) = 0.
   ENDIF
 ENDDO
 !
@@ -169,7 +169,7 @@ ALLOCATE(IMASK(IDIM))
 ILU=0
  CALL GET_SURF_MASK_n(DTCO, U, &
                       YMASK,IDIM,IMASK,ILU,ILUOUT)
- CALL PACK_SAME_RANK(IMASK,ZDEPTH(:),PDEPTH(:))
+ CALL PACK_SAME_RANK(IMASK,ZDEPTH(:,1),PDEPTH(:))
  CALL PACK_SAME_RANK(IMASK,ISTATUS(:),KSTATUS(:))
 DEALLOCATE(IMASK)
 !
