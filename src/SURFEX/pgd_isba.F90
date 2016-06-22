@@ -332,7 +332,8 @@ SELECT CASE (IO%CISBA)
   CASE ('2-L')
 !          
     IO%NGROUND_LAYER = 2
-    IO%CPEDOTF       ='CH78'   
+    IO%CPEDOTF       ='CH78'
+    ALLOCATE(IO%XSOILGRID(0)) 
     WRITE(ILUOUT,*) '*****************************************'
     WRITE(ILUOUT,*) '* With option CISBA = ',IO%CISBA,'         *'
     WRITE(ILUOUT,*) '* the number of soil layers is set to 2 *'
@@ -343,6 +344,7 @@ SELECT CASE (IO%CISBA)
 !          
     IO%NGROUND_LAYER = 3
     IO%CPEDOTF       ='CH78'    
+    ALLOCATE(IO%XSOILGRID(0))
     WRITE(ILUOUT,*) '*****************************************'
     WRITE(ILUOUT,*) '* With option CISBA = ',IO%CISBA,'         *'
     WRITE(ILUOUT,*) '* the number of soil layers is set to 3 *'

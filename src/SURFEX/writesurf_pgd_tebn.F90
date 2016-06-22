@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_n (HSELECT, TOP, BOP, G, BDD, DTB, DTT, GDM, GRM, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_n (HSELECT, TOP, BOP, G, BDD, DTB, DTT, T, GDM, GRM, HPROGRAM)
 !     ###############################################
 !
 !!****  *WRITE_PGD_TEB_n* - writes TEB fields
@@ -33,6 +33,7 @@
 !!    -------------
 !!      Original    01/2003 
 !!      B. Decharme 07/2011 : delete argument HWRITE
+!!      M. Moge     02/2015 parallelization using WRITE_LCOVER
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -46,6 +47,7 @@ USE MODD_GRID_n, ONLY : GRID_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
+USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 !
@@ -53,7 +55,7 @@ USE MODE_WRITE_SURF_COV, ONLY : WRITE_SURF_COV
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITE_GRID
-!
+USE MODI_WRITE_LCOVER
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -74,6 +76,7 @@ TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
@@ -208,7 +211,7 @@ YCOMMENT=YRECFM
 !
 ! * ISBA fields specific to urban gardens
 !
- CALL WRITESURF_PGD_TEB_VEG_n(HSELECT, GDM%DTV%NTIME, GDM%O, GDM%K, HPROGRAM)
+ CALL WRITESURF_PGD_TEB_VEG_n(HSELECT, TOP, T, GDM%DTV%NTIME, GDM%O, GDM%K, GDM%P, HPROGRAM)
 !
 ! * ISBA fields specific to urban greenroofs
 !

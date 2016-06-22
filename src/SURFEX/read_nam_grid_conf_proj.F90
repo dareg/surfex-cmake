@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ################################################################
-      SUBROUTINE READ_NAM_GRID_CONF_PROJ(PGRID_FULL_PAR,KDIM_FULL,HPROGRAM,KGRID_PAR,KL,PGRID_PAR,HDIR)
+      SUBROUTINE READ_NAM_GRID_CONF_PROJ(GCP,PGRID_FULL_PAR,KDIM_FULL,HPROGRAM,KGRID_PAR,KL,PGRID_PAR,HDIR)
 !     ################################################################
 !
 !!****  *READ_NAM_GRID_CONF_PROJ* - routine to read in namelist the horizontal grid
@@ -38,6 +38,8 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_GRID_CONF_PROJ_n, ONLY :GRID_CONF_PROJ_t
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK, NPIO
 !
 USE MODE_POS_SURF
@@ -48,7 +50,6 @@ USE MODI_GET_LUOUT
 USE MODI_READ_AND_SEND_MPI
 !
 USE MODE_GRIDTYPE_CONF_PROJ
-USE MODD_GRID_CONF_PROJ, ONLY : XLATC, XLONC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -57,6 +58,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 REAL, DIMENSION(:), POINTER :: PGRID_FULL_PAR
 INTEGER, INTENT(IN) :: KDIM_FULL
@@ -188,8 +191,8 @@ IF (HDIR/='H') THEN
   CALL LATLON_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATCEN,XLONCEN, &
                          ZXOR,ZYOR,ZLATOR,ZLONOR                 )  
   !
-  XLATC=XLATCEN
-  XLONC=XLONCEN
+  GCP%XLATC=XLATCEN
+  GCP%XLONC=XLONCEN
   !
 ELSE
   !

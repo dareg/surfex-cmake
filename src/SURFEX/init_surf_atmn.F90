@@ -372,10 +372,17 @@ IF (.NOT. LZENITH) CALL SUNPOS(KYEAR, KMONTH, KDAY, PTIME, YSC%UG%G%XLON, YSC%UG
 IF (HPROGRAM/='AROME '.AND.NRANK==NPIO) THEN
   !
   IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
+#ifdef MNH_PARALLEL
+    CALL READ_GRIDTYPE(HPROGRAM,YSC%UG%CGRID,YSC%UG%NGRID_PAR,YSC%U%NSIZE_FULL,.FALSE.,HDIR='H')
+    ALLOCATE(YSC%UG%XGRID_FULL_PAR(YSC%UG%NGRID_PAR))
+    CALL READ_GRIDTYPE(HPROGRAM,YSC%UG%CGRID,YSC%UG%NGRID_PAR,YSC%U%NSIZE_FULL,.TRUE.,&
+                       YSC%UG%XGRID_FULL_PAR,IRESP,HDIR='H')
+#else          
     CALL READ_GRIDTYPE(HPROGRAM,YSC%UG%G%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%U%NDIM_FULL,.FALSE.,HDIR='A')
     ALLOCATE(YSC%UG%XGRID_FULL_PAR(YSC%UG%NGRID_FULL_PAR))
     CALL READ_GRIDTYPE(HPROGRAM,YSC%UG%G%CGRID,YSC%UG%NGRID_FULL_PAR,YSC%U%NDIM_FULL,.TRUE.,&
                        YSC%UG%XGRID_FULL_PAR,IRESP,HDIR='A')
+#endif               
   ENDIF
   !
 ENDIF
@@ -539,7 +546,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XSEA(:)
 !
 ! initialization
 IF (YSC%U%NDIM_SEA>0) &
-  CALL INIT_SEA_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U, &
+  CALL INIT_SEA_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U, YSC%GCP, &
                   YSC%SM, YSC%DLO, YSC%DL, YSC%DLC, &
                   HPROGRAM,HINIT,YSC%U%NSIZE_SEA,KSV,KSW,            &
                   HSV,ZP_CO2,ZP_RHOA,                                &
@@ -569,7 +576,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XWATER(:)
 ! initialization
 IF (YSC%U%NDIM_WATER>0) &
   CALL INIT_INLAND_WATER_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, &
-                           YSC%U, YSC%WM, YSC%FM, YSC%DLO, YSC%DL, YSC%DLC,    &
+                           YSC%U, YSC%WM, YSC%FM, YSC%DLO, YSC%DL, YSC%DLC,   &
                            HPROGRAM,HINIT,YSC%U%NSIZE_WATER,KSV,KSW,          &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
@@ -596,10 +603,10 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XNATURE(:)
 !
 ! initialization
 IF (YSC%U%NDIM_NATURE>0) &
-  CALL INIT_NATURE_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U,   &
-                     YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL,       &
-                     YSC%DLC, YSC%NDST, YSC%SLT, YSC%SV,               &
-                     HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,      &
+  CALL INIT_NATURE_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U,    &
+                     YSC%USS, YSC%GCP, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL,&
+                     YSC%DLC, YSC%NDST, YSC%SLT, YSC%SV,                &
+                     HPROGRAM,HINIT,OLAND_USE,YSC%U%NSIZE_NATURE,       &
                      KSV,KSW, HSV,ZP_CO2,ZP_RHOA,                       &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                      ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
@@ -625,7 +632,7 @@ ZFRAC_TILE(:,JTILE) = YSC%U%XTOWN(:)
 !
 ! initialization
 IF (YSC%U%NDIM_TOWN>0) &
-  CALL INIT_TOWN_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U, &
+  CALL INIT_TOWN_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%UG, YSC%U, YSC%GCP, &
                    YSC%TM, YSC%GDM, YSC%GRM, YSC%DLO, YSC%DL, YSC%DLC,  &
                    HPROGRAM,HINIT,YSC%U%NSIZE_TOWN,KSV,KSW,             &
                    HSV,ZP_CO2,ZP_RHOA,                                &

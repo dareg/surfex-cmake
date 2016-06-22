@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #############################################################
-      SUBROUTINE INIT_SEA_n (DTCO, OREAD_BUDGETC, UG, U, SM, &
+      SUBROUTINE INIT_SEA_n (DTCO, OREAD_BUDGETC, UG, U, GCP, SM, &
                              DGO, DL, DLC, HPROGRAM,HINIT,KI,KSV,KSW,  &
                              HSV,PCO2,PRHOA,                            &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
@@ -45,12 +45,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
 USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
@@ -74,6 +74,7 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 TYPE(DIAG_t), INTENT(INOUT) :: DL
@@ -127,7 +128,7 @@ ELSE IF (U%CSEA=='FLUX  ') THEN
                        HPROGRAM,HINIT,KI,KSV,KSW,HSV,PDIR_ALB,PSCA_ALB,  &
                        PEMIS,PTSRAD,PTSURF,'OK'                    )  
 ELSE IF (U%CSEA=='SEAFLX') THEN
- CALL INIT_SEAFLUX_n(DTCO, OREAD_BUDGETC, UG, U, SM, &
+ CALL INIT_SEAFLUX_n(DTCO, OREAD_BUDGETC, UG, U, GCP, SM, &
                      HPROGRAM,HINIT,KI,KSV,KSW,HSV,PCO2,PRHOA,     &
                      PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,    &
                      PEMIS,PTSRAD,PTSURF,                          &

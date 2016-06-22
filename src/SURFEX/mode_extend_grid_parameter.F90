@@ -3,29 +3,28 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !##################
-MODULE MODE_SPLIT_GRID_PARAMETER
+MODULE MODE_EXTEND_GRID_PARAMETER
 !##################
 !
 CONTAINS
 !
+!    Author
+!  M.Moge  01/03/2015 
+!
 !     #############################################################
-#ifdef MNH_PARALLEL
-      SUBROUTINE SPLIT_GRID_PARAMETERX1(HPROGRAM,HGRID,HREC,KDIM,KSIZE,KIMAX_ll,KJMAX_ll,KHALO,PFIELD,PFIELD_SPLIT)
-#else
-      SUBROUTINE SPLIT_GRID_PARAMETERX1(HPROGRAM,HGRID,HREC,KDIM,KSIZE,PFIELD,PFIELD_SPLIT)
-#endif
+      SUBROUTINE EXTEND_GRID_PARAMETERX1(HPROGRAM,HGRID,HREC,KDIM,KSIZE,KIMAX_ll,KJMAX_ll,PFIELD,PFIELD_EXTEND)
 !     #############################################################
 !
-!!****  * - routine to split a real array on the splitted grid 
+!!****  * - routine to extend a real splitted array on SURFEX halo
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef SFX_OL
-USE MODE_SPLIT_GRID_PARAMETER_OL
+#ifdef OL
+!USE MODE_EXTEND_GRID_PARAMETER_OL
 #endif
-#ifdef SFX_MNH
-USE MODI_SPLIT_GRID_PARAMETERX1_MNH
+#ifdef MNH
+USE MODI_EXTEND_GRID_PARAMETERX1_MNH
 #endif
 !
 IMPLICIT NONE
@@ -36,62 +35,52 @@ IMPLICIT NONE
  CHARACTER(LEN=10),      INTENT(IN) :: HGRID       ! grid type
  CHARACTER(LEN=6),       INTENT(IN) :: HREC        ! name of the parameter
 INTEGER,                INTENT(IN) :: KDIM        ! size of PFIELD
-INTEGER,                INTENT(IN) :: KSIZE       ! size of PFIELD_SPLIT
-#ifdef MNH_PARALLEL
+INTEGER,                INTENT(IN) :: KSIZE       ! size of PFIELD_EXTEND
 INTEGER,                INTENT(IN) :: KIMAX_ll    !(global) dimension of the domain - X direction
 INTEGER,                INTENT(IN) :: KJMAX_ll    !(global) dimension of the domain - Y direction
-INTEGER,                INTENT(IN) :: KHALO ! size of the Halo
-#endif
 REAL, DIMENSION(KDIM ), INTENT(IN) :: PFIELD      ! real field for complete grid
-REAL, DIMENSION(KSIZE), INTENT(OUT):: PFIELD_SPLIT! real field for splitted grid
+REAL, DIMENSION(KSIZE), INTENT(OUT):: PFIELD_EXTEND! real field for splitted grid
 !
 !*      0.2   Declarations of local variables
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER:SPLIT_GRID_PARAMETERX1',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_EXTEND_GRID_PARAMETER:EXTEND_GRID_PARAMETERX1',0,ZHOOK_HANDLE)
 !
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH_PARALLEL
-  CALL SPLIT_GRID_PARAMETERX1_MNH(HGRID,HREC,KDIM,KSIZE,KIMAX_ll,KJMAX_ll,KHALO,PFIELD,PFIELD_SPLIT)
-#else
-#ifdef SFX_MNH
-  CALL SPLIT_GRID_PARAMETERX1_MNH(HGRID,HREC,KDIM,KSIZE,PFIELD,PFIELD_SPLIT)
-#endif
+#ifdef MNH
+  CALL EXTEND_GRID_PARAMETERX1_MNH(HGRID,HREC,KDIM,KSIZE,KIMAX_ll,KJMAX_ll,PFIELD,PFIELD_EXTEND)
 #endif
 ENDIF
 !
 !
 IF (HPROGRAM=='OFFLIN') THEN
-#ifdef SFX_OL
-  CALL SPLIT_GRID_PARAMETERX1_OL(HPROGRAM,HGRID,HREC,KDIM,KSIZE,PFIELD,PFIELD_SPLIT)
+#ifdef OL
+!  CALL EXTEND_GRID_PARAMETERX1_OL(HPROGRAM,HGRID,HREC,KDIM,KSIZE,PFIELD,PFIELD_EXTEND)
+!TODO : write subroutine EXTEND_GRID_PARAMETERX1_OL
 #endif
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER:SPLIT_GRID_PARAMETERX1',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_EXTEND_GRID_PARAMETER:EXTEND_GRID_PARAMETERX1',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-END SUBROUTINE SPLIT_GRID_PARAMETERX1
+END SUBROUTINE EXTEND_GRID_PARAMETERX1
 !
 !
 !     #############################################################
-#ifdef MNH_PARALLEL
-      SUBROUTINE SPLIT_GRID_PARAMETERN0(HPROGRAM,HGRID,HREC,KHALO,KFIELD,KFIELD_SPLIT)
-#else
-      SUBROUTINE SPLIT_GRID_PARAMETERN0(HPROGRAM,HGRID,HREC,KFIELD,KFIELD_SPLIT)
-#endif
+      SUBROUTINE EXTEND_GRID_PARAMETERN0(HPROGRAM,HGRID,HREC,KFIELD,KFIELD_EXTEND)
 !     #############################################################
 !
-!!****  * - routine to define an integer related to splitted grid
+!!****  * - routine to "extend" a integer related to splitted grid on SURFEX halo
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef SFX_OL
-USE MODE_SPLIT_GRID_PARAMETER_OL
+#ifdef OL
+!USE MODE_EXTEND_GRID_PARAMETER_OL
 #endif
-#ifdef SFX_MNH
-USE MODI_SPLIT_GRID_PARAMETERN0_MNH
+#ifdef MNH
+USE MODI_EXTEND_GRID_PARAMETERN0_MNH
 #endif
 !
 IMPLICIT NONE
@@ -101,38 +90,32 @@ IMPLICIT NONE
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM     ! calling program
  CHARACTER(LEN=10), INTENT(IN) :: HGRID        ! grid type
  CHARACTER(LEN=6),  INTENT(IN) :: HREC         ! name of the parameter
-#ifdef MNH_PARALLEL
-INTEGER,           INTENT(IN) :: KHALO ! size of the Halo
-#endif 
 INTEGER,           INTENT(IN) :: KFIELD       ! integer scalar for complete grid
-INTEGER,           INTENT(OUT):: KFIELD_SPLIT ! integer scalar for splitted grid
+INTEGER,           INTENT(OUT):: KFIELD_EXTEND ! integer scalar for splitted grid
 !*      0.2   Declarations of local variables
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER:SPLIT_GRID_PARAMETERN0',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_EXTEND_GRID_PARAMETER:EXTEND_GRID_PARAMETERN0',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !
 IF (HPROGRAM=='MESONH') THEN
-#ifdef MNH_PARALLEL
-  CALL SPLIT_GRID_PARAMETERN0_MNH(HGRID,HREC,KHALO,KFIELD,KFIELD_SPLIT)
-#else
-#ifdef SFX_MNH
-  CALL SPLIT_GRID_PARAMETERN0_MNH(HGRID,HREC,KFIELD,KFIELD_SPLIT)
-#endif
+#ifdef MNH
+  CALL EXTEND_GRID_PARAMETERN0_MNH(HGRID,HREC,KFIELD,KFIELD_EXTEND)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='OFFLIN') THEN
-#ifdef SFX_OL
-  CALL SPLIT_GRID_PARAMETERN0_OL(HPROGRAM,HGRID,HREC,KFIELD,KFIELD_SPLIT)
+#ifdef OL
+!  CALL EXTEND_GRID_PARAMETERN0_OL(HPROGRAM,HGRID,HREC,KFIELD,KFIELD_EXTEND)
+!TODO : write subroutine EXTEND_GRID_PARAMETERN0_OL
 #endif
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('MODE_SPLIT_GRID_PARAMETER:SPLIT_GRID_PARAMETERN0',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_EXTEND_GRID_PARAMETER:EXTEND_GRID_PARAMETERN0',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-END SUBROUTINE SPLIT_GRID_PARAMETERN0
+END SUBROUTINE EXTEND_GRID_PARAMETERN0
 !
-END MODULE MODE_SPLIT_GRID_PARAMETER
+END MODULE MODE_EXTEND_GRID_PARAMETER

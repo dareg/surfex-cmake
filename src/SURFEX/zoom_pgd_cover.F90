@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE ZOOM_PGD_COVER (DTCO, UG, U, &
+      SUBROUTINE ZOOM_PGD_COVER (DTCO, UG, U, GCP, &
                                  HPROGRAM,HINIFILE,HINIFILETYPE,OECOCLIMAP)
 !     ###########################################################
 
@@ -38,17 +38,17 @@
 !     Modification 17/04/12 M.Tomasini All COVER physiographic fields are now 
 !!                                     interpolated for spawning => 
 !!                                     ABOR1_SFX if (.NOT.OECOCLIMAP) in comment
+!     Modification 05/02/15 M.Moge : use NSIZE_FULL instead of SIZE(XLAT) (for clarity)
+!!      J.Escobar 18/12/2015 : missing interface
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
 !
-!
-!
-!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR,   ONLY : JPCOVER
@@ -68,6 +68,9 @@ USE MODI_SUM_ON_ALL_PROCS
 USE MODI_GET_LUOUT
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 USE MODI_GET_1D_MASK
+#ifdef SFX_MNH
+USE MODI_READ_SURFX2COV_1COV_MNH
+#endif
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -77,10 +80,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
-!
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
@@ -98,11 +101,15 @@ INTEGER :: INI     ! total 1D dimension (input grid)
 INTEGER :: IL      ! total 1D dimension (output grid)
 INTEGER :: JCOVER  ! loop counter
 INTEGER :: IVERSION       ! surface version
+#ifdef MNH_PARALLEL
+REAL, DIMENSION(:), POINTER  :: ZCOVER1D
+#endif
 REAL, DIMENSION(:,:), POINTER     :: ZCOVER
 REAL, DIMENSION(:,:), POINTER :: ZSEA1, ZWATER1, ZNATURE1, ZTOWN1
 REAL, DIMENSION(:,:), POINTER :: ZSEA2, ZWATER2, ZNATURE2, ZTOWN2
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSUM
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12)  :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100) :: YCOMMENT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
@@ -115,19 +122,16 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
 !  These points will not be used during the horizontal interpolation step.
 !  Their value must be defined as XUNDEF.
 !
- CALL OPEN_AUX_IO_SURF(&
-                       HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
 !
- CALL READ_SURF(&
-                HPROGRAM,'ECOCLIMAP',OECOCLIMAP,IRESP)
+ CALL READ_SURF(HPROGRAM,'ECOCLIMAP',OECOCLIMAP,IRESP)
 !
 !------------------------------------------------------------------------------
 !
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(&
-                       HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+ CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
  CALL PREP_OUTPUT_GRID(UG%G, UG%G, U%NSIZE_FULL, ILUOUT)
 !
@@ -137,18 +141,17 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_COVER',0,ZHOOK_HANDLE)
 !              ----------------
 !
 YRECFM='VERSION'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,IVERSION,IRESP)
+ CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
 ALLOCATE(U%LCOVER(JPCOVER))
- CALL OLD_NAME(&
-               HPROGRAM,'COVER_LIST      ',YRECFM)
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,U%LCOVER(:),IRESP,HDIR='-')
 !
+ CALL OLD_NAME(HPROGRAM,'COVER_LIST      ',YRECFM)
+ CALL READ_LCOVER(HPROGRAM,U%LCOVER)
+!
+#ifndef MNH_PARALLEL
 ALLOCATE(ZCOVER(INI,COUNT(U%LCOVER)))
- CALL READ_SURF_COV(&
-                    HPROGRAM,YRECFM,ZCOVER(:,:),U%LCOVER,IRESP,HDIR='A')
+ CALL READ_SURF_COV(HPROGRAM,YRECFM,ZCOVER(:,:),U%LCOVER,IRESP,HDIR='A')
+#endif
 !
 ALLOCATE(ZSEA1   (INI,1))
 ALLOCATE(ZNATURE1(INI,1))
@@ -156,33 +159,46 @@ ALLOCATE(ZWATER1 (INI,1))
 ALLOCATE(ZTOWN1  (INI,1))
 !
 IF (IVERSION>=7) THEN
-  CALL READ_SURF(&
-                HPROGRAM,'FRAC_SEA   ',ZSEA1(:,1),   IRESP,HDIR='A')
-  CALL READ_SURF(&
-                HPROGRAM,'FRAC_NATURE',ZNATURE1(:,1),IRESP,HDIR='A')
-  CALL READ_SURF(&
-                HPROGRAM,'FRAC_WATER ',ZWATER1(:,1), IRESP,HDIR='A')
-  CALL READ_SURF(&
-                HPROGRAM,'FRAC_TOWN  ',ZTOWN1(:,1),  IRESP,HDIR='A')
+  CALL READ_SURF(HPROGRAM,'FRAC_SEA   ',ZSEA1(:,1),   IRESP,HDIR='A')
+  CALL READ_SURF(HPROGRAM,'FRAC_NATURE',ZNATURE1(:,1),IRESP,HDIR='A')
+  CALL READ_SURF(HPROGRAM,'FRAC_WATER ',ZWATER1(:,1), IRESP,HDIR='A')
+  CALL READ_SURF(HPROGRAM,'FRAC_TOWN  ',ZTOWN1(:,1),  IRESP,HDIR='A')
   !
 ELSE
-  CALL CONVERT_COVER_FRAC(DTCO, &
-                          ZCOVER,U%LCOVER,ZSEA1(:,1),ZNATURE1(:,1),ZTOWN1(:,1),ZWATER1(:,1))
+#ifndef MNH_PARALLEL
+  CALL CONVERT_COVER_FRAC(DTCO,ZCOVER,U%LCOVER,ZSEA1(:,1),ZNATURE1(:,1),ZTOWN1(:,1),ZWATER1(:,1))
+#endif
 ENDIF
 !
- CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
 !------------------------------------------------------------------------------
 !
 !*      4.     Interpolations
 !              --------------
 !
-IL = SIZE(UG%G%XLAT)
+IL = U%NSIZE_FULL
 ALLOCATE(U%XCOVER(IL,COUNT(U%LCOVER)))
 !
- CALL HOR_INTERPOL(DTCO, U, &
-                   ILUOUT,ZCOVER,U%XCOVER)
+! on lit les cover une apres l'autre, et on appelle hor_interpol sur chaque cover separement
 !
+#ifdef MNH_PARALLEL
+IF ( HPROGRAM == 'MESONH' ) THEN
+  ICPT1 = 0
+  DO JCOVER=1,JPCOVER
+    IF ( U%LCOVER( JCOVER ) ) THEN
+      ICPT1 = ICPT1 + 1
+      CALL READ_SURFX2COV_1COV_MNH(YRECFM,INI,JCOVER,ZCOVER1D(:),IRESP,YCOMMENT,'A')
+      CALL HOR_INTERPOL(DTCO, U,GCP,ILUOUT,ZCOVER1D,U%XCOVER(:,ICPT1:ICPT1))
+    ENDIF
+    !
+  ENDDO 
+ENDIF
+DEALLOCATE(ZCOVER1D)
+#else
+ CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZCOVER,U%XCOVER)
 DEALLOCATE(ZCOVER)
+#endif
+!
+ CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
 !
 ALLOCATE(ZCOVER(IL,COUNT(U%LCOVER)))
 ICPT1 = 0
@@ -209,14 +225,10 @@ ALLOCATE(ZNATURE2(IL,1))
 ALLOCATE(ZWATER2 (IL,1))
 ALLOCATE(ZTOWN2  (IL,1))
 !
- CALL HOR_INTERPOL(DTCO, U, &
-                   ILUOUT,ZSEA1,ZSEA2)
- CALL HOR_INTERPOL(DTCO, U, &
-                   ILUOUT,ZNATURE1,ZNATURE2)
- CALL HOR_INTERPOL(DTCO, U, &
-                   ILUOUT,ZWATER1,ZWATER2)
- CALL HOR_INTERPOL(DTCO, U, &
-                   ILUOUT,ZTOWN1,ZTOWN2)
+ CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZSEA1,ZSEA2)
+ CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZNATURE1,ZNATURE2)
+ CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZWATER1,ZWATER2)
+ CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZTOWN1,ZTOWN2)
 !
 DEALLOCATE(ZSEA1)
 DEALLOCATE(ZNATURE1)

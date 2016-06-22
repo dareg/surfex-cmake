@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PREP_SEAICE (UG, DTCO, DTS, O, OR, KLAT, S, U, &
+SUBROUTINE PREP_SEAICE (UG, DTCO, DTS, O, OR, KLAT, S, U, GCP, &
                         HPROGRAM,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 !     #################################################################################
 !
@@ -28,12 +28,6 @@ SUBROUTINE PREP_SEAICE (UG, DTCO, DTS, O, OR, KLAT, S, U, &
 !!      Original    01/2014
 !!------------------------------------------------------------------
 !
-!
-!
-!
-!
-!
-!
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -42,6 +36,7 @@ USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODI_GET_LUOUT
@@ -76,6 +71,8 @@ TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
 INTEGER, INTENT(IN) :: KLAT
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
+!
 TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -121,7 +118,7 @@ ENDIF
 !*      2.     Reading and horizontal interpolations of Seaice cover
 !
 IF (S%LHANDLE_SIC) THEN 
-   CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, DTS, O, OR, KLAT, S, &
+   CALL PREP_HOR_SEAFLUX_FIELD(DTCO, UG, U, GCP, DTS, O, OR, KLAT, S, &
                                HPROGRAM,'SIC    ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL)
 ENDIF
 !

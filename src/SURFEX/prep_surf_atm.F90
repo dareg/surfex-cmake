@@ -101,28 +101,28 @@ IF (ASSOCIATED(YSC%U%XCOVER)) DEALLOCATE(YSC%U%XCOVER)
 ! SEA Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_SEA>0) CALL PREP_SEA(YSC%DTCO, YSC%UG, YSC%U, YSC%SM,  &
+IF(YSC%U%NDIM_SEA>0) CALL PREP_SEA(YSC%DTCO, YSC%UG, YSC%U, YSC%GCP, YSC%SM,  &
                                 HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE,YDCTL)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! INLAND WATER Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_WATER>0) CALL PREP_INLAND_WATER(YSC%DTCO, YSC%USS, YSC%UG, YSC%U, YSC%FM, YSC%WM, &
+IF(YSC%U%NDIM_WATER>0) CALL PREP_INLAND_WATER(YSC%DTCO, YSC%USS, YSC%UG, YSC%U, YSC%GCP, YSC%FM, YSC%WM, &
                                         HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE,YDCTL)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_NATURE>0) CALL PREP_NATURE(YSC%DTCO, YSC%IM, YSC%UG, YSC%U, YSC%USS, &
+IF(YSC%U%NDIM_NATURE>0) CALL PREP_NATURE(YSC%DTCO, YSC%IM, YSC%UG, YSC%U, YSC%USS, YSC%GCP, &
                                          HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE,YDCTL)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
-IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%TM, YSC%GDM, YSC%GRM, &
+IF(YSC%U%NDIM_TOWN>0) CALL PREP_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%GCP, YSC%TM, YSC%GDM, YSC%GRM, &
                                      HPROGRAM,YATMFILE,YATMFILETYPE,YPGDFILE,YPGDFILETYPE,YDCTL)
 !
  CALL CLEAR_GRIB_INDEX

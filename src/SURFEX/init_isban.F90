@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !#############################################################
-SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, IM, DTZ,     &
+SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, DTZ,&
                         NDST, SLT, SV, HPROGRAM, HINIT, OLAND_USE,    &
                         KI, KSV, KSW, HSV, PCO2, PRHOA, PZENITH,      &
                         PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB, PEMIS,  &
@@ -65,6 +65,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
@@ -136,6 +137,7 @@ LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
@@ -338,7 +340,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
 !               ---------------------------------
 !
  CALL READ_PGD_ISBA_n(IM%CHI, DTCO, IM%DTV, DTZ, IM%GB, IM%G, IM%ISS, IM%O, IM%S, IM%K, &
-                      UG, U, USS, SV, HPROGRAM,OLAND_USE)
+                      UG, U, USS, GCP, SV, HPROGRAM,OLAND_USE)
 !
 IF (HINIT=='PRE') THEN 
   DO JP = 1,IM%O%NPATCH

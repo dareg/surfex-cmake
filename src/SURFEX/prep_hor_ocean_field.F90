@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, O, OR, KLAT, HPROGRAM,   &
+SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, GCP, O, OR, KLAT, HPROGRAM,   &
                                  HFILE,HFILETYPE,KLUOUT,OUNIF,   &
                                  HSURF,HNCVARNAME                )
 !     #######################################################
@@ -31,7 +31,7 @@ SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, O, OR, KLAT, HPROGRAM,   &
 !!------------------------------------------------------------------
 !
 !
-!
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -60,11 +60,10 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-!
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
@@ -117,7 +116,7 @@ ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,3)))
 !
 DO JLEV=1,SIZE(ZFIELDIN,2)
   ZFIELD(:,:)=ZFIELDIN(:,JLEV,:)
-  CALL HOR_INTERPOL(DTCO, U, KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
+  CALL HOR_INTERPOL(DTCO, U, GCP, KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
 ENDDO
 !
 !*      5.     Return to historical variable

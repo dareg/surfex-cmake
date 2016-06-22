@@ -29,13 +29,14 @@ CONTAINS
 !---------------------------------------------------------------------------------------
 !
 !     #######################
-      SUBROUTINE READ_EXTERN_DEPTH (U, DTCO, IO, &
+      SUBROUTINE READ_EXTERN_DEPTH (U, DTCO, GCP, IO, &
                                     HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                                     KLUOUT,HISBA,HNAT,HFIELD,KNI,KLAYER, &
                                    KPATCH,PSOILGRID,PDEPTH,KVERSION,KWG_LAYER          )
 !     #######################
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -50,7 +51,7 @@ USE MODI_GARDEN_SOIL_DEPTH
 !
 ! Modifications :
 ! P.Marguinaud : 11-09-2012 : shorten field name
-!
+! G.Delautier : 24-06-2015 : bug for arome compressed files
 !
 IMPLICIT NONE
 !
@@ -58,6 +59,7 @@ IMPLICIT NONE
 !  ---------------
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
@@ -181,7 +183,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
         IF (JL<10)  WRITE(YRECFM,FMT='(A4,I1.1)') 'D_DG',JL
         IF (JL>=10) WRITE(YRECFM,FMT='(A4,I2.2)') 'D_DG',JL
       ENDIF
-      CALL READ_SURF_ISBA_PAR_n(DTCO, U, KPATCH, HFILEPGDTYPE, YRECFM, KLUOUT, KNI, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, KPATCH, HFILEPGDTYPE, YRECFM, KLUOUT, KNI, &
                                 IVERSION, IBUGFIX, GDATA_DG, PDEPTH(:,JL,:),IRESP,HDIR='E')
     END DO
     GREAD_OK = .TRUE.
@@ -204,7 +206,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
         ELSE
           YRECFM2='D_ROOT_DEPTH'
         ENDIF                   
-        CALL READ_SURF_ISBA_PAR_n(DTCO, U, KPATCH, HFILEPGDTYPE, YRECFM2, KLUOUT, KNI, &
+        CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, KPATCH, HFILEPGDTYPE, YRECFM2, KLUOUT, KNI, &
                                   IVERSION, IBUGFIX, GDATA_ROOT_DEPTH, PDEPTH(:,2,:),IRESP,HDIR='E')
       ENDIF
       !
@@ -224,7 +226,7 @@ IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
         YRECFM2='D_GROUND_DEPTH'  
         IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) YRECFM2='D_GROUND_DPT'
       ENDIF            
-      CALL READ_SURF_ISBA_PAR_n(DTCO, U, KPATCH, HFILEPGDTYPE, YRECFM2, KLUOUT, KNI, &
+      CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, KPATCH, HFILEPGDTYPE, YRECFM2, KLUOUT, KNI, &
                                 IVERSION, IBUGFIX, GDATA_GROUND_DEPTH, ZGROUND_DEPTH(:,:),IRESP,HDIR='E')
       !
       IF (.NOT.ANY(GDATA_DG(1:IEND))) THEN
@@ -370,7 +372,7 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !---------------------------------------------------------------------------------------
 !
 !     #######################
-      SUBROUTINE READ_EXTERN_ISBA (U, DTCO, IO, &
+      SUBROUTINE READ_EXTERN_ISBA (U, DTCO, GCP, IO, &
                                    HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
                                   KLUOUT,KNI,HFIELD,HNAME,PFIELD,PDEPTH,OKEY)
 !     #######################
@@ -378,6 +380,7 @@ END SUBROUTINE READ_EXTERN_DEPTH
 !
 USE MODD_ISBA_n, ONLY : ISBA_NP_t, ISBA_K_t, ISBA_P_t, ISBA_NP_INIT, ISBA_K_INIT
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -386,6 +389,7 @@ USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_ISBA_PAR,    ONLY : XOPTIMGRID
 !
 USE MODE_SOIL
+USE MODI_READ_SURF
 USE MODI_ISBA_SOC_PARAMETERS
 USE MODI_PACK_SAME_RANK
 !
@@ -394,11 +398,10 @@ IMPLICIT NONE
 !* dummy arguments
 !  ---------------
 !
-!
-!
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-!
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
+!
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 CHARACTER(LEN=28),    INTENT(IN)  :: HFILE     ! name of file
@@ -422,10 +425,14 @@ TYPE(ISBA_NP_t) :: YNP
 TYPE(ISBA_P_t), POINTER :: PK
 !
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+#ifdef MNH_PARALLEL
+ CHARACTER(LEN=8)  :: YPATCH
+#endif 
  CHARACTER(LEN=4)  :: YLVL
+ CHARACTER(LEN=4)  :: YPEDOTF        ! type of pedo-transfert function
  CHARACTER(LEN=3)  :: YISBA          ! type of ISBA soil scheme
  CHARACTER(LEN=3)  :: YNAT           ! type of surface (nature, garden)
- CHARACTER(LEN=4)  :: YPEDOTF        ! type of pedo-transfert function
+!
 INTEGER           :: IRESP          ! reading return code
 INTEGER           :: ILAYER, ILAYER_SAVE         ! number of layers
 INTEGER           :: JL         ! loop counter
@@ -669,7 +676,7 @@ ELSE
   YNAT='NAT'
   IF (GTEB) YNAT='GRD'
   !
-  CALL READ_EXTERN_DEPTH(U, DTCO, IO,                            &
+  CALL READ_EXTERN_DEPTH(U, DTCO,  GCP, IO,                      &
                          HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,  &
                          KLUOUT,YISBA,YNAT,HFIELD,KNI,           &
                          ILAYER,IPATCH,ZSOILGRID,PDEPTH,IVERSION,IWG_LAYER)
@@ -715,9 +722,10 @@ DO JL=1,IWORK
   WRITE(YLVL,'(I4)') JL
   YRECFM=TRIM(HNAME)//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
   CALL MAKE_CHOICE_ARRAY(HFILETYPE, IPATCH, GDIM, YRECFM, PFIELD(:,JL,:),HDIR='E')
-  DO JP=1,IPATCH
-    WHERE (ZNAT(:)==0.) PFIELD(:,JL,JP) = XUNDEF
-  END DO
+END DO
+!
+DO JP=1,IPATCH
+  WHERE (ZNAT(:)==0.) PFIELD(:,JL,JP) = XUNDEF
 END DO
 !
 DEALLOCATE (ZNAT)

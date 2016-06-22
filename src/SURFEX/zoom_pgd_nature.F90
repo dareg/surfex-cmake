@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_NATURE (DTCO, IM, UG, U, USS, &
+      SUBROUTINE ZOOM_PGD_NATURE (DTCO, IM, UG, U, USS, GCP, &
                                   HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE, &
                                    OECOCLIMAP                                      )  
 !     ###########################################################
@@ -46,6 +46,7 @@ USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -63,6 +64,7 @@ TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=28),    INTENT(IN)  :: HINIFILE    ! input atmospheric file name
@@ -85,7 +87,7 @@ ELSE IF (U%CNATURE=='FLUX  ') THEN
   IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_NATURE',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
-  CALL ZOOM_PGD_ISBA(IM%CHI, DTCO, IM%DTV, IM%G, IM%O, IM%S, IM%K, IM%ISS, UG, U, USS, &
+  CALL ZOOM_PGD_ISBA(IM%CHI, DTCO, IM%DTV, IM%G, IM%O, IM%S, IM%K, IM%ISS, UG, U, USS, GCP, &
                      HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,OECOCLIMAP)
 END IF
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_NATURE',1,ZHOOK_HANDLE)

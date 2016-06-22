@@ -2,7 +2,7 @@
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
-SUBROUTINE INIT_INDEX_MPI (DTCO, U, UG, HPROGRAM,HINIT,HALG,PIO_FRAC,OSHADOWS)
+SUBROUTINE INIT_INDEX_MPI (DTCO, U, UG, GCP, HPROGRAM,HINIT,HALG,PIO_FRAC,OSHADOWS)
 !
 ! 04-2014 : Modifs Matthieu Lafaysse for shadows :
 !        * OSHADOWS logical to pass to get_sizes_parallel
@@ -12,6 +12,7 @@ SUBROUTINE INIT_INDEX_MPI (DTCO, U, UG, HPROGRAM,HINIT,HALG,PIO_FRAC,OSHADOWS)
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t 
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NINDEX, NSIZE_TASK, NSIZE, WLOG_MPI, &
                             NREQ, NNUM, NDIM_FULL_INIT
@@ -52,6 +53,7 @@ INCLUDE "mpif.h"
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
  CHARACTER(LEN=3), INTENT(IN) :: HINIT 
@@ -94,7 +96,7 @@ IF ( NRANK==NPIO ) THEN
     !
     CALL INI_CSTS
     !
-    CALL PGD_GRID (UG, U%NDIM_FULL, HPROGRAM,'                            ','      ',&
+    CALL PGD_GRID (UG, U, GCP, HPROGRAM,'                            ','      ',&
                    .FALSE.,'A')
     !
   ELSE

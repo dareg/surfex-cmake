@@ -41,7 +41,7 @@
 !!                   11/2013 : same for groundwater distribution
 !!                   11/2014 : Write XSOILGRID as a series of real 
 !!      P. Samuelsson 10/2014 : MEB
-!!
+!!      M. Moge      02/2015 parallelization using WRITE_LCOVER
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -66,6 +66,7 @@ USE MODI_WRITE_SURF
 USE MODI_WRITE_GRID
 USE MODI_WRITESURF_PGD_ISBA_PAR_n
 USE MODI_WRITESURF_PGD_TSZ0_PAR_n
+USE MODI_WRITE_LCOVER
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -212,9 +213,7 @@ ENDIF
 !
 !* cover classes
 !
-YRECFM='COVER_LIST'
-YCOMMENT='(LOGICAL LIST)'
- CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,S%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+ CALL WRITE_LCOVER(HSELECT,HPROGRAM,S%LCOVER)
 !
 #ifdef SFX_OL
 IF (LWR_VEGTYPE) THEN

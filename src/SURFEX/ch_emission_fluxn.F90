@@ -26,6 +26,8 @@
 !!    D.Gazen  01/12/03  change emissions handling for surf. externalization
 !!    P.Tulet  01/01/04  change emission conversion factor
 !!    P.Tulet  01/01/05  add dust, orilam
+!!    M.Leriche    2015  suppress ZDEPOT
+!!    M.Moge    01/2016  using READ_SURF_FIELD2D for 2D surfex fields reads
 !!
 !!    EXTERNAL
 !!    --------
@@ -43,7 +45,7 @@ USE MODD_CH_SURF_n, ONLY : CH_SURF_t
 USE MODD_TYPE_EFUTIL,      ONLY: EMISSVAR_T, PRONOSVAR_T
 USE MODD_CSTS,             ONLY: NDAYSEC
 !
-USE MODI_READ_SURF
+USE MODI_READ_SURF_FIELD2D
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
 USE MODI_GET_LUOUT
@@ -101,7 +103,6 @@ TYPE(PRONOSVAR_T),POINTER :: CURPRONOS !Current pronostic variable
  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CNAMES
 REAL,DIMENSION(SIZE(PSFSV,1),KNBTS_MAX)     :: ZWORK ! temporary array for reading data
 REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZEMIS ! interpolated in time emission flux
-REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZDEPOT! interpolated in time deposition flux
 REAL,DIMENSION(SIZE(PSFSV,1))               :: ZFCO  ! CO flux
 INTEGER                          :: INEQ  ! number of chemical var
                                           !(=NEQ (chimie gaz) + NSV_AER (chimie aerosol)
@@ -215,7 +216,7 @@ DO JI=1,SIZE(CHE%TSEMISS)
         IF (IVERB >= 6)&
                WRITE (ILUOUT,*) 'READ emission :',TRIM(YRECFM),&
                ', SIZE(ZWORK)=',SIZE(ZWORK,1),INBTS 
-        CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,1:INBTS),IRESP)
+        CALL READ_SURF_FIELD2D(HPROGRAM,ZWORK(:,1:INBTS),YRECFM)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
         WHERE(ZWORK(:,1:INBTS) == 999.)
@@ -430,13 +431,6 @@ DO WHILE(ASSOCIATED(CURPRONOS))
   CURPRONOS=>CURPRONOS%NEXT
 !
 END DO
-!
-ZDEPOT(:,:) = 0.
-WHERE (PSFSV(:,:) >= 0.) 
-  ZEMIS(:,:) = ZEMIS(:,:) + PSFSV(:,:)
-ELSE WHERE
-  ZDEPOT(:,:) = PSFSV(:,:)
-END WHERE
 !
 IF ((LCH_AERO_FLUX).AND.(SV%NSV_AERBEG > 0)) THEN
   IF (GCO) THEN

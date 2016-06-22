@@ -3,8 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #############################################################
-      SUBROUTINE INIT_NATURE_n (DTCO, OREAD_BUDGETC, UG, U, USS, IM, DTZ, &
-                                DGO, DL, DLC, NDST, SLT, SV,             &
+      SUBROUTINE INIT_NATURE_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, &
+                                DTZ, DGO, DL, DLC, NDST, SLT, SV,         &
                                 HPROGRAM,HINIT,OLAND_USE, KI,KSV,KSW,     &
                                 HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,   &
                                 PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,PTSURF,    &
@@ -55,6 +55,7 @@ USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
 USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
@@ -76,14 +77,13 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-!
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 TYPE(DIAG_t), INTENT(INOUT) :: DL
@@ -141,7 +141,7 @@ ELSE IF (U%CNATURE=='FLUX  ') THEN
                        KI, KSV, KSW, HSV, PDIR_ALB, PSCA_ALB, PEMIS,   &
                        PTSRAD, PTSURF, 'OK'    )  
 ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
-  CALL INIT_ISBA_n(DTCO, OREAD_BUDGETC, UG, U, USS, &
+  CALL INIT_ISBA_n(DTCO, OREAD_BUDGETC, UG, U, USS, GCP, &
                    IM, DTZ, NDST, SLT, SV, &
                    HPROGRAM, HINIT, OLAND_USE, KI, KSV, KSW, HSV, &
                    PCO2, PRHOA, PZENITH, PAZIM, PSW_BANDS,        &

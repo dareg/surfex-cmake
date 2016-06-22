@@ -28,6 +28,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003
+!!      M. Moge     02/2015 parallelization using WRITE_LCOVER
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,6 +41,7 @@ USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODE_WRITE_SURF_COV, ONLY : WRITE_SURF_COV
 !
 USE MODI_WRITE_SURF
+USE MODI_WRITE_LCOVER
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -48,8 +50,6 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
-!
-!
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -60,7 +60,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
+INTEGER :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -82,10 +82,7 @@ YCOMMENT = '(-)'
  CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,'FRAC_TOWN  ',U%XTOWN,  IRESP,HCOMMENT=YCOMMENT)
 !
-YRECFM='COVER_LIST'
-YCOMMENT='(LOGICAL LIST)'
- CALL WRITE_SURF(HSELECT, &
-                 HPROGRAM,YRECFM,U%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+CALL WRITE_LCOVER(HSELECT,HPROGRAM,U%LCOVER)
 !
 YCOMMENT='COVER FIELDS'
  CALL WRITE_SURF_COV(HSELECT,  &
@@ -98,8 +95,7 @@ YCOMMENT='COVER FIELDS'
 !
 YRECFM='ZS'
 YCOMMENT='X_Y_ZS (M)'
- CALL WRITE_SURF(HSELECT, &
-                 HPROGRAM,YRECFM,U%XZS(:),IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,U%XZS(:),IRESP,HCOMMENT=YCOMMENT)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_COVER_N',1,ZHOOK_HANDLE)
 !

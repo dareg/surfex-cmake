@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #############################################################
-      SUBROUTINE INIT_SEAFLUX_n (DTCO, OREAD_BUDGETC, UG, U, SM, &
+      SUBROUTINE INIT_SEAFLUX_n (DTCO, OREAD_BUDGETC, UG, U, GCP, SM, &
                                  HPROGRAM,HINIT,KI,KSV,KSW,                 &
                                  HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,    &
                                  PDIR_ALB,PSCA_ALB, PEMIS,PTSRAD,PTSURF,    &
@@ -50,12 +50,12 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
 USE MODD_SURFEX_n, ONLY : SEAFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
@@ -109,9 +109,11 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
+!
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 !
 CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -277,7 +279,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%G, SM%S, U, UG, HPROGRAM)
+ CALL READ_PGD_SEAFLUX_n(DTCO, SM%DTS, SM%G, SM%S, U, UG, GCP, HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
 !

@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_VEG_n (HSELECT, KTIME, IO, K, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_VEG_n (HSELECT, TOP, T, KTIME, IO, K, P, HPROGRAM)
 !     ###############################################
 !
 !!****  *WRITE_PGD_TEB_VEG_n* - writes ISBA fields describing urban gardens
@@ -39,8 +39,13 @@
 !              ------------
 !
 !
+USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
+USE MODD_TEB_n, ONLY : TEB_t
+!
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_K_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t
+!
+USE MODD_SURF_PAR,          ONLY : XUNDEF, NUNDEF
 !
 USE MODI_WRITE_SURF
 !
@@ -52,13 +57,16 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+!
+TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
+TYPE(TEB_t), INTENT(INOUT) :: T
 !
 INTEGER, INTENT(IN) :: KTIME
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_P_t), INTENT(INOUT) :: P
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
@@ -70,7 +78,8 @@ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
 CHARACTER(LEN=4 ) :: YLVL
 !
-INTEGER :: JJ, JLAYER
+REAL, DIMENSION(:), ALLOCATABLE :: ZWORK
+INTEGER :: JJ, JL
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -87,11 +96,11 @@ YCOMMENT=YRECFM
 !* Reference grid for DIF
 !
 IF(IO%CISBA=='DIF') THEN
-  DO JLAYER=1,IO%NGROUND_LAYER
-     WRITE(YLVL,'(I4)') JLAYER     
+  DO JL=1,IO%NGROUND_LAYER
+     WRITE(YLVL,'(I4)') JL     
      YRECFM='GD_SGRID'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
      YCOMMENT='Depth of TEB Garden soilgrid layer '//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,IO%XSOILGRID(JLAYER),IRESP,HCOMMENT=YCOMMENT)
+     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,IO%XSOILGRID(JL),IRESP,HCOMMENT=YCOMMENT)
   END DO 
 ENDIF
 !
@@ -130,7 +139,6 @@ YCOMMENT='X_Y_GD_RUNOFFB'
 YRECFM='GD_WDRAIN'
 YCOMMENT='X_Y_GD_WDRAIN'
  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,K%XWDRAIN,IRESP,HCOMMENT=YCOMMENT)
-!
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_VEG_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

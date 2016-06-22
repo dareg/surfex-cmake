@@ -3,8 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #############################################################
-      SUBROUTINE INIT_TEB_n (DTCO, UG, U, CHT, DTT, SB, TG, TOP, TPN, NT, TD, &
-                             BDD, BOP, DTB, NB, GDM, GRM,                     &
+      SUBROUTINE INIT_TEB_n (DTCO, UG, U, GCP, CHT, DTT, SB, TG, TOP, TPN,    &
+                             NT, TD, BDD, BOP, DTB, NB, GDM, GRM,             &
                              HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,        &
                              PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,      &
                              PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,  &
@@ -48,6 +48,7 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_CH_TEB_n, ONLY : CH_TEB_t
 USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
@@ -126,6 +127,7 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 TYPE(CH_TEB_t), INTENT(INOUT) :: CHT 
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
@@ -297,7 +299,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','READ ')
 !
  CALL READ_COVER_GARDEN(HPROGRAM,TOP%LGARDEN)
 !
- CALL READ_PGD_TEB_n(DTCO, U, UG, TOP, TG, BOP, BDD, DTB, DTT, HPROGRAM)
+ CALL READ_PGD_TEB_n(DTCO, U, UG, GCP, TOP, TG, BOP, BDD, DTB, DTT, HPROGRAM)
 !
  CALL END_IO_SURF_n(HPROGRAM)
 ! 

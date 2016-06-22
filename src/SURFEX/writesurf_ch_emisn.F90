@@ -18,6 +18,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    03/2004
+!!      M.Moge    01/2016  using WRITE_SURF_FIELD2D/3D for 2D/3D surfex fields writes
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -26,7 +27,7 @@
 USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 !
 USE MODI_WRITE_SURF
-!
+USE MODI_WRITE_SURF_FIELD2D
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -53,16 +54,18 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 !
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be written
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=100):: YCOMMENTUNIT   ! Comment string : unit of the datas in the field to write
  CHARACTER(LEN=80) :: YNAME          ! emitted species name
 !
-INTEGER           :: JI,JT          ! loop indices
-INTEGER           :: JSPEC          ! loop index
-LOGICAL           :: GFOUND,LOK
  CHARACTER(LEN=40),DIMENSION(CHE%NEMIS_NBR) :: YEMISPEC_NAMES
-INTEGER,          DIMENSION(CHE%NEMIS_NBR) :: INBTIMES
-INTEGER,          DIMENSION(CHE%NEMIS_NBR) :: IFIRST,ILAST,INEXT
+INTEGER,           DIMENSION(CHE%NEMIS_NBR) :: INBTIMES
+INTEGER,           DIMENSION(CHE%NEMIS_NBR) :: IFIRST,ILAST,INEXT
+
+INTEGER :: JI,JT          ! loop indices
+INTEGER :: JSPEC          ! loop index
 INTEGER :: INTIMESMAX,ITMP
 INTEGER :: IEMISPEC_NBR
+LOGICAL           :: GFOUND,LOK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !-------------------------------------------------------------------------------
@@ -189,8 +192,9 @@ YCOMMENT = "Emission times in second"
 ! Finally write emission data for species JSPEC
 YRECFM = "E_"//TRIM(YEMISPEC_NAMES(JSPEC))
 YCOMMENT = "Emission data (x,y,t),"//TRIM(CHE%CEMIS_COMMENT(IINDEX(1)))
- CALL WRITE_SURF(HSELECT, &
-                 HPROGRAM,YRECFM,ZWORK2D(:,:),IRESP,HCOMMENT=YCOMMENT,HNAM_DIM="Temporal_emiss  ")
+YCOMMENTUNIT='-'
+ CALL WRITE_SURF_FIELD2D(HSELECT, &
+                  HPROGRAM,ZWORK2D(:,:),YRECFM,YCOMMENT,YCOMMENTUNIT,HNAM_DIM="Temporal_emiss  ")
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_CH_EMIS_N:WRITE_EMIS_SPEC',1,ZHOOK_HANDLE)
 !

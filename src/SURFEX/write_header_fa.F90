@@ -4,8 +4,7 @@
 !SFX_LIC for details. version 1.
 !
 !#############################################
-SUBROUTINE WRITE_HEADER_FA (HGRID, PGRID_PAR, &
-                            CFILETYPE,HWRITE)
+SUBROUTINE WRITE_HEADER_FA (GCP, HGRID, PGRID_PAR, CFILETYPE, HWRITE)
 !#############################################
 !
 !!    PURPOSE
@@ -41,7 +40,7 @@ SUBROUTINE WRITE_HEADER_FA (HGRID, PGRID_PAR, &
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_GRID_CONF_PROJ,  ONLY : XLATC, XLONC
+USE MODD_GRID_CONF_PROJ_n,  ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_IO_SURF_FA
 !
@@ -65,6 +64,8 @@ IMPLICIT NONE
 !
 !*    0.1    Declaration of arguments
 !            ------------------------
+!
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=*), INTENT(IN) :: HGRID
 REAL, DIMENSION(:), INTENT(IN) :: PGRID_PAR
@@ -159,8 +160,8 @@ IF (HGRID=="CONF PROJ ") THEN
   ZSINLA(2) = ZPRPK
   ZSINLA(3) = ZLOPO*ZRAD
   ZSINLA(4) = ZLAPO*ZRAD
-  ZSINLA(5) = XLONC*ZRAD
-  ZSINLA(6) = XLATC*ZRAD  
+  ZSINLA(5) = GCP%XLONC*ZRAD
+  ZSINLA(6) = GCP%XLATC*ZRAD  
   ZSINLA(7) = ZDX(1)
   ZSINLA(8) = ZDY(1)
   ZSINLA(13) = 0.0

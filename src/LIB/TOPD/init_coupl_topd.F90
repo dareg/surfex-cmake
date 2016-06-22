@@ -142,6 +142,11 @@ NMASKT(:,:) = NUNDEF
 !
 !*       1    Initialization:
 !               ---------------
+!
+ZWG_3L (:,:) = XUNDEF 
+ZWGI_3L(:,:) = XUNDEF
+ZDG_3L (:,:) = XUNDEF  
+!
 ALLOCATE(NMASKT_PATCH(U%NDIM_NATURE))
 !
 IF (IO%CISBA=='DIF') THEN

@@ -15,6 +15,7 @@ USE MODD_CH_SNAP_n, ONLY : CH_EMIS_SNAP_t
 !
 USE MODI_GET_LUOUT
 USE MODI_WRITE_SURF
+USE MODI_WRITE_SURF_FIELD2D
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -27,13 +28,15 @@ IMPLICIT NONE
 !
 TYPE(CH_EMIS_SNAP_t), INTENT(INOUT) :: CHN
 !
- CHARACTER(LEN=6) :: HPROGRAM
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
 !
 !*       0.2   declarations of local variables
 !
+ CHARACTER(LEN=16)  :: YRECFM   ! article name
+ CHARACTER(LEN=100) :: YCOMMENT ! comment
+ CHARACTER(LEN=100) :: YCOMMENTUNIT   ! Comment string : unit of the datas in the field to write
+!
 INTEGER             :: IRESP    ! I/O error code
- CHARACTER (LEN=16)  :: YRECFM   ! article name
- CHARACTER (LEN=100) :: YCOMMENT ! comment
 INTEGER             :: ILUOUT   ! Unit number for prints
 INTEGER             :: JSPEC    ! Loop index for emission species
 INTEGER             :: JSNAP    ! Loop index for SNAP categories
@@ -71,18 +74,16 @@ DO JSPEC=1,CHN%NEMIS_NBR
                  HPROGRAM,YRECFM,CHN%CEMIS_NAME(JSPEC),IRESP,YCOMMENT)
 !
 ! Writes the temporal profiles of all snaps
+  YCOMMENTUNIT='-'
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))//"_M"
-  CALL WRITE_SURF(HSELECT, &
-                 HPROGRAM,YRECFM,CHN%XSNAP_MONTHLY(:,:,JSPEC),IRESP,YCOMMENT,&
-        HDIR='-',HNAM_DIM="Nemis_snap      ")
+  CALL WRITE_SURF_FIELD2D(HSELECT, HPROGRAM,CHN%XSNAP_MONTHLY(:,:,JSPEC),YRECFM,&
+                          YCOMMENT,YCOMMENTUNIT,HDIR='-',HNAM_DIM="Nemis_snap      ")  
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))//"_D"
-  CALL WRITE_SURF(HSELECT, &
-                 HPROGRAM,YRECFM,CHN%XSNAP_DAILY(:,:,JSPEC),IRESP,YCOMMENT,&
-        HDIR='-',HNAM_DIM="Nemis_snap        ")
+  CALL WRITE_SURF_FIELD2D(HSELECT, HPROGRAM,CHN%XSNAP_DAILY(:,:,JSPEC),YRECFM,&
+                          YCOMMENT,YCOMMENTUNIT,HDIR='-',HNAM_DIM="Nemis_snap      ")    
   YRECFM = "E_"//TRIM(CHN%CEMIS_NAME(JSPEC))//"_H"
-  CALL WRITE_SURF(HSELECT, &
-                 HPROGRAM,YRECFM,CHN%XSNAP_HOURLY(:,:,JSPEC),IRESP,YCOMMENT,&
-        HDIR='-',HNAM_DIM="Nemis_snap       ")
+  CALL WRITE_SURF_FIELD2D(HSELECT, HPROGRAM,CHN%XSNAP_HOURLY(:,:,JSPEC),YRECFM,&
+                          YCOMMENT,YCOMMENTUNIT,HDIR='-',HNAM_DIM="Nemis_snap      ")    
 ! Writes the potential emission of species for each snap
   DO JSNAP=1,CHN%NEMIS_SNAP
     WRITE(YRECFM,'("SNAP",I2.2,"_",A3)') JSNAP,CHN%CEMIS_NAME(JSPEC)

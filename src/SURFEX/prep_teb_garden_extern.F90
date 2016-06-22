@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, IO, U, &
+SUBROUTINE PREP_TEB_GARDEN_EXTERN (DTCO, IO, U, GCP, &
                                    HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,KPATCH,PFIELD)
 !     #################################################################################
 !
@@ -33,6 +33,7 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODE_READ_EXTERN
 !
@@ -45,6 +46,7 @@ USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
 USE MODI_READ_TEB_PATCH
 USE MODI_TOWN_PRESENCE
+USE MODI_MAKE_CHOICE_ARRAY
 !
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
 USE MODD_PREP_TEB_GARDEN,ONLY : XGRID_SOIL, XWR_DEF
@@ -64,6 +66,7 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
@@ -87,15 +90,16 @@ REAL, DIMENSION(:,:),   POINTER     :: ZFIELD1        ! field read on initial MN
 REAL, DIMENSION(:,:,:), POINTER     :: ZD             ! depth of field in the soil
 REAL, DIMENSION(:,:), POINTER       :: ZD1            ! depth of field in the soil, one patch
 REAL, DIMENSION(:,:), ALLOCATABLE   :: ZOUT           !
+ CHARACTER(LEN=12)                  :: YSURF     ! type of field
+ CHARACTER(LEN=3)                   :: YPATCH    ! indentificator for TEB patch
 INTEGER                             :: JPATCH         ! loop counter for patch
 INTEGER                             :: ITEB_PATCH     ! number of TEB patches in file
 INTEGER                             :: IVERSION       ! SURFEX version
 INTEGER                             :: IBUGFIX        ! SURFEX bug version
-LOGICAL                             :: GOLD_NAME      ! old name flag for temperatures
- CHARACTER(LEN=12)                   :: YSURF     ! type of field
- CHARACTER(LEN=3)                    :: YPATCH    ! indentificator for TEB patch
-LOGICAL                         :: GTEB      ! flag if TEB fields are present
+LOGICAL                         :: GTEB      ! flag if TEB fields are present 
+LOGICAL                         :: GOLD_NAME      ! old name flag for temperatures
 LOGICAL                         :: GGARDEN   ! T if gardens are present in the file
+LOGICAL                         :: GDIM
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -117,11 +121,11 @@ IF (LHOOK) CALL DR_HOOK('PREP_TEB_GARDEN_EXTERN',0,ZHOOK_HANDLE)
 CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
 !
 !* reading of version of the file being read
-CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP,HDIR='-')
-CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP,HDIR='-')
-GOLD_NAME=(IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
+CALL READ_SURF(HFILEPGDTYPE,'VERSION',IVERSION,IRESP)
+CALL READ_SURF(HFILEPGDTYPE,'BUG',IBUGFIX,IRESP)
+GOLD_NAME = (IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX<3))
 !
-CALL PREP_GRID_EXTERN(HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+CALL PREP_GRID_EXTERN(GCP,HFILEPGDTYPE,KLUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 IF (NRANK/=NPIO) INI = 0
 !
@@ -177,7 +181,7 @@ SELECT CASE(HSURF)
     END IF
     YSURF=ADJUSTL(YSURF)  
 !* reading of the profile and its depth definition
-     CALL READ_EXTERN_ISBA(U, DTCO, IO, HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,INI,&
+     CALL READ_EXTERN_ISBA(U, DTCO, GCP, IO, HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,KLUOUT,INI,&
                            HSURF,YSURF,ZFIELD,ZD)
 ! 
      IF (NRANK==NPIO) THEN
@@ -227,10 +231,13 @@ SELECT CASE(HSURF)
        CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')
        YRECFM = 'WR'
      END IF
+
+     CALL READ_SURF(HFILETYPE,'VERSION',IVERSION,IRESP)
+     CALL READ_SURF(HFILETYPE,'BUG',IBUGFIX,IRESP)
+     GDIM = (IVERSION>8 .OR. IVERSION==8 .AND. IBUGFIX>0)
      YRECFM=ADJUSTL(YRECFM)
-     
      ALLOCATE(ZFIELD(INI,1,IPATCH))
-     CALL READ_SURF(HFILETYPE,YRECFM,ZFIELD(:,1,:),IRESP,HDIR='A')
+     CALL MAKE_CHOICE_ARRAY(HFILETYPE, IPATCH, GDIM, YRECFM, ZFIELD(:,1,:),HDIR='E')
      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
      CALL PUT_ON_ALL_VEGTYPES(INI,1,1,NVEGTYPE,ZFIELD,PFIELD)
      DEALLOCATE(ZFIELD)

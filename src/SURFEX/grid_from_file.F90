@@ -3,8 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE GRID_FROM_FILE (PGRID_FULL_PAR,KDIM_FULL,&
-                        HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
+      SUBROUTINE GRID_FROM_FILE (U,GCP,PGRID_FULL_PAR,HPROGRAM,HFILE,HFILETYPE,&
+                                 OGRID,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -34,12 +34,21 @@
 !!    ------------
 !!
 !!    Original     01/2004
+!!      M.Moge     02/2015  Parallelization of spawning
+!!      M.Moge     04/2015  Parallelization of prep_pgd on son model
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
+!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NSIZE_TASK
+!
+#ifdef MNH_PARALLEL
+USE MODE_TOOLS_ll, ONLY : GET_DIM_PHYS_ll
+#endif
 !
 USE MODI_READ_NAM_GRIDTYPE
 USE MODI_OPEN_AUX_IO_SURF
@@ -59,9 +68,10 @@ IMPLICIT NONE
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 REAL, DIMENSION(:), POINTER :: PGRID_FULL_PAR
-INTEGER, INTENT(IN) :: KDIM_FULL
 !
  CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
  CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! file name
@@ -77,6 +87,10 @@ INTEGER,           INTENT(OUT)  :: KL         ! number of points on processor
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
+INTEGER           :: IIMAX
+INTEGER           :: IJMAX
+INTEGER           :: IIMAX_LOC
+INTEGER           :: IJMAX_LOC
 INTEGER           :: ILUOUT ! listing  file  logical unit
 INTEGER           :: ILUNAM ! namelist file  logical unit
 INTEGER           :: IRESP  ! return code
@@ -108,6 +122,7 @@ IF (HDIR/='H') THEN
   CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ',HDIR=HDIR)
   !  
   CALL READ_SURF(HFILETYPE,'DIM_FULL  ',KL,IRESP,HDIR=HDIR)
+  U%NDIM_FULL = KL
   !
   !---------------------------------------------------------------------------
   !
@@ -121,11 +136,24 @@ IF (HDIR/='H') THEN
   !*       5.    Reading parameters of the grid
   !              ------------------------------
   !
-  CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR=HDIR)
+#ifdef MNH_PARALLEL
+  CALL READ_SURF(HPROGRAM,'IMAX ',IIMAX, IRESP,HDIR='H')
+  CALL READ_SURF(HPROGRAM,'JMAX ',IJMAX, IRESP,HDIR='H')
+  U%NIMAX_SURF_ll = IIMAX
+  U%NJMAX_SURF_ll = IJMAX
+  CALL GET_DIM_PHYS_ll('B',IIMAX_LOC,IJMAX_LOC)
+  U%NSIZE_FULL = IIMAX_LOC*IJMAX_LOC
+  KL = U%NSIZE_FULL
+  CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,U%NSIZE_FULL,.FALSE.,HDIR='H')
   !
+  ALLOCATE(PGRID_PAR(KGRID_PAR))
+  CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,U%NSIZE_FULL,.TRUE.,PGRID_PAR,IRESP,HDIR='H')
+#else  
+  CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.FALSE.,HDIR=HDIR)
   !
   ALLOCATE(PGRID_PAR(KGRID_PAR))
    CALL READ_GRIDTYPE(HFILETYPE,HGRID,KGRID_PAR,KL,.TRUE.,PGRID_PAR,IRESP,HDIR=HDIR)
+#endif
   !
   !---------------------------------------------------------------------------
   !
@@ -146,13 +174,13 @@ IF (HDIR/='H') THEN
   !*       8.    Grid modification
   !              -----------------
   !
-  IF (.NOT. OGRID) CALL GRID_MODIF(ILUOUT,ILUNAM,HGRID,KGRID_PAR,PGRID_PAR,KL)
+  IF (.NOT. OGRID) CALL GRID_MODIF(U,ILUOUT,ILUNAM,HGRID,KGRID_PAR,PGRID_PAR,KL)
   !
   CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
   !
 ELSE
   !
-  CALL READ_NAM_GRIDTYPE(PGRID_FULL_PAR,KDIM_FULL,HPROGRAM,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
+  CALL READ_NAM_GRIDTYPE(GCP,PGRID_FULL_PAR,U%NDIM_FULL,HPROGRAM,HGRID,KGRID_PAR,PGRID_PAR,KL,HDIR)
   !
 ENDIF
   !

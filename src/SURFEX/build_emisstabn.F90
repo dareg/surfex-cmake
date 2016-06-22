@@ -28,14 +28,13 @@
 !!                        molec./m2/s)
 !!    M.Leriche  04/14   apply conversion factor if lead = f
 !!                       change emissions name EMIS_ -> E_ name for coherence with PGD
+!!    M.Moge    01/2016  using READ_SURF_FIELD2D for 2D surfex fields reads
 !!
 !!    EXTERNAL
 !!    --------
 !
-!
-!
 USE MODI_CH_OPEN_INPUTB
-USE MODI_READ_SURF
+USE MODI_READ_SURF_FIELD2D
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
@@ -154,7 +153,7 @@ DO JSPEC=1,SIZE(TPEMISS) ! loop on offline emission species
     ALLOCATE(TPEMISS(JSPEC)%XEMISDATA(KSIZE,INBTS))
 ! Read file for emission data
     YRECFM='E_'//TRIM(TPEMISS(JSPEC)%CNAME)
-    CALL READ_SURF(HPROGRAM,YRECFM,TPEMISS(JSPEC)%XEMISDATA(:,:),IRESP)
+    CALL READ_SURF_FIELD2D(HPROGRAM,TPEMISS(JSPEC)%XEMISDATA(:,:),YRECFM)
 !
 ! Correction : Replace 999. with 0. value in the Emission FLUX
 ! and apply conversion

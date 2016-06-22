@@ -33,11 +33,11 @@
 !!    -------------
 !!      Original    01/2003 
 !!      B. Decharme 07/2011 : delete argument HWRITE
+ !!      M. Moge     02/2015 parallelization using WRITE_LCOVER
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
-!
 !
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
 USE MODD_GRID_n, ONLY : GRID_t
@@ -50,7 +50,7 @@ USE MODE_WRITE_SURF_COV, ONLY : WRITE_SURF_COV
 USE MODI_WRITE_SURF
 USE MODI_WRITE_GRID
 USE MODI_WRITESURF_PGD_SEAF_PAR_n
-!
+USE MODI_WRITE_LCOVER
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -86,9 +86,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* cover classes
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_SEAFLUX_N',0,ZHOOK_HANDLE)
-YRECFM='COVER_LIST'
-YCOMMENT='(LOGICAL LIST)'
- CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,S%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
+!
+ CALL WRITE_LCOVER(HSELECT,HPROGRAM,S%LCOVER)
 !
 !
 !* orography
