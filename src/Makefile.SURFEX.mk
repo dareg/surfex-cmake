@@ -1,3 +1,7 @@
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 #           Initialisation of some variables             #
@@ -87,7 +91,6 @@ endif
 #
 DIR_ASSIM += ASSIM
 FPPFLAGS_ASSIM = -DUSE_SODA
-#FPPFLAGS_ASSIM=
 #
 ifdef DIR_ASSIM
 DIR_MASTER += $(DIR_ASSIM)
@@ -214,8 +217,8 @@ endif
 ifeq "$(VER_DRHOOK)" "SIMPLE"
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
-FPPFLAGS_HOOK += -DLINUX -DLITTLE -fno-second-underscore
-CPPFLAGS_HOOK += -DLINUX -DLITTLE -DHAS_XMOTIF -DINTEGER_IS_INT
+FPPFLAGS_HOOK += -DLINUX 
+CPPFLAGS_HOOK += -DLINUX 
 
 OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o getcurheap.o 
 OBJS_LISTE_MASTER += gethwm.o getpag.o getrss.o  getstackusage.o getstatm.o getstk.o 
@@ -597,10 +600,6 @@ endif
 #           Number of NESTED MODEL                       #
 ##########################################################
 NSOURCE=8
-#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 # PROG_LIST : Main program liste to compile              #
