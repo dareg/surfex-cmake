@@ -214,7 +214,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   CALL TREAT_FIELD(UG, U, USS, &
                    HPROGRAM,'SURF  ',HFILETYPE,'A_MESH',HFILE,   &
-                   YFIELD,ZFIELD                   )  
+                   YFIELD,ZFIELD                   )
 !
 !-------------------------------------------------------------------------------
 !
@@ -236,7 +236,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
       CASE ('NAT')
         WHERE (U%XNATURE(:)==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1
 
-        IF (PRESENT(PVEGTYPE)) THEN
+        IF (PRESENT(PVEGTYPE) .AND.SIZE(NSIZE,2)>1) THEN
           IF (JTYPE<SIZE(PVEGTYPE,2)) THEN
             ALLOCATE(ZVEGTYPE(U%NSIZE_FULL))
             CALL UNPACK_SAME_RANK(IMASK,PVEGTYPE(:,JTYPE),ZVEGTYPE)
