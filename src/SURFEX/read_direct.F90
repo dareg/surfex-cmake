@@ -274,7 +274,7 @@ ENDIF
 !
 ! ires c'est le nombre de lignes qu'on lit dans un demi degré (multiple de 60)
 INB_LINE_READ = INBLINE / ((ZGLBLATMAX-ZGLBLATMIN)*2.)
-INB_LINE_READ = MAX(INB_LINE_READ/3,60)
+IF (INB_LINE_READ>60) INB_LINE_READ = MAX(INB_LINE_READ/3,60)
 ! on lit toujours 60 lignes d'un coup 
 ISIZE = INB_LINE_READ * INBCOL
 !
