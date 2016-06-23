@@ -484,6 +484,7 @@ DO
             WRITE(ILUOUT,*) '*******************************************************************'
           ENDIF
           JL = IPAS + 1 !back to first lat
+          IWORK = 0
           CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT   ! rereads the file
         ENDIF
@@ -516,6 +517,7 @@ DO
             WRITE(ILUOUT,*) '*******************************************************************'
           ENDIF
           JL = IPAS + 1
+          IWORK = 0
           CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT
         ENDIF
@@ -539,6 +541,7 @@ DO
             WRITE(ILUOUT,*) '*******************************************************************'
           ENDIF
           JL = IPAS + 1
+          IWORK = 0
           CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT
         ENDIF
@@ -622,7 +625,7 @@ DO
           !*   11.2    Test with respect to the 'no data' value
           !            ----------------------------------------
           !
-          IF (ABS(ZVALUE(ICOLINDEX)-ZNODATA)<=1.E-10) CYCLE
+          !IF (ABS(ZVALUE(ICOLINDEX)-ZNODATA)<=1.E-10) CYCLE
           !
           !*   11.3    copy of the correct values in a work array
           !            ------------------------------------------
@@ -638,7 +641,6 @@ DO
       !-------------------------------------------------------------------------------
     END DO !JLON
     !-------------------------------------------------------------------------------
-    
     IF (MOD((JLINE-ILINE1+1),INB_LINE_READ)==0) THEN
       !
       IF (.NOT.GMULTITYPE.AND.IFACT/=1) THEN
