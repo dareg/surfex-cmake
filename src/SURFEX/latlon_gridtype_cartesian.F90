@@ -37,7 +37,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 !
 USE MODD_CSTS,     ONLY : XPI
 !

@@ -30,7 +30,7 @@ SUBROUTINE PREP_WATFLUX (DTCO, UG, U, GCP, WG, W, SB,  &
 !!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !

@@ -284,15 +284,21 @@ IF (NRANK/=NPIO) THEN
 
     IDX_I = IDX_I + 1
     !sends indexes to npio
+#ifdef SFX_MPI    
     CALL MPI_SEND(IVAL_EXT,SIZE(IVAL_EXT)*KIND(IVAL_EXT)/4,MPI_INTEGER,NPIO,IDX_I,NCOMM,INFOMPI)
+#endif
 
     IDX_I = IDX_I + 1
     !send coords of the points to extrapolate
+#ifdef SFX_MPI    
     CALL MPI_SEND(ZCOOR,SIZE(ZCOOR)*KIND(ZCOOR)/4,MPI_REAL,NPIO,IDX_I,NCOMM,INFOMPI)
+#endif
 
     IDX_I = IDX_I + 1
     !receives values of the field from NPIO
+#ifdef SFX_MPI    
     CALL MPI_RECV(ZFIELD,SIZE(ZFIELD)*KIND(ZFIELD)/4,MPI_REAL,NPIO,IDX_I,NCOMM,ISTATUS,INFOMPI)
+#endif
 
     DO JI=1,ITSIZE(1)
       PFIELD(IMASK(JI),:) = ZFIELD(JI,:)
@@ -324,10 +330,12 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
       IF (J/=NPIO) THEN
 
         !receives indexes and coordinaites
+#ifdef SFX_MPI        
         CALL MPI_RECV(IVAL_EXT(1:IBOR(1,J),1:IBOR(2,J)), IBOR(1,J)*IBOR(2,J)*KIND(IVAL_EXT)/4, &
                         MPI_INTEGER, J, IDX_I+1, NCOMM, ISTATUS, INFOMPI)
         CALL MPI_RECV(ZCOOR(1:IBOR(1,J),:), IBOR(1,J)*SIZE(ZCOOR,2)*KIND(ZCOOR)/4,&
                         MPI_REAL, J, IDX_I+2, NCOMM, ISTATUS, INFOMPI)
+#endif
 
       ENDIF
     
@@ -360,7 +368,9 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
       !
       IF (J/=NPIO) THEN
         !send values found to extrapolate
+#ifdef SFX_MPI        
         CALL MPI_SEND(ZFIELD,SIZE(ZFIELD)*KIND(ZFIELD)/4,MPI_REAL,J,IDX_I+3,NCOMM,INFOMPI)
+#endif
       ELSE
         DO JI = 1,IBOR(1,J)
           PFIELD(IMASK(JI),:) = ZFIELD(JI,:)

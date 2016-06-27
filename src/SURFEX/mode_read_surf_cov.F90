@@ -164,7 +164,9 @@ ELSE
       ENDIF
       ALLOCATE(NINDEX(IFULL))
     ENDIF
+#ifdef SFX_MPI
     CALL MPI_BCAST(NINDEX,SIZE(NINDEX)*KIND(NINDEX)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
   ENDIF
   !
   IPIO_SAVE = NPIO
@@ -243,7 +245,9 @@ ELSE
           !NPIO needs to know all covers read
           IF (NRANK/=NPIO) THEN
             IDX = IDX + 1 
+#ifdef SFX_MPI            
             CALL MPI_SEND(ZFIELD,SIZE(ZFIELD)*KIND(ZFIELD)/4,MPI_REAL,NPIO,IDX,NCOMM,INFOMPI)
+#endif
           ELSE
             CALL PACK_SAME_RANK(IMASKF,ZFIELD,PFIELD(:,JCOVER))
           ENDIF
@@ -281,8 +285,10 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',0,ZHOOK_HANDLE_OMP)
             IDX = IDX_SAVE + JP + 1
             !each task receives the part of the cover read that concerns it 
             !only NPIO in cas of HDIR/=H
+#ifdef SFX_MPI            
             CALL MPI_RECV(ZWORKR(:,ITREQ(JPROC+1)),SIZE(ZWORKR,1)*KIND(ZWORKR)/4,&
                           MPI_REAL,JPROC,IDX,NCOMM,ISTATUS,INFOMPI)
+#endif
           ENDIF
           !
         ENDIF
@@ -296,7 +302,7 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',1,ZHOOK_HANDLE_OMP)
       !
       !waits that all cover pieces are sent
 #ifdef SFX_MPI
-      IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN
+      IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN              
         CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS,INFOMPI)
       ENDIF
 #endif

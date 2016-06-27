@@ -38,7 +38,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 !
 USE MODI_GET_GRID_COORD
 !

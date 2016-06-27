@@ -40,7 +40,7 @@
 !              ------------
 !
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODE_WRITE_SURF_COV, ONLY : WRITE_SURF_COV

@@ -176,9 +176,11 @@ IF (NPROC>1) THEN
    !
     IF (JP/=NRANK) THEN
       !
+#ifdef SFX_MPI
       !each task receives each ISIZE from each task
       CALL MPI_RECV(ISIZE,NSIZE_max*KIND(ISIZE)/4,MPI_INTEGER,&
                 JP,IDX_SAVE+1+JP,NCOMM,ISTATUS,INFOMPI)
+#endif
       !
     ELSE
       !
@@ -197,7 +199,9 @@ IF (NPROC>1) THEN
     !
   ENDDO
   DEALLOCATE(ISIZE)
+#ifdef SFX_MPI  
   CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS2,INFOMPI)
+#endif  
 ELSE
   NSIZE(:,1) = NSIZE_ALL(:,1)
 ENDIF

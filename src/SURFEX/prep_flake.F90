@@ -34,7 +34,7 @@ SUBROUTINE PREP_FLAKE (DTCO, USS, FG, F, SB, UG, U, GCP, &
 !!------------------------------------------------------------------
 !
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 !

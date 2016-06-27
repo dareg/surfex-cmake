@@ -33,7 +33,7 @@ SUBROUTINE PREP_SEAFLUX (DTCO, UG, U, GCP, SG, SB, S, DTS, O, OR, &
 !!      P. Marguinaud10/2014, Support for a 2-part PREP
 !!------------------------------------------------------------------
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_CANOPY_n, ONLY : CANOPY_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t

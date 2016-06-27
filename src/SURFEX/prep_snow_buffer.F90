@@ -28,7 +28,7 @@ SUBROUTINE PREP_SNOW_BUFFER (G, U, HPROGRAM,HSURF,KLUOUT,KLAYER,PFIELD)
 !!------------------------------------------------------------------
 !
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODE_SNOW3L

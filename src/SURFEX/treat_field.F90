@@ -228,8 +228,10 @@ IF (NPROC>1) THEN
         ELSE
           IREQ = JP
         ENDIF
+#ifdef SFX_MPI        
         CALL MPI_ISEND(ISIZE(:,:,JP+1),SIZE(ISIZE,1)*SIZE(ISIZE,2)*KIND(ISIZE)/4,&
                              MPI_INTEGER,JP,IDX,NCOMM,NREQ(IREQ),INFOMPI)
+#endif
       ENDIF
     ENDDO
 !$OMP END DO
@@ -246,8 +248,10 @@ IF (NPROC>1) THEN
       !
       IF (JP/=NRANK) THEN
         !each task receives each ISIZE from each task
+#ifdef SFX_MPI        
         CALL MPI_RECV(ISIZE0,NSIZE_max*SIZE(ISIZE0,2)*KIND(ISIZE0)/4,MPI_INTEGER,&
                       JP,IDX_SAVE+1+JP,NCOMM,ISTATUS,INFOMPI)
+#endif
       ELSE
         !
         ICPT = 0
@@ -264,7 +268,9 @@ IF (NPROC>1) THEN
       NSIZE(:,:) = NSIZE(:,:) + ISIZE0(1:NSIZE_TASK(NRANK),:)
       !
     ENDDO
+#ifdef SFX_MPI    
     CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS2,INFOMPI)
+#endif
     !
     DEALLOCATE(ISIZE,ISIZE0)
     !

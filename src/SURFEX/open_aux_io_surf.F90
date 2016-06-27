@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE OPEN_AUX_IO_SURF (&
-                                   HFILE,HFILETYPE,HMASK,HDIR)
+      SUBROUTINE OPEN_AUX_IO_SURF (HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF* - chooses the routine to OPENialize IO
@@ -97,7 +96,7 @@ IF (PRESENT(HDIR)) YDIR=HDIR
 !
 IF (HFILETYPE=='MESONH') THEN
 #ifdef SFX_MNH
-  CALL MNHOPEN_AUX_IO_SURF(HFILE,HFILETYPE,HMASK,YDIR)
+  CALL MNHOPEN_AUX_IO_SURF(HFILE,HFILETYPE,HMASK)
 #endif
 END IF
 !
@@ -109,8 +108,7 @@ ENDIF
 !
 IF (HFILETYPE=='ASCII ' ) THEN
 #ifdef SFX_ASC
-  CALL OPEN_AUX_IO_SURF_ASC(&
-                            HFILE,HFILETYPE,HMASK,YDIR)
+  CALL OPEN_AUX_IO_SURF_ASC(HFILE,HFILETYPE,HMASK,YDIR)
 #endif
 ENDIF
 !
@@ -122,22 +120,19 @@ ENDIF
 !
 IF (HFILETYPE=='FA    ' ) THEN
 #ifdef SFX_FA
-  CALL OPEN_AUX_IO_SURF_FA(&
-                           HFILE,HFILETYPE,HMASK,YDIR)
+  CALL OPEN_AUX_IO_SURF_FA(HFILE,HFILETYPE,HMASK,YDIR)
 #endif
 ENDIF
 !
 IF (HFILETYPE=='LFI   ' ) THEN
 #ifdef SFX_LFI
-  CALL OPEN_AUX_IO_SURF_LFI(&
-                            HFILE,HFILETYPE,HMASK,YDIR)
+  CALL OPEN_AUX_IO_SURF_LFI(HFILE,HFILETYPE,HMASK,YDIR)
 #endif
 ENDIF
 !
 IF (HFILETYPE=='NC    ' ) THEN
 #ifdef SFX_NC
-  CALL OPEN_AUX_IO_SURF_NC(&
-                           HFILE,HFILETYPE,HMASK,YDIR)
+  CALL OPEN_AUX_IO_SURF_NC(HFILE,HFILETYPE,HMASK,YDIR)
 #endif
 ENDIF
 !
