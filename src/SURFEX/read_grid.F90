@@ -81,20 +81,17 @@ IF (LASSIM) THEN
   LREAD_ALL = .TRUE.
 ENDIF
 !
- CALL READ_SURF(&
-                HPROGRAM,'GRID_TYPE',G%CGRID,KRESP)
+ CALL READ_SURF(HPROGRAM,'GRID_TYPE',G%CGRID,KRESP)
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_GRIDTYPE(&
-                    HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.FALSE.)
+ CALL READ_GRIDTYPE(HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.FALSE.)
 !
 ALLOCATE(G%XGRID_PAR(IGRID_PAR))
- CALL READ_GRIDTYPE(&
-                    HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.TRUE.,G%XGRID_PAR,KRESP)
+ CALL READ_GRIDTYPE(HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.TRUE.,G%XGRID_PAR,KRESP)
 !
 !---------------------------------------------------------------------------
 !
@@ -107,16 +104,13 @@ SELECT CASE (G%CGRID)
   CASE("NONE      ")
     IF (PRESENT(PDIR)) PDIR(:) = 0.
     !
-    CALL READ_SURF(&
-                HPROGRAM,'LON',      G%XLON,KRESP)
+    CALL READ_SURF(HPROGRAM,'LON',      G%XLON,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
-    CALL READ_SURF(&
-                HPROGRAM,'LAT',      G%XLAT,KRESP)
+    CALL READ_SURF(HPROGRAM,'LAT',      G%XLAT,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
-    CALL READ_SURF(&
-                HPROGRAM,'MESH_SIZE',G%XMESH_SIZE,KRESP)
+    CALL READ_SURF(HPROGRAM,'MESH_SIZE',G%XMESH_SIZE,KRESP)
     IF (KRESP/=0 .AND. LHOOK) CALL DR_HOOK('READ_GRID',1,ZHOOK_HANDLE)
     IF (KRESP/=0) RETURN
 
