@@ -1206,6 +1206,9 @@ DO JJ = 1,SIZE(ZSNOW)
     PSNOWRHO(JJ,JST)  = 999.
     PSNOWTEMP(JJ,JST) = 0.
     PSNOWDZ(JJ,JST)   = 0.
+    DO JIMP=1,NIMPUR
+        PSNOWIMPURV2(JJ,JST,JIMP)=0.
+    ENDDO
   ENDDO  !  end loop unactive snow layers
 !  
 ENDDO    ! end loop grid points
@@ -3335,7 +3338,7 @@ REAL, DIMENSION(:), INTENT(IN)         :: PLEL3L
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZPHASE,              &
                                                       ZSNOWLIQ, ZSNOWRHO,  &
                                                       ZWHOLDMAX, ZSNOWDZ,  &
-                                                      ZSNOWTEMP 
+                                                      ZSNOWTEMP,ZSNOWSWE 
 !                                                     
 REAL, DIMENSION(SIZE(PSNOWRHO,1),0:SIZE(PSNOWRHO,2),NIMPUR) ::  ZFLOWIMPUR             !Mass of impurity scavenged to layer down                                                     
 !
@@ -3355,6 +3358,7 @@ IF (LHOOK) CALL DR_HOOK('SNOWCROREFRZ',0,ZHOOK_HANDLE)
 ! 0. Initialize:
 ! --------------
 !
+
 INLVLS = SIZE(PSNOWDZ,2)
 !
 DO JJ=1,SIZE(PSNOWDZ,1)        
@@ -3362,6 +3366,7 @@ DO JJ=1,SIZE(PSNOWDZ,1)
     ZSNOWRHO (JJ,JST) = PSNOWRHO(JJ,JST)
     ZSNOWTEMP(JJ,JST) = PSNOWTEMP(JJ,JST)
     ZWHOLDMAX(JJ,JST) = SNOWCROHOLD( PSNOWRHO(JJ,JST),PSNOWLIQ(JJ,JST),PSNOWDZ(JJ,JST) )
+    ZSNOWSWE(JJ,JST) = PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)
   ENDDO
 ENDDO
 !
@@ -3389,6 +3394,8 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     ! 2. Increases Liquid Water from the upper layers flow (or rain for top layer) 
     !    -----------------------------
     PSNOWLIQ(JJ,JST) = PSNOWLIQ(JJ,JST) + ZFLOWLIQ(JJ,JST-1)
+    ZSNOWSWE(JJ,JST) = ZSNOWSWE(JJ,JST) + XRHOLW*ZFLOWLIQ(JJ,JST-1) ! Actualise the swe to take into account the new water arrival
+    !Used to scavenge impurities
     !    
     ! 2.bis Increases impurity content from the upper layers flow
     !    -----------------------------
@@ -3408,7 +3415,9 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     ZSNOWLIQ(JJ,JST) = PSNOWLIQ(JJ,JST) - ZPHASE(JJ,JST)/(XLMTT*XRHOLW)       
     !
     ! Warm layer and reduce liquid if freezing occurs:
+    !print*, "avant",ZSNOWDZ(JJ,JST) 
     ZSNOWDZ(JJ,JST) = MAX(XSNOWDMIN/INLVLS, PSNOWDZ(JJ,JST))
+    !print*, "apres",ZSNOWDZ(JJ,JST) 
     !
     !
     ! Difference with ISBA-ES: a possible cooling of current refreezing water
@@ -3424,15 +3433,26 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     ! Any water in excess of the maximum holding space for liquid water
     ! amount is drained into next layer down.
     ZFLOWLIQ(JJ,JST) = MAX( 0., ZSNOWLIQ(JJ,JST)-ZWHOLDMAX(JJ,JST) )
+    
+    DO JIMP=1,NIMPUR
+      ZFLOWIMPUR(JJ,JST,JIMP) = MAX( 0., SCAVEN_COEF(JIMP)*PSNOWIMPURV2(JJ,JST,JIMP)*&
+      ((ZFLOWLIQ(JJ,JST)*XRHOLW)/ZSNOWSWE(JJ,JST)))
+    ENDDO 
+    
+    !PRINT*, "AVANT ACTU ",1000*ZFLOWLIQ(JJ,JST),ZSNOWLIQ(JJ,JST),PSNOWLIQ(JJ,JST),PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)
     ! 
     !IF (ZFLOWLIQ(JJ,JST)/=0) THEN
     !DO JIMP=1,NIMPUR      
     !    ZFLOWIMPUR(JJ,JST,JIMP) = MAX( 0., SCAVEN_COEF(JIMP)*PSNOWIMPURV2(JJ,JST,JIMP)*&
-    !  (ZFLOWLIQ(JJ,JST)/(ZSNOWRHO(JJ,JST)*ZSNOWDZ(JJ,JST)*1000.)))                   !Compute the mass of impurity leaving the layer in Kg to check
-    !  ENDDO
+     ! ((ZFLOWLIQ(JJ,JST)*XRHOLW)/(ZSNOWRHO(JJ,JST)*ZSNOWDZ(JJ,JST))))                   !Compute the mass of impurity leaving the layer in Kg to check
+     !   IF (ZFLOWIMPUR(JJ,JST,JIMP)>PSNOWIMPURV2(JJ,JST,JIMP)) THEN 
+     !       Print*, "Avant getrho",(PSNOWLIQ(JJ,JST)*XRHOLW)/(PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST))
+     !   ENDIF
+    !ENDDO
+    !Print*, "Avant getrho",(ZFLOWLIQ(JJ,JST)*XRHOLW)/(ZSNOWRHO(JJ,JST)*ZSNOWDZ(JJ,JST))
     !ELSE
-    !  DO JIMP=1,NIMPUR 
-    !    ZFLOWIMPUR(JJ,JST,JIMP)=0.
+     ! DO JIMP=1,NIMPUR 
+     !   ZFLOWIMPUR(JJ,JST,JIMP)=0.
     !  ENDDO
     !ENDIF
     !
@@ -3449,12 +3469,14 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
       PSNOWDZ (JJ,JST) = PSNOWDZ(JJ,JST) * ZSNOWRHO(JJ,JST) / XRHOLI
       ZSNOWRHO(JJ,JST) = XRHOLI
     ENDIF
+    !Print*, "APrés getrho",(ZFLOWLIQ(JJ,JST)*XRHOLW)/(ZSNOWRHO(JJ,JST)*ZSNOWDZ(JJ,JST))
     !
     ! 6. Update thickness and density and any freezing:
     !    ----------------------------------------------
     PSNOWRHO(JJ,JST) = ZSNOWRHO(JJ,JST)
     PSNOWLIQ(JJ,JST) = ZSNOWLIQ(JJ,JST)
     !
+    !PRINT*, "APRES ACTU ",1000*ZFLOWLIQ(JJ,JST),ZSNOWLIQ(JJ,JST),PSNOWLIQ(JJ,JST),PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)
     ! 7. Conservation of impurity content
     !
     !PSNOWIMPUR in g/g of ice -> the new ice mass receive its part of impurity content from the rest of the ice
@@ -3462,16 +3484,9 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
     ! In the last layer we do not conserve impurity contente it is supposed to be constant
     !IF (JST/=KNLVLS_USE(JJ)) THEN
     !  DO JIMP=1,NIMPUR
-    !    PSNOWIMPURV2(JJ,JST,JIMP)=PSNOWIMPURV2(JJ,JST,JIMP)!-ZFLOWIMPUR(JJ,JST,JIMP)
+    !    PSNOWIMPURV2(JJ,JST,JIMP)=PSNOWIMPURV2(JJ,JST,JIMP)-ZFLOWIMPUR(JJ,JST,JIMP)
     !  ENDDO
     !ENDIF
-!    DO JIMP=1,NIMPUR
-!      IF (PSNOWIMPURV2(JJ,JST,JIMP)<0) THEN
-!        PRINT*, 'ZMASSICE BEFORE',ZMASSICE_BEFORE
-!        PRINT*, 'ZMASSICE After',ZMASSICE_AFTER
-!      ENDIF
-!    ENDDO
-    !
     !
   ENDDO ! loop JST active snow layers
   !
@@ -3484,8 +3499,15 @@ DO JJ = 1,SIZE(PSNOWDZ,1)  ! loop JJ grid points
   !
 ENDDO ! loop JJ grid points
 !
-
-
+! Try to implement impurity scavenging
+DO JIMP=1,NIMPUR
+  DO JJ = 1,SIZE(PSNOWDZ,1)
+    DO JST=1,KNLVLS_USE(JJ)
+        PSNOWIMPURV2(JJ,JST,JIMP)=PSNOWIMPURV2(JJ,JST,JIMP) + ZFLOWIMPUR(JJ,JST-1,JIMP)
+        PSNOWIMPURV2(JJ,JST,JIMP)=PSNOWIMPURV2(JJ,JST,JIMP)-ZFLOWIMPUR(JJ,JST,JIMP)
+    ENDDO
+  ENDDO  
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCROREFRZ',1,ZHOOK_HANDLE)
 !
