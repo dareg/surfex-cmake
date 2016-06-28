@@ -44,7 +44,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_DATA_COVER,     ONLY : XDATA_D_ROOF, XDATA_D_ROAD, XDATA_D_WALL, XDATA_D_FLOOR
-USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NDATA_ROOF_LAYER, NDATA_ROAD_LAYER, &
+USE MODD_DATA_COVER_PAR, ONLY : NCOVER, NTYPE, NDATA_ROOF_LAYER, NDATA_ROAD_LAYER, &
                                 NDATA_WALL_LAYER, NDATA_FLOOR_LAYER
 !
 USE MODI_OPEN_AUX_IO_SURF
@@ -57,6 +57,7 @@ USE MODI_OLD_NAME
 USE MODI_THERMAL_LAYERS_CONF
 USE MODI_OPEN_AUX_IO_SURF
 USE MODI_CLOSE_AUX_IO_SURF
+USE MODI_READ_LECOCLIMAP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -88,32 +89,34 @@ REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL   :: PD_FLOOR
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-LOGICAL, DIMENSION(JPCOVER)          :: GCOVER ! flag to read the covers
+LOGICAL, DIMENSION(:), ALLOCATABLE   :: GCOVER ! flag to read the covers
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZCOVER ! cover fractions
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZD     ! depth of surface layers
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZPAR_D ! depth of data_surface layers
 !
+REAL, DIMENSION(SIZE(XDATA_D_ROOF,1),SIZE(XDATA_D_ROOF,2)) :: ZDATA
+!
 INTEGER           :: IVERSION_PGD, IVERSION_PREP       ! surface version
 INTEGER           :: IBUGFIX_PGD, IBUGFIX_PREP        ! surface bugfix version
- CHARACTER(LEN=1) :: YDIR
 INTEGER           :: IVERSION       ! surface version
 INTEGER           :: IBUGFIX        ! surface bugfix version
+ CHARACTER(LEN=1) :: YDIR
+ CHARACTER(LEN=3)  :: YAREA          ! Area where field is to be averaged
  CHARACTER(LEN=5)  :: YSURF          ! Type of surface
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=12) :: YRECFM0        ! Name of the article to be read
  CHARACTER(LEN=12) :: YRECFM1        ! Name of the article to be read
  CHARACTER(LEN=12) :: YRECFM2        ! Name of the article to be read
  CHARACTER(LEN=12) :: YRECFM3        ! Name of the article to be read 
- CHARACTER(LEN=3)  :: YAREA          ! Area where field is to be averaged
-INTEGER           :: IRESP          ! reading return code
-LOGICAL           :: GDATA          ! T if depth is to be read in the file
-LOGICAL           :: GREAD_EXT
-REAL, DIMENSION(SIZE(XDATA_D_ROOF,1),SIZE(XDATA_D_ROOF,2)) :: ZDATA
+INTEGER :: IRESP          ! reading return code
 INTEGER :: ILAYER                   ! number of surface layers
 INTEGER :: JLAYER                   ! loop counter on surface layers
 INTEGER :: IPAR_LAYER               ! number of data surface layers
 INTEGER :: IDATA_LAYER              ! number of data surface layers from ecoclimap
 INTEGER :: ILU                      ! number of points
+LOGICAL           :: GECOCLIMAP, GECOSG
+LOGICAL           :: GDATA, GDIM          ! T if depth is to be read in the file
+LOGICAL           :: GREAD_EXT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -128,19 +131,21 @@ IF (LHOOK) CALL DR_HOOK('GET_TEB_DEPTHS',0,ZHOOK_HANDLE)
 YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
-CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')
 YRECFM='VERSION'
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION_PGD,IRESP,HDIR='-')
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IVERSION_PGD,IRESP,HDIR='-')
 YRECFM='BUG'
-CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX_PGD,IRESP,HDIR='-')
-CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+ CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX_PGD,IRESP,HDIR='-')
+ CALL READ_LECOCLIMAP(HFILEPGDTYPE,GECOCLIMAP,GECOSG,HDIR='-')
+ CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+GDIM = (IVERSION_PGD>8 .OR. IVERSION_PGD==8 .AND. IBUGFIX_PGD>0)
 !
-CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
+ CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
 YRECFM='VERSION'
  CALL READ_SURF(HFILETYPE,YRECFM,IVERSION_PREP,IRESP,HDIR='-')
 YRECFM='BUG'
  CALL READ_SURF(HFILETYPE,YRECFM,IBUGFIX_PREP,IRESP,HDIR='-')
-CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+ CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
 !
 IF (PRESENT(PD_ROOF)) THEN
   YSURF='ROOF '
@@ -238,6 +243,12 @@ IF (.NOT.GDATA) THEN
   !
   IF (.NOT.GREAD_EXT) THEN
     !
+    IF (GDIM.AND.GECOSG) THEN
+      ALLOCATE(GCOVER(SUM(NTYPE)))
+    ELSE
+      ALLOCATE(GCOVER(NCOVER))
+    ENDIF
+    !
     CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'FULL  ')   
     !* reading of the cover to obtain the thickness of layers
     CALL OLD_NAME(HFILEPGDTYPE,'COVER_LIST      ',YRECFM,'-')
@@ -256,7 +267,7 @@ IF (.NOT.GDATA) THEN
         CALL AV_PGD (DTCO,ZPAR_D(:,JLAYER), ZCOVER, ZDATA(:,JLAYER),YAREA,'ARI',GCOVER)
       END DO
     ENDIF
-    DEALLOCATE(ZCOVER)
+    DEALLOCATE(GCOVER,ZCOVER)
     !
     IF (IVERSION_PREP<7 .OR. (IVERSION_PREP==7 .AND. IBUGFIX_PREP<=2)) THEN
       !* ind version of TEB, the computational grid was equal to the data grid
