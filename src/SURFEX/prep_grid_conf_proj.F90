@@ -62,12 +62,12 @@ INTEGER,           INTENT(OUT)   :: KNI          ! number of points
 !* 0.2 Declaration of local variables
 !      ------------------------------
 !
- CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be read
-INTEGER           :: IRESP
-!
-!
-INTEGER           :: JL        ! loop counter
 REAL, DIMENSION(:), ALLOCATABLE :: ZW ! work array
+!
+ CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be read
+ CHARACTER(LEN=1) :: YDIR
+INTEGER           :: IRESP
+INTEGER           :: JL        ! loop counter
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------------
@@ -102,19 +102,22 @@ YRECFM = 'JMAX'
 !
 KNI = GCP%NX * GCP%NY
 !
+YDIR = '-'
+IF (HFILETYPE=='MESONH') YDIR = 'A'
+!
 ALLOCATE(ZW(KNI))
 !
 IF (ALLOCATED(XX)) DEALLOCATE(XX)
 ALLOCATE(XX(GCP%NX))
 YRECFM = 'XX'
- CALL READ_SURF(HFILETYPE,YRECFM,ZW,IRESP,HDIR='-')
+ CALL READ_SURF(HFILETYPE,YRECFM,ZW,IRESP,HDIR=YDIR)
 XX = ZW(1:GCP%NX)
 
 
 IF (ALLOCATED(XY)) DEALLOCATE(XY)
 ALLOCATE(XY(GCP%NY))
 YRECFM = 'YY'
- CALL READ_SURF(HFILETYPE,YRECFM,ZW,IRESP,HDIR='-')
+ CALL READ_SURF(HFILETYPE,YRECFM,ZW,IRESP,HDIR=YDIR)
 DO JL=1,KNI
   IF (MOD(JL,GCP%NX)==0) XY(JL/GCP%NX) = ZW(JL)
 END DO

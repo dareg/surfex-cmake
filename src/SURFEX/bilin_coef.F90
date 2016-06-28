@@ -193,6 +193,7 @@ DO JL=1,SIZE(PX2)
 !* interpolation weights in X direction
 !
   JI=KCI(JL)
+  JI=MAX(MIN(JI,IIU),0)
   IF (PX1(JI)<=PX2(JL)) THEN
     PCX(JL,2) = (PX2(JL)-ZX(JI+1))/(PX1(JI)-ZX(JI+1))
     PCX(JL,2) = MAX(MIN(PCX(JL,2),1.),0.)
@@ -208,6 +209,7 @@ DO JL=1,SIZE(PX2)
 !  interpolation weights in Y direction
 !
   JJ=KCJ(JL)
+  JJ=MAX(MIN(JJ,IJU),0)
   IF (PY1(JJ)<=PY2(JL)) THEN
     PCY(JL,2) = (PY2(JL)-ZY(JJ+1))/(PY1(JJ)-ZY(JJ+1))
     PCY(JL,2) = MAX(MIN(PCY(JL,2),1.),0.)

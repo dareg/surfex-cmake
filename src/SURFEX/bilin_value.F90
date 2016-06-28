@@ -200,7 +200,7 @@ ELSE
       IS2 = IBOR(2,2,0)-IBOR(2,1,0)+1
       ISIZE = IS1*IS2
       ALLOCATE(ZFIELD1(IS1,IS2,INL))
-      IF (SUM(IBOR(:,:,0))/=0) THEN
+      IF (SUM(IBOR(:,:,0))/=0) THEN    
         DO JL=IBOR(2,1,0),IBOR(2,2,0)
           ZFIELD1(:,JL-IBOR(2,1,0)+1,:) = PFIELD1(KX*(JL-1)+IBOR(1,1,0):KX*(JL-1)+IBOR(1,2,0),:)
         ENDDO
@@ -233,6 +233,8 @@ DO JK=1,INL
     !
     JI = KCI(JL) - IJEXT(1,1) + 1
     JJ = KCJ(JL) - IJEXT(2,1) + 1
+    JI = MAX(MIN(JI,SIZE(ZFIELD1,1)),0)
+    JJ = MAX(MIN(JJ,SIZE(ZFIELD1,2)),0)
     !
     !* interpolation weights in X direction
     !
