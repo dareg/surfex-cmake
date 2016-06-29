@@ -43,11 +43,13 @@ IMPLICIT NONE
 !            ------------------------
 !
 REAL,    DIMENSION(:,:), INTENT(INOUT) :: PPGDARRAY ! Mesonh field
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
+REAL :: ZINT
+INTEGER :: JI, JJ
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',0,ZHOOK_HANDLE)
@@ -75,10 +77,18 @@ SELECT CASE (CATYPE)
           
 END SELECT
 !
-WHERE (PPGDARRAY/=XUNDEF) 
-  PPGDARRAY(:,:) = AINT(PPGDARRAY(:,:)) + &
-            NINT((PPGDARRAY(:,:)-AINT(PPGDARRAY(:,:)))*100000000.)/100000000.
-ENDWHERE
+DO JJ=1,SIZE(PPGDARRAY,2)
+  DO JI = 1,SIZE(PPGDARRAY,1)
+
+    IF (PPGDARRAY(JI,JJ)/=XUNDEF) THEN
+      ZINT = FLOAT(AINT(PPGDARRAY(JI,JJ),KIND=16))
+      IF (PPGDARRAY(JI,JJ)/=ZINT) THEN
+        PPGDARRAY(JI,JJ) = ZINT + NINT((PPGDARRAY(JI,JJ)-ZINT)*100000000)/100000000.
+      ENDIF
+    ENDIF
+
+  ENDDO
+ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_MESH',1,ZHOOK_HANDLE)
 

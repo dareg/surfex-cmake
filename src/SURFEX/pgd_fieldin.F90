@@ -142,12 +142,13 @@ ENDIF
 !*    6.      Mask for the field
 !             ------------------
 !
+YMASK = ''
 SELECT CASE (HAREA)
   CASE ('LAN')
           YMASK = 'LAND  '
   CASE ('TWN')
           YMASK = 'TOWN  '
-    CASE ('BLD')
+  CASE ('BLD')
           YMASK = 'TOWN '              
   CASE ('NAT')
           YMASK = 'NATURE'
@@ -156,9 +157,7 @@ SELECT CASE (HAREA)
   CASE ('WAT')
           YMASK = 'WATER '
   CASE DEFAULT
-          PFIELD(:,:) = ZFIELD(:,:)
-          IF (LHOOK) CALL DR_HOOK('PGD_FIELDIN',1,ZHOOK_HANDLE)
-          RETURN
+          YMASK = 'FULL  '
 END SELECT
 
  CALL GET_TYPE_DIM_n(DTCO, U, YMASK,IDIM)

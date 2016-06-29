@@ -66,6 +66,8 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZUNITY
 !
+REAL :: ZINT
+INTEGER :: JI, JJ
 INTEGER :: JCOV ! loop counter on cover classes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
@@ -94,8 +96,16 @@ DO JCOV=1,SIZE(U%XCOVER,2)
   END WHERE
 END DO
 !
-U%XCOVER(:,:) = AINT(U%XCOVER(:,:)) + &
-            NINT((U%XCOVER(:,:)-AINT(U%XCOVER(:,:)))*100000000.)/100000000.
+DO JJ=1,SIZE(U%XCOVER,2)
+  DO JI = 1,SIZE(U%XCOVER,1)
+
+    ZINT = FLOAT(AINT(U%XCOVER(JI,JJ),KIND=16))
+    IF (U%XCOVER(JI,JJ)/=ZINT) THEN
+      U%XCOVER(JI,JJ) = ZINT + NINT((U%XCOVER(JI,JJ)-ZINT)*100000000)/100000000.
+    ENDIF
+
+  ENDDO
+ENDDO
 !
 !-------------------------------------------------------------------------------
 DEALLOCATE(ZUNITY)
