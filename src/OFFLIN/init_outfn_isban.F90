@@ -1504,7 +1504,7 @@ ENDIF
 
 ! 6. Create file for vegetation parameter values
 !----------------------------------------------------------
-
+print*,'DGI%PGD ',DGI%LPGD
 IF(LASSIM) THEN
   IF(CASSIM=='PLUS ') THEN
     YFILE='ISBA_VEG_EVOLUTION_P.OUT.nc'
@@ -1540,6 +1540,7 @@ ELSEIF(DGI%LPGD)THEN
   JRET=NF_REDEF(IFILE_ID)
   YATT ='dimensionless'
   !
+  print*,'def veg'
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'VEG'         ,'Output_vegetation_fraction'         ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
@@ -1653,11 +1654,11 @@ ELSEIF(DGI%LPGD)THEN
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'WRMAX_CF'    ,'Coefficient_Max_Water_Interception' ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'ALBNIR_SOIL' ,'Output_ALBNIR_SOIL'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
+                      IFILE_ID,'ALBNIR_S' ,'Output_ALBNIR_SOIL'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'ALBVIS_SOIL' ,'Output_ALBVIS_SOIL'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
+                      IFILE_ID,'ALBVIS_S' ,'Output_ALBVIS_SOIL'                 ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'ALBUV_SOIL'  ,'soil_UV_albedo'                     ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
+                      IFILE_ID,'ALBUV_S'  ,'soil_UV_albedo'                     ,IDDIM(1:INDIMS-1),YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'ALBNIR_ISBA' ,'total_near-infra-red albedo'        ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
