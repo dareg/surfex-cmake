@@ -597,10 +597,14 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       PMONTH = .TRUE.
     ENDIF
   ! 	  	A.2.2. Daily condition
-    IF (TPTIME%TIME > 28800. .and. TPTIME%TIME < 64800.) THEN					! No production allowed between 8am and 7pm
-      PDAY = .FALSE.
-    ELSE
+    IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN		! Production allowed all day from 1st of NOV ... until 15th of DEC
       PDAY = .TRUE.
+    ELSE
+      IF (TPTIME%TIME > 28800. .and. TPTIME%TIME < 64800.) THEN								! No production allowed between 8am and 7pm
+	PDAY = .FALSE.
+      ELSE
+	PDAY = .TRUE.
+      ENDIF
     ENDIF
 
   !       A.3. Boolean from timing conditions
@@ -611,24 +615,25 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
       IF (OSELF_PROD) THEN
 !
-!!!!!!!!!!!!!!!			FORMULATION BY HANZER, 2014			!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
 !
-	IF (TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY > 307. .and. TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY < 362.) THEN			! i.e. SM possible from 15th of NOV (11*27+6+15=318) ... until 31st of DEC (12*27+6+31=361) => Produce 200kg/m2 MAX
+	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN			! i.e. SM possible from 1st of NOV (11*31+1=342) ... until 15th of DEC (12*31+15=387)
 !																	! i.e. SM possible even during day time on that period
-	  IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 240. .and. MOD(TPTIME%TDATE%DAY, 2) == 0.) THEN					! Max admissible prod in that period 200kg/m2 + Installation capacity 50% of snowguns simultaneously => 1 day / 2
-	    OPRODSNOWMAK(JJ) = .TRUE.
+	  IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 150.) THEN										! Max admissible prod in that period 150 kg/m2 
+	    OPRODSNOWMAK(JJ) = .TRUE.													! .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
 	  ELSE
 	    OPRODSNOWMAK(JJ) = .FALSE.
 	  ENDIF
 	ENDIF
-	IF (TPTIME%TDATE%MONTH*27+6+TPTIME%TDATE%DAY < 89.) THEN								! Case Between 1st of JAN until 28th of Feb.
-	  IF (ZSNOW(JJ)*100 < 60 .and. MOD(TPTIME%TDATE%DAY, 2) == 0.) THEN							! If < XTIMESNOWMAK (kg/m2) keep producing (Installation capacity 50% of snowguns simultaneously => 1 day / 2)
-	    OPRODSNOWMAK(JJ) = .TRUE.
+!
+	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 91.) THEN				! Case Between 15th of DEC until 28th of Feb.
+	  IF (ZSNOW(JJ) < 0.60) THEN							! If HTN < 0.6 (m) keep producing
+	    OPRODSNOWMAK(JJ) = .TRUE.							!  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
 	  ELSE
 	    OPRODSNOWMAK(JJ) = .FALSE.
 	  ENDIF
 	ENDIF
-!!!!!!!!!!!!!!!			FORMULATION BY HANZER, 2014			!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
 ! 
       ELSE	! SELF_PROD conditions is FALSE
 ! 		A.2.3. Suitable night for snowmaking
