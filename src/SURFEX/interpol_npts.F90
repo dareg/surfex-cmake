@@ -227,6 +227,7 @@ DO JL=1,IL1
   IF (KNEAR_NBR/=U%NDIM_FULL) THEN
 
     ICOUNT = 0
+!$OMP PARALLEL DO PRIVATE(JK,ICOUNT)
     DO JK=1,KNEAR_NBR
       IF (UG%NNEAR(JL,JK)>0) THEN
         !is the neareast point available to interpolation
@@ -236,6 +237,7 @@ DO JL=1,IL1
         END IF
       END IF
     END DO
+!$OMP END PARALLEL DO
     !
     !did we found enough points for interpolate
     IF (ICOUNT>=KNPTS) THEN
@@ -252,6 +254,7 @@ DO JL=1,IL1
   !
   ZDIST(1:ICOUNT) = (PX(IINDEX(1:ICOUNT))-ZX(JL))**2 + (PY(IINDEX(1:ICOUNT))-ZY(JL))**2
   !
+!$OMP PARALLEL DO PRIVATE(JP,JK,JKK)
   DO JP = 1,ICOUNT
     !
     IF (ZDIST(JP)>ZNDIST(ICPT,INPTS)) CYCLE
@@ -278,6 +281,7 @@ DO JL=1,IL1
     ENDDO
     !
   ENDDO
+!$OMP END PARALLEL DO
   !
 ENDDO
 !

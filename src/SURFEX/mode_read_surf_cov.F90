@@ -12,8 +12,7 @@ PUBLIC :: READ_SURF_COV
 CONTAINS
 
 !     #############################################################
-      SUBROUTINE READ_SURF_COV (&
-                                HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE READ_SURF_COV (HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !
@@ -22,25 +21,22 @@ USE MODD_SURFEX_MPI, ONLY : NPROC, NPIO, NRANK, IDX_R, NREQ, NCOMM, NSIZE, NINDE
 USE MODD_SURF_PAR,  ONLY : XUNDEF
 !
 #ifdef SFX_LFI
-USE MODE_READ_SURF_LFI, ONLY: READ_SURFN_LFI
 USE MODD_IO_SURF_LFI, ONLY : NMASK_lfi=>NMASK, NFULL_lfi=>NFULL
 #endif
 #ifdef SFX_NC
-USE MODE_READ_SURF_NC, ONLY: READ_SURFN_NC
 USE MODD_IO_SURF_NC, ONLY : NMASK_nc=>NMASK, NFULL_nc=>NFULL
 #endif
 #ifdef SFX_ASC
-USE MODE_READ_SURF_ASC, ONLY: READ_SURFN_ASC
 USE MODD_IO_SURF_ASC, ONLY : NMASK_asc=>NMASK, NFULL_asc=>NFULL
 #endif
 #ifdef SFX_FA
-USE MODE_READ_SURF_FA, ONLY: READ_SURFX_FA
 USE MODD_IO_SURF_FA, ONLY : NMASK_fa=>NMASK, NFULL_fa=>NFULL
 #endif
 #ifdef SFX_MNH
 USE MODI_READ_SURFX2COV_MNH
 #endif
 !
+USE MODI_READ_SURF
 USE MODI_PACK_SAME_RANK
 USE MODI_READ_AND_SEND_MPI
 !
@@ -82,7 +78,7 @@ INTEGER, DIMENSION(SIZE(PFIELD,2)) :: IMASK
  CHARACTER(LEN=1)   :: YDIR
  CHARACTER(LEN=4)  :: YLVL
 INTEGER :: IFLAG 
-INTEGER            :: JJ, IPIO_SAVE, IPAS, JP, IDEB, IFIN
+INTEGER            :: IPIO_SAVE, IPAS, JP, IDEB, IFIN, JJ
 INTEGER            :: JCOVER, JPROC, IPROC
 INTEGER            :: IL1, IL2, IDX_SAVE, IDX, IVAL
 INTEGER :: INFOMPI, IREQ, JPROC2, IFULL
@@ -213,23 +209,7 @@ ELSE
         NPIO = NRANK
         !
         !reading of the whol cover (HDIR='A')
-        IF (HPROGRAM=='LFI   ') THEN
-#ifdef SFX_LFI
-          CALL READ_SURFN_LFI(YREC,ZFIELD,KRESP,YCOMMENT,'A')
-#endif
-        ELSEIF (HPROGRAM=='ASCII ') THEN
-#ifdef SFX_ASC
-          CALL READ_SURFN_ASC(YREC,ZFIELD,KRESP,YCOMMENT,'A')
-#endif
-        ELSEIF (HPROGRAM=='FA     ') THEN
-#ifdef SFX_FA
-          CALL READ_SURFX_FA(YREC,SIZE(ZFIELD),ZFIELD,KRESP,YCOMMENT,'A')
-#endif
-        ELSEIF (HPROGRAM=='NC     ') THEN
-#ifdef SFX_NC
-          CALL READ_SURFN_NC(YREC,ZFIELD,KRESP,YCOMMENT,'A')
-#endif
-        ENDIF
+        CALL READ_SURF(HPROGRAM,YREC,ZFIELD,KRESP,YCOMMENT,'A')
         !
         !NPIO rebecomes the I/O task 
         NPIO = IPIO_SAVE
@@ -245,7 +225,7 @@ ELSE
           !NPIO needs to know all covers read
           IF (NRANK/=NPIO) THEN
             IDX = IDX + 1 
-#ifdef SFX_MPI            
+#ifdef SFX_MPI
             CALL MPI_SEND(ZFIELD,SIZE(ZFIELD)*KIND(ZFIELD)/4,MPI_REAL,NPIO,IDX,NCOMM,INFOMPI)
 #endif
           ELSE
@@ -302,7 +282,7 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',1,ZHOOK_HANDLE_OMP)
       !
       !waits that all cover pieces are sent
 #ifdef SFX_MPI
-      IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN              
+      IF (YDIR=='H' .AND. IPAS*NRANK+JP<=IL2 .AND. NPROC>1) THEN
         CALL MPI_WAITALL(NPROC-1,NREQ(1:NPROC-1),ISTATUS,INFOMPI)
       ENDIF
 #endif
