@@ -42,7 +42,6 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURFEX_OMP, ONLY : NBLOCK
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPROC, NPIO, NCOMM, IDX_I
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XPI
@@ -89,22 +88,22 @@ REAL :: ZNDIST! smallest distance to valid point
 REAL :: ZCOSLA! cosine of latitude
 REAL :: ZLONSC! longitude of valid point
 REAL :: ZIDLO, ZIDLOMAX, ZIDLOMIN, ZIDLAMAX, ZIDLAMIN
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOOR, ZCOOR2
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOOR
 REAL, DIMENSION(:), ALLOCATABLE :: ZIDLA
 REAL,    DIMENSION(:), ALLOCATABLE :: ZLA       ! input "latitude"  coordinate
 REAL,    DIMENSION(:), ALLOCATABLE :: ZLO       ! input "longitude" coordinate
 REAL(KIND=JPRB) :: ZRAD ! conversion degrees to radians
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK, IMASKR
-INTEGER, DIMENSION(:,:), ALLOCATABLE :: IVAL_EXT, IVAL_EXT2, ITAB
+INTEGER, DIMENSION(:,:), ALLOCATABLE :: IVAL_EXT
 INTEGER, DIMENSION(NPROC) :: INO_TAB
 INTEGER  :: INO     ! output array size
-INTEGER, DIMENSION(2) :: ITSIZE
+INTEGER, DIMENSION(2) :: ITSIZE, ITDIM
 INTEGER, DIMENSION(2,0:NPROC-1) :: IBOR
-INTEGER :: ISIZE, ISIZE_MAX, JJ, ID0, ICOMPT, ICPT
+INTEGER :: ISIZE, ISIZE_MAX, J, ID0, ICOMPT, ICPT
 INTEGER :: INFOMPI, IDX, INL
 INTEGER  :: JI, JL, JLAT, JLON, JIPOS, JP   ! loop index on points
-INTEGER  :: JISC  !index on valid points
+INTEGER  :: JISC  ! loop index on valid points
 #ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
 #endif
@@ -114,6 +113,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_1',0,ZHOOK_HANDLE)
 !
+print*,'hor_extrapol_surf in'
 INO = SIZE(PFIELD,1)
 INL = SIZE(PFIELD,2)
 !
@@ -182,7 +182,6 @@ DO JI=1,INO
   !
   IF (ALL(PFIELD(JI,:)/=XUNDEF)) CYCLE
   IF (.NOT. OINTERP(JI))  CYCLE
-  print*,'JI ',JI,NRANK
   ICPT = ICPT + 1
   !
   ZTLONMIN(JI) = MINVAL(ZLO(KP(JI,:)))-ZIDLOMAX*NHALO_PREP
@@ -199,36 +198,27 @@ ENDDO
 ITSIZE(1) = ICPT
 ITSIZE(2) = ISIZE_MAX
 !
-IBOR(:,:) = 0
-!
 !NPIO knows the numbers of points to extrapolate for all tasks
 IF (NPROC>1) THEN
 #ifdef SFX_MPI
-  !CALL MPI_GATHER(ITSIZE,2*KIND(ITSIZE)/4,MPI_INTEGER,&
-  !                IBOR,2*KIND(IBOR)/4,MPI_INTEGER,& 
-  !                NPIO,NCOMM,INFOMPI)
-  CALL MPI_ALLGATHER(ITSIZE,2*KIND(ITSIZE)/4,MPI_INTEGER,&
+  CALL MPI_GATHER(ITSIZE,2*KIND(ITSIZE)/4,MPI_INTEGER,&
                   IBOR,2*KIND(IBOR)/4,MPI_INTEGER,& 
-                  NCOMM,INFOMPI)
+                  NPIO,NCOMM,INFOMPI)
 #endif
 ELSE
   IBOR(:,0) = ITSIZE(:)
 ENDIF
-print*,'ibor1 ',IBOR(1,:),NRANK
-print*,'ibor2 ',IBOR(2,:),NRANK
 !
 !imask associated the number of the point to extrapolate to its real index in
 !the field
 ALLOCATE(IMASK(ITSIZE(1)))
 IMASK(:) = 0
 !
-ALLOCATE(IVAL_EXT(MAXVAL(IBOR(1,:)),MAXVAL(IBOR(2,:))))
 IF (NRANK==NPIO) THEN
-!  ALLOCATE(IVAL_EXT(MAXVAL(IBOR(1,:)),MAXVAL(IBOR(2,:))))
-  !ALLOCATE(IVAL_EXT(ITSIZE(1),ITSIZE(2)))
+  ALLOCATE(IVAL_EXT(MAXVAL(IBOR(1,:)),MAXVAL(IBOR(2,:))))
   ALLOCATE(ZCOOR   (MAXVAL(IBOR(1,:)),2))
 ELSE
-  !ALLOCATE(IVAL_EXT(ITSIZE(1),ITSIZE(2)))
+  ALLOCATE(IVAL_EXT(ITSIZE(1),ITSIZE(2)))
   ALLOCATE(ZCOOR(ITSIZE(1),2))
 ENDIF
 IVAL_EXT(:,:) = 0
@@ -271,7 +261,6 @@ DO JI=1,INO
           !ival_ext contains the indexes of the points needed to interpolate
           !in the complete grid
           IVAL_EXT(ICPT,ICOMPT) = JISC + JLON
-          if( icpt>size(ival_ext,1).or.icompt>size(ival_ext,2)) print*,icpt,icompt,'pb'
         ENDIF
       ENDDO
     ENDIF
@@ -289,16 +278,15 @@ IF (NRANK/=NPIO) THEN
   IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_2',0,ZHOOK_HANDLE)
 
   !if some points of this task need to be extrapolated
-print*,'sum(itsize) ',sum(itsize),nrank
   IF (SUM(ITSIZE)/=0) THEN
 
+    !zfield will contain the values of the field
+    ALLOCATE(ZFIELD(ITSIZE(1),INL))
 
     IDX_I = IDX_I + 1
     !sends indexes to npio
-#ifdef SFX_MPI   
-    print*,'send_ival_ext ',NRANK,shape(IVAL_EXT),size(IVAL_EXT),KIND(IVAL_EXT),NPIO,IDX_I 
+#ifdef SFX_MPI    
     CALL MPI_SEND(IVAL_EXT,SIZE(IVAL_EXT)*KIND(IVAL_EXT)/4,MPI_INTEGER,NPIO,IDX_I,NCOMM,INFOMPI)
-print*,'send_ival_ext ok ',NRANK
 #endif
 
     IDX_I = IDX_I + 1
@@ -306,9 +294,6 @@ print*,'send_ival_ext ok ',NRANK
 #ifdef SFX_MPI    
     CALL MPI_SEND(ZCOOR,SIZE(ZCOOR)*KIND(ZCOOR)/4,MPI_REAL,NPIO,IDX_I,NCOMM,INFOMPI)
 #endif
-
-    !zfield will contain the values of the field
-    ALLOCATE(ZFIELD(ITSIZE(1),INL))
 
     IDX_I = IDX_I + 1
     !receives values of the field from NPIO
@@ -329,141 +314,87 @@ print*,'send_ival_ext ok ',NRANK
 
 ELSE
 
+IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
+  DO JP = NPIO,NPROC-1+NPIO
 
-  IF (SUM(IBOR)/=0) THEN
-    !
-    ALLOCATE(ZFIELD(MAXVAL(IBOR(1,:)),INL))
-    print*,'ibor ',shape(ibor),shape(zfield),NRANK,NBLOCK
-    !
-    !ALLOCATE(IVAL_EXT2(ITSIZE(1),ITSIZE(2)))
-    ALLOCATE(ZCOOR2(ITSIZE(1),2))
-    !IVAL_EXT2(:,:) = IVAL_EXT(1:SIZE(IVAL_EXT2,1),1:SIZE(IVAL_EXT2,2))
-    ZCOOR2   (:,:) = ZCOOR(1:SIZE(ZCOOR2,1),1:SIZE(ZCOOR2,2))
-    !
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-    IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
-!$OMP DO SCHEDULE(DYNAMIC,1) &
-!$OMP PRIVATE(JP,JJ,JI,JL,ZNDIST,IDX,ZCOSLA,JISC,ID0,ITAB,&
-!$OMP         ZLONSC,ZDIST,ISTATUS,INFOMPI,ZCOOR,ZFIELD)
-DO JP = NPIO,NPROC-1+NPIO
+    J = JP
+    IF (JP>NPROC-1) J = JP-NPROC
 
-      ZFIELD(:,:) = XUNDEF
+    IF (SUM(IBOR(:,J))/=0) THEN
 
-    print*,'JP ',JP
-    JJ = JP
-print*,'JJ ',JJ
-    IF (JJ>NPROC-1) JJ = JP-NPROC
+      ALLOCATE(ZFIELD(IBOR(1,J),INL))
+      ZFIELD=XUNDEF
 
-    print*,'loop JP ',JJ,sum(IBOR(:,JJ))
-      IF (SUM(IBOR(:,JJ))/=0) THEN
-
-        !ALLOCATE(ITAB(IBOR(1,JJ),IBOR(2,JJ)))
-
-print*,'JJ/=NPIO',JJ
-        IF (JJ/=NPIO) THEN
-
+      IF (J/=NPIO) THEN
 
         !receives indexes and coordinaites
-#ifdef SFX_MPI       
-print*,'recv ival_ext' ,JJ,shape(ITAB),size(ITAB),KIND(ITAB),JJ,IDX_I+1
-          CALL MPI_RECV(IVAL_EXT, SIZE(IVAL_EXT)*KIND(IVAL_EXT)/4, &
-          !CALL MPI_RECV(ITAB, SIZE(ITAB)*KIND(ITAB)/4, &
-                          MPI_INTEGER, JJ, IDX_I+1, NCOMM, ISTATUS, INFOMPI)
-print*,'recv zcoor',JJ
-          CALL MPI_RECV(ZCOOR(1:IBOR(1,JJ),:), IBOR(1,JJ)*SIZE(ZCOOR,2)*KIND(ZCOOR)/4,&
-                          MPI_REAL, JJ, IDX_I+2, NCOMM, ISTATUS, INFOMPI)
-print*,'recv ok',JJ
-#endif
-          !IVAL_EXT(1:IBOR(1,JJ),1:IBOR(2,JJ)) = ITAB(:,:)
-  
-        ELSE
-    
-print*,'for NPIO == ',JJ
-          ! ITAB(:,:) = IVAL_EXT(:,:)
-          !IVAL_EXT(1:IBOR(1,JJ),1:IBOR(2,JJ)) = IVAL_EXT2(:,:)
-          ZCOOR(1:IBOR(1,JJ),:) = ZCOOR2(:,:)
-print*,'for NPIO == ok ',JJ
-
-        ENDIF
-    
-
-print*,'calculations',JJ
-        DO JL=1,INL
-          DO JI=1,IBOR(1,JJ)
-            ZNDIST = XUNDEF
-            IDX = IBOR(2,JJ)+1
-            ZCOSLA = COS(ZCOOR(JI,1)*ZRAD)
-            DO JISC = 1,IBOR(2,JJ)
-              !index in the whole grid of the point used to interpolate
-              ID0 = IVAL_EXT(JI,JISC)
-              !ID0 = ITAB(JI,JISC)
-              IF (ID0==0) EXIT
-              IF (PFIELD_IN(ID0,JL)/=XUNDEF) THEN
-                ZLONSC = ZLO(ID0)
-                IF (GLALO) THEN
-                  IF (ZLONSC-ZCOOR(JI,2)> 180.) ZLONSC = ZLONSC - 360.
-                  IF (ZLONSC-ZCOOR(JI,2)<-180.) ZLONSC = ZLONSC + 360.
-                  ZDIST = (ZLA(ID0)-ZCOOR(JI,1)) ** 2 + ((ZLONSC-ZCOOR(JI,2))*ZCOSLA) ** 2
-                ELSE
-                  ZDIST = (ZLA(ID0)-ZCOOR(JI,1)) ** 2 + (ZLONSC-ZCOOR(JI,2)) ** 2
-                END IF
-                IF (ZDIST<=ZNDIST) THEN
-                  ZFIELD(JI,JL) = PFIELD_IN(ID0,JL)
-                  ZNDIST = ZDIST
-                ENDIF
-              ENDIF
-            END DO   
-          ENDDO
-        ENDDO
-      
-        !DEALLOCATE(ITAB)
-
-print*,'end calculations ',JJ
-        IF (JJ/=NPIO) THEN
-          !send values found to extrapolate
 #ifdef SFX_MPI        
-print*,'send zfield ',JJ
-          CALL MPI_SEND(ZFIELD(1:IBOR(1,JJ),:),IBOR(1,JJ)*INL*KIND(ZFIELD)/4,MPI_REAL,JJ,IDX_I+3,NCOMM,INFOMPI)
-print*,'send zfield ok',JJ
+        CALL MPI_RECV(IVAL_EXT(1:IBOR(1,J),1:IBOR(2,J)), IBOR(1,J)*IBOR(2,J)*KIND(IVAL_EXT)/4, &
+                        MPI_INTEGER, J, IDX_I+1, NCOMM, ISTATUS, INFOMPI)
+        CALL MPI_RECV(ZCOOR(1:IBOR(1,J),:), IBOR(1,J)*SIZE(ZCOOR,2)*KIND(ZCOOR)/4,&
+                        MPI_REAL, J, IDX_I+2, NCOMM, ISTATUS, INFOMPI)
 #endif
-        ELSE
-print*,'for NPIO == pfield ',JJ
-          DO JI = 1,IBOR(1,JJ)
-            PFIELD(IMASK(JI),:) = ZFIELD(JI,:)
-          ENDDO
-print*,'end for NPIO == pfield ',JJ
-        ENDIF            
-        !
-print*,'endif1 ',JJ
+
       ENDIF
+    
+      DO JL=1,INL
+        DO JI=1,IBOR(1,J)
+          ZNDIST=XUNDEF
+          IDX = IBOR(2,J)+1
+          ZCOSLA=COS(ZCOOR(JI,1)*ZRAD)
+          DO JISC = 1,IBOR(2,J)
+            !index in the whole grid of the point used to interpolate
+            ID0 = IVAL_EXT(JI,JISC)
+            IF (ID0==0) EXIT
+            IF (PFIELD_IN(ID0,JL)/=XUNDEF) THEN
+              ZLONSC = ZLO(ID0)
+              IF (GLALO) THEN
+                IF (ZLONSC-ZCOOR(JI,2)> 180.) ZLONSC = ZLONSC - 360.
+                IF (ZLONSC-ZCOOR(JI,2)<-180.) ZLONSC = ZLONSC + 360.
+                ZDIST= (ZLA(ID0)-ZCOOR(JI,1)) ** 2 + ((ZLONSC-ZCOOR(JI,2))*ZCOSLA) ** 2
+              ELSE
+                ZDIST= (ZLA(ID0)-ZCOOR(JI,1)) ** 2 + (ZLONSC-ZCOOR(JI,2)) ** 2
+              END IF
+              IF (ZDIST<=ZNDIST) THEN
+                ZFIELD(JI,JL) = PFIELD_IN(ID0,JL)
+                ZNDIST = ZDIST
+              ENDIF
+            ENDIF
+          END DO   
+        ENDDO
+      ENDDO
       !
-print*,'endif2 ',JJ
-    ENDDO
-!$OMP END DO
-print*,'enddo ok ',NRANK
-    IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
+      IF (J/=NPIO) THEN
+        !send values found to extrapolate
+#ifdef SFX_MPI        
+        CALL MPI_SEND(ZFIELD,SIZE(ZFIELD)*KIND(ZFIELD)/4,MPI_REAL,J,IDX_I+3,NCOMM,INFOMPI)
+#endif
+      ELSE
+        DO JI = 1,IBOR(1,J)
+          PFIELD(IMASK(JI),:) = ZFIELD(JI,:)
+        ENDDO
+      ENDIF            
+      !
+      DEALLOCATE(ZFIELD)
+      !
+    ENDIF
     !
-!$OMP BARRIER
-    !
-    DEALLOCATE(ZFIELD)
-    DEALLOCATE(ZCOOR2)!,IVAL_EXT2)
-    !
-  ENDIF
+  ENDDO
+IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',1,ZHOOK_HANDLE_OMP)
+!
   !
-  print*,'endif3 ',NRANK
-  IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_32',0,ZHOOK_HANDLE)  
+IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_32',0,ZHOOK_HANDLE)  
   !
   IDX_I = IDX_I + 3
   !
-  IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_32',1,ZHOOK_HANDLE)  
+IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_32',1,ZHOOK_HANDLE)  
   !
 ENDIF
-print*,'endif 12 ',NRANK
 !
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_4',0,ZHOOK_HANDLE)  
 !
-DEALLOCATE(ZCOOR,IVAL_EXT)
+DEALLOCATE(ZCOOR)
+DEALLOCATE(IVAL_EXT)
 DEALLOCATE(IMASK)
 !
 IF (ALLOCATED(ZLA)) DEALLOCATE(ZLA)
