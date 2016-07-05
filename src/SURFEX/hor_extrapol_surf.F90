@@ -113,7 +113,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_1',0,ZHOOK_HANDLE)
 !
-print*,'hor_extrapol_surf in'
 INO = SIZE(PFIELD,1)
 INL = SIZE(PFIELD,2)
 !
