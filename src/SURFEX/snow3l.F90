@@ -2169,19 +2169,10 @@ ENDIF
 ! NOTE: evaluate this term assuming the snow layer
 ! can't exceed the freezing point as this adjustment
 ! is made in melting routine. Then must adjust temperature
-! to conserve energy.
-! NOTE: if MEB used, surface fluxes are imposed and a test semi-implicit
-! ground-snow flux has already been estimated and snow-free ground fluxes
-! are generally weaker (and snow fractions are generally set to go to unity
-! faster than for the composite soil-veg case), thus this correction
-! is not as essential and is off.
+! to conserve energy:
 !
-PGRNDFLUXO(:)          = ZDTERM(:,INLVLS)*(ZSNOWTEMP(:,INLVLS)         -PTG(:))
-IF(OMEB)THEN
-   PGRNDFLUX(:)        = PGRNDFLUXO(:) 
-ELSE
-   PGRNDFLUX(:)        = ZDTERM(:,INLVLS)*(MIN(XTT,ZSNOWTEMP(:,INLVLS))-PTG(:))
-ENDIF
+PGRNDFLUXO(:)       = ZDTERM(:,INLVLS)*(ZSNOWTEMP(:,INLVLS)         -PTG(:))
+PGRNDFLUX(:)        = ZDTERM(:,INLVLS)*(MIN(XTT,ZSNOWTEMP(:,INLVLS))-PTG(:))
 !
 ZSNOWTEMP(:,INLVLS) = ZSNOWTEMP(:,INLVLS) + (PGRNDFLUXO(:)-PGRNDFLUX(:))/ZCTERM(:,INLVLS)
 !

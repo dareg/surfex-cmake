@@ -129,7 +129,7 @@ LOGICAL, INTENT(IN)                 :: OGLACIER   ! True = Over permanent snow a
 !                                                     initialise WGI=WSAT,
 !                                                     Hsnow>=10m and allow 0.8<SNOALB<0.85
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                       ! 'OLD' = direct
 !                                                       ! 'NEW' = Taylor serie, order 1
 !
@@ -278,7 +278,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
 LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
+ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -306,7 +306,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD, & 
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
-                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK
+                                       ZSNOW_MASS_BUDGET
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
 !                                      ZRRSNOW      = rain rate over snow [kg/(m2 s)]
 !                                      ZSNOW        = snow depth (m) 
@@ -327,10 +327,6 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
 !                                                 to maintain an accurate water
 !                                                 balance [kg/(m2 s)]
 !                                      ZSNOW_MASS_BUDGET = snow water equivalent budget (kg/m2/s)
-!                                      ZWGHT        = MEB surface layer weight for distributing energy
-!                                                     between litter and ground layers for the case
-!                                                     of total ablation during a timestep (-).
-!                                      ZWORK        = local working variable (*)
 !
 !*      0.3    declarations of packed  variables
 !
@@ -368,8 +364,6 @@ ZSOILCOND(:)   = 0.0
 ZRRSNOW(:)     = 0.0
 ZSNOWFALL(:)   = 0.0
 ZSNOWABLAT_DELTA(:) = 0.0
-ZWGHT(:)       = 0.0
-ZWORK(:)       = 0.0
 PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 !
@@ -483,13 +477,12 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
 !
    IF(OMEB)THEN
-     ZPSN(:)   = 1.0
-     ZWGHT(:)  = PPSN(:)
+     ZPSN(:)=1.0
    ELSE
 !    To Conserve mass in ISBA without MEB, 
 !    EVAP must be weignted by the snow fraction
 !    in the calulation of THRUFAL
-     ZPSN(:)   = PPSN(:)
+     ZPSN(:)=PPSN(:)
    ENDIF
 !
    ZSNOWABLAT_DELTA(:) = 0.0
@@ -517,13 +510,9 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
                           - PHSNOW(:) - PLES3L(:) - PLEL3L(:)) + PGSFCSNOW(:)     &
                           - PSNOWHMASS(:)/PTSTEP 
       ZGRNDFLUXN(:)       = (ZSNOWH(:)+PSNOWHMASS(:))/PTSTEP + PGFLUXSNOW(:)
-      ZWORK(:)            = PTSTEP*ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      ZWGHT(:)            = ZWGHT(:)*PSOILHCAPZ(:,2)*PDZG(:,2)/(PSOILHCAPZ(:,1)*PDZG(:,1) + PSOILHCAPZ(:,2)*PDZG(:,2))
-      PTG(:,1)            = PTG(:,1) + ZWORK(:)*(1.-ZWGHT(:))*PCT(:)
-      PTG(:,2)            = PTG(:,2) + ZWORK(:)*    ZWGHT(:)/(PSOILHCAPZ(:,2)*PDZG(:,2))
-      ZWORK(:)            = ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      PDELHEATG(:)        = PDELHEATG(:)     + ZWORK(:)  
-      PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZWORK(:)  
+      PTG(:,1)            = PTG(:,1) + PTSTEP*PCT(:)*ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
+      PDELHEATG(:)        = PDELHEATG(:)     + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
+      PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
       PGRNDFLUX(:)        = ZGRNDFLUXN(:)
       PFLSN_COR(:)        = 0.0
      END WHERE
@@ -595,7 +584,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !================================================================
 SUBROUTINE CALL_MODEL(KSIZE1,KSIZE2,KSIZE3,KMASK)
