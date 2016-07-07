@@ -94,7 +94,7 @@ LOGICAL,              INTENT(OUT) :: OECOCLIMAP  ! flag to use ecoclimap
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-INTEGER :: ICPT1, ICPT2
+INTEGER :: ICPT1
 INTEGER :: IRESP
 INTEGER :: ILUOUT
 INTEGER :: INI     ! total 1D dimension (input grid)
@@ -203,24 +203,6 @@ DEALLOCATE(ZCOVER)
  CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
 !
 ALLOCATE(ZCOVER(IL,COUNT(U%LCOVER)))
-ICPT1 = 0
-ICPT2 = 0
-DO JCOVER = 1,JPCOVER
-  IF (U%LCOVER(JCOVER)) THEN
-    ICPT1 = ICPT1 + 1
-    IF (ALL(U%XCOVER(:,ICPT1)==0.)) THEN
-      U%LCOVER(JCOVER) = .FALSE.
-    ELSE
-      ICPT2 = ICPT2 + 1
-      ZCOVER(:,ICPT2) = U%XCOVER(:,ICPT1)
-    ENDIF
-  ENDIF
-ENDDO
-!
-DEALLOCATE(U%XCOVER)
-ALLOCATE(U%XCOVER(IL,ICPT2))
-U%XCOVER(:,:) = ZCOVER(:,1:ICPT2)
-DEALLOCATE(ZCOVER)
 !
 ALLOCATE(ZSEA2  (IL,1))
 ALLOCATE(ZNATURE2(IL,1))
@@ -268,9 +250,6 @@ DO JCOVER=1,SIZE(U%XCOVER,2)
   WHERE(ZSUM(:)/=0.)  U%XCOVER(:,JCOVER) = U%XCOVER(:,JCOVER)/ZSUM(:)
 END DO
 !
-DO JCOVER=1,SIZE(U%XCOVER,2)
-  IF (ALL(U%XCOVER(:,JCOVER)==0.)) U%LCOVER(JCOVER) = .FALSE.
-END DO
 !------------------------------------------------------------------------------
 !
 !*      6.     Fractions

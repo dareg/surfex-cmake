@@ -96,7 +96,7 @@ LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed b
 !
 LOGICAL :: LRM_RIVER   !delete inland river coverage. Default is false
 !
-INTEGER :: ISIZE_FULL, JI
+INTEGER :: ISIZE_FULL, JI, IDIM_FULL
 INTEGER :: ILUOUT ! logical unit of output listing file
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -135,6 +135,7 @@ ALLOCATE(YSC%UG%XJPDIR      (YSC%U%NSIZE_FULL))
  CALL PUT_PGD_GRID(YSC%UG%G%CGRID, YSC%U%NSIZE_FULL,YSC%UG%G%NGRID_PAR, YSC%UG%G%XGRID_PAR)
 !
 IF (HPROGRAM=='MESONH') THEN
+  IDIM_FULL = YSC%U%NDIM_FULL
   YSC%U%NDIM_FULL = NL
   NSIZE = NL
   ALLOCATE(NINDEX(NL))
@@ -234,6 +235,10 @@ ENDIF
 !            ---------------------------
 !
 IF (NRANK==NPIO) CALL WRITE_COVER_TEX_END(HPROGRAM)
+!
+IF (HPROGRAM=='MESONH') THEN
+ YSC%U%NDIM_FULL = IDIM_FULL
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',1,ZHOOK_HANDLE)
 !_______________________________________________________________________________

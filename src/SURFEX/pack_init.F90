@@ -105,11 +105,6 @@ IF (LHOOK) CALL DR_HOOK('PACK_INIT',0,ZHOOK_HANDLE)
 !             ----------------------------
 !
  CALL GET_TYPE_DIM_n(DTCO,U,HSURF,IL)
-IF (IL==0) THEN
-  ALLOCATE(PCOVER(0,0))
-  IF (LHOOK) CALL DR_HOOK('PACK_INIT',1,ZHOOK_HANDLE)
-  RETURN
-ENDIF
 !
 ALLOCATE(IMASK(IL))
 ILU=0
@@ -121,6 +116,12 @@ ILU=0
 !             ---------------
 !
  CALL PACK_GRID(IMASK,UG%G%CGRID,G%CGRID,UG%G%XGRID_PAR,G%XGRID_PAR)
+!
+IF (IL==0) THEN
+  ALLOCATE(PCOVER(0,0))
+  IF (LHOOK) CALL DR_HOOK('PACK_INIT',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
@@ -144,7 +145,6 @@ DO JCOVER=1,COUNT(GCOVER)
   CALL GET_COVER_n(U,HPROGRAM,JCOVER,ZCOVER)
   CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
 ENDDO
-
  CALL GET_ZS_n(U,HPROGRAM,U%NSIZE_FULL,ZZS)
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
