@@ -38,7 +38,12 @@ IMPLICIT NONE
 LOGICAL    :: LNOWRITE_CANOPY  ! flag used to avoid writing of canopy fields in OUTPUT file
 LOGICAL    :: LNOWRITE_TEXFILE ! flag used to avoid writing of tex file describing parameters
 !
-LOGICAL :: LNAM_WRITTEN = .TRUE.
+LOGICAL :: LNAM_ATM_WRITTEN = .TRUE.
+LOGICAL :: LNAM_FLAKE_WRITTEN = .TRUE.
+LOGICAL :: LNAM_ISBA_WRITTEN = .TRUE.
+LOGICAL :: LNAM_SEAFLUX_WRITTEN = .TRUE.
+LOGICAL :: LNAM_TEB_WRITTEN = .TRUE.
+LOGICAL :: LNAM_WATFLUX_WRITTEN = .TRUE.
 !-----------------------------------------------------------------------------------------------------
 !
 END MODULE MODD_WRITE_SURF_ATM
