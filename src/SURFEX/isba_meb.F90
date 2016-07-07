@@ -100,7 +100,7 @@
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_CSTS,           ONLY : XCPD, XDAY, XRHOLW 
+USE MODD_CSTS,           ONLY : XCPD, XDAY, XRHOLW, XLVTT, XLSTT 
 USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 USE MODD_ISBA_PAR,       ONLY : XRS_MAX 
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
@@ -562,6 +562,7 @@ REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWHCAP            ! sno
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWRHO             ! snow layer density (kg/m3)
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWAGE             ! snow layer grain age
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWSWE             ! snow layer liquid water equivalent (kg/m2)
+REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWLIQ             ! snow layer liquid water (m)
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZTAU_N               ! snow rad transmission coef at layer base (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZALBG                ! Effective ground albedo
@@ -689,6 +690,9 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZLAI                 ! Pot
 REAL, DIMENSION(SIZE(PPS))                         :: ZALBVIS_TSOIL        ! average snow-free ground VIS albedo (soil plus flooded fraction) 
 REAL, DIMENSION(SIZE(PPS))                         :: ZALBNIR_TSOIL        ! average snow-free ground NIR albedo (soil plus flooded fraction)
 REAL, DIMENSION(SIZE(PPS))                         :: ZSWNET_S             ! Net SW radiation at the surface (below canopy snow/ground/flooded zone)
+REAL, DIMENSION(SIZE(PPS))                         :: ZLTT                 ! Average latent heat (normalization factor) (J/kg)
+REAL, DIMENSION(SIZE(PPS))                         :: ZLSTTC               ! Working coefficient to compute ZLTT: frozen part (-)
+REAL, DIMENSION(SIZE(PPS))                         :: ZLVTTC               ! Working coefficient to compute ZLTT: non-frozen part (-)
 !
 !
 ! - CPHOTO/=NON (Ags Option(s)):
@@ -733,7 +737,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 INTEGER :: INI, INL, JJ, JL
 REAL, DIMENSION(SIZE(PWR))         :: ZPHASEL  ! Phase changement in litter (W/m2)
 REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC
-REAL, DIMENSION(SIZE(PFROZEN1))     :: ZFROZEN1SFC
+REAL, DIMENSION(SIZE(PWR))         :: ZFROZEN1SFC
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -802,8 +806,8 @@ ZSNOWRHO(:,:)    = PSNOWRHO(:,:)
 ZSNOWAGE(:,:)    = PSNOWAGE(:,:)
 ZSNOWSWE(:,:)    = PSNOWSWE(:,:)
 !
- CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                     &
-        PLAI,ZSNOWRHO,ZSNOWSWE,PSNOWHEAT,                            &
+ CALL PREPS_FOR_MEB_EBUD_RAD(PPS,                                    &
+        PLAI,ZSNOWRHO,ZSNOWSWE,PSNOWHEAT,ZSNOWLIQ,                   &
         PSNOWTEMP,PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,PEMISNOW,              &
         ZSIGMA_F,ZCHIP,                                              &
         PTSTEP,PSR,PTA,PVMOD,ZSNOWAGE,ZPERMSNOWFRAC                  )
@@ -978,6 +982,20 @@ ZTHRMA_TV(:)    =  ZWORK(:)
 ZTHRMB_TV(:)    =  0.0
 !
 !
+! Compute the average latent heat (normalization factor) (J kg-1):
+! NOTE that we could use a function which depends on the different resistances,
+! but this can make the average latent heat relatively noisy(leading to a slightly less
+! tightly closed budgets owing to numerical noise): here we opt for a more
+! temporally smooth approximation based on fractional coverage:
+!
+ZLVTTC(:) = ( ZSIGMA_F(:)*(1.-ZPSNCV(:)) + (1.0-PPSN(:)-PFF(:))*(1.0-ZFROZEN1SFC(:))           )* &
+            (1.0 - PPSN(:)*PPALPHAN(:)) 
+ZLSTTC(:) = ( ZSIGMA_F(:)*    ZPSNCV(:)  + (1.0-PPSN(:)-PFF(:))*     ZFROZEN1SFC(:)  + PPSN(:) )* &
+            (1.0 - PPSN(:)*PPALPHAN(:)) + PPSN(:)*PPALPHAN(:)
+ZLTT(:)   = (ZLVTTC(:)*XLVTT + ZLSTTC(:)*XLSTT)/MAX(1.E-12, ZLVTTC(:) + ZLSTTC(:))
+ZLTT(:)   = MIN(XLSTT, MAX(ZLTT(:), XLVTT)) ! numerical check
+!
+!
 ! Possibly split time step if large: 
 ! Although the energy budget is fully implicit, a very small canopy heat capacity 
 ! (and neglect of canopy air space heat capacity) can possibly lead to
@@ -1039,9 +1057,9 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !              ----------------------------------------
 !
    CALL E_BUDGET_MEB(HISBA,HCPSURF,ZTSTEP,                                             &
-              PPS,PCG,ZCTSFC,PCV,PWRVN,PWR,                                            &
+              ZLTT,PPS,PCG,ZCTSFC,PCV,PWRVN,PWR,                                       &
               PTDEEP_A,PTDEEP_B,ZD_G,ZSOILCONDZ,ZSOILHCAPZ,                            &
-              PSNOWDZ,ZSNOWCOND,ZSNOWHCAP,                                             &
+              PSNOWDZ,ZSNOWRHO,ZSNOWCOND,ZSNOWHCAP,                                    &
               PSWNET_V,PSWNET_G,PSWNET_NS,ZTAU_N,                                      &
               PLWNET_V,PLWNET_G,PLWNET_N,                                              &
               ZDLWNET_V_DTV,ZDLWNET_V_DTG,ZDLWNET_V_DTN,                               &
@@ -1056,7 +1074,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               ZLEG_DELTA,ZLEGI_DELTA,PHUG,ZHUGI,ZHVG,ZHVN,ZFROZEN1SFC,                 &
               ZFLXC_C_A,ZFLXC_G_C,ZFLXC_VG_C,ZFLXC_VN_C,ZFLXC_N_C,ZFLXC_N_A,           &
               ZFLXC_MOM,                                                               &
-              ZTGL,PTV,PSNOWTEMP,                                                      &
+              ZTGL,PTV,PSNOWTEMP,ZSNOWLIQ,                                             &
               ZFLXC_V_C,ZHVGS,ZHVNS,                                                   &
               ZDQSAT_G,ZDQSAT_V,ZDQSATI_N,                                             &
               PTC,PQC,ZTA_IC,ZQA_IC,ZUSTAR2_IC,ZVMOD,                                  &
@@ -1068,7 +1086,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !              -------------------------------------------------------------------
 !
    CALL ISBA_FLUXES_MEB(PRHOA,                                                         &
-              ZSIGMA_F,ZSIGMA_FN,PEMISNOW,                                             &
+              ZLTT,ZSIGMA_F,ZSIGMA_FN,PEMISNOW,                                        &
               ZRNET_V,ZRNET_G,PRNSNOW,                                                 & 
               PSWNET_V,PSWNET_G,PSWNET_N,                                              &
               PLWNET_V,PLWNET_G,PLWNET_N,                                              &
@@ -1095,7 +1113,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
               PEVAP,PSUBL,PLETR_V_C,PLER_V_C,ZLESFC,ZLESFCI,                           &
               PLE_FLOOD,PLEI_FLOOD,ZLES3L,ZLEL3L,                                      &
               ZEVAP3L,PLES_V_C,PLETR,PLER,PLEV,PLE,PLEI,                               &
-              PTS_RAD,PEMIST,PLSTT                                                     )
+              PTS_RAD,PEMIST                                                           )
 !
 ! Compute aggregated coefficients for evaporation
 ! Sum(LEC+LES+LEL) = ACagg * Lv * RHOA * (HUagg.Qsat - Qa)
@@ -1155,7 +1173,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
 ! snowpack and part falling onto snow-free understory.
 !
 !
- CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
+CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
         ZRR, PLEV_V_C, PLETR_V_C, ZVEGFACT, ZPSNCV,      &
         PWR, ZWRMAX, ZRRSFC, PDRIP, PRRVEG, PLVTT        )
 !
@@ -1184,7 +1202,9 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PPSN(:))
            OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
            HSNOWMETAMO, HSNOWRAD                                                       )  
 !
-! If a litter layer exists, compute hydrology:
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!*      11.0    Litter layer hydrology:
+!               -----------------------
 !
 IF(OMEB_LITTER)THEN
 !
@@ -1207,21 +1227,23 @@ ELSE
 !
 ENDIF
 !
-!*      11.0    Separate litter and soil temperature
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+!*      12.0    Separate litter and soil temperature
 !              ------------------------------------
 !
 
- CALL RESHIFT_MEB_SOIL(OMEB_LITTER,ZTGL,PTL,PTG,ZLESFC,ZLESFCI,           &
+CALL RESHIFT_MEB_SOIL(OMEB_LITTER,ZTGL,PTL,PTG,ZLESFC,ZLESFCI,           &
                             PLEG,PLEGI,PLELITTER,PLELITTERI)              
 !
 !
+CALL DEALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-!
- CALL DEALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
-!
+!*      13.0    Ice litter effect
+!              ------------------
 IF(OMEB_LITTER)THEN
 !
- CALL ICE_LITTER(PTSTEP, PLELITTERI,                  &
+   CALL ICE_LITTER(PTSTEP, PLELITTERI,               &
                 PSOILHCAPZ,                          &
                 PTG, PTL, PWGI, PWG, KWG_LAYER,      &
                 PDZG,PWRL,PWRLI,PGNDLITTER,ZPHASEL,  &
@@ -1931,7 +1953,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      0.3    declarations of local parameters
 !
 REAL, PARAMETER                       :: Z1 = 45.0       !litter bulk density (kg/m3)
-REAL, PARAMETER                       :: Z2 = 0.1        !coeff for litter conductivity (K/m)
+REAL, PARAMETER                       :: Z2 = 0.1        !coeff for litter conductivity (W/(mK))
 REAL, PARAMETER                       :: Z3 = 0.03       !coeff for litter conductivity
 REAL, PARAMETER                       :: Z4 = 0.95       !litter porosity       (m3/m3)
 REAL, PARAMETER                       :: Z5 = 0.12       !litter field capacity (m3/m3)
@@ -2120,7 +2142,7 @@ PWRLI(:)= ZWRLI(:) * PGNDLITTER(:) * XRHOLW
 !    -----------------------------------------
 !
 !
-ZELITTERI(:) = PLELITTERI(:) * (PTSTEP/PLSTT)
+ZELITTERI(:) = PLELITTERI(:) * (PTSTEP/PLSTT(:))
 ZEXCESS(:)   = MAX( 0.0 , ZELITTERI(:) - PWRLI(:) )
 PLITCOR=ZEXCESS/PTSTEP
 PWRLI  (:)   = PWRLI(:) - ( ZELITTERI(:) - ZEXCESS(:) )

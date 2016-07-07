@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !   ############################################################################
 SUBROUTINE PREPS_FOR_MEB_EBUD_RAD(PPS,                                         &
-     PLAICV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                                       &
+     PLAICV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,PSNOWLIQ,                              &
      PSNOWTEMP,PSNOWDZ,PSCOND,PHEATCAPS,PEMISNOW,PSIGMA_F,PCHIP,               &
      PTSTEP,PSR,PTA,PVMOD,PSNOWAGE,PPERMSNOWFRAC                               )
 !   ############################################################################
@@ -82,14 +82,14 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE, PSNOWAGE, PSNOWRHO
 
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSIGMA_F, PCHIP
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEMISNOW
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ, PSCOND, PHEATCAPS, PSNOWTEMP
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ, PSCOND, PHEATCAPS, PSNOWTEMP, PSNOWLIQ
 !
 !
 !*      0.2    declarations of local variables
 !
 INTEGER                                            :: JI, JK
 REAL, DIMENSION(SIZE(PLAICV,1))                    :: ZPSNA
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWLIQ, ZSNOWHEAT, ZSNOWDZN
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEAT, ZSNOWDZN
 REAL, DIMENSION(SIZE(PTA))                         :: ZSNOW, ZSNOWHMASS
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -140,7 +140,7 @@ PHEATCAPS(:,:)   = SNOW3LSCAP(PSNOWRHO)                    ! J m-3 K-1
 PSNOWTEMP(:,:)   = XTT + ( ((ZSNOWHEAT(:,:)/MAX(1.E-10,PSNOWDZ(:,:)))  &
                    + XLMTT*PSNOWRHO(:,:))/PHEATCAPS(:,:) )  
 !
-ZSNOWLIQ(:,:)    = MAX(0.0,PSNOWTEMP(:,:)-XTT)*PHEATCAPS(:,:)*         &
+PSNOWLIQ(:,:)    = MAX(0.0,PSNOWTEMP(:,:)-XTT)*PHEATCAPS(:,:)*         &
                    PSNOWDZ(:,:)/(XLMTT*XRHOLW) 
 
 PSNOWTEMP(:,:)   = MIN(XTT,PSNOWTEMP(:,:))
@@ -149,7 +149,7 @@ PSNOWTEMP(:,:)   = MIN(XTT,PSNOWTEMP(:,:))
 
 PSNOWSWE(:,:)  = PSNOWDZ(:,:)*PSNOWRHO(:,:)             
 
- CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,PSNOWTEMP,ZSNOW,ZSNOWLIQ)
+ CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,PSNOWTEMP,ZSNOW,PSNOWLIQ)
 
 ! Snow thermal conductivity:
 !

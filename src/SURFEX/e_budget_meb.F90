@@ -4,9 +4,9 @@
 !SFX_LIC for details. version 1.
 !     ##########################################################################
       SUBROUTINE E_BUDGET_MEB(HISBA,HCPSURF,PTSTEP,                                           &
-           PPS,PCG,PCT,PCV,PWRVN,PWR,                                                         &
+           PLTT,PPS,PCG,PCT,PCV,PWRVN,PWR,                                                    &
            PTDEEP_A,PTDEEP_B,PD_G,PSOILCONDZ,PSOILHCAPZ,                                      &  
-           PSNOWDZ,PSNOWCONDZ,PSNOWHCAPZ,                                                     &  
+           PSNOWDZ,PSNOWRHO,PSNOWCONDZ,PSNOWHCAPZ,                                            &  
            PSWNET_V,PSWNET_G,PSWNET_N,PTAU_N,                                                 &
            PLWNET_V,PLWNET_G,PLWNET_N,                                                        &
            PLWNET_V_DTV,PLWNET_V_DTG,PLWNET_V_DTN,                                            &
@@ -21,7 +21,7 @@
            PLEG_DELTA,PLEGI_DELTA,PHUG,PHUGI,PHVG,PHVN,PFROZEN1,                              &
            PFLXC_C_A,PFLXC_G_C,PFLXC_VG_C,PFLXC_VN_C,PFLXC_N_C,PFLXC_N_A,                     &
            PFLXC_MOM,                                                                         &
-           PTG,PTV,PTN,                                                                       &
+           PTG,PTV,PTN,PSNOWLIQ,                                                              &
            PFLXC_V_C,PHVGS,PHVNS,                                                             & 
            PDQSAT_G,PDQSAT_V,PDQSATI_N,                                                       & 
            PTC,PQC,PTA_IC,PQA_IC,PUSTAR2_IC,PVMOD,                                            &
@@ -92,13 +92,14 @@
 !               ------------
 !
 USE MODD_CSTS,                    ONLY : XLVTT, XLSTT, XTT, XCPD, XCPV, XCL, &
-                                         XDAY, XPI
+                                         XDAY, XPI, XLMTT, XRHOLW
 USE MODD_SURF_ATM,                ONLY : LCPL_ARP
 USE MODD_SURF_PAR,                ONLY : XUNDEF
 USE MODD_SNOW_METAMO,             ONLY : XSNOWDZMIN
 !
 USE MODE_THERMOS
 USE MODE_MEB,                     ONLY : SFC_HEATCAP_VEG
+USE MODE_SNOW3L,                  ONLY : SNOW3LHOLD
 !
 USE MODI_TRIDIAG_GROUND_RM_COEFS
 USE MODI_TRIDIAG_GROUND_RM_SOLN
@@ -149,10 +150,11 @@ REAL, DIMENSION(:,:), INTENT(IN)   :: PD_G, PSOILCONDZ, PSOILHCAPZ
 !                                     PSOILCONDZ = soil thermal conductivity (W m-1 K-1)
 !                                     PSOILHCAPZ = soil heat capacity        (J m-3 K-1)
 !
-REAL, DIMENSION(:,:), INTENT(IN)   :: PSNOWDZ, PSNOWCONDZ, PSNOWHCAPZ
+REAL, DIMENSION(:,:), INTENT(IN)   :: PSNOWDZ, PSNOWCONDZ, PSNOWHCAPZ, PSNOWRHO
 !                                     PSNOWDZ    = snow layer thickness      (m)
 !                                     PSNOWCONDZ = snow thermal conductivity (W m-1 K-1)
 !                                     PSNOWHCAPZ = snow heat capacity        (J m-3 K-1)
+!                                     PSNOWRHO   = snow layer density        (kg/m3)
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PSWNET_V, PSWNET_G, PSWNET_N
 !                                     PSWNET_G = Understory-ground net SW radiation explicit term (W m-2)
@@ -238,8 +240,12 @@ REAL, DIMENSION(:),   INTENT(IN)   :: PFLXC_C_A, PFLXC_G_C, PFLXC_VG_C, PFLXC_VN
 !                                     PFLXC_N_A  = As above, but for : ground-based snow to canopy air           (kg m-2 s-1)
 !                                     PFLXC_MOM  = flux form drag transfer coefficient: canopy air to atmosphere (kg m-2 s-1)
 !
-REAL, DIMENSION(:,:), INTENT(INOUT):: PTN
-!                                     PTN    = Ground-based snow temperature profile (K)
+REAL, DIMENSION(:),   INTENT(IN)   :: PLTT
+!                                     PLTT    = latent heat normalization factor (J kg-1)
+!
+REAL, DIMENSION(:,:), INTENT(INOUT):: PTN, PSNOWLIQ
+!                                     PTN      = Ground-based snow temperature profile (K)
+!                                     PSNOWLIQ = Snow layer liquid water content       (m)
 !
 REAL, DIMENSION(:),   INTENT(INOUT):: PTV
 !                                     PTV    = Vegetation canopy temperature (K)
@@ -309,15 +315,13 @@ REAL, DIMENSION(:),  INTENT(OUT)   :: PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG
 !
 INTEGER                                   :: JNSNOW, JNGRND, JNPTS, JJ, JK, JL
 !
-REAL                                      :: ZHNS
-!
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))  :: ZTGO
 !
 REAL, DIMENSION(SIZE(PTN,1),SIZE(PTN,2))  :: ZTNO
 !
 REAL, DIMENSION(SIZE(PTG,1))              :: ZTVO
 !
-REAL, DIMENSION(SIZE(PPS))                :: ZHN, ZHS, ZHVS
+REAL, DIMENSION(SIZE(PPS))                :: ZHN, ZHS, ZHVS, ZHNS
 !
 REAL, DIMENSION(SIZE(PPS))                :: ZPSNAG, ZWORK, ZFFF, ZGCOND1
 !
@@ -341,7 +345,9 @@ REAL, DIMENSION(SIZE(PPS))                :: ZTCONDA_DELZ_G, ZTCONDA_DELZ_N, ZTC
 !
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2))  :: ZSOIL_COEF_A, ZSOIL_COEF_B
 !
-REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)):: ZSNOW_COEF_A, ZSNOW_COEF_B, ZSNOWDZ
+REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)):: ZSNOW_COEF_A, ZSNOW_COEF_B
+!
+REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)):: ZWHOLDMAX
 !
 REAL, DIMENSION(SIZE(PD_G,1),SIZE(PD_G,2)+SIZE(PSNOWDZ,2)) :: ZD, ZT, ZHCAPZ, ZCONDZ,         &
                                              ZCOEF_A, ZCOEF_B, ZSOURCE
@@ -367,8 +373,6 @@ ZTVO(:)   = PTV(:)
 ! limit the value for certain computations:
 
 ZPSNA(:)  = MIN(1.0-ZERTOL, PPSNA(:))
-
-ZSNOWDZ(:,:) = 0.0 ! local working variable
 
 JNSNOW       = SIZE(PTN,2)
 JNGRND       = SIZE(PTG,2)
@@ -466,11 +470,8 @@ IF(HISBA == 'DIF')THEN
 ! so it is more accurate as the snow fraction approaches unity.
 ! Starting from snowpack surface downward to base of ground:
 !
-   ZSNOWDZ(:,:)           = MAX(XSNOWDZMIN, PSNOWDZ(:,:))
-!
-
    JL                     = 1
-   ZD(:,JL)               = ZSNOWDZ(:,1)
+   ZD(:,JL)               = PSNOWDZ(:,1)
    ZT(:,JL)               = ZTNO(:,1)
    ZHCAPZ(:,JL)           = PSNOWHCAPZ(:,1)
    ZCONDZ(:,JL)           = PSNOWCONDZ(:,1)
@@ -478,7 +479,7 @@ IF(HISBA == 'DIF')THEN
    DO JK=2,JNSNOW
       JL                  = JL + 1
       DO JJ=1,JNPTS
-         ZD(JJ,JL)        = ZSNOWDZ(JJ,JK)
+         ZD(JJ,JL)        = ZD(JJ,JL-1) + PSNOWDZ(JJ,JK)
          ZT(JJ,JL)        = ZTNO(JJ,JK)
          ZHCAPZ(JJ,JL)    = PSNOWHCAPZ(JJ,JK)
          ZCONDZ(JJ,JL)    = PSNOWCONDZ(JJ,JK)
@@ -528,7 +529,7 @@ ELSE
 
 
    JL                    = 1
-   ZD(:,JL)              = ZSNOWDZ(:,1)
+   ZD(:,JL)              = PSNOWDZ(:,1)
    ZT(:,JL)              = ZTNO(:,1)
    ZHCAPZ(:,JL)          = PSNOWHCAPZ(:,1)
    ZCONDZ(:,JL)          = PSNOWCONDZ(:,1)
@@ -536,7 +537,7 @@ ELSE
    DO JK=2,JNSNOW
       JL                 = JL + 1
       DO JJ=1,JNPTS
-         ZD(JJ,JL)       = ZSNOWDZ(JJ,JK)
+         ZD(JJ,JL)       = ZD(JJ,JL-1) + PSNOWDZ(JJ,JK)
          ZT(JJ,JL)       = ZTNO(JJ,JK)
          ZHCAPZ(JJ,JL)   = PSNOWHCAPZ(JJ,JK)
          ZCONDZ(JJ,JL)   = PSNOWCONDZ(JJ,JK)
@@ -563,29 +564,31 @@ ENDIF
 !
 ! Interfacial ground-snowbase thermal conductivity divided by interfacial dz:
 !
-ZTCONDA_DELZ_NG(:) = 2/((ZSNOWDZ(:,JNSNOW)/PSNOWCONDZ(:,JNSNOW))+(PD_G(:,1)/ZGCOND1(:) ))
+ZTCONDA_DELZ_NG(:) = 2/((PSNOWDZ(:,JNSNOW)/PSNOWCONDZ(:,JNSNOW))+(PD_G(:,1)/ZGCOND1(:) ))
 !
 !
-!*       3.     Pseudo humidity factors (-)
+!*       3.     Pseudo humidity factors (-) and effective latent heat (J kg-1) 
 !               ---------------------------------------------------------
 !
-! First, compute the average flux heat exchange coefficient for the canopy: (kg m-2 s-1)
+! Compute the average flux heat exchange coefficient for the canopy: (kg m-2 s-1)
 ! Numerical: let get very small (fluxes can become essentially negligible), but not zero
 !
 PFLXC_V_C(:)   = PFLXC_VG_C(:)*(1.-PPSN(:)) + PFLXC_VN_C(:)*PPSN(:)*(1.-ZPSNA(:))
 PFLXC_V_C(:)   = MAX(PFLXC_V_C(:), ZERTOL_FLX_C)
-
+!
+!
 ! Understory vegetation and ground factors:
 
-ZFFF(:)        = PFF(:)*( 1.0 - PFFROZEN(:)*(1.0 - (XLSTT/XLVTT)) )
+ZFFF(:)        = PFF(:)*( (1.0 - PFFROZEN(:))*(XLVTT/PLTT(:)) +                        &
+                                 PFFROZEN(:) *(XLSTT/PLTT(:)) )
  
-ZHN(:)         = (1.0-PPSN(:)-ZFFF(:))*(                                             &
-                            PLEG_DELTA(:) *(1.0-PFROZEN1(:))                         &
-                 +          PLEGI_DELTA(:)*     PFROZEN1(:)*(XLSTT/XLVTT) ) + ZFFF(:)         
+ZHN(:)         = (1.0-PPSN(:)-PFF(:))*(                                                &
+                            PLEG_DELTA(:) *(1.0-PFROZEN1(:))*(XLVTT/PLTT(:))           &
+                 +          PLEGI_DELTA(:)*     PFROZEN1(:) *(XLSTT/PLTT(:)) ) + ZFFF(:)         
 
-ZHS(:)         = (1.0-PPSN(:)-ZFFF(:))*(                                             &
-                   PHUG(:) *PLEG_DELTA(:) *(1.0-PFROZEN1(:))                         &
-                 + PHUGI(:)*PLEGI_DELTA(:)*     PFROZEN1(:)*(XLSTT/XLVTT) ) + ZFFF(:)
+ZHS(:)         = (1.0-PPSN(:)-PFF(:))*(                                                &
+                   PHUG(:) *PLEG_DELTA(:) *(1.0-PFROZEN1(:))*(XLVTT/PLTT(:))           &
+                 + PHUGI(:)*PLEGI_DELTA(:)*     PFROZEN1(:) *(XLSTT/PLTT(:)) ) + ZFFF(:)
 
 ! adjust for local use in solution (since they are multiplied by 1-psn herein):
 
@@ -593,23 +596,24 @@ ZHN(:)         = ZHN(:)/MAX(1.0 - PPSN(:) , ZERTOL)
 
 ZHS(:)         = ZHS(:)/MAX(1.0 - PPSN(:) , ZERTOL)
 
-! Vegetation canopy factor:
+! Vegetation canopy factors:
 
 PHVGS(:)       = (1.-ZPSNA(:))*PPSN(:) *PHVN(:)*(PFLXC_VN_C(:)/PFLXC_V_C(:)) + &
                            (1.-PPSN(:))*PHVG(:)*(PFLXC_VG_C(:)/PFLXC_V_C(:))
-
+!
 PHVNS(:)       = (1.-ZPSNA(:))*PPSN(:) *        (PFLXC_VN_C(:)/PFLXC_V_C(:)) + &
                            (1.-PPSN(:))*        (PFLXC_VG_C(:)/PFLXC_V_C(:))
 
 ! - total canopy H factor (including intercepted snow)
 
-ZHVS(:)        = (1.-PPSNCV(:))*PHVGS(:) + PPSNCV(:)*(XLSTT/XLVTT)*PHVNS(:)   
+ZHVS(:)        = (1.-PPSNCV(:))*(XLVTT/PLTT(:))*PHVGS(:) +                     &
+                     PPSNCV(:) *(XLSTT/PLTT(:))*PHVNS(:)   
 
 ! Snow latent heating factor:
 ! NOTE, for now we consider only snow sublimation 
 !       (not evaporation from snow liquid)
 !
-ZHNS           = (XLSTT/XLVTT)
+ZHNS(:)           = XLSTT/PLTT(:)
 !
 !
 !*       4.     Transform atmospheric coupling coefficients for T and q
@@ -635,10 +639,10 @@ ZPET_C_COEF_P(:)  =   PPET_A_COEF(:)*PFLXC_N_A(:)*PPSN(:)*PPSNA(:)*PTHRMA_TN(:) 
 ! q coefficients:
 
 ZWORK(:)          = 1.0 + PPEQ_A_COEF(:)*(PFLXC_C_A(:)*ZPSNAG(:) +                               &
-                                          PFLXC_N_A(:)*PPSN(:)*PPSNA(:)*ZHNS)
-ZPEQ_A_COEF_P(:)  = PPEQ_A_COEF(:)*PFLXC_C_A(:)*ZPSNAG(:)            /ZWORK(:)
-ZPEQ_B_COEF_P(:)  = PPEQ_B_COEF(:)                                   /ZWORK(:)
-ZPEQ_C_COEF_P(:)  = PPEQ_A_COEF(:)*PFLXC_N_A(:)*PPSN(:)*PPSNA(:)*ZHNS/ZWORK(:)
+                                          PFLXC_N_A(:)*PPSN(:)*PPSNA(:)*ZHNS(:))
+ZPEQ_A_COEF_P(:)  = PPEQ_A_COEF(:)*PFLXC_C_A(:)*ZPSNAG(:)               /ZWORK(:)
+ZPEQ_B_COEF_P(:)  = PPEQ_B_COEF(:)                                      /ZWORK(:)
+ZPEQ_C_COEF_P(:)  = PPEQ_A_COEF(:)*PFLXC_N_A(:)*PPSN(:)*PPSNA(:)*ZHNS(:)/ZWORK(:)
 
 
 !*       5.     Compute canopy air coefficients (T and q)
@@ -671,13 +675,13 @@ ZCOEFD_TC(:) =(PFLXC_N_C(:)*PTHRMA_TN(:)*          PPSN(:)*(1.0-PPSNA(:)) +     
 ZWORK(:)       = PFLXC_C_A(:) *(1.-ZPEQ_A_COEF_P(:))*ZPSNAG(:)                                      &
                    + PFLXC_V_C(:)* ZHVS(:)                                                          &
                    + PFLXC_G_C(:) *ZHN(:) *(1.0-PPSN(:))                                            &
-                   + PFLXC_N_C(:) *ZHNS   *     PPSN(:) *(1.0-PPSNA(:))
+                   + PFLXC_N_C(:) *ZHNS(:)*     PPSN(:) *(1.0-PPSNA(:))
 ZWORK(:)       = MAX(ZERTOL, ZWORK(:))
 
 ZCOEFA_QC(:)   = ( PFLXC_C_A(:) *ZPEQ_B_COEF_P(:)*ZPSNAG(:)                                         &
                  + PFLXC_V_C(:) *ZHVS(:)*(PQSAT_V(:)-PDQSAT_V(:)*ZTVO(:)  )                         &
                  + PFLXC_G_C(:) *ZHS(:) *(PQSAT_G(:)-PDQSAT_G(:)*ZTGO(:,1))*(1.0-PPSN(:))           &
-                 + PFLXC_N_C(:) *ZHNS   *(PQSATI_N(:)-PDQSATI_N(:)*ZTNO(:,1))*                      &
+                 + PFLXC_N_C(:) *ZHNS(:)*(PQSATI_N(:)-PDQSATI_N(:)*ZTNO(:,1))*                      &
                                                                       PPSN(:)*(1.0-PPSNA(:))        &
                                                                                 )/ZWORK(:) 
 
@@ -685,7 +689,7 @@ ZCOEFB_QC(:)   = PFLXC_V_C(:) *ZHVS(:)*PDQSAT_V(:)                            /Z
 
 ZCOEFC_QC(:)   = PFLXC_G_C(:) *ZHS(:) *PDQSAT_G(:)*(1.0-PPSN(:))              /ZWORK(:)
 
-ZCOEFD_QC(:)   = PFLXC_N_C(:) *ZHNS   *PDQSATI_N(:)*     PPSN(:)*(1.0-PPSNA(:))/ZWORK(:)
+ZCOEFD_QC(:)   = PFLXC_N_C(:) *ZHNS(:)*PDQSATI_N(:)*     PPSN(:)*(1.0-PPSNA(:))/ZWORK(:)
 
 !*       6.     Surface Energy Budget(s) coefficients
 !               -------------------------------------
@@ -705,72 +709,72 @@ ZRNET_N_DTVN(:) = PLWNET_N_DTV(:)            *ZWORK(:)
 
 ZWORK(:)    =   (PCHEATV(:)/PTSTEP) - PLWNET_V_DTV(:)                                               &
               + PFLXC_V_C(:)*(PTHRMA_TV(:) - PTHRMA_TC(:)*ZCOEFB_TC(:)                              &
-              + XLVTT*ZHVS(:)*(PDQSAT_V(:) - ZCOEFB_QC(:)) )           
+              + PLTT(:)*ZHVS(:)*(PDQSAT_V(:) - ZCOEFB_QC(:)) )           
 
 ZBETA_V(:)  = ( (PCHEATV(:)/PTSTEP)*ZTVO(:) + PLWNET_V(:) + PSWNET_V(:)                             &
               - PLWNET_V_DTV(:)*ZTVO(:) - PLWNET_V_DTG(:)*ZTGO(:,1) - PLWNET_V_DTN(:)*ZTNO(:,1)     &
               - PFLXC_V_C(:)*( PTHRMB_TV(:)-PTHRMB_TC(:)-PTHRMA_TC(:)*ZCOEFA_TC(:)                  &
-              + XLVTT*ZHVS(:)*(PQSAT_V(:) - PDQSAT_V(:)*ZTVO(:)                                     &
+              + PLTT(:)*ZHVS(:)*(PQSAT_V(:) - PDQSAT_V(:)*ZTVO(:)                                   &
               - ZCOEFA_QC(:)) ) )/ZWORK(:)
 
 ZALPHA_V(:) = (PLWNET_V_DTG(:) + PFLXC_V_C(:)*(PTHRMA_TC(:)*ZCOEFC_TC(:)                            &
-              + XLVTT*ZHVS(:)*ZCOEFC_QC(:) ) )/ZWORK(:)
+              + PLTT(:)*ZHVS(:)*ZCOEFC_QC(:) ) )/ZWORK(:)
 
 ZGAMMA_V(:) = (PLWNET_V_DTN(:) + PFLXC_V_C(:)*(PTHRMA_TC(:)*ZCOEFD_TC(:)                            &
-              + XLVTT*ZHVS(:)*ZCOEFD_QC(:) ) )/ZWORK(:)
+              + PLTT(:)*ZHVS(:)*ZCOEFD_QC(:) ) )/ZWORK(:)
 
 ! Tg coefs, where TG = BETA_G + ALPHA_G*TV + GAMMA_G*TN
 
-ZWORK(:)    =   (PCHEATG(:)/PTSTEP) - PLWNET_G_DTG(:)                                                &
+ZWORK(:)    =   (PCHEATG(:)/PTSTEP) - PLWNET_G_DTG(:)                                               &
               + (1.0-PPSN(:))*PFLXC_G_C(:)*( (PTHRMA_TG(:) - PTHRMA_TC(:)*ZCOEFC_TC(:))             &
-              + XLVTT*(ZHS(:)*PDQSAT_G(:) - ZHN(:)*ZCOEFC_QC(:)) )                                  &
+              + PLTT(:)*(ZHS(:)*PDQSAT_G(:) - ZHN(:)*ZCOEFC_QC(:)) )                                &
               + ZTCONDA_DELZ_G(:)*(1.0-ZSOIL_COEF_A(:,2))                                           &
               + PPSN(:)*ZTCONDA_DELZ_NG(:)
 
 ZBETA_G(:)  = ( (PCHEATG(:)/PTSTEP)*ZTGO(:,1)  + PLWNET_G(:) + PSWNET_G(:)                          &
               - PLWNET_G_DTV(:)*ZTVO(:) - PLWNET_G_DTG(:)*ZTGO(:,1) - PLWNET_G_DTN(:)*ZTNO(:,1)     &
               - (1.0-PPSN(:))*PFLXC_G_C(:)*( PTHRMB_TG(:)-PTHRMB_TC(:)-PTHRMA_TC(:)*ZCOEFA_TC(:)    &
-              + XLVTT*(ZHS(:)*(PQSAT_G(:) - PDQSAT_G(:)*ZTGO(:,1))                                  &
+              + PLTT(:)*(ZHS(:)*(PQSAT_G(:) - PDQSAT_G(:)*ZTGO(:,1))                                &
               - ZHN(:)*ZCOEFA_QC(:)) )                                                              &
               + ZTCONDA_DELZ_G(:)*ZSOIL_COEF_B(:,2)                                                 &
               + PPSN(:)*ZTCONDA_DELZ_NG(:)*ZTNO(:,JNSNOW) )/ZWORK(:)
 
 ZALPHA_G(:) =  (PLWNET_G_DTV(:) + PFLXC_G_C(:)*(1.0-PPSN(:))*( PTHRMA_TC(:)*ZCOEFB_TC(:)             &
-              + XLVTT*ZHN(:)*ZCOEFB_QC(:) ) )/ZWORK(:)
+              + PLTT(:)*ZHN(:)*ZCOEFB_QC(:) ) )/ZWORK(:)
 
 ZGAMMA_G(:) =  (PLWNET_G_DTN(:) + PFLXC_G_C(:)*(1.0-PPSN(:))*( PTHRMA_TC(:)*ZCOEFD_TC(:)             &
-              + XLVTT*ZHN(:)*ZCOEFD_QC(:) ) )/ZWORK(:)
+              + PLTT(:)*ZHN(:)*ZCOEFD_QC(:) ) )/ZWORK(:)
 
 ! Tn coefs, where TN = BETA_N + ALPHA_N*TV + GAMMA_N*TG
 
 ZWORK(:)    =   (PCHEATN(:)/PTSTEP) - ZRNET_N_DTNN(:)                                                     &
               + PFLXC_N_C(:)*(1.-PPSNA(:))*( PTHRMA_TN(:) - PTHRMA_TC(:)*ZCOEFD_TC(:)                     &
-              + (XLVTT*ZHNS)*(PDQSATI_N(:) - ZCOEFD_QC(:)) )                                              &
+              + (PLTT(:)*ZHNS(:))*(PDQSATI_N(:) - ZCOEFD_QC(:)) )                                         &
               + PFLXC_N_A(:)*    PPSNA(:)*(                                                               &
                 PTHRMA_TN(:) - PTHRMA_TA(:)*(ZPET_A_COEF_P(:)*ZCOEFD_TC(:) + ZPET_C_COEF_P(:))            &
-              + (XLVTT*ZHNS)*(PDQSATI_N(:)*(1.0-ZPEQ_C_COEF_P(:)) - ZPEQ_A_COEF_P(:)*ZCOEFD_QC(:)) )      &
+              + (PLTT(:)*ZHNS(:))*(PDQSATI_N(:)*(1.0-ZPEQ_C_COEF_P(:)) - ZPEQ_A_COEF_P(:)*ZCOEFD_QC(:)) ) &
               + ZTCONDA_DELZ_N(:)*(1.0-ZSNOW_COEF_A(:,2))
 
 ZBETA_N(:)  = ( (PCHEATN(:)/PTSTEP)*ZTNO(:,1)  + ZRNET_NN(:) + PHPSNOW(:) + PMELTADV(:)                   &
               - ZRNET_N_DTVN(:)*ZTVO(:) - ZRNET_N_DTGN(:)*ZTGO(:,1) - ZRNET_N_DTNN(:)*ZTNO(:,1)           &
               - PFLXC_N_C(:)*(1.-PPSNA(:))*( PTHRMB_TN(:) - PTHRMB_TC(:) - PTHRMA_TC(:)*ZCOEFA_TC(:)      &
-              + (XLVTT*ZHNS)*(PQSATI_N(:) - PDQSATI_N(:)*ZTNO(:,1)                                        &
+              + (PLTT(:)*ZHNS(:))*(PQSATI_N(:) - PDQSATI_N(:)*ZTNO(:,1)                                   &
               - ZCOEFA_QC(:)) )                                                                           &
               - PFLXC_N_A(:)*PPSNA(:)*( PTHRMB_TC(:) - PTHRMB_TA(:) -                                     &
                                           PTHRMA_TA(:)*(ZPET_B_COEF_P(:) + ZCOEFA_TC(:)*ZPET_A_COEF_P(:)) &
-              + (XLVTT*ZHNS)*((PQSATI_N(:) - PDQSATI_N(:)*ZTNO(:,1))*(1.0-ZPEQ_C_COEF_P(:))               &
+              + (PLTT(:)*ZHNS(:))*((PQSATI_N(:) - PDQSATI_N(:)*ZTNO(:,1))*(1.0-ZPEQ_C_COEF_P(:))          &
               - ZPEQ_B_COEF_P(:) - ZPEQ_A_COEF_P(:)*ZCOEFA_QC(:)) )                                       &
               + ZTCONDA_DELZ_N(:)*ZSNOW_COEF_B(:,2) )/ZWORK(:)
 
 ZALPHA_N(:) = ( ZRNET_N_DTVN(:) + PFLXC_N_C(:)*(1.-PPSNA(:))*( PTHRMA_TC(:)*ZCOEFB_TC(:)                  &
-              + (XLVTT*ZHNS)*ZCOEFB_QC(:) )                                                               &
+              + (PLTT(:)*ZHNS(:))*ZCOEFB_QC(:) )                                                          &
               + PFLXC_N_A(:)*    PPSNA(:) *( PTHRMA_TA(:)*ZCOEFB_TC(:)*ZPET_A_COEF_P(:)                   &
-              + (XLVTT*ZHNS)*ZCOEFB_QC(:)*ZPEQ_A_COEF_P(:) ) )/ZWORK(:)
+              + (PLTT(:)*ZHNS(:))*ZCOEFB_QC(:)*ZPEQ_A_COEF_P(:) ) )/ZWORK(:)
 
 ZGAMMA_N(:) = ( ZRNET_N_DTGN(:) + PFLXC_N_C(:)*(1.-PPSNA(:))*( PTHRMA_TC(:)*ZCOEFC_TC(:)                  &
-              + (XLVTT*ZHNS)*ZCOEFC_QC(:))                                                                &
+              + (PLTT(:)*ZHNS(:))*ZCOEFC_QC(:))                                                           &
               + PFLXC_N_A(:)*    PPSNA(:) *( PTHRMA_TA(:)*ZCOEFC_TC(:)*ZPET_A_COEF_P(:)                   &
-              + (XLVTT*ZHNS)*ZCOEFC_QC(:)*ZPEQ_A_COEF_P(:) ) )/ZWORK(:)
+              + (PLTT(:)*ZHNS(:))*ZCOEFC_QC(:)*ZPEQ_A_COEF_P(:) ) )/ZWORK(:)
 
 !*       7.     Solve multiple energy budgets simultaneously (using an implicit time scheme)
 !               ----------------------------------------------------------------------------
@@ -797,6 +801,8 @@ WHERE(PPSN(:) > 0.0)
 ! doesn't exceed it's physical limit, Tf). The new real snow Tn consistent with these fluxes
 ! (and the T-profile within the snow) will be computed within the snow scheme.
 
+   PSNOWLIQ(:,1) = PSNOWLIQ(:,1) + MAX(0., (PTN(:,1)-XTT)*PSNOWHCAPZ(:,1)*PSNOWDZ(:,1)/(XLMTT*XRHOLW)) ! m
+
    PTN(:,1)      = MIN(XTT, PTN(:,1))
 
    PTV(:)        = ZBETA_P_V(:) + ZALPHA_P_V(:)*PTN(:,1)
@@ -814,7 +820,7 @@ WHERE(PPSN(:) > 0.0)
 ! Lowest atmospheric level specific humidity (for this patch):
 ! - First, compute the surface specific humidity of the snow:
 
-   ZWORK(:)      = ZHNS*( PQSATI_N(:) + PDQSATI_N(:)*(PTN(:,1) - ZTNO(:,1)) ) ! q_n+
+   ZWORK(:)      = ZHNS(:)*( PQSATI_N(:) + PDQSATI_N(:)*(PTN(:,1) - ZTNO(:,1)) ) ! q_n+
 
    PQA_IC(:)     = ZPEQ_B_COEF_P(:) + ZPEQ_A_COEF_P(:) *PQC(:) + ZPEQ_C_COEF_P(:) *ZWORK(:)
 
@@ -850,21 +856,65 @@ ELSEWHERE ! snow free canopy-understory case:
 END WHERE
 !
 !
+!*       8.     Solve for sub-surface test snow temperature profile 
+!               -----------------------------------------------------------------------------
 ! Compute test sub-surface snow temperatures: this improves time split estimate of 
 ! surface to sub-surface flux estimates. Note that the sub-surface
 ! snow temperatures are "test" temperatures, with final "true" values
-! computed within the snow routine.
+! computed within the snow routine. 
+! But we also include simple hydrology and refreezing since this can have
+! a significant impact during melt events on the sub-surface test
+! snow Temperature profile...
 !
-
- CALL TRIDIAG_GROUND_RM_SOLN(ZT,ZCOEF_A,ZCOEF_B)
+!
+CALL TRIDIAG_GROUND_RM_SOLN(ZT,ZCOEF_A,ZCOEF_B)
+!
+! Update Test T and Liquid content of snow:
+!
 DO JK=2,JNSNOW
-   WHERE(PPSN(:) > 0.0)
-      PTN(:,JK) = MIN(XTT,ZT(:,JK))
-   ENDWHERE
+   DO JJ=1,JNPTS
+      IF(PPSN(JJ) > 0.0)THEN
+         PSNOWLIQ(JJ,JK) = PSNOWLIQ(JJ,JK) + MAX(0., (ZT(JJ,JK)-XTT)* &
+                           PSNOWHCAPZ(JJ,JK)*PSNOWDZ(JJ,JK)/(XLMTT*XRHOLW)) ! m
+         PTN(JJ,JK)      = MIN(XTT,ZT(JJ,JK))
+      ENDIF
+   ENDDO
+ENDDO
+!
+! Tipping bucket snow hydrology: update Liq
+! NOTE this mimicks what is assumed to be done in the snow scheme. If a more sophisticated
+! snow hydrology scheme is used, this code should be adapted.
+!
+ZWHOLDMAX(:,:)        = SNOW3LHOLD(PSNOWRHO,PSNOWDZ) ! m
+ZWORK(:)              = MAX(0., PSNOWLIQ(:,1)-ZWHOLDMAX(:,1))
+PSNOWLIQ(:,1)         = PSNOWLIQ(:,1) - ZWORK(:)
+DO JK=2,JNSNOW
+   DO JJ=1,JNPTS
+      PSNOWLIQ(JJ,JK) = PSNOWLIQ(JJ,JK) + ZWORK(JJ)
+      ZWORK(JJ)       = MAX(0., PSNOWLIQ(JJ,JK)-ZWHOLDMAX(JJ,JK))
+      PSNOWLIQ(JJ,JK) = PSNOWLIQ(JJ,JK) - ZWORK(JJ)
+   ENDDO
+ENDDO
+PSNOWLIQ(:,:) = MAX(0.0, PSNOWLIQ(:,:)) ! numerical check
+!
+! Now, possibly refreeze liquid water which has flowed into a layer,
+! thus reducing liquid water and warming the snowpack:
+!
+DO JK=2,JNSNOW
+   DO JJ=1,JNPTS
+      IF(PPSN(JJ) > 0.0)THEN
+         PTN(JJ,JK)      = PTN(JJ,JK) + PSNOWLIQ(JJ,JK)*(XLMTT*XRHOLW)/             &
+                               (PSNOWHCAPZ(JJ,JK)*MAX(1.E-6,PSNOWDZ(JJ,JK)))  ! K
+         ZWORK(JJ)       = MAX(0., (XTT-PTN(JJ,JK))*                                &
+                             PSNOWHCAPZ(JJ,JK)*PSNOWDZ(JJ,JK)/(XLMTT*XRHOLW)) ! m 
+         PSNOWLIQ(JJ,JK) = PSNOWLIQ(JJ,JK) - ZWORK(JJ)
+         PTN(JJ,JK)      = MIN(XTT,PTN(JJ,JK))
+      ENDIF
+   ENDDO
 ENDDO
 !
 !
-!*       8.     Solve soil temperature profile (implicitly coupled to surface energy budgets)
+!*       9.     Solve soil temperature profile (implicitly coupled to surface energy budgets)
 !               -----------------------------------------------------------------------------
 ! The back-substitution of sub-surface soil T profile
 ! (update all temperatures *below* the surface)
@@ -886,7 +936,7 @@ ELSEWHERE
                               (1. - ZWORK(:)*PTDEEP_A(:))                   ! (W/m2)
 END WHERE
 !
-!*       9.     Temperature tendencies
+!*      10.     Temperature tendencies
 !               ----------------------
 !
 ! Compute energy budget tendencies (for flux computations) 
@@ -897,7 +947,7 @@ PDELTAT_V(:)   = PTV(:)   - ZTVO(:)
 PDELTAT_N(:)   = PTN(:,1) - ZTNO(:,1)
 !
 !
-!*      10.     Flux Diagnostics
+!*      11.     Flux Diagnostics
 !               ----------------
 !
 ! Locally implicit (with respect to the ground T) snow-ground heat flux (W m-2).
@@ -910,7 +960,7 @@ PDELTAT_N(:)   = PTN(:,1) - ZTNO(:,1)
 PGRNDFLUX(:)    = PPSN(:)*ZTCONDA_DELZ_NG(:)*( PTN(:,JNSNOW) - PTG(:,1) )
 !
 !
-!*      10.     Energy Storage Diagnostics (W m-2)
+!*      12.     Energy Storage Diagnostics (W m-2)
 !               ----------------------------------
 !
 PDELHEATG_SFC(:) = PCHEATG(:)*PDELTAT_G(:)/PTSTEP 
@@ -924,7 +974,7 @@ IF(HISBA == 'DIF')THEN
                                              ( PD_G(:,1)           /PSOILCONDZ(:,1)) )
 !
 !
-!*      10.a    Energy Storage Diagnostics (W m-2): DIF
+!*      12.a    Energy Storage Diagnostics (W m-2): DIF
 !               ---------------------------------------
 !
 ! These terms are used for computing energy budget diagnostics.
@@ -940,7 +990,7 @@ IF(HISBA == 'DIF')THEN
 !
 ELSE
 
-!*      10.b    Energy Storage Diagnostics (W m-2): Force Restore
+!*      12.b    Energy Storage Diagnostics (W m-2): Force Restore
 !               -------------------------------------------------
 !
 ! Flux between surface and sub-surface (W m-2):
@@ -954,7 +1004,7 @@ ELSE
 ENDIF
 
 !
-!*      11.     Additional Diagnostics
+!*      13.     Additional Diagnostics
 !               ----------------------
 !
 ! Here compute the updated (time t+dt) effective reference level specific heat capacity:
@@ -966,8 +1016,11 @@ ELSEIF(.NOT.LCPL_ARP)THEN
    PCPS(:) = XCPD + ( XCPV - XCPD ) * PQC(:)   
 ENDIF
 !
-PLVTT(:)   = XLVTT
-PLSTT(:)   = XLVTT ! latent heat of sublimation already accounted for
+! These latent heats are used to convert between
+! latent heat and water mass fluxes:
+!
+PLVTT(:)   = PLTT(:)
+PLSTT(:)   = PLTT(:)
 !
 !
 IF (LHOOK) CALL DR_HOOK('E_BUDGET_MEB',1,ZHOOK_HANDLE)
