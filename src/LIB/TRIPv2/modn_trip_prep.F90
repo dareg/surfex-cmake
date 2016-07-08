@@ -49,12 +49,16 @@ REAL             :: XTAUG_DOWN  = 30.0 ! Downstream transfert time value
 !
 LOGICAL          :: LGWEQ = .FALSE.
 !
+!Read restart flood
+!
+LOGICAL          :: LREAD_FLOOD = .FALSE.
+!
 !-------------------------------------------------------------------------------
 !
 !*       1.    NAMELISTS
 !              ---------
 !
-NAMELIST/NAM_TRIP_PREP/XTAUG_UNIF,XTAUG_UP,XTAUG_DOWN,LGWEQ
+NAMELIST/NAM_TRIP_PREP/XTAUG_UNIF,XTAUG_UP,XTAUG_DOWN,LGWEQ,LREAD_FLOOD
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_TRIP_PREP
