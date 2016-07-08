@@ -1504,7 +1504,6 @@ ENDIF
 
 ! 6. Create file for vegetation parameter values
 !----------------------------------------------------------
-print*,'DGI%PGD ',DGI%LPGD
 IF(LASSIM) THEN
   IF(CASSIM=='PLUS ') THEN
     YFILE='ISBA_VEG_EVOLUTION_P.OUT.nc'
@@ -1540,7 +1539,6 @@ ELSEIF(DGI%LPGD)THEN
   JRET=NF_REDEF(IFILE_ID)
   YATT ='dimensionless'
   !
-  print*,'def veg'
   CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'VEG'         ,'Output_vegetation_fraction'         ,IDDIM,YATT_TITLE,YATT)
   CALL DEF_VAR_NETCDF(DGU, &
