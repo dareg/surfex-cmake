@@ -130,9 +130,9 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
-!
  CALL PREP_OUTPUT_GRID(UG%G, UG%G, U%NSIZE_FULL, ILUOUT)
+!
+ CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !------------------------------------------------------------------------------
 !

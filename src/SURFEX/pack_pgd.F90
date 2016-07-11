@@ -55,7 +55,7 @@ USE MODI_GET_LCOVER_n
 USE MODI_GET_ZS_n
 USE MODI_PACK_SAME_RANK
 USE MODI_PACK_GRID
-!
+USE MODI_LATLON_GRID
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -124,6 +124,15 @@ IF (IL==0) THEN
   IF (LHOOK) CALL DR_HOOK('PACK_PGD',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+!*    3.      Computes geographical quantities
+!             --------------------------------
+!
+ CALL LATLON_GRID(G,IL,ZDIR)
+!
+IF (PRESENT(PDIR)) PDIR = ZDIR
 !
 !-------------------------------------------------------------------------------
 !

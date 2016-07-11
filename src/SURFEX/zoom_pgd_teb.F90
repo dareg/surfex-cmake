@@ -166,10 +166,9 @@ TG%NDIM = ILU
 !*      3.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
-!
  CALL PREP_OUTPUT_GRID(UG%G, TG, U%NSIZE_FULL, ILUOUT)
 !
+ CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
 !
 !------------------------------------------------------------------------------
 !

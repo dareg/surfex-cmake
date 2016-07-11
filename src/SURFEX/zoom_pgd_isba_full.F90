@@ -73,6 +73,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+!
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
@@ -129,11 +130,11 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA_FULL',0,ZHOOK_HANDLE)
 !*      2.     Reading of grid
 !              ---------------
 !
- CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
-!
  CALL PREP_OUTPUT_GRID(UG%G, IG, U%NSIZE_FULL, ILUOUT)
 !
-!------------------------------------------------------------------------------
+ CALL PREP_GRID_EXTERN(GCP,HINIFILETYPE,ILUOUT,CINGRID_TYPE,CINTERP_TYPE,INI)
+!
+!-----------------------------------------------------------------------------
 !
 !*      3.     Reading of fields
 !              -----------------
@@ -229,10 +230,10 @@ IF (CHI%LCH_NO_FLUX) THEN
   IF (IO%LNOF) THEN
     !
     ALLOCATE(S%XPH(INI))
-    CALL READ_SURF(HPROGRAM,'PH',S%XPH(:),IRESP)
+    CALL READ_SURF(HPROGRAM,'PH',S%XPH(:),IRESP,HDIR='A')
     !
     ALLOCATE(S%XFERT(INI))
-    CALL READ_SURF(HPROGRAM,'FERT',S%XFERT(:),IRESP)
+    CALL READ_SURF(HPROGRAM,'FERT',S%XFERT(:),IRESP,HDIR='A')
     !
   ELSE
     CALL ABOR1_SFX("READ_PGD_ISBAn: WITH LCH_NO_FLUX=T, PH AND FERT FIELDS ARE GIVEN AT PGD STEP")
@@ -265,7 +266,9 @@ LINTERP(:) = .TRUE.
 !* interpolations
 !
  CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZSAND,K%XSAND)
+!
  CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZCLAY,K%XCLAY)
+!
 ALLOCATE(ZOUTB(SIZE(K%XRUNOFFB),1))
  CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZRUNOFFB,ZOUTB)
 K%XRUNOFFB(:) = ZOUTB(:,1)

@@ -142,7 +142,7 @@ IF (ICOUNT==0) RETURN
 !
 DO JL=1,INL
   WRITE(KLUOUT,*) ' Remaining horizontal extrapolations'
-  WRITE(KLUOUT,*) ' Total number of input data     : ',ICOUNT
+  WRITE(KLUOUT,*) ' Total number of input data     : ',ICOUNT,' /  ',SIZE(PFIELD2(:,JL))
   WRITE(KLUOUT,*) ' Number of points to interpolate: ',COUNT(PFIELD2(:,JL)==XUNDEF .AND. OINTERP(:))
 ENDDO
 !
