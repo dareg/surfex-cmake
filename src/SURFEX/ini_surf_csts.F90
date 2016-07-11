@@ -57,6 +57,7 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            LMEBREC,                            &
                            XANSFRACMEL, XTEMPANS,              &
                            XANSMINMEB
+USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -93,7 +94,7 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
-                             XPERCENTAGEPORE
+                             XPERCENTAGEPORE,XVVISC3
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -218,6 +219,9 @@ XVAGING_GLACIER   = 900.
 
 ! percentage of the total pore volume to compute the max liquid water holding capacity   !Pahaut 1976
 XPERCENTAGEPORE = 0.05
+!
+! Snow viscosity coefficient
+XVVISC3= 0.023
 !
 ! Roughness length for flood (m)
 !

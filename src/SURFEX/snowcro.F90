@@ -1563,15 +1563,15 @@ DO JJ = 1,SIZE(PSNOW)
     !
     ! Snow viscosity basic equation (depend on temperature and density only):
     ! Cluzet et al 2016 2nd option for coefficients on temperature and density
-    IF (HSNOWCOMP=="B92") THEN
-      ZVISCOSITY(JJ,JST) = XVVISC1 * &
+!     IF (HSNOWCOMP=="B92") THEN
+    ZVISCOSITY(JJ,JST) = XVVISC1 * &
                          EXP( XVVISC3*PSNOWRHO(JJ,JST) + XVVISC4*ABS(XTT-PSNOWTEMP(JJ,JST)) ) * &
                          PSNOWRHO(JJ,JST) / XVRO11 
-    ELSEIF (HSNOWCOMP=="B93") THEN
-      ZVISCOSITY(JJ,JST) = XVVISC1 * &
-                         EXP( XVVISC3_B93*PSNOWRHO(JJ,JST) + XVVISC4_B93*ABS(XTT-PSNOWTEMP(JJ,JST)) ) * &
-                         PSNOWRHO(JJ,JST) / XVRO11 
-    ENDIF
+!     ELSEIF (HSNOWCOMP=="B93") THEN
+!       ZVISCOSITY(JJ,JST) = XVVISC1 * &
+!                          EXP( XVVISC3_B93*PSNOWRHO(JJ,JST) + XVVISC4_B93*ABS(XTT-PSNOWTEMP(JJ,JST)) ) * &
+!                          PSNOWRHO(JJ,JST) / XVRO11 
+!     ENDIF
     ! Equations below apply changes to the basic viscosity value, based on snow microstructure properties
     IF ( PSNOWLIQ(JJ,JST)>0.0 ) THEN
       ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) / &
@@ -5158,6 +5158,9 @@ INLVLS_OLD = -1
 ZPSNOW_NEW = 0.
 ZPSNOW_OLD = 0.
 !
+! Compute the old number of layers
+!
+! New total snowdepth
 DO JST = 1,INLVLS_NEW
   ZPSNOW_NEW = ZPSNOW_NEW + PSNOWDZN(JST)
 ENDDO
@@ -5165,6 +5168,7 @@ ENDDO
 IF ( ABS( ZPSNOW_NEW - PSNOWDZF )<XUEPSI ) THEN
   INLVLS_OLD = 0
 ELSE
+  ! Old total snowdepth
   DO JST = 1,SIZE(PSNOWRHO)
     IF ( PSNOWDZ(JST)>=XUEPSI ) THEN
       ZPSNOW_OLD = ZPSNOW_OLD + PSNOWDZ(JST)
@@ -5190,6 +5194,7 @@ ZPSNOW_NEW = ZPSNOW_OLD
 ! initialization of variables describing the initial snowpack + new snowfall
 !
 IF ( GSNOWFALL ) THEN
+  ! Layers 2:JST of the newsnowpack take properties of layers 1:JST-1 of the old snowpack
   DO JST = 2,INLVLS_OLD
     ZSNOWDZO   (JST) = PSNOWDZ   (JST-1)
     ZSNOWRHOO  (JST) = PSNOWRHO  (JST-1)
@@ -5200,6 +5205,7 @@ IF ( GSNOWFALL ) THEN
     ZSNOWAGEO  (JST) = PSNOWAGE  (JST-1)
     ZSNOWIMPURO  (JST) = PSNOWIMPUR (JST-1)
   ENDDO
+  ! The new layer takes properties of fresh snow
   ZSNOWDZO   (1) = PSNOWDZF
   ZSNOWRHOO  (1) = PSNOWRHOF
   ZSNOWHEATO (1) = PSNOWHEATF
@@ -5209,6 +5215,7 @@ IF ( GSNOWFALL ) THEN
   ZSNOWAGEO  (1) = PSNOWAGEF
   ZSNOWIMPURO  (1) = PSNOWIMPURF  
 ELSE
+  ! first init without any change of the properties
   DO JST = 1,INLVLS_OLD
     ZSNOWDZO   (JST) = PSNOWDZ   (JST)
     ZSNOWRHOO  (JST) = PSNOWRHO  (JST)

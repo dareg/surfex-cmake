@@ -1953,11 +1953,21 @@ DO JST_NEW = 1,KNLVLS_NEW
     ELSE
       ! old layer contributes to the new one
       ! computation of its contributing ratio and mass/heat 
+      !
+      !        NEW                                           OLD
+      !                                              ------------------- PSNOWZTOP_OLD(JST_OLD)
+      !------------------- PSNOWZTOP_NEW(JST_NEW)                                                     |
+      !                                                                                               | ZPROPOR
+      !                                              ------------------- PSNOWZTOP_OLD(JST_OLD)       |
+      !------------------- PSNOWZTOP_NEW(JST_NEW)
+      !
+      
       ZPROPOR = ( MIN( PSNOWZTOP_OLD(JST_OLD), PSNOWZTOP_NEW(JST_NEW) )   &
                 - MAX( PSNOWZBOT_OLD(JST_OLD), PSNOWZBOT_NEW(JST_NEW) ) ) &
                  / PSNOWDZO(JST_OLD) 
       ZMASDZ_OLD = ZPROPOR * PSNOWRHOO(JST_OLD) * PSNOWDZO(JST_OLD)
       !
+      ! The mass of new snow is incremented with the different old layers contributing
       ZMASTOTN    = ZMASTOTN + ZMASDZ_OLD
       ZMASTOT_T07 = ZMASTOT_T07 + 1.
       !
