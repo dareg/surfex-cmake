@@ -356,7 +356,12 @@ ELSE
                    XSKEW_WORK(:)= 2.266-0.023*ZTI_MEAN(:)-0.245*ZTI_STD(:)-0.240*ZTI_SKEW(:)
            ENDWHERE
          ENDIF
-!           
+!
+         WHERE(XMEAN_WORK(:)/=XUNDEF.AND.(XMAX_WORK(:)-XMIN_WORK(:))>0.2)
+               XSTD_WORK (:)=MAX(0.2,XSTD_WORK (:))
+               XSKEW_WORK(:)=MAX(0.2,XSKEW_WORK(:))
+         ENDWHERE
+!
          WHERE(XMEAN_WORK(:)>0.0.AND.XMEAN_WORK(:)/=XUNDEF)
                ZDELTA   (:)= (XMEAN_WORK(:)-ZMEAN_INI(:))
                XMIN_WORK(:)= MAX(             0.0,XMIN_WORK(:)+ZDELTA(:))
