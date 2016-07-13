@@ -263,7 +263,6 @@ IF (PRESENT(PX)) THEN
     PX(:) = PGRID_PAR(12+1:12+IL)
   END IF        
 END IF
-
 IF (PRESENT(PY)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
@@ -379,7 +378,7 @@ REAL                      :: ZRDSDG,ZCLAT0,ZSLAT0,ZCLATOR,ZSLATOR
 REAL                      :: ZXBM0,ZYBM0,ZRO0,ZGA0 
 REAL                      :: ZXP,ZYP,ZEPSI,ZT1,ZCGAM,ZSGAM,ZRACLAT0
 !
-REAL :: ZATA,ZRO2,ZT2,ZXMI0,ZYMI0, ZXI, ZYI, ZIRPK, ZIRDSDG
+REAL :: ZATA,ZRO2,ZT2,ZXMI0,ZYMI0, ZXI, ZYI, ZIRDSDG
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !--------------------------------------------------------------------------------
@@ -442,7 +441,6 @@ IF(PRPK /= 0.) THEN
 ZT1     = (XRADIUS*(ABS(ZCLAT0))**(1.-ZRPK))**(2./ZRPK) * (1+ZSLAT0)**2 
 !
 ZIRDSDG = 1./ZRDSDG
-ZIRPK = 1./ZRPK
 !
 ISIZE_OMP = MAX(1,SIZE(ZY)/NBLOCKTOT)
 !
@@ -462,13 +460,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_21',0,ZHOOK_HA
       ZATA = ATAN2(ZXI,-ZYI)*ZIRDSDG
     ENDIF
     !
-    PLON(JI) = (ZBETA+ZATA)*ZIRPK+ZLON0
+    PLON(JI) = (ZBETA+ZATA)/ZRPK+ZLON0
     !
     !*   2.3     Latitude
     !
     ZRO2 = ZXI**2+ZYI**2
     !    
-    ZT2  = (ZRPK**2*ZRO2)**ZIRPK
+    ZT2  = (ZRPK**2*ZRO2)**(1./ZRPK)
     !
     PLAT(JI) = (XPI/2.-ACOS((ZT1-ZT2)/(ZT1+ZT2)))*ZIRDSDG
     !
