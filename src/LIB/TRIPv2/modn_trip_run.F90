@@ -63,6 +63,7 @@ LOGICAL                           :: LCUMFRC  = .FALSE.  ! Cumulated (or not) fo
 LOGICAL                           :: LDIAG_MISC = .FALSE.  ! if true, more diag for model testing
 LOGICAL                           :: LRESTART   = .TRUE.   ! write restart file
 LOGICAL                           :: LPRINT     = .FALSE.  ! write some information in an ascii file 
+LOGICAL                           :: LWR_DIAG   = .TRUE.   ! write diag file
 !
 !*    Time steps
 !     ----------
@@ -76,7 +77,8 @@ REAL                              :: XTSTEP_DIAG = 86400.0
 !              ---------
 !
 NAMELIST/NAM_TRIP_RUN/CREADFRC,CDRAIN,CRUNOFF,LCUMFRC,LDIAG_MISC, &
-                      LPRINT,LRESTART,XTSTEP_RUN,XTSTEP_DIAG
+                      LPRINT,LRESTART,XTSTEP_RUN,XTSTEP_DIAG,     &
+                      LWR_DIAG
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_TRIP_RUN

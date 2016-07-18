@@ -29,7 +29,7 @@ USE MODD_OFF_TRIP_n
 !
 USE MODD_TRIP_LISTING
 !
-USE MODN_TRIP_RUN, ONLY : LRESTART, LPRINT,   &
+USE MODN_TRIP_RUN, ONLY : LRESTART, LPRINT, LWR_DIAG,  &
                           XTSTEP_RUN, XTSTEP_DIAG
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, NUNDEF, XDAY
@@ -207,8 +207,10 @@ ENDIF
 ! * 9. Store run mean diagnostic and write restart
 !-------------------------------------------------------------------------------
 !
- CALL TRIP_DIAG_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TPG, &
-                   NLISTING,ILON,ILAT,ZRUNTIME)
+IF(LWR_DIAG)THEN
+   CALL TRIP_DIAG_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TPG, &
+                      NLISTING,ILON,ILAT,ZRUNTIME)
+ENDIF
 !
 IF(LRESTART)THEN
    CALL TRIP_RESTART(YTRIP_CUR%TP, YTRIP_CUR%TPG, &
