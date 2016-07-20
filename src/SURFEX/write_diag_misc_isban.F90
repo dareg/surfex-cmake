@@ -408,7 +408,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
               HCOMMENT=YCOMMENT)                  
       YCOMMENT='Thickness of refrozen snow at the top of the snowpack'
       CALL WRITE_SURF(DGU, U, &
-              HPROGRAM,'REFROZ_TH',DGMI%XAVG_SNOW_WETTHICKNESS(:),IRESP,&
+              HPROGRAM,'REFROZ_TH',DGMI%XAVG_SNOW_REFROZENTHICKNESS(:),IRESP,&
               HCOMMENT=YCOMMENT)                                 
     ENDIF
     
@@ -711,7 +711,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
               HCOMMENT=YCOMMENT) 
       YCOMMENT='Thickness of refrozen snow at the top of the snowpack per patch'
       CALL WRITE_SURF(DGU, U, &
-              HPROGRAM,'REFROZ_TH_P',DGMI%XSNOW_WETTHICKNESS(:,:),IRESP,&
+              HPROGRAM,'REFROZ_TH_P',DGMI%XSNOW_REFROZENTHICKNESS(:,:),IRESP,&
               HCOMMENT=YCOMMENT)                
     ENDIF
     
