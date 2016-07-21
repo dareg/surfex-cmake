@@ -52,7 +52,7 @@
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
         PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
-        P_DIR_SW, P_SCA_SW)          
+        P_DIR_SW, P_SCA_SW,PIMPWET,PIMPDRY)          
 !     ##########################################################################
 !
 !                             
@@ -98,6 +98,7 @@
 !
 !*       0.     DECLARATIONS
 !               ------------
+USE MODD_PREP_SNOW,      ONLY : NIMPUR
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XCPD, XDAY, XRHOLW 
@@ -326,6 +327,9 @@ REAL, DIMENSION(:),   INTENT(IN) :: PAH,PBH    ! coefficients for herbaceous wat
 !
 REAL, DIMENSION(:),   INTENT(IN) :: PCSP       ! atmospheric CO2 concentration
 !                                                 [ppmm]=[kg CO2 / kg air]
+REAL, DIMENSION(:,:),   INTENT(IN) :: PIMPWET
+REAL, DIMENSION(:,:),   INTENT(IN) :: PIMPDRY
+!
 REAL, DIMENSION(:),   INTENT(IN) :: PGMES      ! mesophyll conductance (m s-1)
 !
 REAL, DIMENSION(:),   INTENT(IN) :: PPOI       ! Gaussian weights (as above)
@@ -1200,7 +1204,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &
            PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZIMPUR_CONC) 
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZIMPUR_CONC,PIMPWET,PIMPDRY) 
 !
 ! If a litter layer exists, compute hydrology:
 !

@@ -27,7 +27,7 @@
                       PPSN, PPSNG, PPSNV,                                        &
                       PPSNV_A, PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL, PIRRIG,    &
                       PWATSUP, PTHRESHOLD, LIRRIGATE, LIRRIDAY, OSTRESSDEF, PGC, &
-                      PF2I, PDMAX, PAH, PBH, PCSP, PGMES, PPOI, PFZERO, PEPSO,   &
+                      PF2I, PDMAX, PAH, PBH, PCSP,PIMPWET,PIMPDRY, PGMES, PPOI, PFZERO, PEPSO,   &
                       PGAMM, PQDGAMM, PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, &
                       PT1AMAX, PT2AMAX, PABC, PD_G, PDZG, PDZDIF, KWG_LAYER,     &
                       PROOTFRAC, PWFC, PWWILT, PWSAT, PBCOEF, PCONDSAT,          &
@@ -499,6 +499,9 @@ REAL, DIMENSION(:),    INTENT(IN) :: PAH,PBH    ! coefficients for herbaceous wa
 !
 REAL, DIMENSION(:),    INTENT(IN) :: PCSP       ! atmospheric CO2 concentration
 !                                                 [ppmm]=[kg CO2 / kg air]
+REAL, DIMENSION(:,:),    INTENT(IN) :: PIMPWET  ! flux of wet deposit for each impurity type 
+REAL, DIMENSION(:,:),    INTENT(IN) :: PIMPDRY  ! flux of dry deposit for each impurity type 
+!
 REAL, DIMENSION(:),    INTENT(IN) :: PGMES      ! mesophyll conductance (m s-1)
 !
 REAL, DIMENSION(:),    INTENT(IN) :: PPOI       ! Gaussian weights (as above)
@@ -1076,7 +1079,7 @@ IF(OMEB)THEN
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
         PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-        P_DIR_SW, P_SCA_SW )
+        P_DIR_SW, P_SCA_SW,PIMPWET,PIMPDRY )
 
 ELSE
 !
@@ -1131,7 +1134,7 @@ ELSE
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
            PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC ) 
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY ) 
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation

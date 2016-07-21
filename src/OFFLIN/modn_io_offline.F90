@@ -142,6 +142,11 @@ CHARACTER(LEN=4) :: YALG_MPI = "LIN "     ! type of distribution algorithm for M
 ! * autorize spectral caculation for snow 
 LOGICAL     :: CSPECSNOW=.FALSE.
 
+! * autorize forcing of impurity deposit coefficients
+LOGICAL     :: LFORCIMP=.FALSE.
+!
+INTEGER     :: NIMPUROF=0  !Number of impurity types in the run, similar to nimpur variable but available in Offline
+
 !
 !-------------------------------------------------------------------------------
 !
@@ -156,7 +161,7 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LSHADOWS_SLOPE,LSHADOWS_OTHER,                           &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
                         YALG_MPI, XDELTA_OROG, LADAPT_SW,                        &
-                        LDELAYEDSTART_NC,NDATESTOP, CSPECSNOW
+                        LDELAYEDSTART_NC,NDATESTOP, CSPECSNOW,LFORCIMP,NIMPUROF
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE

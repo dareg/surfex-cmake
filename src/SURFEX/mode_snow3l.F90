@@ -1838,6 +1838,7 @@ SUBROUTINE GET_MASS_HEAT(KJ,KNLVLS_NEW,KNLVLS_OLD,                              
 !
 USE MODD_SNOW_PAR, ONLY : XSNOWCRITD, XD1, XD2, XD3, XX, XVALB5, XVALB6
 !
+USE MODD_SNOW_METAMO, ONLY : XUEPSI
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -1939,8 +1940,9 @@ DO JST_NEW = 1,KNLVLS_NEW
       ZALBMOYN  = ZALBMOYN  + MAX( 0., ZMASDZ_OLD * (XVALB5-XVALB6*SQRT(ZDIAM)) )
       ZHISTMOYN = ZHISTMOYN + ZMASDZ_OLD * PSNOWHISTO(JST_OLD)
       ZAGEMOYN  = ZAGEMOYN  + ZMASDZ_OLD * PSNOWAGEO (JST_OLD)
-      ! ici il faudrait gérer la présence d'eau liquide pour faire une moyenne pondérée sur le masse de glace
-      IF (ZPROPOR>0.0000000001) THEN
+      ! In fact Zimpurmoyen is adding the contibution in impurity content of all old layers that are used to build a new one.
+      !Zpropor is the 
+      IF (ZPROPOR>XUEPSI) THEN
           DO JIMP=1,NIMPUR
             ZIMPURMOYNV2(JIMP)=ZIMPURMOYNV2(JIMP)+ PSNOWIMPUROV2(JST_OLD,JIMP) * ZPROPOR
           ENDDO

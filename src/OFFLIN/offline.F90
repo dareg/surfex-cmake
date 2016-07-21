@@ -49,6 +49,8 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XPA         ,&! pressure at forcing level             (Pa)
                             XRHOA       ,&! density at forcing level              (kg/m3)
                             XCO2        ,&! CO2 concentration in the air          (kg/m3)
+                            XIMPWET     ,&! wet deposit coef for each type of impurity (g)
+                            XIMPDRY     ,&! dry deposit coef for each type of impurity (g/j)
                             XSNOW       ,&! snow precipitation                    (kg/m2/s)
                             XRAIN       ,&! liquid precipitation                  (kg/m2/s)
                             XSFTH       ,&! flux of heat                          (W/m2)
@@ -67,6 +69,8 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XZ0         ,&! surface roughness length for momentum  (m)
                             XZ0H        ,&! surface roughness length for heat      (m)
                             XQSURF        ! specific humidity at surface           (kg/kg)
+!
+USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
@@ -252,6 +256,8 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZSNOW               ! snow precipitation   
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZRAIN               ! liquid precipitation                  (kg/m2/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZPS                 ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCO2                ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPWET           ! wet deposit coefficient for each impurity type (kg/m²/s)
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPDRY           ! dry deposit coefficient for each impurity type (kg/m²/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDIR                ! wind direction
 INTEGER                           :: ILUOUT              ! ascii output unit number
 INTEGER                           :: ILUNAM              ! namelist unit number
@@ -291,7 +297,7 @@ INTEGER :: ISERIES, ISIZE
 !
 CHARACTER(LEN=100) :: YNAME
 CHARACTER(LEN=10)  :: YRANK
-INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK
+INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK,JIMP
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
 DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
 !
@@ -647,12 +653,16 @@ IF (.NOT.ALLOCATED(ZLW))ALLOCATE(ZLW    (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZSNOW))ALLOCATE(ZSNOW  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZRAIN))ALLOCATE(ZRAIN  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZPS))ALLOCATE(ZPS    (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))   
+IF (.NOT.ALLOCATED(ZIMPWET))ALLOCATE(ZIMPWET   (INI,NIMPUROF,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZIMPDRY))ALLOCATE(ZIMPDRY   (INI,NIMPUROF,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR))ALLOCATE(ZDIR   (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZCOEF))ALLOCATE(ZCOEF   (INI))
 !
 IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
+ZIMPWET   (:,:,:)=XUNDEF
+ZIMPDRY   (:,:,:)=XUNDEF
 !      computes initial air co2 concentration and  density
 !
 #ifdef SFX_MPI
@@ -670,7 +680,7 @@ IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOS
  CALL OL_READ_ATM(&
                   CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
                    ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
-                   ZCO2,ZDIR,LLIMIT_QAIR                           ) 
+                   ZCO2,ZIMPWET,ZIMPDRY,ZDIR,LLIMIT_QAIR                           ) 
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
@@ -690,6 +700,13 @@ XTIME0 = MPI_WTIME()
 !
 XCO2(:)  = ZCO2(:,1)
 XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * XZREF )
+!Set the value of impur deposit coef
+IF (LFORCIMP) THEN  
+  DO JIMP=1,NIMPUROF    
+    XIMPWET(:,JIMP)=ZIMPWET(:,JIMP,1)
+    XIMPDRY(:,JIMP)=ZIMPDRY(:,JIMP,1)
+  ENDDO 
+ENDIF
 !                 
 !       surface Initialisation     
 !
@@ -733,8 +750,9 @@ ENDIF
 !
  CALL INIT_SURF_ATM_n(YSURF_CUR, &
                             CSURF_FILETYPE, YINIT, LLAND_USE,                      &
-                     INKPROMA, NSCAL, IBANDS,                               &
-                     CSV,XCO2(NINDX1SFX:NINDX2SFX),XRHOA(NINDX1SFX:NINDX2SFX),          &
+                     INKPROMA, NSCAL, IBANDS,                                      &
+                     CSV,XCO2(NINDX1SFX:NINDX2SFX),XIMPWET(NINDX1SFX:NINDX2SFX,:),      &
+                     XIMPDRY(NINDX1SFX:NINDX2SFX,:),XRHOA(NINDX1SFX:NINDX2SFX),        &
                      XZENITH(NINDX1SFX:NINDX2SFX),XAZIM(NINDX1SFX:NINDX2SFX),XSW_BANDS, &
                      XDIR_ALB(NINDX1SFX:NINDX2SFX,:), XSCA_ALB(NINDX1SFX:NINDX2SFX,:),  &
                      XEMIS(NINDX1SFX:NINDX2SFX), XTSRAD(NINDX1SFX:NINDX2SFX),           &
@@ -859,13 +877,20 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZPS(:,IDMAX)=ZPS(:,SIZE(ZTA,2))
       ZCO2(:,IDMAX)=ZCO2(:,SIZE(ZTA,2))
       ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
+      IF (LFORCIMP) THEN  
+        DO JIMP=1,NIMPUROF
+          ZIMPWET(:,JIMP,IDMAX)=ZIMPWET(:,JIMP,SIZE(ZTA,2))
+          ZIMPDRY(:,JIMP,IDMAX)=ZIMPDRY(:,JIMP,SIZE(ZTA,2))
+        ENDDO 
+      ENDIF
     ENDIF
     CALL OL_READ_ATM(&
                   CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1,    &
                      ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX), &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),&
-                     ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
+                     ZCO2(:,1:IDMAX),ZIMPWET(:,:,1:IDMAX),ZIMPDRY(:,:,1:IDMAX), &
+                     ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
 
 #ifdef SFX_MPI
@@ -899,6 +924,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZSNOW(:,ID_FORC+1),ZRAIN(:,ID_FORC+1),   &
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
+                            ZIMPWET(:,:,ID_FORC), ZIMPWET(:,:,ID_FORC+1),      &
+                            ZIMPDRY(:,:,ID_FORC), ZIMPDRY(:,:,ID_FORC+1),      &
                             ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
 #ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
@@ -1113,7 +1140,8 @@ IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )!
            XZS(NINDX1SFX:NINDX2SFX), XU(NINDX1SFX:NINDX2SFX),                &
            XV(NINDX1SFX:NINDX2SFX), XQA(NINDX1SFX:NINDX2SFX),                &
            XTA(NINDX1SFX:NINDX2SFX), XRHOA(NINDX1SFX:NINDX2SFX),             &
-           XSV(NINDX1SFX:NINDX2SFX,:), XCO2(NINDX1SFX:NINDX2SFX), CSV,       &
+           XSV(NINDX1SFX:NINDX2SFX,:), XCO2(NINDX1SFX:NINDX2SFX),            &    
+           XIMPWET(NINDX1SFX:NINDX2SFX,:),XIMPDRY(NINDX1SFX:NINDX2SFX,:),CSV, &
            XRAIN(NINDX1SFX:NINDX2SFX),  XSNOW(NINDX1SFX:NINDX2SFX),          &
            XLW(NINDX1SFX:NINDX2SFX), XDIR_SW(NINDX1SFX:NINDX2SFX,:),          &
            XSCA_SW(NINDX1SFX:NINDX2SFX,:), XSW_BANDS, XPS(NINDX1SFX:NINDX2SFX),&

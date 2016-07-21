@@ -18,7 +18,7 @@
                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,PBLOWSNW,               &
                OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
                HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,          &
-               PSPEC_ALB, PDIFF_RATIO) 
+               PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY) 
 !     ##########################################################################
 !
 !!****  *SNOWCRO*
@@ -132,7 +132,7 @@
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_CSTS, ONLY : XTT, XRHOLW, XLMTT,XLSTT,XLVTT, XCL, XCI, XPI, XRHOLI
-USE MODD_SNOW_PAR, ONLY : XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE, XIMPUR_COEFF, XIMPUR_EFOLD, XMAXIMPUR
+USE MODD_SNOW_PAR, ONLY : XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE, XIMPUR_COEFF,XIMPUR_INIT, XIMPUR_EFOLD, XMAXIMPUR
 USE MODD_SNOW_METAMO
 USE MODD_PREP_SNOW, ONLY : NIMPUR
 USE MODD_CONST_TARTES, ONLY:  XPSNOWG0, XPSNOWY0, XPSNOWW0, XPSNOWB0,NPNBANDS
@@ -149,6 +149,7 @@ USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODN_IO_OFFLINE,  ONLY : LFORCIMP
 !
 ! this module is not used anymore
 ! USE MODI_GREGODSTRATI
@@ -192,6 +193,8 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, P
 !                                      PQA     = atmospheric specific humidity
 !                                                at level za
 REAL, DIMENSION(:,:), INTENT(IN )   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral irradiance (W/m2/um)
+!
+REAL, DIMENSION(:,:), INTENT(IN )   :: PIMPWET, PIMPDRY  !Dry and wet deposit coefficient from Forcing File(kg/m²/s)
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PTG, PSOILCOND, PD_G, PPSN3L
 !                                      PTG       = Surface soil temperature (effective
@@ -418,6 +421,9 @@ REAL, DIMENSION(SIZE(PTA))          :: ZSNOWRHOF, ZSNOWDZF, ZSNOWGRAN1F, ZSNOWGR
 REAL, DIMENSION(SIZE(PTA))          :: ZSNOWAGEF
 REAL, DIMENSION(SIZE(PTA),NIMPUR)   ::  ZSNOWIMPURFV2
 
+REAL, DIMENSION(SIZE(PTA),NIMPUR)   ::  ZDRYCOEF ! Dry deposit coefficient for each kind of impurity (g)
+REAL, DIMENSION(SIZE(PTA),NIMPUR)   ::  ZWETCOEF ! Wet deposit coefficient for each kind of impurity (g/s)
+
 
 ! New roughness lengths in case of glaciers without snow.
 REAL, DIMENSION(SIZE(PTA))          :: ZZ0_SNOWICE, ZZ0H_SNOWICE, ZZ0EFF_SNOWICE
@@ -505,10 +511,15 @@ IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA
   ZSNOWW0 = XPSNOWW0  
   ZSNOWB0 = XPSNOWB0
   !
-  ZSNOWIMP_DENSITY(:,:,1) = 1500.       !Soot density
-  ZSNOWIMP_DENSITY(:,:,2) = 2500.       !Dust Density
+  IF (NIMPUR>0) THEN
+    ZSNOWIMP_DENSITY(:,:,1) = 1500.       !Soot density
+    IF (NIMPUR>1) THEN
+      ZSNOWIMP_DENSITY(:,:,2) = 2500.       !Dust Density
+    ENDIF 
+  ENDIF
   ! ZSNOWIMP_CONTENT=25.0E-9
   !
+  
 END IF
 !
 ZUSTAR2_IC = 0.0
@@ -562,6 +573,24 @@ ENDDO    ! end loop grid points
 ! Incrementation of snow layers age
 ZTSTEPDAYS = PTSTEP/86400. ! time step in days
 WHERE ( PSNOWSWE>0 ) PSNOWAGE = PSNOWAGE + ZTSTEPDAYS
+!
+IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA3" ) THEN
+  IF (LFORCIMP) THEN 
+    DO JIMP=1,NIMPUR
+      DO JJ = 1,SIZE(ZSNOW)
+        ZWETCOEF(JJ,JIMP)=PIMPWET(JJ,JIMP)*PTSTEP  !from kg/m²/s to g/m² 
+        ZDRYCOEF(JJ,JIMP)=PIMPDRY(JJ,JIMP)         !from kg/m²/s to g/m²/s
+      ENDDO
+    ENDDO
+  ELSE
+    DO JIMP=1,NIMPUR
+      DO JJ = 1,SIZE(ZSNOW)
+        ZWETCOEF(JJ,JIMP)=XIMPUR_INIT(JIMP)
+        ZDRYCOEF(JJ,JIMP)=XIMPUR_COEFF(JIMP)
+      ENDDO
+    ENDDO
+  ENDIF
+ENDIF
 !
 !***************************************PRINT IN**********************************************
 !
@@ -808,12 +837,12 @@ SELECT CASE (HSNOWRAD)
     ! Increase impurity content following parameterization from S. Morin
     DO JIMP=1,NIMPUR
       DO JJ=1, size(ZSNOW)
-        PSNOWIMPURV2(JJ,1,JIMP)=PSNOWIMPURV2(JJ,1,JIMP)+ZTSTEPDAYS*XIMPUR_COEFF(JIMP)*&
+        PSNOWIMPURV2(JJ,1,JIMP)=PSNOWIMPURV2(JJ,1,JIMP)+PTSTEP*ZDRYCOEF(JJ,JIMP)*&
         EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD)
         
         IF (INLVLS_USE(JJ)>1) THEN
           DO JST=2, INLVLS_USE(JJ)
-            PSNOWIMPURV2(JJ,JST,JIMP)=PSNOWIMPURV2(JJ,JST,JIMP)+ZTSTEPDAYS*XIMPUR_COEFF(JIMP)*&
+            PSNOWIMPURV2(JJ,JST,JIMP)=PSNOWIMPURV2(JJ,JST,JIMP)+PTSTEP*ZDRYCOEF(JJ,JIMP)*&
             EXP(-(SUM(PSNOWDZ(JJ,1:JST-1))+0.5+PSNOWDZ(JJ,JST))/XIMPUR_EFOLD)
           ENDDO
         ENDIF
@@ -4515,7 +4544,7 @@ DO JJ = 1,SIZE(PSNOW(:))
     PSNOWHISTF (JJ) = 0.0
     IF (HSNOWRAD=="TA3") THEN
       DO JIMP=1,NIMPUR
-        PSNOWIMPURFV2(JJ,JIMP)=XIMPUR_INIT(JIMP)
+        PSNOWIMPURFV2(JJ,JIMP)=ZWETCOEF(JJ,JIMP)
       ENDDO
     ENDIF
     PSNOWAGEF  (JJ) = 0.0

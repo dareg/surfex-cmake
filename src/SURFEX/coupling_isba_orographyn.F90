@@ -2,7 +2,7 @@
 SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
                                       HPROGRAM, HCOUPLING,                                    &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
+                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
@@ -38,6 +38,7 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DS
 !!                           improve forcing vertical shift
 !----------------------------------------------------------------
 !
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
@@ -117,6 +118,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -296,7 +299,7 @@ ENDIF
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
                KI, KSV, KSW,                                                                 &
                PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
-               PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                   &
+               PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,                   &
                ZRAIN, ZSNOW, ZLW, ZDIR_SW, ZSCA_SW, PSW_BANDS, ZPS, ZPA,                     &
                PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &

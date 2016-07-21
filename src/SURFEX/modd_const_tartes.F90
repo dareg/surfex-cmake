@@ -207,7 +207,7 @@ REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow g
 !
 !######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW) OR MULLER 2011(HIGH) #############################
 !
-LOGICAL, PARAMETER :: ISMULLER= .TRUE. ! Boolean to determine if we use skilles or muller model
+LOGICAL, PARAMETER :: ISMULLER= .FALSE. ! Boolean to determine if we use skilles or muller model
 !
 INTEGER, PARAMETER :: NPNBANDS_SKILLES = 21 ! number of reference bands
 

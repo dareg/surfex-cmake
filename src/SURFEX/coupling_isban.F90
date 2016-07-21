@@ -2,7 +2,7 @@
 SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
                              HPROGRAM, HCOUPLING,                                              &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
+                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
@@ -69,6 +69,8 @@ SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   
 !!-------------------------------------------------------------------
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+!
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -213,6 +215,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg_CO2/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -254,7 +258,6 @@ REAL, DIMENSION(KI)     :: ZEXNS    ! Exner function at surface                 
 REAL, DIMENSION(KI)     :: ZALFA    ! Wind direction                                (-)
 REAL, DIMENSION(KI)     :: ZQA      ! specific humidity                             (kg/kg)
 REAL, DIMENSION(KI)     :: ZCO2     ! CO2 concentration                             (kg/kg)
-REAL, DIMENSION(KI)     :: ZIMPWET     ! CO2 concentration                             (kg/kg)
 REAL                    :: ZSPINCO2 ! CO2 concentration                             (ppmv)
 REAL, DIMENSION(KI)     :: ZPEQ_A_COEF ! specific humidity implicit
 REAL, DIMENSION(KI)     :: ZPEQ_B_COEF ! coefficients (hum. in kg/kg)
@@ -650,6 +653,8 @@ REAL, DIMENSION(KSIZE) :: ZP_DIR     ! wind direction                        (ra
 REAL, DIMENSION(KSIZE) :: ZP_QA      ! air specific humidity forcing         (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_TA      ! air temperature forcing               (K)
 REAL, DIMENSION(KSIZE) :: ZP_CO2     ! CO2 concentration in the air          (kg/kg)
+REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPWET
+REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPDRY 
 REAL, DIMENSION(KSIZE,KSV) :: ZP_SV      ! scalar concentration in the air       (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH  ! zenithal angle        radian from the vertical)
 REAL, DIMENSION(KSIZE) :: ZP_PEW_A_COEF ! implicit coefficients
@@ -738,7 +743,7 @@ REAL, DIMENSION(KSIZE)               :: ZIRRIG_GR    ! green roof ground irrigat
 ! For multi-energy balance
 LOGICAL :: GMEB  ! True if multi-energy balance should be used for the specific patch
 !
-INTEGER :: JJ, JI, JK
+INTEGER :: JJ, JI, JK , JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !INTEGER :: ILUOUT   ! output listing logical unit
@@ -760,6 +765,8 @@ IF (IM%I%NPATCH==1) THEN
    ZP_QA(:)         = ZQA         (:)
    ZP_TA(:)         = PTA         (:)
    ZP_CO2(:)        = ZCO2        (:)
+   ZP_IMPWET(:,:)   = PIMPWET(:,:)
+   ZP_IMPDRY(:,:)   = PIMPDRY(:,:)
    ZP_SV(:,:)       = PSV         (:,:)
    ZP_PEW_A_COEF(:) = PPEW_A_COEF (:)
    ZP_PEW_B_COEF(:) = PPEW_B_COEF (:)
@@ -833,7 +840,15 @@ ELSE
     ENDDO
   ENDDO
 !
+  DO JIMP=1,NIMPUR
+    DO JJ=1,KSIZE
+      JI = KMASK(JJ)
+      ZP_IMPWET(JJ,JIMP)   = PIMPWET(JI,JIMP)
+    ENDDO
+  ENDDO
 ENDIF
+
+
 !
 !--------------------------------------------------------------------------------------
 !
@@ -1000,7 +1015,7 @@ ZIRRIG_GR(:)= 0.
            IM%PKDI%XP_SNOWFREE_ALB_VEG, IM%PKDI%XP_SNOWFREE_ALB_SOIL, IM%PKI%XP_IRRIG, &
            IM%PKI%XP_WATSUP, IM%PKI%XP_THRESHOLD, IM%PKI%XP_LIRRIGATE, IM%PKI%XP_LIRRIDAY, &
            IM%PKI%LP_STRESS, IM%PKI%XP_GC, IM%PKI%XP_F2I, IM%PKI%XP_DMAX, IM%PKI%XP_AH, &
-           IM%PKI%XP_BH, ZP_CO2, IM%PKI%XP_GMES, IM%I%XPOI, IM%PKI%XP_FZERO, IM%PKI%XP_EPSO, &
+           IM%PKI%XP_BH, ZP_CO2,ZP_IMPWET,ZP_IMPDRY, IM%PKI%XP_GMES, IM%I%XPOI, IM%PKI%XP_FZERO, IM%PKI%XP_EPSO, &
            IM%PKI%XP_GAMM, IM%PKI%XP_QDGAMM, IM%PKI%XP_QDGMES, IM%PKI%XP_T1GMES, IM%PKI%XP_T2GMES, &
            IM%PKI%XP_AMAX, IM%PKI%XP_QDAMAX,  IM%PKI%XP_T1AMAX, IM%PKI%XP_T2AMAX, IM%I%XABC, &
            IM%PKI%XP_DG, IM%PKI%XP_DZG, IM%PKI%XP_DZDIF, IM%PKI%NK_WG_LAYER, IM%PKI%XP_ROOTFRAC, &

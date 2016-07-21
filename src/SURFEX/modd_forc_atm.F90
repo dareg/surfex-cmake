@@ -60,6 +60,8 @@ REAL, DIMENSION(:), ALLOCATABLE  :: XPS       ! pressure at atmospheric model su
 REAL, DIMENSION(:), ALLOCATABLE  :: XPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:), ALLOCATABLE  :: XZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(:), ALLOCATABLE  :: XCO2      ! CO2 concentration in the air          (kg/kg)
+REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPWET ! wet deposit coefficient for each impurity type    (kg/m²/s)
+REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPDRY ! dry deposit coefficient for each impurity type          (kg/m²/s)
 REAL, DIMENSION(:), ALLOCATABLE  :: XSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(:), ALLOCATABLE  :: XRAIN     ! liquid precipitation                  (kg/m2/s)
 !

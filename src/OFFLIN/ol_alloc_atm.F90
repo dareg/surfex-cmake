@@ -52,12 +52,16 @@ USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
                             XTSURF    ,&
                             XZ0       ,&
                             XZ0H      ,&
-                            XQSURF
+                            XQSURF    ,&
+                            XIMPWET   ,&
+                            XIMPDRY
 !
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+!
+USE MODN_IO_OFFLINE,ONLY : LFORCIMP,NIMPUROF
 !
 IMPLICIT NONE
 !
@@ -116,6 +120,8 @@ IF (.NOT.ALLOCATED(XTSURF)) ALLOCATE(XTSURF(KNI)     )
 IF (.NOT.ALLOCATED(XZ0)   ) ALLOCATE(XZ0   (KNI)     )
 IF (.NOT.ALLOCATED(XZ0H)  ) ALLOCATE(XZ0H  (KNI)     )
 IF (.NOT.ALLOCATED(XQSURF)) ALLOCATE(XQSURF(KNI)     )
+IF (.NOT.ALLOCATED(XIMPWET))ALLOCATE(XIMPWET   (KNI,NIMPUROF))
+IF (.NOT.ALLOCATED(XIMPDRY))ALLOCATE(XIMPDRY   (KNI,NIMPUROF))
 !
 IF (SIZE(CSV)>=1) CSV(1) = '#CO   '
 IF (SIZE(CSV)>=2) CSV(2) = '#O3   '     
@@ -202,6 +208,8 @@ XPS       (:)=XUNDEF ! pressure at atmospheric model surface (Pa)
 XPA       (:)=XUNDEF ! pressure at forcing level             (Pa)
 XZS       (:)=XUNDEF ! atmospheric model orography           (m)
 XCO2      (:)=XUNDEF ! CO2 concentration in the air          (kg/kg)
+XIMPWET (:,:) =XUNDEF
+XIMPDRY (:,:) =XUNDEF
 XSNOW     (:)=XUNDEF ! snow precipitation                    (kg/m2/s)
 XRAIN     (:)=XUNDEF ! liquid precipitation                  (kg/m2/s)
 XSFTH     (:)=XUNDEF ! flux of heat                          (W/m2)

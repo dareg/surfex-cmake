@@ -22,7 +22,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                          PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
                          PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
-                         P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC)                               
+                         P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY)                               
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -164,6 +164,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA,                  
 !                                                at level za
 REAL, DIMENSION(:,:), INTENT(IN)    :: P_DIR_SW, P_SCA_SW
 !					P_DIR_SW, P_SCA_SW = direct and diffuse spectral solar irradiance (W/m2/um)
+REAL, DIMENSION(:,:), INTENT(IN)    ::PIMPWET,PIMPDRY
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0NAT, &
                                        PZ0EFF, PZ0HNAT, PALB,PSLOPEDIR
@@ -1065,7 +1066,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,&
-             PSPEC_ALB, PDIFF_RATIO)
+             PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY)
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0
@@ -1240,8 +1241,8 @@ IF (HSNOW_ISBA=='CRO') THEN
   ENDDO
   
   DO JIMP=1,NIMPUR
-    DO JWRK=1,INLVLS
-      DO JJ=1,SIZE(PSNOWSWE,1)
+    DO JWRK=1,KSIZE2
+      DO JJ=1,KSIZE1
         JI = KMASK(JJ)
         PSNOWIMPURV2(JI,JWRK,JIMP) = ZP_SNOWIMPURV2(JJ,JWRK,JIMP) !N6K
       ENDDO
