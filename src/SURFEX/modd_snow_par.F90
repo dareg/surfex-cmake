@@ -106,6 +106,10 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 !
 REAL, SAVE       :: XTAU_SMELT
 !
+! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
+!
+REAL, SAVE       :: X_RI_MAX
+!
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
 !--------------------------------------------------------------------------------
@@ -173,20 +177,14 @@ REAL, PARAMETER       :: XSNOWCRITD = 0.03  ! (m)
 !
 REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
 !                                      
-! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
-!
-REAL, PARAMETER       :: X_RI_MAX = 0.20
-!Cluzet et al 2016 implemented an new HSNOWRES option with different limit richardson number value
-REAL, PARAMETER       :: X_RI_MAX_RI2 = 0.10
-
 !Coefficients for Morin impurities model
 
-REAL,PARAMETER        :: XIMPUR_COEFF = 5.E-8  !	deposition intensity at top of the snowpack
+REAL,PARAMETER        :: XIMPUR_COEFF = 4.E-7 !	deposition intensity at top of the snowpack
 ! (unitless)
 REAL,PARAMETER        :: XIMPUR_COEFF_TA4 = 2.E-7
 REAL,PARAMETER        :: XIMPUR_EFOLD = 0.05 !(m) e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
 
-REAL, PARAMETER       :: XIMPUR_INIT = 1.E-7 ! g/g
+REAL, PARAMETER       :: XIMPUR_INIT = 5.E-8 ! g/g
 REAL, PARAMETER       :: XIMPUR_INIT_TA4 = 5.E-8 ! g/g
 REAL, PARAMETER       :: XMAXIMPUR   = 1.E-5 ! g/g
 
