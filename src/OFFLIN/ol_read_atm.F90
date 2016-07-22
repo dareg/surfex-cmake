@@ -110,11 +110,11 @@ IF      (HFORCING_FILETYPE == 'NETCDF') THEN
 ELSE IF (HFORCING_FILETYPE == 'ASCII ') THEN
   CALL OL_READ_ATM_ASCII  (KFORC_STEP,                       &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
-                           PCO2,PIMPWET,PIMPDRY,PDIR                                         )  
+                           PCO2,PDIR                                         )  
 ELSE IF (HFORCING_FILETYPE == 'BINARY') THEN
   CALL OL_READ_ATM_BINARY (KFORC_STEP,                       &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
-                           PCO2,PIMPWET,PIMPDRY,PDIR                                         )  
+                           PCO2,PDIR                                         )  
 ENDIF
 !
 ! Assume Qair <= Qsat_air
