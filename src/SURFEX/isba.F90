@@ -5,7 +5,7 @@
                       OMEB, OFORC_MEASURE, OMEB_LITTER,                          &
                       PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
-                      OATMORAD,OSNOWSYTRON,                                      &
+                      OATMORAD,OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,  HSNOWCOMP,  &
                       PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,                &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PVDIR,                   &
@@ -40,8 +40,8 @@
                       PRESA, PANFM, PFSAT,                                       &
                       PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
                       PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWGRAN1,                 &
-                      PSNOWGRAN2, PSNOWHIST, PSNOWAGE,PSNOWIMPURV2,  &
-                      PGRNDFLUX, PHPSNOW,                                        &
+                      PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PSNOWIMPUR, PGRNDFLUX,    &
+                      PHPSNOW,                                                   &
                       PSNOWHMASS, PRNSNOW, PHSNOW, PGFLUXSNOW,                   &
                       PUSTARSNOW, PSRSFC, PRRSFC, PLESL, PEMISNOW, PCDSNOW,      &
                       PCHSNOW, PTS_RAD, PTS, PHV, PQS, PSNOWTEMP, PSNOWLIQ,      &
@@ -158,6 +158,7 @@
 !!      (P. LeMoigne) 12/2014 EBA scheme update
 !!      (A. Boone)    02/2015 Consider spectral band dependence of snow for OTR_ML radiation option 
 !! (M. Dumont) 11/2015 Atmotartes and spectral output
+!!      (M. Lafaysse) 2016  Crocus multiphysics (Cluzet et al 2016)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -240,7 +241,8 @@ LOGICAL,              INTENT(IN)  :: OTR_ML     ! new TR
 !                                               ! '3-L' = 3-L snow scheme (option)
 !                                               !         (Boone and Etchevers 2000)
  CHARACTER(LEN=*),     INTENT(IN)  :: HSNOWRES   ! 'DEF' = Default: Louis (ISBA)
-!                                               ! 'RIL' = CROCUS (Martin) method
+!                                               ! 'RIL' = CROCUS (Noilhan) method
+!<bber                                          ! 'M98' = previous (Martin) CROCUS method
 !                                               !  ISBA-SNOW3L turbulant exchange option
  CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! Specific heat
 !                                               ! 'DRY' = dry Cp
@@ -276,20 +278,21 @@ LOGICAL,              INTENT(IN)  :: OAGRI_TO_GRASS
 LOGICAL,              INTENT(IN)  :: OSNOWDRIFT          ! activate snowdrift
 LOGICAL,              INTENT(IN)  :: OSNOWDRIFT_SUBLIM   ! activate sublimation during drift
 LOGICAL,              INTENT(IN)  :: OSNOW_ABS_ZENITH    ! activate parametrization of solar absorption for polar regions
-CHARACTER(3),         INTENT(IN)  :: HSNOWMETAMO
+CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
                                          ! HSNOWMETAMO=C13 Carmagnola et al 2014
                                          ! HSNOWMETAMO=T07 Taillandier et al 2007
                                          ! HSNOWMETAMO=F06 Flanner et al 2006
-CHARACTER(3),         INTENT(IN)  :: HSNOWRAD
                                          !-----------------------
                                          ! Crocus radiative transfer scheme
                                          ! HSNOWRAD=B92 Brun et al 1992
                                          ! HSNOWRAD=TAR TARTES (Libois et al 2013)
                                          ! HSNOWRAD=TA1 TARTES with constant impurities
                                          ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
+                                         ! HSNOWRAD=TA3 TARTES with a modified ageing of snow according to Morin/Charrois 2013-2014                                         
+                                         ! HSNOWRAD=TA4 TARTES with impurities scheme
 !
 LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTRON snow redistribution scheme
@@ -650,7 +653,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST   ! Snow grain historical param
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE    ! Snow grain age
 !                                                   NOTE : methamorphism is only activated if the flag
 !                                                   OSNOW_METAMO=TRUE
-REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPURV2 
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR
 ! 
 ! Diagnostics:
 !
@@ -1029,7 +1032,8 @@ IF(OMEB)THEN
    CALL ISBA_MEB(TPTIME, OMEB, OMEB_LITTER,PGNDLITTER, OFORC_MEASURE, OGLACIER,&
         OTR_ML, OAGRI_TO_GRASS, GSHADE, OSTRESSDEF,                            &
         OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
-        HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON, HPHOTO,                   &   
+        HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,                                    &
+        HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HPHOTO,                    &
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
@@ -1055,7 +1059,7 @@ IF(OMEB)THEN
         PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, ZF2,                                        &
         PWSAT, PWFC,                                                           &
-        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPURV2,     &
+        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,                &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
         PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
@@ -1113,7 +1117,7 @@ ELSE
    CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,&
            TPTIME, PTSTEP, PVEGTYPE,                                            &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                             &
-           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPURV2,  &
+           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,              &
            PTG, PCG, PCT, ZSOILHCAPZ, ZSOILCONDZ(:,1),                          &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,             &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                   &
@@ -1129,7 +1133,8 @@ ELSE
            PSNOWHMASS, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC,                &
            PLAT, PLON, ZQS3L,                                                   &
            OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
-           HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,KTAB_SYT,PSYTMASS,        &
+           HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,                                    &
+           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,      &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &

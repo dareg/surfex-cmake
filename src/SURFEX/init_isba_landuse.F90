@@ -158,7 +158,7 @@ DO JLAYER=1,I%TSNOW%NLAYER
 !                         HPROGRAM,ILUOUT,'IMPURSNOW', I%TSNOW%IMPUR (:,JLAYER,:),0)
       DO JIMP=1,NIMPUR
         CALL INI_VAR_FROM_PATCH(DTCO, I, UG, U, &
-                         HPROGRAM,ILUOUT,'IMPURSNOW', I%TSNOW%IMPURV2 (:,JLAYER,1,:),0)
+                         HPROGRAM,ILUOUT,'IMPURSNOW', I%TSNOW%IMPUR (:,JLAYER,1,:),0)
       ENDDO
                          
    ENDIF

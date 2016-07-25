@@ -17,7 +17,7 @@
                 PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                 PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
                 PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,                        &
-                OSNOWDRIFT,OSNOWDRIFT_SUBLIM                              )  
+                OSNOWDRIFT,OSNOWDRIFT_SUBLIM                              )
 !     ##########################################################################
 !
 !!****  *SNOW3L*
@@ -267,6 +267,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PQS
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PZENITH ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)    :: PXLAT,PXLON ! LAT/LON after packing
+
 !
 LOGICAL, INTENT(IN)               :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 !
@@ -1820,7 +1821,7 @@ PRI(:)=ZRI(:)
 !
 ! Surface aerodynamic resistance for heat transfers
 !
- CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW)
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, PZ0, PZ0H, ZAC, PRA, PCHSNOW, HSNOWRES)
 !
 ! For atmospheric model coupling:
 !

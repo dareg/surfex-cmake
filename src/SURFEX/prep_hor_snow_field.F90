@@ -12,7 +12,7 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,   &
-                                PUNIF_IMPURSNOWV2,  &                                
+                                PUNIF_IMPURSNOW,  &                                
                                 PF,PDEPTH,PVEGTYPE,             &
                                 PVEGTYPE_PATCH,PPATCH           )
 !     #######################################################
@@ -58,7 +58,7 @@ USE MODD_TYPE_SNOW
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE MODD_CSTS,           ONLY : XTT
-USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW
+USE MODD_PREP_SNOW,      ONLY : XGRID_SNOW,NIMPUR
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_SNOW
 USE MODD_PREP,           ONLY : LINTERP
@@ -113,7 +113,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW !
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW ! 
-REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOWV2 !
+REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOW !
 
 REAL,DIMENSION(:,:,:),  INTENT(OUT),OPTIONAL :: PF     ! output field (x,kpatch)
 REAL,DIMENSION(:,:,:),INTENT(IN), OPTIONAL :: PDEPTH ! thickness of each snow layer
@@ -136,6 +136,7 @@ LOGICAL                       :: GSNOW_IDEAL
 INTEGER                       :: JPATCH    ! loop on patches
 INTEGER                       :: JVEGTYPE  ! loop on vegtypes
 INTEGER                       :: JLAYER    ! loop on layers
+INTEGER                       :: JIMP    ! loop on impur types
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -156,7 +157,7 @@ IF (OUNIF) THEN
                       PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW,              &
                       PUNIF_LWCSNOW, PUNIF_ASNOW, PUNIF_SG1SNOW,          &
                       PUNIF_SG2SNOW, PUNIF_HISTSNOW, PUNIF_AGESNOW,       &
-                      PUNIF_IMPURSNOWV2, TPSNOW%NLAYER                       )
+                      PUNIF_IMPURSNOW, TPSNOW%NLAYER                       )
 ELSE IF (HFILETYPE=='GRIB  ') THEN
   CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,TPSNOW%NLAYER,ZFIELDIN)
 ELSE IF (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '.OR. HFILETYPE=='FA    ') THEN
@@ -434,11 +435,13 @@ SELECT CASE (HSNSURF(1:3))
     ENDIF
     !
     !* mask for areas where there is no snow
-    DO JPATCH=1,KPATCH
-      DO JLAYER=1,TPSNOW%NLAYER
-        WHERE(PDEPTH(:,JLAYER,JPATCH)==0. .OR. PDEPTH(:,JLAYER,JPATCH)==XUNDEF) TPSNOW%IMPURV2(:,JLAYER,JPATCH,1) = XUNDEF
-      END DO
-    END DO
+    DO JIMP=1,NIMPUR
+        DO JPATCH=1,KPATCH
+          DO JLAYER=1,TPSNOW%NLAYER
+            WHERE(PDEPTH(:,JLAYER,JPATCH)==0. .OR. PDEPTH(:,JLAYER,JPATCH)==XUNDEF) TPSNOW%IMPUR(:,JLAYER,JIMP,JPATCH) = XUNDEF
+          END DO
+        END DO
+    ENDDO
     !
   
     

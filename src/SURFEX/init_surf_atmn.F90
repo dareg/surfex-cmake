@@ -259,7 +259,7 @@ IF (LNAM_READ) THEN
                             YSC%DGU%LCOEF,YSC%DGU%LSURF_VARS,YSC%DGU%LSURF_BUDGETC,          &
                             YSC%DGU%LRESET_BUDGETC,YSC%DGU%LSELECT, YSC%DGU%LPROVAR_TO_DIAG, &
                             YSC%DGU%LDIAG_GRID, YSC%DGU%LFRAC, YSC%DGU%XDIAG_TSTEP,&
-                            YSC%DGU%LSNOWDIMNC )                       
+                            YSC%DGU%LSNOWDIMNC,YSC%DGU%LRESETCUMUL)  
  !
 ENDIF
 !

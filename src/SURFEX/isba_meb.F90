@@ -2,7 +2,8 @@
       SUBROUTINE ISBA_MEB(TPTIME, OMEB, OMEB_LITTER, PGNDLITTER, OFORC_MEASURE, OGLACIER, &
         OTR_ML, OAGRI_TO_GRASS, OSHADE, OSTRESSDEF,                            &
         OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
-        HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON, HPHOTO,                   &           
+        HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,                           &
+        HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HPHOTO,                    &
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
@@ -28,7 +29,7 @@
         PAN, PANDAY, PANFM, PGPP, PANF, PRESP_BIOMASS_INST,                    &
         PFF, PPSN, PPALPHAN, PLAI, PF2,                                        &
         PWSAT, PWFC,                                                           &
-        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPURV2,     &
+        PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,                &
         PSNOWRHO, PSNOWSWE, PSNOWHEAT, PSNOWTEMP, PSNOWDZ, PSNOWLIQ, PFEMIS,   &
         PSWNET_N, PSWNET_V, PSWNET_G, PSWNET_NS, PALBT, PSWDOWN_GN,            &
         PLW_RAD, PLWNET_N, PLWNET_V, PLWNET_G, PLWDOWN_GN,                     &
@@ -106,7 +107,6 @@ USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 USE MODD_ISBA_PAR,       ONLY : XRS_MAX 
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
-USE MODD_PREP_SNOW   ,   ONLY : NIMPUR
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE MODE_THERMOS
@@ -186,11 +186,12 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWMETAMO   ! Crocus metamorphism schem
 !                                                    ! HSNOWMETAMO = C13 Carmagnola et al 2014
 !                                                    ! HSNOWMETAMO = T07 Taillandier et al 2007
 !                                                    ! HSNOWMETAMO = F06 Flanner et al 2006
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD      ! Crocus radiative transfer scheme:
-!                                                    ! HSNOWMETAMO = B92 Brun et al 1992
-!                                                    ! HSNOWMETAMO = TAR TARTES (Libois et al 2013)
-!                                                    ! HSNOWMETAMO = TA1 TARTES with constant impurities
-!                                                    ! HSNOWMETAMO = TA2 TARTES with constant impurities as a 
+CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP     
+                                                     ! Crocus radiative transfer scheme:
+!                                                    ! HSNOWRAD = B92 Brun et al 1992
+!                                                    ! HSNOWRAD = TAR TARTES (Libois et al 2013)
+!                                                    ! HSNOWRAD = TA1 TARTES with constant impurities
+!                                                    ! HSNOWRAD = TA2 TARTES with constant impurities as a 
 !                                                    !                   function of ageing
 CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO        ! Kind of photosynthesis;
 !                                                    ! 'NON' NOTE: this option currently supported (Jarvis)
@@ -376,7 +377,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1    ! Snow grain parameter 1
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN2    ! Snow grain parameter 2 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST     ! Snow grain historical parameter
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE      ! Snow grain age
-REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPURV2    ! NOTE : methamorphism is only activated if the flag
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR    ! NOTE : methamorphism is only activated if the flag
 !                                                    ! OSNOW_METAMO=TRUE
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PTG           ! Soil layer average temperature (K)
@@ -1181,10 +1182,10 @@ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
 !*      10.0    Explicit snow scheme (MEB: impose surface fluxes as upper BC)
 !              ----------------------------------------------------------------
 !
-CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
+ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,          &
            TPTIME, PTSTEP, PVEGTYPE,                                                   &
            PSNOWSWE, PSNOWHEAT, PSNOWRHO, PSNOWALB,                                    &
-           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPURV2,          &
+           PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,          &
            ZTGL, PCG, ZCTSFC, ZSOILHCAPZ, ZSOILCONDZ(:,1),                             &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, ZRRSFC, PSR_GN,              &
            PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                          &
@@ -1199,7 +1200,8 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
            PSNOWHMASS, PRISNOW, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
            OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
-           HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,KTAB_SYT,PSYTMASS,              &
+           HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,                                &
+           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,              &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,            &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &

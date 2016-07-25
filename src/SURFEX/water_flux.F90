@@ -123,6 +123,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZFP       ! working variable
 REAL, DIMENSION(SIZE(PTA)) :: ZRRCOR    ! correction of CD, CH, CDN due to moist-gustiness
 REAL, DIMENSION(SIZE(PTA)) :: ZCHARN    ! Charnock number
 !
+CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -236,7 +237,7 @@ ENDIF
 !              -------------------------------------------------------
 !
 IF (.NOT.LDRAG_COEF_ARP) THEN
-   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0SEA, PZ0HSEA, ZAC, ZRA, PCH)
+   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0SEA, PZ0HSEA, ZAC, ZRA, PCH, YSNOWRES)
 ENDIF
 !
 IF (LRRGUST_ARP) THEN

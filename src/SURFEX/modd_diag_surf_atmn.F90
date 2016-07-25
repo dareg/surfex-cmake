@@ -26,7 +26,7 @@
 !!      Modified    04/2009 : precip for/from restart file.
 !!      Modified    08/2009 : BUDGETC for all tiles
 !!      Modified    09/2015 : M Lafaysse LSNOWDIMNC
-
+!!      Modified    06/2016 : M Lafaysse LRESETCUMUL
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -62,7 +62,7 @@ TYPE DIAG_SURF_ATM_t
   LOGICAL    :: LSELECT          ! switch to control which fields are written
                                  ! (only those whose naem appears in in text array)
   LOGICAL    :: LSNOWDIMNC       ! if true create a snow layer dimension in nc files
-  
+  LOGICAL    :: LRESETCUMUL      ! reset cumulated variables at 0 at each output timestep
 !  
   TYPE(DATE_TIME):: TIME_BUDGETC
 !                                  
@@ -329,7 +329,7 @@ YDIAG_SURF_ATM%LREAD_BUDGETC=.FALSE.
 YDIAG_SURF_ATM%LPROVAR_TO_DIAG=.FALSE.
 YDIAG_SURF_ATM%LSELECT=.FALSE.
 YDIAG_SURF_ATM%LSNOWDIMNC=.FALSE.
-
+YDIAG_SURF_ATM%LRESETCUMUL=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_SURF_ATM_N:DIAG_SURF_ATM_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_SURF_ATM_INIT
 

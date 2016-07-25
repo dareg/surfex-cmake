@@ -174,7 +174,7 @@ ELSE
 !
 !               -------------------------------------------------
 !
-   CALL SURFACE_AERO_COND(PRI, ZCUR, ZUCUR, PZVMOD, PZ0, PZ0H, ZAC, PRA, PCH)
+   CALL SURFACE_AERO_COND(PRI, ZCUR, ZUCUR, PZVMOD, PZ0, PZ0H, ZAC, PRA, PCH, 'RIL')
 !
 !-------------------------------------------------------------------------------
 !

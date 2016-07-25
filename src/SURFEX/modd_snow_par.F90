@@ -111,6 +111,10 @@ REAL,DIMENSION(5), SAVE     :: XIMPUR_INIT !(g)
 REAL, SAVE    :: XMAXIMPUR=1         !g
 
 !
+! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
+!
+REAL, SAVE       :: X_RI_MAX
+!
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
 !--------------------------------------------------------------------------------
@@ -178,11 +182,21 @@ REAL, PARAMETER       :: XSNOWCRITD = 0.03  ! (m)
 !
 REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
 !                                      
-! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
-!
-REAL, PARAMETER       :: X_RI_MAX = 0.20
+!Coefficients for Morin impurities model
+! (unitless)
+REAL,PARAMETER        :: XIMPUR_COEFF_TA4 = 2.E-7
+REAL,PARAMETER        :: XIMPUR_EFOLD = 0.05 !(m) e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
 
-REAL, PARAMETER      :: XIMPUR_EFOLD=0.05 !(m) e folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer for the deposition of snow impurity
+REAL, PARAMETER       :: XIMPUR_INIT_TA4 = 5.E-8 ! g/g
+
+!Cluzet et al 2016 liquid water content options parameters
+
+! percentage of the total pore volume to compute the max liquid water holding capacity
+REAL, PARAMETER      :: XPERCENTAGEPORE_B92 = 0.05 !(%) original parameter value from Crocus, according to Brun et al. 1992 
+REAL, PARAMETER      :: XPERCENTAGEPORE_O04 = 0.033!(%) different value used in CLM from Oleson et al. 2004
+!
+REAL, PARAMETER      :: XWHOLDMAX_S02 = 0.08 !(-)        fixed value for the maximum liquid water mass fracton in SNOWPACK (Lehning et al. 2002)
+
 
 !                                       
 ! ISBA-ES Maximum snow liquid water holding capacity (fraction by mass) parameters:
@@ -206,7 +220,7 @@ REAL, PARAMETER :: XD1 = 1., XD2 = 3., XD3 = 4., XX = 99., &
                    XVALB2 = .96, XVALB3 = 1.58, XVALB4 = .92, XVALB5 = .90, &
                    XVALB6 = 15.4, XVALB7 = 346.3, XVALB8 = 32.31, XVALB9 = .88, &
                    XVALB10 = .200, XVALB11 = .6, XVDIOP1 = 2.3E-3, XVRPRE1 = .5, &
-                   XVRPRE2=1.5
+                   XVRPRE2=1.
 !
 ! for ageing effects:
 REAL, PARAMETER :: XVPRES1 = 87000.
@@ -247,13 +261,37 @@ REAL, PARAMETER :: XSNOWTHRMCOND_CVAP = -289.99  ! (K)
 !
 ! Crocus thermal conducitivity coefficient from Yen (1981)
 REAL, PARAMETER :: XVRKZ6 = 1.88
+! Cluzet et al 2016, Crocus thermal conductivity coefficients from Calonne et al. 2011
 !
+REAL, PARAMETER :: XSNOWTHRMCOND_C11_1 = 2.5E-6   ! (W m5 K-1 kg-2)
+REAL, PARAMETER :: XSNOWTHRMCOND_C11_2 = -1.23E-4 ! (W m2 K-1 km-1)
+REAL, PARAMETER :: XSNOWTHRMCOND_C11_3 = 0.024    ! (W m-1 K-1) 
 !--------------------------------------------------------------------------------
-! ISBA-ES CROCUS (Pahaut 1976): snowfall density coefficients:
+! ISBA-ES CROCUS (Brun 1989): snowfall density coefficients:
 !
 REAL, PARAMETER :: XSNOWFALL_A_SN = 109.0  ! kg/m3
 REAL, PARAMETER :: XSNOWFALL_B_SN =   6.0  ! kg/(m3 K)
 REAL, PARAMETER :: XSNOWFALL_C_SN =  26.0  ! kg/(m7/2 s1/2)
+!
+! Cluzet et al 2016, Coefficients for A76 fresh snow density option (from Anderson 76)
+REAL, PARAMETER	      :: XRHOS_A76_1 = 50.  ! (kg m-3)
+REAL, PARAMETER       :: XRHOS_A76_2 = 1.7  ! (K-1)
+REAL, PARAMETER	      :: XRHOS_A76_3 = 15.   ! (K)
+! Coefficents for S02 fresh snow density option (from Schmucki and al. 2014)
+REAL, PARAMETER	      :: XRHOS_S02_1 = 3.28 !
+REAL, PARAMETER	      :: XRHOS_S02_2 = 0.03 !  
+REAL, PARAMETER	      :: XRHOS_S02_3 = -0.36 !
+REAL, PARAMETER	      :: XRHOS_S02_4 = -0.75 ! 
+REAL, PARAMETER	      :: XRHOS_S02_5 = 0.8  !  (fixed relative humidity value when snowing (RH = 0.8)
+REAL, PARAMETER	      :: XRHOS_S02_6 = 0.3  !  
+
+
+! Coefficients for P75 (Pahaut 1975 original law quotesd by Brun 1989 but with different values
+REAL, PARAMETER :: XSNOWFALL_A_SN_P75 = 109.0  ! kg/m3
+REAL, PARAMETER :: XSNOWFALL_B_SN_P75 =   8.0  ! kg/(m3 K) this one is different from Brun 89
+REAL, PARAMETER :: XSNOWFALL_C_SN_P75 =  26.0  ! kg/(m7/2 s1/2)
+
+!
 !
 ! Coefficients for the optimal vertical grid calculation
 REAL, PARAMETER :: XDZ1 = 0.01

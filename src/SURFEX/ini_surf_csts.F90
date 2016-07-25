@@ -49,6 +49,7 @@ USE MODD_MEB_PAR,   ONLY : XTAU_LW,                            &
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XAGLAMIN, XAGLAMAX, XHGLA,          &
                            XWSNV, XZ0SN, XZ0HSN,               &
+                           X_RI_MAX,                           &
                            XTAU_SMELT,                         &
                            XALBICE1, XALBICE2, XALBICE3,       &
                            XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW,    &
@@ -57,6 +58,7 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            LMEBREC,                            &
                            XANSFRACMEL, XTEMPANS,              &
                            XANSMINMEB, XIMPUR_INIT, XIMPUR_COEFF
+USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_NAMELIST
@@ -93,7 +95,7 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
-                             XPERCENTAGEPORE, XIMPUR_INIT, XIMPUR_COEFF
+                             XPERCENTAGEPORE,XVVISC3,X_RI_MAX,XIMPUR_INIT, XIMPUR_COEFF
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -172,6 +174,9 @@ XZ0SN = 0.001
 !
 XZ0HSN = 0.0001
 !
+! Maximum Richardson number limit for very stable conditions over snow using the 'RIL' option
+X_RI_MAX = 0.2
+!
 ! Snow Melt timescale with D95 (s): needed to prevent time step 
 ! dependence of melt when snow fraction < unity.
 !
@@ -218,6 +223,9 @@ XVAGING_GLACIER   = 900.
 
 ! percentage of the total pore volume to compute the max liquid water holding capacity   !Pahaut 1976
 XPERCENTAGEPORE = 0.05
+!
+! Snow viscosity coefficient
+XVVISC3= 0.023
 !
 ! Roughness length for flood (m)
 !

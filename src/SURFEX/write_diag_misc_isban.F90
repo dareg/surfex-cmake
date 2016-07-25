@@ -422,7 +422,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
               HCOMMENT=YCOMMENT)                  
       YCOMMENT='Thickness of refrozen snow at the top of the snowpack'
       CALL WRITE_SURF(DGU, U, &
-              HPROGRAM,'REFROZ_TH',DGMI%XAVG_SNOW_WETTHICKNESS(:),IRESP,&
+              HPROGRAM,'REFROZ_TH',DGMI%XAVG_SNOW_REFROZENTHICKNESS(:),IRESP,&
               HCOMMENT=YCOMMENT)                                 
     ENDIF
     
@@ -445,7 +445,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
         WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
         CALL WRITE_SURF(DGU, U,& 
-                    HPROGRAM,YREFIMPUR,DGMI%XIMPURV2(:,:,JIMP,:),IRESP,HCOMMENT=YCOMMENT)
+                    HPROGRAM,YREFIMPUR,DGMI%XIMPUR(:,:,JIMP,:),IRESP,HCOMMENT=YCOMMENT)
       ENDDO             
   ENDIF
   !
@@ -744,7 +744,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
               HCOMMENT=YCOMMENT) 
       YCOMMENT='Thickness of refrozen snow at the top of the snowpack per patch'
       CALL WRITE_SURF(DGU, U, &
-              HPROGRAM,'REFROZ_TH_P',DGMI%XSNOW_WETTHICKNESS(:,:),IRESP,&
+              HPROGRAM,'REFROZ_TH_P',DGMI%XSNOW_REFROZENTHICKNESS(:,:),IRESP,&
               HCOMMENT=YCOMMENT)                
     ENDIF
     
