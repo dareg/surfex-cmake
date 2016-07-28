@@ -175,7 +175,7 @@ END IF
 !*       3.    Allocations
 !              -----------
 !
-IF (IVERSION >= 7 ) CALL READ_SURF(&
+IF (TPSNOW%SCHEME=='CRO' ) CALL READ_SURF(&
                  HPROGRAM,'NIMPUR',NIMPUR,IRESP)
  CALL ALLOCATE_GR_SNOW(TPSNOW,KLU,KPATCH)
 !
@@ -190,7 +190,6 @@ END IF
 !
 IF (IVERSION >= 7 .AND. HSURFTYPE=='VEG') CALL READ_SURF(&
                  HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP)
-
 !
 !-------------------------------------------------------------------------------
 !

@@ -205,9 +205,9 @@ REAL, PARAMETER :: XPSNOWY0 = 0.728 ! Value of y of snow grains at nr=1.3 (no un
 REAL, PARAMETER :: XPSNOWW0 = 0.0611 ! Value of W of snow grains at nr=1.3 (no unit)
 REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths (no unit)
 !
-!######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW) OR MULLER 2011(HIGH) #############################
+!######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW ABSORPTION) OR MULLER 2011(HIGH ABSORPTION) #############################
 !
-LOGICAL, PARAMETER :: ISMULLER= .FALSE. ! Boolean to determine if we use skilles or muller model
+LOGICAL, PARAMETER :: ISMULLER= .TRUE. ! Boolean to determine if we use skilles or muller model
 !
 INTEGER, PARAMETER :: NPNBANDS_SKILLES = 21 ! number of reference bands
 
