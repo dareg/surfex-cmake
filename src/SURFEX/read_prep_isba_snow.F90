@@ -120,7 +120,7 @@ IF (LNAM_READ) THEN
   !
   CSNOW = 'D95'
   NSNOW_LAYER = 1
-  NIMPUR = 1    !Number of different type of impurities
+  NIMPUR = 0    !Number of different type of impurities, set to 0 by default
   !
   CFILE_SNOW = '                         '
   CTYPE_SNOW = '      '
