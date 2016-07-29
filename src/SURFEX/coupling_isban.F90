@@ -71,7 +71,10 @@ SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_PREP_SNOW, ONLY : NIMPUR
+
+#ifdef SFX_OL
 USE MODN_IO_OFFLINE, ONLY : LFORCIMP
+#endif
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -766,10 +769,12 @@ IF (IM%I%NPATCH==1) THEN
    ZP_QA(:)         = ZQA         (:)
    ZP_TA(:)         = PTA         (:)
    ZP_CO2(:)        = ZCO2        (:)
+#ifdef SFX_OL
    IF (LFORCIMP) THEN
     ZP_IMPWET(:,:)   = PIMPWET(:,:)
     ZP_IMPDRY(:,:)   = PIMPDRY(:,:)
    ENDIF
+#endif
    ZP_SV(:,:)       = PSV         (:,:)
    ZP_PEW_A_COEF(:) = PPEW_A_COEF (:)
    ZP_PEW_B_COEF(:) = PPEW_B_COEF (:)
@@ -843,6 +848,7 @@ ELSE
     ENDDO
   ENDDO
 !
+#ifdef SFX_OL
   IF (LFORCIMP) THEN
     DO JIMP=1,NIMPUR
       DO JJ=1,KSIZE
@@ -851,6 +857,7 @@ ELSE
       ENDDO
     ENDDO
   ENDIF
+#endif
 ENDIF
 
 

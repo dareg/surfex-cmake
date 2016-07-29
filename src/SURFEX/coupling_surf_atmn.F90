@@ -41,7 +41,10 @@ SUBROUTINE COUPLING_SURF_ATM_n (YSC, &
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_PREP_SNOW, ONLY : NIMPUR
+
+#ifdef SFX_OL
 USE MODN_IO_OFFLINE, ONLY : LFORCIMP
+#endif
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -549,14 +552,16 @@ DO JJ=1,KSIZE
   ZP_ZS(JJ)         = PZS         (JI)
 ENDDO
 ! 
-IF (LFORCIMP) THEN        !Fill impurity forcing fields if LFORCIMP activated
-  DO JIMP=1,NIMPUR
-    DO JJ=1,KSIZE
-      ZP_IMPWET(JJ,JIMP)=PIMPWET(JI,JIMP)
-      ZP_IMPDRY(JJ,JIMP)=PIMPDRY(JI,JIMP)
+#ifdef SFX_OL
+  IF (LFORCIMP) THEN        !Fill impurity forcing fields if LFORCIMP activated
+    DO JIMP=1,NIMPUR
+      DO JJ=1,KSIZE
+        ZP_IMPWET(JJ,JIMP)=PIMPWET(JI,JIMP)
+        ZP_IMPDRY(JJ,JIMP)=PIMPDRY(JI,JIMP)
+      ENDDO
     ENDDO
-  ENDDO
-ENDIF
+  ENDIF
+#endif
 !consider decoupling between CO2 emploied for photosynthesis and radiative CO2
 !recommended as C4MIP option (XCO2UNCPL in ppmv)
 IF(XCO2UNCPL/=XUNDEF)THEN

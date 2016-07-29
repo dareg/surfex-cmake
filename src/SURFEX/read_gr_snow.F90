@@ -175,8 +175,14 @@ END IF
 !*       3.    Allocations
 !              -----------
 !
-IF (TPSNOW%SCHEME=='CRO' ) CALL READ_SURF(&
+! Read number of impurity type in the Forcing File if something has been written(IVERSION>9)
+IF (TPSNOW%SCHEME=='CRO' .AND.IVERSION>8) THEN
+CALL READ_SURF(&
                  HPROGRAM,'NIMPUR',NIMPUR,IRESP)
+ELSE
+NIMPUR=0
+ENDIF
+
  CALL ALLOCATE_GR_SNOW(TPSNOW,KLU,KPATCH)
 !
 IF (.NOT. GSNOW) THEN

@@ -150,7 +150,9 @@ USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+#ifdef SFX_OL
 USE MODN_IO_OFFLINE,  ONLY : LFORCIMP
+#endif
 !
 ! this module is not used anymore
 ! USE MODI_GREGODSTRATI
@@ -596,7 +598,8 @@ ZTSTEPDAYS = PTSTEP/86400. ! time step in days
 ! Lafaysse / Cluzet : reimplementation of first Morin/Charrois impuritites content option:
 ! part of code modified by S. Morin 22/08/2013 on impurities behavior
 !
-IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA3" ) THEN
+IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA3" .OR. HSNOWRAD=="TA4") THEN
+#ifdef SFX_OL
   IF (LFORCIMP) THEN 
     DO JIMP=1,NIMPUR
       DO JJ = 1,SIZE(ZSNOW)
@@ -612,6 +615,14 @@ IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA
       ENDDO 
     ENDDO
   ENDIF
+#else
+  DO JIMP=1,NIMPUR
+    DO JJ = 1,SIZE(ZSNOW)
+      ZWETCOEF(JJ,JIMP)=XIMPUR_INIT(JIMP)       ! Value defined in the namelist (g/m²) 
+      ZDRYCOEF(JJ,JIMP)=XIMPUR_COEFF(JIMP)      ! Value defined in the namelist (g/m²/s)
+    ENDDO 
+  ENDDO
+#endif
 ENDIF
 !
 
