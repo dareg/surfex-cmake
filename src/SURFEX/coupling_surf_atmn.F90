@@ -548,8 +548,8 @@ DO JJ=1,KSIZE
   ZP_PA(JJ)         = PPA         (JI)
   ZP_ZS(JJ)         = PZS         (JI)
 ENDDO
-!
-IF (LFORCIMP) THEN
+! 
+IF (LFORCIMP) THEN        !Fill impurity forcing fields if LFORCIMP activated
   DO JIMP=1,NIMPUR
     DO JJ=1,KSIZE
       ZP_IMPWET(JJ,JIMP)=PIMPWET(JI,JIMP)

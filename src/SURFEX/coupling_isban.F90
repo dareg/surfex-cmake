@@ -71,6 +71,7 @@ SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
 USE MODD_PREP_SNOW, ONLY : NIMPUR
+USE MODN_IO_OFFLINE, ONLY : LFORCIMP
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -765,8 +766,10 @@ IF (IM%I%NPATCH==1) THEN
    ZP_QA(:)         = ZQA         (:)
    ZP_TA(:)         = PTA         (:)
    ZP_CO2(:)        = ZCO2        (:)
-   ZP_IMPWET(:,:)   = PIMPWET(:,:)
-   ZP_IMPDRY(:,:)   = PIMPDRY(:,:)
+   IF (LFORCIMP) THEN
+    ZP_IMPWET(:,:)   = PIMPWET(:,:)
+    ZP_IMPDRY(:,:)   = PIMPDRY(:,:)
+   ENDIF
    ZP_SV(:,:)       = PSV         (:,:)
    ZP_PEW_A_COEF(:) = PPEW_A_COEF (:)
    ZP_PEW_B_COEF(:) = PPEW_B_COEF (:)
@@ -840,12 +843,14 @@ ELSE
     ENDDO
   ENDDO
 !
-  DO JIMP=1,NIMPUR
-    DO JJ=1,KSIZE
-      JI = KMASK(JJ)
-      ZP_IMPWET(JJ,JIMP)   = PIMPWET(JI,JIMP)
+  IF (LFORCIMP) THEN
+    DO JIMP=1,NIMPUR
+      DO JJ=1,KSIZE
+        JI = KMASK(JJ)
+        ZP_IMPWET(JJ,JIMP)   = PIMPWET(JI,JIMP)
+      ENDDO
     ENDDO
-  ENDDO
+  ENDIF
 ENDIF
 
 
