@@ -39,7 +39,7 @@
 !              ------------
 !
 !
-USE MODD_GRID_n, ONLY : GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 !
 USE MODE_GRIDTYPE_LONLAT_REG
 !
