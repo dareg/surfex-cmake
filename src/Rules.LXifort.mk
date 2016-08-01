@@ -59,8 +59,10 @@ endif
 #
 ifeq "$(VER_MPI)" "NOMPI"
 F90= ifort
+CC = icc
 else
 F90= mpiifort
+CC = mpiicc
 endif
 #
 REALFC=ifort
@@ -82,8 +84,6 @@ FX90FLAGS = $(FCFLAGS_OMP) $(OPT)
 #
 #LDFLAGS    =  -Wl,-noinhibit-exec  -Wl,-warn-once $(PAR)
 LDFLAGS    =  $(FCFLAGS_OMP) -Wl,-warn-once $(PAR)
-#
-CC = icc
 #
 CFLAGS = $(CFLAGS_OMP) -DLINUX -DLITTLE_ENDIAN -DLITTLE -O3 -xAVX -vec-report3  -DPOINTER_64
 #

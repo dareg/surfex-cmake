@@ -83,6 +83,11 @@ export GRIB_DEFINITION_PATH=\${SRC_SURFEX}"/src/LIB/grib_api-1.9.9/definitions"
 export VER_OASIS=${VER_OASIS}
 export VERSION_OASIS=${VERSION_OASIS}
 #
+# Version of XIOS
+#
+export VER_XIOS=${VER_XIOS}
+export VERSION_XIOS=${VERSION_XIOS}
+#
 # Version of DR_HOOK
 #
 export VER_DRHOOK=${VER_DRHOOK}

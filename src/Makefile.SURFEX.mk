@@ -278,6 +278,27 @@ INC        += $(INC_FM)
 endif
 endif
 ##########################################################
+#           XIOS Library                                 #
+##########################################################
+#
+ifneq "$(VER_MPI)" "NOMPI"
+#
+ifneq "$(VER_XIOS)" "0"
+DIR_XIOS?=${SRC_SURFEX}/src/LIB/XIOS-${VERSION_XIOS}-${ARCH}
+LIB_XIOS?=-L$(DIR_XIOS)/lib -lxios -lstdc++
+INC_XIOS?=-I$(DIR_XIOS)/inc
+XIOS_KEY?=${DIR_XIOS}/lib/libxios.a
+#
+LIBS       += $(LIB_XIOS)
+INC        += $(INC_XIOS)
+FPPFLAGS   += -DWXIOS
+VPATH      += $(DIR_XIOS)/inc
+#
+endif
+#
+endif
+#
+##########################################################
 #           Librairie OASIS3-MCT                         #
 ##########################################################
 #RJ: must be before netcdf LIBS to correctly link
@@ -552,6 +573,7 @@ ifeq "$(VER_CDF)" "CDFCTI"
 CDF_PATH?=/usr
 INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
+XIOS_CDF_OPT   = netcdf4_seq
 endif
 
 #
@@ -588,7 +610,20 @@ CDF_PATH       ?= /opt/softs/libraries/ICC16.1.150/netcdf-4.4.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
 endif
-
+#
+# Linux on prolix with Intel15 for CNRM-CM6 compatibility (OK for XIOS)
+#
+ifeq "$(VER_CDF)" "CDFPROLXPARALL"
+VINTEL         = /opt/softs/libraries/ICC16.1.150
+CDF_PATH       = ${VINTEL}/netcdf-c-4.4.0_par_giec
+HDF_PATH       = ${VINTEL}/hdf5-1.8.16_par_thrsaf
+SZIP_PATH      = ${VINTEL}/szip-2.1
+ZLIB_PATH      = ${VINTEL}/zlib-1.2.5
+INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
+XIOS_CDF_OPT   = netcdf4_par
+endif
+#
 ifneq "x$(VER_GRIBAPI)" "x"
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
@@ -612,7 +647,6 @@ ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
 PROG_LIST += PGD PREP OFFLINE SODA SXPOST
-#PGD PREP OFFLINE SODA SXPOST
 #PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 endif
@@ -634,7 +668,7 @@ endif
 #                                                        #
 ##########################################################
 #
-ARCH_XYZ        := $(ARCH_XYZ)-$(OPTLEVEL)
+ARCH_XYZ        := $(ARCH_XYZ)-$(OPTLEVEL)-X$(VER_XIOS)
 OBJDIR_ROOT     := $(OBJDIR_ROOT)-$(ARCH_XYZ)
 LIB_OBJS_ROOT   := $(LIB_OBJS_ROOT)-$(ARCH_XYZ)
 #

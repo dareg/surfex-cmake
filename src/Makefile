@@ -205,7 +205,7 @@ DEP_ALL_MASTER = $(sort $(filter-out $(IGNORE_DEP_MASTER),$(DEP_MASTER)) )
 DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 #
 
-.PHONY : clean all objdir objdirmaster depall objs lib prog print
+.PHONY : clean all objdir objdirmaster depall objs lib prog print xios
 
 .DELETE_ON_ERROR:
 
@@ -234,6 +234,10 @@ ifeq "$(VER_OASIS)" "mct"
 ifneq "$(VER_MPI)" "NOMPI"
 EXTCOUPLERS += oasis
 endif
+endif
+
+ifeq "$(VER_XIOS)" "2"
+EXTCOUPLERS += xios
 endif
 
 # main projectes
@@ -445,7 +449,8 @@ $(OASIS_KEY) : $(CDF_INC)
 	@echo '===> check util/make_dir/COMP.err for STDERR logs'
 	cd $(DIR_OASIS)/util/make_dir && \
 	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS= LDFLAGS= \
-	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(OPT) $(INC_NETCDF) $(LIB_NETCDF)" \
+	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(F90FLAGS)" \
+	  INC_NETCDF="$(INC_NETCDF)" LIB_NETCDF=="$(LIB_NETCDF)" \
 	    $(MAKE) -j 1 -f TopMakefileOasis3
 	echo '=> Compiling oasis DONE'
 
@@ -454,6 +459,42 @@ clean_oasis :
 	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" \
 	    $(MAKE) -j 1 realclean -f TopMakefileOasis3
 	- [ ! -d ${OASIS_PATH} ] || rm -fr  ${OASIS_PATH}
+endif
+endif
+##########################################################
+#                                                        #
+# EXTRA LIB : XIOS                                       #
+#                                                        #
+##########################################################
+
+ADD_OASIS=""
+ifeq "$(VER_OASIS)" "mct"
+  ADD_OASIS="--use_oasis oasis3_mct"
+endif
+
+ifeq "$(VER_XIOS)" "2"
+ifneq "$(VER_MPI)" "NOMPI"
+ifneq "$(XIOS_CDF_OPT)" ""
+#
+xios : $(XIOS_KEY)
+$(XIOS_KEY) : $(CDF_INC)
+	@echo "export Surfex_CC=\"$(CC) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
+	@echo "export Surfex_F90=\"$(F90) $(F90FLAGS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.env  
+	#
+	@echo "OASIS_INCDIR=\"$(INC_OASIS)\"" > $(DIR_XIOS)/arch/arch-Surfex.path  
+	@echo "OASIS_LIBDIR=\"$(LIB_OASIS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.path  
+	@echo "NETCDF_INCDIR=\"$(INC_NETCDF)\"" >> $(DIR_XIOS)/arch/arch-Surfex.path  
+	@echo "NETCDF_LIBDIR=\"$(LIB_NETCDF)\"" >> $(DIR_XIOS)/arch/arch-Surfex.path  
+	#
+	@echo '=> Compiling XIOS -- this may take quite a while (up to ~15 min) :-)'
+	@echo '=>   check progress in $(DIR_XIOS)/make_xios.out'
+	@cd $(DIR_XIOS)  && \
+	  ./make_xios --arch Surfex --netcdf_lib $(XIOS_CDF_OPT) --prod $(ADD_OASIS) > make_xios.out 2>&1 
+	@echo -e '=> Compiling XIOS done\n'
+
+clean_xios :
+	cd ${DIR_XIOS} && rm -fR obj && rm -f lib/*
+endif
 endif
 endif
 ##########################################################
