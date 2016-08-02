@@ -95,7 +95,6 @@ INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field 
 REAL,    DIMENSION(SIZE(G%XLAT)) :: ZDIR
 !
 REAL, DIMENSION(NL)    :: ZCOVER ! cover  on all surface points
-LOGICAL, DIMENSION(JPCOVER)    :: GCOVER ! list of existing cover
 REAL, DIMENSION(NL)            :: ZZS    ! zs     on all surface points
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -119,6 +118,8 @@ ILU=0
 !
  CALL PACK_GRID(IMASK,CGRID,G%CGRID,XGRID_PAR,G%XGRID_PAR)
 !
+ CALL GET_LCOVER_n(U,HPROGRAM,JPCOVER,OCOVER)
+!
 IF (IL==0) THEN
   ALLOCATE(PCOVER(0,0)) 
   IF (LHOOK) CALL DR_HOOK('PACK_PGD',1,ZHOOK_HANDLE)
@@ -139,13 +140,11 @@ IF (PRESENT(PDIR)) PDIR = ZDIR
 !*    4.      Packing of fields
 !             -----------------
 !
- CALL GET_LCOVER_n(U,HPROGRAM,JPCOVER,GCOVER)
-!
 IF (HSURF=='NATURE') THEN
   !
-  ALLOCATE(PCOVER(SIZE(G%XLAT),COUNT(GCOVER)))
+  ALLOCATE(PCOVER(SIZE(G%XLAT),COUNT(OCOVER)))
   !
-  DO JCOVER=1,COUNT(GCOVER)
+  DO JCOVER=1,COUNT(OCOVER)
     CALL GET_COVER_n(U,HPROGRAM,JCOVER,ZCOVER)
     CALL PACK_SAME_RANK(IMASK,ZCOVER(:),PCOVER(:,JCOVER))
   ENDDO
@@ -158,9 +157,6 @@ ENDIF
 !
  CALL GET_ZS_n(U, HPROGRAM,NL,ZZS)
 !
-!- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!
-OCOVER=GCOVER
 !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
