@@ -89,11 +89,11 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
  CHARACTER(LEN=*),  INTENT(IN) :: HFIELD    ! field name for prints
  CHARACTER(LEN=3),  INTENT(IN) :: HAREA     ! area where field is defined
-!                                          ! 'ALL' : everywhere
-!                                          ! 'NAT' : on nature
-!                                          ! 'TWN' : on town
-!                                          ! 'SEA' : on sea
-!                                          ! 'WAT' : on inland waters
+!                                           ! 'ALL' : everywhere
+!                                           ! 'NAT' : on nature
+!                                           ! 'TWN' : on town
+!                                           ! 'SEA' : on sea
+!                                           ! 'WAT' : on inland waters
  CHARACTER(LEN=28), INTENT(IN) :: HFILE     ! data file name
  CHARACTER(LEN=6),  INTENT(INOUT) :: HFILETYPE ! data file type
 REAL,              INTENT(IN) :: PUNIF     ! prescribed uniform value for field
@@ -124,7 +124,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_FIELDIN',0,ZHOOK_HANDLE)
-IF (PRESENT(OPRESENT)) OPRESENT=.TRUE.
+!
 !-------------------------------------------------------------------------------
 !
 !*    2.      Output listing logical unit
@@ -132,43 +132,66 @@ IF (PRESENT(OPRESENT)) OPRESENT=.TRUE.
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-IF (HFILETYPE=='DIRTYP') THEN
-  ALLOCATE(ZFIELD(NL,SUM(NTYPE)))
-ELSE
-  ALLOCATE(ZFIELD(NL,1))
-ENDIF
-!-------------------------------------------------------------------------------
-!
-!*    6.      Mask for the field
-!             ------------------
-!
-YMASK = ''
-SELECT CASE (HAREA)
-  CASE ('LAN')
+IF (LEN_TRIM(HFILE)/=0 .OR. PUNIF/=XUNDEF) THEN
+  !
+  IF (PRESENT(OPRESENT)) OPRESENT=.TRUE.
+  !
+  IF (HFILETYPE=='DIRTYP') THEN
+    ALLOCATE(ZFIELD(NL,SUM(NTYPE)))
+  ELSE
+    ALLOCATE(ZFIELD(NL,1))
+  ENDIF
+  !-------------------------------------------------------------------------------
+  !
+  !*    6.      Mask for the field
+  !             ------------------
+  !
+  YMASK = ''
+  SELECT CASE (HAREA)
+    CASE ('LAN')
           YMASK = 'LAND  '
-  CASE ('TWN')
+    CASE ('TWN')
           YMASK = 'TOWN  '
-  CASE ('BLD')
+    CASE ('BLD')
           YMASK = 'TOWN '              
-  CASE ('NAT')
+    CASE ('NAT')
           YMASK = 'NATURE'
-  CASE ('SEA')
+    CASE ('SEA')
           YMASK = 'SEA   '
-  CASE ('WAT')
+    CASE ('WAT')
           YMASK = 'WATER '
-  CASE DEFAULT
+    CASE DEFAULT
           YMASK = 'FULL  '
-END SELECT
+  END SELECT
 
- CALL GET_TYPE_DIM_n(DTCO, U, YMASK,IDIM)
-IF (IDIM/=SIZE(PFIELD,1)) THEN
-   WRITE(ILUOUT,*)'Wrong dimension of MASK: ',IDIM,SIZE(PFIELD,1)
-   CALL ABOR1_SFX('PGD_FIELDIN: WRONG DIMENSION OF MASK')
+  CALL GET_TYPE_DIM_n(DTCO, U, YMASK,IDIM)
+  IF (IDIM/=SIZE(PFIELD,1)) THEN
+     WRITE(ILUOUT,*)'Wrong dimension of MASK: ',IDIM,SIZE(PFIELD,1)
+     CALL ABOR1_SFX('PGD_FIELDIN: WRONG DIMENSION OF MASK')
+  ENDIF
+
+  ALLOCATE(IMASK(IDIM))
+  ILU=0
+  CALL GET_SURF_MASK_n(DTCO, U, YMASK,IDIM,IMASK,ILU,ILUOUT)
+!
+ELSE
+  !
+  IF (PRESENT(OPRESENT)) THEN
+    OPRESENT=.FALSE.
+    PFIELD(:,:) = XUNDEF
+    IF (LHOOK) CALL DR_HOOK('PGD_FIELDIN',1,ZHOOK_HANDLE)
+    RETURN
+  ENDIF
+  !
+  WRITE(ILUOUT,*) ' '
+  WRITE(ILUOUT,*) '***********************************************************'
+  WRITE(ILUOUT,*) '* Error in PGD field preparation of field : ', HFIELD
+  WRITE(ILUOUT,*) '* There is no prescribed value and no input file          *'
+  WRITE(ILUOUT,*) '***********************************************************'
+  WRITE(ILUOUT,*) ' '
+  CALL ABOR1_SFX('PGD_FIELDIN: NO PRESCRIBED VALUE NOR INPUT FILE FOR '//HFIELD)
+  !
 ENDIF
-
-ALLOCATE(IMASK(IDIM))
-ILU=0
- CALL GET_SURF_MASK_n(DTCO, U, YMASK,IDIM,IMASK,ILU,ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -185,8 +208,6 @@ IF (LEN_TRIM(HFILE)/=0) THEN
   ALLOCATE(NSIZE_ALL (U%NDIM_FULL,1))
 !
   NSIZE_ALL(:,1) = 0
-!
- 
 !
   IF (CATYPE=='MAJ') THEN
     ALLOCATE(NVALNBR  (U%NDIM_FULL,1))
@@ -301,21 +322,6 @@ ELSEIF (PUNIF/=XUNDEF) THEN
 !
   ZFIELD(:,:) = PUNIF
 !
-ELSE
-!
-  IF (PRESENT(OPRESENT)) THEN
-    OPRESENT=.FALSE.
-    IF (LHOOK) CALL DR_HOOK('PGD_FIELDIN',1,ZHOOK_HANDLE)
-    RETURN
-  ENDIF
-!
-  WRITE(ILUOUT,*) ' '
-  WRITE(ILUOUT,*) '***********************************************************'
-  WRITE(ILUOUT,*) '* Error in PGD field preparation of field : ', HFIELD
-  WRITE(ILUOUT,*) '* There is no prescribed value and no input file          *'
-  WRITE(ILUOUT,*) '***********************************************************'
-  WRITE(ILUOUT,*) ' '
-  CALL ABOR1_SFX('PGD_FIELDIN: NO PRESCRIBED VALUE NOR INPUT FILE FOR '//HFIELD)
 !
 END IF
 !
