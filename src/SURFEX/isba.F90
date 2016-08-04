@@ -6,7 +6,7 @@
                       PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
                       OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,  HSNOWCOMP,  &
-                      PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,                &
+                      PCVHEATF, PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,      &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PVDIR,                   &
                       PPEW_A_COEF, PPEW_B_COEF,                                  &
@@ -294,6 +294,8 @@ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCO
 !
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTRON snow redistribution scheme
 REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
+!
+REAL,                 INTENT(IN) :: PCVHEATF 
 !
 REAL,                 INTENT(IN) :: PCGMAX      ! maximum soil heat capacity
 !
@@ -998,7 +1000,7 @@ ELSE
    CALL SOILDIF (HDIFSFCOND, OFLOOD, ZVEG, PCV, PFFG_NOSNOW, PFFV_NOSNOW,       &
      PCG, PCT, ZFROZEN1, PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                 &
      PHCAPSOIL, PCONDDRY, PCONDSLD, PBCOEF, PWSAT, PMPOTSAT, ZSOILCONDZ,        &
-     ZSOILHCAPZ, PFWTD, PWTD, PWR, PPIFLOOD                                     )
+     ZSOILHCAPZ, PFWTD, PWTD, PWR, PPIFLOOD, PCVHEATF                           )
 !
 ENDIF
 !

@@ -5,7 +5,7 @@
                          PD_G, PDZG, PTG, PWG, PWGI, KWG_LAYER,                  &
                          PHCAPSOILZ, PCONDDRYZ, PCONDSLDZ,                       &
                          PBCOEF, PWSAT, PMPOTSAT, PSOILCONDZ, PSOILHCAPZ,        &
-                         PFWTD, PWTD, PWR, PPIFLOOD                              )
+                         PFWTD, PWTD, PWR, PPIFLOOD, PCVHEATF                    )
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -66,7 +66,7 @@
 USE MODD_CSTS,       ONLY : XCL, XCI, XRHOLW, XRHOLI, XPI, XDAY, XCONDI, XTT, XLMTT, XG
 USE MODD_ISBA_PAR,   ONLY : XCONDWTR, XWGMIN, XWTD_MAXDEPTH, & 
                             XOMRHO, XOMSPH, XOMCONDDRY,      &
-                            XOMCONDSLD, XCVHEATF
+                            XOMCONDSLD
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -131,6 +131,7 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFV, PFFG
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PPIFLOOD ! Floodplain potential infiltration or water mass (kg m-2)
 !
+REAL, INTENT(IN)                 :: PCVHEATF
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PTG,1),SIZE(PTG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
@@ -322,7 +323,7 @@ PCG(:) = MIN(ZCTMAX,PCG(:))
 !
 ! Vegetation thermal inertia [(m2 K)/J]
 !
-ZCV(:) = 1.0 / ( XCVHEATF/PCV(:) +  XCL * PWR(:) )
+ZCV(:) = 1.0 / ( PCVHEATF/PCV(:) +  XCL * PWR(:) )
 !
 ZCV(:) = MIN(ZCTMAX,ZCV(:))
 !

@@ -571,6 +571,8 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 !
 ! - Adjustable physical parameters
 !
+  REAL                                  :: XCVHEATF         ! Factor to restore explicit Cv value (DIF option)
+!
   REAL                                  :: XCGMAX           ! maximum soil heat capacity
 !
   REAL                                  :: XCDRAG           ! drag coefficient in canopy
@@ -988,6 +990,7 @@ YISBA%NNLITTLEVS=0
 YISBA%NNSOILCARB=0
 YISBA%XTSTEP=0.
 YISBA%XOUT_TSTEP=0.
+YISBA%XCVHEATF=0.2
 YISBA%XCGMAX=0.
 YISBA%XCDRAG=0.
 YISBA%CRUNOFF=' '
