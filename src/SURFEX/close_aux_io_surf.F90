@@ -70,6 +70,10 @@ USE MODI_MNHCLOSE_AUX_IO_SURF
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroclose_aux_io_surf.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !

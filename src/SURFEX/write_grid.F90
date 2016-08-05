@@ -33,6 +33,7 @@
 !!    -------------
 !!      Original    01/2004 
 !!      P. Samuelsson SMHI  12/2012  Rotated lonlat
+!!      S. Senesi    08/15  Adapt to XIOS (non-sensical in that case => return immediately)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -91,6 +92,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_GRID',0,ZHOOK_HANDLE)
+!
+IF (TRIM(HPROGRAM) == 'XIOS') THEN 
+  IF (LHOOK) CALL DR_HOOK('WRITE_GRID',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
+!
 YCOMMENT='GRID TYPE'
  CALL WRITE_SURF(HSELECT, HPROGRAM,'GRID_TYPE',HGRID,KRESP,YCOMMENT)
 !

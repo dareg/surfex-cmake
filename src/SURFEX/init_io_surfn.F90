@@ -36,6 +36,7 @@
 !!      Original    09/2003 
 !!      Modified    04/2004 by P. LeMoigne: add HACTION if ASCII mode selected
 !!      Modified    01/2009 by B. Decjharme: add HPROGRAM if FA mode selected
+!!      Modified    08/2015 by S. Senesi : handle XIOS output mode
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -71,10 +72,18 @@ USE MODI_INIT_IO_SURF_TXT_n
 USE MODI_MNHINIT_IO_SURF_n
 #endif
 !
+#ifdef WXIOS
+USE MODD_XIOS, ONLY : YXIOS_DOMAIN
+#endif
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
+!
+#ifdef SFX_ARO
+#include "aroinit_io_surf_n.h"
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -153,6 +162,12 @@ IF (HPROGRAM=='NC    ' ) THEN
 #ifdef SFX_NC
   CALL INIT_IO_SURF_NC_n(DTCO, U, &
                          HMASK,HACTION)
+#endif
+ENDIF
+!
+IF (TRIM(HPROGRAM)=='XIOS' ) THEN
+#ifdef WXIOS
+  YXIOS_DOMAIN = HMASK
 #endif
 ENDIF
 !

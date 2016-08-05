@@ -6,7 +6,7 @@
 SUBROUTINE SFX_OASIS_END
 !########################
 !
-!!****  *SFX_OASIS_END* - end coupling SFX - OASIS
+!!****  *SFX_OASIS_END* - end coupling SFX - OASIS and XIOS
 !!
 !!    PURPOSE
 !!    -------
@@ -32,15 +32,20 @@ SUBROUTINE SFX_OASIS_END
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!      S.Sénési    08/2015 : add XIOS_FINALIZE
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SFX_OASIS, ONLY : LOASIS
-!
 #ifdef CPLOASIS
 USE MOD_OASIS
+USE MODD_SFX_OASIS, ONLY : LOASIS
+#endif
+!
+#ifdef WXIOS
+USE MODD_XIOS , ONLY : LXIOS 
+USE XIOS, ONLY : XIOS_FINALIZE
 #endif
 !
 IMPLICIT NONE
@@ -55,10 +60,16 @@ IMPLICIT NONE
 INTEGER                    :: IERR   ! Error info
 !
 !-------------------------------------------------------------------------------
-#ifdef CPLOASIS
-!-------------------------------------------------------------------------------
 !
-IF(LOASIS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arome
+#ifdef WXIOS
+IF (LXIOS) THEN 
+! XIOS will finalize Oasis if needed
+   CALL XIOS_FINALIZE() 
+ENDIF
+#endif
+!
+#ifdef CPLOASIS
+IF(LOASIS .NOT. LXIOS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arome
   CALL OASIS_TERMINATE(IERR)
   IF (IERR/=OASIS_OK) THEN
      WRITE(*,'(A)'   )'Error OASIS terminate'
@@ -66,10 +77,8 @@ IF(LOASIS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arom
      CALL ABORT
      STOP
   ENDIF
-ENDIF
-!
-!-------------------------------------------------------------------------------
 #endif
+!
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE SFX_OASIS_END

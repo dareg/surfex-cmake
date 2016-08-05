@@ -61,6 +61,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroclose_namelist.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !

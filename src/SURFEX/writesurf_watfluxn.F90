@@ -32,6 +32,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!!      S. Senesi   08/2015   Fix some units in HCOMMENTs
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -87,7 +88,7 @@ IF(W%LINTERPOL_TS)THEN
   DO JMTH=1,INMTH
      WRITE(YMTH,'(I2)') (JMTH-1)
      YRECFM='TS_WATER'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-     YCOMMENT='TS_WATER month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
+     YCOMMENT='TS_WATER month t'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))//' (K)'
      CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,W%XTS_MTH(:,JMTH),IRESP,HCOMMENT=YCOMMENT)
   ENDDO
 !

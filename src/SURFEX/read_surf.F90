@@ -259,7 +259,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-!
+#ifdef SFX_ARO
+#include "read_surfx0_aro.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -394,6 +396,10 @@ USE MODI_GET_IOK_ASSIM
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "read_surfx1_aro.h"
+#endif
+!
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM  ! calling program
@@ -519,6 +525,10 @@ USE MODI_READ_SURFX2_MNH
 USE MODI_GET_IOK_ASSIM
 !
 IMPLICIT NONE
+!
+#ifdef SFX_ARO
+#include "read_surfx2_aro.h"
+#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -725,6 +735,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
+#ifdef SFX_ARO
+#include "read_surfn0_aro.h"
+#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -886,6 +899,10 @@ USE MODI_READ_SURFN1_MNH
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "read_surfn1_aro.h"
+#endif
+!
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
@@ -1002,6 +1019,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
+#ifdef SFX_ARO
+#include "read_surfc0_aro.h"
+#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1138,6 +1158,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
+#ifdef SFX_ARO
+#include "read_surfl0_aro.h"
+#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1263,6 +1286,10 @@ USE MODI_READ_SURFL1_MNH
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "read_surfl1_aro.h"
+#endif
+!
 !*      0.1   Declarations of arguments
 !
  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM     ! calling program
@@ -1371,6 +1398,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
+#ifdef SFX_ARO
+#include "read_surft0_aro.h"
+#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1526,6 +1556,9 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
+#ifdef SFX_ARO
+#include "read_surft1_aro.h"
+#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1681,8 +1714,6 @@ IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE "mpif.h"
 #endif
-!
-!
 !
 !*      0.1   Declarations of arguments
 !

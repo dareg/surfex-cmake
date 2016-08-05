@@ -25,6 +25,7 @@ PROGRAM OFFLINE
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
 ! 02/2016: replace DOUBLE PRECISION by REAL to handle problem for promotion of real with GMKPACK or IBM SP
+! 06/2016 S.Senesi    Use XIOS for diags output
 ! -------------------------------------------------
 !
 USE MODD_OFF_SURFEX_n
@@ -109,6 +110,8 @@ USE MODD_SLOPE_EFFECT, ONLY: XZS_THREAD,XZS_XY_THREAD,XSLOPANG_THREAD,&
 !
 USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
 !
+USE MODD_XIOS, ONLY : LXIOS, TXIOS_CONTEXT, LXIOS_DEF_CLOSED, LADD_DIM=>LALLOW_ADD_DIM, NTIMESTEP
+!
 USE MODE_POS_SURF
 !
 USE MODE_CRODEBUG
@@ -166,6 +169,11 @@ USE MODI_SFX_OASIS_SEND_OL
 USE MODI_SFX_OASIS_END
 !RJ: missing modi
 USE MODI_LOCAL_SLOPE_PARAM
+!
+#ifdef WXIOS
+USE XIOS, ONLY : XIOS_CONTEXT_FINALIZE, XIOS_CLOSE_CONTEXT_DEFINITION, XIOS_UPDATE_CALENDAR
+#endif
+USE MODI_SFX_XIOS_SETUP_OL
 !
 USE MODE_GLT_DIA_LU
 !
@@ -277,53 +285,51 @@ INTEGER :: ISERIES, ISIZE
 !
 ! MPI variables
 !
-CHARACTER(LEN=100) :: YNAME
-CHARACTER(LEN=10)  :: YRANK
+ CHARACTER(LEN=100) :: YNAME
+ CHARACTER(LEN=10)  :: YRANK
 INTEGER :: ILEVEL, INFOMPI, J
 REAL :: XTIME0, XTIME1, XTIME
 !
 ! SFX - OASIS coupling variables
 !
 INTEGER :: IBLOCKTOT, IBLOCK
-INTEGER  :: ILOCAL_COMM  ! Local communicator
+!
+LOGICAL         :: LSAVHOOK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
 !
-!*     0.1.   MPI, OASIS, and dr_hook initializations
+!*     0.1.   MPI, OASIS, XIOS and dr_hook initializations
+!
+CSOFTWARE='OFFLINE'
 !
 INFOMPI=1
 !
+! There are issues with oasis if LHOOK=T during its init phase 
+LSAVHOOK=LHOOK
+LHOOK=.FALSE.
+!
 #ifdef CPLOASIS
 !Must be call before DRHOOK !
-CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM)
+ CALL SFX_OASIS_INIT(CNAMELIST,NCOMM)
 #else
 LOASIS   = .FALSE.
-XRUNTIME = 0.0
 #endif
 !
+LHOOK=LSAVHOOK
+IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
+!
 #ifdef SFX_MPI
-IF(.NOT.LOASIS)THEN
+IF(.NOT.LOASIS .AND. .NOT. LXIOS)THEN
  CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
  IF (INFOMPI /= MPI_SUCCESS) THEN 
     CALL ABOR1_SFX('OFFLINE: ERROR WHEN INITIALIZING MPI')
  ENDIF
+ NCOMM=MPI_COMM_WORLD
 ENDIF
-#endif
-!
-IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
-!
-CSOFTWARE='OFFLINE'
-!
-#ifdef SFX_MPI
-IF(LOASIS)THEN
-  NCOMM=ILOCAL_COMM
-ELSE
-  NCOMM=MPI_COMM_WORLD
-ENDIF
- CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
- CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
+CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
+CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
 !
 !RJ: init modd_surefx_omp
@@ -351,8 +357,8 @@ XTIME0 = MPI_WTIME()
 WRITE(YRANK,FMT='(I10)') NRANK
 YNAME=TRIM(YLUOUT)//ADJUSTL(YRANK)
 !
-CLUOUT_LFI =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
-CLUOUT_NC  =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
+ CLUOUT_LFI =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
+ CLUOUT_NC  =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
 !
  CALL GET_LUOUT('ASCII ',ILUOUT)
 OPEN(UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YNAME)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
@@ -379,6 +385,12 @@ ENDIF
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
  CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 !
+#ifdef WXIOS
+LXIOS = (TRIM(CTIMESERIES_FILETYPE) == 'XIOS') 
+#else
+LXIOS=.FALSE.
+#endif
+!
 IF (NPROC==1) THEN 
   XIO_FRAC=1.
 ELSE
@@ -386,15 +398,27 @@ ELSE
 ENDIF
 !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSURF_FILETYPE',CSURF_FILETYPE,'ASCII ','LFI   ','FA    ','NC    ')
+#ifdef WXIOS
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
+                                                                            'ASCII ','LFI   ','FA    ',&
+                                                                            'NONE  ','OFFLIN','NC    '&
+                                                                            ,'XIOS  ')
+#else 
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
                                                                             'ASCII ','LFI   ','FA    ',&
                                                                             'NONE  ','OFFLIN','NC    ')  
+#endif                                                                    
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CFORCING_FILETYPE',CFORCING_FILETYPE,'NETCDF','ASCII ','BINARY')
 !
 IF (NSCAL>59) CALL ABOR1_SFX("OFFLINE: NSCAL MUST BE LOWER THAN OR EQUAL TO 59")
 !
 !
 IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
+!
+IF ((TRIM(CTIMESERIES_FILETYPE) /= 'XIOS') .AND. LADD_DIM) THEN
+      CALL ABOR1_SFX('CANNOT YET SET LALLOW_ADD_DIM TO .TRUE. WITHOUT SETTING CTIMESERIES_FILETYPE to XIOS ')
+ENDIF
+!
 !
  CFILEPGD = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
  CFILEIN  = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
@@ -422,11 +446,11 @@ IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
 !
 !*      0.5.   Reads SFX - OASIS coupling namelists
 !
-CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF)
+ CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF)
 !
 !*      0.6   Assume FA filetype consistency 
 !
-CPROGNAME = CSURF_FILETYPE
+ CPROGNAME = CSURF_FILETYPE
 !
 ! --------------------------------------------------------------------------------------
 !
@@ -457,7 +481,7 @@ XTIME0 = MPI_WTIME()
 !       splitting of the grid
 !
 GSHADOWS = LSHADOWS_SLOPE .OR. LSHADOWS_OTHER
-CALL INIT_INDEX_MPI(YSC%DTCO, YSC%U, YSC%UG, YSC%GCP, CSURF_FILETYPE, 'OFF', YALG_MPI, XIO_FRAC, GSHADOWS)
+ CALL INIT_INDEX_MPI(YSC%DTCO, YSC%U, YSC%UG, YSC%GCP, CSURF_FILETYPE, 'OFF', YALG_MPI, XIO_FRAC, GSHADOWS)
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ init_index ',PLOG=XTIME_NPIO_READ)
@@ -577,7 +601,7 @@ NB_READ_FORC=CEILING(1.*(INB_STEP_ATM+1)/INB_LINES)
 !     Gelato wizzard user)
 !
 #if ! defined in_arpege
-CALL OPNDIA()
+ CALL OPNDIA()
 #endif
 !
 !       allocate local atmospheric variables
@@ -706,8 +730,7 @@ IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
 !
 ! --------------------------------------------------------------------------------------
 !
-INW = 1
-IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
+ CALL SFX_XIOS_SETUP_OL(YSC,ILUOUT,IYEAR,IMONTH,IDAY,ZTIME,XTSTEP_OUTPUT)
 !
 NWRITE = 0
 !
@@ -1035,8 +1058,11 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #endif
       !
       LDEF = .TRUE.
+      INW = 1
+      IF ( LXIOS .AND. .NOT. LXIOS_DEF_CLOSED) INW = 2      
       !
       IF (CTIMESERIES_FILETYPE=="NC    ") THEN
+        INW = 2
         CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, &
                                YSC%TM%DTT, YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
       ENDIF
@@ -1050,6 +1076,14 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifdef SFX_MPI
         XTIME1 =  MPI_WTIME()
 #endif
+
+        IF (LXIOS .AND. LXIOS_DEF_CLOSED) THEN 
+#ifdef WXIOS
+          NTIMESTEP=INT(ZTIMEC/XTSTEP_OUTPUT + 0.5)
+          CALL XIOS_UPDATE_CALENDAR(NTIMESTEP)
+#endif
+        ENDIF
+
         CALL WRITE_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
@@ -1061,6 +1095,17 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME1 =  MPI_WTIME()
 #endif
         CALL WRITE_DIAG_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL')
+        !
+        IF (LXIOS) THEN 
+#ifdef WXIOS
+          IF (.NOT. LXIOS_DEF_CLOSED) THEN 
+            CALL XIOS_CLOSE_CONTEXT_DEFINITION()
+            LXIOS_DEF_CLOSED=.TRUE.
+          ENDIF
+          CALL XIOS_UPDATE_CALENDAR(JSURF_STEP)
+#endif
+        ENDIF
+        !      
 #ifdef SFX_MPI
         XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
 #endif
@@ -1353,7 +1398,7 @@ ENDIF
 !
 !    4'    Close Gelato specific diagnostic 
 #if ! defined in_arpege
-CALL CLSDIA()
+ CALL CLSDIA()
 #endif
 !
 !
@@ -1385,7 +1430,12 @@ IF (LHOOK) CALL DR_HOOK('OFFLINE',1,ZHOOK_HANDLE)
 !
 ! * MPI and OASIS must be finalized after the last DR_HOOK call
 !
-IF(LOASIS)THEN
+IF (LXIOS) THEN 
+#ifdef WXIOS
+  CALL XIOS_CONTEXT_FINALIZE()
+#endif
+ENDIF
+IF(LXIOS .OR. LOASIS)THEN
   CALL SFX_OASIS_END
 ELSE
 #ifdef SFX_MPI

@@ -176,7 +176,7 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-CHARACTER(LEN=3)  :: YREAD
+ CHARACTER(LEN=3)  :: YREAD
 !
 INTEGER           :: ISWB     ! number of shortwave bands
 INTEGER           :: JTILE    ! loop counter on tiles
@@ -220,7 +220,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 !
-CPROGNAME=HPROGRAM
+ CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
    CALL ABOR1_SFX('INIT_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -292,7 +292,7 @@ SELECT CASE (HINIT)
     CALL READ_SURF_ATM_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,YSC%U%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
+    CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
     CALL READ_SURF(HPROGRAM,'DTCUR',YSC%U%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
     LWRITE_EXTERN = .FALSE.
@@ -358,9 +358,9 @@ IF (.NOT. LCLIM_LAI .AND. YSC%U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
 !
 !        2.2. Read grid
 !
-ALLOCATE(YSC%UG%G%XLAT       (YSC%U%NSIZE_FULL))
-ALLOCATE(YSC%UG%G%XLON       (YSC%U%NSIZE_FULL))
-ALLOCATE(YSC%UG%G%XMESH_SIZE (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XLAT      (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XLON      (YSC%U%NSIZE_FULL))
+ALLOCATE(YSC%UG%G%XMESH_SIZE(YSC%U%NSIZE_FULL))
 ALLOCATE(YSC%USS%XZ0EFFJPDIR(YSC%U%NSIZE_FULL))
  CALL READ_GRID(HPROGRAM,YSC%UG%G,IRESP,YSC%USS%XZ0EFFJPDIR)
 !
@@ -470,7 +470,7 @@ DEALLOCATE(ZZ0VEG)
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
+ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
 !
 !*       2.8 Allocations and Initialization of diagnostics
 !
@@ -665,7 +665,7 @@ DEALLOCATE(ZFRAC_TILE)
 !-------------------------------------------------------------------------------
 !==============================================================================
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',1,ZHOOK_HANDLE)
-CONTAINS
+ CONTAINS
 !==============================================================================
 SUBROUTINE PACK_SURF_INIT_ARG(KSIZE,KMASK)
 !

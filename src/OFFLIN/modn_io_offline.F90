@@ -56,7 +56,6 @@ IMPLICIT NONE
  CHARACTER(LEN=6) :: CFORCING_FILETYPE    = 'NETCDF' ! type of atmospheric FORCING files
 !                                                   ! 'NETDF', 'BINARY', or 'ASCII '
 !
-!
 !*    Names of files
 !     --------------
 !
@@ -80,6 +79,9 @@ LOGICAL          :: LOUT_TIMENAME = .FALSE.! change the name of output file at t
                                            ! (ex: 19860502_00h00 -> 19860501_24h00)
 !
 LOGICAL          :: LDIAG_FA_NOCOMPACT = .FALSE. ! fa compaction for diagnostic files
+!
+ LOGICAL           :: LALLOW_ADD_DIM       = .FALSE. ! allow multi-dimensional output 
+                                                    ! if IO scheme can deal with- e.g. XIOS
 !
 !*    Variables
 !     ---------
@@ -151,7 +153,7 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
                         LSHADOWS_SLOPE,LSHADOWS_OTHER, LWR_VEGTYPE,              &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
-                        YALG_MPI, XDELTA_OROG, LADAPT_SW
+                        YALG_MPI, XDELTA_OROG, LADAPT_SW, LALLOW_ADD_DIM
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE

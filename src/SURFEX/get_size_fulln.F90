@@ -51,6 +51,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroget_size_full_n.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !

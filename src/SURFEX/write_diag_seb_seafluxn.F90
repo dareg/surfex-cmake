@@ -34,11 +34,11 @@
 !!      S.Senesi    01/2014 : add diags on seaice 
 !!      S. Belamari 06/2014 : Introduce GRESET to avoid errors due to NBLOCK=0
 !!                            when coupled with ARPEGE/ALADIN/AROME
+!!      S. Senesi    08/15   Add 2nd dimension name for SW bands to write_surf calls
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
-!
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -49,12 +49,9 @@ USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_IO_SURF_ARO,   ONLY : NBLOCK
 #endif
 !
+USE MODD_XIOS, ONLY : LALLOW_ADD_DIM, LXIOS, YSWBAND_DIM_NAME
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF
-!
-!
-!
-!                               
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
@@ -84,9 +81,9 @@ LOGICAL, INTENT(IN) :: OHANDLE_SIC
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
-CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
-CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+ CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=100):: YCOMMENT       ! Comment string
+ CHARACTER(LEN=2)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
@@ -105,7 +102,7 @@ GRESET=.TRUE.
 GRESET=(NBLOCK>0)
 #endif
 !
-CALL INIT_IO_SURF_n(DTCO, U,HPROGRAM,'SEA   ','SEAFLX','WRITE')
+ CALL INIT_IO_SURF_n(DTCO, U,HPROGRAM,'SEA   ','SEAFLX','WRITE')
 !
 !
 !*       1.     Surface temperature :
@@ -200,20 +197,36 @@ IF (DSO%LSURF_BUDGET) THEN
       !
       CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,D%XLWU(:),IRESP,HCOMMENT=YCOMMENT)
       !
-      DO JSW=1, SIZE(D%XSWBD,2)
-         YNUM=ACHAR(48+JSW)
-         !
-         YRECFM='SWD_SEA_'//YNUM
-         YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-         !
-         CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,D%XSWBD(:,JSW),IRESP,HCOMMENT=YCOMMENT)
-         !
-         YRECFM='SWU_SEA_'//YNUM
-         YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-         !
-         CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,D%XSWBU(:,JSW),IRESP,HCOMMENT=YCOMMENT)
-         !
-      ENDDO
+      IF (LALLOW_ADD_DIM.AND.LXIOS) THEN
+        !
+        YRECFM='SWD_SEA_'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(DUO%CSELECT,&
+             HPROGRAM,YRECFM,D%XSWBD(:,:),IRESP,HCOMMENT=YCOMMENT, HNAM_DIM=YSWBAND_DIM_NAME)
+        !
+        YRECFM='SWU_SEA_'
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(DUO%CSELECT,&
+             HPROGRAM,YRECFM,D%XSWBU(:,:),IRESP,HCOMMENT=YCOMMENT, HNAM_DIM=YSWBAND_DIM_NAME)        
+        !
+      ELSE
+        !
+        DO JSW=1, SIZE(D%XSWBD,2)
+          YNUM=ACHAR(48+JSW)
+          !
+          YRECFM='SWD_SEA_'//YNUM
+          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+          !
+          CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,D%XSWBD(:,JSW),IRESP,HCOMMENT=YCOMMENT)
+          !
+          YRECFM='SWU_SEA_'//YNUM
+          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+          !
+          CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,D%XSWBU(:,JSW),IRESP,HCOMMENT=YCOMMENT)
+          !
+        ENDDO
+        !
+      ENDIF
       !
    ENDIF
    !
@@ -438,7 +451,7 @@ ENDIF
 !
 !         End of IO
 !
-CALL END_IO_SURF_n(HPROGRAM)
+ CALL END_IO_SURF_n(HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SEAFLUX_N',1,ZHOOK_HANDLE)
 !

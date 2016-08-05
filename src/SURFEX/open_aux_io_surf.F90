@@ -38,12 +38,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-!
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE YOMHOOK ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 #ifdef SFX_ASC
@@ -71,6 +66,10 @@ USE MODI_MNHOPEN_AUX_IO_SURF
 #endif
 !
 IMPLICIT NONE
+!
+#ifdef SFX_ARO
+#include "aroopen_aux_io_surf.h"
+#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------

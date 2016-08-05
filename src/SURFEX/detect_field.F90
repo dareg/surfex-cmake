@@ -51,6 +51,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "detect_field_aro.h"
+#endif
+!
 !*       0.1   declarations of arguments
 !
  CHARACTER (LEN=6),  INTENT(IN) :: HPROGRAM   ! program

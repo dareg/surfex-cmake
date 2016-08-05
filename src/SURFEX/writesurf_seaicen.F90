@@ -46,6 +46,8 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_GLT_PARAM, ONLY : nl, nt
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
+USE MODD_XIOS, ONLY: LALLOW_ADD_DIM, LXIOS, YSEAICE_LAYER_DIM_NAME
+!
 USE MODI_WRITE_SURF
 !
 !
@@ -82,6 +84,8 @@ CHARACTER(LEN=12) :: YLEVEL           ! Level to write
 CHARACTER(LEN=100):: YCOMMENT         ! Error Message
 !
 INTEGER :: JK,JL                   ! loop counter on ice categories and layes 
+!
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZTABL
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -139,15 +143,35 @@ IF (S%CSEAICE_SCHEME == 'GELATO') THEN
       !
       !*       3.     Prognostic fields with space and ice-category and layer dimension(s) :
       !
-      DO JL=1,nl
-         WRITE(YLVL,'(I2)') JL
-         YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)
-         YFORM='(A6,I1.1,A4)'
-         IF (JL >= 10)  YFORM='(A6,I2.2,A4)'
-         WRITE(YCOMMENT,FMT=YFORM) 'X_Y_ICEH',JL,' (J/kg)'
-         ! .. Write sea ice vertical gltools_enthalpy profile for type JK and level JL  
-         CALL WRITE_SURF(HSELECT,HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP,YCOMMENT)
-      END DO
+      IF (LALLOW_ADD_DIM.AND.LXIOS)  THEN 
+
+        ALLOCATE(ZTABL(SIZE(S%XSIC),NL))
+        ZTABL(:,:) = 0.0
+
+        WRITE(YCOMMENT,*) 'sea-ice enthalpy category:',JL,' (J/kg)'
+        ! .. Write sea ice vertical gltools_enthalpy profile for type JK 
+        DO JL=1,nl
+          ZTABL(:,jl)= S%TGLT%sil(JL,JK,:,1)%ent
+        ENDDO
+        CALL WRITE_SURF(HSELECT, &
+               HPROGRAM,'ICEH'//TRIM(YCATEG), ZTABL,IRESP,YCOMMENT,HNAM_DIM=YSEAICE_LAYER_DIM_NAME)      
+
+       DEALLOCATE(ZTABL)
+
+      ELSE
+
+        DO JL=1,nl
+          WRITE(YLVL,'(I2)') JL
+          YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)
+          YFORM='(A6,I1.1,A4)'
+          IF (JL >= 10)  YFORM='(A6,I2.2,A4)'
+          WRITE(YCOMMENT,FMT=YFORM) 'X_Y_ICEH',JL,' (J/kg)'
+          ! .. Write sea ice vertical gltools_enthalpy profile for type JK and level JL  
+          CALL WRITE_SURF(HSELECT,HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP,YCOMMENT)
+        END DO
+
+      ENDIF
+
    END DO
 ELSE
    ! This is a placeholder for writing state variables for another seaice scheme

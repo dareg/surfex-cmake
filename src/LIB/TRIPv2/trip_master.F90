@@ -29,7 +29,7 @@ USE MODD_OFF_TRIP_n
 !
 USE MODD_TRIP_LISTING
 !
-USE MODN_TRIP_RUN, ONLY : LRESTART, LPRINT,   &
+USE MODN_TRIP_RUN, ONLY : LRESTART, LPRINT, LWR_DIAG,  &
                           XTSTEP_RUN, XTSTEP_DIAG
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, NUNDEF, XDAY
@@ -80,6 +80,7 @@ INTEGER                           :: INPROC              ! Number of processes
 INTEGER                           :: IRANK               ! Local process number
 INTEGER                           :: ILOCAL_COMM         ! Local communicator
 LOGICAL                           :: GOASIS              ! OASIS used(default=.false.)
+LOGICAL                           :: GSAVHOOK            ! Store LHOOK before oasis+mpi init
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -87,7 +88,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! * 0. MPI and OASIS must be initialized before any DR_HOOK call
 ! --------------------------------------------------------------------------------------
 !
+GSAVHOOK=LHOOK
+LHOOK=.FALSE.
 CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM,ZRUNTIME)
+!
+LHOOK=GSAVHOOK
 !
 ! --------------------------------------------------------------------------------------
 ! * 1. Alloc trip variables and open listing
@@ -207,8 +212,10 @@ CALL TRIP_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TP, YTRIP_CUR%TPG, &
 ! * 9. Store run mean diagnostic and write restart
 !-------------------------------------------------------------------------------
 !
-CALL TRIP_DIAG_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TPG, &
-                   NLISTING,ILON,ILAT,ZRUNTIME)
+IF(LWR_DIAG)THEN
+  CALL TRIP_DIAG_RUN(YTRIP_CUR%TPDG, YTRIP_CUR%TPG, &
+                     NLISTING,ILON,ILAT,ZRUNTIME)
+ENDIF
 !
 IF(LRESTART)THEN
    CALL TRIP_RESTART(YTRIP_CUR%TP, YTRIP_CUR%TPG, &

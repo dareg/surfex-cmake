@@ -55,6 +55,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroclose_write_cover_tex.h"
+#endif
+!
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
