@@ -66,7 +66,6 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDIR ! heading of main axis of grid
 !              -------------------------------
 !
 LOGICAL :: GREAD_ALL
-INTEGER :: IGRID_PAR
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
@@ -88,10 +87,10 @@ ENDIF
 !*       2.    Reading parameters of the grid
 !              ------------------------------
 !
- CALL READ_GRIDTYPE(HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.FALSE.)
+ CALL READ_GRIDTYPE(HPROGRAM,G%CGRID,G%NGRID_PAR,SIZE(G%XLAT),.FALSE.)
 !
-ALLOCATE(G%XGRID_PAR(IGRID_PAR))
- CALL READ_GRIDTYPE(HPROGRAM,G%CGRID,IGRID_PAR,SIZE(G%XLAT),.TRUE.,G%XGRID_PAR,KRESP)
+ALLOCATE(G%XGRID_PAR(G%NGRID_PAR))
+ CALL READ_GRIDTYPE(HPROGRAM,G%CGRID,G%NGRID_PAR,SIZE(G%XLAT),.TRUE.,G%XGRID_PAR,KRESP)
 !
 !---------------------------------------------------------------------------
 !

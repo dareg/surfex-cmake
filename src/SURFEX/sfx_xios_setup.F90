@@ -59,7 +59,7 @@ USE MODD_XIOS      , ONLY : LXIOS,TXIOS_CONTEXT,YXIOS_CONTEXT, &
 USE XIOS, ONLY : XIOS_CONTEXT_INITIALIZE, XIOS_GET_HANDLE,   &
      XIOS_SET_CURRENT_CONTEXT, XIOS_SET_TIMESTEP, XIOS_DATE, &
      XIOS_DURATION, XIOS_DEFINE_CALENDAR, XIOS_GETVAR,       &
-     XIOS_SOLVE_INHERITANCE
+     XIOS_SOLVE_INHERITANCE, XIOS_CLOSE_CONTEXT_DEFINITION!, XIOS_INITIALIZE
 !
 USE MODI_ABOR1_SFX
 USE MODI_SFX_XIOS_SET_DOMAIN
@@ -78,7 +78,7 @@ IMPLICIT NONE
 !
 TYPE (SURFEX_t),    INTENT(IN) :: YSC
 !
-INTEGER,            INTENT(IN) :: KCOMM  ! Communicator
+INTEGER,            INTENT(INOUT) :: KCOMM  ! Communicator
 INTEGER,            INTENT(IN) :: KLUOUT    ! Listing logical unit number
 INTEGER,            INTENT(IN) :: KYEAR     ! current year (UTC)
 INTEGER,            INTENT(IN) :: KMONTH    ! current month (UTC)
@@ -136,10 +136,15 @@ LXIOS_DEF_CLOSED=.FALSE.
 !
 !$OMP SINGLE
 !
+!#ifndef CPLOASIS
+!  CALL XIOS_INITIALIZE('surfex', return_comm=KCOMM)
+!#endif
+
  CALL XIOS_CONTEXT_INITIALIZE(YXIOS_CONTEXT, KCOMM)
  CALL XIOS_GET_HANDLE(YXIOS_CONTEXT, TXIOS_CONTEXT)
  CALL XIOS_SET_CURRENT_CONTEXT(TXIOS_CONTEXT)
-!
+! 
+
 ! -----------------------------------------------------------------------------
 !
 !      Set date for XIOS
@@ -203,8 +208,7 @@ TDTIME%SECOND = INT(PTSTEP*NBASE_XIOS_FREQ)
 !  Force XIOS inheritance inorder that fields declarations can 
 !  fully account for user settings
 !
-   CALL XIOS_SOLVE_INHERITANCE()
-!
+!   CALL XIOS_SOLVE_INHERITANCE()
 #endif
 !
 IF (LHOOK) CALL DR_HOOK('SFX_XIOS_SETUP',1,ZHOOK_HANDLE)
