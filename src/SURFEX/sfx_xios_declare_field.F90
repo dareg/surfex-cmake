@@ -261,6 +261,15 @@ IF ( .NOT. GISDEF ) THEN
 ENDIF
 !
 ! ----------------------------------------------------------------------
+! If prec  is not defined , set it to the provided value (def : timestep)
+! ----------------------------------------------------------------------
+!
+ CALL XIOS_IS_DEFINED_FIELD_ATTR(HREC,prec=GISDEF) 
+IF ( .NOT. GISDEF ) THEN 
+  CALL XIOS_SET_FIELD_ATTR(HREC, prec=8)
+ENDIF
+!
+! ----------------------------------------------------------------------
 ! If Freq_op  is not defined , set it to the provided value (def : timestep)
 ! ----------------------------------------------------------------------
 !

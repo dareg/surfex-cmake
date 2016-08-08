@@ -294,8 +294,6 @@ REAL :: XTIME0, XTIME1, XTIME
 !
 INTEGER :: IBLOCKTOT, IBLOCK
 !
-LOGICAL         :: LSAVHOOK
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
@@ -306,10 +304,8 @@ CSOFTWARE='OFFLINE'
 !
 INFOMPI=1
 !
-! There are issues with oasis if LHOOK=T during its init phase 
-LSAVHOOK=LHOOK
-LHOOK=.FALSE.
 !
+! There are issues with oasis if LHOOK=T during its init phase 
 #ifdef WXIOS
 CALL SFX_XIOS_READNAM_OL(CNAMELIST)
 #else
@@ -318,9 +314,6 @@ LXIOS=.FALSE.
 !
 !Must be call before DRHOOK !
  CALL SFX_OASIS_INIT(CNAMELIST,NCOMM)
-!
-LHOOK=LSAVHOOK
-LHOOK=.FALSE.
 !
 #ifdef SFX_MPI
 IF(.NOT.LOASIS.AND..NOT.LXIOS)THEN
@@ -334,7 +327,7 @@ CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
 CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
 !
-IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('OFFLINE',0,NCOMM,ZHOOK_HANDLE)
 !
 !RJ: init modd_surefx_omp
 !$OMP PARALLEL
@@ -704,7 +697,7 @@ XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
 !   Land use or/and vegetation dynamic
-!                  
+!    
 CALL INIT_SURF_LANDUSE_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%U, YSC%UG,   &
                          YSC%IM, YSC%SV, YSC%SLT, YSC%NDST, CSURF_FILETYPE,&
                          YINIT, LLAND_USE, INI, NSCAL, IBANDS, CSV,        &

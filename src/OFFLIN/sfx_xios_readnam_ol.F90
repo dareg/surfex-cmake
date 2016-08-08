@@ -60,11 +60,8 @@ CHARACTER(LEN=28), INTENT(IN )           :: HNAMELIST
 INTEGER            :: ILUNAM
 INTEGER            :: ILUOUT
 LOGICAL            :: GFOUND
-LOGICAL            :: GSAVHOOK
 !
 ! For now, some issued if DrHook is called before Oasis setup, hence :
-GSAVHOOK=LHOOK
-LHOOK=.FALSE.
 !
 LXIOS           = .FALSE.
 LXIOS_DEF_CLOSED= .FALSE.
@@ -91,7 +88,6 @@ IF (LXIOS) THEN
 !
 ENDIF
 !
-LHOOK=GSAVHOOK
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE SFX_XIOS_READNAM_OL
