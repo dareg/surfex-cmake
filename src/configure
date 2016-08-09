@@ -222,7 +222,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
-                export VER_CDF=${VER_CDF:-CDFPROLX}
+                export VER_CDF=${VER_CDF:-CDFPROLXPARALL}
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
               ;;
