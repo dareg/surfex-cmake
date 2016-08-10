@@ -1238,18 +1238,18 @@ ELSEIF(IM%ID%O%LPGD)THEN
     DO JL=1,INLVLD
       WRITE(YPAS,'(I3)') JL ; YLVL=TRIM(ADJUSTL(YPAS))
         CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'DG'//YLVL(:LEN_TRIM(YLVL))//'_ISBA',&
-              'averaged_soil_depth_layer_'//YLVL,JDIM(1:1),YATT_TITLE,(/'m'/))
+              'averaged_soil_depth_layer_'//YLVL,JDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     ENDDO
   ENDIF
   !
-  CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'Z0REL','orography_roughness_length',JDIM(1:1),YATT_TITLE,(/'m'/))
+  CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'Z0REL','orography_roughness_length',JDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
   !
   !
   DO JL=1,INLVLD
     WRITE(YPAS,'(I3)') JL ; YLVL=TRIM(ADJUSTL(YPAS))
-    CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'WSAT'//YLVL,'soil_porosity_layer_'//YLVL,JDIM(1:1),YATT_TITLE,(/'m3/m3'/))
-    CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'WFC'//YLVL,'field_capacity_layer_'//YLVL,JDIM(1:1),YATT_TITLE,(/'m3/m3'/)) 
-    CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'WWILT'//YLVL,'wilting_point_layer_'//YLVL,JDIM(1:1),YATT_TITLE,(/'m3/m3'/))
+    CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'WSAT'//YLVL,'soil_porosity_layer_'//YLVL,JDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/))
+    CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'WFC'//YLVL,'field_capacity_layer_'//YLVL,JDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/)) 
+    CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'WWILT'//YLVL,'wilting_point_layer_'//YLVL,JDIM(1:INDIMS-1),YATT_TITLE,(/'m3/m3'/))
   ENDDO
   !
   IF(IM%O%CISBA=='DIF')THEN
@@ -1276,15 +1276,15 @@ ELSEIF(IM%ID%O%LPGD)THEN
     ENDDO
     !
     IF(INPATCH>1)THEN
-     CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'DG2_DIF_ISBA','averaged_DG2_depth_in_ISBA-DIF',JDIM(1:1),YATT_TITLE,(/'m'/))
+     CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'DG2_DIF_ISBA','averaged_DG2_depth_in_ISBA-DIF',JDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
      CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'DTOTDF_ISBA',&
-             'averaged_Total_soil_depth_for_moisture_in_ISBA-DIF',JDIM(1:1),YATT_TITLE,(/'m'/))
+             'averaged_Total_soil_depth_for_moisture_in_ISBA-DIF',JDIM(1:INDIMS-1),YATT_TITLE,(/'m'/))
     ENDIF
     !
     IF(IM%O%LSOC)THEN
       DO JL=1,INLVLD
         WRITE(YPAS,'(I3)') JL ; YLVL=TRIM(ADJUSTL(YPAS))
-        CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'FRACSOC'//YLVL,'SOC_fraction_layer_'//YLVL,JDIM(1:1),YATT_TITLE,(/'-'/))
+        CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'FRACSOC'//YLVL,'SOC_fraction_layer_'//YLVL,JDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))
       ENDDO
     ENDIF
     !
@@ -1306,7 +1306,7 @@ ELSEIF(IM%ID%O%LPGD)THEN
   DO JVEG=1,NVEGTYPE
      WRITE(YPAS,'(i2)') JVEG 
      YLVLV=TRIM(ADJUSTL(YPAS))
-     CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'VEGTYPE'//YLVLV,'fraction_of_vegtype_in_the_grid_cell',JDIM(1:1),YATT_TITLE,(/'-'/))
+     CALL DEF_VAR_NETCDF(HSELECT,IFILE_ID,'VEGTYPE'//YLVLV,'fraction_of_vegtype_in_the_grid_cell',JDIM(1:INDIMS-1),YATT_TITLE,(/'-'/))
   ENDDO
   !    
   IF(INPATCH>1.AND.NVEGTYPE/=INPATCH)THEN
