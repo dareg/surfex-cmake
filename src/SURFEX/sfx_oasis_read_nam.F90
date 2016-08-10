@@ -62,7 +62,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6), INTENT(IN)           :: HPROGRAM    ! program calling surf. schemes
 REAL,             INTENT(IN)           :: PTSTEP_SURF ! Surfex time step
-CHARACTER(LEN=3), INTENT(IN), OPTIONAL :: HINIT       ! choice of fields to initialize
+CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: HINIT       ! choice of fields to initialize
 !
 !*       0.2   Declarations of local parameter
 !              -------------------------------
