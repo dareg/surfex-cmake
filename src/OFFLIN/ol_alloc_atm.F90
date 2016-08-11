@@ -53,8 +53,10 @@ USE MODD_FORC_ATM,  ONLY: CSV       ,&! name of all scalar variables
                             XZ0       ,&
                             XZ0H      ,&
                             XQSURF    ,&
-                            XIMPWET   ,&
-                            XIMPDRY
+                            XIMPWET   ,& !Impurity wet deposit coefficient
+                            XIMPDRY   ,&! Impurity dry deposit coefficient
+                            XO3   ,&!   Ozone
+                            XAE     !   Aerosol optoical depth
 !
 !
 !
@@ -122,6 +124,8 @@ IF (.NOT.ALLOCATED(XZ0H)  ) ALLOCATE(XZ0H  (KNI)     )
 IF (.NOT.ALLOCATED(XQSURF)) ALLOCATE(XQSURF(KNI)     )
 IF (.NOT.ALLOCATED(XIMPWET))ALLOCATE(XIMPWET   (KNI,NIMPUROF))
 IF (.NOT.ALLOCATED(XIMPDRY))ALLOCATE(XIMPDRY   (KNI,NIMPUROF))
+IF (.NOT.ALLOCATED(XO3)  ) ALLOCATE(XO3  (KNI)     )
+IF (.NOT.ALLOCATED(XAE)) ALLOCATE(XAE(KNI)     )
 !
 IF (SIZE(CSV)>=1) CSV(1) = '#CO   '
 IF (SIZE(CSV)>=2) CSV(2) = '#O3   '     
@@ -208,8 +212,10 @@ XPS       (:)=XUNDEF ! pressure at atmospheric model surface (Pa)
 XPA       (:)=XUNDEF ! pressure at forcing level             (Pa)
 XZS       (:)=XUNDEF ! atmospheric model orography           (m)
 XCO2      (:)=XUNDEF ! CO2 concentration in the air          (kg/kg)
-XIMPWET (:,:) =XUNDEF
-XIMPDRY (:,:) =XUNDEF
+XIMPWET (:,:)=XUNDEF
+XIMPDRY (:,:)=XUNDEF
+XO3 (:)      =XUNDEF
+XAE (:)      =XUNDEF
 XSNOW     (:)=XUNDEF ! snow precipitation                    (kg/m2/s)
 XRAIN     (:)=XUNDEF ! liquid precipitation                  (kg/m2/s)
 XSFTH     (:)=XUNDEF ! flux of heat                          (W/m2)

@@ -51,6 +51,8 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XCO2        ,&! CO2 concentration in the air          (kg/m3)
                             XIMPWET     ,&! wet deposit coef for each type of impurity (g)
                             XIMPDRY     ,&! dry deposit coef for each type of impurity (g/j)
+                            XO3         ,&! Ozone
+                            XAE         ,&! Aerosol optical depth
                             XSNOW       ,&! snow precipitation                    (kg/m2/s)
                             XRAIN       ,&! liquid precipitation                  (kg/m2/s)
                             XSFTH       ,&! flux of heat                          (W/m2)
@@ -256,6 +258,8 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZSNOW               ! snow precipitation   
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZRAIN               ! liquid precipitation                  (kg/m2/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZPS                 ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCO2                ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZO3                 ! Ozone
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZAE                 ! Aerosol optical depth
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPWET           ! wet deposit coefficient for each impurity type (kg/m²/s)
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPDRY           ! dry deposit coefficient for each impurity type (kg/m²/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDIR                ! wind direction
@@ -308,7 +312,7 @@ INTEGER  :: ILOCAL_COMM  ! Local communicator
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !!!!!!!!!!!!!!!!!!!!! For spectral repartion of direct/diffuse solar irradiance 
-REAL, DIMENSION(:), ALLOCATABLE :: ZO3, ZAE, ZP_CLOUD, ZTCLOUD55, ZMU 
+REAL, DIMENSION(:), ALLOCATABLE :: ZP_CLOUD, ZTCLOUD55, ZMU, ZD_O3,ZD_AE
 INTEGER, DIMENSION(:), ALLOCATABLE :: KCLOUD_TYPE
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZIRR_DIFF, ZIRR_DIR
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZP_CUT
@@ -653,7 +657,9 @@ IF (.NOT.ALLOCATED(ZLW))ALLOCATE(ZLW    (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZSNOW))ALLOCATE(ZSNOW  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZRAIN))ALLOCATE(ZRAIN  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZPS))ALLOCATE(ZPS    (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))   
+IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))  
+IF (.NOT.ALLOCATED(ZO3))ALLOCATE(ZO3   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZAE))ALLOCATE(ZAE   (INI,INB_LINES+1)) 
 IF (.NOT.ALLOCATED(ZIMPWET))ALLOCATE(ZIMPWET   (INI,NIMPUROF,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZIMPDRY))ALLOCATE(ZIMPDRY   (INI,NIMPUROF,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR))ALLOCATE(ZDIR   (INI,INB_LINES+1))
@@ -663,6 +669,8 @@ IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
 ZIMPWET   (:,:,:)=XUNDEF
 ZIMPDRY   (:,:,:)=XUNDEF
+ZO3        (:,:) =XUNDEF
+ZAE        (:,:) =XUNDEF
 !      computes initial air co2 concentration and  density
 !
 #ifdef SFX_MPI
@@ -680,7 +688,7 @@ IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOS
  CALL OL_READ_ATM(&
                   CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
                    ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
-                   ZCO2,ZIMPWET,ZIMPDRY,ZDIR,LLIMIT_QAIR                           ) 
+                   ZCO2,ZIMPWET,ZIMPDRY,ZO3,ZAE,ZDIR,LLIMIT_QAIR                           ) 
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
@@ -702,6 +710,8 @@ XCO2(:)  = ZCO2(:,1)
 XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * XZREF )
 !Set the value of impur deposit coef
 IF (LFORCIMP) THEN  
+  XO3(:)  = ZO3(:,1)
+  XAE(:)  = ZAE(:,1)
   DO JIMP=1,NIMPUROF    
     XIMPWET(:,JIMP)=ZIMPWET(:,JIMP,1)
     XIMPDRY(:,JIMP)=ZIMPDRY(:,JIMP,1)
@@ -878,6 +888,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZCO2(:,IDMAX)=ZCO2(:,SIZE(ZTA,2))
       ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
       IF (LFORCIMP) THEN  
+      ZO3(:,IDMAX)=ZO3(:,SIZE(ZTA,2))
+      ZAE(:,IDMAX)=ZAE(:,SIZE(ZTA,2))
         DO JIMP=1,NIMPUROF
           ZIMPWET(:,JIMP,IDMAX)=ZIMPWET(:,JIMP,SIZE(ZTA,2))
           ZIMPDRY(:,JIMP,IDMAX)=ZIMPDRY(:,JIMP,SIZE(ZTA,2))
@@ -890,7 +902,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),&
                      ZCO2(:,1:IDMAX),ZIMPWET(:,:,1:IDMAX),ZIMPDRY(:,:,1:IDMAX), &
-                     ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
+                     ZO3(:,1:IDMAX),ZAE(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
 
 #ifdef SFX_MPI
@@ -924,6 +936,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZSNOW(:,ID_FORC+1),ZRAIN(:,ID_FORC+1),   &
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
+                            ZO3(:,ID_FORC),ZO3(:,ID_FORC+1),         &
+                            ZAE(:,ID_FORC),ZAE(:,ID_FORC+1),         &
                             ZIMPWET(:,:,ID_FORC), ZIMPWET(:,:,ID_FORC+1),      &
                             ZIMPDRY(:,:,ID_FORC), ZIMPDRY(:,:,ID_FORC+1),      &
                             ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
@@ -1016,8 +1030,6 @@ DO JFORC_STEP=1,INB_STEP_ATM
    IF (YSURF_CUR%IM%I%LATMORAD) THEN 
 
 
-IF (.NOT.ALLOCATED(ZO3)) ALLOCATE(ZO3  (INI)       )! 
-IF (.NOT.ALLOCATED(ZAE)) ALLOCATE(ZAE  (INI)       )! 
 IF (.NOT.ALLOCATED(ZP_CLOUD)) ALLOCATE(ZP_CLOUD  (INI)       )! 
 IF (.NOT.ALLOCATED(ZTCLOUD55)) ALLOCATE(ZTCLOUD55  (INI)       )! 
 IF (.NOT.ALLOCATED(KCLOUD_TYPE)) ALLOCATE(KCLOUD_TYPE  (INI)       )! 
@@ -1028,7 +1040,8 @@ IF (.NOT.ALLOCATED(ZINT_DIR_SW)) ALLOCATE(ZINT_DIR_SW  (INI)       )!
 IF (.NOT.ALLOCATED(ZINT_SCA_SW)) ALLOCATE(ZINT_SCA_SW  (INI)       )! 
 IF (.NOT.ALLOCATED(ZMU)) ALLOCATE(ZMU (INI)       )!
 IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )! 
-
+IF (.NOT.ALLOCATED(ZD_O3)) ALLOCATE(ZD_O3  (INI)       )!
+ IF (.NOT.ALLOCATED(ZD_AE)) ALLOCATE(ZD_AE  (INI)       )!
 
   
   ! broadband direct and diffuse irradiance
@@ -1038,8 +1051,15 @@ IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )!
     ZINT_TOT_SW(NINDX1SFX:NINDX2SFX)=ZINT_DIR_SW(NINDX1SFX:NINDX2SFX)+ZINT_SCA_SW(NINDX1SFX:NINDX2SFX)
     XSCA_SW(NINDX1SFX:NINDX2SFX,2:IBANDS)=0.
     XDIR_SW(NINDX1SFX:NINDX2SFX,2:IBANDS)=0.
-    ZO3(NINDX1SFX:NINDX2SFX)= 0.3 ! integrated ozone (atm-cm)
-    ZAE(NINDX1SFX:NINDX2SFX)= 0.1 ! aerosol optical depth
+    IF (LFORCIMP) THEN 
+      ZD_O3(NINDX1SFX:NINDX2SFX)= XO3(NINDX1SFX:NINDX2SFX)/100 ! integrated ozone (atm-cm)
+      ZD_AE(NINDX1SFX:NINDX2SFX)= XAE(NINDX1SFX:NINDX2SFX) ! aerosol optical depth
+      !PRINT*, "ZO3",ZD_O3
+      !PRINT*, "ZAE",ZD_AE
+    ELSE 
+      ZD_O3(NINDX1SFX:NINDX2SFX)= 0.3 ! integrated ozone (atm-cm)
+      ZD_AE(NINDX1SFX:NINDX2SFX)= 0.1 ! aerosol optical depth
+    ENDIF
     ZMU(NINDX1SFX:NINDX2SFX)=COS(XZENITH(NINDX1SFX:NINDX2SFX))
     ZP_CLOUD(NINDX1SFX:NINDX2SFX)= 378.*100.! cloud bottom pressure (Pa)
     KCLOUD_TYPE(NINDX1SFX:NINDX2SFX)= 1! cloud type
@@ -1061,7 +1081,7 @@ IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )!
 	ZTCLOUD55(NINDX1SFX:NINDX2SFX))
      ! WRITE(*,*) ZTCLOUD55(NINDX1SFX:NINDX2SFX),XZENITH(NINDX1SFX:NINDX2SFX),IYEAR, IMONTH, IDAY, ZTIME
 	call IRRADIANCE(ZDATI,ZMU(NINDX1SFX:NINDX2SFX),XQA(NINDX1SFX:NINDX2SFX)/XRHOA(NINDX1SFX:NINDX2SFX)&
-	,ZO3(NINDX1SFX:NINDX2SFX),ZAE(NINDX1SFX:NINDX2SFX),&
+	,ZD_O3(NINDX1SFX:NINDX2SFX),ZD_AE(NINDX1SFX:NINDX2SFX),&
        XPS(NINDX1SFX:NINDX2SFX),XTA(NINDX1SFX:NINDX2SFX),PPZP_CUT,ZP_CLOUD(NINDX1SFX:NINDX2SFX),&
        KCLOUD_TYPE(NINDX1SFX:NINDX2SFX),ZTCLOUD55(NINDX1SFX:NINDX2SFX),ZIRR_DIR(NINDX1SFX:NINDX2SFX,:),&
        ZIRR_DIFF(NINDX1SFX:NINDX2SFX,:))
@@ -1084,7 +1104,7 @@ IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )!
 	ELSE ! case where only total radiation is know
 	ZTCLOUD55(NINDX1SFX:NINDX2SFX)= 0. ! cloud optical depth
 	call IRRADIANCE(ZDATI,ZMU(NINDX1SFX:NINDX2SFX),XQA(NINDX1SFX:NINDX2SFX)/XRHOA(NINDX1SFX:NINDX2SFX),&
-	ZO3(NINDX1SFX:NINDX2SFX),ZAE(NINDX1SFX:NINDX2SFX),&
+	ZD_O3(NINDX1SFX:NINDX2SFX),ZD_AE(NINDX1SFX:NINDX2SFX),&
        XPS(NINDX1SFX:NINDX2SFX),XTA(NINDX1SFX:NINDX2SFX),PPZP_CUT,ZP_CLOUD(NINDX1SFX:NINDX2SFX),&
        KCLOUD_TYPE(NINDX1SFX:NINDX2SFX),ZTCLOUD55(NINDX1SFX:NINDX2SFX),ZIRR_DIR(NINDX1SFX:NINDX2SFX,:),&
        ZIRR_DIFF(NINDX1SFX:NINDX2SFX,:))

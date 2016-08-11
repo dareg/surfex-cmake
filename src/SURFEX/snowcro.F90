@@ -377,6 +377,7 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT !impurities content (g) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: IMPUR_NORM !impurities content (g) (npoints,nlayer,ntypes_impurities)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND, ZRADSINK 
 !                                      ZSNOWTEMP  = Snow layer(s) averaged temperature (K)
@@ -444,6 +445,7 @@ REAL, DIMENSION(SIZE(PTA),NIMPUR)   ::  ZSNOWIMPURF
 
 REAL, DIMENSION(SIZE(PTA),NIMPUR)   ::  ZDRYCOEF ! Dry deposit coefficient for each kind of impurity (g)
 REAL, DIMENSION(SIZE(PTA),NIMPUR)   ::  ZWETCOEF ! Wet deposit coefficient for each kind of impurity (g/s)
+
 
 
 ! New roughness lengths in case of glaciers without snow.
@@ -564,6 +566,7 @@ PLEL3L     = 0.
 PHPSNOW    = 0.
 PEVAPCOR   = 0.
 PTHRUFAL   = 0.
+IMPUR_NORM(:)=0.
 !
 ! pour imprimer des diagnostics sur un des points
 IPRINT = 1 
@@ -679,7 +682,7 @@ ZSNOWBIS(:) = ZSNOW(:)
 ! Calculate uppermost density and thickness changes due to snowfall,
 ! and add heat content of falling snow
 !
- CALL SNOWNLFALL_UPGRID(TPTIME, OGLACIER,                                       &
+CALL SNOWNLFALL_UPGRID(TPTIME, OGLACIER,                                       &
                         PTSTEP,PSR,PTA,PVMOD,ZSNOWBIS,PSNOWRHO,PSNOWDZ,         &
                         PSNOWHEAT,PSNOWHMASS,PSNOWALB,PPERMSNOWFRAC,            &
                         PSNOWGRAN1,PSNOWGRAN2,GSNOWFALL,ZSNOWDZN,               &
@@ -869,21 +872,29 @@ SELECT CASE (HSNOWRAD)
       ZSNOWIMP_CONTENT(:,:,JIMP) = 2. * PSNOWAGE(:,:) * 1E-9
     ENDDO
   CASE("TA3")
-    ! Increase impurity content following parameterization from S. Morin
+!Calculate the factor to norm the impurity content following parameterization from S. Morin(F.tuzet)
+    DO JJ=1, size(ZSNOW)
+      IMPUR_NORM(JJ)=EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD) !Initialise the norm 
+      IF (INLVLS_USE(JJ)>1) THEN
+        DO JST=2, INLVLS_USE(JJ)
+          IMPUR_NORM(JJ)=IMPUR_NORM(JJ)+EXP(-(SUM(PSNOWDZ(JJ,1:JST-1))+0.5*PSNOWDZ(JJ,JST))/XIMPUR_EFOLD)!add the contribution of each layer 
+        ENDDO
+      ENDIF
+    ENDDO
+    ! Increase impurity content following parameterization from S. Morin   
     DO JIMP=1,NIMPUR
       DO JJ=1, size(ZSNOW)
-        PSNOWIMPUR(JJ,1,JIMP)=PSNOWIMPUR(JJ,1,JIMP)+PTSTEP*ZDRYCOEF(JJ,JIMP)*&
-        EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD)
-        
+        PSNOWIMPUR(JJ,1,JIMP)=PSNOWIMPUR(JJ,1,JIMP)+(PTSTEP*ZDRYCOEF(JJ,JIMP)*&
+        EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD))/IMPUR_NORM(JJ)
         IF (INLVLS_USE(JJ)>1) THEN
           DO JST=2, INLVLS_USE(JJ)
-            PSNOWIMPUR(JJ,JST,JIMP)=PSNOWIMPUR(JJ,JST,JIMP)+PTSTEP*ZDRYCOEF(JJ,JIMP)*&
-            EXP(-(SUM(PSNOWDZ(JJ,1:JST-1))+0.5+PSNOWDZ(JJ,JST))/XIMPUR_EFOLD)
+            PSNOWIMPUR(JJ,JST,JIMP)=PSNOWIMPUR(JJ,JST,JIMP)+(PTSTEP*ZDRYCOEF(JJ,JIMP)*&
+            EXP(-(SUM(PSNOWDZ(JJ,1:JST-1))+0.5*PSNOWDZ(JJ,JST))/XIMPUR_EFOLD))/IMPUR_NORM(JJ)
           ENDDO
         ENDIF
       ENDDO
     ENDDO
-    
+ !Compute the impurity concentration of each layer(JST) for each type of impurity(JIMP) and each point (JJ)   
   DO JIMP=1,NIMPUR 
     DO JJ=1,SIZE(ZSNOW)
       DO JST=1,INLVLS_USE(JJ)
@@ -2083,6 +2094,39 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
                    ( ZOPTR - ZOPTR0 + XTAU(IDRHO,IDGRAD,IDTEMP) ) )**(1./XKAPPA(IDRHO,IDGRAD,IDTEMP))
         ZOPTR  = ZOPTR + ZDRDT * PTSTEP/3600.
         ZOPTR  = MIN( ZOPTR, 3./(XRHOLI*2.) * 10.**6.)
+        !
+        PSNOWGRAN1(JJ,JST) = ZOPTR * 2./10.**6.
+        !
+      
+      ELSEIF ( PSNOWLIQ(JJ,JST)<=XUEPSI .AND. HSNOWMETAMO=='F16' )THEN   
+        !
+      !  WRITE(*,*) CSNOWMETAMO,': you are using F06 formulation!!' modified by tuzet F
+        !
+        ! XDRDT0(dens,gradT,T), XTAU(dens,gradT,T), XKAPPA(dens,gradT,T)
+        ! dens: [1-8 <-> 50.-400. kg/m3]
+        ! gradT: [1-31 <-> 0.-300. K/m]
+        ! T: [1-11 <-> 223.15-273.15 K]
+        !
+        !  Select indices of density, temperature gradient and temperature
+        IDRHO  = MIN( ABS( INT( (PSNOWRHO(JJ,JST)-25.)/50.        ) + 1 ), 8  )
+        IDGRAD = MIN( ABS( INT( (ZGRADT-5.)/10.+2.                )     ), 31 )
+        IDTEMP = MIN( ABS( INT( (PSNOWTEMP(JJ,JST)-225.65 )/5.+2. )     ), 11 )
+        IF ( PSNOWTEMP(JJ,JST)<221. ) IDTEMP = 1
+        !
+        ! Compute SSA
+        ZOPTR0 = XVDIAM6/2. * 10.**6.
+        ZOPTR  = PSNOWGRAN1(JJ,JST)/2. * 10.**6.
+        IF (IDRHO >3 ) THEN
+        ZDRDT  = 70*XDRDT0(IDRHO,IDGRAD,IDTEMP) * &
+                 ( XTAU(IDRHO,IDGRAD,IDTEMP) / &
+                   ( (ZOPTR - ZOPTR0) + XTAU(IDRHO,IDGRAD,IDTEMP) ) )**(1./XKAPPA(IDRHO,IDGRAD,IDTEMP))
+        ELSE           
+        ZDRDT  = XDRDT0(IDRHO,IDGRAD,IDTEMP) * &
+                 ( XTAU(IDRHO,IDGRAD,IDTEMP) / &
+                   ( (ZOPTR - ZOPTR0) + XTAU(IDRHO,IDGRAD,IDTEMP) ) )**(1./XKAPPA(IDRHO,IDGRAD,IDTEMP))
+        ENDIF
+        ZOPTR  = ZOPTR + ZDRDT * PTSTEP/3600.
+        !ZOPTR  = MIN( ZOPTR, 3./(XRHOLI*2.) * 10.**6.)
         !
         PSNOWGRAN1(JJ,JST) = ZOPTR * 2./10.**6.
         !
