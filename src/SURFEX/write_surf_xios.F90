@@ -109,29 +109,30 @@ IF (PRESENT(KFIELD) .OR. PRESENT(PFIELD) .OR. PRESENT(HFIELD) .OR. PRESENT(OFIEL
     !  output file (if it is a valid file) , and set the value
     ! ----------------------------------------------------------------------
     !
-    IF ( XIOS_IS_VALID_FILE(COUTPUT_DEFAULT)) THEN 
-
-      CALL XIOS_GET_HANDLE(COUTPUT_DEFAULT,file_hdl)
-      CALL XIOS_ADD_CHILD(file_hdl,var_hdl,HREC)
-
-      IF (PRESENT(KFIELD) ) THEN 
-        CALL XIOS_SET_ATTR(var_hdl,type="int")
-        GRET = XIOS_SETVAR(HREC,KFIELD)
-      ENDIF
-      IF (PRESENT(PFIELD)) THEN 
-        CALL XIOS_SET_ATTR(var_hdl,type="float")
-        GRET = XIOS_SETVAR(HREC,PFIELD)
-      ENDIF
-      IF (PRESENT(OFIELD)) THEN 
-        CALL XIOS_SET_ATTR(var_hdl,type="bool")
-        GRET = XIOS_SETVAR(HREC,OFIELD)
-      ENDIF
-      IF (PRESENT(HFIELD)) THEN 
-        CALL XIOS_SET_ATTR(var_hdl,type="string")
-        GRET = XIOS_SETVAR(HREC,HFIELD)
-      ENDIF
-
-    ENDIF
+!doesn't work for the moment
+!    IF ( XIOS_IS_VALID_FILE(COUTPUT_DEFAULT)) THEN 
+!
+!      CALL XIOS_GET_HANDLE(COUTPUT_DEFAULT,file_hdl)
+!      CALL XIOS_ADD_CHILD(file_hdl,var_hdl,HREC)
+!
+!      IF (PRESENT(KFIELD) ) THEN 
+!        CALL XIOS_SET_ATTR(var_hdl,type="int")
+!        GRET = XIOS_SETVAR(HREC,KFIELD)
+!      ENDIF
+!      IF (PRESENT(PFIELD)) THEN 
+!        CALL XIOS_SET_ATTR(var_hdl,type="float")
+!        GRET = XIOS_SETVAR(HREC,PFIELD)
+!      ENDIF
+!      IF (PRESENT(OFIELD)) THEN 
+!        CALL XIOS_SET_ATTR(var_hdl,type="bool")
+!        GRET = XIOS_SETVAR(HREC,OFIELD)
+!      ENDIF
+!      IF (PRESENT(HFIELD)) THEN 
+!        CALL XIOS_SET_ATTR(var_hdl,type="string")
+!        GRET = XIOS_SETVAR(HREC,HFIELD)
+!      ENDIF
+!
+!    ENDIF
 
   ENDIF
   !
