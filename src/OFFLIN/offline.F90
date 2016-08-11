@@ -1094,7 +1094,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         IF (LXIOS) THEN 
 #ifdef WXIOS
           IF (.NOT. LXIOS_DEF_CLOSED) THEN 
+                  print*,'close_context in'
             CALL XIOS_CLOSE_CONTEXT_DEFINITION()
+            print*,'close_context out'
             LXIOS_DEF_CLOSED=.TRUE.
           ENDIF
           CALL XIOS_UPDATE_CALENDAR(JSURF_STEP)
