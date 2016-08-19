@@ -565,68 +565,11 @@ DO JST = 1,SIZE(PSNOWSWE(:,:),2)
 ENDDO    ! end loop grid points
 ! Incrementation of snow layers age
 ZTSTEPDAYS = PTSTEP/86400. ! time step in days
-! Lafaysse / Cluzet : reimplementation of first Morin/Charrois impuritites content option:
-! part of code modified by S. Morin 22/08/2013 on impurities behavior
-!
-!	HSNOWRAD='TAR'
-!
-!	JJ    	looping indexes "grid poinst"
-!	JST    	looping indexes "snow layers"
-!	INLVLS_USE 	varying number of effective layers 		"nb de couches non vides"	DIMENSION(SIZE(PTA))
-!	ZTSTEPDAYS  	time step in days (days)
-!	ZSNOW         	total snow depth (m)								DIMENSION(SIZE(PSNOWDZ,1))
-!	PSNOWAGE   	Snow grain age									DIMENSION(:,:)
-!	PSNOWDZ   	Snow layer(s) thickness (m)							DIMENSION(:,:)
-!
-!
-! 	dans default_crocus.f90:
-!	XIMPUR_COEFF = 10.		deposition intensity at top of the snowpack (unitless)
-!	XIMPUR_EFOLD = 0.05 (m)		e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
-!	XIMPUR_INIT = 20 (days)		value of snowage assigned to fresh snow layers
-!
-! the closer to the surface, the more snow will get contaminated.
-!
-!
-!PRINT*, "XIMPUR_COEFF", XIMPUR_COEFF
-!PRINT*, "XIMPUR_INIT", XIMPUR_INIT
 
-IF(HSNOWRAD=="TA3") THEN   ! temporary treatment of snowage scaled by distance of the middle of the layer to the surface (application for impurities)
-!
-  DO JJ=1, SIZE(ZSNOW)	!		Pour chaque point de grille, l age de la premiere couche = age de la couche + ( time step * coeff impur * exp( la moitié de la couche 1 / coeff efold) )
-!
-!      PRINT*, "PSNOWAGE", PSNOWAGE(JJ,1), "ZTSTEPDAYS", ZTSTEPDAYS, "PSNOWDZ", PSNOWDZ(JJ,1), "JJ", JJ, "JST", JST
-      PSNOWAGE(JJ,1)=PSNOWAGE(JJ,1) + ZTSTEPDAYS * XIMPUR_COEFF * &
-                  EXP(- 0.5*PSNOWDZ(JJ,1) / XIMPUR_EFOLD)		! 0.5*PSNOWDZ(JJ,1) = la moitié de la couche considérée
-!    	  PRINT*, "ZTSTEPDAYS ", ZTSTEPDAYS
-  !  	  PRINT*, "XIMPUR_COEFF", XIMPUR_COEFF
- !   	  PRINT*, "PSNOWDZ(JJ,1)", PSNOWDZ(JJ,1)
- !   	  PRINT*, "PSNOWDZ(JJ,1)", XIMPUR_EFOLD
-!    	  PRINT*, "EXP", EXP(- 0.5*PSNOWDZ(JJ,1) / XIMPUR_EFOLD)
-!      PRINT*, "CALCUL SAM PSNOWAGE 1", PSNOWAGE(JJ,1)
-!
-      IF(INLVLS_USE(JJ)>1) THEN				! si le nb de couches "non vide" est > 1 alors:          
-	DO JST=2,INLVLS_USE(JJ)				! de la couche 2 à la dernière couche remplie
-	  PSNOWAGE(JJ,JST)=PSNOWAGE(JJ,JST) + ZTSTEPDAYS * XIMPUR_COEFF * &
-                  EXP( - (SUM(PSNOWDZ(JJ,1:JST-1)) + 0.5* PSNOWDZ(JJ,JST))/ XIMPUR_EFOLD)		!SUM(PSNOWDZ(JJ,1:JST-1)) = la somme des hauteurs des couches sus-jacente à la couche considérée + 0.5* PSNOWDZ(JJ,JST) = la moitié en hauteur de la couche considérée
-
- !   	  PRINT*, "ZTSTEPDAYS ", ZTSTEPDAYS
- !   	  PRINT*, "XIMPUR_COEFF", XIMPUR_COEFF
- !   	  PRINT*, "PSNOWDZ(JJ,1)", PSNOWDZ(JJ,1)
-  !  	  PRINT*, "PSNOWDZ(JJ,1)", XIMPUR_EFOLD
-   ! 	  PRINT*, "EXP", EXP( - (SUM(PSNOWDZ(JJ,1:JST-1)) + 0.5* PSNOWDZ(JJ,JST))/ XIMPUR_EFOLD)
-!    	  PRINT*, "CALCUL SAM PSNOWAGE +", PSNOWAGE(JJ,JST)
-!
-!
-	ENDDO  !  end loop snow layers
-      ENDIF
-  ENDDO    ! end loop grid points
-
-ELSE
-  WHERE (PSNOWSWE >0)
+WHERE (PSNOWSWE >0)
     PSNOWAGE=PSNOWAGE+ZTSTEPDAYS    	! this is the classical version where snowage is a real age of snow layers
-					! si la neige est mouillée, SWE >0, age de la couche = age + time step
-  END WHERE
-ENDIF
+END WHERE
+
 !
 !***************************************PRINT IN**********************************************
 !
@@ -1811,8 +1754,7 @@ IMPLICIT NONE
 !
 !     0.1 declarations of arguments  
 !      
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ, PSNOWTEMP, PSNOWLIQ, PSNOWSWE 
-!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ, PSNOWTEMP, PSNOWLIQ, PSNOWSWE
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST              
 !   
 REAL, INTENT(IN)                    :: PTSTEP    
@@ -1888,7 +1830,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       ZVDENT2 = XVSPHE2 * ZVAP
       ! CONDITION POUR LE CAS NON DENDRITIQUE SPHERICITE NON LIMITEE
       GCOND_B92  = ( PSNOWHIST(JJ,JST)/=NVHIS1 .OR. PSNOWGRAN2(JJ,JST)<XVDIAM2 )
-      GCOND_C13 = ( HSNOWMETAMO=='C13' )  ! CONDITION POUR LE CALCUL DE SNOWGRAN1
+      GCOND_C13 = ( HSNOWMETAMO=='C13' ) .OR. ((HSNOWMETAMO=='S-C') .AND. (PSNOWAGE(JJ,JST)>2.0)) ! CONDITION POUR LE CALCUL DE SNOWGRAN1
       ! X COEF
       ZVSPHE = XVSPHE1
       ! FOR C13
@@ -1905,7 +1847,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       ZVDENT2 = - XVDENT1 * ZVAP
       ! CONDITION POUR LE CAS NON DENDRITIQUE NON COMPLETEMENT ANGULEUX
       GCOND_B92  = ( ZGRADT<XVGRAT2 .OR. PSNOWGRAN1(JJ,JST)>0. )
-      GCOND_C13 = ( HSNOWMETAMO=='C13' ) ! CONDITION POUR LE CALCUL DE SNOWGRAN1
+      GCOND_C13 = ( HSNOWMETAMO=='C13' ) .OR. ((HSNOWMETAMO=='S-C') .AND. (PSNOWAGE(JJ,JST)>2.0))! CONDITION POUR LE CALCUL DE SNOWGRAN1
       ! X COEF
       ZVSPHE = XUNDEF 
       ! FOR C13
@@ -2080,7 +2022,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       ! -> Dry snow
       ! -> Evolution of optical diameter
       !---------------------------------
-      ELSEIF ( PSNOWLIQ(JJ,JST)<=XUEPSI .AND. HSNOWMETAMO=='F06' )THEN   
+      ELSEIF ( PSNOWLIQ(JJ,JST)<=XUEPSI .AND. ((HSNOWMETAMO=='F06' ) .OR. ( (HSNOWMETAMO=='S-F').AND.(PSNOWAGE(JJ,JST)>2.) ) ) )THEN   
         !
       !  WRITE(*,*) CSNOWMETAMO,': you are using F06 formulation!!'
         !
@@ -2106,6 +2048,17 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
         !
         PSNOWGRAN1(JJ,JST) = ZOPTR * 2./10.**6.
         !
+      
+      
+      ELSEIF ( PSNOWLIQ(JJ,JST)<=XUEPSI .AND.  ( ((HSNOWMETAMO=='S-F').OR.(HSNOWMETAMO=='S-C')) .AND.(PSNOWAGE(JJ,JST)<=2.) ) ) THEN 
+      
+          ZSSA = 6./( XRHOLI*PSNOWGRAN1(JJ,JST) )
+      
+          ! Equation 5 by Schleef et al 2014
+          ZSSA=ZSSA+(1.1E-6+3.1E-8*(PSNOWTEMP(JJ,JST)-273.15))*(ZSSA**3.1)
+      
+          PSNOWGRAN1(JJ,JST) = 6./( XRHOLI*ZSSA )
+      
       ENDIF
       !
     ENDIF
