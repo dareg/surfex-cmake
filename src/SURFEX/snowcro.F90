@@ -2054,8 +2054,8 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
       
           ZSSA = 6./( XRHOLI*PSNOWGRAN1(JJ,JST) )
       
-          ! Equation 5 by Schleef et al 2014
-          ZSSA=ZSSA+(1.1E-6+3.1E-8*(PSNOWTEMP(JJ,JST)-273.15))*(ZSSA**3.1)
+          ! Equation 5 by Schleef et al 2014 gives -dSSA/dt in m2 kg-1 hour -1:
+          ZSSA=ZSSA-(1.1E-6+3.1E-8*(PSNOWTEMP(JJ,JST)-273.15))*(ZSSA**3.1)*(PTSTEP/3600.)
       
           PSNOWGRAN1(JJ,JST) = 6./( XRHOLI*ZSSA )
       
