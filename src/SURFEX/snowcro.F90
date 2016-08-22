@@ -359,6 +359,8 @@ LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametriza
                                          !-----------------------                                        
 !*      0.2    declarations of local variables
 !
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWSSA_BEFORE, ZSNOWSSA_AFTER,ZSNOWDSSA
+
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
 !
@@ -721,9 +723,15 @@ ENDIF
 !
 !        4.BIS   Snow metamorphism
 !                ----------------- 
-!  
+!
+ CALL SNOWCROGETSSA(HSNOWMETAMO, PSNOWGRAN1,PSNOWGRAN2, INLVLS_USE,ZSNOWSSA_BEFORE)
+! 
  CALL SNOWCROMETAMO(PSNOWDZ,PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,ZSNOWTEMP, &
                     PSNOWLIQ,PTSTEP,PSNOWSWE,INLVLS_USE,PSNOWAGE,HSNOWMETAMO       ) 
+! 
+ CALL SNOWCROGETSSA(HSNOWMETAMO, PSNOWGRAN1,PSNOWGRAN2, INLVLS_USE,ZSNOWSSA_AFTER)                   
+!
+ZSNOWDSSA=ZSNOWSSA_AFTER-ZSNOWSSA_BEFORE
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -740,8 +748,9 @@ ENDIF
 ! Calculate snow density: compaction/aging: density increases
 !
  CALL SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,                      &
-                      PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWLIQ,INLVLS_USE,PDIRCOSZW,&
-                      HSNOWMETAMO)
+                      PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,ZSNOWDSSA,           &
+                      PSNOWLIQ,INLVLS_USE,PDIRCOSZW,                                &
+                      HSNOWMETAMO,HSNOWCOMP)
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -1419,7 +1428,8 @@ IF (LHOOK) CALL DR_HOOK('SNOWCRO',1,ZHOOK_HANDLE)
 !####################################################################
         SUBROUTINE SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,                         &
                                    PSNOWTEMP,PSNOW,PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST, &
-                                   PSNOWLIQ,INLVLS_USE,PDIRCOSZW,HSNOWMETAMO        ) 
+                                   PSNOWAGE, PSNOWDSSA, PSNOWLIQ,INLVLS_USE,PDIRCOSZW,&
+                                   HSNOWMETAMO,HSNOWCOMP) 
 !
 !!    PURPOSE
 !!    -------
@@ -1465,10 +1475,11 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO, PSNOWDZ   ! Density UNIT : kg m
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNOW        ! Snowheight UNIT : m
 !
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, &!Snowtype variables
-                                        PSNOWLIQ     ! Snow liquid water content UNIT ??? 
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PSNOWDSSA !Snowtype variables
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWLIQ     ! Snow liquid water content UNIT ??? 
 INTEGER, DIMENSION(:), INTENT(IN)   :: INLVLS_USE   ! Number of snow layers used
 CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
+CHARACTER(3), INTENT(IN)              :: HSNOWCOMP   ! compaction option
 !
 !*      0.2    declarations of local variables
 !
@@ -1476,6 +1487,9 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2,    &! work snow
                                                       ZVISCOSITY,   &! Snow viscosity UNIT : N m-2 s (= Pa s)
                                                       ZSMASS        !, &  ! overburden mass for a given layer UNIT : kg m-2 
 !                                                      ZWSNOWDZ       ! mass of each snow layer UNIT : kg m-2
+!
+REAL,PARAMETER::PPK=0.18
+REAL,PARAMETER::PPB=-6.6E-3
 !
 INTEGER   :: JJ,JST   ! looping indexes
 !
@@ -1503,6 +1517,13 @@ ENDDO
 DO JJ = 1,SIZE(PSNOW)
   !
   DO JST = 1,INLVLS_USE(JJ)
+    
+   IF ((HSNOWCOMP=="S14").AND.(PSNOWAGE(JJ,JST)<=2.)) THEN
+   
+    ZSNOWRHO2(JJ,JST) = PSNOWRHO(JJ,JST) + PSNOWRHO(JJ,JST) * PPB * PSNOWDSSA(JJ,JST) * &
+                                           ( XG*PDIRCOSZW(JJ)*ZSMASS(JJ,JST))**PPK      
+   
+   ELSE
     !
     ! Snow viscosity basic equation (depend on temperature and density only):
     ! Cluzet et al 2016 2nd option for coefficients on temperature and density
@@ -1546,12 +1567,14 @@ DO JJ = 1,SIZE(PSNOW)
     ! Calculate new snow snow density: compaction from weight/over-burden
     ZSNOWRHO2(JJ,JST) = PSNOWRHO(JJ,JST) + PSNOWRHO(JJ,JST) * PTSTEP * &
                                            ( XG*PDIRCOSZW(JJ)*ZSMASS(JJ,JST)/ZVISCOSITY(JJ,JST) )
-    !    
+   ENDIF    
     ! Calculate new grid thickness in response to density change
     PSNOWDZ(JJ,JST) = PSNOWDZ(JJ,JST) * ( PSNOWRHO(JJ,JST)/ZSNOWRHO2(JJ,JST) )
     !
     !  Update density (kg m-3):
     PSNOWRHO(JJ,JST) = ZSNOWRHO2(JJ,JST)
+    
+
     !
   ENDDO    ! end loop snow layers
   !
@@ -6006,5 +6029,66 @@ IF (LHOOK) CALL DR_HOOK('SNOWCROPRINTDATE',1,ZHOOK_HANDLE)
 END SUBROUTINE SNOWCROPRINTDATE
 !####################################################################
 !###################################################################
+SUBROUTINE SNOWCROGETSSA(HSNOWMETAMO,PSNOWGRAN1,PSNOWGRAN2,KLAYERS,PSNOWSSA)
+!to compute SSA
+USE MODD_CSTS, ONLY : XRHOLI
+USE MODD_SNOW_PAR, ONLY : XD1, XD2, XD3, XX
 !
+IMPLICIT NONE
+!
+INTEGER,DIMENSION(:), INTENT(IN) :: KLAYERS
+REAL, DIMENSION(:,:), INTENT(IN) :: PSNOWGRAN1,PSNOWGRAN2
+CHARACTER(3), INTENT(IN)       :: HSNOWMETAMO
+!
+REAL, DIMENSION(:,:),INTENT(OUT) :: PSNOWSSA
+
+REAL :: ZDIAM
+!
+INTEGER :: JJ,JST
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCROGETSSA',0,ZHOOK_HANDLE)
+!
+IF ( HSNOWMETAMO=='B92' ) THEN
+   !
+  DO JST = 1,SIZE(PSNOWGRAN1,2)
+    DO JJ=1,SIZE(PSNOWGRAN1,1)  !
+      IF (JST<=KLAYERS(JJ)) THEN
+        IF ( PSNOWGRAN1(JJ,JST)<0. ) THEN
+          ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
+                ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 ) 
+          ZDIAM = ZDIAM/10000.
+        ELSE
+          ZDIAM = PSNOWGRAN2(JJ,JST)*PSNOWGRAN1(JJ,JST)/XX + &
+                MAX( 0.0004, 0.5*PSNOWGRAN2(JJ,JST) ) * ( 1.-PSNOWGRAN1(JJ,JST)/XX )                
+        ENDIF
+        PSNOWSSA(JJ,JST) = 6. / (XRHOLI*ZDIAM)
+      ELSE
+        PSNOWSSA(JJ,JST) = -999
+      ENDIF
+    END DO
+  END DO
+    !
+ELSE    
+!
+  DO JST = 1,SIZE(PSNOWGRAN1,2)
+    DO JJ=1,SIZE(PSNOWGRAN1,1)  !
+      IF (JST<=KLAYERS(JJ)) THEN
+        IF(PSNOWGRAN1(JJ,JST)>0) THEN
+          PSNOWSSA(JJ,JST) = 6. / (XRHOLI*PSNOWGRAN1(JJ,JST))
+        ELSE
+          PSNOWSSA(JJ,JST) = -999
+        ENDIF
+       ELSE
+        PSNOWSSA(JJ,JST) = -999
+      ENDIF
+    END DO
+  END DO
+    !
+ENDIF 
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCROGETSSA',0,ZHOOK_HANDLE)
+!
+END SUBROUTINE SNOWCROGETSSA
+!####################################################################
+!###################################################################
 END SUBROUTINE SNOWCRO
