@@ -1491,7 +1491,11 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2,    &! work snow
 REAL,PARAMETER::PPK=0.18
 REAL,PARAMETER::PPB=-6.6E-3
 !
+REAL,PARAMETER::PPA0=0.4
+!
 INTEGER   :: JJ,JST   ! looping indexes
+LOGICAL:: GDENDRITIC
+REAL::ZTHETAICE,ZX,ZVISCOSITY_F,ZVISCOSITY_K
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1524,45 +1528,52 @@ DO JJ = 1,SIZE(PSNOW)
                                            ( XG*PDIRCOSZW(JJ)*ZSMASS(JJ,JST))**PPK      
    
    ELSE
-    !
-    ! Snow viscosity basic equation (depend on temperature and density only):
-    ! Cluzet et al 2016 2nd option for coefficients on temperature and density
-!     IF (HSNOWCOMP=="B92") THEN
-    ZVISCOSITY(JJ,JST) = XVVISC1 * &
+!        IF ( HSNOWMETAMO=='B92' ) THEN 
+!          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<-XUEPSI )
+!        ELSE
+!          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<XVDIAM6*(4.-PSNOWGRAN2(JJ,JST))-XUEPSI )
+!        ENDIF   
+       
+     IF (HSNOWCOMP=="T11") THEN        
+         ZVISCOSITY(JJ,JST) = 0.05 * PSNOWRHO(JJ,JST)**(-0.0371*(PSNOWTEMP(JJ,JST)-XTT)+4.4)*(1E-4*EXP(0.018*PSNOWRHO(JJ,JST))+1)
+     
+     ELSE    
+        ! 
+        ! Snow viscosity basic equation (depend on temperature and density only):
+
+        ZVISCOSITY(JJ,JST) = XVVISC1 * &
                          EXP( XVVISC3*PSNOWRHO(JJ,JST) + XVVISC4*ABS(XTT-PSNOWTEMP(JJ,JST)) ) * &
                          PSNOWRHO(JJ,JST) / XVRO11 
-!     ELSEIF (HSNOWCOMP=="B93") THEN
-!       ZVISCOSITY(JJ,JST) = XVVISC1 * &
-!                          EXP( XVVISC3_B93*PSNOWRHO(JJ,JST) + XVVISC4_B93*ABS(XTT-PSNOWTEMP(JJ,JST)) ) * &
-!                          PSNOWRHO(JJ,JST) / XVRO11 
-!     ENDIF
-    ! Equations below apply changes to the basic viscosity value, based on snow microstructure properties
-    IF ( PSNOWLIQ(JJ,JST)>0.0 ) THEN
-      ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) / &
+                         
+     END IF    
+          
+          ! Equations below apply changes to the basic viscosity value, based on snow microstructure properties
+          IF ( PSNOWLIQ(JJ,JST)>0.0 ) THEN
+              ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) / &
                            ( XVVISC5 + XVVISC6*PSNOWLIQ(JJ,JST)/PSNOWDZ(JJ,JST) ) 
-    ENDIF
+          ENDIF
     !
-    IF( PSNOWLIQ(JJ,JST)/PSNOWDZ(JJ,JST)<=0.01 .AND. PSNOWHIST(JJ,JST)>=NVHIS2 ) THEN   
-      ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) * XVVISC7
-    ENDIF
+          IF( PSNOWLIQ(JJ,JST)/PSNOWDZ(JJ,JST)<=0.01 .AND. PSNOWHIST(JJ,JST)>=NVHIS2 ) THEN   
+              ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) * XVVISC7
+          ENDIF
     !
-    IF ( PSNOWHIST(JJ,JST)==NVHIS1 ) THEN
+          IF ( PSNOWHIST(JJ,JST)==NVHIS1 ) THEN
       !
-      IF ( HSNOWMETAMO=="B92" ) THEN
+            IF ( HSNOWMETAMO=="B92" ) THEN
         !
-        IF ( PSNOWGRAN1(JJ,JST)>=0. .AND. PSNOWGRAN1(JJ,JST)<XVGRAN6 ) THEN   
-          ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) * &
+              IF ( PSNOWGRAN1(JJ,JST)>=0. .AND. PSNOWGRAN1(JJ,JST)<XVGRAN6 ) THEN   
+                  ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) * &
                                MIN( 4., EXP( MIN( XVDIAM1, &
                                                   PSNOWGRAN2(JJ,JST)             -XVDIAM4 ) / XVDIAM6 ) )
-        ENDIF
+              ENDIF
         !
-      ELSEIF ( PSNOWGRAN1(JJ,JST)>=XVDIAM6*(4.-PSNOWGRAN2(JJ,JST)) .AND. PSNOWGRAN2(JJ,JST)<XVGRAN6/XVGRAN1 ) THEN 
-        ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) * &
+            ELSEIF ( PSNOWGRAN1(JJ,JST)>=XVDIAM6*(4.-PSNOWGRAN2(JJ,JST)) .AND. PSNOWGRAN2(JJ,JST)<XVGRAN6/XVGRAN1 ) THEN 
+                  ZVISCOSITY(JJ,JST) = ZVISCOSITY(JJ,JST) * &
                              MIN( 4., EXP( MIN( XVDIAM1, &
                                                (XVDIAM6*(4.-PSNOWGRAN2(JJ,JST)))-XVDIAM4 ) / XVDIAM6 ) )
-      ENDIF
+            ENDIF
       !
-    ENDIF
+         ENDIF
     !
     ! Calculate new snow snow density: compaction from weight/over-burden
     ZSNOWRHO2(JJ,JST) = PSNOWRHO(JJ,JST) + PSNOWRHO(JJ,JST) * PTSTEP * &
@@ -4039,7 +4050,7 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
        !  
        ! snow grains
        IF ( HSNOWMETAMO=='B92' ) THEN 
-         GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<-XEPSI )
+         GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<-XUEPSI )
        ELSE
          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<XVDIAM6*(4.-PSNOWGRAN2(JJ,JST))-XUEPSI )
        ENDIF
