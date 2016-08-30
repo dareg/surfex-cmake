@@ -418,7 +418,7 @@ ifeq "$(VER_CDF)" "CDFAUTO"
 NETCDF_OPTS ?= FC="$(F90)" CC="$(CC)"
 #
 ifneq "$(VER_MPI)" "NOMPI"
-HDF5_OPTS= --enable-parall
+HDF5_OPTS= --enable-parallel
 CDF_OPTS= --enable-parallel-tests
 else
 HDF5_OPTS=
