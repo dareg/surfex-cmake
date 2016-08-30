@@ -537,7 +537,7 @@ HDF5_LIB?=${HDF5_PATH}/lib/libhdf5.a
 CDF_LIB?=${CDF_PATH}/lib/libnetcdf.a
 CDFF_INC?=${CDFF_PATH}/include/netcdf.mod
 #
-INC_NETCDF?=-I${CDFF_PATH}/include
+INC_NETCDF?=-I${CDF_PATH}/include
 #
 LIB_NETCDF     ?= -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 \
 		  -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
