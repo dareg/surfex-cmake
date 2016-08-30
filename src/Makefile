@@ -3,7 +3,7 @@
 #SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 #SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 #SFX_LIC for details. version 1.
-MAKEFLAGS += -r
+#MAKEFLAGS += -r
 ####
 ##########################################################
 #                                                        #
@@ -261,7 +261,7 @@ filedepallmaster :  $(DEP_ALL_MASTER)
 	cat $(OBJDIR_MASTER)/filemaster  | xargs cat  >>  $(OBJDIR_MASTER)/filedepallmaster
 
 libmaster :  depmaster
-	@$(MAKE)  -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES OBJDIR=$(OBJDIR_MASTER) objmaster
+	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES OBJDIR=$(OBJDIR_MASTER) objmaster
 
 
 bibmaster :  libmaster
@@ -413,24 +413,49 @@ endif
 #RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
-ifeq "$(VERSION_CDF)" "3.6.3"
-NETCDF_OPTS ?= FC="$(REALFC)" CPPFLAGS="-DpgiFortran" --disable-shared --disable-cxx
-else
-#RJ: assume to build netcdf4 library with only netcdf3-classic file support
-NETCDF_OPTS ?= FC="$(REALFC)" --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-compiler-recover --with-pic
-endif
+NETCDF_OPTS ?= FC="$(F90)" CC="$(CC)"
 #
-cdf : $(CDF_INC)
-$(CDF_INC) :
-	cd $(DIR_CDF) && LDFLAGS= CFLAGS= CPPFLAGS=  \
-	 ./configure --prefix=${CDF_PATH} $(NETCDF_OPTS) && \
-	 $(MAKE) -j 1 clean && \
-	 $(MAKE) -j 1 && \
-	 $(MAKE) -j 1 install && \
-	 $(MAKE) -j 1 clean
+$(CURL_LIB) :
+	cd $(DIR_CURL) && ./configure --prefix=${CURL_PATH} $(NETCDF_OPTS) && \
+	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(ZLIB_LIB) :
+	cd $(DIR_ZLIB) && ./configure --prefix=${ZLIB_PATH} && \
+	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(SZIP_LIB) : 
+	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
+	 cd $(DIR_HDF5) && \
+	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} --enable-parallel \
+	 --prefix=${HDF5_PATH} $(NETCDF_OPTS) && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(CDF_LIB) : $(LIB_HDF5)
+	 export LD_LIBRARY_PATH=${HDF5_PATH}/lib:${LD_LIBRARY_PATH} && \
+         cd $(DIR_CDF) && CPPFLAGS="-I${HDF5_PATH}/include" LDFLAGS="-L${HDF5_PATH}/lib" \
+	 ./configure --disable-shared --enable-parallel-tests --prefix=${CDF_PATH} $(NETCDF_OPTS) && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+cdf : $(CDFF_INC)
+$(CDFF_INC) : $(CURL_LIB) $(ZLIB_LIB) $(SZIP_LIB) $(HDF5_LIB) $(CDF_LIB)
+	 export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${LD_LIBRARY_PATH} && \
+         cd $(DIR_CDFF) && \
+	 CPPFLAGS="-I${CURL_PATH}/include -I${ZLIB_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include" \
+	 LDFLAGS="-L${CURL_PATH}/lib -lcurl -L${ZLIB_PATH}/lib -lz -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 -L${CDF_PATH}/lib -lnetcdf" \
+	 ./configure --disable-shared --prefix=${CDFF_PATH} $(NETCDF_OPTS) && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 check && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 
 clean_cdf :
-	- [ ! -d ${CDF_PATH} ] || rm -fr  ${CDF_PATH}
+	- [ ! -d ${CURL_PATH} ] || rm -fr  ${CURL_PATH} && \
+	- [ ! -d ${ZLIB_PATH} ] || rm -fr  ${ZLIB_PATH} && \
+	- [ ! -d ${SZIP_PATH} ] || rm -fr  ${SZIP_PATH} && \
+	- [ ! -d ${HDF5_PATH} ] || rm -fr  ${HDF5_PATH} && \
+	- [ ! -d ${CDF_PATH} ]  || rm -fr  ${CDF_PATH}  && \
+	- [ ! -d ${CDFF_PATH} ] || rm -fr  ${CDFF_PATH}
+#
 endif
 
 ##########################################################
@@ -442,7 +467,7 @@ ifeq "$(VER_OASIS)" "mct"
 ifneq "$(VER_MPI)" "NOMPI"
 #
 oasis : $(OASIS_KEY)
-$(OASIS_KEY) : $(CDF_INC)
+$(OASIS_KEY) : $(CDFF_INC)
 	([ ! -d ${OASIS_PATH} ] && mkdir ${OASIS_PATH}) || true
 	@echo '=> Compiling oasis'
 	@echo '===> check util/make_dir/COMP.log STDOUT messages'
@@ -477,7 +502,7 @@ ifneq "$(VER_MPI)" "NOMPI"
 ifneq "$(XIOS_CDF_OPT)" ""
 #
 xios : $(XIOS_KEY)
-$(XIOS_KEY) : $(CDF_INC)
+$(XIOS_KEY) : $(CDFF_INC)
 	@echo "export Surfex_CC=\"$(CC) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
 	@echo "export Surfex_F90=\"$(F90) $(F90FLAGS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.env  
 	#

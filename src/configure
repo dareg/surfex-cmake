@@ -1,5 +1,5 @@
 #!/bin/sh
-#set -x
+set -x
 #set -e
 if [ "x$XYZ" = "x" ] 
 then
@@ -8,7 +8,12 @@ export VERSION_MASTER=${VERSION_MASTER:-SFX-V8-0}
 export VERSION_BUG=${VERSION_BUG:-0}
 export VERSION_XYZ=${VERSION_MASTER}-${VERSION_BUG}
 export VERSION_DATE=${VERSION_DATE:-"27/03/2012"}
-export VERSION_CDF=${VERSION_CDF-"3.6.3"}
+export VERSION_CURL=${VERSION_CURL:-"7.50.1"}
+export VERSION_ZLIB=${VERSION_ZLIB:-"1.2.8"}
+export VERSION_SZIP=${VERSION_SZIP:-"2.1"}
+export VERSION_HDF5=${VERSION_HDF5:-"1.8.17"}
+export VERSION_CDF=${VERSION_CDF:-"4.4.1"}
+export VERSION_CDFF=${VERSION_CDFF:-"4.4.4"}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI-"1.9.9"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
 export VERSION_XIOS=${VERSION_XIOS:-"876-patch"}
@@ -197,7 +202,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 
                 export     ARCH=${ARCH:-LXgfortran}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
-		export  VER_XIOS=${VER_XIOS:-0}
+		export  VER_XIOS=${VER_XIOS:-2}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFCTI}
@@ -445,8 +450,23 @@ fi
 #  Install CDF if VER_CDF=CDFAUTO
 #
 if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
-if [ ! -d "$LOCAL/src/LIB"/"netcdf-${VERSION_CDF}" ] ; then
-  ( cd "$LOCAL/src/LIB" ; tar xvfz netcdf-${VERSION_CDF}.tar.gz )
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"curl-${VERSION_CURL}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz curl-${VERSION_CURL}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"zlib-${VERSION_ZLIB}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz zlib-${VERSION_ZLIB}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"szip-${VERSION_SZIP}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz szip-${VERSION_SZIP}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"hdf5-${VERSION_HDF5}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz hdf5-${VERSION_HDF5}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"netcdf-${VERSION_CDF}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz netcdf-${VERSION_CDF}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"netcdf-fortran-${VERSION_CDFF}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz netcdf-fortran-${VERSION_CDFF}.tar.gz )
 fi
 fi
 #

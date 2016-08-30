@@ -515,17 +515,34 @@ endif
 ifneq "$(VER_CDF)" "NONE"
 #
 ifeq "$(VER_CDF)" "CDFAUTO"
-DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}
-#RJ: avoid non standard libs! Can create non conforming outputs
-CDF_PATH?=${DIR_CDF}-${ARCH}
-CDF_INC?=${CDF_PATH}/include/netcdf.mod
 #
-INC_NETCDF     ?= -I${CDF_PATH}/include
-ifeq "$(VERSION_CDF)" "3.6.3"
-LIB_NETCDF     ?= -L${CDF_PATH}/lib -L${CDF_PATH}/lib64 -lnetcdf
-else
-LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf
-endif
+DIR_CURL?=${SRC_SURFEX}/src/LIB/netcdf4/curl-${VERSION_CURL}
+DIR_ZLIB?=${SRC_SURFEX}/src/LIB/netcdf4/zlib-${VERSION_ZLIB}
+DIR_SZIP?=${SRC_SURFEX}/src/LIB/netcdf4/szip-${VERSION_SZIP}
+DIR_HDF5?=${SRC_SURFEX}/src/LIB/netcdf4/hdf5-${VERSION_HDF5}
+DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf4/netcdf-${VERSION_CDF}
+DIR_CDFF?=${SRC_SURFEX}/src/LIB/netcdf4/netcdf-fortran-${VERSION_CDFF}
+#RJ: avoid non standard libs! Can create non conforming outputs
+CURL_PATH?=${DIR_CURL}-${ARCH}
+ZLIB_PATH?=${DIR_ZLIB}-${ARCH}
+SZIP_PATH?=${DIR_SZIP}-${ARCH}
+HDF5_PATH?=${DIR_HDF5}-${ARCH}
+CDF_PATH?=${DIR_CDF}-${ARCH}
+CDFF_PATH?=${DIR_CDFF}-${ARCH}
+#
+CURL_LIB?=${CURL_PATH}/lib/libcurl.a
+ZLIB_LIB?=${ZLIB_PATH}/lib/libz.a
+SZIP_LIB?=${SZIP_PATH}/lib/libsz.a
+HDF5_LIB?=${HDF5_PATH}/lib/libhdf5.a
+CDF_LIB?=${CDF_PATH}/lib/libnetcdf.a
+CDFF_INC?=${CDFF_PATH}/include/netcdf.mod
+#
+INC_NETCDF?=-I${CDFF_PATH}/include
+#
+LIB_NETCDF     ?= -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 \
+		  -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
+XIOS_CDF_OPT   = netcdf4_seq
+#
 endif
 #
 # NetCDF in SGI ICE
@@ -646,7 +663,7 @@ TRIP_LIST += TRIP_PREP TRIP_MASTER TRIP_CHANGE_DATE
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE SODA SXPOST
+PROG_LIST += PGD PREP OFFLINE SODA 
 #PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 endif
