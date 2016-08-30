@@ -249,7 +249,9 @@ ELSE
       !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
 IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',0,ZHOOK_HANDLE_OMP)
+#ifdef SFX_MPI
 !$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IDX,ISTATUS,INFOMPI)
+#endif
       DO JPROC=0,NPROC-1
         !
         !the cover exists and was read
@@ -274,10 +276,13 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',0,ZHOOK_HANDLE_OMP)
         ENDIF
         !
       ENDDO
+#ifdef SFX_MPI
 !$OMP END DO
+#endif
 IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL 
-      !
+
+!
       IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_5',0,ZHOOK_HANDLE)
       !
       !waits that all cover pieces are sent

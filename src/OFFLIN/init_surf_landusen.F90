@@ -146,10 +146,14 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
+#ifdef SFX_MPI
 CALL MPI_BCAST(UG%NGRID_FULL_PAR,KIND(UG%NGRID_FULL_PAR)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
 IF (NRANK/=NPIO) ALLOCATE(UG%XGRID_FULL_PAR(UG%NGRID_FULL_PAR))
+#ifdef SFX_MPI
  CALL MPI_BCAST(UG%XGRID_FULL_PAR,&
                 SIZE(UG%XGRID_FULL_PAR)*KIND(UG%XGRID_FULL_PAR)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
+#endif
 !   
 !* initialization for I/O
 !

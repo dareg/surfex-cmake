@@ -45,17 +45,16 @@ int ec_is_little_endian_() { return ec_is_little_endian(); }
 /* A routine to be called at the very end in case MPI wasn't finalized */
 /* Registered *only* by MPL_INIT */
 
-#ifdef SFX_MPL
-void ec_mpi_atexit_(void)
+/*void ec_mpi_atexit_(void)
 {
   static int callnum = 0;
   ++callnum;
   if (callnum == 1) {
-    /* register */
+    *//* register *//*
     atexit(ec_mpi_atexit_);
   }
   else if (callnum == 2) {
-    /* action : finish MPI via F90 cmpl_end (in cmpl_binding.F90) */
+    *//* action : finish MPI via F90 cmpl_end (in cmpl_binding.F90) *//* 
     extern void cmpl_end_(int *);
     int ierr = 0;
     cmpl_end_(&ierr);
@@ -66,8 +65,7 @@ void ec_mpi_atexit(void)
 {
   ec_mpi_atexit_();
 }
-#endif
-
+*/
 void ec_set_umask_(void)
 {
   char *env = getenv("EC_SET_UMASK");

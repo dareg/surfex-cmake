@@ -195,7 +195,9 @@ ELSE  ! (i.e. .NOT. LXIOS)
 !
 ENDIF
 !
+#ifdef SFX_MPI
 CALL MPI_COMM_RANK(KLOCAL_COMM,IRANK,IWORK)
+#endif
 IF(IRANK==0)THEN
    WRITE(*,'(A)')'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
    IF (LOASIS) WRITE(*,'(A)')'OASIS used for model : '//TRIM(CMODEL_NAME)

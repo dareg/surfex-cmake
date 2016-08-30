@@ -1070,11 +1070,11 @@ signal_drhook(int sig SIG_EXTRA_ARGS)
   }
 }
 
-void
+/*void
 c_drhook_set_mpi_()
 {
   dr_hook_procinfo_(&myproc, &nproc);
-}
+}*/
 
 
 /*--- signal_drhook_init ---*/
@@ -1085,7 +1085,7 @@ signal_drhook_init(int enforce)
   char *env = getenv("DR_HOOK_SILENT");
   int silent = env ? atoi(env) : 0;
   int j;
-  dr_hook_procinfo_(&myproc, &nproc);
+  /*dr_hook_procinfo_(&myproc, &nproc);*/
   if (myproc < 1) myproc = 1; /* Just to enable output as if myproc was == 1 */
   /* Signals may not yet been set, since MPI not initialized 
      Only enforce-parameter can enforce to set these => no output on myproc=1 */
