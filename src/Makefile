@@ -275,6 +275,7 @@ $(LIB_MASTER) :  $(OBJS_LISTE_MASTER)
 	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER)
 
 progmaster : libmaster
+	export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${CDFF_PATH}/lib
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
 	OBJDIR=$(OBJDIR_MASTER) \
 	LIB_MNH=$(LIB_MASTER) \
@@ -338,6 +339,7 @@ $(LIB_USER) :  $(OBJS_LISTE_USER)
 	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
 
 proguser : libuser
+	export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${CDFF_PATH}/lib
 	@$(MAKE) -I $(OBJDIR_USER)  DO_COMP_USER=YES \
 	OBJDIR=$(OBJDIR_USER) \
 	LIB_MNH=$(LIB_USER) \
@@ -424,7 +426,7 @@ CDF_OPTS=
 endif
 #
 $(CURL_LIB) :
-	cd $(DIR_CURL) && ./configure --prefix=${CURL_PATH} --disable-shared $(NETCDF_OPTS) && \
+	cd $(DIR_CURL) && ./configure --prefix=${CURL_PATH} $(NETCDF_OPTS) && \
 	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(ZLIB_LIB) :
@@ -432,22 +434,24 @@ $(ZLIB_LIB) :
 	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(SZIP_LIB) : 
-	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" --disable-shared && \
+	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
 	 cd $(DIR_HDF5) && \
-	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} --disable-shared $(HDF5_OPTS) \
+	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} $(HDF5_OPTS) \
 	 --prefix=${HDF5_PATH} $(NETCDF_OPTS) && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(CDF_LIB) : $(LIB_HDF5)
+	 export LD_LIBRARY_PATH=${HDF5_PATH}/lib && \
 	 cd $(DIR_CDF) && CPPFLAGS="-I${HDF5_PATH}/include" LDFLAGS="-L${HDF5_PATH}/lib" \
 	 ./configure $(CDF_OPTS) --prefix=${CDF_PATH} --disable-shared $(NETCDF_OPTS) && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 cdf : $(CDFF_INC)
 $(CDFF_INC) : $(CURL_LIB) $(ZLIB_LIB) $(SZIP_LIB) $(HDF5_LIB) $(CDF_LIB)
+	 export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib && \
 	 cd $(DIR_CDFF) && \
 	 CPPFLAGS="-I${CURL_PATH}/include -I${ZLIB_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include" \
 	 LDFLAGS="-L${CURL_PATH}/lib -lcurl -L${ZLIB_PATH}/lib -lz -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 -L${CDF_PATH}/lib -lnetcdf" \
