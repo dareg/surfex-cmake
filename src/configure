@@ -1,5 +1,4 @@
 #!/bin/sh
-set -x
 #set -e
 if [ "x$XYZ" = "x" ] 
 then
@@ -410,6 +409,13 @@ fi
 #
 if [ "x${VER_MPI}" = "xNOMPI" ] ; then
   export VER_DRHOOK=MINI
+fi
+#
+if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
+  export LIB_PATH=$LOCAL/src/LIB/netcdf4/hdf5-${VERSION_HDF5}-${ARCH}-${VER_MPI}/lib
+#
+else
+  export LIB_PATH=
 fi
 #
 # Generate profile_surfex
