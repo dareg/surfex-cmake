@@ -120,7 +120,7 @@ export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}-\${VER_MPI}-\${VER_OMP}-\${OPTL
 export BIN_TOOLS=${BIN_TOOLS}
 export PATH=.:\$SRC_SURFEX/bin:\$SRC_SURFEX/exe:\$SRC_SURFEX/bin_tools/\${BIN_TOOLS}:\$PATH
 #
-export LD_LIBRARY_PATH=${LIB_PATH:-${LD_LIBRARY_PATH}}
+export LD_LIBRARY_PATH=${LIB_PATH}:${LD_LIBRARY_PATH}
 #
 # NCARG_ROOT : for use of graphic tools : diaprog 
 # 
