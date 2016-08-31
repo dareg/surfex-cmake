@@ -7,7 +7,7 @@ SUBROUTINE INIT_SURF_ATM_n (YSC, HPROGRAM,HINIT, OLAND_USE,             &
                             KI,KSV,KSW, HSV,PCO2,PRHOA,                 &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
                              PEMIS,PTSRAD,PTSURF,                       &
-                             KYEAR, KMONTH,KDAY, PTIME,                 &
+                             KYEAR, KMONTH,KDAY, PTIME, TPDATE_END,     &
                              HATMFILE,HATMFILETYPE, HTEST               )  
 !#############################################################
 !
@@ -58,6 +58,7 @@ SUBROUTINE INIT_SURF_ATM_n (YSC, HPROGRAM,HINIT, OLAND_USE,             &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
@@ -168,6 +169,7 @@ INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
+TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
@@ -610,8 +612,8 @@ IF (YSC%U%NDIM_NATURE>0) &
                      KSV,KSW, HSV,ZP_CO2,ZP_RHOA,                       &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                      ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                     KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
-                     'OK'                                               )
+                     KYEAR,KMONTH,KDAY,PTIME,TPDATE_END,                &
+                     HATMFILE,HATMFILETYPE,'OK'      )
 !
 !
  CALL UNPACK_SURF_INIT_ARG(JTILE,YSC%U%NSIZE_NATURE,YSC%U%NR_NATURE)  

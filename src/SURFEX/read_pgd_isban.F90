@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE READ_PGD_ISBA_n (CHI, DTCO, DTV, DTZ, GB, IG, ISS, IO, S, K, &
-                                  UG, U, USS, GCP, SV, HPROGRAM,OLAND_USE)
+                                  UG, U, USS, GCP, SV, HPROGRAM, OLAND_USE, TPDATE_END)
 !     #########################################
 !
 !!****  *READ_PGD_ISBA_n* - routine to initialise ISBA physiographic variables 
@@ -114,6 +114,7 @@ TYPE(SV_t), INTENT(INOUT) :: SV
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 LOGICAL,           INTENT(IN)  :: OLAND_USE ! 
+TYPE(DATE), INTENT(IN) :: TPDATE_END
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -536,7 +537,7 @@ END IF
 !
  CALL READ_LECOCLIMAP(HPROGRAM,IO%LECOCLIMAP,GECOSG)
 !
- CALL READ_PGD_ISBA_PAR_n(DTCO, U, GCP, DTV, IG%NDIM, IO, HPROGRAM,IG%NDIM,OLAND_USE)
+ CALL READ_PGD_ISBA_PAR_n(DTCO, U, GCP, DTV, IG%NDIM, IO, HPROGRAM,IG%NDIM, OLAND_USE, S%TTIME%TDATE, TPDATE_END)
 IF (U%CNATURE == 'TSZ0') CALL READ_PGD_TSZ0_PAR_n(DTZ, HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_ISBA_N',1,ZHOOK_HANDLE)

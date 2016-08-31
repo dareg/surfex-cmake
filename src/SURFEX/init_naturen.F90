@@ -8,7 +8,7 @@
                                 HPROGRAM,HINIT,OLAND_USE, KI,KSV,KSW,     &
                                 HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,   &
                                 PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD,PTSURF,    &
-                                KYEAR, KMONTH,KDAY, PTIME,                &
+                                KYEAR, KMONTH,KDAY, PTIME, TPDATE_END,    &
                                 HATMFILE,HATMFILETYPE,HTEST              )  
 !     #############################################################
 !
@@ -50,6 +50,8 @@
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -62,8 +64,6 @@ USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SV_n, ONLY : SV_t
 !
 USE MODD_CSTS,       ONLY : XTT
-!
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -114,6 +114,7 @@ INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
+TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
@@ -146,8 +147,8 @@ ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
                    HPROGRAM, HINIT, OLAND_USE, KI, KSV, KSW, HSV, &
                    PCO2, PRHOA, PZENITH, PAZIM, PSW_BANDS,        &
                    PDIR_ALB, PSCA_ALB, PEMIS, PTSRAD, PTSURF,     &
-                   KYEAR, KMONTH, KDAY, PTIME, HATMFILE,          &
-                   HATMFILETYPE, 'OK'     )  
+                   KYEAR, KMONTH, KDAY, PTIME, TPDATE_END,        &
+                   HATMFILE, HATMFILETYPE, 'OK'     )  
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_NATURE_N',1,ZHOOK_HANDLE)
 !

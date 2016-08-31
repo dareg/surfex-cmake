@@ -8,7 +8,7 @@ SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, DTZ,&
                         KI, KSV, KSW, HSV, PCO2, PRHOA, PZENITH,      &
                         PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB, PEMIS,  &
                         PTSRAD, PTSURF, KYEAR, KMONTH, KDAY, PTIME,   &
-                        HATMFILE, HATMFILETYPE, HTEST      )
+                        TPDATE_END, HATMFILE, HATMFILETYPE, HTEST      )
 !#############################################################
 !
 !!****  *INIT_ISBA_n* - routine to initialize ISBA
@@ -71,6 +71,7 @@ USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SV_n, ONLY : SV_t
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                          &
                                 XDATA_ALBNIR_VEG, XDATA_ALBVIS_VEG,               &
@@ -169,6 +170,7 @@ INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
+TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
@@ -319,6 +321,7 @@ SELECT CASE (HINIT)
                         IM%ID%DM%LSURF_MISC_DIF, ILUOUT)    
     IF (LNAM_READ) CALL READ_NAM_PREP_ISBA_n(HPROGRAM)                        
     CALL READ_ISBA_DATE(HPROGRAM, HINIT, ILUOUT, HATMFILE, HATMFILETYPE, KYEAR, KMONTH, KDAY, PTIME, IM%S%TTIME)
+    TPDATE_END = IM%S%TTIME%TDATE
 
   CASE DEFAULT
     CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'FULL  ','SURF  ','READ ')
@@ -340,7 +343,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
 !               ---------------------------------
 !
  CALL READ_PGD_ISBA_n(IM%CHI, DTCO, IM%DTV, DTZ, IM%GB, IM%G, IM%ISS, IM%O, IM%S, IM%K, &
-                      UG, U, USS, GCP, SV, HPROGRAM,OLAND_USE)
+                      UG, U, USS, GCP, SV, HPROGRAM, OLAND_USE, TPDATE_END)
 !
 IF (HINIT=='PRE') THEN 
   DO JP = 1,IM%O%NPATCH
