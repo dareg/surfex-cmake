@@ -111,7 +111,7 @@ LOGICAL, INTENT(IN)                 :: OMEB       ! True = coupled to MEB. This 
 !                                                 ! If = False, then energy
 !                                                 ! budget and fluxes are computed herein.
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                       ! 'OLD' = direct
 !                                                       ! 'NEW' = Taylor serie, order 1
 !
@@ -216,7 +216,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD, & 
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
-                                       ZSNOW_MASS_BUDGET
+                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
 !                                      ZRRSNOW      = rain rate over snow [kg/(m2 s)]
 !                                      ZSNOW        = snow depth (m) 
@@ -237,6 +237,11 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
 !                                                 to maintain an accurate water
 !                                                 balance [kg/(m2 s)]
 !                                      ZSNOW_MASS_BUDGET = snow water equivalent budget (kg/m2/s)
+!                                      ZWGHT        = MEB surface layer weight for distributing energy
+!                                                     between litter and ground layers for the case
+!                                                     of total ablation during a timestep (-).
+!                                      ZWORK        = local working variable (*)
+!                                      ZC2          = sub-surface heat capacity [(K m2)/J]
 !
 !*      0.3    declarations of packed  variables
 !
@@ -277,6 +282,10 @@ ZSOILCOND(:)   = 0.0
 ZRRSNOW(:)     = 0.0
 ZSNOWFALL(:)   = 0.0
 ZSNOWABLAT_DELTA(:) = 0.0
+!
+ZWGHT(:)       = 0.0
+ZWORK(:)       = 0.0
+ZC2(:)         = PCT(:)
 !
 DMK%XSNOWLIQ(:,:)  = 0.0
 DMK%XSNOWDZ(:,:)   = 0.0
@@ -402,12 +411,18 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
 !
 !
    IF(OMEB)THEN
-     ZPSN(:)=1.0
+     ZPSN(:) = 1.0
+     IF(IO%CISBA == 'DIF')THEN
+       ZWGHT(:) = PSOILHCAPZ(:,2)*PDZG(:,2)/(PSOILHCAPZ(:,1)*PDZG(:,1) + PSOILHCAPZ(:,2)*PDZG(:,2))
+       ZC2(:)   = 1/(PSOILHCAPZ(:,2)*PDZG(:,2))
+     ELSE
+       ZWGHT(:) = (PD_G(:,2)-PD_G(:,1))/PD_G(:,2)
+     ENDIF           
    ELSE
 !    To Conserve mass in ISBA without MEB, 
 !    EVAP must be weignted by the snow fraction
 !    in the calulation of THRUFAL
-     ZPSN(:)=PEK%XPSN(:)
+     ZPSN(:) = PEK%XPSN(:)
    ENDIF
 !
    ZSNOWABLAT_DELTA(:) = 0.0
@@ -442,9 +457,12 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
                              - DMK%XHSNOW(:) - PLES3L(:) - PLEL3L(:)) + PGSFCSNOW(:)     &
                              - DMK%XSNOWHMASS(:)/PTSTEP 
       ZGRNDFLUXN(:)       = (ZSNOWH(:)+DMK%XSNOWHMASS(:))/PTSTEP + DMK%XGFLUXSNOW(:)
-      PTG(:,1)            = PTG(:,1) + PTSTEP*PCT(:)*ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      PDELHEATG(:)        = PDELHEATG(:)     + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
+      ZWORK(:)            = PTSTEP * ZPSN(:) * (ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
+      PTG(:,1)            = PTG(:,1) + ZWORK(:)*(1.-ZWGHT(:))*PCT(:)
+      PTG(:,2)            = PTG(:,2) + ZWORK(:)*    ZWGHT(:) *ZC2(:)
+      ZWORK(:)            = ZWORK(:) / PTSTEP
+      PDELHEATG(:)        = PDELHEATG(:)     + ZWORK(:)  
+      PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZWORK(:)  
       PGRNDFLUX(:)        = ZGRNDFLUXN(:)
       PFLSN_COR(:)        = 0.0
       !
@@ -524,7 +542,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !================================================================
 SUBROUTINE CALL_MODEL(KSIZE1,KSIZE2,KSIZE3,KMASK)

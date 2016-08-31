@@ -97,7 +97,7 @@ REAL                       :: ZTIMEC            ! cumulated current time (s)
 INTEGER                    :: JNB_TSTEP_RUN     ! TSTEP_RUN counter 
 INTEGER                    :: JNB_TSTEP_DIAG    ! DIAG call counter 
 INTEGER                    :: ICOUNT
-CHARACTER(LEN=3)           :: YWORK
+ CHARACTER(LEN=3)           :: YWORK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

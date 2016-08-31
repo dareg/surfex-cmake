@@ -28,6 +28,8 @@ USE MODD_TRIP_PAR, ONLY : LNCPRINT
 USE NETCDF
 USE MODE_TRIP_NETCDF
 !
+USE MODI_INIT_TRIP_PAR
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -35,8 +37,8 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of local variables
 !
-CHARACTER(LEN=NF90_MAX_NAME), PARAMETER :: YFILE    = 'TRIP_RESTART.nc'
-CHARACTER(LEN=NF90_MAX_NAME), PARAMETER :: YDATE    = 'date'
+ CHARACTER(LEN=NF90_MAX_NAME), PARAMETER :: YFILE    = 'TRIP_RESTART.nc'
+ CHARACTER(LEN=NF90_MAX_NAME), PARAMETER :: YDATE    = 'date'
 INTEGER,                      PARAMETER :: ILISTING = 6
 LOGICAL,                      PARAMETER :: LRW      = .TRUE.
 !
@@ -57,14 +59,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('TRIP_CHANGE_DATE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CALL INIT_TRIP_PAR
+ CALL INIT_TRIP_PAR
 !-------------------------------------------------------------------------------
 !
 ! * Read current date
 !
 OPEN(UNIT=21, FILE='date_trip', FORM='formatted')
 READ(21, *) IYEAR, IMONTH, IDAY, ITIME
-CLOSE(21)
+ CLOSE(21)
 !
 ZDATE(1) = REAL(IYEAR)
 ZDATE(2) = REAL(IMONTH)
@@ -73,11 +75,11 @@ ZDATE(4) = REAL(ITIME)
 !
 ! * Open netcdf file
 !
-CALL NCOPEN(ILISTING,LRW,LNCPRINT,YFILE,INCID)
+ CALL NCOPEN(ILISTING,LRW,LNCPRINT,YFILE,INCID)
 !
 ! * read date in restart file
 !
-CALL NCREAD(ILISTING,INCID,YDATE,ZREAD(:),LNCPRINT)
+ CALL NCREAD(ILISTING,INCID,YDATE,ZREAD(:),LNCPRINT)
 ZDATE_OLD(:) = ZREAD(:)
 !
 WRITE(ILISTING,*)'Change date in trip restart :'
@@ -104,7 +106,7 @@ WRITE(ILISTING,*)'Sucess in writting current date'
 !
 ! * Close netcdf file
 !
-CALL NCCLOSE(ILISTING,LNCPRINT,YFILE,INCID)
+ CALL NCCLOSE(ILISTING,LNCPRINT,YFILE,INCID)
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_CHANGE_DATE',1,ZHOOK_HANDLE)
 !

@@ -49,7 +49,7 @@ USE MODI_GET_LONLAT_TRIP
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -89,7 +89,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 !*       1.     Define parallel partitions:
@@ -101,7 +101,7 @@ IPARAL(CLIM_STRATEGY) = CLIM_SERIAL
 IPARAL(CLIM_OFFSET  ) = 0
 IPARAL(CLIM_LENGTH  ) = KLON*KLAT
 !
-CALL OASIS_DEF_PARTITION(IPART_ID,IPARAL(:),IERR)
+ CALL OASIS_DEF_PARTITION(IPART_ID,IPARAL(:),IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(KLISTING,*)'TRIP_OASIS_DEFINE: OASIS def partition problem, err = ',IERR
@@ -212,7 +212,7 @@ ENDIF
 !*       5.     End of declaration phase:
 !               --------------
 !
-CALL OASIS_ENDDEF(IERR)
+ CALL OASIS_ENDDEF(IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(KLISTING,*)'TRIP_OASIS_DEFINE: OASIS enddef problem, err = ',IERR

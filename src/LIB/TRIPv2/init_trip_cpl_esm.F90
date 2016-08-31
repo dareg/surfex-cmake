@@ -137,8 +137,8 @@ IF(LCPL_LAND)THEN
   IF(LCPL_GW)THEN
 !
     CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,&
-                        TP%XTOPO_RIV,TP%XHGROUND,ZHG_OLD,    &
-                        ZWTD,ZFWTD                           )
+                        TP%XTOPO_RIV,TP%XHC_BED,TP%XHGROUND, &
+                        ZHG_OLD,ZWTD,ZFWTD                   )
 !
     WHERE(TPG%GMASK_GW(:,:))
           TP%XCPL_WTD (:,:) = ZWTD (:,:)
@@ -148,10 +148,11 @@ IF(LCPL_LAND)THEN
   ENDIF
 !
 ! Flood fraction [-] and potential infiltration [kg/m2]
+! no flood for very smal flooded area (<0.1% of grid-cell)
 !       
   IF(LCPL_FLOOD)THEN
-    TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
-    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)
+     TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
+     TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)             
   ENDIF
 !  
 ENDIF

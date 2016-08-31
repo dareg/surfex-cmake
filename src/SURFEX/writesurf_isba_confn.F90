@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_ISBA_CONF_n (CHI, DE, DGO, DMI, IO, &
-                                        HPROGRAM)
+      SUBROUTINE WRITESURF_ISBA_CONF_n (CHI, DE, DGO, DMI, IO, HPROGRAM)
 !     ######################################################
 !
 !!****  *WRITESURF_ISBA_CONF* - routine to read the configuration for ISBA
@@ -38,10 +37,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-!
 USE MODD_CH_ISBA_n, ONLY : CH_ISBA_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
@@ -55,6 +50,7 @@ USE MODN_DEEPSOIL
 USE MODN_TREEDRAG
 USE MODN_DST
 !
+USE MODD_WRITE_SURF_ATM, ONLY : LNAM_ISBA_WRITTEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -83,7 +79,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_ISBA_CONF_N',0,ZHOOK_HANDLE)
- CALL GET_DEFAULT_NAM_n(HPROGRAM,'WRITE',ILUDES)
+ CALL GET_DEFAULT_NAM_n(HPROGRAM,'WRITE',ILUDES,LNAM_ISBA_WRITTEN)
 !
 IF (ILUDES==0 .AND. LHOOK) CALL DR_HOOK('WRITESURF_ISBA_CONF_N',1,ZHOOK_HANDLE)
 IF (ILUDES==0) RETURN

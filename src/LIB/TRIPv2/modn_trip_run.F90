@@ -39,8 +39,8 @@ IMPLICIT NONE
 !*    Names of files
 !     --------------
 !
-CHARACTER(LEN=28), PARAMETER      :: CNAMELIST    = 'TRIP_OPTIONS.nam'
-CHARACTER(LEN=15)                 :: CFILE_FRC    = 'TRIP_FORCING.nc'
+ CHARACTER(LEN=28), PARAMETER      :: CNAMELIST    = 'TRIP_OPTIONS.nam'
+ CHARACTER(LEN=15)                 :: CFILE_FRC    = 'TRIP_FORCING.nc'
 !
 !
 !*    General flags defining forcing options
@@ -48,13 +48,13 @@ CHARACTER(LEN=15)                 :: CFILE_FRC    = 'TRIP_FORCING.nc'
 !
 !
 LOGICAL                           :: LCUMFRC  = .FALSE.  ! Cumulated (or not) forcing variables 
-CHARACTER(LEN=6)                  :: CREADFRC = 'VECTOR' ! Forcing file format
+ CHARACTER(LEN=6)                  :: CREADFRC = 'VECTOR' ! Forcing file format
                                                          ! VECTOR = vector (normaly ilat*ilon)
                                                          ! LATLON = Regular lat lon grid
 !
-CHARACTER(LEN=8)                  :: CDRAIN     = 'DRAIN'  ! Drainage name in FORCING.nc file                                                      
-CHARACTER(LEN=8)                  :: CRUNOFF    = 'RUNOFF' ! Surface runoff name in FORCING.nc file
-CHARACTER(LEN=8)                  :: CSRC_FLOOD = '      ' ! Flood source term (P-E-I) name in FORCING.nc file
+ CHARACTER(LEN=8)                  :: CDRAIN     = 'DRAIN'  ! Drainage name in FORCING.nc file                                                      
+ CHARACTER(LEN=8)                  :: CRUNOFF    = 'RUNOFF' ! Surface runoff name in FORCING.nc file
+ CHARACTER(LEN=8)                  :: CSRC_FLOOD = '      ' ! Flood source term (P-E-I) name in FORCING.nc file
 !
 !
 !*    General flag 

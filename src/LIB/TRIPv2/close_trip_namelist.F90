@@ -51,7 +51,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('CLOSE_TRIP_NAMELIST',0,ZHOOK_HANDLE)
 !
-CLOSE(KLUNAM)
+ CLOSE(KLUNAM)
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_TRIP_NAMELIST',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

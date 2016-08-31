@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ##########################################################################
-      SUBROUTINE ISBA_FLUXES_MEB(KK, PK, PEK, DK, DEK, DMK, PRHOA, PSIGMA_F,PSIGMA_FN, &
+      SUBROUTINE ISBA_FLUXES_MEB(KK, PK, PEK, DK, DEK, DMK, PRHOA, PLTT, PSIGMA_F,PSIGMA_FN, &
                                  PRN_V, PRN_G, PLWNET_V_DTV, PLWNET_V_DTG, PLWNET_V_DTN, &
                                  PLWNET_G_DTV, PLWNET_G_DTG, PLWNET_G_DTN, PLWNET_N_DTV, &
                                  PLWNET_N_DTG, PLWNET_N_DTN, PTHRMA_TA, PTHRMB_TA,       &
@@ -89,8 +89,9 @@ TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 !*      0.1    declarations of arguments
 !
-REAL, DIMENSION(:),   INTENT(IN)   :: PRHOA
+REAL, DIMENSION(:),   INTENT(IN)   :: PRHOA, PLTT
 !                                     PRHOA = reference level air density (kg m-3)
+!                                     PLTT  = latent heat normalization factor (J kg-1)
 !
 REAL, DIMENSION(:),   INTENT(IN)   :: PSIGMA_F, PSIGMA_FN
 !
@@ -211,8 +212,7 @@ REAL, DIMENSION(:),   INTENT(OUT)  :: PEMIS
 !*      0.2    declarations of local variables
 !
 !
-REAL, DIMENSION(SIZE(PEK%XTV(:)))         :: ZFFF, ZWORK
-!                                     ZFFF  = working variables to help distinguish between soil and snow hydrolology and intercepted water reservoirs (-)
+REAL, DIMENSION(SIZE(PEK%XTV(:)))         :: ZWORK
 !                                     ZWORK = working array
 !
 REAL, DIMENSION(SIZE(PEK%XTV(:)))         :: ZSAIR, ZSAIRC
@@ -333,17 +333,11 @@ ZQSATN_G(:)  =        PQSAT_G(:)  + PDQSAT_G(:)  * PDELTAT_G(:)
 ZQSATN_V(:)  =        PQSAT_V(:)  + PDQSAT_V(:)  * PDELTAT_V(:)
 ZQSATIN_N(:) =        PQSATI_N(:) + PDQSATI_N(:) * PDELTAT_N(:)
 
-! additional sfc diagnostics needed for soil and snow hydrolology and intercepted water reservoirs:
-
-ZFFF(:)       = KK%XFF(:)*( 1.0 - KK%XFFROZEN(:)*(1.0 - (XLSTT/XLVTT)) )
-
 ! - Evaporation and Sublimation latent heat fluxes from the soil, respectively:
-! (kg m-2 s-1)
+! (W m-2)
 
-ZWORK(:)      = (1.-PEK%XPSN(:)-ZFFF(:)) * PFLXC_GV(:)
-
+ZWORK(:)      = (1.-PEK%XPSN(:)-KK%XFF(:)) * PFLXC_GV(:)
 PLEG(:)       = ZWORK(:)*PLEG_DELTA(:) *( DK%XHUG(:) *ZQSATN_G(:) - PEK%XQC(:) )*(1.-PFROZEN1(:))*XLVTT
-
 PLEGI(:)      = ZWORK(:)*PLEGI_DELTA(:)*(   PHUGI(:) *ZQSATN_G(:) - PEK%XQC(:) )*    PFROZEN1(:) *XLSTT
 
 ! - Latent heat flux from frozen and unfrozen flooded zones (W m-2)
@@ -354,26 +348,26 @@ DEK%XLEI_FLOOD(:) = ZWORK(:) *     KK%XFFROZEN(:) * XLSTT
 
 ! - Evapotranspiration vapor flux from the vegetation canopy (kg m-2 s-1)
 
-ZEVAP_CV(:) = (1.-PPSNCV(:)) * PHVGS(:) * PFLXC_CV(:)*( ZQSATN_V(:) - PEK%XQC(:) )
+ZEVAP_CV(:) = (1.-PPSNCV(:)) * PHVGS(:) * PFLXC_CV(:)*( ZQSATN_V(:) - PEK%XQC(:) ) * (XLVTT/PLTT(:))
 
 ! - Latent heat flux from the canopy (liquid) water interception reservoir (W m-2)
 
 DEK%XLER_CV(:) = ( (1.-PPSNA(:))*PEK%XPSN(:) * PFLXC_VN_C(:)    +              &
                              (1.-PEK%XPSN(:))* PFLXC_VG_C(:)  ) *              &
                  XLVTT * (1.-PPSNCV(:))* PDELTA_V(:) * ( ZQSATN_V(:) - PEK%XQC(:) )
+!
+! - Total latent heat flux (evapotranspiration) from the vegetation to the canopy air space (W m-2)
+!   *without* sublimation (for TOTAL evapotranspiration and sublimation, add PLESC here)
 
+DEK%XLEV_CV(:)  = PLTT(:) * ZEVAP_CV(:)
+!
 ! - latent heat flux from transpiration from the canopy (W m-2)
 
-DEK%XLETR_CV(:) = ZEVAP_CV(:) * XLVTT - DEK%XLER_CV(:) 
+DEK%XLETR_CV(:) = DEK%XLEV_CV(:) - DEK%XLER_CV(:) 
 
 ! Snow sublimation and evaporation latent heat flux from canopy-intercepted snow (W m-2)
 
 DEK%XLES_CV(:)  =  PPSNCV(:) * XLSTT * PHVNS(:) * PFLXC_CV(:)*( ZQSATN_V(:) - PEK%XQC(:) )
-
-! - Total latent heat flux (evapotranspiration) from the vegetation to the canopy air space (W m-2)
-!   *without* sublimation (for TOTAL evapotranspiration and sublimation, add DEK%XLESCC here)
-
-DEK%XLEV_CV(:)  = XLVTT*ZEVAP_CV(:) 
 
 ! - Total latent heat flux from vegetation canopy overstory to canopy air space
 !   (including transpiration, liquid water store, canopy snow sublimation):
@@ -382,9 +376,9 @@ DEK%XLE_CV(:)   = DEK%XLEV_CV(:) + DEK%XLES_CV(:)
 
 ! - Vapor flux from the ground-based snowpack to the canopy air (kg m-2 s-1):
 
-DEK%XEVAP_GN(:) = PFLXC_GN(:)*(ZQSATIN_N(:) - PEK%XQC(:))*PEK%XPSN(:)*(1.0-PPSNA(:))*(XLSTT/XLVTT)
-
-DEK%XLE_GN(:)   = XLVTT*DEK%XEVAP_GN(:) ! W m-2
+ZWORK(:)        = PFLXC_GN(:)*(ZQSATIN_N(:) - PEK%XQC(:))*PEK%XPSN(:)*(1.0-PPSNA(:))
+DEK%XEVAP_GN(:) = ZWORK(:)*(XLSTT/PLTT(:))
+DEK%XLE_GN(:)   = ZWORK(:)* XLSTT                              ! W m-2
 
 ! - latent heat flux from transpiration from canopy veg (evapotranspiration)
 
@@ -402,20 +396,20 @@ DEK%XLER(:)      = DEK%XLER_CV(:)
 
 ! - Vapor flux from the ground-based snowpack (part burying the canopy vegetation) to the atmosphere (kg m-2 s-1):
 
-PEVAP_N_A(:) = PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:))*       PEK%XPSN(:)*     PPSNA(:) *(XLSTT/XLVTT)
+ZWORK(:)     = PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:))*       PEK%XPSN(:)*     PPSNA(:)
+PEVAP_N_A(:) = ZWORK(:) *(XLSTT/XLVTT)
 
 ! - Net Snow (groud-based) sublimation latent heat flux (W m-2) to the canopy air space and the overlying atmosphere:
 
-PLES(:)      = ( PFLXC_GN(:) *( ZQSATIN_N(:) - PEK%XQC(:))*       PEK%XPSN(:)*(1.0-PPSNA(:))  +      &
-                  PFLXC_N_A(:) *( ZQSATIN_N(:) - PQA_IC(:) )*      PEK%XPSN(:)*     PPSNA(:) ) * XLSTT
+PLES(:)      = ( PFLXC_GN(:) *( ZQSATIN_N(:) - PEK%XQC(:))*       PEK%XPSN(:)*(1.0-PPSNA(:)) + ZWORK(:) ) * XLSTT
 
 ! - Net Snow evaporation (liquid water) latent heat flux (W m-2)
 
-PLEL(:)      = XLVTT*(DEK%XEVAP_GN(:) + PEVAP_N_A(:)) - PLES(:)
+PLEL(:)      = PLTT(:)*(DEK%XEVAP_GN(:) + PEVAP_N_A(:)) - PLES(:)
 
 ! - Total mass flux from ground-based snowpack (kg m-2 s-1)
 
-PEVAPN(:)    = (PLEL(:) + PLES(:))/XLVTT
+PEVAPN(:)    = (PLEL(:) + PLES(:))/PLTT(:)
 
 ! - Total snow-free vapor flux from the understory (flooded areas, baresoil and understory vegetation)
 !   to the canopy air space (W m-2 and kg m-2 s-1, respectively):
@@ -428,7 +422,7 @@ DEK%XEVAP_G(:)  = DEK%XLE_GV(:)/XLVTT
 
 PEVAP_C_A(:) = PFLXC_CA(:) *( PEK%XQC(:) - PQA_IC(:))*(1.0 - PEK%XPSN(:)*PPSNA(:))
 
-DEK%XLE_CA(:)   = XLVTT * PEVAP_C_A(:) ! W m-2
+DEK%XLE_CA(:)   = PLTT(:) * PEVAP_C_A(:) ! W m-2
 
 ! FINAL net vapor flux from the surface to the Atmosphere:
 ! - Net vapor flux from canopy air and exposed ground based snow (from part of snow 
@@ -438,7 +432,7 @@ DK%XEVAP(:)     = PEVAP_C_A(:) + PEVAP_N_A(:)
 ! 
 ! Total latent heat flux of surface/snow/vegetation: W m-2
 !
-PEK%XLE(:)       = DK%XEVAP(:)*XLVTT                    
+PEK%XLE(:)       = DK%XEVAP(:)*PLTT(:)                  
 !
 ! Total sublimation from the surface/snow/vegetation: W m-2
 !
@@ -446,7 +440,7 @@ DK%XLEI(:)      = DEK%XLES_CV(:) + PLEGI(:) + DEK%XLEI_FLOOD(:)
 !
 ! Total sublimation from the surface/snow/vegetation: kg m-2 s-1
 !
-DK%XSUBL(:)     = DK%XLEI(:)/ PK%XLSTT(:)
+DK%XSUBL(:)     = DK%XLEI(:)/ PLTT(:)
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_FLUXES_MEB',1,ZHOOK_HANDLE)
 !

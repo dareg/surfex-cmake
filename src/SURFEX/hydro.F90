@@ -440,7 +440,7 @@ ZTSTEP  = PTSTEP/REAL(INDT)
 ! ------------------------------------------------------------------
 !
 WHERE(PEK%XLAI(:)/=XUNDEF .AND. PVEG(:)/=0.)
-    ZKSFC_IVEG(:) = (1.0-ZINSOLFRZ_VEG*PVEG(:)) * (1.0-(PEK%XLAI(:)/ZINSOLFRZ_LAI))
+    ZKSFC_IVEG(:) = (1.0-ZINSOLFRZ_VEG*PVEG(:)) * MIN(MAX(1.0-(PEK%XLAI(:)/ZINSOLFRZ_LAI),0.0),1.0)    
 ELSEWHERE
     ZKSFC_IVEG(:) = 1.0 ! No vegetation
 ENDWHERE

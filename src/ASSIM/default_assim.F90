@@ -62,6 +62,8 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODD_ASSIM, ONLY : NOBSMAX, NVARMAX
 !
+USE MODI_ABOR1_SFX
+!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
