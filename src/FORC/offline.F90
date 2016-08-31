@@ -30,6 +30,8 @@ PROGRAM OFFLINE
 !
 USE MODD_OFF_SURFEX_n
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE
+!
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
                             XSCA_ALB    ,&! diffuse albedo for each band
@@ -237,7 +239,7 @@ INTEGER                           :: IDMAX               ! nb of lines to read i
 INTEGER                           :: JFORC_STEP          ! atmospheric loop index
 INTEGER                           :: JSURF_STEP          ! isba loop index
 INTEGER                           :: ICOUNT              ! day counter 
-REAL                              :: ZDURATION           ! duration of run                     (s)
+REAL                              :: ZDURATION, ZDURATION2    ! duration of run                     (s)
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTA                 ! air temperature forcing               (K)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZQA                 ! air humidity forcing                  (kg/m3)
@@ -261,6 +263,7 @@ LOGICAL                           :: GSHADOWS
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
 REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
 !
+TYPE(DATE) :: TDATE_END
 ! Flag diag :
 !
 INTEGER                           :: I2M, IBEQ, IDSTEQ
@@ -505,6 +508,12 @@ IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
                       ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,          &
                       ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF     )
 !
+TDATE_END%YEAR = IYEAR
+TDATE_END%MONTH = IMONTH
+TDATE_END%DAY = IDAY
+ZDURATION2 = ZDURATION
+ CALL ADD_FORECAST_TO_DATE_SURF(TDATE_END%YEAR, TDATE_END%MONTH, TDATE_END%DAY, ZDURATION2)
+!
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc conf ',PLOG=XTIME_NPIO_READ)
  CALL WLOG_MPI('TIME_COMM_READ forc conf ',PLOG=XTIME_COMM_READ)
@@ -675,7 +684,7 @@ CALL GOTO_MODEL(1)
  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, INI, NSCAL, IBANDS,  &
                       CSV,XCO2(:),XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,  &
                       XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
-                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME,                 &
+                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
                       YATMFILE, YATMFILETYPE, YTEST                          )
 !
 ! initialization routines to compute shadows
