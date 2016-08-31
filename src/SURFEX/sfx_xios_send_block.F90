@@ -11,7 +11,7 @@ SUBROUTINE SFX_XIOS_SEND_BLOCK(HDTAG,PFIELD,PFIELD2,HDOMAIN,HAXIS,HDCOMMENT,KFRE
 !!     Front-end to XIOS for client models
 !!
 !!
-!!     It performes field declaration to XOS if needed, provided it is
+!!     It performes field declaration to XIOS if needed, provided it is
 !!     not too late with respect to xios context definition closing
 !!     (see sfx_xios_declare_field)  
 !!
@@ -68,7 +68,8 @@ USE MODD_XIOS, ONLY : LXIOS, LXIOS_DEF_CLOSED, NBLOCK , NTIMESTEP
 USE MODI_SFX_XIOS_DECLARE_FIELD
 USE XIOS ,ONLY : XIOS_FIELD, XIOS_FIELDGROUP, &
                  XIOS_GET_FIELD_ATTR, XIOS_GET_DOMAIN_ATTR, &
-                 XIOS_IS_VALID_FIELD, XIOS_SEND_FIELD, XIOS_FIELD_IS_ACTIVE
+                 XIOS_IS_VALID_FIELD, XIOS_SEND_FIELD, XIOS_FIELD_IS_ACTIVE,&
+                 XIOS_UPDATE_CALENDAR
 #endif
 !
 USE MODI_ABOR1_SFX
@@ -102,6 +103,7 @@ TYPE BUF_t
   INTEGER(KIND=JPIM) :: ILEV     ! Number of levels (from first call)
   LOGICAL            :: G1D      ! Multi-level ?
   INTEGER(KIND=JPIM) :: IBLOCK   ! Number of blocks received for current timestep
+  INTEGER(KIND=JPIM) :: ITIMESTEP! Timestep when first block was received  
   REAL(KIND=JPRB), ALLOCATABLE, DIMENSION (:,:) :: ZFIELD ! Accumulate received blocks
 END TYPE BUF_t
 !
@@ -122,6 +124,7 @@ INTEGER(KIND=JPIM)      :: JI, IL, IEMPTY, IIDIM, ITAKE
  CHARACTER(LEN=300)      :: YLCOMMENT
 !
 INTEGER                 :: IFREQOP !
+INTEGER(KIND=JPIM),SAVE :: ILTSTEP=-1 ! Last timestep send to XIOS
 !
 #endif
 !
@@ -152,11 +155,12 @@ YLTAG = TRIM(HDTAG)
 ALLOCATE(YLFIELDS(ISIZE))
 YLFIELDS(:)%YLNAME = ''
 !
-!   Search if field is known - a simple loop on the table - probably not much quick ...
+!   Search if field is known - a simple loop on the table -
+!   probably not much quick ...
 !
 IL = 0
 DO JI=1,ISIZE
-  IF (TRIM(YLFIELDS(JI)%YLNAME) == YLTAG) THEN 
+  IF (YLFIELDS(JI)%YLNAME == YLTAG) THEN 
     IL = JI
     EXIT
   ENDIF
@@ -229,7 +233,7 @@ IF ( IL==0 ) THEN
     ! Record the new field attributes (not its data)
     !
     YLF => YLFIELDS(IEMPTY)
-    YLF%YLNAME = YLTAG
+    YLF%YLNAME = TRIM(YLTAG)
     !
     CALL XIOS_GET_FIELD_ATTR(YLTAG, domain_ref=YLDOMAIN)
     CALL XIOS_GET_DOMAIN_ATTR(YLDOMAIN, data_ni=IIDIM)
@@ -280,6 +284,7 @@ IF (LXIOS_DEF_CLOSED)  THEN
     ITAKE=SIZE(PFIELD2,1)
   ENDIF
   !
+  IF ( YLF%IBLOCK==0 ) YLF%ITIMESTEP = NTIMESTEP  
   YLF%IBLOCK=YLF%IBLOCK+1
   IF ((YLF%ISIZE + ITAKE) > YLF%ISIZEMAX) THEN 
     ! xxx a modifier : le dernier blc arpege arrive avec taille NPROMA
@@ -299,19 +304,37 @@ IF (LXIOS_DEF_CLOSED)  THEN
   ENDIF
   YLF%ISIZE = YLF%ISIZE + ITAKE
   !
-  IF (YLF%IBLOCK==NBLOCK) THEN 
-    ! Send field and clears the buffer (incl. de-allocation)
-    IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',0,ZHOOK_HANDLE2)
-    IF (YLF%G1D) THEN 
-      CALL XIOS_SEND_FIELD(YLTAG,YLF%ZFIELD(:,1))
-    ELSE
-      CALL XIOS_SEND_FIELD(YLTAG,YLF%ZFIELD(:,:))
-    ENDIF
-    IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',1,ZHOOK_HANDLE2)
-    YLF%ISIZE  = 0
-    YLF%IBLOCK = 0
-    DEALLOCATE(YLF%ZFIELD)
-  ENDIF
+   IF (YLF%IBLOCK==NBLOCK) THEN
+      ! Before sending a completed field, update xios calendar with
+      ! current internal timestep only if field's initial timestep is
+      ! not behind it. This allows to keep xios calendar behind model
+      ! calendar when sfx_xios_send_block is called at beginning
+      ! of step N+1 for fields valid at step N (which can be handy)
+      IF (YLF%ITIMESTEP >= NTIMESTEP) THEN 
+         IF (YLF%ITIMESTEP > NTIMESTEP) &
+              CALL ABOR1("SFX_XIOS_SEND_BLOCK: ISSUE WITH TIMESTEP FOR "&
+              //TRIM(YLTAG))
+         IF ( NTIMESTEP > ILTSTEP) THEN
+            ! write(0,*) 'updating XIOS calendar for '//trim(cltag)//' to',ntimestep; call flush(0)
+            CALL XIOS_UPDATE_CALENDAR(NTIMESTEP)
+            ILTSTEP = NTIMESTEP
+         ENDIF
+      ENDIF
+      IF (NTIMESTEP > 0) THEN 
+         ! Send field and clears the buffer (incl. de-allocation)
+         IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',0,ZHOOK_HANDLE2)
+         ! write(0,*) 'sending field '//cltag
+         IF (YLF%G1D) THEN 
+            CALL XIOS_SEND_FIELD(YLFIELDS(IL)%YLNAME,YLF%ZFIELD(:,1))
+         ELSE
+            CALL XIOS_SEND_FIELD(YLFIELDS(IL)%YLNAME,YLF%ZFIELD(:,:))
+         ENDIF
+         IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',1,ZHOOK_HANDLE2)
+      ENDIF
+      YLF%IBLOCK=0
+      YLF%ISIZE=0
+      DEALLOCATE(YLF%ZFIELD)
+   ENDIF  
 ENDIF
 !
 !$OMP END SINGLE
