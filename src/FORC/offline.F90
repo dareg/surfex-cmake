@@ -32,6 +32,8 @@ USE MODD_OFF_SURFEX_n
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE
 !
+USE MODD_WRITE_SURF_ATM, ONLY : LFIRST_WRITE, NCPT_WRITE
+!
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
                             XSCA_ALB    ,&! diffuse albedo for each band
@@ -736,6 +738,8 @@ IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
 !
  CALL SFX_XIOS_SETUP_OL(YSC,ILUOUT,IYEAR,IMONTH,IDAY,ZTIME,XTSTEP_OUTPUT)
 !
+NCPT_WRITE = 0
+!
 NWRITE = 0
 !
 #ifdef SFX_MPI
@@ -1081,10 +1085,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME1 =  MPI_WTIME()
 #endif
 
-        IF (LXIOS .AND. LXIOS_DEF_CLOSED) THEN 
+        IF (LXIOS) THEN 
 #ifdef WXIOS
           NTIMESTEP=INT(ZTIMEC/XTSTEP_OUTPUT + 0.5)
-          CALL XIOS_UPDATE_CALENDAR(NTIMESTEP)
 #endif
         ENDIF
 
@@ -1149,6 +1152,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
       XTIME_WRITE(5) = XTIME_WRITE(5) + (MPI_WTIME() - XTIME1)
 #endif
       !
+      NCPT_WRITE = 0
+      LFIRST_WRITE = .FALSE.
+      !
     ENDIF
     !
   END DO
@@ -1197,6 +1203,8 @@ IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
 !            ------------------
 !
 IF ( LRESTART ) THEN
+  !
+  LFIRST_WRITE = .TRUE.
   !
   IF (NRANK==NPIO) THEN
     !* name of the file
