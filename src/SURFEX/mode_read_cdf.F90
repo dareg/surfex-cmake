@@ -145,7 +145,7 @@ integer,save :: NDIMS=2
 integer :: KVARTYPE
 integer,DIMENSION(:),ALLOCATABLE :: NVARDIMID,NVARDIMLEN
 character(len=80),DIMENSION(:),ALLOCATABLE :: NVARDIMNAM
-integer :: JLOOP2, JLOOP
+integer :: JLOOP
 integer :: NGATTS   
 character(len=80),DIMENSION(:),ALLOCATABLE :: HNAME
 real :: ZMISS1,ZMISS2
@@ -192,15 +192,15 @@ DO JLOOP=1,NGATTS
 ENDDO
 !
 !
-DO JLOOP2=1,NDIMS
+DO JLOOP=1,NDIMS
   HACTION='get variable dimensions name'
-  status=nf90_inquire_dimension(KCDF_ID,NVARDIMID(JLOOP),NAME=NVARDIMNAM(JLOOP2))
+  status=nf90_inquire_dimension(KCDF_ID,NVARDIMID(JLOOP),NAME=NVARDIMNAM(JLOOP))
   if (status/=NF90_NOERR) CALL HANDLE_ERR_CDF(status,HACTION)
   HACTION='get variable dimensions length'
-  status=nf90_inquire_dimension(KCDF_ID,NVARDIMID(JLOOP),LEN=NVARDIMLEN(JLOOP2))
+  status=nf90_inquire_dimension(KCDF_ID,NVARDIMID(JLOOP),LEN=NVARDIMLEN(JLOOP))
   if (status/=NF90_NOERR) CALL HANDLE_ERR_CDF(status,HACTION)
-  !write(0,*) 'variable dimension ',JLOOP2,' named ',NVARDIMNAM(JLOOP2),&
-  !     &'has a length of',NVARDIMLEN(JLOOP2)
+  !write(0,*) 'variable dimension ',JLOOP,' named ',NVARDIMNAM(JLOOP),&
+  !     &'has a length of',NVARDIMLEN(JLOOP)
 ENDDO
 ! 
 ALLOCATE(ZVALU2D(1:NVARDIMLEN(1),1:NVARDIMLEN(2)))
