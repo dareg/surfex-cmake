@@ -21,6 +21,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PPATCH_OUT
 INTEGER, DIMENSION(:,:), INTENT(IN), OPTIONAL :: KMASK_IN
 !
 INTEGER, DIMENSION(SIZE(PPATCH_OUT,1),SIZE(PPATCH_IN,2)) :: IMASK_IN
+REAL, DIMENSION(SIZE(PPATCH_OUT,1),SIZE(PPATCH_OUT,2)) :: ZPATCH_OUT
 INTEGER :: JP, JVEG, IP_I, IP_O, JI, IMASK, JP2
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -36,7 +37,7 @@ ELSE
   ENDDO
 ENDIF
 ! 
-PPATCH_OUT(:,:) = 0.
+ZPATCH_OUT(:,:) = 0.
 !
 ! if NPATCH (in) == NVEGTYPE, the arrays of patches is this of vegtypes
 IF (KNP_IN==NVEGTYPE) THEN
@@ -46,7 +47,7 @@ IF (KNP_IN==NVEGTYPE) THEN
     IP_O = VEGTYPE_TO_PATCH(JVEG,KNP_OUT)
     DO JI = 1,SIZE(IMASK_IN,1)
       IMASK = IMASK_IN(JI,IP_O)
-      IF (IMASK/=0) PPATCH_OUT(IMASK,JVEG) = PVEGTYPE(JI,JVEG)
+      IF (IMASK/=0) ZPATCH_OUT(IMASK,JVEG) = PVEGTYPE(JI,JVEG)
     ENDDO
   ENDDO
   !
@@ -57,7 +58,7 @@ ELSEIF (KNP_IN==KNP_OUT) THEN
   DO JP2 = 1,SIZE(IMASK_IN,2)
     DO JI = 1,SIZE(IMASK_IN,1)
       IMASK = IMASK_IN(JI,JP2)
-      IF (IMASK/=0) PPATCH_OUT(IMASK,JP2) = PPATCH_IN(JI,JP2)
+      IF (IMASK/=0) ZPATCH_OUT(IMASK,JP2) = PPATCH_IN(JI,JP2)
     ENDDO
   ENDDO
   !
@@ -79,7 +80,7 @@ ELSEIF (KNP_IN<KNP_OUT) THEN
         DO JI = 1,SIZE(IMASK_IN,1)
           ! the mask is this of the current output patch
           IMASK = IMASK_IN(JI,IP_O)
-          IF (IMASK/=0) PPATCH_OUT(IMASK,IP_I) = PPATCH_OUT(IMASK,IP_I) + PPATCH_IN(JI,IP_O)
+          IF (IMASK/=0) ZPATCH_OUT(IMASK,IP_I) = ZPATCH_OUT(IMASK,IP_I) + PPATCH_IN(JI,IP_O)
         ENDDO
         ! just one time if several vegtypes are in this patch JP
         EXIT
@@ -104,7 +105,7 @@ ELSEIF (KNP_IN>KNP_OUT) THEN
         ! this input patch gets the value of the corresponding output patch
         DO JI = 1,SIZE(IMASK_IN,1)
           IMASK = IMASK_IN(JI,IP_O)
-          IF (IMASK/=0) PPATCH_OUT(IMASK,IP_I) = PPATCH_IN(JI,IP_O)
+          IF (IMASK/=0) ZPATCH_OUT(IMASK,IP_I) = PPATCH_IN(JI,IP_O)
         ENDDO
         ! just one time because another vegtype of IP_I will be also in IP_O
         EXIT
@@ -113,6 +114,8 @@ ELSEIF (KNP_IN>KNP_OUT) THEN
   ENDDO
   !
 ENDIF
+!
+PPATCH_OUT(:,:) = ZPATCH_OUT(:,:)
 !
 IF (LHOOK) CALL DR_HOOK('GET_PREP_INTERP',1,ZHOOK_HANDLE)
 !
