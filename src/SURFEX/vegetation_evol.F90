@@ -253,12 +253,12 @@ IF (GMASK) THEN
     CALL NITRO_DECLINE(IO, PK, PEK, GWOOD, ZBSLAI_NITRO, PLAT, ZBIOMASS_LEAF)
     CALL LAIGAIN(ZBSLAI_NITRO, PEK, ZBIOMASS_LEAF)
   ENDIF
-!    
+  !  
+  ! reinitialise  PEK%XANDAY(:) and PEK%XANFM(:) 
+  PEK%XANDAY(:)=0.0
+  PEK%XANFM(:) =0.0
+  !
 ENDIF
-!  
-! reinitialise  PEK%XANDAY(:) and PEK%XANFM(:) 
-PEK%XANDAY(:)=0.0
-PEK%XANFM(:) =0.0
 !
 !
 ! * soil temperature in K (over 1m depth for DIF)
