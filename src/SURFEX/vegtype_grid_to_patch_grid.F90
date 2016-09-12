@@ -56,6 +56,10 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PW
 !
 !*      0.2    declarations of local variables
 !
+REAL :: ZINT
+REAL, PARAMETER     :: ZPREC=1.0E+6
+!
+REAL, DIMENSION(SIZE(PW,1)) :: ZSUM
 INTEGER                       :: JP    ! loop on patches
 INTEGER                       :: JVEG  ! loop on vegtypes
 INTEGER                       :: JL, JI, IMASK    ! loop on layers
@@ -66,6 +70,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* averages from vegtypes to chosen number of patches
 IF (LHOOK) CALL DR_HOOK('VEGTYPE_GRID_TO_PATCH_GRID',0,ZHOOK_HANDLE)
 !
+ZSUM(:) = 0.
+DO JVEG=1,NVEGTYPE
+  JP = VEGTYPE_TO_PATCH(JVEG,KNPATCH)
+  IF (JP/=KPATCH) CYCLE
+  DO JI = 1,SIZE(PW,1)
+    ZSUM(JI) =ZSUM(JI) + PVEGTYPE_PATCH(JI,JVEG)   
+  ENDDO
+ENDDO
+!
 PW(:,:) = 0.
 !
 DO JVEG=1,NVEGTYPE
@@ -74,10 +87,25 @@ DO JVEG=1,NVEGTYPE
   DO JL=1,SIZE(PW,2)
     DO JI = 1,SIZE(PW,1)
       IMASK = KMASK(JI)
-      PW(JI,JL) = PW(JI,JL) + PVEGTYPE_PATCH(JI,JVEG) * PFIELDOUT(IMASK,JL,JVEG)  
+      PW(JI,JL) = PW(JI,JL) + PVEGTYPE_PATCH(JI,JVEG) * PFIELDOUT(IMASK,JL,JVEG)
     ENDDO
   END DO
 END DO
+!
+DO JI = 1,SIZE(PW,1)
+  IF (ZSUM(JI)/=0.) PW(JI,:) = PW(JI,:) / ZSUM(JI)
+ENDDO
+!
+DO JP = 1,SIZE(PW,2)
+  DO JI = 1,SIZE(PW,1)
+    IF (PW(JI,JP)/=XUNDEF) THEN
+      ZINT = AINT(PW(JI,JP),KIND=16)
+      IF (PW(JI,JP)/=ZINT) THEN
+        PW(JI,JP) = ZINT + NINT((PW(JI,JP)-ZINT)*ZPREC)/ZPREC
+      ENDIF
+    ENDIF
+  ENDDO
+ENDDO
 !
 !* insures undefined value when patch is not present
 !
