@@ -79,6 +79,8 @@ USE MODI_VEGTYPE_TO_PATCH
 USE MODI_PACK_SAME_RANK
 USE MODI_GET_PREP_INTERP
 !
+USE MODE_SNOW3L, ONLY : SNOW3LGRID
+!
 USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -389,9 +391,10 @@ IF (YDCTL%LPART5) THEN
         IF (OSNOW_IDEAL) THEN
           SK%DEPTH(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSE
-          DO JL=1,SIZE(SK%DEPTH,2)
-            SK%DEPTH(:,JL) = ZW%AL(JP)%ZOUT(:,1)
-          ENDDO
+          CALL SNOW3LGRID(SK%DEPTH(:,:),ZW%AL(JP)%ZOUT(:,1))                
+          !DO JL=1,SIZE(SK%DEPTH,2)
+          !  SK%DEPTH(:,JL) = ZW%AL(JP)%ZOUT(:,1)
+          !ENDDO
         ENDIF
         !
         DO JL = 1,ISNOW_NLAYER

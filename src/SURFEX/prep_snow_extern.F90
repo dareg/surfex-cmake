@@ -50,8 +50,6 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XTT
 !
-USE MODE_SNOW3L
-!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -257,8 +255,8 @@ DO JP = 1,IPATCH
   !              ------------------------
   !
     CASE ('DEP')
-      IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))
       IF (OSNOW_IDEAL.OR.TZSNOW%NLAYER==KLAYER) THEN    
+        IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))              
         PFIELD(:,:,JP) = TZSNOW%WSNOW(:,1:KLAYER)/TZSNOW%RHO(:,1:KLAYER)
         WHERE(TZSNOW%WSNOW(:,1:KLAYER)==XUNDEF) PFIELD(:,:,JP)=XUNDEF
       ELSE     
@@ -269,8 +267,8 @@ DO JP = 1,IPATCH
             ZD(:) = ZD(:) + TZSNOW%WSNOW(:,JL)/TZSNOW%RHO(:,JL)
           ENDWHERE
         END DO
-        !* fine grid
-        CALL SNOW3LGRID(PFIELD(:,:,JP),ZD(:)) 
+        IF (JP<=1) ALLOCATE(PFIELD(INI,1,IPATCH))
+        PFIELD(:,1,JP) = ZD(:)
         DEALLOCATE(ZD)
       ENDIF
   !
