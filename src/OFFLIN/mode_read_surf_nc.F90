@@ -299,10 +299,12 @@ IF (NRANK==NPIO) THEN
     ENDDO
     IRET(4)=NF90_INQUIRE_DIMENSION(NID_NC,IDIMIDS(1),NAME=YNAME)
     !
-    IF (TRIM(YNAME).NE.'Number_of_points') THEN
-      ALLOCATE(ZWORK(IDIMLEN(1)*IDIMLEN(2)))
-    ELSE
-      ALLOCATE(ZWORK(IDIMLEN(1)))
+    IF (HDIR/='-') THEN
+      IF (TRIM(YNAME).NE.'Number_of_points') THEN
+        ALLOCATE(ZWORK(IDIMLEN(1)*IDIMLEN(2)))
+      ELSE
+        ALLOCATE(ZWORK(IDIMLEN(1)))
+      ENDIF
     ENDIF
     !
     ! 2. Get variable
@@ -471,11 +473,13 @@ IF (NRANK==NPIO) THEN
     ENDDO
     !
     IRET(4)=NF90_INQUIRE_DIMENSION(NID_NC,IDIMIDS(1),NAME=YNAME)    
-    ! 
-    IF (TRIM(YNAME).NE.'Number_of_points') THEN
-      ALLOCATE(ZWORK2(IDIMLEN(1)*IDIMLEN(2),IDIMLEN(3)))
-    ELSE
-      ALLOCATE(ZWORK2(IDIMLEN(1),IDIMLEN(2)))
+    !
+    IF (HDIR/='-') THEN
+      IF (TRIM(YNAME).NE.'Number_of_points') THEN
+        ALLOCATE(ZWORK2(IDIMLEN(1)*IDIMLEN(2),IDIMLEN(3)))
+      ELSE
+        ALLOCATE(ZWORK2(IDIMLEN(1),IDIMLEN(2)))
+      ENDIF
     ENDIF
     !
     ! 2. Get variable
