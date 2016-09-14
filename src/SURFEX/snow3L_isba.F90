@@ -638,7 +638,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_PSN
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN_GFLXCOR
 REAL, DIMENSION(KSIZE1)        :: ZP_WORK
 !
-REAL, PARAMETER :: ZDEKTHABS = 0.60 ! m
+REAL, PARAMETER :: ZDEPTHABS = 0.60 ! m
 !
 INTEGER :: JWRK, JJ, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -915,7 +915,7 @@ ELSE
 !    (and update heat storage diagnostic in a consistent manner)
 !
 !    Energy is thickness weighted, thus thicker layers receive more energy and energy
-!    is evenly distributed to depth ZDEKTHABS. An
+!    is evenly distributed to depth ZDEPTHABS. An
 !    alternate method is to weight near surface layers more and diminish weights
 !    (thus eenrgy received by each layer) with depth. Both methods conserve energy as 
 !    long as vertical weights are normalized.
@@ -925,7 +925,7 @@ ELSE
      ZP_SOILD(:) = ZP_DZG(:,1)
      DO JJ=2,KSIZE3
         DO JI=1,KSIZE1
-           IF(ZP_DZG(JI,JJ) <= ZDEKTHABS)THEN
+           IF(ZP_DZG(JI,JJ) <= ZDEPTHABS)THEN
               ZP_SOILD(JI) = ZP_DZG(JI,JJ)
            ENDIF
         ENDDO
@@ -939,7 +939,7 @@ ELSE
      ZP_TG(:,1)         = ZP_TG(:,1)         + ZP_WORK(:)*ZP_CT(:)*ZP_D_G(:,1)   ! (K)
      DO JJ=2,KSIZE3
         DO JI=1,KSIZE1
-           IF (ZP_SOILD(JI) <= ZDEKTHABS) THEN
+           IF (ZP_SOILD(JI) <= ZDEPTHABS) THEN
               ZP_TG(JI,JJ) = ZP_TG(JI,JJ)    + ZP_WORK(JI)/ZP_SOILHCAPZ(JI,JJ)   ! K
            ENDIF
         ENDDO
