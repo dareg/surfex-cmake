@@ -425,10 +425,6 @@ HDF5_OPTS=
 CDF_OPTS=
 endif
 #
-$(CURL_LIB) :
-	cd $(DIR_CURL) && ./configure --prefix=${CURL_PATH} $(NETCDF_OPTS) && \
-	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
-#
 $(ZLIB_LIB) :
 	cd $(DIR_ZLIB) && ./configure --prefix=${ZLIB_PATH} && \
 	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
@@ -437,6 +433,12 @@ $(SZIP_LIB) :
 	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
+$(CURL_LIB) :
+	export LD_LIBRARY_PATH=${ZLIB_PATH}/lib:${SZIP_PATH}/lib:${LD_LIBRARY_PATH} && \
+	cd $(DIR_CURL) && ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} \
+        --prefix=${CURL_PATH} $(NETCDF_OPTS) CC="$(CC)" && \
+	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
 $(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
 	 cd $(DIR_HDF5) && \
 	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} $(HDF5_OPTS) \
@@ -444,14 +446,15 @@ $(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(CDF_LIB) : $(LIB_HDF5)
-	 export LD_LIBRARY_PATH=${HDF5_PATH}/lib && \
+	 export LD_LIBRARY_PATH=${HDF5_PATH}/lib:${LD_LIBRARY_PATH} && \
 	 cd $(DIR_CDF) && CPPFLAGS="-I${HDF5_PATH}/include" LDFLAGS="-L${HDF5_PATH}/lib" \
-	 ./configure $(CDF_OPTS) --prefix=${CDF_PATH} --disable-shared $(NETCDF_OPTS) && \
+         LIBS="-lhdf5_hl -lhdf5"  \
+	 ./configure --enable-netcdf-4 --with-hdf5=${HDF5_PATH} $(CDF_OPTS) --prefix=${CDF_PATH} --disable-shared $(NETCDF_OPTS) && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 cdf : $(CDFF_INC)
-$(CDFF_INC) : $(CURL_LIB) $(ZLIB_LIB) $(SZIP_LIB) $(HDF5_LIB) $(CDF_LIB)
-	 export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib && \
+$(CDFF_INC) : $(ZLIB_LIB) $(SZIP_LIB) $(CURL_LIB) $(HDF5_LIB) $(CDF_LIB)
+	 export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${LD_LIBRARY_PATH} && \
 	 cd $(DIR_CDFF) && \
 	 CPPFLAGS="-I${CURL_PATH}/include -I${ZLIB_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include" \
 	 LDFLAGS="-L${CURL_PATH}/lib -lcurl -L${ZLIB_PATH}/lib -lz -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 -L${CDF_PATH}/lib -lnetcdf" \
@@ -506,6 +509,7 @@ ADD_OASIS=""
 ifeq "$(VER_OASIS)" "mct"
   ADD_OASIS="--use_oasis oasis3_mct"
 endif
+
 
 ifeq "$(VER_XIOS)" "2"
 ifneq "$(VER_MPI)" "NOMPI"
