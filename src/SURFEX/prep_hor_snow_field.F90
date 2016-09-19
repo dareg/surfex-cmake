@@ -388,7 +388,7 @@ IF (YDCTL%LPART5) THEN
         !
       CASE('DEP')  ! snow thickness
         !
-        IF (OSNOW_IDEAL) THEN
+        IF (OSNOW_IDEAL.OR.ISNOW_NLAYER==INL) THEN
           SK%DEPTH(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSE
           CALL SNOW3LGRID(SK%DEPTH(:,:),ZW%AL(JP)%ZOUT(:,1))                
