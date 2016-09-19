@@ -69,11 +69,11 @@ INTEGER      :: JLAT, JLON                 ! indexes of OLATLONMASK array
 !
 INTEGER, PARAMETER :: ILONG=1000
 !
-REAL*4         :: ZVALUER
+REAL         :: ZVALUER
 REAL, DIMENSION(ILONG) :: ZVALUE          ! values of a data point
-REAL*4         :: ZLATR
+REAL         :: ZLATR
 REAL, DIMENSION(ILONG) :: ZLAT              ! latitude of data point
-REAL*4         :: ZLONR
+REAL         :: ZLONR
 REAL, DIMENSION(ILONG) :: ZLON              ! longitude of data point
 !
 INTEGER :: ICPT, ISTAT
