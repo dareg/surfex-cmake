@@ -76,7 +76,7 @@ export VERSION_CDF=${VERSION_CDF}
 #
 export VER_GRIBAPI=${VER_GRIBAPI}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI}
-export GRIB_DEFINITION_PATH=\${SRC_SURFEX}"/src/LIB/grib_api-1.9.9/definitions"
+export GRIB_DEFINITION_PATH=\${SRC_SURFEX}"/src/LIB/grib_api-1.17.0-Source/definitions"
 #
 # Version of OASIS
 #
