@@ -221,10 +221,6 @@ DO JP = 1,IPATCH
     CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   ENDIF
   !
-  !IF (TZSNOW%NLAYER.EQ.KLAYER) THEN
-  !  OSNOW_IDEAL = .TRUE.
-  !ENDIF
-  !
   !-------------------------------------------------------------------------------------
   !
   !*      5.     Total snow content
