@@ -213,21 +213,25 @@ IF (LHOOK) CALL DR_HOOK('BILIN_GRIDIN_5',0,ZHOOK_HANDLE)
 IF (IJU>1) THEN
   DO JL = 2,IJU
     IF (PFIELD1(1,  JL-1)/=0. .AND. PFIELD1(1,  JL)/=0.) THEN
-      PFIELD_XY(1    ,JL) = (PFIELD1(1  ,JL-1) + PFIELD1(1  ,JL)) / 2.
+      PFIELD_XY(1    ,JL) = (ZW(1,JL-1)*PFIELD1(1,JL-1) + ZW(1,JL)*PFIELD1(1,JL)) / &
+                             MAX(1.,ZW(1,JL-1) + ZW(1,JL))
     ENDIF
     IF (PFIELD1(IIU,JL-1)/=0. .AND. PFIELD1(IIU,JL)/=0.) THEN
-      PFIELD_XY(IIU+1,JL) = (PFIELD1(IIU,JL-1) + PFIELD1(IIU,JL)) / 2.
-    ENDIF
+      PFIELD_XY(IIU+1,JL) = (ZW(IIU,JL-1)*PFIELD1(IIU,JL-1) + ZW(IIU,JL)*PFIELD1(IIU,JL)) / &
+                             MAX(1.,ZW(IIU,JL-1) + ZW(IIU,JL))
+    ENDIF 
   ENDDO
 ENDIF 
 !
 IF (IIU>1) THEN
   DO JI = 2,IIU
     IF (PFIELD1(JI-1,1  )/=0. .AND. PFIELD1(JI,1   )/=0.) THEN
-      PFIELD_XY(JI,1    ) = (PFIELD1(JI-1,1  ) + PFIELD1(JI,1  )) / 2.
+      PFIELD_XY(JI,1    ) = (ZW(JI-1,1)*PFIELD1(JI-1,1) + ZW(JI,1)*PFIELD1(JI,1)) / &
+                             MAX(1.,ZW(JI-1,1) + ZW(JI,1))
     ENDIF
     IF (PFIELD1(JI-1,IJU)/=0. .AND. PFIELD1(JI,IJU)/=0.) THEN
-      PFIELD_XY(JI,IJU+1) = (PFIELD1(JI-1,IJU) + PFIELD1(JI,IJU)) / 2.
+      PFIELD_XY(JI,IJU+1) = (ZW(JI-1,IJU)*PFIELD1(JI-1,IJU) + ZW(JI,IJU)*PFIELD1(JI,IJU)) / &
+                             MAX(1.,ZW(JI-1,IJU) + ZW(JI,IJU))
     ENDIF
   ENDDO
 ENDIF 
