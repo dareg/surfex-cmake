@@ -615,9 +615,21 @@ endif
 # Linux on Beaufix
 #
 ifeq "$(VER_CDF)" "CDFBOFX"
-CDF_PATH       ?= /opt/softs/libraries/ICC13.1.4.183/netcdf-4.3.0
+CDF_PATH       ?= /opt/softs/libraries/ICC16.1.150/netcdf-4.4.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
+XIOS_CDF_OPT   = netcdf4_seq
+endif
+#
+ifeq "$(VER_CDF)" "CDFBOFXPARALL"
+VINTEL         = /opt/softs/libraries/ICC16.1.150
+CDF_PATH       = ${VINTEL}/netcdf-c-4.4.0_par_giec
+HDF_PATH       = ${VINTEL}/hdf5-1.8.16_par_thrsaf
+SZIP_PATH      = ${VINTEL}/szip-2.1
+ZLIB_PATH      = ${VINTEL}/zlib-1.2.5
+INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
+XIOS_CDF_OPT   = netcdf4_par
 endif
 #
 # Linux on prolix
@@ -626,6 +638,7 @@ ifeq "$(VER_CDF)" "CDFPROLX"
 CDF_PATH       ?= /opt/softs/libraries/ICC16.1.150/netcdf-4.4.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
+XIOS_CDF_OPT   = netcdf4_seq
 endif
 #
 # Linux on prolix with Intel15 for CNRM-CM6 compatibility (OK for XIOS)
