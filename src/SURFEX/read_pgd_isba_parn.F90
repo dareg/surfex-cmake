@@ -434,7 +434,7 @@ IF (.NOT.OLAND_USE) THEN
                          ANY(DTI%LDATA_Z0)  .OR. ANY(DTI%LDATA_EMIS)) ) THEN
     IF (.NOT.GFLAG) THEN
       YRECFM='NDATA_TIME'
-      CALL READ_SURF(HPROGRAM,YRECFM,ITIME,IRESP,HCOMMENT=YCOMMENT) 
+      CALL READ_SURF(HPROGRAM,YRECFM,DTI%NTIME,IRESP,HCOMMENT=YCOMMENT) 
     ENDIF      
     ITIME = DTI%NTIME
   ELSE
@@ -722,7 +722,7 @@ IF (.NOT.OLAND_USE) THEN
         ENDIF                    
       ELSE
         IF (JT==1) THEN           
-          YRECFM='D_ALBNIR_SOIL'
+          YRECFM='D_ALBNIR_SOI'
           CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, IO%NPATCH, HPROGRAM, YRECFM, ILUOUT, KSIZE, &
                               IVERSION, IBUGFIX, DTI%LDATA_ALBNIR_SOIL,DTI%XPAR_ALBNIR_SOIL(:,1,:),IRESP,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -749,7 +749,7 @@ IF (.NOT.OLAND_USE) THEN
         ENDIF                    
       ELSE
         IF (JT==1) THEN           
-          YRECFM='D_ALBVIS_SOIL'
+          YRECFM='D_ALBVIS_SOI'
           CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, IO%NPATCH, HPROGRAM, YRECFM, ILUOUT, KSIZE, &
                               IVERSION, IBUGFIX, DTI%LDATA_ALBVIS_SOIL,DTI%XPAR_ALBVIS_SOIL(:,1,:),IRESP,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
@@ -769,14 +769,14 @@ IF (.NOT.OLAND_USE) THEN
         IF (GTIME(JT)) THEN
           WRITE(YRECFM,FMT='(A7,I2.2)') 'D_AUS_T',JT
           CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, IO%NPATCH, HPROGRAM, YRECFM, ILUOUT, KSIZE, &
-                            IVERSION, IBUGFIX, DTI%LDATA_ALBUV_SOIL(ID1:ID2),DTI%XPAR_ALBUV_SOIL(:,JT,:),IRESP,&
+                            IVERSIO²N, IBUGFIX, DTI%LDATA_ALBUV_SOIL(ID1:ID2),DTI%XPAR_ALBUV_SOIL(:,JT,:),IRESP,&
                             HCOMMENT=YCOMMENT,HDIR=YDIR)
         ELSE
           DTI%XPAR_ALBUV_SOIL(:,JT,:) = XUNDEF
         ENDIF                     
       ELSE
         IF (JT==1) THEN           
-          YRECFM='D_ALBUV_SOIL'
+          YRECFM='D_ALBUV_SOI'
           CALL READ_SURF_ISBA_PAR_n(DTCO, U, GCP, IO%NPATCH, HPROGRAM, YRECFM, ILUOUT, KSIZE, &
                               IVERSION, IBUGFIX, DTI%LDATA_ALBUV_SOIL,DTI%XPAR_ALBUV_SOIL(:,1,:),IRESP,&
                               HCOMMENT=YCOMMENT,HDIR=YDIR)
