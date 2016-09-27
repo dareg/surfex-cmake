@@ -132,16 +132,30 @@ IF (GRECT) THEN
    !
    CALL XIOS_SET_DOMAIN_ATTR(HNAME, lonvalue_1d=PLON,latvalue_1d=PLAT)
    IF (HGRID=="LONLAT REG")  THEN 
-      CALL XIOS_SET_DOMAIN_ATTR(HNAME, type='rectilinear')
+     !
+     CALL XIOS_SET_DOMAIN_ATTR(HNAME, type='rectilinear')
+     CALL XIOS_SET_DOMAIN_ATTR(HNAME, lonvalue_1d=PLON,latvalue_1d=PLAT)
+     !
+     !CALL XIOS_SET_DOMAIN_ATTR(HNAME, type='regular')
+     !IDIM=KDIM1*KDIM2
+     !ALLOCATE(ZLAT(IDIM),ZLON(IDIM),ZMESH(IDIM),ZDIR(IDIM))
+     !CALL LATLON_GRIDTYPE_LONLAT_REG(SIZE(UG%XGRID_PAR),IDIM,&
+     !     UG%XGRID_PAR,ZLAT,ZLON,ZMESH,ZDIR)
+     !CALL XIOS_SET_DOMAIN_ATTR(HNAME, lonvalue_1d=ZLON(1:KDIM1-KEXT1))
+     !CALL XIOS_SET_DOMAIN_ATTR(HNAME, latvalue_1d=(/(ZLAT(KK),KK=1,IDIM,KDIM1)/)  )
+     !DEALLOCATE(ZLAT,ZLON,ZMESH,ZDIR)     
+     CALL XIOS_SET_DOMAIN_ATTR(HNAME, type='rectilinear')
+     !
    ELSE
       IF (HGRID/="CONF PROJ ") &
            PRINT*,"SFX_XIOS_SET_DOMAIN : Managing "//HGRID//" type grid is not yet tested "
       !
       CALL XIOS_SET_DOMAIN_ATTR(HNAME, type="curvilinear")
+      CALL XIOS_SET_DOMAIN_ATTR(HNAME, lonvalue_1d=PLON,latvalue_1d=PLAT)
       IF (PRESENT(PCORNER_LAT) .AND. (HGRID /='CARTESIAN')) THEN 
          CALL XIOS_SET_DOMAIN_ATTR(HNAME, nvertex=4, &
               bounds_lon_1d=PCORNER_LON,bounds_lat_1d=PCORNER_LAT)
-      ENDIF
+      ENDIF      
       !
    ENDIF
    !
@@ -149,13 +163,30 @@ ELSE
    ! For 1D global grids (such as Gaussian reduced), just provide
    ! KINDEX, the local array of global cell indices
    !
-   CALL XIOS_SET_DOMAIN_ATTR(HNAME, type='unstructured')
-   CALL XIOS_SET_DOMAIN_ATTR(HNAME, data_dim=1, ibegin=0)
-   CALL XIOS_SET_DOMAIN_ATTR(HNAME, ni=ISIZE, ni_glo=KDIM1)
-   CALL XIOS_SET_DOMAIN_ATTR(HNAME, i_index=KINDEX)
+   CALL XIOS_SET_DOMAIN_ATTR(HNAME, type='unstructured', data_dim=1, ni_glo=KDIM1*KDIM2)
+   CALL XIOS_SET_DOMAIN_ATTR(HNAME, ibegin=0)
+   if (maxval(kindex) > KDIM1*KDIM2-1 )  CALL ABOR1_SFX("SFX_XIOS_SET_DOMAIN : maxval(i_index)")
+   if (minval(kindex) < 0 )              CALL ABOR1_SFX("SFX_XIOS_SET_DOMAIN : minval(i_index)")
+   CALL XIOS_SET_DOMAIN_ATTR(HNAME, i_index=KINDEX, ni=size(KINDEX) )
+   ! CALL XIOS_SET_DOMAIN_ATTR(HNAME, mask_1d=LDMASK)
    IF (PRESENT(KMASK)) THEN 
+      !
       ! Use XIOS 'compression' feature to account for Surfex 'packing' 
+      !
+      !write(0,*) 'declaring '//trim(yname)//' with sizes : ',ISIZE,SIZE(KMASK), minval(kindex),maxval(kindex)&
+      !     , minval(kmask),maxval(kmask)
+      !call flush(0)
+      if ( size(kmask) > 0 ) then 
+         if (size(kmask) > size(KINDEX))       CALL ABOR1_SFX("SFX_XIOS_SET_DOMAIN : size(kmask))")
+         if (maxval(kmask) > size(kindex)-1 )  CALL ABOR1_SFX("SFX_XIOS_SET_DOMAIN : maxval(data_i_index)")
+         if (minval(kmask) < 0 )               CALL ABOR1_SFX("SFX_XIOS_SET_DOMAIN : minval(data_i_index)")
+      else
+         !write(0,*) 'zero-size domain '//trim(yname)
+      endif
       CALL XIOS_SET_DOMAIN_ATTR(HNAME, data_i_index=KMASK, data_ni=size(KMASK))
+      !ELSE
+      !write(0,*) 'declaring '//trim(yname)//' with sizes : ',ISIZE, minval(kindex),maxval(kindex)
+      !call flush(0)
    ENDIF
    !
    ! Process lat/lon and their corners

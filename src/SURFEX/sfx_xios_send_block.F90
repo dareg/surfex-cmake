@@ -301,6 +301,8 @@ IF (LXIOS_DEF_CLOSED)  THEN
     ELSE
       YLF%ZFIELD(YLF%ISIZE+1:YLF%ISIZE+ITAKE,:) = PFIELD2(1:ITAKE,:)
     ENDIF
+  ELSEIF ( ITAKE < 0 ) THEN
+    CALL ABOR1_SFX('SFX_XIOS_SEND_BLOCK :isizemax < isize')     
   ENDIF
   YLF%ISIZE = YLF%ISIZE + ITAKE
   !
@@ -323,7 +325,6 @@ IF (LXIOS_DEF_CLOSED)  THEN
       IF (NTIMESTEP > 0) THEN 
          ! Send field and clears the buffer (incl. de-allocation)
          IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',0,ZHOOK_HANDLE2)
-         ! write(0,*) 'sending field '//cltag
          IF (YLF%G1D) THEN 
             CALL XIOS_SEND_FIELD(YLF%YLNAME,YLF%ZFIELD(:,1))
          ELSE
