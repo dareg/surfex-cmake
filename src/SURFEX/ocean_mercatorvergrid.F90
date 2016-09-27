@@ -44,6 +44,7 @@
 !!      Original    01/2008
 !       D.BARBARY 11/2014 : HPROGRAM,OUNIF in Calling OCEAN_MERCATORVERGRID
 !                           Reading oceanic level and depth
+!!      C. Lebeaupin Brossier, G. Faure 09/2016 : indice loop NOCKMIN+1 for XRAY
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -107,13 +108,14 @@ ENDDO
 !!              ---------------
 !
 XK1(NOCKMIN) = 0.
+XK4(NOCKMIN) = 1. / ( XDZ1(NOCKMIN) * XDZ1(NOCKMIN) )
 DO JLOOP = NOCKMIN+1,NOCKMAX
   XK1(JLOOP) = -1. / (XDZ2(JLOOP)*XDZ1(JLOOP-1))
+  XK4(JLOOP) =  1. / (XDZ1(JLOOP)*XDZ1(JLOOP))
 ENDDO
 !
 ZUP=1.
-DO JLOOP = NOCKMIN,NOCKMAX
-  XK4(JLOOP) =  1. / ( XDZ1(JLOOP) * XDZ1(JLOOP) )
+DO JLOOP = NOCKMIN+1,NOCKMAX
   ZDOWN = RAYO(XZ2(JLOOP))
   XRAY(JLOOP) = ZUP - ZDOWN
   ZUP = ZDOWN
@@ -123,7 +125,6 @@ DO JLOOP = NOCKMIN,NOCKMAX-1
   XK2(JLOOP) = -1. / (XDZ2(JLOOP)*XDZ1(JLOOP))
   XK3(JLOOP) = -1. / (XDZ1(JLOOP)*XDZ2(JLOOP+1))
 ENDDO
-!
 XK2(NOCKMAX) = XK2(NOCKMAX-1)
 XK3(NOCKMAX) = 0.
 !

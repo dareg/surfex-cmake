@@ -46,6 +46,7 @@
 !!                   richardson nb in diapycnal mixing, 
 !!                   remove threshold value for mixing tendency
 !!    07/2012, P. Le Moigne : CMO1D phasing
+!!    09/2016, C. Lebeaupin Brossier: XSEATEND and initialization
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -243,42 +244,41 @@ DO JPT=1,SIZE(PFSOL)
   ZEWS    = SQRT(ZSFU**2+ZSFV**2)/XRHOSW
   ZF      = 4.*XPI*SIN(ZLAT*XPI/180.)/86400.
 
+  ZSEAT(:) = O%XSEAT(JPT,:)
+  ZSEAS(:) = O%XSEAS(JPT,:)
+  ZSEAU(:) = O%XSEAU(JPT,:)
+  ZSEAV(:) = O%XSEAV(JPT,:)    
+  ZSEAE(:) = O%XSEAE(JPT,:)
+    !
+  ZSEAU_REL(:) = OR%XSEAU_REL(JPT,:)
+  ZSEAV_REL(:) = OR%XSEAV_REL(JPT,:)
+  ZSEAT_REL(:) = OR%XSEAT_REL(JPT,:)
+  ZSEAS_REL(:) = OR%XSEAS_REL(JPT,:)
+    !
   ZSEAHMO=0.
   DO J=IUP-1,IBOT
-    ZSEAT(J) = O%XSEAT(JPT,J)
-    ZSEAS(J) = O%XSEAS(JPT,J)
-    ZSEAU(J) = O%XSEAU(JPT,J)
-    ZSEAV(J) = O%XSEAV(JPT,J)    
-    ZSEAE(J) = O%XSEAE(JPT,J)
-    !
-    ZSEAU_REL(J) = OR%XSEAU_REL(JPT,J)
-    ZSEAV_REL(J) = OR%XSEAV_REL(JPT,J)
-    ZSEAT_REL(J) = OR%XSEAT_REL(JPT,J)
-    ZSEAS_REL(J) = OR%XSEAS_REL(JPT,J)
-    !
     IF (J>=IUP .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO = ZSEAHMO-XDZ1(J)
   ENDDO
   O%XSEAHMO(JPT) = ZSEAHMO
 
  !precalculation of DRHO
-  DO J=IUP-1,IBOT
-    ZU(J)=0.
-    ZV(J)=0.
-    ZT(J)=0.
-    ZS(J)=0.
-    ZE(J)=0.
-    ADVT(J)=0.
-    ADVS(J)=0.
-    ADVU(J)=0.
-    ADVV(J)=0.
-    ADVE(J)=0.
-    ZZDRHO(J)=(ZSEAT(J)-ZT1)*(ZT2+ZT3*(ZSEAT(J)-ZT1)) + ZS2*(ZSEAS(J)-ZS1)
-    ZUDTREL(J)=0.
-    ZVDTREL(J)=0.
-    ZTDTREL(J)=0.
-    ZSDTREL(J)=0.
-    ZDTFSOL(J)=0.
-  ENDDO
+  ZU(:)=0.
+  ZV(:)=0.
+  ZT(:)=0.
+  ZS(:)=0.
+  ZE(:)=0.
+  ADVT(:)=0.
+  ADVS(:)=0.
+  ADVU(:)=0.
+  ADVV(:)=0.
+  ADVE(:)=0.
+  ZZDRHO(:)=(ZSEAT(:)-ZT1)*(ZT2+ZT3*(ZSEAT(:)-ZT1)) + ZS2*(ZSEAS(:)-ZS1)
+  ZUDTREL(:)=0.
+  ZVDTREL(:)=0.
+  ZTDTREL(:)=0.
+  ZSDTREL(:)=0.
+  ZDTFSOL(:)=0.
+  !
   ZDTFNSOL=0.
 !
 ! Control print
@@ -405,21 +405,18 @@ DO JPT=1,SIZE(PFSOL)
 !!       2.c    Numerical resolution of evolution equations
 !!              -------------------------------------------
 !
-  DO J=IUP,IBOT
-    IF (OR%LREL_CUR) THEN
+  IF (OR%LREL_CUR) THEN
+    DO J=IUP,IBOT
       ZUDTREL(J) =  - (ZSEAU(J)-ZSEAU_REL(J))  / OR%XTAU_REL 
       ZVDTREL(J) =  - (ZSEAV(J)-ZSEAV_REL(J))  / OR%XTAU_REL 
-    ENDIF
-    ! flux solaire
-    ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
-  ENDDO
+    ENDDO
+  ENDIF
 !
   IF (OR%LREL_TS) THEN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! RELAXATION IS MADE INSTEAD OF FLUX CORRECTION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
     DO J=IUP,IBOT
-      ! flux non solaire
       ZTDTREL(J) =  - (ZSEAT(J)-ZSEAT_REL(J)) / OR%XTAU_REL
       ZSDTREL(J) =  - (ZSEAS(J)-ZSEAS_REL(J)) / OR%XTAU_REL
     ENDDO
@@ -433,6 +430,10 @@ DO JPT=1,SIZE(PFSOL)
     ZFNSOL = ZFNSOL + ZTDTREL(IUP)
   ENDIF
 !
+  ! flux solaire
+  DO J=IUP,IBOT
+    ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
+  ENDDO
 ! flux non solaire
   ZDTFNSOL = ZFNSOL/XDZ2(IUP) 
 !
@@ -549,7 +550,7 @@ DO JPT=1,SIZE(PFSOL)
 !!       3.     New oceanic profiles
 !!              --------------------
 !!
-  IF (O%LPROGSST) O%XSEATEND(JPT) = (ZT(IUP)-ZSEAT(IUP)) / O%XOCEAN_TSTEP
+  IF (O%LPROGSST) O%XSEATEND(JPT) = (ZT(IUP)-O%XSEAT(JPT,IUP)) / O%XOCEAN_TSTEP
   ZSEAT(NOCKMIN)  = ZT(IUP)
   ZSEAS(NOCKMIN)  = ZS(IUP)  
   ZSEAU(NOCKMIN)  = ZU(IUP)
