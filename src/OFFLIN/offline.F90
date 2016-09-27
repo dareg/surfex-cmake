@@ -1447,13 +1447,14 @@ IF (LXIOS) THEN
    CALL XIOS_CONTEXT_FINALIZE()
 #endif
 ENDIF
-IF(LXIOS .OR. LOASIS)THEN
-  CALL SFX_OASIS_END
-ELSE
+!
+ CALL SFX_OASIS_END
+!
 #ifdef SFX_MPI
- CALL MPI_FINALIZE(INFOMPI)
-#endif
+IF(.NOT. LOASIS .AND. .NOT. LXIOS) THEN
+  CALL MPI_FINALIZE(INFOMPI)
 ENDIF
+#endif
 !
 ! --------------------------------------------------------------------------------------
 !
