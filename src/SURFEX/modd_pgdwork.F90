@@ -38,6 +38,10 @@
 !
 IMPLICIT NONE
 !
+! to get same results in parallel mode (if results differ, change XPREC to a
+! lower value)
+REAL, PARAMETER :: XPREC = 1.0E+12 
+!
 !*        0.1    summation variables
 !                -------------------
 !
