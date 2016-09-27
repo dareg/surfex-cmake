@@ -13,7 +13,7 @@ export VERSION_SZIP=${VERSION_SZIP:-"2.1"}
 export VERSION_HDF5=${VERSION_HDF5:-"1.8.17"}
 export VERSION_CDF=${VERSION_CDF:-"4.4.1"}
 export VERSION_CDFF=${VERSION_CDFF:-"4.4.4"}
-export VERSION_GRIBAPI=${VERSION_GRIBAPI-"1.9.9"}
+export VERSION_GRIBAPI=${VERSION_GRIBAPI:-"1.17.0"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
 export VERSION_XIOS=${VERSION_XIOS:-"876-patch"}
 export SFX_INT=${SFX_INT-"I4"}
@@ -480,7 +480,7 @@ fi
 #
 if [ "x${VER_GRIBAPI}" = "xGRIBAPI_AUTO" ] ; then
 if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}" ] ; then
-  ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}.tar.gz )
+  ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}-Source.tar.gz )
 fi
 fi
 #
