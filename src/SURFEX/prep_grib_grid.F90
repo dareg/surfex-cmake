@@ -89,7 +89,7 @@ TYPE (DATE_TIME)                :: TPTIME_GRIB    ! current date and time
 !* 0.2 Declaration of local variables
 !      ------------------------------
 !
- CHARACTER(LEN=20)                  :: HGRID         ! type of grid
+ CHARACTER(LEN=50)                  :: HGRID         ! type of grid
 ! General purpose variables
 INTEGER(KIND=kindOfInt), DIMENSION(:), ALLOCATABLE :: ININLO_GRIB
 INTEGER(KIND=kindOfInt)                            :: IMISSING
@@ -203,6 +203,12 @@ SELECT CASE (ICENTER)
 
       CASE('unknown_PLPresent')
         WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Arpege model'
+        HINMODEL = 'ARPEGE'
+        HGRIDTYPE= 'ROTGAUSS  '
+
+      CASE('reduced_stretched_rotated_gg')
+        WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Arpege model'
+        WRITE (KLUOUT,'(A)') 'but reduced grid'
         HINMODEL = 'ARPEGE'
         HGRIDTYPE= 'ROTGAUSS  '
 
