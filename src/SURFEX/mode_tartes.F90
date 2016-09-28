@@ -57,7 +57,7 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 
 
-CONTAINS
+ CONTAINS
 
 SUBROUTINE TARTES(PSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_DENSITY,&
                   PSNOWIMP_CONTENT,PALB,PSW_RAD_DIF,PSW_RAD_DIR,PCOSZEN,KNLVLS_USE,PSNOWALB, &
@@ -193,7 +193,7 @@ END DO
 !
 !4 Diagnostics
 !4.1 Albedo
-CALL SNOWPACK_ALBEDO(ZXC_DIR(:,1,:),ZXC_DIF(:,1,:),ZXD_DIR(:,1,:),ZXD_DIF(:,1,:),  &
+ CALL SNOWPACK_ALBEDO(ZXC_DIR(:,1,:),ZXC_DIF(:,1,:),ZXD_DIR(:,1,:),ZXD_DIF(:,1,:),  &
                      ZGP_DIR(:,1,:),ZGP_DIF(:,1,:),PCOSZEN,ZMUDIFF,PSW_RAD_DIR,    &
                      PSW_RAD_DIF,PSNOWALB)
 !
@@ -471,7 +471,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SINGLE_SCATTERING_OPTICAL_PARAMETERS',0,ZHOOK_HANDLE)
 !
-CALL SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,ZSNOWG00,ZSNOWY,ZSNOWW,ZSNOWB)
+ CALL SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,ZSNOWG00,ZSNOWY,ZSNOWW,ZSNOWB)
 !
 DO JL = 1,KMAX_USE
   !
@@ -499,7 +499,7 @@ DO JL = 1,KMAX_USE
 ENDDO
 !
 !adding co- single scattering albedo for impureties
-CALL IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO(PSNOWSSA,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,&
+ CALL IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO(PSNOWSSA,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,&
                                             KNLVLS_USE,KMAX_USE,ZIMPCOSSALB)
 !
 ZSNOWCOSSALB = ZSNOWCOSSALB + ZIMPCOSSALB
@@ -930,11 +930,11 @@ IF (LHOOK) CALL DR_HOOK('SOLVES_TWO_STREAM2',0,ZHOOK_HANDLE)
 !
 ! for now we inverse the matrix twice :
 ! to be improved by adding a dimension in tridiag_ground_snowcro
-CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
+ CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
                             PVECT_DIR(:,:,:),ZX0_DIR(:,:,:),  &
                             2*KNLVLS_EFF(:,:),0)
 !
-CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
+ CALL TRIDIAG_GROUND_SNOWCRO(PDM(:,:,:),PD(:,:,:),PDP(:,:,:), &
                             PVECT_DIF(:,:,:),ZX0_DIF(:,:,:),  &
                             2*KNLVLS_EFF(:,:),0)
 !
@@ -1029,51 +1029,58 @@ INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (n
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PEPROFILE ! energy absorbed by each layer (W/m^2) npoints,nlayer,nbands)
 !
-REAL, DIMENSION(SIZE(PKESTAR,1),SIZE(PKESTAR,2),SIZE(PKESTAR,3)) :: ZSTAR, ZINT1, ZINT2, ZINT3, ZINT4
-REAL :: ZDEXP, ZFDU, ZFDD
+REAL :: ZINT1, ZINT2, ZINT3, ZINT4, ZINT5
+REAL :: ZDEXP, ZFDU, ZFDD, ZSTAR
 !
 INTEGER::JB,JL,JJ !loop counter
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ENERGY_PROFILE',0,ZHOOK_HANDLE)
-!
-ZSTAR(:,:,:) = PKESTAR(:,:,:) * PDTAUSTAR(:,:,:)
-ZINT1(:,:,:) = EXP(-ZSTAR(:,:,:))
-ZINT2(:,:,:) = EXP(ZSTAR(:,:,:))
-DO JJ = 1,SIZE(PEPROFILE,1)
-  ZINT3(JJ,:,:) = EXP( -PDTAUSTAR(JJ,:,:)/PCOSZEN(JJ))
-  ZINT4(JJ,:,:) = EXP( -PTAUSTAR (JJ,:,:)/PCOSZEN(JJ))
-ENDDO
-!
+
 DO JB = 1,NPNBANDS
   !
-  DO JL = 1,KMAX_EFF(JB)
+  DO JJ =1,SIZE(PEPROFILE,1)
     !
-    DO JJ =1,SIZE(PEPROFILE,1)
+    DO JL = 1,KMAX_EFF(JB)
       !
-      IF (JL==1) THEN     
+      IF (JL==1.OR.JL<=KNLVLS_EFF(JJ,JB)) THEN
         !
-        !surface layer doc equation 64
-        PEPROFILE(JJ,JL,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,JL,JB)+PXD(JJ,JL,JB)+PGP(JJ,JL,JB) ) ) + &
-             ( PXC(JJ,JL,JB)*ZINT1(JJ,JL,JB) + PXD(JJ,JL,JB)*ZINT2(JJ,JL,JB) + PGP(JJ,JL,JB)*ZINT3(JJ,JL,JB) ) - &
-             ( PXA(JJ,JL,JB)*ZINT1(JJ,JL,JB) + PXB(JJ,JL,JB)*ZINT2(JJ,JL,JB) + PGM(JJ,JL,JB)*ZINT3(JJ,JL,JB) &
-             + PCOSZEN(JJ)*ZINT4(JJ,JL,JB) ) 
+        ZSTAR = PKESTAR(JJ,JL,JB) * PDTAUSTAR(JJ,JL,JB)
+        ZINT1 = EXP(-ZSTAR)
+        ZINT2 = EXP( ZSTAR)
         !
-      ELSEIF ( JL<=KNLVLS_EFF(JJ,JB) ) THEN
-        !
-        !internal layers
-        ! 
-        !last factor in equations 62 and 63
-        ZDEXP = ZINT4(JJ,JL,JB) - ZINT4(JJ,JL-1,JB)
-        !
-        !doc equation 62
-        ZFDU = PXC(JJ,JL,JB) * (ZINT1(JJ,JL,JB) -1.) + PXD(JJ,JL,JB) * (ZINT2(JJ,JL,JB) -1.) + PGP(JJ,JL,JB) * ZDEXP
-        !
-        !doc equation 63
-        ZFDD = PXA(JJ,JL,JB) * (ZINT1(JJ,JL,JB) -1.) + PXB(JJ,JL,JB) * (ZINT2(JJ,JL,JB) -1.) + (PGM(JJ,JL,JB) + PCOSZEN(JJ)) * ZDEXP
-        !      
-        PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
+        IF (JL==1) THEN
+          !
+          ZINT3 = EXP( -PDTAUSTAR(JJ,JL,JB)/PCOSZEN(JJ))
+          ZINT4 = EXP( -PTAUSTAR (JJ,JL,JB)/PCOSZEN(JJ))
+          !
+          !surface layer doc equation 64
+          PEPROFILE(JJ,1,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
+                               ( PXC(JJ,1,JB) * ZINT1 + PXD(JJ,1,JB) * ZINT2 + &
+                                 PGP(JJ,1,JB) * ZINT3 ) - &
+                               ( PXA(JJ,1,JB) * ZINT1 + PXB(JJ,1,JB) * ZINT2 + &
+                                 PGM(JJ,1,JB) * ZINT3 + &
+                                 PCOSZEN(JJ) * ZINT4 ) 
+          !
+        ELSE
+          !
+          ZINT5 = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSZEN(JJ) )
+          !last factor in equations 62 and 63
+          ZDEXP = ZINT5 - ZINT4
+          ZINT4 = ZINT5
+          !
+          !doc equation 62
+          ZFDU = PXC(JJ,JL,JB) * ( ZINT1 -1. ) + &
+                 PXD(JJ,JL,JB) * ( ZINT2 -1. ) + PGP(JJ,JL,JB) * ZDEXP
+          !
+          !doc equation 63
+          ZFDD = PXA(JJ,JL,JB) * ( ZINT1 -1. ) + &
+                 PXB(JJ,JL,JB) * ( ZINT2 -1. ) + ( PGM(JJ,JL,JB) + PCOSZEN(JJ) ) * ZDEXP
+          !      
+          PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
+          !
+        ENDIF
         !
       ELSE
         !
@@ -1209,7 +1216,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
 !
 LOGICAL, INTENT(IN) :: ODEBUG ! Print for debugging
-CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 !
 !packed variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNIMP) :: ZSNOWIMP_DENSITY_P !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
@@ -1408,7 +1415,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
 
 LOGICAL,INTENT(IN) :: ODEBUG ! Print for debugging
-CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
+ CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
 
 !Local variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNBANDS) :: ZSNOWENERGY !(npoints,nlayer,nbands)
