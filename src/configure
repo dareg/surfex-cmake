@@ -479,7 +479,7 @@ fi
 #  Install GRIBAPI if VER_GRIBAPI=GRIBAPI_AUTO
 #
 if [ "x${VER_GRIBAPI}" = "xGRIBAPI_AUTO" ] ; then
-if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}" ] ; then
+if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}-Source" ] ; then
   ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}-Source.tar.gz )
 fi
 fi
