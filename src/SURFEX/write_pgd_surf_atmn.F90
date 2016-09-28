@@ -143,6 +143,9 @@ IF (HPROGRAM.NE.'BINARY' .AND. HPROGRAM.NE.'TEXTE ') THEN
                               HPROGRAM)
 ENDIF
 !
+! Rustine proposée par Stéphanie parce que la ligne suivante plante en DEBUG
+if (.not.associated(YSC%USS%XZ0EFFJPDIR)) ALLOCATE(YSC%USS%XZ0EFFJPDIR(0))
+!
  CALL WRITE_GRID(YSC%DGU, YSC%U, &
                  HPROGRAM,YSC%UG%CGRID,YSC%UG%XGRID_PAR,YSC%UG%XLAT,YSC%UG%XLON,&
                  YSC%UG%XMESH_SIZE,IRESP,YSC%USS%XZ0EFFJPDIR)
