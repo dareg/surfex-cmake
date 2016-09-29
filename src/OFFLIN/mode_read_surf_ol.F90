@@ -37,81 +37,25 @@ MODULE MODE_READ_SURF_OL
 !----------------------------------------------------------------------------
 !
 INTERFACE READ_SURF0_OL
-      SUBROUTINE READ_SURFX0_OL(HREC,PFIELD,KRESP,HCOMMENT)
- CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
-REAL,               INTENT(OUT) :: PFIELD   ! the real scalar to be read
-INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
-END SUBROUTINE READ_SURFX0_OL
-      SUBROUTINE READ_SURFN0_OL(HREC,KFIELD,KRESP,HCOMMENT)
- CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
-INTEGER,            INTENT(OUT) :: KFIELD   ! the integer scalar to be read
-INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
-END SUBROUTINE READ_SURFN0_OL
-      SUBROUTINE READ_SURFC0_OL(HREC,HFIELD,KRESP,HCOMMENT)
- CHARACTER(LEN=*),   INTENT(IN)  :: HREC     ! name of the article to be read
- CHARACTER(LEN=40),   INTENT(OUT) :: HFIELD   ! the integer scalar to be read
-INTEGER,             INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),  INTENT(OUT) :: HCOMMENT ! comment
-END SUBROUTINE READ_SURFC0_OL
-      SUBROUTINE READ_SURFL0_OL(HREC,OFIELD,KRESP,HCOMMENT)
- CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
-LOGICAL,                  INTENT(OUT) :: OFIELD   ! array containing the data field
-INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
-END SUBROUTINE READ_SURFL0_OL
+        MODULE PROCEDURE READ_SURFX0_OL
+        MODULE PROCEDURE READ_SURFN0_OL
+        MODULE PROCEDURE READ_SURFC0_OL
+        MODULE PROCEDURE READ_SURFL0_OL
 END INTERFACE
-INTERFACE READ_SURFN_OL
-      SUBROUTINE READ_SURFX1_OL(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
- CHARACTER(LEN=*),  INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:), INTENT(OUT) :: PFIELD   ! array containing the data field
-INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100), INTENT(OUT) :: HCOMMENT ! comment
- CHARACTER(LEN=1),   INTENT(IN)  :: HDIR     ! type of field :
-END SUBROUTINE READ_SURFX1_OL
-      SUBROUTINE READ_SURFX2_OL(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
- CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:,:),     INTENT(OUT) :: PFIELD   ! array containing the data field
-INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
- CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
-END SUBROUTINE READ_SURFX2_OL
-      SUBROUTINE READ_SURFX3_OL(HREC,PFIELD,KRESP,HCOMMENT,HDIR)
- CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
-REAL, DIMENSION(:,:,:),   INTENT(OUT) :: PFIELD   ! array containing the data field
-INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
- CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
-END SUBROUTINE READ_SURFX3_OL
-      SUBROUTINE READ_SURFN1_OL(HREC,KFIELD,KRESP,HCOMMENT,HDIR)
- CHARACTER(LEN=*),      INTENT(IN)  :: HREC     ! name of the article to be read
-INTEGER, DIMENSION(:), INTENT(OUT) :: KFIELD   ! the integer scalar to be read
-INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
- CHARACTER(LEN=1),       INTENT(IN)  :: HDIR     ! type of field :
-END SUBROUTINE READ_SURFN1_OL
-      SUBROUTINE READ_SURFL1_OL(HREC,OFIELD,KRESP,HCOMMENT,HDIR)
- CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
-LOGICAL, DIMENSION(:),   INTENT(OUT) :: OFIELD   ! array containing the data field
-INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
- CHARACTER(LEN=1),         INTENT(IN)  :: HDIR     ! type of field :
-END SUBROUTINE READ_SURFL1_OL
+INTERFACE READ_SURFX1N1_OL
+        MODULE PROCEDURE READ_SURFX1_OL
+        MODULE PROCEDURE READ_SURFN1_OL
+END INTERFACE
+INTERFACE READ_SURFL1X2_OL
+        MODULE PROCEDURE READ_SURFL1_OL
+        MODULE PROCEDURE READ_SURFX2_OL
+        MODULE PROCEDURE READ_SURFX3_OL
 END INTERFACE
 INTERFACE READ_SURFT_OL
-      SUBROUTINE READ_SURFT0_OL(HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
- CHARACTER(LEN=*),        INTENT(IN)  :: HREC     ! name of the article to be read
-INTEGER,                  INTENT(OUT) :: KYEAR    ! year
-INTEGER,                  INTENT(OUT) :: KMONTH   ! month
-INTEGER,                  INTENT(OUT) :: KDAY     ! day
-REAL,                     INTENT(OUT) :: PTIME    ! time
-INTEGER,                  INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(OUT) :: HCOMMENT ! comment
-END SUBROUTINE READ_SURFT0_OL
+        MODULE PROCEDURE READ_SURFT0_OL
 END INTERFACE
 !
-END MODULE MODE_READ_SURF_OL
+CONTAINS
 !
 !     #############################################################
       SUBROUTINE READ_SURFX0_OL(HREC,PFIELD,KRESP,HCOMMENT)
@@ -762,8 +706,6 @@ END SUBROUTINE READ_SURFN0_OL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
-!RJ: missing interface, assumed shape on callee
-USE MODI_READ_SURFX1_OL
 !
 USE NETCDF
 !
@@ -1141,3 +1083,4 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_OL:READ_SURFT0_OL',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT0_OL
 !
+END MODULE MODE_READ_SURF_OL

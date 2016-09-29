@@ -4,11 +4,11 @@
 !SFX_LIC for details. version 1.
 
 MODULE MODE_READ_SURF_COV
-
-!RJ: split cover from read_surf.F90 to avoid compiler bugs
-!RJ: all safety compatibility checks should be done here
-PUBLIC :: READ_SURF_COV
-
+!
+INTERFACE WRITE_READ_COV
+  MODULE PROCEDURE READ_SURF_COV
+END INTERFACE
+!
 CONTAINS
 
 !     #############################################################

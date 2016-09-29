@@ -393,6 +393,7 @@ DO JI=1,INI
 !       call incomplete gamma function for xsat
 !
         CALL DGAM(ZPHI,ZYSAT,10.,ZG,ZGYSAT,IFLG,IFLGST)
+        
 !
 !       if the incomplete gamma function don't works, print why
 !
