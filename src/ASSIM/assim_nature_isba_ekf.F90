@@ -49,9 +49,6 @@ USE MODI_ABOR1_SFX
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 !
 USE MODE_EKF
-USE MODI_CHOLDC
-USE MODI_CHOLSL
-USE MODI_INVERSE_MATRIX
 !
 ! -----------------------------------------------------------
 !
