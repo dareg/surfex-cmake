@@ -47,6 +47,8 @@ USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_OUTER_PRODUCT
 USE MODE_EKF
 USE MODE_RANDOM
+USE MODI_CHOLDC
+USE MODI_CHOLSL
 !
 ! -----------------------------------------------------------
 !

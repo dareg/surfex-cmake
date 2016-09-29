@@ -34,6 +34,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    27/05/08 
+!!      09/16   B. Decharme  limit wtd to -1000m
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -703,7 +704,11 @@ ELSEIF(CGROUNDW=='DIF')THEN
   YVAR ='HGROUND'   
   CALL READ_TRIP(NLISTING,YFILE_READ_INIT,YVAR,ZREAD)   
   TP%XHGROUND(:,:) = ZREAD(ILON_DEB:ILON_END,ILAT_DEB:ILAT_END) 
-
+!
+  WHERE(TPG%GMASK_GW(:,:))
+        TP%XHGROUND(:,:) = MAX(TP%XHGROUND(:,:),TP%XTOPO_RIV(:,:)-XGWDZMAX)
+  ENDWHERE
+!
   IF(LGWEQ)THEN
 !
 !   Groundwater equilibrium (appendix B in Vergnes thesis)
