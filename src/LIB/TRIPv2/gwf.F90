@@ -7,12 +7,24 @@
                       PHGHS,PGOUT,PGNEG,                                  &
                       PGSTO_ALL,PGSTO2_ALL,PGIN_ALL,PGOUT_ALL             )
 !     ###################################################################
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
+!!
+!!     
+!!
+!!    AUTHOR
+!!    ------
+!!	J.P Vergnes   *Meteo France*
+!!
+!!    MODIFICATIONS
+!!    -------------
+!!      Original     08/12
+!!      09/16   B. Decharme  limit wtd to -1000m
+!-------------------------------------------------------------------------------
 !
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
@@ -81,6 +93,9 @@ REAL,                 INTENT(OUT), OPTIONAL   :: PGOUT_ALL
 REAL, PARAMETER       :: ZEPSILON = 1.E-12
 INTEGER, PARAMETER    :: IITERMAX = 100
 !
+REAL, PARAMETER       :: ZGWDZMIN = 10.0    ! Thickness to start to decrease lateral Transmissivity [m]
+REAL, PARAMETER       :: ZGWERR   = 1.E-3   ! Limit negatif ground_sto [m]
+!
 !
 !*      0.3    declarations of local variables
 !
@@ -99,6 +114,7 @@ REAL, DIMENSION(KLON,KLAT)          :: ZRHS             !
 REAL, DIMENSION(KLON,KLAT)          :: ZQDRAIN
 REAL, DIMENSION(KLON,KLAT)          :: ZTAUG
 REAL, DIMENSION(KLON,KLAT)          :: ZSLOPE
+REAL, DIMENSION(KLON,KLAT)          :: ZTRANS
 !
 REAL                                :: ZEVOL            !
 REAL                                :: ZNPTS            ! Number of points in aquifer basins
@@ -123,6 +139,7 @@ ZCR     (:,:) = 0.0
 ZCC     (:,:) = 0.0
 ZCRIV   (:,:) = 0.0
 ZQDRAIN (:,:) = 0.0
+ZTRANS  (:,:) = 0.0
 !
 ! * groundwater mask
 !
@@ -150,7 +167,14 @@ WHERE(OMASK(:,:))
      ZCRIV (:,:) = PWIDTH(:,:) * PLEN(:,:)/ZTAUG(:,:)
 ENDWHERE
 !
- CALL GWF_INT(KLON,KLAT,ZGRID_RES,ZLAT,OMASK,PNUM_AQUI,PTRANS,ZCR,ZCC)
+! * Transmissivity
+!
+WHERE(OMASK(:,:))
+     ZSLOPE(:,:) = MIN(1.0,MAX(0.0,PHGROUND(:,:)-PTOPO_RIV(:,:)+XGWDZMAX-ZGWERR)/ZGWDZMIN)
+     ZTRANS(:,:) = PTRANS(:,:)*ZSLOPE(:,:)
+ENDWHERE
+!
+ CALL GWF_INT(KLON,KLAT,ZGRID_RES,ZLAT,OMASK,PNUM_AQUI,ZTRANS,ZCR,ZCC)
 !
 ! *     2.  ITERATION LOOP
 !           --------------

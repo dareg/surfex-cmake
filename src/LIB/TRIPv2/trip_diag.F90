@@ -20,6 +20,7 @@ SUBROUTINE TRIP_DIAG(TPDG, TP, TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    12/12/13 
+!!      09/16   B. Decharme  limit wtd to -1000m
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -35,7 +36,7 @@ USE MODD_TRIP_OASIS, ONLY : LCPL_LAND
 !
 USE MODN_TRIP,       ONLY : CGROUNDW, CVIT, LFLOOD
 !
-USE MODD_TRIP_PAR,   ONLY : XRHOLW
+USE MODD_TRIP_PAR,   ONLY : XRHOLW, XGWDZMAX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -74,6 +75,8 @@ REAL, DIMENSION(:,:), INTENT(IN)  :: PRUNOFF    !Input surface runoff          [
 REAL, DIMENSION(:,:), INTENT(OUT) :: PDISCHARGE !Cumulated river discharges    [kg]
 !
 !*      0.2    declarations of local variables
+!
+REAL, DIMENSION(SIZE(PSOUT,1),SIZE(PSOUT,2)) :: ZGROUND_STO
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -116,17 +119,23 @@ IF(CGROUNDW/='DEF')THEN
   TPDG%TDIAG%XQGF(:,:) = TPDG%TDIAG%XQGF(:,:) + (PGOUT(:,:)+PGNEG(:,:)) * PTSTEP / XRHOLW
 ENDIF
 !  
-IF(CGROUNDW=='CST')THEN        
+IF(CGROUNDW=='CST')THEN  
+!
   TPDG%TDIAG%XGROUND_STO(:,:) = TPDG%TDIAG%XGROUND_STO(:,:) + TP%XGROUND_STO(:,:) * PTSTEP / TPG%XAREA(:,:)
+!
 ELSEIF(CGROUNDW=='DIF')THEN
+!
+  ZGROUND_STO           (:,:) = (XGWDZMAX+PWTD(:,:)) * TP%XWEFF(:,:) * XRHOLW
+!
+  TPDG%TDIAG%XGROUND_STO(:,:) = TPDG%TDIAG%XGROUND_STO(:,:) + ZGROUND_STO   (:,:) * PTSTEP 
   TPDG%TDIAG%XHGROUND   (:,:) = TPDG%TDIAG%XHGROUND   (:,:) + TP%XHGROUND   (:,:) * PTSTEP
-  TPDG%TDIAG%XGROUND_STO(:,:) = TPDG%TDIAG%XGROUND_STO(:,:) + TP%XHGROUND   (:,:) * PTSTEP * TP%XWEFF(:,:) * XRHOLW
   TPDG%TDIAG%XWTD       (:,:) = TPDG%TDIAG%XWTD       (:,:) + PWTD          (:,:) * PTSTEP
   TPDG%TDIAG%XFWTD      (:,:) = TPDG%TDIAG%XFWTD      (:,:) + PFWTD         (:,:) * PTSTEP
   IF(LDIAG_MISC)THEN
     TPDG%TDIAG%XQGCELL (:,:) = TPDG%TDIAG%XQGCELL (:,:) + PQGCELL (:,:) * PTSTEP / XRHOLW
     TPDG%TDIAG%XHGHS   (:,:) = TPDG%TDIAG%XHGHS   (:,:) + PHGHS   (:,:) * PTSTEP
   ENDIF 
+!
 ENDIF
 !
 ! * Actualisation of flooding scheme diagnostic variables   
