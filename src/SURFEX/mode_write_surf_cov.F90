@@ -4,13 +4,13 @@
 !SFX_LIC for details. version 1.
 
 MODULE MODE_WRITE_SURF_COV
-
-!RJ: split cover from read_surf.F90 to avoid compiler bugs
-!RJ: all safety compatibility checks should be done here
-PUBLIC :: WRITE_SURF_COV
-
+!
+INTERFACE WRITE_SURF_COV
+  MODULE PROCEDURE WRITE_SURF_COV
+END INTERFACE
+!
 CONTAINS
-
+!
 !     #############################################################
       SUBROUTINE WRITE_SURF_COV (HSELECT, &
                                  HPROGRAM,HREC,PFIELD,OFLAG,KRESP,HCOMMENT,HDIR)
@@ -20,7 +20,7 @@ CONTAINS
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
-USE MODI_WRITE_SURF, ONLY: WRITE_SURF
+USE MODI_WRITE_SURF
 #ifdef SFX_MNH
 USE MODI_WRITE_SURFX2COV_MNH
 #endif
