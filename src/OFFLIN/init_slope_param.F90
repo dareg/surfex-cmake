@@ -80,8 +80,6 @@ INTEGER :: JX       ! loop counter
 INTEGER :: JY       ! loop counter
 
 REAL, DIMENSION(:),ALLOCATABLE :: ZZS1D_FULL !orography of total domain
-REAL, DIMENSION(:),ALLOCATABLE :: ZLAT
-REAL, DIMENSION(:),ALLOCATABLE :: ZLAT_FULL !latitudes of total domain
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZZS ! orography in a 2D array
 
 REAL,DIMENSION(:), ALLOCATABLE :: ZDX        ! grid mesh size in x direction
@@ -92,6 +90,8 @@ INTEGER, PARAMETER :: JPHEXT = 1 ! number of points around the physical domain
 
 REAL                   :: ZDZSDX   ! slope in X and Y direction
 REAL                   :: ZDZSDY   ! of a triangle surface
+
+REAL::ZLAT1,ZLAT2
 
 INTEGER :: IIB, IIE, IJB, IJE
 INTEGER :: JI, JJ
@@ -140,16 +140,7 @@ IF (NPROC>1) THEN
   END DO
 
   CALL MPI_ALLGATHERV(PZS,SIZE(PZS)*KIND(PZS)/4,MPI_REAL,ZZS1D_FULL,          &
-                      NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
-
-  IF (SIZE(PLAT)<=NIX) THEN
-    ALLOCATE(ZLAT(NIX))
-    ZLAT(1:KI)=PLAT(1:KI)
-    ALLOCATE(ZLAT_FULL(NIX*NIY))
-    CALL MPI_ALLGATHERV(ZLAT,SIZE(ZLAT)*KIND(ZLAT)/4,MPI_REAL,ZLAT_FULL,          &
-                      NSIZE_TASK(:)*KIND(ZLAT)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
-    DEALLOCATE(ZLAT)
-  ENDIF                  
+                      NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)            
                       
 ELSE
   ZZS1D_FULL=PZS
@@ -204,12 +195,24 @@ ALLOCATE(XZSL (NNX,NNY))
 IF (SIZE(PLAT)>NIX) THEN
     LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
 ELSE
+#ifdef SFX_MPI
     IF (NPROC>1) THEN
-      LREVERTGRID=(ZLAT_FULL(1)>ZLAT_FULL(1+NIX))
-      DEALLOCATE(ZLAT_FULL)
+      
+      IF (NRANK==NINDEX(1))
+        ZLAT1=PLAT(1)
+      ELSEIF (NRANK==NINDEX(1+NSIZE_TASK(1)))
+        ZLAT2=PLAT(1)
+      END IF
+      
+      CALL MPI_BCAST(ZLAT1,KIND(ZLAT1)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
+      CALL MPI_BCAST(ZLAT2,KIND(ZLAT2)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)        
+      
+      LREVERTGRID=(ZLAT1>ZLAT2)
+
     ELSE
       STOP "BIG PROBLEM WITH NUMBER OF THREADS IN SHADOWS"
     END IF
+#endif
 ENDIF
 
 IF (LREVERTGRID) THEN
