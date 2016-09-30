@@ -80,6 +80,7 @@ INTEGER :: JX       ! loop counter
 INTEGER :: JY       ! loop counter
 
 REAL, DIMENSION(:),ALLOCATABLE :: ZZS1D_FULL !orography of total domain
+REAL, DIMENSION(:),ALLOCATABLE :: ZLAT_FULL !latitudes of total domain
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZZS ! orography in a 2D array
 
 REAL,DIMENSION(:), ALLOCATABLE :: ZDX        ! grid mesh size in x direction
@@ -140,6 +141,12 @@ IF (NPROC>1) THEN
   CALL MPI_ALLGATHERV(PZS,SIZE(PZS)*KIND(PZS)/4,MPI_REAL,ZZS1D_FULL,          &
                       NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
 
+  IF (SIZE(PLAT)<=NIX) THEN
+    ALLOCATE(ZLAT_FULL(NIX*NIY))
+    CALL MPI_ALLGATHERV(PLAT,SIZE(PLAT)*KIND(PLAT)/4,MPI_REAL,ZLAT_FULL,          &
+                      NSIZE_TASK(:)*KIND(PLAT)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)                      
+  ENDIF                  
+                      
 ELSE
   ZZS1D_FULL=PZS
 ENDIF
@@ -190,7 +197,15 @@ ALLOCATE(XZSL (NNX,NNY))
 !RJ: next one does not work with NPROC>4
 !RJ 'Fortran runtime error: Index '13' of dimension 1 of array 'plat' above upper bound of 12'
 ! 2d grid should be increasing in latitude
-LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
+IF (SIZE(PLAT)>NIX) THEN
+    LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
+ELSE
+    IF (NPROC>1) THEN
+      LREVERTGRID=(ZLAT_FULL(1)>ZLAT_FULL(1+NIX))
+    ELSE
+      STOP "BIG PROBLEM WITH NUMBER OF THREADS IN SHADOWS"
+    END IF
+ENDIF
 
 IF (LREVERTGRID) THEN
   DO JY=1,NIY
