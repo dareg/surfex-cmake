@@ -67,7 +67,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)
-REAL,DIMENSION(:),INTENT(IN):: PLAT ! latitudes
+REAL, DIMENSION(KI),INTENT(IN):: PLAT ! latitudes
 !
 !
 !
@@ -202,6 +202,7 @@ IF (SIZE(PLAT)>NIX) THEN
 ELSE
     IF (NPROC>1) THEN
       LREVERTGRID=(ZLAT_FULL(1)>ZLAT_FULL(1+NIX))
+      DEALLOCATE(ZLAT_FULL)
     ELSE
       STOP "BIG PROBLEM WITH NUMBER OF THREADS IN SHADOWS"
     END IF
