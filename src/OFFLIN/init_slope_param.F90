@@ -198,9 +198,9 @@ ELSE
 #ifdef SFX_MPI
     IF (NPROC>1) THEN
       
-      IF (NRANK==NINDEX(1))
+      IF (NRANK==NINDEX(1)) THEN
         ZLAT1=PLAT(1)
-      ELSEIF (NRANK==NINDEX(1+NSIZE_TASK(1)))
+      ELSEIF (NRANK==NINDEX(1+NSIZE_TASK(1))) THEN
         ZLAT2=PLAT(1)
       END IF
       
