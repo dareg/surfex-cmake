@@ -67,7 +67,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)
-REAL, DIMENSION(KI),INTENT(IN):: PLAT ! latitudes
+REAL, DIMENSION(:),INTENT(:):: PLAT ! latitudes
 !
 !
 !
@@ -80,6 +80,7 @@ INTEGER :: JX       ! loop counter
 INTEGER :: JY       ! loop counter
 
 REAL, DIMENSION(:),ALLOCATABLE :: ZZS1D_FULL !orography of total domain
+REAL, DIMENSION(:),ALLOCATABLE :: ZLAT
 REAL, DIMENSION(:),ALLOCATABLE :: ZLAT_FULL !latitudes of total domain
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZZS ! orography in a 2D array
 
@@ -142,9 +143,12 @@ IF (NPROC>1) THEN
                       NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
 
   IF (SIZE(PLAT)<=NIX) THEN
+    ALLOCATE(ZLAT(NIX))
+    ZLAT(1:KI)=PLAT(1:KI)
     ALLOCATE(ZLAT_FULL(NIX*NIY))
-    CALL MPI_ALLGATHERV(PLAT,SIZE(PLAT)*KIND(PLAT)/4,MPI_REAL,ZLAT_FULL,          &
-                      NSIZE_TASK(:)*KIND(PLAT)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)                      
+    CALL MPI_ALLGATHERV(ZLAT,SIZE(ZLAT)*KIND(ZLAT)/4,MPI_REAL,ZLAT_FULL,          &
+                      NSIZE_TASK(:)*KIND(ZLAT)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
+    DEALLOCATE(ZLAT)
   ENDIF                  
                       
 ELSE
