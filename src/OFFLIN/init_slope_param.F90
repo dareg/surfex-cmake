@@ -67,7 +67,7 @@ TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)
-REAL, DIMENSION(:),INTENT(:):: PLAT ! latitudes
+REAL, DIMENSION(:),INTENT(IN):: PLAT ! latitudes
 !
 !
 !
