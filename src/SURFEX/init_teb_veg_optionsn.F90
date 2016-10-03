@@ -115,6 +115,7 @@ REAL                              :: ZCO2_START
 REAL                              :: ZCO2_END
 INTEGER                           :: INBYEARSPINS
 INTEGER                           :: INBYEARSPINW
+REAL:: ZCVHEATF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -147,7 +148,7 @@ IF (LNAM_READ) THEN
                    YRAIN, TVG%CHORT, GGLACIER, GCANOPY_DRAG,       &
                    GVEGUPD, GSPINUPCARBS, GSPINUPCARBW,        & 
                    ZSPINMAXS, ZSPINMAXW, ZCO2_START, ZCO2_END, &
-                   INBYEARSPINS, INBYEARSPINW, TVG%LNITRO_DILU     )
+                   INBYEARSPINS, INBYEARSPINW, TVG%LNITRO_DILU ,ZCVHEATF )
  !
  CALL DEFAULT_CH_BIO_FLUX(CHT%LCH_BIO_FLUX)
  !
