@@ -1325,7 +1325,7 @@ ZP_QSURF (:) = IM%PKDI%XP_QS (:)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
  CALL DIAG_EVAP_ISBA_n(IM%DGEI, IM%DGI, IM%I, IM%PKDI, IM%PKI, &
-                       IM%I%CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA)
+                       IM%I%CPHOTO,PTSTEP,KMASK,KSIZE,JPATCH,ZP_RHOA,IM%DGMI%LPROSNOW,ZP_SLOPE_COS)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Isba offline diagnostics for miscellaneous terms over each patch
@@ -1346,7 +1346,7 @@ ZP_QSURF (:) = IM%PKDI%XP_QS (:)
  CALL UNPACK_DIAG_PATCH_n(IM%DGI, IM%GB, IM%I, IM%PKDI, IM%PKI, &
                           KMASK,KSIZE,IM%I%NPATCH,JPATCH, &
                            ZCPL_DRAIN,ZCPL_RUNOFF,ZCPL_EFLOOD,ZCPL_PFLOOD,           &
-                           ZCPL_IFLOOD, ZCPL_ICEFLUX)  
+                           ZCPL_IFLOOD, ZCPL_ICEFLUX,IM%DGMI%LPROSNOW,ZP_SLOPE_COS)  
 !
 ! for chemical deposition
 !

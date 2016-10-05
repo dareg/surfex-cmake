@@ -3,7 +3,8 @@ SUBROUTINE UNPACK_DIAG_PATCH_n (DGI, GB, I, PKDI, PKI, &
                                 KMASK,KSIZE,KNPATCH,KPATCH,    &
                                  PCPL_DRAIN,PCPL_RUNOFF,      &
                                  PCPL_EFLOOD,PCPL_PFLOOD,     &
-                                 PCPL_IFLOOD,PCPL_ICEFLUX     )  
+                                 PCPL_IFLOOD,PCPL_ICEFLUX ,&
+                                 OPROSNOW,PSLOPECOS)    
 !##############################################
 !
 !!****  *UNPACK_DIAG_PATCH_n* - unpacks ISBA diagnostics
@@ -72,11 +73,21 @@ REAL, DIMENSION(:,:),  INTENT(OUT) :: PCPL_PFLOOD
 REAL, DIMENSION(:,:),  INTENT(OUT) :: PCPL_IFLOOD
 REAL, DIMENSION(:,:),  INTENT(OUT) :: PCPL_ICEFLUX
 !
+LOGICAL,INTENT(IN) :: OPROSNOW
+REAL,DIMENSION(:),INTENT(IN) :: PSLOPECOS
+REAL,DIMENSION(SIZE(PSLOPECOS)):: ZCORR_SLOPE
+!
 INTEGER :: JJ, JI, JSW
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('UNPACK_DIAG_PATCH_N',0,ZHOOK_HANDLE)
+!
+IF (OPROSNOW) THEN
+  ZCORR_SLOPE(:)=1./PSLOPECOS(:)
+ELSE
+  ZCORR_SLOPE(:)=1.
+ENDIF
 !
 IF (KNPATCH==1) THEN
   !
@@ -95,19 +106,21 @@ IF (KNPATCH==1) THEN
   END IF
   !
   IF (DGI%LSURF_BUDGET) THEN
-    DGI%XRN    (:, KPATCH)    = PKDI%XP_RN         (:)
-    DGI%XH     (:, KPATCH)    = PKDI%XP_H          (:)
-    DGI%XGFLUX (:, KPATCH)    = PKDI%XP_GFLUX      (:)
-    DGI%XLEI   (:, KPATCH)    = PKDI%XP_LEI        (:)
-    DGI%XSWD   (:, KPATCH)    = PKDI%XP_SWD        (:)
-    DGI%XSWU   (:, KPATCH)    = PKDI%XP_SWU        (:)
-    DGI%XLWD   (:, KPATCH)    = PKDI%XP_LWD        (:)
-    DGI%XLWU   (:, KPATCH)    = PKDI%XP_LWU        (:)
-    DGI%XFMU   (:, KPATCH)    = PKDI%XP_FMU        (:)
-    DGI%XFMV   (:, KPATCH)    = PKDI%XP_FMV        (:)
+    DGI%XRN    (:, KPATCH)    = PKDI%XP_RN         (:) * ZCORR_SLOPE(:)
+    DGI%XH     (:, KPATCH)    = PKDI%XP_H          (:) * ZCORR_SLOPE(:)
+    DGI%XGFLUX (:, KPATCH)    = PKDI%XP_GFLUX      (:) * ZCORR_SLOPE(:)
+    DGI%XLEI   (:, KPATCH)    = PKDI%XP_LEI        (:) * ZCORR_SLOPE(:)
+    DGI%XSWD   (:, KPATCH)    = PKDI%XP_SWD        (:) * ZCORR_SLOPE(:)
+    DGI%XSWU   (:, KPATCH)    = PKDI%XP_SWU        (:) * ZCORR_SLOPE(:)
+    DGI%XLWD   (:, KPATCH)    = PKDI%XP_LWD        (:) * ZCORR_SLOPE(:)
+    DGI%XLWU   (:, KPATCH)    = PKDI%XP_LWU        (:) * ZCORR_SLOPE(:)
+    DGI%XFMU   (:, KPATCH)    = PKDI%XP_FMU        (:) * ZCORR_SLOPE(:)
+    DGI%XFMV   (:, KPATCH)    = PKDI%XP_FMV        (:) * ZCORR_SLOPE(:)
     !
-    DGI%XSWBD   (:, :, KPATCH) = PKDI%XP_SWBD  (:,:)
-    DGI%XSWBU   (:, :, KPATCH) = PKDI%XP_SWBU  (:,:)
+    DO JSW=1,SIZE(DGI%XSWBD,2)
+      DGI%XSWBD   (:, JSW, KPATCH) = PKDI%XP_SWBD  (:,JSW) * ZCORR_SLOPE(:)
+      DGI%XSWBU   (:, JSW, KPATCH) = PKDI%XP_SWBU  (:,JSW) * ZCORR_SLOPE(:)
+    ENDDO
     !
   END IF
   !
@@ -174,20 +187,20 @@ ELSE
   IF (DGI%LSURF_BUDGET) THEN
     DO JJ=1,KSIZE
       JI                     = KMASK         (JJ)
-      DGI%XRN    (JI, KPATCH)    = PKDI%XP_RN         (JJ)
-      DGI%XH     (JI, KPATCH)    = PKDI%XP_H          (JJ)
-      DGI%XGFLUX (JI, KPATCH)    = PKDI%XP_GFLUX      (JJ)
-      DGI%XLEI   (JI, KPATCH)    = PKDI%XP_LEI        (JJ)
-      DGI%XSWD   (JI, KPATCH)    = PKDI%XP_SWD        (JJ)
-      DGI%XSWU   (JI, KPATCH)    = PKDI%XP_SWU        (JJ)
-      DGI%XLWD   (JI, KPATCH)    = PKDI%XP_LWD        (JJ)
-      DGI%XLWU   (JI, KPATCH)    = PKDI%XP_LWU        (JJ)
-      DGI%XFMU   (JI, KPATCH)    = PKDI%XP_FMU        (JJ)
-      DGI%XFMV   (JI, KPATCH)    = PKDI%XP_FMV        (JJ)
+      DGI%XRN    (JI, KPATCH)    = PKDI%XP_RN         (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XH     (JI, KPATCH)    = PKDI%XP_H          (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XGFLUX (JI, KPATCH)    = PKDI%XP_GFLUX      (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XLEI   (JI, KPATCH)    = PKDI%XP_LEI        (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XSWD   (JI, KPATCH)    = PKDI%XP_SWD        (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XSWU   (JI, KPATCH)    = PKDI%XP_SWU        (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XLWD   (JI, KPATCH)    = PKDI%XP_LWD        (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XLWU   (JI, KPATCH)    = PKDI%XP_LWU        (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XFMU   (JI, KPATCH)    = PKDI%XP_FMU        (JJ) * ZCORR_SLOPE(JJ)
+      DGI%XFMV   (JI, KPATCH)    = PKDI%XP_FMV        (JJ) * ZCORR_SLOPE(JJ)
       !
       DO JSW=1,SIZE(DGI%XSWBD,2)
-        DGI%XSWBD   (JI, JSW, KPATCH) = PKDI%XP_SWBD  (JJ,JSW)
-        DGI%XSWBU   (JI, JSW, KPATCH) = PKDI%XP_SWBU  (JJ,JSW)
+        DGI%XSWBD   (JI, JSW, KPATCH) = PKDI%XP_SWBD  (JJ,JSW) * ZCORR_SLOPE(JJ)
+        DGI%XSWBU   (JI, JSW, KPATCH) = PKDI%XP_SWBU  (JJ,JSW) * ZCORR_SLOPE(JJ)
       END DO
       !
     END DO
