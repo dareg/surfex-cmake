@@ -436,7 +436,7 @@ $(SZIP_LIB) :
 $(CURL_LIB) :
 	export LD_LIBRARY_PATH=${ZLIB_PATH}/lib:${SZIP_PATH}/lib:${LD_LIBRARY_PATH} && \
 	cd $(DIR_CURL) && ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} \
-        --prefix=${CURL_PATH} $(NETCDF_OPTS) CC="$(CC)" && \
+        --prefix=${CURL_PATH} $(NETCDF_OPTS) && \
 	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
