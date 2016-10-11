@@ -41,7 +41,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX1
 !
      SUBROUTINE WRITE_SURFX2 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
@@ -58,7 +58,7 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX2
 !
 !RJ: interface to WRITE_SURFX2COV moved out
@@ -89,7 +89,7 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFN1
 !
      SUBROUTINE WRITE_SURFC0 ( HSELECT, HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
@@ -295,7 +295,7 @@ IF (NRANK==NPIO) THEN
     IF (YREC=='time') THEN
       CALL WRITE_SURF0_TIME_OL(PFIELD,KRESP,HCOMMENT)
     ELSE
-      CALL WRITE_SURF0_OL(YREC,PFIELD,KRESP,HCOMMENT)
+      CALL WRITE_SURF0_OL(HSELECT,YREC,PFIELD,KRESP,HCOMMENT)
     ENDIF
 #endif
   ENDIF
@@ -351,7 +351,7 @@ END SUBROUTINE WRITE_SURFX0
 !
 !
 !
-USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
+USE MODD_SURFEX_MPI, ONLY : WLOG_MPI, NRANK
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -406,7 +406,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=12)  :: YREC
@@ -448,7 +448,7 @@ ELSE
   !
   IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-    CALL WRITE_SURFX1N1_OL(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    CALL WRITE_SURFX1N1_OL(HSELECT,YREC,PFIELD,KRESP,HCOMMENT,YDIR)
 #endif
   ENDIF
   !
@@ -564,7 +564,7 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=12)  :: YREC
@@ -608,7 +608,11 @@ ELSE
   !
   IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-    CALL WRITE_SURFL1X2_OL(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    IF (PRESENT(HNAM_DIM)) THEN
+      CALL WRITE_SURFL1X2_OL(HSELECT,YREC,PFIELD,KRESP,HCOMMENT,YDIR,HNAM_DIM=HNAM_DIM)
+    ELSE
+      CALL WRITE_SURFL1X2_OL(HSELECT,YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    ENDIF
 #endif
   ENDIF
   !
@@ -775,7 +779,7 @@ IF (NRANK==NPIO) THEN
   !
   IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-    CALL WRITE_SURF0_OL(YREC,KFIELD,KRESP,HCOMMENT)
+    CALL WRITE_SURF0_OL(HSELECT,YREC,KFIELD,KRESP,HCOMMENT)
 #endif
   ENDIF
   !
@@ -885,7 +889,7 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             ! 'H' : field with
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=12)  :: YREC
@@ -920,7 +924,7 @@ ENDIF
 !
 IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-  CALL WRITE_SURFX1N1_OL(YREC,KFIELD,KRESP,HCOMMENT,YDIR)
+  CALL WRITE_SURFX1N1_OL(HSELECT,YREC,KFIELD,KRESP,HCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -1089,7 +1093,7 @@ IF (NRANK==NPIO) THEN
   !
   IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-    CALL WRITE_SURF0_OL(YREC,YFIELD,KRESP,HCOMMENT)
+    CALL WRITE_SURF0_OL(HSELECT,YREC,YFIELD,KRESP,HCOMMENT)
 #endif
   ENDIF
   !
@@ -1244,7 +1248,7 @@ IF (NRANK==NPIO) THEN
   !
   IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-    CALL WRITE_SURF0_OL(YREC,OFIELD,KRESP,HCOMMENT)
+    CALL WRITE_SURF0_OL(HSELECT,YREC,OFIELD,KRESP,HCOMMENT)
 #endif
   ENDIF
   !
@@ -1385,7 +1389,7 @@ ENDIF
 !
 IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-  CALL WRITE_SURFL1X2_OL(YREC,OFIELD,KRESP,HCOMMENT,YDIR)
+  CALL WRITE_SURFL1X2_OL(HSELECT,YREC,OFIELD,KRESP,HCOMMENT,YDIR)
 #endif
 ENDIF
 !
@@ -1557,7 +1561,7 @@ IF (NRANK==NPIO) THEN
   !
   IF (HPROGRAM=='OFFLIN') THEN
 #ifdef SFX_OL
-    CALL WRITE_SURFT_OL(YREC,IYEAR,IMONTH,IDAY,ZTIME,KRESP,HCOMMENT)
+    CALL WRITE_SURFT_OL(HSELECT,YREC,IYEAR,IMONTH,IDAY,ZTIME,KRESP,HCOMMENT)
 #endif
   ENDIF
   !

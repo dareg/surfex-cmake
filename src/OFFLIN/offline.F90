@@ -88,10 +88,10 @@ USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE,       &
 USE MODD_IO_SURF_LFI,ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, CLUOUT_LFI, CFILEOUT_LFI, &
                             LMNH_COMPATIBLE, CFILEPGD_LFI  
 USE MODD_IO_SURF_NC, ONLY : CFILEIN_NC, CFILEIN_NC_SAVE, CFILEOUT_NC, CLUOUT_NC, &
-                            CFILEPGD_NC, LDEF
+                            CFILEPGD_NC, LDEF_nc=>LDEF
 USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE, LPARTW,    &
                               XSTARTW, XCOUNTW, LTIME_WRITTEN,  &
-                              NSTEP_OUTPUT  
+                              NSTEP_OUTPUT, LDEF_ol=>LDEF
 USE MODD_WRITE_BIN,  ONLY : NWRITE
 !
 USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,   &
@@ -241,6 +241,7 @@ INTEGER                           :: IDMAX               ! nb of lines to read i
 INTEGER                           :: JFORC_STEP          ! atmospheric loop index
 INTEGER                           :: JSURF_STEP          ! isba loop index
 INTEGER                           :: ICOUNT              ! day counter 
+INTEGER                           :: ITIMESTARTINDEX
 REAL                              :: ZDURATION, ZDURATION2    ! duration of run                     (s)
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTA                 ! air temperature forcing               (K)
@@ -506,9 +507,10 @@ IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !
 !       configuration of run
 !
- CALL OL_READ_ATM_CONF(YSC%DTCO, YSC%U, CSURF_FILETYPE, CFORCING_FILETYPE,  &
-                      ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,          &
-                      ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF     )
+ CALL OL_READ_ATM_CONF(YSC%DTCO, YSC%U, YSC%UG%G%CGRID, CSURF_FILETYPE, CFORCING_FILETYPE,  &
+                      LDELAYEDSTART_NC, NDATESTOP, ZDURATION, ZTSTEP, INI,  &
+                      IYEAR, IMONTH, IDAY, ZTIME, ZLAT, ZLON, ZZS_FORC,     &
+                      ZZREF, ZUREF, ITIMESTARTINDEX     )
 !
 TDATE_END%YEAR = IYEAR
 TDATE_END%MONTH = IMONTH
@@ -642,7 +644,7 @@ XTIME0 = MPI_WTIME()
 IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
         CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
- CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, 1,             &
+ CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
                   ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
                   ZCO2,ZDIR,LLIMIT_QAIR                           ) 
 !
@@ -732,13 +734,9 @@ IF(LOASIS)THEN
   CALL SFX_OASIS_DEF_OL(YSC%IM%O, YSC%U, CSURF_FILETYPE,YALG_MPI)
 ENDIF
 !
-IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
-!
 ! --------------------------------------------------------------------------------------
 !
  CALL SFX_XIOS_SETUP_OL(YSC,ILUOUT,IYEAR,IMONTH,IDAY,ZTIME,XTSTEP_OUTPUT)
-!
-NCPT_WRITE = 0
 !
 NWRITE = 0
 !
@@ -753,6 +751,11 @@ XTIME0 = MPI_WTIME()
 !
 XTIME_CALC(:) = 0.
 XTIME_WRITE(:) = 0.
+!
+LFIRST_WRITE = .TRUE.
+!
+NCPT_WRITE = 0
+IF (CTIMESERIES_FILETYPE=="OFFLIN") NCPT_WRITE = 1
 !
 DO JFORC_STEP=1,INB_STEP_ATM
   !
@@ -783,7 +786,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZCO2   (:,IDMAX) = ZCO2   (:,SIZE(ZTA,2))
       ZDIR   (:,IDMAX) = ZDIR   (:,SIZE(ZTA,2))
     ENDIF
-    CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, JFORC_STEP,        &
+    CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1, &
                      ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX),       &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),     &
@@ -1057,7 +1060,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
         !
         XSTARTW = XSTARTW + 1
         NWRITE  = NWRITE  + 1
-        LTIME_WRITTEN(:)=.FALSE.
+        LTIME_WRITTEN=.FALSE.
         !
       ENDIF
       !
@@ -1065,32 +1068,39 @@ DO JFORC_STEP=1,INB_STEP_ATM
       XTIME_WRITE(1) = XTIME_WRITE(1) + (MPI_WTIME() - XTIME1)
 #endif
       !
-      LDEF = .TRUE.
       INW = 1
-      IF ( LXIOS .AND. .NOT. LXIOS_DEF_CLOSED) INW = 2      
       !
+      IF ( LXIOS .AND. .NOT. LXIOS_DEF_CLOSED ) INW = 2      
+      !
+      LDEF_nc = .FALSE. 
       IF (CTIMESERIES_FILETYPE=="NC    ") THEN
+        LDEF_nc = .TRUE.       
         INW = 2
         CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, &
                                YSC%TM%DTT, YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
       ENDIF
       !
+      LDEF_ol = .FALSE.
+      IF (CTIMESERIES_FILETYPE=="OFFLIN".AND.LFIRST_WRITE) THEN
+        LDEF_ol = .TRUE.
+        INW = 2
+        IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
+      ENDIF
+      !
       IDX_W = 0
       !
       DO JNW = 1,INW
-        ! 
+        !
         CALL IO_BUFF_CLEAN
         !
 #ifdef SFX_MPI
         XTIME1 =  MPI_WTIME()
 #endif
-
         IF (LXIOS) THEN 
 #ifdef WXIOS
           NTIMESTEP=INT(ZTIMEC/XTSTEP_OUTPUT + 0.5)
 #endif
         ENDIF
-
         CALL WRITE_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
@@ -1117,7 +1127,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
         XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
 #endif
         !
-        LDEF = .FALSE.
+        LDEF_nc = .FALSE.
+        LDEF_ol = .FALSE.
+        !
+        NCPT_WRITE = 0
+        IF ( NRANK/=NPIO.AND.CTIMESERIES_FILETYPE=="OFFLIN" ) NCPT_WRITE = 1
+        !
+        LFIRST_WRITE = .FALSE.
         !
       ENDDO
       !
@@ -1152,14 +1168,10 @@ DO JFORC_STEP=1,INB_STEP_ATM
       XTIME_WRITE(5) = XTIME_WRITE(5) + (MPI_WTIME() - XTIME1)
 #endif
       !
-      NCPT_WRITE = 0
-      LFIRST_WRITE = .FALSE.
-      !
     ENDIF
     !
   END DO
   !
-  
   IF (NRANK==NPIO) THEN
     IF (LPRINT) THEN
       IF (MOD(ZTIMEC,XDAY) == 0.) THEN
@@ -1235,7 +1247,7 @@ IF ( LRESTART ) THEN
   INW = 1
   IF (CSURF_FILETYPE=="NC    ") INW = 2
   !
-  LDEF = .TRUE.
+  LDEF_nc = .TRUE.
   !
   IF (CSURF_FILETYPE=="NC    ") THEN
     CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, YSC%TM%DTT, &
@@ -1280,13 +1292,15 @@ IF ( LRESTART ) THEN
                           GCH_NO_FLUX_ISBA, GSURF_MISC_BUDGET_ISBA, GPGD_TEB,        &
                           GSURF_MISC_BUDGET_TEB    )
     !
+    YSC%DUO%LSNOWDIMNC = .FALSE.
+    !
     !* writes into the file
     CALL WRITE_SURF_ATM_n(YSC, CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
        CALL WRITE_DIAG_SURF_ATM_n(YSC, CSURF_FILETYPE,'ALL')
     ENDIF
     !
-    LDEF = .FALSE.
+    LDEF_nc = .FALSE.
     !
   ENDDO
   !

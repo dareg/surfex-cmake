@@ -3,8 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 SUBROUTINE OL_DEFINE_DIM (UG, KSIZE_FULL, HPROGRAM, KLUOUT, KNI, &
-                          KDIM1, HUNIT1, HUNIT2, PX, PY, KDIMS, &
-                          KDDIM, HNAME_DIM, KNVEGTYPE)
+                          KDIM1, HUNIT1, HUNIT2, PX, PY, KDIMS,  &
+                          KDDIM, HNAME_DIM, KNSNLAYER )
 !     #######################################################
 !!****  *OL_DEFINE_DIM* - 
 !!
@@ -34,9 +34,8 @@ SUBROUTINE OL_DEFINE_DIM (UG, KSIZE_FULL, HPROGRAM, KLUOUT, KNI, &
 !!    -------------
 !!      Original    06/2010 
 !!      07/2011     add specific computation for IGN grid (B. Decharme)
+!!      09/2015     M. Lafaysse : snow layer dimension
 !-------------------------------------------------------------------------------                         
-!
-!
 !
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
@@ -68,16 +67,20 @@ INTEGER, INTENT(OUT)             :: KDIM1
 REAL,DIMENSION(:), POINTER                :: PX, PY
 INTEGER, DIMENSION(:), POINTER            :: KDIMS, KDDIM
  CHARACTER(LEN=100), DIMENSION(:), POINTER :: HNAME_DIM
- INTEGER, OPTIONAL, INTENT(IN)    :: KNVEGTYPE
+INTEGER, OPTIONAL, INTENT(IN)    :: KNSNLAYER
 !
 REAL, DIMENSION(KNI)             :: ZXX, ZYY
  CHARACTER(LEN=3)                :: YTYPE
 INTEGER                          :: JJ
 INTEGER                          :: INDIMS, IDIM2
+INTEGER                          :: INSNLAYER
 LOGICAL                          :: GRECT     ! T if rectangular grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('OL_DEFINE_DIM',0,ZHOOK_HANDLE)
+!
+INSNLAYER = 0
+IF (PRESENT(KNSNLAYER)) INSNLAYER = KNSNLAYER
 !
 KDIM1=0
 IDIM2=0
@@ -99,7 +102,8 @@ ENDIF
 !
 INDIMS = 2
 IF ( KDIM1.NE.0       ) INDIMS = 3
-IF ( PRESENT(KNVEGTYPE) ) INDIMS = INDIMS + 1
+IF ( INSNLAYER/=0 ) INDIMS = INDIMS + 1
+
 !
 ALLOCATE(KDIMS(INDIMS))
 ALLOCATE(KDDIM(INDIMS))
@@ -168,9 +172,9 @@ ELSEIF(UG%G%CGRID.EQ.'IGN       ')THEN
   !
 ENDIF
 !
-IF (PRESENT(KNVEGTYPE)) THEN
-  KDIMS     (INDIMS-1) = KNVEGTYPE
-  HNAME_DIM (INDIMS-1) = 'Number_of_Vegtypes'
+IF ( INSNLAYER/=0 ) THEN
+  KDIMS     (INDIMS-1) = INSNLAYER
+  HNAME_DIM (INDIMS-1) = 'snow_layer'
 ENDIF
 !
 IF (HPROGRAM/='NOTIME ') THEN

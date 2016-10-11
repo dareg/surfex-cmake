@@ -127,6 +127,7 @@ USE MODI_ALBEDO
 USE MODI_DIAG_INLINE_ISBA_n
 USE MODI_DIAG_EVAP_CUMUL_ISBA_n
 USE MODI_DIAG_MISC_ISBA_n
+USE MODI_REPROJ_DIAG_ISBA_n
 !
 USE MODI_UPDATE_RAD_ISBA_n
 USE MODI_DEEPSOIL_UPDATE
@@ -845,10 +846,11 @@ GMEB = IO%LMEB_PATCH(JP)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Cosine of the slope typically encoutered in the grid mesh (including subgrid orography)
+!  and orientation of this slope
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
 ZP_SLOPE_COS(:) = 1./SQRT(1.+ISSK%XSSO_SLOPE(:)**2)
-IF(LNOSOF)ZP_SLOPE_COS(:) = 1.0
+IF(LNOSOF) ZP_SLOPE_COS(:) = 1.0
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Snow fractions
@@ -929,13 +931,14 @@ ZIRRIG_GR(:)= 0.
 !
  CALL ISBA(IO, KK, PK, PEK, GK, AGK, DK, DEK, DMK,                                            &
            S%TTIME, S%XPOI, S%XABC, GBK%XIACAN, GMEB, PTSTEP, CIMPLICIT_WIND,                 &
-           ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS,    &
-           ZP_RAIN, ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND,          &
-           ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF,         &
-           ZP_PEQ_B_COEF, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG, ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL,   &
-           ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN, ZZ0H_MEBN,&
-           ZZ0EFF_MEBN, ZP_TDEEP_A, ZP_CO2, ZP_FFGNOS, ZP_FFVNOS, ZP_EMIS, ZP_USTAR,          &
-           ZP_AC_AGG, ZP_HU_AGG, ZP_RESP_BIOMASS_INST, ZP_DEEP_FLUX, ZIRRIG_GR             )
+           ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA,                    &
+           ZP_PS, ZP_EXNS, ZP_RAIN, ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW,   &
+           ZP_WIND, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,               &
+           ZP_PET_B_COEF, ZP_PEQ_B_COEF, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG, ZP_ALBNIR_TSOIL,     &
+           ZP_ALBVIS_TSOIL, ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV,    &
+           ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZP_TDEEP_A, ZP_CO2, ZP_FFGNOS, ZP_FFVNOS,        &
+           ZP_EMIS, ZP_USTAR, ZP_AC_AGG, ZP_HU_AGG, ZP_RESP_BIOMASS_INST, ZP_DEEP_FLUX,       &
+           ZIRRIG_GR             )
 !
 ZP_TRAD = DK%XTSRAD
 DK%XLE  = PEK%XLE
@@ -1188,7 +1191,11 @@ ZP_QSURF (:) = DK%XQS (:)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
  CALL DIAG_MISC_ISBA_n(DMK, KK, PK, PEK, AGK, IO, ID%DM%LSURF_MISC_BUDGET, &
-                       PTSTEP, LAGRIP, PTIME, PK%NSIZE_P )                  
+                       ID%DM%LVOLUMETRIC_SNOWLIQ, PTSTEP, LAGRIP, PTIME, PK%NSIZE_P )                  
+!
+ CALL REPROJ_DIAG_ISBA_n(DK, DEK, DMK, PEK, ID%O%LSURF_BUDGET, ID%DE%LSURF_EVAP_BUDGET, &
+                         ID%DE%LWATER_BUDGET, ID%DM%LSURF_MISC_BUDGET, ID%DM%LPROSNOW, &
+                         IO%LMEB_PATCH(JP), ZP_SLOPE_COS)
 !
 ! Unpack ISBA diagnostics (modd_diag_isban) for each patch:ISIZE_MAX = MAXVAL(NSIZE_NATURE_P)
 

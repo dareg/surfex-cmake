@@ -121,7 +121,7 @@ ILU = U%NSIZE_NATURE
 !
 ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 !
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_VEG_EVOLUTION.OUT.nc')
 !
 !-------------------------------------------------------------------------------
 !

@@ -250,7 +250,8 @@ IF (LNAM_READ) THEN
                             YSC%DUO%LSURF_VARS, YSC%DUO%LSURF_BUDGETC, &
                             YSC%DUO%LRESET_BUDGETC, YSC%DUO%LSELECT, &
                             YSC%DUO%LPROVAR_TO_DIAG, YSC%DUO%LDIAG_GRID, &
-                            YSC%DUO%LFRAC, YSC%DUO%XDIAG_TSTEP)                       
+                            YSC%DUO%LFRAC, YSC%DUO%XDIAG_TSTEP, &
+                            YSC%DUO%LSNOWDIMNC, YSC%DUO%LRESETCUMUL )                       
  !
 ENDIF
 !

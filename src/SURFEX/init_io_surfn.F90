@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE INIT_IO_SURF_n (DTCO, U, &
-                                 HPROGRAM,HMASK,HSCHEME,HACTION)
+      SUBROUTINE INIT_IO_SURF_n (DTCO, U, HPROGRAM,HMASK,HSCHEME,HACTION,HNAME)
 !     #######################################################
 !
 !
@@ -96,11 +95,12 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
  CHARACTER(LEN=6),  INTENT(IN)  :: HSCHEME  ! scheme used
  CHARACTER(LEN=5),  INTENT(IN)  :: HACTION  ! action performed ('READ ','WRITE')
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+ CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: HNAME
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_N',0,ZHOOK_HANDLE)
@@ -112,29 +112,29 @@ END IF
 !
 IF (HPROGRAM=='OFFLIN' ) THEN
 #ifdef SFX_OL
-  CALL INIT_IO_SURF_OL_n(DTCO, U, &
-                         HPROGRAM,HMASK,HSCHEME,HACTION)
+  IF(PRESENT(HNAME)) THEN
+    CALL INIT_IO_SURF_OL_n(DTCO, U, HPROGRAM,HMASK,HSCHEME,HACTION,HNAME)
+  ELSE
+    CALL INIT_IO_SURF_OL_n(DTCO, U, HPROGRAM,HMASK,HSCHEME,HACTION,HNAME)
+  ENDIF
 #endif
 ENDIF
 !
 IF (HPROGRAM=='ASCII ' ) THEN
 #ifdef SFX_ASC
-  CALL INIT_IO_SURF_ASC_n(DTCO, U, &
-                          HMASK,HACTION)
+  CALL INIT_IO_SURF_ASC_n(DTCO, U, HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='TEXTE ' ) THEN
 #ifdef SFX_TXT
-  CALL INIT_IO_SURF_TXT_n(DTCO, U, &
-                          HMASK,HACTION)
+  CALL INIT_IO_SURF_TXT_n(DTCO, U, HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='BINARY' ) THEN
 #ifdef SFX_BIN
-  CALL INIT_IO_SURF_BIN_n(DTCO, U, &
-                          HMASK,HACTION)
+  CALL INIT_IO_SURF_BIN_n(DTCO, U, HMASK,HACTION)
 #endif
 ENDIF
 !
@@ -146,22 +146,19 @@ ENDIF
 !
 IF (HPROGRAM=='FA    ' ) THEN
 #ifdef SFX_FA
-  CALL INIT_IO_SURF_FA_n(DTCO, U, &
-                         HPROGRAM,HMASK,HACTION)
+  CALL INIT_IO_SURF_FA_n(DTCO, U, HPROGRAM,HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='LFI   ' ) THEN
 #ifdef SFX_LFI
-  CALL INIT_IO_SURF_LFI_n(DTCO, U, &
-                          HMASK,HACTION)
+  CALL INIT_IO_SURF_LFI_n(DTCO, U, HMASK,HACTION)
 #endif
 ENDIF
 !
 IF (HPROGRAM=='NC    ' ) THEN
 #ifdef SFX_NC
-  CALL INIT_IO_SURF_NC_n(DTCO, U, &
-                         HMASK,HACTION)
+  CALL INIT_IO_SURF_NC_n(DTCO, U, HMASK,HACTION)
 #endif
 ENDIF
 !

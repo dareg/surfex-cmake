@@ -60,7 +60,7 @@ USE MODD_ISBA_n, ONLY : ISBA_NP_t, ISBA_P_t, ISBA_NPE_t, ISBA_PE_t
 USE MODD_IO_SURF_ARO,   ONLY : NBLOCK
 #endif
 !
-USE MODD_XIOS, ONLY : LXIOS, LALLOW_ADD_DIM, YGROUND_LAYER_DIM_NAME, &
+USE MODD_XIOS, ONLY : LALLOW_ADD_DIM, YGROUND_LAYER_DIM_NAME, &
                       YWGROUND_LAYER_DIM_NAME, YWIGROUND_LAYER_DIM_NAME, &
                       YSWBAND_DIM_NAME
 !
@@ -68,14 +68,21 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF, NUNDEF
 !
 USE MODD_CSTS,       ONLY : XRHOLW, XTT, XLMTT
 !
+USE MODD_DST_SURF
+!
 USE MODD_AGRI,     ONLY : LAGRIP
+!
+USE MODE_DIAG
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
 USE MODI_WRITE_FIELD_1D_PATCH
 !
-USE MODD_DST_SURF
+#ifdef SFX_OL
+USE MODD_IO_SURF_OL, ONLY : LDEF
+USE MODN_IO_OFFLINE, ONLY : XTSTEP_OUTPUT
+#endif
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -128,9 +135,42 @@ GRESET=.TRUE.
 #ifdef SFX_ARO
 GRESET=(NBLOCK>0)
 #endif
-
+#ifdef SFX_OL
+IF (LDEF) GRESET = .FALSE.
+#endif
 !
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE')
+#ifdef SFX_OL
+IF (ID%O%LSURF_BUDGET .AND. DUO%LRESETCUMUL .AND. ID%O%LSURF_BUDGETC .AND. .NOT.LDEF) THEN
+  !
+  ! Output variables are not instantaneous but averaged over the output time step
+  ! Fluxes by patch
+  DO JP = 1,IO%NPATCH
+    CALL AVG_DIAG_TSTEP_SURF(XTSTEP_OUTPUT, ID%NDC%AL(JP), ID%ND%AL(JP))
+  ENDDO
+  CALL AVG_DIAG_TSTEP_SURF(XTSTEP_OUTPUT, ID%DC, ID%D)
+  !  
+  IF (ID%DE%LSURF_EVAP_BUDGET) THEN
+    DO JP = 1,IO%NPATCH
+      CALL AVG_DIAG_TSTEP_EVAP(XTSTEP_OUTPUT, ID%NDEC%AL(JP), ID%NDE%AL(JP))
+    ENDDO
+    CALL AVG_DIAG_TSTEP_EVAP(XTSTEP_OUTPUT, ID%DEC, ID%DE)
+    !
+    IF (ID%DE%LWATER_BUDGET) THEN
+      DO JP = 1,IO%NPATCH
+        CALL AVG_DIAG_TSTEP_WATER(XTSTEP_OUTPUT, ID%NDEC%AL(JP), ID%NDE%AL(JP))
+      ENDDO
+      CALL AVG_DIAG_TSTEP_WATER(XTSTEP_OUTPUT, ID%DEC, ID%DE)
+    ENDIF
+  ENDIF
+  !
+END IF
+#endif
+!
+IF ( ID%DM%LPROSNOW ) THEN
+  CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_PROGNOSTIC.OUT.nc')
+ELSE
+  CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_DIAGNOSTICS.OUT.nc')
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !
@@ -149,7 +189,6 @@ END IF
 !               -------------
 !
 IF (ID%O%LSURF_BUDGET) THEN
-  !
   !
   YRECFM='TALB_ISBA'
   YCOMMENT='total albedo over tile nature (-)'
@@ -201,7 +240,7 @@ IF (ID%O%LSURF_BUDGET) THEN
     YCOMMENT='long wave upward radiation over tile nature'//' (W/m2)'
     CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%D%XLWU(:),IRESP,HCOMMENT=YCOMMENT)
     !    
-    IF (LALLOW_ADD_DIM.AND.LXIOS)  THEN
+    IF (LALLOW_ADD_DIM)  THEN
       !
       YRECFM='SWD_ISBA_'
       YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
@@ -246,78 +285,6 @@ END IF
 !              ----------------------------------------
 !
 IF (ID%DE%LSURF_EVAP_BUDGET) CALL WRITE_EVAP_BUD(ID%DE,"_ISBA ",.FALSE.)
-!
-!*       5.    Cumulated Energy fluxes
-!              -----------------------
-!
-IF (ID%O%LSURF_BUDGETC) THEN
-  !
-  CALL WRITE_EVAP_BUD(ID%DEC,"C_ISBA",(ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC))
-  !
-  IF(IO%LGLACIER)THEN
-    YRECFM='ICE_FC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DEC%XICEFLUX(:),IRESP,HCOMMENT=YCOMMENT)
-  ENDIF
-  !  
-  YRECFM='RNC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XRN(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='HC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XH(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='LEC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLE(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='LEIC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLEI(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='GFLUXC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XGFLUX(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='EVAPC_ISBA'
-  YCOMMENT='total evaporative flux for tile nature'//' (Kg/m2/s)'
-  CALL WRITE_SURF(DUO%CSELECT, HPROGRAM,YRECFM,ID%DC%XEVAP(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='SUBLC_ISBA'
-  YCOMMENT='sublimation flux for tile nature'//' (Kg/m2/s)'
-  CALL WRITE_SURF(DUO%CSELECT, HPROGRAM,YRECFM,ID%DC%XSUBL(:),IRESP,HCOMMENT=YCOMMENT)
-  !  
-  IF (ID%O%LRAD_BUDGET .OR. (ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC)) THEN
-    !
-    YRECFM='SWDC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XSWD(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='SWUC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XSWU(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWDC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLWD(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-    YRECFM='LWUC_ISBA'
-    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLWU(:),IRESP,HCOMMENT=YCOMMENT)
-    !
-  ENDIF
-  !
-  YRECFM='FMUC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (Pa.s)'  
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XFMU(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  YRECFM='FMVC_ISBA'
-  YCOMMENT='X_Y_'//YRECFM//' (Pa.s)'  
-  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XFMV(:),IRESP,HCOMMENT=YCOMMENT)
-  !
-  !  
-ENDIF
 !
 !*       6.     parameters at 2 and 10 meters :
 !               -------------------------------
@@ -421,233 +388,367 @@ ENDIF
 !
 !----------------------------------------------------------------------------
 !
+ISIZE = U%NSIZE_NATURE
+!
+!User want (or not) patch output
+IF (ID%O%LPATCH_BUDGET.AND.(IO%NPATCH >1)) THEN
+  !
+  !*      10.     Richardson number (for each patch)
+  !               -----------------
+  !
+  IF (ID%O%N2M>=1) THEN
+    !  
+    YRECFM='RI_'
+    YCOMMENT='X_Y_'//YRECFM      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XRI(:),ISIZE)
+    ENDDO
+    !
+  END IF
+  !
+  !*       11.     Energy fluxes :(for each patch)
+  !                -------------
+  !
+  IF (ID%O%LSURF_BUDGET) THEN
+    !
+    YRECFM='TALB_'
+    YCOMMENT='total albedo per patch'
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XALBT(:),ISIZE)
+    ENDDO      
+    !
+    YRECFM='RN_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XRN(:),ISIZE)
+    ENDDO      
+    !
+    YRECFM='H_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+    DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+            NP%AL(JP)%NR_P,ID%ND%AL(JP)%XH(:),ISIZE)
+    ENDDO      
+    !
+    YRECFM='LE_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+    DO JP = 1,IO%NPATCH
+      CALL  WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,NPE%AL(JP)%XLE(:),ISIZE)  
+    ENDDO      
+    !
+    YRECFM='LEI_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XLEI(:),ISIZE)
+    ENDDO  
+    !
+    YRECFM='GFLUX_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XGFLUX(:),ISIZE)
+    ENDDO   
+    !
+    YRECFM='EVAP_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XEVAP(:),ISIZE)
+    ENDDO    
+    !
+    YRECFM='SUBL_'
+    YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSUBL(:),ISIZE)
+    ENDDO   
+    !     
+    IF (ID%O%LRAD_BUDGET .OR. (ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC)) THEN
+      !
+      YRECFM='SWD_'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
+      DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWD(:),ISIZE)
+      ENDDO       
+      !
+      YRECFM='SWU_'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWU(:),ISIZE)
+      ENDDO
+      !
+      YRECFM='LWD_'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XLWD(:),ISIZE)
+      ENDDO  
+      !
+      YRECFM='LWU_'
+      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XLWU(:),ISIZE)
+      ENDDO
+      !
+      DO JSW=1, SIZE(ID%D%XSWBD,2)
+        YNUM=ACHAR(48+JSW)
+        !
+        YRECFM='SWD_'//YNUM
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'          
+        DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWD(:),ISIZE)
+        ENDDO
+        !
+        YRECFM='SWU_'//YNUM
+        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'          
+        DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWU(:),ISIZE)
+        ENDDO
+        !
+      ENDDO
+      !
+    ENDIF
+    !
+    YRECFM='FMU_'
+    YCOMMENT='X_Y_'//YRECFM//' (Pa)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XFMU(:),ISIZE)
+    ENDDO
+    !
+    YRECFM='FMV_'
+    YCOMMENT='X_Y_'//YRECFM//' (Pa)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XFMV(:),ISIZE)
+    ENDDO
+    !
+  END IF
+  !
+  !*       12.    Specific Energy fluxes :(for each patch)
+  !               ----------------------------------------
+  !
+  IF (ID%DE%LSURF_EVAP_BUDGET) CALL WRITE_EVAP_BUD_PATCH(ID%NDE,'_ ',.FALSE.)
+  !
+  !*       13.    surface temperature parameters at 2 and 10 meters (for each patch):
+  !               -------------------------------------------------------------------
+  !
+  IF (ID%O%N2M>=1.AND..NOT.IO%LCANOPY) THEN
+    !
+    YRECFM='T2M_'
+    YCOMMENT='X_Y_'//YRECFM//' (K)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XT2M(:),ISIZE)
+    ENDDO
+    !
+    YRECFM='T2MMIN_'
+    YCOMMENT='X_Y_'//YRECFM//' (K)' 
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XT2M_MIN(:),ISIZE)
+      IF (GRESET) ID%ND%AL(JP)%XT2M_MIN(:)=XUNDEF        
+    ENDDO        
+    !      
+    YRECFM='T2MMAX_'
+    YCOMMENT='X_Y_'//YRECFM//' (K)'
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XT2M_MAX(:),ISIZE)
+      IF (GRESET) ID%ND%AL(JP)%XT2M_MAX(:)=-XUNDEF        
+    ENDDO
+    ! 
+    YRECFM='Q2M_'
+    YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XQ2M(:),ISIZE)
+    ENDDO
+    !
+    YRECFM='HU2M_'
+    YCOMMENT='X_Y_'//YRECFM//' (PERCENT)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XHU2M(:),ISIZE)
+    ENDDO
+    !
+    YRECFM='ZON10M_'
+    YCOMMENT='X_Y_'//YRECFM//' (M/S)'      
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XZON10M(:),ISIZE)
+    ENDDO
+    !
+    YRECFM='MER10M_'
+    YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XMER10M(:),ISIZE)
+    ENDDO
+    !    
+    YRECFM='W10M_'
+    YCOMMENT='X_Y_'//YRECFM//' (M/S)'
+    DO JP=1,IO%NPATCH
+      CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,ID%ND%AL(JP)%XWIND10M(:),ISIZE)
+    ENDDO
+    !
+  END IF
+  !
+ENDIF
+!
+!----------------------------------------------------------------------------
+!
 !*       9.     Diag of prognostic fields
 !               -------------------------
-!
-ISIZE = U%NSIZE_NATURE
 !
 IF (DUO%LPROVAR_TO_DIAG) CALL PROVAR_TO_DIAG
 !
 !----------------------------------------------------------------------------
 !
+!*       15.     chemical diagnostics:
+!               --------------------
+!
+IF (CHI%SVI%NBEQ>0 .AND. CHI%CCH_DRY_DEP=="WES89 ") THEN
+  !
+  DO JSV = 1,SIZE(CHI%CCH_NAMES,1)
+    YRECFM='DVNT'//TRIM(CHI%CCH_NAMES(JSV))
+    WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_NAT_',JSV
+    DO JP = 1,IO%NPATCH
+      CALL  WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+                                 NP%AL(JP)%NR_P,NCHI%AL(JP)%XDEP(:,JSV),ISIZE)
+    ENDDO
+  END DO
+  !
+ENDIF
+!
+IF (CHI%SVI%NBEQ>0 .AND. CHI%LCH_BIO_FLUX) THEN
+  !
+  IF (ASSOCIATED(GB%XFISO)) THEN
+    YRECFM='FISO'
+    WRITE(YCOMMENT,'(A21)')'FISO (molecules/m2/s)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,GB%XFISO(:),IRESP,HCOMMENT=YCOMMENT)
+  END IF
+  !
+  IF (ASSOCIATED(GB%XFISO)) THEN
+    YRECFM='FMONO'
+    WRITE(YCOMMENT,'(A22)')'FMONO (molecules/m2/s)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,GB%XFMONO(:),IRESP,HCOMMENT=YCOMMENT)
+  END IF
+  !
+ENDIF
+!
+IF (CHI%LCH_NO_FLUX) THEN
+  IF (ASSOCIATED(GB%XNOFLUX)) THEN
+    YRECFM='NOFLUX'
+    WRITE(YCOMMENT,'(A21)')'NOFLUX (molecules/m2/s)'
+    CALL WRITE_SURF(DUO%CSELECT, HPROGRAM,YRECFM,GB%XNOFLUX(:),IRESP,HCOMMENT=YCOMMENT)
+  END IF
+END IF
+!
+IF (CHI%SVI%NDSTEQ > 0)THEN
+  !
+  DO JSV = 1,NDSTMDE ! for all dust modes
+    WRITE(YRECFM,'(A5,I3.3)')'F_DST',JSV
+    YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
+    DO JP = 1,IO%NPATCH
+      CALL  WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
+                                 NP%AL(JP)%NR_P,NDST%AL(JP)%XSFDST(:,JSV),ISIZE)
+    ENDDO    
+  END DO
+  !
+ENDIF
+!
+!----------------------------------------------------------------------------
+!
+!*       5.    Cumulated Energy fluxes
+!              -----------------------
+!
+ CALL END_IO_SURF_n(HPROGRAM)
+ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_DIAG_CUMUL.OUT.nc')
+!
+IF (ID%O%LSURF_BUDGETC) THEN
+  !
+  CALL WRITE_EVAP_BUD(ID%DEC,"C_ISBA",(ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC))
+  !
+  IF(IO%LGLACIER)THEN
+    YRECFM='ICE_FC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DEC%XICEFLUX(:),IRESP,HCOMMENT=YCOMMENT)
+  ENDIF
+  !  
+  YRECFM='RNC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XRN(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='HC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XH(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLE(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='LEIC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLEI(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='GFLUXC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XGFLUX(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='EVAPC_ISBA'
+  YCOMMENT='total evaporative flux for tile nature'//' (Kg/m2/s)'
+  CALL WRITE_SURF(DUO%CSELECT, HPROGRAM,YRECFM,ID%DC%XEVAP(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='SUBLC_ISBA'
+  YCOMMENT='sublimation flux for tile nature'//' (Kg/m2/s)'
+  CALL WRITE_SURF(DUO%CSELECT, HPROGRAM,YRECFM,ID%DC%XSUBL(:),IRESP,HCOMMENT=YCOMMENT)
+  !  
+  IF (ID%O%LRAD_BUDGET .OR. (ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC)) THEN
+    !
+    YRECFM='SWDC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XSWD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='SWUC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XSWU(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWDC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLWD(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    YRECFM='LWUC_ISBA'
+    YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
+    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XLWU(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+  ENDIF
+  !
+  YRECFM='FMUC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (Pa.s)'  
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XFMU(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+  YRECFM='FMVC_ISBA'
+  YCOMMENT='X_Y_'//YRECFM//' (Pa.s)'  
+  CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%DC%XFMV(:),IRESP,HCOMMENT=YCOMMENT)
+  !
+ENDIF
+!
+!----------------------------------------------------------------------------
+!
 !User want (or not) patch output
-IF(ID%O%LPATCH_BUDGET.AND.(IO%NPATCH >1))THEN
-    !----------------------------------------------------------------------------
-    !
-    !*      10.     Richardson number (for each patch)
-    !               -----------------
-    !
-    IF (ID%O%N2M>=1) THEN
-      !
-      
-      YRECFM='RI_'
-      YCOMMENT='X_Y_'//YRECFM      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XRI(:),ISIZE)
-      ENDDO
-      !
-    END IF
-    !
-    !*       11.     Energy fluxes :(for each patch)
-    !                -------------
-    !
-    IF (ID%O%LSURF_BUDGET) THEN
-      !
-      YRECFM='TALB_'
-      YCOMMENT='total albedo per patch'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XALBT(:),ISIZE)
-      ENDDO      
-      !
-      YRECFM='RN_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XRN(:),ISIZE)
-      ENDDO      
-      !
- 
-      YRECFM='H_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XH(:),ISIZE)
-      ENDDO      
-      !
-      YRECFM='LE_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-      DO JP = 1,IO%NPATCH
-        CALL  WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NPE%AL(JP)%XLE(:),ISIZE)  
-      ENDDO      
-      !
-      YRECFM='LEI_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XLEI(:),ISIZE)
-      ENDDO  
-      !
-      YRECFM='GFLUX_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XGFLUX(:),ISIZE)
-      ENDDO   
-      !
-      YRECFM='EVAP_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XEVAP(:),ISIZE)
-      ENDDO    
-      !
-      YRECFM='SUBL_'
-      YCOMMENT='X_Y_'//YRECFM//' (W/m2)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSUBL(:),ISIZE)
-      ENDDO   
-      !     
-      IF (ID%O%LRAD_BUDGET .OR. (ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC)) THEN
-        !
-        YRECFM='SWD_'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
-        DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWD(:),ISIZE)
-        ENDDO       
-        !
-    
-        YRECFM='SWU_'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
-        DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWU(:),ISIZE)
-        ENDDO
-        !
-        YRECFM='LWD_'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
-        DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XLWD(:),ISIZE)
-        ENDDO  
-        !
-        YRECFM='LWU_'
-        YCOMMENT='X_Y_'//YRECFM//' (W/m2)'        
-        DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XLWU(:),ISIZE)
-        ENDDO
-        !
-        DO JSW=1, SIZE(ID%D%XSWBD,2)
-          YNUM=ACHAR(48+JSW)
-          !
-          YRECFM='SWD_'//YNUM
-          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'          
-          DO JP=1,IO%NPATCH
-            CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWD(:),ISIZE)
-          ENDDO
-          !
-          YRECFM='SWU_'//YNUM
-          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'          
-          DO JP=1,IO%NPATCH
-            CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XSWU(:),ISIZE)
-          ENDDO
-          !
-        ENDDO
-        !
-      ENDIF
-      !
-      YRECFM='FMU_'
-      YCOMMENT='X_Y_'//YRECFM//' (Pa)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XFMU(:),ISIZE)
-      ENDDO
-      !
-      YRECFM='FMV_'
-      YCOMMENT='X_Y_'//YRECFM//' (Pa)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XFMV(:),ISIZE)
-      ENDDO
-      !
-    END IF
-    !
-    !*       12.    Specific Energy fluxes :(for each patch)
-    !               ----------------------------------------
-    !
-    IF (ID%DE%LSURF_EVAP_BUDGET) CALL WRITE_EVAP_BUD_PATCH(ID%NDE,'_ ',.FALSE.)
-    !
-    !*       13.    surface temperature parameters at 2 and 10 meters (for each patch):
-    !               -------------------------------------------------------------------
-    !
-    IF (ID%O%N2M>=1.AND..NOT.IO%LCANOPY) THEN
-      !
-      YRECFM='T2M_'
-      YCOMMENT='X_Y_'//YRECFM//' (K)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XT2M(:),ISIZE)
-      ENDDO
-      !
-      YRECFM='T2MMIN_'
-      YCOMMENT='X_Y_'//YRECFM//' (K)' 
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XT2M_MIN(:),ISIZE)
-        IF (GRESET) ID%ND%AL(JP)%XT2M_MIN(:)=XUNDEF        
-      ENDDO        
-      !      
-      YRECFM='T2MMAX_'
-      YCOMMENT='X_Y_'//YRECFM//' (K)'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XT2M_MAX(:),ISIZE)
-        IF (GRESET) ID%ND%AL(JP)%XT2M_MAX(:)=-XUNDEF        
-      ENDDO
-      ! 
-      YRECFM='Q2M_'
-      YCOMMENT='X_Y_'//YRECFM//' (KG/KG)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XQ2M(:),ISIZE)
-      ENDDO
-      !
-      YRECFM='HU2M_'
-      YCOMMENT='X_Y_'//YRECFM//' (PERCENT)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XHU2M(:),ISIZE)
-      ENDDO
-      !
-      YRECFM='ZON10M_'
-      YCOMMENT='X_Y_'//YRECFM//' (M/S)'      
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XZON10M(:),ISIZE)
-      ENDDO
-      !
-      YRECFM='MER10M_'
-      YCOMMENT='X_Y_'//YRECFM//' (M/S)'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XMER10M(:),ISIZE)
-      ENDDO
-      !    
-      YRECFM='W10M_'
-      YCOMMENT='X_Y_'//YRECFM//' (M/S)'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,ID%ND%AL(JP)%XWIND10M(:),ISIZE)
-      ENDDO
-      !
-    END IF
+IF (ID%O%LPATCH_BUDGET.AND.(IO%NPATCH >1)) THEN
     !
     !*       14.    Cumulated Energy fluxes :(for each patch)
     !               -----------------------------------------
@@ -764,67 +865,36 @@ IF(ID%O%LPATCH_BUDGET.AND.(IO%NPATCH >1))THEN
     !
     !-------------------------------------------------------------------------------
 ENDIF
-!User want (or not) patch output
-!-------------------------------------------------------------------------------
-!
-!*       15.     chemical diagnostics:
-!               --------------------
-!
-IF (CHI%SVI%NBEQ>0 .AND. CHI%CCH_DRY_DEP=="WES89 ") THEN
-  !
-  DO JSV = 1,SIZE(CHI%CCH_NAMES,1)
-    YRECFM='DVNT'//TRIM(CHI%CCH_NAMES(JSV))
-    WRITE(YCOMMENT,'(A13,I3.3)')'(m/s) DV_NAT_',JSV
-    DO JP = 1,IO%NPATCH
-      CALL  WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                                 NP%AL(JP)%NR_P,NCHI%AL(JP)%XDEP(:,JSV),ISIZE)
-    ENDDO
-  END DO
-  !
-ENDIF
-!
-IF (CHI%SVI%NBEQ>0 .AND. CHI%LCH_BIO_FLUX) THEN
-  !
-  IF (ASSOCIATED(GB%XFISO)) THEN
-    YRECFM='FISO'
-    WRITE(YCOMMENT,'(A21)')'FISO (molecules/m2/s)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,GB%XFISO(:),IRESP,HCOMMENT=YCOMMENT)
-  END IF
-  !
-  IF (ASSOCIATED(GB%XFISO)) THEN
-    YRECFM='FMONO'
-    WRITE(YCOMMENT,'(A22)')'FMONO (molecules/m2/s)'
-    CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,GB%XFMONO(:),IRESP,HCOMMENT=YCOMMENT)
-  END IF
-  !
-ENDIF
-!
-IF (CHI%LCH_NO_FLUX) THEN
-  IF (ASSOCIATED(GB%XNOFLUX)) THEN
-    YRECFM='NOFLUX'
-    WRITE(YCOMMENT,'(A21)')'NOFLUX (molecules/m2/s)'
-    CALL WRITE_SURF(DUO%CSELECT, HPROGRAM,YRECFM,GB%XNOFLUX(:),IRESP,HCOMMENT=YCOMMENT)
-  END IF
-END IF
-!
-IF (CHI%SVI%NDSTEQ > 0)THEN
-  !
-  DO JSV = 1,NDSTMDE ! for all dust modes
-    WRITE(YRECFM,'(A5,I3.3)')'F_DST',JSV
-    YCOMMENT='X_Y_'//YRECFM//' (kg/m2/s)'
-    DO JP = 1,IO%NPATCH
-      CALL  WRITE_FIELD_1D_PATCH(DUO%CSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                                 NP%AL(JP)%NR_P,NDST%AL(JP)%XSFDST(:,JSV),ISIZE)
-    ENDDO    
-  END DO
-  !
-ENDIF
-!
-!-------------------------------------------------------------------------------
 !
 !         End of IO
 !
  CALL END_IO_SURF_n(HPROGRAM)
+!
+!-------------------------------------------------------------------------------
+!
+!User want (or not) patch output
+!-------------------------------------------------------------------------------
+!
+IF ( DUO%LRESETCUMUL .AND. ID%O%LSURF_BUDGETC ) THEN
+  !
+  DO JP = 1,IO%NPATCH
+    CALL INIT_SURF_BUD(ID%NDC%AL(JP),0.)
+  ENDDO
+  !  
+  IF (ID%DE%LSURF_EVAP_BUDGET) THEN
+    DO JP = 1,IO%NPATCH
+      CALL INIT_EVAP_BUD(ID%NDEC%AL(JP))
+    ENDDO
+    !
+    IF (ID%DE%LWATER_BUDGET) THEN
+      DO JP = 1,IO%NPATCH
+        CALL INIT_WATER_BUD(ID%NDEC%AL(JP))
+      ENDDO
+    ENDIF
+  ENDIF
+  !
+END IF
+!
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N',1,ZHOOK_HANDLE)
 !
 CONTAINS
@@ -1611,7 +1681,7 @@ DO JP=1,IO%NPATCH
    ENDDO
 ENDDO
 !
-IF (LALLOW_ADD_DIM.AND.LXIOS)  THEN 
+IF (LALLOW_ADD_DIM)  THEN 
   YRECFM='TG_ISBA' ; 
   YCOMMENT='Soil temperature (K)'
   CALL WRITE_SURF(DUO%CSELECT, &
@@ -1717,7 +1787,7 @@ IF(IO%CISBA/='DIF')THEN
   IWORK=2 ! No ice in the FR 3-layers
 ENDIF
 !
-IF (LALLOW_ADD_DIM.AND.LXIOS)  THEN 
+IF (LALLOW_ADD_DIM)  THEN 
   YRECFM='WGI_ISBA_' ; 
   YCOMMENT='Soil solid water content (m3/m3)' 
   CALL WRITE_SURF(DUO%CSELECT, &

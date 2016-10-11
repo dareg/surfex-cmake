@@ -26,7 +26,7 @@ END INTERFACE
 CONTAINS
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX0_NC ( HSELECT, HREC,PFIELD,KRESP,HCOMMENT)
+      SUBROUTINE WRITE_SURFX0_NC (HSELECT,HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
 !!****  *WRITEX0* - routine to read a real scalar
@@ -72,8 +72,7 @@ IRET=0
 YATT_TITLE(1) = "comment"
 YATT(1) = HCOMMENT
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFX0_NC',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -82,8 +81,7 @@ IF (NID_NC /= 0) THEN
   !----------------------------
   IF (LDEF) THEN
     !
-    CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT,  IVAR_ID, NF90_DOUBLE)
+    CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT,  IVAR_ID, NF90_DOUBLE)
     !
   ELSE
     ! 2. Put variable
@@ -151,8 +149,7 @@ KRESP= 0
 YATT_TITLE(1) = "comment"
 YATT(1) = HCOMMENT
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFN0_NC',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -163,8 +160,7 @@ IF (NID_NC /= 0) THEN
   ! 1. Find id of the variable
   !----------------------------
   IF (LDEF) THEN
-    CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF90_INT)
+    CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF90_INT)
     ! 
     ! 2. Get variable
     !----------------------------
@@ -232,8 +228,7 @@ KRESP=0
 YATT_TITLE(1) = "comment"
 YATT(1) = HCOMMENT
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFC0_NC',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -243,8 +238,7 @@ IF (NID_NC /= 0) THEN
   IF (LDEF) THEN
     IRET = NF90_INQ_DIMID(NID_NC,'char_len',IDIMS(1))
     !
-    CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF90_CHAR,LEN_TRIM(HFIELD))
+    CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF90_CHAR,LEN_TRIM(HFIELD))
     !
   ELSE
     IRET = NF90_INQ_VARID(NID_NC,HREC,IVAR_ID)
@@ -324,8 +318,7 @@ ENDIF
 IRET=0
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFL0_NC',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -335,10 +328,10 @@ YATT(1) = HCOMMENT
 IF (NID_NC /= 0) THEN        
   !
   IF (LDEF) THEN
-    CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF90_CHAR)
+    CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMS, YATT_TITLE, YATT, IVAR_ID, NF90_CHAR)
     !
   ELSE
+    !
     IRET = NF90_INQ_VARID(NID_NC,HREC,IVAR_ID)
     ! 2. Put variable
     !----------------------------
@@ -365,9 +358,6 @@ END SUBROUTINE WRITE_SURFL0_NC
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
 ! 
-!
-!
-!
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 !
 !
@@ -402,7 +392,7 @@ INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem 
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                           
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                           
 !*      0.2   Declarations of local variables
 !
 INTEGER :: IRET0
@@ -436,7 +426,6 @@ ENDIF
 INDIMS = 0
 IDIMLEN(:) = 0
 YNAME = ""
-KRESP=0
 !
  CALL IO_BUFF(HREC,'W',GFOUND)
 !
@@ -616,7 +605,7 @@ INTEGER,              INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem
                                              ! 'H' : field with
                                              !       horizontal spatial dim.
                                              ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                              
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                              
 !*      0.2   Declarations of local variables
 !
 INTEGER :: IRET0
@@ -643,8 +632,7 @@ IDIMLEN(:) = 0
 YNAME = ""
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 !
 YATT_TITLE(1) = "comment"
 YATT(1) = HCOMMENT
@@ -843,7 +831,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM  
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM  
 ! 
 !*      0.2   Declarations of local variables
 !
@@ -880,8 +868,7 @@ IDIMLEN(:) = 0
 YNAME = ""
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK("WRITE_SURF_NC:WRITE_SURFN1_NC",1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
@@ -934,8 +921,7 @@ ENDIF
 IF (YNAME.NE.'lon' .AND. YNAME.NE.'xx') THEN
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
+      CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMIDS(1:1), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
     ENDIF
   ELSE
     JRET = NF90_INQ_VARID(NID_NC,HREC,IVAR_ID)
@@ -944,8 +930,7 @@ IF (YNAME.NE.'lon' .AND. YNAME.NE.'xx') THEN
 ELSE
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
+      CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
     ENDIF  
   ELSE
     JRET = NF90_INQ_VARID(NID_NC,HREC,IVAR_ID)    
@@ -1052,7 +1037,7 @@ INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a prob
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
- CHARACTER(LEN=16), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                                 
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM                                                 
 !*      0.2   Declarations of local variables
 !
 INTEGER :: IRET0
@@ -1079,8 +1064,7 @@ IDIMLEN(:) = 0
 YNAME = ""
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 !
 YATT_TITLE(1) = "comment"
 YATT(1) = HCOMMENT
@@ -1151,8 +1135,7 @@ ENDIF
 IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
+      CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMIDS(1:2), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
     ENDIF
   ELSE
     JRET = NF90_INQ_VARID(NID_NC,HREC,IVAR_ID)
@@ -1161,8 +1144,7 @@ IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
 ELSE
   IF (LDEF) THEN
     IF (NRANK==NPIO) THEN
-      CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, HREC, HREC, IDIMIDS(1:3), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
+      CALL DEF_VAR_NETCDF(HSELECT, NID_NC, HREC, HREC, IDIMIDS(1:3), YATT_TITLE, YATT, IVAR_ID, NF90_INT)
     ENDIF 
   ELSE
     JRET = NF90_INQ_VARID(NID_NC,HREC,IVAR_ID)    
@@ -1411,8 +1393,7 @@ KRESP=0
 YATT_TITLE(1) = "comment"
 YATT(1) = HCOMMENT
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_NC:WRITE_SURFT0_NC',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -1435,32 +1416,28 @@ DO JWRK=1,4
     !
     IF (JWRK==1) THEN
       IF (LDEF) THEN
-        CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_INT)
+        CALL DEF_VAR_NETCDF(HSELECT, NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_INT)
       ELSE
         JRET = NF90_INQ_VARID(NID_NC,YRECFM,IVAR_ID)
         IRET(JWRK)=NF90_PUT_VAR(NID_NC,IVAR_ID,KYEAR)
       ENDIF
     ELSEIF (JWRK==2) THEN
       IF (LDEF) THEN    
-        CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_INT)
+        CALL DEF_VAR_NETCDF(HSELECT, NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_INT)
       ELSE
         JRET = NF90_INQ_VARID(NID_NC,YRECFM,IVAR_ID)        
         IRET(JWRK)=NF90_PUT_VAR(NID_NC,IVAR_ID,KMONTH)
       ENDIF        
     ELSEIF (JWRK==3) THEN
       IF (LDEF) THEN    
-        CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_INT)
+        CALL DEF_VAR_NETCDF(HSELECT, NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_INT)
       ELSE
         JRET = NF90_INQ_VARID(NID_NC,YRECFM,IVAR_ID)        
         IRET(JWRK)=NF90_PUT_VAR(NID_NC,IVAR_ID,KDAY)
       ENDIF        
     ELSEIF (JWRK==4) THEN
       IF (LDEF) THEN    
-        CALL DEF_VAR_NETCDF( HSELECT, &
-                        NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_DOUBLE)
+        CALL DEF_VAR_NETCDF(HSELECT, NID_NC, YRECFM, YRECFM, IDIMIDS, YATT_TITLE, YATT, IVAR_ID,NF90_DOUBLE)
       ELSE
         JRET = NF90_INQ_VARID(NID_NC,YRECFM,IVAR_ID)        
         IRET(JWRK)=NF90_PUT_VAR(NID_NC,IVAR_ID,PTIME)
@@ -1535,31 +1512,23 @@ DO JWRK=1,4
   !
   IF (JRET==0) THEN
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN1_NC( HSELECT, &
-                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN1_NC(HSELECT, YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN1_NC( HSELECT, &
-                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN1_NC(HSELECT, YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN1_NC( HSELECT, &
-                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN1_NC(HSELECT, YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX1_NC( HSELECT, &
-                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFX1_NC(HSELECT, YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ENDIF
   ELSE
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN1_NC( HSELECT, &
-                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN1_NC(HSELECT, YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN1_NC( HSELECT, &
-                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN1_NC(HSELECT, YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN1_NC( HSELECT, &
-                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN1_NC(HSELECT, YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX1_NC( HSELECT, &
-                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFX1_NC(HSELECT, YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
     ENDIF
   ENDIF    
   !
@@ -1631,31 +1600,23 @@ DO JWRK=1,4
   !
   IF (JRET==0) THEN
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN2_NC( HSELECT, &
-                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN2_NC(HSELECT, YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN2_NC( HSELECT, &
-                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN2_NC(HSELECT, YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN2_NC( HSELECT, &
-                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFN2_NC(HSELECT, YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX2_NC( HSELECT, &
-                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
+      CALL WRITE_SURFX2_NC(HSELECT, YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-','Number_of_dates ')
     ENDIF
   ELSE
     IF (JWRK==1) THEN
-      CALL WRITE_SURFN2_NC( HSELECT, &
-                           YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN2_NC(HSELECT, YRECFM,KYEAR,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==2) THEN
-      CALL WRITE_SURFN2_NC( HSELECT, &
-                           YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN2_NC(HSELECT, YRECFM,KMONTH,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==3) THEN
-      CALL WRITE_SURFN2_NC( HSELECT, &
-                           YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFN2_NC(HSELECT, YRECFM,KDAY,IRET(JWRK),HCOMMENT,'-')
     ELSEIF (JWRK==4) THEN
-      CALL WRITE_SURFX2_NC( HSELECT, &
-                           YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
+      CALL WRITE_SURFX2_NC(HSELECT, YRECFM,PTIME,IRET(JWRK),HCOMMENT,'-')
     ENDIF
   ENDIF          
   !

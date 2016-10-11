@@ -37,7 +37,7 @@
 !!       B. Decharme 10/2012 : New diag for DIF 
 !!                               active layer thickness over permafrost area
 !!                               frozen layer thickness over non-permafrost area
-!!
+!!       M. Lafaysse 09/2015 : new Crocus-MEPRA outputs
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -56,6 +56,8 @@ TYPE DIAG_MISC_ISBA_t
   LOGICAL :: LSURF_MISC_BUDGET   ! flag for miscellaneous terms of isba scheme
   LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo
   LOGICAL :: LSURF_MISC_DIF      ! flag for miscellaneous terms of isba-dif scheme
+  LOGICAL :: LPROSNOW            ! flag for Crocus-MEPRA outputs
+  LOGICAL :: LVOLUMETRIC_SNOWLIQ ! volumetric snow liquid water content (kg m-3)  
 !
 !* variables for each patch
 !
@@ -94,11 +96,17 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XCDSNOW    ! snow drag coefficient (ISBA-ES:3-L)           (-)
   REAL, POINTER, DIMENSION(:) :: XCHSNOW    ! heat turbulent transfer coefficient 
 !                                               ! (ISBA-ES:3-L)                                 (-)
-  REAL, POINTER, DIMENSION(:,:)::XSNOWDZ    ! snow layer thicknesses                        (m)
-  REAL, POINTER, DIMENSION(:) :: XSNOWHMASS ! heat content change due to mass
-!                                               ! changes in snowpack: for budget
-
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWDZ     ! snow layer thicknesses                        (m)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWDEND   ! dendricity (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSPHER  ! sphericity (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSIZE   ! grain size (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSSA    ! snow specific surface area (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWTYPEMEPRA ! snow grain type (Crocus-MEPRA)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWRAM    ! snow ram resistance (Crocus-MEPRA)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSHEAR  ! snow shear resistance (Crocus-MEPRA)  
 !
+  REAL, POINTER, DIMENSION(:) :: XSNOWHMASS ! heat content change due to mass
+!                                           ! changes in snowpack: for budget
   REAL, POINTER, DIMENSION(:,:) :: XSNOWLIQ    ! snow liquid water profile (ISBA-ES:3-L)
   REAL, POINTER, DIMENSION(:,:) :: XSNOWTEMP   ! snow temperature profile  (ISBA-ES:3-L)
 !     
@@ -106,6 +114,12 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XTDSNOW       ! Total snow height
   REAL, POINTER, DIMENSION(:) :: XTTSNOW       ! Total snow temperature
 !
+  REAL, POINTER, DIMENSION(:) :: XSNDPT_1DY, XSNDPT_3DY, XSNDPT_5DY, XSNDPT_7DY ! fresh snow depth in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:) :: XSNSWE_1DY, XSNSWE_3DY, XSNSWE_5DY, XSNSWE_7DY! fresh snow water equivalent in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:) :: XSNRAM_SONDE ! penetration depth of the ram resistance sensor (2 DaN)
+  REAL, POINTER, DIMENSION(:) :: XSN_WETTHCKN ! Thickness of wet snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:) :: XSN_REFRZNTHCKN  ! Thickness of refrozen snow at the top of the snowpack
+
   REAL, POINTER, DIMENSION(:) :: XPSNG         ! Snow fraction over ground, diag at time t
   REAL, POINTER, DIMENSION(:) :: XPSNV         ! Snow fraction over vegetation, diag at time t
   REAL, POINTER, DIMENSION(:) :: XPSN          ! Total Snow fraction, diag at time t
@@ -198,6 +212,24 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XCDSNOW)
   NULLIFY(DMI%XCHSNOW)
   NULLIFY(DMI%XSNOWDZ)
+  NULLIFY(DMI%XSNOWDEND)
+  NULLIFY(DMI%XSNOWSPHER)
+  NULLIFY(DMI%XSNOWSIZE)
+  NULLIFY(DMI%XSNOWTYPEMEPRA)
+  NULLIFY(DMI%XSNOWSSA)
+  NULLIFY(DMI%XSNOWRAM)
+  NULLIFY(DMI%XSNOWSHEAR)
+  NULLIFY(DMI%XSNDPT_1DY)
+  NULLIFY(DMI%XSNDPT_3DY)
+  NULLIFY(DMI%XSNDPT_5DY)
+  NULLIFY(DMI%XSNDPT_7DY) 
+  NULLIFY(DMI%XSNSWE_1DY)
+  NULLIFY(DMI%XSNSWE_3DY)
+  NULLIFY(DMI%XSNSWE_5DY)
+  NULLIFY(DMI%XSNSWE_7DY)
+  NULLIFY(DMI%XSNRAM_SONDE)
+  NULLIFY(DMI%XSN_REFRZNTHCKN)
+  NULLIFY(DMI%XSN_WETTHCKN)  
   NULLIFY(DMI%XSNOWHMASS)  
   NULLIFY(DMI%XSNOWLIQ)
   NULLIFY(DMI%XSNOWTEMP)

@@ -195,7 +195,7 @@ ENDIF
 !
 ! 3. Check for errors
 !--------------------
-DO JRET=1,2
+DO JRET=1,3
   IF ((PFIELD==XUNDEF).OR.(NID_NC==0).OR.IRET(JRET).NE.NF90_NOERR) THEN 
     PFIELD=XUNDEF
     KRESP=1

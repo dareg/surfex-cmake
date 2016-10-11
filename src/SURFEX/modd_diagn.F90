@@ -27,7 +27,11 @@ MODULE MODD_DIAG_n
 !!    -------------
 !!      Original       01/2004
 !!      Modified    01/2006 : sea flux parameterization.
+!!      Modified    04/2009 : precip for/from restart file.
+!!      Modified    08/2009 : BUDGETC for all tiles
 !!      P. Samuelsson 10/2014 : added min max for XT2M
+!!      Modified    09/2015 : M Lafaysse LSNOWDIMNC
+!!      Modified    06/2016 : M Lafaysse LRESETCUMUL
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -60,6 +64,8 @@ TYPE DIAG_OPTIONS_t
   LOGICAL :: LREAD_BUDGETC       ! flag for surface cumulated energy budget
   LOGICAL :: LPROVAR_TO_DIAG     ! switch to write (or not) prognostic variable
                                  ! and allows puting field in diagnostics 
+  LOGICAL    :: LSNOWDIMNC       ! if true create a snow layer dimension in nc files
+  LOGICAL    :: LRESETCUMUL      ! reset cumulated variables at 0 at each output timestep 
   LOGICAL    :: LSELECT          ! switch to control which fields are written
                                  ! (only those whose naem appears in in text array)  
 !
@@ -187,6 +193,8 @@ DGO%LSURF_BUDGETC=.FALSE.
 DGO%LRESET_BUDGETC=.FALSE.
 DGO%LREAD_BUDGETC=.FALSE.
 DGO%LPROVAR_TO_DIAG=.FALSE.
+DGO%LSNOWDIMNC=.FALSE.
+DGO%LRESETCUMUL=.FALSE.
 DGO%LSELECT=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_N:DIAG_OPTIONS_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_OPTIONS_INIT

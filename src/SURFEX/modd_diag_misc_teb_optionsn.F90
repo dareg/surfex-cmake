@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ############################
-      MODULE MODD_DIAG_MISC_TEB_OPTION_n
+      MODULE MODD_DIAG_MISC_TEB_OPTIONS_n
 !     ############################
 !
 !!****  *MODD_DIAG_MISC_TEB - declaration of packed surface parameters for TEB scheme
@@ -45,20 +45,12 @@ TYPE DIAG_MISC_TEB_OPTIONS_t
 !
   LOGICAL :: LSURF_MISC_BUDGET   ! flag for miscellaneous terms of teb scheme
   LOGICAL :: LSURF_EVAP_BUDGET   ! flag for all terms of evaporation
-  LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo  
+  LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo
 !
 END TYPE DIAG_MISC_TEB_OPTIONS_t
 !
-
-
-
 CONTAINS
-
 !
-
-
-
-
 SUBROUTINE DIAG_MISC_TEB_OPTIONS_INIT(YDIAG_MISC_TEB_OPTIONS)
 TYPE(DIAG_MISC_TEB_OPTIONS_t), INTENT(INOUT) :: YDIAG_MISC_TEB_OPTIONS
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -70,4 +62,4 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_TEB_N:DIAG_MISC_TEB_OPTIONS_INIT",1,ZHOO
 END SUBROUTINE DIAG_MISC_TEB_OPTIONS_INIT
 
 
-END MODULE MODD_DIAG_MISC_TEB_OPTION_n
+END MODULE MODD_DIAG_MISC_TEB_OPTIONS_n

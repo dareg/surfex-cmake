@@ -14,10 +14,9 @@
                            PLE_GRND, PGFLX_GRND, PRN_TWN, PH_TWN, PLE_TWN, PGFLX_TWN, PEVAP_TWN,  &
                            PSFCO2, PUW_GRND, PUW_RF, PDUWDU_GRND, PDUWDU_RF,                      &
                            PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PTS_TWN, PEMIS_TWN,           &
-                           PDIR_ALB_TWN, PSCA_ALB_TWN, PRESA_TWN, PDQS_TWN, PQF_TWN, PQF_BLD,     &
-                           PFLX_BLD, PAC_RD, PAC_GD, PAC_GRF, PAC_RD_WAT, PAC_GD_WAT, PAC_GRF_WAT,&
-                           KDAY, PEMIT_LW_FAC, PEMIT_LW_GRND, PT_RAD_IND, PREF_SW_GRND,           &
-                           PREF_SW_FAC, PHU_BLD, PTIME, PPROD_BLD  )
+                           PDIR_ALB_TWN, PSCA_ALB_TWN, PRESA_TWN, PAC_RD, PAC_GD, PAC_GRF,        &
+                           PAC_RD_WAT, PAC_GD_WAT, PAC_GRF_WAT, KDAY, PEMIT_LW_FAC, PEMIT_LW_GRND,&
+                           PT_RAD_IND, PREF_SW_GRND, PREF_SW_FAC, PHU_BLD, PTIME, PPROD_BLD  )
 !   ##########################################################################
 !
 !!****  *TEB_GARDEN*  
@@ -198,10 +197,6 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PEMIS_TWN         ! town equivalent emiss
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDIR_ALB_TWN      ! town equivalent direct albedo
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PSCA_ALB_TWN      ! town equivalent diffuse albedo
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRESA_TWN         ! town aerodynamical resistance
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDQS_TWN          ! heat storage inside town
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PQF_TWN           ! total anthropogenic heat
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PQF_BLD            ! anthropogenic heat flux of domestic heating
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PFLX_BLD           ! heat flx from inside bld through its structure
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_RD           ! road conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GD         ! green area conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GRF      ! green roof conductance
@@ -749,18 +744,18 @@ SUBROUTINE TEB_GARDEN3
              PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA, PLW_RAD, &
              PRR, PSR, PZREF, PUREF, PVMOD, PH_TRAFFIC, PLE_TRAFFIC, PTSTEP,       &
              ZDF_RF, ZDN_RF, ZDF_RD, ZDN_RD, ZQSAT_RF, ZQSAT_RD, ZDELT_RF,         &
-             ZDELT_RD, GDDK%XTSRAD, PLEW_RF, ZUW_GRF, PLEW_RD, PLE_WL_A,       &
+             ZDELT_RD, GDDK%XTSRAD, PLEW_RF, ZUW_GRF, PLEW_RD, PLE_WL_A,           &
              PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRNSN_RD,   &
              PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, ZUW_RD, PUW_RF, ZDUWDU_RD,      &
              PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN,        &
-             PDQS_TWN, PQF_TWN, PQF_BLD, PFLX_BLD, ZAC_RF, PAC_RD, ZAC_WL, ZAC_TOP,&
-             PAC_GD, ZAC_RF_WAT, PAC_RD_WAT, ZLW_WA_TO_WB, ZLW_WA_TO_R,            &
-             ZLW_WB_TO_R, ZLW_WA_TO_NR, ZLW_WB_TO_NR, ZLW_R_TO_WA, ZLW_R_TO_WB,    &
-             ZLW_G_TO_WA, ZLW_G_TO_WB, ZLW_S_TO_WA, ZLW_S_TO_WB, ZLW_S_TO_R,       &
-             ZLW_S_TO_NR, ZLW_NR_TO_WA, ZLW_NR_TO_WB, ZLW_NR_TO_WIN, ZLW_WA_TO_WIN,&
-             ZLW_WB_TO_WIN, ZLW_G_TO_WIN, ZLW_R_TO_WIN, ZLW_S_TO_WIN,              &
-             ZLW_WIN_TO_WA, ZLW_WIN_TO_WB, ZLW_WIN_TO_R, ZLW_WIN_TO_NR, KDAY,      &
-             PEMIT_LW_FAC, ZEMIT_LW_RD, PT_RAD_IND, PHU_BLD, PTIME, ZE_SHADING )
+             ZAC_RF, PAC_RD, ZAC_WL, ZAC_TOP, PAC_GD, ZAC_RF_WAT, PAC_RD_WAT,      &
+             ZLW_WA_TO_WB, ZLW_WA_TO_R, ZLW_WB_TO_R, ZLW_WA_TO_NR, ZLW_WB_TO_NR,   &
+             ZLW_R_TO_WA, ZLW_R_TO_WB, ZLW_G_TO_WA, ZLW_G_TO_WB, ZLW_S_TO_WA,      &
+             ZLW_S_TO_WB, ZLW_S_TO_R, ZLW_S_TO_NR, ZLW_NR_TO_WA, ZLW_NR_TO_WB,     &
+             ZLW_NR_TO_WIN, ZLW_WA_TO_WIN, ZLW_WB_TO_WIN, ZLW_G_TO_WIN,            &
+             ZLW_R_TO_WIN, ZLW_S_TO_WIN, ZLW_WIN_TO_WA, ZLW_WIN_TO_WB,             &
+             ZLW_WIN_TO_R, ZLW_WIN_TO_NR, KDAY, PEMIT_LW_FAC, ZEMIT_LW_RD,         &
+             PT_RAD_IND, PHU_BLD, PTIME, ZE_SHADING )
 !
 !-------------------------------------------------------------------------------
 !

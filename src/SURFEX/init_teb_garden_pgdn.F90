@@ -63,6 +63,7 @@ USE MODD_SURF_PAR,ONLY: XUNDEF, NUNDEF
 
 USE MODD_SGH_PAR, ONLY: XF_DECAY
 !
+USE MODI_READ_PREP_GARDEN_SNOW
 USE MODI_GET_LUOUT
 USE MODI_ALLOCATE_TEB_VEG_PGD
 USE MODI_READ_PGD_TEB_GARDEN_n
@@ -140,6 +141,20 @@ IF (LHOOK) CALL DR_HOOK('INIT_TEB_GARDEN_PGD_n',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 CALL SSO_INIT(YSS)
+!
+!*       1.     Reading of snow configuration:
+!               ------------------------------
+!
+!* initialization of snow scheme (TSNOW defined in MODD_TEB_GARDEN_n)
+!
+IF (HINIT=='PRE') THEN
+  CALL READ_PREP_GARDEN_SNOW(HPROGRAM,PEK%TSNOW%SCHEME,PEK%TSNOW%NLAYER)
+!
+  IF (PEK%TSNOW%SCHEME.NE.'3-L' .AND. PEK%TSNOW%SCHEME.NE.'CRO' .AND. IO%CISBA=='DIF') THEN
+    CALL ABOR1_SFX("INIT_TEB_GARDEN_n: WITH CISBA = DIF, CSNOW MUST BE 3-L OR CRO")
+  ENDIF
+ENDIF
+!
 !-------------------------------------------------------------------------------
 !
 !*       2.     Physiographic fields

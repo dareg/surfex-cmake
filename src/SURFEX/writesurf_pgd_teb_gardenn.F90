@@ -3,10 +3,10 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_VEG_n (HSELECT, TOP, T, KTIME, IO, K, P, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_GARDEN_n (HSELECT, TOP, T, KTIME, IO, K, P, HPROGRAM)
 !     ###############################################
 !
-!!****  *WRITE_PGD_TEB_VEG_n* - writes ISBA fields describing urban gardens
+!!****  *WRITE_PGD_TEB_GARDEN_n* - writes ISBA fields describing urban gardens
 !!
 !!    PURPOSE
 !!    -------
@@ -85,7 +85,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_VEG_N',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_GARDEN_N',0,ZHOOK_HANDLE)
 !
 !* soil scheme option
 !
@@ -140,7 +140,7 @@ YRECFM='GD_WDRAIN'
 YCOMMENT='X_Y_GD_WDRAIN'
  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,K%XWDRAIN,IRESP,HCOMMENT=YCOMMENT)
 !
-IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_VEG_N',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_GARDEN_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
-END SUBROUTINE WRITESURF_PGD_TEB_VEG_n
+END SUBROUTINE WRITESURF_PGD_TEB_GARDEN_n

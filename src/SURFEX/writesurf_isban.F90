@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_ISBA_n (HSELECT, CHI, NDST, &
+      SUBROUTINE WRITESURF_ISBA_n (HSELECT, OSNOWDIMNC, CHI, NDST, &
                                    IO, S, NP, NPE, KI, HPROGRAM, OLAND_USE)
 !     #####################################
 !
@@ -52,6 +52,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK
 !
 USE MODN_PREP_SURF_ATM, ONLY : LWRITE_EXTERN
 !
@@ -62,7 +63,6 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_NP_t, ISBA_NPE_t, ISBA_S_t
 !
 USE MODD_SURF_PAR, ONLY : NUNDEF
-!
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM, CASSIM_ISBA, NIE, NENS, &
                        XADDTIMECORR, LENS_GEN, NVAR
@@ -83,6 +83,7 @@ IMPLICIT NONE
 !              -------------------------
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT 
+LOGICAL, INTENT(IN) :: OSNOWDIMNC  
 !
 TYPE(CH_ISBA_t), INTENT(INOUT) :: CHI
 TYPE(DST_NP_t), INTENT(INOUT) :: NDST
@@ -121,6 +122,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !               -----------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_ISBA_N',0,ZHOOK_HANDLE)
+!
 !* soil temperatures
 !
 IF(IO%LTEMP_ARP)THEN
@@ -232,7 +234,7 @@ ENDIF
 !* snow mantel
 !
 DO JP = 1,IO%NPATCH
-  CALL WRITESURF_GR_SNOW(HSELECT, HPROGRAM, 'VEG', '     ', KI, &
+  CALL WRITESURF_GR_SNOW(OSNOWDIMNC, HSELECT, HPROGRAM, 'VEG', '     ', KI, &
            NP%AL(JP)%NR_P, JP, NPE%AL(JP)%TSNOW)
 ENDDO
 !
@@ -531,7 +533,7 @@ ENDIF
 YRECFM='DTCUR'
 YCOMMENT='s'
  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%TTIME,IRESP,HCOMMENT=YCOMMENT)
- !
+!
 IF (LHOOK) CALL DR_HOOK('WRITESURF_ISBA_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -234,8 +234,6 @@ REAL, DIMENSION(KI)  :: ZLE_WL_A  ! latent heat flux on walls
 REAL, DIMENSION(KI)  :: ZLE_WL_B  ! latent heat flux on walls
 REAL, DIMENSION(KI)  :: ZAVG_H_WL
 !
-REAL, DIMENSION(KI)  :: ZQF_BLD       ! domestic heating
-REAL, DIMENSION(KI)  :: ZFLX_BLD      ! flux from bld
 REAL, DIMENSION(KI)  :: ZPROD_BLD        ! averaged     energy production from solar panel (W/m2 bld)
 REAL, DIMENSION(KI) :: ZHU_BLD
 REAL, DIMENSION(KI) :: ZAVG_TI_BLD
@@ -302,9 +300,6 @@ REAL, DIMENSION(KI)  :: ZAVG_DIR_ALB  ! direct albedo of town
 REAL, DIMENSION(KI)  :: ZAVG_SCA_ALB  ! diffuse albedo of town
 !
 REAL, DIMENSION(KI)  :: ZSFCO2        ! CO2 flux over town
-!
-REAL, DIMENSION(KI)  :: ZDQS     ! storage inside town materials
-REAL, DIMENSION(KI)  :: ZQF      ! total anthropogenic heat
 !
 REAL, DIMENSION(KI)  :: ZRI           ! Richardson number
 REAL, DIMENSION(KI)  :: ZCD           ! drag coefficient
@@ -688,10 +683,9 @@ DO JP = 1,TOP%NTEB_PATCH
                   ZHSN_RD, ZLESN_RD, ZGSN_RD, ZMELT_RD, ZRN_GRND, ZH_GRND, ZLE_GRND,      &
                   ZGFLX_GRND, ZRN, ZH, ZLE, ZGFLX, ZEVAP, ZSFCO2, ZUW_GRND,               &
                   ZUW_RF, ZDUWDU_GRND, ZDUWDU_RF, ZUSTAR, ZCD, ZCDN, ZCH, ZRI, ZTRAD,     &
-                  ZEMIS, ZDIR_ALB, ZSCA_ALB, ZRESA, ZDQS, ZQF, ZQF_BLD,                   &
-                  ZFLX_BLD, ZAC_RD, ZAC_GD, ZAC_GRF, ZAC_RD_WAT, ZAC_GD_WAT, ZAC_GRF_WAT, &
-                  KDAY, ZEMIT_LW_FAC, ZEMIT_LW_GRND, ZT_RAD_IND, ZREF_SW_GRND, ZREF_SW_FAC,&
-                  ZHU_BLD, PTIME, ZPROD_BLD       )
+                  ZEMIS, ZDIR_ALB, ZSCA_ALB, ZRESA, ZAC_RD, ZAC_GD, ZAC_GRF, ZAC_RD_WAT,  &
+                  ZAC_GD_WAT, ZAC_GRF_WAT, KDAY, ZEMIT_LW_FAC, ZEMIT_LW_GRND, ZT_RAD_IND, &
+                  ZREF_SW_GRND, ZREF_SW_FAC, ZHU_BLD, PTIME, ZPROD_BLD       )
 
 
   !

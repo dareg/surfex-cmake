@@ -71,7 +71,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_MISC_FLAKE_N',0,ZHOOK_HANDLE)
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','FLAKE   ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','FLAKE ','WRITE','FLAKE_DIAGNOSTICS.OUT.nc')
 !
 !-------------------------------------------------------------------------------
 !

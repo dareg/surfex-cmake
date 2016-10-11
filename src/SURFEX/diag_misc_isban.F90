@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE DIAG_MISC_ISBA_n (DMK, KK, PK, PEK, AGK, IO, OSURF_MISC_BUDGET, &
-                             PTSTEP, OAGRIP, PTIME, KSIZE    )  
+                             OVOLUMETRIC_SNOWLIQ, PTSTEP, OAGRIP, PTIME, KSIZE  )  
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-ISBA_n * - additional diagnostics for ISBA
@@ -45,7 +45,7 @@ USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_AGRI_n, ONLY : AGRI_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
-USE MODD_CSTS,       ONLY : XTT
+USE MODD_CSTS,       ONLY : XTT, XRHOLW
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !                                     
@@ -68,14 +68,16 @@ TYPE(AGRI_t), INTENT(INOUT) :: AGK
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 LOGICAL, INTENT(IN) :: OSURF_MISC_BUDGET
-REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
-LOGICAL, INTENT(IN)               :: OAGRIP
-REAL,    INTENT(IN)               :: PTIME   ! current time since midnight
-INTEGER, INTENT(IN)               :: KSIZE
+LOGICAL, INTENT(IN) :: OVOLUMETRIC_SNOWLIQ
+REAL,    INTENT(IN) :: PTSTEP        ! timestep for  accumulated values 
+LOGICAL, INTENT(IN) :: OAGRIP
+REAL,    INTENT(IN) :: PTIME   ! current time since midnight
+INTEGER, INTENT(IN) :: KSIZE
+!
 !    
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(SIZE(PEK%XPSN,1))    :: ZSNOWTEMP
+REAL, DIMENSION(SIZE(PEK%XPSN))    :: ZSNOWTEMP
 REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZWORK
 REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZWORKTEMP
 !
@@ -106,7 +108,6 @@ IF (OSURF_MISC_BUDGET) THEN
   ENDDO
   !
   DO JL = 1,SIZE(PEK%TSNOW%WSNOW,2)
-!cdir nodep 
     DO JI = 1,SIZE(PEK%TSNOW%WSNOW,1)
       ZWORK(JI,JL)  = PEK%TSNOW%WSNOW(JI,JL) / PEK%TSNOW%RHO(JI,JL)
     ENDDO
@@ -123,7 +124,6 @@ IF (OSURF_MISC_BUDGET) THEN
   ENDIF
   !
   DO JL = 1,SIZE(PEK%TSNOW%WSNOW,2)
-!cdir nodep 
     DO JI = 1,SIZE(PEK%TSNOW%WSNOW,1)
       DMK%XTWSNOW(JI) = DMK%XTWSNOW(JI) + PEK%TSNOW%WSNOW(JI,JL)      
       DMK%XTDSNOW(JI) = DMK%XTDSNOW(JI) + ZWORK (JI,JL)
@@ -145,6 +145,13 @@ IF (OSURF_MISC_BUDGET) THEN
   DMK%XFFV   (:) = KK%XFFV  (:)
   DMK%XFSAT  (:) = KK%XFSAT (:)
   DMK%XTTSNOW(:) = ZSNOWTEMP(:)
+  !  
+  IF ( (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') .AND. OVOLUMETRIC_SNOWLIQ ) THEN
+    !
+    WHERE (DMK%XSNOWLIQ(:,:)/=XUNDEF) &
+                    DMK%XSNOWLIQ(:,:) = DMK%XSNOWLIQ(:,:) * XRHOLW / DMK%XSNOWDZ(:,:)
+    !
+  ENDIF
   !
   ! cosine of solar zenith angle 
   !
@@ -153,7 +160,6 @@ IF (OSURF_MISC_BUDGET) THEN
        ! Mask where vegetation evolution is performed (just before solar midnight)
        GMASK = ( PTIME - PTSTEP < 0. ) .AND. ( PTIME >= 0. )
        IF (GMASK) THEN
-!cdir nodep
          DO JI=1,KSIZE
            !
            IF (PEK%XMUS(JI).NE.0.) THEN
@@ -163,7 +169,6 @@ IF (OSURF_MISC_BUDGET) THEN
            ENDIF
            !
          ENDDO
-!cdir nodep         
          DO JI=1,KSIZE   
            PEK%XFAPARC(JI)   = 0.
            PEK%XFAPIRC(JI)   = 0.

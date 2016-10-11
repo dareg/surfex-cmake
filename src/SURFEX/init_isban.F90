@@ -231,7 +231,7 @@ IF (LNAM_READ) THEN
                         IM%ID%DM%LSURF_MISC_BUDGET, IM%ID%DM%LSURF_DIAG_ALBEDO,                     &
                         IM%ID%O%LSURF_BUDGETC, IM%ID%DM%LSURF_MISC_DIF, IM%ID%O%LPATCH_BUDGET,      &
                         IM%ID%O%LPGD, IM%ID%O%LRESET_BUDGETC, IM%ID%DE%LWATER_BUDGET,               &
-                        IM%ID%O%XDIAG_TSTEP                                )  
+                        IM%ID%DM%LPROSNOW,IM%ID%DM%LVOLUMETRIC_SNOWLIQ,IM%ID%O%XDIAG_TSTEP          )  
  !
  CALL DEFAULT_CROCUS(IM%O%LSNOWDRIFT, IM%O%LSNOWDRIFT_SUBLIM, IM%O%LSNOW_ABS_ZENITH, &
                      IM%O%CSNOWMETAMO, IM%O%CSNOWRAD)

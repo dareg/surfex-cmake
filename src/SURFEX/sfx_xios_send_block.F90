@@ -61,6 +61,8 @@ SUBROUTINE SFX_XIOS_SEND_BLOCK(HDTAG,PFIELD,PFIELD2,HDOMAIN,HAXIS,HDCOMMENT,KFRE
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK
+!
 USE MODD_XIOS, ONLY : LXIOS, LXIOS_DEF_CLOSED, NBLOCK , NTIMESTEP
 !
 ! NBLOCK dans arpege : YOMDIM:NGPBLKS
@@ -129,7 +131,6 @@ INTEGER(KIND=JPIM),SAVE :: ILTSTEP=-1 ! Last timestep send to XIOS
 #endif
 !
 REAL(KIND=JPRB)          :: ZHOOK_HANDLE
-REAL(KIND=JPRB)          :: ZHOOK_HANDLE2
 !
 !#include "abor1.intfb.h"
 !
@@ -324,16 +325,14 @@ IF (LXIOS_DEF_CLOSED)  THEN
       ENDIF
       IF (NTIMESTEP > 0) THEN 
          ! Send field and clears the buffer (incl. de-allocation)
-         IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',0,ZHOOK_HANDLE2)
          IF (YLF%G1D) THEN 
             CALL XIOS_SEND_FIELD(YLF%YLNAME,YLF%ZFIELD(:,1))
          ELSE
             CALL XIOS_SEND_FIELD(YLF%YLNAME,YLF%ZFIELD(:,:))
          ENDIF
-         IF (LHOOK) CALL DR_HOOK('XIOS_SEND_FIELD',1,ZHOOK_HANDLE2)
       ENDIF
-      YLF%IBLOCK=0
-      YLF%ISIZE=0
+      YLF%IBLOCK = 0
+      YLF%ISIZE  = 0
       DEALLOCATE(YLF%ZFIELD)
    ENDIF  
 ENDIF

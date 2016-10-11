@@ -81,7 +81,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_SEAFLUX_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','WRITE','SEAFLUX_PROGNOSTIC.OUT.nc')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------

@@ -13,15 +13,14 @@
                      PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRNSN_RD,&
                      PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, PUW_RD, PUW_RF, PDUWDU_RD,   &
                      PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN,     &
-                     PDQS_TWN, PQF_TWN, PQF_BLD, PFLX_BLD, PAC_RF, PAC_RD, PAC_WL,      &
-                     PAC_TOP, PAC_GARDEN, PAC_RF_WAT, PAC_RD_WAT, PLW_WA_TO_WB,         &
-                     PLW_WA_TO_R, PLW_WB_TO_R, PLW_WA_TO_NR, PLW_WB_TO_NR, PLW_R_TO_WA, &
-                     PLW_R_TO_WB, PLW_G_TO_WA, PLW_G_TO_WB, PLW_S_TO_WA, PLW_S_TO_WB,   &
-                     PLW_S_TO_R, PLW_S_TO_NR, PLW_NR_TO_WA, PLW_NR_TO_WB, PLW_NR_TO_WIN,&
-                     PLW_WA_TO_WIN, PLW_WB_TO_WIN, PLW_G_TO_WIN, PLW_R_TO_WIN,          &
-                     PLW_S_TO_WIN, PLW_WIN_TO_WA, PLW_WIN_TO_WB, PLW_WIN_TO_R,          &
-                     PLW_WIN_TO_NR, KDAY, PEMIT_LW_FAC, PEMIT_LW_RD, PT_RAD_IND,        &
-                     PHU_BLD, PTIME, PE_SHADING )
+                     PAC_RF, PAC_RD, PAC_WL, PAC_TOP, PAC_GARDEN, PAC_RF_WAT,           &
+                     PAC_RD_WAT, PLW_WA_TO_WB, PLW_WA_TO_R, PLW_WB_TO_R, PLW_WA_TO_NR,  &
+                     PLW_WB_TO_NR, PLW_R_TO_WA, PLW_R_TO_WB, PLW_G_TO_WA, PLW_G_TO_WB,  &
+                     PLW_S_TO_WA, PLW_S_TO_WB, PLW_S_TO_R, PLW_S_TO_NR, PLW_NR_TO_WA,   &
+                     PLW_NR_TO_WB, PLW_NR_TO_WIN, PLW_WA_TO_WIN, PLW_WB_TO_WIN,         &
+                     PLW_G_TO_WIN, PLW_R_TO_WIN, PLW_S_TO_WIN, PLW_WIN_TO_WA,           &
+                     PLW_WIN_TO_WB, PLW_WIN_TO_R, PLW_WIN_TO_NR, KDAY, PEMIT_LW_FAC,    &
+                     PEMIT_LW_RD, PT_RAD_IND, PHU_BLD, PTIME, PE_SHADING )
 !   ##########################################################################
 !
 !!****  *TEB*  
@@ -304,11 +303,6 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCH_TWN     ! town averaged heat transfer
 !                                                 ! coefficient
 REAL, DIMENSION(:), INTENT(OUT)   :: PRI_TWN      ! town averaged Richardson number
 REAL, DIMENSION(:), INTENT(OUT)   :: PRESA_TWN    ! town aerodynamical resistance
-REAL, DIMENSION(:), INTENT(OUT)   :: PDQS_TWN     ! heat storage inside town
-REAL, DIMENSION(:), INTENT(OUT)   :: PQF_TWN      ! total anthropogenic heat
-REAL, DIMENSION(:), INTENT(OUT)   :: PQF_BLD       ! anthropogenic heat flux of
-                                                   ! domestic heating  
-REAL, DIMENSION(:), INTENT(OUT)   :: PFLX_BLD      ! heat flx from inside bld through its structure
 REAL, DIMENSION(:), INTENT(OUT)   :: PAC_RF      ! roof conductance
 REAL, DIMENSION(:), INTENT(INOUT) :: PAC_RD      ! road conductance
 REAL, DIMENSION(:), INTENT(OUT)   :: PAC_WL      ! wall conductance

@@ -81,7 +81,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_WATFLUX_N',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','WRITE','WATFLUX_PROGNOSTIC.OUT.nc')
 !
 !*       1.     Selection of surface scheme
 !               ---------------------------

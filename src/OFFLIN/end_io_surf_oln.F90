@@ -37,8 +37,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_SURF_OL, ONLY : LMASK
+USE MODD_IO_SURF_OL, ONLY : LMASK, LDEF, NID_NC
 !
+USE NETCDF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -54,7 +55,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-!
+INTEGER :: JRET
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_OL_N',0,ZHOOK_HANDLE)
@@ -62,6 +63,12 @@ IF (LHOOK) CALL DR_HOOK('END_IO_SURF_OL_N',0,ZHOOK_HANDLE)
 !$MPI BARRIER
 !
 LMASK = .FALSE.
+!
+IF (LDEF) THEN
+  JRET = NF90_ENDDEF(NID_NC)
+  NID_NC = 0
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_OL_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -48,6 +48,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
@@ -100,7 +101,6 @@ CPROGNAME = HPROGRAM
 !
 !*       1.     Configuration and cover fields:
 !               ------------------------------
-!
 !
 !         Initialisation for IO
 !
@@ -159,15 +159,15 @@ IF (YSC%U%NDIM_WATER>0) CALL WRITE_INLAND_WATER_n(YSC%DTCO, YSC%DUO%CSELECT, YSC
 !*       5.     Vegetation scheme
 !               -----------------
 !
-IF (YSC%U%NDIM_NATURE>0) CALL WRITE_NATURE_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%IM, &
-                                         YSC%NDST, HPROGRAM,HWRITE,OLAND_USE)
+IF (YSC%U%NDIM_NATURE>0) CALL WRITE_NATURE_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%DUO%LSNOWDIMNC, &
+                                             YSC%U, YSC%IM, YSC%NDST, HPROGRAM,HWRITE,OLAND_USE)
 !
 !
 !*       6.     Urban scheme
 !               ------------
 !
-IF (YSC%U%NDIM_TOWN>0) CALL WRITE_TOWN_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%TM, &
-                                     YSC%GDM, YSC%GRM, HPROGRAM,HWRITE)
+IF (YSC%U%NDIM_TOWN>0) CALL WRITE_TOWN_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%DUO%LSNOWDIMNC, &
+                                         YSC%U, YSC%TM, YSC%GDM, YSC%GRM, HPROGRAM,HWRITE)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_SURF_ATM_N',1,ZHOOK_HANDLE)
 !

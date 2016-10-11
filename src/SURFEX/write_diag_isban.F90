@@ -70,9 +70,9 @@ IF (HWRITE/='PGD') THEN
           ABS(NINT(IM%S%TTIME%TIME/IM%ID%O%XDIAG_TSTEP)*IM%ID%O%XDIAG_TSTEP-IM%S%TTIME%TIME)<1.E-3 ) THEN
     CALL WRITE_DIAG_SEB_ISBA_n(DTCO, DUO, U, IM%NCHI, IM%CHI, IM%ID, NDST, IM%GB, &
                                IM%O, IM%NP, IM%NPE, HPROGRAM)
-    CALL WRITE_DIAG_MISC_ISBA_n(DTCO, DUO%CSELECT, U, IM%ID%O%LPATCH_BUDGET, IM%ID%D, IM%ID%ND, &
-                                IM%ID%DM, IM%ID%NDM, IM%O, IM%S, IM%K, IM%NP, &
-                                IM%NPE%AL(1)%TSNOW, HPROGRAM)
+    CALL WRITE_DIAG_MISC_ISBA_n(DTCO, DUO%CSELECT, DUO%LSNOWDIMNC, U, IM%ID%O%LPATCH_BUDGET, &
+                                IM%ID%D, IM%ID%ND, IM%ID%DM, IM%ID%NDM, IM%O, IM%S, IM%K,    &
+                                IM%NP, IM%NPE%AL(1)%TSNOW, HPROGRAM)
   END IF
 END IF
 !

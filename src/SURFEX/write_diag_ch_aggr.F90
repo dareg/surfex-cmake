@@ -75,7 +75,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_CH_AGGR_n',0,ZHOOK_HANDLE)
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'FULL  ','SURF  ','WRITE')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'FULL  ','SURF  ','WRITE','SURF_ATM_DIAGNOSTICS.OUT.nc')
 !
 !-------------------------------------------------------------------------------
 !
@@ -84,7 +84,8 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'FULL  ','SURF  ','WRITE')
 DO JSPEC=1,SIZE(CHE%TSEMISS)
   YRECFM = "E_"//TRIM(CHE%TSEMISS(JSPEC)%CNAME)
   YCOMMENT = "Emission data at time t (ppm*m/s)"
-  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,CHE%TSEMISS(JSPEC)%XEMISDATA,IRESP,HCOMMENT=YCOMMENT)
+  CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,CHE%TSEMISS(JSPEC)%XEMISDATA,IRESP,HCOMMENT=YCOMMENT,&
+          HNAM_DIM="Temporal_emiss")
 END DO
 !
 !-------------------------------------------------------------------------------
