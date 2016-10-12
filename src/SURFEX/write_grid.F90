@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE WRITE_GRID (DGU, U, &
-                             HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,PDIR,HDIR)
+                             HPROGRAM,HGRID,PGRID_PAR,PLAT,PLON,PMESH_SIZE,KRESP,HDIR)
 !     #########################################
 !
 !!****  *WRITE_GRID* - routine to write the horizontal grid of a scheme
@@ -80,7 +80,6 @@ REAL, DIMENSION(:), INTENT(IN)  :: PLAT       ! latitude  (degrees)
 REAL, DIMENSION(:), INTENT(IN)  :: PLON       ! longitude (degrees)
 REAL, DIMENSION(:), INTENT(IN)  :: PMESH_SIZE ! horizontal mesh size (m2)
 INTEGER,            INTENT(OUT) :: KRESP      ! error return code
-REAL, DIMENSION(:), INTENT(IN) , OPTIONAL :: PDIR ! heading of main axis of grid compared to North (degrees)
  CHARACTER(LEN=1),    INTENT(IN), OPTIONAL :: HDIR ! type of field :
                                                   ! 'H' : field with
                                                   !       horizontal spatial dim.
