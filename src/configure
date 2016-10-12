@@ -15,7 +15,7 @@ export VERSION_CDF=${VERSION_CDF:-"4.4.1"}
 export VERSION_CDFF=${VERSION_CDFF:-"4.4.4"}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI:-"1.17.0"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
-export VERSION_XIOS=${VERSION_XIOS:-"876-patch"}
+export VERSION_XIOS=${VERSION_XIOS:-"trunk-967"}
 export SFX_INT=${SFX_INT-"I4"}
 #
 export NEED_TOOLS=NO
@@ -412,7 +412,7 @@ if [ "x${VER_MPI}" = "xNOMPI" ] ; then
 fi
 #
 if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
-  export LIB_PATH=$LOCAL/src/LIB/netcdf4/hdf5-${VERSION_HDF5}-${ARCH}-${VER_MPI}/lib
+  export LIB_PATH=$LOCAL/src/LIB/netcdf4/netcdf-fortran-${VERSION_CDFF}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/netcdf-${VERSION_CDF}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/hdf5-${VERSION_HDF5}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/szip-${VERSION_SZIP}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/zlib-${VERSION_ZLIB}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/curl-${VERSION_CURL}-${ARCH}-${VER_MPI}/lib
 #
 else
   export LIB_PATH=
@@ -504,6 +504,7 @@ fi
 #
 #  Install XIOS
 #
+set -x
 if [ x"${VER_XIOS}" == x2 ] ; then
     if [ "x${VER_MPI}" = "xNOMPI" ] ; then
 	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
@@ -514,7 +515,7 @@ if [ x"${VER_XIOS}" == x2 ] ; then
     else
 	cd $LOCAL/src/LIB
 	base=XIOS-${VERSION_XIOS}
-	if [ ! -d $base ]; then 
+	if [ ! -d $base-$ARCH ]; then 
 	    tarball=$base.tar
 	    if [ -f $tarball ] ; then 
 		tar -xf $tarball 
