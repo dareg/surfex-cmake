@@ -332,7 +332,7 @@ ZZ0SN(:) = XZ0SN
 ZWSAT(:) = PWSAT(:)-PWGI(:)
 ZWFC(:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
 PHUG(:)  = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
-ZWSAT(:) = MAX(XWGMIN, ZWSAT(:))
+ZWSAT(:) = MAX(XWGMIN, PWSAT(:)-PWG(:))
 ZWFC(:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
 PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 !
