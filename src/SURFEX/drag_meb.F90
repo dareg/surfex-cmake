@@ -300,7 +300,7 @@ ZWFC (:)  = PWFC(:)*ZWSAT(:)/PWSAT(:)
 !
 DK%XHUG(:) = 0.5 * ( 1.-COS(XPI*MIN((PWG(:)-XWGMIN) /ZWFC(:),1.)) )
 !
-ZWSAT(:) = MAX(XWGMIN, ZWSAT(:))
+ZWSAT(:) = MAX(XWGMIN, ZWSAT(:)-PWG(:))
 ZWFC (:) = PWFC(:)*ZWSAT(:)/PWSAT(:)
 PHUGI(:) = 0.5 * ( 1.-COS(XPI*MIN(PWGI(:)/ZWFC(:),1.)) )
 !

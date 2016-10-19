@@ -3,14 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #######################################################
-#ifdef MNH_PARALLEL
-      SUBROUTINE GET_SURF_GRID_DIM_n (UG, &
-                                      HGRID,ORECT,KDIM1,KDIM2,&
+      SUBROUTINE GET_SURF_GRID_DIM_n (UG,HGRID,ORECT,KDIM1,KDIM2,&
                                       KGRID_PAR,PGRID_PAR)
-#else
-      SUBROUTINE GET_SURF_GRID_DIM_n (UG, &
-                                      HGRID,ORECT,KDIM1,KDIM2)
-#endif
 !     #######################################################
 !
 !!**** *GET_SURF_GRID_DIM_n* get the grid mesh dimensions
@@ -61,10 +55,8 @@ LOGICAL,                         INTENT(OUT)   :: ORECT     ! T if rectangular g
 INTEGER,                         INTENT(OUT)   :: KDIM1     ! 1st dimension
 INTEGER,                         INTENT(OUT)   :: KDIM2     ! 2nd dimension
 !
-#ifdef MNH_PARALLEL
-INTEGER,                         INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
-REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
-#endif
+INTEGER, OPTIONAL,               INTENT(IN)  :: KGRID_PAR ! size of PGRID_PAR
+REAL,    DIMENSION(:), OPTIONAL, INTENT(IN)  :: PGRID_PAR ! grid parameters
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
@@ -75,11 +67,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',0,ZHOOK_HANDLE)
 HGRID = UG%G%CGRID
 !
-#ifdef MNH_PARALLEL
- CALL GET_GRID_DIM(UG%G%CGRID,KGRID_PAR,PGRID_PAR,ORECT,KDIM1,KDIM2)
-#else
- CALL GET_GRID_DIM(UG%G%CGRID,UG%NGRID_FULL_PAR,UG%XGRID_FULL_PAR,ORECT,KDIM1,KDIM2)
-#endif
+IF (PRESENT(KGRID_PAR).AND.PRESENT(PGRID_PAR)) THEN
+  CALL GET_GRID_DIM(UG%G%CGRID,KGRID_PAR,PGRID_PAR,ORECT,KDIM1,KDIM2)
+ELSE
+  CALL GET_GRID_DIM(UG%G%CGRID,UG%NGRID_FULL_PAR,UG%XGRID_FULL_PAR,ORECT,KDIM1,KDIM2)
+ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('GET_SURF_GRID_DIM_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
