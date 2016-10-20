@@ -551,20 +551,20 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
       ELSE
         !
         !Prognostic variables forced to XUNDEF for correct outputs
-        !DMK%XSNOWDZ(JJ,JWRK)=XUNDEF
-        !! Careful : to compute average surface temperature in ISBA_SNOW_AGR
-        !! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
-        !! (vanishing snowpack)
-        !IF (.NOT.(PEK%XPSN(JJ)>0.0.AND.JWRK==1)) DMK%XSNOWTEMP(JJ,JWRK) = XUNDEF
-        !DMK%XSNOWLIQ  (JJ,JWRK) = XUNDEF
-        !PEK%TSNOW%HEAT(JJ,JWRK) = XUNDEF
-        !PEK%TSNOW%RHO (JJ,JWRK) = XUNDEF
-        !PEK%TSNOW%AGE (JJ,JWRK) = XUNDEF
-        !IF (PEK%TSNOW%SCHEME=='CRO') THEN
-        !  PEK%TSNOW%GRAN1(JJ,JWRK) = XUNDEF
-        !  PEK%TSNOW%GRAN2(JJ,JWRK) = XUNDEF
-        !  PEK%TSNOW%HIST (JJ,JWRK) = XUNDEF
-        !END IF
+        DMK%XSNOWDZ(JJ,JWRK)=XUNDEF
+        ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
+        ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
+        ! (vanishing snowpack)
+        IF (.NOT.(PEK%XPSN(JJ)>0.0.AND.JWRK==1)) DMK%XSNOWTEMP(JJ,JWRK) = XUNDEF
+        DMK%XSNOWLIQ  (JJ,JWRK) = XUNDEF
+        PEK%TSNOW%HEAT(JJ,JWRK) = XUNDEF
+        PEK%TSNOW%RHO (JJ,JWRK) = XUNDEF
+        PEK%TSNOW%AGE (JJ,JWRK) = XUNDEF
+        IF (PEK%TSNOW%SCHEME=='CRO') THEN
+          PEK%TSNOW%GRAN1(JJ,JWRK) = XUNDEF
+          PEK%TSNOW%GRAN2(JJ,JWRK) = XUNDEF
+          PEK%TSNOW%HIST (JJ,JWRK) = XUNDEF
+        END IF
       ENDIF               
     ENDDO
   ENDDO
