@@ -41,6 +41,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    08/2009
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -106,7 +107,6 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSNET_ICE
 REAL, DIMENSION(KI)   :: ZRUNOFF    ! Cumulated Surface runoff             (kg/m2)
 REAL, DIMENSION(KI)   :: ZDRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(KI)   :: ZCALVING   ! Cumulated Calving flux               (kg/m2)
-REAL, DIMENSION(KI)   :: ZRECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
 REAL, DIMENSION(KI)   :: ZSRCFLOOD  ! Cumulated flood freshwater flux      (kg/m2)
 !
 REAL, DIMENSION(KI)   :: ZSEA_FWSU  ! Cumulated zonal wind stress       (Pa.s)
@@ -152,15 +152,13 @@ IF(LCPL_LAND)THEN
   ZRUNOFF  (:) = XUNDEF
   ZDRAIN   (:) = XUNDEF
   ZCALVING (:) = XUNDEF
-  ZRECHARGE(:) = XUNDEF
   ZSRCFLOOD(:) = XUNDEF
 !
 ! * Get land output fields
 !       
   CALL GET_SFX_LAND(I, U, &
-                    LCPL_GW,LCPL_FLOOD,LCPL_CALVING,    &
-                    ZRUNOFF,ZDRAIN,ZCALVING,ZRECHARGE,  &
-                    ZSRCFLOOD             )
+                    LCPL_GW,LCPL_FLOOD,LCPL_CALVING,  &
+                    ZRUNOFF,ZDRAIN,ZCALVING,ZSRCFLOOD )
 !
 ! * Assign land output fields
 !        

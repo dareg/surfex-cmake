@@ -22,6 +22,7 @@ MODULE MODN_TRIP_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -40,7 +41,6 @@ REAL             :: XTSTEP_CPL_LAND = -1.0     ! Coupling time step
 !
  CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff 
  CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
- CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge
  CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux
  CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
 !
@@ -70,7 +70,7 @@ REAL             :: XTSTEP_CPL_SEA = -1.0   ! Coupling time step
 !
 NAMELIST/NAM_TRIP_LAND_CPL/XTSTEP_CPL_LAND,CRUNOFF,CDRAIN, &
                            CFFLOOD,CPIFLOOD,CWTD,CFWTD,    &
-                           CRECHARGE,CCALVING,CSRCFLOOD
+                           CCALVING,CSRCFLOOD
 !
 !
 !*       2.    NAMELISTS TRIP COUPLED WITH A OCEANIC GENERAL CIRCULATION MODEL

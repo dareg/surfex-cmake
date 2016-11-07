@@ -22,6 +22,7 @@ SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    06/08 
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -90,7 +91,6 @@ REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZSRC_FLOOD_OL     ! Flood source term
 REAL, DIMENSION(KLON,KLAT) :: ZRUNOFF           ! Surface runoff               (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZDRAIN            ! Drainage                     (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZCALVING          ! Calving flux                 (kg/s)
-REAL, DIMENSION(KLON,KLAT) :: ZRECHARGE         ! Groundwater recharge         (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZSRC_FLOOD        ! Input P-E-I flood source term(kg/s)
 !
 REAL                       :: ZTIMEC            ! cumulated current time (s)
@@ -110,7 +110,6 @@ IF (LHOOK) CALL DR_HOOK('TRIP_RUN',0,ZHOOK_HANDLE)
 ZRUNOFF   (:,:) = XUNDEF
 ZDRAIN    (:,:) = XUNDEF
 ZCALVING  (:,:) = XUNDEF
-ZRECHARGE (:,:) = XUNDEF
 ZSRC_FLOOD(:,:) = XUNDEF
 !
 ! --------------------------------------------------------------------------------------
@@ -141,13 +140,12 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
    IF(OOASIS)THEN           
      CALL TRIP_OASIS_RECV(TP, TPG, &
                           KLISTING,KLON,KLAT,ZTIMEC,ZRUNOFF,  &
-                          ZDRAIN,ZCALVING,ZRECHARGE,ZSRC_FLOOD)
+                          ZDRAIN,ZCALVING,ZSRC_FLOOD          )
    ELSE
      ZDRAIN    (:,:) = ZDRAIN_OL    (:,:,JNB_TSTEP_RUN) / XTSTEP_RUN
      ZRUNOFF   (:,:) = ZRUNOFF_OL   (:,:,JNB_TSTEP_RUN) / XTSTEP_RUN
      ZSRC_FLOOD(:,:) = ZSRC_FLOOD_OL(:,:,JNB_TSTEP_RUN) / XTSTEP_RUN
      ZCALVING  (:,:) = 0.0
-     ZRECHARGE (:,:) = 0.0
    ENDIF
 !
 ! * TRIP PHYSIC CALL
@@ -156,8 +154,7 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
                        KLISTING,KLON,KLAT,PTIME,LPRINT, &
                        JNB_TSTEP_RUN,JNB_TSTEP_DIAG,    &
                        XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,  &
-                       ZDRAIN,ZCALVING,ZRECHARGE,       &
-                       ZSRC_FLOOD                       )
+                       ZDRAIN,ZCALVING,ZSRC_FLOOD       )
 !
 ! * TRIP OUTPUT FLUXES
 !

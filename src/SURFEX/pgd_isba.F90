@@ -44,6 +44,7 @@
 !!    R. Alkama     05/2012 : npatch must be 12 or 19 if CPHOTO/='NON'
 !!    B. Decharme   11/2013 : groundwater distribution for water table/surface coupling
 !!    P. Samuelsson 02/2012 : MEB
+!!    B. Decharme    10/2016  bug surface/groundwater coupling   
 !!
 !----------------------------------------------------------------------------
 !
@@ -164,7 +165,6 @@ REAL                     :: ZRM_PATCH        ! threshold to remove little fracti
  CHARACTER(LEN=28)        :: YRUNOFFB         ! file name for runoffb parameter
  CHARACTER(LEN=28)        :: YWDRAIN          ! file name for wdrain parameter
  CHARACTER(LEN=28)        :: YPERM            ! file name for permafrost distribution
- CHARACTER(LEN=28)        :: YGW               ! file name for groundwater map
  CHARACTER(LEN=6)         :: YSANDFILETYPE    ! sand data file type
  CHARACTER(LEN=6)         :: YCLAYFILETYPE    ! clay data file type
  CHARACTER(LEN=6)         :: YSOCFILETYPE     ! organic carbon data file type
@@ -172,7 +172,6 @@ REAL                     :: ZRM_PATCH        ! threshold to remove little fracti
  CHARACTER(LEN=6)         :: YRUNOFFBFILETYPE ! subgrid runoff data file type
  CHARACTER(LEN=6)         :: YWDRAINFILETYPE  ! subgrid drainage data file type
  CHARACTER(LEN=6)         :: YPERMFILETYPE    ! permafrost distribution data file type
- CHARACTER(LEN=6)         :: YGWFILETYPE      ! groundwater distribution data file type
 REAL                     :: XUNIF_SAND       ! uniform value of sand fraction  (-)
 REAL                     :: XUNIF_CLAY       ! uniform value of clay fraction  (-)
 REAL                     :: XUNIF_SOC_TOP    ! uniform value of organic carbon top soil (kg/m2)
@@ -180,13 +179,11 @@ REAL                     :: XUNIF_SOC_SUB    ! uniform value of organic carbon s
 REAL                     :: XUNIF_RUNOFFB    ! uniform value of subgrid runoff coefficient
 REAL                     :: XUNIF_WDRAIN     ! uniform subgrid drainage parameter
 REAL                     :: XUNIF_PERM       ! uniform permafrost distribution
-REAL                     :: XUNIF_GW         ! uniform groundwater distribution
 LOGICAL                  :: LIMP_SAND        ! Imposed maps of Sand
 LOGICAL                  :: LIMP_CLAY        ! Imposed maps of Clay
 LOGICAL                  :: LIMP_SOC         ! Imposed maps of organic carbon
 LOGICAL                  :: LIMP_CTI         ! Imposed maps of topographic index statistics
 LOGICAL                  :: LIMP_PERM        ! Imposed maps of permafrost distribution
-LOGICAL                  :: LIMP_GW          ! Imposed maps of groundwater distribution
 REAL, DIMENSION(150)     :: ZSOILGRID        ! Soil grid reference for DIF
  CHARACTER(LEN=28)        :: YPH           ! file name for pH
  CHARACTER(LEN=28)        :: YFERT         ! file name for fertilisation rate
@@ -217,7 +214,6 @@ IF (LHOOK) CALL DR_HOOK('PGD_ISBA',0,ZHOOK_HANDLE)
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,          &
                        XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,    &
                        YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM, GMEB,        &                       
-                       YGW, YGWFILETYPE, XUNIF_GW, LIMP_GW,                      &                       
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,      &
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,         &
@@ -658,49 +654,6 @@ ELSE
 !
   I%LPERM=.FALSE.  
   ALLOCATE(I%XPERM(0))
-!
-ENDIF
-!
-!*    11.     Groundwater bassin distribution
-!             -----------------------
-!
-IF(LEN_TRIM(YGW)/=0.OR.XUNIF_GW/=XUNDEF)THEN
-!
-  ALLOCATE(I%XGW(ILU))
-!
-  I%LGW=.TRUE.
-!
-  IF(LIMP_GW)THEN
-!
-    IF(YGWFILETYPE=='NETCDF')THEN
-       CALL ABOR1_SFX('Use another format than netcdf for groundwater input file with LIMP_GW')
-    ELSE
-#ifdef SFX_ASC
-       CFILEIN     = ADJUSTL(ADJUSTR(YGW)//'.txt')
-#endif
-#ifdef SFX_FA
-       CFILEIN_FA  = ADJUSTL(ADJUSTR(YGW)//'.fa')
-#endif
-#ifdef SFX_LFI
-       CFILEIN_LFI = ADJUSTL(YGW)
-#endif
- CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                         YGWFILETYPE,'NATURE','ISBA  ','READ ')
-    ENDIF     
-!   
-    CALL READ_SURF(&
-                 YGWFILETYPE,'GW',I%XGW(:),IRESP) 
-!
-    CALL END_IO_SURF_n(YGWFILETYPE)
-  ELSE
-    CALL PGD_FIELD(DTCO, UG, U, USS, &
-                  HPROGRAM,'Groundwater bassin','NAT',YGW,YGWFILETYPE,XUNIF_GW,I%XGW(:))
-  ENDIF
-!
-ELSE
-!
-  I%LGW=.FALSE.  
-  ALLOCATE(I%XGW(0))
 !
 ENDIF
 !

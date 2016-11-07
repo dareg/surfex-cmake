@@ -33,6 +33,7 @@ SUBROUTINE SFX_OASIS_CHECK (I, U, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -109,7 +110,7 @@ IF(.NOT.LCPL_GW.AND.I%CISBA=='DIF'.AND.I%LWTD)THEN
       WRITE(KLUOUT,*)'!!!                                                     !!!'
       WRITE(KLUOUT,*)'!!! ARE YOU SURE : YOU DO NOT WANT THIS COUPLING ?      !!!'
       WRITE(KLUOUT,*)'!!!                                                     !!!'
-      WRITE(KLUOUT,*)'!!! Use NAM_SFX_LAND_CPL with CWTD, CFWTD and CRECHARGE !!!'
+      WRITE(KLUOUT,*)'!!! Use NAM_SFX_LAND_CPL with CWTD and CFWTD            !!!'
       WRITE(KLUOUT,*)'!!!  if you want this coupling via OASIS                !!!'
       WRITE(KLUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'  
 ENDIF

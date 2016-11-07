@@ -920,7 +920,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
                       IFILE_ID,'FLT_ISBA'    ,'non-permafrost_frozen_layer_thickness'                      ,JDIM,YATT_TITLE,YATT)
   ENDIF
   !
-  IF(I%LGW)THEN
+  IF(I%LWTD)THEN
     YATT = '-'
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'FWTD_ISBA'   ,'grid-cell_fraction_of_water_table_to_rise'              ,JDIM,YATT_TITLE,YATT)

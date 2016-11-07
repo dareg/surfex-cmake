@@ -5,7 +5,7 @@
 !     #########
       SUBROUTINE DIAG_CPL_ESM_ISBA (I, &
                                     PTSTEP,PCPL_DRAIN,PCPL_RUNOFF,PCPL_EFLOOD, &
-                                     PCPL_PFLOOD,PCPL_IFLOOD,PCPL_ICEFLUX         )  
+                                    PCPL_PFLOOD,PCPL_IFLOOD,PCPL_ICEFLUX       )  
 !     #####################################################################
 !
 !!****  *DIAG_CPL_ESM_ISBA*  
@@ -39,6 +39,7 @@
 !!    -------------
 !!
 !!      B. Decharme    01/16 : Bug with flood budget and add cpl keys
+!!      B. Decharme   10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -71,7 +72,6 @@ REAL, DIMENSION(:,:), INTENT(IN)   :: PCPL_ICEFLUX
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PCPL_DRAIN,1),SIZE(PCPL_DRAIN,2)) :: ZCPL_DRAIN
-REAL, DIMENSION(SIZE(PCPL_DRAIN,1),SIZE(PCPL_DRAIN,2)) :: ZCPL_RECHARGE
 !
 REAL, DIMENSION(SIZE(I%XPATCH,1)) :: ZSUMPATCH
 REAL, DIMENSION(SIZE(I%XPATCH,1)) :: ZBUDGET
@@ -98,27 +98,11 @@ DO JPATCH=1,INP
   ENDDO
 ENDDO
 !
-ZCPL_RECHARGE(:,:) = 0.0
-!
 IF(I%CISBA/='DIF')THEN
 ! prevent small negatives values with ISBA-FR
   ZCPL_DRAIN(:,:)=MAX(0.0,PCPL_DRAIN(:,:))
 ELSE
   ZCPL_DRAIN(:,:)=PCPL_DRAIN(:,:)
-ENDIF
-!
-!* groundwater case
-!  ----------------
-!
-IF(LCPL_GW.AND.I%LWTD)THEN
-  DO JPATCH=1,INP
-    DO JI=1,INI
-      IF(I%XGW(JI)>0.0.AND.ZSUMPATCH(JI)>0.0)THEN
-        ZCPL_RECHARGE(JI,JPATCH) = PCPL_DRAIN(JI,JPATCH)
-        ZCPL_DRAIN   (JI,JPATCH) = 0.0
-      ENDIF
-    ENDDO
-  ENDDO
 ENDIF
 !
 !* update ISBA - RRM coupling variable (kg/m2)
@@ -135,10 +119,6 @@ DO JPATCH=1,INP
 !
      IF(I%LGLACIER.AND.ZSUMPATCH(JI)>0.0)THEN
         I%XCPL_ICEFLUX(JI) = I%XCPL_ICEFLUX(JI) + PTSTEP * PCPL_ICEFLUX(JI,JPATCH) * I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
-     ENDIF
-!
-     IF(LCPL_GW.AND.I%LWTD.AND.ZSUMPATCH(JI)>0.0)THEN
-        I%XCPL_RECHARGE(JI) = I%XCPL_RECHARGE(JI) + PTSTEP * ZCPL_RECHARGE(JI,JPATCH) * I%XPATCH(JI,JPATCH)/ZSUMPATCH(JI)
      ENDIF
 !   
      IF(LCPL_FLOOD.AND.I%LFLOOD.AND.ZSUMPATCH(JI)>0.0)THEN

@@ -26,6 +26,7 @@ MODULE MODN_SFX_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -48,7 +49,6 @@ REAL             :: XTSTEP_CPL_LAKE = -1.0  ! Coupling time step for lake
  CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff 
  CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
  CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux 
- CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge 
  CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
 !
 ! Input variables
@@ -57,6 +57,8 @@ REAL             :: XTSTEP_CPL_LAKE = -1.0  ! Coupling time step for lake
  CHARACTER(LEN=8) :: CFWTD       = '        '   ! grid-cell fraction of water table rise
  CHARACTER(LEN=8) :: CFFLOOD     = '        '   ! Floodplains fraction
  CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion
+!
+REAL             :: XFLOOD_LIM = 0.01
 !
 !-------------------------------------------------------------------------------
 !
@@ -116,8 +118,8 @@ LOGICAL          :: LWATER = .FALSE.
 !*       1.    NAMELISTS FOR LAND SURFACE FIELD
 !              ------------------------------------------------
 !
-NAMELIST/NAM_SFX_LAND_CPL/XTSTEP_CPL_LAND,                                &
-                         CRUNOFF,CDRAIN,CCALVING,CRECHARGE,CWTD,CFWTD,    &
+NAMELIST/NAM_SFX_LAND_CPL/XTSTEP_CPL_LAND, XFLOOD_LIM,        &
+                         CRUNOFF,CDRAIN,CCALVING,CWTD,CFWTD,  &
                          CFFLOOD,CPIFLOOD,CSRCFLOOD
 !
 !

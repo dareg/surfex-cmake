@@ -33,6 +33,7 @@ MODULE MODD_ISBA_n
 !!      A.L. Gibelin    07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin    07/2009 : Suppress PPST and PPSTF as outputs
 !!      P. Samuelsson   02/2012 : MEB
+!!      B. Decharme    10/2016  bug surface/groundwater coupling   
 !!
 !-------------------------------------------------------------------------------
 !
@@ -169,7 +170,6 @@ TYPE ISBA_t
   LOGICAL                        :: LCTI       ! Topographic index data
   LOGICAL                        :: LSOCP      ! Soil organic carbon profile data
   LOGICAL                        :: LPERM      ! Permafrost distribution data
-  LOGICAL                        :: LGW        ! Groudwater distribution data
   LOGICAL                        :: LNOF  
 !-------------------------------------------------------------------------------
 !
@@ -401,7 +401,6 @@ TYPE ISBA_t
   REAL, POINTER, DIMENSION(:,:)    :: XCLAY          ! clay fraction                           (-)
   REAL, POINTER, DIMENSION(:,:)    :: XSOC           ! soil organic carbon content             (kg/m2)
   REAL, POINTER, DIMENSION(:)      :: XPERM          ! permafrost distribution                 (-)
-  REAL, POINTER, DIMENSION(:)      :: XGW            ! groundwater distribution                 (-)
 
   REAL, POINTER, DIMENSION(:)      :: XWDRAIN        ! continuous drainage parameter           (-)
   REAL, POINTER, DIMENSION(:)      :: XTAUICE        ! soil freezing characteristic timescale  (s)
@@ -673,7 +672,6 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
   REAL, POINTER, DIMENSION(:)  :: XCPL_DRAIN   ! Surface runoff
   REAL, POINTER, DIMENSION(:)  :: XCPL_RUNOFF  ! Deep drainage or gourdwater recharge
   REAL, POINTER, DIMENSION(:)  :: XCPL_ICEFLUX ! Calving flux
-  REAL, POINTER, DIMENSION(:)  :: XCPL_RECHARGE! Groundwater recharge
   REAL, POINTER, DIMENSION(:)  :: XCPL_EFLOOD  ! floodplains evaporation
   REAL, POINTER, DIMENSION(:)  :: XCPL_PFLOOD  ! floodplains precipitation interception
   REAL, POINTER, DIMENSION(:)  :: XCPL_IFLOOD  ! floodplains infiltration
@@ -891,7 +889,6 @@ IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YISBA%XCPL_DRAIN)
   NULLIFY(YISBA%XCPL_RUNOFF)
   NULLIFY(YISBA%XCPL_ICEFLUX)
-  NULLIFY(YISBA%XCPL_RECHARGE)
   NULLIFY(YISBA%XCPL_EFLOOD)
   NULLIFY(YISBA%XCPL_PFLOOD)
   NULLIFY(YISBA%XCPL_IFLOOD)
@@ -953,7 +950,6 @@ YISBA%LECOCLIMAP=.FALSE.
 YISBA%LCTI=.FALSE.
 YISBA%LSOCP=.FALSE.
 YISBA%LPERM=.FALSE.
-YISBA%LGW=.FALSE.
 YISBA%LSPINUPCARBS=.FALSE.
 YISBA%LSPINUPCARBW=.FALSE.
 YISBA%LAGRI_TO_GRASS=.FALSE.

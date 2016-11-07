@@ -5,8 +5,7 @@
 !     #########
       SUBROUTINE GET_SFX_LAND (I, U, &
                                OCPL_GW,OCPL_FLOOD,OCPL_CALVING,  &
-                              PRUNOFF,PDRAIN,PCALVING,PRECHARGE, &
-                              PSRCFLOOD            )  
+                               PRUNOFF,PDRAIN,PCALVING,PSRCFLOOD )  
 !     ###############################################################################
 !
 !!****  *GET_SFX_LAND* - routine to get some land surface variables from surfex
@@ -34,6 +33,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -68,7 +68,6 @@ LOGICAL,            INTENT(IN)  :: OCPL_CALVING ! calving key
 REAL, DIMENSION(:), INTENT(OUT) :: PRUNOFF    ! Cumulated Surface runoff             (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PDRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PCALVING   ! Cumulated Calving flux               (kg/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PRECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSRCFLOOD  ! Cumulated freshwater flux            (kg/m2)
 !
 !*       0.2   Declarations of local variables
@@ -90,7 +89,6 @@ IF (LHOOK) CALL DR_HOOK('GET_SFX_LAND',0,ZHOOK_HANDLE)
 PRUNOFF  (:) = XUNDEF
 PDRAIN   (:) = XUNDEF
 PCALVING (:) = XUNDEF
-PRECHARGE(:) = XUNDEF
 PSRCFLOOD(:) = XUNDEF
 !
 !*       2.0   Get variable over nature
@@ -116,13 +114,6 @@ IF(U%NSIZE_NATURE>0)THEN
   ELSEIF(I%LGLACIER)THEN
     I%XCPL_DRAIN  (:) = I%XCPL_DRAIN(:) + I%XCPL_ICEFLUX(:)
     I%XCPL_ICEFLUX(:) = 0.0
-  ENDIF
-!
-! * groundwater recharge 
-!
-  IF(OCPL_GW)THEN
-    CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XCPL_RECHARGE(:),PRECHARGE(:),XUNDEF)
-    I%XCPL_RECHARGE(:)=0.0
   ENDIF
 !
 ! * floodplain source terms

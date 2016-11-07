@@ -1,10 +1,9 @@
 !#################################################################
 SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
-                            KLISTING,KLON,KLAT,PTIME,OPRINT, &
+                           KLISTING,KLON,KLAT,PTIME,OPRINT, &
                            KNB_TSTEP_RUN,KNB_TSTEP_DIAG,    &
                            PTSTEP_RUN,PTSTEP_DIAG,PRUNOFF,  &
-                           PDRAIN,PCALVING,PRECHARGE,       &
-                           PSRC_FLOOD                       ) 
+                           PDRAIN,PCALVING,PSRC_FLOOD       )
 !#################################################################
 !
 !!****  *TRIP*  
@@ -27,6 +26,7 @@ SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
 !!    -------------
 !!      Original    01/02/05 
 !!      Modif.      28/05/08 
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -84,7 +84,6 @@ INTEGER,              INTENT(INOUT) :: KNB_TSTEP_DIAG !DIAG call counter     [-]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PRUNOFF   !Input surface runoff            [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDRAIN    !Input free drainage             [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PCALVING  !Input claving flux from glacier [kg/s]
-REAL, DIMENSION(:,:), INTENT(IN)    :: PRECHARGE !Input goundwater recharge       [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSRC_FLOOD! Input P-E-I flood source term  [kg/s]
 !
 !*      0.2    declarations of local variables
@@ -167,9 +166,9 @@ ZRUNOFF(:,:) = PRUNOFF(:,:)
 !calving over greenland and antarctica directly to ocean
 !
 WHERE(TPG%GMASK(:,:).AND..NOT.TPG%GMASK_GRE(:,:).AND..NOT.TPG%GMASK_ANT(:,:))
-  ZDRAIN(:,:) = PDRAIN(:,:)+PRECHARGE(:,:)+PCALVING(:,:)
+  ZDRAIN(:,:) = PDRAIN(:,:)+PCALVING(:,:)
 ELSEWHERE
-  ZDRAIN(:,:) = PDRAIN(:,:)+PRECHARGE(:,:)
+  ZDRAIN(:,:) = PDRAIN(:,:)
 ENDWHERE
 !
 ! Flood treatment

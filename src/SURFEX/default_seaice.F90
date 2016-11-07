@@ -432,7 +432,7 @@ xhsimin = .2
 !
 alblc = 0.
 xlmelt = 3.e-3
-xswhdfr = 0.95
+xswhdfr = 1.00
 albyngi = 1.
 albimlt = 0.56
 albsmlt = 0.77

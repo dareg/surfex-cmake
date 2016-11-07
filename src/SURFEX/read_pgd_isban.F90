@@ -42,6 +42,7 @@
 !!                   11/2013  : same for groundwater distribution
 !!                   11/2014  : Read XSOILGRID as a series of real 
 !!      P. Samuelsson 10/2014 : MEB
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -400,30 +401,7 @@ ELSE
 !
 ENDIF
 !
-!* groundwater distribution
-!
-IF (IVERSION>=8) THEN
-   YRECFM='GWKEY'
-   CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%LGW,IRESP)
-ELSE
-   I%LGW=.FALSE.
-ENDIF
-!
-IF(I%LGW)THEN
-!  
-  ALLOCATE(I%XGW (IG%NDIM))
-!
-  YRECFM='GWFRAC'
-  CALL READ_SURF(&
-                HPROGRAM,YRECFM,I%XGW(:),IRESP)
-  WHERE(I%XGW(:)==XUNDEF)I%XGW(:)=0.0
-!
-ELSE
-!  
-  ALLOCATE(I%XGW (0))
-!
-ENDIF
+!SOILNOX
 !
 IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
    YRECFM='NO'
@@ -432,8 +410,6 @@ IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
 ELSE
    I%LNOF = .FALSE.
 ENDIF
-!
-!SOILNOX
 !
 IF (CHI%LCH_NO_FLUX) THEN
   !

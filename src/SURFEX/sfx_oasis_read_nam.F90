@@ -32,6 +32,7 @@ SUBROUTINE SFX_OASIS_READ_NAM(HPROGRAM,PTSTEP_SURF,HINIT)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    05/2008 
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -216,17 +217,11 @@ IF(LCPL_LAND)THEN
 !
 ! Particular case due to water table depth / surface coupling
 !    
-  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0.OR.LEN_TRIM(CRECHARGE)>0)THEN
+  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0)THEN
     LCPL_GW = .TRUE.
   ENDIF
 !
   IF(LCPL_GW)THEN
-!
-!   Output variable
-!
-    YKEY  ='CRECHARGE'
-    YCOMMENT='Groundwater recharge'
-    CALL CHECK_FIELD(CRECHARGE,YKEY,YCOMMENT,YLAND,KOUT)
 !
 !   Input variable
 !

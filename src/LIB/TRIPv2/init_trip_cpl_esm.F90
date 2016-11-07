@@ -17,13 +17,14 @@ SUBROUTINE INIT_TRIP_CPL_ESM (TP, TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    12/12/13 
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 !
-USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
@@ -31,6 +32,9 @@ USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
 !
 USE MODD_TRIP_PAR,  ONLY : XUNDEF
 !
+USE MODE_TRIP_GRID
+!
+USE MODI_TRIP_NEAREST
 !
 USE MODI_GWF_CPL_UPDATE
 !
@@ -50,9 +54,18 @@ INTEGER, INTENT(IN) :: KLAT
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(KLON,KLAT) :: ZHG_OLD    !Water table elevation at t-1    [m]
-REAL, DIMENSION(KLON,KLAT) :: ZWTD       !Water table depth               [m]
-REAL, DIMENSION(KLON,KLAT) :: ZFWTD      !Fraction of Water table to rise
+REAL,   DIMENSION(KLON,KLAT) :: ZHG_OLD    !Water table elevation at t-1    [m]
+REAL,   DIMENSION(KLON,KLAT) :: ZWTD       !Water table depth               [m]
+REAL,   DIMENSION(KLON,KLAT) :: ZFWTD      !Fraction of Water table to rise
+!
+INTEGER,DIMENSION(KLON*KLAT) :: ICODE
+REAL,   DIMENSION(KLON*KLAT) :: ZNEAR
+REAL,   DIMENSION(KLON*KLAT) :: ZX
+REAL,   DIMENSION(KLON*KLAT) :: ZY
+REAL,   DIMENSION(KLON)      :: ZLON
+REAL,   DIMENSION(KLAT)      :: ZLAT
+!
+INTEGER                      :: IWORK, JLON, JLAT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -87,13 +100,16 @@ ENDIF
 !
 IF(LCPL_LAND)THEN
   IF(LCPL_GW)THEN
-    ALLOCATE(TP%XCPL_FWTD(KLON,KLAT))
-    ALLOCATE(TP%XCPL_WTD (KLON,KLAT))
-    TP%XCPL_FWTD(:,:) = XUNDEF
-    TP%XCPL_WTD (:,:) = XUNDEF
+    ALLOCATE(TP%XCPL_FWTD (KLON,KLAT))
+    ALLOCATE(TP%XCPL_WTD  (KLON,KLAT))
+    ALLOCATE(TP%XNEAR_AQUI(KLON,KLAT))
+    TP%XCPL_FWTD (:,:) = XUNDEF
+    TP%XCPL_WTD  (:,:) = XUNDEF
+    TP%XNEAR_AQUI(:,:) = XUNDEF
   ELSE
-    ALLOCATE(TP%XCPL_FWTD(0,0))
-    ALLOCATE(TP%XCPL_WTD (0,0))
+    ALLOCATE(TP%XCPL_FWTD (0,0))
+    ALLOCATE(TP%XCPL_WTD  (0,0))
+    ALLOCATE(TP%XNEAR_AQUI(0,0))
   ENDIF
   IF(LCPL_FLOOD)THEN
     ALLOCATE(TP%XCPL_FFLOOD (KLON,KLAT))
@@ -107,8 +123,9 @@ IF(LCPL_LAND)THEN
 ELSE
   ALLOCATE(TP%XCPL_FFLOOD (0,0))
   ALLOCATE(TP%XCPL_PIFLOOD(0,0))
-  ALLOCATE(TP%XCPL_FWTD(0,0))
-  ALLOCATE(TP%XCPL_WTD (0,0))
+  ALLOCATE(TP%XCPL_FWTD   (0,0))
+  ALLOCATE(TP%XCPL_WTD    (0,0))
+  ALLOCATE(TP%XNEAR_AQUI  (0,0))
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -132,9 +149,9 @@ ENDIF
 !
 IF(LCPL_LAND)THEN
 !
-! Water table depth and fraction of water table to rise
-!
   IF(LCPL_GW)THEN
+!
+!   Water table depth and fraction of water table to rise
 !
     CALL GWF_CPL_UPDATE(TP%XTABGW_H,TP%XTABGW_F,TPG%GMASK_GW,&
                         TP%XTOPO_RIV,TP%XHC_BED,TP%XHGROUND, &
@@ -143,8 +160,44 @@ IF(LCPL_LAND)THEN
     WHERE(TPG%GMASK_GW(:,:))
           TP%XCPL_WTD (:,:) = ZWTD (:,:)
           TP%XCPL_FWTD(:,:) = ZFWTD(:,:)
+    ELSEWHERE(TPG%GMASK(:,:))
+          TP%XCPL_WTD (:,:) = XUNDEF
+          TP%XCPL_FWTD(:,:) = 0.0          
     ENDWHERE
+!
+!   Find nearest aquifer
 !    
+    CALL GET_TRIP_GRID(TPG%XTRIP_GRID,PLON=ZLON,PLAT=ZLAT)
+!
+    ZNEAR(:)=XUNDEF
+    ICODE(:)=-1    
+!
+    IWORK=0
+    DO JLAT=1,KLAT
+       DO JLON=1,KLON 
+          IF(TPG%GMASK(JLON,JLAT))THEN
+            IWORK=IWORK+1
+            ICODE(IWORK)=0
+            ZX   (IWORK)=ZLON(JLON)
+            ZY   (IWORK)=ZLAT(JLAT)
+            ZNEAR(IWORK)=TP%XNUM_AQUI(JLON,JLAT)
+            IF(TPG%GMASK_GW(JLON,JLAT))ICODE(IWORK)=1
+          ENDIF
+       ENDDO
+    ENDDO
+!
+    CALL TRIP_NEAREST(IWORK,ICODE(1:IWORK),ZX(1:IWORK),ZY(1:IWORK),ZNEAR(1:IWORK))
+!
+    IWORK=0
+    DO JLAT=1,KLAT
+       DO JLON=1,KLON
+          IF(TPG%GMASK(JLON,JLAT))THEN          
+            IWORK=IWORK+1
+            TP%XNEAR_AQUI(JLON,JLAT)=ZNEAR(IWORK)
+          ENDIF
+       ENDDO
+    ENDDO
+!
   ENDIF
 !
 ! Flood fraction [-] and potential infiltration [kg/m2]

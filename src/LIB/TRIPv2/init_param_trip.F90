@@ -79,7 +79,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PARAM_TRIP',0,ZHOOK_HANDLE)
 !
-INPARAM = 6
+INPARAM = 7
 IF(CGROUNDW/='DEF'           )INPARAM = INPARAM + 1
 IF(CVIT=='VAR'               )INPARAM = INPARAM + 3
 IF(CGROUNDW=='DIF'           )INPARAM = INPARAM + 6
@@ -124,8 +124,8 @@ YUNIT  (4) = '-                          '
 LZLEN  (4) = .FALSE.
 LDOUBLE(4) = .FALSE.
 !
-YVNAME (5) = 'DR_AREA                    '
-YVLNAME(5) = 'Trip drainage area         '
+YVNAME (5) = 'CELL_AREA                  '
+YVLNAME(5) = 'Trip cell area             '
 YUNIT  (5) = 'm2                         '
 LZLEN  (5) = .FALSE.
 LDOUBLE(5) = .TRUE.
@@ -136,7 +136,13 @@ YUNIT  (6) = '-                          '
 LZLEN  (6) = .FALSE.
 LDOUBLE(6) = .FALSE.
 !
-INUM = 6
+YVNAME (7) = 'DR_AREA                    '
+YVLNAME(7) = 'Trip drainage area         '
+YUNIT  (7) = 'm2                         '
+LZLEN  (7) = .FALSE.
+LDOUBLE(7) = .TRUE.
+!
+INUM = 7
 !
 IF(CGROUNDW/='DEF')THEN
 !   

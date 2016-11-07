@@ -43,6 +43,7 @@
 !!                   11/2013 : same for groundwater distribution
 !!                   11/2014 : Write XSOILGRID as a series of real 
 !!      P. Samuelsson 10/2014 : MEB
+!!    10/2016 B. Decharme : bug surface/groundwater coupling   
 !!
 !-------------------------------------------------------------------------------
 !
@@ -304,20 +305,6 @@ IF(I%LPERM)THEN
   YRECFM='PERM'
   CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,I%XPERM(:),IRESP,HCOMMENT=YCOMMENT)
-ENDIF
-!
-!* groundwater distribution
-!
-YRECFM='GWKEY'
-YCOMMENT=''
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,YRECFM,I%LGW,IRESP,HCOMMENT=YCOMMENT)
-!
-IF(I%LGW)THEN
-  YCOMMENT='X_Y_GWFRAC'
-  YRECFM='GWFRAC'
-  CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,YRECFM,I%XGW(:),IRESP,HCOMMENT=YCOMMENT)
 ENDIF
 !
 !SOILNOX

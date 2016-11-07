@@ -58,6 +58,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, DGU, UG, U, IM, DST, SLT, SV, &
 !!                                          water table / Surface coupling
 !!      P. Samuelsson  02/14 : MEB
 !!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
+!!      B. Decharme   10/2016  bug surface/groundwater coupling   
 !!
 !-------------------------------------------------------------------------------
 !
@@ -490,6 +491,10 @@ IF(LCPL_LAND)THEN
 !    
   IM%I%LCPL_RRM = .TRUE.
 !
+  IF(LCPL_GW)THEN
+    IM%I%LWTD = .TRUE.
+  ENDIF
+!
   ALLOCATE(IM%I%XCPL_DRAIN (KI))
   ALLOCATE(IM%I%XCPL_RUNOFF(KI))
   IM%I%XCPL_DRAIN (:) = 0.0
@@ -500,14 +505,6 @@ IF(LCPL_LAND)THEN
      IM%I%XCPL_ICEFLUX(:) = 0.0
   ELSE
      ALLOCATE(IM%I%XCPL_ICEFLUX(0))
-  ENDIF
-!
-  IF(LCPL_GW)THEN
-    IM%I%LWTD = .TRUE.
-    ALLOCATE(IM%I%XCPL_RECHARGE(KI))
-    IM%I%XCPL_RECHARGE(:) = 0.0
-  ELSE
-    ALLOCATE(IM%I%XCPL_RECHARGE(0))
   ENDIF
 !
   IF(LCPL_FLOOD)THEN
@@ -529,18 +526,10 @@ ELSE
   ALLOCATE(IM%I%XCPL_RUNOFF  (0))
   ALLOCATE(IM%I%XCPL_DRAIN   (0))
   ALLOCATE(IM%I%XCPL_ICEFLUX (0))
-  ALLOCATE(IM%I%XCPL_RECHARGE(0))
   ALLOCATE(IM%I%XCPL_EFLOOD  (0))
   ALLOCATE(IM%I%XCPL_PFLOOD  (0))
   ALLOCATE(IM%I%XCPL_IFLOOD  (0))
 !
-ENDIF
-!
-IF(IM%I%LWTD.AND..NOT.IM%I%LGW)THEN
-  WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: Groundwater map is required by SFX - Groundwater coupling '
-  WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: Please check your pgd namelist where this map must be     '
-  WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: specified (YGW and YGWFILETYPE, or XUNIF_GW, or LIMP_GW)  '
-  CALL ABOR1_SFX('COMPUTE_ISBA_PARAMETERS: Groundwater map is required by SFX - Groundwater coupling')
 ENDIF
 !
 ! * Initialize flood scheme :
