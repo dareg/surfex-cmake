@@ -62,8 +62,10 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZFIELDIN
 INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: ILSMIN
 INTEGER, DIMENSION(:,:), ALLOCATABLE :: IMASKIN  ! input mask
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASKOUT ! output mask
+INTEGER, DIMENSION(:), POINTER :: IMASK=>NULL()
+INTEGER, DIMENSION(SIZE(NP,1),SIZE(NP,2)) :: IP
 INTEGER                         :: INO, INL      ! output number of points
-INTEGER                         :: JL       ! loop counter
+INTEGER                         :: JL, JI       ! loop counter
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -89,8 +91,13 @@ ALLOCATE(ILSMIN(INO,INL,12))
 !
 CALL HORIBL_SURF_GRIDIN(NY,NIX,NNI,PFIELDIN(:,:),INO, &
                         .FALSE.,KLUOUT,LGLOBS,LGLOBN,LGLOBLON,NP, &
-                        ZFIELDIN0,ZFIELDIN,ILSMIN,IMASKIN,IMASKOUT)
+                        ZFIELDIN0,ZFIELDIN,ILSMIN,IMASKIN,IMASKOUT,IMASK)
 !
+DO JL=1,SIZE(NP,2)
+  DO JI = 1,SIZE(NP,1)
+    IP(JI,JL) = IMASK(NP(JI,JL))
+  ENDDO
+ENDDO
 !
 !*      3.    Input mask
 !
@@ -101,16 +108,12 @@ DO JL=1,INL
 !
 ENDDO
 !
-!IF (LGLOBLON.OR.LGLOBN.OR.LGLOBS) THEN
-!  CALL HORIBL_SURF_EXTRAP(0.,XILO1H,XY,XILO2H,NY,NIX,NNI,ZFIELDIN0,&
-!                          INO,NP,XZX,XZY,PFIELDOUT,KLUOUT,LINTERP)
-!ELSE
   CALL HORIBL_SURF_EXTRAP(0.,XILO1H,XY,XILO2H,NY,NIX,NNI,PFIELDIN,&
-                          INO,NP,XZX,XZY,PFIELDOUT,KLUOUT,LINTERP)
-!ENDIF
+                          INO,IP,XZX,XZY,PFIELDOUT,KLUOUT,LINTERP)
 !
 !*      5.    Deallocations
 !
+IMASK => NULL()
 DEALLOCATE(IMASKIN )
 DEALLOCATE(IMASKOUT)
 DEALLOCATE(ZFIELDIN0)
