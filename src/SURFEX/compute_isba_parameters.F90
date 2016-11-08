@@ -108,7 +108,6 @@ USE MODD_TOPODYN, ONLY : NNCAT, NMESHT
 USE MODE_RANDOM
 !
 USE MODI_GET_Z0REL
-USE MODI_SET_ROUGH
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 USE MODI_INIT_IO_SURF_n
@@ -948,9 +947,6 @@ END IF
 !
 !        PART 9: initialize radiative and physical properties
 !        ----------------------------------------------------
-!
- CALL SET_ROUGH(IO%LCANOPY,IO%CROUGH)
-!
 !
 DO JP=1,IO%NPATCH
   PK => NP%AL(JP)

@@ -41,14 +41,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('TEST_RECORD_LEN',0,ZHOOK_HANDLE)
 !
-NCPT_WRITE = NCPT_WRITE + 1
-!
-IF (TRIM(HREC)=="time") THEN
+IF (TRIM(HREC)=="time".OR.TRIM(HREC)=="longitude".OR.TRIM(HREC)=="latitude") THEN
   ONOWRITE = .FALSE.
   IF (LHOOK) CALL DR_HOOK('TEST_RECORD_LEN',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
 !
+NCPT_WRITE = NCPT_WRITE + 1
 !
 IF (LFIRST_WRITE) THEN
   !

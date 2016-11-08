@@ -72,7 +72,6 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE MODI_GET_SSO_ROUGH
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -95,7 +94,6 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: ILUOUT         ! logical unit of output file
 INTEGER           :: INAM           ! logical unit of namelist file
- CHARACTER(LEN=4)  :: YROUGH         ! CROUGH from surf_atm
 INTEGER           :: IMI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -147,7 +145,6 @@ IF (LNAM_READ) THEN
  CALL POSNAM(INAM,'NAM_ISBA_SNOWN',GFOUND,ILUOUT)
  IF (GFOUND) READ(UNIT=INAM,NML=NAM_ISBA_SNOWn) 
  !
- CALL TEST_NAM_VAR_SURF(ILUOUT,'CROUGH',CROUGH,'NONE','Z01D','Z04D','BE04','UNDE')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSCOND',CSCOND,'NP89','PL98')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CALBEDO',CALBEDO,'EVOL','DRY ','WET ','MEAN','USER','CM13')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CC1DRY',CC1DRY,'DEF ','GB93')
@@ -192,20 +189,6 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-!* coherence check : orographic drag must be done only once
-!
- CALL GET_SSO_ROUGH(YROUGH)
-!
-IF (YROUGH/="NONE") THEN
-  IF (LNAM_READ) THEN
-    WRITE(ILUOUT,*) " -------------------------------------------------------------------------- "
-    WRITE(ILUOUT,*) " Orographic roughness is done in SURF_ATM, so it should not be done in ISBA "
-    WRITE(ILUOUT,*) " CROUGH in NAM_ISBAn is set to 'NONE' "
-    WRITE(ILUOUT,*) " "
-    WRITE(ILUOUT,*) " -------------------------------------------------------------------------- "
-  ENDIF
-  CROUGH = "NONE"
-END IF
 IF (LHOOK) CALL DR_HOOK('READ_ISBA_CONF_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

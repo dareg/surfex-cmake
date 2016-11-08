@@ -329,17 +329,6 @@ IF (IO%LCANOPY) THEN
 !
   ENDIF
 !
-!*      1.4   Subgrid-scale orographic drag (Beljaars et al 2004)
-!             -----------------------------
-!
-  IF (IO%CROUGH=='BE04') THEN
-!
-!* computes tendencies on wind and Tke due to subgridscale orography
-    CALL SSO_BELJAARS04(USS, SB, KI, ISS%XSSO_STDEV, ZFORC_U, ZDFORC_UDU )
-!
-  ENDIF
-!
-!
 !*      1.5   Computes coefficients for implicitation
 !             ---------------------------------------
 !
@@ -441,14 +430,6 @@ IF (IO%LCANOPY_DRAG) THEN
 !
 END IF
 !
-!
-IF (IO%CROUGH=='BE04') THEN
-!
-!* computes tendencies on wind and Tke due to subgridscale orography
-  CALL SSO_BELJAARS04(USS, SB, KI, ISS%XSSO_STDEV, ZFORC_U, ZDFORC_UDU     )
-!
-ENDIF
-!
 !-------------------------------------------------------------------------------------
 !
 !*      6.    Evolution of canopy air due to these impacts
@@ -468,7 +449,7 @@ ENDDO
 ! Momentum fluxes if canopy is used
 !
 !* Total friction due to surface averaged friction and averaged canopy drag
-IF (IO%LCANOPY_DRAG .OR. IO%CROUGH=='BE04') THEN
+IF (IO%LCANOPY_DRAG) THEN
   DO JJ=1,KI
     ZUSTAR_GROUND(JJ) = SQRT(SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/PRHOA(JJ))
     IF (ZUSTAR_GROUND(JJ)>0.) THEN

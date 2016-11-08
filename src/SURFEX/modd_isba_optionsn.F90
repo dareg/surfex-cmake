@@ -156,9 +156,6 @@ LOGICAL :: LCANOPY ! T: SBL scheme within the canopy
 !                            NOTE that when using the YISBA='DIF' multi-layer soil option,
 !                            the 'LWT' method is used. It is only an option
 !                            when using the force-restore soil method ('2-L' or '3-L')
- CHARACTER(LEN=4) :: CROUGH     ! type of roughness length
-                                ! 'Z01D'
-                                ! 'Z04D'
  CHARACTER(LEN=3) :: CCPSURF    ! specific heat at surface
 !                               ! 'DRY' = default value (dry Cp)
 !                               ! 'HUM' = Cp as a fct of specific humidity  
@@ -305,7 +302,6 @@ IO%CSOILFRZ=' '
 IO%CDIFSFCOND=' '
 IO%CSNOWRES=' '
 IO%CALBEDO=' '
-IO%CROUGH=' '
 IO%CCPSURF=' '
 IO%XOUT_TSTEP=0.
 IO%XTSTEP=0.

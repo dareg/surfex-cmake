@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     ######### 
       SUBROUTINE DEFAULT_ISBA(PTSTEP, POUT_TSTEP,                        &
-                              HROUGH, HRUNOFF, HALBEDO, HSCOND,          &
+                              HRUNOFF, HALBEDO, HSCOND,                  &
                               HC1DRY, HSOILFRZ, HDIFSFCOND, HSNOWRES,    &
                               HCPSURF, PCGMAX, PCDRAG, HKSAT, OSOC,      &
                               HRAIN, HHORT, OGLACIER, OCANOPY_DRAG,      &
@@ -60,7 +60,6 @@ IMPLICIT NONE
 !
 REAL,              INTENT(OUT) :: PTSTEP     ! time-step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time-step for writing
-CHARACTER(LEN=4),  INTENT(OUT) :: HROUGH   ! type of roughness length
 CHARACTER(LEN=4),  INTENT(OUT) :: HALBEDO  ! albedo type
 !                                          ! 'DRY ' 
 !                                          ! 'EVOL' 
@@ -157,10 +156,6 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',0,ZHOOK_HANDLE)
 !
 PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
-!!!!!do not phased!!!!!!!
-!HROUGH  = "NONE"
-!!!!!do not phased!!!!!!!
-HROUGH  = "UNDE"  ! undefined. Needs further information on canopy scheme use to set default
 HSCOND  = "PL98"
 HALBEDO = "DRY "
 !

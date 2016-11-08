@@ -4,8 +4,8 @@
 !SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE Z0EFF (HSNOW_SCHEME, &
-                      HROUGH, OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,      &
-                      PPALPHAN,PZ0LITTER, PWSNOW, ISS, PFF, PZ0_FLOOD,           &
+                      OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,             &
+                      PPALPHAN,PZ0LITTER, PWSNOW, ISS, PFF, PZ0_FLOOD,          &
                       PZ0_O_Z0H, PZ0_WITH_SNOW, PZ0H_WITH_SNOW,PZ0EFF,          &
                       PZ0G_WITHOUT_SNOW,                                        &
                       PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                           &
@@ -84,7 +84,6 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=*), INTENT(IN) :: HSNOW_SCHEME
 !
- CHARACTER(LEN=*),   INTENT(IN)  :: HROUGH         ! type of roughness length
 LOGICAL, INTENT(IN)             :: OMEB           ! True = patch with multi-energy balance 
 !                                                 ! False = patch with classical ISBA
 REAL, DIMENSION(:), INTENT(IN)  :: PALFA          ! wind direction from J axis (clockwise)
@@ -251,64 +250,18 @@ ENDIF
 !*       1.2    for momentum
 !               ------------
 !
-!
 !                                     In this particular case, we now use
 !                                     the roughness length due to the coupled
 !                                     effect of vegetation and topography
 !                                     Snow and Flood effects are yet taken
 !                                     into account through ZZ0EFF
 !
-IF (HROUGH=='Z04D') THEN
+PZ0EFF(:) = PZ0_WITH_SNOW(:)
+IF(OMEB)THEN
+  PZ0EFF_MEBV(:) = PZ0_MEBV(:)
+  PZ0EFF_MEBN(:) = PZ0_MEBN(:)
+ENDIF
 !
-! For multi-energy balance (MEB): the HROUGH=='Z04D' option is not considered yet!
-  !
-  ZZ0EFFIP(:) = ISS%XZ0EFFIP(:)
-  ZZ0EFFIM(:) = ISS%XZ0EFFIM(:)
-  ZZ0EFFJP(:) = ISS%XZ0EFFJP(:)
-  ZZ0EFFJM(:) = ISS%XZ0EFFJM(:)
-  !
-  CALL SUBSCALE_Z0EFF(ISS,PZ0_WITH_SNOW,.FALSE.,OMASK=(PPSN>0..OR.PFF(:)>0.)   )  
-  !
-  WHERE(ZALFA(:)>=0. .AND. ZALFA(:)<XPI/2.)
-    PZ0EFF(:)=ISS%XZ0EFFIP(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJP(:)*COS(ZALFA(:))**2
-  END WHERE
-  WHERE(ZALFA(:)>=XPI/2. .AND. ZALFA(:)<=XPI)
-    PZ0EFF(:)=ISS%XZ0EFFIP(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJM(:)*COS(ZALFA(:))**2
-  END WHERE
-  WHERE (ZALFA(:)>=-XPI/2 .AND. ZALFA(:)<0.)
-    PZ0EFF(:)=ISS%XZ0EFFIM(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJP(:)*COS(ZALFA(:))**2
-  END WHERE
-  WHERE (ZALFA(:)>=-XPI .AND. ZALFA(:)<-XPI/2.)
-    PZ0EFF(:)=ISS%XZ0EFFIM(:)*SIN(ZALFA(:))**2 + ISS%XZ0EFFJM(:)*COS(ZALFA(:))**2
-  END WHERE
-  !
-  ISS%XZ0EFFIP(:) = ZZ0EFFIP(:)
-  ISS%XZ0EFFIM(:) = ZZ0EFFIM(:)
-  ISS%XZ0EFFJP(:) = ZZ0EFFJP(:)
-  ISS%XZ0EFFJM(:) = ZZ0EFFJM(:)
-  !
-ELSE IF (HROUGH=='Z01D') THEN
-  PZ0EFF(:) = PZ0_WITH_SNOW(:) + PZ0REL(:)
-  IF(OMEB)THEN
-    PZ0EFF_MEBV(:) = PZ0_MEBV(:) + PZ0REL(:)
-    PZ0EFF_MEBN(:) = PZ0_MEBN(:) + PZ0REL(:)
-  ENDIF
-  IF (LALDZ0H) THEN
-     ! Aladin dynamic z0 contains already orographic component
-     PZ0EFF(:) = PZ0EFF(:) - PZ0REL(:)
-     IF(OMEB)THEN
-       PZ0EFF_MEBV(:) = PZ0EFF_MEBV(:) - PZ0REL(:)
-       PZ0EFF_MEBN(:) = PZ0EFF_MEBN(:) - PZ0REL(:)
-     ENDIF
-!     PZ0H_WITH_SNOW(:) = PZ0EFF(:) / PZ0_O_Z0H(:)   ! it is aleardy corrected under IF statement of TSNOW%SCHEME  
-  ENDIF
-ELSE
-  PZ0EFF(:) = PZ0_WITH_SNOW(:)
-  IF(OMEB)THEN
-    PZ0EFF_MEBV(:) = PZ0_MEBV(:)
-    PZ0EFF_MEBN(:) = PZ0_MEBN(:)
-  ENDIF
-END IF
 IF (LHOOK) CALL DR_HOOK('Z0EFF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

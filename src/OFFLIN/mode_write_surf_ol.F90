@@ -552,6 +552,8 @@ IF (LDEF) THEN
                 YATT_TITLE,YATT,IVAR_ID,NF90_DOUBLE)
       ENDIF
       !
+      JRET = NF90_PUT_ATT(NID_NC,IVAR_ID,"grid_mapping","Projection_Type")
+      !
     ENDIF
     !
   ENDIF
@@ -836,6 +838,8 @@ IF (LDEF) THEN
         CALL DEF_VAR_NETCDF(HSELECT,NID_NC,HREC,YCOMMENT,IDIMIDS(1:INDIMS), &
                 YATT_TITLE,YATT,IVAR_ID,NF90_DOUBLE)
       ENDIF
+      !
+      JRET = NF90_PUT_ATT(NID_NC,IVAR_ID,"grid_mapping","Projection_Type")
       !
     ENDIF
     !
