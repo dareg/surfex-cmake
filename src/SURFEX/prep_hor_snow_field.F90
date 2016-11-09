@@ -425,7 +425,7 @@ IF (YDCTL%LPART5) THEN
           ENDDO      
         ELSE
           !* interpolation on snow levels
-          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),SK%RHO)
+          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%RHO)
         ENDIF
         !
         !* mask for areas where there is no snow
@@ -456,7 +456,7 @@ IF (YDCTL%LPART5) THEN
             ENDDO        
           ELSE
             !* interpolation of heat on snow levels
-            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),SK%HEAT)
+            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%HEAT)
           ENDIF
           !
           !* mask for areas where there is no snow
@@ -475,7 +475,7 @@ IF (YDCTL%LPART5) THEN
               ZHEAT(:,JL) = ZW%AL(JP)%ZOUT(:,1)
             ENDDO        
           ELSE
-            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),ZHEAT)
+            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),ZHEAT)
           ENDIF
           !
           !* transformation from heat to temperature
@@ -502,7 +502,7 @@ IF (YDCTL%LPART5) THEN
           ENDDO      
         ELSE
           !* interpolation of heat on snow levels
-          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),SK%GRAN1)
+          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%GRAN1)
         ENDIF
         !
         !* mask for areas where there is no snow
@@ -520,7 +520,7 @@ IF (YDCTL%LPART5) THEN
           ENDDO      
         ELSE
           !* interpolation of heat on snow levels
-          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),SK%GRAN2)
+          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%GRAN2)
         ENDIF
         !
         !* mask for areas where there is no snow
@@ -538,7 +538,7 @@ IF (YDCTL%LPART5) THEN
           ENDDO      
         ELSE
           !* interpolation of heat on snow levels
-          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),SK%HIST)
+          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%HIST)
         ENDIF
         !
         !* mask for areas where there is no snow
@@ -559,7 +559,7 @@ IF (YDCTL%LPART5) THEN
             ENDDO        
           ELSE
             !* interpolation of heat on snow levels
-            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(:,:,JP),SK%AGE)
+            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%AGE)
           ENDIF
         ENDIF
         !
