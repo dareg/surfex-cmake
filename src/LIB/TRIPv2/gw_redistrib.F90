@@ -105,6 +105,7 @@ ENDWHERE
 ! * Init flux fileds
 !-------------------------------------------------------------------------------
 !
+ZBILAN     = 0.0
 ZFNEG(:,:) = 0.0
 PFOUT(:,:) = PREAD(:,:)
 !
@@ -113,11 +114,12 @@ DO JLAT=1,KLAT
       IF(GMASK_NOGW(JLON,JLAT).AND.PREAD(JLON,JLAT)<0.0)THEN
         PFOUT(JLON,JLAT) = 0.0
         ZFNEG(JLON,JLAT) = PREAD(JLON,JLAT)
+        ZBILAN           = ZBILAN + PREAD(JLON,JLAT)
       ENDIF
    ENDDO
 ENDDO
 !
-IF(ALL(ZFNEG(:,:)==0.0))THEN
+IF(ZBILAN==0.0)THEN
 ! If no negative fluxes over none groundwater mask, return
   IF (LHOOK) CALL DR_HOOK('GW_REDISTRIB',1,ZHOOK_HANDLE)
   RETURN
