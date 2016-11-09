@@ -163,7 +163,7 @@ ELSE
   KDIMS(1) = KNI
   HNAME_DIM(1) = 'Number_of_points' 
 
-  IF (UG%G%CGRID=="GAUSS     ".AND.LWRITE_COORD) THEN
+  IF (UG%G%CGRID=="GAUSS     ") THEN
    
     HNAME_DIM(2) = "latitude"
     HNAME_DIM(3) = "longitude"
