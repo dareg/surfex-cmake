@@ -42,6 +42,8 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
+REAL, DIMENSION(:,:), ALLOCATABLE :: XWORKS
+!
 INTEGER, DIMENSION(:), ALLOCATABLE :: NREQ
 INTEGER, DIMENSION(:), ALLOCATABLE :: NINDEX
 INTEGER, DIMENSION(:), ALLOCATABLE :: NNUM
