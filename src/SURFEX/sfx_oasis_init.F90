@@ -47,6 +47,7 @@ SUBROUTINE SFX_OASIS_INIT(HNAMELIST,KLOCAL_COMM,HINIT)
 !!
 !!     Original    10/2013
 !!     S.Sénési    08/2015 - handle XIOS
+!!     B.Decharme  09/2016 - no CALL ABORT if no namelist in Arpege
 !!
 !-------------------------------------------------------------------------------
 !
@@ -120,17 +121,21 @@ IF(LEN_TRIM(HNAMELIST)/=0)THEN
   OPEN(UNIT=11,FILE=HNAMELIST,ACTION='READ',FORM="FORMATTED",POSITION="REWIND",STATUS='OLD',IOSTAT=IERR)   
 !
   IF (IERR /= 0) THEN
-     WRITE(*,'(A)' )'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-     WRITE(*,'(2A)')'SFX_OASIS_INIT: SFX NAMELIST FILE NOT FOUND: ',TRIM(HNAMELIST)
-     WRITE(*,'(A)' )'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-     CALL ABORT
-     STOP
+    WRITE(*,'(A)' )'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    WRITE(*,'(A)' )' WARNING WARNING WARNING WARNING WARNING     '
+    WRITE(*,'(A)' )' ---------------------------------------     '
+    WRITE(*,'(2A)')'SFX_OASIS_INIT: SFX NAMELIST FILE NOT FOUND: ',TRIM(HNAMELIST)
+    WRITE(*,'(A)' )'-------------------------------------------  '     
+    WRITE(*,'(A)' )'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+#ifndef SFX_ARO 
+    CALL ABORT
+    STOP
+#endif
+  ELSE
+    READ (UNIT=11,NML=NAM_OASIS,IOSTAT=IERR)
+    CLOSE(UNIT=11)
   ENDIF
-!
-  READ (UNIT=11,NML=NAM_OASIS,IOSTAT=IERR)
-!
-  CLOSE(UNIT=11)
-!
+  !
 ENDIF
 !
 !-------------------------------------------------------------------------------

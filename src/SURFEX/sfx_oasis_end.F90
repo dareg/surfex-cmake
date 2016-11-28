@@ -48,6 +48,8 @@ USE MODD_XIOS , ONLY : LXIOS
 USE XIOS, ONLY : XIOS_FINALIZE
 #endif
 !
+USE MODI_ABOR1_SFX
+!
 IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
@@ -74,8 +76,7 @@ IF(LOASIS .NOT. LXIOS)THEN !Same test than in offline.F90 because use for Arpege
   IF (IERR/=OASIS_OK) THEN
      WRITE(*,'(A)'   )'Error OASIS terminate'
      WRITE(*,'(A,I4)')'Return code from oasis_terminate : ',IERR
-     CALL ABORT
-     STOP
+     CALL ABOR1_SFX("SFX_OASIS_END: Error OASIS terminate")
   ENDIF
 #endif
 !

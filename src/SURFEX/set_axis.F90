@@ -2,7 +2,7 @@
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
-SUBROUTINE SET_AXIS(HNAME, PVALUE ,CDPOSITIVE, KSIZE)
+SUBROUTINE SET_AXIS(HNAME, PVALUE ,CDPOSITIVE, KSIZE, CDUNITS, PBOUNDS)
 !!
 !!
 !!     PURPOSE
@@ -60,6 +60,8 @@ CHARACTER(LEN=*), INTENT(IN)  :: HNAME    ! axis name
 REAL,DIMENSION(:),INTENT(IN), OPTIONAL  :: PVALUE   ! axis coordinate values array
 CHARACTER(LEN=*), INTENT(IN), OPTIONAL  :: CDPOSITIVE  ! 'up' or 'down', if axis is vertical
 INTEGER         , INTENT(IN), OPTIONAL  :: KSIZE       ! size of the axis (when values are not provided)
+CHARACTER(LEN=*), INTENT(IN), OPTIONAL  :: CDUNITS     ! Units for the values
+REAL,DIMENSION(:,:),INTENT(IN),OPTIONAL :: PBOUNDS  ! coordinate bounds array (should be (2,:))
 !
 !  Local variables
 !
@@ -83,6 +85,12 @@ IF (LXIOS) THEN
    CALL XIOS_ADD_CHILD(axisgroup_hdl,axis_hdl,HNAME)
    IF (PRESENT(PVALUE)) THEN
       CALL XIOS_SET_AXIS_ATTR(HNAME, VALUE=PVALUE, N_GLO=SIZE(PVALUE))
+      IF (PRESENT(PBOUNDS)) THEN
+         CALL XIOS_SET_AXIS_ATTR(HNAME, BOUNDS=PBOUNDS)
+      ENDIF
+      IF (PRESENT(CDUNITS)) THEN
+         CALL XIOS_SET_AXIS_ATTR(HNAME, UNIT=CDUNITS)
+      ENDIF
    ELSE
       IF (PRESENT(KSIZE)) THEN 
          ALLOCATE(ZAXIS(KSIZE))
