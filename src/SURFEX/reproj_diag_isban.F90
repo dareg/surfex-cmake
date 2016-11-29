@@ -30,6 +30,7 @@ USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_ISBA_n, ONLY : ISBA_PE_t
+USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -178,25 +179,32 @@ IF ( OPROSNOW ) THEN
     !
     DMK%XTWSNOW(:) = DMK%XTWSNOW(:) * ZCORR_SLOPE(:)
     DMK%XTDSNOW(:) = DMK%XTDSNOW(:) * ZCORR_SLOPE(:)
-    DMK%XTTSNOW(:) = DMK%XTTSNOW(:) * ZCORR_SLOPE(:)
     !
     IF ( PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO' ) THEN
       !
-      DMK%XSNOWLIQ(:,:) = DMK%XSNOWLIQ(:,:) * ZCORR_SLOPE_2D(:,:)
-      DMK%XSNOWDZ (:,:) = DMK%XSNOWDZ (:,:) * ZCORR_SLOPE_2D(:,:)
+      WHERE(DMK%XSNOWDZ/=XUNDEF)
+        DMK%XSNOWLIQ(:,:) = DMK%XSNOWLIQ(:,:) * ZCORR_SLOPE_2D(:,:)
+        DMK%XSNOWDZ (:,:) = DMK%XSNOWDZ (:,:) * ZCORR_SLOPE_2D(:,:)
+      ENDWHERE
       !
       IF ( PEK%TSNOW%SCHEME=='CRO' ) THEN
-        DMK%XSNDPT_1DY     (:) = DMK%XSNDPT_1DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNDPT_3DY     (:) = DMK%XSNDPT_3DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNDPT_5DY     (:) = DMK%XSNDPT_5DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNDPT_7DY     (:) = DMK%XSNDPT_7DY     (:) * ZCORR_SLOPE(:)   
-        DMK%XSNSWE_1DY     (:) = DMK%XSNSWE_1DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNSWE_3DY     (:) = DMK%XSNSWE_3DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNSWE_5DY     (:) = DMK%XSNSWE_5DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNSWE_7DY     (:) = DMK%XSNSWE_7DY     (:) * ZCORR_SLOPE(:)
-        DMK%XSNRAM_SONDE   (:) = DMK%XSNRAM_SONDE   (:) * ZCORR_SLOPE(:)
-        DMK%XSN_REFRZNTHCKN(:) = DMK%XSN_REFRZNTHCKN(:) * ZCORR_SLOPE(:) 
-        DMK%XSN_WETTHCKN   (:) = DMK%XSN_WETTHCKN   (:) * ZCORR_SLOPE(:)
+        !PRINT*,ZCORR_SLOPE(:)
+        !PRINT*,DMK%XSNDPT_1DY     (:)
+        !PRINT*,DMK%XTDSNOW(:)
+        !PRINT*,DMK%XTSNOW(:)
+        WHERE(DMK%XTWSNOW>0.)
+          DMK%XSNDPT_1DY     (:) = DMK%XSNDPT_1DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNDPT_3DY     (:) = DMK%XSNDPT_3DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNDPT_5DY     (:) = DMK%XSNDPT_5DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNDPT_7DY     (:) = DMK%XSNDPT_7DY     (:) * ZCORR_SLOPE(:)   
+          DMK%XSNSWE_1DY     (:) = DMK%XSNSWE_1DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNSWE_3DY     (:) = DMK%XSNSWE_3DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNSWE_5DY     (:) = DMK%XSNSWE_5DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNSWE_7DY     (:) = DMK%XSNSWE_7DY     (:) * ZCORR_SLOPE(:)
+          DMK%XSNRAM_SONDE   (:) = DMK%XSNRAM_SONDE   (:) * ZCORR_SLOPE(:)
+          DMK%XSN_REFRZNTHCKN(:) = DMK%XSN_REFRZNTHCKN(:) * ZCORR_SLOPE(:) 
+          DMK%XSN_WETTHCKN   (:) = DMK%XSN_WETTHCKN   (:) * ZCORR_SLOPE(:)
+        ENDWHERE
       ENDIF
       !
     ENDIF
