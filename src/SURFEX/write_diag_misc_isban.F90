@@ -420,7 +420,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       !
       WRITE(YLVL,'(I2)') JL
       !
-      YRECFM='SWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      YRECFM='SWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))//'_'
       YFORM='(A39,I1.1,A4)'
       IF (JL >= 10)  YFORM='(A39,I2.2,A4)'    
       WRITE(YCOMMENT,FMT=YFORM) 'soil wetness index per patch for layer ',JL,' (-)'
@@ -429,7 +429,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
             NP%AL(JP)%NR_P,NDM%AL(JP)%XSWI(:,JL),ISIZE)
       ENDDO      
       !
-      YRECFM='TSWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
+      YRECFM='TSWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))//'_'
       YFORM='(A39,I1.1,A4)'
       IF (JL >= 10)  YFORM='(A39,I2.2,A4)'
       WRITE(YCOMMENT,FMT=YFORM) 'total swi (liquid+solid) per patch for layer ',JL,' (-)'
@@ -487,7 +487,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     !        3.3    SGH scheme
     !               ----------
     !
-    IF(IO%CRUNOFF=='DT92')THEN    
+    IF(IO%CRUNOFF=='SGH '.OR.IO%CRUNOFF=='DT92')THEN    
       YRECFM='FSAT_'
       YCOMMENT='Soil saturated fraction per patch (-)'
       DO JP=1,IO%NPATCH
@@ -549,7 +549,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     !        3.5    Halstead coefficient
     !               --------------------
     !
-    YRECFM='HV'
+    YRECFM='HV_'
     YCOMMENT='Halstead coefficient per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
@@ -584,72 +584,76 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       !
       YCOMMENT='accumulated snow thickness for past 1 days per patch'
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_1DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_1DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_1DY(:),ISIZE)
       ENDDO        
       !
       YCOMMENT=   'accumulated snow thickness for past 3 days per patch'   
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_3DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_3DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_3DY(:),ISIZE)
       ENDDO      
       !
       YCOMMENT=  'accumulated snow thickness for past 5 days per patch'
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_5DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_5DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_5DY(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='accumulated snow thickness for past 7 days per patch'      
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_7DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_7DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_7DY(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='accumulated snow water equivalent for past 1 days per patch'   
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_1DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_1DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_1DY(:),ISIZE)
       ENDDO     
       !
       YCOMMENT='accumulated snow water equivalent for past 3 days per patch'      
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_3DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_3DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_3DY(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='accumulated snow water equivalent for past 5 days per patch'  
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_5DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_5DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_5DY(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='accumulated snow water equivalent for past 7 days per patch'      
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_7DY',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_7DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_7DY(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='Penetration of ram resistance sensor (2 daN) per patch'               
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'RAMSOND',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'RAMSOND_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNRAM_SONDE(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='Thickness of wet snow at the top of the snowpack per patch'    
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'WET_TH',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'WET_TH_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_WETTHCKN(:),ISIZE)
       ENDDO      
       !
       YCOMMENT='Thickness of refrozen snow at the top of the snowpack per patch'
       DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'REFRZTH',YCOMMENT,JP,&
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'REFRZTH_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_REFRZNTHCKN(:),ISIZE)
       ENDDO      
       !   
     ENDIF
-    !      
+    !
+  ENDIF
+  !
+  IF(OPATCH_BUDGET)THEN
+    !
     IF ( OSNOWDIMNC ) THEN
       !
       IF ( DM%LVOLUMETRIC_SNOWLIQ ) THEN
