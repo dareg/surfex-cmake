@@ -16,7 +16,7 @@
                PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,PBLOWSNW,               &
-               OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
+               HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
                HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP)
 !     ##########################################################################
 !
@@ -323,7 +323,14 @@ REAL, DIMENSION(:,:), INTENT(IN)      :: PBLOWSNW !  Properties of deposited blo
                                       !    3 : SGRA1 of deposited snow
                                       !    4 : SGRA2 of deposited snow
 !
-LOGICAL, INTENT(IN)                   :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
+CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
+                                      ! Mechanical transformation of snow grain and compaction + effect of wind 
+                                      ! on falling snow properties
+                                      !    'NONE': No snowdrift scheme
+                                      !    'DFLT': falling snow falls as purely dendritic
+                                      !    'GA01': Gallee et al 2001
+                                      !    'VI13': Vionnet et al 2013
+LOGICAL, INTENT(IN)                   :: OSNOWDRIFT_SUBLIM ! activate sublimation during drift
 LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
  CHARACTER(3), INTENT(IN)             :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP
                                          !-----------------------
@@ -629,7 +636,7 @@ ZSNOWBIS(:) = ZSNOW(:)
                         PSNOWHEAT,PSNOWHMASS,PSNOWALB,PPERMSNOWFRAC,            &
                         PSNOWGRAN1,PSNOWGRAN2,GSNOWFALL,ZSNOWDZN,               &
                         ZSNOWRHOF,ZSNOWDZF,ZSNOWGRAN1F,ZSNOWGRAN2F, ZSNOWHISTF, &
-                        ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,OSNOWDRIFT,PZ0EFF,PUREF,&
+                        ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,HSNOWDRIFT,PZ0EFF,PUREF,&
                         PBLOWSNW,HSNOWMETAMO, HSNOWFALL, PQA, PSNOWTEMP)
 !
 !***************************************DEBUG IN**********************************************
@@ -766,7 +773,7 @@ ENDIF
 !               ---------------
 PSNDRIFT(:) = 0.0
 
-IF (OSNOWDRIFT) THEN
+IF (HSNOWDRIFT  .NE. 'NONE') THEN
   CALL SNOWDRIFT(PTSTEP, PVMOD, PSNOWRHO,PSNOWDZ, ZSNOW,                      &
                  PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,INLVLS_USE,PTA,PQA,PPS,PRHOA,&
                  PZ0EFF,PUREF,OSNOWDRIFT_SUBLIM,HSNOWMETAMO,PSNDRIFT)
@@ -4116,7 +4123,7 @@ SUBROUTINE SNOWNLFALL_UPGRID(TPTIME, OGLACIER,PTSTEP,PSR,PTA,PVMOD,        &
                              PSNOWALB,PPERMSNOWFRAC,PSNOWGRAN1,PSNOWGRAN2, &
                              GSNOWFALL,PSNOWDZN,PSNOWRHOF,PSNOWDZF,        &
                              PSNOWGRAN1F,PSNOWGRAN2F,PSNOWHISTF,PSNOWAGEF, PSNOWIMPURF,&
-                             OMODIF_GRID,KNLVLS_USE,OSNOWDRIFT,PZ0EFF,PUREF,&
+                             OMODIF_GRID,KNLVLS_USE,HSNOWDRIFT,PZ0EFF,PUREF,&
                              PBLOWSNW,HSNOWMETAMO, HSNOWFALL,PQA, PSNOWTEMP)
 !
 !!    PURPOSE
@@ -4205,7 +4212,13 @@ LOGICAL, DIMENSION(:), INTENT(OUT)   :: OMODIF_GRID
 ! 
 INTEGER, DIMENSION(:), INTENT(INOUT) :: KNLVLS_USE
 
-LOGICAL,INTENT(IN) :: OSNOWDRIFT ! if snowdrift then grain types are not modified by wind!
+CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
+                                      ! Mechanical transformation of snow grain and compaction + effect of wind 
+                                      ! on falling snow properties
+                                      !    'NONE': No snowdrift scheme
+                                      !    'DFLT': falling snow falls as purely dendritic
+                                      !    'GA01': Gallee et al 2001
+                                      !    'VI13': Vionnet et al 2013
 !
 CHARACTER(3), INTENT(IN)              :: HSNOWFALL   ! snowfall density scheme Cluzet et al 2016
 CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
@@ -4225,7 +4238,7 @@ REAL :: ZSNOW_UPPER, ZSNOW_UPPER2 ! snow depth treatednormally (<= XDEPTH_SURFAC
 REAL :: ZCOEF_DEPTH !coefficient for repartition of deep snow above 3 meters
 REAL :: ZTHICKNESS_INTERMEDIATE, ZTHICKNESS2
 REAL :: ZPENALTY, ZDIFTYPE_INF, ZDIFTYPE_SUP, ZCRITSIZE, ZCRITSIZE_INF, ZCRITSIZE_SUP
-REAL :: ZSNOW2L, ZCOEF
+REAL :: ZSNOW2L, ZCOEF, ZMOB
 
 INTEGER :: INB_DEEP_LAYER, INB_UPPER_LAYER !separation between deep and upper layers
                                            ! if snow depth below XDEPTH_SURFACE then INB_DEEP_LAYER=0
@@ -4534,13 +4547,30 @@ DO JJ = 1,SIZE(PSNOW(:))
     !
     IF ( HSNOWMETAMO=='B92' ) THEN
       !
-      IF ( OSNOWDRIFT ) THEN
-        PSNOWGRAN1F(JJ) = -XGRAN
-        PSNOWGRAN2F(JJ) = XNSPH3
-      ELSE
+
+      IF ( HSNOWDRIFT=='DFLT' ) THEN
+!           1st Option : Snow falls as fresh snow whatever the wind speed
+         PSNOWGRAN1F(JJ) = -XGRAN
+         PSNOWGRAN2F(JJ) = XNSPH3
+!
+      ELSE IF ( HSNOWDRIFT=='GA01' ) THEN
+!           2nd Option : deposited grains have a thresold wind speed equal to
+!           the current 5m wind speed (cf Gallee et al, 2001)
+       ZMOB = MAX(MIN(2.868*EXP(-0.085*PVMOD(JJ))-1.,1.),0.)
+       PSNOWGRAN1F(JJ) = MAX(-XGRAN,- ZMOB * XGRAN*396./395.)
+       PSNOWGRAN2F(JJ) = XGRAN - 49.*(-PSNOWGRAN1F(JJ)/99.)
+!
+      ELSE IF ( HSNOWDRIFT=='VI13' ) THEN
+!           3rd Option : parameterization of Vionnet et al (2013) that allows
+!       simulatneous snow transport and snowfall for wind speed higher than 6 m/s
+        PSNOWGRAN1F(JJ) = -XGRAN* MAX(MIN(-0.07*(ZWIND_GRAIN(JJ)-2.)+1.,1.),0.2)
+        PSNOWGRAN2F(JJ) = XGRAN * MIN(MAX(0.14/4.*(ZWIND_GRAIN(JJ)-2.)+0.5,0.5),0.9)
+!
+      ELSE IF ( HSNOWDRIFT=='NONE' ) THEN
         PSNOWGRAN1F(JJ) = MAX( MIN( XNDEN1*ZWIND_GRAIN(JJ)-XNDEN2, XNDEN3 ), -XGRAN )
         PSNOWGRAN2F(JJ) = MIN( MAX( XNSPH1*ZWIND_GRAIN(JJ)+XNSPH2, XNSPH3 ), XNSPH4 )     
       END IF
+
 !   --------------------------------------------------------------------
 !
 !  Characteristic of accumulated snow grains (falling snow + deposited blowing
@@ -4554,10 +4584,10 @@ DO JJ = 1,SIZE(PSNOW(:))
       !
     ELSE
       !
-      IF ( OSNOWDRIFT ) THEN
+      IF (  HSNOWDRIFT=='DFLT' ) THEN
         PSNOWGRAN1F(JJ) = XVDIAM6
         PSNOWGRAN2F(JJ) = XNSPH3/XGRAN
-      ELSE
+      ELSE IF ( HSNOWDRIFT=='NONE' ) THEN
         PSNOWGRAN2F(JJ) = MIN( MAX( XNSPH1*ZWIND_GRAIN(JJ)+XNSPH2, XNSPH3 ), XNSPH4 ) / XGRAN
         ZCOEF = MAX( MIN( XNDEN1*ZWIND_GRAIN(JJ)-XNDEN2, XNDEN3 ), -XGRAN ) / ( -XGRAN )
         PSNOWGRAN1F(JJ) = XVDIAM6 * &

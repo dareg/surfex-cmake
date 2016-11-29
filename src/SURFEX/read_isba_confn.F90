@@ -170,8 +170,34 @@ IF (LNAM_READ) THEN
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWCOND',CSNOWCOND,'Y81', 'I02','C11')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWHOLD',CSNOWHOLD,'B92', 'SPK','O04','B02')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWCOMP',CSNOWCOMP,'B92', 'S14', 'T11')
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWDRIFT',CSNOWDRIFT,'NONE','DFLT','VI13','GA01')
  !bber>
- ! 
+ !
+  IF(CSNOWMETAMO .NE. 'B92' .AND. LSNOWSYTRON) THEN
+    WRITE(ILUOUT,*) '------------------------------------'
+    WRITE(ILUOUT,*) 'SYTRON scheme can only work with options: '
+    WRITE(ILUOUT,*) ' CSNOWMETAMO= B92'
+    WRITE(ILUOUT,*) '------------------------------------'
+    CALL ABOR1_SFX('READ_ISBA_CONF: UPDATE OPTION IN SNOW METAMORPHISM SCHEME')
+ ENDIF
+
+   IF(LSNOWDRIFT_SUBLIM .AND. LSNOWSYTRON) THEN
+    WRITE(ILUOUT,*) '------------------------------------'
+    WRITE(ILUOUT,*) 'SYTRON scheme already computes mass loss due to sublimation '
+    WRITE(ILUOUT,*) 'Set LSNOWDRIFT_SUBLIM to FALSE'
+    WRITE(ILUOUT,*) '------------------------------------'
+    CALL ABOR1_SFX('READ_ISBA_CONF: TURN OFF LSNOWDRIFT_SUBLIM')
+ ENDIF
+
+  IF(CSNOWMETAMO .NE. 'B92' .AND. (CSNOWDRIFT=='VI13' .OR. CSNOWDRIFT=='GA01')) THEN
+    WRITE(ILUOUT,*) '------------------------------------'
+    WRITE(ILUOUT,*) 'Snowdrift scheme can only work with options: '
+    WRITE(ILUOUT,*) 'NONE or DFLT'
+    WRITE(ILUOUT,*) 'when CSNOWMETAMO is different than B92   '
+    WRITE(ILUOUT,*) '------------------------------------'
+    CALL ABOR1_SFX('READ_ISBA_CONF: UPDATE OPTION IN SNOWDRIFT SCHEME')    
+ ENDIF
+ !
  !* close namelist file
  !
  CALL CLOSE_NAMELIST(HPROGRAM,INAM)

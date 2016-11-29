@@ -1,7 +1,7 @@
 !     #########
       SUBROUTINE ISBA_MEB(TPTIME, OMEB, OMEB_LITTER, PGNDLITTER, OFORC_MEASURE, OGLACIER, &
         OTR_ML, OAGRI_TO_GRASS, OSHADE, OSTRESSDEF,                            &
-        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
+        HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,                                    &
         HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HPHOTO,                    &           
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
@@ -147,9 +147,17 @@ LOGICAL,              INTENT(IN)    :: OGLACIER      ! True = Over permanent sno
 !                                                    ! initialise WGI=WSAT,
 !                                                    ! Hsnow>=10m and allow 0.8<SNOALB<0.85
 !                                                    ! False = No specific treatment
-LOGICAL,              INTENT(IN)    :: OSNOWDRIFT    ! if=T, activate snowdrift
+CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
+                        ! Mechanical transformation of snow grain and compaction + effect of wind 
+                        ! on falling snow properties
+                        !    'NONE': No snowdrift scheme (Crocus and ES)
+                        !    'DFLT': snowdrift activated (Crocus and ES) and falling snow falls as purely dendritic (Crocus)
+                        !    'GA01': snowdrift activated (Crocus) and falling snow from Gallee et al 2001 (Crocus only)
+                        !    'VI13': snowdrift activated (Crocus) and falling snow from Vionnet et al 2013 (Crocus only)
+                                      !
 LOGICAL,              INTENT(IN)    :: OSNOWDRIFT_SUBLIM ! if=T, activate snowdrift sublimation 
 LOGICAL,              INTENT(IN)    :: OSNOW_ABS_ZENITH  ! if=T, activate parametrization of solar absorption 
+
 !                                                        ! for polar regions
 LOGICAL,              INTENT(IN)    :: OTR_ML        ! Multi-layer SW radiative transfer option (NOTE =T for MEB)
 LOGICAL,              INTENT(IN)    :: OAGRI_TO_GRASS! Used in Multi-layer SW radiative transfer option
@@ -1191,7 +1199,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PPSN, PSRSFC, PRRSFC, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC,                  &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
            PSNOWHMASS, PRISNOW, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
-           OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
+           HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
            HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,                                         &
            HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,              &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,            &

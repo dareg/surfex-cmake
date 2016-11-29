@@ -65,6 +65,10 @@ USE MODI_INIT_IO_SURF_n
 USE MODI_WRITE_SURF
 USE MODI_END_IO_SURF_n
 !
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE, ONLY : XTSTEP_OUTPUT
+#endif
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -416,6 +420,15 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
   ENDIF
 
   IF(I%TSNOW%SCHEME=='CRO') THEN
+
+      IF (DGU%LRESETCUMUL) THEN
+        ! Output variables are not instantaneous but averaged over the output time step      
+         DGMI%XAVG_SYTMASS(:) = DGMI%XAVG_SYTMASSC(:)/XTSTEP_OUTPUT
+         
+         DGMI%XAVG_SYTMASSC(:) = 0.
+         DGMI%XSYTMASSC(:,:)   = 0.
+      ENDIF
+
       YRECFM='SYTFLX_ISBA'
       YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
       CALL WRITE_SURF(DGU, U, &

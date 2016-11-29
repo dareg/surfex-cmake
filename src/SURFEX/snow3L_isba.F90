@@ -16,7 +16,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PDELHEATN, PDELHEATN_SFC,                                           &
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
                          PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
-                         OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
+                         HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
                          HSNOWMETAMO, HSNOWRAD,OSNOWSYTRON,                                  &
                          HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,KTAB_SYT,PSYTMASS,       &
                          PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
@@ -305,7 +305,15 @@ REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)      :: PLAT
 REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
-LOGICAL, INTENT(IN)                 :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
+CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
+                                      ! Mechanical transformation of snow grain and compaction + effect of wind 
+                                      ! on falling snow properties
+                        !    'NONE': No snowdrift scheme (Crocus and ES)
+                        !    'DFLT': snowdrift activated (Crocus and ES) and falling snow falls as purely dendritic (Crocus)
+                        !    'GA01': snowdrift activated (Crocus) and falling snow from Gallee et al 2001 (Crocus only)
+                        !    'VI13': snowdrift activated (Crocus) and falling snow from Vionnet et al 2013 (Crocus only)                        
+                                      ! 
+LOGICAL, INTENT(IN)                 :: OSNOWDRIFT_SUBLIM ! activate sublimation during drift
 LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
 CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP !bber added HSNOWFALL HSNOWHOLD and HSNOWCOND bber
                                          !-----------------------
@@ -1015,7 +1023,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
-             ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
+             ZP_LAT, ZP_LON, ZP_BLOWSNW, HSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,                       &
              HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP                    )
 !
@@ -1061,7 +1069,7 @@ ELSE
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
-             ZP_LAT, ZP_LON, OSNOWDRIFT, OSNOWDRIFT_SUBLIM                 )
+             ZP_LAT, ZP_LON, HSNOWDRIFT, OSNOWDRIFT_SUBLIM                 )
 !
   IF(OMEB)THEN
 !

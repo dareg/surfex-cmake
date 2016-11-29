@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DEFAULT_CROCUS(OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
+      SUBROUTINE DEFAULT_CROCUS(HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
                  HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,HSNOWFALL,HSNOWCOND,HSNOWHOLD,HSNOWCOMP)  
 !     ########################################################################
 !
@@ -45,8 +45,9 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-! Logicals to activate / disactivate snowdrift                                          
-LOGICAL, INTENT(OUT)          :: OSNOWDRIFT
+! Snowdrift scheme and selection of properties of falling snow  
+CHARACTER(*), INTENT(OUT)     :: HSNOWDRIFT
+! Logicals to activate / disactivate blowing snow sublimation  
 LOGICAL, INTENT(OUT)          :: OSNOWDRIFT_SUBLIM
 LOGICAL, INTENT(OUT)          :: OSNOW_ABS_ZENITH
 ! Logical to activate / disactivate Sytron                                          
@@ -64,7 +65,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',0,ZHOOK_HANDLE)
 !
-OSNOWDRIFT        = .TRUE.
+HSNOWDRIFT        = 'DFLT'
 OSNOWDRIFT_SUBLIM = .FALSE.
 OSNOW_ABS_ZENITH = .FALSE.
 OSNOWSYTRON=.FALSE.

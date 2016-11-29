@@ -258,7 +258,6 @@ LOGICAL                           :: GFOUND              ! return logical when r
 LOGICAL                           :: GSHADOWS    
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
 REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
-LOGICAL:: GSNOWSYTRON                                        ! activate Sytron snow redistribution scheme (works with Crocus Only)
 !
 ! Flag diag :
 !
@@ -723,7 +722,7 @@ END IF
 !
 ! initialization routines to define sytron grid
 IF (NBLOCK==0) THEN
-  IF(GSNOWSYTRON) THEN
+  IF(YSURF_CUR%IM%I%LSNOWSYTRON) THEN
     CALL INIT_SYTRON_TABLE(YSURF_CUR%IM%I,ZZS_FORC,INI,ZLAT,ZLON)
   ELSE
     ALLOCATE(NTAB_SYT(INI))

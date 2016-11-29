@@ -141,7 +141,15 @@ TYPE ISBA_t
                                               ! False = no random perturbation (default)
 !-------------------------------------------------------------------------------
 ! Snow options
-  LOGICAL                        :: LSNOWDRIFT, LSNOWDRIFT_SUBLIM ! Logicals for snowdrift and sublimation
+! Snow drift scheme
+  CHARACTER(4)                   :: CSNOWDRIFT ! 
+                                       ! Mechanical transformation of snow grain and compaction + effect of wind 
+                                      ! on falling snow properties
+                                      !    'NONE': No snowdrift scheme
+                                      !    'DFLT': falling snow falls as purely dendritic
+                                      !    'GA01': Gallee et al 2001
+                                      !    'VI13': Vionnet et al 2013
+  LOGICAL                        ::  LSNOWDRIFT_SUBLIM ! Logicals for snowdrift sublimation
 !
   LOGICAL                        :: LSNOW_ABS_ZENITH ! if True modify solar absorption as a function of solar zenithal angle
                                                      ! (physically wrong but better results in polar regions when CSNOWRAD=B92)
@@ -953,7 +961,7 @@ YISBA%LNITRO_DILU=.FALSE.
 YISBA%LCANOPY=.FALSE.
 YISBA%LCANOPY_DRAG=.FALSE.
 YISBA%LPERTSURF=.FALSE.
-YISBA%LSNOWDRIFT=.TRUE.
+YISBA%CSNOWDRIFT='DFLT'
 YISBA%LSNOWDRIFT_SUBLIM=.FALSE.
 YISBA%LSNOW_ABS_ZENITH=.FALSE.
 YISBA%LSNOWSYTRON=.FALSE.

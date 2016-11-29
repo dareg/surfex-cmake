@@ -17,7 +17,7 @@
                 PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                 PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
                 PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,                        &
-                OSNOWDRIFT,OSNOWDRIFT_SUBLIM                              )
+                HSNOWDRIFT,OSNOWDRIFT_SUBLIM                              )
 !     ##########################################################################
 !
 !!****  *SNOW3L*
@@ -269,7 +269,13 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZENITH ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)    :: PXLAT,PXLON ! LAT/LON after packing
 
 !
-LOGICAL, INTENT(IN)               :: OSNOWDRIFT, OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
+!
+CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
+                                      !    'NONE': No snowdrift scheme
+                                      !    'DFLT':  Snowdrift scheme activated
+                                      !  Other options are available in Crocus
+
+LOGICAL, INTENT(IN)               ::  OSNOWDRIFT_SUBLIM ! activate snowdrift, sublimation during drift
 !
 !*      0.2    declarations of local variables
 !
@@ -452,7 +458,7 @@ CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,PSNOWLIQ)
 ! Snow compaction and metamorphism due to drift
 !
 PSNDRIFT(:) = 0.0
-IF (OSNOWDRIFT) THEN
+IF (HSNOWDRIFT == 'DFLT') THEN
    CALL SNOW3LDRIFT(PTSTEP,PVMOD,PTA,PQA,PPS,PRHOA,PSNOWRHO,&
                     PSNOWDZ,ZSNOW,OSNOWDRIFT_SUBLIM,PSNDRIFT)
 ENDIF

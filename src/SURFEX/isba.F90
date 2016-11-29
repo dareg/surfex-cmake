@@ -3,7 +3,7 @@
                       HC1DRY, HSCOND, HSNOW_ISBA, HSNOWRES, HCPSURF, HSOILFRZ,   &
                       HDIFSFCOND, TPTIME, OFLOOD, OTEMP_ARP, OGLACIER,           &
                       OMEB, OFORC_MEASURE, OMEB_LITTER,                          &
-                      PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, OSNOWDRIFT,        &
+                      PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, HSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
                       OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,  HSNOWCOMP,  &
                       PCVHEATF, PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,      &
@@ -273,7 +273,15 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation optio
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
 LOGICAL,              INTENT(IN)  :: OAGRI_TO_GRASS
-LOGICAL,              INTENT(IN)  :: OSNOWDRIFT          ! activate snowdrift
+!
+CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
+                                      ! Mechanical transformation of snow grain and compaction + effect of wind 
+                                      ! on falling snow properties
+                        !    'NONE': No snowdrift scheme (Crocus and ES)
+                        !    'DFLT': snowdrift activated (Crocus and ES) and falling snow falls as purely dendritic (Crocus)
+                        !    'GA01': snowdrift activated (Crocus) and falling snow from Gallee et al 2001 (Crocus only)
+                        !    'VI13': snowdrift activated (Crocus) and falling snow from Vionnet et al 2013 (Crocus only)                      
+                                      !
 LOGICAL,              INTENT(IN)  :: OSNOWDRIFT_SUBLIM   ! activate sublimation during drift
 LOGICAL,              INTENT(IN)  :: OSNOW_ABS_ZENITH    ! activate parametrization of solar absorption for polar regions
 CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP
@@ -1021,7 +1029,7 @@ CALL SOILSTRESS(HISBA, ZF2,                 &
 IF(OMEB)THEN
    CALL ISBA_MEB(TPTIME, OMEB, OMEB_LITTER,PGNDLITTER, OFORC_MEASURE, OGLACIER,&
         OTR_ML, OAGRI_TO_GRASS, GSHADE, OSTRESSDEF,                            &
-        OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
+        HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,                                    &
         HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HPHOTO,                    &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
@@ -1120,7 +1128,7 @@ ELSE
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
            PSNOWHMASS, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC,                &
            PLAT, PLON, ZQS3L,                                                   &
-           OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
+           HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
            HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,                                    &
            HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,      &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &

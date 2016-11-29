@@ -230,9 +230,7 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)   ! Loop over snow layers
           !
           !  Compute characteristics of transported snow grains from eroded snow
           !  including fragmentation
-          !write(*,*) 'SG1',PSNOWGRAN1(JJ,JWRK),'SG2',PSNOWGRAN2(JJ,JWRK)
           CALL SYVGRAI(PTSTEP,XV1*ZVMOD_SYT(JJ),PSNOWGRAN1(JJ,JWRK),PSNOWGRAN2(JJ,JWRK),ZGRAN1,ZGRAN2)
-          !write(*,*) 'SG1 after',ZGRAN1,'SG2 after',ZGRAN2          
 ! 
           ! Compute density of transported snow including compaction effet due
           ! to the transport
@@ -260,10 +258,8 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)   ! Loop over snow layers
             !ZRHOD(JJ) = (ZRHO*ZZ + ZRHOD(JJ)*ZHTE(JJ))/MAX(XRHMI,ZZ+ZHTE(JJ))  
             ZRHOD(JJ) = (ZRHO*ZZ + ZRHOD(JJ)*ZHTE(JJ))/(ZZ+ZHTE(JJ))  
           ! Aggregate snow grains
-            !write(*,*) 'SG1 before ag',ZGRAN1F(JJ),'SG2 before ag',ZGRAN2F(JJ)
             CALL SYVAGRE(ZGRAN1F(JJ),ZGRAN2F(JJ),ZGRAN1,ZGRAN2,ZGRAN1F(JJ),ZGRAN2F(JJ),ZHTE(JJ),ZZ)
           ! 
-            !write(*,*) 'SG1 after ag',ZGRAN1F(JJ),'SG2 after ag',ZGRAN2F(JJ)
           ENDIF
           !
           ZRHOT(JJ) = MAX(ZRHOT(JJ),XRHOMIN)
@@ -294,10 +290,11 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)   ! Loop over snow layers
           ELSE
                Z31 = 0.
           ENDIF
+          ! Modif.VV 20151125 to remove snow fluxes entering the eroded area 
+          Z31 = 0.
           ! Reduce total amount of eroded snow accounting for snow fluxes
           ! entering the eroded area
           ZHTE(JJ) = ZHTE(JJ) + MAX(0., ZTT-Z31)
-          !!WRITE(*,*) 'Z31',Z31,'ZHTE',ZHTE(JJ)
           !
           ! Assumption: snow flux leaves the deposited side
           ! Factor to compute reduced wind speed
@@ -305,7 +302,6 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)   ! Loop over snow layers
           ZHIST=0.
           CALL SYVPROT(ZV44*ZVMOD_SYT(JJ),ZGRAN1F(JJ),ZGRAN2F(JJ),ZHIST,ZSNOWMOB,  &
                         ZSNOWDRIFT)
-          !!WRITE(*,*) 'ZV44',ZV44,'Drift',ZSNOWDRIFT
           IF(ZSNOWDRIFT>0.) THEN
                CALL SYVTAUX(1.1*ZSNOWMOB,ZV44*ZVMOD_SYT(JJ),ZREHU(JJ),PTA(JJ),ZRSALT,&
                                        ZRSUSP,ZRSUBL)
@@ -313,10 +309,11 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)   ! Loop over snow layers
           ELSE
                Z32 = 0.
           ENDIF
+          ! Modif VV 20151125 to remove snow fluxes leaving the accumulated area
+          Z32=0.
           ! Reduce total amount of accumulated snow accounting for snow fluxes
           ! leaving the accumulated area
           ZHDE(JJ) = ZHDE(JJ) + MAX(0., ZDD-Z32)
-          !WRITE(*,*) 'Z32',Z32,'ZHDE',ZHDE(JJ)
 
           ! Computation of snow erosion/deposition is over when 
           !
@@ -347,8 +344,6 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)
            ! Amount of snow removed from the top layer
            ZSNOW_ERO = MIN(ZSNOWDZ(JJ,1),ZHTE(JJ))
      
-          !write(*,*) 'Erosion point',JJ,'layer',JWRK,'SNWERO',ZSNOW_ERO,'Tot Ero',ZHTE(JJ)
-          !write(*,*) 'Erosion point',JJ,'layer',JWRK,'SNWDEPTH',ZSNOW(JJ)
 
            CALL SYVERO(ZSNOW_ERO, ZSNOWHEAT(JJ,:), ZSNOWDZ(JJ,:), PSNOWSWE(JJ,:),  &
                     PSNOWRHO(JJ,:), PSNOWGRAN1(JJ,:), PSNOWGRAN2(JJ,:),            &
@@ -356,7 +351,6 @@ DO JWRK = 1,SIZE(PSNOWRHO,2)
 
            ZHTE(JJ) = ZHTE(JJ)-ZSNOW_ERO ! Amount of snow that still need to be
                                          ! eroded from the snowpack
-          !write(*,*) 'Fin Erosion point',JJ,'layer',JWRK,'Tot Ero',ZHTE(JJ)
       ENDIF
     ENDDO
 
@@ -378,11 +372,6 @@ DO  JJ = 1, SIZE(PVMOD)
    PBLOWSNW(KTAB_SYT(JJ),4) = ZGRAN2F(JJ)
 
 ENDDO
-
-!WRITE(*,*) 'DEP 1',PBLOWSNW(:,1)
-!WRITE(*,*) 'DEP 2',PBLOWSNW(:,2)
-!WRITE(*,*) 'DEP 3',PBLOWSNW(:,3)
-!WRITE(*,*) 'DEP 4',PBLOWSNW(:,4)
 
 PSYTMASS(:)=0.
 DO  JJ = 1, SIZE(PVMOD)
@@ -725,8 +714,6 @@ KNLVLS = SIZE(PSNOWSWE,1)
 !       1. Compute erosion
 !
 
-!write(*,*) 'Ero', INLVLS_USE
-!write(*,*) 'Ero', PSNOWDZ(:)
 IF(ABS(PSD_REM-PSNOWDZ(1))<XUEPSI) THEN ! Surface layer is totally removed.
 !   
      DO JLAYER=1,INLVLS_USE-1
@@ -771,7 +758,6 @@ ELSE  ! Surface layer is partially removed.
       PSNOWSWE(1)  = PSNOWDZ(1)*PSNOWRHO(1)
 END IF
 
-!write(*,*) 'After Ero', PSNOWDZ(:)
 END SUBROUTINE SYVERO
 
 END SUBROUTINE SNOW_SYTRON
