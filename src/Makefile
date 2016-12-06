@@ -275,7 +275,7 @@ $(LIB_MASTER) :  $(OBJS_LISTE_MASTER)
 	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER)
 
 progmaster : libmaster
-	export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${CDFF_PATH}/lib
+	export LD_LIBRARY_PATH=${SZIP_PATH}/lib:${ZLIB_PATH}/lib:${CURL_PATH}/lib:${HDF5_PATH}/lib:${CDF_PATH}/lib:${CDFF_PATH}/lib:${LD_LIBRARY_PATH}
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
 	OBJDIR=$(OBJDIR_MASTER) \
 	LIB_MNH=$(LIB_MASTER) \
@@ -339,7 +339,7 @@ $(LIB_USER) :  $(OBJS_LISTE_USER)
 	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
 
 proguser : libuser
-	export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${CDFF_PATH}/lib
+	export LD_LIBRARY_PATH=${SZIP_PATH}/lib:${ZLIB_PATH}/lib:${CURL_PATH}/lib:${HDF5_PATH}/lib:${CDF_PATH}/lib:${CDFF_PATH}/lib:${LD_LIBRARY_PATH}
 	@$(MAKE) -I $(OBJDIR_USER)  DO_COMP_USER=YES \
 	OBJDIR=$(OBJDIR_USER) \
 	LIB_MNH=$(LIB_USER) \
@@ -415,51 +415,67 @@ endif
 #RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
-NETCDF_OPTS ?= FC="$(F90)" CC="$(CC)"
+NETCDF_OPTS ?= FC="$(F90)" CC="$(CC) "
 #
 ifneq "$(VER_MPI)" "NOMPI"
-HDF5_OPTS= --enable-parallel
+HDF5_OPTS= --enable-fortran --enable-parallel
 CDF_OPTS= --enable-parallel-tests
 else
-HDF5_OPTS=
-CDF_OPTS=
+HDF5_OPTS= --enable-fortran
+CDF_OPTS= 
 endif
+#
+# Compilation 
+CFLAGSHDF5CDF= -fp-model precise
+FCFLAGSHDF5CDF= -fp-model precise
+
+AM_CPPFLAGSHDF5= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include
+H5_LDFLAGSHDF5= -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:/opt/softs/intel/impi/5.1.2.150/intel64/lib:${ZLIB_PATH}/lib:${SZIP_PATH}/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L/opt/softs/intel/impi/5.1.2.150/intel64 -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+
+CPPFLAGSCDF= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include -I${HDF5_PATH}/include
+LDFLAGSCDF= -Wl,-rpath,/opt/softs/intel/impi/5.1.2.150/intel64/lib:/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:${HDF5_PATH}/lib:${SZIP_PATH}/lib:${ZLIB_PATH}/lib -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+LIBSCDF= -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+
+CPPFLAGSCDFF= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include
+LDFLAGSCDFF= -Wl,-rpath,/opt/softs/intel/impi/5.1.2.150/intel64/lib:/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:${CDF_PATH}/lib:${HDF5_PATH}/lib:${SZIP_PATH}/lib:${ZLIB_PATH}/lib -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+LIBSCDFF= -netcdf -lhdf5_hl -lhdf5 -ldl -lm -lz -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+
+$(SZIP_LIB) : 
+	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(ZLIB_LIB) :
 	cd $(DIR_ZLIB) && ./configure --prefix=${ZLIB_PATH} && \
 	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
-$(SZIP_LIB) : 
-	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
-	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
-#
 $(CURL_LIB) :
-	export LD_LIBRARY_PATH=${ZLIB_PATH}/lib:${SZIP_PATH}/lib:${LD_LIBRARY_PATH} && \
-	cd $(DIR_CURL) && ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} \
-        --prefix=${CURL_PATH} $(NETCDF_OPTS) && \
+	cd $(DIR_CURL) && ./configure --with-szlib=${SZIP_PATH} --with-zlib=${ZLIB_PATH}  \
+        --prefix=${CURL_PATH} CC="$(CC)" LDFLAGS="-L$(SZIP_PATH)/lib -L$(ZLIB_PATH)/lib" \
+        LIBS="-lsz -lz" CPPFLAGS="-I$(SZIP_PATH)/include -I$(ZLIB_PATH)/include" \
+	LT_SYS_LIBRARY_PATH="$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib:$(LD_LIBRARY_PATH)" && \
 	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
 	 cd $(DIR_HDF5) && \
-	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} $(HDF5_OPTS) \
-	 --prefix=${HDF5_PATH} $(NETCDF_OPTS) && \
+	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} $(HDF5_OPTS) --prefix=${HDF5_PATH} \
+	 CC="$(CC)" CFLAGS="$(CFLAGSHDF5CDF)" FC="$(F90)" FCFLAGS="$(FCFLAGSHDF5CDF)" \
+         CPPFLAGS="$(AM_CPPFLAGSHDF5)" LDFLAGS="$(H5_LDFLAGSHDF5)" LIBS="$(LIBSHDF5)" && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 $(CDF_LIB) : $(LIB_HDF5)
-	 export LD_LIBRARY_PATH=${HDF5_PATH}/lib:${LD_LIBRARY_PATH} && \
-	 cd $(DIR_CDF) && CPPFLAGS="-I${HDF5_PATH}/include" LDFLAGS="-L${HDF5_PATH}/lib" \
-         LIBS="-lhdf5_hl -lhdf5"  \
-	 ./configure --enable-netcdf-4 --with-hdf5=${HDF5_PATH} $(CDF_OPTS) --prefix=${CDF_PATH} --disable-shared $(NETCDF_OPTS) && \
+	 cd $(DIR_CDF) && \
+	./configure --with-hdf5=${HDF5_PATH} $(CDF_OPTS) --prefix=${CDF_PATH} \
+	 CC="$(CC)" CFLAGS="$(CFLAGSHDF5CDF)" FC="$(F90)" FCFLAGS="$(FCFLAGSHDF5CDF)" \
+         CPPFLAGS="$(CPPFLAGSCDF)" LDFLAGS="$(LDFLAGSCDF)" LIBS="$(LIBSCDF)" && \
 	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 #
 cdf : $(CDFF_INC)
 $(CDFF_INC) : $(ZLIB_LIB) $(SZIP_LIB) $(CURL_LIB) $(HDF5_LIB) $(CDF_LIB)
-	 export LD_LIBRARY_PATH=${CURL_PATH}/lib:${ZLIB_PATH}/lib:${CDF_PATH}/lib:${HDF5_PATH}/lib:${LD_LIBRARY_PATH} && \
 	 cd $(DIR_CDFF) && \
-	 CPPFLAGS="-I${CURL_PATH}/include -I${ZLIB_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include" \
-	 LDFLAGS="-L${CURL_PATH}/lib -lcurl -L${ZLIB_PATH}/lib -lz -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 -L${CDF_PATH}/lib -lnetcdf" \
-	 ./configure --prefix=${CDFF_PATH} --disable-shared $(NETCDF_OPTS) && \
-	 $(MAKE) -j 1 clean && $(MAKE) -j 1 check && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+         ./configure --prefix=${CDFF_PATH} \
+	 CC="$(CC)" CFLAGS="$(CFLAGSHDF5CDF)" FC="$(F90)" FCFLAGS="$(FCFLAGSHDF5CDF)" \
+         CPPFLAGS="$(CPPFLAGSCDFF)" LDFLAGS="$(LDFLAGSCDFF)" LIBS="$(LIBSCDFF)" && \
+         $(MAKE) -j 1 clean && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 
 clean_cdf :
 	- [ ! -d ${CURL_PATH} ] || rm -fr  ${CURL_PATH} && \
@@ -509,7 +525,6 @@ ADD_OASIS=""
 ifeq "$(VER_OASIS)" "mct"
   ADD_OASIS="--use_oasis oasis3_mct"
 endif
-
 
 ifeq "$(VER_XIOS)" "2"
 ifneq "$(VER_MPI)" "NOMPI"
