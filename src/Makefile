@@ -425,9 +425,15 @@ HDF5_OPTS= --enable-fortran
 CDF_OPTS= 
 endif
 #
-# Compilation 
+# Compilation
+ifeq "$(F90)" "ifort"
 CFLAGSHDF5CDF= -fp-model precise
 FCFLAGSHDF5CDF= -fp-model precise
+endif
+ifeq "$(F90)" "mpiifort"
+CFLAGSHDF5CDF= -fp-model precise
+FCFLAGSHDF5CDF= -fp-model precise
+endif
 
 AM_CPPFLAGSHDF5= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include
 H5_LDFLAGSHDF5= -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:/opt/softs/intel/impi/5.1.2.150/intel64/lib:${ZLIB_PATH}/lib:${SZIP_PATH}/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L/opt/softs/intel/impi/5.1.2.150/intel64 -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
