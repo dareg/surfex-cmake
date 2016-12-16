@@ -62,8 +62,8 @@ REAL, DIMENSION(:), ALLOCATABLE  :: XZS       ! atmospheric model orography     
 REAL, DIMENSION(:), ALLOCATABLE  :: XCO2      ! CO2 concentration in the air          (kg/kg)
 REAL, DIMENSION(:), ALLOCATABLE  :: XO3     ! Ozone
 REAL, DIMENSION(:), ALLOCATABLE  :: XAE      ! Aerosol optical depth
-REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPWET ! wet deposit coefficient for each impurity type    (kg/m²/s)
-REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPDRY ! dry deposit coefficient for each impurity type          (kg/m²/s)
+REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPWET ! wet deposit coefficient for each impurity type    (g/m²/s)
+REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPDRY ! dry deposit coefficient for each impurity type          (g/m²/s)
 REAL, DIMENSION(:), ALLOCATABLE  :: XSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(:), ALLOCATABLE  :: XRAIN     ! liquid precipitation                  (kg/m2/s)
 !
