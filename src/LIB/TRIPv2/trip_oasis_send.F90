@@ -42,6 +42,8 @@ USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_PAR,   ONLY : XUNDEF
 !
+USE MODN_TRIP_RUN, ONLY : XTSTEP_RUN
+!
 USE MODN_TRIP_OASIS, ONLY : XTSTEP_CPL_SEA, XTSTEP_CPL_LAND
 USE MODD_TRIP_OASIS
 !
@@ -92,7 +94,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_SEND',0,ZHOOK_HANDLE)
 !*       1.     Define current coupling time step in second :
 !               ---------------------------------------------
 !
-IDATE = INT(PTIMEC)
+IDATE = INT(PTIMEC-XTSTEP_RUN)
 !
 !-------------------------------------------------------------------------------
 !

@@ -135,6 +135,10 @@ JNB_TSTEP_DIAG = 0
 !
 DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
 !
+! * TRIP TIME INCREMENT
+!
+   ZTIMEC = ZTIMEC + XTSTEP_RUN
+!
 ! * TRIP INPUT FLUXES (kg/s)
 !
    IF(OOASIS)THEN           
@@ -151,10 +155,10 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
 ! * TRIP PHYSIC CALL
 !
    CALL TRIP_INTERFACE(TPDG, TP, TPG, &
-                       KLISTING,KLON,KLAT,PTIME,LPRINT, &
-                       JNB_TSTEP_RUN,JNB_TSTEP_DIAG,    &
-                       XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,  &
-                       ZDRAIN,ZCALVING,ZSRC_FLOOD       )
+                       KLISTING,KLON,KLAT,PTIME,ZTIMEC,    &
+                       LPRINT,JNB_TSTEP_RUN,JNB_TSTEP_DIAG,&
+                       XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,     &
+                       ZDRAIN,ZCALVING,ZSRC_FLOOD          )
 !
 ! * TRIP OUTPUT FLUXES
 !
@@ -162,10 +166,6 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
      CALL TRIP_OASIS_SEND(TP, TPG, &
                           KLISTING,KLON,KLAT,ZTIMEC)
    ENDIF
-!
-! * TRIP TIME INCREMENT
-!
-   ZTIMEC = ZTIMEC + XTSTEP_RUN
 !                   
    IF (LPRINT.AND.MOD(ZTIMEC,XDAY)==0.0) THEN
       ICOUNT = ICOUNT +1
