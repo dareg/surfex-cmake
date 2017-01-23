@@ -75,7 +75,7 @@ INTEGER,              INTENT(IN)    :: KLISTING       !Output file id
 INTEGER,              INTENT(IN)    :: KLON           !Number of longitude
 INTEGER,              INTENT(IN)    :: KLAT           !Number of latittude
 REAL,                 INTENT(INOUT) :: PTIME          !Current time          (s)
-REAL,                 INTENT(IN)    :: PTIMEC         !Cumulated time        (s)
+REAL,                 INTENT(INOUT) :: PTIMEC         !Cumulated time        (s)
 LOGICAL,              INTENT(IN)    :: OPRINT         !print option          [-]
 INTEGER,              INTENT(IN)    :: KNB_TSTEP_RUN  !TSTEP_RUN counter     [-]
 REAL,                 INTENT(IN)    :: PTSTEP_RUN     !Run  timestep         [s]
@@ -280,21 +280,22 @@ DO JTSTEP=1,ITSTEP !TRIP time step loop
 !
 !  * Time actualization  
 !
-   PTIME = PTIME + XTSTEP
+   PTIME  = PTIME  + XTSTEP
+   PTIMEC = PTIMEC + XTSTEP
+!
+!  * Write diagnostic  
+!
+   IF (LWR_DIAG.AND.MOD(PTIMEC,PTSTEP_DIAG) == 0.) THEN
+      KNB_TSTEP_DIAG = KNB_TSTEP_DIAG + 1
+      CALL TRIP_DIAG_WRITE(TPDG, TPG, &
+                           KLISTING,KLON,KLAT,KNB_TSTEP_DIAG,PTSTEP_DIAG)
+   ENDIF
 !
 !  * end 
 !
    IF(OPRINT)WRITE(KLISTING,*)' '
 !
 ENDDO ! * End TRIP time step loop
-!
-!  * Write diagnostic  
-!
-IF (LWR_DIAG.AND.MOD(PTIMEC,PTSTEP_DIAG) == 0.) THEN
-  KNB_TSTEP_DIAG = KNB_TSTEP_DIAG + 1
-  CALL TRIP_DIAG_WRITE(TPDG, TPG, &
-                        KLISTING,KLON,KLAT,KNB_TSTEP_DIAG,PTSTEP_DIAG)
-ENDIF
 !
 !
 !-------------------------------------------------------------------------------

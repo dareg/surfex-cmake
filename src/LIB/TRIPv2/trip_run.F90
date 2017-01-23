@@ -33,7 +33,7 @@ SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
 !
 !
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
-USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_LISTING
@@ -61,7 +61,7 @@ IMPLICIT NONE
 !
 !
 TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
-TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_t),      INTENT(INOUT) :: TP
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 LOGICAL, INTENT(IN)  :: OOASIS        ! Oasis coupling or not
@@ -94,6 +94,7 @@ REAL, DIMENSION(KLON,KLAT) :: ZCALVING          ! Calving flux                 (
 REAL, DIMENSION(KLON,KLAT) :: ZSRC_FLOOD        ! Input P-E-I flood source term(kg/s)
 !
 REAL                       :: ZTIMEC            ! cumulated current time (s)
+REAL                       :: ZTIME_CPL         ! Coupling time
 INTEGER                    :: JNB_TSTEP_RUN     ! TSTEP_RUN counter 
 INTEGER                    :: JNB_TSTEP_DIAG    ! DIAG call counter 
 INTEGER                    :: ICOUNT
@@ -135,10 +136,6 @@ JNB_TSTEP_DIAG = 0
 !
 DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
 !
-! * TRIP TIME INCREMENT
-!
-   ZTIMEC = ZTIMEC + XTSTEP_RUN
-!
 ! * TRIP INPUT FLUXES (kg/s)
 !
    IF(OOASIS)THEN           
@@ -163,8 +160,9 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
 ! * TRIP OUTPUT FLUXES
 !
    IF(OOASIS)THEN
+     ZTIME_CPL=ZTIMEC-XTSTEP_RUN
      CALL TRIP_OASIS_SEND(TP, TPG, &
-                          KLISTING,KLON,KLAT,ZTIMEC)
+                          KLISTING,KLON,KLAT,ZTIME_CPL)
    ENDIF
 !                   
    IF (LPRINT.AND.MOD(ZTIMEC,XDAY)==0.0) THEN
