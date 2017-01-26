@@ -78,7 +78,7 @@ INTEGER(KIND=kindOfInt)                            :: IMISSING
 INTEGER(KIND=kindOfInt)                            :: IUNIT
 INTEGER(KIND=kindOfInt)                            :: IGRIB
 INTEGER                            :: ICENTER       ! number of center
- CHARACTER(LEN=20)                  :: HGRID         ! type of grid
+ CHARACTER(LEN=50)                  :: HGRID         ! type of grid
 INTEGER                            :: ISCAN, JSCAN
 INTEGER                            :: ILENX ! nb points in X
 INTEGER                            :: ILENY ! nb points in Y
@@ -164,6 +164,12 @@ SELECT CASE (ICENTER)
 
       CASE('unknown_PLPresent')
         WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Arpege model'
+        HINMODEL = 'ARPEGE'
+        HGRIDTYPE= 'ROTGAUSS  '
+
+      CASE('reduced_stretched_rotated_gg')
+        WRITE (KLUOUT,'(A)') ' | Grib file from French Weather Service - Arpege model'
+        WRITE (KLUOUT,'(A)') 'but reduced grid'
         HINMODEL = 'ARPEGE'
         HGRIDTYPE= 'ROTGAUSS  '
 
