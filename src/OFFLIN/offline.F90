@@ -305,6 +305,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! --------------------------------------------------------------------------------------
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off1'
 !*     0.1.   MPI, OASIS, XIOS and dr_hook initializations
 !
 CSOFTWARE='OFFLINE'
@@ -357,6 +358,7 @@ IBLOCK = 0
 XTIME0 = MPI_WTIME()
 #endif
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off2'
 !
 !*      0.3.   Open ascii file for writing
 !
@@ -452,6 +454,7 @@ ENDIF
 !
  CPROGNAME = CSURF_FILETYPE
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off3'
 ! --------------------------------------------------------------------------------------
 !
 !*      1.    Initializations
@@ -506,11 +509,13 @@ IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
 !
 !       configuration of run
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off4'
  CALL OL_READ_ATM_CONF(YSC%DTCO, YSC%U, YSC%UG%G%CGRID, CSURF_FILETYPE, CFORCING_FILETYPE,  &
                       LDELAYEDSTART_NC, NDATESTOP, ZDURATION, ZTSTEP, INI,  &
                       IYEAR, IMONTH, IDAY, ZTIME, ZLAT, ZLON, ZZS_FORC,     &
                       ZZREF, ZUREF, ITIMESTARTINDEX     )
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off5'
 TDATE_END%YEAR = IYEAR
 TDATE_END%MONTH = IMONTH
 TDATE_END%DAY = IDAY
@@ -643,10 +648,12 @@ XTIME0 = MPI_WTIME()
 IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
         CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off6'
  CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
                   ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
                   ZCO2,ZDIR,LLIMIT_QAIR                           ) 
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off7'
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
  CALL WLOG_MPI('TIME_COMM_READ forc ',PLOG=XTIME_COMM_READ)
@@ -684,12 +691,14 @@ XTIME0 = MPI_WTIME()
 !
 CALL GOTO_MODEL(1)
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off8'
  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, INI, NSCAL, IBANDS,  &
                       CSV,XCO2(:),XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,  &
                       XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
                       XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
                       YATMFILE, YATMFILETYPE, YTEST                          )
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off9'
 ! initialization routines to compute shadows
 IF (GSHADOWS) THEN
   IF (IBLOCK==0) THEN
@@ -757,11 +766,13 @@ NCPT_WRITE = 0
 !
 DO JFORC_STEP=1,INB_STEP_ATM
   !
+!if(NRANK==NPIO) print*,*,NRANK,'off10',JFORC_STEP
 #ifdef SFX_MPI
   XTIME1 = MPI_WTIME()
 #endif
   ! read Forcing
   !
+!if(NRANK==NPIO) print*,*,NRANK,'off10b'
   !indice of forcing line in forcing arrays
   ID_FORC=JFORC_STEP-INT(JFORC_STEP/INB_LINES)*INB_LINES
   IF (ID_FORC==0) ID_FORC=INB_LINES
@@ -784,11 +795,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
       ZCO2   (:,IDMAX) = ZCO2   (:,SIZE(ZTA,2))
       ZDIR   (:,IDMAX) = ZDIR   (:,SIZE(ZTA,2))
     ENDIF
+!if(NRANK==NPIO) print*,*,NRANK,'off10c'
     CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1, &
                      ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX),       &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
                      ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),     &
                      ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
+!if(NRANK==NPIO) print*,*,NRANK,'off10d'
   ENDIF
 
 #ifdef SFX_MPI
@@ -796,8 +809,10 @@ DO JFORC_STEP=1,INB_STEP_ATM
   XTIME1 = MPI_WTIME()
 #endif
   !
+!if(NRANK==NPIO) print*,*,NRANK,'off10e'
   DO JSURF_STEP=1,INB_ATM
     !
+!if(NRANK==NPIO) print*,*,NRANK,'off11',JSURF_STEP
     ! time interpolation of the forcing
     !
 #ifdef SFX_MPI
@@ -887,6 +902,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                                   XSURF_TRIANGLE_THREAD)
     END IF
     !
+!if(NRANK==NPIO) print*,*,NRANK,'off12'
     CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, &
                              INI, NSCAL, IBANDS, XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,         &
                              XZS, XU, XV, XQA, XTA, XRHOA, XSV, XCO2, CSV, XRAIN, XSNOW, XLW, XDIR_SW,  &
@@ -894,6 +910,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                              XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF, XPEW_A_COEF, &
                              XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,XPET_B_COEF,XPEQ_B_COEF, YTEST      )
     !
+!if(NRANK==NPIO) print*,*,NRANK,'off13'
 #ifdef SFX_MPI
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
 #endif
@@ -1099,18 +1116,22 @@ DO JFORC_STEP=1,INB_STEP_ATM
           NTIMESTEP=INT(ZTIMEC/XTSTEP_OUTPUT + 1.)
 #endif
         ENDIF
+!if(NRANK==NPIO) print*,*,NRANK,'off14'
         CALL WRITE_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
+!if(NRANK==NPIO) print*,*,NRANK,'off15'
         CALL DIAG_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE)
 #ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
+!if(NRANK==NPIO) print*,*,NRANK,'off16'
         CALL WRITE_DIAG_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL')
         !
+!if(NRANK==NPIO) print*,*,NRANK,'off17'
         IF (LXIOS) THEN 
 #ifdef WXIOS
           IF (.NOT. LXIOS_DEF_CLOSED) THEN 
@@ -1181,6 +1202,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
   !
 END DO
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off18'
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('OL_READ_ATM ',PLOG=XTIME_CALC(1))
  CALL WLOG_MPI('SUNPOS ',PLOG=XTIME_CALC(2))
@@ -1245,6 +1267,10 @@ IF ( LRESTART ) THEN
   IF (CSURF_FILETYPE=="NC    ") INW = 2
   !
   LDEF_nc = .TRUE.
+  LDEF_ol = .TRUE.
+  !
+  IF (ALLOCATED(YSC%DUO%CSELECT)) DEALLOCATE(YSC%DUO%CSELECT)
+  ALLOCATE(YSC%DUO%CSELECT(0))
   !
   IF (CSURF_FILETYPE=="NC    ") THEN
     CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, YSC%TM%DTT, &
@@ -1298,6 +1324,11 @@ IF ( LRESTART ) THEN
     ENDIF
     !
     LDEF_nc = .FALSE.
+    LDEF_ol = .FALSE.
+    !
+    NCPT_WRITE = 0
+    !
+    LFIRST_WRITE = .FALSE.
     !
   ENDDO
   !
@@ -1417,6 +1448,7 @@ IF ( LINQUIRE ) THEN
   !
 ENDIF   
 !
+!if(NRANK==NPIO) print*,*,NRANK,'off19'
 ! --------------------------------------------------------------------------------------
 !
 !    4'    Close Gelato specific diagnostic 
