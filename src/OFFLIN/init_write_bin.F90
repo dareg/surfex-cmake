@@ -36,7 +36,7 @@ USE MODD_IO_SURF_BIN,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_BIN,  ONLY:NUNIT0, NVAR, CVAR, JPVAR, NIND
 !
 USE MODI_ABOR1_SFX
-USE MODI_TEST_RECORD_LEN
+!USE MODI_TEST_RECORD_LEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -51,7 +51,7 @@ INTEGER,             INTENT(IN)     :: KPATCH
 LOGICAL,             INTENT(INOUT)  :: OWFL
 INTEGER                             :: IP, IVAR, IFIELD, JFIELD
 INTEGER                             :: IRECLEN
-LOGICAL                             :: LMATCH
+!LOGICAL                             :: LMATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -146,9 +146,9 @@ ELSE
       IFIELD=IFIELD+1
     ENDDO
   
-    CALL TEST_RECORD_LEN("ASCII ",HREC,HSELECT,LMATCH)
+    !CALL TEST_RECORD_LEN("ASCII ",HREC,HSELECT,LMATCH)
 
-    IF (.NOT. LMATCH ) THEN
+    !IF (.NOT. LMATCH ) THEN
 
       IVAR = IVAR+1
       IF (IVAR-NUNIT0>JPVAR) THEN
@@ -159,9 +159,9 @@ ELSE
       OPEN(UNIT=IVAR,FILE=TRIM(HREC)//'.BIN',FORM='UNFORMATTED',ACCESS='DIRECT',RECL=IRECLEN)
       OWFL=.TRUE.
 
-    ELSE
-      OWFL=.FALSE.
-    ENDIF
+    !ELSE
+    !  OWFL=.FALSE.
+    !ENDIF
 
   ENDIF
 ENDIF
