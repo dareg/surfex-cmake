@@ -48,8 +48,6 @@ IF (TRIM(HREC)=="time".OR.TRIM(HREC)=="longitude".OR.TRIM(HREC)=="latitude") THE
 ENDIF
 !
 NCPT_WRITE = NCPT_WRITE + 1
-!if(HREC(1:8)=="TG1_ISBA".and.nrank==NPIO) print*,'test ',HREC,NCPT_WRITE
-!if (HREC(1:2)=="TG".and.nrank==npio) print*,HREC,NCPT_WRITE,LFIRST_WRITE,NRANK
 !
 IF (LFIRST_WRITE) THEN
   !
@@ -94,7 +92,6 @@ IF (LFIRST_WRITE) THEN
   END SELECT
   !
   ! if output fields selection is active, test if this field is to be written
-  !print*,size(HSELECT)
   IF (SIZE(HSELECT)>0)  THEN
      IFIELD=COUNT(HSELECT /= '            ')
      ONOWRITE=.TRUE.
