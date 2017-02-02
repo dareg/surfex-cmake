@@ -133,6 +133,7 @@ ELSE
   IWORK=2 !Only 2 temperature layer in ISBA-FR
 ENDIF
 !
+!print*,'write TG'
 DO JL=1,IWORK
   WRITE(YLVL,'(I4)') JL
   YRECFM='TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
@@ -140,6 +141,7 @@ DO JL=1,IWORK
   IF (JL >= 10)  YFORM='(A6,I2.2,A4)'
   WRITE(YCOMMENT,FMT=YFORM) 'X_Y_TG',JL,' (K)'
   DO JP = 1,IO%NPATCH
+    !print*,'write_field1d ',YRECFM
     CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NPE%AL(JP)%XTG(:,JL),KI)
   ENDDO

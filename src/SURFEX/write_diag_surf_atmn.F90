@@ -27,6 +27,7 @@ SUBROUTINE WRITE_DIAG_SURF_ATM_n (YSC,HPROGRAM,HWRITE)
 !!      Original    01/2004
 !!------------------------------------------------------------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
@@ -73,12 +74,16 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
 CPROGNAME = HPROGRAM
 !
+!if (NRANK==NPIO) print*,'diag_sea'
 IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%SM, & 
                                                 HPROGRAM,HWRITE)
+!if (NRANK==NPIO) print*,'diag_water'
 IF (YSC%U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(YSC%DTCO, YSC%DUO, YSC%U, &
                                                          YSC%WM, YSC%FM, HPROGRAM,HWRITE)
+!if (NRANK==NPIO) print*,'diag_nature'
 IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%IM, &
                                                    YSC%NDST, HPROGRAM,HWRITE)
+!if (NRANK==NPIO) print*,'diag_town'
 IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%TM, &
                                                  YSC%GDM, YSC%GRM, HPROGRAM,HWRITE)
 !
@@ -86,12 +91,14 @@ IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%
 ! Writing
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
+!if (NRANK==NPIO) print*,'write'
 IF (YSC%DUO%XDIAG_TSTEP==XUNDEF .OR. &
         ABS(NINT(YSC%U%TTIME%TIME/YSC%DUO%XDIAG_TSTEP)*YSC%DUO%XDIAG_TSTEP-YSC%U%TTIME%TIME)<1.E-3 ) THEN
   !
   IF (YSC%DUO%LFRAC) THEN
     CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','WRITE','SURF_ATM.OUT.nc')          
     YCOMMENT = '(fraction)'
+ !if (NRANK==NPIO) print*,'frac'
     CALL WRITE_SURF(YSC%DUO%CSELECT,HPROGRAM,'FRAC_SEA   ',YSC%U%XSEA, IRESP,HCOMMENT=YCOMMENT)
     CALL WRITE_SURF(YSC%DUO%CSELECT,HPROGRAM,'FRAC_NATURE',YSC%U%XNATURE,IRESP,HCOMMENT=YCOMMENT)
     CALL WRITE_SURF(YSC%DUO%CSELECT,HPROGRAM,'FRAC_WATER ',YSC%U%XWATER, IRESP,HCOMMENT=YCOMMENT)
@@ -99,10 +106,12 @@ IF (YSC%DUO%XDIAG_TSTEP==XUNDEF .OR. &
     CALL END_IO_SURF_n(HPROGRAM)
   END IF
   !
+!if (NRANK==NPIO) print*,'seb_surf_atm'
   IF (HWRITE/='PGD'.AND.YSC%DUO%LDIAG_GRID) &
           CALL WRITE_DIAG_SEB_SURF_ATM_n(YSC%DTCO, YSC%DUO, YSC%DU, YSC%DUC, YSC%U, &
                                          YSC%UG%G%CGRID, HPROGRAM)
   !
+!if (NRANK==NPIO) print*,'chemical'
   IF (YSC%CHU%LCH_EMIS .AND. YSC%SV%NBEQ>0 .AND. YSC%CHU%LCH_SURF_EMIS) THEN
     IF (YSC%CHU%CCH_EMIS=='AGGR') THEN 
       CALL WRITE_DIAG_CH_AGGR_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%CHE, HPROGRAM)
@@ -112,6 +121,7 @@ IF (YSC%DUO%XDIAG_TSTEP==XUNDEF .OR. &
   END IF
   !  
 END IF
+!if (NRANK==NPIO) print*,'end write'
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !--------------------------------------------------------------------------------------

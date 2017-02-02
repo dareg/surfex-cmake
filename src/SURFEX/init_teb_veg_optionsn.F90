@@ -141,7 +141,7 @@ IF (LNAM_READ) THEN
  !             forced to the same values for TEB and urban green areas)
  !
  CALL DEFAULT_ISBA(GDO%XTSTEP, GDO%XOUT_TSTEP, GDO%CRUNOFF, &
-                   GDO%CALBEDO, GDO%CSCOND, GDO%CC1DRY, GDO%CSOILFRZ,   &
+                   GDO%CSCOND, GDO%CC1DRY, GDO%CSOILFRZ,   &
                    GDO%CDIFSFCOND, GDO%CSNOWRES, GDO%CCPSURF, GDO%XCGMAX, &
                    GDO%XCDRAG, GDO%CKSAT, GDO%LSOC, GDO%CRAIN, GDO%CHORT, &
                    GDO%LGLACIER, GDO%LCANOPY_DRAG, GDO%LVEGUPD, GDO%LSPINUPCARBS, &

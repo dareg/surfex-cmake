@@ -111,6 +111,7 @@ IF (NRANK/=NPIO) THEN
   !
 #ifdef SFX_MPI
   XTIME0 = MPI_WTIME()
+  !print*,'mpi_send ',NRANK,IDX_W
   CALL MPI_SEND(ZWORK,SIZE(ZWORK)*KIND(ZWORK)/4,MPI_REAL,NPIO,IDX_W,NCOMM,INFOMPI)
   XTIME_COMM_WRITE = XTIME_COMM_WRITE + (MPI_WTIME() - XTIME0)
 #endif
@@ -129,7 +130,9 @@ ELSE
     !
     IF (I/=NPIO) THEN
 #ifdef SFX_MPI
+     ! print*,'recv in',I,IDX_W
       CALL MPI_RECV(ZINTER,SIZE(ZINTER)*KIND(ZINTER)/4,MPI_REAL,I,IDX_W,NCOMM,ISTATUS,INFOMPI)
+     ! print*,'recv out ',I,IDX_W
 #endif
     ELSE
       ZINTER(:) = ZWORK(:)

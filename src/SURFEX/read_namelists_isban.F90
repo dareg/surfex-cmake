@@ -54,7 +54,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
  CALL DEFAULT_ISBA(XTSTEP, XOUT_TSTEP,                           &
-                     CRUNOFF,CALBEDO,CSCOND,                     &
+                     CRUNOFF, CSCOND,                            &
                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,     &
                      CCPSURF, XCGMAX, XCDRAG, CKSAT, LSOC,       &
                      CRAIN, CHORT, LGLACIER, LCANOPY_DRAG,       &

@@ -27,6 +27,7 @@ SUBROUTINE WRITE_DIAG_ISBA_n (DTCO, DUO, U, IM, NDST,  HPROGRAM, HWRITE)
 !!      Original    01/2004
 !!------------------------------------------------------------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
@@ -68,8 +69,10 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_ISBA_N',0,ZHOOK_HANDLE)
 IF (HWRITE/='PGD') THEN
   IF (IM%ID%O%XDIAG_TSTEP==XUNDEF .OR. &
           ABS(NINT(IM%S%TTIME%TIME/IM%ID%O%XDIAG_TSTEP)*IM%ID%O%XDIAG_TSTEP-IM%S%TTIME%TIME)<1.E-3 ) THEN
+    !if (NRANK==NPIO) print*,'seb_isba'
     CALL WRITE_DIAG_SEB_ISBA_n(DTCO, DUO, U, IM%NCHI, IM%CHI, IM%ID, NDST, IM%GB, &
                                IM%O, IM%NP, IM%NPE, HPROGRAM)
+    !if (nrank==npio) print*,'misc_isba'
     CALL WRITE_DIAG_MISC_ISBA_n(DTCO, DUO%CSELECT, DUO%LSNOWDIMNC, U, IM%ID%O%LPATCH_BUDGET, &
                                 IM%ID%D, IM%ID%ND, IM%ID%DM, IM%ID%NDM, IM%O, IM%S, IM%K,    &
                                 IM%NP, IM%NPE%AL(1)%TSNOW, HPROGRAM)
@@ -79,10 +82,12 @@ END IF
 IF (IM%ID%O%LPGD) THEN
   IF (IM%ID%O%XDIAG_TSTEP==XUNDEF .OR. &
       ABS(NINT(IM%S%TTIME%TIME/IM%ID%O%XDIAG_TSTEP)*IM%ID%O%XDIAG_TSTEP-IM%S%TTIME%TIME)<1.E-3 ) THEN
+    !if (nrank==npio) print*,'pgd_isba'
     CALL WRITE_DIAG_PGD_ISBA_n(DTCO, DUO%CSELECT, U, IM%CHI, IM%NCHI, IM%ID%DM%LSURF_DIAG_ALBEDO, &
                                IM%O, IM%S, IM%K, IM%NP, IM%NPE, IM%ISS, HPROGRAM)
   END IF
 END IF
+!if(nrank==npio) print*,'diag_isba out'
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_ISBA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------
 !

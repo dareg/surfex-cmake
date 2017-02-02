@@ -216,7 +216,7 @@ IF (LNAM_READ) THEN
  !        0.1. Hard defaults
  !      
  CALL DEFAULT_ISBA(IM%O%XTSTEP, IM%O%XOUT_TSTEP,                                   &
-                   IM%O%CRUNOFF, IM%O%CALBEDO, IM%O%CSCOND,                        &
+                   IM%O%CRUNOFF, IM%O%CSCOND,                                      &
                    IM%O%CC1DRY, IM%O%CSOILFRZ, IM%O%CDIFSFCOND, IM%O%CSNOWRES,     &
                    IM%O%CCPSURF, IM%O%XCGMAX, IM%O%XCDRAG, IM%O%CKSAT, IM%O%LSOC,  &
                    IM%O%CRAIN, IM%O%CHORT, IM%O%LGLACIER, IM%O%LCANOPY_DRAG,       &

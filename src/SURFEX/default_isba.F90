@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     ######### 
       SUBROUTINE DEFAULT_ISBA(PTSTEP, POUT_TSTEP,                        &
-                              HRUNOFF, HALBEDO, HSCOND,                  &
+                              HRUNOFF, HSCOND,                           &
                               HC1DRY, HSOILFRZ, HDIFSFCOND, HSNOWRES,    &
                               HCPSURF, PCGMAX, PCDRAG, HKSAT, OSOC,      &
                               HRAIN, HHORT, OGLACIER, OCANOPY_DRAG,      &
@@ -60,11 +60,6 @@ IMPLICIT NONE
 !
 REAL,              INTENT(OUT) :: PTSTEP     ! time-step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time-step for writing
-CHARACTER(LEN=4),  INTENT(OUT) :: HALBEDO  ! albedo type
-!                                          ! 'DRY ' 
-!                                          ! 'EVOL' 
-!                                          ! 'WET ' 
-!                                          ! 'USER' 
 CHARACTER(LEN=4),  INTENT(OUT) :: HSCOND   ! Thermal conductivity
 !                                          ! 'DEF ' = DEFault: NP89 implicit method
 !                                          ! 'PL98' = Peters-Lidard et al. 1998 used
@@ -157,7 +152,6 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',0,ZHOOK_HANDLE)
 PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
 HSCOND  = "PL98"
-HALBEDO = "DRY "
 !
 HC1DRY     = 'DEF '
 HSOILFRZ   = 'DEF'

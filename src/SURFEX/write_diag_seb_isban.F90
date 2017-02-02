@@ -45,6 +45,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
@@ -166,6 +167,7 @@ IF (ID%O%LSURF_BUDGET .AND. DUO%LRESETCUMUL .AND. ID%O%LSURF_BUDGETC .AND. .NOT.
 END IF
 #endif
 !
+!print*,NRANK,'init_io_surf ',NRANK
 IF ( ID%DM%LPROSNOW ) THEN
   CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_PROGNOSTIC.OUT.nc')
 ELSE
@@ -177,6 +179,7 @@ ENDIF
 !*       2.     Richardson number :
 !               -----------------
 !
+!print*,NRANK,'RI_ISBA ',NRANK
 IF (ID%O%N2M>=1) THEN
   !
   YRECFM='RI_ISBA'
@@ -188,6 +191,7 @@ END IF
 !*       3.     Energy fluxes :
 !               -------------
 !
+!print*,NRANK,'TALB_ISBA ',NRANK
 IF (ID%O%LSURF_BUDGET) THEN
   !
   YRECFM='TALB_ISBA'
@@ -284,11 +288,13 @@ END IF
 !*       4.    Specific Energy fluxes :(for each patch)
 !              ----------------------------------------
 !
+!print*,NRANK,'EVAP_ISBA ',NRANK
 IF (ID%DE%LSURF_EVAP_BUDGET) CALL WRITE_EVAP_BUD(ID%DE,"_ISBA ",.FALSE.)
 !
 !*       6.     parameters at 2 and 10 meters :
 !               -------------------------------
 !
+!print*,NRANK,'N2M ',NRANK
 IF (ID%O%N2M>=1) THEN
   !
   YRECFM='T2M_ISBA'
@@ -350,6 +356,7 @@ END IF
 !*       7.     Transfer coefficients
 !               ---------------------
 !
+!print*,NRANK,'COEF ',NRANK
 IF (ID%O%LCOEF) THEN
   !
   YRECFM='CD_ISBA'
@@ -378,6 +385,7 @@ ENDIF
 !
 !*       8.     Surface humidity
 !               ----------------
+!print*,NRANK,'SURF_VARS ',NRANK
 IF (ID%O%LSURF_VARS) THEN
   !
   YRECFM='QS_ISBA'
@@ -390,6 +398,7 @@ ENDIF
 !
 ISIZE = U%NSIZE_NATURE
 !
+!print*,NRANK,'PATCH_BUDGET ',NRANK
 !User want (or not) patch output
 IF (ID%O%LPATCH_BUDGET.AND.(IO%NPATCH >1)) THEN
   !
@@ -406,6 +415,7 @@ IF (ID%O%LPATCH_BUDGET.AND.(IO%NPATCH >1)) THEN
     ENDDO
     !
   END IF
+!print*,NRANK,'RI_PATCH OK ',NRANK
   !
   !*       11.     Energy fluxes :(for each patch)
   !                -------------
@@ -612,13 +622,16 @@ ENDIF
 !*       9.     Diag of prognostic fields
 !               -------------------------
 !
+!print*,NRANK,'PROVAR_TO_DIAG ',NRANK
 IF (DUO%LPROVAR_TO_DIAG) CALL PROVAR_TO_DIAG
 !
 !----------------------------------------------------------------------------
 !
 !*       15.     chemical diagnostics:
 !               --------------------
+  !print*,NRANK,'RNC ',NRANK
 !
+!print*,NRANK,'CHEMICAL ',NRANK
 IF (CHI%SVI%NBEQ>0 .AND. CHI%CCH_DRY_DEP=="WES89 ") THEN
   !
   DO JSV = 1,SIZE(CHI%CCH_NAMES,1)
@@ -674,13 +687,16 @@ ENDIF
 !*       5.    Cumulated Energy fluxes
 !              -----------------------
 !
+!print*,NRANK,'BUDGETC ',NRANK
  CALL END_IO_SURF_n(HPROGRAM)
  CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_DIAG_CUMUL.OUT.nc')
 !
 IF (ID%O%LSURF_BUDGETC) THEN
   !
+  !print*,NRANK,'EVAPC ',NRANK
   CALL WRITE_EVAP_BUD(ID%DEC,"C_ISBA",(ID%O%LSURF_BUDGETC .AND. .NOT.DUO%LRESET_BUDGETC))
   !
+  !print*,NRANK,'RNC ',NRANK
   IF(IO%LGLACIER)THEN
     YRECFM='ICE_FC_ISBA'
     YCOMMENT='X_Y_'//YRECFM//' (Kg/m2)'
@@ -1657,6 +1673,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N:PROVAR_TO_DIAG',0,ZHOOK_HANDLE)
 !
+!print*,NRANK,'provar 1'
 INI=U%NSIZE_NATURE
 !
 ! * soil temperatures (K)
@@ -1681,6 +1698,7 @@ DO JP=1,IO%NPATCH
    ENDDO
 ENDDO
 !
+!print*,NRANK,'provar 2'
 IF (LALLOW_ADD_DIM)  THEN 
   YRECFM='TG_ISBA' ; 
   YCOMMENT='Soil temperature (K)'
@@ -1692,10 +1710,13 @@ ELSE
     YRECFM='TG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
     YCOMMENT='X_Y_'//YRECFM//' (K)'
+    !!if(nrank==npio) print*,'seb in ',JL,YRECFM
     CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ZTG(:,JL),IRESP,HCOMMENT=YCOMMENT)
+    !!if(nrank==npio) print*,'seb out ',YRECFM
   END DO
 ENDIF
 !
+!print*,NRANK,'provar 3'
 ! * Compute soil liquid and ice water content (kg/m2 and m3/m3) 
 !
 ZWG (:,:)=0.0
@@ -1749,6 +1770,7 @@ ELSE
 !  
 ENDIF
 !
+!print*,NRANK,'provar 4'
 IF(HPROGRAM=='AROME '.OR.HPROGRAM=='FA    ')THEN
   ZMISS=0.0
 ELSE
@@ -1780,6 +1802,7 @@ ELSE
   END DO
 ENDIF
 !
+!print*,NRANK,'provar 5'
 ! * soil ice water content (m3/m3) and soil ice mass (kg/m2)
 !
 IWORK=IO%NGROUND_LAYER
@@ -1802,6 +1825,7 @@ ELSE
   END DO
 ENDIF
 !
+!print*,NRANK,'provar 6'
 ! * water intercepted on leaves (kg/m2)
 !
 ZWORK(:)=0.0
@@ -1834,6 +1858,7 @@ IF(IO%LGLACIER)THEN
   !
 ENDIF
 !
+!print*,NRANK,'provar 7'
 ! * Snow albedo (-) 
 !
 ZPATCH(:) = 0.0
@@ -1862,6 +1887,7 @@ YRECFM='ASN_ISBA'
 YCOMMENT='X_Y_'//YRECFM//' (-)'
 CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
 !  
+!print*,NRANK,'provar 8'
 IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
   !
   ! * Snow reservoir (kg/m2) by layer
@@ -1885,6 +1911,7 @@ IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
     CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDDO
+!print*,NRANK,'provar 81'
   !
   ! * Snow depth (m)
   !
@@ -1900,14 +1927,17 @@ IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
                 PEK%TSNOW%WSNOW(JJ,JL)/PEK%TSNOW%RHO(JJ,JL)
       ENDDO
     ENDDO
+    !print*,NRANK,JL,NPE%AL(1)%TSNOW%NLAYER,' DSN_ISBA'
     !
     WRITE(YLVL,'(I4)') JL
     YRECFM='DSN_'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     YRECFM=YRECFM(:LEN_TRIM(YRECFM))//'_ISBA'
     YCOMMENT='X_Y_'//YRECFM//' (kg/m2)'
+    !print*,NRANK,size(ZWORK),minval(ZWORK),maxval(ZWORK)
     CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDDO
+!print*,NRANK,'provar 82'
   !
   ! * Snow temperature (k)
   !  
@@ -1933,6 +1963,7 @@ IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
       ENDDO
     ENDDO
     !
+!print*,NRANK,'provar 83'
     WHERE(ZPATCH(:)>0.0)
       ZWORK(:) = ZWORK(:) / ZPATCH(:)
     ELSEWHERE
@@ -1946,6 +1977,7 @@ IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
     CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
     !
   ENDDO
+!print*,NRANK,'provar 84'
   !
   ! * Snow age (day)
   !    
@@ -1964,6 +1996,7 @@ IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
           ENDIF
        ENDDO
     ENDDO
+!print*,NRANK,'provar 85'
     !
     WHERE(ZPATCH(:)>0.0)
       ZWORK(:) = ZWORK(:) / ZPATCH(:)
@@ -1975,10 +2008,12 @@ IF(NPE%AL(1)%TSNOW%SCHEME=='3-L' .OR. NPE%AL(1)%TSNOW%SCHEME=='CRO')THEN
     YCOMMENT='X_Y_'//YRECFM//' (day_since_snowfall)'
     CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ZWORK(:),IRESP,HCOMMENT=YCOMMENT)
     !
+!print*,NRANK,'provar 86'
   ENDDO
   !
 ENDIF
 !
+!print*,NRANK,'provar 9'
 ! * Isba-Ags biomass reservoir
 !
 IF(IO%CPHOTO=='NIT'.OR.IO%CPHOTO=='NCB')THEN
@@ -2005,6 +2040,7 @@ IF(IO%CPHOTO=='NIT'.OR.IO%CPHOTO=='NCB')THEN
 !
 ENDIF
 !
+!print*,NRANK,'provar 10'
 ! * Isba-CC carbon reservoir
 !
 IF(IO%CRESPSL=='CNT')THEN
@@ -2064,6 +2100,7 @@ IF(IO%CRESPSL=='CNT')THEN
 !
 ENDIF
 !
+!print*,NRANK,'provar 11'
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_ISBA_N:PROVAR_TO_DIAG',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE PROVAR_TO_DIAG
