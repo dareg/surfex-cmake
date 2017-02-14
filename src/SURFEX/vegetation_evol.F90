@@ -76,9 +76,7 @@ USE MODD_TYPE_DATE_SURF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_TRBE, NVT_BONE,   &
                                 NVT_TRBD, NVT_TEBE, NVT_TENE,   &
                                 NVT_BOBD, NVT_BOND, NVT_SHRB,   &
-                                NVT_TRBE, NVT_C3, NVT_C4,       &
-                                NVT_IRR, NVT_GRAS
-!
+                                NVT_TRBE
 USE MODD_SURF_PAR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK

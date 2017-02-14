@@ -53,8 +53,7 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR
 USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, NSIZE, XSUMVAL
-USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW, &
-                                IDX_TWN_ECOSG
+USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW, LVEG_PRES
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA, XDATA_NATURE, XDATA_WATER
 !
 USE MODI_GET_LUOUT
@@ -119,9 +118,6 @@ LOGICAL,             INTENT(OUT)   :: ORM_RIVER    ! delete river coverage (defa
  CHARACTER(LEN=28)       :: YCOVER      ! file name for cover types
  CHARACTER(LEN=6)        :: YFILETYPE   ! data file type
 !
- CHARACTER(LEN=28)       :: YCLC        ! file name for cover types
- CHARACTER(LEN=6)        :: YCLCFILETYPE   ! data file type
-!
 REAL                     :: XRM_COVER   ! limit of coverage under which the
                                         ! cover is removed. Default is 1.E-6
 REAL                     :: XRM_COAST   ! limit of coast coverage under which
@@ -145,7 +141,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCO
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GCOVER, GCOVER2
 !
-INTEGER :: INFOMPI, JPROC, IDX_TWN1, IDX_TWN2
+INTEGER :: INFOMPI, JPROC
 INTEGER               :: ILUOUT    ! output listing logical unit
 INTEGER               :: IRESP     ! Error code after redding
 INTEGER               :: JCOV    ! loop counter on covers
@@ -197,8 +193,7 @@ IECO2 = 0
 !
  CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YFILETYPE, XUNIF_COVER,  &
                          XRM_COVER, XRM_COAST, XRM_LAKE, LRM_RIVER, &
-                         XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER, &
-                         YCLC, YCLCFILETYPE )  
+                         XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -292,6 +287,9 @@ ELSE
 !
   DEALLOCATE(XSUMVAL  )
 !
+!-------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+!
 !*    4.      Interpolation if some points are not initialized (no data for these points) (same time)
 !             ---------------------------------------------------------------------------------------
 !
@@ -299,105 +297,6 @@ ELSE
   CALL INTERPOL_FIELD2D(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1), U%XCOVER(:,:),YFIELD)
 !
 !-------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
-!
-  ! CORINE town map
-  IF (LEN_TRIM(YCLC)/=0 .AND. U%LECOSG) THEN
-!       
-    DEALLOCATE(NSIZE)
-!
-    ! save LCOVER from ECOSG
-    ALLOCATE(GCOVER(JPCOVER))
-    GCOVER(:) = U%LCOVER(:)
-    U%LCOVER(:) = .FALSE.
-    ! find IDX_TWN1: index of IDX_TWN_ECOSG (24) in XCOVER
-    IDX_TWN1 = COUNT(GCOVER(1:IDX_TWN_ECOSG))
-    ! save XCOVER from ECOSG
-    ALLOCATE(ZCOVER(SIZE(U%XCOVER,1),SIZE(U%XCOVER,2)))
-    ZCOVER(:,:) = U%XCOVER(:,:)
-    DEALLOCATE(U%XCOVER)
-!
-!*    3.      Averages the field
-!             ------------------
-!
-    ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1)      )
-    ALLOCATE(XALL     (U%NDIM_FULL,1,2)    )
-!
-    NSIZE_ALL(:,:) = 0.
-    XALL   (:,:,:) = 0.
-    CALL TREAT_FIELD(UG, U, USS, &
-                     HPROGRAM,'SURF  ',YCLCFILETYPE,'A_COVR',YCLC, 'COVER               ' ) 
-!
-    DEALLOCATE(XSUMVAL  )
-!
-    ! save LCOVER from CORINE
-    ALLOCATE(GCOVER2(JPCOVER))
-    GCOVER2(:) = U%LCOVER(:)
-    ! save XCOVER from CORINE 
-    ALLOCATE(ZCOVER2(SIZE(U%XCOVER,1),SIZE(U%XCOVER,2)))
-    ZCOVER2(:,:) = U%XCOVER(:,:)
-    DEALLOCATE(U%XCOVER)
-!
-    ! Total LCOVER
-    WHERE(GCOVER(:)) U%LCOVER(:) = .TRUE.
-
-    ! Allocate total XCOVER
-    ALLOCATE(U%XCOVER(SIZE(ZCOVER,1),COUNT(U%LCOVER)))
-    U%XCOVER(:,:) = 0.
-!
-    ! for each point GCORINE tells in corine town covers are present
-    ALLOCATE(GCORINE(SIZE(ZCOVER,1)))
-    GCORINE(:) = .FALSE.
-    !
-    ICPT_TOT = 0
-    ICPT1 = 0
-    ICPT2 = 0
-    IDX_TWN2 = 0
-    ! loop on all covers
-    DO JCOV = 1,JPCOVER
-      ! if this cover is present in one of the two maps
-      IF (GCOVER(JCOV).OR.GCOVER2(JCOV)) THEN
-        ICPT_TOT = ICPT_TOT + 1  ! index of this cover in final XCOVER     
-        IF (GCOVER (JCOV)) ICPT1 = ICPT1 + 1 ! index of this cover in ECOSG 
-        IF (JCOV==IDX_TWN_ECOSG) IDX_TWN2 = ICPT_TOT ! index of cover IDX_TWN_ECOSG in final XCOVER
-        ! if there is something for this cover in the corine map
-        IF (GCOVER2(JCOV)) THEN
-          ICPT2 = ICPT2 + 1   ! index of this cover in CORINE
-          ! for points where this is town in ECOSG and this cover in CORINE
-          WHERE(ZCOVER(:,IDX_TWN1)/=0..AND.ZCOVER2(:,ICPT2)/=0.)
-            ! the final fraction is this of CORINE weighted by this of ECOSG
-            U%XCOVER(:,ICPT_TOT) = ZCOVER2(:,ICPT2)*ZCOVER(:,IDX_TWN1)
-            ! points that have corine covers are flagged
-            GCORINE(:) = .TRUE.
-          END WHERE
-          ! if this cover is present in ECOSG
-          IF (GCOVER(JCOV)) THEN
-            ! where there is no town in ECOSG or not of this cover in CORINE
-            WHERE(ZCOVER(:,IDX_TWN1)==0..OR.ZCOVER2(:,ICPT2)==0.)
-              ! we keep the fraction of this cover from ECOSG
-              U%XCOVER(:,ICPT_TOT) = ZCOVER(:,ICPT1)
-            END  WHERE
-          ENDIF
-        ELSE
-          ! if there is nothing in the corine map, we take ECOSG
-          U%XCOVER(:,ICPT_TOT) = ZCOVER(:,ICPT1)
-        ENDIF
-      ENDIF
-    ENDDO
-    ! cover IDX_TWN2 is replaced by the contribution of CORINE
-    WHERE (GCORINE(:)) U%XCOVER(:,IDX_TWN2) = 0.
-!
-    
-    DEALLOCATE(ZCOVER)
-    DEALLOCATE(ZCOVER2)
-    DEALLOCATE(GCOVER)
-!
-  ENDIF
-!
-!*    4.      Interpolation if some points are not initialized (no data for these points) (same time)
-!             ---------------------------------------------------------------------------------------
-!
-!
 !-------------------------------------------------------------------------------
 !
 !*    5.      Coherence check
@@ -798,6 +697,15 @@ ELSE
   DEALLOCATE(ZDEF)
   DEALLOCATE(IMASK_COVER)
   !
+ENDIF
+!
+LVEG_PRES(:) = .FALSE.
+IF (.NOT.U%LECOSG) THEN
+  DO JCOV = 1,JPCOVER
+    IF (U%LCOVER(JCOV)) THEN
+      WHERE(DTCO%XDATA_VEGTYPE(JCOV,:) > 0.) LVEG_PRES(:) = .TRUE.
+    ENDIF
+  ENDDO
 ENDIF
 !
 U%NSIZE_NATURE    = COUNT(U%XNATURE(:) > 0.0)

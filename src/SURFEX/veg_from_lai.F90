@@ -102,7 +102,8 @@ USE MODD_DATA_COVER_PAR, ONLY :NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     &
                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
                                  NVT_IRR, NVT_GRAS, NVT_TROG, NVT_PARK,  &
                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                 NVT_BOND, NVT_BOGR, NVT_SHRB
+                                 NVT_BOND, NVT_BOGR, NVT_SHRB, NVT_C3W,  &
+                                 NVT_C3S, NVT_FLTR, NVT_FLGR
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_VEG
 !
@@ -121,7 +122,7 @@ REAL                             :: PVEG         ! vegetation fraction
 !
 !*      0.2    declarations of local variables
 !
-REAL :: ZLAI, ZAGRI
+REAL :: ZLAI, ZAGRI, ZSUM1, ZSUM2, ZSUM3
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
@@ -137,25 +138,33 @@ ELSE
   ZAGRI = (1. - EXP( -0.6 * ZLAI ))
 ENDIF
 !
-PVEG = ZAGRI                      *(PVEGTYPE(NVT_C4  ) +   &! C4 crops
-                                    PVEGTYPE(NVT_IRR ) +   &! irrigated crops
-                                    PVEGTYPE(NVT_C3  )  )  &! C3 crops
-       + 0.95                     *(PVEGTYPE(NVT_TEBD) +   &! TREE
-                                    PVEGTYPE(NVT_TRBD) +   &! TREE
-                                    PVEGTYPE(NVT_TEBE) +   &! TREE
-                                    PVEGTYPE(NVT_BOBD) +   &! TREE
-                                    PVEGTYPE(NVT_SHRB) +   &! TREE
-                                    PVEGTYPE(NVT_BONE) +   &! CONI
-                                    PVEGTYPE(NVT_TENE) +   &! CONI
-                                    PVEGTYPE(NVT_BOND) )   &! CONI
+ZSUM1 = PVEGTYPE(NVT_C4)
+IF (NVT_IRR>0 .AND. NVT_C3>0) THEN
+  ZSUM1 = ZSUM1 + PVEGTYPE(NVT_IRR) + PVEGTYPE(NVT_C3)
+ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+  ZSUM1 = ZSUM1 + PVEGTYPE(NVT_C3W) + PVEGTYPE(NVT_C3S)
+ENDIF
+!
+ZSUM2 = PVEGTYPE(NVT_TEBD) + PVEGTYPE(NVT_TRBD) + PVEGTYPE(NVT_TEBE) +   &
+        PVEGTYPE(NVT_BOBD) + PVEGTYPE(NVT_SHRB) + PVEGTYPE(NVT_BONE) +   &
+        PVEGTYPE(NVT_TENE) +  PVEGTYPE(NVT_BOND)
+IF (NVT_FLTR>0) ZSUM2 = ZSUM2 + PVEGTYPE(NVT_FLTR)
+!
+ZSUM3 = PVEGTYPE(NVT_GRAS) + PVEGTYPE(NVT_BOGR) + PVEGTYPE(NVT_TROG)
+IF (NVT_PARK>0) THEN
+  ZSUM3 = ZSUM3 + PVEGTYPE(NVT_PARK)
+ELSEIF (NVT_FLGR>0) THEN
+  ZSUM3 = ZSUM3 + PVEGTYPE(NVT_FLGR)
+ENDIF
+!
+PVEG = ZAGRI                      * ZSUM1   &!
+       + 0.95                     * ZSUM2   &! 
        + XEVERG_VEG               * PVEGTYPE(NVT_TRBE)     &! EVER 
-       + 0.95                     *(PVEGTYPE(NVT_GRAS) +   &! grassland C3
-                                    PVEGTYPE(NVT_BOGR) +   &! boral grass C3
-                                    PVEGTYPE(NVT_TROG) +   &! tropical grass C4
-                                    PVEGTYPE(NVT_PARK)  )  &! irr. parks
+       + 0.95                     * ZSUM3   &! 
        + 0.                       * PVEGTYPE(NVT_NO  )     &! no vegetation (smooth)
        + 0.                       * PVEGTYPE(NVT_SNOW)     &! no vegetation (snow)
        + 0.                       * PVEGTYPE(NVT_ROCK)      ! no vegetation (rocks)  
+!
 IF (LHOOK) CALL DR_HOOK('MODI_VEG_FROM_LAI:VEG_FROM_LAI_0D',1,ZHOOK_HANDLE)
 !-----------------------------------------------------------------
 !
@@ -206,7 +215,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,    &
                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
                                  NVT_IRR, NVT_GRAS, NVT_TROG, NVT_PARK,  &
                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                 NVT_BOND, NVT_BOGR, NVT_SHRB 
+                                 NVT_BOND, NVT_BOGR, NVT_SHRB, NVT_C3W,  &
+                                 NVT_C3S, NVT_FLTR, NVT_FLGR 
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_VEG
 !
@@ -225,7 +235,7 @@ REAL,   DIMENSION(SIZE(PLAI))      :: PVEG         ! vegetation fraction
 !
 !*      0.2    declarations of local variables
 !
-REAL,   DIMENSION(SIZE(PLAI))      :: ZLAI, ZAGRI
+REAL,   DIMENSION(SIZE(PLAI))      :: ZLAI, ZAGRI, ZSUM1, ZSUM2, ZSUM3
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
@@ -241,22 +251,29 @@ ELSE
   ZAGRI(:) = (1. - EXP( -0.6 * ZLAI(:) ))
 ENDIF
 !
-PVEG(:) = ZAGRI(:)                *(PVEGTYPE(:,NVT_C4  ) +   &! C4 crops
-                                    PVEGTYPE(:,NVT_IRR ) +   &! irrigated crops
-                                    PVEGTYPE(:,NVT_C3  )  )  &! C3 crops
-       + 0.95                     *(PVEGTYPE(:,NVT_TEBD) +   &! TREE
-                                    PVEGTYPE(:,NVT_TRBD) +   &! TREE
-                                    PVEGTYPE(:,NVT_TEBE) +   &! TREE
-                                    PVEGTYPE(:,NVT_BOBD) +   &! TREE
-                                    PVEGTYPE(:,NVT_SHRB) +   &! TREE
-                                    PVEGTYPE(:,NVT_BONE) +   &! CONI
-                                    PVEGTYPE(:,NVT_TENE) +   &! CONI
-                                    PVEGTYPE(:,NVT_BOND) )   &! CONI
+ZSUM1(:) = PVEGTYPE(:,NVT_C4)
+IF (NVT_IRR>0 .AND. NVT_C3>0) THEN
+  ZSUM1(:) = ZSUM1(:) + PVEGTYPE(:,NVT_IRR) + PVEGTYPE(:,NVT_C3)
+ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+  ZSUM1(:) = ZSUM1(:) + PVEGTYPE(:,NVT_C3W) + PVEGTYPE(:,NVT_C3S)
+ENDIF
+!
+ZSUM2(:) = PVEGTYPE(:,NVT_TEBD) + PVEGTYPE(:,NVT_TRBD) + PVEGTYPE(:,NVT_TEBE) +   &  
+           PVEGTYPE(:,NVT_BOBD) + PVEGTYPE(:,NVT_SHRB) + PVEGTYPE(:,NVT_BONE) +   &
+           PVEGTYPE(:,NVT_TENE) +  PVEGTYPE(:,NVT_BOND)
+IF (NVT_FLTR>0) ZSUM2(:) = ZSUM2(:) + PVEGTYPE(:,NVT_FLTR)
+!
+ZSUM3(:) = PVEGTYPE(:,NVT_GRAS) + PVEGTYPE(:,NVT_BOGR) + PVEGTYPE(:,NVT_TROG)
+IF (NVT_PARK>0) THEN
+  ZSUM3(:) = ZSUM3(:) + PVEGTYPE(:,NVT_PARK)
+ELSEIF (NVT_FLGR>0) THEN
+  ZSUM3(:) = ZSUM3(:) + PVEGTYPE(:,NVT_FLGR)
+ENDIF
+!
+PVEG(:) = ZAGRI(:)                * ZSUM1(:) &
+       + 0.95                     * ZSUM2(:) &
        + XEVERG_VEG               * PVEGTYPE(:,NVT_TRBE)     &! EVER 
-       + 0.95                     *(PVEGTYPE(:,NVT_GRAS) +   &! grassland C3
-                                    PVEGTYPE(:,NVT_BOGR) +   &! boral grass C3
-                                    PVEGTYPE(:,NVT_TROG) +   &! tropical grass C4
-                                    PVEGTYPE(:,NVT_PARK)  )  &! irr. parks
+       + 0.95                     * ZSUM3(:) &
        + 0.                       * PVEGTYPE(:,NVT_NO  )     &! no vegetation (smooth)
        + 0.                       * PVEGTYPE(:,NVT_SNOW)     &! no vegetation (snow)
        + 0.                       * PVEGTYPE(:,NVT_ROCK)      ! no vegetation (rocks)
@@ -312,7 +329,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,    &
                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
                                  NVT_IRR, NVT_GRAS, NVT_TROG, NVT_PARK,  &
                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                 NVT_BOND, NVT_BOGR, NVT_SHRB 
+                                 NVT_BOND, NVT_BOGR, NVT_SHRB, NVT_C3W,  &
+                                 NVT_C3S, NVT_FLTR, NVT_FLGR 
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_VEG
@@ -332,7 +350,7 @@ REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PVEG ! vegetation fraction
 !
 !*      0.2    declarations of local variables
 !
-REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: ZLAI, ZAGRI
+REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: ZLAI, ZAGRI, ZSUM1, ZSUM2, ZSUM3
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODI_VEG_FROM_LAI:VEG_FROM_LAI_2D',0,ZHOOK_HANDLE)
@@ -353,23 +371,30 @@ ELSE
   ENDWHERE
 ENDIF
 !
+ZSUM1(:,:) = PVEGTYPE(:,:,NVT_C4)
+IF (NVT_IRR>0 .AND. NVT_C3>0) THEN
+  ZSUM1(:,:) = ZSUM1(:,:) + PVEGTYPE(:,:,NVT_IRR) + PVEGTYPE(:,:,NVT_C3)
+ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+  ZSUM1(:,:) = ZSUM1(:,:) + PVEGTYPE(:,:,NVT_C3W) + PVEGTYPE(:,:,NVT_C3S)
+ENDIF
+!
+ZSUM2(:,:) = PVEGTYPE(:,:,NVT_TEBD) + PVEGTYPE(:,:,NVT_TRBD) + PVEGTYPE(:,:,NVT_TEBE) +   &   
+             PVEGTYPE(:,:,NVT_BOBD) + PVEGTYPE(:,:,NVT_SHRB) + PVEGTYPE(:,:,NVT_BONE) +   &
+             PVEGTYPE(:,:,NVT_TENE) +  PVEGTYPE(:,:,NVT_BOND)
+IF (NVT_FLTR>0) ZSUM2(:,:) = ZSUM2(:,:) + PVEGTYPE(:,:,NVT_FLTR)
+!
+ZSUM3(:,:) = PVEGTYPE(:,:,NVT_GRAS) + PVEGTYPE(:,:,NVT_BOGR) + PVEGTYPE(:,:,NVT_TROG)
+IF (NVT_PARK>0) THEN
+  ZSUM3(:,:) = ZSUM3(:,:) + PVEGTYPE(:,:,NVT_PARK)
+ELSEIF (NVT_FLGR>0) THEN
+  ZSUM3(:,:) = ZSUM3(:,:) + PVEGTYPE(:,:,NVT_FLGR)
+ENDIF
+!
 WHERE (PLAI(:,:) /= XUNDEF)
-PVEG(:,:) = ZAGRI(:,:)               *(PVEGTYPE(:,:,NVT_C4  ) +   &! C4 crops
-                                       PVEGTYPE(:,:,NVT_IRR ) +   &! irrigated crops
-                                       PVEGTYPE(:,:,NVT_C3  )  )  &! C3 crops
-       + 0.95                        *(PVEGTYPE(:,:,NVT_TEBD) +   &! TREE
-                                       PVEGTYPE(:,:,NVT_TRBD) +   &! TREE
-                                       PVEGTYPE(:,:,NVT_TEBE) +   &! TREE
-                                       PVEGTYPE(:,:,NVT_BOBD) +   &! TREE
-                                       PVEGTYPE(:,:,NVT_SHRB) +   &! TREE
-                                       PVEGTYPE(:,:,NVT_BONE) +   &! CONI
-                                       PVEGTYPE(:,:,NVT_TENE) +   &! CONI
-                                       PVEGTYPE(:,:,NVT_BOND) )   &! CONI
+PVEG(:,:) = ZAGRI(:,:)               * ZSUM1(:,:) &
+       + 0.95                        * ZSUM2(:,:) &
        + XEVERG_VEG                  * PVEGTYPE(:,:,NVT_TRBE)     &! EVER 
-       + 0.95                        *(PVEGTYPE(:,:,NVT_GRAS) +   &! grassland C3
-                                       PVEGTYPE(:,:,NVT_BOGR) +   &! boral grass C3
-                                       PVEGTYPE(:,:,NVT_TROG) +   &! tropical grass C4
-                                       PVEGTYPE(:,:,NVT_PARK)  )  &! irr. parks
+       + 0.95                        * ZSUM3(:,:) &
        + 0.                          * PVEGTYPE(:,:,NVT_NO  )     &! no vegetation (smooth)
        + 0.                          * PVEGTYPE(:,:,NVT_SNOW)     &! no vegetation (snow)
        + 0.                          * PVEGTYPE(:,:,NVT_ROCK)      ! no vegetation (rocks)
@@ -427,7 +452,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,    &
                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
                                  NVT_IRR, NVT_GRAS, NVT_TROG, NVT_PARK,  &
                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                 NVT_BOND, NVT_BOGR, NVT_SHRB 
+                                 NVT_BOND, NVT_BOGR, NVT_SHRB, NVT_C3W,  &
+                                 NVT_C3S, NVT_FLTR, NVT_FLGR 
 
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -457,12 +483,26 @@ PVEG(:) = XUNDEF
 !
 IF(OAGRI_TO_GRASS)THEN
   IF (PVEGTYPE(NVT_C4  )>0.) PVEG(NVT_C4  )= 0.95
-  IF (PVEGTYPE(NVT_IRR )>0.) PVEG(NVT_IRR )= 0.95
-  IF (PVEGTYPE(NVT_C3  )>0.) PVEG(NVT_C3  )= 0.95
+  IF (NVT_IRR>0) THEN
+    IF (PVEGTYPE(NVT_IRR )>0.) PVEG(NVT_IRR )= 0.95
+  ENDIF
+  IF (NVT_C3>0) THEN
+    IF (PVEGTYPE(NVT_C3  )>0.) PVEG(NVT_C3  )= 0.95
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    IF (PVEGTYPE(NVT_C3W )>0.) PVEG(NVT_C3W )= 0.95
+    IF (PVEGTYPE(NVT_C3S )>0.) PVEG(NVT_C3S )= 0.95
+  ENDIF
 ELSE
   IF (PVEGTYPE(NVT_C4  )>0.) PVEG(NVT_C4  )= 1. - EXP( -0.6 * ZLAI(NVT_C4  ) )
-  IF (PVEGTYPE(NVT_IRR )>0.) PVEG(NVT_IRR )= 1. - EXP( -0.6 * ZLAI(NVT_IRR ) )
-  IF (PVEGTYPE(NVT_C3  )>0.) PVEG(NVT_C3  )= 1. - EXP( -0.6 * ZLAI(NVT_C3  ) )
+  IF (NVT_IRR>0) THEN
+    IF (PVEGTYPE(NVT_IRR )>0.) PVEG(NVT_IRR )= 1. - EXP( -0.6 * ZLAI(NVT_IRR ) )
+  ENDIF
+  IF (NVT_C3>0) THEN
+    IF (PVEGTYPE(NVT_C3  )>0.) PVEG(NVT_C3  )= 1. - EXP( -0.6 * ZLAI(NVT_C3  ) )
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    IF (PVEGTYPE(NVT_C3W )>0.) PVEG(NVT_C3W )= 1. - EXP( -0.6 * ZLAI(NVT_C3W ) )
+    IF (PVEGTYPE(NVT_C3S )>0.) PVEG(NVT_C3S )= 1. - EXP( -0.6 * ZLAI(NVT_C3S ) )
+  ENDIF
 ENDIF
 !
 IF (PVEGTYPE(NVT_TEBD)>0.) PVEG(NVT_TEBD)=  0.95
@@ -473,12 +513,19 @@ IF (PVEGTYPE(NVT_SHRB)>0.) PVEG(NVT_SHRB)=  0.95
 IF (PVEGTYPE(NVT_BONE)>0.) PVEG(NVT_BONE)=  0.95
 IF (PVEGTYPE(NVT_TENE)>0.) PVEG(NVT_TENE)=  0.95
 IF (PVEGTYPE(NVT_BOND)>0.) PVEG(NVT_BOND)=  0.95
+IF (NVT_FLTR>0) THEN
+  IF (PVEGTYPE(NVT_FLTR)>0.) PVEG(NVT_FLTR)=  0.95
+ENDIF
 IF (PVEGTYPE(NVT_TRBE)>0.) PVEG(NVT_TRBE)=  XEVERG_VEG
 !
 IF (PVEGTYPE(NVT_GRAS)>0.) PVEG(NVT_GRAS)=  0.95
 IF (PVEGTYPE(NVT_BOGR)>0.) PVEG(NVT_BOGR)=  0.95
 IF (PVEGTYPE(NVT_TROG)>0.) PVEG(NVT_TROG)=  0.95
-IF (PVEGTYPE(NVT_PARK)>0.) PVEG(NVT_PARK)=  0.95
+IF (NVT_PARK>0) THEN
+  IF (PVEGTYPE(NVT_PARK)>0.) PVEG(NVT_PARK)=  0.95
+ELSEIF (NVT_FLGR>0) THEN
+  IF (PVEGTYPE(NVT_FLGR)>0.) PVEG(NVT_FLGR)=  0.95
+ENDIF
 !
 IF (PVEGTYPE(NVT_NO  )>0.) PVEG(NVT_NO  )= 0.
 IF (PVEGTYPE(NVT_SNOW)>0.) PVEG(NVT_SNOW)= 0.

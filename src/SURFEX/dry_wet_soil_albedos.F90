@@ -50,7 +50,7 @@ USE MODD_ISBA_n, ONLY : ISBA_K_t
 USE MODD_DATA_COVER_PAR, ONLY : NVT_PARK, NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, &
                                 NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS, NVT_BOGR,      &
-                                NVT_TROG                   
+                                NVT_TROG, NVT_C3W, NVT_C3S, NVT_FLTR, NVT_FLGR                 
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -62,28 +62,38 @@ IMPLICIT NONE
 !
 TYPE(ISBA_K_t), INTENT(INOUT) :: KK
 !
+REAL :: ZSUM
+INTEGER :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DRY_WET_SOIL_ALBEDOS',0,ZHOOK_HANDLE)
-KK%XALBVIS_DRY(:) = 0.05 +  (   0.05 + MAX(0.30 * KK%XSAND(:,1), 0.10) )  &
-                         * ( 1. - 0.9 * ( KK%XVEGTYPE(:,NVT_C3)        &
-                                        + KK%XVEGTYPE(:,NVT_C4)        &
-                                        + KK%XVEGTYPE(:,NVT_IRR)       &
-                                        + KK%XVEGTYPE(:,NVT_GRAS)      &
-                                        + KK%XVEGTYPE(:,NVT_TROG)      &
-                                        + KK%XVEGTYPE(:,NVT_PARK)      &
-                                        + KK%XVEGTYPE(:,NVT_TRBE)      &
-                                        + KK%XVEGTYPE(:,NVT_BONE)      &
-                                        + KK%XVEGTYPE(:,NVT_TEBD)      &
-                                        + KK%XVEGTYPE(:,NVT_TRBD)      & 
-                                        + KK%XVEGTYPE(:,NVT_TEBE)      &
-                                        + KK%XVEGTYPE(:,NVT_TENE)      &
-                                        + KK%XVEGTYPE(:,NVT_BOBD)      &
-                                        + KK%XVEGTYPE(:,NVT_BOND)      &
-                                        + KK%XVEGTYPE(:,NVT_BOGR)      &
-                                        + KK%XVEGTYPE(:,NVT_SHRB))**2 )  
+!
+DO JJ=1,SIZE(KK%XVEGTYPE,1)
+  !
+  ZSUM = KK%XVEGTYPE(JJ,NVT_C4) + KK%XVEGTYPE(JJ,NVT_GRAS) + KK%XVEGTYPE(JJ,NVT_TROG) &
+       + KK%XVEGTYPE(JJ,NVT_TRBE) + KK%XVEGTYPE(JJ,NVT_BONE) + KK%XVEGTYPE(JJ,NVT_TEBD) &
+       + KK%XVEGTYPE(JJ,NVT_TRBD) + KK%XVEGTYPE(JJ,NVT_TEBE) + KK%XVEGTYPE(JJ,NVT_TENE) &
+       + KK%XVEGTYPE(JJ,NVT_BOBD) + KK%XVEGTYPE(JJ,NVT_BOND) + KK%XVEGTYPE(JJ,NVT_BOGR) &
+       + KK%XVEGTYPE(JJ,NVT_SHRB)
+  !
+  IF (NVT_C3/=0 .AND. NVT_IRR/=0) THEN
+    ZSUM = ZSUM + KK%XVEGTYPE(JJ,NVT_C3) + KK%XVEGTYPE(JJ,NVT_IRR)
+  ELSEIF (NVT_C3W/=0 .AND. NVT_C3S/=0) THEN
+    ZSUM = ZSUM + KK%XVEGTYPE(JJ,NVT_C3W) + KK%XVEGTYPE(JJ,NVT_C3S)
+  ENDIF
+  !
+  IF (NVT_PARK/=0) THEN
+    ZSUM = ZSUM + KK%XVEGTYPE(JJ,NVT_PARK)
+  ELSEIF (NVT_FLTR/=0 .AND. NVT_FLGR/=0) THEN
+    ZSUM = ZSUM + KK%XVEGTYPE(JJ,NVT_FLTR) + KK%XVEGTYPE(JJ,NVT_FLGR)
+  ENDIF
+  !
+  KK%XALBVIS_DRY(JJ) = 0.05 +  (   0.05 + MAX(0.30 * KK%XSAND(JJ,1), 0.10) )  &
+                         * ( 1. - 0.9 * ZSUM**2 )
+  !
+ENDDO
 !
 KK%XALBNIR_DRY(:) = KK%XALBVIS_DRY(:) + 0.10
 !

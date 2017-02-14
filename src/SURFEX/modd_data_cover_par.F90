@@ -50,14 +50,20 @@ INTEGER, PARAMETER    :: NCOVER_ECO1_END    = 255
 !firt class number of EUROPE
 INTEGER, PARAMETER    :: NCOVER_ECO2_START  = 301
 !
-INTEGER, PARAMETER :: NVEGTYPE = 19
+INTEGER, PARAMETER :: NVEGTYPE_OLD = 19
+INTEGER, PARAMETER :: NVEGTYPE_ECOSG = 20
+!
 INTEGER, PARAMETER :: NWATTYPE = 2
 INTEGER, PARAMETER :: NSEATYPE = 1
 INTEGER, PARAMETER :: NTWNTYPE = 10
-INTEGER, DIMENSION(4) :: NTYPE = (/NVEGTYPE,NSEATYPE,NWATTYPE,NTWNTYPE/)
+INTEGER, DIMENSION(4) :: NTYPE = (/NSEATYPE,NWATTYPE,NVEGTYPE_ECOSG,NTWNTYPE/)
 !
-INTEGER  :: IDX_TWN_ECOSG = 0
+LOGICAL, DIMENSION(NVEGTYPE_OLD) :: LVEG_PRES
+!
 INTEGER, PARAMETER :: NCOVER = 573
+!
+INTEGER :: NVEGTYPE
+!
 ! number of vegetation types
 !
 INTEGER  :: NVT_C4    ! C4 cultures types
@@ -79,21 +85,27 @@ INTEGER  :: NVT_ROCK  ! ROCKs
 INTEGER  :: NVT_SNOW  ! Ice-cap ice-sheet
 INTEGER  :: NVT_IRR   ! IRRigated crops
 INTEGER  :: NVT_PARK  ! irrigated PARKs gardens or peat bogs
+!
+INTEGER :: NVT_C3W    ! winter C3 crops
+INTEGER :: NVT_C3S    ! summer C3 crops
+INTEGER :: NVT_FLTR   ! flooded trees
+INTEGER :: NVT_FLGR   ! flooded grassland
+!
 ! indexes of these types (C4 cultures types, Broadleaf TREEs, CONIferous trees,
 !                         EVERgreen broadleaf trees, GRASsland, TROpical Grass,
 !                         C3 CULTures types, NO vegetation, ROCKs,
 !                         IRRigated crops, irrigated PARKs gardens or peat bogs)
 !
-INTEGER :: NUT_DENS
-INTEGER :: NUT_SUB1
-INTEGER :: NUT_SUB2
-INTEGER :: NUT_ZIC
-INTEGER :: NUT_ROAD
-INTEGER :: NUT_PORT
-INTEGER :: NUT_AIR
-INTEGER :: NUT_MINE
-INTEGER :: NUT_PARK
-INTEGER :: NUT_SPOR
+INTEGER :: NUT_CPHR
+INTEGER :: NUT_CPMR
+INTEGER :: NUT_CPLR
+INTEGER :: NUT_OPHR
+INTEGER :: NUT_OPMR
+INTEGER :: NUT_OPLR
+INTEGER :: NUT_LWLR
+INTEGER :: NUT_LALR
+INTEGER :: NUT_SPAR
+INTEGER :: NUT_INDU
 !
 !---------------------------------------------------------------------------------
 !

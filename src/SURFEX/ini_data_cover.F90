@@ -103,7 +103,8 @@ USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER
                                   XDATA_EFF_PANEL, XDATA_FRAC_PANEL,                &
                                   XDATA_GNDLITTER, XDATA_Z0LITTER, XDATA_H_VEG
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
+USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVEGTYPE_OLD, NVEGTYPE_ECOSG,   &
+                                  NVT_NO, NVT_ROCK, NVT_SNOW,             &
                                   NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_C3,   &
                                   NVT_C4, NVT_IRR, NVT_GRAS, NVT_TROG,    &
                                   NVT_PARK, NVT_TRBD, NVT_TEBE, NVT_TENE, &
@@ -111,10 +112,10 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVT_NO, NVT_ROCK, NVT_SNOW,     &
                                   JPCOVER, NCOVER, NTYPE, NDATA_ROAD_LAYER,  &
                                   NDATA_WALL_LAYER, NDATA_ROOF_LAYER,     &
                                   NDATA_FLOOR_LAYER, CNAMES, NBARE_SOIL,  &
-                                  NROCK, NSEA, NWATER, NPERMSNOW, NUT_DENS, &
-                                  NUT_SUB1, NUT_SUB2, NUT_ZIC, NUT_ROAD, &
-                                  NUT_PORT, NUT_AIR, NUT_MINE, NUT_PARK, &
-                                  NUT_SPOR 
+                                  NROCK, NSEA, NWATER, NPERMSNOW, NUT_CPHR, &
+                                  NUT_CPMR, NUT_CPLR, NUT_OPHR, NUT_OPMR, &
+                                  NUT_OPLR, NUT_LWLR, NUT_LALR, NUT_SPAR, &
+                                  NUT_INDU, NVT_C3W, NVT_C3S, NVT_FLTR, NVT_FLGR 
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
@@ -259,25 +260,57 @@ XDATA_SEA = 0.
 !
 !New name  N   Nold   Comments
 !-----------------------------
-NVT_NO   = 1   ! 1  ! no vegetation (smooth)
-NVT_ROCK = 2   ! 2  ! no vegetation (rocks)
-NVT_SNOW = 3   ! 3  ! permanent snow and ice
-NVT_TEBD = 4   ! 4  ! temperate broadleaf cold-deciduous summergreen (TREE)
-NVT_BONE = 5   ! 5  ! boreal needleleaf evergreen  (CONI)
-NVT_TRBE = 6   ! 6  ! tropical broadleaf evergreen (EVER)
-NVT_C3   = 7   ! 7  ! C3 cultures types
-NVT_C4   = 8   ! 8  ! C4 cultures types
-NVT_IRR  = 9   ! 9  ! irrigated crops
-NVT_GRAS =10   !10  ! grassland
-NVT_TROG =11   !11  ! tropical grassland
-NVT_PARK =12   !12  ! peat bogs, parks and gardens (irrigated grass)
-NVT_TRBD =13   ! 4  ! tropical broadleaf deciduous (TREE)
-NVT_TEBE =14   ! 4  ! temperate broadleaf evergreen (TREE)
-NVT_TENE =15   ! 5  ! temperate needleleaf evergreen (CONI)
-NVT_BOBD =16   ! 4  ! boreal broadleaf cold-deciduous summergreen (TREE)
-NVT_BOND =17   ! 5  ! boreal needleleaf cold-deciduous summergreen (CONI)
-NVT_BOGR =18   !10  ! boreal grass (GRAS)
-NVT_SHRB =19   ! 4  ! shrub (TREE)
+IF (U%LECOSG) THEN
+  NVEGTYPE = NVEGTYPE_ECOSG
+  NVT_C3   = 0
+  NVT_PARK = 0
+  NVT_IRR  = 0
+  NVT_NO   = 1   ! 1  ! no vegetation (smooth)
+  NVT_ROCK = 2   ! 2  ! no vegetation (rocks)
+  NVT_SNOW = 3   ! 3  ! permanent snow and ice
+  NVT_BOBD = 4   ! 4  ! boreal broadleaf cold-deciduous summergreen (TREE)
+  NVT_TEBD = 5   ! 4  ! temperate broadleaf cold-deciduous summergreen (TREE)
+  NVT_TRBD = 6   ! 4  ! tropical broadleaf deciduous (TREE)  
+  NVT_TEBE = 7   ! 4  ! temperate broadleaf evergreen (TREE)  
+  NVT_TRBE = 8   ! 6  ! tropical broadleaf evergreen (EVER)
+  NVT_BONE = 9   ! 5  ! boreal needleleaf evergreen  (CONI)  
+  NVT_TENE =10   ! 5  ! temperate needleleaf evergreen (CONI)
+  NVT_BOND =11   ! 5  ! boreal needleleaf cold-deciduous summergreen (CONI)  
+  NVT_SHRB =12   ! 4  ! shrub (TREE)
+  NVT_BOGR =13   !10  ! boreal grass (GRAS)
+  NVT_GRAS =14   !10  ! grassland
+  NVT_TROG =15   !11  ! tropical grassland 
+  NVT_C3W  =16   ! 7  ! C3W cultures types
+  NVT_C3S  =17   ! 7  ! C3S cultures types
+  NVT_C4   =18   ! 8  ! C4 cultures types
+  NVT_FLTR =19   !12  ! flooded trees
+  NVT_FLGR =20   !12  ! flooded grassland
+ELSE
+  NVEGTYPE = NVEGTYPE_OLD 
+  NVT_C3W  = 0
+  NVT_C3S  = 0
+  NVT_FLTR = 0
+  NVT_FLGR = 0
+  NVT_NO   = 1   ! 1  ! no vegetation (smooth)
+  NVT_ROCK = 2   ! 2  ! no vegetation (rocks)
+  NVT_SNOW = 3   ! 3  ! permanent snow and ice
+  NVT_TEBD = 4   ! 4  ! temperate broadleaf cold-deciduous summergreen (TREE)
+  NVT_BONE = 5   ! 5  ! boreal needleleaf evergreen  (CONI)
+  NVT_TRBE = 6   ! 6  ! tropical broadleaf evergreen (EVER)
+  NVT_C3   = 7   ! 7  ! C3 cultures types
+  NVT_C4   = 8   ! 8  ! C4 cultures types
+  NVT_IRR  = 9   ! 9  ! irrigated crops
+  NVT_GRAS =10   !10  ! grassland
+  NVT_TROG =11   !11  ! tropical grassland
+  NVT_PARK =12   !12  ! peat bogs, parks and gardens (irrigated grass)
+  NVT_TRBD =13   ! 4  ! tropical broadleaf deciduous (TREE)
+  NVT_TEBE =14   ! 4  ! temperate broadleaf evergreen (TREE)
+  NVT_TENE =15   ! 5  ! temperate needleleaf evergreen (CONI)
+  NVT_BOBD =16   ! 4  ! boreal broadleaf cold-deciduous summergreen (TREE)
+  NVT_BOND =17   ! 5  ! boreal needleleaf cold-deciduous summergreen (CONI)
+  NVT_BOGR =18   !10  ! boreal grass (GRAS)
+  NVT_SHRB =19   ! 4  ! shrub (TREE)
+ENDIF
 !
 !*    2.1    leaf area index
 !            ---------------
@@ -673,16 +706,16 @@ XDATA_H_VEG (:,:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
-NUT_DENS = SUM(NTYPE(1:3)) + 1
-NUT_SUB1 = SUM(NTYPE(1:3)) + 2
-NUT_SUB2 = SUM(NTYPE(1:3)) + 3
-NUT_ZIC  = SUM(NTYPE(1:3)) + 4
-NUT_ROAD = SUM(NTYPE(1:3)) + 5
-NUT_PORT = SUM(NTYPE(1:3)) + 6
-NUT_AIR  = SUM(NTYPE(1:3)) + 7
-NUT_MINE = SUM(NTYPE(1:3)) + 8
-NUT_PARK = SUM(NTYPE(1:3)) + 9
-NUT_SPOR = SUM(NTYPE(1:3)) + 10
+NUT_CPHR = SUM(NTYPE(1:3)) + 1
+NUT_CPMR = SUM(NTYPE(1:3)) + 2
+NUT_CPLR = SUM(NTYPE(1:3)) + 3
+NUT_OPHR = SUM(NTYPE(1:3)) + 4
+NUT_OPMR = SUM(NTYPE(1:3)) + 5
+NUT_OPLR = SUM(NTYPE(1:3)) + 6
+NUT_LWLR = SUM(NTYPE(1:3)) + 7
+NUT_LALR = SUM(NTYPE(1:3)) + 8
+NUT_SPAR = SUM(NTYPE(1:3)) + 9
+NUT_INDU = SUM(NTYPE(1:3)) + 10
 !
 !*    3.1    z0 for artificial surfaces
 !            --------------------------

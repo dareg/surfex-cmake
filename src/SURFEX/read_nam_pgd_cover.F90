@@ -5,8 +5,7 @@
 !     #########
       SUBROUTINE READ_NAM_PGD_COVER(HPROGRAM, HCOVER, HFILETYPE, PUNIF_COVER,  &
                                     PRM_COVER, PRM_COAST, PRM_LAKE, ORM_RIVER, &
-                                    PRM_SEA, OORCA_GRID, PLAT_ANT, OIMP_COVER, &
-                                    HCLC, HCLCFILETYPE )  
+                                    PRM_SEA, OORCA_GRID, PLAT_ANT, OIMP_COVER )  
 !     ##############################################################
 !
 !!**** *READ_NAM_PGD_COVER* reads namelist for Cover
@@ -70,8 +69,6 @@ REAL,                INTENT(OUT)   :: PRM_SEA     ! limit of sea coverage
 LOGICAL,             INTENT(OUT)   :: OORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
 REAL,                INTENT(OUT)   :: PLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
 LOGICAL,             INTENT(OUT)   :: OIMP_COVER  ! Imposed values for Cover from another PGD file
-CHARACTER(LEN=28),   INTENT(OUT)   :: HCLC        ! file name for cover types
-CHARACTER(LEN=6),    INTENT(OUT)   :: HCLCFILETYPE   ! data file type
 !
 !
 !*    0.2    Declaration of local variables
@@ -108,14 +105,11 @@ LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex a
 REAL                     :: XLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
 !
 LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
-CHARACTER(LEN=28)        :: YCLC         ! file name for clc types
-CHARACTER(LEN=6)         :: YCLCFILETYPE ! data file type
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_COVER/ YCOVER, YCOVERFILETYPE, XUNIF_COVER, XRM_COVER, XRM_COAST,     &
-                    XRM_LAKE, LRM_RIVER, XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER,&
-                    YCLC, YCLCFILETYPE 
+                    XRM_LAKE, LRM_RIVER, XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER 
 !
 !-------------------------------------------------------------------------------
 !
@@ -136,9 +130,6 @@ LORCA_GRID     = .FALSE.
 XLAT_ANT       = -77.0
 !
 LIMP_COVER     = .FALSE.
-!
-YCLC         = '                          '
-YCLCFILETYPE = '      '
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
@@ -167,8 +158,6 @@ PRM_SEA     = XRM_SEA     ! limit of sea coverage
 OORCA_GRID  = LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
 PLAT_ANT    = XLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
 OIMP_COVER  = LIMP_COVER  ! Imposed values for Cover from another PGD file
-HCLC         = YCLC       ! file name for cover types
-HCLCFILETYPE = YCLCFILETYPE   ! data file type
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_COVER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

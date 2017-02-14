@@ -106,7 +106,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD,      &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND,      &
                                 NVT_SHRB, NVT_C3, NVT_C4, NVT_IRR,           &
-                                NVT_GRAS, NVT_BOGR, NVT_TROG
+                                NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
+                                NVT_C3S, NVT_FLTR, NVT_FLGR
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -149,7 +150,11 @@ IF ( PLAI /= XUNDEF) THEN
   ZALLEN_H = EXP((ZLAI-3.5)/(1.3))
 END IF
 !
-PH_VEG(NVT_PARK) = ZLAI / 6.                    ! irr. grassland
+IF (NVT_PARK>0) THEN
+  PH_VEG(NVT_PARK) = ZLAI / 6.                    ! irr. grassland
+ELSEIF (NVT_FLGR>0) THEN
+  PH_VEG(NVT_FLGR) = ZLAI / 6.
+ENDIF
 IF (LTREEDRAG) THEN
   PH_VEG(NVT_TEBD) = ZLAI / 6.                  ! forest
   PH_VEG(NVT_BONE) = ZLAI / 6.                  ! forest
@@ -160,6 +165,7 @@ IF (LTREEDRAG) THEN
   PH_VEG(NVT_BOBD) = ZLAI / 6.                  ! forest
   PH_VEG(NVT_BOND) = ZLAI / 6.                  ! forest
   PH_VEG(NVT_SHRB) = ZLAI / 6.                  ! forest  
+  IF (NVT_FLTR>0) PH_VEG(NVT_FLTR) = ZLAI / 6.
 ELSE
   PH_VEG(NVT_TEBD) = PH_TREE                  ! forest
   PH_VEG(NVT_BONE) = PH_TREE                  ! forest
@@ -170,18 +176,29 @@ ELSE
   PH_VEG(NVT_BOBD) = PH_TREE                  ! forest
   PH_VEG(NVT_BOND) = PH_TREE                  ! forest
   PH_VEG(NVT_SHRB) = PH_TREE                  ! forest  
+  IF (NVT_FLTR>0) PH_VEG(NVT_FLTR) = PH_TREE
 END IF
 PH_VEG(NVT_GRAS) = ZLAI / 6.                    ! grassland
 PH_VEG(NVT_BOGR) = ZLAI / 6.                    ! boreal grassland
 PH_VEG(NVT_TROG) = ZLAI / 6.                    ! tropical grassland
 IF(OAGRI_TO_GRASS)THEN
-  PH_VEG(NVT_C3  ) = ZLAI / 6.
+  IF (NVT_C3>0) THEN
+    PH_VEG(NVT_C3  ) = ZLAI / 6.
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    PH_VEG(NVT_C3W ) = ZLAI / 6.
+    PH_VEG(NVT_C3S ) = ZLAI / 6.
+  ENDIF
   PH_VEG(NVT_C4  ) = ZLAI / 6.
-  PH_VEG(NVT_IRR ) = ZLAI / 6.
+  IF (NVT_IRR>0) PH_VEG(NVT_IRR ) = ZLAI / 6.
 ELSE
-  PH_VEG(NVT_C3  ) = MIN(1. , ZALLEN_H )          ! cultures
+  IF (NVT_C3>0) THEN
+    PH_VEG(NVT_C3  ) = MIN(1. , ZALLEN_H )          ! cultures
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    PH_VEG(NVT_C3W ) =  MIN(1. , ZALLEN_H )
+    PH_VEG(NVT_C3S ) =  MIN(1. , ZALLEN_H )
+  ENDIF
   PH_VEG(NVT_C4  ) = MIN(2.5, ZALLEN_H )          ! C4 types
-  PH_VEG(NVT_IRR ) = MIN(2.5, ZALLEN_H )          ! irrigated crops (as C4)
+  IF (NVT_IRR>0) PH_VEG(NVT_IRR ) = MIN(2.5, ZALLEN_H )          ! irrigated crops (as C4)
 ENDIF
 PH_VEG(NVT_NO  ) = 0.1                          ! no vegetation (smooth)
 PH_VEG(NVT_ROCK) = 1.                           ! no vegetation (rocks)
@@ -240,7 +257,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD,      &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND,      &
                                 NVT_SHRB, NVT_C3, NVT_C4, NVT_IRR,           &
-                                NVT_GRAS, NVT_BOGR, NVT_TROG
+                                NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
+                                NVT_C3S, NVT_FLTR, NVT_FLGR
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -286,7 +304,12 @@ WHERE (PLAI(:) /= XUNDEF)
 END WHERE
 !
 !
-PH_VEG(:,NVT_PARK) = ZLAI(:) / 6.                 ! irr. grassland
+IF (NVT_PARK>0) THEN
+  PH_VEG(:,NVT_PARK) = ZLAI(:) / 6.                 ! irr. grassland
+ELSEIF (NVT_FLGR>0) THEN
+  PH_VEG(:,NVT_FLGR) = ZLAI(:) / 6.
+ENDIF
+!
 IF (LTREEDRAG) THEN
   PH_VEG(:,NVT_TEBD) = ZLAI(:) / 6.         ! forest
   PH_VEG(:,NVT_BONE) = ZLAI(:) / 6.         ! forest
@@ -297,6 +320,7 @@ IF (LTREEDRAG) THEN
   PH_VEG(:,NVT_BOBD) = ZLAI(:) / 6.         ! forest
   PH_VEG(:,NVT_BOND) = ZLAI(:) / 6.         ! forest
   PH_VEG(:,NVT_SHRB) = ZLAI(:) / 6.         ! forest  
+  IF (NVT_FLTR>0) PH_VEG(:,NVT_FLTR) = ZLAI(:) / 6.
 ELSE
   PH_VEG(:,NVT_TEBD) = PH_TREE(:)           ! forest
   PH_VEG(:,NVT_BONE) = PH_TREE(:)           ! forest
@@ -306,19 +330,30 @@ ELSE
   PH_VEG(:,NVT_TENE) = PH_TREE(:)           ! forest
   PH_VEG(:,NVT_BOBD) = PH_TREE(:)           ! forest
   PH_VEG(:,NVT_BOND) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_SHRB) = PH_TREE(:)           ! forest  
+  PH_VEG(:,NVT_SHRB) = PH_TREE(:)           ! forest
+  IF (NVT_FLTR>0) PH_VEG(:,NVT_FLTR) = PH_TREE(:)  
 END IF
 PH_VEG(:,NVT_GRAS) = ZLAI(:) / 6.           ! grassland
 PH_VEG(:,NVT_BOGR) = ZLAI(:) / 6.           ! boreal grassland
 PH_VEG(:,NVT_TROG) = ZLAI(:) / 6.           ! tropical grassland
 IF(OAGRI_TO_GRASS)THEN
-  PH_VEG(:,NVT_C3  ) = ZLAI(:) / 6.
+  IF (NVT_C3>0) THEN
+    PH_VEG(:,NVT_C3  ) = ZLAI(:) / 6.
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    PH_VEG(:,NVT_C3W ) = ZLAI(:) / 6.
+    PH_VEG(:,NVT_C3S ) = ZLAI(:) / 6.
+  ENDIF
   PH_VEG(:,NVT_C4  ) = ZLAI(:) / 6.
-  PH_VEG(:,NVT_IRR ) = ZLAI(:) / 6.
+  IF (NVT_IRR>0) PH_VEG(:,NVT_IRR ) = ZLAI(:) / 6.
 ELSE
-  PH_VEG(:,NVT_C3  ) = MIN(1. , ZALLEN_H(:) )          ! cultures
+  IF (NVT_C3>0) THEN
+    PH_VEG(:,NVT_C3  ) = MIN(1. , ZALLEN_H(:) )          ! cultures
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    PH_VEG(:,NVT_C3W ) = MIN(1. , ZALLEN_H(:) )
+    PH_VEG(:,NVT_C3S ) = MIN(1. , ZALLEN_H(:) )
+  ENDIF
   PH_VEG(:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:) )          ! C4 types
-  PH_VEG(:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:) )          ! irrigated crops (as C4)
+  IF (NVT_IRR>0) PH_VEG(:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:) )          ! irrigated crops (as C4)
 ENDIF
 PH_VEG(:,NVT_NO  ) = 0.1                    ! no vegetation (smooth)
 PH_VEG(:,NVT_ROCK) = 1.                     ! no vegetation (rocks)
@@ -376,7 +411,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD,      &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND,      &
                                 NVT_SHRB, NVT_C3, NVT_C4, NVT_IRR,           &
-                                NVT_GRAS, NVT_BOGR, NVT_TROG
+                                NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
+                                NVT_C3S, NVT_FLTR, NVT_FLGR
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
@@ -424,7 +460,12 @@ WHERE(PLAI(:,:)/=XUNDEF)
 END WHERE
 !
 !
-PH_VEG(:,:,NVT_PARK) = ZLAI(:,:) / 6.               ! irr. grassland
+IF (NVT_PARK>0) THEN
+  PH_VEG(:,:,NVT_PARK) = ZLAI(:,:) / 6.               ! irr. grassland
+ELSEIF (NVT_FLGR>0) THEN
+  PH_VEG(:,:,NVT_FLGR) = ZLAI(:,:) / 6. 
+ENDIF
+!
 IF (LTREEDRAG) THEN
   PH_VEG(:,:,NVT_TEBD) = ZLAI(:,:) / 6.         ! forest
   PH_VEG(:,:,NVT_BONE) = ZLAI(:,:) / 6.         ! forest
@@ -435,6 +476,7 @@ IF (LTREEDRAG) THEN
   PH_VEG(:,:,NVT_BOBD) = ZLAI(:,:) / 6.         ! forest
   PH_VEG(:,:,NVT_BOND) = ZLAI(:,:) / 6.         ! forest
   PH_VEG(:,:,NVT_SHRB) = ZLAI(:,:) / 6.         ! forest  
+  IF (NVT_FLTR>0) PH_VEG(:,:,NVT_FLTR) = ZLAI(:,:) / 6.
 ELSE
   PH_VEG(:,:,NVT_TEBD) = PH_TREE(:,:)           ! forest
   PH_VEG(:,:,NVT_BONE) = PH_TREE(:,:)           ! forest
@@ -445,18 +487,29 @@ ELSE
   PH_VEG(:,:,NVT_BOBD) = PH_TREE(:,:)           ! forest
   PH_VEG(:,:,NVT_BOND) = PH_TREE(:,:)           ! forest
   PH_VEG(:,:,NVT_SHRB) = PH_TREE(:,:)           ! forest   
+  IF (NVT_FLTR>0) PH_VEG(:,:,NVT_FLTR) = PH_TREE(:,:)
 END IF
 PH_VEG(:,:,NVT_GRAS) = ZLAI(:,:) / 6.               ! grassland
 PH_VEG(:,:,NVT_BOGR) = ZLAI(:,:) / 6.               ! boreal grassland
 PH_VEG(:,:,NVT_TROG) = ZLAI(:,:) / 6.               ! tropical grassland
 IF(OAGRI_TO_GRASS)THEN
-  PH_VEG(:,:,NVT_C3  ) = ZLAI(:,:) / 6.
+  IF (NVT_C3>0) THEN
+    PH_VEG(:,:,NVT_C3  ) = ZLAI(:,:) / 6.
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    PH_VEG(:,:,NVT_C3W ) = ZLAI(:,:) / 6.
+    PH_VEG(:,:,NVT_C3S ) = ZLAI(:,:) / 6.
+  ENDIF
   PH_VEG(:,:,NVT_C4  ) = ZLAI(:,:) / 6.
-  PH_VEG(:,:,NVT_IRR ) = ZLAI(:,:) / 6.
+  IF (NVT_IRR>0) PH_VEG(:,:,NVT_IRR ) = ZLAI(:,:) / 6.
 ELSE
-  PH_VEG(:,:,NVT_C3  ) = MIN(1. , ZALLEN_H(:,:) )          ! cultures
+  IF (NVT_C3>0) THEN
+    PH_VEG(:,:,NVT_C3  ) = MIN(1. , ZALLEN_H(:,:) )          ! cultures
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    PH_VEG(:,:,NVT_C3W ) = MIN(2.5, ZALLEN_H(:,:) )
+    PH_VEG(:,:,NVT_C3S ) = MIN(2.5, ZALLEN_H(:,:) )
+  ENDIF
   PH_VEG(:,:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:,:) )          ! C4 types
-  PH_VEG(:,:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:,:) )          ! irrigated crops (as C4)
+  IF (NVT_IRR>0) PH_VEG(:,:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:,:) )          ! irrigated crops (as C4)
 ENDIF
 PH_VEG(:,:,NVT_NO  ) = 0.1                          ! no vegetation (smooth)
 PH_VEG(:,:,NVT_ROCK) = 1.                           ! no vegetation (rocks)
@@ -516,7 +569,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD,      &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND,      &
                                 NVT_SHRB, NVT_C3, NVT_C4, NVT_IRR,           &
-                                NVT_GRAS, NVT_BOGR, NVT_TROG
+                                NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
+                                NVT_C3S, NVT_FLTR, NVT_FLGR
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_TREEDRAG,       ONLY : LTREEDRAG
 !
@@ -552,7 +606,11 @@ WHERE (PLAI(:)/= XUNDEF)
 END WHERE
 !
 !
-IF (PVEGTYPE(NVT_PARK)>0.) PH_VEG(NVT_PARK) = PLAI(NVT_PARK) / 6.          ! irr. grasslands
+IF (NVT_PARK>0) THEN
+  IF (PVEGTYPE(NVT_PARK)>0.) PH_VEG(NVT_PARK) = PLAI(NVT_PARK) / 6.          ! irr. grasslands
+ELSEIF (NVT_FLGR>0) THEN
+  IF (PVEGTYPE(NVT_FLGR)>0.) PH_VEG(NVT_FLGR) = PLAI(NVT_FLGR) / 6.    
+ENDIF
 IF (LTREEDRAG) THEN
   IF (PVEGTYPE(NVT_TEBD)>0.) PH_VEG(NVT_TEBD) = PLAI(NVT_TEBD) / 6.        ! broadleaf forest
   IF (PVEGTYPE(NVT_BONE)>0.) PH_VEG(NVT_BONE) = PLAI(NVT_BONE) / 6.        ! coniferous forest
@@ -563,6 +621,9 @@ IF (LTREEDRAG) THEN
   IF (PVEGTYPE(NVT_BOBD)>0.) PH_VEG(NVT_BOBD) = PLAI(NVT_BOBD) / 6.        ! broadleaf forest
   IF (PVEGTYPE(NVT_BOND)>0.) PH_VEG(NVT_BOND) = PLAI(NVT_BOND) / 6.        ! coniferous forest
   IF (PVEGTYPE(NVT_SHRB)>0.) PH_VEG(NVT_SHRB) = PLAI(NVT_SHRB) / 6.        ! euqatorial forest  
+  IF (NVT_FLTR>0) THEN
+    IF (PVEGTYPE(NVT_FLTR)>0.) PH_VEG(NVT_FLTR) = PLAI(NVT_FLTR) / 6.
+  ENDIF
 ELSE
   IF (PVEGTYPE(NVT_TEBD)>0.) PH_VEG(NVT_TEBD) = PH_TREE(NVT_TEBD)          ! broadleaf forest
   IF (PVEGTYPE(NVT_BONE)>0.) PH_VEG(NVT_BONE) = PH_TREE(NVT_BONE)          ! coniferous forest
@@ -573,18 +634,35 @@ ELSE
   IF (PVEGTYPE(NVT_BOBD)>0.) PH_VEG(NVT_BOBD) = PH_TREE(NVT_BOBD)          ! broadleaf forest
   IF (PVEGTYPE(NVT_BOND)>0.) PH_VEG(NVT_BOND) = PH_TREE(NVT_BOND)          ! coniferous forest
   IF (PVEGTYPE(NVT_SHRB)>0.) PH_VEG(NVT_SHRB) = PH_TREE(NVT_SHRB)          ! euqatorial forest  
+  IF (NVT_FLTR>0) THEN
+    IF (PVEGTYPE(NVT_FLTR)>0.) PH_VEG(NVT_FLTR) = PH_TREE(NVT_FLTR)
+  ENDIF
 END IF
 IF (PVEGTYPE(NVT_GRAS)>0.) PH_VEG(NVT_GRAS) = PLAI(NVT_GRAS) / 6.          ! grassland
 IF (PVEGTYPE(NVT_BOGR)>0.) PH_VEG(NVT_BOGR) = PLAI(NVT_BOGR) / 6.          ! boreal grassland
 IF (PVEGTYPE(NVT_TROG)>0.) PH_VEG(NVT_TROG) = PLAI(NVT_TROG) / 6.          ! tropical grassland
 IF(OAGRI_TO_GRASS)THEN
-  IF (PVEGTYPE(NVT_C3  )>0.) PH_VEG(NVT_C3  ) = PLAI(NVT_C3)  / 6.  ! cultures
+  IF (NVT_C3>0) THEN
+    IF (PVEGTYPE(NVT_C3  )>0.) PH_VEG(NVT_C3  ) = PLAI(NVT_C3)  / 6.  ! cultures
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    IF (PVEGTYPE(NVT_C3W )>0.) PH_VEG(NVT_C3W ) = PLAI(NVT_C3W) / 6.
+    IF (PVEGTYPE(NVT_C3S )>0.) PH_VEG(NVT_C3S ) = PLAI(NVT_C3S) / 6.
+  ENDIF
   IF (PVEGTYPE(NVT_C4  )>0.) PH_VEG(NVT_C4  ) = PLAI(NVT_C4)  / 6.  ! C4 types
-  IF (PVEGTYPE(NVT_IRR )>0.) PH_VEG(NVT_IRR ) = PLAI(NVT_IRR) / 6.  ! irrigated crops (as C4)
+  IF (NVT_IRR>0) THEN
+    IF (PVEGTYPE(NVT_IRR )>0.) PH_VEG(NVT_IRR ) = PLAI(NVT_IRR) / 6.  ! irrigated crops (as C4)
+  ENDIF
 ELSE
-  IF (PVEGTYPE(NVT_C3  )>0.) PH_VEG(NVT_C3  ) = MIN(1. , ZALLEN_H(NVT_C3) )  ! cultures
+  IF (NVT_C3>0) THEN
+    IF (PVEGTYPE(NVT_C3  )>0.) PH_VEG(NVT_C3  ) = MIN(1. , ZALLEN_H(NVT_C3) )  ! cultures
+  ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
+    IF (PVEGTYPE(NVT_C3W )>0.) PH_VEG(NVT_C3W ) = MIN(1. , ZALLEN_H(NVT_C3W) ) 
+    IF (PVEGTYPE(NVT_C3S )>0.) PH_VEG(NVT_C3S ) = MIN(1. , ZALLEN_H(NVT_C3S) )
+  ENDIF
   IF (PVEGTYPE(NVT_C4  )>0.) PH_VEG(NVT_C4  ) = MIN(2.5, ZALLEN_H(NVT_C4) )  ! C4 types
-  IF (PVEGTYPE(NVT_IRR )>0.) PH_VEG(NVT_IRR ) = MIN(2.5, ZALLEN_H(NVT_IRR) ) ! irrigated crops (as C4)
+  IF (NVT_IRR>0) THEN
+    IF (PVEGTYPE(NVT_IRR )>0.) PH_VEG(NVT_IRR ) = MIN(2.5, ZALLEN_H(NVT_IRR) ) ! irrigated crops (as C4)
+  ENDIF
 ENDIF
 IF (PVEGTYPE(NVT_NO  )>0.) PH_VEG(NVT_NO  ) = 0.1                          ! no vegetation (smooth)
 IF (PVEGTYPE(NVT_ROCK)>0.) PH_VEG(NVT_ROCK) = 1.                           ! no vegetation (rocks)

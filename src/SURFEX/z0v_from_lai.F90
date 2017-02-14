@@ -103,11 +103,6 @@ END MODULE MODI_Z0V_FROM_LAI
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
-                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
-                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
-                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -199,11 +194,6 @@ END FUNCTION Z0V_FROM_LAI_0D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
-                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
-                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
-                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -293,11 +283,6 @@ END FUNCTION Z0V_FROM_LAI_1D
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
-                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
-                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
-                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
@@ -393,11 +378,6 @@ END FUNCTION Z0V_FROM_LAI_2D
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
-                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
-                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
-                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
-                                  NVT_BOND, NVT_BOGR, NVT_SHRB
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_VEG_HEIGHT_FROM_LAI
 !

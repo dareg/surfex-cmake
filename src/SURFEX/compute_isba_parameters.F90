@@ -412,10 +412,10 @@ DO JP = 1, IO%NPATCH
   !-------------------------------------------------------------------------------
   !
   ! in init_veg_pgd_n, things needed also by garden and greenroof
-  CALL INIT_VEG_PGD_n(ISSK, IO, S, K, KK, PK, PEK, AGK, KI,  &
+  CALL INIT_VEG_PGD_n(ISSK, DTI, IO, S, K, KK, PK, PEK, AGK, KI,  &
                       HPROGRAM, 'NATURE', ILUOUT, PK%NSIZE_P, S%TTIME%TDATE%MONTH, &
                       LDEEPSOIL, LPHYSDOMC, XTDEEP_CLI, XGAMMAT_CLI,   & 
-                      LAGRIP, XTHRESHOLD, HINIT, PCO2, PRHOA        )  
+                      LAGRIP, XTHRESHOLD, HINIT, PCO2, PRHOA        )
   !
   !-------------------------------------------------------------------------------
   !
@@ -453,6 +453,8 @@ DO JP = 1, IO%NPATCH
   KK%XEMISF        = 0.0  
   !
 ENDDO
+!
+IF (DTI%LDATA_CONDSAT) DEALLOCATE(DTI%XPAR_CONDSAT)
 !
 !----------------------------------------------------------------------------------
 !----------------------------------------------------------------------------------

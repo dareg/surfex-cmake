@@ -54,7 +54,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_TYPE_DATE_SURF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
+USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVEGTYPE_OLD, NVEGTYPE_ECOSG
 !
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE, XDATA_VEG,         &
@@ -89,8 +89,8 @@ CHARACTER(LEN=*),       INTENT(IN)    :: HSFTYPE ! nature / garden
 !            ------------------------------
 !
 TYPE(DATE_TIME), DIMENSION(:,:), ALLOCATABLE :: TPWORK
-REAL, DIMENSION(19)   :: XSTRESS   ! 1. if defensive /0. if offensive
-REAL, DIMENSION(19)   :: XSTRESS_NOAGRI   ! 1. if defensive /0. if offensive
+REAL, DIMENSION(NVEGTYPE)   :: XSTRESS   ! 1. if defensive /0. if offensive
+REAL, DIMENSION(NVEGTYPE)   :: XSTRESS_NOAGRI   ! 1. if defensive /0. if offensive
 !
 CHARACTER(LEN=3)  :: YTREE, YNAT, YVEG
 !
@@ -103,14 +103,20 @@ INTEGER               :: ISIZE_LMEB_PATCH  ! Number of patches with MEB=true
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-DATA XSTRESS        /1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./
-DATA XSTRESS_NOAGRI /1.,1.,1.,0.,1.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./
 !-------------------------------------------------------------------------------
 !
 !*    1.      Initializations
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_MIXPAR',0,ZHOOK_HANDLE)
+!
+IF (NVEGTYPE==NVEGTYPE_ECOSG) THEN
+  XSTRESS        = (/1.,1.,1.,0.,0.,0.,0.,0.,1.,1.,1.,0.,0.,0.,0.,1.,1.,0.,0.,0./)
+  XSTRESS_NOAGRI = (/1.,1.,1.,0.,0.,0.,0.,0.,1.,1.,1.,0.,0.,0.,0.,0.,0.,0.,0.,0./)
+ELSE
+  XSTRESS =        (/1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./)
+  XSTRESS_NOAGRI = (/1.,1.,1.,0.,1.,0.,0.,0.,0.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0./)
+ENDIF
 !
 ISIZE_LMEB_PATCH=COUNT(IO%LMEB_PATCH(:))
 !

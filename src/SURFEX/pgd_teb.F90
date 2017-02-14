@@ -111,8 +111,6 @@ TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTGR
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL, DIMENSION(0,0) :: ZPAR_TYPE
-!
 INTEGER         :: ILUOUT    ! output listing logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -174,7 +172,7 @@ ALLOCATE(TG%XMESH_SIZE (TG%NDIM))
 !             -------------------
 !
 TOP%LECOCLIMAP = U%LECOCLIMAP
- CALL PGD_TEB_PAR(DTCO, UG, U, USS, BDD, DTT, ZPAR_TYPE, TG%NDIM, &
+ CALL PGD_TEB_PAR(DTCO, UG, U, USS, BDD, DTT, TG%NDIM, &
                   HPROGRAM,U%LGARDEN,TOP%LGREENROOF,TOP%CBLD_ATYPE)
 !
 !-------------------------------------------------------------------------------
@@ -200,7 +198,7 @@ IF (TOP%LGARDEN) CALL PGD_TEB_VEG(DTCO, UG, U, USS, GDO, GDK, DTGD, GDIR, &
 !*    8.      Case of Building Energy Model
 !             -----------------------------
 !
-IF (TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(DTCO, UG, U, USS, DTB, ZPAR_TYPE, TG%NDIM, &
+IF (TOP%CBEM .EQ. 'BEM') CALL PGD_BEM_PAR(DTCO, UG, U, USS, DTB, TG%NDIM, &
                                           HPROGRAM,BOP%LAUTOSIZE)
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB',1,ZHOOK_HANDLE)

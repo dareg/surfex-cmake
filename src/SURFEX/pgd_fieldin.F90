@@ -57,7 +57,7 @@ USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, CATYPE, NSIZE, XSUMVAL,   &
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
 !
-USE MODD_DATA_COVER_PAR, ONLY : NTYPE
+USE MODD_DATA_COVER_PAR, ONLY : NTYPE, LVEG_PRES
 !
 USE MODI_GET_LUOUT
 USE MODI_TREAT_FIELD
@@ -112,7 +112,7 @@ INTEGER                        :: IDIM   !
 INTEGER :: JI
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZVEGTYPE
-INTEGER :: JJ, JTYPE
+INTEGER :: JJ, JT, JTN
  CHARACTER(LEN=20)   :: YFIELD
  CHARACTER(LEN=6)    :: YMASK
 INTEGER             :: INPTS     ! number of points used for interpolation
@@ -241,37 +241,41 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    4.      Mask for the interpolations
 !             ---------------------------
 !
-  DO JTYPE=1,SIZE(NSIZE,2)
+  DO JT=1,SIZE(NSIZE,2)
+
     SELECT CASE (HAREA)
 
       CASE ('LAN')
-        WHERE ((U%XTOWN(:)+U%XNATURE(:))==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1
+        WHERE ((U%XTOWN(:)+U%XNATURE(:))==0. .AND. NSIZE(:,JT)==0 ) NSIZE(:,JT) = -1
 
       CASE ('TWN')
-        WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1
+        WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:,JT)==0 ) NSIZE(:,JT) = -1
 
       CASE ('BLD')
-        WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1 
+        WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:,JT)==0 ) NSIZE(:,JT) = -1 
 
       CASE ('NAT')
-        WHERE (U%XNATURE(:)==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1
-
+        WHERE (U%XNATURE(:)==0. .AND. NSIZE(:,JT)==0 ) NSIZE(:,JT) = -1
+        !
+        ! for fields calculated by vegtype
         IF (PRESENT(PVEGTYPE) .AND.SIZE(NSIZE,2)>1) THEN
-          IF (JTYPE<SIZE(PVEGTYPE,2)) THEN
+          ! only for the natural part
+          JTN = JT - SUM(NTYPE(1:2))
+          IF ( JTN <= SIZE(PVEGTYPE,2) ) THEN
             ALLOCATE(ZVEGTYPE(U%NSIZE_FULL))
-            CALL UNPACK_SAME_RANK(IMASK,PVEGTYPE(:,JTYPE),ZVEGTYPE)
-            WHERE (ZVEGTYPE(:)==0. .AND. NSIZE(:,JTYPE)==0) NSIZE(:,JTYPE) = -1
+            CALL UNPACK_SAME_RANK(IMASK,PVEGTYPE(:,JTN),ZVEGTYPE)
+            WHERE (ZVEGTYPE(:)==0. .AND. NSIZE(:,JT)==0) NSIZE(:,JT) = -1
             DEALLOCATE(ZVEGTYPE)
           ELSE
-            NSIZE(:,JTYPE) = -1
+            NSIZE(:,JT) = -1
           ENDIF
         ENDIF
 
       CASE ('SEA')
-        WHERE (U%XSEA   (:)==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1
+        WHERE (U%XSEA   (:)==0. .AND. NSIZE(:,JT)==0 ) NSIZE(:,JT) = -1
 
       CASE ('WAT')
-        WHERE (U%XWATER (:)==0. .AND. NSIZE(:,JTYPE)==0 ) NSIZE(:,JTYPE) = -1
+        WHERE (U%XWATER (:)==0. .AND. NSIZE(:,JT)==0 ) NSIZE(:,JT) = -1
 
     END SELECT
 
@@ -282,30 +286,43 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    5.      Interpolation if some points are not initialized (no data for these points)
 !             ------------------------------------------------
 !
-  DO JTYPE=1,SIZE(NSIZE,2)
+  DO JT=1,SIZE(NSIZE,2)
 
-    IF (SIZE(ZFIELD,2)>1 .AND. ( &
-        (YFIELD(1:3)=='LAI'.OR.YFIELD(1:10)=='ALBNIR_VEG'.OR.YFIELD(1:10)=='ALBVIS_VEG') .OR. &
-        (SIZE(ZFIELD,2)>1.AND.YFIELD(1:6)=='H_TREE') ) ) THEN
+    !multitype input file
+    IF (SIZE(ZFIELD,2)>1) THEN
 
-      IF (JTYPE<=3) THEN
-        ZFIELD(:,JTYPE) = 0.
-        NSIZE (:,JTYPE) = 1
+      !fields defined only on the not-bare soil part
+      IF ( (YFIELD(1:3)=='LAI'.OR.YFIELD(1:10)=='ALBNIR_VEG'.OR.YFIELD(1:10)=='ALBVIS_VEG') .OR. &
+           (SIZE(ZFIELD,2)>1.AND.YFIELD(1:6)=='H_TREE') ) THEN
+
+        IF ( (.NOT.U%LECOSG.AND.JT<=3).OR.(U%LECOSG.AND.JT<=SUM(NTYPE(1:2))+3) ) THEN
+          ZFIELD(:,JT) = 0.
+          NSIZE (:,JT) = 1
+        ENDIF
+
+        ! height of trees only defined for tree vegtypes
+        IF (YFIELD(1:6)=='H_TREE') THEN
+          IF ((.NOT.U%LECOSG.AND.(JT>=7 .AND. JT<=12) .OR. (JT>=18 .AND. JT<=19)).OR. &
+              (     U%LECOSG.AND.(JT<=(SUM(NTYPE(1:2))+3).OR.JT>=(SUM(NTYPE(1:2))+13)) ) ) THEN
+            ZFIELD(:,JT) = 0.
+            NSIZE (:,JT) = 1.
+          ENDIF
+        ENDIF
+
       ENDIF
 
-      IF (YFIELD(1:6)=='H_TREE') THEN
-        IF ((JTYPE>=7 .AND.JTYPE<=12) .OR.(JTYPE>=18.AND.JTYPE<=19)) THEN
-          ZFIELD(:,JTYPE) = 0.
-          NSIZE (:,JTYPE) = 1.
-        ENDIF
+      ! if the cover / vegtype is not present on the area
+      IF( (U%LECOSG.AND..NOT.U%LCOVER(JT)) .OR. (.NOT.U%LECOSG.AND..NOT.LVEG_PRES(JT)) ) THEN
+        ZFIELD(:,JT) = 0.
+        NSIZE (:,JT) = 1.
       ENDIF
 
     ENDIF
 
     IF (PUNIF/=XUNDEF) THEN
-      CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,JTYPE),ZFIELD(:,JTYPE),HFIELD,PDEF=PUNIF,KNPTS=INPTS)
+      CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,JT),ZFIELD(:,JT),HFIELD,PDEF=PUNIF,KNPTS=INPTS)
     ELSE
-      CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,JTYPE),ZFIELD(:,JTYPE),HFIELD)
+      CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,JT),ZFIELD(:,JT),HFIELD)
     ENDIF
 
   ENDDO        
@@ -325,7 +342,12 @@ ELSEIF (PUNIF/=XUNDEF) THEN
 !
 END IF
 !
- CALL PACK_SAME_RANK(IMASK,ZFIELD(:,:),PFIELD(:,:))
+! only the case nature is treated for now, to adapt for town later
+IF (HAREA=='NAT'.AND.SIZE(ZFIELD,2)>SIZE(PFIELD,2)) THEN
+  CALL PACK_SAME_RANK(IMASK,ZFIELD(:,SUM(NTYPE(1:2))+1:SUM(NTYPE(1:3))),PFIELD(:,:))
+ELSE
+  CALL PACK_SAME_RANK(IMASK,ZFIELD(:,:),PFIELD(:,:))
+ENDIF
 !
 DEALLOCATE(ZFIELD)
 DEALLOCATE(IMASK)
