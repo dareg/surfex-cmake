@@ -260,7 +260,11 @@ IF (LEN_TRIM(HFILE)/=0) THEN
         ! for fields calculated by vegtype
         IF (PRESENT(PVEGTYPE) .AND.SIZE(NSIZE,2)>1) THEN
           ! only for the natural part
-          JTN = JT - SUM(NTYPE(1:2))
+          IF (U%LECOSG) THEN
+            JTN = JT - SUM(NTYPE(1:2))
+          ELSE
+            JTN = JT
+          ENDIF
           IF ( JTN <= SIZE(PVEGTYPE,2) ) THEN
             ALLOCATE(ZVEGTYPE(U%NSIZE_FULL))
             CALL UNPACK_SAME_RANK(IMASK,PVEGTYPE(:,JTN),ZVEGTYPE)
@@ -304,7 +308,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 
         ! height of trees only defined for tree vegtypes
         IF (YFIELD(1:6)=='H_TREE') THEN
-          IF ((.NOT.U%LECOSG.AND.(JT>=7 .AND. JT<=12) .OR. (JT>=18 .AND. JT<=19)).OR. &
+          IF ((.NOT.U%LECOSG.AND.((JT>=7 .AND. JT<=12) .OR. (JT>=18 .AND. JT<=19))).OR. &
               (     U%LECOSG.AND.(JT<=(SUM(NTYPE(1:2))+3).OR.JT>=(SUM(NTYPE(1:2))+13)) ) ) THEN
             ZFIELD(:,JT) = 0.
             NSIZE (:,JT) = 1.
@@ -345,10 +349,10 @@ ELSEIF (PUNIF/=XUNDEF) THEN
 END IF
 !
 ! only the case nature is treated for now, to adapt for town later
-IF (HAREA=='NAT'.AND.SIZE(ZFIELD,2)>SIZE(PFIELD,2)) THEN
+IF (HAREA=='NAT'.AND.SIZE(ZFIELD,2)>SIZE(PFIELD,2).AND.U%LECOSG) THEN
   CALL PACK_SAME_RANK(IMASK,ZFIELD(:,SUM(NTYPE(1:2))+1:SUM(NTYPE(1:3))),PFIELD(:,:))
 ELSE
-  CALL PACK_SAME_RANK(IMASK,ZFIELD(:,:),PFIELD(:,:))
+  CALL PACK_SAME_RANK(IMASK,ZFIELD(:,1:SIZE(PFIELD,2)),PFIELD(:,:))
 ENDIF
 !
 DEALLOCATE(ZFIELD)
