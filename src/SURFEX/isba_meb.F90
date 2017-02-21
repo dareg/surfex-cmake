@@ -1704,6 +1704,12 @@ ENDDO
  CALL SNOW3LRADTRANS(XSNOWDZMIN, ZSPECTRALALBEDO, ZSNOWDZ, PSNOWRHO, &
                            ZPERMSNOWFRAC, PZENITH,  PSNOWAGE, PTAU_N)
 !
+! Note that because we force a snow thickness to compute tramission, 
+! a bogus value ( < 0) can be computed despite the non-estance of snow.
+! To check/prevent any problems, simply make a simple check:
+!
+PTAU_N(:,:) = MAX(0., PTAU_N(:,:))
+!
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
