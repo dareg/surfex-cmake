@@ -510,7 +510,7 @@ $(OASIS_KEY) : $(CDFF_INC)
 	cd $(DIR_OASIS)/util/make_dir && \
 	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS= LDFLAGS= \
 	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(F90FLAGS)" \
-	  INC_NETCDF="$(INC_NETCDF)" LIB_NETCDF=="$(LIB_NETCDF)" \
+	  INC_NETCDF="$(INC_NETCDF)" LIB_NETCDF="$(LIB_NETCDF)" \
 	    $(MAKE) -j 1 -f TopMakefileOasis3
 	echo '=> Compiling oasis DONE'
 
