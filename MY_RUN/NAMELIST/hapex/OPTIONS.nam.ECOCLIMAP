@@ -307,8 +307,9 @@
 /
 &NAM_SGH_ISBAn         CRUNOFF    = "WSAT"
 /
+&NAM_SSOn              CROUGH     = "Z04D"
+/
 &NAM_ISBAn             CSCOND     = "NP89"     ,
-                       CALBEDO    = "DRY"      ,
                        CC1DRY     = 'DEF '     ,
                        CSOILFRZ   = 'DEF'      ,
                        CDIFSFCOND = 'DEF '     ,
