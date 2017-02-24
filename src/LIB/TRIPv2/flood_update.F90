@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE FLOOD_UPDATE (PTAB_F,PTAB_H,PTAB_VF,PAREA,PFLOOD_STO, &
-                                 PHFLOOD,PFFLOOD,PFLOOD_LEN,PWFLOOD      )  
+                               PLEN,PHFLOOD,PFFLOOD,PFLOOD_LEN,PWFLOOD )  
 !     ##########################################################################
 !
 !!****  *FLOOD_UPDATE*  
@@ -55,6 +55,7 @@ REAL,DIMENSION(:,:,:), INTENT(IN)  :: PTAB_H  ! Topo height array
 REAL,DIMENSION(:,:,:), INTENT(IN)  :: PTAB_VF ! Flood volume array
 REAL,DIMENSION(:,:),   INTENT(IN)  :: PAREA   ! grid area                 [m²]
 REAL,DIMENSION(:,:),   INTENT(IN)  :: PFLOOD_STO ! Floodplain water mass  [kg]
+REAL,DIMENSION(:,:),   INTENT(IN)  :: PLEN    ! River lenght              [m]
 !
 REAL,DIMENSION(:,:),   INTENT(OUT) :: PHFLOOD ! Floodplain fraction        [-]
 REAL,DIMENSION(:,:),   INTENT(OUT) :: PFFLOOD    ! Floodplain water depth  [m]
@@ -130,7 +131,7 @@ ENDDO
 !-------------------------------------------------------------------------------
 !
 WHERE(ZFLOOD_STO(:,:)>0.0)
-  PFLOOD_LEN(:,:) = XRATMED*SQRT(PFFLOOD(:,:)*PAREA(:,:))
+  PFLOOD_LEN(:,:) = MIN(PLEN(:,:),XRATMED*SQRT(PFFLOOD(:,:)*PAREA(:,:)))
   PWFLOOD   (:,:) = PAREA(:,:)*PFFLOOD(:,:)/PFLOOD_LEN(:,:)
 ENDWHERE
 !

@@ -1,10 +1,9 @@
 !#################################################################
 SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
-                            KLISTING,KLON,KLAT,PTIME,OPRINT, &
-                           KNB_TSTEP_RUN,KNB_TSTEP_DIAG,    &
-                           PTSTEP_RUN,PTSTEP_DIAG,PRUNOFF,  &
-                           PDRAIN,PCALVING,PRECHARGE,       &
-                           PSRC_FLOOD                       ) 
+                           KLISTING,KLON,KLAT,PTIME,PTIMEC,    &
+                           OPRINT,KNB_TSTEP_RUN,KNB_TSTEP_DIAG,&
+                           PTSTEP_RUN,PTSTEP_DIAG,PRUNOFF,     &
+                           PDRAIN,PCALVING,PSRC_FLOOD          )
 !#################################################################
 !
 !!****  *TRIP*  
@@ -27,6 +26,7 @@ SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
 !!    -------------
 !!      Original    01/02/05 
 !!      Modif.      28/05/08 
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -75,6 +75,7 @@ INTEGER,              INTENT(IN)    :: KLISTING       !Output file id
 INTEGER,              INTENT(IN)    :: KLON           !Number of longitude
 INTEGER,              INTENT(IN)    :: KLAT           !Number of latittude
 REAL,                 INTENT(INOUT) :: PTIME          !Current time          (s)
+REAL,                 INTENT(INOUT) :: PTIMEC         !Cumulated time        (s)
 LOGICAL,              INTENT(IN)    :: OPRINT         !print option          [-]
 INTEGER,              INTENT(IN)    :: KNB_TSTEP_RUN  !TSTEP_RUN counter     [-]
 REAL,                 INTENT(IN)    :: PTSTEP_RUN     !Run  timestep         [s]
@@ -84,7 +85,6 @@ INTEGER,              INTENT(INOUT) :: KNB_TSTEP_DIAG !DIAG call counter     [-]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PRUNOFF   !Input surface runoff            [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDRAIN    !Input free drainage             [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PCALVING  !Input claving flux from glacier [kg/s]
-REAL, DIMENSION(:,:), INTENT(IN)    :: PRECHARGE !Input goundwater recharge       [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSRC_FLOOD! Input P-E-I flood source term  [kg/s]
 !
 !*      0.2    declarations of local variables
@@ -167,9 +167,9 @@ ZRUNOFF(:,:) = PRUNOFF(:,:)
 !calving over greenland and antarctica directly to ocean
 !
 WHERE(TPG%GMASK(:,:).AND..NOT.TPG%GMASK_GRE(:,:).AND..NOT.TPG%GMASK_ANT(:,:))
-  ZDRAIN(:,:) = PDRAIN(:,:)+PRECHARGE(:,:)+PCALVING(:,:)
+  ZDRAIN(:,:) = PDRAIN(:,:)+PCALVING(:,:)
 ELSEWHERE
-  ZDRAIN(:,:) = PDRAIN(:,:)+PRECHARGE(:,:)
+  ZDRAIN(:,:) = PDRAIN(:,:)
 ENDWHERE
 !
 ! Flood treatment
@@ -280,11 +280,12 @@ DO JTSTEP=1,ITSTEP !TRIP time step loop
 !
 !  * Time actualization  
 !
-   PTIME = PTIME + XTSTEP
+   PTIME  = PTIME  + XTSTEP
+   PTIMEC = PTIMEC + XTSTEP
 !
 !  * Write diagnostic  
 !
-   IF (LWR_DIAG.AND.MOD(PTIME,PTSTEP_DIAG) == 0.) THEN
+   IF (LWR_DIAG.AND.MOD(PTIMEC,PTSTEP_DIAG) == 0.) THEN
       KNB_TSTEP_DIAG = KNB_TSTEP_DIAG + 1
       CALL TRIP_DIAG_WRITE(TPDG, TPG, &
                            KLISTING,KLON,KLAT,KNB_TSTEP_DIAG,PTSTEP_DIAG)

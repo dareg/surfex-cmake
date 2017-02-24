@@ -22,6 +22,7 @@ MODULE MODD_TRIP
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       21/05/08
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -46,6 +47,7 @@ REAL, POINTER, DIMENSION(:,:) :: XHC_BED        ! River bed depth              [
 REAL, POINTER, DIMENSION(:,:) :: XWEFF          ! Porosité efficace
 REAL, POINTER, DIMENSION(:,:) :: XTRANS         ! Transmissivité
 REAL, POINTER, DIMENSION(:,:) :: XNUM_AQUI      ! Numéro aquifère
+REAL, POINTER, DIMENSION(:,:) :: XNEAR_AQUI     ! Nearest aquifer
 REAL, POINTER, DIMENSION(:,:) :: XTOPO_RIV      ! River elevation              [m]
 !
 !-------------------------------------------------------------------------------
@@ -118,6 +120,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_TRIP:TRIP_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YTRIP%XWEFF)
   NULLIFY(YTRIP%XTRANS)
   NULLIFY(YTRIP%XNUM_AQUI)
+  NULLIFY(YTRIP%XNEAR_AQUI)
   NULLIFY(YTRIP%XTOPO_RIV)
   NULLIFY(YTRIP%XTABGW_H)
   NULLIFY(YTRIP%XHGROUND)

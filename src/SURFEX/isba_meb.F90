@@ -58,6 +58,9 @@
 !!    -------------
 !!      Original       10/2014
 !!      (A. Napoly)    09/2015  Add Litter layer option code
+!!      (A. Boone)     02/2017  Owing to fix to FAPAIR.F90 routine (called by
+!!                              RAIDATIVE_TRANSFERT.F90 herein), edited slightly        
+!!                              SWnet computations to be compatible.
 !!
 !-------------------------------------------------------------------------------
 !
@@ -265,7 +268,7 @@ REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZSNOWSWE    
 REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZSNOWLIQ             ! snow layer liquid water (m)
 REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZTAU_N               ! snow rad transmission coef at layer base (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
-REAL, DIMENSION(SIZE(PPS))                         :: ZALBG                ! Effective ground albedo
+REAL, DIMENSION(SIZE(PPS))                         :: ZALBS                ! Effective surface (ground) albedo
 REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_F             ! LW transmission factor
 REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_FN            ! LW transmission factor - including buried (snow) 
 !                                                                          ! vegetation effect
@@ -430,12 +433,15 @@ REAL, DIMENSION(SIZE(PPS))   :: ZSWNET_V_SUM, ZSWNET_G_SUM, ZSWNET_N_SUM, ZLWNET
                                 ZLWUP_SUM
 REAL, DIMENSION(SIZE(PPS))   :: ZDELHEATG_SFC_SUM, ZDELHEATV_SFC_SUM, ZDELHEATG_SUM
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL, DIMENSION(SIZE(PPS))   :: ZALBV, ZALBG, ZTR
 !
-INTEGER :: INJ, INL, JJ, JL
 REAL, DIMENSION(SIZE(PEK%XWR,1))         :: ZPHASEL  ! Phase changement in litter (W/m2)
 REAL, DIMENSION(SIZE(PEK%XWR,1))         :: ZCTSFC 
 REAL, DIMENSION(SIZE(PEK%XWR,1))         :: ZFROZEN1SFC
+!
+INTEGER :: INJ, INL, JJ, JL
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -443,21 +449,21 @@ REAL, DIMENSION(SIZE(PEK%XWR,1))         :: ZFROZEN1SFC
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB',0,ZHOOK_HANDLE)
 !
-PIACAN(:,:) = 0.
+PIACAN(:,:) = 0.0
 !
-DMK%XFAPAR(:)    = 0.
-DMK%XFAPIR(:)    = 0.
-DMK%XFAPAR_BS(:) = 0.
-DMK%XFAPIR_BS(:) = 0.
+DMK%XFAPAR(:)    = 0.0
+DMK%XFAPIR(:)    = 0.0
+DMK%XFAPAR_BS(:) = 0.0
+DMK%XFAPIR_BS(:) = 0.0
 !
 DEK%XRRLIT(:)   = 0.0
 DEK%XDRIPLIT(:) = 0.0
 !
-DEK%XLEGI(:)    = 0.
-DEK%XLEG(:)     = 0.
+DEK%XLEGI(:)    = 0.0
+DEK%XLEG(:)     = 0.0
 !
-ZLESFCI(:) = 0.
-ZLESFC(:)  = 0.
+ZLESFCI(:) = 0.0
+ZLESFC(:)  = 0.0
 !
 ZIACAN_SUNLIT(:,:) = XUNDEF
 ZIACAN_SHADE(:,:)  = XUNDEF
@@ -473,13 +479,18 @@ ZWORK2(:)          = XUNDEF
 ZWORK3(:)          = XUNDEF
 ZWORK4(:)          = XUNDEF
 !
+ZTR(:)             = 0.0
+ZALBS(:)           = XUNDEF
+ZALBG(:)           = XUNDEF
+ZALBV(:)           = XUNDEF
+!
 !*      1.1    Preliminaries for litter parameters
 !              -----------------------------------
 !
 INJ=SIZE(PEK%XWG,1)
 INL=SIZE(PEK%XWG,2)
 !
-CALL ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
+ CALL ALLOCATE_LOCAL_VARS_PREP_GRID_SOIL
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -542,38 +553,76 @@ END WHERE
                            PEK%XMUS, PEK%XLAI_EFFC, OSHADE, ZIACAN,  ZIACAN_SUNLIT,   &
                            ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,           &
                            DMK%XFAPAR_BS, DMK%XFAPIR_BS )    
-
+!
+WHERE(PSW_RAD(:) > 0.001) ! Sun is up...
+!
 ! Total effective surface (canopy, ground/flooded zone, snow) all-wavelength
 ! albedo: diagnosed from shortwave energy budget closure
 
-DK%XALBT(:)      = 1. - (XSW_WGHT_VIS*(DMK%XFAPAR(:)+DMK%XFAPAR_BS(:)) +   &
-                         XSW_WGHT_NIR*(DMK%XFAPIR(:)+DMK%XFAPIR_BS(:)))
-ZSWUP   (:)      = PSW_RAD(:)*DK%XALBT(:)
-DK%XALBT(:)      = ZSWUP(:)/MAX(1.E-5, PSW_RAD(:))
+  DK%XALBT(:)      = 1. - (XSW_WGHT_VIS*(DMK%XFAPAR(:)+DMK%XFAPAR_BS(:)) +   &
+                           XSW_WGHT_NIR*(DMK%XFAPIR(:)+DMK%XFAPIR_BS(:)))
+  ZSWUP   (:)      = PSW_RAD(:)*DK%XALBT(:)
+  DK%XALBT(:)      = ZSWUP(:)/MAX(1.E-5, PSW_RAD(:))
 
-! Diagnose all-wavelength SW radiative budget components:
+! Diagnose all-wavelength SW radiative budget 
+! for the canopy and below canopy (surface) components;
 
-DEK%XSWNET_V(:) = PSW_RAD(:)*(XSW_WGHT_VIS*DMK%XFAPAR   (:) + XSW_WGHT_NIR*DMK%XFAPIR   (:))
-ZSWNET_S(:)     = PSW_RAD(:)*(XSW_WGHT_VIS*DMK%XFAPAR_BS(:) + XSW_WGHT_NIR*DMK%XFAPIR_BS(:))
-DEK%XSWNET_N(:) = ZSWNET_S(:)*    PEK%XPSN(:)
-DEK%XSWNET_G(:) = ZSWNET_S(:)*(1.-PEK%XPSN(:))
+  DEK%XSWNET_V(:) = PSW_RAD(:)*(XSW_WGHT_VIS*DMK%XFAPAR   (:) + XSW_WGHT_NIR*DMK%XFAPIR   (:))
+  ZSWNET_S(:)     = PSW_RAD(:)*(XSW_WGHT_VIS*DMK%XFAPAR_BS(:) + XSW_WGHT_NIR*DMK%XFAPIR_BS(:))
+
+! Compute all-wavelength effective ground (soil+snow) surface,
+! soil and veg albedos, respectively:
+
+   ZALBS(:)      = XSW_WGHT_NIR*ZALBNIR_TSOIL(:) + XSW_WGHT_VIS*ZALBVIS_TSOIL(:)
+
+   ZALBG(:)      = XSW_WGHT_NIR*PALBNIR_TSOIL(:) + XSW_WGHT_VIS*PALBVIS_TSOIL(:)
+
+   ZALBV(:)      = XSW_WGHT_NIR*PALBNIR_TVEG(:)  + XSW_WGHT_VIS*PALBVIS_TVEG(:)
+!
+! Compute total all wavelength SW transmission:
+! A solution of a quadradic equation based on ground energy budget Eq in FAPAIR.F90
+! Tr = [ -b - sqrt(b^2 - 4ac) ]/(2a)   (this is good root for this computation)
+! Here we derrive Eq so that a=1 
+
+   ZWORK4(:)     = ZALBS(:)*ZALBV(:)
+   ZWORK2(:)     = -(1.-ZALBS(:)*(1.-ZALBV(:)))/ZWORK4(:)          ! b
+   ZWORK3(:)     = ZSWNET_S(:)/(PSW_RAD(:)*ZWORK4(:))              ! c
+   ZWORK(:)      = SQRT(MAX(0.0, ZWORK2(:)**2 - 4*ZWORK3(:)))      ! sqrt(b**2 - 4c)           
+   ZTR(:)        = 0.5*(-ZWORK2(:) - ZWORK(:))                     ! -b - sqrt(b^2 - 4c) ]/2   
+   ZTR(:)        = MIN(1.,MAX(0., ZTR(:) ))
+!
+! Downwelling SW radiation arriving at ground/snow surface
+
+   DEK%XSWDOWN_GN(:) = PSW_RAD(:)*ZTR(:)
+
+! Get snow and ground components:
+
+   DEK%XSWNET_G(:)   = (1.-PEK%XPSN(:))*DEK%XSWDOWN_GN(:)*(1.-ZALBG(:)+ZALBS(:)*(1.-ZTR(:))*ZALBV(:))
+   DEK%XSWNET_N(:)   = ZSWNET_S(:)-DEK%XSWNET_G(:) ! conservative computation
 
 ! Quantity of net shortwave radiation absorbed in surface snow layer 
 
-DEK%XSWNET_NS(:)  = DEK%XSWNET_N(:)*(1.0 - ZTAU_N(:,1))
-
-! Compute all-wavelength effective ground albedo
-
-ZALBG(:)      = XSW_WGHT_NIR*ZALBNIR_TSOIL(:) + XSW_WGHT_VIS*ZALBVIS_TSOIL(:)
-
+  DEK%XSWNET_NS(:)  = DEK%XSWNET_N(:)*(1.0 - ZTAU_N(:,1))
+!
 ! Any SW radiation reaching the base of the lowest snow layer can pass
 ! into the soil:
 
-ZTAU_N(:,SIZE(PEK%TSNOW%WSNOW,2)) = ZTAU_N(:,SIZE(PEK%TSNOW%WSNOW,2))*(1.-ZALBG(:))
+   ZTAU_N(:,SIZE(PEK%TSNOW%WSNOW,2)) = ZTAU_N(:,SIZE(PEK%TSNOW%WSNOW,2))*(1.-ZALBG(:))
+!
+ELSEWHERE
 
-! Downwelling SW radiation arriving at ground/snow surface
+! Sun is down:
+   
+   ZSWUP(:)                   = 0.
+   DK%XALBT(:)                = XUNDEF
+   DEK%XSWDOWN_GN(:)          = 0.
+   DEK%XSWNET_G(:)            = 0.
+   DEK%XSWNET_V(:)            = 0.
+   DEK%XSWNET_N(:)            = 0.
+   DEK%XSWNET_NS(:)           = 0.
+   ZTAU_N(:,SIZE(PEK%TSNOW%WSNOW,2)) = 0.
 
-DEK%XSWDOWN_GN(:) = ZSWNET_S(:)/(1.-ZALBG(:))
+END WHERE
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -1319,6 +1368,12 @@ ENDDO
 !
 CALL SNOW3LRADTRANS(XSNOWDZMIN, ZSPECTRALALBEDO, ZSNOWDZ, PSNOWRHO, &
                            ZPERMSNOWFRAC, PZENITH,  PSNOWAGE, PTAU_N)
+!
+! Note that because we force a snow thickness to compute tramission, 
+! a bogus value ( < 0) can be computed despite the non-estance of snow.
+! To check/prevent any problems, simply make a simple check:
+!
+PTAU_N(:,:) = MAX(0., PTAU_N(:,:))
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
 !

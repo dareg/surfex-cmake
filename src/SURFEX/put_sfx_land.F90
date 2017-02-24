@@ -34,6 +34,7 @@
 !!    -------------
 !!      Original    08/2009
 !!      B. Decharme    01/16 : Bug with flood budget
+!!    10/2016 B. Decharme : bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -44,8 +45,7 @@ USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-!
-!
+USE MODN_SFX_OASIS,  ONLY : XFLOOD_LIM
 !
 USE MODI_PACK_SAME_RANK
 !
@@ -105,9 +105,8 @@ IF(OCPL_WTD)THEN
   CALL PACK_SAME_RANK(U%NR_NATURE(:),PFWTD(:),K%XFWTD(:))
   CALL CHECK_LAND(YCOMMENT,K%XFWTD)
 !
-  WHERE(S%XGW(:)==0.0)
+  WHERE(K%XFWTD(:)==0.0)
     K%XWTD    (:) = XUNDEF
-    K%XFWTD   (:) = 0.0
   ENDWHERE
 !
 ENDIF
@@ -124,6 +123,13 @@ IF(OCPL_FLOOD)THEN
   YCOMMENT='Potential flood infiltration'
   CALL PACK_SAME_RANK(U%NR_NATURE(:),PPIFLOOD(:),K%XPIFLOOD(:))
   CALL CHECK_LAND(YCOMMENT,K%XPIFLOOD)
+!
+! No flood for very smal flooded area (default 1%)
+!
+  WHERE(K%XFFLOOD (:)<XFLOOD_LIM)
+    K%XFFLOOD (:)=0.0
+    K%XPIFLOOD(:)=0.0
+  ENDWHERE
 !
 ENDIF
 !

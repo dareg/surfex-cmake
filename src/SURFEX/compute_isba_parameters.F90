@@ -58,6 +58,7 @@ SUBROUTINE COMPUTE_ISBA_PARAMETERS (DTCO, OREAD_BUDGETC, UG, U, &
 !!                                          water table / Surface coupling
 !!      P. Samuelsson  02/14 : MEB
 !!      B. Decharme    01/16 : Bug when vegetation veg, z0 and emis are imposed whith interactive vegetation
+!!      B. Decharme   10/2016  bug surface/groundwater coupling 
 !!
 !-------------------------------------------------------------------------------
 !
@@ -698,6 +699,10 @@ IF(LCPL_LAND)THEN
 !    
   IO%LCPL_RRM = .TRUE.
 !
+  IF(LCPL_GW)THEN
+    IO%LWTD = .TRUE.
+  ENDIF
+!
   ALLOCATE(S%XCPL_DRAIN (KI))
   ALLOCATE(S%XCPL_RUNOFF(KI))
   S%XCPL_DRAIN (:) = 0.0
@@ -708,14 +713,6 @@ IF(LCPL_LAND)THEN
      S%XCPL_ICEFLUX(:) = 0.0
   ELSE
      ALLOCATE(S%XCPL_ICEFLUX(0))
-  ENDIF
-!
-  IF(LCPL_GW)THEN
-    IO%LWTD = .TRUE.
-    ALLOCATE(S%XCPL_RECHARGE(KI))
-    S%XCPL_RECHARGE(:) = 0.0
-  ELSE
-    ALLOCATE(S%XCPL_RECHARGE(0))
   ENDIF
 !
   IF(LCPL_FLOOD)THEN
@@ -737,7 +734,6 @@ ELSE
   ALLOCATE(S%XCPL_RUNOFF  (0))
   ALLOCATE(S%XCPL_DRAIN   (0))
   ALLOCATE(S%XCPL_ICEFLUX (0))
-  ALLOCATE(S%XCPL_RECHARGE(0))
   ALLOCATE(S%XCPL_EFLOOD  (0))
   ALLOCATE(S%XCPL_PFLOOD  (0))
   ALLOCATE(S%XCPL_IFLOOD  (0))
@@ -750,13 +746,6 @@ IF(LCPL_CALVING)THEN
    IF(.NOT.IO%LGLACIER)THEN
      CALL ABOR1_SFX('COMPUTE_ISBA_PARAMETERS: LGLACIER MUST BE ACTIVATED IF LCPL_CALVING')
    ENDIF
-ENDIF
-!
-IF(IO%LWTD.AND..NOT.IO%LGW)THEN
-  WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: Groundwater map is required by SFX - Groundwater coupling '
-  WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: Please check your pgd namelist where this map must be     '
-  WRITE(ILUOUT,*)'COMPUTE_ISBA_PARAMETERS: specified (YGW and YGWFILETYPE, or XUNIF_GW, or LIMP_GW)  '
-  CALL ABOR1_SFX('COMPUTE_ISBA_PARAMETERS: Groundwater map is required by SFX - Groundwater coupling')
 ENDIF
 !
 !-------------------------------------------------------------------------------

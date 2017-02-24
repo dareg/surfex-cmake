@@ -45,6 +45,7 @@ SUBROUTINE FAPAIR(PABC, PFD_SKY, PIA, PLAI, PXMUS, PSSA_SUP, PSSA_INF, &
 !!      Original    01/04/2011 
 !!      Commented by C. Delire 07/13
 !!      C. Delire   08/13 : moved calculation of diffuse fraction from here to radiative_transfert.F90
+!!      A. Boone    02/17 : corrected computation of PFAPR_BS
 !!
 !!-------------------------------------------------------------------------------
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -244,8 +245,7 @@ END DO
 !
 WHERE (PIA(:).NE.0.)
   PFAPR(:) = PFAPR(:) / PIA(:)
-  PFAPR_BS(:)=(1.-PALB_VEG(:))*(1-PALB_SOIL(:))*(1.+PALB_VEG(:)*PALB_SOIL(:))*ZTR(:)
-  WHERE (PLAI(:).EQ.0) PFAPR_BS(:) = 1-PALB_SOIL(:)
+  PFAPR_BS(:)= ZTR(:)*(1.-PALB_SOIL(:)*(1. - PALB_VEG(:)*(1.-ZTR(:))))
 END WHERE
 !
 !WHERE (ZLAI_SHADE(:) .NE.0.) ZRN_SHADE(:)  = ZXIA_SHADE(:) / ZLAI_SHADE(:)

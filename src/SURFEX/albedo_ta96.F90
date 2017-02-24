@@ -60,7 +60,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ALBEDO_TA96',0,ZHOOK_HANDLE)
 PDIR_ALB(:) = XALBCOEF_TA96/(1.1*(MAX(COS(PZENITH(:)),0.))**1.4+0.15)
-PDIR_ALB(:) = XALBCOEF_TA96/(1.1*(MAX(COS(PZENITH(:)),0.))**1.4+0.15)
 IF (LHOOK) CALL DR_HOOK('ALBEDO_TA96',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

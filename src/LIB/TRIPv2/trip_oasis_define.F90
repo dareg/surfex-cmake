@@ -28,6 +28,7 @@ SUBROUTINE TRIP_OASIS_DEFINE(KLISTING,KLON,KLAT)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -173,10 +174,6 @@ IF(LCPL_LAND)THEN
 !
   IF(LCPL_GW)THEN
 !
-!   Iutput groundwater recharge
-    CALL OASIS_DEF_VAR(NRECHARGE_ID,CRECHARGE,IPART_ID,IVAR_NODIMS,OASIS_IN,IVAR_SHAPE,OASIS_DOUBLE,IERR)  
-    IF(IERR/=OASIS_OK) CALL ABORT_TRIP('TRIP_OASIS_DEFINE: OASIS def var problem for groundwater recharge')
-!          
 !   Output Water table depth
     CALL OASIS_DEF_VAR(NWTD_ID,CWTD,IPART_ID,IVAR_NODIMS,OASIS_OUT,IVAR_SHAPE,OASIS_DOUBLE,IERR)  
     IF(IERR/=OASIS_OK) CALL ABORT_TRIP('TRIP_OASIS_DEFINE: OASIS def var problem for Water table depth')

@@ -32,6 +32,7 @@ SUBROUTINE SFX_OASIS_PREP (IO, S, UG, U, HPROGRAM)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -79,15 +80,12 @@ CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schem
 INTEGER,           PARAMETER  :: INC = 4    ! Number of grid-cell corners
 !
 CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAND = 'slan'
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_QSB  = 'sdra'
-CHARACTER(LEN=4),  PARAMETER  :: YSFX_GW   = 'sgw '
 CHARACTER(LEN=4),  PARAMETER  :: YSFX_SEA  = 'ssea'
 CHARACTER(LEN=4),  PARAMETER  :: YSFX_LAKE = 'slak'
 !
 !*       0.3   Declarations of local variables
 !              -------------------------------
 !
-REAL,    DIMENSION(U%NDIM_FULL)       :: ZGW        ! frac groundwater
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_LAND ! land-sea mask for rrm coupling
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_LAKE ! lake mask for ogcm coupling
 REAL,    DIMENSION(U%NDIM_FULL)       :: ZMASK_SEA  ! sea-land mask for ogcm coupling
@@ -137,17 +135,6 @@ CALL GET_MESH_CORNER(UG, ILUOUT,ZCORNER_LAT(:,1,:),ZCORNER_LON(:,1,:))
 ZLON(:,1)=UG%G%XLON(:)
 ZLAT(:,1)=UG%G%XLAT(:)
 !
-IF(LCPL_GW.AND.IO%LGW)THEN
-  CALL UNPACK_SAME_RANK(U%NR_NATURE(:),S%XGW(:),ZGW(:))
-  WHERE(ZGW(:)==XUNDEF)
-    ZGW(:)=0.0
-  ELSEWHERE(ZGW(:)>0.0)
-    ZGW(:)=1.0
-  ENDWHERE  
-ELSE
-  ZGW(:) = 0.0
-ENDIF
-!
 !-------------------------------------------------------------------------------
 !
 !*       3.     Comput masks :
@@ -190,35 +177,6 @@ IF(LCPL_LAND)THEN
   CALL OASIS_WRITE_AREA  (YSFX_LAND,U%NDIM_FULL,1,ZAREA(:,:))
   CALL OASIS_WRITE_MASK  (YSFX_LAND,U%NDIM_FULL,1,IMASK(:,:))
   !
-  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZMASK_LAND(:) * (1.0-ZGW(:))
-  !0 = not masked ; 1 = masked
-  WHERE(ZAREA(:,1)>0.0)
-    IMASK(:,1) = 0
-  ELSEWHERE
-    IMASK(:,1) = 1
-  ENDWHERE  
-  !
-  CALL OASIS_WRITE_GRID  (YSFX_QSB,U%NDIM_FULL,1,ZLON(:,:),ZLAT(:,:))  
-  CALL OASIS_WRITE_CORNER(YSFX_QSB,U%NDIM_FULL,1,INC,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
-  CALL OASIS_WRITE_AREA  (YSFX_QSB,U%NDIM_FULL,1,ZAREA(:,:))
-  CALL OASIS_WRITE_MASK  (YSFX_QSB,U%NDIM_FULL,1,IMASK(:,:))
-  !
-ENDIF
-!
-! groundwater surface coupling case
-!
-IF(LCPL_GW)THEN       
-  ZAREA(:,1) = UG%G%XMESH_SIZE(:) * ZGW(:)
-  !0 = not masked ; 1 = masked
-  WHERE(ZAREA(:,1)>0.0)
-        IMASK(:,1) = 0
-  ELSEWHERE
-        IMASK(:,1) = 1
-  ENDWHERE
-  CALL OASIS_WRITE_GRID  (YSFX_GW,U%NDIM_FULL,1,ZLON(:,:),ZLAT(:,:))  
-  CALL OASIS_WRITE_CORNER(YSFX_GW,U%NDIM_FULL,1,INC,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
-  CALL OASIS_WRITE_AREA  (YSFX_GW,U%NDIM_FULL,1,ZAREA(:,:))
-  CALL OASIS_WRITE_MASK  (YSFX_GW,U%NDIM_FULL,1,IMASK(:,:))
 ENDIF
 !
 !*       1.2    Grid definition for lake surface :

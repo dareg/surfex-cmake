@@ -285,6 +285,7 @@ ifneq "$(VER_MPI)" "NOMPI"
 #
 ifneq "$(VER_XIOS)" "0"
 DIR_XIOS?=${SRC_SURFEX}/src/LIB/XIOS-${VERSION_XIOS}-${ARCH}
+#DIR_XIOS?=${SRC_SURFEX}/src/LIB/XIOS-trunk-967-LXgfortran
 LIB_XIOS?=-L$(DIR_XIOS)/lib -lxios -lstdc++
 INC_XIOS?=-I$(DIR_XIOS)/inc
 XIOS_KEY?=${DIR_XIOS}/lib/libxios.a
@@ -490,7 +491,7 @@ GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 #
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
 ifeq "$(VER_GRIBAPI)" "SOPRANO"
@@ -680,6 +681,9 @@ else
 PROG_LIST += PGD PREP OFFLINE SODA
 #PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
+ifeq "$(VER_OASIS)" "mct"
+     PROG_LIST += $(TRIP_LIST)
+endif
 endif
 #
 #RJ: only include during 'make user' to avoid 'bad' programs

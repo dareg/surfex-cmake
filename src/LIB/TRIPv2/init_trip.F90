@@ -115,9 +115,7 @@ REAL,DIMENSION(:,:),ALLOCATABLE      :: ZREAD
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHSTREAM
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZVEL
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWORK
-REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHG_OLD
-REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWTD
-REAL,DIMENSION(:,:),ALLOCATABLE      :: ZFWTD
+REAL,DIMENSION(:,:),ALLOCATABLE      :: ZGW_STO
 !
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLON
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLAT
@@ -385,7 +383,9 @@ TPG%NBASMAX = MAXVAL(TPG%NBASID(:,:),TPG%NBASID(:,:)>0)
 !
 ! * Set area size
 !
- CALL SETAREA(KLAT,ZLATMIN,ZGRID_RES,TPG%XAREA)
+YVAR ='CELL_AREA'
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TPG%XAREA)
+WHERE(.NOT.TPG%GMASK(:,:))TPG%XAREA(:,:)=XUNDEF
 !
 ! * Distance between grids with the meandering ratio
 !
@@ -588,8 +588,10 @@ ENDIF
 ! * Initial Conditions
 !-------------------------------------------------------------------------------
 !
+ALLOCATE(ZGW_STO(KLON,KLAT))
 ALLOCATE(ZHSTREAM(KLON,KLAT))
 ALLOCATE(ZVEL    (KLON,KLAT))
+ZGW_STO (:,:) = 0.0
 ZHSTREAM(:,:) = 0.0
 ZVEL    (:,:) = 0.0
 !
@@ -601,6 +603,12 @@ IF(CVIT == 'VAR')THEN
 !
 ENDIF
 !
+IF(CGROUNDW=='DIF')THEN
+  WHERE(TPG%GMASK_GW(:,:))
+    ZGW_STO(:,:)=(XGWDZMAX+TP%XHGROUND(:,:)-TP%XTOPO_RIV(:,:))*TP%XWEFF(:,:)*XRHOLW
+  ENDWHERE
+ENDIF
+!
 ! * Fraction, width, water depth of floodplains
 ! 
 IWORK=0
@@ -609,6 +617,8 @@ IF(LFLOOD)THEN
 !        
   WHERE(TPG%GMASK(:,:).AND.TPG%GMASK_FLD(:,:))
         TP%XFLOOD_LEN(:,:) = XRATMED*SQRT(TP%XFFLOOD(:,:)*TPG%XAREA(:,:))
+        TP%XFLOOD_LEN(:,:) = MIN(TPG%XLEN(:,:),TP%XFLOOD_LEN(:,:))
+
   ELSEWHERE
         TP%XFLOOD_LEN(:,:) = 0.0
         TP%XWFLOOD   (:,:) = 0.0
@@ -677,21 +687,18 @@ IF(CVIT == 'VAR')THEN
                                                      MAXVAL(ZHSTREAM,  TPG%GMASK_VEL)  
 ENDIF
 WRITE(NLISTING,*)''
-WRITE(NLISTING,*)'Initial river storage        : ',MINVAL(TP%XSURF_STO, TPG%GMASK),  &
-                                                   MAXVAL(TP%XSURF_STO, TPG%GMASK)  
+WRITE(NLISTING,*)'Initial river storage        : ',MINVAL(TP%XSURF_STO/TPG%XAREA, TPG%GMASK),  &
+                                                   MAXVAL(TP%XSURF_STO/TPG%XAREA, TPG%GMASK)  
 IF(CGROUNDW=='CST')THEN                                                 
   WRITE(NLISTING,*)''
-  WRITE(NLISTING,*)'Initial ground storage       : ',MINVAL(TP%XGROUND_STO,TPG%GMASK_GW),  &
-                                                     MAXVAL(TP%XGROUND_STO,TPG%GMASK_GW)  
+  WRITE(NLISTING,*)'Initial ground storage       : ',MINVAL(TP%XGROUND_STO/TPG%XAREA,TPG%GMASK_GW),  &
+                                                     MAXVAL(TP%XGROUND_STO/TPG%XAREA,TPG%GMASK_GW)  
 ELSEIF(CGROUNDW=='DIF')THEN
   WRITE(NLISTING,*)''
-  WRITE(NLISTING,*)'Initial groundwater elevation : ',MINVAL(TP%XHGROUND,TPG%GMASK_GW),  &
-                                                      MAXVAL(TP%XHGROUND,TPG%GMASK_GW)  
-  WHERE(TPG%GMASK_GW(:,:))
-        ZHSTREAM(:,:)=TP%XTOPO_RIV(:,:)-TP%XHC_BED(:,:)+ZHSTREAM(:,:)
-  ENDWHERE
-  WRITE(NLISTING,*)'Initial river elevation       : ',MINVAL(ZHSTREAM,TPG%GMASK_GW),  &
-                                                      MAXVAL(ZHSTREAM,TPG%GMASK_GW)
+  WRITE(NLISTING,*)'Initial gw elevation         : ',MINVAL(TP%XHGROUND,TPG%GMASK_GW),  &
+                                                     MAXVAL(TP%XHGROUND,TPG%GMASK_GW)  
+  WRITE(NLISTING,*)'Initial gw storage           : ',MINVAL(ZGW_STO,TPG%GMASK_GW),  &
+                                                     MAXVAL(ZGW_STO,TPG%GMASK_GW)
 ENDIF
 WRITE(NLISTING,*)''
 
@@ -721,6 +728,7 @@ ENDIF
 !
 DEALLOCATE(ZVEL)
 DEALLOCATE(ZHSTREAM)
+DEALLOCATE(ZGW_STO)
 !
 !-------------------------------------------------------------------------------
 ! * Create high frequency diag file
@@ -777,12 +785,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP:OUTPUT_DATE',0,ZHOOK_HANDLE)
 !
-INDAYS = FLOOR(PTSTEP_DIAG/86400.)
-ISEC=MAX(0,NINT(PTIME-(PTSTEP_DIAG-INDAYS*86400)))
-ITIME(1)=FLOOR(ISEC/3600.)
-ITIME(2)=FLOOR((ISEC-ITIME(1)*3600)/60.)
-ITIME(3)=ISEC-ITIME(1)*3600-ITIME(2)*60 
-!
 IF (PTSTEP_DIAG == FLOOR(PTSTEP_DIAG/86400.)*86400) THEN 
   HTIMEUNIT ='days since '
   PTIME_DIAG=86400.
@@ -800,6 +802,11 @@ ENDIF
 IDATE(1) = KYEAR
 IDATE(2) = KMONTH
 IDATE(3) = KDAY
+!
+ISEC=PTIME
+ITIME(1)=FLOOR(ISEC/3600.)
+ITIME(2)=FLOOR((ISEC-ITIME(1)*3600)/60.)
+ITIME(3)=ISEC-ITIME(1)*3600-ITIME(2)*60 
 !
  CALL WRITE_TIME(IDATE(1),1,"-",HTIMEUNIT)
  CALL WRITE_TIME(IDATE(2),0,"-",HTIMEUNIT)

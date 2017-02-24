@@ -39,6 +39,7 @@
 !!    M.Tomasini   17/04/12 All COVER physiographic fields are now 
 !!                          interpolated for spawning => 
 !!                          ABOR1_SFX if (.NOT.OECOCLIMAP) in comment
+!!    10/2016 B. Decharme : bug surface/groundwater coupling  
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -202,32 +203,13 @@ ELSE
 !
 ENDIF
 !
-!* groundwater distribution
-!
-IF (IVERSION>=8) THEN
-   CALL READ_SURF(HPROGRAM,'GWKEY',IO%LGW,IRESP)
-ELSE
-   IO%LGW=.FALSE.
-ENDIF
-!
-IF(IO%LGW)THEN
-!  
-  ALLOCATE(S%XGW (INI))
-  CALL READ_SURF(HPROGRAM,'GWFRAC',S%XGW(:),IRESP)
-!
-ELSE
-!  
-  ALLOCATE(S%XGW (0))
-!
-ENDIF
+!SOILNOX
 !
 IF (IVERSION>7 .OR. (IVERSION==7 .AND. IBUGFIX>=3)) THEN
    CALL READ_SURF(HPROGRAM,'NO',IO%LNOF,IRESP)
 ELSE
    IO%LNOF = .FALSE.
 ENDIF
-!
-!SOILNOX
 !
 IF (CHI%LCH_NO_FLUX) THEN
   !

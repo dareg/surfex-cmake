@@ -22,6 +22,7 @@ SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    06/08 
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -32,7 +33,7 @@ SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
 !
 !
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
-USE MODD_TRIP, ONLY : TRIP_t
+USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODD_TRIP_LISTING
@@ -60,7 +61,7 @@ IMPLICIT NONE
 !
 !
 TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
-TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_t),      INTENT(INOUT) :: TP
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 LOGICAL, INTENT(IN)  :: OOASIS        ! Oasis coupling or not
@@ -90,10 +91,10 @@ REAL, DIMENSION(KLON_OL,KLAT_OL,KNB_OL) :: ZSRC_FLOOD_OL     ! Flood source term
 REAL, DIMENSION(KLON,KLAT) :: ZRUNOFF           ! Surface runoff               (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZDRAIN            ! Drainage                     (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZCALVING          ! Calving flux                 (kg/s)
-REAL, DIMENSION(KLON,KLAT) :: ZRECHARGE         ! Groundwater recharge         (kg/s)
 REAL, DIMENSION(KLON,KLAT) :: ZSRC_FLOOD        ! Input P-E-I flood source term(kg/s)
 !
 REAL                       :: ZTIMEC            ! cumulated current time (s)
+REAL                       :: ZTIME_CPL         ! Coupling time
 INTEGER                    :: JNB_TSTEP_RUN     ! TSTEP_RUN counter 
 INTEGER                    :: JNB_TSTEP_DIAG    ! DIAG call counter 
 INTEGER                    :: ICOUNT
@@ -110,7 +111,6 @@ IF (LHOOK) CALL DR_HOOK('TRIP_RUN',0,ZHOOK_HANDLE)
 ZRUNOFF   (:,:) = XUNDEF
 ZDRAIN    (:,:) = XUNDEF
 ZCALVING  (:,:) = XUNDEF
-ZRECHARGE (:,:) = XUNDEF
 ZSRC_FLOOD(:,:) = XUNDEF
 !
 ! --------------------------------------------------------------------------------------
@@ -141,34 +141,29 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
    IF(OOASIS)THEN           
      CALL TRIP_OASIS_RECV(TP, TPG, &
                           KLISTING,KLON,KLAT,ZTIMEC,ZRUNOFF,  &
-                          ZDRAIN,ZCALVING,ZRECHARGE,ZSRC_FLOOD)
+                          ZDRAIN,ZCALVING,ZSRC_FLOOD          )
    ELSE
      ZDRAIN    (:,:) = ZDRAIN_OL    (:,:,JNB_TSTEP_RUN) / XTSTEP_RUN
      ZRUNOFF   (:,:) = ZRUNOFF_OL   (:,:,JNB_TSTEP_RUN) / XTSTEP_RUN
      ZSRC_FLOOD(:,:) = ZSRC_FLOOD_OL(:,:,JNB_TSTEP_RUN) / XTSTEP_RUN
      ZCALVING  (:,:) = 0.0
-     ZRECHARGE (:,:) = 0.0
    ENDIF
 !
 ! * TRIP PHYSIC CALL
 !
    CALL TRIP_INTERFACE(TPDG, TP, TPG, &
-                       KLISTING,KLON,KLAT,PTIME,LPRINT, &
-                       JNB_TSTEP_RUN,JNB_TSTEP_DIAG,    &
-                       XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,  &
-                       ZDRAIN,ZCALVING,ZRECHARGE,       &
-                       ZSRC_FLOOD                       )
+                       KLISTING,KLON,KLAT,PTIME,ZTIMEC,    &
+                       LPRINT,JNB_TSTEP_RUN,JNB_TSTEP_DIAG,&
+                       XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,     &
+                       ZDRAIN,ZCALVING,ZSRC_FLOOD          )
 !
 ! * TRIP OUTPUT FLUXES
 !
    IF(OOASIS)THEN
+     ZTIME_CPL=ZTIMEC-XTSTEP_RUN
      CALL TRIP_OASIS_SEND(TP, TPG, &
-                          KLISTING,KLON,KLAT,ZTIMEC)
+                          KLISTING,KLON,KLAT,ZTIME_CPL)
    ENDIF
-!
-! * TRIP TIME INCREMENT
-!
-   ZTIMEC = ZTIMEC + XTSTEP_RUN
 !                   
    IF (LPRINT.AND.MOD(ZTIMEC,XDAY)==0.0) THEN
       ICOUNT = ICOUNT +1

@@ -94,7 +94,7 @@ REAL, PARAMETER       :: ZEPSILON = 1.E-12
 INTEGER, PARAMETER    :: IITERMAX = 100
 !
 REAL, PARAMETER       :: ZGWDZMIN = 10.0    ! Thickness to start to decrease lateral Transmissivity [m]
-REAL, PARAMETER       :: ZGWERR   = 1.E-3   ! Limit negatif ground_sto [m]
+REAL, PARAMETER       :: ZGWERR   = 0.01    ! Limit of 1cm to limit negatif ground_sto [m]
 !
 !
 !*      0.3    declarations of local variables
@@ -257,8 +257,8 @@ IF(OPRINT)THEN
            PGSTO_ALL  = PGSTO_ALL  + PWEFF(JLON,JLAT)*PHG_OLD (JLON,JLAT)*XRHOLW
            PGSTO2_ALL = PGSTO2_ALL + PWEFF(JLON,JLAT)*PHGROUND(JLON,JLAT)*XRHOLW
            PGIN_ALL   = PGIN_ALL   + PDRAIN(JLON,JLAT)*PTSTEP_RUN/(PTSTEP*PAREA(JLON,JLAT))
-           PGOUT_ALL  = PGOUT_ALL  + (PQGCELL(JLON,JLAT)+PGOUT(JLON,JLAT)+PGNEG(JLON,JLAT))*PTSTEP_RUN &
-                                   / (PTSTEP*PAREA(JLON,JLAT))
+           PGOUT_ALL  = PGOUT_ALL  + (PGOUT(JLON,JLAT)+PGNEG(JLON,JLAT)-PQGCELL(JLON,JLAT)) &
+                                   * PTSTEP_RUN/(PTSTEP*PAREA(JLON,JLAT))
         ENDIF
      ENDDO
   ENDDO

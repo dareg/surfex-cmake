@@ -29,6 +29,7 @@ SUBROUTINE TRIP_OASIS_PREP (TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -48,7 +49,6 @@ USE MODD_TRIP_OASIS
 USE MODE_TRIP_GRID
 !
 USE MODI_ABORT_TRIP
-USE MODI_GET_LONLAT_TRIP
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -78,7 +78,6 @@ INTEGER,               PARAMETER  :: IG_NSEGMENTS = 1       ! Number of segments
 INTEGER, DIMENSION(2), PARAMETER  :: IVAR_NODIMS  = (/2,1/) ! rank and number of bundles in coupling field
 !
  CHARACTER(LEN=4)                  :: YCPL_LAND = 'tlan'
- CHARACTER(LEN=4)                  :: YCPL_QSB  = 'tdra'
  CHARACTER(LEN=4)                  :: YCPL_GW   = 'tgw '
  CHARACTER(LEN=4)                  :: YCPL_FLD  = 'tfld'
  CHARACTER(LEN=4)                  :: YCPL_SEA  = 'tsea'
@@ -95,7 +94,6 @@ REAL,    DIMENSION(KLON,KLAT)           :: ZLON
 REAL,    DIMENSION(KLON,KLAT)           :: ZLAT
 REAL,    DIMENSION(KLON,KLAT)           :: ZAREA
 INTEGER, DIMENSION(KLON,KLAT)           :: IMASK
-LOGICAL, DIMENSION(KLON,KLAT)           :: GWORK
 !
 REAL,    DIMENSION(KLON,KLAT,INCORNER)  :: ZCORNER_LON
 REAL,    DIMENSION(KLON,KLAT,INCORNER)  :: ZCORNER_LAT
@@ -181,26 +179,6 @@ IF(LCPL_LAND)THEN
   CALL OASIS_WRITE_CORNER(YCPL_LAND,KLON,KLAT,INCORNER,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
   CALL OASIS_WRITE_AREA  (YCPL_LAND,KLON,KLAT,ZAREA(:,:))
   CALL OASIS_WRITE_MASK  (YCPL_LAND,KLON,KLAT,IMASK(:,:))
-!
-  IF(LCPL_GW)THEN 
-    GWORK(:,:)=.NOT.TPG%GMASK_GW(:,:)
-  ELSE
-    GWORK(:,:)=.TRUE.
-  ENDIF
-!
-! 0 = not masked ; 1 = masked
-  WHERE(TPG%GMASK(:,:).AND.GWORK(:,:))
-    IMASK(:,:) = 0
-  ELSEWHERE
-    IMASK(:,:) = 1
-  ENDWHERE
-!
-  ZAREA(:,:) = TPG%XAREA(:,:) * (1.0-IMASK(:,:))
-!
-  CALL OASIS_WRITE_GRID  (YCPL_QSB,KLON,KLAT,ZLON(:,:),ZLAT(:,:))
-  CALL OASIS_WRITE_CORNER(YCPL_QSB,KLON,KLAT,INCORNER,ZCORNER_LON(:,:,:),ZCORNER_LAT(:,:,:))
-  CALL OASIS_WRITE_AREA  (YCPL_QSB,KLON,KLAT,ZAREA(:,:))
-  CALL OASIS_WRITE_MASK  (YCPL_QSB,KLON,KLAT,IMASK(:,:))
 !
 ENDIF
 !

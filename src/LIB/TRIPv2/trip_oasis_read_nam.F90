@@ -28,6 +28,7 @@ SUBROUTINE TRIP_OASIS_READ_NAM(KLISTING,PRUNTIME)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    05/2008 
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -172,17 +173,11 @@ IF(LCPL_LAND)THEN
 !
 ! Particular case due to groundwater scheme
 !          
-  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0.OR.LEN_TRIM(CRECHARGE)>0)THEN
+  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0)THEN
     LCPL_GW = .TRUE.
   ENDIF
 !
   IF(LCPL_GW)THEN
-!
-!   Input variable
-!
-    YKEY  ='CRECHARGE'
-    YCOMMENT='Groundwater recharge'
-    CALL CHECK_TRIP_FIELD(CRECHARGE,YKEY,YCOMMENT,YLAND,KIN)
 !
 !   Output variable
 !

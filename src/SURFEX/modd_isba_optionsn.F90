@@ -83,7 +83,6 @@ REAL :: XRM_PATCH             ! threshold to remove little fractions of patches
 LOGICAL :: LSOCP              ! Soil organic carbon profile data
 LOGICAL :: LCTI               ! Topographic index data
 LOGICAL :: LPERM              ! Permafrost distribution data
-LOGICAL :: LGW                ! Groudwater distribution data
 LOGICAL :: LNOF  
 !
 ! Type of vegetation (simplification of vegetation charaterization)
@@ -283,7 +282,6 @@ IO%XRM_PATCH=0.0
 IO%LSOCP=.FALSE.
 IO%LCTI=.FALSE.
 IO%LPERM=.FALSE.
-IO%LGW=.FALSE.
 IO%LNOF=.FALSE.
 IO%NNBIOMASS=0
 IO%NNLITTER=0

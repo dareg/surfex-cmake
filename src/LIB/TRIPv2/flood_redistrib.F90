@@ -90,7 +90,7 @@ REAL :: ZAREA_TOT
 REAL :: ZTOT_STO
 REAL :: ZBILAN
 !
-INTEGER :: JBAS, JLON, JLAT
+INTEGER :: JBAS, JLON, JLAT, ICOUNT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -107,7 +107,7 @@ ZFLDBUDGET(:,:) = XUNDEF
 PRESIDU   (:,:) = 0.0
 PSRCFLD   (:,:) = 0.0
 !
-IF(ALL(TPG%GMASK_FLD(:,:).AND.PREAD(:,:)==0.0))THEN
+IF(ALL(PREAD(:,:)==0.0))THEN
 ! If no fluxes, return
   IF (LHOOK) CALL DR_HOOK('FLOOD_REDISTRIB',1,ZHOOK_HANDLE)
   RETURN
@@ -155,37 +155,36 @@ DO JLAT=1,KLAT
    ENDDO
 ENDDO
 !
-ZBAS_REMAIN(:) = 0.0
 ZBAS_AREA  (:) = 0.0
 ZBAS_STO   (:) = 0.0
 !
 DO JLAT=1,KLAT
    DO JLON=1,KLON
       JBAS=TPG%NBASID(JLON,JLAT)
-      IF(TPG%GMASK_FLD(JLON,JLAT).AND.LBAS_FLD(JBAS))THEN        
-        ZBAS_AREA  (JBAS)=ZBAS_AREA  (JBAS)+TPG%XAREA   (JLON,JLAT)
-        ZBAS_STO   (JBAS)=ZBAS_STO   (JBAS)+TP%XSURF_STO(JLON,JLAT)
-        ZBAS_REMAIN(JBAS)=ZBAS_REMAIN(JBAS)+TPG%XAREA   (JLON,JLAT)*ZREMAIN(JLON,JLAT) ! kg/s
+      IF(TPG%GMASK_FLD(JLON,JLAT).AND.LBAS_FLD(JBAS).AND.TP%XFLOOD_STO(JLON,JLAT)>0.0)THEN        
+        ZBAS_AREA  (JBAS)=ZBAS_AREA(JBAS)+TPG%XAREA   (JLON,JLAT)
+        ZBAS_STO   (JBAS)=ZBAS_STO (JBAS)+TP%XSURF_STO(JLON,JLAT)
       ENDIF
    ENDDO
 ENDDO
 !
+ICOUNT = 0
+!
 DO JBAS=TPG%NBASMIN,TPG%NBASMAX
-   IF(ZBAS_AREA(JBAS)>0..AND.LBAS_FLD(JBAS))THEN
+    IF(LBAS_FLD(JBAS))THEN
      IF((ZBAS_STO(JBAS)/ZBAS_AREA(JBAS))<=ZSTO)THEN
        !WRITE(NLISTING,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
        !WRITE(NLISTING,*)'A basin is empty :',JBAS
        !WRITE(NLISTING,*)'MASS (kg/m2) = ', ZBAS_STO(JBAS)/ZBAS_AREA(JBAS)
        !WRITE(NLISTING,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-       LBAS_FLD   (JBAS)=.FALSE.
-       ZBAS_AREA  (JBAS)=0.0
-       ZBAS_REMAIN(JBAS)=0.0
-       ZBAS_STO   (JBAS)=0.0
+       LBAS_FLD(JBAS)=.FALSE.
+     ELSE
+       ICOUNT=ICOUNT+1
      ENDIF
    ENDIF
 ENDDO
 !
-IF(ZFLUXE_IN/=0.0.AND.ALL(.NOT.LBAS_FLD(:)))THEN
+IF(ZFLUXE_IN/=0.0.AND.ICOUNT==0)THEN
 !
 !------------------------------------------------------------------------------------------
 !  * If there is no flooded areas, redistribute the redidue globaly
@@ -206,15 +205,23 @@ ELSE
 !  * Redistribute the redidue  over each basin where there is flood
 !-------------------------------------------------------------------------------
 !
+  ZBAS_REMAIN(:) = 0.0
+  ZBAS_STO   (:) = 0.0
+!
   ZFLUXE_IN  = 0.0
   ZTOT_STO   = 0.0
 !
   DO JLAT=1,KLAT
      DO JLON=1,KLON
         JBAS=TPG%NBASID(JLON,JLAT)
+        IF(TPG%GMASK_FLD(JLON,JLAT).AND.LBAS_FLD(JBAS).AND.TP%XFLOOD_STO(JLON,JLAT)>0.0)THEN
+          ZTOT_STO      = ZTOT_STO      + TP%XFLOOD_STO(JLON,JLAT)
+          ZBAS_STO(JBAS)=ZBAS_STO(JBAS) + TP%XFLOOD_STO(JLON,JLAT)
+        ENDIF
         IF(TPG%GMASK_FLD(JLON,JLAT).AND.LBAS_FLD(JBAS))THEN
-          ZTOT_STO = ZTOT_STO + TP%XSURF_STO(JLON,JLAT)
-        ELSEIF(TPG%GMASK_FLD(JLON,JLAT))THEN
+          ZBAS_REMAIN(JBAS)=ZBAS_REMAIN(JBAS)+TPG%XAREA(JLON,JLAT)*ZREMAIN(JLON,JLAT) ! kg/s
+        ENDIF
+        IF(TPG%GMASK_FLD(JLON,JLAT).AND.(.NOT.LBAS_FLD(JBAS)))THEN
           ZFLUXE_IN  = ZFLUXE_IN  + TPG%XAREA(JLON,JLAT) * ZREMAIN(JLON,JLAT) ! kg/s
         ENDIF
      ENDDO
@@ -223,9 +230,9 @@ ELSE
   DO JLAT=1,KLAT
      DO JLON=1,KLON
         JBAS = TPG%NBASID(JLON,JLAT)
-        IF(TPG%GMASK_FLD(JLON,JLAT).AND.LBAS_FLD(JBAS))THEN
-          ZRATIO (JLON,JLAT) = TP%XSURF_STO(JLON,JLAT)/TPG%XAREA(JLON,JLAT)
-          PRESIDU(JLON,JLAT) = PRESIDU(JLON,JLAT) + ZBAS_REMAIN(JBAS)*ZRATIO(JLON,JLAT)/ZBAS_STO(JBAS) & ! kg/m2/s
+        IF(TPG%GMASK_FLD(JLON,JLAT).AND.LBAS_FLD(JBAS).AND.TP%XFLOOD_STO(JLON,JLAT)>0.0)THEN
+          ZRATIO (JLON,JLAT) = TP%XFLOOD_STO(JLON,JLAT)/TPG%XAREA(JLON,JLAT)
+          PSRCFLD(JLON,JLAT) = PSRCFLD(JLON,JLAT) + ZBAS_REMAIN(JBAS)*ZRATIO(JLON,JLAT)/ZBAS_STO(JBAS) & ! kg/m2/s
                                                   + ZFLUXE_IN        *ZRATIO(JLON,JLAT)/ZTOT_STO         ! kg/m2/s
         ENDIF
      ENDDO

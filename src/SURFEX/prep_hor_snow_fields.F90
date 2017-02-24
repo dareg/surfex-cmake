@@ -306,7 +306,11 @@ IF (.NOT.OSNOW_IDEAL) THEN
       ENDWHERE
     END DO
     !
-    CALL SNOW3LGRID(ZDEPTH(1:ISIZE,:,JP),ZDTOT(1:ISIZE))
+    IF (ISNOW_NLAYER > 1) THEN
+      CALL SNOW3LGRID(ZDEPTH(1:ISIZE,:,JP),ZDTOT(1:ISIZE))
+    ELSE
+      ZDEPTH(1:ISIZE,1,JP) = ZDTOT(1:ISIZE)
+    ENDIF
     !
     !* snow content profile for each grid level
     DO JL=1,ISNOW_NLAYER

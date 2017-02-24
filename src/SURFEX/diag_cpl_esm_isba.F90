@@ -38,6 +38,7 @@
 !!    -------------
 !!
 !!      B. Decharme    01/16 : Bug with flood budget and add cpl keys
+!!      B. Decharme   10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -75,7 +76,6 @@ TYPE(ISBA_K_t), POINTER :: KK
 TYPE(ISBA_P_t), POINTER :: PK
 !
 REAL, DIMENSION(SIZE(PCPL_DRAIN,1),SIZE(PCPL_DRAIN,2)) :: ZCPL_DRAIN
-REAL, DIMENSION(SIZE(PCPL_DRAIN,1),SIZE(PCPL_DRAIN,2)) :: ZCPL_RECHARGE
 !
 REAL, DIMENSION(SIZE(S%XPATCH,1)) :: ZSUMPATCH
 REAL, DIMENSION(SIZE(S%XPATCH,1)) :: ZBUDGET
@@ -101,27 +101,11 @@ DO JP=1,IO%NPATCH
   ENDDO
 ENDDO
 !
-ZCPL_RECHARGE(:,:) = 0.0
-!
 IF(IO%CISBA/='DIF')THEN
 ! prevent small negatives values with ISBA-FR
   ZCPL_DRAIN(:,:)=MAX(0.0,PCPL_DRAIN(:,:))
 ELSE
   ZCPL_DRAIN(:,:)=PCPL_DRAIN(:,:)
-ENDIF
-!
-!* groundwater case
-!  ----------------
-!
-IF(LCPL_GW.AND.IO%LWTD)THEN
-  DO JP=1,IO%NPATCH
-    DO JI=1,INJ
-      IF(S%XGW(JI)>0.0.AND.ZSUMPATCH(JI)>0.0)THEN
-        ZCPL_RECHARGE(JI,JP) = PCPL_DRAIN(JI,JP)
-        ZCPL_DRAIN   (JI,JP) = 0.0
-      ENDIF
-    ENDDO
-  ENDDO
 ENDIF
 !
 !* update ISBA - RRM coupling variable (kg/m2)
@@ -138,10 +122,6 @@ DO JP=1,IO%NPATCH
 !
      IF(IO%LGLACIER.AND.ZSUMPATCH(JI)>0.0)THEN
         S%XCPL_ICEFLUX(JI) = S%XCPL_ICEFLUX(JI) + PTSTEP * PCPL_ICEFLUX(JI,JP) * S%XPATCH(JI,JP)/ZSUMPATCH(JI)
-     ENDIF
-!
-     IF(LCPL_GW.AND.IO%LWTD.AND.ZSUMPATCH(JI)>0.0)THEN
-        S%XCPL_RECHARGE(JI) = S%XCPL_RECHARGE(JI) + PTSTEP * ZCPL_RECHARGE(JI,JP) * S%XPATCH(JI,JP)/ZSUMPATCH(JI)
      ENDIF
 !   
      IF(LCPL_FLOOD.AND.IO%LFLOOD.AND.ZSUMPATCH(JI)>0.0)THEN

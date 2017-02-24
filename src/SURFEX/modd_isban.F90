@@ -33,6 +33,7 @@ MODULE MODD_ISBA_n
 !!      A.L. Gibelin    07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin    07/2009 : Suppress PPST and PPSTF as outputs
 !!      P. Samuelsson   02/2012 : MEB
+!!      B. Decharme    10/2016  bug surface/groundwater coupling 
 !!
 !-------------------------------------------------------------------------------
 !
@@ -62,7 +63,6 @@ LOGICAL, POINTER, DIMENSION(:):: LCOVER            ! GCOVER(i)=T --> ith cover f
 REAL, POINTER, DIMENSION(:)      :: XTI_MIN,XTI_MAX,XTI_MEAN,XTI_STD,XTI_SKEW
 !
 REAL, POINTER, DIMENSION(:,:)    :: XSOC           ! soil organic carbon content             (kg/m2)
-REAL, POINTER, DIMENSION(:)      :: XGW            ! groundwater distribution                (-)
 REAL, POINTER, DIMENSION(:)      :: XPH            ! soil pH
 REAL, POINTER, DIMENSION(:)      :: XFERT          ! soil fertilisation rate (kgN/ha/h)
 !
@@ -88,7 +88,6 @@ REAL, POINTER, DIMENSION(:) :: XC_DEPTH_RATIO
 REAL, POINTER, DIMENSION(:)  :: XCPL_DRAIN   ! Surface runoff
 REAL, POINTER, DIMENSION(:)  :: XCPL_RUNOFF  ! Deep drainage or gourdwater recharge
 REAL, POINTER, DIMENSION(:)  :: XCPL_ICEFLUX ! Calving flux
-REAL, POINTER, DIMENSION(:)  :: XCPL_RECHARGE! Groundwater recharge
 REAL, POINTER, DIMENSION(:)  :: XCPL_EFLOOD  ! floodplains evaporation
 REAL, POINTER, DIMENSION(:)  :: XCPL_PFLOOD  ! floodplains precipitation interception
 REAL, POINTER, DIMENSION(:)  :: XCPL_IFLOOD  ! floodplains infiltration
@@ -491,7 +490,6 @@ NULLIFY(YISBA_S%XTI_STD)
 NULLIFY(YISBA_S%XTI_SKEW)
 !
 NULLIFY(YISBA_S%XSOC)
-NULLIFY(YISBA_S%XGW)
 NULLIFY(YISBA_S%XPH)
 NULLIFY(YISBA_S%XFERT)
 !
@@ -507,7 +505,6 @@ NULLIFY(YISBA_S%XC_DEPTH_RATIO)
 NULLIFY(YISBA_S%XCPL_DRAIN)
 NULLIFY(YISBA_S%XCPL_RUNOFF)
 NULLIFY(YISBA_S%XCPL_ICEFLUX)
-NULLIFY(YISBA_S%XCPL_RECHARGE)
 NULLIFY(YISBA_S%XCPL_EFLOOD)
 NULLIFY(YISBA_S%XCPL_PFLOOD)
 NULLIFY(YISBA_S%XCPL_IFLOOD)
