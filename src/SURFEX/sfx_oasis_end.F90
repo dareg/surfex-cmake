@@ -71,13 +71,14 @@ ENDIF
 #endif
 !
 #ifdef CPLOASIS
-IF(LOASIS .NOT. LXIOS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arome
+IF(LOASIS .AND. .NOT. LXIOS)THEN !Same test than in offline.F90 because use for Arpege-Aladin-Arome
   CALL OASIS_TERMINATE(IERR)
   IF (IERR/=OASIS_OK) THEN
      WRITE(*,'(A)'   )'Error OASIS terminate'
      WRITE(*,'(A,I4)')'Return code from oasis_terminate : ',IERR
      CALL ABOR1_SFX("SFX_OASIS_END: Error OASIS terminate")
   ENDIF
+ENDIF
 #endif
 !
 !-------------------------------------------------------------------------------
