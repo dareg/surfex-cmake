@@ -430,7 +430,7 @@ IF (YDCTL%LPART5) THEN
         !
         !* mask for areas where there is no snow
         DO JL=1,ISNOW_NLAYER
-          WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%RHO(:,JL) = XUNDEF
+          WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%RHO(:,JL) = XUNDEF
         END DO
         !
         !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -440,7 +440,7 @@ IF (YDCTL%LPART5) THEN
         SK%ALB(:) = ZW%AL(JP)%ZOUT(:,1)
         !
         !* mask for areas where there is no snow
-        WHERE(PDEPTH(:,1,JP)==0. .OR. PDEPTH(:,1,JP)==XUNDEF)  SK%ALB(:) = XUNDEF
+        WHERE(PDEPTH(1:KSIZE_P(JP),1,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),1,JP)==XUNDEF)  SK%ALB(:) = XUNDEF
       !
       !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       !
@@ -461,7 +461,7 @@ IF (YDCTL%LPART5) THEN
           !
           !* mask for areas where there is no snow
           DO JL=1,ISNOW_NLAYER
-            WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%HEAT(:,JL) = XUNDEF
+            WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%HEAT(:,JL) = XUNDEF
           END DO
           !
         ELSE IF (SK%SCHEME=='1-L') THEN
@@ -486,7 +486,7 @@ IF (YDCTL%LPART5) THEN
           !
           !* mask for areas where there is no snow
           DO JL=1,ISNOW_NLAYER
-            WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%T(:,JL) = XUNDEF
+            WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%T(:,JL) = XUNDEF
           END DO
           !
         END IF
@@ -507,7 +507,7 @@ IF (YDCTL%LPART5) THEN
         !
         !* mask for areas where there is no snow
         DO JL=1,ISNOW_NLAYER
-          WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%GRAN1(:,JL) = XUNDEF
+          WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%GRAN1(:,JL) = XUNDEF
         END DO
         !
       CASE('SG2')
@@ -525,7 +525,7 @@ IF (YDCTL%LPART5) THEN
         !
         !* mask for areas where there is no snow
         DO JL=1,ISNOW_NLAYER
-          WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%GRAN2(:,JL) = XUNDEF
+          WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%GRAN2(:,JL) = XUNDEF
         END DO
         !
       CASE('HIS')
@@ -543,7 +543,7 @@ IF (YDCTL%LPART5) THEN
         !
         !* mask for areas where there is no snow
         DO JL=1,ISNOW_NLAYER
-          WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%HIST(:,JL) = XUNDEF
+          WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%HIST(:,JL) = XUNDEF
         END DO
         !
       CASE('AGE')
@@ -565,7 +565,7 @@ IF (YDCTL%LPART5) THEN
         !
         !* mask for areas where there is no snow
         DO JL=1,ISNOW_NLAYER
-          WHERE(PDEPTH(:,JL,JP)==0. .OR. PDEPTH(:,JL,JP)==XUNDEF) SK%AGE(:,JL) = XUNDEF
+          WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%AGE(:,JL) = XUNDEF
         END DO
         !
     END SELECT
