@@ -125,7 +125,7 @@ LOGICAL             :: GRECV_LAND
 LOGICAL             :: GRECV_FLOOD
 LOGICAL             :: GRECV_SEA
 !
-INTEGER             :: INKPROMA, ILUOUT
+INTEGER             :: ILUOUT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -177,7 +177,6 @@ CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,ZTIME_CPL,         &
                     ZSEA_VCU     (:),ZSEAICE_SIT  (:), &
                     ZSEAICE_CVR  (:),ZSEAICE_ALB  (:)  )
 !
-!
 !-------------------------------------------------------------------------------
 ! Put variable over land tile
 !-------------------------------------------------------------------------------
@@ -203,7 +202,7 @@ ENDIF
 GRECV_FLOOD=(GRECV_LAND.AND.LCPL_FLOOD)
 !
 IF(GRECV_SEA.OR.GRECV_FLOOD)THEN     
-  CALL UPDATE_ESM_SURF_ATM_n(F, IM, S, U, W, HPROGRAM, INKPROMA, KSW, PZENITH, PSW_BANDS, &
+  CALL UPDATE_ESM_SURF_ATM_n(F, IM, S, U, W, HPROGRAM, KI, KSW, PZENITH, PSW_BANDS, &
                              PTSRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )                    
 ENDIF
 !

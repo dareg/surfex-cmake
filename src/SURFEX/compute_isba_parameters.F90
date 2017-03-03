@@ -740,6 +740,36 @@ ELSE
 !
 ENDIF
 !
+!
+IF (LCPL_LAND) THEN
+  !
+  ALLOCATE(K%XFWTD(KI))
+  ALLOCATE(K%XWTD (KI))
+  K%XFWTD(:) = 0.0
+  K%XWTD (:) = XUNDEF
+  !
+  IF(LCPL_FLOOD)THEN
+    ALLOCATE(K%XFFLOOD (KI))
+    ALLOCATE(K%XPIFLOOD(KI))
+    K%XFFLOOD (:) = 0.0
+    K%XPIFLOOD(:) = 0.0
+    !
+  ELSE
+    !
+    ALLOCATE(K%XFFLOOD (0))
+    ALLOCATE(K%XPIFLOOD(0))
+    !   
+  ENDIF
+  !
+ELSE
+  !
+  ALLOCATE(K%XFWTD(0))
+  ALLOCATE(K%XWTD (0))
+  ALLOCATE(K%XFFLOOD (0))
+  ALLOCATE(K%XPIFLOOD(0))
+  !   
+ENDIF
+!
 ! * Check some key :
 !
 IF(LCPL_CALVING)THEN

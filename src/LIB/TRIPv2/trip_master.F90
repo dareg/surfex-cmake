@@ -94,7 +94,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! * 1. Alloc trip variables and open listing
 ! --------------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('TRIP_MASTER',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('TRIP_MASTER',0,ILOCAL_COMM,ZHOOK_HANDLE)
 !
  CALL TRIP_ALLOC_LIST(1)
 !
