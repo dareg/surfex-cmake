@@ -164,17 +164,17 @@ ELSEIF (.NOT.ALLOCATED(NINDEX)) THEN
   ALLOCATE(NINDEX(0))
 ENDIF
 !
+IF (HINIT=='PGD' .AND. (HALG=='TILA' .OR. HALG=='TILL')) THEN
+  HALG = 'LIN '
+  WRITE(*,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
+  WRITE(ILUOUT,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
+ENDIF
+!
 IF (HALG=='LIN ') THEN
   !
   IF (NRANK==NPIO) CALL SET_NB_POINTS_LIN(NPROC,NPROC-1,U%NDIM_FULL,NINDEX,OSHADOWS)
   !
 ELSEIF (HALG=='ADJ ' .OR. HALG=='TILA' .OR. HALG=='TILL') THEN
-  !
-  IF (HINIT=='PGD' .AND. (HALG=='TILA' .OR. HALG=='TILL')) THEN
-    HALG = 'LIN '
-    WRITE(*,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
-    WRITE(ILUOUT,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
-  ENDIF
   !
   IF (NRANK==NPIO .AND. (HALG=='ADJ ' .OR. HALG=='TILA')) THEN
     ALLOCATE(ILEFT  (U%NDIM_FULL))
