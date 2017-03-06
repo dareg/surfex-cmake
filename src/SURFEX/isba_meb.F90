@@ -383,7 +383,6 @@ REAL, DIMENSION(:),   INTENT(INOUT) :: PWRLI         ! ice retained on the litte
 REAL, DIMENSION(:),   INTENT(INOUT) :: PWRVN         ! liquid water equiv of snow retained on the foliage
 !                                                    ! of the canopy vegetation [kg/m2]
 REAL, DIMENSION(:),   INTENT(INOUT) :: PRESA         ! aerodynamic resistance (s/m)
-REAL, DIMENSION(:),   INTENT(INOUT) :: PLE           ! total latent heat flux (W/m2)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PLE_FLOOD     ! Floodplains latent heat flux: liquid part [W/m2]
 REAL, DIMENSION(:),   INTENT(INOUT) :: PLEI_FLOOD    ! Floodplains latent heat flux: frozen part [W/m2]
 !
@@ -437,6 +436,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PHUG          ! ground relative humidity
 REAL, DIMENSION(:),   INTENT(OUT)   :: PQS           ! surface humidity (kg/kg)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PRN           ! net radiation
 REAL, DIMENSION(:),   INTENT(OUT)   :: PH            ! sensible heat flux
+REAL, DIMENSION(:),   INTENT(OUT)   :: PLE           ! total latent heat flux (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLEI          ! sublimation latent heat flux
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLEGI         ! latent heat of sublimation over frozen soil
 REAL, DIMENSION(:),   INTENT(OUT)   :: PLEG          ! latent heat of evaporation
@@ -554,6 +554,9 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomas
 !
 REAL, PARAMETER                                    :: ZTSTEP_EB     = 300. ! s Minimum time tstep required 
 !                                                                          !   to time-split MEB energy budget
+REAL, PARAMETER                                    :: ZSWRAD_MIN    = 1.E-6! W/m2 Threshold SWdown for which Sun is up...approx
+                                                                           !      (No need to do nonsense SW computations during the night)
+!
 INTEGER                                            :: JTSPLIT_EB           ! number of time splits
 INTEGER                                            :: JDT                  ! time split loop index
 !
@@ -776,9 +779,6 @@ ZWORK2(:)          = XUNDEF
 ZWORK3(:)          = XUNDEF
 ZWORK4(:)          = XUNDEF
 ZTR(:)             = 0.0
-ZALBS(:)           = XUNDEF
-ZALBG(:)           = XUNDEF
-ZALBV(:)           = XUNDEF
 !
 !*      1.1    Preliminaries for litter parameters
 !              -----------------------------------
@@ -852,8 +852,19 @@ CALL RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,                        &
      ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN,                              &
      PFAPAR, PFAPIR, PFAPAR_BS, PFAPIR_BS                                 )    
 
+! Compute all-wavelength effective ground (soil+snow) surface,
+! soil and veg albedos, respectively:
 
-WHERE(PSW_RAD(:) > 0.001) ! Sun is up...
+ZALBS(:)      = XSW_WGHT_NIR*ZALBNIR_TSOIL(:) +                           & 
+                XSW_WGHT_VIS*ZALBVIS_TSOIL(:)
+
+ZALBG(:)      = XSW_WGHT_NIR*PALBNIR_TSOIL(:) +                           & 
+                XSW_WGHT_VIS*PALBVIS_TSOIL(:)
+
+ZALBV(:)      = XSW_WGHT_NIR*PALBNIR_TVEG(:)  +                           & 
+                XSW_WGHT_VIS*PALBVIS_TVEG(:)
+
+WHERE(PSW_RAD(:) > ZSWRAD_MIN) ! Sun is up...approx
 
 ! Total effective surface (canopy, ground/flooded zone, snow) all-wavelength
 ! albedo: diagnosed from shortwave energy budget closure
@@ -871,18 +882,6 @@ WHERE(PSW_RAD(:) > 0.001) ! Sun is up...
 
    ZSWNET_S(:)   = PSW_RAD(:)*(XSW_WGHT_VIS*PFAPAR_BS(:) +                   &
                                XSW_WGHT_NIR*PFAPIR_BS(:))
-
-! Compute all-wavelength effective ground (soil+snow) surface,
-! soil and veg albedos, respectively:
-
-   ZALBS(:)      = XSW_WGHT_NIR*ZALBNIR_TSOIL(:) +                           & 
-                   XSW_WGHT_VIS*ZALBVIS_TSOIL(:)
-
-   ZALBG(:)      = XSW_WGHT_NIR*PALBNIR_TSOIL(:) +                           & 
-                   XSW_WGHT_VIS*PALBVIS_TSOIL(:)
-
-   ZALBV(:)      = XSW_WGHT_NIR*PALBNIR_TVEG(:)  +                           & 
-                   XSW_WGHT_VIS*PALBVIS_TVEG(:)
 
 ! Compute total all wavelength SW transmission:
 ! A solution of a quadradic equation based on ground energy budget Eq in FAPAIR.F90
@@ -916,16 +915,17 @@ WHERE(PSW_RAD(:) > 0.001) ! Sun is up...
 
 ELSEWHERE
 
-! Sun is down:
-   
-   ZSWUP(:)                   = 0.
-   PALBT(:)                   = XUNDEF
-   PSWDOWN_GN(:)              = 0.
-   PSWNET_G(:)                = 0.
-   PSWNET_V(:)                = 0.
-   PSWNET_N(:)                = 0.
-   PSWNET_NS(:)               = 0.
-   ZTAU_N(:,SIZE(PSNOWSWE,2)) = 0.
+! Sun is down: (since approx used, put limiting values here...sun is so low
+! on the horizon that all incoming SWrad, possible trace amount, is reflected)
+
+   PALBT(:)                   = 1.0 
+   ZSWUP(:)                   = PSW_RAD(:)
+   PSWDOWN_GN(:)              = 0.0
+   PSWNET_G(:)                = 0.0
+   PSWNET_V(:)                = 0.0
+   PSWNET_N(:)                = 0.0
+   PSWNET_NS(:)               = 0.0
+   ZTAU_N(:,SIZE(PSNOWSWE,2)) = 0.0
 
 END WHERE   
 !
@@ -934,7 +934,7 @@ END WHERE
 !*      4.0    Longwave radiative transfer
 !              ---------------------------  
 !
- CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                 &
+ CALL ISBA_LWNET_MEB(PLAI,PPSN,PPALPHAN,                                &
         PEMISNOW,PFEMIS,PFF,                                            &
         PTV,ZTGL(:,1),PSNOWTEMP(:,1),                                   &
         PLW_RAD,PLWNET_N,PLWNET_V,PLWNET_G,                             &
@@ -980,9 +980,12 @@ ELSE IF (MAXVAL(PGMES) /= XUNDEF .OR. MINVAL(PGMES) /= XUNDEF) THEN
    ZFFV(:)  = 0.0
 
    ZQSAT(:) = QSAT(PTV,PPS)  
+   ZWORK(:) = 0.0 ! passed in as LE: Since Qc corresponds to the effective 
+                  ! surface specific humidity in ISBA-MEB, 
+                  ! so no need for LE correction (only required for composite ISBA)
    CALL COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                            &
         PVEGTYPE, OSTRESSDEF, PAH, PBH, PF2I, PDMAX,                        &
-        PPOI, PCSP, PTV, PF2, PSW_RAD, PRESA, PQC, ZQSAT, PLE,              &
+        PPOI, PCSP, PTV, PF2, PSW_RAD, PRESA, PQC, ZQSAT, ZWORK,            &
         PPALPHAN, ZDELTA, PLAI, PRHOA, PZENITH, PFZERO, PEPSO,              &
         PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,              &
         PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, ZFFV,                             &
@@ -1705,8 +1708,8 @@ ENDDO
                            ZPERMSNOWFRAC, PZENITH,  PSNOWAGE, PTAU_N)
 !
 ! Note that because we force a snow thickness to compute tramission, 
-! a bogus value ( < 0) can be computed despite the non-estance of snow.
-! To check/prevent any problems, simply make a simple check:
+! a bogus value ( < 0) can be computed despite the non-existence of snow.
+! To check/prevent any problems, make a simple check:
 !
 PTAU_N(:,:) = MAX(0., PTAU_N(:,:))
 !

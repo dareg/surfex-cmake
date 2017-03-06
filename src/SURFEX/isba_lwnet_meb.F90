@@ -51,6 +51,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    22/01/11 
+!!      A. Boone    04/03/17  add factor to dLWnet_n/dT_n term to cause it to vanish
+!!                            under some extreme circumstances. 
 !!
 !-------------------------------------------------------------------------------
 !
@@ -112,6 +114,14 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZLW_N_A, ZLW_N_B, ZLW_N_C,            &
 REAL, DIMENSION(SIZE(PEMIS_N)) :: ZEMIS_G
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+REAL, PARAMETER             :: ZTGRAD_MAX = 60. ! K When Tn-Tv approaches this difference, the derrivative term 
+                                                !   dLWnet_n/dTn vanishes. See below for details.
+REAL, PARAMETER             :: ZTGRAD_DIF = 10. ! K This is the range in Tn-Tv over which dLWnet_n/dTn 
+                                                !   linearly vanishes. See below for details.
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -182,7 +192,20 @@ PLWNET_G_DTN(:) =   ZLW_N_J(:)                               *4/PTN(:)
 
 PLWNET_N_DTV(:) = ( ZLW_N_F(:) - ZLW_N_G(:)                 )*4/PTV(:)
 PLWNET_N_DTG(:) =   ZLW_G_K(:)                               *4/PTG(:)
-PLWNET_N_DTN(:) = ( ZLW_N_J(:) - ZLW_N_I(:)                 )*4/PTN(:)
+PLWNET_N_DTN(:) = ( ZLW_N_K(:) - ZLW_N_I(:)                 )*4/PTN(:)
+
+! Note that for very thin snow combined with extremely cold 
+! conditions, very weak LWdown forcing and strong Tn-Tc differences,
+! the derrivative of Lwnet_n/dT_n can pose problems (i.e. the assumption of
+! a linear change over the given time step is a poor approximation), 
+! thus in these rare instances, this derrivative is forced
+! to vanish (over some small temperature difference range). This has no impact
+! on numerical stability (since the LW linerization has no effect on this) and has
+! no impact on results in the general sense (since it is temporary and the assumed gradieints
+! are so large that they are rarely, if ever during a run, encountered).
+! Use PTV as a proxy for air T (under these conditions, it should be close to PTC for example)
+
+PLWNET_N_DTN(:) = PLWNET_N_DTN(:)*MIN(1., MAX(0., ZTGRAD_MAX-MAX(0.,PTN(:)-PTV(:)))/ZTGRAD_DIF)
 
 !------------------------------------------------------------------
 ! - Compute *explicit* net budgets (at time t): W m-2
