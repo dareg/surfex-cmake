@@ -166,8 +166,10 @@ ENDIF
 !
 IF (HINIT=='PGD' .AND. (HALG=='TILA' .OR. HALG=='TILL')) THEN
   HALG = 'LIN '
-  WRITE(*,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
-  WRITE(ILUOUT,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
+  IF (NRANK==NPIO) THEN
+    WRITE(*,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
+    WRITE(ILUOUT,*) 'INIT_INDEX_MPI: for PGD, TILA and TILL are forbidden, forced to LIN'
+  ENDIF
 ENDIF
 !
 IF (HALG=='LIN ') THEN
