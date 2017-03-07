@@ -109,7 +109,7 @@ REAL, DIMENSION(PK%NSIZE_P,SIZE(S%XABC)) :: ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_S
 LOGICAL, DIMENSION(PK%NSIZE_P)         :: GSHADE
 !
 REAL, PARAMETER :: ZPUT0 = 0.0
-INTEGER :: ISWB
+INTEGER :: ISWB, JJ
 INTEGER :: JSWB
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -122,23 +122,25 @@ ISWB   = SIZE(PSW_BANDS)
 !
 !-------------------------------------------------------------------------------------
 !
-IF(IO%LMEB_PATCH(KPATCH))THEN
+ZVEG(:) = PEK%XVEG(:)
+!
+IF(IO%LMEB_PATCH(KPATCH).OR.IO%LFLOOD)THEN
   !
   CALL PACK_SAME_RANK(PK%NR_P,PZENITH(:),ZZENITH(:))
   !
-  ZVEG(:)=0.   ! Set veg=0 for MEB to get bare soil conditions for snow cover and
-  !            ! flood fraction
-  !
-  IF(PRESENT(PDIR_SW))THEN
+  IF(IO%LMEB_PATCH(KPATCH))THEN
     !
-    CALL PACK_SAME_RANK(PK%NR_P,PDIR_SW(:,:), ZDIR_SW(:,:))
-    CALL PACK_SAME_RANK(PK%NR_P,PSCA_SW(:,:), ZSCA_SW(:,:))  
+    ZVEG(:)=0.   ! Set veg=0 for MEB to get bare soil conditions for snow cover and
+    !            ! flood fraction
+    !
+    IF(PRESENT(PDIR_SW))THEN
+      !
+      CALL PACK_SAME_RANK(PK%NR_P,PDIR_SW(:,:), ZDIR_SW(:,:))
+      CALL PACK_SAME_RANK(PK%NR_P,PSCA_SW(:,:), ZSCA_SW(:,:))  
+      !
+    ENDIF
     !
   ENDIF
-  !
-ELSE
-  !
-  ZVEG(:) = PEK%XVEG(:)
   !
 ENDIF
 !   
