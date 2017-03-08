@@ -8,8 +8,8 @@ export VERSION_MASTER=${VERSION_MASTER:-SFX-V8-0}
 export VERSION_BUG=${VERSION_BUG:-0}
 export VERSION_XYZ=${VERSION_MASTER}-${VERSION_BUG}
 export VERSION_DATE=${VERSION_DATE:-"27/03/2012"}
-export VERSION_CDF=${VERSION_CDF-"3.6.3"}
-export VERSION_GRIBAPI=${VERSION_GRIBAPI-"1.9.9"}
+export VERSION_CDF=${VERSION_CDF:-"3.6.3"}
+export VERSION_GRIBAPI=${VERSION_GRIBAPI:-"1.17.0"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
 export SFX_INT=${SFX_INT-"I4"}
 #
@@ -425,8 +425,8 @@ fi
 #  Install GRIBAPI if VER_GRIBAPI=GRIBAPI_AUTO
 #
 if [ "x${VER_GRIBAPI}" = "xGRIBAPI_AUTO" ] ; then
-if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}" ] ; then
-  ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}.tar.gz )
+if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}-Source" ] ; then
+  ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}-Source.tar.gz )
 fi
 fi
 #
@@ -453,7 +453,7 @@ fi
 #      RESUME                                            #
 #                                                        #
 ##########################################################
-
+echo $VERSION_GRIBAPI
 echo  "ARCH=${ARCH}"
 echo  "VER_MPI=${VER_MPI}"
 echo  "VER_OMP=${VER_OMP}"
