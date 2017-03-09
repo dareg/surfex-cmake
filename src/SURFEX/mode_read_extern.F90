@@ -8,7 +8,7 @@ MODULE MODE_READ_EXTERN
 !-------------------------------------------------------------------
 !
 USE MODD_SURF_PAR,       ONLY : NUNDEF, XUNDEF
-USE MODD_DATA_COVER_PAR, ONLY : NCOVER, NTYPE, NVEGTYPE, JPCOVER
+USE MODD_DATA_COVER_PAR, ONLY : NCOVER, NTYPE, NVEGTYPE, JPCOVER, NVEGTYPE_OLD, NVEGTYPE_ECOSG
 !
 USE MODE_READ_SURF_COV, ONLY : READ_SURF_COV
 !
@@ -107,6 +107,7 @@ REAL,  DIMENSION(KNI)                :: ZPERM  ! permafrost distribution
  CHARACTER(LEN=4)                     :: YHVEG  ! type of high vegetation
  CHARACTER(LEN=4)                     :: YLVEG  ! type of low  vegetation
  CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
+INTEGER                              :: INVEGTYPE_SAVE, IJPCOVER_SAVE
 LOGICAL                              :: GECOCLIMAP ! T if ecoclimap is used
 LOGICAL                              :: GECOSG
 LOGICAL                              :: GPAR_GARDEN! T if garden data are used
@@ -144,6 +145,15 @@ ELSE
   CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
 END IF
 !
+INVEGTYPE_SAVE = NVEGTYPE
+IJPCOVER_SAVE = JPCOVER
+IF (GECOSG) THEN
+  NVEGTYPE = NVEGTYPE_ECOSG
+  JPCOVER = SUM(NTYPE)
+ELSE
+  NVEGTYPE = NVEGTYPE_OLD
+  JPCOVER = NCOVER
+ENDIF
 !
 !------------------------------------------------------------------------------
 !
@@ -382,6 +392,8 @@ IF (GECOCLIMAP .AND. .NOT.GREAD_OK ) THEN
   !
 ENDIF
 !
+NVEGTYPE = INVEGTYPE_SAVE
+JPCOVER = IJPCOVER_SAVE
 !-------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_DEPTH',1,ZHOOK_HANDLE)

@@ -59,8 +59,9 @@ IMPLICIT NONE
 INTEGER,        INTENT(IN) :: IVEGTYPE !indices of vegetation type           
 INTEGER,        INTENT(IN) :: INPATCH  !total number of PATCHES used 
 !
- CHARACTER(LEN=2) :: YVEGTYPE
 INTEGER                    :: IPATCH_NB! PATCH index corresponding to the vegtype IVEGTYPE  
+!
+ CHARACTER(LEN=2) :: YVEGTYPE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*      0.2    declarations of local variables
@@ -228,7 +229,7 @@ IF (INPATCH==12) THEN
    IF (IVEGTYPE== NVT_PARK .OR. IVEGTYPE== NVT_FLGR) IPATCH_NB = 12
 END IF
 !
-IF (INPATCH==19) THEN
+IF (INPATCH==19 .OR. INPATCH==20) THEN
   IPATCH_NB = IVEGTYPE
 END IF
 !
