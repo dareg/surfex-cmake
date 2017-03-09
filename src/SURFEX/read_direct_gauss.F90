@@ -486,6 +486,7 @@ DO
           ENDIF
           JL = IPAS + 1 !back to first lat
           IWORK = 0
+          IF (HFIELD(1:5)=="COVER") U%LCOVER(:) = .FALSE.
           CALL REFRESH_PGDWORK(HSUBROUTINE)
           EXIT   ! rereads the file
         ENDIF

@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE OLD_NAME (&
-                           HPROGRAM,HRECIN,HRECOUT,HDIR)
+      SUBROUTINE OLD_NAME (HPROGRAM,HRECIN,HRECOUT,HDIR)
 !     #######################################################
 !
 !!****  *OLD_NAME* - get the old name of a field for reading in an old SURFEX file
@@ -79,8 +78,8 @@ IF (PRESENT(HDIR)) YDIR = HDIR
 !
 HRECOUT = HRECIN
 IF (HRECIN=='COVER_LIST') THEN
-  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP,YDIR)
-  CALL READ_SURF(HPROGRAM,'BUG', IBUGFIX ,IRESP,YDIR)
+  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP,HDIR=YDIR)
+  CALL READ_SURF(HPROGRAM,'BUG', IBUGFIX ,IRESP,HDIR=YDIR)
   IF (IVERSION<7 .OR. (IVERSION==7 .AND. IBUGFIX==0)) HRECOUT='COVER'
 END IF
 !
