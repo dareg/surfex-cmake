@@ -243,7 +243,9 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
+!if(HREC(1:5)=="DSN_5") print*,HREC,' gather_and_write ',NRANK
  CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+!if(HREC(1:5)=="DSN_5") print*,HREC,' gather_and_write ok ',NRANK
 !
 IF (NRANK==NPIO) THEN
   !
@@ -251,12 +253,14 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
+!if(HREC(1:5)=="DSN_5") print*,HREC,' init_write_bin'
   CALL INIT_WRITE_BIN(HSELECT, NFULL, HREC,1,LWFL)
   !
   IF (LWFL) THEN 
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
   ENDIF
   !
+!if(HREC(1:5)=="DSN_5") print*,HREC,' write_ok'
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)  
   !
 #ifdef SFX_MPI

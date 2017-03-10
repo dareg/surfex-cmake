@@ -360,27 +360,36 @@ HCOMMENT = " "
 XTIME0 = MPI_WTIME()
 #endif
 !
+!print*,'readin ',HREC,NRANK,NPIO
 IF (NRANK==NPIO) THEN
   !
   ! 0. find filename
   ! -----------------
+  !print*,'ol_find_file_read in ',HREC
   CALL OL_FIND_FILE_READ(HREC,IFILE_ID)
+  !print*,HREC,IFILE_ID
   ! 
   IF (IFILE_ID.NE.0) THEN
     !   
     ! 1. Find id of the variable
     !----------------------------
     IRET(1)=NF90_INQ_VARID   (IFILE_ID,HREC,IVAR_ID)
+!print*,'varid ',iret(1),ivar_id
     IRET(1)=NF90_INQUIRE_VARIABLE(IFILE_ID,IVAR_ID,XTYPE=ITYPE)
+!print*,'itype ',iret(1),itype
     IRET(1)=NF90_INQUIRE_VARIABLE(IFILE_ID,IVAR_ID,NDIMS=INDIMS)
+!print*,'indims ',iret(1),indims
     IRET(1)=NF90_INQUIRE_VARIABLE(IFILE_ID,IVAR_ID,DIMIDS=IDIMIDS(1:INDIMS))
+!print*,'idimids ',iret(1),idimids(1:indims)
     IDIMLEN(:) = 1.
     DO JDIM=1,INDIMS
       JRET=NF90_INQUIRE_DIMENSION(IFILE_ID,IDIMIDS(JDIM),LEN=IDIMLEN(JDIM))
+      !print*,'dimlen ',jdim,jret,idimlen(jdim)
     ENDDO
     ! 
     ! 2. Get variable
     !----------------------------
+   !print*,'partr',lpartr
     IF (LPARTR) THEN
       ! write partially a time-matrix. 
       ! Have to find which of the dimension is the time dimension
@@ -401,13 +410,16 @@ IF (NRANK==NPIO) THEN
           ISTRIDE(JDIM)=1
         ENDIF
       ENDDO
+      !print*,istart,icount,istride
 
       ALLOCATE(ZWORK2(PRODUCT(ICOUNT(1:INDIMS-1)),ICOUNT(INDIMS)))
       IF (ITYPE==NF90_DOUBLE) THEN
         IRET(2)=NF90_GET_VAR(IFILE_ID,IVAR_ID,ZWORK2,ISTART,ICOUNT,ISTRIDE)
+       ! print*,'cas1 ',iret(2)
       ELSEIF (ITYPE==NF90_FLOAT) THEN
         ALLOCATE(ZTAB_2D4(PRODUCT(ICOUNT(1:INDIMS-1)),ICOUNT(INDIMS)))
         IRET(2)=NF90_GET_VAR(IFILE_ID,IVAR_ID,ZTAB_2D4,ISTART,ICOUNT,ISTRIDE)
+      ! print*,'cas2 ',iret(2)
         ZWORK2(:,:) = ZTAB_2D4(:,:)
         DEALLOCATE(ZTAB_2D4)
       ENDIF
