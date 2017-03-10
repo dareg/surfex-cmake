@@ -81,10 +81,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_NETCDF',0,ZHOOK_HANDLE)
-!print*,'read_tair ',XCOUNT
  CALL READ_SURF(&
                 'OFFLIN','Tair',      PTA    (:,1:XCOUNT),IRET)
-!print*,'read_tair ok'
  CALL READ_SURF(&
                 'OFFLIN','Qair',      PQA    (:,1:XCOUNT),IRET)
  CALL READ_SURF(&
