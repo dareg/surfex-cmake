@@ -118,7 +118,7 @@ REAL    :: ZGLBLATMIN                 ! minimum latitude of data box in the file
 REAL    :: ZGLBLONMIN                 ! minimum longitude of data box in the file
 REAL    :: ZGLBLATMAX                 ! maximum latitude of data box in the file
 REAL    :: ZGLBLONMAX                 ! maximum longitude of data box in the file
-REAL    :: ZNODATA                    ! value below which data are not considered
+REAL    :: ZNODATA, ZNODATA2          ! value below which data are not considered
 REAL    :: ZDLAT                      ! latitude mesh in the data file
 REAL    :: ZDLON                      ! longitude mesh in the data file
 REAL    :: ZLONMIN                    ! minimum longitude of mask mesh
@@ -127,6 +127,7 @@ REAL    :: ZLATMIN                    ! minimum latitude of mask mesh
 REAL    :: ZLATMAX                    ! maximum latitude of mask mesh
 REAL    :: ZSHIFT                     ! shift on longitudes
 INTEGER :: IFACT              ! Factor integer to real
+INTEGER(KIND=2) :: INODATA, INODATA2
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZVALUE
 REAL, DIMENSION(:), POINTER :: ZLAT   ! latitude of data points
@@ -376,6 +377,10 @@ JL = IPAS + 1
 !
 IF (GCOMPRESS) ILINE_COMPRESS = 1
 !
+INODATA = ZNODATA
+INODATA2 = ISHFTC(INODATA,8)
+ZNODATA2 = INODATA2
+!
 DO 
   !
   !the file is read from the top to the bottom (quicker)
@@ -456,7 +461,9 @@ DO
       ENDIF
       !
       IF (ICPT==0.AND..NOT.GCOMPRESS) THEN 
-        IF ( (HFIELD(1:5)=="COVER" .AND. (ANY(ZVALUE>JPCOVER.AND.ZVALUE/=ZNODATA) .OR. ANY(ZVALUE<0..AND.ZVALUE/=ZNODATA)) ) .OR. & 
+        IF ( (HFIELD(1:5)=="COVER" .AND. (ANY(ZVALUE>JPCOVER.AND.ZVALUE/=ZNODATA) .OR. &
+                        ANY(ZVALUE<0..AND.ZVALUE/=ZNODATA) .OR. ALL(ZVALUE==256.)) ) .OR. & 
+             (ZNODATA/=0 .AND. (ALL(ZVALUE==ZNODATA2))) .OR. &
             ((HFIELD(1:4)=="SAND" .OR. HFIELD(1:4)=="CLAY") .AND. &
                 (ANY(ZVALUE>100..AND.ZVALUE/=ZNODATA) .OR. ANY(ZVALUE<0..AND.ZVALUE/=ZNODATA)) ) .OR. &
              (HFIELD(1:3)=="SOC" .AND. (ANY(ZVALUE>15000..AND.ZVALUE/=ZNODATA) .OR. ANY(ZVALUE<0..AND.ZVALUE/=ZNODATA)) )  .OR. &
