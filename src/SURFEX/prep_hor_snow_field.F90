@@ -336,25 +336,25 @@ IF (YDCTL%LPART5) THEN
       !
       ZD(:)=0.
       DO JL = 1,ISNOW_NLAYER
-        WHERE (PDEPTH(:,JL,JP)/=XUNDEF) ZD(:) = ZD(:) + PDEPTH(:,JL,JP)
+        WHERE (PDEPTH(1:KSIZE_P(JP),JL,JP)/=XUNDEF) ZD(1:KSIZE_P(JP)) = ZD(1:KSIZE_P(JP)) + PDEPTH(1:KSIZE_P(JP),JL,JP)
       END DO
       !
       !* grid at center of layers
       !
-      ZGRID(:,1,JP) = PDEPTH(:,1,JP)
+      ZGRID(1:KSIZE_P(JP),1,JP) = PDEPTH(1:KSIZE_P(JP),1,JP)
       IF(ISNOW_NLAYER>1) THEN
         DO JL = 2,ISNOW_NLAYER
-          ZGRID(:,JL,JP) = ZGRID(:,JL-1,JP) + PDEPTH(:,JL,JP)
+          ZGRID(1:KSIZE_P(JP),JL,JP) = ZGRID(1:KSIZE_P(JP),JL-1,JP) + PDEPTH(1:KSIZE_P(JP),JL,JP)
         ENDDO
       ENDIF
       !
       ! * normalized grid
       !
       DO JL=1,ISNOW_NLAYER
-        WHERE (ZD(:)/=0.)
-          ZGRID(:,JL,JP) = ZGRID(:,JL,JP) / ZD(:)
+        WHERE (ZD(1:KSIZE_P(JP))/=0.)
+          ZGRID(1:KSIZE_P(JP),JL,JP) = ZGRID(1:KSIZE_P(JP),JL,JP) / ZD(1:KSIZE_P(JP))
         ELSEWHERE
-          ZGRID(:,JL,JP) = 1.0
+          ZGRID(1:KSIZE_P(JP),JL,JP) = 1.0
         END WHERE
       END DO
       !
