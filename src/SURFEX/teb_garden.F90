@@ -14,8 +14,8 @@
                            PLE_GRND, PGFLX_GRND, PRN_TWN, PH_TWN, PLE_TWN, PGFLX_TWN, PEVAP_TWN,  &
                            PSFCO2, PUW_GRND, PUW_RF, PDUWDU_GRND, PDUWDU_RF,                      &
                            PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PTS_TWN, PEMIS_TWN,           &
-                           PDIR_ALB_TWN, PSCA_ALB_TWN, PRESA_TWN, PAC_RD, PAC_GD, PAC_GRF,        &
-                           PAC_RD_WAT, PAC_GD_WAT, PAC_GRF_WAT, KDAY, PEMIT_LW_FAC, PEMIT_LW_GRND,&
+                           PDIR_ALB_TWN, PSCA_ALB_TWN, PRESA_TWN, PAC_RD, PAC_GD, PAC_GR,         &
+                           PAC_RD_WAT, PAC_GD_WAT, PAC_GR_WAT, KDAY, PEMIT_LW_FAC, PEMIT_LW_GRND, &
                            PT_RAD_IND, PREF_SW_GRND, PREF_SW_FAC, PHU_BLD, PTIME, PPROD_BLD  )
 !   ##########################################################################
 !
@@ -117,14 +117,14 @@ TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !
 INTEGER, INTENT(IN) :: KTEB_P                             ! TEB current patch number 
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND       ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND      ! wind implicitation option
 !                                                         ! 'OLD' = direct
 !                                                         ! 'NEW' = Taylor serie, order 1
 REAL, DIMENSION(:),   INTENT(IN)    :: PTSUN              ! solar time   (s from midnight)
 !                                                         
-REAL, DIMENSION(:)  , INTENT(INOUT) :: PT_CAN          ! canyon air temperature
-REAL, DIMENSION(:)  , INTENT(INOUT) :: PQ_CAN          ! canyon air specific humidity
-REAL, DIMENSION(:)  , INTENT(IN)    :: PU_CAN          ! canyon hor. wind
+REAL, DIMENSION(:)  , INTENT(INOUT) :: PT_CAN             ! canyon air temperature
+REAL, DIMENSION(:)  , INTENT(INOUT) :: PQ_CAN             ! canyon air specific humidity
+REAL, DIMENSION(:)  , INTENT(IN)    :: PU_CAN             ! canyon hor. wind
 REAL, DIMENSION(:)  , INTENT(IN)    :: PU_LOWCAN          ! wind near the road
 REAL, DIMENSION(:)  , INTENT(IN)    :: PT_LOWCAN          ! temp. near the road
 REAL, DIMENSION(:)  , INTENT(IN)    :: PQ_LOWCAN          ! hum. near the road
@@ -173,25 +173,25 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRNSN_RD       ! net radiation over snow
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHSN_RD        ! sensible heat flux over snow
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLESN_RD       ! latent heat flux over snow
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGSN_RD        ! flux under the snow
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PMELT_RD         ! snow melt
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PMELT_RD       ! snow melt
 !
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GRND           ! net radiation over ground
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GRND            ! sensible heat flux over ground
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GRND           ! latent heat flux over ground
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_GRND          ! net radiation over ground
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_GRND           ! sensible heat flux over ground
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_GRND          ! latent heat flux over ground
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLX_GRND        ! flux through the ground
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN_TWN           ! net radiation over town
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH_TWN            ! sensible heat flux over town
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE_TWN           ! latent heat flux over town
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLX_TWN        ! flux through the ground
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLX_TWN         ! flux through the ground
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP_TWN         ! evaporation flux (kg/m2/s)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2       (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GRND           ! momentum flux for ground built surf
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_RF           ! momentum flux for roofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDUWDU_GRND        !
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDUWDU_RF        !
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2            ! flux of CO2       (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_GRND          ! momentum flux for ground built surf
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW_RF            ! momentum flux for roofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDUWDU_GRND       !
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDUWDU_RF         !
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUSTAR_TWN        ! friciton velocity over town
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PCD                ! town averaged drag coefficient
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PCDN               ! town averaged neutral drag coefficient
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PCD               ! town averaged drag coefficient
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PCDN              ! town averaged neutral drag coefficient
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PCH_TWN           ! town averaged heat transfer coefficient
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRI_TWN           ! town averaged Richardson number
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PTS_TWN           ! town surface temperature
@@ -199,12 +199,12 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PEMIS_TWN         ! town equivalent emiss
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PDIR_ALB_TWN      ! town equivalent direct albedo
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PSCA_ALB_TWN      ! town equivalent diffuse albedo
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRESA_TWN         ! town aerodynamical resistance
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_RD           ! road conductance
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GD         ! green area conductance
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GRF      ! green roof conductance
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_RD_WAT       ! road conductance for latent heat
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GD_WAT     ! green area conductance for latent heat
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GRF_WAT  ! green roof conductance for latent heat
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_RD            ! road conductance
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GD            ! green area conductance
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GR            ! green roof conductance
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_RD_WAT        ! road conductance for latent heat
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GD_WAT        ! green area conductance for latent heat
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_GR_WAT        ! green roof conductance for latent heat
 !
 ! new arguments created after BEM
 !
@@ -246,11 +246,11 @@ REAL, DIMENSION(SIZE(PTA)) :: ZDELT_RF     ! fraction of water on roofs
 REAL, DIMENSION(SIZE(PTA)) :: ZAC_RF       ! roof conductance
 REAL, DIMENSION(SIZE(PTA)) :: ZAC_RF_WAT   ! roof water conductance
 REAL, DIMENSION(SIZE(PTA)) :: ZAC_WL       ! wall conductance
-REAL, DIMENSION(SIZE(PTA)) :: ZAC_TOP        ! top conductance
+REAL, DIMENSION(SIZE(PTA)) :: ZAC_TOP      ! top conductance
 REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_RD     ! hum of saturation for roads
-REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_GD   ! hum of saturation for green areas
+REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_GD     ! hum of saturation for green areas
 REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_RF     ! hum of saturation for roofs
-REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_GRF! hum of saturation for green roofs
+REAL, DIMENSION(SIZE(PTA)) :: ZQSAT_GR     ! hum of saturation for green roofs
 !
 ! coefficients for LW computations over snow (from previous time-step)
 !
@@ -269,31 +269,31 @@ INTEGER                    :: JSWB
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZALB_GD    ! albedo     for green areas
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIS_GD   ! emissivity for green areas
-REAL, DIMENSION(SIZE(PTA)) :: ZALB_GRF ! albedo     for green roofs
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIS_GRF! emissivity for green roofs
+REAL, DIMENSION(SIZE(PTA)) :: ZALB_GR    ! albedo     for green roofs
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIS_GR   ! emissivity for green roofs
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TVEG_GD      ! nearIR  veg tot albedo
 REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TVEG_GD      ! visible veg tot albedo
 REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TSOIL_GD     ! nearIR  soil tot albedo
 REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TSOIL_GD     ! visible soil tot albedo
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TVEG_GRF      ! nearIR  veg tot albedo
-REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TVEG_GRF      ! visible veg tot albedo
-REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TSOIL_GRF     ! nearIR  soil tot albedo
-REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TSOIL_GRF     ! visible soil tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TVEG_GR      ! nearIR  veg tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TVEG_GR      ! visible veg tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBNIR_TSOIL_GR     ! nearIR  soil tot albedo
+REAL, DIMENSION(SIZE(PTA)) :: ZALBVIS_TSOIL_GR     ! visible soil tot albedo
 !
 ! radiation received by surfaces
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_RD        ! solar rad received by roads
-REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WL_A      ! solar rad received by walls
-REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WL_B      ! solar rad received by walls
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_RD      ! solar rad received by roads
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WL_A    ! solar rad received by walls
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WL_B    ! solar rad received by walls
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_GD      ! solar rad received by gardens
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_SN_RD   ! solar rad received by snow on roads
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_GD      ! IR rad received by gardens
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZSW_RAD_GD      ! solar radiation reaching urban green areas
-REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_RF        ! solar rad received by roofs in presence of solar panels
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_RF      ! solar rad received by roofs in presence of solar panels
 !
 ! coefficients for LW contributions
 !
@@ -338,7 +338,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZLW_NR_TO_WIN       ! L.W. interactions snow(road)
                                                   !
 REAL, DIMENSION(SIZE(PTA)) :: ZREC_SW_WIN         ! solar received by windows [W m-2(win)]
 REAL, DIMENSION(SIZE(PTA)) :: ZT_SKY              ! sky temperature [K]
-REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_RF        ! Incoming LW on roofs in presence of solar panels
+REAL, DIMENSION(SIZE(PTA)) :: ZREC_LW_RF          ! Incoming LW on roofs in presence of solar panels
 !
 ! local variable at previous time-step
 !
@@ -347,50 +347,49 @@ REAL, DIMENSION(SIZE(PTA)) :: ZPET_B_COEF
 REAL, DIMENSION(SIZE(PTA)) :: ZPEQ_A_COEF          
 REAL, DIMENSION(SIZE(PTA)) :: ZPEQ_B_COEF          
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZUW_RD            ! momentum flux for roads
-REAL, DIMENSION(SIZE(PTA)) :: ZUW_GD          ! momentum flux for green areas
-REAL, DIMENSION(SIZE(PTA)) :: ZUW_GRF       ! momentum flux for green roofs
-REAL, DIMENSION(SIZE(PTA)) :: ZDUWDU_RD         !
+REAL, DIMENSION(SIZE(PTA)) :: ZUW_RD       ! momentum flux for roads
+REAL, DIMENSION(SIZE(PTA)) :: ZUW_GD       ! momentum flux for green areas
+REAL, DIMENSION(SIZE(PTA)) :: ZUW_GR       ! momentum flux for green roofs
+REAL, DIMENSION(SIZE(PTA)) :: ZDUWDU_RD    !
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZAC_AGG_GD      ! aggreg. aeodynamic resistance for green areas
-REAL, DIMENSION(SIZE(PTA)) :: ZHU_AGG_GD      ! aggreg. relative humidity for green areas
-REAL, DIMENSION(SIZE(PTA)) :: ZAC_AGG_GRF   ! aggreg. aeodynamic resistance for green roofs
-REAL, DIMENSION(SIZE(PTA)) :: ZHU_AGG_GRF   ! aggreg. relative humidity for green roofs
+REAL, DIMENSION(SIZE(PTA)) :: ZAC_AGG_GD   ! aggreg. aeodynamic resistance for green areas
+REAL, DIMENSION(SIZE(PTA)) :: ZHU_AGG_GD   ! aggreg. relative humidity for green areas
+REAL, DIMENSION(SIZE(PTA)) :: ZAC_AGG_GR   ! aggreg. aeodynamic resistance for green roofs
+REAL, DIMENSION(SIZE(PTA)) :: ZHU_AGG_GR   ! aggreg. relative humidity for green roofs
 !
 !  surfaces relative fractions
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZRF_FRAC          ! roof, wall and
-REAL, DIMENSION(SIZE(PTA)) :: ZWL_FRAC          ! road fractions
-REAL, DIMENSION(SIZE(PTA)) :: ZRD_FRAC          ! of exchange surf.
+REAL, DIMENSION(SIZE(PTA)) :: ZRF_FRAC        ! roof, wall and
+REAL, DIMENSION(SIZE(PTA)) :: ZWL_FRAC        ! road fractions
+REAL, DIMENSION(SIZE(PTA)) :: ZRD_FRAC        ! of exchange surf.
 REAL, DIMENSION(SIZE(PTA)) :: ZGD_FRAC        !                  
-REAL, DIMENSION(SIZE(PTA)) :: ZTOTS_O_HORS        ! total canyon+roof surface
-!                                                 ! over horizontal surface
+REAL, DIMENSION(SIZE(PTA)) :: ZTOTS_O_HORS    ! total canyon+roof surface
+!                                             ! over horizontal surface
 REAL, DIMENSION(SIZE(PTA)) :: ZWL_O_RD        ! wall surface over road surface
-REAL, DIMENSION(SIZE(PTA)) :: ZWL_O_GRND        ! wall surface over (road+green area) surface
+REAL, DIMENSION(SIZE(PTA)) :: ZWL_O_GRND      ! wall surface over (road+green area) surface
 !
 ! surface temperatures
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZTS_GRF       ! surface temperature of urban greenroofs at t
-REAL, DIMENSION(SIZE(PTA)) :: ZMTC_O_GR_R1        ! mean thermal conductivity over distance 
-!                                                 ! between two layers (bottom GR & roof)
+REAL, DIMENSION(SIZE(PTA)) :: ZMTC_O_GR_R1 ! mean thermal conductivity over distance 
+!                                          ! between two layers (bottom GR & roof)
 !
 ! fluxes from green surfaces
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GD       ! CO2 fluxes (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_GD     ! LW flux emitted by the garden (W/m2 garden)
-REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GRF      ! CO2 fluxes over greenroofs (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GD      ! CO2 fluxes (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_GD    ! LW flux emitted by the garden (W/m2 garden)
+REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GR      ! CO2 fluxes over greenroofs (m/s*kg_CO2/kg_air)
 !
 ! fluxes from built surfaces
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_RD       ! LW flux emitted by the road (W/m2 road)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_RD    ! LW flux emitted by the road (W/m2 road)
 !
 ! fluxes from/to solar panel
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWDN_PANEL    ! LW flux emitted DOWNWARDS by the solar panel (W/m2 panel)
-REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWUP_PANEL    ! LW flux emitted UPWARDS   by the solar panel (W/m2 panel)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWDN_PANEL  ! LW flux emitted DOWNWARDS by the solar panel (W/m2 panel)
+REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWUP_PANEL  ! LW flux emitted UPWARDS   by the solar panel (W/m2 panel)
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_RF       ! LW flux emitted UPWARDS   by the roof        (W/m2 roof )
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZRN_GD, ZH_GD, ZLE_GD, ZGFLUX_GD, ZEVAP_GD, ZTSRAD_GD, ZRUNOFF_GD
 REAL, DIMENSIOn(SIZE(PTA)) :: ZRN_GR, ZH_GR, ZLE_GR, ZGFLUX_GR
-REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GR, ZRUNOFF_GR, ZDRAIN_GR 
+REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GR, ZTSRAD_GR, ZRUNOFF_GR, ZDRAIN_GR 
 !
 !new local variables for shading
 REAL, DIMENSION(SIZE(PTA)) :: ZE_SHADING          ! energy not ref., nor absorbed, nor
@@ -505,35 +504,34 @@ ZQA(:) = PQA(:) * QSAT(PTA(:),PPS(:)) / QSAT(ZTA(:),PPA(:))
 !
 ZALB_GD   = XUNDEF
 ZEMIS_GD  = XUNDEF
+ZTSRAD_GD = XUNDEF
 !
 IF (TOP%LGARDEN) THEN
- GDDK%XTSRAD = XUNDEF
  CALL TEB_VEG_PROPERTIES(T%XGARDEN, GDM%O, GDM%NPE%AL(KTEB_P), &
                         PDIR_SW, PSCA_SW, PSW_BANDS, KSW,   &
-                        GDDK%XTSRAD, ZEMIS_GD, ZALB_GD,     &
+                        ZTSRAD_GD, ZEMIS_GD, ZALB_GD,       &
                         PTA=PT_LOWCAN,                      &
                         PALBNIR_TVEG=ZALBNIR_TVEG_GD,       &
                         PALBVIS_TVEG=ZALBVIS_TVEG_GD,       &
                         PALBNIR_TSOIL=ZALBNIR_TSOIL_GD,     &
                         PALBVIS_TSOIL=ZALBVIS_TSOIL_GD     )
-ELSE
-  ALLOCATE(GDDK%XTSRAD(0))
 ENDIF
 !
 ! for greenroofs :
 !
-ZALB_GRF   = XUNDEF
-ZEMIS_GRF  = XUNDEF
-ZTS_GRF    = XUNDEF
+ZALB_GR   = XUNDEF
+ZEMIS_GR  = XUNDEF
+ZTSRAD_GR = XUNDEF
 !
 IF (TOP%LGREENROOF) THEN
  CALL TEB_VEG_PROPERTIES(T%XGREENROOF, GRM%O, GRM%NPE%AL(KTEB_P), &
-                           PDIR_SW, PSCA_SW, PSW_BANDS, KSW,     &
-                           ZTS_GRF, ZEMIS_GRF, ZALB_GRF, PTA=PTA,&
-                           PALBNIR_TVEG=ZALBNIR_TVEG_GRF,        &
-                           PALBVIS_TVEG=ZALBVIS_TVEG_GRF,        &
-                           PALBNIR_TSOIL=ZALBNIR_TSOIL_GRF,      &
-                           PALBVIS_TSOIL=ZALBVIS_TSOIL_GRF  ) 
+                           PDIR_SW, PSCA_SW, PSW_BANDS, KSW,    &
+                           ZTSRAD_GR, ZEMIS_GR, ZALB_GR,        &
+                           PTA=PTA,                             &
+                           PALBNIR_TVEG=ZALBNIR_TVEG_GR,        &
+                           PALBVIS_TVEG=ZALBVIS_TVEG_GR,        &
+                           PALBNIR_TSOIL=ZALBNIR_TSOIL_GR,      &
+                           PALBVIS_TSOIL=ZALBVIS_TSOIL_GR  ) 
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -574,7 +572,7 @@ END IF
 !
  CALL URBAN_SOLAR_ABS(TOP, T, B, DMT, ZDIR_SW, ZSCA_SW, PZENITH, PAZIM,  &
                       TPN%XFRAC_PANEL, TPN%XALB_PANEL, ZALB_GD,     &
-                      T%XSVF_GARDEN, ZALB_GRF, ZDN_RF, ZDF_RF,      &
+                      T%XSVF_GARDEN, ZALB_GR, ZDN_RF, ZDF_RF,       &
                       ZDN_RD, ZDF_RD, ZREC_SW_RD, ZREC_SW_SN_RD,    &
                       ZREC_SW_WL_A, ZREC_SW_WL_B, ZREC_SW_GD,       &
                       ZREC_SW_RF, PDIR_ALB_TWN, PSCA_ALB_TWN,       &
@@ -586,7 +584,7 @@ END IF
 !*      6.     LW properties
 !              -------------
 !
-  CALL URBAN_LW_COEF(B, T, PLW_RAD, ZEMIS_GD, T%TSNOW_ROAD%TS, GDDK%XTSRAD,  &
+  CALL URBAN_LW_COEF(B, T, PLW_RAD, ZEMIS_GD, T%TSNOW_ROAD%TS, ZTSRAD_GD,  &
                      ZLW_WA_TO_WB, ZLW_WA_TO_R, ZLW_WB_TO_R,            &
                      ZLW_WA_TO_NR, ZLW_WB_TO_NR, ZLW_WA_TO_G,           &
                      ZLW_WB_TO_G, ZLW_WA_TO_WIN, ZLW_WB_TO_WIN,         &
@@ -618,11 +616,11 @@ SUBROUTINE TEB_GARDEN2
 !
 IF (TOP%LGARDEN) THEN
   ZT_SKY  (:) = (PLW_RAD(:)/XSTEFAN)**0.25
-  ZREC_LW_GD(:) = (ZLW_S_TO_G  (:) * (ZT_SKY(:)       - GDDK%XTSRAD(:))   &
-                 + ZLW_WA_TO_G (:) * (T%XT_WALL_A(:,1)- GDDK%XTSRAD(:))   &
-                 + ZLW_WB_TO_G (:) * (T%XT_WALL_B(:,1)- GDDK%XTSRAD(:))   &
-                 + ZLW_WIN_TO_G(:) * (B%XT_WIN1(:)    - GDDK%XTSRAD(:)) ) &
-                   / ZEMIS_GD(:) + XSTEFAN * GDDK%XTSRAD(:)**4
+  ZREC_LW_GD(:) = (ZLW_S_TO_G  (:) * (ZT_SKY(:)       - ZTSRAD_GD(:))   &
+                 + ZLW_WA_TO_G (:) * (T%XT_WALL_A(:,1)- ZTSRAD_GD(:))   &
+                 + ZLW_WB_TO_G (:) * (T%XT_WALL_B(:,1)- ZTSRAD_GD(:))   &
+                 + ZLW_WIN_TO_G(:) * (B%XT_WIN1(:)    - ZTSRAD_GD(:)) ) &
+                   / ZEMIS_GD(:) + XSTEFAN * ZTSRAD_GD(:)**4
 ELSE
   ZREC_LW_GD      (:) = XUNDEF
 END IF
@@ -666,21 +664,31 @@ ZPEQ_B_COEF(:) = PQ_LOWCAN(:)
 !
 IF (TOP%LGARDEN) THEN
 !
-  CALL GARDEN(DTCO, G, T, TOP, TIR, GDM%DTV, GDM%GB, GDDK, GDDEK, GDDMK,            &
+  CALL GARDEN(DTCO, G, T, TOP, TIR, GDM%DTV, GDM%GB, GDDK, GDDEK, GDDMK,                &
               GDM%O, GDM%S, GDM%K, GDM%P, GDM%NPE%AL(KTEB_P),                           &
               HIMPLICIT_WIND, TOP%TTIME, PTSUN, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, &
               ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF, PTSTEP, PZ_LOWCAN,    &
               PT_LOWCAN, PQ_LOWCAN, PEXNS, PRHOA, PCO2, PPS, PRR, PSR, PZENITH,         &
               ZREC_SW_GD, ZREC_LW_GD, PU_LOWCAN, ZALBNIR_TVEG_GD, ZALBVIS_TVEG_GD,      &
-              ZALBNIR_TSOIL_GD, ZALBVIS_TSOIL_GD, ZSFCO2_GD, ZUW_GD, PAC_GD, ZQSAT_GD,  &
+              ZALBNIR_TSOIL_GD, ZALBVIS_TSOIL_GD, ZRN_GD, ZH_GD, ZLE_GD, ZGFLUX_GD,     &
+              ZSFCO2_GD, ZEVAP_GD, ZUW_GD, ZRUNOFF_GD, PAC_GD, ZQSAT_GD, ZTSRAD_GD,     &
               ZAC_AGG_GD, ZHU_AGG_GD, DMT%XIRRIG_GARDEN )  
 
   PAC_GD_WAT(:) = PAC_GD(:)
   DMT%XABS_SW_GARDEN(:) = (1.-ZALB_GD(:)) * ZREC_SW_GD
-  DMT%XABS_LW_GARDEN(:) = ZEMIS_GD(:) * ZREC_LW_GD(:) - XSTEFAN * ZEMIS_GD(:) * GDDK%XTSRAD(:)**4 
-  ZEMIT_LW_GD(:) = XSTEFAN * GDDK%XTSRAD(:)**4 + (1 - ZEMIS_GD(:)) / ZEMIS_GD(:) * DMT%XABS_LW_GARDEN(:)
+  DMT%XABS_LW_GARDEN(:) = ZEMIS_GD(:) * ZREC_LW_GD(:) - XSTEFAN * ZEMIS_GD(:) * ZTSRAD_GD(:)**4 
+  ZEMIT_LW_GD(:) = XSTEFAN * ZTSRAD_GD(:)**4 + (1 - ZEMIS_GD(:)) / ZEMIS_GD(:) * DMT%XABS_LW_GARDEN(:)
 
 ELSE
+  !
+  ZRN_GD    (:) = 0.
+  ZH_GD     (:) = 0.
+  ZLE_GD    (:) = 0.
+  ZGFLUX_GD (:) = 0.
+  ZEVAP_GD  (:) = 0.
+  ZRUNOFF_GD(:) = 0. 
+  ! 
+  ZTSRAD_GD (:) = XUNDEF
   !
   ZUW_GD     (:) = 0.
   PAC_GD     (:) = 0.
@@ -703,29 +711,39 @@ ENDIF
 !
 IF (TOP%LGREENROOF) THEN
   !
-  CALL GREENROOF(DTCO, G, T, TOP, TIR, GRM%DTV, GRM%GB, GRDK, GRDEK,              &
-                 GRDMK, GRM%O, GRM%S, GRM%K, GRM%P, GRM%NPE%AL(KTEB_P),               &
-                 HIMPLICIT_WIND, TOP%TTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,          &
-                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF, PTSTEP, PZREF,   &
-                 PUREF, PTA, PQA, PEXNS, PEXNA,PRHOA, PCO2, PPS, PRR, PSR, PZENITH,   &
-                 ZREC_SW_RF, ZREC_LW_RF, PVMOD,ZALBNIR_TVEG_GRF, ZALBVIS_TVEG_GRF,    &
-                 ZALBNIR_TSOIL_GRF, ZALBVIS_TSOIL_GRF, ZSFCO2_GRF, ZUW_GRF, PAC_GRF,  &
-                 ZQSAT_GRF, ZTS_GRF, ZAC_AGG_GRF, ZHU_AGG_GRF, DMT%XG_GREENROOF_ROOF, &
-                 DMT%XIRRIG_GREENROOF ) 
+  CALL GREENROOF(DTCO, G, T, TOP, TIR, GRM%DTV, GRM%GB, GRDK, GRDEK,                 &
+                 GRDMK, GRM%O, GRM%S, GRM%K, GRM%P, GRM%NPE%AL(KTEB_P),              &
+                 HIMPLICIT_WIND, TOP%TTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,         &
+                 ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF, PTSTEP, PZREF,  &
+                 PUREF, PTA, PQA, PEXNS, PEXNA,PRHOA, PCO2, PPS, PRR, PSR, PZENITH,  &
+                 ZREC_SW_RF, ZREC_LW_RF, PVMOD,ZALBNIR_TVEG_GR, ZALBVIS_TVEG_GR,     &
+                 ZALBNIR_TSOIL_GR, ZALBVIS_TSOIL_GR, ZRN_GR, ZH_GR, ZLE_GR,          &
+                 ZGFLUX_GR, ZSFCO2_GR, ZEVAP_GR, ZUW_GR, ZRUNOFF_GR, ZDRAIN_GR,      &
+                 PAC_GR, ZQSAT_GR, ZTSRAD_GR, ZAC_AGG_GR, ZHU_AGG_GR,                &
+                 DMT%XG_GREENROOF_ROOF, DMT%XIRRIG_GREENROOF ) 
   !
-  PAC_GRF_WAT(:) = PAC_GRF(:)
-  DMT%XABS_SW_GREENROOF(:) = (1.-ZALB_GRF(:)) * ZREC_SW_RF
-  DMT%XABS_LW_GREENROOF(:) = ZEMIS_GRF * ZREC_LW_RF - XSTEFAN * ZEMIS_GRF * ZTS_GRF**4
+  PAC_GR_WAT(:) = PAC_GR(:)
+  DMT%XABS_SW_GREENROOF(:) = (1.-ZALB_GR(:)) * ZREC_SW_RF
+  DMT%XABS_LW_GREENROOF(:) = ZEMIS_GR * ZREC_LW_RF - XSTEFAN * ZEMIS_GR * ZTSRAD_GR**4
 
 ELSE
   !
-  ZUW_GRF    (:) = 0.
-  PAC_GRF    (:) = 0.
-  ZSFCO2_GRF (:) = 0.
-  ZQSAT_GRF  (:) = XUNDEF
-  ZTS_GRF    (:) = XUNDEF
-  ZAC_AGG_GRF(:) = XUNDEF
-  ZHU_AGG_GRF(:) = XUNDEF 
+  ZRN_GR    (:) = 0.
+  ZH_GR     (:) = 0.
+  ZLE_GR    (:) = 0.
+  ZGFLUX_GR (:) = 0.
+  ZEVAP_GR  (:) = 0.
+  ZRUNOFF_GR(:) = 0.
+  ZDRAIN_GR (:) = 0.  
+  !
+  ZTSRAD_GR (:) = XUNDEF
+  !
+  ZUW_GR    (:) = 0.
+  PAC_GR    (:) = 0.
+  ZSFCO2_GR (:) = 0.
+  ZQSAT_GR  (:) = XUNDEF
+  ZAC_AGG_GR(:) = XUNDEF
+  ZHU_AGG_GR(:) = XUNDEF 
   ZMTC_O_GR_R1(:) = XUNDEF 
   !
   DMT%XIRRIG_GREENROOF (:) = 0.
@@ -739,42 +757,6 @@ END SUBROUTINE TEB_GARDEN2
 !-------------------------------------------------------------------------------
 SUBROUTINE TEB_GARDEN3
 !
-IF (TOP%LGARDEN) THEN
-  ZRN_GD    (:) = GDDK%XRN     (:) 
-  ZH_GD     (:) = GDDK%XH      (:)
-  ZLE_GD    (:) = GDDK%XLE     (:)
-  ZGFLUX_GD (:) = GDDK%XGFLUX  (:)
-  ZEVAP_GD  (:) = GDDK%XEVAP   (:)
-  ZTSRAD_GD (:) = GDDK%XTSRAD  (:)
-  ZRUNOFF_GD(:) = GDDEK%XRUNOFF(:)
-ELSE
-  ZRN_GD    (:) = 0.
-  ZH_GD     (:) = 0.
-  ZLE_GD    (:) = 0.
-  ZGFLUX_GD (:) = 0.
-  ZEVAP_GD  (:) = 0.
-  ZTSRAD_GD (:) = 0.
-  ZRUNOFF_GD(:) = 0.        
-ENDIF
-!
-IF (TOP%LGREENROOF) THEN
-  ZRN_GR    (:) = GRDK%XRN(:)
-  ZH_GR     (:) = GRDK%XH (:)
-  ZLE_GR    (:) = GRDK%XLE(:)
-  ZGFLUX_GR (:) = GRDK%XGFLUX(:)
-  ZEVAP_GR  (:) = GRDK%XEVAP   (:)
-  ZRUNOFF_GR(:) = GRDEK%XRUNOFF(:)
-  ZDRAIN_GR (:) = GRDEK%XDRAIN (:)
-ELSE
-  ZRN_GR    (:) = 0.
-  ZH_GR     (:) = 0.
-  ZLE_GR    (:) = 0.
-  ZGFLUX_GR (:) = 0.
-  ZEVAP_GR  (:) = 0.
-  ZRUNOFF_GR(:) = 0.
-  ZDRAIN_GR (:) = 0.  
-ENDIF
-!
 !*     9.      Treatment of built covers
 !              -------------------------
 !
@@ -784,7 +766,7 @@ ENDIF
              PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA, PLW_RAD, &
              PRR, PSR, PZREF, PUREF, PVMOD, PH_TRAFFIC, PLE_TRAFFIC, PTSTEP,       &
              ZDF_RF, ZDN_RF, ZDF_RD, ZDN_RD, ZQSAT_RF, ZQSAT_RD, ZDELT_RF,         &
-             ZDELT_RD, ZTSRAD_GD, PLEW_RF, ZUW_GRF, PLEW_RD, PLE_WL_A,             &
+             ZDELT_RD, ZTSRAD_GD, PLEW_RF, ZUW_GR, PLEW_RD, PLE_WL_A,              &
              PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF,             &
              ZRN_GR, ZH_GR, ZLE_GR, ZGFLUX_GR, ZDRAIN_GR, ZRUNOFF_GR,              &
              PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, ZUW_RD, PUW_RF,       &
@@ -827,7 +809,7 @@ END IF
  CALL AVG_URBAN_FLUXES(TOP, T, B, TPN, DMT,                                               &
                        PTS_TWN, PEMIS_TWN, PT_CAN, PQ_CAN, PT_LOWCAN, PQ_LOWCAN,          &
                        ZTA, ZQA, PRHOA, PPS, PH_TRAFFIC,  PLE_TRAFFIC, ZWL_O_GRND,        &
-                       ZESN_RF, ZEMIS_GRF, PLW_RAD,  ZAC_RF, ZAC_RF_WAT, ZAC_WL, PAC_RD,  &
+                       ZESN_RF, ZEMIS_GR, PLW_RAD,  ZAC_RF, ZAC_RF_WAT, ZAC_WL, PAC_RD,  &
                        PAC_RD_WAT, ZAC_TOP, PAC_GD, ZQSAT_GD, ZAC_AGG_GD, ZHU_AGG_GD,     &
                        ZQSAT_RF, ZQSAT_RD, ZDELT_RF, ZDELT_RD, ZRF_FRAC, ZWL_FRAC,        &
                        ZRD_FRAC, ZGD_FRAC, ZTOTS_O_HORS, ZDF_RF, ZDN_RF, ZDF_RD, ZDN_RD,  &
@@ -837,7 +819,7 @@ END IF
                        PRN_GRND, PH_GRND, PLE_GRND, PGFLX_GRND, PRN_TWN, PH_TWN, PLE_TWN, &
                        PGFLX_TWN, PEVAP_TWN, ZEMIT_LW_RD,ZEMIT_LW_GD, PEMIT_LW_GRND, ZEMIS_GD )
 !
-PSFCO2(:) = T%XGARDEN(:) * ZSFCO2_GD(:) + T%XBLD(:) * T%XGREENROOF(:) * ZSFCO2_GRF(:) ! no CO2 flux from built and road yet.
+PSFCO2(:) = T%XGARDEN(:) * ZSFCO2_GD(:) + T%XBLD(:) * T%XGREENROOF(:) * ZSFCO2_GR(:) ! no CO2 flux from built and road yet.
 !
 !-------------------------------------------------------------------------------
 !

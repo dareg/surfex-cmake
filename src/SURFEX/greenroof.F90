@@ -4,13 +4,13 @@
 !SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GRO, S, K, P, PEK,    &
-                          HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
-                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
-                          PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,     &
-                          PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,           &
-                          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,&                
-                          PSFCO2, PUW, PAC, PQSAT, PTS, PAC_AGG, PHU_AGG,          &
-                          PDEEP_FLUX, PIRRIG )  
+                          HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,  &
+                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
+                          PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,      &
+                          PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,            &
+                          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, &                
+                          PRN, PH, PLE, PGFLUX, PSFCO2, PEVAP, PUW, PRUNOFF, PDRAIN,&
+                          PAC, PQSAT, PTSRAD, PAC_AGG, PHU_AGG, PDEEP_FLUX, PIRRIG )  
 !   ##################################################################################
 !
 !!****  *GREENROOF*  
@@ -148,14 +148,21 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TVEG       ! visible veg tot albe
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TSOIL      ! visible soil tot albedo
 !
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2                ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the greenroofs
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2      ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over greenroofs (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! greenroof surface runoff
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDRAIN      ! greenroof surface drainage
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC         ! greenroof aerodynamical conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT       ! saturation humidity
-REAL, DIMENSION(:)  , INTENT(INOUT) :: PTS         ! greenroof radiative surface temp. (snow free)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PTSRAD      ! greenroof radiative surface temp. (snow free)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG     ! aggreg. aeodynamic resistance for greenroofs for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG     ! aggreg. relative humidity for greenroofs for latent heat flux
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX  ! Heat Flux at the bottom layer of the greenroof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! greenroof summer irrigation rate
 !
 !
@@ -264,8 +271,6 @@ ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
            ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
            ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG )
 !
-PTS(:) = DK%XTSRAD(:)
-!
 IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:) = DMK%XSNOWTEMP(:,1)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -320,8 +325,8 @@ WHERE (T%XGREENROOF/=0.)
   ! surface (radiative) temp. and forcing air temperature (estimated at future time step)
   ZTA = PPET_B_COEF + PPET_A_COEF * DK%XH
   PAC = 0.
-  WHERE (PTS /= ZTA)
-    PAC(:)   = MAX(DK%XH(:) / XCPD / PRHOA(:) / (PTS - ZTA) , 0.)
+  WHERE (DK%XTSRAD /= ZTA)
+    PAC(:)   = MAX(DK%XH(:) / XCPD / PRHOA(:) / (DK%XTSRAD - ZTA) , 0.)
   ENDWHERE
   !
   ! Humidity of saturation for green areas
@@ -343,6 +348,17 @@ ELSEWHERE
   PUW    (:) = XUNDEF  
   !
 END WHERE
+!
+!
+PTSRAD(:) = DK%XTSRAD(:)
+!
+PRN   (:) = DK%XRN     (:) 
+PH    (:) = DK%XH      (:) 
+PLE   (:) = DK%XLE     (:) 
+PGFLUX(:) = DK%XGFLUX  (:) 
+PEVAP (:) = DK%XEVAP   (:) 
+PRUNOFF(:) =DEK%XRUNOFF(:)
+PDRAIN (:) =DEK%XDRAIN (:)
 !
 IF (LHOOK) CALL DR_HOOK('GREENROOF',1,ZHOOK_HANDLE)
 !

@@ -8,8 +8,9 @@
                        PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
                        PTSTEP, PZREF, PTA, PQA, PEXNS, PRHOA, PCO2, PPS, PRR,   &
                        PSR, PZENITH, PSW, PLW, PVMOD, PALBNIR_TVEG,             &
-                       PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, PSFCO2, PUW, &
-                       PAC, PQSAT, PAC_AGG, PHU_AGG, PIRRIG         )  
+                       PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,              &
+                       PRN, PH, PLE, PGFLUX, PSFCO2, PEVAP, PUW, PRUNOFF,       &
+                       PAC, PQSAT, PTSRAD, PAC_AGG, PHU_AGG, PIRRIG         )  
 !   ##########################################################################
 !
 !!****  *GARDEN*  
@@ -145,10 +146,17 @@ REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TVEG       ! visible veg tot albe
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBNIR_TSOIL      ! nearIR  soil tot albedo
 REAL, DIMENSION(:)  , INTENT(IN)    :: PALBVIS_TSOIL      ! visible soil tot albedo
 !
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over green areas
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over green areas
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over green areas
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the green areas
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2      ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over gardens (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! runoff over garden (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC         ! aerodynamical conductance
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT       ! saturation humidity
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PTSRAD      ! garden radiative surface temp. (snow free)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG     ! aggreg. aeodynamic resistance for green areas for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG     ! aggreg. relative humidity for green areas for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! garden summer irrigation rate
@@ -318,17 +326,28 @@ WHERE (T%XGARDEN/=0.)
   !
 ELSEWHERE
   !
-  DK%XRN   (:) = XUNDEF
-  DK%XH    (:) = XUNDEF
-  DK%XLE   (:) = XUNDEF
-  DK%XGFLUX(:) = XUNDEF
-  DK%XEVAP (:) = XUNDEF  
+  DK%XRN     (:) = XUNDEF
+  DK%XH      (:) = XUNDEF
+  DK%XLE     (:) = XUNDEF
+  DK%XGFLUX  (:) = XUNDEF
+  DK%XEVAP   (:) = XUNDEF  
+  DEK%XRUNOFF(:) = XUNDEF
   !
   PAC    (:) = XUNDEF
   PQSAT  (:) = XUNDEF
   PUW    (:) = XUNDEF
   !
 END WHERE
+!
+!
+PTSRAD(:) = DK%XTSRAD(:)
+!
+PRN    (:) = DK%XRN    (:) 
+PH     (:) = DK%XH     (:) 
+PLE    (:) = DK%XLE    (:) 
+PGFLUX (:) = DK%XGFLUX (:) 
+PEVAP  (:) = DK%XEVAP  (:) 
+PRUNOFF(:) =DEK%XRUNOFF(:)
 !
 IF (LHOOK) CALL DR_HOOK('GARDEN',1,ZHOOK_HANDLE)
 !
