@@ -133,8 +133,8 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_LAND)THEN
-  CALL PUT_SFX_LAND(IM%S, IM%K, U, ILUOUT,LCPL_GW,LCPL_FLOOD,PLAND_WTD(:), &
-                    PLAND_FWTD(:),PLAND_FFLOOD(:),PLAND_PIFLOOD(:))        
+  CALL PUT_SFX_LAND(IM%O, IM%S, IM%K, IM%NK, IM%NP, U, ILUOUT, LCPL_GW, LCPL_FLOOD, &
+                    PLAND_WTD(:), PLAND_FWTD(:),PLAND_FFLOOD(:),PLAND_PIFLOOD(:))        
 ENDIF
 !
 !-------------------------------------------------------------------------------

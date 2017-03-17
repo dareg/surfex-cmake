@@ -182,7 +182,7 @@ CALL SFX_OASIS_RECV(HPROGRAM,KI,KSW,ZTIME_CPL,         &
 !-------------------------------------------------------------------------------
 !
 IF(GRECV_LAND)THEN
-  CALL PUT_SFX_LAND(IM%S, IM%K, U, ILUOUT,LCPL_GW,LCPL_FLOOD, ZLAND_WTD(:),&
+  CALL PUT_SFX_LAND(IM%O, IM%S, IM%K, IM%NK, IM%NP, U, ILUOUT,LCPL_GW,LCPL_FLOOD, ZLAND_WTD(:),&
                     ZLAND_FWTD(:), ZLAND_FFLOOD(:),ZLAND_PIFLOOD(:)  )        
 ENDIF
 !
