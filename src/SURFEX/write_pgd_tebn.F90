@@ -83,7 +83,7 @@ CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','WRITE')
 !               ---------------------------
 !
  CALL WRITESURF_PGD_TEB_n(HSELECT, TM%TOP, TM%BOP, TM%G, TM%BDD, TM%DTB, TM%DTT, TM%NT%AL(1), &
-                          GDM, GRM, HPROGRAM)
+                          TM%TIR, GDM, GRM, HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !

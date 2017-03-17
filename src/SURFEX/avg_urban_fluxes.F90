@@ -3,20 +3,22 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE AVG_URBAN_FLUXES(TOP, T, B, TPN, DMT, GDD, GDDE, GRD, GRDE,         &
+    SUBROUTINE AVG_URBAN_FLUXES(TOP, T, B, TPN, DMT,                               &
                                 PTS_TWN, PEMIS_TWN,  PT_CAN,                       &
                                 PQ_CAN, PT_LOWCAN, PQ_LOWCAN, PTA, PQA, PRHOA, PPS,&
                                 PH_TRAFFIC, PLE_TRAFFIC, PWL_O_GRND, PESN_RF,      &
-                                PEMIS_GRF, PLW_RAD, PAC_RF, PAC_RF_WAT, PAC_WL,    &
+                                PEMIS_GR, PLW_RAD, PAC_RF, PAC_RF_WAT, PAC_WL,     &
                                 PAC_RD, PAC_RD_WAT, PAC_TOP, PAC_GD, PQSAT_GD,     &
                                 PAC_AGG_GD, PHU_AGG_GD, PQSAT_RF, PQSAT_RD,        &
                                 PDELT_RF, PDELT_RD, PRF_FRAC, PWL_FRAC, PRD_FRAC,  &
                                 PGD_FRAC, PTOTS_O_HORS, PDF_RF, PDN_RF, PDF_RD,    &
                                 PDN_RD, PLE_WL_A, PLE_WL_B, PLEW_RF, PLESN_RF,     &
-                                PLEW_RD, PLESN_RD, PHSN_RD, PRN_GRND, PH_GRND,     &
-                                PLE_GRND, PGFLX_GRND, PRN_TWN, PH_TWN, PLE_TWN,    &
-                                PGFLX_TWN, PEVAP_TWN, PEMIT_LW_RD, PEMIT_LW_GD,    &
-                                PEMIT_LW_GRND, PEMIS_GD             )  
+                                PLEW_RD, PLESN_RD, PHSN_RD,                        &
+                                PTSRAD_GD, PRN_GD, PH_GD, PLE_GD, PGFLUX_GD, PEVAP_GD,&
+                                PRUNOFF_GD, PEVAP_GR, PRUNOFF_GR, PDRAIN_GR,       &
+                                PRN_GRND, PH_GRND, PLE_GRND, PGFLX_GRND,           &
+                                PRN_TWN, PH_TWN, PLE_TWN, PGFLX_TWN, PEVAP_TWN,    &
+                                PEMIT_LW_RD, PEMIT_LW_GD, PEMIT_LW_GRND, PEMIS_GD  )
 !   ##########################################################################
 !
 !!****  *AVG_URBAN_FLUXES* computes fluxes on urbanized surfaces  
@@ -91,15 +93,11 @@ TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
 TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
-TYPE(DIAG_t), INTENT(INOUT) :: GDD
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: GDDE
-TYPE(DIAG_t), INTENT(INOUT) :: GRD
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: GRDE
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PTS_TWN          ! town surface temperature
-REAL, DIMENSION(:), INTENT(OUT)   :: PEMIS_TWN        ! town equivalent emissivity
-REAL, DIMENSION(:), INTENT(INOUT) :: PT_CAN         ! canyon air temperature
-REAL, DIMENSION(:), INTENT(INOUT) :: PQ_CAN         ! canyon air specific humidity
+REAL, DIMENSION(:), INTENT(OUT)   :: PTS_TWN           ! town surface temperature
+REAL, DIMENSION(:), INTENT(OUT)   :: PEMIS_TWN         ! town equivalent emissivity
+REAL, DIMENSION(:), INTENT(INOUT) :: PT_CAN            ! canyon air temperature
+REAL, DIMENSION(:), INTENT(INOUT) :: PQ_CAN            ! canyon air specific humidity
 REAL, DIMENSION(:), INTENT(IN)    :: PT_LOWCAN         ! low canyon air temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PQ_LOWCAN         ! low canyon air specific humidity
 !
@@ -113,33 +111,33 @@ REAL, DIMENSION(:), INTENT(IN)    :: PH_TRAFFIC        ! anthropogenic sensible
 !                                                      ! heat fluxes due to traffic
 REAL, DIMENSION(:), INTENT(IN)    :: PLE_TRAFFIC       ! anthropogenic latent
 !                                                      ! heat fluxes due to traffic
-REAL, DIMENSION(:), INTENT(IN)    :: PWL_O_GRND      ! wall Surf. / ground (road+green) Surf.
-! 
-REAL, DIMENSION(:), INTENT(IN)    :: PESN_RF       ! snow roof emissivity
+REAL, DIMENSION(:), INTENT(IN)    :: PWL_O_GRND        ! wall Surf. / ground (road+green) Surf.
+!   
+REAL, DIMENSION(:), INTENT(IN)    :: PESN_RF           ! snow roof emissivity
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PEMIS_GRF   ! green roof emissivity
+REAL, DIMENSION(:), INTENT(IN)    :: PEMIS_GR          ! green roof emissivity
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PLW_RAD           ! incoming longwave rad.
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_RF          ! surface conductance
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_RF            ! surface conductance
 !                                                      ! for heat transfers
 !                                                      ! above roofs
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_RF_WAT      ! surface conductance
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_RF_WAT        ! surface conductance
 !                                                      ! for heat transfers
 !                                                      ! above roofs (for water)
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_WL          ! surface conductance
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_WL            ! surface conductance
 !                                                      ! for heat transfer
 !                                                      ! between wall and canyon
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_RD          ! surface conductance
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_RD            ! surface conductance
 !                                                      ! for heat transfers
 !                                                      ! between road and canyon
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_RD_WAT      ! surface conductance
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_RD_WAT        ! surface conductance
 !                                                      ! for heat transfers
 !                                                      ! inside canyon (for water)
 REAL, DIMENSION(:), INTENT(IN)    :: PAC_TOP           ! aerodynamical conductance
 !                                                      ! between atmosphere and
 !                                                      ! canyon top
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_GD        ! aerodynamical conductance
+REAL, DIMENSION(:), INTENT(IN)    :: PAC_GD            ! aerodynamical conductance
 !                                                      ! between atmosphere and
 !                                                      ! green areas
 REAL, DIMENSION(:), INTENT(IN)    :: PQSAT_GD      ! q_sat(Ts)
@@ -153,9 +151,9 @@ REAL, DIMENSION(:), INTENT(IN)    :: PDELT_RD        ! roof and roads
 REAL, DIMENSION(:), INTENT(IN)    :: PRF_FRAC        ! roof, wall,
 REAL, DIMENSION(:), INTENT(IN)    :: PWL_FRAC        ! road, and green area
 REAL, DIMENSION(:), INTENT(IN)    :: PRD_FRAC        ! fractions
-REAL, DIMENSION(:), INTENT(IN)    :: PGD_FRAC      ! of exchange surf.
-REAL, DIMENSION(:), INTENT(IN)    :: PTOTS_O_HORS      ! total canyon+roof surface
-!                                                      ! over horizontal surface
+REAL, DIMENSION(:), INTENT(IN)    :: PGD_FRAC        ! of exchange surf.
+REAL, DIMENSION(:), INTENT(IN)    :: PTOTS_O_HORS    ! total canyon+roof surface
+!                                                    ! over horizontal surface
 REAL, DIMENSION(:), INTENT(IN)    :: PDF_RF          ! snow-free    roof fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PDN_RF          ! snow-covered roof fraction
 REAL, DIMENSION(:), INTENT(IN)    :: PDF_RD          ! snow-free    road fraction
@@ -165,23 +163,35 @@ REAL, DIMENSION(:), INTENT(IN)    :: PLE_WL_A        ! latent heat flux over wal
 REAL, DIMENSION(:), INTENT(IN)    :: PLE_WL_B        ! latent heat flux over wall
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PLEW_RF         ! latent heat flux of snowfree roof
-REAL, DIMENSION(:), INTENT(IN)    :: PLESN_RF      ! latent heat flux over snow
+REAL, DIMENSION(:), INTENT(IN)    :: PLESN_RF        ! latent heat flux over snow
 REAL, DIMENSION(:), INTENT(IN)    :: PLEW_RD         ! latent heat flux of snowfree road
-REAL, DIMENSION(:), INTENT(IN)    :: PLESN_RD      ! latent heat flux over snow
-REAL, DIMENSION(:), INTENT(IN)    :: PHSN_RD       ! sensible heat flux over snow
+REAL, DIMENSION(:), INTENT(IN)    :: PLESN_RD        ! latent heat flux over snow
+REAL, DIMENSION(:), INTENT(IN)    :: PHSN_RD         ! sensible heat flux over snow
+
+REAL, DIMENSION(:), INTENT(IN)    :: PTSRAD_GD     ! green area surface temperature
+REAL, DIMENSION(:), INTENT(IN)    :: PRN_GD        ! net radiation over green areas
+REAL, DIMENSION(:), INTENT(IN)    :: PH_GD         ! sensible heat flux over green areas
+REAL, DIMENSION(:), INTENT(IN)    :: PLE_GD        ! latent heat flux over green areas
+REAL, DIMENSION(:), INTENT(IN)    :: PGFLUX_GD     ! flux through the green areas
+REAL, DIMENSION(:), INTENT(IN)    :: PEVAP_GD      ! evaporation over gardens
+REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFF_GD    ! surface runoff over green areas      (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)    :: PEVAP_GR      ! evaporation over green roofs
+REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFF_GR    ! surface runoff over green roofs      (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)    :: PDRAIN_GR     ! outlet drainage at green roof base   (kg/m2/s)
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PRN_GRND          ! net radiation over ground
-REAL, DIMENSION(:), INTENT(OUT)   :: PH_GRND           ! sensible heat flux over ground
-REAL, DIMENSION(:), INTENT(OUT)   :: PLE_GRND          ! latent heat flux over ground
+!
+REAL, DIMENSION(:), INTENT(OUT)   :: PRN_GRND         ! net radiation over ground
+REAL, DIMENSION(:), INTENT(OUT)   :: PH_GRND          ! sensible heat flux over ground
+REAL, DIMENSION(:), INTENT(OUT)   :: PLE_GRND         ! latent heat flux over ground
 REAL, DIMENSION(:), INTENT(OUT)   :: PGFLX_GRND       ! flux through the ground
 REAL, DIMENSION(:), INTENT(OUT)   :: PRN_TWN          ! net radiation over town
 REAL, DIMENSION(:), INTENT(OUT)   :: PH_TWN           ! sensible heat flux over town
 REAL, DIMENSION(:), INTENT(OUT)   :: PLE_TWN          ! latent heat flux over town
-REAL, DIMENSION(:), INTENT(OUT)   :: PGFLX_TWN       ! flux through the ground for town
+REAL, DIMENSION(:), INTENT(OUT)   :: PGFLX_TWN        ! flux through the ground for town
 REAL, DIMENSION(:), INTENT(OUT)   :: PEVAP_TWN        ! evaporation (kg/m2/s)
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_RD ! LW emitted by the road (W/m2 road)
-REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_GD ! LW emitted by the garden (W/m2 garden)
+REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_RD   ! LW emitted by the road (W/m2 road)
+REAL, DIMENSION(:), INTENT(IN)    :: PEMIT_LW_GD   ! LW emitted by the garden (W/m2 garden)
 REAL, DIMENSION(:), INTENT(OUT)   :: PEMIT_LW_GRND ! LW emitted by the ground (road+garden) (W/m2 ground)
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PEMIS_GD  ! garden emissivity
@@ -192,44 +202,12 @@ REAL, DIMENSION(SIZE(PLW_RAD))    :: ZLW_UP            ! upwards radiations
 REAL, DIMENSION(SIZE(T%XROAD)) :: ZQSAT_CAN
 REAL, DIMENSION(SIZE(T%XROAD)) :: ZRD, ZGD
 !
-REAL, DIMENSION(SIZE(T%XROAD)) :: ZRN_GD, ZH_GD, ZLE_GD, ZGFLUX_GD, ZEVAP_GD, ZTSRAD_GD, ZRUNOFF_GD
-REAL, DIMENSION(SIZE(T%XROAD)) :: ZEVAP_GR, ZRUNOFF_GR, ZDRAIN_GR 
-!
 REAL :: ZINTER
 INTEGER :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('AVG_URBAN_FLUXES',0,ZHOOK_HANDLE)
-!
-IF (TOP%LGARDEN) THEN
-  ZRN_GD    (:) = GDD%XRN     (:) 
-  ZH_GD     (:) = GDD%XH      (:)
-  ZLE_GD    (:) = GDD%XLE     (:)
-  ZGFLUX_GD (:) = GDD%XGFLUX  (:)
-  ZEVAP_GD  (:) = GDD%XEVAP   (:)
-  ZTSRAD_GD (:) = GDD%XTSRAD  (:)
-  ZRUNOFF_GD(:) = GDDE%XRUNOFF(:)
-ELSE
-  ZRN_GD    (:) = 0.
-  ZH_GD     (:) = 0.
-  ZLE_GD    (:) = 0.
-  ZGFLUX_GD (:) = 0.
-  ZEVAP_GD  (:) = 0.
-  ZTSRAD_GD (:) = 0.
-  ZRUNOFF_GD(:) = 0.        
-ENDIF
-!
-IF (TOP%LGREENROOF) THEN
-  ZEVAP_GR  (:) = GRD%XEVAP   (:)
-  ZRUNOFF_GR(:) = GRDE%XRUNOFF(:)
-  ZDRAIN_GR (:) = GRDE%XDRAIN (:)
-ELSE
-  ZEVAP_GR  (:) = 0.
-  ZRUNOFF_GR(:) = 0.
-  ZDRAIN_GR (:) = 0.       
-ENDIF
-!
 !
 ZRD(:)=0.
 ZGD(:)=0.
@@ -247,13 +225,13 @@ DO JJ=1,SIZE(T%XROAD)
 !*      1.     Averaged fluxes for ground (green areas + road)
 !              -----------------------------------------------
 !
-  PRN_GRND(JJ)    = ZRD(JJ) * DMT%XRN_ROAD   (JJ) + ZGD(JJ) * ZRN_GD(JJ)
+  PRN_GRND(JJ)    = ZRD(JJ) * DMT%XRN_ROAD   (JJ) + ZGD(JJ) * PRN_GD(JJ)
 !
-  PH_GRND (JJ)    = ZRD(JJ) *  DMT%XH_ROAD   (JJ) + ZGD(JJ) * ZH_GD (JJ) + PH_TRAFFIC (JJ) / (1.-T%XBLD (JJ))
+  PH_GRND (JJ)    = ZRD(JJ) *  DMT%XH_ROAD   (JJ) + ZGD(JJ) * PH_GD (JJ) + PH_TRAFFIC (JJ) / (1.-T%XBLD (JJ))
 !
-  PLE_GRND(JJ)    = ZRD(JJ) * DMT%XLE_ROAD   (JJ) + ZGD(JJ) * ZLE_GD(JJ) + PLE_TRAFFIC(JJ) / (1.-T%XBLD (JJ))
+  PLE_GRND(JJ)    = ZRD(JJ) * DMT%XLE_ROAD   (JJ) + ZGD(JJ) * PLE_GD(JJ) + PLE_TRAFFIC(JJ) / (1.-T%XBLD (JJ))
 !
-  PGFLX_GRND(JJ)  = ZRD(JJ) * DMT%XGFLUX_ROAD(JJ) + ZGD(JJ) * ZGFLUX_GD(JJ)
+  PGFLX_GRND(JJ)  = ZRD(JJ) * DMT%XGFLUX_ROAD(JJ) + ZGD(JJ) * PGFLUX_GD(JJ)
 !
 !
   PEMIT_LW_GRND(JJ) = T%XROAD_O_GRND(JJ) * PEMIT_LW_RD(JJ) + T%XGARDEN_O_GRND(JJ) * PEMIT_LW_GD(JJ)
@@ -265,14 +243,14 @@ DO JJ=1,SIZE(T%XROAD)
   PRN_TWN(JJ)    = PTOTS_O_HORS(JJ) * ( &
                  + PRF_FRAC(JJ) * DMT%XRN_ROOF   (JJ)                  &
                  + PRD_FRAC(JJ) * DMT%XRN_ROAD   (JJ)                  &
-                 + PGD_FRAC(JJ) * ZRN_GD         (JJ)                  &
+                 + PGD_FRAC(JJ) * PRN_GD         (JJ)                  &
                  + PWL_FRAC(JJ) * DMT%XRN_WALL_A (JJ) * 0.5            &
                  + PWL_FRAC(JJ) * DMT%XRN_WALL_B (JJ) * 0.5 )  
 !
   PH_TWN (JJ)    = PTOTS_O_HORS(JJ) * ( &
                  + PRF_FRAC(JJ) * DMT%XH_ROOF   (JJ)                   &
                  + PRD_FRAC(JJ) * DMT%XH_ROAD   (JJ)                   &
-                 + PGD_FRAC(JJ) * ZH_GD         (JJ)                   &
+                 + PGD_FRAC(JJ) * PH_GD         (JJ)                   &
                  + PWL_FRAC(JJ) * DMT%XH_WALL_A (JJ) * 0.5             &
                  + PWL_FRAC(JJ) * DMT%XH_WALL_B (JJ) * 0.5 )           &
                  + PH_TRAFFIC(JJ) + T%XH_INDUSTRY(JJ)  
@@ -280,7 +258,7 @@ DO JJ=1,SIZE(T%XROAD)
   PLE_TWN(JJ)    = PTOTS_O_HORS(JJ) * ( &
                    PRF_FRAC(JJ) * DMT%XLE_ROOF  (JJ)                   &
                  + PRD_FRAC(JJ) * DMT%XLE_ROAD  (JJ)                   &
-                 + PGD_FRAC(JJ) * ZLE_GD        (JJ)                   &
+                 + PGD_FRAC(JJ) * PLE_GD        (JJ)                   &
                  + PWL_FRAC(JJ) * PLE_WL_A(JJ) * 0.5             &
                  + PWL_FRAC(JJ) * PLE_WL_B(JJ) * 0.5 )           &
                  + PLE_TRAFFIC (JJ) + T%XLE_INDUSTRY(JJ)  
@@ -288,7 +266,7 @@ DO JJ=1,SIZE(T%XROAD)
   PGFLX_TWN(JJ)= PTOTS_O_HORS(JJ) * ( &
                   PRF_FRAC(JJ) * DMT%XGFLUX_ROOF  (JJ)                 &
                 + PRD_FRAC(JJ) * DMT%XGFLUX_ROAD  (JJ)                 &
-                + PGD_FRAC(JJ) * ZGFLUX_GD        (JJ)                 &
+                + PGD_FRAC(JJ) * PGFLUX_GD        (JJ)                 &
                 + PWL_FRAC(JJ) * DMT%XGFLUX_WALL_A(JJ) * 0.5           &
                 + PWL_FRAC(JJ) * DMT%XGFLUX_WALL_B(JJ) * 0.5 )   
 !
@@ -324,7 +302,7 @@ DO JJ=1,SIZE(T%XROAD)
 !
     PEMIS_TWN(JJ) = T%XBLD       (JJ) * (1.-T%XGREENROOF(JJ)) * PDF_RF(JJ) * T%XEMIS_ROOF(JJ) * (1.-TPN%XFRAC_PANEL(JJ)) &
                   + T%XBLD       (JJ) * (1.-T%XGREENROOF(JJ)) * PDN_RF(JJ) * PESN_RF     (JJ) * (1.-TPN%XFRAC_PANEL(JJ)) &
-                  + T%XBLD       (JJ) *     T%XGREENROOF(JJ)               * PEMIS_GRF   (JJ) * (1.-TPN%XFRAC_PANEL(JJ)) &
+                  + T%XBLD       (JJ) *     T%XGREENROOF(JJ)               * PEMIS_GR    (JJ) * (1.-TPN%XFRAC_PANEL(JJ)) &
                   + T%XBLD       (JJ)                                   * TPN%XEMIS_PANEL(JJ) *      TPN%XFRAC_PANEL(JJ) &
                   + T%XROAD      (JJ) * ( T%XSVF_ROAD(JJ)     * PDF_RD(JJ) * T%XEMIS_ROAD(JJ)                       &
                                       +   T%XSVF_ROAD(JJ)     * PDN_RD(JJ) * T%TSNOW_ROAD%EMIS(JJ))                 &
@@ -344,10 +322,10 @@ DO JJ=1,SIZE(T%XROAD)
   PEVAP_TWN(JJ) = PTOTS_O_HORS(JJ)*(                                                             &
                    PRF_FRAC  (JJ) * PDF_RF(JJ) * (1.-T%XGREENROOF(JJ)) * PLEW_RF   (JJ) / XLVTT  &
                  + PRF_FRAC  (JJ) * PDN_RF(JJ) * (1.-T%XGREENROOF(JJ)) * PLESN_RF  (JJ) / XLSTT  &
-                 + PRF_FRAC  (JJ)              *     T%XGREENROOF(JJ)  * ZEVAP_GR  (JJ)          &
+                 + PRF_FRAC  (JJ)              *     T%XGREENROOF(JJ)  * PEVAP_GR  (JJ)          &
                  + PRD_FRAC  (JJ) * PDF_RD(JJ)                         * PLEW_RD   (JJ) / XLVTT  &
                  + PRD_FRAC  (JJ) * PDN_RD(JJ)                         * PLESN_RD  (JJ) / XLSTT  &
-                 + PGD_FRAC  (JJ)                                      * ZEVAP_GD  (JJ)          &
+                 + PGD_FRAC  (JJ)                                      * PEVAP_GD  (JJ)          &
                  + PWL_FRAC  (JJ) * 0.5                 * (PLE_WL_A(JJ) + PLE_WL_B(JJ)) / XLVTT )&
                  +                                                     PLE_TRAFFIC (JJ) / XLVTT  &
                  +                                                   T%XLE_INDUSTRY(JJ) / XLVTT
@@ -361,9 +339,9 @@ DO JJ=1,SIZE(T%XROAD)
 !              -----------------------------------
 !
   DMT%XRUNOFF_TOWN(JJ) =  ((1.-T%XGREENROOF(JJ))* DMT%XRUNOFF_STRLROOF (JJ)                  &
-                      +   T%XGREENROOF(JJ) *(ZRUNOFF_GR(JJ) + ZDRAIN_GR(JJ))) * T%XBLD(JJ)   &
+                      +   T%XGREENROOF(JJ) *(PRUNOFF_GR(JJ) + PDRAIN_GR(JJ))) * T%XBLD(JJ)   &
                       +    T%XROAD    (JJ) * DMT%XRUNOFF_ROAD(JJ)                            &
-                      +    T%XGARDEN  (JJ) * ZRUNOFF_GD(JJ)                 
+                      +    T%XGARDEN  (JJ) * PRUNOFF_GD(JJ)                 
 !-------------------------------------------------------------------------------
 !
 !*      6.    Air canyon temperature at time t+dt
@@ -380,9 +358,7 @@ DO JJ=1,SIZE(T%XROAD)
                    + PHSN_RD(JJ) * PDN_RD(JJ)                           / PRHOA(JJ) / XCPD  ) &
                                             / ZINTER  
 !
-    IF (SIZE(ZTSRAD_GD)>0) THEN
-      PT_CAN(JJ) = PT_CAN(JJ) + ( ZTSRAD_GD(JJ) * PAC_GD(JJ) * ZGD(JJ) ) / ZINTER
-    ENDIF
+    PT_CAN(JJ) = PT_CAN(JJ) + ( PTSRAD_GD(JJ) * PAC_GD(JJ) * ZGD(JJ) ) / ZINTER
     !
     IF (TOP%CBEM=="BEM") THEN
       PT_CAN(JJ) = PT_CAN(JJ) + (DMT%XH_WASTE(JJ) * B%XF_WASTE_CAN(JJ) / (1-T%XBLD(JJ)) / PRHOA(JJ) / XCPD) / ZINTER

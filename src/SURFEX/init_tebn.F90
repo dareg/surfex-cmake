@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #############################################################
       SUBROUTINE INIT_TEB_n (DTCO, UG, U, GCP, CHT, DTT, SB, TG, TOP, TPN,    &
-                             NT, TD, BDD, BOP, DTB, NB, GDM, GRM,             &
+                             TIR, NT, TD, BDD, BOP, DTB, NB, GDM, GRM,        &
                              HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,        &
                              PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,      &
                              PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,  &
@@ -56,6 +56,7 @@ USE MODD_CANOPY_n, ONLY: CANOPY_t
 USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 USE MODD_TEB_n, ONLY : TEB_NP_t
 USE MODD_SURFEX_n, ONLY : TEB_DIAG_t, TEB_VEG_DIAG_t, TEB_GARDEN_MODEL_t, TEB_GREENROOF_MODEL_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
@@ -135,6 +136,7 @@ TYPE(CANOPY_t), INTENT(INOUT) :: SB
 TYPE(GRID_t), INTENT(INOUT) :: TG
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(TEB_NP_t), INTENT(INOUT) :: NT
 !
 TYPE(TEB_DIAG_t), INTENT(INOUT) :: TD
@@ -468,7 +470,7 @@ END DO ! end of loop on TEB patches
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
  CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'TOWN  ','TEB   ','READ ')     
- CALL READ_PGD_TEB_IRRIG_n(TG, GDM%TIR, HPROGRAM)
+ CALL READ_PGD_TEB_IRRIG_n(TG, TIR, HPROGRAM)
  CALL END_IO_SURF_n(HPROGRAM)
 !
 !-------------------------------------------------------------------------------

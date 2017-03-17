@@ -3,14 +3,15 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !   ##########################################################################
-    SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DMT, GRD, GRDE, HIMPLICIT_WIND, PTSUN,        &
+    SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DMT, HIMPLICIT_WIND, PTSUN,                   &
                      PT_CANYON, PQ_CANYON, PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,  &
                      PZ_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPEW_A_COEF_LOWCAN,           &
                      PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA,       &
                      PLW_RAD, PRR, PSR, PZREF, PUREF, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,   &
                      PTSTEP, PDF_RF, PDN_RF, PDF_RD, PDN_RD, PQSAT_RF, PQSAT_RD,        &
                      PDELT_RF, PDELT_RD, PTS_GARDEN, PLEW_RF, PUW_GR, PLEW_RD, PLE_WL_A,&
-                     PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRNSN_RD,&
+                     PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRN_GR, &
+                     PH_GR, PLE_GR, PGFLUX_GR, PDRAIN_GR, PRUNOFF_GR, PRNSN_RD,    &
                      PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, PUW_RD, PUW_RF, PDUWDU_RD,   &
                      PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN,     &
                      PAC_RF, PAC_RD, PAC_WL, PAC_TOP, PAC_GARDEN, PAC_RF_WAT,           &
@@ -221,8 +222,6 @@ TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
-TYPE(DIAG_t), INTENT(INOUT) :: GRD
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: GRDE
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -296,7 +295,15 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PUW_RD     ! Momentum flux for roads
 REAL, DIMENSION(:), INTENT(OUT)   :: PUW_RF     ! Momentum flux for roofs
 REAL, DIMENSION(:), INTENT(OUT)   :: PDUWDU_RD  !
 REAL, DIMENSION(:), INTENT(OUT)   :: PDUWDU_RF  !
-REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR_TWN  ! friciton velocity over town
+REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR_TWN ! friciton velocity over town
+!
+REAL, DIMENSION(:), INTENT(IN)    :: PRN_GR     ! net radiation over greenroof
+REAL, DIMENSION(:), INTENT(IN)    :: PH_GR      ! sensible heat flux over greenroof
+REAL, DIMENSION(:), INTENT(IN)    :: PLE_GR     ! latent heat flux over greenroof
+REAL, DIMENSION(:), INTENT(IN)    :: PGFLUX_GR  ! flux through the greenroof
+REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFF_GR ! runoff over green roofs
+REAL, DIMENSION(:), INTENT(IN)    :: PDRAIN_GR  ! outlet drainage at base of green roofs
+!
 REAL, DIMENSION(:), INTENT(OUT)   :: PCD          ! town averaged drag coefficient
 REAL, DIMENSION(:), INTENT(OUT)   :: PCDN         ! town averaged neutral drag coefficient
 REAL, DIMENSION(:), INTENT(OUT)   :: PCH_TWN     ! town averaged heat transfer
@@ -677,13 +684,14 @@ END SELECT
 !*      10.    Fluxes over built surfaces
 !              --------------------------
 !
- CALL URBAN_FLUXES   (TOP, T, B, DMT, GRD, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF, &
+ CALL URBAN_FLUXES   (TOP, T, B, DMT, HIMPLICIT_WIND, PT_CANYON, PPEW_A_COEF, PPEW_B_COEF,      &
                       PEXNS, PRHOA, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,PAC_WL, PCD, PDF_RF,         &
                       PDN_RF, PDF_RD, PDN_RD, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF,             &
                       PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RF, ZDQS_RF, PMELT_RD,        &
                       ZDQS_RD, ZDQS_WL_A, ZDQS_WL_B, ZFLX_BLD_RF, ZFLX_BLD_WL_A,                &
                       ZFLX_BLD_WL_B, ZFLX_BLD_FL, ZFLX_BLD_MA, PE_SHADING, PLEW_RF,             &
-                      PLEW_RD, PLE_WL_A, PLE_WL_B, ZMELT_BLT, PUSTAR_TWN      )
+                      PRN_GR, PH_GR, PLE_GR, PGFLUX_GR,                                         &
+                      PLEW_RD, PLE_WL_A, PLE_WL_B, ZMELT_BLT, PUSTAR_TWN                        )
 !
 !
 ! Water transfer from snow reservoir to water reservoir in case of snow melt
@@ -707,7 +715,7 @@ ENDWHERE
 !
 IF (TOP%LGREENROOF) THEN
   DMT%XRUNOFF_ROOF(:) =  (1.-T%XGREENROOF(:)) * DMT%XRUNOFF_STRLROOF(:) &
-                        + T%XGREENROOF(:) * (GRDE%XRUNOFF(:) + GRDE%XDRAIN(:))
+                        + T%XGREENROOF(:) * (PRUNOFF_GR(:) + PDRAIN_GR(:))
 ELSE
   DMT%XRUNOFF_ROOF(:) =  DMT%XRUNOFF_STRLROOF(:)
 ENDIF                                                      

@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE TEB_GARDEN (DTCO, G, TOP, T, BOP, B, TPN, DMT, GDM, GRM, KTEB_P,                   &
+    SUBROUTINE TEB_GARDEN (DTCO, G, TOP, T, BOP, B, TPN, TIR, DMT, GDM, GRM, KTEB_P,              &
                            HIMPLICIT_WIND, PTSUN, PT_CAN, PQ_CAN, PU_CAN, PT_LOWCAN, PQ_LOWCAN,   &
                            PU_LOWCAN, PZ_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPEW_A_COEF_LOWCAN,    &
                            PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA, PCO2,     &
@@ -64,6 +64,7 @@ USE MODD_TEB_n, ONLY : TEB_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_TEB_PANEL_n, ONLY : TEB_PANEL_t
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 !
 USE MODD_DIAG_n, ONLY : DIAG_t
@@ -108,12 +109,13 @@ TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(BEM_t), INTENT(INOUT) :: B
 TYPE(TEB_PANEL_t), INTENT(INOUT) :: TPN
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
 !
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !
-INTEGER, INTENT(IN) :: KTEB_P
+INTEGER, INTENT(IN) :: KTEB_P                             ! TEB current patch number 
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND       ! wind implicitation option
 !                                                         ! 'OLD' = direct
@@ -376,7 +378,7 @@ REAL, DIMENSION(SIZE(PTA)) :: ZMTC_O_GR_R1        ! mean thermal conductivity ov
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GD       ! CO2 fluxes (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_GD     ! LW flux emitted by the garden (W/m2 garden)
-REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GRF    ! CO2 fluxes over greenroofs (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(SIZE(PTA)) :: ZSFCO2_GRF      ! CO2 fluxes over greenroofs (m/s*kg_CO2/kg_air)
 !
 ! fluxes from built surfaces
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_RD       ! LW flux emitted by the road (W/m2 road)
@@ -386,13 +388,15 @@ REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWDN_PANEL    ! LW flux emitted DOWNWARDS by
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LWUP_PANEL    ! LW flux emitted UPWARDS   by the solar panel (W/m2 panel)
 REAL, DIMENSION(SIZE(PTA)) :: ZEMIT_LW_RF       ! LW flux emitted UPWARDS   by the roof        (W/m2 roof )
 !
+REAL, DIMENSION(SIZE(PTA)) :: ZRN_GD, ZH_GD, ZLE_GD, ZGFLUX_GD, ZEVAP_GD, ZTSRAD_GD, ZRUNOFF_GD
+REAL, DIMENSIOn(SIZE(PTA)) :: ZRN_GR, ZH_GR, ZLE_GR, ZGFLUX_GR
+REAL, DIMENSION(SIZE(PTA)) :: ZEVAP_GR, ZRUNOFF_GR, ZDRAIN_GR 
+!
 !new local variables for shading
 REAL, DIMENSION(SIZE(PTA)) :: ZE_SHADING          ! energy not ref., nor absorbed, nor
                                                   ! trans. by glazing [Wm-2(win)]
 LOGICAL, DIMENSION(SIZE(PTA)) :: GSHADE           ! describes if one encounters the
 !                                                 ! conditions to close windows
-!                                              
-!
 INTEGER :: JJ
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -662,7 +666,7 @@ ZPEQ_B_COEF(:) = PQ_LOWCAN(:)
 !
 IF (TOP%LGARDEN) THEN
 !
-  CALL GARDEN(DTCO, G, T, TOP, GDM%TIR, GDM%DTV, GDM%GB, GDDK, GDDEK, GDDMK,            &
+  CALL GARDEN(DTCO, G, T, TOP, TIR, GDM%DTV, GDM%GB, GDDK, GDDEK, GDDMK,            &
               GDM%O, GDM%S, GDM%K, GDM%P, GDM%NPE%AL(KTEB_P),                           &
               HIMPLICIT_WIND, TOP%TTIME, PTSUN, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, &
               ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF, PTSTEP, PZ_LOWCAN,    &
@@ -674,7 +678,7 @@ IF (TOP%LGARDEN) THEN
   PAC_GD_WAT(:) = PAC_GD(:)
   DMT%XABS_SW_GARDEN(:) = (1.-ZALB_GD(:)) * ZREC_SW_GD
   DMT%XABS_LW_GARDEN(:) = ZEMIS_GD(:) * ZREC_LW_GD(:) - XSTEFAN * ZEMIS_GD(:) * GDDK%XTSRAD(:)**4 
-  ZEMIT_LW_GD(:) = XSTEFAN * GDDK%XTSRAD(:)**4 + (1 - ZEMIS_GD(:)) / ZEMIS_GD(:) * DMT%XABS_LW_GARDEN(:)   
+  ZEMIT_LW_GD(:) = XSTEFAN * GDDK%XTSRAD(:)**4 + (1 - ZEMIS_GD(:)) / ZEMIS_GD(:) * DMT%XABS_LW_GARDEN(:)
 
 ELSE
   !
@@ -699,7 +703,7 @@ ENDIF
 !
 IF (TOP%LGREENROOF) THEN
   !
-  CALL GREENROOF(DTCO, G, T, TOP, GDM%TIR, GRM%DTV, GRM%GB, GRDK, GRDEK,              &
+  CALL GREENROOF(DTCO, G, T, TOP, TIR, GRM%DTV, GRM%GB, GRDK, GRDEK,              &
                  GRDMK, GRM%O, GRM%S, GRM%K, GRM%P, GRM%NPE%AL(KTEB_P),               &
                  HIMPLICIT_WIND, TOP%TTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,          &
                  ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF, PTSTEP, PZREF,   &
@@ -735,19 +739,56 @@ END SUBROUTINE TEB_GARDEN2
 !-------------------------------------------------------------------------------
 SUBROUTINE TEB_GARDEN3
 !
+IF (TOP%LGARDEN) THEN
+  ZRN_GD    (:) = GDDK%XRN     (:) 
+  ZH_GD     (:) = GDDK%XH      (:)
+  ZLE_GD    (:) = GDDK%XLE     (:)
+  ZGFLUX_GD (:) = GDDK%XGFLUX  (:)
+  ZEVAP_GD  (:) = GDDK%XEVAP   (:)
+  ZTSRAD_GD (:) = GDDK%XTSRAD  (:)
+  ZRUNOFF_GD(:) = GDDEK%XRUNOFF(:)
+ELSE
+  ZRN_GD    (:) = 0.
+  ZH_GD     (:) = 0.
+  ZLE_GD    (:) = 0.
+  ZGFLUX_GD (:) = 0.
+  ZEVAP_GD  (:) = 0.
+  ZTSRAD_GD (:) = 0.
+  ZRUNOFF_GD(:) = 0.        
+ENDIF
+!
+IF (TOP%LGREENROOF) THEN
+  ZRN_GR    (:) = GRDK%XRN(:)
+  ZH_GR     (:) = GRDK%XH (:)
+  ZLE_GR    (:) = GRDK%XLE(:)
+  ZGFLUX_GR (:) = GRDK%XGFLUX(:)
+  ZEVAP_GR  (:) = GRDK%XEVAP   (:)
+  ZRUNOFF_GR(:) = GRDEK%XRUNOFF(:)
+  ZDRAIN_GR (:) = GRDEK%XDRAIN (:)
+ELSE
+  ZRN_GR    (:) = 0.
+  ZH_GR     (:) = 0.
+  ZLE_GR    (:) = 0.
+  ZGFLUX_GR (:) = 0.
+  ZEVAP_GR  (:) = 0.
+  ZRUNOFF_GR(:) = 0.
+  ZDRAIN_GR (:) = 0.  
+ENDIF
+!
 !*     9.      Treatment of built covers
 !              -------------------------
 !
-  CALL TEB  (TOP, T, BOP, B, GDM%TIR, DMT, GRDK, GRDEK, HIMPLICIT_WIND,            &
+  CALL TEB  (TOP, T, BOP, B, TIR, DMT, HIMPLICIT_WIND,                             &
              PTSUN, PT_CAN, PQ_CAN, PU_CAN, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,       &
              PZ_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPEW_A_COEF_LOWCAN,              &
              PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA, PLW_RAD, &
              PRR, PSR, PZREF, PUREF, PVMOD, PH_TRAFFIC, PLE_TRAFFIC, PTSTEP,       &
              ZDF_RF, ZDN_RF, ZDF_RD, ZDN_RD, ZQSAT_RF, ZQSAT_RD, ZDELT_RF,         &
-             ZDELT_RD, GDDK%XTSRAD, PLEW_RF, ZUW_GRF, PLEW_RD, PLE_WL_A,           &
-             PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRNSN_RD,   &
-             PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, ZUW_RD, PUW_RF, ZDUWDU_RD,      &
-             PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN,        &
+             ZDELT_RD, ZTSRAD_GD, PLEW_RF, ZUW_GRF, PLEW_RD, PLE_WL_A,             &
+             PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF,             &
+             ZRN_GR, ZH_GR, ZLE_GR, ZGFLUX_GR, ZDRAIN_GR, ZRUNOFF_GR,              &
+             PRNSN_RD, PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, ZUW_RD, PUW_RF,       &
+             ZDUWDU_RD, PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN, &
              ZAC_RF, PAC_RD, ZAC_WL, ZAC_TOP, PAC_GD, ZAC_RF_WAT, PAC_RD_WAT,      &
              ZLW_WA_TO_WB, ZLW_WA_TO_R, ZLW_WB_TO_R, ZLW_WA_TO_NR, ZLW_WB_TO_NR,   &
              ZLW_R_TO_WA, ZLW_R_TO_WB, ZLW_G_TO_WA, ZLW_G_TO_WB, ZLW_S_TO_WA,      &
@@ -783,7 +824,7 @@ END IF
 !*     11.     Aggregation
 !              -----------
 !
- CALL AVG_URBAN_FLUXES(TOP, T, B, TPN, DMT, GDDK, GDDEK, GRDK, GRDEK,                     &
+ CALL AVG_URBAN_FLUXES(TOP, T, B, TPN, DMT,                                               &
                        PTS_TWN, PEMIS_TWN, PT_CAN, PQ_CAN, PT_LOWCAN, PQ_LOWCAN,          &
                        ZTA, ZQA, PRHOA, PPS, PH_TRAFFIC,  PLE_TRAFFIC, ZWL_O_GRND,        &
                        ZESN_RF, ZEMIS_GRF, PLW_RAD,  ZAC_RF, ZAC_RF_WAT, ZAC_WL, PAC_RD,  &
@@ -791,6 +832,8 @@ END IF
                        ZQSAT_RF, ZQSAT_RD, ZDELT_RF, ZDELT_RD, ZRF_FRAC, ZWL_FRAC,        &
                        ZRD_FRAC, ZGD_FRAC, ZTOTS_O_HORS, ZDF_RF, ZDN_RF, ZDF_RD, ZDN_RD,  &
                        PLE_WL_A, PLE_WL_B, PLEW_RF, PLESN_RF, PLEW_RD, PLESN_RD, PHSN_RD, &
+                       ZTSRAD_GD, ZRN_GD, ZH_GD, ZLE_GD, ZGFLUX_GD, ZEVAP_GD,             &
+                       ZRUNOFF_GD, ZEVAP_GR, ZRUNOFF_GR, ZDRAIN_GR,                       &
                        PRN_GRND, PH_GRND, PLE_GRND, PGFLX_GRND, PRN_TWN, PH_TWN, PLE_TWN, &
                        PGFLX_TWN, PEVAP_TWN, ZEMIT_LW_RD,ZEMIT_LW_GD, PEMIT_LW_GRND, ZEMIS_GD )
 !

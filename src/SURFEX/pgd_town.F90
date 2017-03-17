@@ -90,7 +90,7 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
   RETURN
 ELSE IF (U%CTOWN=='TEB   ') THEN
   CALL PGD_TEB(DTCO, UG, U, USS, TM%TOP, TM%BOP, TM%G, TM%BDD, TM%DTT, TM%DTB, &
-                          GDM%O, GDM%K, GDM%DTV, GDM%TIR, &
+                          GDM%O, GDM%K, GDM%DTV, TM%TIR, &
                           GRM%O, GRM%S, GRM%K, GRM%DTV, HPROGRAM)
 END IF
 IF (LHOOK) CALL DR_HOOK('PGD_TOWN',1,ZHOOK_HANDLE)

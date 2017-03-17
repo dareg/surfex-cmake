@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_n (HSELECT, TOP, BOP, G, BDD, DTB, DTT, T, GDM, GRM, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_n (HSELECT, TOP, BOP, G, BDD, DTB, DTT, T, TIR, GDM, GRM, HPROGRAM)
 !     ###############################################
 !
 !!****  *WRITE_PGD_TEB_n* - writes TEB fields
@@ -47,6 +47,7 @@ USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 USE MODD_DATA_BEM_n, ONLY : DATA_BEM_t
 USE MODD_DATA_TEB_n, ONLY : DATA_TEB_t
+USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 USE MODD_TEB_n, ONLY : TEB_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -76,6 +77,7 @@ TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 TYPE(DATA_TEB_t), INTENT(INOUT) :: DTT
+TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(TEB_t), INTENT(INOUT) :: T
 !
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
@@ -242,7 +244,7 @@ YCOMMENT='ZS'
 !
 !-------------------------------------------------------------------------------
  CALL WRITESURF_PGD_TEB_PAR_n(BDD, DTB, GDM%DTV, GRM%DTV, DTT, HSELECT, GDM%O, &
-                              GRM%O, GRM%S, GRM%K, GDM%TIR, TOP, HPROGRAM)
+                              GRM%O, GRM%S, GRM%K, TIR, TOP, HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
