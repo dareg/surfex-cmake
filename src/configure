@@ -15,7 +15,7 @@ export VERSION_CDF=${VERSION_CDF:-"4.4.1"}
 export VERSION_CDFF=${VERSION_CDFF:-"4.4.4"}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI:-"1.17.0"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
-export VERSION_XIOS=${VERSION_XIOS:-"trunk-986"}
+export VERSION_XIOS=${VERSION_XIOS:-"trunk-1078"}
 export SFX_INT=${SFX_INT-"I4"}
 #
 export NEED_TOOLS=NO
@@ -411,11 +411,11 @@ if [ "x${VER_MPI}" = "xNOMPI" ] ; then
   export VER_DRHOOK=MINI
 fi
 #
+LIB_PATH= 
+#
 if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
   export LIB_PATH=$LOCAL/src/LIB/netcdf4/netcdf-fortran-${VERSION_CDFF}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/netcdf-${VERSION_CDF}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/hdf5-${VERSION_HDF5}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/szip-${VERSION_SZIP}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/zlib-${VERSION_ZLIB}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/curl-${VERSION_CURL}-${ARCH}-${VER_MPI}/lib
 #
-else
-  export LIB_PATH=
 fi
 #
 # Generate profile_surfex
@@ -481,6 +481,7 @@ fi
 if [ "x${VER_GRIBAPI}" = "xGRIBAPI_AUTO" ] ; then
 if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}-Source" ] ; then
   ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}-Source.tar.gz )
+  export LIB_PATH=$LOCAL/src/LIB/grib_api-${VERSION_GRIBAPI}-Source-${ARCH}/lib
 fi
 fi
 #
