@@ -83,7 +83,7 @@ FX90FLAGS = $(FCFLAGS_OMP) $(OPT)
 # -132 
 #
 #LDFLAGS    =  -Wl,-noinhibit-exec  -Wl,-warn-once $(PAR)
-LDFLAGS    =  $(FCFLAGS_OMP) -Wl,-warn-once $(PAR)
+LDFLAGS    =  $(FCFLAGS_OMP) -Wl,-warn-once $(PAR) -ldl -lrt
 #
 CFLAGS = $(CFLAGS_OMP) -DLINUX -DLITTLE_ENDIAN -DLITTLE -O3 -xAVX -vec-report3  -DPOINTER_64
 #

@@ -74,7 +74,7 @@ F77FLAGS      = $(FCFLAGS_OMP) $(OPT)
 FX90 = $(F90)
 FX90FLAGS     = $(FCFLAGS_OMP) $(OPT)
 #
-LDFLAGS   =  $(FCFLAGS_OMP) -Wl,-warn-once
+LDFLAGS   =  $(FCFLAGS_OMP) -Wl,-warn-once -ldl -lrt
 #
 # preprocessing flags
 #

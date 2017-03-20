@@ -202,7 +202,7 @@ FPPFLAGS_HOOK += -DLINUX
 CPPFLAGS_HOOK += -DLINUX
 
 OBJS_LISTE_MASTER += drhook.o crc.o addrdiff.o cargs.o endian.o env.o linuxtrbk.o
-OBJS_LISTE_MASTER += gethwm.o getstatm.o getrss.o getstk.o getpag.o getstackusage.o getcurheap.o
+OBJS_LISTE_MASTER += gethwm.o getmaxrss.o getstatm.o getrss.o getstk.o getpag.o getstackusage.o getcurheap.o
 
 #RJ: optional MPL layer support in DRHOOK for testing compatibility only!
 ifneq "$(VER_MPI)" "NOMPI"
@@ -217,12 +217,12 @@ endif
 ifeq "$(VER_DRHOOK)" "SIMPLE"
 DIR_HOOK = LIB/DRHOOK_SIMPLE
 INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
-FPPFLAGS_HOOK += -DLINUX 
-CPPFLAGS_HOOK += -DLINUX 
+FPPFLAGS_HOOK += -DLINUX -DSFX_MPL 
+CPPFLAGS_HOOK += -DLINUX -DSFX_MPL
 
-OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o getcurheap.o 
-OBJS_LISTE_MASTER += gethwm.o getpag.o getrss.o  getstackusage.o getstatm.o getstk.o 
-OBJS_LISTE_MASTER += linuxtrbk.o mpe_locking.o
+OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o fnecsx.o getcurheap.o 
+OBJS_LISTE_MASTER += gethwm.o getmaxrss.o getpag.o getrss.o getstackusage.o getstatm.o getstk.o 
+OBJS_LISTE_MASTER += linux_bind.o linuxtrbk.o mpe_locking.o
 endif
 #
 ifdef DIR_HOOK
