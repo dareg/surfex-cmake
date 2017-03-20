@@ -57,7 +57,7 @@ MODULE MPL_WRITE_MOD
 !     Modifications.
 !     --------------
 !        Original : 2000-12-08 (Based on MPE_WRITE)
-!
+!        R. EL Khatib 24-May-2011 Change ifdef MPI2 into ifndef MPI1
 !     -----------------------------------------------------------------
 !
 USE PARKIND1  ,ONLY : JPIM     ,JPRB     ,JPRM
@@ -73,6 +73,7 @@ INTERFACE MPL_WRITE
 MODULE PROCEDURE MPL_WRITE_INT,MPL_WRITE_REAL8
 END INTERFACE
 
+PRIVATE
 PUBLIC MPL_WRITE
 
 CONTAINS
@@ -81,7 +82,7 @@ SUBROUTINE MPL_WRITE_INT(KFPTR,KOP,KBUF,KLEN,KREQ,KERROR)
 
 
 #ifdef USE_8_BYTE_WORDS
-  Use mpi4to8, Only : &
+  USE MPI4TO8, ONLY : &
     MPI_FILE_WRITE_SHARED => MPI_FILE_WRITE_SHARED8, &
     MPI_FILE_WRITE_ORDERED => MPI_FILE_WRITE_ORDERED8, &
     MPI_FILE_IWRITE_SHARED => MPI_FILE_IWRITE_SHARED8, &
@@ -96,9 +97,9 @@ INTEGER(KIND=JPIM) KBUF(:)
 INTEGER(KIND=JPIM) KREQ
 
 
-INTEGER(KIND=JPIM) status(MPI_STATUS_SIZE)
+INTEGER(KIND=JPIM) STATUS(MPI_STATUS_SIZE)
 !
-#ifdef MPI2
+#ifndef MPI1
 
 !     -----------------------------------------------------------------
 !
@@ -201,7 +202,7 @@ SUBROUTINE MPL_WRITE_REAL8(KFPTR,KOP,PBUF,KLEN,KREQ,KERROR)
 
 
 #ifdef USE_8_BYTE_WORDS
-  Use mpi4to8, Only : &
+  USE MPI4TO8, ONLY : &
     MPI_FILE_WRITE_SHARED => MPI_FILE_WRITE_SHARED8, &
     MPI_FILE_WRITE_ORDERED => MPI_FILE_WRITE_ORDERED8, &
     MPI_FILE_IWRITE_SHARED => MPI_FILE_IWRITE_SHARED8, &
@@ -216,9 +217,9 @@ REAL(KIND=JPRM) PBUF(:)
 INTEGER(KIND=JPIM) KREQ
 
 
-INTEGER(KIND=JPIM) status(MPI_STATUS_SIZE)
+INTEGER(KIND=JPIM) STATUS(MPI_STATUS_SIZE)
 !
-#ifdef MPI2
+#ifndef MPI1
 
 !     -----------------------------------------------------------------
 !

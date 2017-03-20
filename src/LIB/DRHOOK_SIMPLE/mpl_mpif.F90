@@ -1,5 +1,3 @@
 MODULE MPL_MPIF
-#ifdef SFX_MPI
-include "mpif.h"
-#endif
+#include "mpif.h"
 END MODULE MPL_MPIF

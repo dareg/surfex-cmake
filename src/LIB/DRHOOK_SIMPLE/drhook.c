@@ -1,4 +1,3 @@
-
 #define _DRHOOK_C_   1
 
 /* 
@@ -30,7 +29,25 @@ If *ALSO* intending to run on IBM P5+ systems, then set also BOTH
 #define PMAPI_P5_PLUS
 */
 
-#if defined(PMAPI_P5_PLUS)
+/* Thanks to John Hague (IBM) 
+ If intending to run on IBM p6 systems, then set also BOTH
+#define PMAPI_POST_P4
+#define PMAPI_P6
+ */
+
+#ifndef INTEL
+#ifdef __INTEL_COMPILER
+#define INTEL
+#endif
+#endif
+
+#if defined(PMAPI_P7)
+#define ENTRY_4 5
+#define ENTRY_6 4
+#elif defined(PMAPI_P6)
+#define ENTRY_4 5
+#define ENTRY_6 4
+#elif defined(PMAPI_P5_PLUS)
 #define ENTRY_4 5
 #define ENTRY_6 4
 #else
@@ -46,29 +63,53 @@ If *ALSO* intending to run on IBM P5+ systems, then set also BOTH
 
 #ifdef RS6K
 #pragma options opt=3 halt=e
+#include <pthread.h>
 #endif
 
 /* === This doesn't handle recursive calls correctly (yet) === */
 
 #include "drhook.h"
+
+static void set_timed_kill();
+static void process_options();
+static char *TimeStr(char *s, int slen);
+
+int drhook_memtrace = 0; /* set to 1, if opt_memprof or opt_timeline ; used in getcurheap.c to lock stuff */
+
+#if !defined(CACHELINESIZE)
+/* ***Note: A hardcoded cache line size in bytes !!! */
+#ifdef RS6K
+#define CACHELINESIZE 128
+#else
+#define CACHELINESIZE 64
+#endif
+#endif
+
 #include "crc.h"
 #include <time.h>
 
 static char *start_stamp = NULL;
 static char *end_stamp = NULL;
-#ifdef VPP
-#include <ucontext.h>
+
+#if defined(NECSX)
+#pragma cdir options -Nv -Csopt
+extern void necsx_trbk_(const char *msg, int msglen); /* from ../utilities/gentrbk.F90 */
 #endif
 
 #if defined(LINUX) && !defined(XT3) && !defined(XD1) && !defined(CYGWIN)
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(NO_TRAPFPE)
 
 #define _GNU_SOURCE 1
 #if defined(CYGWIN)
 #include <mingw/fenv.h>
 #else
 #include <fenv.h>
+#endif
+#if defined(DARWIN)
+  /*  A temporary fix to link on MacIntosh. Something more clever will be done later -REK. */
+void feenableexcept() { }
+void fedisableexcept() { }
 #endif
 
 static void trapfpe(void)
@@ -87,11 +128,23 @@ static void untrapfpe(void)
 
 #endif /* defined(LINUX) && !defined(XT3) && !defined(XD1) */
 
-#if (!defined(LINUX) || defined(CYGWIN)) && defined(__GNUC__)
+#if (!defined(LINUX) || defined(CYGWIN) || defined(NO_TRAPFPE)) && defined(__GNUC__)
 /* For example Solaris with gcc */
 #define trapfpe()
 #define untrapfpe()
 #endif
+
+#ifndef drhook_harakiri_timeout_default
+#define drhook_harakiri_timeout_default 500
+#endif
+
+static int drhook_harakiri_timeout = drhook_harakiri_timeout_default;
+static int drhook_trapfpe = 1;
+
+static int atp_enabled = 0; /* Cray ATP specific */
+static int atp_max_cores = 20; /* Cray ATP specific */
+static int atp_max_analysis_time = 300; /* Cray ATP specific */
+static int atp_ignore_sigterm = 0; /* Cray ATP specific */
 
 static int any_memstat = 0;
 static int opt_gethwm = 0;
@@ -117,18 +170,44 @@ static int opt_callpath = 0;
 static int callpath_indent = callpath_indent_default;
 #define callpath_depth_default 50
 static int callpath_depth = callpath_depth_default;
+static int callpath_packed = 0;
 
 static int opt_calltrace = 0;
+static int opt_funcenter = 0;
+static int opt_funcexit = 0;
 
-static int opt_timeline = 0; /* myproc or -1 [or 0 for --> timeline feature off] */
+static int opt_timeline = 0; /* myproc or -1 [or 0 for --> timeline feature off (default)] */
 static int opt_timeline_thread = 1; /* thread-id control : 
-				       0 for all threads; thread-wise values, 
-				       1 -> #1 only [but curheap still global] (default), 
+				    <= 0 print for all threads
+				       1 -> #1 only [but curheap still SUM of all threads] (default), 
 				       n -> print for increasing number of threads separately : [1..n] */
 static int opt_timeline_format = 1; /* if 1, print only {wall,hwm,rss,curheap} w/o labels "wall=" etc.; else fully expanded fmt */
 static int opt_timeline_unitno = 6; /* Fortran unit number : default = 6 i.e. stdout */
-static int opt_timeline_freq = 100; /* How often to print : every n-th call : default = every 100th call */
-static unsigned long long int *timeline_calls = NULL;
+static long long int opt_timeline_freq = 1000000; /* How often to print : every n-th call : default = every 10^6 th call or ... */
+static double opt_timeline_MB = 1.0; /* ... rss or curheap jumps up/down by more than this many MBytes (default = 1) : unit MBytes */
+
+static volatile sig_atomic_t opt_gencore = 0;
+static int opt_gencore_signal = 0;
+
+static int hpm_grp = 0;
+static int opt_random_memstat = 0; /* > 0 if to obtain random memory stats (maxhwm, maxstk) for tid=1. Updated when rand() % opt_random_memstat == 0 */
+
+/* Begin of developer options */
+static char *drhook_timed_kill = NULL; /* Timer assisted simulated kill of procs/threads by signal */
+static int drhook_dump_smaps = 0; /* Print /proc/<tid>/smaps from signal handler (before moving to ATP or below) */
+static int drhook_dump_buddyinfo = 0; /* Print /proc/buddyinfo from signal handler (before moving to ATP or below) */
+static int drhook_dump_hugepages = 0;
+static double drhook_dump_hugepages_freq = 0;
+/* End of developer options */
+
+typedef struct drhook_timeline_t {
+  unsigned long long int calls[2]; /* 0=drhook_begin , 1=drhook_end */
+  double last_curheap_MB;
+  double last_rss_MB;
+  char pad[CACHELINESIZE - (2*sizeof(unsigned long long int) + 2*sizeof(double))]; /* padding : e.g. 64 bytes - 4*8 bytes */
+} drhook_timeline_t; /* cachelinesize optimized --> less false sharing when running with OpenMP */
+
+static drhook_timeline_t *timeline = NULL;
 
 /* HPM-specific */
 
@@ -147,6 +226,8 @@ static        double opt_hpmstop_mflops    =  1000000.0; /* Yes, 1 PetaFlop/s !!
 #define SIG_PASS_EXTRA_ARGS  , sigcode, sigcontextptr
 #endif
 
+#define NIL "(nil)"
+
 #undef MIN
 #define MIN(a,b) ( (a) < (b) ? (a) :  (b) )
 
@@ -162,7 +243,9 @@ static        double opt_hpmstop_mflops    =  1000000.0; /* Yes, 1 PetaFlop/s !!
 extern long long int getstk_();
 extern long long int getmaxstk_();
 extern long long int gethwm_();
+extern long long int getmaxhwm_();
 extern long long int getrss_();
+extern long long int getmaxrss_();
 extern long long int getcurheap_();
 extern long long int getmaxcurheap_();
 extern long long int getcurheap_thread_(const int *tidnum);    /* *tidnum >= 1 && <= max_threads */
@@ -183,6 +266,12 @@ static long long int irtc_start = 0;
 extern long long int irtc();
 #define WALLTIME() ((double)(irtc() - irtc_start)*1.0e-9)
 #define CPUTIME() util_cputime_()
+#elif defined(CRAYXT)
+/* Cray XT3/XT4 with catamount microkernel */
+#include <catamount/dclock.h>
+static double dclock_start = 0;
+#define WALLTIME() (dclock() - dclock_start)
+#define CPUTIME()  WALLTIME()
 #else
 #if defined(SV2)
 #include <intrinsics.h>
@@ -212,7 +301,7 @@ static double my_inv_irtc_rate = 0;
 #include "cargs.h"
 
 extern int get_thread_id_();
-extern void LinuxTraceBack(void *sigcontextptr);
+extern void LinuxTraceBack(const char *prefix, const char *timestr, void *sigcontextptr);
 
 /*** typedefs ***/
 
@@ -244,6 +333,7 @@ typedef struct drhook_key_t {
   char *filename;         /* the filename where the 1st call (on this routine-name) 
 			     to dr_hook() occurred */
   long long int sizeinfo; /* # of data elements, bytes, etc. */
+  long long int min_sizeinfo, max_sizeinfo; /* min & max of # of data elements, bytes, etc. */
   /* memprof specific */
   long long int mem_seenmax;
   long long int mem_child, mem_curdelta;
@@ -262,10 +352,10 @@ typedef struct drhook_calltree_t {
 } drhook_calltree_t;
 
 typedef struct drhook_sig_t {
-  int active;
   char name[32];
   struct sigaction new;
   struct sigaction old;
+  int active;
   int ignore_atexit;
 } drhook_sig_t;
 
@@ -289,7 +379,8 @@ typedef struct drhook_prof_t {
   unsigned char is_max;
   char *name;
   char *filename;
-  unsigned long long int sizeinfo;
+  long long int sizeinfo;
+  long long int min_sizeinfo, max_sizeinfo;
   double sizespeed, sizeavg;
   const equivalence_t *callpath; /* parent's tree down to callpath_depth */
   int callpath_len;
@@ -324,8 +415,16 @@ typedef struct drhook_watch_t {
   int watch_first_nbytes;
   char first_nbytes[MAX_WATCH_FIRST_NBYTES];
   unsigned int crc32;
+  int printkey;
+  int nvals;
   struct drhook_watch_t *next;
 } drhook_watch_t;
+
+typedef struct drhook_prefix_t {
+  char s[256];
+  char timestr[128];
+  int nsigs;
+} drhook_prefix_t;
 
 /*** static (local) variables ***/
 
@@ -339,8 +438,11 @@ static drhook_key_t      **keydata  = NULL;
 static drhook_calltree_t **calltree = NULL;
 static drhook_calltree_t **thiscall = NULL;
 static int signals_set = 0;
-static int signal_handler_called = 0;
-static int signal_handler_ignore_atexit = 0;
+static volatile sig_atomic_t signal_handler_called = 0;
+static volatile sig_atomic_t signal_handler_ignore_atexit = 0;
+static volatile sig_atomic_t unlimited_corefile_retcode = 9999;
+static volatile unsigned long long int saved_corefile_hardlimit = 0;
+static int allow_coredump = -1; /* -1 denotes ALL MPI-tasks, 1..NPES == myproc, 0 = coredump will not be enabled by DrHook at init */
 static drhook_sig_t siglist[1+NSIG] = { 0 };
 static char *a_out = NULL;
 static char *mon_out = NULL;
@@ -352,15 +454,43 @@ static drhook_key_t **curkeyptr = NULL; /* pointers to current keyptr (per threa
 static drhook_watch_t *watch = NULL;
 static drhook_watch_t *last_watch = NULL;
 static int watch_count = 0; /* No. of *active* watch points */
+static drhook_prefix_t *ec_drhook = NULL;
+static int timestr_len = 0;
+
+#define PREFIX(tid) (ec_drhook && tid >= 1 && tid <= numthreads) ? ec_drhook[tid-1].s : ""
+#define TIDNSIGS(tid) (ec_drhook && tid >= 1 && tid <= numthreads) ? ec_drhook[tid-1].nsigs : -1
+#define TIMESTR(tid) (timestr_len > 0 && ec_drhook && tid >= 1 && tid <= numthreads) ? TimeStr(ec_drhook[tid-1].timestr,timestr_len) : ""
+#define FFL __FUNCTION__,__FILE__,__LINE__
+
+#ifndef SYS_gettid
+#define SYS_gettid __NR_gettid
+#endif
+
+static pid_t gettid() {
+  pid_t tid = syscall(SYS_gettid);
+  return tid;
+}
+
+
+#if !defined(NCALLSTACK)
+#ifdef PARKIND1_SINGLE
+/* > 0 : USE call stack approach : needed for single precision version */
+#define NCALLSTACK 64
+#else
+/* == 0 : do NOT use call stack approach : usually for double precision version */
+#define NCALLSTACK  0
+#endif
+#endif
+static int cstklen = NCALLSTACK;
 
 #define HASHSIZE(n) ((unsigned int)1<<(n))
 #define HASHMASK(n) (HASHSIZE(n)-1)
 
-#define NHASH    15
+#define NHASH    16
 #define NHASHMAX 24
 static int nhash = NHASH;
-unsigned int hashsize = HASHSIZE(NHASH);
-unsigned int hashmask = HASHMASK(NHASH);
+static unsigned int hashsize = HASHSIZE(NHASH);
+static unsigned int hashmask = HASHMASK(NHASH);
 
 #ifdef HPM
 /* HPM-specific (static) protos */
@@ -388,6 +518,102 @@ static double mip_count(const drhook_key_t *keyptr);
 
 #endif
 
+/*--- spin ---*/
+
+static int spin(int secs) {
+  struct timespec req, rem;
+  req.tv_sec = secs;
+  req.tv_nsec = 0;
+  return nanosleep(&req, &rem);
+}
+
+/*--- dump_file ---*/
+
+static void dump_file(const char *pfx, int tid, int sig, int nsigs, const char filename[])
+{
+  /* Developer option: Will this spoil our ATP trace ... ? */
+  FILE *fp;
+  char in[256];
+  char *tst = TIMESTR(tid);
+  if (sig > 0 && nsigs >= 1) {
+    fprintf(stderr,
+	    "%s %s [%s@%s:%d] Developer option shows content of the file '%s', signal#%d, nsigs = %d\n",
+	    pfx,tst,FFL,filename,sig,nsigs);
+  }
+  else {
+    fprintf(stderr,
+	    "%s %s [%s@%s:%d] Developer option shows content of the file '%s'\n",
+	    pfx,tst,FFL,filename);
+  }
+  fp = fopen(filename,"r");
+  if (fp) {
+    while (fgets(in,sizeof(in),fp) == in) {
+       fprintf(stderr,"%s %s [%s@%s:%d] %s",pfx,tst,FFL,in);
+       /* fprintf(stderr,"%s",in); */
+    }
+    fclose(fp);
+  }
+}
+
+/*--- dump_hugepages ---*/
+
+static void dump_hugepages(int enforce, const char *pfx, int tid, int sig, int nsigs)
+{
+  if (enforce || drhook_dump_hugepages) {
+    if (enforce || tid == 1) { /* OML-thread id >= 1 */
+      static double next_scheduled = -1;
+      double wt = WALLTIME();
+      if (enforce || wt > next_scheduled) {
+	const int kcomm = -1;
+	const int ftnunitno = 0; /* stderr */
+	fflush(NULL);
+	ec_cray_meminfo_(&ftnunitno,pfx,&kcomm,strlen(pfx));
+	fflush(NULL);
+	if (drhook_dump_buddyinfo) {
+	  dump_file(pfx,tid,sig,nsigs,"/proc/buddyinfo");
+	  dump_file(pfx,tid,sig,nsigs,"/proc/meminfo");
+	}
+	wt = WALLTIME();
+	next_scheduled = wt + drhook_dump_hugepages_freq;
+      }
+    }
+  }
+}
+
+
+/*--- set_default_handler ---*/
+
+static int set_unlimited_corefile(unsigned long long int *hardlimit);
+
+static int set_default_handler(int sig, int unlimited_corefile, int verbose)
+{
+  int rc = -2;
+  if (sig >= 1 && sig <= NSIG) {
+    unsigned long long int hardlimit = 0;
+    struct sigaction sa = { 0 };
+    sa.sa_handler = SIG_DFL;
+    sigemptyset(&sa.sa_mask);
+    /*
+      sigfillset(&sa.sa_mask); -- if we wanted to block all (catchable) signals whilst in subsequent signal handler SIG_DFL
+      sigaddset(&sa.sa_mask, some_signal_to_be_blocked); ... just in case
+    */
+    sigaction(sig, &sa, NULL);
+    if (unlimited_corefile) rc = set_unlimited_corefile(&hardlimit); /* unconditionally */
+    if (verbose) {
+      int tid = get_thread_id_();
+      char *pfx = PREFIX(tid);
+      char buf[128] = "";
+      if (unlimited_corefile && rc == 0) snprintf(buf,sizeof(buf)," -- hardlimit for core file is now %llu (0x%llx)", hardlimit, hardlimit);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] "
+	      "Enabled default signal handler (SIG_DFL) for signal#%d%s\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,buf);
+    }
+  }
+  return rc;
+}
+
 /*--- malloc_drhook ---*/
 
 static void *
@@ -396,7 +622,9 @@ malloc_drhook(size_t size)
   size_t size1 = MAX(1,size);
   void *p = malloc(size1);
   if (!p) {
-    fprintf(stderr,"***Error in malloc_drhook(): Unable to allocate space for %d bytes\n", size1);
+    fprintf(stderr,
+	    "***Error in malloc_drhook(): Unable to allocate space for %lld bytes\n", 
+	    (long long int)size1);
     RAISE(SIGABRT);
   }
   return p;
@@ -416,6 +644,91 @@ calloc_drhook(size_t nmemb, size_t size)
 /*--- free_drhook ---*/
 
 #define free_drhook(x) { if (x) { free(x); x = NULL; } }
+
+/*--- callstack ---*/
+
+/* Note: For single precision calls -- small performance penalty */
+
+typedef struct callstack_t {
+  drhook_key_t **keyptr;
+  unsigned int next;
+  unsigned int maxdepth;
+} callstack_t;
+
+static callstack_t **cstk = NULL;
+
+static drhook_key_t *callstack(int tid, void *key, drhook_key_t *keyptr)
+{
+  /* Single routine -- two usages:
+
+     (1) Upon c_drhook_start_() we call:
+
+         (void) callstack(tid, key, u.keyptr);
+	 - store keyptr into thread specific call stack
+	 - fill *key up to 4-bytes index stating the position in the aforementioned call stack
+
+     (2) Upon c_drhook_end_() we call:
+
+         u.keyptr = callstack(tid, (void *)key, NULL);
+	 - pass 4-byte index in
+         - obtain keyptr from call stack
+	 - decrement call stack
+
+  */
+
+  static const unsigned int inc = 64;
+  unsigned int idx, *Index = key;
+  callstack_t *c = cstk[tid-1];
+  if (keyptr) {
+    if (!c) {
+      cstk[tid-1] = c = calloc_drhook(1, sizeof(*c));
+      c->keyptr = (drhook_key_t **) calloc_drhook(cstklen, sizeof(drhook_key_t *));
+      c->next = 0;
+      c->maxdepth = cstklen;
+    }
+    idx = (c->next)++;
+    if (idx >= c->maxdepth) {
+      drhook_key_t **kptr;
+      unsigned int maxdepth = idx + inc;
+      char *pfx = PREFIX(tid);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] "
+	      "Call stack index %u out of range [0,%u) : extending the range to [0,%u) for this thread\n",
+	      pfx,TIMESTR(tid),FFL,
+	      idx,c->maxdepth,maxdepth);
+      kptr = (drhook_key_t **) calloc_drhook(maxdepth, sizeof(drhook_key_t *));
+      memcpy(kptr,c->keyptr,c->maxdepth * sizeof(drhook_key_t *));
+      free_drhook(c->keyptr);
+      c->keyptr = kptr;
+      c->maxdepth = maxdepth;
+    }
+    if (idx >= c->maxdepth) {
+      char *pfx = PREFIX(tid);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] "
+	      "Call stack index %u still out of range [0,%u). Aborting ...\n",
+	      pfx,TIMESTR(tid),FFL,
+	      idx,c->maxdepth);
+      RAISE(SIGABRT);
+    }
+    c->keyptr[idx] = keyptr;
+    *Index = idx;
+  }
+  else {
+    idx = --(c->next);
+    if (idx != *Index) {
+      char *pfx = PREFIX(tid);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] "
+	      "Invalid index to call stack %u : out of range [0,%u). Expecting the exact value of %u\n",
+	      pfx,TIMESTR(tid),FFL,
+	      idx,c->maxdepth,*Index);
+      RAISE(SIGABRT);
+    }
+    keyptr = c->keyptr[idx];
+  }
+  return keyptr;
+}
 
 /*--- strdup_drhook ---*/
 
@@ -447,11 +760,26 @@ static char *
 timestamp()
 {
   time_t tp;
-  const int bufsize = 80;
+  const int bufsize = 64;
   char *buf = malloc_drhook(bufsize+1);
   time(&tp);
   strftime(buf, bufsize, "%Y%m%d %H%M%S", localtime(&tp));
   return buf;
+}
+
+/*--- TimeStr ---*/
+
+static char *
+TimeStr(char *s, int slen)
+{
+  if (s) {
+    time_t tp;
+    char buf[64];
+    time(&tp);
+    strftime(buf, sizeof(buf), "%Y%m%d:%H%M%S", localtime(&tp));
+    snprintf(s,slen,"[%s:%lld:%.3f]",buf,(long long int)tp,WALLTIME());
+  }
+  return s;
 }
 
 /*--- hashfunc ---*/
@@ -497,7 +825,7 @@ static void
 insert_calltree(int tid, drhook_key_t *keyptr)
 {
   if (tid >= 1 && tid <= numthreads) {
-    drhook_calltree_t *treeptr = thiscall[--tid];
+    drhook_calltree_t *treeptr = thiscall[tid-1];
     while (treeptr->active) {
       if (!treeptr->next) {
 	treeptr->next = calloc_drhook(1,sizeof(drhook_calltree_t));
@@ -507,12 +835,12 @@ insert_calltree(int tid, drhook_key_t *keyptr)
     }
     treeptr->keyptr = keyptr;
     treeptr->active = 1;
-    thiscall[tid] = treeptr;
+    thiscall[tid-1] = treeptr;
 #ifdef HPM
     if (opt_hpmprof) {
       drhook_key_t *kptr = treeptr->keyptr;
       if (!kptr->hpm_stopped) {
-	stopstart_hpm(tid+1,
+	stopstart_hpm(tid,
 		      treeptr->prev ? treeptr->prev->keyptr : NULL, /* stop current (i.e. my parent) */
 		      kptr);                             /* start to gather for me */
 	kptr->this_delta_wall_child = 0;
@@ -521,12 +849,12 @@ insert_calltree(int tid, drhook_key_t *keyptr)
 #ifdef DEBUG
 	fprintf(stderr,"insert[%.*s@%d]: this_delta_wall_child=%.15g, mip#%.15g, mflop#%.15g\n",
 		kptr->name_len,kptr->name,
-		tid+1,kptr->this_delta_wall_child,
+		tid,kptr->this_delta_wall_child,
 		kptr->mip_count_in,kptr->mflop_count_in);
 #endif
       }
       else {
-	stop_only_hpm(tid+1,
+	stop_only_hpm(tid,
 		      treeptr->prev ? treeptr->prev->keyptr : NULL /* stop current (i.e. my parent) */);
       } /* if (!kptr->hpm_stopped) else */
     } /* if (opt_hpmprof) */
@@ -541,7 +869,7 @@ remove_calltree(int tid, drhook_key_t *keyptr,
 		const double *delta_wall, const double *delta_cpu)
 {
   if (tid >= 1 && tid <= numthreads) {
-    drhook_calltree_t *treeptr = thiscall[--tid];
+    drhook_calltree_t *treeptr = thiscall[tid-1];
     if (treeptr->active && treeptr->keyptr == keyptr) {
       treeptr->active = 0;
       if (treeptr->prev) {
@@ -558,9 +886,8 @@ remove_calltree(int tid, drhook_key_t *keyptr,
 	  }
 	  if (opt_memprof) {
 	    /*
-	    int tmp_tid = tid+1;
 	    const long long int size = 0;
-	    c_drhook_memcounter_(&tmp_tid, &size, NULL);
+	    c_drhook_memcounter_(&tid, &size, NULL);
 	    fprintf(stderr,
 		    ">parent(%.*s)->mem_child = %lld ; this(%.*s)->alldelta = %lld, mem_child = %lld\n",
 		    parent_keyptr->name_len, parent_keyptr->name, parent_keyptr->mem_child,
@@ -575,25 +902,24 @@ remove_calltree(int tid, drhook_key_t *keyptr,
 	    */
 	  }
 	} /* if (parent_keyptr) */
-	thiscall[tid] = treeptr->prev;
+	thiscall[tid-1] = treeptr->prev;
       }
       else {
-
-	thiscall[tid] = calltree[tid];
+	thiscall[tid-1] = calltree[tid-1];
       }
 #ifdef HPM
       if (opt_hpmprof) {
 	drhook_key_t *kptr = treeptr->keyptr;
 	if (!kptr->hpm_stopped) {
 	  double this_delta_wall_self = *delta_wall - kptr->this_delta_wall_child;
-	  stopstart_hpm(tid+1, 
+	  stopstart_hpm(tid, 
 			kptr, 
-			thiscall[tid]->keyptr); /* stop current, (re-)start previous */
+			thiscall[tid-1]->keyptr); /* stop current, (re-)start previous */
 	  /* Calculate moving average of mipsrate & mflops ; divpc we don't bother */
 #ifdef DEBUG
 	  fprintf(stderr,"remove[%.*s@%d]: this_delta_wall_self=%.15g i.e. %.15g - %.15g",
 		  kptr->name_len,kptr->name,
-		  tid+1,this_delta_wall_self,
+		  tid,this_delta_wall_self,
 		  *delta_wall,kptr->this_delta_wall_child);
 #endif
 	  if (this_delta_wall_self > 0) {
@@ -622,14 +948,14 @@ remove_calltree(int tid, drhook_key_t *keyptr,
 	  }
 	}
 	else {
-	  stop_only_hpm(tid+1,kptr);
+	  stop_only_hpm(tid,kptr);
 	} /* if (!kptr->hpm_stopped) else ... */
       } /* if (opt_hpmprof) */
 #endif
-      curkeyptr[tid] = thiscall[tid]->keyptr;
+      curkeyptr[tid-1] = thiscall[tid-1]->keyptr;
     }
     else {
-      curkeyptr[tid] = NULL;
+      curkeyptr[tid-1] = NULL;
     } /* if (treeptr->active && treeptr->keyptr == keyptr) else ... */
   }
 }
@@ -704,7 +1030,7 @@ flptrap(int sig)
     fp_enable(TRP_INVALID | TRP_DIV_BY_ZERO | TRP_OVERFLOW);
   }
 }
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) && !defined(NO_TRAPFPE)
 static void
 flptrap(int sig)
 {
@@ -721,9 +1047,12 @@ flptrap(int sig)
 }
 #endif
 
-/*--- catch_signals ---*/
-
+static void signal_gencore(int sig SIG_EXTRA_ARGS);
+static void signal_harakiri(int sig SIG_EXTRA_ARGS);
 static void signal_drhook(int sig SIG_EXTRA_ARGS);
+static void trapfpe_treatment(int sig, int silent);
+
+/*--- catch_signals ---*/
 
 #define CATCHSIG(x) {\
   drhook_sig_t *sl = &siglist[x];\
@@ -735,11 +1064,14 @@ static void signal_drhook(int sig SIG_EXTRA_ARGS);
     sl->new.sa_handler = u.func1args;\
     sl->new.sa_flags = SA_SIGINFO;\
     sigaction(x,&sl->new,&sl->old);\
-    flptrap(x);\
+    trapfpe_treatment(x,silent);   \
     if (!silent && myproc == 1) {\
+      int tid = get_thread_id_(); \
+      char *pfx = PREFIX(tid); \
       fprintf(stderr,\
-	      ">>%s(): DR_HOOK also catches signal#%d; new handler installed at 0x%x; old preserved at 0x%x\n",\
-              "catch_signals", x, sl->new.sa_handler, sl->old.sa_handler);\
+	      "%s %s [%s@%s:%d] DR_HOOK also catches signal#%d : New handler '%s' installed at %p (old at %p)\n", \
+	      pfx,TIMESTR(tid),FFL,					\
+	      x, "signal_drhook", sl->new.sa_handler, sl->old.sa_handler); \
     }\
   }\
 }
@@ -748,6 +1080,14 @@ static void
 catch_signals(int silent)
 {
   char *env = getenv("DR_HOOK_CATCH_SIGNALS");
+  if (!silent && myproc == 1) {
+    int tid = get_thread_id_();
+    char *pfx = PREFIX(tid);
+    fprintf(stderr,
+	    "%s %s [%s@%s:%d] DR_HOOK_CATCH_SIGNALS=%s\n",
+	    pfx,TIMESTR(tid),FFL,
+	    env ? env : "<undef>");
+  }
   if (env) {
     const char delim[] = ", \t/";
     char *p, *s = strdup_drhook(env);
@@ -770,13 +1110,103 @@ catch_signals(int silent)
   }
 }
 
+/*--- trapfpe_treatment ---*/
+
+static void
+trapfpe_treatment(int sig, int silent)
+{
+  if (sig == SIGFPE) {
+#if defined(__GNUC__) && !defined(NO_TRAPFPE)
+    int tid = get_thread_id_();
+    char *pfx = PREFIX(tid);
+    if (drhook_trapfpe) {
+      if (!silent && myproc == 1) {
+	fprintf(stderr,
+		"%s %s [%s@%s:%d] DR_HOOK enables SIGFPE-related floating point trapping since DRHOOK_TRAPFPE=%d\n",
+		pfx,TIMESTR(tid),FFL,
+		drhook_trapfpe);
+      }
+      flptrap(sig); /* Has FLP-trapping on, regardless */
+    }
+    else {
+      if (!silent && myproc == 1) {
+	fprintf(stderr,
+		"%s %s [%s@%s:%d] DR_HOOK turns SIGFPE-related floating point trapping off since DRHOOK_TRAPFPE=%d\n",
+		pfx,TIMESTR(tid),FFL,
+		drhook_trapfpe);
+      }
+      untrapfpe(); /* Turns off a possible -Ktrap=fp from pgf90 */
+    }
+#endif
+  }
+}
+
+/*--- restore_default_signals ---*/
+
+static void
+restore_default_signals(int silent)
+{
+  char *env = getenv("DR_HOOK_RESTORE_DEFAULT_SIGNALS");
+  if (!silent && myproc == 1) {
+    int tid = get_thread_id_();
+    char *pfx = PREFIX(tid);
+    fprintf(stderr,
+	    "%s %s [%s@%s:%d] DR_HOOK_RESTORE_DEFAULT_SIGNALS=%s\n",
+	    pfx,TIMESTR(tid),FFL,
+	    env ? env : "<undef>");
+  }
+  if (env) {
+    int unlim_core = 1;
+    const char delim[] = ", \t/";
+    char *p, *s = strdup_drhook(env);
+    p = strtok(s,delim);
+    while (p) {
+      int sig = atoi(p);
+      if (sig >= 1 && sig <= NSIG) {
+	drhook_sig_t *sl = &siglist[sig];
+	if (sl->active == 0) { /* Not touched yet by ignore_signals() */
+	  set_default_handler(sig,unlim_core,(!silent && myproc == 1));
+	  unlim_core = 0;
+	  if (sig == SIGFPE) trapfpe_treatment(sig, (!silent && myproc == 1));
+	  sl->active = -2;
+	}
+      }
+      else if (sig == -1) { /* Restore default signals for all available/catchable to DR_HOOK */
+	int j;
+	for (j=1; j<=NSIG; j++) {
+	  drhook_sig_t *sl = &siglist[j];
+	  if (sl->active == 0) {  /* Not touched yet by ignore_signals() */
+	    set_default_handler(j,unlim_core,(!silent && myproc == 1));
+	    unlim_core = 0;
+	    if (j == SIGFPE) trapfpe_treatment(j, (!silent && myproc == 1));
+	    sl->active = -2;
+	  }
+	} /* for (j=1; j<=NSIG; j++) */
+	break;
+      }
+      p = strtok(NULL,delim);
+    }
+    free_drhook(s);
+  }
+}
+
 /*--- ignore_signals ---*/
 
 static void
 ignore_signals(int silent)
 {
   char *env = getenv("DR_HOOK_IGNORE_SIGNALS");
+  if (!silent && myproc == 1) {
+    int tid = get_thread_id_();
+    char *pfx = PREFIX(tid);
+    fprintf(stderr,
+	    "%s %s [%s@%s:%d] DR_HOOK_IGNORE_SIGNALS=%s\n",
+	    pfx,TIMESTR(tid),FFL,
+	    env ? env : "<undef>");
+  }
   if (env) {
+    int tid = get_thread_id_();
+    char *pfx = PREFIX(tid);
     const char delim[] = ", \t/";
     char *p, *s = strdup_drhook(env);
     p = strtok(s,delim);
@@ -786,11 +1216,10 @@ ignore_signals(int silent)
 	drhook_sig_t *sl = &siglist[sig];
 	if (!silent && myproc == 1) {
 	  fprintf(stderr,
-		  ">>>ignore_signals(): DR_HOOK will ignore signal#%d altogether\n", sig);
+		  "%s %s [%s@%s:%d] DR_HOOK ignores signal#%d altogether\n", 
+		  pfx,TIMESTR(tid),FFL,
+		  sig);
 	}
-#if defined(__GNUC__)
-	if (sig == SIGFPE) untrapfpe(); /* Turns off a possible -Ktrap=fp from pgf90 */
-#endif
 	sl->active = -1;
       }
       else if (sig == -1) { /* Switches off ALL signals from DR_HOOK */
@@ -799,11 +1228,10 @@ ignore_signals(int silent)
 	  drhook_sig_t *sl = &siglist[j];
 	  if (!silent && myproc == 1) {
 	    fprintf(stderr,
-		    ">>>ignore_signals(): DR_HOOK will ignore signal#%d altogether\n", j);
+		    "%s %s [%s@%s:%d] DR_HOOK ignores signal#%d altogether\n", 
+		    pfx,TIMESTR(tid),FFL,
+		    j);
 	  }
-#if defined(__GNUC__)
-	  if (sig == SIGFPE) untrapfpe(); /* Turns off a possible -Ktrap=fp from pgf90 */
-#endif
 	  sl->active = -1;
 	} /* for (j=1; j<=NSIG; j++) */
 	break;
@@ -816,24 +1244,32 @@ ignore_signals(int silent)
 
 /*--- gdb__sigdump ---*/
 
-#if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1)
+#if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1) && !defined(_CRAYC)
 static void gdb__sigdump(int sig SIG_EXTRA_ARGS)
 {
   static int who = 0; /* Current owner of the lock, if > 0 */
   int is_set = 0;
   int it = get_thread_id_(); 
   drhook_sig_t *sl = &siglist[sig];
+  char *pfx = PREFIX(it);
 
   coml_test_lockid_(&is_set, &DRHOOK_lock);
   if (is_set && who == it) {
-    fprintf(stderr,"[gdb__sigdump] : Received (another) signal#%d(%s), pid=%d\n",sig,sl->name,pid);
-    fprintf(stderr,"[gdb__sigdump] : Recursive calls by the same thread#%d not allowed. Bailing out\n",it);
+    fprintf(stderr,"%s %s [%s@%s:%d] Received (another) signal#%d (%s)\n",
+	    pfx,TIMESTR(it),FFL,
+	    sig,sl->name);
+    fprintf(stderr,"%s %s [%s@%s:%d] Recursive calls by the same thread#%d not allowed. Bailing out\n",
+	    pfx,TIMESTR(it),FFL,
+	    it);
     return;
   }
   if (!is_set) coml_set_lockid_(&DRHOOK_lock);
   who = it;
-  fprintf(stderr,"[gdb__sigdump] : Received signal#%d(%s), pid=%d\n",sig,sl->name,pid);
-  LinuxTraceBack(sigcontextptr);
+  fprintf(stderr,"%s %s [%s@%s:%d] Received signal#%d(%s) : sigcontextptr=%p\n",
+	  pfx,TIMESTR(it),FFL,
+	  sig,sl->name,sigcontextptr);
+  LinuxTraceBack(pfx,TIMESTR(it),sigcontextptr);
+  /* LinuxTraceBack(pfx,TIMESTR(tid),NULL); */
   who = 0;
   coml_unset_lockid_(&DRHOOK_lock);
 }
@@ -841,232 +1277,468 @@ static void gdb__sigdump(int sig SIG_EXTRA_ARGS)
 
 /*--- signal_drhook ---*/
 
-#define SETSIG(x,ignore_flag) {\
-  drhook_sig_t *sl = &siglist[x];\
-  if (sl->active == 0) {\
-    drhook_sigfunc_t u;\
-    u.func3args = signal_drhook;\
-    sl->active = 1;\
-    strcpy(sl->name,#x);\
-    sigemptyset(&sl->new.sa_mask);\
-    sl->new.sa_handler = u.func1args;\
-    sl->new.sa_flags = SA_SIGINFO;\
-    sigaction(x,&sl->new,&sl->old);\
-    sl->ignore_atexit = ignore_flag;\
-    flptrap(x);\
-    if (!silent && myproc == 1) {\
-      fprintf(stderr,"%s(%s=%d): New handler installed at 0x%x; old preserved at 0x%x\n",\
-              "signal_drhook", sl->name, x, sl->new.sa_handler, sl->old.sa_handler);\
-    }\
-  }\
+#define SETSIG5(x,ignore_flag,handler_name,preserve_old,xstr) {	\
+    drhook_sig_t *sl = &siglist[x];				\
+    if (sl->active == 0) {		\
+      drhook_sigfunc_t u;					\
+      u.func3args = handler_name;				\
+      sl->active = 1;							\
+      strcpy(sl->name,xstr);						\
+      sigemptyset(&sl->new.sa_mask);					\
+      sl->new.sa_handler = u.func1args;					\
+      sl->new.sa_flags = SA_SIGINFO;					\
+      sigaction(x,&sl->new,preserve_old ? &sl->old : NULL);		\
+      sl->ignore_atexit = ignore_flag;					\
+      trapfpe_treatment(x,silent);					\
+      if (!silent && myproc == 1) {					\
+	int tid = get_thread_id_();					\
+	char *pfx = PREFIX(tid);					\
+	const char fmt[] = "%s %s [%s@%s:%d] New signal handler '%s' for signal#%d (%s) at %p (old at %p)\n"; \
+	fprintf(stderr,fmt,						\
+		pfx,TIMESTR(tid),FFL,					\
+		#handler_name,						\
+		x, sl->name,						\
+		sl->new.sa_handler,					\
+		preserve_old ? sl->old.sa_handler : NULL);		\
+      }							\
+    }						\
 }
 
-#define JSETSIG(x,ignore_flag) {\
-  drhook_sig_t *sl = &siglist[x];\
-  drhook_sigfunc_t u;\
-  fprintf(stderr,"JSETSIG: sl->active = %d\n",sl->active);\
-  u.func3args = signal_drhook;\
-  sl->active = 1;\
-  strcpy(sl->name,#x);\
-  sigemptyset(&sl->new.sa_mask);\
-  sl->new.sa_handler = u.func1args;\
-  sl->new.sa_flags = SA_SIGINFO;\
-  sigaction(x,&sl->new,&sl->old);\
-  sl->ignore_atexit = ignore_flag;\
-  flptrap(x);\
-  fprintf(stderr,"%s(%s=%d): New handler installed at 0x%x; old preserved at 0x%x\n",\
-            "signal_drhook", sl->name, x, sl->new.sa_handler, sl->old.sa_handler);\
+#define SETSIG(x,ignore_flag) SETSIG5(x,ignore_flag,signal_drhook,1,#x)
+
+#define JSETSIG(x,ignore_flag) {					\
+    drhook_sig_t *sl = &siglist[x];					\
+    drhook_sigfunc_t u;							\
+    /* fprintf(stderr,"JSETSIG: sl->active = %d\n",sl->active); */	\
+    u.func3args = signal_harakiri;					\
+    sl->active = 1;							\
+    strcpy(sl->name,#x);						\
+    sigemptyset(&sl->new.sa_mask);					\
+    sl->new.sa_handler = u.func1args;					\
+    sl->new.sa_flags = SA_SIGINFO;					\
+    sigaction(x,&sl->new,&sl->old);					\
+    sl->ignore_atexit = ignore_flag;					\
+    trapfpe_treatment(x,0);						\
+    {									\
+      int tid = get_thread_id_();					\
+      char *pfx = PREFIX(tid);						\
+      const char fmt[] = "%s %s [%s@%s:%d] Harakiri signal handler '%s' for signal#%d (%s) installed at %p (old at %p)\n"; \
+      fprintf(stderr,fmt,						\
+	      pfx,TIMESTR(tid),FFL,					\
+	      "signal_harakiri",					\
+	      x, sl->name,						\
+	      sl->new.sa_handler,					\
+	      sl->old.sa_handler);					\
+    }									\
+  }
+
+#if defined(RS6K) && defined(__64BIT__)
+#define DRH_STRUCT_RLIMIT struct rlimit64
+#define DRH_GETRLIMIT getrlimit64
+#define DRH_SETRLIMIT setrlimit64
+#else
+#define DRH_STRUCT_RLIMIT struct rlimit
+#define DRH_GETRLIMIT getrlimit
+#define DRH_SETRLIMIT setrlimit
+#endif
+
+static int set_unlimited_corefile(unsigned long long int *hardlimit)
+{
+  /* 
+     Make sure we *only* set soft-limit (not hard-limit) to 0 in our scripts i.e. :
+        $ ulimit -S -c 0
+     but *not*
+        $ ulimit -c 0
+     See man ksh or man bash for more
+  */
+  int rc = -1;
+  if (unlimited_corefile_retcode == 9999) { /* Done only once */
+    DRH_STRUCT_RLIMIT r;
+    if (DRH_GETRLIMIT(RLIMIT_CORE, &r) == 0) {
+      r.rlim_cur = r.rlim_max;
+      if (DRH_SETRLIMIT(RLIMIT_CORE, &r) == 0) {
+	saved_corefile_hardlimit = r.rlim_cur;
+	rc = 0;
+      }
+    }
+    unlimited_corefile_retcode = rc;
+  }
+  if (hardlimit) *hardlimit = saved_corefile_hardlimit;
+  rc = unlimited_corefile_retcode;
+  return rc;
+}
+
+static void 
+signal_gencore(int sig SIG_EXTRA_ARGS)
+{
+  if (opt_gencore > 0) { 
+    opt_gencore = 0; /* A tiny chance for a race condition between threads */
+    if (sig == opt_gencore_signal && sig >= 1 && sig <= NSIG) {
+      signal(sig, SIG_IGN);
+      signal(SIGABRT, SIG_DFL);
+      { /* Enable unlimited cores (up to hard-limit) and call abort() --> generates core dump */
+	if (set_unlimited_corefile(NULL) == 0) {
+	  int tid = get_thread_id_();
+	  char *pfx = PREFIX(tid);
+	  fprintf(stderr,
+		  "%s %s [%s@%s:%d] Received signal#%d and now calling abort() ...\n",
+		  pfx,TIMESTR(tid),FFL,
+		  sig);
+	  LinuxTraceBack(pfx,TIMESTR(tid),NULL);
+	  abort(); /* Dump core, too */
+	}
+      }
+      /* Should never end up here */
+      fflush(NULL);
+      _exit(128+ABS(sig));
+    } /* if (sig >= 1 && sig <= NSIG && sig == opt_gencore_signal) */
+  }
+}
+
+static char *safe_llitoa(long long int i, char b[], int blen)
+{
+  char const digit[] = "0123456789";
+  char *p = b;
+  long long int shifter;
+  if (i < 0) {
+    *p++ = '-';
+    i *= -1;
+  }
+  shifter = i;
+  do { /* Move to where representation ends */
+    ++p;
+    shifter = shifter/10;
+  } while (shifter);
+  *p = '\0';
+  do{ /* Move back, inserting digits as u go */
+    *--p = digit[i%10];
+    i = i/10;
+  } while (i);
+  return b;
+}
+
+
+static void 
+signal_harakiri(int sig SIG_EXTRA_ARGS)
+{
+  /* A signal handler that will force to exit the current thread immediately for sure */
+
+  /* The following output should be malloc-free */
+
+  time_t tp;
+  int fd = fileno(stderr);
+  int tid = get_thread_id_();
+  int nsigs = TIDNSIGS(tid);
+  char *pfx = PREFIX(tid);
+  char buf[128];
+  char s[1024];
+  strcpy(s,pfx);
+  /* [%s@%s:%d] for FFL below */
+  strcat(s," [");
+  strcat(s,__FUNCTION__);
+  strcat(s,"@");
+  strcat(s,__FILE__);
+  strcat(s,":");
+  strcat(s,safe_llitoa(__LINE__,buf,sizeof(buf)));
+  strcat(s,"] [epoch=");
+  time(&tp);
+  strcat(s,safe_llitoa(tp,buf,sizeof(buf)));
+  strcat(s,"] Terminating process to avoid hangs due to signal#");
+  strcat(s,safe_llitoa(sig,buf,sizeof(buf)));
+  strcat(s," by raising signal SIGKILL = ");
+  strcat(s,safe_llitoa(SIGKILL,buf,sizeof(buf)));
+  strcat(s,", nsigs = ");
+  strcat(s,safe_llitoa(nsigs,buf,sizeof(buf)));
+
+  write(fd,s,strlen(s));
+
+  raise(SIGKILL); /* Use raise, not RAISE here */
+  _exit(128+ABS(sig)); /* Should never reach here, bu' in case it does, then ... */
 }
 
 static void 
 signal_drhook(int sig SIG_EXTRA_ARGS)
 {
-  /* signal(sig, SIG_IGN); */
-  if (signals_set && sig >= 1 && sig <= NSIG) { 
-    /* Signal catching */
+  int nsigs;
+  int tid = get_thread_id_();
+  char *pfx = PREFIX(tid);
+  if (signals_set && sig >= 1 && sig <= NSIG) {
     drhook_sig_t *sl = &siglist[sig];
-    drhook_sigfunc_t u;
     sigset_t newmask, oldmask;
-    int tid, nsigs;
-    long long int hwm = gethwm_();
-    long long int rss = getrss_();
-    long long int maxstack = getmaxstk_();
-    long long int pag = getpag_();
-    rss /= 1048576;
-    hwm /= 1048576;
-    maxstack /= 1048576;
-    tid = get_thread_id_();
 
-    /*------------------------------------------------------------ 
-      Strategy:
-      - drhook intercepts most interupts.
-      - 1st interupt will 
-        - call alarm(10) to try to make sure 2nd interrupt received
-        - try to call tracebacks and exit (which includes atexits)
-      - 2nd (and subsequent) interupts will 
-        - spin for 20 sec (to give 1st interrupt time to complete tracebacks) 
-        - and then call _exit (bypassing atexit)
-    ------------------------------------------------------------*/
-      
-    /* if (sig != SIGTERM) signal(SIGTERM, SIG_DFL); */  /* Let the default SIGTERM to occur */
-
-    nsigs=1+signal_handler_called++;
-
-    if (nsigs > 3 * max_threads) {
-      /* Note: Cannot even print & flush the msg below */
-      /*
-      fprintf(stderr,
-	      "***Error: Too deep recursion in signal handling. Issuing 'kill -9 %d' now !!\n",
-	      pid);
-      fflush(NULL);
-      */
-      raise(SIGKILL); /* Use raise, not RAISE here */
-      _exit(1); /* Should never reach here, bu' in case it does, then ... */
-    }
-
-    fprintf(stderr,
-	    "[myproc#%d,tid#%d,pid#%d,signal#%d(%s)]: Received signal :: %lldMB (heap),"
-	    " %lldMB (rss), %lldMB (stack), %lld (paging), nsigs %d, time %8.2f\n",
-	    myproc,tid,pid,sig,sl->name, hwm, rss, maxstack, pag, nsigs, WALLTIME());
-    fflush(NULL);
-
-    /*----- 2nd (and subsequent) calls to signal handler: spin 20 sec,  _exit ---------*/
-    if (nsigs > 1) {
-      if (nsigs < max_threads) {
-	double tt, ttt=0;
-	int is;
-	tt=WALLTIME();
-	while ( ttt < 20.0 ) {
-	  for ( is=0; is<100000000; is++) {
-	    tt=tt+0.01; 
-	    tt=tt-0.01;
-	  }
-	  ttt=WALLTIME()-tt;
-	}
-	fprintf(stderr,"tid#%d calling _exit with sig=%d, time =%8.2f\n",tid,sig,WALLTIME());
-	fflush(NULL);
-      }
-      raise(SIGKILL); /* Use raise, not RAISE here */
-      _exit(1); /* Should never reach here, bu' in case it does, then ... */
-    }
-
-    /*---- First call to signal handler: call alarm(10), tracebacks,  exit ------*/
-
-    fprintf(stderr,"Activating SIGALRM=%d and calling alarm(10), time =%8.2f\n",SIGALRM,WALLTIME());
-    fflush(NULL);
-    JSETSIG(SIGALRM,1);
-    alarm(10);
-
-#ifdef RS6K
-    /*-- llcancel attempted but sometimes hangs ---
-    {
-      char *env = getenv("LOADL_STEP_ID");
-      if (env) {
-        char *cancel = "delayed_llcancel ";
-	char cmd[80];
-	sprintf(cmd,"%s %s &",cancel,env);
-	fprintf(stderr,"tid#%d issuing command: %s, time =%8.2f\n",tid,cmd,WALLTIME());
-	fflush(NULL);
-	system(cmd);
-      }
-    }
-    ------------------------------------*/
+#if 0    
+    signal(sig, SIG_IGN); /* We may not need this ... */
+#endif
+    
+    /* Signal catching */
+#ifdef _OPENMP
+#pragma omp critical
+    nsigs = (++signal_handler_called);
+    if (sl->ignore_atexit) signal_handler_ignore_atexit++;
+#else
+    nsigs = (++signal_handler_called); /* A tiny chance for a race condition between threads */
+    if (sl->ignore_atexit) signal_handler_ignore_atexit++;
 #endif
 
-    u.func3args = signal_drhook;
+    if (ec_drhook && tid >= 1 && tid <= numthreads) ec_drhook[tid-1].nsigs = nsigs; /* Store for possible signal_harakiri() */
+    
+    /*------------------------------------------------------------ 
+      Strategy:
+      - drhook intercepts most interrupts.
+      - 1st interupt will 
+      - call alarm(10) to try to make sure 2nd interrupt received
+      - try to call tracebacks and exit (which includes atexits)
+      - 2nd (and subsequent) interupts will 
+      - spin for 20 sec (to give 1st interrupt time to complete tracebacks) 
+      - and then call _exit (bypassing atexit)
+      ------------------------------------------------------------*/
+    
+    /* if (sig != SIGTERM) signal(SIGTERM, SIG_DFL); */  /* Let the default SIGTERM to occur */
+    
+#ifdef _OPENMP
+    max_threads = omp_get_max_threads();
+#endif
+    if (nsigs == 1) {
+      /*---- First call to signal handler: call alarm(drhook_harakiri_timeout), tracebacks,  exit ------*/
+      
+      /* Enjoy some output (only from the first guy that came in) */
+      long long int hwm = gethwm_();
+      long long int rss = getmaxrss_();
+      long long int maxstack = getmaxstk_();
+      long long int pag = getpag_();
+      rss /= 1048576;
+      hwm /= 1048576;
+      maxstack /= 1048576;
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] Received signal#%d (%s) :: %lldMB (heap),"
+	      " %lldMB (maxrss), %lldMB (maxstack), %lld (paging), nsigs = %d\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig, sl->name, hwm, rss, maxstack, pag, nsigs);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] Also activating Harakiri-alarm (SIGALRM=%d) to expire after %ds elapsed to prevent hangs, nsigs = %d\n",
+	      pfx,TIMESTR(tid),FFL,
+	      SIGALRM,drhook_harakiri_timeout,nsigs);
+      JSETSIG(SIGALRM,1); /* This will now set another signal handler than signal_drhook */
+      fflush(NULL);
+      alarm(drhook_harakiri_timeout);
+    }
+    else if (nsigs > 1) {
+      /*----- 2nd (and subsequent) calls to signal handler: spin harakiri-timeout + 60 sec,  _exit ---------*/
+      int offset = 60;
+      int secs = drhook_harakiri_timeout+offset;
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] Calling signal_harakiri upon receipt of signal#%d"
+	      " after %ds spin, nsigs = %d\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,secs,nsigs);
+      fflush(NULL);
+      spin(secs);
+      signal_harakiri(sig SIG_PASS_EXTRA_ARGS);
+    }
 
-    sigfillset(&newmask);
+    /* All below this point should be nsigs == 1 i.e. the first threat arriving signal_drhook() */
+    
+#ifdef RS6K
+    /*-- llcancel attempted but sometimes hangs ---
+      {
+      char *env = getenv("LOADL_STEP_ID");
+      if (env) {
+      char *cancel = "delayed_llcancel ";
+      char cmd[80];
+      sprintf(cmd,"%s %s &",cancel,env);
+      fprintf(stderr,"tid#%d issuing command: %s\n",tid,cmd;
+      fflush(NULL);
+      system(cmd);
+      }
+      }
+      ------------------------------------*/
+#endif
+    
+    /* sigfillset(&newmask); -- dead code since sigprocmask() was not called */
     /*
-    sigemptyset(&newmask);
-    sigaddset(&newmask, sig);
+      sigemptyset(&newmask);
+      sigaddset(&newmask, sig);
     */
-
+    
     /* Start critical region (we don't want any signals to interfere while doing this) */
     /* sigprocmask(SIG_BLOCK, &newmask, &oldmask); */
-
-    if (sl->ignore_atexit) signal_handler_ignore_atexit++;
-
-    { /* Print Dr.Hook traceback */
+    
+    if (nsigs == 1) { 
+      /* Print Dr.Hook traceback */
       const int ftnunitno = 0; /* stderr */
       const int print_option = 2; /* calling tree */
       int level = 0;
-      int is;
-      fprintf(stderr,"tid#%d starting drhook traceback, time =%8.2f\n",tid,WALLTIME());
+
+      dump_hugepages(1,pfx,tid,sig,nsigs);
+
+      if (drhook_dump_smaps) {
+	pid_t unixtid = gettid();
+	char filename[256];
+	snprintf(filename,sizeof(filename),"/proc/%ld/smaps",(long)unixtid);
+	dump_file(pfx,tid,sig,nsigs,filename);
+      }
+
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] Starting DrHook backtrace for signal#%d, nsigs = %d\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,nsigs);
       fflush(NULL);
       c_drhook_print_(&ftnunitno, &tid, &print_option, &level);
       fflush(NULL);
-      fprintf(stderr,"tid#%d starting sigdump traceback, time =%8.2f\n",tid,WALLTIME());
-      fflush(NULL);
+
+      /* To make it less likely that another thread generates a signal while we are
+	 doing a traceback lets wait a while (seems to fix problems of the traceback
+	 terminating abnormally. Probably a better way of doing this involving holding
+	 off signals but sigprocmask is not safe in multithreaded code -  P Towers Dec 10 2012 
+	 This was originally an issue with the Intel compiler but may be of benefit for other
+	 compilers. Cannot see it doing harm - P Towers Aug 29 2013 */ 
+      spin(MIN(5,tid));
+
+      if (sig != SIGABRT && sig != SIGTERM) {
 #ifdef RS6K
-      xl__sigdump(sig SIG_PASS_EXTRA_ARGS); /* Can't use xl__trce(...), since it also stops */
+	xl__sigdump(sig SIG_PASS_EXTRA_ARGS); /* Can't use xl__trce(...), since it also stops */
 #endif
-#ifdef INTEL
-      intel_trbk_(); /* from ../utilities/gentrbk.F90 */
+	
+#if 1
+	/* Active code ? */
+#if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1)
+	LinuxTraceBack(pfx,TIMESTR(tid),NULL);
 #endif
+#else
+	/* Dead code ? */
+#if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1) && !defined(_CRAYC)
+	gdb__sigdump(sig SIG_PASS_EXTRA_ARGS);
+#endif
+#endif
+	
+#ifdef __INTEL_COMPILER
+	intel_trbk_(); /* from ../utilities/gentrbk.F90 */
+#endif
+	
+#if defined(NECSX)
+	necsx_trbk_("signal_drhook",13); /* from ../utilities/gentrbk.F90 */
+#endif
+      }
+
 #ifdef VPP
 #if defined(SA_SIGINFO) && SA_SIGINFO > 0
       _TraceCalls(sigcontextptr); /* Need VPP's libmp.a by Pierre Lagier */
 #endif
 #endif
-#if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1)
-      gdb__sigdump(sig SIG_PASS_EXTRA_ARGS);
-#endif
+      
+      fprintf(stderr, 
+	      "%s %s [%s@%s:%d] DrHook backtrace done for signal#%d, nsigs = %d\n", 
+	      pfx,TIMESTR(tid),FFL,
+	      sig,nsigs);
       fflush(NULL);
-      fprintf(stderr,"Done tracebacks, calling exit with sig=%d, time =%8.2f\n",sig,WALLTIME());
-      fflush(NULL);
-      if (sig != SIGABRT && sig != SIGTERM) ABOR1("Dr.Hook calls ABOR1 ...");
-      _exit(1);
     }
+    
     /* sigprocmask(SIG_SETMASK, &oldmask, 0); */
     /* End critical region : the original signal state restored */
+    
+    {
+      int restored = 0, tdiff;
+      time_t t1, t2;
+      drhook_sigfunc_t u;
+      u.func3args = signal_drhook;
+      if (opt_propagate_signals &&
+	  sl->old.sa_handler != SIG_DFL && 
+	  sl->old.sa_handler != SIG_IGN && 
+	  sl->old.sa_handler != u.func1args) {
+	u.func1args = sl->old.sa_handler;
 
-#if 1
-    /*-------------- Following code currently redundant---------------*/
-    if (opt_propagate_signals &&
-	sl->old.sa_handler != SIG_DFL && 
-	sl->old.sa_handler != SIG_IGN && 
-	sl->old.sa_handler != u.func1args) {
-      /*
-      fprintf(stderr,
-	      ">>%s(at 0x%x): Calling previous signal handler in chain at 0x%x (if possible)\n",
-	      "signal_drhook",signal_drhook,sl->old.sa_handler); 
-      u.func1args = sl->old.sa_handler;
-      u.func3args(sig SIG_PASS_EXTRA_ARGS);
-      */
-      fprintf(stderr,
-              ">>%s(at 0x%x): Do not call previous signal handler in chain at 0x%x\n",
-              "signal_drhook",signal_drhook,sl->old.sa_handler);
+	if (atp_enabled) {
+	  /* Restore the default, core-file creating action to these "ATP" recognized signals */
+	  switch (sig) {
+	  case SIGTERM:
+	    if (atp_ignore_sigterm) break; /* SIGSEGV not reset to SIG_DFL as ATP now ignores SIGTERM */
+	    /* Fall thru (see man atp on Cray) */
+	  case SIGFPE:
+	  case SIGILL:
+	  case SIGTRAP:
+	  case SIGABRT:
+	  case SIGBUS:
+	  case SIGSEGV:
+	  case SIGSYS:
+	  case SIGXCPU:
+#if defined(SIGXFSZ)
+	  case SIGXFSZ:
+#endif
+	    fprintf(stderr,
+		    "%s %s [%s@%s:%d] Resetting SIGSEGV (%d) to "
+		    "default signal handler (SIG_DFL) before calling ATP for signal#%d, nsigs = %d\n",
+		    pfx,TIMESTR(tid),FFL,
+		    SIGSEGV,sig,nsigs);
+	    set_default_handler(SIGSEGV,1,1);
+	    restored = 1;
+	    break;
+	  default: 
+	    break;
+	  }
+	}
+
+	fprintf(stderr,
+		"%s %s [%s@%s:%d] Calling previous signal handler at %p for signal#%d, nsigs = %d\n",
+		pfx,TIMESTR(tid),FFL,
+		u.func1args,sig,nsigs); 
+
+	time(&t1);
+	u.func3args(sig SIG_PASS_EXTRA_ARGS); /* This could now be the ATP */
+	time(&t2);
+	tdiff = (t2 - t1);
+
+	fprintf(stderr,
+                "%s %s [%s@%s:%d] Returned from previous signal handler"
+		" (at %p, signal#%d, time taken = %ds), nsigs = %d\n",
+		pfx,TIMESTR(tid),FFL,
+		u.func1args,sig,tdiff,nsigs); 
+
+	if (atp_enabled && restored && atp_max_cores > 0) {
+	  /* Assuming it was indeed ATP, then lets spin a bit to allow other cores be dumped */
+	  int secs = MIN(drhook_harakiri_timeout,atp_max_analysis_time);
+	  int grace = 60;
+	  secs = 60 + MIN(tdiff * (atp_max_cores-1),secs);
+	  if (secs > 0) {
+	    fprintf(stderr,
+		    "%s %s [%s@%s:%d] Before aborting (signal#%d) spin %ds (incl. grace %ds)"
+		    " to give ATP time to write all #%d core file(s), nsigs = %d\n",
+		    pfx,TIMESTR(tid),FFL,
+		    sig,secs,grace,atp_max_cores,nsigs);
+	    spin(secs);
+	  }
+	}
+
+	if (sig != SIGABRT && sig != SIGTERM) {
+	  if (atp_enabled && atp_max_cores > 0) {
+	    fprintf(stderr,
+		    "%s %s [%s@%s:%d] DrHook calls abort() and attempts to dump core (signal#%d), nsigs = %d\n",
+		    pfx,TIMESTR(tid),FFL,
+		    sig,nsigs);
+	    set_default_handler(SIGABRT,1,1);
+	    abort();
+	  }
+	}
+	/* Now proceed to definitive _exit() */
+      }
+      else {
+	fprintf(stderr,
+		"%s %s [%s@%s:%d] Not configured (DR_HOOK_PROPAGATE_SIGNALS=%d) or "
+		"can't call previous signal handler (for signal#%d) in the chain at %p, nsigs = %d\n",
+		pfx,TIMESTR(tid),FFL,
+		opt_propagate_signals,sig,
+		sl->old.sa_handler,nsigs);
+      }
     }
-    /* Make sure that the process really exits now */
-    fprintf(stderr,
-	    "[myproc#%d,tid#%d,pid#%d,signal#%d(%s)]: Error exit due to this signal\n",
-	    myproc,tid,pid,sig,sl->name);
-    fflush(NULL);
-    _exit(1);
-    /*---------------- End of redundant code---------------------*/
-#endif
-
   }
-  else {
-    fprintf(stderr,
-	    "%s(at 0x%x): Invalid signal#%d or signals/this signal not set (%d)\n",
-	    "signal_drhook",signal_drhook,sig,signals_set);
-#ifdef RS6K
-    xl__sigdump(sig SIG_PASS_EXTRA_ARGS);
-#endif
-#ifdef INTEL
-    intel_trbk_(); /* from ../utilities/gentrbk.F90 */
-#endif
-#ifdef VPP
-#if defined(SA_SIGINFO) && SA_SIGINFO > 0
-    _TraceCalls(sigcontextptr); /* Need VPP's libmp.a by Pierre Lagier */
-#endif
-#endif
-#if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1)
-    gdb__sigdump(sig SIG_PASS_EXTRA_ARGS);
-#endif
+   
+  {
+    int errcode = 128 + ABS(sig);
+    /* Make sure that the process/thread really exits now -- immediately !! */
+    fprintf(stderr, "%s %s [%s@%s:%d] Error _exit(%d) upon receipt of signal#%d, nsigs = %d\n",
+	    pfx,TIMESTR(tid),FFL,
+	    errcode,sig,nsigs);
     fflush(NULL);
-    _exit(1);
+    _exit(errcode);
   }
 }
 
@@ -1074,6 +1746,15 @@ void
 c_drhook_set_mpi_()
 {
   dr_hook_procinfo_(&myproc, &nproc);
+}
+
+void
+c_drhook_not_mpi_()
+{
+  /* Emulates in a one call : export DR_HOOK_NOT_MPI=1" */
+  /* To have a desired effect, call BEFORE the very first call to DR_HOOK */
+  static char s[] = "DR_HOOK_NOT_MPI=1"; /* note: must be static */
+  putenv(s);
 }
 
 
@@ -1091,32 +1772,98 @@ signal_drhook_init(int enforce)
      Only enforce-parameter can enforce to set these => no output on myproc=1 */
   if (!enforce && (myproc < 1 || nproc < 0)) return; 
   if (signals_set) return; /* Extra safety */
+  /* To present sumpini.F90 (f.ex.) initializing DrHook-signals in case of 
+     DR_HOOK was turned off (=0), then set also export DR_HOOK_INIT_SIGNALS=0 */
+  env = getenv("DR_HOOK_INIT_SIGNALS");
+  if (env && *env == '0') {
+    signals_set = 2; /* Pretend they are set */
+    return; /* Never initialize signals via DrHook (dangerous, but sometimes necessary) */
+  }
+  if (!ec_drhook) {
+    int slen;
+    char hostname[HOST_NAME_MAX];
+    int ntids = 1;
+#ifdef _OPENMP
+    ntids = omp_get_max_threads();
+#endif
+    numthreads = ntids;
+    ec_drhook = calloc_drhook(ntids, sizeof(*ec_drhook));
+    slen = sizeof(ec_drhook[0].s);
+    timestr_len = sizeof(ec_drhook[0].timestr);
+    if (gethostname(hostname,sizeof(hostname)) != 0) strcpy(hostname,"unknown");
+    if (myproc == 1) {
+      fprintf(stderr,"[EC_DRHOOK:hostname:myproc:omptid:pid:unixtid] [YYYYMMDD:HHMMSS:epoch:walltime] [function@file:lineno] -- Max OpenMP threads = %d\n",ntids);
+    }
+#pragma omp parallel num_threads(ntids)
+    {
+      int tid = get_thread_id_();
+      int j = tid - 1;
+      pid_t unixtid = gettid();
+      snprintf(ec_drhook[j].s,slen,"[EC_DRHOOK:%s:%d:%d:%lld:%lld]",
+	       hostname,myproc,tid,
+	       (long long int)pid, (long long int)unixtid);
+    }
+  }
+  env = getenv("ATP_ENABLED");
+  atp_enabled = (env && *env == '1') ? 1 : 0;
+  if (atp_enabled) {
+    env = getenv("ATP_MAX_CORES");
+    if (env) atp_max_cores = atoi(env);
+    env = getenv("ATP_MAX_ANALYSIS_TIME");
+    if (env) atp_max_analysis_time = atoi(env);
+    env = getenv("ATP_IGNORE_SIGTERM");
+    if (env) atp_ignore_sigterm = atoi(env);
+    if (!silent && myproc == 1) {
+      int tid = get_thread_id_();
+      char *pfx = PREFIX(tid);
+      fprintf(stderr,"%s %s [%s@%s:%d] ATP_ENABLED=%d\n",pfx,TIMESTR(tid),FFL,atp_enabled);
+      fprintf(stderr,"%s %s [%s@%s:%d] ATP_MAX_CORES=%d\n",pfx,TIMESTR(tid),FFL,atp_max_cores);
+      fprintf(stderr,"%s %s [%s@%s:%d] ATP_MAX_ANALYSIS_TIME=%d\n",pfx,TIMESTR(tid),FFL,atp_max_analysis_time);
+      fprintf(stderr,"%s %s [%s@%s:%d] ATP_IGNORE_SIGTERM=%d\n",pfx,TIMESTR(tid),FFL,atp_ignore_sigterm);
+    }
+  }
+  process_options();
   for (j=1; j<=NSIG; j++) { /* Initialize */
     drhook_sig_t *sl = &siglist[j];
-    sl->active = 0;
     sprintf(sl->name, "DR_HOOK_SIG#%d", j);
+    sl->active = 0;
     sl->ignore_atexit = 0;
   }
-  ignore_signals(silent); /* These signals will not be seen by DR_HOOK */
+  ignore_signals(silent); /* These signals will not be handled by DR_HOOK */
+  restore_default_signals(silent); /* These signals will be restored with SIG_DFL status (regardless if to-be-caught with DrHook or ATP or anyhing else) */
   SETSIG(SIGABRT,0); /* Good to be first */
   SETSIG(SIGBUS,0);
   SETSIG(SIGSEGV,0);
-  SETSIG(SIGILL,0);
 #if defined(SIGEMT)
   SETSIG(SIGEMT,0);
 #endif
 #if defined(SIGSTKFLT)
   SETSIG(SIGSTKFLT,0); /* Stack fault */
 #endif
+#if !defined(NECSX)
+  /* For the moment turn off these on NEC SX ... */
   SETSIG(SIGFPE,0);
-  SETSIG(SIGTRAP,0); /* should be switched off when used with debuggers */
+  SETSIG(SIGILL,0);
+#endif
+  SETSIG(SIGTRAP,0); /* Should be switched off when used with debuggers */
   SETSIG(SIGINT,0);
-  SETSIG(SIGQUIT,0);
-  SETSIG(SIGTERM,0);
+  if (atp_enabled) {
+    /* We let ATP to catch SIGQUIT (it uses this for non-failed tasks, we think) -- thus commented out */
+    /* SETSIG(SIGQUIT,0); */
+    /* Unless ATP ignores SIGTERM, we ignore it from DrHook -- thus conditionally commented out */
+    if (atp_ignore_sigterm) SETSIG(SIGTERM,0); /* Means: DrHook does NOT ignore SIGTERM -- ATP does */
+  }
+  else {
+    SETSIG(SIGQUIT,0);
+    SETSIG(SIGTERM,0);
+  }
 #if defined(SIGIOT)
   SETSIG(SIGIOT,0);  /* Same as SIGABRT; Used to be a typo SIGIO ;-( */
 #endif
   SETSIG(SIGXCPU,1); /* ignore_atexit == 1 i.e. no profile info via atexit() */
+#if defined(SIGXFSZ)
+  SETSIG(SIGXFSZ,0);
+#endif
 #if defined(SIGDANGER)
   SETSIG(SIGDANGER,1); /* To catch the place where paging space gets dangerously low */
 #endif
@@ -1127,7 +1874,38 @@ signal_drhook_init(int enforce)
   SETSIG(SIGHUP);
   SETSIG(SIGCONT);
   */
+#if defined(SIGCORE)
+  SETSIG(SIGCORE,0); /* NEC SX core dumping */
+#endif
+#if defined(SIGDEAD)
+  SETSIG(SIGDEAD,0); /* NEC SX dead lock */
+#endif
+#if defined(SIGXMEM)
+  SETSIG(SIGXMEM,0); /* NEC SX exceeded memory size limit */
+#endif
+#if defined(SIGXDSZ)
+  SETSIG(SIGXDSZ,0); /* NEC SX exceeded data size limit */
+#endif
+#if defined(SIGMEM32)
+  SETSIG(SIGMEM32,0); /* NEC SX exceeded memory size limit of 32KB */
+#endif
+#if defined(SIGNMEM)
+  SETSIG(SIGNMEM,0); /* NEC SX exce error for no memory */
+#endif
+#if defined(SIGXABT)
+  SETSIG(SIGXABT,0); /* NEC SX distributed parallel program aborted */
+#endif
+  /*
+    #if defined(SIG)
+    SETSIG(SIG,0);
+    #endif
+  */
   catch_signals(silent); /* Additional signals to be seen by DR_HOOK */
+  if (opt_gencore > 0 && opt_gencore_signal >= 1 && opt_gencore_signal <= NSIG) {
+    drhook_sigfunc_t u;
+    u.func3args = signal_gencore;
+    signal(opt_gencore_signal, u.func1args); /* A facility to dump core */
+  }
   signals_set = 1; /* Signals are set now */
 }
 
@@ -1161,94 +1939,157 @@ get_memmon_out(int me)
   return s;
 }
 
+/*--- random_memstat ---*/
+
+static void
+random_memstat(int tid, int enforce)
+{
+  if (tid == 1 && opt_random_memstat > 0 && opt_random_memstat <= RAND_MAX) {
+    int random_number = rand();
+    if (enforce || random_number % opt_random_memstat == 0) {
+      getmaxhwm_();
+      getmaxstk_();
+    }
+  }
+}
+
 /*--- process_options ---*/
 
 static void do_prof();
 
+void /* Fortran callable */
+c_drhook_process_options_(const int *lhook, const int *Myproc, const int *Nproc)
+{
+    c_drhook_set_lhook_(lhook);
+    if (Myproc) myproc = *Myproc;
+    if (Nproc)  nproc  = *Nproc;
+    process_options();
+}
+
+#define OPTPRINT(fp,...) if (fp) fprintf(fp,__VA_ARGS__)
+
 static void
 process_options()
 {
+  char *pfx = "";
   char *env;
-  FILE *fp = stderr;
+  FILE *fp = NULL;
+  int tid, ienv, newline;
+  static int processed = 0;
+  if (processed) return;
+
+  tid = get_thread_id_();
 
   env = getenv("DR_HOOK_SHOW_PROCESS_OPTIONS");
+  ienv = env ? atoi(env) : 1;
+  if (ienv == -1 || ienv == myproc) fp = stderr;
+  if (fp) pfx = PREFIX(tid);
+
+  OPTPRINT(fp,"%s %s [%s@%s:%d] fp = %p\n",pfx,TIMESTR(tid),FFL,fp);
+
+  env = getenv("DR_HOOK_ALLOW_COREDUMP");
   if (env) {
-    int ienv = atoi(env);
-    if (ienv == 0) fp = NULL;
+    ienv = atoi(env);
+    allow_coredump = (ienv == -1 || ienv == myproc) ? ienv : 0;
+  }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_ALLOW_COREDUMP=%d\n",pfx,TIMESTR(tid),FFL,allow_coredump);
+  if (allow_coredump) {
+    unsigned long long int hardlimit = 0;
+    int rc = set_unlimited_corefile(&hardlimit);
+    if (rc == 0) {
+      OPTPRINT(fp,"%s %s [%s@%s:%d] Hardlimit for core file is now %llu (0x%llx)\n", 
+	       pfx,TIMESTR(tid),FFL,hardlimit,hardlimit);
+    }
   }
 
   env = getenv("DR_HOOK_PROFILE");
   if (env) {
-    char *s = calloc_drhook(strlen(env) + 10, sizeof(*s));
+    char *s = calloc_drhook(strlen(env) + 15, sizeof(*s));
     strcpy(s,env);
     if (!strchr(env,'%')) strcat(s,".%d");
     mon_out = strdup_drhook(s);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_PROFILE=%s\n",mon_out);
-    free(s);
+    free_drhook(s);
   }
+  if (mon_out) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_PROFILE=%s\n",pfx,TIMESTR(tid),FFL,mon_out);
 
   env = getenv("DR_HOOK_PROFILE_PROC");
   if (env) {
     mon_out_procs = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_PROFILE_PROC=%d\n",mon_out_procs);
   }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_PROFILE_PROC=%d\n",pfx,TIMESTR(tid),FFL,mon_out_procs);
 
   env = getenv("DR_HOOK_PROFILE_LIMIT");
   if (env) {
     percent_limit = atof(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_PROFILE_LIMIT=%.3f\n",percent_limit);
   }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_PROFILE_LIMIT=%.3f\n",pfx,TIMESTR(tid),FFL,percent_limit);
 
-  env = getenv("DR_HOOK_CALLPATH_INDENT");
+  env = getenv("DR_HOOK_FUNCENTER");
   if (env) {
-    callpath_indent = atoi(env);
-    if (callpath_indent < 1 || callpath_indent > 8) callpath_indent = callpath_indent_default;
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_CALLPATH_INDENT=%d\n",callpath_indent);
+    opt_funcenter = atoi(env);
   }
+  if (opt_funcenter) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_FUNCENTER=%d\n",pfx,TIMESTR(tid),FFL,opt_funcenter);
 
-  env = getenv("DR_HOOK_CALLPATH_DEPTH");
+  env = getenv("DR_HOOK_FUNCEXIT");
   if (env) {
-    callpath_depth = atoi(env);
-    if (callpath_depth < 0) callpath_depth = callpath_depth_default;
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_CALLPATH_DEPTH=%d\n",callpath_depth);
+    opt_funcexit = atoi(env);
   }
+  if (opt_funcexit) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_FUNCEXIT=%d\n",pfx,TIMESTR(tid),FFL,opt_funcexit);
 
-  env = getenv("DR_HOOK_CALLTRACE");
-  if (env) {
-    opt_calltrace = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_CALLTRACE=%d\n",opt_calltrace);
+  if (opt_funcenter || opt_funcexit) {
+    opt_gethwm = opt_getstk = 1;
   }
 
   env = getenv("DR_HOOK_TIMELINE");
   if (env) {
     opt_timeline = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_TIMELINE=%d\n",opt_timeline);
+  }
+  
+  if (opt_timeline) {
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMELINE=%d\n",pfx,TIMESTR(tid),FFL,opt_timeline);
+
+    env = getenv("DR_HOOK_TIMELINE_THREAD");
+    if (env) {
+      opt_timeline_thread = atoi(env);
+    }
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMELINE_THREAD=%d\n",pfx,TIMESTR(tid),FFL,opt_timeline_thread);
+    
+    env = getenv("DR_HOOK_TIMELINE_FORMAT");
+    if (env) {
+      opt_timeline_format = atoi(env);
+    }
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMELINE_FORMAT=%d\n",pfx,TIMESTR(tid),FFL,opt_timeline_format);
+    
+    env = getenv("DR_HOOK_TIMELINE_UNITNO");
+    if (env) {
+      opt_timeline_unitno = atoi(env);
+    }
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMELINE_UNITNO=%d\n",pfx,TIMESTR(tid),FFL,opt_timeline_unitno);
+
+    env = getenv("DR_HOOK_TIMELINE_FREQ");
+    if (env) {
+      opt_timeline_freq = atoi(env);
+    }
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMELINE_FREQ=%lld\n",pfx,TIMESTR(tid),FFL,opt_timeline_freq);
+
+    env = getenv("DR_HOOK_TIMELINE_MB");
+    if (env) {
+      opt_timeline_MB = atof(env);
+      if (opt_timeline_MB < 0) opt_timeline_MB = 1.0;
+    }
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMELINE_MB=%g\n",pfx,TIMESTR(tid),FFL,opt_timeline_MB);
   }
 
-  env = getenv("DR_HOOK_TIMELINE_THREAD");
+  env = getenv("DR_HOOK_RANDOM_MEMSTAT");
   if (env) {
-    opt_timeline_thread = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_TIMELINE_THREAD=%d\n",opt_timeline_thread);
+    opt_random_memstat = atoi(env);
+    if (opt_random_memstat < 0) opt_random_memstat = 0;
+    if (opt_random_memstat > RAND_MAX) opt_random_memstat = RAND_MAX;
+    random_memstat(1,1);
   }
-
-  env = getenv("DR_HOOK_TIMELINE_FORMAT");
-  if (env) {
-    opt_timeline_format = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_TIMELINE_FORMAT=%d\n",opt_timeline_format);
-  }
-
-  env = getenv("DR_HOOK_TIMELINE_UNITNO");
-  if (env) {
-    opt_timeline_unitno = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_TIMELINE_UNITNO=%d\n",opt_timeline_unitno);
-  }
-
-  env = getenv("DR_HOOK_TIMELINE_FREQ");
-  if (env) {
-    opt_timeline_freq = atoi(env);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_TIMELINE_FREQ=%d\n",opt_timeline_freq);
-  }
-
+  
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_RANDOM_MEMSTAT=%d  (RAND_MAX=%d)\n",pfx,TIMESTR(tid),FFL,opt_random_memstat,RAND_MAX);
+    
   env = getenv("DR_HOOK_HASHBITS");
   if (env) {
     int value = atoi(env);
@@ -1257,7 +2098,80 @@ process_options()
     nhash = value;
     hashsize = HASHSIZE(nhash);
     hashmask = HASHMASK(nhash);
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_HASHBITS=%d\n",nhash);
+  }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_HASHBITS=%d\n",pfx,TIMESTR(tid),FFL,nhash);
+
+  env = getenv("DR_HOOK_NCALLSTACK");
+  if (env) {
+    int value = atoi(env);
+    if (value < 1) value = NCALLSTACK;
+    cstklen = value;
+  }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_NCALLSTACK=%d\n",pfx,TIMESTR(tid),FFL,cstklen);
+
+  env = getenv("DR_HOOK_HARAKIRI_TIMEOUT");
+  if (env) {
+    int value = atoi(env);
+    if (value < 1) value = drhook_harakiri_timeout_default;
+    drhook_harakiri_timeout = value;
+  }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_HARAKIRI_TIMEOUT=%d\n",pfx,TIMESTR(tid),FFL,drhook_harakiri_timeout);
+
+  env = getenv("DR_HOOK_TRAPFPE");
+  if (env) {
+    int value = atoi(env);
+    drhook_trapfpe = (value != 0) ? 1 : 0; /* currently accept just 0 or 1 */
+  }
+  OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TRAPFPE=%d\n",pfx,TIMESTR(tid),FFL,drhook_trapfpe);
+
+  env = getenv("DR_HOOK_TIMED_KILL");
+  if (env) {
+    drhook_timed_kill = strdup_drhook(env);
+  }
+  if (drhook_timed_kill) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_TIMED_KILL=%s\n",pfx,TIMESTR(tid),FFL,drhook_timed_kill);
+
+  env = getenv("DR_HOOK_DUMP_SMAPS");
+  if (env) {
+    ienv = atoi(env);
+    drhook_dump_smaps = (ienv != 0) ? 1 : 0;
+  }
+  if (drhook_dump_smaps) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_DUMP_SMAPS=%d\n",pfx,TIMESTR(tid),FFL,drhook_dump_smaps);
+
+  env = getenv("DR_HOOK_DUMP_BUDDYINFO");
+  if (env) {
+    ienv = atoi(env);
+    drhook_dump_buddyinfo = (ienv != 0) ? 1 : 0;
+  }
+  if (drhook_dump_buddyinfo) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_DUMP_BUDDYINFO=%d\n",pfx,TIMESTR(tid),FFL,drhook_dump_buddyinfo);
+
+  env = getenv("DR_HOOK_DUMP_HUGEPAGES");
+  if (env) {
+    double freq;
+    int nel = sscanf(env,"%d,%lf",&ienv,&freq);
+    if (nel == 2) {
+      drhook_dump_hugepages = (freq > 0 && (ienv == -1 || ienv == myproc)) ? ienv : 0;
+      if (drhook_dump_hugepages) drhook_dump_hugepages_freq = freq;
+    }
+  }
+  if (drhook_dump_hugepages) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_DUMP_HUGEPAGES=%d,%.6f\n",pfx,TIMESTR(tid),FFL,
+				      drhook_dump_hugepages,drhook_dump_hugepages_freq);
+
+  env = getenv("DR_HOOK_GENCORE");
+  if (env) {
+    opt_gencore = atoi(env);
+  }
+
+  if (opt_gencore) {
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_GENCORE=%d\n",pfx,TIMESTR(tid),FFL,opt_gencore);
+    
+    env = getenv("DR_HOOK_GENCORE_SIGNAL");
+    if (env) {
+      int itmp = atoi(env);
+      if (itmp >= 1 && itmp <= NSIG && itmp != SIGABRT) {
+	opt_gencore_signal = itmp;
+      }
+    }
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_GENCORE_SIGNAL=%d\n",pfx,TIMESTR(tid),FFL,opt_gencore_signal);
   }
 
   env = getenv("DR_HOOK_HPMSTOP");
@@ -1274,15 +2188,16 @@ process_options()
     n = sscanf(s,"%lld %lf",&a,&b);
     if (n >= 1) opt_hpmstop_threshold = a;
     if (n >= 2) opt_hpmstop_mflops = b;
-    if (fp) fprintf(fp,">>>process_options(): DR_HOOK_HPMSTOP=%lld,%.15g\n",
-	    opt_hpmstop_threshold,opt_hpmstop_mflops);
+    OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_HPMSTOP=%lld,%.15g\n",
+		    pfx,TIMESTR(tid),FFL,opt_hpmstop_threshold,opt_hpmstop_mflops);
     free_drhook(s);
   }
 
+  newline = 0;
   env = getenv("DR_HOOK_OPT");
   if (env) {
     const char delim[] = ", \t/";
-    char *comma = ">>>process_options(): DR_HOOK_OPT=\"";
+    char *comma = " DR_HOOK_OPT=\"";
     char *s = strdup_drhook(env);
     char *p = s;
     while (*p) {
@@ -1290,85 +2205,90 @@ process_options()
       p++;
     } 
     p = strtok(s,delim);
-    /* if (p) if (fp) fprintf(fp,">>>process_options(): DR_HOOK_OPT=\""); */
+    /* if (p) OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_OPT=\"",pfx,TIMESTR(tid)); */
+    if (p && fp) {
+      fprintf(fp,"%s %s [%s@%s:%d]",pfx,TIMESTR(tid),FFL);
+      newline = 1;
+    }
     while (p) {
       /* Assume that everything is OFF by default */
       if (strequ(p,"ALL")) { /* all except profiler data */
 	opt_gethwm = opt_getstk = opt_getrss = opt_getpag = opt_walltime = opt_cputime = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"ALL"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"ALL"); comma = ",";
       }
       else if (strequ(p,"MEM") || strequ(p,"MEMORY")) {
 	opt_gethwm = opt_getstk = opt_getrss = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"MEMORY"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"MEMORY"); comma = ",";
       }
       else if (strequ(p,"TIME") || strequ(p,"TIMES")) {
 	opt_walltime = opt_cputime = 1;
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"TIMES"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"TIMES"); comma = ",";
       }
       else if (strequ(p,"HWM") || strequ(p,"HEAP")) {
 	opt_gethwm = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"HEAP"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"HEAP"); comma = ",";
       }
       else if (strequ(p,"STK") || strequ(p,"STACK")) {
 	opt_getstk = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"STACK"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"STACK"); comma = ",";
       }
       else if (strequ(p,"RSS")) {
 	opt_getrss = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"RSS"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"RSS"); comma = ",";
       }
       else if (strequ(p,"PAG") || strequ(p,"PAGING")) {
 	opt_getpag = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"PAGING"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"PAGING"); comma = ",";
       }
       else if (strequ(p,"WALL") || strequ(p,"WALLTIME")) {
 	opt_walltime = 1;
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"WALLTIME"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"WALLTIME"); comma = ",";
       }
       else if (strequ(p,"CPU") || strequ(p,"CPUTIME")) {
 	opt_cputime = 1;
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"CPUTIME"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"CPUTIME"); comma = ",";
       }
       else if (strequ(p,"CALLS") || strequ(p,"COUNT")) {
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"CALLS"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"CALLS"); comma = ",";
       }
       else if (strequ(p,"MEMPROF")) {
 	opt_memprof = 1;
+	drhook_memtrace = 1;
 	opt_gethwm = opt_getstk = opt_getrss = 1;
 	opt_getpag = 1;
 	opt_calls = 1;
 	any_memstat++;
-	if (fp) fprintf(fp,"%s%s",comma,"MEMPROF"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"MEMPROF"); comma = ",";
       }
       else if (strequ(p,"PROF") || strequ(p,"WALLPROF")) {
 	opt_wallprof = 1;
 	opt_walltime = 1;
 	opt_cpuprof = 0; /* Note: Switches cpuprof OFF */
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"WALLPROF"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"WALLPROF"); comma = ",";
       }
       else if (strequ(p,"CPUPROF")) {
 	opt_cpuprof = 1;
 	opt_cputime = 1;
 	opt_wallprof = 0; /* Note: Switches walprof OFF */
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"CPUPROF"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"CPUPROF"); comma = ",";
       }
       else if (strequ(p,"HPM") || strequ(p,"HPMPROF") || strequ(p,"MFLOPS")) {
 	opt_hpmprof = 1;
@@ -1376,45 +2296,83 @@ process_options()
 	opt_walltime = 1;
 	opt_cpuprof = 0;  /* Note: Switches cpuprof OFF */
 	opt_calls = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"HPMPROF"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"HPMPROF"); comma = ",";
       }
       else if (strequ(p,"TRIM")) {
 	opt_trim = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"TRIM"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"TRIM"); comma = ",";
       }
       else if (strequ(p,"SELF")) {
 	opt_self = 2;
-	if (fp) fprintf(fp,"%s%s",comma,"SELF"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"SELF"); comma = ",";
       }
       else if (strequ(p,"NOSELF")) {
 	opt_self = 0;
-	if (fp) fprintf(fp,"%s%s",comma,"NOSELF"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"NOSELF"); comma = ",";
       }
       else if (strequ(p,"NOPROP") || strequ(p,"NOPROPAGATE") ||
 	       strequ(p,"NOPROPAGATE_SIGNALS")) {
 	opt_propagate_signals = 0;
-	if (fp) fprintf(fp,"%s%s",comma,"NOPROPAGATE_SIGNALS"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"NOPROPAGATE_SIGNALS"); comma = ",";
       }
       else if (strequ(p,"NOSIZE") || strequ(p,"NOSIZEINFO")) {
 	opt_sizeinfo = 0;
-	if (fp) fprintf(fp,"%s%s",comma,"NOSIZEINFO"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"NOSIZEINFO"); comma = ",";
       }
       else if (strequ(p,"CLUSTER") || strequ(p,"CLUSTERINFO")) {
 	opt_clusterinfo = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"CLUSTERINFO"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"CLUSTERINFO"); comma = ",";
       }
       else if (strequ(p,"CALLPATH")) {
 	opt_callpath = 1;
-	if (fp) fprintf(fp,"%s%s",comma,"CALLPATH"); comma = ",";
+	OPTPRINT(fp,"%s%s",comma,"CALLPATH"); comma = ",";
       }
       p = strtok(NULL,delim);
     }
     free_drhook(s);
-    if (*comma == ',') if (fp) fprintf(fp,"\"\n");
-    if (opt_wallprof || opt_cpuprof || opt_memprof) {
+    if (*comma == ',') {
+      OPTPRINT(fp,"\"\n");
+      newline = 0;
+    }
+    if (newline) OPTPRINT(fp,"\n");
+
+    if (opt_callpath) {
+      env = getenv("DR_HOOK_CALLPATH_INDENT");
+      if (env) {
+	callpath_indent = atoi(env);
+	if (callpath_indent < 1 || callpath_indent > 8) callpath_indent = callpath_indent_default;
+      }
+      OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_CALLPATH_INDENT=%d\n",pfx,TIMESTR(tid),FFL,callpath_indent);
+      
+      env = getenv("DR_HOOK_CALLPATH_DEPTH");
+      if (env) {
+	callpath_depth = atoi(env);
+	if (callpath_depth < 0) callpath_depth = callpath_depth_default;
+      }
+      OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_CALLPATH_DEPTH=%d\n",pfx,TIMESTR(tid),FFL,callpath_depth);
+      
+      env = getenv("DR_HOOK_CALLPATH_PACKED");
+      if (env) {
+	callpath_packed = atoi(env);
+      }
+      OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_CALLPATH_PACKED=%d\n",pfx,TIMESTR(tid),FFL,callpath_packed);
+      
+      env = getenv("DR_HOOK_CALLTRACE");
+      if (env) {
+	opt_calltrace = atoi(env);
+      }
+      OPTPRINT(fp,"%s %s [%s@%s:%d] DR_HOOK_CALLTRACE=%d\n",pfx,TIMESTR(tid),FFL,opt_calltrace);
+    }
+
+    if (opt_wallprof || opt_cpuprof || opt_memprof || opt_timeline) {
       atexit(do_prof);
     }
   }
+  else {
+    if (opt_timeline) atexit(do_prof);
+  } /* if (env) */
+
+  processed = 1;
 }
 
 /*--- trim ---*/
@@ -1439,12 +2397,11 @@ trim(const char *name, int *n)
     name_len--;
   }
   *n = len;
-  if (name) return name;
-  else {
+  if (!name) {
     /* Never actually called (unless a true fatality) */
     ABOR1("***Fatal error in drhook.c:trim()-function");
-    return NULL;
   }
+  return name;
 }
 
 /*--- insertkey ---*/
@@ -1470,7 +2427,7 @@ insertkey(int tid, const drhook_key_t *keyptr_in)
 	keyptr = keyptr->next;
       }  /* if (!keyptr->name) ... else ... */
     } /* for (;;) */
-  } /* if (tid >= 0 && tid < numthreads) */
+  } /* if (tid >= 1 && tid <= numthreads) */
   return keyptr;
 }
 
@@ -1515,7 +2472,9 @@ getkey(int tid, const char *name, int name_len,
 	  memcpy(keyptr->name, name, name_len);
 	  keyptr->name[name_len] = 0;
 	}
-	if (filename && *filename && filename_len > 0) {
+	if (filename_len > 0 &&
+	    filename && 
+	    *filename) {
 	  char *psave = NULL;
 	  char *p = psave = malloc_drhook((filename_len+1)*sizeof(*filename));
 	  memcpy(p, filename, filename_len);
@@ -1571,12 +2530,15 @@ putkey(int tid, drhook_key_t *keyptr, const char *name, int name_len,
        int sizeinfo,
        double *walltime, double *cputime)
 {
+  const int sig = SIGABRT;
+  const char sl_name[] = "SIGABRT";
   drhook_calltree_t *treeptr = (tid >= 1 && tid <= numthreads) ? thiscall[tid-1] : NULL;
-  if (!treeptr || !treeptr->active || !(treeptr->keyptr == keyptr)) {
-    const int sig = SIGABRT;
-    const char sl_name[] = "SIGABRT";
+  if (!treeptr || !treeptr->active || treeptr->keyptr != keyptr) {
+    char *pfx = PREFIX(tid);
     char *s;
-    if (opt_trim) name = trim(name,&name_len);
+    unsigned int hash;
+    if (opt_trim) name = trim(name, &name_len);
+    hash = hashfunc(name, name_len);
     s = strdup2_drhook(name,name_len);
     if (opt_trim) {
       char *p = s;
@@ -1586,24 +2548,57 @@ putkey(int tid, drhook_key_t *keyptr, const char *name, int name_len,
       }
     }
     fprintf(stderr,
-	    "[myproc#%d,tid#%d,pid#%d,signal#%d(%s)]: Dr.Hook has detected an invalid"
-	    " key-pointer/handle while leaving routine '%s'\n",
-	    myproc,tid,pid,sig,sl_name,s);
+	    "%s %s [%s@%s:%d] [signal#%d(%s)]: Dr.Hook has detected an invalid"
+	    " key-pointer/handle while leaving the routine '%s' [hash=%u]\n",
+	    pfx,TIMESTR(tid),FFL,
+	    sig,sl_name,s,hash);
+
     if (treeptr) {
       equivalence_t u;
+
       u.keyptr = treeptr->keyptr;
+      hash = (u.keyptr && u.keyptr->name) ? hashfunc(u.keyptr->name,u.keyptr->name_len) : 0;
       fprintf(stderr,
-	      "[myproc#%d,tid#%d,pid#%d,signal#%d(%s)]: Expecting key-pointer=0x%x (%.20g)"
-	      " and treeptr->active-flag == 1\n",
-	      myproc,tid,pid,sig,sl_name,u.keyptr,u.d);
+	      "%s %s [%s@%s:%d] [signal#%d(%s)]: Expecting the key-pointer=%p"
+	      " and treeptr->active-flag = 1\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,sl_name,u.keyptr);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] [signal#%d(%s)]: A probable routine missing the closing"
+	      " DR_HOOK-call is '%s' [hash=%u]\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,sl_name,
+	      (u.keyptr && u.keyptr->name) ? u.keyptr->name : NIL, hash);
+
       u.keyptr = keyptr;
+      hash = (u.keyptr && u.keyptr->name) ? hashfunc(u.keyptr->name,u.keyptr->name_len) : 0;
       fprintf(stderr,
-	      "[myproc#%d,tid#%d,pid#%d,signal#%d(%s)]: Got a key-pointer=0x%x (%.20g)"
+	      "%s %s [%s@%s:%d] [signal#%d(%s)]: Got a key-pointer=%p"
 	      " and treeptr->active-flag = %d\n",
-	      myproc,tid,pid,sig,sl_name,u.keyptr,u.d,treeptr->active);
+	      pfx,TIMESTR(tid),FFL,
+	      sig,sl_name,u.keyptr,treeptr->active);
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] [signal#%d(%s)]: This key-pointer maybe associated with"
+	      " the routine '%s' [hash=%u]\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,sl_name,
+	      (u.keyptr && u.keyptr->name) ? u.keyptr->name : NIL, hash);
+
+      u.keyptr = curkeyptr[tid-1];
+      hash = (u.keyptr && u.keyptr->name) ? hashfunc(u.keyptr->name,u.keyptr->name_len) : 0;
+      fprintf(stderr,
+	      "%s %s [%s@%s:%d] [signal#%d(%s)]: The current key-pointer (=%p) thinks"
+	      " it maybe associated with the routine '%s' [hash=%u]\n",
+	      pfx,TIMESTR(tid),FFL,
+	      sig,sl_name,
+	      u.keyptr,
+	      (u.keyptr && u.keyptr->name) ? u.keyptr->name : NIL, hash);
     }
-    fprintf(stderr,"[myproc#%d,tid#%d,pid#%d,signal#%d(%s)]: Aborting...\n",myproc,tid,pid,sig,sl_name);
     free_drhook(s);
+    fprintf(stderr,
+	    "%s %s [%s@%s:%d] [signal#%d(%s)]: Aborting...\n",
+	    pfx,TIMESTR(tid),FFL,
+	    sig,sl_name);
     RAISE(SIGABRT);
   }
   else if (tid >= 1 && tid <= numthreads) {
@@ -1611,6 +2606,17 @@ putkey(int tid, drhook_key_t *keyptr, const char *name, int name_len,
     double delta_cpu  = 0;
     if (any_memstat) memstat(keyptr,&tid,0);
     if (opt_calls)   keyptr->status--;
+    if (opt_sizeinfo && sizeinfo > 0) {
+      if (keyptr->sizeinfo == 0) { /* First time */
+	keyptr->min_sizeinfo = sizeinfo;
+	keyptr->max_sizeinfo = sizeinfo;
+      }
+      else {
+	keyptr->min_sizeinfo = MIN(keyptr->min_sizeinfo, sizeinfo);
+	keyptr->max_sizeinfo = MAX(keyptr->max_sizeinfo, sizeinfo);
+      }
+      keyptr->sizeinfo += sizeinfo;
+    }
     if (opt_cputime && cputime) {
       *cputime = CPUTIME();
       delta_cpu = *cputime - keyptr->cpu_in;
@@ -1621,7 +2627,6 @@ putkey(int tid, drhook_key_t *keyptr, const char *name, int name_len,
     }
     if (opt_walltime) keyptr->delta_wall_all += delta_wall;
     if (opt_cputime)  keyptr->delta_cpu_all  += delta_cpu;
-    if (opt_sizeinfo && sizeinfo > 0) keyptr->sizeinfo += sizeinfo;
     remove_calltree(tid, keyptr, &delta_wall, &delta_cpu);
   }
 }
@@ -1631,7 +2636,7 @@ putkey(int tid, drhook_key_t *keyptr, const char *name, int name_len,
 static void
 init_drhook(int ntids)
 {
-  if (numthreads == 0 || !keydata || !calltree || !keyself || !overhead || !curkeyptr) {
+  if (numthreads == 0 || !keydata || !calltree || !keyself || !overhead || !curkeyptr || !cstk) {
     int j;
     if (pid == -1) { /* Ensure that just called once */
       {
@@ -1639,13 +2644,18 @@ init_drhook(int ntids)
 	(void) WALLTIME();
 	(void) CPUTIME();
 	(void) gethwm_();
+	(void) getmaxhwm_();
 	(void) getrss_();
+	(void) getmaxrss_();
 	(void) getstk_();
 	(void) getmaxstk_();
 	(void) getpag_();
       }
 #ifdef RS6K
       irtc_start = irtc();
+#endif
+#ifdef CRAYXT
+      dclock_start = dclock();
 #endif
 #if defined(SV2) || defined(XD1) || defined(XT3)
 #if defined(SV2)
@@ -1668,7 +2678,7 @@ init_drhook(int ntids)
 	  coml_set_debug_(&konoff, &kret);
 	}
       }
-#ifdef NEC
+#if defined(NECSX)
       { /* If C-programs compiled with -traceback, then NEC/F90 
 	   MESPUT-call will also includes C-routines in the traceback if 
 	   in addition 'export C_TRACEBACK=YES' */
@@ -1682,7 +2692,9 @@ init_drhook(int ntids)
 #endif
       ec_set_umask_();
       pid = getpid();
+      signal_drhook_init(1); /* myproc gets set .. if not earlier */
       process_options();
+      set_timed_kill();
       drhook_lhook = 1;
     }
     if (!keydata) {
@@ -1690,6 +2702,9 @@ init_drhook(int ntids)
       for (j=0; j<ntids; j++) {
 	keydata[j] = calloc_drhook(hashsize, sizeof(drhook_key_t));
       }
+    }
+    if (!cstk) {
+      cstk = calloc_drhook(ntids, sizeof(**cstk));
     }
     if (!calltree) {
       calltree = malloc_drhook(sizeof(**calltree) * ntids);
@@ -1718,11 +2733,19 @@ init_drhook(int ntids)
       }
     }
     numthreads = ntids;
-    signal_drhook_init(1);
-    if (!timeline_calls) {
+    if (!timeline) {
       if (opt_timeline_unitno >= 0 && opt_timeline_freq >= 1 &&
 	  (opt_timeline == myproc || opt_timeline == -1)) {
-	timeline_calls = calloc_drhook(ntids * 2, sizeof(*timeline_calls));
+	timeline = calloc_drhook(ntids, sizeof(*timeline));
+      }
+      if (timeline) drhook_memtrace = 1;
+      if (timeline) {
+	/* The first timeline-call */
+	const int ftnunitno = opt_timeline_unitno;
+	const int master = 1;
+	const int print_option = +7;
+	int initlev = 0;
+	c_drhook_print_(&ftnunitno, &master, &print_option, &initlev);
       }
     }
     init_hpm(1); /* First thread */
@@ -1764,7 +2787,7 @@ itself(drhook_key_t *keyptr_self,
 {
   drhook_key_t *keyptr = NULL;
   if (keyself) {
-    keyptr = keyptr_self ? keyptr_self : keyself[--tid];
+    keyptr = keyptr_self ? keyptr_self : keyself[tid-1];
     if (opt == 0) {
       if (opt_wallprof) keyptr->wall_in = walltime ? *walltime : WALLTIME();
       else              keyptr->cpu_in = cputime ? *cputime : CPUTIME();
@@ -1860,10 +2883,10 @@ unroll_callpath(FILE *fp, int len,
 #ifdef DEBUG
       else {
 	fprintf(fp,
-		"\n????callpath=0x%x, callpath->keyptr=0x%x,  callpath->keyptr->name='%s'",
+		"\n????callpath=%p, callpath->keyptr=%p,  callpath->keyptr->name='%s'",
 		callpath, callpath ? callpath->keyptr : 0,
 		(callpath && callpath->keyptr && callpath->keyptr->name) ?
-		callpath->keyptr->name : "(nil)");
+		callpath->keyptr->name : NIL);
       }
 #endif
     }
@@ -1877,7 +2900,7 @@ get_callpath(int tid, int *callpath_len)
   int depth = 0;
   equivalence_t *callpath = NULL;
   if (tid >= 1 && tid <= numthreads) {
-    const drhook_calltree_t *treeptr = thiscall[--tid];
+    const drhook_calltree_t *treeptr = thiscall[tid-1];
     while (treeptr && treeptr->active && depth < callpath_depth) {
       depth++;
       treeptr = treeptr->prev;
@@ -1885,7 +2908,7 @@ get_callpath(int tid, int *callpath_len)
     if (depth > 0) {
       int j = 0;
       callpath = malloc_drhook(sizeof(*callpath) * depth);
-      treeptr = thiscall[tid];
+      treeptr = thiscall[tid-1];
       while (treeptr && treeptr->active && j < callpath_depth) {
 	callpath[j].keyptr = treeptr->keyptr;
 	j++;
@@ -1925,19 +2948,64 @@ do_prof()
     int initlev = 0;
     c_drhook_print_(&ftnunitno, &master, &print_option, &initlev);
   }
+
+  if (!do_prof_off && timeline) {
+    /* The last timeline-call */
+    const int ftnunitno = opt_timeline_unitno;
+    const int master = 1;
+    const int print_option = -7;
+    int initlev = 0;
+    c_drhook_print_(&ftnunitno, &master, &print_option, &initlev);
+  }
 }
 
 /*--- Check watch points ---*/
 
+typedef enum { /* See dr_hook_watch_mod.F90 */
+  KEYNONE =  0,
+  KEYLOG  =  1,
+  KEYCHAR =  2,
+  KEY_I4  =  4,
+  KEY_I8  =  8,
+  KEY_R4  = 16,
+  KEY_R8  = 32 
+} PrintWatchKeys_t;
+
+static void print_watch(int ftnunitno, int key, const void *ptr, int n)
+{
+  if (ptr && key > KEYNONE && n > 0) {
+    int nmax = n;
+    if (key == KEYLOG) {
+      dr_hook_prt_logical_(&ftnunitno, ptr, &nmax);
+    }
+    else if (key == KEYCHAR) {
+      dr_hook_prt_char_(&ftnunitno, ptr, &nmax);
+    }
+    else if (key == KEY_I4) {
+      dr_hook_prt_i4_(&ftnunitno, ptr, &nmax);
+    }
+    else if (key == KEY_I8) {
+      dr_hook_prt_i8_(&ftnunitno, ptr, &nmax);
+    }
+    else if (key == KEY_R4) {
+      dr_hook_prt_r4_(&ftnunitno, ptr, &nmax);
+    }
+    else if (key == KEY_R8) {
+      dr_hook_prt_r8_(&ftnunitno, ptr, &nmax);
+    }
+  }
+}
+
 static void 
 check_watch(const char *label,
 	    const char *name,
-	    int name_len)
+	    int name_len,
+	    int allow_abort)
 {
   if (watch) {
-    drhook_watch_t *p;
+    int print_traceback = 1;
+    drhook_watch_t *p = watch;
     coml_set_lockid_(&DRHOOK_lock);
-    p = watch;
     while (p) {
       if (p->active) {
 	unsigned int crc32 = 0;
@@ -1945,26 +3013,37 @@ check_watch(const char *label,
 	const char *first_nbytes = p->ptr;
 	int changed = memcmp(first_nbytes,p->ptr,p->watch_first_nbytes);
 	if (!changed) {
-	  /* The first nbytes the same; checking if crc has changed ... */
+	  /* The first nbytes were still the same; checking if crc has changed ... */
 	  crc32_(p->ptr, &p->nbytes, &crc32);
 	  changed = (crc32 != p->crc32);
 	  calc_crc = 1;
 	}
 	if (changed) {
 	  int tid = get_thread_id_();
+	  char *pfx = PREFIX(tid);
 	  if (!calc_crc) crc32_(p->ptr, &p->nbytes, &crc32);
 	  fprintf(stderr,
-		  "***%s: Watch point '%s' at address 0x%x on myproc#%d has changed"
-		  " (detected in tid#%d when %s routine %.*s) : new crc32=%u\n",
+		  "%s %s [%s@%s:%d] ***%s: Changed watch point '%s' at %p (%d bytes [#%d values])"
+		  " -- %s %.*s : new crc32=%u\n",
+		  pfx,TIMESTR(tid),FFL,
 		  p->abort_if_changed ? "Error" : "Warning",
-		  p->name, p->ptr, myproc, tid,
+		  p->name, p->ptr, p->nbytes, p->nvals,
 		  label, name_len, name, crc32);
-	  if (p->abort_if_changed) {
+	  print_watch(0, p->printkey, p->ptr, p->nvals);
+	  if (print_traceback) {
+	    LinuxTraceBack(pfx,TIMESTR(tid),NULL);
+	    print_traceback = 0;
+	  }
+	  if (allow_abort && p->abort_if_changed) {
 	    coml_unset_lockid_(&DRHOOK_lock); /* An important unlocking on Linux; otherwise hangs (until time-out) */
 	    RAISE(SIGABRT);
 	  }
+#if 0
 	  p->active = 0; /* No more these messages for this array */
 	  watch_count--;
+#else
+	  p->crc32 = crc32;
+#endif
 	}
       }
       p = p->next;
@@ -1973,11 +3052,22 @@ check_watch(const char *label,
   }
 }
 
+void
+c_drhook_check_watch_(const char *where,
+		      const int *allow_abort
+		      /* Hidden length */
+		      , int where_len)
+{
+  if (watch && watch_count > 0) check_watch("whilst at", where, where_len, *allow_abort);
+}
+
 /*** PUBLIC ***/
 
 #define TIMERS \
-double walltime = opt_walltime ? WALLTIME() : 0; \
-double cputime  = opt_cputime ? CPUTIME()  : 0
+  double walltime = opt_walltime ? WALLTIME() : 0;	\
+  double cputime  = opt_cputime ? CPUTIME()  : 0;	\
+  long long int hwm = opt_gethwm ? gethwm_() : 0;	\
+  long long int stk = opt_getstk ? getstk_() : 0
 
 
 /*=== c_drhook_set_lhook_ ===*/
@@ -2012,7 +3102,7 @@ c_drhook_getenv_(const char *s,
     if (valuelen < len) len = valuelen;
     memcpy(value,env,len); 
   }
-  free(p);
+  free_drhook(p);
 }
 
 
@@ -2059,7 +3149,10 @@ c_drhook_watch_(const int *onoff,
 		const char *array_name,
 		const void *array_ptr,
 		const int *nbytes,
-		const int *abort_if_changed
+		const int *abort_if_changed,
+		const int *printkey,
+		const int *nvals,
+		const int *print_traceback_when_set
 		/* Hidden length */
 		,int array_name_len)
 {
@@ -2103,9 +3196,21 @@ c_drhook_watch_(const int *onoff,
   memcpy(p->first_nbytes,p->ptr,p->watch_first_nbytes);
   p->crc32 = 0;
   crc32_(p->ptr, &p->nbytes, &p->crc32);
-  fprintf(stderr,
-  "***Warning: Watch point '%s' was created for address 0x%x (%d bytes, on myproc#%d, tid#%d) : crc32=%u\n",
-          p->name, p->ptr, p->nbytes, myproc, p->tid, p->crc32);
+  p->printkey = *printkey;
+  p->nvals = *nvals;
+  {
+    char *pfx = PREFIX(p->tid);
+    int ftnunitno = 0;
+    int textlen = strlen(pfx) + strlen(p->name) + 256;
+    char *text = malloc_drhook(textlen * sizeof(*text));
+    snprintf(text,textlen,
+	     "%s ***Warning: Set watch point '%s' at %p (%d bytes [%d values]) : crc32=%u",
+	     pfx, p->name, p->ptr, p->nbytes, p->nvals, p->crc32);
+    dr_hook_prt_(&ftnunitno, text, strlen(text));
+    print_watch(ftnunitno, p->printkey, p->ptr, p->nvals);
+    free_drhook(text);
+    if (*print_traceback_when_set) LinuxTraceBack(pfx,TIMESTR(p->tid),NULL);
+  }
 
   coml_unset_lockid_(&DRHOOK_lock);
 }
@@ -2125,7 +3230,17 @@ c_drhook_start_(const char *name,
   equivalence_t u;
   ITSELF_0;
   if (!signals_set) signal_drhook_init(1);
-  if (watch && watch_count > 0) check_watch("entering", name, name_len);
+  if (name_len > 0 && opt_funcenter == *thread_id) {
+    fprintf(stdout,"<e> %d %d %.*s %lld %lld\n",myproc,*thread_id,name_len,name,hwm,stk);
+    fflush(stdout);
+  }
+  if (watch && watch_count > 0) check_watch("when entering routine", name, name_len, 1);
+  if (drhook_dump_hugepages) {
+    int tid = *thread_id;
+    char *pfx = PREFIX(tid);
+    dump_hugepages(0,pfx,tid,0,-1);
+  }
+  /* if (opt_random_memstat > 0) random_memstat(*thread_id,0); */
   if (!opt_callpath) {
     u.keyptr = getkey(*thread_id, name, name_len, 
 		      filename, filename_len,
@@ -2142,7 +3257,14 @@ c_drhook_start_(const char *name,
 		      callpath, callpath_len, &free_callpath);
     if (free_callpath) free_drhook(callpath);
   }
-  *key = u.d;
+  if (cstklen == 0) {
+    /* Double precision */
+    *key = u.d;
+  }
+  else {
+    /* Single precision : The variable "*key" is treated like max 4-byte entity -- "an index" */
+    (void) callstack(*thread_id, key, u.keyptr);
+  }
   ITSELF_1;
   if (opt_calltrace) {      
     coml_set_lockid_(&DRHOOK_lock);
@@ -2155,17 +3277,32 @@ c_drhook_start_(const char *name,
     }
     coml_unset_lockid_(&DRHOOK_lock);
   }
-  if (timeline_calls) {
+  if (timeline) {
     int tid = *thread_id;
     if (opt_timeline_thread <= 0 || tid <= opt_timeline_thread) {
-      int id = 2 * (tid - 1);
-      if ((timeline_calls[id]++)%opt_timeline_freq == 0) {
+      drhook_timeline_t *tl = &timeline[tid-1];
+      int bigjump = 1;
+      unsigned long long int mod = (tl->calls[0]++)%opt_timeline_freq;
+      double rss = (double)(getrss_()/1048576.0); /* in MBytes */
+      double curheap = (opt_timeline_thread == 1 && tid == 1) ?
+	(double)(getcurheap_()/1048576.0) : (double)(getcurheap_thread_(&tid)/1048576.0); /* in MBytes */
+      if (mod != 0) {
+	double inc_MB;
+	inc_MB = tl->last_rss_MB - rss;
+	if (ABS(inc_MB) < opt_timeline_MB) {
+	  inc_MB = tl->last_curheap_MB - curheap;
+	}
+	if (ABS(inc_MB) < opt_timeline_MB) bigjump = 0;
+      }
+      if (mod == 0 || bigjump) {
 	coml_set_lockid_(&DRHOOK_lock);
 	{
-	  const int ftnunitno = opt_timeline_unitno;
+	  int ftnunitno = opt_timeline_unitno;
 	  const int print_option = 5; /* calling "tree" with just the current entry */
 	  int level = 0;
-	  c_drhook_print_(&ftnunitno, thread_id, &print_option, &level);
+	  tl->last_rss_MB = rss;
+	  tl->last_curheap_MB = curheap;
+	  c_drhook_print_(&ftnunitno, &tid, &print_option, &level);
 	}
 	coml_unset_lockid_(&DRHOOK_lock);
       }
@@ -2187,7 +3324,14 @@ c_drhook_end_(const char *name,
   TIMERS;
   equivalence_t u;
   ITSELF_0;
-  u.d = *key;
+  if (cstklen == 0) {
+    /* Double precision */
+    u.d = *key;
+  }
+  else {
+    /* Single precision : The variable "*key" is treated like max 4-byte entity -- "an index" */
+    u.keyptr = callstack(*thread_id, (void *)key, NULL);
+  }
   /*
   if (opt_calltrace) {
     coml_set_lockid_(&DRHOOK_lock);
@@ -2195,23 +3339,43 @@ c_drhook_end_(const char *name,
     coml_unset_lockid_(&DRHOOK_lock);
   }
   */
-  if (timeline_calls) {
+  if (name_len > 0 && opt_funcexit == *thread_id) {
+    fprintf(stdout,"<x> %d %d %.*s %lld %lld\n",myproc,*thread_id,name_len,name,hwm,stk);
+    fflush(stdout);
+  }
+  if (opt_random_memstat > 0) random_memstat(*thread_id,0);
+  if (timeline) {
     int tid = *thread_id;
     if (opt_timeline_thread <= 0 || tid <= opt_timeline_thread) {
-      int id = 2 * (tid - 1);
-      if ((timeline_calls[id]++)%opt_timeline_freq == 0) {
+      drhook_timeline_t *tl = &timeline[tid-1];
+      int bigjump = 1;
+      unsigned long long int mod = (tl->calls[1]++)%opt_timeline_freq;
+      double rss = (double)(getrss_()/1048576.0); /* in MBytes */
+      double curheap = (opt_timeline_thread == 1 && tid == 1) ?
+	(double)(getcurheap_()/1048576.0) : (double)(getcurheap_thread_(&tid)/1048576.0); /* in MBytes */
+      if (mod != 0) {
+	double inc_MB;
+	inc_MB = tl->last_rss_MB - rss;
+	if (ABS(inc_MB) < opt_timeline_MB) {
+	  inc_MB = tl->last_curheap_MB - curheap;
+	}
+	if (ABS(inc_MB) < opt_timeline_MB) bigjump = 0;
+      }
+      if (mod == 0 || bigjump) {
 	coml_set_lockid_(&DRHOOK_lock);
 	{
-	  const int ftnunitno = opt_timeline_unitno;
+	  int ftnunitno = opt_timeline_unitno;
 	  const int print_option = -5; /* calling "tree" with just the current entry */
 	  int level = 0;
-	  c_drhook_print_(&ftnunitno, thread_id, &print_option, &level);
+	  tl->last_rss_MB = rss;
+	  tl->last_curheap_MB = curheap;
+	  c_drhook_print_(&ftnunitno, &tid, &print_option, &level);
 	}
 	coml_unset_lockid_(&DRHOOK_lock);
       }
     } /* if (opt_timeline_thread <= 0 || tid <= opt_timeline_thread) */
   }
-  if (watch && watch_count > 0) check_watch("leaving", name, name_len);
+  if (watch && watch_count > 0) check_watch("when leaving routine", name, name_len, 1);
   putkey(*thread_id, u.keyptr, name, name_len, 
 	 *sizeinfo,
 	 &walltime, &cputime);
@@ -2225,6 +3389,18 @@ c_drhook_memcounter_(const int *thread_id,
 		     const long long int *size,
 		     long long int *keyptr_addr)
 {
+  int tid = (thread_id && (*thread_id >= 1) && (*thread_id <= numthreads))
+    ? *thread_id : get_thread_id_();
+  int has_timeline = (timeline && size) ? opt_timeline : 0;
+  if (has_timeline) {
+    if (opt_timeline_thread <= 1 || tid <= opt_timeline_thread) {
+      double size_MB = (double)((*size)/1048576.0); /* In MBytes */
+      if (ABS(size_MB) < opt_timeline_MB) has_timeline = 0; /* Do not report */
+    }
+    else {
+      has_timeline = 0; /* Do not report */
+    }
+  } /* if (has_timeline) */
   if (opt_memprof) {
     if (size) {
       union {
@@ -2232,12 +3408,9 @@ c_drhook_memcounter_(const int *thread_id,
 	drhook_key_t *keyptr;
       } u;
       long long int alldelta;
-      int tid = (thread_id && (*thread_id >= 1) && (*thread_id <= numthreads))
-	? *thread_id : get_thread_id_();
-      tid--;
       if (*size > 0) { /* Memory is being allocated */
-	if (curkeyptr[tid]) {
-	  drhook_key_t *keyptr = curkeyptr[tid];
+	if (curkeyptr[tid-1]) {
+	  drhook_key_t *keyptr = curkeyptr[tid-1];
 	  keyptr->mem_curdelta += *size;
 	  alldelta = keyptr->mem_curdelta + keyptr->mem_child;
 	  if (alldelta > keyptr->maxmem_alldelta) keyptr->maxmem_alldelta = alldelta;
@@ -2251,7 +3424,7 @@ c_drhook_memcounter_(const int *thread_id,
 	}
 	else {
 	  if (keyptr_addr) *keyptr_addr = 0;
-	} /* if (curkeyptr[tid]) */
+	} /* if (curkeyptr[tid-1]) */
 	/*
 	fprintf(stderr,
 		"memcounter: allocated %lld bytes ; *keyptr_addr = %lld\n",
@@ -2265,7 +3438,7 @@ c_drhook_memcounter_(const int *thread_id,
 	  keyptr = u.keyptr;
 	}
 	else 
-	  keyptr = curkeyptr[tid];
+	  keyptr = curkeyptr[tid-1];
 	/*
 	fprintf(stderr,
 		"memcounter: DE-allocated %lld bytes ; *keyptr_addr = %lld\n",
@@ -2278,9 +3451,26 @@ c_drhook_memcounter_(const int *thread_id,
 	  if (alldelta > keyptr->maxmem_alldelta) keyptr->maxmem_alldelta = alldelta;
 	  if (*size < 0) keyptr->free_count++;
 	} /* if (keyptr) */
-      }
+      } /* if (*size > 0) ... else */
     } /* if (size) */
-  }
+  } /* if (opt_memprof) */
+  if (has_timeline) {
+    double curheap = (opt_timeline_thread == 1 && tid == 1) ?
+      (double)(getcurheap_()/1048576.0) : (double)(getcurheap_thread_(&tid)/1048576.0); /* in MBytes */
+    double rss = (double)(getrss_()/1048576.0); /* in MBytes */
+    coml_set_lockid_(&DRHOOK_lock);
+    {
+      int ftnunitno = opt_timeline_unitno;
+      double size_MB = (double)((*size)/1048576.0); /* In MBytes */
+      int print_option = (size_MB > 0) ? 6 : -6; /* timeline upon c_drhook_memcounter_ & (big) ALLOCATE or DEALLOCATE */
+      int level = 0;
+      drhook_timeline_t *tl = &timeline[tid-1];
+      tl->last_curheap_MB = curheap;
+      tl->last_rss_MB = rss;
+      c_drhook_print_(&ftnunitno, &tid, &print_option, &level);
+    }
+    coml_unset_lockid_(&DRHOOK_lock);
+  } /* if (has_timeline) */
 }
 
 /*=== c_drhook_print_ ===*/
@@ -2379,24 +3569,67 @@ trim_and_adjust_left(const char *p, int *name_len)
   return p;
 }
 
+static void print_routine_name0(FILE * fp, const char * p_name, int p_tid, const char * p_filename, int p_cluster, 
+                                const equivalence_t * p_callpath, int p_callpath_len, int len, int cluster_size) 
+{
+  int name_len = 0; 
+  const char *name = trim_and_adjust_left(p_name,&name_len); 
+
+  if (callpath_packed) {
+
+    if (p_callpath && p_callpath_len > 0) {
+      const equivalence_t * callpath = &p_callpath[p_callpath_len-1];
+      int j;
+      for (j=0; j<p_callpath_len; callpath--, j++) 
+        if (callpath && callpath->keyptr && callpath->keyptr->name) {
+          const char *name = callpath->keyptr->name;
+          int name_len = callpath->keyptr->name_len;
+          fprintf(fp,"%.*s/",name_len,name);
+        }
+    } 
+  } 
+
+  fprintf(fp,"%.*s@%d%s%s", 
+          name_len, name, 
+          p_tid, 
+          p_filename ? ":" : "", 
+          p_filename ? p_filename : ""); 
+  
+  if (opt_clusterinfo) { 
+    fprintf(fp," [%d,%d]", 
+            p_cluster, ABS(cluster_size)); 
+  } 
+    
+  if (!callpath_packed) 
+    unroll_callpath(fp, len, p_callpath, p_callpath_len); 
+  
+
+}
+
 #define print_routine_name(fp, p, len, cluster_size) \
   if (fp && p) { \
-    int name_len = 0; \
-    const char *name = trim_and_adjust_left(p->name,&name_len); \
-    fprintf(fp,"%.*s@%d%s%s", \
-	    name_len, name, \
-	    p->tid, \
-	    p->filename ? ":" : "", \
-	    p->filename ? p->filename : ""); \
-    \
-    if (opt_clusterinfo) { \
-      fprintf(fp," [%d,%d]", \
-	      p->cluster, ABS(cluster_size)); \
-    } \
-    \
-    unroll_callpath(fp, len, p->callpath, p->callpath_len); \
+    print_routine_name0(fp, p->name, p->tid, p->filename, p->cluster, \
+                        p->callpath, p->callpath_len, len, cluster_size);\
   } /* if (fp && p) */
 
+
+#ifdef NECSX
+/* We need this because NEC SX refuses to write no more than 132 character for Fortran unit = 0 */
+static void
+DrHookPrint(int ftnunitno, const char *line)
+{
+  if (line) {
+    FILE *fp = NULL;
+    if (ftnunitno <= 0) 
+      fp = stderr;
+    else if (ftnunitno == 6) 
+      fp = stdout;
+    else
+      dr_hook_prt_(&ftnunitno, line, strlen(line));
+    OPTPRINT(fp,"%s\n",line);
+  }
+}
+#endif
 
 void 
 c_drhook_print_(const int *ftnunitno,
@@ -2408,14 +3641,35 @@ c_drhook_print_(const int *ftnunitno,
 					    4=memory profiling
 					    5=timeline upon entering the routine
 					   -5=timeline upon leaving the routine
+					    6=timeline upon c_drhook_memcounter_ & (big) ALLOCATE
+					   -6=timeline upon c_drhook_memcounter_ & (big) DEALLOCATE
+					    7=timeline : the very first call (upon setup or dr.hook)
+					   -7=timeline : the very last call (in atexit())
 					 */
 		int *level
 		)
 {
-  int tid = (thread_id && (*thread_id > 0)) ? *thread_id : get_thread_id_();
-  if (keydata && calltree && tid >= 1 && tid <= numthreads) {
+  static int first_time = 0;
+  int tid = (thread_id && (*thread_id >= 1) && (*thread_id <= numthreads))
+    ? *thread_id : get_thread_id_();
+  int mytid = get_thread_id_();
+  char *pfx = PREFIX(tid);
+  if (ftnunitno && keydata && calltree) {
     char line[4096];
+    int abs_print_option = ABS(*print_option);
     int j;
+
+  /* Mod to call traceback and continue if called with level=99 */
+      if(*level == 99) {
+        *level=0;
+      }
+      else {
+        if(*print_option == 2) {
+          if(first_time == 1) return;
+          first_time = 1;
+        }
+      }
+  /* end of Mod  */
 
     if (*print_option == 1) { /* raw call counts */
       for (j=0; j<hashsize; j++) {
@@ -2425,8 +3679,9 @@ c_drhook_print_(const int *ftnunitno,
 	  if (keyptr->name) {
 	    char *s = line;
 	    sprintf(s,
-		    "[myproc#%d,tid#%d,pid#%d,hash#%d,nest=%d]: '%s'",
-		    myproc,tid,pid,j,nestlevel,keyptr->name);
+		    "%s %s [%s@%s:%d] [hash#%d,nest=%d] '%s'",
+		    pfx,TIMESTR(tid),FFL,
+		    j,nestlevel,keyptr->name);
 	    s += strlen(s);
 	    PRINT_CALLS();
 	    PRINT_HWM();
@@ -2436,7 +3691,11 @@ c_drhook_print_(const int *ftnunitno,
 	    PRINT_WALL();
 	    PRINT_CPU();
 	    *s = 0;
+#ifdef NECSX
+	    DrHookPrint(*ftnunitno, line);
+#else
 	    dr_hook_prt_(ftnunitno, line, strlen(line));
+#endif
 	  }
 	  keyptr = keyptr->next;
 	  nestlevel++;
@@ -2444,55 +3703,131 @@ c_drhook_print_(const int *ftnunitno,
       } /* for (j=0; j<hashsize; j++) */
     }
 
-    else if (*print_option == 2 || ABS(*print_option) == 5) { /* current calling tree */
+    else if (*print_option == 2 || 
+	     abs_print_option == 5 || 
+	     abs_print_option == 6 || 
+	     abs_print_option == 7
+	     ) { /* the current calling tree */
       drhook_calltree_t *treeptr = calltree[tid-1];
-      if (tid > 1 && *print_option == 2) { 
-	/* I'm not master thread, but my master has the beginning of the calltree */
-	int initlev = 0;
-	const int master = 1;
-	c_drhook_print_(ftnunitno, &master, print_option, &initlev);
-	*level += initlev;
+
+      if (*print_option == 2) { 
+	long long int hwm = getmaxhwm_()/1048576;
+	long long int rss = getmaxrss_()/1048576;
+	long long int maxstack = getmaxstk_()/1048576;
+	snprintf(line,sizeof(line),
+		 "%s %s [%s@%s:%d] %lld MB (maxheap), %lld MB (maxrss), %lld MB (maxstack)",
+		 pfx,TIMESTR(tid),FFL,
+		 hwm,rss,maxstack);
+#ifdef NECSX
+	DrHookPrint(*ftnunitno, line);
+#else
+	dr_hook_prt_(ftnunitno, line, strlen(line));
+#endif
       }
-      while (treeptr && treeptr->active) {
+
+      if (tid > 1) {
+	if (*print_option == 2) {
+	  /* I'm not a master thread, but my master has the beginning of the calltree */
+	  int initlev = 0;
+	  const int master = 1;
+          first_time = 0;
+	  c_drhook_print_(ftnunitno, &master, print_option, &initlev);
+	  *level += initlev;
+	}
+	else if (tid > opt_timeline_thread) {
+	  return;
+	}
+      }
+
+      if (abs_print_option == 7) {
+	treeptr = NULL;
+      }
+      else if (abs_print_option == 5 || abs_print_option == 6) {
+	treeptr = thiscall[tid-1];
+      }
+      else {
+	treeptr = calltree[tid-1];
+      }
+
+      while (abs_print_option == 7 || (treeptr && treeptr->active)) {
 	int do_print = (*print_option == 2 || 
-			(ABS(*print_option) == 5 && 
-			((!treeptr->next) || (treeptr->next && !treeptr->next->active))));
+			abs_print_option == 7 ||
+			abs_print_option == 5 || abs_print_option == 6);
 	if (do_print) {
-	  drhook_key_t *keyptr = treeptr->keyptr;
+	  drhook_key_t *keyptr = (abs_print_option == 7) ? NULL : treeptr->keyptr;
 	  char *s = line;
-	  char kind = (*print_option == 2) ? ':' :
-	    ((*print_option == -5) ? '<' : '>');
-	  sprintf(s,"[myproc#%d,tid#%d,pid#%d]%c ",myproc,tid,pid,kind);
+	  char is_timeline = 1, kind;
+	  switch (*print_option) {
+	  case -5: kind = '<'; break;
+	  case -6: kind = '-'; break;
+	  case -7: kind = 'E'; break;
+	  case  5: kind = '>'; break;
+	  case  6: kind = '+'; break;
+	  case  7: kind = 'B'; break;
+	  default:
+	  case 2: kind = ':'; is_timeline = 0; break;
+	  }
+	  if (*print_option == 2 || 
+	      (is_timeline && tid > 1 && tid <= opt_timeline_thread))  {
+	    sprintf(s,"%s %s [%s@%s:%d] %s%c ",
+		    pfx,TIMESTR(tid),FFL,
+		    is_timeline ? "tl:" : "",
+		    kind);
+	  }
+	  else if (is_timeline && opt_timeline_thread == 1 && tid == 1) {
+	    sprintf(s,"%s %s [%s@%s:%d] %s%c ",
+		    pfx,TIMESTR(tid),FFL,
+		    is_timeline ? "tl:" : "",
+		    kind);
+	  }
 	  s += strlen(s);
 	  (*level)++;
 	  for (j=0; j<(*level); j++) *s++ = ' ';
 	  if (*print_option == 2) {
+            if(mytid != tid) { /* We are printing the master call tree as far as >OMP*/
+              if(strncmp(">OMP",keyptr->name,4) == 0) {
+                (*level)--;
+                return;
+              }
+            }
 	    sprintf(s,"%s ",keyptr->name);
 	    s += strlen(s);
 	  }
-	  if (ABS(*print_option) == 5) {
+	  if (is_timeline) {
+	    double wall = WALLTIME();
+	    double rss, curheap;
+	    drhook_timeline_t *tl = &timeline[tid-1];
+	    if (abs_print_option == 5 || abs_print_option == 6) { /* when called via drhook_begin/_end or memcounter */
+	      curheap = tl->last_curheap_MB;
+	      rss = tl->last_rss_MB;
+	    }
+	    else {
+	      rss = (double)(getrss_()/1048576.0); /* in MBytes */
+	      curheap = (opt_timeline_thread == 1 && tid == 1) ?
+		(double)(getcurheap_()/1048576.0) : (double)(getcurheap_thread_(&tid)/1048576.0); /* in MBytes */
+	      tl->last_curheap_MB = curheap;
+	      tl->last_rss_MB = rss;
+	    }
 	    if (opt_timeline_format == 1) {
-	      sprintf(s,
-		      "%.4g %.4g %.4g %.4g %.4g",
-		      WALLTIME(), 
-		      (double)(gethwm_()/1048576.0), (double)(getrss_()/1048576.0), 
-		      (opt_timeline_thread == 1 && tid == 1) ? 
-		      (double)(getcurheap_()/1048576.0) : (double)(getcurheap_thread_(&tid)/1048576.0),
-		      (double)(getstk_()/1048576.0));
+	      sprintf(s, "%.6f %.4g %.4g", wall, rss, curheap);
 	    }
 	    else {
 	      sprintf(s,
-		      "wall=%.4g cpu=%.4g hwm=%.4g rss=%.4g curheap=%.4g stack=%.4g pag=%lld",
-		      WALLTIME(), CPUTIME(),
-		      (double)(gethwm_()/1048576.0), (double)(getrss_()/1048576.0), 
-		      (opt_timeline_thread == 1 && tid == 1) ? 
-		      (double)(getcurheap_()/1048576.0) : (double)(getcurheap_thread_(&tid)/1048576.0),
+		      "wall=%.6f cpu=%.4g hwm=%.4g rss=%.4g curheap=%.4g stack=%.4g pag=%lld",
+		      wall, CPUTIME(),
+		      (double)(gethwm_()/1048576.0), rss,
+		      curheap,
 		      (double)(getstk_()/1048576.0),
 		      getpag_());
 	    }
 	    s += strlen(s);
 	    *s++ = ' ';
-	    sprintf(s,"'%s'",keyptr->name);
+	    if (keyptr) {
+	      sprintf(s,"'%s'",keyptr->name);
+	    }
+	    else {
+	      sprintf(s,"'#PROGRAM %s'",(*print_option == 7) ? "BEGIN" : "END");
+	    }
 	    s += strlen(s);
 	  }
 	  else {
@@ -2505,10 +3840,15 @@ c_drhook_print_(const int *ftnunitno,
 	    PRINT_CPU();
 	  }
 	  *s = 0;
+#ifdef NECSX
+	  DrHookPrint(*ftnunitno, line);
+#else
 	  dr_hook_prt_(ftnunitno, line, strlen(line));
+#endif
 	}
-	treeptr = treeptr->next;
-      } /* while (treeptr && treeptr->active) */
+	if (abs_print_option == 7 || abs_print_option == 5 || abs_print_option == 6) break;
+	if (treeptr) treeptr = treeptr->next;
+      } /* while (abs_print_option == 7 || (treeptr && treeptr->active)) */
     }
 
     else if (*print_option == 3) { /* profiling (CPU, wall-clock and/or MFlop/s) */
@@ -2608,6 +3948,8 @@ c_drhook_print_(const int *ftnunitno,
 #endif
 	      p->filename = keyptr->filename;
 	      p->sizeinfo = keyptr->sizeinfo;
+	      p->min_sizeinfo = keyptr->min_sizeinfo;
+	      p->max_sizeinfo = keyptr->max_sizeinfo;
 	      p->sizespeed = (p->self > 0 && p->sizeinfo > 0) ? p->sizeinfo/p->self : 0;
 	      p->sizeavg = (p->calls > 0 && p->sizeinfo > 0) ? p->sizeinfo/p->calls : 0;
 	      p->callpath = keyptr->callpath;
@@ -2616,8 +3958,8 @@ c_drhook_print_(const int *ftnunitno,
 	    }
 	    keyptr = keyptr->next;
 	  } /* while (keyptr && keyptr->status == 0) */
-	} /* for (t=0; t<numthreads; t++) */
-      } /* for (j=0; j<hashsize; j++) */
+	} /* for (j=0; j<hashsize; j++) */
+      } /* for (t=0; t<numthreads; t++) */
 
       do {
 	double mflop_rate = 0;
@@ -2636,7 +3978,10 @@ c_drhook_print_(const int *ftnunitno,
 	if (!filename) break;
 
 	if ((myproc == 1 && mon_out_procs == -1) || mon_out_procs == myproc) {
-	  fprintf(stderr,"Writing profiling information of proc#%d into file '%s'\n",myproc,filename);
+	  fprintf(stderr,
+		  "%s %s [%s@%s:%d] Writing profiling information of proc#%d into file '%s'\n",
+		  pfx,TIMESTR(tid),FFL,
+		  myproc,filename);
 	}
 
 	fp = fopen(filename,"w");
@@ -2737,8 +4082,8 @@ c_drhook_print_(const int *ftnunitno,
 	fprintf(fp,"\tInstrumentation   ended : %s\n",end_stamp ? end_stamp : "N/A");
 	fprintf(fp,"\tInstrumentation overhead: %.2f%%\n",max_overhead_pc);
 	{
-	  long long int hwm = gethwm_()/1048576;
-	  long long int rss = getrss_()/1048576;
+	  long long int hwm = getmaxhwm_()/1048576;
+	  long long int rss = getmaxrss_()/1048576;
 	  long long int maxstack = getmaxstk_()/1048576;
 	  long long int pag = getpag_();
 	  fprintf(fp,
@@ -2817,7 +4162,7 @@ c_drhook_print_(const int *ftnunitno,
 	fprintf(fp,"Routine@<thread-id>");
 	if (opt_clusterinfo) fprintf(fp," [Cluster:(id,size)]");
 	fprintf(fp,"\n");
-	if (opt_sizeinfo) fprintf(fp,"%*s %s\n",len," ","(Size; Size/sec; AvgSize/call)");
+	if (opt_sizeinfo) fprintf(fp,"%*s %s\n",len-20," ","(Size; Size/sec; Size/call; MinSize; MaxSize)");
 	if (opt_hpmprof) {
 	  fprintf(fp,  "        (self)        (sec)        (sec)        (sec)                                       \n");
 	}
@@ -2853,10 +4198,13 @@ c_drhook_print_(const int *ftnunitno,
 	    
 	  if (opt_sizeinfo && p->sizeinfo > 0) {
 	    char s1[DRHOOK_STRBUF], s2[DRHOOK_STRBUF], s3[DRHOOK_STRBUF];
+	    char s4[DRHOOK_STRBUF], s5[DRHOOK_STRBUF];
 	    lld_commie(p->sizeinfo,s1);
 	    dbl_commie(p->sizespeed,s2);
 	    dbl_commie(p->sizeavg,s3);
-	    fprintf(fp,"\n%*s (%s  %s  %s)",len-10," ",s1,s2,s3);
+	    lld_commie(p->min_sizeinfo,s4);
+	    lld_commie(p->max_sizeinfo,s5);
+	    fprintf(fp,"\n%*s (%s; %s; %s; %s; %s)",len-20," ",s1,s2,s3,s4,s5);
 	  }
 	  fprintf(fp,"\n");
 	  p++;
@@ -3181,7 +4529,6 @@ Dr_Hook(const char *name, int option, double *handle,
 /**** Interface to HPM (RS6K) ****/
 
 #include <pmapi.h>
-#include <pthread.h>
 
 static pthread_mutex_t hpm_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -3193,9 +4540,9 @@ static double cycles = 1300000000.0; /* 1.3GHz ; changed via pm_cycles() in init
 #define TEST_PM_ERROR(name, rc) \
   if (rc != 0) { \
     fprintf(stderr,"PM_ERROR(tid#%d, pthread_self()=%d): rc=%d at %s(), line=%d, file=%s\n",\
-	    tid+1,pthread_self(),rc,name,__LINE__,__FILE__); \
+	    tid,pthread_self(),rc,name,__LINE__,__FILE__); \
     pm_error((char *)name, rc); \
-    sleep(tid+1); \
+    spin(tid); \
     RAISE(SIGABRT); \
   }
 
@@ -3205,14 +4552,12 @@ init_hpm(int tid)
   const char *name = "init_hpm";
   int rc;
 
-  --tid;
-
   if (!hpm_tid_init) {
     hpm_tid_init = calloc_drhook(numthreads, sizeof(*hpm_tid_init));
     cycles = pm_cycles();
   }
 
-  if (!hpm_tid_init[tid]) {
+  if (!hpm_tid_init[tid-1]) {
 #ifdef PMAPI_POST_P4
     pm_info2_t pminfo;
 #else
@@ -3234,11 +4579,56 @@ init_hpm(int tid)
 
     if (myproc <= 1) fprintf(stderr,
 			     ">>>pm_init() for ECMWF/OpenMP-tid#%d, pthread_self()=%d\n",
-			     tid+1,pthread_self());
+			     tid,pthread_self());
   }
 
-  if (!hpm_tid_init[tid]) {
-#if defined(PMAPI_P5_PLUS)
+  if (!hpm_tid_init[tid-1]) {
+#if defined(PMAPI_P7)
+    char *env = getenv("HPM_GROUP");
+    hpm_grp = atoi(env);
+    int group;
+    fprintf(stderr,"hpm_group = %d\n",hpm_grp);
+    if (hpm_grp == 150) group = 150; 
+    if (hpm_grp == 141) group = 141; 
+    /*-- counters --
+     case 150:
+       strcpy(group_label, "pm_vsu23, VSU Execution");
+       strcpy(label[0], "four flops operation (fdiv,fsqrt) Scalar Instructions only (PM_VSU_FSQRT_FDIV)");
+       strcpy(label[1], "VSU0 Finished an instruction (PM_VSU_FIN)");
+       strcpy(label[2], "two flops operation (fmadd, fnmadd, fmsub, fnmsub) Scalar instructions only (PM_VSU_FMA)");
+       strcpy(label[3], "one flop (fadd, fmul, fsub, fcmp, fsel, fabs, fnabs, fres, fsqrte, fneg) operation finished (PM_VSU_1FLOP)");
+       strcpy(label[4], "Run instructions completed(PM_RUN_INST_CMPL)");
+       strcpy(label[5], "Run cycles (PM_RUN_CYC)");
+       strcpy(label[6], "Nothing");
+       strcpy(label[7], "Nothing");
+    */
+    /*-- counters --
+     case 141:
+       strcpy(group_label, "pm_vsu14, VSU Execution");
+       strcpy(label[0], "one flop (fadd, fmul, fsub, fcmp, fsel, fabs, fnabs, fres, fsqrte, fneg) operation finished (PM_VSU_1FLOP)");
+       strcpy(label[1], "four flops operation (scalar fdiv, fsqrt; DP vector version of fmadd, fnmadd, fmsub, SP vector versions of single flop instructions) (PM_VSU_4FLOP)");
+       strcpy(label[2], "eight flops operation (DP vector versions of fdiv,fsqrt and SP vector versions of fmadd,fnmadd,fmsub,fnmsub) (PM_VSU_8FLOP)");
+       strcpy(label[3], "two flops operation (scalar fmadd, fnmadd, fmsub, fnmsub and DP vector versions of single flop instructions) (PM_VSU_2FLOP)");
+       strcpy(label[4], "Run instructions completed(PM_RUN_INST_CMPL)");
+       strcpy(label[5], "Run cycles (PM_RUN_CYC)");
+       strcpy(label[6], "Nothing");
+       strcpy(label[7], "Nothing");
+    */
+#elif defined(PMAPI_P6)
+    const int group = 186; /* pm_hpm1 */
+    /*-- counters --
+     case 186:
+       strcpy(group_label, "HPM group");
+       strcpy(label[0], "FPU executed one flop instruction (PM_FPU_1FLOP)");
+       strcpy(label[1], "FPU executed multiply-add instruction (PM_FPU_FMA)");
+       strcpy(label[2], "FPU executed FSQRT or FDIV instruction (PM_FPU_SQRT_FDIV)");
+       strcpy(label[3], "Processor Cycles (PM_CYC [shared chip])");
+       strcpy(label[4], "Run instructions completed(PM_RUN_INST_CMPL)");
+       strcpy(label[5], "Run cycles (PM_RUN_CYC)");
+       strcpy(label[6], "Nothing");
+       strcpy(label[7], "Nothing");
+    */
+#elif defined(PMAPI_P5_PLUS)
     /* IBM Power 5+ specific */
     const int group = 150; /* pm_hpmcount2 */
     /*-- counters -- (from John Hague, IBM/UK, 22-Aug-2006 : Thanx!!)
@@ -3268,6 +4658,8 @@ init_hpm(int tid)
        strcpy(label[7], "LSU executed Floating Point load instruction (PM_LSU_LDF)");
     */
 #endif
+
+    if (myproc <= 1) fprintf(stderr,"group = %d\n",group);
 
     pm_prog_t pmprog;
     pm_data_t pmdata;
@@ -3303,7 +4695,7 @@ init_hpm(int tid)
     /*-----------------------------------------*/
     /* initialize the group and start counting */
     /*-----------------------------------------*/
-    hpm_tid_init[tid] = pthread_self(); /* Always > 0 */
+    hpm_tid_init[tid-1] = pthread_self(); /* Always > 0 */
 
     rc = pm_set_program_mythread(&pmprog); 
     TEST_PM_ERROR((char *)name, rc);
@@ -3323,7 +4715,6 @@ stop_only_hpm(int tid, drhook_key_t *pstop)
   /* if (numthreads > 1) pthread_mutex_lock(&hpm_lock); */
 
   if (!hpm_tid_init || !hpm_tid_init[tid-1]) init_hpm(tid);
-  --tid;
 
   /*
   rc = pm_stop_mythread();
@@ -3360,7 +4751,6 @@ stopstart_hpm(int tid, drhook_key_t *pstop, drhook_key_t *pstart)
   /* if (numthreads > 1) pthread_mutex_lock(&hpm_lock); */
 
   if (!hpm_tid_init || !hpm_tid_init[tid-1]) init_hpm(tid);
-  --tid;
 
   /*
   rc = pm_stop_mythread();
@@ -3406,9 +4796,9 @@ static double cycles = 0;
 #define TEST_PM_ERROR(name, rc) \
   if (rc != 0) { \
     fprintf(stderr,"PM_ERROR(tid#%d, pthread_self()=%d): rc=%d at %s(), line=%d, file=%s\n",\
-            tid+1,pthread_self(),rc,name,__LINE__,__FILE__); \
+            tid,pthread_self(),rc,name,__LINE__,__FILE__); \
     pm_error((char *)name, rc); \
-    sleep(tid+1); \
+    spin(tid); \
     RAISE(SIGABRT); \
   }
 
@@ -3428,8 +4818,6 @@ stop_only_hpm(int tid, drhook_key_t *pstop)
   int i, rc;
 
   if (!hpm_tid_init || !hpm_tid_init[tid-1]) init_hpm(tid);
-  --tid;
-
 
   if (pstop && !pstop->counter_stopped) {
 
@@ -3455,7 +4843,6 @@ stopstart_hpm(int tid, drhook_key_t *pstop, drhook_key_t *pstart)
   int i, rc;
 
   if (!hpm_tid_init || !hpm_tid_init[tid-1]) init_hpm(tid);
-  --tid;
 
   if (pstop && pstop->counter_in && !pstop->counter_stopped) {
 #if defined(DT_FLOP)
@@ -3494,6 +4881,17 @@ mflops_hpm(const drhook_key_t *keyptr)
     long long int sum = 0;
 #if defined(DT_FLOP)
     sum = keyptr->counter_sum[0];
+#elif defined(PMAPI_P7)
+    /* IBM Power 7 specific */
+    if(hpm_grp == 150) { 
+      sum = 2 * keyptr->counter_sum[2] + keyptr->counter_sum[3];
+    }
+    if(hpm_grp == 141) { 
+      sum = 2 * keyptr->counter_sum[0] + 4 * keyptr->counter_sum[1] + 2 * keyptr->counter_sum[3];
+    }
+#elif defined(PMAPI_P6)
+    /* IBM Power 6 specific */
+    sum = keyptr->counter_sum[0] + 2 * keyptr->counter_sum[1];
 #elif defined(PMAPI_P5_PLUS)
     /* IBM Power 5+ specific */
     sum = 2 * keyptr->counter_sum[1] + keyptr->counter_sum[3];
@@ -3529,13 +4927,28 @@ divpc_hpm(const drhook_key_t *keyptr)
 #else
   if (keyptr && keyptr->counter_sum) {
     long long int sum = 0;
-#if defined(PMAPI_P5_PLUS)
+#if defined(PMAPI_P7)
+    /* IBM Power 7 specific */
+    if(hpm_grp == 150) { 
+      sum = 2 * keyptr->counter_sum[2] + keyptr->counter_sum[3];
+      if (sum > 0) divpc = (keyptr->counter_sum[0]*100.0)/sum;
+    }
+    if(hpm_grp == 141) { 
+      sum = 2 * keyptr->counter_sum[0] + 4 * keyptr->counter_sum[1] + 2 * keyptr->counter_sum[3];
+      if (sum > 0) divpc = (keyptr->counter_sum[1]*100.0)/sum;
+    }
+#elif defined(PMAPI_P6)
+    /* IBM Power 6 specific */
+    sum = keyptr->counter_sum[0] + 2 * keyptr->counter_sum[1];
+    if (sum > 0) divpc = (keyptr->counter_sum[2]*100.0)/sum;
+#elif defined(PMAPI_P5_PLUS)
     /* IBM Power 5+ specific */
     sum = 2 * keyptr->counter_sum[1] + keyptr->counter_sum[3];
+    if (sum > 0) divpc = (keyptr->counter_sum[0]*100.0)/sum;
 #else
     sum = keyptr->counter_sum[1] + keyptr->counter_sum[2] + keyptr->counter_sum[3] - keyptr->counter_sum[5];
-#endif
     if (sum > 0) divpc = (keyptr->counter_sum[0]*100.0)/sum;
+#endif
   }
 #endif
   return divpc;
@@ -3548,6 +4961,17 @@ mflop_count(const drhook_key_t *keyptr)
   if (keyptr && keyptr->counter_sum && keyptr->counter_sum[ENTRY_4] > 0) {
 #if defined(DT_FLOP)
     sum = (keyptr->counter_sum[0]) * 1e-6;
+#elif defined(PMAPI_P7)
+    /* IBM Power 7 specific */
+    if(hpm_grp == 150) { 
+      sum = (2 * keyptr->counter_sum[2] + keyptr->counter_sum[3]) * 1e-6;
+    }
+    if(hpm_grp == 141) { 
+      sum = (2 * keyptr->counter_sum[0] + 4 * keyptr->counter_sum[1] + 2 * keyptr->counter_sum[3]) * 1e-6;
+    }
+#elif defined(PMAPI_P6)
+    /* IBM Power 6 specific */
+    sum = (keyptr->counter_sum[0] + 2 * keyptr->counter_sum[1]) * 1e-6;
 #elif defined(PMAPI_P5_PLUS)
     /* IBM Power 5+ specific */
     sum = (2 * keyptr->counter_sum[1] + keyptr->counter_sum[3]) * 1e-6;
@@ -3604,6 +5028,42 @@ mip_count(const drhook_key_t *keyptr)
 #undef MAX
 #include <sys/param.h>
 
+#include <sys/time.h>
+
+#if !defined(VPP)
+
+FORTRAN_CALL
+double util_walltime_()
+{
+  static double time_init = -1;
+  double time_in_secs;
+#if !defined(CRAYXT)
+  struct timeval tbuf;
+  if (gettimeofday(&tbuf,NULL) == -1) perror("UTIL_WALLTIME");
+
+  if (time_init == -1) time_init = 
+    (double) tbuf.tv_sec + (tbuf.tv_usec / 1000000.0);
+
+  time_in_secs = 
+  (double) tbuf.tv_sec + (tbuf.tv_usec / 1000000.0) - time_init;
+#else
+  if (time_init == -1) time_init = dclock();
+  time_in_secs = dclock() - time_init;
+#endif
+  return time_in_secs;
+}
+
+#if defined(CRAYXT)
+/* Cray XT3/XT4 with catamount microkernel */
+
+FORTRAN_CALL
+double util_cputime_()
+{
+  return util_walltime_(); /* In absence of anything better */
+}
+
+#else
+
 extern clock_t times (struct tms *buffer);
 
 FORTRAN_CALL
@@ -3623,26 +5083,8 @@ double util_cputime_()
   return (tbuf.tms_utime + tbuf.tms_stime +
           tbuf.tms_cutime + tbuf.tms_cstime) / clock_ticks; 
 }
+#endif
 
-#include <sys/time.h>
-
-#ifndef VPP
-FORTRAN_CALL
-double util_walltime_()
-{
-  static double time_init = 0;
-  double time_in_secs;
-  struct timeval tbuf;
-  if (gettimeofday(&tbuf,NULL) == -1) perror("UTIL_WALLTIME");
-
-  if (time_init == 0) time_init = 
-    (double) tbuf.tv_sec + (tbuf.tv_usec / 1000000.0);
-
-  time_in_secs = 
-  (double) tbuf.tv_sec + (tbuf.tv_usec / 1000000.0) - time_init;
-
-  return time_in_secs;
-}
 #else 
 /* VPP */
 FORTRAN_CALL
@@ -3657,9 +5099,6 @@ double util_walltime_()
   return time_in_secs;
 }
 #endif
-
-#include <sys/time.h>
-#include <sys/resource.h>
 
 #ifdef VPP
 
@@ -3759,4 +5198,72 @@ int util_ihpstat_(int *option)
 #endif /* SGI or VPP */
 
   return ret_value;
+}
+
+
+
+#define SECS(x) ((int)(x))
+#define NSECS(x) ((int)(1000000000 * ((x) - SECS(x))))
+ 
+static void set_timed_kill()
+{
+  if (drhook_timed_kill) {
+    const char delim[] = ", \t/";
+    char *p, *s = strdup_drhook(drhook_timed_kill);
+    p = strtok(s,delim);
+    while (p) {
+      int target_myproc, target_omptid, target_sig;
+      double start_time;
+      int nelems = sscanf(p,"%d:%d:%d:%lf",
+			  &target_myproc, &target_omptid, &target_sig, &start_time);
+      int ntids = 1;
+#ifdef _OPENMP
+      ntids = omp_get_max_threads();
+#endif
+      if (nelems == 4 && 
+	  (target_myproc == myproc || target_myproc == -1) &&
+	  (target_omptid == -1 || (target_omptid >= 1 && target_omptid <= ntids)) &&
+	  (target_sig >= 1 && target_sig <= NSIG) &&
+	  start_time > 0) {
+#pragma omp parallel num_threads(ntids)
+	{
+	  int tid = get_thread_id_();
+	  if (target_omptid == -1 || target_omptid == tid) {
+	    char *pfx = PREFIX(tid);
+	    timer_t timerid = { 0 };
+	    struct itimerspec its = { 0 } ;
+	    struct sigevent sev = { 0 } ;
+	    sev.sigev_notify = SIGEV_THREAD_ID | SIGEV_SIGNAL;
+	    sev.sigev_signo = target_sig;
+	    /* sev.sigev_notify_thread_id = gettid(); */
+	    sev._sigev_un._tid = gettid(); 
+	    sev.sigev_value.sival_ptr = &timerid;
+	    
+	    its.it_value.tv_sec = SECS(start_time);
+	    its.it_value.tv_nsec = NSECS(start_time);
+	    
+	    its.it_interval.tv_sec = 0;
+	    its.it_interval.tv_nsec = 0;
+	    
+	    timer_create(CLOCK_MONOTONIC, &sev, &timerid);
+	    /* timer_create(CLOCK_REALTIME, &sev, &timerid); */
+	    timer_settime(timerid, 0, &its, NULL);
+	    
+#pragma omp critical (TimedKill)
+	    {
+	      fprintf(stderr,
+		      "%s %s [%s@%s:%d] Developer timer (%s) expires"
+		      " after %.3fs through signal#%d (ntids=%d)\n",
+		      pfx,TIMESTR(tid),FFL,
+		      p,
+		      start_time, target_sig, ntids);
+	      fflush(NULL);
+	    }
+	  } /* if (target_omptid == -1 || target_omptid == tid) */
+	}
+      }
+      p = strtok(NULL,delim);
+    }
+    free_drhook(s);
+  }
 }

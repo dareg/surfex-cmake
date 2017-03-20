@@ -54,7 +54,7 @@ MODULE MPL_OPEN_MOD
 !     Modifications.
 !     --------------
 !        Original : 2000-12-08 (Based on MPE_OPEN)
-!
+!        R. EL Khatib 24-May-2011 Change ifdef MPI2 into ifndef MPI1
 !     -----------------------------------------------------------------
 !
 USE PARKIND1  ,ONLY : JPIM     ,JPRB
@@ -66,6 +66,7 @@ USE MPL_IOINIT_MOD
 
 IMPLICIT NONE
 
+PRIVATE
 PUBLIC MPL_OPEN
 
 CONTAINS
@@ -74,16 +75,16 @@ SUBROUTINE MPL_OPEN(KFPTR,KTYPE,KNAME,KERROR)
 
 
 #ifdef USE_8_BYTE_WORDS
-  Use mpi4to8, Only : &
+  USE MPI4TO8, ONLY : &
     MPI_FILE_OPEN => MPI_FILE_OPEN8
 #endif
 
-INTEGER(KIND=JPIM),INTENT(IN) :: ktype
-INTEGER(KIND=JPIM),INTENT(OUT) :: kfptr,kerror
+INTEGER(KIND=JPIM),INTENT(IN) :: KTYPE
+INTEGER(KIND=JPIM),INTENT(OUT) :: KFPTR,KERROR
 CHARACTER*(*) KNAME
-INTEGER(KIND=JPIM) :: mode,info
+INTEGER(KIND=JPIM) :: MODE,INFO
 
-#ifdef MPI2
+#ifndef MPI1
 
 !
 !     -----------------------------------------------------------------
@@ -91,7 +92,7 @@ INTEGER(KIND=JPIM) :: mode,info
 !     1.    Preamble
 !           --------
 !
-IF( MPL_RANK > MPL_NUMIO ) then
+IF( MPL_RANK > MPL_NUMIO ) THEN
   KERROR = -1
   RETURN
 ENDIF

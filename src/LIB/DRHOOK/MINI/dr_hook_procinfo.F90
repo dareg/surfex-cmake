@@ -1,18 +1,18 @@
-subroutine dr_hook_procinfo(kmyproc, knproc)
+SUBROUTINE DR_HOOK_PROCINFO(KMYPROC, KNPROC)
 USE PARKIND1  ,ONLY : JPIM     ,JPRB
 #ifdef SFX_MPL
-use mpl_data_module, only : MPL_RANK,MPL_NUMPROC
+USE MPL_MODULE, ONLY : MPL_RANK,MPL_NUMPROC
 #endif
-implicit none
+IMPLICIT NONE
 #ifdef SFX_MPI
 INCLUDE 'mpif.h'
 #endif
-INTEGER(KIND=JPIM),intent(out) :: kmyproc, knproc
+INTEGER(KIND=JPIM),INTENT(OUT) :: KMYPROC, KNPROC
 INTEGER(KIND=JPIM) :: IRNK,ISZ,IERR
 LOGICAL :: LLINIT
-#if defined(SFX_MPL)
-kmyproc = mpl_rank
-knproc = mpl_numproc
+#ifdef SFX_MPL
+KMYPROC = MPL_RANK
+KNPROC = MPL_NUMPROC
 #else
 IRNK=0
 ISZ=1
@@ -23,7 +23,7 @@ IF(LLINIT) THEN
   CALL MPI_COMM_SIZE(MPI_COMM_WORLD,ISZ,IERR)
 ENDIF
 #endif
-kmyproc = IRNK+1
-knproc = ISZ
+KMYPROC = IRNK+1
+KNPROC = ISZ
 #endif
-end subroutine dr_hook_procinfo
+END SUBROUTINE DR_HOOK_PROCINFO

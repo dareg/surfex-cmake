@@ -34,6 +34,7 @@ MODULE MPL_END_MOD
 !     Modifications.
 !     --------------
 !        Original: 2000-09-01
+!        P. Towers     3-Jul-2014 Add call to ec_cray_meminfo
 
 !     ------------------------------------------------------------------
 
@@ -55,7 +56,7 @@ SUBROUTINE MPL_END(KERROR)
 
 
 #ifdef USE_8_BYTE_WORDS
-  Use mpi4to8, Only : &
+  USE MPI4TO8, ONLY : &
     MPI_BUFFER_DETACH => MPI_BUFFER_DETACH8, MPI_FINALIZE => MPI_FINALIZE8
 #endif
 
@@ -66,7 +67,7 @@ LOGICAL                      :: LLABORT=.TRUE.
 
 IF(MPL_NUMPROC < 1) THEN
   IF(MPL_NUMPROC == -1) THEN
-    IF (.not.LINITMPI_VIA_MPL) THEN
+    IF (.NOT.LINITMPI_VIA_MPL) THEN
       ! Neither MPL_INIT_MOD nor MPL_ARG_MOD -modules were called before this
       CALL MPL_MESSAGE(CDMESSAGE=' MPL_END CALLED BEFORE MPL_INIT ')
     ENDIF
@@ -80,6 +81,10 @@ IF(MPL_NUMPROC < 1) THEN
   ENDIF
   RETURN
 ENDIF
+
+#ifdef _CRAYFTN
+  CALL EC_CRAY_MEMINFO(-1,"mpl_end",MPL_COMM)
+#endif
 
 IF (ALLOCATED(MPL_ATTACHED_BUFFER)) THEN
   CALL MPI_BUFFER_DETACH(MPL_ATTACHED_BUFFER,MPL_MBX_SIZE,IERROR)

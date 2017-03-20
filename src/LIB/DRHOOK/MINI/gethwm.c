@@ -5,6 +5,8 @@
 
 typedef  long long int  ll_t;
 
+static ll_t maxhwm = 0;
+
 #if defined(CRAY) && !defined(SV2)
 #define gethwm GETHWM
 #else
@@ -57,7 +59,14 @@ gethwm()
 
 #else  /* non-RS6K */
 
-#if defined(LINUX)
+#if defined(_CRAYC)
+ll_t
+gethwm()
+{
+  extern ll_t get_tcmalloc_heap_size_();
+  return get_tcmalloc_heap_size_();
+}
+#elif defined(LINUX)
 static ll_t basesize = -1;
 static size_t pagesize = 4096;
 ll_t gethwm()
@@ -71,9 +80,20 @@ ll_t gethwm()
       if (pagesize <= 0) pagesize = 4096;
     }
     rc = (sm.size - basesize) * pagesize;
+    if (rc > maxhwm) maxhwm = rc;
   }
   return rc;
 }
+
+#elif defined(NECSX)
+
+ll_t
+gethwm() 
+{ 
+  extern ll_t getrss_();
+  return getrss_();
+}
+
 #else
 ll_t gethwm()
 {
@@ -96,3 +116,9 @@ unsigned int sleep_(unsigned int seconds)
 }
 
 #endif
+
+ll_t getmaxhwm_()
+{
+  (void) gethwm_();
+  return maxhwm;
+}

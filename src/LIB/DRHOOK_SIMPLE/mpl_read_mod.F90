@@ -57,7 +57,7 @@ MODULE MPL_READ_MOD
 !     Modifications.
 !     --------------
 !        Original : 2000-12-11
-!
+!        R. EL Khatib 24-May-2011 Change ifdef MPI2 into ifndef MPI1
 !     -----------------------------------------------------------------
 !
 USE PARKIND1  ,ONLY : JPIM     ,JPRB     ,JPRM
@@ -73,6 +73,7 @@ INTERFACE MPL_READ
 MODULE PROCEDURE MPL_READ_INT,MPL_READ_REAL8
 END INTERFACE
 
+PRIVATE
 PUBLIC MPL_READ
 
 CONTAINS
@@ -81,7 +82,7 @@ SUBROUTINE MPL_READ_INT(KFPTR,KOP,KBUF,KLEN,KREQ,KERROR)
 
 
 #ifdef USE_8_BYTE_WORDS
-  Use mpi4to8, Only : &
+  USE MPI4TO8, ONLY : &
     MPI_FILE_READ_SHARED => MPI_FILE_READ_SHARED8, &
     MPI_FILE_READ_ORDERED => MPI_FILE_READ_ORDERED8, &
     MPI_FILE_IREAD_SHARED => MPI_FILE_IREAD_SHARED8, &
@@ -95,9 +96,9 @@ INTEGER(KIND=JPIM) KBUF(:)
 INTEGER(KIND=JPIM) KREQ
 
 
-INTEGER(KIND=JPIM) status(MPI_STATUS_SIZE)
+INTEGER(KIND=JPIM) STATUS(MPI_STATUS_SIZE)
 !
-#ifdef MPI2
+#ifndef MPI1
 
 !     -----------------------------------------------------------------
 !
@@ -200,7 +201,7 @@ SUBROUTINE MPL_READ_REAL8(KFPTR,KOP,PBUF,KLEN,KREQ,KERROR)
 
 
 #ifdef USE_8_BYTE_WORDS
-  Use mpi4to8, Only : &
+  USE MPI4TO8, ONLY : &
     MPI_FILE_READ_SHARED => MPI_FILE_READ_SHARED8, &
     MPI_FILE_READ_ORDERED => MPI_FILE_READ_ORDERED8, &
     MPI_FILE_IREAD_SHARED => MPI_FILE_IREAD_SHARED8, &
@@ -214,9 +215,9 @@ REAL(KIND=JPRM) PBUF(:)
 INTEGER(KIND=JPIM) KREQ
 
 
-INTEGER(KIND=JPIM) status(MPI_STATUS_SIZE)
+INTEGER(KIND=JPIM) STATUS(MPI_STATUS_SIZE)
 !
-#ifdef MPI2
+#ifndef MPI1
 
 !     -----------------------------------------------------------------
 !

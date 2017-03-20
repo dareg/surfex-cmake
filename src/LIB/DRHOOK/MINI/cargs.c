@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "cargs.h"
 
@@ -20,6 +21,10 @@ static char *a_out = NULL;
 #define PSCMD "/bin/ps"
 #endif /* !defined(PSCMD) */
 
+#if !defined(TAILCMD)
+#define TAILCMD "/usr/bin/tail"
+#endif /* !defined(TAILCMD) */
+
 static const char *get_a_out()
 {
   /* progname is a blank string;
@@ -30,18 +35,35 @@ static const char *get_a_out()
   /* Using an alternative method of getting a.out :
      
   ps -p<pid> | tail -1 | awk '{print $NF}' 
-  
+
+  This can give false positives, as we search the path for the binary: we may have
+  executed ./MASTER rather than the first MASTER in the path.
+
   Naturally this cannot be the nicest method around ;-(
   So, a competition is launched: make this better and 
   you may win a week in Bahamas!!
 
   */
 
+#if defined(LINUX)
+   /* On Linux, the following is more reliable, if /proc is available. 
+    */
+  if (!a_out) {
+     int len;
+     char symlink[NAME_MAX], real_exe[NAME_MAX];
+     snprintf(symlink, NAME_MAX, "/proc/%d/exe", getpid());
+     if ((len = readlink(symlink, real_exe, NAME_MAX)) > 0)  {
+	a_out = malloc((len+1)*sizeof(*a_out));
+        strncpy(a_out, real_exe, len);
+	a_out[len] = '\0';
+     }
+  }
+#endif
   if (!a_out && (access(PSCMD,X_OK) == 0)) {
-    char cmd[sizeof(PSCMD) + 100];
+    char cmd[sizeof(PSCMD) + sizeof(TAILCMD) + 100];
     FILE *fp = NULL;
     pid_t pid = getpid();
-    sprintf(cmd,"%s -p%d | tail -1 | awk '{print $NF}'", PSCMD, (int)pid);
+    sprintf(cmd,"%s -p%d | %s -1 | awk '{print $NF}'", PSCMD, (int)pid, TAILCMD);
     fp = popen(cmd, "r");
     if (fp) {
       char c[65536];
@@ -56,13 +78,12 @@ static const char *get_a_out()
 	    char *start = saved;
 	    char *token = strtok(saved,":");
 	    do {
-	      /* char fullpath[strlen(start) + 1 + lenc + 1]; */
-	      char *fullpath = malloc(strlen(start) + 1 + lenc + 1);
-	      snprintf(fullpath,sizeof(fullpath),"%s/%s",start,c);
+	      int lenf = strlen(start) + 1 + lenc + 1;
+	      char *fullpath = malloc(lenf * sizeof(*fullpath));
+	      snprintf(fullpath,lenf,"%s/%s",start,c);
 	      if (access(fullpath,X_OK) == 0) { /* It's this one!! */
-		a_out = strdup(fullpath);
-		free(fullpath);
-		break;
+		a_out = fullpath;
+		break; /* do { ... } while (token) */
 	      }
 	      free(fullpath);
 	      start = token;
@@ -70,7 +91,7 @@ static const char *get_a_out()
 	    } while (token);
 	    free(saved);
 	  }
-	}
+	} /* if (!strchr(c,'/')) */
 	if (!a_out) a_out = strdup(c);
       }
       pclose(fp);
@@ -226,7 +247,6 @@ void putarg_info_(const int *argc, const char *cterm
   numargs = Argc;
   args = calloc(1 + numargs, sizeof(arg_t));
 }
-
 
 void putarg_info (const int *argc, const char *cterm
 		  /* Hidden argument */

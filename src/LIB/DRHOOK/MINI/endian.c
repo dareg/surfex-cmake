@@ -44,20 +44,26 @@ int ec_is_little_endian_() { return ec_is_little_endian(); }
 
 /* A routine to be called at the very end in case MPI wasn't finalized */
 /* Registered *only* by MPL_INIT */
+/* Disable this feature via : export EC_MPI_ATEXIT=0 */
 
-/*void ec_mpi_atexit_(void)
+#ifdef SFX_MPL
+void ec_mpi_atexit_(void)
 {
+  char *env = getenv("EC_MPI_ATEXIT");
+  int do_it = env ? atoi(env) : 1;
   static int callnum = 0;
   ++callnum;
-  if (callnum == 1) {
-    *//* register *//*
-    atexit(ec_mpi_atexit_);
-  }
-  else if (callnum == 2) {
-    *//* action : finish MPI via F90 cmpl_end (in cmpl_binding.F90) *//* 
-    extern void cmpl_end_(int *);
-    int ierr = 0;
-    cmpl_end_(&ierr);
+  if (do_it) {
+    if (callnum == 1) {
+      /* register */
+      atexit(ec_mpi_atexit_);
+    }
+    else if (callnum == 2) {
+      /* action : finish MPI via F90 cmpl_end (in cmpl_binding.F90) */
+      extern void cmpl_end_(int *);
+      int ierr = 0;
+      cmpl_end_(&ierr);
+    }
   }
 }
 
@@ -65,7 +71,8 @@ void ec_mpi_atexit(void)
 {
   ec_mpi_atexit_();
 }
-*/
+#endif
+
 void ec_set_umask_(void)
 {
   char *env = getenv("EC_SET_UMASK");
