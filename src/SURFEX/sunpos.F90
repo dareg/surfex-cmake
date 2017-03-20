@@ -49,12 +49,15 @@
 !!      (K. Suhre)           14/02/97  bug correction for ZLON0     
 !!      (V. Masson)          01/03/03  add zenithal angle output
 !!      (V. Masson)          14/03/14  avoid discontinuous declination at 00UTC each day
+!!      (M. Goret)           20/03/17  bug correction when changing date
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
 USE MODD_CSTS,          ONLY : XPI, XDAY
+!
+USE MODI_ADD_FORECAST_TO_DATE_SURF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -85,6 +88,7 @@ REAL, DIMENSION(:),           INTENT(OUT)  :: PTSUN      ! Solar time
 !*       0.2   declarations of local variables
 !
 !
+INTEGER                                    :: IYEAR, IMONTH, IDAY ! current year, month, day
 REAL                                       :: ZUT        ! Universal time
 !
 REAL, DIMENSION(SIZE(PLON))                :: ZTUT    ,&! True (absolute) Universal Time
@@ -116,18 +120,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 IF (LHOOK) CALL DR_HOOK('SUNPOS_1',0,ZHOOK_HANDLE)
 !
-ZUT  = MOD( 24.0+MOD(PTIME/3600.,24.0),24.0 )
-
+IYEAR=KYEAR
+IMONTH=KMONTH
+IDAY=KDAY
+ZUT=PTIME
+!
+ CALL ADD_FORECAST_TO_DATE_SURF(IYEAR, IMONTH, IDAY, ZUT)
+!
 INOBIS(:) = (/0,31,59,90,120,151,181,212,243,273,304,334/)
 IBIS(0:1) = INOBIS(0:1)
 DO JI=2,11
   IBIS(JI) = INOBIS(JI)+1
 END DO
-IF( MOD(KYEAR,4).EQ.0 .AND. (MOD(KYEAR,100).NE.0 .OR. MOD(KYEAR,400).EQ.0)) THEN
-  ZDATE = FLOAT(KDAY +   IBIS(KMONTH-1)) - 1 + PTIME/XDAY
+IF( MOD(IYEAR,4).EQ.0 .AND. (MOD(IYEAR,100).NE.0 .OR. MOD(IYEAR,400).EQ.0)) THEN
+  ZDATE = FLOAT(IDAY +   IBIS(IMONTH-1)) - 1 + ZUT/XDAY
   ZAD = 2.0*XPI*ZDATE/366.0
 ELSE
-  ZDATE = FLOAT(KDAY + INOBIS(KMONTH-1)) - 1 + PTIME/XDAY
+  ZDATE = FLOAT(IDAY + INOBIS(IMONTH-1)) - 1 + ZUT/XDAY
   ZAD = 2.0*XPI*ZDATE/365.0
 END IF
 

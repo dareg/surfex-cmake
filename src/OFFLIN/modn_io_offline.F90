@@ -129,6 +129,7 @@ LOGICAL          :: LLAND_USE = .FALSE.
 !     ----------
 !
 LOGICAL          :: LADAPT_SW = .FALSE.
+LOGICAL          :: LINTERP_SW = .FALSE.
 !
 !*    General flag to modify direct solar radiation due to slopes and shadows.
 !     ----------
@@ -158,8 +159,8 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
                         LSHADOWS_SLOPE,LSHADOWS_OTHER, LWR_VEGTYPE,              &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
-                        YALG_MPI, XDELTA_OROG, LADAPT_SW, LALLOW_ADD_DIM,        &
-                        LDELAYEDSTART_NC, NDATESTOP
+                        YALG_MPI, XDELTA_OROG, LADAPT_SW, LINTERP_SW,            &
+                        LALLOW_ADD_DIM, LDELAYEDSTART_NC, NDATESTOP
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE

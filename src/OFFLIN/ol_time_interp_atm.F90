@@ -7,7 +7,8 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,             &
                                PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2,        &
                                PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,      &
                                PLW1,PLW2,PSNOW2,PRAIN2,                  &
-                               PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2         )  
+                               PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2,        &
+                               PZEN,PSUMZEN )  
 !**************************************************************************
 !
 !!    PURPOSE
@@ -38,6 +39,8 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,             &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    06/2003
+!
+USE MODN_IO_OFFLINE, ONLY : LINTERP_SW
 !
 USE MODD_CSTS,       ONLY : XPI, XRD, XRV, XG
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -80,11 +83,12 @@ INTEGER,INTENT(IN) :: KSURF_STEP, KNB_ATM
 REAL, DIMENSION(:),INTENT(IN) :: PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2
 REAL, DIMENSION(:),INTENT(IN) :: PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,PLW1,PLW2
 REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2
+REAL, DIMENSION(:),INTENT(IN) :: PZEN,PSUMZEN 
 
 ! local variables
 REAL :: ZDTA, ZDQA, ZDDIR_SW, ZDSCA_SW, ZDLW,  &
         ZDPS, ZDCO2, ZDU, ZDV, ZU1, ZV1, ZU2, ZV2 
-REAL :: ZPI, ZNB_ATM, ZSURF_STEP, ZCOEF
+REAL :: ZPI, ZNB_ATM, ZSURF_STEP, ZCOEF, ZCOEF2
 INTEGER :: J, INKPROMA
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
@@ -139,11 +143,24 @@ DO J = 1,SIZE(PTA1)
     ZDCO2    = (PCO22(J)-PCO21(J))*ZCOEF
     XCO2(J) = PCO21(J) + ZDCO2
     !
-    ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
-    XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
-    !
-    ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
-    XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
+    IF (LINTERP_SW) THEN
+      !
+      ZCOEF2=0.
+      IF (PSUMZEN(J)>0.) ZCOEF2=MAX((COS(PZEN(J))/PSUMZEN(J)),0.)
+      !
+      XDIR_SW(J,1) = MIN(PDIR_SW2(J)*ZCOEF2,1300.0*MAX(COS(PZEN(J)),0.))
+      !
+      XSCA_SW(J,1) = MIN(PSCA_SW2(J)*ZCOEF2,1300.0*MAX(COS(PZEN(J)),0.))
+      !
+    ELSE
+      !
+      ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
+      XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
+      !
+      ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
+      XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
+      !
+    ENDIF
     !
     !
     XRAIN (J)= PRAIN2(J)
