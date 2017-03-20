@@ -275,7 +275,6 @@ $(LIB_MASTER) :  $(OBJS_LISTE_MASTER)
 	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER)
 
 progmaster : libmaster
-	export LD_LIBRARY_PATH=${SZIP_PATH}/lib:${ZLIB_PATH}/lib:${CURL_PATH}/lib:${HDF5_PATH}/lib:${CDF_PATH}/lib:${CDFF_PATH}/lib:${LD_LIBRARY_PATH}
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
 	OBJDIR=$(OBJDIR_MASTER) \
 	LIB_MNH=$(LIB_MASTER) \
@@ -339,7 +338,6 @@ $(LIB_USER) :  $(OBJS_LISTE_USER)
 	cd $(OBJDIR_USER)   ; find . -name "*.o" | xargs $(AR) r $(LIB_USER)
 
 proguser : libuser
-	export LD_LIBRARY_PATH=${SZIP_PATH}/lib:${ZLIB_PATH}/lib:${CURL_PATH}/lib:${HDF5_PATH}/lib:${CDF_PATH}/lib:${CDFF_PATH}/lib:${LD_LIBRARY_PATH}
 	@$(MAKE) -I $(OBJDIR_USER)  DO_COMP_USER=YES \
 	OBJDIR=$(OBJDIR_USER) \
 	LIB_MNH=$(LIB_USER) \
