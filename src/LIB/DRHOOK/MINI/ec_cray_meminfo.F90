@@ -7,9 +7,9 @@ IMPLICIT NONE
 !   Modified : Sami Saarinen (ECMWF) : 21-SEP-2016 : Added getenv EC_MEMINFO -- export EC_MEMINFO=0 disables any EC_MEMINFO output
 
 #ifdef SFX_MPI
-#include "mpif.h"
+include 'mpif.h'
 #endif
-
+!
 INTEGER(KIND=4), INTENT(IN) :: KCOMM
 INTEGER(KIND=4), INTENT(IN) :: IU
 CHARACTER*(*), INTENT(IN) :: IDSTRING
