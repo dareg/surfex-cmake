@@ -84,7 +84,9 @@ USE MODI_INIT_INDEX_MPI
 !
 !------------------------------------------------------------------------------
 !
-!
+#ifdef SFX_MPL
+USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
+#endif
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -129,9 +131,6 @@ INTEGER :: ILEVEL, INFOMPI
 INTEGER :: JNW, INW
 INTEGER :: IRET, INB, JPROC
 DOUBLE PRECISION :: XTIME0
-#ifdef CPLOASIS
-INTEGER :: ILOCAL_COMM, INPROC
-#endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -140,11 +139,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.      Set default names and parallelized I/O
 !             --------------------------------------
 !
-#ifdef CPLOASIS
 !Must be call before DRHOOK !
-CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM,'PRE')
-#else
-LOASIS = .FALSE.
+CALL SFX_OASIS_INIT(CNAMELIST,NCOMM,'PRE')
+#ifdef SFX_MPL
+IF(LOASIS)THEN
+  LMPLUSERCOMM = .TRUE.
+  MPLUSERCOMM = NCOMM
+ENDIF
 #endif
 !
 #ifdef SFX_MPI
@@ -153,31 +154,18 @@ IF(.NOT.LOASIS)THEN
   IF (INFOMPI /= MPI_SUCCESS) THEN 
     CALL ABOR1_SFX('OFFLINE: ERROR WHEN INITIALIZING MPI')
   ENDIF
+  NCOMM = MPI_COMM_WORLD
 ENDIF
+ CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
+ CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
 !
 IF (LHOOK) CALL DR_HOOK('PREP',0,ZHOOK_HANDLE)
-!
-#ifdef SFX_MPI
-NCOMM = MPI_COMM_WORLD
-#endif
-!
-#ifdef CPLOASIS
-IF(LOASIS)THEN
-  CALL MPI_COMM_SIZE(ILOCAL_COMM,INPROC,INFOMPI)
-  NCOMM = ILOCAL_COMM
-ENDIF
-#endif
 !
 !    Allocations of Surfex Types
  CALL SURFEX_ALLOC_LIST(1)
 !
 CSOFTWARE='PREP'
-!
-#ifdef SFX_MPI
- CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
- CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
-#endif
 !
 !     1.1     initializations
 !             ---------------
