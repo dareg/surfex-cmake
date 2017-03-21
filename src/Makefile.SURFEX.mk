@@ -226,6 +226,9 @@ OBJS_LISTE_MASTER += linux_bind.o linuxtrbk.o mpe_locking.o
 endif
 #
 ifdef DIR_HOOK
+ifeq ($(F90),$(filter $(F90),ifort mpiifort)) 
+FPPFLAGS_HOOK += -D__INTEL_COMPILER
+endif
 DIR_MASTER += $(DIR_HOOK)
 FPPFLAGS   += $(FPPFLAGS_HOOK)
 CPPFLAGS   += $(CPPFLAGS_HOOK)
@@ -538,7 +541,10 @@ HDF5_LIB?=${HDF5_PATH}/lib/libhdf5.a
 CDF_LIB?=${CDF_PATH}/lib/libnetcdf.a
 CDFF_INC?=${CDFF_PATH}/include/netcdf.mod
 #
-INC_NETCDF?=-I${CDF_PATH}/include -I${CDFF_PATH}/include
+#INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+#LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
+
+INC_NETCDF?= -I${CDFF_PATH}/include -I${CDF_PATH}/include -I${HDF5_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include -I${CURL_PATH}/include
 #
 LIB_NETCDF     ?= -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 \
 		  -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
@@ -624,13 +630,13 @@ XIOS_CDF_OPT   = netcdf4_seq
 endif
 #
 ifeq "$(VER_CDF)" "CDFBOFXPARALL"
-VINTEL         = /opt/softs/libraries/ICC16.1.150
-CDF_PATH       = ${VINTEL}/netcdf-c-4.4.0_par_giec
-HDF_PATH       = ${VINTEL}/hdf5-1.8.16_par_thrsaf
-SZIP_PATH      = ${VINTEL}/szip-2.1
-ZLIB_PATH      = ${VINTEL}/zlib-1.2.5
-INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
-LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
+VINTEL        ?= /opt/softs/libraries/ICC16.1.150
+CDF_PATH      ?= ${VINTEL}/netcdf-c-4.4.0_par_giec
+HDF_PATH      ?= ${VINTEL}/hdf5-1.8.16_par_thrsaf
+SZIP_PATH     ?= ${VINTEL}/szip-2.1
+ZLIB_PATH     ?= ${VINTEL}/zlib-1.2.5
+INC_NETCDF    ?= -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+LIB_NETCDF    ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl -Wl,-rpath,${CDF_PATH}/lib -Wl,-rpath,$(HDF_PATH)/lib -Wl,-rpath,$(SZIP_PATH)/lib -Wl,-rpath,$(ZLIB_PATH)/lib
 XIOS_CDF_OPT   = netcdf4_par
 endif
 #

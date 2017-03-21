@@ -10,7 +10,12 @@
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
 # use splr.pl script for dependency generation
+# 
+DO_ASM = NO
 USE_SPLR = YES
+USE_SPLR_WRAP = NO
+#AVOID_CPP = YES
+AVOID_CPP = NO
 #
 OPT_BASE   =  -convert big_endian -r8 -g -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise 
 #-switch fe_inline_all_arg_copy_inout
