@@ -2500,7 +2500,7 @@ ENDIF
 !*    9.     Arrange cover (optional nam_pgd_arrange_cover & option to use !gardens or not)
 !            ------------------------------------------------------------------------------
 !
- CALL ARRANGE_COVER(DTCO, U%LWATER_TO_NATURE, U%LTOWN_TO_ROCK, &
+ CALL ARRANGE_COVER(DTCO, U%LWATER_TO_NATURE, U%LTOWN_TO_ROCK,                   &
                     XDATA_NATURE,XDATA_TOWN,XDATA_SEA,XDATA_WATER,XDATA_VEGTYPE, &
                     XDATA_GARDEN,U%LGARDEN, XDATA_BLD, XDATA_WALL_O_HOR            )
 !
@@ -2509,15 +2509,14 @@ ENDIF
 !*   10.     LAI for ecoclimap2: climatological or not
 !            -----------------------------------------
 !
-IF (.NOT.U%LECOSG) CALL ECOCLIMAP2_LAI(DTCO%NYEAR, DTCO%XDATA_VEGTYPE)
+IF (.NOT.U%LECOSG) CALL ECOCLIMAP2_LAI(DTCO%NYEAR)
 !
 !-------------------------------------------------------------------------------
 !
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
- CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PSURF2=DTCO%XDATA_GARDEN, &
-                     PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+ CALL INI_DATA_PARAM(PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                      PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                      PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                      PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &

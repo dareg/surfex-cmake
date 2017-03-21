@@ -413,7 +413,7 @@ IF ( IM%O%LSPINUPCARBS .AND. (IM%O%NNBYEARSOLD <= ISPINEND) ) THEN
 !
    IM%O%LAGRI_TO_GRASS = .TRUE.
 !
-   CALL INI_DATA_PARAM(DTCO%XDATA_VEGTYPE, PSURF=DTCO%XDATA_NATURE, PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
+   CALL INI_DATA_PARAM(PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI,                                           &
                        PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                        PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
                        PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &

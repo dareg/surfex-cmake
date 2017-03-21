@@ -43,16 +43,15 @@ REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PZ0  ! vegetation roughness
 !
 END FUNCTION Z0V_FROM_LAI_2D
 !
-    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_VEGTYPE(PLAI,PH_TREE,OAGRI_TO_GRASS) RESULT(PZ0)
 !
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
-REAL,   DIMENSION(:),   INTENT(IN) :: PVEGTYPE     ! type of vegetation
 LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI)) :: PZ0  ! vegetation roughness
 !
-END FUNCTION Z0V_FROM_LAI_PATCH
+END FUNCTION Z0V_FROM_LAI_VEGTYPE
 !
 END INTERFACE
 !
@@ -338,7 +337,7 @@ END FUNCTION Z0V_FROM_LAI_2D
 !
 !
 !   ###########################################################
-    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_VEGTYPE(PLAI,PH_TREE,OAGRI_TO_GRASS) RESULT(PZ0)
 !   ###########################################################
 !!
 !!    PURPOSE
@@ -390,7 +389,6 @@ IMPLICIT NONE
 !
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
-REAL,   DIMENSION(:),   INTENT(IN) :: PVEGTYPE     ! type of vegetation
 LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
@@ -403,17 +401,19 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZH_VEG          ! height for each type
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_PATCH',0,ZHOOK_HANDLE)
-ZH_VEG(:) = VEG_HEIGHT_FROM_LAI(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS)
+IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_VEGTYPE',0,ZHOOK_HANDLE)
+ZH_VEG(:) = VEG_HEIGHT_FROM_LAI(PLAI,PH_TREE,OAGRI_TO_GRASS)
 !
-PZ0 (:) = MAX(0.001, 0.13*ZH_VEG(:)) ! rugosite pour chaque vegtype
+PZ0(:) = XUNDEF
+!
+WHERE(ZH_VEG(:)/=XUNDEF) PZ0 (:) = MAX(0.001, 0.13*ZH_VEG(:)) ! rugosite pour chaque vegtype
 !-----------------------------------------------------------------
 !
 WHERE (PLAI(:) == XUNDEF)
   PZ0(:) = XUNDEF
 END WHERE
-IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_PATCH',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_VEGTYPE',1,ZHOOK_HANDLE)
 !
 !
-END FUNCTION Z0V_FROM_LAI_PATCH
+END FUNCTION Z0V_FROM_LAI_VEGTYPE
 !

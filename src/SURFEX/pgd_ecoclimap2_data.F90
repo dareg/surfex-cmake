@@ -191,7 +191,8 @@ END IF
 !    4.    Computes LAI evolution for the chosen year
 !          ------------------------------------------
 !
- CALL ECOCLIMAP2_LAI(KYEAR,PDATA_VEGTYPE)
+ CALL ECOCLIMAP2_LAI(KYEAR)
+!
 IF (LHOOK) CALL DR_HOOK('PGD_ECOCLIMAP2_DATA',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
