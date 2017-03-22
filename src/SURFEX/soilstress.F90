@@ -48,6 +48,10 @@ SUBROUTINE SOILSTRESS( HISBA, PF2, KK, PK, PEK, PF2WGHT, PF5        )
 !!     (P.Jabouille)  13/11/96    mininum value for ZF1
 !!     (V. Masson)    28/08/98    add PF2 for Calvet (1998) CO2 computations
 !!     (B. Decharme)     07/15    Suppress numerical adjustement for PF2 
+!!     (B. Decharme)     01/17    Suppress soil/vegetation parameters modification
+!!                                for DIF due to the presence of ice to ensure maximum
+!!                                vegetation stress when soil ice is important. Indeed,
+!!                                soil ice acts as drought events for vegetation stress
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -89,13 +93,6 @@ REAL, DIMENSION(SIZE(KK%XWFC,1)) ::  ZWFC_AVGZ, ZWSAT_AVGZ, ZWWILT_AVGZ
 !                                  ZWFC_AVGZ   = field capacity averaged over entire soil column
 !                                  ZWSAT_AVGZ  = porosity averaged over entire soil column
 !                                  ZWWILT_AVGZ = wilting point averaged over entire soil column
-!
-! ISBA-DF:
-!
-REAL, DIMENSION(SIZE(PEK%XWG,1)) :: ZWSAT, ZWFC, ZWWILT
-!                               ZWSAT     = ice-adjusted porosity profile (m3/m3)
-!                               ZWFC      = ice-adjusted field capacity profile (m3/m3)
-!                               ZWWILT    = ice-adjusted wilting point profile (m3/m3)
 !
 REAL    :: ZROOTFRACN
 !          ZROOTFRACN = Normalized root fraction weights
@@ -150,16 +147,11 @@ IF(HISBA =='DIF')THEN
 ! First layer
 !---------------------------------------------------------
 !
-! Due to the presence of ice, modify soil parameters:
-  ZWSAT (:) = KK%XWSAT (:,1) - PEK%XWGI(:,1)
-  ZWFC  (:) = KK%XWFC  (:,1) * ZWSAT(:)/KK%XWSAT(:,1)
-  ZWWILT(:) = KK%XWWILT(:,1) * ZWSAT(:)/KK%XWSAT(:,1)
-!
 ! Calculate the soil water stress factor for each layer:
-  PF2WGHT(:,1) = MAX(0.0,MIN(1.0,(PEK%XWG(:,1)-ZWWILT(:))/(ZWFC(:)-ZWWILT(:))))
+  PF2WGHT(:,1) = (PEK%XWG(:,1)-KK%XWWILT(:,1))/(KK%XWFC(:,1)-KK%XWWILT(:,1))
 !
 ! Normalize the transpiration weights by root fraction:
-  PF2WGHT(:,1) = PK%XROOTFRAC(:,1)*PF2WGHT(:,1)
+  PF2WGHT(:,1) = PK%XROOTFRAC(:,1)*MAX(0.0,MIN(1.0,PF2WGHT(:,1)))
 !
 ! Net soil water stress for entire root zone:
   PF2(:) = PF2WGHT(:,1)
@@ -174,19 +166,14 @@ IF(HISBA =='DIF')THEN
       IDEPTH=PK%NWG_LAYER(JJ)
       IF(JL<=IDEPTH)THEN
 !
-!       Due to the presence of ice, modify soil parameters:
-        ZWSAT (JJ) = KK%XWSAT (JJ,JL) - PEK%XWGI(JJ,JL)
-        ZWFC  (JJ) = KK%XWFC  (JJ,JL) * ZWSAT(JJ)/KK%XWSAT(JJ,JL)
-        ZWWILT(JJ) = KK%XWWILT(JJ,JL) * ZWSAT(JJ)/KK%XWSAT(JJ,JL)
-!
 !       Calculate normalized root fraction weights:
         ZROOTFRACN = PK%XROOTFRAC(JJ,JL) - PK%XROOTFRAC(JJ,JL-1)
 !
 !       Calculate the soil water stress factor for each layer:
-        PF2WGHT(JJ,JL) = MAX(0.0,MIN(1.0,(PEK%XWG(JJ,JL)-ZWWILT(JJ))/(ZWFC(JJ)-ZWWILT(JJ))))
+        PF2WGHT(JJ,JL) = (PEK%XWG(JJ,JL)-KK%XWWILT(JJ,1))/(KK%XWFC(JJ,1)-KK%XWWILT(JJ,1))
 !
-!       Normalize the transpiration weights by root fraction:                                                
-        PF2WGHT(JJ,JL) = ZROOTFRACN*PF2WGHT(JJ,JL)
+!       Normalize the transpiration weights by root fraction:
+        PF2WGHT(JJ,JL) = ZROOTFRACN*MAX(0.0,MIN(1.0,PF2WGHT(JJ,JL)))
 !
 !       Net soil water stress for entire root zone:
         PF2(JJ)        = PF2(JJ) + PF2WGHT(JJ,JL)

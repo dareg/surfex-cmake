@@ -255,6 +255,9 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomas
 !
 REAL, PARAMETER                                    :: ZTSTEP_EB     = 300. ! s Minimum time tstep required 
 !                                                                          !   to time-split MEB energy budget
+REAL, PARAMETER                                    :: ZSWRAD_MIN    = 1.E-6! W/m2 Threshold SWdown for which Sun is up...approx
+                                                                           !      (No need to do nonsense SW computations during the night)
+!
 INTEGER                                            :: JTSPLIT_EB           ! number of time splits
 INTEGER                                            :: JDT                  ! time split loop index
 !
@@ -480,9 +483,6 @@ ZWORK3(:)          = XUNDEF
 ZWORK4(:)          = XUNDEF
 !
 ZTR(:)             = 0.0
-ZALBS(:)           = XUNDEF
-ZALBG(:)           = XUNDEF
-ZALBV(:)           = XUNDEF
 !
 !*      1.1    Preliminaries for litter parameters
 !              -----------------------------------
@@ -547,14 +547,23 @@ ELSEWHERE
    ZALBNIR_TSOIL(:) = PALBNIR_TSOIL(:)
 END WHERE
 !
-  CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH,                      &
-                           PALBVIS_TVEG, ZALBVIS_TSOIL, PALBNIR_TVEG, ZALBNIR_TSOIL,  &
-                           PSW_RAD, ZLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
-                           PEK%XMUS, PEK%XLAI_EFFC, OSHADE, ZIACAN,  ZIACAN_SUNLIT,   &
-                           ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,           &
-                           DMK%XFAPAR_BS, DMK%XFAPIR_BS )    
+ CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH,                      &
+                          PALBVIS_TVEG, ZALBVIS_TSOIL, PALBNIR_TVEG, ZALBNIR_TSOIL,  &
+                          PSW_RAD, ZLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
+                          PEK%XMUS, PEK%XLAI_EFFC, OSHADE, ZIACAN,  ZIACAN_SUNLIT,   &
+                          ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,           &
+                          DMK%XFAPAR_BS, DMK%XFAPIR_BS )    
+
+! Compute all-wavelength effective ground (soil+snow) surface,
+! soil and veg albedos, respectively:
+
+ZALBS(:)      = XSW_WGHT_NIR*ZALBNIR_TSOIL(:) + XSW_WGHT_VIS*ZALBVIS_TSOIL(:)
+
+ZALBG(:)      = XSW_WGHT_NIR*PALBNIR_TSOIL(:) + XSW_WGHT_VIS*PALBVIS_TSOIL(:)
+
+ZALBV(:)      = XSW_WGHT_NIR*PALBNIR_TVEG(:)  + XSW_WGHT_VIS*PALBVIS_TVEG(:)
 !
-WHERE(PSW_RAD(:) > 0.001) ! Sun is up...
+WHERE(PSW_RAD(:) > ZSWRAD_MIN) ! Sun is up...approx
 !
 ! Total effective surface (canopy, ground/flooded zone, snow) all-wavelength
 ! albedo: diagnosed from shortwave energy budget closure
@@ -569,15 +578,6 @@ WHERE(PSW_RAD(:) > 0.001) ! Sun is up...
 
   DEK%XSWNET_V(:) = PSW_RAD(:)*(XSW_WGHT_VIS*DMK%XFAPAR   (:) + XSW_WGHT_NIR*DMK%XFAPIR   (:))
   ZSWNET_S(:)     = PSW_RAD(:)*(XSW_WGHT_VIS*DMK%XFAPAR_BS(:) + XSW_WGHT_NIR*DMK%XFAPIR_BS(:))
-
-! Compute all-wavelength effective ground (soil+snow) surface,
-! soil and veg albedos, respectively:
-
-   ZALBS(:)      = XSW_WGHT_NIR*ZALBNIR_TSOIL(:) + XSW_WGHT_VIS*ZALBVIS_TSOIL(:)
-
-   ZALBG(:)      = XSW_WGHT_NIR*PALBNIR_TSOIL(:) + XSW_WGHT_VIS*PALBVIS_TSOIL(:)
-
-   ZALBV(:)      = XSW_WGHT_NIR*PALBNIR_TVEG(:)  + XSW_WGHT_VIS*PALBVIS_TVEG(:)
 !
 ! Compute total all wavelength SW transmission:
 ! A solution of a quadradic equation based on ground energy budget Eq in FAPAIR.F90
@@ -613,8 +613,8 @@ ELSEWHERE
 
 ! Sun is down:
    
-   ZSWUP(:)                   = 0.
-   DK%XALBT(:)                = XUNDEF
+   DK%XALBT(:)                = 1.0
+   ZSWUP(:)                   = PSW_RAD(:)
    DEK%XSWDOWN_GN(:)          = 0.
    DEK%XSWNET_G(:)            = 0.
    DEK%XSWNET_V(:)            = 0.
@@ -672,11 +672,16 @@ ELSE IF (MAXVAL(PEK%XGMES) /= XUNDEF .OR. MINVAL(PEK%XGMES) /= XUNDEF) THEN
 
    ZFFV(:)  = 0.0
 
-   ZQSAT(:) = QSAT(PEK%XTV(:),PPS)  
+   ZQSAT(:) = QSAT(PEK%XTV(:),PPS) 
+   
+   ZWORK(:) = PEK%XLE(:) ! passed in as LE: Since Qc corresponds to the effective 
+   PEK%XLE(:) = 0.       ! surface specific humidity in ISBA-MEB, 
+                         ! so no need for LE correction (only required for composite ISBA) 
    CALL COTWORES(PTSTEP, IO, OSHADE,  PK, PEK, PK%XDMAX, PPOI, PCSP, PEK%XTV, &
                  PF2, PSW_RAD, PEK%XQC, ZQSAT, PPALPHAN, ZDELTA, PRHOA,       &
                  PZENITH, ZFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN,       &
                  ZIACAN, PABC, ZRS, DEK%XGPP, PRESP_BIOMASS_INST(:,1))
+   PEK%XLE(:) = ZWORK(:)
 !
    PIACAN(:,:) = ZIACAN(:,:)
 !
