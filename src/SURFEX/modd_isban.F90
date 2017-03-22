@@ -116,6 +116,9 @@ REAL, POINTER, DIMENSION(:,:)    :: XPATCH         ! fraction of each tile/patch
 !
 REAL, POINTER, DIMENSION(:,:,:)  :: XVEGTYPE_PATCH ! fraction of each vegetation type for
 !
+REAL, POINTER, DIMENSION(:,:)     :: XINNOV
+REAL, POINTER, DIMENSION(:,:)     :: XRESID
+!
 END TYPE ISBA_S_t
 !
 !
@@ -314,9 +317,10 @@ REAL, POINTER, DIMENSION(:) :: XRE25           ! Ecosystem respiration parameter
 REAL, POINTER, DIMENSION(:) :: XDMAX           ! maximum air saturation deficit
 !                                                ! tolerate by vegetation
 !                                                (kg/kg)
-REAL, POINTER, DIMENSION(:,:)   :: XRED_NOISE
 !
+REAL, POINTER, DIMENSION(:,:)     :: XRED_NOISE
 REAL, POINTER, DIMENSION(:,:)     :: XINCR
+REAL, POINTER, DIMENSION(:,:,:)   :: XHO
 !
 END TYPE ISBA_P_t
 !
@@ -517,6 +521,9 @@ NULLIFY(YISBA_S%XEMIS_NAT)
 !
 NULLIFY(YISBA_S%XTSRAD_NAT)
 !
+NULLIFY(YISBA_S%XINNOV)
+NULLIFY(YISBA_S%XRESID)
+!
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_S_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_S_INIT
 !
@@ -629,8 +636,9 @@ NULLIFY(YISBA_P%XZ0_O_Z0H)
 NULLIFY(YISBA_P%XRE25)  
 NULLIFY(YISBA_P%XDMAX)
 !
-NULLIFY(YISBA_P%XINCR)
 NULLIFY(YISBA_P%XRED_NOISE)
+NULLIFY(YISBA_P%XINCR)
+NULLIFY(YISBA_P%XHO)
 !
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_P_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_P_INIT

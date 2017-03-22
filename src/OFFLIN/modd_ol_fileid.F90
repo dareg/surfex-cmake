@@ -56,13 +56,14 @@ IMPLICIT NONE
                                          'ISBA_VEG_EVOLUTION_A.OUT.nc',&
                                          'ISBA_PROGNOSTIC.OUT.nc     ',&
                                          'ISBA_DIAGNOSTICS.OUT.nc    '/)
- CHARACTER(LEN=200), DIMENSION(24) :: XNETCDF_FILENAME_OUT= &
+ CHARACTER(LEN=200), DIMENSION(25) :: XNETCDF_FILENAME_OUT= &
                                        (/'ISBA_VEG_EVOLUTION.OUT.nc  ',&
                                          'ISBA_VEG_EVOLUTION_P.OUT.nc', &
                                          'ISBA_VEG_EVOLUTION_A.OUT.nc', &
                                          'ISBA_PROGNOSTIC.OUT.nc     ',&
                                          'ISBA_DIAGNOSTICS.OUT.nc    ',&
                                          'ISBA_DIAG_CUMUL.OUT.nc     ',&
+                                         'ISBA_ANALYSIS.OUT.nc       ',&
                                          'SEAFLUX_PROGNOSTIC.OUT.nc  ',&
                                          'SEAFLUX_DIAGNOSTICS.OUT.nc ',&
                                          'SEAFLUX_DIAG_CUMUL.OUT.nc  ',&
@@ -81,7 +82,7 @@ IMPLICIT NONE
                                          'TEB_DIAG_CUMUL.OUT.nc      ',&
                                          'SURF_ATM.OUT.nc            ',&
                                          'SURF_ATM_DIAGNOSTICS.OUT.nc'/)  
-INTEGER, DIMENSION(24) :: XNETCDF_FILEID_OUT
+INTEGER, DIMENSION(25) :: XNETCDF_FILEID_OUT
 !
  CHARACTER(LEN=20), DIMENSION(:), ALLOCATABLE :: XVAR_TO_FILEIN !contains names
                                                                 !of variables to write

@@ -42,7 +42,6 @@ INTEGER, DIMENSION(:), POINTER :: NMASK=>NULL() ! 1D mask to read only interesti
  CHARACTER(LEN=6)               :: CMASK ! surface mask type
 INTEGER                        :: NFULL ! total number fo points of surface
 LOGICAL, SAVE          :: LCREATED=.FALSE.   ! flag to know if the output file was created
-LOGICAL                :: LOPEN        ! flag to know if the file has been openned during the surface call and is to be read
 INTEGER                :: NNI_FORC      ! number of points in forcing files.
 !
 END MODULE MODD_IO_SURF_ASC

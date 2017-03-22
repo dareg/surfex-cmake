@@ -91,7 +91,6 @@ IF ( NPRINTLEV > 0 .AND. KI>0) WRITE(*,*) 'Mean T2m increments over TOWN ',SUM(Z
 
 
 ! Temperature analysis of TOWN points
-
 WHERE (ZTRD3(:)/=XUNDEF)
   ZTRD3(:) = ZTRD3(:) + ZT2INC(:)/(2.0*XPI)
 END WHERE

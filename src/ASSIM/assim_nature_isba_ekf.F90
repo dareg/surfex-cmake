@@ -29,14 +29,14 @@ USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISB
 !
 USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
 !
-USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, XQCOBS, NNCO, NVAR, NNCV, &
+USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, XQCOBS, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XSIGMA, CBIO, XI,        &
                                XF_PATCH, XF, COBS, XSCALE_QLAI,CFILE_FORMAT_OBS,   &
                                XALPH,NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS,&
                                NOBS, XYO
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
-!
+USE MODD_ISBA_PAR,      ONLY : XWGMIN
 !
 #ifdef SFX_ARO
 USE YOMMP0,             ONLY : MYPROC 
@@ -97,12 +97,13 @@ REAL,DIMENSION(NVAR+1,NOBSTYPE) :: ZYF            ! Vector of model observations
 !
 REAL,DIMENSION(KI*IO%NPATCH*NVAR*IO%NPATCH*NVAR) :: ZBLONG
 REAL,DIMENSION(KI,IO%NPATCH*NVAR,IO%NPATCH*NVAR) :: ZB           ! background error covariance matrix
-REAL,DIMENSION(KI,IO%NPATCH*NVAR) :: ZINCR
+REAL,DIMENSION(IO%NPATCH*NVAR) :: ZINCR
 !
 REAL,DIMENSION(IO%NPATCH*NVAR,IO%NPATCH*NVAR) :: ZLTM         ! linear tangent matrix for the f'ward model
 REAL,DIMENSION(IO%NPATCH*NVAR,IO%NPATCH*NVAR) :: ZQ           ! model error matrix
 !
-REAL,DIMENSION(NOBSTYPE*NBOUTPUT,IO%NPATCH*NVAR) :: ZHO, ZHOWR             ! Jacobian of observation operator
+REAL,DIMENSION(NOBSTYPE*NBOUTPUT,IO%NPATCH*NVAR) :: ZHOWR        ! Jacobian of observation operator
+REAL,DIMENSION(NOBSTYPE*NBOUTPUT,IO%NPATCH*NVAR) :: ZHO             ! Jacobian of observation operator
 REAL,DIMENSION(IO%NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZHOT            ! Transpose of HO
 REAL,DIMENSION(IO%NPATCH*NVAR,NOBSTYPE*NBOUTPUT) :: ZGAIN           ! Kalman gain (used explicitly for Ba) 
 !
@@ -117,7 +118,8 @@ REAL,DIMENSION(IO%NPATCH*NVAR,IO%NPATCH*NVAR) :: ZIDENT          ! identitiy mat
 REAL,DIMENSION(IO%NPATCH) :: ZVLAIMIN
 !
 REAL :: ZTIME, ZMIN                 ! current time since start of the run (s)
-
+REAL :: ZB3, ZB4
+!
 INTEGER :: IOBSCOUNT
 INTEGER :: IYEAR                      ! current year (UTC)
 INTEGER :: IMONTH                     ! current month (UTC)
@@ -127,6 +129,7 @@ INTEGER :: IRESP                      ! return code
 INTEGER :: ISTEP                      ! 
 INTEGER :: IMYPROC
 INTEGER :: IOBS
+INTEGER :: ISCREENLEV
 INTEGER :: ISTAT, ICPT, IUNIT
 !
 INTEGER :: JI,JJ,JP,JK,JJP,JL,K1,L1,IMASK,INPATCH
@@ -192,13 +195,40 @@ DO JL = 1,NVAR
     ZIDENT(JP+INPATCH*(JL-1),JP+INPATCH*(JL-1)) = 1.0
   ENDDO
   !
-  WHERE ( XI(:,:,JL)/=XUNDEF )
-    ZEPS(:,:,JL) = XTPRT(JL) * XI(:,:,JL)
-  ELSEWHERE
+  ! XTPRT=XTPRT*(FP-WP) for WG case
+  IF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2' .OR. &
+       TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4' .OR. &
+       TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6' .OR. &
+       TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8') THEN
+    !
+    DO JP = 1,INPATCH
+      WHERE ( XI(:,JP,JL)/=XUNDEF ) ! not sure that it is necessary
+        ZEPS(:,JP,JL) = XTPRT(JL) * ZCOFSWI(:) ! XI(:,JP,JL)
+      ELSEWHERE
+        ZEPS(:,JP,JL) = 1.
+      ENDWHERE
+    ENDDO
+    !
+  ELSEIF (TRIM(CVAR(JL))=='LAI') THEN
+    !
+    WHERE ( XI(:,:,JL)/=XUNDEF )
+      ZEPS(:,:,JL) = XTPRT(JL) * XI(:,:,JL)
+    ELSEWHERE
+      ZEPS(:,:,JL) = 1.
+    ENDWHERE
+    !
+  ELSE
+    !
     ZEPS(:,:,JL) = 1.
-  ENDWHERE
+    !
+  ENDIF
   !
-  IF ( TRIM(CVAR(JL))=='WG2' .OR. TRIM(CVAR(JL))=='WG1' ) THEN
+  IF (NPRINTLEV>0) WRITE(*,*) 'ZEPS | ', TRIM(CVAR(JL)), ' : ' , XTPRT(JL)
+  !
+  IF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2' .OR. &
+       TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4' .OR. &
+       TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6' .OR. &
+       TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8') THEN
     !
     DO JI = 1,KI
       ZCOEF(JI,:,JL) = ZCOFSWI(JI)*ZCOFSWI(JI)
@@ -420,13 +450,17 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "FA" ) THEN
         XYO(:,IOBS) = PT2M(:)
       CASE("HU2M")   
         XYO(:,IOBS) = PHU2M(:)
-      CASE("WG1","LAI")  
+      CASE("WG1","WG2","LAI")  
         CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in ASSIM_NATURE_ISBA_EKF!")
     END SELECT                 
   ENDDO
   !  
 ENDIF
 !
+! ISCREENLEV defines the ground level used to screen observations when soil is frozen
+!   Future change: better look at COBS(IOBS) which should be WG1 for 3-L and WG2 for DIF
+IF (IO%CISBA=='3-L') ISCREENLEV = 1
+IF (IO%CISBA=='DIF') ISCREENLEV = 2
 !
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//TRIM(YMYPROC),STATUS='unknown',IOSTAT=ISTAT)
@@ -438,14 +472,14 @@ DO JI = 1,KI
     !
     DO JJ = 1,PK%NSIZE_P
       IF (PK%NR_P(JJ) == JI) THEN
-        IF (PEK%XWGI(JJ,1)<ZMIN) ZMIN = PEK%XWGI(JJ,1)
+        IF (PEK%XWGI(JJ,ISCREENLEV)<ZMIN) ZMIN = PEK%XWGI(JJ,ISCREENLEV)
         EXIT
       ENDIF
     ENDDO
   ENDDO
   IF ( ZMIN>0. ) THEN
     XYO (JI,:) = XUNDEF
-    IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',JI,' REMOVED'
+    !IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',JI,' REMOVED'
   ENDIF
   IF ( NPRINTLEV > 0 ) WRITE (111,*) XYO(JI,:)
 ENDDO
@@ -489,7 +523,15 @@ ENDIF
 DO JP = 1,INPATCH
   ALLOCATE(NP%AL(JP)%XINCR(KI,NVAR))
   NP%AL(JP)%XINCR(:,:) = 0.
+  ALLOCATE(NP%AL(JP)%XHO(KI,NOBSTYPE*NBOUTPUT,NVAR))
+  NP%AL(JP)%XHO(:,:,:) = 0.
 ENDDO
+!
+ALLOCATE(S%XINNOV(KI,NOBSTYPE*NBOUTPUT))
+S%XINNOV(:,:) = 0.
+!
+ALLOCATE(S%XRESID(KI,NOBSTYPE*NBOUTPUT))
+S%XRESID(:,:) = 0.
 !
 IOBSCOUNT = 0
 DO JI=1,KI
@@ -503,13 +545,13 @@ DO JI=1,KI
       ENDWHERE
     ENDIF
   ENDDO
-  IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in sim obs yf', ZYF(:,1)
+  !IF ( NPRINTLEV > 0 ) WRITE(*,*) 'read in sim obs yf', ZYF(:,1)
   !
   !
   ZR   (:,:) = 0. ! Observation error matrix
   !
   ZHO  (:,:) = XUNDEF  ! Linearized observation matrix
-  ZHOWR  (:,:) = XUNDEF
+  ZHOWR(:,:) = XUNDEF
   ZB2  (:)   = XUNDEF  ! Innovation vector
   
   DO ISTEP=1,NBOUTPUT
@@ -522,7 +564,7 @@ DO JI=1,KI
       ZR(K1,K1) = XERROBS(JK)*XERROBS(JK)
       IF ( COBS(JK) .EQ. "LAI" ) THEN
         ZR(K1,K1) = ZR(K1,K1) * XYO(JI,K1)*XYO(JI,K1)
-      ELSEIF (COBS(JK) .EQ. "WG1") THEN
+      ELSEIF (COBS(JK) .EQ. "WG1" .OR. COBS(JK) .EQ. "WG2") THEN
         ! convert R for wg1 from SWI  to abs value
         ZR(K1,K1) = ZR(K1,K1) * ZCOFSWI(JI)*ZCOFSWI(JI)
       ENDIF
@@ -536,20 +578,29 @@ DO JI=1,KI
       DO JL=1,NVAR
         DO JP=1,INPATCH
           !
+          PEK => NPE%AL(JP)
+          !
           L1 = JP + INPATCH*(JL-1)
           !
-          IF ( S%XPATCH(JI,JP)>0.0 .AND. XF_PATCH(JI,JP,JL+1,JK).NE.XUNDEF .AND. XF_PATCH(JI,JP,1,JK).NE.XUNDEF ) THEN 
+          IF ( S%XPATCH(JI,JP)>0.0 .AND. XF_PATCH(JI,JP,JL+1,JK).NE.XUNDEF .AND. &
+               XF_PATCH(JI,JP,1,JK).NE.XUNDEF .AND. PEK%XWGI(JI,ISCREENLEV).EQ.0. ) THEN 
             ZHOWR(K1,L1) = S%XPATCH(JI,JP)*(XF_PATCH(JI,JP,JL+1,JK) - XF_PATCH(JI,JP,1,JK))/ZEPS(JI,JP,JL)
           ENDIF
           !
           IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN         !if obs available
             ! Jacobian of obs operator
             ZHO(K1,L1) = S%XPATCH(JI,JP)*(XF_PATCH(JI,JP,JL+1,JK) - XF_PATCH(JI,JP,1,JK))/ZEPS(JI,JP,JL)
+            !IF (NPRINTLEV>0) WRITE(*,*) JI,S%XPATCH(JI,JP)*XF_PATCH(JI,JP,JL+1,JK), S%XPATCH(JI,JP)*XF_PATCH(JI,JP,1,JK),ZEPS(JI,JP,JL)
+            !IF (NPRINTLEV>0) WRITE(*,*) 'NVAR | OBS | ZHO ', TRIM(CVAR(JL)), ' | ', COBS(JK), ' | ' , ZHO(K1,L1), JI
+            !IF (NPRINTLEV>0) WRITE(*,*) 'ZCOEF | ZCOFSWI ', ZCOEF(JI,JP,JL), ' | ', ZCOFSWI(JI)
             ! impose limits  
-            ZHO(K1,L1) = MAX(-0.1, ZHO(K1,L1))
-            ZHO(K1,L1) = MIN( 1.0, ZHO(K1,L1))
+            !ZHO(K1,L1) = MAX(-0.1, ZHO(K1,L1))
+            !ZHO(K1,L1) = MIN( 1.0, ZHO(K1,L1))
             ! innovation vector
             ZB2(K1) = XYO(JI,K1) - ZYF(1,JK)
+            IF (S%XPATCH(JI,JP)>0.0 .AND. XF_PATCH(JI,JP,JL+1,JK).NE.XUNDEF .AND. XF_PATCH(JI,JP,1,JK).NE.XUNDEF) THEN
+              S%XINNOV(JI,K1) = ZB2(K1)
+            ENDIF
             IOBSCOUNT = IOBSCOUNT + 1
           ELSE  !if no obs available
             ! set obs operator and innovation to zero if no obs available
@@ -564,6 +615,7 @@ DO JI=1,KI
     !
   ENDDO
   !
+  !S%XINNOV(JI,:) = ZB2(:)
   IF ( NPRINTLEV > 0 ) THEN
     WRITE(111,*) ZR(:,:)
     WRITE(112,*) ZB2(:)
@@ -579,36 +631,107 @@ DO JI=1,KI
   ZK1 (:,:) = MATMUL(ZHO(:,:),MATMUL(ZB(JI,:,:),ZHOT(:,:))) + ZR(:,:)
   CALL CHOLDC(NOBSTYPE,ZK1(:,:),ZP(:))                         ! Cholesky decomposition (1)
   CALL CHOLSL(NOBSTYPE,ZK1(:,:),ZP(:),ZB2(:),ZX(:))            ! Cholesky decomposition (2)
-  ZINCR(JI,:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
+  ZINCR(:) = MATMUL(ZB(JI,:,:),MATMUL(ZHOT(:,:),ZX(:)))
   DO JL=1,NVAR
     DO JP=1,INPATCH
       !
-      L1 = JP+INPATCH*(JL-1)
-      !
-      ! Update the modified values
-      IF ( TRIM(CVAR(JL))=="LAI" ) THEN
-        ZINCR(JI,L1) = MAX( ZINCR(JI,L1), ZVLAIMIN(JP)-XF(JI,JP,1,JL) )
-        XBIO_PASS(JI,JP) = XBIO_PASS(JI,JP) + ZINCR(JI,L1)*XALPH(JP)
-      ELSEIF ( XF(JI,JP,1,JL)+ZINCR(JI,L1)<0. ) THEN
-        ZINCR(JI,L1) = 0.
+      IF ( S%XPATCH(JI,JP)>0.0 .AND. XF(JI,JP,1,JL).NE.XUNDEF ) THEN
+        !
+        L1 = JP+INPATCH*(JL-1)
+        !
+        ! Update the modified values
+        IF ( TRIM(CVAR(JL))=="LAI" ) THEN
+          ZINCR(L1) = MAX( ZINCR(L1), ZVLAIMIN(JP)-XF(JI,JP,1,JL) )
+          ZINCR(L1) = MIN (MAX( ZINCR(L1), -1.), 1.)
+          XBIO_PASS(JI,JP) = XBIO_PASS(JI,JP) + ZINCR(L1)*XALPH(JP)
+        ELSEIF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2' .OR. &
+                 TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4' .OR. &
+                 TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6' .OR. &
+                 TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8') THEN
+          IF ( TRIM(CVAR(JL))=='WG1' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,1)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG2' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,2)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG3' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,3)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG4' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,4)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG5' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,5)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG6' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,6)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG7' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,7)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WG8' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,8)-XF(JI,JP,1,JL) )
+          ENDIF
+          ZINCR(L1) = MIN( MAX( ZINCR(L1), -0.1), 0.1)
+        ELSEIF ( XF(JI,JP,1,JL)+ZINCR(L1)<0. ) THEN
+          ZINCR(L1) = 0.
+        ENDIF
+        !
+        XF(JI,JP,1,JL) = XF(JI,JP,1,JL) + ZINCR(L1)
+        !
+        ! For no only warn if we have negative values.
+        IF ( NPRINTLEV > 0 ) THEN
+          IF ( XF(JI,JP,1,JL) < 0. ) WRITE(*,*) "WARNING X<0. for ",JI,JP," for variable ",TRIM(CVAR(JL))
+        ENDIF
+        !
       ENDIF
+    ENDDO
+  ENDDO
+  !
+  ! TRY TO COMPUTE ANALYSIS RESIDUAL
+  DO ISTEP = 1,NBOUTPUT
+    !
+    DO JK = 1,NOBSTYPE
       !
-      XF(JI,JP,1,JL) = XF(JI,JP,1,JL) + ZINCR(JI,L1)
+      K1  = (ISTEP-1)*NOBSTYPE + JK
+      ZB3 = XUNDEF
       !
-      ! For no only warn if we have negative values.
-      IF ( NPRINTLEV > 0 ) THEN
-        IF ( XF(JI,JP,1,JL) < 0. ) WRITE(*,*) "WARNING X<0. for ",JI,JP," for variable ",TRIM(CVAR(JL))
-      ENDIF
+      DO JL = 1,NVAR
+        IF ( ( TRIM(CVAR(JL))=="WG1" .AND. TRIM(COBS(JK)) == "WG1" ) .OR. &
+             ( TRIM(CVAR(JL))=="WG2" .AND. TRIM(COBS(JK)) == "WG2" ) .OR. &
+             ( TRIM(CVAR(JL))=="LAI" .AND. TRIM(COBS(JK)) == "LAI" ) ) THEN
+             print*,JL,CVAR(JL),COBS(JL),XYO(JI,K1)
+          IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN
+            ZB4  = 0.
+            DO JP = 1,INPATCH ! all patches
+              IF ( S%XPATCH(JI,JP)>0.0 .AND.  XF(JI,JP,1,JL) .NE.XUNDEF) THEN
+                ZB4 = ZB4 + XF(JI,JP,1,JL) * S%XPATCH(JI,JP)
+              ENDIF
+            ENDDO
+            ZB3 = XYO(JI,K1)-  ZB4
+          ENDIF
+        ENDIF
+      ENDDO
+      !
+      S%XRESID(JI,K1) = ZB3
+      !
+    ENDDO
+    !
+  ENDDO
+  !
+  DO JL=1,NVAR
+    DO JP = 1,INPATCH
+      PK => NP%AL(JP)
+      !
+      DO JJ = 1,PK%NSIZE_P
+        IF ( PK%NR_P(JJ)==JI ) THEN
+          PK%XHO(JJ,:,JL) = ZHOWR(:,JP+INPATCH*(JL-1))
+          PK%XINCR(JJ,JL) = ZINCR(JP+INPATCH*(JL-1))
+        ENDIF
+      ENDDO
       !
     ENDDO
   ENDDO
   !
   IF ( NPRINTLEV > 0 ) THEN
     DO JP=1,INPATCH
-      WRITE(113,*) (XF(JI,JP,1,JL),JL=1,NVAR), (ZINCR(JI,JP+INPATCH*(JL-1)),JL=1,NVAR)
+      WRITE(113,*) (XF(JI,JP,1,JL),JL=1,NVAR), (ZINCR(JP+INPATCH*(JL-1)),JL=1,NVAR)
     ENDDO
   ENDIF
-  
+  !
 !--------------------ANALYSIS OF B (FOR USE IN NEXT CYCLE)-------------------
   ! Ba = (I-KH)Bf(I-KH)t+KRKt
   ! K = BfHt{K1}**-1
@@ -655,7 +778,7 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !//////////////////////TO WRITE ANALYSIS ARRAYS/////////////////////////////////////
 !
-IF (LBEV .OR. NPRINTLEV>0) THEN
+IF (LBEV .OR. NPRINTLEV>1) THEN
   ! Write out analysed B (for use in next cycle)
   YBGFILE = "BGROUNDout_ASSIM."//TRIM(YMYPROC)
   CALL B_BIG_LOOP(IO,"WRIT",YBGFILE,ZB)
@@ -683,8 +806,6 @@ DO JL=1,NVAR
     DO JI = 1,PK%NSIZE_P
       IMASK = PK%NR_P(JI)
       !
-      PK%XINCR(JI,JL) = ZINCR(IMASK,JP+INPATCH*(JL-1))
-      !
       ! Update the modified values
       SELECT CASE (TRIM(CVAR(JL)))
         CASE("TG1")
@@ -695,6 +816,18 @@ DO JL=1,NVAR
           PEK%XWG(JI,1) = XF(IMASK,JP,1,JL)
         CASE("WG2")
           PEK%XWG(JI,2) = XF(IMASK,JP,1,JL)
+        CASE("WG3")
+          PEK%XWG(JI,3) = XF(IMASK,JP,1,JL)
+        CASE("WG4")
+          PEK%XWG(JI,4) = XF(IMASK,JP,1,JL)
+        CASE("WG5")
+          PEK%XWG(JI,5) = XF(IMASK,JP,1,JL)
+        CASE("WG6")
+          PEK%XWG(JI,6) = XF(IMASK,JP,1,JL)
+        CASE("WG7")
+          PEK%XWG(JI,7) = XF(IMASK,JP,1,JL)
+        CASE("WG8")
+          PEK%XWG(JI,8) = XF(IMASK,JP,1,JL)
         CASE("LAI") 
           PEK%XLAI(JI) = XF(IMASK,JP,1,JL)
           SELECT CASE (TRIM(CBIO))

@@ -43,7 +43,7 @@ USE MODN_ASSIM,    ONLY : NAM_NACVEG,NAM_ASSIM,LASSIM,CASSIM,&
 USE MODD_ASSIM,    ONLY : NVAR,NOBSTYPE,XTPRT,XTPRT_M,XSIGMA,&
                           XSIGMA_M,CVAR,CVAR_M,COBS,NNCO,&
                           NVARMAX,NNCV,LASSIM,CASSIM_ISBA,LPRT,&
-                          NOBSMAX,XERROBS_M,XERROBS, &
+                          NOBSMAX,COBS_M,XERROBS_M,XERROBS, &
                           XQCOBS_M,XQCOBS,&
                           XINFL_M,XINFL,XADDINFL_M,XADDINFL, &
                           XADDTIMECORR_M, XADDTIMECORR, NIE, &
@@ -126,6 +126,7 @@ IF ( ( CASSIM_ISBA == "EKF" .AND. ( LASSIM.OR.LPRT ) ) .OR. &
       J = J + 1
     ENDIF
   ENDDO
+  CVAR = ADJUSTL(CVAR)
 ENDIF
 
 IF ( ( CASSIM_ISBA == "EKF" .AND. ( LASSIM.OR.LPRT ) ) .OR. &
@@ -143,21 +144,14 @@ IF ( ( CASSIM_ISBA == "EKF" .AND. ( LASSIM.OR.LPRT ) ) .OR. &
   J = 1
   DO I = 1,NOBSMAX
     IF (NNCO(I) == 1 .AND. J <= NOBSTYPE ) THEN
-      SELECT CASE (I)
-        CASE (1)   
-          COBS(J) = 'T2M'
-        CASE (2)
-          COBS(J) = 'HU2M'
-        CASE (3)
-          COBS(J) = 'WG1'
-        CASE (4) 
-          COBS(J) = 'LAI'
-        CASE (5)
-          COBS(J) = 'SWE'
-       END SELECT
-       XERROBS(J) = XERROBS_M(I)
-       XQCOBS(J) = XQCOBS_M(I)
-       J = J + 1
+      IF (J <= NOBSTYPE .AND. (TRIM(COBS_M(I)) == 'T2M' .OR. TRIM(COBS_M(I)) == 'HU2M' .OR. &
+          TRIM(COBS_M(I)) == 'WG1' .OR. TRIM(COBS_M(I)) == 'WG2' .OR. TRIM(COBS_M(I)) == 'LAI' .OR. &
+          TRIM(COBS_M(I)) == 'SWE') ) THEN
+        COBS(J) = TRIM(COBS_M(I))
+        XERROBS(J) = XERROBS_M(I)
+        XQCOBS(J) = XQCOBS_M(I)
+        J = J + 1
+      ENDIF
     ENDIF
   ENDDO
 ENDIF

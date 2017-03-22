@@ -64,7 +64,7 @@ USE MODD_XIOS, ONLY : LALLOW_ADD_DIM
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
 !
-USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR
+USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR, NOBSTYPE, NBOUTPUT
 !                                 
 USE MODD_AGRI,            ONLY :   LAGRIP
 !
@@ -104,14 +104,14 @@ TYPE(SURF_SNOW), INTENT(IN) :: TPSNOW
 !              -------------------------------
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
- CHARACTER(LEN=1) :: YVAR
+ CHARACTER(LEN=1) :: YVAR, YOBS, YTIM
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
 REAL, DIMENSION(SIZE(DM%XSWI,1)) :: ZMAX
-INTEGER           :: JL, JJ, JVAR, JP, JI, ISIZE
+INTEGER           :: JL, JJ, JVAR, JOBS, JP, JI, JT, JK, ISIZE
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -828,6 +828,9 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   ! 
   IF (LASSIM .AND. CASSIM_ISBA=="EKF  ") THEN
     !
+    CALL END_IO_SURF_n(HPROGRAM)
+    CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_ANALYSIS.OUT.nc')
+    !
     DO JVAR = 1,NVAR
       WRITE(YVAR,FMT='(I1.1)') JVAR
       YRECFM="ANAL_INCR"//YVAR
@@ -835,6 +838,42 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       DO JP = 1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
                                 NP%AL(JP)%NR_P,NP%AL(JP)%XINCR(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE)
+      ENDDO
+      WRITE(YVAR,FMT='(I1.1)') JVAR
+      DO JT = 1,NBOUTPUT
+        WRITE(YTIM,FMT='(I1.1)') JT
+        DO JOBS = 1,NOBSTYPE
+          WRITE(YOBS,FMT='(I1.1)') JOBS
+          YRECFM="HO"//YVAR//"_"//YOBS//"_"//YTIM
+          YCOMMENT="by patch"
+          JK = (JT-1)*NOBSTYPE + JOBS
+          DO JP = 1,IO%NPATCH
+            CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
+                                      NP%AL(JP)%NR_P,NP%AL(JP)%XHO(1:NP%AL(JP)%NSIZE_P,JK,JVAR),ISIZE)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+    !
+    DO JT = 1,NBOUTPUT        
+      WRITE(YTIM,FMT='(I1.1)') JT
+      DO JOBS = 1,NOBSTYPE
+        WRITE(YOBS,FMT='(I1.1)') JOBS
+        YRECFM="INNOV"//YOBS//"_"//YTIM
+        YCOMMENT="not by patch"
+        JK = (JT-1)*NOBSTYPE + JOBS
+        CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%XINNOV(:,JK),IRESP,HCOMMENT=YCOMMENT)
+      ENDDO
+    ENDDO
+    !
+    DO JT = 1,NBOUTPUT
+      WRITE(YTIM,FMT='(I1.1)') JT
+      DO JOBS = 1,NOBSTYPE
+        WRITE(YOBS,FMT='(I1.1)') JOBS
+        YRECFM="RESID"//YOBS//"_"//YTIM
+        YCOMMENT="not by patch"
+        JK = (JT-1)*NOBSTYPE + JOBS
+        CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%XRESID(:,JK),IRESP,HCOMMENT=YCOMMENT)
       ENDDO
     ENDDO
     !

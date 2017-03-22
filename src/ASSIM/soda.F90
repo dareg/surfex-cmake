@@ -42,6 +42,7 @@ PROGRAM SODA
 !! 03/2014 E. Martin change indices names in OMP module according to GMAP changes
 !  05/2013 B. Decharme New coupling variables XTSURF (for AGCM)
 !  02/2016 B. Decharme MODD_IO_SURF_ARO not used
+!  09/2016 S. Munier XTSTEP_OUTPUT set to 0
 !----------------------------------------------------------------------------
 !
 USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
@@ -97,7 +98,8 @@ USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, &
 !
 USE MODN_IO_OFFLINE,     ONLY : NAM_IO_OFFLINE, CNAMELIST, CPGDFILE, CPREPFILE, CSURFFILE, &
                                 CSURF_FILETYPE, CTIMESERIES_FILETYPE, LLAND_USE, YALG_MPI, &
-                                LDIAG_FA_NOCOMPACT, LOUT_TIMENAME, XIO_FRAC, LRESTART_2M
+                                LDIAG_FA_NOCOMPACT, LOUT_TIMENAME, XIO_FRAC, LRESTART_2M,  &
+                                XTSTEP_OUTPUT
 !
 USE MODE_POS_SURF,  ONLY : POSNAM
 !
@@ -493,6 +495,8 @@ DO NIFIC = INB,1,-1
                 XF_PATCH(JI,JP,NIFIC,IOBS) = XAHU2M_ISBA(JI,1)
               CASE("WG1")
                 XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,1)
+              CASE("WG2")
+                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,2)
               CASE("LAI")
                 XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XLAI(JI)
               CASE DEFAULT
@@ -521,7 +525,17 @@ DO NIFIC = INB,1,-1
               CASE("WG2")
                 XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,2)
               CASE("WG3")
-                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,3)              
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,3) 
+              CASE("WG4")
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,4)
+              CASE("WG5")
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,5)
+              CASE("WG6")
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,6)
+              CASE("WG7")
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,7)
+              CASE("WG8")
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,8)
               CASE("LAI")
                 XF(IMASK,JP,NIFIC,JL) = PEK%XLAI(JI)
               CASE DEFAULT
@@ -884,19 +898,15 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
 
     ! Set observations used for possibly other tiles than nature
     ! Distribute read variables
-    JJ = 1
-    DO JI = 1,NOBSMAX
-      IF (NNCO(JI) == 1 .AND. JJ <= NOBSTYPE ) THEN
-        SELECT CASE (JI)
-          CASE (1)
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
-          CASE (2)
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
-          CASE (5)
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
-        END SELECT
-        JJ = JJ + 1
-      ENDIF
+    DO IOBS = 1,NOBSTYPE
+      SELECT CASE (TRIM(COBS(IOBS)))
+        CASE ("T2M")
+          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
+        CASE ("HU2M")
+          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
+        CASE ("SWE")
+          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
+      END SELECT
     ENDDO
 
   ELSE
@@ -908,19 +918,15 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
       ENDDO
     ENDIF
     ! Set observations used for possibly other tiles than nature
-    JJ = 1
-    DO JI = 1,NOBSMAX
-      IF (NNCO(JI) == 1 .AND. JJ <= NOBSTYPE ) THEN 
-        SELECT CASE (JI)
-          CASE (1)
-            ZT2M(:)=ZWORK(:,JJ)
-          CASE (2)
-            ZHU2M(:)=ZWORK(:,JJ)
-          CASE (5)
-            ZSWE(:)=ZWORK(:,JJ)
-         END SELECT
-         JJ = JJ + 1
-       ENDIF
+    DO IOBS = 1,NOBSTYPE
+      SELECT CASE (TRIM(COBS(IOBS)))
+        CASE ("T2M")
+          ZT2M(:)=ZWORK(:,JJ)
+        CASE ("HU2M")
+          ZHU2M(:)=ZWORK(:,JJ)
+        CASE ("SWE")
+          ZSWE(:)=ZWORK(:,JJ)
+       END SELECT
      ENDDO
   ENDIF
   DEALLOCATE(ZWORK)
@@ -1138,6 +1144,7 @@ ENDIF
 !
 NWRITE = 1
 XSTARTW = 1
+XTSTEP_OUTPUT = 0.
 LTIME_WRITTEN = .FALSE.
 !
 DO IENS = 1,ISIZE
@@ -1181,7 +1188,17 @@ DO IENS = 1,ISIZE
             CASE("WG2")
               PEK%XWG(JI,2) = XF(IMASK,JP,IENS,JL)
             CASE("WG3")
-              PEK%XWG(JI,3) = XF(IMASK,JP,IENS,JL)          
+              PEK%XWG(JI,3) = XF(IMASK,JP,IENS,JL)  
+            CASE("WG4")
+              PEK%XWG(JI,4) = XF(IMASK,JP,IENS,JL)  
+            CASE("WG5")
+              PEK%XWG(JI,5) = XF(IMASK,JP,IENS,JL)  
+            CASE("WG6")
+              PEK%XWG(JI,6) = XF(IMASK,JP,IENS,JL)  
+            CASE("WG7")
+              PEK%XWG(JI,7) = XF(IMASK,JP,IENS,JL)  
+            CASE("WG8")
+              PEK%XWG(JI,8) = XF(IMASK,JP,IENS,JL)        
             CASE("LAI") 
               PEK%XLAI(JI) = XF(IMASK,JP,IENS,JL)
             CASE DEFAULT
