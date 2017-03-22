@@ -188,53 +188,7 @@ endif
 #           Librairie DR_HOOK                            #
 ##########################################################
 
-FUNDEFS += -USFX_MPL -ULINUX
-
-ifeq "$(VER_DRHOOK)" "BYPASS"
-DIR_HOOK = LIB/DRHOOK/BYPASS
-endif
-
-#RJ: minimal version of DRHOOK, mainly for profiling only
-ifeq "$(VER_DRHOOK)" "MINI"
-DIR_HOOK = LIB/DRHOOK/MINI
-INC_HOOK = -I$(B)LIB/DRHOOK/MINI
-FPPFLAGS_HOOK += -DLINUX
-CPPFLAGS_HOOK += -DLINUX
-
-OBJS_LISTE_MASTER += drhook.o crc.o addrdiff.o cargs.o endian.o env.o linuxtrbk.o
-OBJS_LISTE_MASTER += gethwm.o getmaxrss.o getstatm.o getrss.o getstk.o getpag.o getstackusage.o getcurheap.o
-
-#RJ: optional MPL layer support in DRHOOK for testing compatibility only!
-ifneq "$(VER_MPI)" "NOMPI"
-ifeq "$(USE_MPL)" "YES"
-FPPFLAGS_HOOK += -DSFX_MPL
-CPPFLAGS_HOOK += -DSFX_MPL
-DIR_HOOK += LIB/DRHOOK/MPL
-endif
-endif
-endif
-
-ifeq "$(VER_DRHOOK)" "SIMPLE"
-DIR_HOOK = LIB/DRHOOK_SIMPLE
-INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
-FPPFLAGS_HOOK += -DLINUX -DSFX_MPL 
-CPPFLAGS_HOOK += -DLINUX -DSFX_MPL
-
-OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o fnecsx.o getcurheap.o 
-OBJS_LISTE_MASTER += gethwm.o getmaxrss.o getpag.o getrss.o getstackusage.o getstatm.o getstk.o 
-OBJS_LISTE_MASTER += linux_bind.o linuxtrbk.o mpe_locking.o
-endif
-#
-ifdef DIR_HOOK
-ifeq ($(F90),$(filter $(F90),ifort mpiifort)) 
-FPPFLAGS_HOOK += -D__INTEL_COMPILER
-endif
-DIR_MASTER += $(DIR_HOOK)
-FPPFLAGS   += $(FPPFLAGS_HOOK)
-CPPFLAGS   += $(CPPFLAGS_HOOK)
-INC        += $(INC_HOOK)
-VPATH      += $(DIR_HOOK)
-endif
+# now included in XRD
 #
 ##########################################################
 #           Source XRD                                   #
@@ -242,29 +196,40 @@ endif
 
 FUNDEFS += -UFA_GRIBEX -UUSE_SAMIO -UNECSX -UVPP
 
-#RJ: XRD40 for cross validation
-VER_XRD ?= XRD39
-#VER_XRD ?= XRD40
+VER_XRD ?= XRD44
 
 ifneq "$(VER_XRD)" "NONE"
-DIR_XRD += LIB/$(VER_XRD)/FA
-DIR_XRD += LIB/$(VER_XRD)/LFI
+DIR_XRD += LIB/$(VER_XRD)/fa
+DIR_XRD += LIB/$(VER_XRD)/fi_libc
+DIR_XRD += LIB/$(VER_XRD)/lfi
+DIR_XRD += LIB/$(VER_XRD)/lfi_alt
 DIR_XRD += LIB/$(VER_XRD)/grib_mf
+DIR_XRD += LIB/$(VER_XRD)/linux
 DIR_XRD += LIB/$(VER_XRD)/module
-#DIR_XRD += LIB/$(VER_XRD)/support
+DIR_XRD += LIB/$(VER_XRD)/parallel
+DIR_XRD += LIB/$(VER_XRD)/support
 DIR_XRD += LIB/$(VER_XRD)/utilities
-INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/FA -I$(B)LIB/$(VER_XRD)/LFI
+INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/fa -I$(B)LIB/$(VER_XRD)/lfi -I$(B)LIB/$(VER_XRD)/utilities
 #RJ: for time being avoid interfaces usage from xrd/fa cpp prototyping, not needed with backported patches
 #RJ FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
-FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE
-CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE
+FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DSFX_MPL
+CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DSFX_MPL
 endif
 #
+OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o fi_libc.o fnecsx.o getcurheap.o 
+OBJS_LISTE_MASTER += gethwm.o getmaxrss.o getpag.o getrss.o getstackusage.o getstatm.o getstk.o 
+OBJS_LISTE_MASTER += iswap8.o lfi_abor.o lfi_altm.o lfi_alts.o lfi_dumm.o lfi_fmul.o lfi_fort.o lfi_grok.o
+OBJS_LISTE_MASTER += lfi_hndl.o lfi_intf.o lfi_miss.o lfi_util.o lfi_verb.o linux_bind.o linuxtrbk.o mpe_locking.o
+#
 ifdef DIR_XRD
+ifeq ($(F90),$(filter $(F90),ifort mpiifort)) 
+FPPFLAGS_XRD += -D__INTEL_COMPILER
+endif
 DIR_MASTER += $(DIR_XRD)
 FPPFLAGS   += $(FPPFLAGS_XRD)
 CPPFLAGS   += $(CPPFLAGS_XRD)
 INC        += $(INC_XRD)
+VPATH      += $(DIR_XRD)
 endif
 ##########################################################
 #           Source FM                                    #
