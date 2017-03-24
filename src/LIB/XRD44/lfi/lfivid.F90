@@ -192,7 +192,7 @@ IMPLICIT NONE
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKB)  KNUMPD                                 ! IN   
-INTEGER (KIND=JPLIKB)  KTAMPO     (LFI%JPLARX)                ! IN   
+INTEGER (KIND=JPLIKB)  KTAMPO     (*)                ! IN   
 INTEGER (KIND=JPLIKB)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
@@ -213,7 +213,7 @@ IMPLICIT NONE
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
 INTEGER (KIND=JPLIKM)  KNUMPD                                 ! IN   
-INTEGER (KIND=JPLIKB)  KTAMPO     (LFI%JPLARX)                ! IN   
+INTEGER (KIND=JPLIKB)  KTAMPO     (*)                ! IN   
 INTEGER (KIND=JPLIKM)  KRETIN                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()

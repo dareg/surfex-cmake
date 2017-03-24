@@ -424,12 +424,12 @@ INTEGER (KIND=JPLIKB)  KNIVAU                                 ! IN
 CHARACTER (LEN=*)      CDSUFF                                 ! IN   
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPLIKB)  KLCHAM                                 ! IN   
-INTEGER (KIND=JPLIKB)  KSEC1      (FA%JPSEC1)                 !   OUT
-INTEGER (KIND=JPLIKB)  KSEC2      (FA%JPSEC2)                 !   OUT
+INTEGER (KIND=JPLIKB)  KSEC1      (*)                 !   OUT
+INTEGER (KIND=JPLIKB)  KSEC2      (*)                 !   OUT
 REAL (KIND=JPDBLR)     PSEC2      (*)                         !   OUT
 INTEGER (KIND=JPLIKB)  KSEC3      (2)                         !   OUT
 REAL (KIND=JPDBLR)     PSEC3      (*)                         !   OUT
-INTEGER (KIND=JPLIKB)  KSEC4      (FA%JPSEC4)                 !   OUT
+INTEGER (KIND=JPLIKB)  KSEC4      (*)                 !   OUT
 TYPE (FAGR1TAB)        YDGR1TAB                               !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
@@ -459,12 +459,12 @@ INTEGER (KIND=JPLIKM)  KNIVAU                                 ! IN
 CHARACTER (LEN=*)      CDSUFF                                 ! IN   
 LOGICAL                LDCOSP                                 ! IN   
 INTEGER (KIND=JPLIKM)  KLCHAM                                 ! IN   
-INTEGER (KIND=JPLIKM)  KSEC1      (FA%JPSEC1)                 !   OUT
-INTEGER (KIND=JPLIKM)  KSEC2      (FA%JPSEC2)                 !   OUT
+INTEGER (KIND=JPLIKM)  KSEC1      (*)                 !   OUT
+INTEGER (KIND=JPLIKM)  KSEC2      (*)                 !   OUT
 REAL (KIND=JPDBLR)     PSEC2      (*)                         !   OUT
 INTEGER (KIND=JPLIKM)  KSEC3      (2)                         !   OUT
 REAL (KIND=JPDBLR)     PSEC3      (*)                         !   OUT
-INTEGER (KIND=JPLIKM)  KSEC4      (FA%JPSEC4)                 !   OUT
+INTEGER (KIND=JPLIKM)  KSEC4      (*)                 !   OUT
 TYPE (FAGR1TAB)        YDGR1TAB                               !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()

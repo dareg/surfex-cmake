@@ -292,7 +292,7 @@ IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKB)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKB)  KRANG                                  ! IN   
-REAL (KIND=JPDBLR)     PCHAMP     (FA%JPXCSP)                 ! INOUT
+REAL (KIND=JPDBLR)     PCHAMP     (*)                 ! INOUT
 INTEGER (KIND=JPLIKB)  KSTRON                                 ! IN   
 INTEGER (KIND=JPLIKB)  KPUILA                                 ! IN   
 
@@ -313,7 +313,7 @@ IMPLICIT NONE
 ! Arguments
 INTEGER (KIND=JPLIKM)  KREP                                   !   OUT
 INTEGER (KIND=JPLIKM)  KRANG                                  ! IN   
-REAL (KIND=JPDBLR)     PCHAMP     (FA%JPXCSP)                 ! INOUT
+REAL (KIND=JPDBLR)     PCHAMP     (*)                 ! INOUT
 INTEGER (KIND=JPLIKM)  KSTRON                                 ! IN   
 INTEGER (KIND=JPLIKM)  KPUILA                                 ! IN   
 
