@@ -69,7 +69,9 @@
  SAVE        CB,CBM
  DATA IFIRST/0/
 #ifndef SERIAL
-#include "mpif.h"
+#ifdef SFX_MPI
+include "mpif.h"
+#endif
 #endif
 
  CALL SYSTEM("hostname")

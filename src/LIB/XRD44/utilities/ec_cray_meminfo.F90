@@ -5,8 +5,9 @@ IMPLICIT NONE
 !-- EC_CRAY_MEMINFO:
 !   Author   : Peter Towers (ECMWF)  : 2015-2016
 !   Modified : Sami Saarinen (ECMWF) : 21-SEP-2016 : Added getenv EC_MEMINFO -- export EC_MEMINFO=0 disables any EC_MEMINFO output
-
-#include "mpif.h"
+#ifdef SFX_MPI
+include "mpif.h"
+#endif
 
 INTEGER(KIND=4), INTENT(IN) :: KCOMM
 INTEGER(KIND=4), INTENT(IN) :: IU
