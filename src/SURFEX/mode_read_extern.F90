@@ -99,20 +99,20 @@ INTEGER           :: IBUGFIX
 LOGICAL, DIMENSION(:), ALLOCATABLE   :: GCOVER ! flag to read the covers
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZCOVER ! cover fractions
 REAL,    DIMENSION(:,:), ALLOCATABLE :: ZGROUND_DEPTH ! cover fractions
-REAL, DIMENSION(:), ALLOCATABLE   :: ZSOILGRID
+REAL, DIMENSION(:), ALLOCATABLE      :: ZSOILGRID
 REAL,  DIMENSION(KNI)                :: ZHVEG  ! high vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZLVEG  ! low  vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZNVEG  ! no   vegetation fraction
 REAL,  DIMENSION(KNI)                :: ZPERM  ! permafrost distribution
- CHARACTER(LEN=4)                     :: YHVEG  ! type of high vegetation
- CHARACTER(LEN=4)                     :: YLVEG  ! type of low  vegetation
- CHARACTER(LEN=4)                     :: YNVEG  ! type of no   vegetation
+ CHARACTER(LEN=4)                    :: YHVEG  ! type of high vegetation
+ CHARACTER(LEN=4)                    :: YLVEG  ! type of low  vegetation
+ CHARACTER(LEN=4)                    :: YNVEG  ! type of no   vegetation
 INTEGER                              :: INVEGTYPE_SAVE, IJPCOVER_SAVE
 LOGICAL                              :: GECOCLIMAP ! T if ecoclimap is used
 LOGICAL                              :: GECOSG
 LOGICAL                              :: GPAR_GARDEN! T if garden data are used
-LOGICAL, DIMENSION(NVEGTYPE)         :: GDATA_DG
-LOGICAL, DIMENSION(NVEGTYPE)         :: GDATA_GROUND_DEPTH, GDATA_ROOT_DEPTH
+LOGICAL, DIMENSION(NVEGTYPE_ECOSG)   :: GDATA_DG
+LOGICAL, DIMENSION(NVEGTYPE_ECOSG)   :: GDATA_GROUND_DEPTH, GDATA_ROOT_DEPTH
 LOGICAL                              :: GPERM
 LOGICAL                              :: GREAD_EXT
 LOGICAL      :: GREAD_OK, GDIM, GFLAG, GWATER_TO_NATURE, GTOWN_TO_ROCK, GGARDEN
@@ -130,6 +130,8 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_EXTERN:READ_EXTERN_DEPTH',0,ZHOOK_HANDLE)
 !
 YRECFM='BUG'
  CALL READ_SURF(HFILEPGDTYPE,YRECFM,IBUGFIX,IRESP,HDIR='-')
+!
+GFLAG = IVERSION>8 .OR. (IVERSION==8.AND.IBUGFIX>=1)
 !
  CALL READ_LECOCLIMAP(HFILEPGDTYPE,GECOCLIMAP,GECOSG,HDIR='-')
 IF (HNAT=='NAT') THEN  
@@ -168,10 +170,9 @@ KWG_LAYER(:,:) = NUNDEF
 !
 GREAD_OK = .FALSE.
 !
-GFLAG = IVERSION>8 .OR. (IVERSION==8.AND.IBUGFIX>=1)
 !
 IEND = 1
-IF (GFLAG) IEND = NVEGTYPE
+IF (GFLAG) IEND = NVEGTYPE_ECOSG
 !
 IF (HNAT=='NAT' .AND. (IVERSION>=7 .OR. .NOT.GECOCLIMAP)) THEN
   !
