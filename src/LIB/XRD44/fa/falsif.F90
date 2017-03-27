@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FALSIF_MT64                           &
+SUBROUTINE FALSIF_FORT                           &
 &                     (FA,  KREP, KNUMER, CDIDEN )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -43,7 +43,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILIDEN=INT (LEN (CDIDEN), JPLIKB)
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -58,7 +58,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -102,7 +102,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -129,7 +129,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDIDEN='''''',A,'''''''')')                  &
 &   KREP,KNUMER,CLACTI(1:ILACTI)
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILACTI),LLRLFI)
 !
@@ -141,7 +141,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FALSIF_MT64
+END SUBROUTINE FALSIF_FORT
 
 
 
@@ -160,7 +160,7 @@ CHARACTER (LEN=*)      CDIDEN                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALSIF_MT64                     &
+CALL FALSIF_FORT                     &
 &           (FA, KREP, KNUMER, CDIDEN)
 
 END SUBROUTINE FALSIF64
@@ -201,7 +201,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FALSIF_MT64                     &
+CALL FALSIF_FORT                     &
 &           (FA, IREP, INUMER, CDIDEN)
 
 KREP       = INT (      IREP, JPLIKM)

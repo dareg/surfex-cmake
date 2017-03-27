@@ -2,7 +2,7 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Sep-2012 P. Marguinaud Remove unused local variables
-SUBROUTINE FANOUV_MT64                                             &
+SUBROUTINE FANOUV_FORT                                             &
 &                     (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU,   &
 &                      LDERFA, LDIMST, KNIMES, KNBARP, KNBARI,     &
 &                      CDNOMC)
@@ -105,12 +105,12 @@ ILOMIN=MIN ( INT (LEN (CDNOMF), JPLIKB),         &
 !     initialiser les variables globales du logiciel s'il s'agit
 !     du premier appel a un sous-programme de ce logiciel.
 !
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !        Si KNUMER est nul, alors le numero d'unite logique est
 !     attribué automatiquement
 IF (KNUMER == 0) THEN
-  CALL FAAUTO_MT64  (FA, KNUMER, .FALSE.)
+  CALL FAAUTO_FORT  (FA, KNUMER, .FALSE.)
   IRANG=0
 ENDIF
 !
@@ -158,7 +158,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 LLNOUF=KNBARI.EQ.0
-CALL FANUCA_MT64                          &
+CALL FANUCA_FORT                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 LLNOUC=IRANGC.EQ.0
 !
@@ -243,7 +243,7 @@ ENDIF
 ! de -1 pris par FA%NBFPDG, FA%NBFCSP, FA%NSTROF et FA%NPUFLA en
 ! IRANG-ieme position.
 !
-CALL FAINOC_MT64            &
+CALL FAINOC_FORT            &
 &               (FA,  IRANG )
 !
 IRANER=IRANG
@@ -309,11 +309,11 @@ IF (INIMES.EQ.2) THEN
 &     '',  LDIMST= '',L1,                                           &
 &         '', KNIMES='',I2,'', KNBARP='',I6,'' KNBARI='',I6)')      &
 &   KREP,KNUMER,LDNOMM,CDSTTU,LDERFA,LDIMST,KNIMES,KNBARP,KNBARI
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILACTI),LLRLFI)
   CLMESS='CDNOMC='''//CLACTI(1:ILACTI)//''''
-  CALL FAIPAR_MT64                                     &
+  CALL FAIPAR_FORT                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,                                  &
 &               CLACTI(1:ILACTI),LLRLFI)
@@ -326,7 +326,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FANOUV_MT64
+END SUBROUTINE FANOUV_FORT
 
 
 
@@ -355,7 +355,7 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANOUV_MT64                                             &
+CALL FANOUV_FORT                                             &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 
@@ -421,7 +421,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 INBARP     = INT (    KNBARP, JPLIKB)
 
-CALL FANOUV_MT64                                             &
+CALL FANOUV_FORT                                             &
 &           (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, INIMES, INBARP, INBARI, CDNOMC)
 

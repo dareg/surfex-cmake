@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIENO_MT64                                           &
+SUBROUTINE FAIENO_FORT                                           &
 &                     (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP, LDUNDF, PUNDF)
 USE FA_MOD, ONLY : FA_COM, FAGR1TAB
@@ -71,7 +71,7 @@ IREP=0
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 !
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -81,7 +81,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -94,14 +94,14 @@ IF (LLREORD) THEN
   ISMAX  = FA%CADRE(IRANGC)%NSMAX     
   IMSMAX = FA%CADRE(IRANGC)%NMSMAX     
   ALLOCATE (ZCHAMP (4 * (IMSMAX+1) * (ISMAX+1))) ! Assez grand
-  CALL FAREOR_MT64 (FA, IREP, KNUMER, PCHAMP, ZCHAMP, .FALSE.)
+  CALL FAREOR_FORT (FA, IREP, KNUMER, PCHAMP, ZCHAMP, .FALSE.)
   IF (IREP /= 0) GOTO 1001
-  CALL FAIEN1_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, ZCHAMP, LDCOSP, &
+  CALL FAIEN1_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, ZCHAMP, LDCOSP, &
                   & LLUNDF, ZUNDF, YLGR1TAB)
   IF (IREP /= 0) GOTO 1001
   DEALLOCATE (ZCHAMP)
 ELSE
-  CALL FAIEN1_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, LDCOSP, &
+  CALL FAIEN1_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, LDCOSP, &
                   & LLUNDF, ZUNDF, YLGR1TAB)
 ENDIF
 
@@ -111,7 +111,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -131,7 +131,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KNUMER='',I3,         &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,               &
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')            &
 &   KREP,KNUMER,TRIM (CDPREF),KNIVAU,TRIM (CDSUFF),LDCOSP
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, '',LLRLFI)
 !
@@ -144,7 +144,7 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FAIENO_MT64
+END SUBROUTINE FAIENO_FORT
 
 
 
@@ -171,7 +171,7 @@ REAL (KIND=JPDBLR),    OPTIONAL :: PUNDF                      ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIENO_MT64 (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, LDCOSP, &
+CALL FAIENO_FORT (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, LDCOSP, &
                 & LDUNDF, PUNDF)
 
 END SUBROUTINE FAIENO64
@@ -232,7 +232,7 @@ INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FAIENO_MT64 (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, PCHAMP, LDCOSP, &
+CALL FAIENO_FORT (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, PCHAMP, LDCOSP, &
                 & LDUNDF, PUNDF)
 
 KREP       = INT (      IREP, JPLIKM)

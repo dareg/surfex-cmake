@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADECO_MT64                                                &
+SUBROUTINE FADECO_FORT                                                &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF,   &
 &                      LDCOSP, CDNOMA, KLNOMA, KVALCO, KLONGD,        &
 &                      PCHAMP )
@@ -60,13 +60,13 @@ TYPE (FAGR1TAB) YLGR1TAB
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FADECO_MT',0,ZHOOK_HANDLE)
 
-CALL FADEC1_MT64 (FA, KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF,  &
+CALL FADEC1_FORT (FA, KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF,  &
                 & LDCOSP, CDNOMA, KLNOMA, KVALCO, KLONGD,      & 
                 & PCHAMP, LLUNDF, ZUNDF, YLGR1TAB)
 
 IF (LHOOK) CALL DR_HOOK('FADECO_MT',1,ZHOOK_HANDLE)
 
-END SUBROUTINE FADECO_MT64
+END SUBROUTINE FADECO_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FADECO64                                        &
@@ -92,7 +92,7 @@ REAL (KIND=JPDBLR)     PCHAMP     (*)                         !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADECO_MT64                                               &
+CALL FADECO_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &            CDNOMA, KLNOMA, KVALCO, KLONGD, PCHAMP)
 
@@ -158,7 +158,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 ILONGD     = INT (    KLONGD, JPLIKB)
 
-CALL FADECO_MT64                                               &
+CALL FADECO_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, LDCOSP, &
 &            CDNOMA, ILNOMA, KVALCO, ILONGD, PCHAMP)
 

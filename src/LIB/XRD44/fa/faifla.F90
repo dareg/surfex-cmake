@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIFLA_MT64           &
+SUBROUTINE FAIFLA_FORT           &
 &                     (FA, KRANG)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -60,7 +60,7 @@ ELSEIF (IPUILA.LT.0) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FAIFLA_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FAIFLA_MT64
+END SUBROUTINE FAIFLA_FORT
 
 
 
@@ -77,7 +77,7 @@ INTEGER (KIND=JPLIKB)  KRANG                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIFLA_MT64           &
+CALL FAIFLA_FORT           &
 &           (FA, KRANG)
 
 END SUBROUTINE FAIFLA64
@@ -113,7 +113,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  ! IN
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL FAIFLA_MT64           &
+CALL FAIFLA_FORT           &
 &           (FA, IRANG)
 
 

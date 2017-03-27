@@ -1,4 +1,4 @@
-SUBROUTINE FADCPL_MT64                                          &
+SUBROUTINE FADCPL_FORT                                          &
 &                     (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, &
 &                      PCHAMP, LDCOSP, LDUNDF, PUNDF)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -153,7 +153,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 
   WRITE (UNIT=CLMESS,FMT="('KREP=',I4,', KRANG=',I4,', CDPREF=''',A,'''')") &
 &             KREP, KRANG, CDNOMA
-  CALL FAIPAR_MT64                                       &
+  CALL FAIPAR_FORT                                       &
 &                 (FA,INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR, '',.FALSE.)
 ENDIF

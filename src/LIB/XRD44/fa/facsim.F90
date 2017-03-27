@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACSIM_MT64                                    &
+SUBROUTINE FACSIM_FORT                                    &
 &                     (FA,  KREP, KRANG, PCHAME, PCHAMS,  &
 &                      KPULAS, KSTRON)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -106,12 +106,12 @@ ENDIF
 ! Si ce n'est pas encore fait, initialisation des tableaux XLAP... et FA%FLAP1D.
 !
 IF (FA%LIXLAP) THEN
-  CALL FAIXLA_MT64           &
+  CALL FAIXLA_FORT           &
 &                 (FA)
   FA%LIXLAP = .FALSE.
 ENDIF
 IF (FA%FICHIER(KRANG)%LIFLAP) THEN
-  CALL FAIFLA_MT64           &
+  CALL FAIFLA_FORT           &
 &                (FA, KRANG)
   FA%FICHIER(KRANG)%LIFLAP = .FALSE.
 ENDIF
@@ -235,7 +235,7 @@ ENDIF
 !
 !        Calcul de l'erreur de compactage initiale.
 !
-CALL FAXION_MT64                                                              &
+CALL FAXION_FORT                                                              &
 &               (FA, PCHAME,IPUFLA,IDIMNC,ILCHAM,ZMIN,                        &
 &                ZMAX,INBITS,LLARPE,ZERRXI,LLMLAM,FA%CADRE(IRANGC)%NOZPAR(1), &
 &                KSTRON,ITRONC,IXLOPA)
@@ -349,7 +349,7 @@ ENDIF
 !
 !        Calcul de la nouvelle erreur de compactage.
 !
-CALL FAXION_MT64                                                      &
+CALL FAXION_FORT                                                      &
 &               (FA, PCHAME,IPUISS,IDIMNC,ILCHAM,ZMIN,ZMAX,INBITS,    &
 &                LLARPE,ZECART(IPOSEX,INDICE),LLMLAM,                 &
 &                FA%CADRE(IRANGC)%NOZPAR(1),KSTRON,ITRONC,IXLOPA)
@@ -569,7 +569,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', PCHAME(1)='',G12.5,'', PCHAMS('',I3,'')='',G12.5, &
 &         '', KPULAS='',I3)')                                   &
 &     KREP,KRANG,PCHAME(1),IDIMNC+1,PCHAMS(IDIMNC+1),KPULAS
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF

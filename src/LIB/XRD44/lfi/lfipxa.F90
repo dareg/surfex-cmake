@@ -356,7 +356,7 @@ INTEGER (KIND=JPLIKB)  KLSUIV                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPXA_MT64                                               &
+CALL LFIPXA_FORT                                               &
 &           (LFI, KREP, KNUMER, CDNOMA, CDSTRU, CDSUIV, KLSUIV)
 
 END SUBROUTINE LFIPXA64
@@ -404,7 +404,7 @@ INTEGER (KIND=JPLIKB)  ILSUIV                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIPXA_MT64                                               &
+CALL LFIPXA_FORT                                               &
 &           (LFI, IREP, INUMER, CDNOMA, CDSTRU, CDSUIV, ILSUIV)
 
 KREP       = INT (      IREP, JPLIKM)

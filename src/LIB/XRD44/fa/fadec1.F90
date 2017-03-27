@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADEC1_MT64                                                &
+SUBROUTINE FADEC1_FORT                                                &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF,   &
 &                      LDCOSP, CDNOMA, KLNOMA, KVALCO, KLONGD,        &
 &                      PCHAMP, LDUNDF, PUNDF, YDGR1TAB)
@@ -80,7 +80,7 @@ ILPRFU=INT (LEN (CDPREF), JPLIKB)
 ILSUFU=INT (LEN (CDSUFF), JPLIKB)
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
 KLNOMA=0
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -95,7 +95,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -108,7 +108,7 @@ ENDIF
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT64                                             &
+CALL FANFAR_FORT                                             &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CDNOMA, &
 &                IB1PAR(6),ILPRFU,ILSUFU,ILNOMU)
 IF (IREP.NE.0) GOTO 1001
@@ -165,22 +165,22 @@ ENDIF
 !
 IF (FALGRA (IVALC1)) THEN
 ! Cas d'un champ gribe avec GRIB_API
-  CALL FADGRA_MT64                                                 &
+  CALL FADGRA_FORT                                                 &
 &                 (FA,  IREP,   IRANG,  CDNOMA(1:ILNOMU), KVALCO,  &
 &                  KLONGD, PCHAMP, LDCOSP, CDPREF, KNIVAU, CDSUFF, &
 &                  LDUNDF, PUNDF)
 ELSEIF (IVALC1.EQ.3) THEN
 ! Cas d'un champ gribe avec GRIBEX
-  CALL FADECX_MT64                                                 &
+  CALL FADECX_FORT                                                 &
 &                 (FA,  IREP,   IRANG,  CDNOMA(1:ILNOMU), KVALCO,  &
 &                  KLONGD, PCHAMP, LDCOSP, CDPREF, KNIVAU, CDSUFF, &
 &                  LDUNDF, PUNDF, YDGR1TAB)
 ELSEIF (IVALC1.EQ.4) THEN
-  CALL FADCPL_MT64                                                 &
+  CALL FADCPL_FORT                                                 &
 &                 (FA,  IREP,   IRANG,  CDNOMA(1:ILNOMU), KVALCO,  &
 &                  KLONGD, PCHAMP, LDCOSP, LDUNDF, PUNDF)
 ELSE
-  CALL FADECI_MT64                                                 &
+  CALL FADECI_FORT                                                 &
 &                 (FA,  IREP,   IRANG,  CDNOMA(1:ILNOMU), KVALCO,  &
 &                  KLONGD, PCHAMP, LDCOSP )
 ENDIF
@@ -195,7 +195,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -236,7 +236,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,         &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,               &
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')            &
 &   KREP,KNUMER,CLPREF(1:ILPREF),KNIVAU,CLSUFF(1:ILSUFF),LDCOSP
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CDNOMA(1:ILNOMU),LLRLFI)
 !
@@ -248,4 +248,4 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FADEC1_MT64
+END SUBROUTINE FADEC1_FORT

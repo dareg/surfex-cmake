@@ -96,7 +96,7 @@ LOGICAL                LDIMST                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOSF_MT64                       &
+CALL LFIOSF_FORT                       &
 &           (LFI, KREP, KNUMER, LDIMST)
 
 END SUBROUTINE LFIOSF64
@@ -137,7 +137,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIOSF_MT64                       &
+CALL LFIOSF_FORT                       &
 &           (LFI, IREP, INUMER, LDIMST)
 
 KREP       = INT (      IREP, JPLIKM)

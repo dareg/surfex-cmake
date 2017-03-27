@@ -92,7 +92,7 @@ INTEGER (KIND=JPLIKB)  KNIMES                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOPT_MT64                                               &
+CALL LFIOPT_FORT                                               &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES)
 
@@ -148,7 +148,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIOPT_MT64                                               &
+CALL LFIOPT_FORT                                               &
 &           (LFI, IREP, INUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, INIMES)
 

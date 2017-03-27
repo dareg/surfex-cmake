@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAGRTW_MT64           &
+SUBROUTINE FAGRTW_FORT           &
 &                     (FA, KREP, KUNIT)
 USE FA_MOD, ONLY : FA_COM, FAGR1TAB
 USE PARKIND1, ONLY : JPRB
@@ -21,7 +21,7 @@ IF (LHOOK) CALL DR_HOOK('FAGRTW_MT',0,ZHOOK_HANDLE)
 KREP=0
 
 IF (.NOT. ASSOCIATED (FA%YGR1TAB)) THEN
-  CALL FAICOR_MT64 (FA)
+  CALL FAICOR_FORT (FA)
 ENDIF
 
 IOST = 0
@@ -46,7 +46,7 @@ ENDIF
 
 IF (LHOOK) CALL DR_HOOK('FAGRTW_MT',1,ZHOOK_HANDLE)
 
-END SUBROUTINE FAGRTW_MT64
+END SUBROUTINE FAGRTW_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FAGRTW64                    &
@@ -62,7 +62,7 @@ INTEGER (KIND=JPLIKB)  KUNIT                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAGRTW_MT64                           &
+CALL FAGRTW_FORT                           &
 &           (FA, KREP, KUNIT)
 
 END SUBROUTINE FAGRTW64
@@ -101,7 +101,7 @@ INTEGER (KIND=JPLIKB)  IUNIT                                  ! IN
 
 IUNIT      = INT (     KUNIT, JPLIKB)
 
-CALL FAGRTW_MT64                           &
+CALL FAGRTW_FORT                           &
 &           (FA, IREP, IUNIT)
 
 KREP       = INT (      IREP, JPLIKM)

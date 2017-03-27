@@ -379,7 +379,7 @@ INTEGER (KIND=JPLIKB)  KLONUT                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFISUP_MT64                               &
+CALL LFISUP_FORT                               &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONUT)
 
 END SUBROUTINE LFISUP64
@@ -423,7 +423,7 @@ INTEGER (KIND=JPLIKB)  ILONUT                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFISUP_MT64                               &
+CALL LFISUP_FORT                               &
 &           (LFI, IREP, INUMER, CDNOMA, ILONUT)
 
 KREP       = INT (      IREP, JPLIKM)

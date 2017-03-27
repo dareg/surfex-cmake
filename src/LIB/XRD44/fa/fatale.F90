@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FATALE_MT64                           &
+SUBROUTINE FATALE_FORT                           &
 &                     (FA,  KREP, KNUMER, LDERFA )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -38,12 +38,12 @@ LOGICAL                  LLFATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FATALE_MT',0,ZHOOK_HANDLE)
 CLACTI=''
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.NE.0) THEN
   FA%FICHIER(IRANG)%LERRFA=LDERFA
-  CALL LFIERF_MT64                            &
+  CALL LFIERF_FORT                            &
 &                 (FA%LFI, IREP,KNUMER,LDERFA)
   LLRLFI=IREP.NE.0
 ELSE
@@ -64,7 +64,7 @@ ENDIF
 CLNSPR='FATALE'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', LDERFA= '',L1)') KREP,KNUMER,LDERFA
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,LLRLFI)
 !
@@ -75,7 +75,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FATALE_MT64
+END SUBROUTINE FATALE_FORT
 
 
 
@@ -94,7 +94,7 @@ LOGICAL                LDERFA                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATALE_MT64                     &
+CALL FATALE_FORT                     &
 &           (FA, KREP, KNUMER, LDERFA)
 
 END SUBROUTINE FATALE64
@@ -135,7 +135,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FATALE_MT64                     &
+CALL FATALE_FORT                     &
 &           (FA, IREP, INUMER, LDERFA)
 
 KREP       = INT (      IREP, JPLIKM)

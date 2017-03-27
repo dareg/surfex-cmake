@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADIES_MT64                           &
+SUBROUTINE FADIES_FORT                           &
 &                     (FA,  KREP, KNUMER, KDATEF )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -39,7 +39,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FADIES_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 LLVERF=.FALSE.
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -49,7 +49,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -80,7 +80,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA.OR.IXNVMS(IRANG).EQ.2) THEN
@@ -97,7 +97,7 @@ IF (INIMES.EQ.2) THEN
 &       '', KDATEF(1:5)='',I5,2(''/'',I2),I3,'':'',I2.2,   &
 &       '', KDATEF(7:8)='',I6,''-'',I6)') KREP,KNUMER,     &
 &     (KDATEF(J),J=1,5),(KDATEF(J),J=7,8)
-  CALL FAIPAR_MT64                                     &
+  CALL FAIPAR_FORT                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -109,7 +109,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FADIES_MT64
+END SUBROUTINE FADIES_FORT
 
 
 
@@ -128,7 +128,7 @@ INTEGER (KIND=JPLIKB)  KDATEF     (*)                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADIES_MT64                     &
+CALL FADIES_FORT                     &
 &           (FA, KREP, KNUMER, KDATEF)
 
 END SUBROUTINE FADIES64
@@ -170,7 +170,7 @@ INTEGER (KIND=JPLIKB)  IDATEF     (FA%JPLDAT)                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FADIES_MT64                     &
+CALL FADIES_FORT                     &
 &           (FA, IREP, INUMER, IDATEF)
 
 KREP       = INT (      IREP, JPLIKM)

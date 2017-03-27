@@ -1,6 +1,6 @@
 INTERFACE
 
-SUBROUTINE FACONO_MT64                                             &
+SUBROUTINE FACONO_FORT                                             &
 &                     (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,   &
 &                      PCHAMP, LDCOSP, CDNOMA, KLNOMA, PVALCO,     &
 &                      KLONGD, LDUNDF, PUNDF)

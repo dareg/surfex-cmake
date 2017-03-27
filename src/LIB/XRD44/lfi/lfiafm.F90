@@ -210,7 +210,7 @@ INTEGER (KIND=JPLIKB)  KFACTM                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIAFM_MT64                       &
+CALL LFIAFM_FORT                       &
 &           (LFI, KREP, KNUMER, KFACTM)
 
 END SUBROUTINE LFIAFM64
@@ -253,7 +253,7 @@ INTEGER (KIND=JPLIKB)  IFACTM                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 IFACTM     = INT (    KFACTM, JPLIKB)
 
-CALL LFIAFM_MT64                       &
+CALL LFIAFM_FORT                       &
 &           (LFI, IREP, INUMER, IFACTM)
 
 KREP       = INT (      IREP, JPLIKM)

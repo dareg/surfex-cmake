@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANION_MT64                                                &
+SUBROUTINE FANION_FORT                                                &
 &                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,     &
 &                      LDEXIS, LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 USE FA_MOD, ONLY : FA_COM
@@ -84,7 +84,7 @@ KNGRIB=0
 KNARG1=0
 KNARG2=0
 KNARG3=0
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -94,7 +94,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -104,7 +104,7 @@ IF (FA%FICHIER(IRANG)%LCREAF) GOTO 1001
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT64                                             &
+CALL FANFAR_FORT                                             &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CLNOMA, &
 &                IB1PAR,ILPRFU,ILSUFU,ILNOMU)
 IF (IREP.NE.0) GOTO 1001
@@ -113,7 +113,7 @@ LLNOMU=.TRUE.
 !     3.  -  RECHERCHE DE L'ARTICLE SUR LE FICHIER, LECTURE PARTIELLE.
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT64                                       &
+CALL LFINFO_FORT                                       &
 &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMU), &
 &             ILONGA,IPOSEX)
 LLRLFI=IREP.NE.0
@@ -132,14 +132,14 @@ IF (FA%FICHIER(IRANG)%LERRFA) THEN
 !     LFI, on va temporairement annuler l'option LFI afin de pouvoir
 !     faire une lecture partielle de l'entete de l'article Champ.
 !
-  CALL LFIERF_MT64                             &
+  CALL LFIERF_FORT                             &
 &                 (FA%LFI, IREP,KNUMER,.FALSE.)
   LLRLFI=IREP.NE.0
   IF (LLRLFI) GOTO 1001
   LLTEMP=.TRUE.
 ENDIF
 !
-CALL LFILEC_MT64                                       &
+CALL LFILEC_FORT                                       &
 &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMU), &
 &               IVALCO,5_JPLIKB )
 !
@@ -234,7 +234,7 @@ IF (LLTEMP) THEN
 !         On remet le fichier en mode "toute erreur fatale" au niveau
 !     du logiciel LFI.
 !
-  CALL LFIERF_MT64                            &
+  CALL LFIERF_FORT                            &
 &                 (FA%LFI, IREP,KNUMER,.TRUE.)
   LLRLFI=IREP.NE.0
 ENDIF
@@ -244,7 +244,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -288,7 +288,7 @@ WRITE (UNIT=CLMESS,                                              &
 &       '',KNARG2='',I3,'',KNARG3='',I6)')                       &
 &   KREP,KNUMER,CLPREF(1:ILPREF),KNIVAU,CLSUFF(1:ILSUFF),LDEXIS, &
 &   LDCOSP,KNGRIB,KNARG1,KNARG2,KNARG3
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLNOMA(1:ILNOMU),LLRLFI)
 !
@@ -300,7 +300,7 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FANION_MT64
+END SUBROUTINE FANION_FORT
 
 
 
@@ -328,7 +328,7 @@ INTEGER (KIND=JPLIKB)  KNARG3                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANION_MT64                                               &
+CALL FANION_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDEXIS, &
 &           LDCOSP, KNGRIB, KNARG1, KNARG2, KNARG3)
 
@@ -395,7 +395,7 @@ INTEGER (KIND=JPLIKB)  INARG3                                 !   OUT
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANION_MT64                                               &
+CALL FANION_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, LDEXIS, &
 &           LDCOSP, INGRIB, INARG1, INARG2, INARG3)
 

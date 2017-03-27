@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACTEC_MT64                                      &
+SUBROUTINE FACTEC_FORT                                      &
 &                     (FA, KREP, PA, KNBIT, KDEC, KE, KNUTIL)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB

@@ -1214,7 +1214,7 @@ INTEGER (KIND=JPLIKB)  KNBARI                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOUV_MT64                                               &
+CALL LFIOUV_FORT                                               &
 &           (LFI, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI)
 
@@ -1278,7 +1278,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 INBARP     = INT (    KNBARP, JPLIKB)
 
-CALL LFIOUV_MT64                                               &
+CALL LFIOUV_FORT                                               &
 &           (LFI, IREP, INUMER, LDNOMM, CDNOMF, CDSTTO, LDERFA, &
 &           LDIMST, INIMES, INBARP, INBARI)
 

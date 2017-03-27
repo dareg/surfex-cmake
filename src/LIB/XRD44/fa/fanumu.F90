@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANUMU_MT64                    &
+SUBROUTINE FANUMU_FORT                    &
 &                     (FA,  KNUMER, KRANG )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -33,14 +33,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANUMU_MT',0,ZHOOK_HANDLE)
 
 IF (FA%FANUMU_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FANUMU_LLPREA=.FALSE.
 ENDIF
 !
 !          VERROUILLAGE GLOBAL (A CAUSE DE L'UTILISATION DE FA%NFIOUV )
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 !
 DO J=1,FA%NFIOUV
@@ -58,12 +58,12 @@ IRESUL=0
 !
 !          DEVERROUILLAGE GLOBAL
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                         &
+IF (FA%LFAMUL) CALL LFIVER_FORT                         &
 &                              (FA%LFI, FA%VRGLAS,'OFF')
 KRANG=IRESUL
 !
 IF (LHOOK) CALL DR_HOOK('FANUMU_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FANUMU_MT64
+END SUBROUTINE FANUMU_FORT
 
 
 
@@ -81,7 +81,7 @@ INTEGER (KIND=JPLIKB)  KRANG                                  !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANUMU_MT64              &
+CALL FANUMU_FORT              &
 &           (FA, KNUMER, KRANG)
 
 END SUBROUTINE FANUMU64
@@ -120,7 +120,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FANUMU_MT64              &
+CALL FANUMU_FORT              &
 &           (FA, INUMER, IRANG)
 
 KRANG      = INT (     IRANG, JPLIKM)

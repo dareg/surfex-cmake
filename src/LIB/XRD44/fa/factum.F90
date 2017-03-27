@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACTUM_MT64             &
+SUBROUTINE FACTUM_FORT             &
 &                     (FA,  CDNOMC )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -41,7 +41,7 @@ IF (FA%FACTUM_LLPREA) THEN
 !
 !         Initialisation eventuelle des variables globales du logiciel.
 !
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FACTUM_LLPREA=.FALSE.
 ENDIF
@@ -74,13 +74,13 @@ IF (ILNOMC.GT.FA%NCPCAD) THEN
 ENDIF
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
 !          Controle d'existence du cadre specifie.
 !
-CALL FANUCA_MT64                          &
+CALL FANUCA_FORT                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 !
 IF (IRANGC.EQ.0) THEN
@@ -91,7 +91,7 @@ ENDIF
 !     2.  -  SUPPRESSION PROPREMENT DITE VIA LE SOUS-PROGRAMME "FACTUI".
 !-----------------------------------------------------------------------
 !
-CALL FACTUI_MT64                &
+CALL FACTUI_FORT                &
 &               (FA, IREP,IRANGC)
 !**
 !    10.  -  PHASE TERMINALE : MESSAGERIE, AVEC "ABORT" EVENTUEL,
@@ -102,7 +102,7 @@ CALL FACTUI_MT64                &
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=LLMOER(IREP,0_JPLIKB )
@@ -126,7 +126,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''CDNOMC='''''',A,'''''''')') &
 &     CLACTI(1:ILNOMC)
 INUMER=JPNIIL
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CLACTI(1:ILNOMC),.FALSE.)
 !
@@ -136,7 +136,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FACTUM_MT64
+END SUBROUTINE FACTUM_FORT
 
 
 
@@ -153,7 +153,7 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTUM_MT64           &
+CALL FACTUM_FORT           &
 &           (FA, CDNOMC)
 
 END SUBROUTINE FACTUM64
@@ -187,7 +187,7 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 ! Convert arguments
 
 
-CALL FACTUM_MT64           &
+CALL FACTUM_FORT           &
 &           (FA, CDNOMC)
 
 

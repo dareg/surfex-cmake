@@ -1,4 +1,4 @@
-SUBROUTINE FACGRA_MT64                                              &
+SUBROUTINE FACGRA_FORT                                              &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP, KVALCO, KLONGD,              &
 &                      LDUNDF, PUNDF)
@@ -57,7 +57,7 @@ IF (LHOOK) CALL DR_HOOK('FACGRA_MT',0,ZHOOK_HANDLE)
 
 KREP = 0
 
-CALL FACGRM_MT64 (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
+CALL FACGRM_FORT (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
                 & LDCOSP, IGRIBH, LDUNDF, PUNDF, 1_JPLIKB)
 
 IF (KREP /= 0) GOTO 1001
@@ -111,7 +111,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &     KREP, KRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF)), LDCOSP, KLONGD, ILONGD
 
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF

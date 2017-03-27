@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAREOR_MT64                                             &
+SUBROUTINE FAREOR_FORT                                             &
 &                     (FA,  KREP, KNUMER, PCHAMM, PCHAMF, LDFTOM)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -41,7 +41,7 @@ IF (LHOOK) CALL DR_HOOK('FAREOR_MT',0,ZHOOK_HANDLE)
 KREP = 0
 LLRLFI = .FALSE.
 
-CALL FANUMU_MT64 (FA, KNUMER,IRANG)
+CALL FANUMU_FORT (FA, KNUMER,IRANG)
 
 IF (IRANG .EQ. 0) THEN
   KREP = -51
@@ -81,7 +81,7 @@ CLNSPR='FAREOR'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KNUMER='',I3)') &
 &   KREP,KNUMER
 
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,KREP,LLFATA,CLMESS, &
 &                CLNSPR, '',LLRLFI)
 
@@ -158,7 +158,7 @@ END SUBROUTINE FAREOR_GLO
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FAREOR_MT64
+END SUBROUTINE FAREOR_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FAREOR64                                      &
@@ -177,7 +177,7 @@ LOGICAL                LDFTOM                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREOR_MT64                                             &
+CALL FAREOR_FORT                                             &
 &                     (FA,  KREP, KNUMER, PCHAMM, PCHAMF, LDFTOM)
 
 END SUBROUTINE FAREOR64
@@ -222,7 +222,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAREOR_MT64                                             &
+CALL FAREOR_FORT                                             &
 &                     (FA, IREP, INUMER, PCHAMM, PCHAMF, LDFTOM)
 
 KREP       = INT (      IREP, JPLIKM)

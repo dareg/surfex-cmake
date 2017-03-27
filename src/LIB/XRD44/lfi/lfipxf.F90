@@ -497,7 +497,7 @@ INTEGER (KIND=JPLIKB)  KLONG                                  !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIPXF_MT64                                               &
+CALL LFIPXF_FORT                                               &
 &           (LFI, KREP, KNUMER, KNUMEX, CDCFGX, KLAREX, KXCNEX, &
 &           KFACEX, KNUTRA, CDNOMA, KLONG)
 
@@ -567,7 +567,7 @@ IXCNEX     = INT (    KXCNEX, JPLIKB)
 IFACEX     = INT (    KFACEX, JPLIKB)
 INUTRA     = INT (    KNUTRA, JPLIKB)
 
-CALL LFIPXF_MT64                                               &
+CALL LFIPXF_FORT                                               &
 &           (LFI, IREP, INUMER, INUMEX, CDCFGX, ILAREX, IXCNEX, &
 &           IFACEX, INUTRA, CDNOMA, ILONG)
 

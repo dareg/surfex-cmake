@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FA_LIMITS_MT64                               &
+SUBROUTINE FA_LIMITS_FORT                               &
 &                       (FA, KPXPAH,KPXIND,KPXGEO,KPXNIV)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -38,7 +38,7 @@ KPXIND=FA%JPXIND
 KPXGEO=FA%JPXGEO
 KPXNIV=FA%JPXNIV
 
-END SUBROUTINE FA_LIMITS_MT64
+END SUBROUTINE FA_LIMITS_FORT
 
 
 
@@ -58,7 +58,7 @@ INTEGER (KIND=JPLIKB)  KPXNIV                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FA_LIMITS_MT64                            &
+CALL FA_LIMITS_FORT                            &
 &           (FA, KPXPAH, KPXIND, KPXGEO, KPXNIV)
 
 END SUBROUTINE FA_LIMITS64
@@ -102,7 +102,7 @@ INTEGER (KIND=JPLIKB)  IPXNIV                                 !   OUT
 ! Convert arguments
 
 
-CALL FA_LIMITS_MT64                            &
+CALL FA_LIMITS_FORT                            &
 &           (FA, IPXPAH, IPXIND, IPXGEO, IPXNIV)
 
 KPXPAH     = INT (    IPXPAH, JPLIKM)

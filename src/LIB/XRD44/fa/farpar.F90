@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARPAR_MT64                                         &
+SUBROUTINE FARPAR_FORT                                         &
 &                     (FA,  KREP, CDPREF, CDSUFF, KCODPA, KNUM)
 USE FA_MOD, ONLY : FA_COM, JPNIIL, FAGR1TAB
 USE PARKIND1, ONLY : JPRB
@@ -187,13 +187,13 @@ IF (FA%LFAMOP) THEN
   INUMER=JPNIIL
 !
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4)') KREP
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLNSPR,.FALSE.)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FARPAR_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FARPAR_MT64
+END SUBROUTINE FARPAR_FORT
 
 
 
@@ -214,7 +214,7 @@ INTEGER (KIND=JPLIKB)  KCODPA     (KNUM,7)                    ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARPAR_MT64                                   &
+CALL FARPAR_FORT                                   &
 &           (FA, KREP, CDPREF, CDSUFF, KCODPA, KNUM)
 
 END SUBROUTINE FARPAR64
@@ -261,7 +261,7 @@ INTEGER (KIND=JPLIKB)  INUM                                   ! INOUT
 ICODPA     = INT (    KCODPA, JPLIKB)
 INUM       = INT (      KNUM, JPLIKB)
 
-CALL FARPAR_MT64                                   &
+CALL FARPAR_FORT                                   &
 &           (FA, IREP, CDPREF, CDSUFF, ICODPA, INUM)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIPAG_MT64                                              &
+SUBROUTINE FAIPAG_FORT                                              &
 &                     (FA,  KREP,  KNUMER,  CDPREF, KNIVAU, CDSUFF, &
 &                      KNIPAR, YDGR1TAB)
 USE FA_MOD, ONLY : FA_COM, JPNIIL, FAGR1TAB, NUNDEF
@@ -66,7 +66,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAIPAG_MT',0,ZHOOK_HANDLE)
 KREP=0
 
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.LE.0.OR.IRANG.GT.FA%JPNXFA) THEN
@@ -215,7 +215,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &       '', CDSUFF='''''',A,'''''''')')                   &
 &     KREP, IRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF))
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, KNUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CDPREF,.FALSE.)
 ENDIF
@@ -226,7 +226,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FAIPAG_MT64
+END SUBROUTINE FAIPAG_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FAIPAG64                                        &
@@ -249,7 +249,7 @@ TYPE (FAGR1TAB)        YDGR1TAB                               ! INOUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIPAG_MT64                                               &
+CALL FAIPAG_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, KNIPAR, &
 &            YDGR1TAB)
 
@@ -305,7 +305,7 @@ INTEGER (KIND=JPLIKB)  INIPAR     (8)                         !   OUT
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FAIPAG_MT64                                            &
+CALL FAIPAG_FORT                                            &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, INIPAR, YDGR1TAB)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,7 +1,7 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Sep-2012 P. Marguinaud Fix unitialized variables
-SUBROUTINE FADECI_MT64                                              &
+SUBROUTINE FADECI_FORT                                              &
 &                     (FA,  KREP,   KRANG,  CDNOMA, KVALCO, KLONGA, &
 &                      PCHAMP, LDCOSP)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -345,7 +345,7 @@ ELSE
 !-----------------------------------------------------------------------
 !
     IF (IPUILA.NE.0) THEN
-      CALL FARCIS_MT64                                    &
+      CALL FARCIS_FORT                                    &
 &                     (FA, KREP,KRANG,PCHAMP,ICPACK,IPUILA)
       IF (KREP.NE.0) GOTO 1001
     ENDIF
@@ -370,7 +370,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', CDNOMA='''''',A,'''''', LDCOSP= '',L1,      &
 &         '', KLONGA='',I8)')                             &
 &     KREP, KRANG, CDNOMA, LDCOSP, KLONGA
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CDNOMA,.FALSE.)
 ENDIF
@@ -381,5 +381,5 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FADECI_MT64
+END SUBROUTINE FADECI_FORT
 

@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANIME_MT64                           &
+SUBROUTINE FANIME_FORT                           &
 &                     (FA,  KREP, KNUMER, KNIMES )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -38,7 +38,7 @@ LOGICAL                  LLFATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANIME_MT',0,ZHOOK_HANDLE)
 CLACTI=''
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 INIMEX=0
 !
@@ -47,7 +47,7 @@ IF (IRANG.EQ.0) THEN
 ELSEIF (KNIMES.GE.0.AND.KNIMES.LE.2) THEN
   INIMEX=IXNVMS (IRANG)
   FA%FICHIER(IRANG)%NIVOMS=KNIMES
-  CALL LFINIM_MT64                            &
+  CALL LFINIM_FORT                            &
 &                 (FA%LFI, IREP,KNUMER,KNIMES)
   LLRLFI=IREP.NE.0
 ELSE
@@ -67,7 +67,7 @@ ENDIF
 CLNSPR='FANIME'
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', KNIMES='',I3)') KREP,KNUMER,KNIMES
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,.FALSE.)
 !
@@ -78,7 +78,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FANIME_MT64
+END SUBROUTINE FANIME_FORT
 
 
 
@@ -97,7 +97,7 @@ INTEGER (KIND=JPLIKB)  KNIMES                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANIME_MT64                     &
+CALL FANIME_FORT                     &
 &           (FA, KREP, KNUMER, KNIMES)
 
 END SUBROUTINE FANIME64
@@ -140,7 +140,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 
-CALL FANIME_MT64                     &
+CALL FANIME_FORT                     &
 &           (FA, IREP, INUMER, INIMES)
 
 KREP       = INT (      IREP, JPLIKM)

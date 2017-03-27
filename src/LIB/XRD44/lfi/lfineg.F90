@@ -105,7 +105,7 @@ INTEGER (KIND=JPLIKB)  KNIVAU                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINEG_MT64            &
+CALL LFINEG_FORT            &
 &           (LFI, KNIVAU)
 
 END SUBROUTINE LFINEG64
@@ -141,7 +141,7 @@ INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN
 
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL LFINEG_MT64            &
+CALL LFINEG_FORT            &
 &           (LFI, INIVAU)
 
 

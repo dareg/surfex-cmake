@@ -2,7 +2,7 @@
 !                        Reallocate cadre when redefinition happens
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACADI_MT64                                           &
+SUBROUTINE FACADI_FORT                                           &
 &                   (FA, KREP, CDNOMC, KTYPTR, PSLAPO, PCLOPO,   &
 &                    PSLOPO,                                     &
 &                    PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,     &
@@ -337,7 +337,7 @@ IF (KPHASE.EQ.2) GOTO 1001
 !
 !        Le nom de cadre specifie est-il deja defini ?
 !
-CALL FANUCA_MT64                          &
+CALL FANUCA_FORT                          &
 &               (FA, CDNOMC,KRANGC,.FALSE.)
 LDREDF=KRANGC.NE.0
 IF (LDREDF) GOTO 500
@@ -575,7 +575,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &  KREP,CLACTI(1:ILNOMC),PSLAPO,PCLOPO,PSLOPO,PCODIL,          &
 &  KTRONC,KNLATI,KNXLON,KNIVER,PREFER,LDMODC,LDREDF,KPHASE,    &
 &  KRANGC,KLNOMC,KGARDE
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILNOMC),.FALSE.)
 ELSEIF (KTRONC.LE.FA%NSTROI.AND.(KPHASE.EQ.0.OR.KPHASE.EQ.1)) THEN
@@ -587,12 +587,12 @@ ELSEIF (KTRONC.LE.FA%NSTROI.AND.(KPHASE.EQ.0.OR.KPHASE.EQ.1)) THEN
 &         FMT='(''TRONCATURE ('',I2,'') INFERIEURE '',              &
 & ''OU EGALE A LA SOUS-TRONCATURE "NON COMPACTEE" IMPLICITE ('',I2, &
 & ''), CADRE '''''',A,'''''''')') KTRONC,FA%NSTROI,CDNOMC(1:ILNOMC)
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FACADI_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FACADI_MT64
+END SUBROUTINE FACADI_FORT
 
 

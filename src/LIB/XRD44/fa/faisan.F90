@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAISAN_MT64                                           &
+SUBROUTINE FAISAN_FORT                                           &
 &                     (FA,  KREP, KNUMER, CDNOMA, KDONNE, KLONGD)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -49,7 +49,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 
 !
@@ -66,7 +66,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -93,7 +93,7 @@ IF (FA%FICHIER(IRANG)%NCOGRIF (12) > 0) THEN
   CALL WGRIB1 (LLECRI)
 ENDIF
 IF (.NOT. LLECRI) THEN
-  CALL LFIECR_MT64                                       &
+  CALL LFIECR_FORT                                       &
   &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMA), &
   &                KDONNE,KLONGD)
 ENDIF
@@ -109,7 +109,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -136,7 +136,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDNOMA='''''',A,'''''', KLONGD='',I8)')     &
 &   KREP,KNUMER,CLACTI(1:ILACTI),KLONGD
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CLACTI(1:ILACTI),LLRLFI)
 !
@@ -214,7 +214,7 @@ IF (ILGRIBA /= ILGRIBB) RETURN
 ! Ouverture du fichier externe
 
 IF (FA%FICHIER(IRANG)%NFILEP == 0) THEN
-  CALL LFIOPT_MT64                                        &
+  CALL LFIOPT_FORT                                        &
 &                 (FA%LFI, IREP, KNUMER, LLNOMM, CLNOMF,  &
 &                  CLSTTU, LLERFA, LLIMST, INIMES)
   IF (IREP /= 0) RETURN
@@ -247,7 +247,7 @@ IDONNE (1:3) = KDONNE (1:3)
 IDONNE (4) = FA%FICHIER(IRANG)%NOFFST
 IDONNE (5) = ILONGD
 
-CALL LFIECR_MT64                                         &
+CALL LFIECR_FORT                                         &
 &               (FA%LFI, IREP, KNUMER, CLNOMA(1:ILNOMA), &
 &                IDONNE, ILONGD)
 
@@ -275,7 +275,7 @@ ENDIF
 
 END SUBROUTINE FILEPARSE
 
-END SUBROUTINE FAISAN_MT64
+END SUBROUTINE FAISAN_FORT
 
 
 
@@ -296,7 +296,7 @@ INTEGER (KIND=JPLIKB)  KDONNE (KLONGD)                        ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAISAN_MT64                                     &
+CALL FAISAN_FORT                                     &
 &           (FA, KREP, KNUMER, CDNOMA, KDONNE, KLONGD)
 
 END SUBROUTINE FAISAN64
@@ -343,7 +343,7 @@ INTEGER (KIND=JPLIKB)  ILONGD                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONGD     = INT (    KLONGD, JPLIKB)
 
-CALL FAISAN_MT64                                     &
+CALL FAISAN_FORT                                     &
 &           (FA, IREP, INUMER, CDNOMA, KDONNE, ILONGD)
 
 KREP       = INT (      IREP, JPLIKM)

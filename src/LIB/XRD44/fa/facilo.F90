@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACILO_MT64                                             &
+SUBROUTINE FACILO_FORT                                             &
 &                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,  &
 &                      PCHAMP, LDCOSP, LDUNDF, PUNDF)
 USE FA_MOD, ONLY : FA_COM, FAGR1TAB
@@ -67,14 +67,14 @@ IF (PRESENT (PUNDF  )) ZUNDF  = PUNDF
 IREP = 0
 LLRLFI=.FALSE.
 
-CALL FANUMU_MT64 (FA, KNUMER,IRANG)
+CALL FANUMU_FORT (FA, KNUMER,IRANG)
 
 IF (IRANG .EQ. 0) THEN
   IREP = -51
   GOTO 1001
 ENDIF
 
-CALL FANION_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
+CALL FANION_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
                 & LLEXIST, LLCOSP, INGRIB, INBITS, ISTRON, IPUILA)
 
 IF (IREP /= 0) GOTO 1001
@@ -97,14 +97,14 @@ IF (LLREORD) THEN
   IMSMAX = FA%CADRE(IRANGC)%NMSMAX     
   ALLOCATE (ZCHAMP (4 * (IMSMAX+1) * (ISMAX+1))) ! Assez grand
 
-  CALL FACIL1_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, ZCHAMP, LDCOSP, &
+  CALL FACIL1_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, ZCHAMP, LDCOSP, &
                   & LLUNDF, ZUNDF, YLGR1TAB)
   IF (IREP /= 0) GOTO 1001
-  CALL FAREOR_MT64 (FA, IREP, KNUMER, PCHAMP, ZCHAMP, .TRUE.)
+  CALL FAREOR_FORT (FA, IREP, KNUMER, PCHAMP, ZCHAMP, .TRUE.)
   IF (IREP /= 0) GOTO 1001
   DEALLOCATE (ZCHAMP)
 ELSE
-  CALL FACIL1_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, LDCOSP, &
+  CALL FACIL1_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, LDCOSP, &
                   & LLUNDF, ZUNDF, YLGR1TAB)
 ENDIF
 
@@ -134,7 +134,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KNUMER='',I3,        &
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')            &
 &   KREP,KNUMER,TRIM (CDPREF),KNIVAU,TRIM (CDSUFF),LDCOSP
 
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,KREP,LLFATA,CLMESS, &
 &                CLNSPR, '',LLRLFI)
 
@@ -146,7 +146,7 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FACILO_MT64
+END SUBROUTINE FACILO_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FACILO64                                        &
@@ -172,7 +172,7 @@ REAL (KIND=JPDBLR),    OPTIONAL :: PUNDF                      !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACILO_MT64                                               &
+CALL FACILO_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, LDUNDF, PUNDF)
 
@@ -236,7 +236,7 @@ INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FACILO_MT64                                               &
+CALL FACILO_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, PCHAMP, &
 &            LDCOSP, LDUNDF, PUNDF)
 

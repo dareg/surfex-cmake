@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARINE_MT64             &
+SUBROUTINE FARINE_FORT             &
 &                     (FA,  KOPTIO )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -209,7 +209,7 @@ IF (FA%FARINE_LLPREA) THEN
 !  3/ Creation de la correspondance "nom article FA" et
 !                                   "descripteurs GRIBEX"
   IF (.NOT. ASSOCIATED (FA%YGR1TAB)) THEN
-    CALL FAICOR_MT64 (FA)
+    CALL FAICOR_FORT (FA)
   ENDIF
 !
 !
@@ -259,7 +259,7 @@ IF (FA%FARINE_LLPREA) THEN
   LLNMUL=(KOPTIO.EQ.1).OR.(KOPTIO.EQ.2.AND.FA%FARINE_LLDEFM)
   LLASGN=LLNMUL
   LLREL=.FALSE.
-  CALL LFIINI_MT64               &
+  CALL LFIINI_FORT               &
 &                (FA%LFI, KOPTIO)
 !
 ELSEIF (KOPTIO.EQ.2) THEN
@@ -283,7 +283,7 @@ ELSE
     GOTO 1001
   ENDIF
 !
-  CALL LFIINI_MT64               &
+  CALL LFIINI_FORT               &
 &                (FA%LFI, KOPTIO)
 !
 ENDIF
@@ -292,10 +292,10 @@ FA%LFAMUL=LLNMUL
 IREP=0
 !
 IF (LLASGN) THEN
-  CALL LFIVER_MT64                          &
+  CALL LFIVER_FORT                          &
 &                 (FA%LFI, FA%VRGLAS,'ASGN')
 ELSEIF (LLREL) THEN
-  CALL LFIVER_MT64                         &
+  CALL LFIVER_FORT                         &
 &                 (FA%LFI, FA%VRGLAS,'REL')
 ENDIF
 !
@@ -323,18 +323,18 @@ IF (MAX (INIMES,FA%NIMSGA).EQ.2) THEN
   WRITE (UNIT=CLMESS,                                  &
 &         FMT='(''KOPTIO='',I5,'', CODE INTERNE='',I4)' &
 &         ) KOPTIO,IREP
-  IF (INIMES.NE.2) CALL FAIPAR_MT64                          &
+  IF (INIMES.NE.2) CALL FAIPAR_FORT                          &
 &                                  (FA, INUMER,FA%NIMSGA,IREP, &
 &                                .FALSE.,CLMESS,               &
 &                                CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,.FALSE.)
 !
 IF (LHOOK) CALL DR_HOOK('FARINE_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FARINE_MT64
+END SUBROUTINE FARINE_FORT
 
 
 
@@ -351,7 +351,7 @@ INTEGER (KIND=JPLIKB)  KOPTIO                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARINE_MT64           &
+CALL FARINE_FORT           &
 &           (FA, KOPTIO)
 
 END SUBROUTINE FARINE64
@@ -387,7 +387,7 @@ INTEGER (KIND=JPLIKB)  IOPTIO                                 ! IN
 
 IOPTIO     = INT (    KOPTIO, JPLIKB)
 
-CALL FARINE_MT64           &
+CALL FARINE_FORT           &
 &           (FA, IOPTIO)
 
 

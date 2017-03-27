@@ -1,7 +1,7 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! R. El Khatib 30-Mar-2012 KULOUT
-SUBROUTINE FANMSG_MT64                    &
+SUBROUTINE FANMSG_FORT                    &
 &                     (FA,  KNIVAU, KULOUT)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -47,7 +47,7 @@ IF (LHOOK) CALL DR_HOOK('FANMSG_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 
 IF (FA%FANMSG_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FANMSG_LLPREA=.FALSE.
 ENDIF
@@ -55,7 +55,7 @@ ENDIF
 IF (KNIVAU.GE.0.AND.KNIVAU.LE.2) THEN
   INIMES=MAX (FA%NIMSGA,KNIVAU)
   FA%NIMSGA=KNIVAU
-  CALL LFINMG_MT64                       &
+  CALL LFINMG_FORT                       &
 &                 (FA%LFI, KNIVAU,KULOUT)
   IREP=0
 ELSE
@@ -81,19 +81,19 @@ IF (MAX (INIMES,FA%NIMSGA).EQ.2) THEN
   WRITE (UNIT=CLMESS,                                  &
 &         FMT='(''KNIVAU='',I5,'', CODE INTERNE='',I4)' &
 &         ) KNIVAU,IREP
-  IF (INIMES.NE.2) CALL FAIPAR_MT64                          &
+  IF (INIMES.NE.2) CALL FAIPAR_FORT                          &
 &                                  (FA, INUMER,FA%NIMSGA,IREP, &
 &                                .FALSE.,CLMESS,               &
 &                                CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,                           &
 &             .FALSE.)
 !
 IF (LHOOK) CALL DR_HOOK('FANMSG_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FANMSG_MT64
+END SUBROUTINE FANMSG_FORT
 
 
 ! Oct-2012 P. Marguinaud 64b LFI
@@ -110,7 +110,7 @@ INTEGER (KIND=JPLIKB)  KULOUT                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANMSG_MT64               &
+CALL FANMSG_FORT               &
 &           (FA, KNIVAU, KULOUT)
 
 END SUBROUTINE FANMSG64
@@ -150,7 +150,7 @@ INTEGER (KIND=JPLIKB)  IULOUT                                 ! IN
 INIVAU     = INT (    KNIVAU, JPLIKB)
 IULOUT     = INT (    KULOUT, JPLIKB)
 
-CALL FANMSG_MT64               &
+CALL FANMSG_FORT               &
 &           (FA, INIVAU, IULOUT)
 
 

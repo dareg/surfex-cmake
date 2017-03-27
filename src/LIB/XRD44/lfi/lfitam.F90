@@ -97,7 +97,7 @@ LOGICAL                LDTAME                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFITAM_MT64                               &
+CALL LFITAM_FORT                               &
 &           (LFI, KREP, KNUMER, LDTAML, LDTAME)
 
 END SUBROUTINE LFITAM64
@@ -140,7 +140,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFITAM_MT64                               &
+CALL LFITAM_FORT                               &
 &           (LFI, IREP, INUMER, LDTAML, LDTAME)
 
 KREP       = INT (      IREP, JPLIKM)

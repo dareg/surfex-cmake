@@ -266,7 +266,7 @@ IMPLICIT NONE
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICFG_MT64            &
+CALL LFICFG_FORT            &
 &           (LFI)
 
 END SUBROUTINE LFICFG64
@@ -296,7 +296,7 @@ TYPE (LFICOM)          LFI                                    ! INOUT
 ! Convert arguments
 
 
-CALL LFICFG_MT64            &
+CALL LFICFG_FORT            &
 &           (LFI)
 
 

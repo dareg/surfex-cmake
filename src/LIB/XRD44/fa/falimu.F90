@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FALIMU_MT64                                     &
+SUBROUTINE FALIMU_FORT                                     &
 &                     (FA,  KXNIVV, KXTRON, KXLATI, KXLONG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -42,14 +42,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FALIMU_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FALIMU_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FALIMU_LLPREA=.FALSE.
 ENDIF
 !
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !**
@@ -68,7 +68,7 @@ KXLONG=FA%NXLONG
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (FA%NIMSGA.EQ.2) THEN
@@ -79,13 +79,13 @@ IF (FA%NIMSGA.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KXNIVV='',I4,'', KXTRON='',I4, &
 &         '', KXLATI='',I4,'', KXLONG='',I4)')               &
 &     KXNIVV,KXTRON,KXLATI,KXLONG
-  CALL FAIPAR_MT64                                     &
+  CALL FAIPAR_FORT                                     &
 &                 (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FALIMU_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FALIMU_MT64
+END SUBROUTINE FALIMU_FORT
 
 
 
@@ -105,7 +105,7 @@ INTEGER (KIND=JPLIKB)  KXLONG                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALIMU_MT64                               &
+CALL FALIMU_FORT                               &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
 
 END SUBROUTINE FALIMU64
@@ -149,7 +149,7 @@ INTEGER (KIND=JPLIKB)  IXLONG                                 !   OUT
 ! Convert arguments
 
 
-CALL FALIMU_MT64                               &
+CALL FALIMU_FORT                               &
 &           (FA, IXNIVV, IXTRON, IXLATI, IXLONG)
 
 KXNIVV     = INT (    IXNIVV, JPLIKM)

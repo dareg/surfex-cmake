@@ -69,7 +69,7 @@ INTEGER (KIND=JPLIKB)  KFACMD                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOFD_MT64            &
+CALL LFIOFD_FORT            &
 &           (LFI, KFACMD)
 
 END SUBROUTINE LFIOFD64
@@ -104,7 +104,7 @@ INTEGER (KIND=JPLIKB)  IFACMD                                 !   OUT
 ! Convert arguments
 
 
-CALL LFIOFD_MT64            &
+CALL LFIOFD_FORT            &
 &           (LFI, IFACMD)
 
 KFACMD     = INT (    IFACMD, JPLIKM)

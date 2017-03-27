@@ -1,7 +1,7 @@
 ! Jan-2013 P. Marguinaud Use JNGEOM & JNEXPL parameters
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACIES_MT64                                            &
+SUBROUTINE FACIES_FORT                                            &
 &                   (FA,  CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, &
 &                    PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,      &
 &                    KNOZPA, PSINLA, KNIVER, PREFER, PAHYBR,      &
@@ -77,7 +77,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FACIES_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FACIES_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FACIES_LLPREA=.FALSE.
 ENDIF
@@ -118,11 +118,11 @@ ENDIF
 !
 !             Verrouillage global prealable, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
-CALL FANUCA_MT64                          &
+CALL FANUCA_FORT                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 !
 IF (IRANGC.EQ.0) THEN
@@ -193,7 +193,7 @@ IREP=0
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=IREP.NE.0.AND.FA%NRFAGA.NE.2
@@ -222,12 +222,12 @@ WRITE (UNIT=CLMESS,                                               &
 &     CLACTI(1:ILNOMC),KTYPTR,PSLAPO,PCLOPO,PSLOPO,PCODIL,         &
 &     KTRONC,KNLATI,KNXLON,KNIVER,PREFER,LDGARD
 INUMER=JPNIIL
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILNOMC),.FALSE.)
 !
 IF (LHOOK) CALL DR_HOOK('FACIES_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FACIES_MT64
+END SUBROUTINE FACIES_FORT
 
 
 
@@ -262,7 +262,7 @@ LOGICAL                LDGARD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACIES_MT64                                               &
+CALL FACIES_FORT                                               &
 &           (FA, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,      &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
@@ -348,12 +348,12 @@ LOGICAL                LLMLAM
 ! Convert arguments
 
 
-CALL FACIES_MT64                                               &
+CALL FACIES_FORT                                               &
 &           (FA, CDNOMC, ITYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           ITRONC, INLATI, INXLON, INLOPA, INOZPA, PSINLA,      &
 &           INIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
 
-CALL FANUCA_MT64                     &
+CALL FANUCA_FORT                     &
 &           (FA,CDNOMC,IRANGC,.FALSE.)
 
 IF (IRANGC.NE.0) THEN

@@ -1,6 +1,6 @@
 INTERFACE
 
-SUBROUTINE FACILO_MT64                                             &
+SUBROUTINE FACILO_FORT                                             &
 &                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,  &
 &                      PCHAMP, LDCOSP, LDUNDF, PUNDF)
 USE FA_MOD, ONLY : FA_COM

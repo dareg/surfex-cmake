@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARFLU_MT64                                     &
+SUBROUTINE FARFLU_FORT                                     &
 &                     (FA,  KXNIVV, KXTRON, KXLATI, KXLONG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -52,7 +52,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FARFLU_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FARFLU_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FARFLU_LLPREA=.FALSE.
 ENDIF
@@ -78,7 +78,7 @@ ENDIF
 !
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
@@ -125,7 +125,7 @@ IREP=0
 !
 !          Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=IREP.NE.0.AND.FA%NRFAGA.NE.2
@@ -146,7 +146,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KXNIVV='',I4,'', KXTRON='',I4, &
 &         '', KXLATI='',I4,'', KXLONG='',I4)')               &
 &     KXNIVV,KXTRON,KXLATI,KXLONG
-  CALL FAIPAR_MT64                                     &
+  CALL FAIPAR_FORT                                     &
 &                 (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -165,13 +165,13 @@ IF (INIMES.GE.1) THEN
 &     FA%NXNIVV,FA%NXTRON,FA%NXLATI,FA%NXLONG
   ENDIF
 !
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FARFLU_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FARFLU_MT64
+END SUBROUTINE FARFLU_FORT
 
 
 
@@ -191,7 +191,7 @@ INTEGER (KIND=JPLIKB)  KXLONG                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARFLU_MT64                               &
+CALL FARFLU_FORT                               &
 &           (FA, KXNIVV, KXTRON, KXLATI, KXLONG)
 
 END SUBROUTINE FARFLU64
@@ -239,7 +239,7 @@ IXTRON     = INT (    KXTRON, JPLIKB)
 IXLATI     = INT (    KXLATI, JPLIKB)
 IXLONG     = INT (    KXLONG, JPLIKB)
 
-CALL FARFLU_MT64                               &
+CALL FARFLU_FORT                               &
 &           (FA, IXNIVV, IXTRON, IXLATI, IXLONG)
 
 

@@ -613,7 +613,7 @@ LOGICAL                LDTOUT                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFILAF_MT64                       &
+CALL LFILAF_FORT                       &
 &           (LFI, KREP, KNUMER, LDTOUT)
 
 END SUBROUTINE LFILAF64
@@ -654,7 +654,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFILAF_MT64                       &
+CALL LFILAF_FORT                       &
 &           (LFI, IREP, INUMER, LDTOUT)
 
 KREP       = INT (      IREP, JPLIKM)

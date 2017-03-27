@@ -1170,7 +1170,7 @@ CHARACTER (LEN=*)      CDSTTC                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFER_MT64                       &
+CALL LFIFER_FORT                       &
 &           (LFI, KREP, KNUMER, CDSTTC)
 
 END SUBROUTINE LFIFER64
@@ -1211,7 +1211,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIFER_MT64                       &
+CALL LFIFER_FORT                       &
 &           (LFI, IREP, INUMER, CDSTTC)
 
 KREP       = INT (      IREP, JPLIKM)

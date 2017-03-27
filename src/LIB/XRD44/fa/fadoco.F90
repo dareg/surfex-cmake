@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADOCO_MT64                                              &
+SUBROUTINE FADOCO_FORT                                              &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD,      &
 &                      PCHAMP, LDUNDF, PUNDF)
@@ -93,7 +93,7 @@ IREP=0
 LLRLFI=.FALSE.
 KLNOMA=0
 
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -111,16 +111,16 @@ IF (LLREORD) THEN
   IMSMAX = FA%CADRE(IRANGC)%NMSMAX     
   ALLOCATE (ZCHAMP (4 * (IMSMAX+1) * (ISMAX+1))) ! Assez grand
 
-  CALL FADEC1_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
+  CALL FADEC1_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
                   & LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD,   &
                   & ZCHAMP, LLUNDF, ZUNDF, YLGR1TAB)
 
   IF (IREP /= 0) GOTO 1001
-  CALL FAREOR_MT64 (FA, IREP, KNUMER, PCHAMP, ZCHAMP, .TRUE.)
+  CALL FAREOR_FORT (FA, IREP, KNUMER, PCHAMP, ZCHAMP, .TRUE.)
   IF (IREP /= 0) GOTO 1001
   DEALLOCATE (ZCHAMP)
 ELSE
-  CALL FADEC1_MT64 (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
+  CALL FADEC1_FORT (FA, IREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
                   & LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD,   &
                   & PCHAMP, LLUNDF, ZUNDF, YLGR1TAB)
 ENDIF
@@ -150,7 +150,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,         &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,               &
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')            &
 &   KREP,KNUMER,TRIM (CDPREF),KNIVAU,TRIM (CDSUFF),LDCOSP
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,TRIM (CDNOMA))
 !
@@ -162,7 +162,7 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FADOCO_MT64
+END SUBROUTINE FADOCO_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FADOCO64                                        &
@@ -193,7 +193,7 @@ REAL (KIND=JPDBLR),    OPTIONAL :: PUNDF                      !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FADOCO_MT64                                               &
+CALL FADOCO_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &            CDNOMA, KLNOMA, PVALCO, KLONGD, PCHAMP,           &
 &            LDUNDF, PUNDF)
@@ -272,7 +272,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 ILONGD     = INT (    KLONGD, JPLIKB)
 
-CALL FADOCO_MT64                                               &
+CALL FADOCO_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, LDCOSP, &
 &            CDNOMA, ILNOMA, PVALCO, ILONGD, PCHAMP,           &
 &            LDUNDF, PUNDF)

@@ -151,7 +151,7 @@ LOGICAL                LDOUVR                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOFM_MT64                               &
+CALL LFIOFM_FORT                               &
 &           (LFI, KREP, KNUMER, KFACTM, LDOUVR)
 
 END SUBROUTINE LFIOFM64
@@ -195,7 +195,7 @@ INTEGER (KIND=JPLIKB)  IFACTM                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIOFM_MT64                               &
+CALL LFIOFM_FORT                               &
 &           (LFI, IREP, INUMER, IFACTM, LDOUVR)
 
 KREP       = INT (      IREP, JPLIKM)

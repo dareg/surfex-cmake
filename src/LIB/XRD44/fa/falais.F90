@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FALAIS_MT64                                           &
+SUBROUTINE FALAIS_FORT                                           &
 &                     (FA,  KREP, KNUMER, CDNOMA, KDONNE, KLONGD )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -48,7 +48,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -64,7 +64,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -84,7 +84,7 @@ ENDIF
 ILNOMA=MIN ( FA%NCPCAD, INT (LEN (CDNOMA), JPLIKB) )
 CLNOMA(1:ILNOMA)=CDNOMA(1:ILNOMA)
 !
-CALL LFILEC_MT64                                      &
+CALL LFILEC_FORT                                      &
 &               (FA%LFI, IREP,KNUMER,CLNOMA(1:ILNOMA), &
 &                KDONNE,KLONGD)
 LLRLFI=IREP.NE.0
@@ -99,7 +99,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -126,7 +126,7 @@ ENDIF
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &       '', CDNOMA='''''',A,'''''', KLONGD='',I8)')      &
 &   KREP,KNUMER,CLACTI(1:ILACTI),KLONGD
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILACTI),LLRLFI)
 !
@@ -137,7 +137,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FALAIS_MT64
+END SUBROUTINE FALAIS_FORT
 
 
 
@@ -158,7 +158,7 @@ INTEGER (KIND=JPLIKB)  KDONNE     (KLONGD)                    ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FALAIS_MT64                                     &
+CALL FALAIS_FORT                                     &
 &           (FA, KREP, KNUMER, CDNOMA, KDONNE, KLONGD)
 
 END SUBROUTINE FALAIS64
@@ -205,7 +205,7 @@ INTEGER (KIND=JPLIKB)  ILONGD                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONGD     = INT (    KLONGD, JPLIKB)
 
-CALL FALAIS_MT64                                     &
+CALL FALAIS_FORT                                     &
 &           (FA, IREP, INUMER, CDNOMA, KDONNE, ILONGD)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIOPT_MT64                                             &
+SUBROUTINE FAIOPT_FORT                                             &
 &                     (FA,  KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU,  &
 &                      LDERFA, LDIMST, KNIMES, CDNOMC)
 USE FA_MOD, ONLY : FA_COM
@@ -62,7 +62,7 @@ IF (LHOOK) CALL DR_HOOK('FAIOPT_MT',0,ZHOOK_HANDLE)
 
 IREP=0
 IRANG=0
-CALL FANUMU_MT64                  &
+CALL FANUMU_FORT                  &
 &               (FA, KNUMER, IRANG)
 
 IF (IRANG .EQ. 0) THEN
@@ -80,7 +80,7 @@ CDSTTU=''
 LDIMST=.FALSE.
 
 IF (LDNOMM) THEN
-  CALL LFIOPT_MT64                                        &
+  CALL LFIOPT_FORT                                        &
 &                 (FA%LFI, IREP, KNUMER, LDNOMM, CDNOMF,  &
 &                  CDSTTU, LDERFA, LDIMST, KNIMES)
 
@@ -90,7 +90,7 @@ ENDIF
 1001 CONTINUE
 KREP=IREP
 IF (LHOOK) CALL DR_HOOK('FAIOPT_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FAIOPT_MT64
+END SUBROUTINE FAIOPT_FORT
 
 
 
@@ -117,7 +117,7 @@ CHARACTER (LEN=*)      CDNOMC                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIOPT_MT64                                             &
+CALL FAIOPT_FORT                                             &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, CDNOMC)
 
@@ -175,7 +175,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAIOPT_MT64                                             &
+CALL FAIOPT_FORT                                             &
 &           (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, INIMES, CDNOMC)
 

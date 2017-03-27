@@ -1,6 +1,6 @@
 INTERFACE
 
-SUBROUTINE FAIENO_MT64                                           &
+SUBROUTINE FAIENO_FORT                                           &
 &                     (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP, LDUNDF, PUNDF)
 USE FA_MOD, ONLY : FA_COM

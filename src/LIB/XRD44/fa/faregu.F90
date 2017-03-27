@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAREGU_MT64                                 &
+SUBROUTINE FAREGU_FORT                                 &
 &                     (FA,  KNUMER, CDCLEF, KVAL, KOPT)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -69,7 +69,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAREGU_MT',0,ZHOOK_HANDLE)
 IREP=0
 !
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -82,7 +82,7 @@ ENDIF
 ! les eventuelles modifs apportees par IDCEN et/ou IDMOD
 !
 IF (FA%FICHIER(IRANG)%LISEC1) THEN
-  CALL FAISC1_MT64              &
+  CALL FAISC1_FORT              &
 &                (FA, IREP,IRANG)
   IF (IREP.NE.0) THEN
     WRITE (UNIT=FA%NULOUT,FMT=*) &
@@ -458,7 +458,7 @@ WRITE (UNIT=CLMESS,FMT='(''IREP='',I4,'', KNUMER='',I3,  &
 &         '', CDCLEF='''''',A,'''''', KVAL='',I12,       &
 &        '', KOPT='',I4)')                               &
 &              IREP,KNUMER,CDCLEF,KVAL,KOPT
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLNSPR,.FALSE.)
 !
@@ -469,7 +469,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FAREGU_MT64
+END SUBROUTINE FAREGU_FORT
 
 
 
@@ -489,7 +489,7 @@ INTEGER (KIND=JPLIKB)  KOPT                                   ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREGU_MT64                           &
+CALL FAREGU_FORT                           &
 &           (FA, KNUMER, CDCLEF, KVAL, KOPT)
 
 END SUBROUTINE FAREGU64
@@ -537,7 +537,7 @@ IF (KOPT==1) THEN
 ENDIF
 IOPT       = INT (      KOPT, JPLIKB)
 
-CALL FAREGU_MT64                           &
+CALL FAREGU_FORT                           &
 &           (FA, INUMER, CDCLEF, IVAL, IOPT)
 
 IF (KOPT==0) THEN

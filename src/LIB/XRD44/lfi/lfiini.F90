@@ -250,7 +250,7 @@ INTEGER (KIND=JPLIKB)  KOPTIO                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIINI_MT64            &
+CALL LFIINI_FORT            &
 &           (LFI, KOPTIO)
 
 END SUBROUTINE LFIINI64
@@ -286,7 +286,7 @@ INTEGER (KIND=JPLIKB)  IOPTIO                                 ! IN
 
 IOPTIO     = INT (    KOPTIO, JPLIKB)
 
-CALL LFIINI_MT64            &
+CALL LFIINI_FORT            &
 &           (LFI, IOPTIO)
 
 

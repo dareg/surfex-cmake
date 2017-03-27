@@ -1,7 +1,7 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Jun-2015 R. El Khatib Allow an unlimited number of vertical levels
-SUBROUTINE FAINIG_MT64                                                &
+SUBROUTINE FAINIG_FORT                                                &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF,   &
 &                      LDCOSP, KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3,    &
 &                      PSEC3, KSEC4, YDGR1TAB)
@@ -109,7 +109,7 @@ ENDIF
 ! du tableau FA%NSEC1(2:21,KRANG) qui va servir comme base pour KSEC1:
 !
 IF (FA%FICHIER(KRANG)%LISEC1) THEN
-  CALL FAISC1_MT64              &
+  CALL FAISC1_FORT              &
 &                (FA, KREP,KRANG)
   IF (KREP.NE.0) GOTO 1001
   FA%FICHIER(KRANG)%LISEC1=.FALSE.
@@ -119,7 +119,7 @@ KSEC1(2:21)=FA%FICHIER(KRANG)%NSEC1(2:21)
 !
 !  Initialisation de INIPAR (5 elts de KSEC1 (1 et 6:9) et un indicateur
 !  de type de champ: 0->RAS; 2->min/max; 4->cumul)
-CALL FAIPAG_MT64                                                   &
+CALL FAIPAG_FORT                                                   &
 &               (FA,  KREP, INUMER, CDPREF, KNIVAU, CDSUFF, INIPAR,&
 &                YDGR1TAB)
 IF (KREP.NE.0) GOTO 1001
@@ -211,7 +211,7 @@ KSEC1(23)=INIPAR(7)
 ! les tableaux NSEC2xxx et FA%XSEC2.
 !
 IF (FA%CADRE(IRANGC)%LISEC2) THEN
-  CALL FAISC2_MT64               &
+  CALL FAISC2_FORT               &
 &                (FA, KREP,IRANGC)
   IF (KREP.NE.0) GOTO 1001
   FA%CADRE(IRANGC)%LISEC2=.FALSE.
@@ -222,7 +222,7 @@ ENDIF
 ! de la ss-tronc dans FAGOTE).
 !
 IF (LLMLAM.AND.FA%FICHIER(KRANG)%LISC2F) THEN
-  CALL FAIS2F_MT64              &
+  CALL FAIS2F_FORT              &
 &                (FA, KREP,KRANG)
   IF (KREP.NE.0) GOTO 1001
   FA%FICHIER(KRANG)%LISC2F=.FALSE.
@@ -389,7 +389,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')      &
 &         KREP,KRANG,CDPREF(1:LEN_TRIM(CDPREF)),KNIVAU,   &
 &         CDSUFF(1:LEN_TRIM(CDSUFF)),LDCOSP
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,                                &
 &                  CLNSPR,.FALSE.)
@@ -401,7 +401,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FAINIG_MT64
+END SUBROUTINE FAINIG_FORT
 
 
 
@@ -434,7 +434,7 @@ TYPE (FAGR1TAB)        YDGR1TAB                               !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAINIG_MT64                                              &
+CALL FAINIG_FORT                                              &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &            KLCHAM, KSEC1, KSEC2, PSEC2, KSEC3, PSEC3, KSEC4,&
 &            YDGR1TAB)
@@ -514,7 +514,7 @@ IRANG      = INT (     KRANG, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 ILCHAM     = INT (    KLCHAM, JPLIKB)
 
-CALL FAINIG_MT64                                              &
+CALL FAINIG_FORT                                              &
 &           (FA, IREP, IRANG, CDPREF, INIVAU, CDSUFF, LDCOSP, &
 &            ILCHAM, ISEC1, ISEC2, PSEC2, ISEC3, PSEC3, ISEC4,&
 &            YDGR1TAB)

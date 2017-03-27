@@ -1,4 +1,4 @@
-SUBROUTINE FACCPL_MT64                                              &
+SUBROUTINE FACCPL_FORT                                              &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP, KVALCO, KLONGD)
 USE FA_MOD, ONLY : FA_COM, JPNIIL, FAFICH, FACADR
@@ -113,7 +113,7 @@ DO ILAT = 1, INLATI
 ENDDO
 
 LLUNDF = .TRUE.
-CALL FACGRM_MT64 (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, ZCHAMP, &
+CALL FACGRM_FORT (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, ZCHAMP, &
                 & LDCOSP, IGRIBH, LLUNDF, ZUNDF, 2_JPLIKB)
 
 IF (KREP /= 0) GOTO 1001
@@ -169,7 +169,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT="('KREP=',I4,', KRANG=',I4,         &
 &   ', CDPREF=''',A,''', KNIVAU=',I4,', CDSUFF=''',A,'''')") &
 &             KREP, KRANG, CDPREF, KNIVAU, CDSUFF
-  CALL FAIPAR_MT64                                       &
+  CALL FAIPAR_FORT                                       &
 &                 (FA,INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR, '',.FALSE.)
 ENDIF

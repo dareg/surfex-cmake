@@ -1,7 +1,7 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
 ! Sep-2012 P. Marguinaud Fix uninitialized variables
-SUBROUTINE FACINE_MT64                                              &
+SUBROUTINE FACINE_FORT                                              &
 &                     (FA,  KREP,   KRANG,  CDNOMA, PCHAMP, LDCOSP, &
 &                      PVALCO, KLONGD, KB1PAR, LDUNDF, PUNDF)
 USE FA_MOD, ONLY : FA_COM, JPNIIL, JPPRCM
@@ -252,7 +252,7 @@ ELSE
 !     laplacien du champ a la place du champ, de maniere a augmenter
 !     la precision du champ en "aplanissant" le spectre.
 !
-    CALL FACSIM_MT64 (FA, KREP,KRANG,PCHAMP,ZCHAMP,IPUILA,ICPACK)
+    CALL FACSIM_FORT (FA, KREP,KRANG,PCHAMP,ZCHAMP,IPUILA,ICPACK)
     IF (FA%LFAMOP) THEN
       print *,'FACINE: puissance Dolby selectionnee ',IPUILA
     ENDIF
@@ -433,7 +433,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', CDNOMA='''''',A,'''''', LDCOSP= '',L1,      &
 &         '', KLONGD='',I8)')                             &
 &     KREP, KRANG, CDNOMA, LDCOSP, KLONGD
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR, CDNOMA,.FALSE.)
 ENDIF
@@ -444,7 +444,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FACINE_MT64
+END SUBROUTINE FACINE_FORT
 !INTF KREP            OUT                                                              
 !INTF KRANG         IN                                                                 
 !INTF CDNOMA        IN                                                                 

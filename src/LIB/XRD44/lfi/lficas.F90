@@ -242,7 +242,7 @@ LOGICAL                LDAVAN                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICAS_MT64                                              &
+CALL LFICAS_FORT                                              &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONG, KPOSEX, LDAVAN)
 
 END SUBROUTINE LFICAS64
@@ -291,7 +291,7 @@ INTEGER (KIND=JPLIKB)  IPOSEX                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFICAS_MT64                                              &
+CALL LFICAS_FORT                                              &
 &           (LFI, IREP, INUMER, CDNOMA, ILONG, IPOSEX, LDAVAN)
 
 KREP       = INT (      IREP, JPLIKM)

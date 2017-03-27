@@ -68,7 +68,7 @@ LOGICAL                LDEBUG                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIDEB_MT64            &
+CALL LFIDEB_FORT            &
 &           (LFI, LDEBUG)
 
 END SUBROUTINE LFIDEB64
@@ -102,7 +102,7 @@ LOGICAL                LDEBUG                                 ! IN
 ! Convert arguments
 
 
-CALL LFIDEB_MT64            &
+CALL LFIDEB_FORT            &
 &           (LFI, LDEBUG)
 
 

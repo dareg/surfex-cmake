@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAPULA_MT64                                 &
+SUBROUTINE FAPULA_FORT                                 &
 &                     (FA,  KREP, KRANG, PSPEC, KPULAP)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -327,7 +327,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I4,  &
 &         '', ISTRON='',I4,'', KPULAP='',I6)')            &
 &         KREP,KRANG,ISTRON,KPULAP
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLNSPR,.FALSE.)
 ENDIF

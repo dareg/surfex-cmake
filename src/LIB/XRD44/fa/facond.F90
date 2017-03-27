@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACOND_MT64                                              &
+SUBROUTINE FACOND_FORT                                              &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP, CDNOMA, KLNOMA, PVALCO,      &
 &                      KLONGD)
@@ -71,13 +71,13 @@ IF (LHOOK) CALL DR_HOOK('FACOND_MT',0,ZHOOK_HANDLE)
 LLUNDF = .FALSE.
 ZUNDF  = 0._JPDBLR
 KLONGD = 0
-CALL FACON1_MT64 (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
+CALL FACON1_FORT (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                 PCHAMP, LDCOSP, CDNOMA, KLNOMA, PVALCO,      &
 &                 KLONGD, LLUNDF, ZUNDF, YLGR1TAB)
 
 IF (LHOOK) CALL DR_HOOK('FACOND_MT',1,ZHOOK_HANDLE)
 
-END SUBROUTINE FACOND_MT64
+END SUBROUTINE FACOND_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FACOND64                                       &
@@ -103,7 +103,7 @@ INTEGER (KIND=JPLIKB)  KLONGD                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACOND_MT64                                               &
+CALL FACOND_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &           LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD)
 
@@ -168,7 +168,7 @@ INTEGER (KIND=JPLIKB)  ILONGD                                 !   OUT
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FACOND_MT64                                               &
+CALL FACOND_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, PCHAMP, &
 &            LDCOSP, CDNOMA, ILNOMA, PVALCO, ILONGD)
 

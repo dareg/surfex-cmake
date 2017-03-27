@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACTUI_MT64                   &
+SUBROUTINE FACTUI_FORT                   &
 &                     (FA,  KREP, KRANGC )
 USE FA_MOD, ONLY : FA_COM, FREE_CADRE, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -90,13 +90,13 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   INUMER=JPNIIL
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANGC='',I4)') &
 &     KREP,KRANGC
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FACTUI_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FACTUI_MT64
+END SUBROUTINE FACTUI_FORT
 
 
 
@@ -114,7 +114,7 @@ INTEGER (KIND=JPLIKB)  KRANGC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACTUI_MT64             &
+CALL FACTUI_FORT             &
 &           (FA, KREP, KRANGC)
 
 END SUBROUTINE FACTUI64
@@ -153,7 +153,7 @@ INTEGER (KIND=JPLIKB)  IRANGC                                 ! IN
 
 IRANGC     = INT (    KRANGC, JPLIKB)
 
-CALL FACTUI_MT64             &
+CALL FACTUI_FORT             &
 &           (FA, IREP, IRANGC)
 
 KREP       = INT (      IREP, JPLIKM)

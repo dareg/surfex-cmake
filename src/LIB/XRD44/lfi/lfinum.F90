@@ -95,7 +95,7 @@ INTEGER (KIND=JPLIKB)  KRANG                                  !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINUM_MT64                &
+CALL LFINUM_FORT                &
 &           (LFI, KNUMER, KRANG)
 
 END SUBROUTINE LFINUM64
@@ -134,7 +134,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFINUM_MT64                &
+CALL LFINUM_FORT                &
 &           (LFI, INUMER, IRANG)
 
 KRANG      = INT (     IRANG, JPLIKM)

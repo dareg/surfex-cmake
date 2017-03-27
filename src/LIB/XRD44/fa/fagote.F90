@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAGOTE_MT64                                             &
+SUBROUTINE FAGOTE_FORT                                             &
 &                     (FA,  KREP, KNUMER, KNGRIB, KNARG1, KNARG2,  &
 &                      KNARG3, KNARG4, KNARG5)
 USE FA_MOD, ONLY : FA_COM
@@ -70,7 +70,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAGOTE_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 LLVERF=.FALSE.
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 
@@ -111,7 +111,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -189,7 +189,7 @@ IF (KNGRIB /= 4) THEN
 ! de -1 pris par FA%NBFPDG, FA%NBFCSP, FA%NSTROF et FA%NPUFLA en
 ! IRANG-ieme position.
 !
-  CALL FAINOC_MT64 (FA, IRANG)
+  CALL FAINOC_FORT (FA, IRANG)
 ENDIF
 !
 !**
@@ -203,7 +203,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -225,7 +225,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,       &
 &       '', KNGRIB='',I2,'', KNARG1='',I3,'', KNARG2='',I3,   &
 &       '', KNARG3='',I2,'', KNARG4='',I3,'', KNARG5='',I3)') &
 &   KREP,KNUMER,KNGRIB,KNARG1,KNARG2,KNARG3,KNARG4,KNARG5
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CLACTI,.FALSE.)
 !
@@ -237,7 +237,7 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FAGOTE_MT64
+END SUBROUTINE FAGOTE_FORT
 
 
 
@@ -262,7 +262,7 @@ INTEGER (KIND=JPLIKB)  KNARG5                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAGOTE_MT64                                               &
+CALL FAGOTE_FORT                                               &
 &           (FA, KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
 &            KNARG4, KNARG5)
 
@@ -329,7 +329,7 @@ ISTRON     = INT (    KNARG3, JPLIKB)
 IPUILA     = INT (    KNARG4, JPLIKB)
 IDMOPL     = INT (    KNARG5, JPLIKB)
 
-CALL FAGOTE_MT64                                               &
+CALL FAGOTE_FORT                                               &
 &           (FA, IREP, INUMER, INGRIB, INBPDG, INBCSP, ISTRON, &
 &            IPUILA, IDMOPL)
 

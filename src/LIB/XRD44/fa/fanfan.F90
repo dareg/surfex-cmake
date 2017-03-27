@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANFAN_MT64                                             &
+SUBROUTINE FANFAN_FORT                                             &
 &                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,  &
 &                      CDNOMA, KLNOMA)
 USE FA_MOD, ONLY : FA_COM
@@ -47,7 +47,7 @@ LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILPRFU=INT (LEN (CDPREF), JPLIKB)
 ILSUFU=INT (LEN (CDSUFF), JPLIKB)
-CALL FANUMU_MT64 (FA, KNUMER,IRANG)
+CALL FANUMU_FORT (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
   IREP=-51
@@ -56,7 +56,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64 (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
+IF (FA%LFAMUL) CALL LFIVER_FORT (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
 IF (FA%FICHIER(IRANG)%LCREAF) THEN
@@ -68,7 +68,7 @@ ENDIF
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT64                                             &
+CALL FANFAR_FORT                                             &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CDNOMA, &
 &                IB1PAR(6),ILPRFU,ILSUFU,KLNOMA)
 
@@ -79,7 +79,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64 (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
+IF (LLVERF) CALL LFIVER_FORT (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 
 IF (LLFATA) THEN
   INIMES=2
@@ -98,7 +98,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,'', KNUMER='',I3, &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,       &
 &       '', CDSUFF='''''',A,'''')')                     &
 &   KREP,KNUMER,CDPREF(1:ILPRFU),KNIVAU,CDSUFF(1:ILSUFU)
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR, CDNOMA(1:KLNOMA),LLRLFI)
 !
@@ -109,7 +109,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FANFAN_MT64
+END SUBROUTINE FANFAN_FORT
 
 
 
@@ -133,7 +133,7 @@ INTEGER (KIND=JPLIKB)  KLNOMA                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANFAN_MT64                                               &
+CALL FANFAN_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &            KLNOMA)
 
@@ -189,7 +189,7 @@ INTEGER (KIND=JPLIKB)  ILNOMA                                 !   OUT
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANFAN_MT64                                               &
+CALL FANFAN_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, CDNOMA, &
 &            ILNOMA)
 

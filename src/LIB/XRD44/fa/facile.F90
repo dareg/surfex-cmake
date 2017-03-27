@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACILE_MT64                                             &
+SUBROUTINE FACILE_FORT                                             &
 &                     (FA,  KREP, KNUMER, CDPREF, KNIVAU, CDSUFF,  &
 &                      KCHAMP, LDCOSP)
 USE FA_MOD, ONLY : FA_COM, FAGR1TAB
@@ -50,13 +50,13 @@ LOGICAL LDCOSP, LLUNDF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FACILE_MT',0,ZHOOK_HANDLE)
 
-CALL FACIL1_MT64 (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, KCHAMP, LDCOSP, &
+CALL FACIL1_FORT (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, KCHAMP, LDCOSP, &
                 & LLUNDF, IUNDF, YLGR1TAB)
 
 
 IF (LHOOK) CALL DR_HOOK('FACILE_MT',1,ZHOOK_HANDLE)
 
-END SUBROUTINE FACILE_MT64
+END SUBROUTINE FACILE_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FACILE64                                        &
@@ -78,7 +78,7 @@ LOGICAL                LDCOSP                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACILE_MT64                                               &
+CALL FACILE_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, KCHAMP, &
 &            LDCOSP)
 
@@ -133,7 +133,7 @@ INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FACILE_MT64                                               &
+CALL FACILE_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, KCHAMP, &
 &            LDCOSP)
 

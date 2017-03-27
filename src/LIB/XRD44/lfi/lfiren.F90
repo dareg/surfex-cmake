@@ -324,7 +324,7 @@ CHARACTER (LEN=*)      CDNOM2                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIREN_MT64                               &
+CALL LFIREN_FORT                               &
 &           (LFI, KREP, KNUMER, CDNOM1, CDNOM2)
 
 END SUBROUTINE LFIREN64
@@ -367,7 +367,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIREN_MT64                               &
+CALL LFIREN_FORT                               &
 &           (LFI, IREP, INUMER, CDNOM1, CDNOM2)
 
 KREP       = INT (      IREP, JPLIKM)

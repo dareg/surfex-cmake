@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAMISO_MT64             &
+SUBROUTINE FAMISO_FORT             &
 &                     (FA,  LDEBUG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -31,7 +31,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAMISO_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FAMISO_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FAMISO_LLPREA=.FALSE.
 ENDIF
@@ -57,12 +57,12 @@ INIMES=2
 IREP=0
 CLNSPR='FAMISO'
 WRITE (UNIT=CLMESS,FMT='(''LDEBUG= '',L1)') LDEBUG
-CALL FAIPAR_MT64                                      &
+CALL FAIPAR_FORT                                      &
 &               (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                CLNSPR,CLACTI,.FALSE.)
 !
 IF (LHOOK) CALL DR_HOOK('FAMISO_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FAMISO_MT64
+END SUBROUTINE FAMISO_FORT
 
 
 
@@ -79,7 +79,7 @@ LOGICAL                LDEBUG                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAMISO_MT64           &
+CALL FAMISO_FORT           &
 &           (FA, LDEBUG)
 
 END SUBROUTINE FAMISO64
@@ -113,7 +113,7 @@ LOGICAL                LDEBUG                                 ! IN
 ! Convert arguments
 
 
-CALL FAMISO_MT64           &
+CALL FAMISO_FORT           &
 &           (FA, LDEBUG)
 
 

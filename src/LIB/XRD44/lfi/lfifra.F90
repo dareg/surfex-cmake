@@ -80,7 +80,7 @@ LOGICAL                LDFRAN                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIFRA_MT64            &
+CALL LFIFRA_FORT            &
 &           (LFI, LDFRAN)
 
 END SUBROUTINE LFIFRA64
@@ -114,7 +114,7 @@ LOGICAL                LDFRAN                                 ! IN
 ! Convert arguments
 
 
-CALL LFIFRA_MT64            &
+CALL LFIFRA_FORT            &
 &           (LFI, LDFRAN)
 
 

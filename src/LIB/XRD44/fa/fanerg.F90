@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANERG_MT64             &
+SUBROUTINE FANERG_FORT             &
 &                     (FA,  KNIVAU )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -42,14 +42,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANERG_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FANERG_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FANERG_LLPREA=.FALSE.
 ENDIF
 !
 IF (KNIVAU.GE.0.AND.KNIVAU.LE.2) THEN
   FA%NRFAGA=KNIVAU
-  CALL LFINEG_MT64                &
+  CALL LFINEG_FORT                &
 &                 (FA%LFI, KNIVAU)
   IREP=0
 ELSE
@@ -78,12 +78,12 @@ IF (MAX (INIMES,FA%NIMSGA).EQ.2) THEN
 &         ) KNIVAU,IREP
 ENDIF
 !
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &             CLNSPR,CLACTI,.FALSE.)
 !
 IF (LHOOK) CALL DR_HOOK('FANERG_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FANERG_MT64
+END SUBROUTINE FANERG_FORT
 
 
 
@@ -100,7 +100,7 @@ INTEGER (KIND=JPLIKB)  KNIVAU                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANERG_MT64           &
+CALL FANERG_FORT           &
 &           (FA, KNIVAU)
 
 END SUBROUTINE FANERG64
@@ -136,7 +136,7 @@ INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN
 
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANERG_MT64           &
+CALL FANERG_FORT           &
 &           (FA, INIVAU)
 
 

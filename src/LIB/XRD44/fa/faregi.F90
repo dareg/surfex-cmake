@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAREGI_MT64                         &
+SUBROUTINE FAREGI_FORT                         &
 &                     (FA,  CDCLEF, KVAL, KOPT)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -70,7 +70,7 @@ IF (FA%FAREGI_LLPREA) THEN
 !
 !          A la premiere utilisation, appel au sous-programme "FARINE".
 !
-  CALL FARINE_MT64             &
+  CALL FARINE_FORT             &
 &                (FA, 2_JPLIKB )
   FA%FAREGI_LLPREA=.FALSE.
 ENDIF
@@ -376,7 +376,7 @@ WRITE (UNIT=CLMESS,FMT='(''IREP='',I2,            &
 &        '', KOPT='',I4)')                        &
 &        IREP,CDCLEF,KVAL,KOPT
 INUMER=JPNIIL
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLNSPR,.FALSE.)
 !
@@ -386,7 +386,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FAREGI_MT64
+END SUBROUTINE FAREGI_FORT
 
 
 
@@ -405,7 +405,7 @@ INTEGER (KIND=JPLIKB)  KOPT                                   ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAREGI_MT64                   &
+CALL FAREGI_FORT                   &
 &           (FA, CDCLEF, KVAL, KOPT)
 
 END SUBROUTINE FAREGI64
@@ -449,7 +449,7 @@ IF (KOPT==1) THEN
 ENDIF
 IOPT       = INT (      KOPT, JPLIKB)
 
-CALL FAREGI_MT64                   &
+CALL FAREGI_FORT                   &
 &           (FA, CDCLEF, IVAL, IOPT)
 
 IF (KOPT==0) THEN

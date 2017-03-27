@@ -244,7 +244,7 @@ INTEGER (KIND=JPLIKB)  KPOSEX                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINFO_MT64                                      &
+CALL LFINFO_FORT                                      &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONG, KPOSEX)
 
 END SUBROUTINE LFINFO64
@@ -291,7 +291,7 @@ INTEGER (KIND=JPLIKB)  IPOSEX                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFINFO_MT64                                      &
+CALL LFINFO_FORT                                      &
 &           (LFI, IREP, INUMER, CDNOMA, ILONG, IPOSEX)
 
 KREP       = INT (      IREP, JPLIKM)

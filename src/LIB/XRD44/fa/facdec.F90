@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACDEC_MT64                                &
+SUBROUTINE FACDEC_FORT                                &
 &                     (FA, KREP, PA, PMIN, KNBIT, KDEC)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -75,7 +75,7 @@ INBINT  = 2**KNBIT -1
 XNBINT  = REAL (INBINT, JPDBLR)
 ! Cas du facteur decimal nul (reference a calculer dans tous les cas)
 JDEC    = 0
-CALL FACTEC_MT64                                    &
+CALL FACTEC_FORT                                    &
 &              (FA, KREP, PA, KNBIT, JDEC, IE0, INU0)
 !
 !**
@@ -102,7 +102,7 @@ DO JDEC = IDECMIN, IDECMAX
 ! 2/ PA * 10**JDEC inclus dans le domaine de validite des real*8
   IF (ABS(LOG10(ABS(PA))+REAL (JDEC, JPDBLR)) .GE. REAL (RANGE(PA), JPDBLR)) CYCLE
 !
-  CALL FACTEC_MT64                                     &
+  CALL FACTEC_FORT                                     &
 &                (FA, KREP, PA, KNBIT, JDEC, IE, INUTIL)
   IF (KREP.NE.0) CYCLE
 ! 3/ PMIN*10**JDEC + (2**KNBIT-1)*2**IE < HUGE(real*4) pour decodage
@@ -157,7 +157,7 @@ ENDIF
 1001 CONTINUE
 !
 IF (LHOOK) CALL DR_HOOK('FACDEC_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FACDEC_MT64
+END SUBROUTINE FACDEC_FORT
 
 
 
@@ -178,7 +178,7 @@ INTEGER (KIND=JPLIKB)  KDEC                                   !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACDEC_MT64                            &
+CALL FACDEC_FORT                            &
 &           (FA, KREP, PA, PMIN, KNBIT, KDEC)
 
 END SUBROUTINE FACDEC64
@@ -224,7 +224,7 @@ INTEGER (KIND=JPLIKB)  IDEC                                   !   OUT
 
 INBIT      = INT (     KNBIT, JPLIKB)
 
-CALL FACDEC_MT64                            &
+CALL FACDEC_FORT                            &
 &           (FA, IREP, PA, PMIN, INBIT, IDEC)
 
 KREP       = INT (      IREP, JPLIKM)

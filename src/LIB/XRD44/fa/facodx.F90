@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACODX_MT64                                              &
+SUBROUTINE FACODX_FORT                                              &
 &                     (FA,  KREP,   KRANG,  CDPREF, KNIVAU, CDSUFF, &
 &                      PSEC4, LDCOSP, KVALCO, KLONGD,               &
 &                      LDUNDF, PUNDF, YDGR1TAB)
@@ -155,7 +155,7 @@ IF (LDCOSP .AND. LLMLAM) THEN
 !
 !     Determination de la puissance de Laplacien (en 1/1000 ieme)
 !
-  CALL FAPULA_MT64                                 &
+  CALL FAPULA_FORT                                 &
 &                 (FA,  KREP, KRANG, PSEC4, IPULAP )
   ZPULAP=REAL(IPULAP,JPDBLR)/1000._JPDBLR
 !       ZPULAP=0.
@@ -196,7 +196,7 @@ IF (LDCOSP .AND. LLMLAM) THEN
 &          CDPREF,KNIVAU,CDSUFF
   ENDIF
   KREP = 0
-  IF (LLFACDE) CALL FACDEC_MT64 (FA, KREP, ZA, ZMIN, INBITS, IDECOPT)
+  IF (LLFACDE) CALL FACDEC_FORT (FA, KREP, ZA, ZMIN, INBITS, IDECOPT)
   IF (KREP.NE.0) THEN
     KREP = 0
   ENDIF
@@ -280,7 +280,7 @@ ENDIF
       IDECOPT = 0
       KREP = 0
     ELSE 
-      CALL FACDEC_MT64 (FA, KREP, ZA, ZMIN, INBITS, IDECOPT)
+      CALL FACDEC_FORT (FA, KREP, ZA, ZMIN, INBITS, IDECOPT)
       IF (KREP.NE.0) THEN
         WRITE (UNIT=FA%NULOUT,FMT=*)'FACODX: field incriminated by FACDEC was ', CDPREF,KNIVAU,CDSUFF
         IDECOPT = 0
@@ -295,7 +295,7 @@ ENDIF
 !
 !     3.1 -  Sections 1, 2, 3 et 4 (sf la partie reelle pour 4)
 !
-CALL FAINIG_MT64                                                   &
+CALL FAINIG_FORT                                                   &
 &               (FA,  KREP, KRANG, CDPREF, KNIVAU, CDSUFF, LDCOSP, &
 &                IILCHAM, ISEC1, ISEC2, ZSEC2, ISEC3, ZSEC3, ISEC4,&
 &                YDGR1TAB)
@@ -555,12 +555,12 @@ IF (IRET==710) THEN
 &         '', KLONGD='',I6)')                             &
 &     KREP, KRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF)), LDCOSP, KLONGD
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
   CLMESS=                                                          &
 & ' CAUTION: this field is not packed or it will occupy more space'
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
   IF (LHOOK) CALL DR_HOOK('FACODX_MT',1,ZHOOK_HANDLE)
@@ -582,7 +582,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', KLONGD='',I6)')                             &
 &     KREP, KRANG, CDPREF(1:LEN_TRIM(CDPREF)), KNIVAU,    &
 &     CDSUFF(1:LEN_TRIM(CDSUFF)), LDCOSP, KLONGD
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -593,7 +593,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FACODX_MT64
+END SUBROUTINE FACODX_FORT
 
 !INTF KREP            OUT                                                              
 !INTF KRANG         IN                                                                 

@@ -179,7 +179,7 @@ INTEGER (KIND=JPLIKB)  KNUMER                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFISFM_MT64               &
+CALL LFISFM_FORT               &
 &           (LFI, KREP, KNUMER)
 
 END SUBROUTINE LFISFM64
@@ -218,7 +218,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFISFM_MT64               &
+CALL LFISFM_FORT               &
 &           (LFI, IREP, INUMER)
 
 KREP       = INT (      IREP, JPLIKM)

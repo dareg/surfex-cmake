@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIS2F_MT64                  &
+SUBROUTINE FAIS2F_FORT                  &
 &                     (FA,  KREP, KRANG )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -76,7 +76,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 !
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I4)') &
 &     KREP, KRANG
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLNSPR,.FALSE.)
 ENDIF
@@ -87,7 +87,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FAIS2F_MT64
+END SUBROUTINE FAIS2F_FORT
 
 
 
@@ -105,7 +105,7 @@ INTEGER (KIND=JPLIKB)  KRANG                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIS2F_MT64            &
+CALL FAIS2F_FORT            &
 &           (FA, KREP, KRANG)
 
 END SUBROUTINE FAIS2F64
@@ -144,7 +144,7 @@ INTEGER (KIND=JPLIKB)  IRANG                                  ! IN
 
 IRANG      = INT (     KRANG, JPLIKB)
 
-CALL FAIS2F_MT64            &
+CALL FAIS2F_FORT            &
 &           (FA, IREP, IRANG)
 
 KREP       = INT (      IREP, JPLIKM)

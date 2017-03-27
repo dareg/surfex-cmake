@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIPAR_MT64                                            &
+SUBROUTINE FAIPAR_FORT                                            &
 &                     (FA,  KNUMER, KNIMES, KCODE, LDFATA, CDMESS,  &
 &                      CDNSPR, CDACTI, LDRLFI )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -876,7 +876,7 @@ IF (KNIMES.EQ.0.OR.LDFATA) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FAIPAR_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FAIPAR_MT64
+END SUBROUTINE FAIPAR_FORT
 
 
 
@@ -901,7 +901,7 @@ LOGICAL                LDRLFI                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIPAR_MT64                                              &
+CALL FAIPAR_FORT                                              &
 &           (FA, KNUMER, KNIMES, KCODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 
@@ -959,7 +959,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 ICODE      = INT (     KCODE, JPLIKB)
 
-CALL FAIPAR_MT64                                              &
+CALL FAIPAR_FORT                                              &
 &           (FA, INUMER, INIMES, ICODE, LDFATA, CDMESS, CDNSPR, &
 &           CDACTI, LDRLFI)
 

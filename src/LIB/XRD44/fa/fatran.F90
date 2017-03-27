@@ -1,7 +1,7 @@
 ! Nov-2012 P. Marguinaud Use local INDIRECT array
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FATRAN_MT64                                            &
+SUBROUTINE FATRAN_FORT                                            &
 &                     (FA,  KREP,  KNUMER,  PCHAME, PCHAMS, LDOPT )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -59,7 +59,7 @@ LOGICAL                  LLFATA
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FATRAN_MT',0,ZHOOK_HANDLE)
 KREP=0
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -220,7 +220,7 @@ CLNSPR='FATRAN'
 !
 WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', IRANG='',I4, &
 &         '', LDOPT='',L2)')  KREP, IRANG, LDOPT
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, KNUMER,INIMES,KREP,LLFATA,CLMESS, &
 &               CLNSPR,CLNSPR,.FALSE.)
 !
@@ -231,7 +231,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FATRAN_MT64
+END SUBROUTINE FATRAN_FORT
 
 
 
@@ -252,7 +252,7 @@ LOGICAL                LDOPT                                  ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATRAN_MT64                                    &
+CALL FATRAN_FORT                                    &
 &           (FA, KREP, KNUMER, PCHAME, PCHAMS, LDOPT)
 
 END SUBROUTINE FATRAN64
@@ -297,7 +297,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FATRAN_MT64                                    &
+CALL FATRAN_FORT                                    &
 &           (FA, IREP, INUMER, PCHAME, PCHAMS, LDOPT)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAVEUR_MT64                                             &
+SUBROUTINE FAVEUR_FORT                                             &
 &                     (FA,  KREP, KNUMER, KNGRIB, KNARG1, KNARG2,  &
 &                      KNARG3, KNARG4, KNARG5)
 USE FA_MOD, ONLY : FA_COM
@@ -61,7 +61,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FAVEUR_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 LLVERF=.FALSE.
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -71,7 +71,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !**
@@ -105,7 +105,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -125,7 +125,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,      &
 &       '', KNGRIB='',I2,'', KNARG1='',I3,'', KNARG2='',I3,   &
 &       '', KNARG3='',I2,'', KNARG4='',I3,'', KNARG5='',I3)') &
 &   KREP,KNUMER,KNGRIB,KNARG1,KNARG2,KNARG3,KNARG4,KNARG5
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI,.FALSE.)
 !
@@ -136,7 +136,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FAVEUR_MT64
+END SUBROUTINE FAVEUR_FORT
 
 
 
@@ -161,7 +161,7 @@ INTEGER (KIND=JPLIKB)  KNARG5                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAVEUR_MT64                                               &
+CALL FAVEUR_FORT                                               &
 &           (FA, KREP, KNUMER, KNGRIB, KNARG1, KNARG2, KNARG3, &
 &           KNARG4, KNARG5)
 
@@ -222,7 +222,7 @@ INTEGER (KIND=JPLIKB)  INARG5                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAVEUR_MT64                                               &
+CALL FAVEUR_FORT                                               &
 &           (FA, IREP, INUMER, INGRIB, INARG1, INARG2, INARG3, &
 &           INARG4, INARG5)
 

@@ -1,7 +1,7 @@
 ! Jan-2013 P. Marguinaud Use JNGEOM & JNEXPL parameters
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAITOU_MT64                                             &
+SUBROUTINE FAITOU_FORT                                             &
 &                     (FA,  KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU,  &
 &                      LDERFA, LDIMST, KNIMES, KNBARP, KNBARI,     &
 &                      CDNOMC)
@@ -112,12 +112,12 @@ ILOMIN=MIN ( INT (LEN (CDNOMF), JPLIKB),         &
 !     initialiser les variables globales du logiciel s'il s'agit
 !     du premier appel a un sous-programme de ce logiciel.
 !
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !        Si KNUMER est nul, alors le numero d'unite logique est
 !     attribué automatiquement
 IF (KNUMER == 0) THEN
-  CALL FAAUTO_MT64  (FA, KNUMER, .TRUE.)
+  CALL FAAUTO_FORT  (FA, KNUMER, .TRUE.)
   IRANG=0
 ENDIF
 !
@@ -135,7 +135,7 @@ ENDIF
 !
 !             Verrouillage global, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
@@ -169,7 +169,7 @@ ENDIF
 !      articles constituant le cadre, la date et l'identificateur)
 !
 INBARP=KNBARP+7
-CALL LFIOUV_MT64                                            &
+CALL LFIOUV_FORT                                             &
 &               (FA%LFI, IREPOU,KNUMER,LDNOMM,CDNOMF,CDSTTU, &
 &             LDERFA,LDIMST,                                 &
 &             KNIMES,INBARP,KNBARI)
@@ -184,7 +184,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 LLNOUF=KNBARI.EQ.0
-CALL FANUCA_MT64                          &
+CALL FANUCA_FORT                          &
 &               (FA, CDNOMC,IRANGC,.FALSE.)
 LLNOUC=IRANGC.EQ.0
 !
@@ -254,7 +254,7 @@ IF (LLNOUF) THEN
 !
     LLRLFI=.TRUE.
     ILDIMEN=IDIMEN
-    CALL LFIECR_MT64 (FA%LFI, IREP, KNUMER, FA%CPCADI, ILDIMEN, FA%JPCADI)
+    CALL LFIECR_FORT (FA%LFI, IREP, KNUMER, FA%CPCADI, ILDIMEN, FA%JPCADI)
     IDIMEN=ILDIMEN
     IF (IREP.NE.0) GOTO 1001
 !
@@ -265,7 +265,7 @@ IF (LLNOUF) THEN
 !
        ILONGA=INPAHE*2
        ILRDPOL=IRDPOL
-       CALL LFIECR_MT64 (FA%LFI, IREP, KNUMER, FA%CPCARP, ILRDPOL, ILONGA)
+       CALL LFIECR_FORT (FA%LFI, IREP, KNUMER, FA%CPCARP, ILRDPOL, ILONGA)
        IRDPOL=ILRDPOL
        IF (IREP.NE.0) GOTO 1001
 !
@@ -277,7 +277,7 @@ IF (LLNOUF) THEN
 !
        ILONGA=JNEXPL+INPIND
        ILRDPOL=IRDPOL
-       CALL LFIECR_MT64 (FA%LFI, IREP, KNUMER, FA%CPCARP, ILRDPOL, ILONGA)
+       CALL LFIECR_FORT (FA%LFI, IREP, KNUMER, FA%CPCARP, ILRDPOL, ILONGA)
        IRDPOL=ILRDPOL
        IF (IREP.NE.0) GOTO 1001
 !
@@ -292,7 +292,7 @@ IF (LLNOUF) THEN
     IF (IREP.NE.0) GOTO 1001
 !
     ILPNVER=FA%JPNVER
-    CALL LFIECR_MT64 (FA%LFI, IREP, KNUMER, CLNOMA(1:ILNOMC), ILPNVER, 1_JPLIKB)
+    CALL LFIECR_FORT (FA%LFI, IREP, KNUMER, CLNOMA(1:ILNOMC), ILPNVER, 1_JPLIKB)
     IF (IREP.NE.0) GOTO 1001
 !
     LLRLFI=.FALSE.
@@ -304,7 +304,7 @@ ENDIF
 !     2.1 - Fichier preexistant...lecture et controle du Cadre "Fichier"
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT64                                             &
+CALL LFINFO_FORT                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCADI,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -319,7 +319,7 @@ ELSEIF (ILONGA.NE.FA%JPCADI) THEN
 ENDIF
 !
 ILDIMEN=IDIMEN
-CALL LFILEC_MT64 (FA%LFI, IREP, KNUMER, FA%CPCADI, ILDIMEN, FA%JPCADI)
+CALL LFILEC_FORT (FA%LFI, IREP, KNUMER, FA%CPCADI, ILDIMEN, FA%JPCADI)
 IDIMEN=ILDIMEN
 !
 IF (IREP.NE.0) THEN
@@ -327,7 +327,7 @@ IF (IREP.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFINFO_MT64 (FA%LFI, IREP, KNUMER, FA%CPCAFS, ILONGA, IPOSEX)
+CALL LFINFO_FORT (FA%LFI, IREP, KNUMER, FA%CPCAFS, ILONGA, IPOSEX)
 !
 IF (IREP.NE.0) THEN
   LLRLFI=.TRUE.
@@ -359,7 +359,7 @@ INIVER=IDIMEN(4)
 ITYPTR=IDIMEN(5)
 IPHASE=1
 IGARDE=1
-CALL FACADI_MT64                                                    &
+CALL FACADI_FORT                                                    &
 &              (FA, IREP,CDNOMC,ITYPTR,ZCHMID(1),ZCHMID(2),         &
 &               ZCHMID(3),ZCHMID(4),ITRONC,INLATI,INXLON,IRDPOL(1), &
 &               IRDPOL(FA%JPXPAH+1),ZSINLA,                         &
@@ -367,7 +367,7 @@ CALL FACADI_MT64                                                    &
 &               LLMODC,LLREDF,IPHASE,IRANGC,ILNOMC,IGARDE)
 IF (IREP.NE.0) GOTO 1001
 !
-CALL LFINFO_MT64                                             &
+CALL LFINFO_FORT                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCARP,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -384,7 +384,7 @@ ELSEIF (ILONGA.NE.INPAHE*2) THEN
 ENDIF
 !
 ILRDPOL=IRDPOL
-CALL LFILEC_MT64 (FA%LFI, IREP, KNUMER, FA%CPCARP, ILRDPOL, ILONGA)
+CALL LFILEC_FORT (FA%LFI, IREP, KNUMER, FA%CPCARP, ILRDPOL, ILONGA)
 IRDPOL=ILRDPOL
 !
 IF (IREP.NE.0) THEN
@@ -392,7 +392,7 @@ IF (IREP.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFINFO_MT64                                             &
+CALL LFINFO_FORT                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCASL,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -415,7 +415,7 @@ IF (IREP.NE.0) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFINFO_MT64                                             &
+CALL LFINFO_FORT                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPCACH,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -441,7 +441,7 @@ ENDIF
 !        Tests complementaires sur les valeurs lues.
 !
 IPHASE=2
-CALL FACADI_MT64                                                    &
+CALL FACADI_FORT                                                    &
 &              (FA, IREP,CDNOMC,ITYPTR,ZCHMID(1),ZCHMID(2),         &
 &               ZCHMID(3),ZCHMID(4),ITRONC,INLATI,INXLON,IRDPOL(1), &
 &               IRDPOL(INPAHE+1),ZSINLA,                            &
@@ -453,7 +453,7 @@ IF (IREP.NE.0) GOTO 1001
 !           premier article suivant les articles du cadre.
 !-----------------------------------------------------------------------
 !
-CALL LFICAS_MT64                                   &
+CALL LFICAS_FORT                                   &
 &               (FA%LFI, IREP,KNUMER,CLNOMA,ILONGA, &
 &                IPOSEX,.FALSE.)
 !
@@ -469,7 +469,7 @@ ENDIF
 !     2.3 - Fichier preexistant...lecture et controle de l'article DATE.
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT64                                             &
+CALL LFINFO_FORT                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPDATE,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -483,7 +483,7 @@ ELSEIF (ILONGA.NE.FA%JPLDAT) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFILEC_MT64 (FA%LFI, IREP, KNUMER, FA%CPDATE, IDATEF, FA%JPLDAT)
+CALL LFILEC_FORT (FA%LFI, IREP, KNUMER, FA%CPDATE, IDATEF, FA%JPLDAT)
 !
 IF (IREP.NE.0) THEN
   LLRLFI=.TRUE.
@@ -495,7 +495,7 @@ ENDIF
 !           Fichier preexistant...lecture et controle de l'article DATX.
 !-----------------------------------------------------------------------
 !
-CALL LFINFO_MT64                                             &
+CALL LFINFO_FORT                                             &
 &               (FA%LFI, IREP,KNUMER,FA%CPDATX,ILONGA,IPOSEX)
 !
 IF (IREP.NE.0) THEN
@@ -509,7 +509,7 @@ ELSEIF (ILONGA.NE.FA%JPLDAT) THEN
   GOTO 1001
 ENDIF
 !
-CALL LFILEC_MT64 (FA%LFI, IREP, KNUMER, FA%CPDATX, IDATXF, FA%JPLDAT)
+CALL LFILEC_FORT (FA%LFI, IREP, KNUMER, FA%CPDATX, IDATXF, FA%JPLDAT)
 !
 IF (IREP.NE.0) THEN
   LLRLFI=.TRUE.
@@ -529,14 +529,14 @@ FA%FICHIER(IRANG)%LCREAF=.TRUE.
 !
 !        Controle de la Date fichier, et stockage dans FA%MADATE.
 !
-CALL FANDAI_MT64                             &
+CALL FANDAI_FORT                             &
 &               (FA, IREP,IRANG,IDATEF,IDATXF,LLMODA)
 IF (IREP.NE.0) GOTO 1001
 !
 !         Definition du Cadre proprement dite.
 !
 IPHASE=3
-CALL FACADI_MT64                                                  &
+CALL FACADI_FORT                                                  &
 &              (FA, IREP,CDNOMC,ITYPTR,ZCHMID(1),ZCHMID(2),         &
 &               ZCHMID(3),ZCHMID(4),ITRONC,INLATI,INXLON,IRDPOL(1), &
 &               IRDPOL(INPAHE+1),ZSINLA,                            &
@@ -583,7 +583,7 @@ ENDIF
 ! de -1 pris par FA%NBFPDG, FA%NBFCSP, FA%NSTROF et FA%NPUFLA en
 ! IRANG-ieme position.
 !
-CALL FAINOC_MT64            &
+CALL FAINOC_FORT            &
 &               (FA,  IRANG )
 !
 IRANER=IRANG
@@ -599,7 +599,7 @@ FA%FICHIER(IRANG)%NRASVE = 0
 FA%FICHIER(IRANG)%LIFLAP=.TRUE.
 !
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                                 &
+IF (FA%LFAMUL) CALL LFIVER_FORT                                 &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ASGN')
 !
 !        On incremente le nombre de fichiers attaches au cadre specifie.
@@ -633,7 +633,7 @@ ENDIF
 !
 !           Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (.NOT.LLFATA.AND.INIMES.EQ.0)  THEN 
@@ -658,11 +658,11 @@ IF (INIMES.EQ.2) THEN
 &     '',  LDIMST= '',L1,                                           &
 &         '', KNIMES='',I2,'', KNBARP='',I6,'' KNBARI='',I6)')      &
 &   KREP,KNUMER,LDNOMM,CDSTTU,LDERFA,LDIMST,KNIMES,KNBARP,KNBARI
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILACTI),LLRLFI)
   CLMESS='CDNOMC='''//CLACTI(1:ILACTI)//''''
-  CALL FAIPAR_MT64                                     &
+  CALL FAIPAR_FORT                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI(1:ILACTI),LLRLFI)
 ENDIF
@@ -681,7 +681,7 @@ INTEGER (KIND=JPLIKB) :: KLONGA
 REAL (KIND=JPDBLR)    :: PDONNE (KLONGA)
 REAL (KIND=JPDBLD)    :: ZDONNE (KLONGA)
 
-CALL LFILEC_MT64 (FA%LFI, IREP, KNUMER, CDNOMA, ZDONNE, KLONGA)
+CALL LFILEC_FORT (FA%LFI, IREP, KNUMER, CDNOMA, ZDONNE, KLONGA)
 
 PDONNE = REAL (ZDONNE, JPDBLR)
 
@@ -696,11 +696,11 @@ REAL (KIND=JPDBLD)    :: ZDONNE (KLONGA)
 
 ZDONNE = REAL (PDONNE, JPDBLD)
 
-CALL LFIECR_MT64 (FA%LFI, IREP, KNUMER, CDNOMA, ZDONNE, KLONGA)
+CALL LFIECR_FORT (FA%LFI, IREP, KNUMER, CDNOMA, ZDONNE, KLONGA)
 
 END SUBROUTINE LFIECR_RD
 
-END SUBROUTINE FAITOU_MT64
+END SUBROUTINE FAITOU_FORT
 
 
 
@@ -728,7 +728,7 @@ CHARACTER (LEN=*)      CDNOMC                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAITOU_MT64                                             &
+CALL FAITOU_FORT                                             &
 &           (FA, KREP, KNUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, KNIMES, KNBARP, KNBARI, CDNOMC)
 
@@ -794,7 +794,7 @@ INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 INBARP     = INT (    KNBARP, JPLIKB)
 
-CALL FAITOU_MT64                                              &
+CALL FAITOU_FORT                                              &
 &          (FA, IREP, INUMER, LDNOMM, CDNOMF, CDSTTU, LDERFA, &
 &           LDIMST, INIMES, INBARP, INBARI, CDNOMC)
 

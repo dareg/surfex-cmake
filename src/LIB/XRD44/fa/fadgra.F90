@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FADGRA_MT64                                          &
+SUBROUTINE FADGRA_FORT                                          &
 &                     (FA, KREP, KRANG, CDNOMA, KVALCO, KLONGA, &
 &                      PCHAMP, LDCOSP, CDPREF, KNIVAU, CDSUFF,  &
 &                      LDUNDF, PUNDF)
@@ -265,7 +265,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         '', CDNOMA='''''',A,'''''', KLONGA= '',I8,      &
 &         '', LDCOSP='',L1)')                             &
 &     KREP, KRANG, CDNOMA, KLONGA, LDCOSP
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CDNOMA,.FALSE.)
 ENDIF

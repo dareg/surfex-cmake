@@ -92,7 +92,7 @@ INTEGER (KIND=JPLIKB)  KNIMES                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINIM_MT64                       &
+CALL LFINIM_FORT                       &
 &           (LFI, KREP, KNUMER, KNIMES)
 
 END SUBROUTINE LFINIM64
@@ -135,7 +135,7 @@ INTEGER (KIND=JPLIKB)  INIMES                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIMES     = INT (    KNIMES, JPLIKB)
 
-CALL LFINIM_MT64                       &
+CALL LFINIM_FORT                       &
 &           (LFI, IREP, INUMER, INIMES)
 
 KREP       = INT (      IREP, JPLIKM)

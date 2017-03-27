@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIENC_MT64                                              &
+SUBROUTINE FAIENC_FORT                                              &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP)
 USE FA_MOD, ONLY : FA_COM, FAGR1TAB
@@ -53,12 +53,12 @@ IF (LHOOK) CALL DR_HOOK('FAIENC_MT',0,ZHOOK_HANDLE)
 LLUNDF = .FALSE.
 ZUNDF  = 0._JPDBLR
 
-CALL FAIEN1_MT64 (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
+CALL FAIEN1_FORT (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
                 & PCHAMP, LDCOSP, LLUNDF, ZUNDF, YLGR1TAB)
 
 IF (LHOOK) CALL DR_HOOK('FAIENC_MT',1,ZHOOK_HANDLE)
 
-END SUBROUTINE FAIENC_MT64
+END SUBROUTINE FAIENC_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE FAIENC64                                        &
@@ -80,7 +80,7 @@ LOGICAL                LDCOSP                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIENC_MT64                                               &
+CALL FAIENC_FORT                                               &
 &           (FA, KREP, KNUMER, CDPREF, KNIVAU, CDSUFF, PCHAMP, &
 &            LDCOSP)
 
@@ -135,7 +135,7 @@ INTEGER (KIND=JPLIKB)  INIVAU                                 ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FAIENC_MT64                                               &
+CALL FAIENC_FORT                                               &
 &           (FA, IREP, INUMER, CDPREF, INIVAU, CDSUFF, PCHAMP, &
 &            LDCOSP)
 

@@ -91,7 +91,7 @@ LOGICAL                LDERFA                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOEF_MT64                       &
+CALL LFIOEF_FORT                       &
 &           (LFI, KREP, KNUMER, LDERFA)
 
 END SUBROUTINE LFIOEF64
@@ -132,7 +132,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFIOEF_MT64                       &
+CALL LFIOEF_FORT                       &
 &           (LFI, IREP, INUMER, LDERFA)
 
 KREP       = INT (      IREP, JPLIKM)

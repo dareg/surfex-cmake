@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAXION_MT64                                           &
+SUBROUTINE FAXION_FORT                                           &
 &                     (FA,  PCHAME, KPUISS, KDIMNC, KLCHAM, PMIN,  &
 &                      PMAX, KNBITS, LDARPE, PECART, LDMLAM,       &
 &                      KNOZPA, KSTROF, KTRONC, KXLOPA )

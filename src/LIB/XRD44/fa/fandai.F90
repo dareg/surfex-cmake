@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANDAI_MT64                                  &
+SUBROUTINE FANDAI_FORT                                  &
 &                     (FA,  KREP, KRANG, KDATEF, KDATXF, LDMODA )
 USE FA_MOD, ONLY : FA_COM, JPNIIL, &
                  & JD_YEA, JD_MON, JD_DAY, & 
@@ -200,7 +200,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &       '', LDMODA= '',L1)') &
 &     KREP,KRANG,(KDATEF(J),J=1,5),(KDATEF(J),J=7,8),KDATXF,&
 &     LDMODA
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &               (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                CLNSPR,CLACTI, .FALSE.)
 ENDIF
@@ -270,5 +270,5 @@ END SUBROUTINE FANDAI_CMPSEC
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FANDAI_MT64
+END SUBROUTINE FANDAI_FORT
 

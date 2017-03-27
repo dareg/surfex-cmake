@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FARCIS_MT64                                          &
+SUBROUTINE FARCIS_FORT                                          &
 &                     (FA,  KREP, KRANG, PCHAMP, KSTRON, KPUILA )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -59,7 +59,7 @@ IF (KRANG.LE.0.OR.KRANG.GT.FA%JPNXFA) THEN
 ENDIF
 !
 IF (FA%LIXLAP) THEN
-  CALL FAIXLA_MT64           &
+  CALL FAIXLA_FORT           &
 &                 (FA)
   FA%LIXLAP=.FALSE.
 ENDIF
@@ -266,7 +266,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KRANG='',I4,        &
 &    '', PCHAMP(1)='',G12.5,'', KSTRON='',I4,'', KPUILA='',I3)') &
 &     KREP,KRANG,PCHAMP(1),KSTRON,KPUILA
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &               CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -277,7 +277,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FARCIS_MT64
+END SUBROUTINE FARCIS_FORT
 
 
 
@@ -298,7 +298,7 @@ INTEGER (KIND=JPLIKB)  KPUILA                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FARCIS_MT64                                    &
+CALL FARCIS_FORT                                    &
 &           (FA, KREP, KRANG, PCHAMP, KSTRON, KPUILA)
 
 END SUBROUTINE FARCIS64
@@ -347,7 +347,7 @@ IRANG      = INT (     KRANG, JPLIKB)
 ISTRON     = INT (    KSTRON, JPLIKB)
 IPUILA     = INT (    KPUILA, JPLIKB)
 
-CALL FARCIS_MT64                                    &
+CALL FARCIS_FORT                                    &
 &           (FA, IREP, IRANG, PCHAMP, ISTRON, IPUILA)
 
 KREP       = INT (      IREP, JPLIKM)

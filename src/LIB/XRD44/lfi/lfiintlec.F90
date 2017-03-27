@@ -1,7 +1,7 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe LFI
 
-SUBROUTINE LFIINTLEC_MT64                          &
+SUBROUTINE LFIINTLEC_FORT                          &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 USE LFIMOD, ONLY : LFICOM
 USE LFI_PRECISION
@@ -31,12 +31,12 @@ INTEGER (KIND=JPLIKM)  KTAB       (KLONG)                     !   OUT
 INTEGER (KIND=JPLIKB)  ITAB       (KLONG)                     !   OUT
 ! Convert arguments
 
-CALL LFILEC_MT64                                 &
+CALL LFILEC_FORT                                 &
 &           (LFI, KREP, KNUMER, CDNOMA, ITAB, KLONG)
 
 KTAB       = INT (      ITAB, JPLIKM)
 
-END SUBROUTINE LFIINTLEC_MT64
+END SUBROUTINE LFIINTLEC_FORT
 
 ! Oct-2012 P. Marguinaud 64b LFI
 SUBROUTINE LFIINTLEC64                        &
@@ -55,7 +55,7 @@ INTEGER (KIND=JPLIKM)  KTAB       (KLONG)                     !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIINTLEC_MT64                                 &
+CALL LFIINTLEC_FORT                                 &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE LFIINTLEC64
@@ -102,7 +102,7 @@ INTEGER (KIND=JPLIKB)  ILONG                                  ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFIINTLEC_MT64                                 &
+CALL LFIINTLEC_FORT                                 &
 &           (LFI, IREP, INUMER, CDNOMA, KTAB, ILONG)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAGIOT_MT64                                              &
+SUBROUTINE FAGIOT_FORT                                              &
 &                     (FA,  KNGRIB, KNARG1, KNARG2, KNARG3, KNARG4, &
 &                      KNARG5)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -64,7 +64,7 @@ IF (FA%FAGIOT_LLPREA) THEN
 !
 !          A la premiere utilisation, appel au sous-programme "FARINE".
 !
-  CALL FARINE_MT64             &
+  CALL FARINE_FORT             &
 &                (FA, 2_JPLIKB )
   FA%FAGIOT_LLPREA=.FALSE.
 ENDIF
@@ -91,7 +91,7 @@ ENDIF
 !
 !         Verrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !
@@ -149,7 +149,7 @@ LLFATA=LLMOER (IREP,0_JPLIKB )
 !
 !        Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (LLFATA) THEN
@@ -170,7 +170,7 @@ WRITE (UNIT=CLMESS,FMT='(''KNGRIB='',I2,'', KNARG1='',I3,  &
 &       '', KNARG5='',I3)')                                 &
 &   KNGRIB,KNARG1,KNARG2,KNARG3,KNARG4,KNARG5
 INUMER=JPNIIL
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI,.FALSE.)
 !
@@ -181,7 +181,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "falgra.h"
 
-END SUBROUTINE FAGIOT_MT64
+END SUBROUTINE FAGIOT_FORT
 
 
 
@@ -203,7 +203,7 @@ INTEGER (KIND=JPLIKB)  KNARG5                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAGIOT_MT64                                               &
+CALL FAGIOT_FORT                                               &
 &           (FA, KNGRIB, KNARG1, KNARG2, KNARG3, KNARG4, KNARG5)
 
 END SUBROUTINE FAGIOT64
@@ -259,7 +259,7 @@ INARG3     = INT (    KNARG3, JPLIKB)
 INARG4     = INT (    KNARG4, JPLIKB)
 INARG5     = INT (    KNARG5, JPLIKB)
 
-CALL FAGIOT_MT64                                               &
+CALL FAGIOT_FORT                                               &
 &           (FA, INGRIB, INARG1, INARG2, INARG3, INARG4, INARG5)
 
 

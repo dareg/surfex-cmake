@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANUCA_MT64                             &
+SUBROUTINE FANUCA_FORT                             &
 &                     (FA,  CDNOMC, KRANGC, LDVERR )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -39,7 +39,7 @@ LOGICAL LDVERR, LLVERG
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FANUCA_MT',0,ZHOOK_HANDLE)
 IF (FA%FANUCA_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FANUCA_LLPREA=.FALSE.
 ENDIF
@@ -47,7 +47,7 @@ ENDIF
 !          VERROUILLAGE GLOBAL (A CAUSE DE L'UTILISATION DE FA%NFIOUV )
 !
 LLVERG=FA%LFAMUL.AND.LDVERR
-IF (LLVERG) CALL LFIVER_MT64                        &
+IF (LLVERG) CALL LFIVER_FORT                        &
 &                           (FA%LFI, FA%VRGLAS,'ON')
 !
 DO J=1,FA%NCADEF
@@ -65,12 +65,12 @@ IRESUL=0
 !
 !          DEVERROUILLAGE GLOBAL
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 KRANGC=IRESUL
 !
 IF (LHOOK) CALL DR_HOOK('FANUCA_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FANUCA_MT64
+END SUBROUTINE FANUCA_FORT
 
 
 
@@ -89,7 +89,7 @@ LOGICAL                LDVERR                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANUCA_MT64                       &
+CALL FANUCA_FORT                       &
 &           (FA, CDNOMC, KRANGC, LDVERR)
 
 END SUBROUTINE FANUCA64
@@ -128,7 +128,7 @@ INTEGER (KIND=JPLIKB)  IRANGC                                 !   OUT
 ! Convert arguments
 
 
-CALL FANUCA_MT64                       &
+CALL FANUCA_FORT                       &
 &           (FA, CDNOMC, IRANGC, LDVERR)
 
 KRANGC     = INT (    IRANGC, JPLIKM)

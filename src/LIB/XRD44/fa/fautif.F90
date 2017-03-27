@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAUTIF_MT64                           &
+SUBROUTINE FAUTIF_FORT                           &
 &                     (FA,  KREP, KNUMER, CDIDEN )
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -45,7 +45,7 @@ CLACTI=''
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
 ILIDEN=INT (LEN (CDIDEN), JPLIKB)
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -58,7 +58,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 CLNOMA=FA%FICHIER(IRANG)%CIDENT
@@ -75,7 +75,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 IF (CDIDEN.NE.FA%FICHIER(IRANG)%CIDENT) THEN
-  CALL LFIREN_MT64                                             &
+  CALL LFIREN_FORT                                             &
 &                 (FA%LFI, IREP,KNUMER,FA%FICHIER(IRANG)%CIDENT,CDIDEN)
   LLRLFI=IREP.NE.0
   IF (.NOT.LLRLFI) FA%FICHIER(IRANG)%CIDENT=CDIDEN
@@ -93,7 +93,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -121,7 +121,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &         '', CDIDEN='''''',A,'''''''')')                  &
 &   KREP,KNUMER,CLACTI(1:ILACTI)
-  CALL FAIPAR_MT64                              &
+  CALL FAIPAR_FORT                              &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA, &
 &               CLMESS,CLNSPR,                    &
 &               CLACTI(1:ILACTI),LLRLFI)
@@ -134,7 +134,7 @@ IF (INIMES.GE.1.AND.IRANG.NE.0) THEN
 &  '(''Ancien Identificateur de l''''unite logique'',I3, &
 &    '' : '''''',A,'''''', Nouveau: '''''',A,'''''''')') &
 &  KNUMER,CLNOMA,FA%FICHIER(IRANG)%CIDENT
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, KNUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI(1:ILACTI),.FALSE.)
 ENDIF
@@ -146,7 +146,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FAUTIF_MT64
+END SUBROUTINE FAUTIF_FORT
 
 
 
@@ -165,7 +165,7 @@ CHARACTER (LEN=*)      CDIDEN                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAUTIF_MT64                     &
+CALL FAUTIF_FORT                     &
 &           (FA, KREP, KNUMER, CDIDEN)
 
 END SUBROUTINE FAUTIF64
@@ -206,7 +206,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAUTIF_MT64                     &
+CALL FAUTIF_FORT                     &
 &           (FA, IREP, INUMER, CDIDEN)
 
 KREP       = INT (      IREP, JPLIKM)

@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACON1_MT64                                              &
+SUBROUTINE FACON1_FORT                                              &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      PCHAMP, LDCOSP, CDNOMA, KLNOMA, KVALCO,      &
 &                      KLONGD, LDUNDF, PUNDF, YDGR1TAB)
@@ -80,7 +80,7 @@ ILPRFU=INT (LEN (CDPREF), JPLIKB)
 ILSUFU=INT (LEN (CDSUFF), JPLIKB)
 ILCDNO=INT (LEN (CDNOMA), JPLIKB)
 KLNOMA=0
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 IF (IRANG.EQ.0) THEN
@@ -95,7 +95,7 @@ ENDIF
 !
 !         Verrouillage eventuel du fichier.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -108,7 +108,7 @@ ENDIF
 !            ( controles de CDPREF, KNIVAU, CDSUFF inclus )
 !-----------------------------------------------------------------------
 !
-CALL FANFAR_MT64                                             &
+CALL FANFAR_FORT                                             &
 &               (FA, IREP,IRANG,CDPREF,KNIVAU,CDSUFF,CDNOMA, &
 &               IB1PAR(6),ILPRFU,ILSUFU,ILNOMU)
 IF (IREP.NE.0) GOTO 1001
@@ -164,7 +164,7 @@ ENDIF
 !
 IF (FA%FICHIER(IRANG)%NFGRIB.EQ.3) THEN
 ! Cas d'un champ qu'il faut "griber" avec GRIBEX
-  CALL FACODX_MT64                                            &
+  CALL FACODX_FORT                                            &
 &                 (FA,  IREP, IRANG, CDPREF, KNIVAU, CDSUFF,  &
 &                  PCHAMP, LDCOSP, KVALCO, KLONGD,            &
 &                  LDUNDF, PUNDF, YDGR1TAB)
@@ -188,22 +188,22 @@ ELSEIF (FALGRA (FA%FICHIER(IRANG)%NFGRIB)) THEN
   IF (LDCOSP .AND. (FALGRA_SP (FA%FICHIER(IRANG)%NFGRIB) == 102)) THEN
     INGRIB = FA%FICHIER(IRANG)%NFGRIB
     FA%FICHIER(IRANG)%NFGRIB = 2_JPLIKB
-    CALL FACINE_MT64                                             &
+    CALL FACINE_FORT                                             &
 &                   (FA,  IREP, IRANG, CDNOMA(1:ILNOMU), PCHAMP, &
 &                    LDCOSP, KVALCO, KLONGD, IB1PAR,             &
 &                    LDUNDF, PUNDF)
     FA%FICHIER(IRANG)%NFGRIB = INGRIB
   ELSE
-    CALL FACGRA_MT64 (FA,  IREP, IRANG, CDPREF, KNIVAU, CDSUFF,  &
+    CALL FACGRA_FORT (FA,  IREP, IRANG, CDPREF, KNIVAU, CDSUFF,  &
                     & PCHAMP(1), LDCOSP, KVALCO, KLONGD,         &
                     & LDUNDF, PUNDF)
   ENDIF
 ELSEIF (FA%FICHIER(IRANG)%NFGRIB.EQ.4) THEN
-  CALL FACCPL_MT64                                            &
+  CALL FACCPL_FORT                                            &
 &                 (FA,  IREP, IRANG, CDPREF, KNIVAU, CDSUFF,  &
 &                  PCHAMP, LDCOSP, KVALCO, KLONGD, IB1PAR)
 ELSE
-  CALL FACINE_MT64                                             &
+  CALL FACINE_FORT                                             &
 &                 (FA,  IREP, IRANG, CDNOMA(1:ILNOMU), PCHAMP, &
 &                  LDCOSP, KVALCO, KLONGD, IB1PAR,             &
 &                  LDUNDF, PUNDF)
@@ -225,7 +225,7 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage eventuel du fichier.
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
 !
 IF (LLFATA) THEN
@@ -266,7 +266,7 @@ WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3,         &
 &       '', CDPREF='''''',A,'''''', KNIVAU='',I6,               &
 &       '', CDSUFF='''''',A,'''''', LDCOSP= '',L1)')            &
 &   KREP,KNUMER,CLPREF(1:ILPREF),KNIVAU,CLSUFF(1:ILSUFF),LDCOSP
-CALL FAIPAR_MT64                                       &
+CALL FAIPAR_FORT                                       &
 &               (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CDNOMA(1:ILNOMU),LLRLFI)
 !
@@ -278,5 +278,5 @@ CONTAINS
 #include "facom2.ixnvms.h"
 #include "falgra.h"
 
-END SUBROUTINE FACON1_MT64
+END SUBROUTINE FACON1_FORT
 

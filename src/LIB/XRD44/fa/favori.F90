@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAVORI_MT64                                              &
+SUBROUTINE FAVORI_FORT                                              &
 &                     (FA,  KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, &
 &                      KDMOPL)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -51,14 +51,14 @@ IF (FA%FAVORI_LLPREA) THEN
 !
 !          A la premiere utilisation, appel au sous-programme "FARINE".
 !
-  CALL FARINE_MT64             &
+  CALL FARINE_FORT             &
 &                (FA, 2_JPLIKB )
   FA%FAVORI_LLPREA=.FALSE.
 ENDIF
 !
 !         Verrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 LLVERG=FA%LFAMUL
 !**
@@ -78,7 +78,7 @@ KDMOPL=FA%NMIDPL
 !
 !        Deverrouillage global eventuel.
 !
-IF (LLVERG) CALL LFIVER_MT64                         &
+IF (LLVERG) CALL LFIVER_FORT                         &
 &                           (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (FA%NIMSGA.EQ.2) THEN
@@ -90,13 +90,13 @@ IF (FA%NIMSGA.EQ.2) THEN
 &         '', KDMOPL='',I3)')                                 &
 &    KNGRIB,KNBPDG,KNBCSP,KSTRON,KPUILA,KDMOPL
   INUMER=JPNIIL
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('FAVORI_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FAVORI_MT64
+END SUBROUTINE FAVORI_FORT
 
 
 
@@ -118,7 +118,7 @@ INTEGER (KIND=JPLIKB)  KDMOPL                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAVORI_MT64                                               &
+CALL FAVORI_FORT                                               &
 &           (FA, KNGRIB, KNBPDG, KNBCSP, KSTRON, KPUILA, KDMOPL)
 
 END SUBROUTINE FAVORI64
@@ -168,7 +168,7 @@ INTEGER (KIND=JPLIKB)  IDMOPL                                 !   OUT
 ! Convert arguments
 
 
-CALL FAVORI_MT64                                               &
+CALL FAVORI_FORT                                               &
 &           (FA, INGRIB, INBPDG, INBCSP, ISTRON, IPUILA, IDMOPL)
 
 KNGRIB     = INT (    INGRIB, JPLIKM)

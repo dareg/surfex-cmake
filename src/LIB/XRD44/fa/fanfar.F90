@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FANFAR_MT64                                            &
+SUBROUTINE FANFAR_FORT                                            &
 &                     (FA,  KREP, KRANG, CDPREF, KNIVAU, CDSUFF,  &
 &                      CDNOMA, KB1PAR, KLPRFU, KLSUFU, KLNOMU )
 USE FA_MOD, ONLY : FA_COM, JPNIIL
@@ -229,7 +229,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
 &         2('','',I4),'','',I6,3('','',I3))')                   &
 &     KREP,KRANG,CLACTI(1:ILACTI),KNIVAU,CLNOMA(1:ILNOMA),      &
 &     CLAUXI(1:ILAUXI),KB1PAR,KLPRFU,KLSUFU,KLNOMU
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR, CLACTI(1:ILACTI),.FALSE.)
 ENDIF
@@ -240,7 +240,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FANFAR_MT64
+END SUBROUTINE FANFAR_FORT
 
 
 
@@ -272,7 +272,7 @@ INTEGER (KIND=JPLIKB)  KLNOMU                                 !   OUT
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FANFAR_MT64                                              &
+CALL FANFAR_FORT                                              &
 &           (FA, KREP, KRANG, CDPREF, KNIVAU, CDSUFF, CDNOMA, &
 &           KB1PAR, KLPRFU, KLSUFU, KLNOMU)
 
@@ -337,7 +337,7 @@ INTEGER (KIND=JPLIKB)  ILNOMU                                 !   OUT
 IRANG      = INT (     KRANG, JPLIKB)
 INIVAU     = INT (    KNIVAU, JPLIKB)
 
-CALL FANFAR_MT64                                              &
+CALL FANFAR_FORT                                              &
 &           (FA, IREP, IRANG, CDPREF, INIVAU, CDSUFF, CDNOMA, &
 &            IB1PAR, ILPRFU, ILSUFU, ILNOMU)
 

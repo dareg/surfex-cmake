@@ -63,7 +63,7 @@ CHARACTER (LEN=*)      CDSENS                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIVER_MT64                 &
+CALL LFIVER_FORT                 &
 &           (LFI, PVEROU, CDSENS)
 
 END SUBROUTINE LFIVER64
@@ -99,7 +99,7 @@ CHARACTER (LEN=*)      CDSENS                                 ! IN
 ! Convert arguments
 
 
-CALL LFIVER_MT64                 &
+CALL LFIVER_FORT                 &
 &           (LFI, PVEROU, CDSENS)
 
 

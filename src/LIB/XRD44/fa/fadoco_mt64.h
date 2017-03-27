@@ -1,6 +1,6 @@
 INTERFACE
 
-SUBROUTINE FADOCO_MT64                                              &
+SUBROUTINE FADOCO_FORT                                              &
 &                     (FA,  KREP,   KNUMER, CDPREF, KNIVAU, CDSUFF, &
 &                      LDCOSP, CDNOMA, KLNOMA, PVALCO, KLONGD,      &
 &                      PCHAMP, LDUNDF, PUNDF)

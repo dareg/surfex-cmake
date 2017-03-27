@@ -80,7 +80,7 @@ INTEGER (KIND=JPLIKB)  KULOUT                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIOMG_MT64            &
+CALL LFIOMG_FORT            &
 &           (LFI, KNIVAU, KULOUT)
 
 END SUBROUTINE LFIOMG64
@@ -118,7 +118,7 @@ INTEGER (KIND=JPLIKB)  IULOUT                                 !   OUT
 ! Convert arguments
 
 
-CALL LFIOMG_MT64            &
+CALL LFIOMG_FORT            &
 &           (LFI, INIVAU, IULOUT)
 
 KNIVAU     = INT (    INIVAU, JPLIKM)

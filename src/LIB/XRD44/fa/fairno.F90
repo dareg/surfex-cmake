@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIRNO_MT64                           &
+SUBROUTINE FAIRNO_FORT                           &
 &                     (FA,  KREP, KNUMER, CDSTTU )
 USE FA_MOD, ONLY : FA_COM, FREE_FICHIER, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -42,12 +42,12 @@ CLACTI=''
 IREP=0
 LLVERF=.FALSE.
 LLRLFI=.FALSE.
-CALL FANUMU_MT64                 &
+CALL FANUMU_FORT                 &
 &               (FA, KNUMER,IRANG)
 !
 !         Verrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 !
 IF (IRANG.EQ.0) THEN
@@ -68,7 +68,7 @@ ELSE
 !
 ENDIF
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                               &
+IF (FA%LFAMUL) CALL LFIVER_FORT                               &
 &                              (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'ON')
 LLVERF=FA%LFAMUL
 !
@@ -111,9 +111,9 @@ FA%NULIND(J)=FA%NULIND(J+1)
 ENDDO
 !
 IF (FA%LFAMUL) THEN
-  CALL LFIVER_MT64                                &
+  CALL LFIVER_FORT                                &
 &                 (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
-  CALL LFIVER_MT64                                &
+  CALL LFIVER_FORT                                &
 &                 (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'REL')
 ENDIF
 !
@@ -129,7 +129,7 @@ IF (FA%CADRE(IRANGC)%NULCAD.LE.0.AND. &
 &   (FA%CADRE(IRANGC)%NGARDE.EQ.0.OR.  &
 &   (FA%CADRE(IRANGC)%NGARDE.EQ.1.AND. &
 &     .NOT.FA%LIGARD)))                &
-&      CALL FACTUI_MT64                &
+&      CALL FACTUI_FORT                &
 &                     (FA, IREP,IRANGC)
 CALL FREE_FICHIER (FA%FICHIER(IRANG))
 !**
@@ -143,9 +143,9 @@ LLFATA=LLMOER (IREP,IRANG)
 !
 !        Deverrouillage(s) eventuel(s).
 !
-IF (LLVERF) CALL LFIVER_MT64                                &
+IF (LLVERF) CALL LFIVER_FORT                                &
 &                           (FA%LFI, FA%FICHIER(IRANG)%VRFICH,'OFF')
-IF (FA%LFAMUL) CALL LFIVER_MT64                         &
+IF (FA%LFAMUL) CALL LFIVER_FORT                         &
 &                              (FA%LFI, FA%VRGLAS,'OFF')
 !
 IF (LLFATA) THEN
@@ -176,7 +176,7 @@ IF (INIMES.EQ.2) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I4,'', KNUMER='',I3, &
 &         '', CDSTTU='''''',A,'''''''')') KREP,KNUMER,     &
 &       CLACTI(1:ILNOMC)
-  CALL FAIPAR_MT64                                     &
+  CALL FAIPAR_FORT                                     &
 &                 (FA, KNUMER,INIMES,IREP,LLFATA,CLMESS, &
 &               CLNSPR,CLACTI(1:ILNOMC),LLRLFI)
 !
@@ -189,7 +189,7 @@ CONTAINS
 #include "facom2.llmoer.h"
 #include "facom2.ixnvms.h"
 
-END SUBROUTINE FAIRNO_MT64
+END SUBROUTINE FAIRNO_FORT
 
 
 
@@ -208,7 +208,7 @@ CHARACTER (LEN=*)      CDSTTU                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIRNO_MT64                     &
+CALL FAIRNO_FORT                     &
 &           (FA, KREP, KNUMER, CDSTTU)
 
 END SUBROUTINE FAIRNO64
@@ -249,7 +249,7 @@ INTEGER (KIND=JPLIKB)  INUMER                                 ! IN
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL FAIRNO_MT64                     &
+CALL FAIRNO_FORT                     &
 &           (FA, IREP, INUMER, CDSTTU)
 
 KREP       = INT (      IREP, JPLIKM)

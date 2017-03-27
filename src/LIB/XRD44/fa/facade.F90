@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FACADE_MT64                                                &
+SUBROUTINE FACADE_FORT                                                &
 &                     (FA,  CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO,   &
 &                      PCODIL, KTRONC, KNLATI, KNXLON, KNLOPA,        &
 &                      KNOZPA, PSINLA, KNIVER, PREFER, PAHYBR,        &
@@ -87,7 +87,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('FACADE_MT',0,ZHOOK_HANDLE)
 CLACTI=''
 IF (FA%FACADE_LLPREA) THEN
-  CALL FARINE_MT64              &
+  CALL FARINE_FORT              &
 &                 (FA, 2_JPLIKB )
   FA%FACADE_LLPREA=.FALSE.
 ENDIF
@@ -105,10 +105,10 @@ ENDIF
 !
 !             Verrouillage global prealable, si necessaire.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                        &
+IF (FA%LFAMUL) CALL LFIVER_FORT                        &
 &                              (FA%LFI, FA%VRGLAS,'ON')
 !
-CALL FACADI_MT64                                                &
+CALL FACADI_FORT                                                &
 &            (FA, IREP,CDNOMC,KTYPTR,PSLAPO,PCLOPO,             &
 &             PSLOPO,PCODIL,                                    &
 &             KTRONC,KNLATI,KNXLON,KNLOPA,KNOZPA,PSINLA,KNIVER, &
@@ -123,7 +123,7 @@ ILNOMC=MIN (ILNOMC,FA%NCPCAD)
 !
 !          Deverrouillage global eventuel.
 !
-IF (FA%LFAMUL) CALL LFIVER_MT64                         &
+IF (FA%LFAMUL) CALL LFIVER_FORT                         &
 &                              (FA%LFI, FA%VRGLAS,'OFF')
 !
 LLFATA=LLMOER(IREP,0_JPLIKB )
@@ -162,7 +162,7 @@ IF (INIMES.EQ.1.AND.FA%NIMSGA.EQ.2) THEN
 !
 !        Cas ou il faut en fait 2 messages.
 !
-  CALL FAIPAR_MT64                                      &
+  CALL FAIPAR_FORT                                      &
 &                 (FA, INUMER,INIMES,IREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
   INIMES=2
@@ -185,7 +185,7 @@ IF (INIMES.EQ.2) THEN
 &       KTRONC,KNLATI,KNXLON,KNIVER,PREFER,LDGARD
 ENDIF
 !
-CALL FAIPAR_MT64                                     &
+CALL FAIPAR_FORT                                     &
 &               (FA, INUMER,INIMES,IREP,LLFATA,CLMESS, &
 &                CLNSPR,CLACTI(1:ILNOMC),.FALSE.)
 !
@@ -195,7 +195,7 @@ CONTAINS
 
 #include "facom2.llmoer.h"
 
-END SUBROUTINE FACADE_MT64
+END SUBROUTINE FACADE_FORT
 
 
 
@@ -230,7 +230,7 @@ LOGICAL                LDGARD                                 ! IN
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FACADE_MT64                                               &
+CALL FACADE_FORT                                               &
 &           (FA, CDNOMC, KTYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           KTRONC, KNLATI, KNXLON, KNLOPA, KNOZPA, PSINLA,      &
 &           KNIVER, PREFER, PAHYBR, PBHYBR, LDGARD)
@@ -332,7 +332,7 @@ INIVER     = INT (    KNIVER, JPLIKB)
 INLOPA (1:ISZNLOPA) = INT (KNLOPA (1:ISZNLOPA), JPLIKB)
 INOZPA (1:ISZNOZPA) = INT (KNOZPA (1:ISZNOZPA), JPLIKB)
 
-CALL FACADE_MT64                                               &
+CALL FACADE_FORT                                               &
 &           (FA, CDNOMC, ITYPTR, PSLAPO, PCLOPO, PSLOPO, PCODIL, &
 &           ITRONC, INLATI, INXLON, INLOPA, INOZPA, PSINLA,      &
 &           INIVER, PREFER, PAHYBR, PBHYBR, LDGARD)

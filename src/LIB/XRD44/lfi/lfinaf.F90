@@ -136,7 +136,7 @@ INTEGER (KIND=JPLIKB)  KNAMAX                                 !   OUT
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFINAF_MT64                                               &
+CALL LFINAF_FORT                                               &
 &           (LFI, KREP, KNUMER, KNALDO, KNTROU, KNARES, KNAMAX)
 
 END SUBROUTINE LFINAF64
@@ -187,7 +187,7 @@ INTEGER (KIND=JPLIKB)  INAMAX                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFINAF_MT64                                               &
+CALL LFINAF_FORT                                               &
 &           (LFI, IREP, INUMER, INALDO, INTROU, INARES, INAMAX)
 
 KREP       = INT (      IREP, JPLIKM)

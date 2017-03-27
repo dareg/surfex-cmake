@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FAIXLA_MT64           &
+SUBROUTINE FAIXLA_FORT           &
 &                     (FA)
 USE FA_MOD, ONLY : FA_COM
 USE PARKIND1, ONLY : JPRB
@@ -68,7 +68,7 @@ ENDDO
 !
 !
 IF (LHOOK) CALL DR_HOOK('FAIXLA_MT',1,ZHOOK_HANDLE)
-END SUBROUTINE FAIXLA_MT64
+END SUBROUTINE FAIXLA_FORT
 
 
 
@@ -84,7 +84,7 @@ IMPLICIT NONE
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FAIXLA_MT64           &
+CALL FAIXLA_FORT           &
 &           (FA)
 
 END SUBROUTINE FAIXLA64
@@ -116,7 +116,7 @@ TYPE (FA_COM)          FA                                     ! INOUT
 ! Convert arguments
 
 
-CALL FAIXLA_MT64           &
+CALL FAIXLA_FORT           &
 &           (FA)
 
 

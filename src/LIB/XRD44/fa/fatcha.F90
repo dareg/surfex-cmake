@@ -1,6 +1,6 @@
 ! Oct-2012 P. Marguinaud 64b LFI
 ! Jan-2011 P. Marguinaud Thread-safe FA
-SUBROUTINE FATCHA_MT64                                              &
+SUBROUTINE FATCHA_FORT                                              &
 &                     (FA,  KREP, CDNOMC,  LDCOSP, KLCHAM)
 USE FA_MOD, ONLY : FA_COM, JPNIIL
 USE PARKIND1, ONLY : JPRB
@@ -45,7 +45,7 @@ IF (LHOOK) CALL DR_HOOK('FATCHA_MT',0,ZHOOK_HANDLE)
 
 KREP=0
 
-CALL FANUCA_MT64 (FA, CDNOMC, IRANGC, .FALSE.)
+CALL FANUCA_FORT (FA, CDNOMC, IRANGC, .FALSE.)
 
 IF (IRANGC.EQ.0) THEN
   KREP=-51
@@ -79,7 +79,7 @@ IF (FA%LFAMOP.OR.LLFATA) THEN
   WRITE (UNIT=CLMESS,FMT='(''KREP='',I5,                  &
 &        '', LDCOSP= '',L1, '', KLCHAM='',I6)')           &
 &        KREP, LDCOSP, KLCHAM
-  CALL FAIPAR_MT64                                        &
+  CALL FAIPAR_FORT                                        &
 &                 (FA, INUMER,INIMES,KREP,.FALSE.,CLMESS, &
 &                  CLNSPR,CLACTI,.FALSE.)
 ENDIF
@@ -104,7 +104,7 @@ LOGICAL LDCOSP
 
 IF (.NOT. FA_COM_DEFAULT_INIT) CALL NEW_FA_DEFAULT ()
 
-CALL FATCHA_MT64 (FA,  KREP, CDNOMC,  LDCOSP, KLCHAM)
+CALL FATCHA_FORT (FA,  KREP, CDNOMC,  LDCOSP, KLCHAM)
 
 END SUBROUTINE
 
@@ -136,7 +136,7 @@ LOGICAL               LDCOSP
 INTEGER (KIND=JPLIKB) IREP, ILCHAM
 
 
-CALL FATCHA_MT64 (FA, IREP, CDNOMC,  LDCOSP, ILCHAM)
+CALL FATCHA_FORT (FA, IREP, CDNOMC,  LDCOSP, ILCHAM)
 
 KREP   = INT (  IREP, JPLIKM)
 KLCHAM = INT (ILCHAM, JPLIKM)

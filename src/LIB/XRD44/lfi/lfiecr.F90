@@ -514,7 +514,7 @@ INTEGER (KIND=JPLIKB)  KTAB       (KLONG)                     ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFIECR_MT64                                    &
+CALL LFIECR_FORT                                    &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE LFIECR64
@@ -561,7 +561,7 @@ INTEGER (KIND=JPLIKB)  ILONG                                  ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFIECR_MT64                                    &
+CALL LFIECR_FORT                                    &
 &           (LFI, IREP, INUMER, CDNOMA, KTAB, ILONG)
 
 KREP       = INT (      IREP, JPLIKM)

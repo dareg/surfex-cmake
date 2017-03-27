@@ -280,7 +280,7 @@ INTEGER (KIND=JPLIKB)  KTAB       (KLONG)                     ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFILAP_MT64                                    &
+CALL LFILAP_FORT                                    &
 &           (LFI, KREP, KNUMER, CDNOMA, KTAB, KLONG)
 
 END SUBROUTINE LFILAP64
@@ -327,7 +327,7 @@ INTEGER (KIND=JPLIKB)  ILONG                                  ! IN
 INUMER     = INT (    KNUMER, JPLIKB)
 ILONG      = INT (     KLONG, JPLIKB)
 
-CALL LFILAP_MT64                                    &
+CALL LFILAP_FORT                                    &
 &           (LFI, IREP, INUMER, CDNOMA, KTAB, ILONG)
 
 KREP       = INT (      IREP, JPLIKM)

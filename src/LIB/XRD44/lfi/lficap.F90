@@ -241,7 +241,7 @@ LOGICAL                LDRECU                                 ! IN
 
 IF (.NOT. LFICOM_DEFAULT_INIT) CALL NEW_LFI_DEFAULT ()
 
-CALL LFICAP_MT64                                              &
+CALL LFICAP_FORT                                              &
 &           (LFI, KREP, KNUMER, CDNOMA, KLONG, KPOSEX, LDRECU)
 
 END SUBROUTINE LFICAP64
@@ -290,7 +290,7 @@ INTEGER (KIND=JPLIKB)  IPOSEX                                 !   OUT
 
 INUMER     = INT (    KNUMER, JPLIKB)
 
-CALL LFICAP_MT64                                              &
+CALL LFICAP_FORT                                              &
 &           (LFI, IREP, INUMER, CDNOMA, ILONG, IPOSEX, LDRECU)
 
 KREP       = INT (      IREP, JPLIKM)
