@@ -579,12 +579,18 @@ DO JI=1,KI
         DO JP=1,INPATCH
           !
           PEK => NPE%AL(JP)
+          PK => NP%AL(JP)
           !
           L1 = JP + INPATCH*(JL-1)
           !
           IF ( S%XPATCH(JI,JP)>0.0 .AND. XF_PATCH(JI,JP,JL+1,JK).NE.XUNDEF .AND. &
-               XF_PATCH(JI,JP,1,JK).NE.XUNDEF .AND. PEK%XWGI(JI,ISCREENLEV).EQ.0. ) THEN 
-            ZHOWR(K1,L1) = S%XPATCH(JI,JP)*(XF_PATCH(JI,JP,JL+1,JK) - XF_PATCH(JI,JP,1,JK))/ZEPS(JI,JP,JL)
+               XF_PATCH(JI,JP,1,JK).NE.XUNDEF ) THEN
+            DO JJ = 1, PK%NSIZE_P
+              IF (PK%NR_P(JJ)==JI) EXIT
+            ENDDO
+            IF (PEK%XWGI(JJ,ISCREENLEV).EQ.0.) THEN 
+              ZHOWR(K1,L1) = S%XPATCH(JI,JP)*(XF_PATCH(JI,JP,JL+1,JK) - XF_PATCH(JI,JP,1,JK))/ZEPS(JI,JP,JL)
+            ENDIF
           ENDIF
           !
           IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN         !if obs available
@@ -693,7 +699,6 @@ DO JI=1,KI
         IF ( ( TRIM(CVAR(JL))=="WG1" .AND. TRIM(COBS(JK)) == "WG1" ) .OR. &
              ( TRIM(CVAR(JL))=="WG2" .AND. TRIM(COBS(JK)) == "WG2" ) .OR. &
              ( TRIM(CVAR(JL))=="LAI" .AND. TRIM(COBS(JK)) == "LAI" ) ) THEN
-             print*,JL,CVAR(JL),COBS(JL),XYO(JI,K1)
           IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN
             ZB4  = 0.
             DO JP = 1,INPATCH ! all patches
