@@ -392,7 +392,7 @@ DO JLOOP=1,3
   !
   CALL URBAN_EXCH_COEF(TOP%CZ0H, ZZ0_O_Z0H, PTS_ROAD, PQ_LOWCAN, PEXNS, PEXNA,  &
                        PT_LOWCAN, PQ_LOWCAN, PZ_LOWCAN, PZ_LOWCAN,              &
-                       PU_CANYON+ZW_CAN, ZZ0_ROAD, ZRI, ZCD_ROAD, ZCDN,         &
+                       PU_LOWCAN+ZW_CAN, ZZ0_ROAD, ZRI, ZCD_ROAD, ZCDN,         &
                        PAC_ROAD, ZRA_ROAD, ZCH_ROAD   )
   !
   DO JJ=1,SIZE(PTA)
