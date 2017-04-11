@@ -124,6 +124,7 @@ ELSE
 ENDIF
 !
 GDIM = (IVERSION>8 .OR. IVERSION==8 .AND. IBUGFIX>0)
+IF (GDIM) CALL READ_SURF(HPROGRAM,'SPLIT_PATCH',GDIM,IRESP)
 !
 !-------------------------------------------------------------------------------
 !
@@ -172,7 +173,7 @@ ENDIF
 !*       2.    Presence of snow fields in the file
 !              -----------------------------------
 !
-IF (KPATCH>0 .AND. GDIM) THEN
+IF (KPATCH>0) THEN
   WRITE(YPAT,'(I2)') KPATCH
   YPAT = "P"//ADJUSTL(YPAT)
   IPAT_LEN = LEN_TRIM(ADJUSTL(YPAT))        
@@ -195,6 +196,11 @@ ELSE
     GSNOW = .TRUE.
   END IF
 END IF
+!
+IF (.NOT.GDIM) THEN
+  YPAT = " "
+  IPAT_LEN=1
+ENDIF
 !
 !-------------------------------------------------------------------------------
 !

@@ -19,6 +19,7 @@ INTERFACE WRITE_SURFN_LFI
         MODULE PROCEDURE WRITE_SURFN1_LFI
         MODULE PROCEDURE WRITE_SURFL1_LFI
         MODULE PROCEDURE WRITE_SURFX2_LFI
+        MODULE PROCEDURE WRITE_SURFX3_LFI
 END INTERFACE
 INTERFACE WRITE_SURFT_LFI
         MODULE PROCEDURE WRITE_SURFT0_LFI
@@ -429,8 +430,7 @@ END SUBROUTINE WRITE_IN_LFI_X1_FOR_MNH
 END SUBROUTINE WRITE_SURFX1_LFI
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_LFI (&
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_LFI (HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
@@ -573,6 +573,154 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX2_LFI:WRITE_IN_LFI_X2_FO
 END SUBROUTINE WRITE_IN_LFI_X2_FOR_MNH
 !
 END SUBROUTINE WRITE_SURFX2_LFI
+!
+!     #############################################################
+      SUBROUTINE WRITE_SURFX3_LFI (HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  * - routine to fill a write 2D array for the externalised surface 
+!
+!
+!
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
+!
+USE MODD_IO_SURF_LFI,        ONLY : CFILEOUT_LFI, CLUOUT_LFI, NMASK, NFULL, &
+                                    LMNH_COMPATIBLE, NIU, NIB, NIE, NJU, NJB, NJE
+!
+USE MODI_IO_BUFF
+USE MODI_FMWRIT
+USE MODI_ERROR_WRITE_SURF_LFI
+USE MODI_GATHER_AND_WRITE_MPI
+USE MODI_GET_SURF_UNDEF
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+!
+!
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+REAL, DIMENSION(:,:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
+INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+                                                 ! 'H' : field with
+                                                 !       horizontal spatial dim.
+                                                 ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+!
+LOGICAL :: GFOUND
+DOUBLE PRECISION :: XTIME0
+REAL             :: ZUNDEF  ! default value
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2),SIZE(PFIELD,3)) :: ZWORK   ! work array read in the file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX3_LFI',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+ CALL IO_BUFF(&
+                HREC,'W',GFOUND)
+!
+IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX3_LFI',1,ZHOOK_HANDLE)
+IF (GFOUND) RETURN
+!
+IF (HDIR=='H') CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
+  !  
+  IF (HDIR=='H') THEN
+    !
+    CALL GET_SURF_UNDEF(ZUNDEF)
+    !
+    IF (.NOT. LMNH_COMPATIBLE) THEN
+      CALL FMWRITX3(CFILEOUT_LFI,HREC,CLUOUT_LFI,SIZE(ZWORK),ZWORK,4,100,HCOMMENT,KRESP)
+      CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+    ELSE
+      CALL WRITE_IN_LFI_X3_FOR_MNH(HREC,ZWORK,KRESP,HCOMMENT)
+    END IF
+    !
+  ELSE
+    CALL FMWRITX3(CFILEOUT_LFI,HREC,CLUOUT_LFI,SIZE(PFIELD),PFIELD,4,100,HCOMMENT,KRESP)
+    CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+  END IF
+  !
+#ifdef SFX_MPI
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
+  !  
+ENDIF
+!
+!if (HREC=='ALBVIS_ISBA') stop
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX3_LFI',1,ZHOOK_HANDLE)
+!
+CONTAINS
+!
+!     #############################################################
+      SUBROUTINE WRITE_IN_LFI_X3_FOR_MNH(HREC,PFIELD,KRESP,HCOMMENT)
+!     #############################################################
+!
+!!****  * - routine to fill a write 2D array for the externalised surface 
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+USE MODI_ABOR1_SFX
+!
+IMPLICIT NONE
+!
+!*      0.1   Declarations of arguments
+!
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+REAL, DIMENSION(:,:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
+INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+!
+!*      0.2   Declarations of local variables
+! 
+INTEGER :: JI, JJ
+REAL    :: ZUNDEF
+REAL, DIMENSION(NIU,NJU,SIZE(PFIELD,2),SIZE(PFIELD,3)) :: ZWORK4D ! work array read in a MNH file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX3_LFI:WRITE_IN_LFI_X3_FOR_MNH',0,ZHOOK_HANDLE)
+!
+ CALL GET_SURF_UNDEF(ZUNDEF)
+!
+ZWORK4D=ZUNDEF
+DO JJ=1,NJE-NJB+1
+  DO JI=1,NIE-NIB+1
+    ZWORK4D(NIB+JI-1,NJB+JJ-1,:,:) = PFIELD(JI+(NIE-NIB+1)*(JJ-1),:,:)
+  END DO
+END DO
+!
+IF (NJE==NJB) THEN
+  CALL FMWRITX3(CFILEOUT_LFI,HREC,CLUOUT_LFI,SIZE(ZWORK4D,3)*NIU,ZWORK4D(:,NJE,:,:),4,100,HCOMMENT,KRESP)
+ELSEIF (NIE==NIB) THEN
+  CALL FMWRITX3(CFILEOUT_LFI,HREC,CLUOUT_LFI,SIZE(ZWORK4D,3)*NJU,ZWORK4D(NIE,:,:,:),4,100,HCOMMENT,KRESP)
+ELSE
+  !CALL FMWRITX4(CFILEOUT_LFI,HREC,CLUOUT_LFI,SIZE(ZWORK3D),ZWORK4D,4,100,HCOMMENT,KRESP)
+  CALL ABOR1_SFX("WRITE_SURFX3_LFI: NOT POSSIBLE TO WRITE 4D FIELDS IN LFI")
+ENDIF
+!  
+ CALL ERROR_WRITE_SURF_LFI(HREC,KRESP)
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_LFI:WRITE_SURFX3_LFI:WRITE_IN_LFI_X3_FOR_MNH',1,ZHOOK_HANDLE)
+END SUBROUTINE WRITE_IN_LFI_X3_FOR_MNH
+!
+END SUBROUTINE WRITE_SURFX3_LFI
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN1_LFI (&

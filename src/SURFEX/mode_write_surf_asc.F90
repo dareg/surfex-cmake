@@ -15,6 +15,7 @@ INTERFACE WRITE_SURFN_ASC
         MODULE PROCEDURE WRITE_SURFN1_ASC
         MODULE PROCEDURE WRITE_SURFL1_ASC
         MODULE PROCEDURE WRITE_SURFX2_ASC
+        MODULE PROCEDURE WRITE_SURFX3_ASC
 END INTERFACE
 INTERFACE WRITE_SURFT_ASC
         MODULE PROCEDURE WRITE_SURFT0_ASC
@@ -323,8 +324,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_ASC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_ASC (&
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_ASC (HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
@@ -408,6 +408,92 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX2_ASC',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFX2_ASC
+!
+!     #############################################################
+      SUBROUTINE WRITE_SURFX3_ASC (HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  * - routine to fill a write 2D array for the externalised surface 
+!
+!
+!
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE, WLOG_MPI
+!
+USE MODD_IO_SURF_ASC,        ONLY : NUNIT, NMASK, NFULL, CMASK
+!
+USE MODI_IO_BUFF
+USE MODI_ERROR_WRITE_SURF_ASC
+USE MODI_GATHER_AND_WRITE_MPI
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+!
+!
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+REAL, DIMENSION(:,:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
+INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+                                                 ! 'H' : field with
+                                                 !       horizontal spatial dim.
+                                                 ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+! 
+LOGICAL :: GFOUND
+INTEGER :: ISIZE
+REAL   :: XTIME0
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2),SIZE(PFIELD,3)) :: ZWORK   ! work array read in the file
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX3_ASC',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+ CALL IO_BUFF(&
+                HREC,'W',GFOUND)
+!
+IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX3_ASC',1,ZHOOK_HANDLE)
+IF (GFOUND) RETURN
+!
+IF (HDIR=='-') THEN
+  ISIZE = SIZE(PFIELD,1)
+  ZWORK(1:ISIZE,:,:) = PFIELD(:,:,:)
+ELSE
+  ISIZE = SIZE(ZWORK,1)
+  CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+ENDIF
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
+  !
+  WRITE(NUNIT,FMT=*,IOSTAT=KRESP) '&'//CMASK//' '//HREC
+  WRITE(NUNIT,FMT='(A50)',IOSTAT=KRESP) HCOMMENT(1:50)
+  WRITE(NUNIT,FMT='(50D20.8)',IOSTAT=KRESP) ZWORK(1:ISIZE,:,:)
+  !
+  IF (KRESP/=0) CALL ERROR_WRITE_SURF_ASC(HREC,KRESP)
+  !
+#ifdef SFX_MPI
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
+  !  
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX3_ASC',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX3_ASC
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN1_ASC (&

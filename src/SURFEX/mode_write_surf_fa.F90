@@ -15,6 +15,7 @@ INTERFACE WRITE_SURFN_FA
         MODULE PROCEDURE WRITE_SURFN1_FA
         MODULE PROCEDURE WRITE_SURFL1_FA
         MODULE PROCEDURE WRITE_SURFX2_FA
+        MODULE PROCEDURE WRITE_SURFX3_FA
 END INTERFACE
 INTERFACE WRITE_SURFT_FA
         MODULE PROCEDURE WRITE_SURFT0_FA
@@ -395,8 +396,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_FA
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_FA (&
-                                  HREC,KL1,KL2,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_FA (HREC,KL1,KL2,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
@@ -509,6 +509,127 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFX2_FA
+!
+!     #############################################################
+      SUBROUTINE WRITE_SURFX3_FA (HREC,KL1,KL2,KL3,PFIELD,KRESP,HCOMMENT,HDIR)
+!     #############################################################
+!
+!!****  * - routine to fill a write 2D array for the externalised surface 
+!
+!
+!
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
+!
+USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NMASK, NFULL, &
+                            CPREFIX2D, LFANOCOMPACT
+USE MODD_SURF_PAR,   ONLY : XUNDEF
+!
+USE MODI_IO_BUFF
+USE MODI_ERROR_WRITE_SURF_FA
+USE MODI_GATHER_AND_WRITE_MPI
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+!
+!
+ CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+INTEGER,                  INTENT(IN) :: KL1      ! number of points
+INTEGER,                  INTENT(IN) :: KL2      ! 2nd dimension
+INTEGER,                  INTENT(IN) :: KL3      ! 2nd dimension
+REAL, DIMENSION(KL1,KL2,KL3), INTENT(IN) :: PFIELD   ! array containing the data field
+INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+ CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+                                                 ! 'H' : field with
+                                                 !       horizontal spatial dim.
+                                                 ! '-' : no horizontal dim.
+!*      0.2   Declarations of local variables
+! 
+LOGICAL :: GFOUND
+CHARACTER(LEN=4)  :: YPREFIX
+CHARACTER(LEN=3)  :: YPATCH
+INTEGER           :: I, JL, JP ! loop counter
+INTEGER           :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
+REAL  :: XTIME0
+REAL, DIMENSION(MAX(NFULL,SIZE(PFIELD,1)),SIZE(PFIELD,2),SIZE(PFIELD,3)) :: ZWORK   ! work array read in the file
+REAL, DIMENSION(SIZE(PFIELD,2),SIZE(PFIELD,3))       :: ZMEAN, ZCOUNT
+REAL(KIND=JPRB)   :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',0,ZHOOK_HANDLE)
+!
+KRESP=0
+!
+ CALL IO_BUFF(HREC,'W',GFOUND)
+!
+IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',1,ZHOOK_HANDLE)
+IF (GFOUND) RETURN
+!
+ CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+!
+IF (NRANK==NPIO) THEN
+  !
+#ifdef SFX_MPI
+  XTIME0 = MPI_WTIME()
+#endif
+  !    
+  IF(LFANOCOMPACT)THEN
+    CALL FAVEUR(KRESP,NUNIT_FA,INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL)
+    ! -- Pour ecrire sans compactage
+    CALL FAGOTE(KRESP,NUNIT_FA,-1,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL)
+    DO JP=1,SIZE(ZWORK,3)
+      DO JL=1,SIZE(ZWORK,2)
+        WRITE(YPATCH,'(I3.3)')JL
+        YPREFIX=CPREFIX2D//YPATCH//'_'
+        CALL FAIENC(KRESP,NUNIT_FA,YPREFIX,0,HREC,ZWORK(:,JL,JP),.FALSE.)
+        IF (KRESP/=0) CALL ERROR_WRITE_SURF_FA(HREC,KRESP)
+      ENDDO
+    END DO
+    ! On remet la valeur par defaut 
+    CALL FAGOTE(KRESP,NUNIT_FA,INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL)
+  ELSE
+    ZMEAN (:,:)=0.0
+    ZCOUNT(:,:)=0.0
+    DO I=1,NFULL
+      DO JP=1,SIZE(ZWORK,3)
+        DO JL=1,SIZE(ZWORK,2)
+          IF(ZWORK(I,JL,JP)/=XUNDEF) THEN
+            ZMEAN (JL,JP)=ZMEAN(JL,JP)+ZWORK(I,JL,JP)
+            ZCOUNT(JL,JP)=ZCOUNT(JL,JP)+1.0
+          ENDIF
+        ENDDO
+      ENDDO
+    ENDDO
+    WHERE(ZCOUNT(:,:)>0.0)ZMEAN(:,:)=ZMEAN(:,:)/ZCOUNT(:,:)
+    DO JP=1,SIZE(ZWORK,3)        
+      DO JL=1,SIZE(ZWORK,2)
+        WHERE(ZWORK(:,JL,JP)==XUNDEF)ZWORK(:,JL,JP)=ZMEAN(JL,JP)
+        WRITE(YPATCH,'(I3.3)')JL
+        YPREFIX=CPREFIX2D//YPATCH//'_'
+        CALL FAIENC(KRESP,NUNIT_FA,YPREFIX,0,HREC,ZWORK(:,JL,JP),.FALSE.)
+        IF (KRESP/=0) CALL ERROR_WRITE_SURF_FA(HREC,KRESP)
+      ENDDO
+    END DO
+  ENDIF
+  !
+#ifdef SFX_MPI
+  XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
+#endif
+  !  
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX3_FA',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX3_FA
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN1_FA (&

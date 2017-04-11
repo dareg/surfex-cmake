@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_TEB_GARDEN_n (HSELECT, OSNOWDIMNC, IO, PEK, HPROGRAM,HPATCH)
+      SUBROUTINE WRITESURF_TEB_GARDEN_n (HSELECT, OSNOWDIMNC, IO, S, PEK, HPROGRAM,HPATCH)
 !     #####################################
 !
 !!****  *WRITESURF_TEB_GARDEN_n* - writes ISBA prognostic fields
@@ -44,7 +44,7 @@
 !              ------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_PE_t
+USE MODD_ISBA_n, ONLY : ISBA_PE_t, ISBA_S_t
 !
 USE MODD_SURF_PAR, ONLY : NUNDEF
 !
@@ -65,6 +65,7 @@ IMPLICIT NONE
 LOGICAL, INTENT(IN) :: OSNOWDIMNC
 !
 TYPE(ISBA_OPTIONS_t), INTENT(IN) :: IO
+TYPE(ISBA_S_t), INTENT(IN) :: S
 TYPE(ISBA_PE_t), INTENT(IN) :: PEK
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
@@ -190,7 +191,9 @@ DO JI = 1,SIZE(IMASK_P)
   IMASK_P(JI) = JI
 ENDDO
  CALL WRITESURF_GR_SNOW(OSNOWDIMNC, HSELECT, HPROGRAM, YRECFM, HPATCH,&
-                        SIZE(PEK%XTG,1), IMASK_P, 0, PEK%TSNOW)
+                        SIZE(PEK%XTG,1), IMASK_P, 0, PEK%TSNOW, S%XWSN_WR, &
+                        S%XRHO_WR, S%XHEA_WR, S%XAGE_WR, S%XSG1_WR, S%XSG2_WR, &
+                        S%XHIS_WR, S%XALB_WR)
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_TEB_GARDEN_N',1,ZHOOK_HANDLE)
 !

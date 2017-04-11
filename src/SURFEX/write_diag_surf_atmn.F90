@@ -33,7 +33,6 @@ USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 !
-!
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODI_INIT_IO_SURF_n
@@ -72,6 +71,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',0,ZHOOK_HANDLE)
+!
 CPROGNAME = HPROGRAM
 !
 IF (YSC%U%NDIM_SEA    >0) CALL WRITE_DIAG_SEA_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%SM, & 
@@ -113,6 +113,7 @@ IF (YSC%DUO%XDIAG_TSTEP==XUNDEF .OR. &
   END IF
   !  
 END IF
+!
 IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !--------------------------------------------------------------------------------------

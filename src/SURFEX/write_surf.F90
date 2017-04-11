@@ -61,6 +61,23 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
 END SUBROUTINE WRITE_SURFX2
 !
+     SUBROUTINE WRITE_SURFX3 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!
+!
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+!
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
+REAL, DIMENSION(:,:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
+INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+!                                             ! 'H' : field with
+!                                             !       horizontal spatial dim.
+!                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+END SUBROUTINE WRITE_SURFX3
+!
 !RJ: interface to WRITE_SURFX2COV moved out
 !
      SUBROUTINE WRITE_SURFN0 ( HSELECT, HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)
@@ -658,6 +675,170 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX2',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE WRITE_SURFX2
+!
+!     #############################################################
+      SUBROUTINE WRITE_SURFX3 ( HSELECT, HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+!     #############################################################
+!
+!!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
+!
+!
+!
+!
+!
+!
+USE MODD_SURFEX_MPI, ONLY : WLOG_MPI
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+#ifdef SFX_OL
+USE MODE_WRITE_SURF_OL, ONLY: WRITE_SURFL1X2_OL
+#endif
+#ifdef SFX_TXT
+USE MODE_WRITE_SURF_TXT, ONLY: WRITE_SURFX_TXT
+#endif
+#ifdef SFX_BIN
+USE MODE_WRITE_SURF_BIN, ONLY: WRITE_SURFX_BIN
+#endif
+#ifdef SFX_LFI
+USE MODE_WRITE_SURF_LFI, ONLY: WRITE_SURFN_LFI
+#endif
+#ifdef SFX_NC
+USE MODE_WRITE_SURF_NC, ONLY: WRITE_SURFN_NC
+#endif
+#ifdef SFX_ASC
+USE MODE_WRITE_SURF_ASC, ONLY: WRITE_SURFN_ASC
+#endif
+#ifdef SFX_FA
+USE MODE_WRITE_SURF_FA, ONLY: WRITE_SURFN_FA
+#endif
+#ifdef SFX_MNH
+!USE MODI_WRITE_SURFX3_MNH
+#endif
+#ifdef WXIOS
+USE MODI_WRITE_SURF_XIOS
+#endif
+!
+USE MODI_TEST_RECORD_LEN
+!
+IMPLICIT NONE
+!
+#ifdef SFX_ARO
+!#include "write_surfx2_aro.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+ CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! calling program
+!
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+!
+ CHARACTER(LEN=*),     INTENT(IN)  :: HREC     ! name of the article to be written
+REAL, DIMENSION(:,:,:), INTENT(IN)  :: PFIELD   ! array containing the data field
+INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+ CHARACTER(LEN=100),   INTENT(IN)  :: HCOMMENT ! Comment string
+ CHARACTER(LEN=1),OPTIONAL,INTENT(IN)  :: HDIR ! type of field :
+!                                             ! 'H' : field with
+!                                             !       horizontal spatial dim.
+!                                             ! '-' : no horizontal dim.
+ CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+!*      0.2   Declarations of local variables
+!
+ CHARACTER(LEN=12)  :: YREC
+INTEGER            :: IL1
+INTEGER            :: IL2, IL3
+ CHARACTER(LEN=1)   :: YDIR
+LOGICAL :: GNOWRITE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX3',0,ZHOOK_HANDLE)
+!
+YREC = HREC
+!
+ CALL TEST_RECORD_LEN(HPROGRAM,YREC,HSELECT,GNOWRITE)
+!
+IF(GNOWRITE .AND. LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX3',1,ZHOOK_HANDLE)
+IF(GNOWRITE)RETURN
+!
+IF (TRIM(HPROGRAM)=='XIOS') THEN
+#ifdef WXIOS
+      CALL WRITE_SURF_XIOS(TRIM(YREC), HCOMMENT, PFIELD3=PFIELD, HAXIS=HNAM_DIM)
+#endif
+ELSE
+  !      
+  YDIR = 'H'
+  IF (PRESENT(HDIR)) YDIR = HDIR
+  IL1  = SIZE(PFIELD,1)
+  IL2  = SIZE(PFIELD,2)
+  IL3  = SIZE(PFIELD,3)
+  !
+  IF (HPROGRAM=='MESONH') THEN
+#ifdef SFX_MNH
+    !CALL WRITE_SURFX3_MNH(YREC,IL1,IL2,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='AROME ') THEN
+#ifdef SFX_ARO
+    !CALL WRITE_SURFX3_ARO(YREC,IL1,IL2,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='OFFLIN') THEN
+#ifdef SFX_OL
+    IF (PRESENT(HNAM_DIM)) THEN
+      CALL WRITE_SURFL1X2_OL(HSELECT,YREC,PFIELD,KRESP,HCOMMENT,YDIR,HNAM_DIM=HNAM_DIM)
+    ELSE
+      CALL WRITE_SURFL1X2_OL(HSELECT,YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    ENDIF
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='TEXTE ') THEN
+#ifdef SFX_TXT
+    !CALL WRITE_SURFX_TXT(HSELECT, YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='BINARY') THEN
+#ifdef SFX_BIN
+    !CALL WRITE_SURFX_BIN(HSELECT, YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='LFI   ') THEN
+#ifdef SFX_LFI
+    CALL WRITE_SURFN_LFI(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='NC    ') THEN
+#ifdef SFX_NC
+    IF (PRESENT(HNAM_DIM)) THEN
+      CALL WRITE_SURFN_NC( HSELECT, YREC,PFIELD,KRESP,HCOMMENT,YDIR,HNAM_DIM)
+    ELSE
+      CALL WRITE_SURFN_NC( HSELECT, YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    ENDIF
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='ASCII ') THEN
+#ifdef SFX_ASC
+    CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+  IF (HPROGRAM=='FA    ') THEN
+#ifdef SFX_FA
+    CALL WRITE_SURFN_FA(YREC,IL1,IL2,IL3,PFIELD,KRESP,HCOMMENT,YDIR)
+#endif
+  ENDIF
+  !
+ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX3',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE WRITE_SURFX3
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN0 ( HSELECT, HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT)

@@ -426,7 +426,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       WRITE(YCOMMENT,FMT=YFORM) 'soil wetness index per patch for layer ',JL,' (-)'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XSWI(:,JL),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XSWI(:,JL),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YRECFM='TSWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))//'_'
@@ -435,7 +435,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       WRITE(YCOMMENT,FMT=YFORM) 'total swi (liquid+solid) per patch for layer ',JL,' (-)'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XTSWI(:,JL),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XTSWI(:,JL),ISIZE,S%XWORK_WR)
       ENDDO        
       !
     END DO
@@ -448,14 +448,14 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       WRITE(YCOMMENT,FMT=YFORM) 'total swi (liquid+solid) per patch for layer ',JL,' (-)'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XALT(:),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XALT(:),ISIZE,S%XWORK_WR)
       ENDDO          
       !
       YRECFM='FLT_'
       YCOMMENT='frozen layer thickness over non-permafrost per patch (m)'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XFLT(:),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XFLT(:),ISIZE,S%XWORK_WR)
       ENDDO        
       !
     ENDIF
@@ -467,21 +467,21 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='snow fraction per patch over ground '
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XPSNG(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XPSNG(:),ISIZE,S%XWORK_WR)
     ENDDO  
     !   
     YRECFM='PSNV_'
     YCOMMENT='snow fraction per patch over vegetation'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XPSNV(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XPSNV(:),ISIZE,S%XWORK_WR)
     ENDDO      
     !
     YRECFM='PSN_'
     YCOMMENT='total snow fraction per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XPSN(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XPSN(:),ISIZE,S%XWORK_WR)
     ENDDO      
     !
     !        3.3    SGH scheme
@@ -492,7 +492,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       YCOMMENT='Soil saturated fraction per patch (-)'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XFSAT(:),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XFSAT(:),ISIZE,S%XWORK_WR)
       ENDDO        
     ENDIF
     !
@@ -505,21 +505,21 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       YCOMMENT='flood fraction per patch over ground '
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XFFG(:),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XFFG(:),ISIZE,S%XWORK_WR)
       ENDDO       
       !
       YRECFM='FFV_'
       YCOMMENT='flood fraction per patch over vegetation'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XFFV(:),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XFFV(:),ISIZE,S%XWORK_WR)
       ENDDO        
       !
       YRECFM='FF_'
       YCOMMENT='total flood fraction per patch'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,NDM%AL(JP)%XFF(:),ISIZE)
+            NP%AL(JP)%NR_P,NDM%AL(JP)%XFF(:),ISIZE,S%XWORK_WR)
       ENDDO 
       !
     ENDIF
@@ -534,14 +534,14 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       YCOMMENT='total surface temperature (isba+snow) per patch'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,ND%AL(JP)%XTS(:),ISIZE)
+            NP%AL(JP)%NR_P,ND%AL(JP)%XTS(:),ISIZE,S%XWORK_WR)
       ENDDO       
       !
       YRECFM='TSRAD_'
       YCOMMENT='total radiative surface temperature (isba+snow) per patch'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-            NP%AL(JP)%NR_P,ND%AL(JP)%XTSRAD(:),ISIZE)
+            NP%AL(JP)%NR_P,ND%AL(JP)%XTSRAD(:),ISIZE,S%XWORK_WR)
       ENDDO  
       !      
     ENDIF
@@ -553,7 +553,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='Halstead coefficient per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XHV(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XHV(:),ISIZE,S%XWORK_WR)
     ENDDO      
     !
     !        3.6  Snow outputs 
@@ -563,21 +563,21 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='X_Y_WSNOW_TOT (kg/m2) per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XTWSNOW(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XTWSNOW(:),ISIZE,S%XWORK_WR)
     ENDDO      
     !
     YRECFM='DSN_T_'
     YCOMMENT='X_Y_DSNOW_TOT (m) per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XTDSNOW(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XTDSNOW(:),ISIZE,S%XWORK_WR)
     ENDDO      
     !
     YRECFM='TSN_T_'
     YCOMMENT='X_Y_TSNOW_TOT (k) per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XTTSNOW(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XTTSNOW(:),ISIZE,S%XWORK_WR)
     ENDDO      
     !
     IF (TPSNOW%SCHEME=='CRO' .AND. DM%LPROSNOW) THEN
@@ -585,67 +585,67 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       YCOMMENT='accumulated snow thickness for past 1 days per patch'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_1DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_1DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_1DY(:),ISIZE,S%XWORK_WR)
       ENDDO        
       !
       YCOMMENT=   'accumulated snow thickness for past 3 days per patch'   
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_3DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_3DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_3DY(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT=  'accumulated snow thickness for past 5 days per patch'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_5DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_5DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_5DY(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='accumulated snow thickness for past 7 days per patch'      
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_7DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_7DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_7DY(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='accumulated snow water equivalent for past 1 days per patch'   
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_1DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_1DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_1DY(:),ISIZE,S%XWORK_WR)
       ENDDO     
       !
       YCOMMENT='accumulated snow water equivalent for past 3 days per patch'      
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_3DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_3DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_3DY(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='accumulated snow water equivalent for past 5 days per patch'  
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_5DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_5DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_5DY(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='accumulated snow water equivalent for past 7 days per patch'      
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SWE_7DY_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_7DY(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNSWE_7DY(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='Penetration of ram resistance sensor (2 daN) per patch'               
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'RAMSOND_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNRAM_SONDE(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNRAM_SONDE(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='Thickness of wet snow at the top of the snowpack per patch'    
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'WET_TH_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_WETTHCKN(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_WETTHCKN(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !
       YCOMMENT='Thickness of refrozen snow at the top of the snowpack per patch'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'REFRZTH_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_REFRZNTHCKN(:),ISIZE)
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_REFRZNTHCKN(:),ISIZE,S%XWORK_WR)
       ENDDO      
       !   
     ENDIF
@@ -663,19 +663,19 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       ENDIF
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWLIQ',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWLIQ(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWLIQ(:,:),ISIZE,'snow_layer',S%XWSN_WR)
       ENDDO
       !
       YCOMMENT='snow temperature (K)'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWTEMP',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTEMP(:,:),ISIZE,'snow_layer')
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTEMP(:,:),ISIZE,'snow_layer',S%XWSN_WR)
       ENDDO
       !        
       YCOMMENT=  'snow layer thickness'
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWDZ',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWDZ(:,:),ISIZE,'snow_layer')
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWDZ(:,:),ISIZE,'snow_layer',S%XWSN_WR)
       ENDDO
       !      
       IF (TPSNOW%SCHEME=='CRO' .AND. DM%LPROSNOW) THEN
@@ -683,43 +683,43 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         YCOMMENT=  'snow layer dendricity'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWDEND',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWDEND(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWDEND(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO        
         !
         YCOMMENT='snow layer sphericity'  
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSPHER',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSPHER(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSPHER(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO        
         !
         YCOMMENT='snow layer grain size'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSIZE',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSIZE(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSIZE(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO        
         !
         YCOMMENT='snow layer specific surface area'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSSA',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSSA(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSSA(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO        
         !
         YCOMMENT='snow layer grain type'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWTYPE',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTYPEMEPRA(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTYPEMEPRA(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO        
         !
         YCOMMENT='snow layer ram resistance'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWRAM',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWRAM(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWRAM(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO        
         !
         YCOMMENT='snow layer shear resistance'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSHEAR',YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSHEAR(:,:),ISIZE,'snow_layer')
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSHEAR(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO
         !
       ENDIF
@@ -741,7 +741,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         WRITE(YCOMMENT,FMT=YFORM) 'snow liquid water',JL,' (m)'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWLIQ(:,JL),ISIZE)
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWLIQ(:,JL),ISIZE,S%XWORK_WR)
         ENDDO          
         !
         YRECFM='SNOWTEMP'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
@@ -750,7 +750,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         WRITE(YCOMMENT,FMT=YFORM) 'snow temperature',JL,' (K)'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTEMP(:,JL),ISIZE)
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTEMP(:,JL),ISIZE,S%XWORK_WR)
         ENDDO
         !
       END DO
@@ -768,7 +768,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='irrigation threshold per patch'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XSEUIL(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XSEUIL(:),ISIZE,S%XWORK_WR)
     ENDDO    
     !
   ENDIF
@@ -779,49 +779,49 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='FAPAR (-)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPAR(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPAR(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
     YRECFM='FAPIR'
     YCOMMENT='FAPIR (-)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPIR(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPIR(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
     YRECFM='FAPAR_BS'
     YCOMMENT='FAPAR_BS (-)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPAR_BS(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPAR_BS(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
     YRECFM='FAPIR_BS'
     YCOMMENT='FAPIR_BS (-)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPIR_BS(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XFAPIR_BS(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
     YRECFM='DFAPARC'
     YCOMMENT='DFAPARC (-)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XDFAPARC(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XDFAPARC(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
     YRECFM='DFAPIRC'
     YCOMMENT='DFAPIRC (-)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XDFAPIRC(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XDFAPIRC(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
     YRECFM='DLAI_EFFC'
     YCOMMENT='DLAI_EFFC (m2/m2)'
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
-          NP%AL(JP)%NR_P,NDM%AL(JP)%XDLAI_EFFC(:),ISIZE)
+          NP%AL(JP)%NR_P,NDM%AL(JP)%XDLAI_EFFC(:),ISIZE,S%XWORK_WR)
     ENDDO
     !
   ENDIF
@@ -837,7 +837,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       YCOMMENT="by patch"
       DO JP = 1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
-                                NP%AL(JP)%NR_P,NP%AL(JP)%XINCR(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE)
+                                NP%AL(JP)%NR_P,NP%AL(JP)%XINCR(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE,S%XWORK_WR)
       ENDDO
       WRITE(YVAR,FMT='(I1.1)') JVAR
       DO JT = 1,NBOUTPUT
@@ -849,7 +849,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
           JK = (JT-1)*NOBSTYPE + JOBS
           DO JP = 1,IO%NPATCH
             CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
-                                      NP%AL(JP)%NR_P,NP%AL(JP)%XHO(1:NP%AL(JP)%NSIZE_P,JK,JVAR),ISIZE)
+                                      NP%AL(JP)%NR_P,NP%AL(JP)%XHO(1:NP%AL(JP)%NSIZE_P,JK,JVAR),ISIZE,S%XWORK_WR)
           ENDDO
         ENDDO
       ENDDO

@@ -211,7 +211,11 @@ INCLUDE 'mpif.h'
 INTEGER                           :: IYEAR               ! current year (UTC)
 INTEGER                           :: IMONTH              ! current month (UTC)
 INTEGER                           :: IDAY                ! current day (UTC)
-REAL                              :: ZTIME               ! current time since start of the run (s)
+INTEGER                           :: IYEAR2              ! current year at end of timestep(UTC)
+INTEGER                           :: IMONTH2             ! current month at end of timestep(UTC)
+INTEGER                           :: IDAY2               ! current day at end of timestep(UTC)
+REAL                              :: ZTIME               ! current time since start of the day (s)
+REAL                              :: ZTIME2              ! current time since start of the day at end of timestep (s)
 REAL                              :: ZTIMEC              ! current duration since start of the run (s)
 !
 INTEGER                           :: IYEAR_OUT           ! output year name
@@ -300,9 +304,6 @@ INTEGER :: ISERIES, ISIZE
  CHARACTER(LEN=10)  :: YRANK
 INTEGER :: ILEVEL, INFOMPI, J
 REAL :: XTIME0, XTIME1, XTIME
-!
-REAL ::  ZTIME2
-INTEGER :: IDAY2
 !
 ! SFX - OASIS coupling variables
 !
@@ -837,7 +838,13 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #endif
     !
     CALL SUNPOS(IYEAR, IMONTH, IDAY, ZTIME, ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
-    CALL SUNPOS(IYEAR, IMONTH, IDAY, ZTIME+XTSTEP_SURF, ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+    IYEAR2 = IYEAR
+    IMONTH2= IMONTH
+    IDAY2  = IDAY
+    ZTIME2 = ZTIME+XTSTEP_SURF
+    CALL ADD_FORECAST_TO_DATE_SURF(IYEAR2, IMONTH2, IDAY2, ZTIME2)
+    CALL SUNPOS(IYEAR2, IMONTH2, IDAY2, ZTIME2, ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+    !
 #ifdef SFX_MPI
     XTIME_CALC(2) = XTIME_CALC(2) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()

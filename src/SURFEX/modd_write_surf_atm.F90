@@ -49,6 +49,8 @@ LOGICAL :: LFIRST_WRITE = .TRUE.
 LOGICAL, DIMENSION(50000) :: LNOWRITE
 INTEGER :: NCPT_WRITE = 0
 !
+LOGICAL :: LSPLIT_PATCH
+!
 !-----------------------------------------------------------------------------------------------------
 !
 END MODULE MODD_WRITE_SURF_ATM
