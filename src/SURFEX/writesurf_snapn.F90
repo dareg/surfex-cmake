@@ -86,7 +86,7 @@ DO JSPEC=1,CHN%NEMIS_NBR
                           YCOMMENT,YCOMMENTUNIT,HDIR='-',HNAM_DIM="Nemis_snap      ")    
 ! Writes the potential emission of species for each snap
   DO JSNAP=1,CHN%NEMIS_SNAP
-    WRITE(YRECFM,'("SNAP",I2.2,"_",A3)') JSNAP,CHN%CEMIS_NAME(JSPEC)
+    WRITE(YRECFM,'("SN",I2.2,"_",A7)') JSNAP,CHN%CEMIS_NAME(JSPEC)
     CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,YRECFM,CHN%XEMIS_FIELDS_SNAP(:,JSNAP,JSPEC),IRESP,YCOMMENT)
   END DO

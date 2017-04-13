@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE CH_INIT_EMISSION_n (CHE, PCONVERSION, HSV, &
-                                     HPROGRAM,KLU,KCH,PRHOA)
+      SUBROUTINE CH_INIT_EMISSION_n (CHE, PCONVERSION, HSV, HPROGRAM,KLU,HINIT,PRHOA,HCHEM_SURF_FILE)
 !     #######################################
 !
 !!****  *CH_INIT_EMIISION_n* - routine to initialize chemical emissions data structure
@@ -28,6 +27,7 @@
 !!      D.Gazen  01/12/03  change emissions handling for surf. externalization
 !!      P.Tulet  01/01/04  introduction of rhodref for externalization
 !!      M.Leriche 04/2014  change length of CHARACTER for emission 6->12
+!!      M.Leriche & V. Masson 05/16 bug in write emis fields for nest
 !-----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -39,6 +39,9 @@ USE MODI_GET_LUOUT
 USE MODI_BUILD_EMISSTAB_n
 USE MODI_BUILD_PRONOSLIST_n
 USE MODI_READ_SURF
+USE MODI_OPEN_NAMELIST
+USE MODI_CLOSE_NAMELIST
+USE MODI_READ_SURF_FIELD2D
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -58,15 +61,19 @@ REAL, DIMENSION(:), POINTER :: PCONVERSION
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! Program name
 INTEGER,           INTENT(IN)  :: KLU      ! number of points
-INTEGER,           INTENT(IN)  :: KCH      ! logical unit of input chemistry file
+CHARACTER(LEN=3),  INTENT(IN)  :: HINIT    ! Flag to know if one initializes:
+!                                          ! 'ALL' : all variables for a run
+!                                          ! 'PRE' : only variables to build 
+!                                          !         an initial file
 REAL, DIMENSION(:),INTENT(IN)  :: PRHOA    ! air density
+CHARACTER(LEN=28), INTENT(IN)  :: HCHEM_SURF_FILE ! ascii file for chemistry aggregation
 !
 !*       0.2   declarations of local variables
 !
 INTEGER             :: IRESP                 !   File 
 INTEGER             :: ILUOUT                ! output listing logical unit
- CHARACTER (LEN=16)  :: YRECFM                ! management
- CHARACTER (LEN=100) :: YCOMMENT              ! variables
+ CHARACTER (LEN=16) :: YRECFM                ! management
+ CHARACTER (LEN=40) :: YCOMMENT              ! variables
 INTEGER             :: JSPEC                 ! Loop index for cover data
 INTEGER             :: IIND1,IIND2           ! Indices counter
 !
@@ -78,7 +85,9 @@ INTEGER,DIMENSION(:),ALLOCATABLE  :: IOFFNDX ! index array of offline emission s
 INTEGER                           :: INBTS   ! number of emission times for a species
 INTEGER                           :: INBOFF  ! Number of offline emissions
 INTEGER                           :: IVERB   ! verbose level
- CHARACTER(LEN=3)                  :: YSURF   ! surface type
+INTEGER                           :: ICH      ! logical unit of input chemistry file
+CHARACTER(LEN=3)                  :: YSURF   ! surface type
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK2D ! work array to read emission fields
 !
 INTEGER           :: IVERSION       ! version of surfex file being read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -91,7 +100,7 @@ WRITE(ILUOUT,*) '------ Beginning of CH_INIT_EMISSION ------'
 YRECFM='VERSION'
  CALL READ_SURF(HPROGRAM,YRECFM,IVERSION,IRESP)
 !
-!*      2.     Chemical Emission fields
+!*      1.     Chemical Emission fields
 !              ------------------------
 !
 ! Read the total number of emission files 
@@ -124,6 +133,11 @@ END IF
 IF (.NOT. ASSOCIATED(CHE%CEMIS_AREA))   ALLOCATE(CHE%CEMIS_AREA(CHE%NEMISPEC_NBR))
 IF (.NOT. ASSOCIATED(CHE%NEMIS_TIME))   ALLOCATE(CHE%NEMIS_TIME(CHE%NEMIS_NBR))
 CHE%NEMIS_TIME(:) = -1
+!
+IF (HINIT/='ALL') THEN
+  ALLOCATE(CHE%XEMIS_FIELDS(KLU,CHE%NEMIS_NBR))
+  ALLOCATE(CHE%CEMIS_COMMENT(CHE%NEMIS_NBR))
+END IF
 !
 ALLOCATE(ITIMES(CHE%NEMIS_NBR))
 ALLOCATE(INBTIMES(CHE%NEMISPEC_NBR))
@@ -184,6 +198,17 @@ CHE%NTIME_MAX = MAXVAL(CHE%NEMIS_TIME)
   CHE%CEMIS_NAME(JSPEC) = YSPEC_NAME
   CHE%CEMIS_AREA(JSPEC) = YSURF
 ! 
+!*      2.     Simple reading of emission fields
+
+  IF (HINIT /= "ALL") THEN
+    YRECFM='E_'//TRIM(ADJUSTL(YSPEC_NAME))
+    ALLOCATE(ZWORK2D(KLU,INBTS))
+    CALL READ_SURF_FIELD2D(HPROGRAM,ZWORK2D(:,:),YRECFM,YCOMMENT)
+    CHE%XEMIS_FIELDS(:,IIND1:IIND2) = ZWORK2D(:,:)
+    CHE%CEMIS_COMMENT(IIND1:IIND2) = YCOMMENT
+    DEALLOCATE(ZWORK2D)
+  END IF
+!
 END DO
 !
 WRITE(ILUOUT,*) '---- Nunmer of OFFLINE species = ',INBOFF
@@ -192,21 +217,27 @@ WRITE(ILUOUT,*) 'IOFFNDX=',IOFFNDX
 
 IVERB=6
 
-IF (INBOFF > 0) THEN
-  ALLOCATE(CHE%TSEMISS(INBOFF))
-  ALLOCATE(YEMIS_NAME(INBOFF))
+!*      3.     Conversion and aggregation
 
-  CALL BUILD_EMISSTAB_n(PCONVERSION, HPROGRAM,KCH,CHE%CEMIS_NAME,INBTIMES,CHE%NEMIS_TIME,&
+IF (HINIT == "ALL") THEN
+  IF (INBOFF > 0) THEN
+    CALL OPEN_NAMELIST(HPROGRAM,ICH,HFILE=HCHEM_SURF_FILE)
+    ALLOCATE(CHE%TSEMISS(INBOFF))
+    ALLOCATE(YEMIS_NAME(INBOFF))
+
+    CALL BUILD_EMISSTAB_n(PCONVERSION, HPROGRAM,ICH,CHE%CEMIS_NAME,INBTIMES,CHE%NEMIS_TIME,&
                           IOFFNDX,CHE%TSEMISS,KLU,ILUOUT,IVERB,PRHOA)  
-  DO JSPEC = 1,INBOFF ! Loop on the number of species
-    YEMIS_NAME(JSPEC) = CHE%TSEMISS(JSPEC)%CNAME(1:12)
-  END DO
-  CALL BUILD_PRONOSLIST_n(HSV, SIZE(CHE%TSEMISS),YEMIS_NAME,CHE%TSPRONOSLIST,KCH,ILUOUT,IVERB)
-  DEALLOCATE(YEMIS_NAME)
-ELSE
-  ALLOCATE(CHE%TSEMISS(0))
-  NULLIFY(CHE%TSPRONOSLIST)
-END IF
+    DO JSPEC = 1,INBOFF ! Loop on the number of species
+      YEMIS_NAME(JSPEC) = CHE%TSEMISS(JSPEC)%CNAME(1:12)
+    END DO
+    CALL BUILD_PRONOSLIST_n(HSV, SIZE(CHE%TSEMISS),YEMIS_NAME,CHE%TSPRONOSLIST,ICH,ILUOUT,IVERB)
+    DEALLOCATE(YEMIS_NAME)
+    CALL CLOSE_NAMELIST(HPROGRAM,ICH)
+  ELSE
+    ALLOCATE(CHE%TSEMISS(0))
+    NULLIFY(CHE%TSPRONOSLIST)
+  END IF
+ENDIF
 
 DEALLOCATE(ITIMES,INBTIMES,IOFFNDX)
 WRITE(ILUOUT,*) '------ Leaving CH_INIT_EMISSION ------'
