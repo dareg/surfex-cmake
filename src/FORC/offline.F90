@@ -165,6 +165,7 @@ USE MODI_PREP_RESTART_COUPL_TOPD
 USE MODI_INIT_SLOPE_PARAM
 USE MODI_SLOPE_RADIATIVE_EFFECT
 !
+USE MODI_SFX_OASIS_READ_NAM
 USE MODI_SFX_OASIS_INIT
 USE MODI_SFX_OASIS_DEF_OL
 USE MODI_SFX_OASIS_RECV_OL
@@ -181,6 +182,9 @@ USE MODI_SFX_XIOS_SETUP_OL
 !
 USE MODE_GLT_DIA_LU
 !
+#ifdef SFX_MPL
+USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
+#endif
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -207,7 +211,11 @@ INCLUDE 'mpif.h'
 INTEGER                           :: IYEAR               ! current year (UTC)
 INTEGER                           :: IMONTH              ! current month (UTC)
 INTEGER                           :: IDAY                ! current day (UTC)
-REAL                              :: ZTIME               ! current time since start of the run (s)
+INTEGER                           :: IYEAR2              ! current year at end of timestep(UTC)
+INTEGER                           :: IMONTH2             ! current month at end of timestep(UTC)
+INTEGER                           :: IDAY2               ! current day at end of timestep(UTC)
+REAL                              :: ZTIME               ! current time since start of the day (s)
+REAL                              :: ZTIME2              ! current time since start of the day at end of timestep (s)
 REAL                              :: ZTIMEC              ! current duration since start of the run (s)
 !
 INTEGER                           :: IYEAR_OUT           ! output year name
@@ -287,6 +295,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZPSNG, ZPSNV
 REAL, DIMENSION(:), ALLOCATABLE   :: ZZ0EFF
 REAL, DIMENSION(:), ALLOCATABLE   :: ZZS
 REAL, DIMENSION(:), ALLOCATABLE   :: ZZ0_FULL, ZZ0EFF_FULL, ZZS_FULL
+REAL, DIMENSION(:), ALLOCATABLE :: ZSUMZEN
 INTEGER :: ISERIES, ISIZE
 !
 ! MPI variables
@@ -323,6 +332,12 @@ LHOOK = GSAVHOOK
 !
 !Must be call before DRHOOK !
  CALL SFX_OASIS_INIT(CNAMELIST,NCOMM)
+#ifdef SFX_MPL
+IF (LOASIS.OR.LXIOS) THEN
+  LMPLUSERCOMM = .TRUE.
+  MPLUSERCOMM = NCOMM
+ENDIF
+#endif
 !
 #ifdef SFX_MPI
 IF(.NOT.LOASIS.AND..NOT.LXIOS)THEN
@@ -336,7 +351,7 @@ CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
 CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
 !
-IF (LHOOK) CALL DR_HOOK('OFFLINE',0,NCOMM,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
 !
 !RJ: init modd_surefx_omp
 !$OMP PARALLEL
@@ -624,7 +639,8 @@ IF (.NOT.ALLOCATED(ZRAIN))  ALLOCATE(ZRAIN  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZPS))    ALLOCATE(ZPS    (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZCO2))   ALLOCATE(ZCO2   (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR))   ALLOCATE(ZDIR   (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZCOEF))  ALLOCATE(ZCOEF   (INI))
+IF (.NOT.ALLOCATED(ZCOEF))  ALLOCATE(ZCOEF     (INI))
+IF (.NOT.ALLOCATED(ZSUMZEN))ALLOCATE(ZSUMZEN   (INI))
 !
 IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
@@ -795,6 +811,23 @@ DO JFORC_STEP=1,INB_STEP_ATM
   XTIME_CALC(1) = XTIME_CALC(1) + (MPI_WTIME() - XTIME1)
   XTIME1 = MPI_WTIME()
 #endif
+  !    
+  !COMPUTE SUM ZENITH angle between 2 timestepA
+  ZSUMZEN(:)=0.0
+  DO JSURF_STEP = 1,INB_ATM
+    IDAY2  = IDAY
+    ZTIME2 = ZTIME + (JSURF_STEP-1.)*XTSTEP_SURF
+    IF (ZTIME2>86400.) THEN
+      ZTIME2 = ZTIME2-86400
+      IDAY2  = IDAY+1
+    ENDIF
+    CALL SUNPOS(IYEAR, IMONTH, IDAY2, ZTIME+(JSURF_STEP-1.)*XTSTEP_SURF, &
+                ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
+    !
+    ZSUMZEN(:)= ZSUMZEN(:) + MAX(COS(XZENITH(:)+0.1),0.)/(INB_ATM*1.0)
+    !
+  ENDDO
+  WHERE ( ZSUMZEN<0.01 ) ZSUMZEN = 0.0
   !
   DO JSURF_STEP=1,INB_ATM
     !
@@ -803,8 +836,15 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifdef SFX_MPI
     XTIME1 = MPI_WTIME()
 #endif
+    !
     CALL SUNPOS(IYEAR, IMONTH, IDAY, ZTIME, ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
-    CALL SUNPOS(IYEAR, IMONTH, IDAY, ZTIME+XTSTEP_SURF, ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+    IYEAR2 = IYEAR
+    IMONTH2= IMONTH
+    IDAY2  = IDAY
+    ZTIME2 = ZTIME+XTSTEP_SURF
+    CALL ADD_FORECAST_TO_DATE_SURF(IYEAR2, IMONTH2, IDAY2, ZTIME2)
+    CALL SUNPOS(IYEAR2, IMONTH2, IDAY2, ZTIME2, ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+    !
 #ifdef SFX_MPI
     XTIME_CALC(2) = XTIME_CALC(2) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
@@ -819,8 +859,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZLW(:,ID_FORC),ZLW(:,ID_FORC+1),         &
                             ZSNOW(:,ID_FORC+1),ZRAIN(:,ID_FORC+1),   &
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
-                            ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
-                            ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
+                            ZCO2(:,ID_FORC),ZCO2(:,ID_FORC+1),       &
+                            ZDIR(:,ID_FORC),ZDIR(:,ID_FORC+1),       &
+                            XZENITH+0.1,ZSUMZEN                      )
 #ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
@@ -1045,6 +1086,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
             IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
             IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
             IDATEF(7:11) = 0
+            NUNIT_FA = 19
             IF (CSURF_FILETYPE/='FA    ') THEN
               CALL WRITE_HEADER_FA(YSC%GCP, YSC%UG%G%CGRID, YSC%UG%XGRID_FULL_PAR, CSURF_FILETYPE,'ALL')
             ELSE
@@ -1245,6 +1287,10 @@ IF ( LRESTART ) THEN
   IF (CSURF_FILETYPE=="NC    ") INW = 2
   !
   LDEF_nc = .TRUE.
+  LDEF_ol = .TRUE.
+  !
+  IF (ASSOCIATED(YSC%DUO%CSELECT)) DEALLOCATE(YSC%DUO%CSELECT)
+  ALLOCATE(YSC%DUO%CSELECT(0))
   !
   IF (CSURF_FILETYPE=="NC    ") THEN
     CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, YSC%TM%DTT, &
@@ -1298,6 +1344,11 @@ IF ( LRESTART ) THEN
     ENDIF
     !
     LDEF_nc = .FALSE.
+    LDEF_ol = .FALSE.
+    !
+    NCPT_WRITE = 0
+    !
+    LFIRST_WRITE = .FALSE.
     !
   ENDDO
   !
