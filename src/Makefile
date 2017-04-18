@@ -395,7 +395,7 @@ endif
 ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 gribapi : $(GRIBAPI_INC)
 $(GRIBAPI_INC) :
-	cd $(DIR_GRIBAPI) && LDFLAGS= CFLAGS= CPPFLAGS=  \
+	cd $(DIR_GRIBAPI) && LDFLAGS= FCFLAGS= CPPFLAGS="$(CFLAGS)" \
 	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(REALFC)" && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
