@@ -459,7 +459,7 @@ GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 #
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
 ifeq "$(VER_GRIBAPI)" "SOPRANO"
@@ -563,6 +563,13 @@ ifeq "$(VER_CDF)" "CDFCTI"
 CDF_PATH?=/usr
 INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
+XIOS_CDF_OPT   = netcdf4_seq
+endif
+
+ifeq "$(VER_CDF)" "CDFMAC"
+CDF_PATH?=/opt/local
+INC_NETCDF     = -I${CDF_PATH}/include
+LIB_NETCDF     = -L${CDF_PATH}/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
 XIOS_CDF_OPT   = netcdf4_seq
 endif
 
