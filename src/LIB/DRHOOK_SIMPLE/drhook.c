@@ -74,13 +74,17 @@ static char *end_stamp = NULL;
 static void trapfpe(void)
 {
   /* Enable some exceptions. At startup all exceptions are masked. */
+#ifndef DARWIN  
   (void) feenableexcept(FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW);
+#endif
 }
 
 static void untrapfpe(void)
 {
   /* Disable some exceptions. At startup all exceptions are masked. */
+#ifndef DARWIN
   (void)fedisableexcept(FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW);
+#endif
 }
 
 #endif /* defined(__GNUC__) */

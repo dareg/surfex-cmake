@@ -387,8 +387,8 @@ endif
 ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 gribapi : $(GRIBAPI_INC)
 $(GRIBAPI_INC) :
-	cd $(DIR_GRIBAPI) && LDFLAGS= CFLAGS= CPPFLAGS=  \
-	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(REALFC)" && \
+	cd $(DIR_GRIBAPI) && LDFLAGS= FCFLAGS= CPPFLAGS="$(CFLAGS)" FC="$(REALFC)" \
+	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
 	 $(MAKE) -j 1 install && \
@@ -490,7 +490,7 @@ install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
 endif
 
 $(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -iname "spll_*.f*" \
-              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/gI' | head -1 )
+              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/g' | head -1 )
 
 #RJ: added hack when linking user if no master was linked
 $(PROG_LIST) :  $(LIB_MNH)  $(LIB_GRIBEX)

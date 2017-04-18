@@ -15,6 +15,8 @@
 #include <signal.h>
 #include "cargs.h"
 
+#define _XOPEN_SOURCE
+
 #define PRETOSTR(x) #x
 #define TOSTR(x) PRETOSTR(x)
 
@@ -24,7 +26,6 @@
 
 #define strequ(s1,s2)     ((void *)s1 && (void *)s2 && strcmp(s1,s2) == 0)
 #define strnequ(s1,s2,n)  ((void *)s1 && (void *)s2 && memcmp(s1,s2,n) == 0)
-
 
 #if (defined(LINUX) || defined(SUN4)) && !defined(XT3) && !defined(XD1) 
 
