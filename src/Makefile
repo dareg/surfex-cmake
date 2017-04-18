@@ -506,7 +506,7 @@ $(OASIS_KEY) : $(CDFF_INC)
 	@echo '===> check util/make_dir/COMP.log STDOUT messages'
 	@echo '===> check util/make_dir/COMP.err for STDERR logs'
 	cd $(DIR_OASIS)/util/make_dir && \
-	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS= LDFLAGS= \
+	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS="$(CFLAGS)" LDFLAGS= \
 	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(F90FLAGS)" \
 	  INC_NETCDF="$(INC_NETCDF)" LIB_NETCDF="$(LIB_NETCDF)" \
 	    $(MAKE) -j 1 -f TopMakefileOasis3
@@ -536,7 +536,7 @@ ifneq "$(XIOS_CDF_OPT)" ""
 #
 xios : $(XIOS_KEY)
 $(XIOS_KEY) : $(CDFF_INC)
-	@echo "export Surfex_CC=\"$(CC) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
+	@echo "export Surfex_CC=\"$(CC) $(CFLAGS) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
 	@echo "export Surfex_F90=\"$(F90) $(F90FLAGS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.env  
 	#
 	@echo "OASIS_INCDIR=\"$(INC_OASIS)\"" > $(DIR_XIOS)/arch/arch-Surfex.path  
@@ -593,7 +593,7 @@ install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
 endif
 
 $(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -iname "spll_*.f*" \
-              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/gI' | head -1 )
+              | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/g' | head -1 )
 
 #RJ: added hack when linking user if no master was linked
 $(PROG_LIST) :  $(LIB_MNH)  $(LIB_GRIBEX)

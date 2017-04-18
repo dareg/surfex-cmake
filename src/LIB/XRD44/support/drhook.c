@@ -1,5 +1,7 @@
 #define _DRHOOK_C_   1
 
+#define HOST_NAME_MAX 100
+
 /* 
    drhook.c
 
@@ -2694,7 +2696,9 @@ init_drhook(int ntids)
       pid = getpid();
       signal_drhook_init(1); /* myproc gets set .. if not earlier */
       process_options();
+#ifndef DARWIN
       set_timed_kill();
+#endif
       drhook_lhook = 1;
     }
     if (!keydata) {
@@ -5200,7 +5204,7 @@ int util_ihpstat_(int *option)
   return ret_value;
 }
 
-
+#ifndef DARWIN
 
 #define SECS(x) ((int)(x))
 #define NSECS(x) ((int)(1000000000 * ((x) - SECS(x))))
@@ -5267,3 +5271,5 @@ static void set_timed_kill()
     free_drhook(s);
   }
 }
+
+#endif

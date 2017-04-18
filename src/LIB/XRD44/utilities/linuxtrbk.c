@@ -20,6 +20,8 @@
 #include <alloca.h>
 #include "cargs.h"
 
+#define _XOPEN_SOURCE
+
 #ifdef CRAYXT
 /* Cray XT3/XT4 with catamount microkernel */
 #define system(cmd) (-1)

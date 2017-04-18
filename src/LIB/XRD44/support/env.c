@@ -252,6 +252,8 @@ ec_usleep(const int *usecs)
 
 /* ec_gethostname, by S.Saarinen, 30-sep-2016 */
 
+#ifndef DARWIN
+
 void ec_gethostname_(char a[], 
 		     /* Hidden argument */
 		     int alen)
@@ -271,6 +273,8 @@ void ec_gethostname(char a[],
 {
   ec_gethostname_(a,alen);
 }
+
+#endif
 
 #if defined(__GNUC__)
 
