@@ -9,10 +9,10 @@ MAKEFLAGS += -r
 #          searching in PATH=$(1)                        #
 ##########################################################
 #
-dependance_flist = $(notdir $(shell find $(1) -follow -type f \
+dependance_flist = $(notdir $(shell find -L $(1) -type f \
                -iname '*.f' -o -iname '*.f90' -o -name '*.fx90' \
                | grep -v ',v' | sed -e 's/\.f.*/.D/g' -e 's/\.F.*/.D/g' ))
-obj_flist        = $(notdir $(shell find $(1) -follow -type f \
+obj_flist        = $(notdir $(shell find -L $(1) -type f \
                -iname 'spll_*.f*' | sed -e 's/\..*/.o/g' ))
 #
 ##########################################################
@@ -123,7 +123,7 @@ DEP_MASTER= $(call dependance_flist,$(DIR_MASTER))
 #  init VPATH depending on compilation phase
 #
 ifdef DO_DEP_MASTER
-VPATH += $(shell find $(DIR_MASTER) -follow -type d )
+VPATH += $(shell find -L $(DIR_MASTER) -type d )
 VPATH += $(OBJDIR_MASTER)
 endif
 #
@@ -145,7 +145,7 @@ OBJDIR_USER=$(OBJDIR_ROOT)/$(VER_USER)
 #
 ifdef DO_DEP_USER
 DEP_USER= $(call dependance_flist,$(DIR_USER))
-VPATH += $(shell find $(DIR_USER) -follow -type d )
+VPATH += $(shell find -L $(DIR_USER) -type d )
 VPATH += $(OBJDIR_USER)
 endif
 #
@@ -173,7 +173,7 @@ endif
 #
 # MASTER
 #
-OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find $(OBJDIR_MASTER) -follow -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
+OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(notdir $(shell find -L $(OBJDIR_MASTER) -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
 #OBJS_LISTE_MASTER :=  $(OBJS_LISTE_MASTER) $(obj_flist $(OBJDIR_MASTER))
 #
 OBJS_LISTE_MASTER := $(sort $(filter-out $(IGNORE_OBJS),$(OBJS_LISTE_MASTER)))
@@ -182,14 +182,14 @@ LIB_MASTER=$(OBJDIR_MASTER)/$(LIB_OBJS_ROOT)-MASTER.a
 #
 # USER
 #
-#ifdef DO_COMP_USER
-OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find $(OBJDIR_USER) -follow -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
+ifdef OBJDIR_USER
+OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(notdir $(shell find -L $(OBJDIR_USER) -type f -iname "spll_*.f*" | sed -e 's/\..*/.o/g' ))
 #OBJS_LISTE_USER :=  $(OBJS_LISTE_USER) $(obj_flist $(OBJDIR_USER))
 #
 OBJS_LISTE_USER := $(sort $(filter-out $(IGNORE_OBJS), $(OBJS_LISTE_USER) $(OBJS_LISTE_MASTER) ))
 #
 LIB_USER=$(OBJDIR_USER)/$(LIB_OBJS_ROOT)-$(VER_USER).a
-#endif
+endif
 ##########################################################
 #                                                        #
 # DEP_ALL : All dependance *.D to generate               #
@@ -248,7 +248,7 @@ depmaster : objdirmaster
 	@$(MAKE) DO_DEP_MASTER=YES OBJDIR=$(OBJDIR_MASTER) filedepallmaster
 
 filedepallmaster :  $(DEP_ALL_MASTER)
-	find  $(OBJDIR_MASTER) -follow -name "*.D" >  $(OBJDIR_MASTER)/filemaster
+	find -L $(OBJDIR_MASTER) -name "*.D" >  $(OBJDIR_MASTER)/filemaster
 	rm -f  $(OBJDIR_MASTER)/filedepallmaster
 	cat $(OBJDIR_MASTER)/filemaster  | xargs cat  >>  $(OBJDIR_MASTER)/filedepallmaster
 
@@ -264,7 +264,7 @@ bibmaster :  libmaster
 objmaster :  $(OBJS_LISTE_MASTER)
 
 $(LIB_MASTER) :  $(OBJS_LISTE_MASTER)
-	cd $(OBJDIR_MASTER) ; find . -follow -name '*.o'| xargs $(AR) r $(LIB_MASTER)
+	cd $(OBJDIR_MASTER) ; find -L . -name '*.o'| xargs $(AR) r $(LIB_MASTER)
 
 progmaster : libmaster
 	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES  \
@@ -288,7 +288,7 @@ cleanmaster : $(addprefix clean_,$(PROJECTS))
 	-test -d $(OBJDIR_MASTER) && rm -fr $(OBJDIR_MASTER)
 
 cleanobjmaster :
-	-test -d $(OBJDIR_MASTER) && find $(OBJDIR_MASTER) -follow -name "*.o" -o -name "*.mod" | xargs rm
+	-test -d $(OBJDIR_MASTER) && find -L $(OBJDIR_MASTER) -name "*.o" -o -name "*.mod" | xargs rm
 
 clean_progmaster :
 	-test -d $(OBJDIR_MASTER) && cd $(OBJDIR_MASTER) && rm -f $(PROG_LIST)
@@ -312,7 +312,7 @@ depuser : objdiruser depmaster
 	@$(MAKE) DO_DEP_USER=YES OBJDIR=$(OBJDIR_USER) filedepalluser
 
 filedepalluser : $(DEP_ALL_USER)
-	find  $(OBJDIR_USER) -follow -name "*.D" >  $(OBJDIR_USER)/fileuser
+	find -L $(OBJDIR_USER) -name "*.D" >  $(OBJDIR_USER)/fileuser
 	cat $(OBJDIR_USER)/fileuser | sed -e "s!$(OBJDIR_USER)!$(OBJDIR_MASTER)!g"  >  $(OBJDIR_USER)/filenotmaster
 	grep -F -v -f   $(OBJDIR_USER)/filenotmaster  $(OBJDIR_MASTER)/filemaster >  $(OBJDIR_USER)/filemaster
 	rm -f  $(OBJDIR_USER)/filedepalluser
@@ -489,7 +489,7 @@ else
 install : $(patsubst %,%-${ARCH_XYZ},$(PROG_LIST))
 endif
 
-$(PROG_LIST) : OBJ_PROG=$(shell find $(PROG_DIR) -follow -type f -iname "spll_*.f*" \
+$(PROG_LIST) : OBJ_PROG=$(shell find -L $(PROG_DIR) -type f -iname "spll_*.f*" \
               | xargs grep -l -E -i "^[[:space:]]*program *$@" |  sed -e 's/\.f.*/.o/g' | head -1 )
 
 #RJ: added hack when linking user if no master was linked
