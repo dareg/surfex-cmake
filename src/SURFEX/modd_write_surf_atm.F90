@@ -49,7 +49,7 @@ LOGICAL :: LFIRST_WRITE = .TRUE.
 LOGICAL, DIMENSION(50000) :: LNOWRITE
 INTEGER :: NCPT_WRITE = 0
 !
-LOGICAL :: LSPLIT_PATCH
+LOGICAL :: LSPLIT_PATCH = .TRUE.
 !
 !-----------------------------------------------------------------------------------------------------
 !
