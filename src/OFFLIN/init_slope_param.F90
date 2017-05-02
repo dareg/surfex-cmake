@@ -2,8 +2,7 @@
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
-SUBROUTINE INIT_SLOPE_PARAM (UG, &
-                             PZS,KI,PLAT)
+SUBROUTINE INIT_SLOPE_PARAM (UG, PGRID_FULL_PAR, PZS, KI, PLAT)
 !
 !!**** *INIT_SLOPE_PARAM
 !!                         Compute physiographic field necessary to account for
@@ -49,7 +48,7 @@ SUBROUTINE INIT_SLOPE_PARAM (UG, &
 !            -----------
 !
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 !
 USE MODI_GET_MESH_DIM
 !
@@ -67,7 +66,8 @@ INCLUDE "mpif.h"
 !            ------------------------
 !
 !
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(GRID_t), INTENT(INOUT) :: UG
+REAL, DIMENSION(:), INTENT(IN) :: PGRID_FULL_PAR
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)
@@ -160,7 +160,7 @@ ALLOCATE(ZDY (NIX*NIY))
 
 IF (NRANK==NPIO) THEN
 
-  CALL GET_MESH_DIM(UG%CGRID,SIZE(UG%XGRID_FULL_PAR),NIX*NIY,UG%XGRID_FULL_PAR,ZDX,ZDY,UG%XMESH_SIZE)
+  CALL GET_MESH_DIM(UG%CGRID,SIZE(PGRID_FULL_PAR),NIX*NIY,PGRID_FULL_PAR,ZDX,ZDY,UG%XMESH_SIZE)
   
 ENDIF
 

@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE INIT_WRITE_BIN (DGU, U, &
+      SUBROUTINE INIT_WRITE_BIN (HSELECT, KDIM_FULL, &
                                  HREC,KPATCH,OWFL)
 !     ######################
 !
@@ -32,37 +32,31 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-!
-!
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
 USE MODD_IO_SURF_BIN,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_BIN,  ONLY:NUNIT0, NVAR, CVAR, JPVAR, NIND
 !
 USE MODI_ABOR1_SFX
-USE MODI_TEST_RECORD_LEN
+!USE MODI_TEST_RECORD_LEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-!
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+ INTEGER, INTENT(IN) :: KDIM_FULL
 !
  CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 INTEGER,             INTENT(IN)     :: KPATCH    
 LOGICAL,             INTENT(INOUT)  :: OWFL
 INTEGER                             :: IP, IVAR, IFIELD, JFIELD
 INTEGER                             :: IRECLEN
-LOGICAL                             :: LMATCH
+!LOGICAL                             :: LMATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('INIT_WRITE_BIN',0,ZHOOK_HANDLE)
-IRECLEN=U%NDIM_FULL*KPATCH*4
+IRECLEN=KDIM_FULL*KPATCH*4
 !
 IVAR=NUNIT0
 DO IP=1, JPVAR
@@ -82,7 +76,7 @@ ELSE
   IF (CVAR(1).NE.'                ') IVAR=MAXVAL(NVAR(:))
 !
 !
-  IF (.NOT.DGU%LSELECT) THEN
+  IF (SIZE(HSELECT)==0) THEN
 !
     IF ( (HREC(1:2)/='D_'                          ) .AND.  &
           (HREC(1:2)/='DX'                           ) .AND.  &
@@ -147,15 +141,14 @@ ELSE
   ELSE
 !        
     IFIELD=0
-    DO JFIELD=1,SIZE(DGU%CSELECT)
-      IF (DGU%CSELECT(JFIELD)== '            ') EXIT
+    DO JFIELD=1,SIZE(HSELECT)
+      IF (HSELECT(JFIELD)== '            ') EXIT
       IFIELD=IFIELD+1
     ENDDO
   
-    CALL TEST_RECORD_LEN(DGU, &
-                         "ASCII ",HREC,LMATCH)
+    !CALL TEST_RECORD_LEN("ASCII ",HREC,HSELECT,LMATCH)
 
-    IF (.NOT. LMATCH ) THEN
+    !IF (.NOT. LMATCH ) THEN
 
       IVAR = IVAR+1
       IF (IVAR-NUNIT0>JPVAR) THEN
@@ -166,9 +159,9 @@ ELSE
       OPEN(UNIT=IVAR,FILE=TRIM(HREC)//'.BIN',FORM='UNFORMATTED',ACCESS='DIRECT',RECL=IRECLEN)
       OWFL=.TRUE.
 
-    ELSE
-      OWFL=.FALSE.
-    ENDIF
+    !ELSE
+    !  OWFL=.FALSE.
+    !ENDIF
 
   ENDIF
 ENDIF

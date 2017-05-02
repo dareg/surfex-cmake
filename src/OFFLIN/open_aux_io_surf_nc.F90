@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #######################################################
       SUBROUTINE OPEN_AUX_IO_SURF_NC (&
-                                      HFILE,HFILETYPE,HMASK)
+                                      HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -52,9 +52,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_GET_1D_MASK
 !
+USE NETCDF
+!
 IMPLICIT NONE
 !
-INCLUDE "netcdf.inc"
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -64,14 +65,14 @@ INCLUDE "netcdf.inc"
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
  CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR  
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
 REAL, DIMENSION(:),ALLOCATABLE :: ZFULL  ! total cover
 INTEGER                        :: ILU,IRET, IL
-INTEGER                        :: INB ! number of articles in the file
- CHARACTER(LEN=28) :: YFILE
+CHARACTER(LEN=28) :: YFILE
 LOGICAL :: GOPENED
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -81,15 +82,15 @@ IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_NC',0,ZHOOK_HANDLE)
 YFILE = TRIM(HFILE)//".nc"
 INQUIRE(FILE=YFILE,OPENED=GOPENED)
 IF (.NOT.GOPENED) THEN
-  IRET = NF_OPEN(YFILE,NF_NOWRITE,NID_NC)
+  IRET = NF90_OPEN(YFILE,NF90_NOWRITE,NID_NC)
 ENDIF
 
  CALL GET_LUOUT('NC    ',NLUOUT)
 !
- CMASK = HMASK
- CFILEIN_NC = YFILE
+CMASK = HMASK
+CFILEIN_NC = YFILE
  CALL READ_SURF(&
-                'NC    ','DIM_FULL',ILU,IRET)
+                'NC    ','DIM_FULL',ILU,IRET,HDIR=HDIR)
 NFULL_AUX = ILU
 !
 !------------------------------------------------------------------------------
@@ -101,8 +102,10 @@ ALLOCATE(NMASK(IL))
 ZFULL=1.
  CALL GET_1D_MASK(IL,IL,ZFULL,NMASK)
 !
+DEALLOCATE(ZFULL)
+!
 !------------------------------------------------------------------------------
- CMASK = HMASK
+CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('OPEN_AUX_IO_SURF_NC',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

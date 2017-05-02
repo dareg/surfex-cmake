@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_NATURE_n (DGMI, IG, I, U, &
-                           HPROGRAM,KI,                                    &
+SUBROUTINE ASSIM_NATURE_n (IM, U, HPROGRAM, KI, &
                           PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
                           PSWEC,     PTSC,   PUCLS, PVCLS,                &
@@ -34,11 +33,8 @@ SUBROUTINE ASSIM_NATURE_n (DGMI, IG, I, U, &
 !!      Original    04/2012
 !!--------------------------------------------------------------------
 !
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
-!
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK
@@ -51,13 +47,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
- CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PCON_RAIN
 REAL, DIMENSION(KI), INTENT(IN) :: PSTRAT_RAIN
@@ -75,7 +69,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PTS
 REAL, DIMENSION(KI), INTENT(IN) :: PT2M
 REAL, DIMENSION(KI), INTENT(IN) :: PHU2M
 REAL, DIMENSION(KI), INTENT(IN) :: PSWE
- CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
+CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
@@ -94,8 +88,7 @@ END IF
 !
 IF (U%CNATURE=='ISBA  ') THEN
   !
-  CALL ASSIM_ISBA_n(DGMI, IG, I, U, &
-                    HPROGRAM,KI,                                    &
+  CALL ASSIM_ISBA_n(IM, U, HPROGRAM, KI,  &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
                     PSWEC,     PTSC,     PUCLS, PVCLS,              &

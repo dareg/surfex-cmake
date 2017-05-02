@@ -1,5 +1,9 @@
 ####
-MAKEFLAGS += -r
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
+#MAKEFLAGS += -r
 ####
 ##########################################################
 #                                                        #
@@ -201,7 +205,7 @@ DEP_ALL_MASTER = $(sort $(filter-out $(IGNORE_DEP_MASTER),$(DEP_MASTER)) )
 DEP_ALL_USER   = $(sort $(filter-out $(IGNORE_DEP_USER)  ,$(DEP_USER)) )
 #
 
-.PHONY : clean all objdir objdirmaster depall objs lib prog print
+.PHONY : clean all objdir objdirmaster depall objs lib prog print xios
 
 .DELETE_ON_ERROR:
 
@@ -232,6 +236,10 @@ EXTCOUPLERS += oasis
 endif
 endif
 
+ifeq "$(VER_XIOS)" "2"
+EXTCOUPLERS += xios
+endif
+
 # main projectes
 PROJECTS += ecoclimap progmaster
 
@@ -253,7 +261,7 @@ filedepallmaster :  $(DEP_ALL_MASTER)
 	cat $(OBJDIR_MASTER)/filemaster  | xargs cat  >>  $(OBJDIR_MASTER)/filedepallmaster
 
 libmaster :  depmaster
-	@$(MAKE)  -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES OBJDIR=$(OBJDIR_MASTER) objmaster
+	@$(MAKE) -I $(OBJDIR_MASTER)  DO_COMP_MASTER=YES OBJDIR=$(OBJDIR_MASTER) objmaster
 
 
 bibmaster :  libmaster
@@ -387,8 +395,8 @@ endif
 ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
 gribapi : $(GRIBAPI_INC)
 $(GRIBAPI_INC) :
-	cd $(DIR_GRIBAPI) && LDFLAGS= FCFLAGS= CPPFLAGS="$(CFLAGS)" FC="$(REALFC)" \
-	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} && \
+	cd $(DIR_GRIBAPI) && LDFLAGS= FCFLAGS= CPPFLAGS="$(CFLAGS)" \
+	 ./configure --disable-jpeg --prefix=${GRIBAPI_PATH} FC="$(REALFC)" && \
 	 $(MAKE) -j 1 clean && \
 	 $(MAKE) -j 1 && \
 	 $(MAKE) -j 1 install && \
@@ -405,24 +413,82 @@ endif
 #RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
-ifeq "$(VERSION_CDF)" "3.6.3"
-NETCDF_OPTS ?= FC="$(REALFC)" CPPFLAGS="-DpgiFortran" --disable-shared --disable-cxx
+NETCDF_OPTS ?= FC="$(F90)" CC="$(CC) "
+#
+ifneq "$(VER_MPI)" "NOMPI"
+HDF5_OPTS= --enable-fortran --enable-parallel
+CDF_OPTS= --enable-parallel-tests
 else
-#RJ: assume to build netcdf4 library with only netcdf3-classic file support
-NETCDF_OPTS ?= FC="$(REALFC)" --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-netcdf-4 --disable-hdf4 --disable-fsync --disable-dap --enable-cdmremote=no --disable-examples --disable-cxx --disable-v2 --disable-shared --disable-compiler-recover --with-pic
+HDF5_OPTS= --enable-fortran
+CDF_OPTS= 
 endif
 #
-cdf : $(CDF_INC)
-$(CDF_INC) :
-	cd $(DIR_CDF) && LDFLAGS= CFLAGS= CPPFLAGS=  \
-	 ./configure --prefix=${CDF_PATH} $(NETCDF_OPTS) && \
-	 $(MAKE) -j 1 clean && \
-	 $(MAKE) -j 1 && \
-	 $(MAKE) -j 1 install && \
-	 $(MAKE) -j 1 clean
+# Compilation
+ifeq "$(F90)" "ifort"
+CFLAGSHDF5CDF= -fp-model precise
+FCFLAGSHDF5CDF= -fp-model precise
+endif
+ifeq "$(F90)" "mpiifort"
+CFLAGSHDF5CDF= -fp-model precise
+FCFLAGSHDF5CDF= -fp-model precise
+endif
+
+AM_CPPFLAGSHDF5= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include
+H5_LDFLAGSHDF5= -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:/opt/softs/intel/impi/5.1.2.150/intel64/lib:${ZLIB_PATH}/lib:${SZIP_PATH}/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L/opt/softs/intel/impi/5.1.2.150/intel64 -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+
+CPPFLAGSCDF= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include -I${HDF5_PATH}/include
+LDFLAGSCDF= -Wl,-rpath,/opt/softs/intel/impi/5.1.2.150/intel64/lib:/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:${HDF5_PATH}/lib:${SZIP_PATH}/lib:${ZLIB_PATH}/lib -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+LIBSCDF= -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+
+CPPFLAGSCDFF= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include
+LDFLAGSCDFF= -Wl,-rpath,/opt/softs/intel/impi/5.1.2.150/intel64/lib:/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:${CDF_PATH}/lib:${HDF5_PATH}/lib:${SZIP_PATH}/lib:${ZLIB_PATH}/lib -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+LIBSCDFF= -netcdf -lhdf5_hl -lhdf5 -ldl -lm -lz -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+
+$(SZIP_LIB) : 
+	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(ZLIB_LIB) :
+	cd $(DIR_ZLIB) && ./configure --prefix=${ZLIB_PATH} && \
+	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(CURL_LIB) :
+	cd $(DIR_CURL) && ./configure --with-szlib=${SZIP_PATH} --with-zlib=${ZLIB_PATH}  \
+        --prefix=${CURL_PATH} CC="$(CC)" LDFLAGS="-L$(SZIP_PATH)/lib -L$(ZLIB_PATH)/lib" \
+        LIBS="-lsz -lz" CPPFLAGS="-I$(SZIP_PATH)/include -I$(ZLIB_PATH)/include" \
+	LT_SYS_LIBRARY_PATH="$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib:$(LD_LIBRARY_PATH)" && \
+	$(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(HDF5_LIB) : $(ZLIB_LIB) $(SZIP_LIB)
+	 cd $(DIR_HDF5) && \
+	 ./configure --with-zlib=${ZLIB_PATH} --with-szlib=${SZIP_PATH} $(HDF5_OPTS) --prefix=${HDF5_PATH} \
+	 CC="$(CC)" CFLAGS="$(CFLAGSHDF5CDF)" FC="$(F90)" FCFLAGS="$(FCFLAGSHDF5CDF)" \
+         CPPFLAGS="$(AM_CPPFLAGSHDF5)" LDFLAGS="$(H5_LDFLAGSHDF5)" LIBS="$(LIBSHDF5)" && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+$(CDF_LIB) : $(LIB_HDF5)
+	 cd $(DIR_CDF) && \
+	./configure --with-hdf5=${HDF5_PATH} $(CDF_OPTS) --prefix=${CDF_PATH} \
+	 CC="$(CC)" CFLAGS="$(CFLAGSHDF5CDF)" FC="$(F90)" FCFLAGS="$(FCFLAGSHDF5CDF)" \
+         CPPFLAGS="$(CPPFLAGSCDF)" LDFLAGS="$(LDFLAGSCDF)" LIBS="$(LIBSCDF)" && \
+	 $(MAKE) -j 1 clean && $(MAKE) -j 1 && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
+#
+cdf : $(CDFF_INC)
+$(CDFF_INC) : $(ZLIB_LIB) $(SZIP_LIB) $(CURL_LIB) $(HDF5_LIB) $(CDF_LIB)
+	 cd $(DIR_CDFF) && \
+         ./configure --prefix=${CDFF_PATH} \
+	 CC="$(CC)" CFLAGS="$(CFLAGSHDF5CDF)" FC="$(F90)" FCFLAGS="$(FCFLAGSHDF5CDF)" \
+         CPPFLAGS="$(CPPFLAGSCDFF)" LDFLAGS="$(LDFLAGSCDFF)" LIBS="$(LIBSCDFF)" && \
+         $(MAKE) -j 1 clean && $(MAKE) -j 1 install && $(MAKE) -j 1 clean
 
 clean_cdf :
-	- [ ! -d ${CDF_PATH} ] || rm -fr  ${CDF_PATH}
+	- [ ! -d ${CURL_PATH} ] || rm -fr  ${CURL_PATH} && \
+	- [ ! -d ${ZLIB_PATH} ] || rm -fr  ${ZLIB_PATH} && \
+	- [ ! -d ${SZIP_PATH} ] || rm -fr  ${SZIP_PATH} && \
+	- [ ! -d ${HDF5_PATH} ] || rm -fr  ${HDF5_PATH} && \
+	- [ ! -d ${CDF_PATH} ]  || rm -fr  ${CDF_PATH}  && \
+	- [ ! -d ${CDFF_PATH} ] || rm -fr  ${CDFF_PATH}
+#
 endif
 
 ##########################################################
@@ -434,14 +500,15 @@ ifeq "$(VER_OASIS)" "mct"
 ifneq "$(VER_MPI)" "NOMPI"
 #
 oasis : $(OASIS_KEY)
-$(OASIS_KEY) : $(CDF_INC)
+$(OASIS_KEY) : $(CDFF_INC)
 	([ ! -d ${OASIS_PATH} ] && mkdir ${OASIS_PATH}) || true
 	@echo '=> Compiling oasis'
 	@echo '===> check util/make_dir/COMP.log STDOUT messages'
 	@echo '===> check util/make_dir/COMP.err for STDERR logs'
 	cd $(DIR_OASIS)/util/make_dir && \
 	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" CPPFLAGS= LDFLAGS= \
-	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(OPT) $(INC_NETCDF) $(LIB_NETCDF)" \
+	  F90="$(F90)" F="$(F90)" F90FLAGS_1="$(F90FLAGS)" \
+	  INC_NETCDF="$(INC_NETCDF)" LIB_NETCDF="$(LIB_NETCDF)" \
 	    $(MAKE) -j 1 -f TopMakefileOasis3
 	echo '=> Compiling oasis DONE'
 
@@ -450,6 +517,42 @@ clean_oasis :
 	  COUPLE="$(DIR_OASIS)" ARCHDIR="${OASIS_PATH}" \
 	    $(MAKE) -j 1 realclean -f TopMakefileOasis3
 	- [ ! -d ${OASIS_PATH} ] || rm -fr  ${OASIS_PATH}
+endif
+endif
+##########################################################
+#                                                        #
+# EXTRA LIB : XIOS                                       #
+#                                                        #
+##########################################################
+
+ADD_OASIS=""
+ifeq "$(VER_OASIS)" "mct"
+  ADD_OASIS="--use_oasis oasis3_mct"
+endif
+
+ifeq "$(VER_XIOS)" "2"
+ifneq "$(VER_MPI)" "NOMPI"
+ifneq "$(XIOS_CDF_OPT)" ""
+#
+xios : $(XIOS_KEY)
+$(XIOS_KEY) : $(CDFF_INC)
+	@echo "export Surfex_CC=\"$(CC) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
+	@echo "export Surfex_F90=\"$(F90) $(F90FLAGS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.env  
+	#
+	@echo "OASIS_INCDIR=\"$(INC_OASIS)\"" > $(DIR_XIOS)/arch/arch-Surfex.path  
+	@echo "OASIS_LIBDIR=\"$(LIB_OASIS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.path  
+	@echo "NETCDF_INCDIR=\"$(INC_NETCDF)\"" >> $(DIR_XIOS)/arch/arch-Surfex.path  
+	@echo "NETCDF_LIBDIR=\"$(LIB_NETCDF)\"" >> $(DIR_XIOS)/arch/arch-Surfex.path  
+	#
+	@echo '=> Compiling XIOS -- this may take quite a while (up to ~15 min) :-)'
+	@echo '=>   check progress in $(DIR_XIOS)/make_xios.out'
+	@cd $(DIR_XIOS)  && \
+	  ./make_xios --arch Surfex --netcdf_lib $(XIOS_CDF_OPT) --prod $(ADD_OASIS) > make_xios.out 2>&1 
+	@echo -e '=> Compiling XIOS done\n'
+
+clean_xios :
+	cd ${DIR_XIOS} && rm -fR obj && rm -f lib/*
+endif
 endif
 endif
 ##########################################################

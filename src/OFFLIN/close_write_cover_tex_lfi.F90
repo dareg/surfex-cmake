@@ -65,7 +65,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('CLOSE_WRITE_COVER_TEX_LFI',0,ZHOOK_HANDLE)
 YTEX = 'class_cover_data.tex'
  CALL FMFREE(YTEX,CLUOUT_LFI,IRESP)
- CLOSE(KTEX)
+CLOSE(KTEX)
 IF (LHOOK) CALL DR_HOOK('CLOSE_WRITE_COVER_TEX_LFI',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

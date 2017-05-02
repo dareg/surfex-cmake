@@ -17,7 +17,7 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
- CONTAINS
+CONTAINS
 !
 !############################################################################
 !############################################################################
@@ -609,16 +609,17 @@ SUBROUTINE XY_GAUSS(PCODIL,KSIZE,PNODATA,PVALUE,PLAT_XY,PLON_XY)
   !
   INTEGER :: JJ, IDN, IDT
   !
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+  REAL(KIND=JPRB) :: ZHOOK_HANDLE_OMP
   !--------------------------------------------------------------------------------
   !
   !*     1.     Preliminary calculations
   !             ------------------------
   !
-  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE)
   !
 !
-!$OMP PARALLEL DO PRIVATE(IDN,IDT,ZCOS1, ZV1, ZLAT1, ZCOS2, ZLON1, ZINVC, &
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(IDN,IDT,ZCOS1, ZV1, ZLAT1, ZCOS2, ZLON1, ZINVC, &
 !$OMP ZSINN, ZV2, ZINVS, ZSINT, ZCOST, ZV3, ZLAT2, ZM, ZLON2)
   DO JJ=1,SIZE(PVALUE)
     !
@@ -672,10 +673,10 @@ SUBROUTINE XY_GAUSS(PCODIL,KSIZE,PNODATA,PVALUE,PLAT_XY,PLON_XY)
     IF (ABS(PLON_XY(JJ)-360.)<1.E-4) PLON_XY(JJ) = 0.
     !
   ENDDO
-!$OMP END PARALLEL DO    
-!
-  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE)
-    !---------------------------------------------------------------------------------
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE_OMP)  
+!$OMP END PARALLEL
+!---------------------------------------------------------------------------------
   END SUBROUTINE XY_GAUSS
   !---------------------------------------------------------------------------------
   !############################################################################

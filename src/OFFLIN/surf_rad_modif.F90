@@ -142,7 +142,7 @@ ISWB = SIZE(PDIRFLASWD,3)
 !              ---------------------------------
 !
 
- CALL SURF_SOLAR_SLOPES  ( PCOSZEN, PSINZEN, PAZIMSOL,                    &
+CALL SURF_SOLAR_SLOPES  ( PCOSZEN, PSINZEN, PAZIMSOL,                    &
                           PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,&
                           PDIRFLASWD, ZDIRSWDT   )
 
@@ -151,7 +151,7 @@ ISWB = SIZE(PDIRFLASWD,3)
 !*       3.    RESOLVED shadows for direct solar radiation
 !              -------------------------------------------
 
- CALL SURF_SOLAR_SHADOWS (PMAP, PXHAT, PYHAT, PCOSZEN, PSINZEN, PAZIMSOL, PZS, PZS_XY,&
+CALL SURF_SOLAR_SHADOWS (PMAP, PXHAT, PYHAT, PCOSZEN, PSINZEN, PAZIMSOL, PZS, PZS_XY,&
                      ZXHAT_ll,ZYHAT_ll,IIOR_ll,IJOR_ll,ZZS_ll,ZZS_XY_ll,         &
                      ZDIRSWDT, ZDIRSWD                                           )
 

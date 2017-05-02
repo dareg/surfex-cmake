@@ -1,7 +1,3 @@
-#MNH_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-#MNH_LIC This is part of the Meso-NH software governed by the CeCILL-C licence
-#MNH_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-#MNH_LIC for details. version 1.
 #
 # For NEC-SX : bypass underflow
 #
@@ -24,3 +20,13 @@ export F_RECLUNIT=BYTE
 # Performance MPI
 #
 export MPIPROGINF=detail
+#
+export SXMPIVERSION=r171-8
+export SXF90VERSION=rev451-ia64
+export SX_BASE_MPI=/SX/opt/mpisx/${SXMPIVERSION}
+export SX_BASE_F90=/SX/opt/sxf90/${SXF90VERSION}
+export PATH=$SX_BASE_MPI/bin:$PATH
+export PATH=$SX_BASE_F90/bin:$PATH
+export MANPATH=$SX_BASE_MPI/man:$MANPATH
+export MANPATH=$SX_BASE_F90/man:$MANPATH
+#

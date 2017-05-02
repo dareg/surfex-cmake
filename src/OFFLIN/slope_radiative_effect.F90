@@ -207,7 +207,7 @@ ZMAP(:,:) = 1.
 ! PRINT*,XZSL
 ! PRINT*,"in slope radiative effect",SIZE(XZSL,1),SIZE(XZSL,2)
 
- CALL  SURF_RAD_MODIF ( ZMAP, XXHAT_THREAD, XYHAT_THREAD,                    &
+CALL  SURF_RAD_MODIF ( ZMAP, XXHAT_THREAD, XYHAT_THREAD,                    &
                        ZCOSZEN, ZSINZEN, ZAZIMSOL,PZS,PZS_XY,               &
                        PSLOPANG,PSLOPAZI,PSURF_TRIANGLE,                    &
                        XXHAT,XYHAT,NINDX1_X,NINDX1_Y,XZSL,XZS_XY,           &

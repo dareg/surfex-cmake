@@ -22,7 +22,7 @@ MODULE MODD_TRIP_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
-!!      B. Decharme 10/2016  bug surface/groundwater coupling   
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !
 !*       0.   DECLARATIONS
 !             ------------

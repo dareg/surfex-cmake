@@ -17,7 +17,7 @@ SUBROUTINE TRIP_DIAG_CPL_ESM (TP, TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    12/12/13 
-!!      B. Decharme 10/2016  bug surface/groundwater coupling   
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS

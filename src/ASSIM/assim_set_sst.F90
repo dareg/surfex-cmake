@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_SET_SST (DTCO, DGU, S, U, &
-                          KI,PITM,PSST,PSIC,HTEST)
+SUBROUTINE ASSIM_SET_SST (DTCO, S, U, KI, PITM, PSST, PSIC, HTEST)
 
 !     ###############################################################################
 !
@@ -30,7 +29,7 @@ SUBROUTINE ASSIM_SET_SST (DTCO, DGU, S, U, &
 !!--------------------------------------------------------------------
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -62,7 +61,6 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -70,7 +68,7 @@ INTEGER,            INTENT(IN)  :: KI
 REAL,DIMENSION(KI), INTENT(IN)  :: PITM
 REAL,DIMENSION(KI), INTENT(OUT) :: PSST
 REAL,DIMENSION(KI), INTENT(OUT) :: PSIC  ! Not used at the moment
- CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
+CHARACTER(LEN=2),   INTENT(IN)  :: HTEST ! must be equal to 'OK'
 !
 !*      0.2    declarations of local variables
 !
@@ -78,8 +76,8 @@ REAL,DIMENSION(KI), INTENT(OUT) :: PSIC  ! Not used at the moment
 !
 REAL,ALLOCATABLE, DIMENSION(:,:) :: ZWORK,ZWORK2
 REAL,ALLOCATABLE, DIMENSION(:)   :: ZSEA
- CHARACTER(LEN=200)   :: YMFILE     ! Name of the SST file
- CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
+CHARACTER(LEN=200)   :: YMFILE     ! Name of the SST file
+CHARACTER(LEN=6)     :: YPROGRAM2 = 'FA    '
 REAL, DIMENSION(SIZE(PSST)) :: ZSST
 REAL                 :: ZFMAX, ZFMIN, ZFMEAN
 INTEGER              :: IRESP,ISTAT
@@ -103,8 +101,8 @@ IF ( LREAD_SST_FROM_FILE ) THEN
   !
   IF ( TRIM(CFILE_FORMAT_SST) == "ASCII" ) THEN
     !
-    ALLOCATE(ZSEA(U%NDIM_FULL))
-    ALLOCATE(ZWORK(U%NDIM_FULL,2))
+    ALLOCATE(ZSEA  (U%NDIM_FULL))
+    ALLOCATE(ZWORK (U%NDIM_FULL,2))
     ALLOCATE(ZWORK2(U%NSIZE_FULL,2))
     !
     IF (NPROC>1) CALL GATHER_AND_WRITE_MPI(U%XSEA,ZSEA)
@@ -161,19 +159,16 @@ IF ( LREAD_SST_FROM_FILE ) THEN
     !
     !  Open FA file
     !
-    CALL INIT_IO_SURF_n(DTCO, DGU, U, &
-                        YPROGRAM2,'EXTZON','SURF  ','READ ')
+    CALL INIT_IO_SURF_n(DTCO, U, YPROGRAM2,'EXTZON','SURF  ','READ ')
     !
     !  Read SST_SIC 
     !
     IF ( LECSST ) THEN
       ! SST field interpolated from ECMWF SST ANALYSIS to model domain
-      CALL READ_SURF(&
-                     YPROGRAM2,'SURFSEA.TEMPERA',PSST,IRESP)
+      CALL READ_SURF(YPROGRAM2,'SURFSEA.TEMPERA',PSST,IRESP)
     ELSE
       ! Surface temperature from boundary in SST_SIC
-      CALL READ_SURF(&
-                     YPROGRAM2,'SURFTEMPERATURE',PSST,IRESP)
+      CALL READ_SURF(YPROGRAM2,'SURFTEMPERATURE',PSST,IRESP)
     ENDIF
     !
     !  Close SST_SIC file

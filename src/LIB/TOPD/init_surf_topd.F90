@@ -4,8 +4,7 @@
 !SFX_LIC for details. version 1.
 !-------------------------------------------------------------------------------
 !     #############################################################
-      SUBROUTINE INIT_SURF_TOPD (DGEI, I, UG, U, &
-                                 HPROGRAM,KI)
+      SUBROUTINE INIT_SURF_TOPD (DEC, IO, S, K, NP, NPE, UG, U, HPROGRAM,KI)
 !     #############################################################
 !
 !!****  *INIT_SURF_TOPD* - routine to initialize variables needed for coupling with Topmodel
@@ -46,10 +45,10 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -76,9 +75,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEC
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -93,7 +95,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_SURF_TOPD',0,ZHOOK_HANDLE)
 IF (LCOUPL_TOPD) THEN
   IF (NPROC>1) CALL ABOR1_SFX('INIT_SURF_TOPD: TOPD CANNOT RUN WITH MORE THAN 1 MPI TASK') 
   IF (NBLOCKTOT>1) CALL ABOR1_SFX("INIT_SURF_TOPD: TOPD CANNOT RUN WITH NUMEROUS OPENMP BLOCKS")
-  IF (I%TSNOW%SCHEME/='3-L') &
+  IF (NPE%AL(1)%TSNOW%SCHEME/='3-L') &
         CALL ABOR1_SFX("INIT_SURF_TOPD: coupling with topmodel only runs with TSNOW%SCHEME=3-L")
 ENDIF
 !
@@ -115,8 +117,7 @@ IF (LCOUPL_TOPD) THEN
   !         4.   Initialises variables nedded for coupling with Topmodel
   !              -------------------------------------------------------
   !
-  CALL INIT_COUPL_TOPD(DGEI, I, UG, U, &
-                       HPROGRAM,KI)
+  CALL INIT_COUPL_TOPD(DEC, IO, S, K, NP, NPE, UG, U, HPROGRAM)
   !
   WRITE(ILUOUT,*) 'Couplage avec TOPMODEL active'
   !

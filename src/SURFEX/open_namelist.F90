@@ -61,6 +61,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroopen_namelist.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
@@ -81,10 +85,9 @@ IF (LHOOK) CALL DR_HOOK('OPEN_NAMELIST',0,ZHOOK_HANDLE)
 IF (PRESENT(HFILE)) THEN
   YFILE = HFILE
 ELSE
-  YFILE = '                           '
+  YFILE = '                            '
 END IF
 
-!$OMP SINGLE
 IF (HPROGRAM=='MESONH') THEN
 #ifdef SFX_MNH
   CALL MNHOPEN_NAMELIST(HPROGRAM,KLUNAM,YFILE)
@@ -114,7 +117,6 @@ ELSE IF (HPROGRAM=='NC    ') THEN
   CALL OPEN_NAMELIST_NC(HPROGRAM,KLUNAM,YFILE)
 #endif
 END IF
-!$OMP END SINGLE COPYPRIVATE(KLUNAM)
 !
 IF (LHOOK) CALL DR_HOOK('OPEN_NAMELIST',1,ZHOOK_HANDLE)
 !

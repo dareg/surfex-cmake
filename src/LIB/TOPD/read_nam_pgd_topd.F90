@@ -90,7 +90,7 @@ IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_TOPD',0,ZHOOK_HANDLE)
 !             ---------------------------
 !
 LCOUPL_TOPD = .FALSE.
- CCAT(:) = '   '
+CCAT(:) = '   '
 XF_PARAM_BV(:) = 2.5
 XC_DEPTH_RATIO_BV(:) = 1.
 !

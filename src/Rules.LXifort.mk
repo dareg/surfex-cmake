@@ -1,3 +1,7 @@
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 # Compiler Options                                       #
@@ -6,7 +10,12 @@
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
 # use splr.pl script for dependency generation
+# 
+DO_ASM = NO
 USE_SPLR = YES
+USE_SPLR_WRAP = NO
+#AVOID_CPP = YES
+AVOID_CPP = NO
 #
 OPT_BASE   =  -convert big_endian -r8 -g -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise 
 #-switch fe_inline_all_arg_copy_inout
@@ -55,8 +64,10 @@ endif
 #
 ifeq "$(VER_MPI)" "NOMPI"
 F90= ifort
+CC = icc
 else
 F90= mpiifort
+CC = mpiicc
 endif
 #
 REALFC=ifort
@@ -77,9 +88,7 @@ FX90FLAGS = $(FCFLAGS_OMP) $(OPT)
 # -132 
 #
 #LDFLAGS    =  -Wl,-noinhibit-exec  -Wl,-warn-once $(PAR)
-LDFLAGS    =  $(FCFLAGS_OMP) -Wl,-warn-once $(PAR)
-#
-CC = icc
+LDFLAGS    =  $(FCFLAGS_OMP) -Wl,-warn-once $(PAR) -ldl -lrt
 #
 CFLAGS = $(CFLAGS_OMP) -DLINUX -DLITTLE_ENDIAN -DLITTLE -O3 -xAVX -vec-report3  -DPOINTER_64
 #

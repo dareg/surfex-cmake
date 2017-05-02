@@ -83,7 +83,7 @@ REAL                      :: ZWRK        ! work variable
 REAL, DIMENSION(KNMC)     :: ZDAREA      ! drainage area (aire drainee)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
- CHARACTER(LEN=100)    :: YHEADER    ! Header File to be read
+CHARACTER(LEN=100)    :: YHEADER    ! Header File to be read
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_SLOPE_FILE',0,ZHOOK_HANDLE)
 !

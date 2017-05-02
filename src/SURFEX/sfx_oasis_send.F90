@@ -42,7 +42,7 @@ SUBROUTINE SFX_OASIS_SEND(KLUOUT,KI,KDATE,OSEND_LAND,OSEND_LAKE,OSEND_SEA,      
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
-!!    10/2016 B. Decharme : bug surface/groundwater coupling   
+!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -106,7 +106,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PSEAICE_EVAP ! Cumulated Sea-ice sublimation 
 !
 REAL, DIMENSION(KI,1) :: ZWRITE ! Mean flux send to OASIS (Pa, m/s, W/m2 or kg/m2/s)
 !
- CHARACTER(LEN=50)     :: YCOMMENT
+CHARACTER(LEN=50)     :: YCOMMENT
 INTEGER               :: IERR   ! Error info
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -307,7 +307,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_SEND',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
- CONTAINS
+CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_SFX_SEND(KLUOUT,KERR,HCOMMENT,PWRITE)
@@ -318,7 +318,7 @@ IMPLICIT NONE
 !
 INTEGER,          INTENT(IN) :: KLUOUT
 INTEGER,          INTENT(IN) :: KERR
- CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
+CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
 !
 REAL, DIMENSION(:), INTENT(OUT):: PWRITE
 !

@@ -163,7 +163,7 @@ LOGICAL :: LMASKLON, LMASKLAT, LWORK
 !Output attribut for netcdf diag file
 !-------------------------------------------------------------------------------
 !
-CHARACTER(LEN=50) :: YTITLE,YTIMEUNIT
+ CHARACTER(LEN=50) :: YTITLE,YTIMEUNIT
 !                    YTITLE    = Title of each output file
 !                    YTIMEUNIT = Time unit in each output file if present
 !
@@ -325,7 +325,7 @@ ALLOCATE(TPG%NBASID(ILON,ILAT))
 ALLOCATE(ZLEN      (ILON,ILAT))
 ALLOCATE(ZGRCN     (ILON,ILAT))       
 ALLOCATE(ZSEQ      (ILON,ILAT))   
-ALLOCATE(ZFRACAREA (ILON,ILAT))   
+ALLOCATE(ZFRACAREA (ILON,ILAT))
 ALLOCATE(ZNUM_BAS  (ILON,ILAT))
 ALLOCATE(ZDR_AREA  (ILON,ILAT))
 ALLOCATE(ZGREEN_ANT(ILON,ILAT))
@@ -493,6 +493,7 @@ ELSE
   ZLEN(:,:) = ZWORK(ILON_DEB12:ILON_END12,ILAT_DEB12:ILAT_END12)
 !
 ENDIF
+!
 !
 ! * Set area size
 !

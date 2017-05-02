@@ -70,7 +70,12 @@ export CONF_DOLLAR=${CONF_DOLLAR}
 # Version of NETCDF
 #
 export VER_CDF=${VER_CDF}
+export VERSION_CURL=${VERSION_CURL}
+export VERSION_ZLIB=${VERSION_ZLIB}
+export VERSION_SZIP=${VERSION_SZIP}
+export VERSION_HDF5=${VERSION_HDF5}
 export VERSION_CDF=${VERSION_CDF}
+export VERSION_CDFF=${VERSION_CDFF}
 #
 # Version of GRIBAPI
 #
@@ -82,6 +87,11 @@ export GRIB_DEFINITION_PATH=\${SRC_SURFEX}"/src/LIB/grib_api-1.17.0-Source/defin
 #
 export VER_OASIS=${VER_OASIS}
 export VERSION_OASIS=${VERSION_OASIS}
+#
+# Version of XIOS
+#
+export VER_XIOS=${VER_XIOS}
+export VERSION_XIOS=${VERSION_XIOS}
 #
 # Version of DR_HOOK
 #
@@ -104,11 +114,13 @@ export OMP_NUM_THREADS=1
 ##########################################################
 ##########################################################
 #
-export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}-\${VER_MPI}-\${VER_OMP}-\${OPTLEVEL}\${VER_USER:+-\${VER_USER}}"
+export XYZ="-\${ARCH}\${MNH_INT}-\${VERSION_XYZ}-\${VER_MPI}-\${VER_OMP}-\${OPTLEVEL}-X\${VER_XIOS}\${VER_USER:+-\${VER_USER}}"
 #[ "x\${VER_USER}" != "x" ] && export XYZ="\${XYZ}-\${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
 export BIN_TOOLS=${BIN_TOOLS}
 export PATH=.:\$SRC_SURFEX/bin:\$SRC_SURFEX/exe:\$SRC_SURFEX/bin_tools/\${BIN_TOOLS}:\$PATH
+#
+export LD_LIBRARY_PATH=${LIB_PATH}:${LD_LIBRARY_PATH}
 #
 # NCARG_ROOT : for use of graphic tools : diaprog 
 # 

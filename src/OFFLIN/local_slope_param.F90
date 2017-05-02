@@ -21,7 +21,6 @@ INTEGER::JJ
 
 
 ! Il faut déterminer la position de début  du thread MPI par rapport au ZZS1D_FULL de init_slope_param :
-!$OMP SINGLE
 IF (NPROC>1) THEN
   DO JJ=1,SIZE(NINDEX)
     IF(NINDEX(JJ)==NRANK) THEN
@@ -32,7 +31,6 @@ IF (NPROC>1) THEN
 ELSE
   IMINMPI=1
 END IF
-!$OMP END SINGLE
 
 NINDX1_MPI_OMP=IMINMPI+JPINDX1-1
 NINDX2_MPI_OMP=IMINMPI+JPINDX2-1

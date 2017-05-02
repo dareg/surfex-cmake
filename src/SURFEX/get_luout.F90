@@ -51,6 +51,10 @@ USE MODI_MNHGET_LUOUT
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroget_luout.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !

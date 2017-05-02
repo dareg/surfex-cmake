@@ -90,7 +90,7 @@ INTEGER                   :: IOVER                  ! Unit of the files
 INTEGER                   :: ILUOUT                 ! Unit of the files
 INTEGER                   :: IOS
 !
- CHARACTER(LEN=28) :: YFILE
+CHARACTER(LEN=28) :: YFILE
 !
 REAL   :: ZTMP !Temporary variable read
 !
@@ -110,7 +110,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_TOPD_OL',0,ZHOOK_HANDLE)
 !
 WRITE(ILUOUT,*) 'INITIALISATION INIT_TOPD_OL'
 !
- CALL INIT_TOPD('ASCII ')
+CALL INIT_TOPD('ASCII ')
 !
   !*      2       Calculations for routing by geomorpho
   !               -------------------------------------

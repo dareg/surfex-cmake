@@ -3,9 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !#########
-SUBROUTINE SFX_OASIS_DEF_OL (I, &
-                              U, &
-                             HPROGRAM,HALG_MPI)
+SUBROUTINE SFX_OASIS_DEF_OL (IO, U, HPROGRAM,HALG_MPI)
 !#############################################
 !
 !!****  *SFX_OASIS_DEF_OL* - Offline driver for definitions for exchange of coupling fields
@@ -42,7 +40,7 @@ SUBROUTINE SFX_OASIS_DEF_OL (I, &
 !
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -67,12 +65,12 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
- CHARACTER(LEN=4),   INTENT(IN)  :: HALG_MPI   ! decomposition algorithm
+CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM   ! program calling surf. schemes
+CHARACTER(LEN=4),   INTENT(IN)  :: HALG_MPI   ! decomposition algorithm
 !
 !
 !*       0.2   Declarations of local variables
@@ -161,8 +159,7 @@ DEALLOCATE(ISEG_OFFSET)
 !*       2.     Put definitions for exchange of coupling fields :
 !               -------------------------------------------------
 !
- CALL SFX_OASIS_DEFINE(I, U, &
-                      HPROGRAM,INPTS,IPARAL)
+CALL SFX_OASIS_DEFINE(IO, U, HPROGRAM,INPTS,IPARAL)
 !
 DEALLOCATE(IPARAL)
 !

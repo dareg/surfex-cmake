@@ -3,12 +3,11 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE OL_READ_ATM_CONF_ASCII (YSC, &
-                                    HSURF_FILETYPE, HFORCING_FILETYPE,  &
-                                     PDURATION, PTSTEP_FORC, KNI, &
-                                     KYEAR, KMONTH, KDAY, PTIME,  &
-                                     PLAT, PLON, PZS,             &
-                                     PZREF, PUREF                 )  
+SUBROUTINE OL_READ_ATM_CONF_ASCII (DTCO, U, HSURF_FILETYPE, HFORCING_FILETYPE,  &
+                                   PDURATION, PTSTEP_FORC, KNI, &
+                                   KYEAR, KMONTH, KDAY, PTIME,  &
+                                   PLAT, PLON, PZS,             &
+                                   PZREF, PUREF                 )  
 !
 !==================================================================
 !!****  *OL_READ_ATM_CONF* - Initialization routine
@@ -42,10 +41,8 @@ SUBROUTINE OL_READ_ATM_CONF_ASCII (YSC, &
 !!                  with GTMSK to read dimensions.
 !==================================================================
 !
-!
-!
-USE MODD_SURFEX_n, ONLY : SURFEX_t
-!
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_TYPE_DATE_SURF
 !
@@ -74,7 +71,8 @@ INCLUDE 'mpif.h'
 #endif
 !
 !
-TYPE(SURFEX_t), INTENT(INOUT) :: YSC
+TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HSURF_FILETYPE
  CHARACTER(LEN=6), INTENT(IN)  :: HFORCING_FILETYPE
@@ -153,13 +151,10 @@ ENDIF
 !*      2.    Read full grid dimension and date
 !
  CALL SET_SURFEX_FILEIN(HSURF_FILETYPE,'PREP')
- CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
-                     HSURF_FILETYPE,'FULL  ','SURF  ','READ ') 
+CALL INIT_IO_SURF_n(DTCO, U, HSURF_FILETYPE,'FULL  ','SURF  ','READ ') 
 !
- CALL READ_SURF(&
-                HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
- CALL READ_SURF(&
-                HSURF_FILETYPE,'DTCUR',TTIME,IRET)
+ CALL READ_SURF(HSURF_FILETYPE,'DIM_FULL',IDIM_FULL,IRET)
+ CALL READ_SURF(HSURF_FILETYPE,'DTCUR',TTIME,IRET)
 !
  CALL END_IO_SURF_n(HSURF_FILETYPE)
 !
@@ -170,8 +165,7 @@ PTIME  = TTIME%TIME
 !
 !*      4.    Geographical initialization
 !
- CALL GET_SIZE_FULL_n(YSC%U, &
-                      'OFFLIN ',IDIM_FULL,KNI) 
+ CALL GET_SIZE_FULL_n('OFFLIN ',IDIM_FULL,U%NSIZE_FULL,KNI) 
 !
 ALLOCATE(PLON (KNI))
 ALLOCATE(PLAT (KNI))
