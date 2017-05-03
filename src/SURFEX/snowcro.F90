@@ -539,9 +539,11 @@ IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA
   ZSNOWB0 = XPSNOWB0
   ! If Impurity are used, initialize Impurity Density according to Impurity Type
   IF (NIMPUR>0) THEN
-    ZSNOWIMP_DENSITY(:,:,1) = 1500.       !Soot density
+    ZSNOWIMP_DENSITY(:,:,1) = 1270.       !Soot density according to Flanner et.al 2012 (set to 1500 for the paper)
+    ZSNOWIMP_CONTENT(:,:,1) = 0.
     IF (NIMPUR>1) THEN
-      ZSNOWIMP_DENSITY(:,:,2) = 2500.       !Dust Density
+      ZSNOWIMP_DENSITY(:,:,2) = 2600.       !Dust Density (hess1995)
+      ZSNOWIMP_CONTENT(:,:,2) = 0.
     ENDIF 
   ENDIF
   ! ZSNOWIMP_CONTENT=25.0E-9
@@ -894,6 +896,16 @@ SELECT CASE (HSNOWRAD)
         ENDIF
       ENDDO
     ENDDO
+   ! TAke into account wet deposit by rainfall    
+    DO JIMP=1,NIMPUR
+      DO JJ=1, size(ZSNOW)
+        IF (PRR(JJ)>XUEPSI .AND. PSR(JJ)<XUEPSI) THEN
+          PSNOWIMPUR(JJ,1,JIMP)=PSNOWIMPUR(JJ,1,JIMP)+ZWETCOEF(JJ,JIMP)       
+        ENDIF
+     ENDDO
+   ENDDO
+    
+    
  !Compute the impurity concentration of each layer(JST) for each type of impurity(JIMP) and each point (JJ)   
   DO JIMP=1,NIMPUR 
     DO JJ=1,SIZE(ZSNOW)
@@ -918,10 +930,10 @@ SELECT CASE (HSNOWRAD)
 
   !
   CASE ("TAR","TA1","TA2","TA3", "TA4")!
-    IF ((ANY(PSNOWIMPUR<0)).OR.(ANY(PSNOWIMPUR>1))) THEN
+    IF ((ANY(ZSNOWIMP_CONTENT<0)).OR.(ANY(ZSNOWIMP_CONTENT>1))) THEN
       PRINT*,"PROBLEME GRAVE"
       PRINT*,"ATTENTION VALEURS ANORMALES IMPURETES"
-      PRINT*,'Before Tartes',PSNOWIMPUR(:,:,1),'Stop',PSNOWIMPUR(:,:,2)
+      PRINT*,'Before Tartes',ZSNOWIMP_CONTENT(:,:,1),'Stop',ZSNOWIMP_CONTENT(:,:,2)
     ENDIF
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
                         ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH, &
@@ -933,12 +945,21 @@ SELECT CASE (HSNOWRAD)
 ! ! output spectral albedo and diffuse to total irradiance ratio
   DO JJ=1,NPNBANDS
 	  DO JP=1, size(ZSNOW)
+!	    PSPEC_ALB(JP,JJ)=PZENITH(JJ)
 	    PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)
 	  ENDDO
   ENDDO
-    
+  
+  DO JJ=NPNBANDS+1,JPNBANDS_ATM
+	  DO JP=1, size(ZSNOW)
+!	    PSPEC_ALB(JP,JJ)=PZENITH(JJ)
+	    PSPEC_ALB(JP,JJ)=0.
+	  ENDDO
+  ENDDO   
+   
   DO JJ=1,JPNBANDS_ATM
 	  DO JP=1, size(ZSNOW)
+!	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)
 	    IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN
 	      PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))
 	    ELSE 
@@ -3374,7 +3395,7 @@ DO JJ = 1,SIZE(PSNOWDZ,1)
                        / ( ZSNOWLWE(JJ,JST) - PSNOWLIQ(JJ,JST) )
     PSNOWDZ   (JJ,JST) = PSNOWDZ (JJ,JST) * ZCMPRSFACT(JJ,JST)
     PSNOWRHO  (JJ,JST) = ZSNOWLWE(JJ,JST) * XRHOLW / PSNOWDZ(JJ,JST)
-   ! scavenging of 30% of melt
+   ! scavenging of 20% of melt
    ! 2. Add snow melt to current snow liquid water content:
     ! ------------------------------------------------------
     !
@@ -4600,7 +4621,7 @@ DO JJ = 1,SIZE(PSNOW(:))
     ENDIF
     !
     PSNOWHISTF (JJ) = 0.0
-    IF (HSNOWRAD=="TA3") THEN
+    IF (HSNOWRAD=="TA3" .AND. PSR(JJ)>XUEPSI) THEN
       DO JIMP=1,NIMPUR
         PSNOWIMPURF(JJ,JIMP)=ZWETCOEF(JJ,JIMP)
       ENDDO
