@@ -536,7 +536,7 @@ ifneq "$(XIOS_CDF_OPT)" ""
 #
 xios : $(XIOS_KEY)
 $(XIOS_KEY) : $(CDFF_INC)
-	@echo "export Surfex_CC=\"$(CC) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
+	@echo "export Surfex_CC=\"$(CC) $(CFLAGS) $(CFLAGS_OMP)\"" > $(DIR_XIOS)/arch/arch-Surfex.env  
 	@echo "export Surfex_F90=\"$(F90) $(F90FLAGS)\"" >> $(DIR_XIOS)/arch/arch-Surfex.env  
 	#
 	@echo "OASIS_INCDIR=\"$(INC_OASIS)\"" > $(DIR_XIOS)/arch/arch-Surfex.path  
