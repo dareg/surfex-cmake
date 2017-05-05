@@ -852,6 +852,7 @@ CALL AVG_FLUXES_MEB_TSPLIT     ! average fluxes over time split
 CALL SNOW_LOAD_MEB(PK, PEK, DEK, PTSTEP, PSR, ZWRVNMAX, ZKVN, ZCHEATV, ZMELTVN, &
                    ZVELC, PSUBVCOR)
 !
+
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*     9.0    Snow explicit canopy loading/interception 
@@ -901,7 +902,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PEK%XPSN(:))
                   PPEQ_B_COEF, PSNOW_THRUFAL, PGRNDFLUX, PFLSN_COR,         &
                   PRESTOREN, PEVAPCOR, DEK%XLES, DEK%XLESL, ZEVAP3L, PSNOWSFCH, &
                   PDELHEATN, PDELHEATN_SFC, PRISNOW, PZENITH, PDELHEATG,    &
-                  PDELHEATG_SFC, PQSNOW     )  
+                  PDELHEATG_SFC, PQSNOW     ) 
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !*      11.0    Litter layer hydrology:
@@ -1672,7 +1673,7 @@ REAL, PARAMETER                       :: Z3 = 0.03       !coeff for litter condu
 REAL, PARAMETER                       :: Z4 = 0.95       !litter porosity       (m3/m3)
 REAL, PARAMETER                       :: Z5 = 0.12       !litter field capacity (m3/m3)
 !
-REAL, DIMENSION(SIZE(PEK%XWG))        :: ZWORK
+REAL, DIMENSION(SIZE(PEK%XWG,1))      :: ZWORK
 !
 !-------------------------------------------------------------------------------
 !
@@ -1852,7 +1853,7 @@ PEK%XWGI (:,1) = PEK%XWGI(:,1)- ZEXCESS / (XRHOLW * PDZG(:,1))
 !
 ZEXCESS(:)     = MAX( 0.0, - PEK%XWGI(:,1) )
 PEK%XWGI(:,1)  = PEK%XWGI(:,1) + ZEXCESS(:)                                
-PEK%XWG (:,1)  = PEK%XWG (:,1) - ZEXCESS(:)                                
+PEK%XWG (:,1)  = PEK%XWG (:,1) - ZEXCESS(:)     
 PEK%XTG (:,1)  = PEK%XTG (:,1) + ZEXCESS(:) * (XLMTT*XRHOLW)/PSOILHCAPZ(:,1) 
 !
 DO JL=1,INL-1                 
