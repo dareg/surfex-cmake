@@ -1,5 +1,7 @@
       FUNCTION GET_OPT(CLOPT,CLARG,LLMPOFF)
+#ifdef SFX_MPI
       USE MPL_ARG_MOD
+#endif
 !
 !     CRAY function
 !
@@ -29,7 +31,9 @@
       IF (LLMPOFF) THEN
         NBARGS=COMMAND_ARGUMENT_COUNT()
       ELSE
+#ifdef SFX_MPI
         NBARGS=MPL_IARGC()
+#endif
       ENDIF
 #endif
 ! si on a lu tous les arguments on sort ...
@@ -44,7 +48,9 @@
       IF (LLMPOFF) THEN
         CALL GETARG(IARG,COPT)
       ELSE
+#ifdef SFX_MPI
         CALL MPL_GETARG(IARG,COPT)
+#endif
       ENDIF
 #endif
       COPT1=COPT(2:2)
@@ -65,7 +71,9 @@
          IF (LLMPOFF) THEN
            CALL GETARG(IARG+1,CLARG)
          ELSE
+#ifdef SFX_MPI
            CALL MPL_GETARG(IARG+1,CLARG)
+#endif
          ENDIF
 #endif
          IARG=IARG+2

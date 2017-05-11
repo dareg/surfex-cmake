@@ -6,7 +6,9 @@ USE PARKIND1   , ONLY : JPIM     ,JPIB     ,JPRB     ,JPRM    ,JPRD
 USE YOMHOOK    , ONLY : LHOOK, DR_HOOK
 USE OML_MOD     , ONLY : OML_MAX_THREADS, OML_MY_THREAD, OML_IN_PARALLEL
 USE STRHANDLER_MOD , ONLY : TOUPPER
+#ifdef SFX_MPI
 USE MPL_MODULE , ONLY : MPL_MYRANK, MPL_NPROC
+#endif
 
 !$
 !..   Author: Sami Saarinen, ECMWF, 10/02/98
@@ -131,7 +133,11 @@ IF (PRESENT(INEW)) THEN
 ELSE IF (.NOT.LLOMP) THEN ! Override the default method (only if outside the OpenMP)
   ITMP = -1 ! no change
   IF (LLFIRST) THEN ! Do once per execution only
+#ifdef SFX_MPI
     INPES = MPL_NPROC()
+#else
+    INPES = 1
+#endif
     CALL GET_ENVIRONMENT_VARIABLE('EC_SORTING_INFO',CLENV) ! ../support/env.c
     IF (CLENV /= ' ') THEN
       ITMP = NSINFO
@@ -146,7 +152,11 @@ ELSE IF (.NOT.LLOMP) THEN ! Override the default method (only if outside the Ope
         NSINFO = ITMP
       ENDIF
     ENDIF
+#ifdef SFX_MPI
     IMYPROC = MPL_MYRANK()
+#else
+    IMYPROC = 0
+#endif
     CALL GET_ENVIRONMENT_VARIABLE('EC_SORTING_METHOD',CLENV) ! ../support/env.c
     IF (CLENV /= ' ') THEN
        IF (IMYPROC == NSINFO) WRITE(0,'(a)')'<EC_SORTING_METHOD='//TRIM(CLENV)

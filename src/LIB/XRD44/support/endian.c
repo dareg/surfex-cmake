@@ -59,9 +59,11 @@ void ec_mpi_atexit_(void)
     }
     else if (callnum == 2) {
       /* action : finish MPI via F90 cmpl_end (in cmpl_binding.F90) */
+#ifdef SFX_MPI
       extern void cmpl_end_(int *);
       int ierr = 0;
       cmpl_end_(&ierr);
+#endif
     }
   }
 }

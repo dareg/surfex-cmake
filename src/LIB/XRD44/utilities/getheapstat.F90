@@ -1,9 +1,9 @@
 SUBROUTINE GETHEAPSTAT(KOUT, CDLABEL)
 
 USE PARKIND1  ,ONLY : JPIM     ,JPRB     ,JPIB
-
+#ifdef SFX_MPI
 USE MPL_MODULE
-
+#endif
 #ifdef NAG
 USE F90_UNIX_ENV, ONLY: GETENV
 #endif
@@ -25,9 +25,13 @@ CHARACTER(LEN=80) CLTEXT(0:4)
 CALL GET_ENVIRONMENT_VARIABLE("EC_PROFILE_HEAP", CLENV) ! turn OFF by export EC_PROFILE_HEAP=0
 
 IF (KOUT >= 0 .AND. CLENV /= '0') THEN
+#ifdef SFX_MPI
   IMYPROC = MPL_MYRANK()
   INPROC  = MPL_NPROC()
-
+#else
+  IMYPROC = 0
+  INPROC = 1
+#endif
   DO I=1,ISIZE
     ILIMIT(I) = I ! power of 10's ; pls. consult ifsaux/utilities/getcurheap.c
   ENDDO
@@ -53,8 +57,10 @@ IF (KOUT >= 0 .AND. CLENV /= '0') THEN
     ZRECV(:) = -1
 
     ICOUNTS(:) = ISIZE
+#ifdef SFX_MPI
     CALL MPL_GATHERV(ZSEND(:), KROOT=1, KRECVCOUNTS=ICOUNTS(:), &
                     &PRECVBUF=ZRECV, CDSTRING='GETHEAPSTAT:')
+#endif
 
     IF (IMYPROC == 1) THEN
 !     Not more than 132 columns, please :-)

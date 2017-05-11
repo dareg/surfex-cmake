@@ -121,8 +121,9 @@ CALL VPP_ABORT()
 #else
 
 IRETURN_CODE=1
+#ifdef SFX_MPI
 CALL MPI_ABORT(KCOMM,IRETURN_CODE,IERROR)
-
+#endif
 #endif
 
 CALL EC_RAISE(SIGABRT) ! In case ever ends up here

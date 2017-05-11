@@ -37,7 +37,9 @@ CHARACTER(LEN=4) :: CSTAR
 CHARACTER(LEN=LEN(CSTAR)+1+LEN(IDSTRING)) :: ID_STRING
 CHARACTER (LEN = 10) ::  CLDATEOD,CLTIMEOD,CLZONEOD
 INTEGER(KIND=4) :: IVALUES(8)
+#ifdef SFX_MPI
 INTEGER(KIND=4) :: IRECV_STATUS(MPI_STATUS_SIZE)
+#endif
 LOGICAL :: LLNOCOMM, LLNOHDR
 CHARACTER(LEN=64) :: CLPFX
 CHARACTER(LEN=3) :: ZUM
@@ -65,6 +67,7 @@ ELSE
    CLPFX = ' '
    IPFXLEN = 0
    ZUM = 'sum'
+#ifdef SFX_MPI
    CALL MPI_BARRIER(KCOMM,ERROR)
    
    CALL MPI_COMM_RANK(KCOMM, MYPROC, ERROR)
@@ -80,6 +83,10 @@ ELSE
       WRITE(0,*) CLPFX(1:IPFXLEN)//"## EC_CRAY_MEMINFO error code ",ERROR," from MPI_COMM_SIZE"
       CALL MPI_ABORT(KCOMM,-1,ERROR)
    ENDIF
+#else
+   NPROC = 1
+   MYPROC = 0
+#endif
 ENDIF
 
 IF(MYPROC == 0) THEN 
@@ -108,11 +115,19 @@ IF(MYPROC == 0) THEN
      WRITE(KULOUT,'(a,/,a)') CLPFX(1:IPFXLEN)//"## EC_MEMINFO ",CLPFX(1:IPFXLEN)//"## EC_MEMINFO"
      WRITE(KULOUT,'(4a)') CLPFX(1:IPFXLEN)//"## EC_MEMINFO Detailed memory information ", &
           "for program ",TRIM(PROGRAM)
+#ifdef SFX_OMP
      WRITE(KULOUT,'(a,i5,a,i3,a,a,'':'',a,'':'',a,a,a,''-'',a,''-'',a)') &
           CLPFX(1:IPFXLEN)//"## EC_MEMINFO Running with ",NPROC, &
           " tasks and ", OMP_GET_MAX_THREADS(), " threads at time ", &
           CLTIMEOD(1:2),CLTIMEOD(3:4),CLTIMEOD(5:10), &
           " on ",CLDATEOD(7:8),CLDATEOD(5:6),CLDATEOD(3:4)
+#else
+     WRITE(KULOUT,'(a,i5,a,i3,a,'':'',a,a,a,''-'',a,''-'',a)') &
+          CLPFX(1:IPFXLEN)//"## EC_MEMINFO Running with ",NPROC, &
+          " tasks and 1 threads at time ", &
+          CLTIMEOD(1:2),CLTIMEOD(3:4),CLTIMEOD(5:10), &
+          " on ",CLDATEOD(7:8),CLDATEOD(5:6),CLDATEOD(3:4)
+#endif
      WRITE(KULOUT,'(4a)') CLPFX(1:IPFXLEN)//"## EC_MEMINFO The Job Name is ",TRIM(JOBNAME), &
           " and the Job ID is ",TRIM(JOBID)
      WRITE(KULOUT,'(a)')  CLPFX(1:IPFXLEN)//"## EC_MEMINFO "
@@ -135,11 +150,19 @@ IF(MYPROC == 0) THEN
     WRITE(0,'(a,/,a)') CLPFX(1:IPFXLEN)//"## EC_MEMINFO ",CLPFX(1:IPFXLEN)//"## EC_MEMINFO"
     WRITE(0,'(4a)') CLPFX(1:IPFXLEN)//"## EC_MEMINFO Detailed memory information ", &
                     "for program ",TRIM(PROGRAM)
+#ifdef SFX_OMP
     WRITE(0,'(a,i5,a,i3,a,a,'':'',a,'':'',a,a,a,''-'',a,''-'',a)') &
                     CLPFX(1:IPFXLEN)//"## EC_MEMINFO Running with ",NPROC, &
                     " tasks and ", OMP_GET_MAX_THREADS(), " threads at time ", &
                     CLTIMEOD(1:2),CLTIMEOD(3:4),CLTIMEOD(5:10), &
                     " on ",CLDATEOD(7:8),CLDATEOD(5:6),CLDATEOD(3:4)
+#else
+    WRITE(0,'(a,i5,a,i3,a,a,'':'',a,a,a,''-'',a,''-'',a)') &
+                    CLPFX(1:IPFXLEN)//"## EC_MEMINFO Running with ",NPROC, &
+                    " tasks and 1 threads at time ", &
+                    CLTIMEOD(1:2),CLTIMEOD(3:4),CLTIMEOD(5:10), &
+                    " on ",CLDATEOD(7:8),CLDATEOD(5:6),CLDATEOD(3:4)
+#endif
     WRITE(0,'(4a)') CLPFX(1:IPFXLEN)//"## EC_MEMINFO The Job Name is ",TRIM(JOBNAME), &
                     " and the Job ID is ",TRIM(JOBID)
     WRITE(0,'(a)')  CLPFX(1:IPFXLEN)//"## EC_MEMINFO "
@@ -160,7 +183,9 @@ ENDIF
 
 IF(ERROR /= 0 ) THEN
   WRITE(0,*) CLPFX(1:IPFXLEN)//"## EC_CRAY_MEMINFO error code ",ERROR," from MPI_BARRIER"
+#ifdef SFX_MPI
   CALL MPI_ABORT(KCOMM,-1,ERROR)
+#endif
 ENDIF
 
 #ifndef DARWIN
@@ -261,6 +286,7 @@ ITAG = 98765
 IF(MYPROC == 0) THEN
     NODENUM=1
     LASTNODE=NODENAME
+#ifdef SFX_MPI
     DO I=1,NPROC-1
         CALL MPI_RECV(NODENAME(1:8),8,MPI_BYTE,I,ITAG,KCOMM,IRECV_STATUS,ERROR)
         IF(ERROR /= 0 ) THEN
@@ -319,6 +345,7 @@ IF(MYPROC == 0) THEN
           LASTNODE=NODENAME
         ENDIF
     ENDDO
+#endif
     PERCENT_USED(2) = 0
     IF(HEAP_SIZE > NODEHUGE) THEN
 ! running with small pages
@@ -351,11 +378,13 @@ IF(MYPROC == 0) THEN
       CLOSE(KULOUT)
     ENDIF
 ELSE
+#ifdef SFX_MPI
     CALL MPI_SEND(NODENAME(1:8),8,MPI_BYTE,0,ITAG,KCOMM,ERROR)
     IF(ERROR /= 0 ) THEN
        WRITE(0,*) CLPFX(1:IPFXLEN)//"## EC_CRAY_MEMINFO error code ",ERROR," from MPI_SEND"
        CALL MPI_ABORT(KCOMM,-1,ERROR)
     ENDIF
+#endif
     SENDBUF(1)=NODEHUGE
     SENDBUF(2)=MEMFREE
     SENDBUF(3)=CACHED
@@ -365,15 +394,17 @@ ELSE
     SENDBUF(7)=HUGEPAGE1
     SENDBUF(8)=HEAP_SIZE
     SENDBUF(9)=TASKSMALL
+#ifdef SFX_MPI
     CALL MPI_SEND(SENDBUF(1:9),9,MPI_INTEGER8,0,ITAG+1,KCOMM,ERROR)
     IF(ERROR /= 0 ) THEN
        WRITE(0,*) CLPFX(1:IPFXLEN)//"## EC_CRAY_MEMINFO error code ",ERROR," from MPI_SEND"
        CALL MPI_ABORT(KCOMM,-1,ERROR)
     ENDIF
+#endif
 ENDIF
-
+#ifdef SFX_MPI
 IF (.not.LLNOCOMM) CALL MPI_BARRIER(KCOMM,ERROR)
-
+#endif
 END SUBROUTINE EC_CRAY_MEMINFO
 
 SUBROUTINE MEMINFO(KOUT,KSTEP)
