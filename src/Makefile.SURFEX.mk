@@ -67,7 +67,7 @@ FUNDEFS += -URJ_OFIX -URJ_PFIX
 #
 DIR_SURFEX += SURFEX
 FPPFLAGS_SURFEX= -DSFX_ASC -DSFX_FA -DSFX_LFI
-INC_SURFEX = -I$(B)include
+INC_SURFEX = -I$(B)include -I$(B)SURFEX
 #
 ifdef DIR_SURFEX
 DIR_MASTER += $(DIR_SURFEX)
@@ -209,6 +209,9 @@ DIR_XRD += LIB/$(VER_XRD)/module
 DIR_XRD += LIB/$(VER_XRD)/parallel
 DIR_XRD += LIB/$(VER_XRD)/support
 DIR_XRD += LIB/$(VER_XRD)/utilities
+ifneq "$(VER_MPI)" "NOMPI"
+DIR_XRD += LIB/$(VER_XRD)/mpl
+endif
 INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/fa -I$(B)LIB/$(VER_XRD)/lfi -I$(B)LIB/$(VER_XRD)/utilities
 #RJ: for time being avoid interfaces usage from xrd/fa cpp prototyping, not needed with backported patches
 #RJ FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
@@ -307,6 +310,9 @@ FUNDEFS += -UNOMPI -USFX_MPI
 #RJ: moved from all configs here
 ifneq "$(VER_MPI)" "NOMPI"
 FPPFLAGS += -DSFX_MPI
+endif
+ifneq "$(VER_OMP)" "NOOMP"
+FPPFLAGS +=-DSFX_OMP
 endif
 #
 ifndef VER_MPI
