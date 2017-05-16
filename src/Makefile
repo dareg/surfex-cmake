@@ -413,7 +413,7 @@ endif
 #RJ: fix issue with mixed compilers by clearing some env flags: LDFLAGS,CFLAGS,CPPFLAGS
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
-NETCDF_OPTS ?= FC="$(F90)" CC="$(CC) "
+NETCDF_OPTS ?= FC="$(F90)" CC="$(CC)"
 #
 ifneq "$(VER_MPI)" "NOMPI"
 HDF5_OPTS= --enable-fortran --enable-parallel
@@ -442,7 +442,7 @@ LIBSCDF= -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compil
 
 CPPFLAGSCDFF= -I${ZLIB_PATH}/include -I${SZIP_PATH}/include -I${HDF5_PATH}/include -I${CDF_PATH}/include
 LDFLAGSCDFF= -Wl,-rpath,/opt/softs/intel/impi/5.1.2.150/intel64/lib:/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64:${CDF_PATH}/lib:${HDF5_PATH}/lib:${SZIP_PATH}/lib:${ZLIB_PATH}/lib -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
-LIBSCDFF= -netcdf -lhdf5_hl -lhdf5 -ldl -lm -lz -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
+LIBSCDFF= -lnetcdf -lhdf5_hl -lhdf5 -ldl -lm -lz -L/opt/softs/intel/impi/5.1.2.150/intel64/lib -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L${CDF_PATH}/lib -L${HDF5_PATH}/lib -L${ZLIB_PATH}/lib -L${SZIP_PATH}/lib
 
 $(SZIP_LIB) : 
 	 cd $(DIR_SZIP) && ./configure --prefix=${SZIP_PATH} CC="$(CC)" && \
