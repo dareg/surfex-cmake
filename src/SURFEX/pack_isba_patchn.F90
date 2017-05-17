@@ -944,7 +944,11 @@ IF (I%NPATCH==1) THEN
   PKI%XP_HO2JM        (:)    =    I%XHO2JM        (:)
   PKI%XP_SSO_SLOPE    (:)    =    I%XSSO_SLOPE    (:)
   PKI%XP_SSO_DIR      (:)    =    I%XSSO_DIR      (:)
-  PKI%NP_TAB_SYT      (:)    =    NTAB_SYT      (:)
+  IF ((I%TSNOW%SCHEME=='CRO') .AND. (I%LSNOWSYTRON)) THEN
+    PKI%NP_TAB_SYT      (:)    =    NTAB_SYT      (:)
+  ELSE
+    PKI%NP_TAB_SYT      (:)    = -999.
+  ENDIF
   PKI%XP_GAMMAT       (:)    =    I%XGAMMAT       (:)
   PKI%XP_TDEEP        (:)    =    I%XTDEEP        (:)  
   PKI%XP_LAT          (:)    =    IG%XLAT          (:)

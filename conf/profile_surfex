@@ -61,17 +61,18 @@ export VER_USER=
 #
 # 'Scandollar' Post Processing default variables
 #
-export CONF_DOLLAR=/manto/tuzetf/SURFEX/tuzet2/tuzet/conf/post/confdollar_aeropc_default
+export CONF_DOLLAR=/home/lafaysse/SURFEX/lafaysse_fromV8trunk/conf/post/confdollar_cnrmpc_default
 #
 # Version of NETCDF
 #
-export VER_CDF=CDFAUTO
+export VER_CDF=CDFCTI
 export VERSION_CDF=3.6.3
 #
 # Version of GRIBAPI
 #
 export VER_GRIBAPI=GRIBAPI_AUTO
-export VERSION_GRIBAPI=1.9.9
+export VERSION_GRIBAPI=1.17.0
+export GRIB_DEFINITION_PATH=${SRC_SURFEX}"/src/LIB/grib_api-1.17.0-Source/definitions"
 #
 # Version of OASIS
 #

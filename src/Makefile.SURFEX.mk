@@ -459,13 +459,13 @@ ARCH_XYZ    := $(ARCH_XYZ)-$(VER_MPI)-$(VER_OMP)
 ifneq "$(VER_GRIBAPI)" "NONE"
 #
 ifeq "$(VER_GRIBAPI)" "GRIBAPI_AUTO"
-DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}
+DIR_GRIBAPI?=${SRC_SURFEX}/src/LIB/grib_api-${VERSION_GRIBAPI}-Source
 #RJ: avoid non standard libs! Can create non conforming outputs
 GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 #
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
 ifeq "$(VER_GRIBAPI)" "SOPRANO"
@@ -600,8 +600,11 @@ ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
 PROG_LIST += PGD PREP OFFLINE SODA
-PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
+#PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
+ifeq "$(VER_OASIS)" "mct"
+     PROG_LIST += $(TRIP_LIST)
+endif
 endif
 #
 #RJ: only include during 'make user' to avoid 'bad' programs
