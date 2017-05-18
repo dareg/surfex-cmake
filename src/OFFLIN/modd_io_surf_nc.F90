@@ -35,6 +35,7 @@ IMPLICIT NONE
 !
 !* variables for each patch
 !
+ CHARACTER(LEN=28),SAVE :: CFILE_NC
  CHARACTER(LEN=28),SAVE :: CFILEIN_NC 
  CHARACTER(LEN=28),SAVE :: CFILEIN_NC_SAVE            ! Name of the input
  CHARACTER(LEN=28),SAVE :: CFILEOUT_NC                ! Name of the output
@@ -47,12 +48,9 @@ INTEGER :: NLUOUT         ! logical unit of output file
 LOGICAL, SAVE :: LCREATED = .FALSE.
 LOGICAL :: LDEF = .FALSE.
 !
-INTEGER, DIMENSION(:),POINTER :: NMASK
-!$OMP THREADPRIVATE(NMASK)
+INTEGER, DIMENSION(:),POINTER :: NMASK=>NULL()
  CHARACTER(LEN=6)               :: CMASK ! surface mask type
-!$OMP THREADPRIVATE(CMASK)
 INTEGER :: NFULL
-!$OMP THREADPRIVATE(NFULL)
 INTEGER :: NFULL_AUX ! total number fo points of surface (Auxilarry file for prep)
 !
 LOGICAL, SAVE                     :: LMASK = .FALSE.

@@ -4,8 +4,7 @@
 !SFX_LIC for details. version 1.
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA (I, UG, U, &
-                               KI,KSTEP,GTOPD)
+      SUBROUTINE TOPD_TO_ISBA (K, UG, U, KI,KSTEP,GTOPD)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -52,9 +51,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_K_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -80,9 +77,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-!
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -102,7 +97,7 @@ REAL, DIMENSION(KI)       :: ZDG_FULL
 !
 REAL, DIMENSION(KI,NNCAT) :: ZCOUNT, ZW_CAT
 !
- CHARACTER(LEN=5)          :: YSTEP
+CHARACTER(LEN=5)          :: YSTEP
 INTEGER                   :: JCAT_IN
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -144,7 +139,7 @@ DO JMESH=1,KI
    IF (XTOTBV_IN_MESH(JMESH)==XBV_IN_MESH(JMESH,JCAT)) THEN ! only 1 catchment on mesh
     JCAT_IN=JCAT
     IF (GTOPD(JCAT).AND. NNBV_IN_MESH(JMESH,JCAT) /=0.) THEN
-     IF (XBV_IN_MESH(JMESH,JCAT)>=UG%XMESH_SIZE(JMESH)*0.75.AND. ZCOUNT(JMESH,JCAT)/=0.) THEN ! catchment covers totaly mesh
+     IF (XBV_IN_MESH(JMESH,JCAT)>=UG%G%XMESH_SIZE(JMESH)*0.75.AND. ZCOUNT(JMESH,JCAT)/=0.) THEN ! catchment covers totaly mesh
      ZW(JMESH) = ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT) 
      ELSEIF(ZCOUNT(JMESH,JCAT)/=0.)THEN
       ZW(JMESH) = ZW_CAT(JMESH,JCAT) /  ZCOUNT(JMESH,JCAT) 
@@ -159,11 +154,11 @@ DO JMESH=1,KI
   IF(ZW(JMESH)==0.0) JCAT_IN=0 ! several catchments on the same mesh
   !
   IF (JCAT_IN==0) THEN  ! several catchments on the same mesh
-   IF (XTOTBV_IN_MESH(JMESH)>=UG%XMESH_SIZE(JMESH)*0.75) THEN ! catchmentS cover totaly mesh
+   IF (XTOTBV_IN_MESH(JMESH)>=UG%G%XMESH_SIZE(JMESH)*0.75) THEN ! catchmentS cover totaly mesh
     DO JCAT=1,NNCAT
      IF (GTOPD(JCAT).AND. ZCOUNT(JMESH,JCAT)/=0.) THEN
       ZW(JMESH) = ZW(JMESH) + ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT) *&
-                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/UG%XMESH_SIZE(JMESH)))
+                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/UG%G%XMESH_SIZE(JMESH)))
      ELSE
       ZW(JMESH)=0.
      ENDIF
@@ -173,7 +168,7 @@ DO JMESH=1,KI
     DO JCAT=1,NNCAT
      IF (GTOPD(JCAT).AND. ZCOUNT(JMESH,JCAT)/=0.) THEN
       ZW(JMESH) = ZW(JMESH) + ZW_CAT(JMESH,JCAT) / ZCOUNT(JMESH,JCAT)*&
-                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/UG%XMESH_SIZE(JMESH)))
+                 MIN(1.0,(XBV_IN_MESH(JMESH,JCAT)/UG%G%XMESH_SIZE(JMESH)))
      ELSE
       ZW(JMESH)=0.
      ENDIF
@@ -191,7 +186,7 @@ ENDDO
 XWG_FULL(:) = MAX(ZW(:),XWGMIN)
 !
 !
- CALL UNPACK_SAME_RANK(U%NR_NATURE,I%XWSAT(:,2),ZWSAT_FULL)
+ CALL UNPACK_SAME_RANK(U%NR_NATURE,K%XWSAT(:,2),ZWSAT_FULL)
 !
 XWSUPSAT=0.
 !ludo glace Wsat varie
@@ -217,8 +212,7 @@ IF ( (NFREQ_MAPS_WG/=0 .AND. MOD(KSTEP,NFREQ_MAPS_WG)==0) .OR.&
   ENDIF
   !
   CALL OPEN_FILE('ASCII ',NUNIT,HFILE='carte_w'//YSTEP,HFORM='FORMATTED',HACTION='WRITE')
-  CALL WRITE_FILE_ISBAMAP(UG, &
-                          NUNIT,XWG_FULL,KI)
+  CALL WRITE_FILE_ISBAMAP(UG, NUNIT,XWG_FULL,KI)
   CALL CLOSE_FILE('ASCII ',NUNIT)
   !
 ENDIF

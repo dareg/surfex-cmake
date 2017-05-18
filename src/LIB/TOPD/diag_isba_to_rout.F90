@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !-----------------------------------------------------------------
 !     ############################
-      SUBROUTINE DIAG_ISBA_TO_ROUT (UG, &
+      SUBROUTINE DIAG_ISBA_TO_ROUT (PMESH_SIZE, &
                                     PVARC,PVARCP,PVARROUT)
 !     ############################
 !
@@ -64,8 +64,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-!
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+REAL, DIMENSION(:), INTENT(IN) :: PMESH_SIZE
 !
 REAL,DIMENSION(:),INTENT(IN)        :: PVARC       ! Current time step cumulated diagnostic from SurfEx
 REAL,DIMENSION(:),INTENT(IN)        :: PVARCP      ! Previous time step cumulated diagnostic from SurfEx 
@@ -86,7 +85,7 @@ IF ( SIZE(PVARC,1)==SIZE(PVARCP,1) ) THEN
   WHERE ( PVARC/=XUNDEF )
     PVARROUT = PVARC - PVARCP
     PVARROUT = PVARROUT / XTOPD_STEP
-    PVARROUT = PVARROUT * UG%XMESH_SIZE / XRHOLW
+    PVARROUT = PVARROUT * PMESH_SIZE / XRHOLW
   ENDWHERE
   !
 ELSE 

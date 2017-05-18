@@ -1,16 +1,21 @@
 #!/bin/sh
-#set -x
 #set -e
 if [ "x$XYZ" = "x" ] 
 then
 #
-export VERSION_MASTER=${VERSION_MASTER:-SFX-V8-0}
-export VERSION_BUG=${VERSION_BUG:-0}
+export VERSION_MASTER=${VERSION_MASTER:-SFX-V8-1}
+export VERSION_BUG=${VERSION_BUG:-1}
 export VERSION_XYZ=${VERSION_MASTER}-${VERSION_BUG}
 export VERSION_DATE=${VERSION_DATE:-"27/03/2012"}
-export VERSION_CDF=${VERSION_CDF:-"3.6.3"}
+export VERSION_CURL=${VERSION_CURL:-"7.50.1"}
+export VERSION_ZLIB=${VERSION_ZLIB:-"1.2.8"}
+export VERSION_SZIP=${VERSION_SZIP:-"2.1"}
+export VERSION_HDF5=${VERSION_HDF5:-"1.8.17"}
+export VERSION_CDF=${VERSION_CDF:-"4.4.1"}
+export VERSION_CDFF=${VERSION_CDFF:-"4.4.4"}
 export VERSION_GRIBAPI=${VERSION_GRIBAPI:-"1.17.0"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
+export VERSION_XIOS=${VERSION_XIOS:-"trunk-1078"}
 export SFX_INT=${SFX_INT-"I4"}
 #
 export NEED_TOOLS=NO
@@ -30,6 +35,7 @@ then
     export ARCH=${ARCH:-bgfortran}
     export VER_MPI=${VER_MPI:-NOMPI}
     export VER_OMP=${VER_OMP:-NOOMP}
+    export  VER_XIOS=${VER_XIOS:-0}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFEXT}
     export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_EXT}
@@ -46,6 +52,7 @@ bash --norc
     export ARCH=${ARCH:-zgfortran}
     export VER_MPI=${VER_MPI:-MPIAUTO}
     export VER_OMP=${VER_OMP:-NOOMP}
+    export  VER_XIOS=${VER_XIOS:-0}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFAUTO}
     export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_AUTO}
@@ -62,6 +69,7 @@ bash --norc
     export ARCH=${ARCH:-zifort}
     export VER_MPI=${VER_MPI:-NOMPI}
     export VER_OMP=${VER_OMP:-OMP}
+    export  VER_XIOS=${VER_XIOS:-0}
     export OPTLEVEL=${OPTLEVEL:-O2}
     export VER_CDF=${VER_CDF:-CDFEXT}
     export VER_GRIBAPI=${VER_GRIBAPI:-GRIBAPI_EXT}
@@ -84,7 +92,8 @@ else
 case "$TARG" in
 'Linux service'*) 
                 export     ARCH=${ARCH:-LXifort} 
-                export  VER_MPI=${VER_MPI:-MPIICE} 
+		export  VER_MPI=${VER_MPI:-MPIICE}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export NEED_NCARG=${NEED_NCARG:-YES}
                 export MVWORK=${MVWORK:-NO}
                 domain=$(grep .fr /etc/hosts | head -1 )
@@ -114,6 +123,7 @@ module load sgi-mpt/1.26
 'Linux platine'*|'Linux titane'*|'Linux curie'*) 
                 export     ARCH=${ARCH:-LXifort} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO} 
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2} 
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFAUTO}
@@ -121,6 +131,7 @@ module load sgi-mpt/1.26
 'Linux brodie'*|'Linux mercure'*) 
                 export     ARCH=${ARCH:-SX8} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO} 
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O4} 
                 export MVWORK=${MVWORK:-YES}
                 export VER_CDF=${VER_CDF:-CDFSX}
@@ -133,6 +144,7 @@ module rm netcdf ; module load netcdf/3.6.3
 'Linux tori'*|'Linux yuki'*)
                 export     ARCH=${ARCH:-SX8}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFMFSX}
@@ -141,7 +153,8 @@ module rm netcdf ; module load netcdf/3.6.3
               ;;
 'Linux babel'*) 
                 export     ARCH=${ARCH:-BG} 
-                export  VER_MPI=${VER_MPI:-MPIAUTO}   
+                export  VER_MPI=${VER_MPI:-MPIAUTO} 
+	        export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2} 
                 export MVWORK=${MVWORK:-YES}
               ;;
@@ -149,6 +162,7 @@ AIX*)
                 export MNH_ARCH=$(echo $ARCH | grep AIX)
                 export     ARCH=${MNH_ARCH:-AIX64} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO}   
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2} 
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFAIX}
@@ -176,6 +190,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
                 export    OMPI_FC=ifort
                 export       ARCH=${ARCH:-LXifort}
                 export    VER_MPI=${VER_MPI:-OMPICNRM}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export   OPTLEVEL=${OPTLEVEL:-DEBUG}
                 export     MVWORK=${MVWORK:-NO}
                 export    VER_CDF=${VER_CDF:-CDFCTI}
@@ -186,6 +201,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 
                 export     ARCH=${ARCH:-LXgfortran}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
+		export  VER_XIOS=${VER_XIOS:-2}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFCTI}
@@ -196,19 +212,22 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 
                 export     ARCH=${ARCH:-MCgfortran}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
+		export  VER_XIOS=${VER_XIOS:-2}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFMAC}
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
               ;;
+
 'Linux beaufixlogin'*) #BEAUFIX
 
                 export     ARCH=${ARCH:-LXifort}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
-                export VER_CDF=${VER_CDF:-CDFBOFX}
+                export VER_CDF=${VER_CDF:-CDFBOFXPARALL}
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
               ;;
@@ -216,15 +235,17 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 
                 export     ARCH=${ARCH:-LXifort}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
-                export VER_CDF=${VER_CDF:-CDFPROLX}
+                export VER_CDF=${VER_CDF:-CDFPROLXPARALL}
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
               ;;
 'Linux nuwa'*)      
                 export     ARCH=${ARCH:-LXifort} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO} 
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-DEBUG}  
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFAUTO}
@@ -240,6 +261,7 @@ export MANPATH=\$MPI_ROOT/share/man:\$MANPATH
 'Linux krypton') #SMHI krypton@NSC
                 export ARCH=${ARCH:-LXgfortran}
                 export VER_MPI=${VER_MPI:-NOMPI}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFAUTO}
@@ -267,6 +289,7 @@ export MANPATH=\$MPI_ROOT/share/man:\$MANPATH
 Linux*)      
                 export     ARCH=${ARCH:-LXgfortran} 
                 export  VER_MPI=${VER_MPI:-MPIAUTO} 
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}  
                 export MVWORK=${MVWORK:-NO}
                 #export VER_CDF=${VER_CDF:-CDFGFOR}
@@ -279,6 +302,7 @@ Linux*)
 
                 export     ARCH=${ARCH} 
                 export  VER_MPI=${VER_MPI:-MPIVIDE} 
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-DEBUG}
               ;;
 esac
@@ -399,11 +423,18 @@ if [ "x${VER_MPI}" = "xNOMPI" ] ; then
   export VER_DRHOOK=MINI
 fi
 #
+LIB_PATH= 
+#
+if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
+  export LIB_PATH=$LOCAL/src/LIB/netcdf4/netcdf-fortran-${VERSION_CDFF}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/netcdf-${VERSION_CDF}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/hdf5-${VERSION_HDF5}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/szip-${VERSION_SZIP}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/zlib-${VERSION_ZLIB}-${ARCH}-${VER_MPI}/lib:$LOCAL/src/LIB/netcdf4/curl-${VERSION_CURL}-${ARCH}-${VER_MPI}/lib
+#
+fi
+#
 # Generate profile_surfex
 #
 "${LOCAL}/bin/eval_dollar"  profile_surfex.ihm > profile_surfex
 chmod +x profile_surfex
-XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}${VER_MPI:+-${VER_MPI}}${VER_OMP:+-${VER_OMP}}-${OPTLEVEL}
+XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_USER:+-${VER_USER}}${VER_MPI:+-${VER_MPI}}${VER_OMP:+-${VER_OMP}}-${OPTLEVEL}-X${VER_XIOS}
 cp profile_surfex "profile_surfex-${XYZ}"
 #
 #  Do some post-install stuff
@@ -437,8 +468,23 @@ fi
 #  Install CDF if VER_CDF=CDFAUTO
 #
 if [ "x${VER_CDF}" = "xCDFAUTO" ] ; then
-if [ ! -d "$LOCAL/src/LIB"/"netcdf-${VERSION_CDF}" ] ; then
-  ( cd "$LOCAL/src/LIB" ; tar xvfz netcdf-${VERSION_CDF}.tar.gz )
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"curl-${VERSION_CURL}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz curl-${VERSION_CURL}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"zlib-${VERSION_ZLIB}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz zlib-${VERSION_ZLIB}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"szip-${VERSION_SZIP}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz szip-${VERSION_SZIP}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"hdf5-${VERSION_HDF5}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz hdf5-${VERSION_HDF5}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"netcdf-${VERSION_CDF}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz netcdf-${VERSION_CDF}.tar.gz )
+fi
+if [ ! -d "$LOCAL/src/LIB/netcdf4"/"netcdf-fortran-${VERSION_CDFF}" ] ; then
+  ( cd "$LOCAL/src/LIB/netcdf4" ; tar xvfz netcdf-fortran-${VERSION_CDFF}.tar.gz )
 fi
 fi
 #
@@ -447,6 +493,7 @@ fi
 if [ "x${VER_GRIBAPI}" = "xGRIBAPI_AUTO" ] ; then
 if [ ! -d "$LOCAL/src/LIB"/"grib_api-${VERSION_GRIBAPI}-Source" ] ; then
   ( cd "$LOCAL/src/LIB" ; tar xvfz grib_api-${VERSION_GRIBAPI}-Source.tar.gz )
+  export LIB_PATH=$LOCAL/src/LIB/grib_api-${VERSION_GRIBAPI}-Source-${ARCH}/lib
 fi
 fi
 #
@@ -468,12 +515,40 @@ else
 fi
 fi
 #
+#  Install XIOS
+#
+set -x
+if [ x"${VER_XIOS}" == x2 ] ; then
+    if [ "x${VER_MPI}" = "xNOMPI" ] ; then
+	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+	echo 'XIOS can not be compiled without mpi'
+	echo 'SURFEX will not be able to run using it'
+	echo 'XIOS build DISABLED'
+	echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    else
+	cd $LOCAL/src/LIB
+	base=XIOS-${VERSION_XIOS}
+	if [ ! -d $base-$ARCH ]; then 
+	    tarball=$base.tar
+	    if [ -f $tarball ] ; then 
+		tar -xf $tarball 
+		mv $base $base-$ARCH
+	    else
+		echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+		echo 'Cannot find XIOS tarball $tarball'
+		echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+		exit
+	    fi
+	fi
+    fi
+fi
+#
 ##########################################################
 #                                                        #
 #      RESUME                                            #
 #                                                        #
 ##########################################################
-echo $VERSION_GRIBAPI
+
 echo  "ARCH=${ARCH}"
 echo  "VER_MPI=${VER_MPI}"
 echo  "VER_OMP=${VER_OMP}"
@@ -485,6 +560,7 @@ echo  "VER_GRIBAPI=${VER_GRIBAPI}"
 echo  "VER_DRHOOK=${VER_DRHOOK}"
 echo  "BIN_TOOLS=${BIN_TOOLS}"
 echo  "VER_OASIS=${VER_OASIS}"
+echo  "VER_XIOS=${VER_XIOS}"
 echo 
 echo  "---> XYZ=${XYZ}"
 echo

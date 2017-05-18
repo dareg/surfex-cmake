@@ -3,9 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########################
-      SUBROUTINE WRITE_BLD_DESCRIPTION_n (DGU, U, &
-                                           BDD, &
-                                          HPROGRAM)
+      SUBROUTINE WRITE_BLD_DESCRIPTION_n (HSELECT, BDD, HPROGRAM)
 !     #########################
 !
 !!
@@ -41,12 +39,6 @@
 !            -----------
 !
 !
-!
-!
-!
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
 USE MODD_BLD_DESCRIPTION_n, ONLY : BLD_DESC_t
 !
 USE MODI_WRITE_SURF
@@ -61,10 +53,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-!
-!
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
 TYPE(BLD_DESC_t), INTENT(INOUT) :: BDD
 !
@@ -103,8 +92,7 @@ ZWORK(6) = FLOAT(BDD%NDESC_ROAD_LAYER)
 ZWORK(7) = FLOAT(BDD%NDESC_FLOOR_LAYER)
 !
 YCOMMENT='Configuration numbers for descriptive building data'
- CALL WRITE_SURF(DGU, U, &
-                 HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,'-','Bld_dimensions  ')
+ CALL WRITE_SURF(HSELECT, HPROGRAM,'BLD_DESC_CNF',ZWORK,IRESP,YCOMMENT,'-','Bld_dimensions  ')
 DEALLOCATE(ZWORK)
 !
 !-------------------------------------------------------------------------------
@@ -193,13 +181,13 @@ END DO
  CALL UP_DESC_IND_W(BDD%NDESC_AGE) ; ZWORK(I1:I2) = FLOAT(BDD%NDESC_AGE_DATE(:))
 !
 YCOMMENT='Descriptive building data'
- CALL WRITE_SURF(DGU, U, &
+ CALL WRITE_SURF(HSELECT, &
                  HPROGRAM,'BLD_DESC_DAT',ZWORK,IRESP,YCOMMENT,'-','Bld_parameters  ')
 DEALLOCATE(ZWORK)
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_BLD_DESCRIPTION_n',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
- CONTAINS
+CONTAINS
 SUBROUTINE UP_DESC_IND_W(K)
 INTEGER, INTENT(IN) :: K
 I1=I2+1

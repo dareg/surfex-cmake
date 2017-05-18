@@ -26,7 +26,8 @@ MODULE MODD_SFX_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
-!!    10/2016 B. Decharme : bug surface/groundwater coupling   
+!!      S.Senesi       08/2015 : add CMODEL_NAME
+!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -40,6 +41,9 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 LOGICAL             :: LOASIS   = .FALSE. ! To use oasis coupler or not
+!
+CHARACTER(LEN=6)    :: CMODEL_NAME        ! component model name (i.e. name under which 
+!                                         ! Surfex is declared to Oasis)
 !
 REAL                :: XRUNTIME = 0.0     ! Total simulated time in oasis namcouple (s)
 !

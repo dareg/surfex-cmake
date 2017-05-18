@@ -42,16 +42,14 @@ INTEGER, DIMENSION(:),POINTER :: NMASK
 INTEGER                       :: NSTEP_OUTPUT
 LOGICAL                       :: LMASK = .FALSE.
 LOGICAL                       :: LPARTR,LPARTW
-LOGICAL                       :: LDEFINED_NATURE
-LOGICAL                       :: LDEFINED_SEA
-LOGICAL                       :: LDEFINED_WATER
-LOGICAL                       :: LDEFINED_TOWN
-LOGICAL                       :: LDEFINED_SURF_ATM
-LOGICAL,DIMENSION(5)          :: LTIME_WRITTEN
+LOGICAL                       :: LTIME_WRITTEN
 INTEGER                       :: XTYPE
 INTEGER                       :: XSTART,XCOUNT,XSTRIDE
 INTEGER                       :: XSTARTW,XCOUNTW
-
+!
+LOGICAL :: LDEF
+INTEGER :: NID_NC
+!
 INTEGER, DIMENSION(:),ALLOCATABLE :: NMASK_IGN
 
 !------------------------------------------------------------------------------

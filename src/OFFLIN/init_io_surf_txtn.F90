@@ -69,11 +69,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_TXT_N',0,ZHOOK_HANDLE)
 !
  CALL GET_LUOUT('TEXTE ',ILUOUT)
 !
- CALL GET_DIM_FULL_n(U, &
-                     NFULL)
+ CALL GET_DIM_FULL_n(U%NDIM_FULL, NFULL)
 !
- CALL GET_SIZE_FULL_n(U, &
-                      'TEXTE ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n('TEXTE ',NFULL,U%NSIZE_FULL,ILU)
 !
 IL = ILU
  CALL GET_TYPE_DIM_n(DTCO, U, &
@@ -81,7 +79,7 @@ IL = ILU
  CALL INIT_IO_SURF_MASK_n(DTCO, U, &
                           HMASK, IL, ILUOUT, ILU, NMASK)
 !
- CMASK = HMASK
+CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_TXT_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
 !

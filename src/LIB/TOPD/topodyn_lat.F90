@@ -117,6 +117,8 @@ DO JJ = 1,NNCAT
   GFOUND = .FALSE.
   ZDIFMIN = 99999.
   !
+  ZKAV = 0.
+  !
   ZRW(:) = PRW(JJ,:) 
   ZDMAX(:) = XDMAXT(JJ,:)
   ZDX = XDXT(JJ)
@@ -215,13 +217,13 @@ DO JJ = 1,NNCAT
       J2 = J2 + 1
       !
     ENDDO
-    !     
+    !   
     DO J1 = J2,NNMC(JJ)
       !
       IF (ZMASK(J1)/=XUNDEF) THEN
         !
         ZKVAL = PKAPPA(JJ,J1) * EXP(XLAMBDA(JJ,J1))
-!        ZKVAL = PKAPPA(JJ,J1) * XDAREA(JJ,J1) / XSLOP(JJ,J1)
+!       ZKVAL = PKAPPA(JJ,J1) * XDAREA(JJ,J1) / XSLOP(JJ,J1)
         ZKVAL = LOG(ZKVAL)
         !
         IF (ZKVAL.GT.ZKVALMAX) THEN
@@ -380,7 +382,7 @@ DO JJ = 1,NNCAT
     !
     GTOPD(JJ)=.TRUE.
     !
-  ELSE
+ ELSE
     !
     !  'Pas de redistribution laterale'
     GTOPD(JJ)=.FALSE.

@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###########################################################
-      SUBROUTINE ZOOM_PGD_SURF_ATM (YSC, &
-                                    HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)
+      SUBROUTINE ZOOM_PGD_SURF_ATM (YSC,HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)
 !     ###########################################################
 
 !!
@@ -60,6 +59,7 @@ USE MODI_ZOOM_PGD_NATURE
 USE MODI_ZOOM_PGD_SEA
 USE MODI_ZOOM_PGD_TOWN
 USE MODI_READ_COVER_GARDEN
+USE MODI_GOTO_MODEL_MNH
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -83,6 +83,7 @@ TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !            ------------------------------
 !
 INTEGER :: IRESP
+INTEGER :: IINFO_ll
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 !
@@ -101,22 +102,17 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    2.      Initialisation of output grid and schemes
 !             -----------------------------------------
 !
- CALL PGD_GRID(&
-               YSC%UG, YSC%U, &
-               HPROGRAM,HFILE,HFILETYPE,.TRUE.,YSC%UG%CGRID,YSC%UG%NGRID_PAR,YSC%UG%XGRID_PAR)
+ CALL GOTO_MODEL_MNH(YSC%U,HPROGRAM,2,IINFO_ll)
+ CALL PGD_GRID(YSC%UG, YSC%U, YSC%GCP, HPROGRAM,HFILE,HFILETYPE,.TRUE.,HDIR='Z')
 !
- CALL OPEN_AUX_IO_SURF(&
-                       HINIFILE,HINIFILETYPE,'FULL  ')
- CALL READ_SURF(&
-                HINIFILETYPE,'SEA',   YSC%U%CSEA,   IRESP)
- CALL READ_SURF(&
-                HINIFILETYPE,'NATURE',YSC%U%CNATURE,IRESP)
- CALL READ_SURF(&
-                HINIFILETYPE,'WATER', YSC%U%CWATER, IRESP)
- CALL READ_SURF(&
-                HINIFILETYPE,'TOWN',  YSC%U%CTOWN,  IRESP)
- CALL READ_COVER_GARDEN(&
-                        HINIFILETYPE,YSC%U%LGARDEN)
+
+ CALL GOTO_MODEL_MNH(YSC%U,HPROGRAM,1,IINFO_ll)
+ CALL OPEN_AUX_IO_SURF(HINIFILE,HINIFILETYPE,'FULL  ')
+ CALL READ_SURF(HINIFILETYPE,'SEA',   YSC%U%CSEA,   IRESP)
+ CALL READ_SURF(HINIFILETYPE,'NATURE',YSC%U%CNATURE,IRESP)
+ CALL READ_SURF(HINIFILETYPE,'WATER', YSC%U%CWATER, IRESP)
+ CALL READ_SURF(HINIFILETYPE,'TOWN',  YSC%U%CTOWN,  IRESP)
+ CALL READ_COVER_GARDEN(HINIFILETYPE,YSC%U%LGARDEN)
  CALL INIT_READ_DATA_COVER(HPROGRAM)
  CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
  CALL CLOSE_AUX_IO_SURF(HINIFILE,HINIFILETYPE)
@@ -126,7 +122,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    3.      surface cover
 !             -------------
 !
- CALL ZOOM_PGD_COVER(YSC%DTCO, YSC%UG, YSC%U, &
+ CALL ZOOM_PGD_COVER(YSC%DTCO, YSC%UG, YSC%U, YSC%GCP, &
                      HPROGRAM,HINIFILE,HINIFILETYPE,YSC%U%LECOCLIMAP)
 !
 !-------------------------------------------------------------------------------
@@ -134,8 +130,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !*    4.      Orography
 !             ---------
 !
- CALL ZOOM_PGD_OROGRAPHY(YSC%DTCO, &
-                         YSC%UG, YSC%U, YSC%USS, &
+ CALL ZOOM_PGD_OROGRAPHY(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%GCP, &
                          HPROGRAM,YSC%U%XSEA,YSC%U%XWATER,HINIFILE,HINIFILETYPE)
 !
 !_______________________________________________________________________________
@@ -144,8 +139,7 @@ IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_SURF_ATM',0,ZHOOK_HANDLE)
 !             ------------------------------------
 !
 IF (YSC%U%NDIM_NATURE>0)                                 &
-  CALL ZOOM_PGD_NATURE(YSC%IM%CHI, YSC%DTCO, YSC%IM%DTI, YSC%IM%IG, &
-                        YSC%IM%I, YSC%UG, YSC%U, YSC%USS, &
+  CALL ZOOM_PGD_NATURE(YSC%DTCO, YSC%IM, YSC%UG, YSC%U, YSC%USS, YSC%GCP, &
                        HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
@@ -153,10 +147,8 @@ IF (YSC%U%NDIM_NATURE>0)                                 &
 !             ----------------------------------
 !
 IF (YSC%U%NDIM_TOWN>0)                                 &
-  CALL ZOOM_PGD_TOWN(YSC%TM%B, YSC%TM%DGCT, YSC%TM%DGMT, YSC%TM%T, YSC%GDM%TGD, &
-                     YSC%GDM%TGDPE, YSC%GRM%TGR, YSC%GRM%TGRPE, &
-                     YSC%TM%BOP, YSC%TM%BDD, YSC%TM%DTB, YSC%DTCO, YSC%TM%DTT, YSC%UG, YSC%U, &
-                     YSC%GDM%TGDO, YSC%GDM%TGDP, YSC%TM%TG, YSC%TM%TOP, YSC%GDM%TVG, &
+  CALL ZOOM_PGD_TOWN(YSC%TM%BOP, YSC%TM%BDD, YSC%TM%DTB, YSC%DTCO, YSC%TM%DTT, YSC%UG, YSC%U, YSC%GCP, &
+                     YSC%GDM%O, YSC%GDM%K, YSC%TM%G, YSC%TM%TOP, &
                      HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP,YSC%U%LGARDEN)  
 !_______________________________________________________________________________
 !
@@ -164,7 +156,7 @@ IF (YSC%U%NDIM_TOWN>0)                                 &
 !             ------------------------------------------
 !
 IF (YSC%U%NDIM_WATER>0)                                 &
-  CALL ZOOM_PGD_INLAND_WATER(YSC%DTCO, YSC%FM%FG, YSC%FM%F, YSC%UG, YSC%U, YSC%USS, YSC%WM%WG, YSC%WM%W, &
+  CALL ZOOM_PGD_INLAND_WATER(YSC%DTCO, YSC%FM%G, YSC%FM%F, YSC%UG, YSC%U, YSC%USS, YSC%WM%G, YSC%WM%W, &
                              HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE,YSC%U%LECOCLIMAP)  
 !_______________________________________________________________________________
 !
@@ -172,7 +164,7 @@ IF (YSC%U%NDIM_WATER>0)                                 &
 !             ---------------------------------
 !
 IF (YSC%U%NDIM_SEA>0)                                 &
-  CALL ZOOM_PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%SG, YSC%SM%S, YSC%UG, YSC%U, &
+  CALL ZOOM_PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%G, YSC%SM%S, YSC%UG, YSC%U, YSC%GCP, &
                     HPROGRAM,HINIFILE,HINIFILETYPE,HFILE,HFILETYPE)  
 !
 !_______________________________________________________________________________

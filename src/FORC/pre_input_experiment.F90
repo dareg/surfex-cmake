@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !----------------------------
 PROGRAM PRE_INPUT_EXPERIMENT
 !----------------------------
@@ -47,11 +43,7 @@ USE MODD_TYPE_DATE_SURF
 !
 USE MODE_POS_SURF
 !
-USE MODI_ALLOC_SURFEX
-USE MODI_GOTO_SURFEX
-USE MODI_DEALLOC_SURFEX
 USE MODI_CREATE_FILE
-USE MODI_WRITE_SURF
 USE MODI_WRITE_NETCDF
 USE MODI_DEF_VAR_NETCDF
 USE MODI_MY_FORC
@@ -64,6 +56,8 @@ USE MODI_INI_CSTS
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
+USE NETCDF
+!
 !----------------------------------------------------------------------------
 !
 !*    0.     Declaration of parameters
@@ -71,7 +65,6 @@ USE PARKIND1  ,ONLY : JPRB
 !      
 IMPLICIT NONE
 !
-include 'netcdf.inc'
 !----------------------------------------------------------------------------
 !
 INTEGER :: INI                  ! number of forcing points
@@ -133,7 +126,7 @@ REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 CHARACTER(LEN=12) :: YEXPERIMENT_NAME
 CHARACTER(LEN=4)  :: YEAR, YEAR2
 INTEGER           :: IYEAR1, IYEAR2, IYEAR
-INTEGER           :: NYEAR1, NYEAR2
+INTEGER           :: NYEAR1, NYEAR2, JRET
 INTEGER           :: NUMBER_GRID_CELLS
 INTEGER           :: NUMBER_OF_TIME_STEPS_INPUT
 INTEGER           :: NUMBER_OF_TIME_STEPS_FINAL
@@ -555,19 +548,19 @@ CALL WRITE_NETCDF(IFILE_ID(12),'CO2air','Near_Surface_CO2_Concentration',TRANSPO
 !              2.4 closing file
 !     ------------
 !
-IRET=NF_CLOSE(IFILE_ID(1))
+IRET=NF90_CLOSE(IFILE_ID(1))
 IF (LSPLIT_NC) THEN
-  IRET=NF_CLOSE(IFILE_ID(2))
-  IRET=NF_CLOSE(IFILE_ID(3))
-  IRET=NF_CLOSE(IFILE_ID(4))
-  IRET=NF_CLOSE(IFILE_ID(5))
-  IRET=NF_CLOSE(IFILE_ID(6))
-  IRET=NF_CLOSE(IFILE_ID(7))
-  IRET=NF_CLOSE(IFILE_ID(8))
-  IRET=NF_CLOSE(IFILE_ID(9))
-  IRET=NF_CLOSE(IFILE_ID(10))
-  IRET=NF_CLOSE(IFILE_ID(11))
-  IRET=NF_CLOSE(IFILE_ID(12))
+  IRET=NF90_CLOSE(IFILE_ID(2))
+  IRET=NF90_CLOSE(IFILE_ID(3))
+  IRET=NF90_CLOSE(IFILE_ID(4))
+  IRET=NF90_CLOSE(IFILE_ID(5))
+  IRET=NF90_CLOSE(IFILE_ID(6))
+  IRET=NF90_CLOSE(IFILE_ID(7))
+  IRET=NF90_CLOSE(IFILE_ID(8))
+  IRET=NF90_CLOSE(IFILE_ID(9))
+  IRET=NF90_CLOSE(IFILE_ID(10))
+  IRET=NF90_CLOSE(IFILE_ID(11))
+  IRET=NF90_CLOSE(IFILE_ID(12))
   ENDIF  
 !
 ELSE

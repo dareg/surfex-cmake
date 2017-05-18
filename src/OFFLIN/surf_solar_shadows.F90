@@ -421,7 +421,7 @@ END DO
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !
- CONTAINS
+CONTAINS
 !
 SUBROUTINE PROJ_SOLAR(PX,PY,PZ,PA,PB)
 REAL, INTENT(IN)  :: PX  ! X coordinate (conformal plane)

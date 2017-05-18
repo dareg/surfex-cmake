@@ -111,9 +111,9 @@
 /
 &NAM_SGH_ISBAn         CRUNOFF    = "WSAT"
 /
-&NAM_ISBAn             CROUGH     = "Z04D"     ,
-                       CSCOND     = "NP89"     ,
-                       CALBEDO    = "DRY"      ,
+&NAM_SSOn              CROUGH     = "Z04D"
+/
+&NAM_ISBAn             CSCOND     = "NP89"     ,
                        CC1DRY     = 'DEF '     ,
                        CSOILFRZ   = 'DEF'      ,
                        CDIFSFCOND = 'DEF '     ,

@@ -53,6 +53,11 @@ USE MODI_TRIP_OASIS_READ_NAM
 USE MODI_TRIP_OASIS_DEFINE
 USE MODI_TRIP_OASIS_END
 !
+#ifdef SFX_MPI
+#ifdef SFX_MPL
+USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
+#endif
+#endif
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -89,6 +94,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! --------------------------------------------------------------------------------------
 !
  CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM,ZRUNTIME)
+#ifdef SFX_MPI
+#ifdef SFX_MPL
+IF (ILOCAL_COMM/=0) THEN
+  LMPLUSERCOMM = .TRUE.
+  MPLUSERCOMM = ILOCAL_COMM
+ENDIF
+#endif
+#endif
 !
 ! --------------------------------------------------------------------------------------
 ! * 1. Alloc trip variables and open listing

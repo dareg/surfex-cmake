@@ -3,14 +3,11 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
-                             HPROGRAM, KI,                                               &
-                            PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,             &
-                            PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
-                            PSWEC,     PTSC,                                            &
-                            PTS,       PT2M,        PHU2M,     PSWE,                    &
-                            PSST,      PSIC,  PUCLS, PVCLS,                             &
-                            HTEST , OD_MASKEXT, PLON, PLAT, OLKEEPEXTZONE )
+SUBROUTINE ASSIM_SURF_ATM_n (U, IM, SM, TM, WM, HPROGRAM, KI,                          &
+                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, PCLOUDS,  &
+                             PLSM, PEVAPTR, PEVAP, PSWEC, PTSC, PTS, PT2M, PHU2M, PSWE,&
+                             PSST, PSIC, PUCLS, PVCLS, HTEST, OD_MASKEXT, PLON, PLAT,  &
+                             OLKEEPEXTZONE )
 !     #################################################################################
 !
 !
@@ -36,18 +33,8 @@ SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
-!
-!
-!
-!
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t, SEAFLUX_MODEL_t, WATFLUX_MODEL_t, TEB_MODEL_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURFEX_MPI,  ONLY : NRANK, NPIO
 !
@@ -70,17 +57,13 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
+TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
- CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
+CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
 REAL, DIMENSION(KI), INTENT(IN) :: PCON_RAIN
 REAL, DIMENSION(KI), INTENT(IN) :: PSTRAT_RAIN
@@ -100,7 +83,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PSST
 REAL, DIMENSION(KI), INTENT(IN) :: PSIC
 REAL, DIMENSION(KI), INTENT(IN) :: PUCLS
 REAL, DIMENSION(KI), INTENT(IN) :: PVCLS
- CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
+CHARACTER(LEN=2),   INTENT(IN)  :: HTEST        ! must be equal to 'OK'
 LOGICAL,  DIMENSION (KI), INTENT(IN) ::  OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
@@ -115,7 +98,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ASSIM_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
- CPROGNAME = HPROGRAM
+CPROGNAME = HPROGRAM
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -162,7 +145,8 @@ IF(GWATER)THEN
 !
   CALL ASSIM_TREAT_SURF(JTILE,U%NSIZE_WATER,U%NR_WATER)
 !
-ENDIF 
+ENDIF
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -197,7 +181,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('ASSIM_SURF_ATM_N',1,ZHOOK_HANDLE)
 !
 !=======================================================================================
- CONTAINS
+CONTAINS
 !
 !=======================================================================================
 SUBROUTINE ASSIM_TREAT_SURF(KTILE,KSIZE,KMASK)
@@ -264,9 +248,9 @@ IF (KTILE==1) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
  
-  CALL ASSIM_SEA_n(S, U, &
-                    HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST,&
-                    OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
+  CALL ASSIM_SEA_n(SM%S, U, HPROGRAM, KSIZE,                &
+                   ZP_PTS, ZP_PSST, ZP_PSIC, ZP_PLSM, HTEST,&
+                   OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
 
 ELSEIF (KTILE==2) THEN
   
@@ -276,9 +260,9 @@ ELSEIF (KTILE==2) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_INLAND_WATER_n(I, U, W, &
-                            HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
-                            OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
+  CALL ASSIM_INLAND_WATER_n(IM%NPE, WM%W, U, HPROGRAM, KSIZE, &
+                            ZP_PTS, ZP_PLSM, HTEST,           &
+                            OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
 
 ELSEIF (KTILE==3) THEN
   
@@ -288,8 +272,7 @@ ELSEIF (KTILE==3) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_NATURE_n(DGMI, IG, I, U, &
-                      HPROGRAM,KSIZE,                                             &
+  CALL ASSIM_NATURE_n(IM, U, HPROGRAM, KSIZE,                                     &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
                       ZP_PSWEC,     ZP_PTSC,        ZP_UCLS,      ZP_VCLS,        &
@@ -304,8 +287,7 @@ ELSEIF (KTILE==4) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_TOWN_n(U, T, TOP, &
-                    HPROGRAM,KSIZE,ZP_PT2M,HTEST)
+  CALL ASSIM_TOWN_n(U, TM%NT, TM%TOP, HPROGRAM, KSIZE, ZP_PT2M, HTEST)
   
 ENDIF
 

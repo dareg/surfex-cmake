@@ -62,10 +62,6 @@ REAL, PARAMETER                      :: XMCO2 = 44.0E-3, XMC   = 12.0E-3
 !                                       and C (Carbon), respectively
 !                                       (used for conversions in kg) 
 !
-REAL, PARAMETER                      :: XDMAX_AGS = 0.045
-!                                       maximum specific humidity deficit (kg kg-1)
-!                                       for standard ISBA AGS (CPHOTO = 'AGS' or 'LAI')
-!
 REAL, PARAMETER                      :: XPARCF = 0.48
 !                                       coefficient: PAR fraction of incoming solar radiation
 !

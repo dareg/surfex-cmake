@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE MIXTL_n (O, OR, SG, &
-                        PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
+    SUBROUTINE MIXTL_n (O, OR, PLAT, PFSOL,PFNSOL,PSFTEAU,PSFU,PSFV,PSEATEMP)
 !     #######################################################################
 !
 !!****  *MIXTLN (1D MODEL)*  
@@ -55,7 +54,6 @@
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 !
 USE MODD_CSTS
 USE MODD_OCEAN_CSTS
@@ -77,7 +75,8 @@ IMPLICIT NONE
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+!
+REAL, DIMENSION(:), INTENT(IN) :: PLAT
 !
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSOL   ! solar flux (W/m2)
 REAL, DIMENSION(:)  ,INTENT(IN)       :: PFNSOL  ! non solar flux (W/m2)
@@ -235,7 +234,7 @@ DO JPT=1,SIZE(PFSOL)
   IKHML=1
 !
   !simplified variables inside this loop
-  ZLAT    = SG%XLAT   (JPT)
+  ZLAT    = PLAT   (JPT)
   ZFSOL   = PFSOL  (JPT)
   ZFNSOL  = PFNSOL (JPT)
   ZSFTEAU = PSFTEAU(JPT)
@@ -249,35 +248,35 @@ DO JPT=1,SIZE(PFSOL)
   ZSEAU(:) = O%XSEAU(JPT,:)
   ZSEAV(:) = O%XSEAV(JPT,:)    
   ZSEAE(:) = O%XSEAE(JPT,:)
-    !
+  !
   ZSEAU_REL(:) = OR%XSEAU_REL(JPT,:)
   ZSEAV_REL(:) = OR%XSEAV_REL(JPT,:)
   ZSEAT_REL(:) = OR%XSEAT_REL(JPT,:)
   ZSEAS_REL(:) = OR%XSEAS_REL(JPT,:)
-    !
-  ZSEAHMO=0.
+  !
+  ZSEAHMO = 0.
   DO J=IUP-1,IBOT
     IF (J>=IUP .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO = ZSEAHMO-XDZ1(J)
   ENDDO
   O%XSEAHMO(JPT) = ZSEAHMO
-
- !precalculation of DRHO
-  ZU(:)=0.
-  ZV(:)=0.
-  ZT(:)=0.
-  ZS(:)=0.
-  ZE(:)=0.
-  ADVT(:)=0.
-  ADVS(:)=0.
-  ADVU(:)=0.
-  ADVV(:)=0.
-  ADVE(:)=0.
-  ZZDRHO(:)=(ZSEAT(:)-ZT1)*(ZT2+ZT3*(ZSEAT(:)-ZT1)) + ZS2*(ZSEAS(:)-ZS1)
-  ZUDTREL(:)=0.
-  ZVDTREL(:)=0.
-  ZTDTREL(:)=0.
-  ZSDTREL(:)=0.
-  ZDTFSOL(:)=0.
+  !
+  !precalculation of DRHO
+  ZU     (:) = 0.
+  ZV     (:) = 0.
+  ZT     (:) = 0.
+  ZS     (:) = 0.
+  ZE     (:) = 0.
+  ADVT   (:) = 0.
+  ADVS   (:) = 0.
+  ADVU   (:) = 0.
+  ADVV   (:) = 0.
+  ADVE   (:) = 0.
+  ZZDRHO (:) = (ZSEAT(:)-ZT1)*(ZT2+ZT3*(ZSEAT(:)-ZT1)) + ZS2*(ZSEAS(:)-ZS1)
+  ZUDTREL(:) = 0.
+  ZVDTREL(:) = 0.
+  ZTDTREL(:) = 0.
+  ZSDTREL(:) = 0.
+  ZDTFSOL(:) = 0.
   !
   ZDTFNSOL=0.
 !
@@ -411,12 +410,18 @@ DO JPT=1,SIZE(PFSOL)
       ZVDTREL(J) =  - (ZSEAV(J)-ZSEAV_REL(J))  / OR%XTAU_REL 
     ENDDO
   ENDIF
+  !
+  DO J=IUP,IBOT
+    ! flux solaire
+    ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
+  ENDDO
 !
   IF (OR%LREL_TS) THEN
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! RELAXATION IS MADE INSTEAD OF FLUX CORRECTION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
     DO J=IUP,IBOT
+      ! flux non solaire
       ZTDTREL(J) =  - (ZSEAT(J)-ZSEAT_REL(J)) / OR%XTAU_REL
       ZSDTREL(J) =  - (ZSEAS(J)-ZSEAS_REL(J)) / OR%XTAU_REL
     ENDDO
@@ -430,10 +435,6 @@ DO JPT=1,SIZE(PFSOL)
     ZFNSOL = ZFNSOL + ZTDTREL(IUP)
   ENDIF
 !
-  ! flux solaire
-  DO J=IUP,IBOT
-    ZDTFSOL(J) = XRAY(J)*ZFSOL/XDZ2(J) 
-  ENDDO
 ! flux non solaire
   ZDTFNSOL = ZFNSOL/XDZ2(IUP) 
 !

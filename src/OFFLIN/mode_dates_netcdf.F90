@@ -24,7 +24,7 @@ INTEGER,PARAMETER::JP_GREGOIRE=1582 !Année où le pape Grégoire XIII décida d
 !De plus les journées du 5 au 14 octobre 1582 ont été supprimées pour compenser le retard accumulé
 
 
- CONTAINS
+CONTAINS
 
 !----------------------------------------------------------------------------------------------------------------
 

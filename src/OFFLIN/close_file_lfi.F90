@@ -67,7 +67,7 @@ IF (LHOOK) CALL DR_HOOK('CLOSE_FILE_LFI',0,ZHOOK_HANDLE)
 #ifdef SFX_LFI
  CALL FMFREE(CNAMFI(KUNIT),CLUOUT_LFI,IRESP)
 #endif
- CLOSE(KUNIT)
+CLOSE(KUNIT)
 IF (LHOOK) CALL DR_HOOK('CLOSE_FILE_LFI',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

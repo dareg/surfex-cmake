@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_FLAKE (DTCO, FG, F, UG, U, USS, &
-                            HPROGRAM,OECOCLIMAP,ORM_RIVER)
+      SUBROUTINE PGD_FLAKE (DTCO, FG, F, UG, U, USS, HPROGRAM,ORM_RIVER)
 !     ##############################################################
 !
 !!**** *PGD_FLAKE* monitor for averaging and interpolations of FLAKE physiographic fields
@@ -42,14 +41,14 @@
 !            -----------
 !
 !
-!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_FLAKE_GRID_n, ONLY : FLAKE_GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 USE MODD_FLAKE_n, ONLY : FLAKE_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -85,14 +84,13 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(FLAKE_GRID_t), INTENT(INOUT) :: FG
+TYPE(GRID_t), INTENT(INOUT) :: FG
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
- CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-LOGICAL,             INTENT(IN)    :: OECOCLIMAP
+CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(IN)    :: ORM_RIVER    ! delete river coverage (default = false)
 !
 !
@@ -187,20 +185,15 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_FLAKE)
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n(DTCO, U, &
-                      'WATER ',FG%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',FG%NDIM)
 !
-ALLOCATE(F%LCOVER     (JPCOVER))
-ALLOCATE(F%XZS        (FG%NDIM))
+ALLOCATE(F%LCOVER      (JPCOVER))
+ALLOCATE(F%XZS         (FG%NDIM))
 ALLOCATE(FG%XLAT       (FG%NDIM))
 ALLOCATE(FG%XLON       (FG%NDIM))
 ALLOCATE(FG%XMESH_SIZE (FG%NDIM))
 !
- CALL PACK_PGD(DTCO, U, &
-               HPROGRAM, 'WATER ',                    &
-                FG%CGRID,  FG%XGRID_PAR,                     &
-                F%LCOVER, F%XCOVER, F%XZS,                   &
-                FG%XLAT, FG%XLON, FG%XMESH_SIZE                 )  
+ CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', FG, F%LCOVER, F%XCOVER, F%XZS  )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -226,7 +219,7 @@ IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT
   !
 ELSE
   !
-  IF(OECOCLIMAP.AND.(.NOT.ORM_RIVER))THEN
+  IF(U%LECOCLIMAP.AND.(.NOT.ORM_RIVER))THEN
      WRITE(ILUOUT,*)'With this version of Flake, river must be removed'
      WRITE(ILUOUT,*)'Indeed, river energy budget can not be computed  '
      WRITE(ILUOUT,*)'using static lake scheme without 2D informations.'
@@ -255,8 +248,8 @@ WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
 !
 ALLOCATE(F%XWATER_FETCH  (FG%NDIM)) 
 !
- CATYPE='ARI'
- CALL PGD_FIELD(DTCO, UG, U, USS, &
+CATYPE='ARI'
+CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'wind fetch','WAT',YWATER_FETCH,YWATER_FETCHFILETYPE,XUNIF_WATER_FETCH,F%XWATER_FETCH(:))
 !
 !-------------------------------------------------------------------------------
@@ -266,8 +259,8 @@ ALLOCATE(F%XWATER_FETCH  (FG%NDIM))
 !
 ALLOCATE(F%XT_BS         (FG%NDIM)) 
 !
- CATYPE='ARI'
- CALL PGD_FIELD(DTCO, UG, U, USS, &
+CATYPE='ARI'
+CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'sediments bottom temperature ','WAT',YT_BS,YT_BSFILETYPE,XUNIF_T_BS,F%XT_BS(:))
 !
 !-------------------------------------------------------------------------------
@@ -277,8 +270,8 @@ ALLOCATE(F%XT_BS         (FG%NDIM))
 !
 ALLOCATE(F%XDEPTH_BS     (FG%NDIM)) 
 !
- CATYPE='INV'
- CALL PGD_FIELD(DTCO, UG, U, USS, &
+CATYPE='INV'
+CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'depth of sediments layer','WAT',YDEPTH_BS,YDEPTH_BSFILETYPE,XUNIF_DEPTH_BS,F%XDEPTH_BS(:))
 !
 !-------------------------------------------------------------------------------
@@ -288,8 +281,8 @@ ALLOCATE(F%XDEPTH_BS     (FG%NDIM))
 
 ALLOCATE(F%XEXTCOEF_WATER(FG%NDIM)) 
 !
- CATYPE='ARI'
- CALL PGD_FIELD(DTCO, UG, U, USS, &
+CATYPE='ARI'
+CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'water extinction coefficient','WAT', &
                  YEXTCOEF_WATER,YEXTCOEF_WATERFILETYPE,XUNIF_EXTCOEF_WATER, &
                  F%XEXTCOEF_WATER(:))  
@@ -299,7 +292,7 @@ ALLOCATE(F%XEXTCOEF_WATER(FG%NDIM))
 !*   10.     Prints of flake parameters in a tex file
 !            ----------------------------------------
 !
- CALL WRITE_COVER_TEX_WATER
+IF (NRANK==NPIO) CALL WRITE_COVER_TEX_WATER
 !
 IF (LHOOK) CALL DR_HOOK('PGD_FLAKE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

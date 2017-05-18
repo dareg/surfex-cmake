@@ -22,7 +22,7 @@ MODULE MODD_TRIP
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       21/05/08
-!!      B. Decharme 10/2016  bug surface/groundwater coupling   
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !
 !*       0.   DECLARATIONS
 !             ------------

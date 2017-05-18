@@ -3,9 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_SEA_n (S, U, &
-                        HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
-                       OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
+SUBROUTINE ASSIM_SEA_n (S, U, HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
+                        OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
 !
@@ -56,13 +55,13 @@ IMPLICIT NONE
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
- CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
 REAL,DIMENSION(KI), INTENT(IN) :: PTS_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PSST_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PSIC_IN
 REAL,DIMENSION(KI), INTENT(IN) :: PITM
- CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
+CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 LOGICAL, DIMENSION(KI), INTENT(IN) :: OD_MASKEXT
 REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLON_IN
@@ -95,7 +94,7 @@ IF (U%CSEA=="NONE") THEN
   RETURN
 ENDIF
 !
- CALL PACK_SAME_RANK(U%NR_SEA,U%XZS,ZALT)
+CALL PACK_SAME_RANK(U%NR_SEA,U%XZS,ZALT)
 !
 ! Read SST from file or set it to input SST
 IF ( .NOT.LAESST ) THEN

@@ -33,9 +33,9 @@ fi
 #
 export SRC_SURFEX="/home/faroux/SVN/surfex/trunk"   
 #
-#  Version MESONH PACKAGE :: PACK-SFX-V8-0-0 : 27/03/2012
+#  Version MESONH PACKAGE :: PACK-SFX-V8-1-1 : 27/03/2012
 #
-export VERSION_XYZ=SFX-V8-0-0
+export VERSION_XYZ=SFX-V8-1-1
 #
 #  Target Architecture/compiler Machine 
 #
@@ -47,17 +47,17 @@ export ARCH=LXgfortran
 #
 #export VER_MPI=MPIVIDE,LAMMPI,MPIAUTO,OMPI122G95
 #
-export VER_MPI=MPIAUTO
+export VER_MPI=NOMPI
 #
 #  Version of OMP
 #
-export VER_OMP=OMP
+export VER_OMP=NOOMP
 #
 # OPTIMIZATION LEVEL
 #
 #export OPTLEVEL=DEBUG,O2
 #
-export OPTLEVEL=DEBUG
+export OPTLEVEL=O2
 #
 #  USER VERSION
 #
@@ -70,22 +70,32 @@ export CONF_DOLLAR=/home/faroux/SVN/surfex/trunk/conf/post/confdollar_cnrmpc_def
 # Version of NETCDF
 #
 export VER_CDF=CDFCTI
-export VERSION_CDF=3.6.3
+export VERSION_CURL=7.50.1
+export VERSION_ZLIB=1.2.8
+export VERSION_SZIP=2.1
+export VERSION_HDF5=1.8.17
+export VERSION_CDF=4.4.1
+export VERSION_CDFF=4.4.4
 #
 # Version of GRIBAPI
 #
 export VER_GRIBAPI=GRIBAPI_AUTO
-export VERSION_GRIBAPI=1.9.9
-export GRIB_DEFINITION_PATH=${SRC_SURFEX}"/src/LIB/grib_api-1.9.9/definitions"
+export VERSION_GRIBAPI=1.17.0
+export GRIB_DEFINITION_PATH=${SRC_SURFEX}"/src/LIB/grib_api-1.17.0-Source/definitions"
 #
 # Version of OASIS
 #
 export VER_OASIS=NOmct
 export VERSION_OASIS=3-mct
 #
+# Version of XIOS
+#
+export VER_XIOS=2
+export VERSION_XIOS=trunk-1078
+#
 # Version of DR_HOOK
 #
-export VER_DRHOOK=SIMPLE
+export VER_DRHOOK=MINI
 #
 # Version of Def integer
 #
@@ -104,11 +114,13 @@ export OMP_NUM_THREADS=1
 ##########################################################
 ##########################################################
 #
-export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}-${VER_MPI}-${VER_OMP}-${OPTLEVEL}${VER_USER:+-${VER_USER}}"
+export XYZ="-${ARCH}${MNH_INT}-${VERSION_XYZ}-${VER_MPI}-${VER_OMP}-${OPTLEVEL}-X${VER_XIOS}${VER_USER:+-${VER_USER}}"
 #[ "x${VER_USER}" != "x" ] && export XYZ="${XYZ}-${VER_USER}"
 # PATH to find tools like "makegen, etc ..."
 export BIN_TOOLS=NO
 export PATH=.:$SRC_SURFEX/bin:$SRC_SURFEX/exe:$SRC_SURFEX/bin_tools/${BIN_TOOLS}:$PATH
+#
+export LD_LIBRARY_PATH=::/opt/gfortran/lib64
 #
 # NCARG_ROOT : for use of graphic tools : diaprog 
 # 
@@ -133,4 +145,4 @@ export VARTTY=`tty`
 #
 # Optional Environnement variable/Module  Env
 #
- 
+

@@ -184,7 +184,6 @@ REAL, DIMENSION(:), INTENT(IN)    :: PTG
 !                                      PTG       = Surface soil temperature (effective
 !                                                  temperature the of layer lying below snow)
 REAL, DIMENSION(:), INTENT(IN)    :: PLVTT, PLSTT ! = latent heats for hydrology
-!
 REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWALB
 !                                      PSNOWALB = Prognostic surface snow albedo
 !                                                 (does not include anything but

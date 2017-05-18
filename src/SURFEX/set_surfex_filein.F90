@@ -66,6 +66,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "set_surfex_file_name_aro.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !

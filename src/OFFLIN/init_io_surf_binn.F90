@@ -64,11 +64,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_BIN_N',0,ZHOOK_HANDLE)
 !
  CALL GET_LUOUT('BINARY',ILUOUT)
 !
- CALL GET_DIM_FULL_n(U, &
-                     NFULL)
+ CALL GET_DIM_FULL_n(U%NDIM_FULL, NFULL)
 !
- CALL GET_SIZE_FULL_n(U, &
-                      'BINARY ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n('BINARY ',NFULL,U%NSIZE_FULL,ILU)
 !
 IL = ILU
  CALL GET_TYPE_DIM_n(DTCO, U, &
@@ -76,7 +74,7 @@ IL = ILU
  CALL INIT_IO_SURF_MASK_n(DTCO, U, &
                           HMASK, IL, ILUOUT, ILU, NMASK)
 !
- CMASK = HMASK
+CMASK = HMASK
 IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_BIN_N',1,ZHOOK_HANDLE)
 !------------------------------------------------------------------------------
 END SUBROUTINE INIT_IO_SURF_BIN_n

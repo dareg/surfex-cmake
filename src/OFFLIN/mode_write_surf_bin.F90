@@ -24,7 +24,7 @@ INTERFACE WRITE_SURFT_BIN
         MODULE PROCEDURE WRITE_SURFT2_BIN
 END INTERFACE
 !
- CONTAINS
+CONTAINS
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFX0_BIN(HREC,PFIELD,KRESP,HCOMMENT)
@@ -192,8 +192,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFC0_BIN',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFC0_BIN
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_BIN (DGU, U, &
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_BIN (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
@@ -201,8 +200,6 @@ END SUBROUTINE WRITE_SURFC0_BIN
 !
 !
 !
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -225,8 +222,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -255,10 +251,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-!$OMP SINGLE
-  !  
-  CALL INIT_WRITE_BIN(DGU, U, &
-                      HREC,1,LWFL)
+  CALL INIT_WRITE_BIN(HSELECT, NFULL, HREC,1,LWFL)
   !
   IF (LWFL) THEN 
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
@@ -266,8 +259,6 @@ IF (NRANK==NPIO) THEN
   !
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)  
   !
-!$OMP END SINGLE NOWAIT
-  !  
 #ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
@@ -279,17 +270,13 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_BIN:WRITE_SURFX1_BIN',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_BIN
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_BIN (DGU, U, &
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_BIN (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
 !
 !
 !
-!
-USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -312,8 +299,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
-TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+ CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
@@ -342,18 +328,13 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-!$OMP SINGLE
-  !
-  CALL INIT_WRITE_BIN(DGU, U, &
-                      HREC,SIZE(PFIELD,2),LWFL)
+  CALL INIT_WRITE_BIN(HSELECT, NFULL, HREC,SIZE(PFIELD,2),LWFL)
   !
   IF (LWFL) THEN
     WRITE(NIND,REC=NWRITE,IOSTAT=KRESP) ZWORK
   ENDIF
   !
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_BIN(HREC,KRESP)
-  !
-!$OMP END SINGLE NOWAIT
   !
 #ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)

@@ -52,7 +52,7 @@ IMPLICIT NONE
 !            ------------------------
 !
  CHARACTER(LEN=10),    INTENT(IN)    :: HGRID    ! type of grid
-REAL, DIMENSION(:),   POINTER       :: PGRID_PAR! lits of parameters used to define the grid
+REAL, DIMENSION(:),   INTENT(IN)     :: PGRID_PAR! lits of parameters used to define the grid
 REAL, DIMENSION(:),   INTENT(IN)    :: PSEA     ! sea  fraction
 INTEGER,              INTENT(IN)    :: KZSFILTER! number of filter iteration
 REAL, DIMENSION(:),   INTENT(INOUT) :: PZS      ! orography

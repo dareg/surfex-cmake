@@ -66,6 +66,7 @@ TYPE SURF_ATM_t
   LOGICAL                        :: LECOCLIMAP ! T: parameters computed from ecoclimap
 !                                              ! F: they are read in the file
 !
+  LOGICAL                        :: LECOSG     ! T: parameters computed from ecosg
 !-------------------------------------------------------------------------------
 !
 ! change water (not lake) to nature and/or town to rock : arrange cover properly
@@ -121,6 +122,16 @@ TYPE SURF_ATM_t
   INTEGER                               :: NSIZE_FULL   ! total number of grid points by proc     (-)
   INTEGER                               :: NDIM_FULL    ! total number of grid points             (-)
 !
+! global sizes of the physical domain
+!
+  INTEGER                               :: NIMAX_SURF_ll
+  INTEGER                               :: NJMAX_SURF_ll
+!
+! local sizes of the physical domain
+!
+  INTEGER                               :: NIMAX_SURF_LOC
+  INTEGER                               :: NJMAX_SURF_LOC
+!
 !-----------------------------------------------------------------------------------------------------
 !
 ! Surface fields (only 1 horizontal dimension)
@@ -152,7 +163,7 @@ END TYPE SURF_ATM_t
 !
 
 
- CONTAINS
+CONTAINS
 
 
 !
@@ -185,6 +196,7 @@ YSURF_ATM%CNATURE=' '
 YSURF_ATM%CWATER=' '
 YSURF_ATM%CSEA=' '
 YSURF_ATM%LECOCLIMAP=.FALSE.
+YSURF_ATM%LECOSG=.FALSE.
 YSURF_ATM%LWATER_TO_NATURE=.FALSE.
 YSURF_ATM%LTOWN_TO_ROCK=.FALSE.
 YSURF_ATM%LGARDEN=.FALSE.
@@ -198,6 +210,10 @@ YSURF_ATM%NSIZE_NATURE=0
 YSURF_ATM%NDIM_NATURE=0
 YSURF_ATM%NSIZE_FULL=0
 YSURF_ATM%NDIM_FULL=0
+YSURF_ATM%NIMAX_SURF_ll=0
+YSURF_ATM%NJMAX_SURF_ll=0
+YSURF_ATM%NIMAX_SURF_LOC=0
+YSURF_ATM%NJMAX_SURF_LOC=0
 YSURF_ATM%XOUT_TSTEP=0.
 IF (LHOOK) CALL DR_HOOK("MODD_SURF_ATM_N:SURF_ATM_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE SURF_ATM_INIT

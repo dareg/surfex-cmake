@@ -28,7 +28,7 @@ SUBROUTINE TRIP_OASIS_READ_NAM(KLISTING,PRUNTIME)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    05/2008 
-!!      B. Decharme 10/2016  bug surface/groundwater coupling   
+!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS

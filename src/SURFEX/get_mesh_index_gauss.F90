@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_GAUSS(KNBLINES,KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,&
+      SUBROUTINE GET_MESH_INDEX_GAUSS(KNBLINES,KSSO,PGRID_PAR,PLAT,PLON,&
                                       KINDEX,KISSOX,KISSOY,PVALUE,PNODATA)
 !     ###############################################################
 !
@@ -47,7 +47,6 @@ IMPLICIT NONE
 !            ------------------------
 !
 INTEGER,                       INTENT(IN)   :: KNBLINES
-INTEGER,                       INTENT(IN)   :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                       INTENT(IN)   :: KSSO        ! number of subgrid mesh in each direction
 REAL,    DIMENSION(:),         INTENT(IN)   :: PGRID_PAR ! grid parameters
 REAL,    DIMENSION(:),         INTENT(IN)   :: PLAT      ! latitude of the point  (degrees)
@@ -74,7 +73,7 @@ INTEGER :: IFACTX, ISIZEX, ISIZEY
 INTEGER :: JI, JJ, JL       ! loop counter in x
 INTEGER :: JGRID, IGRID0    ! loop counter on grid  points
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_1',0,ZHOOK_HANDLE)
@@ -227,9 +226,6 @@ ELSE
   ZY(:) = PLAT(:) 
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',1,ZHOOK_HANDLE)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',0,ZHOOK_HANDLE)
-!
 !-------------------------------------------------------------------------------
 !
 !*    5.     Localisation of the data points on (x,y) grid
@@ -238,7 +234,12 @@ IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',0,ZHOOK_HANDLE)
 ICJ(:) = 0
 !
 IFACTX = SIZE(NFRACDX)
-!$OMP PARALLEL DO PRIVATE(JJ,JI,JGRID)
+!
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_2',1,ZHOOK_HANDLE)
+!
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(JJ,JI,JGRID)
 DO JL=1,SIZE(PLAT)
   !
  IF (ZVALUE(JL)==ZNODATA) CYCLE
@@ -272,12 +273,14 @@ DO JL=1,SIZE(PLAT)
   ENDDO fracx
   !
 ENDDO
-!$OMP END PARALLEL DO
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_3',1,ZHOOK_HANDLE)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',0,ZHOOK_HANDLE)
 !
-!$OMP PARALLEL DO PRIVATE(IGRID0,JGRID,JI,JJ)
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',0,ZHOOK_HANDLE_OMP)
+!$OMP DO PRIVATE(IGRID0,JGRID,JI,JJ)
 DO JL=1,SIZE(PLAT)
   !
   IF (ZVALUE(JL)==ZNODATA) CYCLE
@@ -313,26 +316,29 @@ DO JL=1,SIZE(PLAT)
   END DO fracy
   !
 END DO
-!$OMP END PARALLEL DO 
+!£$OMP END DO
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_4',1,ZHOOK_HANDLE)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',0,ZHOOK_HANDLE)
 !
 !*    6.     Localisation of the data points on in the subgrid of this mesh
 !            --------------------------------------------------------------
 !
 IF (KSSO/=0) THEN
-!$OMP PARALLEL DO 
+!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',0,ZHOOK_HANDLE_OMP)
+!$OMP DO 
   DO JL=1,SIZE(PLAT)
     IF (KINDEX(1,JL)/=0) THEN
       KISSOX(1,JL) = 1 + INT( FLOAT(KSSO) * (ZX(JL)-XXINF(KINDEX(1,JL)))/(XXSUP(KINDEX(1,JL))-XXINF(KINDEX(1,JL))) )
       KISSOY(1,JL) = 1 + INT( FLOAT(KSSO) * (ZY(JL)-XYINF(KINDEX(1,JL)))/(XYSUP(KINDEX(1,JL))-XYINF(KINDEX(1,JL))) ) 
     ENDIF 
   ENDDO
-!$OMP END PARALLEL DO
+!$OMP END DO
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',1,ZHOOK_HANDLE_OMP)
+!$OMP END PARALLEL
 ENDIF
 !
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_GAUSS_5',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE GET_MESH_INDEX_GAUSS

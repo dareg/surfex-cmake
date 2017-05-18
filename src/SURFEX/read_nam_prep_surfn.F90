@@ -34,16 +34,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PREP_SURF_N',0,ZHOOK_HANDLE)
 !
-NHALO_PREP = 2
+NHALO_PREP = 0
 !
 NYEAR=NUNDEF
 NMONTH=NUNDEF
 NDAY=NUNDEF
 XTIME=XUNDEF
- CFILE     = '                         '
- CFILETYPE = '      '
- CFILEPGD     = '                         '
- CFILEPGDTYPE = '      '
+CFILE     = '                         '
+CFILETYPE = '      '
+CFILEPGD     = '                         '
+CFILEPGDTYPE = '      '
+LWRITE_EXTERN = .FALSE.
 !
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
