@@ -262,6 +262,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
           ! only for the natural part
           IF (U%LECOSG) THEN
             JTN = JT - SUM(NTYPE(1:2))
+            NSIZE(:,1:SUM(NTYPE(1:2))) = -1
           ELSE
             JTN = JT
           ENDIF
