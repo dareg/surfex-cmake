@@ -307,8 +307,8 @@ ZC2(:)         = PCT(:)
 DMK%XSNOWLIQ(:,:)  = 0.0
 DMK%XSNOWDZ(:,:)   = 0.0
 !
-INLVLS          = SIZE(PEK%TSNOW%WSNOW(:,:),2)                         
-INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
+INLVLS          = SIZE(PEK%TSNOW%WSNOW(:,:),2)    
+INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2)) 
 !
 !
 IF(.NOT.OMEB)THEN 
