@@ -78,7 +78,7 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_CSTS,           ONLY : XCPD, XDAY, XRHOLW, XLVTT, XLSTT 
 USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
-USE MODD_ISBA_PAR,       ONLY : XRS_MAX 
+USE MODD_ISBA_PAR,       ONLY : XRS_MAX, XLIMH
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
@@ -398,6 +398,8 @@ REAL, DIMENSION(SIZE(PPS))                         :: ZSWNET_S             ! Net
 REAL, DIMENSION(SIZE(PPS))                         :: ZLTT                 ! Average latent heat (normalization factor) (J/kg)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLSTTC               ! Working coefficient to compute ZLTT: frozen part (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZLVTTC               ! Working coefficient to compute ZLTT: non-frozen part (-)
+REAL, DIMENSION(SIZE(PPS))                         :: ZZREF
+REAL, DIMENSION(SIZE(PPS))                         :: ZUREF
 !
 !
 ! - CPHOTO/=NON (Ags Option(s)):
@@ -724,6 +726,22 @@ ZTHRMB_TG(:)   =  0.0
 ZTHRMA_TV(:)   =  ZWORK(:)
 ZTHRMB_TV(:)   =  0.0
 !
+!
+! For turbulence computations:
+! Adjust (shift upward) local reference heights "seen by the turbulence scheme"
+! if they are below the canopy:
+! NOTE, this approach is an alternative to LFORC_MEASURE=F, which shifts
+! vegetation downward by the displacement height. Both approaches essentially
+! conceptually assume that the vegetation is part of the terrain.
+! Also, here, conserve any UREF and ZREF differences.
+!
+IF(IO%LFORC_MEASURE)THEN
+   WHERE(PZREF(:) - PEK%XH_VEG(:) < XLIMH)
+      ZZREF(:) = PEK%XH_VEG(:) + XLIMH
+      ZUREF(:) = PEK%XH_VEG(:) + XLIMH + MAX(0.,PUREF(:)-PZREF(:))
+   END WHERE
+ENDIF
+!
 ! Compute the average latent heat (normalization factor) (J kg-1):
 ! NOTE that we could use a function which depends on the different resistances,
 ! but this can make the average latent heat relatively noisy(leading to a slightly less
@@ -777,7 +795,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
                  PRHOA, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,      &
                  PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,      &
                  ZSNOWSWE(:,1), ZCHIP, ZTSTEP, ZRS, ZRSN, PPALPHAN,  &
-                 PZREF, PUREF, PDIRCOSZW, ZPSNCV, ZDELTA, ZVELC,     &
+                 ZZREF, ZUREF, PDIRCOSZW, ZPSNCV, ZDELTA, ZVELC,     &
                  PRISNOW, ZUSTAR2SNOW, ZHUGI, ZHVG,                  &
                  ZHVN, ZLEG_DELTA, ZLEGI_DELTA, ZHSGL, ZHSGF,        &
                  ZFLXC_CA, ZFLXC_N_A, ZFLXC_GV, ZFLXC_GN,            &
@@ -896,8 +914,8 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PEK%XPSN(:))
  CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,       &
                   TPTIME, PTSTEP, PK%XVEGTYPE_PATCH,  ZTGL, ZCTSFC,         &
                   ZSOILHCAPZ, ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA,      &
-                  PVMOD, PLW_RAD, ZRRSFC, DEK%XSR_GN, PRHOA, PUREF, PEXNS,  &
-                  PEXNA, PDIRCOSZW, PZREF, ZALBG, ZD_G, ZDZG, PPEW_A_COEF,  &
+                  PVMOD, PLW_RAD, ZRRSFC, DEK%XSR_GN, PRHOA, ZUREF, PEXNS,  &
+                  PEXNA, PDIRCOSZW, ZZREF, ZALBG, ZD_G, ZDZG, PPEW_A_COEF,  &
                   PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,       &
                   PPEQ_B_COEF, PSNOW_THRUFAL, PGRNDFLUX, PFLSN_COR,         &
                   PRESTOREN, PEVAPCOR, DEK%XLES, DEK%XLESL, ZEVAP3L, PSNOWSFCH, &
