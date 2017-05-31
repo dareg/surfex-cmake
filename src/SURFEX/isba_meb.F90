@@ -740,6 +740,9 @@ IF(IO%LFORC_MEASURE)THEN
       ZZREF(:) = PEK%XH_VEG(:) + XLIMH
       ZUREF(:) = PEK%XH_VEG(:) + XLIMH + MAX(0.,PUREF(:)-PZREF(:))
    END WHERE
+ELSE
+   ZZREF(:)    = PZREF(:)
+   ZUREF(:)    = PUREF(:)
 ENDIF
 !
 ! Compute the average latent heat (normalization factor) (J kg-1):
