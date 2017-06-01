@@ -4307,10 +4307,11 @@ DO JJ = 1,SIZE(PSNOW(:))
   ZSNOWMAK(JJ) = PSNOWMAK(JJ)
   ZPSR_SNOWMAK(JJ) = ZSNOWMAK(JJ)*XRHO_SNOWMAK/PTSTEP
 !
-  IF (PSR(JJ)>XUEPSI .OR. PBLOWSNW(JJ,1) > XUEPSI  .OR. ZPSR_SNOWMAK(JJ) > XUEPSI) THEN  		!20160211
+  IF (PSR(JJ)>XUEPSI .OR. PBLOWSNW(JJ,1) > XUEPSI  .OR. ZPSR_SNOWMAK(JJ) > XUEPSI) THEN
     !    
     ! newly fallen snow characteristics:
-    IF ( KNLVLS_USE(JJ)>0 ) THEN 		!Case of new snowfall on a previously snow-free surface 
+    !Case of new snowfall on a previously snow-free surface 
+    IF ( KNLVLS_USE(JJ)>0 ) THEN 		
       ZSCAP    (JJ) = XCI*PSNOWRHO(JJ,1)
       ZSNOWTEMP(JJ) = XTT + ( PSNOWHEAT(JJ,1) + XLMTT*PSNOWRHO(JJ,1)*PSNOWDZ(JJ,1) ) / &
                             ( ZSCAP(JJ) * MAX( XSNOWDMIN/INLVLS, PSNOWDZ(JJ,1) ) ) 
@@ -4319,8 +4320,8 @@ DO JJ = 1,SIZE(PSNOW(:))
     ENDIF
     ZSNOWTEMP(JJ) = MIN( XTT, ZSNOWTEMP(JJ) )
 
-!! ok dans ttes versions
-!! Debut modifs par VV
+    ! ok dans ttes versions
+    ! Debut modifs par VV
     !
     !
     ! Wind speeds at reference heights for new snow density and charactristics of
