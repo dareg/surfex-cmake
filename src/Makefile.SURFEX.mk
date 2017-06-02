@@ -491,6 +491,8 @@ ifneq "$(VER_CDF)" "NONE"
 #
 ifeq "$(VER_CDF)" "CDFAUTO"
 #
+#
+DIR_M4?=${SRC_SURFEX}/src/LIB/netcdf4/m4-${VERSION_M4}
 DIR_CURL?=${SRC_SURFEX}/src/LIB/netcdf4/curl-${VERSION_CURL}
 DIR_ZLIB?=${SRC_SURFEX}/src/LIB/netcdf4/zlib-${VERSION_ZLIB}
 DIR_SZIP?=${SRC_SURFEX}/src/LIB/netcdf4/szip-${VERSION_SZIP}
@@ -498,6 +500,7 @@ DIR_HDF5?=${SRC_SURFEX}/src/LIB/netcdf4/hdf5-${VERSION_HDF5}
 DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf4/netcdf-${VERSION_CDF}
 DIR_CDFF?=${SRC_SURFEX}/src/LIB/netcdf4/netcdf-fortran-${VERSION_CDFF}
 #RJ: avoid non standard libs! Can create non conforming outputs
+M4_PATH?=${DIR_M4}-${ARCH}-${VER_MPI}
 CURL_PATH?=${DIR_CURL}-${ARCH}-${VER_MPI}
 ZLIB_PATH?=${DIR_ZLIB}-${ARCH}-${VER_MPI}
 SZIP_PATH?=${DIR_SZIP}-${ARCH}-${VER_MPI}
@@ -505,6 +508,7 @@ HDF5_PATH?=${DIR_HDF5}-${ARCH}-${VER_MPI}
 CDF_PATH?=${DIR_CDF}-${ARCH}-${VER_MPI}
 CDFF_PATH?=${DIR_CDFF}-${ARCH}-${VER_MPI}
 #
+M4_BIN?=${M4_PATH}/bin/m4
 CURL_LIB?=${CURL_PATH}/lib/libcurl.a
 ZLIB_LIB?=${ZLIB_PATH}/lib/libz.a
 SZIP_LIB?=${SZIP_PATH}/lib/libsz.a
