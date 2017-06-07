@@ -71,7 +71,6 @@ USE MODD_CO2V_PAR,       ONLY : XTOPT, XFZERO1, XFZERO2, XFZEROTROP, XEPSO, XGAM
                                   XQDAMAX, XT1AMAX, XT2AMAX, XAH, XBH,            &
                                   XDSPOPT, XIAOPT, XAW, XBW, XMCO2, XMC, XTAU_WOOD  
 ! 
-USE MODE_COTWO,          ONLY : GAULEG
 USE MODI_COTWO  
 !
 !*       0.     DECLARATIONS
