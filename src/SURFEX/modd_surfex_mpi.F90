@@ -43,6 +43,7 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: XWORKS
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: XWORK2S
 !
 INTEGER, DIMENSION(:), ALLOCATABLE :: NREQ
 INTEGER, DIMENSION(:), ALLOCATABLE :: NINDEX
