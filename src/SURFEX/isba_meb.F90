@@ -735,14 +735,13 @@ ZTHRMB_TV(:)   =  0.0
 ! conceptually assume that the vegetation is part of the terrain.
 ! Also, here, conserve any UREF and ZREF differences.
 !
+ZZREF(:)       = PZREF(:)
+ZUREF(:)       = PUREF(:)
 IF(IO%LFORC_MEASURE)THEN
    WHERE(PZREF(:) - PEK%XH_VEG(:) < XLIMH)
       ZZREF(:) = PEK%XH_VEG(:) + XLIMH
       ZUREF(:) = PEK%XH_VEG(:) + XLIMH + MAX(0.,PUREF(:)-PZREF(:))
    END WHERE
-ELSE
-   ZZREF(:)    = PZREF(:)
-   ZUREF(:)    = PUREF(:)
 ENDIF
 !
 ! Compute the average latent heat (normalization factor) (J kg-1):
