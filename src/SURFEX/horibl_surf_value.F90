@@ -206,7 +206,7 @@ DO JL = 1, KOLEN
   ZT = POLA(JL) - PLA(JL,1)
   ZWV(1) = ZLSMV(1) * (1.+ZLSMV(2)*ZT/ZP(1)) * (1.+ZLSMV(3)*ZT/ZP(2)) * (1.+ZLSMV(4)*ZT/(PLA(JL,1)-PLA(JL,4)))  
   ZT = POLA(JL) - PLA(JL,2)
-  ZWV(2) = ZLSMV(2) * (1.-ZLSMV(1)*ZT/ZP(1)) * (1.+ZLSMV(3)*ZT/ZP(3)) * (1.+ZLSMV(4)*ZT/(PLA(JL,2)-PLA(JL,4)))  
+  ZWV(2) = ZLSMV(2) * (1.-ZLSMV(1)*ZT/ZP(1)) * (1.+ZLSMV(3)*ZT/ZP(3)) * (1.+ZLSMV(4)*ZT/(PLA(JL,2)-PLA(JL,4))) 
   ZT = POLA(JL) - PLA(JL,3)
   ZWV(3) = ZLSMV(3) * (1.-ZLSMV(1)*ZT/ZP(2)) * (1.-ZLSMV(2)*ZT/ZP(3)) * (1.+ZLSMV(4)*ZT/(PLA(JL,3)-PLA(JL,4))) 
   ZWV(4) = 1. - ZWV(1) - ZWV(2) - ZWV(3)
@@ -259,8 +259,10 @@ DO JL = 1, KOLEN
   ZWP(3:6) = ZWP(3:6) * ZWV(2)
   ZWP(7:10) = ZWP(7:10) * ZWV(3)
   ZWP(11:12) = ZWP(11:12) * ZWV(4)
+  !WHERE (ZWP(:)<1.E-4) ZWP(:) = 0.
+  !ZWP(:) = ZWP(:) / SUM(ZWP)
 !
-  PAROUT(JL) = 0
+  PAROUT(JL) = 0.
   DO JI = 1,12
     PAROUT(JL) = PAROUT(JL) + ZWP(JI) * PARIN(JL,JI)
   ENDDO

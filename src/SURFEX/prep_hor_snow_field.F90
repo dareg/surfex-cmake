@@ -74,7 +74,7 @@ USE MODI_PREP_SNOW_EXTERN
 USE MODI_PREP_SNOW_BUFFER
 USE MODI_HOR_INTERPOL
 USE MODI_VEGTYPE_GRID_TO_PATCH_GRID
-USE MODI_SNOW_HEAT_TO_T_WLIQ
+USE MODI_SNOW_T_WLIQ_TO_HEAT
 USE MODI_VEGTYPE_TO_PATCH
 USE MODI_PACK_SAME_RANK
 USE MODI_GET_PREP_INTERP
@@ -148,7 +148,8 @@ REAL, POINTER, DIMENSION(:,:,:)     :: ZFIELDIN   ! field to interpolate horizon
 REAL, POINTER, DIMENSION(:,:,:) :: ZFIELDOUTP ! field interpolated   horizontally
 REAL, POINTER, DIMENSION(:,:,:) :: ZFIELDOUTV !
 REAL, ALLOCATABLE, DIMENSION(:)   :: ZD        ! snow depth (x, kpatch)
-REAL, ALLOCATABLE, DIMENSION(:,:) :: ZHEAT     ! work array (x, output snow grid, kpatch)
+REAL, ALLOCATABLE, DIMENSION(:,:) :: ZTEMP
+REAL, ALLOCATABLE, DIMENSION(:,:) :: ZWLIQ     ! liquid water snow pack content
 REAL, ALLOCATABLE, DIMENSION(:,:,:) :: ZGRID     ! grid array (x, output snow grid, kpatch)
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDEPTH, ZPATCH
@@ -184,7 +185,7 @@ IF (YDCTL%LPART1) THEN
     CALL PREP_GRIB_GRID(HFILE,KLUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
     IF (NRANK==NPIO) CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,ISNOW_NLAYER,ZFIELDIN)        
   ELSE IF (HFILETYPE=='MESONH' .OR. HFILETYPE=='ASCII ' .OR. HFILETYPE=='LFI   '&
-          .OR. HFILETYPE=='FA    '.OR. HFILETYPE=='AROME ') THEN
+          .OR. HFILETYPE=='FA    '.OR. HFILETYPE=='AROME '.OR.HFILETYPE=='NC    ') THEN
     CALL PREP_SNOW_EXTERN(GCP,HPROGRAM,HSNSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE, &
                           KLUOUT,ZFIELDIN,OSNOW_IDEAL,ISNOW_NLAYER,KTEB_PATCH)
   ELSE IF (HFILETYPE=='BUFFER') THEN
@@ -448,16 +449,24 @@ IF (YDCTL%LPART5) THEN
         !
         IF (SK%SCHEME=='3-L' .OR. SK%SCHEME=='CRO') THEN
           !
+          ALLOCATE(ZTEMP(KSIZE_P(JP),ISNOW_NLAYER))
+          ALLOCATE(ZWLIQ(KSIZE_P(JP),ISNOW_NLAYER))
+          ZWLIQ(:,:) = 0.0
+          !
           IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
-            SK%HEAT(:,:) = ZW%AL(JP)%ZOUT(:,:)
-          ELSEIF(INL==1) THEN
-            DO JL = 1,ISNOW_NLAYER
-              SK%HEAT(:,JL) = ZW%AL(JP)%ZOUT(:,1)
-            ENDDO        
+            ZTEMP(:,:) = ZW%AL(JP)%ZOUT(:,:)
+          ELSEIF (INL==1) THEN
+            DO JL = 1,ISNOW_NLAYER 
+              ZTEMP(:,JL) = ZW%AL(JP)%ZOUT(:,1)
+            ENDDO
           ELSE
             !* interpolation of heat on snow levels
-            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%HEAT)
+            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),ZTEMP)
           ENDIF
+          !
+          CALL SNOW_T_WLIQ_TO_HEAT(SK%HEAT,SK%RHO,ZTEMP,ZWLIQ)
+          DEALLOCATE(ZTEMP)
+          DEALLOCATE(ZWLIQ)
           !
           !* mask for areas where there is no snow
           DO JL=1,ISNOW_NLAYER
@@ -466,23 +475,19 @@ IF (YDCTL%LPART5) THEN
           !
         ELSE IF (SK%SCHEME=='1-L') THEN
           !* interpolation of heat on snow levels
-          ALLOCATE(ZHEAT(KSIZE_P(JP),ISNOW_NLAYER))
           !
           IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
-            ZHEAT(:,:) = ZW%AL(JP)%ZOUT(:,:)
+            SK%T(:,:) = ZW%AL(JP)%ZOUT(:,:)
           ELSEIF(INL==1) THEN
             DO JL = 1,ISNOW_NLAYER
-              ZHEAT(:,JL) = ZW%AL(JP)%ZOUT(:,1)
+              SK%T(:,JL) = ZW%AL(JP)%ZOUT(:,1)
             ENDDO        
           ELSE
-            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),ZHEAT)
+            CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%T)
           ENDIF
           !
           !* transformation from heat to temperature
-          CALL SNOW_HEAT_TO_T_WLIQ(ZHEAT,SK%RHO,SK%T)
           WHERE (SK%T>XTT) SK%T = XTT
-          !
-          DEALLOCATE(ZHEAT)
           !
           !* mask for areas where there is no snow
           DO JL=1,ISNOW_NLAYER

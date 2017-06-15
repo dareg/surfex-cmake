@@ -237,7 +237,8 @@ ELSE IF (YFILETYPE=='ASCLLV') THEN
 ELSE IF (YFILETYPE=='GRIB  ') THEN
   CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
   IF (NRANK==NPIO) CALL PREP_TEB_GREENROOF_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)        
-ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '.OR. YFILETYPE=='FA    '.OR. YFILETYPE=='AROME ') THEN
+ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '&
+        .OR. YFILETYPE=='FA    '.OR. YFILETYPE=='AROME '.OR.YFILETYPE=='NC    ') THEN
    CALL PREP_TEB_GREENROOF_EXTERN(DTCO, IO, U, GCP, &
                                   HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,KPATCH,ZFIELDIN)
 ELSE IF (YFILETYPE=='BUFFER') THEN
@@ -317,7 +318,11 @@ SELECT CASE (HSURF)
   ALLOCATE(ZF (INI,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
+  IF (SIZE(ZW,2)/=IO%NGROUND_LAYER) THEN
+    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
+  ELSE
+    ZF(:,:) = ZW(:,:)
+  ENDIF  
   !
   !* retrieves soil water content from soil relative humidity
   ALLOCATE(PEK%XWG(INI,IO%NGROUND_LAYER))
@@ -334,7 +339,11 @@ SELECT CASE (HSURF)
   ALLOCATE(ZF (INI,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
+  IF (SIZE(ZW,2)/=IO%NGROUND_LAYER) THEN
+    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
+  ELSE
+    ZF(:,:) = ZW(:,:)
+  ENDIF  
   !
   !* retrieves soil ice content from soil relative humidity
   ALLOCATE(PEK%XWGI(INI,IO%NGROUND_LAYER))
@@ -350,11 +359,15 @@ SELECT CASE (HSURF)
  CASE('TG     ') 
   IWORK=IO%NGROUND_LAYER
   ALLOCATE(PEK%XTG(INI,IWORK))
-  ALLOCATE(ZDG(SIZE(P%XDG,1),IWORK))
-  !* diffusion method, the soil grid is the same as for humidity
-  ZDG(:,:) = P%XDG(:,:)
-  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,PEK%XTG(:,:))
-  DEALLOCATE(ZDG)
+  IF (SIZE(ZW,2)/=IWORK) THEN  
+    ALLOCATE(ZDG(SIZE(P%XDG,1),IWORK))
+    !* diffusion method, the soil grid is the same as for humidity
+    ZDG(:,:) = P%XDG(:,:)
+    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,PEK%XTG(:,:))
+    DEALLOCATE(ZDG)
+  ELSE
+    PEK%XTG(:,:) = ZW(:,:)
+  ENDIF
   !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !

@@ -296,7 +296,7 @@ IF (YDCTL%LPART1) THEN
     CALL PREP_GRIB_GRID(YFILE,ILUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)        
     IF (NRANK==NPIO) CALL PREP_ISBA_GRIB(HPROGRAM,HSURF,YFILE,ILUOUT,ZFIELDIN)        
   ELSE IF (YFILETYPE=='MESONH' .OR. YFILETYPE=='ASCII ' .OR. YFILETYPE=='LFI   '&
-          .OR.YFILETYPE=='FA    '.OR. YFILETYPE=='AROME ') THEN
+          .OR.YFILETYPE=='FA    '.OR. YFILETYPE=='AROME '.OR.YFILETYPE=='NC    ') THEN
     CALL PREP_ISBA_EXTERN(DTCO, IO, U, GCP, HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,ILUOUT,ZFIELDIN,OKEY)
   ELSE IF (YFILETYPE=='BUFFER') THEN
     CALL PREP_ISBA_BUFFER(IG, U, HPROGRAM,HSURF,ILUOUT,ZFIELDIN)
@@ -429,7 +429,11 @@ IF (YDCTL%LPART5) THEN
         ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
       !
       !* interpolates on output levels
-        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+        IF (SIZE(ZW%AL(JP)%ZOUT,2)/=IO%NGROUND_LAYER) THEN
+          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+        ELSE
+          ZF%AL(JP)%ZOUT(:,:) = ZW%AL(JP)%ZOUT(:,:)
+        ENDIF
       !
       !* retrieves soil water content from soil relative humidity
         ALLOCATE(PEK%XWG(PK%NSIZE_P,IO%NGROUND_LAYER))
@@ -468,7 +472,11 @@ IF (YDCTL%LPART5) THEN
         ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
         !
         !* interpolates on output levels
-        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+        IF (SIZE(ZW%AL(JP)%ZOUT,2)/=IO%NGROUND_LAYER) THEN
+          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+        ELSE
+          ZF%AL(JP)%ZOUT(:,:) = ZW%AL(JP)%ZOUT(:,:)
+        ENDIF        
         !
         !* retrieves soil ice content from soil relative humidity
         ALLOCATE(PEK%XWGI(PK%NSIZE_P,IO%NGROUND_LAYER))
@@ -510,26 +518,29 @@ IF (YDCTL%LPART5) THEN
         PK => NP%AL(JP)
         PEK => NPE%AL(JP)
         !
-        ALLOCATE(ZDG(SIZE(PK%XDG,1),INL))
         ALLOCATE(PEK%XTG(PK%NSIZE_P,INL))
         !
-        IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
-          ZDG(:,1) = 0.01
-          ZDG(:,2) = 0.40                    ! deep temperature for force-restore taken at 20cm
-          IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used       
-          IF(IO%LTEMP_ARP)THEN
-            ZDG(:,3) = 1.0
-            DO JL=4,INL
-              ZDG(:,JL) = ZDG(:,JL-1)+1.0
-            ENDDO
-          ENDIF
+        IF (SIZE(ZW%AL(JP)%ZOUT,2)/=IO%NGROUND_LAYER) THEN
+          ALLOCATE(ZDG(SIZE(PK%XDG,1),INL))
+          IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
+            ZDG(:,1) = 0.01
+            ZDG(:,2) = 0.40                    ! deep temperature for force-restore taken at 20cm
+            IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used       
+            IF(IO%LTEMP_ARP)THEN
+              ZDG(:,3) = 1.0
+              DO JL=4,INL
+                ZDG(:,JL) = ZDG(:,JL-1)+1.0
+              ENDDO
+            ENDIF
+          ELSE
+            !* diffusion method, the soil grid is the same as for humidity
+            ZDG(:,:) = PK%XDG(:,:)
+          END IF
+          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,ZDG,PEK%XTG)
+          DEALLOCATE(ZDG)
         ELSE
-          !* diffusion method, the soil grid is the same as for humidity
-          ZDG(:,:) = PK%XDG(:,:)
-        END IF
-        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,ZDG,PEK%XTG)
-        !
-        DEALLOCATE(ZDG)
+          PEK%XTG(:,:) = ZW%AL(JP)%ZOUT(:,:)
+        ENDIF          
         !
       ENDDO
       !

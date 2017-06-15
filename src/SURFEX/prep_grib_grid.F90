@@ -266,7 +266,7 @@ SELECT CASE (HGRIDTYPE)
        NNI= NX * NY
      !
      !
-     CASE ('GAUSS    ','ROTGAUSS  ','LATLON    ')
+     CASE ('GAUSS     ','ROTGAUSS  ','LATLON    ')
      ! 3.2 Usual or Gaussian lat,lon grid (ECMWF files)
      !
    
