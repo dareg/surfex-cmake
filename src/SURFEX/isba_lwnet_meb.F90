@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ##########################################################################             
       SUBROUTINE ISBA_LWNET_MEB(PLAI,PPSN,PPSNA,PEMIS_N,PEMIS_F,PFF,                          &
            PTV,PTG,PTN,PLW_RAD,PLWNET_N,PLWNET_V,PLWNET_G,                                    &
@@ -47,6 +51,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    22/01/11 
+!!      A. Boone    04/03/17  add factor to dLWnet_n/dT_n term to cause it to vanish
+!!                            under some extreme circumstances. 
 !!
 !-------------------------------------------------------------------------------
 !
@@ -108,6 +114,14 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZLW_N_A, ZLW_N_B, ZLW_N_C,            &
 REAL, DIMENSION(SIZE(PEMIS_N)) :: ZEMIS_G
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!*      0.3    declarations of local parameters
+!
+REAL, PARAMETER             :: ZTGRAD_MAX = 60. ! K When Tn-Tv approaches this difference, the derrivative term 
+                                                !   dLWnet_n/dTn vanishes. See below for details.
+REAL, PARAMETER             :: ZTGRAD_DIF = 10. ! K This is the range in Tn-Tv over which dLWnet_n/dTn 
+                                                !   linearly vanishes. See below for details.
+!
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -135,7 +149,7 @@ ZFRAC(:)      = 1.-PPSN(:)
 ZPN(:)        = PPSN(:)*(1.-PPSNA(:))
 ZSIGMA_FA(: ) = (1.-ZPN(:))*PSIGMA_F(:) + ZPN(:)*PSIGMA_FN(:)
 
-CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_F,ZSIGMA_FA,       &
+ CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_F,ZSIGMA_FA,       &
      ZEMIS_G,PTV,PTG,                                         & 
      ZLW_G_A,ZLW_G_B,ZLW_G_C,ZLW_G_D,ZLW_G_E,ZLW_G_F,         &
      ZLW_G_G,ZLW_G_H,ZLW_G_I,ZLW_G_J,ZLW_G_K,ZLW_G_L          )
@@ -146,7 +160,7 @@ ZFRAC(:)      = PPSN(:)
 ZPN(:)        = PPSN(:) + PPSNA(:)*(1.-PPSN(:))
 ZSIGMA_FA(: ) = (1.-ZPN(:))*PSIGMA_F(:) + ZPN(:)*PSIGMA_FN(:)
 
-CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_FN,ZSIGMA_FA,      &
+ CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_FN,ZSIGMA_FA,      &
      PEMIS_N,PTV,PTN,                                         & 
      ZLW_N_A,ZLW_N_B,ZLW_N_C,ZLW_N_D,ZLW_N_E,ZLW_N_F,         &
      ZLW_N_G,ZLW_N_H,ZLW_N_I,ZLW_N_J,ZLW_N_K,ZLW_N_L          )
@@ -178,7 +192,20 @@ PLWNET_G_DTN(:) =   ZLW_N_J(:)                               *4/PTN(:)
 
 PLWNET_N_DTV(:) = ( ZLW_N_F(:) - ZLW_N_G(:)                 )*4/PTV(:)
 PLWNET_N_DTG(:) =   ZLW_G_K(:)                               *4/PTG(:)
-PLWNET_N_DTN(:) = ( ZLW_N_J(:) - ZLW_N_I(:)                 )*4/PTN(:)
+PLWNET_N_DTN(:) = ( ZLW_N_K(:) - ZLW_N_I(:)                 )*4/PTN(:)
+
+! Note that for very thin snow combined with extremely cold 
+! conditions, very weak LWdown forcing and strong Tn-Tc differences,
+! the derrivative of Lwnet_n/dT_n can pose problems (i.e. the assumption of
+! a linear change over the given time step is a poor approximation), 
+! thus in these rare instances, this derrivative is forced
+! to vanish (over some small temperature difference range). This has no impact
+! on numerical stability (since the LW linerization has no effect on this) and has
+! no impact on results in the general sense (since it is temporary and the assumed gradieints
+! are so large that they are rarely, if ever during a run, encountered).
+! Use PTV as a proxy for air T (under these conditions, it should be close to PTC for example)
+
+PLWNET_N_DTN(:) = PLWNET_N_DTN(:)*MIN(1., MAX(0., ZTGRAD_MAX-MAX(0.,PTN(:)-PTV(:)))/ZTGRAD_DIF)
 
 !------------------------------------------------------------------
 ! - Compute *explicit* net budgets (at time t): W m-2
@@ -203,7 +230,7 @@ PLWNET_V(:)  = PLW_RAD(:) - ZLWUP(:) - PLWNET_G(:) - PLWNET_N(:)
 
 IF (LHOOK) CALL DR_HOOK('ISBA_LWNET_MEB',1,ZHOOK_HANDLE)
 
-CONTAINS
+ CONTAINS
 !=========================================================
 SUBROUTINE LW_FLUX_COMP(PPN,PLW_RAD,PFRAC,PSIGMA_F,PSIGMA_FA,      &
      PEMIS_S,PTV,PTEMP_S,                                          & 

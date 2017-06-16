@@ -1,8 +1,8 @@
 !   ############################################################################
 SUBROUTINE PREPS_FOR_MEB_EBUD_RAD(PPS,                                         &
-     PLAICV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,                                       &
+     PLAICV,PSNOWRHO,PSNOWSWE,PSNOWHEAT,PSNOWLIQ,                              &
      PSNOWTEMP,PSNOWDZ,PSCOND,PHEATCAPS,PEMISNOW,PSIGMA_F,PCHIP,               &
-     PTSTEP,PSR,PTA,PVMOD,PSNOWAGE,PPERMSNOWFRAC                               )
+     PTSTEP,PSR,PTA,PVMOD,PSNOWAGE,PPERMSNOWFRAC,HSNOW_ISBA,HSNOWCOND          )
 !   ############################################################################
 !
 !!****  *PREPS_FOR_MEB_EBUD_RAD*
@@ -73,19 +73,20 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PTA
 REAL, DIMENSION(:),   INTENT(IN)    :: PVMOD
 REAL, DIMENSION(:),   INTENT(IN)    :: PPERMSNOWFRAC 
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWHEAT
-
+CHARACTER(LEN=*),     INTENT(IN)    :: HSNOW_ISBA
+CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWCOND
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWSWE, PSNOWAGE, PSNOWRHO
 
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSIGMA_F, PCHIP
 REAL, DIMENSION(:),   INTENT(OUT)   :: PEMISNOW
-REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ, PSCOND, PHEATCAPS, PSNOWTEMP
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ, PSCOND, PHEATCAPS, PSNOWTEMP, PSNOWLIQ
 !
 !
 !*      0.2    declarations of local variables
 !
 INTEGER                                            :: JI, JK
 REAL, DIMENSION(SIZE(PLAICV,1))                    :: ZPSNA
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWLIQ, ZSNOWHEAT, ZSNOWDZN
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEAT, ZSNOWDZN
 REAL, DIMENSION(SIZE(PTA))                         :: ZSNOW, ZSNOWHMASS
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -119,13 +120,21 @@ DO JK=1,SIZE(PSNOWDZ,2)
       ZSNOW(JI)  = ZSNOW(JI) + PSNOWDZ(JI,JK)
    ENDDO
 ENDDO
-!
-CALL SNOW3LFALL(PTSTEP,PSR,PTA,PVMOD,ZSNOW,PSNOWRHO,PSNOWDZ,          &
+
+IF (HSNOW_ISBA=="CRO") THEN
+
+ ! à voir ce qu'on garde ici
+
+ELSE
+
+ CALL SNOW3LFALL(PTSTEP,PSR,PTA,PVMOD,ZSNOW,PSNOWRHO,PSNOWDZ,          &
                  ZSNOWHEAT,ZSNOWHMASS,PSNOWAGE,PPERMSNOWFRAC )
 
-CALL SNOW3LGRID(ZSNOWDZN,ZSNOW,PSNOWDZ_OLD=PSNOWDZ)
+ CALL SNOW3LGRID(ZSNOWDZN,ZSNOW,PSNOWDZ_OLD=PSNOWDZ)
 
-CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,ZSNOWHEAT,PSNOWAGE)
+ CALL SNOW3LTRANSF(ZSNOW,PSNOWDZ,ZSNOWDZN,PSNOWRHO,ZSNOWHEAT,PSNOWAGE)
+
+END IF
 
 ! Snow heat capacity:
 !
@@ -136,7 +145,7 @@ PHEATCAPS(:,:)   = SNOW3LSCAP(PSNOWRHO)                    ! J m-3 K-1
 PSNOWTEMP(:,:)   = XTT + ( ((ZSNOWHEAT(:,:)/MAX(1.E-10,PSNOWDZ(:,:)))  &
                    + XLMTT*PSNOWRHO(:,:))/PHEATCAPS(:,:) )  
 !
-ZSNOWLIQ(:,:)    = MAX(0.0,PSNOWTEMP(:,:)-XTT)*PHEATCAPS(:,:)*         &
+PSNOWLIQ(:,:)    = MAX(0.0,PSNOWTEMP(:,:)-XTT)*PHEATCAPS(:,:)*         &
                    PSNOWDZ(:,:)/(XLMTT*XRHOLW) 
 
 PSNOWTEMP(:,:)   = MIN(XTT,PSNOWTEMP(:,:))
@@ -145,11 +154,16 @@ PSNOWTEMP(:,:)   = MIN(XTT,PSNOWTEMP(:,:))
 
 PSNOWSWE(:,:)  = PSNOWDZ(:,:)*PSNOWRHO(:,:)             
 
-CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,PSNOWTEMP,ZSNOW,ZSNOWLIQ)
-
+IF (HSNOW_ISBA=="CRO") THEN
+  ! à voir ce qu'on garde ici
+  CALL SNOWCROTHRM(PSNOWRHO,PSCOND,PSNOWTEMP,PPS,PSNOWLIQ, &
+                       HSNOWCOND                  )
+ELSE
+  CALL SNOW3LCOMPACTN(PTSTEP,XSNOWDZMIN,PSNOWRHO,PSNOWDZ,PSNOWTEMP,ZSNOW,PSNOWLIQ)
 ! Snow thermal conductivity:
 !
-CALL SNOW3LTHRM(PSNOWRHO,PSCOND,PSNOWTEMP,PPS)
+ CALL SNOW3LTHRM(PSNOWRHO,PSCOND,PSNOWTEMP,PPS)
+ENDIF
 !
 ! View factor: (1 - shielding factor)
 !
@@ -163,7 +177,7 @@ PEMISNOW(:)       = XEMISSN
 !
 IF (LHOOK) CALL DR_HOOK('PREPS_FOR_MEB_EBUD_RAD',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !####################################################################
 SUBROUTINE SNOW3LFALL(PTSTEP,PSR,PTA,PVMOD,PSNOW,PSNOWRHO,PSNOWDZ,        &
                       PSNOWHEAT,PSNOWHMASS,PSNOWAGE,PPERMSNOWFRAC)  
@@ -986,6 +1000,75 @@ IF (LHOOK) CALL DR_HOOK('SNOW3LCOMPACTN',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOW3LCOMPACTN
 !####################################################################
-
+!####################################################################
+SUBROUTINE SNOWCROTHRM(PSNOWRHO,PSCOND,PSNOWTEMP,PPS,PSNOWLIQ, &
+                       HSNOWCOND                  )
+!
+!!    PURPOSE
+!!    -------
+!     Calculate snow thermal conductivity from
+!     Sun et al. 1999, J. of Geophys. Res., 104, 19587-19579
+!     (vapor) and Anderson, 1976, NOAA Tech. Rep. NWS 19 (snow).
+!
+!     Upon activation of flag OCOND_YEN, use the Yen (1981) formula for thermal conductivity
+!     This formula was originally used in Crocus.
+!
+!     05/2016 : Lafaysse/Cluzet : new available options
+!
+USE MODD_CSTS, ONLY : XP00, XCONDI, XRHOLW
+USE MODD_SNOW_PAR, ONLY : XSNOWTHRMCOND1, XSNOWTHRMCOND2, XSNOWTHRMCOND_AVAP, &
+                          XSNOWTHRMCOND_BVAP, XSNOWTHRMCOND_CVAP, XVRKZ6, &
+                          XSNOWTHRMCOND_C11_1, XSNOWTHRMCOND_C11_2, XSNOWTHRMCOND_C11_3
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, DIMENSION(:), INTENT(IN)      :: PPS
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWTEMP, PSNOWRHO, PSNOWLIQ
+REAL, DIMENSION(:,:), INTENT(OUT)   :: PSCOND
+!
+CHARACTER(3), INTENT(IN)              :: HSNOWCOND ! conductivity option
+!
+!*      0.2    declarations of local variables
+!
+INTEGER :: JJ, JST ! looping indexes
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!-------------------------------------------------------------------------------
+IF (LHOOK) CALL DR_HOOK('SNOWCROTHRM',0,ZHOOK_HANDLE)
+!
+! 1. Snow thermal conductivity
+! ----------------------------
+!
+DO JST = 1,SIZE(PSNOWRHO(:,:),2)
+  !
+  DO JJ = 1,SIZE(PSNOWRHO(:,:),1)
+    ! Cluzet et al 2016
+    IF ( HSNOWCOND=='Y81') THEN
+      PSCOND(JJ,JST) = XCONDI * EXP( XVRKZ6 * LOG( PSNOWRHO(JJ,JST)/XRHOLW ) )
+      ! Snow thermal conductivity is set to be above 0.04 W m-1 K-1
+      PSCOND(JJ,JST) = MAX( 0.04, PSCOND(JJ,JST) )
+    ELSE IF(HSNOWCOND == 'I02') THEN
+      PSCOND(JJ,JST) = ( XSNOWTHRMCOND1 + &
+                         XSNOWTHRMCOND2 * PSNOWRHO(JJ,JST) * PSNOWRHO(JJ,JST) ) + &
+                         MAX( 0.0, ( XSNOWTHRMCOND_AVAP + &
+                                    ( XSNOWTHRMCOND_BVAP/(PSNOWTEMP(JJ,JST) + XSNOWTHRMCOND_CVAP) ) ) &
+                                   * (XP00/PPS(JJ)) )
+    ELSE IF(HSNOWCOND == 'C11') THEN
+      PSCOND(JJ,JST) = XSNOWTHRMCOND_C11_1 * PSNOWRHO(JJ,JST)* PSNOWRHO(JJ,JST) + &
+      		       XSNOWTHRMCOND_C11_2 * PSNOWRHO(JJ,JST) + XSNOWTHRMCOND_C11_3
+    ENDIF
+    !
+    ! In older versions, snow thermal conductivity is annihilated in presence of liquid water.
+    ! We decided to remove this incorrect parameterization (May 2016)
+    !
+   ENDDO ! end loop JST
+   !
+ENDDO ! end loop JST
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCROTHRM',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE SNOWCROTHRM
 
 END SUBROUTINE PREPS_FOR_MEB_EBUD_RAD

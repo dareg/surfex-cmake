@@ -879,8 +879,11 @@ REAL, DIMENSION(SIZE(PWR)) :: ZEVAPCOR ! evaporation correction as last traces o
 REAL, DIMENSION(SIZE(PWR)) :: ZLES3L   ! sublimation from ISBA-ES(3L)
 REAL, DIMENSION(SIZE(PWR)) :: ZLEL3L   ! evaporation heat flux of water in the snow (W/m2)
 REAL, DIMENSION(SIZE(PWR)) :: ZEVAP3L  ! evaporation flux over snow from ISBA-ES (kg/m2/s)
-REAL, DIMENSION(SIZE(PWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow pack: 
-!                                           ! ISBA-ES [kg/(m2 s)]
+REAL, DIMENSION(SIZE(PWR)) :: ZSNOW_THRUFAL      !rate that liquid water leaves snow pack: 
+!                                                ISBA-ES [kg/(m2 s)]
+REAL, DIMENSION(SIZE(PWR)) :: ZSNOW_THRUFAL_SOIL !liquid water leaving the snowpack directly to the 
+!                                                !soil, ISBA-ES: [kg/(m2 s)] (equal to ZSNOW_THRUFAL
+!                                                !if OMEB_LITTER=False and zero if OMEB_LITTER=True)
 REAL, DIMENSION(SIZE(PWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
 REAL, DIMENSION(SIZE(PWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
 REAL, DIMENSION(SIZE(PWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
@@ -908,6 +911,8 @@ REAL, DIMENSION(SIZE(PWR))               :: ZFLSN_COR  ! snow/soil-biomass corre
 !
 REAL, DIMENSION(SIZE(PWR))               :: ZSUBVCOR   ! A possible snow (intercepted by the canopy) mass correction 
 !                                                       (to be potentially removed from soil) when MEB activated (kg/m2/s)
+REAL, DIMENSION(SIZE(PWR))               :: ZLITCOR   ! A possible ice (in litter layer) mass correction 
+!                                                       (to be potentially removed from soil) when litter activated (kg/m2/s)
 !
 ! Misc :
 !
@@ -957,6 +962,7 @@ ZRI3L       (:) = XUNDEF
 ZSOILHCAPZ(:,:) = XUNDEF
 ZSOILCONDZ(:,:) = XUNDEF
 ZF2WGHT   (:,:) = XUNDEF
+ZEVAP3L(:)      = XUNDEF
 !
 PRS         (:)   = 0.0
 PAC_AGG     (:)   = 0.0
@@ -977,13 +983,23 @@ ZDELHEATN     (:) = 0.0
 ZDELHEATN_SFC (:) = 0.0
 ZSNOWSFCH     (:) = 0.0
 ZGSFCSNOW     (:) = 0.0
+ZSNOW_THRUFAL (:) = 0.0
 !
 ZSUBVCOR(:)     = 0.0
+ZLITCOR(:)     = 0.0
+ZLES3L          = 0.0
+ZLEL3L          = 0.0
 !
 IF(OMEB)THEN
    ZVEG(:) = 0.0
+   PLEG(:) = 0.0
+   PLEGI(:) = 0.0
+   PLELITTER(:) = 0.0
+   PLELITTERI(:) = 0.0
 ELSE
    ZVEG(:) = PVEG(:)
+   PLES_V_C(:) = 0.0
+   PWRVN   (:) = 0.0
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
@@ -1116,7 +1132,7 @@ ELSE
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,              &
            PTG, PCG, PCT, ZSOILHCAPZ, ZSOILCONDZ(:,1),                          &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,             &
-           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                   &
+           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR, PLVTT, PLSTT,                &
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G, PDZG,      &
            PPEW_A_COEF, PPEW_B_COEF,                                            &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
@@ -1210,7 +1226,7 @@ CALL HYDRO(HISBA, HSNOW_ISBA, HRUNOFF, HSOILFRZ, OMEB, OGLACIER,                
      PFFG, PFFV, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,      &
      PIRRIG_GR, PQSB, PFWTD, PWTD,                                              & 
      ZDELHEATG, ZDELHEATG_SFC,                                                  &
-     ZDELPHASEG, ZDELPHASEG_SFC                                                 )
+     ZDELPHASEG, ZDELPHASEG_SFC, PLVTT, PLSTT                                   )
 
 !-------------------------------------------------------------------------------
 !

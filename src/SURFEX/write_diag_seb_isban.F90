@@ -1917,8 +1917,6 @@ IF(DGI%LPATCH_BUDGET.AND.(I%NPATCH >1))THEN
         YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
         CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGI%XSWDC(:,:),IRESP,HCOMMENT=YCOMMENT)
-        PRINT*,"SWDC_P"
-        PRINT*,DGI%XSWDC(:,:)
         !
         YRECFM='SWUC_P'
         YCOMMENT='X_Y_'//YRECFM//' (J/m2)'

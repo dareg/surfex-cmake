@@ -629,25 +629,25 @@ IF (DGEI%LSURF_EVAP_BUDGET) THEN
                       IFILE_ID,'LE_N_C_ISBA' ,'MEB: latent heat flux from the snow on the ground'              ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'SWNET_V_ISBA' ,'MEB: net vegetation canopy shortwave radiation'                ,IDDIM,  &
+                      IFILE_ID,'SWNT_V_ISBA' ,'MEB: net vegetation canopy shortwave radiation'                ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'SWNET_G_ISBA' ,'MEB: net ground shortwave radiation'                           ,IDDIM,  &
+                      IFILE_ID,'SWNT_G_ISBA' ,'MEB: net ground shortwave radiation'                           ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'SWNET_N_ISBA' ,'MEB: net snow shortwave radiation'                             ,IDDIM,  &
+                      IFILE_ID,'SWNT_N_ISBA' ,'MEB: net snow shortwave radiation'                             ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'SWNET_NS_ISBA' ,'MEB: net snow shortwave radiation for surface layer'          ,IDDIM,  &
+                      IFILE_ID,'SWNT_NS_ISBA' ,'MEB: net snow shortwave radiation for surface layer'          ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'LWNET_V_ISBA' ,'MEB: net vegetation canopy longwave radiation'                 ,IDDIM,  &
+                      IFILE_ID,'LWNT_V_ISBA' ,'MEB: net vegetation canopy longwave radiation'                 ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'LWNET_G_ISBA' ,'MEB: net ground longwave radiation'                            ,IDDIM,  &
+                      IFILE_ID,'LWNT_G_ISBA' ,'MEB: net ground longwave radiation'                            ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'LWNET_N_ISBA' ,'MEB: net snow longwave radiation'                              ,IDDIM,  &
+                      IFILE_ID,'LWNT_N_ISBA' ,'MEB: net snow longwave radiation'                              ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'H_V_C_ISBA' ,'MEB: sensible heat flux from vegetation canopy overstory'        ,IDDIM,  &
@@ -662,10 +662,10 @@ IF (DGEI%LSURF_EVAP_BUDGET) THEN
                       IFILE_ID,'H_N_C_ISBA' ,'MEB: sensible heat flux from the snow on the ground'             ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'SWDOWN_GN_ISBA' ,'MEB: SW reaching the snowpack/ground understory'             ,IDDIM,  &
+                      IFILE_ID,'SWDN_GN_ISBA' ,'MEB: SW reaching the snowpack/ground understory'             ,IDDIM,  &
                         YATT_TITLE,YATT)      
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'LWDOWN_GN_ISBA' ,'MEB: LW reaching the snowpack/ground understory'             ,IDDIM,  &
+                      IFILE_ID,'LWDN_GN_ISBA' ,'MEB: LW reaching the snowpack/ground understory'             ,IDDIM,  &
                         YATT_TITLE,YATT)      
     YATT = 'kg/m2s'
     CALL DEF_VAR_NETCDF(DGU, &

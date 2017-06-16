@@ -5,7 +5,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,             &
                          PTG, PCG, PCT, PSOILHCAPZ, PSOILCONDZ,                              &
                          PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,            &
-                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR,                    &
+                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR, PLVTT, PLSTT,      &
                          PZREF, PZ0NAT, PZ0EFF, PZ0HNAT, PALB, PD_G, PDZG,                   &
                          PPEW_A_COEF, PPEW_B_COEF,                                           &
                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                 &
@@ -75,6 +75,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
 !!      Modified by B. Decharme  (08/2013): Qsat as argument (needed for coupling with atm)
 !!      Modified by A. Boone     (10/2014): MEB: pass in fluxes when using MEB
 !!      Modified by M. Lafaysse (08/2015): MEB-Crocus coupling
+!!      Modified by B. Decharme  (03/2016): No snowdrift under forest
 !!
 !-------------------------------------------------------------------------------
 !
@@ -83,7 +84,10 @@ USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
-USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
+USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW,                       &
+                                NVT_TEBD, NVT_TRBE, NVT_BONE,   &
+                                NVT_TRBD, NVT_TEBE, NVT_TENE,   &
+                                NVT_BOBD, NVT_BOND, NVT_SHRB
 !
 USE MODI_SNOW3L
 USE MODI_SNOWCRO
@@ -164,7 +168,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA,                  
 !                                                at level za
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0NAT, &
-                                       PZ0EFF, PZ0HNAT, PALB,PSLOPEDIR
+                                       PZ0EFF, PZ0HNAT, PALB,PSLOPEDIR, PLVTT, PLSTT
 !                                      PZ0EFF    = roughness length for momentum 
 !                                      PZ0NAT    = grid box average roughness length
 !                                      PZ0HNAT   = grid box average roughness length
@@ -178,6 +182,9 @@ REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PR
 !                                                  normal to the surface and the vertical
 !                                      PALB      = soil/vegetation albedo
 !                                      PSLOPE_DIR = direction of the slope
+!                                      PLVTT     = latent heat of vaporization-hydrology (J/kg)
+!                                      PLSTT     = latent heat of sublimation-hydrology  (J/kg)
+
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PPSN
 !                                      PPSN     = Snow cover fraction (total) 
@@ -345,7 +352,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD, & 
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
-                                       ZSNOW_MASS_BUDGET
+                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
 !                                      ZRRSNOW      = rain rate over snow [kg/(m2 s)]
 !                                      ZSNOW        = snow depth (m) 
@@ -366,6 +373,11 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
 !                                                 to maintain an accurate water
 !                                                 balance [kg/(m2 s)]
 !                                      ZSNOW_MASS_BUDGET = snow water equivalent budget (kg/m2/s)
+!                                      ZWGHT        = MEB surface layer weight for distributing energy
+!                                                     between litter and ground layers for the case
+!                                                     of total ablation during a timestep (-).
+!                                      ZWORK        = local working variable (*)
+!                                      ZC2          = sub-surface heat capacity [(K m2)/J]
 
 REAL, DIMENSION(SIZE(PTA),4)        :: ZBLOWSNW   ! Properties of deposited blowing snow
                                       !    1 : Deposition flux (kg/m2/s)
@@ -427,6 +439,9 @@ ZSOILCOND(:)   = 0.0
 ZRRSNOW(:)     = 0.0
 ZSNOWFALL(:)   = 0.0
 ZSNOWABLAT_DELTA(:) = 0.0
+ZWGHT(:)       = 0.0
+ZWORK(:)       = 0.0
+ZC2(:)         = PCT(:)
 PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
@@ -476,6 +491,20 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
    ENDDO
 !
+! Calculate preliminary snow depth (m)
+
+   ZSNOW(:)=0.
+   ZSNOWH(:)=0.
+   ZSNOWSWE_1D(:)=0.
+   ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
+!
+   DO JWRK=1,SIZE(PSNOWSWE,2)
+      DO JJ=1,SIZE(PSNOWSWE,1)
+         ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
+         ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+         ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+      END DO
+   ENDDO
 !
    IF(HISBA == 'DIF')THEN
       ZSOILCOND(:)   = PSOILCONDZ(:)
@@ -567,12 +596,18 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
 !
    IF(OMEB)THEN
-     ZPSN(:)=1.0
+     ZPSN(:)      = 1.0
+     IF(HISBA == 'DIF')THEN
+        ZWGHT(:)  = PSOILHCAPZ(:,2)*PDZG(:,2)/(PSOILHCAPZ(:,1)*PDZG(:,1) + PSOILHCAPZ(:,2)*PDZG(:,2))
+        ZC2(:)    = 1/(PSOILHCAPZ(:,2)*PDZG(:,2))
+     ELSE
+        ZWGHT(:)  = (PD_G(:,2)-PD_G(:,1))/PD_G(:,2)
+     ENDIF
    ELSE
 !    To Conserve mass in ISBA without MEB, 
 !    EVAP must be weignted by the snow fraction
 !    in the calulation of THRUFAL
-     ZPSN(:)=PPSN(:)
+     ZPSN(:)   = PPSN(:)
    ENDIF
 !
    ZSNOWABLAT_DELTA(:) = 0.0
@@ -582,7 +617,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZSNOWSWE_OUT(:)     = 0.0
       PLES3L(:)           = MIN(PLES3L(:), XLSTT*(ZSNOWSWE_1D(:)/PTSTEP + PSR(:)))
       PLEL3L(:)           = 0.0
-      PEVAP(:)            = PLES3L(:)/XLSTT
+      PEVAP(:)            = PLES3L(:)/PLSTT(:)
       PTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)*ZPSN(:) + ZRRSNOW(:)) ! kg m-2 s-1
       ZTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)         + ZRRSNOW(:)) ! kg m-2 s-1
       PSRSFC(:)           = 0.0
@@ -600,9 +635,12 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
                           - PHSNOW(:) - PLES3L(:) - PLEL3L(:)) + PGSFCSNOW(:)     &
                           - PSNOWHMASS(:)/PTSTEP 
       ZGRNDFLUXN(:)       = (ZSNOWH(:)+PSNOWHMASS(:))/PTSTEP + PGFLUXSNOW(:)
-      PTG(:,1)            = PTG(:,1) + PTSTEP*PCT(:)*ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      PDELHEATG(:)        = PDELHEATG(:)     + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
-      PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
+      ZWORK(:)            = PTSTEP*ZPSN(:)*(ZGRNDFLUXN(:) - PGRNDFLUX(:) - PFLSN_COR(:))
+      PTG(:,1)            = PTG(:,1) + ZWORK(:)*(1.-ZWGHT(:))*PCT(:)
+      PTG(:,2)            = PTG(:,2) + ZWORK(:)*    ZWGHT(:) *ZC2(:)
+      ZWORK(:)            = ZWORK(:)/PTSTEP
+      PDELHEATG(:)        = PDELHEATG(:)     + ZWORK(:)  
+      PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZWORK(:)  
       PGRNDFLUX(:)        = ZGRNDFLUXN(:)
       PFLSN_COR(:)        = 0.0
      END WHERE
@@ -654,39 +692,17 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
    DO JWRK=1,INLVLS
       DO JJ=1,SIZE(PSNOWSWE,1)
-         IF(PSNOWSWE(JJ,JWRK)>0.0) THEN
-           IF (PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
-              WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
-              WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
-              WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
-              WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
-              WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
-              WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
-              WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
-              WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
-              CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
-            ENDIF
-            
-         ELSE
-           !Prognostic variables forced to XUNDEF for correct outputs
-           PSNOWDZ(JJ,JWRK)=XUNDEF
-           ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
-           ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
-           ! (vanishing snowpack)
-           IF (.NOT.((PPSN(JJ)>0.0).AND.(JWRK==1))) THEN
-               PSNOWTEMP(JJ,JWRK)=XUNDEF
-           ENDIF
-           PSNOWLIQ(JJ,JWRK)=XUNDEF
-           PSNOWHEAT(JJ,JWRK)=XUNDEF
-           PSNOWRHO(JJ,JWRK)=XUNDEF
-           PSNOWAGE(JJ,JWRK)=XUNDEF
-           IF (HSNOW_ISBA=='CRO') THEN
-               PSNOWGRAN1(JJ,JWRK)=XUNDEF
-               PSNOWGRAN2(JJ,JWRK)=XUNDEF
-               PSNOWHIST(JJ,JWRK)=XUNDEF
-           END IF
+         IF(PSNOWSWE(JJ,JWRK)>0.0.AND.PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
+            WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
+            WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
+            WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
+            WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
+            WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
+            WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
+            WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
+            WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
+            CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
          ENDIF
-         
       ENDDO
    ENDDO
 !
@@ -740,6 +756,8 @@ REAL, DIMENSION(KSIZE1)        :: ZP_DELHEATG
 REAL, DIMENSION(KSIZE1)        :: ZP_DELHEATG_SFC
 REAL, DIMENSION(KSIZE1)        :: ZP_SW_RAD
 REAL, DIMENSION(KSIZE1)        :: ZP_QA
+REAL, DIMENSION(KSIZE1)        :: ZP_LVTT
+REAL, DIMENSION(KSIZE1)        :: ZP_LSTT
 REAL, DIMENSION(KSIZE1)        :: ZP_VMOD
 REAL, DIMENSION(KSIZE1)        :: ZP_LW_RAD
 REAL, DIMENSION(KSIZE1)        :: ZP_RHOA
@@ -779,6 +797,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_USTARSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_CHSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_SNOWHMASS
 REAL, DIMENSION(KSIZE1)        :: ZP_VEGTYPE
+REAL, DIMENSION(KSIZE1)        :: ZP_FOREST
 REAL, DIMENSION(KSIZE1)        :: ZP_PEW_A_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEW_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PET_A_COEF
@@ -818,7 +837,6 @@ INTEGER :: JWRK, JJ, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA:CALL_MODEL',0,ZHOOK_HANDLE)
-
 !
 ! Initialize:
 !
@@ -841,7 +859,6 @@ DO JWRK=1,KSIZE2
    ENDDO
 ENDDO
 !
-
 IF (HSNOW_ISBA=='CRO') THEN
    DO JWRK=1,KSIZE2
       DO JJ=1,KSIZE1
@@ -892,7 +909,6 @@ IF (OMEB) THEN
     DO JJ=1,KSIZE1
       JI                    = KMASK           (JJ)
       ZP_DZG      (JJ,JWRK) = PDZG       (JI,JWRK)
-      ZP_SNOWIMPUR(JJ,JWRK) = XUNDEF
     ENDDO
   ENDDO
 ENDIF
@@ -916,6 +932,8 @@ DO JJ=1,KSIZE1
    ZP_UREF    (JJ) = PUREF    (JI)
    ZP_EXNS    (JJ) = PEXNS    (JI)
    ZP_EXNA    (JJ) = PEXNA    (JI)
+   ZP_LVTT    (JJ) = PLVTT    (JI)
+   ZP_LSTT    (JJ) = PLSTT    (JI)
    ZP_DIRCOSZW(JJ) = PDIRCOSZW(JI)
    ZP_ZREF    (JJ) = PZREF    (JI)
    ZP_Z0NAT   (JJ) = PZ0NAT   (JI)
@@ -954,6 +972,9 @@ ENDDO
 DO JJ=1,KSIZE1
    JI = KMASK(JJ)
    ZP_VEGTYPE (JJ) = PVEGTYPE (JI,NVT_SNOW)
+   ZP_FOREST  (JJ) = PVEGTYPE(JI,NVT_TEBD) + PVEGTYPE(JI,NVT_TRBE) + PVEGTYPE(JI,NVT_BONE)   &
+                   + PVEGTYPE(JI,NVT_TRBD) + PVEGTYPE(JI,NVT_TEBE) + PVEGTYPE(JI,NVT_TENE)   & 
+                   + PVEGTYPE(JI,NVT_BOBD) + PVEGTYPE(JI,NVT_BOND) + PVEGTYPE(JI,NVT_SHRB)   
 ENDDO
 !
 !
@@ -981,6 +1002,9 @@ IF(OMEB)THEN
    ZP_SWNETSNOWS(:)  = ZP_SWNETSNOWS(:)  *ZP_PSN_INV(:)
    ZP_LWNETSNOW(:)   = ZP_LWNETSNOW(:)   *ZP_PSN_INV(:)
    ZP_HSNOW(:)       = ZP_HSNOW(:)       *ZP_PSN_INV(:)
+   ZP_GFLUXSNOW(:)   = ZP_GFLUXSNOW(:)   *ZP_PSN_INV(:) 
+   ZP_GSFCSNOW(:)    = ZP_GSFCSNOW(:)    *ZP_PSN_INV(:) 
+   ZP_SNOWHMASS(:)   = ZP_SNOWHMASS(:)   *ZP_PSN_INV(:)
    ZP_LES3L(:)       = ZP_LES3L(:)       *ZP_PSN_INV(:)
    ZP_LEL3L(:)       = ZP_LEL3L(:)       *ZP_PSN_INV(:)
    ZP_GRNDFLUX(:)    = ZP_GRNDFLUX(:)    *ZP_PSN_INV(:)
@@ -1060,7 +1084,8 @@ ELSE
              ZP_PS, ZP_SRSNOW, ZP_RRSNOW, ZP_PSN3L, ZP_TA, ZP_TG(:,1),     &
              ZP_SW_RAD, ZP_QA, ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF,       &
              ZP_EXNS, ZP_EXNA, ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF,   &
-             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G(:,1), ZP_SNOWLIQ,      &
+             ZP_Z0HNAT, ZP_ALB, ZP_SOILCOND, ZP_D_G(:,1),                  &
+             ZP_LVTT, ZP_LSTT, ZP_SNOWLIQ,                                 &
              ZP_SNOWTEMP, ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX ,             &
              ZP_EVAPCOR, ZP_SOILCOR, ZP_GFLXCOR, ZP_SNOWSFCH,              &
              ZP_DELHEATN, ZP_DELHEATN_SFC,                                 &
@@ -1068,8 +1093,10 @@ ELSE
              ZP_RNSNOW, ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L,       &
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
-             ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
-             ZP_LAT, ZP_LON, HSNOWDRIFT, OSNOWDRIFT_SUBLIM                 )
+             ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_FOREST,        &
+             ZP_ZENITH, ZP_LAT, ZP_LON, HSNOWDRIFT, OSNOWDRIFT_SUBLIM     )
+
+ENDIF
 !
   IF(OMEB)THEN
 !
@@ -1163,7 +1190,6 @@ ELSE
 !
   ENDIF
 !
-ENDIF
 !
 !===============================================================
 !conversion of snow heat from J/m2 into J/m3

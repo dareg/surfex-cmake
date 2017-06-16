@@ -533,14 +533,25 @@ ZQA_IC     = 0.0
 !
 IF (.NOT. (OMEB) )THEN
   PGRNDFLUX  = 0.
+  PHSNOW     = 0.
+  PRNSNOW    = 0.
+  PLES3L     = 0.
+  PLEL3L     = 0.
+  PHPSNOW    = 0.
+
+!ELSE
+!  PRINT*, "+++++++++++++++++++++"
+!  PRINT*, "FLUXES FROM MEB:"
+!  PRINT*,"PGRNDFLUX",PGRNDFLUX
+!  PRINT*,"PHSNOW",PHSNOW
+!  PRINT*,"PRNSNOW",PRNSNOW
+!  PRINT*,"PLES3L",PLES3L
+!  PRINT*,"PLEL3L",PLEL3L
+!  PRINT*,"PHPSNOW",PHPSNOW
+!  PRINT*, "+++++++++++++++++++++"
 ENDIF
 
 PSNOWHMASS = 0.
-PHSNOW     = 0.
-PRNSNOW    = 0.
-PLES3L     = 0.
-PLEL3L     = 0.
-PHPSNOW    = 0.
 PEVAPCOR   = 0.
 PTHRUFAL   = 0.
 !

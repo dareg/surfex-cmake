@@ -1,6 +1,6 @@
 !   ############################################################################
 SUBROUTINE SNOW_LOAD_MEB(PTSTEP,PSR,PTV,PWRVNMAX,PKVN,PCHEATV,PLERCV,PLESC,PMELTVN, &
-          PVELC,PMELTCV,PFRZCV,PUNLOADSNOW,PWRV,PWRVN,PSUBVCOR)
+          PVELC,PMELTCV,PFRZCV,PUNLOADSNOW,PWRV,PWRVN,PSUBVCOR,PLVTT,PLSTT)
 !   ############################################################################
 !
 !!****  *SNOW_LOAD_MEB*
@@ -41,7 +41,7 @@ SUBROUTINE SNOW_LOAD_MEB(PTSTEP,PSR,PTV,PWRVNMAX,PKVN,PCHEATV,PLERCV,PLESC,PMELT
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,     ONLY : XTT, XLMTT, XLVTT, XLSTT
+USE MODD_CSTS,     ONLY : XTT, XLMTT
 !
 USE MODD_SNOW_PAR, ONLY : XRHOSMAX_ES
 !
@@ -54,6 +54,7 @@ IMPLICIT NONE
 !
 REAL,               INTENT(IN)    :: PTSTEP
 !
+REAL, DIMENSION(:), INTENT(IN)    :: PLVTT, PLSTT
 REAL, DIMENSION(:), INTENT(IN)    :: PSR,PCHEATV, PLERCV, PVELC,              &
                                      PLESC, PMELTVN, PWRVNMAX, PKVN
 !
@@ -125,7 +126,7 @@ ELSEWHERE
 ! NOTE for the rare case that sublimation exceeds snow mass (possible as traces of snow disappear)
 ! compute a mass correction to be removed from soil (to conserve mass): PSUBVCOR
 
-   ZSUB(:)        = PLESC(:)*(PTSTEP/XLSTT)              ! kg m-2
+   ZSUB(:)        = PLESC(:)*(PTSTEP/PLSTT(:))           ! kg m-2
    PSUBVCOR(:)    = MAX(0.0, ZSUB(:) - ZWRVN(:))/PTSTEP  ! kg m-2 s-1
    ZWRVN(:)       = MAX(0.0, ZWRVN(:) - ZSUB(:))         ! kg m-2
 
@@ -144,7 +145,7 @@ ELSEWHERE
 ! Also, update liquid water stored on the canopy here:
 
    PFRZCV(:)      = PTSTEP*MAX(0.0, -PMELTVN(:))        ! kg m-2  
-   PFRZCV(:)      = MIN(PFRZCV(:), MAX(0.0,PWRV(:)-PLERCV(:)*(PTSTEP/XLVTT)))
+   PFRZCV(:)      = MIN(PFRZCV(:), MAX(0.0,PWRV(:)-PLERCV(:)*(PTSTEP/PLVTT(:))))
    ZWRVN(:)       = ZWRVN(:) + PFRZCV(:)
    PWRV(:)        = PWRV(:)  - PFRZCV(:)
 

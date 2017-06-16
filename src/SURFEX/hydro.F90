@@ -20,7 +20,7 @@
                          PPIFLOOD, PIFLOOD, PPFLOOD, PRRVEG, PIRRIG_FLUX,   &
                          PIRRIG_GR, PQSB, PFWTD, PWTD,                      &
                          PDELHEATG, PDELHEATG_SFC,                          &
-                         PDELPHASEG, PDELPHASEG_SFC                         )
+                         PDELPHASEG, PDELPHASEG_SFC, PLVTT, PLSTT           )
 !     #####################################################################
 !
 !!****  *HYDRO*  
@@ -92,7 +92,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLVTT, XLSTT, XLMTT
+USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLSTT, XLMTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN, XDENOM_MIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
 !
@@ -130,7 +130,7 @@ IMPLICIT NONE
 !                                             ! 'WSAT'
 !                                             ! 'DT92'
 !                                             ! 'SGH ' Topmodel
-CHARACTER(LEN=*),   INTENT(IN)      :: HSOILFRZ   ! soil freezing-physics option
+ CHARACTER(LEN=*),   INTENT(IN)      :: HSOILFRZ   ! soil freezing-physics option
 !                                                 ! 'DEF'   Default (Boone et al. 2000; Giard and Bazile 2000)
 !                                                 ! 'LWT'   phase changes as above, but relation between unfrozen 
 !                                                         water and temperature considered
@@ -157,8 +157,9 @@ REAL, DIMENSION(:), INTENT(IN)    :: PRR, PSR, PLEV, PLETR, PLEG, PLES
 !                                      PLEG = latent heat of evaporation over the ground
 !                                      PLES = latent heat of sublimation over the snow
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFB ! slope of the runoff curve
-REAL, DIMENSION(:), INTENT(IN)    :: PWDRAIN  ! minimum Wg for drainage (m3/m3)
+REAL, DIMENSION(:), INTENT(IN)    :: PRUNOFFB      ! slope of the runoff curve
+REAL, DIMENSION(:), INTENT(IN)    :: PLVTT, PLSTT  ! latent heat of vaporization and sublimation (J/kg)  
+REAL, DIMENSION(:), INTENT(IN)    :: PWDRAIN       ! minimum Wg for drainage (m3/m3)
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PC1, PC2, PWGEQ, PCG, PCT
 REAL, DIMENSION(:,:), INTENT(IN)  :: PC3
@@ -295,13 +296,13 @@ REAL, DIMENSION(:),  INTENT(INOUT) :: PRRVEG   !Precip. intercepted by vegetatio
 !
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFG,PFFV
 REAL, DIMENSION(:),  INTENT(IN)    :: PFFLOOD  !Floodplain effective fraction
-REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltration [kg/m²]
+REAL, DIMENSION(:),  INTENT(IN)    :: PPIFLOOD !Floodplain potential infiltration [kg/m**2]
 !
-REAL, DIMENSION(:), INTENT(INOUT)  :: PIFLOOD  !Floodplain real infiltration      [kg/m²/s]
-REAL, DIMENSION(:), INTENT(INOUT)  :: PPFLOOD  !Floodplain interception           [kg/m²/s]
+REAL, DIMENSION(:), INTENT(INOUT)  :: PIFLOOD  !Floodplain real infiltration      [kg/m**2/s]
+REAL, DIMENSION(:), INTENT(INOUT)  :: PPFLOOD  !Floodplain interception           [kg/m**2/s]
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PTOPQS   !Topmodel (HRUNOFF=SGH) subsurface flow by layer (m/s)
-REAL, DIMENSION(:),   INTENT(OUT)  :: PQSB     !Topmodel (HRUNOFF=SGH) lateral subsurface flow [kg/m²/s]
+REAL, DIMENSION(:),   INTENT(OUT)  :: PQSB     !Topmodel (HRUNOFF=SGH) lateral subsurface flow [kg/m\B2/s]
 !
 REAL, DIMENSION(:), INTENT(IN)     :: PFWTD    !grid-cell fraction of water table to rise
 REAL, DIMENSION(:), INTENT(IN)     :: PWTD     !water table depth (m)
@@ -488,7 +489,7 @@ IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
 !
    CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                    &
                    ZRR, ZLEV, ZLETR, PVEG, ZPSNV,         &
-                   PWR, PWRMAX, ZPG, PDRIP, PRRVEG        ) 
+                   PWR, PWRMAX, ZPG, PDRIP, PRRVEG, PLVTT ) 
 !
 !
 !
@@ -600,7 +601,7 @@ ZTSTEP  = PTSTEP/REAL(INDT)
 ! ------------------------------------------------------------------
 !
 WHERE(PLAI(:)/=XUNDEF .AND. PVEG(:)/=0.)
-    ZKSFC_IVEG(:) = (1.0-ZINSOLFRZ_VEG*PVEG(:)) * (1.0-(PLAI(:)/ZINSOLFRZ_LAI))
+    ZKSFC_IVEG(:) = (1.0-ZINSOLFRZ_VEG*PVEG(:)) * MIN(MAX(1.0-(PLAI(:)/ZINSOLFRZ_LAI),0.0),1.0)
 ELSEWHERE
     ZKSFC_IVEG(:) = 1.0 ! No vegetation
 ENDWHERE
@@ -638,10 +639,10 @@ IF (HISBA=='DIF') THEN
 ! ------------------------------------------------------------------
 !
   ZPG     (:) =  ZPG    (:)        / XRHOLW
-  ZEVAPCOR(:) = PEVAPCOR(:)        / XRHOLW
-  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*XLVTT)
-  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*XLVTT)
-  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*XLSTT)
+  ZEVAPCOR(:) = ZEVAPCOR(:)        / XRHOLW
+  ZLEG    (:) =  ZLEG   (:)        /(XRHOLW*PLVTT(:))
+  ZLETR   (:) = (ZLETR  (:)/ZF2(:))/(XRHOLW*PLVTT(:))
+  ZLEGI   (:) = ZLEGI   (:)        /(XRHOLW*PLSTT(:))
 !
   DO JDT = 1,INDT
 !                      
@@ -716,7 +717,7 @@ ELSE
 !
 #ifdef TOPD
   IF (LCOUPL_TOPD) THEN
-    !runoff topo cumule (kg/m²)
+    !runoff topo cumule (kg/m**2)
     DO JJ=1,SIZE(NMASKT_PATCH)
       IF  (NMASKT_PATCH(JJ)/=0) THEN
         IF ( XATOP(NMASKT_PATCH(JJ))/=XUNDEF) THEN
