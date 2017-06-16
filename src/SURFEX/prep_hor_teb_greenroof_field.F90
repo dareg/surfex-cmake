@@ -318,11 +318,8 @@ SELECT CASE (HSURF)
   ALLOCATE(ZF (INI,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  IF (SIZE(ZW,2)/=IO%NGROUND_LAYER) THEN
-    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
-  ELSE
-    ZF(:,:) = ZW(:,:)
-  ENDIF  
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
+
   !
   !* retrieves soil water content from soil relative humidity
   ALLOCATE(PEK%XWG(INI,IO%NGROUND_LAYER))
@@ -339,11 +336,7 @@ SELECT CASE (HSURF)
   ALLOCATE(ZF (INI,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  IF (SIZE(ZW,2)/=IO%NGROUND_LAYER) THEN
-    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
-  ELSE
-    ZF(:,:) = ZW(:,:)
-  ENDIF  
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
   !
   !* retrieves soil ice content from soil relative humidity
   ALLOCATE(PEK%XWGI(INI,IO%NGROUND_LAYER))
@@ -359,15 +352,11 @@ SELECT CASE (HSURF)
  CASE('TG     ') 
   IWORK=IO%NGROUND_LAYER
   ALLOCATE(PEK%XTG(INI,IWORK))
-  IF (SIZE(ZW,2)/=IWORK) THEN  
-    ALLOCATE(ZDG(SIZE(P%XDG,1),IWORK))
-    !* diffusion method, the soil grid is the same as for humidity
-    ZDG(:,:) = P%XDG(:,:)
-    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,PEK%XTG(:,:))
-    DEALLOCATE(ZDG)
-  ELSE
-    PEK%XTG(:,:) = ZW(:,:)
-  ENDIF
+  ALLOCATE(ZDG(SIZE(P%XDG,1),IWORK))
+  !* diffusion method, the soil grid is the same as for humidity
+  ZDG(:,:) = P%XDG(:,:)
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,PEK%XTG(:,:))
+  DEALLOCATE(ZDG)
   !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !

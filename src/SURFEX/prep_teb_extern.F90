@@ -242,68 +242,54 @@ ELSE
         WHERE (ZMASK(:)==0.) ZFIELD(:,JLAYER) = XUNDEF
       ENDDO
       !
-      IF ((YSURF=='T_ROAD'.AND.ILAYER/=TOP%NROAD_LAYER).OR.&
-          (YSURF=='T_ROOF'.AND.ILAYER/=TOP%NROOF_LAYER).OR.&
-          (YSURF=='T_WALL'.AND.ILAYER/=TOP%NWALL_LAYER).OR.&
-          ((YSURF=='T_MASS'.OR.YSURF=='T_FLOO').AND.ILAYER/=BOP%NFLOOR_LAYER)) THEN
-
-        ALLOCATE(ZD(INI,ILAYER))
-        IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD,HDIR='E')
-        IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD,HDIR='E')
-        IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
-        IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
-        IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
+      ALLOCATE(ZD(INI,ILAYER))
+      IF (YSURF=='T_ROAD') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROAD=ZD,HDIR='E')
+      IF (YSURF=='T_ROOF') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_ROOF=ZD,HDIR='E')
+      IF (YSURF=='T_WALL') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_WALL=ZD,HDIR='E')
+      IF (YSURF=='T_MASS') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
+      IF (YSURF=='T_FLOO') CALL GET_TEB_DEPTHS(DTCO,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,PD_FLOOR=ZD,HDIR='E')
+      !
+      IF (NRANK==NPIO) THEN
         !
-        IF (NRANK==NPIO) THEN
+        !* recovers middle layer depth (from the surface)
+        ALLOCATE(ZDEPTH    (INI,ILAYER))
+        DO JI=1,INI
           !
-          !* recovers middle layer depth (from the surface)
-          ALLOCATE(ZDEPTH    (INI,ILAYER))
-          DO JI=1,INI
-            !
-            ZDEPTH    (JI,1)= ZD(JI,1)/2.
-            ZDEPTH_TOT      = ZD(JI,1)
-            DO JLAYER=2,ILAYER
-              ZDEPTH    (JI,JLAYER) = ZDEPTH_TOT + ZD(JI,JLAYER)/2.
-              ZDEPTH_TOT = ZDEPTH_TOT + ZD(JI,JLAYER)
-            ENDDO
-            !
-            !* in case of wall or roof, normalizes by total wall or roof thickness
-            IF (YSURF=='T_ROOF' .OR. YSURF=='T_WALL' .OR. YSURF == 'T_FLOO' .OR. YSURF == 'T_MASS') THEN
-              DO JLAYER=1,ILAYER
-                ZDEPTH(JI,JLAYER) = ZDEPTH(JI,JLAYER) / ZDEPTH_TOT
-              END DO
-            END IF
-            !
+          ZDEPTH    (JI,1)= ZD(JI,1)/2.
+          ZDEPTH_TOT      = ZD(JI,1)
+          DO JLAYER=2,ILAYER
+            ZDEPTH    (JI,JLAYER) = ZDEPTH_TOT + ZD(JI,JLAYER)/2.
+            ZDEPTH_TOT = ZDEPTH_TOT + ZD(JI,JLAYER)
           ENDDO
           !
-          !* interpolation on the fine vertical grid
-          IF (YSURF=='T_ROAD') THEN
-            ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROAD)))
-            CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROAD,PFIELD)
-          ELSEIF (YSURF=='T_ROOF') THEN
-            ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROOF)))
-            CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROOF,PFIELD)
-          ELSEIF (YSURF=='T_WALL') THEN
-            ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_WALL)))
-            CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_WALL,PFIELD)
-          ELSEIF (YSURF=='T_FLOO' .OR. YSURF=='T_MASS') THEN
-            ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_FLOOR)))
-            CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_FLOOR,PFIELD)
+          !* in case of wall or roof, normalizes by total wall or roof thickness
+          IF (YSURF=='T_ROOF' .OR. YSURF=='T_WALL' .OR. YSURF == 'T_FLOO' .OR. YSURF == 'T_MASS') THEN
+            DO JLAYER=1,ILAYER
+              ZDEPTH(JI,JLAYER) = ZDEPTH(JI,JLAYER) / ZDEPTH_TOT
+            END DO
           END IF
-          DEALLOCATE(ZDEPTH)        
           !
-        ENDIF
+        ENDDO
         !
-        DEALLOCATE(ZD)
-        !
-      ELSE
-        !
-        ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(ZFIELD,2)))
-        PFIELD(:,:) = ZFIELD(:,:)
+        !* interpolation on the fine vertical grid
+        IF (YSURF=='T_ROAD') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROAD)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROAD,PFIELD)
+        ELSEIF (YSURF=='T_ROOF') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_ROOF)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_ROOF,PFIELD)
+        ELSEIF (YSURF=='T_WALL') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_WALL)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_WALL,PFIELD)
+        ELSEIF (YSURF=='T_FLOO' .OR. YSURF=='T_MASS') THEN
+          ALLOCATE(PFIELD(SIZE(ZFIELD,1),SIZE(XGRID_FLOOR)))
+          CALL INTERP_GRID(ZDEPTH,ZFIELD,XGRID_FLOOR,PFIELD)
+        END IF
+        DEALLOCATE(ZDEPTH)        
         !
       ENDIF
       !
-      !* end
+      DEALLOCATE(ZD)
       DEALLOCATE(ZFIELD)
 !---------------------------------------------------------------------------------------
 !

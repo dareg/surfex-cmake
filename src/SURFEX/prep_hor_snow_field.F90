@@ -323,11 +323,12 @@ IF (YDCTL%LPART5) THEN
     !
   ENDIF
   !
+
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
   !*      5.     Defines normalized output grid, if depths of snow layers are present
   !
-  IF (PRESENT(PDEPTH) .AND. .NOT.OSNOW_IDEAL) THEN
+  IF ( PRESENT(PDEPTH) .AND. .NOT.OSNOW_IDEAL ) THEN
     !
     ALLOCATE(ZD(SIZE(PDEPTH,1)))
     !
@@ -399,7 +400,7 @@ IF (YDCTL%LPART5) THEN
         !
       CASE('DEP')  ! snow thickness
         !
-        IF (OSNOW_IDEAL.OR.ISNOW_NLAYER==INL) THEN
+        IF (OSNOW_IDEAL) THEN
           SK%DEPTH(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSE
           CALL SNOW3LGRID(SK%DEPTH(:,:),ZW%AL(JP)%ZOUT(:,1))                
@@ -418,7 +419,7 @@ IF (YDCTL%LPART5) THEN
       !
       CASE('RHO') 
         !
-        IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+        IF (OSNOW_IDEAL) THEN
           SK%RHO(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSEIF(INL==1) THEN
           DO JL = 1,ISNOW_NLAYER
@@ -453,7 +454,7 @@ IF (YDCTL%LPART5) THEN
           ALLOCATE(ZWLIQ(KSIZE_P(JP),ISNOW_NLAYER))
           ZWLIQ(:,:) = 0.0
           !
-          IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+          IF (OSNOW_IDEAL) THEN
             ZTEMP(:,:) = ZW%AL(JP)%ZOUT(:,:)
           ELSEIF (INL==1) THEN
             DO JL = 1,ISNOW_NLAYER 
@@ -476,7 +477,7 @@ IF (YDCTL%LPART5) THEN
         ELSE IF (SK%SCHEME=='1-L') THEN
           !* interpolation of heat on snow levels
           !
-          IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+          IF (OSNOW_IDEAL) THEN
             SK%T(:,:) = ZW%AL(JP)%ZOUT(:,:)
           ELSEIF(INL==1) THEN
             DO JL = 1,ISNOW_NLAYER
@@ -499,7 +500,7 @@ IF (YDCTL%LPART5) THEN
         !
       CASE('SG1')
         !
-        IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+        IF (OSNOW_IDEAL) THEN
           SK%GRAN1(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSEIF(INL==1) THEN
          DO JL = 1,ISNOW_NLAYER
@@ -517,7 +518,7 @@ IF (YDCTL%LPART5) THEN
         !
       CASE('SG2')
         !
-        IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+        IF (OSNOW_IDEAL) THEN
           SK%GRAN2(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSEIF(SIZE(ZW%AL(JP)%ZOUT,2)==1) THEN
           DO JL = 1,ISNOW_NLAYER
@@ -535,7 +536,7 @@ IF (YDCTL%LPART5) THEN
         !
       CASE('HIS')
         !
-        IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+        IF (OSNOW_IDEAL) THEN
           SK%HIST(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSEIF(INL==1) THEN
           DO JL = 1,ISNOW_NLAYER
@@ -556,7 +557,7 @@ IF (YDCTL%LPART5) THEN
         IF (SK%SCHEME=='3-L'.AND.(.NOT.OSNOW_IDEAL).AND.(.NOT.OUNIF))THEN
           SK%AGE(:,:) = 0.0
         ELSE
-          IF (OSNOW_IDEAL.OR.INL==ISNOW_NLAYER) THEN
+          IF (OSNOW_IDEAL) THEN
             SK%AGE(:,:) = ZW%AL(JP)%ZOUT(:,:)
           ELSEIF(INL==1) THEN
             DO JL = 1,ISNOW_NLAYER

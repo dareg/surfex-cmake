@@ -429,11 +429,7 @@ IF (YDCTL%LPART5) THEN
         ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
       !
       !* interpolates on output levels
-        IF (SIZE(ZW%AL(JP)%ZOUT,2)/=IO%NGROUND_LAYER) THEN
-          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
-        ELSE
-          ZF%AL(JP)%ZOUT(:,:) = ZW%AL(JP)%ZOUT(:,:)
-        ENDIF
+        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
       !
       !* retrieves soil water content from soil relative humidity
         ALLOCATE(PEK%XWG(PK%NSIZE_P,IO%NGROUND_LAYER))
@@ -472,11 +468,7 @@ IF (YDCTL%LPART5) THEN
         ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
         !
         !* interpolates on output levels
-        IF (SIZE(ZW%AL(JP)%ZOUT,2)/=IO%NGROUND_LAYER) THEN
-          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
-        ELSE
-          ZF%AL(JP)%ZOUT(:,:) = ZW%AL(JP)%ZOUT(:,:)
-        ENDIF        
+        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)       
         !
         !* retrieves soil ice content from soil relative humidity
         ALLOCATE(PEK%XWGI(PK%NSIZE_P,IO%NGROUND_LAYER))
@@ -520,27 +512,23 @@ IF (YDCTL%LPART5) THEN
         !
         ALLOCATE(PEK%XTG(PK%NSIZE_P,INL))
         !
-        IF (SIZE(ZW%AL(JP)%ZOUT,2)/=IO%NGROUND_LAYER) THEN
-          ALLOCATE(ZDG(SIZE(PK%XDG,1),INL))
-          IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
-            ZDG(:,1) = 0.01
-            ZDG(:,2) = 0.40                    ! deep temperature for force-restore taken at 20cm
-            IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used       
-            IF(IO%LTEMP_ARP)THEN
-              ZDG(:,3) = 1.0
-              DO JL=4,INL
-                ZDG(:,JL) = ZDG(:,JL-1)+1.0
-              ENDDO
-            ENDIF
-          ELSE
-            !* diffusion method, the soil grid is the same as for humidity
-            ZDG(:,:) = PK%XDG(:,:)
-          END IF
-          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,ZDG,PEK%XTG)
-          DEALLOCATE(ZDG)
+        ALLOCATE(ZDG(SIZE(PK%XDG,1),INL))
+        IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
+          ZDG(:,1) = 0.01
+          ZDG(:,2) = 0.40                    ! deep temperature for force-restore taken at 20cm
+          IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used       
+          IF(IO%LTEMP_ARP)THEN
+            ZDG(:,3) = 1.0
+            DO JL=4,INL
+              ZDG(:,JL) = ZDG(:,JL-1)+1.0
+            ENDDO
+          ENDIF
         ELSE
-          PEK%XTG(:,:) = ZW%AL(JP)%ZOUT(:,:)
-        ENDIF          
+          !* diffusion method, the soil grid is the same as for humidity
+          ZDG(:,:) = PK%XDG(:,:)
+        END IF
+        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,ZDG,PEK%XTG)
+        DEALLOCATE(ZDG)        
         !
       ENDDO
       !

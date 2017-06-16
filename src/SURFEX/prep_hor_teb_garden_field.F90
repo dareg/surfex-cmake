@@ -326,11 +326,7 @@ SELECT CASE (HSURF)
   ALLOCATE(ZF (INI,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  IF (SIZE(ZW,2)/=IO%NGROUND_LAYER) THEN
-    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
-  ELSE
-    ZF(:,:) = ZW(:,:)
-  ENDIF
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
   !
   !* retrieves soil water content from soil relative humidity
   ALLOCATE(PEK%XWG(INI,IO%NGROUND_LAYER))
@@ -347,11 +343,7 @@ SELECT CASE (HSURF)
   ALLOCATE(ZF (INI,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-  IF (SIZE(ZW,2)/=IO%NGROUND_LAYER) THEN
-    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF)
-  ELSE
-    ZF(:,:) = ZW(:,:)
-  ENDIF  
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,P%XDG(:,:),ZF) 
   !
   !* retrieves soil ice content from soil relative humidity
   ALLOCATE(PEK%XWGI(INI,IO%NGROUND_LAYER))
@@ -367,21 +359,17 @@ SELECT CASE (HSURF)
  CASE('TG     ') 
   IWORK=IO%NGROUND_LAYER
   ALLOCATE(PEK%XTG(INI,IWORK))
-  IF (SIZE(ZW,2)/=IWORK) THEN
-    ALLOCATE(ZDG(SIZE(P%XDG,1),IWORK))
-    IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
-      ZDG(:,1) = 0.01
-      ZDG(:,2) = 0.40   ! deep temperature for force-restore taken at 20cm
-      IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used
-    ELSE
-      !* diffusion method, the soil grid is the same as for humidity
-      ZDG(:,:) = P%XDG(:,:)
-    END IF
-    CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,PEK%XTG(:,:))
-    DEALLOCATE(ZDG)
+  ALLOCATE(ZDG(SIZE(P%XDG,1),IWORK))
+  IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
+    ZDG(:,1) = 0.01
+    ZDG(:,2) = 0.40   ! deep temperature for force-restore taken at 20cm
+    IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used
   ELSE
-    PEK%XTG(:,:) = ZW(:,:)
-  ENDIF
+    !* diffusion method, the soil grid is the same as for humidity
+    ZDG(:,:) = P%XDG(:,:)
+  END IF
+  CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW,ZDG,PEK%XTG(:,:))
+  DEALLOCATE(ZDG)
   !
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
