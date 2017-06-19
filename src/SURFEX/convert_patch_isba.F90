@@ -561,11 +561,11 @@ IF (OIRR .AND. .NOT.OUPDATE_ALB) THEN
      IF(SIZE(PEK%TSEED)>0) THEN
        IF (GDATA .AND. ANY(DTV%LDATA_SEED_M) .AND. ANY(DTV%LDATA_SEED_D)) THEN
           CALL AV_PGD_PARAM(DTV%XPAR_LAI, DTV%XPAR_VEG, &
-                            ZWORKI,DTV%XPAR_VEGTYPE,DTV%XPAR_REAP_M(:,:),YVEG,'MAJ',&
+                            ZWORKI,DTV%XPAR_VEGTYPE,DTV%XPAR_SEED_M(:,:),YVEG,'MAJ',&
                             PK%NR_P,IO%NPATCH,KPATCH,KDECADE=KDEC2)
           PEK%TSEED(:)%TDATE%MONTH = NINT(ZWORKI(:))
           CALL AV_PGD_PARAM(DTV%XPAR_LAI, DTV%XPAR_VEG, &
-                            ZWORKI,DTV%XPAR_VEGTYPE,DTV%XPAR_REAP_D(:,:),YVEG,'MAJ',&
+                            ZWORKI,DTV%XPAR_VEGTYPE,DTV%XPAR_SEED_D(:,:),YVEG,'MAJ',&
                             PK%NR_P,IO%NPATCH,KPATCH,KDECADE=KDEC2)
           PEK%TSEED(:)%TDATE%DAY = NINT(ZWORKI(:))        
        ELSE            
