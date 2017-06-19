@@ -418,9 +418,9 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     !
     DO JL=1,IO%NGROUND_LAYER
       !
-      WRITE(YLVL,'(I2)') JL
+      WRITE(YLVL,'(I2.0)') JL
       !
-      YRECFM='SWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))//'_'
+      YRECFM='SWI'//TRIM(ADJUSTL(YLVL(:)))//'_'
       YFORM='(A39,I1.1,A4)'
       IF (JL >= 10)  YFORM='(A39,I2.2,A4)'    
       WRITE(YCOMMENT,FMT=YFORM) 'soil wetness index per patch for layer ',JL,' (-)'
@@ -429,7 +429,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
             NP%AL(JP)%NR_P,NDM%AL(JP)%XSWI(:,JL),ISIZE,S%XWORK_WR)
       ENDDO      
       !
-      YRECFM='TSWI'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))//'_'
+      YRECFM='TSWI'//TRIM(ADJUSTL(YLVL(:)))//'_'
       YFORM='(A39,I1.1,A4)'
       IF (JL >= 10)  YFORM='(A39,I2.2,A4)'
       WRITE(YCOMMENT,FMT=YFORM) 'total swi (liquid+solid) per patch for layer ',JL,' (-)'
