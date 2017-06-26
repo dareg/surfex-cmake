@@ -67,7 +67,7 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_CSTS,     ONLY : XPI
 USE MODD_SNOW_PAR, ONLY : XZ0SN
-USE MODD_ISBA_PAR, ONLY : XWGMIN, XFLXMAX
+USE MODD_ISBA_PAR, ONLY : XWGMIN
 USE MODD_SURF_ATM, ONLY : LDRAG_COEF_ARP, XRIMAX, LRRGUST_ARP, XRRSCALE,   &
                           XRRGAMMA, XUTILGUST, LCPL_ARP
 USE MODD_MEB_PAR,  ONLY : XKDELTA_WR
@@ -477,24 +477,15 @@ ENDIF
 ! ZG_VG_C = conductance between canopy and canopy air (1-png)
 ! ZG_VN_C = conductance between canopy and canopy air (png)
 !
-! The resistances between ground/snow and canopy air go to zero when lai => 0,
-! limit exchange coefficients to 5000.
+! The resistances between ground/snow and canopy air go to zero when lai => 0
 !
-WHERE(ZRA_G_C(:) > ZRAEPS)
-   PFLXC_G_C(:) = PRHOA(:)  / ZRA_G_C(:)
-   PHSGL(:)     = ZRA_G_C(:)/(ZRA_G_C(:)+ZRSGL(:))
-   PHSGF(:)     = ZRA_G_C(:)/(ZRA_G_C(:)+ZRSGF(:))
-ELSEWHERE
-   PFLXC_G_C(:) = XFLXMAX
-   PHSGL(:)     = 1.
-   PHSGF(:)     = 1.
-END WHERE
-!
-WHERE(ZRA_N_C>ZRAEPS)
-   PFLXC_N_C(:) = PRHOA(:)/ZRA_N_C(:)
-ELSEWHERE
-   PFLXC_N_C(:) = XFLXMAX
-END WHERE
+ZRA_G_C(:)   = MAX(ZRAEPS,ZRA_G_C(:))
+PFLXC_G_C(:) = PRHOA(:)  / ZRA_G_C(:)
+PHSGL(:)     = ZRA_G_C(:)/(ZRA_G_C(:)+ZRSGL(:))
+PHSGF(:)     = ZRA_G_C(:)/(ZRA_G_C(:)+ZRSGF(:))
+
+ZRA_N_C(:)   = MAX(ZRA_N_C(:),ZRAEPS)
+PFLXC_N_C(:) = PRHOA(:)/ZRA_N_C(:)
 !
 ! Reduce sublimation from ground based snowpack as it
 ! becomes vanishingly thin. This is mainly just for numerical reasons within the snow scheme

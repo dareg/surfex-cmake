@@ -275,6 +275,10 @@ IF(GMEB)THEN
 
   GMEB_PATCH_REC(:)=.FALSE.
 
+  GMEB_PATCH_REC(:)=.TRUE.
+  GMEB_PATCH_REC(1:3)=.FALSE.
+  
+
   IF(IO%NPATCH==1 .AND. GMEB_PATCH(1))THEN
     WRITE(ILUOUT,*) '*****************************************'
     WRITE(ILUOUT,*) '* WARNING!'

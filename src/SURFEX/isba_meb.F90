@@ -1381,8 +1381,8 @@ ZDSGRAIN(:) = SNOW3LDOPT(PSNOWRHO(:,1),ZAGE)
 ! ----------------------------------------
 ! For now, consider just 2 bands with MEB, so renormalize:
 
-ZSPECTRALALBEDO(:,1) = ZSPECTRALALBEDO(:,1)
 ZSPECTRALALBEDO(:,2) = (PEK%TSNOW%ALB(:) - XSW_WGHT_VIS*ZSPECTRALALBEDO(:,1))/XSW_WGHT_NIR
+ZSPECTRALALBEDO(:,3) = XUNDEF
 !
 ! Adjust thickness to be as in snow computations:
 !
@@ -1415,11 +1415,9 @@ END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
 !     decay of radiation with increasing snow depth).
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA1,XVBETA2, &
-                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN
 USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 !
-USE MODE_SNOW3L,   ONLY : SNOW3LDOPT
+USE MODE_SNOW3L,   ONLY : SNOW3LDOPT, SNOW3LRADABS_SFC
 !
 IMPLICIT NONE
 !
@@ -1442,11 +1440,7 @@ INTEGER                              :: JJ, JI
 INTEGER                              :: INJ
 INTEGER                              :: INLVLS
 !
-REAL, DIMENSION(SIZE(PSNOWRHO,1))    :: ZRADTOT, ZPROJLAT, ZCOSZEN
-REAL, DIMENSION(SIZE(PSNOWRHO,1))    :: ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
-!
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDSGRAIN, ZCOEF, ZSNOWDZ, ZAGE
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZBETA1, ZBETA2, ZBETA3, ZWORK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -1477,17 +1471,6 @@ ZSNOWDZ(:,:) = MAX(PSNOWDZMIN, PSNOWDZ(:,:))
 ! SNOWCVEXT => from Bohren and Barkstrom 1974
 ! SNOWAGRAIN and SNOWBGRAIN=> from Jordan 1976)
 !
-! Coefficient for taking into account the increase of path length of rays
-! in snow due to zenithal angle
-!
-ZCOSZEN(:)=MAX(XMINCOSZEN,COS(PZENITH(:)))
-!
-! This formulation is incorrect but it compensate partly the fact that 
-! the albedo formulation does not account for zenithal angle.
-! Only for polar or glacier regions
-!
-ZPROJLAT(:)=(1.0-PPERMSNOWFRAC(:))+PPERMSNOWFRAC(:)/ZCOSZEN(:)
-!
 ! Snow optical grain diameter (no age dependency over polar regions):
 !
 ZAGE(:,:) = 0.
@@ -1501,29 +1484,8 @@ ENDDO
 !
 ZDSGRAIN(:,:) = SNOW3LDOPT(PSNOWRHO,ZAGE)
 !
-! Extinction coefficient from Brun et al. (1989):
-!
-ZWORK(:,:)=SQRT(ZDSGRAIN(:,:))
-!
-ZBETA1(:,:)=MAX(XVBETA1*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA2)
-ZBETA2(:,:)=MAX(XVBETA3*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA4)
-ZBETA3(:,:)=XVBETA5
-!
-ZOPTICALPATH1(:) = 0.0
-ZOPTICALPATH2(:) = 0.0
-ZOPTICALPATH3(:) = 0.0
-!
-DO JJ=1,INLVLS
-   DO JI=1,INJ
-      !
-         ZOPTICALPATH1(JI) = ZOPTICALPATH1(JI) + ZBETA1(JI,JJ)*ZSNOWDZ(JI,JJ)
-         ZOPTICALPATH2(JI) = ZOPTICALPATH2(JI) + ZBETA2(JI,JJ)*ZSNOWDZ(JI,JJ)
-
-         ZCOEF (JI,JJ) = XSW_WGHT_VIS*(1.0-PSPECTRALALBEDO(JI,1))*EXP(-ZOPTICALPATH1(JI)*ZPROJLAT(JI)) &
-                       + XSW_WGHT_NIR*(1.0-PSPECTRALALBEDO(JI,2))*EXP(-ZOPTICALPATH2(JI)*ZPROJLAT(JI)) 
-
-   ENDDO
-ENDDO
+ZCOEF(:,:)    = SNOW3LRADABS_SFC(PSNOWRHO,ZSNOWDZ,PSPECTRALALBEDO,   &
+                                 PZENITH,PPERMSNOWFRAC,ZDSGRAIN)
 !
 ! 3. Radiation trans at base of each layer
 ! ----------------------------------
