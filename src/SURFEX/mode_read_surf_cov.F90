@@ -68,11 +68,11 @@ INTEGER, INTENT(OUT) :: KRESP               ! KRESP  : return-code if a problem 
 #ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
 #endif
-INTEGER, DIMENSION(NPROC) :: ITREQ
-REAL, DIMENSION(:,:),ALLOCATABLE :: ZWORKR
+!INTEGER, DIMENSION(NPROC) :: ITREQ
+REAL, DIMENSION(:),ALLOCATABLE :: ZWORKR
 REAL, DIMENSION(:),ALLOCATABLE :: ZFIELD
 INTEGER, DIMENSION(:), POINTER :: IMASKF
-INTEGER, DIMENSION(SIZE(PFIELD,2)) :: IMASK
+INTEGER, DIMENSION(COUNT(OFLAG)) :: IMASK
  CHARACTER(LEN=100) :: YCOMMENT
  CHARACTER(LEN=16)  :: YREC
  CHARACTER(LEN=1)   :: YDIR
@@ -93,7 +93,7 @@ YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
 !
 IL1 = SIZE(PFIELD,1)
-IL2 = SIZE(PFIELD,2)
+IL2 = COUNT(OFLAG)
 !
 IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_1',1,ZHOOK_HANDLE)
 !
@@ -144,11 +144,13 @@ ELSE
   !if we want to get covers for the current task or for the whole domain
   IF (YDIR=='H') THEN
      !second dimension because the reading of covers is parallelized with MPI
-    ALLOCATE(ZWORKR(NSIZE,NPROC-1))
-  ELSE
-    ALLOCATE(ZWORKR(IFULL,NPROC))
+    ALLOCATE(ZWORKR(NSIZE))
+  ELSEIF (NRANK==NPIO) THEN
+    ALLOCATE(ZWORKR(IFULL))
+  ELSE 
+    ALLOCATE(ZWORKR(0))
   ENDIF
-  ZWORKR(:,:) = 0.
+  ZWORKR(:) = 0.
   !
   IF (NPROC>1 .AND. YDIR=='H') THEN
     IFLAG = 0
@@ -245,32 +247,35 @@ ELSE
     IF (NRANK==NPIO .OR. YDIR=='H') THEN
       !
       !receives pieces of cover fields
-      ITREQ(:) = 0
+      !ITREQ(:) = 0
       !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
 IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',0,ZHOOK_HANDLE_OMP)
 #ifdef SFX_MPI
-!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IDX,ISTATUS,INFOMPI)
+!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IDX,ISTATUS,INFOMPI) FIRSTPRIVATE(ZWORKR)
 #endif
       DO JPROC=0,NPROC-1
         !
         !the cover exists and was read
         IF (IPAS*JPROC + JP<=IL2) THEN
           !
-          IF (JPROC<NRANK) THEN
-            ITREQ(JPROC+1) = JPROC+1
-          ELSE
-            ITREQ(JPROC+1) = JPROC
-          ENDIF    
+          !IF (JPROC<NRANK) THEN
+          !  ITREQ(JPROC+1) = JPROC+1
+          !ELSE
+          !  ITREQ(JPROC+1) = JPROC
+          !ENDIF    
           !     
           IF (JPROC/=NRANK) THEN
             IDX = IDX_SAVE + JP + 1
             !each task receives the part of the cover read that concerns it 
             !only NPIO in cas of HDIR/=H
-#ifdef SFX_MPI            
-            CALL MPI_RECV(ZWORKR(:,ITREQ(JPROC+1)),SIZE(ZWORKR,1)*KIND(ZWORKR)/4,&
+#ifdef SFX_MPI           
+            CALL MPI_RECV(ZWORKR(:),SIZE(ZWORKR)*KIND(ZWORKR)/4,&
                           MPI_REAL,JPROC,IDX,NCOMM,ISTATUS,INFOMPI)
 #endif
+            IVAL = IPAS*JPROC + JP
+            CALL PACK_SAME_RANK(IMASKF,ZWORKR(:),PFIELD(:,IVAL))
+            !
           ENDIF
           !
         ENDIF
@@ -294,21 +299,21 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_4',1,ZHOOK_HANDLE_OMP)
       !
       IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_5',1,ZHOOK_HANDLE)
       !
-      IF (YDIR=='H' .OR. NRANK==NPIO) THEN
-        !packs data
-        IREQ = MAXVAL(ITREQ)
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_6',0,ZHOOK_HANDLE_OMP)
-!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IVAL)
-        DO JPROC=0,IREQ-1
-          IVAL = IPAS*JPROC + JP
-          IF (JPROC>=NRANK ) IVAL = IVAL + IPAS
-          CALL PACK_SAME_RANK(IMASKF,ZWORKR(:,JPROC+1),PFIELD(:,IVAL))
-        ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_6',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
-      ENDIF
+!      IF (YDIR=='H' .OR. NRANK==NPIO) THEN
+!        !packs data
+!        IREQ = MAXVAL(ITREQ)
+!!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_6',0,ZHOOK_HANDLE_OMP)
+!!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IVAL)
+!        DO JPROC=0,IREQ-1
+!          IVAL = IPAS*JPROC + JP
+!          IF (JPROC>=NRANK ) IVAL = IVAL + IPAS
+!          CALL PACK_SAME_RANK(IMASKF,ZWORKR(:,JPROC+1),PFIELD(:,IVAL))
+!        ENDDO
+!!$OMP END DO
+!IF (LHOOK) CALL DR_HOOK('READ_SURF_COV_6',1,ZHOOK_HANDLE_OMP)
+!!$OMP END PARALLEL
+!      ENDIF
       !
     ENDIF
     !

@@ -70,8 +70,8 @@ INTEGER, OPTIONAL, INTENT(IN) :: KPATCH
 #ifdef SFX_MPI
 INTEGER, DIMENSION(MPI_STATUS_SIZE,NPROC-1) :: ISTATUS
 #endif
-INTEGER, DIMENSION(NPROC) :: ITREQ
-REAL, DIMENSION(:,:,:),ALLOCATABLE :: ZWORKR
+!INTEGER, DIMENSION(NPROC) :: ITREQ
+REAL, DIMENSION(:,:),ALLOCATABLE :: ZWORKR
 REAL, DIMENSION(:,:),ALLOCATABLE :: ZFIELD
 INTEGER, DIMENSION(:), POINTER :: IMASKF
  CHARACTER(LEN=100) :: YCOMMENT
@@ -144,11 +144,13 @@ ELSE
   !if we want to get covers for the current task or for the whole domain
   IF (YDIR=='H') THEN
      !second dimension because the reading of covers is parallelized with MPI
-    ALLOCATE(ZWORKR(NSIZE,IL3,NPROC-1))
-  ELSE
-    ALLOCATE(ZWORKR(IFULL,IL3,NPROC))
+    ALLOCATE(ZWORKR(NSIZE,IL3))
+  ELSEIF (NRANK==NPIO) THEN
+    ALLOCATE(ZWORKR(IFULL,IL3))
+  ELSE 
+    ALLOCATE(ZWORKR(0,0))
   ENDIF
-  ZWORKR(:,:,:) = 0.
+  ZWORKR(:,:) = 0.
   !
   IF (NPROC>1 .AND. YDIR=='H') THEN
     IFLAG = 0
@@ -238,7 +240,7 @@ ELSE
     IF (NRANK==NPIO .OR. YDIR=='H') THEN
       !
       !receives pieces of cover fields
-      ITREQ(:) = 0
+      !ITREQ(:) = 0
       !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
 IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_4',0,ZHOOK_HANDLE_OMP)
@@ -250,20 +252,23 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_4',0,ZHOOK_HANDLE_OMP)
         !the cover exists and was read
         IF (IPAS*JPROC + JP<=IL2) THEN
           !
-          IF (JPROC<NRANK) THEN
-            ITREQ(JPROC+1) = JPROC+1
-          ELSE
-            ITREQ(JPROC+1) = JPROC
-          ENDIF    
+          !IF (JPROC<NRANK) THEN
+          !  ITREQ(JPROC+1) = JPROC+1
+          !ELSE
+          !  ITREQ(JPROC+1) = JPROC
+          !ENDIF    
           !     
           IF (JPROC/=NRANK) THEN
             IDX = IDX_SAVE + JP + 1
             !each task receives the part of the cover read that concerns it 
             !only NPIO in cas of HDIR/=H
 #ifdef SFX_MPI            
-            CALL MPI_RECV(ZWORKR(:,:,ITREQ(JPROC+1)),SIZE(ZWORKR,1)*SIZE(ZWORKR,2)*KIND(ZWORKR)/4,&
+            CALL MPI_RECV(ZWORKR(:,:),SIZE(ZWORKR)*KIND(ZWORKR)/4,&
                           MPI_REAL,JPROC,IDX,NCOMM,ISTATUS,INFOMPI)
 #endif
+            IVAL = IPAS*JPROC + JP
+            CALL PACK_SAME_RANK(IMASKF,ZWORKR(:,:),PFIELD(:,IVAL,:))
+            !
           ENDIF
           !
         ENDIF
@@ -287,21 +292,21 @@ IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_4',1,ZHOOK_HANDLE_OMP)
       !
       IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_5',1,ZHOOK_HANDLE)
       !
-      IF (YDIR=='H' .OR. NRANK==NPIO) THEN
-        !packs data
-        IREQ = MAXVAL(ITREQ)
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_6',0,ZHOOK_HANDLE_OMP)
-!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IVAL)
-        DO JPROC=0,IREQ-1
-          IVAL = IPAS*JPROC + JP
-          IF (JPROC>=NRANK ) IVAL = IVAL + IPAS
-          CALL PACK_SAME_RANK(IMASKF,ZWORKR(:,:,JPROC+1),PFIELD(:,IVAL,:))
-        ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_6',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
-      ENDIF
+!      IF (YDIR=='H' .OR. NRANK==NPIO) THEN
+!        !packs data
+!        IREQ = MAXVAL(ITREQ)
+!!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_6',0,ZHOOK_HANDLE_OMP)
+!!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JPROC,IVAL)
+!        DO JPROC=0,IREQ-1
+!          IVAL = IPAS*JPROC + JP
+!          IF (JPROC>=NRANK ) IVAL = IVAL + IPAS
+!          CALL PACK_SAME_RANK(IMASKF,ZWORKR(:,:,JPROC+1),PFIELD(:,IVAL,:))
+!        ENDDO
+!!$OMP END DO
+!IF (LHOOK) CALL DR_HOOK('READ_SURF_LAYERS_6',1,ZHOOK_HANDLE_OMP)
+!!$OMP END PARALLEL
+!      ENDIF
       !
     ENDIF
     !
