@@ -21,6 +21,7 @@ PROGRAM TRIP_PREP
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    06/2008
+!!      S.Sénési    08/11/16 : interface to XIOS
 !!------------------------------------------------------------------
 !
 USE MODD_SURFEX_TRIP_n
@@ -72,6 +73,7 @@ INTEGER  :: ILUNAM          ! namelist unit number
 LOGICAL  :: GFOUND          ! return logical when reading namelist
 INTEGER  :: ILOCAL_COMM     ! Local communicator
 LOGICAL  :: GOASIS          ! OASIS used(default=.false.)
+LOGICAL  :: GXIOS           ! XIOS used(default=.false.)
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -81,7 +83,7 @@ NAMELIST/NAM_START_DATE/NYEAR,NMONTH,NDAY,XTIME
 ! * 0. MPI and OASIS must be initialized before any DR_HOOK call
 ! --------------------------------------------------------------------------------------
 !
- CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM)
+ CALL TRIP_OASIS_INIT(GOASIS,GXIOS,ILOCAL_COMM,LPREP=.TRUE.)
 #ifdef SFX_MPI
 #ifdef SFX_MPL
 IF (ILOCAL_COMM/=0) THEN
@@ -175,9 +177,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_PREP',1,ZHOOK_HANDLE)
 ! * 3. MPI and OASIS must be finalized after the last DR_HOOK call
 ! --------------------------------------------------------------------------------------
 !
-IF(GOASIS)THEN
-  CALL TRIP_OASIS_END
-ENDIF
+CALL TRIP_OASIS_END(GOASIS,GXIOS)
 !
 !-------------------------------------------------------------------------------------
 !

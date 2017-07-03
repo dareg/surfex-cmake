@@ -1,6 +1,7 @@
 !####################################################################################
 SUBROUTINE INIT_TRIP (TPDG, TP, TPG, &
-                       KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,PTSTEP_RUN,PTSTEP_DIAG,ORESTART)
+                      KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,&
+                      PTSTEP_RUN,PTSTEP_DIAG,ORESTART,OXIOS)
 !####################################################################################
 !
 !!****  *INIT_TRIP*  
@@ -40,8 +41,6 @@ SUBROUTINE INIT_TRIP (TPDG, TP, TPG, &
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
 USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
@@ -52,7 +51,6 @@ USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
 !
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
-!
 !
 USE MODE_TRIP_GRID
 USE MODE_TRIP_INIT
@@ -65,6 +63,7 @@ USE MODI_INIT_TRIP_DIAG
 USE MODI_INIT_RESTART_TRIP
 USE MODI_GET_LONLAT_TRIP
 USE MODI_INIT_TRIP_CPL_ESM
+USE MODI_ALLOC_TRIP_DIAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -92,6 +91,7 @@ REAL,             INTENT(IN) :: PTSTEP_RUN
 REAL,             INTENT(IN) :: PTSTEP_DIAG
 !
 LOGICAL,          INTENT(IN) :: ORESTART
+LOGICAL,          INTENT(IN) :: OXIOS
 !
 !-------------------------------------------------------------------------------
 !
@@ -116,6 +116,7 @@ REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHSTREAM
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZVEL
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWORK
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZGW_STO
+REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWTD
 !
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLON
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLAT
@@ -588,9 +589,11 @@ ENDIF
 ! * Initial Conditions
 !-------------------------------------------------------------------------------
 !
-ALLOCATE(ZGW_STO(KLON,KLAT))
+ALLOCATE(ZGW_STO (KLON,KLAT))
+ALLOCATE(ZWTD    (KLON,KLAT))
 ALLOCATE(ZHSTREAM(KLON,KLAT))
 ALLOCATE(ZVEL    (KLON,KLAT))
+ZWTD    (:,:) = 0.0
 ZGW_STO (:,:) = 0.0
 ZHSTREAM(:,:) = 0.0
 ZVEL    (:,:) = 0.0
@@ -606,6 +609,7 @@ ENDIF
 IF(CGROUNDW=='DIF')THEN
   WHERE(TPG%GMASK_GW(:,:))
     ZGW_STO(:,:)=(XGWDZMAX+TP%XHGROUND(:,:)-TP%XTOPO_RIV(:,:))*TP%XWEFF(:,:)*XRHOLW
+    ZWTD   (:,:)=TP%XHGROUND(:,:)-TP%XTOPO_RIV(:,:)
   ENDWHERE
 ENDIF
 !
@@ -697,6 +701,8 @@ ELSEIF(CGROUNDW=='DIF')THEN
   WRITE(NLISTING,*)''
   WRITE(NLISTING,*)'Initial gw elevation         : ',MINVAL(TP%XHGROUND,TPG%GMASK_GW),  &
                                                      MAXVAL(TP%XHGROUND,TPG%GMASK_GW)  
+  WRITE(NLISTING,*)'Initial water table depth    : ',MINVAL(ZWTD,       TPG%GMASK_GW),  &
+                                                     MAXVAL(ZWTD,       TPG%GMASK_GW)     
   WRITE(NLISTING,*)'Initial gw storage           : ',MINVAL(ZGW_STO,TPG%GMASK_GW),  &
                                                      MAXVAL(ZGW_STO,TPG%GMASK_GW)
 ENDIF
@@ -729,28 +735,39 @@ ENDIF
 DEALLOCATE(ZVEL)
 DEALLOCATE(ZHSTREAM)
 DEALLOCATE(ZGW_STO)
+DEALLOCATE(ZWTD)
 !
 !-------------------------------------------------------------------------------
-! * Create high frequency diag file
+! * Alloc diag diag
 !-------------------------------------------------------------------------------
 !
-YFILE  = YDIAG  
-YTITLE = 'TRIP high frequency outputs'
- CALL OUTPUT_DATE(YUNITTIME,XTIME_DIAG)
- CALL INIT_TRIP_DIAG(TPDG, TPG, &
+CALL ALLOC_TRIP_DIAG (TPDG,KLON,KLAT)
+!
+!-------------------------------------------------------------------------------
+! * Create high diag files
+!-------------------------------------------------------------------------------
+!
+IF(.NOT.OXIOS)THEN
+  !
+  YFILE  = YDIAG  
+  YTITLE = 'TRIP high frequency outputs'
+  CALL OUTPUT_DATE(YUNITTIME,XTIME_DIAG)
+  !
+  CALL INIT_TRIP_DIAG(TPDG, TPG, &
                     NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.) 
+  !
+  !-------------------------------------------------------------------------------
+  ! * Create run mean diag file
+  !-------------------------------------------------------------------------------
+  !
+  YFILE     = YRUN
+  YTITLE    = 'TRIP run mean outputs'
+  WRITE(YTIME,'(i4.4,i2.2)') KYEAR, KMONTH
+  YUNITTIME = 'months since '//YTIME(1:4)//'-'//YTIME(5:LEN_TRIM(YTIME))//'-15'
+  CALL INIT_TRIP_DIAG(TPDG, TPG, &
+                      NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.)
 !
-!-------------------------------------------------------------------------------
-! * Create run mean diag file
-!-------------------------------------------------------------------------------
-!
-YFILE     = YRUN
-YTITLE    = 'TRIP run mean outputs'
-WRITE(YTIME,'(i4.4,i2.2)') KYEAR, KMONTH
-YUNITTIME = 'months since '//YTIME(1:4)//'-'//YTIME(5:LEN_TRIM(YTIME))//'-15'
- CALL INIT_TRIP_DIAG(TPDG, TPG, &
-                    NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.)
-!
+ENDIF
 !
 !-------------------------------------------------------------------------------
 ! * Create restart file
@@ -762,6 +779,7 @@ IF(ORESTART)THEN
   CALL INIT_RESTART_TRIP(TPG, &
                          NLISTING,YFILE_RESTART,KLON,KLAT,YTITLE,YUNITTIME,.FALSE.)
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

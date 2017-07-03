@@ -1,5 +1,5 @@
 SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
-                     OOASIS,                           &
+                     OOASIS, OXIOS,                   &
                     KLISTING,KLON,KLAT,KNB_TSTEP_RUN, &
                     PRUNTIME,KLON_OL,KLAT_OL,KNB_OL,  &
                     KYEAR,KMONTH,KDAY,PTIME           )
@@ -23,14 +23,11 @@ SUBROUTINE TRIP_RUN (TPDG, TP, TPG, &
 !!    -------------
 !!      Original    06/08 
 !!      B. Decharme 10/2016  bug surface/groundwater coupling   
+!!      S.Sénési    08/11/16 : interface to XIOS
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
-!
-!
-!
-!
 !
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
 USE MODD_TRIP,      ONLY : TRIP_t
@@ -65,6 +62,8 @@ TYPE(TRIP_t),      INTENT(INOUT) :: TP
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 LOGICAL, INTENT(IN)  :: OOASIS        ! Oasis coupling or not
+LOGICAL, INTENT(IN)  :: OXIOS         ! Do we use XIOS
+!
 INTEGER, INTENT(IN)  :: KLISTING      ! Listing ID
 INTEGER, INTENT(IN)  :: KLON          ! Number of longitude
 INTEGER, INTENT(IN)  :: KLAT          ! Number of latittude
@@ -98,7 +97,7 @@ REAL                       :: ZTIME_CPL         ! Coupling time
 INTEGER                    :: JNB_TSTEP_RUN     ! TSTEP_RUN counter 
 INTEGER                    :: JNB_TSTEP_DIAG    ! DIAG call counter 
 INTEGER                    :: ICOUNT
- CHARACTER(LEN=3)           :: YWORK
+ CHARACTER(LEN=3)          :: YWORK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -155,7 +154,7 @@ DO JNB_TSTEP_RUN = 1, KNB_TSTEP_RUN
                        KLISTING,KLON,KLAT,PTIME,ZTIMEC,    &
                        LPRINT,JNB_TSTEP_RUN,JNB_TSTEP_DIAG,&
                        XTSTEP_RUN,XTSTEP_DIAG,ZRUNOFF,     &
-                       ZDRAIN,ZCALVING,ZSRC_FLOOD          )
+                       ZDRAIN,ZCALVING,ZSRC_FLOOD,OXIOS    )
 !
 ! * TRIP OUTPUT FLUXES
 !

@@ -3,7 +3,7 @@ SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
                            KLISTING,KLON,KLAT,PTIME,PTIMEC,    &
                            OPRINT,KNB_TSTEP_RUN,KNB_TSTEP_DIAG,&
                            PTSTEP_RUN,PTSTEP_DIAG,PRUNOFF,     &
-                           PDRAIN,PCALVING,PSRC_FLOOD          )
+                           PDRAIN,PCALVING,PSRC_FLOOD,OXIOS    )
 !#################################################################
 !
 !!****  *TRIP*  
@@ -26,7 +26,8 @@ SUBROUTINE TRIP_INTERFACE (TPDG, TP, TPG, &
 !!    -------------
 !!      Original    01/02/05 
 !!      Modif.      28/05/08 
-!!      B. Decharme 10/2016  bug surface/groundwater coupling   
+!!      B. Decharme 10/2016  bug surface/groundwater coupling  
+!!      S.Sénési    08/11/16 : interface to XIOS 
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -68,7 +69,7 @@ IMPLICIT NONE
 !
 !
 TYPE(TRIP_DIAG_t), INTENT(INOUT) :: TPDG
-TYPE(TRIP_t), INTENT(INOUT) :: TP
+TYPE(TRIP_t),      INTENT(INOUT) :: TP
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
 INTEGER,              INTENT(IN)    :: KLISTING       !Output file id
@@ -81,6 +82,7 @@ INTEGER,              INTENT(IN)    :: KNB_TSTEP_RUN  !TSTEP_RUN counter     [-]
 REAL,                 INTENT(IN)    :: PTSTEP_RUN     !Run  timestep         [s]
 REAL,                 INTENT(IN)    :: PTSTEP_DIAG    !Diag timestep         [s]
 INTEGER,              INTENT(INOUT) :: KNB_TSTEP_DIAG !DIAG call counter     [-]
+LOGICAL,              INTENT(IN)    :: OXIOS          !Do we use XIOS
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PRUNOFF   !Input surface runoff            [kg/s]
 REAL, DIMENSION(:,:), INTENT(IN)    :: PDRAIN    !Input free drainage             [kg/s]
@@ -116,6 +118,8 @@ REAL                       :: ZGSTO2_ALL !Global groundwater storage at t-1  [kg
 REAL                       :: ZGIN_ALL   !Global gw recharge + lateral input [kg/m2/s]
 REAL                       :: ZGOUT_ALL  !Global gw outflow                  [kg/m2/s]
 !
+LOGICAL                    :: GWRDIAG
+!
 INTEGER :: JTSTEP, ITSTEP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -129,9 +133,6 @@ IF (LHOOK) CALL DR_HOOK('TRIP_INTERFACE',0,ZHOOK_HANDLE)
 !*       0.     Initialize local variables:
 !               ---------------------------
 !
-ZRUNOFF         (:,:) = 0.0
-ZDRAIN          (:,:) = 0.0
-ZSRC_FLOOD      (:,:) = 0.0
 ZSOUT           (:,:) = 0.0
 ZSIN            (:,:) = 0.0
 ZVEL            (:,:) = 0.0
@@ -181,7 +182,7 @@ IF(LFLOOD)THEN
         ZSRC_FLOOD(:,:) = 0.0
   ENDWHERE
 ELSE
-  ZSRC_FLOOD(:,:) = XUNDEF  
+  ZSRC_FLOOD(:,:) = 0.0
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -189,7 +190,7 @@ ENDIF
 !*       1.     Initialize local diag :
 !               -----------------------
 !
- CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,   &
+CALL TRIP_DIAG_INIT(ZSOUT,ZSIN,ZVEL,ZHS,ZGOUT,ZGNEG,ZHG_OLD,  &
                     ZWTD,ZFWTD,ZQGCELL,ZHGHS,                  &
                     ZQFR,ZQRF,ZVFIN,ZVFOUT,ZHSF,ZDISCHARGE,    &
                     ZGSTO_ALL,ZGSTO2_ALL,ZGIN_ALL,ZGOUT_ALL    )
@@ -199,7 +200,7 @@ ENDIF
 !*       2.     Initialize river height and velocity :
 !               --------------------------------------
 !
- CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
+CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,TPG%XLEN,TP%XWIDTH, &
                  TP%XSLOPEBED,TP%XN,TP%XSURF_STO,ZHS,ZVEL )
 !
 !-------------------------------------------------------------------------------
@@ -285,10 +286,12 @@ DO JTSTEP=1,ITSTEP !TRIP time step loop
 !
 !  * Write diagnostic  
 !
-   IF (LWR_DIAG.AND.MOD(PTIMEC,PTSTEP_DIAG) == 0.) THEN
+   GWRDIAG = (LWR_DIAG.AND.MOD(PTIMEC,PTSTEP_DIAG) == 0.)
+!
+   IF (GWRDIAG) THEN
       KNB_TSTEP_DIAG = KNB_TSTEP_DIAG + 1
       CALL TRIP_DIAG_WRITE(TPDG, TPG, &
-                           KLISTING,KLON,KLAT,KNB_TSTEP_DIAG,PTSTEP_DIAG)
+                           KLISTING,KLON,KLAT,KNB_TSTEP_DIAG,PTSTEP_DIAG,OXIOS)
    ENDIF
 !
 !  * end 

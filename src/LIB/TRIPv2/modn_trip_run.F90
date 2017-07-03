@@ -29,12 +29,18 @@ MODULE  MODN_TRIP_RUN
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    04/2013
+!!      S.Sénési    08/11/16 : interface to XIOS
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
 IMPLICIT NONE
+!
+!*    Names of model
+!     --------------
+!
+CHARACTER(LEN=6)                  :: CMODEL_NAME  = 'trip'
 !
 !*    Names of files
 !     --------------
