@@ -84,7 +84,10 @@ CALL OCEAN_REL_INIT(SM%OR)
 !
 !-------------------------------------------------------------------------------------
 !
-IF (ASSOCIATED(SM%S%TGLT%bat) .AND. SM%S%CSEAICE_SCHEME=='GELATO' ) CALL GLTOOLS_DEALLOC(SM%S%TGLT)
+IF (ASSOCIATED(SM%S%ICE)) THEN
+  CALL SM%S%ICE%DEALLOC()
+  NULLIFY(SM%S%ICE)
+END IF
 !
 IF (LHOOK) CALL DR_HOOK('DEALLOC_SEAFLUX_N',1,ZHOOK_HANDLE)
 !

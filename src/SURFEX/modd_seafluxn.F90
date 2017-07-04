@@ -36,7 +36,8 @@
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF
 !
-USE MODD_TYPES_GLT,   ONLY : T_GLT
+USE ABSTRACT_ICE, ONLY : SEA_ICE_t
+USE MODD_TYPES_GLT, ONLY: T_GLT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -128,8 +129,8 @@ TYPE SEAFLUX_t
 !
 ! Sea-ice :
 !
-  TYPE(T_GLT)                           :: TGLT ! Sea-ice state , diagnostics and auxilliaries
-                                             ! for the case of embedded Gelato Seaice model
+  TYPE(T_GLT) :: TGLT
+  CLASS(SEA_ICE_t), POINTER             :: ICE ! Sea-ice state
 !
 ! Date:
 !

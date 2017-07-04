@@ -39,9 +39,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODI_GET_LUOUT
 USE MODI_GET_TYPE_DIM_N
-USE MODI_GLTOOLS_READNAM
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
@@ -49,9 +47,6 @@ USE MODE_PREP_CTL, ONLY : PREP_CTL
 !
 USE MODN_PREP_SEAFLUX,   ONLY : CPREP_SEAICE_SCHEME => CSEAICE_SCHEME
 USE MODI_PREP_HOR_SEAFLUX_FIELD
-!
-USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo 
-USE MODI_GLTOOLS_ALLOC
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -85,9 +80,7 @@ CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
 !
 INTEGER :: IK,IL  ! loop counter on ice categories and layers 
 INTEGER :: JMTH,INMTH
-INTEGER :: ILUOUT
-LOGICAL :: GFOUND         ! Return code when searching namelist
-INTEGER :: ILUNAM         ! logical unit of namelist file
+INTEGER :: INP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -96,17 +89,6 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',0,ZHOOK_HANDLE)
 !
 !*      0.     Default of configuration
 !
-!
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-!
-!-------------------------------------------------------------------------------------
-!
-!*      1.     Interpret namelist
-!
-S%CSEAICE_SCHEME=CPREP_SEAICE_SCHEME
-IF ( S%CSEAICE_SCHEME == 'GELATO' ) THEN
-  CALL GLTOOLS_READNAM(.FALSE.,ILUOUT)
-ENDIF
 !
 S%LHANDLE_SIC = .FALSE.
 IF(TRIM(S%CSEAICE_SCHEME)/='NONE' .OR. TRIM(S%CINTERPOL_SIC)/='NONE' )THEN
@@ -159,46 +141,9 @@ IF(S%LINTERPOL_SIT)THEN
    ENDDO
 !
 ENDIF
-!-------------------------------------------------------------------------------------
-!
-!*      Creating default initial state for Gelato 
-!
-!
-CALL GET_TYPE_DIM_n(DTCO, U, 'SEA   ',nx)
-ny=1
-nyglo=1
-nxglo=nx
-CALL GLTOOLS_ALLOC(S%TGLT)
-!
-!*       G1    Prognostic fields with only space dimension(s) :
-!
-S%TGLT%ust(:,1)=0.
-!
-!*       G2     Prognostic fields with space and ice-category dimension(s) :
-!
-! sea ice age 
-S%TGLT%sit(:,:,1)%age=0.
-! melt pond volume 
-S%TGLT%sit(:,:,1)%vmp=0.
-! sea ice surface albedo 
-S%TGLT%sit(:,:,1)%asn=0.
-! sea ice fraction 
-S%TGLT%sit(:,:,1)%fsi=0.
-! sea ice thickness 
-S%TGLT%sit(:,:,1)%hsi=1.*S%TGLT%sit(:,:,1)%fsi
-! sea ice salinity 
-S%TGLT%sit(:,:,1)%ssi=0.
-! sea ice surface temperature 
-S%TGLT%sit(:,:,1)%tsf=260.
-! snow thickness 
-S%TGLT%sit(:,:,1)%hsn=0.
-! snow density 
-S%TGLT%sit(:,:,1)%rsn=100.
-!
-!*       G3     Prognostic fields with space, ice-category and layer dimensions :
-!
-! sea ice vertical gltools_enthalpy profile for all types and levels
-S%TGLT%sil(:,:,:,1)%ent=-1000. 
+
+CALL GET_TYPE_DIM_n(DTCO, U, 'SEA   ', INP)
+CALL S%ICE%PREP(INP, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
 !
 IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',1,ZHOOK_HANDLE)
 !
