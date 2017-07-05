@@ -35,7 +35,7 @@ USE MODE_TRIP_NETCDF
 USE MODN_TRIP_RUN,   ONLY : LDIAG_MISC
 USE MODN_TRIP,       ONLY : CGROUNDW, CVIT, LFLOOD
 !
-USE MODD_TRIP_OASIS, ONLY : LCPL_LAND, LCPL_FLOOD
+USE MODD_TRIP_OASIS, ONLY : LCPL_LAND
 !
 USE MODD_TRIP_PAR, ONLY : XUNDEF, LNCPRINT
 !
@@ -65,18 +65,16 @@ LOGICAL, INTENT(IN)          :: OTIME
 !
 !*      0.2    declarations of output variables
 !
-INTEGER, PARAMETER :: INDIAG = 100
-!
- CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(INDIAG) :: YVNAME  !Name of each output variable
- CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(INDIAG) :: YVLNAME !Long name of each output variables
- CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(INDIAG) :: YUNIT   !Unit of each output variable
+ CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YVNAME  !Name of each output variable
+ CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YVLNAME !Long name of each output variables
+ CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YUNIT   !Unit of each output variable
 !
  CHARACTER(LEN=NF90_MAX_NAME) :: YFILE,YTITLE,YTIMEUNIT
 !
-REAL, DIMENSION(KLON) ::  ZLON
-REAL, DIMENSION(KLAT) ::  ZLAT
+REAL, DIMENSION(:), ALLOCATABLE ::  ZLON
+REAL, DIMENSION(:), ALLOCATABLE ::  ZLAT
 !
-INTEGER :: INCID, INUM
+INTEGER :: INDIAG, INCID, INUM
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -86,100 +84,51 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP_DIAG',0,ZHOOK_HANDLE)
 INUM   = 0
+INDIAG = 2
+IF(LDIAG_MISC) INDIAG = INDIAG + 1
+IF(LCPL_LAND.AND.LDIAG_MISC) INDIAG = INDIAG + 2
+IF(CVIT=='VAR')     INDIAG = INDIAG + 2
+IF(CGROUNDW/='DEF') INDIAG = INDIAG + 2
+IF(CGROUNDW=='DIF')THEN 
+  INDIAG = INDIAG + 3
+  IF(LDIAG_MISC)INDIAG = INDIAG + 2
+ENDIF
+IF(LFLOOD)THEN
+  INDIAG = INDIAG + 3
+  IF(LDIAG_MISC) INDIAG = INDIAG + 8
+ENDIF
 !
-!-------------------------------------------------------------------------------
-! * River mass, fluxes, and velocity
-!-------------------------------------------------------------------------------
+! * Allocate netcdf file attributs
+!
+ALLOCATE(YVNAME  (INDIAG))
+ALLOCATE(YVLNAME (INDIAG))
+ALLOCATE(YUNIT   (INDIAG))
+!
+ALLOCATE(ZLON(KLON))
+ALLOCATE(ZLAT(KLAT))
+!
+! * Initialyse netcdf file attributs
 !
 INUM = INUM + 1
-YVNAME (INUM) = 'rivw                      '
+YVNAME (INUM) = 'SURF_STO                  '
 YVLNAME(INUM) = 'River storage             '
 YUNIT  (INUM) = 'kg m-2                    '
 !
 INUM = INUM + 1
-YVNAME (INUM) = 'rivdis                    '
-YVLNAME(INUM) = 'River discharge           '
+YVNAME (INUM) = 'QDIS                      '
+YVLNAME(INUM) = 'Discharge                 '
 YUNIT  (INUM) = 'm3 s-1                    '
 !
-INUM = INUM + 1
-YVNAME (INUM) = 'rivin                     '
-YVLNAME(INUM) = 'River Inflow              '
-YUNIT  (INUM) = 'm3 s-1                    '
-!
-IF(CVIT=='VAR')THEN
-!
+IF(LDIAG_MISC)THEN
+! 
   INUM = INUM + 1
-  YVNAME (INUM) = 'rivh                      '
-  YVLNAME(INUM) = 'River height              '
-  YUNIT  (INUM) = 'm                         '
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'rivv                      '
-  YVLNAME(INUM) = 'River velocity            '
-  YUNIT  (INUM) = 'm s-1                     '
-!
+  YVNAME (INUM) = 'QSIN                      '
+  YVLNAME(INUM) = 'Inflow to the river       '
+  YUNIT  (INUM) = 'm3 s-1                    '
+! 
 ENDIF
 !
-!-------------------------------------------------------------------------------
-! * Groundwater mass, fluxes, and depth
-!-------------------------------------------------------------------------------
-!
-IF(CGROUNDW/='DEF')THEN
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'gw                '
-  YVLNAME(INUM) = 'Groundwater storage       '
-  YUNIT  (INUM) = 'kg m-2                    '
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'gwToriv                   '
-  YVLNAME(INUM) = 'Groundwater-river exchange'
-  YUNIT  (INUM) = 'kg m-2 s-1                '
-!
-ENDIF
-!
-IF(CGROUNDW=='DIF')THEN
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'gwh                               '
-  YVLNAME(INUM) = 'Groundwater height from 0 altitude'
-  YUNIT  (INUM) = 'm                                 '
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'wtd                                  '
-  YVLNAME(INUM) = 'Water Table Depth (positive downward)'
-  YUNIT  (INUM) = 'm                                    '
-!
-ENDIF
-!
-!-------------------------------------------------------------------------------
-! * Floodplains
-!-------------------------------------------------------------------------------
-!
-IF(LFLOOD)THEN
-!        
-  INUM = INUM + 1
-  YVNAME (INUM) = 'fldw                      '
-  YVLNAME(INUM) = 'Floodplain storage        '
-  YUNIT  (INUM) = 'kg m-2                    '
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'fldf                      '
-  YVLNAME(INUM) = 'Floodplain fraction       '
-  YUNIT  (INUM) = '-                         '
-!
-  INUM = INUM + 1
-  YVNAME (INUM) = 'fldh                      '
-  YVLNAME(INUM) = 'Floodplain depth          '
-  YUNIT  (INUM) = 'm                         '
-!
-ENDIF
-!
-!-------------------------------------------------------------------------------
-! * Forcing variables can be used to force TRIP offline
-!-------------------------------------------------------------------------------
-!
-IF(LCPL_LAND)THEN
+IF(LCPL_LAND.AND.LDIAG_MISC)THEN
 ! 
   INUM = INUM + 1
   YVNAME (INUM) = 'RUNOFF                    '
@@ -193,62 +142,133 @@ IF(LCPL_LAND)THEN
 ! 
 ENDIF
 !
-IF(LCPL_FLOOD)THEN
+IF(CGROUNDW/='DEF')THEN
+!        
   INUM = INUM + 1
-  YVNAME (INUM)= 'FSOURCE                   '
-  YVLNAME(INUM)= 'Floodplains source (Pf-Ef-If) (can be used to force TRIP offline)'
-  YUNIT  (INUM)= 'mm of water               '
+  YVNAME (INUM) = 'QGF'
+  YVLNAME(INUM) = 'Groundwater-river exchange'
+  YUNIT  (INUM) = 'm3 s-1                    '
+!
+  INUM = INUM + 1
+  YVNAME (INUM) = 'GROUND_STO                '
+  IF(CGROUNDW=='CST')THEN
+    YVLNAME(INUM) = 'Groundwater storage     '
+  ELSEIF(CGROUNDW=='DIF')THEN
+    YVLNAME(INUM) = 'Groundwater mass equivalent'
+  ENDIF
+  YUNIT  (INUM) = 'kg m-2                    '
+!
 ENDIF
 !
-!-------------------------------------------------------------------------------
-! * MISC fields
-!-------------------------------------------------------------------------------
+IF(CGROUNDW=='DIF')THEN
 !
-IF(LDIAG_MISC)THEN
+  INUM = INUM + 1
+  YVNAME (INUM) = 'HGROUND                   '
+  YVLNAME(INUM) = 'Groundwater height        '
+  YUNIT  (INUM) = 'm                         '
 !
-  IF(CGROUNDW=='DIF')THEN
+  INUM = INUM + 1
+  YVNAME (INUM) = 'FWTD                      '
+  YVLNAME(INUM) = 'grid-cell fraction of wtd '
+  YUNIT  (INUM) = '-                         '
+!
+  INUM = INUM + 1
+  YVNAME (INUM) = 'WTD                       '
+  YVLNAME(INUM) = 'Wat Tab Depth for coupling'
+  YUNIT  (INUM) = 'm                         '
+!
+  IF(LDIAG_MISC)THEN
 !
     INUM = INUM + 1
-    YVNAME (INUM) = 'gwdf                                   '
-    YVLNAME(INUM) = 'grid-cell fraction of Groundwater depth'
-    YUNIT  (INUM) = '-                                      '
+    YVNAME (INUM) = 'QGCELL                    ' 
+    YVLNAME(INUM) = 'Grid-cell fluxes budget   '
+    YUNIT  (INUM) = 'm3 s-1                    '
 !
     INUM = INUM + 1
-    YVNAME (INUM) = 'gwfTocell                               ' 
-    YVLNAME(INUM) = 'Groundwater fluxes between adjacent cell'
-    YUNIT  (INUM) = 'kg m-2 s-1                              '
-!
-    INUM = INUM + 1
-    YVNAME (INUM)= 'gwh_less_rivh              '
+    YVNAME (INUM)= 'HGHRIV                     '
     YVLNAME(INUM)= 'Hground - Hriver           '
     YUNIT  (INUM)= 'm                          '
 !
   ENDIF
 !
-  IF(LFLOOD)THEN
+ENDIF
+!
+IF(CVIT=='VAR')THEN
+!
+  INUM = INUM + 1
+  YVNAME (INUM) = 'VEL                       '
+  YVLNAME(INUM) = 'Stream flow velocity      '
+  YUNIT  (INUM) = 'm s-1                     '
+!
+  INUM = INUM + 1
+  YVNAME (INUM) = 'HSTREAM                   '
+  YVLNAME(INUM) = 'Stream river height       '
+  YUNIT  (INUM) = 'm                         '
+!
+ENDIF
+!
+IF(LFLOOD)THEN
+!        
+  INUM = INUM + 1
+  YVNAME (INUM) = 'FLOOD_STO                 '
+  YVLNAME(INUM) = 'Floodplain storage        '
+  YUNIT  (INUM) = 'kg m-2                    '
+!
+  INUM = INUM + 1
+  YVNAME (INUM) = 'FFLOOD                    '
+  YVLNAME(INUM) = 'TRIP flooded fraction     '
+  YUNIT  (INUM) = '-                         '
+!
+  INUM = INUM + 1
+  YVNAME (INUM) = 'HFLOOD                    '
+  YVLNAME(INUM) = 'Flood depth               '
+  YUNIT  (INUM) = 'm                         '
+!
+  IF(LDIAG_MISC)THEN
 !
     INUM = INUM + 1
-    YVNAME (INUM)= 'fldh_less_rivh              '
-    YVLNAME(INUM)= 'Hflood - Hriver             '
+    YVNAME (INUM)= 'FSOURCE                      '
+    YVLNAME(INUM)= 'Floodplains source (Pf-Ef-If) (can be used to force TRIP offline)'
+    YUNIT  (INUM)= 'mm of water                  '
+!
+    INUM = INUM + 1
+    YVNAME (INUM)= 'VFIN                      '
+    YVLNAME(INUM)= 'River to flood velocity   '
+    YUNIT  (INUM)= 'm s-1                     '
+!
+    INUM = INUM + 1
+    YVNAME (INUM)= 'QRF                       '
+    YVLNAME(INUM)= 'River flow to floodplain  '
+    YUNIT  (INUM)= 'm3 s-1                    '
+!
+    INUM = INUM + 1
+    YVNAME (INUM)= 'VFOUT                     '
+    YVLNAME(INUM)= 'Flood to river velocity   '
+    YUNIT  (INUM)= 'm s-1                     '
+!
+    INUM = INUM + 1
+    YVNAME (INUM)= 'QFR                       '
+    YVLNAME(INUM)= 'Flood flow to river       '
+    YUNIT  (INUM)= 'm3 s-1                    '
+!
+    INUM = INUM + 1
+    YVNAME (INUM)= 'HSF                         '
+    YVLNAME(INUM)= 'River-Flood depth comparison'
     YUNIT  (INUM)= 'm                           '
 !
     INUM = INUM + 1
-    YVNAME (INUM)= 'fld_width                   '
-    YVLNAME(INUM)= 'Flood width                 '
+    YVNAME (INUM)= 'WF                          '
+    YVLNAME(INUM)= 'Flood width during dt       '
     YUNIT  (INUM)= 'm                           '
 !
     INUM = INUM + 1
-    YVNAME (INUM)= 'fld_length                  '
-    YVLNAME(INUM)= 'Flood length                '
+    YVNAME (INUM)= 'LF                          '
+    YVLNAME(INUM)= 'Flood lenght during dt      '
     YUNIT  (INUM)= 'm                           '
 !
   ENDIF
 !
-ENDIF     
-!
-!-------------------------------------------------------------------------------
-! * Create netcdf file
-!-------------------------------------------------------------------------------
+ENDIF
 !
 ! * Create netcdf file
 !
@@ -256,11 +276,20 @@ YFILE     = HFILE(1:LEN_TRIM(HFILE))
 YTITLE    = HTITLE(1:LEN_TRIM(HTITLE))
 YTIMEUNIT = HTIMEUNIT(1:LEN_TRIM(HTIMEUNIT))
 !
- CALL GET_LONLAT_TRIP(TPG,KLON,KLAT,ZLON,ZLAT)
+ CALL GET_LONLAT_TRIP(TPG, &
+                     KLON,KLAT,ZLON,ZLAT)
 !
  CALL NCCREATE(KLISTING,YFILE,YTITLE,YTIMEUNIT,YVNAME,YVLNAME,YUNIT,ZLON,ZLAT,XUNDEF,LNCPRINT,INCID,OTIME)
 !
  CALL NCCLOSE(KLISTING,LNCPRINT,YFILE,INCID)
+!
+! * Deallocate netcdf file attributs
+!
+DEALLOCATE(YVNAME  )
+DEALLOCATE(YVLNAME )
+DEALLOCATE(YUNIT   )
+DEALLOCATE(ZLON    )
+DEALLOCATE(ZLAT    )
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP_DIAG',1,ZHOOK_HANDLE)
 !
