@@ -532,7 +532,7 @@ endif
 
 ADD_OASIS=""
 ifeq "$(VER_OASIS)" "mct"
-  ADD_OASIS="--use_oasis oasis3_mct"
+  ADD_OASIS=--use_oasis oasis3_mct
 endif
 
 ifeq "$(VER_XIOS)" "2"
