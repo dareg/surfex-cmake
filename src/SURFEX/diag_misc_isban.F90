@@ -252,6 +252,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         JI                      =  KMASK         (JJ)
         !
         IF (DGMI%LVOLUMETRIC_SNOWLIQ) THEN
+        	IF (PKDI%XP_SNOWDZ(JJ,JK)==0.) PKDI%XP_SNOWLIQ(JJ,JK)=XUNDEF
           IF (PKDI%XP_SNOWLIQ(JJ,JK)==XUNDEF) THEN
             DGMI%XSNOWLIQ (JI,JK,KPATCH)  =  PKDI%XP_SNOWLIQ(JJ,JK)
           ELSE

@@ -377,7 +377,7 @@ END IF
                       HPROGRAM, GCOUPLING,                                                 &
              PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
              KI, KSV, KSW,                                                                 &
-             PTSUN, PZENITH, PZENITH2,                                                     &
+             PTSUN, PZENITH, PZENITH2,  PAZIM  ,                                                 &
              ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,    &
              PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,                     &
              PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &

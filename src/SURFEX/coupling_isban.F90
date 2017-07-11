@@ -1,7 +1,7 @@
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
                              HPROGRAM, HCOUPLING,                                              &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2,PAZIM, &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
@@ -213,6 +213,7 @@ REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on hori
 REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
@@ -661,6 +662,7 @@ REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPWET
 REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPDRY 
 REAL, DIMENSION(KSIZE,KSV) :: ZP_SV      ! scalar concentration in the air       (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH  ! zenithal angle        radian from the vertical)
+REAL, DIMENSION(KSIZE) :: ZP_AZIM  ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(KSIZE) :: ZP_PEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KSIZE) :: ZP_PEW_B_COEF ! needed if HCOUPLING='I'
 REAL, DIMENSION(KSIZE) :: ZP_PET_A_COEF
@@ -760,6 +762,7 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_n:TREAT_PATCH',0,ZHOOK_HANDLE)
 !
 IF (IM%I%NPATCH==1) THEN
    ZP_ZENITH(:)     = PZENITH     (:)
+   ZP_AZIM(:)     = PAZIM         (:)
    ZP_ZREF(:)       = PZREF       (:)
    ZP_UREF(:)       = PUREF       (:)
    ZP_WIND(:)       = ZWIND       (:)
@@ -801,6 +804,7 @@ ELSE
   DO JJ=1,KSIZE
    JI = KMASK(JJ)
    ZP_ZENITH(JJ)     = PZENITH     (JI)
+   ZP_AZIM(JJ)     = PAZIM          (JI)
    ZP_ZREF(JJ)       = PZREF       (JI)
    ZP_UREF(JJ)       = PUREF       (JI)
    ZP_WIND(JJ)       = ZWIND       (JI)
@@ -1009,7 +1013,7 @@ ZIRRIG_GR(:)= 0.
            IM%I%LSNOW_ABS_ZENITH, IM%I%CSNOWMETAMO, IM%I%CSNOWRAD,IM%I%LATMORAD, IM%I%LSNOWSYTRON, &
            IM%I%CSNOWFALL, IM%I%CSNOWCOND, IM%I%CSNOWHOLD, IM%I%CSNOWCOMP, IM%I%XCGMAX, ZP_ZREF, &
            ZP_UREF, ZP_SLOPE_COS, ZP_SLOPE_DIR, ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, &
-           ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, &
+           ZP_SNOW, ZP_ZENITH,ZP_AZIM, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, &
            ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,  ZP_PET_B_COEF, ZP_PEQ_B_COEF, &
            IM%PKI%XP_RSMIN, IM%PKI%XP_RGL, IM%PKI%XP_GAMMA, IM%PKI%XP_CV, IM%PKI%XP_RUNOFFD, &
            IM%PKI%XP_SOILWGHT, IM%I%NLAYER_HORT, IM%I%NLAYER_DUN, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG,  &

@@ -15,7 +15,7 @@
                PRNSNOW,PHSNOW,PGFLUXSNOW,                                &
                PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
-               PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,PBLOWSNW,               &
+               PPERMSNOWFRAC,PZENITH,PANGL_NORM,PXLAT,PXLON,PBLOWSNW,     &
                OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
                HSNOWMETAMO, HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,          &
                PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP)
@@ -198,7 +198,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, P
 !                                                at level za
 REAL, DIMENSION(:,:), INTENT(IN )   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral irradiance (W/m2/um)
 !
-REAL, DIMENSION(:,:), INTENT(IN )   :: PIMPWET, PIMPDRY  !Dry and wet deposit coefficient from Forcing File(kg/m²/s)
+REAL, DIMENSION(:,:), INTENT(IN )   :: PIMPWET, PIMPDRY  !Dry and wet deposit coefficient from Forcing File(g/m²/s)
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PTG, PSOILCOND, PD_G, PPSN3L
 !                                      PTG       = Surface soil temperature (effective
@@ -329,6 +329,7 @@ REAL, DIMENSION(:), INTENT(OUT)      ::  PQS
 !                                      PQS = surface humidity
 !
 REAL, DIMENSION(:), INTENT(IN)        :: PZENITH ! solar zenith angle
+REAL, DIMENSION(:), INTENT(IN)        :: PANGL_NORM ! Angle entre le soleil et la normal au sol et le soleil (=zenith sans pente au sol) utilisé dans TARTES
 REAL, DIMENSION(:), INTENT(IN)        :: PXLAT,PXLON ! LAT/LON after packing
 !
 REAL, DIMENSION(:,:), INTENT(IN)      :: PBLOWSNW !  Properties of deposited blowing snow (from Sytron or Meso-NH/Crocus)
@@ -935,10 +936,13 @@ SELECT CASE (HSNOWRAD)
       PRINT*,"ATTENTION VALEURS ANORMALES IMPURETES"
       PRINT*,'Before Tartes',ZSNOWIMP_CONTENT(:,:,1),'Stop',ZSNOWIMP_CONTENT(:,:,2)
     ENDIF
+    
+    
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
-                        ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH, &
-                        INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
+                        ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_NORM, &  ! juste test, normalement PANGL_NORM=PZENITH, 
+                        PDIRCOSZW,INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
                         P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF,OATMORAD)
+!    PRINT*,"ZRADSINK",ZRADSINK,"ZRADXS",ZRADXS   , "TIME",tptime                
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !! activation of spectral outputs 
 

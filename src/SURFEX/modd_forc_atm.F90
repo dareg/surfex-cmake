@@ -53,7 +53,7 @@ REAL, DIMENSION(:,:),ALLOCATABLE :: XSCA_SW   ! diffuse solar radiation (on hori
 REAL, DIMENSION(:), ALLOCATABLE  :: XSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(:), ALLOCATABLE  :: XZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(:), ALLOCATABLE  :: XZENITH2  ! zenithal angle at t+1(radian from the vertical)
-REAL, DIMENSION(:), ALLOCATABLE  :: XAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(:), ALLOCATABLE  :: XAZIM     ! azimuthal angle at t+1    (radian from North, clockwise)
 REAL, DIMENSION(:), ALLOCATABLE  :: XLW       ! longwave radiation (on horizontal surf.)
 !                                            !                                       (W/m2)
 REAL, DIMENSION(:), ALLOCATABLE  :: XPS       ! pressure at atmospheric model surface (Pa)

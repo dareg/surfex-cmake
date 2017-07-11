@@ -8,7 +8,7 @@
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
         PSOILHCAPZ, PSOILCONDZ, PFROZEN1,                                      &
-        PPS, PZENITH, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
+        PPS, PZENITH,PAZIM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
         PH_VEG, PDIRCOSZW, PSLOPE_DIR,                                         &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
         PPEW_A_COEF, PPEW_B_COEF,                                              &
@@ -209,6 +209,7 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PLAT          ! Latitude (degrees North)
 REAL, DIMENSION(:),   INTENT(IN)    :: PLON          ! Longitude (degrees East)
 REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
 REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! solar zenith angle
+REAL, DIMENSION(:),   INTENT(IN)      :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD       ! solar (shortwave) incoming radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(IN)    :: PLW_RAD       ! thermal (longwave) incoming radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(IN)    :: PSCA_SW       ! solar diffuse incoming radiation [W/m2]
@@ -1198,7 +1199,7 @@ CALL HYDRO_VEG(HRAIN, PTSTEP, PMUF,                      &
            PSNDRIFT, PUSTARSNOW,                                                       & 
            PPSN, PSRSFC, PRRSFC, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC,                  &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
-           PSNOWHMASS, PRISNOW, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
+           PSNOWHMASS, PRISNOW, PZENITH,PAZIM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
            OSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
            HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,                                &
            HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,              &

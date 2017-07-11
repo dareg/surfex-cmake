@@ -350,6 +350,8 @@ REAL, DIMENSION(SIZE(PPS)) :: ZP_SWNET_V, ZP_SWNET_G, ZP_SWNET_N, ZP_SWNET_NS,  
           ZP_SR_GN, ZP_MELTCV, ZP_FRZCV,                                          &
           ZP_SWDOWN_GN, ZP_LWDOWN_GN
 !
+REAL, DIMENSION(SIZE(PPS)) :: ZP_ANGL_NORM   ! angle between the normal to the surface and the sun used in snowcro
+!
 TYPE (DATE_TIME),   DIMENSION(0) :: TPSEED ! seeding date
 TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
@@ -477,7 +479,7 @@ ZDIFF_RATIO=XUNDEF
           GDM%TVG%XCGMAX, PZ_LOWCAN, PZ_LOWCAN, ZDIRCOSZW,            &
           ZSLOPEDIR,PT_LOWCAN,                                        &
           PQ_LOWCAN, PEXNS, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
-          ZP_MEB_SCA_SW,                                              &
+          ZP_ANGL_NORM,ZP_MEB_SCA_SW,                                              &
           PSW, PLW, PU_LOWCAN, ZWINDDIR,                              &
           PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, &
           PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, GDM%TGDP%XRSMIN, &

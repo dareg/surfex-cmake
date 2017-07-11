@@ -163,7 +163,10 @@ REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface oro
 !
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
-REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV
+REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV ! Cosine of the slope angle
+! 
+REAL, DIMENSION(KI)    :: ZSKYVF ! SKY VIEW factor, portion of the sky seen by the simulation point. 100% for a flat simulation
+! 
 REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
@@ -232,6 +235,7 @@ IF(LNOSOF)THEN
 !
    Z3D_TOT_SURF    (:) = 0.
    Z3D_TOT_SURF_INV(:) = 0.
+   ZSKYVF          (:) = 1.
 !   
    ZSCA_SW(:,:) = PSCA_SW(:,:)
    ZDIR_SW(:,:) = PDIR_SW(:,:)
@@ -256,17 +260,18 @@ ELSE
 !
    Z3D_TOT_SURF(:) = SQRT(1.+IM%I%XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
+   ZSKYVF          (:) =  (1+Z3D_TOT_SURF_INV(:))/2  ! (1+cos(theta))/2 ,Dumont et al. 2017
 !
 !  number of spectral shortwave bands
 !
    ISWB = SIZE(PSW_BANDS)
 !
    DO JSWB=1,ISWB
-!     correcting for the slope angle (scaterred SW flux)
+!     correcting for the slope angle (scaterred SW flux), multiplying by cos(theta) in the standard version and (1+cos(theta))/2 
 !
-      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
+      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
 
-!     correcting for the slope angle (scaterred SW flux)
+!     the inverse operation is done in snow_meteo or surf_solar_slope so it is neutral.
 !
       ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
    END DO
@@ -276,8 +281,8 @@ ELSE
 !
 !  incoming LW radiation per m2 of actual surface
 !
-   ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
-          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
+   ZLW(:) =  ZLW(:)                                  *     ZSKYVF(:) &            ! PArt of the longwave coming from the sky 
+          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-ZSKYVF(:))     ! PArt of the longwave coming from the ground
 !
 !  liquid precipitation per m2 of actual surface
 !

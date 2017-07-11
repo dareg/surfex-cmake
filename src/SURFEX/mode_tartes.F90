@@ -58,7 +58,7 @@ USE PARKIND1  ,ONLY : JPRB
 CONTAINS
 
 SUBROUTINE TARTES(PSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_DENSITY,&
-                  PSNOWIMP_CONTENT,PALB,PSW_RAD_DIF,PSW_RAD_DIR,PCOSZEN,KNLVLS_USE,PSNOWALB, &
+                  PSNOWIMP_CONTENT,PALB,PSW_RAD_DIF,PSW_RAD_DIR,PCOSNORM,KNLVLS_USE,PSNOWALB, &
                   PSNOWENERGY,PSOILENERGY)
 !
 USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS,XREFICE_R,XREFICE_I,XREFIMP_I,XP_MUDIFF
@@ -79,7 +79,7 @@ REAL, DIMENSION(:,:), INTENT(IN)   :: PALB ! soil/vegetation albedo (npoints,nba
 !
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSW_RAD_DIF ! spectral diffuse incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSW_RAD_DIR ! spectral direct incident light (W/m^2) (npoints,nbands)
-REAL, DIMENSION(:), INTENT(IN)     :: PCOSZEN ! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)     :: PCOSNORM ! cosine of normal zenithal solar angle (npoints)
 !
 INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow layers (npoints)
 !
@@ -150,7 +150,7 @@ IMAX_USE = MAXVAL(KNLVLS_USE)
 
 !3 solve the radiative transfer for each wavelength
 !3.1 Compte G+ and G- vectors for direct and diffuse radiations
- CALL GP_GM_VECTORS(ZSNOWSSALB,ZKESTAR,ZG_STAR,ZSSALB_STAR,ZGAMMA1,ZGAMMA2,PCOSZEN,PSW_RAD_DIR, &
+ CALL GP_GM_VECTORS(ZSNOWSSALB,ZKESTAR,ZG_STAR,ZSSALB_STAR,ZGAMMA1,ZGAMMA2,PCOSNORM,PSW_RAD_DIR, &
                     INLVLS_EFF,IMAX_EFF,ZGP_DIR,ZGM_DIR)
  CALL GP_GM_VECTORS(ZSNOWSSALB,ZKESTAR,ZG_STAR,ZSSALB_STAR,ZGAMMA1,ZGAMMA2,ZMUDIFF,PSW_RAD_DIF, &
                     INLVLS_EFF,IMAX_EFF,ZGP_DIF,ZGM_DIF)
@@ -167,7 +167,7 @@ END DO
 !
 !3.3 Compute the matrix and vectors
  CALL TWO_STREAM_MATRIX(ZSNOWALBEDO,ZALB,ZKESTAR,ZDTAUSTAR,INLVLS_EFF,IMAX_EFF,ZDM,ZD,ZDP)
- CALL TWO_STREAM_VECTOR(ZSNOWALBEDO,ZALB,ZDTAUSTAR,ZTAUSTAR,ZGM_DIR,ZGP_DIR,PCOSZEN,INLVLS_EFF,IMAX_EFF,ZVECTOR_DIR)
+ CALL TWO_STREAM_VECTOR(ZSNOWALBEDO,ZALB,ZDTAUSTAR,ZTAUSTAR,ZGM_DIR,ZGP_DIR,PCOSNORM,INLVLS_EFF,IMAX_EFF,ZVECTOR_DIR)
  CALL TWO_STREAM_VECTOR(ZSNOWALBEDO,ZALB,ZDTAUSTAR,ZTAUSTAR,ZGM_DIF,ZGP_DIF,ZMUDIFF,INLVLS_EFF,IMAX_EFF,ZVECTOR_DIF)
 !
 ! DO JB=1,NPNBANDS,30
@@ -192,11 +192,11 @@ END DO
 !4 Diagnostics
 !4.1 Albedo
 CALL SNOWPACK_ALBEDO(ZXC_DIR(:,1,:),ZXC_DIF(:,1,:),ZXD_DIR(:,1,:),ZXD_DIF(:,1,:),  &
-                     ZGP_DIR(:,1,:),ZGP_DIF(:,1,:),PCOSZEN,ZMUDIFF,PSW_RAD_DIR,    &
+                     ZGP_DIR(:,1,:),ZGP_DIF(:,1,:),PCOSNORM,ZMUDIFF,PSW_RAD_DIR,    &
                      PSW_RAD_DIF,PSNOWALB)
 !
 !4.2 Energy profile
- CALL ENERGY_PROFILE(ZXA_DIR,ZXB_DIR,ZXC_DIR,ZXD_DIR,ZKESTAR,ZDTAUSTAR,ZTAUSTAR,ZGM_DIR,ZGP_DIR,PCOSZEN, &
+ CALL ENERGY_PROFILE(ZXA_DIR,ZXB_DIR,ZXC_DIR,ZXD_DIR,ZKESTAR,ZDTAUSTAR,ZTAUSTAR,ZGM_DIR,ZGP_DIR,PCOSNORM, &
                      INLVLS_EFF,IMAX_EFF,ZEPROFILE_DIR)
  CALL ENERGY_PROFILE(ZXA_DIF,ZXB_DIF,ZXC_DIF,ZXD_DIF,ZKESTAR,ZDTAUSTAR,ZTAUSTAR,ZGM_DIF,ZGP_DIF,ZMUDIFF, &
                      INLVLS_EFF,IMAX_EFF,ZEPROFILE_DIF)
@@ -211,7 +211,7 @@ DO JB = 1,NPNBANDS
 END DO
 !
 !4.3 Soil absorption
- CALL SOIL_ABSORPTION(ZXA_DIR,ZXB_DIR,ZKESTAR,ZDTAUSTAR,ZTAUSTAR,ZGM_DIR,PCOSZEN,PALB,INLVLS_EFF,ZSOILABS_DIR)
+ CALL SOIL_ABSORPTION(ZXA_DIR,ZXB_DIR,ZKESTAR,ZDTAUSTAR,ZTAUSTAR,ZGM_DIR,PCOSNORM,PALB,INLVLS_EFF,ZSOILABS_DIR)
  CALL SOIL_ABSORPTION(ZXA_DIF,ZXB_DIF,ZKESTAR,ZDTAUSTAR,ZTAUSTAR,ZGM_DIF,ZMUDIFF,PALB,INLVLS_EFF,ZSOILABS_DIF)
 !
 PSOILENERGY = PSW_RAD_DIR * ZSOILABS_DIR + PSW_RAD_DIF * ZSOILABS_DIF
@@ -765,7 +765,7 @@ END SUBROUTINE ESTIMATE_EFFECTIVE_LAYER_NUMBER
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 !
-SUBROUTINE GP_GM_VECTORS(PSNOWSSALB,PKESTAR,PG_STAR,PSSALB_STAR,PGAMMA1,PGAMMA2,PCOSZEN,PSW_RAD,KNLVLS_EFF,KMAX_EFF,PGP,PGM)
+SUBROUTINE GP_GM_VECTORS(PSNOWSSALB,PKESTAR,PG_STAR,PSSALB_STAR,PGAMMA1,PGAMMA2,PCOSNORM,PSW_RAD,KNLVLS_EFF,KMAX_EFF,PGP,PGM)
 !
 !return GP and GM vectors of equations 40/41 and 46/47
 ! (equations for the downward and upward fluxes in the snowpack for the 2 stream approximation)
@@ -780,7 +780,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN)  :: PG_STAR ! asymmetry factor * (npoints,nla
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PSSALB_STAR
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGAMMA1,PGAMMA2
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSW_RAD ! incident radiation (direct or diffuse) (npoints,nbands)
-REAL, DIMENSION(:), INTENT(IN)      :: PCOSZEN ! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)      :: PCOSNORM ! cosine of normal zenithal solar angle (npoints)
 INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (npoints,nbands)
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PGP !GP vector (npoints,nlayer,nbands)
@@ -806,11 +806,11 @@ DO JB = 1,NPNBANDS
       !
       IF ( PSW_RAD(JJ,JB)>0. .AND. KNLVLS_EFF(JJ,JB)>=JL ) THEN
         !
-        ZGAMMA3 = 0.25 * ( 2. - 3.*PG_STAR(JJ,JL,JB)*PCOSZEN(JJ) ) !doc equation 28
-        ZGAMMA4 = 0.25 * ( 2. + 3.*PG_STAR(JJ,JL,JB)*PCOSZEN(JJ) ) !doc equation 27
-        ZG = PCOSZEN(JJ)**2 * PSSALB_STAR(JJ,JL,JB) / ( (PKESTAR(JJ,JL,JB)*PCOSZEN(JJ))**2 - 1. ) !factor eq 44-45
-        PGP(JJ,JL,JB) = ZG * ( (PGAMMA1(JJ,JL,JB)-1./PCOSZEN(JJ))*ZGAMMA3 + PGAMMA2(JJ,JL,JB)*ZGAMMA4 ) !doc equation 45
-        PGM(JJ,JL,JB) = ZG * ( (PGAMMA1(JJ,JL,JB)+1./PCOSZEN(JJ))*ZGAMMA4 + PGAMMA2(JJ,JL,JB)*ZGAMMA3 ) !doc equation 44
+        ZGAMMA3 = 0.25 * ( 2. - 3.*PG_STAR(JJ,JL,JB)*PCOSNORM(JJ) ) !doc equation 28
+        ZGAMMA4 = 0.25 * ( 2. + 3.*PG_STAR(JJ,JL,JB)*PCOSNORM(JJ) ) !doc equation 27
+        ZG = PCOSNORM(JJ)**2 * PSSALB_STAR(JJ,JL,JB) / ( (PKESTAR(JJ,JL,JB)*PCOSNORM(JJ))**2 - 1. ) !factor eq 44-45
+        PGP(JJ,JL,JB) = ZG * ( (PGAMMA1(JJ,JL,JB)-1./PCOSNORM(JJ))*ZGAMMA3 + PGAMMA2(JJ,JL,JB)*ZGAMMA4 ) !doc equation 45
+        PGM(JJ,JL,JB) = ZG * ( (PGAMMA1(JJ,JL,JB)+1./PCOSNORM(JJ))*ZGAMMA4 + PGAMMA2(JJ,JL,JB)*ZGAMMA3 ) !doc equation 44
         !
       ENDIF
       !
@@ -915,7 +915,7 @@ IF (LHOOK) CALL DR_HOOK('TWO_STREAM_MATRIX',1,ZHOOK_HANDLE)
 END SUBROUTINE TWO_STREAM_MATRIX
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE TWO_STREAM_VECTOR(PSNOWALBEDO,PSOILALBEDO,PDTAUSTAR,PTAUSTAR,PGM,PGP,PCOSZEN,KNLVLS_EFF,KMAX_EFF,PVECTOR)
+SUBROUTINE TWO_STREAM_VECTOR(PSNOWALBEDO,PSOILALBEDO,PDTAUSTAR,PTAUSTAR,PGM,PGP,PCOSNORM,KNLVLS_EFF,KMAX_EFF,PVECTOR)
 !compute the V vector in the system describing the continuity and boundary conditions at one point and one wavelength.
 ! see doc section 1.5
 !
@@ -929,7 +929,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN)  :: PDTAUSTAR    !Optical depth of each layer
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTAUSTAR     !Cumulated optical depth
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGP          !GP vector (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGM !GM vector (npoints,nlayer,nbands)
-REAL, DIMENSION(:), INTENT(IN)      :: PCOSZEN ! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)      :: PCOSNORM ! cosine of normal zenithal solar angle (npoints)
 INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (npoints,nbands)
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PVECTOR !output vector V
@@ -955,7 +955,8 @@ DO JB = 1,NPNBANDS
         ZDGP = PGP(JI,JL+1,JB) - PGP(JI,JL,JB) !doc equation 58
         ZDGM = PGM(JI,JL+1,JB) - PGM(JI,JL,JB) !doc equation 58
         !
-        ZEXP = EXP( -PTAUSTAR(JI,JL,JB)/PCOSZEN(JI) )
+        ZEXP = EXP( -PTAUSTAR(JI,JL,JB)/PCOSNORM(JI) )          
+   
         !see expression doc page 9
         PVECTOR(JI,2*JL,JB)   = ( ZDGM - PSNOWALBEDO(JI,JL+1,JB) * ZDGP ) * ZEXP 
         PVECTOR(JI,2*JL+1,JB) = ( ZDGP - PSNOWALBEDO(JI,JL,JB)   * ZDGM ) * ZEXP 
@@ -964,11 +965,11 @@ DO JB = 1,NPNBANDS
       !
     END DO
     !
-    PVECTOR(JI,2*KNLVLS_EFF(JI,JB),JB) = ( PSOILALBEDO(JI,JB) * &
-                                            ( PGM(JI,KNLVLS_EFF(JI,JB),JB) + PCOSZEN(JI) ) - &
+      PVECTOR(JI,2*KNLVLS_EFF(JI,JB),JB) = ( PSOILALBEDO(JI,JB) * &
+                                            ( PGM(JI,KNLVLS_EFF(JI,JB),JB) + PCOSNORM(JI) ) - &
                                            PGP(JI,KNLVLS_EFF(JI,JB),JB) ) * &
-                                            EXP( -PTAUSTAR(JI,KNLVLS_EFF(JI,JB),JB) / PCOSZEN(JI) )
-    !
+                                            EXP( -PTAUSTAR(JI,KNLVLS_EFF(JI,JB),JB) / PCOSNORM(JI) )         
+        
   END DO
   !
 END DO
@@ -1044,7 +1045,7 @@ END SUBROUTINE SOLVES_TWO_STREAM2
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWPACK_ALBEDO(PXC_DIR,PXC_DIF,PXD_DIR,PXD_DIF,PGP_DIR,PGP_DIF,&
-                           PCOSZEN_DIR,PCOSZEN_DIF,PSW_RAD_DIR,PSW_RAD_DIF,PSNOWALB)
+                           PCOSNORM_DIR,PCOSZEN_DIF,PSW_RAD_DIR,PSW_RAD_DIF,PSNOWALB)
 ! compute the albedo of the snowpack at one wavelength
 !
 USE MODD_CONST_TARTES, ONLY : NPNBANDS
@@ -1053,7 +1054,7 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PXC_DIR,PXC_DIF,PXD_DIR,PXD_DIF ! for first level (npoints*nbands)
 REAL, DIMENSION(:,:), INTENT(IN)  :: PGP_DIR,PGP_DIF ! for first level (npoints*nbands)
-REAL, DIMENSION(:), INTENT(IN)    :: PCOSZEN_DIR,PCOSZEN_DIF  ! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)    :: PCOSNORM_DIR,PCOSZEN_DIF  ! cosine of normal zenithal solar angle (npoints)
 REAL, DIMENSION(:,:), INTENT(IN)  :: PSW_RAD_DIR,PSW_RAD_DIF  ! incident radiation W/m^2 (npoints*nbands)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWALB ! albedo at one wavelength
 !
@@ -1072,7 +1073,7 @@ DO JB = 1,NPNBANDS
   ! Doc equation 66 (separated in direct and diffuse components)
   ZREF_DIR = ( PXC_DIR(:,JB)+PXD_DIR(:,JB)+PGP_DIR(:,JB) ) * PSW_RAD_DIR(:,JB)
   ZREF_DIF = ( PXC_DIF(:,JB)+PXD_DIF(:,JB)+PGP_DIF(:,JB) ) * PSW_RAD_DIF(:,JB) 
-  ZINC = PSW_RAD_DIR(:,JB)*PCOSZEN_DIR + PSW_RAD_DIF(:,JB)*PCOSZEN_DIF
+  ZINC = PSW_RAD_DIR(:,JB)*PCOSNORM_DIR + PSW_RAD_DIF(:,JB)*PCOSZEN_DIF
   WHERE ( ZINC>0. )
     PSNOWALB(:,JB) = (ZREF_DIR+ZREF_DIF) / ZINC
   ELSEWHERE
@@ -1086,7 +1087,7 @@ IF (LHOOK) CALL DR_HOOK('SNOWPACK_ALBEDO',1,ZHOOK_HANDLE)
 END SUBROUTINE SNOWPACK_ALBEDO
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE ENERGY_PROFILE(PXA,PXB,PXC,PXD,PKESTAR,PDTAUSTAR,PTAUSTAR,PGM,PGP,PCOSZEN,KNLVLS_EFF,KMAX_EFF,PEPROFILE)
+SUBROUTINE ENERGY_PROFILE(PXA,PXB,PXC,PXD,PKESTAR,PDTAUSTAR,PTAUSTAR,PGM,PGP,PCOSNORM,KNLVLS_EFF,KMAX_EFF,PEPROFILE)
 
     !compute energy absorption for each layer and wavelength
 USE MODD_CONST_TARTES, ONLY : NPNBANDS
@@ -1099,7 +1100,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN)  :: PDTAUSTAR !Optical depth of each layer (n
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTAUSTAR !Cumulated optical depth (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGP !GP vector (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGM !GM vector (npoints,nlayer,nbands)
-REAL, DIMENSION(:), INTENT(IN)      :: PCOSZEN! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)      :: PCOSNORM! cosine of normal zenithal solar angle (npoints)
 INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (npoints,nbands)
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PEPROFILE ! energy absorbed by each layer (W/m^2) npoints,nlayer,nbands)
@@ -1119,12 +1120,12 @@ DO JB = 1,NPNBANDS
     ZSTAR = PKESTAR(JJ,1,JB) * PDTAUSTAR(JJ,1,JB)
     !
     !surface layer doc equation 64
-    PEPROFILE(JJ,1,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
+    PEPROFILE(JJ,1,JB) = ( PCOSNORM(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
                             ( PXC(JJ,1,JB) * EXP(-ZSTAR) + PXD(JJ,1,JB) * EXP(ZSTAR) + &
-                              PGP(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSZEN(JJ)) ) - &
+                              PGP(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSNORM(JJ)) ) - &
                             ( PXA(JJ,1,JB) * EXP(-ZSTAR) + PXB(JJ,1,JB) * EXP(ZSTAR) + &
-                              PGM(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSZEN(JJ)) + &
-                               PCOSZEN(JJ) * EXP( -PTAUSTAR (JJ,1,JB)/PCOSZEN(JJ)) ) 
+                              PGM(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSNORM(JJ)) + &
+                               PCOSNORM(JJ) * EXP( -PTAUSTAR (JJ,1,JB)/PCOSNORM(JJ)) ) 
     !
     !internal layers
     ! 
@@ -1135,7 +1136,7 @@ DO JB = 1,NPNBANDS
       IF ( JL<=KNLVLS_EFF(JJ,JB) ) THEN
         !
         !last factor in equations 62 and 63
-        ZDEXP = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSZEN(JJ) ) - EXP( -PTAUSTAR(JJ,JL-1,JB)/PCOSZEN(JJ) )
+        ZDEXP = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSNORM(JJ) ) - EXP( -PTAUSTAR(JJ,JL-1,JB)/PCOSNORM(JJ) )
         !
         !doc equation 62
         ZFDU = PXC(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
@@ -1143,7 +1144,7 @@ DO JB = 1,NPNBANDS
         !
         !doc equation 63
         ZFDD = PXA(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
-               PXB(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + ( PGM(JJ,JL,JB) + PCOSZEN(JJ) ) * ZDEXP
+               PXB(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + ( PGM(JJ,JL,JB) + PCOSNORM(JJ) ) * ZDEXP
         !      
         PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
         !
@@ -1164,7 +1165,7 @@ IF (LHOOK) CALL DR_HOOK('ENERGY_PROFILE',1,ZHOOK_HANDLE)
 END SUBROUTINE ENERGY_PROFILE
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE SOIL_ABSORPTION(PXA,PXB,PKESTAR,PDTAUSTAR,PTAUSTAR,PGM,PCOSZEN,PALB,KNLVLS_EFF,PSOILENERGY)
+SUBROUTINE SOIL_ABSORPTION(PXA,PXB,PKESTAR,PDTAUSTAR,PTAUSTAR,PGM,PCOSNORM,PALB,KNLVLS_EFF,PSOILENERGY)
 !compute the energy absorbed by the soil at each wavelength
 !
 USE MODD_CONST_TARTES, ONLY : NPNBANDS
@@ -1176,7 +1177,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN)  :: PKESTAR !Asymptotic Flux Extinction Coeff
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PDTAUSTAR !Optical depth of each layer (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTAUSTAR !Cumulated optical depth (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGM !GM vector (npoints,nlayer,nbands)
-REAL, DIMENSION(:), INTENT(IN)      :: PCOSZEN! cosine of zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)      :: PCOSNORM! cosine of normal zenithal solar angle (npoints)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PALB! soil albedo (npoints,nbands)
 INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (npoints,nbands)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSOILENERGY
@@ -1196,8 +1197,8 @@ DO JB=1,NPNBANDS
                                EXP( -PKESTAR(JI,KNLVLS_EFF(JI,JB),JB) * PDTAUSTAR(JI,KNLVLS_EFF(JI,JB),JB) ) + &
                              PXB(JI,KNLVLS_EFF(JI,JB),JB) * &
                                EXP(  PKESTAR(JI,KNLVLS_EFF(JI,JB),JB) * PDTAUSTAR(JI,KNLVLS_EFF(JI,JB),JB) ) + &
-                           ( PGM(JI,KNLVLS_EFF(JI,JB),JB)+PCOSZEN(JI) ) * &
-                               EXP( -PTAUSTAR(JI,KNLVLS_EFF(JI,JB),JB)/PCOSZEN(JI) ) )
+                           ( PGM(JI,KNLVLS_EFF(JI,JB),JB)+PCOSNORM(JI) ) * &
+                               EXP( -PTAUSTAR(JI,KNLVLS_EFF(JI,JB),JB)/PCOSNORM(JI) ) )
     !
   END DO
   !
@@ -1208,24 +1209,32 @@ IF (LHOOK) CALL DR_HOOK('SOIL_ABSORPTION',1,ZHOOK_HANDLE)
 END SUBROUTINE SOIL_ABSORPTION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE SPECTRAL_REPARTITION(PSW_RAD,PCOSZEN,PSW_RAD_DIF,PSW_RAD_DIR,PNIR_ABS,P_DIR_SW, P_SCA_SW, OATMORAD)
+SUBROUTINE SPECTRAL_REPARTITION(PSW_RAD,PCOSZEN,PCOSNORM,PDIRCOSZW,P_DIR_SW, P_SCA_SW,OATMORAD,&
+                                LNODIR,PSW_RAD_DIF,PSW_RAD_DIR,PNIR_ABS)
 
 USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPRATIO_DIR,XPRATIO_DIF,XPCOEFNIR_DIR,XPCOEFNIR_DIF,XP_MUDIFF
 USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM, PPWAVELENGTHS_ATM, PPTEN
 
 IMPLICIT NONE
 
-REAL, DIMENSION(:), INTENT(IN)    :: PSW_RAD ! broadband global incident light (W/m^2) (npoints)
+REAL, DIMENSION(:), INTENT(IN)    :: PSW_RAD ! broadband global incident light (W/m^2) (npoints) not used any more
 REAL, DIMENSION(:), INTENT(IN)    :: PCOSZEN ! cosine of zenithal solar angle (npoints)
-LOGICAL, INTENT(IN) :: OATMORAD ! activate spectral repartition from atmotartes
+REAL, DIMENSION(:), INTENT(IN)    :: PCOSNORM ! cosine of normal zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)     :: PDIRCOSZW ! Cosinus of the angle between the
+!                                                  normal to the surface and the vertica
 REAL, DIMENSION(:,:), INTENT(IN)  :: P_DIR_SW, P_SCA_SW ! spectral repartition of direct and diffuse from atmotartes (npoints, jpnbands_atm)
+LOGICAL, INTENT(IN)               :: OATMORAD ! activate spectral repartition from atmotartes
+LOGICAL, DIMENSION(:) , INTENT(IN):: LNODIR    ! Logical to check if the sun is hiden by the ground (in case of slope simulation)
+! If the sun is above the horizon but hiden by the slope the spectral repartition is 100% diffuse (Tuzet.F)
+! For now LNODIR is applied only if ATMORAD is desactivated
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSW_RAD_DIF ! spectral diffuse incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSW_RAD_DIR ! spectral direct incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(:), INTENT(OUT)   :: PNIR_ABS ! Near infrared radiation (2500-4000 nm) absorbed by snowpack (W/m^2) (npoints)
 
+REAL, DIMENSION(SIZE(PSW_RAD)) :: ZDIFFUSE_PORTION ! portion of the total incoming radiation that is diffuse
+REAL, DIMENSION(SIZE(PSW_RAD)) :: ZSW_RAD_BROADDIR,ZSW_RAD_BROADDIF,ZSW_RAD_TOT ! direct,diffuse and total broadband incident light (W/m^2) (npoints)
 
-REAL, DIMENSION(SIZE(PSW_RAD)) :: ZSW_RAD_BROADDIR,ZSW_RAD_BROADDIF ! direct and diffuse broadband incident light (W/m^2) (npoints)
-INTEGER :: JB !Loop counter
+INTEGER :: JB,JJ !Loop counter
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1233,44 +1242,83 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SPECTRAL_REPARTITION',0,ZHOOK_HANDLE)
 !
 
+! Initialization:
+ZSW_RAD_BROADDIR(:)=0.
+ZSW_RAD_BROADDIF(:)=0.
+
+!
+!If ATMORAD PARAMETERIZATION IS ACTIVATED
 IF (OATMORAD) THEN
 
-DO JB = 1,NPNBANDS
-  PSW_RAD_DIF(:,JB) = P_SCA_SW(:,JB)/ XP_MUDIFF
-  PSW_RAD_DIR(:,JB) = P_DIR_SW(:,JB)/PCOSZEN(:)
-END DO
-PNIR_ABS(:)=0.
-DO JB = NPNBANDS,JPNBANDS_ATM
- PNIR_ABS(:)=PNIR_ABS(:)+P_SCA_SW(:,JB)+P_DIR_SW(:,JB)
-END DO
+  DO JB = 1,NPNBANDS
+    PSW_RAD_DIF(:,JB) = P_SCA_SW(:,JB)/ XP_MUDIFF
+    PSW_RAD_DIR(:,JB) = P_DIR_SW(:,JB)/PCOSZEN(:)
+  END DO
+  PNIR_ABS(:)=0.
+  DO JB = NPNBANDS,JPNBANDS_ATM
+   PNIR_ABS(:)=PNIR_ABS(:)+P_SCA_SW(:,JB)+P_DIR_SW(:,JB)
+  END DO
 
 
-! experience tout en diffus
-!DO JB = 1,NPNBANDS
-!  PSW_RAD_DIF(:,JB) = (P_DIR_SW(:,JB)+P_SCA_SW(:,JB))/XP_MUDIFF
-!  PSW_RAD_DIR(:,JB) = 0.!P_SCA_SW(:,JB)/ XP_MUDIFF
-!END DO
+      ! experience tout en diffus
+      !DO JB = 1,NPNBANDS
+      !  PSW_RAD_DIF(:,JB) = (P_DIR_SW(:,JB)+P_SCA_SW(:,JB))/XP_MUDIFF
+      !  PSW_RAD_DIR(:,JB) = 0.!P_SCA_SW(:,JB)/ XP_MUDIFF
+      !END DO
 
 
-! WRITE(*,*) PCOSZEN
-! WRITE(*,*) PNIR_ABS, "NIR absorbed"
-! WRITE(*,*) SUM(PSW_RAD_DIF,2), "DIFFUS"
-! WRITE(*,*) SUM(PSW_RAD_DIR,2) ,"DIRECT"
+      ! WRITE(*,*) PCOSZEN
+      ! WRITE(*,*) PNIR_ABS, "NIR absorbed"
+      ! WRITE(*,*) SUM(PSW_RAD_DIF,2), "DIFFUS"
+      ! WRITE(*,*) SUM(PSW_RAD_DIR,2) ,"DIRECT"
 
-ELSE
-! Separate broadband global radiation in direct and diffuse (parametrization Marie Dumont)
-! NB : thresold 1. to the factor when zenithal angle close to pi/2
-ZSW_RAD_BROADDIF = MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &
-                             - 3.52421131883*PCOSZEN + 0.0299111951172 ), 1. ) * PSW_RAD
-ZSW_RAD_BROADDIR = PSW_RAD - ZSW_RAD_BROADDIF
+!If ATMORAD PARAMETERIZATION IS NOT ACTIVATED
+ELSE 
 
-! Spectral decomposition
-DO JB = 1,NPNBANDS
-  PSW_RAD_DIF(:,JB) = XPRATIO_DIF(JB) * ZSW_RAD_BROADDIF / XP_MUDIFF
-  PSW_RAD_DIR(:,JB) = XPRATIO_DIR(JB) * ZSW_RAD_BROADDIR / PCOSZEN(:)
-END DO
+  DO JJ= 1,SIZE(ZSW_RAD_TOT)   ! If no direct because of the slope effect, everything is diffuse
+    IF (LNODIR(JJ)) THEN
+      ZSW_RAD_BROADDIR(JJ)=0.   
+      DO JB = 1,NPNBANDS  ! To get back to radiations on a flat area
+        ZSW_RAD_BROADDIF(JJ) = ZSW_RAD_BROADDIF(JJ)+(P_SCA_SW(JJ,JB)*2/(1+PDIRCOSZW(JJ)))            !To have the diffuseradiation on a flat surface
+      ENDDO
+    ELSE
+      DO JB = 1,NPNBANDS  ! To get back to radiations on a flat area
+        ZSW_RAD_BROADDIR(JJ) = ZSW_RAD_BROADDIR(JJ)+(P_DIR_SW(JJ,JB)*PCOSZEN(JJ)/PCOSNORM(JJ))       !To have the direct radiation on a flat surface
+        ZSW_RAD_BROADDIF(JJ) = ZSW_RAD_BROADDIF(JJ)+(P_SCA_SW(JJ,JB)*2/(1+PDIRCOSZW(JJ)))            !To have the diffuseradiation on a flat surface
+      ENDDO
+    ENDIF
+  END DO
+  
+  ZSW_RAD_TOT(:)=ZSW_RAD_BROADDIR(:)+ZSW_RAD_BROADDIF(:)                                !To have the total radiation on a flat surface
 
-PNIR_ABS = ZSW_RAD_BROADDIF*XPCOEFNIR_DIF + ZSW_RAD_BROADDIR*XPCOEFNIR_DIR
+! IF THERE IS NO SEPARATION BETWEEN DIRECT AND DIFFUSE RADIATION IN THE FORCING
+  IF (ZSW_RAD_BROADDIF(1)==0.) THEN 
+    
+    ! Separate broadband global radiation in direct and diffuse (parametrization Marie Dumont)
+    ! NB : thresold 1. to the factor when zenithal angle close to pi/2
+    ZDIFFUSE_PORTION=MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &
+                                 - 3.52421131883*PCOSZEN + 0.0299111951172 ), 1. )
+                                 
+    DO JJ= 1,SIZE(ZSW_RAD_TOT)   ! If no direct because of the slope effect, everything is diffuse
+      IF (LNODIR(JJ)) THEN                    
+        ZDIFFUSE_PORTION(JJ)=1.
+      ENDIF
+    ENDDO              
+          
+    ZSW_RAD_BROADDIF = ZDIFFUSE_PORTION * ZSW_RAD_TOT
+    ZSW_RAD_BROADDIR = ZSW_RAD_TOT - ZSW_RAD_BROADDIF
+
+  ENDIF
+  ! Spectral decomposition    If the direct and diffuse are separated in the forcing we use this direct/diffuse repartition
+  ! and we do the recorrection for the slope effect.
+  ! In this case we do an uncorrection and a recorrection which is neutral but it's easier to understand.
+
+    DO JB = 1,NPNBANDS
+      PSW_RAD_DIF(:,JB) = XPRATIO_DIF(JB) * ZSW_RAD_BROADDIF *(1+PDIRCOSZW(:) /(2* XP_MUDIFF))
+      PSW_RAD_DIR(:,JB) = XPRATIO_DIR(JB) * ZSW_RAD_BROADDIR / PCOSZEN (:)
+    END DO
+    
+  PNIR_ABS = ZSW_RAD_BROADDIF*XPCOEFNIR_DIF + ZSW_RAD_BROADDIR*XPCOEFNIR_DIR
 
 
 ENDIF 
@@ -1283,10 +1331,10 @@ END SUBROUTINE SPECTRAL_REPARTITION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
-                          PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
+                          PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_NORM,PDIRCOSZW,KNLVLS_USE,      &
                           PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW, PSNOWALB_SP,&
                           PSPEC_DIR, PSPEC_DIF,OATMORAD)
-!
+
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
 !
@@ -1310,6 +1358,7 @@ REAL, DIMENSION(:), INTENT(IN)     :: PALB ! soil/vegetation albedo (npoints)
 REAL, DIMENSION(:), INTENT(IN)     :: PSW_RAD ! global broadband incident light (W/m^2) (npoints)
 REAL, DIMENSION(:,:), INTENT(IN)   :: P_DIR_SW, P_SCA_SW ! diffuse and direct spectral irradiance (npoints, jpnbands_atm)
 REAL, DIMENSION(:), INTENT(IN)     :: PZENITH ! zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)     :: PANGL_NORM  ! normal solar angle (npoints),angle between the sun and the normal to the ground(taking slope effects into account)
 !
 INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow layers (npoints)
 !
@@ -1323,7 +1372,8 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_DIR, PSPEC_DIF
 LOGICAL, INTENT(IN) :: ODEBUG ! Print for debugging
 LOGICAL, INTENT(IN) :: OATMORAD ! activate atmotartes scheme
 CHARACTER(3), INTENT(IN)          :: HSNOWMETAMO ! metamorphism scheme
-!
+REAL, DIMENSION(:), INTENT(IN)     :: PDIRCOSZW ! Cosinus of the angle between the
+!                                                  normal to the surface and the vertical
 !packed variables
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY_P !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT_P !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
@@ -1341,6 +1391,9 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZRADSINK_P
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZALB_P ! soil/vegetation albedo (npoints)
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSW_RAD_P ! global broadband incident light (W/m^2) (npoints)
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZZENITH_P ! zenithal solar angle (npoints)
+REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZANGLNORM_P ! normal solar angle (npoints),angle between the sun and the normal to the ground(taking slope effects into account)
+REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZDIRCOSZW ! Cosinus of the angle between the
+!                                                  normal to the surface and the vertical
 !
 !Same outputs as SNOWCRORAD and SNOWCROALB
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZRADXS_P
@@ -1389,7 +1442,9 @@ IF ( IPOINTDAY>=1 ) THEN
     ZALB_P      (JJ_P) = PALB      (JJ)
     ZSW_RAD_P   (JJ_P) = PSW_RAD   (JJ)
     ZZENITH_P   (JJ_P) = PZENITH   (JJ)
+    ZANGLNORM_P (JJ_P) = PANGL_NORM(JJ)
     INLVLS_USE_P(JJ_P) = KNLVLS_USE(JJ)
+    ZDIRCOSZW   (JJ_P) = PDIRCOSZW(JJ)
     !
   END DO
   !
@@ -1433,6 +1488,7 @@ IF ( IPOINTDAY>=1 ) THEN
     !
   END DO
   !
+
 !RJ: fix fp-invalid(nan) trapping in ISBA_DIF8_SN3L_NIT_SNCRO8_C13_SNOWRAD_TAR, ISBA_DIF8_SN3L_NIT_SNCRO8_C13_SNOWRAD_TA2 tests
 #ifdef RJ_OFIX
 !RJ: temp fix to avoid accessing uninited values (NANS) in mode_tartes.F90 by explicit inited shape, no inpact for results, problem in array padding
@@ -1443,7 +1499,8 @@ IF ( IPOINTDAY>=1 ) THEN
                            ZSNOWIMP_DENSITY_P(1:IPOINTDAY,1:IMAX_USE,1:NIMPUR),                       &
                            ZSNOWIMP_CONTENT_P(1:IPOINTDAY,1:IMAX_USE,1:NIMPUR),                       &
                            ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),                                &
-                           ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),  & 
+                           ZZENITH_P(1:IPOINTDAY),ZANGLNORM_P(1:IPOINTDAY),ZDIRCOSZW(1:IPOINTDAY),    &
+                           INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),  & 
                            ZRADSINK_P(1:IPOINTDAY,1:IMAX_USE),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO,&
                            P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
                            PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:),OATMORAD)
@@ -1452,9 +1509,9 @@ IF ( IPOINTDAY>=1 ) THEN
                            ZSNOWDZ_P(1:IPOINTDAY,:),ZSNOWG0_P(1:IPOINTDAY,:),ZSNOWY0_P(1:IPOINTDAY,:),            &
                            ZSNOWW0_P(1:IPOINTDAY,:),ZSNOWB0_P(1:IPOINTDAY,:),ZSNOWIMP_DENSITY_P(1:IPOINTDAY,:,:), &
                            ZSNOWIMP_CONTENT_P(1:IPOINTDAY,:,:),ZALB_P(1:IPOINTDAY),ZSW_RAD_P(1:IPOINTDAY),        &
-                           ZZENITH_P(1:IPOINTDAY),INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),              &
-                           ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),ODEBUG,HSNOWMETAMO,&
-                           P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
+                           ZZENITH_P(1:IPOINTDAY),ZANGLNORM_P(1:IPOINTDAY),ZDIRCOSZW(1:IPOINTDAY),&
+                           INLVLS_USE_P(1:IPOINTDAY),ZSNOWALB_P(1:IPOINTDAY),ZRADSINK_P(1:IPOINTDAY,:),ZRADXS_P(1:IPOINTDAY),&
+                           ODEBUG,HSNOWMETAMO,P_DIR_SW(1:IPOINTDAY,:), P_SCA_SW(1:IPOINTDAY,:),PSNOWALB_SP(1:IPOINTDAY,:),&
                              PSPEC_DIR(1:IPOINTDAY,:), PSPEC_DIF(1:IPOINTDAY,:),OATMORAD)
 #endif
   !
@@ -1492,7 +1549,7 @@ END SUBROUTINE SNOWCRO_TARTES
 !--------------------------------------------------------------------------------
 
 SUBROUTINE SNOWCRO_CALL_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
-                               PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,KNLVLS_USE,      &
+                               PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_NORM,PDIRCOSZW, KNLVLS_USE,  &
                                PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW,PALB_SP,&
                                PSPEC_DIR,PSPEC_DIF,OATMORAD)
 !
@@ -1500,9 +1557,12 @@ SUBROUTINE SNOWCRO_CALL_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PS
 ! M. Lafaysse 26/08/2013
 !
 USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XP_MUDIFF
+USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM
 USE MODD_CSTS, ONLY : XRHOLI,XPI
 !
 USE MODE_SNOW3L, ONLY : GET_DIAM
+!
+USE MODD_SNOW_METAMO,  ONLY : XUEPSI
 !
 IMPLICIT NONE
 
@@ -1521,6 +1581,10 @@ REAL, DIMENSION(:), INTENT(IN)     :: PALB ! soil/vegetation albedo (npoints)
 REAL, DIMENSION(:), INTENT(IN)     :: PSW_RAD ! global broadband incident light (W/m^2) (npoints)
 REAL, DIMENSION(:,:), INTENT(IN)   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral reparation from atmotartes	
 REAL, DIMENSION(:), INTENT(IN)     :: PZENITH ! zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)     :: PANGL_NORM  ! normal solar angle (npoints),angle between the sun and the normal to the ground(taking slope effects into account)
+REAL, DIMENSION(:), INTENT(IN)     :: PDIRCOSZW ! Cosinus of the angle between the
+!                                                  normal to the surface and the vertical
+
 !
 INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow layers (npoints)
 !
@@ -1541,6 +1605,8 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NPNBANDS) :: ZSNOWENERGY !(npo
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWSSA !snow specific surface area (m^2/kg) (npoints,nlayer) 
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWENERGY_BB ! (W/m^2) (npoints,nlayers)
 !
+!REAL, DIMENSION(SIZE(PSNOWRHO,1),JPNBANDS_ATM) :: Z_DIR_SW ! direct spectral reparation from atmotartes, forced to 0 is the slope does not see the sun	
+!
 REAL, DIMENSION(SIZE(PSNOWRHO,1),NPNBANDS) :: ZSW_RAD_DIF ! spectral diffuse incident light (W/m^2) (npoints,nbands)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),NPNBANDS) :: ZSW_RAD_DIR ! spectral direct incident light (W/m^2) (npoints,nbands)
 !
@@ -1557,6 +1623,9 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZREFLECTED_BB ! (W/m^2) (npoints)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZSNOWENERGY_CUM,ZSNOWENERGY_UPPER ! Cumulated absorbed energy for 1 wavelength W/m^2 (npoints)
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZMAX ! maximum available energy for 1 wavelength  W/m^2 (npoints,nbands)
+!
+LOGICAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZL_NODIR ! Logical to check if the sun is hiden by the ground (in case of slope simulation)
+! If the sun is above the horizon but hiden by the slope the spectral repartition is 100% diffuse
 !
 REAL :: ZDIAM !optical diameter
 !
@@ -1588,9 +1657,20 @@ DO JB = 1,NPNBANDS
   ZALB(:,JB) = PALB(:)
 END DO
 !
+! If the sun is hidden by the slope, there is no direct radiation 
+
+ZL_NODIR(:)=.FALSE.
+DO JJ = 1,SIZE(PSNOWRHO,1)
+  IF (COS(PANGL_NORM(JJ))<XUEPSI) THEN
+    ZL_NODIR(JJ)=.TRUE.
+  ENDIF
+ENDDO
+
 !Spectral repartition of radiation
- CALL SPECTRAL_REPARTITION(PSW_RAD,COS(PZENITH),ZSW_RAD_DIF,ZSW_RAD_DIR,ZNIR_ABS,P_DIR_SW, P_SCA_SW, OATMORAD)
-!
+ CALL SPECTRAL_REPARTITION(PSW_RAD,COS(PZENITH),MAX(COS(PANGL_NORM),XUEPSI),PDIRCOSZW,P_DIR_SW, &
+ P_SCA_SW, OATMORAD,ZL_NODIR,ZSW_RAD_DIF,ZSW_RAD_DIR,ZNIR_ABS)
+
+
 IF ( ODEBUG ) THEN
   WRITE(*,*) "ZSW_RAD_DIF=",ZSW_RAD_DIF
   WRITE(*,*) "ZSW_RAD_DIR=",ZSW_RAD_DIR
@@ -1602,7 +1682,7 @@ IF (.NOT.OATMORAD) THEN
 PSPEC_DIF(:,:)=0.
 PSPEC_DIR(:,:)=0.
 DO JJ=1,NPNBANDS
-PSPEC_DIR(:,JJ)=ZSW_RAD_DIR(:,JJ)*COS(PZENITH)
+PSPEC_DIR(:,JJ)=ZSW_RAD_DIR(:,JJ)*PANGL_NORM
 PSPEC_DIF(:,JJ)=ZSW_RAD_DIF(:,JJ)*XP_MUDIFF
 ENDDO
 ELSE 
@@ -1615,8 +1695,13 @@ ENDIF
 !Call tartes model
 ! For test and debugging this routine can be called independently by a python interface   
 !
- CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,ZALB,&
-             ZSW_RAD_DIF,ZSW_RAD_DIR,COS(PZENITH),KNLVLS_USE,ZSNOWALB,ZSNOWENERGY,ZSOILENERGY)
+
+
+! The cosinus of the normal angle has to be positive so that TARTES can run. if it is not there is no direct light and the zenithal angle won't be
+! usefull for the computation, hence the threshold value of XUEPSI
+CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,ZALB,&
+             ZSW_RAD_DIF,ZSW_RAD_DIR,MAX(COS(PANGL_NORM),XUEPSI),KNLVLS_USE,ZSNOWALB,ZSNOWENERGY,ZSOILENERGY)
+
 ! 
     ! Modif ML : in some cases, Tartes is unstable in infra-red wavelengths : control of energy values and apply threshold if necessary
     ! --------------------------------------------------------------------------------------------------------------------

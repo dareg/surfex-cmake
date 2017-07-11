@@ -15,7 +15,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSNOWSFCH,              &
                          PDELHEATN, PDELHEATN_SFC,                                           &
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
-                         PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
+                         PSNOWHMASS, PRI, PZENITH, PAZIM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
                          HSNOWMETAMO, HSNOWRAD,OATMORAD,OSNOWSYTRON,                         &
                          HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,KTAB_SYT,PSYTMASS,       &
@@ -311,6 +311,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PQS
 ! ajout_EB pour prendre en compte angle zenithal du soleil dans LRAD
 ! puis plus tard dans LALB
 REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
+REAL, DIMENSION(:), INTENT(IN)      :: PAZIM     ! solar azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:), INTENT(IN)      :: PLAT
 REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
@@ -378,6 +379,12 @@ REAL, DIMENSION(SIZE(PTA))          :: ZBLOWSNW_ACC
 !                                      ZBLOWSNW_ACC  = minimum equivalent snow depth
 !                                                      for deposition of blown snow particles
 !                                                      during the current time step (m)
+REAL, DIMENSION(SIZE(PTA))          :: ZANGLE_SLOP
+!                                      ZANGLE_NORM  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
+
+REAL, DIMENSION(SIZE(PTA))          :: ZANGLE_NORM
+!                                      ZANGLE_NORM  = angle between the normal to the ground and the sun (=zenith if flat simulation)
+                                      !  used only in TARTES for now
 !
 !*      0.3    declarations of packed  variables
 !
@@ -434,6 +441,12 @@ PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
+ZANGLE_SLOP(:) =0.0
+ZANGLE_NORM(:) =PZENITH(:)
+!PRINT *,"ANG" ,"NORD :",PDIRCOSZW(1), "SUD:",PDIRCOSZW(4)
+!PRINT *, "DIR","NORD :",PSLOPEDIR(1), "SUD:",PSLOPEDIR(4)
+!PRINT *, "azim","NORD :",PAZIM(1)
+
 !
 INLVLS          = SIZE(PSNOWSWE(:,:),2)                         
 INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
@@ -479,8 +492,12 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZRRSNOW(JJ)        = PPSN(JJ)*PRR(JJ)
       PRRSFC(JJ)         = PRR(JJ) - ZRRSNOW(JJ)
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
+      ZANGLE_SLOP(JJ) =ACOS(PDIRCOSZW(JJ))    ! Compute the angle of the slope 
+      ZANGLE_NORM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ZANGLE_SLOP(JJ)))+ &
+      (SIN(PZENITH(JJ))*SIN(ZANGLE_SLOP(JJ)*COS(PAZIM(JJ)-(PSLOPEDIR(JJ)*XPI/180))))) !Compute the normal zenithal angle     
    ENDDO
 !
+!PRINT*,"zangle",ZANGLE_NORM(:)
    IF(HISBA == 'DIF')THEN
       ZSOILCOND(:)   = PSOILCONDZ(:)
    ELSE
@@ -796,6 +813,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_PET_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEQ_A_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEQ_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_ZENITH
+REAL, DIMENSION(KSIZE1)        :: ZP_ANGLE_NORM    ! Angle entre le soleil et la normal au sol et le soleil (=zenith sans pente au sol) utilisé dans TARTES
 REAL, DIMENSION(KSIZE1)        :: ZP_LAT,ZP_LON
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN_INV
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN
@@ -960,6 +978,7 @@ DO JJ=1,KSIZE1
    ZP_LAT  (JJ)      = PLAT(JI)
    ZP_LON  (JJ)      = PLON(JI)
    ZP_ZENITH(JJ)     = PZENITH  (JI)
+   ZP_ANGLE_NORM(JJ)     = ZANGLE_NORM  (JI)
 !
    ZP_GRNDFLUX    (JJ) = PGRNDFLUX    (JI)
    ZP_RNSNOW      (JJ) = PRNSNOW      (JI)
@@ -1032,6 +1051,9 @@ ENDIF
 ! Call ISBA-SNOW3L model:  
 !  
 IF (HSNOW_ISBA=='CRO') THEN 
+
+!PRINT *, "NORD"," ZEN :",ZP_ZENITH(1), "NORM:",ZP_ANGLE_NORM(1) 
+!PRINT *, "SUD"," ZEN :",ZP_ZENITH(5), "NORM:",ZP_ANGLE_NORM(5) 
   
    CALL SNOWCRO(HSNOWRES, TPTIME, OMEB, OGLACIER, HIMPLICIT_WIND,          &
              ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
@@ -1049,6 +1071,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
+             ZP_ANGLE_NORM,                                                &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,&
              PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY,                       &

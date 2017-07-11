@@ -363,6 +363,9 @@ TYPE (DATE_TIME),   DIMENSION(0) :: TPREAP ! reaping date
 !
 INTEGER                    :: ILU
 !
+REAL, DIMENSION(SIZE(PPS)) :: ZP_ANGL_NORM   ! angle between the normal to the surface and the sun used in snowcro$
+!
+
 LOGICAL :: GAGRI_TO_GRASS
 !
 !Snow options
@@ -493,7 +496,7 @@ ZP_SCA_SW=XUNDEF
           YSNOWMETAMO,YSNOWRAD,GATMORAD,GSNOWSYTRON, YSNOWFALL, YSNOWCOND, YSNOWHOLD, YSNOWCOMP, & 
           TVG%XCGMAX, PZREF, PUREF, ZDIRCOSZW, ZSLOPEDIR, PTA,         &
           PQA, PEXNA, PRHOA, PPS, PEXNS,  PRR, PSR, PZENITH,    &
-          ZP_MEB_SCA_SW,                                           &
+          ZP_ANGL_NORM, ZP_MEB_SCA_SW,                                           &
           PSW, PLW, PVMOD, ZWINDDIR, PPEW_A_COEF,                     &
           PPEW_B_COEF, PPET_A_COEF,                                   &
           PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, GRM%TGRP%XRSMIN, GRM%TGRP%XRGL, GRM%TGRP%XGAMMA,&
