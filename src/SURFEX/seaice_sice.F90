@@ -1,0 +1,1017 @@
+MODULE ICE_SICE
+USE ABSTRACT_ICE
+USE MODE_SEAICE_SICE
+USE MODE_SEAICE_SICE_SNOW
+USE MODD_SURF_PAR, ONLY: XUNDEF
+USE YOMHOOK,       ONLY: LHOOK, DR_HOOK
+USE PARKIND1,      ONLY: JPRB
+IMPLICIT NONE
+
+TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: SICE_t
+  PRIVATE
+    TYPE(SICE_CONFIG_t) :: CONFIG
+    TYPE(SICE_SNOW_t), POINTER :: SNOW
+
+    INTEGER :: NUM_LAYERS !< Number of ice layers
+    INTEGER :: NUM_POINTS !< Size of the SEA tile
+    REAL :: XICE_THICKNESS !< Initial sea ice thickness [m]
+
+    REAL, POINTER :: Z(:,:) !< Depth of lower boundary for each vertical layer. [m]
+    REAL, POINTER :: DZ(:,:) !< Thickness of each layer. [m]
+    REAL, POINTER :: Z_DIFF(:,:) !< Distance between two layers. [m]
+    REAL, POINTER :: T(:,:) !< Mean temperature of ice layers. [K]
+
+    REAL, POINTER :: SHAPE(:) !< Ice shape function
+    REAL, POINTER :: AGE(:) !< Ice age [s]
+
+    REAL, POINTER :: XTICE(:)
+    REAL, POINTER :: XSIC(:)
+    REAL, POINTER :: XICE_ALB(:)
+
+    ! Part of input data are copied during COUPLING_ICEFLUX call
+    REAL, POINTER :: XCH(:)
+    REAL, POINTER :: XRHOA(:)
+    REAL, POINTER :: XWIND(:)
+    REAL, POINTER :: XPS(:)
+    REAL, POINTER :: XEXNA(:)
+    REAL, POINTER :: XEXNS(:)
+    REAL, POINTER :: PTA(:)
+    REAL, POINTER :: PQA(:)
+    REAL, POINTER :: PZREF(:)
+    REAL, POINTER :: PUREF(:)
+
+    TYPE( MODEL_FIELD ), ALLOCATABLE :: MF(:)
+  CONTAINS
+    PROCEDURE :: INIT
+    PROCEDURE :: PREP
+    PROCEDURE :: ASSIM
+    PROCEDURE :: RUN
+    PROCEDURE :: DEALLOC
+
+    PROCEDURE :: READSURF
+    PROCEDURE :: WRITESURF
+    PROCEDURE :: WRITE_DIAG
+
+    PROCEDURE :: GET_RESPONSE
+    PROCEDURE, PASS :: COUPLING_ICEFLUX => COUPLING_ICEFLUX_SICE
+
+    PROCEDURE, PRIVATE, PASS :: GET_MODEL_FIELDS
+    PROCEDURE, PRIVATE, PASS :: ALLOCA
+    PROCEDURE, PRIVATE, PASS :: REGRID
+    PROCEDURE, PRIVATE, PASS :: RUN_INTERNAL
+    PROCEDURE, PRIVATE, PASS :: GROWTH
+    PROCEDURE, PRIVATE, PASS :: COMPUTE_SHAPE
+
+    PROCEDURE, PRIVATE, NOPASS :: IO
+END TYPE SICE_t
+
+CONTAINS
+
+SUBROUTINE INIT(THIS, HPROGRAM)
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM
+
+  THIS%NUM_LAYERS = 4 ! Hard-coded default value
+  THIS%XICE_THICKNESS = 1.0
+
+  THIS%CONFIG = READ_SICE_CONFIG(HPROGRAM)
+
+  IF(THIS%CONFIG%LICE_HAS_SNOW) THEN
+    ALLOCATE(THIS%SNOW)
+    CALL THIS%SNOW%INIT(HPROGRAM)
+  ELSE
+    NULLIFY(THIS%SNOW)
+  ENDIF
+END SUBROUTINE INIT
+
+SUBROUTINE PREP(THIS, KLU, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
+USE MODD_CSTS, ONLY: XTTSI
+USE MODI_GET_LUOUT
+USE MODI_OPEN_NAMELIST
+USE MODI_CLOSE_NAMELIST
+USE MODE_POS_SURF
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  INTEGER, INTENT(IN) :: KLU
+  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  !< program calling surf. schemes
+  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    !< name of the Atmospheric file
+  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE!< type of the Atmospheric file
+  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    !< name of the PGD file
+  CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE!< type of the PGD file
+
+  REAL, ALLOCATABLE :: ZTMP(:)
+
+  INTEGER :: ILUNAM
+  INTEGER :: ILUOUT
+
+  LOGICAL :: GFOUND
+  INTEGER :: JI, IN
+
+  REAL :: XICE_TUNIF
+  LOGICAL :: LINIT_FROM_SST
+  INTEGER :: NUM_LAYERS
+  REAL :: XICE_THICKNESS
+
+  NAMELIST /NAM_PREP_SEAICE_SICE/  &
+    XICE_TUNIF,                 &
+    LINIT_FROM_SST,             &
+    NUM_LAYERS,                 &
+    XICE_THICKNESS
+
+  XICE_TUNIF = XTTSI
+  LINIT_FROM_SST = .FALSE.
+  NUM_LAYERS = THIS%NUM_LAYERS
+  XICE_THICKNESS = THIS%XICE_THICKNESS
+
+  CALL GET_LUOUT(HPROGRAM,ILUOUT)
+
+  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+  CALL POSNAM(ILUNAM,'NAM_PREP_SEAICE_SICE',GFOUND,ILUOUT)
+  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_PREP_SEAICE_SICE)
+  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+
+  THIS%NUM_LAYERS = NUM_LAYERS
+  THIS%NUM_POINTS = KLU
+  THIS%XICE_THICKNESS = XICE_THICKNESS
+
+  IF(THIS%CONFIG%LICE_HAS_SNOW) THEN
+    CALL THIS%SNOW%PREP(KLU, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
+  END IF
+
+  CALL THIS%ALLOCA()
+  IF(.NOT. ALLOCATED(THIS%MF)) THEN
+    CALL THIS%GET_MODEL_FIELDS(THIS%MF)
+  END IF
+
+  CALL THIS%REGRID()
+  FILL_BY_UNIFORM: IF(.NOT. LINIT_FROM_SST) THEN
+    WRITE(ILUOUT, *) 'Filling ice by the uniform prescribed profile...'
+    THIS%T = XICE_TUNIF
+  ELSE FILL_BY_UNIFORM
+    WRITE(ILUOUT, *) 'Filling ice by the SST data...'
+    IN = 0
+    ALLOCATE(ZTMP( THIS%NUM_LAYERS + 2 ))
+    DO JI = 1, THIS%NUM_POINTS
+      IF(THIS%XSST(JI) < XTTSI) THEN
+        CALL LIN_SPACE(THIS%XSST(JI), XTTSI,                               &
+            [THIS%Z(JI,:) - .5*THIS%DZ(JI,:), THIS%Z(JI,THIS%NUM_LAYERS)], &
+            ZTMP(:THIS%NUM_LAYERS + 1))
+        THIS%T(JI,:) = ZTMP(:THIS%NUM_LAYERS)
+        IN = IN + 1
+      END IF
+    END DO
+    DEALLOCATE(ZTMP)
+    WRITE(ILUOUT, *) 'Done for', IN, 'point(s) of', THIS%NUM_POINTS
+  END IF FILL_BY_UNIFORM
+END SUBROUTINE PREP
+
+SUBROUTINE ASSIM(THIS)
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+END SUBROUTINE ASSIM
+
+SUBROUTINE RUN( &
+    THIS, HPROGRAM, PTIMEC, PTSTEP, KSTEP, ESM_CPL, PFSIC, PFSIT, PSI_FLX_DRV, PFREEZING_SST, &
+    PZENITH, PSW_TOT, PLW, &
+    PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF)
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  !< program calling surf. schemes
+  REAL,                INTENT(IN) :: PTIMEC    !< current duration since start of the run (s)
+  REAL,                INTENT(IN) :: PTSTEP    !< surface time-step (s)
+  INTEGER, INTENT(IN) :: KSTEP !< number of ice time steps within a surface time-step
+  TYPE(ESM_CPL_t), INTENT(INOUT) :: ESM_CPL
+  REAL, INTENT(IN) :: PFSIC(:)
+  REAL, INTENT(IN) :: PFSIT(:)
+  REAL, INTENT(IN) :: PSI_FLX_DRV
+  REAL, INTENT(IN) :: PFREEZING_SST
+
+  REAL, INTENT(IN) :: PZENITH(:) !< Zenithal angle at t  (radian from the vertical)
+  REAL, INTENT(IN) :: PSW_TOT(:) !< Shortwave radiation flux at the surface.
+  REAL, INTENT(IN) :: PLW(:) !< Longwave radiation flux at the surface.
+
+  REAL, INTENT(IN) :: PPEW_A_COEF(:) ! implicit coefficients   (m2s/kg)
+  REAL, INTENT(IN) :: PPEW_B_COEF(:) ! needed if HCOUPLING='I' (m/s)
+  REAL, INTENT(IN) :: PPET_A_COEF(:)
+  REAL, INTENT(IN) :: PPEQ_A_COEF(:)
+  REAL, INTENT(IN) :: PPET_B_COEF(:)
+  REAL, INTENT(IN) :: PPEQ_B_COEF(:)
+
+  INTEGER :: IMASK(THIS%NUM_POINTS)
+  INTEGER :: JJ, ISIZE
+
+  IMASK(:) = 0
+  ISIZE = 0
+  DO JJ = 1, THIS%NUM_POINTS
+     IF( THIS%XSIC(JJ)>0. ) THEN
+       ISIZE=ISIZE+1
+       IMASK(ISIZE)=JJ
+     END IF
+  END DO
+
+  IF(ISIZE > 0) THEN
+    CALL PACK_AND_RUN(ISIZE, IMASK)
+  END IF
+  ! Resets input accumulation fields for next step
+  !
+  ESM_CPL%XCPL_SEA_RAIN=0.
+  ESM_CPL%XCPL_SEA_SNOW=0.
+  ESM_CPL%XCPL_SEA_EVAP=0.
+  ESM_CPL%XCPL_SEA_SNET=0.
+  ESM_CPL%XCPL_SEA_HEAT=0.
+  ESM_CPL%XCPL_SEAICE_EVAP=0.
+  ESM_CPL%XCPL_SEAICE_SNET=0.
+  ESM_CPL%XCPL_SEAICE_HEAT=0.
+CONTAINS
+SUBROUTINE PACK_AND_RUN(KSIZE, KMASK)
+IMPLICIT NONE
+  INTEGER, INTENT(IN) :: KSIZE
+  INTEGER, INTENT(IN), DIMENSION(:) :: KMASK
+
+  REAL, DIMENSION(KSIZE), TARGET  ::  &
+      ZEXNA,                          & ! Exner function at atm. level
+      ZRHOA,                          & ! air density                           (kg/m3)
+      ZEXNS,                          & ! Exner function at sea surface
+      ZQA,                            & ! air humidity forcing                  (kg/m3)
+      ZRR,                            & ! liquid precipitation                  (kg/m2/s)
+      ZRS,                            & ! snow precipitation                    (kg/m2/s)
+      ZWIND,                          & ! module of wind at atm. wind level
+      ZPS,                            & ! pressure at atmospheric model surface (Pa)
+      ZSW,                            &
+      ZLW,                            &
+      ZZENITH,                        &
+      ZTA,                            &
+      ZUREF,                          &
+      ZZREF,                          &
+      ZCH,                            &
+      ZPEW_A_COEF,                    &
+      ZPEW_B_COEF,                    &
+      ZPET_A_COEF,                    &
+      ZPET_B_COEF,                    &
+      ZPEQ_A_COEF,                    &
+      ZPEQ_B_COEF
+  TYPE(SEA_ICE_FORCING_t) :: FORC
+
+  ZRR        (:) = ESM_CPL%XCPL_SEA_RAIN( KMASK(:KSIZE) )/PTSTEP
+  ZRS        (:) = ESM_CPL%XCPL_SEA_SNOW( KMASK(:KSIZE) )/PTSTEP
+
+  ZCH        (:) = THIS%XCH   ( KMASK(:KSIZE) )
+  ZRHOA      (:) = THIS%XRHOA ( KMASK(:KSIZE) )
+  ZWIND      (:) = THIS%XWIND ( KMASK(:KSIZE) )
+  ZPS        (:) = THIS%XPS   ( KMASK(:KSIZE) )
+  ZEXNA      (:) = THIS%XEXNA ( KMASK(:KSIZE) )
+  ZEXNS      (:) = THIS%XEXNS ( KMASK(:KSIZE) )
+  ZTA        (:) = THIS%PTA   ( KMASK(:KSIZE) )
+  ZQA        (:) = THIS%PQA   ( KMASK(:KSIZE) )
+  ZZREF      (:) = THIS%PZREF ( KMASK(:KSIZE) )
+  ZUREF      (:) = THIS%PUREF ( KMASK(:KSIZE) )
+
+  ZZENITH    (:) = PZENITH    ( KMASK(:KSIZE) )
+  ZSW        (:) = PSW_TOT    ( KMASK(:KSIZE) )
+  ZLW        (:) = PLW        ( KMASK(:KSIZE) )
+  ZPEW_A_COEF(:) = PPEW_A_COEF( KMASK(:KSIZE) )
+  ZPEW_B_COEF(:) = PPEW_B_COEF( KMASK(:KSIZE) )
+  ZPET_A_COEF(:) = PPET_A_COEF( KMASK(:KSIZE) )
+  ZPET_B_COEF(:) = PPET_B_COEF( KMASK(:KSIZE) )
+  ZPEQ_A_COEF(:) = PPEQ_A_COEF( KMASK(:KSIZE) )
+  ZPEQ_B_COEF(:) = PPEQ_B_COEF( KMASK(:KSIZE) )
+
+  FORC%KSIZE = KSIZE
+
+  FORC%RHOA        => ZRHOA
+  FORC%PSURF       => ZPS
+  FORC%WIND        => ZWIND
+  FORC%SW          => ZSW
+  FORC%LW          => ZLW
+  FORC%PRATE_R     => ZRR
+  FORC%PRATE_S     => ZRS
+  FORC%EXNS        => ZEXNS
+  FORC%EXNA        => ZEXNA
+  FORC%CH          => ZCH
+  FORC%TA          => ZTA
+  FORC%QA          => ZQA
+  FORC%ZREF        => ZZREF
+  FORC%UREF        => ZUREF
+  FORC%ZENITH      => ZZENITH
+
+  FORC%PPEW_A_COEF => ZPEW_A_COEF
+  FORC%PPEW_B_COEF => ZPEW_B_COEF
+  FORC%PPET_A_COEF => ZPET_A_COEF
+  FORC%PPET_B_COEF => ZPET_B_COEF
+  FORC%PPEQ_A_COEF => ZPEQ_A_COEF
+  FORC%PPEQ_B_COEF => ZPEQ_B_COEF
+
+  CALL PACK(THIS%MF, KMASK)
+  CALL THIS%RUN_INTERNAL(HPROGRAM, PTIMEC, PTSTEP, KSTEP, PFREEZING_SST, FORC)
+  CALL UNPACK(THIS%MF, KMASK)
+END SUBROUTINE PACK_AND_RUN
+END SUBROUTINE RUN
+
+SUBROUTINE RUN_INTERNAL(THIS, HPROGRAM, PTIMEC, PTSTEP, KSTEP, PFREEZING_SST, FORC)
+USE MODD_CSTS,     ONLY: XTTSI,   &
+                         XCPD,    &
+                         XSTEFAN, &
+                         XLSTT,   &
+                         XTT,     &
+                         XCL,     &
+                         XRHOLI,  &
+                         XLMTT
+USE MODD_SURF_PAR, ONLY: XUNDEF
+USE MODE_THERMOS,  ONLY: QSATI,    &
+                         DQSATI
+
+USE MODI_SOIL_HEATDIF
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  !< program calling surf. schemes
+  REAL,                INTENT(IN) :: PTIMEC    !< current duration since start of the run (s)
+  REAL,                INTENT(IN) :: PTSTEP    !< surface time-step (s)
+  INTEGER, INTENT(IN) :: KSTEP !< number of ice time steps within a surface time-step
+  REAL, INTENT(IN) :: PFREEZING_SST
+  TYPE(SEA_ICE_FORCING_t), INTENT(IN) :: FORC
+
+  REAL, DIMENSION( FORC%KSIZE ) :: &
+      ZCH,        &
+
+      ZQSAT,      &
+      ZDQSAT,     &
+
+      ZVMOD,      &
+
+      ZCT,        &
+      ZTTSI,      &
+      ZICE_ALBEDO,&
+      ZICE_EMISS, &
+      ZTERM2,     &
+      ZTERM1,     &
+
+      ZALPHA, ZBETA, ZGAMMA_T, ZGAMMA_Q,  &
+      Z_PET_A_SFC, Z_PET_B_SFC,                 &
+      Z_PEQ_A_SFC, Z_PEQ_B_SFC,                 &
+
+      ZTMP, ZTMP2
+  REAL, DIMENSION( FORC%KSIZE, THIS%NUM_LAYERS ) :: &
+      ZICECOND,   &
+      ZICEHCAP,   &
+      ZDQ_DZ,     &
+      ZQ_Z, &
+      ZFLUX_COR, &
+      ZFRZ
+  REAL, DIMENSION( THIS%NUM_LAYERS ) :: &
+      Z_EXT, Z_I0
+  LOGICAL, DIMENSION( FORC%KSIZE ) :: &
+      G_MELT
+
+  INTEGER :: I, N, M
+  LOGICAL :: HAS_SNOW, HAS_SNOW_POINTS( THIS%NUM_POINTS )
+  TYPE(SNOW_RESPONSE_t) :: SNOW_RESP
+  REAL( KIND = JPRB ) :: ZHOOK_HANDLE
+
+
+  IF( LHOOK ) CALL DR_HOOK( 'SIMPLE_ICE:RUN', 0, ZHOOK_HANDLE )
+
+  HAS_SNOW = ASSOCIATED( THIS%SNOW )
+  M = FORC%KSIZE
+  !
+  ZCH(:) = FORC%CH(:)
+  ZVMOD(:) = FORC%WIND(:)
+
+  !-----------------------------------------------------------------------
+  ! Initialization of sea ice temperature in points with new ice
+  IF (THIS%CONFIG%LICE_MASS_BALANCE) THEN
+      ZTERM1 = THIS%Z(:M, THIS%NUM_LAYERS)
+      WHERE(THIS%T( :M, 1 ) == XUNDEF)
+          ZTERM1 = THIS%XICE_THICKNESS
+      END WHERE
+      CALL THIS%REGRID(ZTERM1)
+  ELSE
+      IF(ANY( THIS%T( :M, 1 ) == XUNDEF )) CALL THIS%REGRID()
+  END IF
+  DO I = 1, M
+      IF( THIS%T( I, 1 ) == XUNDEF ) THEN
+          THIS%T(I, :) = XTTSI
+      END IF
+  END DO
+  !-----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+  ! Saturated specified humidity near the ice surface
+  ZQSAT  = QSATI ( THIS%T(:M,1), FORC%PSURF        )
+  ZDQSAT = DQSATI( THIS%T(:M,1), FORC%PSURF, ZQSAT )
+  !-----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------
+  ! Ice temperature evolution
+  !Parametrization
+  CALL THERMAL_PROPERTIES( THIS%T(:M,:), 3., ZICEHCAP(:,:), ZICECOND(:,:), ZFRZ(:,:) )
+
+
+  ZCT = 1./(ZICEHCAP( :, 1 )*THIS%Z(:M,1))
+
+  !   Deep temperature for lower boundary condition
+  ZTTSI(:) = PFREEZING_SST + XTT
+
+  !   Parametrization of ice albedo -- one of hightsi's albedo
+  !   parametrization pack.
+  ZICE_ALBEDO = ICE_ALBEDO( THIS%T(:M,1), THIS%CONFIG%NICE_ALBEDO )
+  ZICE_EMISS  = .99
+
+  DO I = 1, M
+      WHERE( THIS%Z(I,:) <= 0.1 )
+          Z_EXT = 17.0
+          Z_I0  = 1.0
+      ELSEWHERE
+          Z_EXT = 1.5
+          Z_I0  = 0.18
+      END WHERE
+      ZQ_Z  (I,:) = ( 1. - ZICE_ALBEDO(I) )*FORC%SW(I)*Z_I0(:)*EXP(-Z_EXT(:)*THIS%Z(I,:))
+      ZDQ_DZ(I,:) = ZQ_Z  (I,:)*Z_EXT(:)
+  END DO
+
+  ZDQ_DZ(:M, 1) = ( 1. - ZICE_ALBEDO(I) )*FORC%SW(I) - ZQ_Z(:M, 1)
+  DO I = 2, THIS%NUM_LAYERS
+      ZDQ_DZ(:M, I) = ZQ_Z(:M, I - 1) - ZQ_Z(:M, I)
+  END DO
+
+  IF( HAS_SNOW ) THEN
+      HAS_SNOW_POINTS = THIS%SNOW%EXISTS()
+      CALL THIS%SNOW%RUN( PTSTEP, FORC, THIS%T(:M,1), THIS%Z(:M,1), ZICECOND(:,1), ZICE_ALBEDO)
+      CALL THIS%SNOW%GET_RESPONSE( M, SNOW_RESP )
+  ELSE
+      HAS_SNOW_POINTS = .FALSE.
+  END IF
+  !coefficients for implicit coupling
+  ZTMP = (1. - FORC%PPET_A_COEF*FORC%RHOA*ZCH*ZVMOD)
+
+  Z_PET_A_SFC = -FORC%PPET_A_COEF*FORC%RHOA*ZCH*ZVMOD*(FORC%EXNA/FORC%EXNS)/ZTMP
+  Z_PET_B_SFC = FORC%PPET_B_COEF*FORC%EXNA/ZTMP
+
+  ZTMP = 1. - FORC%PPEQ_A_COEF*FORC%RHOA*ZCH*ZVMOD
+
+  Z_PEQ_A_SFC = - FORC%PPEQ_A_COEF*FORC%RHOA*ZCH*ZVMOD*ZDQSAT/ZTMP
+  Z_PEQ_B_SFC = (FORC%PPEQ_B_COEF - FORC%PPEQ_A_COEF*FORC%RHOA*ZCH*ZVMOD*( ZQSAT - ZDQSAT*THIS%T(:M,1) ) )/ZTMP
+
+
+  WHERE( HAS_SNOW_POINTS(:M) )
+    ZALPHA = 1 + PTSTEP*ZCT*(XCL*SNOW_RESP%WATER_FLUX(:M) + ZICECOND(:,1)/THIS%Z_DIFF( :M, 1))
+    ZBETA = PTSTEP*ZCT*ZICECOND(:,1)/THIS%Z_DIFF( :M, 1)
+    ZTERM2 = ZBETA/ZALPHA
+    ZTERM1 = (THIS%T(:M,1) + PTSTEP*ZCT*(SNOW_RESP%HEAT_FLUX(:M) + XCL*XTT*SNOW_RESP%WATER_FLUX(:M)))/ZALPHA
+  ELSEWHERE
+    !surface energy balance
+    ZALPHA =                                                           &
+                1./(PTSTEP*ZCT)                                     &
+              + 4.*ZICE_EMISS*XSTEFAN*THIS%T(:M,1)**3                    &
+              + FORC%RHOA*XCPD*ZCH*ZVMOD/FORC%EXNS                    &
+              + XLSTT*FORC%RHOA*ZCH*ZVMOD*ZDQSAT                     &
+              + ZICECOND(:,1)/THIS%Z_DIFF(:M,1)
+
+    ZBETA  =                                                           &
+                1./(PTSTEP*ZCT)*THIS%T(:M,1)                         &
+              + ( 1. - ZICE_ALBEDO )*FORC%SW - ZQ_Z(:,1)               &
+              + FORC%LW                                                 &
+              + 3.*ZICE_EMISS*XSTEFAN*THIS%T(:M,1)**4                    &
+              - XLSTT*FORC%RHOA*ZCH*ZVMOD*( ZQSAT - ZDQSAT*THIS%T(:M,1) )
+
+    ZGAMMA_T = FORC%RHOA*XCPD*ZCH*ZVMOD/FORC%EXNA
+    ZGAMMA_Q = FORC%RHOA*XLSTT*ZCH*ZVMOD
+
+    ZTMP = ZALPHA - ZGAMMA_T*Z_PET_A_SFC - ZGAMMA_Q*Z_PEQ_A_SFC
+
+    ZTERM1 = (ZBETA + ZGAMMA_T*Z_PET_B_SFC + ZGAMMA_Q*Z_PEQ_B_SFC)/ZTMP
+    ZTERM2 = ZICECOND(:,1)/THIS%Z_DIFF(:M,1)/ZTMP
+  END WHERE
+
+
+  !correction flux
+  ZFLUX_COR = 0.
+  DO I = 1, M
+      IF(.NOT. HAS_SNOW_POINTS(I)) ZFLUX_COR(I,:) = ZDQ_DZ(I,:) !*THIS%DZ(I,:)
+  END DO
+
+  ZTMP = 0.
+  ZTMP2 = 0.
+
+  CALL SOIL_HEATDIF(PTSTEP,THIS%DZ(:M,:),THIS%Z_DIFF(:M,:),ZICECOND,      &
+                    ZICEHCAP,ZCT,ZTERM1,ZTERM2,ZTMP,ZTTSI,THIS%T(:M,:), ZTMP2, PFLUX_COR = ZFLUX_COR )
+
+  WHERE(THIS%T(:M,1) > ZFRZ(:,1))
+      G_MELT(:) = .TRUE.
+  ELSE WHERE
+      G_MELT(:) = .FALSE.
+  END WHERE
+
+  IF(THIS%CONFIG%LICE_MASS_BALANCE) THEN
+    IF(HAS_SNOW) THEN
+        !ZTERM1 = THIS%Z(:M, THIS%NUM_LAYERS) + SNOW_RESP%WATER_FLUX(:)*PTSTEP/917.0
+        !CALL THIS%REGRID(ZTERM1)
+    ENDIF
+    WHERE(G_MELT)
+      THIS%T(:M,1) = ZFRZ(:,1)
+      WHERE(HAS_SNOW_POINTS(:M))
+        ZTERM1 = SNOW_RESP%HEAT_FLUX &
+            - ZICECOND(:,1)*(THIS%T(:M,1) - THIS%T(:M,2))/THIS%Z_DIFF(:M,1)
+      ELSE WHERE
+        ZTERM1 = ( 1. - ZICE_ALBEDO )*FORC%SW - ZQ_Z(:,1) &
+            + FORC%LW - ZICE_EMISS*XSTEFAN*THIS%T(:M,1)**4 &
+            - ZGAMMA_Q*(ZQSAT(:) - Z_PEQ_A_SFC *THIS%T(:M,1) - Z_PEQ_B_SFC) &
+            - ZGAMMA_T*((1. -      Z_PET_A_SFC)*THIS%T(:M,1) - Z_PET_B_SFC) &
+            - ZICECOND(:,1)*(THIS%T(:M,1) - THIS%T(:M,2))/THIS%Z_DIFF(:M,1)
+      END WHERE
+    ELSE WHERE
+      ZTERM1 = 0.
+    END WHERE
+    ZTERM1 = THIS%Z(:M, THIS%NUM_LAYERS) - ZTERM1*PTSTEP/(XRHOLI*XLMTT)
+
+    WHERE(ZTERM1 < 0.01)
+      ZTERM1 = 0.01
+    END WHERE
+    CALL THIS%REGRID(ZTERM1)
+
+    CALL THIS%GROWTH(M, PTSTEP, ZTTSI, ZICECOND(:, THIS%NUM_LAYERS))
+  ENDIF
+
+  WHERE(THIS%T(:M,:) > ZFRZ(:,:))
+      THIS%T(:M,:) = ZFRZ(:,:)
+  END WHERE
+
+  CALL THIS%COMPUTE_SHAPE()
+
+  WHERE( THIS%AGE(:M) < 365*24*3600 )
+    THIS%AGE(:M) = THIS%AGE(:M) + PTSTEP
+  END WHERE
+  IF( LHOOK ) CALL DR_HOOK( 'SIMPLE_ICE:RUN', 1, ZHOOK_HANDLE )
+CONTAINS
+  ELEMENTAL SUBROUTINE THERMAL_PROPERTIES( PT, PS, PC, PK, PFRZ )
+    USE MODD_CSTS, ONLY: XTT
+    IMPLICIT NONE
+      REAL, INTENT( IN  ) :: PT, PS ! Ice temperature [K] and salinity [ppt]
+      REAL, INTENT( OUT ) :: PC, PK ! Ice heat capacity [J/(m3 K)] and heat thermal conductivity [W/(K m)]
+      REAL, INTENT( OUT ) :: PFRZ ! Freezing remperature of sea ice [K]
+
+      REAL, PARAMETER ::      &
+          PP_CI = 1.883E6,    & ! Volumetric heat capacity of pure ice
+          PP_L  = 3.014E8,    & ! Volumetric heat of fusion of pure ice
+
+          PP_KA = 0.03,       & ! Air heat conductivity
+          PP_VA = 0.025         ! Fractional value of air in sea ice
+
+      REAL ::      &
+          ZTHETA, &  ! p_t in degC
+          ZTFS,   &  ! Freezing temperature of sea ice with bulk salinity p_s
+
+          ZKI,    &  ! Pure ice heat condictivity
+          ZKB,    &  ! Brine heat conductivity
+          ZKBI       ! Heat conductivity of bubbly ice
+
+
+      ZTHETA = PT - XTT
+      ZTFS   = -5.33E-7*PS**3 - 9.37E-6*PS**2 - 0.0592*PS + 273.15
+
+
+      PC     = PP_CI - (ZTFS - XTT)/ZTHETA**2*PP_L
+
+
+      ZKB    = 0.4184*( 1.25 + 0.030  *ZTHETA + 0.00014*ZTHETA**2 )
+      ZKI    = 1.16  *( 1.91 - 8.66E-3*ZTHETA + 2.97E-5*ZTHETA**2 )
+
+      ZKBI   = ( 2.0*ZKI + PP_KA - 2.0*PP_VA*(ZKI-PP_KA) )/   &
+               ( 2.0*ZKI + PP_KA + 2.0*PP_VA*(ZKI-PP_KA) )*ZKI
+
+      PK     = ZKBI - (ZKBI - ZKB)*(ZTFS - XTT)/ZTHETA
+      PFRZ   = ZTFS
+
+      IF (PK < 1.73) PK = 1.73 !hightsi-like guard
+
+  END SUBROUTINE THERMAL_PROPERTIES
+END SUBROUTINE RUN_INTERNAL
+
+SUBROUTINE GROWTH(THIS, M, TSTEP, TDEEP, PICECOND)
+USE MODD_CSTS, ONLY: XRHOLI, XLMTT
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  INTEGER, INTENT(IN) :: M
+  REAL, INTENT(IN) :: TSTEP
+  REAL, INTENT(IN) :: TDEEP(M)
+  REAL, INTENT(IN) :: PICECOND(M)
+
+  REAL :: ZDHDT(M), ZICE_HEAT_FLUX(M)
+
+  ZICE_HEAT_FLUX(:) = (TDEEP - THIS%T(:M,THIS%NUM_LAYERS))/THIS%Z_DIFF(:M,THIS%NUM_LAYERS)*PICECOND
+  ZDHDT = TSTEP/(XRHOLI*XLMTT)*(ZICE_HEAT_FLUX - THIS%CONFIG%XOCEAN_HEAT_FLUX)
+
+  CALL THIS%REGRID(THIS%Z(:M, THIS%NUM_LAYERS) + ZDHDT)
+END SUBROUTINE GROWTH
+
+SUBROUTINE DEALLOC(THIS)
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+
+  IF(ALLOCATED(THIS%MF)) THEN
+    DEALLOCATE(THIS%MF)
+  END IF
+
+  IF(ASSOCIATED(THIS%Z))        DEALLOCATE(THIS%Z)
+  IF(ASSOCIATED(THIS%DZ))       DEALLOCATE(THIS%DZ)
+  IF(ASSOCIATED(THIS%Z_DIFF))   DEALLOCATE(THIS%Z_DIFF)
+  IF(ASSOCIATED(THIS%T))        DEALLOCATE(THIS%T)
+  IF(ASSOCIATED(THIS%SHAPE))    DEALLOCATE(THIS%SHAPE)
+  IF(ASSOCIATED(THIS%AGE))      DEALLOCATE(THIS%AGE)
+
+  IF(ASSOCIATED(THIS%XTICE))    DEALLOCATE(THIS%XTICE)
+  IF(ASSOCIATED(THIS%XSIC))     DEALLOCATE(THIS%XSIC)
+  IF(ASSOCIATED(THIS%XICE_ALB)) DEALLOCATE(THIS%XICE_ALB)
+
+  IF(ASSOCIATED(THIS%XCH))      DEALLOCATE(THIS%XCH)
+
+  IF(ASSOCIATED(THIS%XRHOA))    DEALLOCATE(THIS%XRHOA)
+  IF(ASSOCIATED(THIS%XWIND))    DEALLOCATE(THIS%XWIND)
+  IF(ASSOCIATED(THIS%XPS  ))    DEALLOCATE(THIS%XPS)
+  IF(ASSOCIATED(THIS%XEXNA))    DEALLOCATE(THIS%XEXNA)
+  IF(ASSOCIATED(THIS%XEXNS))    DEALLOCATE(THIS%XEXNS)
+
+  IF(ASSOCIATED(THIS%PTA  ))    DEALLOCATE(THIS%PTA)
+  IF(ASSOCIATED(THIS%PQA  ))    DEALLOCATE(THIS%PQA)
+  IF(ASSOCIATED(THIS%PZREF))    DEALLOCATE(THIS%PZREF)
+  IF(ASSOCIATED(THIS%PUREF))    DEALLOCATE(THIS%PUREF)
+
+  IF(ASSOCIATED(THIS%SNOW)) CALL THIS%SNOW%DEALLOC()
+END SUBROUTINE DEALLOC
+
+SUBROUTINE READSURF(THIS, G, HPROGRAM, KLU, KLUOUT)
+USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODI_READ_SURF
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  TYPE(GRID_t), INTENT(INOUT)   :: G
+  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM !< calling program
+  INTEGER,           INTENT(IN) :: KLU      !< number of sea patch point
+  INTEGER,           INTENT(IN) :: KLUOUT
+
+  INTEGER :: IRESP
+
+  THIS%NUM_POINTS = KLU
+  IF(ASSOCIATED(THIS%SNOW)) THEN
+    THIS%SNOW%NUM_POINTS = THIS%NUM_POINTS
+    CALL THIS%SNOW%ALLOCA()
+  END IF
+
+  CALL READ_SURF(HPROGRAM,'ICENL', THIS%NUM_LAYERS,IRESP)
+  CALL THIS%ALLOCA()
+
+  CALL READ_SURF(HPROGRAM,'SIC',   THIS%XSIC,IRESP)
+
+  IF(ALLOCATED(THIS%MF)) THEN
+    DEALLOCATE(THIS%MF)
+  END IF
+  CALL THIS%GET_MODEL_FIELDS(THIS%MF)
+
+  CALL IO(THIS%MF, [''], HPROGRAM, IS_READ = .TRUE.)
+  CALL THIS%REGRID(THIS%Z(:, THIS%NUM_LAYERS))
+END SUBROUTINE READSURF
+
+SUBROUTINE WRITESURF(THIS, HSELECT, HPROGRAM)
+USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODI_WRITE_SURF
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  CHARACTER(LEN=*), INTENT(IN) :: HSELECT(:)
+  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
+
+  INTEGER :: IRESP
+  CHARACTER(LEN=100) :: YCOMMENT
+
+  YCOMMENT='Number of sea-ice layers'
+  CALL WRITE_SURF(HSELECT, HPROGRAM, 'ICENL', THIS%NUM_LAYERS, IRESP, YCOMMENT)
+
+  CALL IO(THIS%MF, HSELECT, HPROGRAM, IS_DIAG = .FALSE., IS_READ = .FALSE.)
+END SUBROUTINE WRITESURF
+
+SUBROUTINE WRITE_DIAG(THIS, HSELECT, HPROGRAM)
+USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODI_WRITE_SURF
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  CHARACTER(LEN=*), INTENT(IN) :: HSELECT(:)
+  CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
+
+  CALL IO(THIS%MF, HSELECT, HPROGRAM, IS_DIAG = .TRUE., IS_READ = .FALSE.)
+END SUBROUTINE WRITE_DIAG
+
+SUBROUTINE GET_RESPONSE(THIS, PSIC, PTICE, PICE_ALB)
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+  REAL, INTENT(OUT) :: PSIC(:)
+  REAL, INTENT(OUT) :: PTICE(:)
+  REAL, INTENT(OUT) :: PICE_ALB(:)
+
+  LOGICAL :: GSNOW_POINTS(THIS%NUM_POINTS)
+  REAL :: ZSNOW_TEMP(THIS%NUM_POINTS)
+  REAL :: ZSNOW_ALB(THIS%NUM_POINTS)
+  REAL :: ZICE_ALB(THIS%NUM_POINTS)
+
+  IF(ASSOCIATED(THIS%SNOW)) THEN
+    GSNOW_POINTS(:) = THIS%SNOW%EXISTS()
+    CALL THIS%SNOW%GET_RESPONSE(THIS%NUM_POINTS, PTSUR = ZSNOW_TEMP, PALB = ZSNOW_ALB)
+  ELSE
+    GSNOW_POINTS(:) = .FALSE.
+  END IF
+
+  PSIC(:) = THIS%XSIC(:)
+  ZICE_ALB(:) = ICE_ALBEDO( THIS%T(:,1), THIS%CONFIG%NICE_ALBEDO )
+
+  WHERE(GSNOW_POINTS(:))
+    PTICE(:) = ZSNOW_TEMP(:)
+    PICE_ALB(:) = ZSNOW_ALB(:)
+  ELSE WHERE
+    PTICE(:) = THIS%T(:,1)
+    PICE_ALB(:) = ZICE_ALB
+  END WHERE
+END SUBROUTINE GET_RESPONSE
+
+SUBROUTINE COUPLING_ICEFLUX_SICE(THIS, KI, PTA, PEXNA, PRHOA, PTICE, PEXNS,   &
+                                PQA, PRAIN, PSNOW, PWIND, PZREF, PUREF,  &
+                                PPS, PTWAT, PTTS, PSFTH, PSFTQ,          &
+                                OHANDLE_SIC, PMASK, PQSAT, PZ0,          &
+                                PUSTAR, PCD, PCDN, PCH,                  &
+                                PRI, PRESA, PZ0H )
+USE MODI_COUPLING_ICEFLUX_n
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS !< Ice model
+
+  INTEGER,             INTENT(IN)  :: KI        !< number of points
+  !
+  REAL, DIMENSION(KI), INTENT(IN)  :: PTA       !< air temperature forcing               [K]
+  REAL, DIMENSION(KI), INTENT(IN)  :: PEXNA     !< Exner function at atm. level
+  REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     !< air density                           [kg/m3]
+  REAL, DIMENSION(KI), INTENT(IN)  :: PTICE     !< Ice Surface Temperature
+  REAL, DIMENSION(KI), INTENT(IN)  :: PEXNS     !< Exner function at sea surface
+  REAL, DIMENSION(KI), INTENT(IN)  :: PQA       !< air humidity forcing                  [kg/m3]
+  REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     !< liquid precipitation                  [kg/m2/s]
+  REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     !< snow precipitation                    [kg/m2/s]
+  REAL, DIMENSION(KI), INTENT(IN)  :: PWIND     !< module of wind at atm. wind level
+  REAL, DIMENSION(KI), INTENT(IN)  :: PZREF     !< atm. level for temp. and humidity
+  REAL, DIMENSION(KI), INTENT(IN)  :: PUREF     !< atm. level for wind
+  REAL, DIMENSION(KI), INTENT(IN)  :: PPS       !< pressure at atmospheric model surface [Pa]
+  REAL, DIMENSION(KI), INTENT(IN)  :: PTWAT     !< Sea surface temperature
+  REAL,                INTENT(IN)  :: PTTS      !< Freezing point for sea water
+  REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     !< flux of heat                          [W/m2]
+  REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     !< flux of water vapor                   [kg/m2/s]
+  !
+  LOGICAL, INTENT(IN) , OPTIONAL:: OHANDLE_SIC  !< Should we output extended set of fields
+  REAL, DIMENSION(KI), INTENT(IN) , OPTIONAL :: PMASK     !< Where to compute sea-ice fluxes (0./1.)
+  !
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PQSAT     !< humidity at saturation
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PZ0       !< roughness length over the sea ice
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PUSTAR    !< friction velocity [m/s]
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PCD       !< Drag coefficient
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PCDN      !< Neutral Drag coefficient
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PCH       !< Heat transfer coefficient
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRI       !< Richardson number
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PRESA     !< aerodynamical resistance
+  REAL, DIMENSION(KI), INTENT(OUT), OPTIONAL :: PZ0H      !< heat roughness length over ice
+
+  CALL COUPLING_ICEFLUX_n(KI, PTA, PEXNA, PRHOA, PTICE, PEXNS,     &
+                          PQA, PRAIN, PSNOW, PWIND, PZREF, PUREF,  &
+                          PPS, PTWAT, PTTS, PSFTH, PSFTQ,          &
+                          OHANDLE_SIC, PMASK, PQSAT, PZ0,          &
+                          PUSTAR, PCD, PCDN, PCH,                  &
+                          PRI, PRESA, PZ0H )
+
+  ! Store some data to be used during call to the RUN method.
+  THIS%XCH  (:) = PCH  (:)
+  THIS%XRHOA(:) = PRHOA(:)
+  THIS%XWIND(:) = PWIND(:)
+  THIS%XPS  (:) = PPS  (:)
+  THIS%XEXNA(:) = PEXNA(:)
+  THIS%XEXNS(:) = PEXNS(:)
+  THIS%PTA  (:) = PTA  (:)
+  THIS%PQA  (:) = PQA  (:)
+  THIS%PZREF(:) = PZREF(:)
+  THIS%PUREF(:) = PUREF(:)
+END SUBROUTINE COUPLING_ICEFLUX_SICE
+
+SUBROUTINE ALLOCA(THIS)
+IMPLICIT NONE
+  CLASS(SICE_t) :: THIS
+
+  ALLOCATE( &
+    THIS%Z(THIS%NUM_POINTS, THIS%NUM_LAYERS), &
+    THIS%DZ(THIS%NUM_POINTS, THIS%NUM_LAYERS), &
+    THIS%Z_DIFF(THIS%NUM_POINTS, THIS%NUM_LAYERS), &
+    THIS%T(THIS%NUM_POINTS, THIS%NUM_LAYERS))
+
+  ALLOCATE( &
+    THIS%SHAPE(THIS%NUM_POINTS), &
+    THIS%AGE(THIS%NUM_POINTS))
+
+  ALLOCATE( &
+    THIS%XTICE(THIS%NUM_POINTS), &
+    THIS%XSIC(THIS%NUM_POINTS), &
+    THIS%XICE_ALB(THIS%NUM_POINTS))
+
+  ALLOCATE( &
+    THIS%XCH  (THIS%NUM_POINTS), &
+    THIS%XRHOA(THIS%NUM_POINTS), &
+    THIS%XWIND(THIS%NUM_POINTS), &
+    THIS%XPS  (THIS%NUM_POINTS), &
+    THIS%XEXNA(THIS%NUM_POINTS), &
+    THIS%XEXNS(THIS%NUM_POINTS), &
+    THIS%PTA  (THIS%NUM_POINTS), &
+    THIS%PQA  (THIS%NUM_POINTS), &
+    THIS%PZREF(THIS%NUM_POINTS), &
+    THIS%PUREF(THIS%NUM_POINTS), )
+
+END SUBROUTINE ALLOCA
+
+SUBROUTINE REGRID(THIS, PZNEW)
+IMPLICIT NONE
+  CLASS( SICE_t ) :: THIS
+  REAL, OPTIONAL, INTENT(IN) :: PZNEW(:)
+
+  REAL    :: Z_NEW_THK( THIS%NUM_POINTS )
+  INTEGER :: JI, JN, INUM_ICE_LAYERS
+  REAL    :: ZSKIN
+
+  REAL, DIMENSION( THIS%NUM_POINTS, THIS%NUM_LAYERS ) :: &
+      ZNEW_Z,        &
+      ZNEW_DZ,       &
+      ZNEW_DIFF
+
+  REAL( KIND = JPRB ) :: ZHOOK_HANDLE
+
+  IF( LHOOK ) CALL DR_HOOK( 'SIMPLE_ICE:REGRID', 0, ZHOOK_HANDLE )
+
+  IF(PRESENT(PZNEW)) THEN
+      Z_NEW_THK(:SIZE(PZNEW)) = PZNEW(:)
+  ELSE
+      Z_NEW_THK(:) = THIS%XICE_THICKNESS
+  END IF
+
+  INUM_ICE_LAYERS = THIS%NUM_LAYERS
+  DO JI = 1, THIS%NUM_POINTS
+    IF( Z_NEW_THK(JI) > 0.2 ) THEN
+      ZSKIN = 0.05
+    ELSE
+      ZSKIN = Z_NEW_THK(JI)*0.05/0.2
+    END IF
+    ZSKIN = MIN( ZSKIN, (Z_NEW_THK(JI) - ZSKIN)/( INUM_ICE_LAYERS - 1.0 ) )
+    ! Linear distribution of N-1 first layer thicknesses
+    CALL LIN_SPACE( ZSKIN, Z_NEW_THK(JI),                   &
+                    [( REAL(JN), JN = 1, INUM_ICE_LAYERS )],&
+                    ZNEW_Z( JI, : )                         &
+                  )
+  END DO
+
+  CALL SET_GRID(ZSKIN, THIS%XICE_THICKNESS, ZNEW_Z(:,:), ZNEW_DZ(:,:), ZNEW_DIFF(:,:))
+
+  THIS%Z     (:,:) = ZNEW_Z   (:,:)
+  THIS%DZ    (:,:) = ZNEW_DZ  (:,:)
+  THIS%Z_DIFF(:,:) = ZNEW_DIFF(:,:)
+
+  IF( LHOOK ) CALL DR_HOOK( 'SIMPLE_ICE:REGRID', 1, ZHOOK_HANDLE )
+END SUBROUTINE REGRID
+
+SUBROUTINE COMPUTE_SHAPE( THIS )
+USE MODD_SURF_PAR ,ONLY: XUNDEF
+IMPLICIT NONE
+  CLASS( SICE_t ) :: THIS
+
+  INTEGER :: I
+
+  THIS%SHAPE(:) = XUNDEF
+  DO I = 1, SIZE(THIS%T, DIM = 1)
+      IF( THIS%T(I,1) /= XUNDEF) THEN
+          THIS%SHAPE(I) = SUM( THIS%T(I,:)*THIS%DZ(I,:) )
+      END IF
+  END DO
+END SUBROUTINE
+
+SUBROUTINE GET_MODEL_FIELDS( THIS, MF )
+IMPLICIT NONE
+  CLASS(SICE_t), INTENT(IN) :: THIS
+  TYPE( MODEL_FIELD ), ALLOCATABLE, INTENT( OUT ) :: MF(:)
+
+  INTEGER, PARAMETER :: NUM_FIELDS = 6
+
+  TYPE( MODEL_FIELD ), ALLOCATABLE :: SNOW_FIELDS(:)
+  REAL( KIND = JPRB )  :: ZHOOK_HANDLE
+
+  IF( LHOOK ) CALL DR_HOOK( 'SIMPLE_ICE:GET_MODEL_FIELDS', 0, ZHOOK_HANDLE )
+
+  IF(ASSOCIATED(THIS%SNOW)) THEN
+    CALL THIS%SNOW%GET_MODEL_FIELDS( SNOW_FIELDS )
+  ELSE
+    ALLOCATE( SNOW_FIELDS(0) )
+  END IF
+  ALLOCATE( MF(NUM_FIELDS + SIZE(SNOW_FIELDS)) )
+
+  MF(:NUM_FIELDS) = [MODEL_FIELD(                                       &
+      'TICE',                                                           &
+      'Ice temperature',                                                &
+      'K',                                                              &
+      [THIS%NUM_POINTS, THIS%NUM_LAYERS],                               &
+      P2 = THIS%T                                                       &
+    ),                                                                  &
+    MODEL_FIELD(                                                        &
+      'TICE_SHAPE',                                                     &
+      'Shape factor of ice profile',                                    &
+      'K*m',                                                            &
+      [THIS%NUM_POINTS, 0],                                             &
+      LDIAG = .FALSE.,                                                  &
+      P1 = THIS%SHAPE                                                   &
+    ),                                                                  &
+    MODEL_FIELD(                                                        &
+      'ICE_AGE',                                                        &
+      'Ice age',                                                        &
+      's',                                                              &
+      [THIS%NUM_POINTS, 0],                                             &
+      P1 = THIS%AGE,                                                    &
+      XDEFAULT = 0.                                                     &
+    ),                                                                  &
+    MODEL_FIELD(                                                        &
+      'ZICE',                                                           &
+      'Ice layer bottom depth',                                         &
+      'm',                                                              &
+      [THIS%NUM_POINTS, THIS%NUM_LAYERS],                               &
+      P2 = THIS%Z                                                       &
+    ),                                                                  &
+    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%DZ,     LINTERNAL = .TRUE. ), &
+    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%Z_DIFF, LINTERNAL = .TRUE. )  ]
+
+  IF(SIZE(SNOW_FIELDS) > 0) THEN
+    MF(NUM_FIELDS + 1 : NUM_FIELDS + SIZE(SNOW_FIELDS)) = SNOW_FIELDS(:)
+  END IF
+
+  DEALLOCATE( SNOW_FIELDS )
+  IF( LHOOK ) CALL DR_HOOK( 'SIMPLE_ICE:GET_MODEL_FIELDS', 1, ZHOOK_HANDLE )
+END SUBROUTINE GET_MODEL_FIELDS
+
+SUBROUTINE LIN_SPACE( PA, PB, PX, PY )
+IMPLICIT NONE
+  REAL, INTENT( IN  ) :: PA, &        !< Lower boundary value
+                         PB           !< Upper boundary value
+  REAL, INTENT( IN  ) :: PX(:       ) !< Grid
+  REAL, INTENT( OUT ) :: PY(SIZE(PX)) !< Interpolated values in gridpoints
+
+  REAL                :: ZK
+  INTEGER             :: I, N
+
+  REAL( KIND = JPRB ) :: ZHOOK_HANDLE
+
+  IF( LHOOK ) CALL DR_HOOK( 'LIN_SPACE', 0, ZHOOK_HANDLE )
+
+  N = SIZE(PX)
+
+  ZK = (PB - PA)/(PX( N ) - PX( 1 ))
+
+  DO I = 1, N
+      PY( I ) = ZK*(PX( I ) - PX( 1 )) + PA
+  END DO
+
+  IF( LHOOK ) CALL DR_HOOK( 'LIN_SPACE', 1, ZHOOK_HANDLE )
+END SUBROUTINE LIN_SPACE
+
+SUBROUTINE SET_GRID( PZMIN, PZMAX, PZ, PDZ, PZ_DIFF )
+USE MODD_SURF_PAR, ONLY: XUNDEF
+IMPLICIT NONE
+  REAL, INTENT( IN  )    :: PZMIN,    & !< Skin layer depth, [m]
+                            PZMAX       !< Total depth of vertical grid, [m]
+  REAL, INTENT( IN OUT ) :: PZ( :, : )  !< Depth of lower boundary for each vertical layer, [m]
+  REAL, DIMENSION(SIZE(PZ,1), SIZE(PZ,2)), INTENT( OUT ) :: &
+                            PDZ, &      !< Thickness of each layer, [m]
+                            PZ_DIFF     !< Distanse between consecutive layer middle points, [m]
+
+  INTEGER :: JI, IN, INPOINTS, INLAYER
+
+  REAL( KIND = JPRB ) :: ZHOOK_HANDLE
+
+  IF( LHOOK ) CALL DR_HOOK( 'SET_GRID', 0, ZHOOK_HANDLE )
+
+  INPOINTS = SIZE(PZ, 1)
+  INLAYER  = SIZE(PZ, 2)
+
+  IF( ABS(PZ(1, 1) - XUNDEF) < 1.E-2 ) THEN
+    DO JI = 1, INPOINTS
+      CALL LIN_SPACE(PZMIN, PZMAX, [( REAL(IN), IN = 1, INLAYER )], PZ( JI, : ))
+    END DO
+  END IF
+
+  PDZ    ( :, 1 ) =     PZ( :, 1 )
+  PZ_DIFF( :, 1 ) = 0.5*PZ( :, 2 )
+
+  DO JI = 2, SIZE( PZ, 2 ) - 1
+    PDZ    ( :, JI ) =       PZ( :, JI     ) - PZ( :, JI - 1 )
+    PZ_DIFF( :, JI ) = 0.5*( PZ( :, JI + 1 ) - PZ( :, JI - 1 ) )
+  END DO
+
+  IN = INLAYER
+  PDZ    ( :, IN ) =      PZ( :, IN ) - PZ( :, IN - 1 )
+  PZ_DIFF( :, IN ) = 0.5*(PZ( :, IN ) - PZ( :, IN - 1 ))
+
+  IF( LHOOK ) CALL DR_HOOK( 'SET_GRID', 1, ZHOOK_HANDLE )
+END SUBROUTINE SET_GRID
+END MODULE ICE_SICE

@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITE_DIAG_SEB_SEAICE_n (DTCO, DUO, U, DSO, DI, DIC, HPROGRAM)
+      SUBROUTINE WRITE_DIAG_SEB_SEAICE_n (DTCO, DUO, U, DSO, DI, DIC, DICE, HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_SEB_SEAICE_n* - write the seaice diagnostic fields
@@ -35,6 +35,7 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t, DIAG_t
+USE ABSTRACT_ICE, ONLY : SEA_ICE_t
 !
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 !
@@ -56,6 +57,7 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DSO
 TYPE(DIAG_t), INTENT(INOUT) :: DI
 TYPE(DIAG_t), INTENT(INOUT) :: DIC
+CLASS(SEA_ICE_t), INTENT(INOUT) :: DICE
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
 !
@@ -78,6 +80,7 @@ IF (LHOOK) CALL DR_HOOK('WRITE_DIAG_SEB_SEAICE_N',0,ZHOOK_HANDLE)
 !
 CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'SEA   ','SEAFLX','WRITE','SEAFLUX_DIAGNOSTICS.OUT.nc')
 !
+CALL DICE%WRITE_DIAG(DUO%CSELECT, HPROGRAM)
 !
 !*       8.2.     Richardson number :
 !               -----------------
