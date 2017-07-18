@@ -5,7 +5,7 @@
                       OMEB, OFORC_MEASURE, OMEB_LITTER,                          &
                       PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, HSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
-                      OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,  HSNOWCOMP,  &
+                      OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,  HSNOWCOMP, HSNOWZREF, &
                       PCVHEATF, PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,      &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PVDIR,                   &
@@ -284,7 +284,7 @@ CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
                                       !
 LOGICAL,              INTENT(IN)  :: OSNOWDRIFT_SUBLIM   ! activate sublimation during drift
 LOGICAL,              INTENT(IN)  :: OSNOW_ABS_ZENITH    ! activate parametrization of solar absorption for polar regions
-CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP
+CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP, HSNOWZREF
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -1047,7 +1047,7 @@ IF(OMEB)THEN
         OTR_ML, OAGRI_TO_GRASS, GSHADE, OSTRESSDEF,                            &
         HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,                                    &
-        HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HPHOTO,                    &   
+        HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, HPHOTO,         &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
@@ -1146,7 +1146,7 @@ ELSE
            PLAT, PLON, ZQS3L,                                                   &
            HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
            HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,                                    &
-           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,      &
+           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, KTAB_SYT,PSYTMASS, &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &

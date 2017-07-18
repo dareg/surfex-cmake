@@ -166,7 +166,7 @@ TYPE ISBA_t
   CHARACTER(3)                   :: CSNOWCOND ! Y81 (Yen 1981), I02 (Boone et al. 2002) C11 (Calonne et al. 2011)
   CHARACTER(3)                   :: CSNOWHOLD ! B92 (Brun et al. 1992) O04 (Oleson et al., 2004) S02 (SNOWPACK, Lehning et al, 2002) B02 (ISBA_ES, Boone et al. 2002)
   CHARACTER(3)                   :: CSNOWCOMP ! B92 snow compaction basis version and B93 for slightly different parameters
-  
+  CHARACTER(3)                   :: CSNOWZREF ! CST (constant from snow surface, i.e. Col de Porte) or VAR (variable from snow surface = snow depth has to be removed from reference height)
 !-------------------------------------------------------------------------------
 !
   LOGICAL                        :: LCANOPY ! T: SBL scheme within the canopy
@@ -971,6 +971,7 @@ YISBA%CSNOWFALL='V12'
 YISBA%CSNOWCOND='Y81'
 YISBA%CSNOWHOLD='B92'
 YISBA%CSNOWCOMP='B92'
+YISBA%CSNOWZREF='CST'
 YISBA%LECOCLIMAP=.FALSE.
 YISBA%LCTI=.FALSE.
 YISBA%LSOCP=.FALSE.

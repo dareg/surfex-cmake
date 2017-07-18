@@ -18,7 +18,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
                          HSNOWMETAMO, HSNOWRAD,OSNOWSYTRON,                                  &
-                         HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,KTAB_SYT,PSYTMASS,       &
+                         HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF,KTAB_SYT,PSYTMASS,&
                          PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                          PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
@@ -323,6 +323,7 @@ CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
 LOGICAL, INTENT(IN)                 :: OSNOWDRIFT_SUBLIM ! activate sublimation during drift
 LOGICAL, INTENT(IN)                 :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
 CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP !bber added HSNOWFALL HSNOWHOLD and HSNOWCOND bber
+CHARACTER(3), INTENT(IN)            :: HSNOWZREF
                                          !-----------------------
                                          ! Crocus metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -1049,7 +1050,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, HSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,                       &
-             HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP                    )
+             HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF         )
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0

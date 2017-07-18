@@ -3,7 +3,7 @@
         OTR_ML, OAGRI_TO_GRASS, OSHADE, OSTRESSDEF,                            &
         HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, OIRRIGATE, OIRRIDAY,  &
         HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,                                    &
-        HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HPHOTO,                    &           
+        HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, HPHOTO,         &           
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
@@ -192,7 +192,7 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWMETAMO   ! Crocus metamorphism schem
 !                                                    ! HSNOWMETAMO = C13 Carmagnola et al 2014
 !                                                    ! HSNOWMETAMO = T07 Taillandier et al 2007
 !                                                    ! HSNOWMETAMO = F06 Flanner et al 2006
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP     
+CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF     
                                                      ! Crocus radiative transfer scheme:
 !                                                    ! HSNOWRAD = B92 Brun et al 1992
 !                                                    ! HSNOWRAD = TAR TARTES (Libois et al 2013)
@@ -1322,7 +1322,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWHMASS, PRISNOW, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
            HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
            HSNOWMETAMO, HSNOWRAD, OSNOWSYTRON,                                         &
-           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, KTAB_SYT,PSYTMASS,              &
+           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, KTAB_SYT,PSYTMASS,   &
            PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,            &
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &

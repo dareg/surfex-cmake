@@ -17,7 +17,8 @@
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
                PPERMSNOWFRAC,PZENITH,PXLAT,PXLON,PBLOWSNW,               &
                HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
-               HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP)
+               HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD,   &
+               HSNOWCOMP,HSNOWZREF)
 !     ##########################################################################
 !
 !!****  *SNOWCRO*
@@ -332,7 +333,7 @@ CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
                                       !    'VI13': Vionnet et al 2013
 LOGICAL, INTENT(IN)                   :: OSNOWDRIFT_SUBLIM ! activate sublimation during drift
 LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
- CHARACTER(3), INTENT(IN)             :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP
+ CHARACTER(3), INTENT(IN)             :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF
                                          !-----------------------
                                          ! Metamorphism scheme
                                          ! HSNOWMETAMO=B92 Brun et al 1992
@@ -363,7 +364,11 @@ LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametriza
                                          ! HSNOWHOLD=B02 ISBA_ES  parametrization (Boone et al. 2002)
                                          ! HSNOWHOLD=O04 CLM parametrization (Oleson et al 2004)
                                          ! HSNOWHOLD=S02 SNOWPACK aprametrization (Lehning et al 2002)
-                                         !-----------------------                                        
+                                         !-----------------------                                     
+                                         ! reference height is constant or variable from the snow surface
+                                         ! HSNOWZREF='CST' constant reference height from the snow surface
+                                         ! HSNOWZREF='VAR' variable reference height from the snow surface (i.e. constant from the ground)
+                                         !-----------------------  
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWSSA_BEFORE, ZSNOWSSA_AFTER,ZSNOWDSSA
@@ -435,6 +440,8 @@ REAL, DIMENSION(SIZE(PTA))          :: ZSNOWAGEF,ZSNOWIMPURF
 ! New roughness lengths in case of glaciers without snow.
 REAL, DIMENSION(SIZE(PTA))          :: ZZ0_SNOWICE, ZZ0H_SNOWICE, ZZ0EFF_SNOWICE
 !
+! Reference heights for temperature and wind can be modified depending on snow depth when HSNOWZREF=="VAR".
+REAL, DIMENSION(SIZE(PTA))          :: ZZREF,ZUREF
 !To control and print eneregy balance
 REAL , DIMENSION(SIZE(PTA))         :: ZSUMMASS_INI,ZSUMHEAT_INI,ZSUMMASS_FIN,ZSUMHEAT_FIN
 !
@@ -637,6 +644,12 @@ ENDDO
 !
 ZSNOWBIS(:) = ZSNOW(:)
 !
+! First estimate of ZUREF to estimate wind for snowfall et snowdrift routines
+IF (HSNOWZREF=="VAR") THEN
+  ZUREF(:)=MAX(PUREF(:)-ZSNOW(:),0.2)
+ELSE
+  ZUREF(:)=PUREF(:)
+ENDIF
 !*       2.     Snowfall
 !               --------
 ! Calculate uppermost density and thickness changes due to snowfall,
@@ -647,7 +660,7 @@ ZSNOWBIS(:) = ZSNOW(:)
                         PSNOWHEAT,PSNOWHMASS,PSNOWALB,PPERMSNOWFRAC,            &
                         PSNOWGRAN1,PSNOWGRAN2,GSNOWFALL,ZSNOWDZN,               &
                         ZSNOWRHOF,ZSNOWDZF,ZSNOWGRAN1F,ZSNOWGRAN2F, ZSNOWHISTF, &
-                        ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,HSNOWDRIFT,PZ0EFF,PUREF,&
+                        ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,HSNOWDRIFT,PZ0EFF,ZUREF,&
                         PBLOWSNW,HSNOWMETAMO, HSNOWFALL, PQA, PSNOWTEMP)
 !
 !***************************************DEBUG IN**********************************************
@@ -787,7 +800,7 @@ PSNDRIFT(:) = 0.0
 IF (HSNOWDRIFT  .NE. 'NONE') THEN
   CALL SNOWDRIFT(PTSTEP, PVMOD, PSNOWRHO,PSNOWDZ, ZSNOW,                      &
                  PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,INLVLS_USE,PTA,PQA,PPS,PRHOA,&
-                 PZ0EFF,PUREF,OSNOWDRIFT_SUBLIM,HSNOWMETAMO,PSNDRIFT)
+                 PZ0EFF,ZUREF,OSNOWDRIFT_SUBLIM,HSNOWMETAMO,PSNDRIFT)
 ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -997,6 +1010,15 @@ ELSE
   ZZ0EFF_SNOWICE = PZ0EFF
 END IF
 
+! Recompute this with update snowdepth
+IF (HSNOWZREF=="VAR") THEN
+  ZZREF(:)=MAX(PZREF(:)-ZSNOW(:),0.2)
+  ZUREF(:)=MAX(PUREF(:)-ZSNOW(:),0.2)
+ELSE
+  ZZREF(:)=PZREF(:)
+  ZUREF(:)=PUREF(:)
+ENDIF
+
 IF (OMEB) THEN
 
  CALL SNOWCROEBUDMEB(PTSTEP,XSNOWDZMIN,                                     &                
@@ -1011,9 +1033,9 @@ ELSE
                   PPEW_A_COEF, PPEW_B_COEF,                                    &
                   PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,          &
                   XSNOWDZMIN,                                                  &
-                  PZREF,ZSNOWTEMP(:,1),PSNOWRHO(:,1),PSNOWLIQ(:,1),ZSCAP(:,1), &
+                  ZZREF,ZSNOWTEMP(:,1),PSNOWRHO(:,1),PSNOWLIQ(:,1),ZSCAP(:,1), &
                   ZSCOND(:,1),ZSCOND(:,2),                                     &
-                  PUREF,PEXNS,PEXNA,PDIRCOSZW,PVMOD,                           &
+                  ZUREF,PEXNS,PEXNA,PDIRCOSZW,PVMOD,                           &
                   PLW_RAD,PSW_RAD,PTA,PQA,PPS,PTSTEP,                          &
                   PSNOWDZ(:,1),PSNOWDZ(:,2),PSNOWALB,ZZ0_SNOWICE,              &
                   ZZ0EFF_SNOWICE,ZZ0H_SNOWICE,                                 &

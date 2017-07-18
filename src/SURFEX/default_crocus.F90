@@ -1,6 +1,7 @@
 !     #########
       SUBROUTINE DEFAULT_CROCUS(HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
-                 HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,HSNOWFALL,HSNOWCOND,HSNOWHOLD,HSNOWCOMP)  
+                 HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,HSNOWFALL,HSNOWCOND,HSNOWHOLD,&
+                 HSNOWCOMP,HSNOWZREF)  
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for Crocus
@@ -54,7 +55,7 @@ LOGICAL, INTENT(OUT)          :: OSNOW_ABS_ZENITH
 LOGICAL, INTENT(OUT)          :: OSNOWSYTRON
 !
 ! Snow metamorphism scheme and radiative transfer scheme <bber
- CHARACTER(*), INTENT(OUT) :: HSNOWMETAMO,HSNOWRAD,HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP!added HSNOWFALL HSNOWHOLD and HSNOWCOND bber>
+ CHARACTER(*), INTENT(OUT) :: HSNOWMETAMO,HSNOWRAD,HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF!added HSNOWFALL HSNOWHOLD and HSNOWCOND bber>
 !
 !
 !*       0.2   Declarations of local variables
@@ -77,6 +78,7 @@ HSNOWFALL   = 'V12'
 HSNOWCOND   = 'Y81'
 HSNOWHOLD   = 'B92'
 HSNOWCOMP   = 'B92'
+HSNOWZREF   = 'CST'
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_CROCUS',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
