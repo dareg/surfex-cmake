@@ -593,6 +593,7 @@ REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWLIQ             ! sno
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZTAU_N               ! snow rad transmission coef at layer base (-)
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZALBS                ! Effective surface (ground) albedo
+REAL, DIMENSION(SIZE(PPS))                         :: ZSOILALB             ! Effective surface (ground) albedo for Tartes
 REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_F             ! LW transmission factor
 REAL, DIMENSION(SIZE(PPS))                         :: ZSIGMA_FN            ! LW transmission factor - including buried (snow) 
 !                                                                          ! vegetation effect
@@ -856,13 +857,14 @@ ZSNOWSWE(:,:)    = PSNOWSWE(:,:)
 !              ----------------------------  
 !
 ! Calculate snow albedo: split into spectral bands:
-!
+
+ZSOILALB(:)=PALBVIS_TSOIL(:)*XSW_WGHT_VIS+PALBNIR_TSOIL(:)*XSW_WGHT_NIR
 IF (HSNOW_ISBA=="CRO") THEN
  CALL SNOWCROALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,ZSNOWRHO,ZSNOWAGE,  &
-                                PSNOWGRAN1,PSNOWGRAN2,PPS, &
-                                PPSN,PSNOWDZ,PZENITH,                    &
+                                PSNOWGRAN1,PSNOWGRAN2,PSNOWIMPUR, PPS, PSW_RAD, &
+                                PPSN,PSNOWDZ,PZENITH, ZSOILALB,            &
                                 PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,     &
-                                ZTAU_N,HSNOWMETAMO)
+                                ZTAU_N,HSNOWMETAMO,HSNOWRAD)
 
 ELSE
  CALL SNOWALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,ZSNOWRHO,ZSNOWAGE,PPS,   &
@@ -1795,10 +1797,10 @@ END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
 
 !===============================================================================
 SUBROUTINE SNOWCROALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,  &
-                                      PSNOWGRAN1,PSNOWGRAN2,PPS, &
-                                      PPSN,PSNOWDZ,PZENITH,                    &
+                                      PSNOWGRAN1,PSNOWGRAN2,PSNOWIMPUR, PPS, PSW_RAD, &
+                                      PPSN,PSNOWDZ,PZENITH,  PSOILALB,          &
                                       PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,     &
-                                      PTAU_N,HSNOWMETAMO)
+                                      PTAU_N,HSNOWMETAMO,HSNOWRAD)
 !
 ! Split Total snow albedo into N-spectral bands
 ! NOTE currently MEB only uses 2 bands of the 3 possible.
@@ -1810,6 +1812,8 @@ USE MODD_SNOW_PAR,       ONLY : NSPEC_BAND_SNOW
 USE MODD_SNOW_METAMO,    ONLY : XSNOWDZMIN
 !
 USE MODE_SNOW3L,         ONLY : SNOW3LALB, SNOW3LDOPT 
+USE MODE_TARTES,         ONLY : SNOWCRO_TARTES
+USE MODD_CONST_TARTES, ONLY: NPNIMP, XPSNOWG0, XPSNOWY0, XPSNOWW0, XPSNOWB0
 !
 IMPLICIT NONE
 !
@@ -1821,11 +1825,15 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWRHO      ! Snow layer average densit
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ       ! Snow layer thickness (m)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN2
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWIMPUR
 REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! Zenith angle (rad)
+REAL, DIMENSION(:),   INTENT(IN)    :: PSOILALB
 REAL, DIMENSION(:),   INTENT(IN)    :: PPSN          ! snow fraction (-)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWAGE      ! Snow grain age
 REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
+REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD
 CHARACTER(3),         INTENT(IN)    :: HSNOWMETAMO
+CHARACTER(3),         INTENT(IN)    :: HSNOWRAD
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBFIR   ! Snow FIR (UV) albedo
@@ -1839,11 +1847,22 @@ REAL, DIMENSION(SIZE(PPS))          :: ZWORK, ZWORKA, ZAGE
 REAL, DIMENSION(SIZE(PPS))          :: ZPROJLAT, ZDSGRAIN, ZBETA1, ZBETA2, ZBETA3, &
                                        ZOPTICALPATH1, ZOPTICALPATH2, ZOPTICALPATH3
 REAL, DIMENSION(SIZE(PPS))          :: ZPERMSNOWFRAC
-REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWDZ
+REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWDZ,ZSNOWRHO,ZSNOWGRAN1,ZSNOWGRAN2,ZSNOWAGE
 REAL, DIMENSION(SIZE(PPS),NSPEC_BAND_SNOW)       :: ZSPECTRALALBEDO
 !                                      ZSPECTRALALBEDO = spectral albedo (3 bands in algo: 
 !                                                        MEB currently uses 2)
 !                                                        1=VIS, 2=NIR, 3=UV
+REAL:: ZDEFAULTG1,ZDEFAULTG2
+!
+!For now these values are constant
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWG0 ! asymmetry parameter of snow grains at nr=1.3 and at non absorbing wavelengths (no unit) (npoints,nlayer)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWY0 ! Value of y of snow grains at nr=1.3 (no unit
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWW0 ! Value of W of snow grains at nr=1.3 (no unit)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWB0 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths 
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),1) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),1) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZRADSINK
+REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZRADXS,ZZENITH,ZSW_RAD,ZSNOWALB
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1854,93 +1873,167 @@ IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',0,ZHOOK_HANDLE)
 INI    = SIZE(PSNOWDZ,1)
 INLVLS = SIZE(PSNOWDZ,2)
 !
+IF (HSNOWMETAMO=='B92') THEN
+ZDEFAULTG1=-99
+ZDEFAULTG2=50
+ELSE
+ZDEFAULTG1=0.5
+ZDEFAULTG2=0.5  
+ENDIF
+
 INLVLS_USE(:) = 0
 DO JJ = 1,SIZE(PSNOWDZ(:,:),2)
   DO JI = 1,SIZE(PSNOWDZ(:,:),1)
     IF ( PSNOWDZ(JI,JJ)>0. ) THEN 
       INLVLS_USE(JI) = JJ
+      ZSNOWRHO(JI,JJ)=PSNOWRHO(JI,JJ)
+      ZSNOWAGE(JI,JJ)=PSNOWAGE(JI,JJ)
+      ZSNOWGRAN1(JI,JJ)=PSNOWGRAN1(JI,JJ)
+      ZSNOWGRAN2(JI,JJ)=PSNOWGRAN2(JI,JJ)
+    ELSE
+      ! default values to avoid numerical problems in case of no snow
+      ZSNOWRHO(JI,JJ)=400.
+      ZSNOWAGE(JI,JJ)=10.
+      ZSNOWGRAN1(JI,JJ)=ZDEFAULTG1
+      ZSNOWGRAN2(JI,JJ)=ZDEFAULTG2
     ENDIF
   ENDDO  !  end loop snow layers
 ENDDO    ! end loop grid points
 
-! 1) Spectral albedo
-! ------------------
-!
-ZWORK(:)         = 0.0
-ZWORKA(:)        = PSNOWALB(:)
-ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
-!
 
-CALL SNOWCROALB(.FALSE.,                                             &
-                  ZWORKA,ZSPECTRALALBEDO,PSNOWDZ(:,1),PSNOWRHO(:,1:2),       &
-                  ZPERMSNOWFRAC,PSNOWGRAN1(:,1),PSNOWGRAN2(:,1),               &
-                  PSNOWAGE(:,1),PSNOWGRAN1(:,2),PSNOWGRAN2(:,2),PSNOWAGE(:,2), &
-                  PPS, PZENITH, INLVLS_USE, HSNOWMETAMO) 
 
-!
-! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
-! (also note, here PSNOWALB doesn't evolve...we just diagnose spectral components).
-!
-WHERE(PSNOWALB(:)/=XUNDEF)
-!
-   PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)
-!
-! We diagnose NIR albedo such that total albedo is conserved
-! (using just 2 spectral bands in MEB)
-!
-   PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
-!
-! currently NOT used by MEB
-!
-   PSNOWALBFIR(:) = XUNDEF                                     
-!
-! For the surface layer absorbtion computation:
-!
-   ZSPECTRALALBEDO(:,1) = PSNOWALBVIS(:)
-   ZSPECTRALALBEDO(:,2) = PSNOWALBNIR(:)
-   ZSPECTRALALBEDO(:,3) = PSNOWALBFIR(:)
-!
-ELSEWHERE
-!
-   PSNOWALBVIS(:) = XUNDEF
-   PSNOWALBNIR(:) = XUNDEF
-   PSNOWALBFIR(:) = XUNDEF
-!
-END WHERE
-!
-! Snow optical grain diameter (no age dependency over polar regions):
-!
-ZAGE(:) = (1.0-ZPERMSNOWFRAC(:))*PSNOWAGE(:,1)
-!
-ZDSGRAIN(:) = SNOW3LDOPT(PSNOWRHO(:,1),ZAGE)
-!
-! 2) SW absorption in uppermost snow layer 
-! ----------------------------------------
-! For now, consider just 2 bands with MEB, so renormalize:
+IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOWRAD=="TA3") .OR. (HSNOWRAD=="TA4")) THEN
 
-ZSPECTRALALBEDO(:,1) = ZSPECTRALALBEDO(:,1)
-ZSPECTRALALBEDO(:,2) = (PSNOWALB(:) - XSW_WGHT_VIS*ZSPECTRALALBEDO(:,1))/XSW_WGHT_NIR
+  ! Partie codée à l'arrache pour faire du ESCROC-MEB sur les sites forêts de ESM-SnowMIP
+  ! A vérifier...
+
+
+  ZSNOWG0 = XPSNOWG0
+  ZSNOWY0 = XPSNOWY0
+  ZSNOWW0 = XPSNOWW0  
+  ZSNOWB0 = XPSNOWB0
+  ZSNOWIMP_DENSITY(:,:,1)= 1500.
+  ZSNOWIMP_CONTENT(:,:,1)= PSNOWIMPUR(:,:)
+
+    DO JI = 1,INI
+        ! To not compute anything in Tartes if there is no snow, we tell Tartes that we are overnight.
+        IF ( PSNOWDZ(JI,1)>0. .AND. PSNOWDZ(JI,2)>0. .AND. PSNOWDZ(JI,3)>0. ) THEN
+            ZSW_RAD(JI)=PSW_RAD(JI)
+            ZZENITH(JI)=PZENITH(JI)
+        ELSE
+            ZSW_RAD(JI)=0.
+            ZZENITH(JI)=0.
+        ENDIF
+    END DO
+    
+    ZSNOWALB=PSNOWALB
+    CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,&
+                        ZSNOWG0,ZSNOWY0,ZSNOWW0,ZSNOWB0,&
+                        ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,&
+                        PSOILALB,ZSW_RAD,ZZENITH, INLVLS_USE,ZSNOWALB,&
+                        ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO,PSNOWALBVIS)
+
+                        
+    ! We diagnose NIR albedo such that total albedo is conserved
+    ! (using just 2 spectral bands in MEB)
+    !
+    PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
+    !
+    ! currently NOT used by MEB
+    !
+    PSNOWALBFIR(:) = XUNDEF
+    
+    PTAU_N(:,:)=0.
+    DO JI = 1,INI
+      IF ((PSW_RAD(JI)>0.).AND.(PSNOWALB(JI)<1.)) THEN
+        PTAU_N(JI,1)=-ZRADSINK(JI,1)/((1.-PSNOWALB(JI))*PSW_RAD(JI))
+        DO JJ = 2,INLVLS_USE(JI)   
+          PTAU_N(JI,JJ)=ZRADSINK(JI,JJ)/ZRADSINK(JI,JJ-1)      
+        ENDDO
+      ENDIF
+    ENDDO
+ELSE
+    ! 1) Spectral albedo
+    ! ------------------
+    !
+    ZWORK(:)         = 0.0
+    ZWORKA(:)        = PSNOWALB(:)
+    ZPERMSNOWFRAC(:) = PVEGTYPE(:,NVT_SNOW)
+    !
+
+    CALL SNOWCROALB(.FALSE.,                                             &
+                    ZWORKA,ZSPECTRALALBEDO,PSNOWDZ(:,1),ZSNOWRHO(:,1:2),       &
+                    ZPERMSNOWFRAC,ZSNOWGRAN1(:,1),ZSNOWGRAN2(:,1),               &
+                    ZSNOWAGE(:,1),ZSNOWGRAN1(:,2),ZSNOWGRAN2(:,2),ZSNOWAGE(:,2), &
+                    PPS, PZENITH, INLVLS_USE, HSNOWMETAMO) 
+
+    !
+    ! Since we only consider VIS and NIR bands for soil and veg in MEB currently:
+    ! (also note, here PSNOWALB doesn't evolve...we just diagnose spectral components).
+    !
+    WHERE(PSNOWALB(:)/=XUNDEF)
+    !
+    PSNOWALBVIS(:) = ZSPECTRALALBEDO(:,1)
+    !
+    ! We diagnose NIR albedo such that total albedo is conserved
+    ! (using just 2 spectral bands in MEB)
+    !
+    PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
+    !
+    ! currently NOT used by MEB
+    !
+    PSNOWALBFIR(:) = XUNDEF                                     
+    !
+    ! For the surface layer absorbtion computation:
+    !
+    ZSPECTRALALBEDO(:,1) = PSNOWALBVIS(:)
+    ZSPECTRALALBEDO(:,2) = PSNOWALBNIR(:)
+    ZSPECTRALALBEDO(:,3) = PSNOWALBFIR(:)
+    !
+    ELSEWHERE
+    !
+    PSNOWALBVIS(:) = XUNDEF
+    PSNOWALBNIR(:) = XUNDEF
+    PSNOWALBFIR(:) = XUNDEF
+    !
+    END WHERE
+    !
+    ! Snow optical grain diameter (no age dependency over polar regions):
+    !
+    ! 2) SW absorption in uppermost snow layer 
+    ! ----------------------------------------
+    ! For now, consider just 2 bands with MEB, so renormalize:
+
+    ZSPECTRALALBEDO(:,1) = ZSPECTRALALBEDO(:,1)
+    ZSPECTRALALBEDO(:,2) = (PSNOWALB(:) - XSW_WGHT_VIS*ZSPECTRALALBEDO(:,1))/XSW_WGHT_NIR
+    !
+    ! Adjust thickness to be as in snow computations:
+    !
+    DO JJ=1,INLVLS
+    DO JI=1,INI
+        ZSNOWDZ(JI,JJ) = PSNOWDZ(JI,JJ)/MAX(1.E-4,PPSN(JI))
+    ENDDO
+    ENDDO
+    !
+    !PRINT*,"DEBUG"
+    !print*,ZSNOWDZ
+    !print*,PSNOWRHO
+    !print*,PSNOWGRAN1
+    !print*,PSNOWGRAN2
+    CALL SNOWCRORADTRANS(XSNOWDZMIN, ZSPECTRALALBEDO, ZSNOWDZ, ZSNOWRHO, &
+                            ZPERMSNOWFRAC, PZENITH,  ZSNOWAGE,         &
+                            ZSNOWGRAN1, ZSNOWGRAN2, HSNOWMETAMO,       &
+                            INLVLS_USE, PTAU_N)
+    !
+    ! Note that because we force a snow thickness to compute tramission, 
+    ! a bogus value ( < 0) can be computed despite the non-existence of snow.
+    ! To check/prevent any problems, make a simple check:
+    !
+    PTAU_N(:,:) = MAX(0., PTAU_N(:,:))
 !
-! Adjust thickness to be as in snow computations:
+END IF
 !
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      ZSNOWDZ(JI,JJ) = PSNOWDZ(JI,JJ)/MAX(1.E-4,PPSN(JI))
-   ENDDO
-ENDDO
-!
- CALL SNOWCRORADTRANS(XSNOWDZMIN, ZSPECTRALALBEDO, ZSNOWDZ, PSNOWRHO, &
-                           ZPERMSNOWFRAC, PZENITH,  PSNOWAGE,         &
-                           PSNOWGRAN1, PSNOWGRAN2, HSNOWMETAMO,       &
-                           INLVLS_USE, PTAU_N)
-!
-! Note that because we force a snow thickness to compute tramission, 
-! a bogus value ( < 0) can be computed despite the non-existence of snow.
-! To check/prevent any problems, make a simple check:
-!
-PTAU_N(:,:) = MAX(0., PTAU_N(:,:))
-!
-IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('ISBA_MEB:SNOWCROALB_SPECTRAL_BANDS_MEB',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOWCROALB_SPECTRAL_BANDS_MEB
 !===============================================================================
@@ -2359,13 +2452,13 @@ ZCOSZEN(:)=MAX(XMINCOSZEN,COS(PZENITH(:)))
 ZPROJLAT(:)=(1.0-PPERMSNOWFRAC(:))+PPERMSNOWFRAC(:)/ZCOSZEN(:)
 !
 !
-DO JI= 1,SIZE(KNLVLS_USE)
-  DO JJ = 1,KNLVLS_USE(JJ)
+DO JJ = 1,INLVLS
+  DO JI= 1,INI
     CALL GET_DIAM(PSNOWGRAN1(JI,JJ),PSNOWGRAN2(JI,JJ),ZDSGRAIN(JI,JJ),HSNOWMETAMO)
   ENDDO    ! end loop snow layers
 ENDDO
 
-
+!PRINT*,PSNOWGRAN1(:,:),PSNOWGRAN2(:,:),ZDSGRAIN(:,:)
 !
 ! Extinction coefficient from Brun et al. (1989):
 !
@@ -2388,6 +2481,8 @@ DO JJ=1,INLVLS
 
          ZCOEF (JI,JJ) = XSW_WGHT_VIS*(1.0-PSPECTRALALBEDO(JI,1))*EXP(-ZOPTICALPATH1(JI)*ZPROJLAT(JI)) &
                        + XSW_WGHT_NIR*(1.0-PSPECTRALALBEDO(JI,2))*EXP(-ZOPTICALPATH2(JI)*ZPROJLAT(JI)) 
+     ELSE
+         ZCOEF(JI,JJ)=0.
      ENDIF
 
    ENDDO
