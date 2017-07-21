@@ -189,15 +189,6 @@ IF (LNAM_READ) THEN
     WRITE(ILUOUT,*) '------------------------------------'
     CALL ABOR1_SFX('READ_ISBA_CONF: TURN OFF LSNOWDRIFT_SUBLIM')
  ENDIF
-
-  IF(CSNOWMETAMO .NE. 'B92' .AND. (CSNOWDRIFT=='VI13' .OR. CSNOWDRIFT=='GA01')) THEN
-    WRITE(ILUOUT,*) '------------------------------------'
-    WRITE(ILUOUT,*) 'Snowdrift scheme can only work with options: '
-    WRITE(ILUOUT,*) 'NONE or DFLT'
-    WRITE(ILUOUT,*) 'when CSNOWMETAMO is different than B92   '
-    WRITE(ILUOUT,*) '------------------------------------'
-    CALL ABOR1_SFX('READ_ISBA_CONF: UPDATE OPTION IN SNOWDRIFT SCHEME')    
- ENDIF
  !
  !* close namelist file
  !
