@@ -4620,6 +4620,24 @@ DO JJ = 1,SIZE(PSNOW(:))
       IF (  HSNOWDRIFT=='DFLT' ) THEN
         PSNOWGRAN1F(JJ) = XVDIAM6
         PSNOWGRAN2F(JJ) = XNSPH3/XGRAN
+      ELSE IF ( HSNOWDRIFT=='GA01' ) THEN
+!           2nd Option : deposited grains have a thresold wind speed equal to
+!           the current 5m wind speed (cf Gallee et al, 2001)
+        ZMOB = MAX(MIN(2.868*EXP(-0.085*PVMOD(JJ))-1.,1.),0.)
+        ZCOEF = MAX(-XGRAN,- ZMOB * XGRAN*396./395.)/ ( -XGRAN )
+        PSNOWGRAN2F(JJ) = 1 - 49.*(ZCOEF/99.) 
+        PSNOWGRAN1F(JJ) = XVDIAM6 * &
+                        ( ZCOEF + ( 1.- ZCOEF ) * &
+                                  ( 3.*PSNOWGRAN2F(JJ) + 4.*(1.-PSNOWGRAN2F(JJ)) ) )
+!
+      ELSE IF ( HSNOWDRIFT=='VI13' ) THEN
+!          3rd Option : parameterization of Vionnet et al (2013) that allows
+!       simulatneous snow transport and snowfall for wind speed higher than 6 m/s
+        PSNOWGRAN2F(JJ) = MIN(MAX(0.14/4.*(ZWIND_GRAIN(JJ)-2.)+0.5,0.5),0.9)
+        ZCOEF =  MAX(MIN(-0.07*(ZWIND_GRAIN(JJ)-2.)+1.,1.),0.2)
+        PSNOWGRAN1F(JJ) = XVDIAM6 * &
+                        ( ZCOEF + ( 1.- ZCOEF ) * &
+                                  ( 3.*PSNOWGRAN2F(JJ) + 4.*(1.-PSNOWGRAN2F(JJ)) ) )                 
       ELSE IF ( HSNOWDRIFT=='NONE' ) THEN
         PSNOWGRAN2F(JJ) = MIN( MAX( XNSPH1*ZWIND_GRAIN(JJ)+XNSPH2, XNSPH3 ), XNSPH4 ) / XGRAN
         ZCOEF = MAX( MIN( XNDEN1*ZWIND_GRAIN(JJ)-XNDEN2, XNDEN3 ), -XGRAN ) / ( -XGRAN )
