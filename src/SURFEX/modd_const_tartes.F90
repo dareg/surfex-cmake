@@ -205,6 +205,11 @@ REAL, PARAMETER :: XPSNOWY0 = 0.728 ! Value of y of snow grains at nr=1.3 (no un
 REAL, PARAMETER :: XPSNOWW0 = 0.0611 ! Value of W of snow grains at nr=1.3 (no unit)
 REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths (no unit)
 !
+!######################## Empirical parameterization of ice layers in TARTES (added by F.Tuzet). This is just a preliminary version of TARTES+ICE #############################
+
+REAL, PARAMETER :: XIMPUR_ICE = 2300E-9   !BC and SSA values of a layer that simulate
+REAL, PARAMETER :: XSSA_ICE = 0.7   !a consistent albedo for ice layers (not perfect but better than nothing)
+!
 !######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW ABSORPTION) OR MULLER 2011(HIGH ABSORPTION) #############################
 !
 LOGICAL, PARAMETER :: ISMULLER= .TRUE. ! Boolean to determine if we use skilles or muller model

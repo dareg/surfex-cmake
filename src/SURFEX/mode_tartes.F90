@@ -1340,6 +1340,7 @@ SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0
 !
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_SNOW_METAMO,  ONLY : XUEPSI
+USE MODD_CONST_TARTES,   ONLY : XIMPUR_ICE
 !
 IMPLICIT NONE
 !
@@ -1480,7 +1481,16 @@ IF ( IPOINTDAY>=1 ) THEN
         JJ = IDAYMASK(JJ_P)
         !
         ZSNOWIMP_DENSITY_P(JJ_P,JL,JIMP) = PSNOWIMP_DENSITY(JJ,JL,JIMP)
-        ZSNOWIMP_CONTENT_P(JJ_P,JL,JIMP) = PSNOWIMP_CONTENT(JJ,JL,JIMP)      
+        IF (PSNOWRHO  (JJ,JL) <850.) THEN      !Test to check if the layer considered is snow or ice  
+          ZSNOWIMP_CONTENT_P(JJ_P,JL,JIMP) = PSNOWIMP_CONTENT(JJ,JL,JIMP)
+        ELSE                                   ! If the layer is ice, set the BC content to the value prescribed in modd_const_tartes to reproduce ice albedo
+          IF (JIMP==1) THEN
+            ZSNOWIMP_CONTENT_P(JJ_P,JL,JIMP) = XIMPUR_ICE
+          ELSE
+            ZSNOWIMP_CONTENT_P(JJ_P,JL,JIMP) = 0.
+          ENDIF
+          
+        ENDIF     
         !
       END DO
       !
@@ -1556,7 +1566,7 @@ SUBROUTINE SNOWCRO_CALL_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PS
 ! Interface between Tartes and Crocus
 ! M. Lafaysse 26/08/2013
 !
-USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XP_MUDIFF
+USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XP_MUDIFF,XSSA_ICE
 USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM
 USE MODD_CSTS, ONLY : XRHOLI,XPI
 !
@@ -1643,8 +1653,12 @@ DO JL = 1,SIZE(PSNOWRHO,2)
     !
     IF ( JL<=KNLVLS_USE(JJ) ) THEN
       !
-      CALL GET_DIAM(PSNOWGRAN1(JJ,JL),PSNOWGRAN2(JJ,JL),ZDIAM,HSNOWMETAMO)
-      ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)
+      IF (PSNOWRHO(JJ,JL) < 850.) THEN          !Check to detect ice layer
+        CALL GET_DIAM(PSNOWGRAN1(JJ,JL),PSNOWGRAN2(JJ,JL),ZDIAM,HSNOWMETAMO)
+        ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)
+      ELSE                       !Set the SSA value of ice to the value prescribed in modd_const_tartes to reproduce ice albedo
+        ZSNOWSSA(JJ,JL) = XSSA_ICE
+      ENDIF
       !
     ENDIF
     !

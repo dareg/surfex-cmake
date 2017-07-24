@@ -606,7 +606,7 @@ ZTSTEPDAYS = PTSTEP/86400. ! time step in days
 !
 IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA3" .OR. HSNOWRAD=="TA4") THEN
 #ifdef SFX_OL
-  IF (LFORCIMP) THEN 
+  IF (LFORCIMP) THEN ! Les flux de dépots atmosphériques doivent être en g/m²/s en entrée, format ALADIN
     DO JIMP=1,NIMPUR
       DO JJ = 1,SIZE(ZSNOW)
         ZWETCOEF(JJ,JIMP)=PIMPWET(JJ,JIMP)*PTSTEP  !from g/m²/s to g/m² 
