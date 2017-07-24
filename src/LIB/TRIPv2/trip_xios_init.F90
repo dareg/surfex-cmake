@@ -71,9 +71,6 @@ REAL   , INTENT(IN)               :: PTIME   ! current time (s)
 REAL, DIMENSION(:),ALLOCATABLE    :: ZLON
 REAL, DIMENSION(:),ALLOCATABLE    :: ZLAT
 !
-TYPE(xios_domaingroup) :: domaingroup_hdl
-TYPE(xios_domain)      :: domain_hdl
-!
 #ifdef WXIOS
 INTEGER              :: IREFYEAR
 TYPE(XIOS_DURATION)  :: DTIME
@@ -103,9 +100,6 @@ CALL XIOS_DEFINE_CALENDAR("Gregorian", &
 DTIME%SECOND=XTSTEP_DIAG
 !
 CALL XIOS_SET_TIMESTEP(DTIME)
-!
-!CALL XIOS_GET_HANDLE("domain_definition",domaingroup_hdl)
-!CALL XIOS_ADD_CHILD(domaingroup_hdl,domain_hdl,'trip_grid')
 !
 CALL XIOS_SET_DOMAIN_ATTR("trip_grid",DATA_DIM=2,TYPE="rectilinear")
 CALL XIOS_SET_DOMAIN_ATTR("trip_grid",NI_GLO=KLON,NI=KLON,IBEGIN=0)
