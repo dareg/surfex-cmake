@@ -207,8 +207,8 @@ REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow g
 !
 !######################## Empirical parameterization of ice layers in TARTES (added by F.Tuzet). This is just a preliminary version of TARTES+ICE #############################
 
-REAL, PARAMETER :: XIMPUR_ICE = 2300E-9   !BC and SSA values of a layer that simulate
-REAL, PARAMETER :: XSSA_ICE = 0.7   !a consistent albedo for ice layers (not perfect but better than nothing)
+REAL, PARAMETER :: XIMPUR_ICE = 5000E-9   !BC and SSA values of a layer that simulate
+REAL, PARAMETER :: XSSA_ICE = 0.6   !a consistent albedo for ice layers (not perfect but better than nothing)
 !
 !######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW ABSORPTION) OR MULLER 2011(HIGH ABSORPTION) #############################
 !
