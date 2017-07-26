@@ -267,7 +267,7 @@ ENDIF
 !
 IF (IVERSION>8 .OR. IVERSION==8 .AND. IBUGFIX>=1) THEN
   !
-  YRECFM='ALBEDO'
+  YRECFM='GD_ALBEDO'
   CALL READ_SURF(HPROGRAM,YRECFM,GDO%CALBEDO,IRESP)
   !
 ELSE
@@ -278,7 +278,7 @@ ELSE
                        YSAND, YSANDFILETYPE, XUNIF_SAND, LIMP_SAND,              &
                        YSOC_TOP, YSOC_SUB, YSOCFILETYPE, XUNIF_SOC_TOP,          &
                        XUNIF_SOC_SUB, LIMP_SOC, YCTI, YCTIFILETYPE, LIMP_CTI,    &
-                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM, GMEB,        &                       
+                       YPERM, YPERMFILETYPE, XUNIF_PERM, LIMP_PERM, GMEB,        &
                        YRUNOFFB, YRUNOFFBFILETYPE, XUNIF_RUNOFFB,                &
                        YWDRAIN,  YWDRAINFILETYPE , XUNIF_WDRAIN, ZSOILGRID,      &
                        YPH, YPHFILETYPE, XUNIF_PH, YFERT, YFERTFILETYPE,         &
