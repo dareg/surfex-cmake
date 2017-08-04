@@ -690,25 +690,25 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSPHER',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSPHER(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-        ENDDO        
+        ENDDO
         !
         YCOMMENT='snow layer grain size'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSIZE',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSIZE(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-        ENDDO        
+        ENDDO
         !
         YCOMMENT='snow layer specific surface area'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWSSA',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWSSA(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-        ENDDO        
+        ENDDO
         !
         YCOMMENT='snow layer grain type'
         DO JP=1,IO%NPATCH
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWTYPE',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWTYPEMEPRA(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-        ENDDO        
+        ENDDO
         !
         YCOMMENT='snow layer ram resistance'
         DO JP=1,IO%NPATCH

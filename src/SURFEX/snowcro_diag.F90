@@ -101,9 +101,11 @@ INTEGER :: ICLASS_DEND, ICLASS_SPHER, ICLASS_SIZE, ICLASS_HIST, ICLASS
 REAL    :: ZDIAM                      ! for SSA calculations
 REAL    :: ZRAM_FIN,ZRAM_DEN,ZRAM_ANG   ! for ram strength calculations
 REAL    :: ZSHE_SPH,ZSHE_DEN,ZSHE_MTS,& ! for shear strength calculations
-ZSHE_FE,ZSHE_FRE,ZSHE_FRE_SEC
-REAL::ZEC,Z_TGM
+           ZSHE_FE,ZSHE_FRE,ZSHE_FRE_SEC
+REAL::ZEC,Z_TGM,ZSKIER_STRESS
 
+!1d (location dimension)
+REAL   ,DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS,ZBETA,ZSNOW_DEPTH
 LOGICAL,DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM, GWET, GREFROZEN
 
 LOGICAL :: LTHERM
@@ -129,18 +131,21 @@ GWET      = .TRUE.
 GREFROZEN = .TRUE.
 EPSI      = 1e-16 !To change to correct XUNDEF
 
-! One dimensional variables
-PSNOWDEPTH_1DAYS= 0.
-PSNOWDEPTH_3DAYS= 0.
-PSNOWDEPTH_5DAYS= 0.
-PSNOWDEPTH_7DAYS= 0.
-PSNOWSWE_1DAYS  = 0.
-PSNOWSWE_3DAYS  = 0.
-PSNOWSWE_5DAYS  = 0.
-PSNOWSWE_7DAYS  = 0.
-PSNOWRAM_SONDE  = 0.
+! One dimensional variables (cumulative!!!)
+PSNOWDEPTH_1DAYS        = 0.
+PSNOWDEPTH_3DAYS        = 0.
+PSNOWDEPTH_5DAYS        = 0.
+PSNOWDEPTH_7DAYS        = 0.
+PSNOWSWE_1DAYS          = 0.
+PSNOWSWE_3DAYS          = 0.
+PSNOWSWE_5DAYS          = 0.
+PSNOWSWE_7DAYS          = 0.
+PSNOWRAM_SONDE          = 0.
 PSNOW_WETTHICKNESS      = 0.
 PSNOW_REFROZENTHICKNESS = 0.
+ZWEIGH_STRESS           = 0.
+ZBETA                   = 0.
+ZSNOW_DEPTH             = 0.
 
 ! Two dimensional variables
 PSNOWDEND       = XUNDEF
@@ -457,9 +462,98 @@ DO JST=1,SIZE(PSNOWSWE,2)
         (PSNOWRHO(JJ,JST)*PSNOWRHO(JJ,JST) / 10000. -0.6) + 0.12)
 
       ENDIF
-!
 
-!
+
+      !########################Strength stress ratio######################################################!
+      ! Computes the ratio PACC_RAT between the shear strength (PSNOWSHEAR kgf/dm2 = 0.981 kPa) of the
+      ! current layer and the shear stress due to a skier and to the overlying snow weight at the TOP of the layer
+      ! (= bottom of just above layer).
+      ! and the ratio PNAT_RAT between the shear strength (PSNOWSHEAR kgf/dm2 = 0.981 kPa) and the shear
+      ! stress due only to the weight of the layers at the BOTTOM of the current layer.
+      !
+      ! Stress skier takes into account that the additional stress induced by the skier
+      ! is more distributed (so lower) in the snowpack far below the skier than just below the skier.
+      ! The calculation is based on the simplification of the semi-infinite uniform elastic layer
+      ! theory developed by Boussinesq. Expert rules are used to account for
+      ! bridging effects of different snow types (calculation of beta).
+      !
+      ! Low value of beta indicates high bridging effect (i.e. decrease of max shear stress)
+      ! slab_thr = 1.5          #Threshold on shear strength (kgf/dm2)
+      ! beta_refrozen = 0.5     #(MF/RG, MF, MF/DH or MF/FC) and thermal_state <= 2
+      ! beta_humid = 1.1        #(MF/RG, MF, MF/DH or MF/FC) and thermal_state >  2
+      ! beta_evolved = 1.0      #Other snow types and shear_strength >  slab_thr
+      ! beta_recent_dry = 1.2   #Other snow types and shear_strength <= slab_thr
+      !
+      ! WARNING: two slightly different versions in "python snowtools" or "MEPRA fortran" of PACC_RAT.
+      ! The version in MEPRA fortran is used to calculate the accidental risk and the version
+      ! in snowtools just provides the value of 'MEPRA_ACCIDENTAL_RATIO' but is not used for
+      ! other calculations. Differences are observed on the calculation of contps
+      ! (e.g. -0.015 *snow_depth + 1.45). And the indexing of beta is unclear.
+      ! Corrected in latest surfex version (24.11.2015) ?
+      !
+      ! WARNING: not defined for slope angle = 0 and first top layer
+
+
+      ! Update of beta (bridging factor)
+      IF ((PSNOWTYPEMEPRA(JJ,JST)==JP_MF_MF).OR.&
+          (PSNOWTYPEMEPRA(JJ,JST)==JP_RG_MF).OR.&
+          (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_FC).OR.&
+          (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_DH)) THEN
+
+        IF (PSNOWTEMP(JJ,JST) < 272.96) THEN
+          ZBETA(JJ) = ZBETA(JJ) + 0.5 * PSNOWDZ(JJ,JST)
+        ELSE
+          ZBETA(JJ) = ZBETA(JJ) + 1.1 * PSNOWDZ(JJ,JST)
+        ENDIF
+
+      ELSE
+
+        IF (PSNOWSHEAR(JJ,JST) > 1.5) THEN
+          ZBETA(JJ) = ZBETA(JJ) + 1.0 * PSNOWDZ(JJ,JST)
+        ELSE
+          ZBETA(JJ) = ZBETA(JJ) + 1.2 * PSNOWDZ(JJ,JST)
+        ENDIF
+
+      ENDIF
+
+      !Update of snow depth (depth of bottom of current layer)
+      ZSNOW_DEPTH(JJ) = ZSNOW_DEPTH(JJ) + PSNOWDZ(JJ,JST)
+
+      !Calculation of skier_stress
+      IF (    ZSNOW_DEPTH(JJ) < 0.10) THEN
+        ZSKIER_STRESS = -15 * ZSNOW_DEPTH(JJ) + 4
+      ELSEIF (ZSNOW_DEPTH(JJ) < 0.15) THEN
+        ZSKIER_STRESS = -10 * ZSNOW_DEPTH(JJ) + 3.5
+      ELSEIF (ZSNOW_DEPTH(JJ) < 0.2 ) THEN
+        ZSKIER_STRESS =  -8 * ZSNOW_DEPTH(JJ) + 3.2
+      ELSEIF (ZSNOW_DEPTH(JJ) < 0.35) THEN
+        ZSKIER_STRESS =  -4 * ZSNOW_DEPTH(JJ) + 2.4
+      ELSEIF (ZSNOW_DEPTH(JJ) < 0.5 ) THEN
+        ZSKIER_STRESS =  -2 * ZSNOW_DEPTH(JJ) + 1.7
+      ELSEIF (ZSNOW_DEPTH(JJ) < 0.8 ) THEN
+        ZSKIER_STRESS =-1.5 * ZSNOW_DEPTH(JJ) + 1.45
+      ELSE
+        ZSKIER_STRESS = 0
+      ENDIF
+
+      !Update of shear stress due to overlying layers
+      ZWEIGH_STRESS(JJ) = ZWEIGH_STRESS(JJ) + &
+      PSNOWRHO(JJ,JST) * PSNOWDZ(JJ,JST) * SQRT(1-PDIRCOSZW(JJ)*PDIRCOSZW(JJ)) / 100.
+
+      IF(PDIRCOSZW(JJ)<1) THEN
+        IF (JST>1) THEN
+          PNAT_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / ZWEIGH_STRESS(JJ)
+          PACC_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / PACC_RAT(JJ,JST)
+        ENDIF
+
+        IF(JST<SIZE(PSNOWSWE,2)) THEN
+          !Storing temporariliy stress of skier and snow in PACC_RAT of next layer
+          PACC_RAT(JJ,JST+1) = ZWEIGH_STRESS(JJ) + 1.4 * ZBETA(JJ)/ZSNOW_DEPTH(JJ) * ZSKIER_STRESS
+        ENDIF
+      ENDIF
+
+      !PACC_RAT(JJ,JST) = 2
+      !PNAT_RAT(JJ,JST) = 3
 !
 !
 !
