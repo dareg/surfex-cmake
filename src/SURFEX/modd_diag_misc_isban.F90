@@ -96,14 +96,15 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XCDSNOW    ! snow drag coefficient (ISBA-ES:3-L)           (-)
   REAL, POINTER, DIMENSION(:) :: XCHSNOW    ! heat turbulent transfer coefficient 
 !                                               ! (ISBA-ES:3-L)                                 (-)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWDZ     ! snow layer thicknesses                        (m)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWDEND   ! dendricity (Crocus)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWSPHER  ! sphericity (Crocus)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWSIZE   ! grain size (Crocus)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWSSA    ! snow specific surface area (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWDZ        ! snow layer thicknesses                        (m)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWDEND      ! dendricity (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSPHER     ! sphericity (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSIZE      ! grain size (Crocus)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSSA       ! snow specific surface area (Crocus)
   REAL, POINTER, DIMENSION(:,:) :: XSNOWTYPEMEPRA ! snow grain type (Crocus-MEPRA)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWRAM    ! snow ram resistance (Crocus-MEPRA)
-  REAL, POINTER, DIMENSION(:,:) :: XSNOWSHEAR  ! snow shear resistance (Crocus-MEPRA)  
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWRAM       ! snow ram resistance (Crocus-MEPRA)
+  REAL, POINTER, DIMENSION(:,:) :: XSNOWSHEAR     ! snow shear resistance (Crocus-MEPRA)
+  REAL, POINTER, DIMENSION(:,:) :: XACC_RAT       ! accidental ratio strength/stress
 !
   REAL, POINTER, DIMENSION(:) :: XSNOWHMASS ! heat content change due to mass
 !                                           ! changes in snowpack: for budget
@@ -198,7 +199,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XFRD2_TWGI)
   NULLIFY(DMI%XFRD3_TSWI)
   NULLIFY(DMI%XFRD3_TWG)
-  NULLIFY(DMI%XFRD3_TWGI)    
+  NULLIFY(DMI%XFRD3_TWGI)
   NULLIFY(DMI%XALT)
   NULLIFY(DMI%XFLT)
   NULLIFY(DMI%XRNSNOW)
@@ -219,18 +220,19 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XSNOWSSA)
   NULLIFY(DMI%XSNOWRAM)
   NULLIFY(DMI%XSNOWSHEAR)
+  NULLIFY(DMI%XACC_RAT)
   NULLIFY(DMI%XSNDPT_1DY)
   NULLIFY(DMI%XSNDPT_3DY)
   NULLIFY(DMI%XSNDPT_5DY)
-  NULLIFY(DMI%XSNDPT_7DY) 
+  NULLIFY(DMI%XSNDPT_7DY)
   NULLIFY(DMI%XSNSWE_1DY)
   NULLIFY(DMI%XSNSWE_3DY)
   NULLIFY(DMI%XSNSWE_5DY)
   NULLIFY(DMI%XSNSWE_7DY)
   NULLIFY(DMI%XSNRAM_SONDE)
   NULLIFY(DMI%XSN_REFRZNTHCKN)
-  NULLIFY(DMI%XSN_WETTHCKN)  
-  NULLIFY(DMI%XSNOWHMASS)  
+  NULLIFY(DMI%XSN_WETTHCKN)
+  NULLIFY(DMI%XSNOWHMASS)
   NULLIFY(DMI%XSNOWLIQ)
   NULLIFY(DMI%XSNOWTEMP)
   NULLIFY(DMI%XTWSNOW)
@@ -255,7 +257,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XC2)
   NULLIFY(DMI%XWGEQ)
   NULLIFY(DMI%XCT)
-  NULLIFY(DMI%XRS)  
+  NULLIFY(DMI%XRS)
 DMI%LSURF_MISC_BUDGET=.FALSE.
 DMI%LSURF_DIAG_ALBEDO=.FALSE.
 DMI%LSURF_MISC_DIF=.FALSE.

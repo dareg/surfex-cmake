@@ -150,6 +150,7 @@ IF (OSURF_MISC_BUDGET) THEN
     !
     WHERE (DMK%XSNOWLIQ(:,:)/=XUNDEF) &
                     DMK%XSNOWLIQ(:,:) = DMK%XSNOWLIQ(:,:) * XRHOLW / DMK%XSNOWDZ(:,:)
+    !Check consitency: dz is vertical (?)
     !
   ENDIF
   !
