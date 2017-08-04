@@ -727,6 +727,12 @@ IF (DM%LSURF_MISC_BUDGET) THEN
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'ACC_RAT',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XACC_RAT(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO
+
+        YCOMMENT='natural stress/strength ratio'
+        DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'NAT_RAT',YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XNAT_RAT(:,:),ISIZE,'snow_layer',S%XWSN_WR)
+        ENDDO
         !
       ENDIF
       !

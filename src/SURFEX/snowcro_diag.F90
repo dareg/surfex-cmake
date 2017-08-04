@@ -4,7 +4,7 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
                         PSNOWDZ, PSNOWSWE, PSNOWRHO, PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE, &
                         PSNOWHIST, PSNOWTEMP, PSNOWLIQ, PDIRCOSZW, PSNOWDEND, PSNOWSPHER, &
                         PSNOWSIZE, PSNOWSSA, PSNOWTYPEMEPRA, PSNOWRAM, PSNOWSHEAR, &
-                        PACC_RAT,&
+                        PACC_RAT, PNAT_RAT, &
                         PSNOWDEPTH_1DAYS, PSNOWDEPTH_3DAYS, PSNOWDEPTH_5DAYS, &
                         PSNOWDEPTH_7DAYS, PSNOWSWE_1DAYS, PSNOWSWE_3DAYS, PSNOWSWE_5DAYS,&
                         PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFROZENTHICKNESS)
@@ -79,6 +79,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWTYPEMEPRA     ! snow type (-) INTEGER*
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWRAM           ! ram penetration strength (kgf = 9.81 N)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSHEAR         ! shear strength (kgf/dm2 = 0.981 kPa)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PACC_RAT           ! accidental ratio shear strength/stress
+REAL, DIMENSION(:,:), INTENT(OUT) :: PNAT_RAT           ! natural ratio shear strength/stress
 !Layer-integrated variables
 REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWDEPTH_1DAYS   ! height of snow with age <= 1 day  (m)
 REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWDEPTH_3DAYS   ! height of snow with age <= 3 days (m)
@@ -150,6 +151,7 @@ PSNOWTYPEMEPRA  = XUNDEF
 PSNOWRAM        = XUNDEF
 PSNOWSHEAR      = XUNDEF
 PACC_RAT        = XUNDEF
+PNAT_RAT        = XUNDEF
 
 PRINT *, 'TOTO'
 
@@ -456,6 +458,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
       ENDIF
 !
+
 !
 !
 !

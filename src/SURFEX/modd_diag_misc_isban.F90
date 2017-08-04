@@ -105,6 +105,7 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XSNOWRAM       ! snow ram resistance (Crocus-MEPRA)
   REAL, POINTER, DIMENSION(:,:) :: XSNOWSHEAR     ! snow shear resistance (Crocus-MEPRA)
   REAL, POINTER, DIMENSION(:,:) :: XACC_RAT       ! accidental ratio strength/stress
+  REAL, POINTER, DIMENSION(:,:) :: XNAT_RAT       ! natural ratio strength/stress
 !
   REAL, POINTER, DIMENSION(:) :: XSNOWHMASS ! heat content change due to mass
 !                                           ! changes in snowpack: for budget
@@ -221,6 +222,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XSNOWRAM)
   NULLIFY(DMI%XSNOWSHEAR)
   NULLIFY(DMI%XACC_RAT)
+  NULLIFY(DMI%XNAT_RAT)
   NULLIFY(DMI%XSNDPT_1DY)
   NULLIFY(DMI%XSNDPT_3DY)
   NULLIFY(DMI%XSNDPT_5DY)
