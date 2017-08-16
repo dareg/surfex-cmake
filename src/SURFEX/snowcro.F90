@@ -2113,7 +2113,18 @@ DO JJ = 1,SIZE(PSNOWRHO,1)
         !
         ! Compute SSA
         ZOPTR0 = XVDIAM6/2. * 10.**6.
-        ZOPTR  = PSNOWGRAN1(JJ,JST)/2. * 10.**6.
+        ! Matthieu : Add maximum because there can be continuity problems in the
+        ! S-F metamorphism option
+        ZOPTR  = MAX(PSNOWGRAN1(JJ,JST)/2. * 10.**6.,ZOPTR0)
+        !PRINT*,"ZOPTR0=",ZOPTR0
+        !PRINT*,"ZOPTR=",ZOPTR
+        !PRINT*,"IDRHO=",IDRHO
+        !PRINT*,"IDGRAD=",IDGRAD
+        !PRINT*,"IDETEMP=",IDTEMP
+        !PRINT*, XDRDT0(IDRHO,IDGRAD,IDTEMP)
+        !PRINT*, XTAU(IDRHO,IDGRAD,IDTEMP)
+        !PRINT*, XKAPPA(IDRHO,IDGRAD,IDTEMP)
+
         ZDRDT  = XDRDT0(IDRHO,IDGRAD,IDTEMP) * &
                  ( XTAU(IDRHO,IDGRAD,IDTEMP) / &
                    ( ZOPTR - ZOPTR0 + XTAU(IDRHO,IDGRAD,IDTEMP) ) )**(1./XKAPPA(IDRHO,IDGRAD,IDTEMP))
