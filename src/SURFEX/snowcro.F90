@@ -4413,7 +4413,8 @@ DO JJ = 1,SIZE(PSNOW(:))
       ! ZTHICKNESS_INTERMEDIATE contient ce qu'il reste d'épaisseur disponible
       ! dans les couches supérieures
       !remaining snow for remaining layers
-      ZTHICKNESS_INTERMEDIATE = ZSNOW_UPPER - SUM(ZDZOPT(JJ,1:5)) - ZDZOPT(JJ,INB_UPPER_LAYER)
+      ZTHICKNESS_INTERMEDIATE = ZSNOW_UPPER - SUM ( ZDZOPT ( JJ , 1: MIN ( 5, INB_UPPER_LAYER - 1 ))) &
+                                            - ZDZOPT ( JJ,INB_UPPER_LAYER )
 
       IF ( ZSNOW_UPPER<=XDEPTH_THRESHOLD1 .OR. INB_UPPER_LAYER<8 ) THEN             
         INB_INTERMEDIATE  = INB_UPPER_LAYER - 6
