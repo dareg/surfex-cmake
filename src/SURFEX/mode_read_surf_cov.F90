@@ -141,6 +141,8 @@ ELSE
     ALLOCATE(ZFIELD(NFULL_nc))
     IMASKF=>NMASK_nc
 #endif
+  ELSE
+    ALLOCATE(ZFIELD(0))
   ENDIF
   !
   !if we want to get covers for the current task or for the whole domain
