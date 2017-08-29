@@ -54,7 +54,7 @@ USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_CSTS,    ONLY : XSTEFAN, XCPD, XRD, XP00
 !
-USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
+USE MODD_SURF_ATM, ONLY : LNOSOF, LSLOPE, LVERTSHIFT
 !
 USE MODI_FORCING_VERT_SHIFT
 USE MODI_COUPLING_ISBA_CANOPY_n
@@ -161,6 +161,9 @@ REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface oro
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV
+!
+REAL, DIMENSION(KI)    :: ZSKYVF ! SKY VIEW factor, portion of the sky seen by the simulation
+                                 ! point. 100% for a flat simulation
 REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
@@ -223,7 +226,53 @@ ENDIF
 !*      2.     Presence of orography slopes
 !              ----------------------------
 !
-IF(LNOSOF)THEN
+IF (LSLOPE) THEN
+! M. Lafaysse, August 2017
+!
+! Note that this effect is not conservative and should not be use with
+! atmospheric model
+!
+! This parameterization considers there is an homogeneous and infinite slope.
+! It replaces the parameterization LNOSOF = FALSE which is wrong in that case
+! (I do not know if LNOSOF = FALSE parameterization is correct in some
+! other SURFEX configurations).
+!
+! The LSLOPE parameterization must be used when the shortwave direct radiation has already
+! been projected on the slope.
+! The incoming diffuse shortwave and longwave radiations are horizontal and isotropic.
+! The modifications of these fluxes is only due to a sky view factor which is estimated for
+! an infinite slope.
+!  
+! The longwave radiation of the complementary solid angle is computed assuming
+! the surface of the opposite slopes have the same temperature.
+!
+! The shortwave radiation reflected by the opposite slopes are neglected.
+!
+! Do not modify the direct radiation which must be projected in the forcing file.
+   ZDIR_SW(:,:) = PDIR_SW(:,:)
+!
+! Compute the sky view factor
+   Z3D_TOT_SURF_INV (:) =1./SQRT(1.+IM%I%XSSO_SLOPE(:)**2) ! This is cosine of the slope
+   ZSKYVF    (:) =  (1+Z3D_TOT_SURF_INV(:))/2  ! (1+cos(theta))/2 ,Dumont et al. 2017
+!
+! The diffuse component is multiplied by the sky view factor
+   ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
+! The longwave component is multiplied by the sky view factor and the radiation from  the 
+! complementary solid angle is computed with the Stefan-Boltzmann law using the
+! same surface temperature as the simulation point.
+   ZLW(:) =  ZLW(:)                                  *     ZSKYVF(:) & ! Part coming from the sky 
+   + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-ZSKYVF(:))! Part coming from the ground
+!
+! The precipitation fluxes are always provided for an horizontal surface and must be projected.
+!  Liquid precipitation per m2 of actual surface
+!
+   ZRAIN(:) = ZRAIN(:) * Z3D_TOT_SURF_INV(:)
+!
+!  Solid  precipitation per m2 of actual surface
+!
+   ZSNOW(:) = ZSNOW(:) * Z3D_TOT_SURF_INV(:)
+!   
+ELSEIF(LNOSOF)THEN
 !        
 !  No modifications to conserve mass and energy with atmosphere
 !

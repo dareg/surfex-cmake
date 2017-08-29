@@ -21,7 +21,7 @@
 !!    ------------------
 USE MODD_SURF_ATM, ONLY : XCISMIN, XVMODMIN, LALDTHRES, &
                             LDRAG_COEF_ARP, LALDZ0H,      &
-                            LNOSOF, LCPL_GCM,             &
+                            LNOSOF, LSLOPE, LCPL_GCM,     &
                             XEDB, XEDC, XEDD, XEDK,       &
                             XUSURIC, XUSURID, XUSURICL,   &
                             XVCHRNK, XVZ0CM, XDELTA_MAX,  &
@@ -41,7 +41,7 @@ IMPLICIT NONE
 SAVE
 NAMELIST /NAM_SURF_ATM/XCISMIN, XVMODMIN, LALDTHRES, &
                          LDRAG_COEF_ARP, LALDZ0H,      &
-                         LNOSOF, LCPL_GCM,             &
+                         LNOSOF, LSLOPE, LCPL_GCM,     &
                          XEDB, XEDC, XEDD, XEDK,       &
                          XUSURIC, XUSURID, XUSURICL,   &
                          XVCHRNK, XVZ0CM, XDELTA_MAX,  &

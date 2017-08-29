@@ -7,7 +7,7 @@ SUBROUTINE READ_NAMELISTS_SURF(HPROGRAM)
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 !
 USE MODD_SURF_ATM,       ONLY : XCISMIN, XVMODMIN, LALDTHRES,               &
-                                   LDRAG_COEF_ARP, LALDZ0H, LNOSOF,         &
+                                   LDRAG_COEF_ARP, LALDZ0H, LNOSOF, LSLOPE, &
                                    LCPL_GCM, XEDB, XEDC, XEDD, XEDK,        &
                                    XUSURIC, XUSURID, XUSURICL,              &
                                    XVCHRNK, XVZ0CM, XRIMAX, XDELTA_MAX,     &
@@ -46,7 +46,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_SURF',0,ZHOOK_HANDLE)
  CALL DEFAULT_SURF_ATM(ZOUT_TSTEP,XCISMIN,XVMODMIN,LALDTHRES,     &
-                         LDRAG_COEF_ARP, LALDZ0H, LNOSOF,         &
+                         LDRAG_COEF_ARP, LALDZ0H, LNOSOF, LSLOPE, &
                          LCPL_GCM, XEDB, XEDC, XEDD, XEDK,        &
                          XUSURIC, XUSURID, XUSURICL,              &
                          XVCHRNK, XVZ0CM, XRIMAX, XDELTA_MAX,     &
