@@ -256,7 +256,10 @@ IF (LSLOPE) THEN
    ZSKYVF    (:) =  (1+Z3D_TOT_SURF_INV(:))/2  ! (1+cos(theta))/2 ,Dumont et al. 2017
 !
 ! The diffuse component is multiplied by the sky view factor
-   ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
+  ISWB = SIZE(PSW_BANDS)
+  DO JSWB=1,ISWB
+    ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
+  ENDDO
 ! The longwave component is multiplied by the sky view factor and the radiation from  the 
 ! complementary solid angle is computed with the Stefan-Boltzmann law using the
 ! same surface temperature as the simulation point.
