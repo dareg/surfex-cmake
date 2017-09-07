@@ -8,7 +8,7 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
                         PSNOWDEPTH_1DAYS, PSNOWDEPTH_3DAYS, PSNOWDEPTH_5DAYS, &
                         PSNOWDEPTH_7DAYS, PSNOWSWE_1DAYS, PSNOWSWE_3DAYS, PSNOWSWE_5DAYS,&
                         PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFROZENTHICKNESS,&
-                        PDEP_HIG, PDEP_MOD, PACC_LEV, PPRO_INF_TYP)
+                        PDEP_HIG, PDEP_MOD, PDEP_SUP, PACC_LEV, PPRO_INF_TYP)
 
 ! Diagnostics of Crocus snowpack model
 ! Authors: P. Hagenmuller, Meteo-France, July 2016
@@ -96,7 +96,7 @@ REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_REFROZENTHICKNESS  !
 !
 REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_HIG            ! depth of high instability (m)
 REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_MOD            ! depth of moderate instability (m)
-!REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_SUP            ! snow depth in superior profile(m)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_SUP            ! snow depth in superior profile(m)
 !REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_TOT            ! total snow depth (m)
 !REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_HUM            ! height of the uppest continuous block of humid snow in the sup
 REAL, DIMENSION(:),   INTENT(OUT)    :: PACC_LEV            ! accidental risk index (0-4)
@@ -173,6 +173,14 @@ PDEP_HIG        = 1!XUNDEF
 PDEP_MOD        = 2!XUNDEF
 PACC_LEV        = 3!XUNDEF
 PPRO_INF_TYP    = 4!XUNDEF
+
+DO JJ=1,SIZE(PSNOWSWE,1)
+ IF(PDEP_SUP(JJ) <= 1) THEN
+  PDEP_SUP(JJ) = 2
+ ELSE
+  PDEP_SUP(JJ) = 1
+ ENDIF
+ENDDO
 
 PRINT *, 'TOTO'
 
