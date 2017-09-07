@@ -8,7 +8,8 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
                         PSNOWDEPTH_1DAYS, PSNOWDEPTH_3DAYS, PSNOWDEPTH_5DAYS, &
                         PSNOWDEPTH_7DAYS, PSNOWSWE_1DAYS, PSNOWSWE_3DAYS, PSNOWSWE_5DAYS,&
                         PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFROZENTHICKNESS,&
-                        PDEP_HIG, PDEP_MOD, PDEP_SUP, PACC_LEV, PPRO_INF_TYP)
+                        PDEP_HIG, PDEP_MOD, PDEP_SUP, PDEP_TOT, PDEP_HUM,&
+                        PACC_LEV, PNAT_LEV, PPRO_SUP_TYP, PPRO_INF_TYP, PAVA_TYP)
 
 ! Diagnostics of Crocus snowpack model
 ! Authors: P. Hagenmuller, Meteo-France, July 2016
@@ -97,13 +98,13 @@ REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_REFROZENTHICKNESS  !
 REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_HIG            ! depth of high instability (m)
 REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_MOD            ! depth of moderate instability (m)
 REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_SUP            ! snow depth in superior profile(m)
-!REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_TOT            ! total snow depth (m)
-!REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_HUM            ! height of the uppest continuous block of humid snow in the sup
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_TOT            ! total snow depth (m)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_HUM            ! height of the uppest continuous block of humid snow in the sup
 REAL, DIMENSION(:),   INTENT(OUT)    :: PACC_LEV            ! accidental risk index (0-4)
-!REAL, DIMENSION(:),   INTENT(INOUT)  :: PNAT_LEV            ! natural risk index (0-6)
-!REAL, DIMENSION(:),   INTENT(INOUT)  :: PPRO_SUP_TYP        ! type of superior profile (0, 4, 5, 6)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PNAT_LEV            ! natural risk index (0-6)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PPRO_SUP_TYP        ! type of superior profile (0, 4, 5, 6)
 REAL, DIMENSION(:),   INTENT(OUT)    :: PPRO_INF_TYP        ! type of inferior profile (0, 1, 6)
-!REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP            ! type of avalanche (0-6)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP            ! type of avalanche (0-6)
 !
 !
 ! Declarations of local variables used for calculations
@@ -177,8 +178,18 @@ PPRO_INF_TYP    = 4!XUNDEF
 DO JJ=1,SIZE(PSNOWSWE,1)
  IF(PDEP_SUP(JJ) <= 1) THEN
   PDEP_SUP(JJ) = 2
+  PDEP_TOT(JJ) = 3
+  PDEP_HUM(JJ) = 4
+  PNAT_LEV(JJ) = 5
+  PPRO_SUP_TYP(JJ) = 6
+  PAVA_TYP(JJ) = 7
  ELSE
   PDEP_SUP(JJ) = 1
+  PDEP_TOT(JJ) = 1
+  PDEP_HUM(JJ) = 1
+  PNAT_LEV(JJ) = 1
+  PPRO_SUP_TYP(JJ) = 1
+  PAVA_TYP(JJ) = 1
  ENDIF
 ENDDO
 

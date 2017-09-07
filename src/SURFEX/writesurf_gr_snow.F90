@@ -387,13 +387,30 @@ END IF
 !              ------
 !
 IF (TPSNOW%SCHEME=='CRO') THEN
-  !
   YCOMMENT = 'Depth of superior profile'
-  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_SUP',YCOMMENT,KPATCH,KMASK_P,TPSNOW%DEP_SUP(:),&
-          KI,PALB_WR)
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_SUP',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%DEP_SUP(:),KI,PALB_WR)
   !
-END IF
-!
+  YCOMMENT = 'Total snow depth'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_TOT',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%DEP_TOT(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Height of the uppest continuous block of humid snow in the sup. profile'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_HUM',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%DEP_HUM(:),KI,PALB_WR)
+  !
+    YCOMMENT = 'Natural risk index'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'NAT_LEV',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%NAT_LEV(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Type of superior profile'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'PRO_SUP_TYP',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%PRO_SUP_TYP(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Type of avalanche '
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'AVA_TYP',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%AVA_TYP(:),KI,PALB_WR)
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_GR_SNOW',1,ZHOOK_HANDLE)
 !
