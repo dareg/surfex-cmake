@@ -45,7 +45,7 @@
 !!                           XTSRAD_NAT instead of XAVG_TSRAD
 !!                           delete NWG_SIZE
 !!                           water table depth
-!!
+!!      P. Hagenmuller 09/17 mepra output
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -315,26 +315,38 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='accumulated snow thickness for past 7 days'  
     CALL WRITE_SURF(HSELECT,HPROGRAM,'SD_7DY_ISBA',DM%XSNDPT_7DY(:),IRESP,HCOMMENT=YCOMMENT)                  
     !
-    YCOMMENT='accumulated snow water equivalent for past 1 days'  
+    YCOMMENT='accumulated snow water equivalent for past 1 days'
     CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_1DY_ISBA',DM%XSNSWE_1DY(:),IRESP,HCOMMENT=YCOMMENT) 
     !      
-    YCOMMENT='accumulated snow water equivalent for past 3 days'      
-    CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_3DY_ISBA',DM%XSNSWE_3DY(:),IRESP,HCOMMENT=YCOMMENT)    
+    YCOMMENT='accumulated snow water equivalent for past 3 days'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_3DY_ISBA',DM%XSNSWE_3DY(:),IRESP,HCOMMENT=YCOMMENT)
     !      
-    YCOMMENT='accumulated snow water equivalent for past 5 days'  
-    CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_5DY_ISBA',DM%XSNSWE_5DY(:),IRESP,HCOMMENT=YCOMMENT)                  
+    YCOMMENT='accumulated snow water equivalent for past 5 days'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_5DY_ISBA',DM%XSNSWE_5DY(:),IRESP,HCOMMENT=YCOMMENT)
     !
-    YCOMMENT='accumulated snow water equivalent for past 7 days'     
-    CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_7DY_ISBA',DM%XSNSWE_7DY(:),IRESP,HCOMMENT=YCOMMENT)          
+    YCOMMENT='accumulated snow water equivalent for past 7 days'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'SWE_7DY_ISBA',DM%XSNSWE_7DY(:),IRESP,HCOMMENT=YCOMMENT)
     !      
-    YCOMMENT='Penetration of ram resistance sensor (2 daN)'              
-    CALL WRITE_SURF(HSELECT,HPROGRAM,'RAMSOND_ISBA',DM%XSNRAM_SONDE(:),IRESP,HCOMMENT=YCOMMENT)        
+    YCOMMENT='Penetration of ram resistance sensor (2 daN)'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'RAMSOND_ISBA',DM%XSNRAM_SONDE(:),IRESP,HCOMMENT=YCOMMENT)
     !      
-    YCOMMENT='Thickness of wet snow at the top of the snowpack' 
-    CALL WRITE_SURF(HSELECT,HPROGRAM,'WET_TH_ISBA',DM%XSN_WETTHCKN(:),IRESP,HCOMMENT=YCOMMENT)          
+    YCOMMENT='Thickness of wet snow at the top of the snowpack'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'WET_TH_ISBA',DM%XSN_WETTHCKN(:),IRESP,HCOMMENT=YCOMMENT)
     !      
     YCOMMENT='Thickness of refrozen snow at the top of the snowpack'
-    CALL WRITE_SURF(HSELECT,HPROGRAM,'REFRZTH_ISBA',DM%XSN_REFRZNTHCKN(:),IRESP,HCOMMENT=YCOMMENT)     
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'REFRZTH_ISBA',DM%XSN_REFRZNTHCKN(:),IRESP,HCOMMENT=YCOMMENT)
+
+    YCOMMENT='Depth of high instability'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'DEP_HIG',DM%XDEP_HIG(:),IRESP,HCOMMENT=YCOMMENT)
+
+    YCOMMENT='Depth of moderate instability'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'DEP_MOD',DM%XDEP_MOD(:),IRESP,HCOMMENT=YCOMMENT)
+
+    YCOMMENT='Accidental risk index'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'ACC_LEV',DM%XACC_LEV(:),IRESP,HCOMMENT=YCOMMENT)
+
+    YCOMMENT='Type of inferior profile'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,'PRO_INF_TYP',DM%XPRO_INF_TYP(:),IRESP,HCOMMENT=YCOMMENT)
     !      
   ENDIF
   !  
@@ -646,8 +658,33 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'REFRZTH_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSN_REFRZNTHCKN(:),ISIZE,S%XWORK_WR)
-      ENDDO      
-      !   
+      ENDDO
+
+      YCOMMENT='Depth of high instability per patch'
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_HIG_',YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XDEP_HIG(:),ISIZE,S%XWORK_WR)
+      ENDDO
+
+      YCOMMENT='Depth of moderate instability per patch'
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_MOD_',YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XDEP_MOD(:),ISIZE,S%XWORK_WR)
+      ENDDO
+
+
+      YCOMMENT='Accidental risk index per patch'
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'ACC_LEV_',YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XACC_LEV(:),ISIZE,S%XWORK_WR)
+      ENDDO
+
+      YCOMMENT='Type of inferior profile'
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'PRO_INF_TYP_',YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XPRO_INF_TYP(:),ISIZE,S%XWORK_WR)
+      ENDDO
+
     ENDIF
     !
   ENDIF

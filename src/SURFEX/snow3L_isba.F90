@@ -56,15 +56,16 @@ SUBROUTINE SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,      
 !!      Packing added   4/00  Masson & Boone
 !!      z0h and snow    2/06  LeMoigne
 !!
-!!      Modified by B. Decharme  (03/2009): Consistency with Arpege permanent
+!!      Modified by B. Decharme   (03/2009): Consistency with Arpege permanent
 !!                                          snow/ice treatment
-!!      Modified by A. Boone     (04/2010): Implicit coupling with atmosphere permitted.
+!!      Modified by A. Boone      (04/2010): Implicit coupling with atmosphere permitted.
 !!
-!!      Modified by B. Decharme  (04/2010): check suspicious low temperature for ES and CROCUS
-!!      Modified by B. Decharme  (08/2013): Qsat as argument (needed for coupling with atm)
-!!      Modified by A. Boone     (10/2014): MEB: pass in fluxes when using MEB
-!!      Modified by B. Decharme  (03/2016): No snowdrift under forest
-!!      Modified by M. Lafaysse (08/2015): MEB-Crocus coupling
+!!      Modified by B. Decharme   (04/2010): check suspicious low temperature for ES and CROCUS
+!!      Modified by B. Decharme   (08/2013): Qsat as argument (needed for coupling with atm)
+!!      Modified by A. Boone      (10/2014): MEB: pass in fluxes when using MEB
+!!      Modified by B. Decharme   (03/2016): No snowdrift under forest
+!!      Modified by M. Lafaysse   (08/2015): MEB-Crocus coupling
+!!      Modified by P. Hagenmuller(09/2017): Mepra outputs
 !-------------------------------------------------------------------------------
 !
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
@@ -700,6 +701,10 @@ REAL, DIMENSION(KSIZE1) :: ZP_SNSWE_7DY
 REAL, DIMENSION(KSIZE1) :: ZP_SNRAM_SONDE
 REAL, DIMENSION(KSIZE1) :: ZP_SN_WETTHCKN
 REAL, DIMENSION(KSIZE1) :: ZP_SN_REFRZNTHCKN
+REAL, DIMENSION(KSIZE1) :: ZP_DEP_HIG
+REAL, DIMENSION(KSIZE1) :: ZP_DEP_MOD
+REAL, DIMENSION(KSIZE1) :: ZP_ACC_LEV
+REAL, DIMENSION(KSIZE1) :: ZP_PRO_INF_TYP
 !
 REAL, PARAMETER :: ZDEPTHABS = 0.60 ! m
 !
@@ -923,9 +928,10 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
                       ZP_SNOWHIST, ZP_SNOWTEMP, ZP_SNOWLIQ, ZP_DIRCOSZW, ZP_SNOWDEND, ZP_SNOWSPHER, &
                       ZP_SNOWSIZE, ZP_SNOWSSA, ZP_SNOWTYPEMEPRA, ZP_SNOWRAM, ZP_SNOWSHEAR, &
                       ZP_ACC_RAT, ZP_NAT_RAT, &
-                      ZP_SNDPT_1DY, ZP_SNDPT_3DY, ZP_SNDPT_5DY, ZP_SNDPT_7DY, ZP_SNSWE_1DY, &
-                      ZP_SNSWE_3DY, ZP_SNSWE_5DY, ZP_SNSWE_7DY, ZP_SNRAM_SONDE, ZP_SN_WETTHCKN, &
-                      ZP_SN_REFRZNTHCKN )
+                      ZP_SNDPT_1DY, ZP_SNDPT_3DY, ZP_SNDPT_5DY, ZP_SNDPT_7DY,&
+                      ZP_SNSWE_1DY, ZP_SNSWE_3DY, ZP_SNSWE_5DY, ZP_SNSWE_7DY,&
+                      ZP_SNRAM_SONDE, ZP_SN_WETTHCKN, ZP_SN_REFRZNTHCKN,&
+                      ZP_DEP_HIG, ZP_DEP_MOD, ZP_ACC_LEV, ZP_PRO_INF_TYP)
   ENDIF
   !
 ELSE 
@@ -1115,7 +1121,7 @@ DO JJ=1,KSIZE1
   DMK%XSNOWHMASS(JI)  = ZP_SNOWHMASS   (JJ) 
   DMK%XRNSNOW   (JI)  = ZP_RNSNOW      (JJ)
   DMK%XHSNOW    (JI)  = ZP_HSNOW       (JJ)
-  DMK%XHPSNOW  (JI)   = ZP_HPSNOW      (JJ)
+  DMK%XHPSNOW   (JI)  = ZP_HPSNOW      (JJ)
   DMK%XGFLUXSNOW(JI)  = ZP_GFLUXSNOW   (JJ)  
   !
   PDELHEATG    (JI)   = ZP_DELHEATG    (JJ)
@@ -1142,30 +1148,40 @@ ENDDO
 !
 IF ( SIZE(DMK%XSNOWDEND)>0 ) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBATHEN
-  DMK%XSNDPT_1DY(:) = XUNDEF
-  DMK%XSNDPT_3DY(:) = XUNDEF
-  DMK%XSNDPT_5DY(:) = XUNDEF
-  DMK%XSNDPT_7DY(:) = XUNDEF  
-  DMK%XSNSWE_1DY(:) = XUNDEF 
-  DMK%XSNSWE_3DY(:) = XUNDEF 
-  DMK%XSNSWE_5DY(:) = XUNDEF 
-  DMK%XSNSWE_7DY(:) = XUNDEF 
+  DMK%XSNDPT_1DY     (:) = XUNDEF
+  DMK%XSNDPT_3DY     (:) = XUNDEF
+  DMK%XSNDPT_5DY     (:) = XUNDEF
+  DMK%XSNDPT_7DY     (:) = XUNDEF
+  DMK%XSNSWE_1DY     (:) = XUNDEF
+  DMK%XSNSWE_3DY     (:) = XUNDEF
+  DMK%XSNSWE_5DY     (:) = XUNDEF
+  DMK%XSNSWE_7DY     (:) = XUNDEF
   DMK%XSNRAM_SONDE   (:) = XUNDEF
   DMK%XSN_WETTHCKN   (:) = XUNDEF
-  DMK%XSN_REFRZNTHCKN(:) = XUNDEF   
+  DMK%XSN_REFRZNTHCKN(:) = XUNDEF
+  DMK%XDEP_HIG       (:) = XUNDEF
+  DMK%XDEP_MOD       (:) = XUNDEF
+  DMK%XACC_LEV       (:) = XUNDEF
+  DMK%XPRO_INF_TYP   (:) = XUNDEF
+
   DO JJ=1,KSIZE1
     JI = KMASK(JJ)
-    DMK%XSNDPT_1DY(JI) = ZP_SNDPT_1DY(JJ)
-    DMK%XSNDPT_3DY(JI) = ZP_SNDPT_3DY(JJ)
-    DMK%XSNDPT_5DY(JI) = ZP_SNDPT_5DY(JJ)
-    DMK%XSNDPT_7DY(JI) = ZP_SNDPT_7DY(JJ)
-    DMK%XSNSWE_1DY(JI) = ZP_SNSWE_1DY(JJ)
-    DMK%XSNSWE_3DY(JI) = ZP_SNSWE_3DY(JJ)
-    DMK%XSNSWE_5DY(JI) = ZP_SNSWE_5DY(JJ)
-    DMK%XSNSWE_7DY(JI) = ZP_SNSWE_7DY(JJ)     
+
+    DMK%XSNDPT_1DY     (JI) = ZP_SNDPT_1DY     (JJ)
+    DMK%XSNDPT_3DY     (JI) = ZP_SNDPT_3DY     (JJ)
+    DMK%XSNDPT_5DY     (JI) = ZP_SNDPT_5DY     (JJ)
+    DMK%XSNDPT_7DY     (JI) = ZP_SNDPT_7DY     (JJ)
+    DMK%XSNSWE_1DY     (JI) = ZP_SNSWE_1DY     (JJ)
+    DMK%XSNSWE_3DY     (JI) = ZP_SNSWE_3DY     (JJ)
+    DMK%XSNSWE_5DY     (JI) = ZP_SNSWE_5DY     (JJ)
+    DMK%XSNSWE_7DY     (JI) = ZP_SNSWE_7DY     (JJ)
     DMK%XSNRAM_SONDE   (JI) = ZP_SNRAM_SONDE   (JJ)
     DMK%XSN_WETTHCKN   (JI) = ZP_SN_WETTHCKN   (JJ)
-    DMK%XSN_REFRZNTHCKN(JI) = ZP_SN_REFRZNTHCKN(JJ)    
+    DMK%XSN_REFRZNTHCKN(JI) = ZP_SN_REFRZNTHCKN(JJ)
+    DMK%XDEP_HIG       (JI) = ZP_DEP_HIG       (JJ)
+    DMK%XDEP_MOD       (JI) = ZP_DEP_MOD       (JJ)
+    DMK%XACC_LEV       (JI) = ZP_ACC_LEV       (JJ)
+    DMK%XPRO_INF_TYP   (JI) = ZP_PRO_INF_TYP   (JJ)
   ENDDO
 ENDIF
 !

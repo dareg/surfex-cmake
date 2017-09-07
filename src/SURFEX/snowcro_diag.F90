@@ -7,7 +7,8 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
                         PACC_RAT, PNAT_RAT, &
                         PSNOWDEPTH_1DAYS, PSNOWDEPTH_3DAYS, PSNOWDEPTH_5DAYS, &
                         PSNOWDEPTH_7DAYS, PSNOWSWE_1DAYS, PSNOWSWE_3DAYS, PSNOWSWE_5DAYS,&
-                        PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFROZENTHICKNESS)
+                        PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFROZENTHICKNESS,&
+                        PDEP_HIG, PDEP_MOD, PACC_LEV, PPRO_INF_TYP)
 
 ! Diagnostics of Crocus snowpack model
 ! Authors: P. Hagenmuller, Meteo-France, July 2016
@@ -71,28 +72,38 @@ REAL, DIMENSION(:),   INTENT(IN) :: PDIRCOSZW           ! cosine of slope angle 
 !
 ! Diagnostic variables of Mepra and snowpro
 ! Layer variables
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDEND          ! dendricity (-)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSPHER         ! sphericity (-)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSIZE          ! grain size (m)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSSA           ! specific surface area (m2/kg)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWTYPEMEPRA     ! snow type (-) INTEGER*1 is enough
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWRAM           ! ram penetration strength (kgf = 9.81 N)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSHEAR         ! shear strength (kgf/dm2 = 0.981 kPa)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PACC_RAT           ! accidental ratio shear strength/stress
-REAL, DIMENSION(:,:), INTENT(OUT) :: PNAT_RAT           ! natural ratio shear strength/stress
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWDEND          ! dendricity (-)
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWSPHER         ! sphericity (-)
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWSIZE          ! grain size (m)
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWSSA           ! specific surface area (m2/kg)
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWTYPEMEPRA     ! snow type (-) INTEGER*1 is enough
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWRAM           ! ram penetration strength (kgf = 9.81 N)
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PSNOWSHEAR         ! shear strength (kgf/dm2 = 0.981 kPa)
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PACC_RAT           ! accidental ratio shear strength/stress
+REAL, DIMENSION(:,:), INTENT(OUT)    :: PNAT_RAT           ! natural ratio shear strength/stress
 !Layer-integrated variables
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWDEPTH_1DAYS   ! height of snow with age <= 1 day  (m)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWDEPTH_3DAYS   ! height of snow with age <= 3 days (m)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWDEPTH_5DAYS   ! height of snow with age <= 5 days (m)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWDEPTH_7DAYS   ! height of snow with age <= 7 days (m)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWSWE_1DAYS     ! swe with age <= 1 day  (kg m-2)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWSWE_3DAYS     ! swe with age <= 3 days (kg m-2)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWSWE_5DAYS     ! swe with age <= 5 days (kg m-2)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWSWE_7DAYS     ! swe with age <= 7 days (kg m-2)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOWRAM_SONDE     ! 1st top penetration depth of ramsonde (m)
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOW_WETTHICKNESS !
-REAL, DIMENSION(:),   INTENT(OUT) :: PSNOW_REFROZENTHICKNESS  !
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWDEPTH_1DAYS   ! height of snow with age <= 1 day  (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWDEPTH_3DAYS   ! height of snow with age <= 3 days (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWDEPTH_5DAYS   ! height of snow with age <= 5 days (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWDEPTH_7DAYS   ! height of snow with age <= 7 days (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWSWE_1DAYS     ! swe with age <= 1 day  (kg m-2)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWSWE_3DAYS     ! swe with age <= 3 days (kg m-2)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWSWE_5DAYS     ! swe with age <= 5 days (kg m-2)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWSWE_7DAYS     ! swe with age <= 7 days (kg m-2)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWRAM_SONDE     ! top penetration depth of ramsonde (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_WETTHICKNESS !
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_REFROZENTHICKNESS  !
 !
+REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_HIG            ! depth of high instability (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_MOD            ! depth of moderate instability (m)
+!REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_SUP            ! snow depth in superior profile(m)
+!REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_TOT            ! total snow depth (m)
+!REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_HUM            ! height of the uppest continuous block of humid snow in the sup
+REAL, DIMENSION(:),   INTENT(OUT)    :: PACC_LEV            ! accidental risk index (0-4)
+!REAL, DIMENSION(:),   INTENT(INOUT)  :: PNAT_LEV            ! natural risk index (0-6)
+!REAL, DIMENSION(:),   INTENT(INOUT)  :: PPRO_SUP_TYP        ! type of superior profile (0, 4, 5, 6)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PPRO_INF_TYP        ! type of inferior profile (0, 1, 6)
+!REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP            ! type of avalanche (0-6)
 !
 !
 ! Declarations of local variables used for calculations
@@ -105,7 +116,7 @@ REAL    :: ZSHE_SPH,ZSHE_DEN,ZSHE_MTS,& ! for shear strength calculations
 REAL::ZEC,Z_TGM
 
 !1d (location dimension)
-REAL   ,DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS,ZSKIER_STRESS,ZBETA,ZSNOW_THICK
+REAL   ,DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS, ZSKIER_STRESS, ZBETA, ZSNOW_THICK
 LOGICAL,DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM, GWET, GREFROZEN
 
 LOGICAL :: LTHERM
@@ -148,7 +159,7 @@ ZSKIER_STRESS           = 0.
 ZBETA                   = 0.
 ZSNOW_THICK             = 0.
 
-! Two dimensional variables
+! Two dimensional variables (intitalization not absolutely necessary)
 PSNOWDEND       = XUNDEF
 PSNOWSPHER      = XUNDEF
 PSNOWSIZE       = XUNDEF
@@ -158,12 +169,16 @@ PSNOWRAM        = XUNDEF
 PSNOWSHEAR      = XUNDEF
 PACC_RAT        = XUNDEF
 PNAT_RAT        = XUNDEF
+PDEP_HIG        = 1!XUNDEF
+PDEP_MOD        = 2!XUNDEF
+PACC_LEV        = 3!XUNDEF
+PPRO_INF_TYP    = 4!XUNDEF
 
 PRINT *, 'TOTO'
 
 DO JST=1,SIZE(PSNOWSWE,2)
   DO JJ=1,SIZE(PSNOWSWE,1)
-    
+
     IF (PSNOWSWE(JJ,JST)>0) THEN
       !Do something only in case of non-empty layer
 
@@ -258,7 +273,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       !#-0.2 <= T           # 2            # 3                 # 4        #
 
       ! In practice, only the distinction between thermal state >2 or <= 2 is considered here, i.e.
-      ZSCW = XRHOLW * PSNOWLIQ(JJ,JST) / (PSNOWDZ(JJ,JST) * PDIRCOSZW(JJ)) !ZSCW = liquid water content (kg/m3)
+      ZSCW = XRHOLW * PSNOWLIQ(JJ,JST) / (PSNOWDZ(JJ,JST) * PDIRCOSZW(JJ)) !ZSCW = LWC (kg/m3)
       GTHERMSTATE = (PSNOWTEMP(JJ,JST) < 272.96) .OR. (ZSCW < 5)           !True if thermstate <= 2
 
 
@@ -496,8 +511,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
 
       ! Update of beta (bridging factor)
-      !PRINT *, ZBETA(JJ)
-
       IF (JST==1) THEN
         ZBETA(JJ) = 0
       ELSE
@@ -519,19 +532,20 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ENDIF
       ENDIF
 
-      IF(PDIRCOSZW(JJ)<1).AND.(JST>1) THEN
-        !total_stress(jst) = weight_stress(jst-1) + beta(jst) * skier_stress(jst-1)
+      IF((PDIRCOSZW(JJ)<1).AND.(JST>1)) THEN
+        ! ACC_RAT is defined only for slope > 0 and not for the top layer
+        ! total_stress(jst) = weight_stress(jst-1) + beta(jst) * skier_stress(jst-1)
         PACC_RAT(JJ,JST) = ZWEIGH_STRESS(JJ) + ZBETA(JJ) / ZSNOW_THICK(JJ) * ZSKIER_STRESS(JJ)
         PACC_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / PACC_RAT(JJ,JST)
       ELSE
         PACC_RAT(JJ,JST) = -1
       ENDIF
 
-      !Update of snow thickness
-      !ZSNOW_THICK = thickness of top of current JST layer -> thickness of bottom of current JST layer
+      ! Update of snow thickness
+      ! ZSNOW_THICK = thickness of top of current JST layer -> thickness of bottom of current JST layer
       ZSNOW_THICK(JJ) = ZSNOW_THICK(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
 
-      !Update of skier_stress
+      ! Update of skier_stress
       IF (    ZSNOW_THICK(JJ) < 0.10) THEN
         ZSKIER_STRESS(JJ) = -15.0 * ZSNOW_THICK(JJ) + 4.00
       ELSEIF (ZSNOW_THICK(JJ) < 0.15) THEN
@@ -550,15 +564,22 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
       ZSKIER_STRESS(JJ) = 1.4 * ZSKIER_STRESS(JJ) !Could be incorporated above
 
-      !Update of shear stress due to overlying layers
+      ! Update of shear stress due to overlying layers
       ZWEIGH_STRESS(JJ) = ZWEIGH_STRESS(JJ) + &
       PSNOWRHO(JJ,JST) * PSNOWDZ(JJ,JST) * SQRT(1-PDIRCOSZW(JJ)*PDIRCOSZW(JJ)) / 100.
 
-      IF(PDIRCOSZW(JJ)<1).AND.(JST>1) THEN
+      IF((PDIRCOSZW(JJ)<1).AND.(JST>1)) THEN
+        ! ACC_RAT is defined only for slope > 0 and not for the top layer
         PNAT_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / ZWEIGH_STRESS(JJ)
       ELSE
         PNAT_RAT(JJ,JST) = -1
       ENDIF
+!
+!
+!
+!
+!
+!
 !
       ! All cases
       ! Compute depth and SWE of recent snow
@@ -578,7 +599,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ENDIF
   
       IF(PSNOWAGE(JJ,JST)<=7)THEN
-        PSNOWDEPTH_7DAYS(JJ) = PSNOWDEPTH_7DAYS(JJ) + PSNOWDZ (JJ,JST)    
+        PSNOWDEPTH_7DAYS(JJ) = PSNOWDEPTH_7DAYS(JJ) + PSNOWDZ (JJ,JST)
         PSNOWSWE_7DAYS  (JJ) = PSNOWSWE_7DAYS  (JJ) + PSNOWSWE(JJ,JST)
       END IF
     
@@ -612,5 +633,5 @@ DO JST=1,SIZE(PSNOWSWE,2)
     END IF
   END DO
 END DO
-  
+
 END SUBROUTINE SNOWCRO_DIAG

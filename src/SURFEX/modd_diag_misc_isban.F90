@@ -38,6 +38,7 @@
 !!                               active layer thickness over permafrost area
 !!                               frozen layer thickness over non-permafrost area
 !!       M. Lafaysse 09/2015 : new Crocus-MEPRA outputs
+!!    P. Hagenmuller 09/2017 : complete MEPRA outputs
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -107,20 +108,24 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:,:) :: XACC_RAT       ! accidental ratio strength/stress
   REAL, POINTER, DIMENSION(:,:) :: XNAT_RAT       ! natural ratio strength/stress
 !
-  REAL, POINTER, DIMENSION(:) :: XSNOWHMASS ! heat content change due to mass
+  REAL, POINTER, DIMENSION(:)   :: XSNOWHMASS ! heat content change due to mass
 !                                           ! changes in snowpack: for budget
   REAL, POINTER, DIMENSION(:,:) :: XSNOWLIQ    ! snow liquid water profile (ISBA-ES:3-L)
   REAL, POINTER, DIMENSION(:,:) :: XSNOWTEMP   ! snow temperature profile  (ISBA-ES:3-L)
 !     
-  REAL, POINTER, DIMENSION(:) :: XTWSNOW       ! Total snow reservoir
-  REAL, POINTER, DIMENSION(:) :: XTDSNOW       ! Total snow height
-  REAL, POINTER, DIMENSION(:) :: XTTSNOW       ! Total snow temperature
+  REAL, POINTER, DIMENSION(:)   :: XTWSNOW       ! Total snow reservoir
+  REAL, POINTER, DIMENSION(:)   :: XTDSNOW       ! Total snow height
+  REAL, POINTER, DIMENSION(:)   :: XTTSNOW       ! Total snow temperature
 !
-  REAL, POINTER, DIMENSION(:) :: XSNDPT_1DY, XSNDPT_3DY, XSNDPT_5DY, XSNDPT_7DY ! fresh snow depth in 1, 3, 5, 7 days
-  REAL, POINTER, DIMENSION(:) :: XSNSWE_1DY, XSNSWE_3DY, XSNSWE_5DY, XSNSWE_7DY! fresh snow water equivalent in 1, 3, 5, 7 days
-  REAL, POINTER, DIMENSION(:) :: XSNRAM_SONDE ! penetration depth of the ram resistance sensor (2 DaN)
-  REAL, POINTER, DIMENSION(:) :: XSN_WETTHCKN ! Thickness of wet snow at the top of the snowpack
-  REAL, POINTER, DIMENSION(:) :: XSN_REFRZNTHCKN  ! Thickness of refrozen snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:)   :: XSNDPT_1DY, XSNDPT_3DY, XSNDPT_5DY, XSNDPT_7DY ! fresh snow depth in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:)   :: XSNSWE_1DY, XSNSWE_3DY, XSNSWE_5DY, XSNSWE_7DY! fresh snow water equivalent in 1, 3, 5, 7 days
+  REAL, POINTER, DIMENSION(:)   :: XSNRAM_SONDE       ! Penetration depth of the ram resistance sensor (2 DaN)
+  REAL, POINTER, DIMENSION(:)   :: XSN_WETTHCKN       ! Thickness of wet snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:)   :: XSN_REFRZNTHCKN    ! Thickness of refrozen snow at the top of the snowpack
+  REAL, POINTER, DIMENSION(:)   :: XDEP_HIG           ! Depth of high instability (m)
+  REAL, POINTER, DIMENSION(:)   :: XDEP_MOD           ! Depth of moderate instability (m)
+  REAL, POINTER, DIMENSION(:)   :: XACC_LEV           ! Accidental risk index (0-4)
+  REAL, POINTER, DIMENSION(:)   :: XPRO_INF_TYP       ! Type of inferior profile (0, 1, 6)
 
   REAL, POINTER, DIMENSION(:) :: XPSNG         ! Snow fraction over ground, diag at time t
   REAL, POINTER, DIMENSION(:) :: XPSNV         ! Snow fraction over vegetation, diag at time t
@@ -234,6 +239,10 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XSNRAM_SONDE)
   NULLIFY(DMI%XSN_REFRZNTHCKN)
   NULLIFY(DMI%XSN_WETTHCKN)
+  NULLIFY(DMI%XDEP_HIG)
+  NULLIFY(DMI%XDEP_MOD)
+  NULLIFY(DMI%XACC_LEV)
+  NULLIFY(DMI%XPRO_INF_TYP)
   NULLIFY(DMI%XSNOWHMASS)
   NULLIFY(DMI%XSNOWLIQ)
   NULLIFY(DMI%XSNOWTEMP)
