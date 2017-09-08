@@ -7,7 +7,7 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
                         PACC_RAT, PNAT_RAT, &
                         PSNOWDEPTH_1DAYS, PSNOWDEPTH_3DAYS, PSNOWDEPTH_5DAYS, &
                         PSNOWDEPTH_7DAYS, PSNOWSWE_1DAYS, PSNOWSWE_3DAYS, PSNOWSWE_5DAYS,&
-                        PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFROZENTHICKNESS,&
+                        PSNOWSWE_7DAYS, PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFTHICKNESS,&
                         PDEP_HIG, PDEP_MOD, PDEP_SUP, PDEP_TOT, PDEP_HUM,&
                         PACC_LEV, PNAT_LEV, PPRO_SUP_TYP, PPRO_INF_TYP, PAVA_TYP)
 
@@ -58,18 +58,18 @@ IMPLICIT NONE
 CHARACTER(3), INTENT(IN)         :: HSNOWMETAMO ! metamorphism option
 
 ! Prognostic of snowcro (layer variables)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ          ! slope vertical layer height (projection in diag_misc_isban)(m)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWSWE         ! mass (kg/m2)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWRHO         ! density (kg/m3)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1       ! grain morphology parameter 1 (-)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN2       ! grain morphology parameter 2 (-)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWAGE         ! age since snowfall (day)
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWHIST        ! historical parameter (-) in {0,1,2,3,4,5} ######Why REAL ?
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWTEMP        ! temperature (K)
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWLIQ         ! liquid water content (m) WARNING not in kg/m3???
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ             ! slope-parallel layer height (projection in diag_misc_isban)(m)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWSWE            ! mass (kg/m2)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWRHO            ! density (kg/m3)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1          ! grain morphology parameter 1 (-)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN2          ! grain morphology parameter 2 (-)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWAGE            ! age since snowfall (day)
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWHIST           ! historical parameter (-) in {0-5} ######Why REAL ?
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWTEMP           ! temperature (K)
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWLIQ            ! vertical liquid water content (m)
 !
 ! Characteristics of slope
-REAL, DIMENSION(:),   INTENT(IN) :: PDIRCOSZW           ! cosine of slope angle (-)
+REAL, DIMENSION(:),   INTENT(IN) :: PDIRCOSZW              ! cosine of slope angle (-)
 !
 ! Diagnostic variables of Mepra and snowpro
 ! Layer variables
@@ -93,55 +93,82 @@ REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWSWE_5DAYS     ! swe with age <= 5 d
 REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWSWE_7DAYS     ! swe with age <= 7 days (kg m-2)
 REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOWRAM_SONDE     ! top penetration depth of ramsonde (m)
 REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_WETTHICKNESS !
-REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_REFROZENTHICKNESS  !
-!
-REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_HIG            ! depth of high instability (m)
-REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_MOD            ! depth of moderate instability (m)
-REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_SUP            ! snow depth in superior profile(m)
-REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_TOT            ! total snow depth (m)
-REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_HUM            ! height of the uppest continuous block of humid snow in the sup
-REAL, DIMENSION(:),   INTENT(OUT)    :: PACC_LEV            ! accidental risk index (0-4)
-REAL, DIMENSION(:),   INTENT(INOUT)  :: PNAT_LEV            ! natural risk index (0-6)
-REAL, DIMENSION(:),   INTENT(INOUT)  :: PPRO_SUP_TYP        ! type of superior profile (0, 4, 5, 6)
-REAL, DIMENSION(:),   INTENT(OUT)    :: PPRO_INF_TYP        ! type of inferior profile (0, 1, 6)
-REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP            ! type of avalanche (0-6)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PSNOW_REFTHICKNESS !
+REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_HIG           ! depth of high instability (m)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PDEP_MOD           ! depth of moderate instability (m)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_SUP           ! snow depth in superior profile(m)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_TOT           ! total snow depth (m)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PDEP_HUM           ! height of the uppest continuous block of humid snow in the sup
+REAL, DIMENSION(:),   INTENT(OUT)    :: PACC_LEV           ! accidental risk index (0-4)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PNAT_LEV           ! natural risk index (0-6)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PPRO_SUP_TYP       ! type of superior profile (0, 4, 5, 6)
+REAL, DIMENSION(:),   INTENT(OUT)    :: PPRO_INF_TYP       ! type of inferior profile (0, 1, 6)
+REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP           ! type of avalanche (0-6)
 !
 !
 ! Declarations of local variables used for calculations
 ! scalar
-INTEGER :: ICLASS_DEND, ICLASS_SPHER, ICLASS_SIZE, ICLASS_HIST, ICLASS
-REAL    :: ZDIAM                      ! for SSA calculations
-REAL    :: ZRAM_FIN,ZRAM_DEN,ZRAM_ANG   ! for ram strength calculations
-REAL    :: ZSHE_SPH,ZSHE_DEN,ZSHE_MTS,& ! for shear strength calculations
-           ZSHE_FE,ZSHE_FRE,ZSHE_FRE_SEC
-REAL::ZEC,Z_TGM
+INTEGER :: ICLASS_DEND, ICLASS_SPHER,&                     ! for snow type calculations
+           ICLASS_SIZE, ICLASS_HIST, ICLASS,&              ! for snow type calculations
+           JJ, JST                                         ! array indices (point, layer)
+REAL    :: ZDIAM,&                                         ! for SSA calculations
+           ZRAM_FIN, ZRAM_DEN, ZRAM_ANG,&                  ! for ram strength calculations
+           ZSHE_SPH, ZSHE_DEN, ZSHE_MTS,&                  ! for shear strength calculations
+           ZSHE_FE , ZSHE_FRE, ZSHE_FRE_SEC,&              ! for shear strength calculations
+           ZEC,Z_TGM,&                                     ! for XXXX
+           ZSCW,&                                          ! liquid water content (kg/m3)
+           ZSNOWDZ,&
+           ZSNOWSWE,&
+           ZSNOW_DEPTH_TOP,&
+           ZSNOW_HEIGHT_TOP
+LOGICAL :: GMF, GPP,&                                      ! combination of snow types
+           GTHERMSTATE                                     ! thermal_state <= 2
+
+
+REAL::EPSI!!!!!!!!!!!!VERRUE A REMPLACER PAR EPSI DE SURFEX QUAND TERMINE
+
 
 !1d (location dimension)
-REAL   ,DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS, ZSKIER_STRESS, ZBETA, ZSNOW_THICK
-LOGICAL,DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM, GWET, GREFROZEN
+REAL     , DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS,&
+                                          ZSKIER_STRESS,&
+                                          ZBETA,&
+                                          ZSNOW_THICK,&
+                                          ZCRUST_THICKNESS,&
+                                          ZSNOW_DEPTH,&
+                                          ZACC_HIG_DEP,&
+                                          ZACC_MOD_DEP,&
+                                          ZPRO_CRUST,&
+                                          ZDEP_INF,&
+                                          ZNAT_HIG_DEP,&
+                                          ZNAT_MOD_DEP,&
+                                          ZHUMTHICK
+INTEGER  , DIMENSION(SIZE(PSNOWSWE,1)) :: IPRO_SUP_LIM
+INTEGER*1, DIMENSION(SIZE(PSNOWSWE,1)) :: KACC_LEV
+LOGICAL,   DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM,&
+                                          GWET,&
+                                          GREFROZEN,&
+                                          GBELOW_SLAB,&
+                                          GPREV_ISNOT_MF,&
+                                          GACC_MOD_TEMP,&
+                                          GCOULD_BE_NEW,&
+                                          GIKNOTMF,&
+                                          GFOUND,&
+                                          GHUM,&
+                                          GDRY,&
+                                          GMEL_SUR
 
-LOGICAL :: LTHERM
 
-LOGICAL :: GTHERMSTATE !thermal_state <= 2
-REAL    :: ZSCW        !liquid water content (kg/m3)
-REAL::EPSI!!!!!!!!!!!!VERRUE A REMPLACER PAR EPSI DE SURFEX QUAND TERMINE
-INTEGER :: JJ       ! Array index of point
-INTEGER :: JST      ! Array index of layer
-
-! PRINT*,ASSOCIATED(PSNOWDEPTH_1DAYS),ASSOCIATED(PSNOWDEPTH_3DAYS)
-! PRINT*,ASSOCIATED(PSNOWDEPTH_5DAYS),ASSOCIATED(PSNOWDEPTH_7DAYS)
-! PRINT*,"in snowcrodiag"
-! PRINT*,ALLOCATED(PSNOWDEPTH_1DAYS),ALLOCATED(PSNOWDEPTH_3DAYS)
-! PRINT*,ALLOCATED(PSNOWDEPTH_5DAYS),ALLOCATED(PSNOWDEPTH_7DAYS)
-! PRINT*,SIZE(PSNOWDEPTH_1DAYS),SIZE(PSNOWDEPTH_3DAYS)
-! PRINT*,SIZE(PSNOWDEPTH_5DAYS),SIZE(PSNOWDEPTH_7DAYS)
 
 ! Initializations
-! Scalar
+EPSI      = 1e-16 !To change to correct XUNDEF
+
+! Tests
 GRAM      = .TRUE.
 GWET      = .TRUE.
 GREFROZEN = .TRUE.
-EPSI      = 1e-16 !To change to correct XUNDEF
+
+!Local cumulative
+
 
 ! One dimensional variables (cumulative!!!)
 PSNOWDEPTH_1DAYS        = 0.
@@ -154,11 +181,31 @@ PSNOWSWE_5DAYS          = 0.
 PSNOWSWE_7DAYS          = 0.
 PSNOWRAM_SONDE          = 0.
 PSNOW_WETTHICKNESS      = 0.
-PSNOW_REFROZENTHICKNESS = 0.
+PSNOW_REFTHICKNESS      = 0.
 ZWEIGH_STRESS           = 0.
 ZSKIER_STRESS           = 0.
 ZBETA                   = 0.
 ZSNOW_THICK             = 0.
+ZCRUST_THICKNESS        = 0.
+ZSNOW_DEPTH             = 0.
+ZHUMTHICK = 0.
+
+! One dimensional (non cumulative)
+GBELOW_SLAB             = .FALSE.
+GPREV_ISNOT_MF          = .TRUE. !To be changed in GPREV_IS_MF ?
+GIKNOTMF        = .FALSE.
+GHUM = .TRUE.
+GDRY = .TRUE.
+GMEL_SUR = .TRUE.
+GREFROZEN = .TRUE.
+GRAM = .TRUE.
+GWET= .TRUE.
+GCOULD_BE_NEW   = .FALSE.
+ZACC_HIG_DEP            = XUNDEF
+ZACC_MOD_DEP            = XUNDEF
+PPRO_SUP_TYP    = JPPRO_SUP_NAN
+ZPRO_CRUST      = 0.
+
 
 ! Two dimensional variables (intitalization not absolutely necessary)
 PSNOWDEND       = XUNDEF
@@ -170,28 +217,12 @@ PSNOWRAM        = XUNDEF
 PSNOWSHEAR      = XUNDEF
 PACC_RAT        = XUNDEF
 PNAT_RAT        = XUNDEF
-PDEP_HIG        = 1!XUNDEF
-PDEP_MOD        = 2!XUNDEF
-PACC_LEV        = 3!XUNDEF
-PPRO_INF_TYP    = 4!XUNDEF
+PDEP_HIG        = XUNDEF
+PDEP_MOD        = XUNDEF
+PACC_LEV        = XUNDEF
+PPRO_INF_TYP    = XUNDEF
 
-DO JJ=1,SIZE(PSNOWSWE,1)
- IF(PDEP_SUP(JJ) <= 1) THEN
-  PDEP_SUP(JJ) = 2
-  PDEP_TOT(JJ) = 3
-  PDEP_HUM(JJ) = 4
-  PNAT_LEV(JJ) = 5
-  PPRO_SUP_TYP(JJ) = 6
-  PAVA_TYP(JJ) = 7
- ELSE
-  PDEP_SUP(JJ) = 1
-  PDEP_TOT(JJ) = 1
-  PDEP_HUM(JJ) = 1
-  PNAT_LEV(JJ) = 1
-  PPRO_SUP_TYP(JJ) = 1
-  PAVA_TYP(JJ) = 1
- ENDIF
-ENDDO
+! merge ZSNOW_THICK and ZSNOw_DEPTH
 
 PRINT *, 'TOTO'
 
@@ -527,7 +558,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ! Corrected in latest surfex version (24.11.2015) ?
       !
       ! WARNING: not defined for slope angle = 0 and first top layer
-
+      ! WARNING !!!!!!!!!!!!!! the division by PDIRCOSZW(JJ) does not make sense but agrees with snowtools (check snowtools)
 
       ! Update of beta (bridging factor)
       IF (JST==1) THEN
@@ -551,13 +582,13 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ENDIF
       ENDIF
 
-      IF((PDIRCOSZW(JJ)<1).AND.(JST>1)) THEN
-        ! ACC_RAT is defined only for slope > 0 and not for the top layer
+      IF((PDIRCOSZW(JJ)<0.8).AND.(JST>1)) THEN
+        ! ACC_RAT is defined only for slope > acos(0.8), i.e 40 and not for the top layer
         ! total_stress(jst) = weight_stress(jst-1) + beta(jst) * skier_stress(jst-1)
         PACC_RAT(JJ,JST) = ZWEIGH_STRESS(JJ) + ZBETA(JJ) / ZSNOW_THICK(JJ) * ZSKIER_STRESS(JJ)
         PACC_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / PACC_RAT(JJ,JST)
       ELSE
-        PACC_RAT(JJ,JST) = -1
+        PACC_RAT(JJ,JST) = XUNDEF !-1 in previous versions
       ENDIF
 
       ! Update of snow thickness
@@ -587,70 +618,406 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ZWEIGH_STRESS(JJ) = ZWEIGH_STRESS(JJ) + &
       PSNOWRHO(JJ,JST) * PSNOWDZ(JJ,JST) * SQRT(1-PDIRCOSZW(JJ)*PDIRCOSZW(JJ)) / 100.
 
-      IF((PDIRCOSZW(JJ)<1).AND.(JST>1)) THEN
-        ! ACC_RAT is defined only for slope > 0 and not for the top layer
+      IF((PDIRCOSZW(JJ)<0.8).AND.(JST>1)) THEN
+        ! ACC_RAT is defined only for slope > acos(0.8) and not for the top layer
         PNAT_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / ZWEIGH_STRESS(JJ)
       ELSE
-        PNAT_RAT(JJ,JST) = -1
-      ENDIF
-!
-!
-!
-!
-!
-!
-!
-      ! All cases
-      ! Compute depth and SWE of recent snow
-      IF(PSNOWAGE(JJ,JST)<=1)THEN
-        PSNOWDEPTH_1DAYS(JJ) = PSNOWDEPTH_1DAYS(JJ) + PSNOWDZ (JJ,JST)
-        PSNOWSWE_1DAYS  (JJ) = PSNOWSWE_1DAYS  (JJ) + PSNOWSWE(JJ,JST)
+        PNAT_RAT(JJ,JST) = XUNDEF !-1 in previous versions
       ENDIF
 
-      IF(PSNOWAGE(JJ,JST)<=3)THEN
-        PSNOWDEPTH_3DAYS(JJ) = PSNOWDEPTH_3DAYS(JJ) + PSNOWDZ (JJ,JST)    
-        PSNOWSWE_3DAYS  (JJ) = PSNOWSWE_3DAYS  (JJ) + PSNOWSWE(JJ,JST)
+      !##########################################Accidental risk###################################
+      !
+      ! Update of snow depth (check with ZSNOW_THICK ??)
+      ZSNOW_DEPTH(JJ) = ZSNOW_DEPTH(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+      ! Depth of top of current layer
+      ZSNOW_DEPTH_TOP = ZSNOW_DEPTH(JJ) - PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+      ! Update of total thickness of crusts above current layer (included)
+      ! In practice, it is not necessary to calculate it for the whole snowpack
+      ! when a high instability is already found
+      IF((PSNOWTEMP(JJ,JST) < 272.96).AND.&
+         ((PSNOWTYPEMEPRA(JJ,JST)==JP_RG_MF).OR.&
+          (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_MF).OR.&
+          (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_DH).OR.&
+          (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_FC))) THEN
+
+          ZCRUST_THICKNESS(JJ) = ZCRUST_THICKNESS(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
       ENDIF
-    
-      IF(PSNOWAGE(JJ,JST)<=5)THEN
-        PSNOWDEPTH_5DAYS(JJ) = PSNOWDEPTH_5DAYS(JJ) + PSNOWDZ (JJ,JST)    
-        PSNOWSWE_5DAYS  (JJ) = PSNOWSWE_5DAYS  (JJ) + PSNOWSWE(JJ,JST)
+
+      !
+      !If no slab structure was found yet (GBELOW_SLAB = to be under a slab)
+      IF(.NOT.GBELOW_SLAB(JJ)) THEN
+
+        !Update of GPREV_ISNOT_MF(JJ) = True if layer just above is MF-like snow
+        IF((PSNOWTYPEMEPRA(JJ,JST)==JP_RG_MF).OR.&
+           (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_MF).OR.&
+           (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_DH).OR.&
+           (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_FC)) THEN
+
+          GPREV_ISNOT_MF(JJ) = .FALSE.
+
+        !Update of GBELOW_SLAB(JJ) = True if current layer is below a slab
+        ELSEIF((PSNOWSHEAR(JJ,JST).GT.XACC_SLA_STR).AND.&
+               (GPREV_ISNOT_MF(JJ))                .AND.&
+               ((PSNOWTYPEMEPRA(JJ,JST)==JP_DF_RG).OR.&
+                (PSNOWTYPEMEPRA(JJ,JST)==JP_RG_RG).OR.&
+                (PSNOWTYPEMEPRA(JJ,JST)==JP_RG_FC).OR.&
+                (PSNOWTYPEMEPRA(JJ,JST)==JP_DF_DF))) THEN
+
+          GBELOW_SLAB(JJ) = .TRUE.
+
+        ELSE
+          !Update of GPREV_ISNOT_MF(JJ) = True if layer just above is MF-like snow
+          GPREV_ISNOT_MF(JJ) = .TRUE.
+        ENDIF
+
+      !If a slab structure was found and but no high instability -> searching for a weak layer
+      ELSEIF ((ZSNOW_DEPTH_TOP>= 0.01).AND.&
+              (ZSNOW_DEPTH_TOP<  1.00).AND.&
+              (ZACC_HIG_DEP(JJ) == XUNDEF)) THEN
+
+        !Permanent weak layer composed of facets or depth hoar
+        IF((PSNOWTYPEMEPRA(JJ,JST)==JP_FC_FC).OR.&
+           (PSNOWTYPEMEPRA(JJ,JST)==JP_FC_DH).OR.&
+           (PSNOWTYPEMEPRA(JJ,JST)==JP_DH_DH)) THEN
+
+          !If skier_ratio < threshold1
+          IF((PACC_RAT(JJ,JST).LT.XACC_RAT_HIG)) THEN
+            ZACC_HIG_DEP(JJ) = ZSNOW_DEPTH(JJ) - 0.5 * PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+            !Condition on the crust thickness above weak layer
+            IF(ZCRUST_THICKNESS(JJ) <= 0.01) THEN
+              PACC_LEV(JJ) = JPACC_HIG
+            ELSE
+              PACC_LEV(JJ) = JPACC_MOD
+            ENDIF
+
+          !Else if no moderate was found yet and skier_ratio < XACC_RAT_MOD
+          ELSEIF((ZACC_MOD_DEP(JJ) == XUNDEF).AND.(PACC_RAT(JJ,JST).LT.XACC_RAT_MOD)) THEN
+            ZACC_MOD_DEP(JJ) = ZSNOW_DEPTH(JJ) - 0.5 * PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+            !Condition on the crust thickness above weak layer
+            IF(ZCRUST_THICKNESS(JJ) <= 0.01) THEN
+              PACC_LEV(JJ) = JPACC_MOD
+            ELSE
+              PACC_LEV(JJ) = JPACC_LOW
+            ENDIF
+
+          ENDIF
+
+        !Else if not already found looking for a
+        !temporary weak layer composed of precipitation particles or decomposed snow
+        !Note that there are no condition on ratio_acc
+        ELSEIF((.NOT.GACC_MOD_TEMP(JJ)).AND.&
+               ((PSNOWTYPEMEPRA(JJ,JST)==JP_PP_PP).OR.&
+                (PSNOWTYPEMEPRA(JJ,JST)==JP_PP_DF).OR.&
+                (PSNOWTYPEMEPRA(JJ,JST)==JP_DF_DF))) THEN
+          ZACC_MOD_DEP(JJ) = ZSNOW_DEPTH(JJ) - 0.5 * PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+          !Condition on the crust thickness above weak layer
+          IF(ZCRUST_THICKNESS(JJ) <= 0.01) THEN
+              PACC_LEV(JJ) = JPACC_MOD
+            ELSE
+              PACC_LEV(JJ) = JPACC_LOW
+            ENDIF
+
+          GACC_MOD_TEMP(JJ) = .TRUE.
+
+        ENDIF
       ENDIF
-  
-      IF(PSNOWAGE(JJ,JST)<=7)THEN
-        PSNOWDEPTH_7DAYS(JJ) = PSNOWDEPTH_7DAYS(JJ) + PSNOWDZ (JJ,JST)
-        PSNOWSWE_7DAYS  (JJ) = PSNOWSWE_7DAYS  (JJ) + PSNOWSWE(JJ,JST)
-      END IF
-    
+
+      IF(KACC_LEV(JJ)==JPACC_NAN) THEN
+        KACC_LEV(JJ) = JPACC_LOW
+      ENDIF
+
+      !The accidental risk is later (see below) combined with the natural (spontaneous) risk.
+      !!!!!TEMP
+      PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
+      PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
+!
+!
+!
+      !#######################Superior profile detection and classification########################
+      !
+      ! Note that there are more superior profile classes in original Mepra but they are never used
+      ! in practice. In consequence, they are not considered here. Three types of sup. profile are
+      ! considered: NEW (new snow), FRO (top frozen), WET (top wet).
+      !
+      ! Profile type NEW
+      ! The superior profile, in case of the presence recent snow, is composed of
+      ! the recent snow layers (even not at surface) and all above layers and possibly directly
+      ! below humid layers (thermal_state>2), where thin ice crusts (connected thickness < 1 cm and
+      ! composed of dry MF-like snow layers) are "ignored".
+
+      ! Profile types WET or FRO
+      ! Roughly, these profiles are composed of connected layers of MF-like snow if the top of
+      ! this block of MF layers is close to the snow surface. There are additional constraints to
+      ! define these profiles but they do not make clear sense to me.
+
+      !!!!TODO!!!!!
+      !PPRO_SUP_TYP when no snow = JPPRO_SUP_NAN = 6
+      !HSUP HINF in case of flat terrain ???
+
+      ! GMF = the snowtype is MF-like (MF/RG, MF, MF/DH, MF/FC)
+      GMF = (PSNOWTYPEMEPRA(JJ,JST)==JP_RG_MF).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_MF).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_DH).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_FC)
+
+      ! GPP = the snowtype is new-like, i.e. being of type PP, PP/DF, DF, DF/RG, DF/FC
+      ! not strictly equivalent of being dendritic
+      GPP = (PSNOWTYPEMEPRA(JJ,JST)==JP_PP_PP).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_PP_DF).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_DF_DF).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_DF_RG).OR.&
+            (PSNOWTYPEMEPRA(JJ,JST)==JP_DF_FC)
+
+      IF(GPP) THEN
+        ! When recent snow is found, then
+        ! the superior profile type is, in all cases, NEW,
+        ! the superior profile reaches at least this layer,
+        ! what is direclty below potentially belongs to the superior profile and
+        ! the thickness of the connex crusts is re-initiliazed to zero.
+        PPRO_SUP_TYP (JJ) = JPPRO_SUP_NEW
+        IPRO_SUP_LIM (JJ) = JST
+        PDEP_SUP     (JJ) = ZSNOW_DEPTH(JJ)
+        GCOULD_BE_NEW(JJ) = .TRUE.
+        ZPRO_CRUST   (JJ) = 0
+
+      ELSEIF(GCOULD_BE_NEW(JJ)) THEN
+        ! if the current layer potentially belongs to the sup. profile
+
+        IF((.NOT.GTHERMSTATE).AND.(ZPRO_CRUST(JJ) < XPRO_SUP_CRU)) THEN
+          ! if the current layer is humid and the above crust thickness < 1 cm
+          ! then the current layer and potentially what is below, belongs to the sup. profile and
+          ! the crust thickness is re-initialized to zero.
+          IPRO_SUP_LIM(JJ) = JST
+          PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
+          ZPRO_CRUST  (JJ) = 0
+
+        ELSEIF(GMF.AND.GTHERMSTATE) THEN
+          ! elseif the current layer is a crust
+          ! then we increase the crust thickness accordingly
+          ZPRO_CRUST(JJ) = ZPRO_CRUST(JJ) + PSNOWDZ(JJ,JST)
+
+        ELSE
+          ! in all other cases, the layer and what is below do not belong to the sup. profile.
+          GCOULD_BE_NEW(JJ) = .FALSE.
+
+        ENDIF
+
+      ELSEIF(PPRO_SUP_TYP(JJ).NE.JPPRO_SUP_NEW) THEN
+      ! if a sup. profile of type NEW was not found yet.
+
+        IF(.NOT.GFOUND(JJ)) THEN
+          ! if not found yet, we are looking for the first layer of type MF or being at a
+          ! depth > 3 cm. This layer thermal state determines whether the profile is FRO or WET
+          ! (not consistent...). In case of this layer being not MF, we are not sure yet that the
+          ! sup. profile will be FRO/WET or NAN.
+
+          IF(GMF.OR.(ZSNOW_DEPTH(JJ)>XPRO_SUP_DEP)) THEN
+            GFOUND      (JJ) = .TRUE.
+            IPRO_SUP_LIM(JJ) = JST
+            PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
+
+            IF(GTHERMSTATE) THEN
+              PPRO_SUP_TYP(JJ) = JPPRO_SUP_FRO
+            ELSE
+              PPRO_SUP_TYP(JJ) = JPPRO_SUP_WET
+            ENDIF
+
+            IF(.NOT.GMF) THEN
+              GIKNOTMF(JJ) = .TRUE.
+            ENDIF
+          ENDIF
+
+        ELSEIF(JST.EQ.(IPRO_SUP_LIM(JJ)+1)) THEN
+          !if the first layer of type MF or being at a depth > 3 cm was found and
+          !the bottom of the sup. profile is just above the current layer
+
+          IF(GMF) THEN
+            !if the current layer is of type MF
+            !then we increase the sup. profile and
+            !we do not care anymore on the type of the "found" layer
+            IPRO_SUP_LIM(JJ) = JST
+            PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
+            GIKNOTMF    (JJ) = .FALSE.
+
+          ELSEIF(GIKNOTMF(JJ)) THEN
+            !if the current layer and the "found" layer are not of MF
+            IPRO_SUP_LIM(JJ) = 0
+            PDEP_SUP    (JJ) = 0
+            PPRO_SUP_TYP(JJ) = JPPRO_SUP_NAN
+          ENDIF
+
+        ENDIF
+
+      ENDIF
+
+!
+!
+      !!!!!!!!!!!!!!!!!!!!!Cumulative SWE and DEPTH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      !
+      !Compute depth and SWE of snow with age < X days (X in {1,3,5,7})
+      !
+      !WARNING: there is some rounding, age could be expressed as int in seconds or minutes
+      !but there would be a loss of genericity of the possible crocus timesetps
+      !to get equality with snow_pro.py, replace age<duration by age<=duration in python
+
+      ! PSNOWSWE is slope perpendicular, it is here porjected on the vertical axis,
+      ! as it is later done in diag_misc_isban.
+      ZSNOWSWE = PSNOWSWE(JJ,JST) / PDIRCOSZW(JJ)
+      ZSNOWDZ  = PSNOWDZ (JJ,JST) / PDIRCOSZW(JJ)
+
+      IF(    PSNOWAGE(JJ,JST) <= 7) THEN
+        PSNOWDEPTH_7DAYS(JJ) = PSNOWDEPTH_7DAYS(JJ) + ZSNOWDZ
+        PSNOWSWE_7DAYS  (JJ) = PSNOWSWE_7DAYS  (JJ) + ZSNOWSWE
+      ELSEIF(PSNOWAGE(JJ,JST) <= 5) THEN
+        PSNOWDEPTH_5DAYS(JJ) = PSNOWDEPTH_5DAYS(JJ) + ZSNOWDZ
+        PSNOWSWE_5DAYS  (JJ) = PSNOWSWE_5DAYS  (JJ) + ZSNOWSWE
+      ELSEIF(PSNOWAGE(JJ,JST) <= 3) THEN
+        PSNOWDEPTH_3DAYS(JJ) = PSNOWDEPTH_3DAYS(JJ) + ZSNOWDZ
+        PSNOWSWE_3DAYS  (JJ) = PSNOWSWE_3DAYS  (JJ) + ZSNOWSWE
+      ELSEIF(PSNOWAGE(JJ,JST) <= 1) THEN
+        PSNOWDEPTH_1DAYS(JJ) = PSNOWDEPTH_1DAYS(JJ) + ZSNOWDZ
+        PSNOWSWE_1DAYS  (JJ) = PSNOWSWE_1DAYS  (JJ) + ZSNOWSWE
+      ENDIF
+
       ! Ram sonde penetration
       IF ((GRAM(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
-        PSNOWRAM_SONDE(JJ)=PSNOWRAM_SONDE(JJ)+PSNOWDZ(JJ,JST)
+        PSNOWRAM_SONDE(JJ)   = PSNOWRAM_SONDE(  JJ) + ZSNOWDZ
       ELSE
         GRAM(JJ)=.FALSE.
       ENDIF
 
       ! Depth of wet snow
-      IF ((GWET(JJ)).AND.(PSNOWLIQ(JJ,JST)>0.)) THEN
-        PSNOW_WETTHICKNESS(JJ)=PSNOW_WETTHICKNESS(JJ)+PSNOWDZ(JJ,JST)
+      IF ((GWET(JJ)).AND.(PSNOWLIQ(JJ,JST)>0)) THEN
+        PSNOW_WETTHICKNESS(JJ) = PSNOW_WETTHICKNESS(JJ) + PSNOWDZ(JJ,JST)
       ELSE
         GWET(JJ)=.FALSE.
       ENDIF
+
       ! Depth of refrozen snow
-      IF ((GREFROZEN(JJ)).AND.(PSNOWHIST(JJ,JST)>=2).AND.(PSNOWTEMP(JJ,JST)<273.15)) THEN
-        PSNOW_REFROZENTHICKNESS(JJ)=PSNOW_REFROZENTHICKNESS(JJ)+PSNOWDZ(JJ,JST)
+      IF (GREFROZEN(JJ).AND.(PSNOWHIST(JJ,JST)>=2).AND.(PSNOWTEMP(JJ,JST)<273.15)) THEN
+        PSNOW_REFTHICKNESS(JJ) = PSNOW_REFTHICKNESS(JJ) + PSNOWDZ(JJ,JST)
       ELSE
         GREFROZEN(JJ)=.FALSE.
-      ENDIF    
-    
+      ENDIF
+
+
       ! Specific surface area
+      !in snowpro the density of ice (XRHOLI) is 900 kg/m3 instead of 917 kg/m3 (SURFEX)
+      !which needs to be changed in snow_pro.py
+      !Note: only tested with B92
       IF ( HSNOWMETAMO=='B92' ) THEN
         PSNOWSSA(JJ,JST) = 6. / (XRHOLI*ZDIAM)
       ELSE
         PSNOWSSA(JJ,JST) = 6. / (XRHOLI*PSNOWGRAN1(JJ,JST))
       END IF
 
-    END IF
+    ENDIF
   END DO
 END DO
+
+!RE-initialization for new calculations
+DO JJ=1,SIZE(PSNOWSWE,1)
+  PDEP_TOT   (JJ) = ZSNOW_DEPTH(JJ)
+  ZSNOW_DEPTH(JJ) = 0
+  ZDEP_INF   (JJ) = PDEP_TOT(JJ) - PDEP_SUP(JJ)
+  GWET       (JJ) = .TRUE.
+END DO
+!
+!
+DO JST=1,SIZE(PSNOWSWE,2)
+  DO JJ=1,SIZE(PSNOWSWE,1)
+!
+    IF (PSNOWSWE(JJ,JST) > 0) THEN
+      ! Do something only in case of non-empty layer
+      !
+      ! Update of snow depth (depth of bottom of current layer)
+      !!!!!!!!!!!!!!!!!ALREADY CALCULATED
+      ZSNOW_HEIGHT_TOP = PDEP_TOT(JJ) - ZSNOW_DEPTH(JJ)
+      ZSNOW_DEPTH(JJ)  = ZSNOW_DEPTH(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+!
+      IF(JST<=IPRO_SUP_LIM(JJ)) THEN
+        ! Inside superior profile
+!
+        ZSCW = XRHOLW * PSNOWLIQ(JJ,JST) / (PSNOWDZ(JJ,JST) * PDIRCOSZW(JJ)) !liquid water content
+        GTHERMSTATE = (PSNOWTEMP(JJ,JST) < 272.96).OR.(ZSCW < 5)!True if thermstate <= 2
+!
+        ! Calculations of the height of the uppest continuous block of humid snow in the sup.
+        ! profile (slightly different from SNOWWETTHICKNESS)
+        IF(GWET(JJ).AND.(.NOT.GTHERMSTATE)) THEN
+          PDEP_HUM(JJ) = PDEP_HUM(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+        ELSEIF(PDEP_HUM(JJ).GT.0) THEN
+          GWET(JJ) = .FALSE.
+        ENDIF
+!
+        ! Determination of natural risk based on the stress/strength ratio
+        IF(ZSNOW_HEIGHT_TOP.GE.XNAT_HEI_MIN) THEN
+        !Only searching above a certain height
+
+          IF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW) THEN
+
+            IF(PNAT_RAT(JJ,JST).LE.XNAT_RAT_HIG) THEN
+              ZNAT_HIG_DEP(JJ) = ZSNOW_DEPTH(JJ)
+            ELSEIF(PNAT_RAT(JJ,JST).LE.(XNAT_RAT_MOD+0.05)) THEN !verrue d'origine inconnue
+              ZNAT_MOD_DEP(JJ) = ZSNOW_DEPTH(JJ)
+            ENDIF
+
+          ELSE
+
+            IF(PNAT_RAT(JJ,JST).LE.XNAT_RAT_HIG) THEN
+              ZNAT_HIG_DEP(JJ) = ZSNOW_DEPTH(JJ)
+            ELSEIF(PNAT_RAT(JJ,JST).LE.XNAT_RAT_MOD) THEN
+              ZNAT_MOD_DEP(JJ) = ZSNOW_DEPTH(JJ)
+            ENDIF
+
+
+          ENDIF
+
+
+          ! Calculations used for avalanche type determination
+
+          ! For profile sup. NEW
+          IF(GTHERMSTATE) THEN
+            GHUM(JJ) = .FALSE.
+          ELSE
+            GDRY(JJ) = .FALSE.
+          ENDIF
+
+          !For profile sup. WET and profile inf. NAN
+          IF((ZSNOW_DEPTH(JJ).GT.XNAT_HEI_MIN).AND.GTHERMSTATE) THEN
+            GMEL_SUR(JJ) = .TRUE.
+          ENDIF
+
+          !For profile sup. FRO and profile inf. NAN
+          !Non-sense ...
+          ZHUMTHICK(JJ) = ZHUMTHICK(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+
+        ENDIF
+!
+      ELSE
+        !inside inferior profile
+        IF(PPRO_INF_TYP(JJ).NE.JPPRO_INF_HAR) THEN
+          IF(ZSNOW_HEIGHT_TOP.GT.(XPRO_INF_COE * ZDEP_INF(JJ))) THEN
+          !NOOOOOOOOOOOOOOT SURE of top
+            IF(PSNOWRAM(JJ,JST).LT.XPRO_INF_RAM) THEN
+              PPRO_INF_TYP(JJ) = JPPRO_INF_SOF
+            ELSE
+              PPRO_INF_TYP(JJ) = JPPRO_INF_HAR
+            ENDIF
+          ENDIF
+        ENDIF
+
+      ENDIF
+
+    ENDIF
+
+  ENDDO
+ENDDO
+
 
 END SUBROUTINE SNOWCRO_DIAG
