@@ -84,6 +84,7 @@ sub setup_parse {
       $type_spec.= '(?:(?:INTEGER|REAL|LOGICAL|DOUBLE PRECISION|COMPLEX)[\s]*+(?:'.$kind_selector.')?)';
       $type_spec.= '|(?:CHARACTER[\s]*+(?:'.$char_selector.')?)';
       $type_spec.= '|(?:TYPE[\s]*+[(][\s]*+'.$type_name.'[\s]*+[)])';
+      $type_spec.= '|(?:CLASS[ ]*+[(][\s]*+'.$name.'[\s]*[)])';
       $type_spec.=')';
 #RJ: special flag to try to recover, by default 'unforgivable'
   our ${f90s_FORGIVE_ME}=0;
@@ -128,9 +129,11 @@ my $dump="\n\@\@\@\n".$$slurp;
 {
   local $/;
 
-#RJ: end[ ]?interface is mandatory, thus explointing
+#RJ: end[ ]?interface is mandatory, thus explointing (including OO stuff too)
 #RJ: markup/blacklist inteface blocks with \x07 "bell character"
-  $dump=~ s%[\n]([ ]*+(?:end)?+[ \t]*+(?:interface))\b%\n\x11$1%ig;
+  $dump=~ s%[\n]([ ]*+(?:end)?+[ \t]*+(?:(?:abstract[ ])?+interface))\b%\n\x11$1%ig;
+#RJ: end[ ]?type is mandated for users, thus very exploiting (to support contains inside TYPE declarations)
+  $dump=~ s%[\n]([ ]*+(?:end)?+[ \t]*+(?:type(?![ \t]*+(?:[(]|is\b))))\b%\n\x11$1%ig;
   $dump=~ s%[\n]([\x11][^\x11]++[\x11])%my $t="\n".$1;$t=~s/[\n][\x11]?/\n\x07/g;$t%eg;
 
   if($dump=~s/[\r][\n]?+/\n/g) {
@@ -627,6 +630,14 @@ CRACK:    {
             $externalized=1;
           }
         }
+        elsif(/^CLASS *\(/) {
+          $content='clas_decl';
+          $decl=2;
+        }
+        elsif(/^PROCEDURE *[(]?/) {
+          $content='procedure_decl';
+          $decl=2;
+        }
         elsif(/^ALLOCATABLE\b/) {
           $content='ALLOCATABLE';
         }
@@ -698,11 +709,24 @@ CRACK:    {
             $in_interface=1;
           }
         }
+        elsif(/^ABSTRACT INTERFACE\b/) {
+          $content='INTERFACE';
+          if(! $study_called) {
+            $$prog_info{has_interface_block}=1;
+            $in_interface=1;
+          }
+        }
 #RJ: catch multi space cases too
 #RJ         elsif(/^END ?INTERFACE\b/) {
         elsif(/^END[ ]*+INTERFACE\b/) {
           $content='END INTERFACE';
           $in_interface=0;
+        }
+#RJ: some more CLASS nonsense
+        elsif(/^TYPE IS\b/i) {
+          $content='type_check';
+          $decl=0;
+          $exec=1;
         }
 #RJ         elsif(/^TYPE *[^\( ]/i) {
         elsif(/^TYPE[ ]*+[^\( ]/i) {
@@ -1085,6 +1109,9 @@ sub study_exec{
 #RJ: catch multi space cases too
   elsif(/^END[ ]*+SELECT\b/) {
     $$content='END SELECT';
+  }
+  elsif(/^($name\s*:\s*)*SELECT\s?TYPE\b/) {
+    $$content='SELECT TYPE';
   }
   elsif(/^WHERE *\(/) {
     $$content='WHERE_construct';
@@ -2787,6 +2814,9 @@ sub f90_indent {
     }
     elsif($href->{content} eq 'END SELECT') {
       $pre_chg=1;
+    }
+    elsif($href->{content} eq 'SELECT TYPE') {
+      $post_chg=1;
     }
     $cont_line=' ' if($href->{content} eq 'cont_line');
     if( $pre_chg ) {
