@@ -175,6 +175,7 @@ EPSI      = 1e-16 !To change to correct XUNDEF
 GRAM      = .TRUE.
 GWET      = .TRUE.
 GREFROZEN = .TRUE.
+GACC_MOD_TEMP = .FALSE.
 
 !Local cumulative
 
@@ -604,7 +605,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ENDIF
       ENDIF
 
-      IF((PDIRCOSZW(JJ)<0.8).AND.(JST>1)) THEN
+      IF((PDIRCOSZW(JJ)<1).AND.(JST>1)) THEN
         ! ACC_RAT is defined only for slope > acos(0.8), i.e 40 and not for the top layer
         ! total_stress(jst) = weight_stress(jst-1) + beta(jst) * skier_stress(jst-1)
         PACC_RAT(JJ,JST) = ZWEIGH_STRESS(JJ) + ZBETA(JJ) / ZSNOW_THICK(JJ) * ZSKIER_STRESS(JJ)
@@ -640,7 +641,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ZWEIGH_STRESS(JJ) = ZWEIGH_STRESS(JJ) + &
       PSNOWRHO(JJ,JST) * PSNOWDZ(JJ,JST) * SQRT(1-PDIRCOSZW(JJ)*PDIRCOSZW(JJ)) / 100.
 
-      IF((PDIRCOSZW(JJ)<0.8).AND.(JST>1)) THEN
+      IF((PDIRCOSZW(JJ)<1).AND.(JST>1)) THEN
         ! ACC_RAT is defined only for slope > acos(0.8) and not for the top layer
         PNAT_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / ZWEIGH_STRESS(JJ)
       ELSE
@@ -735,19 +736,20 @@ DO JST=1,SIZE(PSNOWSWE,2)
                ((PSNOWTYPEMEPRA(JJ,JST)==JP_PP_PP).OR.&
                 (PSNOWTYPEMEPRA(JJ,JST)==JP_PP_DF).OR.&
                 (PSNOWTYPEMEPRA(JJ,JST)==JP_DF_DF))) THEN
+
           ZACC_MOD_DEP(JJ) = ZSNOW_DEPTH(JJ) - 0.5 * PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+          GACC_MOD_TEMP(JJ) = .TRUE.
 
           !Condition on the crust thickness above weak layer
           IF(ZCRUST_THICKNESS(JJ) <= 0.01) THEN
-              PACC_LEV(JJ) = JPACC_MOD
-            ELSE
-              PACC_LEV(JJ) = JPACC_LOW
-            ENDIF
-
-          GACC_MOD_TEMP(JJ) = .TRUE.
+            PACC_LEV(JJ) = JPACC_MOD
+          ELSE
+            PACC_LEV(JJ) = JPACC_LOW
+          ENDIF
 
         ENDIF
       ENDIF
+
 
       IF(KACC_LEV(JJ)==JPACC_NAN) THEN
         KACC_LEV(JJ) = JPACC_LOW
@@ -1223,8 +1225,21 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   !  PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
   !ENDIF
   !!!!!!!!!!!!!!!!!!!
-  PDEP_HIG(JJ) = ZNAT_HIG_DEP(JJ)
-  PDEP_MOD(JJ) = ZNAT_MOD_DEP(JJ)
+
+  IF(ZACC_HIG_DEP(JJ) == XUNDEF) THEN
+    IF(ZACC_MOD_DEP(JJ) == XUNDEF) THEN
+      PDEP_HIG(JJ) = -1
+      PDEP_MOD(JJ) = -1
+    ELSE
+      PDEP_HIG(JJ) = -1
+      PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
+    ENDIF
+  ELSE
+    PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
+    PDEP_MOD(JJ) = -1
+  ENDIF
+
+  PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
   !!!!!!!!!!!!!!!!!!!!
   !
   !
@@ -1234,12 +1249,14 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   !
   !Verrue additionelle pour le cas sans pente
   !Does not make sense, since these variables could be also defined for flat terrain
-  IF(PDIRCOSZW(JJ).EQ.1) THEN
+  IF(PDIRCOSZW(JJ).GT.0.9) THEN
   !!!!!!!!!!!!!!??replace 0 by XUNDEF
     PDEP_SUP(JJ) = 0
     PDEP_HUM(JJ) = 0
-    PDEP_HIG(JJ) = -1
+    PDEP_HIG(JJ) = XUNDEF
+    PDEP_MOD(JJ) = XUNDEF
     PAVA_TYP(JJ) = 0
+
   ENDIF
 
   IF(PDEP_HIG(JJ).EQ.0) THEN
