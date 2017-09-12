@@ -1104,6 +1104,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     ENDDO
   ENDDO
 
+  PEK%TSNOW%PRO_SUP_TYP(:)  = 6!!!!!!!?????????,,
   DO JJ=1,KSIZE1
     JI = KMASK(JJ)
     PEK%TSNOW%DEP_SUP    (JI) = ZP_DEP_SUP    (JJ)

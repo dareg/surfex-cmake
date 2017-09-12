@@ -110,7 +110,10 @@ REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP           ! type of avalanche (
 ! scalar
 INTEGER :: ICLASS_DEND, ICLASS_SPHER,&                     ! for snow type calculations
            ICLASS_SIZE, ICLASS_HIST, ICLASS,&              ! for snow type calculations
-           JJ, JST                                         ! array indices (point, layer)
+           JJ, JST,&                                       ! array indices (point, layer)
+           IPRO_CLASS,&                                    ! for natural risk index calculations
+           IVAL_HIG, IVAL_MOD, IVAL_LOW,&                  ! for natural risk index calculations
+           IACC_FROMNAT
 REAL    :: ZDIAM,&                                         ! for SSA calculations
            ZRAM_FIN, ZRAM_DEN, ZRAM_ANG,&                  ! for ram strength calculations
            ZSHE_SPH, ZSHE_DEN, ZSHE_MTS,&                  ! for shear strength calculations
@@ -141,6 +144,12 @@ REAL     , DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS,&
                                           ZDEP_INF,&
                                           ZNAT_HIG_DEP,&
                                           ZNAT_MOD_DEP,&
+                                          ZDEP_SUP_PRE,&
+                                          ZDEP_TOT_PRE,&
+                                          ZDEP_HUM_PRE,&
+                                          ZAVA_TYP_PRE,&
+                                          ZNAT_LEV_PRE,&
+                                          ZPRO_SUP_TYP_PRE,&
                                           ZHUMTHICK
 INTEGER  , DIMENSION(SIZE(PSNOWSWE,1)) :: IPRO_SUP_LIM
 INTEGER*1, DIMENSION(SIZE(PSNOWSWE,1)) :: KACC_LEV
@@ -203,7 +212,7 @@ GWET= .TRUE.
 GCOULD_BE_NEW   = .FALSE.
 ZACC_HIG_DEP            = XUNDEF
 ZACC_MOD_DEP            = XUNDEF
-PPRO_SUP_TYP    = JPPRO_SUP_NAN
+
 ZPRO_CRUST      = 0.
 
 
@@ -221,6 +230,19 @@ PDEP_HIG        = XUNDEF
 PDEP_MOD        = XUNDEF
 PACC_LEV        = XUNDEF
 PPRO_INF_TYP    = XUNDEF
+
+!Saving previous time step variables
+DO JJ=1,SIZE(PSNOWSWE,1)
+  ZDEP_SUP_PRE    (JJ) = PDEP_SUP    (JJ)
+  ZDEP_TOT_PRE    (JJ) = PDEP_TOT    (JJ)
+  ZDEP_HUM_PRE    (JJ) = PDEP_HUM    (JJ)
+  ZAVA_TYP_PRE    (JJ) = PAVA_TYP    (JJ)
+  ZNAT_LEV_PRE    (JJ) = PNAT_LEV    (JJ)
+  ZPRO_SUP_TYP_PRE(JJ) = PPRO_SUP_TYP(JJ)
+ENDDO
+
+PPRO_SUP_TYP    = JPPRO_SUP_NAN
+PAVA_TYP         = JPAVA_NAN
 
 ! merge ZSNOW_THICK and ZSNOw_DEPTH
 
@@ -733,8 +755,8 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
       !The accidental risk is later (see below) combined with the natural (spontaneous) risk.
       !!!!!TEMP
-      PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
-      PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
+      !PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
+      !PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
 !
 !
 !
@@ -884,21 +906,21 @@ DO JST=1,SIZE(PSNOWSWE,2)
         PSNOWSWE_1DAYS  (JJ) = PSNOWSWE_1DAYS  (JJ) + ZSNOWSWE
       ENDIF
 
-      ! Ram sonde penetration
+      ! Ramsonde top penetration
       IF ((GRAM(JJ)).AND.(PSNOWRAM(JJ,JST)<=2.)) THEN
         PSNOWRAM_SONDE(JJ)   = PSNOWRAM_SONDE(  JJ) + ZSNOWDZ
       ELSE
         GRAM(JJ)=.FALSE.
       ENDIF
 
-      ! Depth of wet snow
+      ! Depth of top wet snow
       IF ((GWET(JJ)).AND.(PSNOWLIQ(JJ,JST)>0)) THEN
         PSNOW_WETTHICKNESS(JJ) = PSNOW_WETTHICKNESS(JJ) + PSNOWDZ(JJ,JST)
       ELSE
         GWET(JJ)=.FALSE.
       ENDIF
 
-      ! Depth of refrozen snow
+      ! Depth of top refrozen snow
       IF (GREFROZEN(JJ).AND.(PSNOWHIST(JJ,JST)>=2).AND.(PSNOWTEMP(JJ,JST)<273.15)) THEN
         PSNOW_REFTHICKNESS(JJ) = PSNOW_REFTHICKNESS(JJ) + PSNOWDZ(JJ,JST)
       ELSE
@@ -907,9 +929,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
 
       ! Specific surface area
-      !in snowpro the density of ice (XRHOLI) is 900 kg/m3 instead of 917 kg/m3 (SURFEX)
-      !which needs to be changed in snow_pro.py
-      !Note: only tested with B92
+      ! in snowpro the density of ice (XRHOLI) is 900 kg/m3 instead of 917 kg/m3 (SURFEX)
+      ! which needs to be changed in snow_pro.py
+      ! Note: only tested with B92
       IF ( HSNOWMETAMO=='B92' ) THEN
         PSNOWSSA(JJ,JST) = 6. / (XRHOLI*ZDIAM)
       ELSE
@@ -960,14 +982,16 @@ DO JST=1,SIZE(PSNOWSWE,2)
         !Only searching above a certain height
 
           IF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW) THEN
+          ! Case of NEW sup. profile
 
             IF(PNAT_RAT(JJ,JST).LE.XNAT_RAT_HIG) THEN
               ZNAT_HIG_DEP(JJ) = ZSNOW_DEPTH(JJ)
-            ELSEIF(PNAT_RAT(JJ,JST).LE.(XNAT_RAT_MOD+0.05)) THEN !verrue d'origine inconnue
+            ELSEIF(PNAT_RAT(JJ,JST).LE.(XNAT_RAT_MOD + 0.05)) THEN !verrue d'origine inconnue
               ZNAT_MOD_DEP(JJ) = ZSNOW_DEPTH(JJ)
             ENDIF
 
           ELSE
+          ! Case of WET or FRO profiles (code not accesible for nan profile)
 
             IF(PNAT_RAT(JJ,JST).LE.XNAT_RAT_HIG) THEN
               ZNAT_HIG_DEP(JJ) = ZSNOW_DEPTH(JJ)
@@ -981,14 +1005,14 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
           ! Calculations used for avalanche type determination
 
-          ! For profile sup. NEW
+          ! Used only for profile sup. NEW
           IF(GTHERMSTATE) THEN
             GHUM(JJ) = .FALSE.
           ELSE
             GDRY(JJ) = .FALSE.
           ENDIF
 
-          !For profile sup. WET and profile inf. NAN
+          ! Used only for profile sup. WET and profile inf. NAN
           IF((ZSNOW_DEPTH(JJ).GT.XNAT_HEI_MIN).AND.GTHERMSTATE) THEN
             GMEL_SUR(JJ) = .TRUE.
           ENDIF
@@ -1000,7 +1024,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ENDIF
 !
       ELSE
-        !inside inferior profile
+        !inside inferior profile to determine its type
         IF(PPRO_INF_TYP(JJ).NE.JPPRO_INF_HAR) THEN
           IF(ZSNOW_HEIGHT_TOP.GT.(XPRO_INF_COE * ZDEP_INF(JJ))) THEN
           !NOOOOOOOOOOOOOOT SURE of top
@@ -1017,6 +1041,215 @@ DO JST=1,SIZE(PSNOWSWE,2)
     ENDIF
 
   ENDDO
+ENDDO
+
+!Loop only on points
+DO JJ=1,SIZE(PSNOWSWE,1)
+
+  !!!!!!!!Natural risks index determination!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  SELECT CASE(INT(PPRO_SUP_TYP(JJ)))
+    CASE(JPPRO_SUP_NEW)
+      IPRO_CLASS = 0
+    CASE(JPPRO_SUP_WET)
+      IPRO_CLASS = 15
+    CASE(JPPRO_SUP_FRO)
+      IPRO_CLASS = 30
+    CASE DEFAULT
+      IPRO_CLASS = 0 !CHECKKKKKKKKKKKKKK
+  END SELECT
+
+  IF    (ZNAT_HIG_DEP(JJ) > XNAT_HEI_HIG) THEN
+    IVAL_HIG = JPNAT_TAB(15 + IPRO_CLASS)
+  ELSEIF(ZNAT_HIG_DEP(JJ) > XNAT_HEI_MOD) THEN
+    IVAL_HIG = JPNAT_TAB(12 + IPRO_CLASS)
+  ELSEIF(ZNAT_HIG_DEP(JJ) > XNAT_HEI_LOW) THEN
+    IVAL_HIG = JPNAT_TAB(9  + IPRO_CLASS)
+  ELSEIF(ZNAT_HIG_DEP(JJ) > 0           ) THEN
+    IVAL_HIG = JPNAT_TAB(6  + IPRO_CLASS)
+  ELSE
+    IVAL_HIG = JPNAT_TAB(3  + IPRO_CLASS)
+  ENDIF
+
+  IF    (ZNAT_MOD_DEP(JJ) > XNAT_HEI_HIG) THEN
+    IVAL_MOD = JPNAT_TAB(14 + IPRO_CLASS)
+  ELSEIF(ZNAT_MOD_DEP(JJ) > XNAT_HEI_MOD) THEN
+    IVAL_MOD = JPNAT_TAB(11 + IPRO_CLASS)
+  ELSEIF(ZNAT_MOD_DEP(JJ) > XNAT_HEI_LOW) THEN
+    IVAL_MOD = JPNAT_TAB(8  + IPRO_CLASS)
+  ELSEIF(ZNAT_MOD_DEP(JJ) > 0)            THEN
+    IVAL_MOD = JPNAT_TAB(5  + IPRO_CLASS)
+  ELSE
+    IVAL_MOD = JPNAT_TAB(2  + IPRO_CLASS)
+  ENDIF
+
+  IF    (PDEP_SUP(JJ) > XNAT_HEI_HIG) THEN
+    IVAL_LOW = JPNAT_TAB(13 + IPRO_CLASS)
+  ELSEIF(PDEP_SUP(JJ) > XNAT_HEI_MOD) THEN
+    IVAL_LOW = JPNAT_TAB(10 + IPRO_CLASS)
+  ELSEIF(PDEP_SUP(JJ) > XNAT_HEI_LOW) THEN
+    IVAL_LOW = JPNAT_TAB(7  + IPRO_CLASS)
+  ELSEIF(PDEP_SUP(JJ) > 0)            THEN
+    IVAL_LOW = JPNAT_TAB(4  + IPRO_CLASS)
+  ELSE
+    IVAL_LOW = JPNAT_TAB(1  + IPRO_CLASS)
+  ENDIF
+
+
+  IF(IVAL_HIG.NE.JPNAT_MOA) THEN
+    ! coding of PNAT_LEV(JJ) = MAX(IVAL_LOW,IVAL_MOD,IVAL_LOW)
+    ! but MAX only works on REAL or INTEGER*4, not INTEGER*1
+    IF(IVAL_MOD.GT.IVAL_LOW) THEN
+      PNAT_LEV(JJ) = IVAL_MOD
+    ELSE
+      PNAT_LEV(JJ) = IVAL_LOW
+    ENDIF
+
+    IF(IVAL_HIG.GT.PNAT_LEV(JJ)) THEN
+      PNAT_LEV(JJ) = IVAL_HIG
+    ENDIF
+
+  ELSE
+    PNAT_LEV(JJ) = JPNAT_MOA
+
+  ENDIF
+
+
+
+  !!!!!!!!!!!!!!!!!Avalanche type!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+  IF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW) THEN
+    !Profile sup. NEW
+
+    IF(GHUM(JJ)) THEN
+      PAVA_TYP(JJ) = JPAVA_NEW_WET
+    ELSEIF(GDRY(JJ)) THEN
+      PAVA_TYP(JJ) = JPAVA_NEW_DRY
+    ELSE
+      PAVA_TYP(JJ) = JPAVA_NEW_MIX
+    ENDIF
+
+  ELSEIF(PPRO_INF_TYP(JJ).EQ.JPPRO_INF_HAR) THEN
+  !Profile sup. FRO  or WET and profile inf. HAR
+    PAVA_TYP(JJ) = JPAVA_MEL_SUR
+
+  ELSEIF(PPRO_INF_TYP(JJ).EQ.JPPRO_INF_SOF) THEN
+  !Profile sup. FRO  or WET and profile inf. SOF
+    PAVA_TYP(JJ) = JPAVA_MEL_GRO
+
+  ELSEIF(PPRO_INF_TYP(JJ).EQ.JPPRO_INF_NAN) THEN
+    !Profile sup. FRO  or WET and profile inf. NAN
+
+    IF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_FRO) THEN
+    ENDIF
+
+    IF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_WET) THEN
+    ENDIF
+
+  ENDIF
+
+    !Additional condition to determine avalanche type
+  !IF((PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_FRO).AND.(PNAT_LEV(JJ).EQ.JPNAT_VLO)) THEN
+  !moved. before after actualize
+  IF((PNAT_LEV(JJ).EQ.JPNAT_VLO).AND.(PPRO_SUP_TYP(JJ).NE.JPPRO_SUP_NEW)) THEN
+    PAVA_TYP(JJ) = JPAVA_NAN
+  ENDIF
+
+  !!!!!Risk nat actualize
+
+  ! only in case, there is not a NAN risk in the previous step
+  IF(ZNAT_LEV_PRE(JJ).LT.JPNAT_NAN) THEN
+
+    !For type sup. NEW
+    IF((  PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW   )   .AND.&
+       (  PAVA_TYP    (JJ).EQ.ZAVA_TYP_PRE(JJ))   .AND.&
+       (  PDEP_TOT    (JJ).LT.ZDEP_TOT_PRE(JJ))   .AND.&
+       (  PDEP_SUP    (JJ).LE.ZDEP_SUP_PRE(JJ))   .AND.&
+       (((PAVA_TYP(JJ).EQ.JPAVA_NEW_MIX).AND.(PDEP_HUM(JJ).LE.ZDEP_HUM_PRE(JJ))).OR.&
+        (PAVA_TYP(JJ).NE.JPAVA_NEW_MIX))) THEN
+
+      PNAT_LEV(JJ) = JPNAT_ACT(INT(PNAT_LEV(JJ)*6 + ZNAT_LEV_PRE(JJ) + 1))
+      !
+      !Weird addtional instruction
+      IF(( PAVA_TYP(JJ).NE.JPAVA_NEW_MIX).AND.&
+         ((PNAT_LEV(JJ).EQ.JPNAT_HIG).OR.(PNAT_LEV(JJ).EQ.JPNAT_VHI)).AND.&
+         ((ZNAT_LEV_PRE(JJ).EQ.JPNAT_MOD).OR.(ZNAT_LEV_PRE(JJ).EQ.JPNAT_HIG).OR.&
+          (ZNAT_LEV_PRE(JJ).EQ.JPNAT_VHI))) THEN
+
+         PNAT_LEV(JJ) = JPNAT_MOD
+      ENDIF
+
+    ENDIF
+
+    !For type sup. WET or FRO
+    IF(((PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_WET).OR.(PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_FRO)).AND.&
+       ((ZPRO_SUP_TYP_PRE(JJ).EQ.JPPRO_SUP_WET).OR.(ZPRO_SUP_TYP_PRE(JJ).EQ.JPPRO_SUP_FRO)).AND.&
+       (ZDEP_INF(JJ).GE.(ZDEP_TOT_PRE(JJ)-ZDEP_SUP_PRE(JJ)-0.05))) THEN
+
+      IF(PNAT_LEV(JJ).EQ.JPNAT_MOD) THEN
+        PNAT_LEV(JJ) = JPNAT_LOW
+      ENDIF
+
+      IF((PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_WET).AND.&
+         ((PNAT_LEV(JJ).EQ.JPNAT_HIG).OR.(PNAT_LEV(JJ).EQ.JPNAT_VHI))) THEN
+
+        IF((ZNAT_LEV_PRE(JJ).EQ.JPNAT_MOD).OR.&
+           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_HIG).OR.&
+           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_VHI)) THEN
+          PNAT_LEV(JJ) = JPNAT_MOD
+        ELSEIF(ZNAT_LEV_PRE(JJ).EQ.JPNAT_LOW) THEN
+          PNAT_LEV(JJ) = JPNAT_LOW
+        ENDIF
+      ENDIF
+    ENDIF
+  ENDIF
+
+! Combination of natural and accidental risk levels
+!
+  IF    ((PNAT_LEV(JJ).EQ.JPNAT_VHI).OR.(PNAT_LEV(JJ).EQ.JPNAT_VHI)) THEN
+    IACC_FROMNAT = JPACC_HIG
+  ELSEIF((PNAT_LEV(JJ).EQ.JPNAT_MOD).OR.(PNAT_LEV(JJ).EQ.JPNAT_MOA)) THEN
+    IACC_FROMNAT = JPACC_MOD
+  ELSE
+    IACC_FROMNAT = JPACC_NUL !!!!!!!!!!!!!!!!!!JP_ACC_LOW ???
+  ENDIF
+
+  !IF(IACC_FROMNAT.GT.PACC_LEV(JJ)) THEN
+  !  PACC_LEV(JJ) = IACC_FROMNAT
+  !  PDEP_HIG(JJ) = ZNAT_HIG_DEP(JJ)
+  !  PDEP_MOD(JJ) = ZNAT_MOD_DEP(JJ)
+  !ELSE
+  !  PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
+  !  PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
+  !ENDIF
+  !!!!!!!!!!!!!!!!!!!
+  PDEP_HIG(JJ) = ZNAT_HIG_DEP(JJ)
+  PDEP_MOD(JJ) = ZNAT_MOD_DEP(JJ)
+  !!!!!!!!!!!!!!!!!!!!
+  !
+  !
+
+  !
+  !
+  !
+  !Verrue additionelle pour le cas sans pente
+  !Does not make sense, since these variables could be also defined for flat terrain
+  IF(PDIRCOSZW(JJ).EQ.1) THEN
+  !!!!!!!!!!!!!!??replace 0 by XUNDEF
+    PDEP_SUP(JJ) = 0
+    PDEP_HUM(JJ) = 0
+    PDEP_HIG(JJ) = -1
+    PAVA_TYP(JJ) = 0
+  ENDIF
+
+  IF(PDEP_HIG(JJ).EQ.0) THEN
+    PDEP_HIG(JJ) = XUNDEF
+  ENDIF
+
+  IF(PDEP_MOD(JJ).EQ.0) THEN
+    PDEP_MOD(JJ) = XUNDEF
+  ENDIF
+
 ENDDO
 
 
