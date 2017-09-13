@@ -120,9 +120,9 @@ IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO' .OR. TPSNOW%SCHEME=='1-L' .OR
         TPSNOW%DEP_SUP     = XUNDEF
         TPSNOW%DEP_TOT     = XUNDEF
         TPSNOW%DEP_HUM     = XUNDEF
-        TPSNOW%NAT_LEV     = XUNDEF
+        TPSNOW%NAT_LEV     = 6!XUNDEF
         TPSNOW%PRO_SUP_TYP = 6!XUNDEF
-        TPSNOW%AVA_TYP     = XUNDEF
+        TPSNOW%AVA_TYP     = 6!XUNDEF
         !
       END IF
       !

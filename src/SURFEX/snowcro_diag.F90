@@ -17,7 +17,7 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
 !
 ! Note that the Mepra diagnosis is the exact copy of the original Mepra (version in snowtools)
 ! and that this version explicitely contains incoherences (see comments in code and list below).
-! In consequence, Mepra results should be considered for what it is worth.
+! In consequence, Mepra results should be considered for what they are worth.
 !
 !########################Mepra overall organization################################################!
 !   0) Initialization of working variables
@@ -106,6 +106,8 @@ REAL, DIMENSION(:),   INTENT(OUT)    :: PPRO_INF_TYP       ! type of inferior pr
 REAL, DIMENSION(:),   INTENT(INOUT)  :: PAVA_TYP           ! type of avalanche (0-6)
 !
 !
+!
+!
 ! Declarations of local variables used for calculations
 ! scalar
 INTEGER :: ICLASS_DEND, ICLASS_SPHER,&                     ! for snow type calculations
@@ -123,7 +125,8 @@ REAL    :: ZDIAM,&                                         ! for SSA calculation
            ZSNOWDZ,&
            ZSNOWSWE,&
            ZSNOW_DEPTH_TOP,&
-           ZSNOW_HEIGHT_TOP
+           ZSNOW_HEIGHT_TOP,&
+           ZNAT_LEV_TMP
 LOGICAL :: GMF, GPP,&                                      ! combination of snow types
            GTHERMSTATE                                     ! thermal_state <= 2
 
@@ -136,12 +139,13 @@ REAL     , DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS,&
                                           ZSKIER_STRESS,&
                                           ZBETA,&
                                           ZSNOW_THICK,&
-                                          ZCRUST_THICKNESS,&
-                                          ZSNOW_DEPTH,&
+                                          ZCRUST_THICKNESS,&    !Total thickness of frozen MF-like
+                                          ZSNOW_DEPTH,&         !Depth of current layer
+                                          ZPRO_CRUST,&          !Thickness of continuous crust
+                                          ZDEP_INF,&
+                                          ZHUMTHICK,&
                                           ZACC_HIG_DEP,&
                                           ZACC_MOD_DEP,&
-                                          ZPRO_CRUST,&
-                                          ZDEP_INF,&
                                           ZNAT_HIG_DEP,&
                                           ZNAT_MOD_DEP,&
                                           ZDEP_SUP_PRE,&
@@ -149,8 +153,8 @@ REAL     , DIMENSION(SIZE(PSNOWSWE,1)) :: ZWEIGH_STRESS,&
                                           ZDEP_HUM_PRE,&
                                           ZAVA_TYP_PRE,&
                                           ZNAT_LEV_PRE,&
-                                          ZPRO_SUP_TYP_PRE,&
-                                          ZHUMTHICK
+                                          ZPRO_SUP_TYP_PRE
+
 INTEGER  , DIMENSION(SIZE(PSNOWSWE,1)) :: IPRO_SUP_LIM
 INTEGER*1, DIMENSION(SIZE(PSNOWSWE,1)) :: KACC_LEV
 LOGICAL,   DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM,&
@@ -171,11 +175,28 @@ LOGICAL,   DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM,&
 ! Initializations
 EPSI      = 1e-16 !To change to correct XUNDEF
 
+!Saving previous time step variables
+DO JJ=1,SIZE(PSNOWSWE,1)
+  ZDEP_SUP_PRE    (JJ) = PDEP_SUP    (JJ)
+  ZDEP_TOT_PRE    (JJ) = PDEP_TOT    (JJ)
+  ZDEP_HUM_PRE    (JJ) = PDEP_HUM    (JJ)
+  ZAVA_TYP_PRE    (JJ) = PAVA_TYP    (JJ)
+  ZNAT_LEV_PRE    (JJ) = PNAT_LEV    (JJ)
+  ZPRO_SUP_TYP_PRE(JJ) = PPRO_SUP_TYP(JJ)
+ENDDO
+
 ! Tests
-GRAM      = .TRUE.
-GWET      = .TRUE.
-GREFROZEN = .TRUE.
-GACC_MOD_TEMP = .FALSE.
+GRAM            = .TRUE.
+GWET            = .TRUE.
+GREFROZEN       = .TRUE.
+GACC_MOD_TEMP   = .FALSE.
+GBELOW_SLAB     = .FALSE.
+GPREV_ISNOT_MF  = .TRUE. !To be changed in GPREV_IS_MF ?
+GIKNOTMF        = .FALSE.
+GHUM            = .TRUE.
+GDRY            = .TRUE.
+GMEL_SUR        = .TRUE.
+GCOULD_BE_NEW   = .FALSE.
 
 !Local cumulative
 
@@ -198,23 +219,17 @@ ZBETA                   = 0.
 ZSNOW_THICK             = 0.
 ZCRUST_THICKNESS        = 0.
 ZSNOW_DEPTH             = 0.
-ZHUMTHICK = 0.
+ZHUMTHICK               = 0.
+ZPRO_CRUST      = 0.
+PDEP_HUM        = 0
 
 ! One dimensional (non cumulative)
-GBELOW_SLAB             = .FALSE.
-GPREV_ISNOT_MF          = .TRUE. !To be changed in GPREV_IS_MF ?
-GIKNOTMF        = .FALSE.
-GHUM = .TRUE.
-GDRY = .TRUE.
-GMEL_SUR = .TRUE.
-GREFROZEN = .TRUE.
-GRAM = .TRUE.
-GWET= .TRUE.
-GCOULD_BE_NEW   = .FALSE.
+ZNAT_HIG_DEP            = 0
+ZNAT_MOD_DEP            = 0
 ZACC_HIG_DEP            = XUNDEF
 ZACC_MOD_DEP            = XUNDEF
 
-ZPRO_CRUST      = 0.
+
 
 
 ! Two dimensional variables (intitalization not absolutely necessary)
@@ -229,21 +244,15 @@ PACC_RAT        = XUNDEF
 PNAT_RAT        = XUNDEF
 PDEP_HIG        = XUNDEF
 PDEP_MOD        = XUNDEF
+
 PACC_LEV        = XUNDEF
 PPRO_INF_TYP    = XUNDEF
 
-!Saving previous time step variables
-DO JJ=1,SIZE(PSNOWSWE,1)
-  ZDEP_SUP_PRE    (JJ) = PDEP_SUP    (JJ)
-  ZDEP_TOT_PRE    (JJ) = PDEP_TOT    (JJ)
-  ZDEP_HUM_PRE    (JJ) = PDEP_HUM    (JJ)
-  ZAVA_TYP_PRE    (JJ) = PAVA_TYP    (JJ)
-  ZNAT_LEV_PRE    (JJ) = PNAT_LEV    (JJ)
-  ZPRO_SUP_TYP_PRE(JJ) = PPRO_SUP_TYP(JJ)
-ENDDO
 
-PPRO_SUP_TYP    = JPPRO_SUP_NAN
+
+PPRO_SUP_TYP     = JPPRO_SUP_NAN
 PAVA_TYP         = JPAVA_NAN
+PNAT_LEV = JPNAT_VLO
 
 ! merge ZSNOW_THICK and ZSNOw_DEPTH
 
@@ -582,6 +591,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       !
       ! WARNING: not defined for slope angle = 0 and first top layer
       ! WARNING !!!!!!!!!!!!!! the division by PDIRCOSZW(JJ) does not make sense but agrees with snowtools (check snowtools)
+
 
       ! Update of beta (bridging factor)
       IF (JST==1) THEN
@@ -1099,21 +1109,9 @@ DO JJ=1,SIZE(PSNOWSWE,1)
 
 
   IF(IVAL_HIG.NE.JPNAT_MOA) THEN
-    ! coding of PNAT_LEV(JJ) = MAX(IVAL_LOW,IVAL_MOD,IVAL_LOW)
-    ! but MAX only works on REAL or INTEGER*4, not INTEGER*1
-    IF(IVAL_MOD.GT.IVAL_LOW) THEN
-      PNAT_LEV(JJ) = IVAL_MOD
-    ELSE
-      PNAT_LEV(JJ) = IVAL_LOW
-    ENDIF
-
-    IF(IVAL_HIG.GT.PNAT_LEV(JJ)) THEN
-      PNAT_LEV(JJ) = IVAL_HIG
-    ENDIF
-
+    PNAT_LEV(JJ) = MAX(INT(IVAL_HIG),MAX(INT(IVAL_MOD),INT(IVAL_LOW)))
   ELSE
     PNAT_LEV(JJ) = JPNAT_MOA
-
   ENDIF
 
 
@@ -1158,9 +1156,9 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   ENDIF
 
   !!!!!Risk nat actualize
-
+  ZNAT_LEV_TMP = PNAT_LEV(JJ)
   ! only in case, there is not a NAN risk in the previous step
-  IF(ZNAT_LEV_PRE(JJ).LT.JPNAT_NAN) THEN
+  IF(ZNAT_LEV_PRE(JJ).NE.JPNAT_NAN) THEN
 
     !For type sup. NEW
     IF((  PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW   )   .AND.&
@@ -1170,40 +1168,55 @@ DO JJ=1,SIZE(PSNOWSWE,1)
        (((PAVA_TYP(JJ).EQ.JPAVA_NEW_MIX).AND.(PDEP_HUM(JJ).LE.ZDEP_HUM_PRE(JJ))).OR.&
         (PAVA_TYP(JJ).NE.JPAVA_NEW_MIX))) THEN
 
-      PNAT_LEV(JJ) = JPNAT_ACT(INT(PNAT_LEV(JJ)*6 + ZNAT_LEV_PRE(JJ) + 1))
+      ZNAT_LEV_TMP = JPNAT_ACT(INT(PNAT_LEV(JJ) + ZNAT_LEV_PRE(JJ)*7 + 1))
+      IF(PNAT_LEv(JJ).EQ.JPNAT_VHI) PRINT*,ZNAT_LEV_PRE(JJ),PNAT_LEv(JJ),ZNAT_LEV_TMP
+      !ZNAT_LEV_TMP =
       !
       !Weird addtional instruction
       IF(( PAVA_TYP(JJ).NE.JPAVA_NEW_MIX).AND.&
          ((PNAT_LEV(JJ).EQ.JPNAT_HIG).OR.(PNAT_LEV(JJ).EQ.JPNAT_VHI)).AND.&
          ((ZNAT_LEV_PRE(JJ).EQ.JPNAT_MOD).OR.(ZNAT_LEV_PRE(JJ).EQ.JPNAT_HIG).OR.&
           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_VHI))) THEN
+         ZNAT_LEV_TMP = JPNAT_MOD
 
-         PNAT_LEV(JJ) = JPNAT_MOD
       ENDIF
 
     ENDIF
 
-    !For type sup. WET or FRO
-    IF(((PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_WET).OR.(PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_FRO)).AND.&
-       ((ZPRO_SUP_TYP_PRE(JJ).EQ.JPPRO_SUP_WET).OR.(ZPRO_SUP_TYP_PRE(JJ).EQ.JPPRO_SUP_FRO)).AND.&
-       (ZDEP_INF(JJ).GE.(ZDEP_TOT_PRE(JJ)-ZDEP_SUP_PRE(JJ)-0.05))) THEN
+    IF((PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW   )   .AND.&
+       (PAVA_TYP    (JJ).EQ.ZAVA_TYP_PRE(JJ))   .AND.&
+       (PDEP_TOT    (JJ).LT.ZDEP_TOT_PRE(JJ))   .AND.&
+       (PNAT_LEV    (JJ).EQ.JPNAT_MOA)) THEN
 
-      IF(PNAT_LEV(JJ).EQ.JPNAT_MOD) THEN
-        PNAT_LEV(JJ) = JPNAT_LOW
-      ENDIF
+        IF(ZNAT_LEV_PRE(JJ).EQ.JPNAT_HIG) ZNAT_LEV_TMP = JPNAT_MOD
+        IF(ZNAT_LEV_PRE(JJ).EQ.JPNAT_VHI) ZNAT_LEV_TMP = JPNAT_HIG
 
-      IF((PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_WET).AND.&
-         ((PNAT_LEV(JJ).EQ.JPNAT_HIG).OR.(PNAT_LEV(JJ).EQ.JPNAT_VHI))) THEN
-
-        IF((ZNAT_LEV_PRE(JJ).EQ.JPNAT_MOD).OR.&
-           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_HIG).OR.&
-           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_VHI)) THEN
-          PNAT_LEV(JJ) = JPNAT_MOD
-        ELSEIF(ZNAT_LEV_PRE(JJ).EQ.JPNAT_LOW) THEN
-          PNAT_LEV(JJ) = JPNAT_LOW
-        ENDIF
-      ENDIF
     ENDIF
+    PACC_LEV(JJ) = PNAT_LEV(JJ)
+    PNAT_LEV(JJ) = ZNAT_LEV_TMP
+
+!
+!    !For type sup. WET or FRO
+!    IF(((PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_WET).OR.(PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_FRO)).AND.&
+!       ((ZPRO_SUP_TYP_PRE(JJ).EQ.JPPRO_SUP_WET).OR.(ZPRO_SUP_TYP_PRE(JJ).EQ.JPPRO_SUP_FRO)).AND.&
+!       (ZDEP_INF(JJ).GE.(ZDEP_TOT_PRE(JJ)-ZDEP_SUP_PRE(JJ)-0.05))) THEN
+!
+!      IF(PNAT_LEV(JJ).EQ.JPNAT_MOD) THEN
+!        PNAT_LEV(JJ) = JPNAT_LOW
+!      ENDIF
+!
+!      IF((PPRO_SUP_TYP    (JJ).EQ.JPPRO_SUP_WET).AND.&
+!         ((PNAT_LEV(JJ).EQ.JPNAT_HIG).OR.(PNAT_LEV(JJ).EQ.JPNAT_VHI))) THEN
+!
+!        IF((ZNAT_LEV_PRE(JJ).EQ.JPNAT_MOD).OR.&
+!           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_HIG).OR.&
+!           (ZNAT_LEV_PRE(JJ).EQ.JPNAT_VHI)) THEN
+!          PNAT_LEV(JJ) = JPNAT_MOD
+!        ELSEIF(ZNAT_LEV_PRE(JJ).EQ.JPNAT_LOW) THEN
+!          PNAT_LEV(JJ) = JPNAT_LOW
+!        ENDIF
+!      ENDIF
+!    ENDIF
   ENDIF
 
 ! Combination of natural and accidental risk levels
@@ -1216,30 +1229,33 @@ DO JJ=1,SIZE(PSNOWSWE,1)
     IACC_FROMNAT = JPACC_NUL !!!!!!!!!!!!!!!!!!JP_ACC_LOW ???
   ENDIF
 
-  !IF(IACC_FROMNAT.GT.PACC_LEV(JJ)) THEN
-  !  PACC_LEV(JJ) = IACC_FROMNAT
-  !  PDEP_HIG(JJ) = ZNAT_HIG_DEP(JJ)
-  !  PDEP_MOD(JJ) = ZNAT_MOD_DEP(JJ)
-  !ELSE
-  !  PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
-  !  PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
-  !ENDIF
-  !!!!!!!!!!!!!!!!!!!
 
+  !Accidental risk
   IF(ZACC_HIG_DEP(JJ) == XUNDEF) THEN
     IF(ZACC_MOD_DEP(JJ) == XUNDEF) THEN
-      PDEP_HIG(JJ) = -1
-      PDEP_MOD(JJ) = -1
+      ZACC_HIG_DEP(JJ) = -1
+      ZACC_MOD_DEP(JJ) = -1
     ELSE
-      PDEP_HIG(JJ) = -1
-      PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
+      ZACC_HIG_DEP(JJ) = -1
+      ZACC_MOD_DEP(JJ) = ZACC_MOD_DEP(JJ)
     ENDIF
   ELSE
-    PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
-    PDEP_MOD(JJ) = -1
+    ZACC_HIG_DEP(JJ) = ZACC_HIG_DEP(JJ)
+    ZACC_MOD_DEP(JJ) = -1
   ENDIF
 
-  PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
+  IF(IACC_FROMNAT.GE.(PACC_LEV(JJ))) THEN
+    PACC_LEV(JJ) = IACC_FROMNAT
+    PDEP_HIG(JJ) = ZNAT_HIG_DEP(JJ)
+    PDEP_MOD(JJ) = ZNAT_MOD_DEP(JJ)
+  ELSE
+    PDEP_HIG(JJ) = ZACC_HIG_DEP(JJ)
+    PDEP_MOD(JJ) = ZACC_MOD_DEP(JJ)
+  ENDIF
+
+  PDEP_HIG(JJ) = ZNAT_HIG_DEP(JJ)
+  PDEP_MOD(JJ) = ZNAT_MOD_DEP(JJ)
+
   !!!!!!!!!!!!!!!!!!!!
   !
   !
