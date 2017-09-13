@@ -58,6 +58,9 @@ USE MODI_SET_SURFEX_FILE_NAME_NC
 #ifdef SFX_MNH
 USE MODI_SET_SURFEX_FILE_NAME_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_SET_SURFEX_FILE_NAME_ARO
+#endif
 !
 USE MODI_ABOR1_SFX
 !
@@ -66,9 +69,6 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "set_surfex_file_name_aro.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -143,7 +143,7 @@ ENDIF
 !
 IF (HPROGRAM=='AROME ' ) THEN
 #ifdef SFX_ARO
-  CALL SET_SURFEX_FILE_NAME_ARO(HMASK)
+  CALL SET_SURFEX_FILE_NAME_ARO
 #endif  
 ENDIF
 !

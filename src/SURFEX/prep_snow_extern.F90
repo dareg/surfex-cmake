@@ -317,7 +317,7 @@ DO JP = 1,IPATCH
             WHERE (ZFIELD>XTT.AND.ZFIELD/=XUNDEF) ZFIELD = XTT
             DEALLOCATE(ZHEAT)
           ENDIF
-          !          
+          !
           IF (OSNOW_IDEAL) THEN 
             IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))                  
             PFIELD(:,:,JP) = ZFIELD(:,:)

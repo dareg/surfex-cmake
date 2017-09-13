@@ -252,6 +252,9 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURF0_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFX0_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFX0_ARO
+#endif
 !
 IMPLICIT NONE
 !
@@ -259,9 +262,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "read_surfx0_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -373,7 +373,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_ASSIM, ONLY : LASSIM, LREAD_ALL, CASSIM_ISBA
 !
 #ifdef SFX_OL
-USE MODE_READ_SURF_OL, ONLY: READ_SURFX1N1_OL
+USE MODE_READ_SURF_OL
 #endif
 #ifdef SFX_LFI
 USE MODE_READ_SURF_LFI, ONLY: READ_SURFN_LFI
@@ -390,14 +390,14 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURFX_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFX1_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFX1_ARO
+#endif
 !
 USE MODI_GET_IOK_ASSIM
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "read_surfx1_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -502,7 +502,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_ASSIM, ONLY : LASSIM, LREAD_ALL, CASSIM_ISBA
 !
 #ifdef SFX_OL
-USE MODE_READ_SURF_OL, ONLY: READ_SURFL1X2_OL
+USE MODE_READ_SURF_OL
 #endif
 #ifdef SFX_LFI
 USE MODE_READ_SURF_LFI, ONLY: READ_SURFN_LFI
@@ -519,14 +519,14 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURFX_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFX2_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFX2_ARO
+#endif
 !
 USE MODI_GET_IOK_ASSIM
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "read_surfx2_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -629,7 +629,7 @@ USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
 !
 #ifdef SFX_OL
-USE MODE_READ_SURF_OL, ONLY: READ_SURFL1X2_OL
+USE MODE_READ_SURF_OL
 #endif
 !
 IMPLICIT NONE
@@ -725,6 +725,9 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURF0_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFN0_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFN0_ARO
+#endif
 !
 IMPLICIT NONE
 !
@@ -732,9 +735,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "read_surfn0_aro.h"
-#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -876,7 +876,7 @@ USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
 !
 #ifdef SFX_OL
-USE MODE_READ_SURF_OL, ONLY: READ_SURFX1N1_OL
+USE MODE_READ_SURF_OL
 #endif
 #ifdef SFX_LFI
 USE MODE_READ_SURF_LFI, ONLY: READ_SURFN_LFI
@@ -893,12 +893,12 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURFN_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFN1_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFN1_ARO
+#endif
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "read_surfn1_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -1009,6 +1009,9 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURF0_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFC0_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFC0_ARO
+#endif
 !
 IMPLICIT NONE
 !
@@ -1016,9 +1019,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "read_surfc0_aro.h"
-#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1148,6 +1148,9 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURF0_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFL0_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFL0_ARO
+#endif
 !
 IMPLICIT NONE
 !
@@ -1155,9 +1158,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "read_surfl0_aro.h"
-#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1262,7 +1262,7 @@ USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1 ,ONLY : JPRB
 !
 #ifdef SFX_OL
-USE MODE_READ_SURF_OL, ONLY: READ_SURFL1X2_OL
+USE MODE_READ_SURF_OL
 #endif
 #ifdef SFX_LFI
 USE MODE_READ_SURF_LFI, ONLY: READ_SURFN_LFI
@@ -1279,12 +1279,11 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURFN_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFL1_MNH
 #endif
-!
-IMPLICIT NONE
-!
 #ifdef SFX_ARO
-#include "read_surfl1_aro.h"
+USE MODI_READ_SURFL1_ARO
 #endif
+
+IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
@@ -1392,6 +1391,9 @@ USE MODE_READ_SURF_FA, ONLY: READ_SURFT_FA
 #ifdef SFX_MNH
 USE MODI_READ_SURFT0_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFT0_ARO
+#endif
 !
 USE MODI_GET_LUOUT
 !
@@ -1401,9 +1403,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "read_surft0_aro.h"
-#endif
 !
 !
 !*      0.1   Declarations of arguments
@@ -1549,6 +1548,9 @@ USE MODE_READ_SURF_NC, ONLY: READ_SURFT_NC
 #ifdef SFX_MNH
 USE MODI_READ_SURFT1_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_READ_SURFT1_ARO
+#endif
 !
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
@@ -1559,9 +1561,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "read_surft1_aro.h"
-#endif
 !
 !
 !*      0.1   Declarations of arguments

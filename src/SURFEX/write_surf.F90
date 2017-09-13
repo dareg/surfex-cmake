@@ -236,6 +236,9 @@ USE MODI_WRITE_SURFX0_MNH
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFX0_ARO
+#endif
 !
 USE MODI_TEST_RECORD_LEN
 !
@@ -245,9 +248,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "write_surfx0_aro.h"
-#endif
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -395,14 +395,14 @@ USE MODI_WRITE_SURFX1_MNH
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFX1_ARO
+#endif
 !
 USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "write_surfx1_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -552,11 +552,11 @@ USE MODI_WRITE_SURF_XIOS
 !
 USE MODI_TEST_RECORD_LEN
 !
-IMPLICIT NONE
-!
 #ifdef SFX_ARO
-#include "write_surfx2_aro.h"
+USE MODI_WRITE_SURFX2_ARO
 #endif
+!
+IMPLICIT NONE
 !
 !*      0.1   Declarations of arguments
 !
@@ -714,14 +714,15 @@ USE MODE_WRITE_SURF_FA, ONLY: WRITE_SURFN_FA
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFX2_ARO
+#endif
+
 !
 USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-!#include "write_surfx2_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -879,6 +880,10 @@ USE MODI_WRITE_SURFN0_MNH
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFN0_ARO
+#endif
+
 !
 USE MODI_TEST_RECORD_LEN
 !
@@ -888,9 +893,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "write_surfn0_aro.h"
-#endif
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -1035,14 +1037,14 @@ USE MODI_WRITE_SURFN1_MNH
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFN1_ARO
+#endif
 !
 USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "write_surfn1_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !
@@ -1188,6 +1190,10 @@ USE MODI_WRITE_SURFC0_MNH
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFC0_ARO
+#endif
+
 !
 USE MODI_TEST_RECORD_LEN
 !
@@ -1197,9 +1203,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "write_surfc0_aro.h"
-#endif
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -1347,6 +1350,10 @@ USE MODI_WRITE_SURFL0_MNH
 #ifdef WXIOS
 USE MODI_WRITE_SURF_XIOS
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFL0_ARO
+#endif
+
 !
 USE MODI_TEST_RECORD_LEN
 !
@@ -1356,9 +1363,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "write_surfl0_aro.h"
-#endif
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -1504,14 +1508,15 @@ USE MODE_WRITE_SURF_NC, ONLY: WRITE_SURFN_NC
 #ifdef SFX_MNH
 USE MODI_WRITE_SURFL1_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFL1_ARO
+#endif
+
 !
 USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "write_surfl1_aro.h"
-#endif
 !&
 !*      0.1   Declarations of arguments
 !
@@ -1648,6 +1653,10 @@ USE MODE_WRITE_SURF_NC, ONLY: WRITE_SURFT_NC
 #ifdef SFX_MNH
 USE MODI_WRITE_SURFT0_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFT0_ARO
+#endif
+
 !
 USE MODI_TEST_RECORD_LEN
 !
@@ -1657,9 +1666,6 @@ IMPLICIT NONE
 INCLUDE "mpif.h"
 #endif
 !
-#ifdef SFX_ARO
-#include "write_surft0_aro.h"
-#endif
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -1797,6 +1803,10 @@ USE MODE_WRITE_SURF_NC, ONLY: WRITE_SURFT_NC
 #ifdef SFX_MNH
 USE MODI_WRITE_SURFT1_MNH
 #endif
+#ifdef SFX_ARO
+USE MODI_WRITE_SURFT1_ARO
+#endif
+
 !
 USE MODI_ABOR1_SFX
 !
@@ -1804,9 +1814,6 @@ USE MODI_TEST_RECORD_LEN
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "write_surft1_aro.h"
-#endif
 !
 !*      0.1   Declarations of arguments
 !

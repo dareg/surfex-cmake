@@ -64,12 +64,13 @@ USE MODI_OPEN_AUX_IO_SURF_NC
 #ifdef SFX_MNH
 USE MODI_MNHOPEN_AUX_IO_SURF
 #endif
+
+#ifdef SFX_ARO
+USE MODI_AROOPEN_AUX_IO_SURF
+#endif
 !
 IMPLICIT NONE
 !
-#ifdef SFX_ARO
-#include "aroopen_aux_io_surf.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
@@ -113,7 +114,7 @@ ENDIF
 !
 IF (HFILETYPE=='AROME ' ) THEN
 #ifdef SFX_ARO
-  CALL AROOPEN_AUX_IO_SURF(HFILE,HFILETYPE,HMASK,YDIR)
+  CALL AROOPEN_AUX_IO_SURF(HFILE,HFILETYPE,HMASK)
 #endif
 ENDIF
 !
