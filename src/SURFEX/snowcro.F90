@@ -946,7 +946,7 @@ SELECT CASE (HSNOWRAD)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !! activation of spectral outputs 
 
-! ! output spectral albedo and diffuse to total irradiance ratio
+ ! output spectral albedo and diffuse to total irradiance ratio
   DO JJ=1,NPNBANDS
 	  DO JP=1, size(ZSNOW)
 !	    PSPEC_ALB(JP,JJ)=PZENITH(JJ)
@@ -954,19 +954,14 @@ SELECT CASE (HSNOWRAD)
 	  ENDDO
   ENDDO
   
-  DO JJ=NPNBANDS+1,JPNBANDS_ATM
-	  DO JP=1, size(ZSNOW)
-!	    PSPEC_ALB(JP,JJ)=PZENITH(JJ)
-	    PSPEC_ALB(JP,JJ)=0.
-	  ENDDO
-  ENDDO   
    
   DO JJ=1,JPNBANDS_ATM
 	  DO JP=1, size(ZSNOW)
-!	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)
-	    IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN
-	      PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))
-	    ELSE 
+!	    PDIFF_RATIO(JP,JJ)=P_DIR_SW(JP,JJ)+P_SCA_SW(JP,JJ)
+!	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)  ! To let commented                              
+	    IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN                            
+	      PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))    
+	    ELSE                                                                        
 	      PDIFF_RATIO(JP,JJ)=1.
 	    ENDIF
 	  ENDDO

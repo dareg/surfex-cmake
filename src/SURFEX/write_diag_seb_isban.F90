@@ -1,8 +1,7 @@
 !     #########
       SUBROUTINE WRITE_DIAG_SEB_ISBA_n ( DTCO, DGU, U, CHI, DGEI, DGI, DST, GB, I, &
                                         HPROGRAM)
-!     #################################
-!
+
 !!****  *WRITE_DIAG_SEB_ISBA* - writes the ISBA diagnostic fields
 !!
 !!    PURPOSE
@@ -102,7 +101,7 @@ TYPE(ISBA_t), INTENT(IN) :: I
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+CHARACTER(LEN=4)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
@@ -266,7 +265,7 @@ IF (DGI%LSURF_BUDGET) THEN
                   HPROGRAM,YRECFM,DGI%XAVG_LWU(:),IRESP,HCOMMENT=YCOMMENT)
     !
     DO JSW=1, SIZE(DGI%XSWBD,2)
-      YNUM=ACHAR(48+JSW)
+      WRITE(YNUM,"(I3)") JSW
       !
       YRECFM='SWD_ISBA_'//YNUM
       YCOMMENT='short wave downward radiation over tile nature for spectral band'//YNUM//' (W/m2)'
@@ -1215,7 +1214,7 @@ IF(DGI%LPATCH_BUDGET.AND.(I%NPATCH >1))THEN
                   HPROGRAM,YRECFM,DGI%XLWU(:,:),IRESP,HCOMMENT=YCOMMENT)
         !
         DO JSW=1, SIZE(DGI%XSWBD,2)
-          YNUM=ACHAR(48+JSW)
+          WRITE(YNUM,"(I3)") JSW
           !
           YRECFM='SWD_P'//YNUM
           YCOMMENT='X_Y_'//YRECFM//' (W/m2)'

@@ -1275,46 +1275,49 @@ IF (OATMORAD) THEN
 !If ATMORAD PARAMETERIZATION IS NOT ACTIVATED
 ELSE 
 
-  DO JJ= 1,SIZE(ZSW_RAD_TOT)   ! If no direct because of the slope effect, everything is diffuse
-    IF (LNODIR(JJ)) THEN
-      ZSW_RAD_BROADDIR(JJ)=0.   
-      DO JB = 1,NPNBANDS  ! To get back to radiations on a flat area
-        ZSW_RAD_BROADDIF(JJ) = ZSW_RAD_BROADDIF(JJ)+(P_SCA_SW(JJ,JB)*2/(1+PDIRCOSZW(JJ)))            !To have the diffuseradiation on a flat surface
-      ENDDO
-    ELSE
-      DO JB = 1,NPNBANDS  ! To get back to radiations on a flat area
-        ZSW_RAD_BROADDIR(JJ) = ZSW_RAD_BROADDIR(JJ)+(P_DIR_SW(JJ,JB)*PCOSZEN(JJ)/PCOSNORM(JJ))       !To have the direct radiation on a flat surface
-        ZSW_RAD_BROADDIF(JJ) = ZSW_RAD_BROADDIF(JJ)+(P_SCA_SW(JJ,JB)*2/(1+PDIRCOSZW(JJ)))            !To have the diffuseradiation on a flat surface
-      ENDDO
-    ENDIF
-  END DO
+!  DO JJ= 1,SIZE(ZSW_RAD_TOT)   ! If no direct because of the slope effect, everything is diffuse
+!    IF (LNODIR(JJ)) THEN
+!      ZSW_RAD_BROADDIR(JJ)=0.   
+!      DO JB = 1,NPNBANDS  ! To get back to radiations on a flat area
+!        ZSW_RAD_BROADDIF(JJ) = ZSW_RAD_BROADDIF(JJ)+(P_SCA_SW(JJ,JB)*2/(1+PDIRCOSZW(JJ)))            !To have the diffuseradiation on a flat surface
+!      ENDDO
+!    ELSE
+!      DO JB = 1,NPNBANDS  ! To get back to radiations on a flat area
+!        ZSW_RAD_BROADDIR(JJ) = ZSW_RAD_BROADDIR(JJ)+(P_DIR_SW(JJ,JB)*PCOSZEN(JJ)/PCOSNORM(JJ))       !To have the direct radiation on a flat surface
+!        ZSW_RAD_BROADDIF(JJ) = ZSW_RAD_BROADDIF(JJ)+(P_SCA_SW(JJ,JB)*2/(1+PDIRCOSZW(JJ)))            !To have the diffuseradiation on a flat surface
+!      ENDDO
+!    ENDIF
+!  END DO
   
-  ZSW_RAD_TOT(:)=ZSW_RAD_BROADDIR(:)+ZSW_RAD_BROADDIF(:)                                !To have the total radiation on a flat surface
+!  ZSW_RAD_TOT(:)=ZSW_RAD_BROADDIR(:)+ZSW_RAD_BROADDIF(:)                                !To have the total radiation on a flat surface
 
 ! IF THERE IS NO SEPARATION BETWEEN DIRECT AND DIFFUSE RADIATION IN THE FORCING
-  IF (ZSW_RAD_BROADDIF(1)==0.) THEN 
+!  IF (ZSW_RAD_BROADDIF(1)==0.) THEN 
     
     ! Separate broadband global radiation in direct and diffuse (parametrization Marie Dumont)
     ! NB : thresold 1. to the factor when zenithal angle close to pi/2
-    ZDIFFUSE_PORTION=MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &
-                                 - 3.52421131883*PCOSZEN + 0.0299111951172 ), 1. )
+!    ZDIFFUSE_PORTION=MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &
+!                                 - 3.52421131883*PCOSZEN + 0.0299111951172 ), 1. )
                                  
-    DO JJ= 1,SIZE(ZSW_RAD_TOT)   ! If no direct because of the slope effect, everything is diffuse
-      IF (LNODIR(JJ)) THEN                    
-        ZDIFFUSE_PORTION(JJ)=1.
-      ENDIF
-    ENDDO              
+!    DO JJ= 1,SIZE(ZSW_RAD_TOT)   ! If no direct because of the slope effect, everything is diffuse
+!      IF (LNODIR(JJ)) THEN                    
+!        ZDIFFUSE_PORTION(JJ)=1.
+!      ENDIF
+!    ENDDO              
           
-    ZSW_RAD_BROADDIF = ZDIFFUSE_PORTION * ZSW_RAD_TOT
-    ZSW_RAD_BROADDIR = ZSW_RAD_TOT - ZSW_RAD_BROADDIF
+!    ZSW_RAD_BROADDIF = ZDIFFUSE_PORTION * ZSW_RAD_TOT
+!    ZSW_RAD_BROADDIR = ZSW_RAD_TOT - ZSW_RAD_BROADDIF
 
-  ENDIF
+!  ENDIF
   ! Spectral decomposition    If the direct and diffuse are separated in the forcing we use this direct/diffuse repartition
   ! and we do the recorrection for the slope effect.
   ! In this case we do an uncorrection and a recorrection which is neutral but it's easier to understand.
-
+  ZSW_RAD_BROADDIF = MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &
+                             - 3.52421131883*PCOSZEN + 0.0299111951172 ), 1. ) * PSW_RAD
+  ZSW_RAD_BROADDIR = PSW_RAD - ZSW_RAD_BROADDIF
+  
     DO JB = 1,NPNBANDS
-      PSW_RAD_DIF(:,JB) = XPRATIO_DIF(JB) * ZSW_RAD_BROADDIF *(1+PDIRCOSZW(:) /(2* XP_MUDIFF))
+      PSW_RAD_DIF(:,JB) = XPRATIO_DIF(JB) * ZSW_RAD_BROADDIF * XP_MUDIFF!(1+PDIRCOSZW(:) /(2* XP_MUDIFF))
       PSW_RAD_DIR(:,JB) = XPRATIO_DIR(JB) * ZSW_RAD_BROADDIR / PCOSZEN (:)
     END DO
     
@@ -1443,7 +1446,7 @@ IF ( IPOINTDAY>=1 ) THEN
     ZALB_P      (JJ_P) = PALB      (JJ)
     ZSW_RAD_P   (JJ_P) = PSW_RAD   (JJ)
     ZZENITH_P   (JJ_P) = PZENITH   (JJ)
-    ZANGLNORM_P (JJ_P) = PANGL_NORM(JJ)
+    ZANGLNORM_P (JJ_P) = PZENITH   (JJ)!PANGL_NORM(JJ)
     INLVLS_USE_P(JJ_P) = KNLVLS_USE(JJ)
     ZDIRCOSZW   (JJ_P) = PDIRCOSZW(JJ)
     !
