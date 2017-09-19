@@ -724,6 +724,7 @@ IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA:CALL_MODEL',0,ZHOOK_HANDLE)
 ZP_PSN_GFLXCOR(:)  = 0.
 ZP_WORK(:)         = 0.
 ZP_SOILD(:)        = 0.
+
 !
 ! pack the variables
 !
@@ -749,6 +750,13 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
       ZP_SNOWHIST (JJ,JWRK) = PEK%TSNOW%HIST  (JI,JWRK)
     ENDDO
   ENDDO
+
+  ZP_DEP_SUP    (:) = 0
+  ZP_DEP_TOT    (:) = 0
+  ZP_DEP_HUM    (:) = 0
+  ZP_NAT_LEV    (:) = 6
+  ZP_PRO_SUP_TYP(:) = 6
+  ZP_AVA_TYP    (:) = 6
 
   DO JJ=1,KSIZE1
     JI = KMASK(JJ)
@@ -933,10 +941,10 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
   ZP_SOILCOR (:) = 0.0
 !
 #ifndef SFX_OL
-  ! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
-  GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
+! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
+GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
 #else
-  GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
+GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
 #endif
   !
   !Ajout test sur pas de temps de sortie
@@ -951,7 +959,13 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
                       ZP_SNRAM_SONDE, ZP_SN_WETTHCKN, ZP_SN_REFRZNTHCKN,&
                       ZP_DEP_HIG, ZP_DEP_MOD, ZP_DEP_SUP, ZP_DEP_TOT, ZP_DEP_HUM,&
                       ZP_ACC_LEV, ZP_NAT_LEV, ZP_PRO_SUP_TYP, ZP_PRO_INF_TYP, ZP_AVA_TYP)
-
+!  ELSE
+!    ZP_DEP_SUP    (:) = 0
+!    ZP_DEP_TOT    (:) = 0
+!    ZP_DEP_HUM    (:) = 0
+!    ZP_NAT_LEV    (:) = 6
+!    ZP_PRO_SUP_TYP(:) = 6
+!    ZP_AVA_TYP    (:) = 6
   ENDIF
   !
 ELSE 
@@ -975,6 +989,7 @@ ELSE
               ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
               ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE,  ZP_FOREST,       &
               ZP_ZENITH, ZP_LAT, ZP_LON, IO%LSNOWDRIFT, IO%LSNOWDRIFT_SUBLIM  )
+
 !
   IF(OMEB)THEN
 !
@@ -1104,9 +1119,14 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     ENDDO
   ENDDO
 
-  PEK%TSNOW%NAT_LEV    (:)  = 6!!!!!!!?????????
-  PEK%TSNOW%PRO_SUP_TYP(:)  = 6!!!!!!!?????????,,
-  PEK%TSNOW%AVA_TYP    (:)  = 6!!!!!!!?????????
+
+  PEK%TSNOW%DEP_SUP    (:) = 0
+  PEK%TSNOW%DEP_TOT    (:) = 0
+  PEK%TSNOW%DEP_HUM    (:) = 0
+  PEK%TSNOW%NAT_LEV    (:) = 6
+  PEK%TSNOW%PRO_SUP_TYP(:) = 6
+  PEK%TSNOW%AVA_TYP    (:) = 6
+
 
   DO JJ=1,KSIZE1
     JI = KMASK(JJ)
@@ -1117,6 +1137,8 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     PEK%TSNOW%PRO_SUP_TYP(JI) = ZP_PRO_SUP_TYP(JJ)
     PEK%TSNOW%AVA_TYP    (JI) = ZP_AVA_TYP    (JJ)
   ENDDO
+
+
 
   IF (SIZE(DMK%XSNOWDEND)>0) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
@@ -1195,7 +1217,7 @@ IF ( SIZE(DMK%XSNOWDEND)>0 ) THEN
   DMK%XSN_REFRZNTHCKN(:) = XUNDEF
   DMK%XDEP_HIG       (:) = XUNDEF
   DMK%XDEP_MOD       (:) = XUNDEF
-  DMK%XACC_LEV       (:) = XUNDEF
+  DMK%XACC_LEV       (:) = 4
   DMK%XPRO_INF_TYP   (:) = XUNDEF
 
   DO JJ=1,KSIZE1

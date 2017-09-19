@@ -479,16 +479,25 @@ JPNAT_VLO,JPNAT_LOW,JPNAT_MOD/)!fake line to be uniform
 ! Table indicating how to change the current risk as a function of the current and previous
 ! risk indices for profil sup. NEW
 !!!!!!!TO DO what if JPNAT_NAN = NI1UNDEF
-! current = line, previous = column
+! current = column, previous = line
 INTEGER*1,DIMENSION(49),PARAMETER :: JPNAT_ACT = (/&
 !vlow    ,low      ,moa      ,mod      ,hig      ,vhi      ,nan
-JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,&!vlo
-JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,&!low
-JPNAT_MOA,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOA,JPNAT_MOA,JPNAT_MOA,&!moa
-JPNAT_MOD,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOD,JPNAT_MOD,JPNAT_MOD,&!mod
-JPNAT_HIG,JPNAT_HIG,JPNAT_HIG,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_HIG,&!hig
-JPNAT_VHI,JPNAT_VHI,JPNAT_HIG,JPNAT_HIG,JPNAT_HIG,JPNAT_HIG,JPNAT_VHI,&!vhi
-JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN/)!nan
+JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_HIG,JPNAT_VHI,JPNAT_NAN,&!vlo
+JPNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_HIG,JPNAT_VHI,JPNAT_NAN,&!low
+JPNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_HIG,JPNAT_VHI,JPNAT_NAN,&!moa
+JPNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!mod
+JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!hig
+JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!vhi
+JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_HIG,JPNAT_VHI,JPNAT_NAN/)!nan
+
+!vlow    ,low      ,moa      ,mod      ,hig      ,vhi      ,nan
+!PNAT_VLO,JPNAT_LOW,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,&!vlo
+!PNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,&!low
+!PNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOA,JPNAT_MOA,JPNAT_MOA,&!moa
+!PNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOD,JPNAT_MOD,JPNAT_MOD,&!mod
+!PNAT_VLO,JPNAT_LOW,JPNAT_HIG,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_HIG,&!hig
+!PNAT_VLO,JPNAT_LOW,JPNAT_HIG,JPNAT_MOD,JPNAT_HIG,JPNAT_HIG,JPNAT_VHI,&!vhi
+!PNAT_VLO,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN/)!nan
 !
 !------------------------------------------------------------------------------
 ! Parameter of superior/inferior profiles characterization
@@ -501,15 +510,15 @@ INTEGER*1, PARAMETER :: JPPRO_SUP_WET = 4   ! ps_fon_deg
 INTEGER*1, PARAMETER :: JPPRO_SUP_FRO = 5   ! ps_fon_gel
 !
 ! Inferior profil types
-INTEGER*1, PARAMETER :: JPPRO_INF_NAN = 6   ! pi_vid in profil.f
-INTEGER*1, PARAMETER :: JPPRO_INF_HAR = 0   ! aggregation of pi_hetero, pi_fili_pla, pi_homo, pi_homo_fb
-INTEGER*1, PARAMETER :: JPPRO_INF_SOF = 1   ! aggregation of pi_hete_squ, pi_fili
+INTEGER*1, PARAMETER :: JPPRO_INF_NAN = 6   ! pi_vid (6) in profil.f
+INTEGER*1, PARAMETER :: JPPRO_INF_HAR = 0   ! aggregation of pi_hetero (0), pi_fili_pla (3), pi_homo (4), pi_homo_fb (5)
+INTEGER*1, PARAMETER :: JPPRO_INF_SOF = 1   ! aggregation of pi_hete_squ (1), pi_fili (2)
 !
 ! Thresholds to define the type of profile
 REAL, PARAMETER :: XPRO_SUP_CRU = 0.01      ! threshold on crust height for prosup type NEW (m)
 REAL, PARAMETER :: XPRO_SUP_DEP = 0.03      ! threshold on depth for prosup type WET and FRO (m)
 REAL, PARAMETER :: XPRO_INF_RAM = 8
-REAL, PARAMETER :: XPRO_INF_COE  = 0.25
+REAL, PARAMETER :: XPRO_INF_COE = 0.25
 !
 !
 !------------------------------------------------------------------------------
@@ -520,8 +529,8 @@ INTEGER*1, PARAMETER :: JPAVA_NEW_DRY = 0    ! recente seche
 INTEGER*1, PARAMETER :: JPAVA_NEW_WET = 1    ! recente humide
 INTEGER*1, PARAMETER :: JPAVA_NEW_MIX = 3    ! recente mixte
 INTEGER*1, PARAMETER :: JPAVA_SLA_SUR = 2    ! plaque surface (never used)
-INTEGER*1, PARAMETER :: JPAVA_MEL_SUR = 4    ! fonte de surface
-INTEGER*1, PARAMETER :: JPAVA_MEL_GRO = 5    ! fonte de fond
+INTEGER*1, PARAMETER :: JPAVA_MEL_SUR = 4    ! fonte de surface             (fon_sur)
+INTEGER*1, PARAMETER :: JPAVA_MEL_GRO = 5    ! fonte de fond                (fon_fon)
 INTEGER*1, PARAMETER :: JPAVA_NAN     = 6    ! vide
 !
 !
