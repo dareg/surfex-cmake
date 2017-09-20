@@ -101,7 +101,7 @@ ENDIF
     ENDIF
     !
   ENDDO
-  !
+!
   IF (KFLAG==1) THEN
     !
     WHERE(OMASK(:)) TPSNOW%ALB    (:) = XUNDEF

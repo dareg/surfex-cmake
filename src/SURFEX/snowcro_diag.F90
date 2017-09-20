@@ -804,6 +804,11 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ELSE
 !       in all other cases, the layer and what is below do not belong to the sup. profile.
           GCOULD_BE_NEW(JJ) = .FALSE.
+
+          IF((ZPRO_CRUST(JJ) < XPRO_SUP_CRU).AND.(JST.GT.1)) THEN
+            IPRO_SUP_LIM(JJ) = JST-1
+            PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ) - PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
+          ENDIF
 !
         ENDIF
 !
@@ -816,10 +821,10 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !       (not consistent...). In case of this layer being not MF, we are not sure yet that the
 !       sup. profile will be FRO/WET or NAN.
 !
-          IF(GMF.OR.(ZSNOW_DEPTH(JJ)>XPRO_SUP_DEP)) THEN
+          IF(GMF.OR.(ZSNOW_DEPTH(JJ).GT.XPRO_SUP_DEP)) THEN
             GFOUND      (JJ) = .TRUE.
-            IPRO_SUP_LIM(JJ) = JST
-            PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
+            !IPRO_SUP_LIM(JJ) = JST
+            !PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
 !
             IF(GTHERMSTATE) THEN
               PPRO_SUP_TYP(JJ) = JPPRO_SUP_FRO
@@ -831,12 +836,14 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !
             IF(GIKNOTMF(JJ)) THEN
               PPRO_SUP_TYP(JJ) = JPPRO_SUP_NAN
+            ELSE
+              IPRO_SUP_LIM(JJ) = JST
+              PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
             ENDIF
 !
           ENDIF
-        ENDIF
 !
-        IF((GFOUND(JJ)).AND.(.NOT.GIKNOTMF(JJ))) THEN
+        ELSEIF(.NOT.GIKNOTMF(JJ)) THEN
           IF(GMF) THEN
 !         if the current layer is of type MF
 !         then we increase the sup. profile and
@@ -846,6 +853,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
           ELSE
             GIKNOTMF(JJ)=.TRUE.
           ENDIF
+
         ENDIF
       ENDIF
 
@@ -884,7 +892,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ENDIF
 !
 !     Depth of top wet snow
-      IF ((GWET(JJ)).AND.(PSNOWLIQ(JJ,JST)>0)) THEN
+      IF ((GWET(JJ)).AND.(PSNOWLIQ(JJ,JST).GT.0)) THEN
         PSNOW_WETTHICKNESS(JJ) = PSNOW_WETTHICKNESS(JJ) + PSNOWDZ(JJ,JST)
       ELSE
         GWET(JJ)=.FALSE.
@@ -913,6 +921,14 @@ END DO
 
 !     #######################Re-initialization####################################################!
 DO JJ=1,SIZE(PSNOWSWE,1)
+! Some weird condition to add the bottom crust of the sup profile new if it is thin enough
+  IF((ZPRO_CRUST   (JJ).LT.XPRO_SUP_CRU ).AND.&
+     (PPRO_SUP_TYP (JJ).EQ.JPPRO_SUP_NEW).AND.&
+     (GCOULD_BE_NEW(JJ))) THEN
+    IPRO_SUP_LIM(JJ) = JST
+    PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
+  ENDIF
+
   PDEP_TOT   (JJ) = ZSNOW_DEPTH(JJ)
   ZSNOW_DEPTH(JJ) = 0
   ZDEP_INF   (JJ) = PDEP_TOT(JJ) - PDEP_SUP(JJ)
