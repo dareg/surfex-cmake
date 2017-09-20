@@ -345,8 +345,8 @@ REAL, PARAMETER                   :: XSNOWTRANS3 = 0.7143               ! (m)
 REAL, PARAMETER                   :: XSNOWTRANS4 = 0.9259                ! (m)
 REAL, PARAMETER                   :: XSNOWTRANS5 = 1.4493                ! (m)
 !
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------------------
 ! Parameters for MEPRA grain type
 ! Note that mixed types are symetric, i.e. PP_DF is PP/DF or DF/PP. There is
 ! no distinction between primary and secondary snow types.
@@ -432,7 +432,7 @@ REAL, PARAMETER :: XACC_RAT_MOD = 2.5   ! threshold on strength/stress ratio (-)
 REAL, PARAMETER :: XACC_SLA_STR = 1.3
 !
 !
-!------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------------------
 ! Parameter of natural risk calculations
 !
 ! Natural risks indices
@@ -489,15 +489,6 @@ JPNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!mod
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!hig
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!vhi
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_HIG,JPNAT_VHI,JPNAT_NAN/)!nan
-
-!vlow    ,low      ,moa      ,mod      ,hig      ,vhi      ,nan
-!PNAT_VLO,JPNAT_LOW,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,JPNAT_VLO,&!vlo
-!PNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,&!low
-!PNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOA,JPNAT_MOA,JPNAT_MOA,&!moa
-!PNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOD,JPNAT_MOD,JPNAT_MOD,&!mod
-!PNAT_VLO,JPNAT_LOW,JPNAT_HIG,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_HIG,&!hig
-!PNAT_VLO,JPNAT_LOW,JPNAT_HIG,JPNAT_MOD,JPNAT_HIG,JPNAT_HIG,JPNAT_VHI,&!vhi
-!PNAT_VLO,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN,JPNAT_NAN/)!nan
 !
 !------------------------------------------------------------------------------
 ! Parameter of superior/inferior profiles characterization
@@ -521,7 +512,7 @@ REAL, PARAMETER :: XPRO_INF_RAM = 8
 REAL, PARAMETER :: XPRO_INF_COE = 0.25
 !
 !
-!------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------------------
 ! Avalanche types
 ! (used for natural risk update)
 !
@@ -535,15 +526,3 @@ INTEGER*1, PARAMETER :: JPAVA_NAN     = 6    ! vide
 !
 !
 END MODULE MODD_SNOW_PAR
-
-
-
-
-
-
-
-
-
-
-
-
