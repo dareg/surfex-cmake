@@ -27,10 +27,11 @@
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    20/01/99                      
-!!      F. solmon   01/06/00 adaptation for patch approach  (+1D)
-!!      V. Masson   01/2004  surface externalization
-!!      P. Samuelsson 07/2014 additional snow albedos
+!!      Original       20/01/99
+!!      F. solmon      01/06/00 adaptation for patch approach  (+1D)
+!!      V. Masson      01/2004  surface externalization
+!!      P. Samuelsson  07/2014  additional snow albedos
+!!      P. Hagenmuller 09/2017  Mepra variables
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -102,7 +103,6 @@ YSURF_SNOW%DEP_HUM     => NULL()
 YSURF_SNOW%NAT_LEV     => NULL()
 YSURF_SNOW%PRO_SUP_TYP => NULL()
 YSURF_SNOW%AVA_TYP     => NULL()
-
 !
 END SUBROUTINE TYPE_SNOW_INIT
 !

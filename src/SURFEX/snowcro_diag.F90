@@ -898,21 +898,29 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
       ! PSNOWSWE is slope perpendicular, it is here porjected on the vertical axis,
       ! as it is later done in diag_misc_isban.
-      ZSNOWSWE = PSNOWSWE(JJ,JST) / PDIRCOSZW(JJ)
-      ZSNOWDZ  = PSNOWDZ (JJ,JST) / PDIRCOSZW(JJ)
+      ZSNOWSWE = PSNOWSWE(JJ,JST)! / PDIRCOSZW(JJ) Projection already done later in surfex
+      ZSNOWDZ  = PSNOWDZ (JJ,JST)! / PDIRCOSZW(JJ) Projection already done later in surfex
 
-      IF(    PSNOWAGE(JJ,JST) <= 7) THEN
+      IF(PSNOWAGE(JJ,JST) <= 7) THEN
         PSNOWDEPTH_7DAYS(JJ) = PSNOWDEPTH_7DAYS(JJ) + ZSNOWDZ
         PSNOWSWE_7DAYS  (JJ) = PSNOWSWE_7DAYS  (JJ) + ZSNOWSWE
-      ELSEIF(PSNOWAGE(JJ,JST) <= 5) THEN
-        PSNOWDEPTH_5DAYS(JJ) = PSNOWDEPTH_5DAYS(JJ) + ZSNOWDZ
-        PSNOWSWE_5DAYS  (JJ) = PSNOWSWE_5DAYS  (JJ) + ZSNOWSWE
-      ELSEIF(PSNOWAGE(JJ,JST) <= 3) THEN
-        PSNOWDEPTH_3DAYS(JJ) = PSNOWDEPTH_3DAYS(JJ) + ZSNOWDZ
-        PSNOWSWE_3DAYS  (JJ) = PSNOWSWE_3DAYS  (JJ) + ZSNOWSWE
-      ELSEIF(PSNOWAGE(JJ,JST) <= 1) THEN
-        PSNOWDEPTH_1DAYS(JJ) = PSNOWDEPTH_1DAYS(JJ) + ZSNOWDZ
-        PSNOWSWE_1DAYS  (JJ) = PSNOWSWE_1DAYS  (JJ) + ZSNOWSWE
+
+        IF(PSNOWAGE(JJ,JST) <= 5) THEN
+          PSNOWDEPTH_5DAYS(JJ) = PSNOWDEPTH_5DAYS(JJ) + ZSNOWDZ
+          PSNOWSWE_5DAYS  (JJ) = PSNOWSWE_5DAYS  (JJ) + ZSNOWSWE
+
+          IF(PSNOWAGE(JJ,JST) <= 3) THEN
+            PSNOWDEPTH_3DAYS(JJ) = PSNOWDEPTH_3DAYS(JJ) + ZSNOWDZ
+            PSNOWSWE_3DAYS  (JJ) = PSNOWSWE_3DAYS  (JJ) + ZSNOWSWE
+
+            IF(PSNOWAGE(JJ,JST) <= 1) THEN
+              PSNOWDEPTH_1DAYS(JJ) = PSNOWDEPTH_1DAYS(JJ) + ZSNOWDZ
+              PSNOWSWE_1DAYS  (JJ) = PSNOWSWE_1DAYS  (JJ) + ZSNOWSWE
+              PRINT*,PSNOWDEPTH_1DAYS(JJ)
+
+            ENDIF
+          ENDIF
+        ENDIF
       ENDIF
 
       ! Ramsonde top penetration

@@ -184,7 +184,7 @@ DO JP=1,IO%NPATCH
         DM%XSNRAM_SONDE   (IMASK) = DM%XSNRAM_SONDE   (IMASK) + PK%XPATCH(JI) * DMK%XSNRAM_SONDE   (JI)
         DM%XSN_WETTHCKN   (IMASK) = DM%XSN_WETTHCKN   (IMASK) + PK%XPATCH(JI) * DMK%XSN_WETTHCKN   (JI)
         DM%XSN_REFRZNTHCKN(IMASK) = DM%XSN_REFRZNTHCKN(IMASK) + PK%XPATCH(JI) * DMK%XSN_REFRZNTHCKN(JI)
-        !The does not make really sense
+        !The following does not make really sense
         DM%XDEP_HIG       (IMASK) = DM%XDEP_HIG       (IMASK) + PK%XPATCH(JI) * DMK%XDEP_HIG       (JI)
         DM%XDEP_MOD       (IMASK) = DM%XDEP_MOD       (IMASK) + PK%XPATCH(JI) * DMK%XDEP_MOD       (JI)
         DM%XACC_LEV       (IMASK) = DM%XACC_LEV       (IMASK) + PK%XPATCH(JI) * DMK%XACC_LEV       (JI)
