@@ -37,6 +37,7 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
 !6)Update of risk nat depending on time step
 !7)Type of avalanche is weird
 !8)+0.05 pour nat_rat dans le cas pro sup new
+!9)add relevant threshold for ZSW (not strictly 0)
 
 !########################Import of parameters#####################################################!
 !
@@ -273,9 +274,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
     IF (PSNOWSWE(JJ,JST)>0) THEN
 !   Do something only in case of non-empty layer
 !
-!     WARNING:
-!     PSNOWLIQ is not well exported before (too much porjections) RIGHT PLACE TO DO THAT?
+!     WARNING: PSNOWLIQ is not well exported before (too much projections) RIGHT PLACE TO DO THAT?
       PSNOWLIQ(JJ,JST) = PSNOWLIQ(JJ,JST) * PDIRCOSZW(JJ)
+      ZSCW = XRHOLW * PSNOWLIQ(JJ,JST) / (PSNOWDZ(JJ,JST) * PDIRCOSZW(JJ)) !LWC (kg/m3)
 !
 !     ########################Grain morphology#####################################################!
 !     Computes dendricity, sphericity, grain size, optical dimater and snow type from variables
@@ -318,13 +319,20 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ICLASS_SPHER = MIN(INT(10 * PSNOWSPHER(JJ,JST) + 0.05),9)
 !
 !       3 classes of grain size in mm 0:[0,0.55[, 1:[0.55,1.05[, 2:[1.05, +inf[. Strange +0.05
-        IF     (PSNOWSIZE(JJ,JST) < 0.00055) THEN
+        IF    (INT(10000*PSNOWSIZE(JJ,JST)+0.5).LE.5) THEN
           ICLASS_SIZE = 0
-        ELSEIF (PSNOWSIZE(JJ,JST) < 0.00105) THEN
+        ELSEIF(INT(10000*PSNOWSIZE(JJ,JST)+0.5).LE.10) THEN
           ICLASS_SIZE = 1
         ELSE
           ICLASS_SIZE = 2
         ENDIF
+!        IF     (PSNOWSIZE(JJ,JST) < 0.00055) THEN
+!          ICLASS_SIZE = 0
+!        ELSEIF (PSNOWSIZE(JJ,JST) < 0.00105) THEN
+!          ICLASS_SIZE = 1
+!        ELSE
+!          ICLASS_SIZE = 2
+!        ENDIF
 !
 !       Overall 10x3x6 classes from 1 to 180 (included)
 !       Historical variable {0,1,...,5} already defines 6 classes
@@ -334,9 +342,11 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ENDIF
 !
 !     For all snow types (dendritic and non-dendritic)
-
-!     Additional constrain to define MF/RG
-      IF ((PSNOWLIQ(JJ,JST) > XSURF_EPSILON) .AND. (PSNOWHIST(JJ,JST) < 2)) THEN
+!
+!     Additional condition to define MF/RG
+!     WARNING: the rounding on ZSCW here and snowttols causes very slight differences an the condition
+!     WARNING: could be changed to 1e-6
+      IF ((ZSCW > XSURF_EPSILON) .AND. (PSNOWHIST(JJ,JST) < 2)) THEN
         PSNOWTYPEMEPRA(JJ,JST) = JP_RG_MF
       ENDIF
 !
@@ -350,7 +360,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !     #-0.2 <= T           # 2            # 3                 # 4        #
 !
 !     In practice, only the distinction between thermal state >2 or <= 2 is considered here, i.e.
-      ZSCW = XRHOLW * PSNOWLIQ(JJ,JST) / (PSNOWDZ(JJ,JST) * PDIRCOSZW(JJ)) !LWC (kg/m3)
       GTHERMSTATE = (PSNOWTEMP(JJ,JST) < 272.96) .OR. (ZSCW < 5)           !Thermstate <= 2
 !
 !     ########################Ram strength#########################################################!
@@ -435,7 +444,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
                                   (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_FC).OR.&
                                   (PSNOWTYPEMEPRA(JJ,JST)==JP_MF_MF))) THEN
 !     Case of wet snow of type RG, DF+RG, MF+RG, MF+DH, MF+FC, MF and RG+FC
-
+!
         IF     (PSNOWRHO(JJ,JST) < 200) THEN
           PSNOWSHEAR(JJ,JST) = 0.1
         ELSEIF (PSNOWRHO(JJ,JST) < 320) THEN
@@ -640,7 +649,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !     ACC_RAT is not defined for slope = 0 degrees and for the top layer
         PNAT_RAT(JJ,JST) = PSNOWSHEAR(JJ,JST) / ZWEIGH_STRESS(JJ)
       ELSE
-        PNAT_RAT(JJ,JST) = XUNDEF !-1 in previous versions
+        PNAT_RAT(JJ,JST) = XUNDEF!in previous -1
       ENDIF
 !
 !     ##########################################Accidental risk###################################
@@ -853,10 +862,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
           ELSE
             GIKNOTMF(JJ)=.TRUE.
           ENDIF
-
+!
         ENDIF
       ENDIF
-
 !
 !
 !     #######################Other cumulative quantities##########################################!
@@ -928,7 +936,7 @@ DO JJ=1,SIZE(PSNOWSWE,1)
     IPRO_SUP_LIM(JJ) = JST
     PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
   ENDIF
-
+!
   PDEP_TOT   (JJ) = ZSNOW_DEPTH(JJ)
   ZSNOW_DEPTH(JJ) = 0
   ZDEP_INF   (JJ) = PDEP_TOT(JJ) - PDEP_SUP(JJ)
@@ -952,6 +960,10 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !
         ZSCW = XRHOLW * PSNOWLIQ(JJ,JST) / (PSNOWDZ(JJ,JST) * PDIRCOSZW(JJ))    !lwc (kg/m3)
         GTHERMSTATE = (PSNOWTEMP(JJ,JST) < 272.96).OR.(ZSCW < 5)                !thermstate <= 2
+!       Storing the current GTHERMSTATE to get the one of the bottom layer of sup profile
+        GTHERMSTATE_BOT(JJ) = GTHERMSTATE
+!!!!!!!!!       Storing the current layer thickness to get the one of the bottom layer
+!!!!!!!!!!        ZTHICK_BOT(JJ) = PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
 !
 !       Calculations of the height of the uppest continuous block of humid snow in the sup.
 !       profile (slightly different from SNOWWETTHICKNESS)
@@ -993,9 +1005,11 @@ DO JST=1,SIZE(PSNOWSWE,2)
             GDRY(JJ) = .FALSE.
           ENDIF
 !         GMEL_GRO used only for profiles sup. WET and NAN
+!         GMEL_GRO = There is no dry layer at a depth > 10 cm and height > 10 cm in the sup profile
           IF((ZSNOW_DEPTH(JJ).GT.XNAT_HEI_MIN).AND.GTHERMSTATE) THEN
             GMEL_GRO(JJ) = .FALSE.
           ENDIF
+!
 !         ZHUMTHICK used for profiles sup. FRO and NAN. Non-sense ...
           ZHUMTHICK(JJ) = ZHUMTHICK(JJ) + PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
         ENDIF
@@ -1014,11 +1028,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !
       ENDIF
 !
-!   Storing the current GTHERMSTATE to get the one of the bottom layer
-    GTHERMSTATE_BOT(JJ) = GTHERMSTATE
-!
-!   Storing the current layer thickness to get the one of the bottom layer
-    ZTHICK_BOT(JJ) = PSNOWDZ(JJ,JST) / PDIRCOSZW(JJ)
 !
     ENDIF
 !
@@ -1076,7 +1085,7 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   ELSE
     INAT_LEV_LOW = JPNAT_TAB(1  + IPRO_CLASS)
   ENDIF
-
+!
   IF(INAT_LEV_HIG.NE.JPNAT_MOA) THEN
     PNAT_LEV(JJ) = MAX(INT(INAT_LEV_HIG),MAX(INT(INAT_LEV_MOD),INT(INAT_LEV_LOW)))
   ELSE
@@ -1086,7 +1095,7 @@ DO JJ=1,SIZE(PSNOWSWE,1)
 ! #######################Avalanche type determination##############################################!
 !
 ! Does not make sense, whatever...
-  ZHUMTHICK(JJ) = ZHUMTHICK(JJ) + ZTHICK_BOT(JJ)
+!!!!!!!!!!!!!!!  ZHUMTHICK(JJ) = ZHUMTHICK(JJ) + ZTHICK_BOT(JJ)
 !
   IF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_NEW) THEN
 ! Profile sup. NEW
@@ -1125,11 +1134,13 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   ELSEIF(PPRO_SUP_TYP(JJ).EQ.JPPRO_SUP_FRO) THEN
 ! Profile sup. WET
     IF(PPRO_INF_TYP(JJ).EQ.JPPRO_INF_NAN) THEN
-      IF((.NOT.GTHERMSTATE_BOT(JJ)).AND.(ZHUMTHICK(JJ).GT.PDEP_TOT(JJ))) THEN
-        PAVA_TYP(JJ) = JPAVA_MEL_SUR
-      ELSE
+!   Profile inf NAN
+      IF((.NOT.GTHERMSTATE_BOT(JJ)).AND.(ZHUMTHICK(JJ).GT.(PDEP_TOT(JJ)/3.0))) THEN
         PAVA_TYP(JJ) = JPAVA_MEL_GRO
+      ELSE
+        PAVA_TYP(JJ) = JPAVA_MEL_SUR
       ENDIF
+
     ELSEIF(PPRO_INF_TYP(JJ).EQ.JPPRO_INF_HAR) THEN
 !   Profile inf HAR
       PAVA_TYP(JJ) = JPAVA_MEL_SUR
@@ -1278,5 +1289,5 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   ENDIF
 !
 ENDDO
-
+!
 END SUBROUTINE SNOWCRO_DIAG
