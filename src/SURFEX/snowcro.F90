@@ -843,10 +843,13 @@ ENDIF
 SELECT CASE (HSNOWRAD)
   CASE ("TA1")
     ZSNOWIMP_CONTENT(:,:,1) = 0.0
+    PSNOWIMPUR(:,:) = 0.0
   CASE ("TA2")
     ZSNOWIMP_CONTENT(:,:,1) = 100.0E-9
+    PSNOWIMPUR(:,:) = 0.0    
   CASE ("TAR")
     ZSNOWIMP_CONTENT(:,:,1) = 2. * PSNOWAGE(:,:) * 1E-9
+    PSNOWIMPUR(:,:) = 0.0    
   CASE("TA3")
     !Increase impurity content following parameterization from S. Morin 
     DO JJ=1, SIZE(ZSNOW)
@@ -939,7 +942,7 @@ SELECT CASE (HSNOWRAD)
                     OSNOW_ABS_ZENITH,HSNOWMETAMO) 
   !
   CASE ("TAR","TA1","TA2","TA3", "TA4")!
-    IF ((ANY(PSNOWIMPUR<0)).OR.(ANY(PSNOWIMPUR>1))) THEN
+    IF ((ANY(ZSNOWIMP_CONTENT<0)).OR.(ANY(ZSNOWIMP_CONTENT>1))) THEN
       PRINT*,"PROBLEME GRAVE"
       PRINT*,"ATTENTION VALEURS ANORMALES IMPURETES"
       PRINT*,PSNOWIMPUR
