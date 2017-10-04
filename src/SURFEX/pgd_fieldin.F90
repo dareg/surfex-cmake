@@ -109,7 +109,7 @@ INTEGER                        :: ILU    ! expected physical size of full surfac
 INTEGER                        :: ILUOUT ! output listing logical unit
 INTEGER, DIMENSION(:), POINTER :: IMASK  ! mask for packing from complete field to nature field
 INTEGER                        :: IDIM   !
-INTEGER :: JI
+INTEGER :: JI, ICASE
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZVEGTYPE
 INTEGER :: JJ, JT, JTN
@@ -319,7 +319,11 @@ IF (LEN_TRIM(HFILE)/=0) THEN
       ENDIF
 
       ! if the cover / vegtype is not present on the area
-      IF( (U%LECOSG.AND..NOT.U%LCOVER(JT)) .OR. (.NOT.U%LECOSG.AND..NOT.LVEG_PRES(JT)) ) THEN
+      ICASE = 0
+      IF (.NOT.U%LECOSG) THEN
+        IF (.NOT.LVEG_PRES(JT)) ICASE=1
+      ENDIF
+      IF( (U%LECOSG.AND..NOT.U%LCOVER(JT)) .OR. ICASE==1 ) THEN
         ZFIELD(:,JT) = 0.
         NSIZE (:,JT) = 1.
       ENDIF
