@@ -310,7 +310,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
         ! height of trees only defined for tree vegtypes
         IF (YFIELD(1:6)=='H_TREE') THEN
           IF ((.NOT.U%LECOSG.AND.((JT>=7 .AND. JT<=12) .OR. (JT>=18 .AND. JT<=19))).OR. &
-              (     U%LECOSG.AND.(JT<=(SUM(NTYPE(1:2))+3).OR.JT>=(SUM(NTYPE(1:2))+13)) ) ) THEN
+              (     U%LECOSG.AND.((JT<=(SUM(NTYPE(1:2))+3).OR.JT>=(SUM(NTYPE(1:2))+13)).AND.JT/=22) ) ) THEN
             ZFIELD(:,JT) = 0.
             NSIZE (:,JT) = 1.
           ENDIF
