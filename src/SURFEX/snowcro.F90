@@ -196,9 +196,9 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, P
 !                                      PPS     = surface pressure
 !                                      PQA     = atmospheric specific humidity
 !                                                at level za
-REAL, DIMENSION(:,:), INTENT(IN )   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral irradiance (W/m2/um)
+REAL, DIMENSION(:,:), INTENT(IN)   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral irradiance (W/m2/um)
 !
-REAL, DIMENSION(:,:), INTENT(IN )   :: PIMPWET, PIMPDRY  !Dry and wet deposit coefficient from Forcing File(g/m²/s)
+REAL, DIMENSION(:,:), INTENT(IN)   :: PIMPWET, PIMPDRY  !Dry and wet deposit coefficient from Forcing File(g/m²/s)
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PTG, PSOILCOND, PD_G, PPSN3L
 !                                      PTG       = Surface soil temperature (effective
@@ -584,6 +584,8 @@ IPRINT = 1
 !
 ! Initialization of the actual number of snow layers, total snow depth 
 !  and layer thicknesses
+
+
 !
 ZSNOWTEMP(:,:) = 0.
 !
@@ -808,7 +810,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROCOMPACTN", INLVLS_USE(IDEBUG),LPRINTGRAN,     &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),   &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),   &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),&
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),&
                            HSNOWMETAMO )
@@ -827,7 +829,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWDRIFT", INLVLS_USE(IDEBUG),LPRINTGRAN,           &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),   &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),   &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),&
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),&
                            HSNOWMETAMO )
@@ -849,7 +851,7 @@ ENDDO    ! end loop grid points
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after  update snow heat content", INLVLS_USE(IDEBUG),LPRINTGRAN,&
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO      )
@@ -938,10 +940,17 @@ SELECT CASE (HSNOWRAD)
     ENDIF
     
     
+    DO JJ=1,SIZE(PSW_RAD)
+      IF (PSW_RAD(JJ)/=(SUM(P_DIR_SW(JJ,:))+SUM(P_SCA_SW(JJ,:)))) THEN
+        PRINT*, "WARNING",PSW_RAD(JJ),"SUM=",(SUM(P_DIR_SW(JJ,:))+SUM(P_SCA_SW(JJ,:)))  
+      ENDIF
+    ENDDO
+    
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
                         ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_NORM, &  ! juste test, normalement PANGL_NORM=PZENITH, 
                         PDIRCOSZW,INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
                         P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF,OATMORAD)
+                       
 !    PRINT*,"ZRADSINK",ZRADSINK,"ZRADXS",ZRADXS   , "TIME",tptime                
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  !! activation of spectral outputs 
@@ -979,8 +988,9 @@ END SELECT
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
+  PRINT*, PSNOWALB, "ALB AFTER TARTES"
   CALL SNOWCROPRINTPROFILE("after SNOWCRORAD", INLVLS_USE(IDEBUG),LPRINTGRAN,               &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO,HSNOWRAD)
@@ -996,7 +1006,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROTHRM", INLVLS_USE(IDEBUG),LPRINTGRAN,              &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO)
@@ -1044,6 +1054,19 @@ IF (OMEB) THEN
 
 ELSE
 
+IF (GCRODEBUGDETAILSPRINT) THEN
+  PRINT *,"BEFORE SNOWCROEBUD "
+      PRINT *,    HSNOWRES, HIMPLICIT_WIND                                    
+      PRINT *,            PPEW_A_COEF, PPEW_B_COEF                                    
+      PRINT *,            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF          
+      PRINT *,            XSNOWDZMIN                                                  
+      PRINT *,            PZREF,ZSNOWTEMP(:,1),PSNOWRHO(:,1),PSNOWLIQ(:,1),ZSCAP(:,1) 
+      PRINT *,            ZSCOND(:,1),ZSCOND(:,2)                                     
+      PRINT *,            PUREF,PEXNS,PEXNA,PDIRCOSZW,PVMOD                           
+      PRINT *,            PLW_RAD,PSW_RAD,PTA,PQA,PPS,PTSTEP                          
+      PRINT *,            PSNOWALB             
+
+ENDIF  
  CALL SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                    &
                   PPEW_A_COEF, PPEW_B_COEF,                                    &
                   PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,          &
@@ -1064,7 +1087,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROEBUD", INLVLS_USE(IDEBUG),LPRINTGRAN,              &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO)
@@ -1086,7 +1109,7 @@ ZGRNDFLUXI(:)  = PGRNDFLUX(:) ! on sauvegarde le flux imposé par MEB
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROSOLVT", INLVLS_USE(IDEBUG),LPRINTGRAN,             &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO)
@@ -1115,7 +1138,7 @@ END IF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROFLUX", INLVLS_USE(IDEBUG),LPRINTGRAN,              &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO)
@@ -1135,7 +1158,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROGONE", INLVLS_USE(IDEBUG),LPRINTGRAN,              &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO)
@@ -1156,7 +1179,7 @@ PGRNDFLUX(:) = PGRNDFLUX(:) + ZRADXS(:)
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROLAYER_GONE", INLVLS_USE(IDEBUG),LPRINTGRAN,        &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO,HSNOWRAD)
@@ -1170,7 +1193,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROMELT", INLVLS_USE(IDEBUG),LPRINTGRAN,              &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO,HSNOWRAD)
@@ -1189,7 +1212,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROREFRZ", INLVLS_USE(IDEBUG),LPRINTGRAN,             &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO)
@@ -1205,7 +1228,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPN", INLVLS_USE(IDEBUG),LPRINTGRAN,             &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO,HSNOWRAD)
@@ -1222,7 +1245,7 @@ ENDIF
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
   CALL SNOWCROPRINTPROFILE("after SNOWCROEVAPGONE", INLVLS_USE(IDEBUG),LPRINTGRAN,          &
-                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),PSNOWTEMP(IDEBUG,:),        &
+                           PSNOWDZ(IDEBUG,:),PSNOWRHO(IDEBUG,:),ZSNOWTEMP(IDEBUG,:),        &
                            PSNOWLIQ(IDEBUG,:),PSNOWHEAT(IDEBUG,:),PSNOWGRAN1(IDEBUG,:),     &
                            PSNOWGRAN2(IDEBUG,:),PSNOWHIST(IDEBUG,:),PSNOWAGE(IDEBUG,:),     &
                            HSNOWMETAMO,HSNOWRAD)
@@ -1408,7 +1431,7 @@ DO JJ = 1,SIZE(ZSNOW)
 !IF(INLVLS_USE(JJ)>0) WRITE(*,*) 'SOL:',JJ,INLVLS_USE(JJ),PGRNDFLUX(JJ),PTG(JJ),&
 ! PSNOWTEMP(jj,INLVLS_USE(JJ)),PSNOWTEMP(jj,1),PZENITH(JJ)           
   DO JST = 1,INLVLS_USE(JJ)        
-    IF ( PSNOWTEMP(JJ,JST) < 100. ) THEN
+    IF ( PSNOWTEMP(JJ,JST) < 200. ) THEN
       WRITE(*,*) 'pb tempe snow :',PSNOWTEMP(JJ,JST)
       WRITE(*,FMT='("DATE:",2(I2.2,"/"),I4.4,F3.0)')          &
         TPTIME%TDATE%DAY,TPTIME%TDATE%MONTH,TPTIME%TDATE%YEAR,TPTIME%TIME/3600.
@@ -1419,9 +1442,13 @@ DO JJ = 1,SIZE(ZSNOW)
       WRITE(*,*) 'XLAT=',PXLAT(JJ),'XLON=',PXLON(JJ)
       WRITE(*,*) 'solar radiation=',PSW_RAD(JJ)
       WRITE(*,*) 'INLVLS_USE(JJ):',INLVLS_USE(JJ)
-      WRITE(*,*) PSNOWDZ(JJ,1:INLVLS_USE(JJ))
-      WRITE(*,*) PSNOWRHO(JJ,1:INLVLS_USE(JJ))
-      WRITE(*,*) PSNOWTEMP(JJ,1:INLVLS_USE(JJ))
+      WRITE(*,*) 'DZ',PSNOWDZ(JJ,1:INLVLS_USE(JJ))
+      WRITE(*,*) 'RHO',PSNOWRHO(JJ,1:INLVLS_USE(JJ))
+      WRITE(*,*) 'TEMP',PSNOWTEMP(JJ,1:INLVLS_USE(JJ))
+      WRITE(*,*) 'RADSINK',ZRADSINK(JJ,:)
+      WRITE(*,*) 'RADXS',ZRADXS(JJ)
+      WRITE(*,*) 'ZENITH',PZENITH(JJ)*(180./XPI)
+      WRITE(*,*) 'EFFECTIF',PANGL_NORM(JJ)*(180./XPI)
       CALL ABOR1_SFX('SNOWCRO: erreur tempe snow')
     ENDIF
   ENDDO
@@ -5950,15 +5977,15 @@ WRITE(*,'(4(A12,"|"))')"------------","------------","------------",&
 WRITE(*,'(4(ES12.3,"|")," meteo1")')PTA,PQA,PRR,PSR
 WRITE(*,'(4(A12,"|"))')"------------","------------","------------",&
 "------------"
-WRITE(*,'(3(A12,"|"))')"------------","------------","------------"
-WRITE(*,'(3(A12,"|"))')"PSW_RAD","PLW_RAD","PVMOD"
-WRITE(*,'(3(A12,"|"))')"------------","------------","------------"
-WRITE(*,'(3(ES12.3,"|")," meteo2")')PSW_RAD,PLW_RAD,PVMOD
-WRITE(*,'(3(A12,"|"))')"------------","------------","------------"
-WRITE(*,*)
-WRITE(*,*)"Ground :"
-WRITE(*,'(4(A12,"|"))')"------------","------------","------------",&
-"------------"
+!WRITE(*,'(3(A12,"|"))')"------------","------------","------------"
+!WRITE(*,'(3(A12,"|"))')"PSW_RAD","PLW_RAD","PVMOD"
+!WRITE(*,'(3(A12,"|"))')"------------","------------","------------"
+!WRITE(*,'(3(ES12.3,"|")," meteo2")')PSW_RAD,PLW_RAD,PVMOD
+!WRITE(*,'(3(A12,"|"))')"------------","------------","------------"
+!WRITE(*,*)
+!WRITE(*,*)"Ground :"
+!WRITE(*,'(4(A12,"|"))')"------------","------------","------------",&
+!"------------"
 WRITE(*,'(4(A12,"|"))')"PTG","PSOILCOND","PD_G","PPSN3L"
 WRITE(*,'(4(A12,"|"))')"------------","------------","------------",&
 "------------"
