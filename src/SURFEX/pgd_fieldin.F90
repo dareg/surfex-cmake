@@ -319,14 +319,14 @@ IF (LEN_TRIM(HFILE)/=0) THEN
       ENDIF
 
       ! if the cover / vegtype is not present on the area
-      ICASE = 0
-      IF (.NOT.U%LECOSG) THEN
-        IF (.NOT.LVEG_PRES(JT)) ICASE=1
-      ENDIF
-      IF( (U%LECOSG.AND..NOT.U%LCOVER(JT)) .OR. ICASE==1 ) THEN
-        ZFIELD(:,JT) = 0.
-        NSIZE (:,JT) = 1.
-      ENDIF
+      !ICASE = 0
+      !IF (.NOT.U%LECOSG) THEN
+      !  IF (.NOT.LVEG_PRES(JT)) ICASE=1
+      !ENDIF
+      !IF( (U%LECOSG.AND..NOT.U%LCOVER(JT)) .OR. ICASE==1 ) THEN
+      !  ZFIELD(:,JT) = 0.
+      !  NSIZE (:,JT) = 1.
+      !ENDIF
 
     ENDIF
 
