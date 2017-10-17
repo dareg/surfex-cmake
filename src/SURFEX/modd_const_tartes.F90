@@ -210,6 +210,10 @@ REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow g
 REAL, PARAMETER :: XIMPUR_ICE = 5000E-9   !BC and SSA values of a layer that simulate
 REAL, PARAMETER :: XSSA_ICE = 0.6   !a consistent albedo for ice layers (not perfect but better than nothing)
 !
+!######################## Implementation of a threshold on the effective illumination angle (added by F.Tuzet) to avoid numerical instability. #############################
+
+REAL, PARAMETER :: COSILLUMMIN = 0.0017  !Minimum value of the cosine of effective illumination angle corresponding to a maximum value of effective illumination angle of 89.9°
+
 !######################## VALUES FOR DUST ACCORDING TO SKILLES 2016(LOW ABSORPTION) OR MULLER 2011(HIGH ABSORPTION) #############################
 !
 LOGICAL, PARAMETER :: ISMULLER= .TRUE. ! Boolean to determine if we use skilles or muller model

@@ -380,10 +380,10 @@ REAL, DIMENSION(SIZE(PTA))          :: ZBLOWSNW_ACC
 !                                                      for deposition of blown snow particles
 !                                                      during the current time step (m)
 REAL, DIMENSION(SIZE(PTA))          :: ZANGLE_SLOP
-!                                      ZANGLE_NORM  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
+!                                      ZANGL_ILLUM  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
 
-REAL, DIMENSION(SIZE(PTA))          :: ZANGLE_NORM
-!                                      ZANGLE_NORM  = angle between the normal to the ground and the sun (=zenith if flat simulation)
+REAL, DIMENSION(SIZE(PTA))          :: ZANGL_ILLUM
+!                                      ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
                                       !  used only in TARTES for now
 !
 !*      0.3    declarations of packed  variables
@@ -442,7 +442,7 @@ PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
 ZANGLE_SLOP(:) =0.0
-ZANGLE_NORM(:) =PZENITH(:)
+ZANGL_ILLUM(:) =PZENITH(:)
 !PRINT *,"ANG" ,"NORD :",PDIRCOSZW(1), "SUD:",PDIRCOSZW(4)
 !PRINT *, "DIR","NORD :",PSLOPEDIR(1), "SUD:",PSLOPEDIR(4)
 !PRINT *, "azim","NORD :",PAZIM(1)
@@ -492,11 +492,10 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       PRRSFC(JJ)         = PRR(JJ) - ZRRSNOW(JJ)
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
       ZANGLE_SLOP(JJ) =ACOS(PDIRCOSZW(JJ))    ! Compute the angle of the slope 
-      ZANGLE_NORM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ZANGLE_SLOP(JJ)))+ &
-      (SIN(PZENITH(JJ))*SIN(ZANGLE_SLOP(JJ)*COS(PAZIM(JJ)-(PSLOPEDIR(JJ)*XPI/180))))) !Compute the normal zenithal angle     
+      ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ZANGLE_SLOP(JJ)))+ &
+      (SIN(PZENITH(JJ))*SIN(ZANGLE_SLOP(JJ)*COS(PAZIM(JJ)-(PSLOPEDIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
    ENDDO
 !
-   !PRINT*,"zanglenorm",ZANGLE_NORM(:)-PZENITH(:)
    IF(HISBA == 'DIF')THEN
       ZSOILCOND(:)   = PSOILCONDZ(:)
    ELSE
@@ -641,7 +640,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
    DO JIMP=1,NIMPUR
      DO JWRK=1,INLVLS
         DO JJ=1,SIZE(PSNOWSWE,1)
-           PSNOWIMPUR (JJ,JWRK,JIMP)=(1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR(JJ,JWRK,JIMP) !N6K
+           PSNOWIMPUR (JJ,JWRK,JIMP)=(1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR(JJ,JWRK,JIMP) !F.T
         ENDDO
      ENDDO
    ENDDO
@@ -814,7 +813,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_PET_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEQ_A_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEQ_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_ZENITH
-REAL, DIMENSION(KSIZE1)        :: ZP_ANGLE_NORM    ! Angle entre le soleil et la normal au sol et le soleil (=zenith sans pente au sol) utilisé dans TARTES
+REAL, DIMENSION(KSIZE1)        :: ZP_ANGL_ILLUM    ! Angle entre le soleil et la normal au sol et le soleil (=zenith sans pente au sol) utilisé dans TARTES
 REAL, DIMENSION(KSIZE1)        :: ZP_LAT,ZP_LON
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN_INV
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN
@@ -839,11 +838,11 @@ REAL, DIMENSION(KSIZE1) :: ZP_SNOWSWE_7DAYS
 REAL, DIMENSION(KSIZE1) :: ZP_SNOWRAM_SONDE
 REAL, DIMENSION(KSIZE1) :: ZP_SNOW_WETTHICKNESS
 REAL, DIMENSION(KSIZE1) :: ZP_SNOW_REFROZENTHICKNESS
-REAL, DIMENSION(KSIZE1,KSIZE2,NIMPUR) :: ZP_SNOWIMP_CONC !N6K
-REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIR_SW !N6K
-REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SCA_SW !N6K
-REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SPEC_ALB !N6K
-REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIFF_RATIO !N6K
+REAL, DIMENSION(KSIZE1,KSIZE2,NIMPUR) :: ZP_SNOWIMP_CONC !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIR_SW !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SCA_SW !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SPEC_ALB !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIFF_RATIO !F.T
 !
 REAL, PARAMETER :: ZDEPTHABS = 0.60 ! m
 !
@@ -993,7 +992,7 @@ DO JJ=1,KSIZE1
    ZP_LAT  (JJ)      = PLAT(JI)
    ZP_LON  (JJ)      = PLON(JI)
    ZP_ZENITH(JJ)     = PZENITH  (JI)
-   ZP_ANGLE_NORM(JJ)     = ZANGLE_NORM  (JI)
+   ZP_ANGL_ILLUM(JJ)     = ZANGL_ILLUM  (JI)
 !
    ZP_GRNDFLUX    (JJ) = PGRNDFLUX    (JI)
    ZP_RNSNOW      (JJ) = PRNSNOW      (JI)
@@ -1074,9 +1073,6 @@ ENDIF
 ! Call ISBA-SNOW3L model:  
 !  
 IF (HSNOW_ISBA=='CRO') THEN 
-
-!PRINT *, "NORD"," ZEN :",ZP_ZENITH(1), "NORM:",ZP_ANGLE_NORM(1) 
-!PRINT *, "SUD"," ZEN :",ZP_ZENITH(5), "NORM:",ZP_ANGLE_NORM(5) 
   
    CALL SNOWCRO(HSNOWRES, TPTIME, OMEB, OGLACIER, HIMPLICIT_WIND,          &
              ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
@@ -1094,7 +1090,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
-             ZP_ANGLE_NORM,                                                &
+             ZP_ANGL_ILLUM,                                                &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, OSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,ZP_DIR_SW, ZP_SCA_SW,&
              ZP_SPEC_ALB, ZP_DIFF_RATIO,ZP_IMPWET,ZP_IMPDRY,                       &
@@ -1276,7 +1272,7 @@ IF (HSNOW_ISBA=='CRO') THEN
     DO JWRK=1,KSIZE2
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
-        PSNOWIMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP) !N6K
+        PSNOWIMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP) !F.T
         PSNOWIMP_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP)
       ENDDO
     ENDDO

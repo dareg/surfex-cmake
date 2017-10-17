@@ -1099,10 +1099,9 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       CALL DEF_VAR_NETCDF(DGU, &
                     IFILE_ID, 'SPEC_ALB',   &
                     'Snow spectral albedo', IDDIMBAND, YATT_TITLE, (/'no unity'/))  
-                    CALL DEF_VAR_NETCDF(DGU, &
+      CALL DEF_VAR_NETCDF(DGU, &
                     IFILE_ID, 'DIFF_RATIO',   &
                     'Spectral diffuse to total ratio', IDDIMBAND, YATT_TITLE, (/'no unity'/))  
-  
     ENDIF 
   
   ENDIF
@@ -1681,7 +1680,7 @@ IF (DGEI%LSURF_BUDGETC) THEN
     CALL DEF_VAR_NETCDF(DGU, &
                       IFILE_ID,'LWDC_ISBA' ,'Averaged_Cumulated_Downward_LW       '                    ,JDIM,YATT_TITLE,YATT)
     CALL DEF_VAR_NETCDF(DGU, &
-                      IFILE_ID,'LWUC_ISBA' ,'Averaged_Cumulated_Upward_LW         '                    ,JDIM,YATT_TITLE,YATT)
+                      IFILE_ID,'LWUC_ISBA' ,'Averaged_Cumulated_Upward_LW         '                    ,JDIM,YATT_TITLE,YATT)  
   ENDIF
   YATT='Pa.s'
   CALL DEF_VAR_NETCDF(DGU, &

@@ -15,7 +15,7 @@
                PRNSNOW,PHSNOW,PGFLUXSNOW,                                &
                PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
-               PPERMSNOWFRAC,PZENITH,PANGL_NORM,PXLAT,PXLON,PBLOWSNW,     &
+               PPERMSNOWFRAC,PZENITH,PANGL_ILLUM,PXLAT,PXLON,PBLOWSNW,     &
                OSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
                HSNOWMETAMO, HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,          &
                PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP)
@@ -329,7 +329,7 @@ REAL, DIMENSION(:), INTENT(OUT)      ::  PQS
 !                                      PQS = surface humidity
 !
 REAL, DIMENSION(:), INTENT(IN)        :: PZENITH ! solar zenith angle
-REAL, DIMENSION(:), INTENT(IN)        :: PANGL_NORM ! Angle entre le soleil et la normal au sol et le soleil (=zenith sans pente au sol) utilisé dans TARTES
+REAL, DIMENSION(:), INTENT(IN)        :: PANGL_ILLUM ! Effective illumination angle, Angle between the sun and the normal to the ground (=zenith if no slope) used in TARTES
 REAL, DIMENSION(:), INTENT(IN)        :: PXLAT,PXLON ! LAT/LON after packing
 !
 REAL, DIMENSION(:,:), INTENT(IN)      :: PBLOWSNW !  Properties of deposited blowing snow (from Sytron or Meso-NH/Crocus)
@@ -388,7 +388,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN
 !                                      ZRADSINK   = Snow solar Radiation source terms (W/m2)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZWHOLDMAX 
-REAL, DIMENSION(SIZE(PSNOWRHO,1),NPNBANDS) :: ZSNOWALB_SP
+REAL, DIMENSION(SIZE(PSNOWRHO,1),JPNBANDS_ATM) :: ZSNOWALB_SP
 REAL, DIMENSION(SIZE(PSNOWRHO,1),JPNBANDS_ATM) :: PSPEC_DIR, PSPEC_DIF
 !
 !For now these values are constant
@@ -947,7 +947,7 @@ SELECT CASE (HSNOWRAD)
     ENDDO
     
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
-                        ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_NORM, &  ! juste test, normalement PANGL_NORM=PZENITH, 
+                        ZSNOWB0,ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_ILLUM, &  ! juste test, normalement PANGL_ILLUM=PZENITH, 
                         PDIRCOSZW,INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
                         P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF,OATMORAD)
                        
@@ -956,18 +956,12 @@ SELECT CASE (HSNOWRAD)
  !! activation of spectral outputs 
 
  ! output spectral albedo and diffuse to total irradiance ratio
-  DO JJ=1,NPNBANDS
-	  DO JP=1, size(ZSNOW)
-!	    PSPEC_ALB(JP,JJ)=PZENITH(JJ)
-	    PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)
-	  ENDDO
-  ENDDO
-  
    
   DO JJ=1,JPNBANDS_ATM
 	  DO JP=1, size(ZSNOW)
 !	    PDIFF_RATIO(JP,JJ)=P_DIR_SW(JP,JJ)+P_SCA_SW(JP,JJ)
-!	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)  ! To let commented                              
+!	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)  ! To let commented    
+      PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)                          
 	    IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN                            
 	      PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))    
 	    ELSE                                                                        
@@ -1448,7 +1442,7 @@ DO JJ = 1,SIZE(ZSNOW)
       WRITE(*,*) 'RADSINK',ZRADSINK(JJ,:)
       WRITE(*,*) 'RADXS',ZRADXS(JJ)
       WRITE(*,*) 'ZENITH',PZENITH(JJ)*(180./XPI)
-      WRITE(*,*) 'EFFECTIF',PANGL_NORM(JJ)*(180./XPI)
+      WRITE(*,*) 'EFFECTIF',PANGL_ILLUM(JJ)*(180./XPI)
       CALL ABOR1_SFX('SNOWCRO: erreur tempe snow')
     ENDIF
   ENDDO

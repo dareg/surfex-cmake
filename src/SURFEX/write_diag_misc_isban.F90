@@ -404,16 +404,15 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
               HPROGRAM,'RAM_SONDE',DGMI%XAVG_SNOWRAM_SONDE(:),IRESP,&
               HCOMMENT=YCOMMENT)     
       IF (DGMI%LPROBANDS) THEN
-      YCOMMENT='Snow spectral albedo' 
-      IF (DGMI%LPROBANDS) THEN
-      CALL WRITE_SURF(DGU, U, &
-              HPROGRAM,'SPEC_ALB',DGMI%XAVG_SPEC_ALB(:,:),IRESP,&
-              HCOMMENT=YCOMMENT)
-      YCOMMENT='Diffuse to total spectral irradiance ratio' 
-      ENDIF
-      CALL WRITE_SURF(DGU, U, &
-              HPROGRAM,'DIFF_RATIO',DGMI%XAVG_DIFF_RATIO(:,:),IRESP,&
-              HCOMMENT=YCOMMENT)
+        YCOMMENT='Snow spectral albedo'
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'SPEC_ALB',DGMI%XAVG_SPEC_ALB(:,:),IRESP,&
+                HCOMMENT=YCOMMENT)
+        YCOMMENT='Diffuse to total spectral irradiance ratio' 
+        CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'DIFF_RATIO',DGMI%XAVG_DIFF_RATIO(:,:),IRESP,&
+                HCOMMENT=YCOMMENT)  
+                
       ENDIF
       
       YCOMMENT='Thickness of wet snow at the top of the snowpack'  
