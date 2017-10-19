@@ -1895,8 +1895,8 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
 !    
 ! spectral albedo 
 PALB_SP(:,1:NPNBANDS)=ZSNOWALB(:,:)
-PALB_SP(:,NPNBANDS:JPNBANDS_ATM)=1.
-! Set the value of Albedo to 1 in the near infrared to have consistent spectral albedo outputs
+PALB_SP(:,NPNBANDS:JPNBANDS_ATM)=0.
+! Set the value of Albedo to 0 in the near infrared to have consistent spectral albedo outputs
 PRADXS(:)=0
 PRADSINK(:,:)=0
 ! Broadband absorbed energy by snowpack and soil
