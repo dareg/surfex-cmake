@@ -71,6 +71,7 @@ LOGICAL          :: LRESTART_2M = .FALSE.  ! write restart file
 LOGICAL          :: LINQUIRE    = .FALSE.  ! inquiry mode
 !      
 LOGICAL          :: LWRITE_COORD = .FALSE. ! write lat/lon of the target grid
+LOGICAL          :: LWRITE_TOPO  = .FALSE. ! write topography of the target grid
 !
 LOGICAL          :: LOUT_TIMENAME = .FALSE.! change the name of output file at the end of a day
                                            ! (ex: 19860502_00h00 -> 19860501_24h00)
@@ -147,7 +148,8 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         CPGDFILE, CPREPFILE, CSURFFILE, LRESTART_2M,             &
                         LPRINT, LRESTART, LINQUIRE, NSCAL, NHALO,                &
                         XTSTEP_SURF, XTSTEP_OUTPUT, LDIAG_FA_NOCOMPACT,          &
-                        LSET_FORC_ZS, LWRITE_COORD, LOUT_TIMENAME, LLIMIT_QAIR,  &
+                        LSET_FORC_ZS, LWRITE_COORD, LWRITE_TOPO,                 &
+                        LOUT_TIMENAME, LLIMIT_QAIR,                              &
                         LSHADOWS_SLOPE,LSHADOWS_OTHER,                           &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
                         YALG_MPI, XDELTA_OROG, LADAPT_SW,                        &
