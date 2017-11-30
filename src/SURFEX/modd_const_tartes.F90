@@ -106,7 +106,7 @@ REAL, PARAMETER :: XPCOEFNIR_DIF = 0.01216941
 !
 REAL, PARAMETER :: XP_MUDIFF = 0.601815023 ! =cos(53./180.*XPI) : diffuse incident flux is treated as direct flux at incident angle 53deg
 !
-REAL, PARAMETER :: XPMAX_OPTICALDEPTH = 400. !maximum optical depth per layer,
+REAL, PARAMETER :: XPMAX_OPTICALDEPTH = 200. !maximum optical depth per layer,200 by default
 REAL, PARAMETER :: XPTAUMAX = 30. !above this optical depth, absorbed energy can be neglected
 !
 ! Real and imaginary components of ice refractive index in the chosen bands
@@ -207,8 +207,8 @@ REAL, PARAMETER :: XPSNOWB0 = 1.225 ! absorption enhancement parameter of snow g
 !
 !######################## Empirical parameterization of ice layers in TARTES (added by F.Tuzet). This is just a preliminary version of TARTES+ICE #############################
 
-REAL, PARAMETER :: XIMPUR_ICE = 100E-9   !BC and SSA values of a layer that simulate
-REAL, PARAMETER :: XSSA_ICE = 0.05   !a consistent albedo for ice layers (not perfect but better than nothing)
+REAL, PARAMETER :: XIMPUR_ICE = 100E-9   !BC and SSA values of a layer that simulate, it is simulating dirty ice 
+REAL, PARAMETER :: XSSA_ICE = 0.05   !a consistent albedo for ice layers (not perfect but better than nothing),it is simulating dirty ice 
 !
 !######################## Implementation of a threshold on the effective illumination angle (added by F.Tuzet) to avoid numerical instability. #############################
 

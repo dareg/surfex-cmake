@@ -1482,7 +1482,6 @@ DO JJ = 1,INPOINTS
     IDAYMASK(IPOINTDAY) = JJ
   END IF
 END DO
-
 !
 IF ( IPOINTDAY>=1 ) THEN
   !
@@ -1736,7 +1735,11 @@ DO JL = 1,SIZE(PSNOWRHO,2)
       !
       IF (PSNOWRHO(JJ,JL) < 850.) THEN          !Check to detect ice layer
         CALL GET_DIAM(PSNOWGRAN1(JJ,JL),PSNOWGRAN2(JJ,JL),ZDIAM,HSNOWMETAMO)
-        ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)
+        ZSNOWSSA(JJ,JL) = 6. / (XRHOLI*ZDIAM)               
+        IF (ZSNOWSSA(JJ,JL)>100.) THEN
+          PRINT *, "SSA anomaly Tartes line 1724"
+          ZSNOWSSA(JJ,JL)=70.
+        ENDIF
       ELSE                       !Set the SSA value of ice to the value prescribed in modd_const_tartes to reproduce ice albedo
         ZSNOWSSA(JJ,JL) = XSSA_ICE
       ENDIF
@@ -1837,10 +1840,10 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
                     ZSNOWENERGY(JJ,JL,JB)=0.
                   ELSE
                     PRINT*, "negative energy"
-                    PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
-                    PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
-                    PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
-                    PRINT*, "Abnormal ERROR TARTES !!"
+!                    PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
+ !                   PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
+!                    PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
+                   ! PRINT*, "Abnormal ERROR TARTES !!"
                     ZSNOWENERGY(JJ,JL,JB)=0.
                   ENDIF
                  ELSE
@@ -1849,11 +1852,11 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
                      ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) 
                      ZSNOWENERGY(JJ,JL,JB)=0.                     
                    ELSE
-                     PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
-                     PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
+                    ! PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
+                    ! PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
                      PRINT*,"excess energy"
-                     PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
-                     PRINT*, "Abnormal ERROR TARTES !!"
+                    ! PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
+                     !PRINT*, "Abnormal ERROR TARTES !!"
                      ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) ! Actualise the Total energy diagnostic to avoid artificial problems in soil energy computation
                      ZSNOWENERGY(JJ,JL,JB)=0.
                    ENDIF 
@@ -1875,7 +1878,7 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
          ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)+ZSOILENERGY(JJ,JB)
          IF (ZSNOWENERGY_CUM(JJ)>ZMAX(JJ)) THEN
            IF (XPWAVELENGTHS(JB)<=1300) THEN
-             PRINT *,"SNOW", ZSNOWENERGY_UPPER(JJ),"SOIL",ZSOILENERGY(JJ,JB),"MAX",ZMAX(JJ)
+            ! PRINT *,"SNOW", ZSNOWENERGY_UPPER(JJ),"SOIL",ZSOILENERGY(JJ,JB),"MAX",ZMAX(JJ)
              IF (ZSNOWENERGY_CUM(JJ)-ZMAX(JJ)>0.01) THEN  ! If there is a large overestimation of soil energy
                PRINT *, "ERROR TARTES (significant soil excess energy in visible)!!"
                ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ) 
