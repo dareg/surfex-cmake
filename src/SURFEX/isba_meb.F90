@@ -972,7 +972,7 @@ ELSEWHERE
    PSWNET_NS(:)               = 0.0
    ZTAU_N(:,SIZE(PSNOWSWE,2)) = 0.0
 
-END WHERE   
+END WHERE  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -1937,7 +1937,12 @@ IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOW
     ! We diagnose NIR albedo such that total albedo is conserved
     ! (using just 2 spectral bands in MEB)
     !
-    PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
+    WHERE(PSNOWALB(:)/=XUNDEF)
+      PSNOWALBNIR(:) = (PSNOWALB(:) - XSW_WGHT_VIS*PSNOWALBVIS(:))/XSW_WGHT_NIR
+    ELSEWHERE
+      PSNOWALBVIS(:) = XUNDEF
+      PSNOWALBNIR(:) = XUNDEF
+    ENDWHERE
     !
     ! currently NOT used by MEB
     !
