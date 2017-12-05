@@ -1861,7 +1861,7 @@ END SUBROUTINE SNOW3LAVGRAIN
 !####################################################################
 !####################################################################
 !####################################################################
-FUNCTION SNOW3LDIFTYP(PGRAIN1,PGRAIN2,PGRAIN3,PGRAIN4,HSNOWMETAMO) RESULT(ZDIFTYPE)
+FUNCTION SNOW3LDIFTYP(PGRAIN1,PGRAIN2,PGRAIN3,PGRAIN4,HSNOWMETAMO,PSNOWRHO1,PSNOWRHO2) RESULT(ZDIFTYPE)
 !
 ! à remplacer sans doute par une routine equivalente du nouveau crocus
 !*    CALCUL DE LA DIFFERENCE ENTRE DEUX TYPES DE GRAINS
@@ -1874,7 +1874,7 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !*      0.1    declarations of arguments
-REAL, INTENT(IN) :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4
+REAL, INTENT(IN) :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4, PSNOWRHO1, PSNOWRHO2
 CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
 REAL :: ZDIFTYPE, ZCOEF3, ZCOEF4
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1882,7 +1882,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      0.2    calcul de la difference entre type de grains
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDIFTYP',0,ZHOOK_HANDLE)
 !
-IF ( HSNOWMETAMO=='B92' ) THEN 
+IF (((PSNOWRHO1 < 600.).AND.(PSNOWRHO2 > 800.)) .OR. ((PSNOWRHO1 > 800.).AND.(PSNOWRHO2 < 600.))) THEN
+  ZDIFTYPE = 200.
+ELSEIF ( HSNOWMETAMO=='B92' ) THEN 
   !
   IF ( ( PGRAIN1<0.  .AND. PGRAIN2>=0.) .OR. ( PGRAIN1>=0. .AND. PGRAIN2<0. ) ) THEN
     ZDIFTYPE = 200.

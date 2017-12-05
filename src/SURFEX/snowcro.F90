@@ -4718,7 +4718,8 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
     ! fresh snow over snow covered ground + enough snow layers 
     OMODIF_GRID(JJ) = .TRUE.
     ZDIFTYPE_SUP = SNOW3LDIFTYP( PSNOWGRAN1(JJ,1),PSNOWGRAN1F(JJ), &
-                                 PSNOWGRAN2(JJ,1),PSNOWGRAN2F(JJ),HSNOWMETAMO ) 
+                                 PSNOWGRAN2(JJ,1),PSNOWGRAN2F(JJ),HSNOWMETAMO, &
+                                 PSNOWRHO(JJ,1),PSNOWRHOF(JJ)) 
     !
     IF ( ( ZDIFTYPE_SUP<XDIFF_1        .AND. PSNOWDZ(JJ,1)<   ZDZOPT(JJ,1) ) .OR. &
          ( (PSR(JJ)+PBLOWSNW(JJ,1)) <XSNOWFALL_THRESHOLD .AND. PSNOWDZ(JJ,1)<2.*ZDZOPT(JJ,1) ) .OR. &
@@ -4777,7 +4778,7 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
                                           PSNOWDZ(JJ,JST-1)/ZDZOPT(JJ,JST-1) )
           ZDIFTYPE_SUP  = SNOW3LDIFTYP( PSNOWGRAN1(JJ,JST-1),PSNOWGRAN1(JJ,JST), &
                                         PSNOWGRAN2(JJ,JST-1),PSNOWGRAN2(JJ,JST), &
-                                        HSNOWMETAMO )
+                                        HSNOWMETAMO, PSNOWRHO(JJ,JST-1), PSNOWRHO(JJ,JST))
           !
           IF ( ZDIFTYPE_SUP+ZCRITSIZE_SUP<ZPENALTY ) THEN
             ZPENALTY = ZDIFTYPE_SUP + ZCRITSIZE_SUP
@@ -4795,13 +4796,13 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
           IF ( JST==1 ) THEN
             ZDIFTYPE_INF  = SNOW3LDIFTYP( PSNOWGRAN1(JJ,1),PSNOWGRAN1F(JJ), &
                                           PSNOWGRAN2(JJ,1),PSNOWGRAN2F(JJ), &
-                                          HSNOWMETAMO)
+                                          HSNOWMETAMO, PSNOWRHO(JJ,1), PSNOWRHOF(JJ))
             !
             ZPENALTY = ZDIFTYPE_INF + ZCRITSIZE_INF
           ELSE
             ZDIFTYPE_INF  = SNOW3LDIFTYP( PSNOWGRAN1(JJ,JST+1),PSNOWGRAN1(JJ,JST), &
                                           PSNOWGRAN2(JJ,JST+1),PSNOWGRAN2(JJ,JST), &
-                                          HSNOWMETAMO)
+                                          HSNOWMETAMO, PSNOWRHO(JJ,JST+1), PSNOWRHO(JJ,JST))
             !
             IF ( ZDIFTYPE_INF+ZCRITSIZE_INF<ZPENALTY ) THEN
               ZPENALTY = ZDIFTYPE_INF + ZCRITSIZE_INF
@@ -4967,7 +4968,7 @@ DO JJ = 1,SIZE(PSNOW(:))
         !
         ZDIFTYPE_INF = SNOW3LDIFTYP( PSNOWGRAN1(JJ,JST+1),PSNOWGRAN1(JJ, JST), &
                                      PSNOWGRAN2(JJ,JST+1),PSNOWGRAN2(JJ, JST), &
-                                     HSNOWMETAMO) 
+                                     HSNOWMETAMO, PSNOWRHO(JJ,JST+1), PSNOWRHO(JJ, JST)) 
         ZDIFTYPE_INF = MAX( XDIFF_1, MIN( XDIFF_MAX, ZDIFTYPE_INF ) )
         !
         IF( PSNOWDZ(JJ,JST) < ZDZOPT(JJ,JST) * XAGREG_COEF_1 / ZDIFTYPE_INF .AND. &
