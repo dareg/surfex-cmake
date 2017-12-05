@@ -4550,21 +4550,21 @@ DO JJ = 1,SIZE(PSNOW(:))
     IF ( HSNOWFALL == 'V12' ) THEN ! Crocus original law
         PSNOWRHOF (JJ) = MAX( XRHOSMIN_ES, XSNOWFALL_A_SN + &
                                        XSNOWFALL_B_SN * ( PTA(JJ)-XTT ) + &
-                                       XSNOWFALL_C_SN * MIN( PVMOD(JJ), SQRT(ZWIND_RHO(JJ) ) ) ) 
+                                       XSNOWFALL_C_SN * SQRT(ZWIND_RHO(JJ) ) )
     ELSEIF( HSNOWFALL == 'P75') THEN ! Pahaut original law quoted by Brun 1989 but with different X_SNOWFALL_BSN
         PSNOWRHOF (JJ) = MAX( XRHOSMIN_ES, XSNOWFALL_A_SN_P75 + &
                                        XSNOWFALL_B_SN_P75 * ( PTA(JJ)-XTT ) + &
-                                       XSNOWFALL_C_SN_P75 * MIN( PVMOD(JJ), SQRT(ZWIND_RHO(JJ) ) ) ) 
+                                       XSNOWFALL_C_SN_P75 * SQRT(ZWIND_RHO(JJ) ) ) 
     ELSEIF ( HSNOWFALL == 'S02') THEN ! SNOWPACK 2014 law  min wind speed = 2m/s
         IF (PTA(JJ) > 259.15) THEN
             PSNOWRHOF (JJ)=EXP(( XRHOS_S02_1 + XRHOS_S02_2 * (PTA(JJ)-XTT) +&
                                  XRHOS_S02_3 + XRHOS_S02_4 * ASIN( SQRT(XRHOS_S02_5)) +&
-                                 XRHOS_S02_6 * LOG10( MAX( MIN( PVMOD(JJ), SQRT(ZWIND_RHO(JJ) ) ), 2. )))&
+                                 XRHOS_S02_6 * LOG10( MAX( SQRT(ZWIND_RHO(JJ) ), 2. )))&
                                  *LOG(10.))	
         ELSE
             PSNOWRHOF (JJ)=EXP(( XRHOS_S02_1 + XRHOS_S02_2 * (PTA(JJ)-XTT) +&
                                  XRHOS_S02_4 * ASIN( SQRT(XRHOS_S02_5)) +&
-                                 XRHOS_S02_6 * LOG10( MAX( MIN( PVMOD(JJ), SQRT(ZWIND_RHO(JJ) ) ), 2. )))&
+                                 XRHOS_S02_6 * LOG10( MAX( SQRT(ZWIND_RHO(JJ) ), 2. )))&
                                  *LOG(10.))	
         ENDIF
     ELSEIF ( HSNOWFALL == 'A76') THEN ! Anderson 76 law
