@@ -1,6 +1,6 @@
 !     #########
       SUBROUTINE DEFAULT_CROCUS(HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,&
-                 HSNOWMETAMO,HSNOWRAD,OSNOWSYTRON,HSNOWFALL,HSNOWCOND,HSNOWHOLD,&
+                 HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,HSNOWFALL,HSNOWCOND,HSNOWHOLD,&
                  HSNOWCOMP,HSNOWZREF)  
 !     ########################################################################
 !
@@ -30,6 +30,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    07/2012
+!!	M. Dumont 01/2016 atmotartes
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -51,6 +52,7 @@ CHARACTER(*), INTENT(OUT)     :: HSNOWDRIFT
 ! Logicals to activate / disactivate blowing snow sublimation  
 LOGICAL, INTENT(OUT)          :: OSNOWDRIFT_SUBLIM
 LOGICAL, INTENT(OUT)          :: OSNOW_ABS_ZENITH
+LOGICAL, INTENT(OUT)          :: OATMORAD
 ! Logical to activate / disactivate Sytron                                          
 LOGICAL, INTENT(OUT)          :: OSNOWSYTRON
 !
@@ -70,6 +72,7 @@ HSNOWDRIFT        = 'DFLT'
 OSNOWDRIFT_SUBLIM = .FALSE.
 OSNOW_ABS_ZENITH = .FALSE.
 OSNOWSYTRON=.FALSE.
+OATMORAD=.FALSE.
 !
 HSNOWMETAMO = 'B92'
 HSNOWRAD    = 'B92'

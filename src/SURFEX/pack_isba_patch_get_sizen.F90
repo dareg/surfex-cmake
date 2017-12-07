@@ -34,6 +34,7 @@ SUBROUTINE PACK_ISBA_PATCH_GET_SIZE_n (I, PKI, &
 !!      B. Decharme  04/2013 : DIF lateral subsurface drainage
 !!                             water table / surface coupling
 !!      P Samuelsson 10/2014 : MEB
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !!
 !!------------------------------------------------------------------
 !
@@ -80,6 +81,7 @@ PKI%NSIZE_ALB=2
 PKI%NSIZE_2=0
 PKI%NSIZE_BIOMASS=0
 PKI%NSIZE_LITTER=0
+PKI%NSIZE_IMPUR=0
 PKI%NSIZE_SOILCARB=0
 PKI%NSIZE_LITTLEVS=0
 !
@@ -104,8 +106,10 @@ ENDIF
 !
 IF(I%TSNOW%SCHEME=='CRO') THEN
   PKI%NSIZE_SNOW=PKI%NSIZE_SNOW+4
+  PKI%NSIZE_IMPUR=PKI%NSIZE_IMPUR+1
 ELSE
   PKI%NSIZE_00=PKI%NSIZE_00+4
+  PKI%NSIZE_000=PKI%NSIZE_000+1  
 ENDIF
 !
 IF(I%LGLACIER) THEN
@@ -161,6 +165,8 @@ IF (I%CPHOTO/='NON'.OR.LTREEDRAG) THEN
 ELSE
   PKI%NSIZE_0 = PKI%NSIZE_0+1        
 ENDIF
+!
+
 !
 IF (I%CPHOTO/='NON') THEN
   PKI%NSIZE_SIMPLE=PKI%NSIZE_SIMPLE+22

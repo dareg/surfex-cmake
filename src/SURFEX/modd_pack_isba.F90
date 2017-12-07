@@ -29,7 +29,7 @@ MODULE MODD_PACK_ISBA
 !!      A.L. Gibelin    07/2009 : Suppress RDK and transform GPP as a diagnostic
 !!      A.L. Gibelin    07/2009 : Suppress PPST and PPSTF as outputs
 !!      P. Samuelsson   10/2014 : MEB and additional snow albedos
-!!
+!!      F. Tuzet        06/2016 : Add of a block for impurity type
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -62,6 +62,7 @@ TYPE PACK_ISBA_t
   INTEGER :: NSIZE_SOILCARB
   INTEGER :: NSIZE_LITTLEVS
   INTEGER :: NSIZE_LITTER
+  INTEGER :: NSIZE_IMPUR
   INTEGER :: NSIZE_0
   INTEGER :: NSIZE_00
   INTEGER :: NSIZE_000
@@ -83,6 +84,7 @@ TYPE PACK_ISBA_t
   REAL, POINTER, DIMENSION(:,:,:) :: XBLOCK_SOILCARB
   REAL, POINTER, DIMENSION(:,:,:) :: XBLOCK_LITTLEVS
   REAL, POINTER, DIMENSION(:,:,:,:) :: XBLOCK_LITTER
+  REAL, POINTER, DIMENSION(:,:,:,:) :: XBLOCK_IMPUR
   REAL, POINTER, DIMENSION(:,:) :: XBLOCK_0
   REAL, POINTER, DIMENSION(:,:,:) :: XBLOCK_00
   REAL, POINTER, DIMENSION(:,:,:,:) :: XBLOCK_000
@@ -304,7 +306,7 @@ TYPE PACK_ISBA_t
   REAL,  POINTER, DIMENSION(:,:) :: XP_SNOWGRAN2   ! grain parameter 2                       (-)
   REAL,  POINTER, DIMENSION(:,:) :: XP_SNOWHIST    ! historical parameter                    (-)
   REAL, POINTER, DIMENSION(:,:)  :: XP_SNOWAGE     ! Snow grain age                          (days)
-  REAL, POINTER, DIMENSION(:,:)  :: XP_SNOWIMPUR   ! Snow impurity content                   (g/g)  
+  REAL, POINTER, DIMENSION(:,:,:):: XP_SNOWIMPUR ! snow impurity content by type (g/g)
   REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALB     ! snow tot albedo                         (-)
   REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALBVIS     ! snow VIS albedo                                  (-)
   REAL,  POINTER, DIMENSION(:)   :: XP_SNOWALBNIR     ! snow NIR albedo                                  (-)
@@ -464,6 +466,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_PACK_ISBA_N:PACK_ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YPACK_ISBA%XBLOCK_SOILCARB)
   NULLIFY(YPACK_ISBA%XBLOCK_LITTLEVS)
   NULLIFY(YPACK_ISBA%XBLOCK_LITTER)
+  NULLIFY(YPACK_ISBA%XBLOCK_IMPUR)
   NULLIFY(YPACK_ISBA%XBLOCK_0)
   NULLIFY(YPACK_ISBA%XBLOCK_00)
   NULLIFY(YPACK_ISBA%XBLOCK_000)

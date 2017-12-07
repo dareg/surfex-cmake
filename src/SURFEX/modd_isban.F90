@@ -161,6 +161,7 @@ TYPE ISBA_t
 !
 ! radiative transfer scheme in snow (Crocus)
   CHARACTER(3)                   :: CSNOWRAD ! B92 (historical version, Brun et al 92), TAR, TA1, TA2 (see Libois et al 2013)
+  LOGICAL                        :: LATMORAD ! activate atmotartes scheme
 ! New multiphysics Crocus options, Cluzet et al 2016
   CHARACTER(3)                   :: CSNOWFALL ! V12 (Vionnet et al. 2012) , A76 (Anderson 1976), S02 (Lehning and al. 2002), P75 (Pahaut 1975)
   CHARACTER(3)                   :: CSNOWCOND ! Y81 (Yen 1981), I02 (Boone et al. 2002) C11 (Calonne et al. 2011)
@@ -967,6 +968,7 @@ YISBA%LSNOW_ABS_ZENITH=.FALSE.
 YISBA%LSNOWSYTRON=.FALSE.
 YISBA%CSNOWMETAMO='B92'
 YISBA%CSNOWRAD='B92'
+YISBA%LATMORAD=.FALSE.
 YISBA%CSNOWFALL='V12'
 YISBA%CSNOWCOND='Y81'
 YISBA%CSNOWHOLD='B92'

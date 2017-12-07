@@ -5,7 +5,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,             &
                          PTG, PCG, PCT, PSOILHCAPZ, PSOILCONDZ,                              &
                          PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,            &
-                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR, PLVTT, PLSTT,      &
+                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR,                    &
                          PZREF, PZ0NAT, PZ0EFF, PZ0HNAT, PALB, PD_G, PDZG,                   &
                          PPEW_A_COEF, PPEW_B_COEF,                                           &
                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                 &
@@ -15,14 +15,15 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSNOWSFCH,              &
                          PDELHEATN, PDELHEATN_SFC,                                           &
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
-                         PSNOWHMASS, PRI, PZENITH, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
+                         PSNOWHMASS, PRI, PZENITH, PAZIM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
-                         HSNOWMETAMO, HSNOWRAD,OSNOWSYTRON,                                  &
+                         HSNOWMETAMO, HSNOWRAD,OATMORAD,OOSNOWSYTRON,                                  &
                          HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF,KTAB_SYT,PSYTMASS,&
                          PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
                          PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-                         PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS)                               
+                         PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
+                         P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY)                               
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -81,6 +82,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
 !
 USE MODD_CSTS,       ONLY : XTT, XPI, XDAY, XLMTT, XLSTT
 USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN
+USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
@@ -166,6 +168,9 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPS, PTA, PSW_RAD, PQA,                  
 !                                      PPS     = surface pressure
 !                                      PQA     = atmospheric specific humidity
 !                                                at level za
+REAL, DIMENSION(:,:), INTENT(IN)    :: P_DIR_SW, P_SCA_SW
+!					P_DIR_SW, P_SCA_SW = direct and diffuse spectral solar irradiance (W/m2/um)
+REAL, DIMENSION(:,:), INTENT(IN)    ::PIMPWET,PIMPDRY
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PZREF, PUREF, PEXNS, PEXNA, PDIRCOSZW, PRHOA, PZ0NAT, &
                                        PZ0EFF, PZ0HNAT, PALB,PSLOPEDIR, PLVTT, PLSTT
@@ -292,6 +297,10 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWSWE_7DAYS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRAM_SONDE
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_WETTHICKNESS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_REFROZENTHICKNESS
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO ! spectral albedo and diffuse to total irradiance ratio
+REAL, DIMENSION(:,:,:), INTENT(OUT) ::PSNOWIMP_CONC
+
+
 
 REAL, DIMENSION(:), INTENT(OUT)     :: PSRSFC, PRRSFC, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC
 !                                      PSRSFC = snow rate on soil/veg surface when SNOW3L in use
@@ -309,6 +318,7 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PQS
 ! ajout_EB pour prendre en compte angle zenithal du soleil dans LRAD
 ! puis plus tard dans LALB
 REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
+REAL, DIMENSION(:), INTENT(IN)      :: PAZIM     ! solar azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:), INTENT(IN)      :: PLAT
 REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
@@ -337,13 +347,14 @@ CHARACTER(3), INTENT(IN)            :: HSNOWZREF
                                          ! HSNOWMETAMO=TA1 TARTES with constant impurities
                                          ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTROn snow redistribution scheme
+LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
 
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER                     :: ZCHECK_TEMP = 100.0 
 !                                      Limit to check suspicious low temperature (K)
 !
-INTEGER                             :: JWRK, JJ ! Loop control
+INTEGER                             :: JWRK, JJ,JIMP ! Loop control
 !
 INTEGER                             :: INLVLS   ! maximum number of snow layers
 INTEGER                             :: INLVLG   ! number of ground layers
@@ -389,6 +400,12 @@ REAL, DIMENSION(SIZE(PTA))          :: ZBLOWSNW_ACC
 !                                      ZBLOWSNW_ACC  = minimum equivalent snow depth
 !                                                      for deposition of blown snow particles
 !                                                      during the current time step (m)
+REAL, DIMENSION(SIZE(PTA))          :: ZANGLE_SLOP
+!                                      ZANGL_ILLUM  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
+
+REAL, DIMENSION(SIZE(PTA))          :: ZANGL_ILLUM
+!                                      ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
+                                      !  used only in TARTES for now
 !
 !*      0.3    declarations of packed  variables
 !
@@ -417,6 +434,7 @@ IF (SIZE(PSNOWDEND)>1) THEN
   PSNOWTYPEMEPRA(:,:)=XUNDEF
   PSNOWRAM(:,:)=XUNDEF
   PSNOWSHEAR(:,:)=XUNDEF
+  PSNOWIMP_CONC(:,:,:)=XUNDEF
 ENDIF
 
 PFLSN_COR(:)   = 0.0
@@ -447,6 +465,12 @@ PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
+ZANGLE_SLOP(:) =0.0
+ZANGL_ILLUM(:) =PZENITH(:)
+!PRINT *,"ANG" ,"NORD :",PDIRCOSZW(1), "SUD:",PDIRCOSZW(4)
+!PRINT *, "DIR","NORD :",PSLOPEDIR(1), "SUD:",PSLOPEDIR(4)
+!PRINT *, "azim","NORD :",PAZIM(1)
+
 !
 INLVLS          = SIZE(PSNOWSWE(:,:),2)                         
 INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
@@ -490,6 +514,9 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZRRSNOW(JJ)        = PPSN(JJ)*PRR(JJ)
       PRRSFC(JJ)         = PRR(JJ) - ZRRSNOW(JJ)
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
+      ZANGLE_SLOP(JJ) =ACOS(PDIRCOSZW(JJ))    ! Compute the angle of the slope 
+      ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ZANGLE_SLOP(JJ)))+ &
+      (SIN(PZENITH(JJ))*SIN(ZANGLE_SLOP(JJ)*COS(PAZIM(JJ)-(PSLOPEDIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
    ENDDO
 !
 ! Calculate preliminary snow depth (m)
@@ -587,9 +614,6 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       DO JJ=1,SIZE(PSNOWSWE,1)
          ZSNOWD      (JJ) = ZSNOWD      (JJ) + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
          ZSNOWSWE_OUT(JJ) = ZSNOWSWE_OUT(JJ) + PSNOWSWE(JJ,JWRK)
-         IF (HSNOW_ISBA=='CRO') THEN
-           PSNOWIMPUR (JJ,JWRK)   = (1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR (JJ,JWRK)
-         ENDIF               
       ENDDO
    END DO
 !
@@ -660,6 +684,13 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
          PSNOWAGE (JJ,JWRK)  = (1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWAGE (JJ,JWRK)
       ENDDO
    ENDDO
+   DO JIMP=1,NIMPUR
+     DO JWRK=1,INLVLS
+        DO JJ=1,SIZE(PSNOWSWE,1)
+           PSNOWIMPUR (JJ,JWRK,JIMP)=(1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR(JJ,JWRK,JIMP) !F.T
+        ENDDO
+     ENDDO
+   ENDDO
 !  
    IF (HSNOW_ISBA=='CRO') THEN
       DO JWRK=1,INLVLS
@@ -693,17 +724,41 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
    DO JWRK=1,INLVLS
       DO JJ=1,SIZE(PSNOWSWE,1)
-         IF(PSNOWSWE(JJ,JWRK)>0.0.AND.PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
-            WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
-            WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
-            WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
-            WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
-            WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
-            WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
-            WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
-            WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
-            CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+
+         IF(PSNOWSWE(JJ,JWRK)>0.0) THEN
+           IF (PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
+              WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
+              WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
+              WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
+              WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
+              WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
+              WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
+              WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
+              WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
+              CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+            ENDIF
+            
+         ELSE
+           !Prognostic variables forced to XUNDEF for correct outputs
+           PSNOWDZ(JJ,JWRK)=XUNDEF
+           ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
+           ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
+           ! (vanishing snowpack)
+           IF (.NOT.((PPSN(JJ)>0.0).AND.(JWRK==1))) THEN
+               PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ENDIF
+           PSNOWLIQ(JJ,JWRK)=XUNDEF
+           PSNOWHEAT(JJ,JWRK)=XUNDEF
+           PSNOWRHO(JJ,JWRK)=XUNDEF
+           PSNOWAGE(JJ,JWRK)=XUNDEF
+
+           IF (HSNOW_ISBA=='CRO') THEN
+               PSNOWGRAN1(JJ,JWRK)=XUNDEF
+               PSNOWGRAN2(JJ,JWRK)=XUNDEF
+               PSNOWHIST(JJ,JWRK)=XUNDEF
+           END IF
          ENDIF
+         
       ENDDO
    ENDDO
 !
@@ -736,8 +791,10 @@ REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWGRAN1
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWGRAN2
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWHIST
 REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWAGE
+REAL, DIMENSION(KSIZE1,KSIZE2,NIMPUR) :: ZP_SNOWIMPUR 
+REAL, DIMENSION(KSIZE1,NIMPUR) :: ZP_IMPWET
+REAL, DIMENSION(KSIZE1,NIMPUR) :: ZP_IMPDRY 
 REAL, DIMENSION(KSIZE1,KSIZE4) :: ZP_BLOWSNW
-REAL, DIMENSION(KSIZE1,KSIZE2) :: ZP_SNOWIMPUR
 REAL, DIMENSION(KSIZE1)        :: ZP_SNOWALB
 REAL, DIMENSION(KSIZE1)        :: ZP_SWNETSNOW
 REAL, DIMENSION(KSIZE1)        :: ZP_SWNETSNOWS
@@ -806,6 +863,7 @@ REAL, DIMENSION(KSIZE1)        :: ZP_PET_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEQ_A_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_PEQ_B_COEF
 REAL, DIMENSION(KSIZE1)        :: ZP_ZENITH
+REAL, DIMENSION(KSIZE1)        :: ZP_ANGL_ILLUM    ! Angle entre le soleil et la normal au sol et le soleil (=zenith sans pente au sol) utilisé dans TARTES
 REAL, DIMENSION(KSIZE1)        :: ZP_LAT,ZP_LON
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN_INV
 REAL, DIMENSION(KSIZE1)        :: ZP_PSN
@@ -830,7 +888,11 @@ REAL, DIMENSION(KSIZE1) :: ZP_SNOWSWE_7DAYS
 REAL, DIMENSION(KSIZE1) :: ZP_SNOWRAM_SONDE
 REAL, DIMENSION(KSIZE1) :: ZP_SNOW_WETTHICKNESS
 REAL, DIMENSION(KSIZE1) :: ZP_SNOW_REFROZENTHICKNESS
-
+REAL, DIMENSION(KSIZE1,KSIZE2,NIMPUR) :: ZP_SNOWIMP_CONC !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIR_SW !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SCA_SW !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SPEC_ALB !F.T
+REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIFF_RATIO !F.T
 !
 REAL, PARAMETER :: ZDEPTHABS = 0.60 ! m
 !
@@ -838,6 +900,7 @@ INTEGER :: JWRK, JJ, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA:CALL_MODEL',0,ZHOOK_HANDLE)
+
 !
 ! Initialize:
 !
@@ -860,6 +923,7 @@ DO JWRK=1,KSIZE2
    ENDDO
 ENDDO
 !
+
 IF (HSNOW_ISBA=='CRO') THEN
    DO JWRK=1,KSIZE2
       DO JJ=1,KSIZE1
@@ -867,7 +931,6 @@ IF (HSNOW_ISBA=='CRO') THEN
          ZP_SNOWGRAN1(JJ,JWRK) = PSNOWGRAN1 (JI,JWRK)
          ZP_SNOWGRAN2(JJ,JWRK) = PSNOWGRAN2 (JI,JWRK)
          ZP_SNOWHIST (JJ,JWRK) = PSNOWHIST  (JI,JWRK)
-         ZP_SNOWIMPUR(JJ,JWRK) = PSNOWIMPUR (JI,JWRK)       
       ENDDO
    ENDDO
 
@@ -884,8 +947,18 @@ ELSE
          ZP_SNOWGRAN1(JJ,JWRK) = XUNDEF
          ZP_SNOWGRAN2(JJ,JWRK) = XUNDEF
          ZP_SNOWHIST (JJ,JWRK) = XUNDEF
-         ZP_SNOWIMPUR(JJ,JWRK) = XUNDEF
       ENDDO
+   ENDDO
+   
+   
+   DO JIMP=1,NIMPUR
+     DO JJ=1,KSIZE1
+       ZP_IMPWET(JJ,JIMP)=XUNDEF
+       ZP_IMPDRY(JJ,JIMP)=XUNDEF
+       DO JWRK=1,KSIZE2
+           ZP_SNOWIMPUR(JJ,JWRK,JIMP) = XUNDEF         !N6K
+        ENDDO
+     ENDDO
    ENDDO
 
   DO JWRK=1,KSIZE4
@@ -953,6 +1026,7 @@ DO JJ=1,KSIZE1
    ZP_LAT  (JJ)      = PLAT(JI)
    ZP_LON  (JJ)      = PLON(JI)
    ZP_ZENITH(JJ)     = PZENITH  (JI)
+   ZP_ANGL_ILLUM(JJ)     = ZANGL_ILLUM  (JI)
 !
    ZP_GRNDFLUX    (JJ) = PGRNDFLUX    (JI)
    ZP_RNSNOW      (JJ) = PRNSNOW      (JI)
@@ -968,6 +1042,14 @@ DO JJ=1,KSIZE1
    ZP_SWNETSNOW   (JJ) = PSWNETSNOW   (JI) 
    ZP_SWNETSNOWS  (JJ) = PSWNETSNOWS  (JI) 
    ZP_LWNETSNOW   (JJ) = PLWNETSNOW   (JI) 
+ENDDO
+
+DO JWRK=1,SIZE(P_DIR_SW,2)
+  DO JJ=1,KSIZE1
+    JI = KMASK(JJ)
+    ZP_DIR_SW(JJ,JWRK)=P_DIR_SW(JI,JWRK)
+    ZP_SCA_SW(JJ,JWRK)=P_SCA_SW(JI,JWRK)
+  ENDDO
 ENDDO
 !
 DO JJ=1,KSIZE1
@@ -1048,8 +1130,10 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
+             ZP_ANGL_ILLUM,                                                &
              ZP_LAT, ZP_LON, ZP_BLOWSNW, HSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
-             OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,                       &
+             OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,ZP_DIR_SW, ZP_SCA_SW,&
+             ZP_SPEC_ALB, ZP_DIFF_RATIO,ZP_IMPWET,ZP_IMPDRY,                       &
              HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF         )
 !
   ZP_GFLXCOR (:) = 0.0
@@ -1068,10 +1152,10 @@ IF (HSNOW_ISBA=='CRO') THEN
    IF (GCOMPUTECRODIAG) THEN
      CALL SNOWCRO_DIAG(HSNOWMETAMO,&
                      ZP_SNOWDZ,ZP_SNOWSWE,ZP_SNOWRHO,ZP_SNOWGRAN1,ZP_SNOWGRAN2,ZP_SNOWAGE,ZP_SNOWHIST,ZP_SNOWTEMP,&
-                     ZP_SNOWLIQ,ZP_DIRCOSZW,ZP_SNOWDEND,ZP_SNOWSPHER,ZP_SNOWSIZE,ZP_SNOWSSA,ZP_SNOWTYPEMEPRA,     &
+                     ZP_SNOWLIQ,ZP_DIRCOSZW,ZP_SNOWIMPUR,ZP_SNOWDEND,ZP_SNOWSPHER,ZP_SNOWSIZE,ZP_SNOWSSA,ZP_SNOWTYPEMEPRA,     &
                      ZP_SNOWRAM, ZP_SNOWSHEAR,ZP_SNOWDEPTH_1DAYS,ZP_SNOWDEPTH_3DAYS,ZP_SNOWDEPTH_5DAYS,           &
                      ZP_SNOWDEPTH_7DAYS,ZP_SNOWSWE_1DAYS,ZP_SNOWSWE_3DAYS,ZP_SNOWSWE_5DAYS,                       &
-                     ZP_SNOWSWE_7DAYS,ZP_SNOWRAM_SONDE,ZP_SNOW_WETTHICKNESS,ZP_SNOW_REFROZENTHICKNESS)
+                     ZP_SNOWSWE_7DAYS,ZP_SNOWRAM_SONDE,ZP_SNOW_WETTHICKNESS,ZP_SNOW_REFROZENTHICKNESS,ZP_SNOWIMP_CONC)
    ENDIF
 
 
@@ -1191,6 +1275,7 @@ ENDIF
 !
   ENDIF
 !
+ENDIF
 !
 !===============================================================
 !conversion of snow heat from J/m2 into J/m3
@@ -1223,10 +1308,27 @@ IF (HSNOW_ISBA=='CRO') THEN
       PSNOWGRAN1(JI,JWRK) = ZP_SNOWGRAN1(JJ,JWRK)
       PSNOWGRAN2(JI,JWRK) = ZP_SNOWGRAN2(JJ,JWRK)
       PSNOWHIST (JI,JWRK) = ZP_SNOWHIST (JJ,JWRK)
-      PSNOWIMPUR(JI,JWRK) = ZP_SNOWIMPUR(JJ,JWRK)
+    ENDDO
+  ENDDO
+  
+  DO JIMP=1,NIMPUR
+    DO JWRK=1,KSIZE2
+      DO JJ=1,KSIZE1
+        JI = KMASK(JJ)
+        PSNOWIMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP) !F.T
+        PSNOWIMP_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP)
+      ENDDO
     ENDDO
   ENDDO      
   
+DO JWRK=1,SIZE(P_DIR_SW,2)
+  DO JJ=1,KSIZE1
+    JI = KMASK(JJ)
+      PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
+      PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
+  ENDDO
+ENDDO
+
   IF (SIZE(PSNOWDEND)>1) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
     DO JWRK=1,KSIZE2

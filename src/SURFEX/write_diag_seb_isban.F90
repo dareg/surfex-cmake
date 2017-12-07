@@ -1,8 +1,7 @@
 !     #########
       SUBROUTINE WRITE_DIAG_SEB_ISBA_n ( DTCO, DGU, U, CHI, DGEI, DGI, DST, GB, I, &
                                         HPROGRAM)
-!     #################################
-!
+
 !!****  *WRITE_DIAG_SEB_ISBA* - writes the ISBA diagnostic fields
 !!
 !!    PURPOSE
@@ -102,7 +101,7 @@ TYPE(ISBA_t), INTENT(IN) :: I
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be write
 CHARACTER(LEN=100):: YCOMMENT       ! Comment string
-CHARACTER(LEN=2)  :: YNUM
+CHARACTER(LEN=4)  :: YNUM
 !
 LOGICAL           :: GRESET
 INTEGER           :: JSV, JSW
@@ -265,7 +264,8 @@ IF (DGI%LSURF_BUDGET) THEN
     CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGI%XAVG_LWU(:),IRESP,HCOMMENT=YCOMMENT)
     !
-    DO JSW=1, SIZE(DGI%XSWBD,2)
+    IF (SIZE(DGI%XSWBD,2)<25) THEN    ! Original SURFEX diagnostic for spectra loutputs, does not work with TARTES  because there are too many spectral bands
+     DO JSW=1, SIZE(DGI%XSWBD,2)
       YNUM=ACHAR(48+JSW)
       !
       YRECFM='SWD_ISBA_'//YNUM
@@ -278,7 +278,24 @@ IF (DGI%LSURF_BUDGET) THEN
       CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGI%XAVG_SWBU(:,JSW),IRESP,HCOMMENT=YCOMMENT)
       !
-    ENDDO
+      ENDDO
+!    ELSE      ! Spectral outputs adapted for TARTES not activated for now to improve performances
+!      !
+!      DO JSW=1, SIZE(DGI%XSWBD,2)
+!        WRITE(YNUM,"(I3)") JSW
+!        YRECFM='SWD_ISBA_'//YNUM
+!        YCOMMENT='spectral short wave downward radiation over tile nature for spectral band (W/m2)'
+!        CALL WRITE_SURF(DGU, U, &
+ !                   HPROGRAM,YRECFM,DGI%XAVG_SWBD(:,:),IRESP,HCOMMENT=YCOMMENT)
+ !       !
+!        YRECFM='SWU_ISBA_'//YNUM
+!        YCOMMENT='spectral short wave upward radiation over tile nature for spectral band (W/m2)'
+!        CALL WRITE_SURF(DGU, U, &
+ !                   HPROGRAM,YRECFM,DGI%XAVG_SWBU(:,:),IRESP,HCOMMENT=YCOMMENT)
+!      ENDDO
+      !
+    ENDIF
+    !    
     !
   ENDIF
   !
@@ -1214,20 +1231,22 @@ IF(DGI%LPATCH_BUDGET.AND.(I%NPATCH >1))THEN
         CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGI%XLWU(:,:),IRESP,HCOMMENT=YCOMMENT)
         !
-        DO JSW=1, SIZE(DGI%XSWBD,2)
-          YNUM=ACHAR(48+JSW)
+        IF (SIZE(DGI%XSWBD,2)<25) THEN ! If TARTES not activated
+          DO JSW=1, SIZE(DGI%XSWBD,2)
+            WRITE(YNUM,"(I3)") JSW
+            !
+            YRECFM='SWD_P'//YNUM
+            YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+            CALL WRITE_SURF(DGU, U, &
+                    HPROGRAM,YRECFM,DGI%XSWBD(:,JSW,:),IRESP,HCOMMENT=YCOMMENT)
+            !
+            YRECFM='SWU_P'//YNUM
+            YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
+            CALL WRITE_SURF(DGU, U, &
+                    HPROGRAM,YRECFM,DGI%XSWBU(:,JSW,:),IRESP,HCOMMENT=YCOMMENT)
           !
-          YRECFM='SWD_P'//YNUM
-          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-          CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,DGI%XSWBD(:,JSW,:),IRESP,HCOMMENT=YCOMMENT)
-          !
-          YRECFM='SWU_P'//YNUM
-          YCOMMENT='X_Y_'//YRECFM//' (W/m2)'
-          CALL WRITE_SURF(DGU, U, &
-                  HPROGRAM,YRECFM,DGI%XSWBU(:,JSW,:),IRESP,HCOMMENT=YCOMMENT)
-          !
-        ENDDO
+          ENDDO
+        ENDIF
         !
       ENDIF
       !
@@ -1917,6 +1936,7 @@ IF(DGI%LPATCH_BUDGET.AND.(I%NPATCH >1))THEN
         YCOMMENT='X_Y_'//YRECFM//' (J/m2)'
         CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGI%XSWDC(:,:),IRESP,HCOMMENT=YCOMMENT)
+
         !
         YRECFM='SWUC_P'
         YCOMMENT='X_Y_'//YRECFM//' (J/m2)'

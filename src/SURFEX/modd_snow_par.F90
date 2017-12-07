@@ -105,6 +105,11 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 ! dependence of melt when snow fraction < unity.
 !
 REAL, SAVE       :: XTAU_SMELT
+! for snow impurity
+REAL,DIMENSION(5), SAVE :: XIMPUR_COEFF !(g/s)
+REAL,DIMENSION(5), SAVE     :: XIMPUR_INIT !(g)
+REAL, SAVE    :: XMAXIMPUR=1         !g
+
 !
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
@@ -178,15 +183,11 @@ REAL, PARAMETER       :: XSNOWCRITD = 0.03  ! (m)
 REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
 !                                      
 !Coefficients for Morin impurities model
-
-REAL,PARAMETER        :: XIMPUR_COEFF = 4.E-9 !	deposition intensity at top of the snowpack
 ! (unitless)
 REAL,PARAMETER        :: XIMPUR_COEFF_TA4 = 2.E-7
-REAL,PARAMETER        :: XIMPUR_EFOLD = 0.05 !(m) e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
+REAL,PARAMETER        :: XIMPUR_EFOLD = 0.005 !(m) e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
 
-REAL, PARAMETER       :: XIMPUR_INIT = 5.E-9 ! g/g
 REAL, PARAMETER       :: XIMPUR_INIT_TA4 = 5.E-8 ! g/g
-REAL, PARAMETER       :: XMAXIMPUR   = 1.E-5 ! g/g
 
 !Cluzet et al 2016 liquid water content options parameters
 
@@ -195,6 +196,8 @@ REAL, PARAMETER      :: XPERCENTAGEPORE_B92 = 0.05 !(%) original parameter value
 REAL, PARAMETER      :: XPERCENTAGEPORE_O04 = 0.033!(%) different value used in CLM from Oleson et al. 2004
 !
 REAL, PARAMETER      :: XWHOLDMAX_S02 = 0.08 !(-)        fixed value for the maximum liquid water mass fracton in SNOWPACK (Lehning et al. 2002)
+
+
 !                                       
 ! ISBA-ES Maximum snow liquid water holding capacity (fraction by mass) parameters:
 !

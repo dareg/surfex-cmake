@@ -114,7 +114,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_WATER_N',0,ZHOOK_HANDLE)
 !
  CALL OL_DEFINE_DIM(UG, U, &
                     HPROGRAM, KLUOUT, INI, .FALSE., TSNOW, IDIM1, YUNIT1, YUNIT2, &
-                   ZX, ZY, IDIMS, IDDIM, YNAME_DIM)
+                   ZX, ZY, IDIMS, IDDIM, YNAME_DIM,.FALSE.)
  CALL GET_DATE_OL(W%TTIME,XTSTEP_OUTPUT,YDATE(1))
 !
 ! 4. Create output file for fluxes values

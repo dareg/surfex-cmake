@@ -35,6 +35,7 @@
 !!                          - Flag to avtivate new maximal liquid water holding capacity : formulation used by Crocus
 !!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
 !      B. Decharme  07/2013 Add ES snow grid case : 6-L or 12-L
+!!    M. Dumont 02/2016 : impurity
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -83,15 +84,17 @@ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
 !
 CHARACTER(LEN=3) :: CSNOW
 INTEGER :: NSNOW_LAYER
+INTEGER :: NIMPUR
 CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
 LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
 REAL :: XASNOW, XSWEMAX
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, XSG1SNOW, XSG2SNOW,&
-                                    XHISTSNOW, XAGESNOW
+                                    XHISTSNOW, XAGESNOW, XIMPURSNOW
 INTEGER           :: JLAYER
 !
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GD, XZSNOW_GD, XRSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, &
-                                    XSG1SNOW_GD, XSG2SNOW_GD, XHISTSNOW_GD, XAGESNOW_GD
+                                    XSG1SNOW_GD, XSG2SNOW_GD, XHISTSNOW_GD, XAGESNOW_GD, &
+                                    XIMPURSNOW_GD
 !
 LOGICAL           :: LFILE
 !
@@ -104,8 +107,8 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
                             CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
                             LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,       &
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
-                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,    &
-                            LSWEMAX,XSWEMAX
+                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,XIMPURSNOW,    &
+                            LSWEMAX,XSWEMAX,NIMPUR
 NAMELIST/NAM_PREP_GARDEN_SNOW/CSNOW_GD, NSNOW_LAYER_GD, CFILE_SNOW_GD, CTYPE_SNOW, &
                               CFILEPGD_SNOW_GD, CTYPEPGD_SNOW,               & 
                               LSNOW_IDEAL_GD, XWSNOW_GD, XZSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, XRSNOW_GD, XASNOW_GD
@@ -135,9 +138,11 @@ IF (LNAM_READ) THEN
   XLWCSNOW_GD(:) = 0.
   XASNOW_GD = XANSMIN  
   XSG1SNOW_GD(:) = XUNDEF
-  XSG2SNOW(:) = XUNDEF
+  XSG2SNOW_GD(:) = XUNDEF
+  XIMPURSNOW_GD(:)= XUNDEF
   XHISTSNOW_GD(:) = XUNDEF
   XAGESNOW_GD(:) = XUNDEF
+  NIMPUR=1
   !
   LSWEMAX=.FALSE.
   XSWEMAX=500.
@@ -165,6 +170,7 @@ IF (LNAM_READ) THEN
     XASNOW = XANSMIN  
     XSG1SNOW(:) = XUNDEF
     XSG2SNOW(:) = XUNDEF
+    XIMPURSNOW(:)= XUNDEF
     XHISTSNOW(:) = XUNDEF
     XAGESNOW(:) = XUNDEF 
     XLWCSNOW(:) = 0. 
@@ -185,6 +191,7 @@ IF (LNAM_READ) THEN
     XASNOW_GD = XASNOW
     XSG1SNOW_GD(:) = XSG1SNOW(:)
     XSG2SNOW_GD(:) = XSG2SNOW(:)
+    XIMPURSNOW_GD(:)=XIMPURSNOW(:)
     XHISTSNOW_GD(:) = XHISTSNOW(:)
     XAGESNOW_GD(:) = XAGESNOW(:)
     !

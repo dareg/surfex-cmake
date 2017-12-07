@@ -31,6 +31,7 @@ SUBROUTINE PREP_HOR_ISBA_FIELD (DTCO, IG, I, UG, U, USS, &
 !!      B. Decharme  03/2014, external init with FA files
 !!                            new vertical interpolation
 !!      P Samuelsson 10/2014, MEB
+!!     M. Dumont 02/2016 , snow impurity content
 !!------------------------------------------------------------------
 !
 !
@@ -48,8 +49,8 @@ USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 USE MODD_PREP,     ONLY : XZS_LS, LINTERP, CMASK
 
 USE MODD_PREP_ISBA, ONLY : XGRID_SOIL, NGRID_LEVEL, LSNOW_IDEAL,    &
-                           XWSNOW, XRSNOW, XTSNOW, XLWCSNOW, XASNOW,          &
-                           XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
+                           XWSNOW, XRSNOW, XTSNOW, XLWCSNOW, XASNOW, &
+                           XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW, XIMPURSNOW,XIMPURSNOWV2
 
 
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
@@ -140,8 +141,11 @@ INI=SIZE(IG%XLAT)
 !
 !*      2.     Snow variables case?
 !
+!
+
 IF (HSURF=='SN_VEG ') THEN
-  CALL READ_PREP_ISBA_SNOW(HPROGRAM,I%TSNOW%SCHEME,I%TSNOW%NLAYER,YFILE_SNOW,YFILETYPE_SNOW,&
+  CALL READ_PREP_ISBA_SNOW(HPROGRAM,I%TSNOW%SCHEME,I%TSNOW%NLAYER,&
+                                YFILE_SNOW,YFILETYPE_SNOW,                      &
                                 YFILEPGD_SNOW,YFILEPGDTYPE_SNOW,GUNIF_SNOW)
   IF(.NOT.GUNIF_SNOW.AND.LEN_TRIM(YFILE_SNOW)==0.AND.LEN_TRIM(YFILETYPE_SNOW)==0)THEN
     IF(LEN_TRIM(YFILE)/=0.AND.LEN_TRIM(YFILETYPE)/=0)THEN
@@ -164,6 +168,7 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
+                            XIMPURSNOWV2, &
                             I%XVEGTYPE, I%XVEGTYPE_PATCH, I%XPATCH,    &
                             OKEY                                 )
   DEALLOCATE(XWSNOW)
@@ -173,6 +178,7 @@ IF (HSURF=='SN_VEG ') THEN
   DEALLOCATE(XSG1SNOW)
   DEALLOCATE(XSG2SNOW)
   DEALLOCATE(XHISTSNOW)
+  DEALLOCATE(XIMPURSNOWV2)
   DEALLOCATE(XAGESNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_ISBA_FIELD',1,ZHOOK_HANDLE)
   RETURN

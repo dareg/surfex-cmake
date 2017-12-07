@@ -45,7 +45,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_SNOW
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT,NIMPUR
 !
 USE MODI_DETECT_FIELD
 USE MODI_WRITE_SURF
@@ -74,13 +74,13 @@ TYPE(SURF_SNOW),    INTENT(IN) :: TPSNOW     ! snow characteristics
 INTEGER             :: ISURFTYPE_LEN
 !
  CHARACTER (LEN=100) :: YFMT           ! format for writing
- CHARACTER(LEN=12)   :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12)   :: YRECFM        ! Name of the article to be read
  CHARACTER(LEN=100)  :: YCOMMENT       ! Comment string
 INTEGER             :: IRESP          ! IRESP  : return-code if a problem appears
 !
 LOGICAL             :: GSNOW          ! T --> snow exists somewhere
 !
-INTEGER             :: JLAYER         ! loop counter
+INTEGER             :: JLAYER,JIMP         ! loop counter
  CHARACTER(LEN=4)    :: YNLAYER        ! String depending on the number of layer : less
                                       !than 10 or more                              
 !
@@ -114,6 +114,9 @@ YRECFM=ADJUSTL(HPREFIX//YRECFM)
 YCOMMENT    = '(INTEGER)'
  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TPSNOW%NLAYER,IRESP,HCOMMENT=YCOMMENT)
+ CALL WRITE_SURF(DGU, U, &
+                HPROGRAM,'NIMPUR',NIMPUR,IRESP,HCOMMENT=YCOMMENT)
+ 
 !
 !
 !*       4.    Tests to find if there is snow
@@ -267,6 +270,20 @@ ELSE
     WRITE(YCOMMENT,YFMT) 'X_Y_SGRAN1_',HSURFTYPE,JLAYER,' (-)'
     CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TPSNOW%GRAN1(:,JLAYER,:),IRESP,HCOMMENT=YCOMMENT)
+! !                  !*       11.b    Snow impur
+! !     !              ----------
+!      !
+      DO JIMP=1,NIMPUR
+        WRITE(YFMT,'(A8,I1,A6)')     '(A4,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'
+        WRITE(YRECFM,YFMT) 'SIM_',JIMP,HSURFTYPE,JLAYER
+        YRECFM=ADJUSTL(HPREFIX//YRECFM)
+        WRITE(YFMT,'(A8,I1,A9)')     '(A9,I1,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
+        WRITE(YCOMMENT,YFMT) 'X_Y_SIMP_',JIMP,HSURFTYPE,JLAYER,' (-)'
+        CALL WRITE_SURF(DGU, U, &
+                     HPROGRAM,YRECFM,TPSNOW%IMPUR(:,JLAYER,JIMP,:),IRESP,HCOMMENT=YCOMMENT)
+      ENDDO
+     
+                 
     !
     !*       12.    Snow Gran2
     !              ------------

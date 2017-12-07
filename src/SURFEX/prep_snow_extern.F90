@@ -302,7 +302,7 @@ SELECT CASE (HSURF(1:3))
 !*      8.     Density or heat profile
 !              -----------------------
 !
-  CASE ('RHO','HEA','SG1','SG2','HIS','AGE')
+  CASE ('RHO','HEA','SG1','SG2','HIS','AGE','IMP')
     ALLOCATE(ZFIELD(INI,TZSNOW%NLAYER,IPATCH))
 !
     SELECT CASE (TZSNOW%SCHEME)
@@ -340,6 +340,7 @@ SELECT CASE (HSURF(1:3))
            IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = TZSNOW%GRAN1(:,1:TZSNOW%NLAYER,:)
            IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = TZSNOW%GRAN2(:,1:TZSNOW%NLAYER,:)
            IF (HSURF(1:3)=='HIS') ZFIELD(:,:,:) = TZSNOW%HIST (:,1:TZSNOW%NLAYER,:)
+           IF (HSURF(1:3)=='IMP') ZFIELD(:,:,:) = TZSNOW%IMPUR (:,1:TZSNOW%NLAYER,1,:)
         ELSE
            IF (HSURF(1:3)=='SG1') ZFIELD(:,:,:) = -20.0
            IF (HSURF(1:3)=='SG2') ZFIELD(:,:,:) = 80.0

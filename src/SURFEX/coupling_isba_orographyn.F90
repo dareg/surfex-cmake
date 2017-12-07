@@ -2,7 +2,7 @@
 SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
                                       HPROGRAM, HCOUPLING,                                    &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
+                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,          &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
@@ -38,6 +38,7 @@ SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DS
 !!                           improve forcing vertical shift
 !----------------------------------------------------------------
 !
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
@@ -117,6 +118,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -160,7 +163,7 @@ REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface oro
 !
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
-REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV
+REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV ! Cosine of the slope angle
 !
 REAL, DIMENSION(KI)    :: ZSKYVF ! SKY VIEW factor, portion of the sky seen by the simulation
                                  ! point. 100% for a flat simulation
@@ -281,6 +284,7 @@ ELSEIF(LNOSOF)THEN
 !
    Z3D_TOT_SURF    (:) = 0.
    Z3D_TOT_SURF_INV(:) = 0.
+   ZSKYVF          (:) = 1.
 !   
    ZSCA_SW(:,:) = PSCA_SW(:,:)
    ZDIR_SW(:,:) = PDIR_SW(:,:)
@@ -305,17 +309,18 @@ ELSE
 !
    Z3D_TOT_SURF(:) = SQRT(1.+IM%I%XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
+   ZSKYVF          (:) =  (1+Z3D_TOT_SURF_INV(:))/2  ! (1+cos(theta))/2 ,Dumont et al. 2017
 !
 !  number of spectral shortwave bands
 !
    ISWB = SIZE(PSW_BANDS)
 !
    DO JSWB=1,ISWB
-!     correcting for the slope angle (scaterred SW flux)
+!     correcting for the slope angle (scaterred SW flux), multiplying by cos(theta) in the standard version and (1+cos(theta))/2 
 !
-      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
+      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
 
-!     correcting for the slope angle (scaterred SW flux)
+!     the inverse operation is done in snow_meteo or surf_solar_slope so it is neutral.
 !
       ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
    END DO
@@ -325,8 +330,8 @@ ELSE
 !
 !  incoming LW radiation per m2 of actual surface
 !
-   ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
-          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
+   ZLW(:) =  ZLW(:)                                  *     ZSKYVF(:) &            ! PArt of the longwave coming from the sky 
+          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-ZSKYVF(:))     ! PArt of the longwave coming from the ground
 !
 !  liquid precipitation per m2 of actual surface
 !
@@ -348,7 +353,7 @@ ENDIF
                PTSTEP, KYEAR, KMONTH, KDAY, PTIME,                                           &
                KI, KSV, KSW,                                                                 &
                PTSUN, PZENITH, PZENITH2, PAZIM,                                              &
-               PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2, HSV,                   &
+               PZREF, PUREF, PZS, PU, PV, ZQA, ZTA, ZRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,                   &
                ZRAIN, ZSNOW, ZLW, ZDIR_SW, ZSCA_SW, PSW_BANDS, ZPS, ZPA,                     &
                PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                      &
                PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                  &

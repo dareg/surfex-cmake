@@ -3,7 +3,8 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
                                PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2,        &
                                PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,      &
                                PLW1,PLW2,PSNOW2,PRAIN2,                  &
-                               PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2         )  
+                               PPS1,PPS2,PCO21,PCO22,PO31,PO32,PAE1,PAE2,&
+                               PIMPWET1,PIMPWET2,PIMPDRY1,PIMPDRY2,PDIR1,PDIR2 )  
 !**************************************************************************
 !
 !!    PURPOSE
@@ -37,6 +38,7 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
 !
 USE MODD_CSTS,       ONLY : XPI, XRD, XRV, XG
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODN_IO_OFFLINE,  ONLY : NIMPUROF, LFORCIMP
 USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               (K)
                             XQA       ,&! air specific humidity forcing         (kg/m3)
                             XRHOA     ,&! air density forcing                   (kg/m3)
@@ -50,6 +52,10 @@ USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               
                             XPA       ,&! pressure at forcing level             (Pa)
                             XRHOA     ,&! density at forcing level              (kg/m3)
                             XCO2      ,&! CO2 concentration in the air          (kg/kg)
+                            XO3       ,&! Ozone
+                            XAE       ,&! Aerosol optical depth
+                            XIMPWET   ,&! wet deposit coefficient
+                            XIMPDRY   ,&! dry deposit coefficient
                             XSNOW     ,&! snow precipitation                    (kg/m2/s)
                             XRAIN     ,&! liquid precipitation                  (kg/m2/s)
                             XZREF       ! height of T,q forcing                 (m)  
@@ -77,13 +83,15 @@ INTEGER,INTENT(IN) :: KSURF_STEP, KNB_ATM
 INTEGER, DIMENSION(:), INTENT(IN) :: KSIZE_OMP
 REAL, DIMENSION(:),INTENT(IN) :: PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2
 REAL, DIMENSION(:),INTENT(IN) :: PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,PLW1,PLW2
-REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2
+REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2,PO31,PO32,PAE1,PAE2
+REAL, DIMENSION(:,:),INTENT(IN) :: PIMPWET1,PIMPWET2,PIMPDRY1,PIMPDRY2
 
 ! local variables
 REAL :: ZDTA, ZDQA, ZDDIR_SW, ZDSCA_SW, ZDLW,  &
-        ZDPS, ZDCO2, ZDU, ZDV, ZU1, ZV1, ZU2, ZV2 
+        ZDPS, ZDCO2, ZDU, ZDV, ZU1, ZV1, ZU2, ZV2,ZDO3,ZDAE  
+REAL, DIMENSION(NIMPUROF)  ::      ZDWET,ZDDRY
 REAL :: ZPI, ZNB_ATM, ZSURF_STEP, ZCOEF
-INTEGER :: J, INKPROMA
+INTEGER :: J, INKPROMA,JIMP
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !========================================================================
@@ -141,6 +149,23 @@ DO J = NINDX1SFX,NINDX2SFX
     !
     ZDCO2    = (PCO22(J)-PCO21(J))*ZCOEF
     XCO2(J) = PCO21(J) + ZDCO2
+    !
+    IF (LFORCIMP) THEN
+    ZDO3    = (PO32(J)-PO31(J))*ZCOEF
+    XO3(J) = PO31(J) + ZDO3
+    
+    ZDAE    = (PAE2(J)-PAE1(J))*ZCOEF
+    XAE(J) = PAE1(J) + ZDAE
+    
+      DO JIMP=1,NIMPUROF
+        ZDWET(JIMP)=(PIMPWET2(J,JIMP)-PIMPWET1(J,JIMP))*ZCOEF
+        XIMPWET(J,JIMP) = PIMPWET1(J,JIMP) + ZDWET(JIMP)
+        
+        ZDDRY(JIMP)=(PIMPDRY2(J,JIMP)-PIMPDRY1(J,JIMP))*ZCOEF
+        XIMPDRY(J,JIMP) = PIMPDRY1(J,JIMP) + ZDDRY(JIMP)
+      
+      ENDDO
+    ENDIF
     !
     ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
     XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW

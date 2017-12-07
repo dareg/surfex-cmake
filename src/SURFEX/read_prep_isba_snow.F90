@@ -38,6 +38,7 @@
 !!      M. Lafaysse 11/2012, possibility to prescribe snow depth instead of snow water equivalent
 !!      M Lafaysse 04/2014 : LSNOW_PREP_PERM
 !      B. Decharme  07/2013 ES snow grid layer can be > to 3 (default 12)
+!!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -63,10 +64,11 @@ USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
                            XLWCSNOW_p=>XLWCSNOW, &
                            XRSNOW_p=>XRSNOW, XASNOW,            &
                            XSG1SNOW_p=>XSG1SNOW, XSG2SNOW_p=>XSG2SNOW, &
-                           XHISTSNOW_p=>XHISTSNOW, XAGESNOW_p=>XAGESNOW
+                           XHISTSNOW_p=>XHISTSNOW, XAGESNOW_p=>XAGESNOW, &
+                           XIMPURSNOWV2_p=>XIMPURSNOWV2
                            
 !
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX , LSNOW_PREP_PERM
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX , LSNOW_PREP_PERM, NIMPUR,NIMPUR_MAX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -78,7 +80,7 @@ IMPLICIT NONE
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
  CHARACTER(LEN=3),  INTENT(OUT) :: HSNOW    ! snow scheme
-INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
+ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILE        ! file name
  CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
  CHARACTER(LEN=28), OPTIONAL, INTENT(OUT) :: HFILEPGD       ! file name
@@ -90,7 +92,11 @@ LOGICAL,           OPTIONAL, INTENT(OUT) :: OUNIF  ! uniform snow
 !
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, &
                                     XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
-INTEGER           :: JLAYER
+                                                    
+REAL,DIMENSION (NSNOW_LAYER_MAX,NIMPUR_MAX)  ::   XIMPURSNOWV2
+!INTEGER           :: NIMPUR  ! Number of impurity types                  
+                                    
+INTEGER           :: JLAYER,JIMP
 !
 LOGICAL           :: LFILE
 !
@@ -104,7 +110,7 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             LSNOW_IDEAL, LSNOW_FRAC_TOT,LSNOW_PREP_PERM, &
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
-                            LSWEMAX,XSWEMAX
+                            XIMPURSNOWV2, LSWEMAX,XSWEMAX,NIMPUR
 !-------------------------------------------------------------------------------
 !* default
 !  -------
@@ -114,6 +120,7 @@ IF (LNAM_READ) THEN
   !
   CSNOW = 'D95'
   NSNOW_LAYER = 1
+  NIMPUR = 0    !Number of different type of impurities, set to 0 by default
   !
   CFILE_SNOW = '                         '
   CTYPE_SNOW = '      '
@@ -132,6 +139,9 @@ IF (LNAM_READ) THEN
   XASNOW = XANSMIN
   XSG1SNOW(:) = XUNDEF
   XSG2SNOW(:) = XUNDEF
+  DO JIMP=1,NIMPUR
+    XIMPURSNOWV2(:,JIMP) = XUNDEF
+  ENDDO
   XHISTSNOW(:) = XUNDEF
   XAGESNOW(:) = XUNDEF  
   !
@@ -231,18 +241,22 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (NSNOW_LAYER))
     ALLOCATE(XSG2SNOW_p (NSNOW_LAYER))
     ALLOCATE(XHISTSNOW_p(NSNOW_LAYER))
+    ALLOCATE(XIMPURSNOWV2_p(NSNOW_LAYER,NIMPUR))
     !
     XSG1SNOW_p =XSG1SNOW (1:NSNOW_LAYER)
     XSG2SNOW_p =XSG2SNOW (1:NSNOW_LAYER)
     XHISTSNOW_p=XHISTSNOW(1:NSNOW_LAYER)
+    XIMPURSNOWV2_p=XIMPURSNOWV2(1:NSNOW_LAYER,1:NIMPUR)
     !
     DO JLAYER=1,NSNOW_LAYER
       IF ((XSG1SNOW_p (JLAYER)==XUNDEF .OR. XSG2SNOW_p(JLAYER)==XUNDEF .OR. &
-           XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF) &
+           XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF .OR. &
+           XIMPURSNOWV2_p(JLAYER,1)==XUNDEF) &
            .AND. XWSNOW_p(JLAYER).NE.0. .AND. XWSNOW_p(JLAYER)/=XUNDEF ) THEN
         WRITE(ILUOUT,*) '----------------------------'
         WRITE(ILUOUT,*) 'WSNOW/=0 AND ONE OF SG1SNOW,'
         WRITE(ILUOUT,*) 'SG2SNOW, HISTSNOW OR AGESNOW'
+        WRITE(ILUOUT,*) 'OR IMPURSNOW'
         WRITE(ILUOUT,*) '         ==XUNDEF           '
         WRITE(ILUOUT,*) '    PLEASE CORRECT THAT     '
         WRITE(ILUOUT,*) '----------------------------'
@@ -255,6 +269,7 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (0))
     ALLOCATE(XSG2SNOW_p (0))
     ALLOCATE(XHISTSNOW_p(0))
+    ALLOCATE(XIMPURSNOWV2_p(0,0))
     !
   ENDIF
   !

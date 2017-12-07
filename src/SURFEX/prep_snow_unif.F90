@@ -6,6 +6,7 @@ SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
                           PUNIF_ASNOW,                  &
                           PUNIF_SG1SNOW, PUNIF_SG2SNOW, &
                           PUNIF_HISTSNOW,PUNIF_AGESNOW, &
+                          PUNIF_IMPURSNOWV2,&
                           KLAYER                        )  
 !     #################################################################################
 !
@@ -38,7 +39,7 @@ USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PREP,           ONLY : CINTERP_TYPE
-USE MODD_PREP_SNOW,      ONLY : NGRID_LEVEL
+USE MODD_PREP_SNOW,      ONLY : NGRID_LEVEL,NIMPUR
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
 USE MODI_SNOW_T_WLIQ_TO_HEAT
@@ -66,6 +67,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW !
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW ! 
+REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOWV2 !
 INTEGER,            INTENT(IN)  :: KLAYER        ! Number of layer of output snow scheme
 !
 !*      0.2    declarations of local variables
@@ -74,7 +76,7 @@ REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW, ZRSNOW
 REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZLWCSNOW !(kg/m2)
 !
 REAL, DIMENSION(1) :: ZD
-INTEGER            :: JVEGTYPE       ! loop counter on vegtypes
+INTEGER            :: JVEGTYPE,JIMP       ! loop counter on vegtypes
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -192,6 +194,23 @@ SELECT CASE(HSURF(1:3))
           PFIELD(1,:,JVEGTYPE) = PUNIF_SG2SNOW(1)
        ENDDO
     ENDIF
+!
+  CASE('IMP')
+    IF (OSNOW_IDEAL) THEN
+       DO JIMP=1,NIMPUR
+         DO JVEGTYPE=1,NVEGTYPE
+            PFIELD(1,:,JVEGTYPE) = PUNIF_IMPURSNOWV2(:,JIMP)  !N6K
+         ENDDO
+       ENDDO
+    ELSE
+      DO JIMP=1,NIMPUR
+         DO JVEGTYPE=1,NVEGTYPE
+            PFIELD(1,:,JVEGTYPE) = PUNIF_IMPURSNOWV2(1,JIMP)  !N6K
+         ENDDO
+     ENDDO
+    ENDIF  
+    
+    
 !
   CASE('HIS')
     IF (OSNOW_IDEAL) THEN

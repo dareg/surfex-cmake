@@ -25,6 +25,7 @@ SUBROUTINE PREP_HOR_TEB_GREENROOF_FIELD (DTCO, IG, I, UG, U, USS, TGR, TGRO, TGR
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    07/2011
+!!      M. Dumont 02/2016 prognostic impurity content for Crocus
 !!------------------------------------------------------------------
 !
 !
@@ -50,6 +51,7 @@ USE MODD_PREP_TEB_GREENROOF, ONLY : XGRID_SOIL, NGRID_LEVEL,                    
 USE MODD_ISBA_PAR,           ONLY : XWGMIN
 USE MODD_DATA_COVER_PAR,     ONLY : NVEGTYPE
 USE MODD_SURF_PAR,           ONLY : XUNDEF
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODI_READ_PREP_TEB_GREENROOF_CONF
 USE MODI_READ_PREP_GREENROOF_SNOW
@@ -116,6 +118,7 @@ REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZF             ! work array (x, output so
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZDG            ! out T grid (x, output soil grid, npatch)
 REAL, ALLOCATABLE, DIMENSION(:,:)   :: ZPATCH         ! work array for patches
 REAL, ALLOCATABLE, DIMENSION(:)     :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW
+REAL, ALLOCATABLE, DIMENSION(:,:)      :: ZIMPURSNOWV2
 INTEGER                             :: ILUOUT         ! output listing logical unit
 !
 LOGICAL                             :: GUNIF          ! flag for prescribed uniform field
@@ -162,6 +165,7 @@ IF (HSURF=='SN_VEG ') THEN
   ENDIF          
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_GR)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_GR)))
+  ALLOCATE(ZIMPURSNOWV2(SIZE(XWSNOW_GR),NIMPUR))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_GR)))
   ALLOCATE(ZPATCH(SIZE(TGRP%XVEGTYPE,1),1))
   ALLOCATE(ZVEGTYPE_PATCH (SIZE(TGRP%XVEGTYPE,1),SIZE(TGRP%XVEGTYPE,2),1))
@@ -178,11 +182,12 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW_GR, XRSNOW_GR, XTSNOW_GR,&
                             XLWCSNOW_GR, XASNOW_GR,         &
                             LSNOW_IDEAL_GR, ZSG1SNOW,       &
-                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GR,  &
+                            ZSG2SNOW, ZHISTSNOW, XAGESNOW_GR,ZIMPURSNOWV2, &
                             TGRP%XVEGTYPE,ZVEGTYPE_PATCH, ZPATCH )
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)
+  DEALLOCATE(ZIMPURSNOWV2)
   DEALLOCATE(ZPATCH)
   DEALLOCATE(ZVEGTYPE_PATCH)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_GREENROOF_FIELD',1,ZHOOK_HANDLE)

@@ -2,7 +2,7 @@
 SUBROUTINE OL_READ_ATM (&
                          HSURF_FILETYPE, HFORCING_FILETYPE, KFORC_STEP,    &
                           PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
-                          PCO2,PDIR,OLIMIT_QAIR                             )  
+                          PCO2,PIMPWET,PIMPDRY,PO3,PAE,PDIR,OLIMIT_QAIR                             )  
 !**************************************************************************
 !
 !!    PURPOSE
@@ -75,6 +75,10 @@ REAL, DIMENSION(:,:),INTENT(INOUT) :: PSNOW
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PRAIN
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PPS
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PCO2
+REAL, DIMENSION(:,:),INTENT(INOUT) :: PAE
+REAL, DIMENSION(:,:),INTENT(INOUT) :: PO3
+REAL, DIMENSION(:,:,:),INTENT(INOUT) :: PIMPWET 
+REAL, DIMENSION(:,:,:),INTENT(INOUT) :: PIMPDRY
 REAL, DIMENSION(:,:),INTENT(INOUT) :: PDIR
 INTEGER,INTENT(IN)               :: KFORC_STEP
  CHARACTER(LEN=6)    ,INTENT(IN)  :: HSURF_FILETYPE
@@ -104,7 +108,7 @@ IF      (HFORCING_FILETYPE == 'NETCDF') THEN
   CALL OL_READ_ATM_NETCDF(&
                            HSURF_FILETYPE,                                   &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&
-                           PCO2,PDIR                                         )  
+                           PCO2,PIMPWET,PIMPDRY,PO3,PAE,PDIR                                         )  
 ELSE IF (HFORCING_FILETYPE == 'ASCII ') THEN
   CALL OL_READ_ATM_ASCII  (KFORC_STEP,                       &
                            PTA,PQA,PWIND,PDIR_SW,PSCA_SW,PLW,PSNOW,PRAIN,PPS,&

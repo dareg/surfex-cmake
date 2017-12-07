@@ -2,7 +2,7 @@
 SUBROUTINE INIT_SURF_ATM_n (YSC, &
                             HPROGRAM,HINIT, OLAND_USE,                   &
                              KI,KSV,KSW,                                &
-                             HSV,PCO2,PRHOA,                            &
+                             HSV,PCO2,PIMPWET,PIMPDRY,PRHOA,            &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
                              PEMIS,PTSRAD,PTSURF,                       &
                              KYEAR, KMONTH,KDAY, PTIME,                 &
@@ -63,6 +63,7 @@ USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_SURF_ATM,       ONLY : XCO2UNCPL
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
+USE MODD_PREP_SNOW    ,  ONLY : NIMPUR
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_DST_SURF,       ONLY : NDSTMDE, NDST_MDEBEG, LVARSIG_DST, LRGFIX_DST 
 USE MODD_SLT_SURF,       ONLY : NSLTMDE, NSLT_MDEBEG, LVARSIG_SLT, LRGFIX_SLT                                
@@ -162,6 +163,8 @@ INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPWET      !  wet deposit coefficient for each impurity type    (g)
+REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPDRY     !  dry deposit coefficient for each impurity type    (g)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
@@ -211,6 +214,8 @@ REAL, DIMENSION(KI)                 :: ZTSUN          ! solar time since midnigh
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_ZENITH   ! zenithal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_AZIM     ! azimuthal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_CO2      ! air CO2 concentration
+REAL, DIMENSION(:,:),     ALLOCATABLE :: ZP_IMPWET      ! wet deposit coef
+REAL, DIMENSION(:,:),     ALLOCATABLE :: ZP_IMPDRY      ! dry deposit coef
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_RHOA     ! air density
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_DIR_ALB  ! direct albedo
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_SCA_ALB  ! diffuse albedo
@@ -254,7 +259,7 @@ IF (LNAM_READ) THEN
                             YSC%DGU%LCOEF,YSC%DGU%LSURF_VARS,YSC%DGU%LSURF_BUDGETC,          &
                             YSC%DGU%LRESET_BUDGETC,YSC%DGU%LSELECT, YSC%DGU%LPROVAR_TO_DIAG, &
                             YSC%DGU%LDIAG_GRID, YSC%DGU%LFRAC, YSC%DGU%XDIAG_TSTEP,&
-                            YSC%DGU%LSNOWDIMNC,YSC%DGU%LRESETCUMUL)                       
+                            YSC%DGU%LSNOWDIMNC,YSC%DGU%LRESETCUMUL)  
  !
 ENDIF
 !

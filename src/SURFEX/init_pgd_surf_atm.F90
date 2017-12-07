@@ -57,6 +57,8 @@ REAL,              INTENT(IN)   :: PTIME       ! time
 !
  CHARACTER(LEN=6), DIMENSION(0)  :: YSV       ! name of all scalar variables
 REAL,             DIMENSION(0)  :: ZCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(0,1)  :: ZIMPWET      ! impurity wet deposit coef
+REAL,             DIMENSION(0,1)  :: ZIMPDRY      ! impurity dry deposit coef
 REAL,             DIMENSION(0)  :: ZRHOA     ! air density (kg/m3)
 REAL,             DIMENSION(0)  :: ZZENITH   ! solar zenithal angle
 REAL,             DIMENSION(0)  :: ZAZIM     ! solar azimuthal angle (rad from N, clock)
@@ -75,7 +77,7 @@ IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',0,ZHOOK_HANDLE)
  CALL INIT_SURF_ATM_n(YSC, &
                       HPROGRAM,HINIT,.FALSE.,                     &
                       0,0,1,                                     &
-                      YSV,ZCO2,ZRHOA,                            &
+                      YSV,ZCO2,ZIMPWET,ZIMPDRY,ZRHOA,            &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &
                       ZEMIS,ZTSRAD,ZTSURF,                       &
                       KYEAR, KMONTH, KDAY, PTIME,                &

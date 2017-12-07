@@ -27,6 +27,7 @@ SUBROUTINE PREP_PERM_SNOW (I, &
 !!                                          snow/ice treatment
 !!      B. Decharme 07/2012: 3-L or Crocus adjustments
 !!      M. Lafaysse 09/2012: adaptation with new snow age in Crocus
+!!      M. dumont 02/2016 : snow impurity content
 !!------------------------------------------------------------------
 !
 
@@ -40,6 +41,7 @@ USE MODD_SNOW_PAR,       ONLY : XRHOSMAX, XANSMAX, XANSMIN, &
                                 XAGLAMAX, XAGLAMIN, XHGLA,  &
                                 XRHOSMAX_ES
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_PREP_SNOW,       ONLY : NIMPUR
 !
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
 !
@@ -71,6 +73,7 @@ REAL, PARAMETER :: ZRHOL1 = 150.
 !*      0.3    declarations of local variables
 !
 INTEGER                             :: JLAYER      ! loop counter on snow layers
+INTEGER                             :: JIMP      ! loop counter on impurity types
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZWSNOW_PERM ! snow total reservoir due to perm. snow
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZWSNOW      ! initial snow total reservoir
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZD          ! new snow total depth
@@ -205,6 +208,8 @@ IF (TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO') THEN
     WHERE(GWORK(:,JLAYER))
              TPSNOW%AGE(:,JLAYER,KSNOW) = 365.0*FLOAT(JLAYER-1)/ &
                                           FLOAT(TPSNOW%NLAYER)
+
+              
     END WHERE
   END DO
   DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
@@ -221,22 +226,38 @@ IF (TPSNOW%SCHEME=='3-L'.OR.TPSNOW%SCHEME=='CRO') THEN
 END IF
 !
 IF (TPSNOW%SCHEME=='CRO') THEN
-DO JLAYER=1,TPSNOW%NLAYER/4
-  WHERE(GWORK(:,JLAYER))
-           TPSNOW%GRAN1(:,JLAYER,KSNOW) = MIN(-1.,-99.*     &
-                  (1.-4*FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER))) 
-           TPSNOW%GRAN2(:,JLAYER,KSNOW) = 50. 
-           TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
-  END WHERE
-END DO
-DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
-  WHERE(GWORK(:,JLAYER))
-           TPSNOW%GRAN1(:,JLAYER,KSNOW) = 99. 
-           TPSNOW%GRAN2(:,JLAYER,KSNOW) = 0.0003 
-           TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
-  END WHERE
-END DO
+  DO JLAYER=1,TPSNOW%NLAYER/4
+    WHERE(GWORK(:,JLAYER))
+             TPSNOW%GRAN1(:,JLAYER,KSNOW) = MIN(-1.,-99.*     &
+                    (1.-4*FLOAT(JLAYER)/FLOAT(TPSNOW%NLAYER))) 
+             TPSNOW%GRAN2(:,JLAYER,KSNOW) = 50. 
+             TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
+    END WHERE
+  END DO
+  DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
+    WHERE(GWORK(:,JLAYER))
+             TPSNOW%GRAN1(:,JLAYER,KSNOW) = 99. 
+             TPSNOW%GRAN2(:,JLAYER,KSNOW) = 0.0003 
+             TPSNOW%HIST(:,JLAYER,KSNOW) = 0 
+    END WHERE
+  END DO
 END IF
+
+IF (TPSNOW%SCHEME=='CRO') THEN
+  DO JIMP=1,NIMPUR
+    DO JLAYER=1,TPSNOW%NLAYER/4
+      WHERE(GWORK(:,JLAYER))
+        TPSNOW%IMPUR(:,JLAYER,JIMP,KSNOW)=0.
+      END WHERE
+    END DO
+    DO JLAYER=1+TPSNOW%NLAYER/4,TPSNOW%NLAYER
+      WHERE(GWORK(:,JLAYER))
+        TPSNOW%IMPUR(:,JLAYER,JIMP,KSNOW)=0.
+      END WHERE
+    END DO
+  ENDDO
+END IF
+
 !
 !-------------------------------------------------------------------------------------
 !

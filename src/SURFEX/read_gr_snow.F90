@@ -51,7 +51,7 @@ USE MODI_READ_SURF
 USE MODI_ALLOCATE_GR_SNOW
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT,NIMPUR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -87,7 +87,7 @@ INTEGER             :: IRESP               ! Error code after redding
  CHARACTER (LEN=100) :: YFMT                ! format for writing
 INTEGER             :: ISURFTYPE_LEN       ! 
 LOGICAL             :: GSNOW               ! snow written in the file
-INTEGER             :: JLAYER              ! loop counter
+INTEGER             :: JLAYER,JIMP              ! loop counter
 REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK ! 2D array to write data in file
  CHARACTER(LEN=1)    :: YDIR                ! type of reading
  CHARACTER(LEN=4)    :: YNLAYER     !Format depending on the number of layers
@@ -175,6 +175,14 @@ END IF
 !*       3.    Allocations
 !              -----------
 !
+! Read number of impurity type in the Forcing File if something has been written(IVERSION>9)
+IF (TPSNOW%SCHEME=='CRO' .AND.IVERSION>8) THEN
+CALL READ_SURF(&
+                 HPROGRAM,'NIMPUR',NIMPUR,IRESP)
+ELSE
+NIMPUR=0
+ENDIF
+
  CALL ALLOCATE_GR_SNOW(TPSNOW,KLU,KPATCH)
 !
 IF (.NOT. GSNOW) THEN
@@ -289,7 +297,29 @@ DO JLAYER = 1,TPSNOW%NLAYER
     TPSNOW%GRAN1(:,JLAYER,:)=ZWORK
     WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%GRAN1(:,JLAYER,:) = XUNDEF
   END IF
-!
+  
+  
+! !   9.b    Snow impurity
+! !              ------------
+! !
+  IF (TPSNOW%SCHEME=='CRO') THEN
+    DO JIMP=1, NIMPUR 
+      IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
+        WRITE(YFMT,'(A8,I1,A6)')     '(A5,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'      
+        WRITE(YRECFM,YFMT) 'SIMP_',JIMP,HSURFTYPE,JLAYER
+      ELSE
+        WRITE(YFMT,'(A8,I1,A6)')     '(A4,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'
+        WRITE(YRECFM,YFMT) 'SIM_',JIMP,HSURFTYPE,JLAYER
+        YRECFM=ADJUSTL(HPREFIX//YRECFM)
+      ENDIF      
+      CALL READ_SURF(&
+                   HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
+      TPSNOW%IMPUR(:,JLAYER,JIMP,:)=ZWORK
+      WHERE (TPSNOW%WSNOW(:,1,:) == 0.0) TPSNOW%IMPUR(:,JLAYER,JIMP,:) = XUNDEF
+      !
+    ENDDO    
+  END IF
+
 !*       10.    Snow Gran2
 !              ------------
 !

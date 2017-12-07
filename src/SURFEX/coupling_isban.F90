@@ -1,8 +1,8 @@
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   &
                              HPROGRAM, HCOUPLING,                                              &
-                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
-                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2,PAZIM, &
+                 PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
@@ -65,9 +65,16 @@ SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, IM, DTGD, DTGR, TGRO, DST, SLT,   
 !!      P Samuelsson 10/2014 : MEB
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!      R. Seferian  05/2015 : Add coupling fiels to vegetation_evol call
+!!      F. Tuzet     06/2016 : Add of a new dimension for impurity: The type of impurity
 !!-------------------------------------------------------------------
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+!
+USE MODD_PREP_SNOW, ONLY : NIMPUR
+
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE, ONLY : LFORCIMP
+#endif
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -206,12 +213,15 @@ REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on hori
 REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
+REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg_CO2/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -358,6 +368,9 @@ DO JJ=1,SIZE(PQA)
   ZPEQ_B_COEF(JJ) = PPEQ_B_COEF(JJ) / PRHOA(JJ)
 !
   ZCO2(JJ) = PCO2(JJ) / PRHOA(JJ)
+  
+!Impurity forcing with CO2 Variable
+  
 !
 ! Other forcing variables depending on incoming forcing (argument list)JJ
 !
@@ -645,8 +658,11 @@ REAL, DIMENSION(KSIZE) :: ZP_DIR     ! wind direction                        (ra
 REAL, DIMENSION(KSIZE) :: ZP_QA      ! air specific humidity forcing         (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_TA      ! air temperature forcing               (K)
 REAL, DIMENSION(KSIZE) :: ZP_CO2     ! CO2 concentration in the air          (kg/kg)
+REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPWET
+REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPDRY 
 REAL, DIMENSION(KSIZE,KSV) :: ZP_SV      ! scalar concentration in the air       (kg/kg)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH  ! zenithal angle        radian from the vertical)
+REAL, DIMENSION(KSIZE) :: ZP_AZIM  ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(KSIZE) :: ZP_PEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KSIZE) :: ZP_PEW_B_COEF ! needed if HCOUPLING='I'
 REAL, DIMENSION(KSIZE) :: ZP_PET_A_COEF
@@ -733,8 +749,10 @@ REAL, DIMENSION(KSIZE)               :: ZIRRIG_GR    ! green roof ground irrigat
 ! For multi-energy balance
 LOGICAL :: GMEB  ! True if multi-energy balance should be used for the specific patch
 !
-INTEGER :: JJ, JI, JK
+INTEGER :: JJ, JI, JK , JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!INTEGER :: ILUOUT   ! output listing logical unit
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_n:TREAT_PATCH',0,ZHOOK_HANDLE)
 !
@@ -744,6 +762,7 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_n:TREAT_PATCH',0,ZHOOK_HANDLE)
 !
 IF (IM%I%NPATCH==1) THEN
    ZP_ZENITH(:)     = PZENITH     (:)
+   ZP_AZIM(:)     = PAZIM         (:)
    ZP_ZREF(:)       = PZREF       (:)
    ZP_UREF(:)       = PUREF       (:)
    ZP_WIND(:)       = ZWIND       (:)
@@ -753,6 +772,12 @@ IF (IM%I%NPATCH==1) THEN
    ZP_QA(:)         = ZQA         (:)
    ZP_TA(:)         = PTA         (:)
    ZP_CO2(:)        = ZCO2        (:)
+#ifdef SFX_OL
+   IF (LFORCIMP) THEN
+    ZP_IMPWET(:,:)   = PIMPWET(:,:)
+    ZP_IMPDRY(:,:)   = PIMPDRY(:,:)
+   ENDIF
+#endif
    ZP_SV(:,:)       = PSV         (:,:)
    ZP_PEW_A_COEF(:) = PPEW_A_COEF (:)
    ZP_PEW_B_COEF(:) = PPEW_B_COEF (:)
@@ -779,6 +804,7 @@ ELSE
   DO JJ=1,KSIZE
    JI = KMASK(JJ)
    ZP_ZENITH(JJ)     = PZENITH     (JI)
+   ZP_AZIM(JJ)       = PAZIM       (JI)
    ZP_ZREF(JJ)       = PZREF       (JI)
    ZP_UREF(JJ)       = PUREF       (JI)
    ZP_WIND(JJ)       = ZWIND       (JI)
@@ -826,7 +852,19 @@ ELSE
     ENDDO
   ENDDO
 !
+#ifdef SFX_OL
+  IF (LFORCIMP) THEN
+    DO JIMP=1,NIMPUR
+      DO JJ=1,KSIZE
+        JI = KMASK(JJ)
+        ZP_IMPWET(JJ,JIMP)   = PIMPWET(JI,JIMP)
+      ENDDO
+    ENDDO
+  ENDIF
+#endif
 ENDIF
+
+
 !
 !--------------------------------------------------------------------------------------
 !
@@ -970,11 +1008,11 @@ ZIRRIG_GR(:)= 0.
            IM%I%CCPSURF, IM%I%CSOILFRZ, IM%I%CDIFSFCOND, IM%I%TTIME, IM%I%LFLOOD, &
            IM%I%LTEMP_ARP, IM%I%LGLACIER, GMEB, IM%I%LFORC_MEASURE, IM%I%LMEB_LITTER, PTSTEP, &
            CIMPLICIT_WIND, IM%I%LAGRI_TO_GRASS, IM%I%CSNOWDRIFT, IM%I%LSNOWDRIFT_SUBLIM, &
-           IM%I%LSNOW_ABS_ZENITH, IM%I%CSNOWMETAMO, IM%I%CSNOWRAD, IM%I%LSNOWSYTRON, &
+           IM%I%LSNOW_ABS_ZENITH, IM%I%CSNOWMETAMO, IM%I%CSNOWRAD,IM%I%LATMORAD, IM%I%LSNOWSYTRON, &
            IM%I%CSNOWFALL, IM%I%CSNOWCOND, IM%I%CSNOWHOLD, IM%I%CSNOWCOMP, IM%I%CSNOWZREF, &
            IM%I%XCVHEATF, IM%I%XCGMAX, ZP_ZREF, &
            ZP_UREF, ZP_SLOPE_COS, ZP_SLOPE_DIR, ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN, &
-           ZP_SNOW, ZP_ZENITH, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, &
+           ZP_SNOW, ZP_ZENITH,ZP_AZIM, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW, ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, &
            ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,  ZP_PET_B_COEF, ZP_PEQ_B_COEF, &
            IM%PKI%XP_RSMIN, IM%PKI%XP_RGL, IM%PKI%XP_GAMMA, IM%PKI%XP_CV, IM%PKI%XP_RUNOFFD, &
            IM%PKI%XP_SOILWGHT, IM%I%NLAYER_HORT, IM%I%NLAYER_DUN, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG,  &
@@ -992,7 +1030,7 @@ ZIRRIG_GR(:)= 0.
            IM%PKDI%XP_SNOWFREE_ALB_VEG, IM%PKDI%XP_SNOWFREE_ALB_SOIL, IM%PKI%XP_IRRIG, &
            IM%PKI%XP_WATSUP, IM%PKI%XP_THRESHOLD, IM%PKI%XP_LIRRIGATE, IM%PKI%XP_LIRRIDAY, &
            IM%PKI%LP_STRESS, IM%PKI%XP_GC, IM%PKI%XP_F2I, IM%PKI%XP_DMAX, IM%PKI%XP_AH, &
-           IM%PKI%XP_BH, ZP_CO2, IM%PKI%XP_GMES, IM%I%XPOI, IM%PKI%XP_FZERO, IM%PKI%XP_EPSO, &
+           IM%PKI%XP_BH, ZP_CO2,ZP_IMPWET,ZP_IMPDRY, IM%PKI%XP_GMES, IM%I%XPOI, IM%PKI%XP_FZERO, IM%PKI%XP_EPSO, &
            IM%PKI%XP_GAMM, IM%PKI%XP_QDGAMM, IM%PKI%XP_QDGMES, IM%PKI%XP_T1GMES, IM%PKI%XP_T2GMES, &
            IM%PKI%XP_AMAX, IM%PKI%XP_QDAMAX,  IM%PKI%XP_T1AMAX, IM%PKI%XP_T2AMAX, IM%I%XABC, &
            IM%PKI%XP_DG, IM%PKI%XP_DZG, IM%PKI%XP_DZDIF, IM%PKI%NK_WG_LAYER, IM%PKI%XP_ROOTFRAC, &
@@ -1006,7 +1044,7 @@ ZIRRIG_GR(:)= 0.
            IM%PKI%XP_TV, IM%PKI%XP_TL, &
            IM%PKI%XP_RESA, IM%PKI%XP_ANFM, IM%PKI%XP_FSAT, IM%PKI%XP_SNOWALB, IM%PKI%XP_SNOWALBVIS, &
            IM%PKI%XP_SNOWALBNIR, IM%PKI%XP_SNOWALBFIR, IM%PKI%XP_SNOWSWE, IM%PKI%XP_SNOWHEAT, &
-           IM%PKI%XP_SNOWRHO, IM%PKI%XP_SNOWGRAN1, IM%PKI%XP_SNOWGRAN2, IM%PKI%XP_SNOWHIST, IM%PKI%XP_SNOWAGE, &
+           IM%PKI%XP_SNOWRHO, IM%PKI%XP_SNOWGRAN1, IM%PKI%XP_SNOWGRAN2, IM%PKI%XP_SNOWHIST, IM%PKI%XP_SNOWAGE,&
            IM%PKI%XP_SNOWIMPUR, &
            IM%PKDI%XP_GRNDFLUX, IM%PKDI%XP_HPSNOW, IM%PKDI%XP_SNOWHMASS, IM%PKDI%XP_RNSNOW, IM%PKDI%XP_HSNOW, &
            IM%PKDI%XP_GFLUXSNOW, IM%PKDI%XP_USTARSNOW, IM%PKDI%XP_SRSFC, IM%PKDI%XP_RRSFC, IM%PKDI%XP_LESL,   &
@@ -1035,9 +1073,11 @@ ZIRRIG_GR(:)= 0.
            IM%PKDI%XP_SNOWTYPEMEPRA,IM%PKDI%XP_SNOWRAM,       &
            IM%PKDI%XP_SNOWSHEAR,IM%PKDI%XP_SNOWDEPTH_1DAYS,IM%PKDI%XP_SNOWDEPTH_3DAYS,IM%PKDI%XP_SNOWDEPTH_5DAYS,         &
            IM%PKDI%XP_SNOWDEPTH_7DAYS,IM%PKDI%XP_SNOWSWE_1DAYS,IM%PKDI%XP_SNOWSWE_3DAYS,IM%PKDI%XP_SNOWSWE_5DAYS,         &
-           IM%PKDI%XP_SNOWSWE_7DAYS,IM%PKDI%XP_SNOWRAM_SONDE,IM%PKDI%XP_SNOW_WETTHICKNESS,IM%PKDI%XP_SNOW_REFROZENTHICKNESS)
+           IM%PKDI%XP_SNOWSWE_7DAYS,IM%PKDI%XP_SNOWRAM_SONDE,IM%PKDI%XP_SNOW_WETTHICKNESS,IM%PKDI%XP_SNOW_REFROZENTHICKNESS,&
+           ZP_DIR_SW, ZP_SCA_SW,IM%PKDI%XP_SPEC_ALB,IM%PKDI%XP_DIFF_RATIO,IM%PKDI%XP_SNOWIMPUR)
 ZP_TRAD=IM%PKDI%XP_TSRAD
 !
+
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Glacier : ice runoff flux (especally for Earth System Model)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

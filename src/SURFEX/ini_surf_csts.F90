@@ -57,7 +57,7 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XPERCENTAGEPORE,                    &
                            LMEBREC,                            &
                            XANSFRACMEL, XTEMPANS,              &
-                           XANSMINMEB
+                           XANSMINMEB, XIMPUR_INIT, XIMPUR_COEFF
 USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
@@ -95,7 +95,7 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
-                             XPERCENTAGEPORE,XVVISC3,X_RI_MAX
+                             XPERCENTAGEPORE,XVVISC3,X_RI_MAX,XIMPUR_INIT, XIMPUR_COEFF
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -230,6 +230,15 @@ XVVISC3= 0.023
 ! Roughness length for flood (m)
 !
 XZ0FLOOD = 0.0002
+
+!!! impurity value 
+XIMPUR_COEFF(1)=5.E-9 ! BC deposition at top of snowpack 
+XIMPUR_INIT(1)=4.E-9 ! BC initial content (g/g) of impurity for fresh snow
+
+XIMPUR_COEFF(2:5)=10.E-6 ! Dust deposition at top of snowpack
+XIMPUR_INIT(2:5)=5.E-6 ! Dust initial content (g/g) of impurity for fresh snow
+
+
 !-------------------------------------------------------------------------------
 !
 ! * Reproductibility for SURFEX OPER

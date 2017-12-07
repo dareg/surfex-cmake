@@ -80,6 +80,7 @@ REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = &
 !
 LOGICAL :: LSNOW_IDEAL 
 !
+
 REAL, DIMENSION(:), POINTER :: XWSNOW         ! Snow reservoir
 REAL, DIMENSION(:), POINTER :: XRSNOW         ! snow density
 REAL, DIMENSION(:), POINTER :: XTSNOW         ! snow temperature
@@ -88,6 +89,8 @@ REAL, DIMENSION(:), POINTER :: XSG1SNOW
 REAL, DIMENSION(:), POINTER :: XSG2SNOW
 REAL, DIMENSION(:), POINTER :: XHISTSNOW
 REAL, DIMENSION(:), POINTER :: XAGESNOW
+REAL, DIMENSION(:), POINTER :: XIMPURSNOW   !N6K
+REAL, DIMENSION(:,:), POINTER :: XIMPURSNOWV2   !N6K
 REAL                  :: XASNOW         ! snow albedo
 !
 !--------------------------------------------------------------------------
@@ -96,7 +99,6 @@ LOGICAL           :: LEXTRAP_TG     ! extrapolate TG points where LSM < 0.5 (buf
 LOGICAL           :: LEXTRAP_WG     ! extrapolate WG points where LSM < 0.5 (buffer only)  
 LOGICAL           :: LEXTRAP_WGI    ! extrapolate WGI points where LSM < 0.5 (buffer only) 
 LOGICAL           :: LEXTRAP_SN     ! extrapolate SNOW (SWE/depth) points where LSM < 0.5 (buffer only) 
-
 END MODULE MODD_PREP_ISBA
 
 
