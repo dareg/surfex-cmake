@@ -166,7 +166,7 @@
 USE MODD_CO2V_PAR,   ONLY : XMC, XMCO2, XPCCO2
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_CSTS,           ONLY : XTT
+USE MODD_CSTS,           ONLY : XTT,XPI
 USE MODD_CO2V_PAR,       ONLY : XMC, XMCO2, XPCCO2
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
@@ -342,6 +342,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PRR        ! Rain rate (in kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN)  :: PSR        ! Snow rate (in kg/m2/s)
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PZENITH    ! solar zenith angle
+!REAL, DIMENSION(:), INTENT(IN)  :: PANGL_ILLUM ! Effective illumination angle, Angle between the sun and the normal to the ground (=zenith if no slope) used in TARTES
 REAL, DIMENSION(:), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:), INTENT(IN)  :: PSW_RAD    ! solar   incoming radiation on slope
 REAL, DIMENSION(:), INTENT(IN)  :: PSCA_SW    ! solar diffuse incoming radiation on slope
@@ -929,6 +930,14 @@ REAL, DIMENSION(SIZE(PWR))               :: ZLITCOR   ! A possible ice (in litte
 !
 ! Misc :
 !
+!
+!REAL, DIMENSION(SIZE(PTA))          :: ZANGL_SLOP! BC : moved here from snow3L_isba.F90
+!                                      ZANGL_SLOP  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
+
+REAL, DIMENSION(SIZE(PWR))          :: ZANGL_ILLUM ! BC : moved here from snow3L_isba.F90
+!                                      ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
+!                                      !  used only in TARTES for now
+INTEGER				    :: JJ ! BC Loop control B
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
 ! Budget: Add to arguments, diags
 
@@ -1002,7 +1011,16 @@ ZSUBVCOR(:)     = 0.0
 ZLITCOR(:)     = 0.0
 ZLES3L          = 0.0
 ZLEL3L          = 0.0
-!
+!Misc :
+!ZANGL_SLOP(:) = 0.0 ! BC    nothing to do here, should be moved elsewheres
+ZANGL_ILLUM(:) = PZENITH(:) ! BC 
+
+DO JJ=1, SIZE(PWR) ! BC computation of illuminaiton angle from Tuzet calc. without ZANGLE_SLOP = ACOS(PDIRCOSZW)
+    !ZANGL_SLOP(JJ) =ACOS(PDIRCOSZW(JJ)) 
+    ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ACOS(PDIRCOSZW(JJ))))+ &
+      (SIN(PZENITH(JJ))*SIN(ACOS(PDIRCOSZW(JJ))*COS(PAZIM(JJ)-(PSLOPE_DIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
+ENDDO
+
 IF(OMEB)THEN
    ZVEG(:) = 0.0
    PLEG(:) = 0.0
@@ -1065,7 +1083,7 @@ IF(OMEB)THEN
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
         ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1,                                      &
-        PPS, PZENITH, PAZIM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
+        PPS, PZENITH, ZANGL_ILLUM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
         PH_VEG, PDIRCOSZW, PSLOPE_DIR,                                         &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
         PPEW_A_COEF, PPEW_B_COEF,                                              &
@@ -1156,7 +1174,7 @@ ELSE
            PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, ZSNOWSFCH,               &
            ZDELHEATN, ZDELHEATN_SFC,                                            &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
-           PSNOWHMASS, ZRI3L, PZENITH,PAZIM, ZDELHEATG, ZDELHEATG_SFC,          &
+           PSNOWHMASS, ZRI3L, PZENITH, ZANGL_ILLUM, ZDELHEATG, ZDELHEATG_SFC,          &
            PLAT, PLON, ZQS3L,                                                   &
            HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
            HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,                                    &

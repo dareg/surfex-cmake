@@ -5,7 +5,7 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,             &
                          PTG, PCG, PCT, PSOILHCAPZ, PSOILCONDZ,                              &
                          PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,            &
-                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR,                    &
+                         PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR, PLVTT, PLSTT,      &
                          PZREF, PZ0NAT, PZ0EFF, PZ0HNAT, PALB, PD_G, PDZG,                   &
                          PPEW_A_COEF, PPEW_B_COEF,                                           &
                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                 &
@@ -15,9 +15,9 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, PSNOWSFCH,              &
                          PDELHEATN, PDELHEATN_SFC,                                           &
                          PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,           &
-                         PSNOWHMASS, PRI, PZENITH, PAZIM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
+                         PSNOWHMASS, PRI, PZENITH, PANGL_ILLUM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQS,&
                          HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                      &
-                         HSNOWMETAMO, HSNOWRAD,OATMORAD,OOSNOWSYTRON,                                  &
+                         HSNOWMETAMO, HSNOWRAD,OATMORAD,OSNOWSYTRON,                                  &
                          HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF,KTAB_SYT,PSYTMASS,&
                          PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
                          PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
@@ -225,7 +225,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST
 !                                      PSNOWGRAN2 = Snow layer(s) grain parameter 2
 !                                      PSNOWHIST  = Snow layer(s) grain historical parameter
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE  ! Snow grain age
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR
 !
 !
 REAL, DIMENSION(:), INTENT(INOUT)   :: PRNSNOW, PHSNOW, PLES3L, PLEL3L,     &
@@ -318,7 +318,9 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PQS
 ! ajout_EB pour prendre en compte angle zenithal du soleil dans LRAD
 ! puis plus tard dans LALB
 REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
-REAL, DIMENSION(:), INTENT(IN)      :: PAZIM     ! solar azimuthal angle      (radian from North, clockwise)
+!REAL, DIMENSION(:), INTENT(IN)      :: PANGL_SLOP !BC
+REAL, DIMENSION(:), INTENT(IN)      :: PANGL_ILLUM !BC
+!REAL, DIMENSION(:), INTENT(IN)      :: PAZIM     ! solar azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:), INTENT(IN)      :: PLAT
 REAL, DIMENSION(:), INTENT(IN)      :: PLON
 !
@@ -400,10 +402,10 @@ REAL, DIMENSION(SIZE(PTA))          :: ZBLOWSNW_ACC
 !                                      ZBLOWSNW_ACC  = minimum equivalent snow depth
 !                                                      for deposition of blown snow particles
 !                                                      during the current time step (m)
-REAL, DIMENSION(SIZE(PTA))          :: ZANGLE_SLOP
-!                                      ZANGL_ILLUM  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
+!REAL, DIMENSION(SIZE(PTA))          :: ZANGL_SLOP
+!                                      ZANGL_SLOP  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
 
-REAL, DIMENSION(SIZE(PTA))          :: ZANGL_ILLUM
+!REAL, DIMENSION(SIZE(PTA))          :: ZANGL_ILLUM  !BC: moved up to ISBA.F90
 !                                      ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
                                       !  used only in TARTES for now
 !
@@ -465,8 +467,8 @@ PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
-ZANGLE_SLOP(:) =0.0
-ZANGL_ILLUM(:) =PZENITH(:)
+!ZANGLE_SLOP(:) =0.0 !BC
+!ZANGL_ILLUM(:) =PZENITH(:)
 !PRINT *,"ANG" ,"NORD :",PDIRCOSZW(1), "SUD:",PDIRCOSZW(4)
 !PRINT *, "DIR","NORD :",PSLOPEDIR(1), "SUD:",PSLOPEDIR(4)
 !PRINT *, "azim","NORD :",PAZIM(1)
@@ -510,13 +512,13 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
    PSRSFC(:)=0.0
 !
-   DO JJ=1,SIZE(PSR)
+   DO JJ=1,SIZE(PSR)  ! BC moved up to ISBA.F90 (least worst solution)
       ZRRSNOW(JJ)        = PPSN(JJ)*PRR(JJ)
       PRRSFC(JJ)         = PRR(JJ) - ZRRSNOW(JJ)
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
-      ZANGLE_SLOP(JJ) =ACOS(PDIRCOSZW(JJ))    ! Compute the angle of the slope 
-      ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ZANGLE_SLOP(JJ)))+ &
-      (SIN(PZENITH(JJ))*SIN(ZANGLE_SLOP(JJ)*COS(PAZIM(JJ)-(PSLOPEDIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
+!      ZANGLE_SLOP(JJ) =ACOS(PDIRCOSZW(JJ))    ! Compute the angle of the slope ! BC moved up to ISBA.F90 (least worst solution)
+!      ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ZANGLE_SLOP(JJ)))+ & ! BC moved up to ISBA.F90 (least worst solution)
+!      (SIN(PZENITH(JJ))*SIN(ZANGLE_SLOP(JJ)*COS(PAZIM(JJ)-(PSLOPEDIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
    ENDDO
 !
 ! Calculate preliminary snow depth (m)
@@ -1026,7 +1028,7 @@ DO JJ=1,KSIZE1
    ZP_LAT  (JJ)      = PLAT(JI)
    ZP_LON  (JJ)      = PLON(JI)
    ZP_ZENITH(JJ)     = PZENITH  (JI)
-   ZP_ANGL_ILLUM(JJ)     = ZANGL_ILLUM  (JI)
+   ZP_ANGL_ILLUM(JJ)     = PANGL_ILLUM  (JI) !BC
 !
    ZP_GRNDFLUX    (JJ) = PGRNDFLUX    (JI)
    ZP_RNSNOW      (JJ) = PRNSNOW      (JI)
@@ -1130,7 +1132,7 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_LEL3L, ZP_EVAP, ZP_SNDRIFT, ZP_RI,                         &
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
-             ZP_ANGL_ILLUM,                                                &
+             ZP_ANGL_ILLUM,                                                & !BC
              ZP_LAT, ZP_LON, ZP_BLOWSNW, HSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,ZP_DIR_SW, ZP_SCA_SW,&
              ZP_SPEC_ALB, ZP_DIFF_RATIO,ZP_IMPWET,ZP_IMPDRY,                       &
@@ -1275,7 +1277,6 @@ ENDIF
 !
   ENDIF
 !
-ENDIF
 !
 !===============================================================
 !conversion of snow heat from J/m2 into J/m3

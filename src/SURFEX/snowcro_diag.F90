@@ -119,21 +119,19 @@ DO JST=1,SIZE(PSNOWSWE,2)
                 MAX( 0.0004, 0.5*PSNOWGRAN2(JJ,JST) ) * ( 1.-PSNOWGRAN1(JJ,JST)/XX ) 
       ! MEPRA grain type
       
-      ICLASS_HIST=NINT(PSNOWHIST(JJ,JST))+1 ! hist entre 0 et 5 iclass_hist entre 1 et 6
-
-      IF (PSNOWSIZE(JJ,JST)<=0.5) THEN
-        ICLASS_SIZE=0
-      ELSEIF (PSNOWSIZE(JJ,JST)<=1.0) THEN
-        ICLASS_SIZE=1
-      ELSE 
-        ICLASS_SIZE=2
+      ! Carmagnola and Morin had the terrible idea to use SNOWGRAN1 and SNOWGRAN2 with different meanings depending on the physical options.
+      ! This complicates everything and should be changed.
+      ! For now :
+      IF ( HSNOWMETAMO=='B92' ) THEN 
+          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<-XUEPSI )
+      ELSE
+          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<XVDIAM6*(4.-PSNOWGRAN2(JJ,JST))-XUEPSI )   
       ENDIF
       
       ICLASS_SPHER=MIN(NINT(10*PSNOWSPHER(JJ,JST)),9)
       
-      ICLASS=ICLASS_HIST+ICLASS_SIZE*6+ICLASS_SPHER*18
-      
-      PSNOWTYPEMEPRA(JJ,JST)=ICRIS_NONDEND1D(ICLASS)
+      IF (.NOT. GDENDRITIC) THEN
+        !Non dendritic case
 
         IF ( HSNOWMETAMO=='B92' ) THEN
           !Dendricity,sphericty and grain size
@@ -227,26 +225,10 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ELSE
         !Dendritic case
 
-        IF ( HSNOWMETAMO=='B92' ) THEN
-            !Dendricity,sphericty and grain size
-            PSNOWSIZE(JJ,JST)  =  XUNDEF  !Grain size not defined for dendritic snow
-            PSNOWDEND(JJ,JST)  = -PSNOWGRAN1(JJ,JST) / XX
-            PSNOWSPHER(JJ,JST) =  PSNOWGRAN2(JJ,JST) / XX
-            
-            !Optical diameter for SSA diagnostic
-            ZDIAM = PSNOWDEND(JJ,JST) * XD1 + (1 - PSNOWDEND(JJ,JST)) * &
-            (PSNOWSPHER(JJ,JST) * XD2 + (1 - PSNOWSPHER(JJ,JST)) * XD3)
-            !ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
-            !      ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 )
-            ZDIAM = ZDIAM/10000.
-            
-            
-        ELSE
-            PSNOWSIZE(JJ,JST)  = XUNDEF
-            PSNOWSPHER(JJ,JST) = PSNOWGRAN2(JJ,JST)
-            PSNOWDEND(JJ,JST)  = MAX(0.,MIN(1.,((1/XVDIAM6) * PSNOWGRAN1(JJ,JST)-4. + PSNOWSPHER(JJ,JST)) / &
-                                                     (PSNOWSPHER(JJ,JST) - 3.)))
-        ENDIF
+        !Dendricity,sphericty and grain size
+        PSNOWSIZE(JJ,JST)  =  XUNDEF  !Grain size not defined for dendritic snow
+        PSNOWDEND(JJ,JST)  = -PSNOWGRAN1(JJ,JST) / XX
+        PSNOWSPHER(JJ,JST) =  PSNOWGRAN2(JJ,JST) / XX
 
         !Optical diameter for SSA diagnostic
         ZDIAM = PSNOWDEND(JJ,JST) * XD1 + (1 - PSNOWDEND(JJ,JST)) * &
@@ -323,9 +305,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
       
       DO JIMP=1,NIMPUR !Modif the cond
         PSNOWIMP_CONC(JJ,JST,JIMP)=PSNOWIMP(JJ,JST,JIMP)/(1000*PSNOWSWE(JJ,JST)) 
-      ENDDO 
+      END DO 
 
-    END IF    
+    END IF
   END DO
 END DO
   

@@ -8,7 +8,7 @@
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
         PSOILHCAPZ, PSOILCONDZ, PFROZEN1,                                      &
-        PPS, PZENITH,PAZIM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
+        PPS, PZENITH, PANGL_ILLUM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
         PH_VEG, PDIRCOSZW, PSLOPE_DIR,                                         &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
         PPEW_A_COEF, PPEW_B_COEF,                                              &
@@ -216,7 +216,8 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PLAT          ! Latitude (degrees North)
 REAL, DIMENSION(:),   INTENT(IN)    :: PLON          ! Longitude (degrees East)
 REAL, DIMENSION(:),   INTENT(IN)    :: PPS           ! Pressure [Pa]
 REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! solar zenith angle
-REAL, DIMENSION(:),   INTENT(IN)      :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(:),   INTENT(IN)    :: PANGL_ILLUM !BC
+!REAL, DIMENSION(:),   INTENT(IN)    :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD       ! solar (shortwave) incoming radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(IN)    :: PLW_RAD       ! thermal (longwave) incoming radiation [W/m2]
 REAL, DIMENSION(:),   INTENT(IN)    :: PSCA_SW       ! solar diffuse incoming radiation [W/m2]
@@ -385,9 +386,9 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1    ! Snow grain parameter 1
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN2    ! Snow grain parameter 2 
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHIST     ! Snow grain historical parameter
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE      ! Snow grain age
-REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR    ! NOTE : methamorphism is only activated if the flag
+!                                                    ! NOTE : methamorphism is only activated if the flag
 !                                                    ! OSNOW_METAMO=TRUE
-!
+REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR  ! Snow impurities content
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PTG           ! Soil layer average temperature (K)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PTV           ! Canopy vegetation temperature (K)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PTL           ! Litter temperature (K)
@@ -1038,7 +1039,7 @@ ELSE IF (MAXVAL(PGMES) /= XUNDEF .OR. MINVAL(PGMES) /= XUNDEF) THEN
                   ! so no need for LE correction (only required for composite ISBA)
    CALL COTWORES(PTSTEP, HPHOTO, OTR_ML, OSHADE,                            &
         PVEGTYPE, OSTRESSDEF, PAH, PBH, PF2I, PDMAX,                        &
-        PPOI, PCSP, PTV, PF2, PSW_RAD, PRESA, PQC, ZQSAT, PLE, ZWORK,            &
+        PPOI, PCSP, PTV, PF2, PSW_RAD, PRESA, PQC, ZQSAT, ZWORK,            &
         PPALPHAN, ZDELTA, PLAI, PRHOA, PZENITH, PFZERO, PEPSO,              &
         PGAMM, PQDGAMM, PGMES, PGC, PQDGMES, PT1GMES, PT2GMES,              &
         PAMAX, PQDAMAX, PT1AMAX, PT2AMAX, ZFFV,                             &
@@ -1319,8 +1320,8 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE,PSNOWIMPUR,                      &
            ZTGL, PCG, ZCTSFC, ZSOILHCAPZ, ZSOILCONDZ(:,1),                             &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, ZRRSFC, PSR_GN,              &
-           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR,                          &
-           PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, ZALBG, ZD_G, ZDZG,            &
+           PRHOA, ZUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR, PLVTT, PLSTT,            &
+           ZZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, ZALBG, ZD_G, ZDZG,            &
            PPEW_A_COEF, PPEW_B_COEF,                                                   &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
            PSNOW_THRUFAL, PGRNDFLUX, PFLSN_COR, PRESTOREN, PEVAPCOR,                   &
@@ -1329,7 +1330,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNDRIFT, PUSTARSNOW,                                                       & 
            PPSN, PSRSFC, PRRSFC, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC,                  &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,                   &
-           PSNOWHMASS, PRISNOW, PZENITH,PAZIM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
+           PSNOWHMASS, PRISNOW, PZENITH, PANGL_ILLUM, PDELHEATG, PDELHEATG_SFC, PLAT, PLON, PQSNOW, &
            HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,                            &
            HSNOWMETAMO, HSNOWRAD,OATMORAD, OSNOWSYTRON,                                         &
            HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, KTAB_SYT,PSYTMASS,   &
@@ -1822,7 +1823,8 @@ USE MODD_SNOW_METAMO,    ONLY : XSNOWDZMIN
 !
 USE MODE_SNOW3L,         ONLY : SNOW3LALB, SNOW3LDOPT 
 USE MODE_TARTES,         ONLY : SNOWCRO_TARTES
-USE MODD_CONST_TARTES, ONLY: NPNIMP, XPSNOWG0, XPSNOWY0, XPSNOWW0, XPSNOWB0
+USE MODD_CONST_TARTES,   ONLY :  XPSNOWG0, XPSNOWY0, XPSNOWW0, XPSNOWB0
+USE MODD_CONST_ATM,      ONLY : JPNBANDS_ATM  !BC
 !
 IMPLICIT NONE
 !
@@ -1834,7 +1836,7 @@ REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWRHO      ! Snow layer average densit
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ       ! Snow layer thickness (m)
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN2
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWIMPUR
+REAL, DIMENSION(:,:,:), INTENT(IN)    :: PSNOWIMPUR
 REAL, DIMENSION(:),   INTENT(IN)    :: PZENITH       ! Zenith angle (rad)
 REAL, DIMENSION(:),   INTENT(IN)    :: PSOILALB
 REAL, DIMENSION(:),   INTENT(IN)    :: PPSN          ! snow fraction (-)
@@ -1844,6 +1846,7 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PSW_RAD
 CHARACTER(3),         INTENT(IN)    :: HSNOWMETAMO
 CHARACTER(3),         INTENT(IN)    :: HSNOWRAD
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
+
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBFIR   ! Snow FIR (UV) albedo
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PTAU_N        ! SW absorption (coef) in uppermost snow layer (-)
@@ -1868,11 +1871,12 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWG0 ! asymmetry parame
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWY0 ! Value of y of snow grains at nr=1.3 (no unit
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWW0 ! Value of W of snow grains at nr=1.3 (no unit)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWB0 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths 
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),1) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),1) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
+REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZRADSINK
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZRADXS,ZZENITH,ZSW_RAD,ZSNOWALB
 !
+REAL, DIMENSION(SIZE(PSNOWRHO,1),JPNBANDS_ATM)  :: ZSPEC_DIR, ZSPEC_DIF,ZSNOWALB_SP ! BC : new output par. from SNOWCRO_TARTES ! BC : new output par. from SNOWCRO_TARTES
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -1915,14 +1919,17 @@ IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOW
 
   ! Partie codée à l'arrache pour faire du ESCROC-MEB sur les sites forêts de ESM-SnowMIP
   ! A vérifier...
-
+  ! BC : actualisation du code lors du merge avec Tuzet
 
   ZSNOWG0 = XPSNOWG0
   ZSNOWY0 = XPSNOWY0
   ZSNOWW0 = XPSNOWW0  
   ZSNOWB0 = XPSNOWB0
-  ZSNOWIMP_DENSITY(:,:,1)= 1500.
-  ZSNOWIMP_CONTENT(:,:,1)= PSNOWIMPUR(:,:)
+  ZSNOWIMP_DENSITY(:,:,1) = 1270.                         !
+  ZSNOWIMP_DENSITY(:,:,2) = 2600.						  !BC actualized this portion of code duplicating Tuzet's values of impuritiens 
+  ZSNOWIMP_CONTENT(:,:,:)= PSNOWIMPUR(:,:,:)             !that arer intilialized quite roughly in snowcro.F90. this might be done insied
+! now as an output  									  ! an appropriate parameter-definition file
+
 
     DO JI = 1,INI
         ! To not compute anything in Tartes if there is no snow, we tell Tartes that we are overnight.
@@ -1939,8 +1946,9 @@ IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOW
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,&
                         ZSNOWG0,ZSNOWY0,ZSNOWW0,ZSNOWB0,&
                         ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,&
-                        PSOILALB,ZSW_RAD,ZZENITH, INLVLS_USE,ZSNOWALB,&
-                        ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO,PSNOWALBVIS)
+                        PSOILALB,ZSW_RAD,ZZENITH, PANGL_ILLUM, PDIRCOSZW, INLVLS_USE,ZSNOWALB,& !BC
+                        ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO, P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, &
+			ZSPEC_DIR, ZSPEC_DIF, OATMORAD, PSNOWALBVIS) ! BC be careful SNOWCRO_TARTES call was changed during merge with tuzet
 
                         
     ! We diagnose NIR albedo such that total albedo is conserved
@@ -2666,6 +2674,7 @@ REAL,   DIMENSION(:,:), INTENT(OUT)   :: PWFCL
 REAL,   DIMENSION(:),   INTENT(OUT)   :: PWSFC
 REAL,   DIMENSION(:),   INTENT(OUT)   :: PWISFC
 REAL,   DIMENSION(:),   INTENT(OUT)   :: PCTSFC
+REAL,   DIMENSION(:),   INTENT(OUT)   :: PFROZEN1SFC
 !
 !*      0.2    declarations of local variables
 !
