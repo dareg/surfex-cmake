@@ -658,7 +658,7 @@ ENDIF
  CALL SNOWNLFALL_UPGRID(TPTIME, OGLACIER,                                       &
                         PTSTEP,PSR,PTA,PVMOD,ZSNOWBIS,PSNOWRHO,PSNOWDZ,         &
                         PSNOWHEAT,PSNOWHMASS,PSNOWALB,PPERMSNOWFRAC,            &
-                        PSNOWGRAN1,PSNOWGRAN2,GSNOWFALL,ZSNOWDZN,               &
+                        PSNOWGRAN1,PSNOWGRAN2,PSNOWAGE,GSNOWFALL,ZSNOWDZN,      &
                         ZSNOWRHOF,ZSNOWDZF,ZSNOWGRAN1F,ZSNOWGRAN2F, ZSNOWHISTF, &
                         ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,HSNOWDRIFT,PZ0EFF,ZUREF,&
                         PBLOWSNW,HSNOWMETAMO, HSNOWFALL, PQA, PSNOWTEMP)
@@ -4168,7 +4168,7 @@ END SUBROUTINE SNOWCROEVAPGONE
 SUBROUTINE SNOWNLFALL_UPGRID(TPTIME, OGLACIER,PTSTEP,PSR,PTA,PVMOD,        &
                              PSNOW,PSNOWRHO,PSNOWDZ,PSNOWHEAT,PSNOWHMASS,  &
                              PSNOWALB,PPERMSNOWFRAC,PSNOWGRAN1,PSNOWGRAN2, &
-                             GSNOWFALL,PSNOWDZN,PSNOWRHOF,PSNOWDZF,        &
+                             PSNOWAGE,GSNOWFALL,PSNOWDZN,PSNOWRHOF,PSNOWDZF,        &
                              PSNOWGRAN1F,PSNOWGRAN2F,PSNOWHISTF,PSNOWAGEF, PSNOWIMPURF,&
                              OMODIF_GRID,KNLVLS_USE,HSNOWDRIFT,PZ0EFF,PUREF,&
                              PBLOWSNW,HSNOWMETAMO, HSNOWFALL,PQA, PSNOWTEMP)
@@ -4241,7 +4241,7 @@ REAL, DIMENSION(:,:), INTENT(IN)     :: PSNOWTEMP
 REAL, DIMENSION(:), INTENT(IN)        :: PQA
 !
 !
-REAL, DIMENSION(:,:), INTENT(IN)     :: PSNOWGRAN1, PSNOWGRAN2
+REAL, DIMENSION(:,:), INTENT(IN)     :: PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE
 !
 REAL, DIMENSION(:,:), INTENT(IN)     :: PBLOWSNW
 !
@@ -4719,18 +4719,20 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
     OMODIF_GRID(JJ) = .TRUE.
     ZDIFTYPE_SUP = SNOW3LDIFTYP( PSNOWGRAN1(JJ,1),PSNOWGRAN1F(JJ), &
                                  PSNOWGRAN2(JJ,1),PSNOWGRAN2F(JJ),HSNOWMETAMO, &
-                                 PSNOWRHO(JJ,1),PSNOWRHOF(JJ)) 
+                                 PSNOWRHO(JJ,1),PSNOWRHOF(JJ),&
+                                 PSNOWAGE(JJ,1),PSNOWAGEF(JJ)) 
     !
     IF ( ( ZDIFTYPE_SUP<XDIFF_1        .AND. PSNOWDZ(JJ,1)<   ZDZOPT(JJ,1) ) .OR. &
          ( (PSR(JJ)+PBLOWSNW(JJ,1)) <XSNOWFALL_THRESHOLD .AND. PSNOWDZ(JJ,1)<2.*ZDZOPT(JJ,1) ) .OR. &
-                                             PSNOWDZ(JJ,1)<XDZMIN_TOP_EXTREM ) THEN
+         ((PSNOWDZ(JJ,1)<XDZMIN_TOP_EXTREM) .AND. (PSNOWRHO(JJ,1)<XRHOTHRESHOLD_ICE))) THEN
       !
       ! Fresh snow is similar to a shallow surface layer (< ZDZOPT)
       ! or snowfall is very low and the surface layer not too deep (< 2*ZDZOPT) [NEW CONDITION 11/2012]
-      ! or the surface layer is extremely thin (< XDZMIN_TOP_EXTREM) [NEW CONDITION 11/2012]
+      ! or the surface layer is extremely thin (< XDZMIN_TOP_EXTREM) [NEW CONDITION 11/2012] and surface is not ice [NEW CONDITION 12/2017]
       ! The two new conditions are necessary for forcings with very low precipitation
       ! (e.g. ERA interim reanalyses, or climate models)
       ! ==> fresh snow is agregated to the surface layer
+      !
       PSNOWDZN(JJ,1) = PSNOWDZ(JJ,1) + PSNOWDZF(JJ)
       DO JST = KNLVLS_USE(JJ),2,-1
         PSNOWDZN(JJ,JST) = PSNOWDZ(JJ,JST)
@@ -4742,9 +4744,12 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
       ! and there is room for extra layers ==> we create a new layer
       KNLVLS_USE(JJ)=KNLVLS_USE(JJ)+1
       !
-      IF ( PSNOWDZF(JJ)>XRATIO_NEWLAYER*PSNOWDZ(JJ,2) ) THEN
+      IF ( PSNOWDZF(JJ)>XRATIO_NEWLAYER*PSNOWDZ(JJ,2) .OR. & 
+           PSNOWRHO(JJ,1)>=XRHOTHRESHOLD_ICE .OR.  PSNOWRHOF(JJ)>=XRHOTHRESHOLD_ICE ) THEN
         !       
         ! Snowfall is sufficient to create a new layer not lower than 1/10 of the second layer
+        ! or snowfall directly over ice
+        ! or freezing rain 
         PSNOWDZN(JJ,1) = PSNOWDZF(JJ)
         DO JST = KNLVLS_USE(JJ),2,-1
           PSNOWDZN(JJ, JST) = PSNOWDZ(JJ,JST-1)
@@ -4778,7 +4783,8 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
                                           PSNOWDZ(JJ,JST-1)/ZDZOPT(JJ,JST-1) )
           ZDIFTYPE_SUP  = SNOW3LDIFTYP( PSNOWGRAN1(JJ,JST-1),PSNOWGRAN1(JJ,JST), &
                                         PSNOWGRAN2(JJ,JST-1),PSNOWGRAN2(JJ,JST), &
-                                        HSNOWMETAMO, PSNOWRHO(JJ,JST-1), PSNOWRHO(JJ,JST))
+                                        HSNOWMETAMO, PSNOWRHO(JJ,JST-1), PSNOWRHO(JJ,JST),&
+                                        PSNOWAGE(JJ,JST-1),PSNOWAGE(JJ,JST))
           !
           IF ( ZDIFTYPE_SUP+ZCRITSIZE_SUP<ZPENALTY ) THEN
             ZPENALTY = ZDIFTYPE_SUP + ZCRITSIZE_SUP
@@ -4796,13 +4802,15 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
           IF ( JST==1 ) THEN
             ZDIFTYPE_INF  = SNOW3LDIFTYP( PSNOWGRAN1(JJ,1),PSNOWGRAN1F(JJ), &
                                           PSNOWGRAN2(JJ,1),PSNOWGRAN2F(JJ), &
-                                          HSNOWMETAMO, PSNOWRHO(JJ,1), PSNOWRHOF(JJ))
+                                          HSNOWMETAMO, PSNOWRHO(JJ,1), PSNOWRHOF(JJ),&
+                                          PSNOWAGE(JJ,1),PSNOWAGEF(JJ))
             !
             ZPENALTY = ZDIFTYPE_INF + ZCRITSIZE_INF
           ELSE
             ZDIFTYPE_INF  = SNOW3LDIFTYP( PSNOWGRAN1(JJ,JST+1),PSNOWGRAN1(JJ,JST), &
                                           PSNOWGRAN2(JJ,JST+1),PSNOWGRAN2(JJ,JST), &
-                                          HSNOWMETAMO, PSNOWRHO(JJ,JST+1), PSNOWRHO(JJ,JST))
+                                          HSNOWMETAMO, PSNOWRHO(JJ,JST+1), PSNOWRHO(JJ,JST),&
+                                          PSNOWAGE(JJ,JST+1),PSNOWAGE(JJ,JST))
             !
             IF ( ZDIFTYPE_INF+ZCRITSIZE_INF<ZPENALTY ) THEN
               ZPENALTY = ZDIFTYPE_INF + ZCRITSIZE_INF
@@ -4814,7 +4822,6 @@ DO JJ=1,SIZE(PSNOW(:)) ! grid point loop
         ENDIF
         !
       ENDDO
-      !
       ! agregation of the similar layers and shift of upper layers
       PSNOWDZN(JJ,JJ_A_AGREG_INF) = PSNOWDZ(JJ,JJ_A_AGREG_INF) + PSNOWDZ(JJ,JJ_A_AGREG_SUP) 
       DO JST = JJ_A_AGREG_SUP,2,-1
@@ -4866,7 +4873,7 @@ ENDIF  ! end specific case INLSVSMIN = INLVLSMAX
 DO JJ=1,SIZE(PSNOW(:))
   !
   ! check if surface layer depth is too small
-  ! in such a case agregation with layer beneath
+  ! in such a case agregation with layer beneath unless it is a single snow layer on an ice layer
   ! in case of reaching INLVLSMIN, looks for an other layer to be splitted
   IF( .NOT.GSNOWFALL(JJ) .AND. PSNOW(JJ)>XSNOWCRITD .AND. &
       .NOT.OMODIF_GRID(JJ) .AND. PSNOWDZ(JJ,1)<XDZMIN_TOP_BIS ) THEN ! case shallow surface layer 
@@ -4874,11 +4881,14 @@ DO JJ=1,SIZE(PSNOW(:))
     OMODIF_GRID(JJ) = .TRUE.
     !
     IF( KNLVLS_USE(JJ)>INLVLSMIN ) THEN ! case minimum not reached
-      KNLVLS_USE(JJ) = KNLVLS_USE(JJ) - 1
-      PSNOWDZN(JJ,1) = PSNOWDZ(JJ,1) + PSNOWDZ(JJ,2)
-      DO JST = 2,KNLVLS_USE(JJ)
-        PSNOWDZN(JJ,JST) = PSNOWDZ(JJ,JST+1)
-      ENDDO
+      IF (.NOT.((PSNOWRHO(JJ,1)<XRHOTHRESHOLD_ICE).AND.(PSNOWRHO(JJ,2)>=XRHOTHRESHOLD_ICE))) THEN
+        ! if it is not a single snow layer on an ice layer
+        KNLVLS_USE(JJ) = KNLVLS_USE(JJ) - 1
+        PSNOWDZN(JJ,1) = PSNOWDZ(JJ,1) + PSNOWDZ(JJ,2)
+        DO JST = 2,KNLVLS_USE(JJ)
+          PSNOWDZN(JJ,JST) = PSNOWDZ(JJ,JST+1)
+        ENDDO
+      ENDIF
     ELSE ! case minimum reached
       CALL GET_SNOWDZN_DEB(KNLVLS_USE(JJ),PSNOWDZ(JJ,:),ZDZOPT(JJ,:),PSNOWDZN(JJ,:))
     ENDIF ! end case minimum reached end case shallow surface layer
@@ -4968,13 +4978,16 @@ DO JJ = 1,SIZE(PSNOW(:))
         !
         ZDIFTYPE_INF = SNOW3LDIFTYP( PSNOWGRAN1(JJ,JST+1),PSNOWGRAN1(JJ, JST), &
                                      PSNOWGRAN2(JJ,JST+1),PSNOWGRAN2(JJ, JST), &
-                                     HSNOWMETAMO, PSNOWRHO(JJ,JST+1), PSNOWRHO(JJ, JST)) 
+                                     HSNOWMETAMO, PSNOWRHO(JJ,JST+1), PSNOWRHO(JJ, JST),&
+                                     PSNOWAGE(JJ,JST+1),PSNOWAGE(JJ,JST)) 
         ZDIFTYPE_INF = MAX( XDIFF_1, MIN( XDIFF_MAX, ZDIFTYPE_INF ) )
         !
         IF( PSNOWDZ(JJ,JST) < ZDZOPT(JJ,JST) * XAGREG_COEF_1 / ZDIFTYPE_INF .AND. &
             PSNOWDZ(JJ,JST) + PSNOWDZ(JJ,JST+1) < &
                 XAGREG_COEF_2 * MAX( ZDZOPT(JJ,JST),ZDZOPT(JJ,JST+1) ) ) THEN
           !
+        IF ((PSNOWRHO(JJ,JST+1)>=XRHOTHRESHOLD_ICE).AND.(PSNOWRHO(JJ,JST)<XRHOTHRESHOLD_ICE)) CYCLE ! never mix snow and ice
+
           PSNOWDZN(JJ,JST) = PSNOWDZ(JJ,JST) + PSNOWDZ(JJ,JST+1)
           ZDZOPT  (JJ,JST) = ZDZOPT(JJ,JST+1)
           DO JST_1 = JST+1,KNLVLS_USE(JJ)-1
@@ -5019,6 +5032,8 @@ DO JJ = 1,SIZE(PSNOW(:))
       IF ( ABS( PSNOWDZN(JJ,JST) - PSNOWDZ(JJ,JST) ) > XUEPSI ) EXIT ! old/new grid differ ==> go to next grid point
       !
       IF ( PSNOWDZN(JJ,JST)> 0.001 ) CYCLE
+      !
+      IF (PSNOWRHO(JJ,JST)>=XRHOTHRESHOLD_ICE .AND. (PSNOWRHO(JJ,JST-1)<XRHOTHRESHOLD_ICE)) CYCLE ! never mix snow and ice
       !
       ! If an internal layer is too shallow, it is merged with the upper layer              
       PSNOWDZN(JJ,JST-1) = PSNOWDZN(JJ,JST) + PSNOWDZN(JJ,JST-1)
