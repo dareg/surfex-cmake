@@ -239,5 +239,7 @@ REAL, DIMENSION(NPNBANDS_SKILLES), SAVE:: XPDUSTMULLER_I= &
        0.0025,0.0021,0.002,0.0018,0.0017,0.0016,0.0016,&
        0.0016,0.0015,0.0015,0.0015,0.0014,0.0014,0.0014/)
 
+!!BC : properly setting setting soot and BC densities 
+REAL,DIMENSION(2), PARAMETER :: XSNOWIMP_DENSITY = (/1270.,2600./)!Soot density according to Flanner et.al 2012 (set to 1500 for the paper) and !Dust Density (hess1995)
 
 END MODULE MODD_CONST_TARTES

@@ -1871,7 +1871,7 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWG0 ! asymmetry parame
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWY0 ! Value of y of snow grains at nr=1.3 (no unit
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWW0 ! Value of W of snow grains at nr=1.3 (no unit)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWB0 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths 
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
+!REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZRADSINK
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZRADXS,ZZENITH,ZSW_RAD,ZSNOWALB
@@ -1925,8 +1925,8 @@ IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOW
   ZSNOWY0 = XPSNOWY0
   ZSNOWW0 = XPSNOWW0  
   ZSNOWB0 = XPSNOWB0
-  ZSNOWIMP_DENSITY(:,:,1) = 1270.                         !
-  ZSNOWIMP_DENSITY(:,:,2) = 2600.						  !BC actualized this portion of code duplicating Tuzet's values of impuritiens 
+  !ZSNOWIMP_DENSITY(:,:,1) = 1270.                         !
+  !ZSNOWIMP_DENSITY(:,:,2) = 2600.						  !BC actualized this portion of code duplicating Tuzet's values of impuritiens 
   ZSNOWIMP_CONTENT(:,:,:)= PSNOWIMPUR(:,:,:)             !that arer intilialized quite roughly in snowcro.F90. this might be done insied
 ! now as an output  									  ! an appropriate parameter-definition file
 
@@ -1945,7 +1945,7 @@ IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOW
     ZSNOWALB=PSNOWALB
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,&
                         ZSNOWG0,ZSNOWY0,ZSNOWW0,ZSNOWB0,&
-                        ZSNOWIMP_DENSITY,ZSNOWIMP_CONTENT,&
+                        ZSNOWIMP_CONTENT,&
                         PSOILALB,ZSW_RAD,ZZENITH, PANGL_ILLUM, PDIRCOSZW, INLVLS_USE,ZSNOWALB,& !BC
                         ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO, P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, &
 			ZSPEC_DIR, ZSPEC_DIF, OATMORAD, PSNOWALBVIS) ! BC be careful SNOWCRO_TARTES call was changed during merge with tuzet

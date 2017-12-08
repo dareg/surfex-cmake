@@ -1376,7 +1376,7 @@ END SUBROUTINE SPECTRAL_REPARTITION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
-                          PSNOWIMP_DENSITY,PSNOWIMP_CONTENT,PALB,PSW_RAD,PZENITH,PANGL_ILLUM,PDIRCOSZW,KNLVLS_USE,      &
+                          PSNOWIMP_CONTENT, PALB,PSW_RAD,PZENITH,PANGL_ILLUM,PDIRCOSZW,KNLVLS_USE,      &
                           PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW, PSNOWALB_SP,&
                           PSPEC_DIR, PSPEC_DIF,OATMORAD,PSNOWALB_FB)
 
@@ -1385,7 +1385,7 @@ SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0
 !
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_SNOW_METAMO,  ONLY : XUEPSI
-USE MODD_CONST_TARTES,   ONLY : XIMPUR_ICE
+USE MODD_CONST_TARTES,   ONLY : XIMPUR_ICE, XSNOWIMP_DENSITY
 !
 IMPLICIT NONE
 !
@@ -1396,7 +1396,7 @@ REAL, DIMENSION(:,:), INTENT(IN)   :: PSNOWY0 ! Value of y of snow grains at nr=
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSNOWW0 ! Value of W of snow grains at nr=1.3 (no unit)
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSNOWB0 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths (no unit)
 REAL, DIMENSION(:,:), INTENT(IN)   :: PSNOWDZ !snow layers thickness (m) (npoints,nlayer)
-REAL, DIMENSION(:,:,:), INTENT(IN) :: PSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
+!REAL, DIMENSION(:,:,:), INTENT(IN) :: PSNOWIMP_DENSITY !impurities density (kg/m^3) !BC (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(:,:,:), INTENT(IN) :: PSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
 !
 REAL, DIMENSION(:), INTENT(IN)     :: PALB ! soil/vegetation albedo (npoints)
@@ -1550,7 +1550,7 @@ IF ( IPOINTDAY>=1 ) THEN
         !
         JJ = IDAYMASK(JJ_P)
         !
-        ZSNOWIMP_DENSITY_P(JJ_P,JL,JIMP) = PSNOWIMP_DENSITY(JJ,JL,JIMP)
+        ZSNOWIMP_DENSITY_P(JJ_P,JL,JIMP) = XSNOWIMP_DENSITY(JIMP)
         IF (PSNOWRHO  (JJ,JL) <850.) THEN      !Test to check if the layer considered is snow or ice  
           ZSNOWIMP_CONTENT_P(JJ_P,JL,JIMP) = PSNOWIMP_CONTENT(JJ,JL,JIMP)
         ELSE                                   ! If the layer is ice, set the BC content to the value prescribed in modd_const_tartes to reproduce ice albedo
