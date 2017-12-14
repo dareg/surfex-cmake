@@ -1977,11 +1977,13 @@ END DO
 ! Source term
 PRADSINK(:,1) = -PSW_RAD(:) + ZREFLECTED_BB(:) + ZSNOWENERGY_BB(:,1)
 !  
+DO JJ=1, SIZE(PSNOWRHO,1)! BC bug from tuzet commit @31211352 ? (omitted JJ loop ?)
 DO JL = 2,SIZE(PSNOWRHO,2)
     IF ( JL<=KNLVLS_USE(JJ) ) THEN  
       PRADSINK(:,JL) = PRADSINK(:,JL-1) + ZSNOWENERGY_BB(:,JL)
     END IF
 END DO
+END DO !BC
 !
 !Excess energy
 PRADXS = PSW_RAD - ZTOTSNOWENERGY - ZREFLECTED_BB
