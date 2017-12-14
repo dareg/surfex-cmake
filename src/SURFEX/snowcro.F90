@@ -908,8 +908,7 @@ ENDIF
 ! Heat source (-sink) term due to shortwave
 ! radiation transmission within the snowpack:
 !
-! PSPEC_ALB=0.
-! PDIFF_RATIO=0.
+
 
 SELECT CASE (HSNOWRAD)
   CASE ("TA1")

@@ -439,6 +439,11 @@ IF (SIZE(PSNOWDEND)>1) THEN
   PSNOWIMP_CONC(:,:,:)=XUNDEF
 ENDIF
 
+IF (SIZE(PDIFF_RATIO)>1) THEN !BC bugfix from tuzet
+	PSPEC_ALB(:,:) = XUNDEF
+	PDIFF_RATIO(:,:) = XUNDEF
+ENDIF
+
 PFLSN_COR(:)   = 0.0
 PTHRUFAL(:)    = 0.0
 PEVAPCOR(:)    = 0.0
@@ -935,7 +940,24 @@ IF (HSNOW_ISBA=='CRO') THEN
          ZP_SNOWHIST (JJ,JWRK) = PSNOWHIST  (JI,JWRK)
       ENDDO
    ENDDO
-
+   
+   DO JIMP=1,NIMPUR !BC merge oubli from tuzet
+     DO JWRK=1,KSIZE2
+        DO JJ=1,KSIZE1
+           JI = KMASK(JJ)
+           ZP_SNOWIMPUR(JJ,JWRK,JIMP) =PSNOWIMPUR(JI,JWRK,JIMP)  !N6K
+        ENDDO
+     ENDDO
+   ENDDO
+   
+   DO JIMP=1,NIMPUR
+     DO JJ=1,KSIZE1
+       JI = KMASK(JJ)
+       ZP_IMPWET(JJ,JIMP)=PIMPWET(JI,JIMP)
+       ZP_IMPDRY(JJ,JIMP)=PIMPDRY(JI,JIMP)
+     ENDDO
+   ENDDO !end BC merge oubli
+   
    DO JWRK=1,KSIZE4
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
@@ -1321,15 +1343,16 @@ IF (HSNOW_ISBA=='CRO') THEN
       ENDDO
     ENDDO
   ENDDO      
-  
-DO JWRK=1,SIZE(P_DIR_SW,2)
-  DO JJ=1,KSIZE1
-    JI = KMASK(JJ)
-      PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
-      PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
-  ENDDO
-ENDDO
-
+  ! BC bugfix from Tuzet for HSNOWRAD~= TARTES
+  IF (SIZE(PDIFF_RATIO)>1) THEN
+    DO JWRK=1,SIZE(P_DIR_SW,2)
+      DO JJ=1,KSIZE1
+        JI = KMASK(JJ)
+          PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
+          PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
+      ENDDO
+    ENDDO
+  ENDIF
   IF (SIZE(PSNOWDEND)>1) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
     DO JWRK=1,KSIZE2
