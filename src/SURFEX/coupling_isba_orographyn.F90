@@ -309,18 +309,17 @@ ELSE
 !
    Z3D_TOT_SURF(:) = SQRT(1.+IM%I%XSSO_SLOPE(:)**2)
    Z3D_TOT_SURF_INV(:) = 1./Z3D_TOT_SURF(:)
-   ZSKYVF          (:) =  (1+Z3D_TOT_SURF_INV(:))/2  ! (1+cos(theta))/2 ,Dumont et al. 2017
 !
 !  number of spectral shortwave bands
 !
    ISWB = SIZE(PSW_BANDS)
 !
    DO JSWB=1,ISWB
-!     correcting for the slope angle (scaterred SW flux), multiplying by cos(theta) in the standard version and (1+cos(theta))/2 
+!     correcting for the slope angle (scaterred SW flux)
 !
-      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
+      ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
 
-!     the inverse operation is done in snow_meteo or surf_solar_slope so it is neutral.
+!     correcting for the slope angle (scaterred SW flux)
 !
       ZDIR_SW(:,JSWB) =  PDIR_SW(:,JSWB) * Z3D_TOT_SURF_INV(:)
    END DO
@@ -330,8 +329,8 @@ ELSE
 !
 !  incoming LW radiation per m2 of actual surface
 !
-   ZLW(:) =  ZLW(:)                                  *     ZSKYVF(:) &            ! PArt of the longwave coming from the sky 
-          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-ZSKYVF(:))     ! PArt of the longwave coming from the ground
+   ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
+          + XSTEFAN*IM%I%XEMIS_NAT(:)*IM%I%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !  liquid precipitation per m2 of actual surface
 !
