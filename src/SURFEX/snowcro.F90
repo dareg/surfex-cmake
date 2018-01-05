@@ -551,14 +551,16 @@ IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA
   ZSNOWB0 = XPSNOWB0
   !BC : commented this block and put impurities definition inside modd_snow_par
   ! If Impurity are used, initialize Impurity Density according to Impurity Type
-  !IF (NIMPUR>0) THEN
+  IF (NIMPUR>0) THEN
+    DO JIMP=1,NIMPUR 
+     ZSNOWIMP_CONTENT(:,:,JIMP) = 0.
+    ENDDO
   !  ZSNOWIMP_DENSITY(:,:,1) = 1270.       !Soot density according to Flanner et.al 2012 (set to 1500 for the paper)
-  !  ZSNOWIMP_CONTENT(:,:,1) = 0.
-  !  IF (NIMPUR>1) THEN
+   ! ZSNOWIMP_CONTENT(:,:,1) = 0.
+   !IF (NIMPUR>1) THEN
   !    ZSNOWIMP_DENSITY(:,:,2) = 2600.       !Dust Density (hess1995)
-  !    ZSNOWIMP_CONTENT(:,:,2) = 0.
-  !  ENDIF 
-  ! ENDIF
+   !   ZSNOWIMP_CONTENT(:,:,2) = 0.
+  ENDIF
   ! ZSNOWIMP_CONTENT=25.0E-9
   !
 END IF
