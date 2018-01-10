@@ -42,6 +42,7 @@
 !               ------------
 !
 USE MODD_WATER_PAR,  ONLY : XALBCOEF_TA96
+USE MODD_CSTS     ,  ONLY : XPI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -59,7 +60,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('ALBEDO_TA96',0,ZHOOK_HANDLE)
-PDIR_ALB(:) = XALBCOEF_TA96/(1.1*(MAX(COS(PZENITH(:)),0.))**1.4+0.15)
+PDIR_ALB(:) = XALBCOEF_TA96/(1.1*(MAX(COS(XPI/2.0 - PZENITH(:)),0.0))**1.4+0.15)
 IF (LHOOK) CALL DR_HOOK('ALBEDO_TA96',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
