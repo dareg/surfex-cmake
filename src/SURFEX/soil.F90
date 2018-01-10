@@ -60,6 +60,7 @@
 !!                     10/10     (Decharme) The previous computation of WGEQ as ( 1.-ZX(JJ)**(IP%XPCOEF(JJ)*8.) )
 !!                                          can introduced some model explosions for heavy clay soil
 !!                     12/14     (LeMoigne) EBA scheme update
+!!                     10/16   (Marguinaud) Port to single precision
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -103,8 +104,8 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFFG_NOSNOW, PFFV_NOSNOW
 REAL, DIMENSION(SIZE(PVEG))   :: ZLAMS,                         &
 !                                              conductivity of snow
 !
-                                  ZCW1MAX, ZX2, ZY1, ZY2,     &
-                                  ZLYMY1, ZZA, ZZB, ZDELTA,   &
+                                  ZCW1MAX, ZX2, ZY1, ZY2,          &
+                                  ZLYMY1, ZZA, ZZB, ZZC, ZDELTA,   &
                                   ZA, ZB,                          &
 !                                              temporary variables for the 
 !                                              calculation of DMI%XC1 in the case
@@ -421,9 +422,15 @@ ELSE
        ZLYMY1(JJ) =   LOG( ZCW1MAX(JJ)/ZY1(JJ))
        ZZA   (JJ) = - LOG( ZY2    (JJ)/ZY1(JJ))
        ZZB   (JJ) = 2. * ZX2(JJ)    * ZLYMY1(JJ)
-       ZDELTA(JJ) = 4. * (ZLYMY1(JJ)+ZZA(JJ)) * ZLYMY1(JJ) * ZX2(JJ)**2
+       ZZC   (JJ) = - ZLYMY1(JJ) * ZX2(JJ)**2
+! More precise calculation of the largest solution
+       ZDELTA(JJ) = MAX (ZZB(JJ)**2 - 4. * ZZA(JJ) * ZZC(JJ), 0.)
 !
-       ZA    (JJ) = (-ZZB(JJ)+SQRT(ZDELTA(JJ))) / (2.*ZZA(JJ))
+       IF (ZZB(JJ) > 0) THEN
+         ZA    (JJ) = - 2. * ZZC (JJ) / (ZZB (JJ) + SQRT (ZDELTA (JJ)))
+       ELSE
+         ZA    (JJ) = (-ZZB(JJ)+SQRT(ZDELTA(JJ))) / (2.*ZZA(JJ))
+       ENDIF
 !
        ZB    (JJ) = ZA(JJ)**2 / ZLYMY1(JJ)
 !

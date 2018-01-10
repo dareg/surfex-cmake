@@ -346,8 +346,8 @@ DO JJ=1,SIZE(T%XROAD)
 !             -----------------------------------
 !
   IF (.NOT. TOP%LCANOPY) THEN
-    ZINTER = PAC_RD(JJ) * PDF_RD(JJ) * ZRD (JJ) +  PAC_GD(JJ) * ZGD(JJ) + PAC_WL(JJ) * PWL_O_GRND(JJ) + PAC_TOP(JJ) 
-    PT_CAN(JJ) =  (  T%XT_ROAD  (JJ,1) * PAC_RD (JJ) * PDF_RD (JJ) * ZRD(JJ)        &
+    ZINTER = ZRD (JJ) * PAC_RD(JJ) * PDF_RD(JJ) + ZGD(JJ) * PAC_GD(JJ) + PAC_WL(JJ) * PWL_O_GRND(JJ) + PAC_TOP(JJ) 
+    PT_CAN(JJ) =  ( ZRD(JJ)      * T%XT_ROAD  (JJ,1) * PAC_RD (JJ)    * PDF_RD (JJ)        &
                    + T%XT_WALL_A(JJ,1) * PAC_WL (JJ) * (1.-B%XGR(JJ)) * PWL_O_GRND(JJ) * 0.5 &
                    + T%XT_WALL_B(JJ,1) * PAC_WL (JJ) * (1.-B%XGR(JJ)) * PWL_O_GRND(JJ) * 0.5 &
                    + B%XT_WIN1    (JJ) * PAC_WL (JJ) *     B%XGR(JJ)  * PWL_O_GRND(JJ)       &
@@ -356,7 +356,7 @@ DO JJ=1,SIZE(T%XROAD)
                    + PHSN_RD(JJ) * PDN_RD(JJ)                           / PRHOA(JJ) / XCPD  ) &
                                             / ZINTER  
 !
-    PT_CAN(JJ) = PT_CAN(JJ) + ( PTSRAD_GD(JJ) * PAC_GD(JJ) * ZGD(JJ) ) / ZINTER
+    PT_CAN(JJ) = PT_CAN(JJ) + ( ZGD(JJ) * PTSRAD_GD(JJ) * PAC_GD(JJ) ) / ZINTER
     !
     IF (TOP%CBEM=="BEM") THEN
       PT_CAN(JJ) = PT_CAN(JJ) + (DMT%XH_WASTE(JJ) * B%XF_WASTE_CAN(JJ) / (1-T%XBLD(JJ)) / PRHOA(JJ) / XCPD) / ZINTER
@@ -366,9 +366,9 @@ DO JJ=1,SIZE(T%XROAD)
 !*      7.     Air canyon specific humidity
 !              ----------------------------
 !
-    ZINTER = PAC_RD_WAT(JJ) * PDF_RD(JJ) * PDELT_RD(JJ) * ZRD(JJ) + PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ) * ZGD(JJ) + PAC_TOP(JJ)
-    PQ_CAN(JJ) = (  PQSAT_RD   (JJ) * PAC_RD_WAT(JJ) * PDF_RD    (JJ) * ZRD(JJ) * PDELT_RD(JJ)    &
-                  + PQSAT_GD   (JJ) * PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ) * ZGD(JJ)                   &
+    ZINTER = ZRD(JJ) * PAC_RD_WAT(JJ) * PDF_RD(JJ) * PDELT_RD(JJ) + ZGD(JJ) * PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ) + PAC_TOP(JJ)
+    PQ_CAN(JJ) = (  ZRD        (JJ) * PQSAT_RD  (JJ) * PAC_RD_WAT(JJ) * PDF_RD    (JJ) * PDELT_RD(JJ)    &
+                  + ZGD        (JJ) * PQSAT_GD  (JJ) * PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ)                   &
                   + PQA        (JJ) * PAC_TOP(JJ)                                                 &
                   + PLE_TRAFFIC(JJ) / (1.-T%XBLD(JJ)) / PRHOA(JJ) / XLVTT                         &
                   + PLESN_RD   (JJ) * PDN_RD(JJ)      / PRHOA(JJ) / XLVTT * ZRD(JJ)  ) / ZINTER

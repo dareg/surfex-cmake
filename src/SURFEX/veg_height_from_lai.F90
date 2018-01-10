@@ -94,6 +94,7 @@ END MODULE MODI_VEG_HEIGHT_FROM_LAI
 !!    -------------
 !!      Original    25/03/99
 !!      P. Samuelsson 02/2012 MEB
+!!      P. Marguinaud (Oct 2016) : Port to single precision
 !!
 !-------------------------------------------------------------------------------
 !
@@ -599,10 +600,12 @@ IF (LHOOK) CALL DR_HOOK('MODI_VEG_HEIGHT_FROM_LAI:VEG_HEIGHT_FROM_LAI_VEGTYPE',0
 !
 PH_VEG(:) = XUNDEF
 !
-ZALLEN_H(:) = XUNDEF
-WHERE (PLAI(:)/= XUNDEF)
-  ZALLEN_H(:) = EXP((PLAI(:)-3.5)/(1.3))
-END WHERE
+IF (ANY (PLAI(:)/= XUNDEF)) THEN
+  ZALLEN_H(:) = XUNDEF
+  WHERE (PLAI(:)/= XUNDEF)
+    ZALLEN_H(:) = EXP((PLAI(:)-3.5)/(1.3))
+  END WHERE
+ENDIF
 !
 !
 IF (NVT_PARK>0) THEN
