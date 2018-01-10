@@ -84,7 +84,7 @@ END SUBROUTINE inisal
 SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia)
   USE modd_types_glt
   USE modd_glt_param
-  TYPE(t_ind), INTENT(in) ::  &
+  TYPE(t_ind), INTENT(inout) ::  &
         tpind
   TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
         tpdia
