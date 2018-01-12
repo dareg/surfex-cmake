@@ -201,6 +201,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
                 export VER_CDF=${VER_CDF:-CDFBOFX}
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
+                export BULL=YES
               ;;
 'Linux nuwa'*)      
                 export     ARCH=${ARCH:-LXifort} 
