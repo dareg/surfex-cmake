@@ -370,6 +370,7 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
                                          ! HSNOWFALL=A76 Anderson et al. 1976
                                          ! HSNOWFALL=S02 Lehning el al. 2002
                                          ! HSNOWFALL=P75 Pahaut 1975
+                                         ! HSNOWFALL=NZE Constant density 200 kg/m3 (who knows ?)                                         
                                          !---------------------
                                          ! Thermal conductivity scheme
                                          ! HSNOWCOND=Y81 default Crocus from Yen et al. 1981
@@ -2522,9 +2523,22 @@ IF ( PSNOWRHO_IN<XRHOTHRESHOLD_ICE ) THEN
                    XVALB10 * PSNOWAGE / PVAGE1 )
 ELSE
   ! Prescribed spectral albedo for surface ice
-  PALB(1) = XALBICE1
-  PALB(2) = XALBICE2
-  PALB(3) = XALBICE3
+  IF (XALBICE1>900) THEN
+    ! Specific case for Brewster glacier (year-dependence of ice albedo)
+    IF (PSNOWAGE<=1365.) THEN
+        PALB(1) = 0.60
+        PALB(2) = 0.32
+        PALB(3) = 0.03   
+    ELSE
+        PALB(1) = 0.48
+        PALB(2) = 0.26
+        PALB(3) = 0.02
+    ENDIF  
+  ELSE
+    PALB(1) = XALBICE1
+    PALB(2) = XALBICE2
+    PALB(3) = XALBICE3
+  ENDIF
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO:GET_ALB',1,ZHOOK_HANDLE)
@@ -4636,6 +4650,8 @@ DO JJ = 1,SIZE(PSNOW(:))
         PSNOWRHOF (JJ) = XRHOS_A76_1 + MAX( EXP(1.5*LOG(XRHOS_A76_2*( PTA(JJ) - XTT + XRHOS_A76_3 ))),0.  )
         !Nota Cluzet floating-point exception à cette ligne.... essai de réécriture de la puissance sous forme logarithmique. en fait, un log(<0) apparaît lorsqu'il neige pour TA<-15°C...
       ENDIF
+    ELSEIF ( HSNOWFALL == 'NZE' ) THEN
+        PSNOWRHOF (JJ) = 200.    
     END IF
     ! 
     !
