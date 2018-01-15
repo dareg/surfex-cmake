@@ -3,7 +3,6 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 SUBROUTINE OI_CONTROL (YSC, &
- & LDINLINE,                 &
  & P__SURFTEMPERATURE,       &
  & P__SURFPREC_EAU_CON,      &
  & P__SURFPREC_EAU_GEC,      &
@@ -63,14 +62,9 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODN_IO_OFFLINE, ONLY : NAM_IO_OFFLINE, CNAMELIST, CSURF_FILETYPE
 
 
-#ifdef SFX_LFI
-USE MODD_IO_SURF_LFI,ONLY : CFILEIN_LFI, CFILEOUT_LFI, CFILEPGD_LFI, CFILEIN_LFI_SAVE
-#endif
-#ifdef SFX_FA
 USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE, CDNOMC, &
                             NDGUX,  NDLUX,  PERPK,  PELON0, PELAT0, &
                             PEDELX, PEDELY, PELON1, PELAT1, PEBETA
-#endif
 #ifdef SFX_ARO
 USE MODD_IO_SURF_ARO,ONLY : NGPTOT, NGPTOT_CAP, NPROMA, NINDX1, NINDX2, NBLOCK, NKPROMA, &
                                                              YSURFEX_CACHE_OUT,          &
@@ -94,9 +88,7 @@ USE MODI_GET_1D_MASK
 USE MODI_END_IO_SURF_n
 USE MODI_IO_BUFF_CLEAN
 USE MODI_OI_BC_SOIL_MOISTURE
-USE MODI_OI_LATLON_CONF_PROJ
 USE MODI_OI_CACSTS
-USE MODI_OI_HOR_EXTRAPOL_SURF
 USE MODI_FLAG_UPDATE
 USE MODI_WRITE_SURF
 
@@ -107,7 +99,6 @@ IMPLICIT NONE
 !
 TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
-LOGICAL, INTENT (IN) :: LDINLINE
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFTEMPERATURE
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFPREC_EAU_CON
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFPREC_EAU_GEC
@@ -166,16 +157,12 @@ INTEGER                            :: IVERSION, IBUGFIX
 INTEGER                            :: JJ,J1
 CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
 CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
-INTEGER                            :: ILUOUT  ! ascii output unit number
 INTEGER                            :: INOBS   ! number of observations
 INTEGER :: ILUNAM
 LOGICAL :: GFOUND
 
 REAL                               :: PLAT0,PLON0,PRPK,PLATOR,PLONOR,DELX,DELY,PBETA,ZTHRES
 REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180
-
-LOGICAL, DIMENSION(:), ALLOCATABLE :: OINTERP_LST, OINTERP_SST
-LOGICAL, DIMENSION(:), ALLOCATABLE :: OINTERP_LST1, OINTERP_SST1
 
 INTEGER :: ISIZE_FULL
 
@@ -194,31 +181,22 @@ CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
 CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
 
-!
 CALL READ_ALL_NAMELISTS(YSC,CSURF_FILETYPE,'ALL',.FALSE.)
-!
-IF (LDINLINE) THEN
 
-  YPROGRAM = 'AROME'
+
+YPROGRAM = 'AROME'
 #ifdef SFX_ARO
-  IGPCOMP = MIN (NGPTOT, NGPTOT_CAP)
-  
-  NBLOCK   = 1
-  NINDX1   = 1 + (NBLOCK - 1) * NPROMA
-  NINDX2   = MIN (NBLOCK * NPROMA, IGPCOMP)
-  NKPROMA  = NINDX2 - NINDX1 + 1
-  YSURFEX_ARO_CUR => YSURFEX_ARO_ALL(NBLOCK)
+IGPCOMP = MIN (NGPTOT, NGPTOT_CAP)
+NBLOCK   = 1
+NINDX1   = 1 + (NBLOCK - 1) * NPROMA
+NINDX2   = MIN (NBLOCK * NPROMA, IGPCOMP)
+NKPROMA  = NINDX2 - NINDX1 + 1
+YSURFEX_ARO_CUR => YSURFEX_ARO_ALL(NBLOCK)
 #endif
-
-ELSE
-
-  YPROGRAM = 'LFI'
-  
-ENDIF
 
 ICURRENT_MODEL = 1
 
-ILUOUT = 111
+
 LLKEEPEXTZONE = .FALSE.
 
 Z1S2PI=1.0_JPRB/(2.0_JPRB*XPI)
@@ -233,15 +211,6 @@ NITRAD   = NECHGU*1800
 
 CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
 
-!   File handling definition
-
-IF (.NOT. LDINLINE) THEN
-#ifdef SFX_LFI
-  CFILEPGD_LFI = 'PGD'
-  CFILEIN_LFI = 'PREP'        ! input PREP file (surface fields) 
-  CFILEIN_LFI_SAVE = CFILEIN_LFI
-#endif
-ENDIF
 
 !   Read grid dimension for allocation
 
@@ -298,11 +267,7 @@ CALL READ_SURF(&
 CALL GET_SIZE_FULL_n(YPROGRAM,YSC%U%NDIM_FULL,YSC%U%NSIZE_FULL,ISIZE_FULL)
 YSC%U%NSIZE_FULL = ISIZE_FULL
 
-IF (LDINLINE) THEN
-  ISIZE = YSC%U%NSIZE_FULL
-ELSE
-  ISIZE = YSC%U%NDIM_FULL
-ENDIF
+ISIZE = YSC%U%NSIZE_FULL
 
 ALLOCATE (PSAB(ISIZE)) 
 ALLOCATE (PARG(ISIZE))
@@ -366,8 +331,6 @@ ALLOCATE (PEVAP(ISIZE))
 ALLOCATE (PLST(ISIZE))
 ALLOCATE (PTRD3(ISIZE))
 
-ALLOCATE (OINTERP_LST(ISIZE))
-ALLOCATE (OINTERP_SST(ISIZE))
 ALLOCATE (ZLST(ISIZE))
 ALLOCATE (ZSST(ISIZE))
 
@@ -519,121 +482,39 @@ ALLOCATE (PLSM_O(ISIZE))
 ALLOCATE (PWS_O(ISIZE))
 ALLOCATE (ZWGINC(ISIZE))
 
-IF (.NOT. LDINLINE) THEN
-
-!  Read atmospheric forecast fields from FA files 
-#ifdef SFX_FA
-  CFILEIN_FA = 'FG_OI_MAIN'        ! input forecast
-  CFILEIN_FA_SAVE  = CFILEIN_FA
-#endif
-!  Open FA file (LAM version with extension zone)
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                     YPROGRAM2,'EXTZON','SURF  ','READ ')
-ENDIF
 
 !  Read model forecast quantities
 
 IF (LAROME) THEN
-  IF (LDINLINE) THEN
-    PRRSL(:) = P__SURFACCPLUIE   (1:ISIZE)
-    PRRSN(:) = P__SURFACCNEIGE   (1:ISIZE)
-    PRRCN(:) = P__SURFACCGRAUPEL (1:ISIZE)
-  ELSE
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFACCPLUIE',    PRRSL  ,IRESP)
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFACCNEIGE',    PRRSN  ,IRESP)
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFACCGRAUPEL',  PRRCN  ,IRESP)
-  ENDIF
+  PRRSL(:) = P__SURFACCPLUIE   (1:ISIZE)
+  PRRSN(:) = P__SURFACCNEIGE   (1:ISIZE)
+  PRRCN(:) = P__SURFACCGRAUPEL (1:ISIZE)
   PRRCL(:) = 0.0
 !   CALL READ_SURF(YPROGRAM2,'SURFIND.VEG.DOMI',PIVEG  ,IRESP) 
   PIVEG(:) = 0.0
 ELSE
-  IF (LDINLINE) THEN
-    PRRCL(:) = P__SURFPREC_EAU_CON (1:ISIZE)
-    PRRSL(:) = P__SURFPREC_EAU_GEC (1:ISIZE)
-    PRRCN(:) = P__SURFPREC_NEI_CON (1:ISIZE)
-    PRRSN(:) = P__SURFPREC_NEI_GEC (1:ISIZE)
-  ELSE
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFPREC.EAU.CON',PRRCL  ,IRESP)
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFPREC.EAU.GEC',PRRSL  ,IRESP)
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFPREC.NEI.CON',PRRCN  ,IRESP)
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFPREC.NEI.GEC',PRRSN  ,IRESP)
-  ENDIF
+  PRRCL(:) = P__SURFPREC_EAU_CON (1:ISIZE)
+  PRRSL(:) = P__SURFPREC_EAU_GEC (1:ISIZE)
+  PRRCN(:) = P__SURFPREC_NEI_CON (1:ISIZE)
+  PRRSN(:) = P__SURFPREC_NEI_GEC (1:ISIZE)
   PIVEG(:) = 0.0
 ENDIF
-IF (LDINLINE) THEN
   PATMNEB(:) = P__ATMONEBUL_BASSE  (1:ISIZE)
   PITM(:)    = P__SURFIND_TERREMER (1:ISIZE)
   PEVAP(:)   = P__SURFFLU_LAT_MEVA (1:ISIZE)
-ELSE
-  CALL READ_SURF(&
-               YPROGRAM2,'ATMONEBUL.BASSE ',PATMNEB,IRESP)
-  CALL READ_SURF(&
-               YPROGRAM2,'SURFIND.TERREMER',PITM   ,IRESP) 
-  CALL READ_SURF(&
-               YPROGRAM2,'SURFFLU.LAT.MEVA',PEVAP  ,IRESP) ! accumulated fluxes (not available in LFI)
-ENDIF
 IF (.NOT.LALADSURF) THEN
-  IF (LDINLINE) THEN
-    PEVAPTR(:) = P__SURFXEVAPOTRANSP (1:ISIZE)
-  ELSE
-    CALL READ_SURF(&
-               YPROGRAM2,'SURFXEVAPOTRANSP',PEVAPTR,IRESP) ! not in ALADIN SURFEX
-  ENDIF
+   PEVAPTR(:) = P__SURFXEVAPOTRANSP (1:ISIZE)
 ELSE
   PEVAPTR(:) = 0.0
 ENDIF
 
-IF (.NOT. LDINLINE) THEN
-!  Close FA file
-  CALL END_IO_SURF_n(YPROGRAM2)
-  CALL IO_BUFF_CLEAN
-  PRINT *,'READ FG_OI_MAIN OK'
-ENDIF
 
-IF (.NOT. LDINLINE) THEN
-!  Define FA file name for CANARI analysis
-#ifdef SFX_FA
-  CFILEIN_FA = 'CANARI'        ! input CANARI analysis
-  CFILEIN_FA_SAVE  = CFILEIN_FA
-#endif
-!  Open FA file 
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                     YPROGRAM2,'EXTZON','SURF  ','READ ')
-ENDIF
+PT2M_O(:)  = P__CLSTEMPERATURE   (1:ISIZE)
+PHU2M_O(:) = P__CLSHUMI_RELATIVE (1:ISIZE)
+PTS_O(:)   = P__SURFTEMPERATURE  (1:ISIZE)
+PUCLS(:)   = P__CLSVENT_ZONAL    (1:ISIZE)
+PVCLS(:)   = P__CLSVENT_MERIDIEN (1:ISIZE)
 
-IF (LDINLINE) THEN
-  PT2M_O(:)  = P__CLSTEMPERATURE   (1:ISIZE)
-  PHU2M_O(:) = P__CLSHUMI_RELATIVE (1:ISIZE)
-  PTS_O(:)   = P__SURFTEMPERATURE  (1:ISIZE)
-  PUCLS(:)   = P__CLSVENT_ZONAL    (1:ISIZE)
-  PVCLS(:)   = P__CLSVENT_MERIDIEN (1:ISIZE)
-ELSE
-!  Read CANARI analysis
-  CALL READ_SURF(&
-               YPROGRAM2,'CLSTEMPERATURE  ',PT2M_O ,IRESP)
-  CALL READ_SURF(&
-               YPROGRAM2,'CLSHUMI.RELATIVE',PHU2M_O,IRESP)
-  CALL READ_SURF(&
-               YPROGRAM2,'SURFTEMPERATURE ',PTS_O  ,IRESP)
-  CALL READ_SURF(&
-               YPROGRAM2,'CLSVENT.ZONAL   ',PUCLS  ,IRESP)
-  CALL READ_SURF(&
-               YPROGRAM2,'CLSVENT.MERIDIEN',PVCLS  ,IRESP)
-ENDIF
-
-IF (.NOT. LDINLINE) THEN
-!  Close CANARI file
-  CALL END_IO_SURF_n(YPROGRAM2)
-  CALL IO_BUFF_CLEAN
-  PRINT *,'READ CANARI OK'
-ENDIF
 
 !  Read ASCAT SM observations (in percent)
 
@@ -661,57 +542,11 @@ INOBS = 0
 
 CALL OI_BC_SOIL_MOISTURE(ISIZE,PSM_O,PSAB,PWS_O)
 
-IF (.NOT. LDINLINE) THEN
-!  Define FA file name for surface climatology
-#ifdef SFX_FA
-  CFILEIN_FA = 'clim_isba'               ! input climatology
-  CFILEIN_FA_SAVE  = CFILEIN_FA
-  CDNOMC     = 'climat'                  ! new frame name
-#endif
-!  Open FA file 
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                     YPROGRAM2,'EXTZON','SURF  ','READ ')
-ENDIF
+PSNC(:) = P__SURFRESERV_NEIGE (1:ISIZE)
 
-IF (LDINLINE) THEN
-  PSNC(:) = P__SURFRESERV_NEIGE (1:ISIZE)
-ELSE
-!  Read climatology file (snow water equivalent)
-  CALL READ_SURF(&
-               YPROGRAM2,'SURFRESERV.NEIGE',PSNC  ,IRESP)
-ENDIF
 
-IF (.NOT. LDINLINE) THEN
-!  Close climatology file
-  CALL END_IO_SURF_n(YPROGRAM2)
-  CALL IO_BUFF_CLEAN
-  PRINT *,'READ CLIMATOLOGY OK'
-ENDIF
-
-IF (.NOT. LDINLINE) THEN
-#ifdef SFX_FA
-  PLAT0  = PELAT0 
-  PLON0  = PELON0 
-  PLATOR = PELAT1 
-  PLONOR = PELON1 
-  PRPK   = PERPK  
-  PBETA  = PEBETA 
-  DELX   = PEDELX 
-  DELY   = PEDELY 
-  IF (PLONOR > 180.0) PLONOR = PLONOR - 360.0
-  IF (PLON0  > 180.0) PLON0  = PLON0  - 360.0
-  DO JJ=1,NDGUX
-    DO J1=1,NDLUX
-      ZPX((JJ-1)*NDLUX + J1) = DELX*REAL(J1-1)
-      ZPY((JJ-1)*NDLUX + J1) = DELY*REAL(JJ-1)
-    ENDDO
-  ENDDO
-#endif
-  CALL OI_LATLON_CONF_PROJ(ISIZE,PLAT0,PLON0,PRPK,PBETA,PLATOR,PLONOR,ZPX,ZPY,PLAT,PLON)
-ELSE
-  PLAT(:) = P__LAT (1:ISIZE)
-  PLON(:) = P__LON (1:ISIZE)
-ENDIF
+PLAT(:) = P__LAT (1:ISIZE)
+PLON(:) = P__LON (1:ISIZE)
 
 !  Allocate arrays to produce analysis increments  
 
@@ -758,7 +593,7 @@ ZWS(:) = XUNDEF
 ZWP(:) = XUNDEF
 ZTL(:) = XUNDEF
 
-WHERE (PWS(:,1)/=XUNDEF) 
+WHERE (YSC%U%XNATURE(:)>0.0_JPRB) 
   ZWS(:)      = PWS(:,1)*XRD1*XRHOLW     ! conversion of m3/m3 -> mm
   ZWP(:)      = PWP(:,1)*PD2(:,1)*XRHOLW  ! conversion of m3/m3 -> mm
   ZTL(:)      = PTL(:,1)*PD2(:,1)*XRHOLW  ! conversion of m3/m3 -> mm
@@ -807,15 +642,13 @@ ENDDO
 
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 
-IF (LDINLINE) THEN
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone
-  WHERE (LD_MASKEXT (1:ISIZE))
-    PD2(:,1) = 1.0
-    ZT2INC(:) = 0.0_JPRB
-    ZH2INC(:) = 0.0_JPRB
-  END WHERE
-ENDIF
+WHERE (LD_MASKEXT (1:ISIZE))
+  PD2(:,1) = 1.0
+  ZT2INC(:) = 0.0_JPRB
+  ZH2INC(:) = 0.0_JPRB
+END WHERE
 
 PRINT *,'           '
 PRINT *,'Mean T2m increments  ',SUM(ZT2INC)/YSC%U%NDIM_FULL
@@ -842,24 +675,22 @@ ZWPINC(:) = 0.0_JPRB
 ZTLINC(:) = 0.0_JPRB
 ZSNINC(:) = 0.0_JPRB
 
-WHERE (PWS(:,1)/=XUNDEF)
+WHERE (YSC%U%XNATURE(:)>0.0_JPRB)
   ZWSINC(:) = ZWS(:) - PWS(:,1)*(XRD1*XRHOLW)    
   ZWPINC(:) = ZWP(:) - PWP(:,1)*(PD2(:,1)*XRHOLW) 
   ZTLINC(:) = ZTL(:) - PTL(:,1)*(PD2(:,1)*XRHOLW) 
   ZSNINC(:) = ZSNS(:) - PSNS(:,1)
 END WHERE
 
-IF (LDINLINE) THEN
 ! Avoid division by zero in next WHERE statement; 
 ! this may occur in the extension zone
-  WHERE (LD_MASKEXT (1:ISIZE))
-    PD2(:,1) = 1.0
-  END WHERE
-ENDIF
+WHERE (LD_MASKEXT (1:ISIZE))
+  PD2(:,1) = 1.0
+END WHERE
 
 !  Define soil moiture analyses over NATURE points
 
-WHERE (PWS(:,1)/=XUNDEF)
+WHERE (YSC%U%XNATURE(:)>0.0_JPRB)
   PWS(:,1)  = ZWS(:)/(XRD1*XRHOLW)
   PWP(:,1)  = ZWP(:)/(PD2(:,1)*XRHOLW)
   PTL(:,1)  = ZTL(:)/(PD2(:,1)*XRHOLW)
@@ -868,174 +699,62 @@ END WHERE
 
 !  Perform temperature analysis according to surface types
 
-OINTERP_LST(:) = .FALSE.
-OINTERP_SST(:) = .FALSE.
-
 ZTSINC(:) = 0.0_JPRB
 ZTPINC(:) = 0.0_JPRB
 
 ! a) Temperature analysis of NATURE points
 
-WHERE (PTS(:,1)/=XUNDEF)
+WHERE (YSC%U%XNATURE(:)>0.0_JPRB)
   ZTSINC(:) = ZTS(:) - PTS(:,1)
   ZTPINC(:) = ZTP(:) - PTP(:,1)
   PTS(:,1)  = ZTS(:)
   PTP(:,1)  = ZTP(:)
 END WHERE
 
+PRINT *, '---------------------------------------------------------------'
+PRINT *, 'Mean WS increments over NATURE ',SUM(ZWSINC,YSC%U%XNATURE > 0.0_JPRB)/YSC%U%NSIZE_NATURE
+PRINT *, 'Mean WP increments over NATURE ',SUM(ZWPINC,YSC%U%XNATURE > 0.0_JPRB)/YSC%U%NSIZE_NATURE
+PRINT *, 'Mean TS increments over NATURE ',SUM(ZTSINC,YSC%U%XNATURE > 0.0_JPRB)/YSC%U%NSIZE_NATURE
+PRINT *, 'Mean TP increments over NATURE ',SUM(ZTPINC,YSC%U%XNATURE > 0.0_JPRB)/YSC%U%NSIZE_NATURE
+PRINT *, 'Mean TL increments over NATURE ',SUM(ZTLINC,YSC%U%XNATURE > 0.0_JPRB)/YSC%U%NSIZE_NATURE
+PRINT *, 'Mean SN increments over NATURE ',SUM(ZSNINC,YSC%U%XNATURE > 0.0_JPRB)/YSC%U%NSIZE_NATURE
+PRINT *, '---------------------------------------------------------------'
+
+ZTSINC(:) = 0.0_JPRB
+
 ! b) Temperature analysis of SEA and LAKE points
 
 DO JJ = 1, ISIZE
-  IF (PITM(JJ) < 0.5_JPRB) THEN
-    IF (PSST(JJ)/=XUNDEF) THEN
-      ZTSINC(JJ) = PTS_O(JJ) - PSST(JJ)
-      PSST(JJ) = PTS_O(JJ)   ! canari
+  IF (YSC%U%XSEA(JJ)>0.0_JPRB) THEN
+    ZTSINC(JJ) = PTS_O(JJ) - PSST(JJ)
+    IF (PITM(JJ) <= 0.5_JPRB) THEN
+      PSST(JJ) = PTS_O(JJ)
+    ELSE
+      IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PSST(JJ) = PTP(JJ,1)
     ENDIF
-    IF (PLST(JJ)/=XUNDEF) THEN
-      PLST(JJ) = PTS_O(JJ)   ! canari
-    ENDIF
-  ELSE
-    IF (PSST(JJ)/=XUNDEF) THEN
-      PSST(JJ) = XUNDEF
-      OINTERP_SST(JJ) = .TRUE.
-    ENDIF
-    IF (PLST(JJ)/=XUNDEF) THEN
-      PLST(JJ) = XUNDEF
-      OINTERP_LST(JJ) = .TRUE.
+  ENDIF
+  IF (YSC%U%XWATER(JJ)>0.0_JPRB) THEN
+    IF (PITM(JJ) <= 0.5_JPRB) THEN
+      PLST(JJ) = PTS_O(JJ)
+    ELSE
+      IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PLST(JJ) = PTP(JJ,1)
     ENDIF
   ENDIF
 ENDDO
 
+PRINT *, 'Mean TS increments over SEA    ',SUM(ZTSINC,YSC%U%XSEA > 0.0_JPRB)/YSC%U%NSIZE_SEA
+
 ! c) Temperature analysis of TOWN points
 
-WHERE (PTRD3(:)/=XUNDEF)
+WHERE (YSC%U%XTOWN(:)>0.0_JPRB)
   PTRD3(:) = PTRD3(:) + ZT2INC(:)*Z1S2PI
 END WHERE
 
-! Search for the nearest grid point values for lake and sea points
-! at locations where the water fraction is less than 50 % 
-! and therefore no useful information is given from the SST analysis
-! A standard temperature gradient is applied to account for the atitude differences
-
-IF (LDINLINE) THEN
-
-  IF (LLKEEPEXTZONE) THEN
-
-    ZLST(:) = PLST(:)
-     
-    IF (LDINLINE) THEN
-      WHERE (LD_MASKEXT (1:ISIZE))
-        ZLST = XUNDEF
-      END WHERE
-    ENDIF
-     
-    CALL OI_HOR_EXTRAPOL_SURF(ISIZE,PLAT,PLON,ZLST,PLAT,PLON,PLST,OINTERP_LST,ZALT)
-     
-    ZSST(:) = PSST(:)
-     
-    IF (LDINLINE) THEN
-      WHERE (LD_MASKEXT (1:ISIZE))
-        ZSST = XUNDEF
-      END WHERE
-    ENDIF
-     
-    CALL OI_HOR_EXTRAPOL_SURF(ISIZE,PLAT,PLON,ZSST,PLAT,PLON,PSST,OINTERP_SST,ZALT)
-
-  ELSE
-
-    ISIZE1 = COUNT (.NOT. LD_MASKEXT)
-   
-    ALLOCATE (PSST1 (ISIZE1), PLST1 (ISIZE1), ZSST1 (ISIZE1), ZLST1 (ISIZE1), PLAT1 (ISIZE1), &
-            & PLON1 (ISIZE1), ZALT1 (ISIZE1), OINTERP_LST1 (ISIZE1), OINTERP_SST1 (ISIZE1))
-   
-    ! remove extension zone
-    JJ = 1
-    DO J1 = 1, ISIZE
-      IF (.NOT. LD_MASKEXT (J1)) THEN
-        PSST1 (JJ) = PSST (J1)
-        PLST1 (JJ) = PLST (J1)
-        PLAT1 (JJ) = PLAT (J1)
-        PLON1 (JJ) = PLON (J1)
-        ZALT1 (JJ) = ZALT (J1)
-        OINTERP_LST1 (JJ) = OINTERP_LST (J1)
-        OINTERP_SST1 (JJ) = OINTERP_SST (J1)
-        JJ = JJ + 1
-      ENDIF
-    ENDDO
-   
-    ZLST1(:) = PLST1(:)
-    CALL OI_HOR_EXTRAPOL_SURF(ISIZE1,PLAT1,PLON1,ZLST1,PLAT1,PLON1,PLST1,OINTERP_LST1,ZALT1)
-     
-    ZSST1(:) = PSST1(:)
-    CALL OI_HOR_EXTRAPOL_SURF(ISIZE1,PLAT1,PLON1,ZSST1,PLAT1,PLON1,PSST1,OINTERP_SST1,ZALT1)
-   
-    ! copy back
-    JJ = 1
-    DO J1 = 1, ISIZE
-      IF (.NOT. LD_MASKEXT (J1)) THEN
-        PSST (J1) = PSST1 (JJ)
-        PLST (J1) = PLST1 (JJ) 
-        JJ = JJ + 1
-      ENDIF
-    ENDDO
-   
-    DEALLOCATE (PSST1, PLST1, ZSST1, ZLST1, PLAT1, PLON1, &
-              & ZALT1, OINTERP_LST1, OINTERP_SST1)
-
-  ENDIF
-
-ELSE
- 
-  ZLST(:) = PLST(:)
-  CALL OI_HOR_EXTRAPOL_SURF(ISIZE,PLAT,PLON,ZLST,PLAT,PLON,PLST,OINTERP_LST,ZALT)
-
-  ZSST(:) = PSST(:)
-  CALL OI_HOR_EXTRAPOL_SURF(ISIZE,PLAT,PLON,ZSST,PLAT,PLON,PSST,OINTERP_SST,ZALT)
-
-ENDIF
-
-! PRINT values produced by OI_HO_EXTRAPOL_SURF
-
-IF (NPRINTLEV>0) THEN
-  DO JJ = 1, ISIZE
-    IF (OINTERP_LST(JJ)) THEN
-      PRINT *,'Lake surface temperature set to ',PLST(JJ),'from nearest neighbour at J=',JJ
-    ENDIF
-    IF (OINTERP_SST(JJ)) THEN
-      PRINT *,'Sea surface temperature set to ',PSST(JJ),'from nearest neighbour at J=',JJ
-    ENDIF
-  ENDDO
-ENDIF
-
-! PRINT statistics of the soil analysis
-
-PRINT *,'---------------------------------------------------------------'
-PRINT *,'Mean WS increments over NATURE ',SUM(ZWSINC,YSC%U%XNATURE > 0.)/YSC%U%NDIM_NATURE
-PRINT *,'Mean WP increments over NATURE ',SUM(ZWPINC,YSC%U%XNATURE > 0.)/YSC%U%NDIM_NATURE
-PRINT *,'Mean TS increments over NATURE ',SUM(ZTSINC,YSC%U%XNATURE > 0.)/YSC%U%NDIM_NATURE
-PRINT *,'Mean TP increments over NATURE ',SUM(ZTPINC,YSC%U%XNATURE > 0.)/YSC%U%NDIM_NATURE
-PRINT *,'Mean TL increments over NATURE ',SUM(ZTLINC,YSC%U%XNATURE > 0.)/YSC%U%NDIM_NATURE
-PRINT *,'Mean SN increments over NATURE ',SUM(ZSNINC,YSC%U%XNATURE > 0.)/YSC%U%NDIM_NATURE
-PRINT *,'---------------------------------------------------------------'
-PRINT *,'Mean WS increments over SEA    ',SUM(ZWSINC,YSC%U%XSEA > 0.)/YSC%U%NDIM_SEA
-PRINT *,'Mean WP increments over SEA    ',SUM(ZWPINC,YSC%U%XSEA > 0.)/YSC%U%NDIM_SEA
-PRINT *,'Mean TS increments over SEA    ',SUM(ZTSINC,YSC%U%XSEA > 0.)/YSC%U%NDIM_SEA
-PRINT *,'Mean TP increments over SEA    ',SUM(ZTPINC,YSC%U%XSEA > 0.)/YSC%U%NDIM_SEA
-PRINT *,'Mean TL increments over SEA    ',SUM(ZTLINC,YSC%U%XSEA > 0.)/YSC%U%NDIM_SEA
-PRINT *,'Mean SN increments over SEA    ',SUM(ZSNINC,YSC%U%XSEA > 0.)/YSC%U%NDIM_SEA
-PRINT *,'---------------------------------------------------------------'
-
-IF (.NOT. LDINLINE) THEN 
-!   Write analysis in LFI file PREP
-#ifdef SFX_LFI
-  CFILEOUT_LFI='PREP'
-#endif
-ENDIF
+PRINT *, '---------------------------------------------------------------'
 
  CALL FLAG_UPDATE(YSC%IM%ID%O, YSC%DUO, .FALSE.,.FALSE.,.TRUE.,.FALSE.)
 CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, YPROGRAM,'FULL  ','SURF  ','WRITE')
 
-IF (LDINLINE) THEN
 #ifdef SFX_ARO
 ! Count 2D fields in MSE
 ! NINDX1, NINDX2, NKPROMA already set 
@@ -1047,17 +766,11 @@ IF (LDINLINE) THEN
   CALL SURFEX_FIELD_BUF_SET_RECORD (YSURFEX_CACHE_OUT, .TRUE.)
 
 #endif
-
-ENDIF
-
  CALL WRITE
 
 CALL END_IO_SURF_n(YPROGRAM)
 CALL IO_BUFF_CLEAN
 
-IF (.NOT. LDINLINE) THEN
-  PRINT *,'after write in PREP file'
-ENDIF
 
 ! -------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL', 1, ZHOOK_HANDLE)
@@ -1149,17 +862,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 0, ZHOOK_HANDLE)
 
-IF (LDINLINE) THEN
 #ifdef SFX_ARO
-  IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 1, ZHOOK_HANDLE)
-  RETURN
+IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 1, ZHOOK_HANDLE)
+RETURN
 #endif
-  JN = COUNT (.NOT. LD_MASKEXT)
-  ZX (1:JN) = PACK (PX, .NOT. LD_MASKEXT)
-ELSE
-  ZX = PX
-  JN = SIZE (PX)
-ENDIF
+JN = COUNT (.NOT. LD_MASKEXT)
+ZX (1:JN) = PACK (PX, .NOT. LD_MASKEXT)
 
 WRITE (0, *) TRIM(CDN)//" = " 
 WRITE (0, *) JN, MINVAL(ZX(1:JN)), MAXVAL(ZX(1:JN))
