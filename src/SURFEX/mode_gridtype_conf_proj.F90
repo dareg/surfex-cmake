@@ -33,6 +33,8 @@ CONTAINS
 !!    -------------
 !!      Original    01/2004
 !!        M.Moge    06/2015 broadcast the space step to all MPI processes (necessary for reproductibility)
+!!      24-Sep-2015 : P.Marguinaud : DX and DY may be nul in AROME extension zone; 
+!!                    take first non-null value for DX and DY 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -110,8 +112,20 @@ PGRID_PAR(6) = PLONOR
 PGRID_PAR(7) = FLOAT(KIMAX)
 PGRID_PAR(8) = FLOAT(KJMAX)
 IF (IL>0) THEN
-  PGRID_PAR(9) = PDX(1)
-  PGRID_PAR(10)= PDY(1)
+  PGRID_PAR( 9) = 0.
+  DO JJ = 1, SIZE (PDX) 
+    IF (PDX (JJ) > 0. .AND. PDX (JJ) /= XUNDEF) THEN 
+      PGRID_PAR( 9) = PDX (JJ) 
+      EXIT 
+    ENDIF 
+  ENDDO 
+  PGRID_PAR(10) = 0. 
+  DO JJ = 1, SIZE (PDY) 
+    IF (PDY (JJ) > 0. .AND. PDY (JJ) /= XUNDEF) THEN 
+      PGRID_PAR(10) = PDY (JJ) 
+      EXIT 
+    ENDIF 
+  ENDDO 
 ENDIF
 !
 #ifdef MNH_PARALLEL
