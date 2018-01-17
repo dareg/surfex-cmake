@@ -1411,7 +1411,7 @@ INTEGER, DIMENSION(:), INTENT(IN)  :: KNLVLS_USE ! number of effective snow laye
 !Same outputs as SNOWCRORAD and SNOWCROALB
 REAL, DIMENSION(:,:), INTENT(OUT) :: PRADSINK !(npoints,nlayers)
 REAL, DIMENSION(:), INTENT(OUT)   :: PRADXS !(npoints)
-REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints,nlayers)
+REAL, DIMENSION(:), INTENT(OUT)   :: PSNOWALB !(npoints)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWALB_SP !(npoints,nbands)
 REAL, DIMENSION(:), INTENT(OUT) ,OPTIONAL  :: PSNOWALB_FB !(npoints,nlayers)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_DIR, PSPEC_DIF
@@ -1839,11 +1839,11 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
              !if the cumulated absorbed energy excess the available energy or if severe negative energy, numerical problem in Tartes : total absorption
              IF ((ZSNOWENERGY_CUM(JJ)>ZMAX(JJ)).OR.(ZSNOWENERGY(JJ,JL,JB)<=-0.1)) THEN
  !               IF (PPWAVELENGTHS(JB)<=1000) THEN             
-               IF ((XPWAVELENGTHS(JB)<=1300) .AND.(ABS(ZSNOWENERGY_CUM(JJ)-ZMAX(JJ))>0.01)) THEN 
+               IF (XPWAVELENGTHS(JB)<=1300) THEN 
                  ! Tolerance 0.01 W/m2 of excess energy in the visible
                  ! Above, the problem should never happen in visible
                  ! Case negative nergy (often happening in the bottom layers(with really low energy values)
-                 IF (ZSNOWENERGY(JJ,JL,JB)<0) THEN
+                 IF (ZSNOWENERGY(JJ,JL,JB)<0.1) THEN
                   !If the energy in the layer ovelaying is already really small, just set the enrgy of the layer to 0 because the problem is numerical
                   IF (ABS(ZSNOWENERGY(JJ,JL-1,JB))<2E-3) THEN
                     ZSNOWENERGY(JJ,JL,JB)=0.
@@ -1856,7 +1856,7 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
                     ZSNOWENERGY(JJ,JL,JB)=0.
                   ENDIF
                  ELSE
-                   !If the energy in the layer ovelaying is already really small, just set the enrgy of the layer to 0 because the problem is numerical
+                   !If the energy in the layer ovelaying is already really small, just set the energy of the layer to 0 because the problem is numerical
                    IF (ZSNOWENERGY(JJ,JL-1,JB)<2E-3 .AND. ZSNOWENERGY(JJ,JL,JB)>1E-1) THEN
                      ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) 
                      ZSNOWENERGY(JJ,JL,JB)=0.                     
@@ -1978,11 +1978,11 @@ END DO
 PRADSINK(:,1) = -PSW_RAD(:) + ZREFLECTED_BB(:) + ZSNOWENERGY_BB(:,1)
 !  
 DO JJ=1, SIZE(PSNOWRHO,1)! BC bug from tuzet commit @31211352 ? (omitted JJ loop ?)
-DO JL = 2,SIZE(PSNOWRHO,2)
-    IF ( JL<=KNLVLS_USE(JJ) ) THEN  
-      PRADSINK(JJ,JL) = PRADSINK(JJ,JL-1) + ZSNOWENERGY_BB(JJ,JL)
-    END IF
-END DO
+  DO JL = 2,SIZE(PSNOWRHO,2)
+      IF ( JL<=KNLVLS_USE(JJ) ) THEN  
+        PRADSINK(JJ,JL) = PRADSINK(JJ,JL-1) + ZSNOWENERGY_BB(JJ,JL)
+      END IF
+  END DO
 END DO !BC
 !
 !Excess energy
