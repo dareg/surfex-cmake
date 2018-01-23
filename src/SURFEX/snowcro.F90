@@ -591,11 +591,6 @@ IF (.NOT. (OMEB) )THEN
 ENDIF
 
 PSNOWHMASS = 0.
-PHSNOW     = 0.
-PRNSNOW    = 0.
-PLES3L     = 0.
-PLEL3L     = 0.
-PHPSNOW    = 0.
 PEVAPCOR   = 0.
 PTHRUFAL   = 0.
 IMPUR_NORM(:)=0.
