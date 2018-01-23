@@ -53,7 +53,7 @@
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
         PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,					   &
-        PSNOW_REFROZENTHICKNESS, P_DIR_SW, P_SCA_SW,PIMPWET,PIMPDRY)          
+        PSNOW_REFROZENTHICKNESS, P_DIR_SW, P_SCA_SW,PSNOWIMP_CONC,PIMPWET,PIMPDRY)          
 !     ##########################################################################
 !
 !                             
@@ -576,6 +576,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_REFROZENTHICKNESS
 REAL, DIMENSION(:),   INTENT(OUT)   :: PANF          ! total assimilation over canopy
 REAL, DIMENSION(:),   INTENT(OUT)   :: PGPP          ! Gross Primary Production
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomass respiration (kgCO2/kgair m/s)
+
+REAL, DIMENSION(:,:,:),   INTENT(OUT)   :: PSNOWIMP_CONC      ! Diagnostic of impurity concentration (g/g) FT+BC
 !
 !
 !*      0.2    declarations of local variables
@@ -598,7 +600,6 @@ REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWAGE             ! sno
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWSWE             ! snow layer liquid water equivalent (kg/m2)
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZSNOWLIQ             ! snow layer liquid water (m)
 REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2)) :: ZTAU_N               ! snow rad transmission coef at layer base (-)
-REAL, DIMENSION(SIZE(PSNOWSWE,1),SIZE(PSNOWSWE,2),NIMPUR) :: ZIMPUR_CONC              ! Impurity content in g
 REAL, DIMENSION(SIZE(PPS))                         :: ZCHIP                ! 
 REAL, DIMENSION(SIZE(PPS))                         :: ZALBS                ! Effective surface (ground) albedo
 REAL, DIMENSION(SIZE(PPS))                         :: ZSOILALB             ! Effective surface (ground) albedo for Tartes
@@ -1338,7 +1339,7 @@ CALL SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WIND,   
            PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,              &
            PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,              &
            PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,   &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,ZIMPUR_CONC,PIMPWET,PIMPDRY) 
+           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY) 
 !
 ! If a litter layer exists, compute hydrology:
 !
