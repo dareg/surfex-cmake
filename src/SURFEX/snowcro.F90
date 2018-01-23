@@ -942,15 +942,17 @@ SELECT CASE (HSNOWRAD)
      ENDDO
    ENDDO
     
+! This piece of code has been moved in tartes    
+    
     
  !Compute the impurity concentration of each layer(JST) for each type of impurity(JIMP) and each point (JJ)   
-  DO JIMP=1,NIMPUR 
-    DO JJ=1,SIZE(ZSNOW)
-      DO JST=1,INLVLS_USE(JJ)
-        ZSNOWIMP_CONTENT(JJ,JST,JIMP)= PSNOWIMPUR(JJ,JST,JIMP)/(1000*(PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)))  ! PSNOIMP en g/m² et RHOxDZ en kg/m²
-      ENDDO
-    ENDDO
-  ENDDO
+!  DO JIMP=1,NIMPUR 
+!    DO JJ=1,SIZE(ZSNOW)
+!      DO JST=1,INLVLS_USE(JJ)
+!        ZSNOWIMP_CONTENT(JJ,JST,JIMP)= PSNOWIMPUR(JJ,JST,JIMP)/(1000*(PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)))  ! PSNOIMP en g/m² et RHOxDZ en kg/m²
+!      ENDDO
+!    ENDDO
+! ENDDO
   CASE DEFAULT
     PSNOWIMPUR(:,:,:)=0.
 END SELECT
@@ -967,7 +969,7 @@ SELECT CASE (HSNOWRAD)
 
   !
   CASE ("TAR","TA1","TA2","TA3", "TA4")!
-    IF ((ANY(ZSNOWIMP_CONTENT<0)).OR.(ANY(ZSNOWIMP_CONTENT>1))) THEN
+    IF ((ANY(PSNOWIMPUR<0)).OR.(ANY(PSNOWIMPUR>1))) THEN
       PRINT*,"PROBLEME GRAVE"
       PRINT*,"ATTENTION VALEURS ANORMALES IMPURETES"
       PRINT*,'Before Tartes',ZSNOWIMP_CONTENT(:,:,1),'Stop',ZSNOWIMP_CONTENT(:,:,2)
@@ -981,7 +983,7 @@ SELECT CASE (HSNOWRAD)
     ENDDO
     
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,ZSNOWG0,ZSNOWY0,ZSNOWW0, &
-                        ZSNOWB0, ZSNOWIMP_CONTENT, PALB,PSW_RAD,PZENITH,PANGL_ILLUM, &  ! juste test, normalement PANGL_ILLUM=PZENITH, 
+                        ZSNOWB0, PSNOWIMPUR, PALB,PSW_RAD,PZENITH,PANGL_ILLUM, &  ! juste test, normalement PANGL_ILLUM=PZENITH, 
                         PDIRCOSZW,INLVLS_USE,PSNOWALB,ZRADSINK,ZRADXS,GCRODEBUGDETAILSPRINT,HSNOWMETAMO,&
                         P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, PSPEC_DIR, PSPEC_DIF,OATMORAD)
                        
@@ -991,7 +993,7 @@ SELECT CASE (HSNOWRAD)
 
  ! output spectral albedo and diffuse to total irradiance ratio
    
-  DO JJ=1,JPNBANDS_ATM
+  DO JJ=1,SIZE(PSPEC_ALB,2)
 	  DO JP=1, size(ZSNOW)
 !	    PDIFF_RATIO(JP,JJ)=P_DIR_SW(JP,JJ)+P_SCA_SW(JP,JJ)
 !	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)  ! To let commented    
