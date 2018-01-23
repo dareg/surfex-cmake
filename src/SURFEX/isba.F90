@@ -5,11 +5,11 @@
                       OMEB, OFORC_MEASURE, OMEB_LITTER,                          &
                       PTSTEP, HIMPLICIT_WIND, OAGRI_TO_GRASS, HSNOWDRIFT,        &
                       OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH,HSNOWMETAMO,HSNOWRAD,  &
-                      OATMORAD,OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,  HSNOWCOMP, HSNOWZREF, &
-                      PCVHEATF, PCGMAX, PZREF, PUREF, PDIRCOSZW,PSLOPE_DIR,      &
-                      PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
-                      PAZIM,PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PVDIR,             &
-                      PPEW_A_COEF, PPEW_B_COEF,                                  &
+                      OATMORAD,OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,     &
+                      HSNOWCOMP, HSNOWZREF, PCVHEATF, PCGMAX, PZREF, PUREF,      &
+                      PDIRCOSZW,PSLOPE_DIR,PTA, PQA, PEXNA, PRHOA, PPS, PEXNS,   &
+                      PRR, PSR, PZENITH,PAZIM,PSCA_SW, PSW_RAD,                  &
+                      PLW_RAD, PVMOD, PVDIR,PPEW_A_COEF, PPEW_B_COEF,            &
                       PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, PRSMIN,&
                       PRGL, PGAMMA, PCV, PRUNOFFD, PSOILWGHT, KLAYER_HORT,       &
                       KLAYER_DUN, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,     &
@@ -27,15 +27,15 @@
                       PPSN, PPSNG, PPSNV,                                        &
                       PPSNV_A, PSNOWFREE_ALB_VEG, PSNOWFREE_ALB_SOIL, PIRRIG,    &
                       PWATSUP, PTHRESHOLD, LIRRIGATE, LIRRIDAY, OSTRESSDEF, PGC, &
-                      PF2I, PDMAX, PAH, PBH, PCSP,PIMPWET,PIMPDRY, PGMES, PPOI, PFZERO, PEPSO,   &
-                      PGAMM, PQDGAMM, PQDGMES, PT1GMES, PT2GMES, PAMAX, PQDAMAX, &
-                      PT1AMAX, PT2AMAX, PABC, PD_G, PDZG, PDZDIF, KWG_LAYER,     &
-                      PROOTFRAC, PWFC, PWWILT, PWSAT, PBCOEF, PCONDSAT,          &
-                      PMPOTSAT, PHCAPSOIL, PCONDDRY, PCONDSLD, PD_ICE, PKSAT_ICE,&
-                      PMUF, PFF, PFFG, PFFV, PFFG_NOSNOW, PFFV_NOSNOW, PFFROZEN, &
-                      PFALB, PFEMIS, PFFLOOD, PPIFLOOD, PIFLOOD, PPFLOOD,        &
-                      PLE_FLOOD, PLEI_FLOOD,  PSODELX, PLAT, PLON, PTG, PWG,     &
-                      PWGI, PCPS, PLVTT, PLSTT, PWR,                             &
+                      PF2I, PDMAX, PAH, PBH, PCSP,PIMPWET,PIMPDRY, PGMES, PPOI,  &
+                      PFZERO, PEPSO,PGAMM, PQDGAMM, PQDGMES, PT1GMES, PT2GMES,   &
+                      PAMAX, PQDAMAX,PT1AMAX, PT2AMAX, PABC, PD_G, PDZG,         &
+                      PDZDIF, KWG_LAYER,PROOTFRAC, PWFC, PWWILT, PWSAT,          &
+                      PBCOEF, PCONDSAT,PMPOTSAT, PHCAPSOIL, PCONDDRY, PCONDSLD,  &
+                      PD_ICE, PKSAT_ICE,PMUF, PFF, PFFG, PFFV, PFFG_NOSNOW,      &
+                      PFFV_NOSNOW, PFFROZEN, PFALB, PFEMIS, PFFLOOD, PPIFLOOD,   &
+                      PIFLOOD, PPFLOOD,PLE_FLOOD, PLEI_FLOOD,  PSODELX,          &
+                      PLAT, PLON, PTG, PWG,PWGI, PCPS, PLVTT, PLSTT, PWR,        &
                       PWRL,PWRLI,PWRVN,PTV, PTL,                                 &
                       PRESA, PANFM, PFSAT,                                       &
                       PSNOWALB, PSNOWALBVIS, PSNOWALBNIR, PSNOWALBFIR,           &
@@ -67,10 +67,11 @@
                       PSWDOWN_GN, PLWDOWN_GN,                                    &                     
                       PIRRIG_GR, PTOPQS, PQSB, PSUBL,                            &
                       PFWTD, PWTD, PSNDRIFT ,KTAB_SYT,PSYTMASS,                  &
-                      PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
-                      PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
-                      PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-                      PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS,&
+                      PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,    &
+                      PSNOWRAM,PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,     &
+                      PSNOWDEPTH_5DAYS,PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,          &
+                      PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,PSNOWSWE_7DAYS,              &
+					  PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
                       P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC)
 !     ##########################################################################
 !
@@ -930,9 +931,6 @@ REAL, DIMENSION(SIZE(PWR))               :: ZLITCOR   ! A possible ice (in litte
 !
 ! Misc :
 !
-!
-!REAL, DIMENSION(SIZE(PTA))          :: ZANGL_SLOP! BC : moved here from snow3L_isba.F90
-!                                      ZANGL_SLOP  = angle of the slope, cosinus of the aspect is given by PDIRCOSZW
 
 REAL, DIMENSION(SIZE(PWR))          :: ZANGL_ILLUM ! BC : moved here from snow3L_isba.F90
 !                                      ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
@@ -1011,12 +1009,13 @@ ZSUBVCOR(:)     = 0.0
 ZLITCOR(:)     = 0.0
 ZLES3L          = 0.0
 ZLEL3L          = 0.0
+
 !Misc :
-!ZANGL_SLOP(:) = 0.0 ! BC    nothing to do here, should be moved elsewheres
+
 ZANGL_ILLUM(:) = PZENITH(:) ! BC 
 
-DO JJ=1, SIZE(PWR) ! BC computation of illuminaiton angle from Tuzet calc. without ZANGLE_SLOP = ACOS(PDIRCOSZW)
-    !ZANGL_SLOP(JJ) =ACOS(PDIRCOSZW(JJ)) 
+DO JJ=1, SIZE(PWR) ! BC computation of illuminaiton angle from Tuzet calc.
+
     ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ACOS(PDIRCOSZW(JJ))))+ &
       (SIN(PZENITH(JJ))*SIN(ACOS(PDIRCOSZW(JJ))*COS(PAZIM(JJ)-(PSLOPE_DIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
 ENDDO
@@ -1077,14 +1076,14 @@ IF(OMEB)THEN
    CALL ISBA_MEB(TPTIME, OMEB, OMEB_LITTER,PGNDLITTER, OFORC_MEASURE, OGLACIER,&
         OTR_ML, OAGRI_TO_GRASS, GSHADE, OSTRESSDEF,                            &
         HSNOWDRIFT, OSNOWDRIFT_SUBLIM, OSNOW_ABS_ZENITH, LIRRIGATE, LIRRIDAY,  &
-        HSNOWMETAMO, HSNOWRAD, OATMORAD, OSNOWSYTRON,                                    &
+        HSNOWMETAMO, HSNOWRAD, OATMORAD, OSNOWSYTRON,                          &
         HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, HPHOTO,         &   
         HISBA, HCPSURF, HRAIN, HSNOW_ISBA, HSNOWRES, HIMPLICIT_WIND,           &
         KWG_LAYER, PTSTEP, PVEGTYPE, PLAT, PLON,                               &
         PTHRESHOLD, PWATSUP, PIRRIG, PIRRIG_FLUX,                              &
         ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1,                                      &
-        PPS, PZENITH, ZANGL_ILLUM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
-        PH_VEG, PDIRCOSZW, PSLOPE_DIR,                                         &
+        PPS, PZENITH, ZANGL_ILLUM, PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR,   &
+        PRHOA, PTA, PQA,PH_VEG, PDIRCOSZW, PSLOPE_DIR,                         &
         PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, PPEQ_A_COEF, PPEQ_B_COEF,      &
         PPEW_A_COEF, PPEW_B_COEF,                                              &
         PZREF, PUREF, PCH, PCD, PCDN, PRI, PRESA, PHUG, PHV, PHU, PQS,         &
@@ -1127,8 +1126,8 @@ IF(OMEB)THEN
         PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,       &
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
-        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-        P_DIR_SW, P_SCA_SW,PIMPWET,PIMPDRY )
+        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS, 					   &
+        PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW,PIMPWET,PIMPDRY )
 
 ELSE
 !
@@ -1164,7 +1163,7 @@ ELSE
            PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST,PSNOWAGE, PSNOWIMPUR,              &
            PTG, PCG, PCT, ZSOILHCAPZ, ZSOILCONDZ(:,1),                          &
            PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR,             &
-           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR, PLVTT, PLSTT,                &
+           PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR, PLVTT, PLSTT,     &
            PZREF, PZ0_WITH_SNOW, PZ0EFF, PZ0H_WITH_SNOW, PALB, PD_G, PDZG,      &
            PPEW_A_COEF, PPEW_B_COEF,                                            &
            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
@@ -1174,16 +1173,17 @@ ELSE
            PSNDRIFT, PUSTARSNOW, PPSN, PSRSFC, PRRSFC, ZSNOWSFCH,               &
            ZDELHEATN, ZDELHEATN_SFC,                                            &
            PEMISNOW, PCDSNOW, PCHSNOW, PSNOWTEMP, PSNOWLIQ, PSNOWDZ,            &
-           PSNOWHMASS, ZRI3L, PZENITH, ZANGL_ILLUM, ZDELHEATG, ZDELHEATG_SFC,          &
+           PSNOWHMASS, ZRI3L, PZENITH, ZANGL_ILLUM, ZDELHEATG, ZDELHEATG_SFC,   &
            PLAT, PLON, ZQS3L,                                                   &
            HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,                       &
-           HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,                                    &
-           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, KTAB_SYT,PSYTMASS, &
-           PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,    &
-           PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,      &
-           PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,      &
-           PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-           P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY ) 
+           HSNOWMETAMO,HSNOWRAD,OATMORAD,OSNOWSYTRON,                           &
+           HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, KTAB_SYT,     &
+           PSYTMASS,PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,     &
+           PSNOWRAM,PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,               &
+           PSNOWDEPTH_5DAYS,PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,     &
+           PSNOWSWE_5DAYS,PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,     &
+           PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,  &
+		   PSNOWIMP_CONC,PIMPWET,PIMPDRY ) 
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation

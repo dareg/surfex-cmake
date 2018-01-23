@@ -15,10 +15,11 @@
                PRNSNOW,PHSNOW,PGFLUXSNOW,                                &
                PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
                PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
-               PPERMSNOWFRAC,PZENITH,PANGL_ILLUM,PXLAT,PXLON,PBLOWSNW,     &
+               PPERMSNOWFRAC,PZENITH,PANGL_ILLUM,PXLAT,PXLON,PBLOWSNW,   &
                HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
-               HSNOWMETAMO, HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,          &
-               PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY, HSNOWFALL, HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF)
+               HSNOWMETAMO, HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,        &
+               PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY, HSNOWFALL, 		 &
+			   HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF)
 !     ##########################################################################
 !
 !!****  *SNOWCRO*
@@ -555,14 +556,7 @@ IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA
     DO JIMP=1,NIMPUR 
      ZSNOWIMP_CONTENT(:,:,JIMP) = 0.
     ENDDO
-  !  ZSNOWIMP_DENSITY(:,:,1) = 1270.       !Soot density according to Flanner et.al 2012 (set to 1500 for the paper)
-   ! ZSNOWIMP_CONTENT(:,:,1) = 0.
-   !IF (NIMPUR>1) THEN
-  !    ZSNOWIMP_DENSITY(:,:,2) = 2600.       !Dust Density (hess1995)
-   !   ZSNOWIMP_CONTENT(:,:,2) = 0.
   ENDIF
-  ! ZSNOWIMP_CONTENT=25.0E-9
-  !
 END IF
 !
 ZUSTAR2_IC = 0.0
@@ -1096,19 +1090,6 @@ IF (OMEB) THEN
 
 ELSE
 
-IF (GCRODEBUGDETAILSPRINT) THEN
-  PRINT *,"BEFORE SNOWCROEBUD "
-      PRINT *,    HSNOWRES, HIMPLICIT_WIND                                    
-      PRINT *,            PPEW_A_COEF, PPEW_B_COEF                                    
-      PRINT *,            PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF          
-      PRINT *,            XSNOWDZMIN                                                  
-      PRINT *,            PZREF,ZSNOWTEMP(:,1),PSNOWRHO(:,1),PSNOWLIQ(:,1),ZSCAP(:,1) 
-      PRINT *,            ZSCOND(:,1),ZSCOND(:,2)                                     
-      PRINT *,            PUREF,PEXNS,PEXNA,PDIRCOSZW,PVMOD                           
-      PRINT *,            PLW_RAD,PSW_RAD,PTA,PQA,PPS,PTSTEP                          
-      PRINT *,            PSNOWALB             
-
-ENDIF  
  CALL SNOWCROEBUD(HSNOWRES, HIMPLICIT_WIND,                                    &
                   PPEW_A_COEF, PPEW_B_COEF,                                    &
                   PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,          &
@@ -1264,8 +1245,8 @@ ENDIF
 !*      11.     Snow Evaporation/Sublimation mass updates:
 !               ------------------------------------------
 !
- CALL SNOWCROEVAPN(PLES3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1), &
-                   PSNOWDZ(:,1),PSNOWLIQ(:,1),PEVAPCOR,PSNOWHMASS            )
+ CALL SNOWCROEVAPN(PLES3L,PTSTEP,ZSNOWTEMP(:,1),PSNOWRHO(:,1),    &
+                   PSNOWDZ(:,1),PSNOWLIQ(:,1),PEVAPCOR,PSNOWHMASS )
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -1548,7 +1529,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !####################################################################
 !####################################################################
@@ -1915,8 +1896,7 @@ IMPLICIT NONE
 !
 !     0.1 declarations of arguments  
 !      
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ, PSNOWTEMP, PSNOWLIQ, PSNOWSWE 
-!
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ, PSNOWTEMP, PSNOWLIQ, PSNOWSWE
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST              
 !   
 REAL, INTENT(IN)                    :: PTSTEP    
@@ -4091,8 +4071,8 @@ END SUBROUTINE SNOWCROGONE
 !####################################################################
 !####################################################################
 SUBROUTINE SNOWCROEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,PSNOWTEMP,PSNOWLIQ,      &
-                           PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,&
-                           KNLVLS_USE,&
+                           PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,           &
+                           KNLVLS_USE,										   &
                            HSNOWMETAMO) 
 !
 !!    PURPOSE
