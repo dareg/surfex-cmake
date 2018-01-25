@@ -1376,7 +1376,7 @@ END SUBROUTINE SPECTRAL_REPARTITION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
-                          PSNOWIMP_CONTENT, PALB,PSW_RAD,PZENITH,PANGL_ILLUM,PDIRCOSZW,KNLVLS_USE,      &
+                          PSNOWIMPUR, PALB,PSW_RAD,PZENITH,PANGL_ILLUM,PDIRCOSZW,KNLVLS_USE,      &
                           PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW, PSNOWALB_SP,&
                           PSPEC_DIR, PSPEC_DIF,OATMORAD,PSNOWALB_FB)
 
