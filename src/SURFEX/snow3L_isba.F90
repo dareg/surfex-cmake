@@ -1305,16 +1305,16 @@ IF (HSNOW_ISBA=='CRO') THEN
       ENDDO
     ENDDO
   ENDDO      
-  ! BC bugfix from Tuzet for HSNOWRAD~= TARTES
-  IF (SIZE(PDIFF_RATIO)>1) THEN
+
+IF (SIZE(PDIFF_RATIO)>1) THEN
     DO JWRK=1,SIZE(P_DIR_SW,2)
       DO JJ=1,KSIZE1
-        JI = KMASK(JJ)
+          JI = KMASK(JJ)
           PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
           PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
       ENDDO
     ENDDO
-  ENDIF
+ ENDIF
   IF (SIZE(PSNOWDEND)>1) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
     DO JWRK=1,KSIZE2
