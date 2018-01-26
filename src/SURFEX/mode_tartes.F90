@@ -4,16 +4,16 @@ MODULE MODE_TARTES
 !
 !! *MODE_TARTES*
 !!
-!! Radiative transfer in snowpack
-
-!!
-!!**  IMPLICIT ARGUMENTS
-!!    ------------------
-!!       NONE          
-!!
-!!    REFERENCE
-!!    ---------
-!!
+!! Radiative transfer in snowpack                
+                                                 
+!!                                               
+!!**  IMPLICIT ARGUMENTS                         
+!!    ------------------                         
+!!       NONE                                    
+!!                                               
+!!    REFERENCE                                  
+!!    ---------                                  
+!!                                               
 !!    AUTHOR
 !!    ------
 !!    M. Lafaysse       * Meteo France *
@@ -1376,7 +1376,7 @@ END SUBROUTINE SPECTRAL_REPARTITION
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
 SUBROUTINE SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0, &
-                          PSNOWIMP_CONTENT, PALB,PSW_RAD,PZENITH,PANGL_ILLUM,PDIRCOSZW,KNLVLS_USE,      &
+                          PSNOWIMPUR, PALB,PSW_RAD,PZENITH,PANGL_ILLUM,PDIRCOSZW,KNLVLS_USE,      &
                           PSNOWALB,PRADSINK,PRADXS,ODEBUG,HSNOWMETAMO,P_DIR_SW, P_SCA_SW, PSNOWALB_SP,&
                           PSPEC_DIR, PSPEC_DIF,OATMORAD,PSNOWALB_FB)
 
@@ -1527,7 +1527,7 @@ IF ( IPOINTDAY>=1 ) THEN
   !
     ! Pack 2D spectral radiations
     
-  DO JL = 1,SIZE(PSPEC_DIR,2)  ! Here JL is a counter for spectral bands
+  DO JL = 1,SIZE(P_DIR_SW,2)  ! Here JL is a counter for spectral bands
     !
     DO JJ_P = 1,IPOINTDAY
       !
@@ -1551,6 +1551,8 @@ IF ( IPOINTDAY>=1 ) THEN
         JJ = IDAYMASK(JJ_P)
         !
         ZSNOWIMP_DENSITY_P(JJ_P,JL,JIMP) = XSNOWIMP_DENSITY(JIMP)
+         !Compute the impurity concentration of each layer(JST) for each type of impurity(JIMP) and each point (JJ) 
+         
         IF (PSNOWRHO  (JJ,JL) <850.) THEN      !Test to check if the layer considered is snow or ice  
           ZSNOWIMP_CONTENT_P(JJ_P,JL,JIMP) = PSNOWIMPUR(JJ,JL,JIMP)/(1000*PSNOWRHO  (JJ,JL)*PSNOWDZ   (JJ,JL)) !PSNOWIMP en g/m² et RHOxDZ en kg/m²
         ELSE                                   ! If the layer is ice, set the BC content to the value prescribed in modd_const_tartes to reproduce ice albedo
