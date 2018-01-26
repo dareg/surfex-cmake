@@ -48,12 +48,13 @@
         PD_G, PDZG, PCPS, PLVTT, PLSTT, PCT, PCV, PCG, PFFROZEN,               &
         PTDEEP_A, PTDEEP_B, PDEEP_FLUX, PMUF, PDRIP, PRRVEG,                   &
         PRISNOW, PSNOW_THRUFAL, PEVAPCOR, PSUBVCOR, PSNOWSFCH, PSNDRIFT,PQSNOW,&
-        KTAB_SYT,PSYTMASS,													   &
+        KTAB_SYT,PSYTMASS,													                           &
         PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,       &
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
-        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,					   &
-        PSNOW_REFROZENTHICKNESS, P_DIR_SW, P_SCA_SW,PSNOWIMP_CONC,PIMPWET,PIMPDRY)          
+        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,					             &
+        PSNOW_REFROZENTHICKNESS, P_DIR_SW, P_SCA_SW,PSPEC_ALB, PDIFF_RATIO,    &
+        PSNOWIMP_CONC,PIMPWET,PIMPDRY)          
 !     ##########################################################################
 !
 !                             
@@ -196,10 +197,7 @@ CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWMETAMO   ! Crocus metamorphism schem
 CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWRAD, HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF     
                                                      ! Crocus radiative transfer scheme:
 !                                                    ! HSNOWRAD = B92 Brun et al 1992
-!                                                    ! HSNOWRAD = TAR TARTES (Libois et al 2013)
-!                                                    ! HSNOWRAD = TA1 TARTES with constant impurities
-!                                                    ! HSNOWRAD = TA2 TARTES with constant impurities as a 
-!                                                    !                   function of ageing
+!                                                    ! HSNOWRAD = T17 (Tuzet et al. 2017), (Libois et al. 2013)
 CHARACTER(LEN=*),     INTENT(IN)    :: HPHOTO        ! Kind of photosynthesis;
 !                                                    ! 'NON' NOTE: this option currently supported (Jarvis)
 !                                                    ! 'AGS'
@@ -579,6 +577,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomas
 
 REAL, DIMENSION(:,:,:),   INTENT(OUT)   :: PSNOWIMP_CONC      ! Diagnostic of impurity concentration (g/g) FT+BC
 !
+REAL, DIMENSION(:,:),   INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO
 !
 !*      0.2    declarations of local variables
 !
@@ -779,7 +778,6 @@ INTEGER :: INI, INL, JJ, JL
 REAL, DIMENSION(SIZE(PWR))         :: ZPHASEL  ! Phase changement in litter (W/m2)
 REAL, DIMENSION(SIZE(PWR))         :: ZCTSFC
 REAL, DIMENSION(SIZE(PWR))         :: ZFROZEN1SFC
-REAL, DIMENSION(SIZE(PPS),SIZE(P_DIR_SW,2)) :: PSPEC_ALB, PDIFF_RATIO
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -1916,7 +1914,7 @@ ENDDO    ! end loop grid points
 
 
 
-IF ( (HSNOWRAD=="TAR") .OR. (HSNOWRAD=="TA1") .OR. (HSNOWRAD=="TA2") .OR. (HSNOWRAD=="TA3") .OR. (HSNOWRAD=="TA4")) THEN
+IF ( (HSNOWRAD=="T17")) THEN
 
   ! Partie codée à l'arrache pour faire du ESCROC-MEB sur les sites forêts de ESM-SnowMIP
   ! A vérifier...

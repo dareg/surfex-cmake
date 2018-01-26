@@ -184,10 +184,10 @@ REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
 !                                      
 !Coefficients for Morin impurities model
 ! (unitless)
-REAL,PARAMETER        :: XIMPUR_COEFF_TA4 = 2.E-7
+
 REAL,PARAMETER        :: XIMPUR_EFOLD = 0.005 !(m) e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
 
-REAL, PARAMETER       :: XIMPUR_INIT_TA4 = 5.E-8 ! g/g
+
 
 !Cluzet et al 2016 liquid water content options parameters
 

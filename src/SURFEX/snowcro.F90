@@ -135,7 +135,7 @@ USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_CSTS, ONLY : XTT, XRHOLW, XLMTT,XLSTT,XLVTT, XCL, XCI, XPI, XRHOLI
 USE MODD_SNOW_PAR, ONLY : XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE, XIMPUR_EFOLD, XIMPUR_COEFF,&
-XIMPUR_INIT,XMAXIMPUR, XIMPUR_INIT_TA4, XIMPUR_COEFF_TA4 !BC
+XIMPUR_INIT,XMAXIMPUR
 USE MODD_SNOW_METAMO
 USE MODD_PREP_SNOW, ONLY : NIMPUR
 USE MODD_CONST_TARTES, ONLY:  XPSNOWG0, XPSNOWY0, XPSNOWW0, XPSNOWB0,NPNBANDS
@@ -360,9 +360,7 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
                                          !-----------------------
                                          ! Radiative transfer scheme
                                          ! HSNOWRAD=B92 Brun et al 1992
-                                         ! HSNOWRAD=TAR TARTES (Libois et al 2013)
-                                         ! HSNOWRAD=TA1 TARTES with constant impurities
-                                         ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
+                                         ! HSNOWRAD=T17 (Tuzet et al. 2017) (Libois et al. 2013) TARTES with impurities content scheme
                                          !-----------------------
                                          ! New options for multiphysics version (Cluzet et al 2016)
                                          ! Falling snow scheme
@@ -391,7 +389,6 @@ LOGICAL, INTENT(IN)                   :: OATMORAD ! activate atmotartes scheme
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWSSA_BEFORE, ZSNOWSSA_AFTER,ZSNOWDSSA
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT !impurities content (g) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: IMPUR_NORM !impurities content (g) (npoints,nlayer,ntypes_impurities)
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWTEMP, ZSCAP, ZSNOWDZN, ZSCOND, ZRADSINK 
@@ -545,19 +542,14 @@ IF ( LCRODEBUG .OR. GCROINFOPRINT .OR. GCRODEBUGPRINTBALANCE ) THEN
 END IF
 !***************************************DEBUG OUT*********************************************
 !
-IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA3" .OR. HSNOWRAD=="TA4") THEN
+IF ( HSNOWRAD=="T17") THEN
   !For now fix constant values
   ZSNOWG0 = XPSNOWG0
   ZSNOWY0 = XPSNOWY0
   ZSNOWW0 = XPSNOWW0  
   ZSNOWB0 = XPSNOWB0
-  !BC : commented this block and put impurities definition inside modd_snow_par
-  ! If Impurity are used, initialize Impurity Density according to Impurity Type
-  IF (NIMPUR>0) THEN
-    DO JIMP=1,NIMPUR 
-     ZSNOWIMP_CONTENT(:,:,JIMP) = 0.
-    ENDDO
-  ENDIF
+  
+  
 END IF
 !
 ZUSTAR2_IC = 0.0
@@ -625,7 +617,7 @@ ZTSTEPDAYS = PTSTEP/86400. ! time step in days
 ! Lafaysse / Cluzet : reimplementation of first Morin/Charrois impuritites content option:
 ! part of code modified by S. Morin 22/08/2013 on impurities behavior
 !
-IF ( HSNOWRAD=="TAR" .OR. HSNOWRAD=="TA1" .OR. HSNOWRAD=="TA2".OR. HSNOWRAD=="TA3" .OR. HSNOWRAD=="TA4") THEN
+IF ( HSNOWRAD=="T17") THEN
 #ifdef SFX_OL
   IF (LFORCIMP) THEN ! Les flux de dépots atmosphériques doivent être en g/m²/s en entrée, format ALADIN
     DO JIMP=1,NIMPUR
@@ -903,15 +895,7 @@ ENDIF
 
 
 SELECT CASE (HSNOWRAD)
-  CASE ("TA1")
-    ZSNOWIMP_CONTENT(:,:,:) = 0.0
-  CASE ("TA2")
-    ZSNOWIMP_CONTENT(:,:,:) = 100.0E-9
-  CASE ("TAR")
-    DO JIMP=1, NIMPUR
-      ZSNOWIMP_CONTENT(:,:,JIMP) = 2. * PSNOWAGE(:,:) * 1E-9
-    ENDDO
-  CASE("TA3")
+  CASE("T17")
 !Calculate the factor to norm the impurity content following parameterization from S. Morin(F.tuzet)
     DO JJ=1, size(ZSNOW)
       IMPUR_NORM(JJ)=EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD) !Initialise the norm 
@@ -943,17 +927,6 @@ SELECT CASE (HSNOWRAD)
      ENDDO
    ENDDO
     
-! This piece of code has been moved in tartes    
-    
-    
- !Compute the impurity concentration of each layer(JST) for each type of impurity(JIMP) and each point (JJ)   
-!  DO JIMP=1,NIMPUR 
-!    DO JJ=1,SIZE(ZSNOW)
-!      DO JST=1,INLVLS_USE(JJ)
-!        ZSNOWIMP_CONTENT(JJ,JST,JIMP)= PSNOWIMPUR(JJ,JST,JIMP)/(1000*(PSNOWRHO(JJ,JST)*PSNOWDZ(JJ,JST)))  ! PSNOIMP en g/m² et RHOxDZ en kg/m²
-!      ENDDO
-!    ENDDO
-! ENDDO
   CASE DEFAULT
     PSNOWIMPUR(:,:,:)=0.
 END SELECT
@@ -969,11 +942,11 @@ SELECT CASE (HSNOWRAD)
                     OSNOW_ABS_ZENITH,HSNOWMETAMO) 
 
   !
-  CASE ("TAR","TA1","TA2","TA3", "TA4")!
+  CASE ("T17")!
     IF ((ANY(PSNOWIMPUR<0)).OR.(ANY(PSNOWIMPUR>1))) THEN
       PRINT*,"PROBLEME GRAVE"
       PRINT*,"ATTENTION VALEURS ANORMALES IMPURETES"
-      PRINT*,'Before Tartes',ZSNOWIMP_CONTENT(:,:,1),'Stop',ZSNOWIMP_CONTENT(:,:,2)
+      PRINT*,'Before Tartes',PSNOWIMPUR(:,:,1),'Stop',PSNOWIMPUR(:,:,2)
     ENDIF
     
     
@@ -4282,7 +4255,7 @@ USE MODD_SNOW_PAR, ONLY : XRHOSMIN_ES, XSNOWDMIN, XANSMAX, XAGLAMAX, XSNOWCRITD,
                           XSNOWFALL_A_SN_P75, XSNOWFALL_B_SN_P75, XSNOWFALL_C_SN_P75,&
                           XRHOS_A76_1, XRHOS_A76_2, XRHOS_A76_3, XRHOS_S02_1,      &
                           XRHOS_S02_2, XRHOS_S02_3, XRHOS_S02_4, XRHOS_S02_5,      &
-                          XRHOS_S02_6, XIMPUR_INIT, XIMPUR_INIT_TA4  
+                          XRHOS_S02_6, XIMPUR_INIT
 !
 USE MODE_SNOW3L
 !
@@ -4742,14 +4715,10 @@ DO JJ = 1,SIZE(PSNOW(:))
     ENDIF
     !
     PSNOWHISTF (JJ) = 0.0
-    IF (HSNOWRAD=="TA3" .AND. PSR(JJ)>XUEPSI) THEN
+    IF (HSNOWRAD=="T17" .AND. PSR(JJ)>XUEPSI) THEN
       DO JIMP=1,NIMPUR
         PSNOWIMPURF(JJ,JIMP)=ZWETCOEF(JJ,JIMP)
       ENDDO
-    ELSE IF (HSNOWRAD=='TA4') THEN
-	  DO JIMP=1,NIMPUR
-      PSNOWIMPURF(JJ,JIMP)=XIMPUR_INIT_TA4
-	  ENDDO
     ENDIF
     
     PSNOWAGEF  (JJ) = 0.0
@@ -5974,7 +5943,7 @@ WRITE(*,*)
 WRITE(*,*)TRIM(HINFO)
 !
 IF (PRESENT(PSNOWIMPUR)) THEN
-  GPRINTIMPUR= (HSNOWRAD=='TA3')
+  GPRINTIMPUR= (HSNOWRAD=='T17')
 ELSE
   GPRINTIMPUR=.FALSE.
 ENDIF

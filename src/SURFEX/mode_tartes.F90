@@ -1823,90 +1823,91 @@ CALL TARTES(ZSNOWSSA,PSNOWRHO,PSNOWDZ,PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWIMP_D
     ! However, we let the comment code because it might happen again.
     
 !     
-     DO JB=1,NPNBANDS
-       ! maximum available energy at this wavelength
-       ZMAX=ZSW_RAD_DIF(:,JB)*XP_MUDIFF+ZSW_RAD_DIR(:,JB)*MAX(COS(PANGL_ILLUM),COSILLUMMIN)
-       ZSNOWENERGY_CUM(:)=0.
-       DO JL=1,SIZE(PSNOWRHO,2)
-         DO JJ=1,SIZE(PSNOWRHO,1)        
-           IF (JL<=KNLVLS_USE(JJ)) THEN
-             ZSNOWENERGY_UPPER(JJ)=ZSNOWENERGY_CUM(JJ) !0 for surface layer
-             ! absorbed energy cumulated from the surface
-             ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)+ZSNOWENERGY(JJ,JL,JB)             
-             ! Case when the energy is negative but close to 0. It can occurs in short wavelengths. Force to 0.
-             IF ((ZSNOWENERGY(JJ,JL,JB)<-XUEPSI) .AND. (ZSNOWENERGY(JJ,JL,JB)>-0.1)) THEN
-              ! PRINT*, "JB=",XPWAVELENGTHS(JB),"Negative energy ",ZSNOWENERGY(JJ,JL,JB),"zen",PZENITH(JJ),"EFFECTIF",PANGL_ILLUM(JJ)
-                ZSNOWENERGY(JJ,JL,JB)=0.
-             END IF
-             !if the cumulated absorbed energy excess the available energy or if severe negative energy, numerical problem in Tartes : total absorption
-             IF ((ZSNOWENERGY_CUM(JJ)>ZMAX(JJ)).OR.(ZSNOWENERGY(JJ,JL,JB)<=-0.1)) THEN
- !               IF (PPWAVELENGTHS(JB)<=1000) THEN             
-               IF ((XPWAVELENGTHS(JB)<=1300) .AND.(ABS(ZSNOWENERGY_CUM(JJ)-ZMAX(JJ))>0.01)) THEN 
-                 ! Tolerance 0.01 W/m2 of excess energy in the visible
-                 ! Above, the problem should never happen in visible
-                 ! Case negative nergy (often happening in the bottom layers(with really low energy values)
-                 IF (ZSNOWENERGY(JJ,JL,JB)<0) THEN
+    DO JB=1,NPNBANDS
+      ! maximum available energy at this wavelength
+      ZMAX=ZSW_RAD_DIF(:,JB)*XP_MUDIFF+ZSW_RAD_DIR(:,JB)*MAX(COS(PANGL_ILLUM),COSILLUMMIN)
+      ZSNOWENERGY_CUM(:)=0.
+      DO JL=1,SIZE(PSNOWRHO,2)
+        DO JJ=1,SIZE(PSNOWRHO,1)        
+          IF (JL<=KNLVLS_USE(JJ)) THEN
+            ZSNOWENERGY_UPPER(JJ)=ZSNOWENERGY_CUM(JJ) !0 for surface layer
+            ! absorbed energy cumulated from the surface
+            ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)+ZSNOWENERGY(JJ,JL,JB)             
+            ! Case when the energy is negative but close to 0. It can occurs in short wavelengths. Force to 0.
+            IF ((ZSNOWENERGY(JJ,JL,JB)<0.) .AND. (ZSNOWENERGY(JJ,JL,JB)>-0.1)) THEN
+             ! PRINT*, "JB=",XPWAVELENGTHS(JB),"Negative energy ",ZSNOWENERGY(JJ,JL,JB),"zen",PZENITH(JJ),"EFFECTIF",PANGL_ILLUM(JJ)
+               ZSNOWENERGY(JJ,JL,JB)=0.
+            END IF
+            !if the cumulated absorbed energy excess the available energy or if severe negative energy, numerical problem in Tartes : total absorption
+            IF ((ZSNOWENERGY_CUM(JJ)>ZMAX(JJ)).OR.(ZSNOWENERGY(JJ,JL,JB)<=-0.1)) THEN
+ !              IF (PPWAVELENGTHS(JB)<=1000) THEN             
+              IF ((XPWAVELENGTHS(JB)<=1300) .AND.(ABS(ZSNOWENERGY_CUM(JJ)-ZMAX(JJ))>0.01)) THEN 
+                ! Tolerance 0.01 W/m2 of excess energy in the visible
+                ! Above, the problem should never happen in visible
+                ! Case negative nergy (often happening in the bottom layers(with really low energy values)
+                IF (ZSNOWENERGY(JJ,JL,JB)<0) THEN
+                 !If the energy in the layer ovelaying is already really small, just set the enrgy of the layer to 0 because the problem is numerical
+                 !IF (ABS(ZSNOWENERGY(JJ,JL-1,JB))<2E-3) THEN
+                  ! ZSNOWENERGY(JJ,JL,JB)=0.
+                 !ELSE
+                   PRINT*, "negative energy", "Thickness:" ,SUM(PSNOWDZ(JJ,1:KNLVLS_USE(JJ)))
+!                   PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
+ !                  PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
+!                   PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
+                  ! PRINT*, "Abnormal ERROR TARTES !!"
+                   ZSNOWENERGY(JJ,JL,JB)=0.
+                  !ENDIF
+                ELSE
                   !If the energy in the layer ovelaying is already really small, just set the enrgy of the layer to 0 because the problem is numerical
-                  IF (ABS(ZSNOWENERGY(JJ,JL-1,JB))<2E-3) THEN
+                  !IF (ZSNOWENERGY(JJ,JL-1,JB)<2E-3 .AND. ZSNOWENERGY(JJ,JL,JB)>1E-1) THEN
+                  !  ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) 
+                  !  ZSNOWENERGY(JJ,JL,JB)=0.                     
+                  !ELSE
+                   ! PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
+                  ! PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
+                    PRINT*,"excess energy" , "Thickness:", SUM(PSNOWDZ(JJ,1:KNLVLS_USE(JJ)))
+                   ! PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
+                    !PRINT*, "Abnormal ERROR TARTES !!"
+                    ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) ! Actualise the Total energy diagnostic to avoid artificial problems in soil energy computation
                     ZSNOWENERGY(JJ,JL,JB)=0.
-                  ELSE
-                    PRINT*, "negative energy"
-!                    PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
- !                   PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
-!                    PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
-                   ! PRINT*, "Abnormal ERROR TARTES !!"
-                    ZSNOWENERGY(JJ,JL,JB)=0.
-                  ENDIF
-                 ELSE
-                   !If the energy in the layer ovelaying is already really small, just set the enrgy of the layer to 0 because the problem is numerical
-                   IF (ZSNOWENERGY(JJ,JL-1,JB)<2E-3 .AND. ZSNOWENERGY(JJ,JL,JB)>1E-1) THEN
-                     ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) 
-                     ZSNOWENERGY(JJ,JL,JB)=0.                     
-                   ELSE
-                    ! PRINT*,"JB=",XPWAVELENGTHS(JB),"JL=",JL,"KNVLSUSE",KNLVLS_USE(JJ)
-                    ! PRINT*,ZSW_RAD_DIF(JJ,JB),ZSW_RAD_DIR(JJ,JB),ZMAX(JJ),ZSNOWENERGY_CUM(JJ)
-                     PRINT*,"excess energy"
-                    ! PRINT*,"profile :",ZSNOWENERGY(JJ,:,JB)
-                     !PRINT*, "Abnormal ERROR TARTES !!"
-                     ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)-ZSNOWENERGY(JJ,JL,JB) ! Actualise the Total energy diagnostic to avoid artificial problems in soil energy computation
-                     ZSNOWENERGY(JJ,JL,JB)=0.
-                   ENDIF 
-                 ENDIF               
-               ELSE    
-                ! The layer absorbes all the remaining energy at this wavelength
-                ZSNOWENERGY(JJ,JL,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ)
-                ! update cumulated energy
-                ZSNOWENERGY_CUM(JJ)=ZMAX(JJ)
-               END IF
-             END IF
-           END IF
-         END DO
-       END DO
-       
-       ! Threshold on soil absorbed energy
-       DO JJ=1,SIZE(PSNOWRHO,1)
-         ZSNOWENERGY_UPPER(JJ)=ZSNOWENERGY_CUM(JJ)
-         ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)+ZSOILENERGY(JJ,JB)
-         IF (ZSNOWENERGY_CUM(JJ)>ZMAX(JJ)) THEN
-           IF (XPWAVELENGTHS(JB)<=1300) THEN
-            ! PRINT *,"SNOW", ZSNOWENERGY_UPPER(JJ),"SOIL",ZSOILENERGY(JJ,JB),"MAX",ZMAX(JJ)
-             IF (ZSNOWENERGY_CUM(JJ)-ZMAX(JJ)>0.01) THEN  ! If there is a large overestimation of soil energy
-               PRINT *, "ERROR TARTES (significant soil excess energy in visible)!!"
-               ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ) 
-             ELSE                                     ! If the overestimation of soil energy is relatively small, just print the error message and adjust soil energy.
-               ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ)  
-             ENDIF         
-           ENDIF
-           ! The layer absorbes all the remaining energy at this wavelength
-           ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ)
-         END IF
-       END DO
-       
-     END DO
-
+                  !ENDIF 
+                ENDIF               
+              ELSE    
+               ! The layer absorbes all the remaining energy at this wavelength
+               ZSNOWENERGY(JJ,JL,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ)
+               ! update cumulated energy
+               ZSNOWENERGY_CUM(JJ)=ZMAX(JJ)
+              END IF
+            END IF
+          END IF
+        END DO
+      END DO
+      
+   !   ! Threshold on soil absorbed energy
+      DO JJ=1,SIZE(PSNOWRHO,1)
+        ZSNOWENERGY_UPPER(JJ)=ZSNOWENERGY_CUM(JJ)
+        ZSNOWENERGY_CUM(JJ)=ZSNOWENERGY_CUM(JJ)+ZSOILENERGY(JJ,JB)
+        IF (ZSNOWENERGY_CUM(JJ)>ZMAX(JJ)) THEN
+          IF (XPWAVELENGTHS(JB)<=1300) THEN
+           ! PRINT *,"SNOW", ZSNOWENERGY_UPPER(JJ),"SOIL",ZSOILENERGY(JJ,JB),"MAX",ZMAX(JJ)
+            IF (ZSNOWENERGY_CUM(JJ)-ZMAX(JJ)>0.01) THEN  ! If there is a large overestimation of soil energy
+              PRINT *, "ERROR TARTES (significant soil excess energy in visible)!!", "Thickness:", SUM(PSNOWDZ(JJ,1:KNLVLS_USE(JJ)))
+              ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ) 
+            ELSE                                     ! If the overestimation of soil energy is relatively small, just print the error message and adjust soil energy.
+              ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ)  
+            ENDIF         
+          ENDIF
+          ! The layer absorbes all the remaining energy at this wavelength
+          ZSOILENERGY(JJ,JB)=ZMAX(JJ)-ZSNOWENERGY_UPPER(JJ)
+        END IF
+      END DO
+   !   
+    END DO
+   !
     ! End modif ML
     ! --------------------------------------------------------------------------------------------------------------------
-!    
+! 
+
 ! spectral albedo 
 PALB_SP(:,1:NPNBANDS)=ZSNOWALB(:,:)
 PALB_SP(:,NPNBANDS:JPNBANDS_ATM)=0.

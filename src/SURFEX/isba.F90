@@ -297,12 +297,8 @@ CHARACTER(3), INTENT(IN)            :: HSNOWMETAMO, HSNOWRAD, HSNOWFALL, HSNOWCO
                                          !-----------------------
                                          ! Crocus radiative transfer scheme
                                          ! HSNOWRAD=B92 Brun et al 1992
-                                         ! HSNOWRAD=TAR TARTES (Libois et al 2013)
-                                         ! HSNOWRAD=TA1 TARTES with constant impurities
-                                         ! HSNOWRAD=TA2 TARTES with constant impurities as function of ageing
-                                         ! HSNOWRAD=TA3 TARTES with a modified ageing of snow according to Morin/Charrois 2013-2014                                         
-                                         ! HSNOWRAD=TA4 TARTES with impurities scheme
-!
+                                         ! HSNOWRAD=T17 TARTES  (Tuzet et al 2017) (Libois et al 2013)
+                                         
 LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTRON snow redistribution scheme
 REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
@@ -1127,7 +1123,7 @@ IF(OMEB)THEN
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
         PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS, 					   &
-        PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW,PSNOWIMP_CONC,PIMPWET,PIMPDRY )
+        PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW,PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY )
 
 ELSE
 !
