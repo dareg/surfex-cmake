@@ -5784,6 +5784,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PLES3L
 !*      0.2    declarations of local variables
 !
 REAL :: ZHEAT, ZMASS, ZDZ, ZLIQ, ZSNOWLWE
+REAL, DIMENSION(NIMPUR) :: ZSNOWIMPUR
 !
 INTEGER :: JJ,JST,JST_1, JST_2, JST_MAX, IDIFF_LAYER ! loop counter
 INTEGER :: ID_1, ID_2
@@ -5830,6 +5831,9 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
         ZMASS = 0.
         ZDZ   = 0.
         ZLIQ  = 0.
+        DO JIMP=1,NIMPUR
+          ZSNOWIMPUR(JIMP)=0.
+        ENDDO
         DO JST_2 = ID_1,ID_2
           ZHEAT = ZHEAT + &
                   PSNOWDZ(JJ,JST_2) * &
@@ -5838,6 +5842,10 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
           ZMASS = ZMASS + PSNOWDZ(JJ,JST_2) * PSNOWRHO(JJ,JST_2)
           ZDZ   = ZDZ   + PSNOWDZ(JJ,JST_2)
           ZLIQ  = ZLIQ  + PSNOWLIQ(JJ,JST_2)
+          ! Compute the total amount of impurity present in the melting layer + the over/underlaying layer
+          DO JIMP=1,NIMPUR
+            ZSNOWIMPUR(JIMP)= ZSNOWIMPUR(JIMP)+PSNOWIMPUR(JJ,JST_2,JIMP)
+          ENDDO
         ENDDO
         !
         PSNOWDZ  (JJ,ID_1) = ZDZ
@@ -5852,6 +5860,7 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
           ( ( ( ( ZHEAT - XLMTT*XRHOLW*PSNOWLIQ(JJ,ID_1) ) / PSNOWDZ(JJ,ID_1) ) + &
               XLMTT*PSNOWRHO(JJ,ID_1) ) &
             / PSCAP(JJ,ID_1) )
+        ! The section on impurity management is volountary put in the loop JST/=KNLVLS_USE(JJ) as explained bellow.
         !
         IF( JST/=KNLVLS_USE(JJ) ) THEN
           !
@@ -5859,9 +5868,11 @@ DO JJ=1,SIZE(PSNOWRHO,1)  ! loop on gridpoints
           PSNOWGRAN2(JJ,JST) = PSNOWGRAN2(JJ,JST+1)
           PSNOWHIST (JJ,JST) = PSNOWHIST (JJ,JST+1)
           PSNOWAGE  (JJ,JST) = PSNOWAGE  (JJ,JST+1)
-          ! situation where impurities from melting layer are transfered to the layer below
+          ! The impurity content of the underlaying layer is equal to the sum of its current content+ the content of the melting layer.
+          ! We put this instruction in the loop JST/=KNLVLS_USE(JJ) because in the case of the bottom layer, we don't want a transfer
+          ! of the impurity content to the overlaying layer (not physical). In that particular case the impurity content is discarded by Crocus.
           DO JIMP=1,NIMPUR
-            PSNOWIMPUR(JJ,JST,JIMP)= PSNOWIMPUR(JJ,JST+1,JIMP)
+            PSNOWIMPUR(JJ,JST,JIMP)= ZSNOWIMPUR(JIMP)
           ENDDO
           !
           ! Shift the above layers
