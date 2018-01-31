@@ -425,7 +425,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZSNOW, ZSFCFRZ, ZTSTERM1, ZTSTERM2, ZCT, 
 !                                      ZSNOWTEMPO1= value of uppermost snow temperature
 !                                                   before time integration (K)
 !
-REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZLIQHEATXS, ZLWUPSNOW, ZGRNDFLUXI, ZPSN3L
+REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZLIQHEATXS, ZGRNDFLUXI, ZPSN3L
 !                                      ZRSRA    = air density over aerodynamic resistance
 !                                      ZDQSAT   = derrivative of saturation specific humidity
 !                                      ZQSAT    = saturation specific humidity
@@ -434,7 +434,6 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRSRA, ZDQSAT, ZQSAT, ZRADXS, ZLIQHEATXS,
 !                                      ZLIQHEATXS = excess snowpack heating for vanishingly thin
 !                                                 snow cover: add energy to snow/ground heat
 !                                                 flux (W m-2)
-!                                      ZLWUPSNOW = upwelling longwave raaditive flux (W m-2)
 !                                      ZGRNDFLUXI= for the case where the ground flux is imposed,
 !                                                  this is the actual imposed value.
 !                                      ZPSN3L    = snow fraction: different use if MEB "on".
@@ -1126,7 +1125,7 @@ IF (.NOT. OMEB) THEN
 
  CALL SNOWCROFLUX(ZSNOWTEMP(:,1),PSNOWDZ(:,1),PEXNS,PEXNA,            &
                   ZUSTAR2_IC,                                         &
-                  PTSTEP,PSNOWALB,PSW_RAD,PEMISNOW,ZLWUPSNOW,PLW_RAD, &
+                  PTSTEP,PSNOWALB,PSW_RAD,PEMISNOW,PLW_RAD,           &
                   ZTA_IC,ZSFCFRZ,ZQA_IC,PHPSNOW,                      &
                   ZSNOWTEMPO1,ZSNOWFLUX,ZCT,ZRADSINK(:,1),            &
                   ZQSAT,ZDQSAT,ZRSRA,                                 &
@@ -3670,7 +3669,7 @@ END SUBROUTINE GET_RHO
 !####################################################################
 SUBROUTINE SNOWCROFLUX(PSNOWTEMP,PSNOWDZ,PEXNS,PEXNA,          &
                        PUSTAR2_IC,                             &
-                       PTSTEP,PALBT,PSW_RAD,PEMIST,PLWUPSNOW,  &
+                       PTSTEP,PALBT,PSW_RAD,PEMIST,            &
                        PLW_RAD,PTA,PSFCFRZ,PQA,PHPSNOW,        &
                        PSNOWTEMPO1,PSNOWFLUX,PCT,PRADSINK,     &
                        PQSAT,PDQSAT,PRSRA,                     &
@@ -3703,7 +3702,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PALBT, PSW_RAD, PEMIST, PLW_RAD,      &
 REAL, DIMENSION(:), INTENT(INOUT)   :: PSNOWTEMP
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PRN, PH, PGFLUX, PLES3L, PLEL3L,      &
-                                        PEVAP, PLWUPSNOW, PUSTAR 
+                                        PEVAP, PUSTAR 
 !
 !*      0.2    declarations of local variables
 !
