@@ -89,8 +89,7 @@ REAL, DIMENSION(:), POINTER :: XSG1SNOW
 REAL, DIMENSION(:), POINTER :: XSG2SNOW
 REAL, DIMENSION(:), POINTER :: XHISTSNOW
 REAL, DIMENSION(:), POINTER :: XAGESNOW
-REAL, DIMENSION(:), POINTER :: XIMPURSNOW   !N6K
-REAL, DIMENSION(:,:), POINTER :: XIMPURSNOWV2   !N6K
+REAL, DIMENSION(:,:), POINTER :: XIMPURSNOW   !N6K
 REAL                  :: XASNOW         ! snow albedo
 !
 !--------------------------------------------------------------------------

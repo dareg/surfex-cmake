@@ -81,7 +81,7 @@ DO JIMP=1,NIMPUR
         !
         IF (SIZE(TPSNOW%GRAN1) >0) THEN
           WHERE(OMASK(:)) 
-          TPSNOW%IMPUR(:,JLAYER,JPATCH,JIMP) = XUNDEF
+          TPSNOW%IMPUR(:,JLAYER,JIMP,JPATCH) = XUNDEF
           END WHERE
         END IF
         !

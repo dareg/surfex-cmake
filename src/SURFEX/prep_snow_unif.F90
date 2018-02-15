@@ -6,7 +6,7 @@ SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
                           PUNIF_ASNOW,                  &
                           PUNIF_SG1SNOW, PUNIF_SG2SNOW, &
                           PUNIF_HISTSNOW,PUNIF_AGESNOW, &
-                          PUNIF_IMPURSNOWV2,&
+                          PUNIF_IMPURSNOW,&
                           KLAYER                        )  
 !     #################################################################################
 !
@@ -67,7 +67,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG1SNOW !
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_SG2SNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_HISTSNOW ! 
 REAL, DIMENSION(:), INTENT(IN)  :: PUNIF_AGESNOW ! 
-REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOWV2 !
+REAL, DIMENSION(:,:), INTENT(IN)  :: PUNIF_IMPURSNOW !
 INTEGER,            INTENT(IN)  :: KLAYER        ! Number of layer of output snow scheme
 !
 !*      0.2    declarations of local variables
@@ -195,20 +195,20 @@ SELECT CASE(HSURF(1:3))
        ENDDO
     ENDIF
 !
-  CASE('IMP')
-    IF (OSNOW_IDEAL) THEN
-       DO JIMP=1,NIMPUR
-         DO JVEGTYPE=1,NVEGTYPE
-            PFIELD(1,:,JVEGTYPE) = PUNIF_IMPURSNOWV2(:,JIMP)  !N6K
-         ENDDO
-       ENDDO
-    ELSE
-      DO JIMP=1,NIMPUR
-         DO JVEGTYPE=1,NVEGTYPE
-            PFIELD(1,:,JVEGTYPE) = PUNIF_IMPURSNOWV2(1,JIMP)  !N6K
-         ENDDO
-     ENDDO
-    ENDIF  
+!  CASE('IMP')
+!    IF (OSNOW_IDEAL) THEN
+!       DO JIMP=1,NIMPUR
+!         DO JVEGTYPE=1,NVEGTYPE
+!            PFIELD(1,:,JVEGTYPE) = PUNIF_IMPURSNOW(:,1)  !N6K
+!         ENDDO
+!       ENDDO
+!    ELSE
+!      DO JIMP=1,NIMPUR
+!         DO JVEGTYPE=1,NVEGTYPE
+!            PFIELD(1,:,JVEGTYPE) = PUNIF_IMPURSNOW(1,1)  !N6K
+!         ENDDO
+!     ENDDO
+!    ENDIF  
     
     
 !

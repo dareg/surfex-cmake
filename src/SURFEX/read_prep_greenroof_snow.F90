@@ -86,13 +86,11 @@ LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
 REAL :: XASNOW, XSWEMAX
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, XSG1SNOW, XSG2SNOW,&
                                     XHISTSNOW, XAGESNOW
-                                   
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XIMPURSNOW                                    
+                                                               
 INTEGER           :: JLAYER                                    
 !
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GR, XZSNOW_GR, XRSNOW_GR, XTSNOW_GR, XLWCSNOW_GR, &
-                                    XSG1SNOW_GR, XSG2SNOW_GR, XHISTSNOW_GR, XAGESNOW_GR
-REAL, DIMENSION(NSNOW_LAYER_MAX) :: XIMPURSNOW_GR                                        
+                                    XSG1SNOW_GR, XSG2SNOW_GR, XHISTSNOW_GR, XAGESNOW_GR                                        
 !
 LOGICAL           :: LFILE
 !
@@ -106,12 +104,12 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,&
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,              &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
-                            XIMPURSNOW,LSWEMAX, XSWEMAX,NIMPUR
+                            LSWEMAX, XSWEMAX,NIMPUR
 
 NAMELIST/NAM_PREP_GREENROOF_SNOW/CSNOW_GR, NSNOW_LAYER_GR, CFILE_SNOW_GR, CTYPE_SNOW, &
                             CFILEPGD_SNOW_GR, CTYPEPGD_SNOW,                & 
                             LSNOW_IDEAL_GR, XWSNOW_GR, XZSNOW_GR, XTSNOW_GR, &
-                            XIMPURSNOW_GR,XLWCSNOW_GR, XRSNOW_GR, XASNOW_GR
+                            XLWCSNOW_GR, XRSNOW_GR, XASNOW_GR
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('READ_PREP_GREENROOF_SNOW',0,ZHOOK_HANDLE)
 !
@@ -141,7 +139,6 @@ IF (LNAM_READ) THEN
   XASNOW_GR         = XANSMIN  
   XSG1SNOW_GR(:)    = XUNDEF
   XSG2SNOW_GR(:)    = XUNDEF
-  XIMPURSNOW_GR(:)  = XUNDEF
   XHISTSNOW_GR(:)   = XUNDEF
   XAGESNOW_GR(:)    = XUNDEF
   NIMPUR=1  
@@ -169,7 +166,6 @@ IF (LNAM_READ) THEN
     XASNOW = XANSMIN  
     XSG1SNOW(:) = XUNDEF
     XSG2SNOW(:) = XUNDEF
-    XIMPURSNOW(:)=XUNDEF
     XHISTSNOW(:) = XUNDEF
     XAGESNOW(:) = XUNDEF    
     !
@@ -188,7 +184,6 @@ IF (LNAM_READ) THEN
     XASNOW_GR = XASNOW
     XSG1SNOW_GR(:) = XSG1SNOW(:)
     XSG2SNOW_GR(:) = XSG2SNOW(:)
-    XIMPURSNOW_GR(:)=XIMPURSNOW(:)
     XHISTSNOW_GR(:) = XHISTSNOW(:)
     XAGESNOW_GR(:) = XAGESNOW(:)
     !

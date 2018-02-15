@@ -423,26 +423,25 @@ SELECT CASE (HSNSURF(1:3))
     END DO
     !
     
-  CASE('IMP')
-    !
-    IF (GSNOW_IDEAL) THEN
-      TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
-    ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
-      TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
-    ELSE
-      !* interpolation of heat on snow levels
-      CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW,ZGRID,TPSNOW%GRAN1)
-    ENDIF
-    !
-    !* mask for areas where there is no snow
-    DO JIMP=1,NIMPUR
-        DO JPATCH=1,KPATCH
-          DO JLAYER=1,TPSNOW%NLAYER
-            WHERE(PDEPTH(:,JLAYER,JPATCH)==0. .OR. PDEPTH(:,JLAYER,JPATCH)==XUNDEF) TPSNOW%IMPUR(:,JLAYER,JIMP,JPATCH) = XUNDEF
-          END DO
-        END DO
-    ENDDO
-    !
+!  CASE('IMP')
+!    !
+!    IF (GSNOW_IDEAL) THEN
+!      TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
+!    ELSEIF(SIZE(ZW,2)==TPSNOW%NLAYER)THEN
+!      TPSNOW%GRAN1(:,:,:) = ZW(:,:,:)
+!    ELSE
+!      !* interpolation of heat on snow levels
+!      CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW,ZGRID,TPSNOW%GRAN1)
+!    !
+!    !* mask for areas where there is no snow
+!    DO JIMP=1,NIMPUR
+!        DO JPATCH=1,KPATCH
+!          DO JLAYER=1,TPSNOW%NLAYER
+!            WHERE(PDEPTH(:,JLAYER,JPATCH)==0. .OR. PDEPTH(:,JLAYER,JPATCH)==XUNDEF) TPSNOW%IMPUR(:,JLAYER,JIMP,JPATCH) = XUNDEF
+!          END DO
+!        END DO
+!    ENDDO
+!    !
   
     
     
