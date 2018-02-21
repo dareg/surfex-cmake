@@ -621,8 +621,8 @@ IF ( HSNOWRAD=="T17") THEN
   IF (LFORCIMP) THEN ! Les flux de dépots atmosphériques doivent être en g/m²/s en entrée, format ALADIN
     DO JIMP=1,NIMPUR
       DO JJ = 1,SIZE(ZSNOW)
-        ZWETCOEF(JJ,JIMP)=PIMPWET(JJ,JIMP)*PTSTEP  !from g/m²/s to g/m² 
-        ZDRYCOEF(JJ,JIMP)=PIMPDRY(JJ,JIMP)         !from g/m²/s to g/m²/s
+        ZWETCOEF(JJ,JIMP)=PIMPWET(JJ,JIMP)*PTSTEP         !from g/m²/s to g/m² during the time step
+        ZDRYCOEF(JJ,JIMP)=PIMPDRY(JJ,JIMP)*PTSTEP         !from g/m²/s to g/m² during the time step
       ENDDO
     ENDDO
   ELSE
@@ -907,11 +907,11 @@ SELECT CASE (HSNOWRAD)
     ! Increase impurity content following parameterization from S. Morin   
     DO JIMP=1,NIMPUR
       DO JJ=1, size(ZSNOW)
-        PSNOWIMPUR(JJ,1,JIMP)=PSNOWIMPUR(JJ,1,JIMP)+(PTSTEP*ZDRYCOEF(JJ,JIMP)*&
+        PSNOWIMPUR(JJ,1,JIMP)=PSNOWIMPUR(JJ,1,JIMP)+(ZDRYCOEF(JJ,JIMP)*&
         EXP(-0.5*PSNOWDZ(JJ,1)/XIMPUR_EFOLD))/IMPUR_NORM(JJ)
         IF (INLVLS_USE(JJ)>1) THEN
           DO JST=2, INLVLS_USE(JJ)
-            PSNOWIMPUR(JJ,JST,JIMP)=PSNOWIMPUR(JJ,JST,JIMP)+(PTSTEP*ZDRYCOEF(JJ,JIMP)*&
+            PSNOWIMPUR(JJ,JST,JIMP)=PSNOWIMPUR(JJ,JST,JIMP)+(ZDRYCOEF(JJ,JIMP)*&
             EXP(-(SUM(PSNOWDZ(JJ,1:JST-1))+0.5*PSNOWDZ(JJ,JST))/XIMPUR_EFOLD))/IMPUR_NORM(JJ)
           ENDDO
         ENDIF
