@@ -1,0 +1,17 @@
+16a17,19
+> ln -s $RUNDIR/Params_config.txt .
+> ln -s $RUNDIR/Forc_* .
+> ln -s $RUNDIR/FORCING.nc .
+18d20
+< ln -s $RUNDIR/SST_SIC .
+24,26d25
+< ln -s $RUNDIR/CANARI_NATURE*.DAT .
+< ln -s $RUNDIR/BGROUNDin* .
+< #
+52c51
+< mv -f LISTING_SODA*.txt $RUNDIR
+---
+> mv -f LISTING_OFFLINE*.txt $RUNDIR
+58,59d56
+< #
+< mv -f BGROUNDout_ASSIM* $RUNDIR

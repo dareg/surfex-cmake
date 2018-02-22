@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+#set -x
+#
+RUNDIR=$(pwd)
+#
+cd $tmpdir
+rm -f *
+#pwd
+#
+#echo " copie des fichiers ecoclimap "
+#
+ln -s $RUNDIR/*.bin .
+ln -s $RUNDIR/PGD* .
+ln -s $RUNDIR/PREP_BASE* .
+ln -s $RUNDIR/*.*.*.*.* .
+ln -s $RUNDIR/LAKE_LTA_NEW.nc .
+ln -s $RUNDIR/mercator_20031203.nc .
+#
+ln -s $RUNDIR/TG* .
+ln -s $RUNDIR/WG* .
+ln -s $RUNDIR/hug* .
+ln -s $RUNDIR/tg* .
+#
+ln -s $RUNDIR/ecmwf.OD.20040810.18-V2 .
+ln -s $RUNDIR/arome.AN.20120215.00 .
+ln -s $RUNDIR/ECMWF_GRIB_FILE .
+#
+ln -s $RUNDIR/drdt_bst_fit_60.nc .
+#
+cp -f $RUNDIR/OPTIONS.nam .
+#
+#echo " copie de l'executable "
+#
+cp -f $RUNDIR/prep$1.exe prep.exe
+#
+MPI_TASKS=1
+#
+export OMP_NUM_THREADS=16
+#export DR_HOOK=1
+#export DR_HOOK_OPT=prof
+#
+ulimit -s unlimited
+#
+srun -N1 -n${MPI_TASKS} -c${OMP_NUM_THREADS} ./prep.exe
+#
+#ls -l
+#
+#cp drhook.* $RUNDIR
+mv -f LISTING_PREP.txt $RUNDIR
+mv -f PREP.* $RUNDIR
+if [ -f PREP_TEST.nc ]
+then
+	mv -f PREP_TEST.nc $RUNDIR
+fi
+#
+cd $RUNDIR
+#

@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+#set -x
+#
+RUNDIR=$(pwd)
+#
+cd $tmpdir
+rm -f *
+#pwd
+#
+#
+#echo " copie des fichiers ecoclimap "
+#
+ln -s $RUNDIR/*.bin .
+ln -s $RUNDIR/PGD* .
+ln -s $RUNDIR/PREP* .
+ln -s $RUNDIR/Params_config.txt .
+ln -s $RUNDIR/Forc_* .
+ln -s $RUNDIR/FORCING.nc .
+#
+ln -s $RUNDIR/ReLACS* .
+ln -s $RUNDIR/LAND_USE.nc .
+ln -s $RUNDIR/boucoiran_xwtop_init.map$1 boucoiran_xwtop_init.map
+ln -s $RUNDIR/stocks_init.txt$1 stocks_init.txt
+ln -s $RUNDIR/surfcont_init.map$1 surfcont_init.map
+for cas in boucoiran GKula Gruevo Vehtino
+do
+  ln -s $RUNDIR/$cas.mask_surf$1 $cas.mask_surf
+  ln -s $RUNDIR/$cas.mask_topd$1 $cas.mask_topd
+  ln -s $RUNDIR/$cas* .
+done
+ln -s $RUNDIR/carte_f_dc.txt$1 carte_f_dc.txt
+#
+ln -s $RUNDIR/drdt_bst_fit_60.nc .
+#
+cp -f $RUNDIR/OPTIONS.nam .
+#
+#echo " copie de l'executable "
+#
+cp -f $RUNDIR/offline$1.exe offline.exe
+#
+MPI_TASKS=1
+#
+#export KMP_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+#
+#export KMP_STACKSIZE=13m
+#export KMP_MONITOR_STACKSIZE=13m
+export OMP_STACKSIZE=13m
+#
+#export DR_HOOK=1
+#export DR_HOOK_OPT=prof
+#
+ulimit -s unlimited
+#
+srun -N1 -n${MPI_TASKS} -c${OMP_NUM_THREADS} ./offline.exe
+#
+#ls -l
+#
+#cp drhook.* $RUNDIR
+mv -f LISTING_OFFLINE*.txt $RUNDIR
+#cp log* $RUNDIR
+
+mv -f SURFOUT.* $RUNDIR
+if [ -f SURFOUT_TEST.nc ]
+then
+	mv -f SURFOUT_TEST.nc $RUNDIR
+fi
+#
+mv -f *.OUT.nc $RUNDIR
+#
+if [ -f boucoiran_xwtop_sav.map ]
+then
+	mv -f boucoiran_xwtop_sav.map $RUNDIR/boucoiran_xwtop_sav.map$1
+fi
+if [ -f stocks_sav.txt ]
+then
+	mv -f stocks_sav.txt $RUNDIR/stocks_sav.txt$1
+fi
+if [ -f surfcont_sav.map ]
+then
+	mv -f surfcont_sav.map $RUNDIR/surfcont_sav.map$1
+fi
+#
+cd $RUNDIR
+#

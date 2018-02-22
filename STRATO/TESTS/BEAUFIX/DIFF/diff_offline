@@ -1,0 +1,30 @@
+23,34c23,24
+< ln -s $RUNDIR/boucoiran_xwtop_init.map$1 boucoiran_xwtop_init.map
+< ln -s $RUNDIR/stocks_init.txt$1 stocks_init.txt
+< ln -s $RUNDIR/surfcont_init.map$1 surfcont_init.map
+< for cas in boucoiran GKula Gruevo Vehtino
+< do
+<   ln -s $RUNDIR/$cas.mask_surf$1 $cas.mask_surf
+<   ln -s $RUNDIR/$cas.mask_topd$1 $cas.mask_topd
+<   ln -s $RUNDIR/$cas* .
+< done
+< ln -s $RUNDIR/carte_f_dc.txt$1 carte_f_dc.txt
+< #
+< ln -s $RUNDIR/drdt_bst_fit_60.nc .
+---
+> ln -s $RUNDIR/boucoiran* .
+> ln -s $RUNDIR/carte_f_dc.txt .
+67,79d56
+< #
+< if [ -f boucoiran_xwtop_sav.map ]
+< then
+< 	mv -f boucoiran_xwtop_sav.map $RUNDIR/boucoiran_xwtop_sav.map$1
+< fi
+< if [ -f stocks_sav.txt ]
+< then
+< 	mv -f stocks_sav.txt $RUNDIR/stocks_sav.txt$1
+< fi
+< if [ -f surfcont_sav.map ]
+< then
+< 	mv -f surfcont_sav.map $RUNDIR/surfcont_sav.map$1
+< fi

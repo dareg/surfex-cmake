@@ -1,0 +1,26 @@
+37,41d36
+< ln -s $RUNDIR/GKula*.* .
+< ln -s $RUNDIR/Gruevo*.* .
+< ln -s $RUNDIR/Vehtino*.* .
+< #
+< ln -s $RUNDIR/FORCING.nc .
+65,77c60
+< for cas in boucoiran GKula Gruevo Vehtino
+< do
+<   if [ -f $cas.mask_surf ]
+<   then
+< 	mv -f $cas.mask_surf $RUNDIR/$cas.mask_surf$1
+<   fi
+<   if [ -f $cas.mask_topd ]
+<   then
+< 	mv -f $cas.mask_topd $RUNDIR/$cas.mask_topd$1
+<   fi
+< done
+< #
+< if [ -f carte_f_dc.txt ]
+---
+> if [ -f boucoiran.mask_surf ]
+79c62
+< 	mv -f carte_f_dc.txt $RUNDIR/carte_f_dc.txt$1
+---
+> 	mv -f boucoiran.mask_surf $RUNDIR
