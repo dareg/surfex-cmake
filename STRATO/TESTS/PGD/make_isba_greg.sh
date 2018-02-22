@@ -52,7 +52,7 @@ do
 	cp -f OPTIONS.nam OPTIONS.nam_save
 done
 cp -f OPTIONS.nam OPTIONS.nam_save
-for i in 1 2 3 12
+for i in 1 2 3 6 7 8 9 12
 do
 	var="XUNIF_LAI(4,$i)"
 	sed -e "s/$var = 1.0E+20/$var = 0./g" OPTIONS.nam_save > OPTIONS.nam
