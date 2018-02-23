@@ -91,7 +91,7 @@ cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFNAM_ALBNIR_VEG(4,3) = \"\"/CFNAM_ALBNIR_VEG(4,3) = \"ALBNIR_ISBA_M7_P0.dat\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFNAM_ALBNIR_VEG(4,4) = \"\"/CFNAM_ALBNIR_VEG(4,4) = \"ALBNIR_ISBA_M7_P0.dat\"/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_ave
+cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFNAM_ALBNIR_VEG(4,5) = \"\"/CFNAM_ALBNIR_VEG(4,5) = \"ALBNIR_ISBA_M7_P0.dat\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFNAM_ALBNIR_VEG(4,6) = \"\"/CFNAM_ALBNIR_VEG(4,6) = \"ALBNIR_ISBA_M7_P0.dat\"/g" OPTIONS.nam_save > OPTIONS.nam
