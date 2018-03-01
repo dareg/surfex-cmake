@@ -315,7 +315,6 @@ IF(LREPROD_OPER)THEN
   XEVERG_RSMIN   = 250.
   XEVERG_VEG     = 0.99
   CDGAVG         = 'ARI'
-  CQSAT          = 'OLD'
   CCHARNOCK      = 'OLD'
 ENDIF
 !
