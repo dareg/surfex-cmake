@@ -772,6 +772,8 @@ XTIME_CALC(:) = 0.
 XTIME_WRITE(:) = 0.
 !
 LFIRST_WRITE = .TRUE.
+LDEF_ol = .TRUE.
+IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
 !
 NCPT_WRITE = 0
 !
@@ -1114,21 +1116,20 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       INW = 1
       !
-      IF ( LXIOS .AND. .NOT. LXIOS_DEF_CLOSED ) INW = 2      
+      IF ( LXIOS .AND. .NOT. LXIOS_DEF_CLOSED ) INW = 2
       !
       LDEF_nc = .FALSE. 
       IF (CTIMESERIES_FILETYPE=="NC    ") THEN
-        LDEF_nc = .TRUE.       
+        LDEF_nc = .TRUE.
         INW = 2
         CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, &
-                               YSC%TM%DTT, YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
+                               YSC%TM%DTT, YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)
       ENDIF
       !
       LDEF_ol = .FALSE.
       IF (CTIMESERIES_FILETYPE=="OFFLIN".AND.LFIRST_WRITE) THEN
         LDEF_ol = .TRUE.
         INW = 2
-        IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
       ENDIF
       !
       IDX_W = 0

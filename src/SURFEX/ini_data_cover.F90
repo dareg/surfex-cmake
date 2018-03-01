@@ -255,7 +255,7 @@ ALLOCATE(XDATA_TOWN(JPCOVER))
 XDATA_TOWN = 0.
 !
 ALLOCATE(XDATA_GARDEN(JPCOVER))
-!n
+!
 XDATA_GARDEN = 0.
 !
 !-------------------------------------------------------------------------------
@@ -1236,9 +1236,7 @@ IF (U%LECOSG) THEN
     XDATA_D_WALL  (:,1) = 0.020   
     XDATA_D_WALL  (:,2) = 0.125
     XDATA_D_WALL  (:,3) = 0.050
-    XDATA_H_TRAFFIC (:) =10.
     XDATA_LE_TRAFFIC(:) = 0.
-    XDATA_H_INDUSTRY(:) = 5.                                              
     XDATA_LE_INDUSTRY(:)= 0.
   END WHERE
   !
