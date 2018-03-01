@@ -104,7 +104,8 @@ ENDIF
 !         1.   Reads the namelists
 !              --------------------
 !
-WRITE(ILUOUT,*) 'Debut init_surf_topo_n'
+! Removed by MF NWP team:
+!WRITE(ILUOUT,*) 'Debut init_surf_topo_n'
 !
 IF (LCOUPL_TOPD) THEN
   !
