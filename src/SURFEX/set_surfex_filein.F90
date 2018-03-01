@@ -33,6 +33,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    05/2011 
+!!      P. Samuelsson  02/2018: Remove obsolete call to SET_SURFEX_FILE_NAME_ARO
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -57,9 +58,6 @@ USE MODI_SET_SURFEX_FILE_NAME_NC
 #endif
 #ifdef SFX_MNH
 USE MODI_SET_SURFEX_FILE_NAME_MNH
-#endif
-#ifdef SFX_ARO
-USE MODI_SET_SURFEX_FILE_NAME_ARO
 #endif
 !
 USE MODI_ABOR1_SFX
@@ -140,12 +138,6 @@ IF (HPROGRAM=='NC    ' ) THEN
 !
 ENDIF
 
-!
-IF (HPROGRAM=='AROME ' ) THEN
-#ifdef SFX_ARO
-  CALL SET_SURFEX_FILE_NAME_ARO
-#endif  
-ENDIF
 !
 IF (HPROGRAM=='MESONH' ) THEN
 #ifdef SFX_MNH
