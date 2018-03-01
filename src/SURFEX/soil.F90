@@ -249,7 +249,8 @@ ELSE
 !
 ! Degree of saturation of soil:
 !
-    ZSATDEG(JJ)   = MAX(0.1, (PEK%XWGI(JJ,2)+PEK%XWG(JJ,2))/KK%XWSAT(JJ,1))
+! Changed by MF NWP team    ZSATDEG(JJ)   = MAX(0.1, (PEK%XWGI(JJ,2)+PEK%XWG(JJ,2))/KK%XWSAT(JJ,1))
+    ZSATDEG(JJ)   = MAX(0.1, PEK%XWG(JJ,2)/KK%XWSAT(JJ,1))
 !
 ! Kersten number:
 !
@@ -448,7 +449,8 @@ ENDIF
 !               --------------
 ! Including vertical diffusion limiting factor for surface soil ice:
 !
-IF(IO%CKSAT=='SGH' .OR. IO%CKSAT=='EXP')THEN
+! Changed by MF NWP team IF(IO%CKSAT=='SGH' .OR. IO%CKSAT=='EXP')THEN
+IF(IO%CKSAT=='SGH')THEN
 !
 ! Adjusted root-zone soil water content
 !
