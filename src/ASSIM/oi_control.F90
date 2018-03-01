@@ -42,6 +42,7 @@ SUBROUTINE OI_CONTROL (YSC, &
 !   (09/2010)  : More parameters to goto_surfex
 !   (03/2011)  : Initialization of ZEVAPTR (F.Bouyssel)
 !   (03/2013)  : Use 10m wind from upperair instead surfex one (F.Taillefer)
+!   (10/2017)  : Bugfix to update sea or lake surface temperature in case XNATURE=0 and ITM>0.5 (F.Bouyssel)
 !
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
@@ -162,7 +163,7 @@ INTEGER :: ILUNAM
 LOGICAL :: GFOUND
 
 REAL                               :: PLAT0,PLON0,PRPK,PLATOR,PLONOR,DELX,DELY,PBETA,ZTHRES
-REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180
+REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180, ZSCAL, ZRTCLS
 
 INTEGER :: ISIZE_FULL
 
@@ -176,6 +177,9 @@ PRINT *,'|                             ENTER OI_ASSIM                           
 PRINT *,'|                                                                        |'
 PRINT *,'--------------------------------------------------------------------------'
 
+! Patrick Samuelsson (SMHI)
+! Next four lines are commented in MF NWP bf4 for cy43t. Hmhm, avoid these
+! comments here since I don't know the reason...
 CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
 CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
 IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
@@ -724,6 +728,7 @@ ZTSINC(:) = 0.0_JPRB
 
 ! b) Temperature analysis of SEA and LAKE points
 
+ZRTCLS=ZSCAL/(5.0_JPRB*XDAY)
 DO JJ = 1, ISIZE
   IF (YSC%U%XSEA(JJ)>0.0_JPRB) THEN
     ZTSINC(JJ) = PTS_O(JJ) - PSST(JJ)
@@ -731,6 +736,7 @@ DO JJ = 1, ISIZE
       PSST(JJ) = PTS_O(JJ)
     ELSE
       IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PSST(JJ) = PTP(JJ,1)
+      IF (YSC%U%XNATURE(JJ)==0.0_JPRB) PSST(JJ) = PSST(JJ) + ZRTCLS*(PTCLS(JJ)-PSST(JJ)) 
     ENDIF
   ENDIF
   IF (YSC%U%XWATER(JJ)>0.0_JPRB) THEN
@@ -738,6 +744,7 @@ DO JJ = 1, ISIZE
       PLST(JJ) = PTS_O(JJ)
     ELSE
       IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PLST(JJ) = PTP(JJ,1)
+      IF (YSC%U%XNATURE(JJ)==0.0_JPRB) PLST(JJ) = PLST(JJ) + ZRTCLS*(PTCLS(JJ)-PLST(JJ))
     ENDIF
   ENDIF
 ENDDO
