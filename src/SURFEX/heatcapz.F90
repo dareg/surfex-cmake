@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE HEATCAPZ(PSANDZ,PHCAPSOIL)
+    SUBROUTINE HEATCAPZ(PSANDZ,PWSATZ,PHCAPSOIL)
 !   ###############################################################
 !!****  *HEATCAPZ*  
 !!
@@ -66,24 +66,31 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 REAL,   DIMENSION(:,:), INTENT(IN) :: PSANDZ     ! soil sand fraction (-)
+REAL,   DIMENSION(:,:), INTENT(IN) :: PWSATZ     ! soil porosity
 !
 REAL,   DIMENSION(:,:), INTENT(OUT):: PHCAPSOIL  ! soil solid heat capacity (J K-1 m-3) 
 !
 !*      0.2    declarations of local variables
 !
+REAL,    DIMENSION(SIZE(PSANDZ,1),SIZE(PSANDZ,2)) :: ZGAMMAD
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('HEATCAPZ',0,ZHOOK_HANDLE)
 !
+ZGAMMAD(:,:)   = XUNDEF 
 PHCAPSOIL(:,:) = XUNDEF
 !
 WHERE(PSANDZ(:,:)/=XUNDEF)
 !   
-!  Soil solid heat capacity from Peters-Lidard et al. 1998
+! Note, ZGAMMAD (soil dry density) can be supplied from obs, but
+! for mesoscale modeling, we use the following approximation 
+! from Peters-Lidard et al. 1998:
+   ZGAMMAD(:,:)   = (1.0-PWSATZ(:,:))*XDRYWGHT
+   PHCAPSOIL(:,:) = XSPHSOIL*ZGAMMAD(:,:)     
 !
-   PHCAPSOIL(:,:) = XSPHSOIL*XDRYWGHT
+!   PHCAPSOIL(:,:) = XSPHSOIL*XDRYWGHT
 !
 END WHERE
 !
