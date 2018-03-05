@@ -732,6 +732,7 @@ ln -s TESTS/CAS_PART/TOPD2/files/*.map .
 rm -f stocks_init.txt stocks_init.txt_new stocks_init.txt_old
 ln -s TESTS/CAS_PART/TOPD2/files/stocks_init.txt stocks_init.txt_new
 ln -s stocks_init.txt_new stocks_init.txt_old
+ln -s stocks_init.txt_new stocks_init.txt
 
 cp -f OPTIONS.nam_topd OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_TOPD_TOPD_EXP_IGN
