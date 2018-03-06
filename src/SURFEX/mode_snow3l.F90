@@ -2006,7 +2006,9 @@ DO JST_NEW = 1,KNLVLS_NEW
       !                                              ------------------- PSNOWZTOP_OLD(JST_OLD)       |
       !------------------- PSNOWZTOP_NEW(JST_NEW)
       !
-      
+      ! The ratio is done in term of layer thickness but it is equivalent to perform this ratio in term of mass (SWE).
+      ! Indeed the ratio only concern one old layer at each loop step, and as its SWE is constant it is equivalent to 
+      ! think in term of depth or in term os mass (only a constant factor RhoOld between the two approach).
       ZPROPOR = ( MIN( PSNOWZTOP_OLD(JST_OLD), PSNOWZTOP_NEW(JST_NEW) )   &
                 - MAX( PSNOWZBOT_OLD(JST_OLD), PSNOWZBOT_NEW(JST_NEW) ) ) &
                  / PSNOWDZO(JST_OLD) 
