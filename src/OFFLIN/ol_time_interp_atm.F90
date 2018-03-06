@@ -38,7 +38,7 @@ SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,KSIZE_OMP,             &
 !
 USE MODD_CSTS,       ONLY : XPI, XRD, XRV, XG
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODN_IO_OFFLINE,  ONLY : NIMPUROF, LFORCIMP
+USE MODN_IO_OFFLINE,  ONLY : NIMPUROF, LFORCIMP, LFORCATMOTARTES
 USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               (K)
                             XQA       ,&! air specific humidity forcing         (kg/m3)
                             XRHOA     ,&! air density forcing                   (kg/m3)
@@ -150,13 +150,15 @@ DO J = NINDX1SFX,NINDX2SFX
     ZDCO2    = (PCO22(J)-PCO21(J))*ZCOEF
     XCO2(J) = PCO21(J) + ZDCO2
     !
+    IF (LFORCATMOTARTES) THEN
+      ZDO3    = (PO32(J)-PO31(J))*ZCOEF
+      XO3(J) = PO31(J) + ZDO3
+      
+      ZDAE    = (PAE2(J)-PAE1(J))*ZCOEF
+      XAE(J) = PAE1(J) + ZDAE
+    ENDIF
+    !
     IF (LFORCIMP) THEN
-    ZDO3    = (PO32(J)-PO31(J))*ZCOEF
-    XO3(J) = PO31(J) + ZDO3
-    
-    ZDAE    = (PAE2(J)-PAE1(J))*ZCOEF
-    XAE(J) = PAE1(J) + ZDAE
-    
       DO JIMP=1,NIMPUROF
         XIMPWET(J,JIMP) = PIMPWET2(J,JIMP)
         

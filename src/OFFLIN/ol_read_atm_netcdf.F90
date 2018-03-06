@@ -46,7 +46,7 @@ SUBROUTINE OL_READ_ATM_NETCDF (&
 !
 !
 !
-USE MODN_IO_OFFLINE,  ONLY : NIMPUROF,LFORCIMP
+USE MODN_IO_OFFLINE,  ONLY : NIMPUROF,LFORCIMP,LFORCATMOTARTES
 USE MODD_IO_SURF_OL, ONLY : XCOUNT
 USE MODI_READ_SURF
 
@@ -109,12 +109,14 @@ IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_NETCDF',0,ZHOOK_HANDLE)
  CALL READ_SURF(&
                 'OFFLIN','CO2air',    PCO2   (:,1:XCOUNT),IRET)  
          
- IF (LFORCIMP) THEN
+ IF (LFORCATMOTARTES) THEN
  !Read the O3 content and the total optical depth
    CALL READ_SURF(&
                       'OFFLIN','AODTOT',  PAE  (:,1:XCOUNT),IRET)
    CALL READ_SURF(&
                       'OFFLIN','OZONE',  PO3  (:,1:XCOUNT),IRET)
+ ENDIF
+ IF (LFORCIMP) THEN
  !Read the Impurity content in the forcing File, you have to set the name of netcdf variables to IMPWET1,IMPWET2... for wet deposit 
  !and IMPDRY1,IMPDRY2... for dry deposit. The fluxes in mocages are in g/m²/s.    
    DO JIMP=1,NIMPUROF
