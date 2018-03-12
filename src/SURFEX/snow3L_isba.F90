@@ -626,7 +626,16 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 	  ENDIF
 	ENDIF
 !
-	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 91.) THEN				! Case Between 15th of DEC until 28th of Feb.
+        IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 387.) THEN                         ! i.e. After December 15
+          IF (ZSNOW(JJ) < 0.60) THEN                                                    ! If HTN < 0.6 (m) keep producing
+            OPRODSNOWMAK(JJ) = .TRUE.
+          ELSE
+            OPRODSNOWMAK(JJ) = .FALSE.
+          ENDIF
+        ENDIF
+
+	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 92.) THEN				! Case Between 1 JAN until 28th of Feb.
+
 	  IF (ZSNOW(JJ) < 0.60) THEN							! If HTN < 0.6 (m) keep producing
 	    OPRODSNOWMAK(JJ) = .TRUE.							!  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
 	  ELSE

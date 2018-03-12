@@ -216,7 +216,7 @@ XALBICE3 = 0.08
 ! PALBICE3=0.05
 !
 ! Options for MM snow production and grooming p.s 20160211
-XPSR_SNOWMAK = 2.
+XPSR_SNOWMAK = 0.0012
 XRHO_SNOWMAK = 600.
 XPTA_SEUIL = 268.
 XTIMESNOWMAK = 0.

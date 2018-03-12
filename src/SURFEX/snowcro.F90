@@ -4203,7 +4203,7 @@ DO JJ = 1,SIZE(PSNOW(:))
       ! ZTHICKNESS_INTERMEDIATE contient ce qu'il reste d'épaisseur disponible
       ! dans les couches supérieures
       !remaining snow for remaining layers
-      ZTHICKNESS_INTERMEDIATE = ZSNOW_UPPER - SUM(ZDZOPT(JJ,1:5)) - ZDZOPT(JJ,INB_UPPER_LAYER)
+      ZTHICKNESS_INTERMEDIATE = ZSNOW_UPPER - SUM(ZDZOPT(JJ,1:MIN(5,INB_UPPER_LAYER-1))) - ZDZOPT(JJ,INB_UPPER_LAYER)
 
       IF ( ZSNOW_UPPER<=XDEPTH_THRESHOLD1 .OR. INB_UPPER_LAYER<8 ) THEN             
         INB_INTERMEDIATE  = INB_UPPER_LAYER - 6
@@ -4349,11 +4349,8 @@ DO JJ = 1,SIZE(PSNOW(:))
     !  PSNOWRHOF and density of accumulated snow
     !
     IF( PBLOWSNW(JJ,1) > XUEPSI) THEN
-            !write(*,*) 'Crocus',JJ,'Fresh',PSNOWRHOF(JJ), 'Rho Blow',PBLOWSNW(JJ,2) 
-            !write(*,*) 'Crocus',JJ,'PSR',PSR(JJ), 'DEP Blow',PBLOWSNW(JJ,1) 
-            PSNOWRHOF(JJ) = (PSNOWRHOF(JJ)*PSR(JJ) + PBLOWSNW(JJ,2) * PBLOWSNW(JJ,1))/ &
+      PSNOWRHOF(JJ) = (PSNOWRHOF(JJ)*PSR(JJ) + PBLOWSNW(JJ,2) * PBLOWSNW(JJ,1))/ &
                        (PSR(JJ)+PBLOWSNW(JJ,1))
-            !write(*,*) 'Crocus new',JJ,PSNOWRHOF(JJ) 
     ENDIF
 !!modifs par VV
 !
