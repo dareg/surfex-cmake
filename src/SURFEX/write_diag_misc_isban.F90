@@ -305,7 +305,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       IF (DGMI%LVOLUMETRIC_SNOWLIQ) THEN
         YCOMMENT='snow liquid water (kg m-3)'
       ELSE
-        YCOMMENT='snow liquid water (m)'
+      YCOMMENT='snow liquid water (m)'
       ENDIF
       CALL WRITE_SURF(DGU, U, &
                 HPROGRAM,'SNOWLIQ',DGMI%XSNOWLIQ(:,:,:),IRESP,HCOMMENT=YCOMMENT)
@@ -406,7 +406,7 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       YCOMMENT='Penetration of ram resistance sensor (2 daN)'              
       CALL WRITE_SURF(DGU, U, &
               HPROGRAM,'RAM_SONDE',DGMI%XAVG_SNOWRAM_SONDE(:),IRESP,&
-              HCOMMENT=YCOMMENT)     
+              HCOMMENT=YCOMMENT)                   
       IF (DGMI%LPROBANDS) THEN
         YCOMMENT='Snow spectral albedo'
         CALL WRITE_SURF(DGU, U, &
@@ -452,7 +452,6 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
       CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XAVG_SYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
       !
-        
       DO JIMP=1,NIMPUR
         WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
         WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
@@ -770,7 +769,13 @@ IF (DGMI%LSURF_MISC_BUDGET) THEN
         YCOMMENT='Total_Sytron_erosion_accumulation_mass (kg/m2) patch'
         CALL WRITE_SURF(DGU, U, &
                   HPROGRAM,YRECFM,DGMI%XSYTMASSC(:,:),IRESP,HCOMMENT=YCOMMENT)
+	!
+        YRECFM='PCOUNT_P'
+        YCOMMENT='Snow production counter (s) per patch'
+        CALL WRITE_SURF(DGU, U, &
+		  HPROGRAM,YRECFM,DGMI%XPRODCOUNT(:,:),IRESP,HCOMMENT=YCOMMENT)
     ENDIF
+  !
     !
   END IF
   !

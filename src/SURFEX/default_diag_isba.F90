@@ -42,7 +42,6 @@
 !!                                         add isba water budget key
 !!      Modif M. Lafaysse 09/2015: OPROSNOW, OVOLUMETRIC_SNOWLIQ
 !!     MOdif M. Dumont 11/15 : OPROBANDS
-
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -112,8 +111,6 @@ ORESET_BUDGETC    = .FALSE.
 OWATER_BUDGET     = .FALSE.
 !
 OPROSNOW          = .FALSE.
-!
-
 OPROBANDS         =.FALSE.
 
 OVOLUMETRIC_SNOWLIQ = .FALSE.

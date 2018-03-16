@@ -24,7 +24,10 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
                          PSNOWDEPTH_5DAYS,PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,    &
                          PSNOWSWE_5DAYS,PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,    &
                          PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO, &
-						 PSNOWIMP_CONC,PIMPWET,PIMPDRY)                               
+			 PSNOWIMP_CONC,PIMPWET,PIMPDRY,                                      &
+			 PSNOWMAK, PPRODCOUNT, 						     &
+			 OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			     &
+			 OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)                               
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -82,7 +85,9 @@ SUBROUTINE SNOW3L_ISBA(HISBA, HSNOW_ISBA, HSNOWRES, OMEB, OGLACIER, HIMPLICIT_WI
 !-------------------------------------------------------------------------------
 !
 USE MODD_CSTS,       ONLY : XTT, XPI, XDAY, XLMTT, XLSTT
-USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN
+USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN, &
+			    XRHO_SNOWMAK, XPSR_SNOWMAK, XPTA_SEUIL, &
+			    XPROD_SCHEME, XPROD_COUNT, XTIMESNOWMAK
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
@@ -277,8 +282,9 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PFLSN_COR, PEVAPCOR, PSNOWHMASS
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNDRIFT
 !                                      PSNDRIFT    = blowing snow sublimation (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT)     :: PSYTMASS 
+REAL, DIMENSION(:), INTENT(OUT)     :: PSYTMASS, PPRODCOUNT
 !                                      PSYTMASS    = eroded/cumulated snow mass in SYTRON (kg/m2/s)
+!                                      PPRODCOUNT  = total production time (s)
 !
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDEND
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSPHER
@@ -349,6 +355,11 @@ CHARACTER(3), INTENT(IN)            :: HSNOWZREF
                                          ! HSNOWMETAMO=TA2 TARTES with constant impurities as function of ageing
 LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTROn snow redistribution scheme
 LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
+!	Snowmaking option by p.Spandre 20160211
+REAL, DIMENSION(:), INTENT(OUT)     :: PSNOWMAK
+LOGICAL, INTENT(IN)                 :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &
+				       OSELF_PROD, OSNOWMAK_PROP
+LOGICAL, DIMENSION(:), INTENT(INOUT)   :: OPRODSNOWMAK
 
 !*      0.2    declarations of local variables
 !
@@ -365,7 +376,9 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD, & 
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
-                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2
+                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2,  &                      
+				       ZTC, ZTW, ZEOD, ZTD, ZTAV, ZEOAV, DD,  &
+				       GA
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
 !                                      ZRRSNOW      = rain rate over snow [kg/(m2 s)]
 !                                      ZSNOW        = snow depth (m) 
@@ -392,6 +405,15 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
 !                                      ZWORK        = local working variable (*)
 !                                      ZC2          = sub-surface heat capacity [(K m2)/J]
 
+!				       ZTC	    = Atmospheric temp (°C)						p.spandre 2014/03/27
+! 				       ZTW	    = Wet bulb temperature (K)						p.spandre 2014/03/27
+! 				       ZEOD	    = Saturated vapor pressure at dew temp. (kPa)			p.spandre 2014/06/04
+! 				       ZTD	    = Dew Point temp.  (°C)						p.spandre 2014/06/04
+! 				       ZTAV	    = Average temp. =(ZTD+ZTC)/2  (°C)					p.spandre 2014/06/04
+! 				       ZEOAV	    = Saturated vapor pressure at average temp. ZTAV (kPa)		p.spandre 2014/06/04
+! 				       DD	    = Slope of saturated vapor pressure curve (kPa/°C)			p.spandre 2014/06/04
+! 				       GA	    = Psychrometric constant (kPa/°C)					p.spandre 2014/06/04
+
 REAL, DIMENSION(SIZE(PTA),4)        :: ZBLOWSNW   ! Properties of deposited blowing snow
                                       !    1 : Deposition flux (kg/m2/s)
                                       !    2 : Density of deposited snow (kg/m3)
@@ -400,10 +422,19 @@ REAL, DIMENSION(SIZE(PTA),4)        :: ZBLOWSNW   ! Properties of deposited blow
 REAL, DIMENSION(SIZE(PTA))          :: ZBLOWSNW_ACC
 !                                      ZBLOWSNW_ACC  = minimum equivalent snow depth
 !                                                      for deposition of blown snow particles
+!
 !                                                      during the current time step (m)
-!REAL, DIMENSION(SIZE(PTA))          :: ZANGL_ILLUM  !BC: moved up to ISBA.F90
-!                                      ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
-                                      !  used only in TARTES for now
+LOGICAL, DIMENSION(SIZE(PTA))       :: LCONDSNOWMAK
+LOGICAL, DIMENSION(SIZE(PTA))       :: LTIMESNOWMAK
+LOGICAL		   		    :: PMONTH
+LOGICAL		   		    :: PDAY
+REAL, DIMENSION(31,31)		    :: PRODTHEO
+! 				       LCONDSNOWMAK = Logical : Suitable Atmospheric conditions for snowmaking				p.spandre 2014/03/28
+!				       LTIMESNOWMAK = Logical: suitable timing conditions for snowmaking				p.spandre 2014/03/28
+! 				       PMONTH	    = integer : Suitable month for snowmaking = 1. Otherwise 0.				p.spandre 2014/03/28
+! 				       PDAY	    = integer : Suitable time in the day for snowmaking = 1. Otherwise 0.		p.spandre 2014/03/28
+! 				       PRODTHEO	    = real : Theoretical production for each date (month, day)				p.spandre 2014/03/28
+
 !
 !*      0.3    declarations of packed  variables
 !
@@ -468,6 +499,22 @@ PSNOWLIQ(:,:)  = 0.0
 PSNOWDZ(:,:)   = 0.0
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
+PSNOWMAK(:) = 0.0
+!
+ZTC(:)         = 0.0			! Atmospheric temp (°C)							p.spandre 2014/03/27
+ZTW(:)         = 0.0			! Wet bulb temperature (K)						p.spandre 2014/03/27
+ZEOD(:)	       = 0.0			! Saturated vapor pressure at dew temp. (kPa)				p.spandre 2014/06/04
+ZTD(:)	       = 0.0			! Dew Point temp.  (°C)							p.spandre 2014/06/04
+ZTAV(:)        = 0.0			! Average temp. =(ZTD+ZTC)/2  (°C)					p.spandre 2014/06/04
+ZEOAV(:)       = 0.0			! Saturated vapor pressure at average temp. ZTAV (kPa)			p.spandre 2014/06/04
+DD(:)          = 0.0			! Slope of saturated vapor pressure curve (kPa/°C)			p.spandre 2014/06/04
+GA(:)          = 0.0			! Psychrometric constant (kPa/°C)					p.spandre 2014/06/04
+LCONDSNOWMAK(:)= .FALSE.		!Logical: suitable atmospheric conditions for snowmaking		p.spandre 2014/03/28
+LTIMESNOWMAK(:)= .FALSE.		!Logical: suitable timing conditions for snowmaking			p.spandre 2014/03/28
+PMONTH	       = .FALSE.
+PDAY	       = .FALSE.
+PRODTHEO(:,:)  = 0.0
+PPRODCOUNT(:)  = 0.0
 !
 INLVLS          = SIZE(PSNOWSWE(:,:),2)                         
 INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
@@ -511,6 +558,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
       ZRRSNOW(JJ)        = PPSN(JJ)*PRR(JJ)
       PRRSFC(JJ)         = PRR(JJ) - ZRRSNOW(JJ)
       ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
+!							 ! Should i remove it? p.s. 20160209
    ENDDO
 !
 ! Calculate preliminary snow depth (m)
@@ -544,35 +592,189 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 ! ===============================================================
 !        Snow redistribution scheme Sytron
 ! 
-! 
-  IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
+IF (HSNOW_ISBA=='CRO' .AND. OSNOWSYTRON) THEN
 
-    CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
+  CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
                         PSNOWHEAT,PSNOWSWE,PSNOWRHO,                       &
                         PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,KTAB_SYT, &
                         ZBLOWSNW,PSYTMASS)
 !
 ! Calculate maximum snow depth (m) of deposited blown snow particles
 !
-    WHERE(ZBLOWSNW(:,1)> 0.)
-      ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
-    END WHERE
-  ENDIF
+  WHERE(ZBLOWSNW(:,1)> 0.)
+     ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
+  END WHERE
+ENDIF
 !
 ! Calculate preliminary snow depth (m)
 
-  ZSNOW(:)=0.
-  ZSNOWH(:)=0.
-  ZSNOWSWE_1D(:)=0.
-  ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
+
+   ZSNOW(:)=0.
+   ZSNOWH(:)=0.
+   ZSNOWSWE_1D(:)=0.
+   ZSNOWH1(:)              = PSNOWHEAT(:,1)*PSNOWSWE(:,1)/PSNOWRHO(:,1) ! sfc layer only
 !
   DO JWRK=1,SIZE(PSNOWSWE,2)
     DO JJ=1,SIZE(PSNOWSWE,1)
         ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PSNOWSWE(JJ,JWRK)
-        ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
+      ZSNOW(JJ)           = ZSNOW(JJ)       + PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
         ZSNOWH(JJ)          = ZSNOWH(JJ)      + PSNOWHEAT(JJ,JWRK)*PSNOWSWE(JJ,JWRK)/PSNOWRHO(JJ,JWRK)
     END DO
   ENDDO
+
+! ======================================================================================================================
+!-----------------------	Snowmaking option by p.spandre	--------------------------------------------------------|
+!															|
+! A.Timing conditions for snowmaking
+!	A.1. Theoretical production
+!
+  IF (OSNOWMAK_BOOL) THEN
+  !
+    DO JJ=1, 30
+      PRODTHEO(11,JJ) = XPROD_SCHEME(1)*30
+    ENDDO
+    DO JJ=1, 31
+      PRODTHEO(12,JJ) = XPROD_SCHEME(2)*31 + PRODTHEO(11,1)
+    ENDDO
+    DO JJ=1, 31
+      PRODTHEO(1,JJ) = XPROD_SCHEME(3)*31 + PRODTHEO(12,1)
+    ENDDO
+    DO JJ=1, 28
+      PRODTHEO(2,JJ) = XPROD_SCHEME(4)*28 + PRODTHEO(1,1)
+    ENDDO
+    DO JJ=1, 31
+      PRODTHEO(3,JJ) = XPROD_SCHEME(5)*31 + PRODTHEO(2,1)
+    ENDDO
+!
+!	A.2. Timing conditions
+!		A.2.1. Month condition
+    IF (TPTIME%TDATE%MONTH < 11. .and. TPTIME%TDATE%MONTH > 3.) THEN				! No production allowed from april to otober included
+      PMONTH = .FALSE.
+    ELSE
+      PMONTH = .TRUE.
+    ENDIF
+  ! 	  	A.2.2. Daily condition
+    IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN		! Production allowed all day from 1st of NOV ... until 15th of DEC
+      PDAY = .TRUE.
+    ELSE
+      IF (TPTIME%TIME > 28800. .and. TPTIME%TIME < 64800.) THEN								! No production allowed between 8am and 7pm
+	PDAY = .FALSE.
+      ELSE
+	PDAY = .TRUE.
+      ENDIF
+    ENDIF
+
+  !       A.3. Boolean from timing conditions
+    DO JJ=1,SIZE(PTA)
+!-----------------------	SELFPROD option by p.spandre	----------------------------------------|
+!				20150728								|
+!		A.2.4. SELFPROD option
+!
+      IF (OSELF_PROD) THEN
+!
+!!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
+!
+	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN			! i.e. SM possible from 1st of NOV (11*31+1=342) ... until 15th of DEC (12*31+15=387)
+!																	! i.e. SM possible even during day time on that period
+	  IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 150.) THEN										! Max admissible prod in that period 150 kg/m2 
+	    OPRODSNOWMAK(JJ) = .TRUE.													! .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+	  ELSE
+	    OPRODSNOWMAK(JJ) = .FALSE.
+	  ENDIF
+	ENDIF
+!
+        IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 387.) THEN                         ! i.e. After December 15
+          IF (ZSNOW(JJ) < 0.60) THEN                                                    ! If HTN < 0.6 (m) keep producing
+            OPRODSNOWMAK(JJ) = .TRUE.
+          ELSE
+            OPRODSNOWMAK(JJ) = .FALSE.
+          ENDIF
+        ENDIF
+
+	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 92.) THEN				! Case Between 1 JAN until 28th of Feb.
+
+	  IF (ZSNOW(JJ) < 0.60) THEN							! If HTN < 0.6 (m) keep producing
+	    OPRODSNOWMAK(JJ) = .TRUE.							!  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+	  ELSE
+	    OPRODSNOWMAK(JJ) = .FALSE.
+	  ENDIF
+	ENDIF
+!!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
+! 
+      ELSE	! SELF_PROD conditions is FALSE
+! 		A.2.3. Suitable night for snowmaking
+	IF (TPTIME%TIME == 64800.) THEN		! condition at 6pm i.e. for each time step, you compare the total.
+	  IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
+	    OPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
+	  ELSE														! then up to day+1 one can produce
+	    OPRODSNOWMAK(JJ) = .FALSE.
+	  ENDIF
+	ENDIF
+      ENDIF
+!													|
+!-----------------------	SELFPROD option by p.spandre	----------------------------------------|
+
+      IF (PDAY .and. PMONTH .and. OPRODSNOWMAK(JJ)) THEN		! Calendar (month+day timing) + suitable night => Timing conditions = TRUE, let's produce!
+	LTIMESNOWMAK(JJ) = .TRUE.
+      ELSE
+	LTIMESNOWMAK(JJ) = .FALSE.
+      ENDIF
+
+    ENDDO
+  ENDIF
+
+  DO JJ=1,SIZE(PTA)
+    IF (OSNOWMAK_BOOL) THEN
+!
+! B. Atmospheric conditions for snowmaking
+!	B.1. Calculation of Wet Bulb temperature calculation according to Jensen,ASCE, 1990 (added p.spandre 04/06/2014)
+      ZTC(JJ)	= PTA(JJ)-273.15								!calculation of atmospheric temperature (°C)
+!		B.1.1 Calculation of dew point temp. TD (°C)
+      IF (PQA(JJ) < 0.001) THEN									! loop to prevent ZEOD from being negative or zero (bug with LOG calculation) 2014/09/04
+	ZEOD(JJ)	= 0.001/(0.622+0.001)*PPS(JJ)/1000.					! Vapor pressure at dew point (kPa) [2.9]
+      ELSE
+	ZEOD(JJ)	= (PQA(JJ)/PRHOA(JJ))/(0.622+0.378*(PQA(JJ)/PRHOA(JJ)))*PPS(JJ)/1000.	! Vapor pressure at dew point (kPa) [2.3]
+      ENDIF											! NB: 	PQA   = air humidity forcing (kg/m3)
+!												! 	PRHOA = air density 	=> mixing ratio r = m(vapor)/m(air) = m(vapor)/[Volume(air)*Density(air)] = [m(vapor)/Volume(air)]/Density(air) = PQA/PRHOA
+      IF (ABS(LOG(ZEOD(JJ))-16.78) < 0.001) THEN						! loop to prevent LOG(ZEOD)-16.78 from being zero => divide by zero 2014/09/04
+	ZTD(JJ)	= (116.9+237.3*LOG(ZEOD(JJ)))/0.001
+      ELSE
+	ZTD(JJ)	= (116.9+237.3*LOG(ZEOD(JJ)))/(16.78-LOG(ZEOD(JJ)))			! Dew Point temperature (°C)  [7.11] and [7.22]
+      ENDIF
+!		B.1.2. Calculation of the slope of the saturation vapor pressure curve
+      ZTAV(JJ)	= (ZTD(JJ)+ZTC(JJ))/2							! Average temperature between Dew point and actual conditions (cf. p176,7.19, Jensen)
+      ZEOAV(JJ)	= EXP((16.78*ZTAV(JJ)-116.9)/(ZTAV(JJ)+237.3))				! Saturated vapor pressure at average temp. (kPa) [7.11]
+      DD(JJ)	= 4098.*ZEOAV(JJ)/(ZTAV(JJ)+237.3)**2					! Slope of the saturation vapor pressure curve (kPa/°C) [7.13]
+!		B.1.3. Calculation of psychrometric constant
+      GA(JJ)	= PPS(JJ)/1000.*0.001013/(0.622*(2.501-2.361/1000.*ZTC(JJ)))		! Latent heat of vaporization (MJ/kg) [7.1] included into GA formula [7.15]
+!		B.1.4. Wet bulb temp. [7.19]
+      ZTW(JJ)	= (GA(JJ)*ZTC(JJ)+DD(JJ)*ZTD(JJ))/(GA(JJ)+DD(JJ))
+      ZTW(JJ)	= ZTW(JJ)+273.15
+!   		End of Wet Bulb Temperature Calculation
+!
+!	B.2. Boolean over atmospheric conditions for snowmaking
+      IF (ZTW(JJ) < XPTA_SEUIL .and. PVMOD(JJ) < 4.2) THEN
+	LCONDSNOWMAK(JJ) = .TRUE.
+      ELSE
+	LCONDSNOWMAK(JJ) = .FALSE.
+      ENDIF
+!
+! C. Boolean over timing + atmospheric conditions									! Production possible even if natural snow falling P.Spandre 2014/03/04
+      IF (LCONDSNOWMAK(JJ) .and. LTIMESNOWMAK(JJ)) THEN
+	PSNOWMAK(JJ)   = XPSR_SNOWMAK*PTSTEP/XRHO_SNOWMAK    								! snowmaking depth by P.S 19/11/2013
+	XPROD_COUNT(JJ) = XPROD_COUNT(JJ)+PTSTEP
+      ELSE
+	PSNOWMAK(JJ)=0.
+      ENDIF
+    ENDIF
+    ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + PSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
+!
+    PPRODCOUNT(JJ) = XPROD_COUNT(JJ)									! PPRODCOUNT will be used to write into a file (DIAG_ISBA) 20150311
+!
+  ENDDO
+!															|
+!-----------------------	Snowmaking option by p.spandre	--------------------------------------------------------|
+!
 !
 ! ===============================================================
 ! === Packing: Only call snow model when there is snow on the surface
@@ -615,7 +817,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !
 !
    IF(OMEB)THEN
-     ZPSN(:)      = 1.0
+     ZPSN(:)=1.0
      IF(HISBA == 'DIF')THEN
         ZWGHT(:)  = PSOILHCAPZ(:,2)*PDZG(:,2)/(PSOILHCAPZ(:,1)*PDZG(:,1) + PSOILHCAPZ(:,2)*PDZG(:,2))
         ZC2(:)    = 1/(PSOILHCAPZ(:,2)*PDZG(:,2))
@@ -626,7 +828,7 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
 !    To Conserve mass in ISBA without MEB, 
 !    EVAP must be weignted by the snow fraction
 !    in the calulation of THRUFAL
-     ZPSN(:)   = PPSN(:)
+     ZPSN(:)=PPSN(:)
    ENDIF
 !
    ZSNOWABLAT_DELTA(:) = 0.0
@@ -719,15 +921,34 @@ IF (HSNOW_ISBA=='3-L' .OR. HISBA == 'DIF' .OR. HSNOW_ISBA == 'CRO') THEN
    DO JWRK=1,INLVLS
       DO JJ=1,SIZE(PSNOWSWE,1)
          IF(PSNOWSWE(JJ,JWRK)>0.0.AND.PSNOWTEMP(JJ,JWRK)<ZCHECK_TEMP)THEN
-            WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
-            WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
-            WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
-            WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
-            WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
-            WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
-            WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
-            WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
-            CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+              WRITE(*,*) 'Suspicious low temperature :',PSNOWTEMP(JJ,JWRK)
+              WRITE(*,*) 'At point and location      :',JJ,'LAT=',PLAT(JJ),'LON=',PLON(JJ)
+              WRITE(*,*) 'At snow level / total layer:',JWRK,'/',INLVLS
+              WRITE(*,*) 'SNOW MASS BUDGET (kg/m2/s) :',ZSNOW_MASS_BUDGET(JJ)
+              WRITE(*,*) 'SWE BY LAYER      (kg/m2)  :',PSNOWSWE (JJ,1:INLVLS)
+              WRITE(*,*) 'DEPTH BY LAYER      (m)    :',PSNOWDZ  (JJ,1:INLVLS)
+              WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PSNOWRHO (JJ,1:INLVLS)
+              WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',PSNOWTEMP(JJ,1:INLVLS)
+              CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+            ENDIF
+         ELSE
+           !Prognostic variables forced to XUNDEF for correct outputs
+           PSNOWDZ(JJ,JWRK)=XUNDEF
+           ! Careful : to compute average surface temperature in ISBA_SNOW_AGR
+           ! PSNOWTEMP(JJ,1) is required when PPSN(JJ)>0 even if PSNOWSWE(JJ,1)==0
+           ! (vanishing snowpack)
+           IF (.NOT.((PPSN(JJ)>0.0).AND.(JWRK==1))) THEN
+               PSNOWTEMP(JJ,JWRK)=XUNDEF
+           ENDIF
+           PSNOWLIQ(JJ,JWRK)=XUNDEF
+           PSNOWHEAT(JJ,JWRK)=XUNDEF
+           PSNOWRHO(JJ,JWRK)=XUNDEF
+           PSNOWAGE(JJ,JWRK)=XUNDEF
+           IF (HSNOW_ISBA=='CRO') THEN
+               PSNOWGRAN1(JJ,JWRK)=XUNDEF
+               PSNOWGRAN2(JJ,JWRK)=XUNDEF
+               PSNOWHIST(JJ,JWRK)=XUNDEF
+           END IF
          ENDIF
       ENDDO
    ENDDO
@@ -863,6 +1084,7 @@ REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIR_SW !F.T
 REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SCA_SW !F.T
 REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_SPEC_ALB !F.T
 REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIFF_RATIO !F.T
+REAL, DIMENSION(KSIZE1)        :: ZP_SNOWMAK
 !
 REAL, PARAMETER :: ZDEPTHABS = 0.60 ! m
 !
@@ -870,7 +1092,7 @@ INTEGER :: JWRK, JJ, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA:CALL_MODEL',0,ZHOOK_HANDLE)
-!
+
 ! Initialize:
 !
 ZP_PSN_GFLXCOR(:)  = 0.
@@ -898,10 +1120,10 @@ IF (HSNOW_ISBA=='CRO') THEN
          JI = KMASK(JJ)
          ZP_SNOWGRAN1(JJ,JWRK) = PSNOWGRAN1 (JI,JWRK)
          ZP_SNOWGRAN2(JJ,JWRK) = PSNOWGRAN2 (JI,JWRK)
-         ZP_SNOWHIST (JJ,JWRK) = PSNOWHIST  (JI,JWRK)
+         ZP_SNOWHIST (JJ,JWRK) = PSNOWHIST  (JI,JWRK)        
       ENDDO
    ENDDO
-   
+
    DO JIMP=1,NIMPUR 
      DO JWRK=1,KSIZE2
         DO JJ=1,KSIZE1
@@ -934,7 +1156,7 @@ ELSE
          ZP_SNOWHIST (JJ,JWRK) = XUNDEF
       ENDDO
    ENDDO
-   
+
    
    DO JIMP=1,NIMPUR
      DO JJ=1,KSIZE1
@@ -1027,8 +1249,11 @@ DO JJ=1,KSIZE1
    ZP_SWNETSNOW   (JJ) = PSWNETSNOW   (JI) 
    ZP_SWNETSNOWS  (JJ) = PSWNETSNOWS  (JI) 
    ZP_LWNETSNOW   (JJ) = PLWNETSNOW   (JI) 
+!
+   ZP_SNOWMAK (JJ) = PSNOWMAK  (JI)
+!  
 ENDDO
-
+!
 DO JWRK=1,SIZE(P_DIR_SW,2)
   DO JJ=1,KSIZE1
     JI = KMASK(JJ)
@@ -1119,7 +1344,9 @@ IF (HSNOW_ISBA=='CRO') THEN
              ZP_LAT, ZP_LON, ZP_BLOWSNW, HSNOWDRIFT,OSNOWDRIFT_SUBLIM,     &
              OSNOW_ABS_ZENITH, HSNOWMETAMO,HSNOWRAD,OATMORAD,ZP_DIR_SW,    &
              ZP_SCA_SW,ZP_SPEC_ALB, ZP_DIFF_RATIO,ZP_IMPWET,ZP_IMPDRY,     &
-             HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF         )
+             HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF         &
+	     ZP_SNOWMAK, OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,    &
+	     OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0
@@ -1294,7 +1521,7 @@ IF (HSNOW_ISBA=='CRO') THEN
       PSNOWGRAN2(JI,JWRK) = ZP_SNOWGRAN2(JJ,JWRK)
       PSNOWHIST (JI,JWRK) = ZP_SNOWHIST (JJ,JWRK)
     ENDDO
-  ENDDO
+  ENDDO      
   
   DO JIMP=1,NIMPUR
     DO JWRK=1,KSIZE2

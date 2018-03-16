@@ -71,8 +71,10 @@
                       PSNOWRAM,PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,     &
                       PSNOWDEPTH_5DAYS,PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,          &
                       PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,PSNOWSWE_7DAYS,              &
-					  PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
-                      P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC)
+		      PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,PSNOW_REFROZENTHICKNESS, &
+                      P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,  &
+		      PPRODCOUNT,OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,	 &
+		      OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
 !     ##########################################################################
 !
 !
@@ -609,6 +611,10 @@ REAL, DIMENSION(:), INTENT(IN)   :: PFWTD    ! grid-cell fraction of water table
 REAL, DIMENSION(:), INTENT(IN)   :: PWTD     ! water table depth from hydrological model (m)
 !                                            ! negative below the soil surface
 !
+LOGICAL, INTENT(IN)              :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &		! Snowmaking and grooming options by PierreS 20160211
+				       OSELF_PROD, OSNOWMAK_PROP
+LOGICAL, DIMENSION(:), INTENT(INOUT):: OPRODSNOWMAK
+!
 !* prognostic variables
 !  --------------------
 !
@@ -690,7 +696,7 @@ REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWTEMP  ! snow layer temperatures (K)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWLIQ   ! snow layer liquid water content (m)
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PSNOWDZ    ! snow layer thickness (m)
 REAL, DIMENSION(:), INTENT(OUT)     :: PSYTMASS   ! eroded/accumulated snow (SYTRON) (kg/m2/s)
-
+!
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWDEND
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSPHER
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWSIZE
@@ -709,8 +715,10 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSNOWSWE_7DAYS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRAM_SONDE
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_WETTHICKNESS
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOW_REFROZENTHICKNESS
+REAL, DIMENSION(:), INTENT(OUT) :: PPRODCOUNT	   ! snow production counter (s)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PSNOWIMP_CONC
+!
 !
 !
 !* output soil parameters
@@ -958,6 +966,8 @@ LOGICAL, DIMENSION(SIZE(PTG,1))  :: GSHADE         ! mask where evolution occurs
 !
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+REAL, DIMENSION(SIZE(PWR)) :: PSNOWMAK !PWR was PSNOWMAK
+
 !
 !-------------------------------------------------------------------------------
 !
@@ -1029,7 +1039,7 @@ ELSE
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
-!
+!snow3L_
 ZALB3L(:)=PSNOWALB(:)
 !
 !-------------------------------------------------------------------------------
@@ -1122,9 +1132,11 @@ IF(OMEB)THEN
         PSNOWDEND,PSNOWSPHER,PSNOWSIZE,PSNOWSSA,PSNOWTYPEMEPRA,PSNOWRAM,       &
         PSNOWSHEAR,PSNOWDEPTH_1DAYS,PSNOWDEPTH_3DAYS,PSNOWDEPTH_5DAYS,         &
         PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,PSNOWSWE_5DAYS,         &
-        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS, 					   &
-        PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW,PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY )
-
+        PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS, 		       &
+        PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW,PSPEC_ALB,                  &
+	PDIFF_RATIO,PSNOWIMP_CONC,PIMPWET,PIMPDRY , PPRODCOUNT,                &
+	OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			       &
+	OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
 ELSE
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -1179,7 +1191,9 @@ ELSE
            PSNOWDEPTH_5DAYS,PSNOWDEPTH_7DAYS,PSNOWSWE_1DAYS,PSNOWSWE_3DAYS,     &
            PSNOWSWE_5DAYS,PSNOWSWE_7DAYS,PSNOWRAM_SONDE,PSNOW_WETTHICKNESS,     &
            PSNOW_REFROZENTHICKNESS,P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,  &
-		   PSNOWIMP_CONC,PIMPWET,PIMPDRY ) 
+	   PSNOWIMP_CONC,PIMPWET,PIMPDRY, PSNOWMAK, PPRODCOUNT, 		&
+	   OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			&
+	   OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)  
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation

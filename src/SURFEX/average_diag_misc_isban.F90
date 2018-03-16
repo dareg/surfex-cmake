@@ -64,6 +64,8 @@ IMPLICIT NONE
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 TYPE(ISBA_t), INTENT(INOUT) :: I
 !
+!*      0.2    declarations of local variables
+!
 INTEGER                         :: JJ        ! grid-cell loop counter
 INTEGER                         :: JPATCH    ! tile loop counter
 INTEGER                         :: JLAYER    ! layer loop counter
@@ -445,6 +447,8 @@ IF(I%TSNOW%SCHEME=='CRO') THEN
 
     DGMI%XAVG_SYTMASS(:) = 0.
     DGMI%XAVG_SYTMASSC(:) = 0.
+
+    DGMI%XAVG_PRODCOUNT(:) = 0.
  
     DO JPATCH=1,INP
     !
@@ -456,6 +460,9 @@ IF(I%TSNOW%SCHEME=='CRO') THEN
     !     SYTRON total outputs
           DGMI%XAVG_SYTMASS(JJ) = DGMI%XAVG_SYTMASS(JJ) + I%XPATCH(JJ,JPATCH) * DGMI%XSYTMASS(JJ,JPATCH)
           DGMI%XAVG_SYTMASSC(JJ) = DGMI%XAVG_SYTMASSC(JJ) + I%XPATCH(JJ,JPATCH) * DGMI%XSYTMASSC(JJ,JPATCH)
+    !
+    !     Snow production counter output
+          DGMI%XAVG_PRODCOUNT(JJ) = DGMI%XAVG_PRODCOUNT(JJ) + I%XPATCH(JJ,JPATCH) * DGMI%XPRODCOUNT(JJ,JPATCH)
     !      
         ENDIF
     !
@@ -468,6 +475,7 @@ ENDIF
 
 !
 !       4.     Final computation for grid-cell diag
+!
 !              ------------------------------------
 !
 !Total Soil Wetness Index and Soil Water Content (m3.m-3)

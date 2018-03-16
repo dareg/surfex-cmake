@@ -113,11 +113,11 @@ DO JST=1,SIZE(PSNOWSWE,2)
     
       ZG1=PSNOWGRAN1(JJ,JST)/99.
       ZRFIN=0.17*PSNOWRHO(JJ,JST)-31
-
-      ! optical diameter
-      ZDIAM = PSNOWGRAN2(JJ,JST)*PSNOWGRAN1(JJ,JST)/XX + &
+    
+        ! optical diameter
+        ZDIAM = PSNOWGRAN2(JJ,JST)*PSNOWGRAN1(JJ,JST)/XX + &
                 MAX( 0.0004, 0.5*PSNOWGRAN2(JJ,JST) ) * ( 1.-PSNOWGRAN1(JJ,JST)/XX ) 
-      ! MEPRA grain type
+        ! MEPRA grain type
       
       ! Carmagnola and Morin had the terrible idea to use SNOWGRAN1 and SNOWGRAN2 with different meanings depending on the physical options.
       ! This complicates everything and should be changed.
@@ -127,7 +127,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ELSE
           GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<XVDIAM6*(4.-PSNOWGRAN2(JJ,JST))-XUEPSI )   
       ENDIF
-      
+
       
       IF (.NOT. GDENDRITIC) THEN
         !Non dendritic case
@@ -169,18 +169,18 @@ DO JST=1,SIZE(PSNOWSWE,2)
         !3 classes of grain size in mm 0:[0,0.55[, 1:[0.55,1.05[, 2:[1.05, +inf[
         !#########Strange +0.05
         IF (PSNOWSIZE(JJ,JST) < 0.00055) THEN
-          ICLASS_SIZE = 0
+          ICLASS_SIZE=0
         ELSEIF (PSNOWSIZE(JJ,JST) < 0.00105) THEN
-          ICLASS_SIZE = 1
-        ELSE
-          ICLASS_SIZE = 2
+          ICLASS_SIZE=1
+        ELSE 
+          ICLASS_SIZE=2
         ENDIF
-
+      
         !Overall 10x3x6 classes from 1 to 180 (included)
         ICLASS = 1 + ICLASS_SPHER + ICLASS_SIZE*10 + ICLASS_HIST*30
-
+      
         !Snow type obtained in table ICRIS_NONDEND1D
-        PSNOWTYPEMEPRA(JJ,JST) = ICRIS_NONDEND1D(ICLASS)
+        PSNOWTYPEMEPRA(JJ,JST)=ICRIS_NONDEND1D(ICLASS)
 
 
         ! Ram resistance (non dendritic case)
@@ -223,21 +223,21 @@ DO JST=1,SIZE(PSNOWSWE,2)
 
       ELSE
         !Dendritic case
-
+      
         IF ( HSNOWMETAMO=='B92' ) THEN
             !Dendricity,sphericty and grain size
             PSNOWSIZE(JJ,JST)  =  XUNDEF  !Grain size not defined for dendritic snow
             PSNOWDEND(JJ,JST)  = -PSNOWGRAN1(JJ,JST) / XX
             PSNOWSPHER(JJ,JST) =  PSNOWGRAN2(JJ,JST) / XX
-            
+
             !Optical diameter for SSA diagnostic
             ZDIAM = PSNOWDEND(JJ,JST) * XD1 + (1 - PSNOWDEND(JJ,JST)) * &
             (PSNOWSPHER(JJ,JST) * XD2 + (1 - PSNOWSPHER(JJ,JST)) * XD3)
-            !ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
-            !      ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 )
-            ZDIAM = ZDIAM/10000.
-            
-            
+        ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
+              ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 ) 
+        ZDIAM = ZDIAM/10000.
+
+
         ELSE
             PSNOWSIZE(JJ,JST)  = XUNDEF
             PSNOWSPHER(JJ,JST) = PSNOWGRAN2(JJ,JST)
@@ -246,18 +246,18 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ENDIF
 
         !10 classes of dendricity 0:[0,0.1[, ..., 9:[0.9,1.0[ (value 1.0 does not exist)
-        ICLASS_DEND = INT(10 * PSNOWDEND(JJ,JST))
-
+        ICLASS_DEND=INT(10*PSNOWDEND(JJ,JST))
+      
         !10 classes of sphericity 0:[0,0.05[, 1:[0.05,0.15[, ..., 9:[0.85,1.0]
         !###########Strange way of defining sphericity classes -> Check with very old versions
         !###########ICLASS_SPHER = MIN(NINT(10 * PSNOWSPHER(JJ,JST)),9) Not exactly the same
         ICLASS_SPHER = MIN(INT(10 * PSNOWSPHER(JJ,JST) + 0.05),9)
-
+      
         !Overall 10x10 classes from 1 to 100 (included)
         ICLASS = 1 + ICLASS_DEND + ICLASS_SPHER*10
 
         !Snow type obtained in table ICRIS_DEND1D
-        PSNOWTYPEMEPRA(JJ,JST) = ICRIS_DEND1D(ICLASS)
+        PSNOWTYPEMEPRA(JJ,JST)=ICRIS_DEND1D(ICLASS)
 
       ENDIF
 

@@ -270,6 +270,7 @@ ZFF    (:) = 0.0
 ZF5    (:) = 1.0
 ZLVTT  (:) = XLVTT
 !We compute ZCD, ZCH and ZRI
+! WRITE(*,*) 'ZTS before CALL DRAG (init_isba_sbl)', ZTS
  CALL DRAG(HISBA, PTSNOW%SCHEME, HCPSURF,  PTSTEP,                            &
           ZTS, ZWG, ZWGI, ZEXNS, ZEXNA, PTA,                                  &
           ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS,                                 &
@@ -278,6 +279,7 @@ ZLVTT  (:) = XLVTT
           ZRESA, ZCH, ZCD, ZCDN, ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS,            &
           ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS, ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA,    &
           ZWR, PRHOA, ZLVTT                                                   )  
+! WRITE(*,*) 'ZTS after CALL DRAG (init_isba_sbl)', ZTS
 !
 !Initialisation of T, Q, Wind and TKE on all canopy levels
 DO JLAYER=1,KLVL

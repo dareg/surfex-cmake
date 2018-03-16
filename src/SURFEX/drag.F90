@@ -229,7 +229,9 @@ PRI(:)      =0.
 !
 ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !
+! WRITE(*,*) 'in DRAG, before', ZQSAT, PTG(:), PPS(:)
 ZQSAT(:) = QSAT(PTG(:),PPS(:)) 
+! WRITE(*,*) 'in DRAG, after', ZQSAT, PTG(:), PPS(:)
 !
 IF(PRESENT(PQSAT))PQSAT(:)=ZQSAT(:)
 !

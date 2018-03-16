@@ -358,7 +358,7 @@ ELSE
   ISIZE_00 = ISIZE_00 + 1
   PKI%XP_SNOWGRAN2  => PKI%XBLOCK_00(:,:,ISIZE_00) 
   ISIZE_00 = ISIZE_00 + 1
-  PKI%XP_SNOWHIST   => PKI%XBLOCK_00(:,:,ISIZE_00)
+  PKI%XP_SNOWHIST   => PKI%XBLOCK_00(:,:,ISIZE_00) 
   ISIZE_000 = ISIZE_000 + 1
   PKI%XP_SNOWIMPUR   => PKI%XBLOCK_000(:,:,:,ISIZE_000)
 END IF
@@ -945,7 +945,7 @@ IF (I%NPATCH==1) THEN
   PKI%XP_SSO_SLOPE    (:)    =    I%XSSO_SLOPE    (:)
   PKI%XP_SSO_DIR      (:)    =    I%XSSO_DIR      (:)
   IF ((I%TSNOW%SCHEME=='CRO') .AND. (I%LSNOWSYTRON)) THEN
-    PKI%NP_TAB_SYT      (:)    =    NTAB_SYT      (:)
+  PKI%NP_TAB_SYT      (:)    =    NTAB_SYT      (:)
   ELSE
     PKI%NP_TAB_SYT      (:)    = -999.
   ENDIF
@@ -1016,7 +1016,7 @@ IF (I%NPATCH==1) THEN
   IF(I%TSNOW%SCHEME=='CRO') THEN
     PKI%XP_SNOWGRAN1  (:,:) =     I%TSNOW%GRAN1  (:,:,1)
     PKI%XP_SNOWGRAN2  (:,:) =     I%TSNOW%GRAN2  (:,:,1)
-    PKI%XP_SNOWHIST   (:,:) =     I%TSNOW%HIST   (:,:,1)
+    PKI%XP_SNOWHIST   (:,:) =     I%TSNOW%HIST   (:,:,1)  
     PKI%XP_SNOWIMPUR (:,:,:)=   I%TSNOW%IMPUR(:,:,:,1)
   END IF
   !
@@ -1376,7 +1376,7 @@ ELSE
               PKI%XP_SNOWIMPUR (JJ,JK,JIMP)=    I%TSNOW%IMPUR   (JI, JK,JIMP, KPATCH)
         ENDDO
       ENDDO
-    ENDDO
+    END DO
   END IF
   !
   IF(I%LGLACIER)THEN

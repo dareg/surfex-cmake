@@ -57,7 +57,10 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XPERCENTAGEPORE,                    &
                            LMEBREC,                            &
                            XANSFRACMEL, XTEMPANS,              &
-                           XANSMINMEB, XIMPUR_INIT, XIMPUR_COEFF
+                           XANSMINMEB, XIMPUR_INIT, XIMPUR_COEFF &
+			   XPSR_SNOWMAK, XRHO_SNOWMAK, 	       &
+			   XPTA_SEUIL, XTIMESNOWMAK, 	       &
+			   XPROD_SCHEME, XSM_END, XFREQ_GRO 		!Grooming and Snowmaking option by P.Spandre 20160211
 USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
@@ -95,7 +98,10 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
-                             XPERCENTAGEPORE,XVVISC3,X_RI_MAX,XIMPUR_INIT, XIMPUR_COEFF
+                             XPERCENTAGEPORE,XVVISC3,X_RI_MAX,         &
+			     XIMPUR_INIT, XIMPUR_COEFF, XPSR_SNOWMAK,  &
+			     XRHO_SNOWMAK, XPTA_SEUIL, XTIMESNOWMAK,   &
+			     XPROD_SCHEME, XSM_END, XFREQ_GRO
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -213,6 +219,15 @@ XALBICE3 = 0.08
 ! PALBICE1=0.23
 ! PALBICE2=0.16
 ! PALBICE3=0.05
+!
+! Options for MM snow production and grooming p.s 20160211
+XPSR_SNOWMAK = 0.0012
+XRHO_SNOWMAK = 600.
+XPTA_SEUIL = 268.
+XTIMESNOWMAK = 0.
+XPROD_SCHEME = (/2500,5000,4000,2500,1000/)
+XSM_END = (/4,15,4,15/)
+XFREQ_GRO = 1
 !
 ! Density threshold for ice detection kg.m-3
 XRHOTHRESHOLD_ICE = 850.
