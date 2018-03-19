@@ -56,8 +56,8 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XVAGING_NOGLACIER, XVAGING_GLACIER, &
                            XPERCENTAGEPORE,                    &
                            LMEBREC,                            &
-                           XANSFRACMEL, XTEMPANS,              &
-                           XANSMINMEB, XIMPUR_INIT, XIMPUR_COEFF &
+                           XANSFRACMEL, XTEMPANS, XANSMINMEB,  &
+                           XIMPUR_INIT, XIMPUR_COEFF,          &
 			   XPSR_SNOWMAK, XRHO_SNOWMAK, 	       &
 			   XPTA_SEUIL, XTIMESNOWMAK, 	       &
 			   XPROD_SCHEME, XSM_END, XFREQ_GRO 		!Grooming and Snowmaking option by P.Spandre 20160211

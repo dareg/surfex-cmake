@@ -708,9 +708,10 @@ ENDIF
                         PSNOWHEAT,PSNOWHMASS,PSNOWALB,PPERMSNOWFRAC,            &
                         PSNOWGRAN1,PSNOWGRAN2,PSNOWAGE,GSNOWFALL,ZSNOWDZN,      &
                         ZSNOWRHOF,ZSNOWDZF,ZSNOWGRAN1F,ZSNOWGRAN2F, ZSNOWHISTF, &
-                        ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,HSNOWDRIFT,PZ0EFF,ZUREF,&
+                        ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,       &
+			HSNOWDRIFT,PZ0EFF,ZUREF,				&
                         PBLOWSNW,HSNOWMETAMO, HSNOWFALL, PQA, PSNOWTEMP,        &
-			,PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP)
+			PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP)
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -830,8 +831,8 @@ ENDIF
 ! Calculate snow density: compaction/aging: density increases
 !
  CALL SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,ZSNOWTEMP,ZSNOW,                      &
-                      PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,ZSNOWDSSA,           &
-                      PSNOWLIQ,INLVLS_USE,PDIRCOSZW,                                &
+                      PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWSWE,PSNOWAGE,            &
+                      ZSNOWDSSA,PSNOWLIQ,INLVLS_USE,PDIRCOSZW,                      &
                       HSNOWMETAMO,HSNOWCOMP, OSNOWCOMPACT_BOOL)
 !
 !***************************************DEBUG IN**********************************************
@@ -1512,7 +1513,8 @@ IF (LHOOK) CALL DR_HOOK('SNOWCRO',1,ZHOOK_HANDLE)
 !####################################################################
         SUBROUTINE SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,                         &
                                    PSNOWTEMP,PSNOW,PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST, &
-                                   PSNOWAGE, PSNOWDSSA, PSNOWLIQ,INLVLS_USE,PDIRCOSZW,&
+                                   PSNOWSWE, PSNOWAGE, PSNOWDSSA, PSNOWLIQ,         &
+				   INLVLS_USE,PDIRCOSZW,			    &
                                    HSNOWMETAMO,HSNOWCOMP, OSNOWCOMPACT_BOOL) 
 !
 !!    PURPOSE
@@ -1563,7 +1565,9 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO, PSNOWDZ   			! Density UNIT : k
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNOW        				! Snowheight UNIT : m
 !
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST, PSNOWAGE, PSNOWDSSA !Snowtype variables
+
+REAL, DIMENSION(:,:), INTENT(INOUT)  :: PSNOWGRAN1, PSNOWGRAN2, PSNOWHIST
+REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDSSA !Snowtype variables
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWLIQ     ! Snow liquid water content UNIT ??? 
 INTEGER, DIMENSION(:), INTENT(IN)   :: INLVLS_USE   ! Number of snow layers used
 CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO ! metamorphism scheme
@@ -4339,7 +4343,6 @@ REAL, DIMENSION(SIZE(PTA))          :: ZSNOWFALL, ZSNOWTEMP, ZSCAP, ZANSMAX
 !	Snowmaking option by p.spandre 28/01/2014
 REAL, DIMENSION(SIZE(PTA))          :: ZPSR_SNOWMAK
 REAL, DIMENSION(SIZE(PTA))          :: ZSNOWMAK
-REAL                                :: ZAGE_NOW
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZDZOPT 
 !
