@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ######################
       MODULE MODD_ISBA_PAR
 !     ######################
@@ -61,7 +57,7 @@ REAL, PARAMETER       :: XRS_MAX   = 5000.
 !
 ! Factor to restore explicit Cv value (DIF option)
 !
-REAL, PARAMETER       :: XCVHEATF  = 0.20 
+REAL, PARAMETER       :: XCVHEATF  = 1. !! 1. dans Tuzet. 2017 et 0.2 dans version par default, set to 0.2 for Jesus
 !
 ! Numerical factor to prevent division by 0 for F2 soilstress function
 !

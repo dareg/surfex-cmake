@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE INI_VAR_FROM_VEGTYPE_DATA (DTCO, DTV, UG, U, &
+      SUBROUTINE INI_VAR_FROM_VEGTYPE_DATA (DTCO, DTI, UG, U, &
                                             HPROGRAM,ILUOUT,HNAME,PFIELD,PDEF)
 !     ##############################################################
 !!
@@ -61,7 +57,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -103,7 +99,7 @@ ALLOCATE(ZFIELD_TOT(U%NSIZE_FULL))
 DO JVEGTYPE=1,IVEGTYPE
   NSIZE(:)=0
   WHERE (PFIELD(:,JVEGTYPE).NE.XUNDEF) NSIZE(:)=1
-  WHERE (DTV%XPAR_VEGTYPE(:,JVEGTYPE)==0.) NSIZE(:)=-1
+  WHERE (DTI%XPAR_VEGTYPE(:,JVEGTYPE)==0.) NSIZE(:)=-1
   CALL UNPACK_SAME_RANK(IMASK,NSIZE,NSIZE_TOT,-1)
   CALL UNPACK_SAME_RANK(IMASK,PFIELD(:,JVEGTYPE),ZFIELD_TOT)
   IF(PRESENT(PDEF))THEN

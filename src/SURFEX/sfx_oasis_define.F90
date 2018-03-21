@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !#########
-SUBROUTINE SFX_OASIS_DEFINE (IO, U, HPROGRAM,KNPTS,KPARAL)
+SUBROUTINE SFX_OASIS_DEFINE (I, U, &
+                             HPROGRAM,KNPTS,KPARAL)
 !###################################################
 !
 !!****  *SFX_OASIS_DEFINE* - Definitions for exchange of coupling fields
@@ -32,7 +29,6 @@ SUBROUTINE SFX_OASIS_DEFINE (IO, U, HPROGRAM,KNPTS,KPARAL)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
-!!    10/2016 B. Decharme : bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -40,7 +36,7 @@ SUBROUTINE SFX_OASIS_DEFINE (IO, U, HPROGRAM,KNPTS,KPARAL)
 !
 !
 !
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_SURF_PAR,  ONLY : NUNDEF
@@ -52,7 +48,7 @@ USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 USE MODI_SFX_OASIS_CHECK
 !
-#ifdef CPLOASIS
+#ifdef SFXOASIS
 USE MOD_OASIS
 #endif
 !
@@ -65,7 +61,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 CHARACTER(LEN=6),        INTENT(IN) :: HPROGRAM    ! program calling surf. schemes
@@ -96,7 +92,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef CPLOASIS
+#ifdef SFXOASIS
 !-------------------------------------------------------------------------------
 !
 !
@@ -105,7 +101,8 @@ IF (LHOOK) CALL DR_HOOK('SFX_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
-CALL SFX_OASIS_CHECK(IO, U, ILUOUT)
+CALL SFX_OASIS_CHECK(I, U, &
+                     ILUOUT)
 !
 !-------------------------------------------------------------------------------
 !
@@ -329,6 +326,10 @@ IF(LCPL_LAND)THEN
 !
   IF(LCPL_GW)THEN
 !
+!     Output groundwater recharge
+      CALL OASIS_DEF_VAR(NRECHARGE_ID,CRECHARGE,IPART_ID,IVAR_NODIMS,OASIS_OUT,IVAR_SHAPE,OASIS_DOUBLE,IERR)  
+      IF(IERR/=OASIS_OK) CALL ABOR1_SFX('SFX_OASIS_DEFINE: OASIS def var problem for land groundwater recharge')
+!      
 !     Input Water table depth
       CALL OASIS_DEF_VAR(NWTD_ID,CWTD,IPART_ID,IVAR_NODIMS,OASIS_IN,IVAR_SHAPE,OASIS_DOUBLE,IERR)  
       IF(IERR/=OASIS_OK) CALL ABOR1_SFX('SFX_OASIS_DEFINE: OASIS def var problem for land Water table depth')

@@ -1,10 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_PGD_TEB_GREENROOF_n (OCH_BIO_FLUX, DTCO, DTV, GB, U, &
-                                           IO, S, K, KDIM, HPROGRAM,KVERSION)
+      SUBROUTINE READ_PGD_TEB_GREENROOF_n (CHT, DTCO, DTGR, GBGR, U, TGRO, TGRP, TG, &
+                                           HPROGRAM,KVERSION)
 !     #########################################
 !
 !!****  *READ_PGD_TEB_GREENROOF_n* - routine to initialise ISBA physiographic variables 
@@ -42,13 +38,14 @@
 !
 !
 !
+USE MODD_CH_TEB_n, ONLY : CH_TEB_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_GR_BIOG_n, ONLY : GR_BIOG_t
+USE MODD_DATA_TEB_GREENROOF_n, ONLY : DATA_TEB_GREENROOF_t
+USE MODD_GR_BIOG_GREENROOF_n, ONLY : GR_BIOG_GREENROOF_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_S_t
+USE MODD_TEB_GREENROOF_OPTION_n, ONLY : TEB_GREENROOF_OPTIONS_t
+USE MODD_TEB_GREENROOF_PGD_n, ONLY : TEB_GREENROOF_PGD_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 !
 USE MODD_ISBA_PAR,        ONLY : XOPTIMGRID
 !
@@ -68,15 +65,14 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-LOGICAL, INTENT(IN) :: OCH_BIO_FLUX
+TYPE(CH_TEB_t), INTENT(INOUT) :: CHT
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
-TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
+TYPE(DATA_TEB_GREENROOF_t), INTENT(INOUT) :: DTGR
+TYPE(GR_BIOG_GREENROOF_t), INTENT(INOUT) :: GBGR
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_K_t), INTENT(INOUT) :: K
-TYPE(ISBA_S_t), INTENT(INOUT) :: S
-INTEGER, INTENT(INOUT) :: KDIM
+TYPE(TEB_GREENROOF_OPTIONS_t), INTENT(INOUT) :: TGRO
+TYPE(TEB_GREENROOF_PGD_t), INTENT(INOUT) :: TGRP
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
 INTEGER,           INTENT(IN)  :: KVERSION ! version of SURFEX of the file being read
@@ -98,40 +94,59 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_TOWN'
- CALL GET_TYPE_DIM_n(DTCO, U, 'TOWN  ',KDIM)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'TOWN  ',TG%NDIM)
 !
+!
+!*       2.     Initialisation of ISBA options for greenroofs
+!               ---------------------------------------------
+!
+!
+YRECFM='GR_ISBA'
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,TGRO%CISBA_GR,IRESP)
+!
+YRECFM='GR_SCOND'
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,TGRO%CSCOND_GR,IRESP)
 !
 !*       3.     Physiographic data fields:
 !               -------------------------
 !
 !* orographic runoff coefficient
 !
+ALLOCATE(TGRP%XRUNOFFB_GR(TG%NDIM))
 YRECFM='GR_RUNOFFB' 
- CALL READ_SURF(HPROGRAM,YRECFM,K%XRUNOFFB,IRESP)
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,TGRP%XRUNOFFB_GR,IRESP)
 !
 !* subgrid drainage coefficient
 !
+ALLOCATE(TGRP%XWDRAIN_GR(TG%NDIM))
 IF (KVERSION<=6) THEN
-  K%XWDRAIN = 0.
+  TGRP%XWDRAIN_GR = 0.
 ELSE
   YRECFM='GR_WDRAIN'
-  CALL READ_SURF(HPROGRAM,YRECFM,K%XWDRAIN,IRESP)
+  CALL READ_SURF(&
+                HPROGRAM,YRECFM,TGRP%XWDRAIN_GR,IRESP)
 ENDIF
 !
 !-------------------------------------------------------------------------------
 !* biogenic chemical emissions
 !
-IF (OCH_BIO_FLUX) THEN
-  ALLOCATE(GB%XISOPOT(KDIM))
+IF (CHT%LCH_BIO_FLUX) THEN
+  ALLOCATE(GBGR%XISOPOT(TG%NDIM))
   YRECFM='E_ISOPOT'
-  CALL READ_SURF(HPROGRAM,YRECFM,GB%XISOPOT,IRESP)
+  CALL READ_SURF(&
+                HPROGRAM,YRECFM,GBGR%XISOPOT,IRESP)
   !
-  ALLOCATE(GB%XMONOPOT(KDIM))
+  ALLOCATE(GBGR%XMONOPOT(TG%NDIM))
   YRECFM='E_MONOPOT'
-  CALL READ_SURF(HPROGRAM,YRECFM,GB%XMONOPOT,IRESP)
+  CALL READ_SURF(&
+                HPROGRAM,YRECFM,GBGR%XMONOPOT,IRESP)
 ELSE
-  ALLOCATE(GB%XISOPOT (0))
-  ALLOCATE(GB%XMONOPOT(0))
+  ALLOCATE(GBGR%XISOPOT (0))
+  ALLOCATE(GBGR%XMONOPOT(0))
 END IF
 !
 !-------------------------------------------------------------------------------
@@ -148,11 +163,9 @@ END IF
 !
 !IF (LPAR_GREENROOF) CALL READ_PGD_TEB_GREENROOF_PAR_n(HPROGRAM)
 !
-IO%LPAR = .TRUE. 
-!
-IO%LECOCLIMAP = (.NOT. IO%LPAR)
-!
- CALL READ_PGD_TEB_GREENROOF_PAR_n(DTV, IO, S, K, KDIM, HPROGRAM)
+ CALL READ_PGD_TEB_GREENROOF_PAR_n(&
+                                                       DTGR, TGRO, TG, &
+                                                       HPROGRAM)
 !
 IF (LHOOK) CALL DR_HOOK('READ_PGD_TEB_GREENROOF_N',1,ZHOOK_HANDLE)
 !

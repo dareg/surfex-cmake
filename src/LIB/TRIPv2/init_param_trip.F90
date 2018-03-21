@@ -51,17 +51,17 @@ IMPLICIT NONE
 !
 TYPE(TRIP_GRID_t), INTENT(INOUT) :: TPG
 !
- CHARACTER(LEN=*), INTENT(IN) :: HFILE, HTITLE, HTIMEUNIT
+CHARACTER(LEN=*), INTENT(IN) :: HFILE, HTITLE, HTIMEUNIT
 !
 INTEGER, INTENT(IN)          :: KLISTING, KLON, KLAT
 !
 !*      0.2    declarations of output variables
 !
- CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YVNAME  !Name of each output variable
- CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YVLNAME !Long name of each output variables
- CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YUNIT   !Unit of each output variable
+CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YVNAME  !Name of each output variable
+CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YVLNAME !Long name of each output variables
+CHARACTER(LEN=NF90_MAX_NAME), DIMENSION(:), ALLOCATABLE :: YUNIT   !Unit of each output variable
 !
- CHARACTER(LEN=NF90_MAX_NAME) :: YFILE,YTITLE,YTIMEUNIT
+CHARACTER(LEN=NF90_MAX_NAME) :: YFILE,YTITLE,YTIMEUNIT
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE ::  LZLEN
 !
@@ -79,7 +79,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PARAM_TRIP',0,ZHOOK_HANDLE)
 !
-INPARAM = 7
+INPARAM = 6
 IF(CGROUNDW/='DEF'           )INPARAM = INPARAM + 1
 IF(CVIT=='VAR'               )INPARAM = INPARAM + 3
 IF(CGROUNDW=='DIF'           )INPARAM = INPARAM + 6
@@ -124,8 +124,8 @@ YUNIT  (4) = '-                          '
 LZLEN  (4) = .FALSE.
 LDOUBLE(4) = .FALSE.
 !
-YVNAME (5) = 'CELL_AREA                  '
-YVLNAME(5) = 'Trip cell area             '
+YVNAME (5) = 'DR_AREA                    '
+YVLNAME(5) = 'Trip drainage area         '
 YUNIT  (5) = 'm2                         '
 LZLEN  (5) = .FALSE.
 LDOUBLE(5) = .TRUE.
@@ -136,13 +136,7 @@ YUNIT  (6) = '-                          '
 LZLEN  (6) = .FALSE.
 LDOUBLE(6) = .FALSE.
 !
-YVNAME (7) = 'DR_AREA                    '
-YVLNAME(7) = 'Trip drainage area         '
-YUNIT  (7) = 'm2                         '
-LZLEN  (7) = .FALSE.
-LDOUBLE(7) = .TRUE.
-!
-INUM = 7
+INUM = 6
 !
 IF(CGROUNDW/='DEF')THEN
 !   
@@ -266,7 +260,7 @@ LDOUBLE(INUM) = .FALSE.
 INUM = INUM + 1
 YVNAME (INUM)= 'TABVF                     '
 YVLNAME(INUM)= 'Potential flood volume    '
-YUNIT  (INUM)= 'kg/m2                     '
+YUNIT  (INUM)= 'kg                        '
 LZLEN  (INUM)= .TRUE.
 LDOUBLE(INUM) = .FALSE.
 !
@@ -278,7 +272,7 @@ YFILE     = HFILE(1:LEN_TRIM(HFILE))
 YTITLE    = HTITLE(1:LEN_TRIM(HTITLE))
 YTIMEUNIT = HTIMEUNIT(1:LEN_TRIM(HTIMEUNIT))
 !
- CALL GET_LONLAT_TRIP(TPG, &
+CALL GET_LONLAT_TRIP(TPG, &
                      KLON,KLAT,ZLON,ZLAT)
 !
 IF(ALL(.NOT.LZLEN(:)))THEN
@@ -289,7 +283,7 @@ ELSE
                    ZLON,ZLAT,XUNDEF,LNCPRINT,INCID,.FALSE.,NDIMTAB,LZLEN,ODOUBLE=LDOUBLE)  
 ENDIF
 !
- CALL NCCLOSE(KLISTING,LNCPRINT,YFILE,INCID)
+CALL NCCLOSE(KLISTING,LNCPRINT,YFILE,INCID)
 !
 ! * Deallocate netcdf file attributs
 !

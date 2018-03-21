@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ######spl
 MODULE MODE_WRITE_SURF_TXT
 !
@@ -180,12 +176,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_TXT:WRITE_SURFL0_TXT',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFL0_TXT
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1_TXT (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX1_TXT (DGU, &
+                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
 !
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -207,7 +206,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:),  INTENT(IN) :: PFIELD   ! array containing the data field
@@ -243,12 +242,17 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-  CALL INIT_WRITE_TXT(HSELECT, HREC,LWFL)
+!$OMP SINGLE
+  !
+  CALL INIT_WRITE_TXT(DGU, &
+                      HREC,LWFL)
   !
   IF (LWFL) WRITE(NIND,FMT='(50D14.6)',IOSTAT=KRESP) ZWORK(1:ISIZE)
   !
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_TXT(HREC,KRESP)
   !
+!$OMP END SINGLE NOWAIT
+  !  
 #ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif
@@ -260,12 +264,15 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_TXT:WRITE_SURFX1_TXT',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_TXT
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_TXT (HSELECT, HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_TXT (DGU, &
+                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
 !
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_WRITE
 !
@@ -287,7 +294,7 @@ INCLUDE "mpif.h"
 !*      0.1   Declarations of arguments
 !
 !
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 REAL, DIMENSION(:,:),     INTENT(IN) :: PFIELD   ! array containing the data field
@@ -323,12 +330,17 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !  
-  CALL INIT_WRITE_TXT(HSELECT, HREC,LWFL)
+!$OMP SINGLE
+  !  
+  CALL INIT_WRITE_TXT(DGU, &
+                      HREC,LWFL)
   !
   IF (LWFL) WRITE(NIND,FMT='(50D14.6)',IOSTAT=KRESP) ZWORK(1:ISIZE,:)
   !
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_TXT(HREC,KRESP)   
   !
+!$OMP END SINGLE NOWAIT
+  !    
 #ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
 #endif

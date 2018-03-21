@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE INIT_WRITE_TXT (HSELECT, HREC,OWFL)
+      SUBROUTINE INIT_WRITE_TXT (DGU, &
+                                 HREC,OWFL)
 !     ######################
 !
 !!****  *INIT_WRITE_TXT_n* Initialize array name to be written and associated
@@ -32,24 +29,27 @@
 !             ------------
 !
 !
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+!
 USE MODD_IO_SURF_TXT,ONLY:NMASK, NFULL, CMASK
 USE MODD_WRITE_TXT,  ONLY:NUNIT0, NVAR, CVAR, CVARN, JPVAR, NIND
 !
 USE MODI_ABOR1_SFX
-!USE MODI_TEST_RECORD_LEN
+USE MODI_TEST_RECORD_LEN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 !
  CHARACTER(LEN=12),   INTENT(IN)     :: HREC    
 LOGICAL,             INTENT(INOUT)  :: OWFL
 INTEGER                             :: IP, IVAR, IFIELD, JFIELD
-!LOGICAL                             :: LMATCH
+LOGICAL                             :: LMATCH
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ ELSE
   IF (CVAR(1).NE.'                ') IVAR=MAXVAL(NVAR(:))
 !
 !
-  IF (SIZE(HSELECT)==0) THEN
+  IF (.NOT.DGU%LSELECT) THEN
 !
     IF ( (HREC(5:7)/='_OC'                          ) .AND.  & 
           (HREC(4:6)/='_OC'                          ) .AND.  &           
@@ -156,14 +156,15 @@ ELSE
   ELSE
 !        
     IFIELD=0
-    DO JFIELD=1,SIZE(HSELECT)
-      IF (HSELECT(JFIELD)== '            ') EXIT
+    DO JFIELD=1,SIZE(DGU%CSELECT)
+      IF (DGU%CSELECT(JFIELD)== '            ') EXIT
       IFIELD=IFIELD+1
     ENDDO
   
-    !CALL TEST_RECORD_LEN("ASCII ",HREC,HSELECT,LMATCH)
+    CALL TEST_RECORD_LEN(DGU, &
+                         "ASCII ",HREC,LMATCH)
 
-    !IF (.NOT. LMATCH ) THEN
+    IF (.NOT. LMATCH ) THEN
 
       IVAR = IVAR+1
       IF (IVAR-NUNIT0>JPVAR) THEN
@@ -174,9 +175,9 @@ ELSE
       OPEN(UNIT=IVAR,FILE=TRIM(HREC)//'.TXT',FORM='FORMATTED')
       OWFL=.TRUE.
 
-    !ELSE
-    !  OWFL=.FALSE.
-    !ENDIF
+    ELSE
+      OWFL=.FALSE.
+    ENDIF
 
   ENDIF
 ENDIF

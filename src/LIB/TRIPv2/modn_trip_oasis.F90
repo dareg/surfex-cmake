@@ -22,7 +22,6 @@ MODULE MODN_TRIP_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
-!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -39,17 +38,18 @@ REAL             :: XTSTEP_CPL_LAND = -1.0     ! Coupling time step
 !
 ! Input variables
 !
- CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff 
- CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
- CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux
- CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
+CHARACTER(LEN=8) :: CRUNOFF     = '        '   ! Surface runoff 
+CHARACTER(LEN=8) :: CDRAIN      = '        '   ! Deep drainage 
+CHARACTER(LEN=8) :: CRECHARGE   = '        '   ! groundwater recharge
+CHARACTER(LEN=8) :: CCALVING    = '        '   ! Calving flux
+CHARACTER(LEN=8) :: CSRCFLOOD   = '        '   ! Floodplains freshwater flux
 !
 ! Output variables
 !
- CHARACTER(LEN=8) :: CFFLOOD     = '        '   ! Floodplains fraction  
- CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion  
- CHARACTER(LEN=8) :: CWTD        = '        '   ! Water table depth  
- CHARACTER(LEN=8) :: CFWTD       = '        '   ! Grid-cell fraction of WTD to rise  
+CHARACTER(LEN=8) :: CFFLOOD     = '        '   ! Floodplains fraction  
+CHARACTER(LEN=8) :: CPIFLOOD    = '        '   ! Flood potential infiltartion  
+CHARACTER(LEN=8) :: CWTD        = '        '   ! Water table depth  
+CHARACTER(LEN=8) :: CFWTD       = '        '   ! Grid-cell fraction of WTD to rise  
 !
 !-------------------------------------------------------------------------------
 !
@@ -59,9 +59,9 @@ REAL             :: XTSTEP_CPL_LAND = -1.0     ! Coupling time step
 !
 REAL             :: XTSTEP_CPL_SEA = -1.0   ! Coupling time step
 !
- CHARACTER(LEN=8) :: CRIVDIS  = '        '   ! River discharges to ocean
- CHARACTER(LEN=8) :: CCALVGRE = '        '   ! Calving flux over greenland
- CHARACTER(LEN=8) :: CCALVANT = '        '   ! Calving flux over antarctica
+CHARACTER(LEN=8) :: CRIVDIS  = '        '   ! River discharges to ocean
+CHARACTER(LEN=8) :: CCALVGRE = '        '   ! Calving flux over greenland
+CHARACTER(LEN=8) :: CCALVANT = '        '   ! Calving flux over antarctica
 !
 !-------------------------------------------------------------------------------
 !
@@ -70,7 +70,7 @@ REAL             :: XTSTEP_CPL_SEA = -1.0   ! Coupling time step
 !
 NAMELIST/NAM_TRIP_LAND_CPL/XTSTEP_CPL_LAND,CRUNOFF,CDRAIN, &
                            CFFLOOD,CPIFLOOD,CWTD,CFWTD,    &
-                           CCALVING,CSRCFLOOD
+                           CRECHARGE,CCALVING,CSRCFLOOD
 !
 !
 !*       2.    NAMELISTS TRIP COUPLED WITH A OCEANIC GENERAL CIRCULATION MODEL

@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !GLT_LIC The GELATO model is a seaice model used in stand-alone or embedded mode. 
 !GLT_LIC  It has been developed by Meteo-France. The holder of GELATO is Meteo-France.
 !GLT_LIC  
@@ -729,25 +725,25 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
   END DO         ! End of loop on grid cells
 !
 ! .. Change sign of pcondb
-  IF (lwg) THEN
+  IF (lp1) THEN
     ztot_ice_snow= np*nt+SUM(icv,MASK=icv<0)
-!    WRITE(noutlu,*)
-!    WRITE(noutlu,*) '                         ** WARNING **'
-!    WRITE(noutlu,*)  &
-!      '  Total number of cases with ice/snow            : ',  &
-!      ztot_ice_snow
-!    WRITE(noutlu,*)  &
-!      '  Convergence failed on # of points              : ',  &
-!      np*nt-SUM(ABS(icv))
-!    IF ( ztot_ice_snow > 0) THEN 
-!       zfailures=100.*FLOAT(np*nt-SUM(ABS(icv)))/ztot_ice_snow
-!    ELSE
-!       zfailures=0.
-!    ENDIF
-!    WRITE(noutlu,FMT='(A,F6.2)')  &
-!            '   % of failure                                  : ',  &
-!            zfailures
-!    WRITE(noutlu,*)
+    WRITE(noutlu,*)
+    WRITE(noutlu,*) '                         ** WARNING **'
+    WRITE(noutlu,*)  &
+      '  Total number of cases with ice/snow            : ',  &
+      ztot_ice_snow
+    WRITE(noutlu,*)  &
+      '  Convergence failed on # of points              : ',  &
+      np*nt-SUM(ABS(icv))
+    IF ( ztot_ice_snow > 0) THEN 
+       zfailures=100.*FLOAT(np*nt-SUM(ABS(icv)))/ztot_ice_snow
+    ELSE
+       zfailures=0.
+    ENDIF
+    WRITE(noutlu,FMT='(A,F6.2)')  &
+            '   % of failure                                  : ',  &
+            zfailures
+    WRITE(noutlu,*)
   ENDIF
 !
   pcondb(:,:) = -pcondb(:,:)

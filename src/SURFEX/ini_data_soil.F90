@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE INI_DATA_SOIL(HISBA,PDG_OUT,PSURF,PSURF2,PROOTDEPTH, &
                                PSOILDEPTH,PSOILGRID,KWG_LAYER   )
@@ -54,15 +50,15 @@ IMPLICIT NONE
 !            ------------------------
 !
  CHARACTER(LEN=*), INTENT(IN) :: HISBA   ! type of soil (Force-Restore OR Diffusion)
-REAL, DIMENSION(:,:), INTENT(OUT) :: PDG_OUT
+REAL, DIMENSION(:,:,:), INTENT(OUT) :: PDG_OUT
 !
 REAL, DIMENSION(:), OPTIONAL, INTENT(IN) :: PSURF
 REAL, DIMENSION(:), OPTIONAL, INTENT(IN) :: PSURF2
-REAL, DIMENSION(:), OPTIONAL, INTENT(IN) :: PROOTDEPTH
-REAL, DIMENSION(:), OPTIONAL, INTENT(IN) :: PSOILDEPTH
+REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: PROOTDEPTH
+REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: PSOILDEPTH
 REAL, DIMENSION(:),   OPTIONAL, INTENT(IN) :: PSOILGRID   ! reference soil grid          (m)
 !
-INTEGER, DIMENSION(:), OPTIONAL, INTENT(OUT) :: KWG_LAYER   ! last layers for soil moisture
+INTEGER, DIMENSION(:,:), OPTIONAL, INTENT(OUT) :: KWG_LAYER   ! last layers for soil moisture
 !
 !*    0.2    Declaration of local variables
 !      ------------------------------
@@ -81,7 +77,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INI_DATA_SOIL',0,ZHOOK_HANDLE)
 !
-PDG_OUT(:,:) = XUNDEF
+PDG_OUT(:,:,:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
@@ -107,10 +103,10 @@ IF (HISBA=='2-L') THEN
    
   DO JLOOP = 1,SIZE(LSURF)
     IF (LSURF(JLOOP)) CYCLE
-    IF(PROOTDEPTH(JLOOP) /= XUNDEF) THEN
-      PDG_OUT(JLOOP,1) = 0.01
-      PDG_OUT(JLOOP,2) = PROOTDEPTH(JLOOP)
-    ENDIF
+    WHERE(PROOTDEPTH(JLOOP,:) /= XUNDEF)
+      PDG_OUT(JLOOP,1,:) = 0.01
+      PDG_OUT(JLOOP,2,:) = PROOTDEPTH(JLOOP,:)
+    END WHERE
   ENDDO
 !
 !
@@ -127,11 +123,11 @@ ELSE
 
     DO JLOOP = 1,SIZE(LSURF)
       IF (LSURF(JLOOP)) CYCLE
-      IF(PSOILDEPTH(JLOOP) /= XUNDEF) THEN
-        PDG_OUT(JLOOP,1) = 0.01
-        PDG_OUT(JLOOP,2) = PROOTDEPTH(JLOOP)
-        PDG_OUT(JLOOP,3) = PSOILDEPTH(JLOOP)
-      ENDIF
+      WHERE(PSOILDEPTH(JLOOP,:) /= XUNDEF)
+        PDG_OUT(JLOOP,1,:) = 0.01
+        PDG_OUT(JLOOP,2,:) = PROOTDEPTH(JLOOP,:)
+        PDG_OUT(JLOOP,3,:) = PSOILDEPTH(JLOOP,:)
+      END WHERE
     ENDDO
 !
 !

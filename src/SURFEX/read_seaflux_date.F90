@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_SEAFLUX_DATE (OMERCATOR, &
+      SUBROUTINE READ_SEAFLUX_DATE (O, &
                                     HPROGRAM,HINIT,KLUOUT,HATMFILE,HATMFILETYPE,&
                                      KYEAR,KMONTH,KDAY,PTIME,TPTIME)  
 !     #######################################################
@@ -64,7 +60,8 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-LOGICAL, INTENT(IN) :: OMERCATOR
+!
+TYPE(OCEAN_t), INTENT(INOUT) :: O
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM    ! program calling
  CHARACTER(LEN=3),  INTENT(IN)  :: HINIT     ! fields to initialize 'ALL', 'PRE', 'PGD'
@@ -118,7 +115,7 @@ END IF
 IF (TPTIME%TDATE%YEAR==NUNDEF.OR.TPTIME%TDATE%MONTH==NUNDEF &
       .OR.TPTIME%TDATE%DAY==NUNDEF.OR.TPTIME%TIME==XUNDEF) THEN  
   !
-  CALL READ_PREP_SEAFLUX_CONF(OMERCATOR, &
+  CALL READ_PREP_SEAFLUX_CONF(O, &
                               HPROGRAM,'DATE   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
                               HATMFILE,HATMFILETYPE,YFILEPGDIN,YFILEPGDINTYPE,KLUOUT,GUNIF)
   !

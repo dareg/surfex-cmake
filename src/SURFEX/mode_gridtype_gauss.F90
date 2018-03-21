@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !##########################
 MODULE MODE_GRIDTYPE_GAUSS
 !##########################
@@ -609,17 +605,16 @@ SUBROUTINE XY_GAUSS(PCODIL,KSIZE,PNODATA,PVALUE,PLAT_XY,PLON_XY)
   !
   INTEGER :: JJ, IDN, IDT
   !
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE_OMP
+  REAL(KIND=JPRB) :: ZHOOK_HANDLE
   !--------------------------------------------------------------------------------
   !
   !*     1.     Preliminary calculations
   !             ------------------------
   !
+  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE)
   !
 !
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE_OMP)
-!$OMP DO PRIVATE(IDN,IDT,ZCOS1, ZV1, ZLAT1, ZCOS2, ZLON1, ZINVC, &
+!$OMP PARALLEL DO PRIVATE(IDN,IDT,ZCOS1, ZV1, ZLAT1, ZCOS2, ZLON1, ZINVC, &
 !$OMP ZSINN, ZV2, ZINVS, ZSINT, ZCOST, ZV3, ZLAT2, ZM, ZLON2)
   DO JJ=1,SIZE(PVALUE)
     !
@@ -673,10 +668,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',0,ZHOOK_HANDLE_OMP)
     IF (ABS(PLON_XY(JJ)-360.)<1.E-4) PLON_XY(JJ) = 0.
     !
   ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE_OMP)  
-!$OMP END PARALLEL
-!---------------------------------------------------------------------------------
+!$OMP END PARALLEL DO    
+!
+  IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE)
+    !---------------------------------------------------------------------------------
   END SUBROUTINE XY_GAUSS
   !---------------------------------------------------------------------------------
   !############################################################################

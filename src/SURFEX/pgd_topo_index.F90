@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_TOPO_INDEX (DTCO, UG, U, USS, S, OCTI, &
+      SUBROUTINE PGD_TOPO_INDEX (DGU, DTCO, UG, U, USS, I, &
                                  HPROGRAM,KLU,HCTI,HCTIFILETYPE,OIMP_CTI)
 !     ##################################################################
 !
@@ -42,21 +38,20 @@
 !            -----------
 !
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t
-!
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_PGD_GRID,       ONLY : NL
 !
 !
-USE MODD_PGDWORK,        ONLY : XALL, XEXT_ALL, NSIZE_ALL, &
+USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, &
                                 XMIN_WORK, XMAX_WORK,     &
                                 XMEAN_WORK, XSTD_WORK,    &
-                                XSKEW_WORK, NSIZE, XSUMVAL 
+                                XSKEW_WORK, XSUMVAL3  
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -97,14 +92,12 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
-!
-TYPE(ISBA_S_t), INTENT(INOUT) :: S
-!
-LOGICAL, INTENT(INOUT) :: OCTI
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM     ! program calling
 INTEGER,              INTENT(IN)  :: KLU          ! number of nature points
@@ -140,17 +133,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_TOPO_INDEX',0,ZHOOK_HANDLE)
 IF(LEN_TRIM(HCTI)==0)THEN
 !
-  ALLOCATE(S%XTI_MIN (0))
-  ALLOCATE(S%XTI_MAX (0))
-  ALLOCATE(S%XTI_MEAN(0))
-  ALLOCATE(S%XTI_STD (0))
-  ALLOCATE(S%XTI_SKEW(0))
+  ALLOCATE(I%XTI_MIN (0))
+  ALLOCATE(I%XTI_MAX (0))
+  ALLOCATE(I%XTI_MEAN(0))
+  ALLOCATE(I%XTI_STD (0))
+  ALLOCATE(I%XTI_SKEW(0))
 !        
 !-------------------------------------------------------------------------------
 ELSE
 !-------------------------------------------------------------------------------
 !
-  OCTI = .TRUE.
+  I%LCTI = .TRUE.
 !
 !*    2.      Find LUOUT
 !             ----------
@@ -164,24 +157,25 @@ ELSE
 !*    3.      Allocations of statistics arrays
 !             --------------------------------
 !
-  ALLOCATE(S%XTI_MIN (KLU))
-  ALLOCATE(S%XTI_MAX (KLU))
-  ALLOCATE(S%XTI_MEAN(KLU))
-  ALLOCATE(S%XTI_STD (KLU))
-  ALLOCATE(S%XTI_SKEW(KLU))
+  ALLOCATE(I%XTI_MIN (KLU))
+  ALLOCATE(I%XTI_MAX (KLU))
+  ALLOCATE(I%XTI_MEAN(KLU))
+  ALLOCATE(I%XTI_STD (KLU))
+  ALLOCATE(I%XTI_SKEW(KLU))
 !
-  S%XTI_MIN (:) = XUNDEF
-  S%XTI_MAX (:) = XUNDEF
-  S%XTI_MEAN(:) = XUNDEF
-  S%XTI_STD (:) = XUNDEF
-  S%XTI_SKEW(:) = XUNDEF
+  I%XTI_MIN (:) = XUNDEF
+  I%XTI_MAX (:) = XUNDEF
+  I%XTI_MEAN(:) = XUNDEF
+  I%XTI_STD (:) = XUNDEF
+  I%XTI_SKEW(:) = XUNDEF
 !
 !-------------------------------------------------------------------------------
 !
 !*    4.      Allocations of work arrays
 !             --------------------------
 !
-  CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',I_DIM)
+  CALL GET_TYPE_DIM_n(DTCO, U, &
+                      'NATURE',I_DIM)
   IF (I_DIM/=KLU) THEN
      WRITE(ILUOUT,*)'PGD_TOPO_INDEX: Wrong dimension of MASK: ',I_DIM,KLU
      CALL ABOR1_SFX('PGD_TOPO_INDEX: WRONG DIMENSION OF MASK')
@@ -228,15 +222,20 @@ ELSE
 #ifdef SFX_LFI
        CFILEIN_LFI = ADJUSTL(HCTI)
 #endif
-CALL INIT_IO_SURF_n(DTCO, U, &
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
                            YFILETYPE,'FULL  ','SURF  ','READ ')
      ENDIF     
 !   
-     CALL READ_SURF(YFILETYPE,'TI_MIN' ,XMIN_WORK ,IRET) 
-     CALL READ_SURF(YFILETYPE,'TI_MAX' ,XMAX_WORK ,IRET)
-     CALL READ_SURF(YFILETYPE,'TI_MEAN',XMEAN_WORK,IRET)
-     CALL READ_SURF(YFILETYPE,'TI_STD' ,XSTD_WORK ,IRET) 
-     CALL READ_SURF(YFILETYPE,'TI_SKEW',XSKEW_WORK,IRET) 
+     CALL READ_SURF(&
+                    YFILETYPE,'TI_MIN' ,XMIN_WORK ,IRET) 
+     CALL READ_SURF(&
+                    YFILETYPE,'TI_MAX' ,XMAX_WORK ,IRET)
+     CALL READ_SURF(&
+                    YFILETYPE,'TI_MEAN',XMEAN_WORK,IRET)
+     CALL READ_SURF(&
+                    YFILETYPE,'TI_STD' ,XSTD_WORK ,IRET) 
+     CALL READ_SURF(&
+                    YFILETYPE,'TI_SKEW',XSKEW_WORK,IRET) 
 !
      CALL END_IO_SURF_n(YFILETYPE)
 !
@@ -247,14 +246,15 @@ CALL INIT_IO_SURF_n(DTCO, U, &
 !*    6.      Use of cti file
 !             ---------------
 !
-     ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
-     ALLOCATE(XEXT_ALL (U%NDIM_FULL,2))
-     ALLOCATE(XALL     (U%NDIM_FULL,3,1))     
+     ALLOCATE(NSIZE   (IFULL))
+     ALLOCATE(XSUMVAL (IFULL))
+     ALLOCATE(XSUMVAL2(IFULL))
+     ALLOCATE(XSUMVAL3(IFULL))
 !
-     NSIZE_ALL(:,1) = 0.
-     XEXT_ALL (:,1) = -99999.
-     XEXT_ALL (:,2) = 99999.
-     XALL   (:,:,1) = 0.     
+     NSIZE    (:) = 0.
+     XSUMVAL  (:) = 0.
+     XSUMVAL2 (:) = 0.
+     XSUMVAL3 (:) = 0.
 !
      XMAX_WORK(:) =-99999.
 !
@@ -269,13 +269,13 @@ CALL INIT_IO_SURF_n(DTCO, U, &
 !*    7.      Coherence
 !             ---------
 !
-     WHERE(NSIZE(:,1)<36.OR.XSTD_WORK(:)==0.0)
+     WHERE(NSIZE(:)<36.OR.XSTD_WORK(:)==0.0)
           XMIN_WORK (:) = XUNDEF
           XMAX_WORK (:) = XUNDEF
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE   (:,1) = 0
+          NSIZE     (:) = 0
      ENDWHERE 
 !
      WHERE(U%XNATURE(:)>0.0.AND.XSKEW_WORK(:)<=-8.0)
@@ -284,7 +284,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE   (:,1) = 0
+          NSIZE     (:) = 0
      ENDWHERE             
 !
      WHERE(U%XNATURE(:)==0.)
@@ -293,7 +293,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE   (:,1) = 0
+          NSIZE     (:) = 0
      ENDWHERE   
 !
 !-------------------------------------------------------------------------------
@@ -352,11 +352,6 @@ CALL INIT_IO_SURF_n(DTCO, U, &
                    XSKEW_WORK(:)= 2.266-0.023*ZTI_MEAN(:)-0.245*ZTI_STD(:)-0.240*ZTI_SKEW(:)
            ENDWHERE
          ENDIF
-!
-         WHERE(XMEAN_WORK(:)/=XUNDEF.AND.(XMAX_WORK(:)-XMIN_WORK(:))>0.2)
-               XSTD_WORK (:)=MAX(0.2,XSTD_WORK (:))
-               XSKEW_WORK(:)=MAX(0.2,XSKEW_WORK(:))
-         ENDWHERE         
 !           
          WHERE(XMEAN_WORK(:)>0.0.AND.XMEAN_WORK(:)/=XUNDEF)
                ZDELTA   (:)= (XMEAN_WORK(:)-ZMEAN_INI(:))
@@ -368,7 +363,7 @@ CALL INIT_IO_SURF_n(DTCO, U, &
               XMEAN_WORK(:) = XUNDEF
               XSTD_WORK (:) = XUNDEF
               XSKEW_WORK(:) = XUNDEF
-              NSIZE   (:,1) = 0
+              NSIZE     (:) = 0
          ENDWHERE
 !
          DEALLOCATE(ZDELTA   )
@@ -391,10 +386,10 @@ CALL INIT_IO_SURF_n(DTCO, U, &
     WRITE(ILUOUT,*) '*********************************************'
 !
     ALLOCATE(ZLAT(NL))
-    CALL GET_GRID_COORD(UG%G%CGRID, UG%G%NGRID_PAR, UG%G%XGRID_PAR, U%NSIZE_FULL, &
+    CALL GET_GRID_COORD(UG, U, &
                         ILUOUT,PY=ZLAT)
 !
-    WHERE (U%XNATURE(:)==0..AND.NSIZE(:,1)==0) NSIZE(:,1) = -1
+    WHERE (U%XNATURE(:)==0..AND.NSIZE(:)==0) NSIZE(:) = -1
 !
 !   No Antarctic
     WHERE(U%XNATURE(:)>0..AND.ZLAT(:)<-60.)
@@ -403,19 +398,26 @@ CALL INIT_IO_SURF_n(DTCO, U, &
           XMEAN_WORK(:) = XUNDEF
           XSTD_WORK (:) = XUNDEF
           XSKEW_WORK(:) = XUNDEF
-          NSIZE   (:,1) = -1
+          NSIZE     (:) = -1
     ENDWHERE   
 !
-    IF(ALL(NSIZE(:,1)==0.0))NSIZE(:,1)=-1
+    IF(ALL(NSIZE(:)==0.0))NSIZE(:)=-1
 !
-    CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1),XMIN_WORK (:),'TI_MIN ',PDEF=XUNDEF,KNPTS=1)
-    CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1),XMAX_WORK (:),'TI_MAX ',PDEF=XUNDEF,KNPTS=1)
-    CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1),XMEAN_WORK(:),'TI_MEAN',PDEF=XUNDEF,KNPTS=1)
-    CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1),XSTD_WORK (:),'TI_STD ',PDEF=XUNDEF,KNPTS=1)
-    CALL INTERPOL_FIELD(UG, U, HPROGRAM,ILUOUT,NSIZE(:,1),XSKEW_WORK(:),'TI_SKEW',PDEF=XUNDEF,KNPTS=1)
+    CALL INTERPOL_FIELD(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,XMIN_WORK (:),'TI_MIN ',PDEF=XUNDEF,KNPTS=1)
+    CALL INTERPOL_FIELD(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,XMAX_WORK (:),'TI_MAX ',PDEF=XUNDEF,KNPTS=1)
+    CALL INTERPOL_FIELD(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,XMEAN_WORK(:),'TI_MEAN',PDEF=XUNDEF,KNPTS=1)
+    CALL INTERPOL_FIELD(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,XSTD_WORK (:),'TI_STD ',PDEF=XUNDEF,KNPTS=1)
+    CALL INTERPOL_FIELD(UG, U, &
+                        HPROGRAM,ILUOUT,NSIZE,XSKEW_WORK(:),'TI_SKEW',PDEF=XUNDEF,KNPTS=1)
 !
     DEALLOCATE(NSIZE     )
     DEALLOCATE(XSUMVAL   )
+    DEALLOCATE(XSUMVAL2  )
+    DEALLOCATE(XSUMVAL3  )
     DEALLOCATE(ZLAT      )
 !
   ENDIF
@@ -424,11 +426,11 @@ CALL INIT_IO_SURF_n(DTCO, U, &
 !*    11.     Asign parameters
 !             ----------------
 !
-  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,S%XTI_MIN)
-  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,S%XTI_MAX)
-  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,S%XTI_MEAN)
-  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,S%XTI_STD)
-  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,S%XTI_SKEW)
+  CALL PACK_SAME_RANK(IMASK,XMIN_WORK ,I%XTI_MIN)
+  CALL PACK_SAME_RANK(IMASK,XMAX_WORK ,I%XTI_MAX)
+  CALL PACK_SAME_RANK(IMASK,XMEAN_WORK,I%XTI_MEAN)
+  CALL PACK_SAME_RANK(IMASK,XSTD_WORK ,I%XTI_STD)
+  CALL PACK_SAME_RANK(IMASK,XSKEW_WORK,I%XTI_SKEW)
 !  
 !-------------------------------------------------------------------------------
 !

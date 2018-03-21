@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !#################################################################################
-SUBROUTINE READ_PGD_NETCDF (UG, U, USS, &
+SUBROUTINE READ_PGD_NETCDF (USS, &
                             HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME,HFIELD,PFIELD)
 !#################################################################################
 !
@@ -28,14 +24,13 @@ SUBROUTINE READ_PGD_NETCDF (UG, U, USS, &
 !!      Original    11/2012
 !!------------------------------------------------------------------
 !
+
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_ABOR1_SFX
 
-USE MODI_READ_AND_SEND_MPI
 USE MODE_READ_CDF, ONLY :HANDLE_ERR_CDF
 ! USE MODD_PGD_GRID,       ONLY : NL ! grid dimension length
 USE MODI_PT_BY_PT_TREATMENT
@@ -44,17 +39,15 @@ USE MODI_GET_LUOUT
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-USE NETCDF
-!
 IMPLICIT NONE
 
+INCLUDE 'netcdf.inc'
 !
 !*      0.1    declarations of arguments
 !
+
 !
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
@@ -66,8 +59,6 @@ REAL,DIMENSION(:),INTENT(OUT),OPTIONAL :: PFIELD ! output a variable
 REAL,DIMENSION(:),POINTER  :: ZLAT,ZLON
 REAL,DIMENSION(:),POINTER  :: ZLAT2D,ZLON2D
 REAL,DIMENSION(:),POINTER,SAVE    :: ZFIELD    ! field to read
-!
-REAL, DIMENSION(:), ALLOCATABLE :: ZFIELD0
 !
 !*      0.2    declarations of local variables
 !
@@ -86,7 +77,7 @@ IF (LHOOK) CALL DR_HOOK('READ_PGD_NETCDF',0,ZHOOK_HANDLE)
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 SELECT CASE (TRIM(HFIELD))
-  CASE ('ZS','slope')
+  CASE ('ZS','slope','aspect')
   CASE DEFAULT
     CALL ABOR1_SFX('READ_PGD_NETCDF: '//TRIM(HFIELD)//" initialization not implemented !")
 END SELECT
@@ -99,7 +90,7 @@ END SELECT
 !              ----------------
 
 ! Open netcdf file
-IERROR=NF90_OPEN(HFILENAME,NF90_NOWRITE,ID_FILE)
+IERROR=NF_OPEN(HFILENAME,NF_NOWRITE,ID_FILE)
 CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILENAME))
 
 CALL READ_FIELD_NETCDF(ID_FILE,'LAT                 ',ZLAT,INLAT)
@@ -107,30 +98,36 @@ CALL READ_FIELD_NETCDF(ID_FILE,'LON                 ',ZLON,INLON)
 CALL READ_FIELD_NETCDF(ID_FILE,HFIELD,ZFIELD,INFIELD)
 
 ! Close netcdf file
-IERROR=NF90_CLOSE(ID_FILE)
+IERROR=NF_CLOSE(ID_FILE)
 
 IF (PRESENT(PFIELD)) THEN
 
-  ALLOCATE(ZFIELD0(U%NDIM_FULL))
-  !
   DO JPOINT=1,INFIELD
 
 ! On pourrait faire un controle des coordonnées ?
 !    IF ((ABS(ZLAT(JPOINT)-????XLAT???)<0.001)  .AND. (ABS(ZLON(JPOINT)-????XLON???)<0.001)) THEN
 
-    ZFIELD0(JPOINT)=ZFIELD(JPOINT)
+    PFIELD(JPOINT)=ZFIELD(JPOINT)
 
 !    END IF
   END DO
-  !
-  CALL READ_AND_SEND_MPI(ZFIELD0,PFIELD)
-  !
-  DEALLOCATE(ZFIELD0)
-  !
+
 ELSE
 
   ALLOCATE(ZLAT2D(INFIELD))
   ALLOCATE(ZLON2D(INFIELD))
+
+  IF (INLAT*INLON==INFIELD) THEN
+    DO JPOINT=1,INFIELD
+      ZLAT2D(JPOINT)=ZLAT((JPOINT-1)/INLON+1)
+      ZLON2D(JPOINT)=ZLON(MOD(JPOINT-1,INLON)+1)
+    END DO
+  ELSEIF ((INLAT==INFIELD) .AND. (INFIELD==INLON)) THEN
+    ZLAT2D(:)=ZLAT(:)
+    ZLON2D(:)=ZLON(:)
+  ELSE
+    CALL ABOR1_SFX('READ_PGD_NETCDF: problem with dimensions lengths between LAT LON and FIELD')
+  END IF
 
   IF (INLAT*INLON==INFIELD) THEN
     CALL ABOR1_SFX('READ_PGD_NETCDF: 1D LAT and LON not implemented')
@@ -145,7 +142,7 @@ ELSE
     !*    5.     Call to the adequate subroutine (point by point treatment)
     !            ----------------------------------------------------------
     !     
-    CALL PT_BY_PT_TREATMENT(UG, U, USS, &
+    CALL PT_BY_PT_TREATMENT(USS, &
                             ILUOUT,  (/ ZLAT2D(JPOINT)/) , (/ZLON2D(JPOINT)/) , (/ ZFIELD(JPOINT)/) , &
       HSUBROUTINE                                       )  
 
@@ -170,15 +167,15 @@ SUBROUTINE READ_FIELD_NETCDF(ID_FILE,HFIELD,PFIELD,ILENDIM)
 
 USE MODE_READ_CDF, ONLY :HANDLE_ERR_CDF
 
-USE NETCDF
-!
 IMPLICIT NONE
 
+INCLUDE 'netcdf.inc'
 
 INTEGER,INTENT(IN)::ID_FILE
  CHARACTER(LEN=20),   INTENT(IN)  :: HFIELD     ! name of variable
 REAL,DIMENSION(:),POINTER::PFIELD
 
+REAL,DIMENSION(:),ALLOCATABLE::ZFIELD
 INTEGER::ID_VAR ! Netcdf IDs for file and variable
 INTEGER::INVARDIMS !number of dimensions of netcdf input variable
 INTEGER,DIMENSION(:),ALLOCATABLE::IVARDIMSID
@@ -188,31 +185,31 @@ INTEGER::IERROR !error status
 INTEGER::ITYPE
 
 ! Look for variable ID for HFIELD
-IERROR=NF90_INQ_VARID(ID_FILE,TRIM(HFIELD),ID_VAR)
+IERROR=NF_INQ_VARID(ID_FILE,TRIM(HFIELD),ID_VAR)
 CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HFIELD))
 
 ! Number of dimensions
-IERROR=NF90_INQUIRE_VARIABLE(ID_FILE,ID_VAR,NDIMS=INVARDIMS)
-if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions number")
+IERROR=NF_INQ_VARNDIMS(ID_FILE,ID_VAR,INVARDIMS)
+if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions number")
 
 ! Id of dimensions
 ALLOCATE(IVARDIMSID(INVARDIMS))
 
-IERROR=NF90_INQUIRE_VARIABLE(ID_FILE,ID_VAR,DIMIDS=IVARDIMSID)
-if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions ids")
+IERROR=NF_INQ_VARDIMID(ID_FILE,ID_VAR,IVARDIMSID)
+if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions ids")
 
 
 SELECT CASE (INVARDIMS)
   CASE (1)
     ! Check dimension length
-    IERROR=NF90_INQUIRE_DIMENSION(ID_FILE,IVARDIMSID(1),LEN=ILENDIM)
-    if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
+    IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(1),ILENDIM)
+    if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
 
   CASE (2)
-    IERROR=NF90_INQUIRE_DIMENSION(ID_FILE,IVARDIMSID(1),LEN=ILENDIM1)
-    if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
-    IERROR=NF90_INQUIRE_DIMENSION(ID_FILE,IVARDIMSID(2),LEN=ILENDIM2)
-    if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
+    IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(1),ILENDIM1)
+    if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
+    IERROR=NF_INQ_DIMLEN(ID_FILE,IVARDIMSID(2),ILENDIM2)
+    if (IERROR/=NF_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
 
     ILENDIM=ILENDIM1*ILENDIM2
 
@@ -228,13 +225,23 @@ DEALLOCATE(IVARDIMSID)
 
 ALLOCATE(PFIELD(ILENDIM))
 
-IERROR=NF90_INQUIRE_VARIABLE(ID_FILE,ID_VAR,XTYPE=ITYPE)
-IF (ITYPE/=NF90_DOUBLE) THEN
-  CALL ABOR1_SFX('READ_PGD_NETCDF: incorrect type for variable '//TRIM(HFIELD))
+IERROR=NF_INQ_VARTYPE(ID_FILE,ID_VAR,ITYPE)
+
+IF (ITYPE == NF_DOUBLE) THEN
+    ! Read 1D variable
+    IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,PFIELD)
+ELSEIF (ITYPE == NF_REAL) THEN
+    ! Read 1D variable
+    ALLOCATE(ZFIELD(ILENDIM))
+    IERROR=NF_GET_VAR_REAL(ID_FILE,ID_VAR,ZFIELD)
+    PFIELD(:)=ZFIELD(:)
+    DEALLOCATE(ZFIELD)
+ELSE
+    CALL ABOR1_SFX('READ_PGD_NETCDF: incorrect type for variable '//TRIM(HFIELD))
 END IF
 
 ! Read 1D variable
-IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,PFIELD)
+IERROR=NF_GET_VAR_DOUBLE(ID_FILE,ID_VAR,PFIELD)
 
 CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HFIELD))
 

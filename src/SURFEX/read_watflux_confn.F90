@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_WATFLUX_CONF_n (CHW, DGO, W, HPROGRAM)
+      SUBROUTINE READ_WATFLUX_CONF_n (CHW, DGW, W, &
+                                      HPROGRAM)
 !     #############################################################
 !
 !!****  *READ_WATFLUX_CONF* - reads the configuration for WATFLUX
@@ -43,7 +40,7 @@
 !
 !
 USE MODD_CH_WATFLUX_n, ONLY : CH_WATFLUX_t
-USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODE_MODELN_SURFEX_HANDLER
@@ -71,7 +68,7 @@ IMPLICIT NONE
 !
 !
 TYPE(CH_WATFLUX_t), INTENT(INOUT) :: CHW
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
@@ -96,7 +93,7 @@ IMI=GET_CURRENT_MODEL_INDEX_SURFEX()
 !
 IF (IMI.NE.-1 .AND. LNAM_READ) THEN
  CALL INIT_NAM_WATFLUXn(W)
- CALL INIT_NAM_DIAG_SURFn(DGO)
+ CALL INIT_NAM_DIAG_SURFn(DGW)
  CALL INIT_NAM_CH_WATFLUXn(CHW)
 ENDIF
 !
@@ -128,7 +125,7 @@ ENDIF
 !
 IF (IMI.NE.-1) THEN
  CALL UPDATE_NAM_WATFLUXn(W)
- CALL UPDATE_NAM_DIAG_SURFn(DGO)
+ CALL UPDATE_NAM_DIAG_SURFn(DGW)
  CALL UPDATE_NAM_CH_WATFLUXn(CHW)
  ENDIF
 !

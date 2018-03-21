@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_TEB_GREENROOF (DTCO, UG, U, USS, IO, S, K, DTV, KDIM, HPROGRAM)
+      SUBROUTINE PGD_TEB_GREENROOF (DTCO, UG, U, USS, GRM, TG, &
+                                    HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB_GREENROOF* monitor for averaging and interpolations of TEB GR physiographic fields
@@ -39,15 +36,14 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t
-USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
+USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
 !
 USE MODD_PGD_GRID,             ONLY : NL
 USE MODD_DATA_COVER_PAR,       ONLY : NVEGTYPE
@@ -68,13 +64,9 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_S_t), INTENT(INOUT) :: S
-TYPE(ISBA_K_t), INTENT(INOUT) :: K
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
-!
-INTEGER, INTENT(IN) :: KDIM
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
+TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
 !
  CHARACTER(LEN=6), INTENT(IN)  :: HPROGRAM   ! Type of program
 !                                           ! F if all parameters must be specified
@@ -98,24 +90,22 @@ IF (LHOOK) CALL DR_HOOK('PGD_TEB_GREENROOF',0,ZHOOK_HANDLE)
 !             ------------------------------------
 !
 ! for green roofs, CISBA = DIF / CSCOND = 'DEF '
-IO%CISBA  = 'DIF'
-IO%CSCOND = 'PL98 ' ! CSCOND_GR = 'PL98' !begin test 29092011 ! normalement pas besoin
-IO%CHORT  = 'DEF '
-IO%CKSAT  = 'DEF '
-IO%LSOC   = .FALSE.
-IO%LTR_ML = .FALSE.
+GRM%TGRO%CISBA_GR  = 'DIF'
+GRM%TGRO%CSCOND_GR = 'PL98 ' ! CSCOND_GR = 'PL98' !begin test 29092011 ! normalement pas besoin
+GRM%TGRO%CHORT_GR  = 'DEF '
+GRM%TGRO%CKSAT_GR  = 'DEF '
+GRM%TGRO%LSOC_GR   = .FALSE.
+GRM%TGRO%LTR_ML_GR = .FALSE.
 !
-ALLOCATE(K%XRUNOFFB(KDIM))
-ALLOCATE(K%XWDRAIN (KDIM))
+ALLOCATE(GRM%TGRP%XRUNOFFB_GR(TG%NDIM))
+ALLOCATE(GRM%TGRP%XWDRAIN_GR (TG%NDIM))
 !
-K%XRUNOFFB(:) = 0.5 
-K%XWDRAIN (:) = 0.0
+GRM%TGRP%XRUNOFFB_GR(:) = 0.5 
+GRM%TGRP%XWDRAIN_GR (:) = 0.0
 !
-DTV%NTIME = 12
-!
-IO%LPAR = .TRUE.
-!
-CALL PGD_TEB_GREENROOF_PAR(DTCO, DTV, UG, U, USS, IO, S, K, KDIM, HPROGRAM)
+GRM%TGRO%NTIME_GR = 12
+CALL PGD_TEB_GREENROOF_PAR(DTCO, GRM%DTGR, UG, U, USS, GRM%TGRO, TG, &
+                           HPROGRAM)
 !
 !
 IF (LHOOK) CALL DR_HOOK('PGD_TEB_GREENROOF',1,ZHOOK_HANDLE)

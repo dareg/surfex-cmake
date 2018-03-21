@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_TEB_UNIF(KLUOUT,HSURF,PFIELD)
 !     #################################################################################
@@ -111,12 +107,12 @@ SELECT CASE(HSURF)
     PFIELD = XTI_BLD
 
   CASE('QI_BLD  ')
-    ALLOCATE(PFIELD(MAX(1,SIZE(XZS_LS)),1))
+    ALLOCATE(PFIELD(SIZE(XZS_LS),1))
     ALLOCATE(ZPS(SIZE(XZS_LS)))
     ALLOCATE(ZTI_BLD(SIZE(XZS_LS)))
     ZPS = XP00 - ZRHOA*XG*XZS_LS
     ZTI_BLD = XTI_BLD
-    PFIELD(:SIZE(XZS_LS),1) = XHUI_BLD * QSAT(ZTI_BLD, ZPS)
+    PFIELD(:,1) = XHUI_BLD * QSAT(ZTI_BLD, ZPS)
     DEALLOCATE(ZPS)
     DEALLOCATE(ZTI_BLD)
 

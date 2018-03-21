@@ -28,7 +28,6 @@ SUBROUTINE TRIP_OASIS_DEFINE(KLISTING,KLON,KLAT)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
-!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,7 +49,7 @@ USE MODI_GET_LONLAT_TRIP
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef CPLOASIS
+#ifdef TRIPOASIS
 USE MOD_OASIS
 #endif
 !
@@ -90,7 +89,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_DEFINE',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-#ifdef CPLOASIS
+#ifdef TRIPOASIS
 !-------------------------------------------------------------------------------
 !
 !*       1.     Define parallel partitions:
@@ -102,7 +101,7 @@ IPARAL(CLIM_STRATEGY) = CLIM_SERIAL
 IPARAL(CLIM_OFFSET  ) = 0
 IPARAL(CLIM_LENGTH  ) = KLON*KLAT
 !
- CALL OASIS_DEF_PARTITION(IPART_ID,IPARAL(:),IERR)
+CALL OASIS_DEF_PARTITION(IPART_ID,IPARAL(:),IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(KLISTING,*)'TRIP_OASIS_DEFINE: OASIS def partition problem, err = ',IERR
@@ -174,6 +173,10 @@ IF(LCPL_LAND)THEN
 !
   IF(LCPL_GW)THEN
 !
+!   Iutput groundwater recharge
+    CALL OASIS_DEF_VAR(NRECHARGE_ID,CRECHARGE,IPART_ID,IVAR_NODIMS,OASIS_IN,IVAR_SHAPE,OASIS_DOUBLE,IERR)  
+    IF(IERR/=OASIS_OK) CALL ABORT_TRIP('TRIP_OASIS_DEFINE: OASIS def var problem for groundwater recharge')
+!          
 !   Output Water table depth
     CALL OASIS_DEF_VAR(NWTD_ID,CWTD,IPART_ID,IVAR_NODIMS,OASIS_OUT,IVAR_SHAPE,OASIS_DOUBLE,IERR)  
     IF(IERR/=OASIS_OK) CALL ABORT_TRIP('TRIP_OASIS_DEFINE: OASIS def var problem for Water table depth')
@@ -209,7 +212,7 @@ ENDIF
 !*       5.     End of declaration phase:
 !               --------------
 !
- CALL OASIS_ENDDEF(IERR)
+CALL OASIS_ENDDEF(IERR)
 !
 IF(IERR/=OASIS_OK)THEN
    WRITE(KLISTING,*)'TRIP_OASIS_DEFINE: OASIS enddef problem, err = ',IERR

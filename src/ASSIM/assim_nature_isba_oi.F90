@@ -1,13 +1,11 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
-SUBROUTINE ASSIM_NATURE_ISBA_OI (IO, S, K, NP, NPE, HPROGRAM, KI, &
+SUBROUTINE ASSIM_NATURE_ISBA_OI (I, &
+                                 HPROGRAM, KI,                     &
                                 PRRCL,    PRRSL,  PRRCN,   PRRSN, &
                                 PATMNEB,  PITM,   PEVAPTR, PEVAP, &
                                 PSNC,     PTSC,   PUCLS, PVCLS,   &
                                 PTS_O,    PT2M_O, PHU2M_O, PSWE,  &
-                                HTEST, OD_MASKEXT, PLON_IN, PLAT_IN )
+                                HTEST, OD_MASKEXT,      &
+                                PLON_IN, PLAT_IN )
 
 ! ------------------------------------------------------------------------------------------
 !  *****************************************************************************************
@@ -32,8 +30,7 @@ SUBROUTINE ASSIM_NATURE_ISBA_OI (IO, S, K, NP, NPE, HPROGRAM, KI, &
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
 !
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
-USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_CSTS,            ONLY : XDAY, XPI, XRHOLW, XLVTT, NDAYSEC
 USE MODD_SURF_PAR,        ONLY : XUNDEF 
@@ -52,14 +49,7 @@ USE MODI_OI_CACSTS
 !
 IMPLICIT NONE
 !
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_S_t), INTENT(INOUT) :: S
-TYPE(ISBA_K_t), INTENT(INOUT) :: K
-TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
-TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
-!
-TYPE(ISBA_P_t), POINTER :: PK
-TYPE(ISBA_PE_t), POINTER :: PEK
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
@@ -104,7 +94,7 @@ INTEGER  :: IYEAR                      ! current year (UTC)
 INTEGER  :: IMONTH                     ! current month (UTC)
 INTEGER  :: IDAY                       ! current day (UTC)
 INTEGER  :: ISSSSS                     ! current time since start of the run (s)
-INTEGER  :: JI, JJ, JP, JL, IMASK
+INTEGER  :: JI, JJ, JP, JL
 INTEGER  :: INOBS   ! number of observations
 REAL(KIND=JPRB)      :: ZHOOK_HANDLE
 !
@@ -134,10 +124,10 @@ NITRAD = NECHGU*1800
 !
 !   Time initializations 
 !
-IYEAR  = S%TTIME%TDATE%YEAR
-IMONTH = S%TTIME%TDATE%MONTH
-IDAY   = S%TTIME%TDATE%DAY
-ISSSSS = S%TTIME%TIME
+IYEAR  = I%TTIME%TDATE%YEAR
+IMONTH = I%TTIME%TDATE%MONTH
+IDAY   = I%TTIME%TDATE%DAY
+ISSSSS = I%TTIME%TIME
 IF ( ISSSSS>NDAYSEC ) ISSSSS = ISSSSS - NDAYSEC
 IDAT = IYEAR*10000. + IMONTH*100. + IDAY
 !
@@ -156,49 +146,26 @@ JP = 1
 JL = 1
 !
 !
-ZSAB  (:) = K%XSAND(:,JP)*100.
-ZARG  (:) = K%XCLAY(:,JP)*100.
+ZSAB  (:) = I%XSAND(:,JP)*100.
+ZARG  (:) = I%XCLAY(:,JP)*100.
+!
+ZTS0  (:) = I%XTG  (:,1,JP)
+ZTP0  (:) = I%XTG  (:,2,JP)
+!
+ZWS0  (:) = I%XWG  (:,1,JP)
+ZWP0  (:) = I%XWG  (:,2,JP)
+ZTL0  (:) = I%XWGI (:,2,JP)
+!
+ZSNS0(:) = I%TSNOW%WSNOW(:,JL,JP)
+ZSNS (:) = ZSNS0(:)
 !
 ZTCLS (:) = XAT2M_ISBA   (:,JP)
 ZHCLS (:) = XAHU2M_ISBA  (:,JP)
 !
-ZD2   (:) = XUNDEF
-ZTS0  (:) = XUNDEF
-ZTP0  (:) = XUNDEF
-ZWS0  (:) = XUNDEF
-ZWP0  (:) = XUNDEF
-ZTL0  (:) = XUNDEF
-ZSNS0 (:) = XUNDEF
-ZRSMIN(:) = XUNDEF
-ZLAI  (:) = XUNDEF
-ZVEG  (:) = XUNDEF
-!
-DO JP = 1,IO%NPATCH
-  PK => NP%AL(JP)
-  PEK => NPE%AL(JP)
-  !
-  DO JI = 1,PK%NSIZE_P
-    IMASK = PK%NR_P(JI)
-    !
-    ZD2   (IMASK) = PK%XDG   (JI,2)
-    !
-    ZTS0  (IMASK) = PEK%XTG  (JI,1)
-    ZTP0  (IMASK) = PEK%XTG  (JI,2)
-    !
-    ZWS0  (IMASK) = PEK%XWG  (JI,1)
-    ZWP0  (IMASK) = PEK%XWG  (JI,2)
-    ZTL0  (IMASK) = PEK%XWGI (JI,2)
-    !
-    ZSNS0 (IMASK) = PEK%TSNOW%WSNOW(JI,JL)
-    !
-    ZRSMIN(IMASK) = PEK%XRSMIN(JI)
-    ZLAI  (IMASK) = PEK%XLAI  (JI)
-    ZVEG  (IMASK) = PEK%XVEG  (JI)
-    !
-  ENDDO
-ENDDO
-!
-ZSNS (:) = ZSNS0(:)
+ZD2   (:) = I%XDG   (:,2,JP)
+ZRSMIN(:) = I%XRSMIN(:,JP)
+ZLAI  (:) = I%XLAI  (:,JP)
+ZVEG  (:) = I%XVEG  (:,JP)
 !
 ZUCLS(:) = PUCLS(:)
 ZVCLS(:) = PVCLS(:)
@@ -378,21 +345,12 @@ WRITE(*,*) 'Mean TL increments over NATURE ',SUM(ZTLINC)/KI
 WRITE(*,*) '---------------------------------------------------------------'
 
 ! Update modified variables
-DO JP = 1,IO%NPATCH
-  PK => NP%AL(JP)
-  PEK => NPE%AL(JP)
-  !
-  DO JI = 1,PK%NSIZE_P
-    IMASK = PK%NR_P(JI)
-    !
-    PEK%XWG (JI,1) = ZWS0(IMASK)
-    PEK%XWG (JI,2) = ZWP0(IMASK)
-    PEK%XTG (JI,1) = ZTS0(IMASK)
-    PEK%XTG (JI,2) = ZTP0(IMASK)
-    PEK%XWGI(JI,2) = ZTL0(IMASK)
-    !
-  ENDDO
-ENDDO
+I%XWG (:,1,JP) = ZWS0(:)
+I%XWG (:,2,JP) = ZWP0(:)
+I%XTG (:,1,JP) = ZTS0(:)
+I%XTG (:,2,JP) = ZTP0(:)
+I%XWGI(:,2,JP) = ZTL0(:)
+
 !
 ! -------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_OI',1,ZHOOK_HANDLE)

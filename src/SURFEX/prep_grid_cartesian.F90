@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PREP_GRID_CARTESIAN (HFILETYPE,HINTERP_TYPE,KNI)
+      SUBROUTINE PREP_GRID_CARTESIAN (&
+                                      HFILETYPE,HINTERP_TYPE,KNI)
 !     ##########################################################################
 !
 !!****  *PREP_GRID_CARTESIAN* - reads EXTERNALIZED Surface grid.
@@ -63,11 +60,11 @@ INTEGER,           INTENT(OUT)   :: KNI          ! number of points
 !* 0.2 Declaration of local variables
 !      ------------------------------
 !
-REAL, DIMENSION(:), ALLOCATABLE :: ZW ! work array
  CHARACTER(LEN=12) :: YRECFM    ! Name of the article to be read
- CHARACTER(LEN=1) :: YDIR
 INTEGER           :: IRESP
+!
 INTEGER           :: JL        ! loop counter
+REAL, DIMENSION(:), ALLOCATABLE :: ZW ! work array
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-----------------------------------------------------------------------
@@ -85,16 +82,13 @@ YRECFM = 'JMAX'
 !
 KNI = NX * NY
 !
-YDIR = '-'
-IF (HFILETYPE=='MESONH') YDIR = 'A'
-!
 ALLOCATE(ZW(KNI))
 !
 IF (ALLOCATED(XX)) DEALLOCATE(XX)
 ALLOCATE(XX(NX))
 YRECFM = 'XX'
  CALL READ_SURF(&
-                HFILETYPE,YRECFM,ZW,IRESP,HDIR=YDIR)
+                HFILETYPE,YRECFM,ZW,IRESP,HDIR='A')
 XX = ZW(1:NX)
 
 
@@ -102,7 +96,7 @@ IF (ALLOCATED(XY)) DEALLOCATE(XY)
 ALLOCATE(XY(NY))
 YRECFM = 'YY'
  CALL READ_SURF(&
-                HFILETYPE,YRECFM,ZW,IRESP,HDIR=YDIR)
+                HFILETYPE,YRECFM,ZW,IRESP,HDIR='A')
 DO JL=1,KNI
   IF (MOD(JL,NX)==0) XY(JL/NX) = ZW(JL)
 END DO

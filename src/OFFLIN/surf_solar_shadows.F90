@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !#########################################################################
 SUBROUTINE SURF_SOLAR_SHADOWS (PMAP,PXHAT,PYHAT,PCOSZEN,PSINZEN,PAZIMSOL,  &
                                PZS,PZS_XY,ZXHAT_ll,ZYHAT_ll,IIOR_ll,       &
@@ -47,7 +43,8 @@ SUBROUTINE SURF_SOLAR_SHADOWS (PMAP,PXHAT,PYHAT,PCOSZEN,PSINZEN,PAZIMSOL,  &
 !
 !
 USE MODN_IO_OFFLINE, ONLY: LSHADOWS_OTHER
-
+USE MODD_SURF_ATM, ONLY : LSLOPE
+!
 IMPLICIT NONE
 !
 !*       0.1   DECLARATIONS OF DUMMY ARGUMENTS :
@@ -405,18 +402,35 @@ END IF
 !*       6.    FLUX FOR THE GRID MESH RECEIVED OVER AN HORIZONTAL SURFACE
 !              ----------------------------------------------------------
 !
-!* there is no problem of summation, because only fluxes projected
-!  over horizontal surfaces are considered here.
 !
-DO JJ=IJB,IJE
-  DO JI=IIB,IIE
-    PDIRSRFSWD(JI,JJ,:) = (  PDIRSWDT(JI,JJ,1,:) &
-                           + PDIRSWDT(JI,JJ,2,:) &
-                           + PDIRSWDT(JI,JJ,3,:) &
-                           + PDIRSWDT(JI,JJ,4,:))&
-                          * 0.25
-  END DO
-END DO
+IF (LSLOPE) THEN
+! With this parameterization, the incident radiation was partioned before all computations
+! and fluxes of the 4 triangles have just to be added here.
+! Note that the final provided radiation is projected on a sloping surface.
+! consistently with the new treatment in coupling_isba_orography subroutine.
+    DO JJ=IJB,IJE
+      DO JI=IIB,IIE
+        PDIRSRFSWD(JI,JJ,:) = PDIRSWDT(JI,JJ,1,:) &
+                            + PDIRSWDT(JI,JJ,2,:) &
+                            + PDIRSWDT(JI,JJ,3,:) &
+                            + PDIRSWDT(JI,JJ,4,:)
+      END DO
+    END DO
+ELSE
+! NOT RECOMMENDED
+!  With other parameterizations,
+!  there is no problem of summation, because only fluxes projected
+!  over horizontal surfaces are considered here.
+    DO JJ=IJB,IJE
+      DO JI=IIB,IIE
+        PDIRSRFSWD(JI,JJ,:) = (  PDIRSWDT(JI,JJ,1,:) &
+                            + PDIRSWDT(JI,JJ,2,:) &
+                            + PDIRSWDT(JI,JJ,3,:) &
+                            + PDIRSWDT(JI,JJ,4,:))&
+                            * 0.25
+      END DO
+    END DO
+END IF
 !
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------

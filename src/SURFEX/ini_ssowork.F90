@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE INI_SSOWORK(PMESHLENGTH,PDLAT,PDLON)
 !     ###############################################
@@ -35,10 +31,9 @@
 !!    Original    10/12/97
 !!
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
-USE MODD_PGDWORK,  ONLY : NSSO, NSSO_ALL, XSSO_ALL
+USE MODD_PGDWORK,  ONLY : XSSQO, LSSQO, NSSO
 USE MODD_SURF_PAR, ONLY : NUNDEF, XUNDEF
-USE MODD_SURFEX_MPI, ONLY : NINDEX
+USE MODD_PGD_GRID, ONLY : NL
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -54,8 +49,6 @@ IMPLICIT NONE
 REAL, OPTIONAL, INTENT(IN) :: PMESHLENGTH ! average mesh length in degrees
 REAL, OPTIONAL, INTENT(IN) :: PDLAT       ! input file mesh size (in latitude,  degrees)
 REAL, OPTIONAL, INTENT(IN) :: PDLON       ! input file mesh size (in longitude, degrees)
-
-INTEGER :: IDIMF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !----------------------------------------------------------------------------
@@ -65,9 +58,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !            -------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INI_SSOWORK',0,ZHOOK_HANDLE)
-!
-IDIMF = SIZE(NINDEX)
-!
 IF (PRESENT(PMESHLENGTH) .AND. PRESENT(PDLAT) .AND. PRESENT(PDLON)) THEN
   IF (PDLAT/= XUNDEF .AND. PDLON /= XUNDEF) THEN
     NSSO = NINT( 2. * PMESHLENGTH / (PDLAT + PDLON) )
@@ -85,16 +75,13 @@ END IF
 !*    2.     Allocate subgrid arrays
 !            -----------------------
 !
-IF (ALLOCATED(XSSO_ALL)) DEALLOCATE(XSSO_ALL)
+IF (ALLOCATED(XSSQO)) DEALLOCATE(XSSQO)
+IF (ALLOCATED(LSSQO)) DEALLOCATE(LSSQO)
 !
-ALLOCATE(XSSO_ALL(IDIMF,NSSO,NSSO))
-XSSO_ALL(:,:,:) = -XUNDEF
-!
-IF (ALLOCATED(NSSO_ALL)) DEALLOCATE(NSSO_ALL)
-!
-ALLOCATE(NSSO_ALL(IDIMF,NSSO,NSSO))
-NSSO_ALL(:,:,:) = 0
-!
+ALLOCATE(XSSQO(NSSO,NSSO,NL))
+ALLOCATE(LSSQO(NSSO,NSSO,NL))
+XSSQO(:,:,:) = -99999.
+LSSQO(:,:,:) = .FALSE.
 IF (LHOOK) CALL DR_HOOK('INI_SSOWORK',1,ZHOOK_HANDLE)
 !
 !----------------------------------------------------------------------------

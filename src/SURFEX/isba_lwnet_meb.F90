@@ -113,6 +113,8 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZLW_N_A, ZLW_N_B, ZLW_N_C,            &
 !
 REAL, DIMENSION(SIZE(PEMIS_N)) :: ZEMIS_G
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !*      0.3    declarations of local parameters
 !
 REAL, PARAMETER             :: ZTGRAD_MAX = 60. ! K When Tn-Tv approaches this difference, the derrivative term 
@@ -120,7 +122,6 @@ REAL, PARAMETER             :: ZTGRAD_MAX = 60. ! K When Tn-Tv approaches this d
 REAL, PARAMETER             :: ZTGRAD_DIF = 10. ! K This is the range in Tn-Tv over which dLWnet_n/dTn 
                                                 !   linearly vanishes. See below for details.
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 !*       0.     Initialization:
@@ -148,7 +149,7 @@ ZFRAC(:)      = 1.-PPSN(:)
 ZPN(:)        = PPSN(:)*(1.-PPSNA(:))
 ZSIGMA_FA(: ) = (1.-ZPN(:))*PSIGMA_F(:) + ZPN(:)*PSIGMA_FN(:)
 
-CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_F,ZSIGMA_FA,       &
+ CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_F,ZSIGMA_FA,       &
      ZEMIS_G,PTV,PTG,                                         & 
      ZLW_G_A,ZLW_G_B,ZLW_G_C,ZLW_G_D,ZLW_G_E,ZLW_G_F,         &
      ZLW_G_G,ZLW_G_H,ZLW_G_I,ZLW_G_J,ZLW_G_K,ZLW_G_L          )
@@ -159,7 +160,7 @@ ZFRAC(:)      = PPSN(:)
 ZPN(:)        = PPSN(:) + PPSNA(:)*(1.-PPSN(:))
 ZSIGMA_FA(: ) = (1.-ZPN(:))*PSIGMA_F(:) + ZPN(:)*PSIGMA_FN(:)
 
-CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_FN,ZSIGMA_FA,      &
+ CALL LW_FLUX_COMP(ZPN,PLW_RAD,ZFRAC,PSIGMA_FN,ZSIGMA_FA,      &
      PEMIS_N,PTV,PTN,                                         & 
      ZLW_N_A,ZLW_N_B,ZLW_N_C,ZLW_N_D,ZLW_N_E,ZLW_N_F,         &
      ZLW_N_G,ZLW_N_H,ZLW_N_I,ZLW_N_J,ZLW_N_K,ZLW_N_L          )
@@ -192,7 +193,7 @@ PLWNET_G_DTN(:) =   ZLW_N_J(:)                               *4/PTN(:)
 PLWNET_N_DTV(:) = ( ZLW_N_F(:) - ZLW_N_G(:)                 )*4/PTV(:)
 PLWNET_N_DTG(:) =   ZLW_G_K(:)                               *4/PTG(:)
 PLWNET_N_DTN(:) = ( ZLW_N_K(:) - ZLW_N_I(:)                 )*4/PTN(:)
-!
+
 ! Note that for very thin snow combined with extremely cold 
 ! conditions, very weak LWdown forcing and strong Tn-Tc differences,
 ! the derrivative of Lwnet_n/dT_n can pose problems (i.e. the assumption of
@@ -229,7 +230,7 @@ PLWNET_V(:)  = PLW_RAD(:) - ZLWUP(:) - PLWNET_G(:) - PLWNET_N(:)
 
 IF (LHOOK) CALL DR_HOOK('ISBA_LWNET_MEB',1,ZHOOK_HANDLE)
 
-CONTAINS
+ CONTAINS
 !=========================================================
 SUBROUTINE LW_FLUX_COMP(PPN,PLW_RAD,PFRAC,PSIGMA_F,PSIGMA_FA,      &
      PEMIS_S,PTV,PTEMP_S,                                          & 

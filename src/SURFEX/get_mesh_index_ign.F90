@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_IGN(KSSO,PGRID_PAR,PLAT,PLON,&
+      SUBROUTINE GET_MESH_INDEX_IGN(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,&
                                 KINDEX,KISSOX,KISSOY,PVALUE,PNODATA)
 !     ###############################################################
 !
@@ -43,6 +39,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+INTEGER,                       INTENT(IN)   :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                       INTENT(IN)   :: KSSO      ! number of subgrid mesh in each direction
 REAL,    DIMENSION(:),        INTENT(IN)    :: PGRID_PAR ! grid parameters
 REAL,    DIMENSION(:),        INTENT(IN)    :: PLAT      ! latitude of the point
@@ -78,7 +75,7 @@ INTEGER                           :: JL       ! loop counter in lambert grid
 INTEGER                           :: JI, JJ       ! loop counter on input points
 INTEGER, DIMENSION(SIZE(PLAT),2) :: ICI
 INTEGER, DIMENSION(1)             :: IDX0
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_1',0,ZHOOK_HANDLE)
@@ -174,6 +171,9 @@ ENDDO
 !*    5.     Localisation of the data points on (x,y) grid
 !            ---------------------------------------------
 !
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_2',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',0,ZHOOK_HANDLE)
+!
 IFACT = SIZE(NFRACD) - 1
 !
 KINDEX(:,:)=0
@@ -182,12 +182,7 @@ KISSOX(:,:) = 0
 KISSOY(:,:) = 0
 !
 ICI(:,:) = 0
-!
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_2',1,ZHOOK_HANDLE)
-!
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',0,ZHOOK_HANDLE_OMP)
-!$OMP DO PRIVATE(JL,JI,JJ)
+!$OMP PARALLEL DO PRIVATE(JL,JI,JJ)
 DO JL=1,SIZE(PLAT)
   !
   IF (ZVALUE(JL)==ZNODATA) CYCLE  
@@ -219,10 +214,9 @@ DO JL=1,SIZE(PLAT)
   ENDDO frac
   !
 ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
+!$OMP END PARALLEL DO
 !
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_3',1,ZHOOK_HANDLE)
 IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',0,ZHOOK_HANDLE)
 !
 DO JL=1,SIZE(PLAT)
@@ -253,10 +247,10 @@ DO JL=1,SIZE(PLAT)
   !
 ENDDO
 !
+IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 DEALLOCATE(ZX )
 DEALLOCATE(ZY )
-IF (LHOOK) CALL DR_HOOK('GET_MESH_INDEX_IGN_4',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE GET_MESH_INDEX_IGN

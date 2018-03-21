@@ -1,7 +1,3 @@
-#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 # Compiler Options                                       #
@@ -17,7 +13,8 @@ OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic 
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
-OPT_CHECK = -fcheck=bounds,do,mem,pointer,recursion -finit-real=nan
+OPT_CHECK = -fbounds-check -finit-real=nan
+#OPT_CHECK = -fcheck=bounds,do,mem,pointer,recursion -finit-real=nan
 OPT_I8    = -fdefault-integer-8
 #
 #
@@ -74,7 +71,7 @@ F77FLAGS      = $(FCFLAGS_OMP) $(OPT)
 FX90 = $(F90)
 FX90FLAGS     = $(FCFLAGS_OMP) $(OPT)
 #
-LDFLAGS   =  $(FCFLAGS_OMP) -Wl,-warn-once -ldl -lrt
+LDFLAGS   =  $(FCFLAGS_OMP) -Wl,-warn-once
 #
 # preprocessing flags
 #

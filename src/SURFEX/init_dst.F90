@@ -1,11 +1,8 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
-SUBROUTINE INIT_DST (DSTK, U, &
+SUBROUTINE INIT_DST (DST, U, &
                      HPROGRAM,  &    ! Program calling unit
-                  KSIZE_P, & ! Number of nature points in a patch
-                  KR_P, &    ! Mask from patch --> nature vectors
+                  KSIZE_NATURE_P, & ! Number of nature points in a patch
+                  KR_NATURE_P, &    ! Mask from patch --> nature vectors
+                  KPATCH, &         ! Maximum number of patches
                   PVEGTYPE_PATCH  ) ! fraction (in a nature point) of a vegtype for a patch
 
 !
@@ -26,14 +23,15 @@ IMPLICIT NONE
 !
 !PASSED VARIABLES
 !
-TYPE(DST_t), INTENT(INOUT) :: DSTK
+TYPE(DST_t), INTENT(INOUT) :: DST
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6), INTENT(IN)      :: HPROGRAM              !Passing unit
 !
-INTEGER, INTENT(IN) :: KSIZE_P
-INTEGER, DIMENSION(:), INTENT(IN) :: KR_P
-REAL, DIMENSION(:,:), INTENT(IN) :: PVEGTYPE_PATCH
+INTEGER, DIMENSION(:), POINTER :: KSIZE_NATURE_P
+INTEGER, DIMENSION(:,:), POINTER :: KR_NATURE_P
+INTEGER, INTENT(IN)  :: KPATCH
+REAL, DIMENSION(:,:,:), POINTER :: PVEGTYPE_PATCH
 !
 !LOCAL VARIABLES
  CHARACTER(LEN=4)    :: CRGUNIT               ! type of log-normal geometric mean radius
@@ -51,9 +49,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_DST',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 !Allocate memory for the real values which will be used by the model
-ALLOCATE(DSTK%XEMISRADIUS_DST(NDSTMDE))
-ALLOCATE(DSTK%XEMISSIG_DST   (NDSTMDE))
-ALLOCATE(DSTK%XMSS_FRC_SRC   (NDSTMDE))
+ALLOCATE(DST%XEMISRADIUS_DST(NDSTMDE))
+ALLOCATE(DST%XEMISSIG_DST   (NDSTMDE))
+ALLOCATE(DST%XMSS_FRC_SRC   (NDSTMDE))
 !
 !Get initial size distributions. This is cut and pasted
 !from dead routine dstpsd.F90
@@ -104,19 +102,19 @@ ENDIF
 DO JMODE=1,NDSTMDE
   JMODE_IDX=JORDER_DST(JMODE)
   !
-  DSTK%XEMISSIG_DST   (JMODE) = XEMISSIG_INI_DST(JMODE_IDX)
-  DSTK%XEMISRADIUS_DST(JMODE) = XEMISRADIUS_INI_DST(JMODE_IDX)
-  DSTK%XMSS_FRC_SRC   (JMODE) = XMSS_FRC_SRC_INI(JMODE_IDX)
+  DST%XEMISSIG_DST   (JMODE) = XEMISSIG_INI_DST(JMODE_IDX)
+  DST%XEMISRADIUS_DST(JMODE) = XEMISRADIUS_INI_DST(JMODE_IDX)
+  DST%XMSS_FRC_SRC   (JMODE) = XMSS_FRC_SRC_INI(JMODE_IDX)
   !
   !Get emisradius, and at the same time convert to number median radius
   IF (CRGUNIT=='MASS') &
-    DSTK%XEMISRADIUS_DST(JMODE) = DSTK%XEMISRADIUS_DST(JMODE) * EXP(-3.d0 * (LOG(DSTK%XEMISSIG_DST(JMODE)))**2)  
+    DST%XEMISRADIUS_DST(JMODE) = DST%XEMISRADIUS_DST(JMODE) * EXP(-3.d0 * (LOG(DST%XEMISSIG_DST(JMODE)))**2)  
   !
 ENDDO
 !
 !Normalize the sum of the emissions to 1 so that all dust is
 !put in one mode or the other
-IF(SUM(DSTK%XMSS_FRC_SRC(:)).LT.1.) DSTK%XMSS_FRC_SRC(:) = DSTK%XMSS_FRC_SRC(:) / SUM(DSTK%XMSS_FRC_SRC(:))
+IF(SUM(DST%XMSS_FRC_SRC(:)).LT.1.) DST%XMSS_FRC_SRC(:) = DST%XMSS_FRC_SRC(:) / SUM(DST%XMSS_FRC_SRC(:))
 !
 !Allocate memory
 !ALLOCATE(NVEGNO_DST)
@@ -124,64 +122,66 @@ IF(SUM(DSTK%XMSS_FRC_SRC(:)).LT.1.) DSTK%XMSS_FRC_SRC(:) = DSTK%XMSS_FRC_SRC(:) 
 NVEGNO_DST = 2
 !
 !Allocate memory for the vegtype-translator
-ALLOCATE(DSTK%NVT_DST(NVEGNO_DST))
+ALLOCATE(DST%NVT_DST(NVEGNO_DST))
 !
 !Set the dust/vegtype translator vector
-DSTK%NVT_DST(1)  = NVT_NO
-DSTK%NVT_DST(2)  = NVT_ROCK
+DST%NVT_DST(1)  = NVT_NO
+DST%NVT_DST(2)  = NVT_ROCK
 !
 !Allocate memory for roughness lengths of erodible surfaces
-ALLOCATE(DSTK%Z0_EROD_DST(NVEGNO_DST))
+ALLOCATE(DST%Z0_EROD_DST(NVEGNO_DST))
 !
 !Set the roughness lengths corresponding to erodible surfaces
 !Smooth roughness length is given to 1.d-5 (dstmbl.f90)
-DSTK%Z0_EROD_DST(1) = 30.d-6    !m (30 um) 
-DSTK%Z0_EROD_DST(2) = 200.d-6   !m (200 um) 
+DST%Z0_EROD_DST(1) = 30.d-6    !m (30 um) 
+DST%Z0_EROD_DST(2) = 200.d-6   !m (200 um) 
 !
 !Allocate memory for dust emitter surface vectors in patch vectors
-IF (.NOT.ASSOCIATED(DSTK%NSIZE_PATCH_DST)) ALLOCATE(DSTK%NSIZE_PATCH_DST(NVEGNO_DST))
+IF (.NOT.ASSOCIATED(DST%NSIZE_PATCH_DST)) ALLOCATE(DST%NSIZE_PATCH_DST(NVEGNO_DST,KPATCH))
 !
-DO JVEG = 1,NVEGNO_DST
-  !Count all the points in the patch where you have dust emitter vegetation
-  DSTK%NSIZE_PATCH_DST(JVEG) = COUNT(PVEGTYPE_PATCH(:,DSTK%NVT_DST(JVEG)) > 0.) 
+DO JPATCH = 1,KPATCH
+  DO JVEG = 1,NVEGNO_DST
+    !Count all the points in the patch where you have dust emitter vegetation
+    DST%NSIZE_PATCH_DST(JVEG,JPATCH) = COUNT(PVEGTYPE_PATCH(:,DST%NVT_DST(JVEG),JPATCH) > 0.) 
+  ENDDO
 ENDDO
 !
 !Find the largest dust emitter vector in any patch
 !ALLOCATE (NSIZE_LARGEST_DST)
 ISIZE_LARGEST_DST = 0
-DO JVEG = 1,NVEGNO_DST
-  ISIZE_LARGEST_DST = max(ISIZE_LARGEST_DST,DSTK%NSIZE_PATCH_DST(JVEG))
+DO JPATCH=1,KPATCH
+  DO JVEG = 1,NVEGNO_DST
+    ISIZE_LARGEST_DST = max(ISIZE_LARGEST_DST,DST%NSIZE_PATCH_DST(JVEG,JPATCH))
+  ENDDO
 ENDDO
 !
-!Allocate memory for KR_PATCH_DST mask translate from patch vector to dust vector
-ALLOCATE(DSTK%NR_PATCH_DST(ISIZE_LARGEST_DST,NVEGNO_DST))
+!Allocate memory for NR_PATCH_DST mask translate from patch vector to dust vector
+ALLOCATE(DST%NR_PATCH_DST(ISIZE_LARGEST_DST,NVEGNO_DST,KPATCH))
 !
 !Initialize the mask array
-DSTK%NR_PATCH_DST(:,:)=0
+DST%NR_PATCH_DST(:,:,:)=0
 !
 !Get values from the dust emitter vegetation mask
-DO JVEG=1,NVEGNO_DST
-  JVEG_IN = DSTK%NVT_DST(JVEG)          ! Get the real vegtype index
-#ifdef RJ_OFIX
-  CALL GET_VEGTYPE_2_PATCH_MASK(ILUOUT,    &
-           DSTK%NSIZE_PATCH_DST(JVEG),             &!I Size of dust emitter vector
-           KSIZE_P,                   &!I Size of patch vector
+DO JPATCH=1,KPATCH
+  DO JVEG=1,NVEGNO_DST
+    JVEG_IN = DST%NVT_DST(JVEG)          ! Get the real vegtype index
+    CALL GET_VEGTYPE_2_PATCH_MASK(ILUOUT,    &
+             DST%NSIZE_PATCH_DST(JVEG,JPATCH),             &!I Size of dust emitter vector
+             KSIZE_NATURE_P(JPATCH),                   &!I Size of patch vector
+             U%NSIZE_NATURE,                             &!I Size of nature vector
 !RJ: attempt to make this call generic
-           KR_P,&!I Mask from patch to nature
-           PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
-           DSTK%NR_PATCH_DST(:DSTK%NSIZE_PATCH_DST(JVEG),JVEG),  &!O Part of mask array to fill with values
-           JVEG_IN                                  &!I Index of vegtype in question
-             )  
+#ifdef RJ_OFIX
+             KR_NATURE_P(:KSIZE_NATURE_P(JPATCH),JPATCH),&!I Mask from patch to nature
 #else
-  CALL GET_VEGTYPE_2_PATCH_MASK(ILUOUT,    &
-           DSTK%NSIZE_PATCH_DST(JVEG),             &!I Size of dust emitter vector
-           KSIZE_P,                   &!I Size of patch vector
-           KR_P,                              &!I Mask from patch to nature
-           PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
-           DSTK%NR_PATCH_DST(:DSTK%NSIZE_PATCH_DST(JVEG),JVEG),  &!O Part of mask array to fill with values
-           JVEG_IN                                  &!I Index of vegtype in question
-             )  
+             KR_NATURE_P,                              &!I Mask from patch to nature
 #endif
+             PVEGTYPE_PATCH,                           &!I Fraction of vegtype of nature point within jpatch 
+             DST%NR_PATCH_DST(:DST%NSIZE_PATCH_DST(JVEG,JPATCH),JVEG,JPATCH),  &!O Part of mask array to fill with values
+             KPATCH,                                   &!I Number of possible patches
+             JPATCH,                                   &!I Index of patch in question
+             JVEG_IN                                  &!I Index of vegtype in question
+             )  
+  ENDDO !Loop on patches
 ENDDO    !Loop on veg-types
 !
 IF (LHOOK) CALL DR_HOOK('INIT_DST',1,ZHOOK_HANDLE)

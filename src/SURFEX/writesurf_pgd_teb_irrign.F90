@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_PGD_TEB_IRRIG_n (HSELECT, TIR, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_TEB_IRRIG_n (DGU, U, &
+                                             TIR, &
+                                            HPROGRAM)
 !     ################################################
 !
 !!****  *WRITESURF_PGD_TEB_IRRIG_n* - writes TEB irrigation physiographic fields
@@ -39,6 +37,12 @@
 !              ------------
 !
 !
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODI_WRITE_SURF
@@ -52,7 +56,10 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+!
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
@@ -76,7 +83,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_TEB_IRRIG_n',0,ZHOOK_HANDLE)
 ! Flag for irrigation of gardens
 YRECFM='L_PAR_GD_IRR'
 YCOMMENT='FLAG FOR SPECIFIED GARDEN IRRIGATION PARAMETERS'
- CALL WRITE_SURF(HSELECT, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%LPAR_GD_IRRIG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Parameters describing irrigation
@@ -84,27 +91,27 @@ IF (TIR%LPAR_GD_IRRIG) THEN
 !
   YRECFM='D_GD_SM_IRR'
   YCOMMENT='Start Month for Gardens Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGD_START_MONTH(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GD_EM_IRR'
   YCOMMENT='End   Month for Gardens Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGD_END_MONTH  (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GD_SH_IRR'
   YCOMMENT='Start Hour  for Gardens Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGD_START_HOUR (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GD_EH_IRR'
   YCOMMENT='End   Hour  for Gardens Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGD_END_HOUR   (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GD_IRRIG'
   YCOMMENT='24h mean Irrigation rate for Gardens Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGD_24H_IRRIG  (:),IRESP,HCOMMENT=YCOMMENT)
 !
 ENDIF
@@ -112,7 +119,7 @@ ENDIF
 ! Flag for irrigation of greenroofs
 YRECFM='L_PAR_GR_IRR'
 YCOMMENT='FLAG FOR SPECIFIED GREENROOFS IRRIGATION PARAMETERS'
- CALL WRITE_SURF(HSELECT, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%LPAR_GR_IRRIG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Parameters describing irrigation
@@ -120,27 +127,27 @@ IF (TIR%LPAR_GR_IRRIG) THEN
 !
   YRECFM='D_GR_SM_IRR'
   YCOMMENT='Start Month for Greenroofs Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGR_START_MONTH(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GR_EM_IRR'
   YCOMMENT='End   Month for Greenroofs Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGR_END_MONTH  (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GR_SH_IRR'
   YCOMMENT='Start Hour  for Greenroofs Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGR_START_HOUR (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GR_EH_IRR'
   YCOMMENT='End   Hour  for Greenroofs Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGR_END_HOUR   (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_GR_IRRIG'
   YCOMMENT='24h mean Irrigation rate for Greenroofs Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XGR_24H_IRRIG  (:),IRESP,HCOMMENT=YCOMMENT)
 !
 ENDIF
@@ -148,7 +155,7 @@ ENDIF
 ! Flag for watering of greenroofs
 YRECFM='L_PAR_RD_IRR'
 YCOMMENT='FLAG FOR SPECIFIED ROAD IRRIGATION PARAMETERS'
- CALL WRITE_SURF(HSELECT, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%LPAR_RD_IRRIG,IRESP,HCOMMENT=YCOMMENT)
 !
 ! Parameters describing watering
@@ -156,27 +163,27 @@ IF (TIR%LPAR_RD_IRRIG) THEN
 !
   YRECFM='D_RD_SM_IRR'
   YCOMMENT='Start Month for Roads Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XRD_START_MONTH(:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_RD_EM_IRR'
   YCOMMENT='End   Month for Roads Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XRD_END_MONTH  (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_RD_SH_IRR'
   YCOMMENT='Start Hour  for Roads Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XRD_START_HOUR (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_RD_EH_IRR'
   YCOMMENT='End   Hour  for Roads Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XRD_END_HOUR   (:),IRESP,HCOMMENT=YCOMMENT)
 !
   YRECFM='D_RD_IRRIG'
   YCOMMENT='24h mean Irrigation rate for Roads Irrigation'
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,TIR%XRD_24H_IRRIG  (:),IRESP,HCOMMENT=YCOMMENT)
 !
 ENDIF

@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE WRITE_COVER_TEX_ISBA(KPATCH,KLAYER,HISBA)
 !     ##########################
@@ -55,8 +51,7 @@ USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NVEGTYPE, NVT_NO, NVT_ROCK,      &
                                   NVT_C3, NVT_C4, NVT_IRR, NVT_GRAS,      &
                                   NVT_TROG,NVT_PARK, NVT_TRBD, NVT_TEBE,  &
                                   NVT_TENE, NVT_BOBD, NVT_BOND, NVT_BOGR, &
-                                  NVT_SHRB, NVT_C3W, NVT_C3S, NVT_FLTR,   &
-                                  NVT_FLGR 
+                                  NVT_SHRB 
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_VEG, XEVERG_RSMIN
 !
@@ -123,15 +118,15 @@ DO
 !* WARNING: check the cover type order in ini_data_cover routine
 !
   IF (CLANG=='EN') THEN
-    WRITE(NTEX, '("&&bare&rocks&snow&broad.d&needl.e&ever-&C3&C4&irr.&grass&grass&irr. ")', ADVANCE='NO') 
-    WRITE(NTEX, '("broad.d&broad.e&needl.e&broad.d&needl.d&grass&shrubs\\")')
-    WRITE(NTEX, '("&&land&&&temp.&boreal&green&crops&crops&crops&C3&C4&grass&trop. ")', ADVANCE='NO')
-    WRITE(NTEX, '("temp.&temp.&boreal&boreal&boreal&broad.\\")')
+    WRITE(NTEX,*) "&&bare&rocks&snow&broad.d&needl.e&ever-&C3&C4&irr.&grass&grass&irr. &
+                    &broad.d&broad.e&needl.e&broad.d&needl.d&grass&shrubs\\"
+    WRITE(NTEX,*) "&&land&&&temp.&boreal&green&crops&crops&crops&C3&C4&grass&trop. &
+                    &temp.&temp.&boreal&boreal&boreal&broad.\\"
   ELSE
-    WRITE(NTEX, '("&&sol&roc&neige&feuillu.d&coni.p&persis-&C3&C4&cult.&prairie&prairie ")', ADVANCE='NO')
-    WRITE(NTEX, '("pelouse&feuillu.d&feuillu.p&aigui.p&feuillu.d&aigui.d&prairie&arbuste\\")')
-    WRITE(NTEX, '("&&nu&&&temp.&boreale&tants&cult.&cult.&irr.&&tropicale&&tropi.&temp. ")', ADVANCE='NO')
-    WRITE(NTEX, '("temp.&boreale&boreale&boreale\\")')
+    WRITE(NTEX,*) "&&sol&roc&neige&feuillu.d&coni.p&persis-&C3&C4&cult.&prairie&prairie &
+               &pelouse&feuillu.d&feuillu.p&aigui.p&feuillu.d&aigui.d&prairie&arbuste\\"
+    WRITE(NTEX,*) "&&nu&&&temp.&boreale&tants&cult.&cult.&irr.&&tropicale&&tropi.&temp. &
+                    &temp.&boreale&boreale&boreale\\"
   END IF
   WRITE(NTEX,*) '\hline'
   WRITE(NTEX,*) '\hline'
@@ -381,20 +376,8 @@ DO JVEGTYPE=1,NVEGTYPE
      YPATCH(1) = 'irrigated grass              '
      YPATCH(2) = "les pelouses irrigu\'ees    "
   END IF
-  IF (JVEGTYPE==NVT_FLTR) THEN
-     YPATCH(1) = 'flooded trees             '
-     YPATCH(2) = "les arbres inondes    "
-  END IF
-  IF (JVEGTYPE==NVT_FLGR) THEN
-     YPATCH(1) = 'flooded grassland              '
-     YPATCH(2) = "les prairies inondees    "
-  END IF
   IF (JVEGTYPE==NVT_C3)   YPATCH = (/ 'C3 crops                     ',   &
                                         'les cultures C3              ' /)  
-  IF (JVEGTYPE==NVT_C3W)  YPATCH = (/ 'C3W crops                    ',   &
-                                        'les cultures C3 dhiver       ' /)  
-  IF (JVEGTYPE==NVT_C3S)  YPATCH = (/ 'C3S crops                    ',   &
-                                        'les cultures C3 dete         ' /)  
   IF (JVEGTYPE==NVT_C4)   YPATCH = (/ 'C4 crops                     ',   &
                                         'les cultures C4              ' /)  
   IF (JVEGTYPE==NVT_IRR ) THEN
@@ -568,4 +551,3 @@ IF (LHOOK) CALL DR_HOOK('WRITE_COVER_TEX_ISBA',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE WRITE_COVER_TEX_ISBA
-

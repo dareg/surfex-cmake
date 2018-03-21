@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_DUMMY_n (HSELECT, DUU, HPROGRAM)
+      SUBROUTINE WRITESURF_DUMMY_n (DGU, U, &
+                                     DUU, &
+                                    HPROGRAM)
 !     ##########################################
 !
 !!****  *WRITESURF_DUMMY_n* - routine to write dummy surface fields
@@ -18,11 +16,17 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    03/2004
-!!      P.Tulet     2015  Bug depassement de tableau YRECFM
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_DUMMY_SURF_FIELDS_n, ONLY : DUMMY_SURF_FIELDS_t
 !
@@ -38,7 +42,9 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
+!
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 TYPE(DUMMY_SURF_FIELDS_t), INTENT(INOUT) :: DUU
 !
@@ -66,7 +72,7 @@ IF (LHOOK) CALL DR_HOOK('WRITESURF_DUMMY_N',0,ZHOOK_HANDLE)
 YRECFM='DUMMY_GR_NBR'
 YCOMMENT=' '
 !
- CALL WRITE_SURF(HSELECT, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,DUU%NDUMMY_NBR,IRESP,HCOMMENT=YCOMMENT)
 !
 !-------------------------------------------------------------------------------
@@ -76,12 +82,12 @@ YCOMMENT=' '
 !
 DO JDUMMY=1,DUU%NDUMMY_NBR
   !
-  WRITE(YRECFM,'(A8,I3.3,A1)') 'DUMMY_GR',JDUMMY,' '
+  WRITE(YRECFM,'(A8,I3.3,A5)') 'DUMMY_GR',JDUMMY,'     '
   YSTRING20=DUU%CDUMMY_NAME(JDUMMY)
   YSTRING03=DUU%CDUMMY_AREA(JDUMMY)
   YCOMMENT='X_Y_'//YRECFM//YSTRING20//YSTRING03//  &
              '                                                             '  
-  CALL WRITE_SURF(HSELECT, &
+  CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,DUU%XDUMMY_FIELDS(:,JDUMMY),IRESP,HCOMMENT=YCOMMENT)
 END DO
 IF (LHOOK) CALL DR_HOOK('WRITESURF_DUMMY_N',1,ZHOOK_HANDLE)

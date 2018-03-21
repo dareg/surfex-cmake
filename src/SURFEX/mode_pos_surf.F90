@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !!    ###############
       MODULE MODE_POS_SURF
 !!    ###############
@@ -19,7 +15,7 @@ MODULE PROCEDURE POSKEY
 END INTERFACE
 !!
 !!
- CONTAINS
+CONTAINS
 !!
 !!    ##############################################
       SUBROUTINE POSNAM(KULNAM,HDNAML,OFOUND,KLUOUT)
@@ -92,17 +88,14 @@ DO JFILE=1,2
   search_nam : DO
     YLINE=' '
     READ(UNIT=KULNAM,FMT='(A)',IOSTAT=IRET,END=100) YLINE
-
 !   If file does not exist, most compilers would just create it and jump 
 !   to the END label ; but a few of them would report an error:         
     IF (IRET /=0 ) THEN                 
       INQUIRE(KULNAM,OPENED=LLOPENED)
       IF (LLOPENED) THEN
-        IF (PRESENT(KLUOUT)) THEN
+        IF (PRESENT(KLUOUT)) &
           WRITE(KLUOUT,FMT=*) 'MODE_POS_SURF : error reading from unit ',&
-                KULNAM,' file ',HDNAML,' line ',YLINE
-          CALL FLUSH(KLUOUT)
-        ENDIF        
+                               KULNAM,' file ',HDNAML,' line ',YLINE
         CALL ABOR1_SFX('MODE_POS_SURF: read error in namelist file') 
       ELSE
         EXIT search_nam

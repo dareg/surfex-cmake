@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE SEAICE_GELATO1D_n (S, HPROGRAM, PTIMEC, PTSTEP)
+    SUBROUTINE SEAICE_GELATO1D_n (S, &
+                                  HPROGRAM,PTIMEC, PTSTEP,TPGLT, PSST, PSSS, &
+         PFSIC, PFSIT, PSIC, PTICE, PICE_ALB)
 !     #######################################################################
 !
 !!****  *SEAICE_GELATO1D_n*  
@@ -58,6 +56,7 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS,ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_TYPES_GLT , ONLY : T_GLT
 USE MODD_GLT_PARAM , ONLY : XTSTEP=>DTT, LWG, LP1, LP2, LP3, LP4, LP5, &
                             NPRINTO, GELATO_DIM=>NX
 
@@ -89,11 +88,20 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 CHARACTER(LEN=6),    INTENT(IN)       :: HPROGRAM  ! program calling surf. schemes
 REAL,                INTENT(IN)       :: PTIMEC    ! current duration since start of the run (s)
 REAL,                INTENT(IN)       :: PTSTEP    ! surface time-step (s)
+TYPE(T_GLT)         ,INTENT(INOUT)    :: TPGLT     ! Gelato state variable
+REAL, DIMENSION(:)  ,INTENT(IN)       :: PSST      ! sea surface temperature (K)
+REAL, DIMENSION(:)  ,INTENT(IN)       :: PSSS      ! sea surface salinity (psu)
+REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSIC ! sea ice cover constraint ([0-1]). 
+REAL, DIMENSION(:)  ,INTENT(IN)       :: PFSIT ! sea ice thickness constraint (m). 
+!
+REAL, DIMENSION(:)  ,INTENT(OUT)      :: PSIC      ! Sea-ice Cover ([0-1])
+REAL, DIMENSION(:)  ,INTENT(OUT)      :: PTICE     ! Sea-ice temperature (K)
+REAL, DIMENSION(:)  ,INTENT(OUT)      :: PICE_ALB  ! Sea-ce albedo ([0-1])
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(  SIZE(S%XSST)) :: ZSST  ! sea surface temperature with frozen sea set at freezing point
-REAL, DIMENSION(  SIZE(S%XSST)) :: ZSIC  ! Will hold a forcing SIC field, even if S%XFSIC is missing
+REAL, DIMENSION(  SIZE(PSST)) :: ZSST  ! sea surface temperature with frozen sea set at freezing point
+REAL, DIMENSION(  SIZE(PSST)) :: ZSIC  ! Will hold a forcing SIC field, even if PFSIC is missing
 !
 INTEGER :: IT      ! total number of Gelato timesteps in one atmospheric timestep
 INTEGER :: JT      ! Running index 1 -> IT
@@ -116,7 +124,7 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! Must restore Gelato problem size (nx) to the correct value for the NPROMA block
 ! 
-GELATO_DIM=SIZE(S%XSSS)
+GELATO_DIM=SIZE(PSSS)
 !
 ! Time steps stuff : default Gelato time step equals surface time step
 !
@@ -142,27 +150,27 @@ ENDIF
 ! Ocean part 
 !----------------------------------------------------------------------------------
 ! Surface salinity 
-S%TGLT%oce_all(:,1)%sml=S%XSSS(:)
+TPGLT%oce_all(:,1)%sml=PSSS(:)
 
 ! Ensure that SSS-dependant freezing point temperature is used on
 ! locations where SIC (or SST) forcing value calls for it
 
 ! First init ZSST with freezing temperature (which depends on local salinity)
 ! (Gelato uses Celsius scale for freezing temperatures)
-ZSST=RESHAPE(glt_swfrzt2d(RESHAPE(S%XSSS,(/SIZE(S%XSSS),1/))) + XTT,(/SIZE(S%XSSS)/))
+ZSST=RESHAPE(glt_swfrzt2d(RESHAPE(PSSS,(/SIZE(PSSS),1/))) + XTT,(/SIZE(PSSS)/))
 
-! Then replace freezing temp with Surfex-provided SST (S%XSST) where
+! Then replace freezing temp with Surfex-provided SST (PSST) where
 ! there is no (explicit or implicit) seaice and temperature is warmer
 ! than freezing point. And inits ZSIC accordingly
 IF (S%LINTERPOL_SIC) THEN  
-   ZSIC=S%XFSIC
-   WHERE ( ZSIC(:) < 1.e-10 .AND. S%XSST(:) > ZSST(:) ) 
-      ZSST(:)=S%XSST(:)
+   ZSIC=PFSIC
+   WHERE ( ZSIC(:) < 1.e-10 .AND. PSST(:) > ZSST(:) ) 
+      ZSST(:)=PSST(:)
    ENDWHERE
 ELSE 
    ! Implicit sea-ice cover
-   WHERE (S%XSST(:) - XTT > S%XFREEZING_SST + 0.1 )
-      ZSST(:)= S%XSST(:) 
+   WHERE (PSST(:) - XTT > S%XFREEZING_SST + 0.1 )
+      ZSST(:)= PSST(:) 
       ZSIC(:)=0.
    ELSEWHERE
       ZSIC(:)=1.
@@ -173,9 +181,9 @@ ENDIF
 !________________________________________________________________________
 !
 !  Reset output accumulation/averaging fields 
-S%XSIC    = 0.
-S%XTICE   = 0.
-S%XICE_ALB= 0.
+PSIC    = 0.
+PTICE   = 0.
+PICE_ALB= 0.
 LP1 = (LWG.AND.NPRINTO>=1)
 LP2 = (LWG.AND.NPRINTO>=2)
 LP3 = (LWG.AND.NPRINTO>=3)
@@ -183,68 +191,68 @@ LP4 = (LWG.AND.NPRINTO>=4)
 LP5 = (LWG.AND.NPRINTO>=5)
 
 DO JT=1,IT
-   IF (SIZE(S%XSSS) > 0) THEN 
-      S%TGLT%oce_all(:,1)%tml=ZSST(:)
-      IF (S%LINTERPOL_SIC) S%TGLT%sit_d(1,:,1)%fsi=ZSIC(:)
-      IF (S%LINTERPOL_SIT) S%TGLT%sit_d(1,:,1)%hsi=S%XFSIT(:)
+   IF (SIZE(PSSS) > 0) THEN 
+      TPGLT%oce_all(:,1)%tml=ZSST(:)
+      IF (S%LINTERPOL_SIC) TPGLT%sit_d(1,:,1)%fsi=ZSIC(:)
+      IF (S%LINTERPOL_SIT) TPGLT%sit_d(1,:,1)%hsi=PFSIT(:)
       ! Gelato will compute heat flux from ocean by itself, thanks to 
       ! imposed namelist parameter nextqoc=0 
-      S%TGLT%oce_all(:,1)%qoc=0. 
+      TPGLT%oce_all(:,1)%qoc=0. 
       ! Zero Frazil flux
-      S%TGLT%oce_all(:,1)%qml=0.
+      TPGLT%oce_all(:,1)%qml=0.
       ! Don't bother for sea level variations
-      S%TGLT%oce_all(:,1)%ssh=0.
+      TPGLT%oce_all(:,1)%ssh=0.
       ! (velocity components are useless in Surfex 1D setting)
       !
       ! Atmosphere part 
       !----------------
       ! Feed Gelato input structure with flux values from XCPL_xx
       ! 
-      S%TGLT%atm_all(:,1)%lip=S%XCPL_SEA_RAIN(:) / PTSTEP
-      S%TGLT%atm_all(:,1)%sop=S%XCPL_SEA_SNOW(:) / PTSTEP
+      TPGLT%atm_all(:,1)%lip=S%XCPL_SEA_RAIN(:) / PTSTEP
+      TPGLT%atm_all(:,1)%sop=S%XCPL_SEA_SNOW(:) / PTSTEP
       ! Fluxes over Sea water
-      S%TGLT%atm_wat(:,1)%eva=S%XCPL_SEA_EVAP(:) / PTSTEP
-      S%TGLT%atm_wat(:,1)%swa=S%XCPL_SEA_SNET(:) / PTSTEP 
-      S%TGLT%atm_wat(:,1)%nsf=S%XCPL_SEA_HEAT(:) / PTSTEP 
-      S%TGLT%atm_wat(:,1)%dfl=S%XSI_FLX_DRV ! W m-2 K-1    
+      TPGLT%atm_wat(:,1)%eva=S%XCPL_SEA_EVAP(:) / PTSTEP
+      TPGLT%atm_wat(:,1)%swa=S%XCPL_SEA_SNET(:) / PTSTEP 
+      TPGLT%atm_wat(:,1)%nsf=S%XCPL_SEA_HEAT(:) / PTSTEP 
+      TPGLT%atm_wat(:,1)%dfl=S%XSI_FLX_DRV ! W m-2 K-1    
       ! Fluxes over Sea ice
-      S%TGLT%atm_ice(1,:,1)%eva=S%XCPL_SEAICE_EVAP(:) / PTSTEP
-      S%TGLT%atm_ice(1,:,1)%swa=S%XCPL_SEAICE_SNET(:) / PTSTEP 
-      S%TGLT%atm_ice(1,:,1)%nsf=S%XCPL_SEAICE_HEAT(:) / PTSTEP 
-      S%TGLT%atm_ice(1,:,1)%dfl=S%XSI_FLX_DRV ! W m-2 K-1   
+      TPGLT%atm_ice(1,:,1)%eva=S%XCPL_SEAICE_EVAP(:) / PTSTEP
+      TPGLT%atm_ice(1,:,1)%swa=S%XCPL_SEAICE_SNET(:) / PTSTEP 
+      TPGLT%atm_ice(1,:,1)%nsf=S%XCPL_SEAICE_HEAT(:) / PTSTEP 
+      TPGLT%atm_ice(1,:,1)%dfl=S%XSI_FLX_DRV ! W m-2 K-1   
       ! (stress components are useless in Surfex 1D setting)
       !
       !       Let Gelato process its input data
       !
-      CALL GLT_GETMLRF( S%TGLT%oce_all,S%TGLT%tml )
-      CALL GLT_GETATMF( S%TGLT )
-      CALL GLTOOLS_CHKINP( 20010101,S%TGLT )
+      CALL GLT_GETMLRF( TPGLT%oce_all,TPGLT%tml )
+      CALL GLT_GETATMF( TPGLT )
+      CALL GLTOOLS_CHKINP( 20010101,TPGLT )
       !
       ! Compute gelato time index
       !
-      S%TGLT%IND%CUR = ( PTIMEC + JT * XTSTEP ) / XTSTEP 
+      TPGLT%IND%CUR = ( PTIMEC + JT * XTSTEP ) / XTSTEP 
       !
       !       Let Gelato thermodynamic scheme run
       !
-      CALL GLT_GELATO( S%TGLT )
+      CALL GLT_GELATO( TPGLT )
       !
       ! Have Gelato feed its coupling ouptut interface
       ! 
-      CALL GLT_SNDATMF( S%TGLT )
-      CALL GLT_SNDMLRF( S%TGLT%bat,S%TGLT%dom,S%TGLT%atm_all,S%TGLT%tml, &
-                        S%TGLT%dia,S%TGLT%sit,S%TGLT%tfl,S%TGLT%ust,S%TGLT%all_oce )
-      CALL WRIDIA_AR5( S%TGLT )
-      CALL GLTOOLS_CHKOUT( 20010101,S%TGLT ) ! Does not actually work with Arpege
+      CALL GLT_SNDATMF( TPGLT )
+      CALL GLT_SNDMLRF( TPGLT%bat,TPGLT%dom,TPGLT%atm_all,TPGLT%tml, &
+           TPGLT%dia,TPGLT%sit,TPGLT%tfl,TPGLT%ust,TPGLT%all_oce )
+      CALL WRIDIA_AR5( TPGLT )
+      CALL GLTOOLS_CHKOUT( 20010101,TPGLT ) ! Does not actually work with Arpege
       ! Sum output fields over Gelato model time step duration
-      S%XSIC     = S%XSIC     + S%TGLT%ice_atm(1,:,1)%fsi * XTSTEP
-      S%XTICE    = S%XTICE    + S%TGLT%ice_atm(1,:,1)%tsf * XTSTEP
-      S%XICE_ALB = S%XICE_ALB + S%TGLT%ice_atm(1,:,1)%alb * XTSTEP
+      PSIC     = PSIC     + TPGLT%ice_atm(1,:,1)%fsi * XTSTEP
+      PTICE    = PTICE    + TPGLT%ice_atm(1,:,1)%tsf * XTSTEP
+      PICE_ALB = PICE_ALB + TPGLT%ice_atm(1,:,1)%alb * XTSTEP
    ENDIF
 END DO
 !   Average output fields over coupling time
-S%XSIC     = S%XSIC     / (IT * XTSTEP)
-S%XTICE    = S%XTICE    / (IT * XTSTEP) 
-S%XICE_ALB = S%XICE_ALB / (IT * XTSTEP) 
+PSIC     = PSIC     / (IT * XTSTEP)
+PTICE    = PTICE    / (IT * XTSTEP) 
+PICE_ALB = PICE_ALB / (IT * XTSTEP) 
 !
 ! Resets input accumulation fields for next step 
 !

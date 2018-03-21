@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_SEAICE_n (G, S, HPROGRAM,KLU,KLUOUT)
+      SUBROUTINE READ_SEAICE_n (&
+                                 SG, S, &
+                                HPROGRAM,KLU,KLUOUT)
 !     #########################################
 !
 !!****  *READ_SEAICE_n* - read seaice scheme variables
@@ -45,7 +43,7 @@
 !
 !
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS, ONLY           : XPI, XTTSI, XTT
@@ -68,6 +66,7 @@ USE MODI_INTERPOL_SST_MTH
 !
 USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
+USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -80,7 +79,7 @@ IMPLICIT NONE
 !
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: G
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! calling program
@@ -138,11 +137,13 @@ IF(S%LINTERPOL_SIC)THEN
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIC_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(HPROGRAM,YRECFM,S%XSIC_MTH(:,JMTH),IRESP)
+      CALL READ_SURF(&
+                     HPROGRAM,YRECFM,S%XSIC_MTH(:,JMTH),IRESP)
       CALL CHECK_SEAICE(YRECFM,S%XSIC_MTH(:,JMTH))
    ENDDO
    !
-   CALL INTERPOL_SST_MTH(S,'C')
+   CALL INTERPOL_SST_MTH(S, &
+                         S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'C',S%XFSIC)
    !
    IF (ANY(S%XFSIC(:)>1.0).OR.ANY(S%XFSIC(:)<0.0)) THEN
      CALL ABOR1_SFX('READ_SEAICE_n: FSIC should be >=0 and <=1') 
@@ -161,7 +162,12 @@ ENDIF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-CALL READ_SURF(HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP)
+CALL READ_SURF(&
+                     HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP)
+!
+IF (TRIM(S%CSEAICE_SCHEME) == 'GELATO' .AND. (NBLOCKTOT>1)) THEN 
+    CALL ABOR1_SFX("READ_SEAICE_n: GELATO CANNOT YET RUN MULTI-THREAD")
+ENDIF
 !
 IF (TRIM(S%CSEAICE_SCHEME) == 'NONE' ) THEN
    IF (S%LINTERPOL_SIC ) THEN
@@ -232,12 +238,14 @@ CALL GLTOOLS_ALLOC(S%TGLT)
 !
 !*       0.     Check dimensions : number of layers and ice categories
 !
-CALL READ_SURF(HPROGRAM,'ICENL',inl_in_file,IRESP)
+CALL READ_SURF(&
+                     HPROGRAM,'ICENL',inl_in_file,IRESP)
 IF (inl_in_file /= nl) THEN 
    WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, nl
    CALL ABOR1_SFX(YMESS)
 END IF
-CALL READ_SURF(HPROGRAM,'ICENT',int_in_file,IRESP)
+CALL READ_SURF(&
+                     HPROGRAM,'ICENT',int_in_file,IRESP)
 IF (int_in_file /= nt) THEN
    WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, nt
    CALL ABOR1_SFX(YMESS)
@@ -245,7 +253,8 @@ END IF
 !
 !*       1.     (Semi-)prognostic fields with only space dimension(s) :
 !
-CALL READ_SURF(HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
+CALL READ_SURF(&
+                     HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
 !
 !*       2.     Prognostic fields with space and ice-category dimension(s) :
 !
@@ -253,23 +262,32 @@ DO JK=1,nt
    WRITE(YLVL,'(I2)') JK
    YCATEG='_'//ADJUSTL(YLVL)
    ! .. Read sea ice age for type JK
-   CALL READ_SURF(HPROGRAM,'ICEAGE'//YCATEG,S%TGLT%sit(JK,:,1)%age,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICEAGE'//YCATEG,S%TGLT%sit(JK,:,1)%age,IRESP)
    ! .. Read melt pond volume for type JK
-   CALL READ_SURF(HPROGRAM,'ICEVMP'//YCATEG,S%TGLT%sit(JK,:,1)%vmp,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICEVMP'//YCATEG,S%TGLT%sit(JK,:,1)%vmp,IRESP)
    ! .. Read sea ice surface albedo for type JK
-   CALL READ_SURF(HPROGRAM,'ICEASN'//YCATEG,S%TGLT%sit(JK,:,1)%asn,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICEASN'//YCATEG,S%TGLT%sit(JK,:,1)%asn,IRESP)
    ! .. Read sea ice fraction for type JK
-   CALL READ_SURF(HPROGRAM,'ICEFSI'//YCATEG, S%TGLT%sit(JK,:,1)%fsi,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICEFSI'//YCATEG, S%TGLT%sit(JK,:,1)%fsi,IRESP)
    ! .. Read sea ice thickness for type JK
-   CALL READ_SURF(HPROGRAM,'ICEHSI'//YCATEG, S%TGLT%sit(JK,:,1)%hsi,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICEHSI'//YCATEG, S%TGLT%sit(JK,:,1)%hsi,IRESP)
    ! .. Read sea ice salinity for type JK
-   CALL READ_SURF(HPROGRAM,'ICESSI'//YCATEG, S%TGLT%sit(JK,:,1)%ssi,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICESSI'//YCATEG, S%TGLT%sit(JK,:,1)%ssi,IRESP)
    ! .. Read sea ice surface temperature for type JK
-   CALL READ_SURF(HPROGRAM,'ICETSF'//YCATEG, S%TGLT%sit(JK,:,1)%tsf,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICETSF'//YCATEG, S%TGLT%sit(JK,:,1)%tsf,IRESP)
    ! .. Read snow thickness for type JK
-   CALL READ_SURF(HPROGRAM,'ICEHSN'//YCATEG, S%TGLT%sit(JK,:,1)%hsn,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICEHSN'//YCATEG, S%TGLT%sit(JK,:,1)%hsn,IRESP)
    ! .. Read snow density for type JK
-   CALL READ_SURF(HPROGRAM,'ICERSN'//YCATEG, S%TGLT%sit(JK,:,1)%rsn,IRESP)
+   CALL READ_SURF(&
+                     HPROGRAM,'ICERSN'//YCATEG, S%TGLT%sit(JK,:,1)%rsn,IRESP)
    !
    !*       3.     Prognostic fields with space, ice-category and layer dimensions :
    !
@@ -277,7 +295,8 @@ DO JK=1,nt
       WRITE(YLVL,'(I2)') JL
       YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)   
       ! .. Read sea ice vertical gltools_enthalpy profile for type JK and level JL  
-      CALL READ_SURF(HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP)
+      CALL READ_SURF(&
+                     HPROGRAM,'ICEH'//YLEVEL, S%TGLT%sil(JL,JK,:,1)%ent,IRESP)
    END DO
 END DO
 !
@@ -338,15 +357,15 @@ S%TGLT%dom(:,1)%vmk=1
 !
 !    lat,lon,srf are inherited from seaflux grid
 !
-S%TGLT%dom(:,1)%lon=G%XLON(:)*XPI/180.
-S%TGLT%dom(:,1)%lat=G%XLAT(:)*XPI/180.
+S%TGLT%dom(:,1)%lon=SG%XLON(:)*XPI/180.
+S%TGLT%dom(:,1)%lat=SG%XLAT(:)*XPI/180.
 !
 !    Except in Gelato dynamics, mesh lengths are used only to compute mesh area
 !    Hence, a simple setting can be used
 !
-S%TGLT%dom(:,1)%dxc=G%XMESH_SIZE(:)**0.5
+S%TGLT%dom(:,1)%dxc=SG%XMESH_SIZE(:)**0.5
 S%TGLT%dom(:,1)%dyc=S%TGLT%dom(:,1)%dxc
-S%TGLT%dom(:,1)%srf=G%XMESH_SIZE(:)
+S%TGLT%dom(:,1)%srf=SG%XMESH_SIZE(:)
 !
 !    Surface of local and global ocean domain (ghost points are masked out)
 !
@@ -387,11 +406,13 @@ IF(S%LINTERPOL_SIT)THEN
    DO JMTH=1,INMTH
       WRITE(YMTH,'(I2)') (JMTH-1)
       YRECFM='SIT_MTH'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-      CALL READ_SURF(HPROGRAM,YRECFM,S%XSIT_MTH(:,JMTH),IRESP)
+      CALL READ_SURF(&
+                     HPROGRAM,YRECFM,S%XSIT_MTH(:,JMTH),IRESP)
       CALL CHECK_SEAICE(YRECFM,S%XSIT_MTH(:,JMTH))
    ENDDO
    !
-   CALL INTERPOL_SST_MTH(S,'H')
+   CALL INTERPOL_SST_MTH(S, &
+                         S%TTIME%TDATE%YEAR,S%TTIME%TDATE%MONTH,S%TTIME%TDATE%DAY,'H',S%XFSIT)
    !
 ELSE
    ! 
@@ -441,7 +462,7 @@ DO JI=1,KLU
    IF(PFIELD(JI)>ZMAX.OR.PFIELD(JI)<ZMIN)THEN
       IERRC=IERRC+1
       WRITE(KLUOUT,*)'PROBLEM FIELD '//TRIM(HFIELD)//' =',PFIELD(JI),&
-                     'NOT REALISTIC AT LOCATION (LAT/LON)',G%XLAT(JI),G%XLON(JI)
+                     'NOT REALISTIC AT LOCATION (LAT/LON)',SG%XLAT(JI),SG%XLON(JI)
    ENDIF
 ENDDO
 !         

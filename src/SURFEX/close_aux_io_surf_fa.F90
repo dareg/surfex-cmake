@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #######################################################
       SUBROUTINE CLOSE_AUX_IO_SURF_FA(HFILE,HFILETYPE)
 !     #######################################################
@@ -37,7 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NFULL, CMASK, NLUOUT, NMASK, CFILEIN_FA, CDNOMC, NMASK
+USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NFULL, CMASK, NLUOUT, NMASK
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -68,11 +64,6 @@ CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
 !
 YFILE=HFILE(1:LEN_TRIM(HFILE))//'.fa'
 WRITE(NLUOUT,*)'HFILETYPE ',HFILETYPE,'END EXTERNAL',NUNIT_FA,YFILE
-!
-CFILEIN_FA = '    '
-NUNIT_FA = 0
-!
-CDNOMC = 'header'
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_AUX_IO_SURF_FA',1,ZHOOK_HANDLE)
 !

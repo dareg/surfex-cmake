@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE PGD_BATHYFIELD (UG, U, USS, &
                                  HPROGRAM,HFIELD,HAREA,HFILE,HFILETYPE,&
@@ -42,14 +38,14 @@
 !            -----------
 !
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : NL
-USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, NSIZE, XSUMVAL
+USE MODD_PGDWORK,        ONLY : XSUMVAL, NSIZE
 !
 USE MODI_GET_LUOUT
 USE MODI_TREAT_BATHYFIELD
@@ -68,7 +64,7 @@ IMPLICIT NONE
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM  ! Type of program
  CHARACTER(LEN=*),  INTENT(IN) :: HFIELD    ! field name for prints
@@ -100,6 +96,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ---------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_BATHYFIELD',0,ZHOOK_HANDLE)
+PFIELD(:) = XUNDEF
 !-------------------------------------------------------------------------------
 !
 !*    2.      Output listing logical unit
@@ -119,17 +116,15 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !*    3.      Averages the field
 !             ------------------
 !
-  ALLOCATE(NSIZE_ALL (U%NDIM_FULL,1))
-  ALLOCATE(XALL      (U%NDIM_FULL,1,1))
+  ALLOCATE(NSIZE     (NL))
+  ALLOCATE(XSUMVAL   (NL))
 !
-  NSIZE_ALL(:,:) = 0
-  XALL   (:,:,:) = 0.
+  NSIZE    (:) = 0.
+  XSUMVAL  (:) = 0.
 !
   YFIELD = '                    '
   YFIELD = HFIELD(1:MIN(LEN(HFIELD),20))
 !
-  PFIELD(:) = XUNDEF
-
   CALL TREAT_BATHYFIELD(UG, U, USS, &
                         HPROGRAM,'SURF  ',HFILETYPE,'A_MESH',HFILE, HNCVARNAME,&
                      YFIELD,PFIELD,HAREA                           )  
@@ -141,15 +136,15 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !
   SELECT CASE (HAREA)
     CASE ('LAN')
-      WHERE (U%XTOWN(:)+U%XNATURE(:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
+      WHERE (U%XTOWN(:)+U%XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('TWN')
-      WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
+      WHERE (U%XTOWN  (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('NAT')
-      WHERE (U%XNATURE(:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
+      WHERE (U%XNATURE(:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('SEA')
-      WHERE (U%XSEA   (:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
+      WHERE (U%XSEA   (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
     CASE ('WAT')
-      WHERE (U%XWATER (:)==0. .AND. NSIZE(:,1)==0 ) NSIZE(:,1) = -1
+      WHERE (U%XWATER (:)==0. .AND. NSIZE(:)==0 ) NSIZE(:) = -1
 
   END SELECT
 !
@@ -159,7 +154,7 @@ IF (LEN_TRIM(HFILE)/=0) THEN
 !             ------------------------------------------------
 !
   CALL INTERPOL_FIELD(UG, U, &
-                      HPROGRAM,ILUOUT,NSIZE(:,1),PFIELD(:),HFIELD)
+                      HPROGRAM,ILUOUT,NSIZE,PFIELD(:),HFIELD)
 !
   DO JLOOP=1,SIZE(PFIELD)
    PFIELD(JLOOP)=MIN(PFIELD(JLOOP),-1.)

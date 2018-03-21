@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ######################
       MODULE MODD_IO_SURF_NC
 !     ######################
@@ -35,7 +31,6 @@ IMPLICIT NONE
 !
 !* variables for each patch
 !
- CHARACTER(LEN=28),SAVE :: CFILE_NC
  CHARACTER(LEN=28),SAVE :: CFILEIN_NC 
  CHARACTER(LEN=28),SAVE :: CFILEIN_NC_SAVE            ! Name of the input
  CHARACTER(LEN=28),SAVE :: CFILEOUT_NC                ! Name of the output
@@ -48,9 +43,12 @@ INTEGER :: NLUOUT         ! logical unit of output file
 LOGICAL, SAVE :: LCREATED = .FALSE.
 LOGICAL :: LDEF = .FALSE.
 !
-INTEGER, DIMENSION(:),POINTER :: NMASK=>NULL()
+INTEGER, DIMENSION(:),POINTER :: NMASK
+!$OMP THREADPRIVATE(NMASK)
  CHARACTER(LEN=6)               :: CMASK ! surface mask type
+!$OMP THREADPRIVATE(CMASK)
 INTEGER :: NFULL
+!$OMP THREADPRIVATE(NFULL)
 INTEGER :: NFULL_AUX ! total number fo points of surface (Auxilarry file for prep)
 !
 LOGICAL, SAVE                     :: LMASK = .FALSE.

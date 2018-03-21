@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ################################################################################
-SUBROUTINE SSO_Z0_FRICTION_n (USS, PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
+SUBROUTINE SSO_Z0_FRICTION_n (USS, &
+                              PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
 !     ################################################################################
 !
 !!****  *SSO_Z0_FRICTION_n * - Computes subgrid-scale orography friction
@@ -37,7 +34,7 @@ SUBROUTINE SSO_Z0_FRICTION_n (USS, PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COE
 !----------------------------------------------------------------
 !
 !
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
@@ -52,7 +49,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PSEA      ! Sea fraction                          (-)
 REAL, DIMENSION(:), INTENT(IN)    :: PUREF     ! Wind forcing height                   (m)

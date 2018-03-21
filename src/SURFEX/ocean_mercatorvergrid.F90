@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE OCEAN_MERCATORVERGRID
 !   ######################################################################
@@ -44,7 +40,6 @@
 !!      Original    01/2008
 !       D.BARBARY 11/2014 : HPROGRAM,OUNIF in Calling OCEAN_MERCATORVERGRID
 !                           Reading oceanic level and depth
-!!      C. Lebeaupin Brossier, G. Faure 09/2016 : indice loop NOCKMIN+1 for XRAY
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -106,14 +101,13 @@ ENDDO
 !!              ---------------
 !
 XK1(NOCKMIN) = 0.
-XK4(NOCKMIN) = 1. / ( XDZ1(NOCKMIN) * XDZ1(NOCKMIN) )
 DO JLOOP = NOCKMIN+1,NOCKMAX
   XK1(JLOOP) = -1. / (XDZ2(JLOOP)*XDZ1(JLOOP-1))
-  XK4(JLOOP) =  1. / (XDZ1(JLOOP)*XDZ1(JLOOP))
 ENDDO
 !
 ZUP=1.
-DO JLOOP = NOCKMIN+1,NOCKMAX
+DO JLOOP = NOCKMIN,NOCKMAX
+  XK4(JLOOP) =  1. / ( XDZ1(JLOOP) * XDZ1(JLOOP) )
   ZDOWN = RAYO(XZ2(JLOOP))
   XRAY(JLOOP) = ZUP - ZDOWN
   ZUP = ZDOWN

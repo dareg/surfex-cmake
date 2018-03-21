@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE DEEPSOIL_UPDATE (PTDEEP, PGAMMAT, KMONTH)
+    SUBROUTINE DEEPSOIL_UPDATE (I, &
+                                KMONTH)
 !   ###############################################################
 !!****  *DEEPSOIL_UPDATE*
 !!
@@ -42,6 +39,9 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
 USE MODD_DEEPSOIL, ONLY : XTDEEP_CLI, XGAMMAT_CLI
 !
 !
@@ -53,8 +53,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PTDEEP
-REAL, DIMENSION(:), INTENT(INOUT) :: PGAMMAT
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,              INTENT(IN)    :: KMONTH   ! current month
 !
@@ -65,11 +65,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',0,ZHOOK_HANDLE)
-DO IP=1,SIZE(PTDEEP)
+DO IP=1,SIZE(I%XTDEEP)
    !
-   PTDEEP (IP) = XTDEEP_CLI (KMONTH)
+   I%XTDEEP (IP) = XTDEEP_CLI (KMONTH)
    !
-   PGAMMAT(IP) = 1. / XGAMMAT_CLI(KMONTH)
+   I%XGAMMAT(IP) = 1. / XGAMMAT_CLI(KMONTH)
    !
 ENDDO
 IF (LHOOK) CALL DR_HOOK('DEEPSOIL_UPDATE',1,ZHOOK_HANDLE)

@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_WATFLUX_n (DTCO, U, W, HPROGRAM)
+      SUBROUTINE READ_WATFLUX_n (DTCO, U, W, &
+                                 HPROGRAM)
 !     #########################################
 !
 !!****  *READ_WATFLUX_n* - reads WATFLUX variables
@@ -87,7 +84,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_WATFLUX_N',0,ZHOOK_HANDLE)
 YRECFM='SIZE_WATER'
- CALL GET_TYPE_DIM_n(DTCO, U, 'WATER ',ILU)
+ CALL GET_TYPE_DIM_n(DTCO, U, &
+                     'WATER ',ILU)
 !
 !*       3.     Prognostic fields:
 !               -----------------
@@ -111,17 +109,20 @@ IF(W%LINTERPOL_TS)THEN
   DO JMTH=1,INMTH
      WRITE(YMTH,'(I2)') (JMTH-1)
      YRECFM='TS_WATER'//ADJUSTL(YMTH(:LEN_TRIM(YMTH)))
-     CALL READ_SURF(HPROGRAM,YRECFM,W%XTS_MTH(:,JMTH),IRESP)
+     CALL READ_SURF(&
+                    HPROGRAM,YRECFM,W%XTS_MTH(:,JMTH),IRESP)
   ENDDO
 !
-  CALL INTERPOL_TS_WATER_MTH(W)
+  CALL INTERPOL_TS_WATER_MTH(W, &
+                             W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TDATE%DAY,W%XTS)
 !
 ELSE
 ! 
   ALLOCATE(W%XTS_MTH(0,0))
 !
   YRECFM='TS_WATER'
-  CALL READ_SURF(HPROGRAM,YRECFM,W%XTS(:),IRESP)
+  CALL READ_SURF(&
+                    HPROGRAM,YRECFM,W%XTS(:),IRESP)
 !
 ENDIF
 !
@@ -136,7 +137,8 @@ ENDIF
 ALLOCATE(W%XZ0(ILU))
 YRECFM='Z0WATER'
 W%XZ0(:) = 0.001
-  CALL READ_SURF(HPROGRAM,YRECFM,W%XZ0(:),IRESP)
+  CALL READ_SURF(&
+                    HPROGRAM,YRECFM,W%XZ0(:),IRESP)
 IF (LHOOK) CALL DR_HOOK('READ_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -1,12 +1,9 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M, OT2MMW, OSURF_BUDGET, O2M_MIN_ZS, ORAD_BUDGET, &
-                                       OCOEF, OSURF_VARS, OSURF_BUDGETC, ORESET_BUDGETC, &
-                                       OSELECT, OPROVAR_TO_DIAG, ODIAG_GRID, OFRAC, &
-                                       PDIAG_TSTEP, OSNOWDIMNC, ORESETCUMUL, CSELECT  )                                         
+      SUBROUTINE DEFAULT_DIAG_SURF_ATM(K2M,OT2MMW,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET, &
+                                         OCOEF,OSURF_VARS,OSURF_BUDGETC,          &
+                                         ORESET_BUDGETC, OSELECT, OPROVAR_TO_DIAG,&
+                                         ODIAG_GRID, OFRAC, PDIAG_TSTEP, OSNOWDIMNC, &
+                                         ORESETCUMUL,CSELECT)                                         
 !     ########################################################################
 !
 !!****  *DEFAULT_DIAG_SURF_ATM* - routine to set default values for the choice of diagnostics
@@ -99,15 +96,15 @@ OSELECT            = .FALSE.
 !
 OPROVAR_TO_DIAG    = .FALSE.
 !
-OSNOWDIMNC = .FALSE.
-ORESETCUMUL = .FALSE.
-!
 ODIAG_GRID   = .TRUE.
 !
 OFRAC        = .FALSE.
 !
 PDIAG_TSTEP  = XUNDEF
 !
+OSNOWDIMNC = .FALSE.
+ORESETCUMUL = .FALSE.
+
 IF (PRESENT(CSELECT)) CSELECT(:) = '            '
 IF (LHOOK) CALL DR_HOOK('DEFAULT_DIAG_SURF_ATM',1,ZHOOK_HANDLE)
 !

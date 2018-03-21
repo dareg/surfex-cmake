@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE SST_UPDATE (DTS, S, PSST)
+    SUBROUTINE SST_UPDATE (DTS, S, &
+                           PSST,TTIME)
 !   ###############################################################
 !!****  *SST_UPDATE*
 !!
@@ -46,6 +43,7 @@
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
+USE MODD_TYPE_DATE_SURF
 USE MODI_TEMPORAL_DISTS
 USE MODI_TEMPORAL_LTS
 !
@@ -62,6 +60,7 @@ IMPLICIT NONE
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
+TYPE(DATE_TIME),      INTENT(IN)    :: TTIME   ! UTC time
 REAL,   DIMENSION(:), INTENT(INOUT) :: PSST    ! sst
 !
 !*      0.2    declarations of local variables
@@ -78,15 +77,15 @@ IF (LHOOK) CALL DR_HOOK('SST_UPDATE',0,ZHOOK_HANDLE)
 IF (.NOT.S%LTZTIME_DONE) THEN
    S%LTZTIME_DONE = .TRUE.
    S%JSX = 1
-   S%TZTIME%TDATE%YEAR  = S%TTIME%TDATE%YEAR
-   S%TZTIME%TDATE%MONTH = S%TTIME%TDATE%MONTH
-   S%TZTIME%TDATE%DAY   = S%TTIME%TDATE%DAY
-   S%TZTIME%TIME        = S%TTIME%TIME
+   S%TZTIME%TDATE%YEAR  = TTIME%TDATE%YEAR
+   S%TZTIME%TDATE%MONTH = TTIME%TDATE%MONTH
+   S%TZTIME%TDATE%DAY   = TTIME%TDATE%DAY
+   S%TZTIME%TIME        = TTIME%TIME
 ENDIF
 !
 ZSST0(:) = S%XSST_INI(:)
 !
-IF ( TEMPORAL_LTS ( S%TTIME, DTS%TDATA_SST(1) ) ) THEN
+IF ( TEMPORAL_LTS ( TTIME, DTS%TDATA_SST(1) ) ) THEN
   !
   CALL TEMPORAL_DISTS ( DTS%TDATA_SST(1)%TDATE%YEAR,DTS%TDATA_SST(1)%TDATE%MONTH, &
                         DTS%TDATA_SST(1)%TDATE%DAY ,DTS%TDATA_SST(1)%TIME,        &
@@ -94,8 +93,8 @@ IF ( TEMPORAL_LTS ( S%TTIME, DTS%TDATA_SST(1) ) ) THEN
                         S%TZTIME%TDATE%DAY    ,S%TZTIME%TIME,                 &
                         ZSDTJX                                            )  
   !
-  CALL TEMPORAL_DISTS ( S%TTIME%TDATE%YEAR   ,S%TTIME%TDATE%MONTH,           &
-                        S%TTIME%TDATE%DAY    ,S%TTIME%TIME,                  &
+  CALL TEMPORAL_DISTS ( TTIME%TDATE%YEAR   ,TTIME%TDATE%MONTH,           &
+                        TTIME%TDATE%DAY    ,TTIME%TIME,                  &
                         S%TZTIME%TDATE%YEAR  ,S%TZTIME%TDATE%MONTH,          &
                         S%TZTIME%TDATE%DAY   ,S%TZTIME%TIME,                 &
                         ZDT                                              )  
@@ -104,7 +103,7 @@ IF ( TEMPORAL_LTS ( S%TTIME, DTS%TDATA_SST(1) ) ) THEN
   !
   ZSST(:)= ZSST0(:)+(DTS%XDATA_SST(:,1)-ZSST0(:))*ZALPHA
   !
-ELSE IF ( .NOT. TEMPORAL_LTS ( S%TTIME, DTS%TDATA_SST(DTS%NTIME) ) ) THEN
+ELSE IF ( .NOT. TEMPORAL_LTS ( TTIME, DTS%TDATA_SST(DTS%NTIME) ) ) THEN
   !
   ZSST(:) = DTS%XDATA_SST(:,DTS%NTIME)
   !
@@ -112,7 +111,7 @@ ELSE
   !
   DO
     JXP = S%JSX + 1
-    IF ( TEMPORAL_LTS( S%TTIME, DTS%TDATA_SST(JXP)) ) EXIT
+    IF ( TEMPORAL_LTS( TTIME, DTS%TDATA_SST(JXP)) ) EXIT
     S%JSX = S%JSX + 1
   ENDDO
   !  
@@ -122,8 +121,8 @@ ELSE
                         DTS%TDATA_SST(S%JSX)%TDATE%DAY  ,DTS%TDATA_SST(S%JSX)%TIME,         &
                         ZSDTJX                                            )  
   !
-  CALL TEMPORAL_DISTS ( S%TTIME%TDATE%YEAR   ,S%TTIME%TDATE%MONTH,                  &
-                        S%TTIME%TDATE%DAY    ,S%TTIME%TIME,                         &
+  CALL TEMPORAL_DISTS ( TTIME%TDATE%YEAR   ,TTIME%TDATE%MONTH,                  &
+                        TTIME%TDATE%DAY    ,TTIME%TIME,                         &
                         DTS%TDATA_SST(S%JSX)%TDATE%YEAR,DTS%TDATA_SST(S%JSX)%TDATE%MONTH,   &
                         DTS%TDATA_SST(S%JSX)%TDATE%DAY ,DTS%TDATA_SST(S%JSX)%TIME,          &
                         ZDT                                             )  

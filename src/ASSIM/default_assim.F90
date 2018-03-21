@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_ISBA,KPRINTLEV,         &
                                OAROME,OECSST,OAESST,OAESNM,                 &
@@ -15,7 +11,7 @@
                                PRSCAL_JAC,OPRT,OSIM,OBEV,OBFIXED,           &
                                KOBSTYPE,OOBSHEADER,HFILE_FORMAT_OBS,OOBSNAT,&
                                HFILE_FORMAT_FG,HFILE_FORMAT_LSM,            &
-                               HFILE_FORMAT_CLIM,HOBS_M,PERROBS_M,PQCOBS_M, &
+                               HFILE_FORMAT_CLIM,PERROBS_M,PQCOBS_M,        &
                                KNCO,KIVAR,KVAR,HVAR_M,HPREFIX_M,            &
                                PSIGMA_M,PTPRT_M,KNCV,PSCALE_Q,              &
                                PSCALE_QLAI,HBIO,HPREFIX_BIO,PALPH,          &
@@ -61,8 +57,6 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODD_ASSIM, ONLY : NOBSMAX, NVARMAX
-!
-USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -112,7 +106,6 @@ CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_OBS
 CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_FG
 CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_LSM
 CHARACTER(LEN=6),    INTENT(OUT) :: HFILE_FORMAT_CLIM
-CHARACTER(LEN=10),  DIMENSION(NOBSMAX), INTENT(OUT) :: HOBS_M
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PERROBS_M
 REAL, DIMENSION(NOBSMAX),    INTENT(OUT) :: PQCOBS_M
 INTEGER, DIMENSION(NOBSMAX), INTENT(OUT) :: KNCO
@@ -209,19 +202,18 @@ HFILE_FORMAT_OBS = "FA    "
 HFILE_FORMAT_FG = "FA    "
 HFILE_FORMAT_LSM = "FA    "
 HFILE_FORMAT_CLIM = "FA    "
-HOBS_M = (/"T2M ","HU2M","WG2 ","LAI ","SWE "/)
 PERROBS_M = (/1.0,0.1,0.4,0.2,0.1/)
 PQCOBS_M = (/999.,999.,999.,999.,999./)
-KNCO = (/0,0,0,0,0/)
+KNCO = (/1,1,0,0,0/)
 OOBSNAT = .FALSE.
 !
 KIVAR = 1
 KVAR = 4
-HVAR_M = (/"WG2","WG1","TG2","TG1","LAI","WG3","WG4","WG5","WG6"/)
-HPREFIX_M = (/"","","","","","","","",""/)
-PSIGMA_M = (/0.15,0.1,2.0,2.0,0.2,0.2,0.2,0.2,0.2/)
-PTPRT_M = (/0.0001,0.0001,0.00001,0.00001,0.001,0.00001,0.0001,0.00001,0.00001/)
-KNCV = (/0,0,0,0,0,0,0,0,0/)
+HVAR_M = (/"WG2","WG1","TG2","TG1","LAI"/)
+HPREFIX_M = (/"","","","",""/)
+PSIGMA_M = (/0.15,0.1,2.0,2.0,0.2/)
+PTPRT_M = (/0.0001,0.0001,0.00001,0.00001,0.001/)
+KNCV = (/1,1,1,1,1/)
 PSCALE_Q = 0.125
 PSCALE_QLAI = 0.5
 HBIO = "BIOMA1"
@@ -232,9 +224,9 @@ PALPH = (/0., 0., 0., 0.08203445, 0.07496252, 0.06846970, 0.06771856, 0.09744689
 KENS = 1
 KIE = 0
 PASSIM_WINH = 24
-PINFL_M = (/0.,0.,0.,0.,0.,0.,0.,0.,0./)
-PADDINFL_M = (/0.,0.,0.,0.,0.,0.,0.,0.,0./)
-PADDTIMECORR_M = (/0.,0.,0.,0.,0.,0.,0.,0.,0./)
+PINFL_M = (/0.,0.,0.,0.,0./)
+PADDINFL_M = (/0.,0.,0.,0.,0./)
+PADDTIMECORR_M = (/0.,0.,0.,0.,0./)
 OENKF = .FALSE.
 ODENKF = .FALSE.
 OENS_GEN = .TRUE.

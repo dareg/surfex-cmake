@@ -16,7 +16,7 @@ INTEGER,PARAMETER::IYEAR_GREGOIRE=1582 !Année où le pape Grégoire XIII décid
 !Au-delà de cette date les années multiples de 100 ne sont pas bissextiles sauf les années multiples de 400 qui le sont
 !De plus les journées du 5 au 14 octobre 1582 ont été supprimées pour compenser le retard accumulé
 !
- CONTAINS
+CONTAINS
 !
 !----------------------------------------------------------------------------------------------------------------
 !
@@ -25,7 +25,7 @@ SUBROUTINE READ_DATE(PTIME,HUNITS,KYEAR,KMONTH,KDAY,PTIME_DATE)
 !*      0.1   Declarations of arguments
 !
 REAL,DIMENSION(:),INTENT(IN)  :: PTIME
- CHARACTER(*),     INTENT(IN)  :: HUNITS
+CHARACTER(*),     INTENT(IN)  :: HUNITS
 !
 INTEGER,          INTENT(OUT) :: KYEAR
 INTEGER,          INTENT(OUT) :: KMONTH
@@ -43,9 +43,9 @@ INTEGER :: IDAY
 INTEGER :: IHOUR
 REAL    :: ZTIME
 !
- CHARACTER(LEN=14) :: YHEADER
- CHARACTER(LEN=100) :: YFMT 
- CHARACTER :: YC1,YC2,YC3
+CHARACTER(LEN=14) :: YHEADER
+CHARACTER(LEN=100) :: YFMT 
+CHARACTER :: YC1,YC2,YC3
 !
 LOGICAL :: GHEADER
 !
@@ -127,7 +127,7 @@ ZTIME = REAL(IHOUR)+ZREST(1)
 !
 !Add the number of hours to a date
 !
- CALL ADDTIME(ITIMEHOURS(1),IYEAR,IMONTH,IDAY,ZTIME)
+CALL ADDTIME(ITIMEHOURS(1),IYEAR,IMONTH,IDAY,ZTIME)
 !
 ! Current date
 !

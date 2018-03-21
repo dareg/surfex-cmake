@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE CH_EMISSION_SNAP_n (CHN, &
                                      HPROGRAM,KSIZE,PSIMTIME,PSUNTIME, &
@@ -24,9 +20,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original 10/2011
-!!
-!!    A. Alias     07/2016  gmkpack problem : name of the internal subroutine modified 
-!!                          because exist already (view SURFEX/day_of_week.F90 )
 !!
 !!    EXTERNAL
 !!    --------
@@ -98,7 +91,8 @@ IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N',0,ZHOOK_HANDLE)
 !*  1.  Updates Conversion Factor (may depends on air density)
 !       ------------------------------------------------------
 !
- CALL CH_CONVERSION_FACTOR(CHN%XCONVERSION, CHN%CCONVERSION, PRHOA(:))
+ CALL CH_CONVERSION_FACTOR(CHN, &
+                           CHN%CCONVERSION,PRHOA(:))
 !
 !------------------------------------------------------------------------------
 !
@@ -142,7 +136,7 @@ SELECT CASE (CHN%CSNAP_TIME_REF)
 
 END SELECT
 !
- CALL DAY_OF_WEEK_CH(IDAY(:,1), IMONTH(:,1), IYEAR(:,1), IDOW(:,1))
+ CALL DAY_OF_WEEK(IDAY(:,1), IMONTH(:,1), IYEAR(:,1), IDOW(:,1))
 !
 IHOUR(:,1) = INT((ZTIME0(:)+1.E-10)/3600.)! 1.E-10 and the where condition after are
 WHERE (IHOUR(:,1)==24) IHOUR(:,1)=23      ! set to avoid computer precision problems
@@ -160,7 +154,7 @@ DO JI=1,KSIZE
   CALL ADD_FORECAST_TO_DATE_SURF(IYEAR(JI,2),IMONTH(JI,2),IDAY(JI,2),ZTIME(JI,2))
 ENDDO
 !
- CALL DAY_OF_WEEK_CH(IDAY(:,2), IMONTH(:,2), IYEAR(:,2), IDOW(:,2))
+ CALL DAY_OF_WEEK(IDAY(:,2), IMONTH(:,2), IYEAR(:,2), IDOW(:,2))
 !
 IHOUR(:,2)=NINT(ZTIME(:,2))/3600
 !
@@ -169,7 +163,7 @@ IHOUR(:,2)=NINT(ZTIME(:,2))/3600
 !*  3.  Emission at the begining of the current hour
 !       --------------------------------------------
 !
- CHN%XEMIS_FIELDS(:,:)=0.
+CHN%XEMIS_FIELDS(:,:)=0.
 !
 DO JSPEC=1,CHN%NEMIS_NBR
   !
@@ -204,7 +198,7 @@ IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 CONTAINS
 !
-SUBROUTINE DAY_OF_WEEK_CH(DATE, MONTH, YEAR, DOW)
+SUBROUTINE DAY_OF_WEEK(DATE, MONTH, YEAR, DOW)
 !!    AUTHOR
 !!    ------
 !!    J.Arteta 
@@ -214,9 +208,6 @@ SUBROUTINE DAY_OF_WEEK_CH(DATE, MONTH, YEAR, DOW)
 !!    MODifICATIONS
 !!    -------------
 !!    S. Queguiner 10/2011  DAY:Monday->Sunday => DOW:1->7
-!!    A. Alias     07/2016  gmkpack problem : name of the internal subroutine modified 
-!!                          because exist already (view SURFEX/day_of_week.F90 )
-!!
 !
 IMPLICIT NONE
 INTEGER, DIMENSION(:), INTENT(IN) :: DATE, MONTH, YEAR
@@ -224,7 +215,7 @@ INTEGER, DIMENSION(:), INTENT(OUT):: DOW
 INTEGER, DIMENSION(SIZE(DOW))     :: DAY, YR, MN, N1, N2
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N:DAY_OF_WEEK_CH',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N:DAY_OF_WEEK',0,ZHOOK_HANDLE)
 !
 YR = YEAR
 MN = MONTH
@@ -241,7 +232,7 @@ DAY = (DATE + N1 + N2 - (YR / 100) + (YR / 400) - 1)
 DOW = MOD(DAY,7) + 7
 WHERE (DOW.GT.7) DOW = DOW - 7
 !
-IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N:DAY_OF_WEEK_CH',1,ZHOOK_HANDLE)
-END SUBROUTINE DAY_OF_WEEK_CH
+IF (LHOOK) CALL DR_HOOK('CH_EMISSION_SNAP_N:DAY_OF_WEEK',1,ZHOOK_HANDLE)
+END SUBROUTINE DAY_OF_WEEK
 !
 END SUBROUTINE CH_EMISSION_SNAP_n

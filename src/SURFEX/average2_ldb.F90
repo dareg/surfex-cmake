@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########################
       SUBROUTINE AVERAGE2_LDB(PPGDARRAY,HTYPE,KSTAT)
 !     #########################
@@ -38,8 +34,7 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PGDWORK,   ONLY : NSIZE, XSUMVAL, XPREC
+USE MODD_PGDWORK,   ONLY : NSIZE, XTNG
 USE MODD_DATA_LAKE, ONLY : XBOUNDGRADDEPTH_LDB, XBOUNDGRADSTATUS_LDB, &
                            XCENTRGRADDEPTH_LDB, NCENTRGRADSTATUS_LDB, &
                            XSMALL_DUMMY
@@ -64,9 +59,8 @@ INTEGER, INTENT(IN)          :: KSTAT
 REAL, DIMENSION(:), ALLOCATABLE :: ZBOUND, ZCENTR
 REAL :: ZFRAC, ZMAX, ZPDF, ZAVE
 !
-REAL :: ZINT
 INTEGER :: IGRAD_MODE
-INTEGER :: JGR, JI
+INTEGER :: JGRAD, JI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -95,25 +89,25 @@ SELECT CASE (HTYPE)
 END SELECT
 !
 !
-DO JI = 1,SIZE(XSUMVAL,1)
+DO JI = 1,SIZE(XTNG,1)
   !
-  DO JGR = 1,SIZE(XSUMVAL,2)
-    IF (NSIZE(JI,1).NE.0) XSUMVAL(JI,JGR) = XSUMVAL(JI,JGR)/NSIZE(JI,1)
+  DO JGRAD = 1,SIZE(XTNG,2)
+    IF (NSIZE(JI).NE.0) XTNG(JI,JGRAD) = XTNG(JI,JGRAD)/NSIZE(JI)
   ENDDO
   !
   !2 because first centre is for values lower than 0
-  ZFRAC = SUM(XSUMVAL(JI,2:SIZE(XSUMVAL,2)))
+  ZFRAC = SUM(XTNG(JI,2:SIZE(XTNG,2)))
   !
   ZMAX = XSMALL_DUMMY
   IGRAD_MODE = 2
   !
   IF (KSTAT.EQ.1) THEN
     !
-    DO JGR = 2, SIZE(XSUMVAL,2)
-      ZPDF = XSUMVAL(JI,JGR) / (ZBOUND(JGR)-ZBOUND(JGR-1))
+    DO JGRAD = 2, SIZE(XTNG,2)
+      ZPDF = XTNG(JI,JGRAD) / (ZBOUND(JGRAD)-ZBOUND(JGRAD-1))
       IF (ZPDF.GT.ZMAX) THEN
         ZMAX = ZPDF
-        IGRAD_MODE = JGR
+        IGRAD_MODE = JGRAD
       ENDIF
     ENDDO
     !
@@ -126,8 +120,8 @@ DO JI = 1,SIZE(XSUMVAL,1)
   ELSEIF (KSTAT.EQ.2) THEN
     !
     ZAVE = 0.
-    DO JGR = 2, SIZE(XSUMVAL,2)
-      ZAVE = ZAVE + ZCENTR(JGR) * XSUMVAL(JI,JGR)
+    DO JGRAD = 2, SIZE(XTNG,2)
+      ZAVE = ZAVE + ZCENTR(JGRAD) * XTNG(JI,JGRAD)
     ENDDO
     !
     IF (ZFRAC.LT.0.00001) THEN
@@ -142,18 +136,6 @@ ENDDO
 !
 DEALLOCATE(ZBOUND)
 DEALLOCATE(ZCENTR)
-!
-!
-DO JI = 1,SIZE(PPGDARRAY)
-
-  IF (PPGDARRAY(JI)/=XUNDEF) THEN
-    ZINT = AINT(PPGDARRAY(JI))
-    IF (PPGDARRAY(JI)/=ZINT) THEN
-      PPGDARRAY(JI) = ZINT + ANINT((PPGDARRAY(JI)-ZINT)*XPREC)/XPREC
-    ENDIF
-  ENDIF
-
-ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE2_LDB',1,ZHOOK_HANDLE)
 !

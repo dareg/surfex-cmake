@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_GRID_CONF_ISBA_n (IG, &
                                        PLONMIN,PLONMAX,PLATMIN,PLATMAX,KX,KY,KL)
@@ -39,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 !
 USE MODE_GRIDTYPE_LONLAT_REG
 !
@@ -53,7 +49,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 !
 REAL,               INTENT(OUT) :: PLONMIN
 REAL,               INTENT(OUT) :: PLONMAX

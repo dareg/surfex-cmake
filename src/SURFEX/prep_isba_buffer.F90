@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PREP_ISBA_BUFFER (G, U, HPROGRAM,HSURF,KLUOUT,PFIELD)
+SUBROUTINE PREP_ISBA_BUFFER (IG, U, &
+                             HPROGRAM,HSURF,KLUOUT,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_ISBA_BUFFER* - initializes ISBA fields from operational BUFFER
@@ -30,7 +27,7 @@ SUBROUTINE PREP_ISBA_BUFFER (G, U, HPROGRAM,HSURF,KLUOUT,PFIELD)
 
 !
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODE_READ_BUFFER
@@ -61,7 +58,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(GRID_t), INTENT(INOUT) :: G
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
@@ -146,8 +143,8 @@ SELECT CASE(HSURF)
 
               ZFIELD_EP_IN(:) = ZFIELD_EP(:)
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
-                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,IG%XLAT,IG%XLON,ZFIELD_EP_IN(:), &
+                                        IG%XLAT,IG%XLON,ZFIELD_EP(:),OINTERP,PZS=ZALT,NDIM2=10)
 #endif
 
               ! Unpack to full rank
@@ -203,8 +200,8 @@ SELECT CASE(HSURF)
 
               ZFIELD_EP_IN(:) = ZFIELD_EP
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
-                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,IG%XLAT,IG%XLON,ZFIELD_EP_IN(:), &
+                                        IG%XLAT,IG%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 #endif
 
               ! Unpack to full rank
@@ -263,8 +260,8 @@ SELECT CASE(HSURF)
           
               ZFIELD_EP_IN(:) = ZFIELD_EP
 #ifdef SFX_ARO
-              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,G%XLAT,G%XLON,ZFIELD_EP_IN(:), &
-                                        G%XLAT,G%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
+              CALL OI_HOR_EXTRAPOL_SURF(U%NSIZE_NATURE,IG%XLAT,IG%XLON,ZFIELD_EP_IN(:), &
+                                        IG%XLAT,IG%XLON,ZFIELD_EP(:),OINTERP,NDIM2=10)
 #endif
 
               ! Unpack to full rank

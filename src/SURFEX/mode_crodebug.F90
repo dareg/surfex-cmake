@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !##########################
 MODULE MODE_CRODEBUG
 !##########################
@@ -55,12 +51,15 @@ REAL :: XWARNING_ENERGYBALANCE=1.E-4
 !
 CONTAINS
 !
-SUBROUTINE INIT_CRODEBUG (HSNOW_SCHEME)
+SUBROUTINE INIT_CRODEBUG (I)
 ! Check environment variables to activate crocus debugging mode if required
 !
 !
- CHARACTER(LEN=*), INTENT(IN) :: HSNOW_SCHEME
 !
+USE MODD_ISBA_n, ONLY : ISBA_t
+!
+!
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(1) :: YCROCUS_INFO,YCROCUS_DEBUG,YCROCUS_BALANCE
  CHARACTER(8) :: YCROCUS_DEBUG_TIME
@@ -68,7 +67,7 @@ SUBROUTINE INIT_CRODEBUG (HSNOW_SCHEME)
  CHARACTER(6) :: YCROCUS_DEBUG_POINT
  CHARACTER(12) :: YCROCUS_DEBUG_LAT,YCROCUS_DEBUG_LON
 !
-IF (HSNOW_SCHEME=='CRO') THEN
+IF (I%TSNOW%SCHEME=='CRO') THEN
   !
   CALL GETENV("CROCUS_INFO",YCROCUS_INFO)
   SELECT CASE (YCROCUS_INFO)

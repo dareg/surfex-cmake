@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITE_COVER_TEX_ISBA_PAR (DTCO, HALBEDO, OTR_ML, &
+      SUBROUTINE WRITE_COVER_TEX_ISBA_PAR (DTCO, I, &
                                            KPATCH,KLAYER,HISBA,HPHOTO,PSOILGRID)
 !     ##########################
 !
@@ -47,6 +43,7 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODE_WRITE_COVER_TEX
 
@@ -70,9 +67,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-!
- CHARACTER(LEN=*), INTENT(IN) :: HALBEDO
-LOGICAL, INTENT(IN) :: OTR_ML
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
 INTEGER,          INTENT(IN) :: KPATCH! number of patch
 INTEGER,          INTENT(IN) :: KLAYER! number of soil layers
@@ -136,15 +131,15 @@ GCOVER(:) = .TRUE.
 !ocl scalar
 !
 DO JJ=1,12
-  CALL CONVERT_COVER_ISBA(DTCO, HALBEDO, &
-                          HISBA,OTR_ML,3*JJ-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
+  CALL CONVERT_COVER_ISBA(DTCO, I, &
+                          HISBA,3*JJ-1,ZCOVER,GCOVER,HPHOTO, 'NAT',         &
                             PVEG=ZVEG(:,:,JJ), PLAI=ZLAI(:,:,JJ),            &
                             PZ0=ZZ0VEG(:,:,JJ), PEMIS_ECO=ZEMIS_ECO(:,:,JJ), &
                             PF2I=ZF2I(:,:,JJ),OSTRESS=GSTRESS(:,:,JJ)        )  
 END DO
 
- CALL CONVERT_COVER_ISBA(DTCO, HALBEDO, &
-                          HISBA,OTR_ML,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
+ CALL CONVERT_COVER_ISBA(DTCO, I, &
+                          HISBA,2,ZCOVER,GCOVER,HPHOTO, 'NAT',            &
                         PRSMIN=ZRSMIN,PGAMMA=ZGAMMA,PWRMAX_CF=ZWRMAX_CF, &
                         PRGL=ZRGL,PCV=ZCV,PSOILGRID=PSOILGRID,           &
                         PDG=ZDG,KWG_LAYER=IWG_LAYER,PDROOT=ZDROOT,       &

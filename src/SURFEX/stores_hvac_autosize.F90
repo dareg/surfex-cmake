@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #############################################################
       SUBROUTINE STORES_HVAC_AUTOSIZE (B, BOP, DTB)
 !     #############################################################
@@ -37,6 +33,9 @@
 !
 !*       0.    DECLARATIONS
 !              ------------
+!
+!
+!
 !
 USE MODD_BEM_n, ONLY : BEM_t
 USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
@@ -78,19 +77,19 @@ IF (LHOOK) CALL DR_HOOK('STORES_HVAC_AUTOSIZE',0,ZHOOK_HANDLE)
 !* stores the real systems characteristics in physiographic data 
 !  for further use
 !
-IL = SIZE(B%XM_SYS_RAT)
+IL = SIZE(B%CUR%XM_SYS_RAT)
 !
 DTB%LDATA_M_SYS_RAT = .TRUE.
 ALLOCATE(DTB%XPAR_M_SYS_RAT(IL))
-DTB%XPAR_M_SYS_RAT = B%XM_SYS_RAT 
+DTB%XPAR_M_SYS_RAT = B%CUR%XM_SYS_RAT 
 !
 DTB%LDATA_CAP_SYS_RAT = .TRUE.
 ALLOCATE(DTB%XPAR_CAP_SYS_RAT(IL))
-DTB%XPAR_CAP_SYS_RAT = B%XCAP_SYS_RAT
+DTB%XPAR_CAP_SYS_RAT = B%CUR%XCAP_SYS_RAT
 !
 DTB%LDATA_CAP_SYS_HEAT = .TRUE.
 ALLOCATE(DTB%XPAR_CAP_SYS_HEAT(IL))
-DTB%XPAR_CAP_SYS_HEAT = B%XCAP_SYS_HEAT
+DTB%XPAR_CAP_SYS_HEAT = B%CUR%XCAP_SYS_HEAT
 !
 BOP%LAUTOSIZE = .FALSE.
 DTB%LDATA_T_SIZE_MIN = .FALSE.

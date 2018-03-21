@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########################################################################
-      SUBROUTINE LATLON_GRIDTYPE_CARTESIAN(G,KL,PDIR)
+      SUBROUTINE LATLON_GRIDTYPE_CARTESIAN(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
 !     #########################################################################
 !
 !!****  *LATLON_GRIDTYPE_CARTESIAN* - routine to compute the horizontal geographic fields
@@ -37,8 +33,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
-!
 USE MODD_CSTS,     ONLY : XPI
 !
 USE MODE_GRIDTYPE_CARTESIAN
@@ -53,9 +47,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(GRID_t), INTENT(INOUT) :: G
-!
+INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
+REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
+REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT       ! latitude  (degrees)
+REAL, DIMENSION(KL),        INTENT(OUT) :: PLON       ! longitude (degrees)
+REAL, DIMENSION(KL),        INTENT(OUT) :: PMESH_SIZE ! mesh size (m2)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
 !
 !*       0.2   Declarations of local variables
@@ -73,10 +70,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_CARTESIAN',0,ZHOOK_HANDLE)
-ALLOCATE(ZDX(SIZE(G%XLAT)))
-ALLOCATE(ZDY(SIZE(G%XLAT)))
+ALLOCATE(ZDX(SIZE(PLAT)))
+ALLOCATE(ZDY(SIZE(PLAT)))
 !
- CALL GET_GRIDTYPE_CARTESIAN(G%XGRID_PAR,ZLAT0,ZLON0, &
+ CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAT0,ZLON0, &
                               PDX=ZDX,PDY=ZDY        )  
 !
 !---------------------------------------------------------------------------
@@ -84,14 +81,14 @@ ALLOCATE(ZDY(SIZE(G%XLAT)))
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
- CALL LATLON_CARTESIAN(ZLAT0,ZLON0,G%XLAT,G%XLON)
+ CALL LATLON_CARTESIAN(ZLAT0,ZLON0,PLAT,PLON)
 !
 !-----------------------------------------------------------------------------
 !
 !*       3.    Compute grid size (2D array)
 !              -----------------
 !
-G%XMESH_SIZE(:) = ZDX(:) * ZDY(:)
+PMESH_SIZE(:) = ZDX(:) * ZDY(:)
 !
 !-----------------------------------------------------------------------------
 !

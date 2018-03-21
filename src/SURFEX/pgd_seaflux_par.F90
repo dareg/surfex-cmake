@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_SEAFLUX_PAR (DTCO, DTS, KDIM, UG, U, USS, HPROGRAM)
+      SUBROUTINE PGD_SEAFLUX_PAR (DTCO, DTS, SG, UG, U, USS, &
+                                  HPROGRAM,OSST_DATA)
 !     ##############################################################
 !
 !!**** *PGD_SEAFLUX_PAR* monitor for averaging and interpolations of sst
@@ -44,9 +41,10 @@
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
+USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 !
@@ -75,12 +73,13 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(DATA_SEAFLUX_t), INTENT(INOUT) :: DTS
-INTEGER, INTENT(IN) :: KDIM
+TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+LOGICAL         ,    INTENT(OUT)   :: OSST_DATA
 !
 !
 !*    0.2    Declaration of local variables
@@ -146,7 +145,7 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_SEAFLUX)
 !
  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
 !
-DTS%LSST_DATA         = LSST_DATA
+OSST_DATA         = LSST_DATA
 IF (.NOT. LSST_DATA .AND. LHOOK) CALL DR_HOOK('PGD_SEAFLUX_PAR',1,ZHOOK_HANDLE)
 IF (.NOT. LSST_DATA) RETURN
 !
@@ -154,7 +153,7 @@ IF (NTIME_SST > NTIME_MAX) THEN
    WRITE(ILUOUT,*)'NTIME_SST SHOULD NOT EXCEED',NTIME_MAX
    CALL ABOR1_SFX('PGD_SEAFLUX_PAR: NTIME TOO BIG')
 ENDIF
-ALLOCATE(DTS%XDATA_SST     (KDIM,NTIME_SST))
+ALLOCATE(DTS%XDATA_SST     (SG%NDIM,NTIME_SST))
 ALLOCATE(DTS%TDATA_SST     (NTIME_SST))
 !
 !-------------------------------------------------------------------------------

@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_DATE_OL(TPTIME,PTSTEP,HDATE)
 !     #######################################################
@@ -53,9 +49,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('GET_DATE_OL',0,ZHOOK_HANDLE)
+
 ITIME(1)=FLOOR(TPTIME%TIME/3600.)
 ITIME(2)=FLOOR((TPTIME%TIME-ITIME(1)*3600)/60.)
-ITIME(3)=TPTIME%TIME-ITIME(1)*3600-ITIME(2)*60
+ITIME(3)=TPTIME%TIME-ITIME(1)*3600-ITIME(2)*60 
 !
 IF (PTSTEP == FLOOR(PTSTEP/86400.)*86400) THEN 
   HDATE='days since '

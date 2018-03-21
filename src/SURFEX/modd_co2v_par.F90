@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ####################
       MODULE MODD_CO2V_PAR
 !     ####################
@@ -61,6 +57,10 @@ REAL, PARAMETER                      :: XMCO2 = 44.0E-3, XMC   = 12.0E-3
 !                                       molecular mass of CO2, 
 !                                       and C (Carbon), respectively
 !                                       (used for conversions in kg) 
+!
+REAL, PARAMETER                      :: XDMAX_AGS = 0.045
+!                                       maximum specific humidity deficit (kg kg-1)
+!                                       for standard ISBA AGS (CPHOTO = 'AGS' or 'LAI')
 !
 REAL, PARAMETER                      :: XPARCF = 0.48
 !                                       coefficient: PAR fraction of incoming solar radiation
@@ -266,12 +266,12 @@ REAL, PARAMETER, DIMENSION(19) :: XDILUDEC = &
 (/ 0., 0., 0., 1., 0., 0., 1., 1., 1., 1., 1., 0., 1., 0., 0., 1., 1., 0., 1. /)
 !
 ! Maximum Leaf photosynthetic capacity (kgCO2 m-2 s-1)
-! Modified according to Kattge et al., 2009 median Vcmax at 25C values, except for TRBE : median-std
+! Modified according to Kattge et al., 2009 median Vcmax at 25C  values
 ! For C3 PFTs : Ammax = Vcmax / 2.     (Jacobs, p 150)
 ! For C4 PFTs : Ammax = Vcmax
 ! Units : [Vcmax]=micromols_CO2 m-2 s-1, [Ammax]=kgCO2 m-2 s-1 --> [Ammax] = [Vcmax] * 44e-3 * 1e-6
 REAL, PARAMETER, DIMENSION(19) :: XAMAX   = &
-(/ 1., 1., 1., 1.3E-6, 1.4E-6, 0.484E-6, 2.2E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, &
+(/ 1., 1., 1., 1.3E-6, 1.4E-6, 0.64E-6, 2.2E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, 1.7E-6, &
    0.9E-6, 1.3E-6, 1.4E-6, 1.3E-6, 0.9E-6, 1.7E-6, 1.2E-6/)
 !                                       
 END MODULE MODD_CO2V_PAR

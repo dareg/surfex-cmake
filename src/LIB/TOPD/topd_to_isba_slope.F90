@@ -1,10 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !-----------------------------------------------------------------
 !     ####################
-      SUBROUTINE TOPD_TO_ISBA_SLOPE (PSSO_SLOPE, KI)
+      SUBROUTINE TOPD_TO_ISBA_SLOPE (USS, &
+                                     KI)
 !     ####################
 !
 !!****  *TOPD_TO_ISBA*  
@@ -50,6 +47,8 @@
 !               ------------
 !
 !
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+!
 USE MODD_TOPODYN,       ONLY : NNCAT, NNMC, XTANB
 USE MODD_COUPLING_TOPD, ONLY : NMASKT,NNPIX
 USE MODD_SURF_PAR,        ONLY : NUNDEF
@@ -62,7 +61,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-REAL, DIMENSION(:), INTENT(INOUT) :: PSSO_SLOPE
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
 INTEGER, INTENT(IN)                 :: KI      ! Grid dimensions
 !
@@ -83,7 +83,7 @@ IF (LHOOK) CALL DR_HOOK('TOPD_TO_ISBA_SLOPE',0,ZHOOK_HANDLE)
 !
 !write(*,*) 'pente avt topmodel',MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)
 !
-ZSSO_SLOPE = PSSO_SLOPE
+ZSSO_SLOPE = USS%XSSO_SLOPE
 !
 ZCOUNT(:) = REAL(NNPIX(:))
 
@@ -103,7 +103,7 @@ WHERE (ZCOUNT /= 0.0)
    ZSSO_SLOPE = ZSSO_SLOPE / ZCOUNT
 ENDWHERE
 !
-PSSO_SLOPE = ZSSO_SLOPE
+USS%XSSO_SLOPE = ZSSO_SLOPE
 !
 !write(*,*) 'pente apres modification', &
 !           MINVAL(XSSO_SLOPE),MAXVAL(XSSO_SLOPE),COUNT(ZCOUNT/=0.0),SUM(XSSO_SLOPE,MASK=XSSO_SLOPE/=XUNDEF)

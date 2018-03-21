@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_NEAR_MESHES_LONLATVAL(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 !     ##############################################################
@@ -34,7 +30,6 @@
 !
 USE MODE_GRIDTYPE_LONLATVAL
 !
-USE MODD_SURFEX_MPI, ONLY : NINDEX, NRANK, NNUM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -77,26 +72,22 @@ ZDIS = 1.E20
 !
 DO JP1=1,KL
   !
-  IF (NINDEX(JP1)==NRANK) THEN
+  DO JP2=1,KL
+    ZDIS(JP2) = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
+  ENDDO
+  ZDMAX = MAXVAL(ZDIS(:)) + 1.
+  ZDIS(JP1) = ZDMAX
+  !
+  ! on prend les knear_nbr premiers, pour chaque
+  !
+  DO JN=1,MIN(KL-1,KNEAR_NBR)
     !
-    DO JP2=1,KL
-      ZDIS(JP2) = SQRT((ZX(JP1)-ZX(JP2))**2+(ZY(JP1)-ZY(JP2))**2)
-    ENDDO
-    ZDMAX = MAXVAL(ZDIS(:)) + 1.
-    ZDIS(JP1) = ZDMAX
+    ID0 = MAXVAL(MINLOC(ZDIS(:)))       
     !
-    ! on prend les knear_nbr premiers, pour chaque
+    KNEAR(JP1,JN) = ID0
+    ZDIS(ID0) = ZDMAX
     !
-    DO JN=1,MIN(KL-1,KNEAR_NBR)
-      !
-      ID0 = MAXVAL(MINLOC(ZDIS(:)))       
-      !
-      KNEAR(NNUM(JP1),JN) = ID0
-      ZDIS(ID0) = ZDMAX
-      !
-    ENDDO
-    !
-  ENDIF
+  ENDDO
   !
 ENDDO
 !

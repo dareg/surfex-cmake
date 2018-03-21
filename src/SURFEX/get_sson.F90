@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_SSO_n (USS, &
                             HPROGRAM,KI,PSSO_SLOPE)
@@ -39,7 +35,7 @@
 !              ------------
 !
 !
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODI_GET_LUOUT
 !
@@ -56,7 +52,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM
 INTEGER,             INTENT(IN)  :: KI          ! horizontal dim. of cover

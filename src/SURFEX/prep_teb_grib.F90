@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_TEB_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !     #################################################################################
@@ -27,13 +23,16 @@ SUBROUTINE PREP_TEB_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !!      Original    01/2004
 !!------------------------------------------------------------------
 !
+
 !
 USE MODD_TYPE_DATE_SURF
 !
+USE MODI_PREP_GRIB_GRID
 USE MODE_READ_GRIB
 USE MODI_INTERP_GRID
 !
-USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE, NNI, CINMODEL
+USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
+USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE, NNI
 USE MODD_PREP_TEB,   ONLY : XGRID_ROAD, XGRID_WALL, XGRID_ROOF, XGRID_FLOOR, &
                             XTI_BLD, XTI_ROAD, XHUI_BLD, XTI_BLD_DEF,        &
                             XHUI_BLD_DEF
@@ -55,6 +54,8 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
+TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
+ CHARACTER(LEN=6)                :: YINMODEL ! model from which GRIB file originates
 REAL, DIMENSION(:)  , POINTER   :: ZMASK => NULL()          ! Land mask
 REAL, DIMENSION(:),   POINTER   :: ZFIELD1D => NULL() ! 1D field read
 REAL, DIMENSION(:,:), POINTER   :: ZFIELD => NULL()   ! field read
@@ -71,7 +72,9 @@ REAL                            :: ZTI_BLD !indoor air temperature
 !
 IF (TRIM(HFILE).NE.CGRIB_FILE) CGRIB_FILE=""
 !
- CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,CINMODEL,ZMASK)
+ CALL PREP_GRIB_GRID(HFILE,KLUOUT,YINMODEL,CINGRID_TYPE,TZTIME_GRIB)
+!
+ CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,YINMODEL,ZMASK)
 !
 IF (HSURF=='T_FLOOR' .OR. HSURF(1:6)=='T_WALL' .OR. HSURF=='T_ROOF' .OR.  &
     HSURF=='T_WIN2' .OR. HSURF=='TI_BLD' .OR. HSURF=='T_MASS') THEN
@@ -87,9 +90,9 @@ SELECT CASE(HSURF)
 !              ---------
 !
   CASE('ZS     ')
-    SELECT CASE (CINMODEL)
-      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
-        CALL READ_GRIB_ZS_LAND(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD1D)
+    SELECT CASE (YINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE')
+        CALL READ_GRIB_ZS_LAND(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD1D)
         ALLOCATE(PFIELD(SIZE(ZFIELD1D),1))
         PFIELD(:,1) = ZFIELD1D(:)
         DEALLOCATE(ZFIELD1D)
@@ -100,13 +103,11 @@ SELECT CASE(HSURF)
 !
   CASE('T_ROAD')
      !* reading of the profile and its depth definition
-     SELECT CASE(CINMODEL)
+     SELECT CASE(YINMODEL)
        CASE('ECMWF ')
-         CALL READ_GRIB_TG_ECMWF(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD,ZD)
+         CALL READ_GRIB_TG_ECMWF(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
        CASE('ARPEGE','ALADIN','MOCAGE')
-         CALL READ_GRIB_TG_METEO_FRANCE(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD,ZD)
-       CASE('HIRLAM')
-         CALL READ_GRIB_TG_HIRLAM(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD,ZD)           
+         CALL READ_GRIB_TG_METEO_FRANCE(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD,ZD)
      END SELECT
      !* if deep road temperature is prescribed
      IF (XTI_ROAD/=XUNDEF) THEN
@@ -119,9 +120,9 @@ SELECT CASE(HSURF)
 
   CASE('T_FLOOR')    
      !* reading of the profile and its depth definition
-     SELECT CASE(CINMODEL)
-       CASE('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
-         CALL READ_GRIB_TF_TEB(HFILE,KLUOUT,CINMODEL,ZTI_BLD,ZMASK,ZFIELD,ZD)
+     SELECT CASE(YINMODEL)
+       CASE('ECMWF ','ARPEGE','ALADIN','MOCAGE')
+         CALL READ_GRIB_TF_TEB(HFILE,KLUOUT,YINMODEL,ZTI_BLD,ZMASK,ZFIELD,ZD)
      END SELECT
      !* if deep road temperature is prescribed
      IF (XTI_ROAD/=XUNDEF) THEN
@@ -133,13 +134,13 @@ SELECT CASE(HSURF)
 !              --------------------------------
 
   CASE('T_WALLA','T_WALLB')
-     CALL READ_GRIB_T_TEB(HFILE,KLUOUT,CINMODEL,ZTI_BLD,ZMASK,ZFIELD,ZD)
+     CALL READ_GRIB_T_TEB(HFILE,KLUOUT,YINMODEL,ZTI_BLD,ZMASK,ZFIELD,ZD)
      CALL TEB_PROFILE_GRIB(XGRID_WALL)
 
   CASE('T_WIN1')
-    SELECT CASE (CINMODEL)
-      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
-        CALL READ_GRIB_TS(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD1D)
+    SELECT CASE (YINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE')
+        CALL READ_GRIB_TS(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD1D)
         ALLOCATE(PFIELD(NNI,1))
         PFIELD(:,1) = ZFIELD1D(:)
         DEALLOCATE(ZFIELD1D)
@@ -149,7 +150,7 @@ SELECT CASE(HSURF)
 !              --------------------------------
 !
   CASE('T_ROOF')    
-     CALL READ_GRIB_T_TEB(HFILE,KLUOUT,CINMODEL,ZTI_BLD,ZMASK,ZFIELD,ZD)
+     CALL READ_GRIB_T_TEB(HFILE,KLUOUT,YINMODEL,ZTI_BLD,ZMASK,ZFIELD,ZD)
      CALL TEB_PROFILE_GRIB(XGRID_ROOF)
 !
 !*      5.bis    Profile of temperatures in thermal mass
@@ -163,9 +164,9 @@ SELECT CASE(HSURF)
 !              ----------------------
 !
   CASE('T_CAN  ')
-    SELECT CASE (CINMODEL)
-      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
-        CALL READ_GRIB_T2_LAND(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD1D)
+    SELECT CASE (YINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE')
+        CALL READ_GRIB_T2(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD1D)
         ALLOCATE(PFIELD(SIZE(ZFIELD1D),1))
         PFIELD(:,1) = ZFIELD1D(:)
         DEALLOCATE(ZFIELD1D)
@@ -175,8 +176,8 @@ SELECT CASE(HSURF)
 !               -------------------
 !
   CASE('Q_CAN  ')
-    SELECT CASE (CINMODEL)
-      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
+    SELECT CASE (YINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE')
         ALLOCATE(PFIELD(NNI,1))
         PFIELD(:,1) = 0.01
     END SELECT
@@ -187,7 +188,7 @@ SELECT CASE(HSURF)
 
   CASE('TI_ROAD')    
      IF (XTI_ROAD==XUNDEF) THEN
-       CALL READ_GRIB_T2_LAND(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD1D)
+       CALL READ_GRIB_T2(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD1D)
        ALLOCATE(PFIELD(SIZE(ZFIELD1D),1))
        PFIELD(:,1) = ZFIELD1D(:)
        DEALLOCATE(ZFIELD1D)
@@ -225,6 +226,8 @@ DEALLOCATE(ZMASK)
 !
 !*      4.     Interpolation method
 !              --------------------
+!
+CINTERP_TYPE='HORIBL'
 !
 !-------------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------------

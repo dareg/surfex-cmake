@@ -1,5 +1,5 @@
 !     #########
-SUBROUTINE TRIP_HS_VEL (PTSTEP,OMASK_VEL,PLEN,PWIDTH,PSLOPEBED,PN,PSURF_STO,PHS,PVEL)
+SUBROUTINE TRIP_HS_VEL (PTSTEP,OMASK,OMASK_VEL,PLEN,PWIDTH,PSLOPEBED,PN,PSURF_STO,PHS,PVEL)
 !     ################################################################
 !
 !!****  *TRIP_HS_VEL*  
@@ -38,7 +38,7 @@ SUBROUTINE TRIP_HS_VEL (PTSTEP,OMASK_VEL,PLEN,PWIDTH,PSLOPEBED,PN,PSURF_STO,PHS,
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODN_TRIP,     ONLY : CVIT, XCVEL
+USE MODN_TRIP,     ONLY : XCVEL
 USE MODD_TRIP_PAR, ONLY : XUNDEF, XM, XVELMIN, &
                           XHSMIN, XRHOLW
 !
@@ -53,6 +53,7 @@ IMPLICIT NONE
 !
 REAL, INTENT(IN)                     :: PTSTEP ! Trip timestep value (10800s)
 !
+LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK      ! General mask mask
 LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_VEL  ! Variable velocity mask
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PLEN       ! river length       [m] 
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PWIDTH     ! river widths                 [m]
@@ -90,19 +91,17 @@ ZHS        (:,:) = 0.0
 PHS (:,:)=XUNDEF
 PVEL(:,:)=XCVEL
 !
-IF(CVIT == 'VAR')THEN
-  WHERE(OMASK_VEL(:,:))       
-      !Variable streamflow velocity
-      PHS     (:,:)=PSURF_STO(:,:)/(XRHOLW*PLEN(:,:)*PWIDTH(:,:))
-      ZHS     (:,:)=MAX(PHS(:,:),ZLOG_MIN)
-      ZRADIUS (:,:)=LOG(PWIDTH(:,:)*ZHS(:,:)/(PWIDTH(:,:)+2.0*ZHS(:,:)))
-      ZVEL    (:,:)=EXP(XM*ZRADIUS(:,:))*SQRT(PSLOPEBED(:,:))/PN(:,:)
-      ZVEL    (:,:)=MAX(XVELMIN,ZVEL(:,:))
-      ZVEL    (:,:)=MIN(ZVEL(:,:),PLEN(:,:)/PTSTEP)
-      !Velocity limitation if the river is very dry
-      PVEL    (:,:)=ZVEL(:,:)*MIN(1.0,MAX(0.0,(PHS(:,:)-XHSMIN))/XHSMIN)
-  ENDWHERE
-ENDIF
+WHERE(OMASK_VEL(:,:))       
+    !Variable streamflow velocity
+    PHS     (:,:)=PSURF_STO(:,:)/(XRHOLW*PLEN(:,:)*PWIDTH(:,:))
+    ZHS     (:,:)=MAX(PHS(:,:),ZLOG_MIN)
+    ZRADIUS (:,:)=LOG(PWIDTH(:,:)*ZHS(:,:)/(PWIDTH(:,:)+2.0*ZHS(:,:)))
+    ZVEL    (:,:)=EXP(XM*ZRADIUS(:,:))*SQRT(PSLOPEBED(:,:))/PN(:,:)
+    ZVEL    (:,:)=MAX(XVELMIN,ZVEL(:,:))
+    ZVEL    (:,:)=MIN(ZVEL(:,:),PLEN(:,:)/PTSTEP)
+    !Velocity limitation if the river is very dry
+    PVEL    (:,:)=ZVEL(:,:)*MIN(1.0,MAX(0.0,(PHS(:,:)-XHSMIN))/XHSMIN)
+ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_HS_VEL',1,ZHOOK_HANDLE)
 !

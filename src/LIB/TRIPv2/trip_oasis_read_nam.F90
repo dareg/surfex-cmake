@@ -28,7 +28,6 @@ SUBROUTINE TRIP_OASIS_READ_NAM(KLISTING,PRUNTIME)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    05/2008 
-!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -65,8 +64,8 @@ REAL,    INTENT(IN), OPTIONAL :: PRUNTIME
 !
 INTEGER,          PARAMETER :: KIN   = 1
 INTEGER,          PARAMETER :: KOUT  = 0
- CHARACTER(LEN=5), PARAMETER :: YLAND = 'land'
- CHARACTER(LEN=5), PARAMETER :: YSEA  = 'ocean'
+CHARACTER(LEN=5), PARAMETER :: YLAND = 'land'
+CHARACTER(LEN=5), PARAMETER :: YSEA  = 'ocean'
 !
 !
 !*       0.3   Declarations of local variables
@@ -74,8 +73,8 @@ INTEGER,          PARAMETER :: KOUT  = 0
 !
 LOGICAL           :: GFOUND         ! Return code when searching namelist
 INTEGER           :: INAM           ! logical unit of namelist file
- CHARACTER(LEN=20) :: YKEY
- CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=20) :: YKEY
+CHARACTER(LEN=50) :: YCOMMENT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -93,9 +92,9 @@ LCPL_FLOOD   = .FALSE.
 LCPL_SEA     = .FALSE.
 LCPL_CALVSEA = .FALSE.
 !
- CALL OPEN_TRIP_NAMELIST(INAM)
+CALL OPEN_TRIP_NAMELIST(INAM)
 !
- CALL TRIP_POSNAM(INAM,'NAM_TRIP_LAND_CPL',GFOUND,KLISTING)
+CALL TRIP_POSNAM(INAM,'NAM_TRIP_LAND_CPL',GFOUND,KLISTING)
 !
 IF (GFOUND) THEN
    READ(UNIT=INAM,NML=NAM_TRIP_LAND_CPL)
@@ -107,7 +106,7 @@ ELSE
    WRITE(KLISTING,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 ENDIF
 !
- CALL TRIP_POSNAM(INAM,'NAM_TRIP_SEA_CPL',GFOUND,KLISTING)
+CALL TRIP_POSNAM(INAM,'NAM_TRIP_SEA_CPL',GFOUND,KLISTING)
 !
 IF (GFOUND) THEN
    READ(UNIT=INAM,NML=NAM_TRIP_SEA_CPL)
@@ -119,7 +118,7 @@ ELSE
    WRITE(KLISTING,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
 ENDIF
 !
- CALL CLOSE_TRIP_NAMELIST(INAM)
+CALL CLOSE_TRIP_NAMELIST(INAM)
 !
 IF(XTSTEP_CPL_LAND>0.0)LCPL_LAND=.TRUE.
 IF(XTSTEP_CPL_SEA >0.0)LCPL_SEA =.TRUE.
@@ -173,11 +172,17 @@ IF(LCPL_LAND)THEN
 !
 ! Particular case due to groundwater scheme
 !          
-  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0)THEN
+  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0.OR.LEN_TRIM(CRECHARGE)>0)THEN
     LCPL_GW = .TRUE.
   ENDIF
 !
   IF(LCPL_GW)THEN
+!
+!   Input variable
+!
+    YKEY  ='CRECHARGE'
+    YCOMMENT='Groundwater recharge'
+    CALL CHECK_TRIP_FIELD(CRECHARGE,YKEY,YCOMMENT,YLAND,KIN)
 !
 !   Output variable
 !
@@ -299,23 +304,23 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_READ_NAM',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
- CONTAINS
+CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_TRIP_FIELD(HFIELD,HKEY,HCOMMENT,HTYP,KID)
 !
 IMPLICIT NONE
 !
- CHARACTER(LEN=*), INTENT(IN) :: HFIELD
- CHARACTER(LEN=*), INTENT(IN) :: HKEY
- CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
- CHARACTER(LEN=*), INTENT(IN) :: HTYP
+CHARACTER(LEN=*), INTENT(IN) :: HFIELD
+CHARACTER(LEN=*), INTENT(IN) :: HKEY
+CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
+CHARACTER(LEN=*), INTENT(IN) :: HTYP
 INTEGER,          INTENT(IN) :: KID
 !
- CHARACTER(LEN=20)  :: YWORK
- CHARACTER(LEN=20)  :: YNAMELIST
- CHARACTER(LEN=128) :: YCOMMENT1
- CHARACTER(LEN=128) :: YCOMMENT2
+CHARACTER(LEN=20)  :: YWORK
+CHARACTER(LEN=20)  :: YNAMELIST
+CHARACTER(LEN=128) :: YCOMMENT1
+CHARACTER(LEN=128) :: YCOMMENT2
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

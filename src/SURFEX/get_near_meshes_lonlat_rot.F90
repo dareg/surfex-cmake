@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_NEAR_MESHES_LONLAT_ROT(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 !     ##############################################################
@@ -34,7 +30,6 @@
 !
 USE MODE_GRIDTYPE_LONLAT_ROT
 !
-USE MODD_SURFEX_MPI, ONLY : NINDEX, NRANK, NNUM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -75,17 +70,15 @@ IF (ILON*ILAT==KL) THEN
     DO JLON=1,ILON
       ICOUNT = 0
       JL = JLON + ILON * (JLAT-1)
-      IF (NINDEX(JL)==NRANK) THEN
-        KNEAR(NNUM(JL),:) = 0      
-        DO JX=-(IDIST-1)/2,IDIST/2
-          DO JY=-(IDIST-1)/2,IDIST/2
-            IF (JLON+JX>0 .AND. JLON+JX<ILON+1 .AND. JLAT+JY>0 .AND. JLAT+JY<ILAT+1) THEN
-              ICOUNT = ICOUNT + 1
-              KNEAR(NNUM(JL),ICOUNT) = (JLON+JX) + ILON * (JLAT+JY-1)
-            END IF
-          END DO
+      KNEAR(JL,:) = 0      
+      DO JX=-(IDIST-1)/2,IDIST/2
+        DO JY=-(IDIST-1)/2,IDIST/2
+          IF (JLON+JX>0 .AND. JLON+JX<ILON+1 .AND. JLAT+JY>0 .AND. JLAT+JY<ILAT+1) THEN
+            ICOUNT = ICOUNT + 1
+            KNEAR(JL,ICOUNT) = (JLON+JX) + ILON * (JLAT+JY-1)
+          END IF
         END DO
-      END IF
+      END DO
     END DO
   END DO
 END IF

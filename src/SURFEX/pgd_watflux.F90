@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_WATFLUX (DTCO, U, G, W, HPROGRAM)
+      SUBROUTINE PGD_WATFLUX (DTCO, U, WG, W, &
+                              HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_WATFLUX* monitor for averaging and interpolations of WATFLUX physiographic fields
@@ -40,11 +37,10 @@
 !            -----------
 !
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SFX_GRID_n, ONLY : GRID_t
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -66,7 +62,7 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(GRID_t), INTENT(INOUT) :: G
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
@@ -100,18 +96,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !             ----------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',0,ZHOOK_HANDLE)
- CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',G%NDIM)
+ CALL GET_SURF_SIZE_n(DTCO, U, &
+                      'WATER ',WG%NDIM)
 !
 ALLOCATE(W%LCOVER     (JPCOVER))
-ALLOCATE(W%XZS        (G%NDIM))
-ALLOCATE(G%XLAT       (G%NDIM))
-ALLOCATE(G%XLON       (G%NDIM))
-ALLOCATE(G%XMESH_SIZE (G%NDIM))
+ALLOCATE(W%XZS        (WG%NDIM))
+ALLOCATE(WG%XLAT       (WG%NDIM))
+ALLOCATE(WG%XLON       (WG%NDIM))
+ALLOCATE(WG%XMESH_SIZE (WG%NDIM))
 !
- CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', G, W%LCOVER, W%XCOVER, W%XZS )  
+ CALL PACK_PGD(DTCO, U, &
+               HPROGRAM, 'WATER ',                    &
+                WG%CGRID,  WG%XGRID_PAR,                     &
+                W%LCOVER, W%XCOVER, W%XZS,                   &
+                WG%XLAT, WG%XLON, WG%XMESH_SIZE                 )  
 !
 !-------------------------------------------------------------------------------
-IF (NRANK==NPIO) CALL WRITE_COVER_TEX_WATER
+ CALL WRITE_COVER_TEX_WATER
 IF (LHOOK) CALL DR_HOOK('PGD_WATFLUX',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !

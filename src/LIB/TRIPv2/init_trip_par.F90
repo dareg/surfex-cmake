@@ -20,7 +20,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original  22/05/08
-!!      09/16   B. Decharme  limit wtd to -1000m
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -37,7 +36,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP_PAR',0,ZHOOK_HANDLE)
 !
-NDIMTAB     = 10
+NDIMTAB     = 100
 NUNDEF      = 1E+9
 !
 XVELMIN     = 0.025
@@ -51,8 +50,6 @@ XYEAR       = 365.0
 XRAD        = 6371229.
 XPI         = 2.*ASIN(1.)
 XTIME_DIAG  = 0.
-!
-XGWDZMAX    = 1000.
 !
 LNCPRINT    = .FALSE.
 !

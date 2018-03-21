@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########################################################################
-      SUBROUTINE LATLON_GRIDTYPE_IGN(G,KL,PDIR)
+      SUBROUTINE LATLON_GRIDTYPE_IGN(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
 !     #########################################################################
 !
 !!****  *LATLON_GRIDTYPE_IGN* - routine to compute the horizontal geographic fields
@@ -37,8 +33,6 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
-!
 USE MODD_CSTS,     ONLY : XPI
 USE MODD_IGN, ONLY : XA, XDELTY
 !
@@ -54,9 +48,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(GRID_t), INTENT(INOUT) :: G
-!
+INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
+REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
+REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT       ! latitude  (degrees)
+REAL, DIMENSION(KL),        INTENT(OUT) :: PLON       ! longitude (degrees)
+REAL, DIMENSION(KL),        INTENT(OUT) :: PMESH_SIZE ! mesh size (m2)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
 !
 !*       0.2   Declarations of local variables
@@ -79,19 +76,19 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ---------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_IGN',0,ZHOOK_HANDLE)
-ALLOCATE(ZX (SIZE(G%XLAT)))
-ALLOCATE(ZY (SIZE(G%XLAT)))
-ALLOCATE(ZDX(SIZE(G%XLAT)))
-ALLOCATE(ZDY(SIZE(G%XLAT)))
+ALLOCATE(ZX (SIZE(PLAT)))
+ALLOCATE(ZY (SIZE(PLAT)))
+ALLOCATE(ZDX(SIZE(PLAT)))
+ALLOCATE(ZDY(SIZE(PLAT)))
 !
- CALL GET_GRIDTYPE_IGN(G%XGRID_PAR,KLAMBERT=ILAMBERT,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
+ CALL GET_GRIDTYPE_IGN(PGRID_PAR,KLAMBERT=ILAMBERT,PX=ZX,PY=ZY,PDX=ZDX,PDY=ZDY      )
 !
 !---------------------------------------------------------------------------
 !
 !*       2.    Computation of latitude and longitude
 !              -------------------------------------
 !
- CALL LATLON_IGN(ILAMBERT,ZX,ZY,G%XLAT,G%XLON)
+ CALL LATLON_IGN(ILAMBERT,ZX,ZY,PLAT,PLON)
 !
 !-----------------------------------------------------------------------------
 !
@@ -101,14 +98,14 @@ ALLOCATE(ZDY(SIZE(G%XLAT)))
 !        3.1   Map factor
 !              ----------
 !
-ALLOCATE(ZMAP(SIZE(G%XLAT)))
+ALLOCATE(ZMAP(SIZE(PLAT)))
 !
  CALL MAP_FACTOR_IGN(ILAMBERT,ZX,ZY,ZMAP)
 !
 !        3.2   Grid size
 !              ---------
 !
-G%XMESH_SIZE(:) = ZDX(:) * ZDY(:) / ZMAP(:)**2
+PMESH_SIZE(:) = ZDX(:) * ZDY(:) / ZMAP(:)**2
 !
 !-----------------------------------------------------------------------------
 !
@@ -116,13 +113,13 @@ G%XMESH_SIZE(:) = ZDX(:) * ZDY(:) / ZMAP(:)**2
 !              ----------------------------------------------------
 !
 !* the following formulae is given for clockwise angles.
-ALLOCATE(ZYDELTY(SIZE(G%XLAT)))
-ALLOCATE(ZLATDY (SIZE(G%XLAT)))
-ALLOCATE(ZLONDY (SIZE(G%XLAT)))
+ALLOCATE(ZYDELTY(SIZE(PLAT)))
+ALLOCATE(ZLATDY (SIZE(PLAT)))
+ALLOCATE(ZLONDY (SIZE(PLAT)))
 ZYDELTY=ZY+XDELTY
  CALL LATLON_IGN(ILAMBERT,ZX,ZYDELTY,ZLATDY,ZLONDY)
 !
-PDIR(:)= ATAN( (XA(ILAMBERT)*(ZLONDY(:)-G%XLON(:))*XPI/180.) / XDELTY) * XPI/180.
+PDIR(:)= ATAN( (XA(ILAMBERT)*(ZLONDY(:)-PLON(:))*XPI/180.) / XDELTY) * XPI/180.
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE URBAN_EXCH_COEF(HZ0H, PZ0_O_Z0H, PTG, PQS, PEXNS, PEXNA, PTA, PQA,   &
                              PZREF, PUREF, PVMOD, PZ0,                            &
@@ -62,6 +58,8 @@ USE PARKIND1  ,ONLY : JPRB
 !
 USE MODI_FLXSURF3BX
 !
+USE MODI_INIT_SURFCONSPHY
+!
 IMPLICIT NONE
 !
  CHARACTER(LEN=6)                  :: HZ0H     ! TEB option for z0h roof & road
@@ -101,6 +99,7 @@ REAL,DIMENSION(SIZE(PTA)) :: z0h_roof,z0h_town,z0h_road     ! local thermal roug
 REAL,DIMENSION(SIZE(PTA)) :: zustar, zta, ztg
 REAL,DIMENSION(SIZE(PTA)) :: ZVMOD                          ! wind
 INTEGER N
+CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 !
 !* MASC95 case
 REAL,DIMENSION(SIZE(PTA)) :: ZDIRCOSZW     ! orography slope cosine
@@ -121,7 +120,7 @@ IF (HZ0H=='MASC95') THEN
 !
   CALL SURFACE_CD(PRI, PZREF, PUREF, PZ0, ZZ0H, PCD, PCDN)
 !
-  CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, PVMOD, PZ0, ZZ0H, PAC, PRA, PCH)
+  CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, PVMOD, PZ0, ZZ0H, PAC, PRA, PCH, YSNOWRES)
 !
 !
 !*      2.     Brutsaert 1982  or Kanda 2007 exchange coefficients
@@ -131,6 +130,7 @@ ELSEIF(HZ0H=='BRUT82' .OR. HZ0H=='KAND07')THEN
   ! initialisations
   fcor(:)=1.0372462E-04
 !RJ: can be removed
+  CALL INIT_SURFCONSPHY
   N=SIZE(PTA)
   !
   ! Set a minimum threshold to the wind

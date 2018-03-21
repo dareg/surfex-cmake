@@ -1,15 +1,14 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE DRAG(HISBA, HSNOW_ISBA, HCPSURF, PTSTEP, PTG, PWG, PWGI,  &
-                    PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR, PPS, PRS,   &
-                    PVEG, PZ0, PZ0EFF, PZ0H, PWFC, PWSAT, PPSNG, PPSNV,  &
-                    PZREF, PUREF, PDIRCOSZW, PDELTA, PF5, PRA, PCH, PCD, &
-                    PCDN, PRI, PHUG, PHUGI, PHV, PHU, PCPS, PQS, PFFG,   &
-                    PFFV, PFF, PFFG_NOSNOW, PFFV_NOSNOW, PLEG_DELTA,     &
-                    PLEGI_DELTA, PWR, PRHOA, PLVTT, PQSAT  )  
+    SUBROUTINE DRAG(HISBA, HSNOW_ISBA, HCPSURF, PTSTEP,                  &
+                      PTG, PWG, PWGI,                                    &
+                      PEXNS, PEXNA, PTA, PVMOD, PQA, PRR, PSR,           &
+                      PPS, PRS, PVEG, PZ0, PZ0EFF, PZ0H,                 &
+                      PWFC, PWSAT, PPSNG, PPSNV, PZREF, PUREF,           &
+                      PDIRCOSZW, PDELTA, PF5, PRA,                       &
+                      PCH, PCD, PCDN, PRI, PHUG, PHUGI,                  &
+                      PHV, PHU, PCPS, PQS, PFFG, PFFV, PFF,              &
+                      PFFG_NOSNOW, PFFV_NOSNOW,                          &
+                      PLEG_DELTA, PLEGI_DELTA, PWR, PRHOA, PLVTT, PQSAT  )  
 !   ############################################################################
 !
 !!****  *DRAG*  
@@ -73,7 +72,6 @@
 !!      (A.Boone)    21/11/11 Add Rs_max limit for dry conditions with Etv
 !!      (B. Decharme)   09/12 limitation of Ri in surface_ri.F90
 !!      (C. Ardilouze)  09/13 Halstead coef set to 0 for very low values
-!!      (B. Decharme)   03/16 Bug in limitation of Er for Interception reservoir
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -113,7 +111,7 @@ CHARACTER(LEN=*),     INTENT(IN)  :: HCPSURF    ! option for specific heat Cp:
 !                                               ! 'DRY' = dry Cp
 !                                               ! 'HUM' = Cp as a function of qs
 !
-REAL,                 INTENT(IN) :: PTSTEP      ! timestep of ISBA (not split time step)
+REAL,                 INTENT(IN) :: PTSTEP      ! timestep of the integration
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PTG, PWG, PWGI, PEXNS
 !                                     PTG     = surface temperature
@@ -210,7 +208,7 @@ REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
 !                                              ZZHV = condensation delta fn for Hv
                                  ZRRCOR
 !                                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness
-!
+CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -231,7 +229,9 @@ PRI(:)      =0.
 !
 ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !
-ZQSAT(:) = QSAT(PTG(:),PPS(:))
+! WRITE(*,*) 'in DRAG, before', ZQSAT, PTG(:), PPS(:)
+ZQSAT(:) = QSAT(PTG(:),PPS(:)) 
+! WRITE(*,*) 'in DRAG, after', ZQSAT, PTG(:), PPS(:)
 !
 IF(PRESENT(PQSAT))PQSAT(:)=ZQSAT(:)
 !
@@ -373,7 +373,7 @@ ELSE
 !*       7.1    SURFACE AERODYNAMIC RESISTANCE FOR HEAT TRANSFERS
 !               -------------------------------------------------
 !
-   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0, PZ0H, ZAC, PRA, PCH)
+   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0, PZ0H, ZAC, PRA, PCH, YSNOWRES)
 !
 !-------------------------------------------------------------------------------
 !
@@ -467,9 +467,6 @@ ENDIF
 !*       2.     Interception reservoir consistency:
 !               -----------------------------------
 !
-!  In DRAG, we use the timestep of ISBA (PTSTEP) and not the split time step (ZTSTEP)
-!  because diagnostic canopy evaporation (Er) must be consistent with PWR to
-!  limit negative dripping in hydro_veg
 !
 ZLEV(:)  = PRHOA(:) * PLVTT(:) * PVEG(:) * (1-ZPSNV(:)) * PHV(:) * (ZQSAT(:) - PQA(:)) / PRA(:)
 !
@@ -484,7 +481,7 @@ ZWR_DELTA(:)=1.0
 !
 WHERE( ZZHV(:)>0.0 .AND. ZER(:)/=0.0 .AND. (PWR(:)+ZRRVEG(:))<ZER(:) )
 !
-       ZWR_DELTA(:) = MAX(0.01,MIN(1.0,(PWR(:)+ZRRVEG(:))/ZER(:)))
+       ZWR_DELTA(:) = MAX(0.25,MIN(1.0,(PWR(:)+ZRRVEG(:))/ZER(:)))
 !       
        PDELTA(:) = PDELTA(:) * ZWR_DELTA(:)
 !

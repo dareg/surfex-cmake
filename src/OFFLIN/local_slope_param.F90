@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 SUBROUTINE LOCAL_SLOPE_PARAM(JPINDX1,JPINDX2)
 
 !!                03/14  : M Lafaysse, modifs for optimization and parallelization
@@ -21,6 +17,7 @@ INTEGER::JJ
 
 
 ! Il faut déterminer la position de début  du thread MPI par rapport au ZZS1D_FULL de init_slope_param :
+!$OMP SINGLE
 IF (NPROC>1) THEN
   DO JJ=1,SIZE(NINDEX)
     IF(NINDEX(JJ)==NRANK) THEN
@@ -31,6 +28,7 @@ IF (NPROC>1) THEN
 ELSE
   IMINMPI=1
 END IF
+!$OMP END SINGLE
 
 NINDX1_MPI_OMP=IMINMPI+JPINDX1-1
 NINDX2_MPI_OMP=IMINMPI+JPINDX2-1

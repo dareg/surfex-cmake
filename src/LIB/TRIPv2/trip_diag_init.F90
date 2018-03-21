@@ -1,6 +1,7 @@
 SUBROUTINE TRIP_DIAG_INIT(PSOUT,PSIN,PVEL,PHS,PGOUT,PGNEG,PHG_OLD,   &
                           PWTD,PFWTD,PQGCELL,PHGHS,                  &
-                          PQFR,PQRF,PVFIN,PVFOUT,PHSF,PDISCHARGE,    &
+                          PQFR,PQRF,PVFIN,PVFOUT,PHSF,PSRC_FLOOD,    &
+                          PDISCHARGE,                                &
                           PGSTO_ALL,PGSTO2_ALL,PGIN_ALL,PGOUT_ALL    )  
 !     #####################################################
 !
@@ -50,6 +51,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PQRF       !river to floodplains exchange [
 REAL, DIMENSION(:,:), INTENT(OUT) :: PVFIN      !QRF velocity                  [m/s]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PVFOUT     !QFR velocity                  [m/s]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PHSF       !river minus flodd heigh       [m]
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSRC_FLOOD !P-E-I flood source term       [kg/s]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PDISCHARGE !Cumulated river discharges    [kg]
 REAL, DIMENSION(:,:), INTENT(OUT) :: PHG_OLD    ! Water table depth before     
 !                                                 water mass conservation      [m]

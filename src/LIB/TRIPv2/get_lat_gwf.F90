@@ -61,7 +61,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_LAT_GWF',0,ZHOOK_HANDLE)
- CALL GET_TRIP_GRID(TPG%XTRIP_GRID,PRES=PRES,PLAT=PLAT)
+CALL GET_TRIP_GRID(TPG%XTRIP_GRID,PRES=PRES,PLAT=PLAT)
 IF (LHOOK) CALL DR_HOOK('GET_LAT_GWF',1,ZHOOK_HANDLE)
 !    
 !---------------------------------------------------------------------------

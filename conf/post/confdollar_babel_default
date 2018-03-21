@@ -1,8 +1,4 @@
 #!/bin/sh
-#MNH_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-#MNH_LIC This is part of the Meso-NH software governed by the CeCILL-C licence
-#MNH_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-#MNH_LIC for details. version 1.
 ##
 ## Run Parameter
 ##
@@ -12,8 +8,8 @@ export TIME=${TIME-"3600"}
 export MEM=${MEM-"1500mb"}
 export MNH_EXP=${MNH_EXP-"MNH_EXP"}
 
-export MPIRUN=${MPIRUN-" mpirun -mode ${MODE} -np ${NBP} -mapfile TXYZ -exe "}
-export MONORUN=${MONORUN-" mpirun -mode ${MODE} -np ${NBP} -mapfile TXYZ -exe "}
+export MPIRUN=${MPIRUN-"poe "}
+export MONORUN=${MONORUN-"poe "}
 export CAT=${CAT-"cat"}
 
 ##
@@ -85,24 +81,23 @@ export QSUB=${QSUB-"llsubmit"}
 ##
 
 export JOBMULTI="\
+# Nom arbitraire du travail LoadLeveler
 # @ job_name = `basename  $PWD`
-# @ job_type = BLUEGENE
-# Fichier sortie standard du travail
-# @ output = \$(job_name)_${NCN}CN_${NBP}procs_${MODE}.$\(jobid)
-# Fichier erreur standard du travail
-# @ error = \$(output)
-# Temps elapsed maximum demande
-# @ wall_clock_limit = ${TIME}
-# Taille partition d'execution
-# @ bg_size = ${NCN}
+# Type de travail
+# @ job_type = parallel
+# Fichier de sortie standard du travail
+# @ output = \$(job_name).\$(jobid)
+# Fichier de sortie d'erreur du travail
+# @ error =  \$(job_name).\$(jobid)
+# Temps CPU max. en seconde par processus
+# @ cpu_limit = ${TIME}
+# MM-imoire max. utilisM-ie par processus (ici 700 Megaoctets)
+# @ data_limit = ${MEM}
+# @ stack_limit = 1500mb,1500mb
+# Nombre de processus demande (ici ${NBP} )
+# @ total_tasks = ${NBP}
 # @ queue
 "
-if [ ${NCN} -ge 512 ] ; then
-export JOBMULTI="\
-# @ BG_CONNECTION = TORUS
-${JOBMULTI}
-"
-fi
 
 export JOBMONO="\
 # Nom arbitraire du travail LoadLeveler

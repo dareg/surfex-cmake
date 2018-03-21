@@ -22,7 +22,6 @@ MODULE MODD_TRIP_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
-!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -52,6 +51,7 @@ LOGICAL             :: LCPL_CALVSEA = .FALSE. ! Calving fluxes from trip to ocea
 !
 INTEGER             :: NRUNOFF_ID    ! Surface runoff id
 INTEGER             :: NDRAIN_ID     ! Drainage id
+INTEGER             :: NRECHARGE_ID  ! Groundwater recharge id
 INTEGER             :: NCALVING_ID   ! Calving flux id
 INTEGER             :: NSRCFLOOD_ID  ! Floodplains freshwater flux id
 !

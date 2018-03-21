@@ -1,62 +1,11 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
-SUBROUTINE DEFAULT_DATA_COVER(PDATA_TOWN,PDATA_NATURE,PDATA_WATER,PDATA_SEA,&
-         PDATA_Z0_TOWN,PDATA_BLD_HEIGHT,PDATA_WALL_O_HOR,PDATA_BLD,PDATA_GARDEN,&
-         PDATA_ALB_ROOF,PDATA_ALB_ROAD,PDATA_ALB_WALL,PDATA_EMIS_ROOF,&
-         PDATA_EMIS_ROAD,PDATA_EMIS_WALL,PDATA_HC_ROOF,PDATA_TC_ROOF,&
-         PDATA_D_ROOF,PDATA_HC_ROAD,PDATA_TC_ROAD,PDATA_D_ROAD,&
-         PDATA_HC_WALL,PDATA_TC_WALL,PDATA_D_WALL,PDATA_H_TRAFFIC,&
-         PDATA_LE_TRAFFIC,PDATA_H_INDUSTRY,PDATA_LE_INDUSTRY,&
-         PDATA_VEGTYPE,PDATA_H_TREE,PDATA_WATSUP,PDATA_IRRIG,&
-         PDATA_ROOT_DEPTH,PDATA_GROUND_DEPTH,PDATA_DICE,TPDATA_SEED,&
-         TPDATA_REAP)
+SUBROUTINE DEFAULT_DATA_COVER
 !
-USE MODD_TYPE_DATE_SURF  
 USE MODD_SURF_PAR
 USE MODD_DATA_COVER_PAR
+USE MODD_DATA_COVER
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
-!
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_TOWN
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_NATURE
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_WATER
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_SEA
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_Z0_TOWN
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_BLD_HEIGHT
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_WALL_O_HOR
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_BLD
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_GARDEN
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_ALB_ROOF
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_ALB_ROAD
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_ALB_WALL
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_EMIS_ROOF
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_EMIS_ROAD
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_EMIS_WALL
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_HC_ROOF
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_TC_ROOF
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_D_ROOF
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_HC_ROAD
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_TC_ROAD
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_D_ROAD
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_HC_WALL
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_TC_WALL
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_D_WALL
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_H_TRAFFIC
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_LE_TRAFFIC
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_H_INDUSTRY
-REAL, DIMENSION(:), INTENT(INOUT), OPTIONAL :: PDATA_LE_INDUSTRY
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_VEGTYPE
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_H_TREE
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_WATSUP
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_IRRIG
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_ROOT_DEPTH
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_GROUND_DEPTH
-REAL, DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: PDATA_DICE
-TYPE(DATE_TIME), DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: TPDATA_SEED
-TYPE(DATE_TIME), DIMENSION(:,:), INTENT(INOUT), OPTIONAL :: TPDATA_REAP
 !
 !*    Declaration of local variables
 !     ------------------------------ 
@@ -67,8 +16,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_DATA_COVER',0,ZHOOK_HANDLE) 
 !
-IF (PRESENT(PDATA_TOWN)) THEN
-PDATA_TOWN(:) = (/          &
+XDATA_TOWN(:) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -128,10 +76,8 @@ PDATA_TOWN(:) = (/          &
    1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00, &
    1.00,   0.00,   0.01 &
          /)
-ENDIF
-!-------------------------------------------------------------------            
-IF (PRESENT(PDATA_NATURE)) THEN                                        
-PDATA_NATURE(:) = (/          &
+!-------------------------------------------------------------------                                                    
+XDATA_NATURE(:) = (/          &
    0.00,   0.00,   0.00,   1.00,   1.00,   1.00,   0.00,   1.00,   1.00,   1.00, &
    1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00, &
    1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00, &
@@ -191,10 +137,8 @@ PDATA_NATURE(:) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   1.00,   0.99 &
          /)
-ENDIF
-!-------------------------------------------------------------------         
-IF (PRESENT(PDATA_WATER)) THEN                                           
-PDATA_WATER(:) = (/          &
+!-------------------------------------------------------------------                                                    
+XDATA_WATER(:) = (/          &
    0.00,   1.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -254,10 +198,8 @@ PDATA_WATER(:) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------      
-IF (PRESENT(PDATA_SEA)) THEN                                              
-PDATA_SEA(:) = (/          &
+!-------------------------------------------------------------------                                                    
+XDATA_SEA(:) = (/          &
    1.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -317,244 +259,194 @@ PDATA_SEA(:) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------            
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_Z0_TOWN)) THEN
-WHERE(PDATA_TOWN>0.) PDATA_Z0_TOWN(:) = 1.000
-PDATA_Z0_TOWN(151) = 3.000
-PDATA_Z0_TOWN(155) = 2.000
-PDATA_Z0_TOWN(156) = 0.500
-PDATA_Z0_TOWN(157) = 2.000
-PDATA_Z0_TOWN(158) = 0.010
-PDATA_Z0_TOWN(159) = 0.100
-PDATA_Z0_TOWN(160) = 0.500
-PDATA_Z0_TOWN(254) = 2.000
-PDATA_Z0_TOWN(255) = 2.000
-ENDIF
-!-------------------------------------------------------------------      
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_BLD_HEIGHT)) THEN                                              
-WHERE(PDATA_TOWN>0.) PDATA_BLD_HEIGHT(:) =   10.
-PDATA_BLD_HEIGHT(151) =   30.
-PDATA_BLD_HEIGHT(155) =   20.
-PDATA_BLD_HEIGHT(156) =    5.
-PDATA_BLD_HEIGHT(157) =   20.
-PDATA_BLD_HEIGHT(159) =    5.
-PDATA_BLD_HEIGHT(160) =    5.
-PDATA_BLD_HEIGHT(254) =   20.
-PDATA_BLD_HEIGHT(255) =   20.
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_WALL_O_HOR)) THEN                                                 
-WHERE(PDATA_TOWN>0.) PDATA_WALL_O_HOR(:) =0.50
-PDATA_WALL_O_HOR(  7) =0.30
-PDATA_WALL_O_HOR(151) =0.90
-PDATA_WALL_O_HOR(152) =0.30
-PDATA_WALL_O_HOR(153) =0.30
-PDATA_WALL_O_HOR(154) =0.30
-PDATA_WALL_O_HOR(155) =0.45
-PDATA_WALL_O_HOR(156) =0.09
-PDATA_WALL_O_HOR(157) =0.90
-PDATA_WALL_O_HOR(158) =0.10
-PDATA_WALL_O_HOR(159) =0.10
-PDATA_WALL_O_HOR(160) =0.10
-PDATA_WALL_O_HOR(161) =1.00
-PDATA_WALL_O_HOR(254) =1.50
-PDATA_WALL_O_HOR(255) =1.50
-PDATA_WALL_O_HOR(561) =0.28
-PDATA_WALL_O_HOR(562) =0.27
-PDATA_WALL_O_HOR(563) =0.25
-PDATA_WALL_O_HOR(564) =0.16
-PDATA_WALL_O_HOR(565) =0.31
-PDATA_WALL_O_HOR(566) =0.28
-PDATA_WALL_O_HOR(567) =0.31
-PDATA_WALL_O_HOR(568) =0.25
-PDATA_WALL_O_HOR(569) =0.24
-PDATA_WALL_O_HOR(570) =0.25
-PDATA_WALL_O_HOR(571) =0.28
-ENDIF
-!-------------------------------------------------------------------      
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_BLD)) THEN                                               
-WHERE(PDATA_TOWN>0.) PDATA_BLD(:) =0.50
-PDATA_BLD(  7) =0.30
-PDATA_BLD(151) =0.45
-PDATA_BLD(152) =0.30
-PDATA_BLD(153) =0.30
-PDATA_BLD(154) =0.30
-PDATA_BLD(155) =0.45
-PDATA_BLD(156) =0.09
-PDATA_BLD(157) =0.45
-PDATA_BLD(158) =0.10
-PDATA_BLD(159) =0.10
-PDATA_BLD(160) =0.10
-PDATA_BLD(254) =0.60
-PDATA_BLD(255) =0.60
-PDATA_BLD(561) =0.28
-PDATA_BLD(562) =0.27
-PDATA_BLD(563) =0.25
-PDATA_BLD(564) =0.16
-PDATA_BLD(565) =0.31
-PDATA_BLD(566) =0.28
-PDATA_BLD(567) =0.31
-PDATA_BLD(568) =0.25
-PDATA_BLD(569) =0.24
-PDATA_BLD(570) =0.25
-PDATA_BLD(571) =0.28
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_GARDEN)) THEN                                                    
-WHERE(PDATA_TOWN>0.) PDATA_GARDEN(:) =0.00
-PDATA_GARDEN(  7) =0.40
-PDATA_GARDEN(151) =0.10
-PDATA_GARDEN(152) =0.40
-PDATA_GARDEN(153) =0.40
-PDATA_GARDEN(154) =0.40
-PDATA_GARDEN(155) =0.10
-PDATA_GARDEN(156) =0.10
-PDATA_GARDEN(157) =0.10
-PDATA_GARDEN(561) =0.44
-PDATA_GARDEN(562) =0.45
-PDATA_GARDEN(563) =0.51
-PDATA_GARDEN(564) =0.48
-PDATA_GARDEN(565) =0.37
-PDATA_GARDEN(566) =0.44
-PDATA_GARDEN(567) =0.38
-PDATA_GARDEN(568) =0.49
-PDATA_GARDEN(569) =0.52
-PDATA_GARDEN(570) =0.51
-PDATA_GARDEN(571) =0.44
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_ALB_ROOF)) THEN                                           
-  WHERE(PDATA_TOWN>0.) PDATA_ALB_ROOF(:) =0.15
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_ALB_ROAD)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_ALB_ROAD(:) =0.08
-ENDIF
-!-------------------------------------------------------------------     
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_ALB_WALL)) THEN                                                
-  WHERE(PDATA_TOWN>0.) PDATA_ALB_WALL(:) =0.25
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_EMIS_ROOF)) THEN                                                  
-  WHERE(PDATA_TOWN>0.) PDATA_EMIS_ROOF(:) =0.90
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_EMIS_ROAD)) THEN                                                  
-  WHERE(PDATA_TOWN>0.) PDATA_EMIS_ROAD(:) =0.94
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_EMIS_WALL)) THEN                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_EMIS_WALL(:) =0.85
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_HC_ROOF)) THEN                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_HC_ROOF(:,  1) =2.11 * 1.E6
-!-------------------------------------------------------------------                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_HC_ROOF(:,  2) =0.28 * 1.E6
-!-------------------------------------------------------------------                                             
-  WHERE(PDATA_TOWN>0.) PDATA_HC_ROOF(:,  3) =0.29 * 1.E6
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_TC_ROOF)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_TC_ROOF(:,  1) =1.5100
-!-------------------------------------------------------------------                                                  
-  WHERE(PDATA_TOWN>0.) PDATA_TC_ROOF(:,  2) =0.0800
-!-------------------------------------------------------------------                                                 
-  WHERE(PDATA_TOWN>0.) PDATA_TC_ROOF(:,  3) =0.0500
-ENDIF
-!-------------------------------------------------------------------
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_D_ROOF)) THEN                                                     
-  WHERE(PDATA_TOWN>0.) PDATA_D_ROOF(:,  1) =0.050
-!-------------------------------------------------------------------                                                 
-  WHERE(PDATA_TOWN>0.) PDATA_D_ROOF(:,  2) =0.400
-!-------------------------------------------------------------------                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_D_ROOF(:,  3) =0.100
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_HC_ROAD)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_HC_ROAD(:,  1) =1.94 * 1.E6
-!-------------------------------------------------------------------                                                 
-  WHERE(PDATA_TOWN>0.) PDATA_HC_ROAD(:,  2) =1.28 * 1.E6
-!-------------------------------------------------------------------                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_HC_ROAD(:,  3) =1.28 * 1.E6
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_TC_ROAD)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_TC_ROAD(:,  1) =0.7454
-!-------------------------------------------------------------------                                               
-  WHERE(PDATA_TOWN>0.) PDATA_TC_ROAD(:,  2) =0.2513
-!-------------------------------------------------------------------                                               
-  WHERE(PDATA_TOWN>0.) PDATA_TC_ROAD(:,  3) =0.2513
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_D_ROAD)) THEN                                                  
-  WHERE(PDATA_TOWN>0.) PDATA_D_ROAD(:,  1) =0.050
-!-------------------------------------------------------------------                                           
-  WHERE(PDATA_TOWN>0.) PDATA_D_ROAD(:,  2) =0.100
-!-------------------------------------------------------------------                                                  
-  WHERE(PDATA_TOWN>0.) PDATA_D_ROAD(:,  3) =1.000
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_HC_WALL)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_HC_WALL(:,  1) =1.55 * 1.E6
-!-------------------------------------------------------------------                                           
-  WHERE(PDATA_TOWN>0.) PDATA_HC_WALL(:,  2) =1.55 * 1.E6
-!-------------------------------------------------------------------                                                
-  WHERE(PDATA_TOWN>0.) PDATA_HC_WALL(:,  3) =0.29 * 1.E6
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_TC_WALL)) THEN                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_TC_WALL(:,  1) =0.9338
-!-------------------------------------------------------------------                                              
-  WHERE(PDATA_TOWN>0.) PDATA_TC_WALL(:,  2) =0.9338
-!-------------------------------------------------------------------                                            
-  WHERE(PDATA_TOWN>0.) PDATA_TC_WALL(:,  3) =0.0500
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_D_WALL)) THEN                                                  
-  WHERE(PDATA_TOWN>0.) PDATA_D_WALL(:,  1) =0.020
-!-------------------------------------------------------------------                                              
-  WHERE(PDATA_TOWN>0.) PDATA_D_WALL(:,  2) =0.125
-!-------------------------------------------------------------------                                              
-  WHERE(PDATA_TOWN>0.) PDATA_D_WALL(:,  3) =0.050
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_H_TRAFFIC)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_H_TRAFFIC(:) =   10.
-PDATA_H_TRAFFIC(151) =   20.
-PDATA_H_TRAFFIC(156) =   30.
-PDATA_H_TRAFFIC(159) =    0.
-PDATA_H_TRAFFIC(160) =    0.
-PDATA_H_TRAFFIC(161) =    0.
-PDATA_H_TRAFFIC(254) =    0.
-PDATA_H_TRAFFIC(255) =    0.
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_LE_TRAFFIC)) THEN                                                   
-  WHERE(PDATA_TOWN>0.) PDATA_LE_TRAFFIC(:) =    0.
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_H_INDUSTRY)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_H_INDUSTRY(:) =    5.
-PDATA_H_INDUSTRY(151) =   10.
-PDATA_H_INDUSTRY(155) =   20.
-PDATA_H_INDUSTRY(156) =    0.
-PDATA_H_INDUSTRY(157) =   20.
-PDATA_H_INDUSTRY(158) =    0.
-PDATA_H_INDUSTRY(159) =    0.
-PDATA_H_INDUSTRY(160) =    0.
-PDATA_H_INDUSTRY(161) =    0.
-PDATA_H_INDUSTRY(254) =    0.
-PDATA_H_INDUSTRY(255) =    0.
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_TOWN).AND.PRESENT(PDATA_LE_INDUSTRY)) THEN                                                    
-  WHERE(PDATA_TOWN>0.) PDATA_LE_INDUSTRY(:) =    0.
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_VEGTYPE)) THEN                                                 
-PDATA_VEGTYPE(:,  1) = (/          &
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_Z0_TOWN(:) = 1.000
+XDATA_Z0_TOWN(151) = 3.000
+XDATA_Z0_TOWN(155) = 2.000
+XDATA_Z0_TOWN(156) = 0.500
+XDATA_Z0_TOWN(157) = 2.000
+XDATA_Z0_TOWN(158) = 0.010
+XDATA_Z0_TOWN(159) = 0.100
+XDATA_Z0_TOWN(160) = 0.500
+XDATA_Z0_TOWN(254) = 2.000
+XDATA_Z0_TOWN(255) = 2.000
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_BLD_HEIGHT(:) =   10.
+XDATA_BLD_HEIGHT(151) =   30.
+XDATA_BLD_HEIGHT(155) =   20.
+XDATA_BLD_HEIGHT(156) =    5.
+XDATA_BLD_HEIGHT(157) =   20.
+XDATA_BLD_HEIGHT(159) =    5.
+XDATA_BLD_HEIGHT(160) =    5.
+XDATA_BLD_HEIGHT(254) =   20.
+XDATA_BLD_HEIGHT(255) =   20.
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_WALL_O_HOR(:) =0.50
+XDATA_WALL_O_HOR(  7) =0.30
+XDATA_WALL_O_HOR(151) =0.90
+XDATA_WALL_O_HOR(152) =0.30
+XDATA_WALL_O_HOR(153) =0.30
+XDATA_WALL_O_HOR(154) =0.30
+XDATA_WALL_O_HOR(155) =0.45
+XDATA_WALL_O_HOR(156) =0.09
+XDATA_WALL_O_HOR(157) =0.90
+XDATA_WALL_O_HOR(158) =0.10
+XDATA_WALL_O_HOR(159) =0.10
+XDATA_WALL_O_HOR(160) =0.10
+XDATA_WALL_O_HOR(161) =1.00
+XDATA_WALL_O_HOR(254) =1.50
+XDATA_WALL_O_HOR(255) =1.50
+XDATA_WALL_O_HOR(561) =0.28
+XDATA_WALL_O_HOR(562) =0.27
+XDATA_WALL_O_HOR(563) =0.25
+XDATA_WALL_O_HOR(564) =0.16
+XDATA_WALL_O_HOR(565) =0.31
+XDATA_WALL_O_HOR(566) =0.28
+XDATA_WALL_O_HOR(567) =0.31
+XDATA_WALL_O_HOR(568) =0.25
+XDATA_WALL_O_HOR(569) =0.24
+XDATA_WALL_O_HOR(570) =0.25
+XDATA_WALL_O_HOR(571) =0.28
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_BLD(:) =0.50
+XDATA_BLD(  7) =0.30
+XDATA_BLD(151) =0.45
+XDATA_BLD(152) =0.30
+XDATA_BLD(153) =0.30
+XDATA_BLD(154) =0.30
+XDATA_BLD(155) =0.45
+XDATA_BLD(156) =0.09
+XDATA_BLD(157) =0.45
+XDATA_BLD(158) =0.10
+XDATA_BLD(159) =0.10
+XDATA_BLD(160) =0.10
+XDATA_BLD(254) =0.60
+XDATA_BLD(255) =0.60
+XDATA_BLD(561) =0.28
+XDATA_BLD(562) =0.27
+XDATA_BLD(563) =0.25
+XDATA_BLD(564) =0.16
+XDATA_BLD(565) =0.31
+XDATA_BLD(566) =0.28
+XDATA_BLD(567) =0.31
+XDATA_BLD(568) =0.25
+XDATA_BLD(569) =0.24
+XDATA_BLD(570) =0.25
+XDATA_BLD(571) =0.28
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_GARDEN(:) =0.00
+XDATA_GARDEN(  7) =0.40
+XDATA_GARDEN(151) =0.10
+XDATA_GARDEN(152) =0.40
+XDATA_GARDEN(153) =0.40
+XDATA_GARDEN(154) =0.40
+XDATA_GARDEN(155) =0.10
+XDATA_GARDEN(156) =0.10
+XDATA_GARDEN(157) =0.10
+XDATA_GARDEN(561) =0.44
+XDATA_GARDEN(562) =0.45
+XDATA_GARDEN(563) =0.51
+XDATA_GARDEN(564) =0.48
+XDATA_GARDEN(565) =0.37
+XDATA_GARDEN(566) =0.44
+XDATA_GARDEN(567) =0.38
+XDATA_GARDEN(568) =0.49
+XDATA_GARDEN(569) =0.52
+XDATA_GARDEN(570) =0.51
+XDATA_GARDEN(571) =0.44
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_ALB_ROOF(:) =0.15
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_ALB_ROAD(:) =0.08
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_ALB_WALL(:) =0.25
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_EMIS_ROOF(:) =0.90
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_EMIS_ROAD(:) =0.94
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_EMIS_WALL(:) =0.85
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_ROOF(:,  1) =2.11 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_ROOF(:,  2) =0.28 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_ROOF(:,  3) =0.29 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_ROOF(:,  1) =1.5100
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_ROOF(:,  2) =0.0800
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_ROOF(:,  3) =0.0500
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_ROOF(:,  1) =0.050
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_ROOF(:,  2) =0.400
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_ROOF(:,  3) =0.100
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_ROAD(:,  1) =1.94 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_ROAD(:,  2) =1.28 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_ROAD(:,  3) =1.28 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_ROAD(:,  1) =0.7454
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_ROAD(:,  2) =0.2513
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_ROAD(:,  3) =0.2513
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_ROAD(:,  1) =0.050
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_ROAD(:,  2) =0.100
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_ROAD(:,  3) =1.000
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_WALL(:,  1) =1.55 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_WALL(:,  2) =1.55 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_HC_WALL(:,  3) =0.29 * 1.E6
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_WALL(:,  1) =0.9338
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_WALL(:,  2) =0.9338
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_TC_WALL(:,  3) =0.0500
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_WALL(:,  1) =0.020
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_WALL(:,  2) =0.125
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_D_WALL(:,  3) =0.050
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_H_TRAFFIC(:) =   10.
+XDATA_H_TRAFFIC(151) =   20.
+XDATA_H_TRAFFIC(156) =   30.
+XDATA_H_TRAFFIC(159) =    0.
+XDATA_H_TRAFFIC(160) =    0.
+XDATA_H_TRAFFIC(161) =    0.
+XDATA_H_TRAFFIC(254) =    0.
+XDATA_H_TRAFFIC(255) =    0.
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_LE_TRAFFIC(:) =    0.
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_H_INDUSTRY(:) =    5.
+XDATA_H_INDUSTRY(151) =   10.
+XDATA_H_INDUSTRY(155) =   20.
+XDATA_H_INDUSTRY(156) =    0.
+XDATA_H_INDUSTRY(157) =   20.
+XDATA_H_INDUSTRY(158) =    0.
+XDATA_H_INDUSTRY(159) =    0.
+XDATA_H_INDUSTRY(160) =    0.
+XDATA_H_INDUSTRY(161) =    0.
+XDATA_H_INDUSTRY(254) =    0.
+XDATA_H_INDUSTRY(255) =    0.
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_TOWN>0.) XDATA_LE_INDUSTRY(:) =    0.
+!-------------------------------------------------------------------                                                    
+XDATA_VEGTYPE(:,  1) = (/          &
    0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.90,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -615,7 +507,7 @@ PDATA_VEGTYPE(:,  1) = (/          &
    0.04,   0.47,   0.46 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  2) = (/          &
+XDATA_VEGTYPE(:,  2) = (/          &
    0.00,   0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -676,7 +568,7 @@ PDATA_VEGTYPE(:,  2) = (/          &
    0.02,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  3) = (/          &
+XDATA_VEGTYPE(:,  3) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -737,7 +629,7 @@ PDATA_VEGTYPE(:,  3) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  4) = (/          &
+XDATA_VEGTYPE(:,  4) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.50,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00,   0.50, &
@@ -798,7 +690,7 @@ PDATA_VEGTYPE(:,  4) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  5) = (/          &
+XDATA_VEGTYPE(:,  5) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    1.00,   0.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -859,7 +751,7 @@ PDATA_VEGTYPE(:,  5) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  6) = (/          &
+XDATA_VEGTYPE(:,  6) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   1.00,   1.00,   1.00,   1.00,   1.00, &
    1.00,   1.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -920,7 +812,7 @@ PDATA_VEGTYPE(:,  6) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  7) = (/          &
+XDATA_VEGTYPE(:,  7) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -981,7 +873,7 @@ PDATA_VEGTYPE(:,  7) = (/          &
    0.19,   0.01,   0.01 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  8) = (/          &
+XDATA_VEGTYPE(:,  8) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1042,7 +934,7 @@ PDATA_VEGTYPE(:,  8) = (/          &
    0.01,   0.01,   0.04 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:,  9) = (/          &
+XDATA_VEGTYPE(:,  9) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1103,7 +995,7 @@ PDATA_VEGTYPE(:,  9) = (/          &
    0.10,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 10) = (/          &
+XDATA_VEGTYPE(:, 10) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.10,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1164,7 +1056,7 @@ PDATA_VEGTYPE(:, 10) = (/          &
    0.40,   0.04,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 11) = (/          &
+XDATA_VEGTYPE(:, 11) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.50,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1225,7 +1117,7 @@ PDATA_VEGTYPE(:, 11) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 12) = (/          &
+XDATA_VEGTYPE(:, 12) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.50,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1286,7 +1178,7 @@ PDATA_VEGTYPE(:, 12) = (/          &
    0.02,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 13) = (/          &
+XDATA_VEGTYPE(:, 13) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.50,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00, &
@@ -1347,7 +1239,7 @@ PDATA_VEGTYPE(:, 13) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 14) = (/          &
+XDATA_VEGTYPE(:, 14) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   1.00,   0.50,   0.00, &
@@ -1408,7 +1300,7 @@ PDATA_VEGTYPE(:, 14) = (/          &
    0.17,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 15) = (/          &
+XDATA_VEGTYPE(:, 15) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   1.00, &
    0.00,   1.00,   0.00,   1.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.50,   0.50, &
@@ -1469,7 +1361,7 @@ PDATA_VEGTYPE(:, 15) = (/          &
    0.05,   0.00,   0.01 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 16) = (/          &
+XDATA_VEGTYPE(:, 16) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1530,7 +1422,7 @@ PDATA_VEGTYPE(:, 16) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 17) = (/          &
+XDATA_VEGTYPE(:, 17) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   1.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1591,7 +1483,7 @@ PDATA_VEGTYPE(:, 17) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 18) = (/          &
+XDATA_VEGTYPE(:, 18) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1652,7 +1544,7 @@ PDATA_VEGTYPE(:, 18) = (/          &
    0.00,   0.00,   0.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_VEGTYPE(:, 19) = (/          &
+XDATA_VEGTYPE(:, 19) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
@@ -1712,10 +1604,8 @@ PDATA_VEGTYPE(:, 19) = (/          &
    0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00,   0.00, &
    0.00,   0.47,   0.48 &
          /)
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_H_TREE)) THEN                                                  
-PDATA_H_TREE(:,  4) = (/          &
+!-------------------------------------------------------------------                                                    
+XDATA_H_TREE(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,     5., XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    15., XUNDEF, XUNDEF, XUNDEF,    15., &
@@ -1776,7 +1666,7 @@ PDATA_H_TREE(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_H_TREE(:,  5) = (/          &
+XDATA_H_TREE(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
     15., XUNDEF,    15., XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -1837,7 +1727,7 @@ PDATA_H_TREE(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_H_TREE(:,  6) = (/          &
+XDATA_H_TREE(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    30.,    20.,    30.,    20.,    20., &
     30.,    30.,    20., XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -1898,7 +1788,7 @@ PDATA_H_TREE(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_H_TREE(:, 13) = (/          &
+XDATA_H_TREE(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    15., XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    20., XUNDEF, XUNDEF, XUNDEF, &
@@ -1959,7 +1849,7 @@ PDATA_H_TREE(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_H_TREE(:, 14) = (/          &
+XDATA_H_TREE(:, 14) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF,    20., XUNDEF, XUNDEF,    20.,    15., XUNDEF, &
@@ -2020,7 +1910,7 @@ PDATA_H_TREE(:, 14) = (/          &
      6., XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_H_TREE(:, 15) = (/          &
+XDATA_H_TREE(:, 15) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    15., &
  XUNDEF,    15., XUNDEF,    15.,    20., XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    15.,    15., &
@@ -2081,7 +1971,7 @@ PDATA_H_TREE(:, 15) = (/          &
      6., XUNDEF,     1. &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_H_TREE(:, 16) = (/          &
+XDATA_H_TREE(:, 16) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2141,14 +2031,10 @@ PDATA_H_TREE(:, 16) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,    10., XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF &
          /)
-ENDIF
-!-------------------------------------------------------------------       
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_H_TREE)) THEN                                             
-  WHERE(PDATA_VEGTYPE(:,17)>0.) PDATA_H_TREE(:, 17) =   15. 
-ENDIF                                
-!-------------------------------------------------------------------            
-IF (PRESENT(PDATA_H_TREE)) THEN                                        
-PDATA_H_TREE(:, 19) = (/          &
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:,17)>0.) XDATA_H_TREE(:, 17) =   15.                                 
+!-------------------------------------------------------------------                                                    
+XDATA_H_TREE(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2208,22 +2094,16 @@ PDATA_H_TREE(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF,     1.,     1. &
          /)
-ENDIF
-!-------------------------------------------------------------------    
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_WATSUP)) THEN                                                
-  WHERE(PDATA_VEGTYPE(:, 8)>0.) PDATA_WATSUP(:,  8) =   0.                                
 !-------------------------------------------------------------------                                                    
-  WHERE(PDATA_VEGTYPE(:, 9)>0.) PDATA_WATSUP(:,  9) =  30.  
-ENDIF                                
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_IRRIG)) THEN                                                    
-  WHERE(PDATA_VEGTYPE(:, 8)>0.) PDATA_IRRIG(:,  8) = 0.00                                   
-!-------------------------------------------------------------------                                                
-  WHERE(PDATA_VEGTYPE(:, 9)>0.) PDATA_IRRIG(:,  9) = 1.00       
-ENDIF                            
-!-------------------------------------------------------------------
-IF (PRESENT(PDATA_ROOT_DEPTH)) THEN                                                    
-PDATA_ROOT_DEPTH(:,  1) = (/          &
+WHERE(XDATA_VEGTYPE(:, 8)>0.) XDATA_WATSUP(:,  8) =   0.                                  
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 9)>0.) XDATA_WATSUP(:,  9) =  30.                                  
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 8)>0.) XDATA_IRRIG(:,  8) = 0.00                                   
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 9)>0.) XDATA_IRRIG(:,  9) = 1.00                                   
+!-------------------------------------------------------------------                                                    
+XDATA_ROOT_DEPTH(:,  1) = (/          &
  XUNDEF, XUNDEF, XUNDEF,   0.50, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.50, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2283,16 +2163,12 @@ PDATA_ROOT_DEPTH(:,  1) = (/          &
    0.50,   0.50,   0.50,   0.50,   0.50,   0.50,   0.50,   0.50, XUNDEF,   0.50, &
    0.50,   1.00,   1.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_ROOT_DEPTH)) THEN                                                  
-WHERE(PDATA_VEGTYPE(:, 2)>0.) PDATA_ROOT_DEPTH(:,  2) = 0.20                              
 !-------------------------------------------------------------------                                                    
-WHERE(PDATA_VEGTYPE(:, 3)>0.) PDATA_ROOT_DEPTH(:,  3) = 0.20  
-ENDIF                            
-!-------------------------------------------------------------------     
-IF (PRESENT(PDATA_ROOT_DEPTH)) THEN                                                  
-PDATA_ROOT_DEPTH(:,  4) = (/          &
+WHERE(XDATA_VEGTYPE(:, 2)>0.) XDATA_ROOT_DEPTH(:,  2) = 0.20                              
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 3)>0.) XDATA_ROOT_DEPTH(:,  3) = 0.20                              
+!-------------------------------------------------------------------                                                    
+XDATA_ROOT_DEPTH(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00, XUNDEF, XUNDEF, XUNDEF,   2.00, &
@@ -2353,7 +2229,7 @@ PDATA_ROOT_DEPTH(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:,  5) = (/          &
+XDATA_ROOT_DEPTH(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
    2.00, XUNDEF,   2.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2414,7 +2290,7 @@ PDATA_ROOT_DEPTH(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:,  6) = (/          &
+XDATA_ROOT_DEPTH(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   8.00,   5.00,   8.00,   5.00,   5.00, &
    8.00,   5.00,   5.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2475,7 +2351,7 @@ PDATA_ROOT_DEPTH(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:,  7) = (/          &
+XDATA_ROOT_DEPTH(:,  7) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2536,7 +2412,7 @@ PDATA_ROOT_DEPTH(:,  7) = (/          &
    1.50,   1.50,   1.50 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:,  8) = (/          &
+XDATA_ROOT_DEPTH(:,  8) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2596,14 +2472,10 @@ PDATA_ROOT_DEPTH(:,  8) = (/          &
  XUNDEF,   1.50,   1.50,   1.50,   1.50, XUNDEF,   1.50,   1.50,   1.50,   1.50, &
    1.50,   1.50,   1.50 &
          /)
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_ROOT_DEPTH)) THEN                                                 
-WHERE(PDATA_VEGTYPE(:, 9)>0.) PDATA_ROOT_DEPTH(:,  9) = 1.50  
-ENDIF                            
-!-------------------------------------------------------------------       
-IF (PRESENT(PDATA_ROOT_DEPTH)) THEN                                                
-PDATA_ROOT_DEPTH(:, 10) = (/          &
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 9)>0.) XDATA_ROOT_DEPTH(:,  9) = 1.50                              
+!-------------------------------------------------------------------                                                    
+XDATA_ROOT_DEPTH(:, 10) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.50, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2664,7 +2536,7 @@ PDATA_ROOT_DEPTH(:, 10) = (/          &
    1.50,   1.50, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:, 11) = (/          &
+XDATA_ROOT_DEPTH(:, 11) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2725,7 +2597,7 @@ PDATA_ROOT_DEPTH(:, 11) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:, 12) = (/          &
+XDATA_ROOT_DEPTH(:, 12) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -2786,7 +2658,7 @@ PDATA_ROOT_DEPTH(:, 12) = (/          &
    1.50, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:, 13) = (/          &
+XDATA_ROOT_DEPTH(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF, XUNDEF, &
@@ -2847,7 +2719,7 @@ PDATA_ROOT_DEPTH(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:, 14) = (/          &
+XDATA_ROOT_DEPTH(:, 14) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF,   3.00,   2.00, XUNDEF, &
@@ -2908,7 +2780,7 @@ PDATA_ROOT_DEPTH(:, 14) = (/          &
    2.00, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:, 15) = (/          &
+XDATA_ROOT_DEPTH(:, 15) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00, &
  XUNDEF,   2.00, XUNDEF,   2.00,   3.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00,   2.00, &
@@ -2968,16 +2840,12 @@ PDATA_ROOT_DEPTH(:, 15) = (/          &
    2.00,   2.00, XUNDEF, XUNDEF,   2.00, XUNDEF,   2.00,   2.00,   2.00,   2.00, &
    2.00, XUNDEF,   2.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------  
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_ROOT_DEPTH)) THEN                                                  
-WHERE(PDATA_VEGTYPE(:,16)>0.) PDATA_ROOT_DEPTH(:, 16) = 2.00                              
 !-------------------------------------------------------------------                                                    
-WHERE(PDATA_VEGTYPE(:,17)>0.) PDATA_ROOT_DEPTH(:, 17) = 2.00  
-ENDIF                            
-!-------------------------------------------------------------------           
-IF (PRESENT(PDATA_ROOT_DEPTH)) THEN                                          
-PDATA_ROOT_DEPTH(:, 18) = (/          &
+WHERE(XDATA_VEGTYPE(:,16)>0.) XDATA_ROOT_DEPTH(:, 16) = 2.00                              
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:,17)>0.) XDATA_ROOT_DEPTH(:, 17) = 2.00                              
+!-------------------------------------------------------------------                                                    
+XDATA_ROOT_DEPTH(:, 18) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3038,7 +2906,7 @@ PDATA_ROOT_DEPTH(:, 18) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_ROOT_DEPTH(:, 19) = (/          &
+XDATA_ROOT_DEPTH(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3098,10 +2966,8 @@ PDATA_ROOT_DEPTH(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF,   3.00,   3.00 &
          /)
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_GROUND_DEPTH)) THEN                                                   
-PDATA_GROUND_DEPTH(:,  1) = (/          &
+!-------------------------------------------------------------------                                                    
+XDATA_GROUND_DEPTH(:,  1) = (/          &
  XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3161,16 +3027,12 @@ PDATA_GROUND_DEPTH(:,  1) = (/          &
    1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00,   1.00, XUNDEF,   1.00, &
    1.00,   1.50,   1.50 &
          /)
-ENDIF
-!------------------------------------------------------------------- 
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_GROUND_DEPTH)) THEN                                                   
-WHERE(PDATA_VEGTYPE(:, 2)>0.) PDATA_GROUND_DEPTH(:,  2) = 0.20                            
 !-------------------------------------------------------------------                                                    
-WHERE(PDATA_VEGTYPE(:, 3)>0.) PDATA_GROUND_DEPTH(:,  3) = 0.20  
-ENDIF                          
-!-------------------------------------------------------------------      
-IF (PRESENT(PDATA_GROUND_DEPTH)) THEN                                              
-PDATA_GROUND_DEPTH(:,  4) = (/          &
+WHERE(XDATA_VEGTYPE(:, 2)>0.) XDATA_GROUND_DEPTH(:,  2) = 0.20                            
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 3)>0.) XDATA_GROUND_DEPTH(:,  3) = 0.20                            
+!-------------------------------------------------------------------                                                    
+XDATA_GROUND_DEPTH(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF, XUNDEF,   3.00, &
@@ -3231,7 +3093,7 @@ PDATA_GROUND_DEPTH(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:,  5) = (/          &
+XDATA_GROUND_DEPTH(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
    3.00, XUNDEF,   3.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3292,7 +3154,7 @@ PDATA_GROUND_DEPTH(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:,  6) = (/          &
+XDATA_GROUND_DEPTH(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   8.00,   5.00,   8.00,   5.00,   5.00, &
    8.00,   5.00,   5.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3353,7 +3215,7 @@ PDATA_GROUND_DEPTH(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:,  7) = (/          &
+XDATA_GROUND_DEPTH(:,  7) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3414,7 +3276,7 @@ PDATA_GROUND_DEPTH(:,  7) = (/          &
    2.00,   2.00,   2.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:,  8) = (/          &
+XDATA_GROUND_DEPTH(:,  8) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3474,14 +3336,10 @@ PDATA_GROUND_DEPTH(:,  8) = (/          &
  XUNDEF,   2.00,   2.00,   2.00,   2.00, XUNDEF,   2.00,   2.00,   2.00,   2.00, &
    2.00,   2.00,   2.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------     
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_GROUND_DEPTH)) THEN                                               
-WHERE(PDATA_VEGTYPE(:, 9)>0.) PDATA_GROUND_DEPTH(:,  9) = 2.00  
-ENDIF                          
-!-------------------------------------------------------------------          
-IF (PRESENT(PDATA_GROUND_DEPTH)) THEN                                             
-PDATA_GROUND_DEPTH(:, 10) = (/          &
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:, 9)>0.) XDATA_GROUND_DEPTH(:,  9) = 2.00                            
+!-------------------------------------------------------------------                                                    
+XDATA_GROUND_DEPTH(:, 10) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3542,7 +3400,7 @@ PDATA_GROUND_DEPTH(:, 10) = (/          &
    2.00,   2.00, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:, 11) = (/          &
+XDATA_GROUND_DEPTH(:, 11) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3603,7 +3461,7 @@ PDATA_GROUND_DEPTH(:, 11) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:, 12) = (/          &
+XDATA_GROUND_DEPTH(:, 12) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3664,7 +3522,7 @@ PDATA_GROUND_DEPTH(:, 12) = (/          &
    2.00, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:, 13) = (/          &
+XDATA_GROUND_DEPTH(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   5.00, XUNDEF, XUNDEF, XUNDEF, &
@@ -3725,7 +3583,7 @@ PDATA_GROUND_DEPTH(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:, 14) = (/          &
+XDATA_GROUND_DEPTH(:, 14) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF,   5.00, XUNDEF, XUNDEF,   5.00,   3.00, XUNDEF, &
@@ -3786,7 +3644,7 @@ PDATA_GROUND_DEPTH(:, 14) = (/          &
    3.00, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:, 15) = (/          &
+XDATA_GROUND_DEPTH(:, 15) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, &
  XUNDEF,   3.00, XUNDEF,   3.00,   4.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00,   3.00, &
@@ -3846,16 +3704,12 @@ PDATA_GROUND_DEPTH(:, 15) = (/          &
    3.00,   3.00, XUNDEF, XUNDEF,   3.00, XUNDEF,   3.00,   3.00,   3.00,   3.00, &
    3.00, XUNDEF,   3.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_GROUND_DEPTH)) THEN                                                 
-WHERE(PDATA_VEGTYPE(:,16)>0.) PDATA_GROUND_DEPTH(:, 16) = 3.00                            
 !-------------------------------------------------------------------                                                    
-WHERE(PDATA_VEGTYPE(:,17)>0.) PDATA_GROUND_DEPTH(:, 17) = 3.00  
-ENDIF                          
-!-------------------------------------------------------------------   
-IF (PRESENT(PDATA_GROUND_DEPTH)) THEN                                                       
-PDATA_GROUND_DEPTH(:, 18) = (/          &
+WHERE(XDATA_VEGTYPE(:,16)>0.) XDATA_GROUND_DEPTH(:, 16) = 3.00                            
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:,17)>0.) XDATA_GROUND_DEPTH(:, 17) = 3.00                            
+!-------------------------------------------------------------------                                                    
+XDATA_GROUND_DEPTH(:, 18) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3916,7 +3770,7 @@ PDATA_GROUND_DEPTH(:, 18) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_GROUND_DEPTH(:, 19) = (/          &
+XDATA_GROUND_DEPTH(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -3976,10 +3830,8 @@ PDATA_GROUND_DEPTH(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF,   3.00,   3.00 &
          /)
-ENDIF
-!-------------------------------------------------------------------        
-IF (PRESENT(PDATA_DICE)) THEN                                            
-PDATA_DICE(:,  1) = (/          &
+!-------------------------------------------------------------------                                                    
+XDATA_DICE(:,  1) = (/          &
  XUNDEF, XUNDEF, XUNDEF,   0.50, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.30, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4040,7 +3892,7 @@ PDATA_DICE(:,  1) = (/          &
    0.50,   1.00,   1.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  2) = (/          &
+XDATA_DICE(:,  2) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.20, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4101,7 +3953,7 @@ PDATA_DICE(:,  2) = (/          &
    0.20, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  3) = (/          &
+XDATA_DICE(:,  3) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.20, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4162,7 +4014,7 @@ PDATA_DICE(:,  3) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  4) = (/          &
+XDATA_DICE(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.60, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, XUNDEF,   1.00, &
@@ -4223,7 +4075,7 @@ PDATA_DICE(:,  4) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  5) = (/          &
+XDATA_DICE(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
    0.30, XUNDEF,   1.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4284,7 +4136,7 @@ PDATA_DICE(:,  5) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  6) = (/          &
+XDATA_DICE(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   8.00,   5.00,   8.00,   4.00,   5.00, &
    8.00,   4.00,   5.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4345,7 +4197,7 @@ PDATA_DICE(:,  6) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  7) = (/          &
+XDATA_DICE(:,  7) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4406,7 +4258,7 @@ PDATA_DICE(:,  7) = (/          &
    1.50,   1.50,   1.50 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  8) = (/          &
+XDATA_DICE(:,  8) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4467,7 +4319,7 @@ PDATA_DICE(:,  8) = (/          &
    1.50,   1.50,   1.50 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:,  9) = (/          &
+XDATA_DICE(:,  9) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4528,7 +4380,7 @@ PDATA_DICE(:,  9) = (/          &
    1.50, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 10) = (/          &
+XDATA_DICE(:, 10) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.30, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4589,7 +4441,7 @@ PDATA_DICE(:, 10) = (/          &
    1.50,   1.50, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 11) = (/          &
+XDATA_DICE(:, 11) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4650,7 +4502,7 @@ PDATA_DICE(:, 11) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 12) = (/          &
+XDATA_DICE(:, 12) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   0.80, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4711,7 +4563,7 @@ PDATA_DICE(:, 12) = (/          &
    1.50, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 13) = (/          &
+XDATA_DICE(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF, XUNDEF, &
@@ -4772,7 +4624,7 @@ PDATA_DICE(:, 13) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 14) = (/          &
+XDATA_DICE(:, 14) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF,   3.00, XUNDEF, XUNDEF,   3.00,   2.00, XUNDEF, &
@@ -4833,7 +4685,7 @@ PDATA_DICE(:, 14) = (/          &
    2.00, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 15) = (/          &
+XDATA_DICE(:, 15) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, &
  XUNDEF,   1.60, XUNDEF,   1.60,   1.50, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   2.00,   1.00, &
@@ -4894,7 +4746,7 @@ PDATA_DICE(:, 15) = (/          &
    2.00, XUNDEF,   2.00 &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 16) = (/          &
+XDATA_DICE(:, 16) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -4954,14 +4806,10 @@ PDATA_DICE(:, 16) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF,   1.00, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF &
          /)
-ENDIF
-!-------------------------------------------------------------------        
-IF (PRESENT(PDATA_VEGTYPE).AND.PRESENT(PDATA_DICE)) THEN                                            
-WHERE(PDATA_VEGTYPE(:,17)>0.) PDATA_DICE(:, 17) = 0.30  
-ENDIF                                  
-!-------------------------------------------------------------------     
-IF (PRESENt(PDATA_DICE)) THEN                                               
-PDATA_DICE(:, 18) = (/          &
+!-------------------------------------------------------------------                                                    
+WHERE(XDATA_VEGTYPE(:,17)>0.) XDATA_DICE(:, 17) = 0.30                                    
+!-------------------------------------------------------------------                                                    
+XDATA_DICE(:, 18) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -5022,7 +4870,7 @@ PDATA_DICE(:, 18) = (/          &
  XUNDEF, XUNDEF, XUNDEF &
          /)
 !-------------------------------------------------------------------                                                    
-PDATA_DICE(:, 19) = (/          &
+XDATA_DICE(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
@@ -5082,22 +4930,15 @@ PDATA_DICE(:, 19) = (/          &
  XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, XUNDEF, &
  XUNDEF,   3.00,   3.00 &
          /)
-ENDIF
-IF (PRESENT(PDATA_VEGTYPE)) THEN
-  IF (PRESENT(TPDATA_SEED)) THEN
 !-------------------------------------------------------------------                                                    
-    WHERE(PDATA_VEGTYPE(:, 9)>0.        ) TPDATA_SEED(:,  9)%TDATE%DAY =10
+WHERE(XDATA_VEGTYPE(:, 9)>0.        ) TDATA_SEED(:,  9)%TDATE%DAY =10
 !-------------------------------------------------------------------                                                    
-    WHERE(PDATA_VEGTYPE(:, 9)>0.        ) TPDATA_SEED(:,  9)%TDATE%MONTH =05
-  ENDIF
-  IF (PRESENT(TPDATA_REAP)) THEN
+WHERE(XDATA_VEGTYPE(:, 9)>0.        ) TDATA_SEED(:,  9)%TDATE%MONTH =05
 !-------------------------------------------------------------------                                                    
-    WHERE(PDATA_VEGTYPE(:, 9)>0.        ) TPDATA_REAP(:,  9)%TDATE%DAY =01
+WHERE(XDATA_VEGTYPE(:, 9)>0.        ) TDATA_REAP(:,  9)%TDATE%DAY =01
 !-------------------------------------------------------------------                                                    
-    WHERE(PDATA_VEGTYPE(:, 9)>0.        ) TPDATA_REAP(:,  9)%TDATE%MONTH =08
-!-------------------------------------------------------------------               
-  ENDIF   
-ENDIF                                  
+WHERE(XDATA_VEGTYPE(:, 9)>0.        ) TDATA_REAP(:,  9)%TDATE%MONTH =08
+!-------------------------------------------------------------------                                                    
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_DATA_COVER',1,ZHOOK_HANDLE) 
 !

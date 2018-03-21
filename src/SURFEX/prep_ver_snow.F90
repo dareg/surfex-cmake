@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_VER_SNOW(TPSNOW,PZS_LS,PZS,PTG_LS,PTG,KDEEP_SOIL)
 !          ###########################################
@@ -53,54 +49,59 @@ IMPLICIT NONE
 TYPE(SURF_SNOW), INTENT(INOUT) :: TPSNOW ! snow mantel characteristics
 REAL, DIMENSION(:), INTENT(IN) :: PZS_LS ! initial orography
 REAL, DIMENSION(:), INTENT(IN) :: PZS    ! final   orography
-REAL, DIMENSION(:,:),INTENT(IN),OPTIONAL:: PTG_LS ! soil temperature on initial orography
-REAL, DIMENSION(:,:),INTENT(IN),OPTIONAL:: PTG    ! soil temperature on final   orography
+REAL, DIMENSION(:,:,:),INTENT(IN),OPTIONAL:: PTG_LS ! soil temperature on initial orography
+REAL, DIMENSION(:,:,:),INTENT(IN),OPTIONAL:: PTG    ! soil temperature on final   orography
 INTEGER,               INTENT(IN),OPTIONAL:: KDEEP_SOIL ! index of deep soil temperature
 !
 !*      0.2    declarations of local variables
 !
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZWSNOW_LS ! snow reservoir   on initial orography
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZTSNOW_LS ! snow temperature on initial orography
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZWSNOW    ! snow content     on final   orography
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZTSNOW    ! snow temperature on final   orography
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZWSNOW2   ! snow content     on final   orography
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZTSNOW2   ! snow temperature on final   orography
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZWLIQ     ! snow liquid water content
-REAL, DIMENSION(:),   ALLOCATABLE :: ZZSFREEZE ! altitude where deep soil freezes
-REAL, DIMENSION(:),   ALLOCATABLE :: ZDTOT     ! snow depth
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZDZSN     ! snow layer thickness
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWSNOW_LS ! snow reservoir   on initial orography
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW_LS ! snow temperature on initial orography
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWSNOW    ! snow content     on final   orography
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW    ! snow temperature on final   orography
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWSNOW2   ! snow content     on final   orography
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZTSNOW2   ! snow temperature on final   orography
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZWLIQ     ! snow liquid water content
+REAL, DIMENSION(:,:),   ALLOCATABLE :: ZZSFREEZE ! altitude where deep soil freezes
+REAL, DIMENSION(:,:),   ALLOCATABLE :: ZDTOT     ! snow depth
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZDZSN     ! snow layer thickness
 !
-INTEGER                             :: JL    ! loop counter on snow layers
+INTEGER                             :: IPATCH    ! number of patches
+INTEGER                             :: JPATCH    ! loop counter on patches
+INTEGER                             :: JLAYER    ! loop counter on snow layers
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('PREP_VER_SNOW',0,ZHOOK_HANDLE)
+IPATCH = SIZE(TPSNOW%WSNOW,3)
 !
 !*       1.    Snow reservoir on initial orography
 !              -----------------------------------
 !
-ALLOCATE(ZWSNOW_LS(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2)))
-ZWSNOW_LS(:,:) =  TPSNOW%WSNOW(:,:)
+ALLOCATE(ZWSNOW_LS(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),IPATCH))
+ZWSNOW_LS(:,:,:) =  TPSNOW%WSNOW(:,:,:)
 !
 !-------------------------------------------------------------------------------------
 !
 !*       2.    temperature of snow on initial orography
 !              ----------------------------------------
 !
-ALLOCATE(ZTSNOW_LS(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2)))
+ALLOCATE(ZTSNOW_LS(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),IPATCH))
 SELECT CASE(TPSNOW%SCHEME)
   CASE ('D95','EBA')
     IF (PRESENT(PTG_LS)) THEN
-      ZTSNOW_LS(:,1) =  MIN(PTG_LS(:,1),XTT)
+      DO JPATCH=1,IPATCH
+        ZTSNOW_LS(:,1,JPATCH) =  MIN(PTG_LS(:,1,JPATCH),XTT)
+      END DO
     ELSE
       ZTSNOW_LS = XUNDEF
     END IF
   CASE ('1-L')
-    ZTSNOW_LS(:,:) =  TPSNOW%T(:,:)
+    ZTSNOW_LS(:,:,:) =  TPSNOW%T(:,:,:)
   CASE ('3-L','CRO')
-    CALL SNOW_HEAT_TO_T_WLIQ(TPSNOW%HEAT(:,:),TPSNOW%RHO(:,:),ZTSNOW_LS(:,:))
+    CALL SNOW_HEAT_TO_T_WLIQ(TPSNOW%HEAT(:,:,:),TPSNOW%RHO(:,:,:),ZTSNOW_LS(:,:,:))
 END SELECT
 !
 !-------------------------------------------------------------------------------------
@@ -108,9 +109,11 @@ END SELECT
 !*       3.    vertical shift of temperature
 !              -----------------------------
 !
-ALLOCATE(ZTSNOW(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2)))
-DO JL=1,TPSNOW%NLAYER
-  ZTSNOW(:,JL) = ZTSNOW_LS(:,JL) + XT_CLIM_GRAD  * (PZS(:) - PZS_LS(:))  
+ALLOCATE(ZTSNOW(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),IPATCH))
+DO JPATCH=1,IPATCH
+  DO JLAYER=1,TPSNOW%NLAYER
+    ZTSNOW(:,JLAYER,JPATCH) = ZTSNOW_LS(:,JLAYER,JPATCH) + XT_CLIM_GRAD  * (PZS(:) - PZS_LS(:))  
+  END DO
 END DO
 !
 !-------------------------------------------------------------------------------------
@@ -120,27 +123,33 @@ END DO
 !
 !* use of climatological snow content gradient
 !
-ALLOCATE(ZWSNOW(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2)))
+ALLOCATE(ZWSNOW(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),IPATCH))
 !
-ZWSNOW(:,:) = ZWSNOW_LS(:,:) 
+ZWSNOW(:,:,:) = ZWSNOW_LS(:,:,:) 
 !
 IF (PRESENT(PTG)) THEN
-  DO JL=1,TPSNOW%NLAYER
-    WHERE(ZWSNOW_LS(:,JL)>0..AND.((PTG(:,KDEEP_SOIL)-XTT >= 2.).OR.(PZS(:) > PZS_LS(:))))
-      ZWSNOW(:,JL) = ZWSNOW_LS(:,JL) + ( XWSNOW_CLIM_GRAD  * (PZS(:) - PZS_LS(:))/TPSNOW%NLAYER)
-      ZWSNOW(:,JL) = MAX(ZWSNOW(:,JL),0.)
-    END WHERE
+  DO JPATCH=1,IPATCH
+    DO JLAYER=1,TPSNOW%NLAYER
+      WHERE(ZWSNOW_LS(:,JLAYER,JPATCH)>0..AND.((PTG(:,KDEEP_SOIL,JPATCH)-XTT >= 2.).OR.(PZS(:) > PZS_LS(:))))
+        ZWSNOW(:,JLAYER,JPATCH) = ZWSNOW_LS(:,JLAYER,JPATCH) + &
+        &( XWSNOW_CLIM_GRAD  * (PZS(:) - PZS_LS(:))/TPSNOW%NLAYER)
+        ZWSNOW(:,JLAYER,JPATCH) = MAX(ZWSNOW(:,JLAYER,JPATCH),0.)
+      END WHERE
+    END DO
   END DO
 ELSE
-  DO JL=1,TPSNOW%NLAYER
-    WHERE(ZWSNOW_LS(:,JL)>0.)
-      ZWSNOW(:,JL) = ZWSNOW_LS(:,JL) + ( XWSNOW_CLIM_GRAD  * (PZS(:) - PZS_LS(:))/TPSNOW%NLAYER)
-      ZWSNOW(:,JL) = MAX(ZWSNOW(:,JL),0.)
-    END WHERE
+  DO JPATCH=1,IPATCH
+    DO JLAYER=1,TPSNOW%NLAYER
+      WHERE(ZWSNOW_LS(:,JLAYER,JPATCH)>0.)
+        ZWSNOW(:,JLAYER,JPATCH) = ZWSNOW_LS(:,JLAYER,JPATCH) + &
+        &( XWSNOW_CLIM_GRAD  * (PZS(:) - PZS_LS(:))/TPSNOW%NLAYER)
+        ZWSNOW(:,JLAYER,JPATCH) = MAX(ZWSNOW(:,JLAYER,JPATCH),0.)
+      END WHERE
+    END DO
   END DO
 ENDIF
 !
-WHERE(TPSNOW%WSNOW(:,:)/=XUNDEF) TPSNOW%WSNOW = ZWSNOW
+WHERE(TPSNOW%WSNOW(:,:,:)/=XUNDEF) TPSNOW%WSNOW = ZWSNOW
 !
 !-------------------------------------------------------------------------------------
 !
@@ -157,9 +166,11 @@ WHERE(TPSNOW%WSNOW(:,:)/=XUNDEF) TPSNOW%WSNOW = ZWSNOW
 !              --------------------------------
 !
 IF (PRESENT(PTG)) THEN
-
-  ALLOCATE(ZZSFREEZE(SIZE(TPSNOW%WSNOW,1)))
-  ZZSFREEZE(:) = PZS + (XTT - PTG(:,KDEEP_SOIL)) / XT_CLIM_GRAD  
+  ALLOCATE(ZZSFREEZE(SIZE(TPSNOW%WSNOW,1),IPATCH))
+  DO JPATCH=1,IPATCH
+    ZZSFREEZE(:,JPATCH) = PZS &
+                          + (XTT - PTG(:,KDEEP_SOIL,JPATCH)) / XT_CLIM_GRAD  
+  END DO
 !
 !*       5.2   Amount and Temperature of new snow (only if soil temperatures are provided)
 !              ----------------------------------
@@ -167,22 +178,28 @@ IF (PRESENT(PTG)) THEN
 !* Snow temperature is then defined as the deep soil temperature at the final
 !  altitude.
 !
-  ALLOCATE(ZWSNOW2(SIZE(TPSNOW%WSNOW,1),TPSNOW%NLAYER))
-  ALLOCATE(ZTSNOW2(SIZE(TPSNOW%WSNOW,1),TPSNOW%NLAYER))
-  DO JL=1,TPSNOW%NLAYER
-    ZWSNOW2(:,JL) =  XWSNOW_CLIM_GRAD * (PZS(:) - ZZSFREEZE(:))/TPSNOW%NLAYER
-    ZWSNOW2(:,JL) = MAX(ZWSNOW2(:,JL),0.)
-    ZTSNOW2(:,JL) = PTG(:,KDEEP_SOIL)
+  ALLOCATE(ZWSNOW2(SIZE(TPSNOW%WSNOW,1),TPSNOW%NLAYER,IPATCH))
+  ALLOCATE(ZTSNOW2(SIZE(TPSNOW%WSNOW,1),TPSNOW%NLAYER,IPATCH))
+  DO JPATCH=1,IPATCH
+    DO JLAYER=1,TPSNOW%NLAYER
+      ZWSNOW2(:,JLAYER,JPATCH) =  XWSNOW_CLIM_GRAD  *&
+      & (PZS(:) - ZZSFREEZE(:,JPATCH))/TPSNOW%NLAYER
+      ZWSNOW2(:,JLAYER,JPATCH) = MAX(ZWSNOW2(:,JLAYER,JPATCH),0.)
+      ZTSNOW2      (:,JLAYER,JPATCH) = PTG(:,KDEEP_SOIL,JPATCH)
+    END DO
   END DO
 !
 !*       5.3   Apply maximum between this value and the shifted one
 !              ----------------------------------------------------
 !
-  DO JL=1,TPSNOW%NLAYER
-    WHERE(TPSNOW%WSNOW(:,JL)/=XUNDEF .AND. ZWSNOW_LS(:,JL)==0. .AND. (PZS(:)-PZS_LS(:))>1000. )  
-      TPSNOW%WSNOW(:,JL) = ZWSNOW2(:,JL)
-      ZTSNOW      (:,JL) = ZTSNOW2(:,JL)
-    END WHERE
+  DO JPATCH=1,IPATCH
+    DO JLAYER=1,TPSNOW%NLAYER
+      WHERE(TPSNOW%WSNOW(:,JLAYER,JPATCH)/=XUNDEF .AND. ZWSNOW_LS(:,JLAYER,JPATCH)==0. &
+                                                    .AND. (PZS(:)-PZS_LS(:))>1000. )  
+        TPSNOW%WSNOW(:,JLAYER,JPATCH) = ZWSNOW2(:,JLAYER,JPATCH)
+        ZTSNOW      (:,JLAYER,JPATCH) = ZTSNOW2(:,JLAYER,JPATCH)
+      END WHERE
+    END DO
   END DO
 
   DEALLOCATE(ZZSFREEZE)
@@ -198,9 +215,9 @@ END IF
 SELECT CASE(TPSNOW%SCHEME)
   CASE('1-L')
     !* snow temperature cannot be larger than 0 C
-    TPSNOW%T (:,:) = MIN ( ZTSNOW(:,:), XTT )
+    TPSNOW%T (:,:,:) = MIN ( ZTSNOW(:,:,:), XTT ) 
   CASE('3-L','CRO')
-    ALLOCATE(ZWLIQ(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2)))
+    ALLOCATE(ZWLIQ(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),IPATCH))
     CALL SNOW_T_WLIQ_TO_HEAT(TPSNOW%HEAT,TPSNOW%RHO,ZTSNOW)
     CALL SNOW_HEAT_TO_T_WLIQ(TPSNOW%HEAT,TPSNOW%RHO,ZTSNOW,ZWLIQ)
     CALL SNOW_T_WLIQ_TO_HEAT(TPSNOW%HEAT,TPSNOW%RHO,ZTSNOW,ZWLIQ)
@@ -212,23 +229,25 @@ END SELECT
 !
 SELECT CASE(TPSNOW%SCHEME)
   CASE('3-L','CRO')
-    ALLOCATE(ZDTOT(SIZE(TPSNOW%WSNOW,1)))
-    ALLOCATE(ZDZSN(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2)))
-    ZDTOT(:)=0.0
-    DO JL=1,TPSNOW%NLAYER
-       WHERE(TPSNOW%WSNOW(:,JL)/=XUNDEF.AND.TPSNOW%RHO(:,JL)/=XUNDEF)
-         ZDTOT(:)=ZDTOT(:)+TPSNOW%WSNOW(:,JL)/TPSNOW%RHO(:,JL)
+    ALLOCATE(ZDTOT(SIZE(TPSNOW%WSNOW,1),IPATCH))
+    ALLOCATE(ZDZSN(SIZE(TPSNOW%WSNOW,1),SIZE(TPSNOW%WSNOW,2),IPATCH))
+    ZDTOT(:,:)=0.0
+    DO JLAYER=1,TPSNOW%NLAYER
+       WHERE(TPSNOW%WSNOW(:,JLAYER,:)/=XUNDEF.AND.TPSNOW%RHO(:,JLAYER,:)/=XUNDEF)
+             ZDTOT(:,:)=ZDTOT(:,:)+TPSNOW%WSNOW(:,JLAYER,:)/TPSNOW%RHO(:,JLAYER,:)
        ENDWHERE
     END DO
-    CALL SNOW3LGRID(ZDZSN(:,:),ZDTOT(:))
-    DO JL=1,TPSNOW%NLAYER
-      WHERE(TPSNOW%RHO(:,JL)/=XUNDEF.AND.ZDTOT(:)>0.)
-        TPSNOW%WSNOW(:,JL) = TPSNOW%RHO(:,JL) * ZDZSN(:,JL)
-      ELSEWHERE(TPSNOW%RHO(:,JL)==XUNDEF.OR.ZDTOT(:)==0.0)
-        TPSNOW%WSNOW(:,JL) = 0.0
-      ELSEWHERE
-        TPSNOW%WSNOW(:,JL) = XUNDEF
-      END WHERE
+    DO JPATCH=1,IPATCH
+       CALL SNOW3LGRID(ZDZSN(:,:,JPATCH),ZDTOT(:,JPATCH))
+      DO JLAYER=1,TPSNOW%NLAYER
+         WHERE(TPSNOW%RHO(:,JLAYER,JPATCH)/=XUNDEF.AND.ZDTOT(:,JPATCH)>0.)
+           TPSNOW%WSNOW(:,JLAYER,JPATCH) = TPSNOW%RHO(:,JLAYER,JPATCH) * ZDZSN(:,JLAYER,JPATCH)
+         ELSEWHERE(TPSNOW%RHO(:,JLAYER,JPATCH)==XUNDEF.OR.ZDTOT(:,JPATCH)==0.0)
+           TPSNOW%WSNOW(:,JLAYER,JPATCH) = 0.0
+         ELSEWHERE
+           TPSNOW%WSNOW(:,JLAYER,JPATCH) = XUNDEF
+         END WHERE
+      END DO
     END DO   
     DEALLOCATE(ZDTOT)
     DEALLOCATE(ZDZSN)

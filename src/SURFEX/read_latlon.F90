@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_LATLON (UG, U, USS, &
+      SUBROUTINE READ_LATLON (USS, &
                               HPROGRAM,HSCHEME,HSUBROUTINE,HFILENAME)
 !     #########################################################
 !
@@ -40,9 +36,8 @@
 !            -----------
 !
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : XMESHLENGTH
 !
@@ -66,9 +61,8 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
+!
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSCHEME       ! Scheme treated
@@ -93,7 +87,7 @@ INTEGER :: IFILE                      ! logical units
 INTEGER :: ILUOUT                     ! output listing logical unit
 INTEGER :: IERR                       ! return codes
 !
-INTEGER :: JLOOP, IFACT                ! loop index
+INTEGER :: JLOOP                      ! loop index
  CHARACTER(LEN=100):: YSTRING          ! string
 !
 REAL    :: ZDLAT                      ! latitude mesh in the data file
@@ -104,9 +98,8 @@ INTEGER :: JCOL                       ! index of column
 REAL, DIMENSION(:), ALLOCATABLE :: ZVALUE ! value of a record of data points
 REAL, DIMENSION(:), POINTER     :: ZLAT   ! latitude of data points
 REAL, DIMENSION(:), POINTER     :: ZLON   ! longitude of data points
-LOGICAL :: GCOMPRESS
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 !
 !----------------------------------------------------------------------------
 !
@@ -127,8 +120,7 @@ IF (LHOOK) CALL DR_HOOK('READ_LATLON',0,ZHOOK_HANDLE)
 !            -----------------
 !
  CALL READHEAD(IFILE,ZGLBLATMIN,ZGLBLATMAX,ZGLBLONMIN,ZGLBLONMAX, &
-               INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR,IFACT,&
-               GCOMPRESS)  
+                INBLINE,INBCOL,ZNODATA,ZDLAT,ZDLON,ZLAT,ZLON,IERR)  
 IF (IERR/=0) THEN
   CALL ABOR1_SFX('READ_LATLON: PROBLEM IN FILE HEADER')
 END IF
@@ -196,10 +188,8 @@ DO JLINE=1,INBLINE
 !*   10.     Call to the adequate subroutine (point by point treatment)
 !            ----------------------------------------------------------
 !
-    ZVALUE(:) = ZVALUE(:) / FLOAT(IFACT)
-
-    CALL PT_BY_PT_TREATMENT(UG, U, USS, &
-                            ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&            
+    CALL PT_BY_PT_TREATMENT(USS, &
+                            ILUOUT,ZLAT(JLINE:JLINE),ZLON(JCOL:JCOL),ZVALUE(JCOL:JCOL),&
                               HSUBROUTINE                                              )  
 !
 !-------------------------------------------------------------------------------

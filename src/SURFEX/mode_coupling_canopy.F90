@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ######spl
         MODULE MODE_COUPLING_CANOPY
 !     ####################
@@ -48,7 +44,7 @@ END SUBROUTINE INIT_FORC
 !     ###############################################################################
 !
 !     ###############################################################################
-SUBROUTINE INIT_COUPLING_CANOPY( SB, PPA, PU, PV, &
+SUBROUTINE INIT_COUPLING_CANOPY( PP, PPA, PT, PQ, PU, PV, PZ, PXU, &
                                  PRHOA, PALFAU, PBETAU, PALFATH,   &
                                  PBETATH, PALFAQ, PBETAQ,          &
                                  PPPA, PTTA, PQQA, PUU, PVV,       &
@@ -57,19 +53,20 @@ SUBROUTINE INIT_COUPLING_CANOPY( SB, PPA, PU, PV, &
                                  PPET_AA_COEF, PPET_BB_COEF,       &
                                  PPEQ_AA_COEF, PPEQ_BB_COEF        )
 !
-USE MODD_CANOPY_n, ONLY : CANOPY_t
-!
 USE MODD_SURF_PAR,         ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00
 USE MODD_SURF_ATM,         ONLY : XWINDMIN
 !
 IMPLICIT NONE
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: SB
-!
+REAL, DIMENSION(:), INTENT(IN) :: PP
 REAL, DIMENSION(:), INTENT(IN) :: PPA
+REAL, DIMENSION(:), INTENT(IN) :: PT
+REAL, DIMENSION(:), INTENT(IN) :: PQ
 REAL, DIMENSION(:), INTENT(IN) :: PU
 REAL, DIMENSION(:), INTENT(IN) :: PV
+REAL, DIMENSION(:), INTENT(IN) :: PZ
+REAL, DIMENSION(:), INTENT(IN) :: PXU
 REAL, DIMENSION(:), INTENT(IN) :: PRHOA
 REAL, DIMENSION(:), INTENT(IN) :: PALFAU
 REAL, DIMENSION(:), INTENT(IN) :: PBETAU
@@ -96,16 +93,16 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_COUPLING_CANOPY:INIT_COUPLING_CANOPY',0,ZHOOK_HANDLE)
 !
-PPPA = SB%XP(:,1)
-PTTA = SB%XT(:,1)
-PQQA = SB%XQ(:,1)
-PUU  = PU / MAX(SQRT(PU**2+PV**2),XWINDMIN) * SB%XU(:,1)
-PVV  = PV / MAX(SQRT(PU**2+PV**2),XWINDMIN) * SB%XU(:,1)
-PUUREF = SB%XZ(:,1)
-PZZREF = SB%XZ(:,1)
+PPPA = PP(:)
+PTTA = PT(:)
+PQQA = PQ(:)
+PUU  = PU / MAX(SQRT(PU**2+PV**2),XWINDMIN) * PXU(:)
+PVV  = PV / MAX(SQRT(PU**2+PV**2),XWINDMIN) * PXU(:)
+PUUREF = PZ(:)
+PZZREF = PZ(:)
 !
-PEXNA(:)   = (SB%XP(:,1)/XP00)**(XRD/XCPD)
-WHERE (SB%XP(:,1)==XUNDEF) !* security at first time-step
+PEXNA(:)   = (PP(:)/XP00)**(XRD/XCPD)
+WHERE (PP(:)==XUNDEF) !* security at first time-step
   PEXNA = (PPA/XP00)**(XRD/XCPD)
   PPPA  = PPA
 END WHERE
@@ -206,10 +203,10 @@ END SUBROUTINE INIT_COUPLING
 !     ###############################################################################
 !
 !     ###############################################################################
-SUBROUTINE INIT_2M_10M( SB, D, PU, PV, PWIND, PRHOA )
-!
-USE MODD_CANOPY_n, ONLY : CANOPY_t
-USE MODD_DIAG_n, ONLY : DIAG_t
+SUBROUTINE INIT_2M_10M( PP, PT, PQ, PXU, PXZ, PU, PV, PWIND, PRHOA,   &
+                        PT2M, PQ2M, PHU2M, PZON10M, PMER10M,          &
+                        PWIND10M,  PWIND10M_MAX, PT2M_MIN, PT2M_MAX,  &
+                        PHU2M_MIN, PHU2M_MAX                          )
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
@@ -219,44 +216,57 @@ USE MODI_INTERPOL_SBL
 !
 IMPLICIT NONE
 !
-TYPE(CANOPY_t), INTENT(INOUT) :: SB
-TYPE(DIAG_t), INTENT(INOUT) :: D
-!
+REAL, DIMENSION(:), INTENT(IN) :: PP
+REAL, DIMENSION(:), INTENT(IN) :: PT
+REAL, DIMENSION(:), INTENT(IN) :: PQ
+REAL, DIMENSION(:,:), INTENT(IN) :: PXU
+REAL, DIMENSION(:,:), INTENT(IN) :: PXZ
 REAL, DIMENSION(:), INTENT(IN) :: PU
 REAL, DIMENSION(:), INTENT(IN) :: PV
 REAL, DIMENSION(:), INTENT(IN) :: PWIND
 REAL, DIMENSION(:), INTENT(IN) :: PRHOA
+REAL, DIMENSION(:), INTENT(OUT) :: PT2M 
+REAL, DIMENSION(:), INTENT(OUT) :: PQ2M
+REAL, DIMENSION(:), INTENT(OUT) :: PHU2M
+REAL, DIMENSION(:), INTENT(OUT) :: PZON10M
+REAL, DIMENSION(:), INTENT(OUT) :: PMER10M
+REAL, DIMENSION(:), INTENT(OUT) :: PWIND10M
+REAL, DIMENSION(:), INTENT(INOUT) :: PWIND10M_MAX
+REAL, DIMENSION(:), INTENT(INOUT) :: PT2M_MIN
+REAL, DIMENSION(:), INTENT(INOUT) :: PT2M_MAX
+REAL, DIMENSION(:), INTENT(INOUT) :: PHU2M_MIN
+REAL, DIMENSION(:), INTENT(INOUT) :: PHU2M_MAX
 !
-REAL, DIMENSION(SIZE(SB%XT,1))   :: ZU10
+REAL, DIMENSION(SIZE(PT))   :: ZU10
 INTEGER                     :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_COUPLING_CANOPY:INIT_2M_10M',0,ZHOOK_HANDLE)
 !
-D%XT2M(:) = SB%XT(:,2)
-D%XT2M_MIN(:) = MIN(D%XT2M(:),D%XT2M_MIN(:))
-D%XT2M_MAX(:) = MAX(D%XT2M(:),D%XT2M_MAX(:))
-D%XQ2M(:) = SB%XQ(:,2) / PRHOA(:)
-D%XHU2M(:)= MIN( D%XQ2M(:) / QSAT(D%XT2M(:),SB%XP(:,2)) , 1.)
-D%XHU2M_MIN(:) = MIN(D%XHU2M(:),D%XHU2M_MIN(:))
-D%XHU2M_MAX(:) = MAX(D%XHU2M(:),D%XHU2M_MAX(:))
- CALL INTERPOL_SBL(SB%XZ(:,:),SB%XU(:,:),10.,ZU10(:))
-DO JJ=1,SIZE(SB%XT(:,2))
+PT2M(:) = PT(:)
+PT2M_MIN(:) = MIN(PT2M(:),PT2M_MIN(:))
+PT2M_MAX(:) = MAX(PT2M(:),PT2M_MAX(:))
+PQ2M(:) = PQ(:) / PRHOA(:)
+PHU2M(:)= MIN( PQ2M(:) / QSAT(PT2M(:),PP(:)) , 1.)
+PHU2M_MIN(:) = MIN(PHU2M(:),PHU2M_MIN(:))
+PHU2M_MAX(:) = MAX(PHU2M(:),PHU2M_MAX(:))
+ CALL INTERPOL_SBL(PXZ(:,:),PXU(:,:),10.,ZU10(:))
+DO JJ=1,SIZE(PT)
   IF (ZU10(JJ)/=XUNDEF) THEN
     IF (PWIND(JJ)>0.) THEN
-      D%XZON10M(JJ) = ZU10(JJ) * PU(JJ)/PWIND(JJ)
-      D%XMER10M(JJ) = ZU10(JJ) * PV(JJ)/PWIND(JJ)
+      PZON10M(JJ) = ZU10(JJ) * PU(JJ)/PWIND(JJ)
+      PMER10M(JJ) = ZU10(JJ) * PV(JJ)/PWIND(JJ)
     ELSE
-      D%XZON10M(JJ) = 0.
-      D%XMER10M(JJ) = 0.
+      PZON10M(JJ) = 0.
+      PMER10M(JJ) = 0.
     END IF
-     D%XWIND10M(JJ) = SQRT(D%XZON10M(JJ)**2+D%XMER10M(JJ)**2)
-     D%XWIND10M_MAX(JJ) = MAX(D%XWIND10M(JJ),D%XWIND10M_MAX(JJ))
+     PWIND10M(JJ) = SQRT(PZON10M(JJ)**2+PMER10M(JJ)**2)
+     PWIND10M_MAX(JJ) = MAX(PWIND10M(JJ),PWIND10M_MAX(JJ))
   ELSE
-    D%XZON10M(JJ) = XUNDEF
-    D%XMER10M(JJ) = XUNDEF
-    D%XWIND10M(JJ) = XUNDEF
-    D%XWIND10M_MAX(JJ) = XUNDEF
+    PZON10M(JJ) = XUNDEF
+    PMER10M(JJ) = XUNDEF
+    PWIND10M(JJ) = XUNDEF
+    PWIND10M_MAX(JJ) = XUNDEF
   END IF
 END DO
 !

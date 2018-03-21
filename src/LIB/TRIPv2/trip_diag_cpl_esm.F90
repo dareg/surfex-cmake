@@ -17,7 +17,6 @@ SUBROUTINE TRIP_DIAG_CPL_ESM (TP, TPG, &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    12/12/13 
-!!      B. Decharme 10/2016  bug surface/groundwater coupling
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -27,7 +26,7 @@ SUBROUTINE TRIP_DIAG_CPL_ESM (TP, TPG, &
 USE MODD_TRIP, ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
-USE MODD_TRIP_PAR,   ONLY : XUNDEF, XRHOLW
+USE MODD_TRIP_PAR,   ONLY : XRHOLW
 !
 USE MODD_TRIP_OASIS, ONLY : LCPL_SEA, LCPL_LAND, LCPL_GW,    &
                             LCPL_FLOOD, LCPL_CALVSEA
@@ -94,9 +93,6 @@ IF(LCPL_LAND)THEN
     WHERE(TPG%GMASK_GW(:,:))
           TP%XCPL_WTD (:,:) = PWTD (:,:)
           TP%XCPL_FWTD(:,:) = PFWTD(:,:)
-    ELSEWHERE(TPG%GMASK(:,:))
-          TP%XCPL_WTD (:,:) = XUNDEF
-          TP%XCPL_FWTD(:,:) = 0.0
     ENDWHERE
   ENDIF
 !
@@ -104,7 +100,7 @@ IF(LCPL_LAND)THEN
 !       
   IF(LCPL_FLOOD)THEN
     TP%XCPL_FFLOOD (:,:) = TP%XFFLOOD    (:,:)
-    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)             
+    TP%XCPL_PIFLOOD(:,:) = TP%XFLOOD_STO (:,:) / TPG%XAREA(:,:)
   ENDIF
 !  
 ENDIF

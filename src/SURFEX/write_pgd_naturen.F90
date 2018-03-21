@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITE_PGD_NATURE_n (DTCO, HSELECT, U, DTZ, IM, HPROGRAM)
+      SUBROUTINE WRITE_PGD_NATURE_n (DTCO, DGU, U, DTI, DTZ, IG, I, &
+                                     HPROGRAM)
 !     ####################################
 !
 !!****  *WRITE_PGD_NATURE_n* - routine to write pgd surface variables in their respective files
@@ -39,10 +36,12 @@
 !
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-!
+USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
 USE MODD_DATA_TSZ0_n, ONLY : DATA_TSZ0_t
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODI_WRITE_PGD_ISBA_n
 !
@@ -57,12 +56,12 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-!
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
-!
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
 TYPE(DATA_TSZ0_t), INTENT(INOUT) :: DTZ
-TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
+TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -78,7 +77,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_NATURE_N',0,ZHOOK_HANDLE)
 IF (U%CNATURE=='ISBA' .OR. U%CNATURE=='TSZ0') THEN
-  CALL WRITE_PGD_ISBA_n(DTCO, HSELECT, U, DTZ, IM, HPROGRAM)
+  CALL WRITE_PGD_ISBA_n(DTCO, DGU, U, DTI, DTZ, IG, I, &
+                        HPROGRAM)
 END IF
 IF (LHOOK) CALL DR_HOOK('WRITE_PGD_NATURE_N',1,ZHOOK_HANDLE)
 !

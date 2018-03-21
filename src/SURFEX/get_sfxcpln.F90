@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE GET_SFXCPL_n (IM, S, U, W, &
+      SUBROUTINE GET_SFXCPL_n (I, S, U, W, &
                                HPROGRAM,KI,PRUI,PWIND,PFWSU,PFWSV,PSNET, &
                                 PHEAT,PEVAP,PRAIN,PSNOW,PICEFLUX,PFWSM,   &
                                 PHEAT_ICE,PEVAP_ICE,PSNET_ICE)  
@@ -41,7 +37,6 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    08/2009
-!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,7 +45,7 @@
 !
 !
 !
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+USE MODD_ISBA_n, ONLY : ISBA_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -78,7 +73,7 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
+TYPE(ISBA_t), INTENT(INOUT) :: I
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
@@ -107,6 +102,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSNET_ICE
 REAL, DIMENSION(KI)   :: ZRUNOFF    ! Cumulated Surface runoff             (kg/m2)
 REAL, DIMENSION(KI)   :: ZDRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(KI)   :: ZCALVING   ! Cumulated Calving flux               (kg/m2)
+REAL, DIMENSION(KI)   :: ZRECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
 REAL, DIMENSION(KI)   :: ZSRCFLOOD  ! Cumulated flood freshwater flux      (kg/m2)
 !
 REAL, DIMENSION(KI)   :: ZSEA_FWSU  ! Cumulated zonal wind stress       (Pa.s)
@@ -152,13 +148,15 @@ IF(LCPL_LAND)THEN
   ZRUNOFF  (:) = XUNDEF
   ZDRAIN   (:) = XUNDEF
   ZCALVING (:) = XUNDEF
+  ZRECHARGE(:) = XUNDEF
   ZSRCFLOOD(:) = XUNDEF
 !
 ! * Get land output fields
 !       
-  CALL GET_SFX_LAND(IM%O, IM%S, U, &
+  CALL GET_SFX_LAND(I, U, &
                     LCPL_GW,LCPL_FLOOD,LCPL_CALVING,    &
-                    ZRUNOFF,ZDRAIN,ZCALVING,ZSRCFLOOD )
+                    ZRUNOFF,ZDRAIN,ZCALVING,ZRECHARGE,  &
+                    ZSRCFLOOD             )
 !
 ! * Assign land output fields
 !        

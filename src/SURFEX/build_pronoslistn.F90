@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE BUILD_PRONOSLIST_n (HSV, KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
+      SUBROUTINE BUILD_PRONOSLIST_n (SV, &
+                                     KEMIS_NBR,HEMIS_NAME,TPPRONOS,KCH,KLUOUT,KVERB)
 !!    #######################################################################
 !!
 !!*** *BUILD_PRONOSLIST*
@@ -31,6 +28,8 @@
 !!    EXTERNAL
 !!    --------
 !
+USE MODD_SV_n, ONLY : SV_t
+!
 USE MODI_CH_OPEN_INPUTB
 !!
 !!    IMPLICIT ARGUMENTS
@@ -52,7 +51,7 @@ IMPLICIT NONE
 !*       0.1  declaration of arguments
 !
 !
- CHARACTER(LEN=*), DIMENSION(:), POINTER :: HSV
+TYPE(SV_t), INTENT(INOUT) :: SV
 !
 INTEGER,                       INTENT(IN)  :: KEMIS_NBR ! number of emitted species
  CHARACTER(LEN=12), DIMENSION(KEMIS_NBR), INTENT(IN) :: HEMIS_NAME ! name of emitted species
@@ -84,12 +83,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('BUILD_PRONOSLIST_N',0,ZHOOK_HANDLE)
 !
 ! CNAMES points on chemical variables name
-CNAMES => HSV
-IEQ = SIZE(HSV)
+CNAMES => SV%CSV
+IEQ = SIZE(SV%CSV)
 !
 ! Namelist is opened and the agregation eq. are reached
 !
+!$OMP SINGLE
  CALL CH_OPEN_INPUTB("AGREGATION", KCH , KLUOUT)
+!$OMP END SINGLE
 !
 ! Parse each eq. line and build the TPPRONOS list
 !
@@ -99,7 +100,9 @@ DO
 !
 ! Read a line and convert 'tab' to 'space' characters
 ! until the keyword 'END_AGREGATION' is reached
+!$OMP SINGLE
   READ(KCH,'(A)',IOSTAT=IERR) YINPLINE
+!$OMP END SINGLE COPYPRIVATE(YINPLINE,IERR)
   IF (IERR /= 0) EXIT
   YINPLINE = TRIM(ADJUSTL(YINPLINE))
   IF (LEN_TRIM(YINPLINE) == 0) CYCLE ! skip blank line

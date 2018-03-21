@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       FUNCTION SUM_ON_ALL_PROCS(HPROGRAM,HGRID,OIN,HNAME) RESULT(KOUT)
 !     #######################################################
@@ -33,13 +29,10 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    07/2011 
-!!      S.Senesi    08/2015 : Adapt to XIOS output mode
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
-!
-USE MODD_SURF_CONF, ONLY : CSOFTWARE
 !
 #ifdef SFX_OL
 USE MODI_SUM_ON_ALL_PROCS_OL
@@ -91,7 +84,7 @@ IF (HPROGRAM=='MESONH') THEN
     CALL SUM_ON_ALL_PROCS_MNH(ISIZE,IIN,KOUT)
   ENDIF
 #endif
-ELSE IF (HPROGRAM=='AROME ' .OR. (HPROGRAM=='XIOS  '.AND.TRIM(CSOFTWARE)/="OFFLINE")) THEN
+ELSE IF (HPROGRAM=='AROME ' ) THEN
 #ifdef SFX_ARO
   KOUT = MAX(COUNT(OIN),1)   ! to be coded properly in AROME
 #endif

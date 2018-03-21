@@ -1,10 +1,11 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-       SUBROUTINE DIAG_SURF_BUDGET_FLAKE (D, PRHOA, PSFTH, PDIR_SW, PSCA_SW, PLW,  &
-                                          PDIR_ALB, PSCA_ALB, PLWUP, PSFZON, PSFMER  )  
+       SUBROUTINE DIAG_SURF_BUDGET_FLAKE (PRHOA, PSFTH,                          &
+                                           PDIR_SW, PSCA_SW, PLW,                &
+                                           PDIR_ALB, PSCA_ALB, PLWUP,            &
+                                           PSFZON, PSFMER, PLE,                  &
+                                           PRN, PH, PGFLUX,                      &
+                                           PSWD, PSWU, PSWBD, PSWBU, PLWD, PLWU, &
+                                           PFMU, PFMV                            )  
 !     ###############################################################################
 !
 !!****  *DIAG_SURF_BUDGET_FLAKE * - Computes diagnostics over lake
@@ -28,7 +29,6 @@
 !!      Original    04/2013
 !!------------------------------------------------------------------
 !
-USE MODD_DIAG_n, ONLY : DIAG_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -36,8 +36,6 @@ USE PARKIND1  ,ONLY : JPRB
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
-!
-TYPE(DIAG_t), INTENT(INOUT) :: D
 !
 REAL, DIMENSION(:), INTENT(IN) :: PRHOA     ! air density
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH     ! heat flux
@@ -51,6 +49,22 @@ REAL, DIMENSION(:,:),INTENT(IN):: PDIR_ALB  ! direct albedo for each spectral ba
 REAL, DIMENSION(:,:),INTENT(IN):: PSCA_ALB  ! diffuse albedo for each spectral band (-)
 REAL, DIMENSION(:), INTENT(IN) :: PSFZON    ! zonal friction
 REAL, DIMENSION(:), INTENT(IN) :: PSFMER    ! meridional friction
+!
+REAL, DIMENSION(:), INTENT(IN) :: PLE       ! total latent heat flux                (W/m2)
+!
+REAL, DIMENSION(:), INTENT(OUT):: PRN       ! net radiation                         (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PH        ! sensible heat flux                    (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PGFLUX    ! storage flux                          (W/m2)
+!
+REAL, DIMENSION(:,:), INTENT(OUT):: PSWBD  ! incoming short wave radiation by spectral band (W/m2)
+REAL, DIMENSION(:,:), INTENT(OUT):: PSWBU  ! upward  short wave radiation by spectral band (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PSWD     ! total incoming short wave radiation (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PSWU     ! total upward short wave radiation (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PLWD     ! Downward long wave radiation (W/m2)
+REAL, DIMENSION(:), INTENT(OUT):: PLWU     ! upward long wave radiation (W/m2)  
+!
+REAL, DIMENSION(:), INTENT(OUT):: PFMU     ! zonal friction
+REAL, DIMENSION(:), INTENT(OUT):: PFMV     ! meridional friction
 !
 !*      0.2    declarations of local variables
 !
@@ -66,39 +80,39 @@ ISWB = SIZE(PDIR_SW,2)
 !* total incoming and outgoing SW
 !
 DO JSWB=1,ISWB
-  D%XSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
-  D%XSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
+  PSWBD(:,JSWB) = PDIR_SW(:,JSWB)                    + PSCA_SW(:,JSWB)
+  PSWBU(:,JSWB) = PDIR_SW(:,JSWB) * PDIR_ALB(:,JSWB) + PSCA_SW(:,JSWB) * PSCA_ALB(:,JSWB) 
 ENDDO
 !
-D%XSWD(:) = 0.
-D%XSWU(:) = 0.
+PSWD(:) = 0.
+PSWU(:) = 0.
 DO JSWB=1,ISWB
-   D%XSWD(:)=D%XSWD(:)+D%XSWBD(:,JSWB)
-   D%XSWU(:)=D%XSWU(:)+D%XSWBU(:,JSWB)
+   PSWD(:)=PSWD(:)+PSWBD(:,JSWB)
+   PSWU(:)=PSWU(:)+PSWBU(:,JSWB)
 ENDDO
 !
 !*incoming outgoing LW
 !
-D%XLWD(:)=PLW  (:)
-D%XLWU(:)=PLWUP(:)
+PLWD(:)=PLW  (:)
+PLWU(:)=PLWUP(:)
 !
 !* net radiation
 !
-D%XRN    =   D%XSWD(:) - D%XSWU(:) + D%XLWD(:) - D%XLWU(:)
+PRN    =   PSWD(:) - PSWU(:) + PLWD(:) - PLWU(:)
 !
 !* sensible heat flux
 !
-D%XH     = PSFTH(:)
+PH     = PSFTH(:)
 !
 !* storage flux
 !
-D%XGFLUX = D%XRN - D%XH - D%XLE
+PGFLUX = PRN - PH - PLE
 !
 !* wind stress
 !
-D%XFMU = PSFZON
+PFMU = PSFZON
 !
-D%XFMV = PSFMER
+PFMV = PSFMER
 IF (LHOOK) CALL DR_HOOK('DIAG_SURF_BUDGET_FLAKE',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

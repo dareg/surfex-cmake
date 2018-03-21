@@ -1,11 +1,11 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !   ##########################################################################
-    SUBROUTINE FLOOR_LAYER_E_BUDGET(B, PTSTEP, PFLX_BLD_FL, PDQS_FL, PIMB_FL, PRADHT_IN,  &
-                                    PRAD_WL_FL, PRAD_RF_FL, PRAD_WIN_FL, PLOAD_FL,        &
-                                    PRAD_FL_MA, PCONV_FL_BLD                  )
+    SUBROUTINE FLOOR_LAYER_E_BUDGET(PT_FLOOR, PTSTEP, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
+                                    PFLX_BLD_FLOOR, PDQS_FLOOR, PIMB_FLOOR,           &
+                                    PF_FLOOR_MASS, PF_FLOOR_WALL, PF_FLOOR_WIN,       &
+                                    PF_FLOOR_ROOF, PRADHT_IN,           &
+                                    PTS_MASS, PRAD_WALL_FLOOR, PRAD_ROOF_FLOOR,       &
+                                    PRAD_WIN_FLOOR, PLOAD_FLOOR, PTI_BLD,             &
+                                    PRAD_FLOOR_MASS, PCONV_FLOOR_BLD                  )
 !   ##########################################################################
 !
 !!****  *FLOOR_LAYER_E_BUDGET*  
@@ -74,8 +74,6 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_BEM_n, ONLY : BEM_t
-!
 USE MODI_LAYER_E_BUDGET_GET_COEF
 USE MODI_LAYER_E_BUDGET
 USE MODE_CONV_DOE
@@ -87,20 +85,29 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-TYPE(BEM_t), INTENT(INOUT) :: B
-!
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PT_FLOOR     ! floor layers temperatures
 REAL,                 INTENT(IN)    :: PTSTEP       ! time step
-REAL, DIMENSION(:),   INTENT(OUT)  :: PFLX_BLD_FL !flux from building to floor
-REAL, DIMENSION(:),   INTENT(OUT) :: PDQS_FL !heat storage inside the floor
-REAL, DIMENSION(:),   INTENT(OUT) :: PIMB_FL !floor energy residual imbalance for verification
+REAL, DIMENSION(:,:), INTENT(IN)    :: PHC_FLOOR    ! heat capacity for road layers
+REAL, DIMENSION(:,:), INTENT(IN)    :: PTC_FLOOR    ! thermal conductivity for 
+                                                    !road layers
+REAL, DIMENSION(:,:), INTENT(IN)  :: PD_FLOOR       ! depth of road layers
+REAL, DIMENSION(:),   INTENT(OUT)  :: PFLX_BLD_FLOOR !flux from building to floor
+REAL, DIMENSION(:),   INTENT(OUT) :: PDQS_FLOOR !heat storage inside the floor
+REAL, DIMENSION(:),   INTENT(OUT) :: PIMB_FLOOR !floor energy residual imbalance for verification
+REAL, DIMENSION(:), INTENT(IN)    :: PF_FLOOR_MASS  ! View factor floor-mass
+REAL, DIMENSION(:), INTENT(IN)    :: PF_FLOOR_WALL  ! View factor floor-wall
+REAL, DIMENSION(:), INTENT(IN)    :: PF_FLOOR_WIN   ! View factor floor-window
+REAL, DIMENSION(:), INTENT(IN)    :: PF_FLOOR_ROOF  ! View factor floor-roof
 REAL, DIMENSION(:), INTENT(IN)    :: PRADHT_IN      ! Indoor radiant heat transfer coefficient
                                                     ! [W K-1 m-2]
-REAL, DIMENSION(:), INTENT(IN)    :: PRAD_RF_FL ! rad. fluxes from roof to floor[W m-2(roof)]
-REAL, DIMENSION(:), INTENT(IN)    :: PRAD_WL_FL ! rad. fluxes from wall to floor[W m-2(wall)]
-REAL, DIMENSION(:), INTENT(IN)    :: PRAD_WIN_FL  ! rad. fluxes from win to floor[W m-2(win)]
-REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_FL ! solar and internal load to the floor
-REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_FL_MA  ! rad. fluxes from floor to mass [W m-2(floor)]
-REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_FL_BLD  ! conv. fluxes from floor to bld [W m-2(floor)]
+REAL, DIMENSION(:), INTENT(IN)    :: PTS_MASS  ! surf. mass temp. (contact with bld air)
+REAL, DIMENSION(:), INTENT(IN)    :: PRAD_ROOF_FLOOR ! rad. fluxes from roof to floor[W m-2(roof)]
+REAL, DIMENSION(:), INTENT(IN)    :: PRAD_WALL_FLOOR ! rad. fluxes from wall to floor[W m-2(wall)]
+REAL, DIMENSION(:), INTENT(IN)    :: PRAD_WIN_FLOOR  ! rad. fluxes from win to floor[W m-2(win)]
+REAL, DIMENSION(:), INTENT(IN)    :: PTI_BLD   ! indoor air temp.
+REAL, DIMENSION(:), INTENT(IN)    :: PLOAD_FLOOR ! solar and internal load to the floor
+REAL, DIMENSION(:), INTENT(OUT)   :: PRAD_FLOOR_MASS  ! rad. fluxes from floor to mass [W m-2(floor)]
+REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_FLOOR_BLD  ! conv. fluxes from floor to bld [W m-2(floor)]
 !
 !*      0.2    declarations of local variables
 !
@@ -108,15 +115,15 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCONV_FL_BLD  ! conv. fluxes from floor to 
 REAL :: ZIMPL=1.0      ! implicit coefficient
 REAL :: ZEXPL=0.0      ! explicit coefficient
 !
-REAL, DIMENSION(SIZE(B%XT_FLOOR,1),SIZE(B%XT_FLOOR,2)) :: ZA,& ! lower diag.
+REAL, DIMENSION(SIZE(PT_FLOOR,1),SIZE(PT_FLOOR,2)) :: ZA,& ! lower diag.
                                                       ZB,& ! main  diag.
                                                       ZC,& ! upper diag.
                                                       ZY   ! r.h.s.
 !
-REAL, DIMENSION(SIZE(B%XT_FLOOR,1)) :: ZTS_FL ! surf. floor temp.  used for rad. exchanges
-REAL, DIMENSION(SIZE(B%XT_FLOOR,1)) :: ZTS_FL_CONV ! surf. floor temp. used for conv exchanges
+REAL, DIMENSION(SIZE(PT_FLOOR,1)) :: ZTS_FLOOR ! surf. floor temp.  used for rad. exchanges
+REAL, DIMENSION(SIZE(PT_FLOOR,1)) :: ZTS_FLOOR_CONV ! surf. floor temp. used for conv exchanges
                                                ! used during calculation
-REAL, DIMENSION(SIZE(B%XT_FLOOR,1)) :: ZCHTC_IN_FL   ! Indoor floor convec heat transfer coefficient
+REAL, DIMENSION(SIZE(PT_FLOOR,1)) :: ZCHTC_IN_FLOOR   ! Indoor floor convec heat transfer coefficient
                                                     ! [W K-1 m-2(bld)]
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -126,51 +133,55 @@ IF (LHOOK) CALL DR_HOOK('FLOOR_LAYER_E_BUDGET',0,ZHOOK_HANDLE)
 !
 ! *Convection heat transfer coefficients [W m-2 K-1]
 !  From EP Engineering Reference
-ZCHTC_IN_FL(:) = CHTC_UP_DOE(B%XT_FLOOR(:,1), B%XTI_BLD(:))
-DO JJ=1,SIZE(ZCHTC_IN_FL)
-   ZCHTC_IN_FL(JJ) = MAX(1., ZCHTC_IN_FL(JJ))
+ZCHTC_IN_FLOOR(:) = CHTC_UP_DOE(PT_FLOOR(:,1), PTI_BLD(:))
+DO JJ=1,SIZE(ZCHTC_IN_FLOOR)
+   ZCHTC_IN_FLOOR(JJ) = MAX(1., ZCHTC_IN_FLOOR(JJ))
 ENDDO
 
 
 !
- CALL LAYER_E_BUDGET_GET_COEF( B%XT_FLOOR, PTSTEP, ZIMPL, B%XHC_FLOOR, B%XTC_FLOOR, B%XD_FLOOR, &
+ CALL LAYER_E_BUDGET_GET_COEF( PT_FLOOR, PTSTEP, ZIMPL, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
                               ZA, ZB, ZC, ZY )
 !
-ZTS_FL(:) = B%XT_FLOOR(:,1) 
+ZTS_FLOOR(:) = PT_FLOOR(:,1) 
 
-ZB(:,1) = ZB(:,1) + ZIMPL * (ZCHTC_IN_FL(:)*4./3. + PRADHT_IN(:) * B%XF_FLOOR_MASS(:))
+ZB(:,1) = ZB(:,1) + ZIMPL * &
+   (ZCHTC_IN_FLOOR(:)*4./3. + PRADHT_IN(:) * PF_FLOOR_MASS(:))
 
 
 ZY(:,1) = ZY(:,1)  &
-   + ZCHTC_IN_FL(:) * (B%XTI_BLD(:) - 1./3. * B%XT_FLOOR(:, 1) * (4* ZEXPL -1))  &
-   + B%XF_FLOOR_WIN  (:) * PRAD_WIN_FL(:) + B%XF_FLOOR_WALL (:) * PRAD_WL_FL(:)  &
-   + B%XF_FLOOR_ROOF (:) * PRAD_RF_FL(:)                   &
-   + PRADHT_IN(:) * B%XF_FLOOR_MASS (:) * (B%XT_MASS(:,1) - ZEXPL * B%XT_FLOOR(:,1))  &
-   + PLOAD_FL(:)
+   + ZCHTC_IN_FLOOR(:) * (PTI_BLD(:) - 1./3. * PT_FLOOR(:, 1) * (4* ZEXPL -1))  &
+   + PF_FLOOR_WIN  (:) * PRAD_WIN_FLOOR(:)                    &
+   + PF_FLOOR_WALL (:) * PRAD_WALL_FLOOR(:)                   &
+   + PF_FLOOR_ROOF (:) * PRAD_ROOF_FLOOR(:)                   &
+   + PRADHT_IN(:) * PF_FLOOR_MASS (:) * (PTS_MASS(:) - ZEXPL * PT_FLOOR(:,1))  &
+   + PLOAD_FLOOR(:)
 !
- CALL LAYER_E_BUDGET( B%XT_FLOOR, PTSTEP, ZIMPL, B%XHC_FLOOR, B%XTC_FLOOR, B%XD_FLOOR, &
-                     ZA, ZB, ZC, ZY, PDQS_FL )
+ CALL LAYER_E_BUDGET( PT_FLOOR, PTSTEP, ZIMPL, PHC_FLOOR, PTC_FLOOR, PD_FLOOR, &
+                     ZA, ZB, ZC, ZY, PDQS_FLOOR )
 !
 !*      floor surface temperature used in the implicit formulation
 !       ----------------------------------------------------------
-ZTS_FL_CONV(:) = 4./3. * ZIMPL * B%XT_FLOOR(:,1) + 1./3. * ZTS_FL(:) * (4 * ZEXPL - 1.)
-ZTS_FL(:) = ZEXPL * ZTS_FL(:) + ZIMPL * B%XT_FLOOR(:,1)
+ZTS_FLOOR_CONV(:) = 4./3. * ZIMPL * PT_FLOOR(:,1) + 1./3. * ZTS_FLOOR(:) * (4 * ZEXPL - 1.)
+ZTS_FLOOR(:) = ZEXPL * ZTS_FLOOR(:) + ZIMPL * PT_FLOOR(:,1)
 !
 !*      fluxes with mass and indoor air
 !       ----------------------------------------------------------
-PRAD_FL_MA(:) = PRADHT_IN(:)     * (ZTS_FL(:) - B%XT_MASS(:,1))
-PCONV_FL_BLD(:) = ZCHTC_IN_FL(:) * (ZTS_FL_CONV(:) - B%XTI_BLD (:))
+PRAD_FLOOR_MASS(:) = PRADHT_IN(:)    * (ZTS_FLOOR(:) - PTS_MASS(:))
+PCONV_FLOOR_BLD(:) = ZCHTC_IN_FLOOR(:) * (ZTS_FLOOR_CONV(:) - PTI_BLD (:))
 !
 !*     Flux between floor and indoor surfaces and air
 !       ------------------------------------------------
-PFLX_BLD_FL(:) = - PCONV_FL_BLD(:) + B%XF_FLOOR_WIN  (:) * PRAD_WIN_FL(:)  &
-       + B%XF_FLOOR_WALL (:) * PRAD_WL_FL(:) + B%XF_FLOOR_ROOF (:) * PRAD_RF_FL(:) &
-       + PRADHT_IN(:) * B%XF_FLOOR_MASS(:) * (B%XT_MASS(:,1)  - ZTS_FL(:)) &
-       + PLOAD_FL(:)
+PFLX_BLD_FLOOR(:) = - PCONV_FLOOR_BLD(:)  &
+       + PF_FLOOR_WIN  (:) * PRAD_WIN_FLOOR(:)  &
+       + PF_FLOOR_WALL (:) * PRAD_WALL_FLOOR(:) &
+       + PF_FLOOR_ROOF (:) * PRAD_ROOF_FLOOR(:) &
+       + PRADHT_IN(:) * PF_FLOOR_MASS(:) * (PTS_MASS (:)  - ZTS_FLOOR(:)) &
+       + PLOAD_FLOOR(:)
 !
 !*     Floor residual energy imbalance for verification
 !       ------------------------------------------------
-PIMB_FL(:) = PFLX_BLD_FL(:) - PDQS_FL(:)
+PIMB_FLOOR(:) = PFLX_BLD_FLOOR(:) - PDQS_FLOOR(:)
 !
 IF (LHOOK) CALL DR_HOOK('FLOOR_LAYER_E_BUDGET',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------

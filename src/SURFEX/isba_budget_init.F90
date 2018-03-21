@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE ISBA_BUDGET_INIT (OWATER_BUDGET, HISBA, PEK, PDG, PDZG, &
+SUBROUTINE ISBA_BUDGET_INIT (DGEI, &
+                             HISBA, HSNOW_ISBA,                   &
+                            PWG, PWGI, PWR, PSNOWSWE, PDG, PDZG, &
                             PWG_INI, PWGI_INI, PWR_INI, PSWE_INI )
 !     ###############################################################################
 !
@@ -31,7 +29,6 @@ SUBROUTINE ISBA_BUDGET_INIT (OWATER_BUDGET, HISBA, PEK, PDG, PDZG, &
 !
 !
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
-USE MODD_ISBA_n, ONLY : ISBA_PE_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XRHOLW
@@ -45,14 +42,22 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-LOGICAL, INTENT(IN) :: OWATER_BUDGET
+TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DGEI
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HISBA      ! type of ISBA version:
 !                                               ! '2-L' (default)
 !                                               ! '3-L'
 !                                               ! 'DIF'
-TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+ CHARACTER(LEN=*),     INTENT(IN)  :: HSNOW_ISBA ! 'DEF' = Default F-R snow scheme
+!                                               !         (Douville et al. 1995)
+!                                               ! '3-L' = 3-L snow scheme (option)
+!                                               !         (Boone and Etchevers 2000)
+!                                               ! 'CRO' = Crocus snow scheme
 !
+REAL, DIMENSION(:,:),  INTENT(IN) :: PWG        ! liquid water content by layer  (m3/m3)
+REAL, DIMENSION(:,:),  INTENT(IN) :: PWGI       ! ice content by layer           (m3/m3)
+REAL, DIMENSION(:),    INTENT(IN) :: PWR        ! liquid water on veg canopy     (kg m-2)
+REAL, DIMENSION(:,:),  INTENT(IN) :: PSNOWSWE   ! snow water equivalent by layer (kg m-2)
 REAL, DIMENSION(:,:),  INTENT(IN) :: PDG        ! soil layer depth               (m)
 REAL, DIMENSION(:,:),  INTENT(IN) :: PDZG       ! soil layer thickness           (m)
 !
@@ -71,9 +76,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA_BUDGET_INIT',0,ZHOOK_HANDLE)
 !
-INI =SIZE(PEK%XWG,1)
-INL =SIZE(PEK%XWG,2)
-INLS=SIZE(PEK%TSNOW%WSNOW,2)
+INI =SIZE(PWG,1)
+INL =SIZE(PWG,2)
+INLS=SIZE(PSNOWSWE,2)
 !
 PWG_INI (:) = XUNDEF
 PWGI_INI(:) = XUNDEF
@@ -84,16 +89,16 @@ PWR_INI (:) = XUNDEF
 ! * Water budget
 !   ------------
 !
-IF(OWATER_BUDGET)THEN
+IF(DGEI%LWATER_BUDGET)THEN
 !
 ! total wr at t-1
-  PWR_INI(:)=PEK%XWR(:)
+  PWR_INI(:)=PWR(:)
 !
 ! total swe at t-1
   PSWE_INI(:)=0.0
   DO JL=1,INLS
      DO JI=1,INI
-        PSWE_INI(JI)=PSWE_INI(JI)+PEK%TSNOW%WSNOW(JI,JL)
+        PSWE_INI(JI)=PSWE_INI(JI)+PSNOWSWE(JI,JL)
      ENDDO
   ENDDO
 !
@@ -103,17 +108,17 @@ IF(OWATER_BUDGET)THEN
   IF(HISBA=='DIF')THEN
     DO JL=1,INL
        DO JI=1,INI
-          IF(PEK%XWG(JI,JL)/=XUNDEF)THEN
-             PWG_INI (JI)=PWG_INI (JI)+PEK%XWG (JI,JL)*PDZG(JI,JL)*XRHOLW
-             PWGI_INI(JI)=PWGI_INI(JI)+PEK%XWGI(JI,JL)*PDZG(JI,JL)*XRHOLW
+          IF(PWG(JI,JL)/=XUNDEF)THEN
+             PWG_INI (JI)=PWG_INI (JI)+PWG (JI,JL)*PDZG(JI,JL)*XRHOLW
+             PWGI_INI(JI)=PWGI_INI(JI)+PWGI(JI,JL)*PDZG(JI,JL)*XRHOLW
           ENDIF
        ENDDO
     ENDDO
   ELSE
-    PWG_INI (:)=PEK%XWG (:,2)*PDG(:,2)*XRHOLW
-    PWGI_INI(:)=PEK%XWGI(:,2)*PDG(:,2)*XRHOLW
+    PWG_INI (:)=PWG (:,2)*PDG(:,2)*XRHOLW
+    PWGI_INI(:)=PWGI(:,2)*PDG(:,2)*XRHOLW
     IF(HISBA=='3-L')THEN
-      PWG_INI(:)=PWG_INI(:)+PEK%XWG(:,3)*(PDG(:,3)-PDG(:,2))*XRHOLW
+      PWG_INI(:)=PWG_INI(:)+PWG(:,3)*(PDG(:,3)-PDG(:,2))*XRHOLW
     ENDIF
   ENDIF
 !

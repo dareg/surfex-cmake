@@ -1,17 +1,13 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ######### 
       SUBROUTINE DEFAULT_ISBA(PTSTEP, POUT_TSTEP,                        &
-                              HRUNOFF, HSCOND,                           &
+                              HROUGH, HRUNOFF, HALBEDO, HSCOND,          &
                               HC1DRY, HSOILFRZ, HDIFSFCOND, HSNOWRES,    &
                               HCPSURF, PCGMAX, PCDRAG, HKSAT, OSOC,      &
                               HRAIN, HHORT, OGLACIER, OCANOPY_DRAG,      &
                               OVEGUPD, OSPINUPCARBS, OSPINUPCARBW,       &
                               PSPINMAXS, PSPINMAXW, PCO2_START, PCO2_END,&
                               KNBYEARSPINS, KNBYEARSPINW,                &
-                              ONITRO_DILU                                )
+                              ONITRO_DILU, PCVHEATF                      )
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA
@@ -60,6 +56,12 @@ IMPLICIT NONE
 !
 REAL,              INTENT(OUT) :: PTSTEP     ! time-step for run
 REAL,              INTENT(OUT) :: POUT_TSTEP ! time-step for writing
+CHARACTER(LEN=4),  INTENT(OUT) :: HROUGH   ! type of roughness length
+CHARACTER(LEN=4),  INTENT(OUT) :: HALBEDO  ! albedo type
+!                                          ! 'DRY ' 
+!                                          ! 'EVOL' 
+!                                          ! 'WET ' 
+!                                          ! 'USER' 
 CHARACTER(LEN=4),  INTENT(OUT) :: HSCOND   ! Thermal conductivity
 !                                          ! 'DEF ' = DEFault: NP89 implicit method
 !                                          ! 'PL98' = Peters-Lidard et al. 1998 used
@@ -140,6 +142,8 @@ INTEGER, INTENT(OUT)          :: KNBYEARSPINW ! nbr years needed to reaches wood
 !
 LOGICAL, INTENT(OUT)          :: ONITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 !
+REAL, INTENT(OUT) :: PCVHEATF
+!
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
@@ -151,7 +155,12 @@ IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',0,ZHOOK_HANDLE)
 !
 PTSTEP     = XUNDEF
 POUT_TSTEP = XUNDEF
+!!!!!do not phased!!!!!!!
+!HROUGH  = "NONE"
+!!!!!do not phased!!!!!!!
+HROUGH  = "UNDE"  ! undefined. Needs further information on canopy scheme use to set default
 HSCOND  = "PL98"
+HALBEDO = "DRY "
 !
 HC1DRY     = 'DEF '
 HSOILFRZ   = 'DEF'
@@ -164,6 +173,8 @@ HKSAT      = 'DEF'
 OSOC       = .FALSE.
 HRAIN      = 'DEF'
 HHORT      = 'DEF'
+!
+PCVHEATF = 0.2
 !
 PCGMAX   = 2.0E-5
 !

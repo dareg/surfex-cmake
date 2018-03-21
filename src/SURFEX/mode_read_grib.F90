@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #####################
 MODULE MODE_READ_GRIB
 !     #####################
@@ -379,7 +375,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_ZS_SEA',0,ZHOOK_HANDLE)
 !
+IF (HINMODEL=='HIRLAM') THEN
+  CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_ZS_SEA:OPTION NOT SUPPORTED '//HINMODEL)
+ELSE
   CALL READ_GRIB_ZS(HGRIB,KLUOUT,HINMODEL,PZSS)
+ENDIF
 !
 IF (SIZE(PMASK)==SIZE(PZSS)) &
   WHERE (PMASK(:)/=0.) PZSS = 0.
@@ -461,7 +461,8 @@ IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TS',0,ZHOOK_HANDLE)
 !
  CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PTS)
 !
-IF (SIZE(PMASK)==SIZE(PTS)) WHERE (PMASK(:)/=1.) PTS = XUNDEF
+IF (SIZE(PMASK)==SIZE(PTS)) &
+  WHERE (PMASK(:)/=1.) PTS = XUNDEF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TS',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_GRIB_TS
@@ -480,59 +481,21 @@ INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
 REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PSST      ! 
 !
-INTEGER :: IRET
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SST',0,ZHOOK_HANDLE)
 !
-SELECT CASE (HINMODEL)
-  CASE ('ECMWF ')
-     CALL READ_GRIB(HGRIB,KLUOUT,34,IRET,PSST)
-     IF (IRET /= 0) CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PSST)
-  CASE ('ARPEGE','ALADIN','MOCAGE','HIRLAM')
-    CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PSST)
-   CASE DEFAULT
-     CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_SST:OPTION NOT SUPPORTED '//HINMODEL)    
-END SELECT
+IF (HINMODEL=='HIRLAM') THEN
+  CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_SST:OPTION NOT SUPPORTED '//HINMODEL)
+ELSE
+  CALL READ_GRIB_T(HGRIB,KLUOUT,HINMODEL,PSST)
+ENDIF
 !
-IF (SIZE(PMASK)==SIZE(PSST)) WHERE (PMASK(:)/=0.) PSST = XUNDEF
+IF (SIZE(PMASK)==SIZE(PSST)) &
+  WHERE (PMASK(:)/=0.) PSST = XUNDEF
 !
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_SST',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_GRIB_SST
-!-------------------------------------------------------------------
-!     ###########################
-      SUBROUTINE READ_GRIB_TSWATER(HGRIB,KLUOUT,HINMODEL,PMASK,PTS)
-!     ###########################
-!
-USE MODD_SURF_PAR,   ONLY : XUNDEF
-!
-IMPLICIT NONE
-!
- CHARACTER(LEN=*),   INTENT(IN)    :: HGRIB     ! Grib file name
-INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
- CHARACTER(LEN=6),   INTENT(IN)    :: HINMODEL  ! Grib originating model
-REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
-REAL, DIMENSION(:), POINTER       :: PTS     ! 
-!
-INTEGER :: IRET
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TSWATER',0,ZHOOK_HANDLE)
-!
-SELECT CASE (HINMODEL)
-  CASE ('ECMWF ')
-     CALL READ_GRIB(HGRIB,KLUOUT,3080,IRET,PTS)
-     IF (IRET /= 0) CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,PTS)
-  CASE ('ARPEGE','ALADIN','MOCAGE','HIRLAM')
-    CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,PTS)
-   CASE DEFAULT
-     CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_TSWATER:OPTION NOT SUPPORTED '//HINMODEL)    
-END SELECT
-!
-IF (SIZE(PMASK)==SIZE(PTS)) WHERE (PMASK(:)/=0.) PTS = XUNDEF
-!
-IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_TSWATER',1,ZHOOK_HANDLE)
-END SUBROUTINE READ_GRIB_TSWATER
 !-------------------------------------------------------------------
 !     ###########################
       SUBROUTINE READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,PT2)
@@ -549,7 +512,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
 REAL, DIMENSION(:), POINTER       :: PT2       ! 
 !
 INTEGER(KIND=kindOfInt)                           :: IRET
-INTEGER                           :: ILTYPE, ILEV    ! type of level (Grib code table 3)
+INTEGER                           :: ILTYPE    ! type of level (Grib code table 3)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------
 !* Read deep soil temperature
@@ -565,11 +528,7 @@ SELECT CASE (HINMODEL)
     IF (IRET /= 0) THEN
        ILTYPE=105
       CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,PT2,KLTYPE=ILTYPE)   
-    ENDIF  
-  CASE ('HIRLAM ')
-     ILTYPE=105
-     ILEV=954
-    CALL READ_GRIB(HGRIB,KLUOUT,11,IRET,PT2,KLTYPE=ILTYPE,KLEV1=ILEV)      
+    ENDIF     
    CASE DEFAULT
      CALL ABOR1_SFX('MODE_READ_GRIB:READ_GRIB_T2:OPTION NOT SUPPORTED '//HINMODEL)
 END SELECT
@@ -578,35 +537,11 @@ IF (IRET /= 0) THEN
   CALL ABOR1_SFX('MODE_READ_GRIB: DEEP SOIL TEMPERATURE MISSING (READ_GRIB_T2)')
 END IF
 !
+IF (SIZE(PMASK)==SIZE(PT2)) &
+  WHERE (PMASK(:)/=1.) PT2 = XUNDEF
+!
 IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T2',1,ZHOOK_HANDLE)
 END SUBROUTINE READ_GRIB_T2
-!-------------------------------------------------------------------
-!-------------------------------------------------------------------
-!     ###########################
-      SUBROUTINE READ_GRIB_T2_LAND(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
-!     ###########################
-!
-USE MODD_SURF_PAR,   ONLY : XUNDEF
-!
-IMPLICIT NONE
-!
- CHARACTER(LEN=*),   INTENT(IN)   :: HGRIB     ! Grib file name
-INTEGER,            INTENT(IN)    :: KLUOUT    ! logical unit of output listing
- CHARACTER(LEN=6),   INTENT(IN)   :: HINMODEL  ! Grib originating model
-REAL, DIMENSION(:), INTENT(IN)    :: PMASK     ! grib land mask
-REAL, DIMENSION(:), POINTER       :: ZFIELD    ! 
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!-------------------------------------------------------------------
-!* Read deep soil temperature
-IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T2_LAND',0,ZHOOK_HANDLE)
-!
- CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
-!
-IF (SIZE(PMASK)==SIZE(ZFIELD)) WHERE (PMASK(:)/=1.) ZFIELD = XUNDEF
-!
-IF (LHOOK) CALL DR_HOOK('MODE_READ_GRIB:READ_GRIB_T2_LAND',1,ZHOOK_HANDLE)
-END SUBROUTINE READ_GRIB_T2_LAND
 !-------------------------------------------------------------------
 !-------------------------------------------------------------------
 SUBROUTINE PUT_LAYER_DEPTH(KLUOUT,KLEV,HROUT,KLTYPE,KLEV1,KLEV2,KNLAYERDEEP,PV4,PV,PD)
@@ -1276,7 +1211,7 @@ PDT(:,1) = 0.01
 !--------------------------------------------------------------------------------
 ! 3.  Deep soil temperature
 !     ---------------------
- CALL READ_GRIB_T2_LAND(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+ CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
 !
 PTG(:,2) = ZFIELD(:)
 PDT(:,2) = 0.4         ! deep temperature layer depth assumed equal to 0.4m
@@ -2102,7 +2037,7 @@ WRITE  (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading temperature fo
 !
 WRITE (KLUOUT,'(A)') 'MODE_READ_GRIB:READ_GRIB_TF_TEB: | Reading deep soil temperature'
 !
- CALL READ_GRIB_T2_LAND(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
+ CALL READ_GRIB_T2(HGRIB,KLUOUT,HINMODEL,PMASK,ZFIELD)
 !
 ALLOCATE(PTF(SIZE(ZFIELD),3))
 ALLOCATE(PD (SIZE(ZFIELD),3))

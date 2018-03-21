@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ##############################
       MODULE MODE_GRIDTYPE_IGN
 !     ##############################
@@ -238,7 +234,7 @@ REAL, DIMENSION(:),   INTENT(OUT):: PLAT,PLON
 REAL, DIMENSION(SIZE(PX)) :: ZGAMMA
 REAL, DIMENSION(SIZE(PX)) :: ZR               ! length of arc meridian line projection
 REAL, DIMENSION(SIZE(PX)) :: ZLATISO          ! Isometric latitude
-REAL :: ZLAT0            ! For iteration
+REAL                      :: ZLAT0            ! For iteration
 ! 
 INTEGER                         :: J, JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -258,7 +254,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*       3.     LATITUDE
 !               --------
       ZLATISO(:)=-1./XN(KLAMBERT) * ALOG(ABS(ZR(:)/XC(KLAMBERT)))
-!   
+!      
 !$OMP PARALLEL DO PRIVATE(JJ,J,ZLAT0)
       DO JJ=1,SIZE(PLAT)
         ZLAT0  =2. * ATAN (EXP(ZLATISO(JJ))) - XPI/2.
@@ -271,9 +267,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
          ZLAT0=PLAT(JJ)
         ENDDO
       ENDDO
-!$OMP END PARALLEL DO
+!$OMP END PARALLEL DO 
 !      
       PLAT(:)=PLAT(:) *180./XPI
+!
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:LATLON_IGN',1,ZHOOK_HANDLE)
 !---------------------------------------------------------------------------------
 END SUBROUTINE LATLON_IGN
@@ -349,7 +346,7 @@ REAL :: ZGAMMA
 REAL :: ZLATFI           ! Isometric latitude
 REAL :: ZR               ! length of arc meridian line projection
 INTEGER :: JJ
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
 !-------------------------------------------------------------------------------
@@ -357,17 +354,13 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !*       1.     Latitude /Longitude in radian :
 !               -------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_1',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',0,ZHOOK_HANDLE)
 !
 ZPI180 = XPI / 180.
 ZPI4 = XPI / 4.
-ZECC2 = XECC(KLAMBERT) / 2.
+ZECC2 = XECC(KLAMBERT) / 2. 
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_1',1,ZHOOK_HANDLE)
-!
-!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_2',0,ZHOOK_HANDLE_OMP)
-!$OMP DO PRIVATE(JJ,ZLONRAD,ZLATRAD,ZWRK,ZLATFI,ZGAMMA,ZR)
+!$OMP PARALLEL DO PRIVATE(JJ,ZLONRAD,ZLATRAD,ZWRK,ZLATFI,ZGAMMA,ZR)
 DO JJ=1,SIZE(PLON)
   !
   IF (PLON(JJ) > 180.) THEN
@@ -381,7 +374,7 @@ DO JJ=1,SIZE(PLON)
 !*       2.     Calcul of the isometric latitude :
 !               ----------------------------------
   !
-  ZWRK   = SIN(ZLATRAD) * XECC(KLAMBERT)  
+  ZWRK   = SIN(ZLATRAD) * XECC(KLAMBERT)
   !
   ZLATFI  = LOG(TAN(ZPI4 + ZLATRAD / 2.)) + ( (LOG(1-ZWRK)-LOG(1+ZWRK)) * ZECC2)
   !
@@ -396,10 +389,9 @@ DO JJ=1,SIZE(PLON)
   PY(JJ) = XYS(KLAMBERT) - COS(ZGAMMA) * ZR   
   !
 ENDDO
-!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN_2',1,ZHOOK_HANDLE_OMP)
-!$OMP END PARALLEL
+!$OMP END PARALLEL DO 
 !
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_IGN:XY_IGN',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 END SUBROUTINE XY_IGN
 !-------------------------------------------------------------------------------
@@ -475,7 +467,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !      
       DO J=1, 100
          ZLAT(:) = 2. * ATAN(                                               &
-           ( (1+XECC(KLAMBERT)*SIN(ZLAT0(:))) / (1-XECC(KLAMBERT)*SIN(ZLAT0(:))) )**(XECC(KLAMBERT)/2.)  &
+           ( (1+XECC(KLAMBERT)*SIN(ZLAT0(:)))/(1-XECC(KLAMBERT)*SIN(ZLAT0(:))) )**(XECC(KLAMBERT)/2.)       &
              *EXP(ZLATISO(:)) )  -XPI/2.  
 !
          IF (MAXVAL(ABS(ZLAT(:) - ZLAT0(:))) < XCVGLAT ) EXIT

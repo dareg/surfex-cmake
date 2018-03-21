@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_OROGRAPHY (DTCO, UG, U, USS, HPROGRAM, HFILE, HFILETYPE, OZS)
+      SUBROUTINE PGD_OROGRAPHY (DGU, DTCO, UG, U, USS, &
+                                HPROGRAM,PSEA,PWATER,HFILE,HFILETYPE,OZS)
 !     ##############################################################
 !
 !!**** *PGD_OROGRAPHY* monitor for averaging and interpolations of cover fractions
@@ -42,18 +39,17 @@
 !*    0.     DECLARATION
 !            -----------
 !
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
-!
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
-USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, XSSQO, LSSQO, NSSO, &
-                                XEXT_ALL, XSUMVAL, NSIZE
+USE MODD_PGDWORK,        ONLY : XSUMVAL, XSUMVAL2, NSIZE, XSSQO, LSSQO, NSSO
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
+USE MODD_CSTS,           ONLY : XPI
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_AUX_IO_SURF
@@ -63,6 +59,7 @@ USE MODI_READ_SURF
 USE MODI_TREAT_FIELD
 USE MODI_READ_PGD_NETCDF
 USE MODI_INTERPOL_FIELD
+USE MODI_INI_SSOWORK
 USE MODI_SSO
 USE MODI_SUBSCALE_AOS
 USE MODI_GET_SIZE_FULL_n
@@ -95,12 +92,15 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
+REAL, DIMENSION(:),   INTENT(IN)  :: PSEA     ! sea  fraction
+REAL, DIMENSION(:),   INTENT(IN)  :: PWATER   ! lake fraction
  CHARACTER(LEN=28),    INTENT(IN)  :: HFILE    ! atmospheric file name
  CHARACTER(LEN=6),     INTENT(IN)  :: HFILETYPE! atmospheric file type
 LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed by atm. model
@@ -112,9 +112,11 @@ LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed b
 INTEGER :: ILUOUT    ! output listing logical unit
 !
 
-REAL,DIMENSION(:),POINTER :: ZSLOPE ! degrees
+REAL,DIMENSION(:),POINTER :: ZSLOPE,ZASPECT ! degrees
 INTEGER::JJ
-REAL,PARAMETER :: PP_DEG2RAD= 3.141592654/180.
+!REAL,PARAMETER :: PP_DEG2RAD= XPI/180.
+REAL  :: PP_DEG2RAD
+
 LOGICAL:: LPRESENT
 
 LOGICAL, DIMENSION(NL)   :: GSSO        ! mask where SSO are computed
@@ -132,7 +134,7 @@ INTEGER                  :: IZS         ! size of orographic array in atmospheri
 !
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
  CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
-CHARACTER(LEN=28)        :: YSLOPE         ! file name for orography
+CHARACTER(LEN=28)        :: YSLOPE         ! file name for slope and aspect
 CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
@@ -153,6 +155,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
+
+ PP_DEG2RAD= XPI/180.
 !
 !-------------------------------------------------------------------------------
 !
@@ -160,7 +164,7 @@ IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
 !             -------------------
 !
  CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YFILETYPE, XUNIF_ZS, &
-                              COROGTYPE, XENV, LIMP_ZS, &
+                              COROGTYPE, XENV, LIMP_ZS , &
                               YSLOPE, YSLOPEFILETYPE, LEXPLICIT_SLOPE)  
 !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'YSLOPEFILETYPE',YSLOPEFILETYPE,'      ','NETCDF')
@@ -215,6 +219,16 @@ USS%XHO2JM    (:) = XUNDEF
 !*    4.      Allocations of work arrays
 !             --------------------------
 !
+ALLOCATE(NSIZE     (NL))
+ALLOCATE(XSUMVAL   (NL))
+ALLOCATE(XSUMVAL2  (NL))
+!
+NSIZE    (:) = 0.
+XSUMVAL  (:) = 0.
+XSUMVAL2 (:) = 0.
+!
+ CALL INI_SSOWORK
+!
 !-------------------------------------------------------------------------------
 !
 !*    5.      Uniform field is prescribed
@@ -225,9 +239,12 @@ IF (OZS) THEN
 !*    5.1     Use of imposed field
 !             --------------------
 !
-  CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
-  CALL READ_SURF(HFILETYPE,'DIM_FULL  ',IDIM_FULL,IRESP)
-  CALL GET_SIZE_FULL_n(HPROGRAM,IDIM_FULL,U%NSIZE_FULL,IZS)
+  CALL OPEN_AUX_IO_SURF(&
+                        HFILE,HFILETYPE,'FULL  ')
+  CALL READ_SURF(&
+                 HFILETYPE,'DIM_FULL  ',IDIM_FULL,IRESP)
+  CALL GET_SIZE_FULL_n(U, &
+                       HPROGRAM,IDIM_FULL,IZS)
   IF (IZS /= NL) THEN
     WRITE(ILUOUT,*) ' '
     WRITE(ILUOUT,*) '***********************************************************'
@@ -240,7 +257,8 @@ IF (OZS) THEN
     WRITE(ILUOUT,*) ' '
     CALL ABOR1_SFX('PGD_OROGRAPHY: ATMOSPHERIC PRESCRIBED OROGRAPHY DOES NOT HAVE THE CORRECT NB OF POINTS')
   END IF
-  CALL READ_SURF(HFILETYPE,'ZS',U%XZS(:),IRESP)
+  CALL READ_SURF(&
+                 HFILETYPE,'ZS',U%XZS(:),IRESP)
   CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
   !
   USS%XAVG_ZS(:)    = U%XZS(:)
@@ -259,6 +277,10 @@ IF (OZS) THEN
   USS%XSSO_ANIS(:)  = 0.
   USS%XSSO_DIR(:)   = 0.
   USS%XSSO_SLOPE(:) = 0.
+
+  DEALLOCATE(NSIZE    )
+  DEALLOCATE(XSUMVAL  )
+  DEALLOCATE(XSUMVAL2 )
 
   IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',1,ZHOOK_HANDLE)
   RETURN
@@ -287,6 +309,10 @@ ELSE IF (XUNIF_ZS/=XUNDEF) THEN
   USS%XSSO_DIR(:)   = 0.
   USS%XSSO_SLOPE(:) = 0.
 
+  DEALLOCATE(NSIZE    )
+  DEALLOCATE(XSUMVAL  )
+  DEALLOCATE(XSUMVAL2 )
+
   IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',1,ZHOOK_HANDLE)
   RETURN
 !
@@ -294,7 +320,6 @@ ELSE IF (XUNIF_ZS/=XUNDEF) THEN
 !             -------
 !
 ELSEIF (LEN_TRIM(YZS)==0) THEN
-
   WRITE(ILUOUT,*) ' '
   WRITE(ILUOUT,*) '***********************************************************'
   WRITE(ILUOUT,*) '* Error in orography preparation                          *'
@@ -303,29 +328,29 @@ ELSEIF (LEN_TRIM(YZS)==0) THEN
   WRITE(ILUOUT,*) ' '
   CALL ABOR1_SFX('PGD_OROGRAPHY: NO PRESCRIBED OROGRAPHY NOR INPUT FILE')
 !  
-ELSEIF (LIMP_ZS) THEN !LIMP_ZS (impose topo from input file at the same resolution)
+ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution)
 !
   IF(YFILETYPE=='NETCDF')THEN
      
 !      CALL ABOR1_SFX('Use another format than netcdf for topo input file with LIMP_ZS')
-    CALL READ_PGD_NETCDF(UG, U, USS, &
+     CALL READ_PGD_NETCDF(USS, &
                           HPROGRAM,'SURF  ','      ',YZS,'ZS                  ',U%XZS)
      
-    USS%XSIL_ZS(:)    = U%XZS(:)
-    USS%XAVG_ZS(:)    = U%XZS(:)
-    USS%XMIN_ZS(:)    = U%XZS(:)
-    USS%XMAX_ZS(:)    = U%XZS(:)
-    USS%XSSO_STDEV(:) = 0.
-    USS%XHO2IP(:)     = 0.
-    USS%XHO2IM(:)     = 0.
-    USS%XHO2JP(:)     = 0.
-    USS%XHO2JM(:)     = 0.
-    USS%XAOSIP(:)     = 0.
-    USS%XAOSIM(:)     = 0.
-    USS%XAOSJP(:)     = 0.
-    USS%XAOSJM(:)     = 0.
-    USS%XSSO_ANIS(:)  = 0.
-    USS%XSSO_DIR(:)   = 0.
+     USS%XSIL_ZS(:)    = U%XZS(:)
+     USS%XAVG_ZS(:)    = U%XZS(:)
+     USS%XMIN_ZS(:)    = U%XZS(:)
+     USS%XMAX_ZS(:)    = U%XZS(:)
+     USS%XSSO_STDEV(:) = 0.
+     USS%XHO2IP(:)     = 0.
+     USS%XHO2IM(:)     = 0.
+     USS%XHO2JP(:)     = 0.
+     USS%XHO2JM(:)     = 0.
+     USS%XAOSIP(:)     = 0.
+     USS%XAOSIM(:)     = 0.
+     USS%XAOSJP(:)     = 0.
+     USS%XAOSJM(:)     = 0.
+     USS%XSSO_ANIS(:)  = 0.
+     USS%XSSO_DIR(:)   = 0.
      
      
     ! read slope in file
@@ -333,73 +358,88 @@ ELSEIF (LIMP_ZS) THEN !LIMP_ZS (impose topo from input file at the same resoluti
       ALLOCATE(ZSLOPE(NL))
 
     ! Read field on the same grid as FORCING
-      CALL READ_PGD_NETCDF(UG, U, USS, &
+      CALL READ_PGD_NETCDF(USS, &
                           HPROGRAM,'SURF  ','      ',YSLOPE,'slope               ',ZSLOPE)
 
       DO JJ=1,NL
-        USS%XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
+       USS%XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
       END DO
       DEALLOCATE(ZSLOPE)     
+    ELSEIF (LEXPLICIT_SLOPE) THEN
+      CALL EXPLICIT_SLOPE(UG,&
+                          U%XZS,USS%XSSO_SLOPE)
     ELSE
       USS%XSSO_SLOPE=0.
     ENDIF
-      
+    
+    ! read aspect in file
+        IF (LEN_TRIM(YSLOPE)/=0) THEN
+            ALLOCATE(ZASPECT(NL))
+
+        ! Read field on the same grid as FORCING
+            CALL READ_PGD_NETCDF(USS, &
+                          HPROGRAM,'SURF  ','      ',YSLOPE,'aspect               ',ZASPECT)
+
+            DO JJ=1,NL
+                USS%XSSO_DIR(JJ)=ZASPECT(JJ)
+            END DO
+            DEALLOCATE(ZASPECT)
+        ELSE
+          USS%XSSO_DIR=0.
+        ENDIF
+     
+     
   ELSE
 #ifdef SFX_ASC
-    CFILEIN     = ADJUSTL(ADJUSTR(YZS)//'.txt')
+     CFILEIN     = ADJUSTL(ADJUSTR(YZS)//'.txt')
 #endif
 #ifdef SFX_FA
-    CFILEIN_FA  = ADJUSTL(ADJUSTR(YZS)//'.fa')
+     CFILEIN_FA  = ADJUSTL(ADJUSTR(YZS)//'.fa')
 #endif
 #ifdef SFX_LFI
-    CFILEIN_LFI = ADJUSTL(YZS)
+     CFILEIN_LFI = ADJUSTL(YZS)
 #endif
-    CALL INIT_IO_SURF_n(DTCO, U, YFILETYPE,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                         YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF     
 !   
-  CALL READ_SURF(YFILETYPE,'ZS',U%XZS(:),IRESP) 
-  CALL READ_SSO_n(U%NSIZE_FULL, U%XSEA, USS, YFILETYPE)
+  CALL READ_SURF(&
+                 YFILETYPE,'ZS',U%XZS(:),IRESP) 
+  CALL READ_SSO_n(&
+                  U, USS, &
+                  YFILETYPE)
 !
   CALL END_IO_SURF_n(YFILETYPE)
+!
+  DEALLOCATE(NSIZE    )
+  DEALLOCATE(XSUMVAL  )
+  DEALLOCATE(XSUMVAL2 )
 !
   IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',1,ZHOOK_HANDLE)
   RETURN
 !
 
-ELSE
-  !
-  ALLOCATE(NSIZE_ALL(U%NDIM_FULL,1))
-  ALLOCATE(XEXT_ALL (U%NDIM_FULL,2))
-  ALLOCATE(XALL     (U%NDIM_FULL,2,1))  
-  NSIZE_ALL(:,1) = 0.
-  XEXT_ALL (:,1) = -99999.
-  XEXT_ALL (:,2) = 99999.
-  XALL   (:,:,1) = 0.  
-  !
-  !-------------------------------------------------------------------------------
+END IF
+!
+!-------------------------------------------------------------------------------
+
 !
 !*    6.      Averages the field
 !             ------------------
 !
-  CALL TREAT_FIELD(UG, U, USS, &
-                  HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS, 'ZS                  ' )  
+ CALL TREAT_FIELD(UG, U, USS, &
+                  HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS,  &
+                   'ZS                  '                     )  
 !
-
-  DEALLOCATE(XSUMVAL )
-  !
-ENDIF  
-!
-IF (.NOT.ALLOCATED(NSIZE)) THEN
-  ALLOCATE(NSIZE(NL,1))
-  NSIZE(:,1) = 0
-ENDIF
+DEALLOCATE(XSUMVAL  )
+DEALLOCATE(XSUMVAL2 )
 !
 !-------------------------------------------------------------------------------
 !
 !*    7.      Coherence with land sea mask
 !             ----------------------------
 !
-WHERE (U%XSEA(:)==1. .AND. NSIZE(:,1)==0) NSIZE(:,1) = -1
+WHERE (PSEA(:)==1. .AND. NSIZE(:)==0) NSIZE(:) = -1
 !
 !-------------------------------------------------------------------------------
 !
@@ -410,16 +450,16 @@ WHERE (U%XSEA(:)==1. .AND. NSIZE(:,1)==0) NSIZE(:,1) = -1
 ! these points are probably small isolated islands, and a default value of 1m is assumed.
 !
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XAVG_ZS,   'average orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE,USS%XAVG_ZS,   'average orography',PDEF=1.)
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XSIL_ZS,   'silhouette orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE,USS%XSIL_ZS,   'silhouette orography',PDEF=1.)
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XMIN_ZS,   'minimum orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE,USS%XMIN_ZS,   'minimum orography',PDEF=1.)
  CALL INTERPOL_FIELD(UG, U, &
-                     HPROGRAM,ILUOUT,NSIZE(:,1),USS%XMAX_ZS,   'maximum orography',PDEF=1.)
+                     HPROGRAM,ILUOUT,NSIZE,USS%XMAX_ZS,   'maximum orography',PDEF=1.)
 !
-IFLAG(:) = NSIZE(:,1)
-WHERE (NSIZE(:,1)==1) IFLAG(:) = 0 ! only 1 data point was not enough for standard deviation
+IFLAG(:) = NSIZE(:)
+WHERE (NSIZE(:)==1) IFLAG(:) = 0 ! only 1 data point was not enough for standard deviation
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_STDEV,'standard deviation of orography',PDEF=0.)
 !
@@ -428,22 +468,22 @@ WHERE (NSIZE(:,1)==1) IFLAG(:) = 0 ! only 1 data point was not enough for standa
 !*    9.      Coherence with land sea mask
 !             ----------------------------
 !
-USS%XAVG_ZS   (:) = USS%XAVG_ZS   (:) * (1. - U%XSEA(:))
-USS%XSIL_ZS   (:) = USS%XSIL_ZS   (:) * (1. - U%XSEA(:))
+USS%XAVG_ZS   (:) = USS%XAVG_ZS   (:) * (1. - PSEA(:))
+USS%XSIL_ZS   (:) = USS%XSIL_ZS   (:) * (1. - PSEA(:))
 !
-WHERE (U%XSEA(:)==1.)
+WHERE (PSEA(:)==1.)
   USS%XSSO_STDEV(:) = XUNDEF
 END WHERE
 !
-WHERE (U%XWATER(:)==1.)
+WHERE (PWATER(:)==1.)
   USS%XSSO_STDEV(:) = 0.
 END WHERE
 !
-WHERE(U%XSEA(:)>0.)
+WHERE(PSEA(:)>0.)
   USS%XMIN_ZS(:) = 0.
 END WHERE
 !
-WHERE(U%XSEA(:)==1.)
+WHERE(PSEA(:)==1.)
   USS%XMAX_ZS(:) = 0.
 END WHERE
 !
@@ -465,7 +505,7 @@ SELECT CASE (COROGTYPE)
     U%XZS(:) = USS%XAVG_ZS(:)
   CASE ('ENV')
     U%XZS(:) = USS%XAVG_ZS(:)
-    WHERE (U%XSEA(:)<1.) U%XZS(:) = USS%XAVG_ZS(:) + XENV * USS%XSSO_STDEV
+    WHERE (PSEA(:)<1.) U%XZS(:) = USS%XAVG_ZS(:) + XENV * USS%XSSO_STDEV
   CASE ('SIL')
     U%XZS(:) = USS%XSIL_ZS(:)
   CASE ('MAX')
@@ -479,36 +519,43 @@ END SELECT
 !*   12.      Subgrid scale orography characteristics
 !             ---------------------------------------
 !
- CALL SSO(U, UG, USS, GSSO, GSSO_ANIS)
+ CALL SSO(UG, USS, &
+          GSSO,GSSO_ANIS,PSEA)
 !
-IFLAG(:) = NSIZE(:,1)
+IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GSSO(:))                 IFLAG(:) = 0
-WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
+WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
- CALL INTERPOL_FIELD(UG, U, &
+
+! read aspect in file
+IF (LEN_TRIM(YSLOPE)==0) THEN
+   CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_DIR,  'subgrid orography direction',PDEF=0.)
+END IF
+
 !
 IF (LEXPLICIT_SLOPE) THEN
-  CALL EXPLICIT_SLOPE(UG, U%NDIM_FULL, U%XZS, USS%XSSO_SLOPE) 
+  CALL EXPLICIT_SLOPE(UG, &
+                      U%XZS,USS%XSSO_SLOPE) 
 ELSEIF (LEN_TRIM(YSLOPE)==0) THEN
   CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_SLOPE,'subgrid orography slope',PDEF=0.)  
 END IF
 !
-IFLAG(:) = NSIZE(:,1)
+IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GSSO_ANIS(:))            IFLAG(:) = 0
-WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
+WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_ANIS, 'subgrid orography anisotropy',PDEF=0.)
 !
-WHERE (U%XSEA(:)==1.)
+WHERE (PSEA(:)==1.)
   USS%XSSO_ANIS (:) = XUNDEF
   USS%XSSO_DIR  (:) = XUNDEF
   USS%XSSO_SLOPE(:) = XUNDEF
 END WHERE
 !
-WHERE (U%XWATER(:)==1.)
+WHERE (PWATER(:)==1.)
   USS%XSSO_ANIS (:) = 1.
   USS%XSSO_DIR  (:) = 0.
   USS%XSSO_SLOPE(:) = 0.
@@ -519,11 +566,12 @@ END WHERE
 !*   13.      Subgrid scale orography roughness
 !             ---------------------------------
 !
- CALL SUBSCALE_AOS(U, UG, USS, GZ0EFFI, GZ0EFFJ)
+ CALL SUBSCALE_AOS(UG, USS, &
+                   GZ0EFFI,GZ0EFFJ,PSEA)
 !
-IFLAG(:) = NSIZE(:,1)
+IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GZ0EFFI(:))              IFLAG(:) = 0
-WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
+WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XAOSIP, 'subgrid orography A/S, direction i+',PDEF=0.)
  CALL INTERPOL_FIELD(UG, U, &
@@ -533,9 +581,9 @@ WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XHO2IM, 'subgrid orography h/2, direction i-',PDEF=0.)
 !
-IFLAG(:) = NSIZE(:,1)
+IFLAG(:) = NSIZE(:)
 WHERE(.NOT. GZ0EFFJ(:))              IFLAG(:) = 0
-WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
+WHERE(PSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XAOSJP, 'subgrid orography A/S, direction j+',PDEF=0.)
  CALL INTERPOL_FIELD(UG, U, &
@@ -545,7 +593,7 @@ WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XHO2JM, 'subgrid orography h/2, direction j-',PDEF=0.)
 !
-WHERE (U%XSEA(:)==1.)
+WHERE (PSEA(:)==1.)
   USS%XHO2IP(:) = XUNDEF
   USS%XHO2IM(:) = XUNDEF
   USS%XHO2JP(:) = XUNDEF
@@ -556,7 +604,7 @@ WHERE (U%XSEA(:)==1.)
   USS%XAOSJM(:) = XUNDEF
 END WHERE
 !
-WHERE (U%XWATER(:)==1.)
+WHERE (PWATER(:)==1.)
   USS%XHO2IP(:) = 0.
   USS%XHO2IM(:) = 0.
   USS%XHO2JP(:) = 0.

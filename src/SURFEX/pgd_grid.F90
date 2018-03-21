@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_GRID (UG, U, GCP, HPROGRAM,HFILE,HFILETYPE,OGRID,HDIR)
+      SUBROUTINE PGD_GRID (&
+                            UG, U, &
+                           HPROGRAM,HFILE,HFILETYPE,OGRID,HGRID,KGRID_PAR,PGRID_PAR)
 !     ##########################################################
 !!
 !!    PURPOSE
@@ -35,19 +33,21 @@
 !!    Original     01/2004
 !!    E. Martin    10/2007 IGN grid
 !!    P. Samuelsson  12/2012 Rotated lonlat
-!!    M. Moge      05/02/2015 parallelization (using local sizes, GET_MEAN_OF_COORD_SQRT_ll, SET_NAM_GRID_CONF_PROJ_LOCAL) + MPPDB_CHECK
-!!    M. Moge      01/03/2015 call SPLIT_GRID if CPROGRAM == 'PGD   ' + remove SET_NAM_GRID_CONF_PROJ_LOCAL
-!!    M. Moge      01/03/2015 change in the input arguments of PGD_GRID_IO_INIT : passing IDXRATIO, IDYRATIO
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
 !            -----------
 !
+!
+!
+!
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t 
 !
-USE MODD_SURFEX_MPI,     ONLY : NSIZE, NPIO, NRANK, NCOMM, NPROC
+USE MODD_SURFEX_MPI,     ONLY : NSIZE, NINDEX, NPIO, NRANK
+USE MODD_SURFEX_OMP,     ONLY : NINDX2SFX, NWORK, NWORK2, XWORK, XWORK2, XWORK3, &
+                                NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
 !
 USE MODD_PGD_GRID,       ONLY : NL, XGRID_PAR, NGRID_PAR, XMESHLENGTH
 USE MODN_PGD_GRID
@@ -61,68 +61,45 @@ USE MODI_CLOSE_NAMELIST
 USE MODI_GET_LUOUT
 USE MODI_READ_NAM_GRIDTYPE
 USE MODI_LATLON_GRID
-USE MODI_ABOR1_SFX
-USE MODI_PGD_GRID_IO_INIT
-USE MODI_GATHER_AND_WRITE_MPI
 !
 USE MODE_POS_SURF
 !
-#ifdef MNH_PARALLEL
-USE MODD_CONF, ONLY : CPROGRAM
-USE MODE_TOOLS_ll, ONLY : GET_MEAN_OF_COORD_SQRT_ll
-!
-USE MODI_GET_SIZE_FULL_n
-USE MODI_SPLIT_GRID
-#endif
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-IMPLICIT NONE
+USE MODI_ABOR1_SFX
 !
-#ifdef SFX_MPI
-INCLUDE "mpif.h"
-#endif
+IMPLICIT NONE
 !
 !*    0.1    Declaration of dummy arguments
 !            ------------------------------
 !
+!
+!
+!
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=6),  INTENT(IN)   :: HPROGRAM   ! program calling the surface
  CHARACTER(LEN=28), INTENT(IN)   :: HFILE      ! atmospheric file name
  CHARACTER(LEN=6),  INTENT(IN)   :: HFILETYPE  ! atmospheric file type
 LOGICAL,           INTENT(IN)   :: OGRID      ! .true. if grid is imposed by atm. model
- CHARACTER(LEN=1), INTENT(IN), OPTIONAL :: HDIR
+ CHARACTER(LEN=10), INTENT(OUT)  :: HGRID      ! grid type
+INTEGER,           INTENT(OUT)  :: KGRID_PAR  ! size of PGRID_PAR
+REAL, DIMENSION(:), POINTER     :: PGRID_PAR  ! parameters defining this grid
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL, DIMENSION(:), ALLOCATABLE :: ZMESH_SIZE
- CHARACTER(LEN=1) :: YDIR
-INTEGER :: ILUOUT ! output listing logical unit
-INTEGER :: ILUNAM ! namelist file  logical unit
-INTEGER :: IIMAX_ll, IJMAX_ll ! global size of son model
-INTEGER :: ISIZE_FULL
+INTEGER           :: ILUOUT ! output listing logical unit
+INTEGER           :: ILUNAM ! namelist file  logical unit
 LOGICAL           :: GFOUND ! Flag true if namelist is present
-LOGICAL :: GRECT
-INTEGER :: INFOMPI
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.3    Declaration of namelists
 !            ------------------------
-!
- INTEGER :: IXOR = 1            ! position of modified bottom left point
- INTEGER :: IYOR = 1            ! according to initial grid
- INTEGER :: IXSIZE = -999       ! number of grid meshes in initial grid to be
- INTEGER :: IYSIZE = -999       ! covered by the modified grid
- INTEGER :: IDXRATIO = 1        ! resolution ratio between modified grid
- INTEGER :: IDYRATIO = 1        ! and initial grid
-NAMELIST/NAM_INIFILE_CONF_PROJ/IXOR,IYOR,IXSIZE,IYSIZE,IDXRATIO,IDYRATIO
 !
 !------------------------------------------------------------------------------
 !
@@ -130,12 +107,6 @@ NAMELIST/NAM_INIFILE_CONF_PROJ/IXOR,IYOR,IXSIZE,IYSIZE,IDXRATIO,IDYRATIO
 !             --------
 !
 IF (LHOOK) CALL DR_HOOK('PGD_GRID',0,ZHOOK_HANDLE)
-!
-YDIR = 'H'
-IF (PRESENT(HDIR)) YDIR = HDIR
-!
-IF (ASSOCIATED(XGRID_PAR)) DEALLOCATE(XGRID_PAR)
-!
  CALL DEFAULT_GRID(HPROGRAM,CGRID)
 !
 YINIFILE  = '                         '
@@ -153,7 +124,6 @@ END IF
 !             -------------
 !
 IF (.NOT. OGRID) THEN
-!
   CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
 !
 !------------------------------------------------------------------------------
@@ -191,54 +161,9 @@ END IF
 !             -----------------
 !
 IF (LEN_TRIM(YINIFILETYPE)>0 .AND. LEN_TRIM(YINIFILE)>0 ) THEN
-  !
   IF (YINIFILETYPE=='MESONH' .OR. YINIFILETYPE=='LFI   ' .OR. YINIFILETYPE=='ASCII ' .OR. YINIFILETYPE=='NC    ') THEN
-    !
-    CALL GRID_FROM_FILE(U,GCP,UG%XGRID_FULL_PAR,HPROGRAM,YINIFILE,YINIFILETYPE,&
-                        OGRID,CGRID,NGRID_PAR,XGRID_PAR,NL,YDIR)
-    !
-    UG%G%CGRID  = CGRID
-    !
-    IF ( CGRID == "IGN       " .OR. CGRID == "GAUSS     " .OR. CGRID == "NONE      " ) THEN
-      GRECT = .FALSE.
-    ELSE
-      GRECT = .TRUE.
-    ENDIF
-    !
-    ! on lit la taille globale du modele fils dans la namelist
-    CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-    CALL POSNAM(ILUNAM,'NAM_INIFILE_CONF_PROJ',GFOUND,ILUOUT)
-    IF (GFOUND) THEN 
-      READ(UNIT=ILUNAM,NML=NAM_INIFILE_CONF_PROJ)
-      IIMAX_ll = IXSIZE*IDXRATIO
-      IJMAX_ll = IYSIZE*IDYRATIO
-    ENDIF
-    CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-    !
-    !*    3.      Additional actions for I/O
-    !
-    IF (GFOUND) THEN 
-#ifdef MNH_PARALLEL
-      CALL PGD_GRID_IO_INIT(HPROGRAM,UG,NGRID_PAR,XGRID_PAR,CGRID,GRECT,IIMAX_ll,IJMAX_ll,IDXRATIO,IDYRATIO)
-#else
-      CALL PGD_GRID_IO_INIT(HPROGRAM,UG)
-#endif
-      IF (YDIR/='H') U%NDIM_FULL = NL
-    ELSE
-#ifdef MNH_PARALLEL
-      CALL PGD_GRID_IO_INIT(HPROGRAM,UG,NGRID_PAR,XGRID_PAR,CGRID,GRECT)
-#else
-      CALL PGD_GRID_IO_INIT(HPROGRAM,UG)
-#endif
-    ENDIF
-    !
-#ifdef MNH_PARALLEL
-    CALL GET_SIZE_FULL_n(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,ISIZE_FULL)
-    U%NSIZE_FULL = ISIZE_FULL
-    NL = U%NSIZE_FULL
-#else
-    U%NSIZE_FULL = NL    
-#endif
+    CALL GRID_FROM_FILE(&
+                        HPROGRAM,YINIFILE,YINIFILETYPE,OGRID,CGRID,NGRID_PAR,XGRID_PAR,NL)
   ELSE
     CALL ABOR1_SFX('PGD_GRID: FILE TYPE NOT SUPPORTED '//HFILETYPE//' FOR FILE '//HFILE)
   END IF
@@ -257,60 +182,51 @@ ELSE
 !
   ELSE
 !
-    CALL READ_NAM_GRIDTYPE(GCP,UG%XGRID_FULL_PAR,U%NDIM_FULL,HPROGRAM,CGRID,NGRID_PAR,XGRID_PAR,NL,YDIR)
+    CALL READ_NAM_GRIDTYPE(HPROGRAM,CGRID,NGRID_PAR,XGRID_PAR,NL)
 !
-    !*    3.      Additional actions for I/O
-    !
-    UG%G%CGRID  = CGRID
-    !
-#ifdef MNH_PARALLEL
-    CALL PGD_GRID_IO_INIT(HPROGRAM,UG,NGRID_PAR,XGRID_PAR)
-#else
-    CALL PGD_GRID_IO_INIT(HPROGRAM,UG)
-#endif
-    IF (YDIR/='H') U%NDIM_FULL = NL
-#ifdef MNH_PARALLEL
-    CALL GET_SIZE_FULL_n(HPROGRAM,NL,U%NSIZE_FULL,ISIZE_FULL)
-    U%NSIZE_FULL = ISIZE_FULL
-    NL = U%NSIZE_FULL
-#endif
-    !
-  END IF  
+  END IF
 
-#ifdef MNH_PARALLEL
-  ! IF we are in PREP_PGD, we need to split the grid. Otherwise, the grid was read in parallel and is already splitted
-  IF ( CPROGRAM == 'PGD   ') THEN
-    CALL SPLIT_GRID(UG,U,'MESONH',NGRID_PAR,XGRID_PAR)
-  ENDIF
-#endif
-    
 END IF
 !
-IF (HDIR=='A') THEN
-  UG%NGRID_FULL_PAR = NGRID_PAR
-  ALLOCATE(UG%XGRID_FULL_PAR(UG%NGRID_FULL_PAR))
-  UG%XGRID_FULL_PAR = XGRID_PAR        
+HGRID     = CGRID
+U%NDIM_FULL = NL
+NSIZE     = U%NDIM_FULL
+IF (.NOT.ALLOCATED(NINDEX)) THEN
+  ALLOCATE(NINDEX(U%NDIM_FULL))
+  NINDEX(:) = 0
+ENDIF
+NINDX2SFX    = U%NDIM_FULL
+ALLOCATE(NWORK(U%NDIM_FULL))
+ALLOCATE(XWORK(U%NDIM_FULL))
+ALLOCATE(NWORK2(U%NDIM_FULL,10))
+ALLOCATE(XWORK2(U%NDIM_FULL,10))
+ALLOCATE(XWORK3(U%NDIM_FULL,10,10))
+IF (NRANK==NPIO) THEN
+  ALLOCATE(NWORK_FULL(U%NDIM_FULL))
+  ALLOCATE(XWORK_FULL(U%NDIM_FULL))
+  ALLOCATE(NWORK2_FULL(U%NDIM_FULL,10))
+  ALLOCATE(XWORK2_FULL(U%NDIM_FULL,10))
 ELSE
-  UG%G%NGRID_PAR = NGRID_PAR
-  ALLOCATE(UG%G%XGRID_PAR(UG%G%NGRID_PAR))
-  UG%G%XGRID_PAR = XGRID_PAR
+  ALLOCATE(NWORK_FULL(0))
+  ALLOCATE(XWORK_FULL(0))
+  ALLOCATE(NWORK2_FULL(0,0))
+  ALLOCATE(XWORK2_FULL(0,0))
 ENDIF
 !
-IF (YDIR=='A') THEN  
-  CALL DR_HOOK('PGD_GRID',1,ZHOOK_HANDLE)
-  RETURN
-ENDIF
+KGRID_PAR = NGRID_PAR
+ALLOCATE(PGRID_PAR(KGRID_PAR))
+PGRID_PAR = XGRID_PAR
 !
 !------------------------------------------------------------------------------
 !
 !*    6.      Latitude and longitude
 !             ----------------------
 !
-ALLOCATE(UG%G%XLAT       (NL))
-ALLOCATE(UG%G%XLON       (NL))
-ALLOCATE(UG%G%XMESH_SIZE (NL))
-ALLOCATE(UG%XJPDIR       (NL))
- CALL LATLON_GRID(UG%G,NL,UG%XJPDIR)
+ALLOCATE(UG%XLAT       (NL))
+ALLOCATE(UG%XLON       (NL))
+ALLOCATE(UG%XMESH_SIZE (NL))
+ALLOCATE(UG%XJPDIR     (NL))
+ CALL LATLON_GRID(CGRID,NGRID_PAR,NL,ILUOUT,XGRID_PAR,UG%XLAT,UG%XLON,UG%XMESH_SIZE,UG%XJPDIR)
 !
 !------------------------------------------------------------------------------
 !
@@ -318,19 +234,7 @@ ALLOCATE(UG%XJPDIR       (NL))
 !             --------------------------------
 !
 !* in meters
-#ifdef MNH_PARALLEL
- CALL GET_MEAN_OF_COORD_SQRT_ll(UG%G%XMESH_SIZE,U%NSIZE_FULL,U%NDIM_FULL,XMESHLENGTH)
-#else
-IF (NRANK==NPIO) ALLOCATE(ZMESH_SIZE(U%NDIM_FULL))
-CALL GATHER_AND_WRITE_MPI(UG%G%XMESH_SIZE,ZMESH_SIZE)
-IF (NRANK==NPIO) XMESHLENGTH = SUM ( SQRT(ZMESH_SIZE) ) / MAX(U%NDIM_FULL,1)
-IF (NPROC>1) THEN
-#ifdef SFX_MPI  
-  CALL MPI_BCAST(XMESHLENGTH,KIND(XMESHLENGTH)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
-#endif
-ENDIF
-IF (NRANK==NPIO) DEALLOCATE(ZMESH_SIZE)
-#endif
+XMESHLENGTH = SUM ( SQRT(UG%XMESH_SIZE) ) / NL
 !
 !* in degrees (of latitude)
 XMESHLENGTH = XMESHLENGTH *180. / XPI / XRADIUS

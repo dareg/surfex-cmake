@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !#######################
 MODULE MODI_Z0V_FROM_LAI
 !#######################
@@ -43,15 +39,16 @@ REAL,   DIMENSION(SIZE(PLAI,1),SIZE(PLAI,2)) :: PZ0  ! vegetation roughness
 !
 END FUNCTION Z0V_FROM_LAI_2D
 !
-    FUNCTION Z0V_FROM_LAI_VEGTYPE(PLAI,PH_TREE,OAGRI_TO_GRASS) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
+REAL,   DIMENSION(:),   INTENT(IN) :: PVEGTYPE     ! type of vegetation
 LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI)) :: PZ0  ! vegetation roughness
 !
-END FUNCTION Z0V_FROM_LAI_VEGTYPE
+END FUNCTION Z0V_FROM_LAI_PATCH
 !
 END INTERFACE
 !
@@ -102,6 +99,11 @@ END MODULE MODI_Z0V_FROM_LAI
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -193,6 +195,11 @@ END FUNCTION Z0V_FROM_LAI_0D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -282,6 +289,11 @@ END FUNCTION Z0V_FROM_LAI_1D
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB  
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
@@ -337,7 +349,7 @@ END FUNCTION Z0V_FROM_LAI_2D
 !
 !
 !   ###########################################################
-    FUNCTION Z0V_FROM_LAI_VEGTYPE(PLAI,PH_TREE,OAGRI_TO_GRASS) RESULT(PZ0)
+    FUNCTION Z0V_FROM_LAI_PATCH(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS) RESULT(PZ0)
 !   ###########################################################
 !!
 !!    PURPOSE
@@ -377,6 +389,11 @@ END FUNCTION Z0V_FROM_LAI_2D
 !*       0.     DECLARATIONS
 !               ------------
 !
+USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,     & 
+                                  NVT_BONE, NVT_TRBE, NVT_C3, NVT_C4,     &
+                                  NVT_IRR, NVT_GRAS, NVT_TROG,NVT_PARK,   &
+                                  NVT_TRBD, NVT_TEBE, NVT_TENE, NVT_BOBD, &
+                                  NVT_BOND, NVT_BOGR, NVT_SHRB
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
@@ -389,6 +406,7 @@ IMPLICIT NONE
 !
 REAL,   DIMENSION(:),   INTENT(IN) :: PLAI         ! Leaf area Index
 REAL,   DIMENSION(:),   INTENT(IN) :: PH_TREE      ! height of trees
+REAL,   DIMENSION(:),   INTENT(IN) :: PVEGTYPE     ! type of vegetation
 LOGICAL,                INTENT(IN) :: OAGRI_TO_GRASS
 !
 REAL,   DIMENSION(SIZE(PLAI))      :: PZ0          ! vegetation roughness
@@ -401,19 +419,17 @@ REAL, DIMENSION(SIZE(PLAI)) :: ZH_VEG          ! height for each type
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_VEGTYPE',0,ZHOOK_HANDLE)
-ZH_VEG(:) = VEG_HEIGHT_FROM_LAI(PLAI,PH_TREE,OAGRI_TO_GRASS)
+IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_PATCH',0,ZHOOK_HANDLE)
+ZH_VEG(:) = VEG_HEIGHT_FROM_LAI(PLAI,PH_TREE,PVEGTYPE,OAGRI_TO_GRASS)
 !
-PZ0(:) = XUNDEF
-!
-WHERE(ZH_VEG(:)/=XUNDEF) PZ0 (:) = MAX(0.001, 0.13*ZH_VEG(:)) ! rugosite pour chaque vegtype
+PZ0 (:) = MAX(0.001, 0.13*ZH_VEG(:)) ! rugosite pour chaque vegtype
 !-----------------------------------------------------------------
 !
 WHERE (PLAI(:) == XUNDEF)
   PZ0(:) = XUNDEF
 END WHERE
-IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_VEGTYPE',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_PATCH',1,ZHOOK_HANDLE)
 !
 !
-END FUNCTION Z0V_FROM_LAI_VEGTYPE
+END FUNCTION Z0V_FROM_LAI_PATCH
 !

@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !#########################################################################
-SUBROUTINE LATLON_GRIDTYPE_GAUSS(G,KL,PDIR)
+SUBROUTINE LATLON_GRIDTYPE_GAUSS(KGRID_PAR,KL,PGRID_PAR,PLAT,PLON,PMESH_SIZE,PDIR)
 !#########################################################################
 !
 !!****  *LATLON_GRIDTYPE_GAUSS* - routine to get the horizontal geographic fields
@@ -37,8 +33,6 @@ SUBROUTINE LATLON_GRIDTYPE_GAUSS(G,KL,PDIR)
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
-!
 USE MODE_GRIDTYPE_GAUSS
 !
 USE MODD_CSTS, ONLY : XRADIUS, XPI
@@ -52,9 +46,12 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(GRID_t), INTENT(INOUT) :: G
-!
+INTEGER,                    INTENT(IN)  :: KGRID_PAR  ! size of PGRID_PAR
 INTEGER,                    INTENT(IN)  :: KL         ! number of points
+REAL, DIMENSION(KGRID_PAR), INTENT(IN)  :: PGRID_PAR  ! parameters defining this grid
+REAL, DIMENSION(KL),        INTENT(OUT) :: PLAT       ! latitude  (degrees)
+REAL, DIMENSION(KL),        INTENT(OUT) :: PLON       ! longitude (degrees)
+REAL, DIMENSION(KL),        INTENT(OUT) :: PMESH_SIZE ! mesh size (m2)
 REAL, DIMENSION(KL),        INTENT(OUT) :: PDIR ! direction of main grid Y axis (deg. from N, clockwise)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -67,7 +64,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !              ------------------
 !
 IF (LHOOK) CALL DR_HOOK('LATLON_GRIDTYPE_GAUSS',0,ZHOOK_HANDLE)
- CALL GET_GRIDTYPE_GAUSS(G%XGRID_PAR,PLAT=G%XLAT,PLON=G%XLON,PMESH_SIZE=G%XMESH_SIZE)
+ CALL GET_GRIDTYPE_GAUSS(PGRID_PAR,PLAT=PLAT,PLON=PLON,PMESH_SIZE=PMESH_SIZE)
 !
 !-----------------------------------------------------------------------------
 !

@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE RADIATIVE_TRANSFERT(OAGRI_TO_GRASS, PVEGTYPE,          &
             PALBVIS_VEG, PALBVIS_SOIL, PALBNIR_VEG, PALBNIR_SOIL, &
@@ -64,8 +60,7 @@ USE MODD_CO2V_PAR,       ONLY : XPARCF, XLAI_SHADE,            &
                                 XSSA_SUP_PIR, XSSA_INF_PIR       ! single scatering albedo (NIR)
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVT_C3, NVT_C4, &
-                                NVT_IRR, NVT_GRAS, &
-                                NVT_C3W, NVT_C3S
+                                NVT_IRR, NVT_GRAS
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
@@ -144,9 +139,7 @@ OSHADE(:)= .TRUE.
 DO JJ = 1, SIZE(PLAI)
 ! CD value calculated for patch with largest fraction ?
   IDMAX = MAXLOC(PVEGTYPE(JJ,:))    
-  IF(OAGRI_TO_GRASS.AND. &
-      (IDMAX(1)==NVT_C3 .OR. IDMAX(1)==NVT_C3W .OR. IDMAX(1)==NVT_C3S .OR. IDMAX(1)==NVT_C4 .OR. IDMAX(1)==NVT_IRR)) &
-        IDMAX(1)=NVT_GRAS
+  IF(OAGRI_TO_GRASS.AND.(IDMAX(1)==NVT_C3.OR.IDMAX(1)==NVT_C4.OR.IDMAX(1)==NVT_IRR))IDMAX(1)=NVT_GRAS
   IF (PLAI(JJ).LT.XLAI_SHADE(IDMAX(1))) OSHADE(JJ) = .FALSE.
   ZB_INF(JJ) = XXB_INF(IDMAX(1))
   ZB_SUP(JJ) = XXB_SUP(IDMAX(1))

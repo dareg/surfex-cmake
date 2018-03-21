@@ -1,9 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE SOILTEMP_ARP_PAR (IO, HPROGRAM)
+      SUBROUTINE SOILTEMP_ARP_PAR (I, &
+                                   HPROGRAM,OTEMP_ARP,KTEMPLAYER_ARP)
 !     ##############################################################
 !
 !!**** *SOILTEMP_ARP_PAR* Impose special pseudo depth for "force-restore"
@@ -41,7 +38,8 @@
 !*    0.     DECLARATION
 !            -----------
 !
-USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+!
+USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_READ_NAMELIST, ONLY : LNAM_READ
@@ -67,10 +65,11 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_t), INTENT(INOUT) :: I
 !
-
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
+LOGICAL,             INTENT(OUT)   :: OTEMP_ARP
+INTEGER,             INTENT(OUT)   :: KTEMPLAYER_ARP
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -119,7 +118,7 @@ ENDIF
 !*    3.      Consistency
 !             -----------
 !
-IF(LTEMP_ARP.AND.IO%CISBA=='DIF')THEN
+IF(LTEMP_ARP.AND.I%CISBA=='DIF')THEN
    LTEMP_ARP=.FALSE.
    WRITE(ILUOUT,*)'LTEMP_ARP put at False because you use the ISBA-DF scheme'
 ENDIF
@@ -147,31 +146,31 @@ ENDIF
 !
 IF(LTEMP_ARP)THEN
 !
-  ALLOCATE(IO%XSODELX(NTEMPLAYER_ARP))
+  ALLOCATE(I%XSODELX(NTEMPLAYER_ARP))
 !
   IF(ALL(SODELX(:)==XUNDEF))THEN
 !          
-    IO%XSODELX(1)=0.5
-    IO%XSODELX(2)=1.5
-    IO%XSODELX(3)=4.5
-    IO%XSODELX(4)=13.5
-    WRITE(ILUOUT,*)'SODELX default values : ',IO%XSODELX(:)
+    I%XSODELX(1)=0.5
+    I%XSODELX(2)=1.5
+    I%XSODELX(3)=4.5
+    I%XSODELX(4)=13.5
+    WRITE(ILUOUT,*)'SODELX default values : ',I%XSODELX(:)
 !    
   ELSE
 !          
-    IO%XSODELX(:)=SODELX(1:NTEMPLAYER_ARP)
-    WRITE(ILUOUT,*)'SODELX imposed to : ',IO%XSODELX(:)
+    I%XSODELX(:)=SODELX(1:NTEMPLAYER_ARP)
+    WRITE(ILUOUT,*)'SODELX imposed to : ',I%XSODELX(:)
 !    
   ENDIF
 !
 ELSE
 !
-  ALLOCATE(IO%XSODELX(0))
+  ALLOCATE(I%XSODELX(0))
 !
 ENDIF
 !
-IO%LTEMP_ARP     =LTEMP_ARP
-IO%NTEMPLAYER_ARP=NTEMPLAYER_ARP
+OTEMP_ARP     =LTEMP_ARP
+KTEMPLAYER_ARP=NTEMPLAYER_ARP
 IF (LHOOK) CALL DR_HOOK('SOILTEMP_ARP_PAR',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

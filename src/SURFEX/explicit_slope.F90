@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########################################################################
-SUBROUTINE EXPLICIT_SLOPE (UG,KDIM_FULL, &
+SUBROUTINE EXPLICIT_SLOPE (UG, &
                            PZS,PSSO_SLOPE)
 !     #########################################################################
 !!    AUTHOR
@@ -17,10 +13,9 @@ SUBROUTINE EXPLICIT_SLOPE (UG,KDIM_FULL, &
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+
 !
-USE MODI_READ_AND_SEND_MPI
-USE MODI_GATHER_AND_WRITE_MPI
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 !
 USE MODI_GET_GRID_DIM
 USE MODI_GET_MESH_DIM
@@ -31,7 +26,6 @@ IMPLICIT NONE
 !
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
-INTEGER, INTENT(IN) :: KDIM_FULL
 REAL,DIMENSION(:),INTENT(IN)::PZS ! resolved model orography
 REAL,DIMENSION(:),INTENT(OUT)::PSSO_SLOPE ! resolved slope tangent
 
@@ -65,9 +59,6 @@ REAL, DIMENSION(:),ALLOCATABLE :: ZYHAT  ! Y coordinate
 REAL,DIMENSION(:), ALLOCATABLE :: ZDX        ! grid mesh size in x direction
 REAL,DIMENSION(:), ALLOCATABLE  :: ZDY       ! grid mesh size in y direction
 
-REAL, DIMENSION(:), ALLOCATABLE :: ZZS0
-REAL, DIMENSION(:), ALLOCATABLE :: ZSSO_SLOPE0
-!
 ! parameters
 REAL,    PARAMETER :: XPI=4.*ATAN(1.)  ! Pi
 INTEGER, PARAMETER :: JPHEXT = 1 ! number of points around the physical domain
@@ -88,7 +79,7 @@ REAL                   :: ZSURF    ! surface of 4 triangles
 !*    1.1     Gets the geometry of the grid
 !            -----------------------------
 !
-CALL GET_GRID_DIM(UG%G%CGRID,SIZE(UG%XGRID_FULL_PAR),UG%XGRID_FULL_PAR,GRECT,IX,IY)
+CALL GET_GRID_DIM(UG%CGRID,SIZE(UG%XGRID_PAR),UG%XGRID_PAR,GRECT,IX,IY)
 !
 INNX=IX+2
 INNY=IY+2
@@ -101,18 +92,17 @@ INNY=IY+2
 ALLOCATE(ZDX (IX*IY))
 ALLOCATE(ZDY (IX*IY))
 
-CALL GET_MESH_DIM(UG%G%CGRID,SIZE(UG%XGRID_FULL_PAR),IX*IY,UG%XGRID_FULL_PAR,ZDX,ZDY,UG%G%XMESH_SIZE)
+
+CALL GET_MESH_DIM(UG%CGRID,SIZE(UG%XGRID_PAR),IX*IY,UG%XGRID_PAR,ZDX,ZDY,UG%XMESH_SIZE)
+
 
 !
 !*    2.     If grid is not rectangular, nothing is done
 !            -------------------------------------------
 !
- ALLOCATE(ZZS0(KDIM_FULL))
- CALL GATHER_AND_WRITE_MPI(PZS,ZZS0)
- !
 !IF (.NOT. GRECT) RETURN
 !
-IF (SIZE(ZZS0) /= IX * IY) RETURN
+IF (SIZE(PZS) /= IX * IY) RETURN
 !
 !-------------------------------------------------------------------------------
 !
@@ -124,12 +114,10 @@ ALLOCATE(ZZSL (INNX,INNY))
 
 DO JY=1,IY
   DO JX=1,IX
-    ZZS (JX,JY) = ZZS0 ( JX + (JY-1)*IX ) 
+    ZZS (JX,JY) = PZS ( JX + (JY-1)*IX ) 
   END DO
 END DO
 
-DEALLOCATE(ZZS0)
-!
 ZZSL(2:INNX-1,2:INNY-1) = ZZS(:,:)
 ZZSL(1,:) = ZZSL(2,:)
 ZZSL(INNX,:) = ZZSL(INNX-1,:)
@@ -238,17 +226,13 @@ DEALLOCATE(ZZSL)
 DEALLOCATE(ZZS)
 DEALLOCATE(ZZS_XY)
 DEALLOCATE(ZMAP)
-!
-ALLOCATE(ZSSO_SLOPE0(KDIM_FULL))
-!
+
 DO JY=1,IY
   DO JX=1,IX
-    ZSSO_SLOPE0( JX + (JY-1)*IX )=ZSSO_SLOPE(JX,JY)
+    PSSO_SLOPE( JX + (JY-1)*IX )=ZSSO_SLOPE(JX,JY)
   END DO
 END DO
-!
-CALL READ_AND_SEND_MPI(ZSSO_SLOPE0,PSSO_SLOPE)
-!
-DEALLOCATE(ZSSO_SLOPE0)
-!
+
+
+
 END SUBROUTINE EXPLICIT_SLOPE

@@ -1,18 +1,14 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n (FM, DST, SLT, HPROGRAM, HCOUPLING,                &
-                                       PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, &
-                                       PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF,    &
-                                       PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,     &
-                                       PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS,   &
-                                       PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,&
-                                       PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0,    &
-                                       PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF,           &
-                                       PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,            &
-                                       PPEQ_B_COEF, HTEST                            )  
+SUBROUTINE COUPLING_FLAKE_OROGRAPHY_n (FM, DST, SLT, &
+                                       HPROGRAM, HCOUPLING,                            &
+                 PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, &
+                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,          &
+                 PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
+                 PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
+                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
+                 PPEW_A_COEF, PPEW_B_COEF,                                                   &
+                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
+                 HTEST                                                                       )  
 !     ###############################################################################
 !
 !!****  *COUPLING_FLAKE_OROGRAPHY_n * - Modifies the input forcing if not
@@ -198,14 +194,14 @@ ELSE
 !
 ENDIF
 !
- CALL COUPLING_FLAKE_SBL_n(FM%SB, FM%CHF, FM%DFO, FM%DF, FM%DFC, FM%DMF, FM%F, DST, SLT,     &
-                           HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME,              &
-                           KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PU, PV,  &
-                           ZQA, ZTA, ZRHOA, PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, &
-                           PSW_BANDS, ZPS, ZPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,         &
-                           PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,          &
-                           PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF,      &
-                           ZPEQ_B_COEF, HTEST )
+ CALL COUPLING_FLAKE_SBL_n(FM, DST, SLT, &
+                            HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, &
+                            KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PU, PV, &
+                            ZQA, ZTA, ZRHOA, PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW, PDIR_SW, PSCA_SW, &
+                            PSW_BANDS, ZPS, ZPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, &
+                            PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, &
+                            PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF, &
+                            ZPEQ_B_COEF, HTEST )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_FLAKE_OROGRAPHY_N',1,ZHOOK_HANDLE)
 !

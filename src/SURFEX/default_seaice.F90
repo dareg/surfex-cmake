@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE DEFAULT_SEAICE(HPROGRAM,                                   &
                           HINTERPOL_SIC, HINTERPOL_SIT, PFREEZING_SST,&
@@ -432,7 +428,7 @@ xhsimin = .2
 !
 alblc = 0.
 xlmelt = 3.e-3
-xswhdfr = 1.00
+xswhdfr = 0.95
 albyngi = 1.
 albimlt = 0.56
 albsmlt = 0.77

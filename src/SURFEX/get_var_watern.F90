@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE GET_VAR_WATER_n (DFO, DF, DWO, DW, &
+      SUBROUTINE GET_VAR_WATER_n (DGF, DGW, &
                                   HPROGRAM,KI,HWATER,PQS,PZ0,PZ0H)
 !     ###########################################################
 !
@@ -38,7 +34,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
+!
+USE MODD_DIAG_FLAKE_n, ONLY : DIAG_FLAKE_t
+USE MODD_DIAG_WATFLUX_n, ONLY : DIAG_WATFLUX_t
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
@@ -53,10 +51,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DFO
-TYPE(DIAG_t), INTENT(INOUT) :: DF
-TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DWO
-TYPE(DIAG_t), INTENT(INOUT) :: DW
+TYPE(DIAG_FLAKE_t), INTENT(INOUT) :: DGF
+TYPE(DIAG_WATFLUX_t), INTENT(INOUT) :: DGW
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
  CHARACTER(LEN=6),     INTENT(IN)     :: HWATER
@@ -96,14 +92,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_WATFLX_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DWO%LSURF_VARS) THEN 
-        PQS      = DW%XQS      
+IF (DGW%LSURF_VARS) THEN 
+        PQS      = DGW%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DWO%LCOEF) THEN 
-        PZ0      = DW%XZ0
-        PZ0H     = DW%XZ0H
+IF (DGW%LCOEF) THEN 
+        PZ0      = DGW%XZ0
+        PZ0H     = DGW%XZ0H
 ELSE 
         PZ0      = XUNDEF
         PZ0H     = XUNDEF
@@ -125,14 +121,14 @@ IF (LHOOK) CALL DR_HOOK('GET_VAR_FLAKE_N',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !-------------------------------------------------------------------------------
 !
-IF (DFO%LSURF_VARS) THEN 
-        PQS      = DF%XQS      
+IF (DGF%LSURF_VARS) THEN 
+        PQS      = DGF%XQS      
 ELSE 
         PQS      = XUNDEF      
 ENDIF           
-IF (DFO%LCOEF) THEN 
-        PZ0      = DF%XZ0
-        PZ0H     = DF%XZ0H
+IF (DGF%LCOEF) THEN 
+        PZ0      = DGF%XZ0
+        PZ0H     = DGF%XZ0H
 ELSE 
         PZ0      = XUNDEF
         PZ0H     = XUNDEF

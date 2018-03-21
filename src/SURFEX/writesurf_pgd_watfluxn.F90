@@ -1,9 +1,7 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITESURF_PGD_WATFLUX_n (HSELECT, G, W, HPROGRAM)
+      SUBROUTINE WRITESURF_PGD_WATFLUX_n (DGU, U, &
+                                           WG, W, &
+                                          HPROGRAM)
 !     ###################################################
 !
 !!****  *WRITESURF_PGD_WATFLUX_n* - writes WATFLUX fields
@@ -33,13 +31,19 @@
 !!    -------------
 !!      Original    01/2003 
 !!      B. Decharme 07/2011 : delete argument HWRITE
-!!      M. Moge     02/2015 parallelization using WRITE_LCOVER
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_SFX_GRID_n, ONLY : GRID_t
+!
+!
+!
+!
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
+USE MODD_WATFLUX_GRID_n, ONLY : WATFLUX_GRID_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
@@ -48,7 +52,7 @@ USE MODE_WRITE_SURF_COV, ONLY : WRITE_SURF_COV
 !
 USE MODI_WRITE_SURF
 USE MODI_WRITE_GRID
-USE MODI_WRITE_LCOVER
+!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -59,9 +63,11 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
- CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
-TYPE(GRID_t), INTENT(INOUT) :: G
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+!
+TYPE(WATFLUX_GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
  CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling
@@ -84,21 +90,26 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* cover classes
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',0,ZHOOK_HANDLE)
+YRECFM='COVER_LIST'
+YCOMMENT='(LOGICAL LIST)'
+ CALL WRITE_SURF(DGU, U, &
+                 HPROGRAM,YRECFM,W%LCOVER(:),IRESP,HCOMMENT=YCOMMENT,HDIR='-')
 !
- CALL WRITE_LCOVER(HSELECT, HPROGRAM, W%LCOVER)
+YCOMMENT='COVER FIELDS'
+ CALL WRITE_SURF_COV(DGU, U, &
+                     HPROGRAM,'COVER',W%XCOVER(:,:),W%LCOVER,IRESP,HCOMMENT=YCOMMENT)
 !
 !* orography
 !
 YRECFM='ZS'
 YCOMMENT='ZS'
- CALL WRITE_SURF(HSELECT, &
+ CALL WRITE_SURF(DGU, U, &
                  HPROGRAM,YRECFM,W%XZS(:),IRESP,HCOMMENT=YCOMMENT)
 !
 !* latitude, longitude
 !
- CALL WRITE_GRID(HSELECT, &
-                 HPROGRAM,G%CGRID,G%XGRID_PAR,G%XLAT,G%XLON,G%XMESH_SIZE,IRESP)
-!
+ CALL WRITE_GRID(DGU, U, &
+                 HPROGRAM,WG%CGRID,WG%XGRID_PAR,WG%XLAT,WG%XLON,WG%XMESH_SIZE,IRESP)
 IF (LHOOK) CALL DR_HOOK('WRITESURF_PGD_WATFLUX_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -1,10 +1,6 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !-----------------------------------------------------------------
 !     ############################
-      SUBROUTINE DIAG_ISBA_TO_ROUT (PMESH_SIZE, &
+      SUBROUTINE DIAG_ISBA_TO_ROUT (UG, &
                                     PVARC,PVARCP,PVARROUT)
 !     ############################
 !
@@ -64,7 +60,8 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-REAL, DIMENSION(:), INTENT(IN) :: PMESH_SIZE
+!
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 !
 REAL,DIMENSION(:),INTENT(IN)        :: PVARC       ! Current time step cumulated diagnostic from SurfEx
 REAL,DIMENSION(:),INTENT(IN)        :: PVARCP      ! Previous time step cumulated diagnostic from SurfEx 
@@ -85,7 +82,7 @@ IF ( SIZE(PVARC,1)==SIZE(PVARCP,1) ) THEN
   WHERE ( PVARC/=XUNDEF )
     PVARROUT = PVARC - PVARCP
     PVARROUT = PVARROUT / XTOPD_STEP
-    PVARROUT = PVARROUT * PMESH_SIZE / XRHOLW
+    PVARROUT = PVARROUT * UG%XMESH_SIZE / XRHOLW
   ENDWHERE
   !
 ELSE 

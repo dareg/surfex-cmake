@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 SUBROUTINE PUT_IN_TIME(HNAME,HTYPE,NTIME1,NTIME2,PDATA)
 
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -36,32 +32,20 @@ ELSEIF (NTIME1==1) THEN
     PDATA(:,JJ,:)=PDATA(:,1,:)
   ENDDO
 ELSEIF (NTIME1==2) THEN !2 values: winter and summer
-  IF (NTIME2.EQ.36) THEN
-    ZDATA=PDATA(:,1:2,:)
-    DO JJ=1,8
-      PDATA(:,JJ,:)=ZDATA(:,1,:)  !until 20 march
-    ENDDO
-    DO JJ=9,26
-      PDATA(:,JJ,:)=ZDATA(:,2,:) !from 21 march to 20 september
-    ENDDO
-    DO JJ=27,36
-      PDATA(:,JJ,:)=ZDATA(:,1,:) !from 21 september to 31 december
-    ENDDO
-  ELSEIF (NTIME2.EQ.12) THEN
-    ZDATA=PDATA(:,1:2,:)
-    DO JJ=1,3
-      PDATA(:,JJ,:)=ZDATA(:,1,:)  !until 20 march
-    ENDDO
-    DO JJ=4,9
-      PDATA(:,JJ,:)=ZDATA(:,2,:) !from 21 march to 20 september
-    ENDDO
-    DO JJ=10,12
-      PDATA(:,JJ,:)=ZDATA(:,1,:) !from 21 september to 31 december
-    ENDDO          
-  ELSE
-    CALL ABOR1_SFX('PUT_IN_TIME: WITH NTIME1=2, NTIME2 MUST BE =36 OR =12 (WINTER AND SUMMER VALUES) '//&
-                   'PROBLEM VAR '//HNAME//''//HTYPE)          
+  IF (NTIME2.NE.36) THEN
+      CALL ABOR1_SFX('PUT_IN_TIME: WITH NTIME1=2, NTIME2 MUST BE =36 (WINTER AND SUMMER VALUES) '//&
+                     'PROBLEM VAR '//HNAME//''//HTYPE)
   ENDIF
+  ZDATA=PDATA(:,1:2,:)
+  DO JJ=1,8
+    PDATA(:,JJ,:)=ZDATA(:,1,:)  !until 20 march
+  ENDDO
+  DO JJ=9,26
+    PDATA(:,JJ,:)=ZDATA(:,2,:) !from 21 march to 20 september
+  ENDDO
+  DO JJ=27,36
+    PDATA(:,JJ,:)=ZDATA(:,1,:) !from 21 september to 31 december
+  ENDDO
 ELSE
   I1=NTIME2/NTIME1
   I2=NTIME2/I1  

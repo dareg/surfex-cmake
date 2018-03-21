@@ -1,7 +1,7 @@
 !#########
-SUBROUTINE TRIP_OASIS_RECV(TP, TPG,                           &
-                           KLISTING,KLON,KLAT,PTIMEC,PRUNOFF, & 
-                           PDRAIN,PCALVING,PSRC_FLOOD         )
+SUBROUTINE TRIP_OASIS_RECV (TP, TPG,                           &
+                           KLISTING,KLON,KLAT,PTIMEC,PRUNOFF,  & 
+                           PDRAIN,PCALVING,PRECHARGE,PSRC_FLOOD)
 !#############################################################################
 !
 !!****  *TRIP_OASIS_RECV* - Receive coupling fields
@@ -30,29 +30,26 @@ SUBROUTINE TRIP_OASIS_RECV(TP, TPG,                           &
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
-!!      B. Decharme 10/2016  bug surface/groundwater coupling   
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
 !
+!
 USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
-!
-USE MODN_TRIP_OASIS, ONLY : XTSTEP_CPL_LAND
 !
 USE MODD_TRIP_PAR,  ONLY : XUNDEF
 !
 USE MODD_TRIP_OASIS
 !
-USE MODI_GW_REDISTRIB
 USE MODI_FLOOD_REDISTRIB
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef CPLOASIS
+#ifdef TRIPOASIS
 USE MOD_OASIS
 #endif
 !
@@ -73,26 +70,26 @@ REAL,    INTENT(IN)               :: PTIMEC        ! Cumulated run time step (s)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PRUNOFF       ! Surface runoff                  (kg/s)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PDRAIN        ! Deep drainage                   (kg/s)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PCALVING      ! Calving flux                    (kg/s)
+REAL, DIMENSION(:,:), INTENT(OUT) :: PRECHARGE     ! Groundwater recharge            (kg/s)
 REAL, DIMENSION(:,:), INTENT(OUT) :: PSRC_FLOOD    ! Input P-E-I flood source term   (kg/s)
 !
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL,    DIMENSION(KLON,KLAT) :: ZREAD
-REAL,    DIMENSION(KLON,KLAT) :: ZSRC_FLOOD
-REAL,    DIMENSION(KLON,KLAT) :: ZWORK
-REAL,    DIMENSION(KLON,KLAT) :: ZRESIDU
+REAL, DIMENSION(KLON,KLAT) :: ZREAD
+REAL, DIMENSION(KLON,KLAT) :: ZSRC_FLOOD
+REAL, DIMENSION(KLON,KLAT) :: ZRESIDU
 !
-CHARACTER(LEN=50)             :: YCOMMENT
-INTEGER                       :: IDATE  ! current coupling time step (s)
-INTEGER                       :: IERR   ! Error info
-INTEGER                       :: JVAR
+CHARACTER(LEN=50)          :: YCOMMENT
+INTEGER                    :: IDATE  ! current coupling time step (s)
+INTEGER                    :: IERR   ! Error info
+INTEGER                    :: JVAR
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
-#ifdef CPLOASIS
+#ifdef TRIPOASIS
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV',0,ZHOOK_HANDLE)
@@ -105,6 +102,7 @@ IDATE = INT(PTIMEC)
 PDRAIN    (:,:) = 0.0
 PRUNOFF   (:,:) = 0.0
 PCALVING  (:,:) = 0.0
+PRECHARGE (:,:) = 0.0
 PSRC_FLOOD(:,:) = 0.0
 !
 !-------------------------------------------------------------------------------
@@ -112,70 +110,52 @@ PSRC_FLOOD(:,:) = 0.0
 !*       2.     Get coupling fields :
 !               ---------------------
 !
-IF(LCPL_LAND.AND.MOD(PTIMEC,XTSTEP_CPL_LAND)==0.0)THEN
+IF(LCPL_LAND)THEN
 !
-! * Receive surface runoff input fields
+! * Receive river input fields
 !
   ZREAD(:,:) = XUNDEF  
   YCOMMENT='Surface runoff'
   CALL OASIS_GET(NRUNOFF_ID,IDATE,ZREAD(:,:),IERR)
-  CALL CHECK_TRIP_RECV(IERR,YCOMMENT,ZREAD,TPG%GMASK)
+  CALL CHECK_TRIP_RECV(IERR,YCOMMENT)
   CALL KGM2S_TO_KGS(IERR,ZREAD,PRUNOFF)
-!
-! * Receive drainage/recharge input fields
 !
   ZREAD(:,:) = XUNDEF  
   YCOMMENT='Deep drainage'
   CALL OASIS_GET(NDRAIN_ID,IDATE,ZREAD(:,:),IERR)
-  CALL CHECK_TRIP_RECV(IERR,YCOMMENT,ZREAD,TPG%GMASK)
-!
-  IF(LCPL_GW)THEN
-!   Redistribute negative recharge flux over groundwater
-!   and conserve water mass over each bassin
-    ZWORK(:,:) = XUNDEF
-    CALL GW_REDISTRIB(TP,TPG, &
-                      KLON,KLAT,ZREAD,ZWORK)
-  ELSE
-    ZWORK(:,:) = ZREAD(:,:)
-  ENDIF
-!  
-  CALL KGM2S_TO_KGS(IERR,ZWORK,PDRAIN)
-!
-! * Receive calving input fields
+  CALL CHECK_TRIP_RECV(IERR,YCOMMENT)
+  CALL KGM2S_TO_KGS(IERR,ZREAD,PDRAIN)
 !
   IF(LCPL_CALVING)THEN
     ZREAD(:,:) = XUNDEF  
     YCOMMENT='calving flux'
     CALL OASIS_GET(NCALVING_ID,IDATE,ZREAD(:,:),IERR)
-    CALL CHECK_TRIP_RECV(IERR,YCOMMENT,ZREAD,TPG%GMASK)
+    CALL CHECK_TRIP_RECV(IERR,YCOMMENT)
     CALL KGM2S_TO_KGS(IERR,ZREAD,PCALVING)
   ENDIF
 !
-! * Receive floodplains input fields
+  IF(LCPL_GW)THEN
+    ZREAD(:,:) = XUNDEF  
+    YCOMMENT='groundwater recharge'
+    CALL OASIS_GET(NRECHARGE_ID,IDATE,ZREAD(:,:),IERR)
+    CALL CHECK_TRIP_RECV(IERR,YCOMMENT)    
+    CALL KGM2S_TO_KGS(IERR,ZREAD,PRECHARGE)
+  ENDIF 
 !
   IF(LCPL_FLOOD)THEN
 !
     ZREAD     (:,:) = XUNDEF 
     ZSRC_FLOOD(:,:) = XUNDEF
-    ZWORK     (:,:) = XUNDEF
-    ZRESIDU   (:,:) = XUNDEF
+    ZRESIDU   (:,:) = XUNDEF    
 !
     YCOMMENT='floodplains freshwater flux (P-E-I)'
     CALL OASIS_GET(NSRCFLOOD_ID,IDATE,ZREAD(:,:),IERR)
-    CALL CHECK_TRIP_RECV(IERR,YCOMMENT,ZREAD,TPG%GMASK_FLD)
-!
-!   Redistribute freshwater flux over flooded grid-cell
-!   and conserve water mass over each bassin
-    CALL FLOOD_REDISTRIB(TP,TPG, &
-                         KLON,KLAT,XTSTEP_CPL_LAND, &
-                         ZREAD,ZSRC_FLOOD,ZWORK     )
-!
+    CALL CHECK_TRIP_RECV(IERR,YCOMMENT)
+    CALL FLOOD_REDISTRIB(TP,TPG,KLON,KLAT,ZREAD,ZSRC_FLOOD,ZRESIDU)
     CALL KGM2S_TO_KGS(IERR,ZSRC_FLOOD,PSRC_FLOOD)
-    CALL KGM2S_TO_KGS(IERR,ZWORK,ZRESIDU)
-!
-    WHERE(TPG%GMASK_FLD(:,:)) 
+     WHERE(TPG%GMASK(:,:)) 
          PRUNOFF(:,:)=PRUNOFF(:,:)+ZRESIDU(:,:)
-    ENDWHERE
+     ENDWHERE
 !
   ENDIF
 !
@@ -184,19 +164,17 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
- CONTAINS
+CONTAINS
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE CHECK_TRIP_RECV(KERR,HCOMMENT,PFIELD,OMASK)
+SUBROUTINE CHECK_TRIP_RECV(KERR,HCOMMENT)
 !
 USE MODI_ABORT_TRIP
 !
 IMPLICIT NONE
 !
-INTEGER,                 INTENT(IN   ) :: KERR
-CHARACTER(LEN=*),        INTENT(IN   ) :: HCOMMENT
-REAL,    DIMENSION(:,:), INTENT(INOUT) :: PFIELD
-LOGICAL, DIMENSION(:,:), INTENT(IN   ) :: OMASK
+INTEGER,          INTENT(IN) :: KERR
+CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -208,10 +186,6 @@ IF (KERR/=OASIS_OK.AND.KERR<OASIS_RECVD) THEN
    WRITE(KLISTING,'(A,I4)')'Return code from receiving '//TRIM(HCOMMENT)//' : ',KERR
    CALL ABORT_TRIP('TRIP_OASIS_RECV: problem receiving '//TRIM(HCOMMENT))
 ENDIF
-!
-WHERE(.NOT.OMASK(:,:))
-      PFIELD(:,:) = 0.0
-ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:CHECK_TRIP_RECV',1,ZHOOK_HANDLE)
 !
@@ -231,7 +205,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_RECV:KGM2S_TO_KGS',0,ZHOOK_HANDLE)
 !
-! kg/m2/s -> kg/s
+! kg/m2 -> kg/s
 !
 IF(KERR>=OASIS_RECVD)THEN
   WHERE(TPG%GMASK(:,:)) 

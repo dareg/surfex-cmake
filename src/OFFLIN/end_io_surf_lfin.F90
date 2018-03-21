@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE END_IO_SURF_LFI_n(HPROGRAM)
 !     #######################################################
@@ -37,8 +33,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI, CFILE_LFI, NFULL, CMASK, CFILEOUT_LFI, CFILEIN_LFI, &
-                             NMASK
+USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI, CFILE_LFI, NFULL, CMASK
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
@@ -62,17 +57,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_LFI_N',0,ZHOOK_HANDLE)
 !
+!$OMP BARRIER
+!
 NFULL = 0
 !
 CMASK = '      '
 !
-NMASK=>NULL()
-!
-IF (CFILE_LFI==CFILEOUT_LFI .AND. NRANK==NPIO .OR. CFILE_LFI==CFILEIN_LFI) THEN
+IF (NRANK==NPIO) THEN
+!$OMP SINGLE 
   CALL FMCLOS(CFILE_LFI,'KEEP',CLUOUT_LFI,IRET)
+!$OMP END SINGLE
 ENDIF
-!
-CFILE_LFI = '                              '
 !
 IF (LHOOK) CALL DR_HOOK('END_IO_SURF_LFI_N',1,ZHOOK_HANDLE)
 !

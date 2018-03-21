@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #############################################################
-      SUBROUTINE INIT_WATFLUX_n (DTCO, OREAD_BUDGETC, UG, U, WM, &
+      SUBROUTINE INIT_WATFLUX_n (DTCO, DGU, UG, U, WM, &
                                  HPROGRAM,HINIT,                             &
                                   KI,KSV,KSW,                                &
                                   HSV,PCO2,PRHOA,                            &
@@ -51,6 +47,7 @@
 USE MODD_SURFEX_n, ONLY : WATFLUX_MODEL_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_DIAG_SURF_ATM_n, ONLY : DIAG_SURF_ATM_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
@@ -78,10 +75,10 @@ USE MODI_READ_SURF
 USE MODI_READ_WATFLUX_DATE
 USE MODI_READ_NAM_PREP_WATFLUX_n
 USE MODI_INIT_CHEMICAL_n
-USE MODI_PREP_CTRL
+USE MODI_PREP_CTRL_WATFLUX
 USE MODI_UPDATE_RAD_WATER
 !
-USE MODI_READ_SBL_n
+USE MODI_READ_WATFLUX_SBL_n
 USE MODI_SET_SURFEX_FILEIN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -96,7 +93,7 @@ IMPLICIT NONE
 !
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
-LOGICAL, INTENT(IN) :: OREAD_BUDGETC
+TYPE(DIAG_SURF_ATM_t), INTENT(INOUT) :: DGU
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
@@ -142,7 +139,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !         Initialisation for IO
 !
 IF (LHOOK) CALL DR_HOOK('INIT_WATFLUX_N',0,ZHOOK_HANDLE)
-!
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HTEST/='OK') THEN
@@ -167,21 +163,23 @@ IF (LNAM_READ) THEN
  !      
  CALL DEFAULT_WATFLUX(WM%W%XTSTEP,WM%W%XOUT_TSTEP,WM%W%CWAT_ALB,WM%W%CINTERPOL_TS)
  CALL DEFAULT_CH_DEP(WM%CHW%CCH_DRY_DEP)
- CALL DEFAULT_DIAG_WATFLUX(WM%DWO%N2M,WM%DWO%LSURF_BUDGET,WM%DWO%L2M_MIN_ZS,WM%DWO%LRAD_BUDGET,&
-                           WM%DWO%LCOEF,WM%DWO%LSURF_VARS, &
-                           WM%DWO%LSURF_BUDGETC,WM%DWO%LRESET_BUDGETC,WM%DWO%XDIAG_TSTEP        )  
+ CALL DEFAULT_DIAG_WATFLUX(WM%DGW%N2M,WM%DGW%LSURF_BUDGET,WM%DGW%L2M_MIN_ZS,WM%DGW%LRAD_BUDGET,&
+                           WM%DGW%LCOEF,WM%DGW%LSURF_VARS, &
+                           WM%DGW%LSURF_BUDGETC,WM%DGW%LRESET_BUDGETC,WM%DGW%XDIAG_TSTEP        )  
  !
 ENDIF
 !
 !        0.2. Defaults from file header
 !    
- CALL READ_DEFAULT_WATFLUX_n(WM%CHW, WM%DWO, WM%W, HPROGRAM)
+ CALL READ_DEFAULT_WATFLUX_n(WM%CHW, WM%DGW, WM%W, &
+                             HPROGRAM)
 !
 !*       1.1    Reading of configuration:
 !               -------------------------
 !
 !
- CALL READ_WATFLUX_CONF_n(WM%CHW, WM%DWO, WM%W, HPROGRAM)
+ CALL READ_WATFLUX_CONF_n(WM%CHW, WM%DGW, WM%W, &
+                          HPROGRAM)
 !
 WM%W%LINTERPOL_TS=.FALSE.
 IF(LCPL_SEA)THEN       
@@ -206,13 +204,18 @@ SELECT CASE (HINIT)
     WM%W%TTIME%TIME       = XUNDEF
 
   CASE ('PRE')
-    CALL PREP_CTRL(WM%DWO,ILUOUT )  
+    CALL PREP_CTRL_WATFLUX(WM%DGW%N2M,WM%DGW%LSURF_BUDGET,WM%DGW%L2M_MIN_ZS,&
+                           WM%DGW%LRAD_BUDGET,WM%DGW%LCOEF,WM%DGW%LSURF_VARS,&
+                             ILUOUT,WM%DGW%LSURF_BUDGETC )  
     IF (LNAM_READ) CALL READ_NAM_PREP_WATFLUX_n(HPROGRAM)                 
-    CALL READ_WATFLUX_DATE(HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,WM%W%TTIME)
+    CALL READ_WATFLUX_DATE(&
+                           HPROGRAM,HINIT,ILUOUT,HATMFILE,HATMFILETYPE,KYEAR,KMONTH,KDAY,PTIME,WM%W%TTIME)
 
   CASE DEFAULT
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'FULL  ','SURF  ','READ ')
-    CALL READ_SURF(HPROGRAM,'DTCUR',WM%W%TTIME,IRESP)
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                        HPROGRAM,'WATER ','WATFLX','READ ')
+    CALL READ_SURF(&
+                   HPROGRAM,'DTCUR',WM%W%TTIME,IRESP)
     CALL END_IO_SURF_n(HPROGRAM)
 END SELECT
 !
@@ -225,11 +228,13 @@ END SELECT
 !         Initialisation for IO
 !
  CALL SET_SURFEX_FILEIN(HPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','READ ')
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                        HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !         Reading of the fields
 !
- CALL READ_PGD_WATFLUX_n(DTCO, U, UG, WM%G, WM%W, HPROGRAM)
+ CALL READ_PGD_WATFLUX_n(DTCO, U, WM%WG, WM%W, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -253,13 +258,15 @@ END IF
 !
 !         Initialisation for IO
 !
-CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'WATER ','WATFLX','READ ')
+CALL INIT_IO_SURF_n(DTCO, DGU, U, &
+                        HPROGRAM,'WATER ','WATFLX','READ ')
 !
 !
 !*       2.     Prognostic and cover fields:
 !               ---------------------------
 !
- CALL READ_WATFLUX_n(DTCO, U, WM%W, HPROGRAM)
+ CALL READ_WATFLUX_n(DTCO, U, WM%W, &
+                     HPROGRAM)
 !
 IF (HINIT/='ALL') THEN
   CALL END_IO_SURF_n(HPROGRAM)
@@ -293,7 +300,8 @@ WM%W%XDIR_ALB = 0.0
 WM%W%XSCA_ALB = 0.0
 WM%W%XEMIS    = 0.0
 !
- CALL UPDATE_RAD_WATER(WM%W,PZENITH,XTT,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
+ CALL UPDATE_RAD_WATER(WM%W%CWAT_ALB,WM%W%XTS,PZENITH,XTT,WM%W%XEMIS,WM%W%XDIR_ALB,&
+                       WM%W%XSCA_ALB,PDIR_ALB,PSCA_ALB,PEMIS,PTSRAD )  
 !
 PTSURF(:) = WM%W%XTS(:)
 !
@@ -302,7 +310,8 @@ PTSURF(:) = WM%W%XTS(:)
 !*       5.     SBL air fields:
 !               --------------
 !
- CALL READ_SBL_n(DTCO, U, WM%SB, WM%W%LSBL, HPROGRAM, "WATER ")
+ CALL READ_WATFLUX_SBL_n(DTCO, U, WM%W, WM%WSB, &
+                         HPROGRAM)
 !
 !-------------------------------------------------------------------------------
 !
@@ -327,7 +336,8 @@ END IF
 !*       7.     diagnostics initialization
 !               --------------------------
 !
- CALL DIAG_WATFLUX_INIT_n(OREAD_BUDGETC, WM%DWO, WM%DW, WM%DWC, WM%W, &
+ CALL DIAG_WATFLUX_INIT_n(&
+                          DGU, WM%DGW, WM%W, &
                           HPROGRAM,ILU,KSW)
 !
 !-------------------------------------------------------------------------------

@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ##############################
 MODULE MODD_GET_MESH_INDEX_LONLAT_REG
 !     ##############################
@@ -35,9 +31,6 @@ IMPLICIT NONE
 !
 REAL, DIMENSION(:), ALLOCATABLE   :: XLONLIM  ! longitude left   limit of grid mesh (dim ILON+1)
 REAL, DIMENSION(:), ALLOCATABLE   :: XLATLIM  ! latitude  bottom limit of grid mesh (dim ILAT+1)
-!
-INTEGER, DIMENSION(:), ALLOCATABLE :: NFRACDLON
-INTEGER, DIMENSION(:), ALLOCATABLE :: NFRACDLAT
 !
 INTEGER :: NLON    ! number of points in longitude
 INTEGER :: NLAT    ! number of points in latitude

@@ -1,12 +1,11 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ############################################################
-      SUBROUTINE INIT_IDEAL_FLUX (DGO, D, DC, OREAD_BUDGETC, &
-                                  HPROGRAM,HINIT,KI,KSV,KSW,     &
-                                  HSV,PDIR_ALB,PSCA_ALB,        &
-                                  PEMIS,PTSRAD,PTSURF, HTEST    )  
+      SUBROUTINE INIT_IDEAL_FLUX (DGL, OREAD_BUDGETC, &
+                                  HPROGRAM,HINIT,                            &
+                                   KI,KSV,KSW,                                &
+                                   HSV,PCO2,PRHOA,                            &
+                                   PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
+                                   PEMIS,PTSRAD,PTSURF,                       &
+                                   HTEST                                      )  
 !     ############################################################
 !
 !!****  *INIT_IDEAL_FLUX * - Prescription of the surface fluxes for the temperature, 
@@ -51,7 +50,7 @@
 !              ------------
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
+USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
 !
 USE MODD_IDEAL_FLUX, ONLY : XSFTS, XALB, XEMIS
 USE MODN_IDEAL_FLUX
@@ -60,7 +59,7 @@ USE MODD_READ_NAMELIST, ONLY : LNAM_READ
 USE MODI_DIAG_IDEAL_INIT_n
 USE MODI_READ_IDEAL_CONF_n
 USE MODI_READ_DEFAULT_IDEAL_n
-USE MODI_PREP_CTRL
+USE MODI_PREP_CTRL_IDEAL
 USE MODI_DEFAULT_DIAG_IDEAL
 USE MODI_ABOR1_SFX
 USE MODI_GET_LUOUT
@@ -73,9 +72,7 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 ! 
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_t), INTENT(INOUT) :: D
-TYPE(DIAG_t), INTENT(INOUT) :: DC
+TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
 !
 LOGICAL, INTENT(IN) :: OREAD_BUDGETC
 !
@@ -85,6 +82,11 @@ INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
+REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
+REAL,             DIMENSION(KSW), INTENT(IN)  :: PSW_BANDS ! middle wavelength of each band
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PDIR_ALB  ! direct albedo for each band
 REAL,             DIMENSION(KI,KSW),INTENT(OUT) :: PSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(KI),  INTENT(OUT) :: PEMIS     ! emissivity
@@ -117,9 +119,8 @@ IF (LNAM_READ) THEN
  !*       0.1    defaults
  !               --------
  !
- CALL DEFAULT_DIAG_IDEAL(DGO%N2M, DGO%LSURF_BUDGET, DGO%L2M_MIN_ZS, DGO%LRAD_BUDGET,&
-                         DGO%LCOEF, DGO%LSURF_VARS, DGO%LSURF_BUDGETC, &
-                         DGO%LRESET_BUDGETC,DGO%XDIAG_TSTEP           )  
+ CALL DEFAULT_DIAG_IDEAL(DGL%N2M,DGL%LSURF_BUDGET,DGL%L2M_MIN_ZS,DGL%LRAD_BUDGET,DGL%LCOEF,DGL%LSURF_VARS,&
+                         DGL%LSURF_BUDGETC,DGL%LRESET_BUDGETC,DGL%XDIAG_TSTEP           )  
 
 ENDIF
 !----------------------------------------------------------------------------------
@@ -127,11 +128,14 @@ ENDIF
 !*       0.2    configuration
 !               -------------
 !
- CALL READ_DEFAULT_IDEAL_n(DGO, HPROGRAM)
- CALL READ_IDEAL_CONF_n(DGO, HPROGRAM)
+ CALL READ_DEFAULT_IDEAL_n(DGL, &
+                           HPROGRAM)
+ CALL READ_IDEAL_CONF_n(DGL, &
+                        HPROGRAM)
 !
 IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 
+!$OMP SINGLE
   ALLOCATE(XTIMEF_f (NFORCF+1))
   ALLOCATE(XSFTH_f  (NFORCF+1))
   ALLOCATE(XSFTQ_f  (NFORCF+1))
@@ -140,6 +144,7 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   ALLOCATE(XTIMET_t (NFORCT+1))
   ALLOCATE(XTSRAD_t (NFORCT+1))
+!$OMP END SINGLE
 !
   XTIMEF_f(1:NFORCF) = XTIMEF(1:NFORCF)
   XSFTH_f (1:NFORCF) = XSFTH (1:NFORCF)
@@ -165,11 +170,12 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !               -------
 !
   IF (HINIT=='PRE') THEN
-    CALL PREP_CTRL(DGO,ILUOUT)  
+    CALL PREP_CTRL_IDEAL(DGL%N2M,DGL%LSURF_BUDGET,DGL%L2M_MIN_ZS,DGL%LRAD_BUDGET,DGL%LCOEF,DGL%LSURF_VARS,&
+                          ILUOUT,DGL%LSURF_BUDGETC)  
   ENDIF
 !
 !----------------------------------------------------------------------------------
-!i
+!
 !*       3.    HOURLY surface scalar mixing ratio fluxes (NFORCF+1 values per scalar from 00UTC to 24UTC)
 !              -----------------------------------------
 !
@@ -181,7 +187,8 @@ IF (.NOT.ALLOCATED(XTIMEF_f)) THEN
 !
   XSFTS = 0.
 !
- CALL DIAG_IDEAL_INIT_n(DGO, D, DC, HPROGRAM, OREAD_BUDGETC, KI, KSW)
+ CALL DIAG_IDEAL_INIT_n(DGL, HPROGRAM, OREAD_BUDGETC, &
+                        KI,KSW)
 !
 ENDIF
 !-------------------------------------------------------------------------------

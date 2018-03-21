@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ##################
       MODULE MODE_SNOW3L
 !     ##################
@@ -53,6 +49,8 @@
 !                                 New algorithm to compute snow grid for 6-L or 12-L
 !     A. Boone          10/2014 - Added snow thermal conductivity routines
 !     B. Decharme       01/2015 - Added optical snow grain size diameter
+!     B. Cluzet         08/2015 - deleted unused procedures SNOWCROHOLD_3,2,1D
+!                               - added lwc options (functions SNOWO04HOLD_0D, SNOWS02HOLD_0D) 
 !----------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -70,13 +68,22 @@ INTERFACE SNOW3LHOLD
   MODULE PROCEDURE SNOW3LHOLD_1D
   MODULE PROCEDURE SNOW3LHOLD_0D
 END INTERFACE
+!
 INTERFACE SNOWCROHOLD
   MODULE PROCEDURE SNOWCROHOLD_3D
   MODULE PROCEDURE SNOWCROHOLD_2D
   MODULE PROCEDURE SNOWCROHOLD_1D
   MODULE PROCEDURE SNOWCROHOLD_0D
 END INTERFACE
+! Cluzet et al 2016
+INTERFACE SNOWSPKHOLD
+  MODULE PROCEDURE SNOWSPKHOLD_0D
+END INTERFACE
 !
+INTERFACE SNOWO04HOLD
+  MODULE PROCEDURE SNOWO04HOLD_0D
+END INTERFACE
+! fin Cluzet et al 2016
 INTERFACE SNOW3LSCAP
   MODULE PROCEDURE SNOW3LSCAP_3D
   MODULE PROCEDURE SNOW3LSCAP_2D
@@ -117,11 +124,7 @@ INTERFACE SNOW3LRADABS
   MODULE PROCEDURE SNOW3LRADABS_2D
   MODULE PROCEDURE SNOW3LRADABS_1D
   MODULE PROCEDURE SNOW3LRADABS_0D
-END INTERFACE 
-!
-INTERFACE SNOW3LRADABS_SFC
-  MODULE PROCEDURE SNOW3LRADABS_SFC
-END INTERFACE 
+END INTERFACE
 !
 INTERFACE SNOW3LTHRM
   MODULE PROCEDURE SNOW3LTHRM
@@ -137,18 +140,9 @@ INTERFACE SNOW3LALB
   MODULE PROCEDURE SNOW3LALB
 END INTERFACE
 !
-INTERFACE SNOW3LFALL
-  MODULE PROCEDURE SNOW3LFALL
+INTERFACE SYVAGRE
+  MODULE PROCEDURE SYVAGRE
 END INTERFACE
-!
-INTERFACE SNOW3LTRANSF
-  MODULE PROCEDURE SNOW3LTRANSF
-END INTERFACE
-!
-INTERFACE SNOW3LCOMPACTN
-  MODULE PROCEDURE SNOW3LCOMPACTN
-END INTERFACE
-!
 !-------------------------------------------------------------------------------
 CONTAINS
 !
@@ -460,6 +454,7 @@ PWHOLDMAX = ZHOLDMAXR*PSNOWDZ*ZSNOWRHO/XRHOLW
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LHOLD_0D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOW3LHOLD_0D
+
 !####################################################################
       FUNCTION SNOWCROHOLD_3D(PSNOWRHO,PSNOWLIQ,PSNOWDZ) RESULT(PWHOLDMAX)
 !
@@ -488,7 +483,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !S. Morin/V. Vionnet 2010 12 09
 
 ! PWHOLDMAX is expressed in m water for each layer
-! In short, PWHOLDMAX = XPERCENTAGEPORE * porosity * PSNOWDZ .
+! In short, PWHOLDMAX = XPERCENTAGEPORE_B92 * porosity * PSNOWDZ .
 ! The porosity is computed as (rho_ice - (rho_snow - lwc))/(rho_ice)
 ! where everything has to be in kg m-3 units. In practice, since
 ! PSNOWLIQ is expressed in m water, expressing the lwc in kg m-3
@@ -640,7 +635,81 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',1,ZHOOK_HANDLE)
 !
 END FUNCTION SNOWCROHOLD_0D
 !####################################################################
+      FUNCTION SNOWO04HOLD_0D(PSNOWRHO,PSNOWLIQ,PSNOWDZ) RESULT(PWHOLDMAX)
+!     Cluzet et al 2016
+!!    PURPOSE
+!!    -------
+!     Calculate the maximum liquid water holding capacity of
+!     snow layer(s), with the CLM model for max lwc (similar SNOWCROHOLD_0D) 
+!     see Oleson et al. 2004
+!
+USE MODD_CSTS,     ONLY : XRHOLW,XRHOLI
+USE MODD_SNOW_PAR, ONLY : XPERCENTAGEPORE_O04
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+!*      0.1    declarations of arguments
+!
+REAL, INTENT(IN)        :: PSNOWDZ, PSNOWRHO, PSNOWLIQ
+!
+REAL                    :: PWHOLDMAX
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',0,ZHOOK_HANDLE)
+PWHOLDMAX = XPERCENTAGEPORE_O04/XRHOLI * (PSNOWDZ * (XRHOLI-PSNOWRHO) + PSNOWLIQ*XRHOLW)
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWCROHOLD_0D',1,ZHOOK_HANDLE)
+!
+END FUNCTION SNOWO04HOLD_0D
 !####################################################################
+        FUNCTION SNOWSPKHOLD_0D(PSNOWRHO,PSNOWLIQ,PSNOWDZ) RESULT(PWHOLDMAX)
+!     Lafaysse et al 2017
+!!    PURPOSE
+!!    -------
+!     Calculate the maximum liquid water holding capacity of
+!     snow layer(s), with the SNOWPACK model for maximum volumetric water content
+!     see Wever 
+!
+USE MODD_CSTS,     ONLY: XRHOLW,XRHOLI
+USE MODD_SNOW_METAMO, ONLY : XUEPSI
+
+
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+
+IMPLICIT NONE
+
+REAL, INTENT(IN)        :: PSNOWDZ, PSNOWRHO, PSNOWLIQ
+REAL                    :: PWHOLDMAX
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+
+REAL                    :: ZTHETAI
+
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWSPKHOLD_0D',0,ZHOOK_HANDLE)
+! PSNOWLIQ in m
+! PSNOWLIQ*XRHOLW/PSNOWDZ liquid water content in kg/m3
+IF (PSNOWDZ>XUEPSI) THEN
+  ZTHETAI=(PSNOWRHO-PSNOWLIQ*XRHOLW/PSNOWDZ)/XRHOLI
+ELSE
+  ZTHETAI=PSNOWRHO/XRHOLI
+END IF
+! In equation 12 Lafaysse et al 2017, capacity in kg m-3
+! Here capacity in m, so eq 12 is multiplied by PSNOWDZ/XRHOLW
+! 
+IF (ZTHETAI<=0.23) THEN
+  PWHOLDMAX = PSNOWDZ * ( 0.08- 0.1023 * (ZTHETAI - 0.03))
+ELSEIF(ZTHETAI>0.812) THEN
+  PWHOLDMAX = 0.
+ELSE
+  PWHOLDMAX = PSNOWDZ * ( 0.0264+0.0099*(1-ZTHETAI)/ZTHETAI )
+
+ENDIF
+
+IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOWSPKHOLD_0D',1,ZHOOK_HANDLE)
+
+END FUNCTION SNOWSPKHOLD_0D
 !####################################################################
       FUNCTION SNOW3LSCAP_3D(PSNOWRHO) RESULT(PSCAP)
 !
@@ -1793,20 +1862,22 @@ END SUBROUTINE SNOW3LAVGRAIN
 !####################################################################
 !####################################################################
 !####################################################################
-FUNCTION SNOW3LDIFTYP(PGRAIN1,PGRAIN2,PGRAIN3,PGRAIN4,HSNOWMETAMO) RESULT(ZDIFTYPE)
+FUNCTION SNOW3LDIFTYP(PGRAIN1,PGRAIN2,PGRAIN3,PGRAIN4,HSNOWMETAMO,&
+                      PSNOWRHO1,PSNOWRHO2,PSNOWAGE1,PSNOWAGE2) RESULT(ZDIFTYPE)
 !
 ! à remplacer sans doute par une routine equivalente du nouveau crocus
 !*    CALCUL DE LA DIFFERENCE ENTRE DEUX TYPES DE GRAINS
 !     VALEUR ENTRE 200 ET 0
 !
 USE MODD_SNOW_METAMO, ONLY : XGRAN, XVDIAM6, XUEPSI
+USE MODD_SNOW_PAR, ONLY : XRHOTHRESHOLD_ICE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !*      0.1    declarations of arguments
-REAL, INTENT(IN) :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4
+REAL, INTENT(IN) :: PGRAIN1, PGRAIN2, PGRAIN3, PGRAIN4, PSNOWRHO1, PSNOWRHO2, PSNOWAGE1, PSNOWAGE2
 CHARACTER(3), INTENT(IN)              :: HSNOWMETAMO
 REAL :: ZDIFTYPE, ZCOEF3, ZCOEF4
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -1814,7 +1885,12 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      0.2    calcul de la difference entre type de grains
 IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LDIFTYP',0,ZHOOK_HANDLE)
 !
-IF ( HSNOWMETAMO=='B92' ) THEN 
+IF (ABS(PSNOWAGE1 - PSNOWAGE2) > 600.) THEN
+  ZDIFTYPE = 200.
+ELSEIF (((PSNOWRHO1 < XRHOTHRESHOLD_ICE).AND.(PSNOWRHO2 >= XRHOTHRESHOLD_ICE)) &
+   .OR. ((PSNOWRHO1 >= XRHOTHRESHOLD_ICE).AND.(PSNOWRHO2 < XRHOTHRESHOLD_ICE))) THEN
+  ZDIFTYPE = 200.
+ELSEIF ( HSNOWMETAMO=='B92' ) THEN 
   !
   IF ( ( PGRAIN1<0.  .AND. PGRAIN2>=0.) .OR. ( PGRAIN1>=0. .AND. PGRAIN2<0. ) ) THEN
     ZDIFTYPE = 200.
@@ -1849,12 +1925,14 @@ END FUNCTION SNOW3LDIFTYP
 SUBROUTINE GET_MASS_HEAT(KJ,KNLVLS_NEW,KNLVLS_OLD,                                &
                          PSNOWZTOP_OLD,PSNOWZTOP_NEW,PSNOWZBOT_OLD,PSNOWZBOT_NEW, &
                          PSNOWRHOO,PSNOWDZO,PSNOWGRAN1O,PSNOWGRAN2O,PSNOWHISTO,   &
-                         PSNOWAGEO,PSNOWHEATO,                                    &
+                         PSNOWAGEO,PSNOWIMPURO,PSNOWHEATO,                        &
                          PSNOWRHON,PSNOWDZN,PSNOWGRAN1N,PSNOWGRAN2N,PSNOWHISTN,   &
-                         PSNOWAGEN, PSNOWHEATN,HSNOWMETAMO                        )
+                         PSNOWAGEN, PSNOWIMPURN,PSNOWHEATN,HSNOWMETAMO            )
 !
 USE MODD_SNOW_PAR, ONLY : XSNOWCRITD, XD1, XD2, XD3, XX, XVALB5, XVALB6
 !
+USE MODD_SNOW_METAMO, ONLY : XUEPSI
+USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -1866,16 +1944,20 @@ REAL, DIMENSION(:), INTENT(IN) :: PSNOWZTOP_OLD, PSNOWZBOT_OLD
 REAL, DIMENSION(:), INTENT(IN) :: PSNOWZTOP_NEW, PSNOWZBOT_NEW
 REAL, DIMENSION(:), INTENT(IN) :: PSNOWRHOO, PSNOWDZO, PSNOWGRAN1O, PSNOWGRAN2O, &
                                   PSNOWHISTO, PSNOWAGEO, PSNOWHEATO
+REAL, DIMENSION(:,:), INTENT(IN) :: PSNOWIMPURO
 REAL, DIMENSION(:), INTENT(IN) :: PSNOWDZN
 CHARACTER(3), INTENT(IN)       :: HSNOWMETAMO
 REAL, DIMENSION(:), INTENT(OUT) :: PSNOWRHON, PSNOWGRAN1N, PSNOWGRAN2N, &
                                    PSNOWHISTN, PSNOWAGEN, PSNOWHEATN
+REAL, DIMENSION(:,:), INTENT(OUT) :: PSNOWIMPURN
 !
 REAL :: ZPROPOR, ZMASDZ_OLD, ZDIAM, ZMASTOT_T07
 REAL :: ZSNOWHEAN, ZMASTOTN, ZDENTMOYN, ZSPHERMOYN, ZALBMOYN, ZHISTMOYN
 REAL :: ZAGEMOYN
+
+REAL, DIMENSION(NIMPUR) :: ZIMPURMOYN
 !
-INTEGER :: JST_NEW, JST_OLD
+INTEGER :: JST_NEW, JST_OLD, JIMP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -1886,6 +1968,9 @@ PSNOWGRAN1N(:) = 0.
 PSNOWGRAN2N(:) = 0.
 PSNOWHISTN (:) = 0.
 PSNOWAGEN  (:) = 0.
+DO JIMP=1,NIMPUR
+  PSNOWIMPURN(:,JIMP) = 0.
+ENDDO
 PSNOWHEATN (:) = 0.
 !
 DO JST_NEW = 1,KNLVLS_NEW
@@ -1899,6 +1984,9 @@ DO JST_NEW = 1,KNLVLS_NEW
   ZDIAM       = 0.
   ZHISTMOYN   = 0.
   ZAGEMOYN    = 0.
+  DO JIMP=1,NIMPUR
+    ZIMPURMOYN(JIMP) =0.
+  ENDDO
   !
   ! lopp over the ols snow layers 
   DO JST_OLD = 1,KNLVLS_OLD
@@ -1910,11 +1998,23 @@ DO JST_NEW = 1,KNLVLS_NEW
     ELSE
       ! old layer contributes to the new one
       ! computation of its contributing ratio and mass/heat 
+      !
+      !        NEW                                           OLD
+      !                                              ------------------- PSNOWZTOP_OLD(JST_OLD)
+      !------------------- PSNOWZTOP_NEW(JST_NEW)                                                     |
+      !                                                                                               | ZPROPOR
+      !                                              ------------------- PSNOWZTOP_OLD(JST_OLD)       |
+      !------------------- PSNOWZTOP_NEW(JST_NEW)
+      !
+      ! The ratio is done in term of layer thickness but it is equivalent to perform this ratio in term of mass (SWE).
+      ! Indeed the ratio only concern one old layer at each loop step, and as its SWE is constant it is equivalent to 
+      ! think in term of depth or in term os mass (only a constant factor RhoOld between the two approach).
       ZPROPOR = ( MIN( PSNOWZTOP_OLD(JST_OLD), PSNOWZTOP_NEW(JST_NEW) )   &
                 - MAX( PSNOWZBOT_OLD(JST_OLD), PSNOWZBOT_NEW(JST_NEW) ) ) &
                  / PSNOWDZO(JST_OLD) 
       ZMASDZ_OLD = ZPROPOR * PSNOWRHOO(JST_OLD) * PSNOWDZO(JST_OLD)
       !
+      ! The mass of new snow is incremented with the different old layers contributing
       ZMASTOTN    = ZMASTOTN + ZMASDZ_OLD
       ZMASTOT_T07 = ZMASTOT_T07 + 1.
       !
@@ -1945,6 +2045,13 @@ DO JST_NEW = 1,KNLVLS_NEW
       ZALBMOYN  = ZALBMOYN  + MAX( 0., ZMASDZ_OLD * (XVALB5-XVALB6*SQRT(ZDIAM)) )
       ZHISTMOYN = ZHISTMOYN + ZMASDZ_OLD * PSNOWHISTO(JST_OLD)
       ZAGEMOYN  = ZAGEMOYN  + ZMASDZ_OLD * PSNOWAGEO (JST_OLD)
+      ! In fact Zimpurmoyen is adding the contibution in impurity content of all old layers that are used to build a new one.
+      !Zpropor is the 
+      IF (ZPROPOR>XUEPSI) THEN
+          DO JIMP=1,NIMPUR
+            ZIMPURMOYN(JIMP)=ZIMPURMOYN(JIMP)+ PSNOWIMPURO(JST_OLD,JIMP) * ZPROPOR
+          ENDDO
+      ENDIF
       !
     ENDIF
     !
@@ -2015,6 +2122,9 @@ DO JST_NEW = 1,KNLVLS_NEW
   !
   PSNOWHISTN(JST_NEW) = NINT( ZHISTMOYN/ZMASTOTN )
   PSNOWAGEN (JST_NEW) = ZAGEMOYN / ZMASTOTN
+  DO JIMP=1,NIMPUR
+    PSNOWIMPURN(JST_NEW,JIMP)= ZIMPURMOYN(JIMP)
+  ENDDO
   !
 ENDDO     
 !
@@ -2062,6 +2172,126 @@ IF (LHOOK) CALL DR_HOOK('GET_DIAM',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE GET_DIAM
 !####################################################################
+SUBROUTINE SYVAGRE(PSNOWGRAN1I,PSNOWGRAN2I,PSNOWGRAN1J,PSNOWGRAN2J,      &
+                   PSNOWGRAN1F,PSNOWGRAN2F,PZI,PZJ)
+!
+!!    PURPOSE
+!!    -------
+!!    Aggregate snow grain characteristics in 2 layers (I and J) to get the
+!!    averaged grain characteristics 
+!!
+!!    METHOD
+!!    -------
+!!    Based on the subroutine get_mass_heat in mode_snow3l.f90
+!!
+!!    AUTHOR
+!!    ------
+!!    V. Vionnet  * Meteo-France *   Implementation in SURFEX
+!!
+!
+USE MODD_SNOW_PAR, ONLY : XSNOWCRITD, XD1, XD2, XD3, XX, XVALB5, XVALB6
+!   
+IMPLICIT NONE
+!
+!
+!*      0.1    declarations of arguments
+!
+REAL, INTENT(IN)      :: PSNOWGRAN1I,PSNOWGRAN2I,PSNOWGRAN1J,PSNOWGRAN2J
+REAL, INTENT(IN)      :: PZI,PZJ      !   Weight of layer I and J
+REAL, INTENT(OUT)     :: PSNOWGRAN1F,PSNOWGRAN2F
+
+!
+!*      0.2    declarations of local variables
+!
+REAL ZDIAMI,ZDIAMJ,ZDIAMMOY
+REAL ZDENTI,ZDENTJ,ZDENTMOY
+REAL ZSPHERI,ZSPHERJ,ZSPHERMOY
+REAL ZALBI,ZALBJ,ZALBMOY
+
+!
+!    1. Compute properties for each layer
+!
+! For layer I
+IF(PSNOWGRAN1I<0.) THEN
+    ZDIAMI = -PSNOWGRAN1I*XD1/XX + (1.+PSNOWGRAN1I/XX) * &
+                 ( PSNOWGRAN2I*XD2/XX +(1.-PSNOWGRAN2I/XX)*XD3 ) 
+    ZDIAMI = ZDIAMI/10000.
+    ZDENTI  = -PSNOWGRAN1I/XX
+    ZSPHERI = PSNOWGRAN2I/XX
+ELSE
+   ZDIAMI = PSNOWGRAN2I
+   ZDENTI =0.
+   ZSPHERI = PSNOWGRAN2I/XX
+ENDIF
+ZALBI = MAX( 0.,  (XVALB5-XVALB6*SQRT(ZDIAMI)) )
+!
+! For layer J
+IF(PSNOWGRAN1J<0.) THEN
+    ZDIAMJ = -PSNOWGRAN1J*XD1/XX + (1.+PSNOWGRAN1J/XX) * &
+                 ( PSNOWGRAN2J*XD2/XX +(1.-PSNOWGRAN2J/XX)*XD3 )
+    ZDIAMJ = ZDIAMJ/10000.
+    ZDENTJ  = -PSNOWGRAN1J/XX
+    ZSPHERJ = PSNOWGRAN2J/XX
+ELSE
+   ZDIAMJ = PSNOWGRAN2J
+   ZDENTJ =0.
+   ZSPHERJ = PSNOWGRAN2J/XX
+ENDIF
+ZALBJ = MAX( 0.,  (XVALB5-XVALB6*SQRT(ZDIAMJ)) )
+!
+!    2. Compute averaged properties
+!
+ZDENTMOY  = MAX(0.,(ZDENTI*PZI+ZDENTJ*PZJ)/( PZI+PZJ))
+ZSPHERMOY = MAX(0.,(ZSPHERI*PZI+ZSPHERJ*PZJ)/( PZI+PZJ))
+ZALBMOY   = MAX(0.,(ZALBI*PZI+ZALBJ*PZJ)/( PZI+PZJ))
+ZDIAMMOY = ( (XVALB5-ZALBMOY)/XVALB6 )**2
+!
+!    3. Compute GRAN1 and GRAN2 of averaged layer
+!
+! size between D2 and D3 and dendricity < 0         
+! sphericity is first preserved, if possible. If not,
+! dendricity = 0
+PSNOWGRAN1F= -XX * ZDENTMOY
+!
+IF(ZDENTMOY/=1.) THEN
+      PSNOWGRAN2F = XX * ( ( ZDIAMMOY*10000. + PSNOWGRAN1F*XD1/XX) &
+                     / ( 1. + PSNOWGRAN1F/XX ) - XD3 )/ ( XD2-XD3 )
+ENDIF
+!
+! dendricity is preserved if possible and sphericity is adjusted
+IF ( ZDIAMMOY < XD2/10000. - 0.0000001 ) THEN
+    !
+    IF ( ABS( PSNOWGRAN1F+XX ) < 0.01 ) THEN
+    !
+       PSNOWGRAN2F = XX * ZSPHERMOY
+    !
+    ELSEIF ( ABS( PSNOWGRAN1F) < 0.0001 ) THEN ! dendritic snow
+    !
+      PSNOWGRAN1F = XX * ZSPHERMOY
+      PSNOWGRAN2F = ZDIAMMOY
+!
+    ELSEIF ( PSNOWGRAN2F < 0. ) THEN ! non dendritic
+!
+      PSNOWGRAN2F = 0.
+!
+    ELSEIF ( PSNOWGRAN2F > XX + 0.0000001 ) THEN ! non dendritic
+!
+      PSNOWGRAN2F = XX
+!
+    ENDIF
+!
+ELSEIF ( ZDIAMMOY > XD3/10000. .OR. ZDENTMOY <= 0. + 0.0000001 .OR. &
+     PSNOWGRAN2F < 0. .OR. PSNOWGRAN2F > XX ) THEN
+!
+! dendritic snow
+! inconsistency with ZDIAM ==>  dendricity = 0
+! size between D2 and D3 and dendricity == 0          
+    PSNOWGRAN1F = XX * ZSPHERMOY
+    PSNOWGRAN2F = ZDIAMMOY
+!
+ENDIF
+
+END SUBROUTINE SYVAGRE
 !####################################################################
 !####################################################################
 FUNCTION SNOW3LRADABS_0D(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC,PDSGRAIN) RESULT(PCOEF)
@@ -2292,99 +2522,6 @@ IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_2D',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
 END FUNCTION SNOW3LRADABS_2D
-!####################################################################
-!####################################################################
-!####################################################################
-FUNCTION SNOW3LRADABS_SFC(PSNOWRHO,PSNOWDZ,PSPECTRALALBEDO,PZENITH,PPERMSNOWFRAC,PDSGRAIN) RESULT(PCOEF)
-!
-!!    PURPOSE
-!!    -------
-!     Calculate the transmission of shortwave radiation within the snowpack
-!     (with depth) for 3 spectral bands
-!     A. Boone 02/2011
-!     A. Boone 11/2014 Updated to use spectral dependence
-!                      NOTE, assumes 3 spectral bands
-!     A. Boone 06/2017 ONLY considers albedo of uppermost layer  
-!
-USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_SNOW_PAR, ONLY : XVSPEC1,XVSPEC2,XVSPEC3,XVBETA1,XVBETA2, &
-                          XVBETA4,XVBETA3,XVBETA5, XMINCOSZEN
-USE MODD_MEB_PAR,  ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
-!
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:,:),   INTENT(IN)                 :: PSNOWRHO        ! snow density    (kg m-3)
-REAL, DIMENSION(:,:),   INTENT(IN)                 :: PSNOWDZ         ! layer thickness (m)
-REAL, DIMENSION(:),     INTENT(IN)                 :: PZENITH         ! zenith angle    (rad)
-REAL, DIMENSION(:),     INTENT(IN)                 :: PPERMSNOWFRAC   ! permanent snow fraction (-)
-REAL, DIMENSION(:,:),   INTENT(IN)                 :: PSPECTRALALBEDO ! spectral albedo (-)
-REAL, DIMENSION(:,:),   INTENT(IN)                 :: PDSGRAIN        ! Snow optical grain diameter (m)
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: PCOEF           ! -
-!
-!*      0.2    declarations of local variables
-!
-INTEGER                                            :: JJ, JI, INLVLS, INI
-REAL, DIMENSION(SIZE(PSNOWRHO,1))                  :: ZPROJLAT,  ZOPTICALPATH1,         &
-                                                      ZOPTICALPATH2, ZOPTICALPATH3
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZWORK, ZBETA1, ZBETA2, ZBETA3
-!
-REAL(KIND=JPRB)                                    :: ZHOOK_HANDLE
-!
-!-------------------------------------------------------------------------------
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_SFC',0,ZHOOK_HANDLE)
-!
-INI    = SIZE(PSNOWDZ(:,:),1)
-INLVLS = SIZE(PSNOWDZ(:,:),2)
-!
-! Coefficient for taking into account the increase of path length of rays
-! in snow due to zenithal angle
-!
-ZPROJLAT(:)           = (1.0-PPERMSNOWFRAC(:))+PPERMSNOWFRAC(:)/ &
-                        MAX(XMINCOSZEN,COS(PZENITH(:)))
-!
-! Extinction coefficient:
-!
-ZWORK(:,:)            = SQRT(PDSGRAIN(:,:))
-ZBETA1(:,:)           = MAX(XVBETA1*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA2)
-ZBETA2(:,:)           = MAX(XVBETA3*PSNOWRHO(:,:)/ZWORK(:,:),XVBETA4)
-ZBETA3(:,:)           = XVBETA5
-!
-ZOPTICALPATH1(:)      = 0.0
-ZOPTICALPATH2(:)      = 0.0
-ZOPTICALPATH3(:)      = 0.0
-!
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      ZOPTICALPATH1(JI) = ZOPTICALPATH1(JI) + ZBETA1(JI,JJ)*PSNOWDZ(JI,JJ)
-      ZOPTICALPATH2(JI) = ZOPTICALPATH2(JI) + ZBETA2(JI,JJ)*PSNOWDZ(JI,JJ)
-
-      IF(PSPECTRALALBEDO(JI,3)==XUNDEF)THEN 
-
-         PCOEF (JI,JJ)     = XSW_WGHT_VIS*(1.0-PSPECTRALALBEDO(JI,1))*EXP(-ZOPTICALPATH1(JI)*ZPROJLAT(JI)) &
-                           + XSW_WGHT_NIR*(1.0-PSPECTRALALBEDO(JI,2))*EXP(-ZOPTICALPATH2(JI)*ZPROJLAT(JI))  
-      ELSE
-      
-         ZOPTICALPATH3(JI) = ZOPTICALPATH3(JI) + ZBETA3(JI,JJ)*PSNOWDZ(JI,JJ)
-
-         PCOEF (JI,JJ)     = XVSPEC1*(1.0-PSPECTRALALBEDO(JI,1))*EXP(-ZOPTICALPATH1(JI)*ZPROJLAT(JI)) &
-                           + XVSPEC2*(1.0-PSPECTRALALBEDO(JI,2))*EXP(-ZOPTICALPATH2(JI)*ZPROJLAT(JI)) &
-                           + XVSPEC3*(1.0-PSPECTRALALBEDO(JI,3))*EXP(-ZOPTICALPATH3(JI)*ZPROJLAT(JI))
-
-      ENDIF
-      
-   ENDDO
-ENDDO
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LRADABS_SFC',1,ZHOOK_HANDLE)
-!-------------------------------------------------------------------------------
-!
-END FUNCTION SNOW3LRADABS_SFC
 !####################################################################
 !####################################################################
 !####################################################################
@@ -2684,517 +2821,5 @@ END SUBROUTINE SNOW3LALB
 !####################################################################
 !####################################################################
 !####################################################################
-SUBROUTINE SNOW3LFALL(PTSTEP,PSR,PTA,PVMOD,PSNOW,PSNOWRHO,PSNOWDZ,        &
-                      PSNOWHEAT,PSNOWHMASS,PSNOWAGE,PPERMSNOWFRAC)  
-!
-!!    PURPOSE
-!!    -------
-!     Calculate changes to snowpack resulting from snowfall.
-!     Update mass and heat content of uppermost layer.
-!
-!
-USE MODD_CSTS,     ONLY : XLMTT, XTT, XCI
-USE MODD_SNOW_PAR, ONLY : XRHOSMIN_ES, XSNOWDMIN, &
-                          XSNOWFALL_A_SN,         &
-                          XSNOWFALL_B_SN,         &
-                          XSNOWFALL_C_SN
-!                   
-USE YOMHOOK   ,    ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,    ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, INTENT(IN)                    :: PTSTEP
-!
-REAL, DIMENSION(:), INTENT(IN)      :: PSR, PTA, PVMOD, PPERMSNOWFRAC
-!
-REAL, DIMENSION(:), INTENT(INOUT)   :: PSNOW
-!
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO, PSNOWDZ, PSNOWHEAT, PSNOWAGE
-!
-REAL, DIMENSION(:), INTENT(OUT)     :: PSNOWHMASS
-!
-!
-!*      0.2    declarations of local variables
-!
-INTEGER                             :: JJ, JI
-!
-INTEGER                             :: INI
-INTEGER                             :: INLVLS
-!
-REAL, DIMENSION(SIZE(PTA))          :: ZSNOWFALL, ZRHOSNEW,        &
-                                       ZSNOW, ZSNOWTEMP,           &
-                                       ZSNOWFALL_DELTA, ZSCAP,     &
-                                       ZAGENEW
-!                               
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
-!-------------------------------------------------------------------------------
-!
-! 0. Initialize:
-! ------------------
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LFALL',0,ZHOOK_HANDLE)
-!
-INI             = SIZE(PSNOWDZ(:,:),1)
-INLVLS          = SIZE(PSNOWDZ(:,:),2)
-!
-ZRHOSNEW(:)     = XRHOSMIN_ES
-ZAGENEW (:)     = 0.0
-ZSNOWFALL(:)    = 0.0
-ZSCAP(:)        = 0.0
-ZSNOW(:)        = PSNOW(:)
-!
-PSNOWHMASS(:)   = 0.0
-!
-! 1. Incorporate snowfall into snowpack:
-! --------------------------------------
-!
-!
-! Heat content of newly fallen snow (J/m2):
-! NOTE for now we assume the snowfall has
-! the temperature of the snow surface upon reaching the snow.
-! This is done as opposed to using the air temperature since
-! this flux is quite small and has little to no impact
-! on the time scales of interest. If we use the above assumption
-! then, then the snowfall advective heat flux is zero.
-!
-ZSNOWTEMP(:)  = XTT
-ZSCAP    (:)  = SNOW3LSCAP(PSNOWRHO(:,1))
-!
-WHERE (PSR(:) > 0.0 .AND. PSNOWDZ(:,1)>0.)
-  ZSNOWTEMP(:)  = XTT + (PSNOWHEAT(:,1) +                              &
-                    XLMTT*PSNOWRHO(:,1)*PSNOWDZ(:,1))/                   &
-                    (ZSCAP(:)*MAX(XSNOWDMIN/INLVLS,PSNOWDZ(:,1)))  
-  ZSNOWTEMP(:)  = MIN(XTT, ZSNOWTEMP(:))
-END WHERE
-!
-WHERE (PSR(:) > 0.0)
-!
-  PSNOWHMASS(:) = PSR(:)*(XCI*(ZSNOWTEMP(:)-XTT)-XLMTT)*PTSTEP
-!
-! Snowfall density: Following CROCUS (Pahaut 1976)
-!
-   ZRHOSNEW(:)   = MAX(XRHOSMIN_ES, XSNOWFALL_A_SN + XSNOWFALL_B_SN*(PTA(:)-XTT)+         &
-                     XSNOWFALL_C_SN*SQRT(PVMOD(:)))  
-!
-!
-! Fresh snowfall changes the snowpack age,
-! decreasing in uppermost snow layer (mass weighted average):
-!
-   PSNOWAGE(:,1) = (PSNOWAGE(:,1)*PSNOWDZ(:,1)*PSNOWRHO(:,1)+ZAGENEW(:)*PSR(:)*PTSTEP) / &
-                   (PSNOWDZ(:,1)*PSNOWRHO(:,1)+PSR(:)*PTSTEP)
-!
-! Augment total pack depth:
-!
-   ZSNOWFALL(:)  = PSR(:)*PTSTEP/ZRHOSNEW(:)    ! snowfall thickness (m)
-!
-   PSNOW(:)      = PSNOW(:) + ZSNOWFALL(:)
-!
-! Fresh snowfall changes the snowpack
-! density, increases the total liquid water
-! equivalent: in uppermost snow layer:
-!
-   PSNOWRHO(:,1) = (PSNOWDZ(:,1)*PSNOWRHO(:,1) + ZSNOWFALL(:)*ZRHOSNEW(:))/     &
-                   (PSNOWDZ(:,1)+ZSNOWFALL(:))  
-!
-   PSNOWDZ(:,1)  = PSNOWDZ(:,1) + ZSNOWFALL(:)
-!
-! Add energy of snowfall to snowpack:
-! Update heat content (J/m2) (therefore the snow temperature
-! and liquid content):
-!
-   PSNOWHEAT(:,1)  = PSNOWHEAT(:,1) + PSNOWHMASS(:)
-!
-END WHERE
-!
-!
-! 2. Case of new snowfall on a previously snow-free surface:
-! ----------------------------------------------------------
-!
-! When snow first falls on a surface devoid of snow,
-! redistribute the snow mass throughout the 3 layers:
-! (temperature already set in the calling routine
-! for this case)
-!
-ZSNOWFALL_DELTA(:)    = 0.0
-WHERE(ZSNOW(:) == 0.0 .AND. PSR(:) > 0.0)
-   ZSNOWFALL_DELTA(:) = 1.0
-END WHERE
-!
-DO JJ=1,INLVLS
-   DO JI=1,INI
-!
-      PSNOWDZ(JI,JJ)   = ZSNOWFALL_DELTA(JI)*(ZSNOWFALL(JI) /INLVLS) + &
-                        (1.0-ZSNOWFALL_DELTA(JI))*PSNOWDZ(JI,JJ)  
-!
-      PSNOWHEAT(JI,JJ) = ZSNOWFALL_DELTA(JI)*(PSNOWHMASS(JI)/INLVLS) + &
-                       (1.0-ZSNOWFALL_DELTA(JI))*PSNOWHEAT(JI,JJ)  
-!
-      PSNOWRHO(JI,JJ)  = ZSNOWFALL_DELTA(JI)*ZRHOSNEW(JI)            + &
-                       (1.0-ZSNOWFALL_DELTA(JI))*PSNOWRHO(JI,JJ)
-!
-      PSNOWAGE(JI,JJ)  = ZSNOWFALL_DELTA(JI)*(ZAGENEW(JI)/INLVLS)    + &
-                       (1.0-ZSNOWFALL_DELTA(JI))*PSNOWAGE(JI,JJ)  
-!
-   ENDDO
-ENDDO
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LFALL',1,ZHOOK_HANDLE)
-!
-!
-END SUBROUTINE SNOW3LFALL
-!####################################################################
-!####################################################################
-!####################################################################
-SUBROUTINE SNOW3LCOMPACTN(PTSTEP,PSNOWDZMIN,PSNOWRHO,PSNOWDZ,PSNOWTEMP,PSNOW,PSNOWLIQ)  
-!
-!!    PURPOSE
-!!    -------
-!     Snow compaction due to overburden and settling.
-!     Mass is unchanged: layer thickness is reduced
-!     in proportion to density increases. Method
-!     of Brun et al (1989) and Vionnet et al. (2012)
-!
-!     
-USE MODD_SURF_PAR, ONLY : XUNDEF
-!
-USE MODD_CSTS,     ONLY : XTT, XG
-USE MODD_SNOW_PAR, ONLY : XRHOSMAX_ES
-!
-USE MODD_SNOW_METAMO, ONLY : XVVISC1,XVVISC3,XVVISC4, &
-                             XVVISC5,XVVISC6,XVRO11
-!
-USE YOMHOOK   ,    ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,    ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!*      0.1    declarations of arguments
-!
-REAL, INTENT(IN)                    :: PTSTEP
-REAL, INTENT(IN)                    :: PSNOWDZMIN
-!
-REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWTEMP, PSNOWLIQ
-!
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO, PSNOWDZ
-!
-REAL, DIMENSION(:), INTENT(OUT)     :: PSNOW
-!
-!
-!*      0.2    declarations of local variables
-!
-INTEGER                             :: JJ, JI
-!
-INTEGER                             :: INI
-INTEGER                             :: INLVLS
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2, ZVISCOCITY, ZF1, &
-                                                      ZTEMP, ZSMASS, ZSNOWDZ,     &
-                                                      ZWSNOWDZ, ZWHOLDMAX
-!
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
-!-------------------------------------------------------------------------------
-!
-! 0. Initialization:
-! ------------------
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LCOMPACTN',0,ZHOOK_HANDLE)
-!
-INI             = SIZE(PSNOWDZ(:,:),1)
-INLVLS          = SIZE(PSNOWDZ(:,:),2)
-!
-ZSNOWRHO2 (:,:) = PSNOWRHO(:,:)
-ZSNOWDZ   (:,:) = MAX(PSNOWDZMIN,PSNOWDZ(:,:))
-ZVISCOCITY(:,:) = 0.0
-ZTEMP     (:,:) = 0.0
-!
-! 1. Cumulative snow mass (kg/m2):
-! --------------------------------
-!
-ZSMASS(:,:) = 0.0
-DO JJ=2,INLVLS
-   DO JI=1,INI
-      ZSMASS(JI,JJ) = ZSMASS(JI,JJ-1) + PSNOWDZ(JI,JJ-1)*PSNOWRHO(JI,JJ-1)
-   ENDDO
-ENDDO
-! overburden of half the mass of the uppermost layer applied to itself
-ZSMASS(:,1) = 0.5 * PSNOWDZ(:,1) * PSNOWRHO(:,1)
-!
-! 2. Compaction
-! -------------
-!
-!Liquid water effect
-!
-ZWHOLDMAX(:,:) = SNOW3LHOLD(PSNOWRHO,PSNOWDZ)
-ZWHOLDMAX(:,:) = MAX(1.E-10, ZWHOLDMAX(:,:))
-ZF1(:,:) = 1.0/(XVVISC5+10.*MIN(1.0,PSNOWLIQ(:,:)/ZWHOLDMAX(:,:)))
-!
-!Snow viscocity, density and grid thicknesses
-!
-DO JJ=1,INLVLS
-   DO JI=1,INI
-!   
-      IF(PSNOWRHO(JI,JJ) < XRHOSMAX_ES)THEN
-!   
-!       temperature dependence limited to 5K: Schleef et al. (2014)
-        ZTEMP     (JI,JJ) = XVVISC4*MIN(5.0,ABS(XTT-PSNOWTEMP(JI,JJ)))
-!        
-!       Calculate snow viscocity: Brun et al. (1989), Vionnet et al. (2012)
-        ZVISCOCITY(JI,JJ) = XVVISC1*ZF1(JI,JJ)*EXP(XVVISC3*PSNOWRHO(JI,JJ)+ZTEMP(JI,JJ))*PSNOWRHO(JI,JJ)/XVRO11
-!
-!       Calculate snow density:
-        ZSNOWRHO2(JI,JJ) = PSNOWRHO(JI,JJ) + PSNOWRHO(JI,JJ)*PTSTEP &
-                         * ( (XG*ZSMASS(JI,JJ)/ZVISCOCITY(JI,JJ)) )
-!         
-!       Conserve mass by decreasing grid thicknesses in response to density increases
-        PSNOWDZ(JI,JJ) = PSNOWDZ(JI,JJ)*(PSNOWRHO(JI,JJ)/ZSNOWRHO2(JI,JJ))  
-!        
-      ENDIF
-!
-   ENDDO
-ENDDO
-!
-! 3. Update total snow depth and density profile:
-! -----------------------------------------------
-!
-! Compaction/augmentation of total snowpack depth
-!
-PSNOW(:) = 0.
-DO JJ=1,INLVLS
-   DO JI=1,INI
-      PSNOW(JI) = PSNOW(JI) + PSNOWDZ(JI,JJ)
-   ENDDO
-ENDDO
-!
-! Update density (kg m-3):
-!
-PSNOWRHO(:,:)  = ZSNOWRHO2(:,:)
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LCOMPACTN',1,ZHOOK_HANDLE)
-!
-!-------------------------------------------------------------------------------
-!
-END SUBROUTINE SNOW3LCOMPACTN
-!####################################################################
-!####################################################################
-!####################################################################
-        SUBROUTINE SNOW3LTRANSF(PSNOW,PSNOWDZ,PSNOWDZN,    &
-                                PSNOWRHO,PSNOWHEAT,PSNOWAGE)  
-!
-!!    PURPOSE
-!!    -------
-!     Snow mass,heat and characteristics redistibution in case of
-!     grid resizing. Total mass and heat content of the overall snowpack
-!     unchanged/conserved within this routine.
-!     Same method as in Crocus
-!
-USE MODD_SURF_PAR, ONLY : XUNDEF          
-USE MODD_SNOW_PAR, ONLY : XSNOWCRITD
-!
-USE YOMHOOK   ,    ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,    ONLY : JPRB
-!
-IMPLICIT NONE
-!
-!
-!*      0.1    declarations of arguments
-!
-REAL, DIMENSION(:  ), INTENT(IN)    :: PSNOW
-!
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWDZN  
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWHEAT
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWRHO
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWDZ
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE
-!
-!*      0.2    declarations of local variables
-!
-INTEGER                             :: JI, JL, JLO
-!
-INTEGER                             :: INI
-INTEGER                             :: INLVLS
-!
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHON
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEATN
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWAGEN
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZTOP_NEW
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZBOT_NEW                                       
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHOO
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEATO
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWAGEO
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWDZO
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZTOP_OLD
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWZBOT_OLD  
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWHEAN
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWAGN
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZMASTOTN
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZMASSDZO
-!
-REAL, DIMENSION(SIZE(PSNOW)) :: ZPSNOW_OLD, ZPSNOW_NEW
-REAL, DIMENSION(SIZE(PSNOW)) :: ZSUMHEAT, ZSUMSWE, ZSUMAGE, ZSNOWMIX_DELTA
-!
-REAL :: ZPROPOR
-!
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
-!
-!-------------------------------------------------------------------------------
-!
-! 0. Initialization:
-! ------------------
-!
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTRANSF',0,ZHOOK_HANDLE)
-!
-INI        = SIZE(PSNOWRHO,1)
-INLVLS     = SIZE(PSNOWRHO,2)
-!
-ZPSNOW_NEW(:) = 0.0
-ZPSNOW_OLD(:) = PSNOW(:)
-!
-DO JL=1,INLVLS
-   DO JI=1,INI
-      ZPSNOW_NEW(JI)=ZPSNOW_NEW(JI)+PSNOWDZN(JI,JL)
-   ENDDO
-ENDDO
-!
-! initialization of variables describing the initial snowpack 
-!
-ZSNOWDZO  (:,:) = PSNOWDZ  (:,:)
-ZSNOWRHOO (:,:) = PSNOWRHO (:,:)
-ZSNOWHEATO(:,:) = PSNOWHEAT(:,:)
-ZSNOWAGEO (:,:) = PSNOWAGE (:,:)
-ZMASSDZO  (:,:) = XUNDEF
-!
-! 1. Calculate vertical grid limits (m):
-! --------------------------------------
-!
-ZSNOWZTOP_OLD(:,1) = ZPSNOW_OLD(:)
-ZSNOWZTOP_NEW(:,1) = ZPSNOW_NEW(:)
-ZSNOWZBOT_OLD(:,1) = ZSNOWZTOP_OLD(:,1)-ZSNOWDZO(:,1)
-ZSNOWZBOT_NEW(:,1) = ZSNOWZTOP_NEW(:,1)-PSNOWDZN(:,1)
-!
-DO JL=2,INLVLS
-   DO JI=1,INI
-      ZSNOWZTOP_OLD(JI,JL) = ZSNOWZBOT_OLD(JI,JL-1)
-      ZSNOWZTOP_NEW(JI,JL) = ZSNOWZBOT_NEW(JI,JL-1)
-      ZSNOWZBOT_OLD(JI,JL) = ZSNOWZTOP_OLD(JI,JL  )-ZSNOWDZO(JI,JL)
-      ZSNOWZBOT_NEW(JI,JL) = ZSNOWZTOP_NEW(JI,JL  )-PSNOWDZN(JI,JL)
-   ENDDO
-ENDDO
-ZSNOWZBOT_OLD(:,INLVLS)=0.0
-ZSNOWZBOT_NEW(:,INLVLS)=0.0
-!
-! 3. Calculate mass, heat, charcateristics mixing due to vertical grid resizing:
-! --------------------------------------------------------------------
-!
-! loop over the new snow layers
-! Summ or avergage of the constituting quantities of the old snow layers
-! which are totally or partially inserted in the new snow layer
-! For snow age, mass weighted average is used.
-!
-ZSNOWHEAN(:,:)=0.0
-ZMASTOTN (:,:)=0.0
-ZSNOWAGN (:,:)=0.0
-!
-DO JL=1,INLVLS
-   DO JLO=1, INLVLS   
-      DO JI=1,INI
-        IF((ZSNOWZTOP_OLD(JI,JLO)>ZSNOWZBOT_NEW(JI,JL)).AND.(ZSNOWZBOT_OLD(JI,JLO)<ZSNOWZTOP_NEW(JI,JL)))THEN
-!                
-          ZPROPOR = (MIN(ZSNOWZTOP_OLD(JI,JLO), ZSNOWZTOP_NEW(JI,JL)) &
-                  -  MAX(ZSNOWZBOT_OLD(JI,JLO), ZSNOWZBOT_NEW(JI,JL)))&
-                  / ZSNOWDZO(JI,JLO) 
-!
-          ZMASSDZO (JI,JLO)=ZSNOWRHOO(JI,JLO)*ZSNOWDZO(JI,JLO)*ZPROPOR
-!
-          ZMASTOTN (JI,JL)=ZMASTOTN (JI,JL)+ZMASSDZO  (JI,JLO)
-          ZSNOWAGN (JI,JL)=ZSNOWAGN (JI,JL)+ZSNOWAGEO (JI,JLO)*ZMASSDZO(JI,JLO)
-!
-          ZSNOWHEAN(JI,JL)=ZSNOWHEAN(JI,JL)+ZSNOWHEATO(JI,JLO)*ZPROPOR
-!          
-        ENDIF
-      ENDDO 
-    ENDDO 
-ENDDO  
-!
-! the new layer inherits from the weighted average properties of the old ones
-! heat and mass
-!
-ZSNOWHEATN(:,:)= ZSNOWHEAN(:,:)
-ZSNOWAGEN (:,:)= ZSNOWAGN (:,:)/ZMASTOTN(:,:)
-ZSNOWRHON (:,:)= ZMASTOTN (:,:)/PSNOWDZN(:,:)
-!
-!
-! 4. Vanishing or very thin snowpack check:
-! -----------------------------------------
-!
-! NOTE: ONLY for very shallow snowpacks, mix properties (homogeneous):
-! this avoids problems related to heat and mass exchange for
-! thin layers during heavy snowfall or signifigant melt: one
-! new/old layer can exceed the thickness of several old/new layers.
-! Therefore, mix (conservative):
-!
-ZSUMHEAT(:)       = 0.0
-ZSUMSWE(:)        = 0.0
-ZSUMAGE(:)        = 0.0
-ZSNOWMIX_DELTA(:) = 0.0
-!
-DO JL=1,INLVLS
-   DO JI=1,INI
-      IF(PSNOW(JI) < XSNOWCRITD)THEN
-         ZSUMHEAT      (JI) = ZSUMHEAT(JI) + PSNOWHEAT(JI,JL)
-         ZSUMSWE       (JI) = ZSUMSWE (JI) + PSNOWRHO (JI,JL)*PSNOWDZ(JI,JL)
-         ZSUMAGE       (JI) = ZSUMAGE (JI) + PSNOWAGE (JI,JL)
-         ZSNOWMIX_DELTA(JI) = 1.0
-      ENDIF
-   ENDDO
-ENDDO
-!
-! Heat and mass are evenly distributed vertically:
-! heat and mass (density and thickness) are constant
-! in profile:
-!
-DO JL=1,INLVLS
-   DO JI=1,INI
-!         
-      ZSNOWHEATN(JI,JL) = ZSNOWMIX_DELTA(JI)*(ZSUMHEAT(JI)/INLVLS)  + &
-                         (1.0-ZSNOWMIX_DELTA(JI))*ZSNOWHEATN(JI,JL)  
-!
-      PSNOWDZN(JI,JL)   = ZSNOWMIX_DELTA(JI)*(PSNOW(JI)/INLVLS)     + &
-                         (1.0-ZSNOWMIX_DELTA(JI))*PSNOWDZN(JI,JL)  
-!
-      ZSNOWRHON(JI,JL)  = ZSNOWMIX_DELTA(JI)*(ZSUMSWE(JI)/PSNOW(JI)) + &
-                         (1.0-ZSNOWMIX_DELTA(JI))*ZSNOWRHON(JI,JL)
-!
-      ZSNOWAGEN(JI,JL)  = ZSNOWMIX_DELTA(JI)*(ZSUMAGE(JI)/INLVLS)  + &
-                         (1.0-ZSNOWMIX_DELTA(JI))*ZSNOWAGEN(JI,JL)  
-!
-   ENDDO
-ENDDO
-!
-! 5. Update mass (density and thickness) and heat:
-! ------------------------------------------------
-!
-PSNOWDZ  (:,:) = PSNOWDZN  (:,:)
-PSNOWRHO (:,:) = ZSNOWRHON (:,:)
-PSNOWHEAT(:,:) = ZSNOWHEATN(:,:)
-PSNOWAGE (:,:) = ZSNOWAGEN (:,:)
-!
-IF (LHOOK) CALL DR_HOOK('MODE_SNOW3L:SNOW3LTRANSF',1,ZHOOK_HANDLE)
-!
-!
-!-------------------------------------------------------------------------------
-!
-END SUBROUTINE SNOW3LTRANSF
-!####################################################################
-!####################################################################
-!####################################################################
-
-
 END MODULE MODE_SNOW3L
 

@@ -1,9 +1,5 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_BINLLVFAST (UG, U, USS, &
+      SUBROUTINE READ_BINLLVFAST (USS, &
                                   HPROGRAM,HSUBROUTINE,HFILENAME)
 !     ##############################################################
 !
@@ -34,9 +30,8 @@
 !            -----------
 !
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SSO_n, ONLY : SSO_t
+!
+USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
@@ -56,9 +51,7 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SSO_t), INTENT(INOUT) :: USS
+TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),  INTENT(IN) :: HPROGRAM      ! Type of program
  CHARACTER(LEN=6),  INTENT(IN) :: HSUBROUTINE   ! Name of the subroutine to call
@@ -126,7 +119,7 @@ END DO
 !     
 IF (ICPT > 0) THEN
   ZLLVWORK=>ZLLV(:,1:ICPT)
-  CALL PT_BY_PT_TREATMENT(UG, U, USS, &
+  CALL PT_BY_PT_TREATMENT(USS, &
                           ILUOUT,ZLLVWORK(1,:),ZLLVWORK(2,:),ZLLVWORK(3,:),HSUBROUTINE)
 END IF
 !

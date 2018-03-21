@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_LUOUT(HPROGRAM,KLUOUT)
 !     #######################################################
@@ -50,10 +46,6 @@ USE MODI_MNHGET_LUOUT
 #endif
 !
 IMPLICIT NONE
-!
-#ifdef SFX_ARO
-#include "aroget_luout.h"
-#endif
 !
 !*       0.1   Declarations of arguments
 !              -------------------------

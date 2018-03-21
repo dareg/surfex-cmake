@@ -19,7 +19,6 @@ MODULE MODD_TRIP_PAR
 !!    MODIFICATIONS
 !!    -------------
 !!      Original  22/05/08
-!!      09/16   B. Decharme  limit wtd to -1000m
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -46,8 +45,6 @@ REAL, SAVE    :: XPI
 LOGICAL, SAVE :: LNCPRINT
 !
 REAL, SAVE    :: XTIME_DIAG
-!
-REAL, SAVE    :: XGWDZMAX
 !
 !--------------------------------------------------------------------------------
 !
