@@ -1,5 +1,8 @@
-SUBROUTINE INIT_SLOPE_PARAM (UG, &
-                             PZS,KI,PLAT)
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
+SUBROUTINE INIT_SLOPE_PARAM (UG, PGRID_FULL_PAR, PZS, KI, PLAT)
 !
 !!**** *INIT_SLOPE_PARAM
 !!                         Compute physiographic field necessary to account for
@@ -45,7 +48,7 @@ SUBROUTINE INIT_SLOPE_PARAM (UG, &
 !            -----------
 !
 !
-USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SFX_GRID_n, ONLY : GRID_t
 !
 USE MODI_GET_MESH_DIM
 !
@@ -63,11 +66,12 @@ INCLUDE "mpif.h"
 !            ------------------------
 !
 !
-TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(GRID_t), INTENT(INOUT) :: UG
+REAL, DIMENSION(:), INTENT(IN) :: PGRID_FULL_PAR
 !
 INTEGER,              INTENT(IN)  :: KI        ! number of points
 REAL, DIMENSION(KI),   INTENT(IN) :: PZS      ! orography of this MPI thread (or total domain if Open MP)
-REAL, DIMENSION(:),INTENT(IN):: PLAT ! latitudes
+REAL,DIMENSION(:),INTENT(IN):: PLAT ! latitudes
 !
 !
 !
@@ -91,9 +95,6 @@ INTEGER, PARAMETER :: JPHEXT = 1 ! number of points around the physical domain
 REAL                   :: ZDZSDX   ! slope in X and Y direction
 REAL                   :: ZDZSDY   ! of a triangle surface
 
-REAL,DIMENSION(1)::ZLAT1,ZLAT2
-REAL :: ZTEST
-
 INTEGER :: IIB, IIE, IJB, IJE
 INTEGER :: JI, JJ
 INTEGER :: JT       ! loop counter (triangles)
@@ -102,30 +103,19 @@ INTEGER,DIMENSION(:),ALLOCATABLE::IDISPLS
 INTEGER::JPOINT,JPROC
 INTEGER::IRANK,INEXTRANK,IPOS
 INTEGER::IINDY
-LOGICAL::GNEEDOTHERLAT
-#ifdef SFX_MPI
-INTEGER, DIMENSION(MPI_STATUS_SIZE) ::ISTATUS
-#endif
-INTEGER,PARAMETER::ITAG=100
-INTEGER,PARAMETER::ITAG2=101
+
 !-------------------------------------------------------------------------------
 !
 !*    1.1     Gets the geometry of the grid
 !            -----------------------------
 !
-!ITAG0=1
-!ITAG1=2
+
 
 ! Toutes les threads MPI doivent connaître le champ d'altitude complet
 ALLOCATE(ZZS1D_FULL(NIX*NIY))
 
 #ifdef SFX_MPI
-!
-IF (NPROC>NIX) THEN
-  PRINT*,"WHEN SHADOWS ARE ACTIVATED, THE NUMBER OF MPI THREADS CAN NOT BE GREATER THAN THE NUMBER OF LINES IN THE SIMULATION GRID"
-  STOP "WHEN SHADOWS ARE ACTIVATED, THE NUMBER OF MPI THREADS CAN NOT BE GREATER THAN THE NUMBER OF LINES IN THE SIMULATION GRID"
-ENDIF
-!
+
 IF (NPROC>1) THEN
 
   ALLOCATE(IDISPLS(0:NPROC-1))
@@ -147,8 +137,8 @@ IF (NPROC>1) THEN
   END DO
 
   CALL MPI_ALLGATHERV(PZS,SIZE(PZS)*KIND(PZS)/4,MPI_REAL,ZZS1D_FULL,          &
-                      NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)            
-                      
+                      NSIZE_TASK(:)*KIND(PZS)/4,IDISPLS,MPI_REAL,NCOMM,INFOMPI)
+
 ELSE
   ZZS1D_FULL=PZS
 ENDIF
@@ -159,7 +149,9 @@ ENDIF
 
 NNX=NIX+2
 NNY=NIY+2
+
 !
+
 !*    1.2    Grid dimension (meters)
 !            -----------------------
 !
@@ -168,8 +160,7 @@ ALLOCATE(ZDY (NIX*NIY))
 
 IF (NRANK==NPIO) THEN
 
-  CALL GET_MESH_DIM(UG%CGRID,SIZE(UG%XGRID_FULL_PAR),NIX*NIY,UG%XGRID_FULL_PAR,&
-                 ZDX,ZDY,UG%XMESH_SIZE)
+  CALL GET_MESH_DIM(UG%CGRID,SIZE(PGRID_FULL_PAR),NIX*NIY,PGRID_FULL_PAR,ZDX,ZDY,UG%XMESH_SIZE)
   
 ENDIF
 
@@ -198,37 +189,8 @@ ALLOCATE(XZSL (NNX,NNY))
 !RJ: next one does not work with NPROC>4
 !RJ 'Fortran runtime error: Index '13' of dimension 1 of array 'plat' above upper bound of 12'
 ! 2d grid should be increasing in latitude
+LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
 
-IF (NRANK==NPIO) THEN
-  ! careful : the following condition might be false for some threads and true from other ones
-  IF (SIZE(PLAT)>NIX) THEN
-    LREVERTGRID=(PLAT(1)>PLAT(1+NIX))
-    GNEEDOTHERLAT=.FALSE.
-  ELSE
-    GNEEDOTHERLAT=.TRUE.
-  ENDIF
-ENDIF
-#ifdef SFX_MPI
-IF (NPROC>1) THEN
-  CALL MPI_BCAST(GNEEDOTHERLAT,1,MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
-  IF (GNEEDOTHERLAT) THEN
-    IF (NRANK==NINDEX(1)) THEN
-        ZLAT1(1)=PLAT(1)
-        CALL MPI_SEND(ZLAT1,KIND(ZLAT1)/4,MPI_REAL,NPIO,ITAG,NCOMM,INFOMPI)        
-    ELSEIF (NRANK==NINDEX(1+NSIZE_TASK(1))) THEN
-        ZLAT2(1)=PLAT(1)
-        CALL MPI_SEND(ZLAT2,KIND(ZLAT2)/4,MPI_REAL,NPIO,ITAG2,NCOMM,INFOMPI)        
-    ELSEIF (NRANK==NPIO) THEN
-        CALL MPI_RECV(ZLAT1(1),KIND(ZLAT1)/4,MPI_REAL,NINDEX(1),&
-                      ITAG,NCOMM,ISTATUS,INFOMPI)
-        CALL MPI_RECV(ZLAT2(1),KIND(ZLAT2)/4,MPI_REAL,NINDEX(1+NSIZE_TASK(1)),&
-                      ITAG2,NCOMM,ISTATUS,INFOMPI)        
-        LREVERTGRID=(ZLAT1(1)>ZLAT2(1))
-    END IF
-  ENDIF
-  CALL MPI_BCAST(LREVERTGRID,1,MPI_LOGICAL,NPIO,NCOMM,INFOMPI)
-ENDIF
-#endif
 IF (LREVERTGRID) THEN
   DO JY=1,NIY
     IINDY=NIY-JY+1
@@ -252,9 +214,8 @@ XZSL(:,NNY) = XZSL(:,NNY-1)
 
 !------------------------------------------------------------------------------------------
 !
-!    3.2.    Orography of SW corner of grid meshes
+!*    3.2.    Orography of SW corner of grid meshes
 !     -------------------------------------
-!
 !
 ALLOCATE(XZS_XY (NNX,NNY))
 XZS_XY(2:NNX,2:NNY) = 0.25*(XZSL(2:NNX,2:NNY)  +XZSL(1:NNX-1,2:NNY) +&
@@ -357,6 +318,10 @@ DO JT=1,4
     END DO
   END DO
 END DO
+
 ! 2d arrays for processor domain
+
 !------------------------------------------------------------------------------------------
+
+
 END SUBROUTINE INIT_SLOPE_PARAM

@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ######################
       MODULE MODD_IO_SURF_OL
 !     ######################
@@ -38,16 +42,14 @@ INTEGER, DIMENSION(:),POINTER :: NMASK
 INTEGER                       :: NSTEP_OUTPUT
 LOGICAL                       :: LMASK = .FALSE.
 LOGICAL                       :: LPARTR,LPARTW
-LOGICAL                       :: LDEFINED_NATURE
-LOGICAL                       :: LDEFINED_SEA
-LOGICAL                       :: LDEFINED_WATER
-LOGICAL                       :: LDEFINED_TOWN
-LOGICAL                       :: LDEFINED_SURF_ATM
-LOGICAL,DIMENSION(5)          :: LTIME_WRITTEN
+LOGICAL                       :: LTIME_WRITTEN
 INTEGER                       :: XTYPE
 INTEGER                       :: XSTART,XCOUNT,XSTRIDE
 INTEGER                       :: XSTARTW,XCOUNTW
-
+!
+LOGICAL :: LDEF
+INTEGER :: NID_NC
+!
 INTEGER, DIMENSION(:),ALLOCATABLE :: NMASK_IGN
 
 !------------------------------------------------------------------------------

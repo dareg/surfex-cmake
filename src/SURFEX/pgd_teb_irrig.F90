@@ -1,6 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_TEB_IRRIG (DTCO, UG, U, USS, TG, TIR, &
-                                HPROGRAM)
+      SUBROUTINE PGD_TEB_IRRIG (DTCO, UG, U, USS, KDIM, TIR, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_TEB_IRRIG* monitor for averaging and interpolations of cover fractions
@@ -41,8 +44,7 @@
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
-USE MODD_TEB_GRID_n, ONLY : TEB_GRID_t
+USE MODD_SSO_n, ONLY : SSO_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
 !
 USE MODD_SURF_PAR,          ONLY : XUNDEF
@@ -70,8 +72,8 @@ IMPLICIT NONE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
-TYPE(TEB_GRID_t), INTENT(INOUT) :: TG
+TYPE(SSO_t), INTENT(INOUT) :: USS
+INTEGER, INTENT(IN) :: KDIM
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
@@ -288,11 +290,11 @@ END IF
 !-------------------------------------------------------------------------------
 IF (TIR%LPAR_GD_IRRIG) THEN
 !
-ALLOCATE(TIR%XGD_START_MONTH   (TG%NDIM        ))
-ALLOCATE(TIR%XGD_END_MONTH     (TG%NDIM        ))
-ALLOCATE(TIR%XGD_START_HOUR    (TG%NDIM        ))
-ALLOCATE(TIR%XGD_END_HOUR      (TG%NDIM        ))
-ALLOCATE(TIR%XGD_24H_IRRIG     (TG%NDIM        ))
+ALLOCATE(TIR%XGD_START_MONTH   (KDIM        ))
+ALLOCATE(TIR%XGD_END_MONTH     (KDIM        ))
+ALLOCATE(TIR%XGD_START_HOUR    (KDIM        ))
+ALLOCATE(TIR%XGD_END_HOUR      (KDIM        ))
+ALLOCATE(TIR%XGD_24H_IRRIG     (KDIM        ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -346,11 +348,11 @@ END IF
 !-------------------------------------------------------------------------------
 IF (TIR%LPAR_GR_IRRIG) THEN
 !
-ALLOCATE(TIR%XGR_START_MONTH   (TG%NDIM        ))
-ALLOCATE(TIR%XGR_END_MONTH     (TG%NDIM        ))
-ALLOCATE(TIR%XGR_START_HOUR    (TG%NDIM        ))
-ALLOCATE(TIR%XGR_END_HOUR      (TG%NDIM        ))
-ALLOCATE(TIR%XGR_24H_IRRIG     (TG%NDIM        ))
+ALLOCATE(TIR%XGR_START_MONTH   (KDIM        ))
+ALLOCATE(TIR%XGR_END_MONTH     (KDIM        ))
+ALLOCATE(TIR%XGR_START_HOUR    (KDIM        ))
+ALLOCATE(TIR%XGR_END_HOUR      (KDIM        ))
+ALLOCATE(TIR%XGR_24H_IRRIG     (KDIM        ))
 !
 !-------------------------------------------------------------------------------
 !
@@ -403,11 +405,11 @@ END IF
 !-------------------------------------------------------------------------------
 IF (TIR%LPAR_RD_IRRIG) THEN
 !
-ALLOCATE(TIR%XRD_START_MONTH   (TG%NDIM        ))
-ALLOCATE(TIR%XRD_END_MONTH     (TG%NDIM        ))
-ALLOCATE(TIR%XRD_START_HOUR    (TG%NDIM        ))
-ALLOCATE(TIR%XRD_END_HOUR      (TG%NDIM        ))
-ALLOCATE(TIR%XRD_24H_IRRIG     (TG%NDIM        ))
+ALLOCATE(TIR%XRD_START_MONTH   (KDIM        ))
+ALLOCATE(TIR%XRD_END_MONTH     (KDIM        ))
+ALLOCATE(TIR%XRD_START_HOUR    (KDIM        ))
+ALLOCATE(TIR%XRD_END_HOUR      (KDIM        ))
+ALLOCATE(TIR%XRD_24H_IRRIG     (KDIM        ))
 !
 !-------------------------------------------------------------------------------
 !

@@ -54,7 +54,7 @@ IMPLICIT NONE
 !
 LOGICAL,                 INTENT(IN)    :: OPRINT   !Printable budget key 
 LOGICAL,                 INTENT(IN)    :: OFLOOD       !Flood scheme key
-CHARACTER(LEN=3),        INTENT(IN)    :: HGROUNDW     !Groundwater scheme key
+ CHARACTER(LEN=3),        INTENT(IN)    :: HGROUNDW     !Groundwater scheme key
 LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_GW     !Groundwater mask
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PAREA        ! Grid-cell area                  [m2]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PWEFF        ! Effective porosity              [-]

@@ -1,5 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ################################################################
-      SUBROUTINE GRID_MODIF_CARTESIAN(KLUOUT,KLUNAM,KGRID_PAR,KL,PGRID_PAR, &
+      SUBROUTINE GRID_MODIF_CARTESIAN(U,KLUOUT,KLUNAM,KGRID_PAR,KL,PGRID_PAR, &
                                                KGRID_PAR2,KL2,OMODIF,PGRID_PAR2      )  
 !     ################################################################
 !
@@ -29,12 +33,18 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!!         M.Moge   06/2015 Initialization of MODD_SPAWN variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+!
 USE MODD_SURF_PAR, ONLY : NUNDEF
+#ifdef SFX_MNH
+USE MODD_SPAWN, ONLY : NDXRATIO,NDYRATIO,NXSIZE,NYSIZE,NXOR,NYOR
+#endif
 
 USE MODE_POS_SURF
 USE MODE_GRIDTYPE_CARTESIAN
@@ -49,6 +59,8 @@ IMPLICIT NONE
 !
 !*       0.1   Declarations of arguments
 !              -------------------------
+!
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER,                      INTENT(IN)    :: KLUOUT     ! output listing logical unit
 INTEGER,                      INTENT(IN)    :: KLUNAM     ! namelist file logical unit
@@ -109,6 +121,16 @@ IF (LHOOK) CALL DR_HOOK('GRID_MODIF_CARTESIAN',0,ZHOOK_HANDLE)
  CALL POSNAM(KLUNAM,'NAM_INIFILE_CARTESIAN',GFOUND,KLUOUT)
 IF (GFOUND) READ(UNIT=KLUNAM,NML=NAM_INIFILE_CARTESIAN)
 !
+#ifdef SFX_MNH
+! store the parameter in MODD_SPAWN
+NXOR = IXOR
+NYOR = IYOR
+NXSIZE = IXSIZE
+NYSIZE = IYSIZE
+NDXRATIO = IDXRATIO
+NDYRATIO = IDYRATIO
+#endif
+!
 !---------------------------------------------------------------------------
 !
 !*       2.    All this information stored into pointer PGRID_PAR
@@ -148,7 +170,7 @@ ALLOCATE(ZY2 (IIMAX2*IJMAX2))
 ALLOCATE(ZDX2(IIMAX2*IJMAX2))
 ALLOCATE(ZDY2(IIMAX2*IJMAX2))
 !
- CALL REGULAR_GRID_SPAWN(KLUOUT,                               &
+ CALL REGULAR_GRID_SPAWN(U,KLUOUT,                              &
                           KL, IIMAX1,IJMAX1,ZX1,ZY1,ZDX1,ZDY1,  &
                           IXOR, IYOR, IDXRATIO, IDYRATIO,       &
                           IXSIZE, IYSIZE,                       &

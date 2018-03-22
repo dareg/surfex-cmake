@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE CLOSE_NAMELIST(HPROGRAM,KLUNAM)
 !     #######################################################
@@ -57,6 +61,10 @@ USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
+#ifdef SFX_ARO
+#include "aroclose_namelist.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
@@ -70,7 +78,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST',0,ZHOOK_HANDLE)
-!$OMP SINGLE
 IF (HPROGRAM=='MESONH') THEN
 #ifdef SFX_MNH
   CALL MNHCLOSE_NAMELIST(HPROGRAM,KLUNAM)
@@ -100,7 +107,6 @@ ELSE IF (HPROGRAM=='NC    ') THEN
   CALL CLOSE_NAMELIST_NC(HPROGRAM,KLUNAM)
 #endif
 END IF
-!$OMP END SINGLE
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

@@ -1,5 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PUT_SFXCPL_n (F, I, S, U, W, &
+SUBROUTINE PUT_SFXCPL_n (F, IM, S, U, W, &
                          HPROGRAM,KI,KSW,PSW_BANDS,PZENITH, &
                         PLAND_WTD,PLAND_FWTD,PLAND_FFLOOD, &
                         PLAND_PIFLOOD,PSEA_SST,PSEA_UCU,   &
@@ -41,14 +45,8 @@ SUBROUTINE PUT_SFXCPL_n (F, I, S, U, W, &
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-!
-!
-!
 USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -77,7 +75,7 @@ IMPLICIT NONE
 !
 !
 TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
@@ -135,9 +133,8 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_LAND)THEN
-  CALL PUT_SFX_LAND(I, U, &
-                    ILUOUT,LCPL_GW,LCPL_FLOOD,PLAND_WTD(:),       &
-                    PLAND_FWTD(:),PLAND_FFLOOD(:),PLAND_PIFLOOD(:))        
+  CALL PUT_SFX_LAND(IM%O, IM%S, IM%K, IM%NK, IM%NP, U, ILUOUT, LCPL_GW, LCPL_FLOOD, &
+                    PLAND_WTD(:), PLAND_FWTD(:),PLAND_FFLOOD(:),PLAND_PIFLOOD(:))        
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -146,8 +143,7 @@ ENDIF
 !
 IF(LCPL_SEA)THEN
 !
-  CALL PUT_SFX_SEA(S, U, W, &
-                   ILUOUT,LCPL_SEAICE,LWATER,PSEA_SST(:),PSEA_UCU(:),       &
+  CALL PUT_SFX_SEA(S, U, W, ILUOUT,LCPL_SEAICE,LWATER,PSEA_SST(:),PSEA_UCU(:), &
                    PSEA_VCU(:),PSEAICE_SIT(:),PSEAICE_CVR(:),PSEAICE_ALB(:) )
 !
 ENDIF
@@ -157,8 +153,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF(LCPL_SEA.OR.LCPL_FLOOD)THEN
-  CALL UPDATE_ESM_SURF_ATM_n(F, I, S, U, W, &
-                             HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,    &
+  CALL UPDATE_ESM_SURF_ATM_n(F, IM, S, U, W, HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,  &
                              PTSRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )
 ENDIF
 !

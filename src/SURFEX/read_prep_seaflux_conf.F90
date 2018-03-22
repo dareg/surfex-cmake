@@ -1,7 +1,11 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_PREP_SEAFLUX_CONF (O, &
-                                         HPROGRAM,HVAR,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE, &
-                                        HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,KLUOUT,OUNIF)
+      SUBROUTINE READ_PREP_SEAFLUX_CONF (OMERCATOR, HPROGRAM,HVAR,HFILE,HFILETYPE,&
+                                         HFILEPGD,HFILEPGDTYPE, HATMFILE,HATMFILETYPE,&
+                                         HPGDFILE,HPGDFILETYPE,KLUOUT,OUNIF)
 !     #######################################################
 !
 !!****  *READ_PREP_SEAFLUX_CONF* - routine to read the configuration for 
@@ -63,8 +67,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-!
-TYPE(OCEAN_t), INTENT(INOUT) :: O
+LOGICAL, INTENT(IN) :: OMERCATOR
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
 CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
@@ -167,7 +170,7 @@ END IF
 !* If 1D coupling: ocean variables initializing
 !  --------------------------------------------
 !
-IF (O%LMERCATOR) THEN
+IF (OMERCATOR) THEN
   WRITE(KLUOUT,*) 'LMERCATOR=T : initializing oceanic vertical grid'
   CALL PREP_OCEAN_MERCATORVERGRID(HPROGRAM,OUNIF)
 END IF

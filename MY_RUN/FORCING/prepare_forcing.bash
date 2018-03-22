@@ -9,7 +9,7 @@
 #------------------------------------------------------------
 # list of available datasets
 #
-XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_MPI:+-${VER_MPI}}${VER_OMP:+-${VER_OMP}}-${OPTLEVEL}${VER_USER:+-${VER_USER}}
+XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}${VER_MPI:+-${VER_MPI}}${VER_OMP:+-${VER_OMP}}-${OPTLEVEL}-X${VER_XIOS}${VER_USER:+-${VER_USER}}
 #
 if [ "${1}" == "" ]
 then
@@ -40,6 +40,7 @@ fi
 #------------------------------------------------------------
 if [ ! -f ../../exe/PRE_INPUT_EXPERIMENT-${XYZ} ]
 then
+	echo "PRE_INPUT_EXPERIMENT-"${XYZ}
 	echo " "
 	echo " you need to compile with VER_USER=FORC and to run profile_surfex....FORC... before "
 	echo " "

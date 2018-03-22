@@ -1,7 +1,10 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_INLAND_WATER_n (I, U, W, &
-                                 HPROGRAM,KI,PTS_IN,PITM,HTEST, &
-                                OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
+SUBROUTINE ASSIM_INLAND_WATER_n (NPE, W, U, HPROGRAM, KI, PTS_IN, PITM, HTEST, &
+                                 OLKEEPEXTZONE, OD_MASKEXT, PLON_IN, PLAT_IN)
 
 !     ###############################################################################
 !
@@ -28,7 +31,7 @@ SUBROUTINE ASSIM_INLAND_WATER_n (I, U, W, &
 !!--------------------------------------------------------------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_n, ONLY : ISBA_NPE_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
@@ -47,7 +50,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
@@ -103,7 +106,7 @@ ELSE
       !*     ZLST updated from LAND values of climatological TS
       DO JJ=1,U%NSIZE_NATURE
         IF ( U%NR_WATER(JI)==U%NR_NATURE(JJ) ) THEN
-          ZLST(JI) = I%XTG(JJ,2,1)
+          ZLST(JI) = NPE%AL(1)%XTG(JJ,2)
           EXIT
         ENDIF
       ENDDO

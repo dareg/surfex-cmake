@@ -1,5 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ###############################################################
-      SUBROUTINE GET_MESH_INDEX_CONF_PROJ(KGRID_PAR,KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
+      SUBROUTINE GET_MESH_INDEX_CONF_PROJ(KSSO,PGRID_PAR,PLAT,PLON,KINDEX,KISSOX,KISSOY)
 !     ###############################################################
 !
 !!**** *GET_MESH_INDEX_CONF_PROJ* get the grid mesh where point (lat,lon) is located
@@ -39,7 +43,6 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
-INTEGER,                       INTENT(IN)    :: KGRID_PAR ! size of PGRID_PAR
 INTEGER,                       INTENT(IN)    :: KSSO      ! number of subgrid mesh in each direction
 !
 REAL,    DIMENSION(:),         INTENT(IN)    :: PGRID_PAR ! grid parameters

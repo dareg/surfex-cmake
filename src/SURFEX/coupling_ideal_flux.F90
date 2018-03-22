@@ -1,14 +1,16 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ############################################################
-SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
-                                HPROGRAM, HCOUPLING, PTIMEC,                                  &
+SUBROUTINE COUPLING_IDEAL_FLUX (DGO, D, DC, HPROGRAM, HCOUPLING, PTIMEC,                 &
                  PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PAZIM,    &
                  PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV,                 &
                  PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA,                   &
                  PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,                                    &
                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,                &
                  PPEW_A_COEF, PPEW_B_COEF,                                                   &
-                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                         &
-                 HTEST                                                                       )  
+                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST                   )  
 !     ############################################################
 !
 !!****  *COUPLING_IDEAL_FLUX * - Computes the surface fluxes for the temperature, 
@@ -52,7 +54,7 @@ SUBROUTINE COUPLING_IDEAL_FLUX (DGL, &
 !              ------------
 !
 !
-USE MODD_DIAG_IDEAL_n, ONLY : DIAG_IDEAL_t
+USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XPI, XLVTT, XDAY, XKARMAN, XTT, &
                             XLSTT, XSTEFAN
@@ -79,7 +81,9 @@ IMPLICIT NONE
 !*       0.1   declarations of arguments
 ! 
 !
-TYPE(DIAG_IDEAL_t), INTENT(INOUT) :: DGL
+TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
+TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(DIAG_t), INTENT(INOUT) :: DC
 !
  CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=1),    INTENT(IN)  :: HCOUPLING ! type of coupling
@@ -185,7 +189,6 @@ INTEGER                     :: JSV     ! loop on scalar variables
 LOGICAL                     :: GCALL_LMO ! flag in non-neutral case
 !
 INTEGER                     :: ILUOUT  ! output listing logical unit
-CHARACTER(LEN=3) :: YSNOWRES='RIL' ! must be equal to 'RIL'
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -341,19 +344,18 @@ END WHERE
 !
 ZLWUP(:)=(1.-PEMIS(:))*PLW(:)+PEMIS(:)*XSTEFAN*PTSURF(:)**4
 !
- CALL SURFACE_RI(PTSURF,PQSURF,ZEXNS,ZEXNA,PTA,PQA,  &
-                PZREF, PUREF, ZDIRCOSZW,ZWIND,ZRI)
+ CALL SURFACE_RI(PTSURF,PQSURF,ZEXNS,ZEXNA,PTA,PQA,PZREF, PUREF, ZDIRCOSZW,ZWIND,ZRI)
 
- CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, ZWIND, PZ0, PZ0H, ZAC, ZRA, ZCH,YSNOWRES)
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, ZWIND, PZ0, PZ0H, ZAC, ZRA, ZCH)
 
  CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0, PZ0H, ZCD, ZCDN)
 
- CALL DIAG_INLINE_IDEAL_n(DGL, PTSTEP, PTA, PTSURF, ZQA, PPA, PPS, PRHOA, PU,      &
-                            PV, PZREF, PUREF, PRAIN, PSNOW,                  &
-                            ZCD, ZCDN, ZCH, ZRI, ZHU, PZ0,                   &
-                            PZ0H, PQSURF, PSFTH, PSFTQ, PSFU, PSFV,          &
-                            PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,       &
-                            ZLE, ZLEI, ZSUBL, ZLWUP                          )
+ CALL DIAG_INLINE_IDEAL_n(DGO, D, DC, PTSTEP, PTA, PTSURF,             &
+                          ZQA, PPA, PPS, PRHOA, PU,  PV, PZREF, PUREF,     &
+                          PRAIN, PSNOW, ZCD, ZCDN, ZCH, ZRI, ZHU, PZ0,     &
+                          PZ0H, PQSURF, PSFTH, PSFTQ, PSFU, PSFV,          &
+                          PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,       &
+                          ZLE, ZLEI, ZSUBL, ZLWUP                          )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !
@@ -377,7 +379,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX:TEMP_FORC_DISTS',0,ZHOOK_HANDLE)
 !
-ZTIMEIN = PTIMEIN - PSTEP/2.
+ZTIMEIN = PTIMEIN
 !
 IF (PTIMES(KFORC)==XUNDEF) THEN
   KHOUR = 1

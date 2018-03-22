@@ -1,5 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ########################################
-      SUBROUTINE GET_ISBA_CONF_n (I, &
+      SUBROUTINE GET_ISBA_CONF_n (IO, KSNOW_LAYER_IN, &
                                   HISBA, KPATCH,KGROUND_LAYER,KSNOW_LAYER,KNBIOMASS,  &
                                    KNLITTER, KNLITTLEVS, KNSOILCARB)  
 !     ########################################
@@ -37,10 +41,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-!
-!
-!
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -51,7 +52,8 @@ IMPLICIT NONE
 !              -------------------------
 !
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(IN) :: IO
+INTEGER, INTENT(IN) :: KSNOW_LAYER_IN
 !
 CHARACTER(LEN=3), INTENT(OUT) :: HISBA
 INTEGER, INTENT(OUT) :: KPATCH        ! number of patchs
@@ -70,14 +72,14 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('GET_ISBA_CONF_N',0,ZHOOK_HANDLE)
-HISBA = I%CISBA
-KPATCH = I%NPATCH
-KGROUND_LAYER = I%NGROUND_LAYER
-KSNOW_LAYER = I%TSNOW%NLAYER
-KNBIOMASS = I%NNBIOMASS
-KNLITTER = I%NNLITTER
-KNLITTLEVS = I%NNLITTLEVS
-KNSOILCARB = I%NNSOILCARB
+HISBA = IO%CISBA
+KPATCH = IO%NPATCH
+KGROUND_LAYER = IO%NGROUND_LAYER
+KSNOW_LAYER = KSNOW_LAYER_IN
+KNBIOMASS = IO%NNBIOMASS
+KNLITTER = IO%NNLITTER
+KNLITTLEVS = IO%NNLITTLEVS
+KNSOILCARB = IO%NNSOILCARB
 IF (LHOOK) CALL DR_HOOK('GET_ISBA_CONF_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================

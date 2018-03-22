@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       FUNCTION ALBEDO_TA96(PZENITH) RESULT(PDIR_ALB)
 !     ##################################################################
@@ -30,6 +34,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    19/09/03
+!!                  20/08/14 R. Séférian correction of the zenith solar angle
 !       
 !-------------------------------------------------------------------------------
 !
@@ -37,7 +42,6 @@
 !               ------------
 !
 USE MODD_WATER_PAR,  ONLY : XALBCOEF_TA96
-!
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB

@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !###############
 MODULE MODD_SFX_OASIS
 !###############
@@ -22,6 +26,8 @@ MODULE MODD_SFX_OASIS
 !!    MODIFICATIONS
 !!    -------------
 !!      Original       10/13
+!!      S.Senesi       08/2015 : add CMODEL_NAME
+!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -35,6 +41,9 @@ IMPLICIT NONE
 !-------------------------------------------------------------------------------
 !
 LOGICAL             :: LOASIS   = .FALSE. ! To use oasis coupler or not
+!
+CHARACTER(LEN=6)    :: CMODEL_NAME        ! component model name (i.e. name under which 
+!                                         ! Surfex is declared to Oasis)
 !
 REAL                :: XRUNTIME = 0.0     ! Total simulated time in oasis namcouple (s)
 !
@@ -54,7 +63,6 @@ LOGICAL             :: LCPL_FLOOD   = .FALSE. ! Fields to/from surfex land area 
 INTEGER             :: NRUNOFF_ID    ! Surface runoff id
 INTEGER             :: NDRAIN_ID     ! Drainage id
 INTEGER             :: NCALVING_ID   ! Calving flux id
-INTEGER             :: NRECHARGE_ID  ! Groundwater recharge id
 INTEGER             :: NSRCFLOOD_ID  ! Floodplains freshwater flux id
 !
 ! Input variables

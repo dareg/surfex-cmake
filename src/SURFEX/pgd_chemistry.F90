@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE PGD_CHEMISTRY (CHE, DTCO, UG, U, USS, &
                                 HPROGRAM,OCH_EMIS)
@@ -43,7 +47,7 @@ USE MODD_CH_EMIS_FIELD_n, ONLY : CH_EMIS_FIELD_t
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_SURF_ATM_SSO_n, ONLY : SURF_ATM_SSO_t
+USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_PGD_GRID,           ONLY : NL
 USE MODD_PGDWORK,            ONLY : CATYPE
@@ -77,7 +81,7 @@ TYPE(CH_EMIS_FIELD_t), INTENT(INOUT) :: CHE
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(SURF_ATM_SSO_t), INTENT(INOUT) :: USS
+TYPE(SSO_t), INTENT(INOUT) :: USS
 !
  CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 LOGICAL,             INTENT(OUT)   :: OCH_EMIS     ! emission flag

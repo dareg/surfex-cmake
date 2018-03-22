@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ################################################################
       SUBROUTINE READ_GRIDTYPE_CARTESIAN (&
                                           HPROGRAM,KGRID_PAR,KLU,OREAD,KSIZE,PGRID_PAR,KRESP,HDIR)
@@ -62,7 +66,7 @@ LOGICAL,                INTENT(IN)    :: OREAD      ! flag to read the grid
 INTEGER,                INTENT(IN)    :: KSIZE      ! estimated size of PGRID_PAR
 REAL, DIMENSION(KSIZE), INTENT(OUT)   :: PGRID_PAR  ! parameters defining this grid
 INTEGER,                INTENT(OUT)   :: KRESP      ! error return code
- CHARACTER(LEN=1),       INTENT(OUT)   :: HDIR       ! reading directive ('A','H')
+ CHARACTER(LEN=1),       INTENT(IN)   :: HDIR       ! reading directive ('A','H')
 !
 !
 !*       0.2   Declarations of local variables
@@ -80,7 +84,6 @@ REAL, DIMENSION(KLU)              :: ZDY      ! Y grid mesh size
 INTEGER                           :: ILUOUT
 !---------------------------------------------------------------------------
 REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR=>NULL()
-!$OMP THREADPRIVATE(ZGRID_PAR)
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !

@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !GLT_LIC The GELATO model is a seaice model used in stand-alone or embedded mode. 
 !GLT_LIC  It has been developed by Meteo-France. The holder of GELATO is Meteo-France.
 !GLT_LIC  
@@ -114,6 +118,8 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia )
   USE modd_glt_const_thm
   USE modd_types_glt
   USE modd_glt_param
+!
+  USE modi_gltools_updaponds_r
 !
   IMPLICIT NONE
 !

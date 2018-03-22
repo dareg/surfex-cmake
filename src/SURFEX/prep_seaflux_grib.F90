@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_SEAFLUX_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !     #################################################################################
@@ -27,13 +31,7 @@ SUBROUTINE PREP_SEAFLUX_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !
 USE MODE_READ_GRIB
 !
-USE MODD_TYPE_DATE_SURF
-!
-USE MODI_PREP_GRIB_GRID
-!
-USE MODD_PREP,       ONLY : CINGRID_TYPE, CINTERP_TYPE
-USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE, NNI
-!
+USE MODD_GRID_GRIB,  ONLY : CGRIB_FILE, CINMODEL
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -50,8 +48,6 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
 !*      0.2    declarations of local variables
 !
-TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
- CHARACTER(LEN=6)              :: YINMODEL ! model from which GRIB file originates
 REAL, DIMENSION(:)  ,     POINTER :: ZMASK => NULL()          ! Land mask
 REAL, DIMENSION(:),       POINTER :: ZFIELD => NULL()   ! field read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -65,9 +61,7 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_GRIB',0,ZHOOK_HANDLE)
 !
 IF (TRIM(HFILE).NE.CGRIB_FILE) CGRIB_FILE=""
 !
- CALL PREP_GRIB_GRID(HFILE,KLUOUT,YINMODEL,CINGRID_TYPE,TZTIME_GRIB)
-!
- CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,YINMODEL,ZMASK)
+ CALL READ_GRIB_LAND_MASK(HFILE,KLUOUT,CINMODEL,ZMASK)
 !
 !*      2.     Reading of field
 !              ----------------
@@ -79,9 +73,9 @@ SELECT CASE(HSURF)
 !      ---------
 !
   CASE('ZS     ')
-    SELECT CASE (YINMODEL)
-      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE')
-        CALL READ_GRIB_ZS_SEA(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD)
+    SELECT CASE (CINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
+        CALL READ_GRIB_ZS_SEA(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD)
         ALLOCATE(PFIELD(SIZE(ZFIELD),1))
         PFIELD(:,1) = ZFIELD(:)
         DEALLOCATE(ZFIELD)
@@ -92,9 +86,9 @@ SELECT CASE(HSURF)
 !      --------------------
 !
   CASE('SST    ')
-    SELECT CASE (YINMODEL)
-      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE')
-        CALL READ_GRIB_SST(HFILE,KLUOUT,YINMODEL,ZMASK,ZFIELD)
+    SELECT CASE (CINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
+        CALL READ_GRIB_SST(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD)
         ALLOCATE(PFIELD(SIZE(ZFIELD),1))
         PFIELD(:,1) = ZFIELD(:)
         DEALLOCATE(ZFIELD)
@@ -104,7 +98,7 @@ SELECT CASE(HSURF)
 !      -------------------------------------
 !
   CASE('SSS    ','SIC    ')
-      ALLOCATE(PFIELD(NNI,1))
+      ALLOCATE(PFIELD(SIZE(ZFIELD),1))
       PFIELD = 0.0
 !
 END SELECT
@@ -114,7 +108,6 @@ DEALLOCATE(ZMASK)
 !*      4.     Interpolation method
 !              --------------------
 !
-CINTERP_TYPE='HORIBL'
 IF (LHOOK) CALL DR_HOOK('PREP_SEAFLUX_GRIB',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

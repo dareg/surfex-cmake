@@ -43,7 +43,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-CHARACTER(LEN=*),  INTENT(IN)  :: YTEXT
+ CHARACTER(LEN=*),  INTENT(IN)  :: YTEXT
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -71,9 +71,9 @@ WRITE(NLISTING,*)YTEXT
 WRITE(NLISTING,*) '-                                                                         -'
 WRITE(NLISTING,*) '---------------------------------------------------------------------------'
 WRITE(NLISTING,*) '---------------------------------------------------------------------------'
-CLOSE(NLISTING)
+ CLOSE(NLISTING)
 !
-CALL ABORT
+ CALL ABORT
 STOP
 !
 IF (LHOOK) CALL DR_HOOK('ABORT_TRIP',1,ZHOOK_HANDLE)

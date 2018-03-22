@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE READ_PREP_GARDEN_SNOW(HPROGRAM,HSNOW,KSNOW_LAYER,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,OUNIF)
 !     #######################################################
@@ -35,7 +39,6 @@
 !!                          - Flag to avtivate new maximal liquid water holding capacity : formulation used by Crocus
 !!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
 !      B. Decharme  07/2013 Add ES snow grid case : 6-L or 12-L
-!!    M. Dumont 02/2016 : impurity
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -84,7 +87,6 @@ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
 !
 CHARACTER(LEN=3) :: CSNOW
 INTEGER :: NSNOW_LAYER
-INTEGER :: NIMPUR
 CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
 LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
 REAL :: XASNOW, XSWEMAX
@@ -107,7 +109,7 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
                             LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,       &
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,    &
-                            LSWEMAX,XSWEMAX,NIMPUR
+                            LSWEMAX,XSWEMAX
 NAMELIST/NAM_PREP_GARDEN_SNOW/CSNOW_GD, NSNOW_LAYER_GD, CFILE_SNOW_GD, CTYPE_SNOW, &
                               CFILEPGD_SNOW_GD, CTYPEPGD_SNOW,               & 
                               LSNOW_IDEAL_GD, XWSNOW_GD, XZSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, XRSNOW_GD, XASNOW_GD
@@ -137,10 +139,9 @@ IF (LNAM_READ) THEN
   XLWCSNOW_GD(:) = 0.
   XASNOW_GD = XANSMIN  
   XSG1SNOW_GD(:) = XUNDEF
-  XSG2SNOW_GD(:) = XUNDEF
+  XSG2SNOW(:) = XUNDEF
   XHISTSNOW_GD(:) = XUNDEF
   XAGESNOW_GD(:) = XUNDEF
-  NIMPUR=1
   !
   LSWEMAX=.FALSE.
   XSWEMAX=500.
@@ -198,7 +199,7 @@ IF (LNAM_READ) THEN
   IF (GFOUND) THEN
     READ(UNIT=ILUNAM,NML=NAM_PREP_GARDEN_SNOW)
     !crocus can't be used in garden if not used in isba scheme
-    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW_GD,'D95','3-L','EBA','NON')
+    CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOW',CSNOW_GD,'D95','3-L','EBA','NON','CRO')
   ENDIF
   !
   IF (CSNOW_GD=='NON') NSNOW_LAYER_GD = 0

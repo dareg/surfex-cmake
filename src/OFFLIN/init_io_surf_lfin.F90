@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE INIT_IO_SURF_LFI_n (DTCO, U, &
                                      HMASK,HACTION)
@@ -76,13 +80,9 @@ IF (LHOOK) CALL DR_HOOK('INIT_IO_SURF_LFI_N',0,ZHOOK_HANDLE)
 !
  CALL GET_LUOUT('LFI   ',NLUOUT)
 !
-!$OMP BARRIER
-!
 IF (HACTION=='GTMSK') THEN
   IF (NRANK==NPIO) THEN 
-!$OMP SINGLE          
     CALL FMOPEN(CFILEIN_LFI,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
-!$OMP END SINGLE    
     CFILE_LFI = CFILEIN_LFI
   ENDIF
   CMASK = HMASK
@@ -91,12 +91,8 @@ IF (HACTION=='GTMSK') THEN
 ENDIF
 !
 IF (HACTION == 'READ ') THEN
-  IF (NRANK==NPIO) THEN
-!$OMP SINGLE            
-    CALL FMOPEN(CFILEIN_LFI,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
-!$OMP END SINGLE    
-    CFILE_LFI = CFILEIN_LFI
-  ENDIF
+  CALL FMOPEN(CFILEIN_LFI,'OLD',CLUOUT_LFI,0,1,1,INB,IRET)
+  CFILE_LFI = CFILEIN_LFI
   CALL READ_SURF(&
                  'LFI   ','DIM_FULL',NFULL,IRET,HDIR='A')
   IF (HMASK == 'FULL  ') THEN
@@ -109,15 +105,14 @@ IF (HACTION == 'READ ') THEN
     NJU_SURF = NJU
    ENDIF
 ELSE
-  CALL GET_DIM_FULL_n(U, &
-                      NFULL)
+  CALL GET_DIM_FULL_n(U%NDIM_FULL, NFULL)
 ENDIF
 !
 !
 IF (HACTION=='WRITE' .AND. NRANK==NPIO) THEN
-!$OMP SINGLE        
-  CALL FMOPEN(CFILEOUT_LFI,'UNKNOWN',CLUOUT_LFI,0,1,1,INB,IRET)
-!$OMP END SINGLE   
+  IF (NRANK==NPIO) THEN
+    CALL FMOPEN(CFILEOUT_LFI,'UNKNOWN',CLUOUT_LFI,0,1,1,INB,IRET)
+  ENDIF
   CFILE_LFI = CFILEOUT_LFI
 ENDIF
 !
@@ -134,16 +129,17 @@ END IF
 !
 ! nindex is needed for call to get_size_full_n. In init_index_mpi, 
 ! it's not initialized for first readings.
-IF (.NOT.ALLOCATED(NINDEX)) THEN
+IF (.NOT.ALLOCATED(NINDEX).AND.NRANK==NPIO) THEN
   ALLOCATE(NINDEX(NFULL))
   NINDEX(:) = 0
+ELSE
+  CALL GET_DIM_FULL_n(U%NDIM_FULL,NFULL)  
 ENDIF  
 !
 !------------------------------------------------------------------------------
 !
 ! MASK is sized according to the mpi task running
- CALL GET_SIZE_FULL_n(U, &
-                      'LFI   ',NFULL,ILU)
+ CALL GET_SIZE_FULL_n('LFI   ',NFULL,U%NSIZE_FULL,ILU)
 IF (ILU>NSIZE) NSIZE = ILU
 !
 IL = ILU

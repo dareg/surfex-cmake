@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ################
       MODULE MODD_PREP_ISBA
 !     ################
@@ -80,7 +84,6 @@ REAL, DIMENSION(NGRID_LEVEL) :: XGRID_SOIL = &
 !
 LOGICAL :: LSNOW_IDEAL 
 !
-
 REAL, DIMENSION(:), POINTER :: XWSNOW         ! Snow reservoir
 REAL, DIMENSION(:), POINTER :: XRSNOW         ! snow density
 REAL, DIMENSION(:), POINTER :: XTSNOW         ! snow temperature
@@ -89,7 +92,6 @@ REAL, DIMENSION(:), POINTER :: XSG1SNOW
 REAL, DIMENSION(:), POINTER :: XSG2SNOW
 REAL, DIMENSION(:), POINTER :: XHISTSNOW
 REAL, DIMENSION(:), POINTER :: XAGESNOW
-REAL, DIMENSION(:,:), POINTER :: XIMPURSNOW   !N6K
 REAL                  :: XASNOW         ! snow albedo
 !
 !--------------------------------------------------------------------------
@@ -98,6 +100,7 @@ LOGICAL           :: LEXTRAP_TG     ! extrapolate TG points where LSM < 0.5 (buf
 LOGICAL           :: LEXTRAP_WG     ! extrapolate WG points where LSM < 0.5 (buffer only)  
 LOGICAL           :: LEXTRAP_WGI    ! extrapolate WGI points where LSM < 0.5 (buffer only) 
 LOGICAL           :: LEXTRAP_SN     ! extrapolate SNOW (SWE/depth) points where LSM < 0.5 (buffer only) 
+
 END MODULE MODD_PREP_ISBA
 
 

@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_NEAR_MESHES_CARTESIAN(KGRID_PAR,KL,PGRID_PAR,KNEAR_NBR,KNEAR)
 !     ##############################################################
@@ -30,6 +34,7 @@
 !
 USE MODE_GRIDTYPE_CARTESIAN
 !
+USE MODD_SURFEX_MPI, ONLY : NINDEX, NRANK, NNUM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -69,16 +74,18 @@ IF (IIMAX*IJMAX==KL) THEN
     DO JI=1,IIMAX
       ICOUNT = 0
       JL = JI + IIMAX * (JJ-1)
-      KNEAR(JL,:) = 0      
-      DO JX=-(IDIST-1)/2,IDIST/2
-        DO JY=-(IDIST-1)/2,IDIST/2
-          IF (JI+JX>0 .AND. JI+JX<IIMAX+1 .AND. JJ+JY>0 .AND. JJ+JY<IJMAX+1) THEN
-            ICOUNT = ICOUNT + 1
-            KNEAR(JL,ICOUNT) = (JI+JX) + IIMAX * (JJ+JY-1)
-          END IF
+      IF (NINDEX(JL)==NRANK) THEN
+        KNEAR(NNUM(JL),:) = 0      
+        DO JX=-(IDIST-1)/2,IDIST/2
+          DO JY=-(IDIST-1)/2,IDIST/2
+            IF (JI+JX>0 .AND. JI+JX<IIMAX+1 .AND. JJ+JY>0 .AND. JJ+JY<IJMAX+1) THEN
+              ICOUNT = ICOUNT + 1
+              KNEAR(NNUM(JL),ICOUNT) = (JI+JX) + IIMAX * (JJ+JY-1)
+            END IF
+          END DO
         END DO
-      END DO
-    END DO
+      ENDIF
+    ENDDO
   END DO
 END IF
 IF (LHOOK) CALL DR_HOOK('GET_NEAR_MESHES_CARTESIAN',1,ZHOOK_HANDLE)

@@ -1,11 +1,15 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE DEFAULT_DIAG_ISBA(K2M,OSURF_BUDGET,O2M_MIN_ZS,ORAD_BUDGET, &
                                    OCOEF,OSURF_VARS,OSURF_EVAP_BUDGET,      &
                                    OSURF_MISC_BUDGET,OSURF_DIAG_ALBEDO,     &
                                    OSURF_BUDGETC,OSURF_MISC_DIF,            &
                                    OPATCH_BUDGET,OPGD,ORESET_BUDGETC,       &
-                                   OWATER_BUDGET,OPROSNOW,OPROBANDS,        &
-                                   OVOLUMETRIC_SNOWLIQ,PDIAG_TSTEP      )  
+                                   OWATER_BUDGET,OPROSNOW,                  &
+                                   OVOLUMETRIC_SNOWLIQ,PDIAG_TSTEP          )  
 !     #################################################################################################################
 !
 !!****  *DEFAULT_DIAG_ISBA* - routine to set default values for the choice of diagnostics
@@ -41,7 +45,6 @@
 !!                                         add miscellaneous field key for dif
 !!                                         add isba water budget key
 !!      Modif M. Lafaysse 09/2015: OPROSNOW, OVOLUMETRIC_SNOWLIQ
-!!     MOdif M. Dumont 11/15 : OPROBANDS
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -75,7 +78,6 @@ LOGICAL,  INTENT(OUT) :: OPGD               ! flag for PGD fields
 LOGICAL,  INTENT(OUT) :: ORESET_BUDGETC     ! flag for cumulated surface budget
 LOGICAL,  INTENT(OUT) :: OWATER_BUDGET      ! flag for isba water budget
 LOGICAL,  INTENT(OUT) :: OPROSNOW           ! flag for Crocus-MEPRA diagnostics
-LOGICAL, INTENT(OUT)  :: OPROBANDS          ! flag for Crocus spectral output
 LOGICAL,  INTENT(OUT) :: OVOLUMETRIC_SNOWLIQ ! volumetric snow liquid water content (kg m-3)
 REAL,     INTENT(OUT) :: PDIAG_TSTEP        ! time-step for writing
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -111,8 +113,7 @@ ORESET_BUDGETC    = .FALSE.
 OWATER_BUDGET     = .FALSE.
 !
 OPROSNOW          = .FALSE.
-OPROBANDS         =.FALSE.
-
+!
 OVOLUMETRIC_SNOWLIQ = .FALSE.
 !
 PDIAG_TSTEP       = XUNDEF

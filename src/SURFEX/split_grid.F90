@@ -1,6 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ###########################################################
-      SUBROUTINE SPLIT_GRID (UG, U, &
-                             HPROGRAM)
+      SUBROUTINE SPLIT_GRID(UG, U, HPROGRAM,KGRID_PAR,PGRID_PAR,KHALO)
 !     ###########################################################
 !!
 !!    PURPOSE
@@ -30,6 +33,7 @@
 !!    ------------
 !!
 !!    Original     08/11
+!!    Modification 01/03/2015 pass KGRID_PAR,PGRID_PAR,KHALO as arguments (M.Moge)
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -59,25 +63,49 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=6),     INTENT(IN)  :: HPROGRAM ! program calling
 !
+INTEGER, OPTIONAL,           INTENT(INOUT)  :: KGRID_PAR ! size of PGRID_PAR pointer
+REAL, DIMENSION(:), OPTIONAL, POINTER, INTENT(INOUT) :: PGRID_PAR ! parameters defining this grid
+INTEGER,            INTENT(IN), OPTIONAL   :: KHALO ! size of the Halo
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
  CHARACTER(LEN=100) :: YCOMMENT
-INTEGER :: IRESP ! error return code
+INTEGER :: IRESP, ISIZE_FULL ! error return code
+INTEGER :: IHALO
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('SPLIT_GRID',0,ZHOOK_HANDLE)
 !
-SELECT CASE(UG%CGRID)
+#ifdef MNH_PARALLEL
+IF (PRESENT(KHALO)) THEN
+  IHALO = KHALO
+ELSE
+  IHALO = 0
+ENDIF
+#else
+IHALO = 0
+#endif
+!
+SELECT CASE(UG%G%CGRID)
 
   CASE('CONF PROJ ')
-    CALL SPLIT_GRID_CONF_PROJ(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,UG%NGRID_PAR,UG%XGRID_PAR)
+    IF (PRESENT(KGRID_PAR).AND.PRESENT(PGRID_PAR)) THEN
+      CALL SPLIT_GRID_CONF_PROJ(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,KGRID_PAR,PGRID_PAR,IHALO)
+    ELSE
+      CALL SPLIT_GRID_CONF_PROJ(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,UG%G%NGRID_PAR,UG%G%XGRID_PAR)
+    ENDIF
+
   CASE('CARTESIAN ')
-    CALL SPLIT_GRID_CARTESIAN(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,UG%NGRID_PAR,UG%XGRID_PAR)
+    IF (PRESENT(KGRID_PAR).AND.PRESENT(PGRID_PAR)) THEN
+      CALL SPLIT_GRID_CARTESIAN(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,KGRID_PAR,PGRID_PAR,IHALO)
+    ELSE
+      CALL SPLIT_GRID_CARTESIAN(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,UG%G%NGRID_PAR,UG%G%XGRID_PAR)
+    ENDIF
+
   CASE DEFAULT
-    CALL GET_SIZE_FULL_n(U, &
-                         HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL)
+    CALL GET_SIZE_FULL_n(HPROGRAM,U%NDIM_FULL,U%NSIZE_FULL,ISIZE_FULL)
+    U%NSIZE_FULL = ISIZE_FULL
 
 END SELECT
 !

@@ -1,12 +1,13 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
-                             HPROGRAM, KI,                                               &
-                            PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,             &
-                            PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,                   &
-                            PSWEC,     PTSC,                                            &
-                            PTS,       PT2M,        PHU2M,     PSWE,                    &
-                            PSST,      PSIC,  PUCLS, PVCLS,                             &
-                            HTEST , OD_MASKEXT, PLON, PLAT, OLKEEPEXTZONE )
+SUBROUTINE ASSIM_SURF_ATM_n (U, IM, SM, TM, WM, HPROGRAM, KI,                          &
+                             PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, PCLOUDS,  &
+                             PLSM, PEVAPTR, PEVAP, PSWEC, PTSC, PTS, PT2M, PHU2M, PSWE,&
+                             PSST, PSIC, PUCLS, PVCLS, HTEST, OD_MASKEXT, PLON, PLAT,  &
+                             OLKEEPEXTZONE )
 !     #################################################################################
 !
 !
@@ -32,19 +33,8 @@ SUBROUTINE ASSIM_SURF_ATM_n (DGMI, IG, I, S, U, T, TOP, W, &
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
-!
-!
-!
-!
-!
-USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t, SEAFLUX_MODEL_t, WATFLUX_MODEL_t, TEB_MODEL_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODD_SURFEX_MPI,  ONLY : NRANK, NPIO
 !
@@ -53,11 +43,6 @@ USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_ASSIM,          ONLY : XAT2M_ISBA, XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, XAT2M_TEB, LAROME
 !
 !RJ: unneeded?
-#ifdef SFX_ARO
-USE MODD_IO_SURF_ARO,ONLY : LWRITE, LCOUNTW, LFMWRIT, XGPGW, YSURFEX_CACHE_OUT,      &
-                            SURFEX_FIELD_BUF_PREALLOC, SURFEX_FIELD_BUF_SET_RECORD,  &
-                            NCOUNTW, NCOUNTW_TOT 
-#endif
 !
 USE MODI_ABOR1_SFX
 USE MODI_ASSIM_SEA_n
@@ -72,15 +57,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(WATFLUX_t), INTENT(INOUT) :: W
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
+TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
+TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
+TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
 !
 CHARACTER(LEN=6),    INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,             INTENT(IN) :: KI
@@ -129,10 +110,10 @@ END IF
 
 ! FLAGS for the various surfaces:
 !
-GSEA      = U%NSIZE_SEA    >0
-GWATER    = U%NSIZE_WATER  >0
-GTOWN     = U%NSIZE_TOWN   >0
-GNATURE   = U%NSIZE_NATURE >0
+GSEA      = U%NDIM_SEA    >0
+GWATER    = U%NDIM_WATER  >0
+GTOWN     = U%NDIM_TOWN   >0
+GNATURE   = U%NDIM_NATURE >0
 !
 ! Tile counter:
 !
@@ -164,7 +145,8 @@ IF(GWATER)THEN
 !
   CALL ASSIM_TREAT_SURF(JTILE,U%NSIZE_WATER,U%NR_WATER)
 !
-ENDIF 
+ENDIF
+!
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! NATURAL SURFACE Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -266,9 +248,9 @@ IF (KTILE==1) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
  
-  CALL ASSIM_SEA_n(S, U, &
-                    HPROGRAM,KSIZE,ZP_PTS,ZP_PSST,ZP_PSIC,ZP_PLSM,HTEST,&
-                    OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
+  CALL ASSIM_SEA_n(SM%S, U, HPROGRAM, KSIZE,                &
+                   ZP_PTS, ZP_PSST, ZP_PSIC, ZP_PLSM, HTEST,&
+                   OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
 
 ELSEIF (KTILE==2) THEN
   
@@ -278,9 +260,9 @@ ELSEIF (KTILE==2) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_INLAND_WATER_n(I, U, W, &
-                            HPROGRAM,KSIZE,ZP_PTS,ZP_PLSM,HTEST,&
-                            OLKEEPEXTZONE,GD_MASKEXT,ZP_LON,ZP_LAT)
+  CALL ASSIM_INLAND_WATER_n(IM%NPE, WM%W, U, HPROGRAM, KSIZE, &
+                            ZP_PTS, ZP_PLSM, HTEST,           &
+                            OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
 
 ELSEIF (KTILE==3) THEN
   
@@ -290,8 +272,7 @@ ELSEIF (KTILE==3) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_NATURE_n(DGMI, IG, I, U, &
-                      HPROGRAM,KSIZE,                                             &
+  CALL ASSIM_NATURE_n(IM, U, HPROGRAM, KSIZE,                                     &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
                       ZP_PSWEC,     ZP_PTSC,        ZP_UCLS,      ZP_VCLS,        &
@@ -306,8 +287,7 @@ ELSEIF (KTILE==4) THEN
     WRITE(*,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_TOWN_n(U, T, TOP, &
-                    HPROGRAM,KSIZE,ZP_PT2M,HTEST)
+  CALL ASSIM_TOWN_n(U, TM%NT, TM%TOP, HPROGRAM, KSIZE, ZP_PT2M, HTEST)
   
 ENDIF
 

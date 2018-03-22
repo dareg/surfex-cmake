@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_GRID_DIM_GAUSS(KGRID_PAR,PGRID_PAR,ORECT,KDIM1,KDIM2)
 !     ##############################################################
@@ -44,11 +48,11 @@ REAL,    DIMENSION(KGRID_PAR),   INTENT(IN)    :: PGRID_PAR ! grid parameters
 LOGICAL,                         INTENT(OUT)   :: ORECT     ! T if rectangular grid
 INTEGER,                         INTENT(OUT)   :: KDIM1     ! 1st dimension
 INTEGER,                         INTENT(OUT)   :: KDIM2     ! 2nd dimension
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*    0.2    Declaration of other local variables
 !            ------------------------------------
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_GRID_DIM_GAUSS',0,ZHOOK_HANDLE)

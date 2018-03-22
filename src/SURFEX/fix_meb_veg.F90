@@ -1,6 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ################################################################
-      SUBROUTINE FIX_MEB_VEG (DTI, IG, I, &
-                              KPATCH)
+      SUBROUTINE FIX_MEB_VEG (DTV, KDIM, OMEB_PATCH, KPATCH)
 !     ################################################################
 !
 !!    PURPOSE
@@ -52,8 +55,6 @@
 !
 !
 USE MODD_DATA_ISBA_n, ONLY : DATA_ISBA_t
-USE MODD_ISBA_GRID_n, ONLY : ISBA_GRID_t
-USE MODD_ISBA_n, ONLY : ISBA_t
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
@@ -71,9 +72,9 @@ IMPLICIT NONE
 !            ------------------------
 !
 !
-TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTI
-TYPE(ISBA_GRID_t), INTENT(INOUT) :: IG
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
+INTEGER, INTENT(IN) :: KDIM
+LOGICAL, DIMENSION(:), INTENT(IN) :: OMEB_PATCH
 !
 INTEGER, INTENT(IN) :: KPATCH
 !
@@ -82,7 +83,7 @@ INTEGER, INTENT(IN) :: KPATCH
 !
 INTEGER :: IPATCH
 !
-REAL, DIMENSION(IG%NDIM,DTI%NTIME)                          :: ZWORKPAR
+REAL, DIMENSION(KDIM,DTV%NTIME)                          :: ZWORKPAR
 REAL, DIMENSION(SIZE(XDATA_VEG,1),SIZE(XDATA_VEG,2)) :: ZWORKDATA
 !
 INTEGER :: JVEGTYPE! loop on vegtype
@@ -101,18 +102,18 @@ ENDDO
 DO JVEGTYPE=1,NVEGTYPE
   !
   ZWORKDATA(:,:)=XDATA_VEG(:,:,JVEGTYPE)
-  IF (DTI%LDATA_VEG) ZWORKPAR(:,:)=DTI%XPAR_VEG(:,:,JVEGTYPE)
+  IF (ANy(DTV%LDATA_VEG)) ZWORKPAR(:,:)=DTV%XPAR_VEG(:,:,JVEGTYPE)
   !
   DO IPATCH=1,KPATCH
-    IF(PATCH_LIST(JVEGTYPE)==IPATCH .AND. I%LMEB_PATCH(IPATCH))THEN
+    IF(PATCH_LIST(JVEGTYPE)==IPATCH .AND. OMEB_PATCH(IPATCH))THEN
       ZWORKDATA(:,:)=0.5
-      IF (DTI%LDATA_VEG) ZWORKPAR(:,:)=0.5
+      IF (ANY(DTV%LDATA_VEG)) ZWORKPAR(:,:)=0.5
       EXIT
     ENDIF
   ENDDO
   !
   XDATA_VEG(:,:,JVEGTYPE)=ZWORKDATA(:,:)
-  IF (DTI%LDATA_VEG) DTI%XPAR_VEG(:,:,JVEGTYPE)=ZWORKPAR(:,:)
+  IF (ANy(DTV%LDATA_VEG)) DTV%XPAR_VEG(:,:,JVEGTYPE)=ZWORKPAR(:,:)
   !
 ENDDO
 !

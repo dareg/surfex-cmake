@@ -1,5 +1,10 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE READ_NAM_PGD_ISBA_MEB(HPROGRAM, KLUOUT, OMEB_PATCH, OFORC_MEASURE,OMEB_LITTER)  
+      SUBROUTINE READ_NAM_PGD_ISBA_MEB(HPROGRAM, KLUOUT, OMEB_PATCH, OFORC_MEASURE, &
+                      OMEB_LITTER, OMEB_GNDRES)  
 !     #############################################################################
 !
 !!**** *READ_NAM_PGD_ISBA_MEB* reads namelist for ISBA
@@ -56,7 +61,7 @@ INTEGER,             INTENT(IN)    :: KLUOUT
 LOGICAL, DIMENSION(:), INTENT(OUT) :: OMEB_PATCH
 LOGICAL              , INTENT(OUT) :: OFORC_MEASURE
 LOGICAL              , INTENT(OUT) :: OMEB_LITTER
-!
+LOGICAL              , INTENT(OUT) :: OMEB_GNDRES
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -71,10 +76,11 @@ LOGICAL                           :: GFOUND    ! flag when namelist is present
 LOGICAL, DIMENSION(19) :: LMEB_PATCH
 LOGICAL                :: LFORC_MEASURE
 LOGICAL                :: LMEB_LITTER
+LOGICAL                :: LMEB_GNDRES
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-NAMELIST/NAM_MEB_ISBA/LMEB_PATCH,LFORC_MEASURE,LMEB_LITTER  
+NAMELIST/NAM_MEB_ISBA/LMEB_PATCH,LFORC_MEASURE,LMEB_LITTER,LMEB_GNDRES  
 !
 !-------------------------------------------------------------------------------
 !
@@ -86,6 +92,7 @@ IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_ISBA_MEB',0,ZHOOK_HANDLE)
 LMEB_PATCH(:) =.FALSE.
 LFORC_MEASURE =.FALSE.
 LMEB_LITTER   =.FALSE.
+LMEB_GNDRES   =.FALSE.
 !
 !-------------------------------------------------------------------------------
 !
@@ -114,6 +121,7 @@ OMEB_PATCH(:) = LMEB_PATCH(:)
 !
 OFORC_MEASURE = LFORC_MEASURE
 OMEB_LITTER   = LMEB_LITTER
+OMEB_GNDRES   = LMEB_GNDRES
 !
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_ISBA_MEB',1,ZHOOK_HANDLE)

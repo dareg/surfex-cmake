@@ -1,6 +1,6 @@
 SUBROUTINE TRIP_SURFACE_FLOOD (KLISTING,PTSTEP,OPRINT,OMASK_FLD,        &
-                               PTAB_F,PTAB_H,PTAB_VF,PAREA,             &
-                               PWIDTH,PN_FLOOD,PHC,                     &
+                               PTAB_F,PTAB_H,PTAB_VF,PAREA, PVEL,       &
+                               PLEN,PWIDTH,PN_FLOOD,PHC,                &
                                PHS,PSURF_STO,PFLOOD_STO,PSOURCE,        &
                                PFLOOD_STO2,PHFLOOD,PFFLOOD,PFLOOD_LEN,  &
                                PWFLOOD,PQFR,PQRF,PVFIN,PVFOUT,PHSF,     &
@@ -69,6 +69,8 @@ REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_H  ! Topo height array
 REAL,DIMENSION(:,:,:), INTENT(IN)    :: PTAB_VF ! Flood volume array
 !
 REAL,DIMENSION(:,:), INTENT(IN)      :: PAREA      ! Grid-cell area    [m²]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PVEL       ! river velocity    [m/s]
+REAL,DIMENSION(:,:), INTENT(IN)      :: PLEN       ! river length       [m] 
 REAL,DIMENSION(:,:), INTENT(IN)      :: PWIDTH     ! river widths                 [m]
 REAL,DIMENSION(:,:), INTENT(IN)      :: PN_FLOOD   ! Manning coeficient over floodplains   [-] (0.1)
 REAL,DIMENSION(:,:), INTENT(IN)      :: PHC        ! River bed depth              [m]
@@ -97,7 +99,6 @@ REAL,                 INTENT(OUT)    :: PFSTO_ALL,PFSTO2_ALL,PSOURCE_ALL, &
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER                            :: ZLEN_MIN = 1.E-6
-REAL, PARAMETER                            :: ZVF_MIN  = 1.E-3
 !
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZSLOPE
@@ -107,6 +108,10 @@ REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZDELTA
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF_IN
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZMF_OUT
 REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZFLD_LEN
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZAREA_SG
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZVRIV
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZVFLD
+REAL, DIMENSION(SIZE(PAREA,1),SIZE(PAREA,2)) :: ZVINER
 !
 REAL    :: ZAREA
 !
@@ -139,6 +144,12 @@ ZMF_IN     (:,:) = 0.0
 ZMF_OUT    (:,:) = 0.0
 ZFLD_LEN   (:,:) = 0.0
 !
+WHERE(OMASK_FLD(:,:))
+   ZAREA_SG(:,:) = PAREA(:,:)-(PLEN(:,:)*PWIDTH(:,:))
+ELSEWHERE
+   ZAREA_SG(:,:) = PAREA(:,:)
+ENDWHERE
+!
 !-------------------------------------------------------------------------------
 ! * Update the floodplain storage due to source (Precip inter - LEf - Infil)
 !-------------------------------------------------------------------------------
@@ -151,10 +162,9 @@ ENDWHERE
 ! * Update the floodplain geomorphological properties
 !------------------------------------------------------------------
 ! 
-CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
-                  PAREA(:,:),PFLOOD_STO2(:,:),PHFLOOD(:,:),   &
-                  PFFLOOD(:,:),PFLOOD_LEN(:,:),PWFLOOD(:,:)   ) 
-!            
+CALL FLOOD_UPDATE(PTAB_F,PTAB_H,PTAB_VF,ZAREA_SG,PFLOOD_STO2, &
+                  PLEN,PHFLOOD,PFFLOOD,PFLOOD_LEN,PWFLOOD     ) 
+!   
 ZFLD_LEN(:,:)=MAX(ZLEN_MIN,PFLOOD_LEN(:,:))
 !
 !------------------------------------------------------------------
@@ -172,8 +182,8 @@ DO JLAT=1,ILAT
          PHSF(JLON,JLAT)=PHS(JLON,JLAT)-PHC(JLON,JLAT)-PHFLOOD(JLON,JLAT)
 !
          ZMF   (JLON,JLAT)=PHSF(JLON,JLAT)*ZFLD_LEN(JLON,JLAT)*PWIDTH(JLON,JLAT)*XRHOLW
-         ZDIST (JLON,JLAT)=PWIDTH(JLON,JLAT)+PWFLOOD(JLON,JLAT)
-         ZSLOPE(JLON,JLAT)=2.0*PHSF(JLON,JLAT)/ZDIST(JLON,JLAT)
+         ZDIST (JLON,JLAT)=0.5*(PWIDTH(JLON,JLAT)+PWFLOOD(JLON,JLAT))
+         ZSLOPE(JLON,JLAT)=PHSF(JLON,JLAT)/ZDIST(JLON,JLAT)
 !
       ENDIF
 !                
@@ -182,12 +192,13 @@ DO JLAT=1,ILAT
 !
       IF(ZMF(JLON,JLAT)>0.0.AND.PFFLOOD(JLON,JLAT)<1.0)THEN
 !
-        ZRADIUS(JLON,JLAT) = (PHS(JLON,JLAT)-PHC(JLON,JLAT))*ZFLD_LEN(JLON,JLAT)     &
-                           / (ZFLD_LEN(JLON,JLAT)+2.0*(PHS(JLON,JLAT)-PHC(JLON,JLAT)))
+        ZRADIUS(JLON,JLAT) = PHS(JLON,JLAT)-PHC(JLON,JLAT)
         ZRADIUS(JLON,JLAT) = EXP(XM*LOG(ZRADIUS(JLON,JLAT)))
 !
-        PVFIN (JLON,JLAT) = MAX(ZVF_MIN,ZRADIUS(JLON,JLAT)*SQRT(ZSLOPE(JLON,JLAT))/PN_FLOOD(JLON,JLAT))
-        PVFIN (JLON,JLAT) = MIN(PVFIN(JLON,JLAT),ZDIST(JLON,JLAT)/PTSTEP)        
+        ZVFLD (JLON,JLAT) = ZRADIUS(JLON,JLAT)*SQRT(ZSLOPE(JLON,JLAT))/PN_FLOOD(JLON,JLAT)
+        ZVRIV (JLON,JLAT) = MAX(PVEL(JLON,JLAT),ZVFLD(JLON,JLAT))
+        ZVINER(JLON,JLAT) = SQRT(ZVRIV(JLON,JLAT)*ZVFLD(JLON,JLAT))
+        PVFIN (JLON,JLAT) = MIN(ZVINER(JLON,JLAT),ZDIST(JLON,JLAT)/PTSTEP)        
         PVFOUT(JLON,JLAT) = 0.0
 !        
         ZMF_IN (JLON,JLAT) = ZMF(JLON,JLAT)
@@ -200,12 +211,12 @@ DO JLAT=1,ILAT
 !
       IF(ZMF(JLON,JLAT)<0.0.AND.PFFLOOD(JLON,JLAT)>0.0)THEN
 !
-        ZRADIUS(JLON,JLAT) = PHFLOOD(JLON,JLAT)*ZFLD_LEN(JLON,JLAT)/(ZFLD_LEN(JLON,JLAT)+2.0*PHFLOOD(JLON,JLAT))
+        ZRADIUS(JLON,JLAT) = PHFLOOD(JLON,JLAT)
         ZRADIUS(JLON,JLAT) = EXP(XM*LOG(ZRADIUS(JLON,JLAT)))
 !
         PVFIN (JLON,JLAT) = 0.0
-        PVFOUT(JLON,JLAT) = MAX(ZVF_MIN,ZRADIUS(JLON,JLAT)*SQRT(-1.0*ZSLOPE(JLON,JLAT))/PN_FLOOD(JLON,JLAT))
-        PVFOUT(JLON,JLAT) = MIN(PVFOUT(JLON,JLAT),ZDIST(JLON,JLAT)/PTSTEP)
+        ZVFLD (JLON,JLAT) = ZRADIUS(JLON,JLAT)*SQRT(-1.0*ZSLOPE(JLON,JLAT))/PN_FLOOD(JLON,JLAT)
+        PVFOUT(JLON,JLAT) = MIN(ZVFLD(JLON,JLAT),ZDIST(JLON,JLAT)/PTSTEP)
 !        
         ZMF_IN (JLON,JLAT) = 0.0
         ZMF_OUT(JLON,JLAT) = ABS(ZMF(JLON,JLAT))
@@ -234,10 +245,9 @@ ENDDO
 !------------------------------------------------------------------
 ! * Update the floodplain geomorphological properties
 !------------------------------------------------------------------
-! 
-CALL FLOOD_UPDATE(PTAB_F(:,:,:),PTAB_H(:,:,:),PTAB_VF(:,:,:), &
-                  PAREA(:,:),PFLOOD_STO2(:,:),PHFLOOD(:,:),   &
-                  PFFLOOD(:,:),PFLOOD_LEN(:,:),PWFLOOD(:,:)   ) 
+!
+CALL FLOOD_UPDATE(PTAB_F,PTAB_H,PTAB_VF,ZAREA_SG,PFLOOD_STO2, &
+                  PLEN,PHFLOOD,PFFLOOD,PFLOOD_LEN,PWFLOOD     )
 !
 !-------------------------------------------------------------------------------
 ! * Budget calculation

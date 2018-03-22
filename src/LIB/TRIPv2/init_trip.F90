@@ -1,6 +1,7 @@
 !####################################################################################
 SUBROUTINE INIT_TRIP (TPDG, TP, TPG, &
-                       KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,PTSTEP_RUN,PTSTEP_DIAG,ORESTART)
+                      KYEAR,KMONTH,KDAY,PTIME,KLON,KLAT,&
+                      PTSTEP_RUN,PTSTEP_DIAG,ORESTART,OXIOS)
 !####################################################################################
 !
 !!****  *INIT_TRIP*  
@@ -40,20 +41,16 @@ SUBROUTINE INIT_TRIP (TPDG, TP, TPG, &
 !*       0.     DECLARATIONS
 !               ------------
 !
-!
-!
 USE MODD_TRIP_DIAG, ONLY : TRIP_DIAG_t
 USE MODD_TRIP,      ONLY : TRIP_t
 USE MODD_TRIP_GRID, ONLY : TRIP_GRID_t
 !
 USE MODN_TRIP, ONLY : CGROUNDW, CVIT, LFLOOD,  &
                       XCVEL, XRATMED, XTSTEP,  &
-                      XTAUG_UNIF, XTAUG_UP,    &
-                      XTAUG_DOWN
+                      LGWSUBF, XGWSUBD 
 !
 USE MODD_TRIP_PAR
 USE MODD_TRIP_LISTING, ONLY : NLISTING
-!
 !
 USE MODE_TRIP_GRID
 USE MODE_TRIP_INIT
@@ -66,6 +63,7 @@ USE MODI_INIT_TRIP_DIAG
 USE MODI_INIT_RESTART_TRIP
 USE MODI_GET_LONLAT_TRIP
 USE MODI_INIT_TRIP_CPL_ESM
+USE MODI_ALLOC_TRIP_DIAG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -93,30 +91,32 @@ REAL,             INTENT(IN) :: PTSTEP_RUN
 REAL,             INTENT(IN) :: PTSTEP_DIAG
 !
 LOGICAL,          INTENT(IN) :: ORESTART
+LOGICAL,          INTENT(IN) :: OXIOS
 !
 !-------------------------------------------------------------------------------
 !
 !*      0.2    declarations of local variables
 !
-CHARACTER(LEN=13), PARAMETER         :: YFILE_PARAM  ='TRIP_PARAM.nc'
-CHARACTER(LEN=12), PARAMETER         :: YFILE_INIT   ='TRIP_PREP.nc'
-CHARACTER(LEN=15), PARAMETER         :: YFILE_RESTART='TRIP_RESTART.nc'
-CHARACTER(LEN=19), PARAMETER         :: YDIAG        ='TRIP_DIAG.nc'
-CHARACTER(LEN=18), PARAMETER         :: YRUN         ='TRIP_DIAG_RUN.nc'
+ CHARACTER(LEN=13), PARAMETER         :: YFILE_PARAM  ='TRIP_PARAM.nc'
+ CHARACTER(LEN=12), PARAMETER         :: YFILE_INIT   ='TRIP_PREP.nc'
+ CHARACTER(LEN=15), PARAMETER         :: YFILE_RESTART='TRIP_RESTART.nc'
+ CHARACTER(LEN=19), PARAMETER         :: YDIAG        ='TRIP_DIAG.nc'
+ CHARACTER(LEN=18), PARAMETER         :: YRUN         ='TRIP_DIAG_RUN.nc'
 ! 
-CHARACTER(LEN=6)                     :: YTIME
-CHARACTER(LEN=50)                    :: YFILE
-CHARACTER(LEN=20)                    :: YVAR 
+ CHARACTER(LEN=6)                     :: YTIME
+ CHARACTER(LEN=50)                    :: YFILE
+ CHARACTER(LEN=20)                    :: YVAR 
 !
 REAL,DIMENSION(4)                    :: ZDATE
+!
+REAL,DIMENSION(:,:,:),ALLOCATABLE    :: ZREAD3D
 !
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZREAD
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHSTREAM
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZVEL
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWORK
-REAL,DIMENSION(:,:),ALLOCATABLE      :: ZHG_OLD
+REAL,DIMENSION(:,:),ALLOCATABLE      :: ZGW_STO
 REAL,DIMENSION(:,:),ALLOCATABLE      :: ZWTD
-REAL,DIMENSION(:,:),ALLOCATABLE      :: ZFWTD
 !
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLON
 REAL, DIMENSION(:),ALLOCATABLE       :: ZLAT
@@ -135,7 +135,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! * Output attribut for netcdf diag file
 !-------------------------------------------------------------------------------
 !
-CHARACTER(LEN=50) :: YTITLE, YUNITTIME
+ CHARACTER(LEN=50) :: YTITLE, YUNITTIME
 !                    YTITLE    = Title of each output file
 !                    YUNITTIME = Time unit in each output file if present
 !
@@ -160,7 +160,7 @@ WRITE(NLISTING,*)''
 !-------------------------------------------------------------------------------
 !
 YVAR='date'
-CALL READ_TRIP(NLISTING,YFILE_INIT,YVAR,ZDATE)
+ CALL READ_TRIP(NLISTING,YFILE_INIT,YVAR,ZDATE)
 !
 KYEAR  = INT(ZDATE(1))
 KMONTH = INT(ZDATE(2))
@@ -171,14 +171,14 @@ PTIME  = ZDATE(4)
 !
 ! * Get TRIP grid configuration
 !
-CALL GET_TRIP_GRID(TPG%XTRIP_GRID,ZLONMIN,ZLONMAX,ZLATMIN,ZLATMAX,ZGRID_RES,KLON,KLAT)
+ CALL GET_TRIP_GRID(TPG%XTRIP_GRID,ZLONMIN,ZLONMAX,ZLATMIN,ZLATMAX,ZGRID_RES,KLON,KLAT)
 !
 ALLOCATE(ZLON(KLON))
 ALLOCATE(ZLAT(KLAT))
 ZLON(:)=XUNDEF
 ZLAT(:)=XUNDEF
 !
-CALL GET_LONLAT_TRIP(TPG, &
+ CALL GET_LONLAT_TRIP(TPG, &
                      KLON,KLAT,ZLON,ZLAT)
 !
 !-------------------------------------------------------------------------------
@@ -217,10 +217,10 @@ IF(LFLOOD)THEN
     WRITE(NLISTING,*)'! You cannot use the flooding scheme without the variable velocity scheme !!!'
     CALL ABORT_TRIP('INIT_TRIP: You cannot use the flooding scheme without the variable velocity scheme !!!')
   ENDIF
-  IF(XTSTEP>1800.)THEN
+  IF(XTSTEP>3600.)THEN
     WRITE(NLISTING,*)'!'
     WRITE(NLISTING,*)'! For flooding, the TRIP time step is too big      !!!'
-    WRITE(NLISTING,*)'! XTSTEP must be equal or inferior to 1800s   !!!'
+    WRITE(NLISTING,*)'! XTSTEP must be equal or inferior to 3600s        !!!'
     WRITE(NLISTING,*)'!'
     CALL ABORT_TRIP('INIT_TRIP: For flooding, the TRIP time step is too big      !!!')
   ENDIF
@@ -248,22 +248,9 @@ IF(ZGRID_RES<0.5.AND.XRATMED==1.4)THEN
      CALL ABORT_TRIP('INIT_TRIP: meandering ratio is 1.4 at 0.5° or 1° resolution !!!')
 ENDIF
 !
-IF(CGROUNDW=='CST')THEN
-  IF(XTAUG_UNIF<1.0.OR.XTAUG_UNIF>365.0)THEN
-    WRITE(NLISTING,*)'! Constant transfert time value XTAUG_UNIF must be at least 1 day or inferior to 365 days !!!'
-    CALL ABORT_TRIP('INIT_TRIP: Constant transfert time value must be at least 1 day or inferior to 365 days')
-  ENDIF        
-ENDIF
-!
-IF(CGROUNDW=='DIF')THEN
-  IF(XTAUG_UP<1.0)THEN
-    WRITE(NLISTING,*)'! Upstream transfert time value XTAUG_UP must be at least 1 day !!!'
-    CALL ABORT_TRIP('INIT_TRIP: Upstream transfert time value must be at least 1 day')
-  ENDIF
-  IF(XTAUG_DOWN>365.0)THEN
-    WRITE(NLISTING,*)'! Downstream transfert time value XTAUG_DOWN must be lower than 365 days !!!'
-    CALL ABORT_TRIP('INIT_TRIP: Downstream transfert time value must be lower than 365 days')
-  ENDIF
+IF(LGWSUBF.AND.XGWSUBD>30.)THEN
+     WRITE(NLISTING,*)'!! XGWSUBD too large (must be <=30), check your namelist  !!!' 
+     CALL ABORT_TRIP('INIT_TRIP: XGWSUBD too large (must be <=30), check your namelist !!!')
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -365,7 +352,7 @@ ALLOCATE(ZREAD(KLON,KLAT))
 ! * Flow direction 
 !
 YVAR ='FLOWDIR'
-CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
 WHERE(ZREAD==XUNDEF)ZREAD=0.0
 TPG%NGRCN(:,:)=INT(ZREAD(:,:))
 WHERE(TPG%NGRCN(:,:)>0)TPG%GMASK(:,:)=.TRUE.
@@ -373,7 +360,7 @@ WHERE(TPG%NGRCN(:,:)>0)TPG%GMASK(:,:)=.TRUE.
 ! * Rriver sequence
 !
 YVAR ='RIVSEQ'
-CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
 WHERE(ZREAD==XUNDEF)ZREAD=0.0
 TPG%NSEQ(:,:)=INT(ZREAD(:,:))
 !
@@ -384,7 +371,7 @@ TPG%NSEQMAX = MAXVAL(TPG%NSEQ(:,:))
 ! * Basin number id
 !
 YVAR ='NUM_BAS'
-CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
 WHERE(ZREAD==XUNDEF)ZREAD=0.0
 TPG%NBASID(:,:)=INT(ZREAD(:,:))
 !
@@ -393,22 +380,24 @@ TPG%NBASMAX = MAXVAL(TPG%NBASID(:,:),TPG%NBASID(:,:)>0)
 !
 ! * Set down stream
 !
-CALL SETNEXT(KLON,KLAT,TPG%NGRCN,TPG%NNEXTX,TPG%NNEXTY)
+ CALL SETNEXT(KLON,KLAT,TPG%NGRCN,TPG%NNEXTX,TPG%NNEXTY)
 !
 ! * Set area size
 !
-CALL SETAREA(KLAT,ZLATMIN,ZGRID_RES,TPG%XAREA)
+YVAR ='CELL_AREA'
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TPG%XAREA)
+WHERE(.NOT.TPG%GMASK(:,:))TPG%XAREA(:,:)=XUNDEF
 !
 ! * Distance between grids with the meandering ratio
 !
 YVAR ='RIVLEN'
-CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TPG%XLEN)
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TPG%XLEN)
 WHERE(.NOT.TPG%GMASK(:,:))TPG%XLEN(:,:)=XUNDEF
 !
 ! * Land mask for Greenland and Antarctica
 !
 YVAR ='GREEN_ANT'
-CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
+ CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD)
 DO JLAT=1,KLAT
    DO JLON=1,KLON
      IF(ZREAD(JLON,JLAT)==2.0)THEN
@@ -526,18 +515,35 @@ IF(LFLOOD)THEN
         TPG%GMASK_FLD(:,:)=.FALSE.
   ENDWHERE
 !
-  ALLOCATE(TP%XTAB_F (KLON,KLAT,NDIMTAB))      
-  ALLOCATE(TP%XTAB_H (KLON,KLAT,NDIMTAB))      
-  ALLOCATE(TP%XTAB_VF(KLON,KLAT,NDIMTAB))      
+  ALLOCATE(ZREAD3D(KLON,KLAT,NDIMTAB))
+!
+  ALLOCATE(TP%XTAB_F (KLON,KLAT,NDIMTAB+1))      
+  ALLOCATE(TP%XTAB_H (KLON,KLAT,NDIMTAB+1))      
+  ALLOCATE(TP%XTAB_VF(KLON,KLAT,NDIMTAB+1))      
+!
+  TP%XTAB_F (:,:,:)=XUNDEF
+  TP%XTAB_H (:,:,:)=XUNDEF
+  TP%XTAB_VF(:,:,:)=XUNDEF
+!  
+  WHERE(TPG%GMASK_FLD(:,:))
+      TP%XTAB_F (:,:,1)=0.0
+      TP%XTAB_H (:,:,1)=0.0
+      TP%XTAB_VF(:,:,1)=0.0         
+  ENDWHERE
 !
   YVAR ='TABF'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTAB_F)
+  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD3D)
+  TP%XTAB_F(:,:,2:NDIMTAB+1)=ZREAD3D(:,:,:)
 !
   YVAR ='TABH'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTAB_H)
+  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD3D)
+  TP%XTAB_H(:,:,2:NDIMTAB+1)=ZREAD3D(:,:,:)
 !
   YVAR ='TABVF'
-  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,TP%XTAB_VF)
+  CALL READ_TRIP(NLISTING,YFILE_PARAM,YVAR,ZREAD3D)
+  TP%XTAB_VF(:,:,2:NDIMTAB+1)=ZREAD3D(:,:,:)
+!
+  DEALLOCATE(ZREAD3D)
 !
 ELSE
 !
@@ -552,7 +558,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 YVAR ='SURF_STO'
-CALL READ_TRIP(NLISTING,YFILE_INIT,YVAR,TP%XSURF_STO)
+ CALL READ_TRIP(NLISTING,YFILE_INIT,YVAR,TP%XSURF_STO)
 !
 IF(CGROUNDW=='CST')THEN
 !        
@@ -583,17 +589,28 @@ ENDIF
 ! * Initial Conditions
 !-------------------------------------------------------------------------------
 !
+ALLOCATE(ZGW_STO (KLON,KLAT))
+ALLOCATE(ZWTD    (KLON,KLAT))
 ALLOCATE(ZHSTREAM(KLON,KLAT))
 ALLOCATE(ZVEL    (KLON,KLAT))
+ZWTD    (:,:) = 0.0
+ZGW_STO (:,:) = 0.0
 ZHSTREAM(:,:) = 0.0
 ZVEL    (:,:) = 0.0
 !
 IF(CVIT == 'VAR')THEN       
 !
-   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK,TPG%GMASK_VEL,  &
+   CALL TRIP_HS_VEL(XTSTEP,TPG%GMASK_VEL,            &
                     TPG%XLEN,TP%XWIDTH,TP%XSLOPEBED, &
                     TP%XN,TP%XSURF_STO,ZHSTREAM,ZVEL )
 !
+ENDIF
+!
+IF(CGROUNDW=='DIF')THEN
+  WHERE(TPG%GMASK_GW(:,:))
+    ZGW_STO(:,:)=(XGWDZMAX+TP%XHGROUND(:,:)-TP%XTOPO_RIV(:,:))*TP%XWEFF(:,:)*XRHOLW
+    ZWTD   (:,:)=TP%XHGROUND(:,:)-TP%XTOPO_RIV(:,:)
+  ENDWHERE
 ENDIF
 !
 ! * Fraction, width, water depth of floodplains
@@ -604,6 +621,8 @@ IF(LFLOOD)THEN
 !        
   WHERE(TPG%GMASK(:,:).AND.TPG%GMASK_FLD(:,:))
         TP%XFLOOD_LEN(:,:) = XRATMED*SQRT(TP%XFFLOOD(:,:)*TPG%XAREA(:,:))
+        TP%XFLOOD_LEN(:,:) = MIN(TPG%XLEN(:,:),TP%XFLOOD_LEN(:,:))
+
   ELSEWHERE
         TP%XFLOOD_LEN(:,:) = 0.0
         TP%XWFLOOD   (:,:) = 0.0
@@ -629,7 +648,7 @@ ENDIF
 ! * Initialize coupling variables
 !-------------------------------------------------------------------------------
 !
-CALL INIT_TRIP_CPL_ESM(TP, TPG, &
+ CALL INIT_TRIP_CPL_ESM(TP, TPG, &
                        KLON,KLAT)
 !
 !-------------------------------------------------------------------------------
@@ -672,21 +691,20 @@ IF(CVIT == 'VAR')THEN
                                                      MAXVAL(ZHSTREAM,  TPG%GMASK_VEL)  
 ENDIF
 WRITE(NLISTING,*)''
-WRITE(NLISTING,*)'Initial river storage        : ',MINVAL(TP%XSURF_STO, TPG%GMASK),  &
-                                                   MAXVAL(TP%XSURF_STO, TPG%GMASK)  
+WRITE(NLISTING,*)'Initial river storage        : ',MINVAL(TP%XSURF_STO/TPG%XAREA, TPG%GMASK),  &
+                                                   MAXVAL(TP%XSURF_STO/TPG%XAREA, TPG%GMASK)  
 IF(CGROUNDW=='CST')THEN                                                 
   WRITE(NLISTING,*)''
-  WRITE(NLISTING,*)'Initial ground storage       : ',MINVAL(TP%XGROUND_STO,TPG%GMASK_GW),  &
-                                                     MAXVAL(TP%XGROUND_STO,TPG%GMASK_GW)  
+  WRITE(NLISTING,*)'Initial ground storage       : ',MINVAL(TP%XGROUND_STO/TPG%XAREA,TPG%GMASK_GW),  &
+                                                     MAXVAL(TP%XGROUND_STO/TPG%XAREA,TPG%GMASK_GW)  
 ELSEIF(CGROUNDW=='DIF')THEN
   WRITE(NLISTING,*)''
-  WRITE(NLISTING,*)'Initial groundwater elevation : ',MINVAL(TP%XHGROUND,TPG%GMASK_GW),  &
-                                                      MAXVAL(TP%XHGROUND,TPG%GMASK_GW)  
-  WHERE(TPG%GMASK_GW(:,:))
-        ZHSTREAM(:,:)=TP%XTOPO_RIV(:,:)-TP%XHC_BED(:,:)+ZHSTREAM(:,:)
-  ENDWHERE
-  WRITE(NLISTING,*)'Initial river elevation       : ',MINVAL(ZHSTREAM,TPG%GMASK_GW),  &
-                                                      MAXVAL(ZHSTREAM,TPG%GMASK_GW)
+  WRITE(NLISTING,*)'Initial gw elevation         : ',MINVAL(TP%XHGROUND,TPG%GMASK_GW),  &
+                                                     MAXVAL(TP%XHGROUND,TPG%GMASK_GW)  
+  WRITE(NLISTING,*)'Initial water table depth    : ',MINVAL(ZWTD,       TPG%GMASK_GW),  &
+                                                     MAXVAL(ZWTD,       TPG%GMASK_GW)     
+  WRITE(NLISTING,*)'Initial gw storage           : ',MINVAL(ZGW_STO,TPG%GMASK_GW),  &
+                                                     MAXVAL(ZGW_STO,TPG%GMASK_GW)
 ENDIF
 WRITE(NLISTING,*)''
 
@@ -716,28 +734,40 @@ ENDIF
 !
 DEALLOCATE(ZVEL)
 DEALLOCATE(ZHSTREAM)
+DEALLOCATE(ZGW_STO)
+DEALLOCATE(ZWTD)
 !
 !-------------------------------------------------------------------------------
-! * Create high frequency diag file
+! * Alloc diag diag
 !-------------------------------------------------------------------------------
 !
-YFILE  = YDIAG  
-YTITLE = 'TRIP high frequency outputs'
-CALL OUTPUT_DATE(YUNITTIME,XTIME_DIAG)
-CALL INIT_TRIP_DIAG(TPDG, TPG, &
+CALL ALLOC_TRIP_DIAG (TPDG,KLON,KLAT)
+!
+!-------------------------------------------------------------------------------
+! * Create high diag files
+!-------------------------------------------------------------------------------
+!
+IF(.NOT.OXIOS)THEN
+  !
+  YFILE  = YDIAG  
+  YTITLE = 'TRIP high frequency outputs'
+  CALL OUTPUT_DATE(YUNITTIME,XTIME_DIAG)
+  !
+  CALL INIT_TRIP_DIAG(TPDG, TPG, &
                     NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.) 
+  !
+  !-------------------------------------------------------------------------------
+  ! * Create run mean diag file
+  !-------------------------------------------------------------------------------
+  !
+  YFILE     = YRUN
+  YTITLE    = 'TRIP run mean outputs'
+  WRITE(YTIME,'(i4.4,i2.2)') KYEAR, KMONTH
+  YUNITTIME = 'months since '//YTIME(1:4)//'-'//YTIME(5:LEN_TRIM(YTIME))//'-15'
+  CALL INIT_TRIP_DIAG(TPDG, TPG, &
+                      NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.)
 !
-!-------------------------------------------------------------------------------
-! * Create run mean diag file
-!-------------------------------------------------------------------------------
-!
-YFILE     = YRUN
-YTITLE    = 'TRIP run mean outputs'
-WRITE(YTIME,'(i4.4,i2.2)') KYEAR, KMONTH
-YUNITTIME = 'months since '//YTIME(1:4)//'-'//YTIME(5:LEN_TRIM(YTIME))//'-15'
-CALL INIT_TRIP_DIAG(TPDG, TPG, &
-                    NLISTING,YFILE,KLON,KLAT,YTITLE,YUNITTIME,.TRUE.)
-!
+ENDIF
 !
 !-------------------------------------------------------------------------------
 ! * Create restart file
@@ -749,19 +779,20 @@ IF(ORESTART)THEN
   CALL INIT_RESTART_TRIP(TPG, &
                          NLISTING,YFILE_RESTART,KLON,KLAT,YTITLE,YUNITTIME,.FALSE.)
 ENDIF
+!
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 ! * CONTAINS
 !-------------------------------------------------------------------------------
 !
-CONTAINS
+ CONTAINS
 !
 SUBROUTINE OUTPUT_DATE(HTIMEUNIT,PTIME_DIAG)
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*), INTENT(OUT) :: HTIMEUNIT
+ CHARACTER(LEN=*), INTENT(OUT) :: HTIMEUNIT
 REAL,             INTENT(OUT) :: PTIME_DIAG
 !
 INTEGER, DIMENSION(3)         :: ITIME, IDATE
@@ -771,12 +802,6 @@ INTEGER                       :: ISEC
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP:OUTPUT_DATE',0,ZHOOK_HANDLE)
-!
-INDAYS = FLOOR(PTSTEP_DIAG/86400.)
-ISEC=MAX(0,NINT(PTIME-(PTSTEP_DIAG-INDAYS*86400)))
-ITIME(1)=FLOOR(ISEC/3600.)
-ITIME(2)=FLOOR((ISEC-ITIME(1)*3600)/60.)
-ITIME(3)=ISEC-ITIME(1)*3600-ITIME(2)*60 
 !
 IF (PTSTEP_DIAG == FLOOR(PTSTEP_DIAG/86400.)*86400) THEN 
   HTIMEUNIT ='days since '
@@ -796,12 +821,17 @@ IDATE(1) = KYEAR
 IDATE(2) = KMONTH
 IDATE(3) = KDAY
 !
-CALL WRITE_TIME(IDATE(1),1,"-",HTIMEUNIT)
-CALL WRITE_TIME(IDATE(2),0,"-",HTIMEUNIT)
-CALL WRITE_TIME(IDATE(3),0,"",HTIMEUNIT)
-CALL WRITE_TIME(ITIME(1),1,":",HTIMEUNIT)
-CALL WRITE_TIME(ITIME(2),0,":",HTIMEUNIT)
-CALL WRITE_TIME(ITIME(3),0,"",HTIMEUNIT)
+ISEC=PTIME
+ITIME(1)=FLOOR(ISEC/3600.)
+ITIME(2)=FLOOR((ISEC-ITIME(1)*3600)/60.)
+ITIME(3)=ISEC-ITIME(1)*3600-ITIME(2)*60 
+!
+ CALL WRITE_TIME(IDATE(1),1,"-",HTIMEUNIT)
+ CALL WRITE_TIME(IDATE(2),0,"-",HTIMEUNIT)
+ CALL WRITE_TIME(IDATE(3),0,"",HTIMEUNIT)
+ CALL WRITE_TIME(ITIME(1),1,":",HTIMEUNIT)
+ CALL WRITE_TIME(ITIME(2),0,":",HTIMEUNIT)
+ CALL WRITE_TIME(ITIME(3),0,"",HTIMEUNIT)
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TRIP:OUTPUT_DATE',1,ZHOOK_HANDLE)
 !

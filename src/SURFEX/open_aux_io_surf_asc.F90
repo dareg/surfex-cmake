@@ -1,6 +1,10 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #######################################################
       SUBROUTINE OPEN_AUX_IO_SURF_ASC (&
-                                       HFILE,HFILETYPE,HMASK)
+                                       HFILE,HFILETYPE,HMASK,HDIR)
 !     #######################################################
 !
 !!****  *OPEN_AUX_IO_SURF_ASC* - chooses the routine to OPENialize IO
@@ -37,7 +41,7 @@
 !
 !
 !
-USE MODD_IO_SURF_ASC,ONLY:NUNIT,CFILEIN,CFILEOUT,NMASK,NLUOUT,NFULL,CMASK
+USE MODD_IO_SURF_ASC,ONLY:NUNIT,NMASK,NLUOUT,NFULL,CMASK
 USE MODI_GET_LUOUT
 USE MODI_READ_SURF
 USE MODI_IO_BUFF_CLEAN
@@ -54,13 +58,13 @@ IMPLICIT NONE
 !
 !
  CHARACTER(LEN=28), INTENT(IN)  :: HFILE     ! file name
- CHARACTER(LEN=6),  INTENT(IN)  :: HFILETYPE ! main program
- CHARACTER(LEN=6),  INTENT(IN)  :: HMASK
+ CHARACTER(LEN=6), INTENT(IN)  :: HFILETYPE ! main program
+ CHARACTER(LEN=6), INTENT(IN)  :: HMASK
+ CHARACTER(LEN=1), INTENT(IN) :: HDIR
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-INTEGER, DIMENSION(:),POINTER  :: IMASK
 INTEGER                        :: IRET, IL
 REAL, DIMENSION(:),ALLOCATABLE :: ZFULL  ! total cover
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -75,13 +79,17 @@ NUNIT=9
 !
 OPEN(UNIT=NUNIT,FILE=TRIM(HFILE)//'.txt',FORM='FORMATTED')
 !
-CMASK = 'FULL  '
+CMASK = HMASK
  CALL READ_SURF(&
-                'ASCII ','DIM_FULL',NFULL,IRET)
-ALLOCATE(NMASK(NFULL))
+                'ASCII ','DIM_FULL',NFULL,IRET,HDIR=HDIR)
+!
 ALLOCATE(ZFULL(NFULL))
-ZFULL=1.
- CALL GET_1D_MASK(NFULL,NFULL,ZFULL,NMASK)
+IL = NFULL
+ZFULL = 1.
+!  
+ALLOCATE(NMASK(IL))
+CALL GET_1D_MASK(IL,NFULL,ZFULL,NMASK)
+!
 DEALLOCATE(ZFULL)
 !
 !------------------------------------------------------------------------------

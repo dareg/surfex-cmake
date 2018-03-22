@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ##################
       MODULE MODD_IO_SURF_LFI
 !     ##################
@@ -37,12 +41,9 @@ IMPLICIT NONE
 INTEGER                :: NUNIT_LFI      ! logical unit of surface file (LFI part)
 INTEGER                :: NLUOUT         ! logical unit of output file
 !
-INTEGER, DIMENSION(:), POINTER :: NMASK ! 1D mask to read only interesting
-!$OMP THREADPRIVATE(NMASK)
+INTEGER, DIMENSION(:), POINTER :: NMASK=>NULL() ! 1D mask to read only interesting
  CHARACTER(LEN=6)               :: CMASK ! surface mask type
-!$OMP THREADPRIVATE(CMASK)
 INTEGER                        :: NFULL     = NUNDEF ! total number fo points of surface
-!$OMP THREADPRIVATE(NFULL)
 INTEGER                        :: NFULL_AUX = NUNDEF ! total number fo points of surface (Auxilarry file for prep)
 INTEGER                        :: NFULL_SURF= NUNDEF ! total number fo points of surface (PGD, PREP or SURFace prognostic file)
 !

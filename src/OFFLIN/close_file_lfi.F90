@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE CLOSE_FILE_LFI(HPROGRAM,KUNIT )
 !     #######################################################
@@ -33,7 +37,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+#ifdef SFX_LFI
 USE MODD_FMDECLAR,    ONLY : CNAMFI
+#endif
 USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -58,7 +64,9 @@ INTEGER :: IRESP
 !  -------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_FILE_LFI',0,ZHOOK_HANDLE)
+#ifdef SFX_LFI
  CALL FMFREE(CNAMFI(KUNIT),CLUOUT_LFI,IRESP)
+#endif
 CLOSE(KUNIT)
 IF (LHOOK) CALL DR_HOOK('CLOSE_FILE_LFI',1,ZHOOK_HANDLE)
 !

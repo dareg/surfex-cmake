@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 ! -------------------------------------------------
 PROGRAM OFFLINE
 !
@@ -5,7 +9,7 @@ PROGRAM OFFLINE
 ! Driver structure
 ! ----------------
 ! 1. Initializations
-! 2. Temporal loops
+! 2. Temporal loo1s
 !   2.a Read forcing
 !   2.b Interpolate forcing in time
 !   2.c Run surface
@@ -20,9 +24,15 @@ PROGRAM OFFLINE
 ! 04/2013 P. Lemoigne Add XDELTA_OROG to fix the maximum difference allowed between
 !                     forcing and surface file orographies if LSET_FORC_ZS=.F
 ! 12/2013 S.Senesi    Add call to Gelato diag files init and close
+! 02/2016: replace DOUBLE PRECISION by REAL to handle problem for promotion of real with GMKPACK or IBM SP
+! 06/2016 S.Senesi    Use XIOS for diags output
 ! -------------------------------------------------
 !
 USE MODD_OFF_SURFEX_n
+!
+USE MODD_TYPE_DATE_SURF, ONLY : DATE
+!
+USE MODD_WRITE_SURF_ATM, ONLY : LFIRST_WRITE, NCPT_WRITE
 !
 USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XDIR_ALB    ,&! direct albedo for each band
@@ -49,10 +59,6 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XPA         ,&! pressure at forcing level             (Pa)
                             XRHOA       ,&! density at forcing level              (kg/m3)
                             XCO2        ,&! CO2 concentration in the air          (kg/m3)
-                            XIMPWET     ,&! wet deposit coef for each type of impurity (g)
-                            XIMPDRY     ,&! dry deposit coef for each type of impurity (g/j)
-                            XO3         ,&! Ozone
-                            XAE         ,&! Aerosol optical depth
                             XSNOW       ,&! snow precipitation                    (kg/m2/s)
                             XRAIN       ,&! liquid precipitation                  (kg/m2/s)
                             XSFTH       ,&! flux of heat                          (W/m2)
@@ -72,11 +78,8 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XZ0H        ,&! surface roughness length for heat      (m)
                             XQSURF        ! specific humidity at surface           (kg/kg)
 !
-USE MODD_SURF_PAR,   ONLY : XUNDEF
-!
 USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
-USE MODD_SYTRON_PAR, ONLY : NTAB_SYT
 USE MODD_IO_SURF_ASC,ONLY : CFILEIN,CFILEIN_SAVE,CFILEOUT,CFILEPGD
 USE MODD_SURF_PAR
 USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE,       &
@@ -85,13 +88,10 @@ USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE,       &
 USE MODD_IO_SURF_LFI,ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, CLUOUT_LFI, CFILEOUT_LFI, &
                             LMNH_COMPATIBLE, CFILEPGD_LFI  
 USE MODD_IO_SURF_NC, ONLY : CFILEIN_NC, CFILEIN_NC_SAVE, CFILEOUT_NC, CLUOUT_NC, &
-                            CFILEPGD_NC, LDEF
-USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE,           &
-                              LDEFINED_NATURE, LDEFINED_SEA,    &
-                              LDEFINED_WATER,  LDEFINED_TOWN,   &
-                              LDEFINED_SURF_ATM, LPARTW,        &
+                            CFILEPGD_NC, LDEF_nc=>LDEF
+USE MODD_IO_SURF_OL, ONLY : XSTART, XCOUNT, XSTRIDE, LPARTW,    &
                               XSTARTW, XCOUNTW, LTIME_WRITTEN,  &
-                              NSTEP_OUTPUT  
+                              NSTEP_OUTPUT, LDEF_ol=>LDEF
 USE MODD_WRITE_BIN,  ONLY : NWRITE
 !
 USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,   &
@@ -100,12 +100,10 @@ USE MODD_SURFEX_MPI, ONLY : NCOMM, NPROC, NRANK, NPIO, WLOG_MPI, PREP_LOG_MPI,  
                             XTIME_NATURE, XTIME_WATER, XTIME_TOWN, &
                             XTIME_INIT_SEA, XTIME_INIT_WATER, &
                             XTIME_INIT_NATURE, XTIME_INIT_TOWN, &
-                            XTIME_WRITE, XTIME_CALC, XTIME_OMP_BARR, &
+                            XTIME_WRITE, XTIME_CALC,  &
                             XTIME_CALC_WRITE, IDX_W, END_LOG_MPI
 !
-USE MODD_SURFEX_OMP, ONLY :  NINDX1SFX, NINDX2SFX, NBLOCK, NBLOCKTOT, &
-                             INIT_DIM, RESET_DIM, NWORK, NWORK2, XWORK, XWORK2, XWORK3, &
-                             NWORK_FULL, NWORK2_FULL, XWORK_FULL, XWORK2_FULL
+USE MODD_SURFEX_OMP, ONLY :  NBLOCK, NBLOCKTOT
 !
 USE MODD_COUPLING_TOPD, ONLY : NNB_TOPD, NNB_STP_RESTART, LBUDGET_TOPD, LTOPD_STEP, &
                                LCOUPL_TOPD, NTOPD_STEP, NYEAR, NMONTH, NDAY, NH, NM
@@ -115,6 +113,8 @@ USE MODD_SLOPE_EFFECT, ONLY: XZS_THREAD,XZS_XY_THREAD,XSLOPANG_THREAD,&
                              XSLOPAZI_THREAD,XSURF_TRIANGLE_THREAD
 !
 USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
+!
+USE MODD_XIOS, ONLY : LXIOS, TXIOS_CONTEXT, LXIOS_DEF_CLOSED, LADD_DIM=>LALLOW_ADD_DIM, NTIMESTEP
 !
 USE MODE_POS_SURF
 !
@@ -136,7 +136,6 @@ USE MODI_COMPARE_OROGRAPHY
 USE MODI_SUNPOS
 USE MODI_INIT_INDEX_MPI
 USE MODI_OL_READ_ATM
-USE MODI_GET_SIZES_PARALLEL
 USE MODI_IO_BUFF_CLEAN
 USE MODI_INIT_SURF_ATM_n
 USE MODI_INIT_SURF_LANDUSE_n
@@ -166,8 +165,8 @@ USE MODI_PREP_RESTART_COUPL_TOPD
 USE MODI_INIT_SLOPE_PARAM
 USE MODI_SLOPE_RADIATIVE_EFFECT
 !
-USE MODI_SFX_OASIS_INIT
 USE MODI_SFX_OASIS_READ_NAM
+USE MODI_SFX_OASIS_INIT
 USE MODI_SFX_OASIS_DEF_OL
 USE MODI_SFX_OASIS_RECV_OL
 USE MODI_SFX_OASIS_SEND_OL
@@ -175,16 +174,19 @@ USE MODI_SFX_OASIS_END
 !RJ: missing modi
 USE MODI_LOCAL_SLOPE_PARAM
 !
+#ifdef WXIOS
+USE XIOS, ONLY : XIOS_CONTEXT_FINALIZE, XIOS_CLOSE_CONTEXT_DEFINITION, XIOS_UPDATE_CALENDAR
+#endif
+USE MODI_SFX_XIOS_READNAM_OL
+USE MODI_SFX_XIOS_SETUP_OL
+!
 USE MODE_GLT_DIA_LU
 !
-!
-USE MODI_INIT_SYTRON_TABLE
-!
-! spectral repartition of irradiance
-USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM, JPNLYR_CLEAR, PPZP_CUT, PPHUND, PPMU_THRESHOLD
-USE MODE_ATMO_TARTES, ONLY : IRRADIANCE, TAU_CLOUD
-USE MODI_JULIAN
-USE MODD_SNOW_METAMO,  ONLY : XUEPSI
+#ifdef SFX_MPI
+#ifdef SFX_MPL
+USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
+#endif
+#endif
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -211,7 +213,11 @@ INCLUDE 'mpif.h'
 INTEGER                           :: IYEAR               ! current year (UTC)
 INTEGER                           :: IMONTH              ! current month (UTC)
 INTEGER                           :: IDAY                ! current day (UTC)
-REAL                              :: ZTIME               ! current time since start of the run (s)
+INTEGER                           :: IYEAR2              ! current year at end of timestep(UTC)
+INTEGER                           :: IMONTH2             ! current month at end of timestep(UTC)
+INTEGER                           :: IDAY2               ! current day at end of timestep(UTC)
+REAL                              :: ZTIME               ! current time since start of the day (s)
+REAL                              :: ZTIME2              ! current time since start of the day at end of timestep (s)
 REAL                              :: ZTIMEC              ! current duration since start of the run (s)
 !
 INTEGER                           :: IYEAR_OUT           ! output year name
@@ -245,8 +251,8 @@ INTEGER                           :: IDMAX               ! nb of lines to read i
 INTEGER                           :: JFORC_STEP          ! atmospheric loop index
 INTEGER                           :: JSURF_STEP          ! isba loop index
 INTEGER                           :: ICOUNT              ! day counter 
-REAL                              :: ZDURATION           ! duration of run                     (s)
 INTEGER                           :: ITIMESTARTINDEX
+REAL                              :: ZDURATION, ZDURATION2    ! duration of run                     (s)
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZTA                 ! air temperature forcing               (K)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZQA                 ! air humidity forcing                  (kg/m3)
@@ -258,10 +264,6 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZSNOW               ! snow precipitation   
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZRAIN               ! liquid precipitation                  (kg/m2/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZPS                 ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCO2                ! CO2 concentration in the air          (kg/m3)
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZO3                 ! Ozone
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZAE                 ! Aerosol optical depth
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPWET           ! wet deposit coefficient for each impurity type (kg/m²/s)
-REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPDRY           ! dry deposit coefficient for each impurity type (kg/m²/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDIR                ! wind direction
 INTEGER                           :: ILUOUT              ! ascii output unit number
 INTEGER                           :: ILUNAM              ! namelist unit number
@@ -274,6 +276,7 @@ LOGICAL                           :: GSHADOWS
 REAL, DIMENSION(:),   ALLOCATABLE :: ZSW                 ! total solar radiation (on horizontal surf.)
 REAL, DIMENSION(:),   ALLOCATABLE :: ZCOEF               ! coefficient for solar radiation interpolation near sunset/sunrise
 !
+TYPE(DATE) :: TDATE_END
 ! Flag diag :
 !
 INTEGER                           :: I2M, IBEQ, IDSTEQ
@@ -294,75 +297,74 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZPSNG, ZPSNV
 REAL, DIMENSION(:), ALLOCATABLE   :: ZZ0EFF
 REAL, DIMENSION(:), ALLOCATABLE   :: ZZS
 REAL, DIMENSION(:), ALLOCATABLE   :: ZZ0_FULL, ZZ0EFF_FULL, ZZS_FULL
+REAL, DIMENSION(:), ALLOCATABLE :: ZSUMZEN
 INTEGER :: ISERIES, ISIZE
 !
 ! MPI variables
 !
-CHARACTER(LEN=100) :: YNAME
-CHARACTER(LEN=10)  :: YRANK
-INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK,JIMP
-INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
-DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
+ CHARACTER(LEN=100) :: YNAME
+ CHARACTER(LEN=10)  :: YRANK
+INTEGER :: ILEVEL, INFOMPI, J
+REAL :: XTIME0, XTIME1, XTIME
 !
 ! SFX - OASIS coupling variables
 !
-INTEGER  :: ILOCAL_COMM  ! Local communicator
+LOGICAL :: GSAVHOOK
+INTEGER :: IBLOCKTOT, IBLOCK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-!!!!!!!!!!!!!!!!!!!!! For spectral repartion of direct/diffuse solar irradiance 
-REAL, DIMENSION(:), ALLOCATABLE :: ZP_CLOUD, ZTCLOUD55, ZMU, ZD_O3,ZD_AE
-INTEGER, DIMENSION(:), ALLOCATABLE :: KCLOUD_TYPE
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZIRR_DIFF, ZIRR_DIR
-REAL, DIMENSION(:,:), ALLOCATABLE :: ZP_CUT
-REAL, DIMENSION(:), ALLOCATABLE ::  ZINT_SCA_SW, ZINT_DIR_SW, ZINT_TOT_SW
-REAL :: ZDATI
-INTEGER :: JI
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 ! --------------------------------------------------------------------------------------
 !
-!*     0.1.   MPI, OASIS, and dr_hook initializations
+!*     0.1.   MPI, OASIS, XIOS and dr_hook initializations
+!
+CSOFTWARE='OFFLINE'
 !
 INFOMPI=1
 !
-#ifdef SFXOASIS
-!Must be call before DRHOOK !
-CALL SFX_OASIS_INIT(CNAMELIST,ILOCAL_COMM)
+GSAVHOOK = LHOOK
+LHOOK = .FALSE.
+! There are issues with oasis if LHOOK=T during its init phase 
+#ifdef WXIOS
+ CALL SFX_XIOS_READNAM_OL(CNAMELIST)
 #else
-LOASIS   = .FALSE.
-XRUNTIME = 0.0
+LXIOS=.FALSE.
+#endif
+LHOOK = GSAVHOOK
+!
+!Must be call before DRHOOK !
+ CALL SFX_OASIS_INIT(CNAMELIST,NCOMM)
+#ifdef SFX_MPI
+#ifdef SFX_MPL
+IF (LOASIS.OR.LXIOS) THEN
+  LMPLUSERCOMM = .TRUE.
+  MPLUSERCOMM = NCOMM
+ENDIF
+#endif
 #endif
 !
 #ifdef SFX_MPI
-IF(.NOT.LOASIS)THEN
+IF(.NOT.LOASIS.AND..NOT.LXIOS)THEN
  CALL MPI_INIT_THREAD(MPI_THREAD_MULTIPLE,ILEVEL,INFOMPI)
  IF (INFOMPI /= MPI_SUCCESS) THEN 
     CALL ABOR1_SFX('OFFLINE: ERROR WHEN INITIALIZING MPI')
  ENDIF
+ NCOMM=MPI_COMM_WORLD
 ENDIF
+CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
+CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
 #endif
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',0,ZHOOK_HANDLE)
-!
-CSOFTWARE='OFFLINE'
-!
-#ifdef SFX_MPI
-IF(LOASIS)THEN
-  NCOMM=ILOCAL_COMM
-ELSE
-  NCOMM=MPI_COMM_WORLD
-ENDIF
- CALL MPI_COMM_SIZE(NCOMM,NPROC,INFOMPI)
- CALL MPI_COMM_RANK(NCOMM,NRANK,INFOMPI)
-#endif
 !
 !RJ: init modd_surefx_omp
 !$OMP PARALLEL
 !$ NBLOCKTOT = OMP_GET_NUM_THREADS()
 !$ NBLOCK = OMP_GET_THREAD_NUM()
 !$OMP END PARALLEL
+!
+IBLOCKTOT = 1
+IBLOCK = 0
 !
  CALL PREP_LOG_MPI
 !
@@ -380,16 +382,14 @@ XTIME0 = MPI_WTIME()
 WRITE(YRANK,FMT='(I10)') NRANK
 YNAME=TRIM(YLUOUT)//ADJUSTL(YRANK)
 !
-CLUOUT_LFI =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
-CLUOUT_NC  =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
+ CLUOUT_LFI =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
+ CLUOUT_NC  =  ADJUSTL(ADJUSTR(YNAME)//'.txt')
 !
  CALL GET_LUOUT('ASCII ',ILUOUT)
 OPEN(UNIT=ILUOUT,FILE=ADJUSTL(ADJUSTR(YNAME)//'.txt'),FORM='FORMATTED',ACTION='WRITE')
 !
 !
 IF ( NRANK==NPIO ) THEN
-  !
-!$OMP SINGLE
   !
 !RJ: be verbose just for openmp
   IF(NBLOCKTOT==1) THEN
@@ -399,8 +399,6 @@ IF ( NRANK==NPIO ) THEN
 !$  WRITE(ILUOUT,*) "CAUTION: DID YOU THINK TO SET OMP_NUM_THREADS=1?"
 !$  WRITE(ILUOUT,*) "PLEASE VERIFY OMP_NUM_THREADS IS INITIALIZED : TYPE ECHO $OMP_NUM_THREADS IN A TERMINAL" 
   ENDIF
-  !
-!$OMP END SINGLE
   !
 ENDIF
 !
@@ -419,9 +417,16 @@ ELSE
 ENDIF
 !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSURF_FILETYPE',CSURF_FILETYPE,'ASCII ','LFI   ','FA    ','NC    ')
+#ifdef WXIOS
+ CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
+                                                                            'ASCII ','LFI   ','FA    ',&
+                                                                            'NONE  ','OFFLIN','NC    '&
+                                                                            ,'XIOS  ')
+#else 
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CTIMESERIES_FILETYPE',CTIMESERIES_FILETYPE,'NETCDF','TEXTE ','BINARY',&
                                                                             'ASCII ','LFI   ','FA    ',&
                                                                             'NONE  ','OFFLIN','NC    ')  
+#endif                                                                    
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CFORCING_FILETYPE',CFORCING_FILETYPE,'NETCDF','ASCII ','BINARY')
 !
 IF (NSCAL>59) CALL ABOR1_SFX("OFFLINE: NSCAL MUST BE LOWER THAN OR EQUAL TO 59")
@@ -429,42 +434,42 @@ IF (NSCAL>59) CALL ABOR1_SFX("OFFLINE: NSCAL MUST BE LOWER THAN OR EQUAL TO 59")
 !
 IF (CTIMESERIES_FILETYPE=='NETCDF') CTIMESERIES_FILETYPE='OFFLIN'
 !
-IF (NRANK==NPIO) THEN
-  !
-  CFILEPGD = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
-  CFILEIN  = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
-  CFILEIN_SAVE = CFILEIN
-  !
-  CFILEPGD_LFI = CPGDFILE
-  CFILEIN_LFI  = CPREPFILE
-  CFILEIN_LFI_SAVE = CFILEIN_LFI
-  !
-  CFILEPGD_FA = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
-  CFILEIN_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
-  CFILEIN_FA_SAVE  = CFILEIN_FA
-  !
-  CFILEPGD_NC = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
-  CFILEIN_NC  = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
-  CFILEIN_NC_SAVE  = CFILEIN_NC
-  !
+IF ((TRIM(CTIMESERIES_FILETYPE) /= 'XIOS') .AND. LADD_DIM) THEN
+      CALL ABOR1_SFX('CANNOT YET SET LALLOW_ADD_DIM TO .TRUE. WITHOUT SETTING CTIMESERIES_FILETYPE to XIOS ')
 ENDIF
+!
+!
+ CFILEPGD = ADJUSTL(ADJUSTR(CPGDFILE)//'.txt')
+ CFILEIN  = ADJUSTL(ADJUSTR(CPREPFILE)//'.txt')
+ CFILEIN_SAVE = CFILEIN
+!
+ CFILEPGD_LFI = CPGDFILE
+ CFILEIN_LFI  = CPREPFILE
+ CFILEIN_LFI_SAVE = CFILEIN_LFI
+!
+ CFILEPGD_FA = ADJUSTL(ADJUSTR(CPGDFILE)//'.fa')
+ CFILEIN_FA  = ADJUSTL(ADJUSTR(CPREPFILE)//'.fa')
+ CFILEIN_FA_SAVE  = CFILEIN_FA
+!
+ CFILEPGD_NC = ADJUSTL(ADJUSTR(CPGDFILE)//'.nc')
+ CFILEIN_NC  = ADJUSTL(ADJUSTR(CPREPFILE)//'.nc')
+ CFILEIN_NC_SAVE  = CFILEIN_NC
 !
 !     Allocations of Surfex Types
  CALL SURFEX_ALLOC_LIST(1)
- YSURF_CUR => YSURF_LIST(1)
+ YSC => YSURF_LIST(1)
 !
 !     Reading all namelist (also assimilation)
- CALL READ_ALL_NAMELISTS(YSURF_CUR, &
-                         CSURF_FILETYPE,'ALL',.FALSE.)
+ CALL READ_ALL_NAMELISTS(YSC, CSURF_FILETYPE,'ALL',.FALSE.)
 !
 !
 !*      0.5.   Reads SFX - OASIS coupling namelists
 !
-CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF)
+ CALL SFX_OASIS_READ_NAM(CSURF_FILETYPE,XTSTEP_SURF)
 !
 !*      0.6   Assume FA filetype consistency 
 !
-CPROGNAME = CSURF_FILETYPE
+ CPROGNAME = CSURF_FILETYPE
 !
 ! --------------------------------------------------------------------------------------
 !
@@ -480,11 +485,6 @@ IF (NRANK==NPIO) THEN
   XSTARTW           = 0
   XCOUNTW           = 1
   LPARTW            = .TRUE.
-  LDEFINED_SURF_ATM = .FALSE.
-  LDEFINED_NATURE   = .FALSE.
-  LDEFINED_TOWN     = .FALSE.
-  LDEFINED_WATER    = .FALSE.
-  LDEFINED_SEA      = .FALSE.
   !
 ENDIF
 !
@@ -496,17 +496,11 @@ XTIME = (MPI_WTIME() - XTIME0)
 XTIME0 = MPI_WTIME()
 #endif
 !
-!       forcing file handling
-!
-IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('CONF ',CFORCING_FILETYPE,'R')
-IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
-!
 !
 !       splitting of the grid
 !
 GSHADOWS = LSHADOWS_SLOPE .OR. LSHADOWS_OTHER
-CALL INIT_INDEX_MPI(YSURF_CUR, &
-                    CSURF_FILETYPE, YALG_MPI, XIO_FRAC, GSHADOWS)
+ CALL INIT_INDEX_MPI(YSC%DTCO, YSC%U, YSC%UG, YSC%GCP, CSURF_FILETYPE, 'OFF', YALG_MPI, XIO_FRAC, GSHADOWS)
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ init_index ',PLOG=XTIME_NPIO_READ)
@@ -524,12 +518,23 @@ XTIME = (MPI_WTIME() - XTIME0)
 XTIME0 = MPI_WTIME()
 #endif
 !
+!       forcing file handling
+!
+IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('CONF ',CFORCING_FILETYPE,'R')
+IF (CFORCING_FILETYPE=='NETCDF') CALL OPEN_FILEIN_OL
+!
 !       configuration of run
 !
- CALL OL_READ_ATM_CONF(YSURF_CUR, &
-                       CSURF_FILETYPE, CFORCING_FILETYPE, LDELAYEDSTART_NC,   &
-                      NDATESTOP, ZDURATION, ZTSTEP, INI, IYEAR, IMONTH, IDAY,  &
-                      ZTIME, ZLAT, ZLON, ZZS_FORC, ZZREF, ZUREF, ITIMESTARTINDEX     )
+ CALL OL_READ_ATM_CONF(YSC%DTCO, YSC%U, YSC%UG%G%CGRID, CSURF_FILETYPE, CFORCING_FILETYPE,  &
+                      LDELAYEDSTART_NC, NDATESTOP, ZDURATION, ZTSTEP, INI,  &
+                      IYEAR, IMONTH, IDAY, ZTIME, ZLAT, ZLON, ZZS_FORC,     &
+                      ZZREF, ZUREF, ITIMESTARTINDEX     )
+!
+TDATE_END%YEAR = IYEAR
+TDATE_END%MONTH = IMONTH
+TDATE_END%DAY = IDAY
+ZDURATION2 = ZDURATION
+ CALL ADD_FORECAST_TO_DATE_SURF(TDATE_END%YEAR, TDATE_END%MONTH, TDATE_END%DAY, ZDURATION2)
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc conf ',PLOG=XTIME_NPIO_READ)
@@ -587,42 +592,23 @@ ENDIF
 !       allocation of variables
 !
 IBANDS = 1
-! special case for snowcro tartes!!!!!!
-
-IF (CSPECSNOW) THEN 
-  IBANDS=JPNBANDS_ATM
-ENDIF 
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  CALL OL_ALLOC_ATM(INI,IBANDS,NSCAL)
 !
 XZS   = ZZS_FORC
 XZREF = ZZREF
 XUREF = ZUREF
-
-
-!!!! allocation of atmospheric variables for atmotartes
-
-
-
-
 !
 !       compare orography
 !
- CALL COMPARE_OROGRAPHY(YSURF_CUR, &
-                         CSURF_FILETYPE, LSET_FORC_ZS, XDELTA_OROG)
+ CALL COMPARE_OROGRAPHY(YSC%DTCO, YSC%U, CSURF_FILETYPE, LSET_FORC_ZS, XDELTA_OROG)
 !
 !       miscellaneous initialization
 !
 ICOUNT = 0
 ZTIMEC = 0.
 !
-ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
- CALL GET_SIZES_PARALLEL(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%UG, YSURF_CUR%U, &
-                         NBLOCKTOT,INI,0,ISIZE_OMP, GSHADOWS)
- CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME, ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
-DEALLOCATE(ISIZE_OMP)
+ CALL SUNPOS(IYEAR, IMONTH, IDAY, ZTIME, ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
 !
 !number of lines read in forcing files
 INB_LINES=1
@@ -641,34 +627,27 @@ NB_READ_FORC=CEILING(1.*(INB_STEP_ATM+1)/INB_LINES)
 !     Gelato wizzard user)
 !
 #if ! defined in_arpege
-CALL OPNDIA()
+ CALL OPNDIA()
 #endif
 !
 !       allocate local atmospheric variables
 !
-IF (.NOT.ALLOCATED(ZTA)) ALLOCATE(ZTA    (INI,INB_LINES+1)) 
-IF (.NOT.ALLOCATED(ZQA))ALLOCATE(ZQA    (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZWIND))ALLOCATE(ZWIND  (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZTA))    ALLOCATE(ZTA    (INI,INB_LINES+1)) 
+IF (.NOT.ALLOCATED(ZQA))    ALLOCATE(ZQA    (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZWIND))  ALLOCATE(ZWIND  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR_SW))ALLOCATE(ZDIR_SW(INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZSCA_SW))ALLOCATE(ZSCA_SW(INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZLW))ALLOCATE(ZLW    (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZSNOW))ALLOCATE(ZSNOW  (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZRAIN))ALLOCATE(ZRAIN  (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZPS))ALLOCATE(ZPS    (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZCO2))ALLOCATE(ZCO2   (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZO3))ALLOCATE(ZO3   (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZAE))ALLOCATE(ZAE   (INI,INB_LINES+1)) 
-IF (.NOT.ALLOCATED(ZIMPWET))ALLOCATE(ZIMPWET   (INI,NIMPUROF,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZIMPDRY))ALLOCATE(ZIMPDRY   (INI,NIMPUROF,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZDIR))ALLOCATE(ZDIR   (INI,INB_LINES+1))
-IF (.NOT.ALLOCATED(ZCOEF))ALLOCATE(ZCOEF   (INI))
+IF (.NOT.ALLOCATED(ZLW))    ALLOCATE(ZLW    (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZSNOW))  ALLOCATE(ZSNOW  (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZRAIN))  ALLOCATE(ZRAIN  (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZPS))    ALLOCATE(ZPS    (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZCO2))   ALLOCATE(ZCO2   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZDIR))   ALLOCATE(ZDIR   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZCOEF))  ALLOCATE(ZCOEF     (INI))
+IF (.NOT.ALLOCATED(ZSUMZEN))ALLOCATE(ZSUMZEN   (INI))
 !
 IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
-ZIMPWET   (:,:,:)=XUNDEF
-ZIMPDRY   (:,:,:)=XUNDEF
-ZO3        (:,:) =XUNDEF
-ZAE        (:,:) =XUNDEF
 !      computes initial air co2 concentration and  density
 !
 #ifdef SFX_MPI
@@ -681,12 +660,12 @@ XTIME0 = MPI_WTIME()
 !
 !* opens forcing files (if ASCII or BINARY)
 !
-IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
+IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
+        CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
- CALL OL_READ_ATM(&
-                  CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
-                   ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
-                   ZCO2,ZIMPWET,ZIMPDRY,ZO3,ZAE,ZDIR,LLIMIT_QAIR                           ) 
+ CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
+                  ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
+                  ZCO2,ZDIR,LLIMIT_QAIR                           ) 
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
@@ -706,17 +685,6 @@ XTIME0 = MPI_WTIME()
 !
 XCO2(:)  = ZCO2(:,1)
 XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * XZREF )
-!Set the value of impur deposit coef
-IF (LFORCATMOTARTES) THEN  
-  XO3(:)  = ZO3(:,1)
-  XAE(:)  = ZAE(:,1)
-ENDIF
-IF (LFORCIMP) THEN  
-  DO JIMP=1,NIMPUROF    
-    XIMPWET(:,JIMP)=ZIMPWET(:,JIMP,1)
-    XIMPDRY(:,JIMP)=ZIMPDRY(:,JIMP,1)
-  ENDDO 
-ENDIF
 !                 
 !       surface Initialisation     
 !
@@ -727,70 +695,28 @@ XTIME = (MPI_WTIME() - XTIME0)
 !
  CALL IO_BUFF_CLEAN
 !
- CALL SURFEX_DEALLO_LIST
- CALL SURFEX_ALLOC_LIST(NBLOCKTOT)
- !
- CALL GOTO_MODEL(1)
-ALLOCATE(ISIZE_OMP(0:NBLOCKTOT-1))
- CALL GET_SIZES_PARALLEL(YSURF_CUR%DTCO, YSURF_CUR%DGU, YSURF_CUR%UG, YSURF_CUR%U, &
-                         NBLOCKTOT,INI,0,ISIZE_OMP, GSHADOWS)
-DO J=0,NBLOCKTOT-1
- CALL WLOG_MPI("SIZES_OMP ",KLOG=J,KLOG2=ISIZE_OMP(J))
-ENDDO
-!
-!$OMP PARALLEL PRIVATE(INKPROMA,XTIME,XTIME0)
+ !CALL SURFEX_DEALLO_LIST
+ !CALL SURFEX_ALLOC_LIST(IBLOCKTOT)
 !
 #ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
-!$ NBLOCK = OMP_GET_THREAD_NUM()
+CALL GOTO_MODEL(1)
 !
-IF (NBLOCK==NBLOCKTOT) THEN
-  CALL INIT_DIM(ISIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-ELSE
-  CALL INIT_DIM(ISIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-ENDIF
-!
-IF (NBLOCK==0) THEN
-  CALL GOTO_MODEL(NBLOCKTOT)
-ELSE
-  CALL GOTO_MODEL(NBLOCK)
-ENDIF
-!
- CALL INIT_SURF_ATM_n(YSURF_CUR, &
-                            CSURF_FILETYPE, YINIT, LLAND_USE,                      &
-                     INKPROMA, NSCAL, IBANDS,                                      &
-                     CSV,XCO2(NINDX1SFX:NINDX2SFX),XIMPWET(NINDX1SFX:NINDX2SFX,:),      &
-                     XIMPDRY(NINDX1SFX:NINDX2SFX,:),XRHOA(NINDX1SFX:NINDX2SFX),        &
-                     XZENITH(NINDX1SFX:NINDX2SFX),XAZIM(NINDX1SFX:NINDX2SFX),XSW_BANDS, &
-                     XDIR_ALB(NINDX1SFX:NINDX2SFX,:), XSCA_ALB(NINDX1SFX:NINDX2SFX,:),  &
-                     XEMIS(NINDX1SFX:NINDX2SFX), XTSRAD(NINDX1SFX:NINDX2SFX),           &
-                     XTSURF(NINDX1SFX:NINDX2SFX),                           &
-                     IYEAR, IMONTH, IDAY, ZTIME,                            &
-                     YATMFILE, YATMFILETYPE, YTEST                          )
+ CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, INI, NSCAL, IBANDS,  &
+                      CSV,XCO2(:),XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,  &
+                      XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
+                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
+                      YATMFILE, YATMFILETYPE, YTEST                          )
 !
 ! initialization routines to compute shadows
 IF (GSHADOWS) THEN
-  IF (NBLOCK==0) THEN
-    CALL INIT_SLOPE_PARAM(YSURF_CUR%UG, &
-                          ZZS_FORC,INI,ZLAT)
+  IF (IBLOCK==0) THEN
+    CALL INIT_SLOPE_PARAM(YSC%UG%G, YSC%UG%XGRID_FULL_PAR,ZZS_FORC,INI,ZLAT)
   END IF 
-  !$OMP BARRIER
-  CALL LOCAL_SLOPE_PARAM(NINDX1SFX,NINDX2SFX)
+  CALL LOCAL_SLOPE_PARAM(1,INI)
 END IF
-!
-! initialization routines to define sytron grid
-IF (NBLOCK==0) THEN
-  IF(YSURF_CUR%IM%I%LSNOWSYTRON) THEN
-    CALL INIT_SYTRON_TABLE(YSURF_CUR%IM%I,ZZS_FORC,INI,ZLAT,ZLON)
-  ELSE
-    ALLOCATE(NTAB_SYT(INI))
-    NTAB_SYT(:)=-999
-  ENDIF
-ENDIF
-
- CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
 !
 #ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
@@ -803,47 +729,33 @@ XTIME = (MPI_WTIME() - XTIME0)
  CALL WLOG_MPI('TIME_COMM_READ init ',PLOG=XTIME_COMM_READ)
  CALL WLOG_MPI(' ')
 !
-!$OMP END PARALLEL
-!
 XTIME_NPIO_READ = 0.
 XTIME_COMM_READ = 0.
 !
 !   Land use or/and vegetation dynamic
-!                  
- CALL INIT_SURF_LANDUSE_n(YSURF_CUR, &
-                          CSURF_FILETYPE,YINIT,LLAND_USE,             &
-                       INI, NSCAL, IBANDS,                           &
-                       CSV,XCO2(NINDX1SFX:NINDX2SFX),XRHOA(NINDX1SFX:NINDX2SFX), &
-                       XZENITH(NINDX1SFX:NINDX2SFX),XAZIM(NINDX1SFX:NINDX2SFX),  &
-                       XSW_BANDS,XDIR_ALB(NINDX1SFX:NINDX2SFX,:),          &
-                       XSCA_ALB(NINDX1SFX:NINDX2SFX,:),                    &
-                       XEMIS(NINDX1SFX:NINDX2SFX),XTSRAD(NINDX1SFX:NINDX2SFX),   &
-                       XTSURF(NINDX1SFX:NINDX2SFX),                           &
-                       IYEAR, IMONTH, IDAY, ZTIME,                   &
-                       YATMFILE, YATMFILETYPE, YTEST                 )
+!    
+CALL INIT_SURF_LANDUSE_n(YSC%DTCO, YSC%DUO%LREAD_BUDGETC, YSC%U, YSC%UG,   &
+                         YSC%IM, YSC%SV, YSC%SLT, YSC%NDST, CSURF_FILETYPE,&
+                         YINIT, LLAND_USE, INI, NSCAL, IBANDS, CSV,        &
+                         XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS, XDIR_ALB, &
+                         XSCA_ALB, XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH,   &
+                         IDAY, ZTIME, YATMFILE, YATMFILETYPE, YTEST )
 !
 #ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
 !
- CALL INIT_CRODEBUG(YSURF_CUR%IM%I)
+ CALL INIT_CRODEBUG(YSC%IM%NPE%AL(1)%TSNOW%SCHEME)
 !
 ! * SURFEX - OASIS  grid, partitions and local field definitions
 !
 IF(LOASIS)THEN
-  CALL SFX_OASIS_DEF_OL(YSURF_CUR%IM%I, &
-                        YSURF_CUR%U, &
-                        CSURF_FILETYPE,YALG_MPI)
+  CALL SFX_OASIS_DEF_OL(YSC%IM%O, YSC%U, CSURF_FILETYPE,YALG_MPI)
 ENDIF
 !
-IF (CTIMESERIES_FILETYPE=="OFFLIN") THEN
-  CALL GOTO_MODEL(1)
-  CALL INIT_OUTPUT_OL_n (YSURF_CUR)
-ENDIF
 ! --------------------------------------------------------------------------------------
 !
-INW = 1
-IF (CTIMESERIES_FILETYPE=="NC    ") INW = 2
+ CALL SFX_XIOS_SETUP_OL(YSC,ILUOUT,IYEAR,IMONTH,IDAY,ZTIME,XTSTEP_OUTPUT)
 !
 NWRITE = 0
 !
@@ -858,6 +770,10 @@ XTIME0 = MPI_WTIME()
 !
 XTIME_CALC(:) = 0.
 XTIME_WRITE(:) = 0.
+!
+LFIRST_WRITE = .TRUE.
+!
+NCPT_WRITE = 0
 !
 DO JFORC_STEP=1,INB_STEP_ATM
   !
@@ -876,41 +792,46 @@ DO JFORC_STEP=1,INB_STEP_ATM
     IF (JFORC_STEP/INB_LINES==NB_READ_FORC-1) THEN 
       IDMAX=INB_STEP_ATM-JFORC_STEP+1+1
       !for ascii and binary forcing files
-      ZTA(:,IDMAX)=ZTA(:,SIZE(ZTA,2))
-      ZQA(:,IDMAX)=ZQA(:,SIZE(ZTA,2))
-      ZWIND(:,IDMAX)=ZWIND(:,SIZE(ZTA,2))
-      ZDIR_SW(:,IDMAX)=ZDIR_SW(:,SIZE(ZTA,2))
-      ZSCA_SW(:,IDMAX)=ZSCA_SW(:,SIZE(ZTA,2))
-      ZLW(:,IDMAX)=ZLW(:,SIZE(ZTA,2))
-      ZSNOW(:,IDMAX)=ZSNOW(:,SIZE(ZTA,2))
-      ZRAIN(:,IDMAX)=ZRAIN(:,SIZE(ZTA,2))
-      ZPS(:,IDMAX)=ZPS(:,SIZE(ZTA,2))
-      ZCO2(:,IDMAX)=ZCO2(:,SIZE(ZTA,2))
-      ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
-      IF (LFORCATMOTARTES) THEN  
-        ZO3(:,IDMAX)=ZO3(:,SIZE(ZTA,2))
-        ZAE(:,IDMAX)=ZAE(:,SIZE(ZTA,2))
-      ENDIF
-      IF (LFORCIMP) THEN
-        DO JIMP=1,NIMPUROF
-          ZIMPWET(:,JIMP,IDMAX)=ZIMPWET(:,JIMP,SIZE(ZTA,2))
-          ZIMPDRY(:,JIMP,IDMAX)=ZIMPDRY(:,JIMP,SIZE(ZTA,2))
-        ENDDO 
-      ENDIF
+      ZTA    (:,IDMAX) = ZTA   (:,SIZE(ZTA,2))
+      ZQA    (:,IDMAX) = ZQA    (:,SIZE(ZTA,2))
+      ZWIND  (:,IDMAX) = ZWIND  (:,SIZE(ZTA,2))
+      ZDIR_SW(:,IDMAX) = ZDIR_SW(:,SIZE(ZTA,2))
+      ZSCA_SW(:,IDMAX) = ZSCA_SW(:,SIZE(ZTA,2))
+      ZLW    (:,IDMAX) = ZLW    (:,SIZE(ZTA,2))
+      ZSNOW  (:,IDMAX) = ZSNOW  (:,SIZE(ZTA,2))
+      ZRAIN  (:,IDMAX) = ZRAIN  (:,SIZE(ZTA,2))
+      ZPS    (:,IDMAX) = ZPS    (:,SIZE(ZTA,2))
+      ZCO2   (:,IDMAX) = ZCO2   (:,SIZE(ZTA,2))
+      ZDIR   (:,IDMAX) = ZDIR   (:,SIZE(ZTA,2))
     ENDIF
-    CALL OL_READ_ATM(&
-                  CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1,    &
-                     ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX), &
+    CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1, &
+                     ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX),       &
                      ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
-                     ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),&
-                     ZCO2(:,1:IDMAX),ZIMPWET(:,:,1:IDMAX),ZIMPDRY(:,:,1:IDMAX), &
-                     ZO3(:,1:IDMAX),ZAE(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
+                     ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),     &
+                     ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
 
 #ifdef SFX_MPI
   XTIME_CALC(1) = XTIME_CALC(1) + (MPI_WTIME() - XTIME1)
   XTIME1 = MPI_WTIME()
 #endif
+  !    
+  !COMPUTE SUM ZENITH angle between 2 timestepA
+  ZSUMZEN(:)=0.0
+  DO JSURF_STEP = 1,INB_ATM
+    IDAY2  = IDAY
+    ZTIME2 = ZTIME + (JSURF_STEP-1.)*XTSTEP_SURF
+    IF (ZTIME2>86400.) THEN
+      ZTIME2 = ZTIME2-86400
+      IDAY2  = IDAY+1
+    ENDIF
+    CALL SUNPOS(IYEAR, IMONTH, IDAY2, ZTIME+(JSURF_STEP-1.)*XTSTEP_SURF, &
+                ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
+    !
+    ZSUMZEN(:)= ZSUMZEN(:) + MAX(COS(XZENITH(:)+0.1),0.)/(INB_ATM*1.0)
+    !
+  ENDDO
+  WHERE ( ZSUMZEN<0.01 ) ZSUMZEN = 0.0
   !
   DO JSURF_STEP=1,INB_ATM
     !
@@ -919,16 +840,21 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifdef SFX_MPI
     XTIME1 = MPI_WTIME()
 #endif
-    CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME, &
-                ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
-    CALL SUNPOS(ISIZE_OMP, IYEAR, IMONTH, IDAY, ZTIME+XTSTEP_SURF, &
-                ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+    !
+    CALL SUNPOS(IYEAR, IMONTH, IDAY, ZTIME, ZLON, ZLAT, XTSUN, XZENITH, XAZIM)
+    IYEAR2 = IYEAR
+    IMONTH2= IMONTH
+    IDAY2  = IDAY
+    ZTIME2 = ZTIME+XTSTEP_SURF
+    CALL ADD_FORECAST_TO_DATE_SURF(IYEAR2, IMONTH2, IDAY2, ZTIME2)
+    CALL SUNPOS(IYEAR2, IMONTH2, IDAY2, ZTIME2, ZLON, ZLAT, XTSUN, XZENITH2, XAZIM)
+    !
 #ifdef SFX_MPI
     XTIME_CALC(2) = XTIME_CALC(2) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
 #endif
     !interpolation between beginning and end of current forcing time step
-    CALL OL_TIME_INTERP_ATM(JSURF_STEP,INB_ATM,ISIZE_OMP,            &
+    CALL OL_TIME_INTERP_ATM(JSURF_STEP,INB_ATM,                      &
                             ZTA(:,ID_FORC),ZTA(:,ID_FORC+1),         &
                             ZQA(:,ID_FORC),ZQA(:,ID_FORC+1),         &
                             ZWIND(:,ID_FORC),ZWIND(:,ID_FORC+1),     &
@@ -937,18 +863,14 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZLW(:,ID_FORC),ZLW(:,ID_FORC+1),         &
                             ZSNOW(:,ID_FORC+1),ZRAIN(:,ID_FORC+1),   &
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
-                            ZCO2(:,ID_FORC), ZCO2(:,ID_FORC+1),      &
-                            ZO3(:,ID_FORC),ZO3(:,ID_FORC+1),         &
-                            ZAE(:,ID_FORC),ZAE(:,ID_FORC+1),         &
-                            ZIMPWET(:,:,ID_FORC), ZIMPWET(:,:,ID_FORC+1),      &
-                            ZIMPDRY(:,:,ID_FORC), ZIMPDRY(:,:,ID_FORC+1),      &
-                            ZDIR(:,ID_FORC) ,ZDIR(:,ID_FORC+1)       )
+                            ZCO2(:,ID_FORC),ZCO2(:,ID_FORC+1),       &
+                            ZDIR(:,ID_FORC),ZDIR(:,ID_FORC+1),       &
+                            XZENITH+0.1,ZSUMZEN                      )
 #ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
     XTIME1 = MPI_WTIME()
 #endif
     !
-
     IF(LADAPT_SW)THEN
       !
       ! coherence between solar zenithal angle and radiation
@@ -995,195 +917,31 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Receive fields to other models proc by proc
-     CALL SFX_OASIS_RECV_OL(YSURF_CUR%FM%F, YSURF_CUR%IM%I, YSURF_CUR%SM%S, YSURF_CUR%U, YSURF_CUR%WM%W, &
-                            CSURF_FILETYPE,INI,IBANDS,ZTIMEC,       &
-                            XTSTEP_SURF,ISIZE_OMP,XZENITH,XSW_BANDS,&
-                            XTSRAD,XDIR_ALB,XSCA_ALB,XEMIS,XTSURF   )
+     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W,               &
+                            CSURF_FILETYPE, INI, IBANDS, ZTIMEC, XTSTEP_SURF, XZENITH, &
+                            XSW_BANDS, XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF   )
     ENDIF
-    !
-!$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
     !
 #ifdef SFX_MPI
     XTIME1 = MPI_WTIME()
 #endif
     !
-!$ NBLOCK = OMP_GET_THREAD_NUM()
-    !
-    IF (NBLOCK==NBLOCKTOT) THEN
-      CALL INIT_DIM(ISIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-    ELSE
-      CALL INIT_DIM(ISIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-    ENDIF
-    !
-    IF (NBLOCK==0) THEN
-      CALL GOTO_MODEL(NBLOCKTOT)
-    ELSE
-      CALL GOTO_MODEL(NBLOCK)
-    ENDIF
-!!!    ! IF SNOWCRORAD=TARTES then spectral repartition of direct and diffuse radiation
-   ! for any spectral calculation regarding snow (tartes and/or atmotartes)
- 
- 	  IF (CSPECSNOW) THEN
-  	  XSCA_SW(NINDX1SFX:NINDX2SFX,2:IBANDS)=0.
-   	  XDIR_SW(NINDX1SFX:NINDX2SFX,2:IBANDS)=0.
-   
- 	  ENDIF
-!	write(*,*) IMONTH, IDAY, ZTIME/(3600.)
- 	IF (YSURF_CUR%IM%I%LATMORAD) THEN 
-
-
-		IF (.NOT.ALLOCATED(ZP_CLOUD)) ALLOCATE(ZP_CLOUD  (INI)       )! 
-   	IF (.NOT.ALLOCATED(ZTCLOUD55)) ALLOCATE(ZTCLOUD55  (INI)       )! 
-		IF (.NOT.ALLOCATED(KCLOUD_TYPE)) ALLOCATE(KCLOUD_TYPE  (INI)       )! 
-		IF (.NOT.ALLOCATED(ZIRR_DIFF)) ALLOCATE(ZIRR_DIFF  (INI, IBANDS)       )! 
-		IF (.NOT.ALLOCATED(ZIRR_DIR)) ALLOCATE(ZIRR_DIR  (INI,IBANDS)       )! 
-		IF (.NOT.ALLOCATED(ZP_CUT)) ALLOCATE(ZP_CUT  (INI, JPNLYR_CLEAR)       )! 
-		IF (.NOT.ALLOCATED(ZINT_DIR_SW)) ALLOCATE(ZINT_DIR_SW  (INI)       )! 
-		IF (.NOT.ALLOCATED(ZINT_SCA_SW)) ALLOCATE(ZINT_SCA_SW  (INI)       )! 
-		IF (.NOT.ALLOCATED(ZMU)) ALLOCATE(ZMU (INI)       )!
-		IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )! 
-		IF (.NOT.ALLOCATED(ZD_O3)) ALLOCATE(ZD_O3  (INI)       )!
-		IF (.NOT.ALLOCATED(ZD_AE)) ALLOCATE(ZD_AE  (INI)       )!
-
-  
-    ! broadband direct and diffuse irradiance
-  
-   	ZINT_SCA_SW(NINDX1SFX:NINDX2SFX)=XSCA_SW(NINDX1SFX:NINDX2SFX,1)
-    ZINT_DIR_SW(NINDX1SFX:NINDX2SFX)=XDIR_SW(NINDX1SFX:NINDX2SFX,1)
-	  ZINT_TOT_SW(NINDX1SFX:NINDX2SFX)=ZINT_DIR_SW(NINDX1SFX:NINDX2SFX)+ZINT_SCA_SW(NINDX1SFX:NINDX2SFX)
-    XSCA_SW(NINDX1SFX:NINDX2SFX,2:IBANDS)=0.
-    XDIR_SW(NINDX1SFX:NINDX2SFX,2:IBANDS)=0.
-    IF (LFORCATMOTARTES) THEN 
-      ZD_O3(NINDX1SFX:NINDX2SFX)= XO3(NINDX1SFX:NINDX2SFX)/100 ! integrated ozone (atm-cm)
-    	ZD_AE(NINDX1SFX:NINDX2SFX)= XAE(NINDX1SFX:NINDX2SFX) ! aerosol optical depth
-    	!PRINT*, "ZO3",ZD_O3
-    	!PRINT*, "ZAE",ZD_AE
-    ELSE 
-      ZD_O3(NINDX1SFX:NINDX2SFX)= 0.3 ! integrated ozone (atm-cm)
-      ZD_AE(NINDX1SFX:NINDX2SFX)= 0.1 ! aerosol optical depth
-    ENDIF
-    ZMU(NINDX1SFX:NINDX2SFX)=COS(XZENITH(NINDX1SFX:NINDX2SFX))
-    ZP_CLOUD(NINDX1SFX:NINDX2SFX)= 378.*100.! cloud bottom pressure (Pa)
-    KCLOUD_TYPE(NINDX1SFX:NINDX2SFX)= 1! cloud type
-    	
-   	IF (MAXVAL(ZINT_TOT_SW(NINDX1SFX:NINDX2SFX))>XUEPSI) THEN
-    !IF (MINVAL(XZENITH(NINDX1SFX:NINDX2SFX))>0.) THEN
-    	IF (MINVAL(ZMU(NINDX1SFX:NINDX2SFX))>XUEPSI) THEN
-       
-       	! prevent calculation during night
-      	! Julian date 
-      
-        CALL JULIAN(IYEAR, IMONTH, IDAY, 0., ZDATI)
-      
-        IF (MAXVAL(ZINT_TOT_SW(NINDX1SFX:NINDX2SFX)-ZINT_DIR_SW(NINDX1SFX:NINDX2SFX)).GT.XUEPSI) THEN
-        	! case where diffuse and direct radiation are known 
-
-        	! calculation of cloud optical depth
-					CALL TAU_CLOUD(ZMU(NINDX1SFX:NINDX2SFX),ZINT_SCA_SW(NINDX1SFX:NINDX2SFX)/ZINT_TOT_SW(NINDX1SFX:NINDX2SFX),&
-										ZTCLOUD55(NINDX1SFX:NINDX2SFX))
-	    	! WRITE(*,*) ZTCLOUD55(NINDX1SFX:NINDX2SFX),XZENITH(NINDX1SFX:NINDX2SFX),IYEAR, IMONTH, IDAY, ZTIME
-					CALL IRRADIANCE(ZDATI,ZMU(NINDX1SFX:NINDX2SFX),XQA(NINDX1SFX:NINDX2SFX)/XRHOA(NINDX1SFX:NINDX2SFX),&
-											ZD_O3(NINDX1SFX:NINDX2SFX),ZD_AE(NINDX1SFX:NINDX2SFX),&
-      								XPS(NINDX1SFX:NINDX2SFX),XTA(NINDX1SFX:NINDX2SFX),PPZP_CUT,ZP_CLOUD(NINDX1SFX:NINDX2SFX),&
-       								KCLOUD_TYPE(NINDX1SFX:NINDX2SFX),ZTCLOUD55(NINDX1SFX:NINDX2SFX),ZIRR_DIR(NINDX1SFX:NINDX2SFX,:),&
-       								ZIRR_DIFF(NINDX1SFX:NINDX2SFX,:))
-      
-      		! normalisation by broadband direct and diffuse irradiance  
-      
-					DO JI=NINDX1SFX,NINDX2SFX 
-			  		IF (SUM(ZIRR_DIFF(JI,:))>0.) THEN
-	        		XSCA_SW(JI,:)=ZINT_SCA_SW(JI)*ZIRR_DIFF(JI,:)/SUM(ZIRR_DIFF(JI,:))
-			   		! XSCA_SW(JI,:)=0.
-	  				END IF 
-			  		IF (SUM(ZIRR_DIR(JI,:))>0.) THEN
-			    		XDIR_SW(JI,:)=ZINT_DIR_SW(JI)*ZIRR_DIR(JI,:)/SUM(ZIRR_DIR(JI,:))
-	   		 		! XDIR_SW(JI,:)=(ZINT_DIR_SW(JI)+ZINT_DIR_SW(JI))*ZIRR_DIR(JI,:)/SUM(ZIRR_DIR(JI,:))
-	  				END IF
-					ENDDO
-					!write(*,*) IMONTH, IDAY, ZTIME/(3600.),ZMU(NINDX1SFX:NINDX2SFX), XZENITH(NINDX1SFX:NINDX2SFX), XDIR_SW(NINDX1SFX:NINDX2SFX,1)
-					!write(*,*) XSCA_SW(NINDX1SFX:NINDX2SFX,1), ZINT_SCA_SW(NINDX1SFX:NINDX2SFX), ZINT_DIR_SW(NINDX1SFX:NINDX2SFX)
-
-
-
-				ELSE ! case where only total radiation is know
-					ZTCLOUD55(NINDX1SFX:NINDX2SFX)= 0. ! cloud optical depth
-					CALL IRRADIANCE(ZDATI,ZMU(NINDX1SFX:NINDX2SFX),XQA(NINDX1SFX:NINDX2SFX)/XRHOA(NINDX1SFX:NINDX2SFX),&
-													ZD_O3(NINDX1SFX:NINDX2SFX),ZD_AE(NINDX1SFX:NINDX2SFX),&
-									        XPS(NINDX1SFX:NINDX2SFX),XTA(NINDX1SFX:NINDX2SFX),PPZP_CUT,ZP_CLOUD(NINDX1SFX:NINDX2SFX),&
-									        KCLOUD_TYPE(NINDX1SFX:NINDX2SFX),ZTCLOUD55(NINDX1SFX:NINDX2SFX),ZIRR_DIR(NINDX1SFX:NINDX2SFX,:),&
-      		 								ZIRR_DIFF(NINDX1SFX:NINDX2SFX,:))
-	
-	  			! normalisation by broadband total irradiance  
-
-	  			DO JI=NINDX1SFX,NINDX2SFX 
-         	
-	  				IF (SUM(ZIRR_DIFF(JI,:)+ZIRR_DIR(JI,:))>0.) THEN
-	  				  XSCA_SW(JI,:)=ZINT_TOT_SW(JI)*ZIRR_DIFF(JI,:)/&
-	  		 			 SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))
-	  				END IF 
-	  				IF (SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))>0.) THEN
-	  			  XDIR_SW(JI,:)=ZINT_TOT_SW(JI)*ZIRR_DIR(JI,:)/&
-	  				SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))
-	  				END IF
-					ENDDO
-
-				ENDIF ! end of clear cloud/case 
-				!!! add 89° threshold for mu to prevent from atmotartes divergence 
-				IF (MAXVAL(ZMU(NINDX1SFX:NINDX2SFX))<PPMU_THRESHOLD) THEN
-					ZINT_SCA_SW(NINDX1SFX:NINDX2SFX)=SUM(XSCA_SW(NINDX1SFX:NINDX2SFX,:))
-					XSCA_SW(NINDX1SFX:NINDX2SFX,:)=0.
-					XSCA_SW(NINDX1SFX:NINDX2SFX,8)=ZINT_SCA_SW(NINDX1SFX:NINDX2SFX)
-				ENDIF
-	
-    	ENDIF
-  	ENDIF
-	ENDIF
-
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
-
-    
-    !
     IF(GSHADOWS) THEN 
-      CALL SLOPE_RADIATIVE_EFFECT(XTSTEP_SURF,XZENITH(NINDX1SFX:NINDX2SFX),&
-      XAZIM(NINDX1SFX:NINDX2SFX),XPS(NINDX1SFX:NINDX2SFX),XTA(NINDX1SFX:NINDX2SFX),&
-      XRAIN(NINDX1SFX:NINDX2SFX),XDIR_SW(NINDX1SFX:NINDX2SFX,:),XLW(NINDX1SFX:NINDX2SFX),&
-      XZS_THREAD,XZS_XY_THREAD, XSLOPANG_THREAD,XSLOPAZI_THREAD,XSURF_TRIANGLE_THREAD)
+      CALL SLOPE_RADIATIVE_EFFECT(XTSTEP_SURF, XZENITH, XAZIM, XPS, XTA, XRAIN, XDIR_SW, XLW, &
+                                  XZS_THREAD, XZS_XY_THREAD, XSLOPANG_THREAD, XSLOPAZI_THREAD,&
+                                  XSURF_TRIANGLE_THREAD)
     END IF
     !
-    CALL COUPLING_SURF_ATM_n(YSURF_CUR, &
-                             CSURF_FILETYPE, 'E', ZTIMEC,                    &
-           XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, INKPROMA, NSCAL, IBANDS, &
-           XTSUN(NINDX1SFX:NINDX2SFX), XZENITH(NINDX1SFX:NINDX2SFX),         &
-           XZENITH2(NINDX1SFX:NINDX2SFX), XAZIM(NINDX1SFX:NINDX2SFX),        &
-           XZREF(NINDX1SFX:NINDX2SFX), XUREF(NINDX1SFX:NINDX2SFX),           &
-           XZS(NINDX1SFX:NINDX2SFX), XU(NINDX1SFX:NINDX2SFX),                &
-           XV(NINDX1SFX:NINDX2SFX), XQA(NINDX1SFX:NINDX2SFX),                &
-           XTA(NINDX1SFX:NINDX2SFX), XRHOA(NINDX1SFX:NINDX2SFX),             &
-           XSV(NINDX1SFX:NINDX2SFX,:), XCO2(NINDX1SFX:NINDX2SFX),            &    
-           XIMPWET(NINDX1SFX:NINDX2SFX,:),XIMPDRY(NINDX1SFX:NINDX2SFX,:),CSV, &
-           XRAIN(NINDX1SFX:NINDX2SFX),  XSNOW(NINDX1SFX:NINDX2SFX),          &
-           XLW(NINDX1SFX:NINDX2SFX), XDIR_SW(NINDX1SFX:NINDX2SFX,:),          &
-           XSCA_SW(NINDX1SFX:NINDX2SFX,:), XSW_BANDS, XPS(NINDX1SFX:NINDX2SFX),&
-           XPA(NINDX1SFX:NINDX2SFX), XSFTQ(NINDX1SFX:NINDX2SFX),             &
-           XSFTH(NINDX1SFX:NINDX2SFX), XSFTS(NINDX1SFX:NINDX2SFX,:),         &
-           XSFCO2(NINDX1SFX:NINDX2SFX), XSFU(NINDX1SFX:NINDX2SFX),           &
-           XSFV(NINDX1SFX:NINDX2SFX), XTSRAD(NINDX1SFX:NINDX2SFX),           &
-           XDIR_ALB(NINDX1SFX:NINDX2SFX,:), XSCA_ALB(NINDX1SFX:NINDX2SFX,:), &
-           XEMIS(NINDX1SFX:NINDX2SFX),                                       &
-           XTSURF(NINDX1SFX:NINDX2SFX), XZ0(NINDX1SFX:NINDX2SFX),            &
-           XZ0H(NINDX1SFX:NINDX2SFX), XQSURF(NINDX1SFX:NINDX2SFX),           &          
-           XPEW_A_COEF(NINDX1SFX:NINDX2SFX),XPEW_B_COEF(NINDX1SFX:NINDX2SFX),&
-           XPET_A_COEF(NINDX1SFX:NINDX2SFX),XPEQ_A_COEF(NINDX1SFX:NINDX2SFX),&
-           XPET_B_COEF(NINDX1SFX:NINDX2SFX),XPEQ_B_COEF(NINDX1SFX:NINDX2SFX),&
-           YTEST                                                             )
-    !
-    CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
+    CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, &
+                             INI, NSCAL, IBANDS, XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,         &
+                             XZS, XU, XV, XQA, XTA, XRHOA, XSV, XCO2, CSV, XRAIN, XSNOW, XLW, XDIR_SW,  &
+                             XSCA_SW, XSW_BANDS, XPS, XPA, XSFTQ, XSFTH, XSFTS, XSFCO2, XSFU, XSFV,     &
+                             XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF, XPEW_A_COEF, &
+                             XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,XPET_B_COEF,XPEQ_B_COEF, YTEST      )
     !
 #ifdef SFX_MPI
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
 #endif
-    !
-!$OMP END PARALLEL
     !
 #ifdef SFX_MPI
     XTIME1 = MPI_WTIME()
@@ -1191,8 +949,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Send fields to other models proc by proc
-     CALL SFX_OASIS_SEND_OL(YSURF_CUR%FM%F, YSURF_CUR%IM%I, YSURF_CUR%SM%S, YSURF_CUR%U, YSURF_CUR%WM%W, &
-                            CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF,ISIZE_OMP)
+     CALL SFX_OASIS_SEND_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W, CSURF_FILETYPE,INI,ZTIMEC,XTSTEP_SURF)
     ENDIF
     !
     ZTIME = ZTIME + XTSTEP_SURF
@@ -1323,6 +1080,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
           CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')
           !
           IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA                  
             LFANOCOMPACT = LDIAG_FA_NOCOMPACT
             IDATEF(1)= IYEAR!_OUT
             IDATEF(2)= IMONTH!_OUT
@@ -1332,20 +1090,21 @@ DO JFORC_STEP=1,INB_STEP_ATM
             IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
             IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
             IDATEF(7:11) = 0
+            NUNIT_FA = 19
             IF (CSURF_FILETYPE/='FA    ') THEN
-              CALL WRITE_HEADER_FA(YSURF_CUR%UG, &
-                                   CSURF_FILETYPE,'ALL')
+              CALL WRITE_HEADER_FA(YSC%GCP, YSC%UG%G%CGRID, YSC%UG%XGRID_FULL_PAR, CSURF_FILETYPE,'ALL')
             ELSE
               CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
             ENDIF
             CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+#endif            
           END IF
           !
         END IF
         !
         XSTARTW = XSTARTW + 1
         NWRITE  = NWRITE  + 1
-        LTIME_WRITTEN(:)=.FALSE.
+        LTIME_WRITTEN=.FALSE.
         !
       ENDIF
       !
@@ -1353,67 +1112,71 @@ DO JFORC_STEP=1,INB_STEP_ATM
       XTIME_WRITE(1) = XTIME_WRITE(1) + (MPI_WTIME() - XTIME1)
 #endif
       !
-      LDEF = .TRUE.
+      INW = 1
       !
+      IF ( LXIOS .AND. .NOT. LXIOS_DEF_CLOSED ) INW = 2      
+      !
+      LDEF_nc = .FALSE. 
       IF (CTIMESERIES_FILETYPE=="NC    ") THEN
-        CALL GOTO_MODEL(1)
-        CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                               YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
-                               YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)                   
+        LDEF_nc = .TRUE.       
+        INW = 2
+        CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, &
+                               YSC%TM%DTT, YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)                   
+      ENDIF
+      !
+      LDEF_ol = .FALSE.
+      IF (CTIMESERIES_FILETYPE=="OFFLIN".AND.LFIRST_WRITE) THEN
+        LDEF_ol = .TRUE.
+        INW = 2
+        IF (CTIMESERIES_FILETYPE=="OFFLIN") CALL INIT_OUTPUT_OL_n (YSC)
       ENDIF
       !
       IDX_W = 0
       !
       DO JNW = 1,INW
-        ! 
+        !
         CALL IO_BUFF_CLEAN
-        !
-!$OMP PARALLEL PRIVATE(INKPROMA,XTIME1)
-        !
-!$ NBLOCK = OMP_GET_THREAD_NUM()
-        !
-        IF (NBLOCK==NBLOCKTOT) THEN
-          CALL INIT_DIM(ISIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-        ELSE
-          CALL INIT_DIM(ISIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-        ENDIF
-        !
-        IF (NBLOCK==0) THEN
-          CALL GOTO_MODEL(NBLOCKTOT)
-        ELSE
-          CALL GOTO_MODEL(NBLOCK)
-        ENDIF
         !
 #ifdef SFX_MPI
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL WRITE_SURF_ATM_n(YSURF_CUR, &
-                              CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
+        IF (LXIOS) THEN 
+#ifdef WXIOS
+          NTIMESTEP=INT(ZTIMEC/XTSTEP_OUTPUT + 1.)
+#endif
+        ENDIF
+        CALL WRITE_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL',LLAND_USE)
 #ifdef SFX_MPI
         XTIME_WRITE(2) = XTIME_WRITE(2) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL DIAG_SURF_ATM_n(YSURF_CUR%IM%DGEI, YSURF_CUR%FM%DGF, YSURF_CUR%DGL, YSURF_CUR%IM%DGI, &
-                             YSURF_CUR%SM%DGS, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, YSURF_CUR%WM%DGW, &
-                             YSURF_CUR%U, YSURF_CUR%USS, &
-                             CTIMESERIES_FILETYPE)
+        CALL DIAG_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE)
 #ifdef SFX_MPI
         XTIME_WRITE(3) = XTIME_WRITE(3) + (MPI_WTIME() - XTIME1)
         XTIME1 =  MPI_WTIME()
 #endif
-        CALL WRITE_DIAG_SURF_ATM_n(YSURF_CUR, &
-                                   CTIMESERIES_FILETYPE,'ALL')
+        CALL WRITE_DIAG_SURF_ATM_n(YSC, CTIMESERIES_FILETYPE,'ALL')
+        !
+        IF (LXIOS) THEN 
+#ifdef WXIOS
+          IF (.NOT. LXIOS_DEF_CLOSED) THEN 
+            CALL XIOS_CLOSE_CONTEXT_DEFINITION()
+            LXIOS_DEF_CLOSED=.TRUE.
+          ENDIF
+          CALL XIOS_UPDATE_CALENDAR(NTIMESTEP)
+#endif
+        ENDIF
+        !      
 #ifdef SFX_MPI
         XTIME_WRITE(4) = XTIME_WRITE(4) + (MPI_WTIME() - XTIME1)
 #endif
         !
-        CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
+        LDEF_nc = .FALSE.
+        LDEF_ol = .FALSE.
         !
-!$OMP BARRIER
+        NCPT_WRITE = 0
         !
-!$OMP END PARALLEL
-        !
-        LDEF = .FALSE.
+        LFIRST_WRITE = .FALSE.
         !
       ENDDO
       !
@@ -1437,7 +1200,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
       !
       IF (NRANK==NPIO) THEN
         IF (CTIMESERIES_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA                
           CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+#endif          
         END IF
         !* add informations in the file
         IF (CTIMESERIES_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
@@ -1450,26 +1215,17 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
   END DO
   !
-  
   IF (NRANK==NPIO) THEN
     IF (LPRINT) THEN
       IF (MOD(ZTIMEC,XDAY) == 0.) THEN
-!$OMP SINGLE              
         ICOUNT = ICOUNT + 1
         CALL WLOG_MPI('SFX DAY :',KLOG=ICOUNT,KLOG2=INT(ZDURATION/XDAY))
         WRITE(*,'(A10,I5,A2,I5)')'SFX  DAY :',ICOUNT,' /',INT(ZDURATION/XDAY)
-!$OMP END SINGLE        
       ENDIF
     ENDIF
   ENDIF
   !
 END DO
-!
-!$OMP PARALLEL PRIVATE(XTIME)
-!
-#ifdef SFX_MPI
-XTIME = (MPI_WTIME() - XTIME0)
-#endif
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('OL_READ_ATM ',PLOG=XTIME_CALC(1))
@@ -1489,27 +1245,9 @@ XTIME = (MPI_WTIME() - XTIME0)
  CALL WLOG_MPI('')
  CALL WLOG_MPI('CLOSE FILES ',PLOG=XTIME_WRITE(5))
  CALL WLOG_MPI('')
- CALL WLOG_MPI('END LOOP ',PLOG=XTIME)
- CALL WLOG_MPI('')
- CALL WLOG_MPI('TIME_NPIO_WRITE ',PLOG=XTIME_NPIO_WRITE)
- CALL WLOG_MPI('TIME_COMM_WRITE ',PLOG=XTIME_COMM_WRITE)
- CALL WLOG_MPI('TIME_OMP_BARR ',PLOG=XTIME_OMP_BARR)
- CALL WLOG_MPI('TIME_CALC_WRITE ',PLOG=XTIME_CALC_WRITE)
- CALL WLOG_MPI('')
- CALL WLOG_MPI('TIME_INIT_SEA ',PLOG=XTIME_INIT_SEA)
- CALL WLOG_MPI('TIME_INIT_WATER ',PLOG=XTIME_INIT_WATER)
- CALL WLOG_MPI('TIME_INIT_NATURE ',PLOG=XTIME_INIT_NATURE)
- CALL WLOG_MPI('TIME_INIT_TOWN ',PLOG=XTIME_INIT_TOWN)
- CALL WLOG_MPI('')
- CALL WLOG_MPI('TIME_SEA ',PLOG=XTIME_SEA)
- CALL WLOG_MPI('TIME_WATER ',PLOG=XTIME_WATER)
- CALL WLOG_MPI('TIME_NATURE ',PLOG=XTIME_NATURE)
- CALL WLOG_MPI('TIME_TOWN ',PLOG=XTIME_TOWN)
 !
-!$OMP END PARALLEL
-!
-!
-IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') CALL OPEN_CLOSE_BIN_ASC_FORC('CLOSE',CFORCING_FILETYPE,'R')
+IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
+        CALL OPEN_CLOSE_BIN_ASC_FORC('CLOSE',CFORCING_FILETYPE,'R')
 !
 IF (CFORCING_FILETYPE=='NETCDF') CALL CLOSE_FILEIN_OL
 IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
@@ -1521,6 +1259,8 @@ IF (CTIMESERIES_FILETYPE=='OFFLIN') CALL CLOSE_FILEOUT_OL
 !
 IF ( LRESTART ) THEN
   !
+  LFIRST_WRITE = .TRUE.
+  !
   IF (NRANK==NPIO) THEN
     !* name of the file
     CFILEOUT    = ADJUSTL(ADJUSTR(CSURFFILE)//'.txt')
@@ -1530,16 +1270,19 @@ IF ( LRESTART ) THEN
 
     !* opens the file
     IF (CSURF_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA            
       LFANOCOMPACT = .TRUE.
       IDATEF(1)= IYEAR
       IDATEF(2)= IMONTH
       IDATEF(3)= IDAY
       IDATEF(4)= FLOOR(ZTIME/3600.)
-      IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60 
+      IDATEF(5)= FLOOR(ZTIME/60.) - IDATEF(4) * 60  
       IDATEF(6)= NINT(ZTIME) - IDATEF(4) * 3600 - IDATEF(5) * 60
-      IDATEF(7:11) = 0    
+      IDATEF(7:11) = 0   
+      NUNIT_FA = 19 
       CALL FAITOU(IRET,NUNIT_FA,.TRUE.,CFILEOUT_FA,'UNKNOWN',.TRUE.,.FALSE.,IVERBFA,0,INB,CDNOMC)
       CALL FANDAR(IRET,NUNIT_FA,IDATEF)
+#endif      
     END IF
     !
   ENDIF
@@ -1547,37 +1290,22 @@ IF ( LRESTART ) THEN
   INW = 1
   IF (CSURF_FILETYPE=="NC    ") INW = 2
   !
-  LDEF = .TRUE.
+  LDEF_nc = .TRUE.
+  LDEF_ol = .TRUE.
+  !
+  IF (ASSOCIATED(YSC%DUO%CSELECT)) DEALLOCATE(YSC%DUO%CSELECT)
+  ALLOCATE(YSC%DUO%CSELECT(0))
   !
   IF (CSURF_FILETYPE=="NC    ") THEN
-    CALL GOTO_MODEL(1)
-    CALL INIT_OUTPUT_NC_n (YSURF_CUR%TM%BDD, YSURF_CUR%CHE, YSURF_CUR%CHN, YSURF_CUR%CHU, &
-                         YSURF_CUR%SM%DTS, YSURF_CUR%TM%DTT, YSURF_CUR%DTZ, YSURF_CUR%IM%I, &
-                         YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%DGU)
+    CALL INIT_OUTPUT_NC_n (YSC%TM%BDD, YSC%CHE, YSC%CHN, YSC%CHU, YSC%SM%DTS, YSC%TM%DTT, &
+                           YSC%DTZ, YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT)
   ENDIF
   !
   DO JNW = 1,INW
     !
     CALL IO_BUFF_CLEAN
     !
-!$OMP PARALLEL PRIVATE(INKPROMA,JNW)
-  !
-!$ NBLOCK = OMP_GET_THREAD_NUM()
-    !
-    IF (NBLOCK==NBLOCKTOT) THEN
-      CALL INIT_DIM(ISIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-    ELSE
-      CALL INIT_DIM(ISIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-    ENDIF
-    !
-    IF (NBLOCK==0) THEN
-      CALL GOTO_MODEL(NBLOCKTOT)
-    ELSE
-      CALL GOTO_MODEL(NBLOCK)
-    ENDIF
-    !  
-    CALL FLAG_UPDATE(YSURF_CUR%IM%DGI, YSURF_CUR%DGU, &
-                     .FALSE.,.TRUE.,.FALSE.,.FALSE.)
+    CALL FLAG_UPDATE(YSC%IM%ID%O, YSC%DUO,.FALSE.,.TRUE.,.FALSE.,.FALSE.)
     !
     IF (LRESTART_2M) THEN
       I2M       = 1
@@ -1604,45 +1332,44 @@ IF ( LRESTART ) THEN
     GPGD_TEB               = .FALSE.
     GSURF_MISC_BUDGET_TEB  = .FALSE.  
     !
-    CALL FLAG_DIAG_UPDATE(YSURF_CUR%FM%CHF, YSURF_CUR%IM%CHI, YSURF_CUR%SM%CHS, YSURF_CUR%TM%CHT, &
-                          YSURF_CUR%WM%CHW, YSURF_CUR%IM%DGEI, YSURF_CUR%FM%DGF, YSURF_CUR%IM%DGI, &
-                          YSURF_CUR%FM%DGMF, YSURF_CUR%IM%DGMI, YSURF_CUR%TM%DGMTO, YSURF_CUR%SM%DGO, &
-                          YSURF_CUR%SM%DGS, YSURF_CUR%SM%DGSI, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, &
-                          YSURF_CUR%WM%DGW, YSURF_CUR%IM%I, YSURF_CUR%U, &
+    CALL FLAG_DIAG_UPDATE(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%U, YSC%SV, &
                           GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
                           GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
-                          GWATER_PROFILE,                                            &                          
-                          GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,   &
-                          GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB    )
+                          GWATER_PROFILE, GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA,     &
+                          GCH_NO_FLUX_ISBA, GSURF_MISC_BUDGET_ISBA, GPGD_TEB,        &
+                          GSURF_MISC_BUDGET_TEB    )
+    !
+    YSC%DUO%LSNOWDIMNC = .FALSE.
     !
     !* writes into the file
-    CALL WRITE_SURF_ATM_n(YSURF_CUR, &
-                              CSURF_FILETYPE,'ALL',LLAND_USE)
+    CALL WRITE_SURF_ATM_n(YSC, CSURF_FILETYPE,'ALL',LLAND_USE)
     IF(CSURF_FILETYPE/='FA    ' .OR. LRESTART_2M) THEN
-       CALL WRITE_DIAG_SURF_ATM_n(YSURF_CUR, &
-                                   CSURF_FILETYPE,'ALL')
+       CALL WRITE_DIAG_SURF_ATM_n(YSC, CSURF_FILETYPE,'ALL')
     ENDIF
     !
-    CALL RESET_DIM(INI,INKPROMA,NINDX1SFX,NINDX2SFX)
+    LDEF_nc = .FALSE.
+    LDEF_ol = .FALSE.
     !
-!$OMP END PARALLEL     
+    NCPT_WRITE = 0
     !
-    LDEF = .FALSE.
+    LFIRST_WRITE = .FALSE.
     !
   ENDDO
   !
   !* closes the file
   IF (NRANK==0 ) THEN
     IF (CSURF_FILETYPE=='FA    ') THEN
+#ifdef SFX_FA            
       CALL FAIRME(IRET,NUNIT_FA,'UNKNOWN')
+#endif      
     END IF
     !* add informations in the file
     IF (CSURF_FILETYPE=='LFI   ' .AND. LMNH_COMPATIBLE) CALL WRITE_HEADER_MNH
     !
   ENDIF
   !
-  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) CALL PREP_RESTART_COUPL_TOPD(YSURF_CUR%UG, YSURF_CUR%U, &
-                                                                                 CSURF_FILETYPE,INI)
+  IF (LCOUPL_TOPD .AND. NTOPD_STEP > NNB_TOPD_STEP) &
+          CALL PREP_RESTART_COUPL_TOPD(YSC%UG, YSC%U, CSURF_FILETYPE,INI)
   !
 END IF
 !
@@ -1652,19 +1379,6 @@ END IF
 !            ------------
 !
 IF ( LINQUIRE ) THEN
-  !
-!$OMP PARALLEL PRIVATE(ZSEA,ZWATER,ZNATURE,ZTOWN,ZT2M,ZQ2M,ZZ0,ZZ0H,ZQS_SEA, &
-!$OMP ZQS_WATER,ZQS_NATURE,ZQS_TOWN,ZQS,ZPSNG,ZPSNV,ZZ0EFF,ZZS ,&
-!$OMP INKPROMA,INI)
-!
-!$ NBLOCK = OMP_GET_THREAD_NUM()
-!
-  IF (NBLOCK==NBLOCKTOT) THEN
-    CALL INIT_DIM(ISIZE_OMP,0,INKPROMA,NINDX1SFX,NINDX2SFX)
-  ELSE
-    CALL INIT_DIM(ISIZE_OMP,NBLOCK,INKPROMA,NINDX1SFX,NINDX2SFX)
-  ENDIF
-  INI = NINDX2SFX-NINDX1SFX+1
   !
   ALLOCATE( ZSEA       ( INI ) )
   ALLOCATE( ZWATER     ( INI ) )
@@ -1685,17 +1399,14 @@ IF ( LINQUIRE ) THEN
   ALLOCATE( ZZS        ( INI ) )
   !
   ISERIES = 0
-  CALL GET_SURF_VAR_n(YSURF_CUR%FM%DGF, YSURF_CUR%IM%I, YSURF_CUR%IM%DGI, YSURF_CUR%IM%DGMI, &
-                      YSURF_CUR%SM%DGS, YSURF_CUR%DGU, YSURF_CUR%TM%DGT, YSURF_CUR%WM%DGW, &
-                      YSURF_CUR%FM%F, YSURF_CUR%UG, YSURF_CUR%U, YSURF_CUR%USS, &
+  CALL GET_SURF_VAR_n(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%DU,  YSC%UG, YSC%U, YSC%USS, &
                       CSURF_FILETYPE,INI,ISERIES,PSEA=ZSEA,PWATER=ZWATER,PNATURE=ZNATURE,PTOWN=ZTOWN, &
-                        PT2M=ZT2M,PQ2M=ZQ2M,PQS=ZQS,PZ0=ZZ0,PZ0H=ZZ0H,PZ0EFF=ZZ0EFF,PQS_SEA=ZQS_SEA,  &
-                        PQS_WATER=ZQS_WATER,PQS_NATURE=ZQS_NATURE,PQS_TOWN=ZQS_TOWN,                  &
-                        PPSNG=ZPSNG,PPSNV=ZPSNV,PZS=ZZS                                         )  
+                      PT2M=ZT2M,PQ2M=ZQ2M,PQS=ZQS,PZ0=ZZ0,PZ0H=ZZ0H,PZ0EFF=ZZ0EFF,PQS_SEA=ZQS_SEA,  &
+                      PQS_WATER=ZQS_WATER,PQS_NATURE=ZQS_NATURE,PQS_TOWN=ZQS_TOWN,                  &
+                      PPSNG=ZPSNG,PPSNV=ZPSNV,PZS=ZZS                                         )  
   !
   ISIZE = SIZE(NINDEX)
   IF (NRANK==NPIO) THEN
-!$OMP SINGLE
     ALLOCATE(ZSEA_FULL   (ISIZE))
     ALLOCATE(ZWATER_FULL (ISIZE))
     ALLOCATE(ZNATURE_FULL(ISIZE))
@@ -1703,9 +1414,7 @@ IF ( LINQUIRE ) THEN
     ALLOCATE(ZZ0_FULL    (ISIZE))
     ALLOCATE(ZZ0EFF_FULL (ISIZE))
     ALLOCATE(ZZS_FULL    (ISIZE))
-!$OMP END SINGLE
   ELSE
-!$OMP SINGLE          
     ALLOCATE(ZSEA_FULL   (0))
     ALLOCATE(ZWATER_FULL (0))
     ALLOCATE(ZNATURE_FULL(0))
@@ -1713,7 +1422,6 @@ IF ( LINQUIRE ) THEN
     ALLOCATE(ZZ0_FULL    (0))
     ALLOCATE(ZZ0EFF_FULL (0))
     ALLOCATE(ZZS_FULL    (0))
-!$OMP END SINGLE    
   ENDIF
   CALL GATHER_AND_WRITE_MPI(ZSEA,ZSEA_FULL) 
   CALL GATHER_AND_WRITE_MPI(ZWATER,ZWATER_FULL)
@@ -1724,7 +1432,6 @@ IF ( LINQUIRE ) THEN
   CALL GATHER_AND_WRITE_MPI(ZZS,ZZS_FULL)
 
   IF (NRANK==NPIO) THEN
-!$OMP SINGLE
     WRITE(ILUOUT,'(A32,I4,A3,I4)') ' GRID BOXES CONTAINING SEA    : ',COUNT( ZSEA_FULL    (:) > 0. ),' / ',ISIZE
     WRITE(ILUOUT,'(A32,I4,A3,I4)') ' GRID BOXES CONTAINING WATER  : ',COUNT( ZWATER_FULL  (:) > 0. ),' / ',ISIZE
     WRITE(ILUOUT,'(A32,I4,A3,I4)') ' GRID BOXES CONTAINING NATURE : ',COUNT( ZNATURE_FULL (:) > 0. ),' / ',ISIZE
@@ -1733,7 +1440,6 @@ IF ( LINQUIRE ) THEN
     WRITE(ILUOUT,*)'ZZ0EFF = ',ZZ0EFF_FULL
     WRITE(ILUOUT,*)'ZZS = ',ZZS_FULL
     WRITE(ILUOUT,*)'MINVAL(ZZS) = ',MINVAL(ZZS_FULL),' MAXVAL(ZZS) = ',MAXVAL(ZZS_FULL)
-!$OMP END SINGLE
   ENDIF
   !
   DEALLOCATE( ZSEA       )
@@ -1753,10 +1459,8 @@ IF ( LINQUIRE ) THEN
   DEALLOCATE( ZPSNV      )
   DEALLOCATE( ZZ0EFF     )
   DEALLOCATE( ZZS        )
-  DEALLOCATE(NTAB_SYT)
   !
   IF (NRANK==NPIO) THEN
-!$OMP SINGLE
     DEALLOCATE(ZSEA_FULL   )
     DEALLOCATE(ZWATER_FULL )
     DEALLOCATE(ZNATURE_FULL)
@@ -1764,10 +1468,7 @@ IF ( LINQUIRE ) THEN
     DEALLOCATE(ZZ0_FULL    )
     DEALLOCATE(ZZ0EFF_FULL )
     DEALLOCATE(ZZS_FULL    )
-!$OMP END SINGLE
   ENDIF
-  !
-!$OMP END PARALLEL
   !
 ENDIF   
 !
@@ -1775,7 +1476,7 @@ ENDIF
 !
 !    4'    Close Gelato specific diagnostic 
 #if ! defined in_arpege
-CALL CLSDIA()
+ CALL CLSDIA()
 #endif
 !
 !
@@ -1788,9 +1489,7 @@ IF (NRANK==NPIO) THEN
   WRITE(ILUOUT,*) '    | OFFLINE ENDS CORRECTLY |'
   WRITE(ILUOUT,*) '    --------------------------'
   WRITE(ILUOUT,*) ' '
-!$OMP SINGLE
   CLOSE(ILUOUT)
-!$OMP END SINGLE  
   WRITE(*,*) ' '
   WRITE(*,*) '    --------------------------'
   WRITE(*,*) '    | OFFLINE ENDS CORRECTLY |'
@@ -1803,29 +1502,25 @@ ENDIF
 IF (ALLOCATED(NINDEX)) DEALLOCATE(NINDEX)
 IF (ALLOCATED(NSIZE_TASK)) DEALLOCATE(NSIZE_TASK)
 !
-IF (ASSOCIATED(NWORK)) DEALLOCATE(NWORK)
-IF (ASSOCIATED(XWORK)) DEALLOCATE(XWORK)
-IF (ASSOCIATED(NWORK2)) DEALLOCATE(NWORK2)
-IF (ASSOCIATED(XWORK2)) DEALLOCATE(XWORK2)
-IF (ASSOCIATED(XWORK3)) DEALLOCATE(XWORK3)
-IF (ASSOCIATED(NWORK_FULL)) DEALLOCATE(NWORK_FULL)
-IF (ASSOCIATED(XWORK_FULL)) DEALLOCATE(XWORK_FULL)
-IF (ASSOCIATED(NWORK2_FULL)) DEALLOCATE(NWORK2_FULL)
-IF (ASSOCIATED(XWORK2_FULL)) DEALLOCATE(XWORK2_FULL)
-!
  CALL END_LOG_MPI
 !
 IF (LHOOK) CALL DR_HOOK('OFFLINE',1,ZHOOK_HANDLE)
 !
 ! * MPI and OASIS must be finalized after the last DR_HOOK call
 !
-IF(LOASIS)THEN
-  CALL SFX_OASIS_END
-ELSE
-#ifdef SFX_MPI
- CALL MPI_FINALIZE(INFOMPI)
+IF (LXIOS) THEN 
+#ifdef WXIOS
+  CALL XIOS_CONTEXT_FINALIZE()
 #endif
 ENDIF
+!
+ CALL SFX_OASIS_END
+!
+#ifdef SFX_MPI
+IF(.NOT. LOASIS .AND. .NOT. LXIOS) THEN
+  CALL MPI_FINALIZE(INFOMPI)
+ENDIF
+#endif
 !
 ! --------------------------------------------------------------------------------------
 !

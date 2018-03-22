@@ -1,3 +1,7 @@
+#SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+#SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+#SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+#SFX_LIC for details. version 1.
 ##########################################################
 #                                                        #
 #           Initialisation of some variables             #
@@ -16,14 +20,6 @@ ARCH_XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}
 #            Source DIRECTORY                            #
 #                                                        #
 ##########################################################
-
-ifdef BULL
-  ifeq "$(BULL)" "YES"
-    LIBS       += -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/mkl/lib/intel64 -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/mkl/lib/intel64 -lintlc -lifport -limf -lifcore -lsvml -lirng
-  endif
-endif
-
-
 
 ##########################################################
 #           Source MYSRC                                 #
@@ -71,7 +67,7 @@ FUNDEFS += -URJ_OFIX -URJ_PFIX
 #
 DIR_SURFEX += SURFEX
 FPPFLAGS_SURFEX= -DSFX_ASC -DSFX_FA -DSFX_LFI
-INC_SURFEX = -I$(B)include
+INC_SURFEX = -I$(B)include -I$(B)SURFEX
 #
 ifdef DIR_SURFEX
 DIR_MASTER += $(DIR_SURFEX)
@@ -94,7 +90,7 @@ endif
 # PRE_BUG TEST !!!
 #
 DIR_ASSIM += ASSIM
-#FPPFLAGS_ASSIM=
+FPPFLAGS_ASSIM = -DUSE_SODA
 #
 ifdef DIR_ASSIM
 DIR_MASTER += $(DIR_ASSIM)
@@ -115,7 +111,7 @@ endif
 #DIR_SURFEX += ARCH_SRC/bug_surfex
 # PRE_BUG TEST !!!
 #
-FUNDEFS += -USFXOASIS -UTRIPOASIS
+FUNDEFS += -UCPLOASIS
 #
 DIR_TRIP += LIB/TRIPv2
 #FPPFLAGS_TRIP=
@@ -192,50 +188,7 @@ endif
 #           Librairie DR_HOOK                            #
 ##########################################################
 
-FUNDEFS += -USFX_MPL -ULINUX
-
-ifeq "$(VER_DRHOOK)" "BYPASS"
-DIR_HOOK = LIB/DRHOOK/BYPASS
-endif
-
-#RJ: minimal version of DRHOOK, mainly for profiling only
-ifeq "$(VER_DRHOOK)" "MINI"
-DIR_HOOK = LIB/DRHOOK/MINI
-INC_HOOK = -I$(B)LIB/DRHOOK/MINI
-FPPFLAGS_HOOK += -DLINUX
-CPPFLAGS_HOOK += -DLINUX
-
-OBJS_LISTE_MASTER += drhook.o crc.o addrdiff.o cargs.o endian.o env.o linuxtrbk.o
-OBJS_LISTE_MASTER += gethwm.o getstatm.o getrss.o getstk.o getpag.o getstackusage.o getcurheap.o
-
-#RJ: optional MPL layer support in DRHOOK for testing compatibility only!
-ifneq "$(VER_MPI)" "NOMPI"
-ifeq "$(USE_MPL)" "YES"
-FPPFLAGS_HOOK += -DSFX_MPL
-CPPFLAGS_HOOK += -DSFX_MPL
-DIR_HOOK += LIB/DRHOOK/MPL
-endif
-endif
-endif
-
-ifeq "$(VER_DRHOOK)" "SIMPLE"
-DIR_HOOK = LIB/DRHOOK_SIMPLE
-INC_HOOK = -I$(B)LIB/DRHOOK_SIMPLE
-FPPFLAGS_HOOK += -DLINUX
-CPPFLAGS_HOOK += -DLINUX
-
-OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o getcurheap.o 
-OBJS_LISTE_MASTER += gethwm.o getpag.o getrss.o  getstackusage.o getstatm.o getstk.o 
-OBJS_LISTE_MASTER += linuxtrbk.o mpe_locking.o
-endif
-#
-ifdef DIR_HOOK
-DIR_MASTER += $(DIR_HOOK)
-FPPFLAGS   += $(FPPFLAGS_HOOK)
-CPPFLAGS   += $(CPPFLAGS_HOOK)
-INC        += $(INC_HOOK)
-VPATH      += $(DIR_HOOK)
-endif
+# now included in XRD
 #
 ##########################################################
 #           Source XRD                                   #
@@ -243,29 +196,43 @@ endif
 
 FUNDEFS += -UFA_GRIBEX -UUSE_SAMIO -UNECSX -UVPP
 
-#RJ: XRD40 for cross validation
-VER_XRD ?= XRD39
-#VER_XRD ?= XRD40
+VER_XRD ?= XRD44
 
 ifneq "$(VER_XRD)" "NONE"
-DIR_XRD += LIB/$(VER_XRD)/FA
-DIR_XRD += LIB/$(VER_XRD)/LFI
+DIR_XRD += LIB/$(VER_XRD)/fa
+DIR_XRD += LIB/$(VER_XRD)/fi_libc
+DIR_XRD += LIB/$(VER_XRD)/lfi
+DIR_XRD += LIB/$(VER_XRD)/lfi_alt
 DIR_XRD += LIB/$(VER_XRD)/grib_mf
+DIR_XRD += LIB/$(VER_XRD)/linux
 DIR_XRD += LIB/$(VER_XRD)/module
-#DIR_XRD += LIB/$(VER_XRD)/support
+DIR_XRD += LIB/$(VER_XRD)/parallel
+DIR_XRD += LIB/$(VER_XRD)/support
 DIR_XRD += LIB/$(VER_XRD)/utilities
-INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/FA -I$(B)LIB/$(VER_XRD)/LFI
+ifneq "$(VER_MPI)" "NOMPI"
+DIR_XRD += LIB/$(VER_XRD)/mpl
+endif
+INC_XRD = -I$(B)LIB/$(VER_XRD)/include -I$(B)LIB/$(VER_XRD)/fa -I$(B)LIB/$(VER_XRD)/lfi -I$(B)LIB/$(VER_XRD)/utilities
 #RJ: for time being avoid interfaces usage from xrd/fa cpp prototyping, not needed with backported patches
 #RJ FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DOFF
-FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE
-CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE
+FPPFLAGS_XRD = -DHIGHRES -DLINUX -DLITTLE_ENDIAN -DLITTLE -DSFX_MPL
+CPPFLAGS_XRD = -DLINUX -DLITTLE_ENDIAN -DLITTLE -DSFX_MPL
 endif
 #
+OBJS_LISTE_MASTER += addrdiff.o cargs.o crc.o drhook.o endian.o env.o fi_libc.o fnecsx.o getcurheap.o 
+OBJS_LISTE_MASTER += gethwm.o getmaxrss.o getpag.o getrss.o getstackusage.o getstatm.o getstk.o 
+OBJS_LISTE_MASTER += iswap8.o lfi_abor.o lfi_altm.o lfi_alts.o lfi_dumm.o lfi_fmul.o lfi_fort.o lfi_grok.o
+OBJS_LISTE_MASTER += lfi_hndl.o lfi_intf.o lfi_miss.o lfi_util.o lfi_verb.o linux_bind.o linuxtrbk.o mpe_locking.o
+#
 ifdef DIR_XRD
+ifeq ($(F90),$(filter $(F90),ifort mpiifort)) 
+FPPFLAGS_XRD += -D__INTEL_COMPILER
+endif
 DIR_MASTER += $(DIR_XRD)
 FPPFLAGS   += $(FPPFLAGS_XRD)
 CPPFLAGS   += $(CPPFLAGS_XRD)
 INC        += $(INC_XRD)
+VPATH      += $(DIR_XRD)
 endif
 ##########################################################
 #           Source FM                                    #
@@ -282,6 +249,28 @@ INC        += $(INC_FM)
 endif
 endif
 ##########################################################
+#           XIOS Library                                 #
+##########################################################
+#
+ifneq "$(VER_MPI)" "NOMPI"
+#
+ifneq "$(VER_XIOS)" "0"
+DIR_XIOS?=${SRC_SURFEX}/src/LIB/XIOS-${VERSION_XIOS}-${ARCH}
+#DIR_XIOS?=${SRC_SURFEX}/src/LIB/XIOS-trunk-967-LXgfortran
+LIB_XIOS?=-L$(DIR_XIOS)/lib -lxios -lstdc++
+INC_XIOS?=-I$(DIR_XIOS)/inc
+XIOS_KEY?=${DIR_XIOS}/lib/libxios.a
+#
+LIBS       += $(LIB_XIOS)
+INC        += $(INC_XIOS)
+FPPFLAGS   += -DWXIOS
+VPATH      += $(DIR_XIOS)/inc
+#
+endif
+#
+endif
+#
+##########################################################
 #           Librairie OASIS3-MCT                         #
 ##########################################################
 #RJ: must be before netcdf LIBS to correctly link
@@ -295,14 +284,14 @@ LIB_OASIS?=-L${OASIS_PATH}/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
 INC_OASIS?=-I${OASIS_PATH}/build/lib/psmile.MPI1
 OASIS_KEY?=${OASIS_PATH}/build/lib/psmile.MPI1/mod_oasis.mod
 #
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DCPLOASIS
 VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
 endif
 endif
 #
 ifeq "$(VER_OASIS)" "mct_EXT"
 ifneq "$(VER_MPI)" "NOMPI"
-FPPFLAGS_OASIS?= -DSFXOASIS -DTRIPOASIS
+FPPFLAGS_OASIS?= -DCPLOASIS
 VPATH      += ${OASIS_PATH}/build/lib/psmile.MPI1
 endif
 endif
@@ -321,6 +310,9 @@ FUNDEFS += -UNOMPI -USFX_MPI
 #RJ: moved from all configs here
 ifneq "$(VER_MPI)" "NOMPI"
 FPPFLAGS += -DSFX_MPI
+endif
+ifneq "$(VER_OMP)" "NOOMP"
+FPPFLAGS +=-DSFX_OMP
 endif
 #
 ifndef VER_MPI
@@ -473,19 +465,13 @@ GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 #
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
 ifeq "$(VER_GRIBAPI)" "SOPRANO"
 GRIBAPI_PATH=/usr/local/sopra/grib_api
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
-endif
-
-ifeq "$(VER_GRIBAPI)" "BULL"
-GRIBAPI_PATH=/opt/softs/libraries/ICC16.1.150/grib_api-1.15.0
-INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api
 endif
 
 ifneq "x$(VER_GRIBAPI)" "x"
@@ -504,17 +490,42 @@ endif
 ifneq "$(VER_CDF)" "NONE"
 #
 ifeq "$(VER_CDF)" "CDFAUTO"
-DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf-${VERSION_CDF}
-#RJ: avoid non standard libs! Can create non conforming outputs
-CDF_PATH?=${DIR_CDF}-${ARCH}
-CDF_INC?=${CDF_PATH}/include/netcdf.mod
 #
-INC_NETCDF     ?= -I${CDF_PATH}/include
-ifeq "$(VERSION_CDF)" "3.6.3"
-LIB_NETCDF     ?= -L${CDF_PATH}/lib -L${CDF_PATH}/lib64 -lnetcdf
-else
-LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf
-endif
+#
+DIR_M4?=${SRC_SURFEX}/src/LIB/netcdf4/m4-${VERSION_M4}
+DIR_CURL?=${SRC_SURFEX}/src/LIB/netcdf4/curl-${VERSION_CURL}
+DIR_ZLIB?=${SRC_SURFEX}/src/LIB/netcdf4/zlib-${VERSION_ZLIB}
+DIR_SZIP?=${SRC_SURFEX}/src/LIB/netcdf4/szip-${VERSION_SZIP}
+DIR_HDF5?=${SRC_SURFEX}/src/LIB/netcdf4/hdf5-${VERSION_HDF5}
+DIR_CDF?=${SRC_SURFEX}/src/LIB/netcdf4/netcdf-${VERSION_CDF}
+DIR_CDFF?=${SRC_SURFEX}/src/LIB/netcdf4/netcdf-fortran-${VERSION_CDFF}
+#RJ: avoid non standard libs! Can create non conforming outputs
+M4_PATH?=${DIR_M4}-${ARCH}-${VER_MPI}
+CURL_PATH?=${DIR_CURL}-${ARCH}-${VER_MPI}
+ZLIB_PATH?=${DIR_ZLIB}-${ARCH}-${VER_MPI}
+SZIP_PATH?=${DIR_SZIP}-${ARCH}-${VER_MPI}
+HDF5_PATH?=${DIR_HDF5}-${ARCH}-${VER_MPI}
+CDF_PATH?=${DIR_CDF}-${ARCH}-${VER_MPI}
+CDFF_PATH?=${DIR_CDFF}-${ARCH}-${VER_MPI}
+#
+M4_BIN?=${M4_PATH}/bin/m4
+CURL_LIB?=${CURL_PATH}/lib/libcurl.a
+ZLIB_LIB?=${ZLIB_PATH}/lib/libz.a
+SZIP_LIB?=${SZIP_PATH}/lib/libsz.a
+HDF5_LIB?=${HDF5_PATH}/lib/libhdf5.a
+CDF_LIB?=${CDF_PATH}/lib/libnetcdf.a
+CDFF_INC?=${CDFF_PATH}/include/netcdf.mod
+#
+#INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+#LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
+
+INC_NETCDF?= -I${CDFF_PATH}/include -I${CDF_PATH}/include -I${HDF5_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include -I${CURL_PATH}/include
+#
+LIB_NETCDF     ?= -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 \
+		  -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
+#
+XIOS_CDF_OPT   = netcdf4_par
+#
 endif
 #
 # NetCDF in SGI ICE
@@ -562,6 +573,14 @@ ifeq "$(VER_CDF)" "CDFCTI"
 CDF_PATH?=/usr
 INC_NETCDF     = -I${CDF_PATH}/include
 LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
+XIOS_CDF_OPT   = netcdf4_seq
+endif
+
+ifeq "$(VER_CDF)" "CDFMAC"
+CDF_PATH?=/opt/local
+INC_NETCDF     = -I${CDF_PATH}/include
+LIB_NETCDF     = -L${CDF_PATH}/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
+XIOS_CDF_OPT   = netcdf4_seq
 endif
 
 #
@@ -583,14 +602,48 @@ LIB_NETCDF     = -L${CDF_PATH}/lib64 -lnetcdff -lnetcdf
 endif
 
 #
-# Linux with gfortran Beaufix
+# Linux on Beaufix
 #
 ifeq "$(VER_CDF)" "CDFBOFX"
-CDF_PATH       ?= /opt/softs/libraries/ICC13.1.4.183/netcdf-4.3.0
+CDF_PATH       ?= /opt/softs/libraries/ICC16.1.150/netcdf-4.4.0
 INC_NETCDF     ?= -I${CDF_PATH}/include 
 LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
+XIOS_CDF_OPT   = netcdf4_seq
 endif
-
+#
+ifeq "$(VER_CDF)" "CDFBOFXPARALL"
+VINTEL        ?= /opt/softs/libraries/ICC16.1.150
+CDF_PATH      ?= ${VINTEL}/netcdf-c-4.4.0_par_giec
+HDF_PATH      ?= ${VINTEL}/hdf5-1.8.16_par_thrsaf
+SZIP_PATH     ?= ${VINTEL}/szip-2.1
+ZLIB_PATH     ?= ${VINTEL}/zlib-1.2.5
+INC_NETCDF    ?= -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+LIB_NETCDF    ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl -Wl,-rpath,${CDF_PATH}/lib -Wl,-rpath,$(HDF_PATH)/lib -Wl,-rpath,$(SZIP_PATH)/lib -Wl,-rpath,$(ZLIB_PATH)/lib
+XIOS_CDF_OPT   = netcdf4_par
+endif
+#
+# Linux on prolix
+#
+ifeq "$(VER_CDF)" "CDFPROLX"
+CDF_PATH       ?= /opt/softs/libraries/ICC16.1.150/netcdf-4.4.0
+INC_NETCDF     ?= -I${CDF_PATH}/include 
+LIB_NETCDF     ?= -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH)/lib
+XIOS_CDF_OPT   = netcdf4_seq
+endif
+#
+# Linux on prolix with Intel15 for CNRM-CM6 compatibility (OK for XIOS)
+#
+ifeq "$(VER_CDF)" "CDFPROLXPARALL"
+VINTEL         = /opt/softs/libraries/ICC16.1.150
+CDF_PATH       = ${VINTEL}/netcdf-c-4.4.0_par_giec
+HDF_PATH       = ${VINTEL}/hdf5-1.8.16_par_thrsaf
+SZIP_PATH      = ${VINTEL}/szip-2.1
+ZLIB_PATH      = ${VINTEL}/zlib-1.2.5
+INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
+XIOS_CDF_OPT   = netcdf4_par
+endif
+#
 ifneq "x$(VER_GRIBAPI)" "x"
 INC            += $(INC_NETCDF)
 LIBS           += $(LIB_NETCDF)
@@ -613,7 +666,7 @@ TRIP_LIST += TRIP_PREP TRIP_MASTER TRIP_CHANGE_DATE
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE SODA
+PROG_LIST += PGD PREP OFFLINE
 #PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 ifeq "$(VER_OASIS)" "mct"
@@ -638,7 +691,7 @@ endif
 #                                                        #
 ##########################################################
 #
-ARCH_XYZ        := $(ARCH_XYZ)-$(OPTLEVEL)
+ARCH_XYZ        := $(ARCH_XYZ)-$(OPTLEVEL)-X$(VER_XIOS)
 OBJDIR_ROOT     := $(OBJDIR_ROOT)-$(ARCH_XYZ)
 LIB_OBJS_ROOT   := $(LIB_OBJS_ROOT)-$(ARCH_XYZ)
 #

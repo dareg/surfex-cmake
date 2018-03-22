@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !#########
 SUBROUTINE SFX_OASIS_READ_NAM(HPROGRAM,PTSTEP_SURF,HINIT)
 !##################################################################
@@ -28,6 +32,7 @@ SUBROUTINE SFX_OASIS_READ_NAM(HPROGRAM,PTSTEP_SURF,HINIT)
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    05/2008 
+!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -58,7 +63,7 @@ IMPLICIT NONE
 !
 CHARACTER(LEN=6), INTENT(IN)           :: HPROGRAM    ! program calling surf. schemes
 REAL,             INTENT(IN)           :: PTSTEP_SURF ! Surfex time step
-CHARACTER(LEN=3), INTENT(IN), OPTIONAL :: HINIT       ! choice of fields to initialize
+CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: HINIT       ! choice of fields to initialize
 !
 !*       0.2   Declarations of local parameter
 !              -------------------------------
@@ -212,17 +217,11 @@ IF(LCPL_LAND)THEN
 !
 ! Particular case due to water table depth / surface coupling
 !    
-  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0.OR.LEN_TRIM(CRECHARGE)>0)THEN
+  IF(LEN_TRIM(CWTD)>0.OR.LEN_TRIM(CFWTD)>0)THEN
     LCPL_GW = .TRUE.
   ENDIF
 !
   IF(LCPL_GW)THEN
-!
-!   Output variable
-!
-    YKEY  ='CRECHARGE'
-    YCOMMENT='Groundwater recharge'
-    CALL CHECK_FIELD(CRECHARGE,YKEY,YCOMMENT,YLAND,KOUT)
 !
 !   Input variable
 !

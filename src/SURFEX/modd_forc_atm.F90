@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ######################
 MODULE MODD_FORC_ATM
 !     ######################
@@ -53,17 +57,13 @@ REAL, DIMENSION(:,:),ALLOCATABLE :: XSCA_SW   ! diffuse solar radiation (on hori
 REAL, DIMENSION(:), ALLOCATABLE  :: XSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(:), ALLOCATABLE  :: XZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(:), ALLOCATABLE  :: XZENITH2  ! zenithal angle at t+1(radian from the vertical)
-REAL, DIMENSION(:), ALLOCATABLE  :: XAZIM     ! azimuthal angle at t+1    (radian from North, clockwise)
+REAL, DIMENSION(:), ALLOCATABLE  :: XAZIM     ! azimuthal angle      (radian from North, clockwise)
 REAL, DIMENSION(:), ALLOCATABLE  :: XLW       ! longwave radiation (on horizontal surf.)
 !                                            !                                       (W/m2)
 REAL, DIMENSION(:), ALLOCATABLE  :: XPS       ! pressure at atmospheric model surface (Pa)
 REAL, DIMENSION(:), ALLOCATABLE  :: XPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:), ALLOCATABLE  :: XZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(:), ALLOCATABLE  :: XCO2      ! CO2 concentration in the air          (kg/kg)
-REAL, DIMENSION(:), ALLOCATABLE  :: XO3     ! Ozone
-REAL, DIMENSION(:), ALLOCATABLE  :: XAE      ! Aerosol optical depth
-REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPWET ! wet deposit coefficient for each impurity type    (g/m²/s)
-REAL, DIMENSION(:,:), ALLOCATABLE  :: XIMPDRY ! dry deposit coefficient for each impurity type          (g/m²/s)
 REAL, DIMENSION(:), ALLOCATABLE  :: XSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(:), ALLOCATABLE  :: XRAIN     ! liquid precipitation                  (kg/m2/s)
 !

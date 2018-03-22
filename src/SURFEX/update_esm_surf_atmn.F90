@@ -1,6 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #################################################################################
-SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, I, S, U, W, &
-                                  HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
+SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, IM, S, U, W, HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
                                    PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )  
 !     #################################################################################
 !
@@ -30,12 +33,8 @@ SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, I, S, U, W, &
 !!-------------------------------------------------------------
 !
 !
-!
-!
-!
-!
 USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_ISBA_n, ONLY : ISBA_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -64,7 +63,7 @@ IMPLICIT NONE
 !
 !
 TYPE(FLAKE_t), INTENT(INOUT) :: F
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
@@ -238,8 +237,7 @@ ENDDO
 IF (KTILE==1) THEN
   !
   IF (U%CSEA=='SEAFLX') THEN
-    CALL UPDATE_ESM_SEAFLUX_n(S, &
-                              U%NSIZE_SEA,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_SEAFLUX_n(S, U%NSIZE_SEA,KSW,ZP_ZENITH,ZP_DIR_ALB, &
                               ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: SEA SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
@@ -248,12 +246,10 @@ IF (KTILE==1) THEN
 ELSEIF (KTILE==2) THEN
   !
   IF (U%CWATER=='WATFLX') THEN   
-    CALL UPDATE_ESM_WATFLUX_n(W, &
-                              U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_WATFLUX_n(W, U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
                               ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF   )
   ELSEIF (U%CWATER=='FLAKE ') THEN
-    CALL UPDATE_ESM_FLAKE_n(F, &
-                            U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_FLAKE_n(F, U%NSIZE_WATER,KSW,ZP_ZENITH,ZP_DIR_ALB, &
                             ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF   )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: INLAND WATER SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
@@ -262,8 +258,8 @@ ELSEIF (KTILE==2) THEN
 ELSEIF (KTILE==3) THEN
   !          
   IF (U%CNATURE=='ISBA') THEN   
-    CALL UPDATE_ESM_ISBA_n(I, &
-                           U%NSIZE_NATURE,KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB, &
+    CALL UPDATE_ESM_ISBA_n(IM%O, IM%S, IM%K, IM%NK, IM%NP, IM%NPE, U%NSIZE_NATURE,&
+                           KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB, &
                            ZP_SCA_ALB,ZP_EMIS,ZP_TRAD,ZP_TSURF              )
   ELSE
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: NATURE SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')

@@ -21,6 +21,7 @@ PROGRAM TRIP_PREP
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    06/2008
+!!      S.Sénési    08/11/16 : interface to XIOS
 !!------------------------------------------------------------------
 !
 USE MODD_SURFEX_TRIP_n
@@ -28,7 +29,6 @@ USE MODD_OFF_TRIP_n
 !
 USE MODD_TRIP_LISTING
 !
-USE MODI_GOTO_TRIP
 USE MODI_INIT_TRIP_PAR
 USE MODI_PREP_TRIP_RUN
 !
@@ -38,6 +38,7 @@ USE MODI_ABORT_TRIP
 USE MODI_TRIP_POSNAM
 USE MODI_READ_NAM_TRIP
 USE MODI_READ_NAM_TRIP_GRID
+USE MODI_READ_NAM_TRIP_PREP
 !
 USE MODI_TRIP_OASIS_END
 !
@@ -46,12 +47,17 @@ USE MODI_TRIP_OASIS_READ_NAM
 USE MODI_TRIP_OASIS_PREP
 USE MODI_TRIP_OASIS_END
 !
+#ifdef SFX_MPI
+#ifdef SFX_MPL
+USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
+#endif
+#endif
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 INCLUDE 'mpif.h'
 #endif
 !
@@ -67,6 +73,7 @@ INTEGER  :: ILUNAM          ! namelist unit number
 LOGICAL  :: GFOUND          ! return logical when reading namelist
 INTEGER  :: ILOCAL_COMM     ! Local communicator
 LOGICAL  :: GOASIS          ! OASIS used(default=.false.)
+LOGICAL  :: GXIOS           ! XIOS used(default=.false.)
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -76,7 +83,15 @@ NAMELIST/NAM_START_DATE/NYEAR,NMONTH,NDAY,XTIME
 ! * 0. MPI and OASIS must be initialized before any DR_HOOK call
 ! --------------------------------------------------------------------------------------
 !
-CALL TRIP_OASIS_INIT(GOASIS,ILOCAL_COMM)
+ CALL TRIP_OASIS_INIT(GOASIS,GXIOS,ILOCAL_COMM,LPREP=.TRUE.)
+#ifdef SFX_MPI
+#ifdef SFX_MPL
+IF (ILOCAL_COMM/=0) THEN
+  LMPLUSERCOMM = .TRUE.
+  MPLUSERCOMM = ILOCAL_COMM
+ENDIF
+#endif
+#endif
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',0,ZHOOK_HANDLE)
 !
@@ -85,7 +100,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_PREP',0,ZHOOK_HANDLE)
  YTRIP_CUR => YTRIP_LIST(1)
 !-------------------------------------------------------------------------------
 !
-CLISTING = CLISTING_PREP
+ CLISTING = CLISTING_PREP
 !
 OPEN (UNIT=NLISTING,FILE=CLISTING_PREP,FORM='FORMATTED',ACTION='WRITE')
 !
@@ -93,8 +108,8 @@ OPEN (UNIT=NLISTING,FILE=CLISTING_PREP,FORM='FORMATTED',ACTION='WRITE')
 !* 1. Time configuration: start date of the run
 ! --------------------------------------------------------------------------------------
 !
-CALL OPEN_TRIP_NAMELIST(ILUNAM)
-CALL TRIP_POSNAM(ILUNAM,'NAM_START_DATE',GFOUND,NLISTING)
+ CALL OPEN_TRIP_NAMELIST(ILUNAM)
+ CALL TRIP_POSNAM(ILUNAM,'NAM_START_DATE',GFOUND,NLISTING)
 IF (GFOUND) THEN
    READ (UNIT=ILUNAM,NML=NAM_START_DATE)
 ELSE
@@ -103,21 +118,23 @@ ELSE
   WRITE(NLISTING,*)'as the date of the beginning of the run'
   CALL ABORT_TRIP('NAM_START_DATE not found in namelist')        
 ENDIF
-CALL CLOSE_TRIP_NAMELIST(ILUNAM)
+ CALL CLOSE_TRIP_NAMELIST(ILUNAM)
 !
 ! --------------------------------------------------------------------------------------
 !* 2. Initializations
 ! --------------------------------------------------------------------------------------
 !
-CALL INIT_TRIP_PAR
+ CALL INIT_TRIP_PAR
 !
 ! --------------------------------------------------------------------------------------
 !* 3. Read grid and physical option namelists
 ! --------------------------------------------------------------------------------------
 !
-CALL READ_NAM_TRIP(NLISTING)
+ CALL READ_NAM_TRIP(NLISTING)
 !
-CALL READ_NAM_TRIP_GRID(YTRIP_CUR%TPG, &
+ CALL READ_NAM_TRIP_PREP(NLISTING)
+!
+ CALL READ_NAM_TRIP_GRID(YTRIP_CUR%TPG, &
                         NLISTING)
 !
 IF(GOASIS)THEN
@@ -128,7 +145,7 @@ ENDIF
 !* 4. TRIP parameters preparation
 ! --------------------------------------------------------------------------------------
 !
-CALL PREP_TRIP_RUN(YTRIP_CUR%TP, YTRIP_CUR%TPG, &
+ CALL PREP_TRIP_RUN(YTRIP_CUR%TP, YTRIP_CUR%TPG, &
                    NYEAR,NMONTH,NDAY,XTIME,ILON,ILAT)
 !
 IF(GOASIS)THEN
@@ -148,10 +165,10 @@ WRITE(*,*) '    ----------------------------'
 WRITE(*,*) '    | TRIP PREP ENDS CORRECTLY |'
 WRITE(*,*) '    ----------------------------'
 !
-CLOSE(NLISTING)
+ CLOSE(NLISTING)
 !
 !-------------------------------------------------------------------------------
-CALL TRIP_DEALLO_LIST
+ CALL TRIP_DEALLO_LIST
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_PREP',1,ZHOOK_HANDLE)
@@ -160,9 +177,7 @@ IF (LHOOK) CALL DR_HOOK('TRIP_PREP',1,ZHOOK_HANDLE)
 ! * 3. MPI and OASIS must be finalized after the last DR_HOOK call
 ! --------------------------------------------------------------------------------------
 !
-IF(GOASIS)THEN
-  CALL TRIP_OASIS_END
-ENDIF
+CALL TRIP_OASIS_END(GOASIS,GXIOS)
 !
 !-------------------------------------------------------------------------------------
 !

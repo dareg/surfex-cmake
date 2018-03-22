@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE WATER_FLUX(PZ0SEA,                                         &
                               PTA, PEXNA, PRHOA, PSST, PEXNS, PQA, PRR, PRS,  &
@@ -123,7 +127,6 @@ REAL, DIMENSION(SIZE(PTA)) :: ZFP       ! working variable
 REAL, DIMENSION(SIZE(PTA)) :: ZRRCOR    ! correction of CD, CH, CDN due to moist-gustiness
 REAL, DIMENSION(SIZE(PTA)) :: ZCHARN    ! Charnock number
 !
-CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -237,7 +240,7 @@ ENDIF
 !              -------------------------------------------------------
 !
 IF (.NOT.LDRAG_COEF_ARP) THEN
-   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0SEA, PZ0HSEA, ZAC, ZRA, PCH, YSNOWRES)
+   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0SEA, PZ0HSEA, ZAC, ZRA, PCH)
 ENDIF
 !
 IF (LRRGUST_ARP) THEN

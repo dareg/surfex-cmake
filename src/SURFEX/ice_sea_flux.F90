@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE ICE_SEA_FLUX(PZ0ICE,                                       &
                               PTA, PEXNA, PRHOA, PTICE, PEXNS, PQA, PRR, PRS, &
@@ -119,7 +123,6 @@ REAL, DIMENSION(SIZE(PTA)) :: ZDIRCOSZW ! orography slope cosine (=1 on water!)
 REAL, DIMENSION(SIZE(PTA)) :: ZFP       ! working variable
 REAL, DIMENSION(SIZE(PTA)) :: ZRRCOR    ! correction od CD, CH, CDN due to moist-gustiness
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
-CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet defaultvaue for HSNOWRES>
 
 !
 !-------------------------------------------------------------------------------
@@ -186,7 +189,7 @@ IF ( XCD_ICE_CST == 0.0 ) THEN
 
      CALL SURFACE_CD(PRI, PZREF, PUREF, PZ0ICE, PZ0HICE, PCD, PCDN)
 !
-     CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0ICE, PZ0HICE, ZAC, ZRA, PCH, YSNOWRES)
+     CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0ICE, PZ0HICE, ZAC, ZRA, PCH)
 !
   ENDIF
 !

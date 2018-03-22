@@ -1,4 +1,8 @@
-SUBROUTINE ASSIM_NATURE_ISBA_ENKF(I, HPROGRAM, KI, PT2M, PHU2M, HTEST)
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
+SUBROUTINE ASSIM_NATURE_ISBA_ENKF(IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
 
 ! -----------------------------------------------------------------------------
 !
@@ -20,18 +24,19 @@ SUBROUTINE ASSIM_NATURE_ISBA_ENKF(I, HPROGRAM, KI, PT2M, PHU2M, HTEST)
 ! -----------------------------------------------------------------------------
 !
 USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
-USE MODD_ASSIM,         ONLY : NOBSTYPE, XERROBS, NVAR, NPRINTLEV, CVAR, &
-                               XF_PATCH, XF,COBS,CFILE_FORMAT_OBS,NENS, &
+USE MODD_ASSIM,         ONLY : NOBSTYPE, XERROBS, NVAR, NPRINTLEV, CVAR,   &
+                               XF_PATCH, XF,COBS,CFILE_FORMAT_OBS,NENS,    &
                                NECHGU, NBOUTPUT, NOBS, XYO, LENKF, LDENKF, &
-                               LPB_CORRELATIONS, LPERTURBATION_RUN, &
+                               LPB_CORRELATIONS, LPERTURBATION_RUN,        &
                                LBIAS_CORRECTION, XINFL
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
-USE MODD_ISBA_n,        ONLY : ISBA_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
+USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
 #ifdef SFX_ARO
-USE YOMMP,              ONLY : MYPROC 
+USE YOMMP0,             ONLY : MYPROC 
 #endif
 !
 USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
@@ -48,7 +53,11 @@ USE MODE_RANDOM
 !
 IMPLICIT NONE
 !
-TYPE(ISBA_t), INTENT(INOUT) :: I
+TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
+TYPE(ISBA_S_t), INTENT(INOUT) :: S
+TYPE(ISBA_K_t), INTENT(INOUT) :: K
+TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
+TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM     ! program calling surf. schemes
 INTEGER,            INTENT(IN) :: KI
@@ -57,6 +66,9 @@ REAL, DIMENSION(:), INTENT(IN) :: PHU2M
 CHARACTER(LEN=2),   INTENT(IN) :: HTEST        ! must be equal to 'OK'
 !
 !    Declarations of local variables
+!
+TYPE(ISBA_P_t), POINTER :: PK
+TYPE(ISBA_PE_t), POINTER :: PEK
 !
  CHARACTER(LEN=30)  :: YBGFILE
  CHARACTER(LEN=17)  :: YLFNAME
@@ -84,15 +96,15 @@ REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZR        ! covariance ma
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT,NOBSTYPE*NBOUTPUT) :: ZK1, ZK2, ZHBHT
 REAL,DIMENSION(NOBSTYPE*NBOUTPUT) :: ZP, ZX
 !
-REAL, DIMENSION(I%NPATCH,NVAR,NENS) :: ZXINCR
-REAL, DIMENSION(I%NPATCH,NVAR,NENS) :: ZA, ZF
-REAL, DIMENSION(I%NPATCH,NOBSTYPE*NBOUTPUT,NENS) :: ZF_PATCH
-REAL, DIMENSION(I%NPATCH,NVAR) :: ZF_MEAN, ZA_MEAN
+REAL, DIMENSION(IO%NPATCH,NVAR,NENS) :: ZXINCR
+REAL, DIMENSION(IO%NPATCH,NVAR,NENS) :: ZA, ZF
+REAL, DIMENSION(IO%NPATCH,NOBSTYPE*NBOUTPUT,NENS) :: ZF_PATCH
+REAL, DIMENSION(IO%NPATCH,NVAR) :: ZF_MEAN, ZA_MEAN
 REAL, DIMENSION(NVAR) :: ZF_AGG, ZA_AGG
 !
 REAL,DIMENSION(:,:,:),ALLOCATABLE :: ZF_MEAN0, ZF_PATCH_MEAN
 !
-REAL :: ZTIME, ZALPHA                    ! current time since start of the run (s)
+REAL :: ZTIME, ZALPHA, ZMIN                   ! current time since start of the run (s)
 
 INTEGER :: IOBSCOUNT
 INTEGER :: IYEAR                      ! current year (UTC)
@@ -105,7 +117,7 @@ INTEGER :: IMYPROC
 INTEGER :: IOBS, IENS
 INTEGER :: ISTAT, ICPT, IUNIT
 !
-INTEGER :: II,J,K,JJ,L,K1,L1
+INTEGER :: JI,JP,JK,JJ,L,K1,L1,INPATCH
 !
 LOGICAL :: GBEXISTS
 !
@@ -113,6 +125,9 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',0,ZHOOK_HANDLE)
+
+#ifdef USE_SODA
+
 !
 !############################# BEGINNING ###############################
 !
@@ -140,7 +155,9 @@ IMYPROC = NRANK+1
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
+IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
+!
+INPATCH = IO%NPATCH
 !
 !############################# INITIALISATIONS ###############################
 !
@@ -149,7 +166,7 @@ IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
 !   using same clay fraction in both layers
 !   Read SAND fraction to compute the saturation for conversion of ERS SWI
 !
- CALL COFSWI(I%XCLAY(:,1),ZCOFSWI)
+ CALL COFSWI(K%XCLAY(:,1),ZCOFSWI)
 !DO I=1,KI
   !ZSMSAT (I) = 0.001 * (-1.08*100.*XSAND(I,1) + 494.305)
   !ZWILT  (I) = 0.001 * 37.1342 * ((100.*XCLAY(I,1))**0.5) 
@@ -162,9 +179,9 @@ IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',I%NPATCH
 ! ====================================================================
 !
 !   Time reinitialization 
-IYEAR  = I%TTIME%TDATE%YEAR
-IMONTH = I%TTIME%TDATE%MONTH
-IDAY   = I%TTIME%TDATE%DAY
+IYEAR  = S%TTIME%TDATE%YEAR
+IMONTH = S%TTIME%TDATE%MONTH
+IDAY   = S%TTIME%TDATE%DAY
 !
 IHOUR = 0
 ZTIME = FLOAT(NECHGU) * 3600.
@@ -191,12 +208,24 @@ ENDIF
 !
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
-DO II = 1,KI
-  IF ( MINVAL(I%XWGI(II,1,:))>0. ) THEN
-    XYO (II,:) = XUNDEF
-    IF ( NPRINTLEV > 1 ) WRITE(*,*) 'OBSERVATION FOR POINT ',II,' REMOVED'
-  ENDIF
-  IF ( NPRINTLEV > 0 ) WRITE (111,*) XYO(II,:)
+DO JI = 1,KI
+  ZMIN = XUNDEF
+  DO JP = 1,INPATCH
+    PK => NP%AL(JP)
+    PEK => NPE%AL(JP)
+    !
+    DO JJ = 1,PK%NSIZE_P
+      IF (PK%NR_P(JJ) == JI) THEN
+        IF (PEK%XWGI(JJ,1)<ZMIN) ZMIN = PEK%XWGI(JJ,1)
+        EXIT
+      ENDIF
+    ENDDO
+  ENDDO
+ IF (ZMIN>0.) THEN
+   XYO (JI,:) = XUNDEF
+   IF ( NPRINTLEV > 1 ) WRITE(*,*) 'OBSERVATION FOR POINT ',JI,' REMOVED'
+ ENDIF
+ IF ( NPRINTLEV > 0 ) WRITE (111,*) XYO(JI,:)
 ENDDO
 IF ( NPRINTLEV > 0 ) CLOSE(111)
 !//////////////////////TO WRITE OBS/////////////////////////////////////
@@ -204,33 +233,33 @@ IF ( NPRINTLEV > 0 ) CLOSE(111)
 ! Recentering THE FORECAST ENSEMBLE MEMBERS
 IF ( LBIAS_CORRECTION ) THEN
   !
-  ALLOCATE(ZF_MEAN0(KI,I%NPATCH,NVAR))
-  ALLOCATE(ZF_PATCH_MEAN(KI,I%NPATCH,NOBS))
+  ALLOCATE(ZF_MEAN0(KI,INPATCH,NVAR))
+  ALLOCATE(ZF_PATCH_MEAN(KI,INPATCH,NOBS))
   !
-  DO II = 1,KI
-    DO J=1,I%NPATCH
+  DO JI = 1,KI
+    DO JP=1,INPATCH
       DO L = 1,NVAR
-        ZF_MEAN0(II,J,L) = SUM(XF(II,J,1:NENS,L))/REAL(NENS)
+        ZF_MEAN0(JI,JP,L) = SUM(XF(JI,JP,1:NENS,L))/REAL(NENS)
       ENDDO
-      DO K = 1,NOBS
-        ZF_PATCH_MEAN(II,J,K) = SUM(XF_PATCH(II,J,1:NENS,K))/REAL(NENS)
+      DO JK = 1,NOBS
+        ZF_PATCH_MEAN(JI,JP,JK) = SUM(XF_PATCH(JI,JP,1:NENS,JK))/REAL(NENS)
       ENDDO
     ENDDO
   ENDDO
   !
-  DO II = 1,KI
-    DO J = 1,I%NPATCH
+  DO JI = 1,KI
+    DO JP = 1,INPATCH
       DO IENS = 1,NENS
         !
         DO L = 1,NVAR
-          IF ( XF(II,J,IENS,L) - ZF_MEAN0(II,J,L) + XF(II,J,NENS+1,L)>0.0 ) THEN
-            XF(II,J,IENS,L) = XF(II,J,IENS,L) - ZF_MEAN0(II,J,L) + XF(II,J,NENS+1,L)
+          IF ( XF(JI,JP,IENS,L) - ZF_MEAN0(JI,JP,L) + XF(JI,JP,NENS+1,L)>0.0 ) THEN
+            XF(JI,JP,IENS,L) = XF(JI,JP,IENS,L) - ZF_MEAN0(JI,JP,L) + XF(JI,JP,NENS+1,L)
           ENDIF
         ENDDO
         !
-        DO K = 1,NOBS
-          IF ( XF_PATCH(II,J,IENS,K) - ZF_PATCH_MEAN(II,J,K) + XF_PATCH(II,J,NENS+1,K)>0.0 ) THEN
-            XF_PATCH(II,J,IENS,K) = XF_PATCH(II,J,IENS,K) - ZF_PATCH_MEAN(II,J,K) + XF_PATCH(II,J,NENS+1,K)
+        DO JK = 1,NOBS
+          IF ( XF_PATCH(JI,JP,IENS,JK) - ZF_PATCH_MEAN(JI,JP,JK) + XF_PATCH(JI,JP,NENS+1,JK)>0.0 ) THEN
+            XF_PATCH(JI,JP,IENS,JK) = XF_PATCH(JI,JP,IENS,JK) - ZF_PATCH_MEAN(JI,JP,JK) + XF_PATCH(JI,JP,NENS+1,JK)
           ENDIF
         ENDDO
         !
@@ -255,7 +284,7 @@ IF ( NPRINTLEV > 0 ) THEN
   OPEN (UNIT=111,FILE='OBSERRORout.'//YMYPROC,STATUS='unknown',IOSTAT=ISTAT)
   ! *** Write innovations in ASCII file ***
   OPEN (unit=112,file='INNOV.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
-  ! Write analysis results and increments in ASCII file
+  ! Write analysis results and increments in ASCJI file
   OPEN (unit=113,file='ANAL_INCR.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
   ! **** Write out the observation operator + Gain matrix ****
   OPEN (unit=114,file='K1.'//YMYPROC,status='unknown',IOSTAT=ISTAT)
@@ -268,14 +297,14 @@ IOBSCOUNT = 0
 !
 CALL INIT_RANDOM_SEED()
 !
-DO II=1,KI
+DO JI=1,KI
   !
   !---------------- MEAN SIMULATED OBS AVERAGED OVER TILES-----------------------
-  ZYF(:,:) = 0. 
-  DO J=1,I%NPATCH
-    IF (I%XPATCH(II,J) > 0.0) THEN
-      WHERE ( XF_PATCH(II,J,:,:)/=XUNDEF ) 
-        ZYF(:,:) = ZYF(:,:) + I%XPATCH(II,J)*XF_PATCH(II,J,:,:)
+  ZYF(:,:) = 0.
+  DO JP = 1,INPATCH 
+    IF (S%XPATCH(JI,JP) > 0.0) THEN
+      WHERE ( XF_PATCH(JI,JP,:,:)/=XUNDEF ) 
+        ZYF(:,:) = ZYF(:,:) + S%XPATCH(JI,JP)*XF_PATCH(JI,JP,:,:)
       ENDWHERE
     ENDIF
   ENDDO
@@ -295,29 +324,29 @@ DO II=1,KI
   
   DO ISTEP=1,NBOUTPUT
     !
-    DO K = 1,NOBSTYPE
+    DO JK = 1,NOBSTYPE
       !
-      K1 = (ISTEP-1)*NOBSTYPE + K
+      K1 = (ISTEP-1)*NOBSTYPE + JK
       !
 !--------------------- SET OBSERVATION ERROR ------------------      
-      ZR(K1,K1) = XERROBS(K)*XERROBS(K)
-      IF ( COBS(K) .EQ. "LAI" ) THEN
-        ZR(K1,K1) = ZR(K1,K1) * XYO(II,K1)*XYO(II,K1)
-      ELSEIF (COBS(K) .EQ. "WG1") THEN
+      ZR(K1,K1) = XERROBS(JK)*XERROBS(JK)
+      IF ( COBS(JK) .EQ. "LAI" ) THEN
+        ZR(K1,K1) = ZR(K1,K1) * XYO(JI,K1)*XYO(JI,K1)
+      ELSEIF (COBS(JK) .EQ. "WG1") THEN
         ! convert R for wg1 from SWI  to abs value
-        ZR(K1,K1) = ZR(K1,K1) * ZCOFSWI(II)*ZCOFSWI(II)
+        ZR(K1,K1) = ZR(K1,K1) * ZCOFSWI(JI)*ZCOFSWI(JI)
       ENDIF
       !
       ! Apply quality control
-      IF ( ABS(XYO(II,K1)-ZYF(NENS+1,K1)) > 0.5 .OR. ZR(K1,K1) < 0. ) XYO(II,K1) = XUNDEF
+      IF ( ABS(XYO(JI,K1)-ZYF(NENS+1,K1)) > 0.5 .OR. ZR(K1,K1) < 0. ) XYO(JI,K1) = XUNDEF
       !
-      IF( XYO(II,K1).NE.XUNDEF .AND. XYO(II,K1).NE.999.0 ) THEN         !if obs available
+      IF( XYO(JI,K1).NE.XUNDEF .AND. XYO(JI,K1).NE.999.0 ) THEN         !if obs available
         !
         DO IENS = 1,NENS
           !
-          ZINNOV(K1,IENS) = XYO(II,K1) - ZYF(IENS,K1)
+          ZINNOV(K1,IENS) = XYO(JI,K1) - ZYF(IENS,K1)
           IF (LENKF) THEN
-            ZINNOV(K1,IENS) = ZINNOV(K1,IENS) + RANDOM_NORMAL() * (XERROBS(K)*ZCOFSWI(II))
+            ZINNOV(K1,IENS) = ZINNOV(K1,IENS) + RANDOM_NORMAL() * (XERROBS(JK)*ZCOFSWI(JI))
           ENDIF
           !
         ENDDO
@@ -330,8 +359,8 @@ DO II=1,KI
     !
     IF ( NPRINTLEV > 0 ) THEN
       WRITE(111,*) ZR(:,:)
-      DO K = 1,NOBS
-        WRITE(112,*) (SUM(ZINNOV(K,:))/(NENS*1.0)), XYO(II,K)
+      DO JK = 1,NOBS
+        WRITE(112,*) (SUM(ZINNOV(JK,:))/(NENS*1.0)), XYO(JI,JK)
       ENDDO
     ENDIF
     !
@@ -342,8 +371,8 @@ DO II=1,KI
   !---------------******  SOIL ANALYSIS *******--------------------------
   !
   DO IENS = 1,NENS
-    ZF(:,:,IENS) = XF(II,:,IENS,:)
-    ZF_PATCH(:,:,IENS) = XF_PATCH(II,:,IENS,:)
+    ZF(:,:,IENS) = XF(JI,:,IENS,:)
+    ZF_PATCH(:,:,IENS) = XF_PATCH(JI,:,IENS,:)
   ENDDO
 
   !
@@ -351,9 +380,9 @@ DO II=1,KI
   !
   IF (.NOT.LPERTURBATION_RUN) THEN
     !
-    DO J = 1,I%NPATCH
+    DO JP = 1,INPATCH
       !
-      CALL OUTER_PRODUCT(NENS,NVAR,NOBS,ZF(J,:,:),I%XPATCH(II,J)*ZF_PATCH(J,:,:),&
+      CALL OUTER_PRODUCT(NENS,NVAR,NOBS,ZF(JP,:,:),S%XPATCH(JI,JP)*ZF_PATCH(JP,:,:),&
                          ZBHT(:,:),ZHBHT(:,:),LPB_CORRELATIONS,CVAR,COBS)
       !
       ZK1(:,:) =  ZHBHT(:,:) + ZR(:,:)
@@ -363,12 +392,12 @@ DO II=1,KI
       DO IENS = 1,NENS           ! Cholesky decomposition (1)
         !
         CALL CHOLSL(NOBS,ZK1(:,:),ZP(:),ZINNOV(:,IENS),ZX(:))   ! Cholesky decomposition (2)       
-        ZXINCR(J,:,IENS) = MATMUL(ZBHT(:,:),ZX(:))
+        ZXINCR(JP,:,IENS) = MATMUL(ZBHT(:,:),ZX(:))
         !
         DO L = 1,NVAR
-          ZA(J,L,IENS) = ZF(J,L,IENS)
+          ZA(JP,L,IENS) = ZF(JP,L,IENS)
           IF (CVAR(L)/="WG3" .AND. CVAR(L)/="TG3") THEN
-            ZA(J,L,IENS) = ZA(J,L,IENS) + ZXINCR(J,L,IENS)
+            ZA(JP,L,IENS) = ZA(JP,L,IENS) + ZXINCR(JP,L,IENS)
           ENDIF
         ENDDO
         !
@@ -384,19 +413,19 @@ DO II=1,KI
       !
       DO L = 1,NVAR
         !
-        DO J = 1,I%NPATCH       
+        DO JP = 1,INPATCH       
           !
           IF ( LDENKF .AND. CVAR(L)/="WG3" .AND. CVAR(L)/="TG3" ) THEN
             !
-            DO K = 1,NOBS
-              ZALPHA = 1.0 / ( 1.0 + SQRT( ZR(K,K)/(ZK2(K,K) + ZR(K,K)) ) )
-              ZA(J,L,IENS) = ZA_MEAN(J,L) + (1.0-ZALPHA) * ( ZF(J,L,IENS)-ZF_MEAN(J,L) ) &
-                                          + ZALPHA * ( ZA(J,L,IENS)-ZA_MEAN(J,L))
+            DO JK = 1,NOBS
+              ZALPHA = 1.0 / ( 1.0 + SQRT( ZR(JK,JK)/(ZK2(JK,JK) + ZR(JK,JK)) ) )
+              ZA(JP,L,IENS) = ZA_MEAN(JP,L) + (1.0-ZALPHA) * ( ZF(JP,L,IENS)-ZF_MEAN(JP,L) ) &
+                                          + ZALPHA * ( ZA(JP,L,IENS)-ZA_MEAN(JP,L))
             ENDDO
             !
           ENDIF                 
           !apply inflation factor to the ensemble spread
-          ZA(J,L,IENS) = ZA_MEAN(J,L) + XINFL(L) * (ZA(J,L,IENS) - ZA_MEAN(J,L))
+          ZA(JP,L,IENS) = ZA_MEAN(JP,L) + XINFL(L) * (ZA(JP,L,IENS) - ZA_MEAN(JP,L))
           !
         ENDDO
         !
@@ -420,10 +449,10 @@ DO II=1,KI
   ZF_AGG(:) = 0.
   ZA_AGG(:) = 0.
   DO L = 1,NVAR
-    DO J = 1,I%NPATCH
-      IF (ZA_MEAN(J,L)/=XUNDEF .AND. ZF_MEAN(J,L)/=XUNDEF) THEN
-        ZF_AGG(L) = ZF_AGG(L) + I%XPATCH(II,J) * ZF_MEAN(J,L)
-        ZA_AGG(L) = ZA_AGG(L) + I%XPATCH(II,J) * ZA_MEAN(J,L)
+    DO JP = 1,INPATCH
+      IF (ZA_MEAN(JP,L)/=XUNDEF .AND. ZF_MEAN(JP,L)/=XUNDEF) THEN
+        ZF_AGG(L) = ZF_AGG(L) + S%XPATCH(JI,JP) * ZF_MEAN(JP,L)
+        ZA_AGG(L) = ZA_AGG(L) + S%XPATCH(JI,JP) * ZA_MEAN(JP,L)
       ENDIF
     ENDDO
   ENDDO
@@ -436,10 +465,10 @@ DO II=1,KI
   !############################# GET VARIABLES FOR OUTPUT WRITING ###############################
   !
   DO IENS = 1,NENS
-    XF(II,:,IENS,:) = ZA(:,:,IENS)
+    XF(JI,:,IENS,:) = ZA(:,:,IENS)
   ENDDO
   !
-  IF (LBIAS_CORRECTION) XF(II,:,NENS+1,:) = ZA_MEAN(:,:)
+  IF (LBIAS_CORRECTION) XF(JI,:,NENS+1,:) = ZA_MEAN(:,:)
   !
 ENDDO
 !
@@ -453,5 +482,8 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',1,ZHOOK_HANDLE)
+
+#endif
+
 !
 END SUBROUTINE ASSIM_NATURE_ISBA_ENKF

@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ##################
       MODULE MODD_ASSIM
 !     ##################
@@ -61,8 +65,8 @@ IMPLICIT NONE
  LOGICAL                               :: LOBSHEADER
  LOGICAL                               :: LOBSNAT
 
- INTEGER, PARAMETER                    :: NOBSMAX = 5
- INTEGER, PARAMETER                    :: NVARMAX = 5
+ INTEGER, PARAMETER                    :: NOBSMAX = 5          ! Maximum number of observations
+ INTEGER, PARAMETER                    :: NVARMAX = 9          ! Maximum number of control variables
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE
@@ -74,6 +78,7 @@ IMPLICIT NONE
  INTEGER                               :: NBOUTPUT  
  INTEGER                               :: NPRINTLEV            ! Verbosity 
 
+ CHARACTER(LEN=10),DIMENSION(NOBSMAX)  :: COBS_M               ! Observation variable name
  CHARACTER(LEN=3),DIMENSION(NVARMAX)   :: CVAR_M               ! X is ctrl
                                                                ! 'PLUS ' (default)
                                                                ! 'AVERA'            

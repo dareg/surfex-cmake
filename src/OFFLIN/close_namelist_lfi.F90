@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE CLOSE_NAMELIST_LFI(HPROGRAM,KLUNAM)
 !     #######################################################
@@ -33,7 +37,9 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
+#ifdef SFX_LFI
 USE MODD_FMDECLAR,    ONLY : CNAMFI
+#endif
 USE MODD_IO_SURF_LFI, ONLY : CLUOUT_LFI
 
 !
@@ -59,7 +65,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !  -------------------
 !
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST_LFI',0,ZHOOK_HANDLE)
+#ifdef SFX_LFI
  CALL FMFREE(CNAMFI(KLUNAM),CLUOUT_LFI,IRESP)
+#endif
 CLOSE(KLUNAM)
 IF (LHOOK) CALL DR_HOOK('CLOSE_NAMELIST_LFI',1,ZHOOK_HANDLE)
 !

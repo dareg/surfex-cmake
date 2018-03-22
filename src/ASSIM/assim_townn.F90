@@ -1,5 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_TOWN_n (U, T, TOP, &
+SUBROUTINE ASSIM_TOWN_n (U, NT, TOP, &
                          HPROGRAM,KI,PT2M_O,HTEST)
 
 !     ###############################################################################
@@ -28,7 +32,7 @@ SUBROUTINE ASSIM_TOWN_n (U, T, TOP, &
 !
 !
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
-USE MODD_TEB_n, ONLY : TEB_t
+USE MODD_TEB_n, ONLY : TEB_NP_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
@@ -49,7 +53,7 @@ IMPLICIT NONE
 !
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(TEB_NP_t), INTENT(INOUT) :: NT
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 !
 CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM  ! program calling surf. schemes
@@ -70,7 +74,7 @@ IF (HTEST/='OK') THEN
 END IF
 
 IF (U%CTOWN=='TEB   ') THEN
-  CALL ASSIM_TEB_n(U, T, TOP, &
+  CALL ASSIM_TEB_n(U, NT, TOP, &
                    HPROGRAM,KI,PT2M_O,HTEST)
 ELSE
   IF (NRANK==NPIO) WRITE(*,*) 'No assimilation done for scheme: ',TRIM(U%CTOWN)

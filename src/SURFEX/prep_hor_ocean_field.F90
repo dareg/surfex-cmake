@@ -1,7 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, &
-                                  O, OR, SG, &
-                                 HPROGRAM,                       &
+SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, GCP, O, OR, KLAT, HPROGRAM,   &
                                  HFILE,HFILETYPE,KLUOUT,OUNIF,   &
                                  HSURF,HNCVARNAME                )
 !     #######################################################
@@ -29,7 +31,7 @@ SUBROUTINE PREP_HOR_OCEAN_FIELD (DTCO, UG, U, &
 !!------------------------------------------------------------------
 !
 !
-!
+USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -37,7 +39,6 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
 USE MODD_OCEAN_n, ONLY : OCEAN_t
 USE MODD_OCEAN_REL_n, ONLY : OCEAN_REL_t
-USE MODD_SEAFLUX_GRID_n, ONLY : SEAFLUX_GRID_t
 !
 USE MODD_CSTS,           ONLY : XTT
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -59,15 +60,14 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-!
-!
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
+TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
 TYPE(OCEAN_t), INTENT(INOUT) :: O
 TYPE(OCEAN_REL_t), INTENT(INOUT) :: OR
-TYPE(SEAFLUX_GRID_t), INTENT(INOUT) :: SG
+INTEGER, INTENT(IN) :: KLAT
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
@@ -80,8 +80,8 @@ LOGICAL,            INTENT(IN)  :: OUNIF     ! flag for prescribed uniform field
 !
 !*      0.2    declarations of local variables
 !
-REAL, POINTER, DIMENSION(:,:,:)    ::ZFIELDIN!field to interpolate horizontally
-REAL, POINTER, DIMENSION(:,:)      ::ZFIELD  !field to interpolate horizontally
+REAL, POINTER, DIMENSION(:,:,:)    ::ZFIELDIN=>NULL()!field to interpolate horizontally
+REAL, POINTER, DIMENSION(:,:)      ::ZFIELD=>NULL()  !field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:,:)::ZFIELDOUT!field interpolated horizontally
 !
 INTEGER                       :: JLEV    ! loop on oceanic vertical level
@@ -98,13 +98,11 @@ IF (OUNIF) THEN
    WRITE(KLUOUT,*) '*****warning*****: you ask for uniform oceanic variables'
    CALL PREP_OCEAN_UNIF(KLUOUT,HSURF,ZFIELDIN)
 ELSE IF (HFILETYPE=='NETCDF') THEN
-   CALL PREP_OCEAN_NETCDF(HPROGRAM,HSURF,HFILE,HFILETYPE,KLUOUT,&
-                         HNCVARNAME,ZFIELDIN)
+   CALL PREP_OCEAN_NETCDF(HPROGRAM,HSURF,HFILE,HFILETYPE,KLUOUT,HNCVARNAME,ZFIELDIN)
 ELSE IF (HFILETYPE=='ASCII') THEN
    WRITE(KLUOUT,*) 'PERSONAL LIB TEST FOR READING ',HFILETYPE,'file type'
    WRITE(KLUOUT,*) 'ASCII FILE MUST CONTAIN LAT,LON,DEPTH,T,S,U,V'
-   CALL PREP_OCEAN_ASCLLV(DTCO, UG, U, &
-                          HPROGRAM,HSURF,HFILE,KLUOUT,ZFIELDIN)                         
+   CALL PREP_OCEAN_ASCLLV(DTCO, UG, U, HPROGRAM,HSURF,HFILE,KLUOUT,ZFIELDIN)                         
 ELSE
   CALL ABOR1_SFX('PREP_OCEAN_HOR_FIELD: data file type not supported : '//HFILETYPE)
 END IF
@@ -113,13 +111,12 @@ END IF
 !
 !*      3.     Horizontal interpolation
 !
-ALLOCATE(ZFIELDOUT  (SIZE(SG%XLAT),SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)) )
+ALLOCATE(ZFIELDOUT  (KLAT,SIZE(ZFIELDIN,2),SIZE(ZFIELDIN,3)) )
 ALLOCATE(ZFIELD(SIZE(ZFIELDIN,1),SIZE(ZFIELDIN,3)))
 !
 DO JLEV=1,SIZE(ZFIELDIN,2)
   ZFIELD(:,:)=ZFIELDIN(:,JLEV,:)
-  CALL HOR_INTERPOL(DTCO, U, &
-                    KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
+  CALL HOR_INTERPOL(DTCO, U, GCP, KLUOUT,ZFIELD,ZFIELDOUT(:,JLEV,:))
 ENDDO
 !
 !*      5.     Return to historical variable

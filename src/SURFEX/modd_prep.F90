@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ################
       MODULE MODD_PREP
 !     ################
@@ -32,9 +36,9 @@ IMPLICIT NONE
 !
 !--------------------------------------------------------------------------
 !
- CHARACTER(LEN=10)  :: CINGRID_TYPE   ! type of input grid
- CHARACTER(LEN=6)   :: CINTERP_TYPE   ! type of interpolation
- CHARACTER(LEN=6)   :: CMASK          ! type of surface
+ CHARACTER(LEN=10)  :: CINGRID_TYPE = "          "   ! type of input grid
+ CHARACTER(LEN=6)   :: CINTERP_TYPE = "      "   ! type of interpolation
+ CHARACTER(LEN=6)   :: CMASK = "      "         ! type of surface
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE :: LINTERP ! .true. where interpolation must be done
 !

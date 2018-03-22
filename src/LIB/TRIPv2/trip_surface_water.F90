@@ -1,6 +1,6 @@
 !     #########
 SUBROUTINE TRIP_SURFACE_WATER (KLISTING,PTSTEP,KGRCN,KSEQ,KNEXTX,KNEXTY,KSEQMAX, &
-                               OPRINT,OMASK_VEL,PLEN,PSLOPEBED,PWIDTH,PN,PRUNOFF,&
+                               OPRINT,OMASK_VEL,PLEN,PRUNOFF,                    &
                                PVEL,PHS,PSURF_STO,PSURF_STO2,PGOUT,PSIN,PSOUT,   &
                                PAREA,PQFR,PQRF,                                  &
                                PSSTO_ALL,PSSTO2_ALL,PSIN_ALL,PDRUN_ALL,          &
@@ -75,9 +75,6 @@ LOGICAL, INTENT(IN)                    :: OPRINT   !Printable budget key
 !
 LOGICAL, DIMENSION(:,:), INTENT(IN)    :: OMASK_VEL  ! Variable velocity mask
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PLEN       ! river length       [m] 
-REAL,    DIMENSION(:,:), INTENT(IN)    :: PSLOPEBED  ! river bed slopes             [m/m]
-REAL,    DIMENSION(:,:), INTENT(IN)    :: PWIDTH     ! river widths                 [m]
-REAL,    DIMENSION(:,:), INTENT(IN)    :: PN         ! Manning roughness coeficient [-] (0.03 to 0.065)
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PAREA      ! Grid-cell area    [m²]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PRUNOFF    ! Surface runoff from ISBA    [kg/s]
 REAL,    DIMENSION(:,:), INTENT(IN)    :: PGOUT      ! ground water outflow        [kg/s]
@@ -133,7 +130,7 @@ ZSTOMAX    (:,:) = 0.0
 !-------------------------------------------------------------------------------
 !
 ISEQ=1
-CALL SEQUENCE_LOOP(ISEQ)
+ CALL SEQUENCE_LOOP(ISEQ)
 !
 IF(KSEQMAX>2)THEN
   ISEQ=2
@@ -193,7 +190,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_SURFACE_WATER',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE SEQUENCE_LOOP(KNUM)

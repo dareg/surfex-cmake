@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !####################################################################
     SUBROUTINE PREPS_FOR_MEB_DRAG(LCVEL, LFORC_MEASURE,                   &
                              PZ0, PZ0H, PZ0EFF, PH_VEG, PZREF,           & 
@@ -157,7 +161,7 @@ ENDIF
 ! Exner function at displacement height
 ! For consistancy displacement height has the same pressure as the surface
 !
- CALL SURFACE_RI(PTC, PQC, PEXNS, PEXNA, PTA, PQA,          &
+CALL SURFACE_RI(PTC, PQC, PEXNS, PEXNA, PTA, PQA,          &
                    ZCUR, ZUCUR, PDIRCOSZW, PVMOD, PRI )
 !
 PRI(:) = MIN(PRI(:),XRIMAX)
@@ -174,7 +178,7 @@ ELSE
 !
 !               -------------------------------------------------
 !
-   CALL SURFACE_AERO_COND(PRI, ZCUR, ZUCUR, PZVMOD, PZ0, PZ0H, ZAC, PRA, PCH, 'RIL')
+   CALL SURFACE_AERO_COND(PRI, ZCUR, ZUCUR, PZVMOD, PZ0, PZ0H, ZAC, PRA, PCH)
 !
 !-------------------------------------------------------------------------------
 !

@@ -1,6 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE HOR_INTERPOL_BUFFER (DTCO, U, &
-                                KLUOUT,PFIELDIN,PFIELDOUT)
+SUBROUTINE HOR_INTERPOL_BUFFER (DTCO, U, KLUOUT,PFIELDIN,PFIELDOUT)
 !     #################################################################################
 !
 !!****  *HOR_INTERPOL_BUFFER * - Only extrapolation
@@ -67,10 +70,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*      1.    Initialisation of the output mask
 !
 IF (LHOOK) CALL DR_HOOK('HOR_INTERPOL_BUFFER',0,ZHOOK_HANDLE)
+!
 INO = SIZE(PFIELDOUT,1)
 ALLOCATE(IMASKOUT(INO))
- CALL GET_SURF_MASK_n(DTCO, U, &
-                      CMASK,INO,IMASKOUT,NNI,KLUOUT)
+ CALL GET_SURF_MASK_n(DTCO, U, CMASK,INO,IMASKOUT,NNI,KLUOUT)
 !
 !*      2.    Mask the input field with the output mask
 !!mask du tableau de taille FULL en fonction du type de surface
@@ -79,6 +82,7 @@ ALLOCATE(IMASKOUT(INO))
 !*      6.    Deallocations
 !
 DEALLOCATE(IMASKOUT)
+!
 IF (LHOOK) CALL DR_HOOK('HOR_INTERPOL_BUFFER',1,ZHOOK_HANDLE)
 
 !-------------------------------------------------------------------------------------

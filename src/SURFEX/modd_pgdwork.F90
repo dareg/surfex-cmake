@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ###################
       MODULE MODD_PGDWORK
 !     ###################
@@ -34,20 +38,31 @@
 !
 IMPLICIT NONE
 !
+! to get same results in parallel mode (if results differ, change XPREC to a
+! lower value)
+REAL, PARAMETER :: XPREC = 1.0E+8
+!
 !*        0.1    summation variables
 !                -------------------
 !
-REAL, DIMENSION(:), ALLOCATABLE   :: XSUMVAL  
+REAL, DIMENSION(:,:), ALLOCATABLE   :: XSUMVAL  
                             ! Sum of data in each mesh
-REAL, DIMENSION(:), ALLOCATABLE   :: XSUMVAL2 
-                            ! Sum of square data in each mesh
-REAL, DIMENSION(:), ALLOCATABLE   :: XSUMVAL3
-                            ! Sum of cube data in each mesh                            
-REAL, DIMENSION(:,:), ALLOCATABLE :: XSUMCOVER
+!
+REAL, DIMENSION(:,:), ALLOCATABLE   :: XEXT_ALL
+                            ! Sum of square data in each mesh 
+!        
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: XALL
+                            ! Sum of each cover type data in each mesh                           
+!  
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: XSSO_ALL
                             ! Sum of each cover type data in each mesh
-REAL, DIMENSION(:,:), ALLOCATABLE :: XTNG
-                            ! for flake
-INTEGER, DIMENSION(:), ALLOCATABLE:: NSIZE
+!
+INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: NSSO_ALL
+                            ! Sum of each cover type data in each mesh     
+!
+INTEGER, DIMENSION(:,:), ALLOCATABLE:: NSIZE
+!                          ! Number of points inside each mesh of the domain
+INTEGER, DIMENSION(:,:), ALLOCATABLE:: NSIZE_ALL
 !                          ! Number of points inside each mesh of the domain
 !
  CHARACTER(LEN=3)                  :: CATYPE = 'ARI'
@@ -85,13 +100,13 @@ REAL, DIMENSION(:), ALLOCATABLE   :: XSKEW_WORK
 !
 INTEGER, PARAMETER :: JPVALMAX=20  ! Maximum number of different values 
 !                                  ! in each grid mesh
-INTEGER, DIMENSION(:),   ALLOCATABLE :: NVALNBR
+INTEGER, DIMENSION(:,:),   ALLOCATABLE :: NVALNBR
 !                                  ! number of different values 
 !                                  ! in each grid mesh
-INTEGER, DIMENSION(:,:), ALLOCATABLE :: NVALCOUNT
+INTEGER, DIMENSION(:,:,:), ALLOCATABLE :: NVALCOUNT
 !                                  ! Number of times each value has been 
 !                                  ! counted in each grid mesh
-REAL,    DIMENSION(:,:), ALLOCATABLE :: XVALLIST
+REAL,    DIMENSION(:,:,:), ALLOCATABLE :: XVALLIST
 !                                  ! List of Values encountered in each grid mesh
 !-------------------------------------------------------------------------------
 !

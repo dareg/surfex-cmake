@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 ! File %M% from Library %Q%
 ! Version %I% from %G% extracted: %H%
 !------------------------------------------------------------------------------
@@ -177,7 +181,6 @@ REAL  ::    &
     z0u_sf=Z_                 ,  &! Roughness length with respect to wind velocity [m]
     z0t_sf=Z_                 ,  &! Roughness length with respect to potential temperature [m]
     z0q_sf=Z_                     ! Roughness length with respect to specific humidity [m]  
-!$OMP THREADPRIVATE(z0u_sf,z0t_sf,z0q_sf)
 !  Security constants
 REAL , PARAMETER ::   &
     u_wind_min_sf  = 1.0E-02  ,  &! Minimum wind speed [m s^{-1}]

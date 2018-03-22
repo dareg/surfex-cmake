@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE OROGRAPHY_FILTER(HGRID,PGRID_PAR,PSEA,KZSFILTER,PZS)
 !     ##############################################################
@@ -48,7 +52,7 @@ IMPLICIT NONE
 !            ------------------------
 !
  CHARACTER(LEN=10),    INTENT(IN)    :: HGRID    ! type of grid
-REAL, DIMENSION(:),   POINTER       :: PGRID_PAR! lits of parameters used to define the grid
+REAL, DIMENSION(:),   INTENT(IN)     :: PGRID_PAR! lits of parameters used to define the grid
 REAL, DIMENSION(:),   INTENT(IN)    :: PSEA     ! sea  fraction
 INTEGER,              INTENT(IN)    :: KZSFILTER! number of filter iteration
 REAL, DIMENSION(:),   INTENT(INOUT) :: PZS      ! orography

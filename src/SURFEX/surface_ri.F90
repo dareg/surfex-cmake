@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE SURFACE_RI(PTG, PQS, PEXNS, PEXNA, PTA, PQA,   &
                                PZREF, PUREF, PDIRCOSZW, PVMOD, PRI )  
@@ -104,7 +108,6 @@ ZTHVS(:)=PTG(:)/PEXNS(:)*( 1.+(XRV/XRD-1.)*PQS(:) )
 ZVMOD(:) = WIND_THRESHOLD(PVMOD(:),PUREF(:))
 !
                                                 ! Richardson's number
-!                                                                                
 PRI(:) = XG * PDIRCOSZW(:) * PUREF(:) * PUREF(:)              &
           * (ZTHVA(:)-ZTHVS(:)) / (0.5 * (ZTHVA(:)+ZTHVS(:)) )  &
           / (ZVMOD(:)*ZVMOD(:)) /PZREF(:)  

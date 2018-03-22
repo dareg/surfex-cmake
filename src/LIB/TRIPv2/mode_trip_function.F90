@@ -38,7 +38,7 @@ MODULE MODE_TRIP_FUNCTION
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 !     ###############################################

@@ -51,7 +51,7 @@ USE MODI_ABORT_TRIP
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -76,7 +76,7 @@ REAL,    INTENT(IN)               :: PTIMEC        ! Cumulated run time step (s)
 INTEGER                    :: IDATE   ! current coupling time step (s)
 INTEGER                    :: IERR    ! Error info
 INTEGER                    :: JVAR
-CHARACTER(LEN=50)          :: YCOMMENT
+ CHARACTER(LEN=50)          :: YCOMMENT
 !
 REAL,    DIMENSION(KLON,KLAT) :: ZWRITE
 LOGICAL, DIMENSION(KLON,KLAT) :: LMASK
@@ -84,7 +84,7 @@ LOGICAL, DIMENSION(KLON,KLAT) :: LMASK
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
-#ifdef TRIPOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_SEND',0,ZHOOK_HANDLE)
@@ -174,7 +174,7 @@ ENDIF
 IF (LHOOK) CALL DR_HOOK('TRIP_OASIS_SEND',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
-CONTAINS
+ CONTAINS
 !-------------------------------------------------------------------------------
 !
 SUBROUTINE CHECK_TRIP_SEND(HCOMMENT)
@@ -183,7 +183,7 @@ USE MODI_ABORT_TRIP
 !
 IMPLICIT NONE
 !
-CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
+ CHARACTER(LEN=*), INTENT(IN) :: HCOMMENT
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !

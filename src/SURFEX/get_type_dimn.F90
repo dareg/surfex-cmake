@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #####################################
       SUBROUTINE GET_TYPE_DIM_n (DTCO, U, &
                                  HTYPE,KDIM)
@@ -66,13 +70,20 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('GET_TYPE_DIM_N',0,ZHOOK_HANDLE)
-IF (.NOT. ASSOCIATED(U%XCOVER) .AND. LHOOK) CALL DR_HOOK('GET_TYPE_DIM_N',1,ZHOOK_HANDLE)
-IF (.NOT. ASSOCIATED(U%XCOVER)) RETURN
+!
+IF (.NOT. ASSOCIATED(U%XCOVER).AND..NOT.ASSOCIATED(U%XSEA)) THEN
+  IF (LHOOK) CALL DR_HOOK('GET_TYPE_DIM_N',1,ZHOOK_HANDLE)
+  RETURN
+ENDIF
 !
 !*        1.    Fractions
 !              ---------
 !
-ILU = SIZE(U%XCOVER,1)
+IF (ASSOCIATED(U%XCOVER)) THEN
+  ILU = SIZE(U%XCOVER,1)
+ELSEIF (ASSOCIATED(U%XSEA)) THEN
+  ILU = SIZE(U%XSEA)
+ENDIF
 !
 ALLOCATE(ZSEA   (ILU))
 ALLOCATE(ZNATURE(ILU))

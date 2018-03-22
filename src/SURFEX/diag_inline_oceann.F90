@@ -1,5 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
-       SUBROUTINE DIAG_INLINE_OCEAN_n (DGO, O, S) 
+       SUBROUTINE DIAG_INLINE_OCEAN_n (DGO, O, PSEABATHY) 
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_SEAFLUX_n * - computes diagnostics during SEAFLUX time-step
@@ -27,7 +31,6 @@
 !
 USE MODD_DIAG_OCEAN_n, ONLY : DIAG_OCEAN_t
 USE MODD_OCEAN_n, ONLY : OCEAN_t
-USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_OCEAN_CSTS
 !
@@ -49,7 +52,7 @@ IMPLICIT NONE
 !
 TYPE(DIAG_OCEAN_t), INTENT(INOUT) :: DGO
 TYPE(OCEAN_t), INTENT(INOUT) :: O
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
+REAL, DIMENSION(:), INTENT(IN) :: PSEABATHY
 !
 REAL, DIMENSION(SIZE(O%XSEAT(:,1)),NOCKMIN:NOCKMAX) :: ZSEADENS
 REAL, DIMENSION(SIZE(O%XSEAT(:,1))) :: ZRHO0,ZRHOCMO,ZDRHOX,ZTCMO
@@ -90,7 +93,7 @@ IF (DGO%LDIAG_OCEAN) THEN
            EXIT
          ENDIF
      ENDDO
-     O%XSEAHMO(JPT)=MIN(O%XSEAHMO(JPT),-S%XSEABATHY(JPT))
+     O%XSEAHMO(JPT)=MIN(O%XSEAHMO(JPT),-PSEABATHY(JPT))
 !
      IHMOLEVEL(JPT)=NOCKMAX
 !

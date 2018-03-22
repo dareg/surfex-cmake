@@ -1,7 +1,10 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_SEA_n (S, U, &
-                        HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
-                       OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
+SUBROUTINE ASSIM_SEA_n (S, U, HPROGRAM,KI,PTS_IN,PSST_IN,PSIC_IN,PITM,HTEST, &
+                        OLKEEPEXTZONE,OD_MASKEXT,PLON_IN,PLAT_IN)
 
 !     ###############################################################################
 !
@@ -184,7 +187,7 @@ ENDIF
 !
 ! Sum the increments
 ZSSTINC(:) = ZSST(:) - S%XSST(:)
-WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
+IF (KI>0) WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
 !
 ! Setting modified variables
 S%XSST(:) = ZSST(:)

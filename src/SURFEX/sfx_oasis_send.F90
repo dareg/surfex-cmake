@@ -1,6 +1,10 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !#########
 SUBROUTINE SFX_OASIS_SEND(KLUOUT,KI,KDATE,OSEND_LAND,OSEND_LAKE,OSEND_SEA,      &
-                          PLAND_RUNOFF,PLAND_DRAIN,PLAND_CALVING,PLAND_RECHARGE,&
+                          PLAND_RUNOFF,PLAND_DRAIN,PLAND_CALVING,               &
                           PLAND_SRCFLOOD,                                       &
                           PLAKE_EVAP,PLAKE_RAIN,PLAKE_SNOW,PLAKE_WATF,          &
                           PSEA_FWSU,PSEA_FWSV,PSEA_HEAT,PSEA_SNET,PSEA_WIND,    &
@@ -38,6 +42,7 @@ SUBROUTINE SFX_OASIS_SEND(KLUOUT,KI,KDATE,OSEND_LAND,OSEND_LAKE,OSEND_SEA,      
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    10/2013
+!!    10/2016 B. Decharme : bug surface/groundwater coupling 
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -55,7 +60,7 @@ USE MODI_GET_LUOUT
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 USE MOD_OASIS
 #endif
 !
@@ -74,7 +79,6 @@ LOGICAL,             INTENT(IN) :: OSEND_SEA
 REAL, DIMENSION(KI), INTENT(IN) :: PLAND_RUNOFF    ! Cumulated Surface runoff             (kg/m2)
 REAL, DIMENSION(KI), INTENT(IN) :: PLAND_DRAIN     ! Cumulated Deep drainage              (kg/m2)
 REAL, DIMENSION(KI), INTENT(IN) :: PLAND_CALVING   ! Cumulated Calving flux               (kg/m2)
-REAL, DIMENSION(KI), INTENT(IN) :: PLAND_RECHARGE  ! Cumulated Recharge to groundwater    (kg/m2)
 REAL, DIMENSION(KI), INTENT(IN) :: PLAND_SRCFLOOD  ! Cumulated flood freshwater flux      (kg/m2)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PLAKE_EVAP  ! Cumulated Evaporation              (kg/m2)
@@ -108,7 +112,7 @@ INTEGER               :: IERR   ! Error info
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
-#ifdef SFXOASIS
+#ifdef CPLOASIS
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('SFX_OASIS_SEND',0,ZHOOK_HANDLE)
@@ -141,13 +145,6 @@ IF(OSEND_LAND)THEN
     YCOMMENT='calving flux over land'
     CALL OUTVAR(PLAND_CALVING,XTSTEP_CPL_LAND,ZWRITE(:,1))
     CALL OASIS_PUT(NCALVING_ID,KDATE,ZWRITE(:,:),IERR)
-    CALL CHECK_SFX_SEND(KLUOUT,IERR,YCOMMENT,ZWRITE(:,1))
-  ENDIF
-!
-  IF(LCPL_GW)THEN
-    YCOMMENT='groundwater recharge over land'
-    CALL OUTVAR(PLAND_RECHARGE,XTSTEP_CPL_LAND,ZWRITE(:,1))
-    CALL OASIS_PUT(NRECHARGE_ID,KDATE,ZWRITE(:,:),IERR)
     CALL CHECK_SFX_SEND(KLUOUT,IERR,YCOMMENT,ZWRITE(:,1))
   ENDIF
 !

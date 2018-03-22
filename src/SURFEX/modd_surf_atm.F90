@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     ####################
       MODULE MODD_SURF_ATM
 !     ####################
@@ -46,7 +50,6 @@ LOGICAL    :: LDRAG_COEF_ARP ! activate aladin formulation for Cd and Ch
 LOGICAL    :: LALDZ0H
 !
 LOGICAL    :: LNOSOF   ! No parameterization of Subgrid Orography effects on atmospheric Forcing  
-LOGICAL    :: LSLOPE   ! Parameterization of homogeneous slope effect on atmospheric Forcing
 LOGICAL    :: LVERTSHIFT ! vertical shift from atmospheric orography to surface orography
 LOGICAL    :: LVSHIFT_LW ! vertical shift for LW
 LOGICAL    :: LVSHIFT_PRCP ! vertical shift for Precip

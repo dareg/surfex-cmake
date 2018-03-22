@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 ! ajoutEB
 ! correction de l'erreur interversion de XVTANG2 et XVTANG3
 !######################
@@ -48,12 +52,8 @@ REAL, PARAMETER                 :: XDIAFP = 4.E-4
 ! Compaction/Settling Coefficients from Crocus v2.4
 !
 REAL, PARAMETER        :: XVVISC1 = 7.62237E6   ! pre-exponential viscosity factor (UNIT : N m-2 s)
-REAL, SAVE        :: XVVISC3 
-! Default value = 0.023       ! density adjustement in the exponential correction for viscosity (UNIT : m3 kg-1)
-!<B. Cluzet added old compaction parameters from ISBA-ES
-!REAL, PARAMETER        :: XVVISC3_B93 = 0.021    
+REAL, PARAMETER        :: XVVISC3 = 0.023       ! density adjustement in the exponential correction for viscosity (UNIT : m3 kg-1)
 REAL, PARAMETER        :: XVVISC4 = .1          ! temperature adjustement in the exponential correction for viscosity (UNIT : K-1)
-!REAL, PARAMETER        :: XVVISC4_B93 = 0.081
 REAL, PARAMETER        :: XVVISC5 = 1.          ! factor for viscosity adjustement to grain type - to be checked
 REAL, PARAMETER        :: XVVISC6 = 60.         ! factor for viscosity adjustement to grain type - to be checked 
 !                                                             (especially this one ; inconsistency with Crocus v2.4)

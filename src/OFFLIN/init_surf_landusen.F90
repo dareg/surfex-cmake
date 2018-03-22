@@ -1,6 +1,10 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !#############################################################
-SUBROUTINE INIT_SURF_LANDUSE_n (YSC, &
-                                HPROGRAM,HINIT,OLAND_USE,                  &
+SUBROUTINE INIT_SURF_LANDUSE_n (DTCO, OREAD_BUDGETC, U, UG, IM, SV, SLT, NDST, &
+                               HPROGRAM,HINIT,OLAND_USE,                  &
                                KI,KSV,KSW,                                &
                                HSV,PCO2,PRHOA,                            &
                                PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
@@ -42,20 +46,28 @@ SUBROUTINE INIT_SURF_LANDUSE_n (YSC, &
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+USE MODD_DST_n, ONLY : DST_NP_t
+USE MODD_SLT_n, ONLY : SLT_t
+USE MODD_SV_n, ONLY : SV_t
 !
-USE MODD_SURFEX_n, ONLY : SURFEX_t
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM
 !
 USE YOMHOOK   ,   ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
-!
+USE MODI_PACK_SAME_RANK
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
 !
 USE MODI_GET_TYPE_DIM_n
 USE MODI_READ_SURF
+USE MODI_MAKE_CHOICE_ARRAY
 !
 USE MODI_SET_VEGTYPES_FRACTIONS
 USE MODI_COMPUTE_ISBA_PARAMETERS
@@ -63,10 +75,21 @@ USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
+!
 !*       0.1   Declarations of arguments
 !              -------------------------
 !
-TYPE(SURFEX_t), INTENT(INOUT) :: YSC
+TYPE(DATA_COVER_t) :: DTCO
+LOGICAL, INTENT(IN) :: OREAD_BUDGETC
+TYPE(SURF_ATM_t) :: U
+TYPE(SURF_ATM_GRID_t) :: UG
+TYPE(ISBA_MODEL_t) :: IM
+TYPE(SV_t), INTENT(INOUT) :: SV
+TYPE(DST_NP_t), INTENT(INOUT) :: NDST
+TYPE(SLT_t), INTENT(INOUT) :: SLT
 !
  CHARACTER(LEN=6),                 INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
  CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to initialize
@@ -99,12 +122,9 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
-REAL, DIMENSION(:,:),ALLOCATABLE  :: ZWORK      ! 2D array to write data in file
-INTEGER           :: JLAYER
-INTEGER           :: ILU          ! 1D physical dimension
+INTEGER           :: JLAYER, INFOMPI
+INTEGER           :: ILU, JP         ! 1D physical dimension
 INTEGER           :: IRESP          ! Error code after redding
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
- CHARACTER(LEN=4)  :: YLVL
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -120,75 +140,61 @@ IF (.NOT. OLAND_USE)THEN
    RETURN
 ENDIF
 !
-IF (YSC%IM%I%CISBA=='DIF') THEN
+IF (IM%O%CISBA=='DIF') THEN
    CALL ABOR1_SFX('INIT_SURF_LANDUSEN: LAND USE NOT IMPLEMENTED WITH DIF')
 ENDIF
 !
 !-------------------------------------------------------------------------------
 !
+#ifdef SFX_MPI
+CALL MPI_BCAST(UG%NGRID_FULL_PAR,KIND(UG%NGRID_FULL_PAR)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+#endif
+IF (NRANK/=NPIO) ALLOCATE(UG%XGRID_FULL_PAR(UG%NGRID_FULL_PAR))
+#ifdef SFX_MPI
+ CALL MPI_BCAST(UG%XGRID_FULL_PAR,&
+                SIZE(UG%XGRID_FULL_PAR)*KIND(UG%XGRID_FULL_PAR)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
+#endif
+!   
 !* initialization for I/O
 !
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%DGU, YSC%U, &
-                        HPROGRAM,'NATURE','ISBA  ','READ ')
+CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
 !
 !* 1D physical dimension
 !
- CALL GET_TYPE_DIM_n(YSC%DTCO, YSC%U, &
-                     'NATURE',ILU)
-ALLOCATE(ZWORK(ILU,YSC%IM%I%NPATCH))
-!
-YSC%IM%DTI%LDATA_MIXPAR = .TRUE.
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_VEGTYPE)) ALLOCATE(YSC%IM%DTI%XPAR_VEGTYPE(ILU,NVEGTYPE))
-IF (YSC%IM%DTI%NTIME==0) YSC%IM%DTI%NTIME = 36
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_LAI)) ALLOCATE(YSC%IM%DTI%XPAR_LAI(ILU,YSC%IM%DTI%NTIME,NVEGTYPE))
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_H_TREE)) ALLOCATE(YSC%IM%DTI%XPAR_H_TREE(ILU,NVEGTYPE))
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_ROOT_DEPTH)) ALLOCATE(YSC%IM%DTI%XPAR_ROOT_DEPTH(ILU,NVEGTYPE))
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_GROUND_DEPTH)) ALLOCATE(YSC%IM%DTI%XPAR_GROUND_DEPTH(ILU,NVEGTYPE))
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_IRRIG)) ALLOCATE(YSC%IM%DTI%XPAR_IRRIG(ILU,YSC%IM%DTI%NTIME,NVEGTYPE))
-IF (.NOT.ASSOCIATED(YSC%IM%DTI%XPAR_WATSUP)) ALLOCATE(YSC%IM%DTI%XPAR_WATSUP(ILU,YSC%IM%DTI%NTIME,NVEGTYPE))
-!
-!* read old patch fraction
-!       
-ALLOCATE(YSC%IM%I%XPATCH_OLD(ILU,YSC%IM%I%NPATCH))       
-YRECFM = 'PATCH'
- CALL READ_SURF(&
-                HPROGRAM,YRECFM,YSC%IM%I%XPATCH_OLD(:,:),IRESP)
-!
-!* read old soil layer thicknesses (m)
-!
-ALLOCATE(YSC%IM%I%XDG_OLD(ILU,YSC%IM%I%NGROUND_LAYER,YSC%IM%I%NPATCH))
-!
-DO JLAYER=1,YSC%IM%I%NGROUND_LAYER
-  WRITE(YLVL,'(I4)') JLAYER
-  YRECFM='OLD_DG'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
-  CALL READ_SURF(&
-                HPROGRAM,YRECFM,ZWORK(:,:),IRESP)
-  YSC%IM%I%XDG_OLD(:,JLAYER,:)=ZWORK
-END DO
-DEALLOCATE(ZWORK)
+ CALL GET_TYPE_DIM_n(DTCO, U, 'NATURE',ILU)
 !
 !* End of IO
 !
  CALL END_IO_SURF_n(HPROGRAM)
+!
+IM%DTV%LDATA_MIXPAR = .TRUE.
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_VEGTYPE)) ALLOCATE(IM%DTV%XPAR_VEGTYPE(ILU,NVEGTYPE))
+IF (IM%DTV%NTIME==0) IM%DTV%NTIME = 36
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_LAI)) ALLOCATE(IM%DTV%XPAR_LAI(ILU,IM%DTV%NTIME,NVEGTYPE))
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_H_TREE)) ALLOCATE(IM%DTV%XPAR_H_TREE(ILU,NVEGTYPE))
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_ROOT_DEPTH)) ALLOCATE(IM%DTV%XPAR_ROOT_DEPTH(ILU,NVEGTYPE))
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_GROUND_DEPTH)) ALLOCATE(IM%DTV%XPAR_GROUND_DEPTH(ILU,NVEGTYPE))
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_IRRIG)) ALLOCATE(IM%DTV%XPAR_IRRIG(ILU,IM%DTV%NTIME,NVEGTYPE))
+IF (.NOT.ASSOCIATED(IM%DTV%XPAR_WATSUP)) ALLOCATE(IM%DTV%XPAR_WATSUP(ILU,IM%DTV%NTIME,NVEGTYPE))
+!
 !
 !-------------------------------------------------------------------------------
 !
 !* read new fraction of each vege type
 ! and then extrapolate parameters defined by cover
 !       
- CALL SET_VEGTYPES_FRACTIONS(YSC%DTCO, YSC%DGU, YSC%IM%DTI, YSC%IM%IG, YSC%IM%I, YSC%UG, YSC%U, &
-                             HPROGRAM)
+ CALL SET_VEGTYPES_FRACTIONS(DTCO, IM%DTV, IM%G%NDIM, IM%O, IM%S, UG, U, HPROGRAM)
 !
 !* re-initialize ISBA with new parameters
 !       
- CALL COMPUTE_ISBA_PARAMETERS(YSC%DTCO, YSC%DGU, YSC%UG, YSC%U, YSC%IM, &
-                             YSC%DST, YSC%SLT,  YSC%SV, &
-                              HPROGRAM,HINIT,OLAND_USE,                  &
-                             ILU,KSV,KSW,                                &
-                             HSV,PCO2,PRHOA,                            &
-                             PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                             PEMIS,PTSRAD,PTSURF,                       &
-                             HTEST                                      )
+ CALL COMPUTE_ISBA_PARAMETERS(DTCO, OREAD_BUDGETC, UG, U, &
+                              IM%O, IM%DTV, IM%SB, IM%S, IM%G, IM%K, IM%NK,  &
+                              IM%NG, IM%NP, IM%NPE, IM%NAG, IM%NISS, IM%ISS, &
+                              IM%NCHI, IM%CHI, IM%ID, IM%GB, IM%NGB,         &
+                              NDST, SLT, SV, HPROGRAM, HINIT, OLAND_USE,     &
+                              ILU, KSV, KSW, HSV, PCO2, PRHOA,     &
+                              PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
+                              PEMIS,PTSRAD,PTSURF,HTEST            )
 !-------------------------------------------------------------------------------
 !                       
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_LANDUSE_N',1,ZHOOK_HANDLE)

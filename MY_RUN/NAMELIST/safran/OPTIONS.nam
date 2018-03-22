@@ -110,9 +110,9 @@
 /
 &NAM_SGH_ISBAn         CRUNOFF    = "DT92"
 /
-&NAM_ISBAn             CROUGH     = "Z04D"     ,
-                       CSCOND     = "PL98"     ,
-                       CALBEDO    = "DRY"      ,
+&NAM_SSOn              CROUGH     = "Z04D"
+/
+&NAM_ISBAn             CSCOND     = "PL98"     ,
                        CC1DRY     = 'DEF '     ,
                        CSOILFRZ   = 'DEF'      ,
                        CDIFSFCOND = 'DEF '     ,

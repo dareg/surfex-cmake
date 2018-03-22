@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE OPEN_FILE_NC(KUNIT,HFILE,HFORM,HACTION,HACCESS,KRECL)
 !     #######################################################
@@ -75,7 +79,7 @@ IF(HACTION=='READ     ') THEN
         ENDIF
 ENDIF
 
-KUNIT = 21
+KUNIT = 11
 !
 IF (HFORM=='FORMATTED') THEN
   OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION,   &
@@ -86,7 +90,7 @@ ELSE
                    FORM=HFORM,ACCESS=HACCESS,RECL=KRECL, ERR=100       )  
   ELSE
     OPEN(UNIT=KUNIT,FILE=HFILE,ACTION=HACTION, &
-           FORM=HFORM, ERR=100           )  
+           FORM=HFORM, ACCESS=HACCESS,ERR=100           )  
   END IF
 END IF
 !

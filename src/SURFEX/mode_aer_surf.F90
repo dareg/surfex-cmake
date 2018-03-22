@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !!   ########################
 MODULE MODE_AER_SURF
 !!   ########################
@@ -10,6 +14,7 @@ MODULE MODE_AER_SURF
 !!    -------------
 !!
 !!      J.Escobar     06/2013  for REAL4/8 add EPSILON management
+!!    M.Leriche 2015 : masse molaire Black carbon à 12 g/mol
 !!
 !------------------------------------------------------------------------------- 
   USE MODD_CHS_AEROSOL
@@ -62,6 +67,7 @@ ZMI(JP_AER_SO4)  = 98.
 ZMI(JP_AER_NO3)  = 63.
 ZMI(JP_AER_NH3)  = 17.
 ZMI(JP_AER_H2O)  = 18.
+ZMI(JP_AER_BC)   = 12.
 ZMI(JP_AER_DST)  = 100.
 IF (NSOA .EQ. 10) THEN
   ZMI(JP_AER_SOA1) = 88. 

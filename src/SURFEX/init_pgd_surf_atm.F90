@@ -1,6 +1,9 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #################################################################################
-SUBROUTINE INIT_PGD_SURF_ATM (YSC, &
-                              HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
+SUBROUTINE INIT_PGD_SURF_ATM (YSC, HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
                                KYEAR, KMONTH, KDAY, PTIME            )  
 !     #################################################################################
 !
@@ -30,6 +33,7 @@ SUBROUTINE INIT_PGD_SURF_ATM (YSC, &
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
+USE MODD_TYPE_DATE_SURF, ONLY : DATE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -55,10 +59,9 @@ REAL,              INTENT(IN)   :: PTIME       ! time
 !
 !*      0.2    declarations of local variables
 !
+TYPE(DATE) :: TDATE_END
  CHARACTER(LEN=6), DIMENSION(0)  :: YSV       ! name of all scalar variables
 REAL,             DIMENSION(0)  :: ZCO2      ! CO2 concentration (kg/m3)
-REAL,             DIMENSION(0,1)  :: ZIMPWET      ! impurity wet deposit coef
-REAL,             DIMENSION(0,1)  :: ZIMPDRY      ! impurity dry deposit coef
 REAL,             DIMENSION(0)  :: ZRHOA     ! air density (kg/m3)
 REAL,             DIMENSION(0)  :: ZZENITH   ! solar zenithal angle
 REAL,             DIMENSION(0)  :: ZAZIM     ! solar azimuthal angle (rad from N, clock)
@@ -74,14 +77,18 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !* initialization of PGD fields of output domain
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',0,ZHOOK_HANDLE)
- CALL INIT_SURF_ATM_n(YSC, &
-                      HPROGRAM,HINIT,.FALSE.,                     &
-                      0,0,1,                                     &
-                      YSV,ZCO2,ZIMPWET,ZIMPDRY,ZRHOA,            &
+!
+TDATE_END%YEAR = KYEAR
+TDATE_END%MONTH = KMONTH
+TDATE_END%DAY = KDAY
+!
+ CALL INIT_SURF_ATM_n(YSC, HPROGRAM,HINIT,.FALSE.,               &
+                      0,0,1,YSV,ZCO2,ZRHOA,                      &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &
                       ZEMIS,ZTSRAD,ZTSURF,                       &
-                      KYEAR, KMONTH, KDAY, PTIME,                &
+                      KYEAR, KMONTH, KDAY, PTIME, TDATE_END,     &
                       HATMFILE,HATMFILETYPE, 'OK'                )  
+!
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',1,ZHOOK_HANDLE)
 
 !

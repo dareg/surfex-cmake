@@ -1,3 +1,7 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE FLAG_GR_SNOW(KFLAG,OMASK,TPSNOW)  
 !     ##########################################################
@@ -38,8 +42,6 @@
 !*       0.    DECLARATIONS
 !
 USE MODD_TYPE_SNOW
-USE MODD_PREP_SNOW, ONLY : NIMPUR
-!
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
@@ -59,7 +61,7 @@ TYPE(SURF_SNOW), INTENT(INOUT) :: TPSNOW   ! snow characteristics
 !*       0.2   declarations of local variables
 !
 REAL            :: ZVAL
-INTEGER         :: JLAYER, JPATCH,JIMP
+INTEGER         :: JLAYER
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('FLAG_GR_SNOW',0,ZHOOK_HANDLE)
@@ -70,78 +72,51 @@ ELSEIF (KFLAG==2) THEN
   ZVAL = XUNDEF
 ENDIF
 !
-
-DO JIMP=1,NIMPUR
-
-  DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
-    !
-    DO JLAYER = 1,TPSNOW%NLAYER
-      !
-      IF (KFLAG==1) THEN
-        !
-        IF (SIZE(TPSNOW%GRAN1) >0) THEN
-          WHERE(OMASK(:)) 
-          TPSNOW%IMPUR(:,JLAYER,JIMP,JPATCH) = XUNDEF
-          END WHERE
-        END IF
-        !
-      ENDIF
-      !
-    ENDDO
-    !
-  END DO
-ENDDO
-
-
-DO JPATCH = 1,SIZE(TPSNOW%WSNOW,3)
-  !
   DO JLAYER = 1,TPSNOW%NLAYER
     !
-    WHERE(OMASK(:)) TPSNOW%WSNOW(:,JLAYER,JPATCH) = ZVAL
+    WHERE(OMASK(:)) TPSNOW%WSNOW(:,JLAYER) = ZVAL
     !
     IF (KFLAG==1) THEN 
       !
-      WHERE(OMASK(:)) TPSNOW%RHO  (:,JLAYER,JPATCH) = XUNDEF
+      WHERE(OMASK(:)) TPSNOW%RHO  (:,JLAYER) = XUNDEF
       !
       IF (SIZE(TPSNOW%TEMP ) >0) THEN
         WHERE(OMASK(:)) 
-          TPSNOW%TEMP (:,JLAYER,JPATCH) = XUNDEF
-          TPSNOW%HEAT (:,JLAYER,JPATCH) = XUNDEF
+          TPSNOW%TEMP (:,JLAYER) = XUNDEF
+          TPSNOW%HEAT (:,JLAYER) = XUNDEF
         END WHERE
       ENDIF
       !
-      IF (SIZE(TPSNOW%T    ) >0) WHERE(OMASK(:)) TPSNOW%T(:,JLAYER,JPATCH) = XUNDEF
+      IF (SIZE(TPSNOW%T    ) >0) WHERE(OMASK(:)) TPSNOW%T(:,JLAYER) = XUNDEF
       !
       IF (SIZE(TPSNOW%GRAN1) >0) THEN
         WHERE(OMASK(:)) 
-          TPSNOW%GRAN1(:,JLAYER,JPATCH) = XUNDEF
-          TPSNOW%GRAN2(:,JLAYER,JPATCH) = XUNDEF
-          TPSNOW%HIST (:,JLAYER,JPATCH) = XUNDEF
-          TPSNOW%AGE  (:,JLAYER,JPATCH) = XUNDEF
+          TPSNOW%GRAN1(:,JLAYER) = XUNDEF
+          TPSNOW%GRAN2(:,JLAYER) = XUNDEF
+          TPSNOW%HIST (:,JLAYER) = XUNDEF
+          TPSNOW%AGE  (:,JLAYER) = XUNDEF
         END WHERE
       END IF
       !
     ENDIF
     !
   ENDDO
-  !
+!
   IF (KFLAG==1) THEN
     !
-    WHERE(OMASK(:)) TPSNOW%ALB    (:,JPATCH) = XUNDEF
-    WHERE(OMASK(:)) TPSNOW%ALBVIS (:,JPATCH) = XUNDEF
-    WHERE(OMASK(:)) TPSNOW%ALBNIR (:,JPATCH) = XUNDEF
-    WHERE(OMASK(:)) TPSNOW%ALBFIR (:,JPATCH) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALB    (:) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALBVIS (:) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALBNIR (:) = XUNDEF
+    WHERE(OMASK(:)) TPSNOW%ALBFIR (:) = XUNDEF
     !
     IF (SIZE(TPSNOW%EMIS ) >0) THEN
       WHERE(OMASK(:))
-        TPSNOW%EMIS (:,JPATCH) = XUNDEF
-        TPSNOW%TS   (:,JPATCH) = XUNDEF
+        TPSNOW%EMIS (:) = XUNDEF
+        TPSNOW%TS   (:) = XUNDEF
       END WHERE
     END IF
     !
   ENDIF
-  !
-END DO
 !
 IF (LHOOK) CALL DR_HOOK('FLAG_GR_SNOW',1,ZHOOK_HANDLE)
 !
