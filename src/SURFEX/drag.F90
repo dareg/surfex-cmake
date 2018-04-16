@@ -210,7 +210,7 @@ REAL, DIMENSION(SIZE(PTG)) :: ZQSAT,           &
 !                                              ZZHV = condensation delta fn for Hv
                                  ZRRCOR
 !                                              ZRRCOR = correction of CD, CH, CDN due to moist-gustiness
-!
+CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
@@ -231,7 +231,7 @@ PRI(:)      =0.
 !
 ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !
-ZQSAT(:) = QSAT(PTG(:),PPS(:))
+ZQSAT(:) = QSAT(PTG(:),PPS(:)) 
 !
 IF(PRESENT(PQSAT))PQSAT(:)=ZQSAT(:)
 !
@@ -373,7 +373,7 @@ ELSE
 !*       7.1    SURFACE AERODYNAMIC RESISTANCE FOR HEAT TRANSFERS
 !               -------------------------------------------------
 !
-   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0, PZ0H, ZAC, PRA, PCH)
+   CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, ZVMOD, PZ0, PZ0H, ZAC, PRA, PCH, YSNOWRES)
 !
 !-------------------------------------------------------------------------------
 !

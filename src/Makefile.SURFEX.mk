@@ -21,6 +21,14 @@ ARCH_XYZ=${ARCH}${MNH_INT}-${VERSION_XYZ}
 #                                                        #
 ##########################################################
 
+ifdef BULL
+  ifeq "$(BULL)" "YES"
+    LIBS       += -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/mkl/lib/intel64 -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/mkl/lib/intel64 -lintlc -lifport -limf -lifcore -lsvml -lirng
+  endif
+endif
+
+
+
 ##########################################################
 #           Source MYSRC                                 #
 ##########################################################
@@ -465,13 +473,19 @@ GRIBAPI_PATH?=${DIR_GRIBAPI}-${ARCH}
 GRIBAPI_INC?=${GRIBAPI_PATH}/include/grib_api.mod
 #
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
 ifeq "$(VER_GRIBAPI)" "SOPRANO"
 GRIBAPI_PATH=/usr/local/sopra/grib_api
 INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
-LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
+endif
+
+ifeq "$(VER_GRIBAPI)" "BULL"
+GRIBAPI_PATH=/opt/softs/libraries/ICC16.1.150/grib_api-1.15.0
+INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
 ifneq "x$(VER_GRIBAPI)" "x"
@@ -666,7 +680,7 @@ TRIP_LIST += TRIP_PREP TRIP_MASTER TRIP_CHANGE_DATE
 ifeq "$(ARCH)" "BG"
 PROG_LIST += OFFLINE 
 else
-PROG_LIST += PGD PREP OFFLINE
+PROG_LIST += PGD PREP OFFLINE SODA
 #PROG_LIST += OI_MAIN SXPOST VARASSIM $(TRIP_LIST)
 #PGD PREP OFFLINE OI_MAIN SODA SXPOST NCPOST VARASSIM
 ifeq "$(VER_OASIS)" "mct"

@@ -180,6 +180,7 @@ REAL, DIMENSION(SIZE(TPSNOW%WSNOW,1)) :: ZDQSATI, ZQSATI
 !
 INTEGER                         :: JJ, JI, JCOMPT_SNOW1, JCOMPT_SNOW2, JCOMPT_SNOW3, JCOMPT_FLUX
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<bber default value for HSNOWRES>
 !-------------------------------------------------------------------------------
 !
 !
@@ -310,7 +311,7 @@ ZQSAT(:) = QSATI(ZTS_SNOW(:), PPS(:) )
 !*      1.2.4  Aerodynamical conductance
 !              -------------------------
 !
- CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, ZZ0, ZZ0H, ZAC, ZRA, ZCH)
+ CALL SURFACE_AERO_COND(ZRI, PZREF, PUREF, PVMOD, ZZ0, ZZ0H, ZAC, ZRA, ZCH, YSNOWRES )!<bber>
 !
 !-------------------------------------------------------------------------------
 !

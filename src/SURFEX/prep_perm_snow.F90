@@ -30,10 +30,11 @@ SUBROUTINE PREP_PERM_SNOW (IO, KK, PK, PEK)
 !!                                          snow/ice treatment
 !!      B. Decharme 07/2012: 3-L or Crocus adjustments
 !!      M. Lafaysse 09/2012: adaptation with new snow age in Crocus
+!!      M. dumont 02/2016 : snow impurity content
 !!------------------------------------------------------------------
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
-!
+
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 !
@@ -44,6 +45,7 @@ USE MODD_SNOW_PAR,       ONLY : XRHOSMAX, XANSMAX, XANSMIN, &
                                 XAGLAMAX, XAGLAMIN, XHGLA,  &
                                 XRHOSMAX_ES
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_PREP_SNOW,       ONLY : NIMPUR
 !
 USE MODD_ISBA_PAR,       ONLY : XWGMIN
 !
@@ -78,6 +80,7 @@ REAL, PARAMETER :: ZRHOL1 = 150.
 !*      0.3    declarations of local variables
 !
 INTEGER                             :: JL      ! loop counter on snow layers
+INTEGER                             :: JIMP      ! loop counter on impurity types
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZWSNOW_PERM ! snow total reservoir due to perm. snow
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZWSNOW      ! initial snow total reservoir
 REAL, DIMENSION(:),   ALLOCATABLE   :: ZD          ! new snow total depth
@@ -220,7 +223,7 @@ IF (PEK%TSNOW%SCHEME=='3-L'.OR.PEK%TSNOW%SCHEME=='CRO') THEN
       DO JL=2,PEK%TSNOW%NLAYER
         WHERE(GWORK(:,JL))
           PEK%TSNOW%RHO(:,JL) = MIN(ZRHOSMAX,PEK%TSNOW%RHO(:,JL-1)+100.)
-        END WHERE     
+         END WHERE     
       ENDDO
     ENDIF
   ENDIF
@@ -230,6 +233,8 @@ IF (PEK%TSNOW%SCHEME=='3-L'.OR.PEK%TSNOW%SCHEME=='CRO') THEN
   DO JL=1,PEK%TSNOW%NLAYER/4
     WHERE(GWORK(:,JL))
       PEK%TSNOW%AGE(:,JL) = 365.0*FLOAT(JL-1)/ FLOAT(PEK%TSNOW%NLAYER)
+
+              
     END WHERE
   END DO
   DO JL=1+PEK%TSNOW%NLAYER/4,PEK%TSNOW%NLAYER
@@ -260,6 +265,22 @@ DO JL=1+PEK%TSNOW%NLAYER/4,PEK%TSNOW%NLAYER
   END WHERE
 END DO
 END IF
+
+IF (PEK%TSNOW%SCHEME=='CRO') THEN
+  DO JIMP=1,NIMPUR
+    DO JL=1,PEK%TSNOW%NLAYER/4
+      WHERE(GWORK(:,JL))
+        PEK%TSNOW%IMPUR(:,JL,JIMP)=0.
+      END WHERE
+    END DO
+    DO JL=1+PEK%TSNOW%NLAYER/4,PEK%TSNOW%NLAYER
+      WHERE(GWORK(:,JL))
+        PEK%TSNOW%IMPUR(:,JL,JIMP)=0.
+      END WHERE
+    END DO
+  ENDDO
+END IF
+
 !
 !-------------------------------------------------------------------------------------
 !

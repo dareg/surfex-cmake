@@ -3,11 +3,12 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ######spl
-SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,             &
+SUBROUTINE OL_TIME_INTERP_ATM (KSURF_STEP,KNB_ATM,                       &
                                PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2,        &
                                PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,      &
                                PLW1,PLW2,PSNOW2,PRAIN2,                  &
                                PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2,        &
+			       									 PO31,PO32,PAE1,PAE2,PIMPWET2,PIMPDRY2,    &
                                PZEN,PSUMZEN )  
 !**************************************************************************
 !
@@ -44,6 +45,7 @@ USE MODN_IO_OFFLINE, ONLY : LINTERP_SW
 !
 USE MODD_CSTS,       ONLY : XPI, XRD, XRV, XG
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODN_IO_OFFLINE,  ONLY : NIMPUROF, LFORCIMP, LFORCATMOTARTES
 USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               (K)
                             XQA       ,&! air specific humidity forcing         (kg/m3)
                             XRHOA     ,&! air density forcing                   (kg/m3)
@@ -57,6 +59,10 @@ USE MODD_FORC_ATM,  ONLY: XTA         ,&! air temperature forcing               
                             XPA       ,&! pressure at forcing level             (Pa)
                             XRHOA     ,&! density at forcing level              (kg/m3)
                             XCO2      ,&! CO2 concentration in the air          (kg/kg)
+                            XO3       ,&! Ozone
+                            XAE       ,&! Aerosol optical depth
+                            XIMPWET   ,&! wet deposit coefficient
+                            XIMPDRY   ,&! dry deposit coefficient
                             XSNOW     ,&! snow precipitation                    (kg/m2/s)
                             XRAIN     ,&! liquid precipitation                  (kg/m2/s)
                             XZREF       ! height of T,q forcing                 (m)  
@@ -82,14 +88,15 @@ IMPLICIT NONE
 INTEGER,INTENT(IN) :: KSURF_STEP, KNB_ATM
 REAL, DIMENSION(:),INTENT(IN) :: PTA1,PTA2,PQA1,PQA2,PWIND1,PWIND2
 REAL, DIMENSION(:),INTENT(IN) :: PDIR_SW1,PDIR_SW2,PSCA_SW1,PSCA_SW2,PLW1,PLW2
-REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2
+REAL, DIMENSION(:),INTENT(IN) :: PSNOW2,PRAIN2,PPS1,PPS2,PCO21,PCO22,PDIR1,PDIR2,PO31,PO32,PAE1,PAE2
+REAL, DIMENSION(:,:),INTENT(IN) :: PIMPWET2,PIMPDRY2
 REAL, DIMENSION(:),INTENT(IN) :: PZEN,PSUMZEN 
 
 ! local variables
 REAL :: ZDTA, ZDQA, ZDDIR_SW, ZDSCA_SW, ZDLW,  &
-        ZDPS, ZDCO2, ZDU, ZDV, ZU1, ZV1, ZU2, ZV2 
+        ZDPS, ZDCO2, ZDU, ZDV, ZU1, ZV1, ZU2, ZV2,ZDO3,ZDAE 
 REAL :: ZPI, ZNB_ATM, ZSURF_STEP, ZCOEF, ZCOEF2
-INTEGER :: J
+INTEGER :: J,JIMP
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !========================================================================
@@ -143,6 +150,23 @@ DO J = 1,SIZE(PTA1)
     ZDCO2    = (PCO22(J)-PCO21(J))*ZCOEF
     XCO2(J) = PCO21(J) + ZDCO2
     !
+    IF (LFORCATMOTARTES) THEN
+      ZDO3    = (PO32(J)-PO31(J))*ZCOEF
+      XO3(J) = PO31(J) + ZDO3
+      
+      ZDAE    = (PAE2(J)-PAE1(J))*ZCOEF
+      XAE(J) = PAE1(J) + ZDAE
+    ENDIF
+    !
+    IF (LFORCIMP) THEN
+      DO JIMP=1,NIMPUROF
+        XIMPWET(J,JIMP) = PIMPWET2(J,JIMP)
+        
+        XIMPDRY(J,JIMP) = PIMPDRY2(J,JIMP)
+      
+      ENDDO
+    ENDIF
+    !
     IF (LINTERP_SW) THEN
       !
       ZCOEF2=0.
@@ -154,12 +178,12 @@ DO J = 1,SIZE(PTA1)
       !
     ELSE
       !
-      ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
-      XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
-      !
-      ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
-      XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
-      !
+    ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
+    XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
+    !
+    ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
+    XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
+    !
     ENDIF
     !
     !

@@ -33,26 +33,27 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    07-03
-!!      modified    11-03,by P. Le Moigne   *Meteo France*
-!!      modified    05-04,by P. Le Moigne : surf_atm diagnostics moved at the
+!!      modified    11-03, by P. Le Moigne   *Meteo France*
+!!      modified    05-04, by P. Le Moigne : surf_atm diagnostics moved at the
 !!                                           right place
-!!      modified    10-04,by P. Le Moigne : add new diagnostics
-!!      modified    10-04,by P. Le Moigne : add Halstead coefficient
-!!      modified     2008,by B. Decharme  : limit the number of diag
+!!      modified    10-04, by P. Le Moigne : add new diagnostics
+!!      modified    10-04, by P. Le Moigne : add Halstead coefficient
+!!      modified     2008, by B. Decharme  : limit the number of diag
 !!                                           Add floodplains diag
-!!      modified    04-09,by A.L. Gibelin : Add respiration diagnostics
-!!      modified    05-09,by A.L. Gibelin : Add carbon spinup
-!!      modified    07-09,by A.L. Gibelin : Add carbon prognostic variables
+!!      modified    04-09, by A.L. Gibelin : Add respiration diagnostics
+!!      modified    05-09, by A.L. Gibelin : Add carbon spinup
+!!      modified    07-09, by A.L. Gibelin : Add carbon prognostic variables
 !!  
-!!      modified    09-12,by B. Decharme  : delete LPROVAR_TO_DIAG for prognostic variables
+!!      modified    09-12, by B. Decharme  : delete LPROVAR_TO_DIAG for prognostic variables
 !!                                           delete NWG_LAYER
 !!                                           Erroneous description in diag comments
-!!      modified    06-13,by B. Decharme  : good dimension for Tg,Wg,et Wgi
+!!      modified    06-13, by B. Decharme  : good dimension for Tg, Wg, et Wgi
 !!                                           bug : TSN_VEG if Snowlayer = 1 ; 
 !!                                           bug : TSRAD_P and not TTSRAD_P
-!!                                           add diag (Qsb,Subl) and Snow noted SN
-!!      modified    10-14,by P. Samuelsson: Added MEB output
+!!                                           add diag (Qsb, Subl) and Snow noted SN
+!!      modified    10-14, by P. Samuelsson: Added MEB output
 !!      modified    09-15  by M. Lafaysse  : new Crocus-MEPRA outputs
+!! 	modified    11-15 by M. Dumont : new Crocus tartes outputs
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -62,16 +63,17 @@ USE MODD_TYPE_DATE_SURF
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
-USE MODD_SURF_ATM_GRID_n,ONLY : SURF_ATM_GRID_t
-USE MODD_SURF_ATM_n,ONLY : SURF_ATM_t
+USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
+USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 !
+USE MODD_PREP_SNOW,        ONLY: NIMPUR,IMPTYP
 USE MODD_OL_FILEID,       ONLY : XNETCDF_FILEID_OUT, XNETCDF_FILENAME_OUT
 !
 USE MODD_ASSIM,          ONLY : LASSIM, CASSIM, CASSIM_ISBA
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LSPLIT_PATCH
 !
-USE MODN_IO_OFFLINE,      ONLY : XTSTEP_OUTPUT
+USE MODN_IO_OFFLINE,       ONLY : XTSTEP_OUTPUT
 !
 USE MODI_GET_DIM_FULL_n
 USE MODI_GET_ISBA_CONF_n
@@ -82,53 +84,58 @@ USE MODI_DEF_VAR_NETCDF
 USE MODI_OL_WRITE_COORD
 USE MODI_OL_WRITE_PROJ
 !
-USE YOMHOOK ,ONLY : LHOOK,  DR_HOOK
-USE PARKIND1,ONLY : JPRB
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
 !
 USE NETCDF
 !
 IMPLICIT NONE
-!
+
 TYPE(ISBA_MODEL_t), INTENT(IN) :: IM
 !
-TYPE(SURF_ATM_GRID_t),INTENT(INOUT) :: UG
-TYPE(SURF_ATM_t),INTENT(INOUT) :: U
+TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
+TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
  CHARACTER(LEN=*),DIMENSION(:),INTENT(IN) :: HSELECT
-LOGICAL, INTENT(IN) :: OSNOWDIMNC
+ LOGICAL, INTENT(IN) :: OSNOWDIMNC
 !
- CHARACTER(LEN=6),INTENT(IN) :: HPROGRAM
-INTEGER,         INTENT(IN) :: KLUOUT
+ CHARACTER(LEN=6), INTENT(IN) :: HPROGRAM
+ INTEGER,          INTENT(IN) :: KLUOUT
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
- CHARACTER(LEN=100),DIMENSION(:),POINTER :: YNAME_DIM
- CHARACTER(LEN=100),DIMENSION(1)  :: YATT_TITLE,YATT
+ CHARACTER(LEN=100), DIMENSION(:), POINTER :: YNAME_DIM
+ CHARACTER(LEN=100), DIMENSION(1) :: YATT_TITLE, YATT
  CHARACTER(LEN=40),DIMENSION(1)   :: YDATE
- CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1,YUNIT2
+ CHARACTER(LEN=13),DIMENSION(1)   :: YUNIT1, YUNIT2
  CHARACTER(LEN=100)               :: YCOMMENT  
  CHARACTER(LEN=50)                :: YFILE
- CHARACTER(LEN=12)                :: YRECFM
+ CHARACTER(LEN=30)                :: YTYPE             ! String for impurity type
+ CHARACTER(LEN=12)                :: YRECFM,YREFIMPUR
  CHARACTER(LEN=3)                 :: YPAS,YPAT
  CHARACTER(LEN=6)                 :: YLVL
+ CHARACTER(LEN=1)                 :: YNDAYS
  CHARACTER(LEN=3)                 :: YISBA
- CHARACTER(LEN=1)                 :: YNDAYS 
  CHARACTER(LEN=2)                 :: YLVLV
  CHARACTER(LEN=3) :: YSNOW_SCHEME
 ! 
-TYPE(DATE_TIME) :: TPTIME
-REAL,DIMENSION(:),POINTER     :: ZX,ZY
-REAL,DIMENSION(:), POINTER    :: ZLAT,ZLON
+ TYPE(DATE_TIME) :: TPTIME
+ REAL,DIMENSION(:), POINTER       :: ZX, ZY
+ REAL,DIMENSION(:), POINTER    :: ZLAT,ZLON
 !
-INTEGER :: ISNOW_LAYER
-INTEGER,DIMENSION(:),POINTER :: IDIMS, IDDIMALL
-INTEGER                      :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS,&
-                                INLITTER, INLITTLEVS, INSOILCARB
-INTEGER                      :: IDIM1, INDIMS, INDIMSALL, INJDIMS
-INTEGER                      :: IFILE_ID, IDIMID, JSV
-INTEGER                      :: IL,JRET, INSNLAYER, JFILE
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+ INTEGER, DIMENSION(:), POINTER   :: IDDIMSNOW, IDDIMBAND,IDDIMIMPUR
+ INTEGER, DIMENSION(:), ALLOCATABLE :: JDIM 
+ INTEGER, DIMENSION(:), ALLOCATABLE :: IDDIM
+ INTEGER :: ISNOW_LAYER
+ INTEGER,DIMENSION(:),POINTER :: IDIMS, IDDIMALL
+ INTEGER                          :: INI, INPATCH, INLVLD, INLVLS, INBIOMASS, &
+                                     INLITTER, INLITTLEVS, INSOILCARB
+ INTEGER                      :: IDIM1, INDIMS, INDIMSALL, INJDIMS
+ INTEGER                          :: IFILE_ID, IDIMID, JSV
+ INTEGER                      :: IL,JRET, INSNLAYER, JFILE
+ INTEGER                          :: JNDAYS
+ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 
@@ -143,19 +150,21 @@ ISNOW_LAYER  = IM%NPE%AL(1)%TSNOW%NLAYER
 !
  CALL GET_DIM_FULL_n(U%NDIM_FULL,INI)
  CALL GET_ISBA_CONF_n(IM%O,ISNOW_LAYER,YISBA,INPATCH,INLVLD,INLVLS,INBIOMASS,&
-                       INLITTER,INLITTLEVS,INSOILCARB)  
+                       INLITTER, INLITTLEVS, INSOILCARB)  
 !
 INSNLAYER = 1
 IF ( OSNOWDIMNC ) INSNLAYER = ISNOW_LAYER
 IF (LSPLIT_PATCH) THEN
-  CALL OL_DEFINE_DIM(UG, U%NSIZE_FULL, HPROGRAM, KLUOUT, INI, IDIM1, YUNIT1, YUNIT2,&
-                     ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM, KNSNLAYER=INSNLAYER,PLAT=ZLAT,PLON=ZLON)
+  CALL OL_DEFINE_DIM(UG, U%NSIZE_FULL, HPROGRAM, KLUOUT, INI, OSNOWDIMNC, IM%NPE%AL(1)%TSNOW, &
+										IDIM1, YUNIT1, YUNIT2, ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM,								&
+                    IM%ID%DM%LPROBANDS,KNSNLAYER=INSNLAYER,PLAT=ZLAT,PLON=ZLON)									  
 ELSE
-  CALL OL_DEFINE_DIM(UG, U%NSIZE_FULL, HPROGRAM, KLUOUT, INI, IDIM1, YUNIT1, YUNIT2,&
-                     ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM, KNPATCH=INPATCH, &
-                     KNSNLAYER=INSNLAYER, PLAT=ZLAT, PLON=ZLON)
+  CALL OL_DEFINE_DIM(UG, U%NSIZE_FULL, HPROGRAM, KLUOUT, INI, OSNOWDIMNC, IM%NPE%AL(1)%TSNOW, &
+										IDIM1, YUNIT1, YUNIT2, ZX, ZY, IDIMS, IDDIMALL, YNAME_DIM,								&
+                    IM%ID%DM%LPROBANDS, KNPATCH=INPATCH, KNSNLAYER=INSNLAYER, PLAT=ZLAT, PLON=ZLON)
+                     
 ENDIF
- CALL GET_DATE_OL(TPTIME,XTSTEP_OUTPUT,YDATE(1))
+CALL GET_DATE_OL(TPTIME,XTSTEP_OUTPUT,YDATE(1))
 !
 INDIMSALL = SIZE(IDDIMALL)
 !
@@ -166,12 +175,21 @@ ELSE
   INJDIMS = INDIMSALL-1
   INDIMS  = INDIMSALL
 ENDIF
+IF (IM%ID%DM%LPROBANDS) THEN 
+	INJDIMS=INJDIMS-1
+	INDIMS=INDIMS-1
+ENDIF
+
+ALLOCATE(IDDIM(INDIMS))
+ALLOCATE(JDIM(INJDIMS))
+ALLOCATE(IDDIMSNOW(INDIMS+1))
+ALLOCATE(IDDIMBAND(INDIMS+1))
 !
 ! 4. Create output file for prognostic variables
 !----------------------------------------------------------
 !
 YATT_TITLE(1)='units'
-!
+! 
 YFILE='ISBA_PROGNOSTIC.OUT.nc'
  CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
 JRET=NF90_REDEF(IFILE_ID) 
@@ -182,37 +200,37 @@ DO JFILE = 1,SIZE(XNETCDF_FILENAME_OUT)
   IF (TRIM(YFILE)==TRIM(XNETCDF_FILENAME_OUT(JFILE))) THEN
     XNETCDF_FILEID_OUT(JFILE) = IFILE_ID
     EXIT
-  ENDIF
-ENDDO
+	ENDIF
+ENDDO  
 !
 IF (.NOT. IM%ID%DM%LPROSNOW) THEN
-  !
+!
   CALL OL_WRITE_COORD(HSELECT,YFILE,IFILE_ID,IDDIMALL,YATT_TITLE,YNAME_DIM,&
                       YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY,ZLON,ZLAT)
-  !
-  !
-  ! 4. Create output file for fluxes values
-  !----------------------------------------------------------
-  !
-  YFILE='ISBA_DIAGNOSTICS.OUT.nc'
+!
+! 4. Create output file for fluxes values
+!----------------------------------------------------------
+!
+	YFILE='ISBA_DIAGNOSTICS.OUT.nc'
   CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
   JRET=NF90_REDEF(IFILE_ID) 
-  YATT ='dimensionless'
-  !
+YATT = 'dimensionless'
+!
+!
   CALL OL_WRITE_PROJ(HSELECT,IFILE_ID,UG)
-  !
+!
   DO JFILE = 1,SIZE(XNETCDF_FILENAME_OUT) 
     IF (TRIM(YFILE)==TRIM(XNETCDF_FILENAME_OUT(JFILE))) THEN
       XNETCDF_FILEID_OUT(JFILE) = IFILE_ID
       EXIT
     ENDIF
   ENDDO
+  !  
+ENDIF  
   !
-ENDIF
-!
  CALL OL_WRITE_COORD(HSELECT,YFILE,IFILE_ID,IDDIMALL,YATT_TITLE,YNAME_DIM,&
                      YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY,ZLON,ZLAT)
-!
+  !
 IF (IM%ID%O%LSURF_BUDGETC) THEN
   !
   YFILE='ISBA_DIAG_CUMUL.OUT.nc'
@@ -220,23 +238,25 @@ IF (IM%ID%O%LSURF_BUDGETC) THEN
   JRET=NF90_REDEF(IFILE_ID)
   !
   CALL OL_WRITE_PROJ(HSELECT,IFILE_ID,UG)
-  !
+  
+
+  ! 
   DO JFILE = 1,SIZE(XNETCDF_FILENAME_OUT) 
     IF (TRIM(YFILE)==TRIM(XNETCDF_FILENAME_OUT(JFILE))) THEN
       XNETCDF_FILEID_OUT(JFILE) = IFILE_ID
       EXIT
-    ENDIF
+  	ENDIF  
   ENDDO
   !
   CALL OL_WRITE_COORD(HSELECT,YFILE,IFILE_ID,IDDIMALL,YATT_TITLE,&
                       YNAME_DIM,YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY,ZLON,ZLAT)
-  !
-ENDIF
-
-
+!
+END IF
+!
+!
 ! 6. Create file for vegetation parameter values
 !----------------------------------------------------------
-
+!
 IF( LASSIM.OR.IM%ID%O%LPGD ) THEN
   !
   YFILE='ISBA_VEG_EVOLUTION.OUT.nc'
@@ -244,19 +264,19 @@ IF( LASSIM.OR.IM%ID%O%LPGD ) THEN
   JRET=NF90_REDEF(IFILE_ID)
   !
   CALL OL_WRITE_PROJ(HSELECT,IFILE_ID,UG)
-  !
+!
   DO JFILE = 1,SIZE(XNETCDF_FILENAME_OUT) 
     IF (TRIM(YFILE)==TRIM(XNETCDF_FILENAME_OUT(JFILE))) THEN
       XNETCDF_FILEID_OUT(JFILE) = IFILE_ID
       EXIT
-    ENDIF
-  ENDDO  
+  	ENDIF
+  ENDDO
   !
   CALL OL_WRITE_COORD(HSELECT,YFILE,IFILE_ID,IDDIMALL,YATT_TITLE,YNAME_DIM,&
                       YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY,ZLON,ZLAT)
-  !  
+  !
 ENDIF
-!
+  !
 ! 7. Create file for analysis increments for EKF
 !----------------------------------------------------------
 
@@ -265,7 +285,7 @@ IF(LASSIM .AND. CASSIM_ISBA=='EKF  ') THEN
   YFILE='ISBA_ANALYSIS.OUT.nc'
   CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)
   JRET=NF90_REDEF(IFILE_ID)
-  !  
+  !
   CALL OL_WRITE_PROJ(HSELECT,IFILE_ID,UG)
   !
   DO JFILE = 1,SIZE(XNETCDF_FILENAME_OUT) 
@@ -273,7 +293,7 @@ IF(LASSIM .AND. CASSIM_ISBA=='EKF  ') THEN
       XNETCDF_FILEID_OUT(JFILE) = IFILE_ID
       EXIT
     ENDIF
-  ENDDO  
+  ENDDO
   !
   CALL OL_WRITE_COORD(HSELECT,YFILE,IFILE_ID,IDDIMALL,YATT_TITLE,YNAME_DIM,&
                       YUNIT1,YUNIT2,IDIM1,YDATE,ZX,ZY,ZLON,ZLAT)
@@ -281,6 +301,9 @@ ENDIF
 !
 IF (ASSOCIATED(ZX)) DEALLOCATE(ZX,ZY)
 DEALLOCATE(ZLON,ZLAT)
+DEALLOCATE(IDDIM)
+DEALLOCATE(IDDIMBAND)
+DEALLOCATE(IDDIMSNOW)
 !
 IF (LHOOK) CALL DR_HOOK('INIT_OUTFN_ISBA_N',1,ZHOOK_HANDLE)
 !

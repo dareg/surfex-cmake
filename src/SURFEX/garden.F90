@@ -4,8 +4,8 @@
 !SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GDO, S, K, P, PEK,    &
-                       HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
-                       PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
+                       HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,       &
+                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
                        PTSTEP, PZREF, PTA, PQA, PEXNS, PRHOA, PCO2, PPS, PRR,   &
                        PSR, PZENITH, PSW, PLW, PVMOD, PALBNIR_TVEG,             &
                        PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,              &
@@ -76,6 +76,7 @@ USE MODD_AGRI_n, ONLY : AGRI_t,AGRI_INIT
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_CSTS,              ONLY: XCPD
+USE MODD_ISBA_PAR,          ONLY: XCVHEATF
 !
 !
 USE MODI_ISBA
@@ -150,7 +151,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over green ar
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the green areas
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2      ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over gardens (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! runoff over garden (kg/m2/s)
@@ -170,7 +171,14 @@ TYPE(AGRI_t) :: YAG
 REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
 REAL, DIMENSION(SIZE(PPS),GDO%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
+REAL, DIMENSION(SIZE(PPS)) :: ZSLOPEDIR           ! slope direction (=-1 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZWINDDIR            ! wind direction (=-1 in TEB)
+INTEGER, DIMENSION(SIZE(PPS)) :: KTAB_SYT        ! array of index containing
+                                                 ! opposite direction for Sytron  (=0 in TEB)
 !
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_DIR_SW ! spectral direct and diffuse irradiance used in snow cro 
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_SCA_SW!
+REAL, DIMENSION(SIZE(PPS),1) :: ZSPEC_ALB, ZDIFF_RATIO
 !  temperatures
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
@@ -188,11 +196,25 @@ REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
 REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, ZPALPHAN, ZZ0G_WITHOUT_SNOW, &
                               ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN, &
                               ZZ0H_MEBN, ZZ0EFF_MEBN
+REAL, DIMENSION(SIZE(PPS)) :: ZP_ANGL_NORM   ! angle between the normal to the surface and the sun used in snowcro
 INTEGER                    :: ILU
 LOGICAL :: GMASK, GALB
 LOGICAL :: GUPDATED
 !
+!Snow options
+LOGICAL :: GSNOWDRIFT_SUBLIM,GSNOW_ABS_ZENITH,GSNOWSYTRON, GATMORAD
+CHARACTER(3) :: YSNOWMETAMO,YSNOWRAD, YSNOWFALL, YSNOWCOND, YSNOWHOLD, YSNOWCOMP, YSNOWZREF !B Cluzet added YSNOWFALL YSNOWHOLDand YSNOWCOND
+CHARACTER(4) :: YSNOWDRIFT
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+REAL, DIMENSION(SIZE(PPS)) :: ZSYTMASS
+! Snowmaking and grooming options
+LOGICAL :: GSNOWCOMPACT_BOOL, GSNOWMAK_BOOL, GSNOWTILLER, &
+	   GSELF_PROD, GSNOWMAK_PROP
+LOGICAL, DIMENSION(SIZE(PPS)) :: GPRODSNOWMAK
+!
+REAL, DIMENSION(SIZE(PPS)) :: ZPRODCOUNT
 !
 !-------------------------------------------------------------------------------
 !
@@ -203,13 +225,39 @@ IF (LHOOK) CALL DR_HOOK('GARDEN',0,ZHOOK_HANDLE)
 ILU = SIZE(PPS)
 !
 ZDIRCOSZW = 1.
+ZSLOPEDIR = -1.
+ZWINDDIR  = -1.
+!
+KTAB_SYT=0
 !
 CALL SSO_INIT(YSS)
 !
 CALL AGRI_INIT(YAG)
 !
 !-------------------------------------------------------------------------------
+! Snow options
+YSNOWDRIFT="NONE"
+GSNOWDRIFT_SUBLIM=.FALSE.
+GSNOW_ABS_ZENITH=.FALSE.
+YSNOWMETAMO="B92"
+YSNOWRAD="B92"
+GSNOWSYTRON=.FALSE.
+GATMORAD=.FALSE.
+YSNOWFALL="V12" 
+YSNOWCOND="Y81"
+YSNOWHOLD="B92"
+YSNOWCOMP="B92"
+YSNOWZREF="CST"
 !
+! Snowmaking and grooming options 20160211
+GSNOWCOMPACT_BOOL = .FALSE.
+GSNOWMAK_BOOL = .FALSE.
+GSNOWTILLER = .FALSE.
+GSELF_PROD = .FALSE.
+GSNOWMAK_PROP = .FALSE.
+GPRODSNOWMAK = .FALSE.
+!-------------------------------------------------------------------------------
+
 !*      2.     Treatment of green areas
 !              ------------------------
 !*      2.1    Automatic irrigation
@@ -241,18 +289,31 @@ DK%XZ0EFF(:) =  PEK%XZ0(:)
 !
 !*      2.2    Call ISBA for green areas
 !              -------------------------
+ZP_DIR_SW=XUNDEF
+ZP_SCA_SW=XUNDEF
+ZSPEC_ALB=XUNDEF
+ZDIFF_RATIO=XUNDEF
+
 !
 ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
  CALL ISBA(GDO, K, P, PEK, G, YAG, DK, DEK, DMK,                                  &
            TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,                    &
-           HIMPLICIT_WIND, PZREF, PZREF, ZDIRCOSZW, PTA, PQA, PEXNS, PRHOA, PPS,  &
-           PEXNS, PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF, &
+     			 HIMPLICIT_WIND, PZREF, PZREF, ZDIRCOSZW, 															&
+					 GATMORAD, GSNOWSYTRON, YSNOWFALL, YSNOWCOND, YSNOWHOLD,YSNOWCOMP,      &
+					 YSNOWZREF, XCVHEATF, ZSLOPEDIR,PEK%TSNOW%GRAN2(:,:),PEK%TSNOW%GRAN2(:,:), & 
+					 PTA, PQA, PEXNS, PRHOA, PPS,  &
+           PEXNS, PRR, PSR, PZENITH,ZP_ANGL_NORM,ZP_MEB_SCA_SW, PSW, PLW, PVMOD, &
+					 ZWINDDIR, PPEW_A_COEF, &
            PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
            PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, ZPALPHAN,    &
            ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN,         &
            ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
-           ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, ZDEEP_FLUX, PIRRIG )     
+           ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, ZDEEP_FLUX, PIRRIG, &
+					 KTAB_SYT,ZSYTMASS,PEK%TSNOW%IMPUR(:,:,:), &
+					 ZP_DIR_SW, ZP_SCA_SW,ZSPEC_ALB, ZDIFF_RATIO, PEK%TSNOW%IMPUR(:,:,:), &
+					 ZPRODCOUNT,GSNOWCOMPACT_BOOL, GSNOWMAK_BOOL, GSNOWTILLER,	       &
+					 GSELF_PROD, GSNOWMAK_PROP, GPRODSNOWMAK)
 !
 IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:)= DMK%XSNOWTEMP(:,1)
 !
@@ -279,7 +340,7 @@ END IF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2          (:) = 0.
+PSFCO2(:)=0.
 DEK%XRESP_ECO (:) = 0.
 DEK%XRESP_AUTO(:) = 0.
 !

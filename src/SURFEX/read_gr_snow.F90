@@ -32,7 +32,7 @@
 !!
 !!    AUTHOR
 !!    ------
-!!	V. Masson       * Meteo France *
+!!      V. Masson       * Meteo France *
 !!
 !!    MODIFICATIONS
 !!    -------------
@@ -54,7 +54,7 @@ USE MODI_PACK_SAME_RANK
 USE MODD_WRITE_SURF_ATM, ONLY : LSPLIT_PATCH
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT,NIMPUR
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -94,7 +94,7 @@ INTEGER, INTENT(IN), OPTIONAL :: KNPATCH
 !
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZWORK
 !
-INTEGER             :: IRESP, JI, JP              ! Error code after redding
+INTEGER             :: IRESP, JI, JP, JIMP             ! Error code after redding
 INTEGER             :: ISURFTYPE_LEN, IPAT_LEN     ! 
 INTEGER             :: JL              ! loop counter
 INTEGER             :: IVERSION, IBUGFIX
@@ -210,6 +210,13 @@ ENDIF
 !*       3.    Allocations
 !              -----------
 !
+! Read number of impurity type in the Forcing File if something has been written(IVERSION>9)
+IF (TPSNOW%SCHEME=='CRO' .AND. IVERSION>8) THEN
+	CALL READ_SURF(HPROGRAM,'NIMPUR',NIMPUR,IRESP)
+ELSE
+	NIMPUR=0
+ENDIF
+
  CALL ALLOCATE_GR_SNOW(TPSNOW,KSIZE_P)
 !
 IF (.NOT. GSNOW) THEN
@@ -234,9 +241,9 @@ ALLOCATE(ZWORK(KLU,INPATCH))
 !
 IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
                          .OR. TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN 
-  !
+!
   WRITE(YFMT0,'(A5,I1,A1)') ',A1,A',ISURFTYPE_LEN
-  !
+!   
   IF (GVERSION) THEN
     YFMT = '(A3'//YFMT0//')'
   ELSE
@@ -252,7 +259,7 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
     !
     CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"TSNOW",HSURFTYPE,TPSNOW%T)
     !
-  ENDIF
+  END IF
   !
   !*       8.    Heat content
   !              ------------
@@ -272,12 +279,35 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
         YFMT = "(A2,A1"//YFMT0//')'       
       ELSE
         YFMT = "(A5"//YFMT0//')'
-      ENDIF
+      ENDIF      
       YFMT = YFMT//YNLAYER//')'
       CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SGRAN",HSURFTYPE,TPSNOW%GRAN1,HREC2="1")
       CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SGRAN",HSURFTYPE,TPSNOW%GRAN2,HREC2="2")
       !
-    ENDIF
+    END IF
+    ! 
+    !*        9.b    Snow impurity
+    !                ------------
+    !
+    IF (TPSNOW%SCHEME=='CRO') THEN
+      DO JL = 1,TPSNOW%NLAYER
+        DO JIMP=1, NIMPUR 
+          IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
+            WRITE(YFMT,'(A8,I1,A6)')     '(A5,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'      
+            WRITE(YRECFM,YFMT) 'SIMP_',JIMP,HSURFTYPE,JL
+          ELSE
+            WRITE(YFMT,'(A8,I1,A6)')     '(A4,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'
+            WRITE(YRECFM,YFMT) 'SIM_',JIMP,HSURFTYPE,JL
+            YRECFM=ADJUSTL(HPREFIX//YRECFM)
+          ENDIF      
+          CALL READ_SURF(HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
+          TPSNOW%IMPUR(:,JL,JIMP) = 0.0
+          !TPSNOW%IMPUR(:,JL,JIMP) = ZWORK  !A VOIR RAFIFE
+          WHERE (TPSNOW%WSNOW(:,1) == 0.0) TPSNOW%IMPUR(:,JL,JIMP) = XUNDEF
+          !
+        ENDDO    
+      ENDDO
+    END IF
     !
     IF ((TPSNOW%SCHEME=='3-L'.AND.IVERSION>=8) .OR. TPSNOW%SCHEME=='CRO') THEN
       !*       12.    Age parameter
@@ -287,7 +317,7 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
         YFMT = "(A3"//YFMT0//')'         
       ELSE
         YFMT = "(A4"//YFMT0//')'
-      ENDIF
+      ENDIF     
       YFMT = YFMT//YNLAYER//')'
       CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SAGE",HSURFTYPE,TPSNOW%AGE)
       !
@@ -301,8 +331,8 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
         ENDWHERE
       ENDDO
       !
-    END IF    
-    !
+    END IF
+      !
   ENDIF
   !
   WRITE(YFMT,'(A5,I1,A2,I1,A1)') '(A4,A',ISURFTYPE_LEN,',A',IPAT_LEN,')'
@@ -314,9 +344,9 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
   ELSE
     CALL READ_SURF(HPROGRAM,YRECFM,ZWORK,IRESP,HDIR=YDIR)
     CALL PACK_SAME_RANK(KMASK_P,ZWORK(:,MAX(1,KPATCH)),TPSNOW%ALB(:))
-  ENDIF
+  ENDIF    
   !
-ENDIF
+END IF
 !
 DEALLOCATE(ZWORK)
 !
@@ -346,16 +376,16 @@ IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',0,ZHOOK_HANDLE_OMP)
             TPSNOW%GRAN1(JI,JL) = XUNDEF
             TPSNOW%GRAN2(JI,JL) = XUNDEF
             TPSNOW%AGE  (JI,JL) = XUNDEF
-          ENDIF
-        ENDIF
+          ENDIF     
+        END IF
         !
-      ENDDO
+      END DO
     ENDIF
   ENDDO
 !$OMP ENDDO
 IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
-  !
+!
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -385,15 +415,15 @@ INTEGER :: JL, IRESP
 !
 IF (PRESENT(HREC2)) THEN
   YREC2=TRIM(HREC2)
-ELSE
+  ELSE
   YREC2=""
-ENDIF
+  ENDIF  
 !
 IF (YREC2/="") THEN
   WRITE(YRECFM,HFMT) TRIM(HREC),TRIM(YREC2),'_',TRIM(HSURF)
 ELSE
   WRITE(YRECFM,HFMT) TRIM(HREC),'_',TRIM(HSURF)
-ENDIF
+END IF
 IF (OVERSION) YRECFM=ADJUSTL(TRIM(HPREF)//YRECFM)
 !
 IF (GDIM2) THEN

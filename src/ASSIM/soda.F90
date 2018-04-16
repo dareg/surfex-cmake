@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 ! *****************************************************************************************
 PROGRAM SODA
-
+!
 #ifdef USE_SODA
 !
 ! ------------------------------------------------------------------------------------------
@@ -61,18 +61,19 @@ USE MODD_WRITE_SURF_ATM, ONLY : LFIRST_WRITE, NCPT_WRITE
 !
 USE MODD_SURF_CONF, ONLY : CPROGNAME, CSOFTWARE
 USE MODD_SURF_PAR,  ONLY : XUNDEF,NUNDEF
+USE MODD_PREP_SNOW,  ONLY : NIMPUR
 !
-USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH,  &
-                       NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU, XI,   &
-                       XLAI_PASS, XBIO_PASS, CBIO, NIVAR, XYO, NIFIC, NPRINTLEV,    &
-                       NOBS, NPRINTLEV, LREAD_ALL, NENS,LBIAS_CORRECTION,           &
+USE MODD_ASSIM, ONLY : LASSIM, LAROME, LALADSURF, CASSIM_ISBA, NVAR, XF, XF_PATCH, &
+                       NOBSTYPE, XAT2M_ISBA, XAHU2M_ISBA, CVAR, COBS, NECHGU, XI,  &
+                       XLAI_PASS, XBIO_PASS, CBIO, NIVAR, XYO, NIFIC, NPRINTLEV, &
+                       NOBS, NPRINTLEV, LREAD_ALL, NENS,LBIAS_CORRECTION, &
                        LEXTRAP_SEA,LEXTRAP_WATER,LEXTRAP_NATURE,LOBSHEADER,NOBSMAX, &
                        CFILE_FORMAT_FG,CFILE_FORMAT_LSM,CFILE_FORMAT_OBS,           &
                        CFILE_FORMAT_CLIM,NNCO,LWATERTG2,LOBSNAT
 !
 USE MODD_FORC_ATM,       ONLY : CSV, XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSUN, XZS, &
                                 XZREF, XUREF, XTA, XQA, XSV, XU, XV, XSW_BANDS,     &
-                                XZENITH, XAZIM, XCO2, XRHOA, XTSURF
+                                XZENITH, XAZIM, XCO2,XIMPWET,XIMPDRY, XRHOA, XTSURF
 !
 USE MODD_WRITE_BIN,  ONLY : NWRITE
 !
@@ -229,7 +230,7 @@ INTEGER :: ISIZE_NATURE, INPATCH
 !
 INTEGER :: I2M, IBEQ, IDSTEQ
 LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
-           GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GWATER_PROFILE,  &
+           GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GWATER_PROFILE, &
            GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,&
            GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB
 !
@@ -374,13 +375,15 @@ IF (ALLOCATED(NMASK_FULL)) DEALLOCATE(NMASK_FULL)
 ISV = 0
 ALLOCATE(CSV(ISV))
 !
-ALLOCATE(XCO2     (ISIZE_FULL))
-ALLOCATE(XRHOA    (ISIZE_FULL))
-ALLOCATE(XZENITH  (ISIZE_FULL))
-ALLOCATE(XAZIM    (ISIZE_FULL))
-ALLOCATE(XEMIS    (ISIZE_FULL))
-ALLOCATE(XTSRAD   (ISIZE_FULL))
-ALLOCATE(XTSURF   (ISIZE_FULL))
+ALLOCATE(XCO2(ISIZE_FULL))
+ALLOCATE(XIMPWET(ISIZE_FULL,NIMPUR))
+ALLOCATE(XIMPDRY(ISIZE_FULL,NIMPUR))
+ALLOCATE(XRHOA(ISIZE_FULL))
+ALLOCATE(XZENITH(ISIZE_FULL))
+ALLOCATE(XAZIM(ISIZE_FULL))
+ALLOCATE(XEMIS(ISIZE_FULL))
+ALLOCATE(XTSRAD(ISIZE_FULL))
+ALLOCATE(XTSURF(ISIZE_FULL))
 !
 ISW = 0
 ALLOCATE(XSW_BANDS(           ISW))
@@ -392,6 +395,8 @@ XZENITH = XUNDEF
 XAZIM   = XUNDEF
 XCO2    = 0.
 XRHOA   = 1.
+XIMPWET=XUNDEF
+XIMPDRY=XUNDEF
 !
 ! Sanity check
 IF ( .NOT. LASSIM ) CALL ABOR1_SFX("YOU CAN'T RUN SODA WITHOUT SETTING LASSIM=.TRUE. IN THE ASSIM NAMELIST")
@@ -461,10 +466,11 @@ DO NIFIC = INB,1,-1
   !    
   ! Initialize the SURFEX interface
   CALL IO_BUFF_CLEAN
-  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE,YINIT, LLAND_USE, ISIZE_FULL, ISV, ISW,      &
-                       CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS, XDIR_ALB, XSCA_ALB, &
-                       XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,    &
-                       YATMFILE, YATMFILETYPE, YTEST  )
+  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, ISIZE_FULL, ISV, ISW,    &
+                       CSV, XCO2, XIMPWET, XIMPDRY, XRHOA, XZENITH, XAZIM, XSW_BANDS,  &
+                       XDIR_ALB, XSCA_ALB,XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH, IDAY,  &
+                       ZTIME, TDATE_END, YATMFILE, YATMFILETYPE, YTEST   )
+                       
   !
   IF ( CASSIM_ISBA=='EKF  ' .OR. CASSIM_ISBA=='ENKF ' ) THEN
     !
@@ -492,15 +498,15 @@ DO NIFIC = INB,1,-1
             IMASK =PK%NR_P(JI)
             SELECT CASE (TRIM(COBS(IOBS)))
               CASE("T2M")
-                XF_PATCH(JI,JP,NIFIC,IOBS) = XAT2M_ISBA(JI,1)
+                  XF_PATCH(JI,JP,NIFIC,IOBS) = XAT2M_ISBA(JI,1)
               CASE("HU2M")
-                XF_PATCH(JI,JP,NIFIC,IOBS) = XAHU2M_ISBA(JI,1)
+                  XF_PATCH(JI,JP,NIFIC,IOBS) = XAHU2M_ISBA(JI,1)
               CASE("WG1")
-                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,1)
-              CASE("WG2")
-                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,2)
+                  XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,1)
+                CASE("WG2")
+                  XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,2)
               CASE("LAI")
-                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XLAI(JI)
+                  XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XLAI(JI)
               CASE DEFAULT
                 CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
             END SELECT
@@ -519,13 +525,13 @@ DO NIFIC = INB,1,-1
             IMASK = PK%NR_P(JI)      
             SELECT CASE (TRIM(CVAR(JL)))
               CASE("TG1")
-                XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,1)
+                    XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,1)
               CASE("TG2")
-                XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,2)
+                    XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,2)
               CASE("WG1")
-                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,1)
+                    XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,1)
               CASE("WG2")
-                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,2)
+                    XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,2)
               CASE("WG3")
                 XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,3) 
               CASE("WG4")
@@ -622,7 +628,7 @@ DO NIFIC = INB,1,-1
               CASE DEFAULT
                 CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
             END SELECT
-          ENDDO
+          ENDDO        
         ENDDO
       ENDDO        
       !
@@ -849,7 +855,7 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
 
   ENDIF
 
-  !   Read all observations (NDIM_FULL)
+    !   Read all observations (NDIM_FULL)
   IF (LOBSNAT) THEN
 
     IF (NRANK==NPIO) THEN
@@ -881,9 +887,9 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
   ELSEIF (NRANK==NPIO) THEN
        
     DO JI = 1,YSC%U%NDIM_FULL
-      READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
-      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-    ENDDO
+        READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
+        IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
+      ENDDO
 
   ENDIF
 
@@ -914,12 +920,12 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
     DO IOBS = 1,NOBSTYPE
       SELECT CASE (TRIM(COBS(IOBS)))
         CASE ("T2M")
-          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
+            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
         CASE ("HU2M")
-          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
+            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
         CASE ("SWE")
-          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
-      END SELECT
+            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
+        END SELECT
     ENDDO
 
   ELSE
@@ -934,13 +940,13 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
     DO IOBS = 1,NOBSTYPE
       SELECT CASE (TRIM(COBS(IOBS)))
         CASE ("T2M")
-          ZT2M(:)=ZWORK(:,JJ)
+            ZT2M(:)=ZWORK(:,JJ)
         CASE ("HU2M")
-          ZHU2M(:)=ZWORK(:,JJ)
+            ZHU2M(:)=ZWORK(:,JJ)
         CASE ("SWE")
-          ZSWE(:)=ZWORK(:,JJ)
-       END SELECT
-     ENDDO
+            ZSWE(:)=ZWORK(:,JJ)
+      END SELECT
+    ENDDO
   ENDIF
   DEALLOCATE(ZWORK)
 
@@ -1128,7 +1134,7 @@ IF (NRANK==NPIO) THEN
   CFILEOUT_FA = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.fa')
 #endif
 #ifdef SFX_NC  
-  CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')
+  CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')  
 #endif
   !
   IF (CSURF_FILETYPE=='FA    ') THEN
@@ -1178,14 +1184,15 @@ DO IENS = 1,ISIZE
     ! Initialize the SURFEX interface
     CALL IO_BUFF_CLEAN
     CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE,YINIT, LLAND_USE, ISIZE_FULL, ISV, ISW,      &
-                         CSV, XCO2, XRHOA, XZENITH, XAZIM, XSW_BANDS, XDIR_ALB, XSCA_ALB, &
-                         XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,    &
-                         YATMFILE, YATMFILETYPE, YTEST              )
+                         CSV, XCO2, XIMPWET,XIMPDRY, XRHOA, XZENITH, XAZIM, XSW_BANDS,    &
+                         XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH, IDAY,  &
+                         ZTIME, TDATE_END, YATMFILE, YATMFILETYPE, YTEST  )
+                          
     !
     DO JP = 1,INPATCH
       PK => YSC%IM%NP%AL(JP)
       PEK => YSC%IM%NPE%AL(JP)  
-
+      !
       DO JL=1,NVAR
         DO JI = 1,PK%NSIZE_P
           IMASK = PK%NR_P(JI) 
@@ -1239,7 +1246,7 @@ DO IENS = 1,ISIZE
   IF (CTIMESERIES_FILETYPE=="OFFLIN") THEN
     CALL INIT_OUTPUT_OL_n (YSC)
   ENDIF
-  !  
+  !
   INW = 1
   IF (CTIMESERIES_FILETYPE=="NC    ".OR.CTIMESERIES_FILETYPE=="OFFLIN") INW = 2
   !
@@ -1286,14 +1293,14 @@ DO IENS = 1,ISIZE
   GSURF_MISC_BUDGET_TEB  = .FALSE.  
   !
   CALL FLAG_DIAG_UPDATE(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%U, YSC%SV,  &          
-                        GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF, &
-                        GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,      &
+                        GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
+                        GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
                         GWATER_PROFILE, GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA,    &
                         GCH_NO_FLUX_ISBA, GSURF_MISC_BUDGET_ISBA, GPGD_TEB,       &
                         GSURF_MISC_BUDGET_TEB    )
   ! 
   YSC%DUO%LSNOWDIMNC = .FALSE.
-  !
+  ! 
   YENS = '   '
   IF (ISIZE>1) WRITE(YENS,'(I3)') IENS
   !
@@ -1329,7 +1336,7 @@ DO IENS = 1,ISIZE
   !  
   INW = 1
   IF (CSURF_FILETYPE=="NC    ") INW = 2
-  !
+  !  
   LFIRST_WRITE = .TRUE.
   ! 
   IF (ASSOCIATED(YSC%DUO%CSELECT)) DEALLOCATE(YSC%DUO%CSELECT)

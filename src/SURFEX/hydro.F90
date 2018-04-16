@@ -84,7 +84,6 @@ USE MODD_ISBA_n, ONLY : ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_AGRI_n, ONLY : AGRI_t
 USE MODD_DIAG_EVAP_ISBA_n, ONLY : DIAG_EVAP_ISBA_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
-!
 USE MODD_CSTS,      ONLY : XRHOLW, XDAY, XTT, XLSTT, XLMTT
 USE MODD_ISBA_PAR,  ONLY : XWGMIN, XDENOM_MIN
 USE MODD_SURF_PAR,  ONLY : XUNDEF, NUNDEF
@@ -120,7 +119,7 @@ TYPE(DIAG_EVAP_ISBA_t), INTENT(INOUT) :: DEK
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMK
 !
 LOGICAL, INTENT(IN)                :: OMEB   ! True  = patch with multi-energy balance 
-!                                            ! False = patch with classical (composite) ISBA
+!                                            ! False = patch with classical (composite) ISBA 
 REAL, INTENT(IN)                    :: PTSTEP
 !                                      timestep of the integration
 !
@@ -144,7 +143,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PPS, PF2
 !
 REAL, DIMENSION(:,:), INTENT(IN)  :: PF2WGHT
 !                                    PF2WGHT   = water stress factor (profile) (-)
-!
+
 REAL, DIMENSION(:,:), INTENT(IN) :: PSOILHCAPZ
 !                                   PSOILHCAPZ = ISBA-DF Soil heat capacity profile [J/(m3 K)]
 !
@@ -335,8 +334,8 @@ IF(.NOT.OMEB)THEN ! Canopy Int & Irrig Already accounted for if MEB in use.
          DEK%XIRRIG_FLUX(:) = PEK%XWATSUP(:) / XDAY           
          ZRR   (:) = ZRR(:) + PEK%XWATSUP(:) / XDAY
          AG%LIRRIDAY(:)    = .TRUE.           
-       END WHERE
-     ENDIF
+      END WHERE
+   ENDIF
    ENDIF
 !
 !* interception reservoir and dripping computation
@@ -489,7 +488,7 @@ IF (IO%CISBA=='DIF') THEN
     CALL HYDRO_SOILDIF(IO, KK, PK, PEK, ZTSTEP, ZPG, ZLETR, ZLEG, ZEVAPCOR,  &
                        PF2WGHT, PPS, ZQSAT, ZQSATI, ZDRAIN, ZHORTON, INL, ZQSB )
 !
-
+!
     CALL ICE_SOILDIF(KK, PK, PEK, ZTSTEP, ZKSFC_IVEG, ZLEGI, PSOILHCAPZ, ZWGI_EXCESS )
 !
     DEK%XDRAIN(:) = DEK%XDRAIN(:) + (ZDRAIN(:)+ZQSB(:)+ZWGI_EXCESS(:))/REAL(INDT)
@@ -502,15 +501,15 @@ IF (IO%CISBA=='DIF') THEN
 !
     PDELPHASEG_SFC(:) = (PEK%XWGI(:,1)-ZWGI0(:,1))*(XLMTT*XRHOLW/PTSTEP)*PK%XDZG(:,1) + &
                          ZLEGI(:)*(XRHOLW*XLSTT)
-    PDELPHASEG(:)     = PDELPHASEG_SFC(:)
-    DO JL=2,INL
+     PDELPHASEG(:)        = PDELPHASEG_SFC(:)
+     DO JL=2,INL
       DO JJ=1,INJ
         PDELPHASEG(JJ) = PDELPHASEG(JJ) + (PEK%XWGI(JJ,JL)-ZWGI0(JJ,JL))*&
                            (XLMTT*XRHOLW/PTSTEP)*PK%XDZG(JJ,JL)
-      ENDDO
-    ENDDO
-    PDELHEATG_SFC(:)     = PDELHEATG_SFC(:) + PDELPHASEG_SFC(:)
-    PDELHEATG(:)         = PDELHEATG(:)     + PDELPHASEG(:)
+        ENDDO
+     ENDDO
+     PDELHEATG_SFC(:)     = PDELHEATG_SFC(:) + PDELPHASEG_SFC(:)
+     PDELHEATG(:)         = PDELHEATG(:)     + PDELPHASEG(:)
 
   ENDDO
 !
@@ -542,7 +541,7 @@ ELSE
 !
 #ifdef TOPD
   IF (LCOUPL_TOPD) THEN
-    !runoff topo cumule (kg/m²)
+    !runoff topo cumule (kg/m**2)
     DO JJ=1,SIZE(NMASKT_PATCH)
       IF  (NMASKT_PATCH(JJ)/=0) THEN
         IF ( XATOP(NMASKT_PATCH(JJ))/=XUNDEF) THEN

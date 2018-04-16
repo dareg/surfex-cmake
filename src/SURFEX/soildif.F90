@@ -88,7 +88,7 @@ TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
 REAL, DIMENSION(:), INTENT(IN)    :: PVEG
 !                                      Soil and vegetation parameters
 !                                      PVEG = fraction of vegetation
-
+!
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PFROZEN1
 !                                      PFROZEN1 = fraction of ice in superficial soil

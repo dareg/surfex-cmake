@@ -116,7 +116,7 @@ REAL                              :: ZCO2_START
 REAL                              :: ZCO2_END
 INTEGER                           :: INBYEARSPINS
 INTEGER                           :: INBYEARSPINW
-!
+REAL:: ZCVHEATF
 INTEGER                  :: IPATCH           ! number of patches
 INTEGER                  :: IGROUND_LAYER    ! number of soil layers
 INTEGER                  :: JVEGTYPE
@@ -161,7 +161,6 @@ CHARACTER(LEN=6)         :: YFERTFILETYPE ! fertilisation data file type
 REAL                     :: XUNIF_PH      ! uniform value of pH
 REAL                     :: XUNIF_FERT    ! uniform value of fertilisation rate
 LOGICAL                  :: GMEB      ! Multi-energy balance (MEB)
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -193,12 +192,15 @@ IF (LNAM_READ) THEN
                    GDO%XCDRAG, GDO%CKSAT, GDO%LSOC, GDO%CRAIN, GDO%CHORT, &
                    GDO%LGLACIER, GDO%LCANOPY_DRAG, GDO%LVEGUPD, GDO%LSPINUPCARBS, &
                    GDO%LSPINUPCARBW, GDO%XSPINMAXS, GDO%XSPINMAXW, GDO%XCO2_START,&
-                   GDO%XCO2_END, GDO%NNBYEARSPINS, GDO%NNBYEARSPINW, GDO%LNITRO_DILU )
+                   GDO%XCO2_END, GDO%NNBYEARSPINS, GDO%NNBYEARSPINW, GDO%LNITRO_DILU,ZCVHEATF )
  !
  CALL DEFAULT_CH_BIO_FLUX(CHT%LCH_BIO_FLUX)
  !
- CALL DEFAULT_CROCUS(GDO%LSNOWDRIFT,GDO%LSNOWDRIFT_SUBLIM,GDO%LSNOW_ABS_ZENITH,&
-                     GDO%CSNOWMETAMO,GDO%CSNOWRAD) 
+ CALL DEFAULT_CROCUS(GDO%CSNOWDRIFT,GDO%LSNOWDRIFT_SUBLIM,GDO%LSNOW_ABS_ZENITH,&
+                     GDO%CSNOWMETAMO,GDO%CSNOWRAD, GDO%LATMORAD, GDO%LSNOWSYTRON, &
+										 GDO%CSNOWFALL, GDO%CSNOWCOND , GDO%CSNOWHOLD, GDO%CSNOWCOMP, &
+										 GDO%CSNOWZREF, GDO%LSNOWCOMPACT_BOOL, GDO%LSNOWMAK_BOOL,     &
+										 GDO%LPRODSNOWMAK, GDO%LSNOWMAK_PROP, GDO%LSNOWTILLER, GDO%LSELF_PROD) 
  !
 ENDIF
 !        1.2. Defaults from file header
@@ -367,7 +369,7 @@ IF (OGREENROOF) THEN
   GRO%NNBYEARSPINW = GDO%NNBYEARSPINW
   GRO%LNITRO_DILU = GDO%LNITRO_DILU
   !
-  GRO%LSNOWDRIFT = GDO%LSNOWDRIFT
+  GRO%CSNOWDRIFT = GDO%CSNOWDRIFT
   GRO%LSNOWDRIFT_SUBLIM = GDO%LSNOWDRIFT_SUBLIM
   GRO%LSNOW_ABS_ZENITH = GDO%LSNOW_ABS_ZENITH
   GRO%CSNOWMETAMO = GDO%CSNOWMETAMO

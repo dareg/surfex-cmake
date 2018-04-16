@@ -46,7 +46,7 @@
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_SNOW
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT,NIMPUR
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LSPLIT_PATCH
 !
@@ -96,9 +96,9 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PALB_WR
 !
 INTEGER             :: ISURFTYPE_LEN, IPAT_LEN, IFACT
 INTEGER             :: IRESP          ! IRESP  : return-code if a problem appears
-INTEGER             :: JL, JP         ! loop counter
+INTEGER             :: JL, JP , JIMP       ! loop counter
 !
-LOGICAL             :: GSNOW          ! T --> snow exists somewhere                                  
+LOGICAL             :: GSNOW          ! T --> snow exists somewhere
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
@@ -112,30 +112,32 @@ ISURFTYPE_LEN = LEN_TRIM(HSURFTYPE)
 JP = MAX(1,KPATCH)
 !
 IF (KPATCH<=1) THEN
-  !
-  !*       2.    Type of snow scheme
-  !              -------------------
-  !
-  WRITE(YFMT,'(A5,I1,A4)') '(A3,A',ISURFTYPE_LEN,',A4)'
-  WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE,'_TYP'
-  YRECFM=ADJUSTL(HPREFIX//YRECFM)
-  YCOMMENT = ' '
+!
+!*       2.    Type of snow scheme
+!              -------------------
+!
+WRITE(YFMT,'(A5,I1,A4)') '(A3,A',ISURFTYPE_LEN,',A4)'
+WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE,'_TYP'
+YRECFM=ADJUSTL(HPREFIX//YRECFM)
+YCOMMENT=' '
   CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,TPSNOW%SCHEME,IRESP,HCOMMENT=YCOMMENT)
-  !
-  !
-  !*       3.    Number of layers
-  !              ----------------
-  !
-  WRITE(YFMT,'(A5,I1,A4)') '(A3,A',ISURFTYPE_LEN,',A2)'
-  WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE,'_N'
-  YRECFM=ADJUSTL(HPREFIX//YRECFM)
-  YCOMMENT    = '(INTEGER)'
+!
+!
+!*       3.    Number of layers
+!              ----------------
+!
+WRITE(YFMT,'(A5,I1,A4)') '(A3,A',ISURFTYPE_LEN,',A2)'
+WRITE(YRECFM,YFMT) 'SN_',HSURFTYPE,'_N'
+YRECFM=ADJUSTL(HPREFIX//YRECFM)
+YCOMMENT    = '(INTEGER)'
   CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,TPSNOW%NLAYER,IRESP,HCOMMENT=YCOMMENT)
-  !
-  !
-  !*       4.    Tests to find if there is snow
-  !              ------------------------------
-  !
+  CALL WRITE_SURF(HSELECT,HPROGRAM,'NIMPUR',NIMPUR,IRESP,HCOMMENT=YCOMMENT)
+ 
+!
+!
+!*       4.    Tests to find if there is snow
+!              ------------------------------
+!
 ENDIF
 !
 IF (KPATCH>0.AND.LSPLIT_PATCH) THEN
@@ -166,13 +168,13 @@ CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,GSNOW,IRESP,HCOMMENT=YCOMMENT)
 IF (KPATCH==1) THEN
   YCOMMENT    = '(LOGICAL)'
   CALL WRITE_SURF(HSELECT,HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP,HCOMMENT=YCOMMENT)
-ENDIF
+END IF
 !
 IF ( OSNOWDIMNC .AND. HPROGRAM=='OFFLIN' ) THEN
-  !
+!
   IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' .OR. &
       TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
-    !
+!
     WRITE(YFMT,'(A5,I1,A1)') '(A4,A',ISURFTYPE_LEN,')'
     WRITE(YRECFM,YFMT) 'WSN_',HSURFTYPE
     YRECFM=ADJUSTL(HPREFIX//YRECFM)
@@ -180,7 +182,7 @@ IF ( OSNOWDIMNC .AND. HPROGRAM=='OFFLIN' ) THEN
     WRITE(YCOMMENT,YFMT) 'X_Y_WSNOW',HSURFTYPE,' (kg/m2)'
     CALL  WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%WSNOW(:,:),&
             KI,'snow_layer',PWSN_WR)
-    !
+!
     WRITE(YFMT,'(A5,I1,A1)') '(A4,A',ISURFTYPE_LEN,')'
     WRITE(YRECFM,YFMT) 'RSN_',HSURFTYPE
     YRECFM=ADJUSTL(HPREFIX//YRECFM)  
@@ -188,7 +190,27 @@ IF ( OSNOWDIMNC .AND. HPROGRAM=='OFFLIN' ) THEN
     WRITE(YCOMMENT,YFMT) 'X_Y_RSNOW',HSURFTYPE,' (kg/m2)'
     CALL  WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%RHO(:,:),&
             KI,'snow_layer',PRHO_WR)
-    !
+!
+    WRITE(YFMT,'(A5,I1,A4)') '(A9,A',ISURFTYPE_LEN,',A8)'
+    WRITE(YCOMMENT,YFMT) 'X_Y_HSNOW',HSURFTYPE,' (kg/m2)'
+    CALL WRITE_SURF(HSELECT, HPROGRAM,'SNOWHEAT',TPSNOW%HEAT(:,:),IRESP,HCOMMENT=YCOMMENT)  
+
+    WRITE(YFMT,'(A5,I1,A4)') '(A8,A',ISURFTYPE_LEN,',A8)'
+    WRITE(YCOMMENT,YFMT) 'X_Y_SAGE',HSURFTYPE,' (kg/m2)'
+    CALL WRITE_SURF(HSELECT, HPROGRAM,'SNOWAGE',TPSNOW%AGE(:,:),IRESP,HCOMMENT=YCOMMENT)
+    
+    WRITE(YFMT,'(A5,I1,A4)') '(A7,A',ISURFTYPE_LEN,',A8)'
+    WRITE(YCOMMENT,YFMT) 'X_Y_SG1',HSURFTYPE,' (kg/m2)'
+    CALL WRITE_SURF(HSELECT, HPROGRAM,'SNOWGRAN1',TPSNOW%GRAN1(:,:),IRESP,HCOMMENT=YCOMMENT)
+    
+    WRITE(YFMT,'(A5,I1,A4)') '(A7,A',ISURFTYPE_LEN,',A8)'  
+    WRITE(YCOMMENT,YFMT) 'X_Y_SG2',HSURFTYPE,' (kg/m2)'
+    CALL WRITE_SURF(HSELECT, HPROGRAM,'SNOWGRAN2',TPSNOW%GRAN2(:,:),IRESP,HCOMMENT=YCOMMENT)
+    
+    WRITE(YFMT,'(A5,I1,A4)') '(A8,A',ISURFTYPE_LEN,',A8)'  
+    WRITE(YCOMMENT,YFMT) 'X_Y_HIST',HSURFTYPE,' (kg/m2)'
+    CALL WRITE_SURF(HSELECT, HPROGRAM,'SNOWHIST',TPSNOW%HIST(:,:),IRESP,HCOMMENT=YCOMMENT)  
+ 
   ENDIF
   !
   IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
@@ -269,7 +291,7 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)') '(A10,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_WSNOW_',HSURFTYPE,JL,' (kg/m2)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%WSNOW(:,JL),&
-              KI,PWSN_WR(:,JL,:))
+                KI,PWSN_WR(:,JL,:))
       !
       !*       7.    Snow density
       !              ------------
@@ -280,7 +302,7 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)') '(A10,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_RSNOW_',HSURFTYPE,JL,' (kg/m3)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%RHO(:,JL),&
-              KI,PRHO_WR(:,JL,:))
+                KI,PRHO_WR(:,JL,:))
       !
     END IF
     !
@@ -295,7 +317,7 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)')     '(A10,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_HSNOW_',HSURFTYPE,JL,' (J/m3)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%HEAT(:,JL),&
-              KI,PHEA_WR(:,JL,:))
+                KI,PHEA_WR(:,JL,:))
       !
       !*       10.    Age parameter
       !              ---------------
@@ -306,7 +328,7 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)')     '(A9,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_SAGE_',HSURFTYPE,JL,' (-)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%AGE(:,JL),&
-              KI,PAGE_WR(:,JL,:))
+                KI,PAGE_WR(:,JL,:))
       !
     END IF
     !
@@ -321,7 +343,7 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)')     '(A11,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_SGRAN1_',HSURFTYPE,JL,' (-)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%GRAN1(:,JL),&
-              KI,PSG1_WR(:,JL,:))
+                KI,PSG1_WR(:,JL,:))
       !
       !*       11.    Snow Gran2
       !              ----------
@@ -332,7 +354,19 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)')     '(A11,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_SGRAN2_',HSURFTYPE,JL,' (-)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%GRAN2(:,JL),&
-              KI,PSG2_WR(:,JL,:))
+                KI,PSG2_WR(:,JL,:))
+      !  
+      !*       11.b    Snow impur
+      !                ----------
+      ! 
+      DO JIMP=1,NIMPUR
+        WRITE(YFMT,'(A8,I1,A6)')     '(A4,I1,A',ISURFTYPE_LEN,','//YNLAYER//')'
+        WRITE(YRECFM,YFMT) 'SIM_',JIMP,HSURFTYPE,JL
+        YRECFM=ADJUSTL(HPREFIX//YRECFM)
+        WRITE(YFMT,'(A8,I1,A9)')     '(A9,I1,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
+        WRITE(YCOMMENT,YFMT) 'X_Y_SIMP_',JIMP,HSURFTYPE,JL,' (-)'
+        CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,TPSNOW%IMPUR(:,JL,JIMP),IRESP,HCOMMENT=YCOMMENT)
+      ENDDO
       !
       !*       13.   Historical parameter
       !              -------------------
@@ -343,15 +377,15 @@ ELSE
       WRITE(YFMT,'(A6,I1,A9)')     '(A10,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
       WRITE(YCOMMENT,YFMT) 'X_Y_SHIST_',HSURFTYPE,JL,' (-)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%HIST(:,JL),&
-              KI,PHIS_WR(:,JL,:))
-      !
+                KI,PHIS_WR(:,JL,:))
+        !
     ENDIF
     !
     !*       8.    Snow temperature
     !              ----------------
     !
     IF (TPSNOW%SCHEME=='1-L') THEN
-      !
+    !
       WRITE(YFMT,'(A5,I1,A6)')     '(A4,A',ISURFTYPE_LEN,','//YNLAYER//')'
       WRITE(YRECFM,YFMT) 'TSN_',HSURFTYPE,JL
       YRECFM=ADJUSTL(HPREFIX//YRECFM)
@@ -410,7 +444,7 @@ IF (TPSNOW%SCHEME=='CRO') THEN
   YCOMMENT = 'Type of avalanche '
   CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'AVA_TYP',YCOMMENT,KPATCH,KMASK_P,&
                              TPSNOW%AVA_TYP(:),KI,PALB_WR)
-ENDIF
+END IF
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_GR_SNOW',1,ZHOOK_HANDLE)
 !

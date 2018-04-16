@@ -37,7 +37,7 @@ USE MODD_TYPE_SNOW
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00, XG, XLVTT
-USE MODD_SURF_ATM,         ONLY : LNOSOF
+USE MODD_SURF_ATM,         ONLY : LNOSOF,LSLOPE
 USE MODD_CANOPY_TURB,      ONLY : XALPSBL
 !
 USE MODI_CLS_TQ
@@ -159,7 +159,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_SBL',0,ZHOOK_HANDLE)
-!
+!    
 ZTS (:) = 0.
 ZWG (:) = 0.
 ZWGI(:) = 0.
@@ -203,6 +203,8 @@ ENDDO
 ZZ0EFF(:)        = ZZ0(:)
 ZZ0_WITH_SNOW(:) = ZZ0(:)
 !
+ZP_SLOPE_COS(:) = 1./SQRT(1.+PSSO_SLOPE(:)**2)
+IF (LNOSOF .AND. (.NOT. LSLOPE)) ZP_SLOPE_COS(:) = 1.0
 !
 ZLAI(:) = 0.
 ZWRMAX_CF(:) = 0.
@@ -228,7 +230,7 @@ DO JP = 1,IO%NPATCH
   ENDDO
 ENDDO
 !
-WHERE (ZVEG(:)>0)
+WHERE(ZVEG(:)>0)
   ZLAI     (:)= ZLAI     (:) / ZVEG(:)
   ZWRMAX_CF(:)= ZWRMAX_CF(:) / ZVEG(:)
   ZWR      (:)= ZWR      (:) / ZVEG(:)
@@ -257,7 +259,7 @@ DO JL=1,ISNOW_LAYER
         ZSUM_LAYER(IMASK,JL) = ZSUM_LAYER(IMASK,JL) + PK%XPATCH(JI)
       ENDIF
       !
-    ENDDO
+END DO
   ENDDO
   !
   DO JP = 1,IO%NPATCH
@@ -285,7 +287,7 @@ END WHERE
 !
 ZSUM(:)=SUM(ZSUM_LAYER(:,:),DIM=2)
 DEALLOCATE(ZSUM_LAYER)
-! 
+!
 ZWSNOW(:,:) = 0.
 DO JL = 1,ISNOW_LAYER
   DO JP = 1,IO%NPATCH
@@ -319,7 +321,7 @@ DO JP = 1,IO%NPATCH
     ENDIF
     !
   ENDDO
-ENDDO
+ENDDO    
 !
 WHERE(ZSUM(:)>0)         
   ZSNOWALB(:) = ZSNOWALB(:) / ZSUM(:)      

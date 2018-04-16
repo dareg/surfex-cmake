@@ -101,6 +101,7 @@ REAL,DIMENSION(SIZE(PTA)) :: z0h_roof,z0h_town,z0h_road     ! local thermal roug
 REAL,DIMENSION(SIZE(PTA)) :: zustar, zta, ztg
 REAL,DIMENSION(SIZE(PTA)) :: ZVMOD                          ! wind
 INTEGER N
+CHARACTER(LEN=3)  ::YSNOWRES ='RIL'!<Cluzet default value for HSNOWRES>
 !
 !* MASC95 case
 REAL,DIMENSION(SIZE(PTA)) :: ZDIRCOSZW     ! orography slope cosine
@@ -121,7 +122,7 @@ IF (HZ0H=='MASC95') THEN
 !
   CALL SURFACE_CD(PRI, PZREF, PUREF, PZ0, ZZ0H, PCD, PCDN)
 !
-  CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, PVMOD, PZ0, ZZ0H, PAC, PRA, PCH)
+  CALL SURFACE_AERO_COND(PRI, PZREF, PUREF, PVMOD, PZ0, ZZ0H, PAC, PRA, PCH, YSNOWRES)
 !
 !
 !*      2.     Brutsaert 1982  or Kanda 2007 exchange coefficients

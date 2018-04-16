@@ -161,7 +161,7 @@ ENDIF
 ! Exner function at displacement height
 ! For consistancy displacement height has the same pressure as the surface
 !
-CALL SURFACE_RI(PTC, PQC, PEXNS, PEXNA, PTA, PQA,          &
+ CALL SURFACE_RI(PTC, PQC, PEXNS, PEXNA, PTA, PQA,          &
                    ZCUR, ZUCUR, PDIRCOSZW, PVMOD, PRI )
 !
 PRI(:) = MIN(PRI(:),XRIMAX)
@@ -178,7 +178,7 @@ ELSE
 !
 !               -------------------------------------------------
 !
-   CALL SURFACE_AERO_COND(PRI, ZCUR, ZUCUR, PZVMOD, PZ0, PZ0H, ZAC, PRA, PCH)
+   CALL SURFACE_AERO_COND(PRI, ZCUR, ZUCUR, PZVMOD, PZ0, PZ0H, ZAC, PRA, PCH, 'RIL')
 !
 !-------------------------------------------------------------------------------
 !

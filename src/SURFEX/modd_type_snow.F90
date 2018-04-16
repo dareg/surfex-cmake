@@ -27,10 +27,10 @@
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original       20/01/99
-!!      F. solmon      01/06/00 adaptation for patch approach  (+1D)
-!!      V. Masson      01/2004  surface externalization
-!!      P. Samuelsson  07/2014  additional snow albedos
+!!      Original    20/01/99                      
+!!      F. solmon   01/06/00 adaptation for patch approach  (+1D)
+!!      V. Masson   01/2004  surface externalization
+!!      P. Samuelsson 07/2014 additional snow albedos
 !!      P. Hagenmuller 09/2017  Mepra variables
 !-------------------------------------------------------------------------------
 !
@@ -42,7 +42,7 @@ IMPLICIT NONE
 !
 TYPE SURF_SNOW
 !
-CHARACTER(LEN=3)                :: SCHEME    ! snow scheme used
+ CHARACTER(LEN=3)                :: SCHEME    ! snow scheme used
 INTEGER                         :: NLAYER    ! number of layers
 !
 REAL, DIMENSION(:,:), POINTER :: DEPTH
@@ -67,6 +67,7 @@ REAL, DIMENSION(:)  , POINTER :: DEP_HUM     ! height of the uppest continuous b
 REAL, DIMENSION(:)  , POINTER :: NAT_LEV     ! natural risk index (0-6)
 REAL, DIMENSION(:)  , POINTER :: PRO_SUP_TYP ! type of superior profile (0, 4, 5, 6)
 REAL, DIMENSION(:)  , POINTER :: AVA_TYP     ! type of avalanche (0-6)
+REAL, DIMENSION(:,:,:), POINTER :: IMPUR ! impurity content with new dim
 END TYPE SURF_SNOW
 !
 TYPE NSURF_SNOW
@@ -103,6 +104,7 @@ YSURF_SNOW%DEP_HUM     => NULL()
 YSURF_SNOW%NAT_LEV     => NULL()
 YSURF_SNOW%PRO_SUP_TYP => NULL()
 YSURF_SNOW%AVA_TYP     => NULL()
+YSURF_SNOW%IMPUR       => NULL()
 !
 END SUBROUTINE TYPE_SNOW_INIT
 !

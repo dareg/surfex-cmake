@@ -36,7 +36,7 @@ SUBROUTINE DIAG_MISC_ISBA_n (DMK, KK, PK, PEK, AGK, IO, OSURF_MISC_BUDGET, &
 !!       B. Decharme 05/2012 : Carbon fluxes in diag_evap
 !!       B. Decharme 05/2012 : Active and frozen layers thickness for dif
 !!       B. Decharme 06/2013 : Snow temp for EBA scheme (XP_SNOWTEMP not allocated)
-!!
+!!       M. Lafaysse 09/2015 : new Crocus-MEPRA outputs
 !!------------------------------------------------------------------
 !
 !
@@ -50,6 +50,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 !                                     
 USE MODD_TYPE_SNOW
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODI_COMPUT_COLD_LAYERS_THICK
 !
@@ -69,12 +70,13 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 !
 LOGICAL, INTENT(IN) :: OSURF_MISC_BUDGET
 LOGICAL, INTENT(IN) :: OVOLUMETRIC_SNOWLIQ
-REAL,    INTENT(IN) :: PTSTEP        ! timestep for  accumulated values 
-LOGICAL, INTENT(IN) :: OAGRIP
-REAL,    INTENT(IN) :: PTIME   ! current time since midnight
+REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated values 
+LOGICAL, INTENT(IN)               :: OAGRIP
+REAL,    INTENT(IN)               :: PTIME   ! current time since midnight
 INTEGER, INTENT(IN) :: KSIZE
-!
 !    
+!
+!
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PEK%XPSN))    :: ZSNOWTEMP
@@ -93,6 +95,7 @@ IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
 !
 IF (OSURF_MISC_BUDGET) THEN
   !
+  
   DMK%XSWI (:,:)=XUNDEF
   DMK%XTSWI(:,:)=XUNDEF  
   DO JL=1,SIZE(PEK%XWG,2)
@@ -110,8 +113,8 @@ IF (OSURF_MISC_BUDGET) THEN
   DO JL = 1,SIZE(PEK%TSNOW%WSNOW,2)
     DO JI = 1,SIZE(PEK%TSNOW%WSNOW,1)
       ZWORK(JI,JL)  = PEK%TSNOW%WSNOW(JI,JL) / PEK%TSNOW%RHO(JI,JL)
-    ENDDO
-  ENDDO
+    END DO
+  ENDDO  
   !
   DMK%XTWSNOW=0.
   DMK%XTDSNOW=0.
@@ -145,17 +148,17 @@ IF (OSURF_MISC_BUDGET) THEN
   DMK%XFFV   (:) = KK%XFFV  (:)
   DMK%XFSAT  (:) = KK%XFSAT (:)
   DMK%XTTSNOW(:) = ZSNOWTEMP(:)
-  !  
+     !
   IF ( (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') .AND. OVOLUMETRIC_SNOWLIQ ) THEN
-    !
+     !
     WHERE (DMK%XSNOWLIQ(:,:)/=XUNDEF) &
                     DMK%XSNOWLIQ(:,:) = DMK%XSNOWLIQ(:,:) * XRHOLW / DMK%XSNOWDZ(:,:)
     !Check consitency: dz is vertical (?)
-    !
+     
   ENDIF
-  !
-  ! cosine of solar zenith angle 
-  !
+!
+! cosine of solar zenith angle 
+!
   IF (IO%CPHOTO/='NON'.AND.IO%LTR_ML) THEN
        !
        ! Mask where vegetation evolution is performed (just before solar midnight)

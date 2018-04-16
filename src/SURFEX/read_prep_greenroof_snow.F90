@@ -35,6 +35,7 @@
 !!      Original    08/2011 
 !!     M. Lafaysse  08/2013 init XZSNOW or XLWCSNOW
 !      B. Decharme  07/2013 ES snow grid layer can be > to 3 (default 12)
+!!     M. Dumont 02/2016 add snow impurity content
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -83,15 +84,17 @@ INTEGER, INTENT(OUT)           :: KSNOW_LAYER  ! number of snow layers
 !
 CHARACTER(LEN=3) :: CSNOW
 INTEGER :: NSNOW_LAYER
+INTEGER :: NIMPUR
 CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
 LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
 REAL :: XASNOW, XSWEMAX
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, XSG1SNOW, XSG2SNOW,&
                                     XHISTSNOW, XAGESNOW
+                                                               
 INTEGER           :: JLAYER                                    
 !
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW_GR, XZSNOW_GR, XRSNOW_GR, XTSNOW_GR, XLWCSNOW_GR, &
-                                    XSG1SNOW_GR, XSG2SNOW_GR, XHISTSNOW_GR, XAGESNOW_GR
+                                    XSG1SNOW_GR, XSG2SNOW_GR, XHISTSNOW_GR, XAGESNOW_GR                                        
 !
 LOGICAL           :: LFILE
 !
@@ -105,7 +108,7 @@ NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,  &
                             LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,&
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,              &
                             XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,     &
-                            LSWEMAX, XSWEMAX
+                            LSWEMAX, XSWEMAX,NIMPUR
 
 NAMELIST/NAM_PREP_GREENROOF_SNOW/CSNOW_GR, NSNOW_LAYER_GR, CFILE_SNOW_GR, CTYPE_SNOW, &
                             CFILEPGD_SNOW_GR, CTYPEPGD_SNOW,                & 
@@ -141,7 +144,8 @@ IF (LNAM_READ) THEN
   XSG1SNOW_GR(:)    = XUNDEF
   XSG2SNOW_GR(:)    = XUNDEF
   XHISTSNOW_GR(:)   = XUNDEF
-  XAGESNOW_GR(:)    = XUNDEF  
+  XAGESNOW_GR(:)    = XUNDEF
+  NIMPUR=1  
   !
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
   CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)

@@ -110,6 +110,21 @@ REAL, SAVE       :: XZ0ICEZ0SNOW
 ! dependence of melt when snow fraction < unity.
 !
 REAL, SAVE       :: XTAU_SMELT
+! for snow impurity
+REAL,DIMENSION(5), SAVE :: XIMPUR_COEFF !(g/s)
+REAL,DIMENSION(5), SAVE     :: XIMPUR_INIT !(g)
+REAL, SAVE    :: XMAXIMPUR=1         !g
+
+!
+!	 Grooming and Snowmaking option by P.Spandre 20160211
+REAL,SAVE 			:: XPSR_SNOWMAK
+REAL,SAVE 			:: XRHO_SNOWMAK
+REAL, SAVE			:: XTIMESNOWMAK
+REAL, SAVE			:: XPTA_SEUIL
+REAL, DIMENSION(5), SAVE	:: XPROD_SCHEME
+REAL, DIMENSION(9500), SAVE	:: XPROD_COUNT
+REAL, DIMENSION(4), SAVE	:: XSM_END
+INTEGER,SAVE			:: XFREQ_GRO
 !
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
@@ -177,10 +192,24 @@ REAL, PARAMETER       :: XSNOWCRITD = 0.03  ! (m)
 ! Used to prevent numerical problems as snow becomes vanishingly thin. 
 !
 REAL, PARAMETER      :: XSNOWDMIN = 0.000001  ! (m)
-!                                      
+!
+!Coefficients for Morin impurities model
+! (unitless)
+
+REAL,PARAMETER        :: XIMPUR_EFOLD = 0.005 !(m) e-folding of the exponential decay rate with depth below the surface of the middle of the considered snow layer (0.5*PSNOWDZ(JJ,1)) for the deposition of snow impurities
+!  
+!Cluzet et al 2016 liquid water content options parameters
+
+! percentage of the total pore volume to compute the max liquid water holding capacity
+REAL, PARAMETER      :: XPERCENTAGEPORE_B92 = 0.05 !(%) original parameter value from Crocus, according to Brun et al. 1992 
+REAL, PARAMETER      :: XPERCENTAGEPORE_O04 = 0.033!(%) different value used in CLM from Oleson et al. 2004
+!
+REAL, PARAMETER      :: XWHOLDMAX_S02 = 0.08 !(-)        fixed value for the maximum liquid water mass fracton in SNOWPACK (Lehning et al. 2002)
+!                                   
 ! Maximum Richardson number limit for very stable conditions using the ISBA-ES 'RIL' option
 !
-REAL, PARAMETER       :: X_RI_MAX = 0.20
+REAL, SAVE       :: X_RI_MAX
+
 !                                       
 ! ISBA-ES Maximum snow liquid water holding capacity (fraction by mass) parameters:
 !
@@ -244,13 +273,37 @@ REAL, PARAMETER :: XSNOWTHRMCOND_CVAP = -289.99  ! (K)
 !
 ! Crocus thermal conducitivity coefficient from Yen (1981)
 REAL, PARAMETER :: XVRKZ6 = 1.88
+! Cluzet et al 2016, Crocus thermal conductivity coefficients from Calonne et al. 2011
 !
+REAL, PARAMETER :: XSNOWTHRMCOND_C11_1 = 2.5E-6   ! (W m5 K-1 kg-2)
+REAL, PARAMETER :: XSNOWTHRMCOND_C11_2 = -1.23E-4 ! (W m2 K-1 km-1)
+REAL, PARAMETER :: XSNOWTHRMCOND_C11_3 = 0.024    ! (W m-1 K-1) 
 !--------------------------------------------------------------------------------
 ! ISBA-ES CROCUS (Pahaut 1976): snowfall density coefficients:
 !
 REAL, PARAMETER :: XSNOWFALL_A_SN = 109.0  ! kg/m3
 REAL, PARAMETER :: XSNOWFALL_B_SN =   6.0  ! kg/(m3 K)
 REAL, PARAMETER :: XSNOWFALL_C_SN =  26.0  ! kg/(m7/2 s1/2)
+!
+! Cluzet et al 2016, Coefficients for A76 fresh snow density option (from Anderson 76)
+REAL, PARAMETER	      :: XRHOS_A76_1 = 50.  ! (kg m-3)
+REAL, PARAMETER       :: XRHOS_A76_2 = 1.7  ! (K-1)
+REAL, PARAMETER	      :: XRHOS_A76_3 = 15.   ! (K)
+! Coefficents for S02 fresh snow density option (from Schmucki and al. 2014)
+REAL, PARAMETER	      :: XRHOS_S02_1 = 3.28 !
+REAL, PARAMETER	      :: XRHOS_S02_2 = 0.03 !  
+REAL, PARAMETER	      :: XRHOS_S02_3 = -0.36 !
+REAL, PARAMETER	      :: XRHOS_S02_4 = -0.75 ! 
+REAL, PARAMETER	      :: XRHOS_S02_5 = 0.8  !  (fixed relative humidity value when snowing (RH = 0.8)
+REAL, PARAMETER	      :: XRHOS_S02_6 = 0.3  !  
+
+
+! Coefficients for P75 (Pahaut 1975 original law quotesd by Brun 1989 but with different values
+REAL, PARAMETER :: XSNOWFALL_A_SN_P75 = 109.0  ! kg/m3
+REAL, PARAMETER :: XSNOWFALL_B_SN_P75 =   8.0  ! kg/(m3 K) this one is different from Brun 89
+REAL, PARAMETER :: XSNOWFALL_C_SN_P75 =  26.0  ! kg/(m7/2 s1/2)
+
+!
 !
 ! Coefficients for the optimal vertical grid calculation
 REAL, PARAMETER :: XDZ1 = 0.01
@@ -413,7 +466,6 @@ JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_DH,JP_MF_DH,JP_MF_DH,JP_MF_DH
 JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_DH,JP_MF_DH,JP_MF_DH,JP_MF_DH,JP_MF_DH,&
 JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_FC,JP_MF_DH,JP_MF_DH,JP_MF_DH,JP_MF_DH,JP_MF_DH/)
 !
-!
 !------------------------------------------------------------------------------
 ! Parameter of accidental risk calculations
 !
@@ -423,18 +475,18 @@ INTEGER*1, PARAMETER :: JPACC_LOW = 1   ! low
 INTEGER*1, PARAMETER :: JPACC_MOD = 2   ! moderate
 INTEGER*1, PARAMETER :: JPACC_HIG = 3   ! high
 INTEGER*1, PARAMETER :: JPACC_NAN = 4   ! empty
-!
+
 ! Thresholds on strength/stress ratio (-)
 REAL, PARAMETER :: XACC_RAT_HIG = 1.5   ! threshold on strength/stress ratio (-)
 REAL, PARAMETER :: XACC_RAT_MOD = 2.5   ! threshold on strength/stress ratio (-)
-!
+
 ! Threshold on slab shear strength (0.981 kPa)
 REAL, PARAMETER :: XACC_SLA_STR = 1.3
-!
-!
+
+
 !--------------------------------------------------------------------------------------------------
 ! Parameter of natural risk calculations
-!
+
 ! Natural risks indices
 INTEGER*1, PARAMETER :: JPNAT_VLO = 0    !very low
 INTEGER*1, PARAMETER :: JPNAT_LOW = 1    !low
@@ -443,17 +495,17 @@ INTEGER*1, PARAMETER :: JPNAT_MOD = 3    !moderate descending
 INTEGER*1, PARAMETER :: JPNAT_HIG = 4    !high
 INTEGER*1, PARAMETER :: JPNAT_VHI = 5    !very high
 INTEGER*1, PARAMETER :: JPNAT_NAN = 6    !empty
-!
+
 ! Thresholds on strength/stress ratio (-)
 REAL, PARAMETER :: XNAT_RAT_HIG  = 2.0
 REAL, PARAMETER :: XNAT_RAT_MOD  = 3.0
-!
+
 ! Thresholds on release thickness (m)
 REAL, PARAMETER :: XNAT_HEI_MIN  = 0.1
 REAL, PARAMETER :: XNAT_HEI_HIG  = 0.8!0.2
 REAL, PARAMETER :: XNAT_HEI_MOD  = 0.4!0.4
 REAL, PARAMETER :: XNAT_HEI_LOW  = 0.2!0.8
-!
+
 ! Correspondance between classes of (sup. profil type, strenght/stress ratio, release depth) and
 ! natural risk indices
 INTEGER*1,DIMENSION(45),PARAMETER :: JPNAT_TAB = (/&
@@ -475,7 +527,7 @@ JPNAT_VLO,JPNAT_LOW,JPNAT_LOW,&
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOD,&
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOD,&
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOD/)!fake line to be uniform
-!
+
 ! Table indicating how to change the current risk as a function of the current and previous
 ! risk indices for profil sup. NEW
 !!!!!!!TO DO what if JPNAT_NAN = NI1UNDEF
@@ -489,17 +541,17 @@ JPNAT_VLO,JPNAT_LOW,JPNAT_LOW,JPNAT_LOW,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!mod
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!hig
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_MOD,JPNAT_HIG,JPNAT_NAN,&!vhi
 JPNAT_VLO,JPNAT_LOW,JPNAT_MOA,JPNAT_MOD,JPNAT_HIG,JPNAT_VHI,JPNAT_NAN/)!nan
-!
+
 !------------------------------------------------------------------------------
 ! Parameter of superior/inferior profiles characterization
 ! (used for natural risk calculation)
-!
+
 ! Superior profil types
 INTEGER*1, PARAMETER :: JPPRO_SUP_NAN = 6   ! ps_vid in profil.f
 INTEGER*1, PARAMETER :: JPPRO_SUP_NEW = 0   ! aggregation of ps_rec_ins, ps_rec_sta, ps_rec_het, ps_rec_pla
 INTEGER*1, PARAMETER :: JPPRO_SUP_WET = 4   ! ps_fon_deg
 INTEGER*1, PARAMETER :: JPPRO_SUP_FRO = 5   ! ps_fon_gel
-!
+
 ! Inferior profil types
 INTEGER*1, PARAMETER :: JPPRO_INF_NAN = 6   ! pi_vid (6) in profil.f
 INTEGER*1, PARAMETER :: JPPRO_INF_HAR = 0   ! aggregation of pi_hetero (0), pi_fili_pla (3), pi_homo (4), pi_homo_fb (5)

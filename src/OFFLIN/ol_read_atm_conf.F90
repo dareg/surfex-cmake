@@ -3,9 +3,10 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE OL_READ_ATM_CONF (DTCO, U, HGRID, HSURF_FILETYPE, HFORCING_FILETYPE, ODELAYEDSTART_NC, &
-                             KDATESTOP, PDURATION, PTSTEP_FORC, KNI, KYEAR, KMONTH, KDAY,  &
-                             PTIME, PLAT, PLON, PZS, PZREF, PUREF, KTIMESTARTINDEX    )  
+SUBROUTINE OL_READ_ATM_CONF (DTCO, U, HGRID, HSURF_FILETYPE, HFORCING_FILETYPE,  &
+                            ODELAYEDSTART_NC, KDATESTOP, PDURATION, PTSTEP_FORC, &
+                            KNI, KYEAR, KMONTH, KDAY, PTIME, PLAT, PLON, PZS,    &
+                            PZREF, PUREF, KTIMESTARTINDEX    )  
 !
 !==================================================================
 !!****  *OL_READ_ATM_CONF* - Initialization routine
@@ -87,12 +88,11 @@ ELSE IF (HFORCING_FILETYPE == 'ASCII ' .OR. HFORCING_FILETYPE == 'BINARY') THEN
 !
  CALL OL_READ_ATM_CONF_ASCII(DTCO, U, HSURF_FILETYPE,            &
                              HFORCING_FILETYPE, PDURATION,       &
-                             PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
-                             KDAY, PTIME, PLAT, PLON,            &
-                             PZS, PZREF, PUREF                   )  
-!    
+                                PTSTEP_FORC, KNI, KYEAR,KMONTH,     &
+                                KDAY, PTIME, PLAT, PLON,            &
+                                PZS, PZREF, PUREF                   )  
  KTIMESTARTINDEX = 1
-!
+!                              
 ENDIF
 IF (LHOOK) CALL DR_HOOK('OL_READ_ATM_CONF',1,ZHOOK_HANDLE)
 !

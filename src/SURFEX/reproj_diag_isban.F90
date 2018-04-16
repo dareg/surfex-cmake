@@ -212,6 +212,9 @@ IF ( OPROSNOW ) THEN
   ENDIF
   !
 ENDIF
+IF ( PEK%TSNOW%SCHEME=='CRO' ) THEN
+		DMK%XSYTMASS (:)  =  DMK%XSYTMASS (:)  *ZCORR_SLOPE(:)
+ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('REPROJ_DIAG_ISBA_N',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------------

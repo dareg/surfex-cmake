@@ -1,20 +1,21 @@
 !     #########
-!
+
 SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
                         PSNOWDZ, PSNOWSWE, PSNOWRHO, PSNOWGRAN1, PSNOWGRAN2, PSNOWAGE, &
-                        PSNOWHIST, PSNOWTEMP, PSNOWLIQ, PDIRCOSZW, PSNOWDEND, PSNOWSPHER, &
+                        PSNOWHIST, PSNOWTEMP, PSNOWLIQ, PDIRCOSZW, PSNOWIMP, PSNOWDEND, PSNOWSPHER, &
                         PSNOWSIZE, PSNOWSSA, PSNOWTYPEMEPRA, PSNOWRAM, PSNOWSHEAR, &
                         PACC_RAT, PNAT_RAT, &
                         PSNOWDEPTH_1DAYS, PSNOWDEPTH_3DAYS, PSNOWDEPTH_5DAYS, PSNOWDEPTH_7DAYS,&
                         PSNOWSWE_1DAYS, PSNOWSWE_3DAYS, PSNOWSWE_5DAYS,PSNOWSWE_7DAYS,&
-                        PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFTHICKNESS,&
+                        PSNOWRAM_SONDE, PSNOW_WETTHICKNESS, PSNOW_REFTHICKNESS,PSNOWIMP_CONC,&
                         PDEP_HIG, PDEP_MOD, PDEP_SUP, PDEP_TOT, PDEP_HUM,&
                         PACC_LEV, PNAT_LEV, PPRO_SUP_TYP, PPRO_INF_TYP, PAVA_TYP)
-!
 ! Diagnostics of Crocus snowpack model
+! Author: M. Lafaysse, Meteo-France, October 2015
 ! Authors: P. Hagenmuller, Meteo-France, July 2016
 ! Modified Summer 2017 (P. Hagenmuller)
 !
+USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
 ! Note that the Mepra diagnosis is the exact copy of the original Mepra (version in snowtools)
 ! and that this version explicitely contains incoherences (see comments in code and list below).
@@ -43,6 +44,8 @@ SUBROUTINE SNOWCRO_DIAG(HSNOWMETAMO, &
 !
 USE MODD_SURF_PAR,      ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_CSTS,          ONLY : XRHOLI, XRHOLW
+USE MODD_SNOW_METAMO, ONLY : XUEPSI,XVDIAM6
+USE MODD_PREP_SNOW ,ONLY : NIMPUR
 !
 USE MODD_SNOW_PAR,ONLY :&
 XX,XD1,XD2,XD3,&
@@ -124,6 +127,8 @@ REAL, DIMENSION(:),   INTENT(INOUT) :: PPRO_SUP_TYP        ! type of superior pr
 REAL, DIMENSION(:),   INTENT(OUT)   :: PPRO_INF_TYP        ! type of inferior profile (0, 1, 6)
 REAL, DIMENSION(:),   INTENT(INOUT) :: PAVA_TYP            ! type of avalanche (0-6)
 !
+REAL, DIMENSION(:,:,:), INTENT(OUT) :: PSNOWIMP_CONC
+REAL, DIMENSION(:,:,:), INTENT(IN) :: PSNOWIMP
 !
 !
 !########################Declaration of local variables############################################!
@@ -138,7 +143,7 @@ REAL    :: ZDIAM,&                                         ! optical diameter fo
            ZSNOW_DEPTH_TOP,&                               ! vertical depth of the top of the layer (m)
            ZSNOW_HEIGHT_TOP,&                              ! vertical height (from ground) of the top of the layer (m)
            ZNAT_LEV_TMP                                    ! natural risk level before time actualization
-INTEGER :: JJ,&                                            ! loop control over point
+INTEGER :: JJ,JIMP, &                                      ! loop control over point
            JST,&                                           ! loop control over layer
            ICLASS_DEND,&                                   ! dendricity class
            ICLASS_SPHER,&                                  ! sphericity class
@@ -150,7 +155,7 @@ INTEGER :: JJ,&                                            ! loop control over p
            IACC_FROMNAT                                    ! accidental risk level derived from natural one
 LOGICAL :: GMF,&                                           ! to be MF-like (MF/RG, MF, MF/DH, MF/FC)
            GPP,&                                           ! to be PP-like(PP, PP/DF, DF, DF/RG, DF/FC) not strictly equivalent of being dendritic
-           GTHERMSTATE                                     ! thermal_state <= 2
+           GTHERMSTATE,GDENDRITIC                                     ! thermal_state <= 2
 !
 !1d (point dimension). 1D and not scalar because of loop first on JST and after on JJ.
 REAL   , DIMENSION(SIZE(PSNOWSWE,1)) :: ZSNOW_DEPTH,&      ! vertical depth of current layer (m)
@@ -187,8 +192,6 @@ LOGICAL, DIMENSION(SIZE(PSNOWSWE,1)) :: GRAM,&             ! no ram>2 found yet
                                         GMEL_GRO,&         ! is there one layer in sup pro between depth > thr and height >thr with thermal state <= 2
                                         GTHERMSTATE_BOT    ! thermal_state <= 2 of bottom layer
 !
-!
-!
 !########################Initialization of output and local variables##############################!
 !
 ! Two dimensional variables (intitalization not absolutely necessary)
@@ -199,6 +202,7 @@ PSNOWSSA        = XUNDEF
 PSNOWTYPEMEPRA  = XUNDEF
 PSNOWRAM        = XUNDEF
 PSNOWSHEAR      = XUNDEF
+PSNOWIMP_CONC=XUNDEF
 PACC_RAT        = XUNDEF
 PNAT_RAT        = XUNDEF
 !
@@ -265,9 +269,6 @@ GMEL_GRO                = .TRUE.
 GTHERMSTATE_BOT         = .FALSE.
 !
 !
-!
-!PRINT *, 'In snowcrodiag', SIZE(PSNOWSWE,1)
-!
 DO JST=1,SIZE(PSNOWSWE,2)
   DO JJ=1,SIZE(PSNOWSWE,1)
 !
@@ -282,18 +283,38 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !     Computes dendricity, sphericity, grain size, optical dimater and snow type from variables
 !     grain1 and grain2.
 !
-      IF (PSNOWGRAN1(JJ,JST) < 0) THEN
+      ! Carmagnola and Morin had the terrible idea to use SNOWGRAN1 and SNOWGRAN2 with different meanings depending on the physical options.
+      ! This complicates everything and should be changed.
+      ! For now :
+      IF ( HSNOWMETAMO=='B92' ) THEN 
+          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<-XUEPSI )
+      ELSE
+          GDENDRITIC = ( PSNOWGRAN1(JJ,JST)<XVDIAM6*(4.-PSNOWGRAN2(JJ,JST))-XUEPSI )   
+      ENDIF
+!
+      IF (GDENDRITIC) THEN
 !     Dendritic case
 !
-        PSNOWSIZE (JJ,JST) =   XUNDEF !not defined for dendritic snow
-        PSNOWDEND (JJ,JST) = - PSNOWGRAN1(JJ,JST) / XX
-        PSNOWSPHER(JJ,JST) =   PSNOWGRAN2(JJ,JST) / XX
-!
-!       Optical diameter for SSA diagnostic
-        ZDIAM = PSNOWDEND(JJ,JST) * XD1 +(1 - PSNOWDEND(JJ,JST)) * &
-        (PSNOWSPHER(JJ,JST) * XD2 + (1 - PSNOWSPHER(JJ,JST)) * XD3)
-        ZDIAM = ZDIAM / 10000.
-!
+        IF ( HSNOWMETAMO=='B92' ) THEN
+            !Dendricity,sphericty and grain size
+            PSNOWSIZE(JJ,JST)  =  XUNDEF  !Grain size not defined for dendritic snow
+            PSNOWDEND(JJ,JST)  = -PSNOWGRAN1(JJ,JST) / XX
+            PSNOWSPHER(JJ,JST) =  PSNOWGRAN2(JJ,JST) / XX
+
+            !Optical diameter for SSA diagnostic
+            ZDIAM = PSNOWDEND(JJ,JST) * XD1 + (1 - PSNOWDEND(JJ,JST)) * &
+            (PSNOWSPHER(JJ,JST) * XD2 + (1 - PSNOWSPHER(JJ,JST)) * XD3)
+        ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
+              ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 ) 
+        ZDIAM = ZDIAM/10000.
+
+
+        ELSE
+            PSNOWSIZE(JJ,JST)  = XUNDEF
+            PSNOWSPHER(JJ,JST) = PSNOWGRAN2(JJ,JST)
+            PSNOWDEND(JJ,JST)  = MAX(0.,MIN(1.,((1/XVDIAM6) * PSNOWGRAN1(JJ,JST)-4. + PSNOWSPHER(JJ,JST)) / &
+                                                     (PSNOWSPHER(JJ,JST) - 3.)))
+        ENDIF
 !       10 classes of dendricity 0:[0,0.1[, ..., 9:[0.9,1.0[ (value 1.0 does not exist)
         ICLASS_DEND = INT(10 * PSNOWDEND(JJ,JST))
 
@@ -307,14 +328,27 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ELSE
 !     Non dendritic case
 !
-        PSNOWSIZE (JJ,JST) = PSNOWGRAN2(JJ,JST)
-        PSNOWDEND (JJ,JST) = 0
-        PSNOWSPHER(JJ,JST) = PSNOWGRAN1(JJ,JST) / XX
-!
-!       Optical diameter for SSA diagnostic
-        ZDIAM = PSNOWSIZE(JJ,JST) * PSNOWSPHER(JJ,JST) + &
-        MAX( 0.0004, 0.5*PSNOWSIZE(JJ,JST) ) * ( 1.-PSNOWSPHER(JJ,JST) )
-!
+        IF ( HSNOWMETAMO=='B92' ) THEN
+          !Dendricity,sphericty and grain size
+          PSNOWSIZE(JJ,JST)  = PSNOWGRAN2(JJ,JST)
+          PSNOWDEND(JJ,JST)  = 0
+          PSNOWSPHER(JJ,JST) = PSNOWGRAN1(JJ,JST) / XX
+        
+          !Optical diameter for SSA diagnostic
+          ZDIAM = PSNOWSIZE(JJ,JST) * PSNOWSPHER(JJ,JST) + &
+          MAX( 0.0004, 0.5*PSNOWSIZE(JJ,JST) ) * ( 1.-PSNOWSPHER(JJ,JST) )
+        ELSE
+          PSNOWDEND(JJ,JST)  = 0
+          PSNOWSPHER(JJ,JST) = PSNOWGRAN2(JJ,JST)
+          PSNOWSIZE(JJ,JST)  = 2.*PSNOWGRAN1(JJ,JST)/(1+  PSNOWSPHER(JJ,JST))
+          IF (PSNOWSPHER(JJ,JST)==0.) THEN
+                  PSNOWSIZE(JJ,JST)=0.0008
+          ELSE
+              IF (PSNOWSIZE(JJ,JST)<0.0008) THEN
+                  PSNOWSIZE(JJ,JST)=(1./PSNOWSPHER(JJ,JST))*(PSNOWGRAN1(JJ,JST)-0.0004*(1-PSNOWSPHER(JJ,JST)))
+              END IF
+          END IF
+        ENDIF
 !       10 classes of sphericity 0:[0,0.05[, 1:[0.05,0.15[, ..., 9:[0.85,1.0]. Strange
         ICLASS_SPHER = MIN(INT(10 * PSNOWSPHER(JJ,JST) + 0.05),9)
 !
@@ -326,21 +360,12 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ELSE
           ICLASS_SIZE = 2
         ENDIF
-!        IF     (PSNOWSIZE(JJ,JST) < 0.00055) THEN
-!          ICLASS_SIZE = 0
-!        ELSEIF (PSNOWSIZE(JJ,JST) < 0.00105) THEN
-!          ICLASS_SIZE = 1
-!        ELSE
-!          ICLASS_SIZE = 2
-!        ENDIF
-!
+
 !       Overall 10x3x6 classes from 1 to 180 (included)
 !       Historical variable {0,1,...,5} already defines 6 classes
         PSNOWTYPEMEPRA(JJ,JST) = JPTAB_NODEND(1 + ICLASS_SPHER + ICLASS_SIZE * 10 +&
                                               NINT(PSNOWHIST(JJ,JST)) * 30)
-!
       ENDIF
-!
 !     For all snow types (dendritic and non-dendritic)
 !
 !     Additional condition to define MF/RG
@@ -380,7 +405,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ZRAM_DEN = MAX(1., 0.018 * PSNOWRHO(JJ,JST) - 1.363)
         ZRAM_ANG = MAX(2., ZRAM_FIN * PSNOWSPHER(JJ,JST) + (1 - PSNOWSPHER(JJ,JST)) * (0.5 * ZRAM_FIN + 0.6))
         PSNOWRAM(JJ,JST) = PSNOWDEND(JJ,JST) * ZRAM_DEN + (1 - PSNOWDEND(JJ,JST)) * ZRAM_ANG
-!
       ELSE
 !     Non-dendritic cases
 !
@@ -488,7 +512,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ELSE
           ZSHE_SPH = 1.025 + 0.5 * (PSNOWSPHER(JJ,JST) - 0.75)
         ENDIF
-!
 !       ZSHE_DEN dendricity
 !       Qualitatively, ZSHE_DEN decreases almost linearly from (dendr,ZSHE_DEN) = (0,1),
 !       i.e. old snow, to (dendr,ZSHE_DEN) = (1.0,0.45), i.e. recent snow.
@@ -871,11 +894,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !     Compute depth and SWE of snow with age < X days (X in {1,3,5,7})
 !     WARNING: there is some rounding on age that may difer between fortran and python snowtools
 !     WARNNG: PSNOWSWE and PSNOWDEPTH are slope perpendicular. The projection is done later in surfex
-!
       IF(PSNOWAGE(JJ,JST) <= 7) THEN
         PSNOWDEPTH_7DAYS(JJ) = PSNOWDEPTH_7DAYS(JJ) + PSNOWDZ (JJ,JST)
         PSNOWSWE_7DAYS  (JJ) = PSNOWSWE_7DAYS  (JJ) + PSNOWSWE(JJ,JST)
-!
         IF(PSNOWAGE(JJ,JST) <= 5) THEN
           PSNOWDEPTH_5DAYS(JJ) = PSNOWDEPTH_5DAYS(JJ) + PSNOWDZ (JJ,JST)
           PSNOWSWE_5DAYS  (JJ) = PSNOWSWE_5DAYS  (JJ) + PSNOWSWE(JJ,JST)
@@ -905,7 +926,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ELSE
         GWET(JJ)=.FALSE.
       ENDIF
-!
 !     Depth of top refrozen snow
       IF (GREFROZEN(JJ).AND.(PSNOWHIST(JJ,JST)>=2).AND.(PSNOWTEMP(JJ,JST)<273.15)) THEN
         PSNOW_REFTHICKNESS(JJ) = PSNOW_REFTHICKNESS(JJ) + PSNOWDZ(JJ,JST)
@@ -914,14 +934,16 @@ DO JST=1,SIZE(PSNOWSWE,2)
       ENDIF
 !
 !     Specific surface area
-!     in snowpro the density of ice (XRHOLI) is 900 kg/m3 instead of 917 kg/m3 (SURFEX)
-!     which needs to be changed in snow_pro.py
-!     Note: only tested with B92
       IF ( HSNOWMETAMO=='B92' ) THEN
         PSNOWSSA(JJ,JST) = 6. / (XRHOLI*ZDIAM)
       ELSE
         PSNOWSSA(JJ,JST) = 6. / (XRHOLI*PSNOWGRAN1(JJ,JST))
       END IF
+      !SnowImpurity Concentration
+      
+      DO JIMP=1,NIMPUR !Modif the cond
+        PSNOWIMP_CONC(JJ,JST,JIMP)=PSNOWIMP(JJ,JST,JIMP)/(1000*PSNOWSWE(JJ,JST)) 
+      END DO 
 !
     ENDIF
   END DO
@@ -936,14 +958,11 @@ DO JJ=1,SIZE(PSNOWSWE,1)
     IPRO_SUP_LIM(JJ) = JST
     PDEP_SUP    (JJ) = ZSNOW_DEPTH(JJ)
   ENDIF
-!
   PDEP_TOT   (JJ) = ZSNOW_DEPTH(JJ)
   ZSNOW_DEPTH(JJ) = 0
   ZDEP_INF   (JJ) = PDEP_TOT(JJ) - PDEP_SUP(JJ)
   GWET       (JJ) = .TRUE.
 END DO
-!
-!
 !     #######################Second layer-point loop##############################################!
 DO JST=1,SIZE(PSNOWSWE,2)
   DO JJ=1,SIZE(PSNOWSWE,1)
@@ -1287,7 +1306,6 @@ DO JJ=1,SIZE(PSNOWSWE,1)
   IF(PDEP_MOD(JJ).EQ.0) THEN
     PDEP_MOD(JJ) = XUNDEF
   ENDIF
-!
 ENDDO
 !
 END SUBROUTINE SNOWCRO_DIAG

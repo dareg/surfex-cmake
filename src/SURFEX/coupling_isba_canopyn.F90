@@ -8,7 +8,8 @@ SUBROUTINE COUPLING_ISBA_CANOPY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID
                                    HPROGRAM, HCOUPLING, PTSTEP,                            &
                                    KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                    PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
-                                   PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
+                                   PQA, PTA, PRHOA, PSV, PCO2, PIMPWET,PIMPDRY, HSV, 			 &
+																	 PRAIN, PSNOW, PLW,     &
                                    PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH,    &
                                    PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,   &
                                    PEMIS, PTSURF, PZ0,PZ0H, PQSURF, PPEW_A_COEF,           &
@@ -50,6 +51,7 @@ USE MODD_SSO_n, ONLY : SSO_t, SSO_NP_t
 USE MODD_SFX_GRID_n, ONLY : GRID_t, GRID_NP_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_P_t, ISBA_PE_t, ISBA_NK_t, ISBA_NP_t, ISBA_NPE_t
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_DST_n, ONLY : DST_NP_t
 
@@ -153,6 +155,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model CANOPY           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -363,9 +367,9 @@ ELSE
 !
   CALL INIT_COUPLING(HCOUPLING, PPS, PPA, PTA, PQA, &
                      PU, PV, PUREF, PZREF,          &
-                     PPEW_A_COEF, PPEW_B_COEF,      &
-                     PPET_A_COEF, PPET_B_COEF,      &
-                     PPEQ_A_COEF, PPEQ_B_COEF,      &
+                      PPEW_A_COEF, PPEW_B_COEF,   &
+                      PPET_A_COEF, PPET_B_COEF,   &
+                      PPEQ_A_COEF, PPEQ_B_COEF,   &
                      ZPA, ZTA, ZQA, ZU, ZV, ZUREF,  &
                      ZZREF, ZPEW_A_COEF,            &
                      ZPEW_B_COEF, ZPET_A_COEF,      &
@@ -382,12 +386,13 @@ END IF
  CALL COUPLING_ISBA_n(DTCO, UG, U, USS, NAG, CHI, NCHI, DTV, ID, NGB, GB, ISS,NISS, IG, &
                       NIG, IO, S, K, NK, NP, NPE, NDST, SLT, HPROGRAM, GCOUPLING,       &
                       PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
-                      PZENITH2, ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2,  &
+                      PZENITH2,  PAZIM, ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA,   &
+											PSV, PCO2,PIMPWET,PIMPDRY, &
                       HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,    &
                       PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB,         &
                       PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, ZPEW_A_COEF,          &
                       ZPEW_B_COEF, ZPET_A_COEF, ZPEQ_A_COEF, ZPET_B_COEF, ZPEQ_B_COEF,  &
-                      'OK' )
+             'OK'                                                                          )
 !
 !-------------------------------------------------------------------------------------
 !
@@ -402,8 +407,8 @@ IF (.NOT. IO%LCANOPY) RETURN
 !*      4.     Computes the impact of surface on air
 !              -------------------------------------
 !
- CALL INIT_FORC(ZFORC_U, ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, &
-                ZFORC_T, ZDFORC_TDT, ZFORC_Q, ZDFORC_QDQ )
+ CALL INIT_FORC( ZFORC_U, ZDFORC_UDU, ZFORC_E, ZDFORC_EDE, &
+               ZFORC_T, ZDFORC_TDT, ZFORC_Q, ZDFORC_QDQ )
 !
 ZSFLUX_U = - SQRT(PSFU(:)**2+PSFV(:)**2) / PRHOA(:)
 ZSFLUX_T(:) = PSFTH(:) / XCPD * ZEXNA(:) / PRHOA(:)
@@ -417,7 +422,7 @@ ZSFLUX_Q(:) = PSFTQ(:)
 IF (IO%LCANOPY_DRAG) THEN
 !
   DO JJ=1,KI
-    ZUW_GROUND   (JJ) = -SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/ PRHOA(JJ)
+    ZUW_GROUND(JJ)    = -SQRT(PSFU(JJ)**2+PSFV(JJ)**2)/ PRHOA(JJ)
     ZDUWDU_GROUND(JJ) = 0.
     IF (SB%XU(JJ,1)/=0.) ZDUWDU_GROUND(JJ) = 2. * ZUW_GROUND(JJ) / SB%XU(JJ,1)
   ENDDO

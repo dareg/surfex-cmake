@@ -136,7 +136,9 @@ IF (LNAM_READ) THEN
 ENDIF
 !
 IF (IMI.NE.-1) THEN
+ print*, "read-surf-atm-confn call UPDATE_NAM_SSOn ligne 141" 
  CALL UPDATE_NAM_SSOn(USS)
+ print*, "read-surf-atm-confn ligne 143"
  CALL UPDATE_NAM_CH_CONTROLn(CHU)
  CALL UPDATE_NAM_CH_SURFn(CHU)
  CALL UPDATE_NAM_DIAG_SURF_ATMn(DGO)

@@ -3,8 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE WRITE_DIAG_MISC_ISBA_n (DTCO, HSELECT, OSNOWDIMNC, U, OPATCH_BUDGET, D,  &
-                                         ND, DM, NDM, IO, S, K, NP, TPSNOW, HPROGRAM)
+      SUBROUTINE WRITE_DIAG_MISC_ISBA_n (DTCO, HSELECT, OSNOWDIMNC, ORESETCUMUL, U, OPATCH_BUDGET, &
+                                         D, ND, DM, NDM, IO, S, K, NP, TPSNOW, HPROGRAM)
 !     #################################
 !
 !!****  *WRITE_DIAG_MISC_ISBA* - writes the ISBA diagnostic fields
@@ -63,8 +63,9 @@ USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t
 USE MODD_XIOS, ONLY : LALLOW_ADD_DIM
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
+USE MODD_PREP_SNOW,        ONLY :   NIMPUR
 !
-USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR, NOBSTYPE, NBOUTPUT
+USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR, NOBSTYPE, NBOUTPUT,  CVAR, COBS
 !                                 
 USE MODD_AGRI,            ONLY :   LAGRIP
 !
@@ -73,6 +74,10 @@ USE MODI_WRITE_SURF
 USE MODI_WRITE_FIELD_2D_PATCH
 USE MODI_WRITE_FIELD_1D_PATCH
 USE MODI_END_IO_SURF_n
+!
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE, ONLY : XTSTEP_OUTPUT
+#endif
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -85,7 +90,7 @@ IMPLICIT NONE
 !
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
-LOGICAL, INTENT(IN) :: OSNOWDIMNC
+LOGICAL, INTENT(IN) :: OSNOWDIMNC, ORESETCUMUL
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 LOGICAL, INTENT(IN) :: OPATCH_BUDGET
 TYPE(DIAG_t), INTENT(INOUT) :: D
@@ -105,13 +110,13 @@ TYPE(SURF_SNOW), INTENT(IN) :: TPSNOW
 !
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=1) :: YVAR, YOBS, YTIM
- CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
+ CHARACTER(LEN=12) :: YRECFM,YREFIMPUR          ! Name of the article to be read
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
 REAL, DIMENSION(SIZE(DM%XSWI,1)) :: ZMAX
-INTEGER           :: JL, JJ, JVAR, JOBS, JP, JI, JT, JK, ISIZE
+INTEGER           :: JL, JJ, JVAR, JOBS, JP, JI, JT, JK, ISIZE, IDEPTH,JIMP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -185,7 +190,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         IF (NP%AL(JP)%NWG_LAYER(JI)/=NUNDEF.AND.NP%AL(JP)%NWG_LAYER(JI)>ZMAX(JJ)) THEN
           ZMAX(JJ) = NP%AL(JP)%NWG_LAYER(JI)
         ENDIF
-      ENDDO
+      ENDDO 
     ENDDO
     !
     DO JJ=1,SIZE(DM%XSWI,1)
@@ -194,12 +199,12 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         IF(JL>ZMAX(JJ))THEN  
           DM%XSWI (JJ,JL) = XUNDEF
           DM%XTSWI(JJ,JL) = XUNDEF
-        ENDIF
+  ENDIF         
       ENDDO 
-
+  !
     ENDDO
   ENDIF         
-  !
+    !
   DO JL=1,IO%NGROUND_LAYER
     !
     WRITE(YLVL,'(I2)') JL
@@ -241,8 +246,8 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,DM%XSOIL_WG(:),IRESP,HCOMMENT=YCOMMENT)
   !
   IF (.NOT.LALLOW_ADD_DIM) THEN
-    YRECFM='WGI_ISBA'
-    YCOMMENT='total volumetric ice content (solid) over the soil column (m3/m3)'
+  YRECFM='WGI_ISBA'
+  YCOMMENT='total volumetric ice content (solid) over the soil column (m3/m3)'
     CALL WRITE_SURF(HSELECT, HPROGRAM,YRECFM,DM%XSOIL_WGI(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF
   !
@@ -347,9 +352,59 @@ IF (DM%LSURF_MISC_BUDGET) THEN
 
     YCOMMENT='Type of inferior profile'
     CALL WRITE_SURF(HSELECT,HPROGRAM,'PRO_INF_TYP',DM%XPRO_INF_TYP(:),IRESP,HCOMMENT=YCOMMENT)
-    !      
   ENDIF
-  !  
+!
+  IF (TPSNOW%SCHEME=='CRO') THEN
+      YRECFM='SYTFLX_P'
+      YCOMMENT='Sytron_erosion_accumulation_flux (kg/m2/s)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
+      ! 
+      YRECFM='SYTFLXC_P'
+      YCOMMENT='Total_Sytron_erosion_accumulation_mass (kg/m2)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
+!
+      YRECFM='PCOUNT_P'
+      YCOMMENT='Snow production counter (s)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
+!
+      IF (ORESETCUMUL) THEN
+        ! Output variables are not instantaneous but averaged over the output time step      
+         DM%XSYTMASS(:) = DM%XSYTMASSC(:)/XTSTEP_OUTPUT
+         
+         DM%XSYTMASSC(:) = 0.
+      ENDIF
+
+      YRECFM='SYTFLX_ISBA'
+      YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
+      ! 
+      YRECFM='SYTFLXC_ISBA'
+      YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+      DO JIMP=1,NIMPUR
+        WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
+        WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
+        CALL WRITE_SURF(HSELECT,HPROGRAM,YREFIMPUR,DM%XIMPUR(:,:,JIMP),IRESP,HCOMMENT=YCOMMENT)
+      ENDDO      
+!         
+      YRECFM='AVG_PCOUNT'
+      YCOMMENT='Snow production counter (s)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
+          
+	ENDIF
+!
+	IF (DM%LPROSNOW) THEN		
+		IF (DM%LPROBANDS) THEN
+			YCOMMENT='Snow spectral albedo'               
+			CALL WRITE_SURF(HSELECT,HPROGRAM,'SPEC_ALB_P',DM%XSPEC_ALB(:,:),IRESP,&
+						  HCOMMENT=YCOMMENT)
+			YCOMMENT='Diffuse to total spectral irradiance ratio'               
+			CALL WRITE_SURF(HSELECT,HPROGRAM,'DIFF_RATIO_P',DM%XDIFF_RATIO(:,:),IRESP,&
+						  HCOMMENT=YCOMMENT)
+		ENDIF                      
+	ENDIF
+  !
   !        2.6    SGH scheme
   !               ----------
   !
@@ -474,14 +529,14 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     !    
     !        3.2    Snow fractions
     !               --------------
-    !  
+    !
     YRECFM='PSNG_'
     YCOMMENT='snow fraction per patch over ground '
     DO JP=1,IO%NPATCH
       CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
           NP%AL(JP)%NR_P,NDM%AL(JP)%XPSNG(:),ISIZE,S%XWORK_WR)
     ENDDO  
-    !   
+    !
     YRECFM='PSNV_'
     YCOMMENT='snow fraction per patch over vegetation'
     DO JP=1,IO%NPATCH
@@ -541,7 +596,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     !
     !
     IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
-      !
+    !
       YRECFM='TS_'
       YCOMMENT='total surface temperature (isba+snow) per patch'
       DO JP=1,IO%NPATCH
@@ -599,7 +654,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_1DY_',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNDPT_1DY(:),ISIZE,S%XWORK_WR)
       ENDDO        
-      !
+        !
       YCOMMENT=   'accumulated snow thickness for past 3 days per patch'   
       DO JP=1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SD_3DY_',YCOMMENT,JP,&
@@ -803,10 +858,13 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         ENDDO
         !
       END DO
-      !
+      !        
     ENDIF
+    
+        
+  !
     !
-  ENDIF
+  END IF
   !
   IF (LAGRIP) THEN
     !

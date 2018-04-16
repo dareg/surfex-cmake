@@ -6,9 +6,10 @@
 SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, NDST, SLT, HPROGRAM, HCOUPLING, PTSTEP, &
                                  KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH,    &
                                  PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, &
-                                 PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW,         &
+                                 PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW, PDIR_SW,  &
+																 PSCA_SW,         &
                                  PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,&
-                                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, &
+                 								 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, &
                                  PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,          &
                                  PPET_B_COEF, PPEQ_B_COEF, HTEST    )  
 !     ###############################################################################
@@ -39,6 +40,7 @@ SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, NDST, SLT, HPROGRAM, HCOU
 !!     B. Decharme  04/2013 new coupling variables and init local variables
 !!-------------------------------------------------------------------
 !
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
@@ -107,6 +109,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -235,7 +239,8 @@ DO JT=1,IT
                                  IM%S, IM%K, IM%NK, IM%NP, IM%NPE, NDST, SLT,                  &
                                  HPROGRAM, HCOUPLING, ZTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI,  &
                                  KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, &
-                                 PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,   &
+                                 PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,      &
+																 PRAIN, PSNOW, PLW,   &
                                  PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, ZSFTQ, ZSFTH, ZSFTS,   &
                                  ZSFCO2, ZSFU, ZSFV, ZTRAD, ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTSURF, &
                                  ZZ0, ZZ0H, ZQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,     &

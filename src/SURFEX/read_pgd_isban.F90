@@ -478,6 +478,13 @@ ALLOCATE(ISS%XSSO_STDEV(IG%NDIM))
 !
  CALL PACK_SSO(USS,HPROGRAM,U%NR_NATURE, ISS)
 !
+!* direction of subgrid-scale orography  
+!
+ALLOCATE(USS%XSSO_DIR(IG%NDIM))
+YRECFM='SSO_DIR'
+ CALL READ_SURF(&
+                HPROGRAM,YRECFM,USS%XSSO_DIR(:),IRESP)
+!
 !* orographic runoff coefficient
 !
 ALLOCATE(K%XRUNOFFB(IG%NDIM))

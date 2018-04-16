@@ -58,6 +58,7 @@ TYPE DIAG_MISC_ISBA_t
   LOGICAL :: LSURF_DIAG_ALBEDO   ! flag to write out diagnostic albedo
   LOGICAL :: LSURF_MISC_DIF      ! flag for miscellaneous terms of isba-dif scheme
   LOGICAL :: LPROSNOW            ! flag for Crocus-MEPRA outputs
+  LOGICAL :: LPROBANDS           ! flag for Crocus spectral ouputs
   LOGICAL :: LVOLUMETRIC_SNOWLIQ ! volumetric snow liquid water content (kg m-3)  
 !
 !* variables for each patch
@@ -67,13 +68,14 @@ TYPE DIAG_MISC_ISBA_t
 !      
   REAL, POINTER, DIMENSION(:,:) :: XSWI        ! Soil wetness index
   REAL, POINTER, DIMENSION(:,:) :: XTSWI       ! Total soil wetness index
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_SWI     ! Soil wetness index
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_TSWI    ! Total Soil wetness index
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_TWG     ! Soil water content (liquid+ice) (kg.m-2)
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_TWGI    ! Soil ice content (kg.m-2)
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_WG     ! Soil water content (liquid+ice) (m3.m-3)
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_WGI    ! Soil ice content (m3.m-3)  
+  REAL, POINTER, DIMENSION(:)     :: XSOIL_SWI     ! Soil wetness index
+  REAL, POINTER, DIMENSION(:)     :: XSOIL_TSWI    ! Total Soil wetness index
+  REAL, POINTER, DIMENSION(:)     :: XSOIL_TWG     ! Soil water content (liquid+ice) (kg.m-2)
+  REAL, POINTER, DIMENSION(:)     :: XSOIL_TWGI    ! Soil ice content (kg.m-2)
+  REAL, POINTER, DIMENSION(:)     :: XSOIL_WG     ! Soil water content (liquid+ice) (m3.m-3)
+  REAL, POINTER, DIMENSION(:)     :: XSOIL_WGI    ! Soil ice content (m3.m-3)  
 !     
+!
   REAL, POINTER, DIMENSION(:) :: XFRD2_TSWI      ! ISBA-FR-DG2 comparable soil wetness index (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWG       ! ISBA-FR-DG2 comparable soil water content (liquid+ice) (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWGI      ! ISBA-FR-DG2 comparable soil ice content (DIF option)  
@@ -154,6 +156,18 @@ TYPE DIAG_MISC_ISBA_t
 !                                               ! content
   REAL, POINTER, DIMENSION(:) :: XCT        ! area-averaged heat capacity
   REAL, POINTER, DIMENSION(:) :: XRS        ! stomatal resistance                            (s/m)
+!
+  REAL, POINTER, DIMENSION(:,:) :: XSPEC_ALB ! spectral snow albedo
+
+  REAL, POINTER, DIMENSION(:,:) :: XDIFF_RATIO ! spectral diffuse to total ratio
+!
+  REAL, POINTER, DIMENSION(:,:,:) :: XIMPUR ! Impurity concentration in g/g
+!
+  REAL, POINTER, DIMENSION(:) :: XSYTMASS    ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2/s)
+  REAL, POINTER, DIMENSION(:) :: XSYTMASSC   ! Eroded/accumulated snow mass (Crocus/SYTRON) (kg/m2)
+  
+  REAL, POINTER, DIMENSION(:) :: XPRODCOUNT    ! Snow production counter (s)
+!
 !
 !------------------------------------------------------------------------------
 !
@@ -269,11 +283,14 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XWGEQ)
   NULLIFY(DMI%XCT)
   NULLIFY(DMI%XRS)
+  NULLIFY(DMI%XIMPUR)
+  NULLIFY(DMI%XSYTMASS)
+  NULLIFY(DMI%XSYTMASSC)
+  NULLIFY(DMI%XPRODCOUNT)
 DMI%LSURF_MISC_BUDGET=.FALSE.
 DMI%LSURF_DIAG_ALBEDO=.FALSE.
 DMI%LSURF_MISC_DIF=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_MISC_ISBA_INIT
-
 
 END MODULE MODD_DIAG_MISC_ISBA_n

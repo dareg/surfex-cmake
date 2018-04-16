@@ -6,11 +6,12 @@
 SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DGO, DL, DLC, NDST, SLT, &
                               HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, &
                               KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS,&
-                              PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,      &
-                              PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS,      &
-                              PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF,    &
+                              PU, PV, PQA, PTA, PRHOA, PSV, PCO2, PIMPWET, PIMPDRY, HSV, PRAIN,&
+															PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, &
+                              PSFTS,PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, &
                               PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,        &
                               PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST  )  
+
 !     ###############################################################################
 !
 !!****  *COUPLING_NATURE_n * - Chooses the surface schemes for natural continental parts  
@@ -35,6 +36,9 @@ SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DGO, DL, DLC, NDST, SLT
 !!      B. Decharme  04/2013 new coupling variables
 !!      P. Le Moigne 03/2015 tsz0 time management
 !!--------------------------------------------------------------------
+!
+!
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
@@ -114,6 +118,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -153,7 +159,8 @@ IF (U%CNATURE=='ISBA  ') THEN
   CALL COUPLING_ISBA_SVAT_n(DTCO, UG, U, USS, IM, NDST, SLT, HPROGRAM, HCOUPLING,  PTSTEP,    &
                             KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,  PTSUN, PZENITH,       &
                             PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV,&
-                            PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS,  &
+                            PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW,  &
+														PSW_BANDS, PPS,  &
                             PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB,   &
                             PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,         &
                             PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,'OK')  
@@ -161,7 +168,8 @@ ELSE IF (U%CNATURE=='TSZ0  ') THEN
   CALL COUPLING_TSZ0_n(DTCO, UG, U, USS, IM, DTZ,  NDST, SLT,     &
                        HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIMEC, KI,    &
                        KSV, KSW, PTSUN, PZENITH,  PZENITH2, PAZIM, PZREF, PUREF, PZS,   &
-                       PU, PV, PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,      &
+                       PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN,  &
+											 PSNOW, PLW,      &
                        PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS,      &
                        PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF,    &
                        PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF,  PPET_A_COEF,       &

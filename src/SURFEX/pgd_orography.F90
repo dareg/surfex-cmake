@@ -54,6 +54,7 @@ USE MODD_PGD_GRID,       ONLY : NL, CGRID, XGRID_PAR
 USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, XSSQO, LSSQO, NSSO, &
                                 XEXT_ALL, XSUMVAL, NSIZE
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
+USE MODD_CSTS,           ONLY : XPI
 !
 USE MODI_GET_LUOUT
 USE MODI_OPEN_AUX_IO_SURF
@@ -112,9 +113,11 @@ LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed b
 INTEGER :: ILUOUT    ! output listing logical unit
 !
 
-REAL,DIMENSION(:),POINTER :: ZSLOPE ! degrees
+REAL,DIMENSION(:),POINTER :: ZSLOPE,ZASPECT ! degrees
 INTEGER::JJ
-REAL,PARAMETER :: PP_DEG2RAD= 3.141592654/180.
+!REAL,PARAMETER :: PP_DEG2RAD= XPI/180.
+REAL  :: PP_DEG2RAD
+
 LOGICAL:: LPRESENT
 
 LOGICAL, DIMENSION(NL)   :: GSSO        ! mask where SSO are computed
@@ -132,7 +135,7 @@ INTEGER                  :: IZS         ! size of orographic array in atmospheri
 !
  CHARACTER(LEN=28)        :: YZS         ! file name for orography
  CHARACTER(LEN=6)         :: YFILETYPE   ! data file type
-CHARACTER(LEN=28)        :: YSLOPE         ! file name for orography
+CHARACTER(LEN=28)        :: YSLOPE         ! file name for slope and aspect
 CHARACTER(LEN=6)         :: YSLOPEFILETYPE   ! data file type
 REAL                     :: XUNIF_ZS    ! uniform orography
  CHARACTER(LEN=3)         :: COROGTYPE   ! orogpraphy type 
@@ -154,13 +157,15 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
+ PP_DEG2RAD= XPI/180.
+!
 !-------------------------------------------------------------------------------
 !
 !*    2.      Reading of namelist
 !             -------------------
 !
  CALL READ_NAM_PGD_OROGRAPHY(HPROGRAM, YZS, YFILETYPE, XUNIF_ZS, &
-                              COROGTYPE, XENV, LIMP_ZS, &
+                              COROGTYPE, XENV, LIMP_ZS , &
                               YSLOPE, YSLOPEFILETYPE, LEXPLICIT_SLOPE)  
 !
  CALL TEST_NAM_VAR_SURF(ILUOUT,'YSLOPEFILETYPE',YSLOPEFILETYPE,'      ','NETCDF')
@@ -303,7 +308,7 @@ ELSEIF (LEN_TRIM(YZS)==0) THEN
   WRITE(ILUOUT,*) ' '
   CALL ABOR1_SFX('PGD_OROGRAPHY: NO PRESCRIBED OROGRAPHY NOR INPUT FILE')
 !  
-ELSEIF (LIMP_ZS) THEN !LIMP_ZS (impose topo from input file at the same resolution)
+ELSEIF(LIMP_ZS)THEN !LIMP_ZS (impose topo from input file at the same resolution)
 !
   IF(YFILETYPE=='NETCDF')THEN
      
@@ -311,21 +316,21 @@ ELSEIF (LIMP_ZS) THEN !LIMP_ZS (impose topo from input file at the same resoluti
     CALL READ_PGD_NETCDF(UG, U, USS, &
                           HPROGRAM,'SURF  ','      ',YZS,'ZS                  ',U%XZS)
      
-    USS%XSIL_ZS(:)    = U%XZS(:)
-    USS%XAVG_ZS(:)    = U%XZS(:)
-    USS%XMIN_ZS(:)    = U%XZS(:)
-    USS%XMAX_ZS(:)    = U%XZS(:)
-    USS%XSSO_STDEV(:) = 0.
-    USS%XHO2IP(:)     = 0.
-    USS%XHO2IM(:)     = 0.
-    USS%XHO2JP(:)     = 0.
-    USS%XHO2JM(:)     = 0.
-    USS%XAOSIP(:)     = 0.
-    USS%XAOSIM(:)     = 0.
-    USS%XAOSJP(:)     = 0.
-    USS%XAOSJM(:)     = 0.
-    USS%XSSO_ANIS(:)  = 0.
-    USS%XSSO_DIR(:)   = 0.
+     USS%XSIL_ZS(:)    = U%XZS(:)
+     USS%XAVG_ZS(:)    = U%XZS(:)
+     USS%XMIN_ZS(:)    = U%XZS(:)
+     USS%XMAX_ZS(:)    = U%XZS(:)
+     USS%XSSO_STDEV(:) = 0.
+     USS%XHO2IP(:)     = 0.
+     USS%XHO2IM(:)     = 0.
+     USS%XHO2JP(:)     = 0.
+     USS%XHO2JM(:)     = 0.
+     USS%XAOSIP(:)     = 0.
+     USS%XAOSIM(:)     = 0.
+     USS%XAOSJP(:)     = 0.
+     USS%XAOSJM(:)     = 0.
+     USS%XSSO_ANIS(:)  = 0.
+     USS%XSSO_DIR(:)   = 0.
      
      
     ! read slope in file
@@ -337,22 +342,40 @@ ELSEIF (LIMP_ZS) THEN !LIMP_ZS (impose topo from input file at the same resoluti
                           HPROGRAM,'SURF  ','      ',YSLOPE,'slope               ',ZSLOPE)
 
       DO JJ=1,NL
-        USS%XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
+       USS%XSSO_SLOPE(JJ)=TAN(ZSLOPE(JJ)*PP_DEG2RAD)
       END DO
       DEALLOCATE(ZSLOPE)     
+    ELSEIF (LEXPLICIT_SLOPE) THEN
+      CALL EXPLICIT_SLOPE(UG,U%NDIM_FULL,&
+                          U%XZS,USS%XSSO_SLOPE)
     ELSE
       USS%XSSO_SLOPE=0.
     ENDIF
-      
+     
+    ! read aspect in file
+        IF (LEN_TRIM(YSLOPE)/=0) THEN
+            ALLOCATE(ZASPECT(NL))
+
+        ! Read field on the same grid as FORCING
+            CALL READ_PGD_NETCDF(UG, U, USS, &
+                          HPROGRAM,'SURF  ','      ',YSLOPE,'aspect               ',ZASPECT)
+
+            DO JJ=1,NL
+                USS%XSSO_DIR(JJ)=ZASPECT(JJ)
+            END DO
+            DEALLOCATE(ZASPECT)
+        ELSE
+          USS%XSSO_DIR=0.
+        ENDIF
   ELSE
 #ifdef SFX_ASC
-    CFILEIN     = ADJUSTL(ADJUSTR(YZS)//'.txt')
+     CFILEIN     = ADJUSTL(ADJUSTR(YZS)//'.txt')
 #endif
 #ifdef SFX_FA
-    CFILEIN_FA  = ADJUSTL(ADJUSTR(YZS)//'.fa')
+     CFILEIN_FA  = ADJUSTL(ADJUSTR(YZS)//'.fa')
 #endif
 #ifdef SFX_LFI
-    CFILEIN_LFI = ADJUSTL(YZS)
+     CFILEIN_LFI = ADJUSTL(YZS)
 #endif
     CALL INIT_IO_SURF_n(DTCO, U, YFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF     
@@ -375,17 +398,17 @@ ELSE
   XEXT_ALL (:,1) = -99999.
   XEXT_ALL (:,2) = 99999.
   XALL   (:,:,1) = 0.  
-  !
-  !-------------------------------------------------------------------------------
 !
+!-------------------------------------------------------------------------------
+
 !*    6.      Averages the field
 !             ------------------
 !
-  CALL TREAT_FIELD(UG, U, USS, &
+ CALL TREAT_FIELD(UG, U, USS, &
                   HPROGRAM,'SURF  ',YFILETYPE,'A_OROG',YZS, 'ZS                  ' )  
 !
-
-  DEALLOCATE(XSUMVAL )
+!
+DEALLOCATE(XSUMVAL  )
   !
 ENDIF  
 !
@@ -485,8 +508,13 @@ IFLAG(:) = NSIZE(:,1)
 WHERE(.NOT. GSSO(:))                 IFLAG(:) = 0
 WHERE(U%XSEA(:)==1. .AND. IFLAG(:)==0) IFLAG(:) = -1
 !
+
+! read aspect in file
+IF (LEN_TRIM(YSLOPE)==0) THEN
  CALL INTERPOL_FIELD(UG, U, &
                      HPROGRAM,ILUOUT,IFLAG,USS%XSSO_DIR,  'subgrid orography direction',PDEF=0.)
+END IF
+
 !
 IF (LEXPLICIT_SLOPE) THEN
   CALL EXPLICIT_SLOPE(UG, U%NDIM_FULL, U%XZS, USS%XSSO_SLOPE) 

@@ -10,7 +10,7 @@
                           PHUI, PLEG_DELTA, PLEGI_DELTA, PGRNDFLUX, PFLUX_COR, &
                           PSOILCONDZ, PSOILHCAPZ, PALBT, PEMIST, PQSAT, PDQSAT, &
                           PFROZEN1, PTDEEP_A,PTA_IC, PQA_IC, PUSTAR2_IC, PDEEP_FLUX, &
-                          PRESTORE                                             )  
+                            PRESTORE                                             )  
 !     ##########################################################################
 !
 !!****  *E_BUDGET*  
@@ -131,8 +131,8 @@ REAL, DIMENSION(:), INTENT (IN)  :: PSW_RAD, PLW_RAD, PPS, PRHOA, PTA, PQA, PVMO
 ! implicit atmospheric coupling coefficients:
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PPEW_A_COEF, PPEW_B_COEF,                   &
-                                   PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
-                                   PPEQ_B_COEF  
+                                     PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,      &
+                                     PPEQ_B_COEF  
 !                                  PPEW_A_COEF = A-wind coefficient (m2s/kg)
 !                                  PPEW_B_COEF = B-wind coefficient (m/s)
 !                                  PPET_A_COEF = A-air temperature coefficient
@@ -194,7 +194,7 @@ REAL, DIMENSION(:), INTENT(OUT)    :: PRESTORE
 REAL, DIMENSION(SIZE(PEK%XSNOWFREE_ALB)) :: ZRORA,                        &
 !                                             rhoa / ra
 !
-                                               ZA,ZB,ZC  
+                                  ZA,ZB,ZC  
 !                                             terms for the calculation of Ts(t)
 !
 ! ISBA-DF:
@@ -298,8 +298,8 @@ ZFG(:) = (1.-PEK%XVEG(:))*(1.-PEK%XPSNG(:)-KK%XFFG(:))
 ZFNFRZ(:) = (1.-KK%XFFROZEN(:))*KK%XFF(:) + ZFV + ZFG(:)*(1.-PFROZEN1(:))
 ZFFRZ(:)  = KK%XFFROZEN(:)     *KK%XFF(:) +       ZFG(:)*PFROZEN1(:)      + PEK%XPSN(:)
 !
-ZSNOW      = 1.
-ZFNSNOW(:) = 1.
+ZSNOW=1.
+ZFNSNOW(:)=1.
 ZCPS(:)    = PK%XCPS(:)
 !
 IF (LCPL_ARP) THEN
@@ -311,7 +311,7 @@ IF (LCPL_ARP) THEN
   PLEGI_DELTA(:) = 1.0
 
   ZLAVG(:)        = PK%XLVTT(:)*ZFNFRZ(:) + PK%XLSTT(:)*ZFFRZ(:)
-  ZXCPV_XCL_AVG(:)=   (XCPV-XCL)*ZFNFRZ(:) + (XCPV-XCI)  *ZFFRZ(:) 
+  ZXCPV_XCL_AVG(:)= (XCPV-XCL)*ZFNFRZ(:) + (XCPV-XCI)*ZFFRZ(:) 
 
   ZLVTT(:) = ZLAVG(:)
   ZLSTT(:) = ZLAVG(:)
@@ -331,8 +331,8 @@ ELSE
 
 ENDIF
 !
-ZFGNFRZ(:) = ZFG(:) * (1.-PFROZEN1(:)) * PLEG_DELTA(:)
-ZFGFRZ (:) = ZFG(:) * PFROZEN1(:)      * PLEGI_DELTA(:)
+ZFGNFRZ(:) = ZFG(:)*(1.-PFROZEN1(:))*PLEG_DELTA(:)
+ZFGFRZ(:) = ZFG(:)*PFROZEN1(:)*PLEGI_DELTA(:)
 !
 ZHUMA(:) = ZLVTT(:)/ZLAVG(:) * ((1.-KK%XFFROZEN(:))*KK%XFF(:) + ZFV(:)*DMK%XHV(:) + ZFGNFRZ(:))   +  &
            ZLSTT(:)/ZLAVG(:) * (KK%XFFROZEN(:)     *KK%XFF(:) + ZFGFRZ(:) + ZSNOW*PEK%XPSN(:) ) 
@@ -477,7 +477,7 @@ ELSEIF (LCPL_ARP) THEN
 ZCDQSAT(:) = (XCPV-XCPD)*ZHUMS(:)*PDQSAT(:)
 ZINCR(:)= DMK%XCT(:) * ZRORA(:) * &
           (ZCDQSAT(:) * ( ZPETA2(:)*PEK%XTG(:,1) - ZPETB2(:)) + &
-          ZXCPV_XCL_AVG(:) * &
+            ZXCPV_XCL_AVG(:) * &
           (ZHUMS(:)*PQSAT(:) - ZHUMA(:) * (ZPEQ_B_COEF(:) + ZPEQ_A_COEF(:) * PEK%XTG(:,1)))) 
 
 ! Surface Energy Budget linearization coefficients for a composite 
@@ -553,22 +553,22 @@ ELSE
     PRESTORE(:) = 2.0 * XPI * (PEK%XTG(:,1)-PEK%XTG(:,2)) / &
                          ( DMK%XCT(:)*XDAY*IO%XSODELX(1)*(IO%XSODELX(1)+IO%XSODELX(2)) )
 !      
-  ELSE
+   ELSE
 !
     PEK%XTG(:,1) = ( PEK%XTG(:,1)*ZB(:) + ZC(:) ) / ZA(:)
 !
     WHERE(KK%XTDEEP(:) /= XUNDEF .AND. KK%XGAMMAT(:) /= XUNDEF)
       PEK%XTG(:,2) = (PEK%XTG(:,2) + (PTSTEP/XDAY)*(PEK%XTG(:,1) + KK%XGAMMAT(:)*KK%XTDEEP(:))) / &
                          (1.+(PTSTEP/XDAY)*(1.0+KK%XGAMMAT(:)))  
-    ELSEWHERE
+      ELSEWHERE
       PEK%XTG(:,2) = (PEK%XTG(:,2) + (PTSTEP/XDAY)*PEK%XTG(:,1)) /        &
                          (1.+(PTSTEP/XDAY) )  
-    END WHERE
+      END WHERE
 !
 !     "Restore" flux between surface and deep layer(W m-2):
     PRESTORE(:) = 2.0*XPI*(PEK%XTG(:,1)-PT2M(:))/(DMK%XCT(:)*XDAY)  
 !
-  ENDIF
+   ENDIF
 !
 ENDIF
 !

@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !#############################################################
 SUBROUTINE INIT_SURF_ATM_n (YSC, HPROGRAM,HINIT, OLAND_USE,             &
-                            KI,KSV,KSW, HSV,PCO2,PRHOA,                 &
+                            KI,KSV,KSW, HSV,PCO2,PIMPWET,PIMPDRY,PRHOA, &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
                              PEMIS,PTSRAD,PTSURF,                       &
                              KYEAR, KMONTH,KDAY, PTIME, TPDATE_END,     &
@@ -66,6 +66,7 @@ USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_SURF_ATM,       ONLY : XCO2UNCPL
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
+USE MODD_PREP_SNOW    ,  ONLY : NIMPUR
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_DST_SURF,       ONLY : NDSTMDE, NDST_MDEBEG, LVARSIG_DST, LRGFIX_DST 
 USE MODD_SLT_SURF,       ONLY : NSLTMDE, NSLT_MDEBEG, LVARSIG_SLT, LRGFIX_SLT                                
@@ -155,6 +156,8 @@ INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPWET      !  wet deposit coefficient for each impurity type    (g)
+REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPDRY     !  dry deposit coefficient for each impurity type    (g)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
@@ -179,7 +182,7 @@ TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
- CHARACTER(LEN=3)  :: YREAD
+CHARACTER(LEN=3)  :: YREAD
 !
 INTEGER           :: ISWB     ! number of shortwave bands
 INTEGER           :: JTILE    ! loop counter on tiles
@@ -205,6 +208,8 @@ REAL, DIMENSION(KI)                 :: ZTSUN          ! solar time since midnigh
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_ZENITH   ! zenithal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_AZIM     ! azimuthal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_CO2      ! air CO2 concentration
+REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_IMPWET      ! wet deposit coef
+REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_IMPDRY      ! dry deposit coef
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_RHOA     ! air density
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_DIR_ALB  ! direct albedo
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_SCA_ALB  ! diffuse albedo
@@ -223,7 +228,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 !
- CPROGNAME=HPROGRAM
+CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
    CALL ABOR1_SFX('INIT_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -244,8 +249,8 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_SSO(YSC%USS%CROUGH, YSC%USS%XFRACZ0, YSC%USS%XCOEFBE)
- CALL DEFAULT_CH_SURF_ATM(YSC%CHU%CCHEM_SURF_FILE, YSC%CHU%LCH_SURF_EMIS)
+ CALL DEFAULT_SSO(YSC%USS%CROUGH,YSC%USS%XFRACZ0,YSC%USS%XCOEFBE)
+ CALL DEFAULT_CH_SURF_ATM(YSC%CHU%CCHEM_SURF_FILE,YSC%CHU%LCH_SURF_EMIS)
  CALL DEFAULT_DIAG_SURF_ATM(YSC%DUO%N2M, YSC%DUO%LT2MMW, YSC%DUO%LSURF_BUDGET,&
                             YSC%DUO%L2M_MIN_ZS, YSC%DUO%LRAD_BUDGET, YSC%DUO%LCOEF,&
                             YSC%DUO%LSURF_VARS, YSC%DUO%LSURF_BUDGETC, &
@@ -265,7 +270,9 @@ ENDIF
 !
 !        1.1. general options (diagnostics, etc...)
 !
+print*, "INIT_SURF_ATMN1 befor call READ_SURF_ATM_CONF_n"
  CALL READ_SURF_ATM_CONF_n(YSC%CHU, YSC%DUO, YSC%USS, HPROGRAM)
+PRINT *, "INIT_SURF_ATMN after call READ_SURF_ATM_CONF_n"
 !
 IF(XCO2UNCPL/=XUNDEF)THEN
   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
@@ -316,7 +323,7 @@ END SELECT
  CALL READ_SURF(HPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
  CALL END_IO_SURF_n(HPROGRAM)
  CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
-                
+!
 !
  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
  CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
@@ -344,7 +351,7 @@ ENDIF
 !* reads if climatological LAI is used or not for ecoclimap2. If not, looks for year to be used.
  CALL READ_LCLIM_LAI(HPROGRAM,LCLIM_LAI)
 IF (.NOT. LCLIM_LAI .AND. YSC%U%TTIME%TDATE%YEAR >= NECO2_START_YEAR &
-                    .AND. YSC%U%TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) YSC%DTCO%NYEAR=YSC%U%TTIME%TDATE%YEAR
+                     .AND. YSC%U%TTIME%TDATE%YEAR <= NECO2_END_YEAR   ) YSC%DTCO%NYEAR=YSC%U%TTIME%TDATE%YEAR
  CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
  CALL READ_ECO2_IRRIG(YSC%DTCO, HPROGRAM)
 !
@@ -408,18 +415,18 @@ IF (YSC%CHU%LCH_EMIS) THEN
     CALL READ_SURF(HPROGRAM,'CH_EMIS_OPT',YSC%CHU%CCH_EMIS,IRESP)
   END IF
   !
-  IF (YSC%CHU%CCH_EMIS=='AGGR') THEN
+      IF (YSC%CHU%CCH_EMIS=='AGGR') THEN
     CALL CH_INIT_EMISSION_n(YSC%CHE, YSC%CHU%XCONVERSION, YSC%SV%CSV, &
                             HPROGRAM,YSC%U%NSIZE_FULL,HINIT,PRHOA,YSC%CHU%CCHEM_SURF_FILE) 
-  ELSE
+      ELSE
     CALL CH_INIT_SNAP_n(YSC%CHN, YSC%SV%CSV, &
                         HPROGRAM,YSC%U%NSIZE_FULL,HINIT,PRHOA,YSC%CHU%CCHEM_SURF_FILE)
-  END IF
+  ENDIF
   !
-ENDIF
-!
-!*       2.5 Initialization of dry deposition scheme (chemistry)  
-!
+END IF
+    !
+    !*       2.5 Initialization of dry deposition scheme (chemistry)
+    !    
 IF (YSC%SV%NBEQ .GT. 0) THEN
 !
   IF (HINIT=='ALL') CALL CH_INIT_DEPCONST(HPROGRAM,YSC%CHU%CCHEM_SURF_FILE,ILUOUT,YSC%SV%CSV(YSC%SV%NSV_CHSBEG:YSC%SV%NSV_CHSEND))
@@ -657,7 +664,7 @@ DEALLOCATE(ZFRAC_TILE)
 !-------------------------------------------------------------------------------
 !==============================================================================
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',1,ZHOOK_HANDLE)
- CONTAINS
+CONTAINS
 !==============================================================================
 SUBROUTINE PACK_SURF_INIT_ARG(KSIZE,KMASK)
 !

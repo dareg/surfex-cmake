@@ -143,7 +143,7 @@ SELECT CASE(HSURF(1:3))
       PFIELD(1,:,1) = PUNIF_TSNOW(:)
     ELSE
       PFIELD(1,:,1) = PUNIF_TSNOW(1)
-    ENDIF          
+    ENDIF
   
 !
   CASE('SG1')
@@ -159,6 +159,7 @@ SELECT CASE(HSURF(1:3))
     ELSE
       PFIELD(1,:,1) = PUNIF_SG2SNOW(1)
     ENDIF
+!    
 !
   CASE('HIS')
     IF (OSNOW_IDEAL) THEN
