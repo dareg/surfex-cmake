@@ -270,9 +270,7 @@ ENDIF
 !
 !        1.1. general options (diagnostics, etc...)
 !
-print*, "INIT_SURF_ATMN1 befor call READ_SURF_ATM_CONF_n"
  CALL READ_SURF_ATM_CONF_n(YSC%CHU, YSC%DUO, YSC%USS, HPROGRAM)
-PRINT *, "INIT_SURF_ATMN after call READ_SURF_ATM_CONF_n"
 !
 IF(XCO2UNCPL/=XUNDEF)THEN
   WRITE(ILUOUT,*)'!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'

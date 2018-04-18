@@ -354,43 +354,23 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     CALL WRITE_SURF(HSELECT,HPROGRAM,'PRO_INF_TYP',DM%XPRO_INF_TYP(:),IRESP,HCOMMENT=YCOMMENT)
   ENDIF
 !
-  IF (TPSNOW%SCHEME=='CRO') THEN
-      YRECFM='SYTFLX_P'
-      YCOMMENT='Sytron_erosion_accumulation_flux (kg/m2/s)'
-      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
-      ! 
-      YRECFM='SYTFLXC_P'
-      YCOMMENT='Total_Sytron_erosion_accumulation_mass (kg/m2)'
-      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
-!
-      YRECFM='PCOUNT_P'
-      YCOMMENT='Snow production counter (s)'
-      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
-!
-      IF (ORESETCUMUL) THEN
-        ! Output variables are not instantaneous but averaged over the output time step      
-         DM%XSYTMASS(:) = DM%XSYTMASSC(:)/XTSTEP_OUTPUT
-         
-         DM%XSYTMASSC(:) = 0.
-      ENDIF
-
-      YRECFM='SYTFLX_ISBA'
-      YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
-      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
-      ! 
-      YRECFM='SYTFLXC_ISBA'
-      YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
-      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
-      !
-      DO JIMP=1,NIMPUR
-        WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
-        WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
-        CALL WRITE_SURF(HSELECT,HPROGRAM,YREFIMPUR,DM%XIMPUR(:,:,JIMP),IRESP,HCOMMENT=YCOMMENT)
-      ENDDO      
+    YRECFM='SYTFLX_ISBA'
+    YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
+    ! 
+    YRECFM='SYTFLXC_ISBA'
+    YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT)
+    !
+    DO JIMP=1,NIMPUR
+      WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
+      WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YREFIMPUR,DM%XIMPUR(:,:,JIMP),IRESP,HCOMMENT=YCOMMENT)
+    ENDDO      
 !         
-      YRECFM='AVG_PCOUNT'
-      YCOMMENT='Snow production counter (s)'
-      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
+    YRECFM='PCOUNT'
+    YCOMMENT='Snow production counter (s)'
+    CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
           
 	ENDIF
 !
@@ -741,8 +721,49 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       ENDDO
 
     ENDIF
-    !
-  ENDIF
+    IF (TPSNOW%SCHEME=='CRO') THEN 
+      YCOMMENT='Snow production counter (s)'
+      DO JP=1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'PCOUNT_',YCOMMENT,JP,&
+              NP%AL(JP)%NR_P,NDM%AL(JP)%XPRODCOUNT(:),ISIZE,S%XWORK_WR)
+      ENDDO
+      YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
+      DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLX_ISBA_',YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSYTMASS(:),ISIZE,S%XWORK_WR)
+      ENDDO
+      !
+      YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
+      DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLXC_ISBA_',YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XSYTMASSC(:),ISIZE,S%XWORK_WR)
+      ENDDO
+      !
+!      DO JIMP=1,NIMPUR
+!        WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
+!        WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
+!        DO JP=1,IO%NPATCH
+!            CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YREFIMPUR,YCOMMENT,JP,&
+!                  NP%AL(JP)%NR_P,NDM%AL(JP)%XIMPUR(:,:,JIMP),ISIZE,S%XWORK_WR)
+!        ENDDO
+!      ENDDO      
+!      !
+!	    IF (DM%LPROSNOW) THEN		
+!		    IF (DM%LPROBANDS) THEN
+!			    YCOMMENT='Snow spectral albedo'  
+!          DO JP=1,IO%NPATCH
+!              CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SPEC_ALB_',YCOMMENT,JP,&
+!                    NP%AL(JP)%NR_P,NDM%AL(JP)%XSPEC_ALB(:,:),ISIZE,S%XWORK_WR)
+!          ENDDO           
+!			    YCOMMENT='Diffuse to total spectral irradiance ratio' 
+!          DO JP=1,IO%NPATCH
+!              CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DIFF_RATIO_',YCOMMENT,JP,&
+!                    NP%AL(JP)%NR_P,NDM%AL(JP)%XDIFF_RATIO(:,:),ISIZE,S%XWORK_WR)
+!          ENDDO
+!		    ENDIF                      
+!	    ENDIF
+!      !
+    ENDIF
   !
   IF((OPATCH_BUDGET.AND. IO%NPATCH>1).OR.IO%NPATCH==1)THEN
     !
@@ -859,10 +880,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
         !
       END DO
       !        
-    ENDIF
-    
-        
-  !
+    ENDIF  
     !
   END IF
   !

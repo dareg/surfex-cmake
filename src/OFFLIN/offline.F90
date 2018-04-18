@@ -758,7 +758,7 @@ XTIME = (MPI_WTIME() - XTIME0)
 !
  CALL IO_BUFF_CLEAN
 !
- CALL SURFEX_DEALLO_LIST
+ !CALL SURFEX_DEALLO_LIST
  !CALL SURFEX_ALLOC_LIST(IBLOCKTOT)
 !
 #ifdef SFX_MPI
@@ -767,14 +767,12 @@ XTIME0 = MPI_WTIME()
 !
 CALL GOTO_MODEL(1)
 !
-PRINT *, "OFFLINE before call INIT_SURF_ATM_n "
  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, INI, NSCAL, IBANDS,  &
                       CSV,XCO2(:),XIMPWET(:,:),XIMPDRY(:,:),                 &
                       XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,              &
                       XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
                       XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
                      YATMFILE, YATMFILETYPE, YTEST                          )
-PRINT *, "OFFLINE after call INIT_SURF_ATM_n "
 !
 ! initialization routines to compute shadows
 IF (GSHADOWS) THEN
@@ -1024,14 +1022,16 @@ DO JFORC_STEP=1,INB_STEP_ATM
                                   XSURF_TRIANGLE_THREAD)
     END IF
     !
-    CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, &
-                             INI, NSCAL, IBANDS, XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,         &
-                             XZS, XU, XV, XQA, XTA, XRHOA, XSV, XCO2, 																	&												
-														 XIMPWET,XIMPDRY,							&
-														 CSV, XRAIN, XSNOW, XLW, XDIR_SW,  																					&
-                             XSCA_SW, XSW_BANDS, XPS, XPA, XSFTQ, XSFTH, XSFTS, XSFCO2, XSFU, XSFV,     &
-                             XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF, XPEW_A_COEF, &
-                             XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,XPET_B_COEF,XPEQ_B_COEF, YTEST      )
+    CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, &
+                            IYEAR, IMONTH, IDAY, ZTIME, INI, NSCAL, IBANDS, &
+                            XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,  &
+                            XZS ,XU, XV,XQA,XTA, XRHOA,XSV,XCO2,XIMPWET,      &										
+														XIMPDRY, CSV, XRAIN, XSNOW, XLW, XDIR_SW,				&
+														XSCA_SW, XSW_BANDS, XPS, XPA, XSFTQ, XSFTH,     &
+                            XSFTS, XSFCO2, XSFU, XSFV, XTSRAD, XDIR_ALB,    &
+                            XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF,     &
+                            XPEW_A_COEF, XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,&
+                            XPET_B_COEF,XPEQ_B_COEF, YTEST      )
     !
 #ifdef SFX_MPI
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)

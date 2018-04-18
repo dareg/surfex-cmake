@@ -13,7 +13,7 @@ USE_SPLR = YES
 #
 #OBJDIR_PATH=/home/escj/azertyuiopqsdfghjklm/wxcvbn/azertyuiopqsdfghjklmwxcvbn
 #
-OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid -fbacktrace -fconvert=swap
+OPT_BASE  = -fdefault-real-8 -fdefault-double-8 -g -fno-second-underscore -fpic  -ffpe-trap=overflow,zero,invalid -fbacktrace -fconvert=swap -pg
 #
 OPT_PERF0 = -O0
 OPT_PERF2 = -O2
@@ -53,7 +53,7 @@ $(OBJSD) : OPT = $(OPT_BASE) $(OPT_PERF0)
 endif
 #
 ifeq "$(VER_MPI)" "NOMPI"
-F90= gfortran
+F90= gfortran -pg
 CC = gcc
 else
 F90 = mpif90
@@ -65,7 +65,7 @@ REALFC=gfortran
 FCFLAGS_OMP= -fopenmp
 CFLAGS_OMP= -fopenmp
 ifeq "$(VER_OMP)" "NOOMP"
-FCFLAGS_OMP=
+FCFLAGS_OMP= -pg
 CFLAGS_OMP=
 endif
 #

@@ -118,6 +118,7 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZHO2IM    ! h/2 i- on all surface points
 REAL, DIMENSION(:), ALLOCATABLE   :: ZHO2JP    ! h/2 j+ on all surface points
 REAL, DIMENSION(:), ALLOCATABLE   :: ZHO2JM    ! h/2 j- on all surface points
 REAL, DIMENSION(:), ALLOCATABLE   :: ZSSO_SLOPE! subgrid slope on all surface points
+REAL, DIMENSION(:), ALLOCATABLE   :: ZSSO_DIR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA',0,ZHOOK_HANDLE)
@@ -255,14 +256,15 @@ ALLOCATE(ZHO2IM(IL))
 ALLOCATE(ZHO2JP(IL))
 ALLOCATE(ZHO2JM(IL))
 ALLOCATE(ZSSO_SLOPE(IL))
+ALLOCATE(ZSSO_DIR(IL))
 
  CALL GET_AOS_n(USS,HPROGRAM,IL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
- CALL GET_SSO_n(USS,HPROGRAM,IL,ZSSO_SLOPE)
+ CALL GET_SSO_n(USS,HPROGRAM,IL,ZSSO_SLOPE, ZSSO_DIR)
 
  CALL PACK_PGD_ISBA(DTCO, IG%NDIM, ISS, U, HPROGRAM,              &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
-                     ZSSO_SLOPE                                   )  
+                     ZSSO_SLOPE, ZSSO_DIR                         )  
 !
 DEALLOCATE(ZAOSIP)
 DEALLOCATE(ZAOSIM)
@@ -273,6 +275,7 @@ DEALLOCATE(ZHO2IM)
 DEALLOCATE(ZHO2JP)
 DEALLOCATE(ZHO2JM)
 DEALLOCATE(ZSSO_SLOPE)
+DEALLOCATE(ZSSO_DIR)
 IF (LHOOK) CALL DR_HOOK('ZOOM_PGD_ISBA',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
