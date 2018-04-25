@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE DIAG_MISC_ISBA_n (DMK, KK, PK, PEK, AGK, IO, OSURF_MISC_BUDGET, &
-                             OVOLUMETRIC_SNOWLIQ, PTSTEP, OAGRIP, PTIME, KSIZE  )  
+                             OVOLUMETRIC_SNOWLIQ, PTSTEP, OAGRIP, PTIME, KSIZE , PSLOPECOS )  
 !     ###############################################################################
 !
 !!****  *DIAG_MISC-ISBA_n * - additional diagnostics for ISBA
@@ -74,11 +74,16 @@ REAL,               INTENT(IN)    :: PTSTEP        ! timestep for  accumulated v
 LOGICAL, INTENT(IN)               :: OAGRIP
 REAL,    INTENT(IN)               :: PTIME   ! current time since midnight
 INTEGER, INTENT(IN) :: KSIZE
+!
+REAL, DIMENSION(:),  INTENT(IN) :: PSLOPECOS ! cosine of the slope for Crocus
 !    
 !
 !
 !*      0.2    declarations of local variables
 !
+REAL, DIMENSION(SIZE(PEK%XPSN))    :: ZCORR_SLOPE
+REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZCORR_SLOPE_2D
+REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZWSNOW
 REAL, DIMENSION(SIZE(PEK%XPSN))    :: ZSNOWTEMP
 REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZWORK
 REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZWORKTEMP
@@ -86,7 +91,7 @@ REAL, DIMENSION(SIZE(PEK%TSNOW%WSNOW,1),SIZE(PEK%TSNOW%WSNOW,2)) :: ZWORKTEMP
 REAL, DIMENSION(KSIZE) :: ZALT, ZFLT
 !
 LOGICAL :: GMASK
-INTEGER :: JL, JI, JK
+INTEGER :: JL, JI, JK, JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -95,6 +100,25 @@ IF (LHOOK) CALL DR_HOOK('DIAG_MISC_ISBA_N',0,ZHOOK_HANDLE)
 !
 IF (OSURF_MISC_BUDGET) THEN
   !
+  IF (DMK%LPROSNOW) THEN
+    DO JJ = 1,SIZE(PEK%TSNOW%WSNOW,1)
+      !this variable is used further to project diagnostics on the verticale
+      ZCORR_SLOPE(JJ)=1./PSLOPECOS(JJ)
+    END DO
+    DO JI = 1,SIZE(PEK%TSNOW%WSNOW,2)
+      DO JJ = 1,SIZE(PEK%TSNOW%WSNOW,1)
+        IF (PEK%TSNOW%WSNOW(JJ,JI)>0) THEN
+          ZCORR_SLOPE_2D(JJ,JI)=ZCORR_SLOPE(JJ)
+        ELSE
+          ZCORR_SLOPE_2D(JJ,JI)=1.
+        ENDIF
+        ZWSNOW(JJ,JI)=PEK%TSNOW%WSNOW(JJ,JI)*ZCORR_SLOPE_2D(JJ,JI)
+      ENDDO
+    ENDDO
+  ELSE
+    ZCORR_SLOPE(:)=1.
+    ZWSNOW(:,:)=PEK%TSNOW%WSNOW(:,:)
+  END IF
   
   DMK%XSWI (:,:)=XUNDEF
   DMK%XTSWI(:,:)=XUNDEF  
@@ -128,7 +152,7 @@ IF (OSURF_MISC_BUDGET) THEN
   !
   DO JL = 1,SIZE(PEK%TSNOW%WSNOW,2)
     DO JI = 1,SIZE(PEK%TSNOW%WSNOW,1)
-      DMK%XTWSNOW(JI) = DMK%XTWSNOW(JI) + PEK%TSNOW%WSNOW(JI,JL)      
+      DMK%XTWSNOW(JI) = DMK%XTWSNOW(JI) + PEK%TSNOW%WSNOW(JI,JL) 
       DMK%XTDSNOW(JI) = DMK%XTDSNOW(JI) + ZWORK (JI,JL)
       ZSNOWTEMP  (JI) = ZSNOWTEMP(JI) + ZWORKTEMP(JI,JL) * ZWORK(JI,JL)
     ENDDO

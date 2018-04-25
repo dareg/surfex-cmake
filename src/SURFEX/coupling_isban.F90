@@ -991,7 +991,7 @@ ZIRRIG_GR(:)= 0.
            ZP_EMIS, ZP_USTAR, ZP_AC_AGG, ZP_HU_AGG, ZP_RESP_BIOMASS_INST, ZP_DEEP_FLUX,       &
            ZIRRIG_GR, &             
 					 NTAB_SYT, ID%DM%XSYTMASS, PEK%TSNOW%IMPUR,&
-					 ZP_DIR_SW, ZP_SCA_SW,ID%DM%XSPEC_ALB,ID%DM%XDIFF_RATIO,PEK%TSNOW%IMPUR,         &
+					 ZP_DIR_SW, ZP_SCA_SW,ID%DM%XSPEC_ALB,ID%DM%XDIFF_RATIO,ID%DM%XIMPUR_CONC,         &
 					 ID%DM%XPRODCOUNT, &
 					 IO%LSNOWCOMPACT_BOOL,IO%LSNOWMAK_BOOL, IO%LSNOWTILLER, IO%LSELF_PROD, IO%LSNOWMAK_PROP, &
 					 IO%LPRODSNOWMAK)
@@ -1248,7 +1248,8 @@ ZP_QSURF (:) = DK%XQS (:)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
  CALL DIAG_MISC_ISBA_n(DMK, KK, PK, PEK, AGK, IO, ID%DM%LSURF_MISC_BUDGET, &
-                       ID%DM%LVOLUMETRIC_SNOWLIQ, PTSTEP, LAGRIP, PTIME, PK%NSIZE_P )                  
+                       ID%DM%LVOLUMETRIC_SNOWLIQ, PTSTEP, LAGRIP, PTIME, PK%NSIZE_P, &
+                       ZP_SLOPE_COS)                  
 !
  CALL REPROJ_DIAG_ISBA_n(DK, DEK, DMK, PEK, ID%O%LSURF_BUDGET, ID%DE%LSURF_EVAP_BUDGET, &
                          ID%DE%LWATER_BUDGET, ID%DM%LSURF_MISC_BUDGET, ID%DM%LPROSNOW, &

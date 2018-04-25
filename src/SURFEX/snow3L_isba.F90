@@ -673,7 +673,7 @@ ENDIF
     ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + PSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
 !
     PPRODCOUNT(JJ) = XPROD_COUNT(JJ)									! PPRODCOUNT will be used to write into a file (DIAG_ISBA) 20150311
-    !DMK%XPRODCOUNT = XPROD_COUNT(JJ)
+    DMK%XPRODCOUNT = XPROD_COUNT(JJ)
 !
   ENDDO
 !															|
@@ -1510,6 +1510,18 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
       ENDDO
     ENDDO
   ENDDO      
+!
+  IF (SIZE(PDIFF_RATIO)>1) THEN
+    DO JWRK=1,SIZE(P_DIR_SW,2)
+      DO JJ=1,KSIZE1
+        JI = KMASK(JJ)
+        PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
+        !DMK%XDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
+        PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
+        !DMK%XSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
+      ENDDO
+    ENDDO
+  ENDIF
 !
   IF (SIZE(DMK%XSNOWDEND)>0) THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA

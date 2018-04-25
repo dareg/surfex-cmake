@@ -124,6 +124,16 @@ REAL, DIMENSION(NPNBANDS) :: XCONST_C ! constant used for assymetry parameter
 ! Imaginary component of impurities refractive index
 REAL, DIMENSION(NPNBANDS,NIMPUR_MAX) :: XREFIMP_I
 
+! Boolean that indicate if the impurity type concerned is treated regarding it's refractive index or concerning its mass absobtion efficiency (MAE).
+LOGICAL, DIMENSION(NIMPUR_MAX) :: L_IS_MAE 
+
+
+! Those values are taken from Caponi et al. 2017 (https://www.atmos-chem-phys.net/17/7175/2017/acp-17-7175-2017.pdf) The default values for now are the ones of Table 4 of this reference. And for now the one of " Lybia; PM2.5 "
+
+REAL, PARAMETER :: XDUST_MAE_400 = 110. ! Dust mass absorptinoefficiency at 400nm
+
+REAL, PARAMETER :: XDUST_AAE = 4.1 ! Dust angstorm exponent 
+
 
 INTEGER, PARAMETER :: NPNBANDS_REF = 191 ! number of reference bands
 
