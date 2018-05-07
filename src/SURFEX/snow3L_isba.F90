@@ -249,7 +249,7 @@ REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR
 
 !*      0.2    declarations of local variables
 !
-REAL, PARAMETER                     :: ZCHECK_TEMP = 50.0 
+REAL, PARAMETER                     :: ZCHECK_TEMP = 150.0 
 !                                      Limit to check suspicious low temperature (K)
 !
 INTEGER                             :: JWRK, JJ,JIMP ! Loop control
@@ -350,6 +350,7 @@ IF (SIZE(DMK%XSNOWDEND)>0) THEN
   DMK%XSNOWTYPEMEPRA(:,:) = XUNDEF
   DMK%XACC_RAT      (:,:) = XUNDEF
   DMK%XNAT_RAT      (:,:) = XUNDEF
+  DMK%XIMPUR_CONC (:,:,:) = XUNDEF ! AVOIR RAFIFE
 	PSNOWIMP_CONC(:,:,:)=XUNDEF
 ENDIF
 !
@@ -500,7 +501,7 @@ IF (PEK%TSNOW%SCHEME=='CRO' .AND. OSNOWSYTRON) THEN
                         PEK%TSNOW%HEAT,PEK%TSNOW%WSNOW,PEK%TSNOW%RHO,      &
                         PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,PEK%TSNOW%HIST,    &
                         PEK%TSNOW%AGE,KTAB_SYT, ZBLOWSNW,PSYTMASS)
-                        
+  DMK%XSYTMASS = PSYTMASS ! A VOIR RAFIFE
 !
 ! Calculate maximum snow depth (m) of deposited blown snow particles
 !
@@ -1507,18 +1508,22 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
         JI = KMASK(JJ)
         PSNOWIMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP) !F.T
         PSNOWIMP_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP)
+!             
+        PEK%TSNOW%IMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP)  !A VOIR RAFIFE
+        DMK%XIMPUR_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP) !A VOIR RAFIFE
       ENDDO
     ENDDO
   ENDDO      
 !
-  IF (SIZE(PDIFF_RATIO)>1) THEN
-    DO JWRK=1,SIZE(P_DIR_SW,2)
+  IF (SIZE(PDIFF_RATIO)>1) THEN 
+     DO JWRK=1,SIZE(P_DIR_SW,2)
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
         PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
-        !DMK%XDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
+        DMK%XDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK) !A VOIR RAFIFE
+!
         PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
-        !DMK%XSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
+        DMK%XSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK) !A VOIR RAFIFE
       ENDDO
     ENDDO
   ENDIF

@@ -148,7 +148,7 @@ ELSE IF (U%CNATURE=='ISBA  ' .OR. U%CNATURE=='TSZ0') THEN
                    PCO2, PRHOA, PZENITH, PAZIM, PSW_BANDS,        &
                    PDIR_ALB, PSCA_ALB, PEMIS, PTSRAD, PTSURF,     &
                    KYEAR, KMONTH, KDAY, PTIME, TPDATE_END,        &
-                   HATMFILE, HATMFILETYPE, 'OK'     )  
+                   HATMFILE, HATMFILETYPE, 'OK'     )
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_NATURE_N',1,ZHOOK_HANDLE)
 !

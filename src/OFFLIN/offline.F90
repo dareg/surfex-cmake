@@ -896,7 +896,6 @@ DO JFORC_STEP=1,INB_STEP_ATM
                      ZIMPDRY(:,:,1:IDMAX),ZO3(:,1:IDMAX),ZAE(:,1:IDMAX),    &
 										 ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
   ENDIF
-
 #ifdef SFX_MPI
   XTIME_CALC(1) = XTIME_CALC(1) + (MPI_WTIME() - XTIME1)
   XTIME1 = MPI_WTIME()
@@ -953,7 +952,7 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZDIR(:,ID_FORC),ZDIR(:,ID_FORC+1),       &
                             ZO3(:,ID_FORC),ZO3(:,ID_FORC+1),         &
                             ZAE(:,ID_FORC),ZAE(:,ID_FORC+1),         &
-                            ZIMPWET(:,:,ID_FORC), ZIMPWET(:,:,ID_FORC+1), &
+                            ZIMPWET(:,:,ID_FORC+1), ZIMPDRY(:,:,ID_FORC+1), &
                             XZENITH+0.1,ZSUMZEN                      )
 #ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
@@ -1015,6 +1014,130 @@ DO JFORC_STEP=1,INB_STEP_ATM
 #ifdef SFX_MPI
     XTIME1 = MPI_WTIME()
 #endif
+    !
+! A VOIR RAFIFE
+!!!    ! IF SNOWCRORAD=TARTES then spectral repartition of direct and diffuse radiation
+   ! for any spectral calculation regarding snow (tartes and/or atmotartes)
+ 	  IF (CSPECSNOW) THEN
+  	  XSCA_SW(:,2:IBANDS)=0.
+   	  XDIR_SW(:,2:IBANDS)=0.
+   
+ 	  ENDIF
+!	write(*,*) IMONTH, IDAY, ZTIME/(3600.)
+ 	IF (YSC%IM%O%LATMORAD) THEN 
+
+
+		IF (.NOT.ALLOCATED(ZP_CLOUD)) ALLOCATE(ZP_CLOUD  (INI)       )! 
+   	IF (.NOT.ALLOCATED(ZTCLOUD55)) ALLOCATE(ZTCLOUD55  (INI)       )! 
+		IF (.NOT.ALLOCATED(KCLOUD_TYPE)) ALLOCATE(KCLOUD_TYPE  (INI)       )! 
+		IF (.NOT.ALLOCATED(ZIRR_DIFF)) ALLOCATE(ZIRR_DIFF  (INI, IBANDS)       )! 
+		IF (.NOT.ALLOCATED(ZIRR_DIR)) ALLOCATE(ZIRR_DIR  (INI,IBANDS)       )! 
+		IF (.NOT.ALLOCATED(ZP_CUT)) ALLOCATE(ZP_CUT  (INI, JPNLYR_CLEAR)       )! 
+		IF (.NOT.ALLOCATED(ZINT_DIR_SW)) ALLOCATE(ZINT_DIR_SW  (INI)       )! 
+		IF (.NOT.ALLOCATED(ZINT_SCA_SW)) ALLOCATE(ZINT_SCA_SW  (INI)       )! 
+		IF (.NOT.ALLOCATED(ZMU)) ALLOCATE(ZMU (INI)       )!
+		IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )! 
+		IF (.NOT.ALLOCATED(ZD_O3)) ALLOCATE(ZD_O3  (INI)       )!
+		IF (.NOT.ALLOCATED(ZD_AE)) ALLOCATE(ZD_AE  (INI)       )!
+
+  
+    ! broadband direct and diffuse irradiance
+  
+   	ZINT_SCA_SW(:)=XSCA_SW(:,1)
+    ZINT_DIR_SW(:)=XDIR_SW(:,1)
+	  ZINT_TOT_SW(:)=ZINT_DIR_SW(:)+ZINT_SCA_SW(:)
+    XSCA_SW(:,2:IBANDS)=0.
+    XDIR_SW(:,2:IBANDS)=0.
+    IF (LFORCATMOTARTES) THEN 
+      ZD_O3(:)= XO3(:)/100 ! integrated ozone (atm-cm)
+    	ZD_AE(:)= XAE(:) ! aerosol optical depth
+    	!PRINT*, "ZO3",ZD_O3
+    	!PRINT*, "ZAE",ZD_AE
+    ELSE 
+      ZD_O3(:)= 0.3 ! integrated ozone (atm-cm)
+      ZD_AE(:)= 0.1 ! aerosol optical depth
+    ENDIF
+    ZMU(:)=COS(XZENITH(:))
+    ZP_CLOUD(:)= 378.*100.! cloud bottom pressure (Pa)
+    KCLOUD_TYPE(:)= 1! cloud type
+    	
+   	IF (MAXVAL(ZINT_TOT_SW(:))>XUEPSI) THEN
+    !IF (MINVAL(XZENITH(:))>0.) THEN
+    	IF (MINVAL(ZMU(:))>XUEPSI) THEN
+       
+       	! prevent calculation during night
+      	! Julian date 
+      
+        !CALL JULIAN(IYEAR, IMONTH, IDAY, 0., ZDATI)
+      
+        IF (MAXVAL(ZINT_TOT_SW(:)-ZINT_DIR_SW(:)).GT.XUEPSI) THEN
+        	! case where diffuse and direct radiation are known 
+
+        	! calculation of cloud optical depth
+					CALL TAU_CLOUD(ZMU(:),ZINT_SCA_SW(:)/ZINT_TOT_SW(:),&
+										ZTCLOUD55(:))
+	    	! WRITE(*,*) ZTCLOUD55(:),XZENITH(:),IYEAR, IMONTH, IDAY, ZTIME
+					CALL IRRADIANCE(ZDATI,ZMU(:),XQA(:)/XRHOA(:),&
+											ZD_O3(:),ZD_AE(:),&
+      								XPS(:),XTA(:),PPZP_CUT,ZP_CLOUD(:),&
+       								KCLOUD_TYPE(:),ZTCLOUD55(:),ZIRR_DIR(:,:),&
+       								ZIRR_DIFF(:,:))
+      
+      		! normalisation by broadband direct and diffuse irradiance  
+      
+					DO JI=1, INI
+			  		IF (SUM(ZIRR_DIFF(JI,:))>0.) THEN
+	        		XSCA_SW(JI,:)=ZINT_SCA_SW(JI)*ZIRR_DIFF(JI,:)/SUM(ZIRR_DIFF(JI,:))
+			   		! XSCA_SW(JI,:)=0.
+	  				END IF 
+			  		IF (SUM(ZIRR_DIR(JI,:))>0.) THEN
+			    		XDIR_SW(JI,:)=ZINT_DIR_SW(JI)*ZIRR_DIR(JI,:)/SUM(ZIRR_DIR(JI,:))
+	   		 		! XDIR_SW(JI,:)=(ZINT_DIR_SW(JI)+ZINT_DIR_SW(JI))*ZIRR_DIR(JI,:)/SUM(ZIRR_DIR(JI,:))
+	  				END IF
+					ENDDO
+					!write(*,*) IMONTH, IDAY, ZTIME/(3600.),ZMU(:), XZENITH(:), XDIR_SW(:,1)
+					!write(*,*) XSCA_SW(:,1), ZINT_SCA_SW(:), ZINT_DIR_SW(:)
+
+
+
+				ELSE ! case where only total radiation is know
+					ZTCLOUD55(:)= 0. ! cloud optical depth
+					CALL IRRADIANCE(ZDATI,ZMU(:),XQA(:)/XRHOA(:),&
+													ZD_O3(:),ZD_AE(:),&
+									        XPS(:),XTA(:),PPZP_CUT,ZP_CLOUD(:),&
+									        KCLOUD_TYPE(:),ZTCLOUD55(:),ZIRR_DIR(:,:),&
+      		 								ZIRR_DIFF(:,:))
+	
+	  			! normalisation by broadband total irradiance  
+
+	  			DO JI=1, INI
+         	
+	  				IF (SUM(ZIRR_DIFF(JI,:)+ZIRR_DIR(JI,:))>0.) THEN
+	  				  XSCA_SW(JI,:)=ZINT_TOT_SW(JI)*ZIRR_DIFF(JI,:)/&
+	  		 			 SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))
+	  				END IF 
+	  				IF (SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))>0.) THEN
+	  			  XDIR_SW(JI,:)=ZINT_TOT_SW(JI)*ZIRR_DIR(JI,:)/&
+	  				SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))
+	  				END IF
+					ENDDO
+
+				ENDIF ! end of clear cloud/case 
+				!!! add 89° threshold for mu to prevent from atmotartes divergence 
+				IF (MAXVAL(ZMU(:))<PPMU_THRESHOLD) THEN
+					ZINT_SCA_SW(:)=SUM(XSCA_SW(:,:))
+					XSCA_SW(:,:)=0.
+					XSCA_SW(:,8)=ZINT_SCA_SW(:)
+				ENDIF
+	
+    	ENDIF
+  	ENDIF
+	ENDIF
+ 
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
+!FIN A VOIR RAFIFE
+    
     !
     IF(GSHADOWS) THEN 
       CALL SLOPE_RADIATIVE_EFFECT(XTSTEP_SURF, XZENITH, XAZIM, XPS, XTA, XRAIN, XDIR_SW, XLW, &

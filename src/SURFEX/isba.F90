@@ -594,6 +594,7 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
+   !print*,"isba", shape(PSNOWIMP_CONC), " and", shape(DMK%XIMPUR_CONC)
    CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,                   &
                     TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,      &
                     ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR,  &

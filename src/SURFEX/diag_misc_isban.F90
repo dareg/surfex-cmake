@@ -180,6 +180,9 @@ IF (OSURF_MISC_BUDGET) THEN
     !Check consitency: dz is vertical (?)
      
   ENDIF
+  IF (PEK%TSNOW%SCHEME=='CRO') THEN !A VOIR RAFIFE ou le mettre?
+      DMK%XSYTMASSC(:)  =  DMK%XSYTMASSC(:) * PTSTEP
+  ENDIF
 !
 ! cosine of solar zenith angle 
 !

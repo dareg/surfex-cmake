@@ -60,11 +60,10 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t, DIAG_MISC_ISBA_NP_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t
 !
-USE MODD_XIOS, ONLY : LALLOW_ADD_DIM
+USE MODD_XIOS, ONLY : LALLOW_ADD_DIM, YSWBAND_DIM_NAME
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
 USE MODD_PREP_SNOW,        ONLY :   NIMPUR
-USE MODN_IO_OFFLINE, ONLY : NIMPUROF
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR, NOBSTYPE, NBOUTPUT,  CVAR, COBS
 !                                 
@@ -115,9 +114,10 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=100):: YCOMMENT       ! Comment string
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
+ CHARACTER(LEN=2)  :: YNUM
 !
 REAL, DIMENSION(SIZE(DM%XSWI,1)) :: ZMAX
-INTEGER           :: JL, JJ, JVAR, JOBS, JP, JI, JT, JK, ISIZE, IDEPTH,JIMP
+INTEGER           :: JL, JJ, JVAR, JOBS, JP, JI, JT, JK, ISIZE, IDEPTH,JIMP, JSW
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -354,12 +354,38 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     YCOMMENT='Type of inferior profile'
     CALL WRITE_SURF(HSELECT,HPROGRAM,'PRO_INF_TYP',DM%XPRO_INF_TYP(:),IRESP,HCOMMENT=YCOMMENT)
     ! 
-!		IF (DM%LPROBANDS) THEN
-!      YCOMMENT='Snow spectral albedo' 
-!      CALL WRITE_SURF(HSELECT,HPROGRAM,'SPEC_ALB',DM%XSPEC_ALB(:,:),IRESP, HCOMMENT=YCOMMENT)
-!      YCOMMENT='Diffuse to total spectral irradiance ratio'               
-!      CALL WRITE_SURF(HSELECT,HPROGRAM,'DIFF_RATIO',DM%XDIFF_RATIO(:,:),IRESP,HCOMMENT=YCOMMENT)
-!    ENDIF                  
+    IF (DM%LPROBANDS) THEN
+      IF (LALLOW_ADD_DIM)  THEN
+        !
+        YRECFM='SPEC_ALB'
+        YCOMMENT='Snow spectral albedo'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HSELECT,&
+             HPROGRAM,YRECFM,DM%XSPEC_ALB(:,:),IRESP,HCOMMENT=YCOMMENT, HNAM_DIM=YSWBAND_DIM_NAME)
+        !
+        YRECFM='DIFF_RATIO'
+        YCOMMENT='Diffuse to total spectral irradiance ratio'//YRECFM//' (W/m2)'
+        CALL WRITE_SURF(HSELECT,&
+             HPROGRAM,YRECFM,DM%XDIFF_RATIO(:,:),IRESP,HCOMMENT=YCOMMENT, HNAM_DIM=YSWBAND_DIM_NAME)
+        !
+      ELSE
+        !
+        DO JSW=1, SIZE(DM%XSPEC_ALB,2)
+          YNUM=ACHAR(48+JSW)
+          !
+          !YRECFM='SPEC_ALB_'//YNUM
+          YRECFM='SPEC_ALB'
+          YCOMMENT='Snow spectral albedo'
+          CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSPEC_ALB(:,JSW),IRESP,HCOMMENT=YCOMMENT)
+          !
+          !YRECFM='DIFF_RATIO_'//YNUM
+          YRECFM='DIFF_RATIO'
+          YCOMMENT='Diffuse to total spectral irradiance ratio'
+          CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XDIFF_RATIO(:,JSW),IRESP,HCOMMENT=YCOMMENT)
+          !
+        ENDDO
+        !
+      ENDIF  
+    ENDIF                
   ENDIF
   !
   IF (TPSNOW%SCHEME=='CRO') THEN
@@ -722,62 +748,32 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       ENDDO
       YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
       DO JP=1,IO%NPATCH
-          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLX_ISBA_',YCOMMENT,JP,&
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLX_ISBA',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSYTMASS(:),ISIZE,S%XWORK_WR)
       ENDDO
       !
       YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
       DO JP=1,IO%NPATCH
-          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLXC_ISBA_',YCOMMENT,JP,&
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLXC_ISBA',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSYTMASSC(:),ISIZE,S%XWORK_WR)
       ENDDO
-!      !
-!      IF (DM%LPROSNOW) THEN		
-!        IF (DM%LPROBANDS) THEN
-!          YCOMMENT='Snow spectral albedo'  
-!          DO JP=1,IO%NPATCH
-!            CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SPEC_ALB_',YCOMMENT,JP,&
-!                    NP%AL(JP)%NR_P,NDM%AL(JP)%XSPEC_ALB(:,:),ISIZE,S%XWORK_WR)
-!          ENDDO           
-!          YCOMMENT='Diffuse to total spectral irradiance ratio' 
-!          DO JP=1,IO%NPATCH
-!            CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DIFF_RATIO_',YCOMMENT,JP,&
-!                    NP%AL(JP)%NR_P,NDM%AL(JP)%XDIFF_RATIO(:,:),ISIZE,S%XWORK_WR)
-!          ENDDO
-!        ENDIF                      
-!      ENDIF
-!      !
     ENDIF
   ENDIF
   !
   IF((OPATCH_BUDGET.AND. IO%NPATCH>1).OR.IO%NPATCH==1)THEN
     !
-! A VOIR RAFIFE
-!    IF (TPSNOW%SCHEME=='CRO') THEN
-!      IF (DM%LPROSNOW) THEN		
-!        IF (DM%LPROBANDS) THEN
-!          YCOMMENT='Snow spectral albedo'  
-!          DO JP=1,IO%NPATCH
-!            CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SPEC_ALB',YCOMMENT,JP,&
-!                    NP%AL(JP)%NR_P,NDM%AL(JP)%XSPEC_ALB(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-!          ENDDO           
-!          YCOMMENT='Diffuse to total spectral irradiance ratio' 
-!          DO JP=1,IO%NPATCH
-!            CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'DIFF_RATIO',YCOMMENT,JP,&
-!                    NP%AL(JP)%NR_P,NDM%AL(JP)%XDIFF_RATIO(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-!          ENDDO
-!        ENDIF                      
-!      ENDIF
-!    ENDIF
+    IF (TPSNOW%SCHEME=='CRO') THEN
 !
-    DO JP=1,IO%NPATCH
-      DO JIMP=1,NIMPUROF
-        WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
-        WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
-        CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YREFIMPUR,YCOMMENT,JP,&
-                    NP%AL(JP)%NR_P,NDM%AL(JP)%XIMPUR_CONC(:,:,JIMP),ISIZE,'snow_layer',S%XWSN_WR)
-      ENDDO
-    ENDDO      
+      DO JP=1,IO%NPATCH
+        DO JIMP=1,NIMPUR
+          
+          WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
+          WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
+          CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YREFIMPUR,YCOMMENT,JP,&
+                      NP%AL(JP)%NR_P,NDM%AL(JP)%XIMPUR_CONC(:,:,JIMP),ISIZE,'snow_layer',S%XWSN_WR)
+        ENDDO
+      ENDDO  
+    ENDIF    
     ! 
     IF ( OSNOWDIMNC ) THEN
        
@@ -800,10 +796,8 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       !        
       YCOMMENT=  'snow layer thickness'
       DO JP=1,IO%NPATCH
-        !print*, "write_diag_misc_isban call snowdz"
         CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'SNOWDZ',YCOMMENT,JP,&
               NP%AL(JP)%NR_P,NDM%AL(JP)%XSNOWDZ(:,:),ISIZE,'snow_layer',S%XWSN_WR)
-        !print*, "write_diag_misc_isban end call snowdz"
       ENDDO
       !      
       IF (TPSNOW%SCHEME=='CRO' .AND. DM%LPROSNOW) THEN

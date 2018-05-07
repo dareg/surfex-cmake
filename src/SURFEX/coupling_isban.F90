@@ -976,6 +976,9 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ZIRRIG_GR(:)= 0.
 !
+ !PRINT*, "XSNOWLIQ", SIZE(ID%DM%XSNOWLIQ) ," and", SIZE(DMK%XSNOWLIQ)
+ !print*,"coupling isba", SIZE(ID%DM%XIMPUR_CONC), " and", SIZE(DMK%XIMPUR_CONC)
+ !print*,"coupling isba", SIZE(ID%DM%XPRODCOUNT), " and", SIZE(DMK%XPRODCOUNT)
  CALL ISBA(IO, KK, PK, PEK, GK, AGK, DK, DEK, DMK,                                            &
            S%TTIME, S%XPOI, S%XABC, GBK%XIACAN, GMEB, PTSTEP, CIMPLICIT_WIND,                 &
            ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, &
@@ -990,9 +993,9 @@ ZIRRIG_GR(:)= 0.
            ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZP_TDEEP_A, ZP_CO2, ZP_FFGNOS, ZP_FFVNOS,        &
            ZP_EMIS, ZP_USTAR, ZP_AC_AGG, ZP_HU_AGG, ZP_RESP_BIOMASS_INST, ZP_DEEP_FLUX,       &
            ZIRRIG_GR, &             
-					 NTAB_SYT, ID%DM%XSYTMASS, PEK%TSNOW%IMPUR,&
-					 ZP_DIR_SW, ZP_SCA_SW,ID%DM%XSPEC_ALB,ID%DM%XDIFF_RATIO,ID%DM%XIMPUR_CONC,         &
-					 ID%DM%XPRODCOUNT, &
+					 NTAB_SYT, DMK%XSYTMASS, PEK%TSNOW%IMPUR,&
+					 ZP_DIR_SW, ZP_SCA_SW,DMK%XSPEC_ALB,DMK%XDIFF_RATIO,DMK%XIMPUR_CONC,         &
+					 DMK%XPRODCOUNT, &
 					 IO%LSNOWCOMPACT_BOOL,IO%LSNOWMAK_BOOL, IO%LSNOWTILLER, IO%LSELF_PROD, IO%LSNOWMAK_PROP, &
 					 IO%LPRODSNOWMAK)
 !

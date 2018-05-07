@@ -374,11 +374,12 @@ DO  JJ = 1, SIZE(PVMOD)
 ENDDO
 
 PSYTMASS(:)=0.
+
 DO  JJ = 1, SIZE(PVMOD)
-     IF(ZHTE_FIN(JJ)>0.) THEN 
-        PSYTMASS(JJ) = -ZHTE_FIN(JJ)/PTSTEP*ZRHOT(JJ)      ! Erosion flux (negative)
-        PSYTMASS(KTAB_SYT(JJ)) = ZHDE_FIN(JJ)/PTSTEP*ZRHOD(JJ) ! Deposition flux (positive)
-     ENDIF
+  IF(ZHTE_FIN(JJ)>0.) THEN 
+    PSYTMASS(JJ) = -ZHTE_FIN(JJ)/PTSTEP*ZRHOT(JJ)      ! Erosion flux (negative)
+    PSYTMASS(KTAB_SYT(JJ)) = ZHDE_FIN(JJ)/PTSTEP*ZRHOD(JJ) ! Deposition flux (positive)
+  ENDIF
 ENDDO
 
 CONTAINS

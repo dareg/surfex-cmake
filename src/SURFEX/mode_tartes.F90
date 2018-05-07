@@ -244,7 +244,10 @@ IF (LHOOK) CALL DR_HOOK('INIT_TARTES',0,ZHOOK_HANDLE)
 !
  CALL REFICE() ! Interpolate refractive index for pure ice on the prescribed wavelengths
  CALL REFSOOT_IMAG() ! Compute refractive index of soot according to wavelengths from Chang (1990)
- CALL REFDUST_IMAG() ! Compute refractive index of dust according to ???
+ 
+ !You can either call REFDUST_IMAG or REFDUST_MAE to choose between refractive index and Mass absorbtion efficiency representation
+ !CALL REFDUST_IMAG() ! Compute refractive index of dust according to ???
+ CALL REFDUST_MAE() ! Compute refractive index of dust according to ???
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TARTES',1,ZHOOK_HANDLE)
 !
@@ -324,7 +327,7 @@ SUBROUTINE REFSOOT_IMAG()
 
 ! Compute refractive index of soot according to wavelengths from Chang (1990)
 
-USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XREFIMP_I
+USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XREFIMP_I,L_IS_MAE
 !
 !PPWAVELENGTHS nanometers
 !
@@ -336,6 +339,11 @@ REAL, DIMENSION    (NPNBANDS) :: ZINDEX_SOOT_REAL,ZINDEX_SOOT_IMAG ! real and im
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+
+L_IS_MAE(1)=.FALSE. !BC Is treated regarding it's refractive index in impurity_single_albedo
+
+!
+
 IF (LHOOK) CALL DR_HOOK('REFSOOT_IMAG',0,ZHOOK_HANDLE)
 !
 ZWL_UM = XPWAVELENGTHS / 1000.
@@ -358,8 +366,7 @@ SUBROUTINE REFDUST_IMAG()
 ! Interpolate refractive index for dust on the prescribed wavelengths
 !
 USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS,NPNBANDS_SKILLES,XREFIMP_I,             &
-                             XPWAVELENGTHS_SKILLES,XPDUSTSKILLES_I,ISMULLER,XPDUSTMULLER_I
-                                                 
+                             XPWAVELENGTHS_SKILLES,XPDUSTSKILLES_I,ISMULLER,XPDUSTMULLER_I,L_IS_MAE
 !
 USE MODI_ABOR1_SFX
 !
@@ -378,6 +385,11 @@ REAL, DIMENSION    (NPNBANDS) :: ZINDEX_DUST_REAL,ZINDEX_DUST_IMAG ! real and im
  COMPLEX, DIMENSION(NPNBANDS) :: ZINDEX_DUST !complex refractive index
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+!
+L_IS_MAE(2)=.FALSE. !Dust Is treated regarding it's refractive index as in Tuzet et al. 2017                                                  
+!
+
 !
 IF (LHOOK) CALL DR_HOOK('REFDUST',0,ZHOOK_HANDLE)
 !
@@ -428,6 +440,52 @@ IF (LHOOK) CALL DR_HOOK('REFDUST',1,ZHOOK_HANDLE)
 END SUBROUTINE REFDUST_IMAG
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
+
+!Subroutine to treat dust impact by computing its mass_absorbtion efficiency instead of its refractive index. Treat this special case separately
+!--------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
+SUBROUTINE REFDUST_MAE()
+!
+! Dust is treated thanks to its mass absorption efficiency and angstorm exponant following values fromCaponi et al. 2017 (https://www.atmos-chem-phys.net/17/7175/2017/acp-17-7175-2017.pdf) The default values for now are the ones of Table 4 of this reference. And for now the one of " Lybia; PM2.5 "
+
+!
+USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS,XREFIMP_I, XDUST_MAE_400,XDUST_AAE,L_IS_MAE            
+                                              
+!
+USE MODI_ABOR1_SFX
+!
+IMPLICIT NONE  ! Definition of the refractive index for the impurities    
+!
+! Log of PPWAVELENGTHS PPWAVELENGTHS_REF PPREFICE_I for interpolation
+REAL, DIMENSION(NPNBANDS)         :: ZDUST_MAE
+!
+INTEGER :: JB
+!
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+                            
+L_IS_MAE(2)=.TRUE. !Dust Is treated regarding it's mass absorption efficiency (Reference: )   
+
+! Compute the mass absorbtion efficiency for this given wavelength, 
+DO JB = 1,NPNBANDS
+  !
+   ZDUST_MAE(JB)=XDUST_MAE_400*((XPWAVELENGTHS(JB)/400.)**(-XDUST_AAE))   
+
+  !
+END DO
+! return the Mass absorption efficiency of the particles in m2/kg
+XREFIMP_I(:,2) = ZDUST_MAE
+!
+IF (LHOOK) CALL DR_HOOK('REFDUST',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE REFDUST_MAE
+!--------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
+
+
+
+
 SUBROUTINE SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWG00,PSNOWY,PSNOWW,PSNOWB)
 
 !compute shape parameter variations as a function of the the refraction index with respect to the value in the visible range.
@@ -470,7 +528,7 @@ END SUBROUTINE SHAPE_PARAMETER_VARIATIONS
 SUBROUTINE IMPURITIES_CO_SINGLE_SCATTERING_ALBEDO(PSNOWSSA,PSNOWIMP_DENSITY,PSNOWIMP_CONTENT, &
                                                   KNLVLS_USE,KMAX_USE,PCOSSALB)
 !
-USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS_M,XREFIMP_I
+USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS_M,XREFIMP_I,L_IS_MAE
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_CSTS, ONLY: XPI
 !
@@ -486,7 +544,7 @@ INTEGER, DIMENSION(:), INTENT(IN)   :: KNLVLS_USE !number of active layers
 INTEGER, INTENT(IN)                 :: KMAX_USE !maximum number of active layers over the domain
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PCOSSALB !co single scattering albedo of impurities
 !
-REAL,DIMENSION(SIZE(PSNOWSSA,1),SIZE(PSNOWSSA,2)) :: ZABS_IMP
+REAL,DIMENSION(SIZE(PSNOWSSA,1),SIZE(PSNOWSSA,2)) :: ZABS_IMP,ZMAE_IMP
 !
 INTEGER :: JIMP !loop counter on impurities
 INTEGER :: JB, JL,JJ !loop counter
@@ -499,21 +557,41 @@ PCOSSALB = 0.
 !
 DO JB = 1,NPNBANDS
   DO JIMP = 1,NIMPUR
-    DO JL = 1,KMAX_USE
-      DO JJ = 1,SIZE(KNLVLS_USE)
-        !
-        IF ( KNLVLS_USE(JJ)>=JL ) THEN
+    IF (L_IS_MAE(JIMP)) THEN ! If the single scatering albedo is computed from Mass absorption efficiency
+      DO JL = 1,KMAX_USE
+        DO JJ = 1,SIZE(KNLVLS_USE)
           !
-          ZABS_IMP(JJ,JL)       = -XREFIMP_I(JB,JIMP)
-          PCOSSALB(JJ,JL,JB) = PCOSSALB(JJ,JL,JB) + &
-                                      12. * XPI / ( XPWAVELENGTHS_M(JB)*PSNOWSSA(JJ,JL) ) * &
-                                      PSNOWIMP_CONTENT(JJ,JL,JIMP) / PSNOWIMP_DENSITY(JJ,JL,JIMP) * &
-                                      ZABS_IMP(JJ,JL) !doc equation 79
+          IF ( KNLVLS_USE(JJ)>=JL ) THEN
+            !
+              !  density could be remove because it is return 2/(density*SSA) *  mae_impurities * impurities_content * density  # Eq !(73) and (inline between 77 and 78)
+              !added by Ghislain in python Tartes (04/2018)
+            ZMAE_IMP(JJ,JL)       = XREFIMP_I(JB,JIMP)
+            PCOSSALB(JJ,JL,JB) = PCOSSALB(JJ,JL,JB) + &
+                                        2.0 / PSNOWSSA(JJ,JL) * &
+                                        PSNOWIMP_CONTENT(JJ,JL,JIMP) * &
+                                        ZMAE_IMP(JJ,JL) !doc equation 79
+            !
+          ENDIF
           !
-        ENDIF
-        !
+        ENDDO
       ENDDO
-    ENDDO
+    ELSE !If the single scatering albedo is computed from the refractive index (classic way of doing)
+      DO JL = 1,KMAX_USE
+        DO JJ = 1,SIZE(KNLVLS_USE)
+          !
+          IF ( KNLVLS_USE(JJ)>=JL ) THEN
+            !
+            ZABS_IMP(JJ,JL)       = -XREFIMP_I(JB,JIMP)
+            PCOSSALB(JJ,JL,JB) = PCOSSALB(JJ,JL,JB) + &
+                                        12. * XPI / ( XPWAVELENGTHS_M(JB)*PSNOWSSA(JJ,JL) ) * &
+                                        PSNOWIMP_CONTENT(JJ,JL,JIMP) / PSNOWIMP_DENSITY(JJ,JL,JIMP) * &
+                                        ZABS_IMP(JJ,JL) !doc equation 79
+            !
+          ENDIF
+          !
+        ENDDO
+      ENDDO
+    ENDIF
   ENDDO
 ENDDO
 !
@@ -1098,7 +1176,7 @@ IF (LHOOK) CALL DR_HOOK('SNOWPACK_ALBEDO',1,ZHOOK_HANDLE)
 END SUBROUTINE SNOWPACK_ALBEDO
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
-SUBROUTINE ENERGY_PROFILE(PXA,PXB,PXC,PXD,PKESTAR,PDTAUSTAR,PTAUSTAR,PGM,PGP,PCOSZEN,KNLVLS_EFF,KMAX_EFF,PEPROFILE)
+SUBROUTINE ENERGY_PROFILE(PXA,PXB,PXC,PXD,PKESTAR,PDTAUSTAR,PTAUSTAR,PGM,PGP,PCOSILLUM,KNLVLS_EFF,KMAX_EFF,PEPROFILE)
 
     !compute energy absorption for each layer and wavelength
 USE MODD_CONST_TARTES, ONLY : NPNBANDS
@@ -1111,7 +1189,7 @@ REAL, DIMENSION(:,:,:), INTENT(IN)  :: PDTAUSTAR !Optical depth of each layer (n
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PTAUSTAR !Cumulated optical depth (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGP !GP vector (npoints,nlayer,nbands)
 REAL, DIMENSION(:,:,:), INTENT(IN)  :: PGM !GM vector (npoints,nlayer,nbands)
-REAL, DIMENSION(:), INTENT(IN)      :: PCOSZEN! cosine of effective zenithal solar angle (npoints)
+REAL, DIMENSION(:), INTENT(IN)      :: PCOSILLUM! cosine of effective zenithal solar angle (npoints)
 INTEGER, DIMENSION(:,:), INTENT(IN) :: KNLVLS_EFF !number of effective layers (npoints,nbands)
 INTEGER, DIMENSION(:), INTENT(IN)   :: KMAX_EFF !maximum number of effective layers over the domain (nbands)
 REAL, DIMENSION(:,:,:), INTENT(OUT) :: PEPROFILE ! energy absorbed by each layer (W/m^2) npoints,nlayer,nbands)
@@ -1127,59 +1205,51 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('ENERGY_PROFILE',0,ZHOOK_HANDLE)
 
 DO JB = 1,NPNBANDS
-	!
-	DO JJ =1,SIZE(PEPROFILE,1)
-		!
-		DO JL = 1,KMAX_EFF(JB)
-			!
-			IF (JL==1.OR.JL<=KNLVLS_EFF(JJ,JB)) THEN
-				!
-				ZSTAR = PKESTAR(JJ,JL,JB) * PDTAUSTAR(JJ,JL,JB)
-				ZINT1 = EXP(-ZSTAR)
-				ZINT2 = EXP( ZSTAR)
-				! 
-				IF (JL==1) THEN
-				!  
-					ZINT3 = EXP( -PDTAUSTAR(JJ,JL,JB)/PCOSZEN(JJ))
-					ZINT4 = EXP( -PTAUSTAR (JJ,JL,JB)/PCOSZEN(JJ))
-					!
-					!surface layer doc equation 64
-					PEPROFILE(JJ,1,JB) = ( PCOSZEN(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
-										       ( PXC(JJ,1,JB) * ZINT1 + PXD(JJ,1,JB) * ZINT2 + &
-										         PGP(JJ,1,JB) * ZINT3 ) - &
-										       ( PXA(JJ,1,JB) * ZINT1 + PXB(JJ,1,JB) * ZINT2 + &
-										         PGM(JJ,1,JB) * ZINT3 + &
-										         PCOSZEN(JJ) * ZINT4 ) 
-					!
-				ELSE
-					!
-					ZINT5 = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSZEN(JJ) )
-					!last factor in equations 62 and 63
-					ZDEXP = ZINT5 - ZINT4
-					ZINT4 = ZINT5
-					!
-					!doc equation 62
-					ZFDU = PXC(JJ,JL,JB) * ( ZINT1 -1. ) + &
-						 PXD(JJ,JL,JB) * ( ZINT2 -1. ) + PGP(JJ,JL,JB) * ZDEXP
-					!
-					!doc equation 63
-					ZFDD = PXA(JJ,JL,JB) * ( ZINT1 -1. ) + &
-						 PXB(JJ,JL,JB) * ( ZINT2 -1. ) + ( PGM(JJ,JL,JB) + PCOSZEN(JJ) ) * ZDEXP
-					!      
-					PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
-					!
-				ENDIF
-			!
-			ELSE
-				!
-				PEPROFILE(JJ,JL,JB) = 0.
-				!
-			ENDIF
-			!
-		ENDDO
-		!
-	ENDDO
-	!
+  !
+  DO JJ =1,SIZE(PEPROFILE,1)
+    !
+    ZSTAR = PKESTAR(JJ,1,JB) * PDTAUSTAR(JJ,1,JB)
+    !
+    
+    !surface layer doc equation 64
+    PEPROFILE(JJ,1,JB) = ( PCOSILLUM(JJ) - ( PXC(JJ,1,JB)+PXD(JJ,1,JB)+PGP(JJ,1,JB) ) ) + &
+                            ( PXC(JJ,1,JB) * EXP(-ZSTAR) + PXD(JJ,1,JB) * EXP(ZSTAR) + &
+                              PGP(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSILLUM(JJ)) ) - &
+                            ( PXA(JJ,1,JB) * EXP(-ZSTAR) + PXB(JJ,1,JB) * EXP(ZSTAR) + &
+                              PGM(JJ,1,JB) * EXP( -PDTAUSTAR(JJ,1,JB)/PCOSILLUM(JJ)) + &
+                               PCOSILLUM(JJ) * EXP( -PTAUSTAR (JJ,1,JB)/PCOSILLUM(JJ)) ) 
+    !
+    !internal layers
+    ! 
+    DO JL = 2,KMAX_EFF(JB)
+      !  
+      ZSTAR = PKESTAR(JJ,JL,JB) * PDTAUSTAR(JJ,JL,JB)
+      !
+      IF ( JL<=KNLVLS_EFF(JJ,JB) ) THEN
+        !
+        !last factor in equations 62 and 63
+        ZDEXP = EXP( -PTAUSTAR(JJ,JL  ,JB)/PCOSILLUM(JJ) ) - EXP( -PTAUSTAR(JJ,JL-1,JB)/PCOSILLUM(JJ) )
+        !
+        !doc equation 62
+        ZFDU = PXC(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
+               PXD(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + PGP(JJ,JL,JB) * ZDEXP
+        !
+        !doc equation 63
+        ZFDD = PXA(JJ,JL,JB) * ( EXP(-ZSTAR) -1. ) + &
+               PXB(JJ,JL,JB) * ( EXP( ZSTAR) -1. ) + ( PGM(JJ,JL,JB) + PCOSILLUM(JJ) ) * ZDEXP
+        !      
+        PEPROFILE(JJ,JL,JB) = ZFDU - ZFDD !doc equation 61
+        !
+      ELSE
+        !
+        PEPROFILE(JJ,JL,JB) = 0.
+        !
+      ENDIF
+      !
+    ENDDO
+    !
+  ENDDO
+  !
 ENDDO
 !
 !
@@ -1306,7 +1376,7 @@ ELSE
     ELSE
       ! If we have no information on the direct/diffus ratio in the forcing, use Marie formula
       IF (SUM(P_SCA_SW(JJ,:))==0.) THEN 
-        print*, "NODIFFUSE, abnormal with SAFRAN",SUM(P_DIR_SW(JJ,:)),SUM(P_SCA_SW(JJ,:)),PSW_RAD(JJ)
+        !print*, "NODIFFUSE, abnormal with SAFRAN",SUM(P_DIR_SW(JJ,:)),SUM(P_SCA_SW(JJ,:)),PSW_RAD(JJ)
         ! Separate broadband global radiation in direct and diffuse (parametrization Marie Dumont)
         ! NB : thresold 1. to the factor when zenithal angle close to pi/2
         ZDIFFUSE_PORTION=MIN( EXP( - 1.54991930344*PCOSZEN**3 + 3.73535795329*PCOSZEN**2 &

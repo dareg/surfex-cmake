@@ -212,27 +212,6 @@ DO JP=1,IO%NPATCH
 !
 ENDDO
 !
-DO JB=1, size(DM%XSPEC_ALB,2)
-	DO JP=1,IO%NPATCH
-		PK => NP%AL(JP)
-		DMK => NDM%AL(JP)
-		PEK => NPE%AL(JP)
-		!   
-		DO JI=1,PK%NSIZE_P
-			IMASK = PK%NR_P(JI)
-			!      
-			IF (DMK%XTWSNOW(JI)>0.0) THEN
-				IF (DM%LPROBANDS) THEN
-					DM%XSPEC_ALB(IMASK,JB)     = DM%XSPEC_ALB(IMASK,JB)   + PK%XPATCH(JI)*DMK%XSPEC_ALB(JI,JB)
-					DM%XDIFF_RATIO(IMASK,JB)   = DM%XDIFF_RATIO(IMASK,JB) + PK%XPATCH(JI)*DMK%XDIFF_RATIO(JI,JB)
-				ENDIF
-			ENDIF
-			!
-		ENDDO
-		!
-	ENDDO
-ENDDO
-
 !
 !-------------------------------------------------------------------------------
 !
@@ -479,9 +458,22 @@ IF(NPE%AL(1)%TSNOW%SCHEME=="CRO") THEN
 !     Snow production counter output
       DM%XPRODCOUNT(IMASK) = DM%XPRODCOUNT(IMASK) + PK%XPATCH(JI) * DMK%XPRODCOUNT(JI)
 !
+      !print*, "average_diag_misc_isban", shape(DM%XSPEC_ALB), " and " , shape(DMK%XSPEC_ALB(JI,JB))
+      
+      DO JB=1, size(DM%XSPEC_ALB,2)
+	      !      
+	      IF (DMK%XTWSNOW(JI)>0.0) THEN
+		      IF (DM%LPROBANDS) THEN
+			      DM%XSPEC_ALB(IMASK,JB)     = DM%XSPEC_ALB(IMASK,JB)   + PK%XPATCH(JI)*DMK%XSPEC_ALB(JI,JB)
+			      DM%XDIFF_RATIO(IMASK,JB)   = DM%XDIFF_RATIO(IMASK,JB) + PK%XPATCH(JI)*DMK%XDIFF_RATIO(JI,JB)
+		      ENDIF
+	      ENDIF
+	      !
+      ENDDO
 		ENDDO
     !
 	ENDDO
+
 ENDIF
 
 
