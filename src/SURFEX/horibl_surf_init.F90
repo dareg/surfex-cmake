@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE HORIBL_SURF_INIT(PILA1,PILO1,PILA2,PILO2,KINLA,KINLO,KOLEN,&
-                           PXOUT,PYOUT,OINTERP,OGLOBLON,OGLOBN,OGLOBS,&
+                           PXOUT,PYOUT,OINTERP,OGAUSS,OGLOBLON,OGLOBN,OGLOBS,&
                            KO,KINLO_OUT,POLA,POLO,PILO1_OUT,&
                            PILO2_OUT,PLA,PILATARRAY )  
 !   ###########################################################################
@@ -121,6 +121,7 @@ INTEGER,                   INTENT(IN)  :: KOLEN   ! size of output array
 REAL,    DIMENSION(:), INTENT(IN)  :: PXOUT   ! X (lon.) of output points
 REAL,    DIMENSION(:), INTENT(IN)  :: PYOUT   ! Y (lat.) of output points
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OINTERP ! .true. where physical value is needed
+LOGICAL, INTENT(IN) :: OGAUSS
 ! 
 LOGICAL, INTENT(OUT)  :: OGLOBLON  ! True if the map is circular
 LOGICAL, INTENT(OUT)  :: OGLOBN    ! True if the map has the north pole
@@ -282,12 +283,23 @@ DO JL = 1, KOLEN
     ELSE 
       DO JLAT0 = 1,KINLA
         JL2 = MOD(JLAT0+IOS_SAVE-1,KINLA)
-        IF (POLA(JL)>=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
-          KO(JL,3) = JL2
-          EXIT
-        ELSEIF (POLA(JL)<=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
-          KO(JL,3) = JL2
-          EXIT
+        IF (JL2==0) JL2 = KINLA
+        IF (OGAUSS) THEN
+          IF (POLA(JL)>=PILATARRAY(JL2).AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2)) THEN
+            KO(JL,3) = JL2
+            EXIT
+          ELSEIF (POLA(JL)<=PILATARRAY(JL2).AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2)) THEN
+            KO(JL,3) = JL2
+            EXIT
+          ENDIF                
+        ELSE
+          IF (POLA(JL)>=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
+            KO(JL,3) = JL2
+            EXIT
+          ELSEIF (POLA(JL)<=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
+            KO(JL,3) = JL2
+            EXIT
+          ENDIF
         ENDIF
       ENDDO
     ENDIF
