@@ -144,6 +144,7 @@ REAL, DIMENSION(:), ALLOCATABLE    :: ZIDLAT   ! Deltai latitude
 REAL                               :: ZIDLA    ! Delta latitude
 REAL                               :: ZSOUTHPOLE! south pole latitude (-90 or  90)
 REAL                               :: ZNORTHPOLE! north pole latitude ( 90 or -90)
+REAL                               :: ZB1, ZB2
 !
 ! Variables implied in the extension procedure
 !
@@ -285,13 +286,13 @@ DO JL = 1, KOLEN
         JL2 = MOD(JLAT0+IOS_SAVE-1,KINLA)
         IF (JL2==0) JL2 = KINLA
         IF (OGAUSS) THEN
-          IF (POLA(JL)>=PILATARRAY(JL2).AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2)) THEN
+          IF (POLA(JL)>=PILATARRAY(JL2).AND.POLA(JL)<PILATARRAY(JL2+1)) THEN
             KO(JL,3) = JL2
             EXIT
-          ELSEIF (POLA(JL)<=PILATARRAY(JL2).AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2)) THEN
+          ELSEIF (POLA(JL)<=PILATARRAY(JL2).AND.POLA(JL)>PILATARRAY(JL2+1)) THEN
             KO(JL,3) = JL2
             EXIT
-          ENDIF                
+          ENDIF                 
         ELSE
           IF (POLA(JL)>=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)<PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
             KO(JL,3) = JL2
@@ -299,8 +300,9 @@ DO JL = 1, KOLEN
           ELSEIF (POLA(JL)<=PILATARRAY(JL2)-ZIDLAT(JL2)/2..AND.POLA(JL)>PILATARRAY(JL2)+ZIDLAT(JL2+1)/2.) THEN
             KO(JL,3) = JL2
             EXIT
-          ENDIF
+          ENDIF                  
         ENDIF
+              
       ENDDO
     ENDIF
     IOS_SAVE = KO(JL,3)
