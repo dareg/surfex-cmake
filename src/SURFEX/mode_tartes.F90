@@ -246,8 +246,12 @@ IF (LHOOK) CALL DR_HOOK('INIT_TARTES',0,ZHOOK_HANDLE)
  CALL REFSOOT_IMAG() ! Compute refractive index of soot according to wavelengths from Chang (1990)
  
  !You can either call REFDUST_IMAG or REFDUST_MAE to choose between refractive index and Mass absorbtion efficiency representation
- !CALL REFDUST_IMAG() ! Compute refractive index of dust according to ???
- CALL REFDUST_MAE() ! Compute refractive index of dust according to ???
+ !CALL REFDUST_IMAG() ! Compute refractive index of dust according to Muller et al. 2011 or Skiles et al. 2014
+ CALL REFDUST_MAE() ! Compute refractive index of dust according to Caponi et al. 2017
+ 
+ CALL REFORGC_IMAG() ! Compute refractive index of organic matter according to Hess et al. 1998
+ 
+ 
 !
 IF (LHOOK) CALL DR_HOOK('INIT_TARTES',1,ZHOOK_HANDLE)
 !
@@ -446,7 +450,7 @@ END SUBROUTINE REFDUST_IMAG
 !--------------------------------------------------------------------------------
 SUBROUTINE REFDUST_MAE()
 !
-! Dust is treated thanks to its mass absorption efficiency and angstorm exponant following values fromCaponi et al. 2017 (https://www.atmos-chem-phys.net/17/7175/2017/acp-17-7175-2017.pdf) The default values for now are the ones of Table 4 of this reference. And for now the one of " Lybia; PM2.5 "
+! Dust is treated thanks to its mass absorption efficiency and angstorm exponant following values from Caponi et al. 2017 (https://www.atmos-chem-phys.net/17/7175/2017/acp-17-7175-2017.pdf) The default values for now are the ones of Table 4 of this reference. And for now the one of " Lybia; PM2.5 "
 
 !
 USE MODD_CONST_TARTES, ONLY: NPNBANDS,XPWAVELENGTHS,XREFIMP_I, XDUST_MAE_400,XDUST_AAE,L_IS_MAE            
@@ -483,8 +487,43 @@ IF (LHOOK) CALL DR_HOOK('REFDUST_MAE',1,ZHOOK_HANDLE)
 END SUBROUTINE REFDUST_MAE
 !--------------------------------------------------------------------------------
 !--------------------------------------------------------------------------------
+SUBROUTINE REFORGC_IMAG()
 
+! Compute refractive index of organic carbon according to wavelengths from Chang (1990), 
 
+USE MODD_CONST_TARTES, ONLY : NPNBANDS,XPWAVELENGTHS,XREFIMP_I,L_IS_MAE
+!
+
+!PPWAVELENGTHS nanometers
+!
+IMPLICIT NONE  ! Definition of the refractive index for the impurities
+!
+REAL, DIMENSION    (NPNBANDS) :: ZINDEX_ORGC_REAL,ZINDEX_ORGC_IMAG ! real and imaginary components of refractive index from 
+ COMPLEX, DIMENSION(NPNBANDS) :: ZINDEX_ORGC !complex refractive index
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+
+L_IS_MAE(3)=.FALSE. !Organic carbon Is treated regarding it's refractive index in impurity_single_albedo
+
+!
+
+IF (LHOOK) CALL DR_HOOK('REFSOOT_IMAG',0,ZHOOK_HANDLE)
+!
+!
+ZINDEX_ORGC_REAL = 1.53    ! (Hess et al.1998) (used by paul ginoux)
+ZINDEX_ORGC_IMAG = 0.005  ! (Hess et al.1998)
+!
+ZINDEX_ORGC = ZINDEX_ORGC_REAL - CMPLX(0,1) * ZINDEX_ORGC_IMAG
+!
+! absorption cross section of small particles (Bohren and Huffman, 1983)
+XREFIMP_I(:,3) = AIMAG( (ZINDEX_ORGC**2-1.) / (ZINDEX_ORGC**2 + 2.) )
+!
+IF (LHOOK) CALL DR_HOOK('REFSOOT_IMAG',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE REFORGC_IMAG
+!--------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------
 
 
 SUBROUTINE SHAPE_PARAMETER_VARIATIONS(PSNOWG0,PSNOWY0,PSNOWW0,PSNOWB0,PSNOWG00,PSNOWY,PSNOWW,PSNOWB)
