@@ -23,6 +23,7 @@ TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: SICE_t
 
     REAL, POINTER :: SHAPE(:) !< Ice shape function
     REAL, POINTER :: AGE(:) !< Ice age [s]
+    REAL, POINTER :: THICKNESS(:) !< Ice thickness [m]
 
     REAL, POINTER :: XTICE(:)
     REAL, POINTER :: XSIC(:)
@@ -76,6 +77,8 @@ IMPLICIT NONE
   THIS%XICE_THICKNESS = 1.0
 
   THIS%CONFIG = READ_SICE_CONFIG(HPROGRAM)
+
+  NULLIFY(THIS%THICKNESS)
 
   IF(THIS%CONFIG%LICE_HAS_SNOW) THEN
     ALLOCATE(THIS%SNOW)
@@ -651,6 +654,7 @@ IMPLICIT NONE
   INTEGER,           INTENT(IN) :: KLU      !< number of sea patch point
   INTEGER,           INTENT(IN) :: KLUOUT
 
+  REAL :: ZICE_THICKNESS(KLU)
   INTEGER :: IRESP
 
   THIS%NUM_POINTS = KLU
@@ -670,7 +674,9 @@ IMPLICIT NONE
   CALL THIS%GET_MODEL_FIELDS(THIS%MF)
 
   CALL IO(THIS%MF, [''], HPROGRAM, IS_READ = .TRUE.)
-  CALL THIS%REGRID(THIS%Z(:, THIS%NUM_LAYERS))
+
+  ZICE_THICKNESS = THIS%THICKNESS
+  CALL THIS%REGRID(ZICE_THICKNESS)
 END SUBROUTINE READSURF
 
 SUBROUTINE WRITESURF(THIS, HSELECT, HPROGRAM)
@@ -825,6 +831,7 @@ IMPLICIT NONE
     THIS%PZREF(THIS%NUM_POINTS), &
     THIS%PUREF(THIS%NUM_POINTS), )
 
+  THIS%THICKNESS(1:THIS%NUM_POINTS) => THIS%Z(:, THIS%NUM_LAYERS)
 END SUBROUTINE ALLOCA
 
 SUBROUTINE REGRID(THIS, PZNEW)
@@ -895,7 +902,7 @@ IMPLICIT NONE
   CLASS(SICE_t), INTENT(IN) :: THIS
   TYPE( MODEL_FIELD ), ALLOCATABLE, INTENT( OUT ) :: MF(:)
 
-  INTEGER, PARAMETER :: NUM_FIELDS = 6
+  INTEGER, PARAMETER :: NUM_FIELDS = 7
 
   TYPE( MODEL_FIELD ), ALLOCATABLE :: SNOW_FIELDS(:)
   REAL( KIND = JPRB )  :: ZHOOK_HANDLE
@@ -933,14 +940,16 @@ IMPLICIT NONE
       XDEFAULT = 0.                                                     &
     ),                                                                  &
     MODEL_FIELD(                                                        &
-      'ZICE',                                                           &
-      'Ice layer bottom depth',                                         &
+      'ICE_THK',                                                        &
+      'Ice thicknesses',                                                &
       'm',                                                              &
-      [THIS%NUM_POINTS, THIS%NUM_LAYERS],                               &
-      P2 = THIS%Z                                                       &
+      [THIS%NUM_POINTS, 0],                                             &
+      P1 = THIS%THICKNESS,                                              &
+      LDEPENDENT = .TRUE.                                               &
     ),                                                                  &
     MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%DZ,     LINTERNAL = .TRUE. ), &
-    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%Z_DIFF, LINTERNAL = .TRUE. )  ]
+    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%Z_DIFF, LINTERNAL = .TRUE. ), &
+    MODEL_FIELD( NCONFIG=[0,0], P2 = THIS%Z,      LINTERNAL = .TRUE. )  ]
 
   IF(SIZE(SNOW_FIELDS) > 0) THEN
     MF(NUM_FIELDS + 1 : NUM_FIELDS + SIZE(SNOW_FIELDS)) = SNOW_FIELDS(:)

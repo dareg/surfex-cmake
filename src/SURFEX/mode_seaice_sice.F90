@@ -67,6 +67,7 @@ TYPE :: MODEL_FIELD
   INTEGER               :: NCONFIG(2) = [0,0]   !< Model grid configuration.
   LOGICAL               :: LDIAG      = .FALSE. !< Diagnostic fields may be written to separate files.
   LOGICAL               :: LINTERNAL  = .FALSE. !< Internal model fields not used in IO operations.
+  LOGICAL               :: LDEPENDENT = .FALSE. !< This field is just a pointer to another field, should not be modified
 
   REAL, POINTER         :: P1(:)      => NULL() !< Pointer to model grid.
   REAL, POINTER         :: P2(:,:)    => NULL() !< Pointer to multilayer model grid.
@@ -86,6 +87,7 @@ IMPLICIT NONE
   IF( LHOOK ) CALL DR_HOOK( 'ABSTRACT_MODEL:MASK', 0, ZHOOK_HANDLE )
 
   DO I = 1, SIZE( MF )
+    IF(MF(I)%LDEPENDENT) CYCLE
     IF( SIZE(MASK) == 1 ) THEN ! One-point masking case
       IF( MASK(1) == 1 ) CYCLE ! If mask points to first element of the masked array, masking is not needed
       ! If masking is needed we swap masked value with value of the first element of the array
@@ -118,6 +120,7 @@ IMPLICIT NONE
   IF( LHOOK ) CALL DR_HOOK( 'ABSTRACT_MODEL:UNMASK', 0, ZHOOK_HANDLE )
 
   DO I = 1, SIZE( MF )
+    IF(MF(I)%LDEPENDENT) CYCLE
     IF( SIZE(MASK) == 1 ) THEN ! One-point unmasking
       IF( MASK(1) == 1 ) CYCLE
       ! Just swap first element of the array with specified by the mask one.
