@@ -1,0 +1,24 @@
+OPTIONS_in=$1
+
+cp -f $OPTIONS_in OPTIONS.nam_prep
+
+cp -f OPTIONS.nam_prep OPTIONS.nam
+./script_teb_run.sh "OPTIONS.nam" "$2" $3 $4 $5
+
+echo "############# $2_TWO_WALLS "
+cp -f OPTIONS.nam_prep OPTIONS.nam_save
+sed -e "s/CWALL\_OPT\ =\ \"UNIF\"/CWALL\_OPT\ =\ \"TWO\"/g" OPTIONS.nam_save > OPTIONS.nam
+./script_teb_run.sh "OPTIONS.nam" "$2_TWO_WALLS" $3 $4 $5
+
+
+echo "############# $2_CANOPY "
+cp -f OPTIONS.nam_prep OPTIONS.nam_save
+sed -e "s/LTEB\_CANOPY\ =\ F/LTEB\_CANOPY\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_can
+./script_teb_run.sh "OPTIONS.nam" "$2_CANOPY" $3 $4 $5
+
+echo "############# $2_TWO_WALLS_CANOPY "
+cp -f OPTIONS.nam_can OPTIONS.nam_save
+sed -e "s/CWALL\_OPT\ =\ \"UNIF\"/CWALL\_OPT\ =\ \"TWO\"/g" OPTIONS.nam_save > OPTIONS.nam
+./script_teb_run.sh "OPTIONS.nam" "$2_TWO_WALLS_CANOPY" $3 $4 $5
+

@@ -1,0 +1,3 @@
+29,30d28
+< ln -s $RUNDIR/drdt_bst_fit_60.nc .
+< #

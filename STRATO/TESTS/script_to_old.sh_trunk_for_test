@@ -1,0 +1,43 @@
+cp -f OPTIONS.nam OPTIONS.nam_new
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/NHALO\ \= 2//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/NSCAL\ \= 0//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/NSCAL\ \= 2//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/NSCAL\ \= 59//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/NOVMX\ \= 1//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/NOVMX\ \= 2//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW = \"\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW = \"PGD_BASE\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW_TEB = \"\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW_TEB = \"PGD_BASE\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW_GD = \"\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW_GD = \"PGD_BASE\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW_GR = \"\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CFILEPGD_SNOW_GR = \"PGD_BASE\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CTYPEPGD_SNOW = \"\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CTYPEPGD_SNOW = \"ASCII\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"LFI\"/g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CSNOWMETAMO\ \=\ \"B92\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+cp -f OPTIONS.nam_old OPTIONS.nam_save
+sed -e "s/CSNOWRAD\ \=\ \"B92\"//g" OPTIONS.nam_save > OPTIONS.nam_old
+
+cp -f OPTIONS.nam_old OPTIONS.nam
+

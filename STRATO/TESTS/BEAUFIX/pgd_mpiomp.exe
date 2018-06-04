@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+#set -x
+#
+RUNDIR=$(pwd)
+#
+cd $tmpdir
+rm -f *
+#pwd
+#
+#
+#echo " copie des fichiers ecoclimap "
+#
+ln -s $RUNDIR/*.bin .
+ln -s $RUNDIR/*.dir .
+ln -s $RUNDIR/*.hdr .
+ln -s $RUNDIR/etopo2.nc .
+#
+ln -s $RUNDIR/PGD_BASE* .
+#
+ln -s $RUNDIR/XDATA*.txt .
+ln -s $RUNDIR/*.dat .
+ln -s $RUNDIR/files .
+#
+ln -s $RUNDIR/*IRRIG.prn .
+#
+ln -s $RUNDIR/poet* .
+ln -s $RUNDIR/geia* .
+ln -s $RUNDIR/geos* .
+ln -s $RUNDIR/DMS* .
+#
+ln -s $RUNDIR/EMIS* .
+ln -s $RUNDIR/*france.txt .
+#
+ln -s $RUNDIR/*sim.dat .
+ln -s $RUNDIR/boucoiran*.* .
+ln -s $RUNDIR/GKula*.* .
+ln -s $RUNDIR/Gruevo*.* .
+ln -s $RUNDIR/Vehtino*.* .
+#
+ln -s $RUNDIR/FORCING.nc .
+#
+cp -f $RUNDIR/OPTIONS.nam .
+#
+#echo " copie de l'executable "
+#
+cp -f $RUNDIR/pgd$1.exe pgd.exe
+#
+MPI_TASKS=4
+#
+export OMP_NUM_THREADS=4
+#export DR_HOOK=1
+#export DR_HOOK_OPT=prof
+#
+ulimit -s unlimited
+#
+srun -N1 -n${MPI_TASKS} -c${OMP_NUM_THREADS} ./pgd.exe
+#
+#ls -l
+#
+#cp drhook.* $RUNDIR
+mv -f LISTING_PGD.txt $RUNDIR
+mv -f PGD.* $RUNDIR
+if [ -f PGD_TEST.nc ]
+then
+	mv -f PGD_TEST.nc $RUNDIR
+fi
+#
+for cas in boucoiran GKula Gruevo Vehtino
+do
+  if [ -f $cas.mask_surf ]
+  then
+	mv -f $cas.mask_surf $RUNDIR/$cas.mask_surf$1
+  fi
+  if [ -f $cas.mask_topd ]
+  then
+	mv -f $cas.mask_topd $RUNDIR/$cas.mask_topd$1
+  fi
+done
+#
+if [ -f carte_f_dc.txt ]
+then
+	mv -f carte_f_dc.txt $RUNDIR/carte_f_dc.txt$1
+fi
+#
+cd $RUNDIR
+#

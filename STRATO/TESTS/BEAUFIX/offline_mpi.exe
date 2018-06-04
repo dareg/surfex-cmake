@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+#set -x
+#
+RUNDIR=$(pwd)
+#
+cd $tmpdir
+rm -f *
+#pwd
+#
+#echo " copie des fichiers ecoclimap "
+#
+ln -s $RUNDIR/*.bin .
+ln -s $RUNDIR/PGD* .
+ln -s $RUNDIR/PREP* .
+ln -s $RUNDIR/Params_config.txt .
+ln -s $RUNDIR/Forc_* .
+ln -s $RUNDIR/FORCING.nc .
+#
+ln -s $RUNDIR/ReLACS* .
+ln -s $RUNDIR/LAND_USE.nc .
+ln -s $RUNDIR/boucoiran* .
+ln -s $RUNDIR/carte_f_dc.txt .
+#
+ln -s $RUNDIR/drdt_bst_fit_60.nc .
+#
+cp -f $RUNDIR/OPTIONS.nam .
+#
+#echo " copie de l'executable "
+#
+cp -f $RUNDIR/offline$1.exe offline.exe
+#
+MPI_TASKS=16
+#
+#export KMP_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+#
+#export KMP_STACKSIZE=13m
+#export KMP_MONITOR_STACKSIZE=13m
+export OMP_STACKSIZE=13m
+#
+#export DR_HOOK=1
+#export DR_HOOK_OPT=prof
+#
+ulimit -s unlimited
+#
+export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+#
+srun -N1 -n${MPI_TASKS} -c${OMP_NUM_THREADS} ./offline.exe
+#
+#ls -l
+#
+#cp drhook.* $RUNDIR
+mv -f LISTING_OFFLINE*.txt $RUNDIR
+#cp log* $RUNDIR
+
+mv -f SURFOUT.* $RUNDIR
+#
+mv -f *.OUT.nc $RUNDIR
+#
+cd $RUNDIR
+#

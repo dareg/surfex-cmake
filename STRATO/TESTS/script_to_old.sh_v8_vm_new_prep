@@ -1,0 +1,76 @@
+cp -f OPTIONS.nam OPTIONS.nam_new
+
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+
+sed -e "s/LSWEMAX = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XSWEMAX = 500.//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_TG = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_WG = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_WGI = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_SN = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LT2MMW = F//g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LPERTSURF = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LPERTFLUX = F//g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^LSOLAR_PANEL/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XDT_RES/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XDT_OFF/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XUNIF_RESIDENTIAL/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XUNIF_FRAC_PANEL/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XUNIF_EMIS_PANEL/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XUNIF_ALB_PANEL/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XUNIF_EFF_PANEL/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GD_START_MONTH = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GD_END_MONTH = 1.0E+20//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GD_START_HOUR = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GD_END_HOUR = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GD_24H_IRRIG = 1.0E+20//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GR_START_MONTH = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GR_END_MONTH = 1.0E+20//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GR_START_HOUR = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GR_END_HOUR = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_GR_24H_IRRIG = 1.0E+20//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_RD_START_MONTH = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_RD_END_MONTH = 1.0E+20//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_RD_START_HOUR = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_RD_END_HOUR = 1.0E+20,//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_RD_24H_IRRIG = 1.0E+20//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CCH_BEM = \"ROW30\"/CCH_BEM = \"\"/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_old
+

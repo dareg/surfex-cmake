@@ -1,0 +1,110 @@
+cp -f OPTIONS.nam OPTIONS.nam_new
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+
+sed -e "s/CFNAM_ALBNIR_VEG(4,[0-9]*)/CFNAM_ALBNIR_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFTYP_ALBNIR_VEG(4,[0-9]*)/CFTYP_ALBNIR_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBNIR_VEG(1,[0-9]*)/XUNIF_ALBNIR_VEG(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBNIR_VEG(4,[0-9]*)/XUNIF_ALBNIR_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBNIR_VEG(7,[0-9]*)/XUNIF_ALBNIR_VEG(7)/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFNAM_ALBVIS_VEG(4,[0-9]*)/CFNAM_ALBVIS_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFTYP_ALBVIS_VEG(4,[0-9]*)/CFTYP_ALBVIS_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBVIS_VEG(1,[0-9]*)/XUNIF_ALBVIS_VEG(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBVIS_VEG(4,[0-9]*)/XUNIF_ALBVIS_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBVIS_VEG(7,[0-9]*)/XUNIF_ALBVIS_VEG(7)/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFNAM_ALBUV_VEG(1,[0-9]*)/CFNAM_ALBUV_VEG(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFTYP_ALBUV_VEG(1,[0-9]*)/CFTYP_ALBUV_VEG(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBUV_VEG(1,[0-9]*)/XUNIF_ALBUV_VEG(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBUV_VEG(4,[0-9]*)/XUNIF_ALBUV_VEG(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBUV_VEG(7,[0-9]*)/XUNIF_ALBUV_VEG(7)/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFNAM_ALBNIR_SOIL(1,[0-9]*)/CFNAM_ALBNIR_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFTYP_ALBNIR_SOIL(1,[0-9]*)/CFTYP_ALBNIR_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBNIR_SOIL(1,[0-9]*)/XUNIF_ALBNIR_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBNIR_SOIL(4,[0-9]*)/XUNIF_ALBNIR_SOIL(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBNIR_SOIL(7,[0-9]*)/XUNIF_ALBNIR_SOIL(7)/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFNAM_ALBVIS_SOIL(1,[0-9]*)/CFNAM_ALBVIS_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFTYP_ALBVIS_SOIL(1,[0-9]*)/CFTYP_ALBVIS_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBVIS_SOIL(1,[0-9]*)/XUNIF_ALBVIS_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBVIS_SOIL(4,[0-9]*)/XUNIF_ALBVIS_SOIL(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBVIS_SOIL(7,[0-9]*)/XUNIF_ALBVIS_SOIL(7)/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFNAM_ALBUV_SOIL(1,[0-9]*)/CFNAM_ALBUV_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CFTYP_ALBUV_SOIL(1,[0-9]*)/CFTYP_ALBUV_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBUV_SOIL(1,[0-9]*)/XUNIF_ALBUV_SOIL(1)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBUV_SOIL(4,[0-9]*)/XUNIF_ALBUV_SOIL(4)/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/XUNIF_ALBUV_SOIL(7,[0-9]*)/XUNIF_ALBUV_SOIL(7)/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LWRITE_EXTERN/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LDIAG_MISC_SEAICE/LDIAG_SEAICE/g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/\ CALBEDO = \"MEAN\" /d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/\ CALBEDO = \"WET\" /d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/\ CALBEDO = \"EVOL\" /d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/\ CALBEDO = \"CM13\" /d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LALLOW_ADD_DIM/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LDELAYEDSTART_NC/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/NDATESTOP/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LSNOWDIMNC/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LRESETCUMUL/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LPROSNOW/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/LVOLUMETRIC_SNOWLIQ/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_old
+

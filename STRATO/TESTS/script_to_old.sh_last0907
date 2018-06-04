@@ -1,0 +1,30 @@
+cp -f OPTIONS.nam OPTIONS.nam_new
+
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+
+sed -e "/^LSWEMAX/d" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "/^XSWEMAX/d" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_TG = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_WG = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_WGI = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LEXTRAP_SN = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LT2MMW = F//g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LPERTSURF = F//g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LPERTFLUX = F//g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/LRESTART_2M = F//g" OPTIONS.nam_save > OPTIONS.nam
+
+cp -f OPTIONS.nam OPTIONS.nam_old
+
