@@ -178,12 +178,12 @@ DO J = 1,SIZE(PTA1)
       !
     ELSE
       !
-    ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
-    XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
-    !
-    ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
-    XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
-    !
+      ZDDIR_SW = (PDIR_SW2(J)-PDIR_SW1(J))*ZCOEF
+      XDIR_SW(J,1) = PDIR_SW1(J)+ZDDIR_SW
+      !
+      ZDSCA_SW = (PSCA_SW2(J)-PSCA_SW1(J))*ZCOEF
+      XSCA_SW(J,1) = PSCA_SW1(J)+ZDSCA_SW
+      !
     ENDIF
     !
     !

@@ -304,9 +304,9 @@ DO JST=1,SIZE(PSNOWSWE,2)
             !Optical diameter for SSA diagnostic
             ZDIAM = PSNOWDEND(JJ,JST) * XD1 + (1 - PSNOWDEND(JJ,JST)) * &
             (PSNOWSPHER(JJ,JST) * XD2 + (1 - PSNOWSPHER(JJ,JST)) * XD3)
-        ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
-              ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 ) 
-        ZDIAM = ZDIAM/10000.
+            ZDIAM =  -PSNOWGRAN1(JJ,JST)*XD1/XX + (1.+PSNOWGRAN1(JJ,JST)/XX) * &
+                  ( PSNOWGRAN2(JJ,JST)*XD2/XX + (1.-PSNOWGRAN2(JJ,JST)/XX) * XD3 ) 
+            ZDIAM = ZDIAM/10000.
 
 
         ELSE
@@ -491,7 +491,11 @@ DO JST=1,SIZE(PSNOWSWE,2)
 !       ZEC corresponds to the ratio between the liquid water content (kg/m3) and
 !       the theoretical maximum liquid water content retaind by the snow layer,
 !       defined as 5% of solid ice volumetric content (m3/m3)
-        ZEC = ZSCW / (50. * (1. + (ZSCW - PSNOWRHO(JJ,JST))/XRHOLI))
+        IF (ABS(PSNOWRHO(JJ,JST) - XRHOLI) < XUEPSI) THEN
+            ZEC = 0.
+        ELSE
+            ZEC = ZSCW / (50. * (1. + (ZSCW - PSNOWRHO(JJ,JST))/XRHOLI))
+        ENDIF
 !
 !       ZSHE_SPH sphericity
 !       Qualitatively ZSHE_SPH increases almost linearly from (spher,ZSHE_SPH)=(0,0.45),

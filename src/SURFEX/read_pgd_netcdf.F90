@@ -28,7 +28,7 @@ SUBROUTINE READ_PGD_NETCDF (UG, U, USS, &
 !!      Original    11/2012
 !!------------------------------------------------------------------
 !
-
+!
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
@@ -51,7 +51,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
-
+!
 TYPE(SURF_ATM_GRID_t), INTENT(INOUT) :: UG
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
@@ -122,7 +122,7 @@ IF (PRESENT(PFIELD)) THEN
 
 !    END IF
   END DO
-
+  !
   CALL READ_AND_SEND_MPI(ZFIELD0,PFIELD)
   !
   DEALLOCATE(ZFIELD0)
@@ -137,6 +137,14 @@ ELSE
       ZLAT2D(JPOINT)=ZLAT((JPOINT-1)/INLON+1)
       ZLON2D(JPOINT)=ZLON(MOD(JPOINT-1,INLON)+1)
     END DO
+  ELSEIF ((INLAT==INFIELD) .AND. (INFIELD==INLON)) THEN
+    ZLAT2D(:)=ZLAT(:)
+    ZLON2D(:)=ZLON(:)
+  ELSE
+    CALL ABOR1_SFX('READ_PGD_NETCDF: problem with dimensions lengths between LAT LON and FIELD')
+  END IF
+
+  IF (INLAT*INLON==INFIELD) THEN
     CALL ABOR1_SFX('READ_PGD_NETCDF: 1D LAT and LON not implemented')
   ELSEIF ((INLAT==INFIELD) .AND. (INFIELD==INLON)) THEN
     ZLAT2D(:)=ZLAT(:)
@@ -232,16 +240,28 @@ DEALLOCATE(IVARDIMSID)
 ! &                             in netcdf file for variable '//TRIM(HFIELD))
 
 ALLOCATE(PFIELD(ILENDIM))
-! TODO test real value
+
 IERROR=NF90_INQUIRE_VARIABLE(ID_FILE,ID_VAR,XTYPE=ITYPE)
 IF (ITYPE/=NF90_DOUBLE) THEN
   CALL ABOR1_SFX('READ_PGD_NETCDF: incorrect type for variable '//TRIM(HFIELD))
 END IF
 
-! Read 1D variable
-IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,PFIELD)
+SELECT CASE (INVARDIMS)
+  CASE (1)
+    ! Read 1D variable
+    IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,PFIELD)
+    CALL HANDLE_ERR_CDF(IERROR,"can't read variable 1D"//TRIM(HFIELD))
 
-CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HFIELD))
+  CASE (2)
+    ! Read 2D variable
+    IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,PFIELD,count=(/ILENDIM1,ILENDIM2/))
+    CALL HANDLE_ERR_CDF(IERROR,"can't read variable 2D"//TRIM(HFIELD))
+
+  CASE DEFAULT
+    CALL ABOR1_SFX('READ_PGD_NETCDF: incorrect number of dimensions for variable (read step) '//TRIM(HFIELD))
+
+END SELECT
+
 
 END SUBROUTINE READ_FIELD_NETCDF
 

@@ -65,12 +65,10 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
-!
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
 REAL, DIMENSION(:), ALLOCATABLE :: ZFIELD, ZFIELD0   ! field read
-
 
 ! CHARACTER(LEN=28) :: YNCVAR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -84,7 +82,6 @@ INTEGER::ID_FILE,ID_VAR ! Netcdf IDs for file and variable
 INTEGER::INVARDIMS !number of dimensions of netcdf input variable
 INTEGER,DIMENSION(:),ALLOCATABLE::IVARDIMSID
 INTEGER::ILENDIM,ILENDIM1,ILENDIM2
-
 
 SELECT CASE (TRIM(HSURF))
   CASE ('TG','WG','WGI')
@@ -105,58 +102,66 @@ IF (LHOOK) CALL DR_HOOK('PREP_ISBA_NETCDF',0,ZHOOK_HANDLE)
 !
 !*      2.     Reading of field
 !              ----------------
-
+!
 IF (NRANK==NPIO) THEN
-! Open netcdf file
+  ! Open netcdf file
   IERROR=NF90_OPEN(HFILE,NF90_NOWRITE,ID_FILE)
- CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILE))
-
-! Look for variable ID
+   CALL HANDLE_ERR_CDF(IERROR,"can't open file "//TRIM(HFILE))
+ 
+  ! Look for variable ID
   IERROR=NF90_INQ_VARID(ID_FILE,TRIM(HSURF),ID_VAR)
- CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HSURF))
+   CALL HANDLE_ERR_CDF(IERROR,"can't find variable "//TRIM(HSURF))
 
-! Number of dimensions
+  ! Number of dimensions
   IERROR=NF90_INQUIRE_VARIABLE(ID_FILE,ID_VAR,NDIMS=INVARDIMS)
   if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions number")
-! Id of dimensions
-ALLOCATE(IVARDIMSID(INVARDIMS))
+  ! Id of dimensions
+  ALLOCATE(IVARDIMSID(INVARDIMS))
   IERROR=NF90_INQUIRE_VARIABLE(ID_FILE,ID_VAR,DIMIDS=IVARDIMSID)
   if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions ids")
 
   ALLOCATE(ZFIELD(U%NDIM_NATURE))
 
-SELECT CASE (INVARDIMS)
-  CASE (1)
-    ! Check dimension length
+  SELECT CASE (INVARDIMS)
+    CASE (1)
+      ! Check dimension length
       IERROR=NF90_INQUIRE_DIMENSION(ID_FILE,IVARDIMSID(1),LEN=ILENDIM)
       if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
-  CASE (2)
+    CASE (2)
       IERROR=NF90_INQUIRE_DIMENSION(ID_FILE,IVARDIMSID(1),LEN=ILENDIM1)
       if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
       IERROR=NF90_INQUIRE_DIMENSION(ID_FILE,IVARDIMSID(2),LEN=ILENDIM2)
       if (IERROR/=NF90_NOERR) CALL HANDLE_ERR_CDF(IERROR,"can't get variable dimensions lengths")
-
-    ILENDIM=ILENDIM1*ILENDIM2
-
-  CASE DEFAULT
-    CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of dimensions for variable '//TRIM(HSURF))
-
-END SELECT
-!
+  
+      ILENDIM=ILENDIM1*ILENDIM2
+  
+    CASE DEFAULT
+      CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of dimensions for variable '//TRIM(HSURF))
+  
+  END SELECT
+  !
   IF(ILENDIM/=U%NDIM_NATURE) CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of points '// &
-                                'in netcdf file for variable '//TRIM(HSURF))
-!
-! Read 1D variable
-  IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,ZFIELD)
- CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+                                  'in netcdf file for variable '//TRIM(HSURF))
+  !
+  SELECT CASE (INVARDIMS)
+    CASE (1)
+      ! Read 1D variable
+      IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,ZFIELD)
+       CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+    CASE (2)
+      ! Read 2D variable
+      IERROR=NF90_GET_VAR(ID_FILE,ID_VAR,ZFIELD,count=(/ILENDIM1,ILENDIM2/))
+       CALL HANDLE_ERR_CDF(IERROR,"can't read variable "//TRIM(HSURF))
+  
+    CASE DEFAULT
+      CALL ABOR1_SFX('PREP_ISBA_NETCDF: incorrect number of dimensions for variable (read step) '//TRIM(HSURF))
+  
+  END SELECT  
 
-
-!
-
-!
-! Close netcdf file
+  !
+  ! Close netcdf file
   IERROR=NF90_CLOSE(ID_FILE)
-!
+  !
 ELSE
   ALLOCATE(ZFIELD(0))
 ENDIF

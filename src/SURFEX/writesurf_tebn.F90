@@ -100,6 +100,7 @@ INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
 !
 REAL, DIMENSION(0,0,1) :: ZWSN_WR, ZRHO_WR, ZHEA_WR, ZAGE_WR, ZSG1_WR, ZSG2_WR, ZHIS_WR
 REAL, DIMENSION(0,1) :: ZALB_WR
+REAL, DIMENSION(0,0,0,1) :: ZIMP_WR
 !
 INTEGER, DIMENSION(SIZE(T%XT_ROOF,1)) :: IMASK
 INTEGER           :: IRESP           ! IRESP  : return-code if a problem appears
@@ -315,13 +316,13 @@ YRECFM='RF'
  CALL WRITESURF_GR_SNOW(OSNOWDIMNC,HSELECT,HPROGRAM,YRECFM,YPATCH,&
                         SIZE(T%XT_ROOF,1),IMASK,0,T%TSNOW_ROOF, &
                         ZWSN_WR,ZRHO_WR,ZHEA_WR,ZAGE_WR,ZSG1_WR, &
-                        ZSG2_WR,ZHIS_WR,ZALB_WR)
+                        ZSG2_WR,ZHIS_WR,ZALB_WR, ZIMP_WR)
 !
 YRECFM='RD'
  CALL WRITESURF_GR_SNOW(OSNOWDIMNC,HSELECT,HPROGRAM,YRECFM,YPATCH,&
                         SIZE(T%XT_ROOF,1),IMASK,0,T%TSNOW_ROAD, &
                         ZWSN_WR,ZRHO_WR,ZHEA_WR,ZAGE_WR,ZSG1_WR, &
-                        ZSG2_WR,ZHIS_WR,ZALB_WR)
+                        ZSG2_WR,ZHIS_WR,ZALB_WR, ZIMP_WR)
 !
 !-------------------------------------------------------------------------------
 !

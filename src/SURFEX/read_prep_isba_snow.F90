@@ -69,8 +69,7 @@ USE MODD_PREP_ISBA, ONLY : CFILE_SNOW, CTYPE_SNOW, CFILEPGD_SNOW, &
                            XRSNOW_p=>XRSNOW, XASNOW,            &
                            XSG1SNOW_p=>XSG1SNOW, XSG2SNOW_p=>XSG2SNOW, &
                            XHISTSNOW_p=>XHISTSNOW, XAGESNOW_p=>XAGESNOW, &
-                           XIMPURSNOW_p=>XIMPURSNOW
-                           
+                           XIMPURSNOW_p=>XIMPURSNOW    
 !
 USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT, NSNOW_LAYER_MAX , LSNOW_PREP_PERM, NIMPUR,NIMPUR_MAX
 !
@@ -98,7 +97,6 @@ REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, &
                                     XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW
                                                     
 REAL,DIMENSION (NSNOW_LAYER_MAX,NIMPUR_MAX)  ::   XIMPURSNOW
-!INTEGER           :: NIMPUR  ! Number of impurity types                  
                                     
 INTEGER           :: JLAYER,JIMP
 !
@@ -123,8 +121,8 @@ IF (LHOOK) CALL DR_HOOK('READ_PREP_ISBA_SNOW',0,ZHOOK_HANDLE)
 IF (LNAM_READ) THEN
   !
   CSNOW = 'D95'
-  NSNOW_LAYER = 1
-  NIMPUR = 1    !FT Number of different type of impurities, set to 0 by default EDIT BC : set to 1
+  NSNOW_LAYER = 1  
+  NIMPUR = 0   
   !
   CFILE_SNOW = '                         '
   CTYPE_SNOW = '      '
@@ -245,28 +243,44 @@ IF (LNAM_READ) THEN
     ALLOCATE(XSG1SNOW_p (NSNOW_LAYER))
     ALLOCATE(XSG2SNOW_p (NSNOW_LAYER))
     ALLOCATE(XHISTSNOW_p(NSNOW_LAYER))
-    ALLOCATE(XIMPURSNOW_p(NSNOW_LAYER,NIMPUR))
     !
     XSG1SNOW_p =XSG1SNOW (1:NSNOW_LAYER)
     XSG2SNOW_p =XSG2SNOW (1:NSNOW_LAYER)
     XHISTSNOW_p=XHISTSNOW(1:NSNOW_LAYER)
-    XIMPURSNOW_p=XIMPURSNOW(1:NSNOW_LAYER,1:NIMPUR)
     !
     DO JLAYER=1,NSNOW_LAYER
       IF ((XSG1SNOW_p (JLAYER)==XUNDEF .OR. XSG2SNOW_p(JLAYER)==XUNDEF .OR. &
-           XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF .OR. &
-           XIMPURSNOW_p(JLAYER,1)==XUNDEF) &
+           XHISTSNOW_p(JLAYER)==XUNDEF .OR. XAGESNOW_p(JLAYER)==XUNDEF) &
            .AND. XWSNOW_p(JLAYER).NE.0. .AND. XWSNOW_p(JLAYER)/=XUNDEF ) THEN
         WRITE(ILUOUT,*) '----------------------------'
         WRITE(ILUOUT,*) 'WSNOW/=0 AND ONE OF SG1SNOW,'
         WRITE(ILUOUT,*) 'SG2SNOW, HISTSNOW OR AGESNOW'
-        WRITE(ILUOUT,*) 'OR IMPURSNOW'
         WRITE(ILUOUT,*) '         ==XUNDEF           '
         WRITE(ILUOUT,*) '    PLEASE CORRECT THAT     '
         WRITE(ILUOUT,*) '----------------------------'
         CALL ABOR1_SFX('READ_PREP_ISBA_SNOW: ERROR IN INITIALISATION OF SNOW PARAMETERS')
       ENDIF
     ENDDO
+    
+    IF (NIMPUR > 0) THEN
+      !
+      ALLOCATE(XIMPURSNOW_p(NSNOW_LAYER,NIMPUR))    
+      XIMPURSNOW_p=XIMPURSNOW(1:NSNOW_LAYER,1:NIMPUR)
+      DO JLAYER=1,NSNOW_LAYER
+        IF (XIMPURSNOW_p(JLAYER,1)==XUNDEF &
+           .AND. XWSNOW_p(JLAYER).NE.0. .AND. XWSNOW_p(JLAYER)/=XUNDEF ) THEN
+          WRITE(ILUOUT,*) '----------------------------'
+          WRITE(ILUOUT,*) 'WSNOW/=0 AND IMPURSNOW      '
+          WRITE(ILUOUT,*) '         ==XUNDEF           '
+          WRITE(ILUOUT,*) '    PLEASE CORRECT THAT     '
+          WRITE(ILUOUT,*) '----------------------------'
+          CALL ABOR1_SFX('READ_PREP_ISBA_SNOW: ERROR IN INITIALISATION OF SNOW PARAMETERS')
+        ENDIF
+      ENDDO
+      !
+    ELSE
+      ALLOCATE(XIMPURSNOW_p(0,0))
+    ENDIF 
     !
   ELSE
     !

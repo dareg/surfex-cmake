@@ -84,18 +84,16 @@ ELSE
   PSSO_SLOPE = USS%XSSO_SLOPE
 END IF
 !
-IF (LHOOK) CALL DR_HOOK('GET_SSO_N',1,ZHOOK_HANDLE)
-!
-!!!A VOIR RAFIFE
-!
 IF ( SIZE(PSSO_DIR) /= SIZE(USS%XSSO_DIR) ) THEN
-  WRITE(ILUOUT,*) 'A VOIR QUELLE DEFINITION POUR CE NOUVEAU VARIABLE XSSO_DIR'
+  WRITE(ILUOUT,*) 'try to get SSO_DIR fields from atmospheric model, but size is not correct'
   WRITE(ILUOUT,*) 'size of field expected by the atmospheric model (PSSO_DIR) :', SIZE(PSSO_DIR)
   WRITE(ILUOUT,*) 'size of field inthe surface                     (XSSO_DIR) :', SIZE(USS%XSSO_DIR)
   CALL ABOR1_SFX('GET_SSON: SSO_DIR SIZE NOT CORRECT')
 ELSE
   PSSO_DIR = USS%XSSO_DIR
 END IF
+!
+IF (LHOOK) CALL DR_HOOK('GET_SSO_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================
 !

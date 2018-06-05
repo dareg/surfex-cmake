@@ -984,6 +984,7 @@ SELECT CASE (HSNOWRAD)
 	  ENDDO
   ENDDO
 
+      PSPEC_ALB(JP,JJ)=MIN(ZSNOWALB_SP(JP,JJ),1.)                          
 
 
 
@@ -1264,6 +1265,14 @@ IF ( HSNOWRAD=='B92' .OR. HSNOWRAD=='B93' ) THEN
                   PSNOWAGE(:,1),PSNOWGRAN1(:,2),PSNOWGRAN2(:,2),PSNOWAGE(:,2), &
                   PPS, PZENITH, INLVLS_USE, HSNOWMETAMO) 
   !the albedo is not updated in the case of TARTES scheme                 
+!ELSEIF ( HSNOWRAD=='T17') THEN ! RAFIFE
+!  DO JJ= 
+!    DO JP=
+!      IF (SUM(PSNOWDZ(JJ,1:INLVLS_USE(JJ))) < XUNDEF) THEN
+!        PSPEC_ALB(JP,JJ)=XUNDEF
+!      ENDIF
+!    END DO
+!  END DO
 ENDIF
 !
 !*      13.     Update snow heat content:

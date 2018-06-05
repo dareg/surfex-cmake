@@ -329,8 +329,6 @@ LOGICAL, DIMENSION(SIZE(PTA))      :: LREMOVE_SNOW
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZSWNET_N, ZSWNET_NS, ZLWNET_N
 !
-LOGICAL :: GCOMPUTECRODIAG ! flag to compute Crocus-MEPRA diagnostics
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! - - ---------------------------------------------------
@@ -351,12 +349,13 @@ IF (SIZE(DMK%XSNOWDEND)>0) THEN
   DMK%XACC_RAT      (:,:) = XUNDEF
   DMK%XNAT_RAT      (:,:) = XUNDEF
   DMK%XIMPUR_CONC (:,:,:) = XUNDEF ! AVOIR RAFIFE
-	PSNOWIMP_CONC(:,:,:)=XUNDEF
+	PSNOWIMP_CONC(:,:,:)=XUNDEF ! AVOIR RAFIFE
 ENDIF
 !
-IF (SIZE(PDIFF_RATIO)>1) THEN 
-	PSPEC_ALB(:,:) = XUNDEF
-	PDIFF_RATIO(:,:) = XUNDEF
+
+IF (SIZE(DMK%XDIFF_RATIO)>1) THEN
+	DMK%XSPEC_ALB(:,:) = XUNDEF
+	DMK%XDIFF_RATIO(:,:) = XUNDEF 
 ENDIF
 !
 DEK%XSNDRIFT(:)    = 0.0
@@ -674,7 +673,7 @@ ENDIF
     ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + PSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
 !
     PPRODCOUNT(JJ) = XPROD_COUNT(JJ)									! PPRODCOUNT will be used to write into a file (DIAG_ISBA) 20150311
-    DMK%XPRODCOUNT = XPROD_COUNT(JJ)
+    IF ( OSELF_PROD ) DMK%XPRODCOUNT = XPROD_COUNT(JJ) ! AVOIR RAFIFE
 !
   ENDDO
 !															|
@@ -699,7 +698,7 @@ ENDIF
          NMASK(ISIZE_SNOW) = JJ
       ENDIF
    ENDDO
-!  
+! 
    IF (ISIZE_SNOW>0) CALL CALL_MODEL(ISIZE_SNOW,INLVLS,INLVLG,IBLOWSNW,NMASK)
 !
 ! ===============================================================
@@ -784,7 +783,7 @@ ENDIF
     PEK%TSNOW%AVA_TYP(:) = 6
     PEK%TSNOW%PRO_SUP_TYP(:) = 6
     !
-     END WHERE
+   END WHERE
 !
 !
    DO JWRK=1,INLVLS
@@ -1032,12 +1031,16 @@ REAL, DIMENSION(KSIZE1,SIZE(P_DIR_SW,2)) :: ZP_DIFF_RATIO !F.T
 REAL, PARAMETER :: ZDEPTHABS = 0.60 ! m
 !
 INTEGER :: JWRK, JJ, JI
+!
+LOGICAL :: GCOMPUTECRODIAG ! flag to compute Crocus-MEPRA diagnostics
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA:CALL_MODEL',0,ZHOOK_HANDLE)
 !
 ! Initialize:
 !
+GCOMPUTECRODIAG = .FALSE.
 ZP_PSN_GFLXCOR(:)  = 0.
 ZP_WORK(:)         = 0.
 ZP_SOILD(:)        = 0.
@@ -1313,9 +1316,9 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
 !
 #ifndef SFX_OL
 ! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
-GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
+  GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
 #else
-GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
+  GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
 #endif
   !
   !Ajout test sur pas de temps de sortie
@@ -1515,7 +1518,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     ENDDO
   ENDDO      
 !
-  IF (SIZE(PDIFF_RATIO)>1) THEN 
+  IF (SIZE(DMK%XDIFF_RATIO)>1) THEN
      DO JWRK=1,SIZE(P_DIR_SW,2)
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)

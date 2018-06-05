@@ -133,6 +133,7 @@ ALLOCATE(YSC%UG%XJPDIR      (YSC%U%NSIZE_FULL))
 !*    2.3     Stores the grid in the module MODD_PGD_GRID
 !
  CALL PUT_PGD_GRID(YSC%UG%G%CGRID, YSC%U%NSIZE_FULL,YSC%UG%G%NGRID_PAR, YSC%UG%G%XGRID_PAR)
+
 !
 IF (HPROGRAM=='MESONH') THEN
   IDIM_FULL = YSC%U%NDIM_FULL
@@ -151,6 +152,7 @@ IF (.NOT.ASSOCIATED(YSC%UG%XGRID_FULL_PAR)) THEN
   YSC%UG%XGRID_FULL_PAR(:) = YSC%UG%G%XGRID_PAR(:)
   YSC%UG%NGRID_FULL_PAR = NGRID_PAR
 ENDIF
+
 !
 !*    2.4     mask to limit the number of input data to read
  CALL LATLONMASK(YSC%UG%G%CGRID, YSC%UG%NGRID_FULL_PAR, YSC%UG%XGRID_FULL_PAR, LLATLONMASK)
@@ -176,14 +178,16 @@ IF (NRANK==NPIO) THEN
   CALL WRITE_COVER_TEX_COVER
 ENDIF
 !
+
 !-------------------------------------------------------------------------------
 !
 !*    4.      Orography
-!             ---------
+!   
 !
  CALL PGD_OROGRAPHY(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM, HFILE, HFILETYPE, OZS)
 !
-!_______________________________________________________________________________
+!
+!__________________________________________________________________________
 !
 !*    5.      Additionnal fields for nature scheme
 !             ------------------------------------
@@ -218,6 +222,7 @@ IF (YSC%U%NDIM_SEA>0) CALL PGD_SEA(YSC%DTCO, YSC%SM%DTS, YSC%SM%G, YSC%SM%S, &
  CALL PGD_DUMMY(YSC%DTCO, YSC%DUU, YSC%UG, YSC%U, YSC%USS, HPROGRAM)
 !_______________________________________________________________________________
 !
+
 !*   10.      Chemical Emission fields
 !             ------------------------
 !
@@ -239,6 +244,7 @@ IF (NRANK==NPIO) CALL WRITE_COVER_TEX_END(HPROGRAM)
 IF (HPROGRAM=='MESONH') THEN
  YSC%U%NDIM_FULL = IDIM_FULL
 ENDIF
+
 !
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',1,ZHOOK_HANDLE)
 !_______________________________________________________________________________
