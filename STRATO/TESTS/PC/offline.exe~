@@ -1,0 +1,48 @@
+#!/bin/bash
+
+export OMP_NUM_THREADS=1
+
+if [ -f boucoiran_xwtop_init.map$1 ]
+then
+	rm -f boucoiran_xwtop_init.map
+	ln -s boucoiran_xwtop_init.map$1 boucoiran_xwtop_init.map
+fi
+if [ -f stocks_init.txt$1 ]
+then
+	rm -f stocks_init.txt
+	ln -s stocks_init.txt$1 stocks_init.txt
+fi
+if [ -f surfcont_init.map$1 ]
+then
+	rm -f surfcont_init.map
+	ln -s surfcont_init.map$1 surfcont_init.map
+fi
+for cas in boucoiran GKula Gruevo Vehtino
+do
+	if [ -f $cas.mask_surf$1 ]
+	then
+		rm -f $cas.mask_surf
+  		ln -s $cas.mask_surf$1 $cas.mask_surf
+	fi
+	if [ -f $cas.mask_topd$1 ]
+	then
+		rm -f $cas.mask_topd
+  		ln -s $cas.mask_topd$1 $cas.mask_topd
+	fi	
+done
+
+
+./offline$1.exe
+
+if [ -f boucoiran_xwtop_sav.map ]
+then
+	mv -f boucoiran_xwtop_sav.map boucoiran_xwtop_sav.map$1
+fi
+if [ -f stocks_sav.txt ]
+then
+	mv -f stocks_sav.txt stocks_sav.txt$1
+fi
+if [ -f surfcont_sav.map ]
+then
+	mv -f surfcont_sav.map surfcont_sav.map$1
+fi

@@ -52,6 +52,7 @@ USE MODD_GRID_LATLONREGUL, ONLY : XILAT1,XILON1,XILAT2,XILON2,NINLAT,NINLON,NILE
 USE MODD_GRID_CARTESIAN, ONLY : XX_ca=>XX, XY_ca=>XY, NCIJ_ca=>NCIJ, XCX_ca=>XCX, XCY_ca=>XCY
 !
 USE MODE_GRIDTYPE_CONF_PROJ
+!
 USE MODI_BILIN_COEF
 USE MODI_READ_SURF
 USE MODI_PREP_GRID_CONF_PROJ
@@ -179,6 +180,9 @@ IF (ALLOCATED(XLAT_OUT)) THEN
     !
     !*      2.    Transformation of latitudes/longitudes into metric coordinates of output grid
     !
+    CALL XY_CONF_PROJ(GCP%XLAT0,GCP%XLON0,GCP%XRPK,GCP%XBETA,GCP%XLATORI,GCP%XLONORI, &
+                        XX_OUT,XY_OUT,XLAT_OUT,XLON_OUT )  
+    !  
     !*      3.    Put input field on its squared grid
     !    
     CALL BILIN_COEF(KLUOUT,XX,XY,XX_OUT,XY_OUT,XCX,XCY,NCIJ(:,1),NCIJ(:,2))

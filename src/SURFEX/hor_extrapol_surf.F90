@@ -47,6 +47,8 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_CSTS,       ONLY : XPI
 USE MODN_PREP_SURF_ATM, ONLY : NHALO_PREP
 !
+USE MODI_ABOR1_SFX
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -84,7 +86,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZFIELD
 REAL :: ZLAT  ! latitude of point to define
 REAL :: ZLON  ! longitude of point to define
 REAL :: ZDIST ! current distance to valid point (in lat/lon grid)
-REAL :: ZNDIST! smallest distance to valid point
+REAL, DIMENSION(:), ALLOCATABLE :: ZNDIST! smallest distance to valid point
 REAL :: ZCOSLA! cosine of latitude
 REAL :: ZLONSC! longitude of valid point
 REAL :: ZIDLO, ZIDLOMAX, ZIDLOMIN, ZIDLAMAX, ZIDLAMIN
@@ -115,6 +117,8 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_1',0,ZHOOK_HANDLE)
 !
 INO = SIZE(PFIELD,1)
 INL = SIZE(PFIELD,2)
+!
+ALLOCATE(ZNDIST(INL))
 !
 !-------------------------------------------------------------------------------
 !
@@ -343,16 +347,16 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
 
       ENDIF
     
-      DO JL=1,INL
+!$OMP PARALLEL DO PRIVATE(JI,ZNDIST,IDX,ZCOSLA,JISC,ID0,ZLONSC,ZDIST)
         DO JI=1,IBOR(1,J)
-          ZNDIST=XUNDEF
+          ZNDIST(:) = XUNDEF
           IDX = IBOR(2,J)+1
           ZCOSLA=COS(ZCOOR(JI,1)*ZRAD)
           DO JISC = 1,IBOR(2,J)
             !index in the whole grid of the point used to interpolate
             ID0 = IVAL_EXT(JI,JISC)
             IF (ID0==0) EXIT
-            IF (PFIELD_IN(ID0,JL)/=XUNDEF) THEN
+            IF (ANY(PFIELD_IN(ID0,:)/=XUNDEF)) THEN
               ZLONSC = ZLO(ID0)
               IF (GLALO) THEN
                 IF (ZLONSC-ZCOOR(JI,2)> 180.) ZLONSC = ZLONSC - 360.
@@ -361,14 +365,18 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
               ELSE
                 ZDIST= (ZLA(ID0)-ZCOOR(JI,1)) ** 2 + (ZLONSC-ZCOOR(JI,2)) ** 2
               END IF
-              IF (ZDIST<=ZNDIST) THEN
-                ZFIELD(JI,JL) = PFIELD_IN(ID0,JL)
-                ZNDIST = ZDIST
-              ENDIF
+              DO JL=1,INL
+                IF (ZDIST<=ZNDIST(JL)) THEN
+                  IF (PFIELD_IN(ID0,JL)/=XUNDEF) THEN
+                    ZFIELD(JI,JL) = PFIELD_IN(ID0,JL)
+                    ZNDIST(JL) = ZDIST
+                  ENDIF
+                ENDIF
+              ENDDO
             ENDIF
           END DO   
         ENDDO
-      ENDDO
+!$OMP END PARALLEL DO
       !
       IF (J/=NPIO) THEN
         !send values found to extrapolate
@@ -379,7 +387,7 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
         DO JI = 1,IBOR(1,J)
           PFIELD(IMASK(JI),:) = ZFIELD(JI,:)
         ENDDO
-      ENDIF            
+      ENDIF
       !
       DEALLOCATE(ZFIELD)
       !
@@ -388,6 +396,7 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
   ENDDO
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',1,ZHOOK_HANDLE_OMP)
 !
+DEALLOCATE(ZNDIST)
   !
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_32',0,ZHOOK_HANDLE)  
   !

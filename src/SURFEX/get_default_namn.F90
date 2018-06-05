@@ -40,6 +40,9 @@
 #ifdef SFX_MNH
 USE MODI_MNHGET_DESFM_n
 #endif
+#ifdef SFX_ARO
+USE MODI_AROGET_DESFM_n
+#endif
 !
 USE MODI_GET_LUOUT
 !

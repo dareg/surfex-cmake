@@ -603,11 +603,11 @@ $(PROG_LIST) : OBJ_PROG=$(shell find -L $(PROG_DIR) -type f -iname "spll_*.f*" \
 #RJ: added hack when linking user if no master was linked
 $(PROG_LIST) :  $(LIB_MNH)  $(LIB_GRIBEX)
 ifeq "$(DO_COMP_USER)" "YES"
-	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ \
+	$(F90) -o $(OBJDIR)/$@ \
 	  $(shell ([ -e $(OBJ_PROG) ] && echo $(OBJ_PROG)) || echo $(OBJ_PROG) | sed -e 's@/MASTER/spll_@/$(VER_USER)/spll_@') \
-	  $(LIB_MNH) $(LIBS)
+	  $(LIB_MNH) $(LIBS) $(LDFLAGS)
 else
-	$(F90) $(LDFLAGS) -o $(OBJDIR)/$@ $(OBJ_PROG) $(LIB_MNH) $(LIBS)
+	$(F90) -o $(OBJDIR)/$@ $(OBJ_PROG) $(LIB_MNH) $(LIBS) $(LDFLAGS)
 endif
 
 ifeq "$(DO_COMP_USER)" "YES"

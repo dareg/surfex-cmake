@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export OMP_NUM_THREADS=2
+
+mpirun -np 2 ./offline$1.exe
+

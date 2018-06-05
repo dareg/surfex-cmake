@@ -949,18 +949,21 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     DO JVAR = 1,NVAR
       WRITE(YVAR,FMT='(I1.1)') JVAR
       YRECFM="ANA_INCR"//YVAR
-      YCOMMENT="by patch"
+      !YCOMMENT="by patch"
+      YCOMMENT="Analysis increment for control variable "//TRIM(CVAR(JVAR))
       DO JP = 1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
                                 NP%AL(JP)%NR_P,NP%AL(JP)%XINCR(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE,S%XWORK_WR)
       ENDDO
+      !
       WRITE(YVAR,FMT='(I1.1)') JVAR
       DO JT = 1,NBOUTPUT
         WRITE(YTIM,FMT='(I1.1)') JT
         DO JOBS = 1,NOBSTYPE
           WRITE(YOBS,FMT='(I1.1)') JOBS
-          YRECFM="HO"//YVAR//"_"//YOBS//"_"//YTIM
-          YCOMMENT="by patch"
+          YRECFM="HO"//YOBS//"_"//YVAR//"_"//YTIM
+          !YCOMMENT="by patch"
+          YCOMMENT="Jacobian matrix for observation "//TRIM(COBS(JOBS))//" and control variable "//TRIM(CVAR(JVAR))  
           JK = (JT-1)*NOBSTYPE + JOBS
           DO JP = 1,IO%NPATCH
             CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
@@ -975,7 +978,8 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       DO JOBS = 1,NOBSTYPE
         WRITE(YOBS,FMT='(I1.1)') JOBS
         YRECFM="INNOV"//YOBS//"_"//YTIM
-        YCOMMENT="not by patch"
+        !YCOMMENT="not by patch"
+        YCOMMENT="Innovation for observation "//TRIM(COBS(JOBS))
         JK = (JT-1)*NOBSTYPE + JOBS
         CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%XINNOV(:,JK),IRESP,HCOMMENT=YCOMMENT)
       ENDDO
@@ -986,7 +990,8 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       DO JOBS = 1,NOBSTYPE
         WRITE(YOBS,FMT='(I1.1)') JOBS
         YRECFM="RESID"//YOBS//"_"//YTIM
-        YCOMMENT="not by patch"
+        !YCOMMENT="not by patch"
+        YCOMMENT="Residuals for observation "//TRIM(COBS(JOBS))
         JK = (JT-1)*NOBSTYPE + JOBS
         CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%XRESID(:,JK),IRESP,HCOMMENT=YCOMMENT)
       ENDDO

@@ -352,6 +352,8 @@ ELSE
   XSTRESS = (/1.,1.,1.,0.,1.,0.,1.,0.,1.,0.,0.,0.,0.,0.,1.,0.,1.,0.,0.,0./)
 ENDIF
 !
+DTV%NVEGTYPE = NVEGTYPE
+!
 NTIME                 = 36
 XUNIF_VEG             = XUNDEF ! vegetation fraction
 XUNIF_LAI             = XUNDEF ! LAI

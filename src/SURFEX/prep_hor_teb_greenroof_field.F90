@@ -50,9 +50,7 @@ USE MODD_TYPE_SNOW
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 USE MODD_GRID_GRIB, ONLY : CINMODEL
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NCOMM, NPROC
-USE MODD_PREP,               ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS,          &
-                                    XLAT_OUT, XLON_OUT, XX_OUT, XY_OUT,          &
-                                    LINTERP, CMASK
+USE MODD_PREP,               ONLY : CINGRID_TYPE, CINTERP_TYPE, XZS_LS, LINTERP, CMASK
 USE MODD_PREP_TEB_GREENROOF, ONLY : XGRID_SOIL, NGRID_LEVEL,                     &
                                     XWSNOW_GR, XRSNOW_GR, XTSNOW_GR,XLWCSNOW_GR, &
                                     XAGESNOW_GR, XASNOW_GR, LSNOW_IDEAL_GR

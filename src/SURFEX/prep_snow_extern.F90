@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_SNOW_EXTERN (GCP,HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
-                            KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER,KTEB_PATCH)
+                             KLUOUT,PFIELD,OSNOW_IDEAL,KLAYER,KTEB_PATCH)
 !     #################################################################################
 !
 !
@@ -164,9 +164,9 @@ IF (YAREA(1:4)=='VEG ') THEN
   CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
 ELSE
   IF (.NOT.GOLD_NAME) THEN
-     IF (YAREA(1:4)=='ROOF') YAREA(1:4) = 'RF  '
-     IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
-   ENDIF
+    IF (YAREA(1:4)=='ROOF') YAREA(1:4) = 'RF  '
+    IF (YAREA(1:4)=='ROAD') YAREA(1:4) = 'RD  '
+  ENDIF
   IF (GTOWN) THEN   
     CALL READ_TEB_PATCH(HFILEPGD,HFILEPGDTYPE,IVERSION_PGD,IBUGFIX_PGD,ITEB_PATCH,HDIR='-')
   ELSE
@@ -203,109 +203,108 @@ ENDDO
 !
 DO JP = 1,IPATCH
   !
-IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)=='RD') THEN
-  IF (.NOT. GTOWN) THEN
-    TZSNOW%SCHEME='1-L'
-    TZSNOW%NLAYER=1
+  IF (YAREA(1:2)=='RO' .OR. YAREA(1:2)=='GA' .OR. YAREA(1:2)=='RF' .OR. YAREA(1:2)=='RD') THEN
+    IF (.NOT. GTOWN) THEN
+      TZSNOW%SCHEME='1-L'
+      TZSNOW%NLAYER=1
       CALL ALLOCATE_GR_SNOW(TZSNOW,INI)
-  ELSE
+    ELSE
       CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
       CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),YPREFIX,INI,INI,IMASK_P,0,TZSNOW, &
                         HDIR='E',KVERSION=IVERSION_PREP,KBUGFIX=IBUGFIX_PREP)
-    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
-  ENDIF
-ELSE
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    ENDIF
+  ELSE
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,YMASK)
     CALL READ_GR_SNOW(HFILETYPE,TRIM(YAREA),YPREFIX,INI,INI,IMASK_P,JP,TZSNOW, &
                       HDIR='E',KVERSION=IVERSION_PREP,KBUGFIX=IBUGFIX_PREP,KNPATCH=IPATCH)
-  CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
-ENDIF
-!
-!-------------------------------------------------------------------------------------
-!
-!*      5.     Total snow content
-!              ------------------
-!
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+  ENDIF
+  !
+  !-------------------------------------------------------------------------------------
+  !
+  !*      5.     Total snow content
+  !              ------------------
+  !
   IF (NRANK==NPIO) THEN
     !
-SELECT CASE (HSURF(1:3))
-  CASE ('WWW')
-    IF (OSNOW_IDEAL) THEN
+    SELECT CASE (HSURF(1:3))
+      CASE ('WWW')
+        IF (OSNOW_IDEAL) THEN
           IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))
           PFIELD(:,:,JP) = TZSNOW%WSNOW(:,1:KLAYER)
-    ELSE
+        ELSE
           IF (JP<=1) ALLOCATE(PFIELD(INI,1,IPATCH))
           PFIELD(:,:,JP) = 0.
           DO JL=1,TZSNOW%NLAYER
             PFIELD(:,1,JP) = PFIELD(:,1,JP) + TZSNOW%WSNOW(:,JL)
-      END DO 
+          END DO 
           WHERE ( PFIELD(:,1,JP)>XUNDEF ) PFIELD(:,1,JP)=XUNDEF
-    ENDIF
-!
-!-------------------------------------------------------------------------------------
-!
-!*      6.     Albedo
-!              ------
-!
-  CASE ('ALB')
+        ENDIF
+  !
+  !-------------------------------------------------------------------------------------
+  !
+  !*      6.     Albedo
+  !              ------
+  !
+    CASE ('ALB')
       IF (JP<=1) ALLOCATE(PFIELD(INI,1,IPATCH))
       PFIELD(:,1,JP) = TZSNOW%ALB(:)
-!
-!-------------------------------------------------------------------------------------
-!
-!*      7.     Total depth to snow grid
-!              ------------------------
-!
-  CASE ('DEP')
-    IF (OSNOW_IDEAL) THEN
+  !
+  !-------------------------------------------------------------------------------------
+  !
+  !*      7.     Total depth to snow grid
+  !              ------------------------
+  !
+    CASE ('DEP')
+      IF (OSNOW_IDEAL) THEN    
         IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))  
         PFIELD(:,:,JP) = TZSNOW%WSNOW(:,1:KLAYER)/TZSNOW%RHO(:,1:KLAYER)
         WHERE(TZSNOW%WSNOW(:,1:KLAYER)==XUNDEF) PFIELD(:,:,JP)=XUNDEF
-    ELSE          
+      ELSE     
         ALLOCATE(ZD(INI))
         ZD(:) = 0.0
         DO JL=1,TZSNOW%NLAYER
           WHERE (TZSNOW%WSNOW(:,JL)/=XUNDEF)
             ZD(:) = ZD(:) + TZSNOW%WSNOW(:,JL)/TZSNOW%RHO(:,JL)
           ENDWHERE
-              ENDDO
+        END DO
         IF (JP<=1) ALLOCATE(PFIELD(INI,1,IPATCH))
         PFIELD(:,1,JP) = ZD(:)
         DEALLOCATE(ZD)
       ENDIF
-!
-!-------------------------------------------------------------------------------------
-!
-!*      8.     Density or heat profile
-!              -----------------------
-!
-  CASE ('RHO','HEA','SG1','SG2','HIS','AGE','IMP')
-!
-    SELECT CASE (TZSNOW%SCHEME)
-      CASE ('D95','1-L','EBA')
+  !
+  !-------------------------------------------------------------------------------------
+  !
+  !*      8.     Density or heat profile
+  !              -----------------------
+  !
+    CASE ('RHO','HEA','SG1','SG2','HIS','AGE')
+  !
+      SELECT CASE (TZSNOW%SCHEME)
+        CASE ('D95','1-L','EBA')
           IF (JP<=1) ALLOCATE(PFIELD(INI,1,IPATCH))   
-        !* computes output physical variable
+          !* computes output physical variable
           IF (HSURF(1:3)=='RHO') PFIELD(:,1,JP) = TZSNOW%RHO(:,1)
-        IF (HSURF(1:3)=='HEA') THEN
+          IF (HSURF(1:3)=='HEA') THEN
             IF (TZSNOW%SCHEME=='D95'.OR.TZSNOW%SCHEME=='EBA') PFIELD(:,1,JP) = XTT-2.
             IF (TZSNOW%SCHEME=='1-L') PFIELD(:,1,JP) = TZSNOW%T(:,1)
-        END IF
+          END IF
           IF (HSURF(1:3)=='SG1') PFIELD(:,1,JP) = -20.0
           IF (HSURF(1:3)=='SG2') PFIELD(:,1,JP) = 80.0
           IF (HSURF(1:3)=='HIS') PFIELD(:,1,JP) = 0.0
           IF (HSURF(1:3)=='AGE') PFIELD(:,1,JP) = 3.0
 
-      CASE ('3-L','CRO')
+        CASE ('3-L','CRO')
           ALLOCATE(ZFIELD(INI,TZSNOW%NLAYER))
-        !* input physical variable
+          !* input physical variable
           IF (HSURF(1:3)=='RHO') ZFIELD(:,:) = TZSNOW%RHO (:,1:TZSNOW%NLAYER)
           IF (HSURF(1:3)=='AGE') ZFIELD(:,:) = TZSNOW%AGE(:,1:TZSNOW%NLAYER)
-        IF (TZSNOW%SCHEME=='CRO')THEN
+          IF (TZSNOW%SCHEME=='CRO')THEN
             IF (HSURF(1:3)=='SG1') ZFIELD(:,:) = TZSNOW%GRAN1(:,1:TZSNOW%NLAYER)
             IF (HSURF(1:3)=='SG2') ZFIELD(:,:) = TZSNOW%GRAN2(:,1:TZSNOW%NLAYER)
             IF (HSURF(1:3)=='HIS') ZFIELD(:,:) = TZSNOW%HIST(:,1:TZSNOW%NLAYER)
-            IF (HSURF(1:3)=='IMP') ZFIELD(:,:) = TZSNOW%IMPUR (:,1:TZSNOW%NLAYER,1)
-        ELSE
+          ELSE
            IF (HSURF(1:3)=='SG1') ZFIELD(:,:) = -20.0
            IF (HSURF(1:3)=='SG2') ZFIELD(:,:) = 80.0
            IF (HSURF(1:3)=='HIS') ZFIELD(:,:) = 0.0                  
@@ -317,56 +316,56 @@ SELECT CASE (HSURF(1:3))
             CALL SNOW_HEAT_TO_T_WLIQ(ZHEAT,TZSNOW%RHO,ZFIELD)
             WHERE (ZFIELD>XTT.AND.ZFIELD/=XUNDEF) ZFIELD = XTT
             DEALLOCATE(ZHEAT)
-        ENDIF
-        !
-        IF (OSNOW_IDEAL) THEN
+          ENDIF
+          !
+          IF (OSNOW_IDEAL) THEN 
             IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))                  
             PFIELD(:,:,JP) = ZFIELD(:,:)
-        ELSE
-          !
+          ELSE
+            !
             IF (JP<=1) ALLOCATE(PFIELD(INI,NGRID_LEVEL,IPATCH))
-          !* input snow layer thickness
+            !* input snow layer thickness
             ALLOCATE(ZDEPTH(INI,TZSNOW%NLAYER))
             ZDEPTH(:,:) = TZSNOW%WSNOW(:,:)/TZSNOW%RHO(:,:)
-          !
-          !* total depth
+            !
+            !* total depth
             ALLOCATE(ZD(INI))
             ZD(:) = 0.
             DO JL=1,TZSNOW%NLAYER
               ZD(:) = ZD(:) + ZDEPTH(:,JL)
-          ENDDO
-          !
-          !* input normalized grid
+            ENDDO
+            !
+            !* input normalized grid
             ALLOCATE(ZGRID(INI,TZSNOW%NLAYER))
-             DO JI=1,INI
+            DO JI=1,INI
               IF(ZD(JI)==0.0)THEN
                 DO JL = 1,TZSNOW%NLAYER
                   ZGRID(JI,JL)=REAL(JL)/REAL(TZSNOW%NLAYER)
-                   ENDDO
-                ELSE
+                ENDDO
+              ELSE
                 DO JL = 1,TZSNOW%NLAYER
                   IF(JL==1)THEN
                     ZGRID(JI,JL)=ZDEPTH(JI,JL)/ ZD(JI)
-                      ELSE
+                  ELSE
                     ZGRID(JI,JL) = ZGRID(JI,JL-1) + ZDEPTH(JI,JL)/ZD(JI)
-                      ENDIF
-                   ENDDO
-                ENDIF
-             ENDDO
-          DEALLOCATE(ZDEPTH)
-          DEALLOCATE(ZD)
-          !    
-          !* interpolation of profile onto fine normalized snow grid
+                  ENDIF
+                ENDDO
+              ENDIF
+            ENDDO
+            DEALLOCATE(ZDEPTH)
+            DEALLOCATE(ZD)
+            !    
+            ! * interpolation of profile onto fine normalized snow grid
             CALL INTERP_GRID_NAT(ZGRID(:,:),ZFIELD(:,:),    &
                                XGRID_SNOW(:), PFIELD(:,:,JP))
-          DEALLOCATE(ZGRID)
-        ENDIF
+            DEALLOCATE(ZGRID)
+          ENDIF
           DEALLOCATE(ZFIELD)
 
-      END SELECT
-    !* put field form patch to all vegtypes
+        END SELECT
+        !* put field form patch to all vegtypes    
     END SELECT
-!
+  !
   ENDIF
   !
   CALL DEALLOC_GR_SNOW(TZSNOW)

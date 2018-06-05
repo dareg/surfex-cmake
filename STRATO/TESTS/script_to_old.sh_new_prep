@@ -1,0 +1,8 @@
+cp -f OPTIONS.nam OPTIONS.nam_new
+
+
+cp -f OPTIONS.nam OPTIONS.nam_save
+sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"LFI\"/g" OPTIONS.nam_save > OPTIONS.nam_old
+
+cp -f OPTIONS.nam_old OPTIONS.nam
+

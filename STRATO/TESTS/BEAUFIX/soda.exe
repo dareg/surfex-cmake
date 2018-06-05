@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+#set -x
+#
+RUNDIR=$(pwd)
+#
+cd $tmpdir
+rm -f *
+#pwd
+#
+#
+#echo " copie des fichiers ecoclimap "
+#
+ln -s $RUNDIR/*.bin .
+ln -s $RUNDIR/PGD* .
+ln -s $RUNDIR/PREP* .
+#
+ln -s $RUNDIR/SST_SIC .
+ln -s $RUNDIR/CANARI .
+ln -s $RUNDIR/clim_isba .
+ln -s $RUNDIR/FG_OI_MAIN .
+ln -s $RUNDIR/fort.61 .
+#
+ln -s $RUNDIR/CANARI_NATURE*.DAT .
+ln -s $RUNDIR/BGROUNDin* .
+#
+cp -f $RUNDIR/OPTIONS.nam .
+#
+#echo " copie de l'executable "
+#
+cp -f $RUNDIR/soda$1.exe soda.exe
+#
+MPI_TASKS=1
+#
+#export KMP_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+#
+#export KMP_STACKSIZE=13m
+#export KMP_MONITOR_STACKSIZE=13m
+export OMP_STACKSIZE=13m
+#
+#export DR_HOOK=1
+#export DR_HOOK_OPT=prof
+#
+ulimit -s unlimited
+#
+srun -N1 -n${MPI_TASKS} -c${OMP_NUM_THREADS} ./soda.exe
+#
+#ls -l
+#
+#cp drhook.* $RUNDIR
+mv -f LISTING_SODA*.txt $RUNDIR
+#cp log* $RUNDIR
+
+mv -f SURFOUT.* $RUNDIR
+#
+mv -f *.OUT.nc $RUNDIR
+#
+mv -f BGROUNDout_ASSIM* $RUNDIR
+#
+cd $RUNDIR
+#

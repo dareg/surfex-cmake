@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export OMP_NUM_THREADS=1
+
+./soda$1.exe
+
