@@ -4,8 +4,8 @@
 !SFX_LIC for details. version 1.
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID, NGB, GB, &
-                                      ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,   &
-                                      HPROGRAM, HCOUPLING, PTSTEP,                            &
+                                      ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, AT, NDST,    &
+                                      SLT, HPROGRAM, HCOUPLING, PTSTEP,                       &
                                       KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                       PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
                                       PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
@@ -68,6 +68,7 @@ USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_CSTS,    ONLY : XSTEFAN, XCPD, XRD, XP00
 !
 USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_FORCING_VERT_SHIFT
 USE MODI_COUPLING_ISBA_CANOPY_n
@@ -96,6 +97,7 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) ::NPE
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 !
@@ -321,7 +323,7 @@ ENDIF
 !              ------------
 !
  CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID, NGB, GB,   &
-                             ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,     &
+                             ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, AT, NDST, SLT, &
                              HPROGRAM, HCOUPLING, PTSTEP,                              &
                              KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
                              PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, ZQA, ZTA,     &

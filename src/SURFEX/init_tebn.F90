@@ -4,11 +4,11 @@
 !SFX_LIC for details. version 1.
 !     #############################################################
       SUBROUTINE INIT_TEB_n (DTCO, UG, U, GCP, CHT, DTT, SB, TG, TOP, TPN,    &
-                             TIR, NT, TD, BDD, BOP, DTB, NB, GDM, GRM,        &
+                             TIR, NT, TD, BDD, BOP, DTB, NB, TM_AT, GDM, GRM, &
                              HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,        &
                              PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,      &
                              PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,  &
-                             KDAY, PTIME, HATMFILE, HATMFILETYPE, HTEST )  
+                             KDAY, PTIME, AT, HATMFILE, HATMFILETYPE, HTEST )  
 !     #############################################################
 !
 !!****  *INIT_TEB_n* - routine to initialize TEB
@@ -73,6 +73,8 @@ USE MODD_CHS_AEROSOL,     ONLY: LVARSIGI, LVARSIGJ
 USE MODD_DST_SURF,        ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST 
 USE MODD_SLT_SURF,        ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
 USE MODD_SURF_PAR,        ONLY: XUNDEF, NUNDEF
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODN_PREP_TEB, ONLY : CROAD_DIR, CWALL_OPT
 !
@@ -146,6 +148,8 @@ TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP
 TYPE(DATA_BEM_t), INTENT(INOUT) :: DTB
 TYPE(BEM_NP_t), INTENT(INOUT) :: NB
 !
+TYPE(SURF_ATM_TURB_t), INTENT(INOUT) :: TM_AT         ! atmospheric turbulence parameters
+!
 TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
 TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !
@@ -170,6 +174,7 @@ INTEGER,                            INTENT(IN)  :: KMONTH      ! current month (
 INTEGER,                            INTENT(IN)  :: KDAY        ! current day (UTC)
 REAL,                               INTENT(IN)  :: PTIME       ! current time since
                                                                !  midnight (UTC, s)
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
  CHARACTER(LEN=28),                  INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                   INTENT(IN)  :: HATMFILETYPE! atmospheric file type
@@ -610,6 +615,13 @@ END IF
 !
 !-------------------------------------------------------------------------------
 !
+!*       8.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+TM_AT=AT
+!
+!
+!-------------------------------------------------------------------------------
 !*      11.     Diagnostics:
 !               -----------
 !

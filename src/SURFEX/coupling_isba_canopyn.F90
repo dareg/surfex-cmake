@@ -4,8 +4,8 @@
 !SFX_LIC for details. version 1.
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_CANOPY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID, NGB, GB, &
-                                   ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,   &
-                                   HPROGRAM, HCOUPLING, PTSTEP,                            &
+                                   ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, AT, NDST,    &
+                                   SLT, HPROGRAM, HCOUPLING, PTSTEP,                       &
                                    KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                    PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
                                    PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
@@ -66,6 +66,7 @@ USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_CSTS,          ONLY : XCPD
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 USE MODD_CANOPY_TURB,   ONLY : XALPSBL
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODE_COUPLING_CANOPY
 !
@@ -103,6 +104,7 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) ::NPE
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 !
@@ -274,7 +276,7 @@ IF (IO%LCANOPY) THEN
 !       1.2.1  First time step canopy initialisation
 !
   IF(ANY(SB%XT(:,:) == XUNDEF)) THEN
-    CALL INIT_ISBA_SBL(IO, K, NP, NPE, SB, &
+    CALL INIT_ISBA_SBL(IO, K, NP, NPE, AT, SB, &
                        PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, PDIR_SW,  &
                        PSCA_SW, PSW_BANDS, PRAIN, PSNOW, PZREF, PUREF, ISS%XSSO_SLOPE )
   ENDIF
@@ -380,7 +382,7 @@ END IF
 !              ------------
 !
  CALL COUPLING_ISBA_n(DTCO, UG, U, USS, NAG, CHI, NCHI, DTV, ID, NGB, GB, ISS,NISS, IG, &
-                      NIG, IO, S, K, NK, NP, NPE, NDST, SLT, HPROGRAM, GCOUPLING,       &
+                      NIG, IO, S, K, NK, NP, NPE, AT, NDST, SLT, HPROGRAM, GCOUPLING,   &
                       PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
                       PZENITH2, ZZREF, ZUREF, PZS, ZU, ZV, ZQA, ZTA, PRHOA, PSV, PCO2,  &
                       HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, ZPA,    &

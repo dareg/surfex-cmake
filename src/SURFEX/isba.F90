@@ -7,7 +7,7 @@
                       OMEB, PTSTEP, HIMPLICIT_WIND, PZREF, PUREF, PDIRCOSZW,     &
                       PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
                       PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,&
-                      PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,        &
+                      PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, AT,    &
                       PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,  &
                       PPALPHAN, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,          &
                       PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PTDEEP_A,   &
@@ -123,6 +123,8 @@ USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 USE MODI_SOIL
 USE MODI_SOILDIF
 USE MODI_SOILSTRESS
@@ -222,6 +224,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PPEW_A_COEF, PPEW_B_COEF, &
 !                                  PPET_B_COEF ! B-air temperature coefficient
 !                                  PPEQ_A_COEF ! A-air specific humidity coefficient
 !                                  PPEQ_B_COEF ! B-air specific humidity coefficient
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 !* vegetation parameters
 !  ---------------------
@@ -473,7 +477,7 @@ IF(OMEB)THEN
                  ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1, PPS, PZENITH,      &
                  PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,  &
                  PDIRCOSZW, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF,   &
-                 PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF,  &
+                 PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF, AT, &
                  PZREF, PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,&
                  PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,       & 
                  PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, &
@@ -546,7 +550,7 @@ ELSE
   CALL ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,                      &
                 HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,                &
                 PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, &
-                PPEQ_B_COEF, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA,   &
+                PPEQ_B_COEF, AT, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA, &
                 PVMOD, PQA, PRR, PSR, PPS, PZREF, PUREF, PDIRCOSZW, &
                 ZF5, PFFG_NOSNOW, PFFV_NOSNOW,  PRHOA, ZCS,         &
                 ZSOILCONDZ, ZSOILHCAPZ, ZFROZEN1, PTDEEP_A,         &
@@ -584,7 +588,7 @@ CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK,                      &
 CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK,                    &
                    OMEB, IO%LMEB_LITTER, PEXNS, PEXNA, PTA, PQA, &
                    PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,  &
-                   ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L,     &
+                   AT, ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L, &
                    ZEVAP3L, ZQS3L, ZALB3L, ZGSFCSNOW,         &
                    ZGRNDFLUX, ZFLSN_COR, PEMIST, PPALPHAN    )  
 !

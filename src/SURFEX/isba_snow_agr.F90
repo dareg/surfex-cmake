@@ -6,7 +6,7 @@
       SUBROUTINE ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK, &
                                OMEB, OMEB_LITTER, PEXNS, PEXNA, PTA, PQA,  &
                                PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,   &
-                               PEMIS, PALB, PUSTAR, PLES3L, PLEL3L,        &
+                               AT, PEMIS, PALB, PUSTAR, PLES3L, PLEL3L,    &
                                PEVAP3L, PQS3L, PALB3L, PGSFCSNOW,          &
                                PZGRNDFLUX, PFLSN_COR, PEMIST, PPALPHAN )
 !     ##########################################################################
@@ -58,6 +58,8 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -95,6 +97,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PDIRCOSZW ! Cosinus of the angle between the 
 REAL, DIMENSION(:), INTENT(IN)  :: PVMOD     ! module of the horizontal wind
 REAL, DIMENSION(:), INTENT(IN)  :: PRR       ! Rain rate (in kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN)  :: PSR       ! Snow rate (in kg/m2/s)
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT      ! atmospheric turbulence parameters
 !
 !* surface parameters
 !  ------------------
@@ -360,7 +363,7 @@ ZVMOD = WIND_THRESHOLD(PVMOD,PUREF)
 !
 IF (LDRAG_COEF_ARP) THEN
    CALL SURFACE_CDCH_1DARP(PZREF, DK%XZ0EFF, DK%XZ0H, ZVMOD, PTA, PEK%XTG(:,1), &
-                             PQA, DK%XQS, DK%XCD, DK%XCDN, DK%XCH              )
+                             PQA, DK%XQS, AT, DK%XCD, DK%XCDN, DK%XCH,DK%XRI              )
 ELSE
    CALL SURFACE_AERO_COND(DK%XRI, PZREF, PUREF, ZVMOD, DK%XZ0, DK%XZ0H, ZAC, ZRA, DK%XCH)
    CALL SURFACE_CD(DK%XRI, PZREF, PUREF, DK%XZ0EFF, DK%XZ0H, DK%XCD, DK%XCDN)

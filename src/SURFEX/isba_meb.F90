@@ -8,7 +8,7 @@
                           PSOILHCAPZ, PSOILCONDZ, PFROZEN1, PPS, PZENITH,           &
                           PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,       &
                           PDIRCOSZW, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF,        &
-                          PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF,       &
+                          PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF, AT,   &
                           PZREF, PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,     &
                           PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,            &
                           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, &
@@ -82,6 +82,8 @@ USE MODD_ISBA_PAR,       ONLY : XRS_MAX, XLIMH
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODE_THERMOS
 USE MODE_MEB,            ONLY : SNOW_INTERCEPT_EFF
@@ -190,6 +192,9 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PPET_A_COEF, PPET_B_COEF, &
 !                                                    ! PPET_B_COEF  B-air temperature coefficient
 !                                                    ! PPEQ_A_COEF  A-air specific humidity coefficient
 !                                                    ! PPEQ_B_COEF  B-air specific humidity coefficient
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
+!
 REAL, DIMENSION(:),   INTENT(IN)    :: PTDEEP_A          ! Deep soil temperature boundary condition 
 !                                                         ! (prescribed)     
 !                                      PTDEEP_A = Deep soil temperature
@@ -791,7 +796,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.1    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !
-   CALL DRAG_MEB(IO, PEK, DMK, DK,  &
+   CALL DRAG_MEB(IO, PEK, AT, DMK, DK,  &
                  ZTGL(:,1), ZTA_IC,  ZQA_IC, ZVMOD, ZWSFC, ZWISFC,   &
                  ZWSAT(:,1), ZWFC(:,1), PEXNS, PEXNA, PPS, PRR, PSR, &
                  PRHOA, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,      &
