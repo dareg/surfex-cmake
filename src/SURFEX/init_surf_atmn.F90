@@ -7,7 +7,7 @@ SUBROUTINE INIT_SURF_ATM_n (YSC, HPROGRAM,HINIT, OLAND_USE,             &
                             KI,KSV,KSW, HSV,PCO2,PRHOA,                 &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
                              PEMIS,PTSRAD,PTSURF,                       &
-                             KYEAR, KMONTH,KDAY, PTIME, TPDATE_END,     &
+                             KYEAR, KMONTH,KDAY, PTIME, TPDATE_END, AT, &
                              HATMFILE,HATMFILETYPE, HTEST               )  
 !#############################################################
 !
@@ -81,6 +81,8 @@ USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE
 USE MODD_SURFEX_MPI, ONLY : XTIME_INIT_SEA, XTIME_INIT_WATER, XTIME_INIT_NATURE, XTIME_INIT_TOWN, &
                             NRANK, NPIO, NSIZE
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODD_MASK, ONLY: NMASK_FULL
 USE MODN_PREP_SURF_ATM, ONLY : LWRITE_EXTERN
@@ -171,6 +173,8 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 TYPE(DATE), INTENT(INOUT) :: TPDATE_END
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
@@ -544,7 +548,7 @@ IF (YSC%U%NDIM_SEA>0) &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                   ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                  KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
+                  KYEAR,KMONTH,KDAY,PTIME, AT, HATMFILE,HATMFILETYPE, &
                   'OK'                                               )  
 !
 !
@@ -573,7 +577,7 @@ IF (YSC%U%NDIM_WATER>0) &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                            ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                           KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
+                           KYEAR,KMONTH,KDAY,PTIME, AT, HATMFILE,HATMFILETYPE, &
                            'OK'                                               )
 !
  CALL UNPACK_SURF_INIT_ARG(JTILE,YSC%U%NSIZE_WATER,YSC%U%NR_WATER)
@@ -602,7 +606,7 @@ IF (YSC%U%NDIM_NATURE>0) &
                      KSV,KSW, HSV,ZP_CO2,ZP_RHOA,                       &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                      ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                     KYEAR,KMONTH,KDAY,PTIME,TPDATE_END,                &
+                     KYEAR,KMONTH,KDAY,PTIME,TPDATE_END, AT,            &
                      HATMFILE,HATMFILETYPE,'OK'      )
 !
 !
@@ -630,7 +634,7 @@ IF (YSC%U%NDIM_TOWN>0) &
                    HSV,ZP_CO2,ZP_RHOA,                                &
                    ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                    ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                   KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
+                   KYEAR,KMONTH,KDAY,PTIME, AT, HATMFILE,HATMFILETYPE, &
                    'OK'                                               )  
 !
 !

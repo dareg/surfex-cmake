@@ -117,6 +117,8 @@ USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
 !
 USE MODD_XIOS, ONLY : LXIOS, TXIOS_CONTEXT, LXIOS_DEF_CLOSED, LADD_DIM=>LALLOW_ADD_DIM, NTIMESTEP
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 USE MODE_POS_SURF
 !
 USE MODE_CRODEBUG
@@ -312,6 +314,8 @@ REAL :: XTIME0, XTIME1, XTIME
 !
 LOGICAL :: GSAVHOOK
 INTEGER :: IBLOCKTOT, IBLOCK
+!
+TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -708,7 +712,7 @@ CALL GOTO_MODEL(1)
  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, INI, NSCAL, IBANDS,  &
                       CSV,XCO2(:),XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,  &
                       XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
-                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
+                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,AT,   &
                       YATMFILE, YATMFILETYPE, YTEST                          )
 !
 ! initialization routines to compute shadows

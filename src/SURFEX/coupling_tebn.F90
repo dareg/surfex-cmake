@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, NT, TPN, TIR, BOP, NB, TD, GDM, GRM, &
+SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, NT, TPN, TIR, BOP, NB, TD, AT, GDM, GRM, &
                            HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV,&
                            KSW, PTSUN, PZENITH, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, &
                            PRHOA, PSV, PCO2, HSV, PRAIN, PSN, PLW, PDIR_SW, PSCA_SW,        &
@@ -69,6 +69,8 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 USE MODE_DSLT_SURF
 USE MODE_THERMOS
 USE MODE_SBLS
@@ -113,6 +115,8 @@ TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(TEB_NP_t), INTENT(INOUT) :: NT
 !
 TYPE(TEB_DIAG_t), INTENT(INOUT) :: TD
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 TYPE(BEM_OPTIONS_t), INTENT(INOUT) :: BOP 
 TYPE(BEM_NP_t), INTENT(INOUT) :: NB
@@ -675,7 +679,7 @@ DO JP = 1,TOP%NTEB_PATCH
   ! Call the physical routines of TEB (including gardens & greenroofs)
   ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
-  CALL TEB_GARDEN(DTCO, G, TOP, NT%AL(JP), BOP, NB%AL(JP), TPN, TIR, TD%NDMT%AL(JP), GDM, GRM, JP, &
+  CALL TEB_GARDEN(DTCO, G, TOP, NT%AL(JP), BOP, NB%AL(JP), TPN, TIR, TD%NDMT%AL(JP), AT, GDM, GRM, JP, &
                   CIMPLICIT_WIND, PTSUN, ZT_CAN, ZQ_CAN, ZU_CANYON, ZT_LOWCAN, ZQ_LOWCAN, &
                   ZU_LOWCAN, ZZ_LOWCAN, ZPEW_A_COEF, ZPEW_B_COEF, ZPEW_A_COEF_LOWCAN,     &
                   ZPEW_B_COEF_LOWCAN, PPS, ZPA, ZEXNS, ZEXNA, ZTA, ZQA, PRHOA, PCO2, PLW, &

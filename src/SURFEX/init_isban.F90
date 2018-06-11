@@ -8,7 +8,7 @@ SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, DTZ,&
                         KI, KSV, KSW, HSV, PCO2, PRHOA, PZENITH,      &
                         PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB, PEMIS,  &
                         PTSRAD, PTSURF, KYEAR, KMONTH, KDAY, PTIME,   &
-                        TPDATE_END, HATMFILE, HATMFILETYPE, HTEST      )
+                        TPDATE_END, AT, HATMFILE, HATMFILETYPE, HTEST      )
 !#############################################################
 !
 !!****  *INIT_ISBA_n* - routine to initialize ISBA
@@ -99,6 +99,8 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 !
 USE MODD_CO2V_PAR,  ONLY : XMCO2, XSPIN_CO2
 USE MODD_CSTS,      ONLY : XMD
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 !
 USE MODI_INIT_IO_SURF_n
 !
@@ -173,6 +175,7 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
  CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
@@ -529,6 +532,13 @@ ELSE
 
 ENDIF
 !
+!-------------------------------------------------------------------------------
+!
+!*       3.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+IM%AT=AT
+
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE INIT_ISBA_n
