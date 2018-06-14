@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 SUBROUTINE OL_DEFINE_DIM (UG, KSIZE_FULL, HPROGRAM, KLUOUT, KNI, &
-			  									OSNOWDIMNC, TSNOW,                     &
+			  									TSNOW,                     &
                           KDIM1, HUNIT1, HUNIT2, PX, PY, KDIMS,  &
                           KDDIM, HNAME_DIM, OSNOWBANDS, KNPATCH, &
 			  									KNSNLAYER, PLAT, PLON)
@@ -74,7 +74,6 @@ INTEGER, INTENT(IN) :: KSIZE_FULL
  CHARACTER(LEN=6),  INTENT(IN)    :: HPROGRAM
 INTEGER, INTENT(IN)              :: KLUOUT
 INTEGER, INTENT(IN)              :: KNI
-LOGICAL, INTENT(IN)              :: OSNOWDIMNC
 LOGICAL, INTENT(IN)		:: OSNOWBANDS
 TYPE(SURF_SNOW),INTENT(IN)           :: TSNOW
 INTEGER, INTENT(OUT)             :: KDIM1
@@ -236,6 +235,7 @@ ELSE
   IDIM1 = KNI
   IDIM2 = KNI
   IFULL = KNI
+
 ENDIF
 !
 !
@@ -311,9 +311,6 @@ ENDIF
 IF ( INPATCH/=0 ) THEN
   KDIMS     (INDIMS-1) = KNPATCH
   HNAME_DIM (INDIMS-1) = 'Number_of_Patches'
-  IDIMSNOW=INDIMS-2
-ELSE
-  IDIMSNOW=INDIMS-1
 ENDIF
 
 IF ( OSNOWBANDS) THEN
@@ -323,16 +320,27 @@ IF ( OSNOWBANDS) THEN
   HNAME_DIM (INDIMS-ID) = 'bands'
 ENDIF
 
-IDIMSNOW = INDIMS-ID
-
 !
 IF ( INSNLAYER/=0 ) THEN
-  ID = 1
-  IF (INPATCH/=0) ID = 2
-  KDIMS     (IDIMSNOW-ID) = INSNLAYER
-  HNAME_DIM (IDIMSNOW-ID) = 'snow_layer'
+
+  IF (INPATCH/=0) THEN
+    IF (OSNOWBANDS) THEN
+      ID = 3
+    ELSE
+      ID = 2
+    ENDIF 
+  ELSE
+    IF (OSNOWBANDS) THEN
+      ID = 2
+    ELSE
+      ID = 1
+    ENDIF 
+  ENDIF    
+  
+  KDIMS     (INDIMS-ID) = INSNLAYER
+  HNAME_DIM (INDIMS-ID) = 'snow_layer'
 ENDIF
-!
+
 !
 IF (HPROGRAM/='NOTIME ') THEN
   KDIMS     (INDIMS) = NF90_UNLIMITED

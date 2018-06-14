@@ -4,11 +4,11 @@
 !SFX_LIC for details. version 1.
 !     #########
     SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GRO, S, K, P, PEK,    &
-                          HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,    &
-                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
+                          HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,  &
+                          PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
                           PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,      &
                           PCO2, PPS, PRR, PSR, PZENITH, PSW, PLW, PVMOD,            &
-                PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,            &                
+                          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, &                
                           PRN, PH, PLE, PGFLUX, PSFCO2, PEVAP, PUW, PRUNOFF, PDRAIN,&
                           PAC, PQSAT, PTSRAD, PAC_AGG, PHU_AGG, PDEEP_FLUX, PIRRIG )  
 !   ##################################################################################
@@ -102,7 +102,7 @@ TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
-
+!
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
 !
@@ -152,7 +152,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over greenroo
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over greenroofs
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the greenroofs
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2                ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2      ! flux of greenroof CO2       (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over greenroofs (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! greenroof surface runoff
@@ -162,7 +162,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PQSAT       ! saturation humidity
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PTSRAD      ! greenroof radiative surface temp. (snow free)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PAC_AGG     ! aggreg. aeodynamic resistance for greenroofs for latent heat flux
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PHU_AGG     ! aggreg. relative humidity for greenroofs for latent heat flux
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX            ! Heat Flux at the bottom layer of the greenroof
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PDEEP_FLUX  ! Heat Flux at the bottom layer of the greenroof
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! greenroof summer irrigation rate
 !
 !
@@ -171,12 +171,12 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PIRRIG      ! greenroof summer irrigation
 TYPE(SSO_t) :: YSS
 TYPE(AGRI_t) :: YAG
 !
-REAL, DIMENSION(SIZE(PPS))           :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
-REAL, DIMENSION(SIZE(PPS))           :: ZSLOPEDIR           ! slope direction (=-1 in TEB)
-REAL, DIMENSION(SIZE(PPS))           :: ZWINDDIR            ! wind direction (=-1 in TEB)
-INTEGER, DIMENSION(SIZE(PPS))        :: KTAB_SYT        ! array of index containing
-						                                            ! opposite direction for
-						                                            ! Sytron  (=0 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZSLOPEDIR           ! slope direction (=-1 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZWINDDIR            ! wind direction (=-1 in TEB)
+INTEGER, DIMENSION(SIZE(PPS))  :: KTAB_SYT        ! array of index containing
+						                                      ! opposite direction for
+						                                      ! Sytron  (=0 in TEB)
 REAL, DIMENSION(SIZE(PPS),GRO%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
 REAL, DIMENSION(SIZE(PPS),1) :: ZP_DIR_SW ! spectral direct and diffuse irradiance used in snow cro 
@@ -185,8 +185,8 @@ REAL, DIMENSION(SIZE(PPS),1) ::ZSPEC_ALB, ZDIFF_RATIO
 !
 !  temperatures
 !
-REAL, DIMENSION(SIZE(PPS))           :: ZTA          ! estimate of air temperature at future time
-!                                                    ! step as if modified by ISBA flux alone.
+REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
+!                                 ! step as if modified by ISBA flux alone.
 !
 !  surfaces relative fractions
 !  for flood
@@ -277,7 +277,7 @@ PIRRIG(:) = 0.
 !
 !* irrigation automatique de type goutte à goutte (arrosage du sol seulement)
 !
-CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN, &
+CALL TEB_IRRIG(TIR%LPAR_GR_IRRIG, PTSTEP, TPTIME%TDATE%MONTH, PTSUN,         &
                TIR%XGR_START_MONTH, TIR%XGR_END_MONTH, TIR%XGR_START_HOUR,   &
                TIR%XGR_END_HOUR, TIR%XGR_24H_IRRIG, PIRRIG     )
 !
@@ -302,9 +302,10 @@ ZP_DIR_SW=XUNDEF
 ZP_SCA_SW=XUNDEF
 ! ZSPEC_ALB=XUNDEF
 ! ZDIFF_RATIO=XUNDEF
-
+DK%XZ0(:) = PEK%XZ0(:)
+DK%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
 DK%XZ0EFF(:) =  PEK%XZ0(:)
-
+!
 ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
  CALL ISBA(GRO, K, P, PEK, G, YAG, DK, DEK, DMK,                                  &
@@ -341,7 +342,7 @@ END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2    (:)=0.
+PSFCO2          (:) = 0.
 DEK%XRESP_ECO (:) = 0.
 DEK%XRESP_AUTO(:) = 0.
 !
@@ -370,22 +371,22 @@ END IF
 !
 WHERE (T%XGREENROOF/=0.)
   !
-! energy balance
-!
+  ! energy balance
+  !
   DK%XLE(:) = PEK%XLE(:)
-!
-! Estimate of green area aerodynamic conductance recomputed from heat flux,
-! surface (radiative) temp. and forcing air temperature (estimated at future time step)
+  !
+  ! Estimate of green area aerodynamic conductance recomputed from heat flux,
+  ! surface (radiative) temp. and forcing air temperature (estimated at future time step)
   ZTA = PPET_B_COEF + PPET_A_COEF * DK%XH
   PAC = 0.
   WHERE (DK%XTSRAD /= ZTA)
     PAC(:)   = MAX(DK%XH(:) / XCPD / PRHOA(:) / (DK%XTSRAD - ZTA) , 0.)
- ENDWHERE
-!
-! Humidity of saturation for green areas
+  ENDWHERE
+  !
+  ! Humidity of saturation for green areas
   PQSAT(:) = QSAT(PEK%XTG(:,1),PPS(:))
-!
-!* friction flux
+  !
+  !* friction flux
   PUW(:)    = -ZUSTAR(:)**2
   !
 ELSEWHERE

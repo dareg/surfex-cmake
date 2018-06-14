@@ -2,9 +2,9 @@ set -x
 
 rm -f $tmpdir/* 
 
-dir_run="/home/cnrm_other/ge/mrmm/farouxs/STRATO"
-exec_new="_netcdf"
-exec_old="_trunk"
+dir_run="/home/cnrm_other/cen/mrns/nheilir/SURFEX/Surfex_V81/STRATO/"
+exec_new="_new"
+exec_old="_old"
 
 cd $dir_run
 

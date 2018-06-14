@@ -122,7 +122,8 @@ cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_SNOWMETAMO_F06_B92"
 #TAR
 echo "############# $2_SNCRO8_B92_SNOWRAD_TAR"
 cp -f OPTIONS.nam_metamo OPTIONS.nam_save
-sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TAR\"/g" OPTIONS.nam_save > OPTIONS.nam
+#T17 for V9 vs TAR for V8
+sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"T17\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_B92_SNOWRAD_TAR"
 ./script_exec_parall.sh "$2_SNCRO8_B92_SNOWRAD_TAR" $3 $4 $5
 #
@@ -131,19 +132,20 @@ sed -e "s/CSNOWMETAMO = \"B92\"/CSNOWMETAMO = \"C13\"/g" OPTIONS.nam_save > OPTI
 #TAR
 echo "############# $2_SNCRO8_C13_SNOWRAD_TAR"
 cp -f OPTIONS.nam_c13 OPTIONS.nam_save
-sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TAR\"/g" OPTIONS.nam_save > OPTIONS.nam
+sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"T17\"/g" OPTIONS.nam_save > OPTIONS.nam
+#T17 for V9 vs TAR for V8
 cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TAR"
 ./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TAR" $3 $4 $5
 #TA1
-echo "############# $2_SNCRO8_C13_SNOWRAD_TA1"
-cp -f OPTIONS.nam_c13 OPTIONS.nam_save
-sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TA1\"/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TA1"
-./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TA1" $3 $4 $5
-#TA2
-echo "############# $2_SNCRO8_C13_SNOWRAD_TA2"
-cp -f OPTIONS.nam_c13 OPTIONS.nam_save
-sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TA2\"/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TA2"
-./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TA2" $3 $4 $5
+#echo "############# $2_SNCRO8_C13_SNOWRAD_TA1"
+#cp -f OPTIONS.nam_c13 OPTIONS.nam_save
+#sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TA1\"/g" OPTIONS.nam_save > OPTIONS.nam
+#cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TA1"
+#./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TA1" $3 $4 $5
+##TA2
+#echo "############# $2_SNCRO8_C13_SNOWRAD_TA2"
+#cp -f OPTIONS.nam_c13 OPTIONS.nam_save
+#sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TA2\"/g" OPTIONS.nam_save > OPTIONS.nam
+#cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TA2"
+#./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TA2" $3 $4 $5
 rm -f drdt_bst_fit_60.nc

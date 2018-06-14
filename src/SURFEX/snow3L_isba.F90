@@ -129,7 +129,7 @@ LOGICAL, INTENT(IN)                 :: OMEB       ! True = coupled to MEB. This 
 !                                                 ! If = False, then energy
 !                                                 ! budget and fluxes are computed herein.
 !
-CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
+ CHARACTER(LEN=*),     INTENT(IN)    :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                       ! 'OLD' = direct
 !                                                       ! 'NEW' = Taylor serie, order 1
 !
@@ -339,13 +339,13 @@ IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',0,ZHOOK_HANDLE)
 !               ---------------------
 !
 IF (SIZE(DMK%XSNOWDEND)>0) THEN
-  DMK%XSNOWDEND     (:,:) = XUNDEF
-  DMK%XSNOWSPHER    (:,:) = XUNDEF
-  DMK%XSNOWSIZE     (:,:) = XUNDEF
-  DMK%XSNOWSSA      (:,:) = XUNDEF
-  DMK%XSNOWRAM      (:,:) = XUNDEF
-  DMK%XSNOWSHEAR    (:,:) = XUNDEF
-  DMK%XSNOWTYPEMEPRA(:,:) = XUNDEF
+  DMK%XSNOWDEND (:,:) = XUNDEF
+  DMK%XSNOWSPHER(:,:) = XUNDEF
+  DMK%XSNOWSIZE (:,:) = XUNDEF
+  DMK%XSNOWSSA  (:,:) = XUNDEF
+  DMK%XSNOWRAM  (:,:) = XUNDEF
+  DMK%XSNOWSHEAR(:,:) = XUNDEF
+  DMK%XSNOWTYPEMEPRA(:,:) = XUNDEF  
   DMK%XACC_RAT      (:,:) = XUNDEF
   DMK%XNAT_RAT      (:,:) = XUNDEF
   DMK%XIMPUR_CONC (:,:,:) = XUNDEF ! AVOIR RAFIFE
@@ -355,7 +355,7 @@ ENDIF
 
 IF (SIZE(DMK%XDIFF_RATIO)>1) THEN
 	DMK%XSPEC_ALB(:,:) = XUNDEF
-	DMK%XDIFF_RATIO(:,:) = XUNDEF 
+	DMK%XDIFF_RATIO(:,:) = XUNDEF
 ENDIF
 !
 DEK%XSNDRIFT(:)    = 0.0
@@ -410,19 +410,19 @@ DMK%XSNOWLIQ(:,:)  = 0.0
 DMK%XSNOWDZ(:,:)   = 0.0
 !
 INLVLS          = SIZE(PEK%TSNOW%WSNOW(:,:),2)    
-INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2))                         
+INLVLG          = MIN(SIZE(PD_G(:,:),2),SIZE(PTG(:,:),2)) 
 IBLOWSNW       = SIZE(ZBLOWSNW(:,:),2)
 !
 !
 IF(.NOT.OMEB)THEN 
-!
-! If MEB activated, these values are input, else initialize here:
-!
-   PGRNDFLUX(:)   = 0.0
-   PLES3L(:)      = 0.0
-   PLEL3L(:)      = 0.0
-   PEVAP(:)       = 0.0
-   PRI(:)         = XUNDEF
+  !
+  ! If MEB activated, these values are input, else initialize here:
+  !
+  PGRNDFLUX(:)      = 0.0
+  PLES3L(:)         = 0.0
+  PLEL3L(:)         = 0.0    
+  PEVAP(:)          = 0.0
+  PRI(:)            = XUNDEF  
   PEK%TSNOW%EMIS(:) = XEMISSN    
   DMK%XRNSNOW(:)    = 0.0
   DMK%XHSNOW(:)     = 0.0
@@ -432,8 +432,7 @@ IF(.NOT.OMEB)THEN
   DMK%XCDSNOW(:)    = 0.0
   DMK%XCHSNOW(:)    = 0.0
   !
-END IF
-!
+ENDIF
 !
 ! Use ISBA-SNOW3L or NOT: NOTE that if explicit soil diffusion method in use,
 ! then *must* use explicit snow model:
@@ -452,22 +451,22 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
     ZSWNET_NS(:)      = DEK%XSWNET_NS(:)
     ZLWNET_N(:)       = DEK%XLWNET_N(:)
   END IF
-!
+
 ! - Snow and rain falling onto the 3-L grid space:
 !
   DMK%XSRSFC(:) = 0.0
 !
-   DO JJ=1,SIZE(PSR)
+  DO JJ=1,SIZE(PSR)
     ZRRSNOW(JJ)        = PEK%XPSN(JJ)*PRR(JJ)
     DMK%XRRSFC(JJ)    = PRR(JJ) - ZRRSNOW(JJ)
-      ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
-   ENDDO
+    ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES    ! maximum possible snowfall depth (m)
+  ENDDO
 !
 ! Calculate preliminary snow depth (m)
 
-   ZSNOW(:)=0.
-   ZSNOWH(:)=0.
-   ZSNOWSWE_1D(:)=0.
+  ZSNOW(:)      =0.
+  ZSNOWH(:)     =0.
+  ZSNOWSWE_1D(:)=0.
   ZSNOWH1(:)    = PEK%TSNOW%HEAT(:,1)*PEK%TSNOW%WSNOW(:,1)/PEK%TSNOW%RHO(:,1) ! sfc layer only
 !
   DO JWRK=1,SIZE(PEK%TSNOW%WSNOW(:,:),2)
@@ -475,12 +474,12 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
       ZSNOWSWE_1D(JJ) = ZSNOWSWE_1D(JJ) + PEK%TSNOW%WSNOW(JJ,JWRK)
       ZSNOW(JJ)       = ZSNOW(JJ)       + PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
       ZSNOWH(JJ)      = ZSNOWH(JJ)      + PEK%TSNOW%HEAT (JJ,JWRK)*PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
-      END DO
-   ENDDO
+    END DO
+  ENDDO
 !
   IF(IO%CISBA == 'DIF')THEN
-      ZSOILCOND(:)   = PSOILCONDZ(:)
-   ELSE
+    ZSOILCOND(:) = PSOILCONDZ(:)
+  ELSE
 !
 ! - Soil thermal conductivity
 !   is implicit in Force-Restore soil method, so it
@@ -689,17 +688,17 @@ ENDIF
 ! counts the number of points where the computations will be made
 !
 !
-   ISIZE_SNOW = 0
-   NMASK(:) = 0
+  ISIZE_SNOW = 0
+  NMASK(:) = 0
 !
-   DO JJ=1,SIZE(ZSNOW)
-      IF (ZSNOW(JJ) >= XSNOWDMIN .OR. ZSNOWFALL(JJ) >= XSNOWDMIN .OR.ZBLOWSNW_ACC(JJ) >= XSNOWDMIN) THEN
-         ISIZE_SNOW = ISIZE_SNOW + 1
-         NMASK(ISIZE_SNOW) = JJ
-      ENDIF
-   ENDDO
-! 
-   IF (ISIZE_SNOW>0) CALL CALL_MODEL(ISIZE_SNOW,INLVLS,INLVLG,IBLOWSNW,NMASK)
+  DO JJ=1,SIZE(ZSNOW)
+    IF (ZSNOW(JJ) >= XSNOWDMIN .OR. ZSNOWFALL(JJ) >= XSNOWDMIN) THEN
+      ISIZE_SNOW = ISIZE_SNOW + 1
+      NMASK(ISIZE_SNOW) = JJ
+    ENDIF
+  ENDDO
+!  
+  IF (ISIZE_SNOW>0) CALL CALL_MODEL(ISIZE_SNOW,INLVLS,INLVLG,IBLOWSNW,NMASK)
 !
 ! ===============================================================
 !
@@ -708,61 +707,61 @@ ENDIF
 ! If MEB used, soil T already computed, therefore correct heating/cooling
 ! effect of updated snow-soil flux
 !
-   ZSNOWD(:) = 0.
-   ZSNOWSWE_OUT(:) = 0.
+  ZSNOWD(:) = 0.
+  ZSNOWSWE_OUT(:) = 0.
   DO JWRK=1,SIZE(PEK%TSNOW%WSNOW(:,:),2)
     DO JJ=1,SIZE(PEK%TSNOW%WSNOW(:,:),1)
       ZSNOWD      (JJ) = ZSNOWD      (JJ) + PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
       ZSNOWSWE_OUT(JJ) = ZSNOWSWE_OUT(JJ) + PEK%TSNOW%WSNOW(JJ,JWRK)
-      ENDDO
-   END DO
+    ENDDO
+  END DO
 !
-   LREMOVE_SNOW(:)=(ZSNOWD(:)<XSNOWDMIN*1.1)
+  LREMOVE_SNOW(:)=(ZSNOWD(:)<XSNOWDMIN*1.1)
 !
 !
-   IF(OMEB)THEN
-     ZPSN(:)=1.0
+  IF(OMEB)THEN
+    ZPSN(:) = 1.0
     IF(IO%CISBA == 'DIF')THEN
       ZWGHT(:) = PSOILHCAPZ(:,2)*PDZG(:,2)/(PSOILHCAPZ(:,1)*PDZG(:,1) + PSOILHCAPZ(:,2)*PDZG(:,2))
       ZC2(:)   = 1/(PSOILHCAPZ(:,2)*PDZG(:,2))
     ELSE
       ZWGHT(:) = (PD_G(:,2)-PD_G(:,1))/PD_G(:,2)
     ENDIF           
-   ELSE
+  ELSE
 !    To Conserve mass in ISBA without MEB, 
 !    EVAP must be weignted by the snow fraction
 !    in the calulation of THRUFAL
     ZPSN(:) = PEK%XPSN(:)
-   ENDIF
+  ENDIF
 !
-   ZSNOWABLAT_DELTA(:) = 0.0
-   ZTHRUFAL        (:) = PTHRUFAL(:)
+  ZSNOWABLAT_DELTA(:) = 0.0
+  ZTHRUFAL        (:) = PTHRUFAL(:)
 !
-   WHERE(LREMOVE_SNOW(:))
+  WHERE(LREMOVE_SNOW(:))
     !
-      ZSNOWSWE_OUT(:)     = 0.0
-      PLES3L(:)           = MIN(PLES3L(:), XLSTT*(ZSNOWSWE_1D(:)/PTSTEP + PSR(:)))
-      PLEL3L(:)           = 0.0
+    ZSNOWSWE_OUT(:)     = 0.0
+    PLES3L(:)           = MIN(PLES3L(:), XLSTT*(ZSNOWSWE_1D(:)/PTSTEP + PSR(:)))
+    PLEL3L(:)           = 0.0
     PEVAP(:)            = PLES3L(:)/PK%XLSTT(:)
-      PTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)*ZPSN(:) + ZRRSNOW(:)) ! kg m-2 s-1
-      ZTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)         + ZRRSNOW(:)) ! kg m-2 s-1
+    PTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)*ZPSN(:) + ZRRSNOW(:)) ! kg m-2 s-1
+    ZTHRUFAL(:)         = MAX(0.0, ZSNOWSWE_1D(:)/PTSTEP + PSR(:) - PEVAP(:)         + ZRRSNOW(:)) ! kg m-2 s-1
     !
     DMK%XSRSFC(:)       = 0.0
     DMK%XRRSFC(:)       = DMK%XRRSFC(:)
     !
-      ZSNOWABLAT_DELTA(:) = 1.0
+    ZSNOWABLAT_DELTA(:) = 1.0
     !
     PEK%TSNOW%ALB(:)    = XUNDEF
     !
-      PEVAPCOR(:)         = 0.0
-      ZSOILCOR(:)         = 0.0
+    PEVAPCOR(:)         = 0.0
+    ZSOILCOR(:)         = 0.0
     !
     DMK%XGFLUXSNOW(:)   = DMK%XRNSNOW(:) - DMK%XHSNOW(:) - PLES3L(:) - PLEL3L(:)
     DMK%XSNOWHMASS(:)   = -PSR(:)*(XLMTT*PTSTEP)
     !
-      PGSFCSNOW(:)        = 0.0
-      PDELHEATN(:)        = -ZSNOWH(:) /PTSTEP
-      PDELHEATN_SFC(:)    = -ZSNOWH1(:)/PTSTEP
+    PGSFCSNOW(:)        = 0.0
+    PDELHEATN(:)        = -ZSNOWH(:) /PTSTEP
+    PDELHEATN_SFC(:)    = -ZSNOWH1(:)/PTSTEP
     PSNOWSFCH(:)        = PDELHEATN_SFC(:) - (ZSWNET_NS(:) + ZLWNET_N(:)    &
                            - DMK%XHSNOW(:) - PLES3L(:) - PLEL3L(:)) + PGSFCSNOW(:)     &
                            - DMK%XSNOWHMASS(:)/PTSTEP 
@@ -773,20 +772,24 @@ ENDIF
     ZWORK(:)            = ZWORK(:) / PTSTEP
     PDELHEATG(:)        = PDELHEATG(:)     + ZWORK(:)  
     PDELHEATG_SFC(:)    = PDELHEATG_SFC(:) + ZWORK(:)  
-      PGRNDFLUX(:)        = ZGRNDFLUXN(:)
-      PFLSN_COR(:)        = 0.0
-
-    PEK%TSNOW%DEP_SUP(:) = 0
-    PEK%TSNOW%DEP_TOT(:) = 0
-    PEK%TSNOW%DEP_HUM(:) = 0
-    PEK%TSNOW%NAT_LEV(:) = 6
-    PEK%TSNOW%AVA_TYP(:) = 6
-    PEK%TSNOW%PRO_SUP_TYP(:) = 6
-    !
-   END WHERE
+    PGRNDFLUX(:)        = ZGRNDFLUXN(:)
+    PFLSN_COR(:)        = 0.0
+  !
+  END WHERE
+  !
+  IF (PEK%TSNOW%SCHEME=='CRO') THEN 
+    WHERE(LREMOVE_SNOW(:))
+      PEK%TSNOW%DEP_SUP(:) = 0
+      PEK%TSNOW%DEP_TOT(:) = 0
+      PEK%TSNOW%DEP_HUM(:) = 0
+      PEK%TSNOW%NAT_LEV(:) = 6
+      PEK%TSNOW%AVA_TYP(:) = 6
+      PEK%TSNOW%PRO_SUP_TYP(:) = 6
+    END WHERE
+  ENDIF
 !
 !
-   DO JWRK=1,INLVLS
+  DO JWRK=1,INLVLS
     DO JJ=1,SIZE(PEK%TSNOW%WSNOW(:,:),1)
       PEK%TSNOW%WSNOW(JJ,JWRK)  = (1.0-ZSNOWABLAT_DELTA(JJ))*PEK%TSNOW%WSNOW(JJ,JWRK)
       PEK%TSNOW%HEAT (JJ,JWRK)  = (1.0-ZSNOWABLAT_DELTA(JJ))*PEK%TSNOW%HEAT (JJ,JWRK)
@@ -797,8 +800,8 @@ ENDIF
                                     ZSNOWABLAT_DELTA(JJ)*XTT  
       DMK%XSNOWLIQ (JJ,JWRK)    = (1.0-ZSNOWABLAT_DELTA(JJ))*DMK%XSNOWLIQ(JJ,JWRK)        
       DMK%XSNOWDZ  (JJ,JWRK)    = (1.0-ZSNOWABLAT_DELTA(JJ))*DMK%XSNOWDZ (JJ,JWRK)
-      ENDDO
-   ENDDO
+    ENDDO
+  ENDDO
    DO JIMP=1,NIMPUR
      DO JWRK=1,INLVLS
         DO JJ=1,SIZE(PEK%TSNOW%WSNOW,1)
@@ -808,22 +811,22 @@ ENDIF
    ENDDO
 !  
   IF (PEK%TSNOW%SCHEME=='CRO') THEN
-      DO JWRK=1,INLVLS
+    DO JWRK=1,INLVLS
       DO JJ=1,SIZE(PEK%TSNOW%GRAN1(:,:),1)
         PEK%TSNOW%GRAN1(JJ,JWRK) = (1.0-ZSNOWABLAT_DELTA(JJ))*PEK%TSNOW%GRAN1(JJ,JWRK) 
         PEK%TSNOW%GRAN2(JJ,JWRK) = (1.0-ZSNOWABLAT_DELTA(JJ))*PEK%TSNOW%GRAN2(JJ,JWRK)
         PEK%TSNOW%HIST (JJ,JWRK) = (1.0-ZSNOWABLAT_DELTA(JJ))*PEK%TSNOW%HIST (JJ,JWRK)
-         ENDDO
       ENDDO
-   ENDIF
+    ENDDO
+  ENDIF
 !
 !  ===============================================================
 !
 !  Compute snow mass budget 
 !
-   ZSNOW_MASS_BUDGET(:) = (ZSNOWSWE_1D(:)-ZSNOWSWE_OUT(:))/PTSTEP + PSR     (:)+ZRRSNOW (:) &
-                                                                  - PEVAP   (:)-ZTHRUFAL(:) &
-                                                                  + PEVAPCOR(:)+ZSOILCOR(:)
+  ZSNOW_MASS_BUDGET(:) = (ZSNOWSWE_1D(:)-ZSNOWSWE_OUT(:))/PTSTEP + PSR     (:)+ZRRSNOW (:) &
+                                                                 - PEVAP   (:)-ZTHRUFAL(:) &
+                                                                 + PEVAPCOR(:)+ZSOILCOR(:)
 !
 !
 !  ===============================================================
@@ -831,13 +834,13 @@ ENDIF
 !  To Conserve mass in ISBA, the latent heat flux part of 
 !  the EVAPCOR term must be weignted by the snow fraction 
 !
-   PEVAPCOR (:) = PEVAPCOR(:)*ZPSN(:) + ZSOILCOR(:)
+  PEVAPCOR (:) = PEVAPCOR(:)*ZPSN(:) + ZSOILCOR(:)
 !
 ! ===============================================================
 !
 ! check suspicious low temperature
 !
-   DO JWRK=1,INLVLS
+  DO JWRK=1,INLVLS
     !
     DO JJ=1,SIZE(PEK%TSNOW%WSNOW,1)
       !
@@ -852,8 +855,8 @@ ENDIF
           WRITE(*,*) 'DEKTH BY LAYER      (m)    :',DMK%XSNOWDZ  (JJ,1:INLVLS)
           WRITE(*,*) 'DENSITY BY LAYER   (kg/m3) :',PEK%TSNOW%RHO(JJ,1:INLVLS)
           WRITE(*,*) 'TEMPERATURE BY LAYER (K)   :',DMK%XSNOWTEMP(JJ,1:INLVLS)
-            CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
-         ENDIF
+          CALL ABOR1_SFX('SNOW3L_ISBA: Suspicious low temperature')                
+        ENDIF
         !
       ELSE
         !
@@ -874,7 +877,7 @@ ENDIF
         END IF
       ENDIF               
     ENDDO
-   ENDDO
+  ENDDO
 !
   IF(OMEB)THEN 
     DEK%XSWNET_N(:)  = ZSWNET_N(:) 
@@ -888,7 +891,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',1,ZHOOK_HANDLE)
 !
-CONTAINS
+ CONTAINS
 !
 !================================================================
 SUBROUTINE CALL_MODEL(KSIZE1,KSIZE2,KSIZE3,KSIZE4,KMASK)
@@ -1052,12 +1055,12 @@ DO JWRK=1,KSIZE2
    DO JJ=1,KSIZE1
       JI = KMASK(JJ)
       ZP_SNOWSWE (JJ,JWRK) = PEK%TSNOW%WSNOW (JI,JWRK)
-      ZP_SNOWRHO (JJ,JWRK) = PEK%TSNOW%RHO   (JI,JWRK)
-      ZP_SNOWHEAT(JJ,JWRK) = PEK%TSNOW%HEAT  (JI,JWRK)
-      ZP_SNOWAGE (JJ,JWRK) = PEK%TSNOW%AGE   (JI,JWRK)
-      ZP_SNOWTEMP(JJ,JWRK) = DMK%XSNOWTEMP   (JI,JWRK)
-      ZP_SNOWLIQ (JJ,JWRK) = DMK%XSNOWLIQ    (JI,JWRK)
-      ZP_SNOWDZ  (JJ,JWRK) = DMK%XSNOWDZ     (JI,JWRK)
+      ZP_SNOWRHO (JJ,JWRK) = PEK%TSNOW%RHO (JI,JWRK)
+      ZP_SNOWHEAT(JJ,JWRK) = PEK%TSNOW%HEAT(JI,JWRK)
+      ZP_SNOWAGE (JJ,JWRK) = PEK%TSNOW%AGE (JI,JWRK)      
+      ZP_SNOWTEMP(JJ,JWRK) = DMK%XSNOWTEMP(JI,JWRK)
+      ZP_SNOWLIQ (JJ,JWRK) = DMK%XSNOWLIQ (JI,JWRK)
+      ZP_SNOWDZ  (JJ,JWRK) = DMK%XSNOWDZ  (JI,JWRK)
    ENDDO
 ENDDO
 !
@@ -1185,7 +1188,7 @@ DO JJ=1,KSIZE1
 
    ZP_RRSNOW  (JJ) = ZRRSNOW  (JI)   
    ZP_SOILCOND(JJ) = ZSOILCOND(JI)
-   !  
+ 
    !  
    ZP_PEW_A_COEF(JJ) = PPEW_A_COEF(JI)
    ZP_PEW_B_COEF(JJ) = PPEW_B_COEF(JI)
@@ -1315,7 +1318,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
   ZP_SOILCOR (:) = 0.0
 !
 #ifndef SFX_OL
-! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
+  ! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
   GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
 #else
   GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
@@ -1429,7 +1432,7 @@ ENDIF !ENDIF cendev
      ZP_TG(:,1)         = ZP_TG(:,1)         + ZP_WORK(:)*ZP_CT(:)*ZP_D_G(:,1)   ! (K)
      DO JJ=2,KSIZE3
         DO JI=1,KSIZE1
-           IF(ZP_SOILD(JI) <= ZDEPTHABS)THEN
+           IF (ZP_SOILD(JI) <= ZDEPTHABS) THEN
               ZP_TG(JI,JJ) = ZP_TG(JI,JJ)    + ZP_WORK(JI)/ZP_SOILHCAPZ(JI,JJ)   ! K
            ENDIF
         ENDDO
@@ -1537,7 +1540,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
         DMK%XSNOWDEND     (JI,JWRK) = ZP_SNOWDEND     (JJ,JWRK)
-        DMK%XSNOWSPHER    (JI,JWRK) = ZP_SNOWSPHER    (JJ,JWRK)
+        DMK%XSNOWSPHER    (JI,JWRK) = ZP_SNOWSPHER    (JJ,JWRK) 
         DMK%XSNOWSIZE     (JI,JWRK) = ZP_SNOWSIZE     (JJ,JWRK)
         DMK%XSNOWSSA      (JI,JWRK) = ZP_SNOWSSA      (JJ,JWRK)
         DMK%XSNOWTYPEMEPRA(JI,JWRK) = ZP_SNOWTYPEMEPRA(JJ,JWRK)

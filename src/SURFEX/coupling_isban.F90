@@ -482,7 +482,7 @@ S%TTIME%TIME = S%TTIME%TIME + PTSTEP
 ! --------------------------------------------------------------------------------------
 !
 PATCH_LOOP: DO JP=1,IO%NPATCH
-!
+  
   IF (NP%AL(JP)%NSIZE_P == 0 ) CYCLE
 !
 ! Pack dummy arguments for each patch:
@@ -525,7 +525,7 @@ IF (IO%LVEGUPD) THEN
                          'NAT', GALB, NISS%AL(JP), GUPDATED             )  
   ENDDO
 !
-END IF
+ENDIF
 !
 IF(IO%LPERTSURF.AND.GUPDATED) THEN
   DO JP = 1,IO%NPATCH
@@ -536,12 +536,12 @@ IF(IO%LPERTSURF.AND.GUPDATED) THEN
     DO JI = 1,PK%NSIZE_P
       IMASK = PK%NR_P(JI)
       !
-  ! random perturbation for ensembles:
-  ! reset these fields to their original values, as in compute_isba_parameters
+      ! random perturbation for ensembles:
+      ! reset these fields to their original values, as in compute_isba_parameters
       PEK%XVEG(JI) = S%XPERTVEG(IMASK)
       PEK%XLAI(JI) = S%XPERTLAI(IMASK)
       PEK%XCV (JI) = S%XPERTCV (IMASK)
-  ! reapply original perturbation patterns
+      ! reapply original perturbation patterns
       IF(PEK%XALBNIR(JI)/=XUNDEF)   PEK%XALBNIR(JI)   = PEK%XALBNIR(JI) *( 1.+ S%XPERTALB(IMASK) )
       IF(PEK%XALBVIS(JI)/=XUNDEF)   PEK%XALBVIS(JI)   = PEK%XALBVIS(JI) *( 1.+ S%XPERTALB(IMASK) )
       IF(PEK%XALBUV(JI)/=XUNDEF)    PEK%XALBUV (JI)   = PEK%XALBUV (JI) *( 1.+ S%XPERTALB(IMASK) )
@@ -596,7 +596,6 @@ PTRAD = S%XTSRAD_NAT
 !
  CALL AVERAGE_DIAG_ISBA_n(ID%O, ID%D, ID%DC, ID%ND, ID%NDC, NP, IO%NPATCH, &
                           ID%O%LSURF_BUDGETC, IO%LCANOPY, PUREF, PZREF, PSFCO2, PTRAD)
-!
 !
 ! Cumulated diagnostics (stored in MODD_DIAG_EVAP_ISBA_n)
 !
@@ -769,7 +768,6 @@ LOGICAL :: GMEB  ! True if multi-energy balance should be used for the specific 
 INTEGER :: JJ, JI, JK , JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-!
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_n:TREAT_PATCH',0,ZHOOK_HANDLE)
 !
 !--------------------------------------------------------------------------------------
@@ -876,11 +874,9 @@ ELSE
         ZP_IMPWET(JJ,JIMP)   = PIMPWET(JI,JIMP)
       ENDDO
     ENDDO
-ENDIF
+  ENDIF
 #endif
 ENDIF
-
-
 !
 !--------------------------------------------------------------------------------------
 !
@@ -962,7 +958,7 @@ ENDIF
  CALL ISBA_ALBEDO(PEK, IO%LTR_ML, GMEB, ZP_DIR_SW, ZP_SCA_SW,                &
                   PSW_BANDS, ISWB, KK%XALBF, KK%XFFV, KK%XFFG, ZP_GLOBAL_SW, &
                   ZP_MEB_SCA_SW, ZP_ALBNIR_TVEG, ZP_ALBVIS_TVEG,             &
-                   ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL                      )  
+                  ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL                   )  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Intialize computation of ISBA water and energy budget
@@ -976,9 +972,6 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ZIRRIG_GR(:)= 0.
 !
- !PRINT*, "XSNOWLIQ", SIZE(ID%DM%XSNOWLIQ) ," and", SIZE(DMK%XSNOWLIQ)
- !print*,"coupling isba", SIZE(ID%DM%XIMPUR_CONC), " and", SIZE(DMK%XIMPUR_CONC)
- !print*,"coupling isba", SIZE(ID%DM%XPRODCOUNT), " and", SIZE(DMK%XPRODCOUNT)
  CALL ISBA(IO, KK, PK, PEK, GK, AGK, DK, DEK, DMK,                                            &
            S%TTIME, S%XPOI, S%XABC, GBK%XIACAN, GMEB, PTSTEP, CIMPLICIT_WIND,                 &
            ZP_ZREF, ZP_UREF, ZP_SLOPE_COS, &
@@ -1042,7 +1035,7 @@ END IF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !ii
-ZP_SFCO2    (:)=0.
+ZP_SFCO2      (:) = 0.
 DEK%XRESP_ECO (:) = 0.
 DEK%XRESP_AUTO(:) = 0.
 !
@@ -1057,7 +1050,7 @@ IF ( IO%CPHOTO/='NON') THEN
   DEK%XGPP(:) = DEK%XGPP(:) * ZP_RHOA(:)
   DEK%XRESP_ECO(:) = DEK%XRESP_ECO(:) * ZP_RHOA(:)
   DEK%XRESP_AUTO(:) = DEK%XRESP_AUTO(:) * ZP_RHOA(:)
-END IF
+ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Reset effecitve roughness lentgh to its nominal value when snow has just disappeared
@@ -1096,7 +1089,7 @@ IF (CHI%SVI%NBEQ>0) THEN
     IBEG = CHI%SVI%NSV_CHSBEG
     IEND = CHI%SVI%NSV_CHSEND 
     ISIZE = IEND - IBEG + 1 
- 
+
     CALL CH_DEP_ISBA(KK, PK, PEK, DK, DMK, CHIK, &
                      ZP_USTAR, ZP_TA, ZP_PA, ZP_TRAD(:), ISIZE )  
  
@@ -1208,8 +1201,8 @@ IF (CHI%SVI%NSLTEQ>0) THEN
   CALL MASSFLUX2MOMENTFLUX(           &
     ZP_SFTS(:,IBEG:IEND),             & !I/O ![kg/m2/sec] In: flux of only mass, out: flux of moments
     ZP_RHOA,                          & !I [kg/m3] air density
-    SLT%XEMISRADIUS_SLT,                  &!I [um] emitted radius for the modes (max 3)
-    SLT%XEMISSIG_SLT,                     &!I [-] emitted sigma for the different modes (max 3)
+    SLT%XEMISRADIUS_SLT,              & !I [um] emitted radius for the modes (max 3)
+    SLT%XEMISSIG_SLT,                 & !I [-] emitted sigma for the different modes (max 3)
     NSLTMDE,                          &
     ZCONVERTFACM0_SLT,                &
     ZCONVERTFACM6_SLT,                &
@@ -1265,9 +1258,9 @@ ZP_QSURF (:) = DK%XQS (:)
 IF (PEK%TSNOW%SCHEME=='3-L'.OR.PEK%TSNOW%SCHEME=='CRO') THEN
   PEK%TSNOW%TEMP(:,:) = DMK%XSNOWTEMP(:,:)
   PEK%TSNOW%TS  (:)   = DMK%XSNOWTEMP(:,1)
-END IF
+ENDIF
 !
-!
+
  CALL UNPACK_DIAG_PATCH_n(IO, DEK, PK, PK%NR_P, PK%NSIZE_P, IO%NPATCH, JP,    &
                           ZCPL_DRAIN, ZCPL_RUNOFF, ZCPL_EFLOOD, ZCPL_PFLOOD,  &
                           ZCPL_IFLOOD, ZCPL_ICEFLUX)  

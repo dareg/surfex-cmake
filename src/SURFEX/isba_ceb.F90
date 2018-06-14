@@ -331,15 +331,15 @@ ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
     DO JI=1,INJ
       ZLAYERHCAP(JI,JL) = PSOILHCAPZ(JI,JL) * MIN( PK%XDZG(JI,JL), &
                 MAX(0.0,ZWORK(JI)-PK%XDG(JI,JL) +PK%XDZG(JI,JL)) )
-        ZTOTALHCAP(JI   )=ZTOTALHCAP(JI)+ZLAYERHCAP(JI,JL)
-     ENDDO
+      ZTOTALHCAP(JI   ) = ZTOTALHCAP(JI) + ZLAYERHCAP(JI,JL)
+    ENDDO
   ENDDO
 !
   DO JL=1,INL
     DO JI=1,INJ
-        IF(ZTOTALHCAP(JI)>0.0)THEN
+      IF(ZTOTALHCAP(JI)>0.0)THEN
         ZFLUX_COR(JI,JL) = PEK%XPSN(JI)*PFLSN_COR(JI)*ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
-        ENDIF
+      ENDIF
     ENDDO
   ENDDO
 !
@@ -350,16 +350,16 @@ ELSEIF(LEXPLICIT_SNOW.AND.IO%CISBA=='DIF')THEN
   ZWORK(:)=PTSTEP*DMK%XCT(:)*PEK%XPSN(:)*ABS(PGRNDFLUX(:))
 !
   WHERE(ZTOTALHCAP(:)>0.0.AND.ZWORK(:)>=ZDTG1_COR)
-       ZGRNDFLUX(:) = PGRNDFLUX(:)*ZLAYERHCAP(:,1)/ZTOTALHCAP(:)
+    ZGRNDFLUX(:) = PGRNDFLUX(:)*ZLAYERHCAP(:,1)/ZTOTALHCAP(:)
   ENDWHERE
 !
   DO JL=2,INL
     DO JI=1,INJ
-        IF(ZTOTALHCAP(JI)>0.0.AND.ZWORK(JI)>=ZDTG1_COR)THEN
+      IF(ZTOTALHCAP(JI)>0.0.AND.ZWORK(JI)>=ZDTG1_COR)THEN
         ZFLUX_COR(JI,JL)=ZFLUX_COR(JI,JL)+PEK%XPSN(JI)*PGRNDFLUX(JI) &
-                                           *ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
-        ENDIF
-     ENDDO
+                                         *ZLAYERHCAP(JI,JL)/ZTOTALHCAP(JI)
+      ENDIF
+    ENDDO
   ENDDO
 !
 ENDIF
@@ -389,7 +389,7 @@ DO JSPLIT=1,ITSPLIT
 !
 !*      3.0    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
-!  
+! 
 !  In DRAG, we use the timestep of ISBA (PTSTEP) and not the split time step (ZTSTEP)
 !  because diagnostic canopy evaporation (Er) must be consistent with PWR water
 !  mass to limit negative dripping in hydro_veg

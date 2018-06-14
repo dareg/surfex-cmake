@@ -771,7 +771,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_OL:WRITE_SURFX2_OL',0,ZHOOK_HANDLE)
 !
-print*,"mode_write_surf_ol", HREC, HCOMMENT , HNAM_DIM
 !
 IRET(:) = 0
 !
@@ -804,7 +803,6 @@ IF (LDEF) THEN
       ! 0. find filename
       ! -----------------
       !
-      print*, "here2"
       INDIMS = 2
       IF ( TRIM(YNAM_DIM) == "Nemis_snap" ) THEN
         IRET(2) = NF90_INQ_DIMID(NID_NC,"Nsnap_temp",IDIMIDS(1))
@@ -838,8 +836,6 @@ IF (LDEF) THEN
       IF (YNAME .NE. 'lon' .AND. YNAME .NE. 'xx') THEN
         CALL DEF_VAR_NETCDF(HSELECT,NID_NC,HREC,YCOMMENT,IDIMIDS(1:INDIMS),&
                 YATT_TITLE,YATT,IVAR_ID,NF90_DOUBLE)
-        print*, "after DEF_VAR_NETCDF ", HSELECT,NID_NC,HREC,YCOMMENT,IDIMIDS(1:INDIMS),&
-                YATT_TITLE,YATT,IVAR_ID
       ELSE
         CALL DEF_VAR_NETCDF(HSELECT,NID_NC,HREC,YCOMMENT,IDIMIDS(1:INDIMS), &
                 YATT_TITLE,YATT,IVAR_ID,NF90_DOUBLE)
@@ -869,13 +865,10 @@ ELSE
       ! 1. Find id of the variable
       !----------------------------
       !
-      print*, "here"
       IRET(1)=NF90_INQ_VARID   (IFILE_ID,HREC,IVAR_ID)
-      print*, "after find id of var1 ", IFILE_ID,HREC,IVAR_ID
       IRET(2)=NF90_INQUIRE_VARIABLE(IFILE_ID,IVAR_ID,NDIMS=INDIMS) 
       IRET(3)=NF90_INQUIRE_VARIABLE(IFILE_ID,IVAR_ID,DIMIDS=IDIMIDS(1:INDIMS))  
       
-      print*, "after find id of var", IFILE_ID,HREC,IVAR_ID,INDIMS,IDIMLEN
       DO JDIM=1,INDIMS
         JRET=NF90_INQUIRE_DIMENSION(IFILE_ID,IDIMIDS(JDIM),LEN=IDIMLEN(JDIM))
         IF (JRET.NE.NF90_NOERR) KRESP=1
@@ -911,13 +904,11 @@ ELSE
   !
   IF (IFILE_ID/=0) THEN
     !
-    print*,"call write data" ,IDIMLEN , INDIMS, size(PFIELD), shape(pfield)
     IF (YNAME .EQ. 'Number_of_points') THEN
       CALL WRITE_DATAX2_OL(IDIMLEN(1),IDIMLEN(2),INDIMS)
     ELSE
       CALL WRITE_DATAX2_OL(IDIMLEN(1)*IDIMLEN(2),IDIMLEN(3),INDIMS)
     ENDIF
-    print*,"end call write data"
     !
   ENDIF
   !

@@ -3,8 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-
-      SUBROUTINE ISBA(IO,KK,PK, PEK, G, AG, DK, DEK, DMK, TPTIME, PPOI,PABC,PIACAN,&
+      SUBROUTINE ISBA(IO, KK, PK, PEK, G, AG, DK, DEK, DMK, TPTIME, PPOI, PABC, PIACAN, &
                       OMEB, PTSTEP, HIMPLICIT_WIND, PZREF, PUREF, PDIRCOSZW,     &
 											OATMORAD,OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,     &
 											HSNOWCOMP, HSNOWZREF, PCVHEATF, PSLOPE_DIR, PIMPWET,PIMPDRY,&
@@ -21,14 +20,6 @@
                       P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,PSNOWIMP_CONC,  &
 											PPRODCOUNT,OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,	 &
 											OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
-
-
-
-                      
-
-
-										 
-
 !     ##########################################################################
 !
 !
@@ -188,7 +179,7 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PABC       ! abscissa needed for integratio
 !                                               ! of net assimilation and stomatal
 !                                               ! conductance over canopy depth
 REAL, DIMENSION(:,:),   INTENT(OUT) :: PIACAN   ! PAR in the canopy at different gauss level
-LOGICAL, INTENT(IN)               :: OMEB       ! True = patch with multi-energy balance 
+LOGICAL, INTENT(IN)                 :: OMEB     ! True = patch with multi-energy balance 
 !                                               ! False = patch with classical ISBA 
 REAL,                 INTENT(IN)  :: PTSTEP     ! timestep of the integration
 CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
@@ -289,7 +280,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PZ0EFF_MEBN        ! roughness length for m
 !  ---------------
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP_A       ! Deep soil temperature (prescribed)
-!                                      PTDEEP_A = Deep soil temperature
+!                                                 PTDEEP_A = Deep soil temperature
 !                                                 coefficient depending on flux
 !* ISBA-Ags parameters
 !  -------------------
@@ -379,8 +370,8 @@ REAL, DIMENSION(SIZE(PEK%XWR)) :: ZEVAP3L  ! evaporation flux over snow from ISB
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNOW_THRUFAL ! rate that liquid water leaves snow pack: 
 !                                           ! ISBA-ES [kg/(m2 s)]
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZSNOW_THRUFAL_SOIL !liquid water leaving the snowpack directly to the 
-!                                                !soil, ISBA-ES: [kg/(m2 s)] (equal to ZSNOW_THRUFAL
-!                                                !if OMEB_LITTER=False and zero if OMEB_LITTER=True)
+!                                                    !soil, ISBA-ES: [kg/(m2 s)] (equal to ZSNOW_THRUFAL
+!                                                    !if OMEB_LITTER=False and zero if OMEB_LITTER=True)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZALB3L   !Snow albedo at t-dt for total albedo calculation (ES/CROCUS)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZRI3L    !Snow Ridcharson number (ES/CROCUS)
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS)
@@ -504,7 +495,7 @@ DO JJ=1, SIZE(PEK%XWR) ! BC computation of illuminaiton angle from Tuzet calc.
 ENDDO
 !
 IF(OMEB)THEN
-   ZVEG(:) = 0.0
+  ZVEG(:)           = 0.0
   DEK%XLEG(:)       = 0.0
   DEK%XLEGI(:)      = 0.0
   DEK%XLELITTER(:)  = 0.0
@@ -514,7 +505,7 @@ ELSE
 ENDIF
 !
 ! Save snow albedo values at beginning of time step for total albedo calculation
-!snow3L_
+!
 ZALB3L(:)=PEK%TSNOW%ALB(:)
 !
 !-------------------------------------------------------------------------------
@@ -595,7 +586,6 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
-   !print*,"isba", shape(PSNOWIMP_CONC), " and", shape(DMK%XIMPUR_CONC)
    CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,                   &
                     TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,      &
                     ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR,  &
@@ -609,7 +599,6 @@ ELSE
                     PSNOWIMPUR, PSNOWIMP_CONC,PIMPWET,       &
                     PIMPDRY, PSNOWMAK, PPRODCOUNT, OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL,      &
                     OSNOWTILLER,OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
-									       
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
@@ -682,7 +671,7 @@ CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK,                    &
 ! All output fluxes and radiative variables have recovered the same physical
 ! meaning, that is they are aggregated quantities (snow + snow-free)
 !***************************************************************************
-!WHERE(SNOWSWE(:,1)==0)
+!WHERE(SNOWSWE(:,1)==0) ! AVOIR RAFIFE
 !	DMK%XSNOWTEMP(:,1)=XUNDEF
 !ENDWHERE
 !
