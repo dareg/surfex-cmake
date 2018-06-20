@@ -362,7 +362,7 @@ IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',0,ZHOOK_HANDLE_OMP)
             TPSNOW%GRAN1(JI,JL) = XUNDEF
             TPSNOW%GRAN2(JI,JL) = XUNDEF
             TPSNOW%AGE  (JI,JL) = XUNDEF
-            TPSNOW%IMPUR(JI,JL,:) = XUNDEF !AVOIR RAFIFE
+            IF (NIMPUR > 0) TPSNOW%IMPUR(JI,JL,:) = XUNDEF
           ENDIF
         ENDIF
         !

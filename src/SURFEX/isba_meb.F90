@@ -3,28 +3,24 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG,                     &
-                          TPTIME, OMEB, OSHADE, HIMPLICIT_WIND, PTSTEP,             &
-                          PSOILHCAPZ, PSOILCONDZ, PFROZEN1, PPS, PZENITH, PANGL_ILLUM, &
-                          PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,&
-                          PDIRCOSZW, PSLOPE_DIR, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF, &
-                          PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF,       &
-                          PZREF, PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,     &
-                          PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,            &
-                          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, &
-                          PABC, PIACAN, PPOI, PCSP, PRESP_BIOMASS_INST, PPALPHAN,   &
-                          PF2, PLW_RAD, PGRNDFLUX, PFLSN_COR, PUSTAR, PEMIST,       &
-                          PHU_AGG, PAC_AGG, PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,&
-                          PDELHEATN, PDELHEATN_SFC, PRESTOREN, PTDEEP_A, PDEEP_FLUX,&
-                          PRISNOW, PSNOW_THRUFAL, PSNOW_THRUFAL_SOIL, PEVAPCOR,     &
-                          PSUBVCOR, PLITCOR, PSNOWSFCH, PQSNOW, 										&
-													OATMORAD, OSNOWSYTRON,                           &
-        									HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF, &
-													KTAB_SYT,PSYTMASS,  																			&
-													P_DIR_SW, P_SCA_SW,PSPEC_ALB, PDIFF_RATIO, PSNOWIMPUR,    &
-													PSNOWIMP_CONC,PIMPWET,PIMPDRY,  PPRODCOUNT, 				      &
-													OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			      &
-													OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK										) 
+      SUBROUTINE ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG,               &
+                          TPTIME, OMEB, OSHADE, HIMPLICIT_WIND, PTSTEP,       &
+                          PSOILHCAPZ, PSOILCONDZ, PFROZEN1, PPS, PZENITH,     &
+                          PANGL_ILLUM,PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR,    &
+                          PSR,PRHOA, PTA, PQA,PDIRCOSZW, PSLOPE_DIR,PEXNS,    &
+                          PEXNA, PPET_A_COEF, PPET_B_COEF,PPEQ_A_COEF,        &
+                          PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF,PZREF,        &
+                          PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,      &
+                          PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,      &
+                          PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,          &
+                          PALBVIS_TSOIL,PABC,PIACAN,PPOI,PCSP,                &
+                          PRESP_BIOMASS_INST,PPALPHAN,PF2,PLW_RAD,            &
+                          PGRNDFLUX,PFLSN_COR,PUSTAR,PEMIST,PHU_AGG,PAC_AGG,  &
+                          PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,PDELHEATN,  &
+                          PDELHEATN_SFC, PRESTOREN, PTDEEP_A, PDEEP_FLUX,     &
+                          PRISNOW,PSNOW_THRUFAL,PSNOW_THRUFAL_SOIL,PEVAPCOR,  &
+                          PSUBVCOR, PLITCOR, PSNOWSFCH, PQSNOW, KTAB_SYT,	  	&
+													P_DIR_SW, P_SCA_SW, PIMPWET, PIMPDRY) 
 !     ##########################################################################
 !
 !                             
@@ -262,29 +258,11 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PLITCOR       ! A possible ice mass corre
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWSFCH     ! snow surface layer pseudo-heating term owing to
 !                                                    !  changes in grid thickness            (W/m2)
 REAL, DIMENSION(:),   INTENT(OUT)   :: PQSNOW        ! snow surface specific humidity (kg/kg)
-REAL, DIMENSION(:),   INTENT(OUT)   :: PSYTMASS      ! eroded/accumulated snow (SYTRON) (kg/m2/s)
-REAL, DIMENSION(:), INTENT(OUT) :: PPRODCOUNT		!20160211
 !
 ! diagnostic variables for Carbon assimilation:
 !
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomass respiration (kgCO2/kgair m/s)
-!
-REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR  ! Snow impurities content
-!
-REAL, DIMENSION(:,:,:),   INTENT(OUT)   :: PSNOWIMP_CONC      ! Diagnostic of impurity concentration (g/g) FT+BC
-!
-REAL, DIMENSION(:,:),   INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO
-!
-CHARACTER(LEN=*),     INTENT(IN)    :: HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF     
-                                                     ! Crocus radiative transfer scheme:
-!                                                    ! HSNOWRAD = B92 Brun et al 1992
-!                                                    ! HSNOWRAD = T17 (Tuzet et al. 2017), (Libois et al. 2013)
-LOGICAL, INTENT(IN)                 :: OATMORAD  ! activate atmotartes scheme
-LOGICAL, INTENT(IN)                 :: OSNOWSYTRON   ! activate SYTRON snow redistribution scheme
-!
-LOGICAL, INTENT(IN)                 :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &		! Snowmaking and grooming options by PierreS 20160211
-				       OSELF_PROD, OSNOWMAK_PROP
-LOGICAL, DIMENSION(:), INTENT(INOUT)   :: OPRODSNOWMAK
+!                                                  
 !*      0.2    declarations of local variables
 !
 !
@@ -484,7 +462,6 @@ INTEGER :: INJ, INL, JJ, JL
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-REAL, DIMENSION(SIZE(PPS)) 	:: PSNOWMAK	!20160211
 !-------------------------------------------------------------------------------
 !
 !*      1.0    Preliminaries
@@ -558,10 +535,11 @@ ZSNOWRHO(:,:)    = PEK%TSNOW%RHO (:,:)
 ZSNOWAGE(:,:)    = PEK%TSNOW%AGE (:,:)
 ZSNOWSWE(:,:)    = PEK%TSNOW%WSNOW(:,:)
 !
-CALL PREPS_FOR_MEB_EBUD_RAD(PPS, PEK%XLAI, ZSNOWRHO, ZSNOWSWE, PEK%TSNOW%HEAT, ZSNOWLIQ, &
-                            DMK%XSNOWTEMP, DMK%XSNOWDZ, ZSNOWCOND, ZSNOWHCAP,  &
-                            PEK%TSNOW%EMIS, ZSIGMA_F, ZCHIP, PTSTEP, PSR, PTA, &
-                            PVMOD, ZSNOWAGE, ZPERMSNOWFRAC,PEK%TSNOW%SCHEME, HSNOWCOND )
+CALL PREPS_FOR_MEB_EBUD_RAD(PPS, PEK%XLAI, ZSNOWRHO, ZSNOWSWE, PEK%TSNOW%HEAT, &
+                            ZSNOWLIQ, DMK%XSNOWTEMP, DMK%XSNOWDZ, ZSNOWCOND,   &
+                            ZSNOWHCAP, PEK%TSNOW%EMIS, ZSIGMA_F, ZCHIP, PTSTEP,&
+                            PSR, PTA, PVMOD, ZSNOWAGE, ZPERMSNOWFRAC,          &
+                            PEK%TSNOW%SCHEME, IO%CSNOWCOND )
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
@@ -572,11 +550,13 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS, PEK%XLAI, ZSNOWRHO, ZSNOWSWE, PEK%TSNOW%HEAT, Z
 !
 ZSOILALB(:)=PALBVIS_TSOIL(:)*XSW_WGHT_VIS+PALBNIR_TSOIL(:)*XSW_WGHT_NIR
 IF (PEK%TSNOW%SCHEME=="CRO") THEN
-	CALL SNOWCROALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH,PEK%TSNOW%ALB,ZSNOWRHO,ZSNOWAGE,   &
-                                PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,PSNOWIMPUR, PPS, PSW_RAD, &
-                                PEK%XPSN,DMK%XSNOWDZ,PZENITH, ZSOILALB,PEK%TSNOW%ALBVIS,  &
-                                PEK%TSNOW%ALBNIR,PEK%TSNOW%ALBFIR,ZTAU_N,						      &
-                                IO%CSNOWMETAMO,IO%CSNOWRAD)
+	CALL SNOWCROALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH,PEK%TSNOW%ALB,ZSNOWRHO, &
+	                                  ZSNOWAGE,PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,  &
+                                    PEK%TSNOW%IMPUR,PPS,PSW_RAD,PEK%XPSN,      &
+                                    DMK%XSNOWDZ,PZENITH, ZSOILALB,             &
+                                    PEK%TSNOW%ALBVIS,PEK%TSNOW%ALBNIR,         &
+                                    PEK%TSNOW%ALBFIR,ZTAU_N,IO%CSNOWMETAMO,    &
+                                    IO%CSNOWRAD,IO%LATMORAD)
 
 ELSE
 	CALL SNOWALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH, PEK, ZSNOWRHO, ZSNOWAGE, PPS,&
@@ -970,12 +950,7 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PEK%XPSN(:))
                   PFLSN_COR, PRESTOREN, PEVAPCOR, DEK%XLES, DEK%XLESL,      &
                   ZEVAP3L, PSNOWSFCH, PDELHEATN, PDELHEATN_SFC, PRISNOW,    &
                   PZENITH, PANGL_ILLUM, PDELHEATG, PDELHEATG_SFC, PQSNOW,   &
-                  OATMORAD, OSNOWSYTRON, HSNOWFALL, HSNOWCOND, HSNOWHOLD,   &
-           	 			HSNOWCOMP, HSNOWZREF, KTAB_SYT, PSYTMASS,                 &
-								  P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO, PSNOWIMPUR,   &
-								  PSNOWIMP_CONC, PIMPWET, PIMPDRY, PSNOWMAK, PPRODCOUNT, 	  &
-								  OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,			      &
-								  OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)  
+                  KTAB_SYT,P_DIR_SW,P_SCA_SW,PIMPWET, PIMPDRY)  
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !*      11.0    Litter layer hydrology:
@@ -1463,10 +1438,10 @@ END SUBROUTINE SNOWALB_SPECTRAL_BANDS_MEB
 
 !===============================================================================
 SUBROUTINE SNOWCROALB_SPECTRAL_BANDS_MEB(PVEGTYPE,PSNOWALB,PSNOWRHO,PSNOWAGE,  &
-                                      PSNOWGRAN1,PSNOWGRAN2,PSNOWIMPUR, PPS, PSW_RAD, &
-                                      PPSN,PSNOWDZ,PZENITH,  PSOILALB,          &
+                                      PSNOWGRAN1,PSNOWGRAN2,PSNOWIMPUR, PPS,   &
+                                      PSW_RAD,PPSN,PSNOWDZ,PZENITH,PSOILALB,   &
                                       PSNOWALBVIS,PSNOWALBNIR,PSNOWALBFIR,     &
-                                      PTAU_N,HSNOWMETAMO,HSNOWRAD)
+                                      PTAU_N,HSNOWMETAMO,HSNOWRAD,OATMORAD)
 !
 ! Split Total snow albedo into N-spectral bands
 ! NOTE currently MEB only uses 2 bands of the 3 possible.
@@ -1506,6 +1481,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBVIS   ! Snow VIS albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBNIR   ! Snow NIR albedo
 REAL, DIMENSION(:),   INTENT(OUT)   :: PSNOWALBFIR   ! Snow FIR (UV) albedo
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PTAU_N        ! SW absorption (coef) in uppermost snow layer (-)
+LOGICAL, INTENT(IN)                 :: OATMORAD  ! activate atmotartes scheme
 !
 !*      0.2    declarations of local variables
 !
@@ -1601,10 +1577,11 @@ IF ( (HSNOWRAD=="T17")) THEN
     ZSNOWALB=PSNOWALB
     CALL SNOWCRO_TARTES(PSNOWGRAN1,PSNOWGRAN2,PSNOWRHO,PSNOWDZ,&
                         ZSNOWG0,ZSNOWY0,ZSNOWW0,ZSNOWB0,&
-                        PSNOWIMPUR,&
-                        PSOILALB,ZSW_RAD,PZENITH, PANGL_ILLUM, PDIRCOSZW, INLVLS_USE,ZSNOWALB,& !BC
-                        ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO, P_DIR_SW, P_SCA_SW, ZSNOWALB_SP, &
-			ZSPEC_DIR, ZSPEC_DIF, OATMORAD, PSNOWALBVIS) ! BC be careful SNOWCRO_TARTES call was changed during merge with tuzet
+                        PSNOWIMPUR,PSOILALB,ZSW_RAD,PZENITH, &
+                        PANGL_ILLUM, PDIRCOSZW, INLVLS_USE,ZSNOWALB,& !BC
+                        ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO, P_DIR_SW, &    
+                        P_SCA_SW, ZSNOWALB_SP,ZSPEC_DIR,               &
+			                  ZSPEC_DIF, OATMORAD, PSNOWALBVIS)
 
                         
     ! We diagnose NIR albedo such that total albedo is conserved

@@ -3,20 +3,17 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND, TPTIME,    &
-                      PTSTEP, PVEGTYPE, PTG, PCT, PSOILHCAPZ, PSOILCONDZ, PPS, PTA,   &
-                      PSW_RAD, PQA, PVMOD, PVDIR, PLW_RAD, PRR, PSR, PRHOA, PUREF,    &
-                      PEXNS, PEXNA, PDIRCOSZW,PSLOPEDIR, PZREF, PALB, PD_G, PDZG,     &
-                      PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,             &
-                      PPET_B_COEF, PPEQ_B_COEF, PTHRUFAL, PGRNDFLUX, PFLSN_COR,       &
-                      PGSFCSNOW, PEVAPCOR, PLES3L, PLEL3L, PEVAP, PSNOWSFCH,          &
-                      PDELHEATN, PDELHEATN_SFC, PRI, PZENITH, PANGL_ILLUM, PDELHEATG, &
-                      PDELHEATG_SFC, PQS ,OATMORAD,OSNOWSYTRON,                       &
-                      HSNOWFALL,  HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF, KTAB_SYT, &
-                      PSYTMASS, P_DIR_SW, P_SCA_SW, PSPEC_ALB, PDIFF_RATIO,           &
-                      PSNOWIMPUR, PSNOWIMP_CONC,PIMPWET,PIMPDRY,                      &
-                      PSNOWMAK, PPRODCOUNT, OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL,         &
-                      OSNOWTILLER,OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK )                                
+SUBROUTINE SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,  &
+                      TPTIME,PTSTEP, PVEGTYPE, PTG, PCT, PSOILHCAPZ,        &
+                      PSOILCONDZ, PPS, PTA,PSW_RAD, PQA, PVMOD, PVDIR,      &
+                      PLW_RAD, PRR, PSR, PRHOA, PUREF,PEXNS, PEXNA,         &
+                      PDIRCOSZW,PSLOPEDIR, PZREF, PALB, PD_G, PDZG,         &
+                      PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,   &
+                      PPET_B_COEF, PPEQ_B_COEF, PTHRUFAL, PGRNDFLUX,        &
+                      PFLSN_COR,PGSFCSNOW, PEVAPCOR, PLES3L, PLEL3L, PEVAP, &
+                      PSNOWSFCH,PDELHEATN, PDELHEATN_SFC, PRI,PZENITH,      &
+                      PANGL_ILLUM, PDELHEATG,PDELHEATG_SFC,PQS,             &
+                      KTAB_SYT,P_DIR_SW,P_SCA_SW,PIMPWET,PIMPDRY)
 !     ######################################################################################
 !
 !!****  *SNOW3L_ISBA*  
@@ -218,10 +215,6 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PTHRUFAL, PFLSN_COR, PEVAPCOR, PGSFCSNOW
 !                                      PGSFCSNOW  = heat flux between the surface and sub-surface 
 !                                                   snow layers (for energy budget diagnostics) (W/m2)
 !
-REAL, DIMENSION(:), INTENT(OUT)     :: PSYTMASS, PPRODCOUNT
-!                                      PSYTMASS    = eroded/cumulated snow mass in SYTRON (kg/m2/s)
-!                                      PPRODCOUNT  = total production time (s)
-!
 REAL, DIMENSION(:), INTENT(OUT)     :: PSNOWSFCH, PDELHEATN, PDELHEATN_SFC
 !
 REAL, DIMENSION(:), INTENT(OUT)     :: PQS
@@ -232,21 +225,6 @@ REAL, DIMENSION(:), INTENT(OUT)     :: PQS
 REAL, DIMENSION(:), INTENT(IN)      :: PZENITH    ! solar zenith angle
 REAL, DIMENSION(:), INTENT(IN)      :: PANGL_ILLUM !BC
 !
-REAL, DIMENSION(:,:), INTENT(OUT) :: PSPEC_ALB, PDIFF_RATIO ! spectral albedo and diffuse to total irradiance ratio
-!
-CHARACTER(3), INTENT(IN)            ::  HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP !bber added HSNOWFALL HSNOWHOLD and HSNOWCOND bber
-CHARACTER(3), INTENT(IN)            :: HSNOWZREF
-                                         
-LOGICAL, INTENT(IN)                 :: OSNOWSYTRON ! activate SYTROn snow redistribution scheme
-LOGICAL, INTENT(IN)                 :: OATMORAD ! activate atmotartes scheme
-!	Snowmaking option by p.Spandre 20160211
-REAL, DIMENSION(:), INTENT(OUT)     :: PSNOWMAK
-LOGICAL, INTENT(IN)                 :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &
-				       OSELF_PROD, OSNOWMAK_PROP
-LOGICAL, DIMENSION(:), INTENT(INOUT)   :: OPRODSNOWMAK
-REAL, DIMENSION(:,:,:), INTENT(OUT) ::PSNOWIMP_CONC
-REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSNOWIMPUR
-
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER                     :: ZCHECK_TEMP = 150.0 
@@ -262,9 +240,9 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD, & 
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
-                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2,  &                      
-				       ZTC, ZTW, ZEOD, ZTD, ZTAV, ZEOAV, DD,  &
-				       GA
+                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2, &   
+				                               ZTC, ZTW, ZEOD, ZTD, ZTAV, ZEOAV, DD,  &
+				                               GA
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
 !                                      ZRRSNOW      = rain rate over snow [kg/(m2 s)]
 !                                      ZSNOW        = snow depth (m) 
@@ -329,6 +307,8 @@ LOGICAL, DIMENSION(SIZE(PTA))      :: LREMOVE_SNOW
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZSWNET_N, ZSWNET_NS, ZLWNET_N
 !
+REAL, DIMENSION(SIZE(PPS)) 	:: ZSNOWMAK	
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 ! - - ---------------------------------------------------
@@ -348,8 +328,7 @@ IF (SIZE(DMK%XSNOWDEND)>0) THEN
   DMK%XSNOWTYPEMEPRA(:,:) = XUNDEF  
   DMK%XACC_RAT      (:,:) = XUNDEF
   DMK%XNAT_RAT      (:,:) = XUNDEF
-  DMK%XIMPUR_CONC (:,:,:) = XUNDEF ! AVOIR RAFIFE
-	PSNOWIMP_CONC(:,:,:)=XUNDEF ! AVOIR RAFIFE
+  DMK%XIMPUR_CONC (:,:,:) = XUNDEF 
 ENDIF
 !
 
@@ -367,7 +346,7 @@ PFLSN_COR(:)   = 0.0
 PTHRUFAL(:)    = 0.0
 PEVAPCOR(:)    = 0.0
 PQS(:)         = XUNDEF
-PSYTMASS(:)    = 0.0
+DMK%XSYTMASS(:)    = 0.0
 !
 ZSNOW(:)       = 0.0
 ZSNOWD(:)      = 0.0
@@ -385,7 +364,7 @@ ZWORK(:)       = 0.0
 ZC2(:)         = PCT(:)
 ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
-PSNOWMAK(:) = 0.0
+ZSNOWMAK(:) = 0.0
 !
 ZTC(:)         = 0.0			! Atmospheric temp (°C)							p.spandre 2014/03/27
 ZTW(:)         = 0.0			! Wet bulb temperature (K)						p.spandre 2014/03/27
@@ -400,7 +379,7 @@ LTIMESNOWMAK(:)= .FALSE.		!Logical: suitable timing conditions for snowmaking			
 PMONTH	       = .FALSE.
 PDAY	       = .FALSE.
 PRODTHEO(:,:)  = 0.0
-PPRODCOUNT(:)  = 0.0
+DMK%XPRODCOUNT(:)  = 0.0
 !
 ZWGHT(:)       = 0.0
 ZWORK(:)       = 0.0
@@ -493,13 +472,12 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
 ! ===============================================================
 !        Snow redistribution scheme Sytron
 ! 
-IF (PEK%TSNOW%SCHEME=='CRO' .AND. OSNOWSYTRON) THEN
+IF (PEK%TSNOW%SCHEME=='CRO' .AND. IO%LSNOWSYTRON) THEN
 
   CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
                         PEK%TSNOW%HEAT,PEK%TSNOW%WSNOW,PEK%TSNOW%RHO,      &
                         PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,PEK%TSNOW%HIST,    &
-                        PEK%TSNOW%AGE,KTAB_SYT, ZBLOWSNW,PSYTMASS)
-  DMK%XSYTMASS = PSYTMASS ! A VOIR RAFIFE
+                        PEK%TSNOW%AGE,KTAB_SYT, ZBLOWSNW,DMK%XSYTMASS)
 !
 ! Calculate maximum snow depth (m) of deposited blown snow particles
 !
@@ -530,7 +508,7 @@ ENDIF
 ! A.Timing conditions for snowmaking
 !	A.1. Theoretical production
 !
-  IF (OSNOWMAK_BOOL) THEN
+  IF (IO%LSNOWMAK_BOOL) THEN
   !
     DO JJ=1, 30
       PRODTHEO(11,JJ) = XPROD_SCHEME(1)*30
@@ -572,33 +550,33 @@ ENDIF
 !				20150728								|
 !		A.2.4. SELFPROD option
 !
-      IF (OSELF_PROD) THEN
+      IF (IO%LSELF_PROD) THEN
 !
 !!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
 !
 	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN			! i.e. SM possible from 1st of NOV (11*31+1=342) ... until 15th of DEC (12*31+15=387)
 !																	! i.e. SM possible even during day time on that period
 	  IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 150.) THEN										! Max admissible prod in that period 150 kg/m2 
-	    OPRODSNOWMAK(JJ) = .TRUE.													! .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+	    IO%LPRODSNOWMAK(JJ) = .TRUE.													! .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
 	  ELSE
-	    OPRODSNOWMAK(JJ) = .FALSE.
+	    IO%LPRODSNOWMAK(JJ) = .FALSE.
 	  ENDIF
 	ENDIF
 !
         IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 387.) THEN                         ! i.e. After December 15
           IF (ZSNOW(JJ) < 0.60) THEN                                                    ! If HTN < 0.6 (m) keep producing
-            OPRODSNOWMAK(JJ) = .TRUE.
+            IO%LPRODSNOWMAK(JJ) = .TRUE.
           ELSE
-            OPRODSNOWMAK(JJ) = .FALSE.
+            IO%LPRODSNOWMAK(JJ) = .FALSE.
           ENDIF
         ENDIF
 
 	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 92.) THEN				! Case Between 1 JAN until 28th of Feb.
 
 	  IF (ZSNOW(JJ) < 0.60) THEN							! If HTN < 0.6 (m) keep producing
-	    OPRODSNOWMAK(JJ) = .TRUE.							!  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+	    IO%LPRODSNOWMAK(JJ) = .TRUE.							!  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
 	  ELSE
-	    OPRODSNOWMAK(JJ) = .FALSE.
+	    IO%LPRODSNOWMAK(JJ) = .FALSE.
 	  ENDIF
 	ENDIF
 !!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
@@ -607,16 +585,16 @@ ENDIF
 ! 		A.2.3. Suitable night for snowmaking
 	IF (TPTIME%TIME == 64800.) THEN		! condition at 6pm i.e. for each time step, you compare the total.
 	  IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
-	    OPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
+	    IO%LPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
 	  ELSE														! then up to day+1 one can produce
-	    OPRODSNOWMAK(JJ) = .FALSE.
+	    IO%LPRODSNOWMAK(JJ) = .FALSE.
 	  ENDIF
 	ENDIF
       ENDIF
 !													|
 !-----------------------	SELFPROD option by p.spandre	----------------------------------------|
 
-      IF (PDAY .and. PMONTH .and. OPRODSNOWMAK(JJ)) THEN		! Calendar (month+day timing) + suitable night => Timing conditions = TRUE, let's produce!
+      IF (PDAY .and. PMONTH .and. IO%LPRODSNOWMAK(JJ)) THEN		! Calendar (month+day timing) + suitable night => Timing conditions = TRUE, let's produce!
 	LTIMESNOWMAK(JJ) = .TRUE.
       ELSE
 	LTIMESNOWMAK(JJ) = .FALSE.
@@ -626,7 +604,7 @@ ENDIF
   ENDIF
 
   DO JJ=1,SIZE(PTA)
-    IF (OSNOWMAK_BOOL) THEN
+    IF (IO%LSNOWMAK_BOOL) THEN
 !
 ! B. Atmospheric conditions for snowmaking
 !	B.1. Calculation of Wet Bulb temperature calculation according to Jensen,ASCE, 1990 (added p.spandre 04/06/2014)
@@ -663,16 +641,15 @@ ENDIF
 !
 ! C. Boolean over timing + atmospheric conditions									! Production possible even if natural snow falling P.Spandre 2014/03/04
       IF (LCONDSNOWMAK(JJ) .and. LTIMESNOWMAK(JJ)) THEN
-	PSNOWMAK(JJ)   = XPSR_SNOWMAK*PTSTEP/XRHO_SNOWMAK    								! snowmaking depth by P.S 19/11/2013
+	ZSNOWMAK(JJ)   = XPSR_SNOWMAK*PTSTEP/XRHO_SNOWMAK    								! snowmaking depth by P.S 19/11/2013
 	XPROD_COUNT(JJ) = XPROD_COUNT(JJ)+PTSTEP
       ELSE
-	PSNOWMAK(JJ)=0.
+	ZSNOWMAK(JJ)=0.
       ENDIF
     ENDIF
-    ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + PSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
+    ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + ZSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
 !
-    PPRODCOUNT(JJ) = XPROD_COUNT(JJ)									! PPRODCOUNT will be used to write into a file (DIAG_ISBA) 20150311
-    IF ( OSELF_PROD ) DMK%XPRODCOUNT = XPROD_COUNT(JJ) ! AVOIR RAFIFE
+    IF (IO%LSNOWMAK_BOOL) DMK%XPRODCOUNT(JJ) = XPROD_COUNT(JJ)
 !
   ENDDO
 !															|
@@ -805,7 +782,7 @@ ENDIF
    DO JIMP=1,NIMPUR
      DO JWRK=1,INLVLS
         DO JJ=1,SIZE(PEK%TSNOW%WSNOW,1)
-           PSNOWIMPUR (JJ,JWRK,JIMP)=(1.0-ZSNOWABLAT_DELTA(JJ))*PSNOWIMPUR(JJ,JWRK,JIMP) !F.T
+          PEK%TSNOW%IMPUR (JJ,JWRK,JIMP)=(1.0-ZSNOWABLAT_DELTA(JJ))*PEK%TSNOW%IMPUR(JJ,JWRK,JIMP) !F.T
         ENDDO
      ENDDO
    ENDDO
@@ -1088,7 +1065,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
      DO JWRK=1,KSIZE2
         DO JJ=1,KSIZE1
            JI = KMASK(JJ)
-           ZP_SNOWIMPUR(JJ,JWRK,JIMP) =PSNOWIMPUR(JI,JWRK,JIMP)  !N6K
+           ZP_SNOWIMPUR(JJ,JWRK,JIMP) =PEK%TSNOW%IMPUR(JI,JWRK,JIMP)  
         ENDDO
      ENDDO
    ENDDO
@@ -1215,7 +1192,7 @@ DO JJ=1,KSIZE1
    ZP_SWNETSNOWS  (JJ) = ZSWNET_NS  (JI) 
    ZP_LWNETSNOW   (JJ) = ZLWNET_N   (JI) 
 !
-   ZP_SNOWMAK (JJ) = PSNOWMAK  (JI)
+   ZP_SNOWMAK (JJ) = ZSNOWMAK  (JI)
 !  
 ENDDO
 !
@@ -1288,30 +1265,28 @@ ENDIF
 ! Call ISBA-SNOW3L model:  
 !  
 IF (PEK%TSNOW%SCHEME=='CRO') THEN 
-      CALL SNOWCRO(IO%CSNOWRES, TPTIME, OMEB, IO%LGLACIER, HIMPLICIT_WIND,          &
-                ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,&
-                ZP_PET_B_COEF, ZP_PEQ_B_COEF, ZP_SNOWSWE, ZP_SNOWRHO,      &
-                ZP_SNOWHEAT, ZP_SNOWALB, ZP_SNOWGRAN1, ZP_SNOWGRAN2,       &
-                ZP_SNOWHIST, ZP_SNOWAGE,ZP_SNOWIMPUR, PTSTEP, ZP_PS, ZP_SRSNOW, &
-                ZP_RRSNOW, ZP_PSN3L, ZP_TA, ZP_TG(:,1), ZP_SW_RAD, ZP_QA,  &
-                ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF, ZP_EXNS, ZP_EXNA,    &
-                ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF, ZP_Z0HNAT,       &
-                ZP_ALB, ZP_SOILCOND, ZP_D_G(:,1), ZP_SNOWLIQ, ZP_SNOWTEMP, &
-                ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX, ZP_EVAPCOR, &
-                ZP_GFLXCOR, ZP_SWNETSNOW, ZP_SWNETSNOWS, ZP_LWNETSNOW,        & 
-                ZP_RNSNOW, &
-                ZP_HSNOW, ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L, ZP_LEL3L,     &
-                ZP_EVAP, ZP_SNDRIFT, ZP_RI,ZP_EMISNOW, ZP_CDSNOW,ZP_USTARSNOW,&
-                ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,  &
-                ZP_ANGL_ILLUM,  &
-                ZP_LAT, ZP_LON, ZP_BLOWSNW, IO%CSNOWDRIFT, IO%LSNOWDRIFT_SUBLIM,    &
-                IO%LSNOW_ABS_ZENITH, IO%CSNOWMETAMO, &
-                IO%CSNOWRAD,OATMORAD,ZP_DIR_SW,                            &
-                ZP_SCA_SW,ZP_SPEC_ALB, ZP_DIFF_RATIO,ZP_IMPWET,ZP_IMPDRY,  &
-                HSNOWFALL, HSNOWCOND, HSNOWHOLD, HSNOWCOMP, HSNOWZREF,     &
-	              ZP_SNOWMAK, OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &
-	              OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK)
-
+      CALL SNOWCRO(IO%CSNOWRES, TPTIME, OMEB, IO%LGLACIER, HIMPLICIT_WIND,    &
+                ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF, ZP_PEQ_A_COEF,   &
+                ZP_PET_B_COEF, ZP_PEQ_B_COEF, ZP_SNOWSWE, ZP_SNOWRHO,         &
+                ZP_SNOWHEAT, ZP_SNOWALB, ZP_SNOWGRAN1, ZP_SNOWGRAN2,          &
+                ZP_SNOWHIST, ZP_SNOWAGE,ZP_SNOWIMPUR, PTSTEP, ZP_PS,          &
+                ZP_SRSNOW,ZP_RRSNOW, ZP_PSN3L, ZP_TA, ZP_TG(:,1),ZP_SW_RAD,   &
+                ZP_QA,ZP_VMOD, ZP_LW_RAD, ZP_RHOA, ZP_UREF, ZP_EXNS, ZP_EXNA, &
+                ZP_DIRCOSZW, ZP_ZREF, ZP_Z0NAT, ZP_Z0EFF, ZP_Z0HNAT,          &
+                ZP_ALB, ZP_SOILCOND, ZP_D_G(:,1), ZP_SNOWLIQ, ZP_SNOWTEMP,    &
+                ZP_SNOWDZ, ZP_THRUFAL, ZP_GRNDFLUX, ZP_EVAPCOR,ZP_GFLXCOR,    &
+                ZP_SWNETSNOW, ZP_SWNETSNOWS, ZP_LWNETSNOW,ZP_RNSNOW,ZP_HSNOW, & 
+                ZP_GFLUXSNOW, ZP_HPSNOW, ZP_LES3L, ZP_LEL3L,ZP_EVAP,          &
+                ZP_SNDRIFT, ZP_RI,ZP_EMISNOW, ZP_CDSNOW,ZP_USTARSNOW,         &
+                ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE, ZP_ZENITH,        &
+                ZP_ANGL_ILLUM, ZP_LAT, ZP_LON, ZP_BLOWSNW,                    &
+                IO%CSNOWDRIFT, IO%LSNOWDRIFT_SUBLIM,IO%LSNOW_ABS_ZENITH,      &
+                IO%CSNOWMETAMO,IO%CSNOWRAD,IO%LATMORAD,ZP_DIR_SW,             &
+                ZP_SCA_SW,ZP_SPEC_ALB, ZP_DIFF_RATIO,ZP_IMPWET,ZP_IMPDRY,     &
+                IO%CSNOWFALL, IO%CSNOWCOND, IO%CSNOWHOLD, IO%CSNOWCOMP,       &
+                IO%CSNOWZREF,ZP_SNOWMAK, IO%LSNOWCOMPACT_BOOL,                &
+                IO%LSNOWMAK_BOOL,IO%LSNOWTILLER,IO%LSELF_PROD,                &
+	              IO%LSNOWMAK_PROP, IO%LPRODSNOWMAK)
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0
@@ -1340,7 +1315,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
   !
 ELSE 
 !
-  CALL SNOW3L(IO%CSNOWRES, TPTIME, OMEB, HIMPLICIT_WIND,                    &
+  CALL SNOW3L(IO%CSNOWRES, TPTIME, OMEB, HIMPLICIT_WIND,                   &
              ZP_PEW_A_COEF, ZP_PEW_B_COEF,                                 &
              ZP_PET_A_COEF, ZP_PEQ_A_COEF,ZP_PET_B_COEF, ZP_PEQ_B_COEF,    &
              ZP_SNOWSWE, ZP_SNOWRHO, ZP_SNOWHEAT, ZP_SNOWALB,              &
@@ -1512,11 +1487,8 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     DO JWRK=1,KSIZE2
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
-        PSNOWIMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP) !F.T
-        PSNOWIMP_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP)
-!             
-        PEK%TSNOW%IMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP)  !A VOIR RAFIFE
-        DMK%XIMPUR_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP) !A VOIR RAFIFE
+        PEK%TSNOW%IMPUR(JI,JWRK,JIMP) = ZP_SNOWIMPUR(JJ,JWRK,JIMP)  
+        DMK%XIMPUR_CONC (JI,JWRK,JIMP) = ZP_SNOWIMP_CONC (JJ,JWRK,JIMP)
       ENDDO
     ENDDO
   ENDDO      
@@ -1525,11 +1497,8 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
      DO JWRK=1,SIZE(P_DIR_SW,2)
       DO JJ=1,KSIZE1
         JI = KMASK(JJ)
-        PDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
-        DMK%XDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK) !A VOIR RAFIFE
-!
-        PSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK)
-        DMK%XSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK) !A VOIR RAFIFE
+        DMK%XDIFF_RATIO(JI,JWRK)=ZP_DIFF_RATIO(JJ,JWRK)
+        DMK%XSPEC_ALB(JI,JWRK)=ZP_SPEC_ALB(JJ,JWRK) 
       ENDDO
     ENDDO
   ENDIF

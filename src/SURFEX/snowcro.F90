@@ -570,12 +570,12 @@ ZQA_IC     = 0.0
 !
 !
 IF (.NOT. (OMEB) )THEN
-PGRNDFLUX  = 0.
-PHSNOW     = 0.
-PRNSNOW    = 0.
-PLES3L     = 0.
-PLEL3L     = 0.
-PHPSNOW    = 0.
+  PGRNDFLUX  = 0.
+  PHSNOW     = 0.
+  PRNSNOW    = 0.
+  PLES3L     = 0.
+  PLEL3L     = 0.
+  PHPSNOW    = 0.
 ENDIF
 
 PSNOWHMASS = 0.
@@ -744,7 +744,7 @@ DO JJ=1,SIZE(ZSNOW)
                               ZSNOWHISTF(JJ),ZSNOWAGEF(JJ),ZSNOWIMPURF(JJ,:),INLVLS_USE(JJ),HSNOWMETAMO      ) 
   ENDIF
   !
-ENDDO 
+ENDDO
 !
 !
 !***************************************DEBUG IN**********************************************
@@ -1264,11 +1264,10 @@ IF ( HSNOWRAD=='B92' .OR. HSNOWRAD=='B93' ) THEN
                   PSNOWAGE(:,1),PSNOWGRAN1(:,2),PSNOWGRAN2(:,2),PSNOWAGE(:,2), &
                   PPS, PZENITH, INLVLS_USE, HSNOWMETAMO) 
   !the albedo is not updated in the case of TARTES scheme                 
-ELSEIF ( HSNOWRAD=='T17') THEN ! RAFIFE
+ELSEIF ( HSNOWRAD=='T17') THEN
   DO JJ=1,SIZE(PSPEC_ALB,2)
     DO JP=1, size(ZSNOW)
       IF (SUM(PSNOWDZ(JP,1:INLVLS_USE(JP))) .LT. EPSILON(XUNDEF))THEN
-        print*, SUM(PSNOWDZ(JP,1:INLVLS_USE(JP))),XUNDEF  
         PSPEC_ALB(JP,JJ)=XUNDEF
       ENDIF
     END DO
@@ -1514,7 +1513,7 @@ END IF
 IF (OMEB) THEN
   PQS=QSATI(PSNOWTEMP(:,1),PPS) ! purely diagnostic
 ELSE
-PQS(:) = ZQSAT(:)
+  PQS(:) = ZQSAT(:)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO',1,ZHOOK_HANDLE)
@@ -2538,10 +2537,10 @@ ELSE
         PALB(3) = 0.02
     ENDIF  
   ELSE
-  PALB(1) = XALBICE1
-  PALB(2) = XALBICE2
-  PALB(3) = XALBICE3
-ENDIF
+    PALB(1) = XALBICE1
+    PALB(2) = XALBICE2
+    PALB(3) = XALBICE3
+  ENDIF
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO:GET_ALB',1,ZHOOK_HANDLE)
@@ -3233,39 +3232,39 @@ PSNOWFLUX(:) = ZDTERM(:,1) * ( ZSNOWTEMP(:,1) - ZSNOWTEMP(:,2) )
 
 IF(.NOT.OMEB)THEN
 
-ZAMTRX_M(:,1) =  0.0
-ZBMTRX_M(:,1) =  ZCTERM(:,2) + ZDTERM(:,1) + ZDTERM(:,2)
-ZCMTRX_M(:,1) = -ZDTERM(:,2)
-ZFRCV_M (:,1) =  ZCTERM(:,2)*PSNOWTEMP(:,2) - (PRADSINK(:,1)-PRADSINK(:,2)) + ZDTERM(:,1)*XTT 
+  ZAMTRX_M(:,1) =  0.0
+  ZBMTRX_M(:,1) =  ZCTERM(:,2) + ZDTERM(:,1) + ZDTERM(:,2)
+  ZCMTRX_M(:,1) = -ZDTERM(:,2)
+  ZFRCV_M (:,1) =  ZCTERM(:,2)*PSNOWTEMP(:,2) - (PRADSINK(:,1)-PRADSINK(:,2)) + ZDTERM(:,1)*XTT 
 !
-DO JJ = 1,SIZE(PTG)
-  DO JST = 2,KNLVLS_USE(JJ)-1
-    ZAMTRX_M(JJ,JST) = ZAMTRX(JJ,JST+1)
-    ZBMTRX_M(JJ,JST) = ZBMTRX(JJ,JST+1)
-    ZCMTRX_M(JJ,JST) = ZCMTRX(JJ,JST+1)
-    ZFRCV_M (JJ,JST) = ZFRCV (JJ,JST+1)
-    ZSNOWTEMP_M(JJ,JST) = PSNOWTEMP(JJ,JST+1)
+  DO JJ = 1,SIZE(PTG)
+    DO JST = 2,KNLVLS_USE(JJ)-1
+      ZAMTRX_M(JJ,JST) = ZAMTRX(JJ,JST+1)
+      ZBMTRX_M(JJ,JST) = ZBMTRX(JJ,JST+1)
+      ZCMTRX_M(JJ,JST) = ZCMTRX(JJ,JST+1)
+      ZFRCV_M (JJ,JST) = ZFRCV (JJ,JST+1)
+      ZSNOWTEMP_M(JJ,JST) = PSNOWTEMP(JJ,JST+1)
+    ENDDO
   ENDDO
-ENDDO
 !
- CALL TRIDIAG_GROUND_SNOWCRO(ZAMTRX_M,ZBMTRX_M,ZCMTRX_M,ZFRCV_M,ZSNOWTEMP_M,KNLVLS_USE,1) 
+  CALL TRIDIAG_GROUND_SNOWCRO(ZAMTRX_M,ZBMTRX_M,ZCMTRX_M,ZFRCV_M,ZSNOWTEMP_M,KNLVLS_USE,1) 
 !
 ! If melting for 2 consecuative time steps, then replace current T-profile
 ! with one assuming T=Tf in surface layer:
 !
-ZSNOWTEMP_DELTA(:) = 0.0
+  ZSNOWTEMP_DELTA(:) = 0.0
 !
-WHERE( ZSNOWTEMP(:,1)>XTT .AND. PSNOWTEMP(:,1)>=XTT )
-  PSNOWFLUX(:) = ZDTERM(:,1) * ( XTT-ZSNOWTEMP_M(:,1) )
-  ZSNOWTEMP_DELTA(:) = 1.0
-END WHERE
+  WHERE( ZSNOWTEMP(:,1)>XTT .AND. PSNOWTEMP(:,1)>=XTT )
+    PSNOWFLUX(:) = ZDTERM(:,1) * ( XTT-ZSNOWTEMP_M(:,1) )
+    ZSNOWTEMP_DELTA(:) = 1.0
+  END WHERE
 !
-DO JJ = 1,SIZE(PTG)
-  DO JST = 2,KNLVLS_USE(JJ)
-    ZSNOWTEMP(JJ,JST) = ZSNOWTEMP_DELTA(JJ)       * ZSNOWTEMP_M(JJ,JST-1) + &
+  DO JJ = 1,SIZE(PTG)
+    DO JST = 2,KNLVLS_USE(JJ)
+      ZSNOWTEMP(JJ,JST) = ZSNOWTEMP_DELTA(JJ)       * ZSNOWTEMP_M(JJ,JST-1) + &
                         (1.0-ZSNOWTEMP_DELTA(JJ)) * ZSNOWTEMP  (JJ,JST)
+    ENDDO
   ENDDO
-ENDDO
 !
 END IF
 !
@@ -3296,9 +3295,9 @@ ENDDO
 !
 IF(.NOT. OMEB) THEN
 !
-PTA_IC(:) = PPET_B_COEF_T(:) + PPET_A_COEF_T(:) * PSNOWTEMP(:,1)
+  PTA_IC(:) = PPET_B_COEF_T(:) + PPET_A_COEF_T(:) * PSNOWTEMP(:,1)
 !
-PQA_IC(:) = PPEQ_B_COEF_T(:) + PPEQ_A_COEF_T(:) * PSNOWTEMP(:,1)
+  PQA_IC(:) = PPEQ_B_COEF_T(:) + PPEQ_A_COEF_T(:) * PSNOWTEMP(:,1)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCROSOLVT',1,ZHOOK_HANDLE)
@@ -3487,7 +3486,7 @@ DO JJ=1,SIZE(PSNOWDZ,1)
     ZSNOWTEMP(JJ,JST) = PSNOWTEMP(JJ,JST)
     !Cluzet et al 2016 : different lwc options
     IF ( HSNOWHOLD == 'B92' ) THEN
-    ZWHOLDMAX(JJ,JST) = XPERCENTAGEPORE/XRHOLI * (PSNOWDZ(JJ,JST) * &
+      ZWHOLDMAX(JJ,JST) = XPERCENTAGEPORE/XRHOLI * (PSNOWDZ(JJ,JST) * &
             (XRHOLI-PSNOWRHO(JJ,JST)) + PSNOWLIQ(JJ,JST)*XRHOLW)
     ELSE IF ( HSNOWHOLD == 'B02' ) THEN 
       ZWHOLDMAX(JJ,JST) = SNOW3LHOLD( PSNOWRHO(JJ,JST),PSNOWDZ(JJ,JST))
@@ -4573,7 +4572,7 @@ DO JJ = 1,SIZE(PSNOW(:))
     !! implementation of different parametrical options for fresh snow density.
     !! Be careful to the time-validity of the options A76(<2h) and S02(<1h) as well as the range of densities. Refer to Lehning et al. 2002 SNOWPACKIII, Anderson 76 and Pahaut 1975
     IF ( HSNOWFALL == 'V12' ) THEN ! Crocus original law
-    PSNOWRHOF (JJ) = MAX( XRHOSMIN_ES, XSNOWFALL_A_SN + &
+        PSNOWRHOF (JJ) = MAX( XRHOSMIN_ES, XSNOWFALL_A_SN + &
                                        XSNOWFALL_B_SN * ( PTA(JJ)-XTT ) + &
                                        XSNOWFALL_C_SN * SQRT(ZWIND_RHO(JJ) ) )
     ELSEIF( HSNOWFALL == 'P75') THEN ! Pahaut original law quoted by Brun 1989 but with different X_SNOWFALL_BSN
@@ -4923,11 +4922,11 @@ DO JJ=1,SIZE(PSNOW(:))
     IF( KNLVLS_USE(JJ)>INLVLSMIN ) THEN ! case minimum not reached
       IF (.NOT.((PSNOWRHO(JJ,1)<XRHOTHRESHOLD_ICE).AND.(PSNOWRHO(JJ,2)>=XRHOTHRESHOLD_ICE))) THEN
         ! if it is not a single snow layer on an ice layer
-      KNLVLS_USE(JJ) = KNLVLS_USE(JJ) - 1
-      PSNOWDZN(JJ,1) = PSNOWDZ(JJ,1) + PSNOWDZ(JJ,2)
-      DO JST = 2,KNLVLS_USE(JJ)
-        PSNOWDZN(JJ,JST) = PSNOWDZ(JJ,JST+1)
-      ENDDO
+        KNLVLS_USE(JJ) = KNLVLS_USE(JJ) - 1
+        PSNOWDZN(JJ,1) = PSNOWDZ(JJ,1) + PSNOWDZ(JJ,2)
+        DO JST = 2,KNLVLS_USE(JJ)
+          PSNOWDZN(JJ,JST) = PSNOWDZ(JJ,JST+1)
+        ENDDO
       ENDIF
     ELSE ! case minimum reached
       CALL GET_SNOWDZN_DEB(KNLVLS_USE(JJ),PSNOWDZ(JJ,:),ZDZOPT(JJ,:),PSNOWDZN(JJ,:))
@@ -5247,13 +5246,13 @@ REAL, INTENT(IN)                  :: PSNOW
 REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWHEAT, PSNOWRHO, PSNOWDZ,     &
                                      PSNOWDZN, PSNOWGRAN1, PSNOWGRAN2, &
                                      PSNOWHIST 
-REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWAGE  
+REAL, DIMENSION(:), INTENT(INOUT) :: PSNOWAGE
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWIMPUR
 
 REAL,  INTENT(IN)                 :: PSNOWRHOF, PSNOWDZF,PSNOWHEATF,   &
                                      PSNOWGRAN1F,PSNOWGRAN2F, PSNOWHISTF 
 
-REAL, INTENT(IN)                  :: PSNOWAGEF                                 
+REAL, INTENT(IN)                  :: PSNOWAGEF  
 REAL,DIMENSION(:),INTENT(IN)         ::PSNOWIMPURF
 !
 INTEGER, INTENT(IN)               :: KNLVLS_USE
@@ -5985,7 +5984,7 @@ IF (OPRINTGRAN) THEN
         "-------------","-------------","-------------","-------------",&
         "-------------","-------------"
   IF (GPRINTIMPUR) THEN
-  WRITE(*,'(9(A12,"|"))')"PSNOWDZ","PSNOWRHO","PSNOWTEMP","PSNOWLIQ","PSNOWHEAT",&
+    WRITE(*,'(9(A12,"|"))')"PSNOWDZ","PSNOWRHO","PSNOWTEMP","PSNOWLIQ","PSNOWHEAT",&
         "PSNOWGRAN1","PSNOWGRAN2","PSNOWSSA","PSNOWIMPUR"
   ELSE
     WRITE(*,'(9(A12,"|"))')"PSNOWDZ","PSNOWRHO","PSNOWTEMP","PSNOWLIQ","PSNOWHEAT",&
@@ -5996,7 +5995,7 @@ IF (OPRINTGRAN) THEN
         "-------------","-------------"
   DO JST = 1,KLAYERS
     IF (GPRINTIMPUR) THEN
-    WRITE(*,'(9(ES12.3,"|")," L",I2.2)') PSNOWDZ(JST),PSNOWRHO(JST),PSNOWTEMP(JST),    &
+      WRITE(*,'(9(ES12.3,"|")," L",I2.2)') PSNOWDZ(JST),PSNOWRHO(JST),PSNOWTEMP(JST),    &
                                           PSNOWLIQ(JST),PSNOWHEAT(JST),PSNOWGRAN1(JST), &
                                           PSNOWGRAN2(JST),ZSNOWSSA(JST),PSNOWIMPUR(JST,1),JST
     ELSE
