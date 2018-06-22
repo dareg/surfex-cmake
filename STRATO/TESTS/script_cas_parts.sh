@@ -128,7 +128,7 @@ cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFTYP_VEGTYPE = \"\"/CFTYP_VEGTYPE = \"NETCDF\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LANDUSE_NETCDF
 #non compatible avec la parallélisation à cause des interpolations
-#./script_exec_all_parall.sh "LANDUSE_NETCDF" $fname $2 $3
+./script_exec_all_parall.sh "LANDUSE_NETCDF" $fname $2 $3
 rm -f LAND_USE.nc
 
 #formats PREP
@@ -175,15 +175,15 @@ sed -e "s/XUNIF_VEGTYPE(19) = 1.0E+20/XUNIF_VEGTYPE(19) = 0.00/g" OPTIONS.nam_sa
 #
 cp -f OPTIONS.nam_avant OPTIONS.nam
 #
-#./script_prep_exte.sh "NAM_LANDUSE_PREP_NC" $fname $exec_new $exec_old "nc" 
+./script_prep_exte.sh "NAM_LANDUSE_PREP_NC" $fname $exec_new $exec_old "nc" 
 #
 cp -f OPTIONS.nam_avant OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"ASCII\"/g" OPTIONS.nam_save > OPTIONS.nam
-#./script_prep_exte.sh "NAM_LANDUSE_PREP_ASCII" $fname $exec_new $exec_old "txt" 
+./script_prep_exte.sh "NAM_LANDUSE_PREP_ASCII" $fname $exec_new $exec_old "txt" 
 #c	
 cp -f OPTIONS.nam_avant OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"LFI\"/g" OPTIONS.nam_save > OPTIONS.nam
-#./script_prep_exte.sh "NAM_LANDUSE_PREP_LFI" $fname $exec_new $exec_old "lfi" 
+./script_prep_exte.sh "NAM_LANDUSE_PREP_LFI" $fname $exec_new $exec_old "lfi" 
 #
 #NC
 echo "########### NAM_LANDUSE_PREP_NC"
@@ -193,7 +193,7 @@ cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFTYP_VEGTYPE = \"\"/CFTYP_VEGTYPE = \"NC\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LANDUSE_PREP_NC
 #non compatible avec la parallélisation à cause des interpolations
-#./script_exec_parall.sh "NAM_LANDUSE_PREP_NC" $fname $2 $3
+./script_exec_parall.sh "NAM_LANDUSE_PREP_NC" $fname $2 $3
 rm -f *_BASE*.nc *_BASE*.nc
 
 #ASCII
@@ -203,7 +203,7 @@ sed -e "s/CFNAM_VEGTYPE = \"\"/CFNAM_VEGTYPE = \"PREP_BASE.txt\"/g" OPTIONS.nam_
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFTYP_VEGTYPE = \"\"/CFTYP_VEGTYPE = \"ASCII\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LANDUSE_PREP_ASCII
-#./script_exec.sh "NAM_LANDUSE_PREP_ASCII" $fname $2 $3
+./script_exec.sh "NAM_LANDUSE_PREP_ASCII" $fname $2 $3
 rm -f *_BASE*.txt *_BASE*.txt
 
 #LFI
@@ -213,7 +213,7 @@ sed -e "s/CFNAM_VEGTYPE = \"\"/CFNAM_VEGTYPE = \"PREP_BASE\"/g" OPTIONS.nam_save
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFTYP_VEGTYPE = \"\"/CFTYP_VEGTYPE = \"LFI\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LANDUSE_PREP_LFI
-#./script_exec.sh "NAM_LANDUSE_PREP_LFI" $fname $2 $3
+./script_exec.sh "NAM_LANDUSE_PREP_LFI" $fname $2 $3
 rm -f *_BASE*.lfi *_BASE*.lfi
 
 #######################CHIMIE####################################
@@ -281,21 +281,21 @@ sed -e "s/LCH\_NO\_FLUX\ \=\ F/LCH\_NO\_FLUX\ \=\ T/g" OPTIONS.nam_save > OPTION
 echo "############# CHIMIE_NC_NETCDF"
 cp -f OPTIONS.nam_chimie OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_CHIMIE_NC_NETCDF
-#./script_exec_all_parall.sh "CHIMIE_NC_NETCDF" $fname $2 $3
+./script_exec_all_parall.sh "CHIMIE_NC_NETCDF" $fname $2 $3
 
 #CHIMIE ASCII NETCDF
 echo "############# CHIMIE_ASCII_NETCDF"
 cp -f OPTIONS.nam_chimie OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"ASCII\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_CHIMIE_ASCII_NETCDF
-#./script_exec.sh "CHIMIE_ASCII_NETCDF" $fname $2 $3
+./script_exec.sh "CHIMIE_ASCII_NETCDF" $fname $2 $3
 
 #CHIMIE LFI NETCDF
 echo "############# CHIMIE_LFI_NETCDF"
 cp -f OPTIONS.nam_chimie OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"LFI\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_CHIMIE_LFI_NETCDF
-#./script_exec.sh "CHIMIE_LFI_NETCDF" $fname $2 $3
+./script_exec.sh "CHIMIE_LFI_NETCDF" $fname $2 $3
 
 #CHIMIE FA NETCDF
 echo "############# CHIMIE_FA_NETCDF"
@@ -304,7 +304,7 @@ cp -f OPTIONS.nam_chimie OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"FA\"/g" OPTIONS.nam_save > OPTIONS.nam
 rm -f PREP.fa
 cp -f OPTIONS.nam OPTIONS.nam_CHIMIE_FA_NETCDF
-#./script_exec.sh "CHIMIE_FA_NETCDF" $fname $2 $3
+./script_exec.sh "CHIMIE_FA_NETCDF" $fname $2 $3
 #
 for file in TESTS/CAS_PART/CHIMIE/files/*
 do
@@ -363,21 +363,21 @@ sed -e "s/LCH\_SURF\_EMIS\ \=\ F/LCH\_SURF\_EMIS\ \=\ T/g" OPTIONS.nam_save > OP
 echo "############# SNAP_NC_NETCDF"
 cp -f OPTIONS.nam_snap OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SNAP_NC_NETCDF
-#./script_exec.sh "SNAP_NC_NETCDF" $fname $2 $3
+./script_exec.sh "SNAP_NC_NETCDF" $fname $2 $3
 
 #SNAP ASCII NETCDF
 echo "############# SNAP_ASCII_NETCDF"
 cp -f OPTIONS.nam_snap OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"ASCII\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SNAP_ASCII_NETCDF
-#./script_exec.sh "SNAP_ASCII_NETCDF" $fname $2 $3
+./script_exec.sh "SNAP_ASCII_NETCDF" $fname $2 $3
 
 #SNAP LFI NETCDF
 echo "############# SNAP_LFI_NETCDF"
 cp -f OPTIONS.nam_snap OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"LFI\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SNAP_LFI_NETCDF
-#./script_exec_all_parall.sh "SNAP_LFI_NETCDF" $fname $2 $3
+./script_exec_all_parall.sh "SNAP_LFI_NETCDF" $fname $2 $3
 
 #SNAP FA NETCDF
 echo "############# SNAP_FA_NETCDF"
@@ -385,7 +385,7 @@ rm -f *.fa
 cp -f OPTIONS.nam_snap OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ \=\ \"NC\"/CSURF\_FILETYPE\ \=\ \"FA\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SNAP_FA_NETCDF
-#./script_exec.sh "SNAP_FA_NETCDF" $fname $2 $3
+./script_exec.sh "SNAP_FA_NETCDF" $fname $2 $3
 
 for file in TESTS/CAS_PART/SNAP/files/*
 do
@@ -503,11 +503,11 @@ ln -s TESTS/CAS_PART/TOPD/*.dat .
 echo "############# TOPD_TOPD_EXP"
 cp -f OPTIONS.nam_topd OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_TOPD_TOPD_EXP
-#./script_exec.sh "TOPD_TOPD_EXP" $fname $2 $3
+./script_exec.sh "TOPD_TOPD_EXP" $fname $2 $3
 
 echo "############ TOPD_TOPD_EXP_RESTART"
 
-#./script_offline_exte.sh "TOPD_TOPD_EXP_RESTART" $fname $exec_new $exec_old "nc" 
+./script_offline_exte.sh "TOPD_TOPD_EXP_RESTART" $fname $exec_new $exec_old "nc" 
 
 #cas restart topmodel
 cp -f OPTIONS.nam_topd OPTIONS.nam_save
@@ -527,7 +527,7 @@ cp -f OPTIONS.nam OPTIONS.nam_TOPD_TOPD_EXP_RESTART
 rm -f FORCING.nc
 ln -s TESTS/CAS_PART/TOPD/files/FORCING.nc.RESTART FORCING.nc
 
-#./script_exec_restart.sh "TOPD_TOPD_EXP_RESTART" $fname $2 $3
+./script_exec_restart.sh "TOPD_TOPD_EXP_RESTART" $fname $2 $3
 #rm -f *_OLD*.nc *_NEW*.nc
 
 
@@ -538,7 +538,7 @@ echo "############# TOPD_TOPD_EXP_12P"
 cp -f OPTIONS.nam_topd OPTIONS.nam_save
 sed -e "s/NPATCH\ \=\ 1/NPATCH\ \=\ 12/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_TOPD_TOPD_EXP_12P
-#./script_exec.sh "TOPD_TOPD_EXP_12P" $fname $2 $3
+./script_exec.sh "TOPD_TOPD_EXP_12P" $fname $2 $3
 
 echo "############# TOPD_DIF_TOPD_DEF"
 cp -f OPTIONS.nam_topd OPTIONS.nam_save
@@ -548,7 +548,7 @@ sed -e "s/CISBA\ \=\ \"3-L\"/CISBA\ \=\ \"DIF\"/g" OPTIONS.nam_save > OPTIONS.na
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/NGROUND\_LAYER\ \=\ 3/NGROUND\_LAYER\ \=\ 6/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_TOPD_DIF_TOPD_DEF
-#./script_exec.sh "TOPD_DIF_TOPD_DEF" $fname $2 $3
+./script_exec.sh "TOPD_DIF_TOPD_DEF" $fname $2 $3
 
 
 echo "########### TOPD_WSAT_EXP"
@@ -564,7 +564,7 @@ sed -e "s/NDAY = 20/NDAY = 19/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam_topd OPTIONS.nam_save
 sed -e "s/CRUNOFF\ \=\ \"TOPD\"/CRUNOFF\ \=\ \"WSAT\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_TOPD_WSAT_EXP
-#./script_exec.sh "TOPD_WSAT_EXP" $fname $2 $3
+./script_exec.sh "TOPD_WSAT_EXP" $fname $2 $3
 
 for file in TESTS/CAS_PART/TOPD/files/*
 do
@@ -829,7 +829,7 @@ rm -f Forc_*.txt
 rm -f Params_config.txt
 ln -s TESTS/CAS_PART/TSZ0/Forc_*.txt .
 cp -f TESTS/CAS_PART/TSZ0/Params_config.txt .
-#./script_exec_all_parall.sh "TSZ0" $fname $2 $3
+./script_exec_all_parall.sh "TSZ0" $fname $2 $3
 
 
 #######################IDEAL####################################
@@ -860,7 +860,7 @@ rm -f Forc_*.txt
 rm -f Params_config.txt
 ln -s TESTS/CAS_PART/IDEAL/Forc_*.txt .
 cp -f TESTS/CAS_PART/IDEAL/Params_config.txt .
-#./script_exec_all_parall.sh "IDEAL" $fname $2 $3
+./script_exec_all_parall.sh "IDEAL" $fname $2 $3
 
 
 
@@ -930,7 +930,7 @@ cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFILETYPE = \"\"/CFILETYPE = \"GRIB\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SODA_OI1
 cp -f OPTIONS.nam_SODA_OI1 OPTIONS.nam
-#./script_exec_soda_oi.sh "SODA_OI1" $fname $2 $3
+./script_exec_soda_oi.sh "SODA_OI1" $fname $2 $3
 
 #OI2
 cp -f OPTIONS.nam_SODA_OI1 OPTIONS.nam_save
@@ -956,7 +956,7 @@ cp -f OPTIONS.nam OPTIONS.nam_assim2
 echo "############ SODA_OI2"
 cp -f OPTIONS.nam_assim2 OPTIONS.nam_SODA_OI2
 cp -f OPTIONS.nam_SODA_OI2 OPTIONS.nam
-#./script_exec_soda_oi.sh "SODA_OI2" $fname $2 $3
+./script_exec_soda_oi.sh "SODA_OI2" $fname $2 $3
 
 #EKF
 cp -f OPTIONS.nam_assim1 OPTIONS.nam_save
@@ -1025,7 +1025,7 @@ cp OPTIONS.nam OPTIONS.nam_save
 sed -e "s/LEXTRAP_WATER = T/LEXTRAP_WATER = F/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SODA_EKF2
 rm -f BGROUND*
-#./script_exec_soda_ekf.sh "SODA_EKF2" $fname $2 $3
+./script_exec_soda_ekf.sh "SODA_EKF2" $fname $2 $3
 
 #ENKF
 echo "############ SODA_ENKF1"
