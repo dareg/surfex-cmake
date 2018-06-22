@@ -458,8 +458,33 @@ ENDIF
 !
 !-----------------------------------------------------------------------------------------------------
 !
-IF (OLAND_USE .OR. HINIT/='PGD') THEN
-
+IF (OLAND_USE .OR. HINIT=='PGD') THEN
+  IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
+  RETURN
+END IF
+!
+CALL COMPUTE_ISBA_PARAMETERS(DTCO, OREAD_BUDGETC, UG, U,                    &
+                             IM%O, IM%DTV, IM%SB, IM%S, IM%G, IM%K, IM%NK,  &
+                             IM%NG, IM%NP, IM%NPE, IM%NAG, IM%NISS, IM%ISS, &
+                             IM%NCHI, IM%CHI, IM%ID, IM%GB, IM%NGB,         &
+                             NDST, SLT, SV, HPROGRAM,HINIT,OLAND_USE,       &
+                             KI,KSV,KSW, HSV,ZCO2,PRHOA,                &
+                             PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
+                             PEMIS,PTSRAD,PTSURF,HTEST                  )
+!
+IF ( IM%O%CSNOWMETAMO/="B92" ) THEN
+  CALL READ_FZ06('drdt_bst_fit_60.nc')
+ENDIF
+!
+IF ( IM%O%CSNOWRAD=="TAR" .OR. IM%O%CSNOWRAD=="TA1" .OR.  IM%O%CSNOWRAD=="TA2" ) THEN
+  CALL INIT_TARTES()
+END IF
+!
+IF (HINIT=='ALL') THEN 
+  YSNOW_SCHEME = IM%NPE%AL(1)%TSNOW%SCHEME
+  ISNOW_NLAYER = IM%NPE%AL(1)%TSNOW%NLAYER
+ENDIF
+!
   IF (.NOT.LSPLIT_PATCH ) THEN
     ALLOCATE(IM%S%XWORK_WR(KI,IM%O%NPATCH))
     IM%S%XWORK_WR(:,:) = XUNDEF
@@ -497,35 +522,6 @@ IF (OLAND_USE .OR. HINIT/='PGD') THEN
 
     ALLOCATE(IM%S%TDATE_WR(0,1))
   ENDIF
-
-ENDIF 
-
-IF (OLAND_USE .OR. HINIT=='PGD') THEN
-  IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
-  RETURN
-END IF
-!
-CALL COMPUTE_ISBA_PARAMETERS(DTCO, OREAD_BUDGETC, UG, U,                    &
-                             IM%O, IM%DTV, IM%SB, IM%S, IM%G, IM%K, IM%NK,  &
-                             IM%NG, IM%NP, IM%NPE, IM%NAG, IM%NISS, IM%ISS, &
-                             IM%NCHI, IM%CHI, IM%ID, IM%GB, IM%NGB,         &
-                             NDST, SLT, SV, HPROGRAM,HINIT,OLAND_USE,       &
-                             KI,KSV,KSW, HSV,ZCO2,PRHOA,                &
-                             PZENITH,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                             PEMIS,PTSRAD,PTSURF,HTEST                  )
-!
-IF ( IM%O%CSNOWMETAMO/="B92" ) THEN
-  CALL READ_FZ06('drdt_bst_fit_60.nc')
-ENDIF
-!
-IF ( IM%O%CSNOWRAD=="TAR" .OR. IM%O%CSNOWRAD=="TA1" .OR.  IM%O%CSNOWRAD=="TA2" ) THEN
-  CALL INIT_TARTES()
-END IF
-!
-IF (HINIT=='ALL') THEN 
-  YSNOW_SCHEME = IM%NPE%AL(1)%TSNOW%SCHEME
-  ISNOW_NLAYER = IM%NPE%AL(1)%TSNOW%NLAYER
-ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
 !
