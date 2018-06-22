@@ -9,7 +9,7 @@
                           PANGL_ILLUM,PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR,    &
                           PSR,PRHOA, PTA, PQA,PDIRCOSZW, PSLOPE_DIR,PEXNS,    &
                           PEXNA, PPET_A_COEF, PPET_B_COEF,PPEQ_A_COEF,        &
-                          PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF,PZREF,        &
+                          PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF, AT, PZREF,   &
                           PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,      &
                           PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,      &
                           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,          &
@@ -19,8 +19,8 @@
                           PDELHEATV_SFC, PDELHEATG_SFC, PDELHEATG,PDELHEATN,  &
                           PDELHEATN_SFC, PRESTOREN, PTDEEP_A, PDEEP_FLUX,     &
                           PRISNOW,PSNOW_THRUFAL,PSNOW_THRUFAL_SOIL,PEVAPCOR,  &
-                          PSUBVCOR, PLITCOR, PSNOWSFCH, PQSNOW, KTAB_SYT,	  	&
-													P_DIR_SW, P_SCA_SW, PIMPWET, PIMPDRY) 
+                          PSUBVCOR, PLITCOR, PSNOWSFCH, PQSNOW, KTAB_SYT,     &
+                          P_DIR_SW, P_SCA_SW, PIMPWET, PIMPDRY) 
 !     ##########################################################################
 !
 !                             
@@ -86,6 +86,8 @@ USE MODD_ISBA_PAR,       ONLY : XRS_MAX, XLIMH
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODE_THERMOS
 USE MODE_MEB,            ONLY : SNOW_INTERCEPT_EFF
@@ -186,7 +188,6 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PZ0_MEBN      ! roughness length for mome
 REAL, DIMENSION(:),   INTENT(IN)    :: PZ0H_MEBN     ! roughness length for heat over MEB snow part of path (m)
 REAL, DIMENSION(:),   INTENT(IN)    :: PZ0EFF_MEBN   ! roughness length for momentum over MEB snow part of patch (m)
 REAL, DIMENSION(:,:), INTENT(IN )   :: P_DIR_SW, P_SCA_SW ! direct and diffuse spectral irradiance (W/m2/um)
-
 !
 ! implicit atmospheric coupling coefficients:
 !
@@ -199,6 +200,9 @@ REAL, DIMENSION(:),   INTENT(IN)    :: PPET_A_COEF, PPET_B_COEF, &
 !                                                    ! PPET_B_COEF  B-air temperature coefficient
 !                                                    ! PPEQ_A_COEF  A-air specific humidity coefficient
 !                                                    ! PPEQ_B_COEF  B-air specific humidity coefficient
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
+!
 REAL, DIMENSION(:),   INTENT(IN)    :: PTDEEP_A          ! Deep soil temperature boundary condition 
 !                                                         ! (prescribed)     
 !                                      PTDEEP_A = Deep soil temperature
@@ -262,7 +266,7 @@ REAL, DIMENSION(:),   INTENT(OUT)   :: PQSNOW        ! snow surface specific hum
 ! diagnostic variables for Carbon assimilation:
 !
 REAL, DIMENSION(:,:), INTENT(OUT)   :: PRESP_BIOMASS_INST ! instantaneous biomass respiration (kgCO2/kgair m/s)
-!                                                  
+!
 !*      0.2    declarations of local variables
 !
 !
@@ -550,8 +554,8 @@ CALL PREPS_FOR_MEB_EBUD_RAD(PPS, PEK%XLAI, ZSNOWRHO, ZSNOWSWE, PEK%TSNOW%HEAT, &
 !
 ZSOILALB(:)=PALBVIS_TSOIL(:)*XSW_WGHT_VIS+PALBNIR_TSOIL(:)*XSW_WGHT_NIR
 IF (PEK%TSNOW%SCHEME=="CRO") THEN
-	CALL SNOWCROALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH,PEK%TSNOW%ALB,ZSNOWRHO, &
-	                                  ZSNOWAGE,PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,  &
+  CALL SNOWCROALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH,PEK%TSNOW%ALB,ZSNOWRHO, &
+                                    ZSNOWAGE,PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,  &
                                     PEK%TSNOW%IMPUR,PPS,PSW_RAD,PEK%XPSN,      &
                                     DMK%XSNOWDZ,PZENITH, ZSOILALB,             &
                                     PEK%TSNOW%ALBVIS,PEK%TSNOW%ALBNIR,         &
@@ -559,7 +563,7 @@ IF (PEK%TSNOW%SCHEME=="CRO") THEN
                                     IO%CSNOWRAD,IO%LATMORAD)
 
 ELSE
-	CALL SNOWALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH, PEK, ZSNOWRHO, ZSNOWAGE, PPS,&
+  CALL SNOWALB_SPECTRAL_BANDS_MEB(PK%XVEGTYPE_PATCH, PEK, ZSNOWRHO, ZSNOWAGE, PPS,&
                                 DMK%XSNOWDZ,PZENITH, ZTAU_N)
 ENDIF
 !
@@ -576,12 +580,12 @@ ELSEWHERE
    ZALBNIR_TSOIL(:) = PALBNIR_TSOIL(:)
 END WHERE
 !
- CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH,                      &
-     PALBVIS_TVEG, ZALBVIS_TSOIL, PALBNIR_TVEG, ZALBNIR_TSOIL,           						 &
-                          PSW_RAD, ZLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
-                          PEK%XMUS, PEK%XLAI_EFFC, OSHADE, ZIACAN,  ZIACAN_SUNLIT,   &
-                          ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,           &
-                          DMK%XFAPAR_BS, DMK%XFAPIR_BS )    
+ CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH,            &
+                PALBVIS_TVEG, ZALBVIS_TSOIL, PALBNIR_TVEG, ZALBNIR_TSOIL,  &
+                PSW_RAD, ZLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
+                PEK%XMUS, PEK%XLAI_EFFC, OSHADE, ZIACAN,  ZIACAN_SUNLIT,   &
+                ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,           &
+                DMK%XFAPAR_BS, DMK%XFAPIR_BS )    
 
 ! Compute all-wavelength effective ground (soil+snow) surface,
 ! soil and veg albedos, respectively:
@@ -818,7 +822,7 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.1    Aerodynamic drag and heat transfer coefficients
 !              -----------------------------------------------
 !
-   CALL DRAG_MEB(IO, PEK, DMK, DK,  &
+   CALL DRAG_MEB(IO, PEK, AT, DMK, DK,  &
                  ZTGL(:,1), ZTA_IC,  ZQA_IC, ZVMOD, ZWSFC, ZWISFC,   &
                  ZWSAT(:,1), ZWFC(:,1), PEXNS, PEXNA, PPS, PRR, PSR, &
                  PRHOA, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,      &
@@ -973,9 +977,6 @@ IF(IO%LMEB_LITTER)THEN
 ELSE
 
   PSNOW_THRUFAL_SOIL(:) = PSNOW_THRUFAL(:)
-
-
-
 
 ENDIF
 !
@@ -1581,7 +1582,7 @@ IF ( (HSNOWRAD=="T17")) THEN
                         PANGL_ILLUM, PDIRCOSZW, INLVLS_USE,ZSNOWALB,& !BC
                         ZRADSINK,ZRADXS,.FALSE.,HSNOWMETAMO, P_DIR_SW, &    
                         P_SCA_SW, ZSNOWALB_SP,ZSPEC_DIR,               &
-			                  ZSPEC_DIF, OATMORAD, PSNOWALBVIS)
+                        ZSPEC_DIF, OATMORAD, PSNOWALBVIS)
 
                         
     ! We diagnose NIR albedo such that total albedo is conserved

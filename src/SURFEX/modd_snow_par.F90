@@ -117,14 +117,14 @@ REAL, SAVE    :: XMAXIMPUR=1         !g
 
 !
 !	 Grooming and Snowmaking option by P.Spandre 20160211
-REAL,SAVE 			:: XPSR_SNOWMAK
-REAL,SAVE 			:: XRHO_SNOWMAK
-REAL, SAVE			:: XTIMESNOWMAK
-REAL, SAVE			:: XPTA_SEUIL
-REAL, DIMENSION(5), SAVE	:: XPROD_SCHEME
-REAL, DIMENSION(9500), SAVE	:: XPROD_COUNT
-REAL, DIMENSION(4), SAVE	:: XSM_END
-INTEGER,SAVE			:: XFREQ_GRO
+REAL,SAVE                        :: XPSR_SNOWMAK
+REAL,SAVE                       :: XRHO_SNOWMAK
+REAL, SAVE                      :: XTIMESNOWMAK
+REAL, SAVE                      :: XPTA_SEUIL
+REAL, DIMENSION(5), SAVE        :: XPROD_SCHEME
+REAL, DIMENSION(9500), SAVE     :: XPROD_COUNT
+REAL, DIMENSION(4), SAVE        :: XSM_END
+INTEGER,SAVE                    :: XFREQ_GRO
 !
 !--------------------------------------------------------------------------------
 ! Snow on the ground: PARAMETER
@@ -286,16 +286,16 @@ REAL, PARAMETER :: XSNOWFALL_B_SN =   6.0  ! kg/(m3 K)
 REAL, PARAMETER :: XSNOWFALL_C_SN =  26.0  ! kg/(m7/2 s1/2)
 !
 ! Cluzet et al 2016, Coefficients for A76 fresh snow density option (from Anderson 76)
-REAL, PARAMETER	      :: XRHOS_A76_1 = 50.  ! (kg m-3)
+REAL, PARAMETER       :: XRHOS_A76_1 = 50.  ! (kg m-3)
 REAL, PARAMETER       :: XRHOS_A76_2 = 1.7  ! (K-1)
-REAL, PARAMETER	      :: XRHOS_A76_3 = 15.   ! (K)
+REAL, PARAMETER       :: XRHOS_A76_3 = 15.   ! (K)
 ! Coefficents for S02 fresh snow density option (from Schmucki and al. 2014)
-REAL, PARAMETER	      :: XRHOS_S02_1 = 3.28 !
-REAL, PARAMETER	      :: XRHOS_S02_2 = 0.03 !  
-REAL, PARAMETER	      :: XRHOS_S02_3 = -0.36 !
-REAL, PARAMETER	      :: XRHOS_S02_4 = -0.75 ! 
-REAL, PARAMETER	      :: XRHOS_S02_5 = 0.8  !  (fixed relative humidity value when snowing (RH = 0.8)
-REAL, PARAMETER	      :: XRHOS_S02_6 = 0.3  !  
+REAL, PARAMETER       :: XRHOS_S02_1 = 3.28 !
+REAL, PARAMETER       :: XRHOS_S02_2 = 0.03 !  
+REAL, PARAMETER       :: XRHOS_S02_3 = -0.36 !
+REAL, PARAMETER       :: XRHOS_S02_4 = -0.75 ! 
+REAL, PARAMETER       :: XRHOS_S02_5 = 0.8  !  (fixed relative humidity value when snowing (RH = 0.8)
+REAL, PARAMETER       :: XRHOS_S02_6 = 0.3  !  
 
 
 ! Coefficients for P75 (Pahaut 1975 original law quotesd by Brun 1989 but with different values

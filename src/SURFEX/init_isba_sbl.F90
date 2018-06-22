@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE INIT_ISBA_SBL(IO, K, NP, NPE, SB, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, &
+    SUBROUTINE INIT_ISBA_SBL(IO, K, NP, NPE, AT, SB, PTSTEP, PPA, PPS, PTA, PQA, PRHOA, PU, PV, &
                              PDIR_SW, PSCA_SW, PSW_BANDS, PRAIN, PSNOW, PZREF, PUREF, PSSO_SLOPE )  
 !     #################################################################################
 !
@@ -39,6 +39,7 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,             ONLY : XCPD, XRD, XP00, XG, XLVTT
 USE MODD_SURF_ATM,         ONLY : LNOSOF,LSLOPE
 USE MODD_CANOPY_TURB,      ONLY : XALPSBL
+USE MODD_SURF_ATM_TURB_n,  ONLY : SURF_ATM_TURB_t
 !
 USE MODI_CLS_TQ
 USE MODI_ISBA_SNOW_FRAC
@@ -58,6 +59,7 @@ TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 TYPE(CANOPY_t), INTENT(INOUT) :: SB
 !
 REAL,               INTENT(IN)   :: PTSTEP   ! timestep of the integration
@@ -369,7 +371,7 @@ IF (LNOSOF) ZP_SLOPE_COS(:) = 1.0
  CALL DRAG(IO%CISBA, PEK%TSNOW%SCHEME, IO%CCPSURF,  PTSTEP, ZTS, ZWG, ZWGI, &
            ZEXNS, ZEXNA, PTA, ZWIND, ZQA, PRAIN, PSNOW, PPS, ZRS, ZVEG,    &
            ZZ0, ZZ0EFF, ZZ0H, K%XWFC(:,1), K%XWSAT(:,1), ZPSNG, ZPSNV,   &
-           PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5, ZRESA, ZCH, ZCD, ZCDN, &
+           PZREF, PUREF, ZP_SLOPE_COS, ZDELTA, ZF5, AT, ZRESA, ZCH, ZCD, ZCDN, &
            ZRI, ZHUG, ZHUGI, ZHV, ZHU, ZCPS, ZQS, ZFFG, ZFFV, ZFF, ZFFGNOS,&
            ZFFVNOS, ZLEG_DELTA, ZLEGI_DELTA, ZWR, PRHOA, ZLVTT            )  
 !

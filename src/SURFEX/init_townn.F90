@@ -6,7 +6,7 @@
       SUBROUTINE INIT_TOWN_n (DTCO, OREAD_BUDGETC, UG, U, GCP, TM, GDM, GRM, DGO, DL, DLC,  &                        
                               HPROGRAM,HINIT,KI,KSV,KSW, HSV,PCO2,PRHOA,       &
                               PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB,       &
-                              PEMIS,PTSRAD,PTSURF,KYEAR,KMONTH,KDAY,PTIME,     &
+                              PEMIS,PTSRAD,PTSURF,KYEAR,KMONTH,KDAY,PTIME,AT,  &
                               HATMFILE,HATMFILETYPE,HTEST                      )  
 !     #############################################################
 !
@@ -54,6 +54,8 @@ USE MODD_SURFEX_n, ONLY : TEB_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GARDEN_MODEL_t
 USE MODD_SURFEX_n, ONLY : TEB_GREENROOF_MODEL_t
 USE MODD_DIAG_n, ONLY : DIAG_OPTIONS_t, DIAG_t
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODD_CSTS,       ONLY : XTT
 !
@@ -104,6 +106,7 @@ INTEGER,                          INTENT(IN)  :: KMONTH    ! current month (UTC)
 INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
@@ -134,10 +137,10 @@ ELSE IF (U%CTOWN=='FLUX  ') THEN
 ELSE IF (U%CTOWN=='TEB   ') THEN
   CALL INIT_TEB_n(DTCO, UG, U, GCP, TM%CHT, TM%DTT, TM%SB, TM%G, TM%TOP,        &
                   TM%TPN, TM%TIR, TM%NT, TM%TD, TM%BDD, TM%BOP, TM%DTB, TM%NB,  &
-                  GDM, GRM, HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,           &
+                  TM%AT, GDM, GRM, HPROGRAM, HINIT, KI, KSV, KSW, HSV, PCO2,    &
                   PRHOA, PZENITH, PAZIM, PSW_BANDS, PDIR_ALB,                   &
                   PSCA_ALB, PEMIS, PTSRAD, PTSURF, KYEAR, KMONTH,               &
-                  KDAY, PTIME, HATMFILE, HATMFILETYPE, 'OK'                     )
+                  KDAY, PTIME, AT, HATMFILE, HATMFILETYPE, 'OK'                     )
 END IF
 IF (LHOOK) CALL DR_HOOK('INIT_TOWN_N',1,ZHOOK_HANDLE)
 !

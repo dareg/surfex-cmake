@@ -7,7 +7,7 @@
                              PZ0, PZ0H, PZ0EFF, PH_VEG, PZREF,           & 
                              PTC, PTA, PQC, PQA, PUREF, PVMOD,            &
                              PEXNA, PEXNS, PDIRCOSZW, PDISPH,             &
-                             PVELC, PZVMOD, PRI, PRA,                     &
+                             PVELC, PZVMOD, AT, PRI, PRA,                     &
                              PCH,PCDN,PCD                                 )
 !
 ! typical values for nordic forest:
@@ -56,6 +56,7 @@
 USE MODD_CSTS,              ONLY : XPI, XKARMAN, XG, XCPD, XRD
 USE MODD_SURF_ATM,          ONLY : LDRAG_COEF_ARP, XRIMAX
 USE MODD_ISBA_PAR,          ONLY : XLIMH
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_SURFACE_AERO_COND
 USE MODI_SURFACE_CD
@@ -95,6 +96,8 @@ REAL, DIMENSION(:), INTENT(IN)   ::  PEXNA, PEXNS, PDIRCOSZW, PDISPH
 !                                     PDIRCOSZW = Cosine of the angle between the normal
 !                                                 to the surface and the vertical
 !                                     PDISPH = displacement height
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 REAL, DIMENSION(:), INTENT(OUT)  ::  PVELC, PZVMOD, PRI, PRA, PCH, PCDN, PCD
 !                                     PVELC  =  wind speed atr top of vegetation
@@ -171,7 +174,7 @@ PZVMOD = WIND_THRESHOLD(PVMOD,ZUCUR)
 IF (LDRAG_COEF_ARP) THEN
 
    CALL SURFACE_CDCH_1DARP(ZCUR, PZ0EFF, PZ0H, PZVMOD, PTA, PTC, &
-                           PQA, PQC, PCD, PCDN, PCH              )
+                           PQA, PQC, AT, PCD, PCDN, PCH,PRI              )
    PRA(:) = 1. / ( PCH(:) * PZVMOD(:) )
 
 ELSE

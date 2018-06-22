@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #################################################################################
 SUBROUTINE INIT_PGD_SURF_ATM (YSC, HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
-                               KYEAR, KMONTH, KDAY, PTIME            )  
+                               KYEAR, KMONTH, KDAY, PTIME                )  
 !     #################################################################################
 !
 !!****  *INIT_PGD_SURF_ATM* - Call surface initialization for PGD fields only
@@ -34,6 +34,7 @@ SUBROUTINE INIT_PGD_SURF_ATM (YSC, HPROGRAM,HINIT,HATMFILE,HATMFILETYPE, &
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -73,6 +74,7 @@ REAL,             DIMENSION(0,1):: ZSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(0)  :: ZEMIS     ! emissivity
 REAL,             DIMENSION(0)  :: ZTSRAD    ! radiative temperature
 REAL,             DIMENSION(0)  :: ZTSURF    ! radiative temperature
+TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -87,7 +89,7 @@ TDATE_END%DAY = KDAY
                       0,0,1,YSV,ZCO2,ZIMPWET,ZIMPDRY,ZRHOA,      &
                       ZZENITH,ZAZIM,ZSW_BANDS,ZDIR_ALB,ZSCA_ALB, &
                       ZEMIS,ZTSRAD,ZTSURF,                       &
-                      KYEAR, KMONTH, KDAY, PTIME, TDATE_END,     &
+                      KYEAR, KMONTH, KDAY, PTIME, TDATE_END,AT,  &
                       HATMFILE,HATMFILETYPE, 'OK'                )  
 !
 IF (LHOOK) CALL DR_HOOK('INIT_PGD_SURF_ATM',1,ZHOOK_HANDLE)

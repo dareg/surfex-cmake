@@ -236,7 +236,7 @@ DO JT=1,IT
 !
   CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM%SB, IM%NAG, IM%CHI, IM%NCHI, IM%DTV,     &
                                  IM%ID, IM%NGB, IM%GB, IM%ISS, IM%NISS, IM%G, IM%NG, IM%O,     &
-                                 IM%S, IM%K, IM%NK, IM%NP, IM%NPE, NDST, SLT,                  &
+                                 IM%S, IM%K, IM%NK, IM%NP, IM%NPE, IM%AT, NDST, SLT,           &
                                  HPROGRAM, HCOUPLING, ZTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI,  &
                                  KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, &
                                  PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,      &

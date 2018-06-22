@@ -285,7 +285,7 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PTHRUFAL,  PEVAPCOR,  PGFLXCOR
 !                                                  (to put any energy excess from snow to soil) (W/m2)
 !                                     
 
-REAL, DIMENSION(:,:), INTENT(OUT) 	:: PSPEC_ALB, PDIFF_RATIO !! spectral albedo and diffuse to total irradiance ratio
+REAL, DIMENSION(:,:), INTENT(OUT)       :: PSPEC_ALB, PDIFF_RATIO !! spectral albedo and diffuse to total irradiance ratio
 
 !REAL, DIMENSION(:), INTENT(OUT)  ::   PSNOWFLUX
 !                                      PSNOWFLUX = heat flux between the surface and sub-surface 
@@ -647,7 +647,7 @@ ENDIF
 !
 
 WHERE (PSNOWSWE >0)
-    PSNOWAGE=PSNOWAGE+ZTSTEPDAYS    	! this is the classical version where snowage is a real age of snow layers
+    PSNOWAGE=PSNOWAGE+ZTSTEPDAYS        ! this is the classical version where snowage is a real age of snow layers
 END WHERE
 
 !
@@ -714,9 +714,9 @@ ENDIF
                         PSNOWGRAN1,PSNOWGRAN2,PSNOWAGE,GSNOWFALL,ZSNOWDZN,      &
                         ZSNOWRHOF,ZSNOWDZF,ZSNOWGRAN1F,ZSNOWGRAN2F, ZSNOWHISTF, &
                         ZSNOWAGEF,ZSNOWIMPURF,GMODIF_MAILLAGE,INLVLS_USE,       &
-			HSNOWDRIFT,PZ0EFF,ZUREF,				&
+                        HSNOWDRIFT,PZ0EFF,ZUREF,                                &
                         PBLOWSNW,HSNOWMETAMO, HSNOWFALL, PQA, PSNOWTEMP,        &
-			PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP)
+                        PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP)
 !
 !***************************************DEBUG IN**********************************************
 IF (GCRODEBUGDETAILSPRINT) THEN
@@ -1526,7 +1526,7 @@ CONTAINS
         SUBROUTINE SNOWCROCOMPACTN(PTSTEP,PSNOWRHO,PSNOWDZ,                         &
                                    PSNOWTEMP,PSNOW,PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST, &
                                    PSNOWSWE, PSNOWAGE, PSNOWDSSA, PSNOWLIQ,         &
-				   INLVLS_USE,PDIRCOSZW,			    &
+                                   INLVLS_USE,PDIRCOSZW,                            &
                                    HSNOWMETAMO,HSNOWCOMP, OSNOWCOMPACT_BOOL) 
 !
 !!    PURPOSE
@@ -4014,8 +4014,7 @@ END SUBROUTINE SNOWCROGONE
 !####################################################################
 SUBROUTINE SNOWCROEVAPGONE(PSNOWHEAT,PSNOWDZ,PSNOWRHO,PSNOWTEMP,PSNOWLIQ,      &
                            PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE,           &
-                           KNLVLS_USE,										   &
-                           HSNOWMETAMO) 
+                           KNLVLS_USE, HSNOWMETAMO) 
 !
 !!    PURPOSE
 !!    -------
@@ -4169,7 +4168,7 @@ SUBROUTINE SNOWNLFALL_UPGRID(TPTIME, OGLACIER,PTSTEP,PSR,PTA,PVMOD,        &
                              PSNOWGRAN1F,PSNOWGRAN2F,PSNOWHISTF,PSNOWAGEF, PSNOWIMPURF,&
                              OMODIF_GRID,KNLVLS_USE,HSNOWDRIFT,PZ0EFF,PUREF,&
                              PBLOWSNW,HSNOWMETAMO, HSNOWFALL,PQA, PSNOWTEMP,&
-			     PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP)
+                             PSNOWMAK, OSNOWMAK_BOOL, OSNOWMAK_PROP)
 !
 !!    PURPOSE
 !!    -------
@@ -4346,8 +4345,8 @@ DO JIMP=1,NIMPUR
   PSNOWIMPURF(:,JIMP) =0.0
 ENDDO
 PSNOWDZN (:,:) = PSNOWDZ(:,:)
-ZPSR_SNOWMAK(:)= 0.0 				!Pierre Spandre 28/01/2014
-ZSNOWMAK(:)= 0.0				!p.spandre 2014/07/15
+ZPSR_SNOWMAK(:)= 0.0    !Pierre Spandre 28/01/2014
+ZSNOWMAK(:)= 0.0        !p.spandre 2014/07/15
 !
 OMODIF_GRID(:) = .FALSE.
 !

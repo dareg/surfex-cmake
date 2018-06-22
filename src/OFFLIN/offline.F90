@@ -1,3 +1,4 @@
+!
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -122,6 +123,8 @@ USE MODD_SLOPE_EFFECT, ONLY: XZS_THREAD,XZS_XY_THREAD,XSLOPANG_THREAD,&
 USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
 !
 USE MODD_XIOS, ONLY : LXIOS, TXIOS_CONTEXT, LXIOS_DEF_CLOSED, LADD_DIM=>LALLOW_ADD_DIM, NTIMESTEP
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODE_POS_SURF
 !
@@ -330,6 +333,8 @@ DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
 !
 LOGICAL :: GSAVHOOK
 INTEGER :: IBLOCKTOT, IBLOCK
+!
+TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -709,8 +714,8 @@ IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
         CALL OPEN_CLOSE_BIN_ASC_FORC('OPEN ',CFORCING_FILETYPE,'R')
 !
  CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
-                   ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
-                   ZCO2,ZIMPWET,ZIMPDRY,ZO3,ZAE,ZDIR,LLIMIT_QAIR     ) 
+                  ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
+                  ZCO2,ZIMPWET,ZIMPDRY,ZO3,ZAE,ZDIR,LLIMIT_QAIR     ) 
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
@@ -764,7 +769,7 @@ CALL GOTO_MODEL(1)
                       CSV,XCO2(:),XIMPWET(:,:),XIMPDRY(:,:),                 &
                       XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,              &
                       XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
-                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
+                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,AT,   &
                      YATMFILE, YATMFILETYPE, YTEST                          )
 !
 ! initialization routines to compute shadows

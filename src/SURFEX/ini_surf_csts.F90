@@ -63,9 +63,9 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            LMEBREC,                            &
                            XANSFRACMEL, XTEMPANS, XANSMINMEB,  &
                            XIMPUR_INIT, XIMPUR_COEFF,          &
-													 XPSR_SNOWMAK, XRHO_SNOWMAK, 	       &
-													 XPTA_SEUIL, XTIMESNOWMAK, 	       	 &
-													 XPROD_SCHEME, XSM_END, XFREQ_GRO 		!Grooming and Snowmaking option by P.Spandre 20160211
+                           XPSR_SNOWMAK, XRHO_SNOWMAK,         &
+                           XPTA_SEUIL, XTIMESNOWMAK,           &
+                           XPROD_SCHEME, XSM_END, XFREQ_GRO !Grooming and Snowmaking option by P.Spandre 20160211
 USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
@@ -104,9 +104,9 @@ NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
                              XVAGING_NOGLACIER, XVAGING_GLACIER,       &
                              XPERCENTAGEPORE,XVVISC3,X_RI_MAX,         &
-			     XIMPUR_INIT, XIMPUR_COEFF, XPSR_SNOWMAK,  &
-			     XRHO_SNOWMAK, XPTA_SEUIL, XTIMESNOWMAK,   &
-			     XPROD_SCHEME, XSM_END, XFREQ_GRO
+                             XIMPUR_INIT, XIMPUR_COEFF, XPSR_SNOWMAK,  &
+                             XRHO_SNOWMAK, XPTA_SEUIL, XTIMESNOWMAK,   &
+                             XPROD_SCHEME, XSM_END, XFREQ_GRO
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &

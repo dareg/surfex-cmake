@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GDO, S, K, P, PEK,    &
+    SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, AT, DTV, GB, DK, DEK, DMK, GDO, S, K, P, PEK,    &
                        HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,       &
                 PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
                        PTSTEP, PZREF, PTA, PQA, PEXNS, PRHOA, PCO2, PPS, PRR,   &
@@ -78,6 +78,7 @@ USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_CSTS,              ONLY: XCPD
 USE MODD_ISBA_PAR,          ONLY: XCVHEATF
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE
@@ -117,6 +118,8 @@ TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
+!
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
@@ -151,7 +154,7 @@ REAL, DIMENSION(:)  , INTENT(OUT)   :: PRN         ! net radiation over green ar
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PH          ! sensible heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PLE         ! latent heat flux over green areas
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PGFLUX      ! flux through the green areas
-REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2             ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
+REAL, DIMENSION(:)  , INTENT(OUT)   :: PSFCO2      ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PEVAP       ! total evaporation over gardens (kg/m2/s)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PUW         ! friction flux (m2/s2)
 REAL, DIMENSION(:)  , INTENT(OUT)   :: PRUNOFF     ! runoff over garden (kg/m2/s)
@@ -173,8 +176,8 @@ REAL, DIMENSION(SIZE(PPS),GDO%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantan
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
 REAL, DIMENSION(SIZE(PPS)) :: ZSLOPEDIR           ! slope direction (=-1 in TEB)
 REAL, DIMENSION(SIZE(PPS)) :: ZWINDDIR            ! wind direction (=-1 in TEB)
-INTEGER, DIMENSION(SIZE(PPS)) :: KTAB_SYT        ! array of index containing
-                                                 ! opposite direction for Sytron  (=0 in TEB)
+INTEGER, DIMENSION(SIZE(PPS)) :: KTAB_SYT         ! array of index containing
+                                                  ! opposite direction for Sytron  (=0 in TEB)
 !
 REAL, DIMENSION(SIZE(PPS),1) :: ZP_DIR_SW ! spectral direct and diffuse irradiance used in snow cro 
 REAL, DIMENSION(SIZE(PPS),1) :: ZP_SCA_SW!
@@ -221,7 +224,7 @@ CALL SSO_INIT(YSS)
 CALL AGRI_INIT(YAG)
 !
 !-------------------------------------------------------------------------------
-
+!
 !*      2.     Treatment of green areas
 !              ------------------------
 !*      2.1    Automatic irrigation
@@ -260,11 +263,11 @@ ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
  CALL ISBA(GDO, K, P, PEK, G, YAG, DK, DEK, DMK, TPTIME, S%XPOI, S%XABC,       &
            GB%XIACAN, .FALSE., PTSTEP, HIMPLICIT_WIND, PZREF, PZREF,           &
-     			 ZDIRCOSZW, XCVHEATF, ZSLOPEDIR, PEK%TSNOW%GRAN2(:,:),               &
-     			 PEK%TSNOW%GRAN2(:,:), PTA, PQA, PEXNS, PRHOA, PPS, PEXNS, PRR, PSR, &
+           ZDIRCOSZW, XCVHEATF, ZSLOPEDIR, PEK%TSNOW%GRAN2(:,:),               &
+           PEK%TSNOW%GRAN2(:,:), PTA, PQA, PEXNS, PRHOA, PPS, PEXNS, PRR, PSR, &
            PZENITH,ZP_ANGL_NORM,ZP_MEB_SCA_SW, PSW, PLW, PVMOD, ZWINDDIR,      &
-					 PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,    &
-           PPEQ_B_COEF, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,             &
+           PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,    &
+           PPEQ_B_COEF, AT, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,         &
            PALBVIS_TSOIL, ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV,    &
            ZZ0EFF_MEBV, ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2,      &
            K%XFFG(:), K%XFFV(:), ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG,             &
@@ -295,7 +298,7 @@ END IF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2(:)=0.
+PSFCO2(:)         = 0.
 DEK%XRESP_ECO (:) = 0.
 DEK%XRESP_AUTO(:) = 0.
 !

@@ -8,7 +8,7 @@ SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, DTZ,&
                         KI, KSV, KSW, HSV, PCO2, PRHOA, PZENITH,      &
                         PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB, PEMIS,  &
                         PTSRAD, PTSURF, KYEAR, KMONTH, KDAY, PTIME,   &
-                        TPDATE_END, HATMFILE, HATMFILETYPE, HTEST      )
+                        TPDATE_END, AT, HATMFILE, HATMFILETYPE, HTEST      )
 !#############################################################
 !
 !!****  *INIT_ISBA_n* - routine to initialize ISBA
@@ -101,6 +101,8 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 !
 USE MODD_CO2V_PAR,  ONLY : XMCO2, XSPIN_CO2
 USE MODD_CSTS,      ONLY : XMD
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 !
 USE MODI_INIT_IO_SURF_n
 !
@@ -175,6 +177,7 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
  CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
@@ -236,12 +239,12 @@ IF (LNAM_READ) THEN
                         IM%ID%O%LPGD, IM%ID%O%LRESET_BUDGETC, IM%ID%DE%LWATER_BUDGET,               &
                         IM%ID%DM%LPROSNOW,IM%ID%DM%LPROBANDS,IM%ID%DM%LVOLUMETRIC_SNOWLIQ,IM%ID%O%XDIAG_TSTEP)
  !
- CALL DEFAULT_CROCUS(IM%O%CSNOWDRIFT, IM%O%LSNOWDRIFT_SUBLIM, IM%O%LSNOW_ABS_ZENITH, &
-                     IM%O%CSNOWMETAMO, IM%O%CSNOWRAD,IM%O%LATMORAD,IM%O%LSNOWSYTRON,IM%O%CSNOWFALL,&
-                     IM%O%CSNOWCOND, IM%O%CSNOWHOLD, IM%O%CSNOWCOMP, IM%O%CSNOWZREF,              &
-										 IM%O%LSNOWCOMPACT_BOOL,IM%O%LSNOWMAK_BOOL,IM%O%LPRODSNOWMAK,	    	&
-										 IM%O%LSNOWMAK_PROP, IM%O%LSNOWTILLER, IM%O%LSELF_PROD)
-										 
+ CALL DEFAULT_CROCUS(IM%O%CSNOWDRIFT, IM%O%LSNOWDRIFT_SUBLIM, IM%O%LSNOW_ABS_ZENITH,                &
+                     IM%O%CSNOWMETAMO, IM%O%CSNOWRAD,IM%O%LATMORAD,IM%O%LSNOWSYTRON,IM%O%CSNOWFALL, &
+                     IM%O%CSNOWCOND, IM%O%CSNOWHOLD, IM%O%CSNOWCOMP, IM%O%CSNOWZREF,                &
+                     IM%O%LSNOWCOMPACT_BOOL,IM%O%LSNOWMAK_BOOL,IM%O%LPRODSNOWMAK,                   &
+                     IM%O%LSNOWMAK_PROP, IM%O%LSNOWTILLER, IM%O%LSELF_PROD)
+ 
  ! 
 ENDIF
 !
@@ -282,9 +285,9 @@ IF (HINIT=='PRE') THEN
   ENDIF
 
 ELSEIF (HINIT=='ALL') THEN
-!
+  !
   CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','READ ')
-!
+  !
   IF (IVERSION<6) THEN
     IM%O%CRESPSL='DEF'
   ELSE  
@@ -298,9 +301,9 @@ ELSEIF (HINIT=='ALL') THEN
       IM%O%NNBYEARSOLD=NUNDEF
     ENDIF
   ENDIF
-!
+  !
   CALL END_IO_SURF_n(HPROGRAM)
-!
+  !
 ENDIF
 !
 IF (IM%O%CISBA/="DIF") THEN
@@ -424,18 +427,18 @@ IF ( IM%O%LSPINUPCARBS .AND. (IM%O%NNBYEARSOLD <= ISPINEND) ) THEN
    IM%O%LAGRI_TO_GRASS = .TRUE.
 !
    CALL INI_DATA_PARAM(PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI,                                           &
-                                  PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
-                                  PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
-                                  PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
-                                  PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
-                                  PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
-                                  PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
-                                  PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
-                                  PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
-                                  PROOT_LIN=XDATA_ROOT_LIN, PROOT_EXTINCTION=XDATA_ROOT_EXTINCTION,              &
-                                  PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
-                                  PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
-                                  PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
+                       PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
+                       PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
+                       PRGL=XDATA_RGL, PCV=XDATA_CV, PGAMMA=XDATA_GAMMA,                              &
+                       PGMES=XDATA_GMES, PGC=XDATA_GC, PBSLAI=XDATA_BSLAI,                            &
+                       PSEFOLD=XDATA_SEFOLD, PLAIMIN_OUT=XDATA_LAIMIN, PDMAX=XDATA_DMAX,              &
+                       PSTRESS=XDATA_STRESS, PF2I=XDATA_F2I, PVEG_OUT=XDATA_VEG,                      &
+                       PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PZ0_O_Z0H=XDATA_Z0_O_Z0H,                    &
+                       PEMIS_ECO=XDATA_EMIS_ECO, PWRMAX_CF=XDATA_WRMAX_CF,                            &
+                       PROOT_LIN=XDATA_ROOT_LIN, PROOT_EXTINCTION=XDATA_ROOT_EXTINCTION,              &
+                       PSOILRC_SO2=XDATA_SOILRC_SO2, PSOILRC_O3=XDATA_SOILRC_O3, PRE25=XDATA_RE25,    &
+                       PCE_NITRO=XDATA_CE_NITRO,PCF_NITRO=XDATA_CF_NITRO,PCNA_NITRO=XDATA_CNA_NITRO,  &
+                       PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
                        PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST, OAGRI_TO_GRASS=IM%O%LAGRI_TO_GRASS)
 !
    ZCO2(:) = PRHOA(:) * IM%O%XCO2_START * 1.E-6 * XMCO2 / XMD
@@ -484,10 +487,10 @@ IF (OLAND_USE .OR. HINIT/='PGD') THEN
         ALLOCATE(IM%S%XSG2_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
         ALLOCATE(IM%S%XHIS_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
         IF ( NIMPUR > 0 ) THEN
-			    ALLOCATE(IM%S%XIMP_WR(KI,ISNOW_NLAYER,NIMPUR,IM%O%NPATCH))
-			  ELSE
-			    ALLOCATE(IM%S%XIMP_WR(0,0,0,1))
-			  ENDIF
+          ALLOCATE(IM%S%XIMP_WR(KI,ISNOW_NLAYER,NIMPUR,IM%O%NPATCH))
+        ELSE
+          ALLOCATE(IM%S%XIMP_WR(0,0,0,1))
+        ENDIF
       ELSE
         ALLOCATE(IM%S%XSG1_WR(0,0,1))
         ALLOCATE(IM%S%XSG2_WR(0,0,1)) 
@@ -545,6 +548,13 @@ IF (HINIT=='ALL') THEN
   ISNOW_NLAYER = IM%NPE%AL(1)%TSNOW%NLAYER
 ENDIF
 !
+!-------------------------------------------------------------------------------
+!
+!*       3.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+IM%AT=AT
+
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE INIT_ISBA_n

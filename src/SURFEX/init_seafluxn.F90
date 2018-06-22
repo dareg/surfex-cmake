@@ -7,7 +7,7 @@
                                  HPROGRAM,HINIT,KI,KSV,KSW,                 &
                                  HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,    &
                                  PDIR_ALB,PSCA_ALB, PEMIS,PTSRAD,PTSURF,    &
-                                 KYEAR, KMONTH,KDAY,PTIME,                  &
+                                 KYEAR, KMONTH,KDAY,PTIME,AT,               &
                                  HATMFILE,HATMFILETYPE,HTEST                )  
 !     #############################################################
 !
@@ -66,6 +66,8 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_CHS_AEROSOL,    ONLY: LVARSIGI, LVARSIGJ
 USE MODD_DST_SURF,       ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST
 USE MODD_SLT_SURF,       ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_DEFAULT_CH_DEP
@@ -137,6 +139,7 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                            !  midnight (UTC, s)
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
 CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
 CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
@@ -431,6 +434,13 @@ IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) &
                                OREAD_BUDGETC, SM%S, HPROGRAM,ILU,KSW)
                  
 !
+!-------------------------------------------------------------------------------
+!
+!*       9.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+SM%AT=AT
+
 !-------------------------------------------------------------------------------
 !
 !         End of IO

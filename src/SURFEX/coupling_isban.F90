@@ -4,11 +4,11 @@
 !SFX_LIC for details. version 1.
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, NAG, CHI, NCHI, DTI, ID, NGB, GB,         &
-                            ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,       &
+                            ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, AT, NDST, SLT,   &
                             HPROGRAM, HCOUPLING, PTSTEP,  KYEAR, KMONTH, KDAY, PTIME,   &
                             KI, KSV, KSW, PTSUN, PZENITH, PZENITH2,PAZIM,PZREF, PUREF, PZS,  &
                             PU, PV, PQA, PTA, PRHOA, PSV, PCO2, PIMPWET,PIMPDRY, HSV,   &
-														PRAIN, PSNOW, PLW, &
+                            PRAIN, PSNOW, PLW, &
                             PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS, &
                             PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS,       &
                             PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF,        &
@@ -118,6 +118,8 @@ USE MODD_DEEPSOIL,       ONLY : LDEEPSOIL
 USE MODD_COUPLING_TOPD,  ONLY : LCOUPL_TOPD, NMASKT_PATCH
 #endif
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 USE MODI_IRRIGATION_UPDATE
 USE MODI_ADD_FORECAST_TO_DATE_SURF
 USE MODI_Z0EFF
@@ -189,6 +191,7 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) ::NPE
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 TYPE(SLT_t), INTENT(INOUT) :: SLT
@@ -972,24 +975,23 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ZIRRIG_GR(:)= 0.
 !
- CALL ISBA(IO, KK, PK, PEK, GK, AGK, DK, DEK, DMK, S%TTIME, S%XPOI, S%XABC,    &
-           GBK%XIACAN, GMEB, PTSTEP, CIMPLICIT_WIND, ZP_ZREF, ZP_UREF,         &
-           ZP_SLOPE_COS, IO%XCVHEATF, ZP_SLOPE_DIR,ZP_IMPWET,ZP_IMPDRY,        &
-					 ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN,            &
-           ZP_SNOW, ZP_ZENITH,ZP_AZIM, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW,     &
-           ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF,       &
-           ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF, ZP_ALBNIR_TVEG,        &
-           ZP_ALBVIS_TVEG, ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL, ZPALPHAN,         &
-           ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV,                &
-           ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZP_TDEEP_A, ZP_CO2, ZP_FFGNOS,    &
-           ZP_FFVNOS, ZP_EMIS, ZP_USTAR, ZP_AC_AGG, ZP_HU_AGG,                 &
-           ZP_RESP_BIOMASS_INST, ZP_DEEP_FLUX, ZIRRIG_GR,                      &
-           NTAB_SYT, ZP_DIR_SW, ZP_SCA_SW)
+ CALL ISBA(IO, KK, PK, PEK, GK, AGK, DK, DEK, DMK, S%TTIME, S%XPOI, S%XABC,     &
+            GBK%XIACAN, GMEB, PTSTEP, CIMPLICIT_WIND, ZP_ZREF, ZP_UREF,         &
+            ZP_SLOPE_COS, IO%XCVHEATF, ZP_SLOPE_DIR,ZP_IMPWET,ZP_IMPDRY,        &
+            ZP_TA, ZP_QA, ZP_EXNA, ZP_RHOA, ZP_PS, ZP_EXNS, ZP_RAIN,            &
+            ZP_SNOW, ZP_ZENITH,ZP_AZIM, ZP_MEB_SCA_SW, ZP_GLOBAL_SW, ZP_LW,     &
+            ZP_WIND, ZP_DIR, ZP_PEW_A_COEF, ZP_PEW_B_COEF, ZP_PET_A_COEF,       &
+            ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF, AT, ZP_ALBNIR_TVEG,    &
+            ZP_ALBVIS_TVEG, ZP_ALBNIR_TSOIL, ZP_ALBVIS_TSOIL, ZPALPHAN,         &
+            ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV,                &
+            ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZP_TDEEP_A, ZP_CO2, ZP_FFGNOS,    &
+            ZP_FFVNOS, ZP_EMIS, ZP_USTAR, ZP_AC_AGG, ZP_HU_AGG,                 &
+            ZP_RESP_BIOMASS_INST, ZP_DEEP_FLUX, ZIRRIG_GR,                      &
+            NTAB_SYT, ZP_DIR_SW, ZP_SCA_SW)
 !
 ZP_TRAD = DK%XTSRAD
 DK%XLE  = PEK%XLE
 !
-
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Glacier : ice runoff flux (especally for Earth System Model)
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

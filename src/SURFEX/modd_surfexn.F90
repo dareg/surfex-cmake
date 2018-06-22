@@ -58,6 +58,7 @@ USE MODD_BEM_n, ONLY : BEM_NP_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_NP_t
 USE MODD_TEB_n, ONLY : TEB_NP_t
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 !---------------------------------------------------------------------------
 !
@@ -73,6 +74,8 @@ TYPE(CANOPY_t) :: SB
 TYPE(CH_FLAKE_t) :: CHF
 TYPE(FLAKE_t) :: F
 !
+TYPE(SURF_ATM_TURB_t) :: AT
+!
 END TYPE FLAKE_MODEL_t
 !
 !
@@ -86,6 +89,8 @@ TYPE(GRID_t) :: G
 TYPE(CANOPY_t) :: SB
 TYPE(CH_WATFLUX_t) :: CHW
 TYPE(WATFLUX_t) :: W 
+!
+TYPE(SURF_ATM_TURB_t) :: AT
 !
 END TYPE WATFLUX_MODEL_t
 !
@@ -116,6 +121,8 @@ TYPE(SEAFLUX_t) :: S
 !
 TYPE(OCEAN_t) :: O
 TYPE(OCEAN_REL_t) :: OR
+!
+TYPE(SURF_ATM_TURB_t) :: AT
 !
 END TYPE SEAFLUX_MODEL_t
 !
@@ -157,6 +164,8 @@ TYPE(ISBA_NK_t) :: NK
 TYPE(ISBA_NP_t) :: NP
 TYPE(ISBA_NPE_t) :: NPE
 TYPE(AGRI_NP_t) :: NAG
+!
+TYPE(SURF_ATM_TURB_t) :: AT
 !
 END TYPE ISBA_MODEL_t
 !
@@ -225,6 +234,8 @@ TYPE(DATA_BEM_t) :: DTB
 TYPE(BEM_OPTIONS_t) :: BOP 
 TYPE(BLD_DESC_t) :: BDD
 TYPE(BEM_NP_t) :: NB
+!
+TYPE(SURF_ATM_TURB_t) :: AT
 !
 END TYPE TEB_MODEL_t
 !

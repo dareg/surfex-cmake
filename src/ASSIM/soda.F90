@@ -99,6 +99,8 @@ USE MODD_IO_SURF_LFI,    ONLY : CFILEIN_LFI, CFILEIN_LFI_SAVE, &
                                 CFILEPGD_LFI, CFILE_LFI, CLUOUT_LFI, CFILEOUT_LFI 
 #endif
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 USE MODN_IO_OFFLINE,     ONLY : NAM_IO_OFFLINE, CNAMELIST, CPGDFILE, CPREPFILE, CSURFFILE, &
                                 CSURF_FILETYPE, CTIMESERIES_FILETYPE, LLAND_USE, YALG_MPI, &
                                 LDIAG_FA_NOCOMPACT, LOUT_TIMENAME, XIO_FRAC, LRESTART_2M,  &
@@ -233,6 +235,8 @@ LOGICAL :: GFRAC, GDIAG_GRID, GSURF_BUDGET, GRAD_BUDGET, GCOEF,    &
            GSURF_VARS, GDIAG_OCEAN, GDIAG_SEAICE, GWATER_PROFILE, &
            GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA, GCH_NO_FLUX_ISBA,&
            GSURF_MISC_BUDGET_ISBA, GPGD_TEB, GSURF_MISC_BUDGET_TEB
+!
+TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
 !
 REAL(KIND=JPRB)                  :: ZHOOK_HANDLE
 ! ******************************************************************************************
@@ -469,7 +473,7 @@ DO NIFIC = INB,1,-1
   CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, ISIZE_FULL, ISV, ISW,    &
                        CSV, XCO2, XIMPWET, XIMPDRY, XRHOA, XZENITH, XAZIM, XSW_BANDS,  &
                        XDIR_ALB, XSCA_ALB,XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH, IDAY,  &
-                       ZTIME, TDATE_END, YATMFILE, YATMFILETYPE, YTEST   )
+                       ZTIME, TDATE_END, AT, YATMFILE, YATMFILETYPE, YTEST   )
                        
   !
   IF ( CASSIM_ISBA=='EKF  ' .OR. CASSIM_ISBA=='ENKF ' ) THEN
@@ -498,15 +502,15 @@ DO NIFIC = INB,1,-1
             IMASK =PK%NR_P(JI)
             SELECT CASE (TRIM(COBS(IOBS)))
               CASE("T2M")
-                  XF_PATCH(JI,JP,NIFIC,IOBS) = XAT2M_ISBA(JI,1)
+                XF_PATCH(JI,JP,NIFIC,IOBS) = XAT2M_ISBA(JI,1)
               CASE("HU2M")
-                  XF_PATCH(JI,JP,NIFIC,IOBS) = XAHU2M_ISBA(JI,1)
+                XF_PATCH(JI,JP,NIFIC,IOBS) = XAHU2M_ISBA(JI,1)
               CASE("WG1")
-                  XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,1)
-                CASE("WG2")
-                  XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,2)
+                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,1)
+              CASE("WG2")
+                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XWG(JI,2)
               CASE("LAI")
-                  XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XLAI(JI)
+                XF_PATCH(IMASK,JP,NIFIC,IOBS) = PEK%XLAI(JI)
               CASE DEFAULT
                 CALL ABOR1_SFX("Mapping of "//COBS(IOBS)//" is not defined in SODA!")
             END SELECT
@@ -525,13 +529,13 @@ DO NIFIC = INB,1,-1
             IMASK = PK%NR_P(JI)      
             SELECT CASE (TRIM(CVAR(JL)))
               CASE("TG1")
-                    XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,1)
+                XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,1)
               CASE("TG2")
-                    XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,2)
+                XF(IMASK,JP,NIFIC,JL) = PEK%XTG(JI,2)
               CASE("WG1")
-                    XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,1)
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,1)
               CASE("WG2")
-                    XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,2)
+                XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,2)
               CASE("WG3")
                 XF(IMASK,JP,NIFIC,JL) = PEK%XWG(JI,3) 
               CASE("WG4")
@@ -628,7 +632,7 @@ DO NIFIC = INB,1,-1
               CASE DEFAULT
                 CALL ABOR1_SFX("Mapping of "//TRIM(CVAR(JL))//" is not defined in SODA!")
             END SELECT
-          ENDDO        
+          ENDDO
         ENDDO
       ENDDO        
       !
@@ -855,7 +859,7 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
 
   ENDIF
 
-    !   Read all observations (NDIM_FULL)
+  !   Read all observations (NDIM_FULL)
   IF (LOBSNAT) THEN
 
     IF (NRANK==NPIO) THEN
@@ -887,9 +891,9 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
   ELSEIF (NRANK==NPIO) THEN
        
     DO JI = 1,YSC%U%NDIM_FULL
-        READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
-        IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
-      ENDDO
+      READ (55,*,IOSTAT=ISTAT)  (ZWORK(JI,JJ),JJ=1,NOBSTYPE)
+      IF ( ISTAT /= 0 ) CALL ABOR1_SFX("Error reading file "//TRIM(YMFILE))
+    ENDDO
 
   ENDIF
 
@@ -920,12 +924,12 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
     DO IOBS = 1,NOBSTYPE
       SELECT CASE (TRIM(COBS(IOBS)))
         CASE ("T2M")
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
+          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZT2M(:))
         CASE ("HU2M")
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
+          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZHU2M(:))
         CASE ("SWE")
-            CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
-        END SELECT
+          CALL READ_AND_SEND_MPI(ZWORK(:,JJ),ZSWE(:))
+      END SELECT
     ENDDO
 
   ELSE
@@ -940,11 +944,11 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "ASCII") THEN
     DO IOBS = 1,NOBSTYPE
       SELECT CASE (TRIM(COBS(IOBS)))
         CASE ("T2M")
-            ZT2M(:)=ZWORK(:,JJ)
+          ZT2M(:)=ZWORK(:,JJ)
         CASE ("HU2M")
-            ZHU2M(:)=ZWORK(:,JJ)
+          ZHU2M(:)=ZWORK(:,JJ)
         CASE ("SWE")
-            ZSWE(:)=ZWORK(:,JJ)
+          ZSWE(:)=ZWORK(:,JJ)
       END SELECT
     ENDDO
   ENDIF
@@ -1134,7 +1138,7 @@ IF (NRANK==NPIO) THEN
   CFILEOUT_FA = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.fa')
 #endif
 #ifdef SFX_NC  
-  CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')  
+  CFILEOUT_NC = ADJUSTL(ADJUSTR(CSURFFILE)//'.'//YTAG//'.nc')
 #endif
   !
   IF (CSURF_FILETYPE=='FA    ') THEN
@@ -1186,7 +1190,7 @@ DO IENS = 1,ISIZE
     CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE,YINIT, LLAND_USE, ISIZE_FULL, ISV, ISW,      &
                          CSV, XCO2, XIMPWET,XIMPDRY, XRHOA, XZENITH, XAZIM, XSW_BANDS,    &
                          XDIR_ALB, XSCA_ALB, XEMIS, XTSRAD, XTSURF, IYEAR, IMONTH, IDAY,  &
-                         ZTIME, TDATE_END, YATMFILE, YATMFILETYPE, YTEST  )
+                         ZTIME, TDATE_END, AT, YATMFILE, YATMFILETYPE, YTEST  )
                           
     !
     DO JP = 1,INPATCH
@@ -1293,14 +1297,14 @@ DO IENS = 1,ISIZE
   GSURF_MISC_BUDGET_TEB  = .FALSE.  
   !
   CALL FLAG_DIAG_UPDATE(YSC%FM, YSC%IM, YSC%SM, YSC%TM, YSC%WM, YSC%DUO, YSC%U, YSC%SV,  &          
-                        GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF,  &
-                        GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,       &
+                        GFRAC, GDIAG_GRID, I2M, GSURF_BUDGET, GRAD_BUDGET, GCOEF, &
+                        GSURF_VARS, IBEQ, IDSTEQ, GDIAG_OCEAN, GDIAG_SEAICE,      &
                         GWATER_PROFILE, GSURF_EVAP_BUDGET, GFLOOD,  GPGD_ISBA,    &
                         GCH_NO_FLUX_ISBA, GSURF_MISC_BUDGET_ISBA, GPGD_TEB,       &
                         GSURF_MISC_BUDGET_TEB    )
   ! 
   YSC%DUO%LSNOWDIMNC = .FALSE.
-  ! 
+  !
   YENS = '   '
   IF (ISIZE>1) WRITE(YENS,'(I3)') IENS
   !
@@ -1336,7 +1340,7 @@ DO IENS = 1,ISIZE
   !  
   INW = 1
   IF (CSURF_FILETYPE=="NC    ") INW = 2
-  !  
+  !
   LFIRST_WRITE = .TRUE.
   ! 
   IF (ASSOCIATED(YSC%DUO%CSELECT)) DEALLOCATE(YSC%DUO%CSELECT)
