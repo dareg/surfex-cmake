@@ -81,8 +81,8 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_CSTS,       ONLY : XTT, XPI, XDAY, XLMTT, XLSTT
 USE MODD_SNOW_PAR,   ONLY : XRHOSMAX_ES, XSNOWDMIN, XRHOSMIN_ES, XEMISSN, &
-			    XRHO_SNOWMAK, XPSR_SNOWMAK, XPTA_SEUIL, &
-			    XPROD_SCHEME, XPROD_COUNT, XTIMESNOWMAK
+                            XRHO_SNOWMAK, XPSR_SNOWMAK, XPTA_SEUIL, &
+                            XPROD_SCHEME, XPROD_COUNT, XTIMESNOWMAK
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
@@ -188,7 +188,7 @@ REAL, DIMENSION(:), INTENT(IN)      :: PPEW_A_COEF, PPEW_B_COEF,                
 !                                      PPEQ_B_COEF = B-air specific humidity coefficient                         !
 !
 INTEGER , DIMENSION(:), INTENT(IN)   ::  KTAB_SYT    ! Array of index defining
-																										 ! opposite points for Sytron
+                                                     ! opposite points for Sytron
 REAL, DIMENSION(:), INTENT(INOUT)   :: PLES3L, PLEL3L, PEVAP, PGRNDFLUX, PDELHEATG, PDELHEATG_SFC
 !                                      PLEL3L        = evaporation heat flux from snow (W/m2)
 !                                      PLES3L        = sublimation (W/m2)
@@ -241,8 +241,8 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
                                        ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2, &   
-				                               ZTC, ZTW, ZEOD, ZTD, ZTAV, ZEOAV, DD,  &
-				                               GA
+                                       ZTC, ZTW, ZEOD, ZTD, ZTAV, ZEOAV, DD,  &
+                                       GA
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
 !                                      ZRRSNOW      = rain rate over snow [kg/(m2 s)]
 !                                      ZSNOW        = snow depth (m) 
@@ -289,9 +289,9 @@ REAL, DIMENSION(SIZE(PTA))          :: ZBLOWSNW_ACC
 !                                                      during the current time step (m)
 LOGICAL, DIMENSION(SIZE(PTA))       :: LCONDSNOWMAK
 LOGICAL, DIMENSION(SIZE(PTA))       :: LTIMESNOWMAK
-LOGICAL		   		    :: PMONTH
-LOGICAL		   		    :: PDAY
-REAL, DIMENSION(31,31)		    :: PRODTHEO
+LOGICAL                             :: PMONTH
+LOGICAL                             :: PDAY
+REAL, DIMENSION(31,31)              :: PRODTHEO
 ! 				       LCONDSNOWMAK = Logical : Suitable Atmospheric conditions for snowmaking				p.spandre 2014/03/28
 !				       LTIMESNOWMAK = Logical: suitable timing conditions for snowmaking				p.spandre 2014/03/28
 ! 				       PMONTH	    = integer : Suitable month for snowmaking = 1. Otherwise 0.				p.spandre 2014/03/28
@@ -305,9 +305,9 @@ INTEGER, DIMENSION(SIZE(PTA))      :: NMASK      ! indices correspondance betwee
 !
 LOGICAL, DIMENSION(SIZE(PTA))      :: LREMOVE_SNOW
 !
-REAL, DIMENSION(SIZE(PTA)) :: ZSWNET_N, ZSWNET_NS, ZLWNET_N
+REAL, DIMENSION(SIZE(PTA))         :: ZSWNET_N, ZSWNET_NS, ZLWNET_N
 !
-REAL, DIMENSION(SIZE(PPS)) 	:: ZSNOWMAK	
+REAL, DIMENSION(SIZE(PPS))         :: ZSNOWMAK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -333,8 +333,8 @@ ENDIF
 !
 
 IF (SIZE(DMK%XDIFF_RATIO)>1) THEN
-	DMK%XSPEC_ALB(:,:) = XUNDEF
-	DMK%XDIFF_RATIO(:,:) = XUNDEF
+  DMK%XSPEC_ALB(:,:) = XUNDEF
+  DMK%XDIFF_RATIO(:,:) = XUNDEF
 ENDIF
 !
 DEK%XSNDRIFT(:)    = 0.0
@@ -366,18 +366,18 @@ ZBLOWSNW(:,:)  = 0.0
 ZBLOWSNW_ACC(:)  = 0.0
 ZSNOWMAK(:) = 0.0
 !
-ZTC(:)         = 0.0			! Atmospheric temp (°C)							p.spandre 2014/03/27
-ZTW(:)         = 0.0			! Wet bulb temperature (K)						p.spandre 2014/03/27
-ZEOD(:)	       = 0.0			! Saturated vapor pressure at dew temp. (kPa)				p.spandre 2014/06/04
-ZTD(:)	       = 0.0			! Dew Point temp.  (°C)							p.spandre 2014/06/04
-ZTAV(:)        = 0.0			! Average temp. =(ZTD+ZTC)/2  (°C)					p.spandre 2014/06/04
-ZEOAV(:)       = 0.0			! Saturated vapor pressure at average temp. ZTAV (kPa)			p.spandre 2014/06/04
-DD(:)          = 0.0			! Slope of saturated vapor pressure curve (kPa/°C)			p.spandre 2014/06/04
-GA(:)          = 0.0			! Psychrometric constant (kPa/°C)					p.spandre 2014/06/04
-LCONDSNOWMAK(:)= .FALSE.		!Logical: suitable atmospheric conditions for snowmaking		p.spandre 2014/03/28
-LTIMESNOWMAK(:)= .FALSE.		!Logical: suitable timing conditions for snowmaking			p.spandre 2014/03/28
-PMONTH	       = .FALSE.
-PDAY	       = .FALSE.
+ZTC(:)         = 0.0  ! Atmospheric temp (°C)							p.spandre 2014/03/27
+ZTW(:)         = 0.0  ! Wet bulb temperature (K)						p.spandre 2014/03/27
+ZEOD(:)        = 0.0  ! Saturated vapor pressure at dew temp. (kPa)				p.spandre 2014/06/04
+ZTD(:)         = 0.0  ! Dew Point temp.  (°C)							p.spandre 2014/06/04
+ZTAV(:)        = 0.0  ! Average temp. =(ZTD+ZTC)/2  (°C)					p.spandre 2014/06/04
+ZEOAV(:)       = 0.0  ! Saturated vapor pressure at average temp. ZTAV (kPa)			p.spandre 2014/06/04
+DD(:)          = 0.0  ! Slope of saturated vapor pressure curve (kPa/°C)			p.spandre 2014/06/04
+GA(:)          = 0.0  ! Psychrometric constant (kPa/°C)					p.spandre 2014/06/04
+LCONDSNOWMAK(:)= .FALSE.  !Logical: suitable atmospheric conditions for snowmaking		p.spandre 2014/03/28
+LTIMESNOWMAK(:)= .FALSE.  !Logical: suitable timing conditions for snowmaking			p.spandre 2014/03/28
+PMONTH         = .FALSE.
+PDAY           = .FALSE.
 PRODTHEO(:,:)  = 0.0
 DMK%XPRODCOUNT(:)  = 0.0
 !
@@ -528,19 +528,19 @@ ENDIF
 !
 !	A.2. Timing conditions
 !		A.2.1. Month condition
-    IF (TPTIME%TDATE%MONTH < 11. .and. TPTIME%TDATE%MONTH > 3.) THEN				! No production allowed from april to otober included
+    IF (TPTIME%TDATE%MONTH < 11. .and. TPTIME%TDATE%MONTH > 3.) THEN      ! No production allowed from april to otober included
       PMONTH = .FALSE.
     ELSE
       PMONTH = .TRUE.
     ENDIF
   ! 	  	A.2.2. Daily condition
-    IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN		! Production allowed all day from 1st of NOV ... until 15th of DEC
+    IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN   ! Production allowed all day from 1st of NOV ... until 15th of DEC
       PDAY = .TRUE.
     ELSE
-      IF (TPTIME%TIME > 28800. .and. TPTIME%TIME < 64800.) THEN								! No production allowed between 8am and 7pm
-	PDAY = .FALSE.
+      IF (TPTIME%TIME > 28800. .and. TPTIME%TIME < 64800.) THEN           ! No production allowed between 8am and 7pm
+        PDAY = .FALSE.
       ELSE
-	PDAY = .TRUE.
+        PDAY = .TRUE.
       ENDIF
     ENDIF
 
@@ -551,18 +551,18 @@ ENDIF
 !		A.2.4. SELFPROD option
 !
       IF (IO%LSELF_PROD) THEN
-!
-!!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
-!
-	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN			! i.e. SM possible from 1st of NOV (11*31+1=342) ... until 15th of DEC (12*31+15=387)
-!																	! i.e. SM possible even during day time on that period
-	  IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 150.) THEN										! Max admissible prod in that period 150 kg/m2 
-	    IO%LPRODSNOWMAK(JJ) = .TRUE.													! .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
-	  ELSE
-	    IO%LPRODSNOWMAK(JJ) = .FALSE.
-	  ENDIF
-	ENDIF
-!
+      !
+      !!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
+      !
+        IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 341. .and. TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 388.) THEN       ! i.e. SM possible from 1st of NOV (11*31+1=342) ... until 15th of DEC (12*31+15=387)
+        !																	! i.e. SM possible even during day time on that period
+          IF(1.0*XPROD_COUNT(JJ)*XPSR_SNOWMAK <= 150.) THEN     ! Max admissible prod in that period 150 kg/m2 
+            IO%LPRODSNOWMAK(JJ) = .TRUE.      ! .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+          ELSE
+            IO%LPRODSNOWMAK(JJ) = .FALSE.
+          ENDIF
+        ENDIF
+        !
         IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY > 387.) THEN                         ! i.e. After December 15
           IF (ZSNOW(JJ) < 0.60) THEN                                                    ! If HTN < 0.6 (m) keep producing
             IO%LPRODSNOWMAK(JJ) = .TRUE.
@@ -571,33 +571,33 @@ ENDIF
           ENDIF
         ENDIF
 
-	IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 92.) THEN				! Case Between 1 JAN until 28th of Feb.
+        IF (TPTIME%TDATE%MONTH*31+TPTIME%TDATE%DAY < 92.) THEN      ! Case Between 1 JAN until 28th of Feb.
 
-	  IF (ZSNOW(JJ) < 0.60) THEN							! If HTN < 0.6 (m) keep producing
-	    IO%LPRODSNOWMAK(JJ) = .TRUE.							!  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
-	  ELSE
-	    IO%LPRODSNOWMAK(JJ) = .FALSE.
-	  ENDIF
-	ENDIF
-!!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
-! 
-      ELSE	! SELF_PROD conditions is FALSE
-! 		A.2.3. Suitable night for snowmaking
-	IF (TPTIME%TIME == 64800.) THEN		! condition at 6pm i.e. for each time step, you compare the total.
-	  IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
-	    IO%LPRODSNOWMAK(JJ) = .TRUE.											! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
-	  ELSE														! then up to day+1 one can produce
-	    IO%LPRODSNOWMAK(JJ) = .FALSE.
-	  ENDIF
-	ENDIF
+          IF (ZSNOW(JJ) < 0.60) THEN      ! If HTN < 0.6 (m) keep producing
+            IO%LPRODSNOWMAK(JJ) = .TRUE.      !  .and. MOD(TPTIME%TDATE%DAY, 2) == 0.		REMOVED + Installation capacity 50% of snowguns simultaneously => 1 day / 2
+          ELSE
+            IO%LPRODSNOWMAK(JJ) = .FALSE.
+          ENDIF
+        ENDIF
+      !!!!!!!!!!!!!!!			FORMULATION ECHELLE ALPES			!!!!!!!!!!!!!!!!!!!
+      ! 
+      ELSE      ! SELF_PROD conditions is FALSE
+        !A.2.3. Suitable night for snowmaking
+        IF (TPTIME%TIME == 64800.) THEN     ! condition at 6pm i.e. for each time step, you compare the total.
+          IF (XPROD_COUNT(JJ) < PRODTHEO(TPTIME%TDATE%MONTH,TPTIME%TDATE%DAY)) THEN
+            IO%LPRODSNOWMAK(JJ) = .TRUE.      ! PNPROD = integer : Suitable night for snowmaking : current prod < theo prod at 6pm		p.spandre 2014/03/28
+          ELSE      ! then up to day+1 one can produce
+            IO%LPRODSNOWMAK(JJ) = .FALSE.
+          ENDIF
+        ENDIF
       ENDIF
 !													|
 !-----------------------	SELFPROD option by p.spandre	----------------------------------------|
 
-      IF (PDAY .and. PMONTH .and. IO%LPRODSNOWMAK(JJ)) THEN		! Calendar (month+day timing) + suitable night => Timing conditions = TRUE, let's produce!
-	LTIMESNOWMAK(JJ) = .TRUE.
+      IF (PDAY .and. PMONTH .and. IO%LPRODSNOWMAK(JJ)) THEN     ! Calendar (month+day timing) + suitable night => Timing conditions = TRUE, let's produce!
+        LTIMESNOWMAK(JJ) = .TRUE.
       ELSE
-	LTIMESNOWMAK(JJ) = .FALSE.
+        LTIMESNOWMAK(JJ) = .FALSE.
       ENDIF
 
     ENDDO
@@ -608,46 +608,47 @@ ENDIF
 !
 ! B. Atmospheric conditions for snowmaking
 !	B.1. Calculation of Wet Bulb temperature calculation according to Jensen,ASCE, 1990 (added p.spandre 04/06/2014)
-      ZTC(JJ)	= PTA(JJ)-273.15								!calculation of atmospheric temperature (°C)
+      ZTC(JJ) = PTA(JJ)-273.15       !calculation of atmospheric temperature (°C)
 !		B.1.1 Calculation of dew point temp. TD (°C)
-      IF (PQA(JJ) < 0.001) THEN									! loop to prevent ZEOD from being negative or zero (bug with LOG calculation) 2014/09/04
-	ZEOD(JJ)	= 0.001/(0.622+0.001)*PPS(JJ)/1000.					! Vapor pressure at dew point (kPa) [2.9]
+      IF (PQA(JJ) < 0.001) THEN     ! loop to prevent ZEOD from being negative or zero (bug with LOG calculation) 2014/09/04
+        ZEOD(JJ)  = 0.001/(0.622+0.001)*PPS(JJ)/1000. ! Vapor pressure at dew point (kPa) [2.9]
       ELSE
-	ZEOD(JJ)	= (PQA(JJ)/PRHOA(JJ))/(0.622+0.378*(PQA(JJ)/PRHOA(JJ)))*PPS(JJ)/1000.	! Vapor pressure at dew point (kPa) [2.3]
-      ENDIF											! NB: 	PQA   = air humidity forcing (kg/m3)
+        ZEOD(JJ)  = (PQA(JJ)/PRHOA(JJ))/(0.622+0.378*(PQA(JJ)/PRHOA(JJ)))*PPS(JJ)/1000. ! Vapor pressure at dew point (kPa) [2.3]
+      ENDIF             ! NB: 	PQA   = air humidity forcing (kg/m3)
 !												! 	PRHOA = air density 	=> mixing ratio r = m(vapor)/m(air) = m(vapor)/[Volume(air)*Density(air)] = [m(vapor)/Volume(air)]/Density(air) = PQA/PRHOA
-      IF (ABS(LOG(ZEOD(JJ))-16.78) < 0.001) THEN						! loop to prevent LOG(ZEOD)-16.78 from being zero => divide by zero 2014/09/04
-	ZTD(JJ)	= (116.9+237.3*LOG(ZEOD(JJ)))/0.001
+      IF (ABS(LOG(ZEOD(JJ))-16.78) < 0.001) THEN      ! loop to prevent LOG(ZEOD)-16.78 from being zero => divide by zero 2014/09/04
+        ZTD(JJ) = (116.9+237.3*LOG(ZEOD(JJ)))/0.001
       ELSE
-	ZTD(JJ)	= (116.9+237.3*LOG(ZEOD(JJ)))/(16.78-LOG(ZEOD(JJ)))			! Dew Point temperature (°C)  [7.11] and [7.22]
+        ZTD(JJ) = (116.9+237.3*LOG(ZEOD(JJ)))/(16.78-LOG(ZEOD(JJ)))   ! Dew Point temperature (°C)  [7.11] and [7.22]
       ENDIF
 !		B.1.2. Calculation of the slope of the saturation vapor pressure curve
-      ZTAV(JJ)	= (ZTD(JJ)+ZTC(JJ))/2							! Average temperature between Dew point and actual conditions (cf. p176,7.19, Jensen)
-      ZEOAV(JJ)	= EXP((16.78*ZTAV(JJ)-116.9)/(ZTAV(JJ)+237.3))				! Saturated vapor pressure at average temp. (kPa) [7.11]
-      DD(JJ)	= 4098.*ZEOAV(JJ)/(ZTAV(JJ)+237.3)**2					! Slope of the saturation vapor pressure curve (kPa/°C) [7.13]
+      ZTAV(JJ) = (ZTD(JJ)+ZTC(JJ))/2         ! Average temperature between Dew point and actual conditions (cf. p176,7.19, Jensen)
+      ZEOAV(JJ) = EXP((16.78*ZTAV(JJ)-116.9)/(ZTAV(JJ)+237.3))      ! Saturated vapor pressure at average temp. (kPa) [7.11]
+      DD(JJ) = 4098.*ZEOAV(JJ)/(ZTAV(JJ)+237.3)**2   ! Slope of the saturation vapor pressure curve (kPa/°C) [7.13]
 !		B.1.3. Calculation of psychrometric constant
-      GA(JJ)	= PPS(JJ)/1000.*0.001013/(0.622*(2.501-2.361/1000.*ZTC(JJ)))		! Latent heat of vaporization (MJ/kg) [7.1] included into GA formula [7.15]
+      GA(JJ) = PPS(JJ)/1000.*0.001013/(0.622*(2.501-2.361/1000.*ZTC(JJ)))    ! Latent heat of vaporization (MJ/kg) [7.1] included into GA formula [7.15]
 !		B.1.4. Wet bulb temp. [7.19]
-      ZTW(JJ)	= (GA(JJ)*ZTC(JJ)+DD(JJ)*ZTD(JJ))/(GA(JJ)+DD(JJ))
-      ZTW(JJ)	= ZTW(JJ)+273.15
+      ZTW(JJ) = (GA(JJ)*ZTC(JJ)+DD(JJ)*ZTD(JJ))/(GA(JJ)+DD(JJ))
+      ZTW(JJ) = ZTW(JJ)+273.15
 !   		End of Wet Bulb Temperature Calculation
 !
 !	B.2. Boolean over atmospheric conditions for snowmaking
       IF (ZTW(JJ) < XPTA_SEUIL .and. PVMOD(JJ) < 4.2) THEN
-	LCONDSNOWMAK(JJ) = .TRUE.
+        LCONDSNOWMAK(JJ) = .TRUE.
       ELSE
-	LCONDSNOWMAK(JJ) = .FALSE.
+        LCONDSNOWMAK(JJ) = .FALSE.
       ENDIF
 !
 ! C. Boolean over timing + atmospheric conditions									! Production possible even if natural snow falling P.Spandre 2014/03/04
       IF (LCONDSNOWMAK(JJ) .and. LTIMESNOWMAK(JJ)) THEN
-	ZSNOWMAK(JJ)   = XPSR_SNOWMAK*PTSTEP/XRHO_SNOWMAK    								! snowmaking depth by P.S 19/11/2013
-	XPROD_COUNT(JJ) = XPROD_COUNT(JJ)+PTSTEP
+        ZSNOWMAK(JJ)   = XPSR_SNOWMAK*PTSTEP/XRHO_SNOWMAK  
+        ! snowmaking depth by P.S 19/11/2013
+        XPROD_COUNT(JJ) = XPROD_COUNT(JJ)+PTSTEP
       ELSE
-	ZSNOWMAK(JJ)=0.
+        ZSNOWMAK(JJ)=0.
       ENDIF
     ENDIF
-    ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + ZSNOWMAK(JJ)    					! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
+    ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + ZSNOWMAK(JJ)      ! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
 !
     IF (IO%LSNOWMAK_BOOL) DMK%XPRODCOUNT(JJ) = XPROD_COUNT(JJ)
 !
@@ -1059,7 +1060,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     ZP_NAT_LEV    (JJ) = PEK%TSNOW%NAT_LEV    (JI)
     ZP_PRO_SUP_TYP(JJ) = PEK%TSNOW%PRO_SUP_TYP(JI)
     ZP_AVA_TYP    (JJ) = PEK%TSNOW%AVA_TYP    (JI)
-	ENDDO
+  ENDDO
 
    DO JIMP=1,NIMPUR 
      DO JWRK=1,KSIZE2
@@ -1078,12 +1079,12 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
      ENDDO
    ENDDO !end BC merge oubli
 
-	DO JWRK=1,KSIZE4
-		DO JJ=1,KSIZE1
-			JI = KMASK(JJ)
-			ZP_BLOWSNW(JJ,JWRK) = ZBLOWSNW(JI,JWRK)
-		ENDDO
-	ENDDO
+  DO JWRK=1,KSIZE4
+    DO JJ=1,KSIZE1
+      JI = KMASK(JJ)
+      ZP_BLOWSNW(JJ,JWRK) = ZBLOWSNW(JI,JWRK)
+    ENDDO
+  ENDDO
 
 ELSE
    DO JWRK=1,KSIZE2
@@ -1286,7 +1287,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
                 IO%CSNOWFALL, IO%CSNOWCOND, IO%CSNOWHOLD, IO%CSNOWCOMP,       &
                 IO%CSNOWZREF,ZP_SNOWMAK, IO%LSNOWCOMPACT_BOOL,                &
                 IO%LSNOWMAK_BOOL,IO%LSNOWTILLER,IO%LSELF_PROD,                &
-	              IO%LSNOWMAK_PROP, IO%LPRODSNOWMAK)
+                IO%LSNOWMAK_PROP, IO%LPRODSNOWMAK)
 !
   ZP_GFLXCOR (:) = 0.0
   ZP_FLSN_COR(:) = 0.0
@@ -1302,14 +1303,14 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
   !Ajout test sur pas de temps de sortie
   IF (GCOMPUTECRODIAG) THEN
     CALL SNOWCRO_DIAG(IO%CSNOWMETAMO,&
-                      ZP_SNOWDZ, ZP_SNOWSWE, ZP_SNOWRHO, ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWAGE,    &
+                      ZP_SNOWDZ, ZP_SNOWSWE, ZP_SNOWRHO, ZP_SNOWGRAN1, ZP_SNOWGRAN2, ZP_SNOWAGE,  &
                       ZP_SNOWHIST, ZP_SNOWTEMP, ZP_SNOWLIQ, ZP_DIRCOSZW, ZP_SNOWIMPUR, ZP_SNOWDEND, &
                       ZP_SNOWSPHER,ZP_SNOWSIZE, ZP_SNOWSSA, ZP_SNOWTYPEMEPRA, ZP_SNOWRAM, ZP_SNOWSHEAR, &
-                      ZP_ACC_RAT, ZP_NAT_RAT, 																											&
-                      ZP_SNDPT_1DY, ZP_SNDPT_3DY, ZP_SNDPT_5DY, ZP_SNDPT_7DY,												&
-                      ZP_SNSWE_1DY, ZP_SNSWE_3DY, ZP_SNSWE_5DY, ZP_SNSWE_7DY,												&
-                      ZP_SNRAM_SONDE, ZP_SN_WETTHCKN, ZP_SN_REFRZNTHCKN,ZP_SNOWIMP_CONC,						&
-                      ZP_DEP_HIG, ZP_DEP_MOD, ZP_DEP_SUP, ZP_DEP_TOT, ZP_DEP_HUM,										&
+                      ZP_ACC_RAT, ZP_NAT_RAT,   &
+                      ZP_SNDPT_1DY, ZP_SNDPT_3DY, ZP_SNDPT_5DY, ZP_SNDPT_7DY, &
+                      ZP_SNSWE_1DY, ZP_SNSWE_3DY, ZP_SNSWE_5DY, ZP_SNSWE_7DY, &
+                      ZP_SNRAM_SONDE, ZP_SN_WETTHCKN, ZP_SN_REFRZNTHCKN,ZP_SNOWIMP_CONC,  &
+                      ZP_DEP_HIG, ZP_DEP_MOD, ZP_DEP_SUP, ZP_DEP_TOT, ZP_DEP_HUM, &
                       ZP_ACC_LEV, ZP_NAT_LEV, ZP_PRO_SUP_TYP, ZP_PRO_INF_TYP, ZP_AVA_TYP)
   ENDIF
   !

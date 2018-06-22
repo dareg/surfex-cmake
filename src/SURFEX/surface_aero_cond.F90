@@ -133,7 +133,7 @@ DO JJ=1,SIZE(PRI)
   ZCDN_M98(JJ)= XKARMAN*XKARMAN/(LOG(PUREF(JJ)/ZZ0(JJ))*LOG(PZREF(JJ)/ZZ0(JJ)))
    
    
-  IF(HSNOWRES=='RIL' .OR. HSNOWRES=='DEF' .OR. HSNOWRES =='RI2') THEN
+  IF(HSNOWRES=='RIL' .OR. HSNOWRES=='DEF') THEN
 !
       IF ( PRI(JJ) < 0.0 ) THEN
         ZDI(JJ) = 1. / ( ZVMOD(JJ)                                  &
@@ -152,9 +152,8 @@ DO JJ=1,SIZE(PRI)
       PRA(JJ) = 1. / PAC(JJ)
     !
       PCH(JJ) = 1. / (PRA(JJ) * ZVMOD(JJ))
-  ELSE IF (HSNOWRES=='M98' .OR. HSNOWRES=='M99')THEN
+  ELSE IF (HSNOWRES=='M98')THEN
   ! Martin and Lejeune 1998 ; Cluzet et al 2016
-  ! No difference between M98 M99 (different default Z0)
     IF (PRI(JJ)<0.0) THEN
         IF (ZCDN_M98(JJ)==0.) THEN
             ZMARTIN(JJ)=1.

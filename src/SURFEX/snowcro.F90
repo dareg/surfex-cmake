@@ -3,29 +3,29 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ##########################################################################
-      SUBROUTINE SNOWCRO(HSNOWRES, TPTIME, OMEB, OGLACIER, HIMPLICIT_WIND,     &
-               PPEW_A_COEF, PPEW_B_COEF,                                 &
-               PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
-               PSNOWSWE,PSNOWRHO,PSNOWHEAT,PSNOWALB,                     &
-               PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE, PSNOWIMPUR,     &
-               PTSTEP,PPS,PSR,PRR,PPSN3L,                                &
-               PTA,PTG,PSW_RAD,PQA,PVMOD,PLW_RAD, PRHOA,                 &
-               PUREF,PEXNS,PEXNA,PDIRCOSZW,                              &
-               PZREF,PZ0,PZ0EFF,PZ0H,PALB,                               &
-               PSOILCOND,PD_G,                                           &
-               PSNOWLIQ,PSNOWTEMP,PSNOWDZ,                               &
-               PTHRUFAL,PGRNDFLUX,PEVAPCOR, PGFLXCOR,                    &
-               PSWNETSNOW,PSWNETSNOWS,PLWNETSNOW,                        &
-               PRNSNOW,PHSNOW,PGFLUXSNOW,    &
-               PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
-               PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
-               PPERMSNOWFRAC,PZENITH,PANGL_ILLUM,PXLAT,PXLON,PBLOWSNW,    &
-               HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
-               HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,         &
-               PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY, HSNOWFALL, 	     &
-	             HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF,                 &
-	             PSNOWMAK, OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,	 &
-	             OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK	)
+      SUBROUTINE SNOWCRO(HSNOWRES, TPTIME, OMEB, OGLACIER, HIMPLICIT_WIND,      &
+                      PPEW_A_COEF, PPEW_B_COEF,                                 &
+                      PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
+                      PSNOWSWE,PSNOWRHO,PSNOWHEAT,PSNOWALB,                     &
+                      PSNOWGRAN1,PSNOWGRAN2,PSNOWHIST,PSNOWAGE, PSNOWIMPUR,     &
+                      PTSTEP,PPS,PSR,PRR,PPSN3L,                                &
+                      PTA,PTG,PSW_RAD,PQA,PVMOD,PLW_RAD, PRHOA,                 &
+                      PUREF,PEXNS,PEXNA,PDIRCOSZW,                              &
+                      PZREF,PZ0,PZ0EFF,PZ0H,PALB,                               &
+                      PSOILCOND,PD_G,                                           &
+                      PSNOWLIQ,PSNOWTEMP,PSNOWDZ,                               &
+                      PTHRUFAL,PGRNDFLUX,PEVAPCOR, PGFLXCOR,                    &
+                      PSWNETSNOW,PSWNETSNOWS,PLWNETSNOW,                        &
+                      PRNSNOW,PHSNOW,PGFLUXSNOW,                                &
+                      PHPSNOW,PLES3L,PLEL3L,PEVAP,PSNDRIFT,PRI,                 &
+                      PEMISNOW,PCDSNOW,PUSTAR,PCHSNOW,PSNOWHMASS,PQS,           &
+                      PPERMSNOWFRAC,PZENITH,PANGL_ILLUM,PXLAT,PXLON,PBLOWSNW,   &
+                      HSNOWDRIFT,OSNOWDRIFT_SUBLIM,OSNOW_ABS_ZENITH,            &
+                      HSNOWMETAMO,HSNOWRAD,OATMORAD,P_DIR_SW, P_SCA_SW,         &
+                      PSPEC_ALB, PDIFF_RATIO,PIMPWET,PIMPDRY, HSNOWFALL,        &
+                      HSNOWCOND, HSNOWHOLD,HSNOWCOMP,HSNOWZREF,                 &
+                      PSNOWMAK, OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER,  &
+                      OSELF_PROD, OSNOWMAK_PROP, OPRODSNOWMAK )
 
 !     ##########################################################################
 !
@@ -143,7 +143,7 @@ USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_CSTS, ONLY : XTT, XRHOLW, XLMTT,XLSTT,XLVTT, XCL, XCI, XPI, XRHOLI
 USE MODD_SNOW_PAR, ONLY : XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE, XPERCENTAGEPORE, XIMPUR_EFOLD, &
- 												  XIMPUR_COEFF,XIMPUR_INIT,XMAXIMPUR,XRHO_SNOWMAK, XPSR_SNOWMAK
+                          XIMPUR_COEFF,XIMPUR_INIT,XMAXIMPUR,XRHO_SNOWMAK, XPSR_SNOWMAK
 USE MODD_SNOW_METAMO
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PREP_SNOW, ONLY : NIMPUR
@@ -356,9 +356,9 @@ CHARACTER(4), INTENT(IN)            :: HSNOWDRIFT        ! Snowdrift scheme :
                                       !    'GA01': Gallee et al 2001
                                       !    'VI13': Vionnet et al 2013
 LOGICAL, INTENT(IN)                   :: OSNOWDRIFT_SUBLIM ! activate sublimation during drift
-REAL, DIMENSION (:), INTENT(IN)       ::  PSNOWMAK 						! Snowmaking thickness (m)
+REAL, DIMENSION (:), INTENT(IN)       ::  PSNOWMAK        ! Snowmaking thickness (m)
 LOGICAL, INTENT(IN)                   :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER, &
-				         OSELF_PROD, OSNOWMAK_PROP
+                                         OSELF_PROD, OSNOWMAK_PROP
 LOGICAL, DIMENSION(:), INTENT(INOUT)  :: OPRODSNOWMAK
 !
 LOGICAL, INTENT(IN)                   :: OSNOW_ABS_ZENITH ! activate parametrization of solar absorption for polar regions
@@ -973,16 +973,16 @@ SELECT CASE (HSNOWRAD)
  ! output spectral albedo and diffuse to total irradiance ratio
    
   DO JJ=1,SIZE(PSPEC_ALB,2)
-	  DO JP=1, size(ZSNOW)
-!	    PDIFF_RATIO(JP,JJ)=P_DIR_SW(JP,JJ)+P_SCA_SW(JP,JJ)
-!	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)  ! To let commented    
+    DO JP=1, size(ZSNOW)
+      !	    PDIFF_RATIO(JP,JJ)=P_DIR_SW(JP,JJ)+P_SCA_SW(JP,JJ)
+      !	    PDIFF_RATIO(JP,JJ)=PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ)  ! To let commented    
       PSPEC_ALB(JP,JJ)=ZSNOWALB_SP(JP,JJ)                         
-	    IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN                            
-	      PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))    
-	    ELSE                                                                        
-	      PDIFF_RATIO(JP,JJ)=1.
-	    ENDIF
-	  ENDDO
+      IF ((PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))>0.) THEN                            
+        PDIFF_RATIO(JP,JJ)=PSPEC_DIF(JP,JJ)/(PSPEC_DIR(JP,JJ)+PSPEC_DIF(JP,JJ))    
+      ELSE                                                                        
+      PDIFF_RATIO(JP,JJ)=1.
+      ENDIF
+    ENDDO
   ENDDO
 
 
@@ -1587,14 +1587,14 @@ CHARACTER(3), INTENT(IN)              :: HSNOWCOMP   ! compaction option
 !
 LOGICAL, INTENT(IN)                 :: OSNOWCOMPACT_BOOL ! 20160211
 !
-REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE, PSNOWSWE			! Age and SWE of snow layers
+REAL, DIMENSION(:,:), INTENT(INOUT) :: PSNOWAGE, PSNOWSWE   ! Age and SWE of snow layers
 !
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWRHO2,    &! work snow density UNIT : kg m-3
                                                       ZVISCOSITY,   &! Snow viscosity UNIT : N m-2 s (= Pa s)
                                                       ZSMASS,        &!overburden mass for a given layer UNIT : kg m-2 
-						      																		ZSMASSCOEFF		! Coefficient for extra pressure due to grooming (p.s 20150721)
+                                                      ZSMASSCOEFF   ! Coefficient for extra pressure due to grooming (p.s 20150721)
 !
 REAL,PARAMETER::PPK=0.18
 REAL,PARAMETER::PPB=-6.6E-3
@@ -1713,8 +1713,8 @@ ENDDO      ! end loop grid points
 
 IF (OSNOWCOMPACT_BOOL) THEN
   CALL SNOWGROOMING(ZSMASS,PSNOWDZ,PSNOWSWE,PSNOWAGE,PSNOWGRAN1,&
-		      PSNOWGRAN2,INLVLS_USE,ZSMASSCOEFF, &
-		      OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER)
+                    PSNOWGRAN2,INLVLS_USE,ZSMASSCOEFF, &
+                    OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER)
 ENDIF
 !
 DO JJ = 1,SIZE(PSNOWDZ,1)
@@ -4540,7 +4540,7 @@ DO JJ = 1,SIZE(PSNOW(:))
     !    
     ! newly fallen snow characteristics:
     !Case of new snowfall on a previously snow-free surface 
-    IF ( KNLVLS_USE(JJ)>0 ) THEN 		
+    IF ( KNLVLS_USE(JJ)>0 ) THEN
       ZSCAP    (JJ) = XCI*PSNOWRHO(JJ,1)
       ZSNOWTEMP(JJ) = XTT + ( PSNOWHEAT(JJ,1) + XLMTT*PSNOWRHO(JJ,1)*PSNOWDZ(JJ,1) ) / &
                             ( ZSCAP(JJ) * MAX( XSNOWDMIN/INLVLS, PSNOWDZ(JJ,1) ) ) 
@@ -4566,7 +4566,7 @@ DO JJ = 1,SIZE(PSNOW(:))
                                LOG(PUREF(JJ)/ZZ0EFF)    
     
     PSNOWHMASS(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))*&
-		      (XCI*(ZSNOWTEMP(JJ)-XTT)-XLMTT)*PTSTEP	!20160211
+                    (XCI*(ZSNOWTEMP(JJ)-XTT)-XLMTT)*PTSTEP  !20160211
     !
     !! Cluzet et al 2016
     !! implementation of different parametrical options for fresh snow density.
@@ -4584,12 +4584,12 @@ DO JJ = 1,SIZE(PSNOW(:))
             PSNOWRHOF (JJ)=EXP(( XRHOS_S02_1 + XRHOS_S02_2 * (PTA(JJ)-XTT) +&
                                  XRHOS_S02_3 + XRHOS_S02_4 * ASIN( SQRT(XRHOS_S02_5)) +&
                                  XRHOS_S02_6 * LOG10( MAX( SQRT(ZWIND_RHO(JJ) ), 2. )))&
-                                 *LOG(10.))	
+                                 *LOG(10.))
         ELSE
             PSNOWRHOF (JJ)=EXP(( XRHOS_S02_1 + XRHOS_S02_2 * (PTA(JJ)-XTT) +&
                                  XRHOS_S02_4 * ASIN( SQRT(XRHOS_S02_5)) +&
                                  XRHOS_S02_6 * LOG10( MAX( SQRT(ZWIND_RHO(JJ) ), 2. )))&
-                                 *LOG(10.))	
+                                 *LOG(10.))
         ENDIF
     ELSEIF ( HSNOWFALL == 'A76') THEN ! Anderson 76 law
       IF(PTA(JJ) - XTT + XRHOS_A76_3 < 0.) THEN
@@ -4614,8 +4614,8 @@ DO JJ = 1,SIZE(PSNOW(:))
 !!modifs par VV
 !
     IF (OSNOWMAK_PROP .and. ZPSR_SNOWMAK(JJ)>XUEPSI) THEN
-      PSNOWRHOF(JJ) = ((PSR(JJ)+PBLOWSNW(JJ,1))*PSNOWRHOF(JJ)+ ZPSR_SNOWMAK(JJ)*XRHO_SNOWMAK)/ &	! Additionnal boolean to use modified properties of machine made snow (MMS) or not p.spandre 2014/07/15
-		      (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))						! NB : ZPSR_SNOWMAK = XPSR_SNOWMAK si prod de neige. =0 sinon. 
+      PSNOWRHOF(JJ) = ((PSR(JJ)+PBLOWSNW(JJ,1))*PSNOWRHOF(JJ)+ ZPSR_SNOWMAK(JJ)*XRHO_SNOWMAK)/ &  ! Additionnal boolean to use modified properties of machine made snow (MMS) or not p.spandre 2014/07/15
+      (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))     ! NB : ZPSR_SNOWMAK = XPSR_SNOWMAK si prod de neige. =0 sinon. 
     ENDIF
     ZSNOWFALL(JJ) = (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ)) * PTSTEP / PSNOWRHOF(JJ)  ! snowfall thickness (m)  		! snowfall thickness (m)
 !
@@ -4696,10 +4696,10 @@ DO JJ = 1,SIZE(PSNOW(:))
       !
       ! Additionnal boolean to use modified properties of machine made snow or not p.spandre 2014/07/15
       IF (OSNOWMAK_PROP) THEN
-	PSNOWGRAN1F(JJ)=(PSNOWGRAN1F(JJ)*(PSR(JJ)+PBLOWSNW(JJ,1))+XVDIAM3*ZPSR_SNOWMAK(JJ))/ &		! SPECIFICATION OPT DIAM
-	(PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))
-	PSNOWGRAN2F(JJ)=(PSNOWGRAN2F(JJ)*(PSR(JJ)+PBLOWSNW(JJ,1))+XNSPH4/XGRAN*ZPSR_SNOWMAK(JJ))/ &	! SPECIFICATION SPHERICITY
-	(PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))
+        PSNOWGRAN1F(JJ)=(PSNOWGRAN1F(JJ)*(PSR(JJ)+PBLOWSNW(JJ,1))+XVDIAM3*ZPSR_SNOWMAK(JJ))/ &    ! SPECIFICATION OPT DIAM
+        (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))
+        PSNOWGRAN2F(JJ)=(PSNOWGRAN2F(JJ)*(PSR(JJ)+PBLOWSNW(JJ,1))+XNSPH4/XGRAN*ZPSR_SNOWMAK(JJ))/ &   ! SPECIFICATION SPHERICITY
+        (PSR(JJ)+PBLOWSNW(JJ,1)+ZPSR_SNOWMAK(JJ))
       END IF
     !
     ENDIF
@@ -6296,8 +6296,8 @@ END SUBROUTINE SNOWCROGETSSA
 !####################################################################
 !###################################################################
         SUBROUTINE SNOWGROOMING(PSMASS,PSNOWDZ,PSNOWSWE,PSNOWAGE,&
-                   PSNOWGRAN1,PSNOWGRAN2,INLVLS_USE,PSMASSCOEFF, &
-		   OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER)
+                                PSNOWGRAN1,PSNOWGRAN2,INLVLS_USE,PSMASSCOEFF, &
+                                OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER)
 !!
 !!    PURPOSE
 !!    -------
@@ -6311,33 +6311,33 @@ IMPLICIT NONE
 !      0.1    declarations of arguments
 !
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PSMASS, PSNOWDZ,PSNOWSWE,&
-				       PSNOWAGE,PSNOWGRAN1, PSNOWGRAN2,&
-				       PSMASSCOEFF
+                                       PSNOWAGE,PSNOWGRAN1, PSNOWGRAN2,&
+                                       PSMASSCOEFF
 !
 INTEGER, DIMENSION(:), INTENT(IN)   :: INLVLS_USE
 !
-LOGICAL, INTENT(IN)   		    :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, &
-				       OSNOWTILLER
+LOGICAL, INTENT(IN)                 :: OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, &
+                                       OSNOWTILLER
 !
 !      0.2    declarations of local variables
 !
-INTEGER		               	    :: JJ,JST,II,SMT   		! looping indexes
+INTEGER                             :: JJ,JST,II,SMT    ! looping indexes
 !
-REAL				    :: ZSNOWAGEB, ZSNOWGRAN1B, ZSNOWGRAN2B, &
-				       ZSNOWRHOB, ZSNOWDZB, &
-				       ZSNOWRHOC, ZSNOWDZC
-REAL, PARAMETER			    :: VSWE = 35.0 		!  threshold for SWE max impacted layers 	# A	SWEp SPECIFICATION - SENSITIVITY TEST : SPECIFIED PARAMETERS
+REAL                                :: ZSNOWAGEB, ZSNOWGRAN1B, ZSNOWGRAN2B, &
+                                       ZSNOWRHOB, ZSNOWDZB, &
+                                       ZSNOWRHOC, ZSNOWDZC
+REAL, PARAMETER                     :: VSWE = 35.0  !  threshold for SWE max impacted layers 	# A	SWEp SPECIFICATION - SENSITIVITY TEST : SPECIFIED PARAMETERS
 !
 LOGICAL, DIMENSION(SIZE(PTA))       :: LTIMECOMPACT
-LOGICAL		   		    :: PMONTH
-LOGICAL		   		    :: PDAY
-REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWCOMPACT, ZSNOWRHOG, ZSNOWDZG		! extra pressure due to grooming kg m-2
+LOGICAL                             :: PMONTH
+LOGICAL                             :: PDAY
+REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWCOMPACT, ZSNOWRHOG, ZSNOWDZG   ! extra pressure due to grooming kg m-2
 !												! density recalculation variable
 !												! layer thickness variable
 II = 1
-SMT = 1		! SMT = 1 <=> GROOMING ONLY
-		! SMT = 3 <=> GROOMING + SNOWMAKING
-PMONTH = .TRUE.	!
+SMT = 1   ! SMT = 1 <=> GROOMING ONLY
+          ! SMT = 3 <=> GROOMING + SNOWMAKING
+PMONTH = .TRUE. !
 !
 DO JJ=1, SIZE(PSNOWDZ,1)
 !-----------------------	Grooming option by p.spandre 2013/12/04		----------------------------------------|
@@ -6345,11 +6345,11 @@ DO JJ=1, SIZE(PSNOWDZ,1)
 !	A. Timing conditions
 !		A.1. Month condition : grooming possible from november to april
 !
-  IF (OSNOWMAK_BOOL) THEN								! Check if GROOMING ONLY or GROOM.+SM
+  IF (OSNOWMAK_BOOL) THEN ! Check if GROOMING ONLY or GROOM.+SM
     SMT = 3
   ENDIF
 !
-  IF (TPTIME%TDATE%MONTH == XSM_END(SMT) .and. TPTIME%TDATE%DAY > XSM_END(SMT+1)) THEN	! Check the closing date for that track
+  IF (TPTIME%TDATE%MONTH == XSM_END(SMT) .and. TPTIME%TDATE%DAY > XSM_END(SMT+1)) THEN  ! Check the closing date for that track
       PMONTH = .FALSE.
   ENDIF
 !
@@ -6357,7 +6357,7 @@ DO JJ=1, SIZE(PSNOWDZ,1)
     PMONTH = .FALSE.
   ENDIF
 !
-  IF (TPTIME%TDATE%MONTH > 10.) THEN							! Grooming in NOV and DEC always TRUE
+  IF (TPTIME%TDATE%MONTH > 10.) THEN    ! Grooming in NOV and DEC always TRUE
     PMONTH = .TRUE.
   ENDIF
 !
@@ -6368,7 +6368,7 @@ DO JJ=1, SIZE(PSNOWDZ,1)
     PDAY = .FALSE.
   ENDIF
 !		A.3. Option : Grooming one day out of two (no grooming on even days)
-			    !! ---> Removed to model daily grooming, ps 2015/05/03 !!
+          !! ---> Removed to model daily grooming, ps 2015/05/03 !!
   IF (MOD(TPTIME%TDATE%DAY, XFREQ_GRO) /= 0.) THEN
     PDAY = .FALSE.
   ENDIF
@@ -6405,7 +6405,7 @@ DO JJ=1, SIZE(PSNOWDZ,1)
       ZSNOWCOMPACT(JJ,JST) = 500.
     ELSE
       IF (SUM(PSNOWSWE(JJ,1:JST)) < 150.) THEN
-	ZSNOWCOMPACT(JJ,JST) = MAX(1000.-10.*SUM(PSNOWSWE(JJ,1:JST)),0.0)
+        ZSNOWCOMPACT(JJ,JST) = MAX(1000.-10.*SUM(PSNOWSWE(JJ,1:JST)),0.0)
       ENDIF
     ENDIF
   ENDDO
@@ -6415,7 +6415,7 @@ DO JJ=1, SIZE(PSNOWDZ,1)
   IF (LTIMECOMPACT(JJ)) THEN
     DO JST=1,INLVLS_USE(JJ)
       ZSNOWRHOC = PSNOWRHO(JJ,JST) + (PSNOWRHO(JJ,JST)*PSMASSCOEFF(JJ,JST))* &
-		  (PSMASS(JJ,JST) + ZSNOWCOMPACT(JJ,JST))
+                  (PSMASS(JJ,JST) + ZSNOWCOMPACT(JJ,JST))
       ZSNOWDZC = PSNOWDZ(JJ,JST)*PSNOWRHO(JJ,JST)/ZSNOWRHOC
 !
       PSNOWRHO(JJ,JST) = ZSNOWRHOC
@@ -6427,12 +6427,11 @@ DO JJ=1, SIZE(PSNOWDZ,1)
 !
 !------------------ TILLING OPTION -----------------------------|
 !								|
-  IF (LTIMECOMPACT(JJ) .and. OSNOWTILLER .and. TPTIME%TIME < 75600. .and. TPTIME%TIME >= 72000.) THEN
-									! Tilling occurs between 8pm and 8.45pm i.e. 4 time steps
+  IF (LTIMECOMPACT(JJ) .and. OSNOWTILLER .and. TPTIME%TIME < 75600. .and. TPTIME%TIME >= 72000.) THEN   ! Tilling occurs between 8pm and 8.45pm i.e. 4 time steps
     DO JST=1,INLVLS_USE(JJ)
-      IF (SUM(PSNOWSWE(JJ,1:JST)) > 35.0) THEN				! Depth of tiller penetration based on SWE			# A	Depth Pen. Tiller SPECIFICATION
-	II = JST
-	EXIT
+      IF (SUM(PSNOWSWE(JJ,1:JST)) > 35.0) THEN      ! Depth of tiller penetration based on SWE			# A	Depth Pen. Tiller SPECIFICATION
+        II = JST
+        EXIT
       ENDIF
     ENDDO
 !
@@ -6440,8 +6439,8 @@ DO JJ=1, SIZE(PSNOWDZ,1)
     ZSNOWGRAN1B = SUM(PSNOWGRAN1(JJ,1:II)*PSNOWSWE(JJ,1:II))/SUM(PSNOWSWE(JJ,1:II))
     ZSNOWGRAN2B = SUM(PSNOWGRAN2(JJ,1:II)*PSNOWSWE(JJ,1:II))/SUM(PSNOWSWE(JJ,1:II))
 !
-    ZSNOWGRAN1B = MAX(ZSNOWGRAN1B, (ZSNOWGRAN1B*4+0.00026)/5)			! Optical Diameter					# C	Opt. Dia. SPECIFICATION
-    ZSNOWGRAN2B = MAX(ZSNOWGRAN2B, (ZSNOWGRAN2B*4+90./100)/5)			! Sphericity						# D	Sphericity SPECIFICATION
+    ZSNOWGRAN1B = MAX(ZSNOWGRAN1B, (ZSNOWGRAN1B*4+0.00026)/5)   ! Optical Diameter					# C	Opt. Dia. SPECIFICATION
+    ZSNOWGRAN2B = MAX(ZSNOWGRAN2B, (ZSNOWGRAN2B*4+90./100)/5)   ! Sphericity						# D	Sphericity SPECIFICATION
 !
     DO JST=1,II
       PSNOWAGE(JJ,JST) = ZSNOWAGEB
@@ -6450,8 +6449,8 @@ DO JJ=1, SIZE(PSNOWDZ,1)
     ENDDO
 !
 ! DENSITY RE-CALCULATION
-    ZSNOWRHOB = SUM(PSNOWRHO(JJ,1:II)*PSNOWSWE(JJ,1:II))/SUM(PSNOWSWE(JJ,1:II))		! Average density
-    ZSNOWRHOB = MAX(ZSNOWRHOB, (ZSNOWRHOB*4.+450.)/5)					! Recalculated average density			# B	Density SPECIFICATION
+    ZSNOWRHOB = SUM(PSNOWRHO(JJ,1:II)*PSNOWSWE(JJ,1:II))/SUM(PSNOWSWE(JJ,1:II))   ! Average density
+    ZSNOWRHOB = MAX(ZSNOWRHOB, (ZSNOWRHOB*4.+450.)/5)   ! Recalculated average density			# B	Density SPECIFICATION
 !
     DO JST=1,II
       ZSNOWRHOG(JJ,JST) = ZSNOWRHOB
