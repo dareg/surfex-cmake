@@ -7170,7 +7170,7 @@ VEGTYPE   Bogr
 
 COVER 124
  FRACTION   Town Nature  Water    Sea
-      124   0.00   0.80   0.20   0.00
+      124   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       124   0.00   0.00   0.00   0.00   0.00   0.50   0.00   0.00   0.00   0.00   0.00   0.50   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -7240,7 +7240,7 @@ VEGTYPE   Park
 
 COVER 125
  FRACTION   Town Nature  Water    Sea
-      125   0.00   0.80   0.20   0.00
+      125   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       125   0.00   0.00   0.00   0.00   0.20   0.00   0.00   0.00   0.00   0.00   0.00   0.80   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -8720,7 +8720,7 @@ VEGTYPE    Irr
 
 COVER 176
  FRACTION   Town Nature  Water    Sea
-      176   0.00   0.80   0.20   0.00
+      176   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       176   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12146,7 +12146,7 @@ VEGTYPE     No
 
 COVER 238
  FRACTION   Town Nature  Water    Sea
-      238   0.00   0.80   0.20   0.00
+      238   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       238   0.00   0.00   0.00   0.50   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.50   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12216,7 +12216,7 @@ VEGTYPE   Park
 
 COVER 239
  FRACTION   Town Nature  Water    Sea
-      239   0.00   0.80   0.20   0.00
+      239   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       239   0.00   0.00   0.00   0.00   0.20   0.00   0.00   0.00   0.00   0.00   0.00   0.80   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12286,7 +12286,7 @@ VEGTYPE   Park
 
 COVER 240
  FRACTION   Town Nature  Water    Sea
-      240   0.00   0.80   0.20   0.00
+      240   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       240   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
@@ -12330,7 +12330,7 @@ VEGTYPE   Park
 
 COVER 241
  FRACTION   Town Nature  Water    Sea
-      241   0.00   0.50   0.50   0.00
+      241   0.00   1.00   0.00   0.00
  FRACTION     No   Rock   Snow   Tebd   Bone   Trbe     C3     C4    Irr   Gras   Trog   Park   Trbd   Tebe   Tene   Bobd   Bond   Bogr   Shrb
       241   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   1.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00   0.00
  mean ALB_SOIL_NIR (36 10-day periods)
