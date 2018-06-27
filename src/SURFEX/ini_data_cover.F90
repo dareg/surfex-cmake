@@ -115,7 +115,10 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVEGTYPE_OLD, NVEGTYPE_ECOSG,   &
                                   NROCK, NSEA, NWATER, NPERMSNOW, NUT_CPHR, &
                                   NUT_CPMR, NUT_CPLR, NUT_OPHR, NUT_OPMR, &
                                   NUT_OPLR, NUT_LWLR, NUT_LALR, NUT_SPAR, &
-                                  NUT_INDU, NVT_C3W, NVT_C3S, NVT_FLTR, NVT_FLGR 
+                                  NUT_INDU, NVT_C3W, NVT_C3S, NVT_FLTR, NVT_FLGR, &
+!ek_beg
+                                  NNSEA, NNWATER
+!ek_end 
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
@@ -1270,13 +1273,29 @@ ENDIF
 !
 ICPT_SEA = 0
 ICPT_WATER = 0
+!ek_beg
+NNSEA = 0
+NNWATER = 0
+DO JCOV = 1, JPCOVER
+   IF (XDATA_SEA(JCOV)==1.) THEN
+      NNSEA = NNSEA + 1
+   ENDIF
+   IF (XDATA_WATER(JCOV)==1.) THEN
+      NNWATER = NNWATER + 1
+   ENDIF   
+END DO
+!ek_end
 !
 IF (U%LECOSG) THEN
   ALLOCATE(NSEA(1))
   ALLOCATE(NWATER(2))
 ELSE
-  ALLOCATE(NSEA(3))
-  ALLOCATE(NWATER(2))        
+!ek_beg
+!  ALLOCATE(NSEA(3))
+!  ALLOCATE(NWATER(2))
+  ALLOCATE(NSEA(NNSEA))
+  ALLOCATE(NWATER(NNWATER))
+!ek_end        
 ENDIF
 !
 NSEA(:) = 0

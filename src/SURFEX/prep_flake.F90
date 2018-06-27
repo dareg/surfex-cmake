@@ -60,7 +60,16 @@ USE MODD_PREP,         ONLY : XZS_LS
 USE MODD_PREP_FLAKE,   ONLY : LCLIM_LAKE
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
-USE MODD_CSTS,       ONLY : XTT
+!USE MODD_CSTS,       ONLY : XTT
+USE modd_flake_parameters, ONLY : &
+  tpl_T_f,  & ! Fresh water freezing point [K]
+  tpl_T_r,  &! Temperature of maximum density of fresh water [K]
+  C_T_min,  &! Minimum value of the shape factor C_T (thermocline)
+  C_T_max,  &! Maximum value of the shape factor C_T (thermocline)
+  h_ML_min_flk,  &! Minimum mixed-layer depth [m]
+  h_Snow_min_flk,  &! Minimum snow thickness [m]
+  h_Ice_min_flk,  &! Minimum ice thickness [m]
+  H_Ice_max        ! Maximum ice tickness in  
 USE MODE_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_CAN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -69,6 +78,7 @@ USE PARKIND1  ,ONLY : JPRB
 USE MODI_CLEAN_PREP_OUTPUT_GRID
 !
 USE MODI_ABOR1_SFX
+
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
@@ -97,7 +107,22 @@ TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
 INTEGER :: ISIZE
 INTEGER :: ILUOUT
-LOGICAL :: GNOVALUE       ! if the variable is not defined
+CHARACTER(LEN=6)              :: YFILETYPE ! type of input file
+CHARACTER(LEN=28)             :: YFILE     ! name of file
+CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
+CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
+LOGICAL, DIMENSION(10)  :: GUNIF  ! if all lake fields except TS and T_MNW are given as unified
+!LOGICAL, DIMENSION(11) :: GFIELD ! if all lake fields except TS are given from the file
+LOGICAL :: GUNIF_TS   ! if TS field is given as unified
+LOGICAL :: GUNIF_ZS   ! if ZS field is given as unified
+LOGICAL :: GINTERP    ! if the field needs horizontal interpolation
+LOGICAL :: GINTERP_ZS ! if the ZS field needs horizontal interpolation
+!LOGICAL :: GFIELD_TS  !  if TS field is given from the file
+LOGICAL :: GFILE      ! if file name exists in the namelist
+!LOGICAL :: GSAME_GRID ! if flake grid is the same as the grid in the file to read 
+LOGICAL :: GUNIF_G    ! if in general we use unified fields
+LOGICAL :: GPROFILE   ! if there is possible to give a temperature profile for a stratified lake (.TRUE.) 
+                      ! or just mixed lakes are possible 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -120,84 +145,93 @@ ISIZE = SIZE(FG%XLAT)
 !
 !*      2.     Reading and horizontal interpolations
 !
+IF (.NOT.LCLIM_LAKE) THEN
+
+!              First reading the configuration and defining the setup
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'TS     ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                            HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF_TS)
+  GFILE = YFILETYPE/='      '
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'T_SNOW ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                            HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(1))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'T_ICE  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(2))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'T_WML  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(3))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'T_BOT  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(4))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'T_B1   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(5))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'CT     ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(6))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'H_SNOW ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(7))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'H_ICE  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(8))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'H_ML   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(9))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'H_B1   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF(10))
+  CALL READ_PREP_FLAKE_CONF(HPROGRAM,'ZS     ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF_ZS)
+  IF(ALL(GUNIF)) THEN
+    GUNIF_G = .TRUE.
+    GPROFILE = .TRUE.
+    WRITE(ILUOUT,*) "WARNING! The unified profile for lakes is taken from the namelist."
+    WRITE(ILUOUT,*) "WARNING! The profile will be checked for the constrains, some values might be changed!"   
+    WRITE(ILUOUT,*) "WARNING! TS will be defined from the profile, might be changed!"    
+  ELSE
+    IF(GUNIF_TS) THEN
+      GUNIF_G = .TRUE.
+      GPROFILE = .FALSE.
+      WRITE(ILUOUT,*) "WARNING! At least one of lake profile variables was not indicated, so set the mixed profile!"  
+    ELSE
+      IF(GFILE) THEN
+        GUNIF_G = .FALSE.
+        GPROFILE = .TRUE.
+      ELSE
+        CALL ABOR1_SFX('PREP_FLAKE: SOME OF LAKE VARIABLES IS MISSING, TS IS ALSO MISSING, FILE NAME IS NOT GIVEN!')
+      END IF
+    END IF
+  END IF
+
 !
 !*      2.0    Large scale orography
 !
  CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'ZS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE)
+                           HPROGRAM,'ZS     ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_ZS,GINTERP_ZS)
 !
 !*      2.1    FLake variables
 !
-GNOVALUE = .FALSE.
 !
-IF (.NOT.LCLIM_LAKE) THEN
-  !
-  CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'TS     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  IF (GNOVALUE) CALL ABOR1_SFX('PREP_FLAKE: AT LEAST TS SHOULD BE GIVEN!')
-  !
-  CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'T_SNOW ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'T_ICE  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'T_WML  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  ALLOCATE(F%XT_MNW(ISIZE))
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'T_BOT  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'T_B1   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'CT     ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'H_SNOW ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'H_ICE  ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'H_ML   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
-  !
-  IF (.NOT.GNOVALUE) CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
-                           HPROGRAM,'H_B1   ',HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,GNOVALUE)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'TS     ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'T_SNOW ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'T_ICE  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'T_WML  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'T_BOT  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'T_B1   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'CT     ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'H_SNOW ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'H_ICE  ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'H_ML   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
+                           HPROGRAM,'H_B1   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
+ ALLOCATE(F%XT_MNW(SIZE(F%XTS)))
+ IF (GINTERP) THEN
+  GPROFILE = .FALSE.
+ END IF
   !
 ENDIF
 !
-IF (LCLIM_LAKE .OR. GNOVALUE) THEN
-  IF (LCLIM_LAKE) THEN
-    ALLOCATE(F%XTS(ISIZE))
-    F%XTS(:)=XUNDEF
-  ENDIF
-  ALLOCATE(F%XT_SNOW(ISIZE)) 
-  ALLOCATE(F%XT_ICE(ISIZE))  
-  ALLOCATE(F%XT_WML(ISIZE))
-  ALLOCATE(F%XT_MNW(ISIZE)) 
-  ALLOCATE(F%XT_BOT(ISIZE))  
-  ALLOCATE(F%XT_B1(ISIZE))
-  ALLOCATE(F%XCT(ISIZE))  
-  ALLOCATE(F%XH_SNOW(ISIZE))  
-  ALLOCATE(F%XH_ICE(ISIZE))
-  ALLOCATE(F%XH_ML(ISIZE))
-  ALLOCATE(F%XH_B1(ISIZE))  
-  F%XT_SNOW(:)=XUNDEF
-  F%XT_ICE(:)=XUNDEF
-  F%XT_WML(:)=XUNDEF
-  F%XT_MNW(:)=XUNDEF
-  F%XT_BOT(:)=XUNDEF
-  F%XT_B1(:)=XUNDEF
-  F%XCT(:)=XUNDEF
-  F%XH_SNOW(:)=XUNDEF
-  F%XH_ICE(:)=XUNDEF
-  F%XH_ML(:)=XUNDEF
-  F%XH_B1(:)=XUNDEF
-ENDIF
 !
 !-------------------------------------------------------------------------------------
 !
@@ -212,43 +246,199 @@ F%XZ0 = 0.001
 !
 ALLOCATE(F%XUSTAR(SIZE(F%XTS)))
 F%XUSTAR = 0.
-!
+
 !-------------------------------------------------------------------------------------
 
 !
 !*      3.     Vertical interpolations of all variables
 !
 IF(.NOT.LCLIM_LAKE) THEN
-  IF (LVERTSHIFT)THEN    
-    CALL PREP_VER_FLAKE(F)
-    WRITE(ILUOUT,*) "WARNING: You want the vertical shift for lakes?"
-    WRITE(ILUOUT,*) "WARNING: Vertical shift for the lake temperature profile is impossible!"
-    WRITE(ILUOUT,*) "WARNING: So, set the default vertical profiles from the shifted surface temperature."    !
-    GNOVALUE=.TRUE.
+  IF (LVERTSHIFT)THEN   
+    IF (GPROFILE) THEN 
+      WRITE(ILUOUT,*) "WARNING: Vertical shift for the lake temperature profile is impossible!"
+      IF(GUNIF_G) THEN
+        WRITE(ILUOUT,*) "WARNING: So, set the mixed profiles from the shifted surface temperature."
+        IF(.NOT.GUNIF_TS) THEN 
+          WHERE(F%XH_SNOW > 0.0)
+            F%XTS(:) = F%XT_SNOW(:)
+          END WHERE
+          WHERE(F%XH_SNOW == 0.0 .AND. F%XH_ICE > 0.0)
+            F%XTS(:) = F%XT_ICE(:)
+          END WHERE
+          WHERE(F%XH_SNOW == 0.0 .AND. F%XH_ICE == 0.0)
+            F%XTS(:) = F%XT_WML(:)
+          ENDWHERE
+        END IF
+        CALL PREP_VER_FLAKE(F)
+        GPROFILE=.FALSE.
+        WRITE(ILUOUT,*) "WARNING: If you want to keep stratification in lakes, set LVERTSHIFT = F."  
+      ELSE
+        WRITE(ILUOUT,*) "WARNING: Vertical shift for lakes will be skipped even with LVERTSHIFT = F."
+      END IF
+    ELSE
+      CALL PREP_VER_FLAKE(F)
+    END IF
   ENDIF
+  DEALLOCATE(XZS_LS)
 END IF
 !
-DEALLOCATE(XZS_LS)
 !-------------------------------------------------------------------------------------
 !
 !*      4.    Compute T_MNW and give the default profile if needed 
 !              or read data from climate files 
 !
 IF (LCLIM_LAKE) THEN
- CALL CLI_LAKE(FG, F)
-ELSEIF (.NOT.GNOVALUE) THEN
-  F%XT_MNW(:)=F%XT_WML(:)-(F%XT_WML(:)-F%XT_BOT(:))*(1.-F%XH_ML(:)/F%XWATER_DEPTH(:))*F%XCT(:)
-ELSE
-  WRITE(ILUOUT,*) "WARNING! One of the lake profile variales was not indicated, so set the default profile!"
-  F%XT_WML=MAX(F%XTS(:),XTT)  
-  F%XT_SNOW=MIN(F%XTS(:),XTT)
-  F%XT_ICE=MIN(F%XTS(:),XTT)
-  F%XH_B1=0.0 
-  F%XCT=0.5   
+
+  ALLOCATE(F%XTS(ISIZE))
+  ALLOCATE(F%XT_SNOW(ISIZE)) 
+  ALLOCATE(F%XT_ICE(ISIZE))  
+  ALLOCATE(F%XT_WML(ISIZE))
+  ALLOCATE(F%XT_MNW(ISIZE)) 
+  ALLOCATE(F%XT_BOT(ISIZE))  
+  ALLOCATE(F%XT_B1(ISIZE))
+  ALLOCATE(F%XCT(ISIZE))  
+  ALLOCATE(F%XH_SNOW(ISIZE))  
+  ALLOCATE(F%XH_ICE(ISIZE))
+  ALLOCATE(F%XH_ML(ISIZE))
+  ALLOCATE(F%XH_B1(ISIZE))
+
+  CALL CLI_LAKE(FG, F)
+
+  GPROFILE =.TRUE.
+END IF
+
+IF (GPROFILE) THEN
+  WHERE(F%XH_SNOW > 0.0)
+    F%XTS(:) = F%XT_SNOW(:)
+  END WHERE
+  WHERE(F%XH_SNOW == 0.0 .AND. F%XH_ICE > 0.0)
+    F%XTS(:) = F%XT_ICE(:)
+  END WHERE
+  WHERE(F%XH_SNOW == 0.0 .AND. F%XH_ICE == 0.0)
+    F%XTS(:) = F%XT_WML(:)
+  ENDWHERE
+END IF
+
+! Check constraints for the profiles,
+! make corrections according to the constratints
+! and calculate the mean water temperature in case of unified profiles
+IF(GPROFILE) THEN
+  WHERE (F%XH_ML < 0.0)
+    F%XH_ML = 0.0
+  END WHERE 
+  WHERE (F%XH_ML > F%XWATER_DEPTH)
+    F%XH_ML = F%XWATER_DEPTH
+  END WHERE
+  WHERE (F%XCT < C_T_min)
+    F%XCT = C_T_min
+  END WHERE
+  WHERE (F%XCT > C_T_max )
+    F%XCT = C_T_max
+  END WHERE
+  WHERE (F%XT_BOT < tpl_T_f )
+    F%XT_BOT = tpl_T_f
+  END WHERE
+  IF (GUNIF_G) THEN 
+! in case of unified profiles, calculate the mean water temperature
+    WHERE (F%XT_WML < tpl_T_f)
+      F%XT_WML = tpl_T_f
+    END WHERE
+    WHERE(F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
+      F%XT_MNW = F%XT_WML
+    ELSEWHERE
+      F%XT_MNW = F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
+    END WHERE
+  ELSE
+! in case of the input file, calculate the mixed layer temperature
+    WHERE (F%XT_MNW < tpl_T_f)
+      F%XT_MNW = tpl_T_f
+    END WHERE
+    WHERE(F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
+      F%XT_WML = F%XT_MNW
+    ELSEWHERE
+      F%XT_WML = (F%XT_MNW-(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT*F%XT_BOT)/ &
+               (1.-(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT)
+      WHERE (F%XT_WML < tpl_T_f)
+        F%XT_WML = tpl_T_f
+        F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
+      END WHERE   
+    END WHERE    
+  END IF
+  WHERE (F%XH_SNOW < h_Snow_min_flk)
+    F%XH_SNOW = 0.0
+    F%XT_SNOW = tpl_T_f
+  END WHERE
+  WHERE (F%XT_SNOW > tpl_T_f)
+    F%XT_SNOW = tpl_T_f
+  END WHERE
+  WHERE (F%XH_ICE < h_Ice_min_flk)
+    F%XH_SNOW = 0.0
+    F%XT_SNOW = tpl_T_f
+    F%XH_ICE = 0.0
+    F%XT_ICE = tpl_T_f
+  END WHERE
+  WHERE(F%XH_ICE > H_Ice_max)
+    F%XH_ICE = H_Ice_max
+  END WHERE
+  WHERE (F%XT_ICE > tpl_T_f)
+    F%XT_ICE = tpl_T_f
+  END WHERE
+  WHERE (F%XH_ICE > h_Ice_min_flk)
+    F%XT_WML = tpl_T_f
+    WHERE (F%XT_WML == F%XT_BOT)
+      F%XH_ML = 0.0
+      F%XCT = C_T_min
+      F%XT_MNW = F%XT_WML 
+    END WHERE
+    WHERE (F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
+      F%XH_ML = 0.0
+      F%XCT = C_T_min
+      F%XT_MNW = F%XT_WML 
+      F%XT_BOT = F%XT_WML      
+    END WHERE
+! was from Dmitrii's code, but then corrected
+ !   WHERE (F%XT_MNW > tpl_T_r)
+ !     F%XT_MNW = tpl_T_r 
+ !   END WHERE
+    WHERE (F%XT_BOT > tpl_T_r .OR. F%XT_MNW > tpl_T_r)
+      F%XT_BOT = tpl_T_r
+      F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT 
+    END WHERE
+  ELSEWHERE
+! Ensure mixing
+    WHERE (F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
+      F%XH_ML = F%XWATER_DEPTH
+      F%XCT = C_T_min
+      F%XT_WML = F%XT_MNW
+      F%XT_BOT = F%XT_MNW
+    END WHERE
+! Avoid temperature of maximum density crossover
+    WHERE ((F%XT_WML <= tpl_T_r .AND. F%XT_BOT > tpl_T_r).OR. &
+           (F%XT_WML >= tpl_T_r .AND. F%XT_BOT < tpl_T_r))
+      F%XT_BOT = tpl_T_r
+      F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT 
+    END WHERE
+! Avoid inversion
+    WHERE ((F%XT_WML <= tpl_T_r .AND. F%XT_BOT < F%XT_WML).OR. &
+           (F%XT_WML >= tpl_T_r .AND. F%XT_BOT > F%XT_WML))
+      F%XH_ML = F%XWATER_DEPTH
+      F%XCT = C_T_min
+      F%XT_WML = F%XT_MNW
+      F%XT_BOT = F%XT_MNW
+    END WHERE
+  END WHERE
+END IF
+
+IF(.NOT.GPROFILE) THEN
+  F%XT_WML=MAX(F%XTS(:),tpl_T_f) 
+  F%XT_SNOW=MIN(F%XTS(:),tpl_T_f)
+  F%XT_ICE=MIN(F%XTS(:),tpl_T_f)
+  F%XH_B1=5.0 
+  F%XCT=C_T_min
   F%XH_SNOW=0.0   
-  WHERE (F%XTS <= XTT)
-   F%XT_BOT=XTT+4.
-   F%XT_B1=XTT+3.9
+  WHERE (F%XTS <= tpl_T_f)
+   F%XT_BOT= tpl_T_r
+   F%XT_B1= tpl_T_r - 0.1
    F%XH_ICE=0.01
    F%XH_ML=F%XWATER_DEPTH/2.
    F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
@@ -259,7 +449,7 @@ ELSE
    F%XH_ML=F%XWATER_DEPTH
    F%XT_MNW=F%XTS 
   END WHERE
-END IF
+END IF 
 !
 !-------------------------------------------------------------------------------------
 !

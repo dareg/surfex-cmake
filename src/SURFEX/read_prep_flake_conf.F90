@@ -220,8 +220,10 @@ IF (LEN_TRIM(HFILETYPE)==0 .AND. .NOT. OUNIF) THEN
      CASE ('DATE   ')
        IF (LHOOK) CALL DR_HOOK('READ_PREP_FLAKE_CONF',1,ZHOOK_HANDLE)
        RETURN
-     CASE('TS     ') ! an input file or a uniform value must be given for TS
-       CALL ABOR1_SFX('READ_PREP_FLAKE_CONF: AN INPUT FILE OR A UNIFORM PRESCRIBED TS REQUIRED')
+!ek_beg
+!     CASE('TS     ') ! an input file or a uniform value must be given for TS
+!       CALL ABOR1_SFX('READ_PREP_FLAKE_CONF: AN INPUT FILE OR A UNIFORM PRESCRIBED TS REQUIRED')
+!ek_end
    END SELECT
 END IF
 IF (LHOOK) CALL DR_HOOK('READ_PREP_FLAKE_CONF',1,ZHOOK_HANDLE)

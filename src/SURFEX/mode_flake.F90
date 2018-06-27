@@ -840,7 +840,8 @@ ELSE HTC_Water                                      ! Open water
   END IF
 
 ! Mean buoyancy frequency in the thermocline
-  N_T_mean = flake_buoypar(0.5*(T_wML_p_flk+T_bot_p_flk))*MAX(0.,(T_wML_p_flk-T_bot_p_flk))
+!ek  N_T_mean = flake_buoypar(0.5*(T_wML_p_flk+T_bot_p_flk))*MAX(0.,(T_wML_p_flk-T_bot_p_flk))
+  N_T_mean = flake_buoypar(0.5*(T_wML_p_flk+T_bot_p_flk))*(T_wML_p_flk-T_bot_p_flk)
   IF(h_ML_p_flk.LE.depth_w-h_ML_min_flk) THEN
     N_T_mean = SQRT(N_T_mean/(depth_w-h_ML_p_flk))  ! Compute N                   
   ELSE 
@@ -1258,8 +1259,10 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !  Security. Ensure that the expression in () does not become negative at a very large h_snow.
   IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_SNOWDENSITY',0,ZHOOK_HANDLE)
-  flake_snowdensity = MAX( c_small_flk, (1. - h_snow*tpl_Gamma_rho_S/tpl_rho_w_r) )
-  flake_snowdensity = MIN( tpl_rho_S_max, tpl_rho_S_min/flake_snowdensity )
+!ek: after Tido Semmler
+!  flake_snowdensity = MAX( c_small_flk, (1. - h_snow*tpl_Gamma_rho_S/tpl_rho_w_r) )
+!  flake_snowdensity = MIN( tpl_rho_S_max, tpl_rho_S_min/flake_snowdensity )
+  flake_snowdensity = 300.
 IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_SNOWDENSITY',1,ZHOOK_HANDLE)
 
 !------------------------------------------------------------------------------
@@ -1344,9 +1347,11 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 ! Snow heat conductivity [J m^{-1} s^{-1} K^{-1} = kg m s^{-3} K^{-1}]
 
   IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_SNOWHEATCONDUCT',0,ZHOOK_HANDLE)
-  flake_snowheatconduct = flake_snowdensity( h_snow )   ! Compute snow density
-  flake_snowheatconduct = MIN( tpl_kappa_S_max, tpl_kappa_S_min                      &
-                          + h_snow*tpl_Gamma_kappa_S*flake_snowheatconduct/tpl_rho_w_r )  
+! ek: after Tido Semmler
+!  flake_snowheatconduct = flake_snowdensity( h_snow )   ! Compute snow density
+!  flake_snowheatconduct = MIN( tpl_kappa_S_max, tpl_kappa_S_min                      &
+!                          + h_snow*tpl_Gamma_kappa_S*flake_snowheatconduct/tpl_rho_w_r )  
+   flake_snowheatconduct = 0.14 + 2.15*EXP(-5.*h_snow)
 IF (LHOOK) CALL DR_HOOK('FLAKE:FLAKE_SNOWHEATCONDUCT',1,ZHOOK_HANDLE)
 
 !------------------------------------------------------------------------------

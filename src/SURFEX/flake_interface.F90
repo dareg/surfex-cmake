@@ -268,7 +268,11 @@ opticpar_water(JL) = opticpar_medium(1,                       &
 !  Set the rate of snow accumulation
 !------------------------------------------------------------------------------
    
-   dMsnowdt_flk = dMsnowdt_in(JL)  
+   dMsnowdt_flk = dMsnowdt_in(JL)
+! ek: Limitation of the snow depth, not to have too much snow
+   if (h_snow_p_flk.GT.3.0) then
+     dMsnowdt_flk = 0.0
+   end if  
    
 !------------------------------------------------------------------------------
 !  Compute solar radiation fluxes (positive downward)

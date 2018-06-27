@@ -110,4 +110,12 @@ REAL,    DIMENSION(:,:,:), ALLOCATABLE :: XVALLIST
 !                                  ! List of Values encountered in each grid mesh
 !-------------------------------------------------------------------------------
 !
+!ek_beg
+!
+!*        0.5    Variables for the lake database
+!                ------------------------------------------- 
+!
+REAL, DIMENSION(:), ALLOCATABLE :: XFRAC_LDB   ! Fraction of lakes calculated from the lake database
+!-------------------------------------------------------------------------------
+!
 END MODULE MODD_PGDWORK

@@ -39,7 +39,10 @@
 !            -----------
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
-USE MODD_PGDWORK,   ONLY : NSIZE, XSUMVAL, XPREC
+!ek_beg
+!USE MODD_PGDWORK,   ONLY : NSIZE, XSUMVAL, XPREC
+USE MODD_PGDWORK,   ONLY : NSIZE, XSUMVAL, XPREC, XFRAC_LDB
+!ek_end
 USE MODD_DATA_LAKE, ONLY : XBOUNDGRADDEPTH_LDB, XBOUNDGRADSTATUS_LDB, &
                            XCENTRGRADDEPTH_LDB, NCENTRGRADSTATUS_LDB, &
                            XSMALL_DUMMY
@@ -90,54 +93,68 @@ SELECT CASE (HTYPE)
     ZCENTR(:) = NCENTRGRADSTATUS_LDB(:)
 !
   CASE DEFAULT
-    CALL ABOR1_SFX("AVERAGE1_LDB: HTYPE NOT SUPPORTED")
+!ek_beg
+!    CALL ABOR1_SFX("AVERAGE1_LDB: HTYPE NOT SUPPORTED")
+    CALL ABOR1_SFX("AVERAGE2_LDB: HTYPE NOT SUPPORTED")
+!ek_end
 !
 END SELECT
 !
 !
 DO JI = 1,SIZE(XSUMVAL,1)
   !
-  DO JGR = 1,SIZE(XSUMVAL,2)
-    IF (NSIZE(JI,1).NE.0) XSUMVAL(JI,JGR) = XSUMVAL(JI,JGR)/NSIZE(JI,1)
-  ENDDO
-  !
-  !2 because first centre is for values lower than 0
-  ZFRAC = SUM(XSUMVAL(JI,2:SIZE(XSUMVAL,2)))
-  !
-  ZMAX = XSMALL_DUMMY
-  IGRAD_MODE = 2
-  !
-  IF (KSTAT.EQ.1) THEN
+!ek_beg
+  IF(NSIZE(JI,1).NE.0) THEN
+!ek_end
+    DO JGR = 1,SIZE(XSUMVAL,2)
+!ek_beg
+!    IF (NSIZE(JI,1).NE.0) XSUMVAL(JI,JGR) = XSUMVAL(JI,JGR)/NSIZE(JI,1)
+     XSUMVAL(JI,JGR) = XSUMVAL(JI,JGR)/NSIZE(JI,1)
+!ek_end
+    ENDDO
     !
-    DO JGR = 2, SIZE(XSUMVAL,2)
-      ZPDF = XSUMVAL(JI,JGR) / (ZBOUND(JGR)-ZBOUND(JGR-1))
-      IF (ZPDF.GT.ZMAX) THEN
-        ZMAX = ZPDF
-        IGRAD_MODE = JGR
+    !2 because first centre is for values lower than 0
+    ZFRAC = SUM(XSUMVAL(JI,2:SIZE(XSUMVAL,2)))
+    !
+    ZMAX = XSMALL_DUMMY
+    IGRAD_MODE = 2
+    !
+    IF (KSTAT.EQ.1) THEN
+      !
+      DO JGR = 2, SIZE(XSUMVAL,2)
+        ZPDF = XSUMVAL(JI,JGR) / (ZBOUND(JGR)-ZBOUND(JGR-1))
+        IF (ZPDF.GT.ZMAX) THEN
+          ZMAX = ZPDF
+          IGRAD_MODE = JGR
+        ENDIF
+      ENDDO
+      !
+      IF (ZFRAC.GT.0.) THEN
+        PPGDARRAY(JI) = ZCENTR(IGRAD_MODE)
+      ELSE
+        PPGDARRAY(JI) = 0.
       ENDIF
-    ENDDO
+      !
+    ELSEIF (KSTAT.EQ.2) THEN
+      !
+      ZAVE = 0.
+      DO JGR = 2, SIZE(XSUMVAL,2)
+        ZAVE = ZAVE + ZCENTR(JGR) * XSUMVAL(JI,JGR)
+      ENDDO
+      !
+      IF (ZFRAC.LT.0.00001) THEN
+        PPGDARRAY(JI) = 0.
+      ELSE
+        PPGDARRAY(JI) = ZAVE / ZFRAC
+      ENDIF
     !
-    IF (ZFRAC.GT.0.) THEN
-      PPGDARRAY(JI) = ZCENTR(IGRAD_MODE)
-    ELSE
-      PPGDARRAY(JI) = 0.
     ENDIF
-    !
-  ELSEIF (KSTAT.EQ.2) THEN
-    !
-    ZAVE = 0.
-    DO JGR = 2, SIZE(XSUMVAL,2)
-      ZAVE = ZAVE + ZCENTR(JGR) * XSUMVAL(JI,JGR)
-    ENDDO
-    !
-    IF (ZFRAC.LT.0.00001) THEN
-      PPGDARRAY(JI) = 0.
-    ELSE
-      PPGDARRAY(JI) = ZAVE / ZFRAC
-    ENDIF 
-    !
-  ENDIF
-  !
+!ek_beg
+    XFRAC_LDB(JI) = ZFRAC
+  ELSE
+    PPGDARRAY(JI)=XUNDEF
+  END IF
+!ek_end 
 ENDDO
 !
 DEALLOCATE(ZBOUND)

@@ -239,7 +239,7 @@ END SUBROUTINE WRITE_SURFC0_ASC
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFX1_ASC (&
-                                   HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+                              HREC,PFIELD,KRESP,HCOMMENT,HDIR,PMISS)
 !     #############################################################
 !
 !!****  * - routine to fill a write 1D array for the externalised surface 
@@ -276,6 +276,7 @@ INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem 
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
+REAL, INTENT(IN), OPTIONAL :: PMISS
 !*      0.2   Declarations of local variables
 !
 LOGICAL :: GFOUND
@@ -298,7 +299,11 @@ IF (HDIR=='-') THEN
   ZWORK(1:ISIZE) = PFIELD
 ELSE
   ISIZE = SIZE(ZWORK)
-  CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+  IF (PRESENT(PMISS)) THEN
+    CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK,PMISS)
+  ELSE
+    CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+  END IF
 ENDIF
 !
 IF (NRANK==NPIO) THEN
@@ -324,7 +329,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_ASC:WRITE_SURFX1_ASC',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1_ASC
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2_ASC (HREC,PFIELD,KRESP,HCOMMENT,HDIR)
+      SUBROUTINE WRITE_SURFX2_ASC (HREC,PFIELD,KRESP,HCOMMENT,HDIR,PMISS)
 !     #############################################################
 !
 !!****  * - routine to fill a write 2D array for the externalised surface 
@@ -361,6 +366,7 @@ INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a pro
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
+REAL, INTENT(IN), OPTIONAL :: PMISS
 !*      0.2   Declarations of local variables
 ! 
 LOGICAL :: GFOUND
@@ -384,7 +390,11 @@ IF (HDIR=='-') THEN
   ZWORK(1:ISIZE,:) = PFIELD(:,:)
 ELSE
   ISIZE = SIZE(ZWORK,1)
-  CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+  IF (PRESENT(PMISS)) THEN
+    CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK,PMISS)
+  ELSE
+    CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+  END IF
 ENDIF
 !
 IF (NRANK==NPIO) THEN
@@ -497,7 +507,7 @@ END SUBROUTINE WRITE_SURFX3_ASC
 !
 !     #############################################################
       SUBROUTINE WRITE_SURFN1_ASC (&
-                                   HREC,KFIELD,KRESP,HCOMMENT,HDIR)
+                               HREC,KFIELD,KRESP,HCOMMENT,HDIR,KMISS)
 !     #############################################################
 !
 !!****  * - routine to write an integer array
@@ -534,6 +544,7 @@ INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a probl
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
+INTEGER, INTENT(IN), OPTIONAL :: KMISS
 !*      0.2   Declarations of local variables
 !
 LOGICAL :: GFOUND
@@ -557,7 +568,11 @@ IF (HDIR=='-' .OR. HREC=='-') THEN
   IWORK(1:ISIZE) = KFIELD
 ELSE
   ISIZE = SIZE(IWORK)
-  CALL GATHER_AND_WRITE_MPI(KFIELD,IWORK,NMASK)
+  IF (PRESENT(KMISS)) THEN
+    CALL GATHER_AND_WRITE_MPI(KFIELD,IWORK,NMASK,KMISS)
+  ELSE
+    CALL GATHER_AND_WRITE_MPI(KFIELD,IWORK,NMASK)
+  END IF
 ENDIF
 !
 IF (NRANK==NPIO) THEN

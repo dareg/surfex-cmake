@@ -30,6 +30,9 @@ SUBROUTINE PREP_FLAKE_UNIF(KLUOUT,HSURF,PFIELD)
 !!------------------------------------------------------------------
 !
 !
+!ek_beg
+USE MODD_SURF_PAR,     ONLY : XUNDEF
+!ek_end
 USE MODD_PREP,       ONLY : CINTERP_TYPE
 USE MODD_PREP_FLAKE,   ONLY : XTS_UNIF, &
                                   XUNIF_T_SNOW  , &
@@ -85,13 +88,13 @@ SELECT CASE(HSURF)
     ALLOCATE(PFIELD(1,1))
     PFIELD = XUNIF_T_ICE
 !
-  CASE('T_MNW  ')
-    ALLOCATE(PFIELD(1,1))
-    PFIELD = XUNIF_T_MNW
-!
   CASE('T_WML  ')
     ALLOCATE(PFIELD(1,1))
     PFIELD = XUNIF_T_WML
+!
+  CASE('T_MNW  ')
+    ALLOCATE(PFIELD(1,1))
+    PFIELD = XUNIF_T_MNW
 !
   CASE('T_BOT  ')
     ALLOCATE(PFIELD(1,1))

@@ -4,8 +4,10 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_HOR_FLAKE_FIELD (DTCO, UG, U, USS, GCP, KLAT, F, &
-                                 HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,&
-                                 HPGDFILE,HPGDFILETYPE,ONOVALUE)
+                                 HPROGRAM,HSURF, &
+                                 YFILE,YFILETYPE, &
+                                 YFILEPGD, YFILEPGDTYPE, &
+                                 GUNIF,GINTERP)
 !     #################################################################################
 !
 !!****  *PREP_HOR_FLAKE_FIELD* - Reads, interpolates and prepares a water field
@@ -81,29 +83,24 @@ TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 INTEGER, INTENT(IN) :: KLAT
 TYPE(FLAKE_t), INTENT(INOUT) :: F
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
- CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
- CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
- CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
- CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE! type of the Atmospheric file
-LOGICAL, OPTIONAL, INTENT(OUT) :: ONOVALUE  ! flag for the not given value
+CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=7),    INTENT(IN)  :: HSURF     ! type of field
+CHARACTER(LEN=6),    INTENT(IN)  :: YFILETYPE ! type of input file
+CHARACTER(LEN=28),   INTENT(IN)  :: YFILE     ! name of file
+CHARACTER(LEN=6),    INTENT(IN)  :: YFILEPGDTYPE ! type of input file
+CHARACTER(LEN=28),   INTENT(IN)  :: YFILEPGD     ! name of file
+LOGICAL, INTENT(IN) :: GUNIF ! if the unified field is given
+LOGICAL, INTENT(OUT) :: GINTERP ! if interpolation was done
 !
 !
 !*      0.2    declarations of local variables
 !
- CHARACTER(LEN=6)              :: YFILETYPE ! type of input file
- CHARACTER(LEN=28)             :: YFILE     ! name of file
- CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
- CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
- TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time 
+TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time 
 REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN=>NULL()  ! field to interpolate horizontally
 REAL, ALLOCATABLE, DIMENSION(:,:) :: ZFIELDOUT ! field interpolated   horizontally
 INTEGER                       :: ILUOUT    ! output listing logical unit
 INTEGER :: INL, INFOMPI
 !
-LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
-LOGICAL                       :: GDEFAULT  ! flag for prescribed default field
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -113,16 +110,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_FLAKE_FIELD',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
- CALL READ_PREP_FLAKE_CONF(HPROGRAM,HSURF,YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
-                          HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
-!
 CMASK = 'WATER'
 !
-GDEFAULT = (YFILETYPE=='      ' .OR. (HSURF(1:2)/='ZS' .AND. HSURF(1:2)/='TS' &
-                .AND. KLAT.NE.1)) .AND. .NOT.GUNIF
-IF (PRESENT(ONOVALUE)) ONOVALUE = GDEFAULT
-!
-IF (.NOT. GDEFAULT) THEN
 !
 !-------------------------------------------------------------------------------------
 !
@@ -160,15 +149,29 @@ IF (NPROC>1) THEN
 ENDIF
   !ALLOCATE(ZFIELDOUT(SIZE(XLAT),SIZE(ZFIELDIN,2)))
   ALLOCATE(ZFIELDOUT(KLAT,1))
-!
-!Impossible to interpolate lake profiles, only the lake surface temperature! 
-!But in uniform case and 1 point case
-  IF(GUNIF .OR. KLAT.EQ.1) THEN
+
+  IF(GUNIF) THEN
     CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN,ZFIELDOUT)
-  ELSE IF(HSURF(1:2)=='ZS' .OR. HSURF(1:2)=='TS') THEN
-    WRITE(ILUOUT,*) "WARNING! Impossible to interpolate lake profiles in horisontal!"
-    WRITE(ILUOUT,*) "So, interoplate only surface temperature and start from lakes mixed down to the bottom"
-    CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN,ZFIELDOUT)
+    GINTERP=.FALSE.
+  ELSE
+    IF(HSURF(1:2)=='ZS') THEN
+      CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN,ZFIELDOUT)
+      GINTERP=.TRUE.
+    ELSE
+      IF((SIZE(ZFIELDIN,1).EQ.SIZE(ZFIELDOUT,1)).AND.(SIZE(ZFIELDIN,2).EQ.SIZE(ZFIELDOUT,2))) THEN
+        ZFIELDOUT=ZFIELDIN
+        GINTERP=.FALSE.
+      ELSE
+        IF(HSURF(1:2)=='TS') THEN
+          CALL HOR_INTERPOL(DTCO, U, GCP, ILUOUT,ZFIELDIN,ZFIELDOUT)
+        ELSE
+          WRITE(ILUOUT,*) "WARNING! Impossible to interpolate lake profiles in horisontal!"
+          WRITE(ILUOUT,*) "So, interoplate only surface temperature and start from lakes mixed down to the bottom"
+          ZFIELDOUT=XUNDEF
+        END IF
+        GINTERP=.TRUE.
+      END IF
+    END IF
   END IF
 !
 !*      5.     Return to historical variable
@@ -189,6 +192,9 @@ ENDIF
    CASE('T_WML  ')
     ALLOCATE(F%XT_WML(SIZE(ZFIELDOUT,1)))
     F%XT_WML(:) = ZFIELDOUT(:,1)
+   CASE('T_MNW  ')
+    ALLOCATE(F%XT_MNW(SIZE(ZFIELDOUT,1)))
+    F%XT_MNW(:) = ZFIELDOUT(:,1)
    CASE('T_BOT  ')
     ALLOCATE(F%XT_BOT(SIZE(ZFIELDOUT,1)))
     F%XT_BOT(:) = ZFIELDOUT(:,1)
@@ -211,24 +217,15 @@ ENDIF
     ALLOCATE(F%XH_B1(SIZE(ZFIELDOUT,1)))
     F%XH_B1(:) = ZFIELDOUT(:,1)
   END SELECT
+!
 !*      6.     Deallocations
 !
-  IF (ALL(ZFIELDOUT==XUNDEF)) GDEFAULT = .TRUE.
-!
+
   DEALLOCATE(ZFIELDIN )
   DEALLOCATE(ZFIELDOUT)
-!
-END IF
 
 !
-IF (GDEFAULT) THEN
-!
-!*      7.    Initial values of FLAKE variables are computed from TS
-!             when uniform values are not prescribed 
-  IF (HSURF(1:2)/='ZS') WRITE(ILUOUT,*) 'NO FILE FOR FIELD ',HSURF, &
-                                        ': UNIFORM DEFAULT FIELD IS PRESCRIBED'
   
-END IF
 !
 IF (LHOOK) CALL DR_HOOK('PREP_HOR_FLAKE_FIELD',1,ZHOOK_HANDLE)
 !

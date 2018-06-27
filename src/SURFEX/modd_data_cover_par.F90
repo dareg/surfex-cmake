@@ -120,6 +120,9 @@ INTEGER                                :: NPERMSNOW
 !
 INTEGER, DIMENSION(:), ALLOCATABLE     :: NSEA
 INTEGER, DIMENSION(:), ALLOCATABLE     :: NWATER
+!ek_beg
+INTEGER :: NNSEA, NNWATER ! Actual number of pure sea or inland water covers
+!ek_end
 !
 !---------------------------------------------------------------------------------
 !

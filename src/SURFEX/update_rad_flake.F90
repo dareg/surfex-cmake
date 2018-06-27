@@ -33,7 +33,9 @@ USE MODD_FLAKE_n, ONLY : FLAKE_t
 !
 USE MODD_WATER_PAR, ONLY : XALBSCA_WAT, XALBWAT, XEMISWAT, XEMISWATICE
 !
-USE modd_flake_parameters , ONLY : h_Snow_min_flk, h_Ice_min_flk
+USE modd_flake_parameters , ONLY : h_Snow_min_flk, h_Ice_min_flk, tpl_T_f
+!
+USE modd_flake_albedo_ref
 !
 USE MODD_SNOW_PAR, ONLY : XEMISSN
 !
@@ -81,6 +83,10 @@ ELSE
   ZALBSCA(:) = XALBWAT
 ENDIF
 !
+F%XICE_ALB(:) = EXP(-c_albice_MR*(tpl_T_f-MIN(F%XTS(:),tpl_T_f))/tpl_T_f) ! ek: introduces security here with MIN finction
+F%XICE_ALB(:) = albedo_whiteice_ref*(1.-F%XICE_ALB(:)) + albedo_blueice_ref*F%XICE_ALB(:)
+F%XSNOW_ALB(:)  = EXP(-c_albice_MR*(tpl_T_f-MIN(F%XTS(:),tpl_T_f))/tpl_T_f) ! ek: introduces security here with MIN finction 
+F%XSNOW_ALB(:)  = albedo_drysnow_ref*(1.-F%XSNOW_ALB(:)) + albedo_meltingsnow_ref*F%XSNOW_ALB(:)
 WHERE (F%XH_SNOW(:)>=h_Snow_min_flk)
 !* snow
   F%XDIR_ALB  (:) = F%XSNOW_ALB(:)

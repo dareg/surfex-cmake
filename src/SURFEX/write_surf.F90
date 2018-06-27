@@ -28,7 +28,7 @@ INTEGER,           INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem ap
 !
 END SUBROUTINE WRITE_SURFX0
 !
-     SUBROUTINE WRITE_SURFX1 (HSELECT, HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+     SUBROUTINE WRITE_SURFX1 (HSELECT, HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM,PMISS)
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -42,9 +42,10 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+REAL, OPTIONAL, INTENT(IN) :: PMISS ! If the user would like to change a missing value from the default
 END SUBROUTINE WRITE_SURFX1
 !
-     SUBROUTINE WRITE_SURFX2 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+     SUBROUTINE WRITE_SURFX2 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM,PMISS)
 !
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
@@ -59,6 +60,7 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+REAL, OPTIONAL, INTENT(IN) :: PMISS ! If the user would like to change a missing value from the default
 END SUBROUTINE WRITE_SURFX2
 !
      SUBROUTINE WRITE_SURFX3 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
@@ -93,7 +95,7 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !
 END SUBROUTINE WRITE_SURFN0
 !
-     SUBROUTINE WRITE_SURFN1 ( HSELECT, HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+     SUBROUTINE WRITE_SURFN1 ( HSELECT, HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM,KMISS)
 !
  CHARACTER(LEN=*), DIMENSION(:), INTENT(IN) :: HSELECT
 !
@@ -107,6 +109,7 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+INTEGER, OPTIONAL, INTENT(IN) :: KMISS ! If the user would like to change a missing value from the default
 END SUBROUTINE WRITE_SURFN1
 !
      SUBROUTINE WRITE_SURFC0 ( HSELECT, HPROGRAM,HREC,HFIELD,KRESP,HCOMMENT)
@@ -359,7 +362,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX0
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX1 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX1 ( HSELECT,HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM,PMISS)
 !     #############################################################
 !
 !!****  *WRITEX1* - routine to fill a real 1D array for the externalised surface 
@@ -419,6 +422,8 @@ INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem 
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+REAL, OPTIONAL, INTENT(IN) :: PMISS ! If the user would like to change a missing value from the default
+!
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=16)  :: YREC2
@@ -496,7 +501,11 @@ ELSE
   !
   IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-    CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    IF (PRESENT(PMISS)) THEN
+      CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR,PMISS)
+    ELSE
+      CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    END IF
 #endif
   ENDIF
   !
@@ -513,7 +522,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFX1',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFX1
 !
 !     #############################################################
-      SUBROUTINE WRITE_SURFX2 ( HSELECT, HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFX2 ( HSELECT, HPROGRAM,HREC,PFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM,PMISS)
 !     #############################################################
 !
 !!****  *WRITEX2* - routine to fill a real 2D array for the externalised surface 
@@ -573,6 +582,7 @@ INTEGER,              INTENT(OUT) :: KRESP    ! KRESP  : return-code if a proble
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+REAL, OPTIONAL, INTENT(IN) :: PMISS ! If the user would like to change a missing value from the default
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=16)  :: YREC2
@@ -656,7 +666,11 @@ ELSE
   !
   IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-    CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    IF (PRESENT(PMISS)) THEN
+      CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR,PMISS)
+    ELSE
+      CALL WRITE_SURFN_ASC(YREC,PFIELD,KRESP,HCOMMENT,YDIR)
+    END IF
 #endif
   ENDIF
   !
@@ -1001,7 +1015,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_WRITE_SURF:WRITE_SURFN0',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFN0
 
 !     #############################################################
-      SUBROUTINE WRITE_SURFN1 ( HSELECT, HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM)
+      SUBROUTINE WRITE_SURFN1 ( HSELECT, HPROGRAM,HREC,KFIELD,KRESP,HCOMMENT,HDIR,HNAM_DIM,KMISS)
 !     #############################################################
 !
 !!****  *WRITEN0* - routine to write an integer
@@ -1061,6 +1075,7 @@ INTEGER,               INTENT(OUT) :: KRESP    ! KRESP  : return-code if a probl
 !                                             !       horizontal spatial dim.
 !                                             ! '-' : no horizontal dim.
  CHARACTER(LEN=*), OPTIONAL,  INTENT(IN) :: HNAM_DIM
+INTEGER, OPTIONAL, INTENT(IN) :: KMISS ! If the user would like to change a missing value from the default
 !*      0.2   Declarations of local variables
 !
  CHARACTER(LEN=16)  :: YREC2
@@ -1131,7 +1146,11 @@ ENDIF
 !
 IF (HPROGRAM=='ASCII ') THEN
 #ifdef SFX_ASC
-  CALL WRITE_SURFN_ASC(YREC,KFIELD,KRESP,HCOMMENT,YDIR)
+  IF (PRESENT(KMISS)) THEN
+    CALL WRITE_SURFN_ASC(YREC,KFIELD,KRESP,HCOMMENT,YDIR,KMISS)
+  ELSE
+    CALL WRITE_SURFN_ASC(YREC,KFIELD,KRESP,HCOMMENT,YDIR)
+  END IF
 #endif
 ENDIF
 !

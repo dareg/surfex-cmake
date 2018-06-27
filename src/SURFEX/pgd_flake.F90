@@ -50,6 +50,9 @@ USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
+!ek_beg
+USE MODD_PGD_GRID,       ONLY : NL
+!ek_end
 USE MODD_DATA_LAKE,      ONLY : CLAKELDB, CSTATUSLDB
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -63,6 +66,10 @@ USE MODI_PGD_FIELD
 
 USE MODI_GET_SURF_SIZE_n
 USE MODI_PACK_PGD
+!ek_beg
+USE MODI_PACK_SAME_RANK
+USE MODI_SUM_ON_ALL_PROCS
+!ek_end
 !
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -101,6 +108,13 @@ INTEGER                           :: ILUOUT    ! output listing logical unit
 INTEGER                           :: ILUNAM    ! namelist file logical unit
 LOGICAL                           :: GFOUND    ! flag when namelist is present
 INTEGER,DIMENSION(:),ALLOCATABLE  :: IWATER_STATUS
+!ek_beg
+REAL, DIMENSION(NL)                :: ZDEPTH    ! physiographic field on full grid
+INTEGER, DIMENSION(NL)             :: ISTATUS
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK  ! mask for packing from complete field to nature field
+INTEGER                            :: ILU    ! expected physical size of full surface array
+CHARACTER(LEN=6)                   :: YMASK
+!ek_end
 !
 !*    0.3    Declaration of namelists
 !            ------------------------
@@ -123,7 +137,11 @@ REAL                     :: XUNIF_WATER_FETCH
 REAL                     :: XUNIF_T_BS
 REAL                     :: XUNIF_DEPTH_BS
 REAL                     :: XUNIF_EXTCOEF_WATER
+!ek_beg
+REAL                     :: XMIN_DEPTH
+!ek_end
 REAL                     :: XMAX_DEPTH
+
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_DATA_FLAKE/ YWATER_DEPTH, YWATER_DEPTH_STATUS, YWATER_DEPTHFILETYPE,     &
@@ -131,6 +149,9 @@ NAMELIST/NAM_DATA_FLAKE/ YWATER_DEPTH, YWATER_DEPTH_STATUS, YWATER_DEPTHFILETYPE
                          XUNIF_WATER_FETCH, YT_BS, YT_BSFILETYPE, XUNIF_T_BS,         &
                          YDEPTH_BS, YDEPTH_BSFILETYPE, XUNIF_DEPTH_BS,                &
                          YEXTCOEF_WATER, YEXTCOEF_WATERFILETYPE, XUNIF_EXTCOEF_WATER, &
+!ek_beg
+                         XMIN_DEPTH,                                                  &
+!ek_end
                          XMAX_DEPTH  
 !-------------------------------------------------------------------------------
 !
@@ -161,7 +182,11 @@ YT_BSFILETYPE          = '      '
 YDEPTH_BSFILETYPE      = '      '
 YEXTCOEF_WATERFILETYPE = '      '
 !
-XMAX_DEPTH  = 1.E+20
+!ek_beg
+!XMAX_DEPTH  = 1.E+20
+XMAX_DEPTH  = 50.
+XMIN_DEPTH  =  1.
+!ek_end
 !
 !-------------------------------------------------------------------------------
 !
@@ -185,22 +210,25 @@ IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_DATA_FLAKE)
 !*    4.      Number of points and packing
 !             ----------------------------
 !
- CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',FG%NDIM)
+!ek_beg
+YMASK        = 'WATER '
+!ek_end
+!ek CALL GET_SURF_SIZE_n(DTCO, U, 'WATER ',FG%NDIM)
 !
-ALLOCATE(F%LCOVER      (JPCOVER))
-ALLOCATE(F%XZS         (FG%NDIM))
-ALLOCATE(FG%XLAT       (FG%NDIM))
-ALLOCATE(FG%XLON       (FG%NDIM))
-ALLOCATE(FG%XMESH_SIZE (FG%NDIM))
+!ek ALLOCATE(F%LCOVER      (JPCOVER))
+!ek ALLOCATE(F%XZS         (FG%NDIM))
+!ek ALLOCATE(FG%XLAT       (FG%NDIM))
+!ek ALLOCATE(FG%XLON       (FG%NDIM))
+!ek ALLOCATE(FG%XMESH_SIZE (FG%NDIM))
 !
- CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', FG, F%LCOVER, F%XCOVER, F%XZS  )  
+!ek CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', FG, F%LCOVER, F%XCOVER, F%XZS  )  
 !
 !-------------------------------------------------------------------------------
 !
 !*    5.      Water depth
 !             -----------
 !
-ALLOCATE(F%XWATER_DEPTH  (FG%NDIM)) 
+!ek ALLOCATE(F%XWATER_DEPTH  (FG%NDIM)) 
 !
 IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT') THEN
   !      
@@ -209,9 +237,23 @@ IF (TRIM(YWATER_DEPTH)==TRIM(CLAKELDB) .AND. TRIM(YWATER_DEPTHFILETYPE)=='DIRECT
      WRITE(ILUOUT,*)'add YWATER_DEPTH_STATUS="GlobalLakeStatus" in NAM_DATA_FLAKE'
      CALL ABOR1_SFX('PGD_FLAKE: STATUS INPUT FILE NAME NOT SET')
   ELSEIF (TRIM(YWATER_DEPTH_STATUS)==TRIM(CSTATUSLDB)) THEN
-     ALLOCATE(IWATER_STATUS  (FG%NDIM))       
-     CALL TREAT_GLOBAL_LAKE_DEPTH(DTCO, UG, U, USS, &
-                                  HPROGRAM,F%XWATER_DEPTH(:),IWATER_STATUS(:))
+!ek     ALLOCATE(IWATER_STATUS  (FG%NDIM))       
+!ek     CALL TREAT_GLOBAL_LAKE_DEPTH(DTCO, UG, U, USS, &
+!ek                                  HPROGRAM,F%XWATER_DEPTH(:),IWATER_STATUS(:))
+!ek_beg
+    CALL TREAT_GLOBAL_LAKE_DEPTH(DTCO, UG, U, USS, &
+                                 HPROGRAM,XMAX_DEPTH,XMIN_DEPTH, &
+                                 ZDEPTH(:),ISTATUS(:))
+    CALL GET_SURF_SIZE_n(DTCO, U, YMASK, FG%NDIM)
+    ALLOCATE(F%XWATER_DEPTH  (FG%NDIM))
+    ALLOCATE(IWATER_STATUS  (FG%NDIM))
+    ALLOCATE(IMASK(FG%NDIM))
+    ILU=0
+    CALL GET_SURF_MASK_n(DTCO, U, YMASK, FG%NDIM, IMASK, ILU, ILUOUT)
+    CALL PACK_SAME_RANK(IMASK,ZDEPTH(:),F%XWATER_DEPTH(:))
+    CALL PACK_SAME_RANK(IMASK,ISTATUS(:),IWATER_STATUS(:))
+    DEALLOCATE(IMASK)
+!ek_end
   ELSE
      WRITE(ILUOUT,*)'Wrong name for Depth Status file :',' expected: ',TRIM(CSTATUSLDB),' input: ',TRIM(YWATER_DEPTH_STATUS)
      CALL ABOR1_SFX('PGD_FLAKE: WRONG STATUS INPUT FILE NAME')
@@ -232,14 +274,18 @@ ELSE
      CALL ABOR1_SFX('PGD_FLAKE: WITH THIS VERSION OF FLAKE, LRM_RIVER MUST BE TRUE')         
   ENDIF
   !
+!ek_beg
+  CALL GET_SURF_SIZE_n(DTCO, U, YMASK, FG%NDIM)
+  ALLOCATE(F%XWATER_DEPTH  (FG%NDIM))
+!ek_end
   CATYPE='INV'
   CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,'water depth','WAT',YWATER_DEPTH,YWATER_DEPTHFILETYPE,XUNIF_WATER_DEPTH,F%XWATER_DEPTH(:))
-  !
 ENDIF
 !
-F%XWATER_DEPTH(:) = MIN (F%XWATER_DEPTH(:),XMAX_DEPTH)
-WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
+!ek: this is moved to tread_global_lake_depth
+!F%XWATER_DEPTH(:) = MIN (F%XWATER_DEPTH(:),XMAX_DEPTH)
+!WRITE(ILUOUT,*)'MAXIMUM LAKE DEPTH = ',XMAX_DEPTH
 !
 !-------------------------------------------------------------------------------
 !
@@ -287,6 +333,25 @@ CALL PGD_FIELD(DTCO, UG, U, USS, &
                  YEXTCOEF_WATER,YEXTCOEF_WATERFILETYPE,XUNIF_EXTCOEF_WATER, &
                  F%XEXTCOEF_WATER(:))  
 !
+!ek_beg
+!           Packing 
+!
+ALLOCATE(F%LCOVER      (JPCOVER))
+ALLOCATE(F%XCOVER      (FG%NDIM,JPCOVER))
+ALLOCATE(F%XZS         (FG%NDIM))
+ALLOCATE(FG%XLAT       (FG%NDIM))
+ALLOCATE(FG%XLON       (FG%NDIM))
+ALLOCATE(FG%XMESH_SIZE (FG%NDIM))
+CALL PACK_PGD(DTCO, U, HPROGRAM, 'WATER ', FG, F%LCOVER, F%XCOVER, F%XZS  ) 
+
+U%NSIZE_WATER     = COUNT(U%XWATER (:) > 0.0)
+U%NSIZE_SEA       = COUNT(U%XSEA   (:) > 0.0)
+
+U%NDIM_WATER     = SUM_ON_ALL_PROCS(HPROGRAM,FG%CGRID,U%XWATER (:) > 0., 'DIM')
+U%NDIM_SEA       = SUM_ON_ALL_PROCS(HPROGRAM,FG%CGRID,U%XSEA   (:) > 0., 'DIM')
+ 
+!ek_end
+
 !-------------------------------------------------------------------------------
 !
 !*   10.     Prints of flake parameters in a tex file

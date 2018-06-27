@@ -120,8 +120,11 @@ REAL , PARAMETER ::        &
     tpl_c_S           = 2.1E+03    ,  &! Specific heat of snow [J kg^{-1} K^{-1}]
     tpl_kappa_w       = 5.46E-01   ,  &! Molecular heat conductivity of water [J m^{-1} s^{-1} K^{-1}]
     tpl_kappa_I       = 2.29       ,  &! Molecular heat conductivity of ice [J m^{-1} s^{-1} K^{-1}]
-    tpl_kappa_S_min   = 0.2        ,  &! Minimum molecular heat conductivity of snow [J m^{-1} s^{-1} K^{-1}]
-    tpl_kappa_S_max   = 1.5        ,  &! Maximum molecular heat conductivity of snow [J m^{-1} s^{-1} K^{-1}]
+!    tpl_kappa_S_min   = 0.2        ,  &! Minimum molecular heat conductivity of snow [J m^{-1} s^{-1} K^{-1}]
+!    tpl_kappa_S_max   = 1.5        ,  &! Maximum molecular heat conductivity of snow [J m^{-1} s^{-1} K^{-1}]
+! After Tido Semmler
+    tpl_kappa_S_min   = 1.1        ,  &! Minimum molecular heat conductivity of snow [J m^{-1} s^{-1} K^{-1}]
+    tpl_kappa_S_max   = 1.1        ,  &! Maximum molecular heat conductivity of snow [J m^{-1} s^{-1} K^{-1}]
     tpl_Gamma_kappa_S = 1.3            ! Empirical parameter [J m^{-2} s^{-1} K^{-1}]   
                                        ! in the expression for the snow heat conductivity 
 
