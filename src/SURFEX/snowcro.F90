@@ -5731,8 +5731,6 @@ IF (LHOOK) CALL DR_HOOK('SNOWDRIFT',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOWDRIFT
 !####################################################################
-!###################################################################
-!####################################################################
 !####################################################################
 SUBROUTINE SNOWCROLAYER_GONE(PTSTEP,PSCAP,PSNOWTEMP,PSNOWDZ,          &
                              PSNOWRHO,PSNOWLIQ,PSNOWGRAN1,PSNOWGRAN2, &
@@ -6294,9 +6292,9 @@ END SUBROUTINE SNOWCROGETSSA
 !####################################################################
 !####################################################################
 !###################################################################
-        SUBROUTINE SNOWGROOMING(PSMASS,PSNOWDZ,PSNOWSWE,PSNOWAGE,&
-                                PSNOWGRAN1,PSNOWGRAN2,INLVLS_USE,PSMASSCOEFF, &
-                                OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER)
+SUBROUTINE SNOWGROOMING(PSMASS,PSNOWDZ,PSNOWSWE,PSNOWAGE,&
+                        PSNOWGRAN1,PSNOWGRAN2,INLVLS_USE,PSMASSCOEFF, &
+                        OSNOWCOMPACT_BOOL, OSNOWMAK_BOOL, OSNOWTILLER)
 !!
 !!    PURPOSE
 !!    -------
@@ -6464,6 +6462,6 @@ DO JJ=1, SIZE(PSNOWDZ,1)
 !------------------ END OF TILLING OPTION ----------------------|
 !
 ENDDO
-        END SUBROUTINE SNOWGROOMING
+END SUBROUTINE SNOWGROOMING
 !
 END SUBROUTINE SNOWCRO
