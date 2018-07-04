@@ -341,7 +341,7 @@ DO JST=1,SIZE(PSNOWSWE,2)
           PSNOWDEND(JJ,JST)  = 0
           PSNOWSPHER(JJ,JST) = PSNOWGRAN2(JJ,JST)
           PSNOWSIZE(JJ,JST)  = 2.*PSNOWGRAN1(JJ,JST)/(1+  PSNOWSPHER(JJ,JST))
-          IF (ABS(PSNOWSPHER(JJ,JST))< XSURF_EPSILON) THEN
+          IF (ABS(PSNOWSPHER(JJ,JST))< XUEPSI) THEN
                   PSNOWSIZE(JJ,JST)=0.0008
           ELSE
               IF (PSNOWSIZE(JJ,JST)<0.0008) THEN
@@ -360,7 +360,6 @@ DO JST=1,SIZE(PSNOWSWE,2)
         ELSE
           ICLASS_SIZE = 2
         ENDIF
-
 !       Overall 10x3x6 classes from 1 to 180 (included)
 !       Historical variable {0,1,...,5} already defines 6 classes
         PSNOWTYPEMEPRA(JJ,JST) = JPTAB_NODEND(1 + ICLASS_SPHER + ICLASS_SIZE * 10 +&
