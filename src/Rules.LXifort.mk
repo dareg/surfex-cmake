@@ -21,7 +21,7 @@ OPT_BASE   =  -convert big_endian -r8 -g -assume nosource_include -assume bytere
 #-switch fe_inline_all_arg_copy_inout
 OPT_PERF0  =  -O0 
 OPT_PERF2  =  -O2 -fpe0 -ftz
-OPT_CHECK  =  -fp-stack-check -ftrapuv -fpe3 -fp-speculation=strict -check all
+OPT_CHECK  =  -fp-stack-check -ftrapuv -fpe3 -fp-speculation=strict -check none
 # -diag-error  -debug full -assume fpe_summary -openmp-report2
 OPT_I8     =  -i8
 #
