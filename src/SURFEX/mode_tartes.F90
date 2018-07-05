@@ -809,13 +809,17 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('TAUSTAR_VECTOR',0,ZHOOK_HANDLE)
 !
 !Compute extinction coefficient
-ZSIGEXT = PSNOWRHO*PSNOWSSA/2. !doc equation 75
+
+
+
 !
 DO JB=1,NPNBANDS
   !
   DO JL = 1,KMAX_USE
     !
     WHERE ( KNLVLS_USE>=JL )
+    
+      ZSIGEXT(:,JL) = PSNOWRHO(:,JL)*PSNOWSSA(:,JL)/2. !doc equation 75
       !Optical depth of each layer with delta-eddington variable change, doc equation 15
       ! + optical depth threshold (doc section 1.8)
       PDTAUSTAR(:,JL,JB) = MIN( ZSIGEXT(:,JL) * PSNOWDZ(:,JL) * ( 1.- PSNOWSSALB(:,JL,JB)*PSNOWG(:,JL,JB)**2 ), &
@@ -1586,6 +1590,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('SNOWCRO_TARTES',0,ZHOOK_HANDLE)
 !
+
 !Default values (night)
 PRADSINK (:,:) = 0.
 PRADXS (:)  = 0.
