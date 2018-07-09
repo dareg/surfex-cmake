@@ -240,7 +240,7 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
                                        ZSNOWABLAT_DELTA, ZSNOWSWE_1D, ZSNOWD, & 
                                        ZSNOWH, ZSNOWH1, ZGRNDFLUXN, ZPSN,     &
                                        ZSOILCOR, ZSNOWSWE_OUT, ZTHRUFAL,      &
-                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2, &   
+                                       ZSNOW_MASS_BUDGET, ZWGHT, ZWORK, ZC2,  &   
                                        ZTC, ZTW, ZEOD, ZTD, ZTAV, ZEOAV, DD,  &
                                        GA
 !                                      ZSOILCOND    = soil thermal conductivity [W/(m K)]
@@ -268,14 +268,14 @@ REAL, DIMENSION(SIZE(PTA))          :: ZRRSNOW, ZSOILCOND, ZSNOW, ZSNOWFALL,  &
 !                                                     of total ablation during a timestep (-).
 !                                      ZWORK        = local working variable (*)
 !                                      ZC2          = sub-surface heat capacity [(K m2)/J]
-!				       ZTC	    = Atmospheric temp (°C)						p.spandre 2014/03/27
-! 				       ZTW	    = Wet bulb temperature (K)						p.spandre 2014/03/27
-! 				       ZEOD	    = Saturated vapor pressure at dew temp. (kPa)			p.spandre 2014/06/04
-! 				       ZTD	    = Dew Point temp.  (°C)						p.spandre 2014/06/04
-! 				       ZTAV	    = Average temp. =(ZTD+ZTC)/2  (°C)					p.spandre 2014/06/04
-! 				       ZEOAV	    = Saturated vapor pressure at average temp. ZTAV (kPa)		p.spandre 2014/06/04
-! 				       DD	    = Slope of saturated vapor pressure curve (kPa/°C)			p.spandre 2014/06/04
-! 				       GA	    = Psychrometric constant (kPa/°C)					p.spandre 2014/06/04
+!                                      ZTC	    = Atmospheric temp (°C)						p.spandre 2014/03/27
+!                                      ZTW	    = Wet bulb temperature (K)						p.spandre 2014/03/27
+!                                      ZEOD	    = Saturated vapor pressure at dew temp. (kPa)			p.spandre 2014/06/04
+!                                      ZTD	    = Dew Point temp.  (°C)						p.spandre 2014/06/04
+!                                      ZTAV	    = Average temp. =(ZTD+ZTC)/2  (°C)					p.spandre 2014/06/04
+!                                      ZEOAV	    = Saturated vapor pressure at average temp. ZTAV (kPa)		p.spandre 2014/06/04
+!                                      DD	    = Slope of saturated vapor pressure curve (kPa/°C)			p.spandre 2014/06/04
+!                                      GA	    = Psychrometric constant (kPa/°C)					p.spandre 2014/06/04
 
 REAL, DIMENSION(SIZE(PTA),4)        :: ZBLOWSNW   ! Properties of deposited blowing snow
                                       !    1 : Deposition flux (kg/m2/s)
@@ -1335,7 +1335,7 @@ ELSE
              ZP_EMISNOW, ZP_CDSNOW, ZP_USTARSNOW,                          &
              ZP_CHSNOW, ZP_SNOWHMASS, ZP_QS, ZP_VEGTYPE,  ZP_FOREST,       &
              ZP_ZENITH, ZP_LAT, ZP_LON, IO%CSNOWDRIFT, IO%LSNOWDRIFT_SUBLIM  )
-ENDIF !ENDIF cendev
+ENDIF
 !
   IF(OMEB)THEN
 !

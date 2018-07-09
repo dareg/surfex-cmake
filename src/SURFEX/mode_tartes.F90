@@ -391,7 +391,7 @@ L_IS_MAE(2)=.FALSE. !Dust Is treated regarding it's refractive index as in Tuzet
 !
 
 !
-IF (LHOOK) CALL DR_HOOK('REFDUST',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('REFDUST_IMAG',0,ZHOOK_HANDLE)
 !
 ZLOG_WL       = LOG(XPWAVELENGTHS)
 ZLOG_WL_REF   = LOG(XPWAVELENGTHS_SKILLES)
@@ -435,7 +435,7 @@ ZINDEX_DUST = ZINDEX_DUST_REAL - CMPLX(0,1) * ZINDEX_DUST_IMAG
 ! absorption cross section of small particles (Bohren and Huffman, 1983) .Not exact for dust because particles are too bigs for that assumption
 XREFIMP_I(:,2) = AIMAG( (ZINDEX_DUST**2-1.) / (ZINDEX_DUST**2 + 2.) )
 !
-IF (LHOOK) CALL DR_HOOK('REFDUST',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('REFDUST_IMAG',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE REFDUST_IMAG
 !--------------------------------------------------------------------------------
@@ -464,7 +464,8 @@ INTEGER :: JB
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-                            
+IF (LHOOK) CALL DR_HOOK('REFDUST_MAE',0,ZHOOK_HANDLE)
+!                     
 L_IS_MAE(2)=.TRUE. !Dust Is treated regarding it's mass absorption efficiency (Reference: )   
 
 ! Compute the mass absorbtion efficiency for this given wavelength, 
@@ -477,7 +478,7 @@ END DO
 ! return the Mass absorption efficiency of the particles in m2/kg
 XREFIMP_I(:,2) = ZDUST_MAE
 !
-IF (LHOOK) CALL DR_HOOK('REFDUST',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('REFDUST_MAE',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE REFDUST_MAE
 !--------------------------------------------------------------------------------

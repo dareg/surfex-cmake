@@ -2296,11 +2296,17 @@ REAL, INTENT(IN) :: PGRADT
 REAL, INTENT(IN) :: PSNOWLIQ
 REAL, INTENT(INOUT) :: PSPHE
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCRO:SET_THRESH',0,ZHOOK_HANDLE)
+!
 IF ( PSNOWLIQ>XUEPSI .OR. PGRADT<XVGRAT1 ) THEN
   PSPHE = MIN(1.,PSPHE)
 ELSE 
   PSPHE = MAX(0.,PSPHE)
 ENDIF
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCRO:SET_THRESH',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SET_THRESH
 !####################################################################
@@ -6243,6 +6249,8 @@ REAL :: ZDIAM
 !
 INTEGER :: JJ,JST
 !
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
 IF (LHOOK) CALL DR_HOOK('SNOWCROGETSSA',0,ZHOOK_HANDLE)
 !
 IF ( HSNOWMETAMO=='B92' ) THEN
@@ -6283,13 +6291,9 @@ ELSE
     !
 ENDIF 
 !
-IF (LHOOK) CALL DR_HOOK('SNOWCROGETSSA',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('SNOWCROGETSSA',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE SNOWCROGETSSA
-!####################################################################
-!###################################################################
-!
-!####################################################################
 !####################################################################
 !###################################################################
 SUBROUTINE SNOWGROOMING(PSMASS,PSNOWDZ,PSNOWSWE,PSNOWAGE,&
@@ -6331,6 +6335,11 @@ LOGICAL                             :: PDAY
 REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWCOMPACT, ZSNOWRHOG, ZSNOWDZG   ! extra pressure due to grooming kg m-2
 !												! density recalculation variable
 !												! layer thickness variable
+!
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCRO:SNOWGROOMING',0,ZHOOK_HANDLE)
+!
 II = 1
 SMT = 1   ! SMT = 1 <=> GROOMING ONLY
           ! SMT = 3 <=> GROOMING + SNOWMAKING
@@ -6462,6 +6471,9 @@ DO JJ=1, SIZE(PSNOWDZ,1)
 !------------------ END OF TILLING OPTION ----------------------|
 !
 ENDDO
+!
+IF (LHOOK) CALL DR_HOOK('SNOWCRO:SNOWGROOMING',1,ZHOOK_HANDLE)
+!
 END SUBROUTINE SNOWGROOMING
 !
 END SUBROUTINE SNOWCRO
