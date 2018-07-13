@@ -14,7 +14,7 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, G, U, GCP, HPROGRAM,      &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,   &
-				YDCTL, PUNIF_IMPURSNOW,  &
+				                        YDCTL, PUNIF_IMPURSNOW,  &
                                 PVEGTYPE_PATCH, PPATCH,         &
                                 KSIZE_P, KR_P, PDEPTH)
 !     #######################################################
@@ -162,7 +162,7 @@ TYPE (DATE_TIME)              :: TZTIME_GRIB    ! current date and time
 INTEGER                       :: JP, IP    ! loop on patches
 INTEGER                       :: JL    ! loop on layers
 INTEGER :: INFOMPI, INL, INP, ISNOW_NLAYER, IMASK, JI
-INTEGER                       :: JIMP    ! loop on impur types
+INTEGER                       :: KIMP    ! Impurity type
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
 !
@@ -185,7 +185,7 @@ IF (YDCTL%LPART1) THEN
                         PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW,           &
                         PUNIF_LWCSNOW, PUNIF_ASNOW, PUNIF_SG1SNOW,       &
                         PUNIF_SG2SNOW, PUNIF_HISTSNOW, PUNIF_AGESNOW,    &
-                        ISNOW_NLAYER  )
+                        PUNIF_IMPURSNOW, ISNOW_NLAYER  )
   ELSE IF (HFILETYPE=='GRIB  ') THEN
     CALL PREP_GRIB_GRID(HFILE,KLUOUT,CINMODEL,CINGRID_TYPE,CINTERP_TYPE,TZTIME_GRIB)            
     IF (NRANK==NPIO) CALL PREP_SNOW_GRIB(HPROGRAM,HSNSURF,HFILE,KLUOUT,ISNOW_NLAYER,ZFIELDIN)        
@@ -578,6 +578,27 @@ IF (YDCTL%LPART5) THEN
         DO JL=1,ISNOW_NLAYER
           WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%AGE(:,JL) = XUNDEF
         END DO
+        
+      CASE('IM1','IM2','IM3','IM4','IM5')
+        ! Analyse the impurity king (kIMP)
+        READ(HSNSURF(3:3),*) KIMP 
+        !
+        IF (OSNOW_IDEAL) THEN
+          SK%IMPUR(:,:,KIMP) = ZW%AL(JP)%ZOUT(:,:)
+        ELSEIF(INL==1) THEN
+          SK%IMPUR(:,JL,KIMP) = ZW%AL(JP)%ZOUT(:,1)
+        ELSE
+          !* interpolation of heat on snow levels
+          CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%IMPUR(:,:,KIMP))
+        ENDIF
+        !
+        !* mask for areas where there is no snow
+        DO JL=1,ISNOW_NLAYER
+          WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%IMPUR(:,JL,KIMP) = XUNDEF
+        END DO
+        
+    !
+
         !
     END SELECT
     !

@@ -60,6 +60,9 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 !
 USE MODE_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_INT_PART2, PREP_CTL_INT_PART4
 !
+USE MODD_PREP_SNOW,      ONLY : NIMPUR
+
+!
 USE MODI_ALLOCATE_GR_SNOW
 USE MODI_PREP_HOR_SNOW_FIELD
 USE MODE_SNOW3L
@@ -123,11 +126,14 @@ TYPE(SURF_SNOW), POINTER :: SK
 REAL,ALLOCATABLE,DIMENSION(:)     :: ZWRHO     ! total snow content from rho profile alone
 REAL,ALLOCATABLE,DIMENSION(:,:,:)   :: ZDEPTH    ! snow depth of each layer
 REAL,ALLOCATABLE,DIMENSION(:)     :: ZDTOT     ! total snow depth
+REAL,DIMENSION(SIZE(PUNIF_IMPURSNOW,1),SIZE(PUNIF_IMPURSNOW,2))    :: ZUNIF_IMP_MASS_SNOW   ! Mass impurity to introduce in the layer converted from concentration in the namelist
 INTEGER, DIMENSION(KPATCH) :: ISIZE_P
 INTEGER,DIMENSION(KL,KPATCH) :: IR_P    ! fraction of each patch
 REAL,DIMENSION(KL,KPATCH)           :: ZPATCH    ! fraction of each patch
 REAL,DIMENSION(:,:,:), ALLOCATABLE  :: ZVEGTYPE_PATCH    ! fraction of each vegtype per patch
 !
+!
+INTEGER                             :: JIMP    ! loop counter on impurity types
 INTEGER                             :: JP, ISNOW_NLAYER    ! loop counter on patches
 INTEGER                             :: JL, JI, ISIZE   ! loop counter on layers
 INTEGER                             :: IVERSION  ! surface version
@@ -428,6 +434,24 @@ IF (TNPSNOW%AL(1)%SCHEME=='CRO') THEN
                          ZVEGTYPE_PATCH, ZPATCH, ISIZE_P, IR_P, PDEPTH=ZDEPTH  )   
   
   
+
+  DO JIMP = 1, NIMPUR
+
+    WRITE(YSNSURF,'(A2,I1,A7)') 'IM',JIMP,HSURF
+    
+    ZUNIF_IMP_MASS_SNOW(:,JIMP)=PUNIF_IMPURSNOW(:,JIMP)*(PUNIF_WSNOW(:)*1000)
+    CALL PREP_HOR_SNOW_FIELD(DTCO, G, U, GCP, &
+                           HPROGRAM,HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,        &
+                           KLUOUT,OUNIF,YSNSURF, KPATCH, KTEB_PATCH, KL, TNPSNOW, TPTIME, &
+                           PUNIF_WSNOW, PUNIF_RSNOW, PUNIF_TSNOW, PUNIF_LWCSNOW,    &
+                           PUNIF_ASNOW, OSNOW_IDEAL, PUNIF_SG1SNOW,                 &
+                           PUNIF_SG2SNOW, PUNIF_HISTSNOW,PUNIF_AGESNOW, YDCTL,      &
+                           ZUNIF_IMP_MASS_SNOW,                   &
+                           ZVEGTYPE_PATCH, ZPATCH, ISIZE_P, IR_P, PDEPTH=ZDEPTH  ) 
+      
+  ENDDO
+  PRINT*, "COUCOU AFTER", TNPSNOW%AL(1)%IMPUR
+
   
   !
 ENDIF
