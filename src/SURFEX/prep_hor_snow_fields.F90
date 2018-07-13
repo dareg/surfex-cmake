@@ -450,7 +450,6 @@ IF (TNPSNOW%AL(1)%SCHEME=='CRO') THEN
                            ZVEGTYPE_PATCH, ZPATCH, ISIZE_P, IR_P, PDEPTH=ZDEPTH  ) 
       
   ENDDO
-  PRINT*, "COUCOU AFTER", TNPSNOW%AL(1)%IMPUR
 
   
   !

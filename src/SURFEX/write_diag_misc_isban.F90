@@ -63,7 +63,7 @@ USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t
 USE MODD_XIOS, ONLY : LALLOW_ADD_DIM
 !
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
-USE MODD_PREP_SNOW,        ONLY :   NIMPUR
+USE MODD_PREP_SNOW,        ONLY :   NIMPUR,IMPTYP
 !
 USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR, CVAR, NOBSTYPE, NBOUTPUT, COBS
 !                                 
@@ -729,18 +729,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   !
   IF((OPATCH_BUDGET.AND. IO%NPATCH>1).OR.IO%NPATCH==1)THEN
     !
-    IF (TPSNOW%SCHEME=='CRO') THEN
-!
-      DO JP=1,IO%NPATCH
-        DO JIMP=1,NIMPUR
-          
-          WRITE(YCOMMENT,'(A9,I1,A7)') 'X_Y_SIMP',JIMP,' (g/g) '
-          WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
-          CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YREFIMPUR,YCOMMENT,JP,&
-                      NP%AL(JP)%NR_P,NDM%AL(JP)%XIMPUR_CONC(:,:,JIMP),ISIZE,'snow_layer',S%XWSN_WR)
-        ENDDO
-      ENDDO  
-      IF (DM%LPROBANDS) THEN
+    IF (TPSNOW%SCHEME=='CRO' .AND. DM%LPROBANDS) THEN
         DO JP=1,IO%NPATCH          
           YRECFM='SPEC_ALB'
           YCOMMENT='Snow spectral albedo'
@@ -753,8 +742,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
           YCOMMENT='Diffuse to total spectral irradiance ratio'
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,JP,&
                       NP%AL(JP)%NR_P,NDM%AL(JP)%XDIFF_RATIO(:,:),ISIZE,'bands',S%XBANDS_WR)
-        ENDDO
-      ENDIF 
+        ENDDO 
     ENDIF    
     ! 
     IF ( OSNOWDIMNC ) THEN
@@ -836,6 +824,16 @@ IF (DM%LSURF_MISC_BUDGET) THEN
           CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,'NAT_RAT',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XNAT_RAT(:,:),ISIZE,'snow_layer',S%XWSN_WR)
         ENDDO
+        
+        DO JP=1,IO%NPATCH
+          DO JIMP=1,NIMPUR
+            
+            YCOMMENT='Concentration of '//IMPTYP(JIMP)//' (g/g) '
+            WRITE(YREFIMPUR,'(A7,I1)')   'SNOWIMP',JIMP             !Name of the impurity type: ex: IMPURTYPE1
+            CALL WRITE_FIELD_2D_PATCH(HSELECT,HPROGRAM,YREFIMPUR,YCOMMENT,JP,&
+                        NP%AL(JP)%NR_P,NDM%AL(JP)%XIMPUR_CONC(:,:,JIMP),ISIZE,'snow_layer',S%XWSN_WR)
+          ENDDO
+        ENDDO  
         !
       ENDIF
       !
