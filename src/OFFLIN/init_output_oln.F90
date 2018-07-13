@@ -164,9 +164,15 @@ IF (NRANK==NPIO) THEN
   !
   IF (YSC%U%NDIM_NATURE>0) THEN
     IF (YSC%U%CNATURE=='ISBA  '.OR.YSC%U%CNATURE=='TSZ0  ') THEN 
-      CALL INIT_OUTFN_ISBA_n(YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT, &
-                              YSC%DUO%LSNOWDIMNC, "NC    ",ILUOUT,   &
-                              ZZS1D_FULL, ZSSO_DIR_FULL, ZSSO_SLOPE_FULL, IMASSIFNUMBER_FULL)
+      IF (LWRITE_TOPO) THEN
+        CALL INIT_OUTFN_ISBA_n(YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT, &
+                              YSC%DUO%LSNOWDIMNC, "NC    ",ILUOUT,    &
+                              ZZS1D_FULL, ZSSO_DIR_FULL, ZSSO_SLOPE_FULL, &
+                              IMASSIFNUMBER_FULL)
+      ELSE
+        CALL INIT_OUTFN_ISBA_n(YSC%IM, YSC%UG, YSC%U, YSC%DUO%CSELECT, &
+                              YSC%DUO%LSNOWDIMNC, "NC    ",ILUOUT)
+      ENDIF                                
 		ENDIF
   ENDIF
   !
