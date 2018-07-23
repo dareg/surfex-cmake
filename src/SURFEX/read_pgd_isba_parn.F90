@@ -496,15 +496,22 @@ IF (.NOT.OLAND_USE) THEN
     ENDIF
   ENDIF
   GTIME(:) = .FALSE.
-  DO JT = 1,SIZE(GTIME)
-    IF (JT_BEG==JT_END .AND. TPDATE_END%YEAR==TPDATE_BEG%YEAR+1) THEN
-      GTIME(JT) = .TRUE.
-    ELSEIF (JT_BEG<=JT_END .AND. JT>=JT_BEG .AND. JT<=JT_END) THEN
-      GTIME(JT) = .TRUE.
-    ELSEIF (JT_BEG>JT_END .AND. (JT>=JT_BEG .OR. JT<=JT_END)) THEN
-      GTIME(JT) = .TRUE. 
-    ENDIF
-  ENDDO 
+!
+  IF (TPDATE_END%YEAR>=TPDATE_BEG%YEAR+2) THEN  ! si au moins une année entière est parcourue
+    GTIME(:) = .TRUE.
+  ELSEIF (TPDATE_END%YEAR==TPDATE_BEG%YEAR+1) THEN ! si on est à cheval sur deux années
+      DO JT = 1,SIZE(GTIME)
+        IF (JT>=JT_BEG .OR. JT<=JT_END) THEN  ! alors on retient toutes les décades après le JT_BEG et toutes celles avant le JT_END
+           GTIME(JT) = .TRUE.
+        ENDIF
+     ENDDO
+  ELSE ! si on est sur la même année
+    DO JT = 1,SIZE(GTIME)
+      IF (JT>=JT_BEG .AND. JT<=JT_END) THEN  ! on garde toutes les décades entre JT_BEG et JT_END
+        GTIME(JT) = .TRUE.
+      ENDIF
+    ENDDO
+  ENDIF
   !
   !
   IF (DTI%LDATA_VEGTYPE) THEN
