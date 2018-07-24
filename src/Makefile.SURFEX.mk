@@ -533,10 +533,16 @@ CDFF_INC?=${CDFF_PATH}/include/netcdf.mod
 #INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
 #LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
 
+#links interne libraries
 INC_NETCDF?= -I${CDFF_PATH}/include -I${CDF_PATH}/include -I${HDF5_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include -I${CURL_PATH}/include
+
+LIB_NETCDF?= -Wl,-rpath,${CDFF_PATH}/lib:${CDF_PATH}/lib:$(HDF5_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib:$(CURL_PATH)/lib -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
+
+
+#INC_NETCDF?= -I${CDFF_PATH}/include -I${CDF_PATH}/include -I${HDF5_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include -I${CURL_PATH}/include
 #
-LIB_NETCDF     ?= -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 \
-		  -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
+#LIB_NETCDF     ?= -L${CDFF_PATH}/lib -lnetcdff -L${CDF_PATH}/lib -lnetcdf -L${HDF5_PATH}/lib -lhdf5_hl -lhdf5 \
+#		  -L${SZIP_PATH}/lib -lsz -L${ZLIB_PATH}/lib -lz -L${CURL_PATH}/lib -lcurl
 #
 XIOS_CDF_OPT   = netcdf4_par
 #
