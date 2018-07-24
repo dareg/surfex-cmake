@@ -580,13 +580,15 @@ IF (YDCTL%LPART5) THEN
         END DO
         
       CASE('IM1','IM2','IM3','IM4','IM5')
-        ! Analyse the impurity king (kIMP)
+        ! Analyse the impurity kind (kIMP)
         READ(HSNSURF(3:3),*) KIMP 
         !
         IF (OSNOW_IDEAL) THEN
           SK%IMPUR(:,:,KIMP) = ZW%AL(JP)%ZOUT(:,:)
         ELSEIF(INL==1) THEN
-          SK%IMPUR(:,JL,KIMP) = ZW%AL(JP)%ZOUT(:,1)
+          DO JL = 1,ISNOW_NLAYER
+            SK%IMPUR(:,JL,KIMP) = ZW%AL(JP)%ZOUT(:,1)
+          ENDDO
         ELSE
           !* interpolation of heat on snow levels
           CALL INIT_FROM_REF_GRID(XGRID_SNOW,ZW%AL(JP)%ZOUT,ZGRID(1:KSIZE_P(JP),:,JP),SK%IMPUR(:,:,KIMP))
@@ -595,10 +597,7 @@ IF (YDCTL%LPART5) THEN
         !* mask for areas where there is no snow
         DO JL=1,ISNOW_NLAYER
           WHERE(PDEPTH(1:KSIZE_P(JP),JL,JP)==0. .OR. PDEPTH(1:KSIZE_P(JP),JL,JP)==XUNDEF) SK%IMPUR(:,JL,KIMP) = XUNDEF
-        END DO
-        
-    !
-
+        END DO  
         !
     END SELECT
     !
