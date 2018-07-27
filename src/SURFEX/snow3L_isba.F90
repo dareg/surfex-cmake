@@ -346,7 +346,7 @@ PFLSN_COR(:)   = 0.0
 PTHRUFAL(:)    = 0.0
 PEVAPCOR(:)    = 0.0
 PQS(:)         = XUNDEF
-DMK%XSYTMASS(:)    = 0.0
+IF (SIZE(DMK%XSYTMASS)>1) DMK%XSYTMASS(:)    = 0.0
 !
 ZSNOW(:)       = 0.0
 ZSNOWD(:)      = 0.0
