@@ -50,9 +50,6 @@ USE MODD_CSTS,           ONLY : XTTS
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
 !
-USE MODD_TYPES_GLT,     ONLY : T_GLT
-USE MODD_GLT_PARAM ,    ONLY : GELATO_DIM=>NX
-USE MODE_GLT_STATS ,    ONLY : GLT_AVHICEM, GLT_AVHSNWM
 USE MODI_CLS_TQ
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_SEA
@@ -277,18 +274,9 @@ IF (DGO%LSURF_VARS) THEN
 ENDIF
 !
 ! Diags from embedded Seaice model
-! CALL DIAG_INLINE_SEAICE() : simply  : 
+! CALL DIAG_INLINE_SEAICE() : simply  :
 !
-IF (DGMSI%LDIAG_MISC_SEAICE) THEN
-   IF (TRIM(S%CSEAICE_SCHEME) == 'GELATO') THEN 
-      GELATO_DIM=SIZE(PTA)
-      DGMSI%XSIT  = RESHAPE(glt_avhicem(S%TGLT%dom,S%TGLT%sit),(/GELATO_DIM/))
-      DGMSI%XSND  = RESHAPE(glt_avhsnwm(S%TGLT%dom,S%TGLT%sit),(/GELATO_DIM/))
-      DGMSI%XMLT  = S%TGLT%oce_all(:,1)%tml
-   ELSE
-      ! Placeholder for an alternate seaice scheme
-   ENDIF
-ENDIF
+IF (DGMSI%LDIAG_MISC_SEAICE) CALL S%ICE%DIAG_MISC(DGMSI)
 !
 ! Diags for Earth System Model coupling or for embedded Seaice model
 ! (we are actually using XCPL_.. variables for feeding the seaice model)

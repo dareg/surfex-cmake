@@ -129,7 +129,6 @@ TYPE SEAFLUX_t
 !
 ! Sea-ice :
 !
-  TYPE(T_GLT) :: TGLT
   CLASS(SEA_ICE_t), POINTER             :: ICE ! Sea-ice state
 !
 ! Date:
