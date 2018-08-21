@@ -1,5 +1,7 @@
 set -x 
 
+ulimit -s unlimited
+
 rm -f $tmpdir/* 
 
 dir_run="/home/cnrm_other/ge/mrmm/farouxs/STRATO"
