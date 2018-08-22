@@ -222,11 +222,9 @@ fi
 #
 cp -f OPTIONS.nam_PREP_EXTERN OPTIONS.nam_save
 sed -e "s/CFILETYPE\ =\ \"ASCII\"/CFILETYPE\ =\ \"FA\"/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_save
-sed -e "s/NHALO_PREP = 2/NHALO_PREP = 80/g" OPTIONS.nam_save > OPTIONS.nam
 mv -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CFILEPGDTYPE\ =\ \"ASCII\"/CFILEPGDTYPE\ =\ \"FA\"/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_PREP_EXTE_FILE_LFI_GENE_NEW
+cp -f OPTIONS.nam OPTIONS.nam_PREP_EXTE_FILE_FA_GENE_NEW
 ./script_exec_pgd_parall.sh "PREP_EXTE_FILE_FA_GENE_NEW" $fname $2 $3
 
 #test fichier PGD PREP LONLAT_REG LFI version précédente
