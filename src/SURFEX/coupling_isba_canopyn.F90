@@ -8,8 +8,8 @@ SUBROUTINE COUPLING_ISBA_CANOPY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID
                                    SLT, HPROGRAM, HCOUPLING, PTSTEP,                       &
                                    KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                    PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
-                                   PQA, PTA, PRHOA, PSV, PCO2, PIMPWET,PIMPDRY, HSV, 			 &
-																	 PRAIN, PSNOW, PLW,     &
+                                   PQA, PTA, PRHOA, PSV, PCO2, PIMPWET,PIMPDRY, HSV,       &
+                                   PRAIN, PSNOW, PLW,                                      &
                                    PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH,    &
                                    PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,   &
                                    PEMIS, PTSURF, PZ0,PZ0H, PQSURF, PPEW_A_COEF,           &
