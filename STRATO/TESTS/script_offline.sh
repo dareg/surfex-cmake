@@ -113,7 +113,7 @@ sed -e "s/CPREPFILE\ =\ \"PREP\"/CPREPFILE\ =\ \"PREP\_TEST\"/g" OPTIONS.nam_sav
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CSURFFILE\ =\ \"SURFOUT\"/CSURFFILE\ =\ \"SURFOUT\_TEST\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_NOMS_FICHIERS
-#./script_exec.sh "NOM_FICHIERS" $fname $2 $3
+./script_exec.sh "NOM_FICHIERS" $fname $2 $3
 rm -f PGD_TEST*
 rm -f PREP_TEST*
 rm -f SURFOUT_TEST*
@@ -126,7 +126,7 @@ sed -e "s/LRESTART\ =\ \T/LRESTART\ =\ F/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/LINQUIRE\ =\ \T/LINQUIRE\ =\ F/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_PRINT_RESTART_INQUIRE
-#./script_exec.sh "PRINT_RESTART_INQUIRE" $fname $2 $3
+./script_exec.sh "PRINT_RESTART_INQUIRE" $fname $2 $3
 
 echo "########### XSTEP_SURF_OUTPUT "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
@@ -134,7 +134,7 @@ sed -e "s/XTSTEP\ =\ 300\./XTSTEP\ =\ 200./g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/XTSTEP\_OUTPUT\ =\ 10800\./XTSTEP\_OUTPUT\ =\ 50400./g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_XSTEP_SURF_OUTPUT
-#./script_exec.sh "XSTEP_SURF_OUTPUT" $fname $2 $3
+./script_exec.sh "XSTEP_SURF_OUTPUT" $fname $2 $3
 
 
 ##############################################################
@@ -143,14 +143,14 @@ echo "########### LADAPT_SW "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/LADAPT_SW = F/LADAPT_SW = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LADAPT_SW
-#./script_exec.sh "LADAPT_SW" $fname $2 $3
+./script_exec.sh "LADAPT_SW" $fname $2 $3
 
 
 echo "########### LT2MMW "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/LT2MMW = F/LT2MMW = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LT2MMW
-#./script_exec.sh "LT2MMW" $fname $2 $3
+./script_exec.sh "LT2MMW" $fname $2 $3
 
 #CSURF_FILETYPE + RESTART + vieux fichier PGD et PREP
 
@@ -158,11 +158,11 @@ cp -f OPTIONS.nam OPTIONS.nam_LT2MMW
 cp -f TESTS/FORCAGES/HIVER/Params_config.txt .
 echo "########### CSURF_FILETYPE "
 cp -f OPTIONS.nam_base2 OPTIONS.nam
-#./script_offline_exte.sh "SURF_FILETYPE_NC_RESTART" $fname $exec_new $exec_old "nc"
-#if [ ! -f PREP_OLD.nc ] 
-#then
-#  ./script_offline_exte.sh "SURF_FILETYPE_NC_RESTART_OLD" $fname $exec_new $exec_old "nc"
-#fi
+./script_offline_exte.sh "SURF_FILETYPE_NC_RESTART" $fname $exec_new $exec_old "nc"
+if [ ! -f PREP_OLD.nc ] 
+then
+  ./script_offline_exte.sh "SURF_FILETYPE_NC_RESTART_OLD" $fname $exec_new $exec_old "nc"
+fi
 cp -f OPTIONS.nam_new OPTIONS.nam
 #
 echo "########### SURF_FILETYPE_NC_RESTART "
@@ -172,14 +172,14 @@ sed -e "s/NMONTH\ =\ 1/NMONTH\ =\ 2/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/NDAY\ =\ 29/NDAY\ =\ 3/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SURF_FILETYPE_NC_RESTART
-#./script_exec_restart_parall.sh "SURF_FILETYPE_NC_RESTART" $fname $2 $3
+./script_exec_restart_parall.sh "SURF_FILETYPE_NC_RESTART" $fname $2 $3
 
 
 echo "########### SURF_FILETYPE_NC_RESTART_OLD "
 rm -f PGD_NEW.nc PREP_NEW.nc
 mv -f PGD_OLD.nc PGD.nc
 mv -f PREP_OLD.nc PREP.nc
-#./script_exec_restart.sh "SURF_FILETYPE_NC_RESTART_OLD" $fname $2 $3
+./script_exec_restart.sh "SURF_FILETYPE_NC_RESTART_OLD" $fname $2 $3
 
 
 #ASCII
@@ -191,7 +191,7 @@ sed -e "s/LRESET\_BUDGETC\ =\ T/LRESET\_BUDGETC\ =\ F/g" OPTIONS.nam_save > OPTI
 cp -f OPTIONS.nam_restart OPTIONS.nam_save
 sed -e "s/CSURF\_FILETYPE\ =\ \"NC\"/CSURF\_FILETYPE\ =\ \"ASCII\"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SURF_FILETYPE_ASCII
-#./script_exec_all_parall.sh "SURF_FILETYPE_ASCII" $fname $2 $3
+./script_exec_all_parall.sh "SURF_FILETYPE_ASCII" $fname $2 $3
 rm -f PGD.txt PREP.txt SURFOUT.txt
 
 #
@@ -396,23 +396,23 @@ echo "########### SET_FORC_ZS "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/LSET\_FORC\_ZS\ =\ F/LSET\_FORC\_ZS\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SET_FORC_ZS
-#./script_exec.sh "SET_FORC_ZS" $fname $2 $3
+./script_exec.sh "SET_FORC_ZS" $fname $2 $3
 echo "########### LIMIT_QAIR "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/LLIMIT\_QAIR\ =\ F/LLIMIT\_QAIR\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_LIMIT_QAIR
-#./script_exec_parall.sh "LIMIT_QAIR" $fname $2 $3
+./script_exec_parall.sh "LIMIT_QAIR" $fname $2 $3
 echo "########### NB_READ_FORC1 "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/NB\_READ\_FORC\ =\ 0/NB\_READ\_FORC\ =\ 1/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_NB_READ_FORC1
-#./script_exec_parall.sh "NB_READ_FORC1" $fname $2 $3 
+./script_exec_parall.sh "NB_READ_FORC1" $fname $2 $3 
 #là il faudrait vérifier qu'on a bien la même chose quand NB_READ_FORC=0, faire un script spécial, par exemple
 echo "########### NB_READ_FORC2 "
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/NB\_READ\_FORC\ =\ 0/NB\_READ\_FORC\ =\ 2/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_NB_READ_FORC2
-#./script_exec.sh "NB_READ_FORC2" $fname $2 $3 
+./script_exec.sh "NB_READ_FORC2" $fname $2 $3 
 #là il faudrait vérifier qu'on a bien la même chose quand NB_READ_FORC=0, faire un script spécial, par exemple
 
 
@@ -424,18 +424,18 @@ cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/CFORCING\_FILETYPE\ \=\ \"ASCII\"/CFORCING\_FILETYPE\ \=\ \"BINARY\"/g" OPTIONS.nam_save > OPTIONS.nam_bin
 cp -f OPTIONS.nam_bin OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_BIN
-#./script_exec_parall.sh "FORC_BIN" $fname $2 $3
+./script_exec_parall.sh "FORC_BIN" $fname $2 $3
 echo "########### FORC_BIN_NB_READ_FORC1 "
 cp -f OPTIONS.nam_bin OPTIONS.nam_save
 sed -e "s/NB\_READ\_FORC\ =\ 0/NB\_READ\_FORC\ =\ 1/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_BIN_NB_READ_FORC1
-#./script_exec.sh "FORC_BIN_NB_READ_FORC1" $fname $2 $3 
+./script_exec.sh "FORC_BIN_NB_READ_FORC1" $fname $2 $3 
 #là il faudrait vérifier qu'on a bien la même chose quand NB_READ_FORC=0, faire un script spécial, par exemple
 echo "########### FORC_BIN_NB_READ_FORC2 "
 cp -f OPTIONS.nam_bin OPTIONS.nam_save
 sed -e "s/NB\_READ\_FORC\ =\ 0/NB\_READ\_FORC\ =\ 2/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_BIN_NB_READ_FORC2
-#./script_exec.sh "FORC_BIN_NB_READ_FORC2" $fname $2 $3 
+./script_exec.sh "FORC_BIN_NB_READ_FORC2" $fname $2 $3 
 #là il faudrait vérifier qu'on a bien la même chose quand NB_READ_FORC=0, faire un script spécial, par exemple
 cp -f TESTS/FORCAGES/HIVER/Params_config.txt .
 #
@@ -451,29 +451,29 @@ cp -f OPTIONS.nam_netcdf OPTIONS.nam_save
 sed -e "s/NDAY\ =\ 29/NDAY\ =\ 25/g" OPTIONS.nam_save > OPTIONS.nam_netcdf
 cp -f OPTIONS.nam_netcdf OPTIONS.nam
 cp -f TESTS/FORCAGES/NETCDF/FORCING1.nc FORCING.nc
-#./script_exec.sh "FORC_NETCDF1" $fname $2 $3
+./script_exec.sh "FORC_NETCDF1" $fname $2 $3
 echo "########### FORC_NETCDF_NB_READ_FORC1 "
 cp -f OPTIONS.nam_netcdf OPTIONS.nam_save
 sed -e "s/NB\_READ\_FORC\ =\ 0/NB\_READ\_FORC\ =\ 1/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_NB_READ_FORC1
-#./script_exec.sh "FORC_NETCDF_NB_READ_FORC1" $fname $2 $3 
+./script_exec.sh "FORC_NETCDF_NB_READ_FORC1" $fname $2 $3 
 #là il faudrait vérifier qu'on a bien la même chose quand NB_READ_FORC=0, faire un script spécial, par exemple
 echo "########### FORC_NETCDF_NB_READ_FORC2 "
 cp -f OPTIONS.nam_netcdf OPTIONS.nam_save
 sed -e "s/NB\_READ\_FORC\ =\ 0/NB\_READ\_FORC\ =\ 2/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_NB_READ_FORC2
-#./script_exec.sh "FORC_NETCDF_NB_READ_FORC2" $fname $2 $3 
+./script_exec.sh "FORC_NETCDF_NB_READ_FORC2" $fname $2 $3 
 #là il faudrait vérifier qu'on a bien la même chose quand NB_READ_FORC=0, faire un script spécial, par exemple
 echo "########### FORC_NETCDF_SEC "
 cp -f OPTIONS.nam_netcdf OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_SEC
 cp -f TESTS/FORCAGES/NETCDF/FORCING_SEC.nc FORCING.nc
-#./script_exec.sh "FORC_NETCDF_SEC" $fname $2 $3
+./script_exec.sh "FORC_NETCDF_SEC" $fname $2 $3
 echo "########### FORC_NETCDF_MIN "
 cp -f OPTIONS.nam_netcdf OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_MIN
 cp -f TESTS/FORCAGES/NETCDF/FORCING_MIN.nc FORCING.nc
-#./script_exec_parall.sh "FORC_NETCDF_MIN" $fname $2 $3
+./script_exec_parall.sh "FORC_NETCDF_MIN" $fname $2 $3
 echo "########### FORC_NETCDF_HOU "
 cp -f OPTIONS.nam_netcdf OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_HOU
@@ -483,12 +483,12 @@ sed -e "s/XWSNOW\_ROOF\ =\ 330\./XWSNOW\_ROOF\ =\ 0\./g" OPTIONS.nam_save > OPTI
 mv -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/XWSNOW\_ROAD\ =\ 150\./XWSNOW\_ROAD\ =\ 0\./g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_hour
-#./script_exec.sh "FORC_NETCDF_HOU" $fname $2 $3
+./script_exec.sh "FORC_NETCDF_HOU" $fname $2 $3
 echo "########### FORC_NETCDF_DAY "
 cp -f OPTIONS.nam_hour OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_DAY
 cp -f TESTS/FORCAGES/NETCDF/FORCING_DAY.nc FORCING.nc
-#./script_exec.sh "FORC_NETCDF_DAY" $fname $2 $3
+./script_exec.sh "FORC_NETCDF_DAY" $fname $2 $3
 
 echo "########## FORC_NETCDF_DELAYEDSTART_DATESTOP"
 cp -f OPTIONS.nam_netcdf OPTIONS.nam
@@ -502,7 +502,7 @@ sed -e "s/LDELAYEDSTART_NC = F/LDELAYEDSTART_NC = T/g"  OPTIONS.nam_save > OPTIO
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/NDATESTOP = 0,0,0,0/NDATESTOP = 1986,1,27,43200/g"  OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_FORC_NETCDF_DELAYEDSTART_DATESTOP
-#./script_exec.sh "FORC_NETCDF_DELAYEDSTART_DATESTOP" $fname $2 $3
+./script_exec.sh "FORC_NETCDF_DELAYEDSTART_DATESTOP" $fname $2 $3
 rm -f FORCING.nc
 
 
@@ -512,25 +512,25 @@ echo "########## OUTPUT_NETCDF_NO_WRITE_COORD"
 #test NETCDF + LWRITE_COORD=F (sorties 2d)
 sed -e "s/LWRITE\_COORD\ \=\ T/LWRITE\_COORD\ \=\ F/g" OPTIONS.nam_base1 > OPTIONS.nam 
 cp -rf OPTIONS.nam OPTIONS.nam_OUTPUT_NETCDF_NO_WRITE_COORD
-#./script_exec_parall.sh "OUTPUT_NETCDF_NO_WRITE_COORD" $fname $2 $3
+./script_exec_parall.sh "OUTPUT_NETCDF_NO_WRITE_COORD" $fname $2 $3
 
 
 echo "########## OUTPUT_ASCII "
 sed -e "s/CTIMESERIES\_FILETYPE\ \=\ \"NETCDF\"/CTIMESERIES\_FILETYPE\ \=\ \"ASCII\"/g" OPTIONS.nam_base1 > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_ASCII
-#./script_exec_parall.sh "OUTPUT_ASCII" $fname $2 $3
+./script_exec_parall.sh "OUTPUT_ASCII" $fname $2 $3
 rm -f SURFOUT*
 
 echo "########## OUTPUT_LFI"
 sed -e "s/CTIMESERIES\_FILETYPE\ \=\ \"NETCDF\"/CTIMESERIES\_FILETYPE\ \=\ \"LFI  \"/g" OPTIONS.nam_base1 > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_LFI
-#./script_exec_parall.sh "OUTPUT_LFI" $fname $2 $3
+./script_exec_parall.sh "OUTPUT_LFI" $fname $2 $3
 rm -f SURFOUT*
 
 echo "########## OUTPUT_NC"
 sed -e "s/CTIMESERIES\_FILETYPE\ \=\ \"NETCDF\"/CTIMESERIES\_FILETYPE\ \=\ \"NC   \"/g" OPTIONS.nam_base1 > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_NC
-#./script_exec_parall.sh "OUTPUT_NC" $fname $2 $3
+./script_exec_parall.sh "OUTPUT_NC" $fname $2 $3
 rm -f SURFOUT*
 
 echo "########## OUTPUT_FA"
@@ -542,41 +542,41 @@ sed -e "s/NJMAX = 8/NJMAX = 20/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/CTIMESERIES\_FILETYPE\ \=\ \"NETCDF\"/CTIMESERIES\_FILETYPE\ \=\ \"FA   \"/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_FA
-#./script_exec_parall.sh "OUTPUT_FA" $fname $2 $3
+./script_exec_parall.sh "OUTPUT_FA" $fname $2 $3
 echo "########## OUTPUT_FA_DIAG_FA_NOCOMPACT"
 sed -e "s/LDIAG\_FA\_NOCOMPACT\ \=\ F/LDIAG\_FA\_NOCOMPACT\ \=\ T/g" OPTIONS.nam_OUTPUT_FA > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_FA_DIAG_FA_NOCOMPACT
-#./script_exec.sh "OUTPUT_FA_DIAG_FA_NOCOMPACT" $fname $2 $3
+./script_exec.sh "OUTPUT_FA_DIAG_FA_NOCOMPACT" $fname $2 $3
 #ne fonctionne pas avec la nouvelle XRD....
 echo "########## OUTPUT_FA_DIAG_FA_OUT_TIMENAME"
 sed -e "s/LOUT\_TIMENAME\ \=\ F/LOUT\_TIMENAME\ \=\ T/g" OPTIONS.nam_OUTPUT_FA > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_FA_OUT_TIMENAME
-#./script_exec.sh "OUTPUT_FA_DIAG_FA_OUT_TIMENAME" $fname $2 $3
+./script_exec.sh "OUTPUT_FA_DIAG_FA_OUT_TIMENAME" $fname $2 $3
 rm -f SURFOUT*
 
 echo "########## OUTPUT_TEXTE"
 sed -e "s/CTIMESERIES\_FILETYPE\ \=\ \"NETCDF\"/CTIMESERIES\_FILETYPE\ \=\ \"TEXTE \"/g" OPTIONS.nam_base1 > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_TEXTE
-#./script_exec.sh "OUTPUT_TEXTE" $fname $2 $3
+./script_exec.sh "OUTPUT_TEXTE" $fname $2 $3
 rm -f *.TXT
 
 echo "########## OUTPUT_BINARY"
 sed -e "s/CTIMESERIES\_FILETYPE\ \=\ \"NETCDF\"/CTIMESERIES\_FILETYPE\ \=\ \"BINARY\"/g" OPTIONS.nam_base1 > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_OUTPUT_BINARY
-#./script_exec_parall.sh "OUTPUT_BINARY" $fname $2 $3
+./script_exec_parall.sh "OUTPUT_BINARY" $fname $2 $3
 rm -f *.BIN
 
 echo "########### SHADOWS_SLOPE"
 cp -f OPTIONS.nam_base1 OPTIONS.nam_save
 sed -e "s/LSHADOWS_SLOPE = F/LSHADOWS_SLOPE = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SHADOWS_SLOPE
-#./script_exec.sh "SHADOWS_SLOPE" $fname $2 $3
+./script_exec.sh "SHADOWS_SLOPE" $fname $2 $3
 
 echo "########### SHADOWS_OTHER"
 cp -f OPTIONS.nam_SHADOWS_SLOPE OPTIONS.nam_save
 sed -e "s/LSHADOWS_OTHER = F/LSHADOWS_OTHER = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SHADOWS_OTHER
-#./script_exec.sh "SHADOWS_OTHER" $fname $2 $3
+./script_exec.sh "SHADOWS_OTHER" $fname $2 $3
 
 #NAM_WRITE_SURF_ATM
 echo "########### NAM_WRITE_SURF_ATM"
@@ -584,13 +584,13 @@ sed -e "s/LNOWRITE\_CANOPY\ \=\ F/LNOWRITE\_CANOPY\ \=\ T/g" OPTIONS.nam_base2 >
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/LNOWRITE\_TEXFILE\ \=\ F/LNOWRITE\_TEXFILE\ \=\ T/g" OPTIONS.nam_save > OPTIONS.nam
 cp OPTIONS.nam OPTIONS.nam_NAM_WRITE_SURF_ATM
-#./script_exec.sh "NAM_WRITE_SURF_ATM" $fname $2 $3
+./script_exec.sh "NAM_WRITE_SURF_ATM" $fname $2 $3
 
 #NAM_WRITE_COVER_TEX
 echo "########### NAM_WRITE_COVER_TEX"
 sed -e "s/CLANG\ \=\ \"FR\"/CLANG\ \=\ \"EN\"/g" OPTIONS.nam_base2 > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_NAM_WRITE_COVER_TEX_EN
-#./script_exec.sh "NAM_WRITE_COVER_TEX_EN" $fname $2 $3
+./script_exec.sh "NAM_WRITE_COVER_TEX_EN" $fname $2 $3
 
 for file in TESTS/PREP/make*.sh
 do

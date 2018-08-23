@@ -1,5 +1,6 @@
 set -x 
 
+ulimit -s unlimited
 
 dir_run="/home/faroux/STRATO"
 exec_new="_new"

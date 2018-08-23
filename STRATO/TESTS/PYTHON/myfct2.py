@@ -12,6 +12,7 @@ import numpy as np
 import myfct2
 import re
 #import matplotlib.pyplot as plt
+import netCDF4
 from Scientific.IO.NetCDF import NetCDFFile
 
 
