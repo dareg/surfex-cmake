@@ -7,9 +7,9 @@ SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, NDST, SLT, HPROGRAM, HCOU
                                  KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH,    &
                                  PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, &
                                  PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW, PDIR_SW,  &
-																 PSCA_SW,         &
+                                 PSCA_SW,         &
                                  PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV,&
-                 								 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, &
+                                 PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, &
                                  PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,          &
                                  PPET_B_COEF, PPEQ_B_COEF, HTEST    )  
 !     ###############################################################################
@@ -240,7 +240,7 @@ DO JT=1,IT
                                  HPROGRAM, HCOUPLING, ZTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI,  &
                                  KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, &
                                  PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV,      &
-																 PRAIN, PSNOW, PLW,   &
+                                 PRAIN, PSNOW, PLW,   &
                                  PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, ZSFTQ, ZSFTH, ZSFTS,   &
                                  ZSFCO2, ZSFU, ZSFV, ZTRAD, ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTSURF, &
                                  ZZ0, ZZ0H, ZQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,     &

@@ -243,7 +243,7 @@ IF (HSURF=='SN_VEG ') THEN
                             XWSNOW, XRSNOW, XTSNOW, XLWCSNOW,    &
                             XASNOW, LSNOW_IDEAL, XSG1SNOW,       &
                             XSG2SNOW, XHISTSNOW, XAGESNOW,       &
-														YDCTL,XIMPURSNOW,                    &
+                            YDCTL,XIMPURSNOW,                    &
                             PVEGTYPE_PATCH=ZVEGTYPE_PATCH,       &
                             PPATCH=ZPATCH, KSIZE_P=ISIZE_P,      &
                             KR_P=IR_P, OKEY=OKEY   )

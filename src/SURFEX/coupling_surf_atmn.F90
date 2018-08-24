@@ -7,7 +7,7 @@ SUBROUTINE COUPLING_SURF_ATM_n (YSC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR,
                                 KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2,      &
                                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV,   &
                                 PCO2, PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW,            & 
-																PDIR_SW, PSCA_SW, PSW_BANDS,															&
+                                PDIR_SW, PSCA_SW, PSW_BANDS,                              &
                                 PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, &
                                 PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,     &
                                 PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,       &
@@ -621,12 +621,12 @@ ELSEIF (KTILE==2) THEN
   !
 ELSEIF (KTILE==3) THEN
   !
-  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL, &
+  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL,  &
                          YSC%DLC, YSC%NDST, YSC%SLT, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP,     &
                          KYEAR, KMONTH, KDAY, PTIME, YSC%U%NSIZE_NATURE, KSV, KSW, ZP_TSUN,   &
                          ZP_ZENITH, ZP_ZENITH2, ZP_AZIM, ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, &
                          ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, ZP_IMPWET,ZP_IMPDRY,           &
-											   HSV, ZP_RAIN, ZP_SNOW, ZP_LW, 																				&
+                         HSV, ZP_RAIN, ZP_SNOW, ZP_LW,                                        &
                          ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH,     &
                          ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV, ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB,  &
                          ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF, ZP_PEW_A_COEF,           &

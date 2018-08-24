@@ -7,7 +7,7 @@ SUBROUTINE COUPLING_NATURE_n (DTCO, UG, U, USS, IM, DTZ, DGO, DL, DLC, NDST, SLT
                               HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH, KDAY, PTIME, &
                               KI, KSV, KSW, PTSUN, PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS,&
                               PU, PV, PQA, PTA, PRHOA, PSV, PCO2, PIMPWET, PIMPDRY, HSV, PRAIN,&
-															PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, &
+                              PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, &
                               PSFTS,PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, &
                               PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,        &
                               PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, HTEST  )  
@@ -160,7 +160,7 @@ IF (U%CNATURE=='ISBA  ') THEN
                             KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW,  PTSUN, PZENITH,       &
                             PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV,&
                             PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW,  &
-														PSW_BANDS, PPS,  &
+                            PSW_BANDS, PPS,  &
                             PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB,   &
                             PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,         &
                             PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,'OK')  
@@ -169,7 +169,7 @@ ELSE IF (U%CNATURE=='TSZ0  ') THEN
                        HPROGRAM, HCOUPLING, PTSTEP, KYEAR, KMONTH, KDAY, PTIMEC, KI,    &
                        KSV, KSW, PTSUN, PZENITH,  PZENITH2, PAZIM, PZREF, PUREF, PZS,   &
                        PU, PV, PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN,  &
-											 PSNOW, PLW,      &
+                       PSNOW, PLW,      &
                        PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS,      &
                        PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF,    &
                        PZ0, PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF,  PPET_A_COEF,       &

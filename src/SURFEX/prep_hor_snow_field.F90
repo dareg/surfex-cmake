@@ -14,7 +14,7 @@ SUBROUTINE PREP_HOR_SNOW_FIELD (DTCO, G, U, GCP, HPROGRAM,      &
                                 PUNIF_ASNOW, OSNOW_IDEAL,       &
                                 PUNIF_SG1SNOW, PUNIF_SG2SNOW,   &
                                 PUNIF_HISTSNOW,PUNIF_AGESNOW,   &
-				                        YDCTL, PUNIF_IMPURSNOW,  &
+                                YDCTL, PUNIF_IMPURSNOW,  &
                                 PVEGTYPE_PATCH, PPATCH,         &
                                 KSIZE_P, KR_P, PDEPTH)
 !     #######################################################
