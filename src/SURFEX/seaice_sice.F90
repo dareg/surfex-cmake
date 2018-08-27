@@ -21,7 +21,6 @@ TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: SICE_t
     REAL, POINTER :: Z_DIFF(:,:) !< Distance between two layers. [m]
     REAL, POINTER :: T(:,:) !< Mean temperature of ice layers. [K]
 
-    REAL, POINTER :: SHAPE(:) !< Ice shape function
     REAL, POINTER :: AGE(:) !< Ice age [s]
     REAL, POINTER :: THICKNESS(:) !< Ice thickness [m]
 
@@ -63,7 +62,6 @@ TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: SICE_t
     PROCEDURE, PRIVATE, PASS :: REGRID
     PROCEDURE, PRIVATE, PASS :: RUN_INTERNAL
     PROCEDURE, PRIVATE, PASS :: GROWTH
-    PROCEDURE, PRIVATE, PASS :: COMPUTE_SHAPE
 
     PROCEDURE, PRIVATE, NOPASS :: IO
 END TYPE SICE_t
@@ -181,9 +179,90 @@ IMPLICIT NONE
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:PREP', 1, ZHOOK_HANDLE)
 END SUBROUTINE PREP
 
-SUBROUTINE ASSIM(THIS)
+SUBROUTINE ASSIM(THIS, HPROGRAM, PSIC_IN, PLON_IN, PLAT_IN)
+USE MODD_CSTS, ONLY: XTTSI
+#if(!defined(ARO) || defined(SODA_OFFLINE))
+USE MODI_OL_PROPAGATE_ICE
+#endif
 IMPLICIT NONE
   CLASS(SICE_t) :: THIS
+  CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM
+  REAL,               INTENT(IN) :: PSIC_IN(:)
+  REAL,               INTENT(IN) :: PLON_IN(:)
+  REAL,               INTENT(IN) :: PLAT_IN(:)
+
+  REAL, DIMENSION(THIS%NUM_POINTS) :: ZSDF, ZW, ZMIXED_TICE, ZICE_THICKNESS
+  REAL :: Z_TI(THIS%NUM_LAYERS)
+  LOGICAL :: GMISSING_OLD_ICE
+  REAL :: ZEDGE_THK ! Mean ice thickness along the old ice edge
+  REAL :: Z_T0, Z_TF, Z_H, Z_P1X, Z_P1Y
+  INTEGER :: JI
+  REAL(KIND=JPRB) :: ZHOOK_HANDLE
+
+  IF (LHOOK) CALL DR_HOOK('ICE_SICE:ASSIM', 0, ZHOOK_HANDLE)
+
+  ZSDF = 0.
+  ZW = 0.
+  ZICE_THICKNESS(:) = THIS%THICKNESS(:)
+
+#if(defined(ARO) && !defined(SODA_OFFLINE))
+  CALL ARO_PROPAGATE_ICE( &
+    THIS%NUM_POINTS,      &
+    THIS%NUM_LAYERS,      &
+    PLON_IN,              &
+    PLAT_IN,              &
+    THIS%XSIC,            &
+    PSIC_IN,              &
+    THIS%T,               &
+    ZICE_THICKNESS,       &
+    ZSDF,                 &
+    GMISSING_OLD_ICE,     &
+    ZEDGE_THK)
+#else
+  CALL OL_PROPAGATE_ICE(  &
+    THIS%NUM_POINTS,      &
+    THIS%NUM_LAYERS,      &
+    PLON_IN,              &
+    PLAT_IN,              &
+    THIS%XSIC,            &
+    PSIC_IN,              &
+    THIS%T,               &
+    ZICE_THICKNESS,       &
+    ZSDF,                 &
+    GMISSING_OLD_ICE,     &
+    ZEDGE_THK)
+#endif
+
+  IF(GMISSING_OLD_ICE) THEN
+    DO JI = 1, THIS%NUM_POINTS
+      IF(PSIC_IN(JI) > 0) THIS%T(JI,:) = XTTSI
+    END DO
+
+    CALL PRUNE(THIS%MF, .NOT. (PSIC_IN > 0.))
+    CALL THIS%REGRID()
+    IF (LHOOK) CALL DR_HOOK('ICE_SICE:ASSIM', 1, ZHOOK_HANDLE)
+    RETURN
+  END IF
+
+  WHERE(ZSDF > 0.)
+    ZW(:) = EXP(-10*EXP(-(1.0 - 0.8*PSIC_IN(:))*ZSDF(:)/2500.0))
+    WHERE(ZICE_THICKNESS(:) > ZEDGE_THK)
+      ZICE_THICKNESS(:) = ZW(:)*ZEDGE_THK + (1. - ZW(:))*ZICE_THICKNESS(:)
+    ENDWHERE
+  ENDWHERE
+
+  DO JI = 1, THIS%NUM_LAYERS
+    WHERE(ZSDF > 0.)
+      ZMIXED_TICE(:) = ZW(:)*XTTSI + (1. - ZW(:))*THIS%T(:,JI)
+    ELSEWHERE
+      ZMIXED_TICE(:) = THIS%T(:,JI)
+    ENDWHERE
+    THIS%T(:,JI) = ZMIXED_TICE(:)
+  END DO
+
+  CALL PRUNE(THIS%MF, .NOT. (PSIC_IN > 0.))
+  CALL THIS%REGRID(ZICE_THICKNESS)
+  IF (LHOOK) CALL DR_HOOK('ICE_SICE:ASSIM', 1, ZHOOK_HANDLE)
 END SUBROUTINE ASSIM
 
 SUBROUTINE RUN( &
@@ -566,8 +645,6 @@ IMPLICIT NONE
       THIS%T(:M,:) = ZFRZ(:,:)
   END WHERE
 
-  CALL THIS%COMPUTE_SHAPE()
-
   WHERE( THIS%AGE(:M) < 365*24*3600 )
     THIS%AGE(:M) = THIS%AGE(:M) + PTSTEP
   END WHERE
@@ -657,7 +734,6 @@ IMPLICIT NONE
   IF(ASSOCIATED(THIS%DZ))       DEALLOCATE(THIS%DZ)
   IF(ASSOCIATED(THIS%Z_DIFF))   DEALLOCATE(THIS%Z_DIFF)
   IF(ASSOCIATED(THIS%T))        DEALLOCATE(THIS%T)
-  IF(ASSOCIATED(THIS%SHAPE))    DEALLOCATE(THIS%SHAPE)
   IF(ASSOCIATED(THIS%AGE))      DEALLOCATE(THIS%AGE)
 
   IF(ASSOCIATED(THIS%XTICE))    DEALLOCATE(THIS%XTICE)
@@ -911,7 +987,6 @@ IMPLICIT NONE
     THIS%T(THIS%NUM_POINTS, THIS%NUM_LAYERS))
 
   ALLOCATE( &
-    THIS%SHAPE(THIS%NUM_POINTS), &
     THIS%AGE(THIS%NUM_POINTS))
 
   ALLOCATE( &
@@ -983,32 +1058,12 @@ IMPLICIT NONE
   IF( LHOOK ) CALL DR_HOOK( 'ICE_SICE:REGRID', 1, ZHOOK_HANDLE )
 END SUBROUTINE REGRID
 
-SUBROUTINE COMPUTE_SHAPE( THIS )
-USE MODD_SURF_PAR ,ONLY: XUNDEF
-IMPLICIT NONE
-  CLASS( SICE_t ) :: THIS
-
-  INTEGER :: I
-  REAL(KIND=JPRB) :: ZHOOK_HANDLE
-
-  IF (LHOOK) CALL DR_HOOK('ICE_SICE:COMPUTE_SHAPE', 0, ZHOOK_HANDLE)
-
-  THIS%SHAPE(:) = XUNDEF
-  DO I = 1, SIZE(THIS%T, DIM = 1)
-      IF( THIS%T(I,1) /= XUNDEF) THEN
-          THIS%SHAPE(I) = SUM( THIS%T(I,:)*THIS%DZ(I,:) )
-      END IF
-  END DO
-
-  IF (LHOOK) CALL DR_HOOK('ICE_SICE:COMPUTE_SHAPE', 1, ZHOOK_HANDLE)
-END SUBROUTINE
-
 SUBROUTINE GET_MODEL_FIELDS( THIS, MF )
 IMPLICIT NONE
   CLASS(SICE_t), INTENT(IN) :: THIS
   TYPE( MODEL_FIELD ), ALLOCATABLE, INTENT( OUT ) :: MF(:)
 
-  INTEGER, PARAMETER :: NUM_FIELDS = 7
+  INTEGER, PARAMETER :: NUM_FIELDS = 6
 
   TYPE( MODEL_FIELD ), ALLOCATABLE :: SNOW_FIELDS(:)
   REAL( KIND = JPRB )  :: ZHOOK_HANDLE
@@ -1028,14 +1083,6 @@ IMPLICIT NONE
       'K',                                                              &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],                               &
       P2 = THIS%T                                                       &
-    ),                                                                  &
-    MODEL_FIELD(                                                        &
-      'TICE_SHAPE',                                                     &
-      'Shape factor of ice profile',                                    &
-      'K*m',                                                            &
-      [THIS%NUM_POINTS, 0],                                             &
-      LDIAG = .FALSE.,                                                  &
-      P1 = THIS%SHAPE                                                   &
     ),                                                                  &
     MODEL_FIELD(                                                        &
       'ICE_AGE',                                                        &

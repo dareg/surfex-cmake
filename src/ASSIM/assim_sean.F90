@@ -73,6 +73,7 @@ REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
 !
 REAL, DIMENSION(KI) :: ZALT
 REAL, DIMENSION(KI) :: ZSST
+REAL, DIMENSION(KI) :: ZSIC
 REAL, DIMENSION(KI) :: ZSST0
 REAL, DIMENSION(KI) :: ZSSTINC
 REAL, DIMENSION(:), ALLOCATABLE :: ZSST01, ZSST1, ZLON1, ZLAT1, ZALT1 
@@ -192,6 +193,18 @@ IF (KI>0) WRITE(*,*) 'Mean SST increments over SEA   ',SUM(ZSSTINC)/KI
 ! Setting modified variables
 S%XSST(:) = ZSST(:)
 !
+ZSIC = PSIC_IN
+! Consistency check
+WHERE(S%XSST(:) > 273.15 .AND. ABS(ZSIC(:)) > 0)
+  WHERE( ZSIC(:) < 0.001 ) ZSIC(:) = 0.0
+  WHERE( S%XSST(:) > 277.0 ) ZSIC(:) = 0.0
+ENDWHERE
+CALL S%ICE%ASSIM(HPROGRAM, ZSIC, PLON_IN, PLAT_IN)
+
+IF(S%LHANDLE_SIC .AND. (S%CSEAICE_SCHEME == 'SICE  ')) THEN
+  S%XSIC(:) = ZSIC(:)
+END IF
+
 IF (LHOOK) CALL DR_HOOK('ASSIM_SEA_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------
