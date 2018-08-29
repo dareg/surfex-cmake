@@ -379,7 +379,7 @@ LTIMESNOWMAK(:)= .FALSE.  !Logical: suitable timing conditions for snowmaking			
 PMONTH         = .FALSE.
 PDAY           = .FALSE.
 PRODTHEO(:,:)  = 0.0
-DMK%XPRODCOUNT(:)  = 0.0
+IF (IO%LSNOWMAK_BOOL) DMK%XPRODCOUNT(:)  = 0.0
 !
 ZWGHT(:)       = 0.0
 ZWORK(:)       = 0.0
@@ -467,38 +467,39 @@ IF (PEK%TSNOW%SCHEME=='3-L' .OR. IO%CISBA == 'DIF' .OR. PEK%TSNOW%SCHEME == 'CRO
 !
     ZSOILCOND(:)    = 4.*XPI/( DMK%XCG(:)*DMK%XCG(:)*XDAY/(PD_G(:,1)*PCT(:)) )
 !
-   ENDIF
+  ENDIF
 !
 ! ===============================================================
 !        Snow redistribution scheme Sytron
 ! 
-IF (PEK%TSNOW%SCHEME=='CRO' .AND. IO%LSNOWSYTRON) THEN
+  IF (PEK%TSNOW%SCHEME=='CRO' .AND. IO%LSNOWSYTRON) THEN
 
-  CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,     &
+    CALL SNOW_SYTRON(PTSTEP,PPS,PTA,PQA,PVMOD,PVDIR,PSLOPEDIR,PDIRCOSZW,   &
                         PEK%TSNOW%HEAT,PEK%TSNOW%WSNOW,PEK%TSNOW%RHO,      &
                         PEK%TSNOW%GRAN1,PEK%TSNOW%GRAN2,PEK%TSNOW%HIST,    &
                         PEK%TSNOW%AGE,KTAB_SYT, ZBLOWSNW,DMK%XSYTMASS)
 !
 ! Calculate maximum snow depth (m) of deposited blown snow particles
 !
-  WHERE(ZBLOWSNW(:,1)> 0.)
-     ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
-  END WHERE
-ENDIF
+    WHERE(ZBLOWSNW(:,1)> 0.)
+      ZBLOWSNW_ACC(:)=ZBLOWSNW(:,1)*PTSTEP/ZBLOWSNW(:,2)
+    END WHERE
+
+  ENDIF
 !
 ! Calculate preliminary snow depth (m)
 
 
-   ZSNOW(:)=0.
-   ZSNOWH(:)=0.
-   ZSNOWSWE_1D(:)=0.
+  ZSNOW(:)=0.
+  ZSNOWH(:)=0.
+  ZSNOWSWE_1D(:)=0.
   ZSNOWH1(:)    = PEK%TSNOW%HEAT(:,1)*PEK%TSNOW%WSNOW(:,1)/PEK%TSNOW%RHO(:,1) ! sfc layer only
 !
   DO JWRK=1,SIZE(PEK%TSNOW%WSNOW(:,:),2)
     DO JJ=1,SIZE(PEK%TSNOW%WSNOW(:,:),1)
-        ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PEK%TSNOW%WSNOW(JJ,JWRK)
-        ZSNOW(JJ)           = ZSNOW(JJ)       + PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
-        ZSNOWH(JJ)          = ZSNOWH(JJ)      + PEK%TSNOW%HEAT(JJ,JWRK)*PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
+      ZSNOWSWE_1D(JJ)     = ZSNOWSWE_1D(JJ) + PEK%TSNOW%WSNOW(JJ,JWRK)
+      ZSNOW(JJ)           = ZSNOW(JJ)       + PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
+      ZSNOWH(JJ)          = ZSNOWH(JJ)      + PEK%TSNOW%HEAT(JJ,JWRK)*PEK%TSNOW%WSNOW(JJ,JWRK)/PEK%TSNOW%RHO(JJ,JWRK)
     END DO
   ENDDO
 
@@ -509,7 +510,7 @@ ENDIF
 !	A.1. Theoretical production
 !
   IF (IO%LSNOWMAK_BOOL) THEN
-  !
+    !
     DO JJ=1, 30
       PRODTHEO(11,JJ) = XPROD_SCHEME(1)*30
     ENDDO
@@ -590,6 +591,7 @@ ENDIF
             IO%LPRODSNOWMAK(JJ) = .FALSE.
           ENDIF
         ENDIF
+
       ENDIF
 !													|
 !-----------------------	SELFPROD option by p.spandre	----------------------------------------|
@@ -601,9 +603,11 @@ ENDIF
       ENDIF
 
     ENDDO
+
   ENDIF
 
   DO JJ=1,SIZE(PTA)
+
     IF (IO%LSNOWMAK_BOOL) THEN
 !
 ! B. Atmospheric conditions for snowmaking
@@ -648,6 +652,7 @@ ENDIF
         ZSNOWMAK(JJ)=0.
       ENDIF
     ENDIF
+
     ZSNOWFALL(JJ)      = PSR(JJ)*PTSTEP/XRHOSMAX_ES + ZSNOWMAK(JJ)      ! MINImum possible snowfall depth (m) + snowmaking depth by P.S 19/11/2013
 !
     IF (IO%LSNOWMAK_BOOL) DMK%XPRODCOUNT(JJ) = XPROD_COUNT(JJ)

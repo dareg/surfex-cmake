@@ -180,7 +180,7 @@ IF (OSURF_MISC_BUDGET) THEN
     !Check consitency: dz is vertical (?)
      
   ENDIF
-  IF (PEK%TSNOW%SCHEME=='CRO') THEN
+  IF (PEK%TSNOW%SCHEME=='CRO' .AND. IO%LSNOWSYTRON) THEN
       DMK%XSYTMASSC(:)  =  DMK%XSYTMASSC(:) * PTSTEP
   ENDIF
 !

@@ -439,28 +439,48 @@ ENDIF ! End ISBA soil scheme case
 !              ------------------------------------------
 !
 IF(NPE%AL(1)%TSNOW%SCHEME=="CRO") THEN
-  DM%XSYTMASS(:) = 0.
-  DM%XSYTMASSC(:) = 0.
-  DM%XPRODCOUNT(:) = 0.
 
-  DO JP=1,IO%NPATCH
-    PK => NP%AL(JP)
-    DMK => NDM%AL(JP)
-    PEK => NPE%AL(JP)
-    !   
-    DO JI=1,PK%NSIZE_P
-      IMASK = PK%NR_P(JI)
+  IF ( IO%LSNOWSYTRON ) THEN
+
+    DM%XSYTMASS(:) = 0.
+    DM%XSYTMASSC(:) = 0.
+
+    DO JP=1,IO%NPATCH
+      PK => NP%AL(JP)
+      DMK => NDM%AL(JP)
+      !   
+      DO JI=1,PK%NSIZE_P
+        IMASK = PK%NR_P(JI)
+        !
+        !     SYTRON total outputs
+        DM%XSYTMASS(IMASK) = DM%XSYTMASS(IMASK) + PK%XPATCH(JI) * DMK%XSYTMASS(JI)
+        DM%XSYTMASSC(IMASK) = DM%XSYTMASSC(IMASK) + PK%XPATCH(JI) * DMK%XSYTMASSC(JI)
+        !
+      ENDDO
       !
-      !     SYTRON total outputs
-      DM%XSYTMASS(IMASK) = DM%XSYTMASS(IMASK) + PK%XPATCH(JI) * DMK%XSYTMASS(JI)
-      DM%XSYTMASSC(IMASK) = DM%XSYTMASSC(IMASK) + PK%XPATCH(JI) * DMK%XSYTMASSC(JI)
-      !
-      !     Snow production counter output
-      DM%XPRODCOUNT(IMASK) = DM%XPRODCOUNT(IMASK) + PK%XPATCH(JI) * DMK%XPRODCOUNT(JI)
+    ENDDO
+
+  ENDIF
+
+  IF ( IO%LSNOWMAK_BOOL ) THEN
+
+    DM%XPRODCOUNT(:) = 0.
+
+    DO JP=1,IO%NPATCH
+      PK => NP%AL(JP)
+      DMK => NDM%AL(JP)
+      !   
+      DO JI=1,PK%NSIZE_P
+        IMASK = PK%NR_P(JI)
+        !
+        !     Snow production counter output
+        DM%XPRODCOUNT(IMASK) = DM%XPRODCOUNT(IMASK) + PK%XPATCH(JI) * DMK%XPRODCOUNT(JI)
+        !
+      ENDDO
       !
     ENDDO
     !
-  ENDDO
+  ENDIF
 
 ENDIF
 

@@ -1245,7 +1245,7 @@ ZP_QSURF (:) = DK%XQS (:)
 !
  CALL REPROJ_DIAG_ISBA_n(DK, DEK, DMK, PEK, ID%O%LSURF_BUDGET, ID%DE%LSURF_EVAP_BUDGET, &
                          ID%DE%LWATER_BUDGET, ID%DM%LSURF_MISC_BUDGET, ID%DM%LPROSNOW, &
-                         IO%LMEB_PATCH(JP), ZP_SLOPE_COS)
+                         IO%LSNOWSYTRON, IO%LMEB_PATCH(JP), ZP_SLOPE_COS)
 !
 ! Unpack ISBA diagnostics (modd_diag_isban) for each patch:ISIZE_MAX = MAXVAL(NSIZE_NATURE_P)
 

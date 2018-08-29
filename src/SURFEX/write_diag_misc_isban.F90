@@ -356,18 +356,27 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   ENDIF
   !
   IF (TPSNOW%SCHEME=='CRO') THEN
-    YRECFM='SYTFLX_ISBA'
-    YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
-    CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
-    ! 
-    YRECFM='SYTFLXC_ISBA'
-    YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
-    CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT) 
-    ! 
-    YRECFM='PCOUNT'
-    YCOMMENT='Snow production counter (s)'
-    CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
-  !
+    !
+    IF (IO%LSNOWSYTRON) THEN
+      !      
+      YRECFM='SYTFLX_ISBA'
+      YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASS(:),IRESP,HCOMMENT=YCOMMENT)
+      ! 
+      YRECFM='SYTFLXC_ISBA'
+      YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XSYTMASSC(:),IRESP,HCOMMENT=YCOMMENT) 
+      !
+    ENDIF
+    !
+    IF (IO%LSNOWMAK_BOOL) THEN
+      !        
+      YRECFM='PCOUNT'
+      YCOMMENT='Snow production counter (s)'
+      CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,DM%XPRODCOUNT(:),IRESP,HCOMMENT=YCOMMENT)
+      !
+    ENDIF
+    !
   ENDIF
   !
   !        2.6    SGH scheme
@@ -707,23 +716,32 @@ IF (DM%LSURF_MISC_BUDGET) THEN
 
     ENDIF
     !
-    IF (TPSNOW%SCHEME=='CRO') THEN 
-      YCOMMENT='Snow production counter (s)'
-      DO JP=1,IO%NPATCH
-        CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'PCOUNT_',YCOMMENT,JP,&
-              NP%AL(JP)%NR_P,NDM%AL(JP)%XPRODCOUNT(:),ISIZE,S%XWORK_WR)
-      ENDDO
-      YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
-      DO JP=1,IO%NPATCH
-          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLX_ISBA',YCOMMENT,JP,&
+    IF (TPSNOW%SCHEME=='CRO') THEN
+
+      IF (IO%LSNOWMAK_BOOL) THEN
+        YCOMMENT='Snow production counter (s)'
+        DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'PCOUNT_',YCOMMENT,JP,&
+                NP%AL(JP)%NR_P,NDM%AL(JP)%XPRODCOUNT(:),ISIZE,S%XWORK_WR)
+        ENDDO
+      ENDIF
+
+      IF (IO%LSNOWSYTRON) THEN    
+
+        YCOMMENT='Sytron_erosion/accumulation_flux (kg/m2/s)'
+        DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLX_',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSYTMASS(:),ISIZE,S%XWORK_WR)
-      ENDDO
-      !
-      YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
-      DO JP=1,IO%NPATCH
-          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLXC_ISBA',YCOMMENT,JP,&
+        ENDDO
+        !
+        YCOMMENT='Cumulated Sytron_erosion/accumulation_flux (kg/m2)'
+        DO JP=1,IO%NPATCH
+          CALL WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'SYTFLXC_',YCOMMENT,JP,&
                 NP%AL(JP)%NR_P,NDM%AL(JP)%XSYTMASSC(:),ISIZE,S%XWORK_WR)
-      ENDDO
+        ENDDO
+
+      ENDIF
+
     ENDIF
   ENDIF
   !
