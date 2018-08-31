@@ -338,32 +338,34 @@ IF(GPROFILE) THEN
   WHERE (F%XT_BOT < tpl_T_f )
     F%XT_BOT = tpl_T_f
   END WHERE
-  IF (GUNIF_G) THEN 
+  IF (.NOT.LCLIM_LAKE) THEN
+    IF (GUNIF_G) THEN 
 ! in case of unified profiles, calculate the mean water temperature
-    WHERE (F%XT_WML < tpl_T_f)
-      F%XT_WML = tpl_T_f
-    END WHERE
-    WHERE(F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
-      F%XT_MNW = F%XT_WML
-    ELSEWHERE
-      F%XT_MNW = F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
-    END WHERE
-  ELSE
-! in case of the input file, calculate the mixed layer temperature
-    WHERE (F%XT_MNW < tpl_T_f)
-      F%XT_MNW = tpl_T_f
-    END WHERE
-    WHERE(F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
-      F%XT_WML = F%XT_MNW
-    ELSEWHERE
-      F%XT_WML = (F%XT_MNW-(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT*F%XT_BOT)/ &
-               (1.-(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT)
       WHERE (F%XT_WML < tpl_T_f)
         F%XT_WML = tpl_T_f
-        F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
-      END WHERE   
-    END WHERE    
-  END IF
+      END WHERE
+      WHERE(F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
+        F%XT_MNW = F%XT_WML
+      ELSEWHERE
+        F%XT_MNW = F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
+      END WHERE
+    ELSE
+! in case of the input file, calculate the mixed layer temperature
+      WHERE (F%XT_MNW < tpl_T_f)
+        F%XT_MNW = tpl_T_f
+      END WHERE
+      WHERE(F%XH_ML >= F%XWATER_DEPTH-h_ML_min_flk)
+        F%XT_WML = F%XT_MNW
+      ELSEWHERE
+        F%XT_WML = (F%XT_MNW-(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT*F%XT_BOT)/ &
+                 (1.-(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT)
+        WHERE (F%XT_WML < tpl_T_f)
+          F%XT_WML = tpl_T_f
+          F%XT_MNW=F%XT_WML-(F%XT_WML-F%XT_BOT)*(1.-F%XH_ML/F%XWATER_DEPTH)*F%XCT
+        END WHERE   
+      END WHERE    
+    END IF
+  END IF 
   WHERE (F%XH_SNOW < h_Snow_min_flk)
     F%XH_SNOW = 0.0
     F%XT_SNOW = tpl_T_f
