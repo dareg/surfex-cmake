@@ -225,7 +225,7 @@ IF (.NOT.LCLIM_LAKE) THEN
                            HPROGRAM,'H_ML   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
  CALL PREP_HOR_FLAKE_FIELD(DTCO, UG, U, USS, GCP, ISIZE, F, &
                            HPROGRAM,'H_B1   ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,GUNIF_G,GINTERP)
- ALLOCATE(F%XT_MNW(SIZE(F%XTS)))
+ ALLOCATE(F%XT_MNW(ISIZE))
  IF (GINTERP) THEN
   GPROFILE = .FALSE.
  END IF
@@ -239,12 +239,12 @@ ENDIF
 !
 !*      2.2    Roughness
 !
-ALLOCATE(F%XZ0(SIZE(F%XTS)))
+ALLOCATE(F%XZ0(ISIZE))
 F%XZ0 = 0.001
 !
 !*      2.2    Friction velocity
 !
-ALLOCATE(F%XUSTAR(SIZE(F%XTS)))
+ALLOCATE(F%XUSTAR(ISIZE))
 F%XUSTAR = 0.
 
 !-------------------------------------------------------------------------------------
