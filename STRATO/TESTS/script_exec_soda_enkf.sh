@@ -3,6 +3,7 @@
 exec_new=$3
 exec_old=$4
 nens=$5
+dir_run=$6
 
 echo $1 >> $2
 
@@ -14,7 +15,7 @@ echo "NEW" >> $2
 
 rm -f BGROUND*
 
-./script_exec_soda_enkf0.sh $exec_new $2 "RES_NEW" $nens
+./script_exec_soda_enkf0.sh $exec_new $2 "RES_NEW" $nens $dir_run
 
 ./script_test_end.sh "NEW" "$2" "$1"
 
@@ -40,7 +41,7 @@ echo "OLD" >> $2
 
 rm -f BGROUND*
 
-./script_exec_soda_enkf0.sh $exec_old $2 "RES_OLD" $nens
+./script_exec_soda_enkf0.sh $exec_old $2 "RES_OLD" $nens $dir_run
 
 ./script_test_end.sh "OLD" "$2" "$1"
 
@@ -77,7 +78,7 @@ AAAAMMJJRR=2007071006
 AAAAMMJJRR_end=2007071106
 while [ $AAAAMMJJRR  -le $AAAAMMJJRR_end ]; do
 
-  AAAAMMJJRRobs=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR 24`
+  AAAAMMJJRRobs=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR 24 $dir_run`
   AAAAMMJJRR=$AAAAMMJJRRobs
   aa=`echo $AAAAMMJJRR | cut -c3-4`
   mm=`echo $AAAAMMJJRR | cut -c5-6`

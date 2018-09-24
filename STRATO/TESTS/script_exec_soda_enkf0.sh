@@ -4,7 +4,7 @@
 exec1=$1
 repres=$3
 nens=$4
-
+dir_run=$5
 
 ./pgd.exe $exec1 >> $2
 ./prep.exe $exec1 >> $2
@@ -28,7 +28,7 @@ while [ $AAAAMMJJRR  -le $AAAAMMJJRR_end ]; do
 
   AAAAMMJJRR_obs=$AAAAMMJJRR
 
-  AAAAMMJJRR=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR_obs 24`
+  AAAAMMJJRR=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR_obs 24 $dir_run`
   aa=`echo $AAAAMMJJRR | cut -c3-4`
   mm=`echo $AAAAMMJJRR | cut -c5-6`
   jj=`echo $AAAAMMJJRR | cut -c7-8`

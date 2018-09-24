@@ -3,6 +3,7 @@ npert=2
 
 exec_new=$3
 exec_old=$4
+dir_run=$5
 
 echo $1 >> $2
 
@@ -12,7 +13,7 @@ cp -f OPTIONS.nam OPTIONS.nam_new
 
 echo "NEW" >> $2
 
-./script_exec_soda_ekf0.sh $exec_new $2 "RES_NEW"
+./script_exec_soda_ekf0.sh $exec_new $2 "RES_NEW" $dir_run
 
 ./script_test_end.sh "NEW" "$2" "$1"
 
@@ -31,7 +32,7 @@ rm -f BGROUND*
 
 echo "OLD" >> $2
 
-./script_exec_soda_ekf0.sh $exec_old $2 "RES_OLD"
+./script_exec_soda_ekf0.sh $exec_old $2 "RES_OLD" $dir_run
 
 ./script_test_end.sh "OLD" "$2" "$1"
 
@@ -64,7 +65,7 @@ AAAAMMJJRR=2007071006
 AAAAMMJJRR_end=2007071506
 while [ $AAAAMMJJRR  -le $AAAAMMJJRR_end ]; do
 
-  AAAAMMJJRRobs=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR 24`
+  AAAAMMJJRRobs=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR 24 $dir_run`
   AAAAMMJJRR=$AAAAMMJJRRobs
   aa=`echo $AAAAMMJJRR | cut -c3-4`
   mm=`echo $AAAAMMJJRR | cut -c5-6`

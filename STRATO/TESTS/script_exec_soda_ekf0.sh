@@ -4,7 +4,7 @@ npert=2
 
 exec1=$1
 repres=$3
-
+dir_run=$4
 
 ./pgd.exe $exec1 >> $2
 ./prep.exe $exec1 >> $2
@@ -24,7 +24,7 @@ while [ $AAAAMMJJRR  -le $AAAAMMJJRR_end ]; do
   cp -f TESTS/CAS_PART/SODA/FORC/'20'$aa$mm$jj$RR'_FORCING_7_3.nc' FORCING.nc
   cp -f TESTS/FORCAGES/HIVER/Params_config.txt_soda_ekf$jj Params_config.txt
 
-  AAAAMMJJRRobs=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR 24`
+  AAAAMMJJRRobs=`TESTS/CAS_PART/SODA/SCRIPTS/smsdate $AAAAMMJJRR 24 $dir_run`
   AAAAMMJJRR=$AAAAMMJJRRobs
   aa=`echo $AAAAMMJJRR | cut -c3-4`
   mm=`echo $AAAAMMJJRR | cut -c5-6`

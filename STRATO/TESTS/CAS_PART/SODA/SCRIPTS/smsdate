@@ -2,7 +2,8 @@
 #
 #Exemple d'utilisation:
 #AAAAMMJJRR=`$HOME/bin/smsdate $AAAAMMJJRR 6`
-CHEMIN=/home/faroux/STRATO/TESTS/CAS_PART/SODA/SCRIPTS
+#CHEMIN=/home/faroux/STRATO/TESTS/CAS_PART/SODA/SCRIPTS
+CHEMIN=$3/TESTS/CAS_PART/SODA/SCRIPTS
 
 DATEIN=`expr $1 |cut -c1-8`
 HEURE=10#`expr $1 | cut -c9-10`
