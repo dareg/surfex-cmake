@@ -52,11 +52,21 @@ sed -e "s/LSNOWDRIFT\_SUBLIM\ =\ F/LSNOWDRIFT\_SUBLIM\ =\ T/g" OPTIONS.nam_save 
 cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM"
 cp -f OPTIONS.nam OPTIONS.nam_sublim
 ./script_exec_parall.sh "$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM" $3 $4 $5
-echo "############# $2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_NOSNOWDRIFT "
+echo "############# $2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_GA01"
 mv -f OPTIONS.nam_sublim OPTIONS.nam_save
-sed -e "s/LSNOWDRIFT\ =\ T/LSNOWDRIFT\ =\ F/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_NOSNOWDRIFT"
-./script_exec.sh "$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_NOSNOWDRIFT" $3 $4 $5
+sed -e 's/CSNOWDRIFT\ =\ "DFLT"/CSNOWDRIFT\ =\ "GA01"/g' OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_GA01"
+./script_exec.sh "$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_GA01" $3 $4 $5
+echo "############# $2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_VI13"
+mv -f OPTIONS.nam_sublim OPTIONS.nam_save
+sed -e 's/CSNOWDRIFT\ =\ "DFLT"/CSNOWDRIFT\ =\ "VI13"/g' OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_VI13"
+./script_exec.sh "$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_VI13" $3 $4 $5
+echo "############# $2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_NONE"
+mv -f OPTIONS.nam_sublim OPTIONS.nam_save
+sed -e 's/CSNOWDRIFT\ =\ "DFLT"/CSNOWDRIFT\ =\ "NONE"/g' OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_NONE"
+./script_exec.sh "$2_SNCRO8_GLACIER_RIL_SNOWDRIFT_SUBLIM_NONE" $3 $4 $5
 
 #test crocus avec 10 couches
 echo "############# $2_SNCRO10 "
@@ -120,32 +130,21 @@ cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_SNOWMETAMO_F06_B92"
 
 #SNOWRAD
 #TAR
-echo "############# $2_SNCRO8_B92_SNOWRAD_TAR"
+echo "############# $2_SNCRO8_B92_SNOWRAD_B93"
 cp -f OPTIONS.nam_metamo OPTIONS.nam_save
 #T17 for V9 vs TAR for V8
-sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"T17\"/g" OPTIONS.nam_save > OPTIONS.nam
-cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_B92_SNOWRAD_TAR"
-./script_exec_parall.sh "$2_SNCRO8_B92_SNOWRAD_TAR" $3 $4 $5
+sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"B93\"/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_B92_SNOWRAD_B93"
+./script_exec_parall.sh "$2_SNCRO8_B92_SNOWRAD_B93" $3 $4 $5
 #
+#TAR
+echo "############# $2_SNCRO8_C13_SNOWRAD_T17"
 cp -f OPTIONS.nam_metamo OPTIONS.nam_save
 sed -e "s/CSNOWMETAMO = \"B92\"/CSNOWMETAMO = \"C13\"/g" OPTIONS.nam_save > OPTIONS.nam_c13
-#TAR
-echo "############# $2_SNCRO8_C13_SNOWRAD_TAR"
 cp -f OPTIONS.nam_c13 OPTIONS.nam_save
 sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"T17\"/g" OPTIONS.nam_save > OPTIONS.nam
 #T17 for V9 vs TAR for V8
-cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TAR"
-./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TAR" $3 $4 $5
-#TA1
-#echo "############# $2_SNCRO8_C13_SNOWRAD_TA1"
-#cp -f OPTIONS.nam_c13 OPTIONS.nam_save
-#sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TA1\"/g" OPTIONS.nam_save > OPTIONS.nam
-#cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TA1"
-#./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TA1" $3 $4 $5
-##TA2
-#echo "############# $2_SNCRO8_C13_SNOWRAD_TA2"
-#cp -f OPTIONS.nam_c13 OPTIONS.nam_save
-#sed -e "s/CSNOWRAD = \"B92\"/CSNOWRAD = \"TA2\"/g" OPTIONS.nam_save > OPTIONS.nam
-#cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_TA2"
-#./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_TA2" $3 $4 $5
+cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8_C13_SNOWRAD_T17"
+./script_exec_parall.sh "$2_SNCRO8_C13_SNOWRAD_T17" $3 $4 $5
+#
 rm -f drdt_bst_fit_60.nc
