@@ -621,7 +621,7 @@ IMPLICIT NONE
   ALLOCATE( MF(NUM_FIELDS) )
 
   MF(:) = [MODEL_FIELD(                      &
-      'WSNOW_ICE',                           &
+      'WSN_ICE',                             &
       'Snow water equivalent',               &
       'Kg/m2',                               &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
@@ -629,7 +629,7 @@ IMPLICIT NONE
       XDEFAULT = 0.                          &
     ),                                       &
     MODEL_FIELD(                             &
-      'RSNOW_ICE',                           &
+      'RSN_ICE',                             &
       'Snow density',                        &
       'Kg/m3',                               &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
@@ -637,7 +637,7 @@ IMPLICIT NONE
       XDEFAULT = XRHOSMIN_ES                 &
     ),                                       &
     MODEL_FIELD(                             &
-      'HSNOW_ICE',                           &
+      'HSN_ICE',                             &
       'Snow heat content',                   &
       'Kg/m3',                               &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
@@ -645,21 +645,21 @@ IMPLICIT NONE
       XDEFAULT = 0.                          &
     ),                                       &
     MODEL_FIELD(                             &
-      'GSNOW_ICE',                           &
+      'GSN_ICE',                             &
       'Snow age',                            &
       's',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       P2 = THIS%AGE                          &
     ),                                       &
     MODEL_FIELD(                             &
-      'ASNOW_ICE',                           &
+      'ASN_ICE',                             &
       'Snow albedo',                         &
       'dimensionless',                       &
       [THIS%NUM_POINTS, 0],                  &
       P1 = THIS%ALBEDO                       &
     ),                                       &
     MODEL_FIELD(                             &
-      'TSNOW_ICE',                           &
+      'TSN_ICE',                             &
       'Snow temperature',                    &
       'K',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
@@ -667,7 +667,7 @@ IMPLICIT NONE
       P2 = THIS%T                            &
     ),                                       &
     MODEL_FIELD(                             &
-      'DSNOW_ICE',                           &
+      'DSN_ICE',                             &
       'Snow thickness',                      &
       'm',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
@@ -676,7 +676,7 @@ IMPLICIT NONE
       XDEFAULT = 0.                          &
     ),                                       &
     MODEL_FIELD(                             &
-      'LWSNOW_ICE',                          &
+      'LWSN_ICE',                            &
       'Snow liquid water',                   &
       'm',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
