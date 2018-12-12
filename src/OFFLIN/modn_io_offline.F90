@@ -36,6 +36,7 @@
 !!      P. Lemoigne 04/2013 Add XDELTA_OROG to fix the maximum difference allowed between
 !!                          forcing and surface file orographies if LSET_FORC_ZS=.F
 !!      M. Dumont 12/2016 spectral calculation for Crocus CSPECSNOW
+!!      Y. Seity  09/2018 add LFAGMAP
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -149,6 +150,9 @@ REAL            :: XIO_FRAC = 1.          ! fraction of ISIZE deduced to I/O
 !
 CHARACTER(LEN=4) :: YALG_MPI = "LIN "     ! type of distribution algorithm for MPI
 !
+
+LOGICAL         :: LFAGMAP = .FALSE.
+
 ! * autorize spectral caculation for snow 
 LOGICAL     :: CSPECSNOW=.FALSE.
 
@@ -173,9 +177,9 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LOUT_TIMENAME, LLIMIT_QAIR,                              &
                         LSHADOWS_SLOPE,LSHADOWS_OTHER, LWR_VEGTYPE,              &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
-                        YALG_MPI, XDELTA_OROG, LADAPT_SW, LINTERP_SW,            &
+                        YALG_MPI, XDELTA_OROG, LADAPT_SW, LINTERP_SW, LFAGMAP,            &
                         LALLOW_ADD_DIM, LDELAYEDSTART_NC, NDATESTOP, CSPECSNOW,  &
-			                  LFORCIMP,NIMPUROF, LFORCATMOTARTES              
+                        LFORCIMP,NIMPUROF, LFORCATMOTARTES              
                         
 !
 !-------------------------------------------------------------------------------

@@ -39,12 +39,13 @@ SUBROUTINE COUPLING_SURF_ATM_n (YSC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR,
 !!      B. Decharme 04/2013 new coupling variables and replace RW_PRECIP_n by CPL_GCM_n
 !!      Modified    06/2013 by J.Escobar  : replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
+!!      A. Mary     04/2016 add ORORAD
 !!-------------------------------------------------------------
 !
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_PREP_SNOW, ONLY : NIMPUR
-
+!
 #ifdef SFX_OL
 USE MODN_IO_OFFLINE, ONLY : LFORCIMP
 #endif
@@ -84,6 +85,7 @@ USE MODI_COUPLING_SEA_n
 USE MODI_COUPLING_TOWN_n
 !
 USE MODI_CPL_GCM_n
+USE MODI_ORORAD
 !
 IMPLICIT NONE
 !
@@ -121,9 +123,9 @@ REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
  CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
-REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
+REAL, DIMENSION(KI,KSW),INTENT(INOUT) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
+REAL, DIMENSION(KI,KSW),INTENT(INOUT) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
 REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
@@ -172,6 +174,8 @@ CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
 INTEGER :: JTILE                        ! loop on type of surface
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
 INTEGER :: ISWB                         ! number of shortwave spectral bands
+!
+REAL, DIMENSION(KI)  :: ZLW
 !
 REAL, DIMENSION(KI)  :: ZPEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KI)  :: ZPEW_B_COEF ! needed if HCOUPLING='I'
@@ -286,6 +290,17 @@ END IF
 #ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! - - - - 
+! Orographic shadowing 
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! - - - - 
+!
+ZLW(:)=PLW(:)
+IF (YSC%USS%LDSV .OR. YSC%USS%LDSH .OR. YSC%USS%LDSL) &
+        CALL ORORAD(YSC%USS,PZENITH,PAZIM,PSCA_ALB,PTRAD,PEMIS,PDIR_SW,PSCA_SW,ZLW)
+
+!
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
@@ -538,7 +553,7 @@ DO JJ=1,KSIZE
   ZP_CO2(JJ)        = PCO2        (JI)
   ZP_RAIN(JJ)       = PRAIN       (JI)
   ZP_SNOW(JJ)       = PSNOW       (JI)
-  ZP_LW(JJ)         = PLW         (JI)
+  ZP_LW(JJ)         = ZLW         (JI)
   ZP_PS(JJ)         = PPS         (JI)
   ZP_PA(JJ)         = PPA         (JI)
   ZP_ZS(JJ)         = PZS         (JI)

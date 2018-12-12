@@ -11,7 +11,7 @@
                                     PVZIUSTAR0, ORRGUST_ARP, PRRSCALE, PRRGAMMA,        &
                                     PUTILGUST, OCPL_ARP, OQVNPLUS, OVERTSHIFT,          &
                                     OVSHIFT_LW, OVSHIFT_PRCP,                           &
-                                    PCO2UNCPL                                           )
+                                    PCO2UNCPL ,OARP_PN                                  )
 !     ########################################################################
 !
 !!****  *DEFAULT_SURF_ATM* - routine to set default values for the choice of surface schemes
@@ -90,6 +90,7 @@ REAL,              INTENT(OUT) :: PRRSCALE
 REAL,              INTENT(OUT) :: PRRGAMMA
 REAL,              INTENT(OUT) :: PUTILGUST
 LOGICAL,           INTENT(OUT) :: OCPL_ARP
+LOGICAL,           INTENT(OUT) :: OARP_PN   ! Flag to change Cv and TAUICE
 LOGICAL,           INTENT(OUT) :: OQVNPLUS
 LOGICAL,           INTENT(OUT) :: OCPL_GCM  ! Flag used to Read/Write some field from/into the restart file for coupling with ARPEGE/ALADIN
 REAL,              INTENT(OUT) :: PCO2UNCPL ! geochemical CO2 for photsynthesis (ppmv)
@@ -142,6 +143,7 @@ PRRSCALE = 1.15E-4
 PRRGAMMA = 0.8
 PUTILGUST = 0.125
 OCPL_ARP=.FALSE.
+OARP_PN=.FALSE.
 OQVNPLUS=.FALSE.
 !
 PCO2UNCPL = XUNDEF

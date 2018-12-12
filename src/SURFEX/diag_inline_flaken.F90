@@ -41,8 +41,8 @@
 !
 !
 !
-USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
-USE MODD_FLAKE_n, ONLY : FLAKE_t
+USE MODD_DIAG_n,       ONLY : DIAG_t, DIAG_OPTIONS_t
+USE MODD_FLAKE_n,      ONLY : FLAKE_t
 !
 USE MODD_CSTS,         ONLY : XTT
 USE MODD_SURF_PAR,     ONLY : XUNDEF
@@ -64,9 +64,9 @@ IMPLICIT NONE
 !
 !
 TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
-TYPE(DIAG_t), INTENT(INOUT) :: D
-TYPE(DIAG_t), INTENT(INOUT) :: DC
-TYPE(FLAKE_t), INTENT(INOUT) :: F
+TYPE(DIAG_t), INTENT(INOUT)      :: D
+TYPE(DIAG_t), INTENT(INOUT)      :: DC
+TYPE(FLAKE_t), INTENT(INOUT)     :: F
 !
 REAL              , INTENT(IN) :: PTSTEP ! atmospheric time-step (s)
 REAL, DIMENSION(:), INTENT(IN) :: PTA    ! atmospheric temperature
@@ -124,9 +124,6 @@ IF (.NOT. F%LSBL) THEN
                   F%XTS, PHU, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  
-  END IF
-!
-  IF (DGO%N2M>=1) THEN
     !
     D%XT2M_MIN(:) = MIN(D%XT2M_MIN(:),D%XT2M(:))
     D%XT2M_MAX(:) = MAX(D%XT2M_MAX(:),D%XT2M(:))

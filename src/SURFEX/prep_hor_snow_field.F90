@@ -408,7 +408,11 @@ IF (YDCTL%LPART5) THEN
         IF (OSNOW_IDEAL) THEN
           SK%DEPTH(:,:) = ZW%AL(JP)%ZOUT(:,:)
         ELSE
-          CALL SNOW3LGRID(SK%DEPTH(:,:),ZW%AL(JP)%ZOUT(:,1))                
+          IF ( ISNOW_NLAYER > 1) THEN
+            CALL SNOW3LGRID(SK%DEPTH(:,:),ZW%AL(JP)%ZOUT(:,1))  
+          ELSE
+            SK%DEPTH(:,1)=ZW%AL(JP)%ZOUT(:,1)
+          ENDIF            
           !DO JL=1,SIZE(SK%DEPTH,2)
           !  SK%DEPTH(:,JL) = ZW%AL(JP)%ZOUT(:,1)
           !ENDDO

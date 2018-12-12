@@ -497,13 +497,6 @@ IF (HINIT=='ALL') THEN
   ISNOW_NLAYER = IM%NPE%AL(1)%TSNOW%NLAYER
 ENDIF
 !
-!-------------------------------------------------------------------------------
-!
-!*       3.     atmospheric turbulence parameters
-!               ---------------------------------
-!
-IM%AT=AT
-!
 IF (.NOT.LSPLIT_PATCH ) THEN
   ALLOCATE(IM%S%XWORK_WR(KI,IM%O%NPATCH))
   IM%S%XWORK_WR(:,:) = XUNDEF
@@ -555,6 +548,15 @@ ELSE
   ALLOCATE(IM%S%TDATE_WR(0,1))
 
 ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+!*       3.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+IM%AT=AT
+!
+!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
 !

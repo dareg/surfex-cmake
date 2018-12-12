@@ -61,10 +61,10 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 !
-TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
-TYPE(DIAG_t), INTENT(INOUT) :: D
-TYPE(CANOPY_t), INTENT(INOUT) :: SB
-TYPE(TEB_t), INTENT(INOUT) :: T
+TYPE(DIAG_OPTIONS_t), INTENT(INOUT)  :: DGO
+TYPE(DIAG_t), INTENT(INOUT)          :: D
+TYPE(CANOPY_t), INTENT(INOUT)        :: SB
+TYPE(TEB_t), INTENT(INOUT)           :: T
 !
 LOGICAL,            INTENT(IN)       :: OCANOPY  ! Flag for canopy
 REAL, DIMENSION(:), INTENT(IN)       :: PTA      ! atmospheric temperature
@@ -104,15 +104,15 @@ REAL, DIMENSION(:), INTENT(IN)       :: PEMIS    ! emissivity                   
 !
 !*      0.2    declarations of local variables
 !
-REAL                                 :: ZZ0_O_Z0H
-REAL, DIMENSION(SIZE(PTA))           :: ZH  
+REAL                        :: ZZ0_O_Z0H
+REAL, DIMENSION(SIZE(PTA))  :: ZH  
 REAL, DIMENSION(SIZE(PTA))  :: ZU10
 REAL, DIMENSION(SIZE(PTA))  :: ZWIND10M_MAX
 REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MIN
 REAL, DIMENSION(SIZE(PTA))  :: ZT2M_MAX
 REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MIN
 REAL, DIMENSION(SIZE(PTA))  :: ZHU2M_MAX
-INTEGER                              :: JJ    ! loop counter
+INTEGER                     :: JJ    ! loop counter
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -150,9 +150,6 @@ ELSE
     D%XQ2M  = T%XQ_CANYON
     D%XRI   = PRI
     D%XHU2M = MIN(T%XQ_CANYON /QSAT(T%XT_CANYON,PPA),1.)
-  END IF
-  !
-  IF (DGO%N2M>=1) THEN
     !
     D%XT2M_MIN(:) = MIN(D%XT2M_MIN(:),D%XT2M(:))
     D%XT2M_MAX(:) = MAX(D%XT2M_MAX(:),D%XT2M(:))

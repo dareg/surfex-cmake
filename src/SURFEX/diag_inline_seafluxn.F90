@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,              &
+SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,                      &
                                   PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,           &
                                   PMERA, PHT, PHW, PCD, PCDN, PCH, PCE, PRI, PHU,     &
                                   PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,          &
@@ -11,7 +11,7 @@ SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,              &
                                   PEMIS, PTRAD, PRAIN, PSNOW,                         & 
                                   PCD_ICE, PCDN_ICE, PCH_ICE, PCE_ICE, PRI_ICE,       &
                                   PZ0_ICE, PZ0H_ICE, PQSAT_ICE, PSFTH_ICE, PSFTQ_ICE, &
-                                   PSFZON_ICE, PSFMER_ICE )
+                                  PSFZON_ICE, PSFMER_ICE )
                                           
 !     #####################################################################################
 !
@@ -50,9 +50,9 @@ USE MODD_CSTS,           ONLY : XTTS
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
 !
-USE MODD_TYPES_GLT,     ONLY : T_GLT
-USE MODD_GLT_PARAM ,    ONLY : GELATO_DIM=>NX
-USE MODE_GLT_STATS ,    ONLY : GLT_AVHICEM, GLT_AVHSNWM
+USE MODD_TYPES_GLT,      ONLY : T_GLT
+USE MODD_GLT_PARAM ,     ONLY : GELATO_DIM=>NX
+USE MODE_GLT_STATS ,     ONLY : GLT_AVHICEM, GLT_AVHSNWM
 USE MODI_CLS_TQ
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_SEA
@@ -163,21 +163,19 @@ IF (.NOT. S%LSBL) THEN
        CALL CLS_WIND(PZONA, PMERA, PHW, PCD_ICE, PCDN_ICE, PRI_ICE, ZH,  &
             DI%XZON10M, DI%XMER10M  )  
     ENDIF 
-  END IF
 !
-  IF (DGO%N2M>=1) THEN
-     IF (S%LHANDLE_SIC) THEN
-        !
-        D%XT2M    = D%XT2M    * (1 - S%XSIC) + DI%XT2M    * S%XSIC
-        D%XQ2M    = D%XQ2M    * (1 - S%XSIC) + DI%XQ2M    * S%XSIC
-        D%XHU2M   = D%XHU2M   * (1 - S%XSIC) + DI%XHU2M   * S%XSIC
-        !
-        D%XZON10M(:) = D%XZON10M(:) * (1 - S%XSIC(:)) + DI%XZON10M(:) * S%XSIC(:)
-        D%XMER10M(:) = D%XMER10M(:) * (1 - S%XSIC(:)) + DI%XMER10M(:) * S%XSIC(:)
-        DI%XWIND10M(:) = SQRT(DI%XZON10M(:)**2+DI%XMER10M(:)**2)
-        !
-        D%XRI    = PRI     * (1 - S%XSIC) + PRI_ICE     * S%XSIC
-        DI%XRI   =PRI_ICE
+    IF (S%LHANDLE_SIC) THEN
+      !
+      D%XT2M    = D%XT2M    * (1 - S%XSIC) + DI%XT2M    * S%XSIC
+      D%XQ2M    = D%XQ2M    * (1 - S%XSIC) + DI%XQ2M    * S%XSIC
+      D%XHU2M   = D%XHU2M   * (1 - S%XSIC) + DI%XHU2M   * S%XSIC
+      !
+      D%XZON10M(:) = D%XZON10M(:) * (1 - S%XSIC(:)) + DI%XZON10M(:) * S%XSIC(:)
+      D%XMER10M(:) = D%XMER10M(:) * (1 - S%XSIC(:)) + DI%XMER10M(:) * S%XSIC(:)
+      DI%XWIND10M(:) = SQRT(DI%XZON10M(:)**2+DI%XMER10M(:)**2)
+      !
+      D%XRI    = PRI     * (1 - S%XSIC) + PRI_ICE     * S%XSIC
+      DI%XRI   =PRI_ICE
      ELSE
         D%XRI    =PRI
      ENDIF
