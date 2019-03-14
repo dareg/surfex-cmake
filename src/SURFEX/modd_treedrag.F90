@@ -22,6 +22,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original 30/06/11
+!!    P. Samuelsson, SMHI  02/2018: Added XZ0_LIMIT
 !!
 !-----------------------------------------------------------------------------
 !
@@ -30,5 +31,6 @@
 IMPLICIT NONE
 LOGICAL    ::     LTREEDRAG=.FALSE.    ! flag used to  take into account tree drag in 
 !                                      ! the atmospheric model instead of SURFEX.
+REAL       ::     XZ0_LIMIT=999.       ! Limit Z0 (m) in Z0V_FROM_LAI to this maximum value.
 !
 END MODULE MODD_TREEDRAG

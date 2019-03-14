@@ -90,7 +90,8 @@ ALLOCATE(PEK%XALBNIR_VEG             (ISIZE              ))
 ALLOCATE(PEK%XALBVIS_VEG             (ISIZE              )) 
 ALLOCATE(PEK%XALBUV_VEG              (ISIZE              )) 
 !
-ALLOCATE(PK%XZ0_O_Z0H               (ISIZE              )) 
+ALLOCATE(PK%XZ0_O_Z0H                (ISIZE              )) 
+ALLOCATE(PK%XH_TREE                  (ISIZE              ))
 !
 IF (ISIZE_LMEB_PATCH>0 .OR. IO%CPHOTO/='NON') THEN
   ALLOCATE(PEK%XBSLAI                  (ISIZE              )) 
@@ -99,11 +100,11 @@ ELSE
 ENDIF
 ! - vegetation: Ags parameters ('AGS', 'LAI', 'AST', 'LST', 'NIT' options)
 !
-IF (IO%CPHOTO/='NON'.OR.LTREEDRAG) THEN
-  ALLOCATE(PK%XH_TREE                 (ISIZE              ))
-ELSE
-  ALLOCATE(PK%XH_TREE                 (0                 ))
-ENDIF
+!IF (IO%CPHOTO/='NON'.OR.LTREEDRAG) THEN
+!  ALLOCATE(PK%XH_TREE                 (ISIZE              ))
+!ELSE
+!  ALLOCATE(PK%XH_TREE                 (0                 ))
+!ENDIF
 !
 IF (IO%CPHOTO/='NON') THEN
   ALLOCATE(PK%XRE25                   (ISIZE              )) 

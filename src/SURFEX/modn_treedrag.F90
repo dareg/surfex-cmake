@@ -22,6 +22,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original 30/06/11
+!!    P. Samuelsson, SMHI  02/2018: Added XZ0_LIMIT
 !!
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
@@ -34,7 +35,7 @@ USE MODD_TREEDRAG
 IMPLICIT NONE
 SAVE
 NAMELIST /NAM_TREEDRAG/  &
-     LTREEDRAG                                             
+     LTREEDRAG, XZ0_LIMIT                                         
 
 !
 END MODULE MODN_TREEDRAG

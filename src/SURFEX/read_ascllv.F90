@@ -35,6 +35,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_PGD_GRID,   ONLY : LLATLONMASK
+USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODI_OPEN_FILE
 USE MODI_CLOSE_FILE
@@ -70,6 +71,7 @@ INTEGER      :: JLAT, JLON                 ! indexes of OLATLONMASK array
 INTEGER*4, PARAMETER :: ILONG=200000
 !
 REAL         :: ZVALUER
+REAL         :: ZNODATA
 REAL, DIMENSION(ILONG) :: ZVALUE          ! values of a data point
 REAL         :: ZLATR
 REAL, DIMENSION(ILONG) :: ZLAT              ! latitude of data point
@@ -91,9 +93,10 @@ IF (LHOOK) CALL DR_HOOK('READ_ASCLLV',0,ZHOOK_HANDLE)
 !
 ICPT = 0
 !
-ZLAT(:) = 0
-ZLON(:) = 0
-ZVALUE(:) = 0
+ZNODATA = XUNDEF
+ZLAT(:) = 0.0
+ZLON(:) = 0.0
+ZVALUE(:) = XUNDEF
 !
 !----------------------------------------------------------------------------
 DO
@@ -103,6 +106,7 @@ DO
 !            -----------------------
 !
   READ(IGLB,*,IOSTAT=ISTAT) ZLATR,ZLONR,ZVALUER
+!
 !
 !----------------------------------------------------------------------------
 !
@@ -139,8 +143,9 @@ DO
     !*    5.     Call to the adequate subroutine (point by point treatment)
     !            ----------------------------------------------------------
     !
-    CALL PT_BY_PT_TREATMENT(UG, U, USS, ILUOUT, &
-            ZLAT(1:ICPT), ZLON(1:ICPT), ZVALUE(1:ICPT), HSUBROUTINE    )  
+    CALL PT_BY_PT_TREATMENT(UG, U, USS, ILUOUT,                      &
+            ZLAT(1:ICPT), ZLON(1:ICPT), ZVALUE(1:ICPT), HSUBROUTINE, &
+            PNODATA=ZNODATA                                          )
     !
     ICPT = 0
     ZLAT  (:) = 0.
