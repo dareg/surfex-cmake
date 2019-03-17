@@ -115,6 +115,7 @@ IMPLICIT NONE
 
   LOGICAL :: GFOUND
   INTEGER :: JI, IN
+  LOGICAL, ALLOCATABLE :: GPRUNE_ALL(:)
 
   REAL :: XICE_TUNIF
   LOGICAL :: LINIT_FROM_SST
@@ -154,6 +155,11 @@ IMPLICIT NONE
   IF(.NOT. ALLOCATED(THIS%MF)) THEN
     CALL THIS%GET_MODEL_FIELDS(THIS%MF)
   END IF
+  ! Reset all model fields to the default state before initialization
+  ALLOCATE(GPRUNE_ALL(THIS%NUM_POINTS))
+  GPRUNE_ALL(:) = .TRUE.
+  CALL PRUNE(THIS%MF, GPRUNE_ALL)
+  DEALLOCATE(GPRUNE_ALL)
 
   CALL THIS%REGRID()
   FILL_BY_UNIFORM: IF(.NOT. LINIT_FROM_SST) THEN
@@ -181,9 +187,8 @@ END SUBROUTINE PREP
 
 SUBROUTINE ASSIM(THIS, HPROGRAM, PSIC_IN, PLON_IN, PLAT_IN)
 USE MODD_CSTS, ONLY: XTTSI
-#if(!defined(ARO) || defined(SODA_OFFLINE))
 USE MODI_OL_PROPAGATE_ICE
-#endif
+USE MODI_ABOR1_SFX
 IMPLICIT NONE
   CLASS(SICE_t) :: THIS
   CHARACTER(LEN=6),   INTENT(IN) :: HPROGRAM
@@ -205,33 +210,37 @@ IMPLICIT NONE
   ZW = 0.
   ZICE_THICKNESS(:) = THIS%THICKNESS(:)
 
-#if(defined(ARO) && !defined(SODA_OFFLINE))
-  CALL ARO_PROPAGATE_ICE( &
-    THIS%NUM_POINTS,      &
-    THIS%NUM_LAYERS,      &
-    PLON_IN,              &
-    PLAT_IN,              &
-    THIS%XSIC,            &
-    PSIC_IN,              &
-    THIS%T,               &
-    ZICE_THICKNESS,       &
-    ZSDF,                 &
-    GMISSING_OLD_ICE,     &
-    ZEDGE_THK)
+  IF(HPROGRAM == 'AROME ') THEN
+#ifdef SFX_ARO
+    CALL ARO_PROPAGATE_ICE( &
+      THIS%NUM_POINTS,      &
+      THIS%NUM_LAYERS,      &
+      PLON_IN,              &
+      PLAT_IN,              &
+      THIS%XSIC,            &
+      PSIC_IN,              &
+      THIS%T,               &
+      ZICE_THICKNESS,       &
+      ZSDF,                 &
+      GMISSING_OLD_ICE,     &
+      ZEDGE_THK)
 #else
-  CALL OL_PROPAGATE_ICE(  &
-    THIS%NUM_POINTS,      &
-    THIS%NUM_LAYERS,      &
-    PLON_IN,              &
-    PLAT_IN,              &
-    THIS%XSIC,            &
-    PSIC_IN,              &
-    THIS%T,               &
-    ZICE_THICKNESS,       &
-    ZSDF,                 &
-    GMISSING_OLD_ICE,     &
-    ZEDGE_THK)
+    CALL ABOR1_SFX('SFX_ARO should be defined while calling SURFEX from AROME')
 #endif
+  ELSE
+    CALL OL_PROPAGATE_ICE(  &
+      THIS%NUM_POINTS,      &
+      THIS%NUM_LAYERS,      &
+      PLON_IN,              &
+      PLAT_IN,              &
+      THIS%XSIC,            &
+      PSIC_IN,              &
+      THIS%T,               &
+      ZICE_THICKNESS,       &
+      ZSDF,                 &
+      GMISSING_OLD_ICE,     &
+      ZEDGE_THK)
+  END IF
 
   IF(GMISSING_OLD_ICE) THEN
     DO JI = 1, THIS%NUM_POINTS
@@ -856,25 +865,25 @@ IMPLICIT NONE
   IF (LHOOK) CALL DR_HOOK('ICE_SICE:GET_RESPONSE', 0, ZHOOK_HANDLE)
 
   IF(ANY(THIS%XSIC > 0.)) THEN
-    IF(ASSOCIATED(THIS%SNOW)) THEN
-      GSNOW_POINTS(:) = THIS%SNOW%EXISTS()
-      CALL THIS%SNOW%GET_RESPONSE(THIS%NUM_POINTS, PTSUR = ZSNOW_TEMP, PALB = ZSNOW_ALB)
-    ELSE
-      GSNOW_POINTS(:) = .FALSE.
-    END IF
+  IF(ASSOCIATED(THIS%SNOW)) THEN
+    GSNOW_POINTS(:) = THIS%SNOW%EXISTS()
+    CALL THIS%SNOW%GET_RESPONSE(THIS%NUM_POINTS, PTSUR = ZSNOW_TEMP, PALB = ZSNOW_ALB)
+  ELSE
+    GSNOW_POINTS(:) = .FALSE.
+  END IF
     WHERE(THIS%XSIC > 0.)
-      ZICE_ALB(:) = ICE_ALBEDO( THIS%T(:,1), THIS%CONFIG%NICE_ALBEDO )
+  ZICE_ALB(:) = ICE_ALBEDO( THIS%T(:,1), THIS%CONFIG%NICE_ALBEDO )
     ELSE WHERE
       ZICE_ALB(:) = XALBSEAICE
     END WHERE
 
-    WHERE(GSNOW_POINTS(:))
-      PTICE(:) = ZSNOW_TEMP(:)
-      PICE_ALB(:) = ZSNOW_ALB(:)
-    ELSE WHERE
-      PTICE(:) = THIS%T(:,1)
-      PICE_ALB(:) = ZICE_ALB
-    END WHERE
+  WHERE(GSNOW_POINTS(:))
+    PTICE(:) = ZSNOW_TEMP(:)
+    PICE_ALB(:) = ZSNOW_ALB(:)
+  ELSE WHERE
+    PTICE(:) = THIS%T(:,1)
+    PICE_ALB(:) = ZICE_ALB
+  END WHERE
   ELSE
     PTICE(:) = XTTSI
     PICE_ALB(:) = XALBSEAICE

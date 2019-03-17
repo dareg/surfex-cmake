@@ -663,7 +663,6 @@ IMPLICIT NONE
       'Snow temperature',                    &
       'K',                                   &
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
-      .TRUE.,                                &
       P2 = THIS%T                            &
     ),                                       &
     MODEL_FIELD(                             &
