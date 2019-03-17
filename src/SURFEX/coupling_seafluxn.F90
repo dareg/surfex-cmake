@@ -639,7 +639,7 @@ ENDIF
 !-------------------------------------------------------------------------------
 !
 IF (S%LHANDLE_SIC) THEN
-  IF (S%CSEAICE_SCHEME == 'NONE  ') THEN
+  IF (S%CSEAICE_SCHEME =='NONE') THEN
      S%XTICE    = S%XSST
      S%XSIC     = S%XFSIC
      S%XICE_ALB = XALBSEAICE           
