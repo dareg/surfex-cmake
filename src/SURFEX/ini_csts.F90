@@ -84,7 +84,11 @@ XSURF_TINY    = 1.0e-80
 XSURF_TINY    = TINY    (XSURF_TINY    )
 #endif
 #else
+#ifdef PARKIND1_SINGLE
+XSURF_TINY    = 1.0e-20
+#else
 XSURF_TINY    = 1.0e-80
+#endif
 #endif
 XSURF_TINY_12 = SQRT    (XSURF_TINY    )
 XSURF_EPSILON = EPSILON (XSURF_EPSILON ) * 10.0
