@@ -145,7 +145,7 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 #else
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATORI,ZLONORI,IIMAX,IJMAX,     &
-                              ZX,ZY,ZDX,ZDY                    )  
+                              ZX,ZY,ZDX,ZDY,0,0                )  
 #endif 
 !
 !---------------------------------------------------------------------------

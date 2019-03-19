@@ -48,6 +48,7 @@ USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_GET_LUOUT
 USE MODI_READ_AND_SEND_MPI
+USE MODI_ABOR1_SFX
 !
 USE MODE_GRIDTYPE_CONF_PROJ
 !
@@ -103,6 +104,8 @@ REAL    :: XLATCEN  ! latitude  of center point
 REAL    :: XLONCEN  ! longitude of center point
 INTEGER :: NIMAX    ! number of points in I direction
 INTEGER :: NJMAX    ! number of points in J direction
+INTEGER :: ILATE    ! size of extension zone
+INTEGER :: ILONE    ! size of extension zone
 REAL    :: XDX      ! increment in X direction (in meters)
 REAL    :: XDY      ! increment in Y direction (in meters)
 !
@@ -112,7 +115,7 @@ LOGICAL :: GFOUND
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_CONF_PROJ/XLAT0, XLON0, XRPK, XBETA
-NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY
+NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY,ILONE,ILATE
 !
 !------------------------------------------------------------------------------
 !
@@ -122,49 +125,54 @@ IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_CONF_PROJ',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HDIR/='H') THEN
-  !      
-  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-  !
-  !---------------------------------------------------------------------------
-  !
-  !*       2.    Reading of projection parameters
-  !              --------------------------------
-  !
-  CALL POSNAM(ILUNAM,'NAM_CONF_PROJ',GFOUND,ILUOUT)
-  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ)
-  !
-  !---------------------------------------------------------------------------
-  !
-  !*       2.    Reading parameters of the grid
-  !              ------------------------------
-  !
-  CALL POSNAM(ILUNAM,'NAM_CONF_PROJ_GRID',GFOUND,ILUOUT)
-  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ_GRID)
-  !
-  !---------------------------------------------------------------------------
-  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-  !---------------------------------------------------------------------------
-  !
-  !*       3.    Number of points
-  !              ----------------
-  !
-  KL = NIMAX * NJMAX
-  !
-  !---------------------------------------------------------------------------
-  !
-  !*       3.    Array of X and Y coordinates
-  !              ----------------------------
-  !
-  !
-  ALLOCATE(ZX(KL))
-  ALLOCATE(ZY(KL))
-  DO JJ=1,NJMAX
-    DO JI=1,NIMAX
-      JL = JI + (JJ-1) * NIMAX
-      ZX(JL) = FLOAT(JI) * XDX
-      ZY(JL) = FLOAT(JJ) * XDY
-    END DO
+!
+ CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+!
+!---------------------------------------------------------------------------
+!
+!*       2.    Reading of projection parameters
+!              --------------------------------
+!
+ CALL POSNAM(ILUNAM,'NAM_CONF_PROJ',GFOUND,ILUOUT)
+IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ)
+!
+!---------------------------------------------------------------------------
+!
+!*       2.    Reading parameters of the grid
+!              ------------------------------
+!
+ CALL POSNAM(ILUNAM,'NAM_CONF_PROJ_GRID',GFOUND,ILUOUT)
+ ILONE=0
+ ILATE=0
+IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ_GRID)
+!
+!---------------------------------------------------------------------------
+ CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+!---------------------------------------------------------------------------
+!
+!*       3.    Number of points
+!              ----------------
+!
+KL = NIMAX * NJMAX
+IF ((ILONE == 0 .AND. ILATE /= 0) .OR. (ILONE /= 0 .AND. ILATE == 0)) THEN
+  CALL ABOR1_SFX('READ_NAM_GRID_CONF_PROJ: KLONE AND KLATE ARE NOT CONSISTENT WRT 0')
+ENDIF
+!
+!---------------------------------------------------------------------------
+!
+!*       3.    Array of X and Y coordinates
+!              ----------------------------
+!
+!
+ALLOCATE(ZX(KL))
+ALLOCATE(ZY(KL))
+DO JJ=1,NJMAX
+  DO JI=1,NIMAX
+    JL = JI + (JJ-1) * NIMAX
+    ZX(JL) = FLOAT(JI) * XDX
+    ZY(JL) = FLOAT(JJ) * XDY
   END DO
+END DO
   !
   !---------------------------------------------------------------------------
   !
@@ -221,7 +229,7 @@ ENDIF
 !
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,XLAT0,XLON0,XRPK,XBETA,    &
                               ZLATOR(1),ZLONOR(1),NIMAX,NJMAX,     &
-                              ZX,ZY,ZDX,ZDY                        )  
+                              ZX,ZY,ZDX,ZDY,ILATE,ILONE            )  
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

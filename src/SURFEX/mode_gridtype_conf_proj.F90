@@ -20,7 +20,7 @@ CONTAINS
 !     ####################################################################
       SUBROUTINE PUT_GRIDTYPE_CONF_PROJ(PGRID_PAR,PLAT0,PLON0,PRPK,PBETA,&
                                           PLATOR,PLONOR,KIMAX,KJMAX,       &
-                                          PX,PY,PDX,PDY                    )  
+                                          PX,PY,PDX,PDY,KLATE,KLONE        )  
 !     ####################################################################
 !
 !!****  *PUT_GRIDTYPE_CONF_PROJ* - routine to store in PGRID_PAR the horizontal grid
@@ -71,6 +71,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PY       ! Y conformal coordinate of bottom b
 REAL, DIMENSION(:), INTENT(IN)  :: PDX      ! X grid mesh size
 REAL, DIMENSION(:), INTENT(IN)  :: PDY      ! Y grid mesh size
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR! parameters defining this grid
+INTEGER,            INTENT(IN)  :: KLATE
+INTEGER,            INTENT(IN)  :: KLONE
 !
 !
 !*       0.2   Declarations of local variables
@@ -97,10 +99,10 @@ IL = SIZE(PX)
 !
 IF (GFULL) THEN
   !* entire grid : one can store only X and Y cooridnate arrays in each direction
-  ALLOCATE(PGRID_PAR(12+KIMAX+KJMAX))
+  ALLOCATE(PGRID_PAR(14+KIMAX+KJMAX))
 ELSE
   !* only some points are present : one store the coordinates of all points
-  ALLOCATE(PGRID_PAR(12+2*IL))
+  ALLOCATE(PGRID_PAR(14+2*IL))
 END IF
 !
 PGRID_PAR(1) = PLAT0
@@ -112,20 +114,8 @@ PGRID_PAR(6) = PLONOR
 PGRID_PAR(7) = FLOAT(KIMAX)
 PGRID_PAR(8) = FLOAT(KJMAX)
 IF (IL>0) THEN
-  PGRID_PAR( 9) = 0.
-  DO JJ = 1, SIZE (PDX) 
-    IF (PDX (JJ) > 0. .AND. PDX (JJ) /= XUNDEF) THEN 
-      PGRID_PAR( 9) = PDX (JJ) 
-      EXIT 
-    ENDIF 
-  ENDDO 
-  PGRID_PAR(10) = 0. 
-  DO JJ = 1, SIZE (PDY) 
-    IF (PDY (JJ) > 0. .AND. PDY (JJ) /= XUNDEF) THEN 
-      PGRID_PAR(10) = PDY (JJ) 
-      EXIT 
-    ENDIF 
-  ENDDO 
+  PGRID_PAR(9) = PDX(1)
+  PGRID_PAR(10)= PDY(1)
 ENDIF
 !
 #ifdef MNH_PARALLEL
@@ -167,21 +157,23 @@ IF (IL<=0) THEN
   PGRID_PAR(10)= XUNDEF
 END IF
 PGRID_PAR(11) = SIZE(PX)
+PGRID_PAR(12) = FLOAT(KLONE)
+PGRID_PAR(13) = FLOAT(KLATE)
 IF (GFULL) THEN
-  PGRID_PAR(12) = 1
+  PGRID_PAR(14) = 1
 ELSE
-  PGRID_PAR(12) = 0
+  PGRID_PAR(14) = 0
 END IF
 !
 IF (GFULL) THEN
-  PGRID_PAR(12     +1:12+KIMAX) = PX(1:KIMAX)
+  PGRID_PAR(14     +1:14+KIMAX) = PX(1:KIMAX)
   DO JJ=1,KJMAX
-    PGRID_PAR(12+KIMAX+JJ) = PY(1+(JJ-1)*KIMAX)
+    PGRID_PAR(14+KIMAX+JJ) = PY(1+(JJ-1)*KIMAX)
   END DO
 ELSE
   IF (IL>0) THEN
-    PGRID_PAR(12     +1:12+  IL) = PX(:)
-    PGRID_PAR(12+  IL+1:12+2*IL) = PY(:)
+    PGRID_PAR(14     +1:14+  IL) = PX(:)
+    PGRID_PAR(14+  IL+1:14+2*IL) = PY(:)
   END IF
 END IF
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:PUT_GRIDTYPE_CONF_PROJ',1,ZHOOK_HANDLE)
@@ -193,7 +185,7 @@ END SUBROUTINE PUT_GRIDTYPE_CONF_PROJ
 !     ####################################################################
       SUBROUTINE GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PLAT0,PLON0,PRPK,PBETA,&
                                           PLATOR,PLONOR,KIMAX,KJMAX,       &
-                                          PX,PY,PDX,PDY,KL                 )  
+                                          PX,PY,PDX,PDY,KL,KLATE,KLONE     )  
 !     ####################################################################
 !
 !!****  *GET_GRIDTYPE_CONF_PROJ* - routine to get from PGRID_PAR the horizontal grid
@@ -235,6 +227,8 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PY       ! Y conformal coor. of gri
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDX      ! X grid mesh size
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDY      ! Y grid mesh size
 INTEGER,            INTENT(OUT), OPTIONAL :: KL       ! number of points
+INTEGER,            INTENT(OUT), OPTIONAL :: KLATE    ! size of extension zone
+INTEGER,            INTENT(OUT), OPTIONAL :: KLONE    ! size of extension zone
 !
 !
 !*       0.2   Declarations of local variables
@@ -263,29 +257,31 @@ IF (PRESENT(KJMAX))  KJMAX = IJMAX
 IF (PRESENT(PDX))    PDX(:)= PGRID_PAR(9)
 IF (PRESENT(PDY))    PDY(:)= PGRID_PAR(10)
 IF (PRESENT(KL))     KL    = IL
+IF (PRESENT(KLONE))  KLONE = NINT (PGRID_PAR (12))
+IF (PRESENT(KLATE))  KLATE = NINT (PGRID_PAR (13))
 !
-GFULL = (PGRID_PAR(12)==1)
+GFULL = (PGRID_PAR(14)==1)
 !
 IF (PRESENT(PX)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
       DO JI=1,IIMAX
-        PX(JI+(JJ-1)*IIMAX) = PGRID_PAR(12+JI)
+        PX(JI+(JJ-1)*IIMAX) = PGRID_PAR(14+JI)
       END DO
     END DO
   ELSE
-    PX(:) = PGRID_PAR(12+1:12+IL)
+    PX(:) = PGRID_PAR(14+1:14+IL)
   END IF        
 END IF
 IF (PRESENT(PY)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
       DO JI=1,IIMAX
-        PY(JI+(JJ-1)*IIMAX) = PGRID_PAR(12+IIMAX+JJ)
+        PY(JI+(JJ-1)*IIMAX) = PGRID_PAR(14+IIMAX+JJ)
       END DO
     END DO
   ELSE
-    PY(:) = PGRID_PAR(12+IL+1:12+2*IL)
+    PY(:) = PGRID_PAR(14+IL+1:14+2*IL)
   END IF        
 END IF
 !
