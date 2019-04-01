@@ -69,7 +69,7 @@ INTEGER                         :: IIMAX, IJMAX
 REAL, DIMENSION(INT(PGRID_PAR(11)))      :: ZX, ZY, ZDX, ZDY
 !
 !* extended grid
-INTEGER                         :: IIMAX_EXTENDED, IJMAX_EXTENDED
+INTEGER                         :: IIMAX_EXTENDED, IJMAX_EXTENDED,ILONE,ILATE
 REAL, DIMENSION(:), ALLOCATABLE :: ZX_EXTENDED, ZY_EXTENDED, ZDX_EXTENDED, ZDY_EXTENDED
 !
 !------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ IF (LHOOK) CALL DR_HOOK('EXTEND_GRID_CONF_PROJ',0,ZHOOK_HANDLE)
 !
  CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                             ZLATOR,ZLONOR,IIMAX,IJMAX,        &
-                            ZX,ZY,ZDX,ZDY                     )
+                            ZX,ZY,ZDX,ZDY,KLONE=ILONE,KLATE=ILATE  )
 !
 !
 !*    2.      Splits the (pertinent) parameters of the grid
@@ -104,7 +104,7 @@ ALLOCATE(ZDY_EXTENDED(KSIZE_FULL))
 NULLIFY(PGRID_PAR)
  CALL PUT_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,       &
                             ZLATOR,ZLONOR,IIMAX_EXTENDED,IJMAX_EXTENDED,  &
-                            ZX_EXTENDED,ZY_EXTENDED,ZDX_EXTENDED,ZDY_EXTENDED   )
+                            ZX_EXTENDED,ZY_EXTENDED,ZDX_EXTENDED,ZDY_EXTENDED,ILATE,ILONE )
                             !
 !
 KGRID_PAR = SIZE(PGRID_PAR)
