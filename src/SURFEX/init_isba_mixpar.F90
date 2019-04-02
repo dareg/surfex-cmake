@@ -155,7 +155,9 @@ ENDIF
 !xpar_lai: needed for av_pgd_param with YLAI
 IF (.NOT.ANY(DTV%LDATA_LAI)) THEN
   ALLOCATE(DTV%XPAR_LAI(KDIM,DTV%NTIME,NVEGTYPE))
+  DTV%XPAR_LAI=XUNDEF  ! Field must be initialized as some values outside KDECADE are used in later calculations and are not otherwise initialized
   CALL AV_PGD(DTCO,DTV%XPAR_LAI(:,KDECADE2,:),PCOVER,XDATA_LAI(:,KDECADE,:),YVEG,'ARI',OCOVER,KDECADE=KDECADE)
+  DTV%XPAR_LAI(:,KDECADE2,1:3)=0.  ! Set LAI=0 for open land, bare rocks and permanent snow
 ENDIF
 !
 !veg
