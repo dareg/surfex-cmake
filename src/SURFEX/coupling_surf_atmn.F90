@@ -112,7 +112,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -122,7 +122,7 @@ REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on hori
 REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH2  ! zenithal angle at t+1(radian from the vertical)
-REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(KI), INTENT(IN)  :: PAZIM     ! solar azimuth angle  (radian from North, clockwise)
 REAL, DIMENSION(KI), INTENT(IN)  :: PLW       ! longwave radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
 REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model surface (Pa)
@@ -199,7 +199,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',0,ZHOOK_HANDLE)
-CPROGNAME=HPROGRAM
+  CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('COUPLING_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -432,6 +432,8 @@ IF (YSC%USS%CROUGH=="Z01D" .OR. YSC%USS%CROUGH=="Z04D") THEN
   CALL SSO_Z0_FRICTION_n(YSC%USS, YSC%U%XSEA,PUREF,PRHOA,PU,PV,ZPEW_A_COEF,ZPEW_B_COEF,PSFU,PSFV)
 ELSE IF (YSC%USS%CROUGH=="BE04") THEN
   CALL SSO_BE04_FRICTION_n(YSC%SB, YSC%USS, PTSTEP,YSC%U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
+ELSE IF (YSC%USS%CROUGH=="OROT") THEN
+   CALL HLOROTUR(PU,PV,PSFU,PSFV)  
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -450,8 +452,8 @@ SUBROUTINE TREAT_SURF(KTILE,KSIZE,KMASK)
 !
 IMPLICIT NONE
 !
-INTEGER, INTENT(IN)               :: KTILE
-INTEGER, INTENT(IN)               :: KSIZE
+INTEGER, INTENT(IN)                :: KTILE
+INTEGER, INTENT(IN)                :: KSIZE
 INTEGER, INTENT(IN), DIMENSION(KI) :: KMASK
 !
 REAL, DIMENSION(KSIZE) :: ZP_TSUN     ! solar time                    (s from midnight)
@@ -469,7 +471,7 @@ REAL, DIMENSION(KSIZE,ISWB) :: ZP_SCA_SW   ! diffuse solar radiation (on horizon
 !                                              !                                       (W/m2)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH2  ! zenithal angle at t+1(radian from the vertical)
-REAL, DIMENSION(KSIZE) :: ZP_AZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(KSIZE) :: ZP_AZIM     ! solar azimuthal angle(radian from North, clockwise)
 REAL, DIMENSION(KSIZE) :: ZP_LW       ! longwave radiation (on horizontal surf.)
 !                                              !                                       (W/m2)
 REAL, DIMENSION(KSIZE) :: ZP_PS       ! pressure at atmospheric model surface (Pa)
@@ -649,7 +651,7 @@ DO JI=1,SIZE(ZP_SFTS,2)
 !cdir nodep
 !cdir unroll=8
   DO JJ=1,KSIZE    
-    ZSFTS_TILE      (KMASK(JJ),JI,KTILE)= ZP_SFTS      (JJ,JI)
+     ZSFTS_TILE      (KMASK(JJ),JI,KTILE)= ZP_SFTS      (JJ,JI)
   ENDDO
 ENDDO
 !
@@ -657,8 +659,8 @@ DO JI=1,SIZE(ZP_DIR_ALB,2)
 !cdir nodep
 !cdir unroll=8
   DO JJ=1,KSIZE   
-    ZDIR_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_DIR_ALB   (JJ,JI)
-    ZSCA_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_SCA_ALB   (JJ,JI)
+     ZDIR_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_DIR_ALB   (JJ,JI)
+     ZSCA_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_SCA_ALB   (JJ,JI)
   ENDDO
 ENDDO
 !
@@ -668,4 +670,87 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:TREAT_SURF',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE TREAT_SURF
 !=======================================================================================
+
+SUBROUTINE HLOROTUR(PU,PV,PSFU,PSFV)
+!----------------------------------------------------------------------
+! HLOROTUR.F90 called by coupling_surf_atmn in SURFEX
+!
+! HLOROTUR calculates orographic stress, i.e. the influence
+! of the smallest scale orography on wind components, using the 
+! ideas of Wood et al., QJRMS, 20001, 172, 759-777. For the usage in
+! HARMONIE, the routine originating in HIRLAM has been extremally simplified.
+! The HIRLAM version of the scheme is described by Rontu, Tellus, 2006,
+! pp.69-81, see also HIRLAM Newsletters 50 and 51.
+!
+! Author:  Laura Rontu, 10.9.2003
+! Updated: Laura Rontu, 30.11.2004
+!          Laura Rontu, 1.10.2006 
+! Modified for HARMONIE Laura Rontu, 23.4.2016
+! ---------------------------------------------------------------------
+#ifdef MERGE_OROTUR
+USE MODD_SURF_ATM_SSO_n, ONLY : XSSO_STDEV, XCOROT, XVOROT, XSOROT
+USE MODD_SURF_ATM_n,     ONLY : XSEA, XWATER
+#endif
+
+!USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+!USE PARKIND1  ,ONLY : JPRB
+!USE YOMLSFORC, ONLY : LMUSCLFA, IMUSCLFA
+
+IMPLICIT NONE
+
+!IN - OUT VARIABLES
+
+REAL, DIMENSION(:), INTENT(IN)    :: PU        ! zonal wind                            (m/s)
+REAL, DIMENSION(:), INTENT(IN)    :: PV        ! meridian wind                         (m/s)
+REAL, DIMENSION(:), INTENT(INOUT) :: PSFU      ! zonal momentum flux                   (Pa)
+REAL, DIMENSION(:), INTENT(INOUT) :: PSFV      ! meridian momentum flux                (Pa)
+
+!LOCAL VARIABLES
+
+INTEGER                     :: JL                     ! loop variables
+REAL                        :: ZVAR                   ! work variables
+REAL                        :: TOROTXS, TOROTYS       ! work variables
+REAL                        :: CSSO, VSSO2, CSSO1     ! tunable coefficients
+
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+
+IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:HLOROTUR',0,ZHOOK_HANDLE)
+
+#ifdef MERGE_OROTUR
+! CSSO depends on tunable coefficient XCOROT and XSOROT, which represents model
+! resolution in metres. XVOROT is used to approximate the influence of wind speed.
+! All three coefficients are defined in namelist nam_ssson. 
+
+  CSSO=XCOROT/(XSOROT*XSOROT)
+  VSSO2=XVOROT*XVOROT
+!  write(66,*) "Coupling_surf_atmn: CSSO VSSO2 XVOROT XSOROT", CSSO, VSSO2, XVOROT, XSOROT
+
+  DO JL=1,KI
+     
+!    only over land
+     IF (XSEA(JL) < 0.01 .AND. XWATER(JL) < 0.01) THEN
+
+!     redefine Csso to get maximum value for weak winds:
+        CSSO1=CSSO*VSSO2/(PU(JL)**2. + PV(JL)**2 + VSSO2)
+        ZVAR=XSSO_STDEV(JL)*XSSO_STDEV(JL)
+        
+!     momentum flux components updated
+        TOROTXS = CSSO1*ZVAR*PSFU(JL)
+        TOROTYS = CSSO1*ZVAR*PSFV(JL)
+
+        PSFU(JL)= PSFU(JL)+TOROTXS
+        PSFV(JL)= PSFV(JL)+TOROTYS
+     END IF
+
+ END DO
+#endif
+
+IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:HLOROTUR',1,ZHOOK_HANDLE)
+!
+!------------------------------------------------------------------------------------
+!
+END SUBROUTINE HLOROTUR
+
+
+
 END SUBROUTINE COUPLING_SURF_ATM_n
