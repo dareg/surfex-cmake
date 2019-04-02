@@ -61,6 +61,7 @@ USE MODI_ABOR1_SFX
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+#endif
 !
 IMPLICIT NONE
 !
@@ -80,6 +81,7 @@ REAL   , INTENT(IN), DIMENSION(:),OPTIONAL  :: PLAT ! Latitudes  for the MPI-tas
 REAL   , INTENT(IN), DIMENSION(:,:),OPTIONAL:: PCORNER_LON, PCORNER_LAT 
 INTEGER, INTENT(IN), DIMENSION(:),OPTIONAL  :: KMASK ! Local Surfex packing mask for the tile
 !
+#ifdef WXIOS
 TYPE(xios_domaingroup) :: domaingroup_hdl
 TYPE(xios_domain)      :: domain_hdl
 !
