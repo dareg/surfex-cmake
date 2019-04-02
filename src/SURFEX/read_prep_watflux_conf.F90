@@ -131,7 +131,7 @@ END IF
 !* If no file and no uniform field is prescribed: error
 !  ---------------------------------------------
 !
-IF (HVAR=='DATE   ' .OR. HVAR=='ZS     ' .AND. LHOOK) CALL DR_HOOK('READ_PREP_WATFLUX_CONF',1,ZHOOK_HANDLE)
+IF ((HVAR=='DATE   ' .OR. HVAR=='ZS     ') .AND. LHOOK) CALL DR_HOOK('READ_PREP_WATFLUX_CONF',1,ZHOOK_HANDLE)
 IF (HVAR=='DATE   ' .OR. HVAR=='ZS     ') RETURN
 !
 IF (LEN_TRIM(HFILETYPE)==0 .AND. .NOT. OUNIF) THEN
