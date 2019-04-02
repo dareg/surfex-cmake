@@ -160,7 +160,7 @@ SELECT CASE (ICENTER)
     SELECT CASE (HGRID)
 
       CASE('rotated_ll')
-        WRITE (KLUOUT,'(A)') ' | Grib file from HIRLAM - regular latlon grid '  
+        WRITE (KLUOUT,'(A)') ' | Grib file from HIRLAM - rotated latlon grid '  
         HINMODEL='HIRLAM'
         HGRIDTYPE='ROTLATLON '
 
@@ -177,9 +177,20 @@ SELECT CASE (ICENTER)
     HGRIDTYPE='ROTLATLON '
 
   CASE (98)
-    WRITE (KLUOUT,'(A)') ' | Grib file from European Center for Medium-range Weather Forecast'
     HINMODEL = 'ECMWF '
-    HGRIDTYPE= 'GAUSS     '
+    SELECT CASE (HGRID)
+
+      CASE('rotated_ll')
+        WRITE (KLUOUT,'(A)') ' | Grib file from ECMWF - rotated latlon grid '  
+        HGRIDTYPE= 'ROTLATLON '
+      CASE('regular_ll')
+        WRITE (KLUOUT,'(A)') ' | Grib file from ECMWF - regular latlon grid '  
+        HGRIDTYPE= 'LATLON    '
+
+      CASE DEFAULT
+        WRITE (KLUOUT,'(A)') ' | Grib file from ECMWF - gaussian grid assumed'
+        HGRIDTYPE= 'GAUSS     '
+    END SELECT
 
   CASE (85)
     SELECT CASE (HGRID)  
@@ -403,11 +414,18 @@ SELECT CASE (HGRIDTYPE)
      !
      CASE ('ROTLATLON ')
      !
-     ! 4.2.5 Rotated lat/lon grid (HIRLAM)
+     ! 4.2.5 Rotated lat/lon grid (HIRLAM/ECMWF)
      !
        IF (NRANK==NPIO) THEN
-       CALL GRIB_GET(IGRIB,'iScansNegatively',ISCAN)
-       CALL GRIB_GET(IGRIB,'jScansPositively',JSCAN)
+
+       IF (ICENTER == 98 ) THEN
+         CALL GRIB_GET(IGRIB,'iScansNegatively',ISCAN)
+         CALL GRIB_GET(IGRIB,'jScansPositively',JSCAN)
+         JSCAN=1-JSCAN
+       ELSE
+         CALL GRIB_GET(IGRIB,'iScansNegatively',ISCAN)
+         CALL GRIB_GET(IGRIB,'jScansNegatively',JSCAN)
+       ENDIF
 
        IF (ISCAN+JSCAN == 0 ) THEN !lon (i) positive, lat (j) negative
          CALL GRIB_GET(IGRIB,'latitudeOfFirstGridPointInDegrees',XRILA2)  
@@ -431,15 +449,13 @@ SELECT CASE (HGRIDTYPE)
          CALL GRIB_GET(IGRIB,'longitudeOfLastGridPointInDegrees',XRILO2)         
        ENDIF
 
+       IF ( XRILO1 > 180. ) XRILO1 = XRILO1 - 360.
+
        CALL GRIB_GET(IGRIB,'latitudeOfSouthernPoleInDegrees',XRLAP)
-       CALL GRIB_GET(IGRIB,'longitudeOfSouthernPoleInDegrees',XRLOP)                       
+       CALL GRIB_GET(IGRIB,'longitudeOfSouthernPoleInDegrees',XRLOP)
 
        CALL GRIB_GET(IGRIB,'iDirectionIncrementInDegrees',XRDX)                 
        CALL GRIB_GET(IGRIB,'jDirectionIncrementInDegrees',XRDY)
-       WRITE(KLUOUT,*)'XRILA1,XRILO1',XRILA1,XRILO1
-       WRITE(KLUOUT,*)'XRILA2,XRILO2',XRILA2,XRILO2
-       WRITE(KLUOUT,*)'XRLAP,XRLOP',XRLAP,XRLOP
-       WRITE(KLUOUT,*)'XRDX,XRDY',XRDX,XRDY
        ENDIF
        IF (NPROC>1) THEN
 #ifdef SFX_MPI                
@@ -453,6 +469,7 @@ SELECT CASE (HGRIDTYPE)
          CALL MPI_BCAST(XRDY,KIND(XRDY)/4,MPI_REAL,NPIO,NCOMM,INFOMPI)
 #endif
        ENDIF
+
 
      !
      CASE ('ROTGAUSS  ')
