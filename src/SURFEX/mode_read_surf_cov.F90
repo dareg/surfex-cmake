@@ -206,8 +206,10 @@ ELSE
       !
       !
       IF (HPROGRAM=='AROME ') THEN
-#ifdef ARO
+#ifdef SFX_ARO
         CALL READ_SURFX1_ARO(YREC,IL1,PFIELD(:,JCOVER),KRESP,YCOMMENT,YDIR)
+#else
+        CALL ABOR1_SFX("You are running AROME. You must compile with -DARO_SFX.") 
 #endif
       ELSE
         !
