@@ -88,7 +88,7 @@ USE MODD_CSTS,       ONLY : XSTEFAN, XCPD, XLSTT, XLVTT, XCL, XTT, XPI, XDAY, &
                             XCI, XRHOLI, XLMTT, XRHOLW, XG, XCL, XCONDI
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_ISBA_PAR,   ONLY : XWGMIN, XSPHSOIL, XDRYWGHT, XRS_MAX
-USE MODD_SNOW_PAR,   ONLY : XTAU_SMELT
+USE MODD_SNOW_PAR,   ONLY : XTAU_SMELT, D95_ZTN_LIMIT
 !
 USE MODE_THERMOS
 !
@@ -348,8 +348,12 @@ IF( (PEK%TSNOW%SCHEME == 'D95' .OR. PEK%TSNOW%SCHEME == 'EBA') .AND. IO%CISBA /=
 !                                            temperature tn
 !
     IF (PEK%TSNOW%SCHEME == 'D95') THEN
-!           
+!      
+     IF ( D95_ZTN_LIMIT ) THEN
+      ZTN(:) = MIN(PEK%XTG(:,1), (1.-PEK%XVEG(:))*PEK%XTG(:,1) + PEK%XVEG(:)*PT2M(:))
+     ELSE
       ZTN(:) = (1.-PEK%XVEG(:))*PEK%XTG(:,1) + PEK%XVEG(:)*PT2M(:)
+     ENDIF
 !
 !     Only diag
       DMK%XSNOWTEMP(:,1) = ZTN (:)

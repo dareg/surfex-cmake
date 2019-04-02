@@ -54,7 +54,7 @@ USE MODD_MEB_PAR,   ONLY : XTAU_LW,                            &
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XAGLAMIN, XAGLAMAX, XHGLA,          &
                            XWSNV, XZ0SN, XZ0HSN,               &
-                           XTAU_SMELT,                         &
+                           XTAU_SMELT,D95_ZTN_LIMIT,           &
                            XALBICE1, XALBICE2, XALBICE3,       &
                            XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW,    &
                            XVAGING_NOGLACIER, XVAGING_GLACIER, &
@@ -93,7 +93,7 @@ NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XZ0FLOOD, XALBWATSNOW,                         &
                         LMEBREC,                                       &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
-                        XTAU_LW, XRAGNC_FACTOR
+                        XTAU_LW, XRAGNC_FACTOR,D95_ZTN_LIMIT
 !
 NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XALBICE1, XALBICE2, XALBICE3,             &
@@ -181,6 +181,9 @@ XZ0HSN = 0.0001
 ! dependence of melt when snow fraction < unity.
 !
 XTAU_SMELT = 300.
+!
+! Limit snow temperature in melting calculations
+D95_ZTN_LIMIT = .FALSE.
 !
 ! Extinction coefficient for view factor for long-wave radiation 
 !
