@@ -52,9 +52,9 @@ IMPLICIT NONE
 !
 !
 !
- CHARACTER(LEN=12),  INTENT(IN) :: HREC     ! field to read or write
+ CHARACTER(LEN=*),   INTENT(IN) :: HREC     ! field to read or write
  CHARACTER(LEN=1),   INTENT(IN) :: HACTION  ! 'R' : file being read
-                                           ! 'W' : file being written
+                                            ! 'W' : file being written
 !
 LOGICAL,            INTENT(OUT):: OKNOWN   ! T : field has already been read/written
 !
