@@ -153,7 +153,7 @@ SELECT CASE(HSURF)
 !
 !*      3.6    MEB fields
 !
-  CASE('WRV    ')
+  CASE('WRV    ','WRL    ','WRLI   ')
      ALLOCATE(PFIELD(NNI,1,1))
      PFIELD(:,:,:) = XWRV_DEF
 !
@@ -165,7 +165,7 @@ SELECT CASE(HSURF)
      ALLOCATE(PFIELD(NNI,1,1))
      PFIELD(:,:,:) = XQC_DEF
 !
-  CASE('TV     ','TC     ')
+  CASE('TV     ','TC     ','TL     ')
      !* reading of the profile and its depth definition
      SELECT CASE(CINMODEL)
        CASE('ECMWF ')
