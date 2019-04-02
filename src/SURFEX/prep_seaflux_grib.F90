@@ -1,6 +1,6 @@
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_SEAFLUX_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
@@ -16,7 +16,7 @@ SUBROUTINE PREP_SEAFLUX_GRIB(HPROGRAM,HSURF,HFILE,KLUOUT,PFIELD)
 !!
 !!    REFERENCE
 !!    ---------
-!!      
+!!
 !!
 !!    AUTHOR
 !!    ------
@@ -94,10 +94,22 @@ SELECT CASE(HSURF)
         DEALLOCATE(ZFIELD)
     END SELECT
 !
-!* 3.  Sea surface salinity and ice fraction
+!* 3.  Sea ice fraction
 !      -------------------------------------
 !
-  CASE('SSS    ','SIC    ')
+  CASE('SIC    ')
+    SELECT CASE (CINMODEL)
+      CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
+        CALL READ_GRIB_SIC(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD)
+        ALLOCATE(PFIELD(SIZE(ZFIELD),1))
+        PFIELD(:,1) = ZFIELD(:)
+        DEALLOCATE(ZFIELD)
+    END SELECT
+!
+!* 3.  Sea surface salinity
+!      -------------------------------------
+!
+  CASE('SSS    ')
       ALLOCATE(PFIELD(SIZE(ZFIELD),1))
       PFIELD = 0.0
 !
