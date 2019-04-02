@@ -146,6 +146,9 @@ INTEGER         :: NI,NJ                  ! Domain size
 REAL            :: XIO_FRAC = 1.          ! fraction of ISIZE deduced to I/O
 !
 CHARACTER(LEN=4) :: YALG_MPI = "LIN "     ! type of distribution algorithm for MPI
+
+LOGICAL         :: LFAGMAP = .FALSE.
+
 !
 !-------------------------------------------------------------------------------
 !
@@ -160,7 +163,7 @@ NAMELIST/NAM_IO_OFFLINE/CSURF_FILETYPE, CTIMESERIES_FILETYPE, CFORCING_FILETYPE,
                         LSHADOWS_SLOPE,LSHADOWS_OTHER, LWR_VEGTYPE,              &
                         NB_READ_FORC, LLAND_USE, NPROMA, NI, NJ, XIO_FRAC,       &
                         YALG_MPI, XDELTA_OROG, LADAPT_SW, LINTERP_SW,            &
-                        LALLOW_ADD_DIM, LDELAYEDSTART_NC, NDATESTOP
+                        LALLOW_ADD_DIM, LDELAYEDSTART_NC, NDATESTOP, LFAGMAP
 !
 !-------------------------------------------------------------------------------
 END MODULE MODN_IO_OFFLINE
