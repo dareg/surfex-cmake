@@ -23,12 +23,12 @@ SUBROUTINE ASSIM_NATURE_ISBA_ENKF(IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, 
   
 ! -----------------------------------------------------------------------------
 !
-USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
+USE MODD_SURFEX_MPI,    ONLY : NRANK
 USE MODD_ASSIM,         ONLY : NOBSTYPE, XERROBS, NVAR, NPRINTLEV, CVAR,   &
                                XF_PATCH, XF,COBS,CFILE_FORMAT_OBS,NENS,    &
                                NECHGU, NBOUTPUT, NOBS, XYO, LENKF, LDENKF, &
                                LPB_CORRELATIONS, LPERTURBATION_RUN,        &
-                               LBIAS_CORRECTION, XINFL
+                               LBIAS_CORRECTION, XINFL, LPIO
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 !
@@ -135,7 +135,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_NATURE_ISBA_ENKF: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-IF ( NPRINTLEV>0 .AND. NRANK==NPIO) THEN
+IF ( NPRINTLEV>0 .AND. LPIO) THEN
   WRITE(*,*)
   WRITE(*,*) '   --------------------------'
   WRITE(*,*) '   |   ENTERING  VARASSIM   |'
@@ -155,7 +155,7 @@ IMYPROC = NRANK+1
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF ( NPRINTLEV > 0 .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
+IF ( NPRINTLEV > 0 .AND. LPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
 !
 INPATCH = IO%NPATCH
 !
@@ -274,7 +274,7 @@ ENDIF
 !############################# ANALYSIS ###############################
 !
 IF ( NPRINTLEV > 0 ) THEN
-  IF (NRANK==NPIO) THEN
+  IF (LPIO) THEN
     WRITE(*,*) 'calculating jacobians',NOBS
     WRITE(*,*) ' and then PERFORMING ANALYSIS'
   ENDIF

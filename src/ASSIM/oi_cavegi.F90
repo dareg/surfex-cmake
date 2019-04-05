@@ -35,6 +35,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('OI_CAVEGI',0,ZHOOK_HANDLE)
 !
+! Explicitely open file 61
+OPEN (61, FORM='FORMATTED', ACTION='READ')
 DO J=1,24
 
   READ(61,'(6X,8F10.4)') PVGAT1(J),PVGAT2(J),PVGAT3(J),&
@@ -50,6 +52,7 @@ DO J=1,24
                          PVGCH1(J),PVGCH2(J)    
 
 ENDDO
+CLOSE (61)
 !
 DO J = 1,24 
 

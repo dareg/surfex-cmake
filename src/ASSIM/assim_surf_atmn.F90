@@ -33,14 +33,14 @@ SUBROUTINE ASSIM_SURF_ATM_n (U, IM, SM, TM, WM, HPROGRAM, KI,                   
 !!      Original    04/2012
 !!-------------------------------------------------------------
 !
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t, SEAFLUX_MODEL_t, WATFLUX_MODEL_t, TEB_MODEL_t
-USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURFEX_n,  ONLY : ISBA_MODEL_t, SEAFLUX_MODEL_t, WATFLUX_MODEL_t, TEB_MODEL_t
+USE MODD_SURF_ATM_n,ONLY : SURF_ATM_t
 !
-USE MODD_SURFEX_MPI,  ONLY : NRANK, NPIO
 !
-USE MODD_SURF_CONF,      ONLY : CPROGNAME
+USE MODD_SURF_CONF, ONLY : CPROGNAME
 !
-USE MODD_ASSIM,          ONLY : XAT2M_ISBA, XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, XAT2M_TEB, LAROME
+USE MODD_ASSIM,     ONLY : XAT2M_ISBA, XAHU2M_ISBA, XAZON10M_ISBA, XAMER10M_ISBA, &
+                           XAT2M_TEB, LAROME, LPIO
 !
 !RJ: unneeded?
 !
@@ -49,6 +49,7 @@ USE MODI_ASSIM_SEA_n
 USE MODI_ASSIM_INLAND_WATER_n
 USE MODI_ASSIM_NATURE_n
 USE MODI_ASSIM_TOWN_n
+USE MODI_GET_LUOUT
 !
 USE YOMHOOK,             ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,            ONLY : JPRB
@@ -92,6 +93,7 @@ LOGICAL, INTENT(IN) :: OLKEEPEXTZONE
 !*      0.2    declarations of local variables
 !
 INTEGER :: JTILE                        ! loop on type of surface
+INTEGER :: ILUOUT
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -103,6 +105,9 @@ CPROGNAME = HPROGRAM
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
+
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
+
 !
 !-------------------------------------------------------------------------------------
 ! Preliminaries: Tile related operations
@@ -242,10 +247,10 @@ ENDDO
 
 IF (KTILE==1) THEN
   
-  IF (NRANK==NPIO) THEN 
-    WRITE(*,*) '*********************************************'
-    WRITE(*,*) '*      ASSIMILATIONS FOR SEA POINTS         *'
-    WRITE(*,*) '*********************************************'
+  IF (LPIO) THEN 
+    WRITE(ILUOUT,*) '*********************************************'
+    WRITE(ILUOUT,*) '*      ASSIMILATIONS FOR SEA POINTS         *'
+    WRITE(ILUOUT,*) '*********************************************'
   ENDIF
  
   CALL ASSIM_SEA_n(SM%S, U, HPROGRAM, KSIZE,                &
@@ -253,23 +258,28 @@ IF (KTILE==1) THEN
                    OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
 
 ELSEIF (KTILE==2) THEN
-  
-  IF (NRANK==NPIO) THEN
-    WRITE(*,*) '*********************************************'  
-    WRITE(*,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
-    WRITE(*,*) '*********************************************'
+
+  IF ( U%CWATER=="WATFLX") THEN  
+    IF (LPIO) THEN
+      WRITE(ILUOUT,*) '*********************************************'  
+      WRITE(ILUOUT,*) '*      ASSIMILATIONS FOR WATER POINTS       *'
+      WRITE(ILUOUT,*) '*********************************************'
+    ENDIF
+
+    CALL ASSIM_INLAND_WATER_n(IM, WM%W, U, HPROGRAM, KSIZE, &
+                              ZP_PTS, ZP_PLSM, HTEST,           &
+                              OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
+  ELSE
+    IF (LPIO) THEN
+      WRITE(ILUOUT,*) 'Inland water is only updated for scheme WATFLX'
+    ENDIF
   ENDIF
-
-  CALL ASSIM_INLAND_WATER_n(IM%NPE, WM%W, U, HPROGRAM, KSIZE, &
-                            ZP_PTS, ZP_PLSM, HTEST,           &
-                            OLKEEPEXTZONE, GD_MASKEXT, ZP_LON, ZP_LAT)
-
 ELSEIF (KTILE==3) THEN
   
-  IF (NRANK==NPIO) THEN
-    WRITE(*,*) '*********************************************'  
-    WRITE(*,*) '*      ASSIMILATIONS FOR NATURE POINTS      *'
-    WRITE(*,*) '*********************************************'
+  IF (LPIO) THEN
+    WRITE(ILUOUT,*) '*********************************************'  
+    WRITE(ILUOUT,*) '*      ASSIMILATIONS FOR NATURE POINTS      *'
+    WRITE(ILUOUT,*) '*********************************************'
   ENDIF
 
   CALL ASSIM_NATURE_n(IM, U, HPROGRAM, KSIZE,                                     &
@@ -281,10 +291,10 @@ ELSEIF (KTILE==3) THEN
   
 ELSEIF (KTILE==4) THEN
   
-  IF (NRANK==NPIO) THEN
-    WRITE(*,*) '*********************************************'  
-    WRITE(*,*) '*      ASSIMILATIONS FOR URBAN POINTS       *'
-    WRITE(*,*) '*********************************************'
+  IF (LPIO) THEN
+    WRITE(ILUOUT,*) '*********************************************'  
+    WRITE(ILUOUT,*) '*      ASSIMILATIONS FOR URBAN POINTS       *'
+    WRITE(ILUOUT,*) '*********************************************'
   ENDIF
 
   CALL ASSIM_TOWN_n(U, TM%NT, TM%TOP, HPROGRAM, KSIZE, ZP_PT2M, HTEST)

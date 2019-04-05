@@ -27,9 +27,8 @@ SUBROUTINE OI_CACSTS(KNBPT,PT2INC,PH2INC,PWGINC,PWS_O,                      &
                      PTCLS,PHCLS,PUCLS,PVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
                      PT2MBIAS,PH2MBIAS,                                     &
                      PRRCL,PRRSL,PRRCN,PRRSN,PATMNEB,PEVAP,PEVAPTR,         &
-                     PITM,PVEG,PALBF,PEMISF,PZ0F,                           &
-                     PIVEG,PARG,PD2,PSAB,PLAI,PRSMIN,PZ0H,                  &
-                     PTSC,PTPC,PWSC,PWPC,PSNC,PGELAT,PGELAM,PGEMU)  
+                     PITM,PVEG,PIVEG,PARG,PD2,PSAB,PLAI,PRSMIN,             &
+                     PTSC,PTPC,PWSC,PWPC,PSNC,PGELAT,PGELAM,PGEMU           )
 !
 !****---------------------------------------------------------------------------
 !**  AIM : INITIALIZES THE PRONOSTIC SURFACE FIELDS
@@ -107,17 +106,13 @@ REAL   ,INTENT(IN)    :: PATMNEB(KNBPT)
 REAL   ,INTENT(IN)    :: PEVAP(KNBPT)
 REAL   ,INTENT(IN)    :: PEVAPTR(KNBPT)
 REAL   ,INTENT(IN)    :: PITM(KNBPT) 
-REAL   ,INTENT(IN) :: PVEG(KNBPT) 
-REAL   ,INTENT(INOUT) :: PALBF(KNBPT)
-REAL   ,INTENT(INOUT) :: PEMISF(KNBPT)
-REAL   ,INTENT(INOUT) :: PZ0F(KNBPT)
-REAL   ,INTENT(INOUT) :: PIVEG(KNBPT)
-REAL   ,INTENT(INOUT) :: PARG(KNBPT)
-REAL   ,INTENT(INOUT) :: PD2(KNBPT)
-REAL   ,INTENT(INOUT) :: PSAB(KNBPT) 
-REAL   ,INTENT(INOUT) :: PLAI(KNBPT)
-REAL   ,INTENT(INOUT) :: PRSMIN(KNBPT)
-REAL   ,INTENT(INOUT) :: PZ0H(KNBPT)
+REAL   ,INTENT(IN)    :: PVEG(KNBPT) 
+REAL   ,INTENT(IN)    :: PIVEG(KNBPT)
+REAL   ,INTENT(IN)    :: PARG(KNBPT)
+REAL   ,INTENT(IN)    :: PD2(KNBPT)
+REAL   ,INTENT(IN)    :: PSAB(KNBPT) 
+REAL   ,INTENT(IN)    :: PLAI(KNBPT)
+REAL   ,INTENT(IN)    :: PRSMIN(KNBPT)
 REAL   ,INTENT(IN)    :: PTSC(KNBPT)
 REAL   ,INTENT(IN)    :: PTPC(KNBPT)
 REAL   ,INTENT(IN)    :: PWSC(KNBPT)
@@ -449,11 +444,12 @@ DO JROF = 1,KNBPT
     ENDIF
     PWP(JROF) = (1.0-ZCLIMCA)*PWP(JROF) + ZCLIMCA*ZWPC
 
-! call back of Sn with a possible correction for melting
-!
-    ZSNA  = (1.0-XRCLIMCA)*PSNS(JROF) + XRCLIMCA*ZSNC
-    ZMSN  = MAX(0.0, XRSNSA/21600.*ZECHGU*(PTCLS(JROF)-XTT))**XRSNSB
-    PSNS(JROF) = MAX (ZSNA-ZMSN,0.0)
+    ! Relaxation for snow
+    IF ( LRELCLIMSNOW ) THEN
+      ZSNA  = (1.0-XRCLIMCA)*PSNS(JROF) + XRCLIMCA*ZSNC
+      ZMSN  = MAX(0.0, XRSNSA/21600.*ZECHGU*(PTCLS(JROF)-XTT))**XRSNSB
+      PSNS(JROF) = MAX (ZSNA-ZMSN,0.0)
+    ENDIF
 
     IF (LFGEL) THEN
       ZMSN = MAX(0.0, XRWPIA/21600. * ZECHGU*(PTCLS(JROF)-XTT))**XRWPIB
@@ -470,21 +466,6 @@ DO JROF = 1,KNBPT
 !   PWP(JROF) = XUNDEF
 !   PTL(JROF) = 0.0
   ENDIF
-
-!*   2.6  Update of surface constants on sea, functions of ice field
-
-  IF ( PITM(JROF) <= 0.5 ) THEN
-    IF ( PTS(JROF) <= XTMERGL ) THEN
-      PALBF (JROF) = XSALBB
-      PEMISF(JROF) = XSEMIB
-      PZ0F  (JROF) = XSZZ0B*XG
-      PZ0H  (JROF) = XRZHZ0G * XSZZ0B*XG
-    ELSE
-      PALBF (JROF) = XSALBM
-      PEMISF(JROF) = XSEMIM
-    ENDIF
-  ENDIF
-
 ENDDO
 
 IF (LHOOK) CALL DR_HOOK('OI_CACSTS',1,ZHOOK_HANDLE)

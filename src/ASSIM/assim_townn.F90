@@ -35,7 +35,6 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_TEB_n, ONLY : TEB_NP_t
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 !
 USE MODD_CSTS,          ONLY : XPI
 USE MODN_IO_OFFLINE,    ONLY : CSURF_FILETYPE
@@ -66,6 +65,7 @@ CHARACTER(LEN=2),   INTENT(IN) :: HTEST ! must be equal to 'OK'
 !-------------------------------------------------------------------------------------
 !
 REAL(KIND=JPRB)                    :: ZHOOK_HANDLE
+INTEGER                            :: ILUOUT
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_TOWN_N',0,ZHOOK_HANDLE)
 
@@ -73,11 +73,12 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_TOWN_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 IF (U%CTOWN=='TEB   ') THEN
   CALL ASSIM_TEB_n(U, NT, TOP, &
                    HPROGRAM,KI,PT2M_O,HTEST)
 ELSE
-  IF (NRANK==NPIO) WRITE(*,*) 'No assimilation done for scheme: ',TRIM(U%CTOWN)
+  WRITE(ILUOUT,*) 'No assimilation done for scheme: ',TRIM(U%CTOWN)
 END IF
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_TOWN_N',1,ZHOOK_HANDLE)

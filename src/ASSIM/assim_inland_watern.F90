@@ -3,8 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_INLAND_WATER_n (NPE, W, U, HPROGRAM, KI, PTS_IN, PITM, HTEST, &
-                                 OLKEEPEXTZONE, OD_MASKEXT, PLON_IN, PLAT_IN)
+SUBROUTINE ASSIM_INLAND_WATER_n (IM, W, U, HPROGRAM, KI, PTS_IN, PITM, HTEST, &
+                                 OLKEEPEXTZONE, OD_MASKEXT, PLON_IN, PLAT_IN  )
 
 !     ###############################################################################
 !
@@ -28,29 +28,32 @@ SUBROUTINE ASSIM_INLAND_WATER_n (NPE, W, U, HPROGRAM, KI, PTS_IN, PITM, HTEST, &
 !!    -------------
 !!      Original    04/2012
 !!      Trygve Aspelien, Separating IO  06/2013
+!!      HIRLAM (P. Samuelsson), include dependence on PATCH, 04/2018
 !!--------------------------------------------------------------------
 !
 !
-USE MODD_ISBA_n, ONLY : ISBA_NPE_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
-USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_ASSIM,          ONLY : NPRINTLEV,LEXTRAP_WATER,LWATERTG2
+USE MODD_ASSIM,          ONLY : NPRINTLEV,LEXTRAP_WATER,LWATERTG2,CASSIM_WATER,LPIO
 !
 USE YOMHOOK,             ONLY : LHOOK,DR_HOOK
 USE PARKIND1,            ONLY : JPRB
 !
 USE MODI_ABOR1_SFX
 USE MODI_OI_HOR_EXTRAPOL_SURF
+USE MODI_ASSIM_GATHER_WRITE_INCREMENTS
+USE MODI_ASSIM_EXTRAPOLATE_FIELD
+USE MODI_GET_LUOUT
 !
 IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
 !
-TYPE(ISBA_NPE_t), INTENT(INOUT) :: NPE
+TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
@@ -70,12 +73,11 @@ REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT_IN
 !
 REAL, DIMENSION(KI)              :: ZLST
 REAL, DIMENSION(KI)              :: ZLST0
-REAL, DIMENSION(KI)              :: ZLSTINC
 REAL, DIMENSION(:), ALLOCATABLE  :: ZLST01, ZLST1, ZLON1, ZLAT1, ZALT1 
 !
 LOGICAL,DIMENSION(KI) :: GINTERP_LST
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GINTERP_LST1
-INTEGER  :: IRESP,JI,JJ,IS1,J1
+INTEGER  :: IRESP,JI,JJ,IS1,J1,ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',0,ZHOOK_HANDLE)
@@ -84,115 +86,92 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_INLAND_WATER_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 
-IF (NRANK==NPIO) WRITE(*,*) 'UPDATING LST FOR INLAND_WATER: ',TRIM(U%CWATER)
-IF (U%CWATER=="NONE") THEN
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
+IF (LPIO) WRITE(ILUOUT,*) 'UPDATING LST FOR INLAND_WATER: ',TRIM(U%CWATER)
+
+IF ( U%CWATER=="NONE" ) THEN
   IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',1,ZHOOK_HANDLE)
   RETURN
 ENDIF
-!
-!*     ZLST updated!
-!
-ZLST(:) = XUNDEF
-IF (.NOT.LWATERTG2 ) THEN
-  !*     ZLST updated from from CANARI analysis
-  DO JI=1,KI
-    IF ( PITM(JI)<0.5 ) ZLST(JI) = PTS_IN(JI)
-  ENDDO
-  !
-ELSE
-  ! Set TG2 from global array
-  DO JI=1,KI
-    IF ( PITM(JI)>0.5 ) THEN
-      !*     ZLST updated from LAND values of climatological TS
-      DO JJ=1,U%NSIZE_NATURE
-        IF ( U%NR_WATER(JI)==U%NR_NATURE(JJ) ) THEN
-          ZLST(JI) = NPE%AL(1)%XTG(JJ,2)
-          EXIT
-        ENDIF
-      ENDDO
-    ENDIF
-  ENDDO
-  !
-ENDIF
-!
-! Set local array from global
-GINTERP_LST(:) = .FALSE.
-DO JI=1,KI
-  IF ( ZLST(JI)/=XUNDEF ) THEN
-    ZLST0(JI) = ZLST(JI)
-  ELSEIF ( LEXTRAP_WATER ) THEN
-    ! Keep ZLST or do extrapolation from neighbour points
-    ZLST0(JI) = XUNDEF
-    GINTERP_LST(JI) = .TRUE.  
-  ELSE
-    ZLST0(JI) = W%XTS(JI)
+
+ZLST(:)=W%XTS(:)
+IF ( TRIM(CASSIM_WATER) == "INPUT" ) THEN
+
+  IF ( U%CWATER=="FLAKE") THEN
+
+    ! DA in vertical for lakes should be called from here.
+    ! At the moment, do nothing: FLake runs freely
+    IF(U%CWATER=='FLAKE ' .AND. LPIO) WRITE(ILUOUT,*) 'NO UPDATE: FLAKE RUNS FREELY'
+        
+    IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',1,ZHOOK_HANDLE)
+    RETURN
   ENDIF
-ENDDO
-!
-IF ( LEXTRAP_WATER ) THEN
+
   !
-  IF (OLKEEPEXTZONE) THEN
-    !     
-    ZLST(:) = ZLST0(:)
-    WHERE ( OD_MASKEXT(:) ) ZLST0(:) = XUNDEF
-    CALL OI_HOR_EXTRAPOL_SURF(KI,PLAT_IN,PLON_IN,ZLST0,PLAT_IN,PLON_IN,ZLST,GINTERP_LST,W%XZS)
-    !
-  ELSE
-    !
-    IS1 = COUNT (.NOT.OD_MASKEXT)
-    ALLOCATE (ZLST1(IS1), ZLST01(IS1), ZLAT1(IS1), ZLON1(IS1), ZALT1(IS1), GINTERP_LST1(IS1))
-    !
-    ! remove extension zone
-    JJ = 1
-    DO J1 = 1, KI
-      IF ( .NOT.OD_MASKEXT(J1) )  THEN
-        ZLST01(JJ) = ZLST0(J1)
-        ZLAT1 (JJ) = PLAT_IN (J1)
-        ZLON1 (JJ) = PLON_IN (J1)
-        ZALT1 (JJ) = W%XZS  (J1)
-        GINTERP_LST1(JJ) = GINTERP_LST(J1)
-        JJ = JJ + 1
-      ENDIF
-    ENDDO
-       
-    ZLST1(:) = ZLST01(:)
-    CALL OI_HOR_EXTRAPOL_SURF(IS1,ZLAT1,ZLON1,ZLST01,ZLAT1,ZLON1,ZLST1,GINTERP_LST1,ZALT1)
-    !
-    ! copy back
-    JJ = 1
-    DO J1 = 1, KI
-      IF ( .NOT.OD_MASKEXT(J1) ) THEN
-        ZLST(J1) = ZLST1(JJ)
-        JJ = JJ + 1
-      ENDIF
+  !*     ZLST updated!
+  !
+  ZLST(:) = XUNDEF
+  IF (.NOT.LWATERTG2 ) THEN
+    !*     ZLST updated from from CANARI analysis
+    DO JI=1,KI
+      IF ( PITM(JI)<0.5 ) ZLST(JI) = PTS_IN(JI)
     ENDDO
     !
-    DEALLOCATE (ZLST01, ZLST1, ZLAT1, ZLON1, ZALT1, GINTERP_LST1)
-    !
+  ELSE
+    ! We do not allow this option if you have more than two patches yet
+    IF (IM%O%NPATCH > 2) CALL ABOR1_SFX('ASSIM_INLAND_WATER_n: LWATERTG2 AND NPATCH > 2 IS NOT VALID!')
+    ! Set TG2 from global array
+    DO JI=1,KI
+      IF ( PITM(JI)>0.5 ) THEN
+        !*     ZLST updated from LAND values of TG2 from patch 1
+        DO JJ=1,IM%NP%AL(1)%NSIZE_P
+          IF ( U%NR_WATER(JI)==U%NR_NATURE(JJ) ) THEN
+            ! Set ZLST to patch 1 for TG2 if defined, otherwise from patch 2
+            IF (IM%NPE%AL(1)%XTG(JJ,2) /=XUNDEF) THEN
+              ZLST(JI) = IM%NPE%AL(1)%XTG(JJ,2)
+            ELSEIF ( IM%O%NPATCH == 2 .AND. (IM%NPE%AL(2)%XTG(JJ,2) /=XUNDEF)) THEN
+              ZLST(JI)=IM%NPE%AL(2)%XTG(JJ,2)
+            ELSE
+              WRITE(*,*) 'ERROR IN INLAND_WATER XTG: ',IM%NPE%AL(1)%XTG(JJ,2),IM%NPE%AL(2)%XTG(JJ,2)
+              CALL ABOR1_SFX('ASSIM_INLAND_WATER_n: THIS SHOULD NEVER HAPPEN:-(')
+            ENDIF
+            EXIT
+          ENDIF
+        ENDDO
+      ENDIF
+    ENDDO
   ENDIF
-  !
-ENDIF
-!
-!*     Print values produced by OI_HO_EXTRAPOL_SURF
-IF ( NPRINTLEV > 2 ) THEN
-  DO JI=1,KI
-    IF (GINTERP_LST(JI)) THEN
-      PRINT *,'Lake surface temperature set to ',ZLST(JI),'from nearest neighbour at I=',U%NR_WATER(JI)
-    ENDIF
-  ENDDO
-ENDIF
-!
-! Sum the increments
-IF (ALL(ZLST(:)/=XUNDEF)) THEN
-  ZLSTINC(:) = ZLST(:) - W%XTS(:)
+
+  ! Sum the increments
+  CALL ASSIM_GATHER_WRITE_INCREMENTS(HPROGRAM,"LST",W%XTS(:),ZLST(:),XUNDEF)
+
   ! Setting modified variables
-  W%XTS(:) = ZLST(:)
+  WHERE ( ZLST(:)/=XUNDEF)
+    W%XTS(:) = ZLST(:)
+  ENDWHERE
+
+ELSEIF ( TRIM(CASSIM_WATER) == "NONE" ) THEN
+  ! Do nothing
 ELSE
-  ZLSTINC(:) = 0.
+  CALL ABOR1_SFX('ASSIM_INLAND_WATER_n:'//TRIM(CASSIM_WATER)//' is not implemented!')
 ENDIF
-!
-WRITE(*,*) 'Mean LST increments over inland water   ',SUM(ZLSTINC)/KI
-!
+
+IF ( LEXTRAP_WATER ) THEN
+  ZLST0=ZLST
+  CALL ASSIM_EXTRAPOLATE_FIELD(HPROGRAM,PLON_IN,PLAT_IN,ZLST0,OLKEEPEXTZONE,OD_MASKEXT,ZLST,PALT=W%XZS)
+
+  ! Sum the increments
+  CALL ASSIM_GATHER_WRITE_INCREMENTS(HPROGRAM,"EXTRAPOLATED LST",W%XTS(:),ZLST(:),XUNDEF)
+
+   ! Setting modified variables
+   WHERE ( ZLST(:)/=XUNDEF)
+     W%XTS(:) = ZLST(:)
+   ENDWHERE
+
+ELSEIF ( TRIM(CASSIM_WATER) == "INPUT"  .AND. LWATERTG2 ) THEN
+  CALL ABOR1_SFX('ASSIM_INLAND_WATER_n: When running LWATERTG2 you must set LEXTRAP_WATER=.T.')
+ENDIF
+
 IF (LHOOK) CALL DR_HOOK('ASSIM_INLAND_WATER_N',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------------

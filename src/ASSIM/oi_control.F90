@@ -147,8 +147,8 @@ REAL, DIMENSION (:),   ALLOCATABLE :: PSST, PSAB, PARG, PLAT, PLON, PTCLS, PHCLS
                                      & PEVAP, PEVAPTR, PT2M_O, PHU2M_O, PTS_O, ZT2INC, ZH2INC,   &
                                      & ZWS, ZWP, ZTL, ZTS, ZTP, ZTCLS, ZHCLS, ZUCLS, ZVCLS,      &
                                      & PSSTC, PWPINC1, PWPINC2, PWPINC3, PT2MBIAS, PH2MBIAS,     &
-                                     & PRRCN, PRRCL, PRRSN, PRRSL, PATMNEB, PITM, PALBF, PEMISF, &
-                                     & PZ0F, PIVEG, PZ0H, PTSC, PTPC, PWSC, PWPC, PSNC, ZEVAP,   &
+                                     & PRRCN, PRRCL, PRRSN, PRRSL, PATMNEB, PITM,                &
+                                     & PIVEG, PTSC, PTPC, PWSC, PWPC, PSNC, ZEVAP,               &
                                      & ZEVAPTR, PGELAT, PGELAM, PGEMU, ZWSINC, ZWPINC, ZTSINC,   &
                                      & ZTPINC, ZTLINC, ZSNINC, ZSNS, ZPX, ZPY, PSM_O, PSIG_SMO,  &
                                      & PLSM_O, PWS_O, ZWGINC, PLST, PTRD3, ZSST, ZLST, ZALT
@@ -462,11 +462,7 @@ ALLOCATE (PRRSN(ISIZE))
 ALLOCATE (PRRSL(ISIZE))
 ALLOCATE (PATMNEB(ISIZE))
 ALLOCATE (PITM(ISIZE))
-ALLOCATE (PALBF(ISIZE))
-ALLOCATE (PEMISF(ISIZE))
-ALLOCATE (PZ0F(ISIZE))
 ALLOCATE (PIVEG(ISIZE))
-ALLOCATE (PZ0H(ISIZE))
 ALLOCATE (PTSC(ISIZE))
 ALLOCATE (PTPC(ISIZE))
 ALLOCATE (PWSC(ISIZE))
@@ -614,13 +610,6 @@ PWPINC3(:)  = XUNDEF
 PT2MBIAS(:) = XUNDEF
 PH2MBIAS(:) = XUNDEF
 
-! Sea-ice surface properties
-
-PALBF(:)    = XUNDEF
-PEMISF(:)   = XUNDEF
-PZ0F(:)     = XUNDEF
-PZ0H(:)     = XUNDEF
-
 ! Climatological arrays set to missing values
 
 PSNC(:)     =  PSNS(:,1) ! need to read the snow climatology
@@ -667,10 +656,10 @@ PRINT *,'           '
                 ZTCLS,ZHCLS,ZUCLS,ZVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
                 PT2MBIAS,PH2MBIAS,                                     &
                 PRRCL,PRRSL,PRRCN,PRRSN,PATMNEB,ZEVAP,ZEVAPTR,         &
-                PITM,PVEG(:,1),PALBF,PEMISF,PZ0F,                      &
-                PIVEG,PARG,PD2(:,1),PSAB,PLAI(:,1),PRSMIN(:,1),PZ0H,   &
+                PITM,PVEG(:,1),                                        &
+                PIVEG,PARG,PD2(:,1),PSAB,PLAI(:,1),PRSMIN(:,1),        &
                 PTSC,PTPC,PWSC,PWPC,PSNC,                              &
-                PGELAT,PGELAM,PGEMU) 
+                PGELAT,PGELAM,PGEMU                                    ) 
 
 !  Store increments
 

@@ -40,6 +40,7 @@ USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE YOMHOOK,         ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,        ONLY : JPRB
 !
+USE MODI_GET_LUOUT
 USE MODI_ABOR1_SFX
 USE MODI_ASSIM_ISBA_n
 !
@@ -77,6 +78,7 @@ REAL(KIND=JPRB), DIMENSION (:), INTENT(IN) ::  PLAT
 !*      0.2    declarations of local variables
 !
 !
+INTEGER         :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -86,6 +88,8 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_NATURE_n: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
+
+CALL GET_LUOUT(HPROGRAM,ILUOUT)
 IF (U%CNATURE=='ISBA  ') THEN
   !
   CALL ASSIM_ISBA_n(IM, U, HPROGRAM, KI,  &
@@ -95,7 +99,7 @@ IF (U%CNATURE=='ISBA  ') THEN
                     PTS,       PT2M,        PHU2M,     PSWE,        &
                     HTEST, OD_MASKEXT, PLON, PLAT )
 ELSE
-  WRITE(*,*) 'No assimilation done for scheme: ',TRIM(U%CNATURE)
+  WRITE(ILUOUT,*) 'No assimilation done for scheme: ',TRIM(U%CNATURE)
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_N',1,ZHOOK_HANDLE)

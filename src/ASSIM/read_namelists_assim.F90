@@ -8,9 +8,10 @@ SUBROUTINE READ_NAMELISTS_ASSIM(HPROGRAM)
 !
 !---------------------------    
 !
-USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,LAROME,LECSST,   &
-                                 LAESST,LAESNM,LALADSURF,LREAD_SST_FROM_FILE,         &
-                                 CFILE_FORMAT_SST,LEXTRAP_SEA,LEXTRAP_WATER,          &
+USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_SEA,CASSIM_WATER,CASSIM_ISBA,   &
+                                 CASSIM_TEB,NPRINTLEV,LAROME,LECSST,                  &
+                                 LAESST,LAESNM,LSWE,LALADSURF,LREAD_SST_FROM_FILE,    &
+                                 CFILE_FORMAT_SST,LEXTRAP_SEA,LEXTRAP_WATER,LEXTRAP_SNOW,&
                                  LEXTRAP_NATURE,LWATERTG2,NBOUTPUT,NECHGU,XRCLIMCA,   &
                                  XRCLISST,XSIGH2MO,XSIGT2MO, XSIGWGO,XSIGWGB,XSIGW2B, &
                                  LOBSWG,LOBS2M,LIMVEG,XSPRECIP2,XRTHR_QC,XSIGWGO_MAX, &
@@ -39,11 +40,12 @@ REAL(KIND=JPRB)                 :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ASSIM',0,ZHOOK_HANDLE)
 
 ! Set default assimilation options/schemes
-CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_ISBA,NPRINTLEV,      &
-                   LAROME,LECSST,LAESST,LAESNM,              &
+CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_SEA,CASSIM_WATER,    &
+                   CASSIM_ISBA,CASSIM_TEB,NPRINTLEV,         &
+                   LAROME,LECSST,LAESST,LAESNM,LSWE,         &
                    LALADSURF,LREAD_SST_FROM_FILE,            &
-                   CFILE_FORMAT_SST,LEXTRAP_SEA,             &
-                   LEXTRAP_WATER,LEXTRAP_NATURE,LWATERTG2,   &
+                   CFILE_FORMAT_SST,LEXTRAP_SEA,LEXTRAP_WATER,&
+                   LEXTRAP_NATURE,LEXTRAP_SNOW,LWATERTG2,    &
                    NBOUTPUT,NECHGU,XRCLIMCA,XRCLISST,        &
                    XSIGH2MO,XSIGT2MO,XSIGWGO,XSIGWGB,        &
                    XSIGW2B,LOBSWG,LOBS2M,LIMVEG,XSPRECIP2,   &

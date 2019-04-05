@@ -27,13 +27,13 @@ SUBROUTINE ASSIM_NATURE_ISBA_EKF (IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, 
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
-USE MODD_SURFEX_MPI,    ONLY : NRANK, NPIO
+USE MODD_SURFEX_MPI,    ONLY : NRANK
 !
 USE MODD_ASSIM,         ONLY : LBEV, LBFIXED, NOBSTYPE, XERROBS, XQCOBS, NVAR, NNCV, &
                                XSCALE_Q, NPRINTLEV, CVAR, XSIGMA, CBIO, XI,        &
                                XF_PATCH, XF, COBS, XSCALE_QLAI,CFILE_FORMAT_OBS,   &
                                XALPH,NECHGU, NBOUTPUT, XTPRT, XLAI_PASS, XBIO_PASS,&
-                               NOBS, XYO
+                               NOBS, XYO, LPIO
 ! 
 USE MODD_SURF_PAR,      ONLY : XUNDEF
 USE MODD_ISBA_PAR,      ONLY : XWGMIN
@@ -73,7 +73,7 @@ TYPE(ISBA_PE_t), POINTER :: PEK
 !
  CHARACTER(LEN=30)  :: YBGFILE
  CHARACTER(LEN=19)  :: YLFNAME
- CHARACTER(LEN=9)   :: YFNAME
+ CHARACTER(LEN=12)   :: YFNAME
  CHARACTER(LEN=7)   :: YMYPROC
  CHARACTER(LEN=1)   :: YCHAR
 !
@@ -129,7 +129,6 @@ INTEGER :: IRESP                      ! return code
 INTEGER :: ISTEP                      ! 
 INTEGER :: IMYPROC
 INTEGER :: IOBS
-INTEGER :: ISCREENLEV
 INTEGER :: ISTAT, ICPT, IUNIT
 !
 INTEGER :: JI,JJ,JP,JK,JJP,JL,K1,L1,IMASK,INPATCH
@@ -149,7 +148,7 @@ IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('ASSIM_NATURE_ISBA_EKF: FATAL ERROR DURING ARGUMENT TRANSFER')
 END IF
 !
-IF ( NPRINTLEV>0  .AND. NRANK==NPIO ) THEN
+IF ( NPRINTLEV>0  .AND. LPIO ) THEN
   WRITE(*,*)
   WRITE(*,*) '   --------------------------'
   WRITE(*,*) '   |   ENTERING  VARASSIM   |'
@@ -169,7 +168,7 @@ IMYPROC = NRANK+1
 !
 WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
 !
-IF ( NPRINTLEV > 0  .AND. NRANK==NPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
+IF ( NPRINTLEV > 0  .AND. LPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
 !
 INPATCH = IO%NPATCH
 !
@@ -208,6 +207,19 @@ DO JL = 1,NVAR
         ZEPS(:,JP,JL) = 1.
       ENDWHERE
     ENDDO
+
+  ELSEIF ( TRIM(CVAR(JL))=='WGI1' .OR. TRIM(CVAR(JL))=='WGI2' .OR. &
+           TRIM(CVAR(JL))=='WGI3' .OR. TRIM(CVAR(JL))=='WGI4' .OR. &
+           TRIM(CVAR(JL))=='WGI5' .OR. TRIM(CVAR(JL))=='WGI6' .OR. &
+           TRIM(CVAR(JL))=='WGI7' .OR. TRIM(CVAR(JL))=='WGI8') THEN
+    !
+    DO JP = 1,INPATCH
+      WHERE ( XI(:,JP,JL)/=XUNDEF ) ! not sure that it is necessary
+        ZEPS(:,JP,JL) = XTPRT(JL) * ZCOFSWI(:) ! XI(:,JP,JL)
+      ELSEWHERE
+        ZEPS(:,JP,JL) = 1.
+      ENDWHERE
+    ENDDO
     !
   ELSEIF (TRIM(CVAR(JL))=='LAI') THEN
     !
@@ -217,18 +229,26 @@ DO JL = 1,NVAR
       ZEPS(:,:,JL) = 1.
     ENDWHERE
     !
-  ELSE
+  ELSE ! E.g. for soil temperatures TG
     !
-    ZEPS(:,:,JL) = 1.
+    WHERE ( XI(:,:,JL)/=XUNDEF )
+      ZEPS(:,:,JL) = XTPRT(JL) * XI(:,:,JL)
+    ELSEWHERE
+      ZEPS(:,:,JL) = 1.
+    ENDWHERE
     !
   ENDIF
   !
   IF (NPRINTLEV>0) WRITE(*,*) 'ZEPS | ', TRIM(CVAR(JL)), ' : ' , XTPRT(JL)
   !
-  IF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2' .OR. &
-       TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4' .OR. &
-       TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6' .OR. &
-       TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8') THEN
+  IF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2'   .OR. &
+       TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4'   .OR. &
+       TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6'   .OR. &
+       TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8'   .OR. &
+       TRIM(CVAR(JL))=='WGI1' .OR. TRIM(CVAR(JL))=='WGI2' .OR. &
+       TRIM(CVAR(JL))=='WGI3' .OR. TRIM(CVAR(JL))=='WGI4' .OR. &
+       TRIM(CVAR(JL))=='WGI5' .OR. TRIM(CVAR(JL))=='WGI6' .OR. &
+       TRIM(CVAR(JL))=='WGI7' .OR. TRIM(CVAR(JL))=='WGI8') THEN
     !
     DO JI = 1,KI
       ZCOEF(JI,:,JL) = ZCOFSWI(JI)*ZCOFSWI(JI)
@@ -457,30 +477,10 @@ IF ( TRIM(CFILE_FORMAT_OBS) == "FA" ) THEN
   !  
 ENDIF
 !
-! ISCREENLEV defines the ground level used to screen observations when soil is frozen
-!   Future change: better look at COBS(IOBS) which should be WG1 for 3-L and WG2 for DIF
-IF (IO%CISBA=='3-L') ISCREENLEV = 1
-IF (IO%CISBA=='DIF') ISCREENLEV = 2
 !
 !//////////////////////TO WRITE OBS/////////////////////////////////////
 IF ( NPRINTLEV > 0 ) OPEN (UNIT=111,FILE='OBSout.'//TRIM(YMYPROC),STATUS='unknown',IOSTAT=ISTAT)
 DO JI = 1,KI
-  ZMIN = XUNDEF
-  DO JP = 1,INPATCH
-    PK => NP%AL(JP)
-    PEK => NPE%AL(JP)
-    !
-    DO JJ = 1,PK%NSIZE_P
-      IF (PK%NR_P(JJ) == JI) THEN
-        IF (PEK%XWGI(JJ,ISCREENLEV)<ZMIN) ZMIN = PEK%XWGI(JJ,ISCREENLEV)
-        EXIT
-      ENDIF
-    ENDDO
-  ENDDO
-  IF ( ZMIN>0. ) THEN
-    XYO (JI,:) = XUNDEF
-    !IF ( NPRINTLEV > 0 ) WRITE(*,*) 'OBSERVATION FOR POINT ',JI,' REMOVED'
-  ENDIF
   IF ( NPRINTLEV > 0 ) WRITE (111,*) XYO(JI,:)
 ENDDO
 IF ( NPRINTLEV > 0 ) CLOSE(111)
@@ -489,7 +489,7 @@ IF ( NPRINTLEV > 0 ) CLOSE(111)
 !############################# ANALYSIS ###############################
 !
 IF ( NPRINTLEV > 0 ) THEN
-  IF (NRANK==NPIO) THEN
+  IF (LPIO) THEN
     WRITE(*,*) 'calculating jacobians',NOBS
     WRITE(*,*) ' and then PERFORMING ANALYSIS'
   ENDIF
@@ -588,9 +588,7 @@ DO JI=1,KI
             DO JJ = 1, PK%NSIZE_P
               IF (PK%NR_P(JJ)==JI) EXIT
             ENDDO
-            IF (PEK%XWGI(JJ,ISCREENLEV).EQ.0.) THEN 
               ZHOWR(K1,L1) = S%XPATCH(JI,JP)*(XF_PATCH(JI,JP,JL+1,JK) - XF_PATCH(JI,JP,1,JK))/ZEPS(JI,JP,JL)
-            ENDIF
           ENDIF
           !
           IF( (XYO(JI,K1).NE.XUNDEF) .AND. (XYO(JI,K1).NE.999.0) ) THEN         !if obs available
@@ -650,10 +648,14 @@ DO JI=1,KI
           ZINCR(L1) = MAX( ZINCR(L1), ZVLAIMIN(JP)-XF(JI,JP,1,JL) )
           ZINCR(L1) = MIN (MAX( ZINCR(L1), -1.), 1.)
           XBIO_PASS(JI,JP) = XBIO_PASS(JI,JP) + ZINCR(L1)*XALPH(JP)
-        ELSEIF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2' .OR. &
-                 TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4' .OR. &
-                 TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6' .OR. &
-                 TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8') THEN
+        ELSEIF ( TRIM(CVAR(JL))=='WG1' .OR. TRIM(CVAR(JL))=='WG2'   .OR. &
+                 TRIM(CVAR(JL))=='WG3' .OR. TRIM(CVAR(JL))=='WG4'   .OR. &
+                 TRIM(CVAR(JL))=='WG5' .OR. TRIM(CVAR(JL))=='WG6'   .OR. &
+                 TRIM(CVAR(JL))=='WG7' .OR. TRIM(CVAR(JL))=='WG8'   .OR. &
+                 TRIM(CVAR(JL))=='WGI1' .OR. TRIM(CVAR(JL))=='WGI2' .OR. &
+                 TRIM(CVAR(JL))=='WGI3' .OR. TRIM(CVAR(JL))=='WGI4' .OR. &
+                 TRIM(CVAR(JL))=='WGI5' .OR. TRIM(CVAR(JL))=='WGI6' .OR. &
+                 TRIM(CVAR(JL))=='WGI7' .OR. TRIM(CVAR(JL))=='WGI8') THEN
           IF ( TRIM(CVAR(JL))=='WG1' ) THEN
             ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,1)-XF(JI,JP,1,JL) )
           ELSEIF ( TRIM(CVAR(JL))=='WG2' ) THEN
@@ -670,6 +672,22 @@ DO JI=1,KI
             ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,7)-XF(JI,JP,1,JL) )
           ELSEIF ( TRIM(CVAR(JL))=='WG8' ) THEN
             ZINCR(L1) = MIN( MAX( ZINCR(L1), XWGMIN-XF(JI,JP,1,JL) ), K%XWSAT(JI,8)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI1' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,1)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI2' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,2)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI3' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,3)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI4' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,4)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI5' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,5)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI6' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,6)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI7' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,7)-XF(JI,JP,1,JL) )
+          ELSEIF ( TRIM(CVAR(JL))=='WGI8' ) THEN
+            ZINCR(L1) = MIN( MAX( ZINCR(L1), 0.0-XF(JI,JP,1,JL) ), K%XWSAT(JI,8)-XF(JI,JP,1,JL) )
           ENDIF
           ZINCR(L1) = MIN( MAX( ZINCR(L1), -0.1), 0.1)
         ELSEIF ( XF(JI,JP,1,JL)+ZINCR(L1)<0. ) THEN
@@ -733,7 +751,7 @@ DO JI=1,KI
   !
   IF ( NPRINTLEV > 0 ) THEN
     DO JP=1,INPATCH
-      WRITE(113,*) (XF(JI,JP,1,JL),JL=1,NVAR), (ZINCR(JP+INPATCH*(JL-1)),JL=1,NVAR)
+      WRITE(113,'(8(1pe12.4))') (XF(JI,JP,1,JL),JL=1,NVAR), (ZINCR(JP+INPATCH*(JL-1)),JL=1,NVAR)
     ENDDO
   ENDIF
   !
@@ -791,7 +809,7 @@ ENDIF
 !
 IF ( NPRINTLEV > 0 ) THEN
   IOBSCOUNT = IOBSCOUNT / INPATCH / NVAR
-  IF (NRANK==NPIO) THEN
+  IF (LPIO) THEN
     WRITE(*,*)
     WRITE(*,*) '   ---------------------------------------'
     WRITE(*,*) '   |   EXITING VARASSIM AFTER ANALYSIS   |'
@@ -833,6 +851,22 @@ DO JL=1,NVAR
           PEK%XWG(JI,7) = XF(IMASK,JP,1,JL)
         CASE("WG8")
           PEK%XWG(JI,8) = XF(IMASK,JP,1,JL)
+        CASE("WGI1")
+          PEK%XWGI(JI,1) = XF(IMASK,JP,1,JL)
+        CASE("WGI2")
+          PEK%XWGI(JI,2) = XF(IMASK,JP,1,JL)
+        CASE("WGI3")
+          PEK%XWGI(JI,3) = XF(IMASK,JP,1,JL)
+        CASE("WGI4")
+          PEK%XWGI(JI,4) = XF(IMASK,JP,1,JL)
+        CASE("WGI5")
+          PEK%XWGI(JI,5) = XF(IMASK,JP,1,JL)
+        CASE("WGI6")
+          PEK%XWGI(JI,6) = XF(IMASK,JP,1,JL)
+        CASE("WGI7")
+          PEK%XWGI(JI,7) = XF(IMASK,JP,1,JL)
+        CASE("WGI8")
+          PEK%XWGI(JI,8) = XF(IMASK,JP,1,JL)
         CASE("LAI") 
           PEK%XLAI(JI) = XF(IMASK,JP,1,JL)
           SELECT CASE (TRIM(CBIO))

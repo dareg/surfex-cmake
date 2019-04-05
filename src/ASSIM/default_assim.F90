@@ -3,11 +3,12 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_ISBA,KPRINTLEV,         &
-                               OAROME,OECSST,OAESST,OAESNM,                 &
+      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_SEA,HASSIM_WATER,       &
+                               HASSIM_ISBA,HASSIM_TEB,KPRINTLEV,            &
+                               OAROME,OECSST,OAESST,OAESNM,OSWE,            &
                                OALADSURF,OREAD_SST_FROM_FILE,               &
                                HFILE_FORMAT_SST,OEXTRAP_SEA,                &
-                               OEXTRAP_WATER,OEXTRAP_NATURE,                &
+                               OEXTRAP_WATER,OEXTRAP_NATURE,OEXTRAP_SNOW,   &
                                OWATERTG2,KBOUTPUT,KECHGU,PRCLIMCA,          &
                                PRCLISST,PSIGH2MO,PSIGT2MO,PSIGWGO,          &
                                PSIGWGB,PSIGW2B,OOBSWG,OOBS2M,OIMVEG,        &
@@ -70,18 +71,23 @@ IMPLICIT NONE
 !              -------------------------
 LOGICAL,           INTENT(OUT) :: OASSIM        ! assimilation or not
 CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM        ! type of corrections PLUS/2DVAR
+CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_SEA
+CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_WATER
 CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_ISBA
+CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_TEB
 INTEGER,           INTENT(OUT) :: KPRINTLEV
 LOGICAL,           INTENT(OUT) :: OAROME
 LOGICAL,           INTENT(OUT) :: OECSST
 LOGICAL,           INTENT(OUT) :: OAESST
 LOGICAL,           INTENT(OUT) :: OAESNM
+LOGICAL,           INTENT(OUT) :: OSWE
 LOGICAL,           INTENT(OUT) :: OALADSURF
 LOGICAL,           INTENT(OUT) :: OREAD_SST_FROM_FILE
 CHARACTER(LEN=6),  INTENT(OUT) :: HFILE_FORMAT_SST
 LOGICAL,           INTENT(OUT) :: OEXTRAP_SEA
 LOGICAL,           INTENT(OUT) :: OEXTRAP_WATER
 LOGICAL,           INTENT(OUT) :: OEXTRAP_NATURE
+LOGICAL,           INTENT(OUT) :: OEXTRAP_SNOW
 LOGICAL,           INTENT(OUT) :: OWATERTG2
 INTEGER,           INTENT(OUT) :: KBOUTPUT
 !
@@ -157,18 +163,23 @@ END IF
 !
 OASSIM    = .FALSE.
 HASSIM    = "PLUS "
+HASSIM_SEA = "INPUT"
+HASSIM_WATER = "INPUT"
 HASSIM_ISBA = "OI" 
+HASSIM_TEB = "ROADT"
 KPRINTLEV = 0
 OAROME    = .TRUE.
 OECSST    = .FALSE.
 OAESST    = .FALSE.
 OAESNM    = .FALSE.
+OSWE      = .TRUE.
 OALADSURF = .TRUE.
 OREAD_SST_FROM_FILE=.FALSE.
 HFILE_FORMAT_SST = "FA    "
 OEXTRAP_SEA    = .TRUE.
 OEXTRAP_WATER  = .TRUE.
 OEXTRAP_NATURE = .FALSE.
+OEXTRAP_SNOW   = .FALSE.
 OWATERTG2      = .FALSE.
 
 KBOUTPUT = 1
