@@ -1,3 +1,16 @@
+!auto_modi:spll_gltools_readnam.D
+MODULE MODI_gltools_readnam
+INTERFACE
+SUBROUTINE gltools_readnam(hmandatory,kluout)
+USE modd_glt_param
+IMPLICIT NONE
+LOGICAL, INTENT(IN),OPTIONAL           :: &
+  hmandatory         ! Is a gltpar file mandatory ?
+INTEGER, INTENT(IN),OPTIONAL           :: &
+ kluout              ! imposed output logical unit ?
+END SUBROUTINE gltools_readnam
+END INTERFACE
+END MODULE MODI_gltools_readnam
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

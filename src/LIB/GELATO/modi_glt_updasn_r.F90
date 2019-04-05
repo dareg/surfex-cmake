@@ -1,3 +1,25 @@
+!auto_modi:spll_glt_updasn_r.D
+MODULE MODI_glt_updasn_r
+INTERFACE
+SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  LOGICAL, DIMENSION(nt,np), INTENT(in) ::  &
+        gsmelt
+  TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
+        tpatm   
+  TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
+        tpblki
+  REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
+        pvsp
+  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
+        tpsit   
+  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
+        tpdia   
+END SUBROUTINE glt_updasn_r
+END INTERFACE
+END MODULE MODI_glt_updasn_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

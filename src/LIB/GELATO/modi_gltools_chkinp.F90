@@ -1,3 +1,17 @@
+!auto_modi:spll_gltools_chkinp.D
+MODULE MODI_gltools_chkinp
+INTERFACE
+SUBROUTINE gltools_chkinp( kdate,tpglt )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT none
+  INTEGER, INTENT(in) ::  &
+    kdate
+  TYPE(t_glt), INTENT(in) ::  &
+    tpglt
+END SUBROUTINE gltools_chkinp
+END INTERFACE
+END MODULE MODI_gltools_chkinp
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

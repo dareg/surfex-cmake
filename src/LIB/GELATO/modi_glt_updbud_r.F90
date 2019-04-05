@@ -1,3 +1,36 @@
+!auto_modi:spll_glt_updbud_r.D
+MODULE MODI_glt_updbud_r
+INTERFACE
+SUBROUTINE glt_updbud_r  &
+  ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  INTEGER, INTENT(in) ::  &
+         kinit
+  CHARACTER(*), INTENT(in) ::  &
+         omsg
+  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
+        tpdom
+  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
+        tpmxl
+  TYPE(t_tfl), DIMENSION(np), INTENT(in) ::  &
+        tptfl
+  TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
+        tpatm
+  TYPE(t_blk), DIMENSION(np), INTENT(in) ::  &
+        tpblkw
+  TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
+        tpblki
+  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
+        tpsit
+  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
+        tpsil
+  TYPE(t_bud), DIMENSION(np), INTENT(inout) ::  &
+        tpbud
+END SUBROUTINE glt_updbud_r
+END INTERFACE
+END MODULE MODI_glt_updbud_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

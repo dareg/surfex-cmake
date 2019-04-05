@@ -1,3 +1,24 @@
+!auto_modi:spll_gltools_avevai.D
+MODULE MODI_gltools_avevai
+INTERFACE
+SUBROUTINE gltools_avevai  &
+        ( tpind,tpnam,pfield,pcumdia,pwgt )
+  USE modd_glt_param
+  USE modd_types_glt
+  IMPLICIT NONE
+  TYPE(t_ind), INTENT(inout) ::  &
+        tpind
+  TYPE(t_def), INTENT(in) ::  &
+        tpnam
+  REAL, DIMENSION(:,:), INTENT(in) ::  &
+        pfield 
+  REAL, DIMENSION(:,:,:), INTENT(inout) ::  &
+        pcumdia
+  REAL, DIMENSION(:,:), OPTIONAL, INTENT(inout) ::  &
+        pwgt
+    END SUBROUTINE gltools_avevai
+END INTERFACE
+END MODULE MODI_gltools_avevai
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

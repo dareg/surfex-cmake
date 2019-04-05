@@ -1,3 +1,16 @@
+!auto_modi:spll_glt_invert.D
+MODULE MODI_glt_invert
+INTERFACE
+SUBROUTINE glt_invert(kdiag,pmat)
+  USE modd_glt_param
+  IMPLICIT NONE
+  INTEGER ::  &
+        kdiag
+  REAL, DIMENSION(:,:), INTENT(inout) ::  &
+        pmat
+END SUBROUTINE glt_invert
+END INTERFACE
+END MODULE MODI_glt_invert
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

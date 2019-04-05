@@ -1,3 +1,26 @@
+!auto_modi:spll_glt_updice.D
+MODULE MODI_glt_updice
+INTERFACE
+SUBROUTINE glt_updice  &
+  ( kinit,omsg,tpdom,tptfl,tpsit,pice_a,pemps_a,psalt_a,psalf_a)
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  INTEGER, INTENT(in) ::  &
+         kinit
+  CHARACTER(*), INTENT(in) ::  &
+        omsg
+  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpdom
+  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(in) ::  &
+        tptfl
+  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(in) ::  &
+        tpsit
+  REAL, INTENT(inout) :: &
+        pemps_a, pice_a, psalt_a, psalf_a
+END SUBROUTINE glt_updice
+END INTERFACE
+END MODULE MODI_glt_updice
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

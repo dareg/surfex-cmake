@@ -1,3 +1,32 @@
+!auto_modi:spll_glt_vhdslab_r.D
+MODULE MODI_glt_vhdslab_r
+INTERFACE
+SUBROUTINE glt_vhdslab_r  &
+        ( kit,pnsftop,pswtra,pderiv,  &
+          pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,osnow )
+  USE modd_glt_param, only : nilay, nl
+  IMPLICIT NONE
+  INTEGER, INTENT(in) ::  &
+    kit
+  REAL, INTENT(in) ::  &
+    pnsftop
+  REAL, DIMENSION(nl), INTENT(in) ::  &
+    pswtra
+  REAL, INTENT(inout) ::  &
+    pderiv
+  REAL, INTENT(out) ::  &
+    pcondb,ptsfa,pqtopmelt
+  REAL, DIMENSION(nilay+1), INTENT(out) ::  &
+    pdh
+  REAL, DIMENSION(0:nilay), INTENT(out) ::  &
+    ptsia
+  LOGICAL, INTENT(out) ::  &
+    osmelt
+  LOGICAL, OPTIONAL, INTENT(in) ::  &
+    osnow
+  END SUBROUTINE glt_vhdslab_r
+END INTERFACE
+END MODULE MODI_glt_vhdslab_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

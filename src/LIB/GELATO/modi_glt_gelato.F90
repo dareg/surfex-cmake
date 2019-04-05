@@ -1,3 +1,15 @@
+!auto_modi:spll_glt_gelato.D
+MODULE MODI_glt_gelato
+INTERFACE
+SUBROUTINE glt_gelato( tpglt )
+USE modd_types_glt 
+USE modd_glt_param
+IMPLICIT NONE
+TYPE(t_glt), INTENT(inout) ::  &
+  tpglt
+END SUBROUTINE glt_gelato
+END INTERFACE
+END MODULE MODI_glt_gelato
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

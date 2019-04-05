@@ -1,3 +1,17 @@
+!auto_modi:spll_gltools_strsplit.D
+MODULE MODI_gltools_strsplit
+INTERFACE
+FUNCTION gltools_strsplit( hval,knword ) RESULT(hresult)
+IMPLICIT NONE
+CHARACTER(*), INTENT(in) ::  &
+  hval
+INTEGER, INTENT(in) ::  &
+  knword
+CHARACTER(80), DIMENSION(knword) ::  &
+  hresult
+END FUNCTION gltools_strsplit
+END INTERFACE
+END MODULE MODI_gltools_strsplit
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

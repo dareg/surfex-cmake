@@ -1,3 +1,23 @@
+!auto_modi:spll_glt_updtfl.D
+MODULE MODI_glt_updtfl
+INTERFACE
+SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,pent,psalt )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  CHARACTER(*), INTENT(in) ::  &
+        hflag  
+  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpmxl
+  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tptfl
+  REAL, DIMENSION(nt,nx,ny), INTENT(in) ::  &
+        pdmass
+  REAL, DIMENSION(nt,nx,ny), INTENT(in), OPTIONAL ::  &
+        psalt,pent
+END SUBROUTINE glt_updtfl
+END INTERFACE
+END MODULE MODI_glt_updtfl
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

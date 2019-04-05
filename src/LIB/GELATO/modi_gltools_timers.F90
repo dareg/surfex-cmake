@@ -1,3 +1,14 @@
+!auto_modi:spll_gltools_timers.D
+MODULE MODI_gltools_timers
+INTERFACE
+SUBROUTINE gltools_timers( hlabel )
+  USE modd_glt_param
+  IMPLICIT NONE
+  CHARACTER(LEN=*), OPTIONAL, INTENT(in) ::  &
+    hlabel 
+END SUBROUTINE gltools_timers
+END INTERFACE
+END MODULE MODI_gltools_timers
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

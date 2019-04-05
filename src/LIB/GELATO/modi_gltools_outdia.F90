@@ -1,3 +1,26 @@
+!auto_modi:spll_gltools_outdia.D
+MODULE MODI_gltools_outdia
+INTERFACE
+SUBROUTINE gltools_outdia  &
+        ( tpind,tpnam,tpdom,pfield,pcumdia,pwgt )
+  USE modd_glt_param
+  USE modd_types_glt
+  IMPLICIT NONE
+  TYPE(t_ind), INTENT(inout) ::  &
+        tpind
+  TYPE(t_def), INTENT(in) ::  &
+        tpnam
+  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpdom
+  REAL, DIMENSION(:,:), INTENT(inout) ::  &
+        pfield 
+  REAL, DIMENSION(:,:,:), INTENT(inout) ::  &
+        pcumdia
+  REAL, DIMENSION(:,:), OPTIONAL, INTENT(inout) ::  &
+        pwgt
+END SUBROUTINE gltools_outdia
+END INTERFACE
+END MODULE MODI_gltools_outdia
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

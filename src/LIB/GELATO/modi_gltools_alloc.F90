@@ -1,3 +1,15 @@
+!auto_modi:spll_gltools_alloc.D
+MODULE MODI_gltools_alloc
+INTERFACE
+SUBROUTINE gltools_alloc(tpglt)
+USE modd_types_glt 
+USE modd_glt_param
+IMPLICIT NONE
+TYPE(t_glt), INTENT(inout) ::  &
+    tpglt
+END SUBROUTINE gltools_alloc
+END INTERFACE
+END MODULE MODI_gltools_alloc
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

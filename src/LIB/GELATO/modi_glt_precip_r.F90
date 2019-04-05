@@ -1,3 +1,30 @@
+!auto_modi:spll_glt_precip_r.D
+MODULE MODI_glt_precip_r
+INTERFACE
+SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,  &
+  pqmelt )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  LOGICAL, DIMENSION(np), INTENT(in) ::  &
+        orain,osnow
+  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
+        tpmxl
+  TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
+        tpatm   
+  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
+        tpsit
+  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
+        tpsil
+  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
+        tptfl
+  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
+        tpdia
+  REAL, DIMENSION(nt,np), INTENT(inout) ::   &
+        pqmelt
+END SUBROUTINE glt_precip_r
+END INTERFACE
+END MODULE MODI_glt_precip_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

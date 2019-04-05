@@ -1,3 +1,24 @@
+!auto_modi:spll_glt_swabs_r.D
+MODULE MODI_glt_swabs_r
+INTERFACE
+SUBROUTINE glt_swabs_r  &
+        ( tpsit,pswtra,pent,pvsp,pdhmelt )
+  USE modd_glt_param
+  USE modd_types_glt
+  IMPLICIT NONE
+  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
+        tpsit
+  REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
+        pswtra
+  REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
+        pent
+  REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
+        pvsp
+  REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
+        pdhmelt
+  END SUBROUTINE glt_swabs_r
+END INTERFACE
+END MODULE MODI_glt_swabs_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

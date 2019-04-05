@@ -1,3 +1,24 @@
+!auto_modi:spll_glt_lmltsi_r.D
+MODULE MODI_glt_lmltsi_r
+INTERFACE
+SUBROUTINE glt_lmltsi_r  &
+        ( tpmxl,tpsil,tpsit,tpdia,tptfl ) 
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
+        tpmxl
+  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
+        tpsil
+  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
+        tpsit
+  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
+        tpdia
+  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
+        tptfl
+END SUBROUTINE glt_lmltsi_r
+END INTERFACE
+END MODULE MODI_glt_lmltsi_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

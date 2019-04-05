@@ -1,3 +1,39 @@
+!auto_modi:spll_glt_thermo.D
+MODULE MODI_glt_thermo
+INTERFACE
+SUBROUTINE glt_thermo  &
+  ( tpdom,pustar,tpmxl,tpatm,  &
+    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpdom
+  REAL, DIMENSION(nx,ny), INTENT(in) ::  &
+        pustar
+  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpmxl
+  TYPE(t_atm), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpatm
+  TYPE(t_blk), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tpblkw
+  TYPE(t_blk), DIMENSION(nt,nx,ny), INTENT(in) ::  &
+        tpblki
+  TYPE(t_bud), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tpbud
+  TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tpdia
+  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tptfl
+  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(inout) ::  &
+        tpsit
+  TYPE(t_vtp), DIMENSION(nl,nt,nx,ny), INTENT(inout) ::  &
+        tpsil
+  TYPE(t_sit), DIMENSION(ntd,nx,ny), OPTIONAL, INTENT(in) ::  &
+        tpsit_d
+END SUBROUTINE glt_thermo
+END INTERFACE
+END MODULE MODI_glt_thermo
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

@@ -1,3 +1,21 @@
+!auto_modi:spll_gltools_adjflx.D
+MODULE MODI_gltools_adjflx
+INTERFACE
+FUNCTION gltools_adjflx(tpdom,ocrit,pfield)
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpdom
+  LOGICAL, DIMENSION(nx,ny), INTENT(in) ::  &
+        ocrit
+  REAL, DIMENSION(nx,ny), INTENT(in) ::   &
+        pfield
+  REAL, DIMENSION(nx,ny) ::  &
+        gltools_adjflx 
+END FUNCTION gltools_adjflx
+END INTERFACE
+END MODULE MODI_gltools_adjflx
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

@@ -1,3 +1,21 @@
+!auto_modi:spll_glt_salflx_r.D
+MODULE MODI_glt_salflx_r
+INTERFACE
+SUBROUTINE glt_salflx_r( pqsalt,tpmxl,tptfl,pdmass,psalt )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  REAL, DIMENSION(nt,np), INTENT(in) ::  &
+        pqsalt
+  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
+        tpmxl
+  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
+        tptfl
+  REAL, DIMENSION(nt,np),OPTIONAL, INTENT(in) ::  &
+        pdmass,psalt
+END SUBROUTINE glt_salflx_r
+END INTERFACE
+END MODULE MODI_glt_salflx_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

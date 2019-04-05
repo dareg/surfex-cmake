@@ -1,3 +1,15 @@
+!auto_modi:spll_glt_inibud.D
+MODULE MODI_glt_inibud
+INTERFACE
+SUBROUTINE glt_inibud(tpbud)
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE 
+  TYPE(t_bud), DIMENSION(:,:), INTENT(inout) ::                         &
+        tpbud
+END SUBROUTINE glt_inibud
+END INTERFACE
+END MODULE MODI_glt_inibud
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

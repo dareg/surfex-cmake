@@ -1,3 +1,32 @@
+!auto_modi:spll_glt_sndmlrf.D
+MODULE MODI_glt_sndmlrf
+INTERFACE
+SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
+  pustar,tpall_oce )
+  USE modd_types_glt
+  USE modd_glt_param
+  IMPLICIT NONE
+  REAL, DIMENSION(nx,ny), INTENT(in) ::  &
+        pbathy
+  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpdom
+  TYPE(t_atm), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpatc
+  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
+        tpml
+  TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tpdia
+  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(in) ::  &
+        tpsit
+  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tptfl
+  REAL, DIMENSION(nx,ny), INTENT(out) ::  &
+        pustar
+  TYPE(t_2oc), DIMENSION(nx,ny), INTENT(inout) ::  &
+        tpall_oce
+END SUBROUTINE glt_sndmlrf
+END INTERFACE
+END MODULE MODI_glt_sndmlrf
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

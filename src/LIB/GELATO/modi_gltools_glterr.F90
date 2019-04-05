@@ -1,3 +1,19 @@
+!auto_modi:spll_gltools_glterr.D
+MODULE MODI_gltools_glterr
+INTERFACE
+SUBROUTINE gltools_glterr  &
+        ( hroutine,hmess,hflag )
+  USE modd_glt_param
+  IMPLICIT NONE
+  CHARACTER(LEN=*), INTENT(in) ::  &
+        hroutine
+  CHARACTER(LEN=*), INTENT(in) ::  &
+        hmess
+  CHARACTER(LEN=*), INTENT(in) ::  &
+        hflag
+END SUBROUTINE gltools_glterr
+END INTERFACE
+END MODULE MODI_gltools_glterr
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
