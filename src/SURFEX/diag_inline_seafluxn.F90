@@ -125,8 +125,12 @@ REAL, DIMENSION(:), INTENT(IN)    :: PSFMER_ICE ! meridian friction
 !*      0.2    declarations of local variables
 !
 LOGICAL                         :: GSIC
+INTEGER                         :: JNUM_ICE
 REAL, DIMENSION(SIZE(PTA))      :: ZZ0W
 REAL, DIMENSION(SIZE(PTA))      :: ZH
+REAL, DIMENSION(SIZE(PTA))      :: ZT2M_ICE, ZQ2M_ICE, ZHU2M_ICE
+REAL, DIMENSION(SIZE(PTA))      :: ZMER10M_ICE, ZZON10M_ICE,ZUNDEF
+LOGICAL, DIMENSION(SIZE(PTA))   :: GICE_MASK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -153,12 +157,55 @@ IF (.NOT. S%LSBL) THEN
     CALL CLS_WIND(PZONA, PMERA, PHW,PCD, PCDN, PRI, ZH,  &
                   D%XZON10M, D%XMER10M)  
     IF (S%LHANDLE_SIC) THEN
-       ZH(:)=2.          
-       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD_ICE, PCH_ICE, PRI_ICE,       &
-            S%XTICE, PHU, PZ0H_ICE, ZH, DI%XT2M, DI%XQ2M, DI%XHU2M)  
-       ZH(:)=10.                
-       CALL CLS_WIND(PZONA, PMERA, PHW, PCD_ICE, PCDN_ICE, PRI_ICE, ZH,  &
-            DI%XZON10M, DI%XMER10M  )  
+       ZUNDEF(:) = XUNDEF
+       GICE_MASK(:) = S%XSIC(:) > 0.
+       JNUM_ICE = COUNT(GICE_MASK)
+
+       IF(JNUM_ICE > 0) THEN
+           ZH(:)=2.          
+           CALL CLS_TQ(                       &
+               PACK(PTA,      MASK=GICE_MASK) &
+             , PACK(PQA,      MASK=GICE_MASK) &
+             , PACK(PPA,      MASK=GICE_MASK) &
+             , PACK(PPS,      MASK=GICE_MASK) &
+             , PACK(PHT,      MASK=GICE_MASK) &
+             , PACK(PCD_ICE,  MASK=GICE_MASK) &
+             , PACK(PCH_ICE,  MASK=GICE_MASK) &
+             , PACK(PRI_ICE,  MASK=GICE_MASK) &
+             , PACK(S%XTICE,  MASK=GICE_MASK) &
+             , PACK(PHU,      MASK=GICE_MASK) &
+             , PACK(PZ0H_ICE, MASK=GICE_MASK) &
+             , PACK(ZH,       MASK=GICE_MASK) &
+             , ZT2M_ICE (:JNUM_ICE)           &
+             , ZQ2M_ICE (:JNUM_ICE)           &
+             , ZHU2M_ICE(:JNUM_ICE)           )
+
+           ZH(:)=10.                
+           CALL CLS_WIND(                     &
+               PACK(PZONA,    MASK=GICE_MASK) &
+             , PACK(PMERA,    MASK=GICE_MASK) &
+             , PACK(PHW,      MASK=GICE_MASK) &
+             , PACK(PCD_ICE,  MASK=GICE_MASK) &
+             , PACK(PCDN_ICE, MASK=GICE_MASK) &
+             , PACK(PRI_ICE,  MASK=GICE_MASK) &
+             , PACK(ZH,       MASK=GICE_MASK) &
+             , ZZON10M_ICE(:JNUM_ICE)         &
+             , ZMER10M_ICE(:JNUM_ICE)         )
+
+           DI%XT2M  = UNPACK(ZT2M_ICE (:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
+           DI%XQ2M  = UNPACK(ZQ2M_ICE (:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
+           DI%XHU2M = UNPACK(ZHU2M_ICE(:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
+
+           DI%XZON10M = UNPACK(ZZON10M_ICE(:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
+           DI%XMER10M = UNPACK(ZMER10M_ICE(:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
+       ELSE
+           DI%XT2M  = XUNDEF
+           DI%XQ2M  = XUNDEF
+           DI%XHU2M = XUNDEF
+
+           DI%XZON10M = XUNDEF
+           DI%XMER10M = XUNDEF
+       END IF
     ENDIF 
   END IF
 !
