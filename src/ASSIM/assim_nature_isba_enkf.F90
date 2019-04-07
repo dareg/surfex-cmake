@@ -125,9 +125,6 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',0,ZHOOK_HANDLE)
-
-#ifdef USE_SODA
-
 !
 !############################# BEGINNING ###############################
 !
@@ -482,8 +479,5 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',1,ZHOOK_HANDLE)
-
-#endif
-
 !
 END SUBROUTINE ASSIM_NATURE_ISBA_ENKF

@@ -139,8 +139,6 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',0,ZHOOK_HANDLE)
-
-#ifdef USE_SODA
 !
 !############################# BEGINNING ###############################
 !
@@ -889,8 +887,6 @@ DO JL=1,NVAR
     ENDDO
   ENDDO
 ENDDO
-!
-#endif
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_EKF',1,ZHOOK_HANDLE)
 !
