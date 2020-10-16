@@ -80,6 +80,7 @@ TYPE(SSO_t), INTENT(INOUT) :: USS
 INTEGER           :: IRESP          ! Error code after redding
 INTEGER           :: JK             ! Loop index
 INTEGER           :: IVERSION       ! Surfex Version
+INTEGER           :: IBUGFIX        ! Surfex bf version
 LOGICAL           :: GORORAD
 ! 
  CHARACTER(LEN=12) :: YRECFM         ! Name of the article to be read
@@ -190,8 +191,11 @@ WHERE (PSEA(:) == 1.) USS%XAOSJM(:) = XUNDEF
 !
 IF (USS%LDSV .OR. USS%LDSH .OR. USS%LDSL) THEN
   CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)      
+  CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)      
   IF (IVERSION < 8) THEN
     CALL ABOR1_SFX("READ_SSON : To use LDSV LDSH or LDSL, you need a PGD computed with version >= 9")
+  ELSE IF (IVERSION == 8 .AND. IBUGFIX ==0) THEN
+    GORORAD=.TRUE.
   ELSE
     CALL READ_SURF(HPROGRAM,'LORORAD',GORORAD,IRESP)
   END IF

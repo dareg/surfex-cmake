@@ -99,7 +99,7 @@ INTEGER                           :: IINFO
 !
 INTEGER                           :: ILUOUT
 !---------------------------------------------------------------------------
-REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR=>NULL()
+REAL, DIMENSION(:),   POINTER     :: ZGRID_PAR
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !---------------------------------------------------------------------------
 !
@@ -108,6 +108,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 !
+ NULLIFY (ZGRID_PAR)
  CALL READ_SURF(HPROGRAM,'LAT0',ZLAT0,KRESP,HDIR=HDIR)
  CALL READ_SURF(HPROGRAM,'LON0',ZLON0,KRESP,HDIR=HDIR)
  CALL READ_SURF(HPROGRAM,'RPK ',ZRPK, KRESP,HDIR=HDIR)
@@ -138,15 +139,17 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
 !*       4.    All this information stored into pointer PGRID_PAR
 !              --------------------------------------------------
 !
-#ifdef MNH_PARALLEL
- CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
-                              ZLATORI,ZLONORI,IIMAX_LOC,IJMAX_LOC,  &
-                              ZX,ZY,ZDX,ZDY                    )
-#else
+!#ifdef MNH_PARALLEL
+! CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
+!                              ZLATORI,ZLONORI,IIMAX_LOC,IJMAX_LOC,  &
+!                              ZX,ZY,ZDX,ZDY                    )
+!#else
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATORI,ZLONORI,IIMAX,IJMAX,     &
-                              ZX,ZY,ZDX,ZDY                    )  
-#endif 
+                              ZX,ZY,ZDX,ZDY,&
+                              0,0,8,8) ! these dimensions have no meaning in
+                                       ! this case
+!#endif 
 !
 !---------------------------------------------------------------------------
 IF (OREAD) THEN

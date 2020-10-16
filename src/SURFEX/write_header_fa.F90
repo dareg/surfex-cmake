@@ -34,6 +34,9 @@ SUBROUTINE WRITE_HEADER_FA (GCP, HGRID, PGRID_PAR, CFILETYPE, HWRITE)
 !!         B. Decharme  01/2009 : FA can be used only if NDIM_FULL >=289 in LATLON
 !!         A. Alias     10/2010 : FA header modified
 !!         R. El Khatib 30-Mar-2012 fanmsg with 2 arguments
+!!         A. Mary      07/2018 : width of I and E zones
+!!         A. Mary      05/2019 : Gauss KNOZPA != 0
+!!         A. Mary      06/2019 : absolute value of RPK
 !!
 !----------------------------------------------------------------------------
 !
@@ -118,6 +121,10 @@ INTEGER :: INXLON
 INTEGER :: IWORK
 INTEGER :: ICOUNT
 INTEGER :: JLAT
+INTEGER :: ILATE
+INTEGER :: ILONE
+INTEGER :: IWIDTH_I_X
+INTEGER :: IWIDTH_I_Y
 !
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -146,7 +153,8 @@ IF (HGRID=="CONF PROJ ") THEN
   ALLOCATE(ZDX(ICOUNT))
   ALLOCATE(ZDY(ICOUNT))
 !
-  CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PDX=ZDX,PDY=ZDY)
+  CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PDX=ZDX,PDY=ZDY,KLONE=ILONE,KLATE=ILATE, &
+                              KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y)
 !
   ALLOCATE(ZSINLA(18))
   ALLOCATE(INLOPA(8))
@@ -157,7 +165,7 @@ IF (HGRID=="CONF PROJ ") THEN
   INOZPA(:)=0
 !
   ZSINLA(1) = -1.0
-  ZSINLA(2) = ZPRPK
+  ZSINLA(2) = ABS(ZPRPK)
   ZSINLA(3) = ZLOPO*ZRAD
   ZSINLA(4) = ZLAPO*ZRAD
   ZSINLA(5) = GCP%XLONC*ZRAD
@@ -168,19 +176,22 @@ IF (HGRID=="CONF PROJ ") THEN
   ZSINLA(14) = 0.0
 !
   INLOPA(1) = 10
-  INLOPA(2) = 1
+  INLOPA(2) = -1
   INLOPA(3) = 1
   INLOPA(4) = ILON
   INLOPA(5) = 1
   INLOPA(6) = ILAT
-  INLOPA(7) = 8
-  INLOPA(8) = 8
+  INLOPA(7) = IWIDTH_I_X
+  INLOPA(8) = IWIDTH_I_Y
 !
   ITYPTR = -INT(REAL(ILON-1)/2.)
   ITRONC = INT(REAL(ILAT-1)/2.)
 !
-  INLATI = ILAT
-  INXLON = ILON
+  INLATI = ILAT+ILATE
+  INXLON = ILON+ILONE
+  IF (ILONE == 0 .AND. ILATE == 0) THEN
+    INLOPA(2) = 0
+  ENDIF
 !
 ELSEIF (HGRID=="CARTESIAN ") THEN
 !
@@ -267,6 +278,10 @@ ELSEIF (HGRID=="GAUSS     ") THEN
   ENDIF
 !
   INOZPA(:)=0
+  DO JLAT = 1,INLATI
+    INOZPA(JLAT) = INT(FLOOR(REAL(INLOPA(JLAT) - 1) / 2.)) ! 2:linear truncation
+  ENDDO
+  WHERE(INOZPA(:) == INOZPA(INLATI/2)) INOZPA(:) = ITRONC ! might be ITRONC + 1  
 !
   ICOUNT=1
   DO JLAT = 1,INLATI

@@ -193,7 +193,8 @@ DEALLOCATE(ZDY1)
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,    &
                               ZLATOR,ZLONOR,                       &
                               IIMAX2,IJMAX2,                       &
-                              ZX2,ZY2,ZDX2,ZDY2                    )  
+                              ZX2,ZY2,ZDX2,ZDY2,&
+                              0,0,8,8) ! these dimensions have no meaning in this case
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX2)

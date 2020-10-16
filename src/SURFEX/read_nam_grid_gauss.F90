@@ -104,7 +104,7 @@ INTEGER :: NDGLG    ! number of pseudo-latitudes
 REAL    :: RMUCEN   ! sine of the latitude of the rotated pole
 REAL    :: RLOCEN   ! longitude of the rotated pole (radian)
 REAL    :: RSTRET   ! stretching factor (must be greater than or equal to 1)
-INTEGER, DIMENSION(1000) :: NRGRI ! number of pseudo-longitudes on each
+INTEGER, DIMENSION(4000) :: NRGRI ! number of pseudo-longitudes on each
                                   ! pseudo-latitude circle on pseau
                                   ! northern hemisphere (starting from
                                   ! the rotated pole)
