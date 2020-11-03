@@ -273,7 +273,7 @@ CONTAINS
                                   HREC,PFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  * - routine to !write a real scalar
+!!****  * - routine to write a real scalar
 !
 !
 USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
@@ -344,7 +344,7 @@ END SUBROUTINE WRITE_SURFX0_FA
                                   HREC,KFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  * - routine to !write an integer
+!!****  * - routine to write an integer
 !
 USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NMASK, CPREFIX1D, LFANOCOMPACT
 !
@@ -416,7 +416,7 @@ END SUBROUTINE WRITE_SURFN0_FA
                                   HREC,OFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  * - routine to !write a logical
+!!****  * - routine to write a logical
 !
 USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
 !
@@ -492,7 +492,7 @@ END SUBROUTINE WRITE_SURFL0_FA
                                   HREC,HFIELD,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  * - routine to !write a character
+!!****  * - routine to write a character
 !
 !
 USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, CPREFIX1D, LFANOCOMPACT
@@ -577,7 +577,7 @@ END SUBROUTINE WRITE_SURFC0_FA
                                   HREC,KL,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-!!****  * - routine to fill a !write 1D array for the externalised surface 
+!!****  * - routine to fill a write 1D array for the externalised surface 
 !
 !
 !
@@ -690,7 +690,7 @@ END SUBROUTINE WRITE_SURFX1_FA
       SUBROUTINE WRITE_SURFX2_FA (HREC,KL1,KL2,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-!!****  * - routine to fill a !write 2D array for the externalised surface 
+!!****  * - routine to fill a write 2D array for the externalised surface 
 !
 !
 !
@@ -814,7 +814,7 @@ END SUBROUTINE WRITE_SURFX2_FA
       SUBROUTINE WRITE_SURFX3_FA (HREC,KL1,KL2,KL3,PFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-!!****  * - routine to fill a !write 2D array for the externalised surface 
+!!****  * - routine to fill a write 2D array for the externalised surface 
 !
 !
 !
@@ -936,7 +936,7 @@ END SUBROUTINE WRITE_SURFX3_FA
                                   HREC,KL,KFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-!!****  * - routine to !write an integer array
+!!****  * - routine to write an integer array
 !
 !
 !
@@ -1044,7 +1044,7 @@ END SUBROUTINE WRITE_SURFN1_FA
                                   HREC,KL,OFIELD,KRESP,HCOMMENT,HDIR)
 !     #############################################################
 !
-!!****  * - routine to !write a logical array
+!!****  * - routine to write a logical array
 !
 !
 !
@@ -1093,8 +1093,6 @@ REAL(KIND=JPRB)  :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL1_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
-
-
 !
 CALL IO_BUFF(HREC,'W',GFOUND)
 !
@@ -1135,9 +1133,6 @@ IF (NRANK==NPIO) THEN
     CALL LFIECR (KRESP, NUNIT_FA, CPREFIX1D//TRIM(HREC), IWORK, SIZE (IWORK))
     IF (KRESP/=0) CALL ERROR_WRITE_SURF_FA(HREC,KRESP)
   ENDIF
-
-
-
   !
 #ifdef SFX_MPI
   XTIME_NPIO_WRITE = XTIME_NPIO_WRITE + (MPI_WTIME() - XTIME0)
@@ -1154,7 +1149,7 @@ END SUBROUTINE WRITE_SURFL1_FA
                                   HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
 !     #############################################################
 !
-!!****  * - routine to !write a date
+!!****  * - routine to write a date
 !
 !
 USE MODD_IO_SURF_FA, ONLY : CPREFIX1D, NUNIT_FA, LFANOCOMPACT
