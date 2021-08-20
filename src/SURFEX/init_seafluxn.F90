@@ -194,7 +194,8 @@ IF (LNAM_READ) THEN
  CALL DEFAULT_SEAICE(HPROGRAM,                                                  &
                      SM%S%CINTERPOL_SIC,SM%S%CINTERPOL_SIT, SM%S%XFREEZING_SST, &
                      SM%S%XSEAICE_TSTEP, SM%S%XSIC_EFOLDING_TIME,               &
-                     SM%S%XSIT_EFOLDING_TIME, SM%S%XCD_ICE_CST, SM%S%XSI_FLX_DRV)     
+                     SM%S%XSIT_EFOLDING_TIME, SM%S%XCD_ICE_CST, SM%S%XSI_FLX_DRV, &
+                     SM%S%LVOLATILE_SIC )
  !                     
  CALL DEFAULT_CH_DEP(SM%CHS%CCH_DRY_DEP) 
  !            

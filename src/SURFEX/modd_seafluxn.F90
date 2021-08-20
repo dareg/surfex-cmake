@@ -58,6 +58,8 @@ TYPE SEAFLUX_t
   CHARACTER(LEN=6)              :: CSEAICE_SCHEME! Name of the seaice scheme 
   REAL, POINTER, DIMENSION(:)   :: XSEABATHY   ! bathymetry
 !
+  LOGICAL                       :: LVOLATILE_SIC ! SIC field could be updated by means unknown to sea ice scheme
+
   LOGICAL                       :: LINTERPOL_SST ! Interpolation of monthly SST
   CHARACTER(LEN=6)              :: CINTERPOL_SST ! Interpolation method of monthly SST
   LOGICAL                       :: LINTERPOL_SSS ! Interpolation of monthly SSS

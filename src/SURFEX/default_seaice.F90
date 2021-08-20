@@ -6,7 +6,8 @@
 SUBROUTINE DEFAULT_SEAICE(HPROGRAM,                                   &
                           HINTERPOL_SIC, HINTERPOL_SIT, PFREEZING_SST,&
                           PSEAICE_TSTEP, PSIC_EFOLDING_TIME,          &
-                          PSIT_EFOLDING_TIME, PCD_ICE, PSI_FLX_DRV    )
+                          PSIT_EFOLDING_TIME, PCD_ICE, PSI_FLX_DRV,   &
+                          OVOLATILE_SIC    )
 !     ########################################################################
 !
 !!****  *DEFAULT_SEAICE* - routine to set default values for the configuration for SEAICE scheme
@@ -70,6 +71,7 @@ REAL,              INTENT(OUT) :: PSIC_EFOLDING_TIME ! E-folding time on SIC rel
 REAL,              INTENT(OUT) :: PSIT_EFOLDING_TIME ! E-folding time on SIT relaxation
 REAL,              INTENT(OUT) :: PCD_ICE       ! turbulent exchanges transfer coefficient on seaice
 REAL,              INTENT(OUT) :: PSI_FLX_DRV   ! turbulent exchanges transfer coefficient on seaice
+LOGICAL,           INTENT(OUT) :: OVOLATILE_SIC ! could SIC be updated outside the sea-ice scheme?
 
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -89,6 +91,7 @@ PSIC_EFOLDING_TIME = 0 ! in days; 0 means no relaxation
 PSIT_EFOLDING_TIME = 0 ! in days; 0 means no relaxation
 PCD_ICE       = 0.0
 PSI_FLX_DRV   = -20.
+OVOLATILE_SIC = .FALSE.
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_SEAICE',1,ZHOOK_HANDLE)
 !

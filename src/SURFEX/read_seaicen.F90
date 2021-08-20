@@ -125,9 +125,14 @@ S%XSIC(:)=XUNDEF
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-IF(S%LINTERPOL_SIC)THEN
-   !
+IF(S%LVOLATILE_SIC .OR. S%LINTERPOL_SIC) THEN
    ALLOCATE(S%XFSIC(KLU))
+   S%XFSIC = XUNDEF
+ELSE
+   ALLOCATE(S%XFSIC(0))
+END IF
+
+IF(S%LINTERPOL_SIC)THEN
    !
    !Precedent, Current, Next, and Second-next Monthly SIC
    INMTH=4   
@@ -148,7 +153,6 @@ IF(S%LINTERPOL_SIC)THEN
    !
 ELSE
    ! 
-   ALLOCATE(S%XFSIC(0))
    ALLOCATE(S%XSIC_MTH(0,0))
    !
 ENDIF
