@@ -49,6 +49,7 @@ TYPE SSO_t
                                ! 'Z01D'
                                ! 'Z04D'
                                ! 'BE04'
+                               ! 'OROT'
 !
   REAL, DIMENSION(:), POINTER   :: XZ0EFFJPDIR    ! heading of J direction (deg from N clockwise)
 !
@@ -64,6 +65,7 @@ TYPE SSO_t
 ! Zo threshold
   REAL   :: XFRACZ0                                ! Z0=Min(Z0, Href/XFRACZ0)
   REAL   :: XCOEFBE                                ! Beljaars coefficient         
+  REAL   :: XCOROT, XVOROT, XSOROT                 ! Coefficients for orotur
 !
 !-----------------------------------------------------------------------------------------------------
 !
@@ -130,6 +132,10 @@ IF (LHOOK) CALL DR_HOOK("MODD_SSO_N:SSO_INIT",0,ZHOOK_HANDLE)
 YSSO%CROUGH=' '
 YSSO%XFRACZ0=2.
 YSSO%XCOEFBE=2.
+YSSO%XCOROT=2500.
+YSSO%XVOROT=8.
+YSSO%XSOROT=500.
+
 IF (LHOOK) CALL DR_HOOK("MODD_SSO_N:SSO_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE SSO_INIT
 !

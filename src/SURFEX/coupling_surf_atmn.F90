@@ -42,6 +42,7 @@ SUBROUTINE COUPLING_SURF_ATM_n (YSC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR,
 !
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
+USE MODD_SSO_n,    ONLY : SSO_t
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -433,7 +434,7 @@ IF (YSC%USS%CROUGH=="Z01D" .OR. YSC%USS%CROUGH=="Z04D") THEN
 ELSE IF (YSC%USS%CROUGH=="BE04") THEN
   CALL SSO_BE04_FRICTION_n(YSC%SB, YSC%USS, PTSTEP,YSC%U%XSEA,PUREF,PRHOA,PU,PV,PSFU,PSFV)
 ELSE IF (YSC%USS%CROUGH=="OROT") THEN
-   CALL HLOROTUR(PU,PV,PSFU,PSFV)  
+  CALL OROTUR(YSC%USS,PU,PV,PSFU,PSFV)
 END IF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -471,7 +472,7 @@ REAL, DIMENSION(KSIZE,ISWB) :: ZP_SCA_SW   ! diffuse solar radiation (on horizon
 !                                              !                                       (W/m2)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH   ! zenithal angle at t  (radian from the vertical)
 REAL, DIMENSION(KSIZE) :: ZP_ZENITH2  ! zenithal angle at t+1(radian from the vertical)
-REAL, DIMENSION(KSIZE) :: ZP_AZIM     ! solar azimuthal angle(radian from North, clockwise)
+REAL, DIMENSION(KSIZE) :: ZP_AZIM     ! solar azimuth angle(radian from North, clockwise)
 REAL, DIMENSION(KSIZE) :: ZP_LW       ! longwave radiation (on horizontal surf.)
 !                                              !                                       (W/m2)
 REAL, DIMENSION(KSIZE) :: ZP_PS       ! pressure at atmospheric model surface (Pa)
@@ -671,11 +672,11 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:TREAT_SURF',1,ZHOOK_HANDLE)
 END SUBROUTINE TREAT_SURF
 !=======================================================================================
 
-SUBROUTINE HLOROTUR(PU,PV,PSFU,PSFV)
+SUBROUTINE OROTUR(USS,PU,PV,PSFU,PSFV)
 !----------------------------------------------------------------------
-! HLOROTUR.F90 called by coupling_surf_atmn in SURFEX
+! OROTUR.F90 called by coupling_surf_atmn in SURFEX
 !
-! HLOROTUR calculates orographic stress, i.e. the influence
+! OROTUR calculates orographic stress, i.e. the influence
 ! of the smallest scale orography on wind components, using the 
 ! ideas of Wood et al., QJRMS, 20001, 172, 759-777. For the usage in
 ! HARMONIE, the routine originating in HIRLAM has been extremally simplified.
@@ -686,20 +687,14 @@ SUBROUTINE HLOROTUR(PU,PV,PSFU,PSFV)
 ! Updated: Laura Rontu, 30.11.2004
 !          Laura Rontu, 1.10.2006 
 ! Modified for HARMONIE Laura Rontu, 23.4.2016
+! Updated: Laura Rontu, 5.12.2018
 ! ---------------------------------------------------------------------
-#ifdef MERGE_OROTUR
-USE MODD_SURF_ATM_SSO_n, ONLY : XSSO_STDEV, XCOROT, XVOROT, XSOROT
-USE MODD_SURF_ATM_n,     ONLY : XSEA, XWATER
-#endif
-
-!USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-!USE PARKIND1  ,ONLY : JPRB
-!USE YOMLSFORC, ONLY : LMUSCLFA, IMUSCLFA
 
 IMPLICIT NONE
 
 !IN - OUT VARIABLES
 
+TYPE(SSO_t)       , INTENT(INOUT) :: USS
 REAL, DIMENSION(:), INTENT(IN)    :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(:), INTENT(IN)    :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(:), INTENT(INOUT) :: PSFU      ! zonal momentum flux                   (Pa)
@@ -714,25 +709,28 @@ REAL                        :: CSSO, VSSO2, CSSO1     ! tunable coefficients
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
-IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:HLOROTUR',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:OROTUR',0,ZHOOK_HANDLE)
 
-#ifdef MERGE_OROTUR
 ! CSSO depends on tunable coefficient XCOROT and XSOROT, which represents model
 ! resolution in metres. XVOROT is used to approximate the influence of wind speed.
 ! All three coefficients are defined in namelist nam_ssson. 
 
-  CSSO=XCOROT/(XSOROT*XSOROT)
-  VSSO2=XVOROT*XVOROT
-!  write(66,*) "Coupling_surf_atmn: CSSO VSSO2 XVOROT XSOROT", CSSO, VSSO2, XVOROT, XSOROT
+!  ZXSSO_STDEV=USS%XSSO_STDEV
+!  ZXVOROT=USS%XVOROT
+!  ZXCOROT=USS%XCOROT
+!  ZXSOROT=USS%XSOROT
+
+  CSSO=USS%XCOROT/(USS%XSOROT*USS%XSOROT)
+  VSSO2=USS%XVOROT*USS%XVOROT
 
   DO JL=1,KI
      
-!    only over land
-     IF (XSEA(JL) < 0.01 .AND. XWATER(JL) < 0.01) THEN
+!    only where sso std defined (land in gp)
+     IF (USS%XSSO_STDEV(JL) /= XUNDEF ) THEN
 
 !     redefine Csso to get maximum value for weak winds:
         CSSO1=CSSO*VSSO2/(PU(JL)**2. + PV(JL)**2 + VSSO2)
-        ZVAR=XSSO_STDEV(JL)*XSSO_STDEV(JL)
+        ZVAR=USS%XSSO_STDEV(JL)*USS%XSSO_STDEV(JL)
         
 !     momentum flux components updated
         TOROTXS = CSSO1*ZVAR*PSFU(JL)
@@ -741,15 +739,13 @@ IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:HLOROTUR',0,ZHOOK_HANDLE)
         PSFU(JL)= PSFU(JL)+TOROTXS
         PSFV(JL)= PSFV(JL)+TOROTYS
      END IF
-
  END DO
-#endif
 
-IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:HLOROTUR',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_n:OROTUR',1,ZHOOK_HANDLE)
 !
 !------------------------------------------------------------------------------------
 !
-END SUBROUTINE HLOROTUR
+END SUBROUTINE OROTUR
 
 
 
