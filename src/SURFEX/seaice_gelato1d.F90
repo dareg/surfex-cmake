@@ -854,7 +854,8 @@ USE MODI_ABOR1_SFX
       THIS%XICE_ALB(KLU) &
       )
   END IF
-
+  !
+  nx=KLU
   nxglo=nx
 #if ! defined in_arpege
   CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
