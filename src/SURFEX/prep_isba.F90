@@ -148,7 +148,7 @@ LOGICAL         :: GWG
 LOGICAL         :: GWGI
 LOGICAL         :: GTG
 !
-REAL            :: SMAX
+REAL            :: ZSMAX,ZSMAXJL
 !
 INTEGER         :: ISIZE_LMEB_PATCH, ISNOW
 !
@@ -324,15 +324,32 @@ IF (YDCTL%LPART6) THEN
 ! 
 !*      4.b     Possibility for setting an upper limit on the initial snow water equivalent field 
 !
-  IF (LSWEMAX) THEN 
-    DO JP = 1,IO%NPATCH
-      SMAX = MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,:)) 
-      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', SMAX 
-      WRITE(*,*) ' Set MAX to', XSWEMAX, '(kg/m2)' 
-      NPE%AL(JP)%TSNOW%WSNOW(:,:) = MIN(NPE%AL(JP)%TSNOW%WSNOW(:,:),XSWEMAX) 
-      SMAX = MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,:)) 
-      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', SMAX 
-    ENDDO
+  IF (LSWEMAX) THEN
+
+   DO JP = 1,IO%NPATCH
+    ZSMAX = MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+    IF (ZSMAX < 1E-8) THEN
+      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
+      WRITE(*,*) ' LSWEMAX not activated'
+    ELSE
+      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
+      WRITE(*,*) ' Set MAX to', XSWEMAX, '(kg/m2)'
+      WRITE(*,*) ' Total SWE BEFORE',MINVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)),MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+      IF ( NPE%AL(JP)%TSNOW%NLAYER == 1 ) THEN
+        NPE%AL(JP)%TSNOW%WSNOW(:,1) = MIN(NPE%AL(JP)%TSNOW%WSNOW(:,1),XSWEMAX)
+      ELSE
+        DO JL=1,NPE%AL(JP)%TSNOW%NLAYER
+          ZSMAXJL = MAXVAL(NPE%AL(JP)%TSNOW%WSNOW(:,JL))
+          WRITE(*,*) ' layer, MAX(Snow content(kg/m2)),weight:',JL,ZSMAXJL,(ZSMAXJL/ZSMAX)*XSWEMAX
+          NPE%AL(JP)%TSNOW%WSNOW(:,JL) =MIN(NPE%AL(JP)%TSNOW%WSNOW(:,JL),(ZSMAXJL/ZSMAX)*XSWEMAX)
+        ENDDO
+      ENDIF
+      WRITE(*,*) ' Total SWE AFTER',MINVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2)),MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+
+      ZSMAX = MAXVAL(SUM(NPE%AL(JP)%TSNOW%WSNOW,DIM=2))
+      WRITE(*,*) ' MAX(Snow content (kg/m2)): ', ZSMAX
+    ENDIF
+   ENDDO 
   ENDIF
 !
 !-------------------------------------------------------------------------------------

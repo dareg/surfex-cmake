@@ -138,6 +138,14 @@ LOGICAL :: LENS_GEN
 LOGICAL :: LPB_CORRELATIONS
 LOGICAL :: LPERTURBATION_RUN
 LOGICAL :: LBIAS_CORRECTION
+! 
+ LOGICAL                               :: LSWEPSINI            ! Logical switch to set initial values of SWE on 
+                                                               ! vegetation type PERMANENT SNOW in the snow analysis
+ REAL                                  :: XSWEPSINI            ! Initial value of SWE on PERMANENT SNOW
+
+ LOGICAL                               :: LSWEPSMIN            ! Logical switch to set a lower limit for SWE on 
+                                                               ! vegetation type PERMANENT SNOW in the snow analysis
+ REAL                                  :: XSWEPSMIN            ! Lower limit of SWE on PERMANENT SNOW
 !
 ! Constants and options of the soil OI analysis
 !

@@ -316,15 +316,22 @@ IF (LAESNM) THEN
 
   DO JPATCH=1,IM%O%NPATCH
 
+    PK => IM%NP%AL(JPATCH)
     PEK => IM%NPE%AL(JPATCH)
     ! removes very small values due to computation precision
-    WHERE( PEK%TSNOW%WSNOW(:,INLAYER) < 1.0E-10 ) PEK%TSNOW%WSNOW(:,INLAYER) = 0.0
-  
-    ! No SNOW
-    WHERE ( PEK%TSNOW%WSNOW(:,INLAYER) == 0.0 )
-      PEK%TSNOW%RHO(:,INLAYER) = XUNDEF
-      PEK%TSNOW%ALB(:)    = XUNDEF
-    END WHERE
+    DO JI = 1,PK%NSIZE_P
+
+      IF( SUM(PEK%TSNOW%WSNOW(JI,:)) < 1.0E-10 ) THEN
+        PEK%TSNOW%WSNOW(JI,:) = 0.0
+        PEK%TSNOW%RHO(JI,:)    = XUNDEF
+        PEK%TSNOW%ALB(JI)       = XUNDEF
+        IF ( PEK%TSNOW%SCHEME == '3-L' .OR. PEK%TSNOW%SCHEME =='1-L' ) THEN
+          PEK%TSNOW%HEAT(JI,:)    = XUNDEF
+          PEK%TSNOW%AGE(JI,:)    = XUNDEF
+        ENDIF
+      END IF
+    ENDDO
+
     !
   ENDDO
 !
