@@ -73,6 +73,9 @@ REAL, DIMENSION(:),     INTENT(OUT):: PTRAD         ! surface radiative temp.
 !*      0.2    declarations of local variables
 !
 REAL, PARAMETER    :: ZEPS = 1.E-10
+#ifdef HIRLAM_SP_HACKS
+REAL, PARAMETER    :: ZEPSFR = 1.E-5
+#endif
 !
 INTEGER :: INI, INP, INSWB  ! dimenssion
 INTEGER :: JI, JP, JSWB     ! loop counter on tiles
@@ -97,8 +100,14 @@ PSCA_ALB   (:,:) = 0.
 DO JSWB = 1,INSWB
   DO JP = 1,INP
     DO JI = 1,INI
-      PDIR_ALB(JI,JSWB) = PDIR_ALB(JI,JSWB) + PFRAC_TILE(JI,JP) * PDIR_ALB_TILE(JI,JSWB,JP)
-      PSCA_ALB(JI,JSWB) = PSCA_ALB(JI,JSWB) + PFRAC_TILE(JI,JP) * PSCA_ALB_TILE(JI,JSWB,JP)
+#ifdef HIRLAM_SP_HACKS
+      IF (PFRAC_TILE(JI,JP) > ZEPSFR) THEN
+#endif
+        PDIR_ALB(JI,JSWB) = PDIR_ALB(JI,JSWB) + PFRAC_TILE(JI,JP) * PDIR_ALB_TILE(JI,JSWB,JP)
+        PSCA_ALB(JI,JSWB) = PSCA_ALB(JI,JSWB) + PFRAC_TILE(JI,JP) * PSCA_ALB_TILE(JI,JSWB,JP)
+#ifdef HIRLAM_SP_HACKS
+      ENDIF
+#endif
     END DO
   END DO
 END DO
@@ -109,7 +118,13 @@ PEMIS      (:)   = 0.
 !
 DO JP = 1,INP
   DO JI = 1,INI
-     PEMIS(JI) = PEMIS(JI) + PFRAC_TILE(JI,JP) * PEMIS_TILE(JI,JP)
+#ifdef HIRLAM_SP_HACKS
+    IF (PFRAC_TILE(JI,JP) > ZEPSFR) THEN
+#endif
+      PEMIS(JI) = PEMIS(JI) + PFRAC_TILE(JI,JP) * PEMIS_TILE(JI,JP)
+#ifdef HIRLAM_SP_HACKS
+    ENDIF
+#endif
   END DO
 END DO
 !
@@ -119,7 +134,11 @@ PTRAD      (:)   = 0.
 !
 DO JP = 1, INP
   DO JI = 1,INI
+#ifdef HIRLAM_SP_HACKS
+    IF (PFRAC_TILE(JI,JP) > ZEPSFR .AND. PEMIS_TILE(JI,JP) < 1.E+9 .AND. PTRAD_TILE(JI,JP) < 1.E+9) THEN
+#else
     IF (PFRAC_TILE(JI,JP) > 0.) THEN
+#endif
       PTRAD(JI) = PTRAD(JI) + (PTRAD_TILE(JI,JP)**4)*PFRAC_TILE(JI,JP)*PEMIS_TILE(JI,JP)
     ENDIF
   END DO

@@ -13,7 +13,7 @@
 !!    PURPOSE
 !!    -------
 !!
-!!    METHODi
+!!    METHOD
 !!    ------
 !!   
 !!    EXTERNAL
@@ -70,7 +70,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PTS_GARDEN     ! green area surf. temp.
 REAL, DIMENSION(:), INTENT(IN) :: PEMIS_GREENROOF! green roof emissivity (snowfree)
 REAL, DIMENSION(:), INTENT(IN) :: PTS_GREENROOF  ! green roof surf. temp.
 REAL, DIMENSION(:), INTENT(OUT):: PEMIS          ! averaged emissivity (all tiles)
-REAL, DIMENSION(:), INTENT(OUT):: PTSRAD         ! averaged radiaitve temp. (all tiles)
+REAL, DIMENSION(:), INTENT(OUT):: PTSRAD         ! averaged radiative temp. (all tiles)
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
@@ -136,10 +136,18 @@ GMASK(:) = .FALSE.
  CALL SNOW_FRAC_ROOF(T%TSNOW_ROOF%WSNOW(:,1),GMASK,ZDN_ROOF,ZDF_ROOF)
 !
 ! fixed incoming LW (W/m2)
-ZLW_RAD(:)= XSTEFAN * (T%XT_ROAD(:,1) ** 4)
+WHERE (T%XT_ROAD(:,1) /= XUNDEF)
+   ZLW_RAD(:)= XSTEFAN * (T%XT_ROAD(:,1) ** 4)
+ELSEWHERE
+   ZLW_RAD(:) = 0.
+ENDWHERE
 !
 ! LW absorbed by roofs
-ZABS_LW_ROOF(:) = T%XEMIS_ROOF(:) * (ZLW_RAD(:) - XSTEFAN * T%XT_ROOF(:,1)**4)
+WHERE (T%XT_ROOF(:,1) /= XUNDEF)
+   ZABS_LW_ROOF(:) = T%XEMIS_ROOF(:) * (ZLW_RAD(:) - XSTEFAN * T%XT_ROOF(:,1)**4)
+ELSEWHERE
+   ZABS_LW_ROOF(:) = 0.
+ENDWHERE
 !
 !* LW absorbed by snow on roof
 WHERE (T%TSNOW_ROOF%TS(:) /= XUNDEF .AND. T%TSNOW_ROOF%EMIS(:) /= XUNDEF) 

@@ -110,7 +110,7 @@ REAL, DIMENSION(:), INTENT(OUT) :: PLW_S_TO_WIN ! L.W. interactions sky->win for
 REAL, DIMENSION(:), INTENT(OUT) :: PLW_WIN_TO_WA ! L.W. interactions win->wall for wall balance
 REAL, DIMENSION(:), INTENT(OUT) :: PLW_WIN_TO_WB ! L.W. interactions win->wall for wall balance
 REAL, DIMENSION(:), INTENT(OUT) :: PLW_WIN_TO_R  ! L.W. interactions win->road for road balance
-REAL, DIMENSION(:), INTENT(OUT) :: PLW_WIN_TO_NR ! L.W. interactions win->GARDEN areas for snow balance
+REAL, DIMENSION(:), INTENT(OUT) :: PLW_WIN_TO_NR ! L.W. interactions win->snow areas for snow balance
 REAL, DIMENSION(:), INTENT(OUT) :: PLW_WIN_TO_G  ! L.W. interactions win->GARDEN areas for garden balance
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PLW_NR_TO_WA! L.W. interactions snow(road)->wall for wall balance
@@ -177,7 +177,11 @@ DO JJ=1,SIZE(T%XROAD)
   PLW_R_TO_WA(JJ) = ZLW(T%XEMIS_ROAD(JJ),T%XEMIS_WALL(JJ),ZF_W_R(JJ),T%XT_ROAD(JJ,1),T%XT_WALL_A(JJ,1))
   PLW_R_TO_WB(JJ) = ZLW(T%XEMIS_ROAD(JJ),T%XEMIS_WALL(JJ),ZF_W_R(JJ),T%XT_ROAD(JJ,1),T%XT_WALL_B(JJ,1))
   !
+#ifdef HIRLAM_SP_HACKS
+  IF (SIZE(PTS_G)>0 .AND. PEMIS_G(JJ)/=XUNDEF) THEN
+#else
   IF (SIZE(PTS_G)>0) THEN
+#endif
     PLW_WA_TO_G(JJ) = ZLW(T%XEMIS_WALL(JJ),PEMIS_G(JJ),ZF_G_W(JJ),T%XT_WALL_A(JJ,1),PTS_G(JJ))
     PLW_WB_TO_G(JJ) = ZLW(T%XEMIS_WALL(JJ),PEMIS_G(JJ),ZF_G_W(JJ),T%XT_WALL_B(JJ,1),PTS_G(JJ))
     PLW_G_TO_WA(JJ) = ZLW(PEMIS_G(JJ),T%XEMIS_WALL(JJ),ZF_W_G(JJ),PTS_G(JJ),T%XT_WALL_A(JJ,1))
@@ -190,7 +194,11 @@ DO JJ=1,SIZE(T%XROAD)
   ENDIF
   !
   !
+#ifdef HIRLAM_SP_HACKS
+  IF (PTS_SR(JJ) .EQ. XUNDEF .OR. T%TSNOW_ROAD%WSNOW(JJ,1) < 1.E-6) THEN
+#else
   IF (PTS_SR(JJ) .EQ. XUNDEF) THEN
+#endif
     PLW_WA_TO_NR (JJ) = 0.
     PLW_WB_TO_NR (JJ) = 0.
     PLW_NR_TO_WA (JJ) = 0.
@@ -215,7 +223,11 @@ DO JJ=1,SIZE(T%XROAD)
   PLW_WIN_TO_R(JJ)= ZLW(ZEMIS_WIN(JJ),T%XEMIS_ROAD(JJ),ZF_R_WIN(JJ),B%XT_WIN1(JJ),T%XT_ROAD(JJ,1))
   PLW_R_TO_WIN(JJ)= ZLW(T%XEMIS_ROAD(JJ),ZEMIS_WIN(JJ),ZF_WIN_R(JJ),T%XT_ROAD(JJ,1),B%XT_WIN1(JJ))
   !
+#ifdef HIRLAM_SP_HACKS
+  IF (SIZE(PTS_G)>0 .AND. PEMIS_G(JJ)/=XUNDEF) THEN
+#else
   IF (SIZE(PTS_G)>0) THEN
+#endif
     PLW_WIN_TO_G(JJ)= ZLW(ZEMIS_WIN(JJ),PEMIS_G(JJ),ZF_G_WIN(JJ),B%XT_WIN1(JJ),PTS_G(JJ))
     PLW_G_TO_WIN(JJ)= ZLW(PEMIS_G(JJ),ZEMIS_WIN(JJ),ZF_WIN_G(JJ),PTS_G(JJ),B%XT_WIN1(JJ))
   ELSE
@@ -233,11 +245,21 @@ DO JJ=1,SIZE(T%XROAD)
   PLW_S_TO_WA(JJ)  = ZLW(1.,T%XEMIS_WALL(JJ),T%XSVF_WALL(JJ),ZT_S(JJ),T%XT_WALL_A(JJ,1))
   PLW_S_TO_WB(JJ)  = ZLW(1.,T%XEMIS_WALL(JJ),T%XSVF_WALL(JJ),ZT_S(JJ),T%XT_WALL_B(JJ,1))
   !
+#ifdef HIRLAM_SP_HACKS
+  IF (SIZE(PTS_G)>0 .AND. PEMIS_G(JJ)/=XUNDEF) THEN
+#else
   IF (SIZE(PTS_G)>0) THEN
+#endif
     PLW_S_TO_G(JJ)  = ZLW(1.,PEMIS_G(JJ),T%XSVF_ROAD(JJ),ZT_S(JJ),PTS_G(JJ))
+  ELSE
+    PLW_S_TO_G(JJ) = 0. 
   ENDIF
-  PLW_S_TO_R(JJ)  = ZLW(1.,T%XEMIS_ROAD(JJ),T%XSVF_ROAD(JJ),ZT_S(JJ),T%XT_ROAD(JJ,1))  
+  PLW_S_TO_R(JJ)  = ZLW(1.,T%XEMIS_ROAD(JJ),T%XSVF_ROAD(JJ),ZT_S(JJ),T%XT_ROAD(JJ,1))
+#ifdef HIRLAM_SP_HACKS
+! It's done (conditionally) above!!!
+#else  
   PLW_S_TO_NR(JJ) = ZLW(1.,T%TSNOW_ROAD%EMIS(JJ),T%XSVF_ROAD(JJ),ZT_S(JJ),PTS_SR(JJ))
+#endif
   !
 ENDDO
 !-------------------------------------------------------------------------------
