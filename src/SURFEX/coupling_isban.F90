@@ -102,6 +102,7 @@ USE MODD_DST_SURF
 USE MODD_SLT_SURF
 USE MODE_DSLT_SURF
 USE MODE_MEB
+USE MODE_SBLS
 !
 USE MODD_AGRI,           ONLY : LAGRIP
 USE MODD_DEEPSOIL,       ONLY : LDEEPSOIL
@@ -676,6 +677,7 @@ REAL, DIMENSION(PK%NSIZE_P) :: ZP_PA      ! pressure at forcing level           
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_ZS      ! atmospheric model orography           (m)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_SFTQ    ! flux of water vapor <w'q'>            (kg.m-2.s-1)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_SFTH    ! flux of temperature <w'T'>            (W/m2)
+REAL, DIMENSION(PK%NSIZE_P) :: ZP_LMO     ! Monin-Obukov length                   (m)
 REAL, DIMENSION(PK%NSIZE_P,KSV) :: ZP_SFTS    ! flux of scalar      <w'sv'>           (mkg/kg/s)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_SFCO2   ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_USTAR   ! friction velocity                     (m/s)
@@ -1162,9 +1164,12 @@ ENDIF !Check on CSLTYN
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
+ZP_LMO(:) = LMO(ZP_USTAR,ZP_TA/ZP_EXNA,ZP_QA,ZP_SFTH/ZP_RHOA/XCPD,ZP_SFTQ/ZP_RHOA)
+!
  CALL DIAG_INLINE_ISBA_n(ID%O, KK, DK, IO%LCANOPY, ZP_TA, ZP_QA, ZP_PA,         &
                          ZP_PS, ZP_RHOA, ZP_U, ZP_V, ZP_ZREF, ZP_UREF, ZP_SFTH, &
-                         ZP_SFTQ, ZP_SFU, ZP_SFV, ZP_DIR_SW, ZP_SCA_SW, ZP_LW )  
+                         ZP_SFTQ, ZP_SFU, ZP_SFV, ZP_DIR_SW, ZP_SCA_SW, ZP_LW,  &
+                         ZP_LMO                                                 )  
 !
 !
 !-------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
        SUBROUTINE CLS_TQ( PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                          PTS, PHU, PZ0H, PH, PTNM, PQNM, PHUNM  )  
+                          PTS, PHU, PZ0H, PH, PTNM, PQNM, PHUNM, PLMO  )  
 !     #####################################################################
 !
 !!****  *PARAMCLS*  
@@ -47,7 +47,7 @@
 !*       0.     DECLARATIONS
 !               ------------
 !
-USE MODD_CSTS,     ONLY : XG, XCPD, XKARMAN
+USE MODD_CSTS,     ONLY : XG, XCPD, XKARMAN, XSURF_EPSILON
 USE MODD_SURF_PAR, ONLY : XUNDEF
 !
 USE MODE_THERMOS
@@ -79,13 +79,19 @@ REAL, DIMENSION(:), INTENT(OUT)      :: PTNM   ! temperature at n meters
 REAL, DIMENSION(:), INTENT(OUT)      :: PQNM   ! specific humidity at n meters
 REAL, DIMENSION(:), INTENT(OUT)      :: PHUNM  ! relative humidity at n meters
 !
+REAL, DIMENSION(:), INTENT(IN), OPTIONAL       :: PLMO   ! Monin-Obukov length
+!
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PTA)) :: ZBNH,ZBH,ZRS
-REAL, DIMENSION(SIZE(PTA)) :: ZLOGS,ZCORS,ZIV
+REAL, DIMENSION(SIZE(PTA)) :: ZLOGS,ZCORS,ZIV,ZAUX
 REAL, DIMENSION(SIZE(PTA)) :: ZQSATA, ZHUA
 REAL, DIMENSION(SIZE(PTA)) :: ZQSATNM, ZPNM, ZQS, ZQSATS
  CHARACTER(LEN=2)           :: YHUMIDITY
+
+REAL :: ZEPS2
+REAL,    PARAMETER :: ZACLS_HS = 1.0   ! Tunable parameter a in mix of Geleyn and Kullmann solutions
+
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
@@ -100,6 +106,7 @@ ZBH    (:) = 0.
 ZRS    (:) = 0.
 ZLOGS  (:) = 0.
 ZCORS  (:) = 0.
+ZAUX   (:) = 0.
 ZIV    (:) = 0.
 ZQSATA (:) = 0.
 ZHUA   (:) = 0.
@@ -107,6 +114,7 @@ ZQSATS (:) = 0.
 ZPNM   (:) = 0.
 ZQSATNM(:) = 0.
 ZQS    (:) = 0.
+ZEPS2=SQRT(EPSILON(1.0))  ! protection of LOG(1 + X)
 !
 !*      1.     preparatory calculations
 !              ------------------------
@@ -115,16 +123,25 @@ ZBNH(:)=LOG( PHT(:)/PZ0H(:))
 !
 ZBH(:)=XKARMAN*SQRT( PCD(:) )/PCH(:) 
 !
-ZRS(:)=MIN(PH/PHT(:),1.)
+ZRS(:)=MIN(PH(:)/PHT(:),1.)
 !
 ZLOGS(:)=LOG(1.+ZRS(:)*(EXP(ZBNH(:)) -1.))
 !
 !*      2.     Stability effects
 !              -----------------
 !
-WHERE (PRI(:)>=0.)
-  ZCORS(:)=ZRS(:)*(ZBNH(:)-ZBH(:))
-END WHERE
+IF(PRESENT(PLMO))THEN
+  ! stable case: revised Kullmann 2009 solution
+  WHERE (PRI(:)>=0.)
+    ZAUX(:)=MAX(ZEPS2,PH(:)*ZACLS_HS/(ZACLS_HS*PZ0H(:)+PLMO(:)))
+    ZCORS(:)=(ZBNH(:)-ZBH(:))*LOG(1.+ZAUX(:)*ZRS(:))/LOG(1.+ZAUX(:))
+  END WHERE
+ELSE
+  ! stable case: Geleyn 1988 solution
+  WHERE (PRI(:)>=0.)
+    ZCORS(:)=ZRS(:)*(ZBNH(:)-ZBH(:))
+  END WHERE
+ENDIF
 !
 WHERE (PRI(:)< 0.)
   ZCORS(:)=LOG(1.+ZRS(:)*(EXP(MAX(0.,ZBNH(:)-ZBH(:)))-1.))

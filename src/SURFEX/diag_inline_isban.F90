@@ -3,8 +3,9 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
- SUBROUTINE DIAG_INLINE_ISBA_n (DGO, KK, DK, OCANOPY, PTA, PQA, PPA, PPS, PRHOA, PZONA, PMERA, &
-                                  PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER, PDIR_SW, PSCA_SW, PLW )  
+ SUBROUTINE DIAG_INLINE_ISBA_n (DGO, KK, DK, OCANOPY, PTA, PQA, PPA, PPS, PRHOA, PZONA, PMERA,   &
+                                  PHT, PHW, PSFTH, PSFTQ, PSFZON, PSFMER, PDIR_SW, PSCA_SW, PLW, &
+                                  PLMO                                                           )  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_ISBA_n * - computes diagnostics during ISBA time-step
@@ -74,6 +75,7 @@ REAL, DIMENSION(:), INTENT(IN)       :: PSFZON   ! zonal friction
 REAL, DIMENSION(:), INTENT(IN)       :: PSFMER   ! meridian friction
 REAL, DIMENSION(:), INTENT(IN)       :: PSFTH    ! heat flux (W/m2)
 REAL, DIMENSION(:), INTENT(IN)       :: PSFTQ    ! water flux (kg/m2/s)
+REAL, DIMENSION(:), INTENT(IN)       :: PLMO     ! Monin-Obukov length (m)
 !
 !*      0.2    declarations of local variables
 !
@@ -87,10 +89,16 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_ISBA_N',0,ZHOOK_HANDLE)
 !
 IF (.NOT. OCANOPY) THEN
   !        
-  IF (DGO%N2M==2) THEN
+  IF (DGO%N2M>=2) THEN
     ZH(:)=2.          
-    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DK%XCD, DK%XCH, DK%XRI, &
+    IF (DGO%N2M==3) THEN
+      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DK%XCD, DK%XCH, DK%XRI, &
+                DK%XTS, DK%XHU, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M, &
+                PLMO )  
+    ELSE
+      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DK%XCD, DK%XCH, DK%XRI, &
                 DK%XTS, DK%XHU, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M )  
+    ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, DK%XCD, DK%XCDN, DK%XRI, ZH, &
                  DK%XZON10M, DK%XMER10M  )  

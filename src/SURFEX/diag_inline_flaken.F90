@@ -9,7 +9,8 @@
                                        PCD, PCDN, PCH, PRI, PHU,                  &
                                        PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER, &
                                        PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB, &
-                                       PLE, PLEI, PSUBL, PLWUP, PALB, PSWE        )  
+                                       PLE, PLEI, PSUBL, PLWUP, PALB, PSWE,       &
+                                       PLMO                                       )  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_FLAKE_n * - computes diagnostics during FLAKE time-step
@@ -105,6 +106,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PLWUP     ! upward longwave radiation (W/m2)
 !
 REAL, DIMENSION(:), INTENT(IN) :: PALB      ! Flake total albedo
 REAL, DIMENSION(:), INTENT(IN) :: PSWE      ! Flake snow water equivalent (kg.m-2)
+REAL, DIMENSION(:), INTENT(IN)       :: PLMO     ! Monin-Obukov length (m)
 !
 !*      0.2    declarations of local variables
 !
@@ -118,10 +120,16 @@ D%XTS(:) = F%XTS(:)
 !
 IF (.NOT. F%LSBL) THEN
 !
-  IF (DGO%N2M==2) THEN
+  IF (DGO%N2M>=2) THEN
     ZH(:)=2.          
-    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                  F%XTS, PHU, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
+    IF (DGO%N2M==3) THEN
+      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
+                F%XTS, PHU, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M, &
+                PLMO )
+    ELSE
+      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
+                F%XTS, PHU, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
+    ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  
   END IF

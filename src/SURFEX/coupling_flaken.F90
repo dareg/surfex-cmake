@@ -67,6 +67,7 @@ USE MODD_DST_SURF
 !
 USE MODE_DSLT_SURF
 USE MODE_THERMOS
+USE MODE_SBLS
 ! 
 USE MODI_WATER_FLUX
 USE MODI_ADD_FORECAST_TO_DATE_SURF
@@ -203,6 +204,7 @@ REAL, DIMENSION(KI)  :: ZLEI   ! sublimation heat flux (W/m2)
 REAL, DIMENSION(KI)  :: ZSUBL  ! sublimation (kg/m2/s)
 REAL, DIMENSION(KI)  :: ZLWUP  ! upward longwave flux at t
 REAL, DIMENSION(KI)  :: ZTRAD  ! Radiative temperature at time t
+REAL, DIMENSION(KI)  :: ZLMO   ! Monin-Obukov length (m)
 REAL, DIMENSION(KI)  :: ZWORK  ! Work array
 !
 REAL                 :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
@@ -486,13 +488,15 @@ IF (F%CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake cod
 !
 ENDIF
 !
+ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
+!
  CALL DIAG_INLINE_FLAKE_n(DGO, D, DC, F, &
                           PTSTEP, PTA,  ZQA, PPA, PPS, PRHOA, PU,    &
                           PV, PZREF, PUREF, PRAIN, PSNOW,            &
                           ZCD, ZCDN, ZCH, ZRI, ZHU,                  &
                           ZZ0H, ZQSAT, PSFTH, PSFTQ, PSFU, PSFV,     &
                           PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB, &
-                          ZLE, ZLEI, ZSUBL, ZLWUP, ZALB, ZSWE        )  
+                          ZLE, ZLEI, ZSUBL, ZLWUP, ZALB, ZSWE, ZLMO  )  
 !
 !-------------------------------------------------------------------------------------
 !

@@ -68,6 +68,7 @@ USE MODI_UPDATE_RAD_WATER
 USE MODI_INTERPOL_TS_WATER_MTH
 !
 USE MODE_DSLT_SURF
+USE MODE_SBLS
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 !
@@ -180,6 +181,7 @@ REAL, DIMENSION(KI)  :: ZTRAD      ! Radiative temperature at time t
 REAL, DIMENSION(KI)  :: ZSFTH_ICE  ! Sea ice flux of heat
 REAL, DIMENSION(KI)  :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
 REAL, DIMENSION(KI)  :: ZWORK      ! Work array
+REAL, DIMENSION(KI)  :: ZLMO       ! Monin-Obukov length (m)
 !
 REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t
 REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
@@ -222,6 +224,7 @@ ZQSAT      (:) = XUNDEF
 ZEMIS      (:) = XUNDEF
 ZTRAD      (:) = XUNDEF
 ZWORK      (:) = XUNDEF
+ZLMO       (:) = XUNDEF
 ZDIR_ALB   (:,:) = XUNDEF
 ZSCA_ALB   (:,:) = XUNDEF
 !
@@ -257,7 +260,7 @@ CALL ADD_FORECAST_TO_DATE_SURF(W%TTIME%TDATE%YEAR,W%TTIME%TDATE%MONTH,W%TTIME%TD
 !
 CALL WATER_FLUX(W%XZ0, PTA, ZEXNA, PRHOA, W%XTS, ZEXNS, ZQA, PRAIN,  &
                 PSNOW, XTT, ZWIND, PZREF, PUREF, PPS, GHANDLE_SIC,   &
-                ZQSAT, PSFTH, PSFTQ, ZUSTAR, ZCD, ZCDN, ZCH, ZRI,    &
+                ZQSAT, PSFTH, PSFTQ, ZUSTAR, ZCD, ZCDN, ZCH, ZRI,  &
                 ZRESA_WATER, ZZ0H                                  )  
 !
 !-------------------------------------------------------------------------------------
@@ -405,12 +408,14 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 ! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
+ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
+!
  CALL DIAG_INLINE_WATFLUX_n(DGO, D, DC, W, &
                             PTSTEP,PTA, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
                             PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, ZZ0H, ZQSAT,     &
                             PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,  &
                             ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD, PRAIN, PSNOW,   &
-                            ZSFTH_ICE, ZSFTQ_ICE                            )
+                            ZSFTH_ICE, ZSFTQ_ICE, ZLMO                        )
 !
 !-------------------------------------------------------------------------------
 ! IMPOSED MONTHLY TS AT TIME t+1

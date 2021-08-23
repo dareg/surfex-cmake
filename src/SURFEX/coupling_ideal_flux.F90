@@ -350,12 +350,14 @@ ZLWUP(:)=(1.-PEMIS(:))*PLW(:)+PEMIS(:)*XSTEFAN*PTSURF(:)**4
 
  CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0, PZ0H, ZCD, ZCDN)
 
+ ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
+
  CALL DIAG_INLINE_IDEAL_n(DGO, D, DC, PTSTEP, PTA, PTSURF,             &
                           ZQA, PPA, PPS, PRHOA, PU,  PV, PZREF, PUREF,     &
                           PRAIN, PSNOW, ZCD, ZCDN, ZCH, ZRI, ZHU, PZ0,     &
                           PZ0H, PQSURF, PSFTH, PSFTQ, PSFU, PSFV,          &
                           PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,       &
-                          ZLE, ZLEI, ZSUBL, ZLWUP                          )
+                          ZLE, ZLEI, ZSUBL, ZLWUP, ZLMO                    )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !

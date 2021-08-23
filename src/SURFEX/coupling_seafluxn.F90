@@ -87,6 +87,8 @@ USE MODI_INTERPOL_SST_MTH
 USE MODI_UPDATE_RAD_SEA
 !
 USE MODE_DSLT_SURF
+USE MODE_SBLS
+
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
 ! 
@@ -227,6 +229,9 @@ REAL, DIMENSION(KI) :: ZHU        ! Near surface relative humidity
 REAL, DIMENSION(KI) :: ZQA        ! specific humidity (kg/kg)
 REAL, DIMENSION(KI) :: ZEMIS      ! Emissivity at time t
 REAL, DIMENSION(KI) :: ZTRAD      ! Radiative temperature at time t
+!
+REAL, DIMENSION(KI) :: ZLMO       ! Monin-Obukov length (m)
+REAL, DIMENSION(KI) :: ZLMO_ICE   ! Monin-Obukov length (m)
 !
 REAL, DIMENSION(KI) :: ZSST       ! XSST corrected for anomalously low values (which actually are sea-ice temp)
 REAL, DIMENSION(KI) :: ZMASK      ! A mask for diagnosing where seaice exists (or, for coupling_iceflux, may appear)
@@ -525,6 +530,9 @@ IF (CHS%SVS%NSLTEQ>0) THEN
   !
 ENDIF
 !
+ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,ZSFTH/PRHOA/XCPD,ZSFTQ/PRHOA)
+ZLMO_ICE(:) = LMO(ZUSTAR_ICE,PTA/ZEXNA,ZQA,ZSFTH_ICE/PRHOA/XCPD,ZSFTQ_ICE/PRHOA)
+!
 !-------------------------------------------------------------------------------
 ! Inline diagnostics at time t for SST and TRAD
 !-------------------------------------------------------------------------------
@@ -534,10 +542,10 @@ CALL DIAG_INLINE_SEAFLUX_n(DGS%O, DGS%D, DGS%DC, DGS%DI, DGS%DIC, DGS%DMI, &
                            PV, PZREF, PUREF, ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU,&
                            ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,          &
                            PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB,      &
-                           ZEMIS, ZTRAD, PRAIN, PSNOW,                     &
+                           ZEMIS, ZTRAD, PRAIN, PSNOW, ZLMO,               &
                            ZCD_ICE, ZCDN_ICE, ZCH_ICE, ZCE_ICE, ZRI_ICE,   &
                            ZZ0_ICE, ZZ0H_ICE, ZQSAT_ICE, ZSFTH_ICE,        &
-                           ZSFTQ_ICE, ZSFU_ICE, ZSFV_ICE)
+                           ZSFTQ_ICE, ZSFU_ICE, ZSFV_ICE, ZLMO_ICE         )
 !
 !-------------------------------------------------------------------------------
 ! A kind of "average_flux"
