@@ -1117,8 +1117,8 @@ IF(OMEB)THEN
 
 ! Diagnose surface layer coef (should be very close/identical to ZCOEF(:,1) computed above)
 
-   ZCOEF(:,1)           = 1.0 - PSWNETSNOWS(:)/MAX(1.E-4,PSWNETSNOW(:))
-
+   ZCOEF(:,1)           = (PSWNETSNOW(:)-PSWNETSNOWS(:))/MAX(1.E-4,PSW_RAD(:))
+   
 ELSE
 
 ! Consider 3 bands:
