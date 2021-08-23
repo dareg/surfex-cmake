@@ -327,6 +327,7 @@ REAL, DIMENSION(SIZE(PEK%XWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS
 !
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZVEG
 !
+REAL, DIMENSION(SIZE(PEK%XWR),SIZE(PABC)) :: ZIACAN
 REAL, DIMENSION(SIZE(PEK%XWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
 !                                      ! absorbed PAR of each level within the
 !                                      ! canopy - Split into shaded and SUNLIT
@@ -495,7 +496,7 @@ ELSE
     CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH, PALBVIS_TVEG,   &
                              PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, PSW_RAD,  &
                              PEK%XLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
-                             PEK%XMUS, PEK%XLAI_EFFC, GSHADE, PIACAN, ZIACAN_SUNLIT,&
+                             PEK%XMUS, PEK%XLAI_EFFC, GSHADE, ZIACAN, ZIACAN_SUNLIT,&
                              ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,     &
                              DMK%XFAPAR_BS, DMK%XFAPIR_BS  )
    ENDIF
@@ -531,8 +532,9 @@ ELSE
       ZQSAT(:)=QSAT(PEK%XTG(:,1),PPS(:))  
       CALL COTWORES(PTSTEP, IO, GSHADE, PK, PEK, PK%XDMAX, PPOI, PCSP, PEK%XTG(:,1), &
                     ZF2, PSW_RAD, PQA, ZQSAT, PEK%XPSNV, ZDELTA, PRHOA, PZENITH,     &
-                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN, PABC,   &
+                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, ZIACAN, PABC,   &
                     DMK%XRS, DEK%XGPP, PRESP_BIOMASS_INST(:,1))
+      PIACAN(:,:) = ZIACAN(:,:)
    ELSE
       PRESP_BIOMASS_INST(:,1) = 0.0
       DEK%XGPP(:) = 0.0
