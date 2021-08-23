@@ -80,7 +80,7 @@ IF (YSC%U%NDIM_WATER  >0) CALL WRITE_DIAG_INLAND_WATER_n(YSC%DTCO, YSC%DUO, YSC%
                                                          YSC%WM, YSC%FM, HPROGRAM,HWRITE)
 IF (YSC%U%NDIM_NATURE >0) CALL WRITE_DIAG_NATURE_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%IM, &
                                                    YSC%NDST, HPROGRAM,HWRITE)
-IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DUO%CSELECT, YSC%U, YSC%TM, &
+IF (YSC%U%NDIM_TOWN   >0) CALL WRITE_DIAG_TOWN_n(YSC%DTCO, YSC%DUO, YSC%U, YSC%TM, &
                                                  YSC%GDM, YSC%GRM, HPROGRAM,HWRITE)
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 

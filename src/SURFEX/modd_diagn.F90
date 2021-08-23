@@ -66,6 +66,7 @@ TYPE DIAG_OPTIONS_t
                                  ! and allows puting field in diagnostics 
   LOGICAL    :: LSNOWDIMNC       ! if true create a snow layer dimension in nc files
   LOGICAL    :: LRESETCUMUL      ! reset cumulated variables at 0 at each output timestep 
+  LOGICAL    :: LRESETMINMAX     ! reset cumulated variables at 0 at each output timestep 
   LOGICAL    :: LSELECT          ! switch to control which fields are written
                                  ! (only those whose naem appears in in text array)  
 !
@@ -195,6 +196,7 @@ DGO%LREAD_BUDGETC=.FALSE.
 DGO%LPROVAR_TO_DIAG=.FALSE.
 DGO%LSNOWDIMNC=.FALSE.
 DGO%LRESETCUMUL=.FALSE.
+DGO%LRESETMINMAX=.TRUE.
 DGO%LSELECT=.FALSE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_N:DIAG_OPTIONS_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_OPTIONS_INIT

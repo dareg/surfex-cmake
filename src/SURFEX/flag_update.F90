@@ -4,7 +4,8 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE FLAG_UPDATE (DIO, DUO, &
-                              ONOWRITE_CANOPY,OPGD,OPROVAR_TO_DIAG,OSELECT)
+                              ONOWRITE_CANOPY,OPGD,OPROVAR_TO_DIAG,OSELECT, &
+                              ORESETMINMAX)
 !     ############################################################
 !
 !!****  *FLAG_UPDATE* - routine to modify selection of output fields
@@ -62,6 +63,7 @@ LOGICAL, INTENT(IN) :: ONOWRITE_CANOPY ! flag to (des)activate writing of canopy
 LOGICAL, INTENT(IN) :: OPGD            ! flag to (des)activate writing of pgd field
 LOGICAL, INTENT(IN) :: OPROVAR_TO_DIAG ! flag to (des)activate writing of diag of prognostic field
 LOGICAL, INTENT(IN) :: OSELECT         ! flag to (des)activate control which fields are written
+LOGICAL, INTENT(IN), OPTIONAL :: ORESETMINMAX ! flag to control reset of min/max fields
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !*       0.2   Declarations of local variables
@@ -73,6 +75,9 @@ LNOWRITE_CANOPY = ONOWRITE_CANOPY
 DIO%LPGD            = OPGD
 DUO%LPROVAR_TO_DIAG = OPROVAR_TO_DIAG
 DUO%LSELECT         = OSELECT
+IF(PRESENT(ORESETMINMAX))THEN
+ DUO%LRESETMINMAX = ORESETMINMAX
+ENDIF
 IF (LHOOK) CALL DR_HOOK('FLAG_UPDATE',1,ZHOOK_HANDLE)
 !-------------------------------------------------------------------------------
 !
