@@ -6,7 +6,7 @@
 @PROCESS NOOPTIMIZE
 #endif
 !     #########################
-      SUBROUTINE INI_DATA_COVER (DTCO, U)
+      SUBROUTINE INI_DATA_COVER (HPROGRAM, DTCO, U)
 !     #########################
 !
 !!**** *INI_DATA_COVER* initializes cover-field correspondance arrays
@@ -116,9 +116,8 @@ USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE, NVEGTYPE_OLD, NVEGTYPE_ECOSG,   &
                                   NUT_CPMR, NUT_CPLR, NUT_OPHR, NUT_OPMR, &
                                   NUT_OPLR, NUT_LWLR, NUT_LALR, NUT_SPAR, &
                                   NUT_INDU, NVT_C3W, NVT_C3S, NVT_FLTR, NVT_FLGR, &
-!ek_beg
-                                  NNSEA, NNWATER
-!ek_end 
+                                  NNSEA, NNWATER, N_SOME_SEA_LAKE, NN_SOME_SEA_LAKE, &
+                                  XRM_WM
 !
 USE MODD_WRITE_COVER_TEX,ONLY : CNAME, CLANG
 !
@@ -179,6 +178,7 @@ USE MODI_ARRANGE_COVER
 USE MODI_COVER301_573
 USE MODI_ECOCLIMAP2_LAI
 USE MODI_INI_DATA_PARAM
+USE MODI_READ_NAM_PGD_COVER
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -188,6 +188,7 @@ IMPLICIT NONE
 !*    0.1    Declaration of arguments
 !            ------------------------
 !
+CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
 TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
@@ -197,6 +198,8 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 !
 INTEGER         :: JCOV, JVEG, JDEC       ! loop counters on covers and decades
 INTEGER         :: ICPT_SEA, ICPT_WATER
+INTEGER         :: ICPT_S_SEA_LAKE
+!
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -245,6 +248,7 @@ IF (ALLOCATED(XDATA_TOWN)) THEN
     DEALLOCATE(XDATA_ROUGH_ROOF,XDATA_ROUGH_WALL,XDATA_RESIDENTIAL,XDATA_FRAC_GR)
     DEALLOCATE(XDATA_EMIS_PANEL,XDATA_ALB_PANEL,XDATA_EFF_PANEL,XDATA_FRAC_PANEL)
     DEALLOCATE(NSEA,NWATER,CNAMES,CNAME)
+    DEALLOCATE(N_SOME_SEA_LAKE)
   ENDIF
 ENDIF
 !
@@ -1277,35 +1281,56 @@ ENDIF
 !
 !-------------------------------------------------------------------------------
 !
-ICPT_SEA = 0
-ICPT_WATER = 0
-!ek_beg
+
+CALL READ_NAM_PGD_COVER(HPROGRAM)
+
+IF(XRM_WM.GT.0.) THEN
+   ! Prohibit covers with mixed sea/land, if limitation
+   ! for land/water fractions exist.
+   ! Nedded for correct snow DA
+   DO JCOV = 1, JPCOVER
+      IF (XDATA_SEA(JCOV).GT.0.) THEN
+         XDATA_SEA(JCOV)=1.
+         XDATA_WATER(JCOV)=0.
+         XDATA_NATURE(JCOV)=0.
+         XDATA_TOWN(JCOV)=0.
+      ENDIF
+   END DO
+END IF
+
 NNSEA = 0
 NNWATER = 0
+NN_SOME_SEA_LAKE = 0
 DO JCOV = 1, JPCOVER
    IF (XDATA_SEA(JCOV)==1.) THEN
       NNSEA = NNSEA + 1
    ENDIF
    IF (XDATA_WATER(JCOV)==1.) THEN
       NNWATER = NNWATER + 1
-   ENDIF   
+   ENDIF
+   IF ((XDATA_SEA(JCOV).GT.0.).OR.(XDATA_WATER(JCOV).GT.0)) THEN
+      NN_SOME_SEA_LAKE = NN_SOME_SEA_LAKE + 1
+   END IF
 END DO
-!ek_end
+
 !
 IF (U%LECOSG) THEN
   ALLOCATE(NSEA(1))
   ALLOCATE(NWATER(2))
+  ALLOCATE(N_SOME_SEA_LAKE(3))
 ELSE
-!ek_beg
-!  ALLOCATE(NSEA(3))
-!  ALLOCATE(NWATER(2))
   ALLOCATE(NSEA(NNSEA))
   ALLOCATE(NWATER(NNWATER))
-!ek_end        
+  ALLOCATE(N_SOME_SEA_LAKE(NN_SOME_SEA_LAKE))
 ENDIF
 !
 NSEA(:) = 0
 NWATER(:) = 0
+N_SOME_SEA_LAKE(:) = 0
+!
+ICPT_SEA = 0
+ICPT_WATER = 0
+ICPT_S_SEA_LAKE = 0
 !
 DO JCOV = 1, JPCOVER
   !
@@ -1330,6 +1355,14 @@ DO JCOV = 1, JPCOVER
     ENDIF
     NWATER(ICPT_WATER) = JCOV
   ENDIF
+  !
+  IF ((XDATA_SEA(JCOV).GT.0.).OR.(XDATA_WATER(JCOV).GT.0.)) THEN
+    ICPT_S_SEA_LAKE = ICPT_S_SEA_LAKE + 1
+    IF(ICPT_S_SEA_LAKE>SIZE(N_SOME_SEA_LAKE))THEN
+      CALL ABOR1_SFX('INI_DATA_COVER: problem with ecoclimap param : ICPT_S_SEA_LAKE > SIZE(N_SOME_SEA_LAKE) ')
+    ENDIF
+    N_SOME_SEA_LAKE(ICPT_S_SEA_LAKE) = JCOV
+  END IF
   !
   IF (XDATA_TOWN(JCOV)==0.) CYCLE
   !

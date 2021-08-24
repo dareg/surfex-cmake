@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_INLAND_WATER (DTCO, FG, F, UG, U, USS, WG, W, HPROGRAM,ORM_RIVER)
+      SUBROUTINE PGD_INLAND_WATER (DTCO, FG, F, UG, U, USS, WG, W, HPROGRAM)
 !     #############################################################
 !
 !!****  *PGD_INLAND_WATER* - routine to choose initialization of lake scheme
@@ -52,6 +52,9 @@ USE MODD_WATFLUX_n, ONLY : WATFLUX_t
 !
 USE MODI_PGD_WATFLUX
 USE MODI_PGD_FLAKE
+
+USE MODD_DATA_COVER_PAR, ONLY : LRM_RIVER
+
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -74,7 +77,6 @@ TYPE(GRID_t), INTENT(INOUT) :: WG
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
 !
 CHARACTER(LEN=6),    INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
-LOGICAL,             INTENT(IN)  :: ORM_RIVER ! delete river coverage (default = false)
 !
 !*       0.2   Declarations of local variables
 !              -------------------------------
@@ -97,7 +99,7 @@ ELSE IF (U%CWATER=='FLUX  ') THEN
 ELSE IF (U%CWATER=='WATFLX') THEN
   CALL PGD_WATFLUX(DTCO, U, WG, W, HPROGRAM)
 ELSE IF (U%CWATER=='FLAKE ') THEN
-  CALL PGD_FLAKE(DTCO, FG, F, UG, U, USS, HPROGRAM,ORM_RIVER)
+  CALL PGD_FLAKE(DTCO, FG, F, UG, U, USS, HPROGRAM,LRM_RIVER)
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('PGD_INLAND_WATER',1,ZHOOK_HANDLE)

@@ -94,8 +94,6 @@ LOGICAL,              INTENT(IN)  :: OZS      ! .true. if orography is imposed b
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
-LOGICAL :: LRM_RIVER   !delete inland river coverage. Default is false
-!
 INTEGER :: ISIZE_FULL, JI, IDIM_FULL
 INTEGER :: ILUOUT ! logical unit of output listing file
 !
@@ -103,8 +101,6 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('PGD_SURF_ATM',0,ZHOOK_HANDLE)
-!
-LRM_RIVER = .FALSE.
 !
 CPROGNAME=HPROGRAM
 !
@@ -168,8 +164,8 @@ ENDIF
 !
  CALL INIT_READ_DATA_COVER(HPROGRAM)
 !
- CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
-IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM,LRM_RIVER)
+ CALL INI_DATA_COVER(HPROGRAM, YSC%DTCO, YSC%U)
+IF (YSC%U%LECOCLIMAP) CALL PGD_COVER(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, HPROGRAM)
 !
 IF (NRANK==NPIO) THEN
   CALL WRITE_COVER_TEX_START(HPROGRAM)
@@ -202,7 +198,7 @@ IF (YSC%U%NDIM_TOWN>0) CALL PGD_TOWN(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, &
 !             ------------------------------------------
 !
 IF (YSC%U%NDIM_WATER>0) CALL PGD_INLAND_WATER(YSC%DTCO, YSC%FM%G, YSC%FM%F, YSC%UG, YSC%U, &
-                                              YSC%USS, YSC%WM%G, YSC%WM%W, HPROGRAM,LRM_RIVER)   
+                                              YSC%USS, YSC%WM%G, YSC%WM%W, HPROGRAM)   
 !_______________________________________________________________________________
 !
 !*    8.      Additionnal fields for sea scheme

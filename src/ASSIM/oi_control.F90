@@ -213,7 +213,7 @@ XRSCALDW = REAL(NECHGU)/6.0_JPRB
 !  half assimilation window in sec
 NITRAD   = NECHGU*1800
 
-CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
+CALL INI_DATA_COVER(YPROGRAM, YSC%DTCO, YSC%U)
 
 
 !   Read grid dimension for allocation

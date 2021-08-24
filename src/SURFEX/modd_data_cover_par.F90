@@ -120,10 +120,13 @@ INTEGER                                :: NPERMSNOW
 !
 INTEGER, DIMENSION(:), ALLOCATABLE     :: NSEA
 INTEGER, DIMENSION(:), ALLOCATABLE     :: NWATER
-!ek_beg
 INTEGER :: NNSEA, NNWATER ! Actual number of pure sea or inland water covers
-!ek_end
+!---------------------------------------------------------------------------------
 !
+! Covers containing some water
+!
+INTEGER, DIMENSION(:), ALLOCATABLE     :: N_SOME_SEA_LAKE
+INTEGER :: NN_SOME_SEA_LAKE ! Actual number of covers containing some sea or inland water
 !---------------------------------------------------------------------------------
 !
 ! maximum number of tiles used at any grid point
@@ -150,6 +153,32 @@ INTEGER                                :: NDATA_FLOOR_LAYER
 REAL                                :: XCDREF = 20.
 !
 !---------------------------------------------------------------------------------
+
+!
+! parameters defined optionally
+!
+CHARACTER(LEN=28)        :: YCOVER      ! file name for cover types
+CHARACTER(LEN=6)         :: YCOVERFILETYPE   ! data file type
+REAL, DIMENSION(:), ALLOCATABLE :: XUNIF_COVER ! value of each cover (cover will be
+!                                                   uniform on the horizontal)
+REAL                     :: XRM_COVER   ! limit of coverage under which the
+                                        ! cover is removed. Default is 1.E-6
+REAL                     :: XRM_COAST   ! limit of coast coverage under which
+                                        ! the coast is replaced by sea or
+                                        ! inland water. Default is 1.
+REAL                     :: XRM_LAKE    ! limit of inland lake coverage under which
+                                        ! the water is removed. Default is 0.0
+LOGICAL                  :: LRM_RIVER   ! delete inland river coverage. Default is false
+REAL                     :: XRM_SEA     ! limit of sea coverage under which
+                                        ! the sea is removed. Default is 0.0
+REAL                     :: XRM_WM      ! limit of total water / total land coverage to remove
+                                        ! (needed for DA of snow). Default is 0.0
+LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
+                                        ! (Earth Model over Antarctic)
+REAL                     :: XLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
+LOGICAL                  :: LUNIF_COVER ! if the uniform cover is provided
+LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
+
 END MODULE MODD_DATA_COVER_PAR
 
 

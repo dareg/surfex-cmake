@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE PGD_COVER ( DTCO, UG, U, USS, HPROGRAM, ORM_RIVER)
+      SUBROUTINE PGD_COVER ( DTCO, UG, U, USS, HPROGRAM)
 !     ##############################################################
 !
 !!**** *PGD_COVER* monitor for averaging and interpolations of cover fractions
@@ -53,7 +53,14 @@ USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PGD_GRID,       ONLY : CGRID, NL, XGRID_PAR
 USE MODD_PGDWORK,        ONLY : XALL, NSIZE_ALL, NSIZE, XSUMVAL, XPREC
-USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NROCK, NSEA, NWATER, NPERMSNOW, LVEG_PRES
+USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, &
+                                NROCK, NSEA, NWATER, N_SOME_SEA_LAKE, &
+                                NPERMSNOW, LVEG_PRES, &
+                                YCOVER, YCOVERFILETYPE, XUNIF_COVER,     &
+                                XRM_COVER, XRM_COAST, XRM_LAKE,          &
+                                XRM_SEA, XRM_WM,                         &
+                                LORCA_GRID, XLAT_ANT,                    &
+                                LUNIF_COVER, LIMP_COVER, LRM_RIVER
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_SEA, XDATA_NATURE, XDATA_WATER
 !
 USE MODI_GET_LUOUT
@@ -70,7 +77,6 @@ USE MODI_READ_LCOVER
 USE MODI_SUM_ON_ALL_PROCS
 !
 USE MODI_MAKE_LCOVER
-USE MODI_READ_NAM_PGD_COVER
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_END_IO_SURF_n
@@ -108,36 +114,30 @@ TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(SSO_t), INTENT(INOUT) :: USS
 !
 CHARACTER(LEN=6),    INTENT(IN)    :: HPROGRAM     ! Type of program
-LOGICAL,             INTENT(OUT)   :: ORM_RIVER    ! delete river coverage (default = false)
 !
 !
 !*    0.2    Declaration of local variables
 !            ------------------------------
 !
  CHARACTER(LEN=10)       :: YFIELD
- CHARACTER(LEN=28)       :: YCOVER      ! file name for cover types
- CHARACTER(LEN=6)        :: YFILETYPE   ! data file type
-!
-REAL                     :: XRM_COVER   ! limit of coverage under which the
-                                        ! cover is removed. Default is 1.E-6
-REAL                     :: XRM_COAST   ! limit of coast coverage under which
-                                        ! the coast is replaced by sea. Default is 1.
-REAL                     :: XRM_LAKE    ! limit of inland lake coverage under which
-                                        ! the water is removed. Default is 0.0                     
-REAL                     :: XRM_SEA     ! limit of sea coverage under which
-                                        ! the sea is removed. Default is 0.0
-REAL                     :: XLAT_ANT    ! Lattitude limit from Orca grid (Antartic)
 !
 REAL, DIMENSION(:), ALLOCATABLE :: ZDEF
 REAL, DIMENSION(:), ALLOCATABLE :: ZLAT
-REAL, DIMENSION(:), ALLOCATABLE :: XUNIF_COVER ! value of each cover (cover will be
-!                                                uniform on the horizontal)
+
 REAL, DIMENSION(:), ALLOCATABLE :: ZSEA   !to check compatibility between 
 REAL, DIMENSION(:), ALLOCATABLE :: ZWATER !prescribed fractions and ECOCLIMAP
 REAL, DIMENSION(:), ALLOCATABLE :: ZNATURE
 REAL, DIMENSION(:), ALLOCATABLE :: ZTOWN
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCOVER_NATURE, ZCOVER_TOWN, ZCOVER_SEA, ZCOVER_WATER, &
                                      ZCOVER, ZCOVER2
+!
+REAL :: ZFR_LARGE, ZFR_SMALL ! Large and small fractions
+REAL :: Z_SEA_LAKE,        & ! Sea/lake fraction related to cover
+        Z_SEA_LAKE_TOT,    & ! Total sea/lake fraction
+        ZMAX,              & ! Maximum cover fraction
+        ZDIFF                ! Difference between fractions
+
+REAL, PARAMETER :: ZEPS= 1.E-7  ! Accuarcy in calculating fractions
 !
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GCOVER, GCOVER2
 !
@@ -149,21 +149,23 @@ INTEGER               :: JL, JI    ! loop counter on horizontal points
 INTEGER               :: ICOVER, ICOVERSUM, ICOVER_OLD, ICPT  ! 0 if cover is not present, >1 if present somewhere
 INTEGER               :: IPERMSNOW, IECO2 
 INTEGER               :: IC_NAT, IC_TWN, IC_WAT, IC_SEA
-INTEGER :: ICPT1, ICPT2, ICPT_TOT
+!
+INTEGER :: JM,                 & ! Loop counter for the mask
+           J_SEA_LAKE, J_LAND, & ! Loop counters for sea/lake and land covers     
+           JMAX,               & ! Number of maximum cover fraction
+           I_SEA_LAKE, I_LAND    ! Numbers of sea/lake and land covers in the cover list
 !
 INTEGER :: IMAXCOVER ! index of maximum cover for the given point
 INTEGER, DIMENSION(:), POINTER :: IMASK_COVER=>NULL()
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_SEA, IMASK_WATER
+INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK_SEA_LAKE, IMASK_LAND ! Masks for sea/lake and land covers
 !
 LOGICAL, DIMENSION(:,:), ALLOCATABLE :: GCOVER_ALL
 LOGICAL, DIMENSION(:), ALLOCATABLE :: GCORINE
-LOGICAL                  :: LORCA_GRID  ! flag to compatibility between Surfex and Orca grid 
-                                        ! (Earth Model over Antarctic)
-LOGICAL                  :: LIMP_COVER  ! Imposed values for Cover from another PGD file
 !
 LOGICAL                  :: GPRESENT
 !
-LOGICAL                  :: LRM_RIVER   ! delete inland river coverage. Default is false
+LOGICAL :: L_SEA_LAKE ! If this cover belongs to sea/lake
 !
 REAL, PARAMETER          :: ZLAT_ANT_WATER = -60. ! Lattitude limit to delete lake over antarctica
 !
@@ -179,10 +181,9 @@ IF (LHOOK) CALL DR_HOOK('PGD_COVER',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ALLOCATE(U%LCOVER   (JPCOVER))
-ALLOCATE(XUNIF_COVER(JPCOVER))
 !
 U%LCOVER    = .FALSE.
-XUNIF_COVER = XUNDEF
+!
 !
 IECO2 = 0
 !
@@ -191,9 +192,6 @@ IECO2 = 0
 !*    2.      Input file for cover types
 !             --------------------------
 !
- CALL READ_NAM_PGD_COVER(HPROGRAM, YCOVER, YFILETYPE, XUNIF_COVER,  &
-                         XRM_COVER, XRM_COAST, XRM_LAKE, LRM_RIVER, &
-                         XRM_SEA, LORCA_GRID, XLAT_ANT, LIMP_COVER )  
 !
 !-------------------------------------------------------------------------------
 !
@@ -201,7 +199,7 @@ IECO2 = 0
 !             ---------------------------
 !-------------------------------------------------------------------------------
 !
-IF (ANY(XUNIF_COVER/=0.)) THEN
+IF (LUNIF_COVER) THEN
 !
 !*    3.1     Verification of the total input cover fractions
 !             -----------------------------------------------
@@ -248,7 +246,7 @@ ELSEIF (LEN_TRIM(YCOVER)==0) THEN
 !-------------------------------------------------------------------------------
 ELSEIF(LIMP_COVER)THEN !LIMP_COVER (impose cover from input file at the same resolution)
 !
-  IF(YFILETYPE=='NETCDF')THEN
+  IF(YCOVERFILETYPE=='NETCDF')THEN
     CALL ABOR1_SFX('Use another format than netcdf for cover input file with LIMP_COVER')
   ELSE
 #ifdef SFX_ASC
@@ -261,15 +259,15 @@ ELSEIF(LIMP_COVER)THEN !LIMP_COVER (impose cover from input file at the same res
     CFILEIN_LFI = ADJUSTL(YCOVER)
 #endif
 CALL INIT_IO_SURF_n(DTCO, U, &
-                        YFILETYPE,'FULL  ','SURF  ','READ ')
+                        YCOVERFILETYPE,'FULL  ','SURF  ','READ ')
   ENDIF
 !
   ALLOCATE(U%LCOVER(JPCOVER))
-  CALL READ_LCOVER(YFILETYPE,U%LCOVER)
+  CALL READ_LCOVER(YCOVERFILETYPE,U%LCOVER)
 !
-  CALL READ_SURF_COV(YFILETYPE,'COVER',U%XCOVER(:,:),U%LCOVER,IRESP)
+  CALL READ_SURF_COV(YCOVERFILETYPE,'COVER',U%XCOVER(:,:),U%LCOVER,IRESP)
 !
-  CALL END_IO_SURF_n(YFILETYPE)
+  CALL END_IO_SURF_n(YCOVERFILETYPE)
 !
 ELSE 
 !-------------------------------------------------------------------------------
@@ -283,7 +281,7 @@ ELSE
   NSIZE_ALL(:,:) = 0
   XALL   (:,:,:) = 0.
   CALL TREAT_FIELD(UG, U, USS, &
-                   HPROGRAM,'SURF  ',YFILETYPE,'A_COVR',YCOVER, 'COVER               ' ) 
+                   HPROGRAM,'SURF  ',YCOVERFILETYPE,'A_COVR',YCOVER, 'COVER               ' ) 
 !
   DEALLOCATE(XSUMVAL  )
 !
@@ -324,7 +322,46 @@ ELSE
     DO JCOV=1,ICOVER
       IF (IMASK_COVER(JCOV)==NWATER(JL)) IMASK_WATER(JL) = JCOV
     ENDDO
-  ENDDO
+ ENDDO
+!
+! Make masks for sea/lake and land
+!  
+  J_SEA_LAKE = 0
+
+  DO JCOV=1,ICOVER
+     DO JL=1,SIZE(N_SOME_SEA_LAKE)
+        IF(IMASK_COVER(JCOV)==N_SOME_SEA_LAKE(JL)) THEN
+           J_SEA_LAKE=J_SEA_LAKE+1
+           EXIT
+        END IF
+     END DO 
+  END DO
+
+  I_SEA_LAKE=J_SEA_LAKE
+  I_LAND=ICOVER-I_SEA_LAKE
+
+  IF(I_SEA_LAKE.NE.0) THEN
+     ALLOCATE(IMASK_SEA_LAKE(I_SEA_LAKE))
+     ALLOCATE(IMASK_LAND(I_LAND))
+
+     J_SEA_LAKE = 0
+     J_LAND = 0
+     DO JCOV=1,ICOVER
+        L_SEA_LAKE=.FALSE.
+        DO JL=1,SIZE(N_SOME_SEA_LAKE)
+           IF(IMASK_COVER(JCOV)==N_SOME_SEA_LAKE(JL)) THEN
+               J_SEA_LAKE = J_SEA_LAKE + 1
+               IMASK_SEA_LAKE(J_SEA_LAKE) = JCOV
+               L_SEA_LAKE=.TRUE.
+               EXIT
+           END IF
+        END DO
+        IF(.NOT.L_SEA_LAKE) THEN
+           J_LAND = J_LAND + 1
+           IMASK_LAND(J_LAND) = JCOV
+        END IF
+     END DO
+  END IF  
   !
   IPERMSNOW=0
   DO JCOV=1,ICOVER
@@ -348,7 +385,6 @@ ELSE
  CALL GET_RMCOV_OMP(ICOVER,U%XCOVER)
   !
   ! * removes River if the user want
-  ORM_RIVER=LRM_RIVER
   IF(LRM_RIVER.AND.IMASK_WATER(2)/=0)THEN
     DO JL=1,SIZE(U%XCOVER,1)
        IMAXCOVER = MAXLOC(U%XCOVER(JL,:),1)
@@ -408,7 +444,66 @@ ELSE
       ENDIF
     ENDDO     
     !    
-  ENDIF
+ ENDIF
+! * removes small fractions of the land-water
+! Needed for the correct DA of snow.
+   IF(I_SEA_LAKE.NE.0) THEN
+      ZFR_SMALL=XRM_WM
+      ZFR_LARGE=1.-XRM_WM
+      IF (XRM_WM.GT.0.) THEN
+         DO JL=1,SIZE(U%XCOVER,1)
+            Z_SEA_LAKE_TOT=0.
+            ZMAX=0.
+            JMAX=0
+            DO JM=1,I_SEA_LAKE
+               Z_SEA_LAKE=U%XCOVER(JL,IMASK_SEA_LAKE(JM))
+               Z_SEA_LAKE_TOT=Z_SEA_LAKE_TOT+Z_SEA_LAKE           
+               IF(Z_SEA_LAKE.GT.ZMAX) THEN
+                  ZMAX=Z_SEA_LAKE
+                  JMAX=JM
+               END IF
+            END DO
+            IF(ABS(Z_SEA_LAKE_TOT-1.).LE.ZEPS) THEN
+               CYCLE
+            END IF
+            IF(ABS(Z_SEA_LAKE_TOT).LE.ZEPS) THEN
+               CYCLE
+            END IF
+            IF(Z_SEA_LAKE_TOT.GE.ZFR_SMALL.AND. &
+               Z_SEA_LAKE_TOT.LE.ZFR_LARGE) THEN
+               CYCLE
+            END IF
+            IF(Z_SEA_LAKE_TOT.GT.ZFR_LARGE) THEN
+               ZDIFF=1.-Z_SEA_LAKE_TOT
+               U%XCOVER(JL,IMASK_SEA_LAKE(JMAX))= &
+               U%XCOVER(JL,IMASK_SEA_LAKE(JMAX))+ZDIFF
+               DO JM=1,I_LAND
+                  U%XCOVER(JL,IMASK_LAND(JM))=0.
+               END DO
+               CYCLE
+            END IF
+            IF(Z_SEA_LAKE_TOT.LT.ZFR_SMALL) THEN
+               ZDIFF=Z_SEA_LAKE_TOT
+               DO JM=1,I_SEA_LAKE
+                  U%XCOVER(JL,IMASK_SEA_LAKE(JM))=0.
+               END DO
+               ZMAX=0.
+               JMAX=0
+               DO JM=1,I_LAND
+                  IF(U%XCOVER(JL,IMASK_LAND(JM)).GT.ZMAX) THEN
+                     ZMAX=U%XCOVER(JL,IMASK_LAND(JM))
+                     JMAX=JM
+                  END IF
+               END DO
+               U%XCOVER(JL,IMASK_LAND(JMAX))=U%XCOVER(JL,IMASK_LAND(JMAX))+ZDIFF
+               CYCLE
+            END IF
+         END DO
+      END IF
+
+      DEALLOCATE(IMASK_SEA_LAKE)
+      DEALLOCATE(IMASK_LAND)
+   END IF 
 !
 !
 ! * Compatibility between Surfex and Orca grid 
@@ -520,7 +615,9 @@ ELSE
 !-------------------------------------------------------------------------------
 END IF
 !
-DEALLOCATE(XUNIF_COVER)
+IF(LUNIF_COVER) THEN
+   DEALLOCATE(XUNIF_COVER)
+END IF
 !-------------------------------------------------------------------------------
 !
 !
