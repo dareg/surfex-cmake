@@ -174,6 +174,9 @@ LOGICAL :: LCANOPY_DRAG         ! T: drag activated in SBL scheme within the can
 LOGICAL :: LVEGUPD              ! True = update vegetation parameters every decade
 LOGICAL :: LPERTSURF            ! True  = apply random perturbations for ensemble prediction
                                 ! False = no random perturbation (default)
+
+REAL :: XPERT_LOW(6)            ! Lower limit for surface perturbations 
+REAL :: XPERT_HIGH(6)           ! Upper limit for surface perturbations
 !
 !
 ! * SGH model options
@@ -311,6 +314,8 @@ IO%LGLACIER=.FALSE.
 IO%LCANOPY_DRAG=.FALSE.
 IO%LVEGUPD=.FALSE.
 IO%LPERTSURF=.FALSE.
+IO%XPERT_LOW=-HUGE(1.0)
+IO%XPERT_HIGH=HUGE(1.0)
 IO%NLAYER_HORT=0
 IO%NLAYER_DUN=0
 IO%CRUNOFF=' '
