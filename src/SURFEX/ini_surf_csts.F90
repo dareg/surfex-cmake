@@ -53,7 +53,7 @@ USE MODD_MEB_PAR,   ONLY : XTAU_LW,                            &
                            XRAGNC_FACTOR, XKDELTA_WR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XAGLAMIN, XAGLAMAX, XHGLA,          &
-                           XWSNV, XZ0SN, XZ0HSN,               &
+                           XWSNV, XWCRN, XZ0SN, XZ0HSN,        &
                            XTAU_SMELT,D95_ZTN_LIMIT,           &
                            XALBICE1, XALBICE2, XALBICE3,       &
                            XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW,    &
@@ -88,8 +88,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XALBWAT, XALBCOEF_TA96, XALBSCA_WAT, XEMISWAT, &
-                        XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XCFFV,  &
-                        XZ0SN, XZ0HSN, XTAU_SMELT, XALBSEAICE,         &
+                        XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XWCRN,  &
+                        XCFFV, XZ0SN, XZ0HSN, XTAU_SMELT, XALBSEAICE,  &
                         XZ0FLOOD, XALBWATSNOW,                         &
                         LMEBREC,                                       &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
@@ -156,6 +156,10 @@ XHGLA    = 33.3 !(m)
 ! Coefficient for calculation of snow fraction over vegetation
 !
 XWSNV = 5.0 !(-)
+!
+! Critical value of the equivalent water content
+! of the snow reservoir for snow fractional coverage and albedo computations
+XWCRN = 10.0   !  ! (kg m-2) Veg (default value)
 !
 ! Water direct albedo coefficient (option "TA96")
 !

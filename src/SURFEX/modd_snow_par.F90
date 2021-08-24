@@ -94,6 +94,11 @@ REAL, SAVE       :: XHGLA
 !
 REAL, SAVE       :: XWSNV
 !
+! Critical value of the equivalent water content
+! of the snow reservoir for snow fractional coverage and albedo computations
+!
+REAL, SAVE       :: XWCRN  
+!
 ! Roughness length of pure snow surface (m)
 !
 REAL, SAVE       :: XZ0SN  
@@ -119,7 +124,7 @@ LOGICAL, SAVE    :: D95_ZTN_LIMIT
 ! Critical value of the equivalent water content
 ! of the snow reservoir for snow fractional coverage and albedo computations
 !
-REAL, PARAMETER       :: XWCRN      = 10.0   ! (kg m-2) Veg (default value)
+!!!REAL, PARAMETER       :: XWCRN      = 10.0   ! (kg m-2) Veg (default value)
 REAL, PARAMETER       :: XWCRN_EXPL =  1.0   ! (kg m-2) Veg explicit
 REAL, PARAMETER       :: XWCRN_ROOF =  1.0   ! (kg m-2)  Roofs 
 REAL, PARAMETER       :: XWCRN_ROAD =  1.0   ! (kg m-2)  Roads
