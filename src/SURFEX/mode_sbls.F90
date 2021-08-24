@@ -544,10 +544,18 @@ FUNCTION LMO_1D(PUSTAR,PTHETA,PRV,PSFTH,PSFRV)
   ZTHETAV(:) = PTHETA(:) * ( 1. +ZEPS * PRV(:))
 !
   LMO_1D(:) = XUNDEF
-  WHERE ( PSFTH(:)/ZTHETAV(:)+ZEPS*PSFRV(:)/=0. )                  &
+! METIE SP HACKS
+#ifdef HIRLAM_SP_HACKS
+  WHERE ( PSFTH(:)/ZTHETAV(:)+ZEPS*PSFRV(:)/=0. .AND. PUSTAR(:)/=XUNDEF )   &
       LMO_1D(:) = - MAX(PUSTAR(:),1.E-6)**3                          &
                 / ( XKARMAN * XG   &
-                    * (  PSFTH(:) / ZTHETAV(:) + ZEPS * PSFRV(:) )  )  
+                    * (  PSFTH(:) / ZTHETAV(:) + ZEPS * PSFRV(:) )  ) 
+#else
+  WHERE ( PSFTH(:)/ZTHETAV(:)+ZEPS*PSFRV(:)/=0. )   &
+      LMO_1D(:) = - MAX(PUSTAR(:),1.E-6)**3                          &
+                / ( XKARMAN * XG   &
+                    * (  PSFTH(:) / ZTHETAV(:) + ZEPS * PSFRV(:) )  )
+#endif
 
   WHERE(ABS(LMO_1D)>10000.) LMO_1D=XUNDEF
 IF (LHOOK) CALL DR_HOOK('MODE_SBLS:LMO_1D',1,ZHOOK_HANDLE)
