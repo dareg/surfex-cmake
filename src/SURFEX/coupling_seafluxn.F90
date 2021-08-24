@@ -409,6 +409,7 @@ IF(LCPL_SEAICE.OR.S%LHANDLE_SIC)THEN
              S%LHANDLE_SIC, ZMASK, ZQSAT_ICE, ZZ0_ICE,   &
              ZUSTAR_ICE, ZCD_ICE, ZCDN_ICE, ZCH_ICE,   &
              ZRI_ICE, ZRESA_SEA_ICE, ZZ0H_ICE          )
+  ZCE_ICE(:) = ZCH_ICE(:) ! We don't have any better estimate from the ICEFLUX call
 ENDIF
 !
 IF (S%LHANDLE_SIC) CALL COMPLEMENT_EACH_OTHER_FLUX
