@@ -300,6 +300,10 @@ IF(PEK%TSNOW%SCHEME == 'D95' .OR. (PEK%TSNOW%SCHEME == 'EBA' .AND. IO%LGLACIER) 
       ZLAMS(:) = XCONDI * (PEK%TSNOW%RHO(:,1)/XRHOLW)**1.885              ! first calculate the
 !                                                                   ! conductivity of snow
       PCS(:)   = 2.0 * SQRT( XPI/(ZLAMS(:)*PEK%TSNOW%RHO(:,1)*XCI*XDAY) )
+
+! Limit the snow heat capacity:
+      PCS(:) = MIN( PCS(:), IO%XCSMAX )
+
    END WHERE
 !
 !-------------------------------------------------------------------------------

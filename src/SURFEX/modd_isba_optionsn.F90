@@ -162,6 +162,7 @@ LOGICAL :: LCANOPY ! T: SBL scheme within the canopy
 REAL :: XOUT_TSTEP              ! ISBA output writing time step
 REAL :: XTSTEP                  ! ISBA time step
 REAL :: XCGMAX                  ! maximum soil heat capacity
+REAL :: XCSMAX                  ! maximum snow heat capacity
 REAL :: XCDRAG                  ! drag coefficient in canopy
 !
 LOGICAL :: LGLACIER             ! True = Over permanent snow and ice, 
@@ -304,6 +305,7 @@ IO%CCPSURF=' '
 IO%XOUT_TSTEP=0.
 IO%XTSTEP=0.
 IO%XCGMAX=0.
+IO%XCSMAX=0.
 IO%XCDRAG=0.
 IO%LGLACIER=.FALSE.
 IO%LCANOPY_DRAG=.FALSE.

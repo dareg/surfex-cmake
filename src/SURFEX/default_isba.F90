@@ -11,7 +11,7 @@
                               OVEGUPD, OSPINUPCARBS, OSPINUPCARBW,       &
                               PSPINMAXS, PSPINMAXW, PCO2_START, PCO2_END,&
                               KNBYEARSPINS, KNBYEARSPINW,                &
-                              ONITRO_DILU                                )
+                              ONITRO_DILU, PCSMAX                        )
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA
@@ -94,6 +94,8 @@ CHARACTER(LEN=3), INTENT(OUT) :: HCPSURF   ! SPECIFIC HEAT
 !                                          ! 'HUM' = Cp fct of qs
 REAL,              INTENT(OUT) :: PCGMAX   ! maximum soil heat capacity
 !
+REAL,              INTENT(OUT) :: PCSMAX   ! maximum snow heat capacity
+!
 REAL,              INTENT(OUT) :: PCDRAG   ! drag coefficient in canopy
 !
 CHARACTER(LEN=4),  INTENT(OUT) :: HRUNOFF  ! surface runoff formulation
@@ -166,6 +168,8 @@ HRAIN      = 'DEF'
 HHORT      = 'DEF'
 !
 PCGMAX   = 2.0E-5
+!
+PCSMAX   = 2.0E-4
 !
 PCDRAG   = 0.15
 !

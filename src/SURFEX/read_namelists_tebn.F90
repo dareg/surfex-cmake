@@ -15,7 +15,7 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODN_TEB_n                          
 USE MODN_TEB_VEG_n,            ONLY: CRUNOFF,CSCOND,                       &
                                      CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,       &
-                                     CCPSURF, XCGMAX, CKSAT,                       &
+                                     CCPSURF, XCGMAX, XCSMAX, CKSAT,               &
                                      CRAIN, CHORT, LGLACIER,                       &
                                      LCANOPY_DRAG, LVEGUPD, LNITRO_DILU
 USE MODN_TEB_GREENROOF_n,      ONLY: CRUNOFF_GR,CSCOND_GR,CKSAT_GR,CHORT_GR
@@ -58,7 +58,8 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_TEB_N',0,ZHOOK_HANDLE)
                       CC1DRY, CSOILFRZ, CDIFSFCOND, CSNOWRES,   &
                       CCPSURF, XCGMAX, CKSAT,                   &
                       CRAIN, CHORT, LGLACIER,                   &
-                      LCANOPY_DRAG, LVEGUPD, LNITRO_DILU        )
+                      LCANOPY_DRAG, LVEGUPD, LNITRO_DILU,       &
+                      XCSMAX                                    )
 !
  CALL DEFAULT_GREENROOF(CRUNOFF_GR,CSCOND_GR, CKSAT_GR,CHORT_GR)
 !

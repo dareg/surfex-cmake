@@ -60,7 +60,8 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ISBA_N',0,ZHOOK_HANDLE)
                      CRAIN, CHORT, LGLACIER, LCANOPY_DRAG,       &
                      LVEGUPD, LSPINUPCARBS, LSPINUPCARBW,        &
                      XSPINMAXS, XSPINMAXW, XCO2_START, XCO2_END, &
-                     NNBYEARSPINS, NNBYEARSPINW, LNITRO_DILU     )
+                     NNBYEARSPINS, NNBYEARSPINW, LNITRO_DILU,    &
+                     XCSMAX                                      )
 !
  CALL DEFAULT_CH_DEP(CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(LCH_BIO_FLUX) 

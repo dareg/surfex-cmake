@@ -8,7 +8,7 @@
                                  HCPSURF, PCGMAX, HKSAT,                 &
                                  HRAIN, HHORT,                           &
                                  OGLACIER, OCANOPY_DRAG, OVEGUPD,        &
-                                 ONITRO_DILU                             )
+                                 ONITRO_DILU, PCSMAX                     )
 !     ########################################################################
 !
 !!****  *DEFAULT_TEB_VEG* - routine to set default values for the configuration for TEB scheme
@@ -71,6 +71,7 @@ LOGICAL, INTENT(OUT)           :: OCANOPY_DRAG ! T: drag activated in SBL scheme
 LOGICAL, INTENT(OUT)           :: OVEGUPD      ! T: update vegetation parameters every decade
 !                                              ! F: keep vegetation parameters constant in time
 REAL,    INTENT(OUT)           :: PCGMAX     ! maximum soil heat capacity
+REAL,    INTENT(OUT)           :: PCSMAX     ! maximum snow heat capacity
 LOGICAL, INTENT(OUT)           :: ONITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -96,6 +97,8 @@ HRAIN      = 'DEF'
 HHORT      = 'DEF'
 !
 PCGMAX     = 2.0E-5
+!
+PCSMAX   = 2.0E-4
 !
 OCANOPY_DRAG = .FALSE.
 !
