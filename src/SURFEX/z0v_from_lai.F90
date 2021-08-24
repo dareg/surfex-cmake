@@ -96,14 +96,13 @@ END MODULE MODI_Z0V_FROM_LAI
 !!      P. Aumond   10/10/2009     Because drag force applied in atmospheric 
 !!                                 model, Z0tree -> z0grass
 !!      R. Alkama    05/2012   : Extantion from 12 to 19 vegtypes 
-!!      P. Samuelsson, SMHI  02/2018: Added XZ0_LIMIT
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TREEDRAG,       ONLY : XZ0_LIMIT
+USE MODD_TREEDRAG,       ONLY : XZ0_MIN_LIMIT, XZ0_MAX_LIMIT
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -147,7 +146,7 @@ ZAVG_H = MAX(ZAVG_H,0.00001)
 ZAVG_H = ZZREF / 0.13 * EXP (-1./SQRT(ZAVG_H))
 !
 PZ0  = MAX(0.001, 0.13*ZAVG_H)
-PZ0  = MIN(XZ0_LIMIT, PZ0)
+PZ0  = MAX(XZ0_MIN_LIMIT, MIN(XZ0_MAX_LIMIT, PZ0))
 IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_0D',1,ZHOOK_HANDLE)
 !
 !-----------------------------------------------------------------
@@ -196,7 +195,7 @@ END FUNCTION Z0V_FROM_LAI_0D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TREEDRAG,       ONLY : XZ0_LIMIT
+USE MODD_TREEDRAG,       ONLY : XZ0_MIN_LIMIT, XZ0_MAX_LIMIT
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -240,7 +239,7 @@ ZAVG_H = MAX(ZAVG_H,0.00001)
 ZAVG_H(:) = ZZREF / 0.13 * EXP (-1./SQRT(ZAVG_H(:)))
 !
 PZ0 (:) = MAX(0.001, 0.13*ZAVG_H(:))
-PZ0 (:) = MIN(XZ0_LIMIT, PZ0(:))
+PZ0 (:) = MAX(XZ0_MIN_LIMIT, MIN(XZ0_MAX_LIMIT, PZ0(:)))
 IF (LHOOK) CALL DR_HOOK('MODI_Z0V_FROM_LAI:Z0V_FROM_LAI_1D',1,ZHOOK_HANDLE)
 !-----------------------------------------------------------------
 !
@@ -288,7 +287,7 @@ END FUNCTION Z0V_FROM_LAI_1D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TREEDRAG,       ONLY : XZ0_LIMIT
+USE MODD_TREEDRAG,       ONLY : XZ0_MIN_LIMIT, XZ0_MAX_LIMIT
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -331,7 +330,7 @@ ZAVG_H(:,:) = MAX(ZAVG_H(:,:),0.00001)
 ZAVG_H(:,:) = ZZREF / 0.13 * EXP (-1./SQRT(ZAVG_H(:,:)))
 !
 PZ0 (:,:) = MAX(0.001, 0.13*ZAVG_H(:,:))
-PZ0 (:,:) = MIN(XZ0_LIMIT, PZ0(:,:))
+PZ0 (:,:) = MAX(XZ0_MIN_LIMIT, MIN(XZ0_MAX_LIMIT, PZ0(:,:)))
 !
 WHERE (PLAI(:,:) == XUNDEF)
   PZ0(:,:) = XUNDEF
@@ -385,7 +384,7 @@ END FUNCTION Z0V_FROM_LAI_2D
 !               ------------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TREEDRAG,       ONLY : XZ0_LIMIT
+USE MODD_TREEDRAG,       ONLY : XZ0_MIN_LIMIT, XZ0_MAX_LIMIT
 USE MODI_VEG_HEIGHT_FROM_LAI
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -416,7 +415,7 @@ PZ0(:) = XUNDEF
 !
 WHERE(ZH_VEG(:)/=XUNDEF) 
   PZ0 (:) = MAX(0.001, 0.13*ZH_VEG(:)) ! rugosite pour chaque vegtype
-  PZ0 (:) = MIN(XZ0_LIMIT, PZ0(:))
+  PZ0 (:) = MAX(XZ0_MIN_LIMIT, MIN(XZ0_MAX_LIMIT, PZ0(:)))
 END WHERE
 !-----------------------------------------------------------------
 !
