@@ -28,6 +28,11 @@ TYPE, PUBLIC :: SICE_SNOW_t
     LIQ_WATER,  & !< Snow layes liquid water content
     T,          & !< Snow layers temperature
     DZ            !< Snow layers thickness
+  REAL, POINTER, DIMENSION( : ) :: &
+    DZ_TOT        !< Total snow thickness
+
+  TYPE( MODEL_FIELD ), ALLOCATABLE :: MF(:)
+
   CONTAINS
     PROCEDURE, PASS :: INIT
     PROCEDURE, PASS :: PREP
@@ -93,6 +98,7 @@ IMPLICIT NONE
 
   THIS%T         = XUNDEF
   THIS%DZ        = 0.0
+  THIS%DZ_TOT    = 0.0
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:PREP', 1, ZHOOK_HANDLE)
 END SUBROUTINE PREP
@@ -169,6 +175,8 @@ IMPLICIT NONE
 
   CALL THIS%POST_RUN(FORC, PTSTEP, ZSNOWH, ZSNOWSWE_1D)
   CALL THIS%SAFETY_GUARD()
+
+  THIS%DZ_TOT(:) = SUM(THIS%DZ(:, :), DIM=2)
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:RUN', 1, ZHOOK_HANDLE)
 END SUBROUTINE RUN
@@ -386,6 +394,8 @@ IMPLICIT NONE
   WHERE(ZP_SNOWALB(:) < 0.75)
     ZP_SNOWALB(:) = 0.75
   ENDWHERE
+  ! Clear the current state
+  CALL PRUNE(THIS%MF)
 
   ! Unpack snow variables
   THIS%ALBEDO   (KMASK(:)   ) = ZP_SNOWALB  (:)
@@ -440,7 +450,7 @@ IMPLICIT NONE
   ZSNOWABLAT_DELTA(:) = 0.0
   !ZTHRUFAL        (:) = PTHRUFAL(:)
   !
-  !PEVAP(:) = 0.
+  PEVAP(:) = 0.
   WHERE(LREMOVE_SNOW(:))
     !PLES3L(:)           = MIN(PLES3L(:), XLSTT*(PSNOWSWE_1D(:)/PTSTEP + FORC%PRATE_S(:)))
     !PLEL3L(:)           = 0.0
@@ -537,6 +547,7 @@ IMPLICIT NONE
   IF(ASSOCIATED(THIS%THRUFAL))   DEALLOCATE(THIS%THRUFAL)
   IF(ASSOCIATED(THIS%GRND_FLUX)) DEALLOCATE(THIS%GRND_FLUX)
   IF(ASSOCIATED(THIS%EVAP_COR))  DEALLOCATE(THIS%EVAP_COR)
+  IF(ASSOCIATED(THIS%DZ_TOT))    DEALLOCATE(THIS%DZ_TOT)
 
   IF(ASSOCIATED(THIS%HEAT))      DEALLOCATE(THIS%HEAT)
   IF(ASSOCIATED(THIS%RHO))       DEALLOCATE(THIS%RHO)
@@ -545,6 +556,8 @@ IMPLICIT NONE
   IF(ASSOCIATED(THIS%LIQ_WATER)) DEALLOCATE(THIS%LIQ_WATER)
   IF(ASSOCIATED(THIS%T))         DEALLOCATE(THIS%T)
   IF(ASSOCIATED(THIS%DZ))        DEALLOCATE(THIS%DZ)
+
+  IF(ALLOCATED(THIS%MF))         DEALLOCATE(THIS%MF)
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:DEALLOC', 1, ZHOOK_HANDLE)
 END SUBROUTINE DEALLOC
@@ -593,7 +606,8 @@ IMPLICIT NONE
     THIS%ALBEDO   (THIS%NUM_POINTS), &
     THIS%THRUFAL  (THIS%NUM_POINTS), &
     THIS%GRND_FLUX(THIS%NUM_POINTS), &
-    THIS%EVAP_COR (THIS%NUM_POINTS))
+    THIS%EVAP_COR (THIS%NUM_POINTS), &
+    THIS%DZ_TOT   (THIS%NUM_POINTS))
 
   ALLOCATE( &
     THIS%HEAT     (THIS%NUM_POINTS, THIS%NUM_LAYERS), &
@@ -602,7 +616,9 @@ IMPLICIT NONE
     THIS%AGE      (THIS%NUM_POINTS, THIS%NUM_LAYERS), &
     THIS%LIQ_WATER(THIS%NUM_POINTS, THIS%NUM_LAYERS), &
     THIS%T        (THIS%NUM_POINTS, THIS%NUM_LAYERS), &
-    THIS%Dz       (THIS%NUM_POINTS, THIS%NUM_LAYERS)  )
+    THIS%DZ       (THIS%NUM_POINTS, THIS%NUM_LAYERS)  )
+
+  CALL THIS%GET_MODEL_FIELDS(THIS%MF)
 
   IF (LHOOK) CALL DR_HOOK('SEAICE_SICE_SNOW:ALLOCA', 1, ZHOOK_HANDLE)
 END SUBROUTINE ALLOCA
@@ -613,7 +629,7 @@ IMPLICIT NONE
   CLASS(SICE_SNOW_t), INTENT(IN) :: THIS
   TYPE( MODEL_FIELD ), ALLOCATABLE, INTENT( OUT ) :: MF(:)
 
-  INTEGER, PARAMETER :: NUM_FIELDS = 11
+  INTEGER, PARAMETER :: NUM_FIELDS = 12
 
   REAL( KIND = JPRB ) :: ZHOOK_HANDLE
   IF( LHOOK ) CALL DR_HOOK( 'SEAICE_SICE_SNOW:GET_MODEL_FIELDS', 0, ZHOOK_HANDLE )
@@ -681,6 +697,15 @@ IMPLICIT NONE
       [THIS%NUM_POINTS, THIS%NUM_LAYERS],    &
       .TRUE.,                                &
       P2 = THIS%LIQ_WATER,                   &
+      XDEFAULT = 0.                          &
+    ),                                       &
+    MODEL_FIELD(                             &
+      'DSN_T_ICE',                           &
+      'Total snow thickness',                &
+      'm',                                   &
+      [THIS%NUM_POINTS, 0],                  &
+      .TRUE.,                                &
+      P1 = THIS%DZ_TOT,                      &
       XDEFAULT = 0.                          &
     ),                                       &
     MODEL_FIELD( NCONFIG=[0,0], P1 = THIS%THRUFAL,   LINTERNAL = .TRUE., XDEFAULT = 0. ), &
