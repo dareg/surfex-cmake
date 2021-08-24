@@ -146,9 +146,8 @@ ENDIF
 ! Handle Sea-ice
 ZSIC = PSIC_IN
 ! Consistency check
-WHERE(S%XSST(:) > 273.15 .AND. ABS(ZSIC(:)) > 0)
-  WHERE( ZSIC(:) < 0.001 ) ZSIC(:) = 0.0
-  WHERE( S%XSST(:) > 277.0 ) ZSIC(:) = 0.0
+WHERE(ABS(ZSIC(:)) > 0)
+  WHERE( ZSIC(:) < 0.05 ) ZSIC(:) = 0.0
 ENDWHERE
 CALL S%ICE%ASSIM(HPROGRAM, ZSIC, PLON_IN, PLAT_IN)
 
