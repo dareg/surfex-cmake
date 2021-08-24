@@ -24,7 +24,7 @@
 !!      Original    09/2007 
 !-------------------------------------------------------------------------------
 !
-USE MODD_SURF_ATM, ONLY: XCISMIN, XVMODMIN, LALDTHRES
+USE MODD_SURF_ATM, ONLY: XCISMIN, XVMODMIN, LALDTHRES, XVMODFAC
 !
 !*       0.     DECLARATIONS
 !               ------------
@@ -56,7 +56,7 @@ IF (LHOOK) CALL DR_HOOK('WIND_THRESHOLD',0,ZHOOK_HANDLE)
 IF (.NOT.LALDTHRES) THEN
 !        
 !  minimum value for exchange coefficients computations : 1m/s / 10m
-   PWIND_NEW = MAX(PWIND , 0.1 * MIN(10.,PUREF) )
+   PWIND_NEW = MAX(PWIND , XVMODFAC * MIN(10.,PUREF) )
 ELSE
 !  minimum value for exchange coefficients computations : 1m/s / 10m
    PWIND_NEW = MAX( XVMODMIN, SQRT( PWIND**2 + (XCISMIN*PUREF)**2 ) )
