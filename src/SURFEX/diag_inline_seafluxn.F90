@@ -155,10 +155,10 @@ IF (.NOT. S%LSBL) THEN
     ZH(:)=2.          
     IF (DGO%N2M==3) THEN
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                S%XSST, PHU, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M, PLMO)
+                S%XSST, PHU, PQSAT, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M, PLMO)
     ELSE
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                S%XSST, PHU, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M)
+                S%XSST, PHU, PQSAT, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M)
     ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,PCD, PCDN, PRI, ZH,  &
@@ -169,7 +169,6 @@ IF (.NOT. S%LSBL) THEN
        JNUM_ICE = COUNT(GICE_MASK)
 
        IF(JNUM_ICE > 0) THEN
-           ZH(:)=2.          
            ZH(:)=2.          
            IF (DGO%N2M==3) THEN
              CALL CLS_TQ(                       &
@@ -183,6 +182,7 @@ IF (.NOT. S%LSBL) THEN
                , PACK(PRI_ICE,  MASK=GICE_MASK) &
                , PACK(S%XTICE,  MASK=GICE_MASK) &
                , PACK(PHU,      MASK=GICE_MASK) &
+               , PACK(PQSAT_ICE,MASK=GICE_MASK) &
                , PACK(PZ0H_ICE, MASK=GICE_MASK) &
                , PACK(ZH,       MASK=GICE_MASK) &
                , ZT2M_ICE (:JNUM_ICE)           &
@@ -201,6 +201,7 @@ IF (.NOT. S%LSBL) THEN
                , PACK(PRI_ICE,  MASK=GICE_MASK) &
                , PACK(S%XTICE,  MASK=GICE_MASK) &
                , PACK(PHU,      MASK=GICE_MASK) &
+               , PACK(PQSAT_ICE,MASK=GICE_MASK) &
                , PACK(PZ0H_ICE, MASK=GICE_MASK) &
                , PACK(ZH,       MASK=GICE_MASK) &
                , ZT2M_ICE (:JNUM_ICE)           &
@@ -345,10 +346,10 @@ IF (DGO%LSURF_VARS) THEN
   !* Humidity at saturation
   !
    IF (S%LHANDLE_SIC) THEN 
-      D%XQS     = (1 - S%XSIC) * PQS + S%XSIC * PQS_ICE
-      DI%XQS = PQS_ICE
+      D%XQS     = (1 - S%XSIC) * PQSAT + S%XSIC * PQSAT_ICE
+      DI%XQS = PQSAT_ICE
    ELSE 
-      D%XQS = PQS
+      D%XQS = PQSAT
    ENDIF
 ENDIF
 !

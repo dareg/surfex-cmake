@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
        SUBROUTINE CLS_TQ( PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                          PTS, PHU, PZ0H, PH, PTNM, PQNM, PHUNM, PLMO  )  
+                          PTS, PHU, PQS, PZ0H, PH, PTNM, PQNM, PHUNM, PLMO  )  
 !     #####################################################################
 !
 !!****  *PARAMCLS*  
@@ -42,6 +42,7 @@
 !!
 !!      Original    26/10/98
 !!      S. Riette   06/2009 CLS_2M becomes CLS_TQ, height now is an argument
+!!      P. Samuelsson 02/220 Base HU2M calcualtions on surface specific humidity input
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -72,6 +73,7 @@ REAL, DIMENSION(:), INTENT(IN)       :: PCH    ! drag coefficient for heat
 REAL, DIMENSION(:), INTENT(IN)       :: PRI    ! Richardson number
 REAL, DIMENSION(:), INTENT(IN)       :: PTS    ! surface temperature
 REAL, DIMENSION(:), INTENT(IN)       :: PHU    ! near-surface humidity (%)
+REAL, DIMENSION(:), INTENT(IN)       :: PQS    ! near-surface specific humidity (kg/kg)
 REAL, DIMENSION(:), INTENT(IN)       :: PZ0H   ! roughness length for heat
 REAL, DIMENSION(:), INTENT(IN)       :: PH     ! height of diagnostic
 !
@@ -86,7 +88,7 @@ REAL, DIMENSION(:), INTENT(IN), OPTIONAL       :: PLMO   ! Monin-Obukov length
 REAL, DIMENSION(SIZE(PTA)) :: ZBNH,ZBH,ZRS
 REAL, DIMENSION(SIZE(PTA)) :: ZLOGS,ZCORS,ZIV,ZAUX
 REAL, DIMENSION(SIZE(PTA)) :: ZQSATA, ZHUA
-REAL, DIMENSION(SIZE(PTA)) :: ZQSATNM, ZPNM, ZQS, ZQSATS
+REAL, DIMENSION(SIZE(PTA)) :: ZQSATNM, ZPNM
  CHARACTER(LEN=2)           :: YHUMIDITY
 
 REAL :: ZEPS2
@@ -110,10 +112,9 @@ ZAUX   (:) = 0.
 ZIV    (:) = 0.
 ZQSATA (:) = 0.
 ZHUA   (:) = 0.
-ZQSATS (:) = 0.
 ZPNM   (:) = 0.
 ZQSATNM(:) = 0.
-ZQS    (:) = 0.
+!
 ZEPS2=SQRT(EPSILON(1.0))  ! protection of LOG(1 + X)
 !
 !*      1.     preparatory calculations
@@ -161,19 +162,18 @@ PTNM(:)=PTS(:)+ZIV(:)*(PTA(:)-PTS(:))
 YHUMIDITY='Q '
 !
 ZPNM(:) = PPS(:) + PH/PHT(:) * (PPA(:)-PPS(:))
-ZQSATNM(:) = QSAT(PTNM(:),ZPNM(:))
+! Refer to QSATW, i.e. saturation humidity over water
+ZQSATNM(:) = QSATW(PTNM(:),ZPNM(:))
 !
 IF (YHUMIDITY=='Q ') THEN
 !        
-  ZQSATS(:) = QSAT(PTS(:),PPS(:))
-  ZQS(:)    = PHU(:)*ZQSATS(:)
-  PQNM(:)   = ZQS(:)+ZIV(:)*(PQA(:)-ZQS(:))
+  PQNM(:)   = PQS(:)+ZIV(:)*(PQA(:)-PQS(:))
   PQNM(:)   = MIN (ZQSATNM(:),PQNM(:)) !must be below saturation
   PHUNM(:)  = PQNM(:) / ZQSATNM(:)
 !
 ELSE IF (YHUMIDITY=='HU') THEN
 !        
-  ZQSATA(:) = QSAT(PTA(:),PPA(:))
+  ZQSATA(:) = QSATW(PTA(:),PPA(:))
   ZHUA(:)   = PQA(:) / ZQSATA(:)
   PHUNM(:)  = PHU(:)+ZIV(:)*(ZHUA(:)-PHU(:))
   PQNM(:)   = PHUNM(:) * ZQSATNM(:)

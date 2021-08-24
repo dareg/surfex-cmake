@@ -403,7 +403,7 @@ END IF
 !-------------------------------------------------------------------------------------
 !
 IF(LCPL_SEAICE.OR.S%LHANDLE_SIC)THEN
-CALL S%ICE%COUPLING_ICEFLUX(KI, PTA, ZEXNA, PRHOA, S%XTICE, ZEXNS, &
+  CALL S%ICE%COUPLING_ICEFLUX(KI, PTA, ZEXNA, PRHOA, S%XTICE, ZEXNS, &
              ZQA, PRAIN, PSNOW, ZWIND, PZREF, PUREF,     &
              PPS, S%XSST, XTTS, ZSFTH_ICE, ZSFTQ_ICE,    &  
              S%LHANDLE_SIC, ZMASK, ZQSAT_ICE, ZZ0_ICE,   &

@@ -109,12 +109,12 @@ D%XTS(:) = PTS(:)
     IF (DGO%N2M==3) THEN
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                 PCD, PCH, PRI,                 &
-                PTS, PHU, PZ0H, ZH,       &
+                PTS, PHU, PQSAT, PZ0H, ZH,       &
                 D%XT2M, D%XQ2M, D%XHU2M, PLMO  )  
     ELSE
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                 PCD, PCH, PRI,                 &
-                PTS, PHU, PZ0H, ZH,            &
+                PTS, PHU, PQSAT, PZ0H, ZH,            &
                 D%XT2M, D%XQ2M, D%XHU2M  )  
     ENDIF
     ZH(:)=10.                

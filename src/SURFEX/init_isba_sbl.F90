@@ -374,7 +374,7 @@ IF (LNOSOF) ZP_SLOPE_COS(:) = 1.0
 !Initialisation of T, Q, Wind and TKE on all canopy levels
 DO JL=1,SB%NLVL
   !
-  CALL CLS_TQ(PTA, ZQA, PPA, PPS, PZREF, ZCD, ZCH, ZRI, ZTS, ZHU, ZZ0H, &
+  CALL CLS_TQ(PTA, ZQA, PPA, PPS, PZREF, ZCD, ZCH, ZRI, ZTS, ZHU, ZQS, ZZ0H, &
               SB%XZ(:,JL), ZTNM, ZQNM, ZHUNM           ) 
   ! 
   SB%XT(:,JL)=ZTNM

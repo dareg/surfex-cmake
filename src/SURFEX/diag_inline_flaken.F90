@@ -124,11 +124,11 @@ IF (.NOT. F%LSBL) THEN
     ZH(:)=2.          
     IF (DGO%N2M==3) THEN
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                F%XTS, PHU, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M, &
+                F%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M, &
                 PLMO )
     ELSE
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                F%XTS, PHU, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
+                F%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
     ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  

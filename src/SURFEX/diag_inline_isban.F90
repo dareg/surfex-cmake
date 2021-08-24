@@ -93,11 +93,11 @@ IF (.NOT. OCANOPY) THEN
     ZH(:)=2.          
     IF (DGO%N2M==3) THEN
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DK%XCD, DK%XCH, DK%XRI, &
-                DK%XTS, DK%XHU, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M, &
+                DK%XTS, DK%XHU, DK%XQS, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M, &
                 PLMO )  
     ELSE
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, DK%XCD, DK%XCH, DK%XRI, &
-                DK%XTS, DK%XHU, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M )  
+                DK%XTS, DK%XHU, DK%XQS, DK%XZ0H, ZH, DK%XT2M, DK%XQ2M, DK%XHU2M )  
     ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, DK%XCD, DK%XCDN, DK%XRI, ZH, &
