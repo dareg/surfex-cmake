@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE GET_SURF_VAR_2ISBA(U,I,DGMI,HPROGRAM, KI, PNATURE, &
+      SUBROUTINE GET_SURF_VAR_2ISBA(U, O, DGMI,HPROGRAM, KI, PNATURE, &
 &                                     PTG2, PSWI1, PSWI2, PWGI1, PWGI2, &
 &                                     PWR, PSNA, PSND, PHV)
 !     #######################################################################
@@ -34,6 +34,8 @@
 !!
 !!    MODIFICATIONS
 !!    -------------
+!       Fuxing Wang   05/2020 Remove IM%I.
+!                        Use diagnostics computed from average_diag_misc_isban.F90
 !!           
 !       
 !-------------------------------------------------------------------------------
@@ -43,6 +45,7 @@
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_ISBA_n ,ONLY : ISBA_PE_t
+USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_TYPE_SNOW
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
@@ -73,8 +76,8 @@ REAL, DIMENSION(KI), INTENT(OUT)  :: PWR         ! Water Intercepted           (
 REAL, DIMENSION(KI), INTENT(OUT)  :: PSNA        ! Snow albedo
 REAL, DIMENSION(KI), INTENT(OUT)  :: PSND        ! Snow layer 1 density        (kg/m2)
 REAL, DIMENSION(KI), INTENT(OUT)  :: PHV         ! Halstead coefficient
-TYPE(SURF_ATM_t), INTENT(INOUT) :: U
-TYPE(ISBA_PE_t),  INTENT(INOUT) :: I
+TYPE(SURF_ATM_t),       INTENT(INOUT) :: U
+TYPE(ISBA_OPTIONS_t),   INTENT(IN)    :: O
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DGMI
 !
 !*       0.2   Declarations of local variables
@@ -121,18 +124,34 @@ INATURE = COUNT(PNATURE (:) > 0.0)
 IMASK(:)=0
 CALL GET_1D_MASK(INATURE, KI, PNATURE, IMASK(1:INATURE))
 
-DO JI = 1, INATURE
-  PTG2(IMASK(JI))  = I%XTG(JI,2)
+IF(O%CISBA=='DIF') THEN ! DIF case
+  DO JI = 1, INATURE
+    PTG2(IMASK(JI))  = DGMI%XFRD2_TG(JI)
   
-  PSWI1(IMASK(JI)) = DGMI%XSWI(JI,1)
-  PSWI2(IMASK(JI)) = DGMI%XSWI(JI,2)
+    PSWI1(IMASK(JI)) = DGMI%XSWI(JI,1)
+    PSWI2(IMASK(JI)) = DGMI%XFRD2_SWI(JI)
   
-  PWGI1(IMASK(JI)) = I%XWGI(JI,1)
-  PWGI2(IMASK(JI)) = I%XWGI(JI,2)
-  PWR(IMASK(JI))   = I%XWR(JI)
-  PSNA(IMASK(JI))  = I%TSNOW%ALB(JI)
-  PSND(IMASK(JI))  = I%TSNOW%RHO(JI,1)
-ENDDO
+    PWGI1(IMASK(JI)) = DGMI%XWGI(JI,1)
+    PWGI2(IMASK(JI)) = DGMI%XFRD2_TWGI(JI)
+    PWR(IMASK(JI))   = DGMI%XWR(JI)
+    PSNA(IMASK(JI))  = DGMI%XSNOWALB(JI)
+    PSND(IMASK(JI))  = DGMI%XSNOWRHO(JI)
+  ENDDO
+
+ELSE ! Force-restore case
+  DO JI = 1, INATURE
+    PTG2(IMASK(JI))  = DGMI%XTG(JI,2)
+
+    PSWI1(IMASK(JI)) = DGMI%XSWI(JI,1)
+    PSWI2(IMASK(JI)) = DGMI%XSWI(JI,2)
+
+    PWGI1(IMASK(JI)) = DGMI%XWGI(JI,1)
+    PWGI2(IMASK(JI)) = DGMI%XWGI(JI,2)
+    PWR(IMASK(JI))   = DGMI%XWR(JI)
+    PSNA(IMASK(JI))  = DGMI%XSNOWALB(JI)
+    PSND(IMASK(JI))  = DGMI%XSNOWRHO(JI)
+  ENDDO
+ENDIF
 !
 !==============================================================================
 IF (LHOOK) CALL DR_HOOK('GET_SURF_VAR_2ISBA',1,ZHOOK_HANDLE)

@@ -64,18 +64,25 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XHV       ! Halstead coefficient
   REAL, POINTER, DIMENSION(:) :: XLAI      ! leaf average index  
 !      
-  REAL, POINTER, DIMENSION(:,:) :: XSWI        ! Soil wetness index
-  REAL, POINTER, DIMENSION(:,:) :: XTSWI       ! Total soil wetness index
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_SWI     ! Soil wetness index
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_TSWI    ! Total Soil wetness index
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_TWG     ! Soil water content (liquid+ice) (kg.m-2)
-  REAL, POINTER, DIMENSION(:)   :: XSOIL_TWGI    ! Soil ice content (kg.m-2)
+  REAL, POINTER, DIMENSION(:,:) :: XTG          ! Soil temperature at each layer (K)
+  REAL, POINTER, DIMENSION(:,:) :: XWGI         ! Soil ice content (m3/m3)
+  REAL, POINTER, DIMENSION(:)   :: XWR          ! Liquid water retained on the foliage of the vegetation canopy (kg/m2)
+  REAL, POINTER, DIMENSION(:,:) :: XSWI         ! Soil wetness index
+  REAL, POINTER, DIMENSION(:,:) :: XTSWI        ! Total soil wetness index
+  REAL, POINTER, DIMENSION(:)   :: XSOIL_SWI    ! Soil wetness index
+  REAL, POINTER, DIMENSION(:)   :: XSOIL_TSWI   ! Total Soil wetness index
+  REAL, POINTER, DIMENSION(:)   :: XSOIL_TWG    ! Soil water content (liquid+ice) (kg.m-2)
+  REAL, POINTER, DIMENSION(:)   :: XSOIL_TWGI   ! Soil ice content (kg.m-2)
   REAL, POINTER, DIMENSION(:)   :: XSOIL_WG     ! Soil water content (liquid+ice) (m3.m-3)
   REAL, POINTER, DIMENSION(:)   :: XSOIL_WGI    ! Soil ice content (m3.m-3)  
 !     
+  REAL, POINTER, DIMENSION(:) :: XFRD2_TG        ! ISBA-FR-DG2 comparable soil temperature (DIF option)
+  REAL, POINTER, DIMENSION(:) :: XFRD2_SWI       ! ISBA-FR-DG2 comparable soil wetness index liquid (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TSWI      ! ISBA-FR-DG2 comparable soil wetness index (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWG       ! ISBA-FR-DG2 comparable soil water content (liquid+ice) (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD2_TWGI      ! ISBA-FR-DG2 comparable soil ice content (DIF option)  
+  REAL, POINTER, DIMENSION(:) :: XFRD3_TG        ! ISBA-FR-Deep comparable soil temperature (DIF option)
+  REAL, POINTER, DIMENSION(:) :: XFRD3_SWI       ! ISBA-FR-Deep comparable soil wetness index liquid (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD3_TSWI      ! ISBA-FR-Deep comparable soil wetness index (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD3_TWG       ! ISBA-FR-Deep comparable soil water content (liquid+ice) (DIF option)
   REAL, POINTER, DIMENSION(:) :: XFRD3_TWGI      ! ISBA-FR-Deep comparable soil ice content (DIF option)
@@ -113,6 +120,9 @@ TYPE DIAG_MISC_ISBA_t
   REAL, POINTER, DIMENSION(:) :: XTWSNOW       ! Total snow reservoir
   REAL, POINTER, DIMENSION(:) :: XTDSNOW       ! Total snow height
   REAL, POINTER, DIMENSION(:) :: XTTSNOW       ! Total snow temperature
+
+  REAL, POINTER, DIMENSION(:) :: XSNOWALB      ! Surface snow albedo
+  REAL, POINTER, DIMENSION(:) :: XSNOWRHO      ! Surface snow density (kg/m3)
 !
   REAL, POINTER, DIMENSION(:) :: XSNDPT_1DY, XSNDPT_3DY, XSNDPT_5DY, XSNDPT_7DY ! fresh snow depth in 1, 3, 5, 7 days
   REAL, POINTER, DIMENSION(:) :: XSNSWE_1DY, XSNSWE_3DY, XSNSWE_5DY, XSNSWE_7DY! fresh snow water equivalent in 1, 3, 5, 7 days
@@ -186,6 +196,9 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HANDLE)
   NULLIFY(DMI%XHV)
   NULLIFY(DMI%XLAI)  
+  NULLIFY(DMI%XTG)
+  NULLIFY(DMI%XWGI)
+  NULLIFY(DMI%XWR)
   NULLIFY(DMI%XSWI)
   NULLIFY(DMI%XTSWI)
   NULLIFY(DMI%XSOIL_SWI)
@@ -194,8 +207,12 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XSOIL_TWGI)
   NULLIFY(DMI%XSOIL_WG)
   NULLIFY(DMI%XSOIL_WGI)
+  NULLIFY(DMI%XFRD2_TG)
+  NULLIFY(DMI%XFRD2_SWI)
   NULLIFY(DMI%XFRD2_TWG)
   NULLIFY(DMI%XFRD2_TWGI)
+  NULLIFY(DMI%XFRD3_TG)
+  NULLIFY(DMI%XFRD3_SWI)
   NULLIFY(DMI%XFRD3_TSWI)
   NULLIFY(DMI%XFRD3_TWG)
   NULLIFY(DMI%XFRD3_TWGI)    
@@ -236,6 +253,8 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XTWSNOW)
   NULLIFY(DMI%XTDSNOW)
   NULLIFY(DMI%XTTSNOW)
+  NULLIFY(DMI%XSNOWALB)
+  NULLIFY(DMI%XSNOWRHO)
   NULLIFY(DMI%XPSNG)
   NULLIFY(DMI%XPSNV)
   NULLIFY(DMI%XPSN)
@@ -258,7 +277,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",0,ZHOOK_HAND
   NULLIFY(DMI%XRS)  
 DMI%LSURF_MISC_BUDGET=.FALSE.
 DMI%LSURF_DIAG_ALBEDO=.FALSE.
-DMI%LSURF_MISC_DIF=.FALSE.
+DMI%LSURF_MISC_DIF=.TRUE.
 IF (LHOOK) CALL DR_HOOK("MODD_DIAG_MISC_ISBA_N:DIAG_MISC_ISBA_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE DIAG_MISC_ISBA_INIT
 

@@ -42,6 +42,8 @@
 !!                           swi, wg and wgi comparable to ISBA-FR-DG2 and DG3 layers
 !!                           active layer thickness over permafrost
 !!                           frozen layer thickness over non-permafrost
+!!      F. Wang     07/2020  New diag XWR, XSNOWALB, XSNOWRHO, XWGI, XTG,
+!!                           XFRD2_SWI, XFRD3_SWI, XFRD2_TG, XFRD3_TG
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -76,7 +78,8 @@ TYPE(ISBA_PE_t), POINTER :: PEK
 INTEGER                         :: JI    ! grid-cell loop counter
 INTEGER                         :: JP    ! tile loop counter
 INTEGER                         :: JL    ! layer loop counter
-REAL, DIMENSION(SIZE(DM%XHV)) :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3
+REAL, DIMENSION(SIZE(DM%XHV))   :: ZSUMDG, ZSNOW, ZSUMFRD2, ZSUMFRD3
+REAL, DIMENSION(SIZE(DM%XHV))   :: ZSUMFRD2_TG, ZSUMFRD3_TG  ! for soil temperature
 REAL                            :: ZWORK
 INTEGER                         :: INI,IDEPTH,IWORK,IMASK
 !
@@ -103,18 +106,21 @@ INI=SIZE(DM%XHV)
 !       1.     Surface Miscellaneous terms
 !              ---------------------------
 !
-DM%XHV  (:)   = 0.
-DM%XPSNG(:)   = 0.
-DM%XPSNV(:)   = 0.
-DM%XPSN (:)   = 0.
-DM%XFSAT(:)   = 0.
-DM%XFFG (:)   = 0.
-DM%XFFV (:)   = 0.
-DM%XFF  (:)   = 0.
-DM%XLAI   (:) = 0.
-DM%XTWSNOW(:) = 0.
-DM%XTDSNOW(:) = 0.  
-DM%XTTSNOW(:) = 0.
+DM%XHV  (:)    = 0.
+DM%XPSNG(:)    = 0.
+DM%XPSNV(:)    = 0.
+DM%XPSN (:)    = 0.
+DM%XFSAT(:)    = 0.
+DM%XFFG (:)    = 0.
+DM%XFFV (:)    = 0.
+DM%XFF  (:)    = 0.
+DM%XLAI (:)    = 0.
+DM%XWR  (:)    = 0.
+DM%XSNOWALB(:) = 0.
+DM%XSNOWRHO(:) = 0.
+DM%XTWSNOW (:) = 0.
+DM%XTDSNOW (:) = 0.
+DM%XTTSNOW (:) = 0.
 IF (DM%LPROSNOW .AND. NPE%AL(1)%TSNOW%SCHEME=="CRO") THEN
   DM%XSNDPT_1DY(:) = 0.
   DM%XSNDPT_3DY(:) = 0.
@@ -157,10 +163,19 @@ DO JP=1,IO%NPATCH
     !
     !     Total LAI
     IF (PEK%XLAI(JI)/=XUNDEF) DM%XLAI(IMASK) = DM%XLAI(IMASK) + PK%XPATCH(JI) * PEK%XLAI(JI)
+    !
+    !     Total WR
+    IF (PEK%XWR(JI)/=XUNDEF) DM%XWR(IMASK) = DM%XWR(IMASK) + PK%XPATCH(JI) * PEK%XWR(JI)
     !      
+    !     Snow albedo
+    DM%XSNOWALB(IMASK) = DM%XSNOWALB(IMASK) + PK%XPATCH(JI) * PEK%TSNOW%ALB(JI)
+    !
     !     Snow total outputs
     DM%XTWSNOW(IMASK) = DM%XTWSNOW(IMASK) + PK%XPATCH(JI) * DMK%XTWSNOW(JI)
     DM%XTDSNOW(IMASK) = DM%XTDSNOW(IMASK) + PK%XPATCH(JI) * DMK%XTDSNOW(JI)
+    IF (DM%XTDSNOW(IMASK) /= XUNDEF .AND. DM%XTDSNOW(IMASK) > 0.0) THEN
+      DM%XSNOWRHO(IMASK) = DM%XTWSNOW(IMASK) / DM%XTDSNOW(IMASK)
+    ENDIF
     !      
     IF (DMK%XTWSNOW(JI)>0.0) THEN
       !
@@ -200,6 +215,9 @@ ENDDO
 DM%XSWI (:,:) = 0.
 DM%XTSWI(:,:) = 0.
 !   
+DM%XWGI (:,:) = 0.
+DM%XTG  (:,:) = 0.
+!
 DM%XSOIL_SWI  (:) = 0.
 DM%XSOIL_TSWI (:) = 0.
 DM%XSOIL_TWG  (:) = 0.
@@ -226,6 +244,7 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
     DO JL=1,IO%NGROUND_LAYER
       DO JI=1,PK%NSIZE_P
         IMASK = PK%NR_P(JI)
+        DM%XTG(IMASK,JL) = DM%XTG(IMASK,JL) + PK%XPATCH(JI) * PEK%XTG(JI,JL)
         ZTG(IMASK,JL) = ZTG(IMASK,JL) + PK%XPATCH(JI) * PEK%XTG(JI,JL)
         ZDG(IMASK,JL) = ZDG(IMASK,JL) + PK%XPATCH(JI) * PK%XDG (JI,JL)
       ENDDO
@@ -249,6 +268,8 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
           IMASK = PK%NR_P(JI)
 
           ZWORK = PK%XDZG(JI,JL)
+          !Soil Ice Content
+          DM%XWGI (IMASK,JL) = DM%XWGI (IMASK,JL) + ZWORK*PK%XPATCH(JI) * PEK%XWGI (JI,JL)
           !Soil Wetness Index profile
           DM%XSWI (IMASK,JL) = DM%XSWI (IMASK,JL) + ZWORK*PK%XPATCH(JI) * DMK%XSWI (JI,JL) 
           DM%XTSWI(IMASK,JL) = DM%XTSWI(IMASK,JL) + ZWORK*PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
@@ -269,9 +290,11 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
   ENDDO
   !
   WHERE(ZPOND(:,:)> 0.)
+    DM%XWGI (:,:) = DM%XWGI (:,:) / ZPOND(:,:)
     DM%XSWI (:,:) = DM%XSWI (:,:) / ZPOND(:,:)
     DM%XTSWI(:,:) = DM%XTSWI(:,:) / ZPOND(:,:)
   ELSEWHERE
+    DM%XWGI (:,:) = XUNDEF
     DM%XSWI (:,:) = XUNDEF
     DM%XTSWI(:,:) = XUNDEF
   ENDWHERE
@@ -280,13 +303,17 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
   IF(DM%LSURF_MISC_DIF)THEN ! LSURF_MISC_DIF case
 ! ---------------------------------------------
 !     
-    ZSUMFRD2(:)=0.0
-    ZSUMFRD3(:)=0.0
+    ZSUMFRD2      (:) = 0.
+    ZSUMFRD3      (:) = 0.
+    ZSUMFRD2_TG   (:) = 0.
+    ZSUMFRD3_TG   (:) = 0.
 !
+    DM%XFRD2_TG   (:) = 0.
     DM%XFRD2_TSWI (:) = 0.
     DM%XFRD2_TWG  (:) = 0.
     DM%XFRD2_TWGI (:) = 0.
 !   
+    DM%XFRD3_TG   (:) = 0.
     DM%XFRD3_TSWI (:) = 0.
     DM%XFRD3_TWG  (:) = 0.
     DM%XFRD3_TWGI (:) = 0.
@@ -300,19 +327,29 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
         IMASK = PK%NR_P(JI)
      
         DO JL = 1,IO%NGROUND_LAYER
+          ZWORK = MIN(PK%XDZG(JI,JL),MAX(0.0,PK%XDG2(JI)-PK%XDG(JI,JL)+PK%XDZG(JI,JL)))
+          DM%XFRD2_TG   (IMASK) = DM%XFRD2_TG   (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XTG  (JI,JL)
+          ZSUMFRD2_TG   (IMASK) = ZSUMFRD2_TG   (IMASK) + ZWORK * PK%XPATCH(JI)
+
+          ZWORK = MIN(PK%XDZG(JI,JL),MAX(0.0,PK%XDG(JI,JL)-PK%XDG2(JI)))
+          DM%XFRD3_TG   (IMASK) = DM%XFRD3_TG   (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XTG  (JI,JL)
+          ZSUMFRD3_TG   (IMASK) = ZSUMFRD3_TG   (IMASK) + ZWORK * PK%XPATCH(JI)
+
           IDEPTH= PK%NWG_LAYER(JI)
 
           IF(JL<=IDEPTH.AND.IDEPTH/=NUNDEF)THEN
             !
             ! ISBA-FR-DG2 comparable soil wetness index, liquid water and ice contents
             ZWORK = MIN(PK%XDZG(JI,JL),MAX(0.0,PK%XDG2(JI)-PK%XDG(JI,JL)+PK%XDZG(JI,JL)))
+            DM%XFRD2_SWI  (IMASK) = DM%XFRD2_SWI  (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XSWI (JI,JL)  ! Liquid
             DM%XFRD2_TSWI (IMASK) = DM%XFRD2_TSWI (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
             DM%XFRD2_TWG  (IMASK) = DM%XFRD2_TWG  (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWG  (JI,JL)
             DM%XFRD2_TWGI (IMASK) = DM%XFRD2_TWGI (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWGI (JI,JL)
-            ZSUMFRD2       (IMASK) = ZSUMFRD2       (IMASK) + ZWORK * PK%XPATCH(JI)
+            ZSUMFRD2      (IMASK) = ZSUMFRD2      (IMASK) + ZWORK * PK%XPATCH(JI)
             !
             ! ISBA-FR-DG3 comparable soil wetness index, liquid water and ice contents
             ZWORK  =MIN(PK%XDZG(JI,JL),MAX(0.0,PK%XDG(JI,JL)-PK%XDG2(JI)))
+            DM%XFRD3_SWI  (IMASK) = DM%XFRD3_SWI  (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XSWI (JI,JL)  ! Liquid
             DM%XFRD3_TSWI (IMASK) = DM%XFRD3_TSWI (IMASK) + ZWORK * PK%XPATCH(JI) * DMK%XTSWI(JI,JL)
             DM%XFRD3_TWG  (IMASK) = DM%XFRD3_TWG  (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWG  (JI,JL)
             DM%XFRD3_TWGI (IMASK) = DM%XFRD3_TWGI (IMASK) + ZWORK * PK%XPATCH(JI) * PEK%XWGI (JI,JL)
@@ -324,20 +361,35 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
 !
     ENDDO
 !    
-    WHERE(ZSUMFRD2(:)>0.0) 
+    WHERE(ZSUMFRD2(:)>0.0)
+          DM%XFRD2_SWI  (:) = DM%XFRD2_SWI  (:) / ZSUMFRD2(:)
           DM%XFRD2_TSWI (:) = DM%XFRD2_TSWI (:) / ZSUMFRD2(:)
           DM%XFRD2_TWG  (:) = DM%XFRD2_TWG  (:) / ZSUMFRD2(:)
           DM%XFRD2_TWGI (:) = DM%XFRD2_TWGI (:) / ZSUMFRD2(:)          
     ELSEWHERE
+          DM%XFRD2_SWI  (:) = XUNDEF
           DM%XFRD2_TSWI (:) = XUNDEF
-    ENDWHERE 
+    ENDWHERE
+    WHERE(ZSUMFRD2_TG(:)>0.0)
+          DM%XFRD2_TG   (:) = DM%XFRD2_TG   (:) / ZSUMFRD2_TG(:)
+    ELSEWHERE
+          DM%XFRD2_TG   (:) = XUNDEF
+    ENDWHERE
 !    
-    WHERE(ZSUMFRD3(:)>0.0) 
+    WHERE(ZSUMFRD3(:)>0.0)
+          DM%XFRD3_TG   (:) = DM%XFRD3_TG   (:) / ZSUMFRD3(:)
+          DM%XFRD3_SWI  (:) = DM%XFRD3_SWI  (:) / ZSUMFRD3(:)
           DM%XFRD3_TSWI (:) = DM%XFRD3_TSWI (:) / ZSUMFRD3(:)
           DM%XFRD3_TWG  (:) = DM%XFRD3_TWG  (:) / ZSUMFRD3(:)
           DM%XFRD3_TWGI (:) = DM%XFRD3_TWGI (:) / ZSUMFRD3(:) 
     ELSEWHERE
+          DM%XFRD3_SWI  (:) = XUNDEF
           DM%XFRD3_TSWI (:) = XUNDEF
+    ENDWHERE
+    WHERE(ZSUMFRD3_TG(:)>0.0)
+          DM%XFRD3_TG   (:) = DM%XFRD3_TG   (:) / ZSUMFRD3_TG(:)
+    ELSEWHERE
+          DM%XFRD3_TG   (:) = XUNDEF
     ENDWHERE
 !
 ! ---------------------------------------------
@@ -348,6 +400,7 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
 ELSE ! Force-restore case
 !---------------------------------------------
 ! 
+  ZPOND(:,:) = 0.
   DO JP=1,IO%NPATCH
     PK => NP%AL(JP)
     PEK => NPE%AL(JP)
@@ -356,6 +409,12 @@ ELSE ! Force-restore case
     DO JI=1,PK%NSIZE_P
       IMASK = PK%NR_P(JI)    
 !
+      ZPOND   (IMASK,1) = ZPOND   (IMASK,1) + PK%XPATCH(JI) * PK%XDG   (JI,1)
+      ZPOND   (IMASK,2) = ZPOND   (IMASK,2) + PK%XPATCH(JI) * PK%XDG   (JI,2)
+      DM%XWGI (IMASK,1) = DM%XWGI (IMASK,1) + PK%XPATCH(JI) * PK%XDG   (JI,1) * PEK%XWGI (JI,1)
+      DM%XWGI (IMASK,2) = DM%XWGI (IMASK,2) + PK%XPATCH(JI) * PK%XDG   (JI,2) * PEK%XWGI (JI,2)
+      DM%XTG  (IMASK,1) = DM%XTG  (IMASK,1) + PK%XPATCH(JI) * PEK%XTG  (JI,1)
+      DM%XTG  (IMASK,2) = DM%XTG  (IMASK,2) + PK%XPATCH(JI) * PEK%XTG  (JI,2)
       DM%XSWI (IMASK,1) = DM%XSWI (IMASK,1) + PK%XPATCH(JI) * DMK%XSWI (JI,1)
       DM%XSWI (IMASK,2) = DM%XSWI (IMASK,2) + PK%XPATCH(JI) * DMK%XSWI (JI,2)
       DM%XTSWI(IMASK,1) = DM%XTSWI(IMASK,1) + PK%XPATCH(JI) * DMK%XTSWI(JI,1)
@@ -370,6 +429,13 @@ ELSE ! Force-restore case
 !          
     ENDDO
   ENDDO     
+
+  WHERE(ZPOND(:,:)>0.0)
+    DM%XWGI (:,:) = DM%XWGI (:,:) / ZPOND (:,:)
+  ELSEWHERE
+    DM%XWGI (:,:) = XUNDEF
+  ENDWHERE
+
 !     
   IF(IO%CISBA=='3-L')THEN
 !          
