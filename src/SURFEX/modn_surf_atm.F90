@@ -29,13 +29,15 @@ USE MODD_SURF_ATM, ONLY : XCISMIN, XVMODMIN, LALDTHRES, &
                             XEDB, XEDC, XEDD, XEDK,       &
                             XUSURIC, XUSURID, XUSURICL,   &
                             XVCHRNK, XVZ0CM, XDELTA_MAX,  &
-                            XRIMAX, LVERTSHIFT,           &
+                            XRIMAX, XRISHIFT, LVERTSHIFT, &
                             LVZIUSTAR0_ARP, LRRGUST_ARP,  &
                             XVZIUSTAR0,XRZHZ0M,           &
                             XRRSCALE, XRRGAMMA,           &
                             XUTILGUST, LCPL_ARP, LQVNPLUS,&
                             LVSHIFT_LW, LVSHIFT_PRCP,     &
-                            XCO2UNCPL, LARP_PN
+                            XCO2UNCPL, LARP_PN,           &
+                            XCD_COEFF1, XCD_COEFF2,       &
+                            XCH_COEFF1, XVMODFAC
 !
 !-----------------------------------------------------------------------------
 !
@@ -49,12 +51,14 @@ NAMELIST /NAM_SURF_ATM/XCISMIN, XVMODMIN, LALDTHRES, &
                          XEDB, XEDC, XEDD, XEDK,       &
                          XUSURIC, XUSURID, XUSURICL,   &
                          XVCHRNK, XVZ0CM, XDELTA_MAX,  &
-                         XRIMAX, LVERTSHIFT,           &
+                         XRIMAX, XRISHIFT, LVERTSHIFT, &
                          LVZIUSTAR0_ARP, LRRGUST_ARP,  &
                          XVZIUSTAR0,XRZHZ0M,           &
                          XRRSCALE, XRRGAMMA,           &
                          XUTILGUST, LCPL_ARP, LQVNPLUS,&
                          LVSHIFT_LW, LVSHIFT_PRCP,     &
-                         XCO2UNCPL, LARP_PN
+                         XCO2UNCPL, LARP_PN,           &
+                         XCD_COEFF1, XCD_COEFF2,       &
+                         XCH_COEFF1, XVMODFAC
 !
 END MODULE MODN_SURF_ATM

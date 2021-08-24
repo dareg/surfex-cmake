@@ -11,7 +11,10 @@
                                     PVZIUSTAR0, ORRGUST_ARP, PRRSCALE, PRRGAMMA,        &
                                     PUTILGUST, OCPL_ARP, OQVNPLUS, OVERTSHIFT,          &
                                     OVSHIFT_LW, OVSHIFT_PRCP,                           &
-                                    PCO2UNCPL, OARP_PN                                  )
+                                    PCO2UNCPL, OARP_PN,                                 &
+                                    PCD_COEFF1, PCD_COEFF2, PCH_COEFF1,                 &
+                                    PRISHIFT, PVMODFAC                                  )
+
 !     ########################################################################
 !
 !!****  *DEFAULT_SURF_ATM* - routine to set default values for the choice of surface schemes
@@ -79,6 +82,11 @@ REAL,              INTENT(OUT) :: PUSURICL
 REAL,              INTENT(OUT) :: PVCHRNK
 REAL,              INTENT(OUT) :: PVZ0CM
 REAL,              INTENT(OUT) :: PRIMAX
+REAL,              INTENT(OUT) :: PRISHIFT   ! Shift of Ri numbers in drag  calculations
+REAL,              INTENT(OUT) :: PVMODFAC   ! Factor for threshold of wind speed in drag calculations
+REAL,              INTENT(OUT) :: PCD_COEFF1
+REAL,              INTENT(OUT) :: PCD_COEFF2
+REAL,              INTENT(OUT) :: PCH_COEFF1
 REAL,              INTENT(OUT) :: PDELTA_MAX ! Maximum fraction of the foliage covered by intercepted water
 REAL,              INTENT(OUT) :: PWINDMIN   ! Minimum wind speed (canopy)
 LOGICAL,           INTENT(OUT) :: OVZIUSTAR0_ARP  ! flag to activate aladin formulation for zoh over sea
@@ -128,6 +136,14 @@ PVCHRNK  = 0.015
 PVZ0CM   = 0.0
 !
 PRIMAX = 0.2
+!
+PCD_COEFF1 = 10.0
+PCD_COEFF2 = 5.0
+PCH_COEFF1 = 15.0
+!
+PRISHIFT = 0.0
+PVMODFAC = 0.1
+!
 PDELTA_MAX = 1.0
 !
 PWINDMIN = 1.E-6

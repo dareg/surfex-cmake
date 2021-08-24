@@ -58,6 +58,7 @@
 !               ------------
 !
 USE MODD_CSTS,ONLY : XKARMAN
+USE MODD_SURF_ATM, ONLY : XCH_COEFF1, XRISHIFT
 USE MODI_WIND_THRESHOLD
 !
 USE MODE_THERMOS
@@ -92,6 +93,7 @@ REAL, DIMENSION(SIZE(PRI)) :: ZZ0, ZZ0H, ZMU,          &
                                ZFH, ZCHSTAR, ZPH, ZCDN, &
                                ZSTA, ZDI, ZWORK1, ZWORK2, ZWORK3 
 REAL, DIMENSION(SIZE(PRI)) :: ZVMOD
+REAL                       :: ZRIMOD, ZSTAMOD
 !
 INTEGER                    :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -141,9 +143,18 @@ DO JJ=1,SIZE(PRI)
     PAC(JJ) = ZCDN(JJ)*(ZVMOD(JJ)-15.* ZSTA(JJ)*ZDI(JJ))*ZFH(JJ)
 
   ELSE
-    ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTA(JJ) )
-    PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
-             / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
+! Modify the estimated Richardson number to have shift in the coefficients,
+! giving "neutral coefficients when 0 < PRI < XRISHIFT and
+! reduced values when XRISHIFT < PRI < XRIMAX
+    ZRIMOD  = MAX(PRI(JJ)-XRISHIFT, 0.)
+    ZSTAMOD = ZRIMOD*ZWORK3(JJ)
+    ZDI(JJ) = SQRT(ZWORK3(JJ) + 5. * ZSTAMOD )
+! Implement coefficients
+!    PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+15.*ZSTA(JJ)*ZDI(JJ)  &
+!             / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)    
+    PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+XCH_COEFF1*ZSTAMOD*ZDI(JJ)  &
+             / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)
+    
   ENDIF
 !
   PRA(JJ) = 1. / PAC(JJ)

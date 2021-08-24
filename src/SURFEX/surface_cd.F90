@@ -59,6 +59,7 @@
 !               ------------
 !
 USE MODD_CSTS,ONLY : XKARMAN
+USE MODD_SURF_ATM, ONLY : XCD_COEFF1, XCD_COEFF2, XRISHIFT
 !
 USE MODE_THERMOS
 !
@@ -88,7 +89,7 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PCDN     ! neutral drag coefficient for mom
 !
 !
 REAL                       :: ZZ0EFF, ZZ0H, ZMU,     &
-                               ZCMSTAR, ZPM, ZCM, ZFM 
+                               ZCMSTAR, ZPM, ZCM, ZFM, ZRIMOD 
 INTEGER                    :: JJ
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
@@ -119,7 +120,12 @@ DO JJ=1,SIZE(PRI)
   ZCM = 10.*ZCMSTAR*PCDN(JJ)*( PUREF(JJ)/ZZ0EFF )**ZPM
 !
   IF ( PRI(JJ) > 0.0 ) THEN
-    ZFM = 1. + 10.*PRI(JJ) / SQRT( 1.+5.*PRI(JJ) )
+! Modify the estimated Richardson number to have shift in the coefficients,
+! giving "neutral coefficients when 0 < PRI < XRISHIFT and
+! reduced values when XRISHIFT < PRI < XRIMAX
+    ZRIMOD = MAX(PRI(JJ)-XRISHIFT, 0.)
+! Implement coefficients    ZFM = 1. + 10.*PRI(JJ) / SQRT( 1.+5.*PRI(JJ) )
+    ZFM = 1. + XCD_COEFF1*ZRIMOD / SQRT( 1.+XCD_COEFF2*ZRIMOD )
     ZFM = 1. / ZFM
   ELSE
     ZFM = 1. - 10.*PRI(JJ) / ( 1.+ZCM*SQRT(-PRI(JJ)) )

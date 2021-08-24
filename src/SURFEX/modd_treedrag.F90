@@ -22,7 +22,8 @@
 !!    MODIFICATIONS
 !!    -------------
 !!    Original 30/06/11
-!!    P. Samuelsson, SMHI  02/2018: Added XZ0_LIMIT
+!!    P. Samuelsson, SMHI  02/2020: Added XALLEN_TERM and XGRASS_H_DNM
+!!    S. Viana, AEMET      06/2020: Added LFAKETREE,XHFAKETREE,XFFAKETREE
 !!
 !-----------------------------------------------------------------------------
 !
@@ -31,6 +32,17 @@
 IMPLICIT NONE
 LOGICAL    ::     LTREEDRAG=.FALSE.    ! flag used to  take into account tree drag in 
 !                                      ! the atmospheric model instead of SURFEX.
-REAL       ::     XZ0_LIMIT=999.       ! Limit Z0 (m) in Z0V_FROM_LAI to this maximum value.
+LOGICAL    ::     LFAKETREE=.FALSE.    ! Flag to activate fake trees option in low vegetation areas.
+REAL       ::     XSCALE_H_TREE=1.0    ! Scale the tree height with this factor
+REAL       ::     XALLEN_TERM=3.5      ! The term is in the expression for height of crops
+REAL       ::     XGRASS_H_DNM=6.0     ! The denominater value is in the expression for height of grass
+REAL       ::     XHFAKETREE=10.       ! Height of fake trees 
+REAL       ::     XFFAKETREE=0.1       ! Fraction of fake trees 
+REAL       ::     XZ0_MIN_LIMIT=0.     ! Limit Z0 (m) in Z0V_FROM_LAI to this minimum value.
+REAL       ::     XZ0_MAX_LIMIT=999.   ! Limit Z0 (m) in Z0V_FROM_LAI to this maximum value.
+REAL       ::     XFORLAT1=1.0         ! 
+REAL       ::     XFORLAT2=0.0         ! 
+REAL       ::     XFORFRAC1=1.0        ! 
+REAL       ::     XFORFRAC2=0.0        ! 
 !
 END MODULE MODD_TREEDRAG

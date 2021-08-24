@@ -20,7 +20,9 @@ USE MODD_SURF_ATM,       ONLY : XCISMIN, XVMODMIN, LALDTHRES,               &
                                    XRRSCALE, XRRGAMMA, XUTILGUST, LCPL_ARP, &
                                    LQVNPLUS, LVERTSHIFT, LVSHIFT_LW,        &
                                    LVSHIFT_PRCP, LARP_PN,                   &
-                                   XCO2UNCPL   
+                                   XCO2UNCPL,                               &
+                                   XCD_COEFF1, XCD_COEFF2, XCH_COEFF1,      &
+                                   XRISHIFT, XVMODFAC
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE, LSPLIT_PATCH                                    
 !
@@ -59,7 +61,9 @@ IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_SURF',0,ZHOOK_HANDLE)
                          XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
                          XRRSCALE, XRRGAMMA,XUTILGUST, LCPL_ARP,  &
                          LQVNPLUS, LVERTSHIFT, LVSHIFT_LW,        &
-                         LVSHIFT_PRCP, XCO2UNCPL, LARP_PN         )
+                         LVSHIFT_PRCP, XCO2UNCPL, LARP_PN,        &
+                         XCD_COEFF1, XCD_COEFF2, XCH_COEFF1,      &
+                         XRISHIFT, XVMODFAC                       )
 !                       
  CALL DEFAULT_WRITE_SURF_ATM(LNOWRITE_CANOPY, LNOWRITE_TEXFILE, LSPLIT_PATCH)
 !
