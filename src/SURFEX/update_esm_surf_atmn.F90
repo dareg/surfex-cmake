@@ -3,8 +3,9 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #################################################################################
-SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, IM, S, U, W, HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
-                                   PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )  
+SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, IM, S, U, W, TM, GDM, GRM, & 
+                                  HPROGRAM, KI, KSW, PZENITH, PSW_BANDS,     &
+                                  PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF )  
 !     #################################################################################
 !
 !!****  *UPDATE_ESM_SURF_ATM_n * - Routine to update radiative properties in Earth
@@ -34,7 +35,8 @@ SUBROUTINE UPDATE_ESM_SURF_ATM_n (F, IM, S, U, W, HPROGRAM, KI, KSW, PZENITH, PS
 !
 !
 USE MODD_FLAKE_n, ONLY : FLAKE_t
-USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t,TEB_MODEL_t, &
+                    TEB_GARDEN_MODEL_t,TEB_GREENROOF_MODEL_t
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_WATFLUX_n, ONLY : WATFLUX_t
@@ -56,6 +58,7 @@ USE MODI_UPDATE_ESM_ISBA_n
 USE MODI_UPDATE_ESM_SEAFLUX_n
 USE MODI_UPDATE_ESM_WATFLUX_n
 USE MODI_UPDATE_ESM_FLAKE_n
+USE MODI_UPDATE_ESM_TEB_n
 !
 IMPLICIT NONE
 !
@@ -67,6 +70,9 @@ TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(WATFLUX_t), INTENT(INOUT) :: W
+TYPE(TEB_MODEL_t),        INTENT(INOUT) :: TM
+TYPE(TEB_GARDEN_MODEL_t), INTENT(INOUT) :: GDM
+TYPE(TEB_GREENROOF_MODEL_t), INTENT(INOUT) :: GRM
 !
  CHARACTER(LEN=6),       INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 INTEGER,                INTENT(IN)  :: KI        ! number of points
@@ -96,6 +102,10 @@ REAL, DIMENSION(KI,KSW,NTILESFC) :: ZDIR_ALB_TILE ! direct albedo
 REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+REAL :: ZSUM
+INTEGER :: JLOOP
+!
 !-------------------------------------------------------------------------------------
 ! Preliminaries: Tile related operations
 !-------------------------------------------------------------------------------------
@@ -106,11 +116,14 @@ GSEA      = (U%NSIZE_SEA    >0 .AND. U%CSEA/='NONE')
 GWATER    = (U%NSIZE_WATER  >0 .AND. U%CWATER/='NONE')
 GNATURE   = (U%NSIZE_NATURE >0 .AND. U%CNATURE/='NONE')
 !
-GTOWN     = U%NSIZE_TOWN   >0
-IF(GTOWN)THEN
-  CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: TOWN SCHEME NOT YET AVAILABLE FOR EARTH SYSTEM MODEL')
-ENDIF
+GTOWN     = (U%NSIZE_TOWN   >0 .AND. U%CTOWN/='NONE')
 !
+IF(GTOWN)THEN
+  IF ((HPROGRAM/='OFFLIN').AND.(HPROGRAM/='MESONH').AND.(HPROGRAM/='AROME ')) THEN
+    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: TOWN SCHEME NOT YET AVAILABLE FOR EARTH SYSTEM MODEL')
+  ENDIF
+ENDIF
+
 ! Tile counter:
 !
 JTILE     = 0 
@@ -175,17 +188,16 @@ ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! URBAN Tile calculations:
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-! Not yet implemented
 !
-!JTILE = JTILE + 1
+JTILE = JTILE + 1
 !
-!IF(GTOWN)THEN
+IF(GTOWN)THEN
 !
-!   ZFRAC_TILE(:,JTILE) = XTOWN(:)
+   ZFRAC_TILE(:,JTILE) = U%XTOWN(:)
 !
-!   CALL TREAT_SURF(NSIZE_TOWN,NR_TOWN,JTILE)  
+   CALL TREAT_SURF(U%NSIZE_TOWN,U%NR_TOWN,JTILE)  
 !
-!ENDIF 
+ENDIF 
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! Grid box average radiative properties:
@@ -197,6 +209,18 @@ ENDIF
 !
  CALL AVERAGE_TSURF(ZFRAC_TILE, ZTSURF_TILE, PTSURF)
 !
+IF(HPROGRAM=='AROME ') THEN
+  DO JLOOP=1,KI
+  ZSUM=SUM(ZFRAC_TILE(JLOOP,:))
+    IF (ZSUM==0.) THEN   ! points sans type de surface (=zoneE)
+      PDIR_ALB(JLOOP,:)=XUNDEF
+      PSCA_ALB(JLOOP,:)=XUNDEF
+      PEMIS(JLOOP)=XUNDEF
+      PTRAD(JLOOP)=XUNDEF
+      PTSURF(JLOOP)=XUNDEF
+    ENDIF
+  ENDDO
+ENDIF
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 IF (LHOOK) CALL DR_HOOK('UPDATE_ESM_SURF_ATM_N',1,ZHOOK_HANDLE)
@@ -265,13 +289,15 @@ ELSEIF (KTILE==3) THEN
     CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: NATURE SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
   ENDIF
   !
-!ELSEIF (KTILE==4) THEN
+ELSEIF (KTILE==4) THEN
 !  !
-!  IF (CTOWN=='TEB   ') THEN   
-!    CALL UPDATE_ESM_TEB_n(NSIZE_SEA,KSW,ZP_ZENITH,ZP_TRAD,ZP_DIR_ALB,ZP_SCA_ALB,ZP_EMIS,ZP_TSURF)
-!  ELSE
-!    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: TEB SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
-!  ENDIF
+  IF (U%CTOWN=='TEB   ') THEN  
+    CALL UPDATE_ESM_TEB_n(TM%TOP, TM%TPN, TM%NT, TM%NB, GDM, GRM, U%NSIZE_TOWN,&
+                          KSW,ZP_ZENITH,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB,&
+                          ZP_EMIS,ZP_TRAD,ZP_TSURF)
+  ELSE
+    CALL ABOR1_SFX('UPDATE_ESM_SURF_ATM_n: TEB SCHEME MUST BE ACTIVATED FOR EARTH SYSTEM MODEL')
+  ENDIF
 !  !        
 ENDIF
 !

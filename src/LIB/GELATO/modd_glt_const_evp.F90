@@ -37,7 +37,6 @@
 !GLT_LIC  may lead to prosecution. 
 !GLT_LIC 
 MODULE modd_glt_const_evp
-  USE modd_glt_param 
   IMPLICIT NONE
 
 #if ! defined in_surfex

@@ -51,110 +51,7 @@
 ! -------------------- BEGIN MODULE mode_glt_stats_r ------------------------ 
 
 MODULE mode_glt_stats_r 
-INTERFACE
-
-FUNCTION glt_iceconcm_r(tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
-        tpsit
-  REAL, DIMENSION(np) ::                                             &
-        glt_iceconcm_r 
-END FUNCTION glt_iceconcm_r
-
-FUNCTION glt_thinice_concm_r(tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
-        tpsit
-  REAL, DIMENSION(np) ::                                             &
-        glt_thinice_concm_r
-END FUNCTION glt_thinice_concm_r
-
-FUNCTION glt_thickice_concm_r(tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
-        tpsit
-  REAL, DIMENSION(np) ::                                             &
-        glt_thickice_concm_r 
-END FUNCTION glt_thickice_concm_r
-
-FUNCTION glt_icesurfg_r(tpdom,tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::                          &
-        tpdom
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-        tpsit
-  REAL ::                                                               &
-        glt_icesurfg_r
-END FUNCTION glt_icesurfg_r
-
-FUNCTION glt_avg_r(tpdom,pfield,ktot)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-    tpdom 
-  REAL, DIMENSION(np), INTENT(in) ::  &
-    pfield
-  INTEGER, INTENT(in) ::  &
-    ktot
-  REAL ::  &
-    glt_avg_r
-END FUNCTION glt_avg_r
-
-FUNCTION glt_avhicem_r(tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-    tpsit
-  REAL, DIMENSION(np) ::                                             &
-    glt_avhicem_r
-END FUNCTION glt_avhicem_r
-
-FUNCTION glt_avhsnwm_r(tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-    tpsit
-  REAL, DIMENSION(np) ::                                             &
-    glt_avhsnwm_r
-END FUNCTION glt_avhsnwm_r
-
-FUNCTION glt_avmsnwm_r(tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-    tpsit
-  REAL, DIMENSION(np) ::                                             &
-    glt_avmsnwm_r
-END FUNCTION glt_avmsnwm_r
-
-FUNCTION glt_avhiceg_r(tpdom,tpsit)
-  USE modd_types_glt
-  USE modd_glt_param 
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::                          &
-    tpdom
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
-    tpsit
-  REAL ::                                                               &
-    glt_avhiceg_r
-END FUNCTION glt_avhiceg_r
-
-FUNCTION glt_voliceg_r(tpdom,tpsit)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
-  REAL ::  &
-        glt_voliceg_r
-END FUNCTION glt_voliceg_r
-
-END INTERFACE
-END MODULE mode_glt_stats_r
+CONTAINS
 
 ! --------------------- END MODULE mode_glt_stats_r -------------------------
 
@@ -165,12 +62,12 @@ END MODULE mode_glt_stats_r
 ! Returns the array of fractional ice coverage on all the cells of 
 ! the domain. 
 
-FUNCTION glt_iceconcm_r(tpsit)
+FUNCTION glt_iceconcm_r(tpsit,np,nt)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
         tpsit
@@ -193,12 +90,13 @@ END FUNCTION glt_iceconcm_r
 ! the domain (ONLY thin ice, thinner than a threshold thickness that
 ! is given as a namelist parameter).   
 
-FUNCTION glt_thinice_concm_r(tpsit)
+FUNCTION glt_thinice_concm_r(tpsit,np,nt,xicethcr)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
+  REAL   , INTENT(in) :: xicethcr
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
         tpsit
@@ -221,12 +119,13 @@ END FUNCTION glt_thinice_concm_r
 ! the domain (ONLY thick ice, thicker than a threshold thickness that
 ! is given as a namelist parameter : xicethcr).   
 
-FUNCTION glt_thickice_concm_r(tpsit)
+FUNCTION glt_thickice_concm_r(tpsit,np,nt,xicethcr)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
+  REAL   , INTENT(in) :: xicethcr
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::               &
         tpsit
@@ -247,12 +146,12 @@ END FUNCTION glt_thickice_concm_r
 
 ! Returns the total surface of the ice cover in a given region (sq. m) 
 
-FUNCTION glt_icesurfg_r(tpdom,tpsit)
+FUNCTION glt_icesurfg_r(tpdom,tpsit,np,nt)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::                          &
         tpdom
@@ -279,13 +178,14 @@ END FUNCTION glt_icesurfg_r
 !  ktot=1 : integral
 !  ktot=0 : average
 
-FUNCTION glt_avg_r(tpdom,pfield,ktot)
+FUNCTION glt_avg_r(tpdom,pfield,ktot,np,xdomsrf_r)
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: np
+  REAL   , INTENT(in) :: xdomsrf_r
 !
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
     tpdom 
@@ -314,12 +214,12 @@ END FUNCTION glt_avg_r
 ! Returns the array of average ice thickness on all the cells of 
 ! the domain. 
 
-FUNCTION glt_avhicem_r(tpsit)
+FUNCTION glt_avhicem_r(tpsit,np,nt)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
     tpsit
@@ -340,11 +240,11 @@ END FUNCTION glt_avhicem_r
 ! Returns the array of average snow thickness on all the cells of 
 ! the domain. 
 
-FUNCTION glt_avhsnwm_r(tpsit)
+FUNCTION glt_avhsnwm_r(tpsit,np,nt)
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::                       &
     tpsit
@@ -365,12 +265,12 @@ END FUNCTION glt_avhsnwm_r
 ! Returns the array of average snow mass on all the cells of 
 ! the domain (kg/m2)
 
-FUNCTION glt_avmsnwm_r(tpsit)
+FUNCTION glt_avmsnwm_r(tpsit,np,nt)
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
 !
   IMPLICIT NONE 
+  INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
     tpsit
@@ -391,12 +291,13 @@ END FUNCTION glt_avmsnwm_r
 
 ! Returns the average ice thickness on the whole domain 
 
-FUNCTION glt_avhiceg_r(tpdom,tpsit)
+FUNCTION glt_avhiceg_r(tpdom,tpsit,np,nt,xdomsrf)
 !
   USE modd_types_glt
-  USE modd_glt_param 
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
+  REAL   , INTENT(in) :: xdomsrf
 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::                           &
         tpdom
@@ -423,12 +324,12 @@ END FUNCTION glt_avhiceg_r
 ! Returns the total volume of ice on the whole region of study, in 
 ! cubic m.
 
-FUNCTION glt_voliceg_r(tpdom,tpsit)
+FUNCTION glt_voliceg_r(tpdom,tpsit,np,nt)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,np
 
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::                          &
         tpdom
@@ -443,6 +344,7 @@ FUNCTION glt_voliceg_r(tpdom,tpsit)
   glt_voliceg_r = SUM( z2_avhsi(:)*tpdom(:)%srf )
 !
 END FUNCTION glt_voliceg_r
+END MODULE mode_glt_stats_r
                                                                         
 ! ----------------------- END FUNCTION glt_voliceg_r ------------------------ 
 ! -----------------------------------------------------------------------

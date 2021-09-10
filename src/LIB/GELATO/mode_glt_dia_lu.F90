@@ -55,12 +55,17 @@ CONTAINS
 ! -----------------------------------------------------------------------
 ! -------------------------- SUBROUTINE OPNDIA --------------------------
 !
-SUBROUTINE OPNDIA()
+
+SUBROUTINE OPNDIA(n0valu,n0vilu,n2valu,n2vilu,navedia,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,noutlu,nxvalu,nxvilu,&
+lp1,lwg,&
+cdiafmt)
 !
-  USE modd_glt_param
   USE modd_types_glt
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) ::  noutlu,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,n0valu,n2valu,nxvalu,n0vilu,n2vilu,nxvilu,navedia
+  LOGICAL,INTENT(IN) ::  lwg,lp1
+  CHARACTER(*),INTENT(IN) ::  cdiafmt
   CHARACTER(80) ::  &
         yfname
 !
@@ -143,10 +148,13 @@ END SUBROUTINE OPNDIA
 ! -----------------------------------------------------------------------
 ! -------------------------- SUBROUTINE CLSDIA --------------------------
 !
-SUBROUTINE CLSDIA()
+SUBROUTINE CLSDIA(n0valu,n0vilu,n2valu,n2vilu,navedia,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,noutlu,nxvalu,nxvilu,&
+lp1,lwg,cdiafmt)
 !
-  USE modd_glt_param
   IMPLICIT NONE
+  INTEGER,INTENT(IN) ::  noutlu,ndiap1,ndiap2,ndiap3,ndiapx,ninsdia,n0valu,n2valu,nxvalu,n0vilu,n2vilu,nxvilu,navedia
+  LOGICAL,INTENT(IN) ::  lp1,lwg
+  CHARACTER(*),INTENT(IN) ::  cdiafmt
 !
 !
 ! .. Welcome message

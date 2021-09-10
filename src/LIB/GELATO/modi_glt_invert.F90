@@ -80,11 +80,14 @@
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_invert -----------------------------
 !
-SUBROUTINE glt_invert(kdiag,pmat)
-  USE modd_glt_param
+SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
   USE modi_gltools_glterr
+
+  USE MODI_ABOR1_SFX
 !
   IMPLICIT NONE
+  INTEGER,INTENT(IN) :: noutlu
+  LOGICAL,INTENT(IN) :: lwg
   INTEGER ::  &
         kdiag
   REAL, DIMENSION(:,:), INTENT(inout) ::  &
@@ -127,7 +130,7 @@ SUBROUTINE glt_invert(kdiag,pmat)
   IF ( kdiag<1 .OR. kdiag>iim ) THEN
       IF(lwg) WRITE(noutlu,*) '      kdiag =',kdiag,' is lower than 1 or',  &
         ' greater than matrix dimension'
-      CALL gltools_glterr( 'invert','','STOP')
+      CALL gltools_glterr( 'invert','','STOP',noutlu,lwg)
   ENDIF
 !
 ! 
@@ -152,7 +155,7 @@ SUBROUTINE glt_invert(kdiag,pmat)
             WRITE(noutlu,*) '          ',zmat(ji,:)
           END DO
         ENDIF
-        CALL gltools_glterr( 'invert','','STOP' )
+      CALL gltools_glterr( 'invert','','STOP',noutlu,lwg )
     ENDIF
   END DO
 !

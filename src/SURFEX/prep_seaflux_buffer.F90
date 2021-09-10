@@ -46,15 +46,15 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to prepare
 !
 !*      0.2    declarations of local variables
 !
 TYPE (DATE_TIME)                :: TZTIME_BUF    ! current date and time
- CHARACTER(LEN=6)              :: YINMODEL ! model from which BUFFER data originate
+CHARACTER(LEN=6)              :: YINMODEL ! model from which BUFFER data originate
 REAL, DIMENSION(:),       POINTER :: ZFIELD   ! field read
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -76,7 +76,7 @@ SELECT CASE(HSURF)
 !* 1.  Orography
 !      ---------
 !
-  CASE('ZS     ')
+  CASE('ZS       ')
     ALLOCATE(PFIELD(NNI,1))
     PFIELD = 0.0
     SELECT CASE (YINMODEL)
@@ -90,7 +90,7 @@ SELECT CASE(HSURF)
 !* 3.  Temperature profiles
 !      --------------------
 !
-  CASE('SST    ')
+  CASE('SST      ')
     ALLOCATE(PFIELD(NNI,1))
     PFIELD = 0.0
     SELECT CASE (YINMODEL)
@@ -103,7 +103,7 @@ SELECT CASE(HSURF)
 !*      5.  Sea surface salinity and ice fraction
 !           -------------------------------------
 !
-  CASE('SSS    ', 'SIC    ')
+  CASE('SSS      ', 'SIC      ')
     ALLOCATE(PFIELD(NNI,1))
     PFIELD = 0.0
 !

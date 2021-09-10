@@ -76,13 +76,15 @@
 ! -------------------------- SUBROUTINE gltools_mskerr --------------------------
 !
 SUBROUTINE gltools_mskerr  &
-        ( href,hfile,hword )
+        ( href,hfile,hword ,noutlu,lwg)
 !
-  USE modd_glt_param
   USE mode_gltools_strlast
   USE modi_gltools_glterr
+  USE MODI_ABOR1_SFX
 !
   IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: lwg
+  INTEGER, INTENT(IN) :: noutlu
 !
   CHARACTER(LEN=*), INTENT(in) ::  &
         href
@@ -104,7 +106,7 @@ SUBROUTINE gltools_mskerr  &
   IF ( yw /= href ) THEN
       WRITE( ymess,FMT='(A," field expected in ",A,". Read ",A)' )  &
         href,TRIM(hfile),TRIM(hword)
-      CALL gltools_glterr( 'inidmn',ymess,'STOP' )
+      CALL gltools_glterr( 'inidmn',ymess,'STOP',noutlu,lwg )
     ELSE
       IF(lwg) WRITE(noutlu,'("Read ",A," mask field.")') TRIM(hword)
   ENDIF

@@ -96,16 +96,19 @@
 ! ------------------------- SUBROUTINE glt_lmltsi_r -------------------------
 !
 SUBROUTINE glt_lmltsi_r  &
-        ( tpmxl,tpsil,tpsit,tpdia,tptfl ) 
+        ( tpmxl,tpsil,tpsit,tpdia,tptfl,&
+        ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t ) 
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_glt_updtfl_r
 !
   IMPLICIT NONE
 !
 !* Arguments
 !
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nilay,nl,nt,np,nicesal,niceage,nmponds,nleviti,nslay
+  REAL   ,INTENT(in) :: xlmelt,dtt,rn_htopoc
+  REAL,DIMENSION(:)   ,INTENT(in) :: sf3t
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
@@ -229,7 +232,9 @@ SUBROUTINE glt_lmltsi_r  &
 !
 ! .. This is the contribution of sea ice melting
 !
-  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,pent=zent,psalt=tpsit%ssi )
+  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      pent=zent,psalt=tpsit%ssi )
 !
 !
 ! 3.4. Massic gltools_enthalpy of removed snow
@@ -241,7 +246,9 @@ SUBROUTINE glt_lmltsi_r  &
 ! 3.5. Update water, heat and salt fluxes affecting the ocean
 ! ------------------------------------------------------------
 !
-  CALL glt_updtfl_r( 'FW2O',tpmxl,tptfl,zdmsn,pent=zent )
+  CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zdmsn,&
+  ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+  pent=zent )
   tpdia(:)%snml = SUM( zdmsn(:,:), DIM=1 ) / dtt
 !    
 !
@@ -284,5 +291,3 @@ SUBROUTINE glt_lmltsi_r  &
 !
 END SUBROUTINE glt_lmltsi_r
 
-! ----------------------- END SUBROUTINE glt_lmltsi_r -----------------------
-! -----------------------------------------------------------------------

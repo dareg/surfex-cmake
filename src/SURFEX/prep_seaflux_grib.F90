@@ -41,7 +41,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
@@ -72,7 +72,7 @@ SELECT CASE(HSURF)
 !* 1.  Orography
 !      ---------
 !
-  CASE('ZS     ')
+  CASE('ZS       ')
     SELECT CASE (CINMODEL)
       CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
         CALL READ_GRIB_ZS_SEA(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD)
@@ -85,7 +85,7 @@ SELECT CASE(HSURF)
 !* 2.  Temperature profiles
 !      --------------------
 !
-  CASE('SST    ')
+  CASE('SST      ')
     SELECT CASE (CINMODEL)
       CASE ('ECMWF ','ARPEGE','ALADIN','MOCAGE','HIRLAM')
         CALL READ_GRIB_SST(HFILE,KLUOUT,CINMODEL,ZMASK,ZFIELD)
@@ -97,7 +97,7 @@ SELECT CASE(HSURF)
 !* 3.  Sea surface salinity and ice fraction
 !      -------------------------------------
 !
-  CASE('SSS    ','SIC    ')
+  CASE('SSS      ','SIC      ')
       ALLOCATE(PFIELD(NNI,1))
       PFIELD = 0.0
 !

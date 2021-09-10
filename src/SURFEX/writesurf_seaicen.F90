@@ -43,7 +43,6 @@
 !
 USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
-USE MODD_GLT_PARAM, ONLY : nl, nt
 USE MODD_TYPES_GLT,   ONLY : T_GLT
 !
 USE MODI_WRITE_SURF
@@ -95,9 +94,9 @@ CALL WRITE_SURF(HSELECT,  HPROGRAM,'SEAICE_SCHEM',S%CSEAICE_SCHEME,IRESP,YCOMMEN
 !
 IF (S%CSEAICE_SCHEME == 'GELATO') THEN 
    YCOMMENT='Number of sea-ice layers'
-   CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENL',nl,IRESP,YCOMMENT)
+   CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENL',S%GLTPARAM%nl,IRESP,YCOMMENT)
    YCOMMENT='Number of ice categories'
-   CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENT',nt,IRESP,YCOMMENT)
+   CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENT',S%GLTPARAM%nt,IRESP,YCOMMENT)
    !
    !*       1.     Prognostic fields with only space dimension(s) :
    !
@@ -106,7 +105,7 @@ IF (S%CSEAICE_SCHEME == 'GELATO') THEN
    !
    !*       2.     Prognostic fields with space and ice-category dimension(s) :
    !
-   DO JK=1,nt
+   DO JK=1,S%GLTPARAM%nt
       WRITE(YICECAT,'(I2)') JK
       YCATEG='_'//ADJUSTL(YICECAT)
       ! .. Write sea ice age for type JK
@@ -139,7 +138,7 @@ IF (S%CSEAICE_SCHEME == 'GELATO') THEN
       !
       !*       3.     Prognostic fields with space and ice-category and layer dimension(s) :
       !
-      DO JL=1,NL
+      DO JL=1,S%GLTPARAM%nl
         WRITE(YLVL,'(I2)') JL
         YLEVEL = YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)
         YFORM='(A6,I1.1,A4)'

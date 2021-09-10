@@ -119,7 +119,12 @@
 ! --------------------- SUBROUTINE glt_thermo_ice_r -------------------------
 !
 SUBROUTINE glt_thermo_ice_r  &
-  ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil )
+  ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,& 
+   ncdlssh,niceage,nicesal,nicesub,nilay,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nslay,nsnwrad,nt,nupdbud,&
+   albimlt,albsdry,albsmlt,dtt,rn_htopoc,xdomsrf_r,xlmelt,xswhdfr,&
+   lp1,lp2,lp3,lp4,lp5,lwg,&
+   depth,height,sf3t,sf3tinv,&
+   ygltvhd)
 !
 !
 !
@@ -128,9 +133,7 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! 1.1. Module declarations
 ! ------------------------
-!
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE modi_glt_vhdiff_r
 !  USE modi_glt_swabs_r
@@ -151,7 +154,8 @@ SUBROUTINE glt_thermo_ice_r  &
   USE modi_gltools_chkglo_r
   USE mode_gltools_enthalpy
   USE modi_glt_updsal_r
-!
+  USE MODD_GLT_VHD, ONLY : t_glt_vhd
+  !
   IMPLICIT NONE
 !
 !
@@ -160,6 +164,10 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! --- INTENT(in) arguments.
 !
+  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud,nl,np,nt
+  LOGICAL, INTENT(IN) :: lp1,lp2,lp3,lp4,lp5,lwg
+  REAL, INTENT(IN) ::  dtt,xdomsrf_r,xswhdfr,rn_htopoc,albimlt,albsmlt,albsdry,xlmelt
+  REAL,DIMENSION(:), INTENT(IN) :: sf3t,sf3tinv,height,depth
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
@@ -181,7 +189,8 @@ SUBROUTINE glt_thermo_ice_r  &
         tpsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
         tpsil 
-!
+  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
+    !
 !
 ! 1.3. Local variables declarations
 ! --------------------------------- 
@@ -234,7 +243,8 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! .. Vertical salinity profile
 !
-  CALL glt_icevsp_r( tpsit,zvsp )
+  CALL glt_icevsp_r( tpsit,zvsp,&
+      nilay,nl,np,nt,height,sf3tinv )
 !
 ! .. Type variables
 !
@@ -249,13 +259,15 @@ SUBROUTINE glt_thermo_ice_r  &
 ! 1.6. Check in
 ! -------------
 !
-  CALL gltools_chkglo_r( 'Before THERMO_ICE_R',tpdom,tpsit)
+  CALL gltools_chkglo_r( 'Before THERMO_ICE_R',tpdom,tpsit,noutlu,np,nprinto,nt,lwg)
 !
   zemps(:) = tptfl(:)%cio
 !
   IF ( nupdbud==1 ) THEN
-    CALL glt_updsnow_r(0, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
-    CALL glt_updice_r(0, ' BEGINNING THERMO_ICE ', tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+    CALL glt_updsnow_r(0, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,&
+        noutlu,np,nt,dtt,xdomsrf_r,lwg)
+    CALL glt_updice_r(0, ' BEGINNING THERMO_ICE ', tpdom, tpsit, zsalt_a, zice_a,&
+        noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -267,7 +279,8 @@ SUBROUTINE glt_thermo_ice_r  &
 ! ------------------------------------------
 !
   IF ( nicesub==1 ) THEN
-      CALL glt_sublim_r( tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia )
+      CALL glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
+          ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv )
   ENDIF
 !
   tpdia(:)%subcio = tptfl(:)%cio - zemps(:)
@@ -275,11 +288,17 @@ SUBROUTINE glt_thermo_ice_r  &
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_sublim_r / Before PRECIP_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,    &
+        dtt,xdomsrf_r,&
+        lp1,lp2,lp3,lwg,sf3tinv)
+            
       CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a, &
+          noutlu,np,nt,dtt,xdomsrf_r,lwg,&
                  -1*tpdia(:)%sus, -1*(tpdia(:)%suw+tpdia(:)%sui))
       CALL glt_updice_r(1, ' AFTER glt_sublim_r ', &
-        tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,&
+        noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -292,14 +311,21 @@ SUBROUTINE glt_thermo_ice_r  &
 !   Note that this routine generates a trend on surface temperature,
 ! that should be taken into account like for other processes later on.
 !
-  CALL glt_precip_r( grain,gsnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,zqmelt )
+  CALL glt_precip_r( grain,gsnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,zqmelt,&
+     ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_precip_r / Before ICETRANS_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,  &
+        dtt,xdomsrf_r,&
+        lp1,lp2,lp3,lwg,sf3tinv)
+         
       CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a, &
+          noutlu,np,nt,dtt,xdomsrf_r,lwg,&
                  -1*(tpdia(:)%s_pr+tpdia(:)%s_prsn), -1*(tpdia(:)%o_pr+tpdia(:)%o_prsn))
-      CALL glt_updice_r(1, ' AFTER glt_precip_r ', tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+      CALL glt_updice_r(1, ' AFTER glt_precip_r ', tpdom, tpsit, zsalt_a, zice_a,&
+          noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -312,7 +338,8 @@ SUBROUTINE glt_thermo_ice_r  &
 ! pockets), 
 !       - the rest crosses the ice slab to reach the mixed layer.
 !
-  CALL glt_icetrans_r( tpblki,tpmxl,tptfl,tpsit,tpdia,zswtra )
+  CALL glt_icetrans_r( tpblki,tpmxl,tptfl,tpsit,tpdia,zswtra,&
+     nilay,nl,np,nt,depth )
 !
 !
 !
@@ -349,9 +376,12 @@ SUBROUTINE glt_thermo_ice_r  &
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_icetrans_r / Before VHDIFF_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
-      CALL glt_updice_r(1, ' AFTER glt_icetrans_r ', tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,nprinto,np,nslay,nsnwrad,nt,  &
+        dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
+          
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
+      CALL glt_updice_r(1, ' AFTER glt_icetrans_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -381,21 +411,28 @@ SUBROUTINE glt_thermo_ice_r  &
   zwork2 = dtt*SUM( tpsit(:,:)%fsi*znsftop, DIM=1 ) 
 !
   zent(:,:,:) = tpsil(:,:,:)%ent
-  CALL glt_aventh(tpsit,tpsil,zei1,zes1)
+  CALL glt_aventh(tpsit,tpsil,zei1,zes1,nilay,nl,np,nt,sf3tinv)
   CALL glt_vhdiff_r  &
     ( tpdom,tpmxl%mlf,zdcondt,tpsit,tpdia,  &
-    znsftop,zswtra,zent,zvsp,zcondb,zqtopmelt,zdhmelt,osmelt )
+    znsftop,zswtra,zent,zvsp,zcondb,zqtopmelt,zdhmelt,osmelt,&
+    nilay,nl,noutlu,np,nslay,nt,dtt,xdomsrf_r,xswhdfr,&
+    lp1,lp2,lp3,lp4,lp5,lwg,&
+    sf3t,sf3tinv,&
+    ygltvhd )
 !
     tpsil(:,:,:)%ent = zent(:,:,:)
-  CALL glt_aventh(tpsit,tpsil,zei2,zes2)
+  CALL glt_aventh(tpsit,tpsil,zei2,zes2,nilay,nl,np,nt,sf3tinv)
 !
 ! .. Checks
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_vhdiff_r / Before UPDHSN_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
-      CALL glt_updice_r(1, ' AFTER glt_vhdiff_r ', tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nsnwrad,nslay,nt,  &
+        dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
+         
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
+      CALL glt_updice_r(1, ' AFTER glt_vhdiff_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -409,13 +446,17 @@ SUBROUTINE glt_thermo_ice_r  &
 ! .. Update snow thickness. If there is not enough snow to be melted,
 ! pass the residual melt flux over to the ocean.
 !
-  CALL glt_updhsn_r( osmelt,zdhmelt,tpmxl,tptfl,tpsit,tpsil,tpdia )
+  CALL glt_updhsn_r( osmelt,zdhmelt,tpmxl,tptfl,tpsit,tpsil,tpdia,&
+     ncdlssh,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc )
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_updhsn_r / Before SNOWICE_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
-      CALL glt_updice_r(1, ' AFTER glt_updhsn_r ', tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,  &
+        dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
+         
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
+      CALL glt_updice_r(1, ' AFTER glt_updhsn_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -424,16 +465,20 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! .. See the routine itself for more details. 
 !
-  CALL glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia )
+  CALL glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
+     ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,dtt,rn_htopoc,sf3tinv)
 !
   tpdia(:)%snicio = tptfl(:)%cio - zemps(:)
   zemps(:) = tptfl(:)%cio
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_snowice_r / Before UPDHSI_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
-      CALL glt_updice_r(1, ' AFTER SNOWICE_R', tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,&
+        dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
+         
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
+      CALL glt_updice_r(1, ' AFTER SNOWICE_R', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -451,7 +496,10 @@ SUBROUTINE glt_thermo_ice_r  &
 !       - residual ocean flux           :       tpmxl%qml,
 ! compute first guess for new sea ice thickness. 
 !
-  CALL glt_updhsi_r( zcondb,zqtopmelt,zdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil )
+  CALL glt_updhsi_r( zcondb,zqtopmelt,zdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil,&
+       ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,noutlu,np,nsalflx,nslay,nt,&
+       dtt,rn_htopoc,lp3,&
+       sf3tinv,height )
 !
   tpdia(:)%hsicio = tptfl(:)%cio - zemps(:)
   zemps(:) = tptfl(:)%cio
@@ -460,10 +508,14 @@ SUBROUTINE glt_thermo_ice_r  &
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_updhsi_r / Before UPDASN_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt, &
+        dtt,xdomsrf_r,&
+        lp1,lp2,lp3,lwg,sf3tinv)
+
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
       CALL glt_updice_r(1, ' AFTER glt_updhsi_r ', &
-        tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -472,16 +524,21 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! .. Update snow cover/bare ice albedo
 !
-  CALL glt_updasn_r( osmelt,tpatm,tpblki,zvsp,tpsit,tpdia )
+  CALL glt_updasn_r( osmelt,tpatm,tpblki,zvsp,tpsit,tpdia,&
+     nilay,nl,nmponds,np,nt,albimlt,albsdry,albsmlt,dtt )
 !
 ! .. Checks
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_updasn_r / before LMLTSI_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt, &
+        dtt,xdomsrf_r,&
+        lp1,lp2,lp3,lwg,sf3tinv)
+         
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
       CALL glt_updice_r(1, ' After glt_updasn_r ', &
-        tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -492,17 +549,22 @@ SUBROUTINE glt_thermo_ice_r  &
 ! at the underside of the floe, but also laterally (see lmltsi routine
 ! for more details).
 !
-  CALL glt_lmltsi_r( tpmxl,tpsil,tpsit,tpdia,tptfl )
+  CALL glt_lmltsi_r( tpmxl,tpsil,tpsit,tpdia,tptfl,&
+ ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t)
 !
   tpdia(:)%lmlcio = tptfl(:)%cio - zemps(:)
   zemps(:) = tptfl(:)%cio
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_lmltsi_r / Before UPDSAL_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt, &
+        dtt,xdomsrf_r,&
+        lp1,lp2,lp3,lwg,sf3tinv)
+
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
       CALL glt_updice_r(1, ' After glt_lmltsi_r ', &
-        tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -512,7 +574,8 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! .. Desalination processes are taken into account here
 !
-  CALL glt_updsal_r( osmelt,tpmxl,tpsit,tptfl )
+  CALL glt_updsal_r( osmelt,tpmxl,tpsit,tptfl,&
+ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
 !
   tpdia(:)%salcio = tptfl(:)%cio - zemps(:)
   zemps(:) = tptfl(:)%cio
@@ -528,15 +591,19 @@ SUBROUTINE glt_thermo_ice_r  &
 !
   IF ( nupdbud==1 ) THEN
       CALL glt_updbud_r( 0,'After glt_updsal_r = End of THERMO_ICE_R:',  &
-        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud )
-      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a, zemp_a)
+        tpdom,tpmxl,tptfl,tpatm,tzdum,tpblki,tpsit,tpsil,tpbud,&
+        niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt, &
+        dtt,xdomsrf_r,&
+        lp1,lp2,lp3,lwg,sf3tinv)
+         
+      CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
       CALL glt_updice_r(1, ' AFTER glt_updsal_r ', &
-        tpdom, tpsit, zsalt_a, zice_a, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 ! .. Sea ice extent and volume checks
 !
-  CALL gltools_chkglo_r( 'After THERMO_ICE_R',tpdom,tpsit )
+  CALL gltools_chkglo_r( 'After THERMO_ICE_R',tpdom,tpsit,noutlu,np,nprinto,nt,lwg )
 !
 !
 ! 7.2. Farewell message

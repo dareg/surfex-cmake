@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
        SUBROUTINE DIAG_CPL_ESM_SEA (S, D, DI, PTSTEP, PSFTQ, PRAIN, PSNOW, &
-                                    PLW, PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW, OSIC)  
+                                    PLW, PPS, PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW, OSIC)  
 !     ###################################################################
 !
 !!****  *DIAG_CPL_ESM_SEA * - Computes diagnostics over sea for 
@@ -57,6 +57,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSFTQ     ! water flux
 REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall
 REAL, DIMENSION(:), INTENT(IN) :: PLW       ! longwave radiation (on horizontal surf.)
+REAL, DIMENSION(:), INTENT(IN) :: PPS       ! Surface pressure
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH_ICE ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ_ICE ! water flux (kg/m2/s)
 REAL, DIMENSION(:,:),INTENT(IN):: PDIR_SW   ! direct  solar radiation (on horizontal surf.)
@@ -106,6 +107,11 @@ S%XCPL_SEA_EVAP(:) = S%XCPL_SEA_EVAP(:) + PTSTEP * PSFTQ(:)
 ! 
 S%XCPL_SEA_RAIN(:) = S%XCPL_SEA_RAIN(:) + PTSTEP * PRAIN(:)
 S%XCPL_SEA_SNOW(:) = S%XCPL_SEA_SNOW(:) + PTSTEP * PSNOW(:)
+!
+!* Cumulated surface pressure (Pa.s)
+! 
+S%XCPL_SEA_PRES(:) = S%XCPL_SEA_PRES(:) + PTSTEP * PPS(:)
+!
 !
 !-------------------------------------------------------------------------------------
 ! Ice flux

@@ -70,14 +70,14 @@
 ! --------------------- END MODULE TOOLS_NEXTVAL ------------------------
 !
 !
-SUBROUTINE gltools_nextval( klun,hlistfld,klistfound,kok,hpar,hval,hcomment ) 
+SUBROUTINE gltools_nextval( klun,hlistfld,klistfound,kok,hpar,hval,lwg,hcomment ) 
 !
 USE modi_gltools_nextline
 !
-USE modd_glt_param
 !
 IMPLICIT NONE
-!
+! 
+  LOGICAL,INTENT(IN) :: lwg
   INTEGER, INTENT(in) ::  &
     klun    
   CHARACTER(80), DIMENSION(:), INTENT(in) ::  &
@@ -110,7 +110,7 @@ ENDIF
 ! 2. Get the first informative line
 ! ==================================
 !
-CALL gltools_nextline( klun,iend,hpar,hval,hcomment=ycomment )
+CALL gltools_nextline( klun,iend,hpar,hval,lwg,hcomment=ycomment )
 !
 !
 ! 3. Controls 

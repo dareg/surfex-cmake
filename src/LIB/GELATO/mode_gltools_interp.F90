@@ -44,40 +44,7 @@
 ! -------------------- BEGIN MODULE mode_gltools_interp -------------------
 !
 MODULE mode_gltools_interp
-INTERFACE
-!
-FUNCTION glt_interpz(plevn,pvtpo,plevo) RESULT(tab_interp)
-  USE modd_glt_param, only : nilay
-  REAL, DIMENSION(nilay+1), INTENT(in) ::  &
-    plevn
-  REAL, DIMENSION(:), INTENT(in) ::  &
-    pvtpo
-  REAL, DIMENSION(:), INTENT(in) ::  &
-    plevo
-  REAL, DIMENSION(nilay) ::  &
-    tab_interp
-END FUNCTION glt_interpz
-!
-#if ! defined in_surfex
-SUBROUTINE glt_c2b(pcu,pcv,pbu,pbv)
-USE modd_glt_param
-REAL, DIMENSION(nx,ny),INTENT(in) ::  &
-  pcu,pcv
-REAL, DIMENSION(nx,ny),INTENT(out) ::  &
-  pbu,pbv
-END SUBROUTINE glt_c2b
-!
-SUBROUTINE glt_b2c(pbu,pbv,pcu,pcv)
-USE modd_glt_param
-REAL, DIMENSION(nx,ny),INTENT(in) ::  &
-  pbu,pbv
-REAL, DIMENSION(ilo:ihi,jlo:jhi), INTENT(out) ::  &
-  pcu,pcv
-END SUBROUTINE glt_b2c
-!
-#endif
-END INTERFACE
-END MODULE mode_gltools_interp
+CONTAINS
 !
 ! -------------------- END MODULE mode_gltools_interp ---------------------
 !
@@ -94,13 +61,13 @@ END MODULE mode_gltools_interp
 ! 
 ! The glt_output is delivered on the model's standard vertical levels.
 !
-FUNCTION glt_interpz(plevn,pvtpo,plevo) RESULT(tab_interp)
+FUNCTION glt_interpz(plevn,pvtpo,plevo,nilay) RESULT(tab_interp)
 !
-  USE modd_glt_param , only: nilay
   USE mode_glt_stats
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(IN) :: nilay
   REAL, DIMENSION(nilay+1), INTENT(in) ::  &
     plevn
   REAL, DIMENSION(:), INTENT(in) ::  &
@@ -134,12 +101,12 @@ END FUNCTION glt_interpz
 ! the grid cell). Note the interpolated fields must be bounded 
 ! afterwards.
 !
-SUBROUTINE glt_c2b(pcu,pcv,pbu,pbv)
+SUBROUTINE glt_c2b(pcu,pcv,pbu,pbv,nx,ny)
 !
-USE modd_glt_param
 !
 IMPLICIT NONE
 !
+INTEGER,INTENT(in) :: nx,ny
 REAL, DIMENSION(nx,ny),INTENT(in) ::  &
   pcu,pcv
 REAL, DIMENSION(nx,ny),INTENT(out) ::  &
@@ -195,13 +162,14 @@ END SUBROUTINE glt_c2b
 ! defined at the middle of the Eastern and Northern edges of the grid 
 ! cell.
 !
-SUBROUTINE glt_b2c(pbu,pbv,pcu,pcv)
+SUBROUTINE glt_b2c(pbu,pbv,pcu,pcv,nx,ny)
 !
-USE modd_glt_param
 USE mode_gltools_bound
 !
 IMPLICIT NONE
 !
+INTEGER,INTENT(in) :: nx,ny    
+REAL, DIMENSION(nx,ny),INTENT(in) ::  &
 REAL, DIMENSION(nx,ny),INTENT(in) ::  &
   pbu,pbv
 REAL, DIMENSION(ilo:ihi,jlo:jhi), INTENT(out) ::  &
@@ -233,3 +201,4 @@ END SUBROUTINE glt_b2c
 ! ------------------------ END SUBROUTINE glt_b2c --------------------------
 ! ----------------------------------------------------------------------
 #endif
+END MODULE mode_gltools_interp

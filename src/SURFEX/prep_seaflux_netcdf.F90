@@ -48,9 +48,9 @@ INCLUDE "mpif.h"
 !
 !*      0.1    declarations of arguments
 !
- CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
- CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
+CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
+CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
+CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing
 REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !
@@ -59,7 +59,7 @@ REAL,DIMENSION(:,:), POINTER    :: PFIELD    ! field to interpolate horizontally
 !TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
 !CHARACTER(LEN=6)              :: YINMODEL ! model from which GRIB file originates
 REAL, DIMENSION(:),       POINTER :: ZFIELD   ! field read
- CHARACTER(LEN=28) :: YNCVAR
+CHARACTER(LEN=28) :: YNCVAR
 INTEGER :: INFOMPI
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -79,7 +79,7 @@ SELECT CASE(HSURF)
 !* 2.1 Orography
 !      ---------
 !
-  CASE('ZS     ')
+  CASE('ZS       ')
     YNCVAR='topo'
     CALL PREP_NETCDF_GRID(HFILE,YNCVAR)
     IF (NRANK==NPIO) THEN
@@ -95,12 +95,12 @@ SELECT CASE(HSURF)
 !* 2.2 Temperature profiles
 !      --------------------
 !
-  CASE('SST    ','SSS    ','SIC    ')
-    IF ( HSURF == 'SST    ') THEN
+  CASE('SST      ','SSS      ','SIC      ')
+    IF ( HSURF == 'SST      ') THEN
        YNCVAR='temperature'
-    ELSE IF ( HSURF == 'SSS    ') THEN
+    ELSE IF ( HSURF == 'SSS      ') THEN
        YNCVAR='sss'
-    ELSE IF ( HSURF == 'SIC    ') THEN
+    ELSE IF ( HSURF == 'SIC      ') THEN
        YNCVAR='sic'
     END IF
     CALL PREP_NETCDF_GRID(HFILE,YNCVAR)

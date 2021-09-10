@@ -22,6 +22,7 @@
 !!    ------------
 !!
 !!    Original    24/03/2015
+!!    R. El Khatib 03/06/2021 Fix uninitialized ZMESH_SIZE.
 !!
 !----------------------------------------------------------------------------
 !
@@ -105,6 +106,7 @@ REAL    :: ZDIST     ! local variable (distance in halo)
 REAL :: ZTPHI        ! local slope (as defined by Manners et al. 2012)
 REAL :: ZVPHI        ! local tilted horizon (as defined by Manners et al. 2012)
 REAL :: ZSVF0        ! local SVF (as defined by Manners et al. 2012)
+REAL :: ZTMP         ! temporary computation variable
 
 REAL :: ZM           ! local subscale M derivatives
 REAL :: ZK           ! local subscale K derivatives
@@ -177,6 +179,7 @@ IF (NRANK==NPIO) THEN
   !
   ALLOCATE(ZDX(U%NDIM_FULL),ZDY(U%NDIM_FULL))
   ALLOCATE(ZMESH_SIZE(U%NDIM_FULL))
+  CALL GATHER_AND_WRITE_MPI(UG%G%XMESH_SIZE,ZMESH_SIZE)
   CALL GET_MESH_DIM(CGRID,UG%NGRID_FULL_PAR,U%NDIM_FULL,UG%XGRID_FULL_PAR,ZDX,ZDY,ZMESH_SIZE)
   DEALLOCATE(ZMESH_SIZE)
   CALL GET_GRID_DIM(CGRID,UG%NGRID_FULL_PAR,UG%XGRID_FULL_PAR,LLRECT,IIMAX,IJMAX)
@@ -332,8 +335,13 @@ IF (NRANK==NPIO) THEN
           DO JF=1,USS%NSECTORS
             ZSVF0 = 0.
             DO JK=1,USS%NSECTORS
-              ZTPHI = XPI + ATAN(1./(-TAN(ZSLOPE_DIR(JL, JF))*COS(2.*XPI*(JK-JF)/8.)))
-              ZTPHI = MOD(ZTPHI, XPI)
+              ZTMP = -TAN(ZSLOPE_DIR(JL, JF))*COS(2.*XPI*(JK-JF)/8.)
+              IF (ABS(ZTMP) < 1.E-6) THEN
+                ZTPHI = XPI/2.
+              ELSE
+                ZTPHI = XPI + ATAN(1./ZTMP)
+                ZTPHI = MOD(ZTPHI, XPI)
+              ENDIF
               ZVPHI = MIN(ZHPHI(JK), ZTPHI) + XPI/2. - ZTPHI
               ZSVF0 = ZSVF0 + SIN(ZVPHI)**2/USS%NSECTORS
             ENDDO
@@ -344,8 +352,13 @@ IF (NRANK==NPIO) THEN
 
           ! compute @ grid scale
           DO JK=1,USS%NSECTORS
-            ZTPHI = XPI + ATAN(1./(-TAN(ZSLOPE(JL))*COS(ZASPECT(JL) - 2.*XPI*(JK-1)/8.)))
-            ZTPHI = MOD(ZTPHI, XPI)
+            ZTMP = -TAN(ZSLOPE(JL))*COS(ZASPECT(JL) - 2.*XPI*(JK-1)/8.)
+            IF (ABS(ZTMP) < 1.E-6) THEN
+              ZTPHI = XPI/2.
+            ELSE
+              ZTPHI = XPI + ATAN(1./ZTMP)
+              ZTPHI = MOD(ZTPHI, XPI)
+            ENDIF
             ZVPHI = MIN(ZHPHI(JK), ZTPHI) + XPI/2. - ZTPHI
             !ZVPHI = ZHPHI(JK) ! plane point
             ZSVF(JL) = ZSVF(JL) + SIN(ZVPHI)**2/USS%NSECTORS

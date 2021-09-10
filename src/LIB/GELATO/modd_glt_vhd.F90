@@ -38,8 +38,8 @@
 !GLT_LIC 
 MODULE modd_glt_vhd
 !
-  USE modd_glt_param
 !
+TYPE t_glt_vhd 
   LOGICAL ::  &
         llredo
   REAL ::  &
@@ -52,5 +52,6 @@ MODULE modd_glt_vhd
         zkodzi
   REAL, DIMENSION(:), ALLOCATABLE ::  &
         zrhocpsi,ztsib,ztsi0
+ENDTYPE t_glt_vhd
 !
   END MODULE modd_glt_vhd

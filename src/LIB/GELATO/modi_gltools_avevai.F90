@@ -79,9 +79,10 @@
 ! -------------------------- SUBROUTINE gltools_avevai --------------------------
 !
 SUBROUTINE gltools_avevai  &
-        ( tpind,tpnam,pfield,pcumdia,pwgt )
+        (tpind,tpnam,pfield,pcumdia,&
+gelato_leadproc,gelato_myrank,n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,&
+dtt,dttave,lwg,pwgt)
 !
-  USE modd_glt_param
   USE modd_types_glt
   USE modd_glt_const_thm
   USE modi_gltools_strlower
@@ -97,6 +98,9 @@ SUBROUTINE gltools_avevai  &
 !
 !* Arguments
 !
+  INTEGER,INTENT(in) :: nx,ny,noutlu,nxglo,nyglo,gelato_leadproc,gelato_myrank,n2valu,n0valu
+  LOGICAL,INTENT(in) :: lwg 
+  REAL   ,INTENT(in) :: dtt,dttave
   TYPE(t_ind), INTENT(inout) ::  &
         tpind
   TYPE(t_def), INTENT(in) ::  &

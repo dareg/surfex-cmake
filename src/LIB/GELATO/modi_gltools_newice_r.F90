@@ -82,7 +82,7 @@
 ! ------------------------- SUBROUTINE gltools_newice_r -------------------------
 !
 SUBROUTINE gltools_newice_r  &
-  ( pfsi,phsi,tpmxl,tpsit,tpsil,  &
+  ( nl,np,nt,pfsi,phsi,tpmxl,tpsit,tpsil,  &
     ptsf,pssi,phsn,prsn,pasn,pent )
 !
 !
@@ -94,7 +94,6 @@ SUBROUTINE gltools_newice_r  &
 ! ------------------------
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_gltools_enthalpy
   USE mode_glt_info_r
@@ -108,6 +107,7 @@ SUBROUTINE gltools_newice_r  &
 !
 ! .. INTENT(in) arguments.
 !
+  INTEGER,INTENT(IN) :: nl,nt,np
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
         pfsi,phsi
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
@@ -181,7 +181,7 @@ SUBROUTINE gltools_newice_r  &
   IF ( PRESENT(pent) ) THEN 
     zent(:,:,:) = pent(:,:,:)
   ELSE
-    zent(:,:,:) = SPREAD( glt_enthalpy2d( ztsf(:,:),zssi(:,:) ),1,nl ) 
+    zent(:,:,:) = SPREAD( glt_enthalpy2d( ztsf(:,:),zssi(:,:),np,nt ),1,nl ) 
   ENDIF
 
 ! 

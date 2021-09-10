@@ -67,12 +67,12 @@
 ! --------------------- END MODULE TOOLS_NEXTLINE -----------------------
 !
 !
-SUBROUTINE gltools_nextline( klun,kend,hpar,hval,hcomment ) 
+SUBROUTINE gltools_nextline( klun,kend,hpar,hval,lwg,hcomment) 
 !
-USE modd_glt_param
 !
 IMPLICIT NONE
 !
+LOGICAL, INTENT(IN) :: lwg
 INTEGER, INTENT(in) ::  &
   klun
 INTEGER, INTENT(out) ::  &

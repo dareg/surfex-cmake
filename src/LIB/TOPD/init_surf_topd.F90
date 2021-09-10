@@ -104,7 +104,6 @@ ENDIF
 !         1.   Reads the namelists
 !              --------------------
 !
-WRITE(ILUOUT,*) 'Debut init_surf_topo_n'
 !
 IF (LCOUPL_TOPD) THEN
   !
@@ -123,9 +122,6 @@ IF (LCOUPL_TOPD) THEN
   !
   !IF (LBUDGET_TOPD) CALL INIT_BUDGET_COUPL_ROUT(KI)
   !
-ELSE
-  !
-  WRITE(ILUOUT,*) 'Pas de couplage avec TOPMODEL'
   !
 ENDIF
 !

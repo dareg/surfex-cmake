@@ -50,21 +50,7 @@
 ! ----------------------- BEGIN MODULE mode_glt_info_r ---------------------
 
 MODULE mode_glt_info_r
-INTERFACE 
-
-SUBROUTINE glt_info_si_r(omess,tpsit,tpsil)
-  USE modd_types_glt
-  USE modd_glt_param
-  CHARACTER(*) ::  &
-        omess
-  TYPE(t_sit), DIMENSION(nt,np), OPTIONAL, INTENT(in) ::  &
-        tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::  &
-        tpsil
-END SUBROUTINE glt_info_si_r
-
-END INTERFACE
-END MODULE mode_glt_info_r
+CONTAINS
 
 ! ----------------------- END MODULE mode_glt_info_r ------------------------
 
@@ -85,14 +71,14 @@ END MODULE mode_glt_info_r
 !       - snow layer density
 !       - surface temperature.
 
-SUBROUTINE glt_info_si_r(omess,tpsit,tpsil)
+SUBROUTINE glt_info_si_r(omess,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,tpsit,tpsil)
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
-
+  LOGICAL,INTENT(in) :: lp2,lp3
+  INTEGER,INTENT(in) :: nl,nt,np,noutlu,nicesal,niceage,nmponds
   CHARACTER(*) ::                                                              &
         omess
   TYPE(t_sit), DIMENSION(nt,np), OPTIONAL, INTENT(in) ::           &
@@ -294,6 +280,7 @@ SUBROUTINE glt_info_si_r(omess,tpsit,tpsil)
 ! *** End of routine
 !
 END SUBROUTINE glt_info_si_r 
+END MODULE mode_glt_info_r
 !
 ! ----------------------- END SUBROUTINE glt_info_si_r ----------------------
 ! -----------------------------------------------------------------------

@@ -96,7 +96,8 @@
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_thermo_end_r -----------------------
 
-SUBROUTINE glt_thermo_end_r( tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil )
+SUBROUTINE glt_thermo_end_r(tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil,&
+niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 !
 !
 ! 1. Declarations
@@ -106,7 +107,6 @@ SUBROUTINE glt_thermo_end_r( tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil )
 ! -------------------------
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE modi_gltools_mixice_r
   USE modi_gltools_chkglo_r
@@ -114,6 +114,11 @@ SUBROUTINE glt_thermo_end_r( tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil )
   IMPLICIT NONE
 !
 !
+  INTEGER,INTENT(IN) :: nl,nt,np,noutlu,niceage,nicesal,nmponds,nilay,nprinto
+  LOGICAL,INTENT(IN) :: lp1,lwg
+  REAL,INTENT(IN) :: dtt
+  REAL,INTENT(IN),DIMENSION(:) :: thick
+
 ! 1.2. Dummy arguments declarations
 ! ----------------------------------
 !
@@ -166,7 +171,7 @@ SUBROUTINE glt_thermo_end_r( tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil )
 ! 2.2. Check in
 ! --------------
 !
-  CALL gltools_chkglo_r( 'Before THERMO_END_R',tpdom,tpsit )
+  CALL gltools_chkglo_r( 'Before THERMO_END_R',tpdom,tpsit,noutlu,np,nprinto,nt,lwg )
 !
 !
 !
@@ -288,7 +293,8 @@ SUBROUTINE glt_thermo_end_r( tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil )
 !
 ! .. Mix together all ice types_glt that are gathered in the same class.
 !
-  CALL gltools_mixice_r(tpml,tzsit,tzsil,tpsit,tpsil)
+  CALL gltools_mixice_r(tpml,tzsit,tzsil,tpsit,tpsil,&
+niceage,nicesal,nilay,nl,nmponds,np,nt)
 !
 ! .. Deallocate auxiliary arrays memory.
 !
@@ -309,7 +315,7 @@ SUBROUTINE glt_thermo_end_r( tpdom,tpml,tpldsit,tpldsil,tpsit,tpsil )
 ! 3.3. Check out
 ! ---------------
 !
-  CALL gltools_chkglo_r( 'After THERMO_END_R',tpdom,tpsit )
+  CALL gltools_chkglo_r( 'After THERMO_END_R',tpdom,tpsit,noutlu,np,nprinto,nt,lwg )
 !
 !
 ! 3.4. Farewell message

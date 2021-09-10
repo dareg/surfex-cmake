@@ -91,14 +91,15 @@
 ! given their areal fractions, overlying snow layers thickness and
 ! density, and vertical temperature profiles. 
 !
-SUBROUTINE gltools_mixice( tpmxl,tplsit,tplsil,tpsit,tpsil )
+SUBROUTINE gltools_mixice(tpmxl,tplsit,tplsil,tpsit,tpsil,&
+niceage,nicesal,nilay,nmponds,nl,nt,nx,ny )
 !
   USE modd_types_glt
   USE modd_glt_const_thm
-  USE modd_glt_param
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: niceage,nicesal,nmponds,nilay,nl,nt,nx,ny
   TYPE(t_mxl),DIMENSION(nx,ny), INTENT(in) ::                           &
         tpmxl
   TYPE(t_sit), DIMENSION(:,:,:,:), INTENT(in) ::                        &

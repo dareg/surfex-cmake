@@ -52,53 +52,8 @@
 ! ----------------------- BEGIN MODULE mode_glt_init ------------------------
 
 MODULE mode_glt_init 
-INTERFACE
+CONTAINS
 
-#if ! defined in_surfex
-SUBROUTINE inidmn(tpglt)
-  USE modd_types_glt
-  TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
-END SUBROUTINE inidmn
-#endif
-
-SUBROUTINE initfl(tptfl)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tptfl
-END SUBROUTINE initfl
-
-SUBROUTINE inisal  &
-  ( tpdom,tpmxl,tpsit )
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpdom
-  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpmxl
-  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(inout) ::  &
-    tpsit
-END SUBROUTINE inisal
-
-SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_ind), INTENT(in) ::  &
-        tpind
-  TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tpdia
-  REAL, DIMENSION(ndiamax,1,1), INTENT(out) ::  &
-        pcumdia0
-  REAL, DIMENSION(ndiamax,nx,ny), INTENT(out) ::  &
-        pcumdia
-END SUBROUTINE inidia
-
-SUBROUTINE init_timers
-END SUBROUTINE init_timers
-
-END INTERFACE
-END MODULE mode_glt_init
 
 ! ------------------------ END MODULE mode_glt_init -------------------------
 
@@ -115,7 +70,6 @@ END MODULE mode_glt_init
 SUBROUTINE inidmn( tpglt )
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_gltools_mpi
   USE modi_gltools_mskerr
@@ -174,7 +128,7 @@ SUBROUTINE inidmn( tpglt )
 !
   OPEN(UNIT=ngrdlu,FILE=yfname,FORM='FORMATTED')
   READ(ngrdlu,*) yword
-  CALL gltools_mskerr( 'TMK',yfname,yword )
+  CALL gltools_mskerr( 'TMK',yfname,yword,noutlu,lwg )
   READ(ngrdlu,*) iwork2(:,:)
 !
 !  iwork2(120,9)=0
@@ -197,7 +151,7 @@ SUBROUTINE inidmn( tpglt )
 ! * Read grid points latitude, in degrees and convert to radians.
 !
   READ(ngrdlu,*) yword
-  CALL gltools_mskerr( 'TLA',yfname,yword )
+  CALL gltools_mskerr( 'TLA',yfname,yword,noutlu,lwg )
   READ(ngrdlu,*) zwork2
   zwork2(:,:) = zwork2(:,:) * pi / 180.
   CALL scatter2d( zwork2,zwork2_p )
@@ -206,7 +160,7 @@ SUBROUTINE inidmn( tpglt )
 ! * Read grid points longitude, in degrees and convert to radians.
 !
   READ(ngrdlu,*) yword
-  CALL gltools_mskerr( 'TLO',yfname,yword )
+  CALL gltools_mskerr( 'TLO',yfname,yword,noutlu,lwg )
   READ(ngrdlu,*) zwork2
   zwork2(:,:) = zwork2(:,:) * pi / 180.
   CALL scatter2d( zwork2,zwork2_p )
@@ -215,13 +169,13 @@ SUBROUTINE inidmn( tpglt )
 ! * Read grid cell dimensions (m) in the X and Y directions. 
 !
   READ(ngrdlu,*) yword
-  CALL gltools_mskerr( 'TSX',yfname,yword )
+  CALL gltools_mskerr( 'TSX',yfname,yword,noutlu,lwg )
   READ(ngrdlu,*) zwork2
   CALL scatter2d( zwork2,zwork2_p )
   tpglt%dom(:,:)%dxc = zwork2_p(:,:)
 !
   READ(ngrdlu,*) yword
-  CALL gltools_mskerr( 'TSY',yfname,yword )
+  CALL gltools_mskerr( 'TSY',yfname,yword,,noutlu,lwg )
   READ(ngrdlu,*) zwork2
   CALL scatter2d( zwork2,zwork2_p )
   tpglt%dom(:,:)%dyc = zwork2_p(:,:)
@@ -247,11 +201,10 @@ END SUBROUTINE inidmn
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE BNDMN ---------------------------
 !
-SUBROUTINE bnddmn( tpglt )
+SUBROUTINE bnddmn( tpglt,noutlu,lwg )
 !
   USE dom_oce
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_gltools_bound
   USE lib_mpp
@@ -410,11 +363,11 @@ END SUBROUTINE bnddmn
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE INITFL ---------------------------
 !
-SUBROUTINE initfl(tptfl)
+SUBROUTINE initfl(tptfl,nx,ny)
   USE modd_types_glt
-  USE modd_glt_param
   IMPLICIT NONE
 !
+  INTEGER, INTENT(in) :: nx,ny
   TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
         tptfl
 !
@@ -442,12 +395,12 @@ END SUBROUTINE initfl
 ! ------------------------- SUBROUTINE INISAL ---------------------------
 !
 SUBROUTINE inisal  &
-  ( tpdom,tpmxl,tpsit )
+  ( tpdom,tpmxl,tpsit,nicesal,nt,nx,ny )
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: nt,nx,ny,nicesal
 !
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
     tpdom
@@ -487,10 +440,10 @@ END SUBROUTINE inisal
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE INIDIA ---------------------------
 !
-SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia)
+SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia,ndiamax,nx,ny)
   USE modd_types_glt
-  USE modd_glt_param
   IMPLICIT NONE
+  INTEGER, INTENT(in) :: ndiamax,nx,ny
 !
   TYPE(t_ind), INTENT(inout) ::  &
         tpind
@@ -581,13 +534,12 @@ END SUBROUTINE inidia
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE INIT_TIMERS ------------------------
 SUBROUTINE init_timers
-  USE modd_glt_param
 !
   IF ( ntimers==1 ) THEN
     CALL CPU_TIME( xtime )
-    clabel = 'FIRST000'
     ntimnum = 1
   ENDIF
 END SUBROUTINE init_timers
+END MODULE mode_glt_init
 ! --------------------- END SUBROUTINE INIT_TIMERS ----------------------
 ! -----------------------------------------------------------------------

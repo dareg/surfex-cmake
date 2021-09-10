@@ -37,6 +37,8 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_DATE_SURF
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
+USE MODD_GLT_PARAM, ONLY : t_glt_param
+USE MODD_GLT_VHD, ONLY : t_glt_vhd
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -65,6 +67,7 @@ TYPE SEAFLUX_t
   CHARACTER(LEN=6)              :: CINTERPOL_SIC ! Interpolation method of monthly SIC
   LOGICAL                       :: LINTERPOL_SIT ! Interpolation of monthly SIT
   CHARACTER(LEN=6)              :: CINTERPOL_SIT ! Interpolation method of monthly SIT
+  CHARACTER(LEN=6)              :: CONSTRAIN_CSV ! Conservation method if sea  ice constraint
   REAL                          :: XFREEZING_SST ! Value marking frozen sea in SST data
   REAL                          :: XSIC_EFOLDING_TIME ! For damping of SIC (days)
   REAL                          :: XSIT_EFOLDING_TIME ! For damping of SIT (days)
@@ -119,6 +122,7 @@ TYPE SEAFLUX_t
   REAL, POINTER, DIMENSION(:) :: XCPL_SEA_RAIN ! Rainfall for ESM coupling
   REAL, POINTER, DIMENSION(:) :: XCPL_SEA_SNOW ! Snowfall for ESM coupling
   REAL, POINTER, DIMENSION(:) :: XCPL_SEA_FWSM ! wind stress for ESM coupling
+  REAL, POINTER, DIMENSION(:) :: XCPL_SEA_PRES ! Surface pressure for ESM coupling
 !  
   REAL, POINTER, DIMENSION(:) :: XCPL_SEAICE_SNET ! Solar net heat flux for ESM coupling
   REAL, POINTER, DIMENSION(:) :: XCPL_SEAICE_HEAT ! Non solar net heat flux
@@ -146,6 +150,10 @@ TYPE SEAFLUX_t
 !
 !
 !
+
+  TYPE(t_glt_param)                  :: GLTPARAM! new structure 
+  TYPE(t_glt_vhd)                    :: GLTVHD! new structure 
+
 END TYPE SEAFLUX_t
 
 
@@ -193,6 +201,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_SEAFLUX_N:SEAFLUX_INIT",0,ZHOOK_HANDLE)
   NULLIFY(YSEAFLUX%XCPL_SEA_RAIN)
   NULLIFY(YSEAFLUX%XCPL_SEA_SNOW)
   NULLIFY(YSEAFLUX%XCPL_SEA_FWSM)
+  NULLIFY(YSEAFLUX%XCPL_SEA_PRES)
   NULLIFY(YSEAFLUX%XCPL_SEAICE_SNET)
   NULLIFY(YSEAFLUX%XCPL_SEAICE_HEAT)
   NULLIFY(YSEAFLUX%XCPL_SEAICE_EVAP)
@@ -208,6 +217,7 @@ YSEAFLUX%LINTERPOL_SIC=.FALSE.
 YSEAFLUX%CINTERPOL_SIC=' '
 YSEAFLUX%LINTERPOL_SIT=.FALSE.
 YSEAFLUX%CINTERPOL_SIT=' '
+YSEAFLUX%CONSTRAIN_CSV=' '
 YSEAFLUX%XFREEZING_SST=-1.8
 YSEAFLUX%XSIC_EFOLDING_TIME=0. ! means : no damping
 YSEAFLUX%XSIT_EFOLDING_TIME=0. ! means : no damping

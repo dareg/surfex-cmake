@@ -54,9 +54,6 @@ USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 USE MODD_WATER_PAR,      ONLY : XALBSEAICE
 !
 USE MODD_TYPES_GLT,   ONLY : T_GLT
-USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo, xdomsrf, &
-                           xdomsrf_g, nprinto, CFSIDMP, CHSIDMP,  &
-                           XFSIDMPEFT, XHSIDMPEFT, ntd
 USE MODD_GLT_CONST_THM, ONLY : epsil1
 USE LIB_MPP,            ONLY : MPP_SUM
 USE MODI_GLT_SNDATMF
@@ -116,7 +113,7 @@ IF (.NOT.S%LHANDLE_SIC) THEN
    RETURN
 ENDIF
 !
-nx=KLU
+S%GLTPARAM%nx=KLU
 !
 ALLOCATE(S%XSIC(KLU))
 S%XSIC(:)=XUNDEF
@@ -189,14 +186,14 @@ ENDIF
 IF(LCPL_SEAICE)THEN       
    CALL ABOR1_SFX('READ_SEAICEN: CANNOT YET MANAGE BOTH TRUE LCPL_SEAICE AND CSEAICE_SCHEME = GELATO')
 ENDIF
-nxglo=nx
+S%GLTPARAM%nxglo=S%GLTPARAM%nx
 #if ! defined in_arpege
-CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
+CALL mpp_sum(S%GLTPARAM%nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
 #else
-IF (NPRINTO > 0) THEN
+IF (S%GLTPARAM%NPRINTO > 0) THEN
    WRITE(KLUOUT,*)'Gelato cannot yet compute global averages when running in Arpege (because of collective comm vs. NPROMA blocks)'
 ENDIF
-nxglo=max(nxglo,1)
+S%GLTPARAM%nxglo=S%GLTPARAM%nx
 #endif
 !
 ! Use convention XSIC_EFOLDING_TIME=0 for avoiding any relaxation 
@@ -204,42 +201,48 @@ nxglo=max(nxglo,1)
 !
 IF(S%LINTERPOL_SIC)THEN
   IF (S%XSIC_EFOLDING_TIME==0.0) THEN 
-     CFSIDMP='PRESCRIBE'
+     S%GLTPARAM%CFSIDMP='PRESCRIBE'
   ELSE
-     CFSIDMP='DAMP'
-     XFSIDMPEFT=S%XSIC_EFOLDING_TIME 
+     S%GLTPARAM%CFSIDMP='DAMP'
+     S%GLTPARAM%XFSIDMPEFT=S%XSIC_EFOLDING_TIME 
   ENDIF
 ENDIF
 !
 IF(S%LINTERPOL_SIT)THEN
   IF (S%XSIT_EFOLDING_TIME==0.0) THEN 
-     CHSIDMP='PRESCRIBE'
+     S%GLTPARAM%CHSIDMP='PRESCRIBE'
   ELSE
-     CHSIDMP='DAMP_FAC'
-     XHSIDMPEFT= S%XSIT_EFOLDING_TIME 
+     S%GLTPARAM%CHSIDMP='DAMP_FAC'
+     S%GLTPARAM%XHSIDMPEFT= S%XSIT_EFOLDING_TIME 
   ENDIF
 ENDIF
+!
+! Try to conserve volume (or not) in case of a sea ice thickness constraint
+S%GLTPARAM%CCSVDMP=S%CONSTRAIN_CSV
 !
 !* Physical dimensions are set for Gelato , as a 1D field (second dimension is degenerated)
 !
 ! Supersedes Gelato hard defaults with a Gelato genuine namelist 
 ! if available (for Gelato wizzards !)
-CALL GLTOOLS_READNAM(.FALSE.,KLUOUT)  
+CALL GLTOOLS_READNAM(.FALSE.,KLUOUT,S%GLTPARAM)  
 !
-ny=1
-nyglo=1
-CALL GLTOOLS_ALLOC(S%TGLT)
+S%GLTPARAM%ny=1
+S%GLTPARAM%nyglo=1
+CALL GLTOOLS_ALLOC(S%TGLT,&
+    S%GLTPARAM%ndiamax,S%GLTPARAM%ndynami,S%GLTPARAM%nl,S%GLTPARAM%nnflxin,&
+    S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%ntd,S%GLTPARAM%nx,S%GLTPARAM%ny,&
+    S%GLTPARAM%lp1)
 !
 !*       0.     Check dimensions : number of layers and ice categories
 !
 CALL READ_SURF(HPROGRAM,'ICENL',inl_in_file,IRESP)
-IF (inl_in_file /= nl) THEN 
-   WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, nl
+IF (inl_in_file /= S%GLTPARAM%nl) THEN 
+   WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, S%GLTPARAM%nl
    CALL ABOR1_SFX(YMESS)
 END IF
 CALL READ_SURF(HPROGRAM,'ICENT',int_in_file,IRESP)
-IF (int_in_file /= nt) THEN
-   WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, nt
+IF (int_in_file /= S%GLTPARAM%nt) THEN
+   WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, S%GLTPARAM%nt
    CALL ABOR1_SFX(YMESS)
 END IF
 !
@@ -249,7 +252,7 @@ CALL READ_SURF(HPROGRAM,'ICEUSTAR',S%TGLT%ust(:,1),IRESP)
 !
 !*       2.     Prognostic fields with space and ice-category dimension(s) :
 !
-DO JK=1,nt
+DO JK=1,S%GLTPARAM%nt
    WRITE(YLVL,'(I2)') JK
    YCATEG='_'//ADJUSTL(YLVL)
    ! .. Read sea ice age for type JK
@@ -273,7 +276,7 @@ DO JK=1,nt
    !
    !*       3.     Prognostic fields with space, ice-category and layer dimensions :
    !
-   DO JL=1,nl
+   DO JL=1,S%GLTPARAM%nl
       WRITE(YLVL,'(I2)') JL
       YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)   
       ! .. Read sea ice vertical gltools_enthalpy profile for type JK and level JL  
@@ -293,8 +296,8 @@ ENDWHERE
 !
 ! .. Detect negative ice concentrations
 !
-DO JX=1,nx
-   DO JL=1,nt 
+DO JX=1,S%GLTPARAM%nx
+   DO JL=1,S%GLTPARAM%nt 
       IF ( S%TGLT%sit(JL,JX,1)%fsi<0. ) THEN
          WRITE(KLUOUT,*)  &
               '**** WARNING **** Correcting problem in ice conc. < 0 at i=',  &
@@ -350,10 +353,10 @@ S%TGLT%dom(:,1)%srf=G%XMESH_SIZE(:)
 !
 !    Surface of local and global ocean domain (ghost points are masked out)
 !
-xdomsrf = SUM( S%TGLT%dom(:,1)%srf, MASK=(S%TGLT%dom(:,1)%tmk==1) )
-xdomsrf_g = xdomsrf
+S%GLTPARAM%xdomsrf = SUM( S%TGLT%dom(:,1)%srf, MASK=(S%TGLT%dom(:,1)%tmk==1) )
+S%GLTPARAM%xdomsrf_g = S%GLTPARAM%xdomsrf
 #if ! defined in_arpege
-CALL mpp_sum(xdomsrf_g) 
+CALL mpp_sum(S%GLTPARAM%xdomsrf_g) 
 #else
 ! Avoid zero divide in Gelato computation of global area averages
 xdomsrf_g = MAX(xdomsrf_g, 1.e-9)
@@ -403,7 +406,7 @@ ENDIF
 !! Initialize the coupling variables with 'snapshot' prognostic variables
 ! (for now, averaged over ice categories)  
 !
-CALL GLT_SNDATMF( S%TGLT, XTTSI - XTT )
+CALL GLT_SNDATMF( S%TGLT, S%GLTPARAM%nnflxin,S%GLTPARAM%alblc,XTTSI- XTT )
 S%XSIC(:)     = S%TGLT%ice_atm(1,:,1)%fsi 
 S%XTICE(:)    = S%TGLT%ice_atm(1,:,1)%tsf 
 S%XICE_ALB(:) = S%TGLT%ice_atm(1,:,1)%alb 

@@ -23,6 +23,7 @@
 !!    ------------
 !!
 !!    Original    24/03/2015
+!!    R. El Khatib 03/06/2021 Fix uninitialized ZMESH_SIZE.
 !!
 !----------------------------------------------------------------------------
 !
@@ -152,6 +153,7 @@ IF (NRANK==NPIO) THEN
   !
   ALLOCATE(ZDX(U%NDIM_FULL),ZDY(U%NDIM_FULL))
   ALLOCATE(ZMESH_SIZE(U%NDIM_FULL))
+  CALL GATHER_AND_WRITE_MPI(UG%G%XMESH_SIZE,ZMESH_SIZE)
   CALL GET_MESH_DIM(CGRID,UG%NGRID_FULL_PAR,U%NDIM_FULL,UG%XGRID_FULL_PAR,ZDX,ZDY,ZMESH_SIZE)
   DEALLOCATE(ZMESH_SIZE)
 

@@ -75,10 +75,9 @@
 ! -----------------------------------------------------------------------
 ! -------------------------- SUBROUTINE gltools_alloc ---------------------------
 !
-SUBROUTINE gltools_alloc(tpglt)
+SUBROUTINE gltools_alloc(tpglt,ndiamax,ndynami,nl,nnflxin,noutlu,nt,ntd,nx,ny,lp1)
 !
 USE modd_types_glt 
-USE modd_glt_param
 #if ! defined in_surfex
 USE modd_CB_DynVariables
 USE modd_CB_DynDim
@@ -90,6 +89,8 @@ USE modd_CB_DynForcing
 !
 IMPLICIT NONE
 !
+INTEGER,INTENT(in)         :: noutlu,nnflxin,ntd,nx,ny,nt,nl,ndynami,ndiamax
+LOGICAL,INTENT(in)         :: lp1
 TYPE(t_glt), INTENT(inout) ::  &
     tpglt
 !

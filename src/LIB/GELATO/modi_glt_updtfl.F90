@@ -112,17 +112,18 @@
 ! -----------------------------------------------------------------------
 ! -------------------------- SUBROUTINE glt_updtfl --------------------------
 !
-SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,pent,psalt )
+SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent,psalt )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_glt_salflx
 !
   IMPLICIT NONE
 !
 ! .. Arguments
 !
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nleviti,nt,nx,ny
+  REAL   ,INTENT(in) :: dtt,rn_htopoc
   CHARACTER(*), INTENT(in) ::  &
         hflag  
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
@@ -202,7 +203,7 @@ SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,pent,psalt )
     IF ( nleviti==1 ) THEN
 ! .. Update virtual water flux (concentration/dilution) in kg.m-2.s-1 
 !
-      CALL glt_salflx( zqsalt2,tpmxl,tptfl,pdmass=pdmass,psalt=zsalt )
+      CALL glt_salflx(zqsalt2,tpmxl,tptfl,ncdlssh,nsalflx,nt,nx,ny,dtt,rn_htopoc,pdmass=pdmass,psalt=zsalt )
       tptfl(:,:)%sio = tptfl(:,:)%sio - 1.e-3 * zqsalt(:,:)
     ENDIF
 !   Fresh Water <-> Ocean

@@ -55,7 +55,6 @@ MODULE mode_glt_nemo_bound
    !!                  on OPA ocean mesh
    !!----------------------------------------------------------------------
    !! * Modules used
-   USE modd_glt_param
 #if ! defined in_surfex
    USE modd_glt_mpp_opa
    USE modd_glt_mppv

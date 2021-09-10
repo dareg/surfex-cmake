@@ -1,5 +1,9 @@
-SUBROUTINE OI_CONTROL (YSC, &
+SUBROUTINE OI_CONTROL (YSC,  &
+ & PUNDEF,                   &
  & P__SURFTEMPERATURE,       &
+ & P__SST,                   &
+ & P__SEAICECONC,            &
+ & P__SEAICETHICK,            &
  & P__SURFPREC_EAU_CON,      &
  & P__SURFPREC_EAU_GEC,      &
  & P__SURFPREC_NEI_CON,      &
@@ -18,7 +22,7 @@ SUBROUTINE OI_CONTROL (YSC, &
  & P__SURFRESERV_NEIGE,      &
  & P__LON,                   &
  & P__LAT,                   &
- & LD_MASKEXT)
+ & LD_MASKEXT                )
 
 ! ------------------------------------------------------------------------------------------
 !  *****************************************************************************************
@@ -38,8 +42,10 @@ SUBROUTINE OI_CONTROL (YSC, &
 !   (09/2010)  : More parameters to goto_surfex
 !   (03/2011)  : Initialization of ZEVAPTR (F.Bouyssel)
 !   (03/2013)  : Use 10m wind from upperair instead surfex one (F.Taillefer)
-!   (04/2018)  : Report 43t2modifs to make canari running again
-!   (09/2018)  : use NECHGXFU for ZEVAP (Y. Seity)
+!   (10/2017)  : Bugfix to update sea or lake surface temperature in case XNATURE=0 and ITM>0.5 (F.Bouyssel)
+!   (03/2020)  : assimilation for Gelato + modif in sst assimilation + undef values (A. Napoly)
+!   (06/2021)  : Split patch PNT (A. Napoly)
+!
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
 !
@@ -66,11 +72,13 @@ USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE, CDNOMC, &
                             NDGUX,  NDLUX,  PERPK,  PELON0, PELAT0, &
                             PEDELX, PEDELY, PELON1, PELAT1, PEBETA
 USE MODD_IO_SURF_ARO,ONLY : NGPTOT, NGPTOT_CAP, NPROMA, NINDX1, NINDX2, NBLOCK, NKPROMA, &
-                                                             YSURFEX_CACHE_OUT,          &
-                            SURFEX_FIELD_BUF_PREALLOC, SURFEX_FIELD_BUF_SET_RECORD
+                                                             YSURFEX_CACHE_OUT,   &
+                            SURFEX_FIELD_BUF_PREALLOC, SURFEX_FIELD_BUF_SET_RECORD,SURFEX_FIELD_BUF_EXIST,YSURFEX_CACHE_IN
+
 USE MODD_SURFEX_ARO, ONLY : YSURFEX_ARO_ALL, YSURFEX_ARO_CUR
 
-USE MODE_POS_SURF,  ONLY : POSNAM
+USE MODE_POS_SURF,   ONLY : POSNAM
+USE QACTEX,          ONLY : LAESIC,LAESIT
 
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
@@ -89,15 +97,20 @@ USE MODI_OI_BC_SOIL_MOISTURE
 USE MODI_OI_CACSTS
 USE MODI_FLAG_UPDATE
 USE MODI_WRITE_SURF
-
 USE YOMHOOK ,ONLY : LHOOK, DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE QACTEX   , ONLY : RCLISST
+USE YOMCST   , ONLY : RTT
 
 IMPLICIT NONE
 !
 TYPE(SURFEX_t), INTENT(INOUT) :: YSC
 !
+REAL(KIND=JPRB), OPTIONAL                ::  PUNDEF
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFTEMPERATURE
+REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SST
+REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SEAICECONC
+REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SEAICETHICK
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFPREC_EAU_CON
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFPREC_EAU_GEC
 REAL(KIND=JPRB), OPTIONAL, DIMENSION (:) ::  P__SURFPREC_NEI_CON
@@ -136,31 +149,40 @@ INTEGER                     :: IRESP                ! return code
 TYPE (DATE_TIME)            :: TTIME                ! Current date and time
 INTEGER                     :: ISIZE
 INTEGER                     :: ISIZE1
-LOGICAL                     :: LLKEEPEXTZONE
+LOGICAL                     :: LLKEEPEXTZONE,LDGELATO
 
 ! Arrays for soil OI analysis
 REAL, DIMENSION (:,:), ALLOCATABLE :: PWS, PWP, PTS, PTP, PTL, PSNS, PRSMIN, PD2, PLAI, PVEG
-REAL, DIMENSION (:),   ALLOCATABLE :: PSST, PSAB, PARG, PLAT, PLON, PTCLS, PHCLS, PUCLS, PVCLS,  &
-                                     & PEVAP, PEVAPTR, PT2M_O, PHU2M_O, PTS_O, ZT2INC, ZH2INC,   &
+REAL, DIMENSION (:),   ALLOCATABLE :: PSST, PSIC, PICEFSI, PICEHSI,PICETSF, PICESSI, PICEH_1,    &
+                                     & PICEH_2, PICEH_3,                                         &
+                                     &PICEH_4,PICEH_5,PICEH_6,PICEH_7,PICEH_8,PICEH_9,           &
+                                     &PICEH_10, PSAB, PARG, PLAT, PLON, PTCLS, PHCLS,            &
+                                     & PUCLS, PVCLS,                                             &
+                                     & PEVAP, PEVAPTR, PT2M_O, PHU2M_O, PTS_O,PSST_O, PSIC_O,    &
+                                     & PSIT_O, ZT2INC, ZH2INC,                                   &
                                      & ZWS, ZWP, ZTL, ZTS, ZTP, ZTCLS, ZHCLS, ZUCLS, ZVCLS,      &
                                      & PSSTC, PWPINC1, PWPINC2, PWPINC3, PT2MBIAS, PH2MBIAS,     &
                                      & PRRCN, PRRCL, PRRSN, PRRSL, PATMNEB, PITM, PALBF, PEMISF, &
                                      & PZ0F, PIVEG, PZ0H, PTSC, PTPC, PWSC, PWPC, PSNC, ZEVAP,   &
                                      & ZEVAPTR, PGELAT, PGELAM, PGEMU, ZWSINC, ZWPINC, ZTSINC,   &
                                      & ZTPINC, ZTLINC, ZSNINC, ZSNS, ZPX, ZPY, PSM_O, PSIG_SMO,  &
-                                     & PLSM_O, PWS_O, ZWGINC, PLST, PTRD3, ZSST, ZLST, ZALT
-REAL, DIMENSION (:),   ALLOCATABLE :: ZSST1, ZLST1, PSST1, PLST1, PLAT1, PLON1, ZALT1
+                                     & PLSM_O, PWS_O, ZWGINC, PLST, PTRD3, ZSST, ZLST, ZALT, PSN_O
+REAL, DIMENSION (:),   ALLOCATABLE :: ZSST1, ZLST1, PSST1, PLST1, PLAT1, PLON1, ZALT1, ZWORK,    &
+                                     & ZWORK2
 
 INTEGER                            :: IVERSION, IBUGFIX
 INTEGER                            :: JJ,J1
 CHARACTER(LEN=10)                  :: YVAR    ! Name of the prognostic variable (in LFI file)
+!CHARACTER(LEN=30)                  :: YSEAICE_SCHEM
 CHARACTER(LEN=100)                 :: YPREFIX ! Prefix of the prognostic variable  (in LFI file)
 INTEGER                            :: INOBS   ! number of observations
 INTEGER :: ILUNAM
-LOGICAL :: GFOUND
-
+LOGICAL :: GFOUND,LSPLIT_PATCH
+INTEGER :: IPATCH,JP
+CHARACTER(LEN=2) :: YPAT
 REAL                               :: PLAT0,PLON0,PRPK,PLATOR,PLONOR,DELX,DELY,PBETA,ZTHRES
-REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180
+REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180, ZSCAL, ZRTCLS, ZLN
+REAL                               :: ZTF
 
 
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -173,14 +195,6 @@ PRINT *,'|                             ENTER OI_ASSIM                           
 PRINT *,'|                                                                        |'
 PRINT *,'--------------------------------------------------------------------------'
 
-!CALL OPEN_NAMELIST('ASCII ',ILUNAM,CNAMELIST)
-!CALL POSNAM(ILUNAM,'NAM_IO_OFFLINE',GFOUND)
-!IF (GFOUND) READ (UNIT=ILUNAM,NML=NAM_IO_OFFLINE)
-!CALL CLOSE_NAMELIST('ASCII ',ILUNAM)
-
-!CALL READ_ALL_NAMELISTS(YSC,CSURF_FILETYPE,'ALL',.FALSE.)
-
-
 YPROGRAM = 'AROME'
 IGPCOMP = MIN (NGPTOT, NGPTOT_CAP)  
 NBLOCK   = 1
@@ -188,13 +202,11 @@ NINDX1   = 1 + (NBLOCK - 1) * NPROMA
 NINDX2   = MIN (NBLOCK * NPROMA, IGPCOMP)
 NKPROMA  = NINDX2 - NINDX1 + 1
 YSURFEX_ARO_CUR => YSURFEX_ARO_ALL(NBLOCK)
-
 ICURRENT_MODEL = 1
-
 LLKEEPEXTZONE = .FALSE.
-
 Z1S2PI=1.0_JPRB/(2.0_JPRB*XPI)
 ZPIS180=XPI/180.0_JPRB
+ZTF=-1.8_JPRB
 
 !   Update some constants dependant from NACVEG
 
@@ -208,8 +220,7 @@ CALL INI_DATA_COVER(YSC%DTCO, YSC%U)
 
 !   Read grid dimension for allocation
 
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                        YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, YPROGRAM,'FULL  ','SURF  ','READ ')
 
 !   Find current time
 
@@ -228,8 +239,7 @@ IF (NSSSSS > NDAYSEC) NSSSSS = NSSSSS - NDAYSEC
 
 CALL END_IO_SURF_n(YPROGRAM)
 CALL SET_SURFEX_FILEIN(YPROGRAM,'PGD ') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                        YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, YPROGRAM,'FULL  ','SURF  ','READ ')
 
 CALL READ_SURF(&
                YPROGRAM,'SEA   ',YSC%U%CSEA   ,IRESP)
@@ -243,8 +253,7 @@ CALL READ_SURF(&
 CALL READ_SURF(&
                YPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
 CALL END_IO_SURF_n(YPROGRAM)
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                        YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, YPROGRAM,'FULL  ','SURF  ','READ ')
 
 CALL READ_SURF(&
                YPROGRAM,'DIM_SEA   ',YSC%U%NDIM_SEA,   IRESP)
@@ -255,26 +264,10 @@ CALL READ_SURF(&
 CALL READ_SURF(&
                YPROGRAM,'DIM_TOWN  ',YSC%U%NDIM_TOWN,  IRESP)
 
-!ALLOCATE(NWORK(YSC%U%NDIM_FULL))
-!ALLOCATE(XWORK(YSC%U%NDIM_FULL))
-!ALLOCATE(NWORK2(YSC%U%NDIM_FULL,10))
-!ALLOCATE(XWORK2(YSC%U%NDIM_FULL,10))
-!ALLOCATE(XWORK3(YSC%U%NDIM_FULL,10,10))
-!IF (NRANK==NPIO) THEN
-!  ALLOCATE(NWORK_FULL(YSC%U%NDIM_FULL))
-!  ALLOCATE(XWORK_FULL(YSC%U%NDIM_FULL))
-!  ALLOCATE(NWORK2_FULL(YSC%U%NDIM_FULL,10))
-!  ALLOCATE(XWORK2_FULL(YSC%U%NDIM_FULL,10))
-!ELSE
-!  ALLOCATE(NWORK_FULL(0))
-!  ALLOCATE(XWORK_FULL(0))
-!  ALLOCATE(NWORK2_FULL(0,0))
-!  ALLOCATE(XWORK2_FULL(0,0))
-!ENDIF
 !
 !   Get total dimension of domain (excluding extension zone)
 
-CALL GET_SIZE_FULL_n(YPROGRAM,YSC%U%NDIM_FULL,YSC%U%NSIZE_FULL,YSC%U%NSIZE_FULL)
+CALL GET_SIZE_FULL_n(YPROGRAM, YSC%U%NDIM_FULL, YSC%U%NSIZE_FULL, YSC%U%NSIZE_FULL)
 
 ISIZE = YSC%U%NSIZE_FULL
 
@@ -327,6 +320,21 @@ ALLOCATE (PTS(ISIZE,1))
 ALLOCATE (PTP(ISIZE,1))
 ALLOCATE (PTL(ISIZE,1))
 ALLOCATE (PSST(ISIZE))
+ALLOCATE (PSIC(ISIZE))
+ALLOCATE (PICEHSI(ISIZE))
+ALLOCATE (PICETSF(ISIZE))
+ALLOCATE (PICESSI(ISIZE))
+ALLOCATE (PICEFSI(ISIZE))
+ALLOCATE (PICEH_1(ISIZE))
+ALLOCATE (PICEH_2(ISIZE))
+ALLOCATE (PICEH_3(ISIZE))
+ALLOCATE (PICEH_4(ISIZE))
+ALLOCATE (PICEH_5(ISIZE))
+ALLOCATE (PICEH_6(ISIZE))
+ALLOCATE (PICEH_7(ISIZE))
+ALLOCATE (PICEH_8(ISIZE))
+ALLOCATE (PICEH_9(ISIZE))
+ALLOCATE (PICEH_10(ISIZE))
 ALLOCATE (PSNS(ISIZE,1))
 ALLOCATE (PLAI(ISIZE,1))
 ALLOCATE (PVEG(ISIZE,1))
@@ -339,39 +347,97 @@ ALLOCATE (PVCLS(ISIZE))
 ALLOCATE (PEVAP(ISIZE))
 ALLOCATE (PLST(ISIZE))
 ALLOCATE (PTRD3(ISIZE))
-
 ALLOCATE (ZLST(ISIZE))
 ALLOCATE (ZSST(ISIZE))
+ALLOCATE (ZWORK(ISIZE))
+ALLOCATE (ZWORK2(ISIZE))
 
 !  Read prognostic variables
 
 CALL END_IO_SURF_n(YPROGRAM)
 CALL SET_SURFEX_FILEIN(YPROGRAM,'PREP') ! change input file name to pgd name
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                        YPROGRAM,'FULL  ','SURF  ','READ ')
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, YPROGRAM,'FULL  ','SURF  ','READ ')
+
+IF (SURFEX_FIELD_BUF_EXIST (YSURFEX_CACHE_IN, 'SPLIT_PATCH')) THEN
+    CALL READ_SURF(YPROGRAM,'SPLIT_PATCH',LSPLIT_PATCH,IRESP)
+    CALL READ_SURF(YPROGRAM,'PATCH_NUMBER',IPATCH,  IRESP)
+ELSE
+   LSPLIT_PATCH=.FALSE.
+   IPATCH=1
+ENDIF
 
 IF (YSC%U%NSIZE_NATURE>0 .AND. YSC%U%CNATURE/='NONE') THEN
-  CALL READ_SURF(&
-               YPROGRAM,'WG1',       PWS,   IRESP)
-  CALL READ_SURF(&
-               YPROGRAM,'WG2',       PWP,   IRESP)
-  CALL READ_SURF(&
-               YPROGRAM,'TG1',       PTS,   IRESP)
-  CALL READ_SURF(&
-               YPROGRAM,'TG2',       PTP,   IRESP)
-  CALL READ_SURF(&
-               YPROGRAM,'WGI2',      PTL,   IRESP)
 
-  CALL READ_SURF(&
-               YPROGRAM,'VERSION',IVERSION,IRESP)
-  CALL READ_SURF(&
-               YPROGRAM,'BUG',IBUGFIX,IRESP)
-  IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
-    CALL READ_SURF(&
-               YPROGRAM,'WSN_VEG1',PSNS,  IRESP)
+  CALL READ_SURF(YPROGRAM,'VERSION',IVERSION,IRESP)
+  CALL READ_SURF(YPROGRAM,'BUG',IBUGFIX,IRESP)
+  IF (LSPLIT_PATCH) THEN 
+    DO JP=1,IPATCH
+      WRITE(YPAT,'(I2)') JP
+      YVAR='RSMIN'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,PRSMIN(:,JP),IRESP)
+      YVAR='DG2'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT))) 
+      CALL READ_SURF(YPROGRAM,YVAR,PD2(:,JP),IRESP)
+      YVAR='LAI'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PLAI(:,JP)  ,IRESP)
+      YVAR='VEG'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PVEG(:,JP)  ,IRESP)
+      YVAR='WG1'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PWS(:,JP)  ,IRESP)
+      YVAR='WG2'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PWP(:,JP)  ,IRESP)
+      YVAR='TG1'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PTS(:,JP)  ,IRESP)
+      YVAR='TG2'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PTP(:,JP)  ,IRESP)
+      YVAR='WGI2'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PTL(:,JP)  ,IRESP)
+      YVAR='WSN_VEG1'
+      YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+      CALL READ_SURF(YPROGRAM,YVAR,  PSNS(:,JP)  ,IRESP)
+    ENDDO
   ELSE
     CALL READ_SURF(&
-               YPROGRAM,'WSNOW_VEG1',PSNS,  IRESP)
+                 YPROGRAM,'WG1',       PWS,   IRESP)
+    CALL READ_SURF(&
+                 YPROGRAM,'WG2',       PWP,   IRESP)
+    CALL READ_SURF(&
+                 YPROGRAM,'TG1',       PTS,   IRESP)
+    CALL READ_SURF(&
+                 YPROGRAM,'TG2',       PTP,   IRESP)
+    CALL READ_SURF(&
+                 YPROGRAM,'WGI2',      PTL,   IRESP)
+  
+    CALL READ_SURF(&
+                 YPROGRAM,'VERSION',IVERSION,IRESP)
+    CALL READ_SURF(&
+                 YPROGRAM,'BUG',IBUGFIX,IRESP)
+  
+    IF (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3) THEN
+      CALL READ_SURF(&
+                 YPROGRAM,'WSN_VEG1',PSNS,  IRESP)
+    ELSE
+      CALL READ_SURF(&
+                 YPROGRAM,'WSNOW_VEG1',PSNS,  IRESP)
+    ENDIF
+
+    ! Read constant surface fields
+    CALL READ_SURF(&
+                   YPROGRAM,'RSMIN',     PRSMIN,IRESP)
+    CALL READ_SURF(&
+                   YPROGRAM,'DG2',       PD2,   IRESP)
+    CALL READ_SURF(&
+                   YPROGRAM,'LAI',       PLAI,  IRESP)
+    CALL READ_SURF(&
+                   YPROGRAM,'VEG',       PVEG,  IRESP)
   ENDIF
 ENDIF
 
@@ -379,6 +445,58 @@ IF (YSC%U%NSIZE_SEA>0 .AND. YSC%U%CSEA/='NONE') THEN
   CALL READ_SURF(&
                YPROGRAM,'SST',       PSST,  IRESP)
 ENDIF
+
+CALL TEST_GELATO(LDGELATO)
+
+IF (YSC%U%NSIZE_SEA>0 .AND. YSC%U%CSEA/='NONE' .AND. LDGELATO) THEN
+   CALL READ_SURF(&
+                 YPROGRAM,'SIC',      PSIC,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEHSI_1',PICEHSI,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICETSF_1',PICETSF,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICESSI_1',PICESSI,  IRESP)
+   CALL READ_SURF(&
+                  YPROGRAM,'ICEFSI_1',PICEFSI,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_1',PICEH_1,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_2',PICEH_2,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_3',PICEH_3,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_4',PICEH_4,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_5',PICEH_5,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_6',PICEH_6,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_7',PICEH_7,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_8',PICEH_8,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_9',PICEH_9,  IRESP)
+   CALL READ_SURF(&
+                 YPROGRAM,'ICEH_1_10',PICEH_10,  IRESP)
+ELSE
+  PSIC(:)   = XUNDEF
+  PICEHSI(:)= XUNDEF
+  PICETSF(:)= XUNDEF
+  PICESSI(:)= XUNDEF
+  PICEFSI(:)= XUNDEF
+  PICEH_1(:)= XUNDEF
+  PICEH_2(:)= XUNDEF
+  PICEH_3(:)= XUNDEF
+  PICEH_4(:)= XUNDEF
+  PICEH_5(:)= XUNDEF
+  PICEH_6(:)= XUNDEF
+  PICEH_7(:)= XUNDEF
+  PICEH_8(:)= XUNDEF
+  PICEH_9(:)= XUNDEF
+  PICEH_10(:)= XUNDEF
+ENDIF
+
 
 IF (YSC%U%NSIZE_WATER>0 .AND. YSC%U%CWATER/='NONE') THEN
   CALL READ_SURF(&
@@ -406,16 +524,6 @@ CALL READ_SURF(&
 CALL READ_SURF(&
                YPROGRAM,'HU2M',      PHCLS, IRESP)
 
-! Read constant surface fields
-
-CALL READ_SURF(&
-               YPROGRAM,'RSMIN',     PRSMIN,IRESP)
-CALL READ_SURF(&
-               YPROGRAM,'DG2',       PD2,   IRESP)
-CALL READ_SURF(&
-               YPROGRAM,'LAI',       PLAI,  IRESP)
-CALL READ_SURF(&
-               YPROGRAM,'VEG',       PVEG,  IRESP)
 
 IF (NPRINTLEV>0) THEN
   JJ = YSC%U%NR_NATURE(1)
@@ -485,12 +593,15 @@ ALLOCATE (PGEMU(ISIZE))
 ALLOCATE (PT2M_O(ISIZE))
 ALLOCATE (PHU2M_O(ISIZE))
 ALLOCATE (PTS_O(ISIZE))
+ALLOCATE (PSST_O(ISIZE))
+ALLOCATE (PSIC_O(ISIZE))
+ALLOCATE (PSIT_O(ISIZE))
 ALLOCATE (PSM_O(ISIZE))
 ALLOCATE (PSIG_SMO(ISIZE))
 ALLOCATE (PLSM_O(ISIZE))
 ALLOCATE (PWS_O(ISIZE))
 ALLOCATE (ZWGINC(ISIZE))
-
+ALLOCATE (PSN_O(ISIZE))
 
 !  Read model forecast quantities
 
@@ -521,9 +632,12 @@ ENDIF
 PT2M_O(:)  = P__CLSTEMPERATURE   (1:ISIZE)
 PHU2M_O(:) = P__CLSHUMI_RELATIVE (1:ISIZE)
 PTS_O(:)   = P__SURFTEMPERATURE  (1:ISIZE)
+PSST_O(:)  = P__SST              (1:ISIZE)
+PSIC_O(:)  = P__SEAICECONC       (1:ISIZE)
+PSIT_O(:)  = P__SEAICETHICK      (1:ISIZE)
 PUCLS(:)   = P__CLSVENT_ZONAL    (1:ISIZE)
 PVCLS(:)   = P__CLSVENT_MERIDIEN (1:ISIZE)
-
+PSN_O(:)   = P__SURFRESERV_NEIGE (1:ISIZE)
 
 !  Read ASCAT SM observations (in percent)
 
@@ -538,7 +652,7 @@ IF (LOBSWG) THEN
   ENDDO
 990 CONTINUE
   CLOSE(UNIT=111)
-  PRINT *,'READ ASCAT SM OK'
+   PRINT *,'READ ASCAT SM OK'
 ELSE
   PSM_O(:)    = 999.0
   PSIG_SMO(:) = 999.0
@@ -572,6 +686,13 @@ ALLOCATE (ZSNINC(ISIZE))
 
 ZT2INC(:) = PT2M_O(:) - PTCLS(:)
 ZH2INC(:) = PHU2M_O(:) - PHCLS(:)
+ZSNINC(:) = 0.0_JPRB
+
+IF (LAESNM) THEN
+  WHERE (YSC%U%XNATURE(:)>0.0_JPRB)
+    ZSNINC(:) = PSN_O(:) - PSNS(:,1)
+  END WHERE
+ENDIF
 
 ! Threshold for background check
 
@@ -666,7 +787,7 @@ PRINT *,'           '
 
 !  Soil analysis based on optimal interpolation
 
- CALL OI_CACSTS(ISIZE,ZT2INC,ZH2INC,ZWGINC,PWS_O,                      &
+ CALL OI_CACSTS(ISIZE,ZT2INC,ZH2INC,ZWGINC,ZSNINC,PWS_O,                      &
                 IDAT,NSSSSS,                                           &
                 ZTP,ZWP,ZTL,ZSNS,ZTS,ZWS,                              &
                 ZTCLS,ZHCLS,ZUCLS,ZVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
@@ -732,24 +853,101 @@ PRINT *, '---------------------------------------------------------------'
 ZTSINC(:) = 0.0_JPRB
 
 ! b) Temperature analysis of SEA and LAKE points
-
+ZWORK2(:)=PSST(:)
+ZSCAL = REAL(NECHGU)*3600._JPRB
+ZRTCLS=ZSCAL/(5.0_JPRB*XDAY)
 DO JJ = 1, ISIZE
   IF (YSC%U%XSEA(JJ)>0.0_JPRB) THEN
     ZTSINC(JJ) = PTS_O(JJ) - PSST(JJ)
-    IF (PITM(JJ) <= 0.5_JPRB) THEN
+    IF (PITM(JJ) <= 0.5_JPRB .AND. PSST_O(JJ) /= PUNDEF) THEN
       PSST(JJ) = PTS_O(JJ)
-    ELSE
-      IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PSST(JJ) = PTP(JJ,1)
+    ELSEIF (PSST_O(JJ) /= PUNDEF) THEN 
+      PSST(JJ) =(1.0_JPRB-RCLISST)*PSST(JJ)+RCLISST*PSST_O(JJ)
+    ELSE    !corresponds to : PSST_O(JJ) == PUNDEF
+      PSST(JJ) = PSST(JJ) + ZRTCLS*(PTCLS(JJ)-PSST(JJ))
     ENDIF
   ENDIF
   IF (YSC%U%XWATER(JJ)>0.0_JPRB) THEN
-    IF (PITM(JJ) <= 0.5_JPRB) THEN
-      PLST(JJ) = PTS_O(JJ)
-    ELSE
-      IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PLST(JJ) = PTP(JJ,1)
-    ENDIF
+    IF (PITM(JJ) <= 0.5_JPRB .AND. PSST_O(JJ) /= PUNDEF) THEN
+      PLST(JJ) =PTS_O(JJ)
+    ELSEIF (PSST_O(JJ) /= PUNDEF) THEN
+      PLST(JJ) =PSST_O(JJ)
+    ELSE    !corresponds to : PSST_O(JJ) == PUNDEF 
+      IF (YSC%U%XNATURE(JJ)>0.0_JPRB) THEN
+        PLST(JJ) = PTP(JJ,1)
+      ELSE
+        PLST(JJ) = PLST(JJ) + ZRTCLS*(PTCLS(JJ)-PLST(JJ))
+      ENDIF
+    ENDIF  
   ENDIF
 ENDDO
+
+
+! b.0) sea ice analysis if GELATO is activated and LAESIC==.TRUE.
+IF (LDGELATO .AND. LAESIC)THEN
+  ZWORK(:)=1.0_JPRB*PSIC(:)
+  PSIC_O(:)=PSIC_O(:)/100._JPRB !convert from percentage to fraction of unit
+  DO JJ= 1,ISIZE
+    IF (YSC%U%XSEA(JJ)>0.0_JPRB) THEN
+      IF (PSIC(JJ)<=1.1 .AND. PSIC(JJ)>=0.) THEN
+        !1. first update ice fraction PSIC
+        PSIC(JJ)=RCLISST*PSIC_O(JJ)+(1.0_JPRB-RCLISST)*PSIC(JJ)
+        !2. if sic to low, replace by 0 and adapt other variables
+        IF(PSIC(JJ)<0.001_JPRB) THEN
+          PSIC(JJ)    =0._JPRB
+          PICEHSI(JJ) =0._JPRB
+          PICEFSI(JJ) =0._JPRB
+          PICEH_1(JJ) =0._JPRB
+          PICEH_2(JJ) =0._JPRB
+          PICEH_3(JJ) =0._JPRB
+          PICEH_4(JJ) =0._JPRB
+          PICEH_5(JJ) =0._JPRB
+          PICEH_6(JJ) =0._JPRB
+          PICEH_7(JJ) =0._JPRB
+          PICEH_8(JJ) =0._JPRB
+          PICEH_9(JJ) =0._JPRB
+          PICEH_10(JJ)=0._JPRB
+        ENDIF
+        !3. correct sst where there is ice, with OSTIA values only (no buoys)
+        IF(PSST_O(JJ) /= PUNDEF .AND. PSIC(JJ)>0._JPRB) THEN
+          PSST(JJ)=PSST_O(JJ)
+        ELSEIF (PSIC(JJ)>0._JPRB) THEN
+          PSST(JJ)=271.35_JPRB    
+        ENDIF
+        !4. assimilate sea ice thickness, if values are realistic
+        IF(LAESIT .AND. PSIT_O(JJ)<10._JPRB .AND. PSIT_O(JJ)>0._JPRB) PICEHSI(JJ)  &
+          &= RCLISST*PSIT_O(JJ)+(1.0_JPRB-RCLISST)*PICEHSI(JJ)
+        !5. initiate variables if where is new ice
+        IF(PSIC(JJ)>0._JPRB .AND. ZWORK(JJ)==0._JPRB)THEN   
+           PICEHSI(JJ)=PSIC(JJ)
+           PICETSF(JJ)=MIN(ZTF,PTCLS(JJ)-RTT)  
+           PICESSI(JJ)=5._JPRB
+           ZLN=1.
+           CALL INIT_ICE_ENTHALPIE (PICEH_1(JJ),ZLN)
+           ZLN=2.
+           CALL INIT_ICE_ENTHALPIE (PICEH_2(JJ),ZLN)
+           ZLN=3.
+           CALL INIT_ICE_ENTHALPIE (PICEH_3(JJ),ZLN)
+           ZLN=4.
+           CALL INIT_ICE_ENTHALPIE (PICEH_4(JJ),ZLN)
+           ZLN=5.
+           CALL INIT_ICE_ENTHALPIE (PICEH_5(JJ),ZLN)
+           ZLN=6.
+           CALL INIT_ICE_ENTHALPIE (PICEH_6(JJ),ZLN)
+           ZLN=7.
+           CALL INIT_ICE_ENTHALPIE (PICEH_7(JJ),ZLN)
+           ZLN=8.
+           CALL INIT_ICE_ENTHALPIE (PICEH_8(JJ),ZLN)
+           ZLN=9.
+           CALL INIT_ICE_ENTHALPIE (PICEH_9(JJ),ZLN)
+           ZLN=10.
+           CALL INIT_ICE_ENTHALPIE (PICEH_10(JJ),ZLN)
+        ENDIF  
+      ENDIF
+    ENDIF
+  ENDDO  
+ENDIF
+
 
 PRINT *, 'Mean TS increments over SEA    ',SUM(ZTSINC,YSC%U%XSEA > 0.0_JPRB)/YSC%U%NSIZE_SEA
 
@@ -759,13 +957,9 @@ WHERE (YSC%U%XTOWN(:)>0.0_JPRB)
   PTRD3(:) = PTRD3(:) + ZT2INC(:)*Z1S2PI
 END WHERE
 
-PRINT *, '---------------------------------------------------------------'
-
 !ANTMPTEST
-! CALL FLAG_UPDATE(YSC%IM%DGI, YSC%DGU, &
-!                  .FALSE.,.FALSE.,.TRUE.,.FALSE.)
-CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
-                        YPROGRAM,'FULL  ','SURF  ','WRITE')
+! CALL FLAG_UPDATE(YSC%IM%DGI, YSC%DGU, .FALSE.,.FALSE.,.TRUE.,.FALSE.)
+CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, YPROGRAM,'FULL  ','SURF  ','WRITE')
 
 ! Count 2D fields in MSE
 ! NINDX1, NINDX2, NKPROMA already set 
@@ -781,16 +975,6 @@ CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, &
 CALL END_IO_SURF_n(YPROGRAM)
 CALL IO_BUFF_CLEAN
 
-!DEALLOCATE(NWORK)
-!DEALLOCATE(XWORK)
-!DEALLOCATE(NWORK2)
-!DEALLOCATE(XWORK2)
-!DEALLOCATE(XWORK3)
-!DEALLOCATE(NWORK_FULL)
-!DEALLOCATE(XWORK_FULL)
-!DEALLOCATE(NWORK2_FULL)
-!DEALLOCATE(XWORK2_FULL)
-
 ! -------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL', 1, ZHOOK_HANDLE)
 
@@ -802,70 +986,184 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 0, ZHOOK_HANDLE)
 
-CALL DD ('WG1', PWS (:,1))
 
-YVAR='WG1'
-YPREFIX='X_Y_WG1 (m3/m3)                                   '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PWS,IRESP,HCOMMENT=YPREFIX)
+IF (LSPLIT_PATCH) THEN
+  DO JP=1,IPATCH
+    YVAR='WG1'
+    YPREFIX='X_Y_WG1 (K)                                       '
+    YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+    CALL WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PWS(:,JP),IRESP,HCOMMENT=YPREFIX)
+    YVAR='WG2'
+    YPREFIX='X_Y_WG2 (K)                                       '
+    YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+    CALL WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PWP(:,JP),IRESP,HCOMMENT=YPREFIX)
+    YVAR='WGI2'
+    YPREFIX='X_Y_WGI2 (K)                                       '
+    YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+    CALL WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PTL(:,JP),IRESP,HCOMMENT=YPREFIX)
+    YVAR='TG1'
+    YPREFIX='X_Y_TG1 (K)                                       '
+    YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+    CALL WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PTS(:,JP),IRESP,HCOMMENT=YPREFIX)
+    YVAR='TG2'
+    YPREFIX='X_Y_TG2 (K)                                       '
+    YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+    CALL WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PTP(:,JP),IRESP,HCOMMENT=YPREFIX)
+    YVAR='WSN_VEG1'
+    YPREFIX='X_Y_WSNOW_VEG1 (K)                                       '
+    YVAR=TRIM(YVAR)//'P'//ADJUSTL(YPAT(:LEN_TRIM(YPAT)))
+    CALL WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PSNS(:,JP),IRESP,HCOMMENT=YPREFIX)
+  ENDDO
+ELSE
+  CALL DD ('WG1', PWS (:,1))
+  YVAR='WG1'
+  YPREFIX='X_Y_WG1 (m3/m3)                                   '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PWS,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('WG2', PWP (:,1))
+  CALL DD ('WG2', PWP (:,1))
+  YVAR='WG2'
+  YPREFIX='X_Y_WG2 (m3/m3)                                   '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PWP,IRESP,HCOMMENT=YPREFIX)
 
-YVAR='WG2'
-YPREFIX='X_Y_WG2 (m3/m3)                                   '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PWP,IRESP,HCOMMENT=YPREFIX)
+  CALL DD ('WGI2', PTL (:,1))
+  YVAR='WGI2'
+  YPREFIX='X_Y_WGI2 (m3/m3)                                  '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PTL,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('WGI2', PTL (:,1))
+  CALL DD ('TG1', PTS (:,1))
+  YVAR='TG1'
+  YPREFIX='X_Y_TG1 (K)                                       '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PTS,IRESP,HCOMMENT=YPREFIX)
 
-YVAR='WGI2'
-YPREFIX='X_Y_WGI2 (m3/m3)                                  '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PTL,IRESP,HCOMMENT=YPREFIX)
+  CALL DD ('TG2', PTP (:,1))
+  YVAR='TG2'
+  YPREFIX='X_Y_TG2 (K)                                       '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PTP,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('TG1', PTS (:,1))
+  CALL DD ('WSNOW_VEG1', PSNS (:,1))
+  YVAR='WSN_VEG1'
+  YPREFIX='X_Y_WSNOW_VEG1 (kg/m2)                            '
+  CALL  WRITE_SURF(YSC%DUO%CSELECT,YPROGRAM,YVAR,PSNS,IRESP,HCOMMENT=YPREFIX)
 
-YVAR='TG1'
-YPREFIX='X_Y_TG1 (K)                                       '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PTS,IRESP,HCOMMENT=YPREFIX)
 
-CALL DD ('TG2', PTP (:,1))
-
-YVAR='TG2'
-YPREFIX='X_Y_TG2 (K)                                       '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PTP,IRESP,HCOMMENT=YPREFIX)
+ENDIF
 
 CALL DD ('SST', PSST)
-
 YVAR='SST'
 YPREFIX='X_Y_SST (K)                                       '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PSST,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PSST,IRESP,HCOMMENT=YPREFIX)
+
+IF (LDGELATO) THEN
+  CALL DD ('SIC', PSIC)
+  YVAR='SIC'
+  YPREFIX='X_Y_SIC                                         '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PSIC,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('SIC_MTH0', PSIC)
+  YVAR='SIC_MTH0'
+  YPREFIX='X_Y_SIC_MTH0                                  '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PSIC,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('SIC_MTH1', PSIC)
+  YVAR='SIC_MTH1'
+  YPREFIX='X_Y_SIC_MTH1                                   '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PSIC,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('SIC_MTH2', PSIC)
+  YVAR='SIC_MTH2'
+  YPREFIX='X_Y_SIC_MTH2                                  '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PSIC,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('SIC_MTH3', PSIC)
+  YVAR='SIC_MTH3'
+  YPREFIX='X_Y_SIC_MTH3                                  '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PSIC,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEHSI', PICEHSI)
+  YVAR='ICEHSI_1'
+  YPREFIX='X_Y_ICEHSI                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEHSI,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICETSF', PICETSF)
+  YVAR='ICETSF_1'
+  YPREFIX='X_Y_ICETSF                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICETSF,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICESSI', PICESSI)
+  YVAR='ICESSI_1'
+  YPREFIX='X_Y_ICESSI                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICESSI,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEFSI', PICEFSI)
+  YVAR='ICEFSI_1'
+  YPREFIX='X_Y_ICEFSI                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEFSI,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_1', PICEH_1)
+  YVAR='ICEH_1_1'
+  YPREFIX='X_Y_ICEH_1_1                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_1,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_2', PICEH_2)
+  YVAR='ICEH_1_2'
+  YPREFIX='X_Y_ICEH_1_2                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_2,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_3', PICEH_3)
+  YVAR='ICEH_1_3'
+  YPREFIX='X_Y_ICEH_1_3                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_3,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_4', PICEH_4)
+  YVAR='ICEH_1_4'
+  YPREFIX='X_Y_ICEH_1_4                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_4,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_5', PICEH_5)
+  YVAR='ICEH_1_5'
+  YPREFIX='X_Y_ICEH_1_5                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_5,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_6', PICEH_6)
+  YVAR='ICEH_1_6'
+  YPREFIX='X_Y_ICEH_1_6                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_6,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_7', PICEH_7)
+  YVAR='ICEH_1_7'
+  YPREFIX='X_Y_ICEH_7                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_7,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_8', PICEH_8)
+  YVAR='ICEH_1_8'
+  YPREFIX='X_Y_ICEH_1_8                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_8,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_9', PICEH_9)
+  YVAR='ICEH_1_9'
+  YPREFIX='X_Y_ICEH_1_9                                      '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_9,IRESP,HCOMMENT=YPREFIX)
+
+  CALL DD ('ICEH_1_10', PICEH_10)
+  YVAR='ICEH_1_10'
+  YPREFIX='X_Y_ICEH_1_10                                     '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PICEH_10,IRESP,HCOMMENT=YPREFIX)
+
+ENDIF
+
 
 CALL DD ('TS_WATER', PLST)
 
 YVAR='TS_WATER'
 YPREFIX='X_Y_TS_WATER (K)                                  '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PLST,IRESP,HCOMMENT=YPREFIX)
+CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PLST,IRESP,HCOMMENT=YPREFIX)
 
 IF (YSC%U%NSIZE_TOWN > 0 .AND. LAROME) THEN
-  CALL DD ('T_ROAD3', PTRD3)
-
+  CALL DD ('TROAD3', PTRD3)
   YVAR='TROAD3'
-  YPREFIX='X_Y_T_ROAD3 (K)                                   '
-  CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PTRD3,IRESP,HCOMMENT=YPREFIX)
+  YPREFIX='X_Y_TROAD3 (K)                                   '
+  CALL WRITE_SURF(YSC%DUO%CSELECT, YPROGRAM,YVAR,PTRD3,IRESP,HCOMMENT=YPREFIX)
 ENDIF
-
-CALL DD ('WSNOW_VEG1', PSNS (:,1))
-
-YVAR='WSN_VEG1'
-YPREFIX='X_Y_WSNOW_VEG1 (kg/m2)                            '
-CALL WRITE_SURF(YSC%DUO%CSELECT, &
-                YPROGRAM,YVAR,PSNS,IRESP,HCOMMENT=YPREFIX)
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:WRITE', 1, ZHOOK_HANDLE)
 
@@ -888,10 +1186,37 @@ ZX (1:JN) = PACK (PX, .NOT. LD_MASKEXT)
 
 WRITE (0, *) TRIM(CDN)//" = " 
 WRITE (0, *) JN, MINVAL(ZX(1:JN)), MAXVAL(ZX(1:JN))
-!WRITE (0, '(10(E14.6,", "))') ZX (1:N)
 
 IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:DD', 1, ZHOOK_HANDLE)
 
 END SUBROUTINE DD
+
+SUBROUTINE INIT_ICE_ENTHALPIE (PICEH,PLN)
+REAL, INTENT(OUT)  :: PICEH
+REAL, INTENT(IN)  :: PLN
+REAL :: ZCP0, ZL0, ZMU, ZSSI0, ZTSF0, ZCPW, ZTT, ZTF, ZTINI, ZTM
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:INIT_ICE_ENTHALPIE', 1, ZHOOK_HANDLE)
+!Constants
+ZCP0=2080._JPRB
+ZL0=333550._JPRB
+ZMU=0.054_JPRB
+ZSSI0=5.0_JPRB
+ZTSF0=-15._JPRB
+ZCPW=3989._JPRB
+ZTT=273.15_JPRB
+ZTF=-1.8_JPRB
+!Calcul
+ZTINI=1/9.*(10*ZTF-ZTSF0+PLN*(ZTSF0-ZTF))     !calculate T at layer PLN following a liear interpolation
+ZTM=-ZMU*ZSSI0
+PICEH=-ZCP0*(ZTM-ZTINI)-ZL0*(1-ZTM/ZTINI)+ZCPW*ZTM
+
+IF (LHOOK) CALL DR_HOOK ('OI_CONTROL:INIT_ICE_ENTHALPIE', 1, ZHOOK_HANDLE)
+END SUBROUTINE INIT_ICE_ENTHALPIE
+
+
+
+
+
 
 END SUBROUTINE OI_CONTROL

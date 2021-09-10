@@ -58,8 +58,7 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS,ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_GLT_PARAM , ONLY : XTSTEP=>DTT, LWG, LP1, LP2, LP3, LP4, LP5, &
-                            NPRINTO, GELATO_DIM=>NX
+USE MODD_TYPES_GLT , ONLY : T_GLT
 
 USE MODI_GLT_GELATO
 USE MODI_GLT_SNDATMF
@@ -116,14 +115,14 @@ CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 ! Must restore Gelato problem size (nx) to the correct value for the NPROMA block
 ! 
-GELATO_DIM=SIZE(S%XSSS)
+S%GLTPARAM%NX=SIZE(S%XSSS)
 !
 ! Time steps stuff : default Gelato time step equals surface time step
 !
 IF (S%XSEAICE_TSTEP == XUNDEF) THEN
   IT=1
   ZT=1.
-  XTSTEP=PTSTEP
+  S%GLTPARAM%DTT=PTSTEP
 !
 !* case of a Gelato time-step specified using NAM_SEAICE
 ELSE
@@ -132,7 +131,7 @@ ELSE
    ELSE
       IT=NINT(PTSTEP/S%XSEAICE_TSTEP)
       ZT=FLOAT(IT)
-      XTSTEP=PTSTEP/ZT
+      S%GLTPARAM%DTT=PTSTEP/ZT
    ENDIF
 ENDIF
 !
@@ -149,7 +148,7 @@ S%TGLT%oce_all(:,1)%sml=S%XSSS(:)
 
 ! First init ZSST with freezing temperature (which depends on local salinity)
 ! (Gelato uses Celsius scale for freezing temperatures)
-ZSST=RESHAPE(glt_swfrzt2d(RESHAPE(S%XSSS,(/SIZE(S%XSSS),1/))) + XTT,(/SIZE(S%XSSS)/))
+ZSST=RESHAPE(glt_swfrzt2d(RESHAPE(S%XSSS,(/SIZE(S%XSSS),1/)),S%GLTPARAM%nx,S%GLTPARAM%ny)+ XTT,(/SIZE(S%XSSS)/))
 
 ! Then replace freezing temp with Surfex-provided SST (S%XSST) where
 ! there is no (explicit or implicit) seaice and temperature is warmer
@@ -176,11 +175,11 @@ ENDIF
 S%XSIC    = 0.
 S%XTICE   = 0.
 S%XICE_ALB= 0.
-LP1 = (LWG.AND.NPRINTO>=1)
-LP2 = (LWG.AND.NPRINTO>=2)
-LP3 = (LWG.AND.NPRINTO>=3)
-LP4 = (LWG.AND.NPRINTO>=4)
-LP5 = (LWG.AND.NPRINTO>=5)
+S%GLTPARAM%LP1 = (S%GLTPARAM%LWG.AND.S%GLTPARAM%NPRINTO>=1)
+S%GLTPARAM%LP2 = (S%GLTPARAM%LWG.AND.S%GLTPARAM%NPRINTO>=2)
+S%GLTPARAM%LP3 = (S%GLTPARAM%LWG.AND.S%GLTPARAM%NPRINTO>=3)
+S%GLTPARAM%LP4 = (S%GLTPARAM%LWG.AND.S%GLTPARAM%NPRINTO>=4)
+S%GLTPARAM%LP5 = (S%GLTPARAM%LWG.AND.S%GLTPARAM%NPRINTO>=5)
 
 DO JT=1,IT
    IF (SIZE(S%XSSS) > 0) THEN 
@@ -216,35 +215,49 @@ DO JT=1,IT
       !
       !       Let Gelato process its input data
       !
-      CALL GLT_GETMLRF( S%TGLT%oce_all,S%TGLT%tml )
-      CALL GLT_GETATMF( S%TGLT )
-      CALL GLTOOLS_CHKINP( 20010101,S%TGLT )
+      CALL GLT_GETMLRF(S%TGLT%oce_all,S%TGLT%tml,S%GLTPARAM%nx,S%GLTPARAM%ny)
+      CALL GLT_GETATMF(S%TGLT,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%ny,S%GLTPARAM%lp1,S%GLTPARAM%lwg)
+      CALL GLTOOLS_CHKINP( 20010101,S%TGLT,                                                                                                                                 &
+                           S%GLTPARAM%n0vilu,S%GLTPARAM%n2vilu,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nprinto,S%GLTPARAM%nsavinp,S%GLTPARAM%nsavlu,                &
+                           S%GLTPARAM%nt,S%GLTPARAM%ntd,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,S%GLTPARAM%xdomsrf_g,S%GLTPARAM%lwg,S%GLTPARAM%ciopath) 
       !
       ! Compute gelato time index
       !
-      S%TGLT%IND%CUR = ( PTIMEC + JT * XTSTEP ) / XTSTEP 
+      S%TGLT%IND%CUR = ( PTIMEC + JT * S%GLTPARAM%DTT ) / S%GLTPARAM%DTT
       !
       !       Let Gelato thermodynamic scheme run
       !
-      CALL GLT_GELATO( S%TGLT )
+      CALL GLT_GELATO( S%TGLT, S%GLTPARAM,S%GLTVHD )
       !
       ! Have Gelato feed its coupling ouptut interface
       ! 
-      CALL GLT_SNDATMF( S%TGLT )
+      CALL GLT_SNDATMF( S%TGLT,S%GLTPARAM%nnflxin,S%GLTPARAM%alblc)
       CALL GLT_SNDMLRF( S%TGLT%bat,S%TGLT%dom,S%TGLT%atm_all,S%TGLT%tml, &
-                        S%TGLT%dia,S%TGLT%sit,S%TGLT%tfl,S%TGLT%ust,S%TGLT%all_oce )
-      CALL WRIDIA_AR5( S%TGLT )
-      CALL GLTOOLS_CHKOUT( 20010101,S%TGLT ) ! Does not actually work with Arpege
+                        S%TGLT%dia,S%TGLT%sit,S%TGLT%tfl,S%TGLT%ust,S%TGLT%all_oce,&
+                        S%GLTPARAM%nadvect,S%GLTPARAM%ncdlssh,S%GLTPARAM%ndyncor,S%GLTPARAM%nleviti,S%GLTPARAM%nsalflx,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%ny,&
+                        S%GLTPARAM%dtt,S%GLTPARAM%rn_htopoc)
+      CALL WRIDIA_AR5(S%TGLT,&
+                      S%GLTPARAM%gelato_leadproc,S%GLTPARAM%gelato_myrank,S%GLTPARAM%n0valu,S%GLTPARAM%n0vilu,S%GLTPARAM%n2valu,S%GLTPARAM%n2vilu,S%GLTPARAM%navedia,&
+                      S%GLTPARAM%ndiamax,S%GLTPARAM%ndiap1,S%GLTPARAM%ndiap2,S%GLTPARAM%ndiap3,S%GLTPARAM%niceage,S%GLTPARAM%nicesal,S%GLTPARAM%ninsdia,S%GLTPARAM%nleviti,&
+                      S%GLTPARAM%nmponds,S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,&
+                      S%GLTPARAM%dtt,S%GLTPARAM%dttave,S%GLTPARAM%lp1,S%GLTPARAM%lwg,S%GLTPARAM%cdiafmt,S%GLTPARAM%cinsfld)
+      CALL GLTOOLS_CHKOUT( 20010101,S%TGLT,&
+                          S%GLTPARAM%n0vilu,S%GLTPARAM%n2vilu,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nprinto,S%GLTPARAM%nsavlu,S%GLTPARAM%nsavout,&
+                          S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,&
+                          S%GLTPARAM%xdomsrf_g,S%GLTPARAM%lp1,S%GLTPARAM%lwg,S%GLTPARAM%ciopath)
       ! Sum output fields over Gelato model time step duration
-      S%XSIC     = S%XSIC     + S%TGLT%ice_atm(1,:,1)%fsi * XTSTEP
-      S%XTICE    = S%XTICE    + S%TGLT%ice_atm(1,:,1)%tsf * XTSTEP
-      S%XICE_ALB = S%XICE_ALB + S%TGLT%ice_atm(1,:,1)%alb * XTSTEP
+      S%XSIC     = S%XSIC     + S%TGLT%ice_atm(1,:,1)%fsi * S%GLTPARAM%DTT
+      S%XTICE    = S%XTICE    + S%TGLT%ice_atm(1,:,1)%tsf * S%GLTPARAM%DTT
+      S%XICE_ALB = S%XICE_ALB + S%TGLT%ice_atm(1,:,1)%alb * S%GLTPARAM%DTT
    ENDIF
 END DO
 !   Average output fields over coupling time
-S%XSIC     = S%XSIC     / (IT * XTSTEP)
-S%XTICE    = S%XTICE    / (IT * XTSTEP) 
-S%XICE_ALB = S%XICE_ALB / (IT * XTSTEP) 
+S%XSIC     = S%XSIC     / (IT * S%GLTPARAM%DTT)
+S%XTICE    = S%XTICE    / (IT * S%GLTPARAM%DTT) 
+S%XICE_ALB = S%XICE_ALB / (IT * S%GLTPARAM%DTT) 
+
+! Safety check
+WHERE(S%XSIC(:)<0.001) S%TGLT%sit(1,:,1)%hsi=0.
 !
 ! Resets input accumulation fields for next step 
 !

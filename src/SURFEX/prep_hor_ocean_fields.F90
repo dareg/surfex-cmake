@@ -63,7 +63,7 @@ REAL, DIMENSION(:), INTENT(IN) :: PSEABATHY
 INTEGER, INTENT(IN) :: KLAT
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! file name
  CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! file type
 INTEGER,            INTENT(IN)  :: KLUOUT    ! logical unit of output listing

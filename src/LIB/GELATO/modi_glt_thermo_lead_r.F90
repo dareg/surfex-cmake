@@ -102,7 +102,9 @@
 ! --------------------- SUBROUTINE glt_thermo_lead_r ------------------------
 !
 SUBROUTINE glt_thermo_lead_r  &
-  (tpdom,pustar,tpmxl,tpatm,tpblkw,  &
+  (ncdlssh,nextqoc,niceage,nicesal,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nsnwrad,nt,&
+  dtt,rn_htopoc,xhsimin,lp1,lp2,lp3,lwg,thick,&
+  tpdom,pustar,tpmxl,tpatm,tpblkw,  &
   tpdia,tptfl,tpsit,tpsil,  &
   tpldsit,tpldsil)
 !
@@ -115,7 +117,6 @@ SUBROUTINE glt_thermo_lead_r  &
 ! ------------------------
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_glt_info_r
   USE modi_gltools_chkglo_r
@@ -132,6 +133,10 @@ SUBROUTINE glt_thermo_lead_r  &
 !
 ! .. INTENT(in) arguments.
 !
+  INTEGER, INTENT(IN) ::noutlu,ncdlssh,nsalflx,nextqoc,nicesal,niceage,nmponds,nsnwrad,nleviti,nl,nt,np,nprinto
+  REAL, INTENT(IN) ::dtt,xhsimin,rn_htopoc
+  REAL,DIMENSION(:), INTENT(IN) ::thick
+  LOGICAL,INTENT(IN) :: lp1,lp2,lp3,lwg
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   REAL, DIMENSION(np), INTENT(in) ::  &
@@ -200,7 +205,7 @@ SUBROUTINE glt_thermo_lead_r  &
 ! .. We update the ocean-ice heat flux (if not provided by the ocean model)
 !
   IF ( nextqoc==0 ) THEN
-      CALL glt_oceflx_r( tpdom,pustar,tpmxl )
+      CALL glt_oceflx_r( tpdom,pustar,tpmxl,np )
   ENDIF
 !
 !
@@ -226,7 +231,7 @@ SUBROUTINE glt_thermo_lead_r  &
 ! 1.8. Check in
 ! -------------
 !
-  CALL gltools_chkglo_r( 'BEFORE THERMO_LEAD_R',tpdom,tpsit )
+  CALL gltools_chkglo_r( 'BEFORE THERMO_LEAD_R',tpdom,tpsit,noutlu,np,nprinto,nt,lwg )
 !
 !
 !
@@ -390,7 +395,7 @@ SUBROUTINE glt_thermo_lead_r  &
 !
 ! .. Get salinity, gltools_enthalpy and thickness of the new ice
 !
-  CALL glt_saltrap_r( yfreeze,zhef,ztem0,tpmxl,zsalt0,zent0,zhldsi ) 
+  CALL glt_saltrap_r( yfreeze,zhef,ztem0,tpmxl,zsalt0,zent0,zhldsi,np,dtt ) 
 !
 ! .. Compute surface temperature and thickness of new ice formed in leads
 !
@@ -461,7 +466,7 @@ SUBROUTINE glt_thermo_lead_r  &
 ! 2.5. Print out information about new sea ice
 ! ---------------------------------------------
 !
-  CALL glt_info_si_r( 'About lead sea ice', tpsit=tpldsit )
+  CALL glt_info_si_r( 'About lead sea ice',niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,tpsit=tpldsit )
 !
 !
 ! 
@@ -483,7 +488,9 @@ SUBROUTINE glt_thermo_lead_r  &
 ! ------------------------------------------------------------
 !
   zent(:,:) = 0.
-  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi2,pent=zent,psalt=zsalt )
+  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi2,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      pent=zent,psalt=zsalt )
 !
 !  print*,'(5) gltools_enthalpy =',tptfl%llo+tptfl%tlo
 !

@@ -178,6 +178,7 @@ END IF
 !
 !*    2.1 Alias input data
 !
+!
 PILO1_OUT = PILO1
 PILO2_OUT = PILO2
 !
@@ -207,6 +208,7 @@ IF (PILO2_OUT < PILO1_OUT) PILO1_OUT = PILO1_OUT - 360.
 !                                              Nptsmax - 1
 !
 JOPOS = MAXVAL(KINLO(1:KINLA))
+
 PILO2_OUT = PILO1_OUT + (PILO2_OUT - PILO1_OUT) * JOPOS / (JOPOS - 1.)
 !
 !* 2.4 Test if the input is global or partially global
@@ -283,7 +285,8 @@ DO JL = 1, KOLEN
       KO(JL,3) = MINLOC(PILATARRAY,1)
     ELSE 
       DO JLAT0 = 1,KINLA
-        JL2 = MOD(JLAT0+IOS_SAVE-1,KINLA)
+        !JL2 = MOD(JLAT0+IOS_SAVE-1,KINLA) !ANTMPTEST
+        JL2 = JLAT0
         IF (JL2==0) JL2 = KINLA
         IF (OGAUSS) THEN
           IF (POLA(JL)>=PILATARRAY(JL2).AND.POLA(JL)<PILATARRAY(JL2+1)) THEN

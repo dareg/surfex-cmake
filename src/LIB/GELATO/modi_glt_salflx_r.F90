@@ -97,14 +97,15 @@
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE glt_salflx_r -------------------------
 !
-SUBROUTINE glt_salflx_r( pqsalt,tpmxl,tptfl,pdmass,psalt )
+SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,pdmass,psalt)
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(in) ::  ncdlssh,nsalflx,nt,np
+  REAL, INTENT(in) ::  dtt,rn_htopoc
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
         pqsalt
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &

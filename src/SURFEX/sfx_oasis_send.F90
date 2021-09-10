@@ -9,7 +9,7 @@ SUBROUTINE SFX_OASIS_SEND(KLUOUT,KI,KDATE,OSEND_LAND,OSEND_LAKE,OSEND_SEA,      
                           PLAKE_EVAP,PLAKE_RAIN,PLAKE_SNOW,PLAKE_WATF,          &
                           PSEA_FWSU,PSEA_FWSV,PSEA_HEAT,PSEA_SNET,PSEA_WIND,    &
                           PSEA_FWSM,PSEA_EVAP,PSEA_RAIN,PSEA_SNOW,PSEA_WATF,    &
-                          PSEAICE_HEAT,PSEAICE_SNET,PSEAICE_EVAP                )
+                          PSEA_PRES,PSEAICE_HEAT,PSEAICE_SNET,PSEAICE_EVAP                )
 !###########################################
 !
 !!****  *SFX_OASIS_SEND* - Send coupling fields
@@ -96,6 +96,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PSEA_EVAP  ! Cumulated Evaporation           
 REAL, DIMENSION(KI), INTENT(IN) :: PSEA_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(KI), INTENT(IN) :: PSEA_SNOW  ! Cumulated Snowfall rate           (kg/m2)
 REAL, DIMENSION(KI), INTENT(IN) :: PSEA_WATF  ! Cumulated freshwater flux         (kg/m2)
+REAL, DIMENSION(KI), INTENT(IN) :: PSEA_PRES  ! Cumulated Surface pressure (Pa.s)
 !
 REAL, DIMENSION(KI), INTENT(IN) :: PSEAICE_HEAT ! Cumulated Sea-ice non solar net heat flux (J/m2)
 REAL, DIMENSION(KI), INTENT(IN) :: PSEAICE_SNET ! Cumulated Sea-ice solar net heat flux     (J/m2)
@@ -272,6 +273,13 @@ IF(OSEND_SEA)THEN
     YCOMMENT='Freshwater flux over sea (P-E)'
     CALL OUTVAR(PSEA_WATF,XTSTEP_CPL_SEA,ZWRITE(:,1))
     CALL OASIS_PUT(NSEA_WATF_ID,KDATE,ZWRITE(:,:),IERR)
+    CALL CHECK_SFX_SEND(KLUOUT,IERR,YCOMMENT,ZWRITE(:,1))
+  ENDIF
+!
+  IF(NSEA_PRES_ID/=NUNDEF)THEN
+    YCOMMENT='Surface pressure'
+    CALL OUTVAR(PSEA_PRES,XTSTEP_CPL_SEA,ZWRITE(:,1))
+    CALL OASIS_PUT(NSEA_PRES_ID,KDATE,ZWRITE(:,:),IERR)
     CALL CHECK_SFX_SEND(KLUOUT,IERR,YCOMMENT,ZWRITE(:,1))
   ENDIF
 !

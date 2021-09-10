@@ -82,10 +82,10 @@
 ! * Subroutine that prints mini, maxi and average of every Gelato glt_output
 ! field, plus field values at one specified grid point.
 !
-SUBROUTINE gltools_chkout( kdate,tpglt )
+SUBROUTINE gltools_chkout(    kdate,tpglt,&
+        n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavlu,nsavout,nt,nx,nxglo,ny,nyglo,xdomsrf_g,lp1,lwg,ciopath )
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_gltools_nwords
   USE modi_gltools_strsplit
   USE mode_gltools_wrivais
@@ -95,7 +95,11 @@ SUBROUTINE gltools_chkout( kdate,tpglt )
 ! .. Dummy arguments
 !
   INTEGER, INTENT(in) ::  &
-    kdate
+    kdate,nprinto,nnflxin,noutlu,nsavout,nsavlu,nt,nx,ny,nxglo,nyglo,n2vilu,n0vilu
+  REAL, INTENT(in) ::  xdomsrf_g
+  LOGICAL, INTENT(in) ::  lp1,lwg
+  CHARACTER(*), INTENT(in) ::  ciopath
+
   TYPE(t_glt), INTENT(inout) ::  &
     tpglt
 !
@@ -299,40 +303,40 @@ SUBROUTINE gltools_chkout( kdate,tpglt )
       DO jk=1,nnflxin
         WRITE(ynum,'(I2.2)') jk
         tznam = t_def( "","","SIFRCI"//ynum,"","T","SCALAR" )
-         CALL gltools_wrivai( tznam,tpglt%ice_atm(jk,:,:)%fsi,kunit=nsavlu,kdbl=1 )
+         CALL gltools_wrivai( tznam,tpglt%ice_atm(jk,:,:)%fsi,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1 )
          tznam = t_def( "","","SIALBI"//ynum,"","T","SCALAR" )
-         CALL gltools_wrivai( tznam,tpglt%ice_atm(jk,:,:)%alb,kunit=nsavlu,kdbl=1 )
+         CALL gltools_wrivai( tznam,tpglt%ice_atm(jk,:,:)%alb,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1)
          tznam = t_def( "","","SITEMI"//ynum,"","T","SCALAR" )
-         CALL gltools_wrivai( tznam,tpglt%ice_atm(jk,:,:)%tsf,kunit=nsavlu,kdbl=1 )
+         CALL gltools_wrivai( tznam,tpglt%ice_atm(jk,:,:)%tsf,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1 )
       END DO
 !
     ELSE
 !
       tznam = t_def( "","","SIFRCSIS","","T","SCALAR" )
-      CALL gltools_wrivai( tznam,tpglt%mix_atm(1,:,:)%fsi,kunit=nsavlu,kdbl=1 ) 
+      CALL gltools_wrivai(tznam,tpglt%mix_atm(1,:,:)%fsi,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
       tznam = t_def( "","","SIALBSIM","","T","SCALAR" )
-      CALL gltools_wrivai( tznam,tpglt%mix_atm(1,:,:)%alb,kunit=nsavlu,kdbl=1 ) 
+      CALL gltools_wrivai(tznam,tpglt%mix_atm(1,:,:)%alb,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
       tznam = t_def( "","","SITEMSIW","","T","SCALAR" )
-      CALL gltools_wrivai( tznam,tpglt%mix_atm(1,:,:)%tsf,kunit=nsavlu,kdbl=1 ) 
+      CALL gltools_wrivai(tznam,tpglt%mix_atm(1,:,:)%tsf,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
       !
     ENDIF
 !
    tznam = t_def( "","","PNSFIXXX","","T","SCALAR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%nsf,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%nsf,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","PSWAIXXX","","T","SCALAR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%swa,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%swa,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","PCDFLIXX","","T","SCALAR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%cdf,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%cdf,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","PWATFLIX","","T","SCALAR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%wfl,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%wfl,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","PTAUXGXX","","U","VECTOR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%ztx,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%ztx,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","PTAUYGXX","","V","VECTOR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%mty,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%mty,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","PUSTARXX","","T","SCALAR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%ust,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%ust,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
    tznam = t_def( "","","SALFLUXX","","T","SCALAR" )
-   CALL gltools_wrivai( tznam,tpglt%all_oce%saf,kunit=nsavlu,kdbl=1 ) 
+   CALL gltools_wrivai(tznam,tpglt%all_oce%saf,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit=nsavlu,kdbl=1) 
   ENDIF
 !
   IF ( ydo ) CLOSE(nsavlu)

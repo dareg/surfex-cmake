@@ -18,7 +18,7 @@
 !        Y. Seity     19-Feb-2018 : Add ZECHGXFU  
 !****---------------------------------------------------------------------------
 !
-SUBROUTINE OI_CACSTS(KNBPT,PT2INC,PH2INC,PWGINC,PWS_O,                      &
+SUBROUTINE OI_CACSTS(KNBPT,PT2INC,PH2INC,PWGINC,PSNINC,PWS_O,               &
                      KDAT,KSSSSS,                                           &
                      PTP,PWP,PTL,PSNS,PTS,PWS,                              &
                      PTCLS,PHCLS,PUCLS,PVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
@@ -79,6 +79,7 @@ INTEGER,INTENT(IN)    :: KNBPT, KDAT, KSSSSS
 REAL   ,INTENT(IN)    :: PT2INC(KNBPT) 
 REAL   ,INTENT(IN)    :: PH2INC(KNBPT) 
 REAL   ,INTENT(IN)    :: PWGINC(KNBPT)
+REAL   ,INTENT(IN)    :: PSNINC(KNBPT)
 REAL   ,INTENT(IN)    :: PWS_O(KNBPT)
 REAL   ,INTENT(INOUT) :: PTP(KNBPT)
 REAL   ,INTENT(INOUT) :: PWP(KNBPT)
@@ -449,7 +450,7 @@ DO JROF = 1,KNBPT
 
 ! call back of Sn with a possible correction for melting
 !
-    ZSNA  = (1.0-XRCLIMCA)*PSNS(JROF) + XRCLIMCA*ZSNC
+    ZSNA  = (1.0-XRCLIMCA)*PSNS(JROF) + XRCLIMCA*ZSNC + PSNINC(JROF)
     ZMSN  = MAX(0.0, XRSNSA/21600.*ZECHGU*(PTCLS(JROF)-XTT))**XRSNSB
     PSNS(JROF) = MAX (ZSNA-ZMSN,0.0)
 

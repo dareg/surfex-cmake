@@ -35,6 +35,7 @@ SUBROUTINE PREP_HOR_SEAFLUX_FIELD (DTCO, UG, U, GCP, DTS, O, OR, KLAT, S, &
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
+USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_DATA_SEAFLUX_n, ONLY : DATA_SEAFLUX_t
@@ -89,7 +90,7 @@ TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
  CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    ! name of the Atmospheric file
  CHARACTER(LEN=6),   INTENT(IN)  :: HATMFILETYPE! type of the Atmospheric file
  CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    ! name of the Atmospheric file
@@ -184,10 +185,10 @@ IF (YDCTL%LPART5) THEN
 !*      5.     Return to historical variable
 !
   SELECT CASE (HSURF)
-  CASE('ZS     ') 
+  CASE('ZS       ') 
     ALLOCATE(XZS_LS(SIZE(ZFIELDOUT,1)))
     XZS_LS(:) = ZFIELDOUT(:,1)
-  CASE('SST    ')
+  CASE('SST      ')
     ALLOCATE(S%XSST(SIZE(ZFIELDOUT,1)))
     S%XSST(:) = ZFIELDOUT(:,1)
     IF (DTS%LSST_DATA) THEN
@@ -199,12 +200,55 @@ IF (YDCTL%LPART5) THEN
       CALL PREP_HOR_OCEAN_FIELDS(DTCO, UG, U, GCP, O, OR, KLAT, S%XSEABATHY, &
                                  HPROGRAM,HSURF,YFILE,YFILETYPE,ILUOUT,GUNIF)
     ENDIF
-  CASE('SSS    ')
+  CASE('SSS      ')
     ALLOCATE(S%XSSS(SIZE(ZFIELDOUT,1)))
     S%XSSS(:) = ZFIELDOUT(:,1)
-  CASE('SIC    ')
+  CASE('SIC      ')
     ALLOCATE(S%XSIC(SIZE(ZFIELDOUT,1)))
     S%XSIC(:) = ZFIELDOUT(:,1)
+  CASE('SIT      ')
+    ALLOCATE(S%XFSIT(SIZE(ZFIELDOUT,1)))
+    S%XFSIT(:) = ZFIELDOUT(:,1)
+  CASE('ICEAGE_1 ')    
+    S%TGLT%sit(1,:,1)%age= ZFIELDOUT(:,1)      
+  CASE('ICEVMP_1 ')
+    S%TGLT%sit(1,:,1)%vmp = ZFIELDOUT(:,1)
+  CASE('ICEASN_1 ')
+    S%TGLT%sit(1,:,1)%asn = ZFIELDOUT(:,1)
+  CASE('ICEFSI_1 ')
+    S%TGLT%sit(1,:,1)%fsi = ZFIELDOUT(:,1)
+  CASE('ICEHSI_1 ')
+    S%TGLT%sit(1,:,1)%hsi = ZFIELDOUT(:,1)
+  CASE('ICESSI_1 ')
+    S%TGLT%sit(1,:,1)%ssi = ZFIELDOUT(:,1)
+  CASE('ICETSF_1 ')
+    S%TGLT%sit(1,:,1)%tsf = ZFIELDOUT(:,1)
+  CASE('ICEHSN_1 ')
+    S%TGLT%sit(1,:,1)%hsn = ZFIELDOUT(:,1)
+  CASE('ICERSN_1 ')
+    S%TGLT%sit(1,:,1)%rsn = ZFIELDOUT(:,1)
+  CASE('ICEH_1_1 ')
+    S%TGLT%sil(1,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_2 ')
+    S%TGLT%sil(2,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_3 ')
+    S%TGLT%sil(3,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_4 ')
+    S%TGLT%sil(4,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_5 ')
+    S%TGLT%sil(5,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_6 ')
+    S%TGLT%sil(6,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_7 ')
+    S%TGLT%sil(7,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_8 ')
+    S%TGLT%sil(8,1,:,1)%ent = ZFIELDOUT(:,1)
+  CASE('ICEH_1_9 ')
+    S%TGLT%sil(9,1,:,1)%ent = ZFIELDOUT(:,1)  
+  CASE('ICEH_1_10')
+    S%TGLT%sil(10,1,:,1)%ent = ZFIELDOUT(:,1)
+ CASE('ICEUSTAR ')
+  S%TGLT%ust(:,1)          = ZFIELDOUT(:,1)     
   END SELECT
 !
 ENDIF

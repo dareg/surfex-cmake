@@ -72,12 +72,13 @@
 ! a kind introductory welcome message.
 ! - Also opens specific files for gltools_timers glt_output
 !
-SUBROUTINE opnout
+SUBROUTINE opnout(gelato_myrank,noutlu,ntimlu,lwg)
 !
-  USE modd_glt_param
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: noutlu,gelato_myrank,ntimlu
+  LOGICAL,INTENT(IN) :: lwg
   CHARACTER(20) :: &
        yfile
 !
@@ -144,11 +145,12 @@ END SUBROUTINE opnout
 !
 ! * Closes GELATO glt_output file, and gltools_timers file
 
-SUBROUTINE clsout
+SUBROUTINE clsout(noutlu,ntimlu,lwg)
 !
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER,INTENT(IN) :: noutlu,ntimlu
+  LOGICAL,INTENT(IN) :: lwg
 !
 !
   IF (lwg) THEN

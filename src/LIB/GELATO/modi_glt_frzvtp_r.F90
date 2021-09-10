@@ -94,17 +94,21 @@
 ! * Note that in the list of arguments, phsi is sea ice new thickness,
 ! not the thickness variation.
 !
-SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil )
+SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
+       nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE mode_gltools_enthalpy
   USE mode_gltools_interp
   USE modi_glt_saltrap_r
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: noutlu,nl,nt,np,nilay
+  REAL,INTENT(IN) :: dtt
+  REAL,DIMENSION(:),INTENT(IN) :: sf3tinv,height
+  LOGICAL,INTENT(IN) :: lp3
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
@@ -145,7 +149,7 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil )
 !
 ! Compute the salinity, gltools_enthalpy and thickness of the new ice
     ztem(:) = -2.
-    CALL glt_saltrap_r( yfreeze,pqfac(jk,:),ztem(:),tpmxl,zssib,zentb,zdhsib )
+    CALL glt_saltrap_r( yfreeze,pqfac(jk,:),ztem(:),tpmxl,zssib,zentb,zdhsib,np,dtt )
 !
     DO jp=1,np
       IF ( pqfac(jk,jp)<0. ) THEN
@@ -171,7 +175,7 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil )
           zlevo(:)=zlevo/zlevo(nilay+2)
 !
 ! Interpolate
-          zentn=glt_interpz( height,zento,zlevo )
+          zentn=glt_interpz( height,zento,zlevo,nilay )
           tpsil(1:nilay,jk,jp)%ent = zentn(:)
 !
 ! Compute initial average gltools_enthalpy in the ice slab
@@ -210,5 +214,3 @@ SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil )
 !
 END SUBROUTINE glt_frzvtp_r
 
-! ---------------------- END SUBROUTINE glt_frzvtp_r ------------------------
-! -----------------------------------------------------------------------

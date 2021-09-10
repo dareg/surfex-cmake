@@ -116,17 +116,18 @@
 ! or snow into account, except the case of rain over non snow covered
 ! sea ice.
 !
-SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,  &
-  pqmelt )
+SUBROUTINE glt_precip_r( orain,osnow,tpmxl,tpatm,tpsit,tpsil,tptfl,tpdia,pqmelt,  &
+  ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE mode_gltools_enthalpy
   USE modi_glt_updtfl_r
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: nilay,nleviti,nl,nt,np , ncdlssh,nsalflx
+  REAL,INTENT(IN) :: dtt ,rn_htopoc
   LOGICAL, DIMENSION(np), INTENT(in) ::  &
         orain,osnow
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
@@ -428,7 +429,8 @@ end do
 ! (coming from the atmosphere) will be lost.
 !
   IF ( nrn2ice==0 ) THEN
-    CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zdmwat)
+    CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zdmwat,&
+        ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
   ENDIF  
 !
 !

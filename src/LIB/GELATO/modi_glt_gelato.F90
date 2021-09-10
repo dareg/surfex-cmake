@@ -86,7 +86,7 @@
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_gelato -------------------------
 !
-SUBROUTINE glt_gelato( tpglt )
+SUBROUTINE glt_gelato( tpglt,ygltparam,ygltvhd)
 !
 !
 ! 1. Declarations
@@ -110,9 +110,6 @@ USE modd_glt_const_evp
 ! * Contains types_glt definitions.
 USE modd_types_glt 
 !
-! * To get access to parameters read from the "namelist".
-USE modd_glt_param
-!
 ! * To send an error message
 USE modi_gltools_glterr
 !
@@ -128,7 +125,11 @@ USE mode_glt_info
 USE modi_glt_updbud
 USE modi_gltools_timers
 !
+USE MODD_GLT_PARAM, ONLY : t_glt_param
+USE MODD_GLT_VHD, ONLY : t_glt_vhd
 !
+USE mode_glt_init
+
 ! * No variables are implicitely declared. 
 IMPLICIT NONE
 !
@@ -136,8 +137,9 @@ IMPLICIT NONE
 ! 1.2. Dummy arguments
 ! ---------------------
 !
-TYPE(t_glt), INTENT(inout) ::  &
-  tpglt
+TYPE(t_glt), INTENT(inout)       ::  tpglt
+TYPE(t_glt_param), INTENT(inout) ::  ygltparam
+TYPE(t_glt_vhd), INTENT(inout)   ::  ygltvhd
 !
 !
 !
@@ -147,24 +149,27 @@ TYPE(t_glt), INTENT(inout) ::  &
 ! 2.1. Local variables
 ! ---------------------
 !
-IF (lp1) THEN
-  WRITE(noutlu,*) ' '
-  WRITE(noutlu,*) '  ** LEVEL 2 - SUBROUTINE GELATO'
-  WRITE(noutlu,*) ' '
+IF (ygltparam%lp1) THEN
+  WRITE(ygltparam%noutlu,*) ' '
+  WRITE(ygltparam%noutlu,*) '  ** LEVEL 2 - SUBROUTINE GELATO'
+  WRITE(ygltparam%noutlu,*) ' '
 ENDIF
 !
 !
 ! 2.2. Initialize lead temperature and sea ice-ocean fluxes
 ! ----------------------------------------------------------
 !
-CALL initfl( tpglt%tfl )
-!
+
+CALL initfl( tpglt%tfl,ygltparam%nx,ygltparam%ny )
+
 !
 ! 2.3. Initialize diagnostics
 ! ----------------------------
 !
-CALL inidia( tpglt%ind,tpglt%dia,tpglt%cdia0,tpglt%cdia )
-CALL gltools_timers('end inidia') 
+CALL inidia( tpglt%ind,tpglt%dia,tpglt%cdia0,tpglt%cdia,&
+    ygltparam%ndiamax,ygltparam%nx,ygltparam%ny )
+CALL gltools_timers(ygltparam%ntimers,ygltparam%ntimlu,ygltparam%ntimnum,&
+ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end inidia') 
 !
 !
 ! 2.4. Budgets initialization
@@ -172,8 +177,13 @@ CALL gltools_timers('end inidia')
 !
 CALL glt_inibud( tpglt%bud )
 !
-CALL glt_info_si( 'Initial conditions:',tpglt%dom,tpsit=tpglt%sit )
-CALL gltools_timers('end inibud') 
+
+CALL glt_info_si( 'Initial conditions:',tpglt%dom,&
+ygltparam%niceage,ygltparam%nicesal,ygltparam%nl,ygltparam%nmponds,ygltparam%noutlu,ygltparam%nt,ygltparam%nx,ygltparam%ny,&
+ygltparam%lp2,ygltparam%lp3,&
+tpsit=tpglt%sit )
+CALL gltools_timers(ygltparam%ntimers,ygltparam%ntimlu,ygltparam%ntimnum,&
+ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end inibud')
 !
 !
 !
@@ -182,12 +192,12 @@ CALL gltools_timers('end inibud')
 !
 ! .. Print level
 !
-IF ( tpglt%ind%cur==tpglt%ind%end ) nprinto = nprlast 
-lp1 = (lwg.AND.nprinto>=1)
-lp2 = (lwg.AND.nprinto>=2)
-lp3 = (lwg.AND.nprinto>=3)
-lp4 = (lwg.AND.nprinto>=4)
-lp5 = (lwg.AND.nprinto>=5)
+IF ( tpglt%ind%cur==tpglt%ind%end ) ygltparam%nprinto = ygltparam%nprlast 
+ygltparam%lp1 = (ygltparam%lwg.AND.ygltparam%nprinto>=1)
+ygltparam%lp2 = (ygltparam%lwg.AND.ygltparam%nprinto>=2)
+ygltparam%lp3 = (ygltparam%lwg.AND.ygltparam%nprinto>=3)
+ygltparam%lp4 = (ygltparam%lwg.AND.ygltparam%nprinto>=4)
+ygltparam%lp5 = (ygltparam%lwg.AND.ygltparam%nprinto>=5)
 !
 !
 ! 3.1. Sea ice salinity initialization
@@ -198,8 +208,11 @@ lp5 = (lwg.AND.nprinto>=5)
 ! sea surface salinity (hence this routine must be invoked after 
 ! ocean surface forcing fields are obtained !)
 !
-IF ( tpglt%ind%cur==tpglt%ind%beg ) CALL inisal( tpglt%dom,tpglt%tml,tpglt%sit )
+
+IF ( tpglt%ind%cur==tpglt%ind%beg ) CALL inisal(tpglt%dom,tpglt%tml,tpglt%sit,&
+    ygltparam%nicesal,ygltparam%nt,ygltparam%nx,ygltparam%ny )
 !
+
 !
 ! 3.2. First energy update budget
 ! --------------------------------
@@ -207,38 +220,49 @@ IF ( tpglt%ind%cur==tpglt%ind%beg ) CALL inisal( tpglt%dom,tpglt%tml,tpglt%sit )
 ! .. This is done even if glt_updbud flag is off, to allow the computation
 ! of certain diagnostics if wished by the user.
 !
+
 CALL glt_updbud( 1,'Initial conditions:',  &
   tpglt%dom,tpglt%tml,tpglt%tfl,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
-  tpglt%sit,tpglt%sil,tpglt%bud )
+  tpglt%sit,tpglt%sil,tpglt%bud,&
+  ygltparam%niceage,ygltparam%nicesal,ygltparam%nilay,ygltparam%nmponds,ygltparam%nl,ygltparam%noutlu,ygltparam%nprinto,&
+  ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,ygltparam%nx,ygltparam%ny,&
+  ygltparam%dtt,ygltparam%xdomsrf_g,ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
 !
+
 !
 !
 ! 4. Sea ice and leads thermodynamics
 ! ====================================
 !
-IF ( ntd==0 ) THEN
+IF ( ygltparam%ntd==0 ) THEN
 !
 ! .. Thermodynamics without sea ice constraint
 !
+
   CALL glt_thermo  &
-    ( tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+      ( ygltparam,ygltvhd,&
+    tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
     tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil )
+
 ELSE
 ! 
 ! .. Thermodynamics with sea ice constraint (no energy conservation)
 !
   CALL glt_thermo  &
-    ( tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
+      ( ygltparam,ygltvhd,&
+    tpglt%dom,tpglt%ust,tpglt%tml,tpglt%atm_all,tpglt%blkw,tpglt%blki,  &
     tpglt%bud,tpglt%dia,tpglt%tfl,tpglt%sit,tpglt%sil,tpsit_d=tpglt%sit_d )
+        
 ENDIF
 !
-CALL gltools_timers('end thermo') 
+CALL gltools_timers(ygltparam%ntimers,ygltparam%ntimlu,ygltparam%ntimnum,&
+ygltparam%xtime,ygltparam%clabel,ygltparam%lwg,'end thermo')
 !
 !
-IF (lp1) THEN
-  WRITE(noutlu,*) ' '
-  WRITE(noutlu,*) '  ** LEVEL 2 - END SUBROUTINE GELATO'
-  WRITE(noutlu,*) ' '
+IF (ygltparam%lp1) THEN
+  WRITE(ygltparam%noutlu,*) ' '
+  WRITE(ygltparam%noutlu,*) '  ** LEVEL 2 - END SUBROUTINE GELATO'
+  WRITE(ygltparam%noutlu,*) ' '
 ENDIF
 !
 END SUBROUTINE glt_gelato

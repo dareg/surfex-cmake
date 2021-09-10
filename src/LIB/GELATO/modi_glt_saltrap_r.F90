@@ -100,16 +100,17 @@
 ! ----------------------- SUBROUTINE glt_saltrap_r --------------------------
 !
 SUBROUTINE glt_saltrap_r  &
-  ( gfreeze,phef,ptem,tpmxl,psalt,pent,phsi )
+  ( gfreeze,phef,ptem,tpmxl,psalt,pent,phsi,np,dtt )
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_gltools_enthalpy
   USE mode_gltools_sigma
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(in) :: np
+  REAL   ,INTENT(in) :: dtt
   LOGICAL, DIMENSION(np), INTENT(in) ::  &
     gfreeze
   REAL, DIMENSION(np), INTENT(in) ::  &
@@ -198,7 +199,7 @@ end do
   ENDWHERE
 !
 ! Enthalpy
-  pent(:) = glt_enthalpy1d( ycont(:),ptem(:),psalt(:) )
+  pent(:) = glt_enthalpy1d( ycont(:),ptem(:),psalt(:),np )
 !
 ! Thickness
   WHERE( ycont(:) )
@@ -209,5 +210,3 @@ end do
 !
 END SUBROUTINE glt_saltrap_r
 
-! ---------------------- END SUBROUTINE glt_saltrap_r -----------------------
-! -----------------------------------------------------------------------

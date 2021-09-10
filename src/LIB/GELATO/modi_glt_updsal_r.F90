@@ -83,16 +83,18 @@
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE glt_updsal_r -------------------------
 !
-SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl )
+SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl,&
+       ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_glt_salflx_r
   USE mode_glt_stats_r
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(IN) ::nleviti,ncdlssh,nsalflx,nt,np
+  REAL, INTENT(IN) ::dtt,rn_htopoc
   LOGICAL, DIMENSION(nt,np), INTENT(in) ::  &
         gsmelt
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
@@ -165,7 +167,7 @@ SUBROUTINE glt_updsal_r( gsmelt,tpmxl,tpsit,tptfl )
 !
 ! .. Update virtual water flux (concentration/dilution) in kg.m-2.s-1
 !
-  CALL glt_salflx_r( -zqsalt2,tpmxl,tptfl )
+  CALL glt_salflx_r( -zqsalt2,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc )
 !
 ! .. Salt flux in kg.m-2.s-1
 !

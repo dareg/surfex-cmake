@@ -53,8 +53,8 @@
 !       - if there is a lot of sea ice, there is a possibility for warm 
 ! water advection in this area, hence any place where there is sea ice 
 ! should be treated to avoid losing sea ice
-!       - a reasonable temperature threshold is 1�, to include areas 
-! where salinity is zero (freezing point = 0�C)
+!       - a reasonable temperature threshold is 1Â°, to include areas 
+! where salinity is zero (freezing point = 0Â°C)
 !  
 ! Created : 2009/06 - Reduced grid option introduced - full grid still 
 !   available (D. Salas y Melia)
@@ -117,7 +117,8 @@
 ! ----------------------- SUBROUTINE glt_thermo -----------------------------
 !
 SUBROUTINE glt_thermo  &
-  ( tpdom,pustar,tpmxl,tpatm,  &
+  (ygltparam,ygltvhd,&
+    tpdom,pustar,tpmxl,tpatm,  &
     tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d )
 !
 !
@@ -129,11 +130,12 @@ SUBROUTINE glt_thermo  &
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE mode_glt_stats
   USE mode_glt_stats_r
   USE modi_glt_thermo_r
   USE modi_glt_constrain_r
+  USE MODD_GLT_VHD, ONLY : t_glt_vhd
+  USE MODD_GLT_PARAM, ONLY : t_glt_param
 !
   IMPLICIT NONE
 !
@@ -141,29 +143,31 @@ SUBROUTINE glt_thermo  &
 ! 1.2. Dummy arguments declarations
 ! ---------------------------------
 !
-  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd  
+  TYPE(t_glt_param), INTENT(inout) :: ygltparam
+  TYPE(t_dom), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpdom
-  REAL, DIMENSION(nx,ny), INTENT(in) ::  &
+  REAL, DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         pustar
-  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
+  TYPE(t_mxl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpmxl
-  TYPE(t_atm), DIMENSION(nx,ny), INTENT(in) ::  &
+  TYPE(t_atm), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpatm
-  TYPE(t_blk), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_blk), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpblkw
-  TYPE(t_blk), DIMENSION(nt,nx,ny), INTENT(in) ::  &
+  TYPE(t_blk), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpblki
-  TYPE(t_bud), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_bud), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpbud
-  TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_dia), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpdia
-  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_tfl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tptfl
-  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(inout) ::  &
+  TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,nx,ny), INTENT(inout) ::  &
+  TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpsil
-  TYPE(t_sit), DIMENSION(ntd,nx,ny), OPTIONAL, INTENT(in) ::  &
+  TYPE(t_sit), DIMENSION(ygltparam%ntd,ygltparam%nx,ygltparam%ny), OPTIONAL, INTENT(in) ::  &
         tpsit_d
 !
 !
@@ -172,19 +176,19 @@ SUBROUTINE glt_thermo  &
 !
   INTEGER ::  &
         jk,jl
-  LOGICAL, DIMENSION(nx,ny) ::  &
+  LOGICAL, DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
         gsel
-  INTEGER, DIMENSION(nx,ny) ::  &
+  INTEGER, DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
         isel
-  REAL, DIMENSION(nx,ny) ::  &
+  REAL, DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
         zfsit,zsnflx
-  TYPE(t_dia), DIMENSION(nx,ny) ::  &
+  TYPE(t_dia), DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
         tzdia0
-  TYPE(t_tfl), DIMENSION(nx,ny) ::  &
+  TYPE(t_tfl), DIMENSION(ygltparam%nx,ygltparam%ny) ::  &
         tztfl0
-  TYPE(t_sit), DIMENSION(nt,nx,ny) ::  &
+  TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny) ::  &
         tzsit0
-  TYPE(t_vtp), DIMENSION(nl,nt,nx,ny) ::  &
+  TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%nx,ygltparam%ny) ::  &
         tzsil0
 !  INTEGER ::  &
 !        ji,jj
@@ -221,10 +225,10 @@ SUBROUTINE glt_thermo  &
 ! 1.4. Welcome message
 ! --------------------
 !
-  IF (lp1) THEN
-    WRITE(noutlu,*) ' '
-    WRITE(noutlu,*) ' *** LEVEL 3 - SUBROUTINE THERMO'
-    WRITE(noutlu,*) ' '
+  IF (ygltparam%lp1) THEN
+    WRITE(ygltparam%noutlu,*) ' '
+    WRITE(ygltparam%noutlu,*) ' *** LEVEL 3 - SUBROUTINE THERMO'
+    WRITE(ygltparam%noutlu,*) ' '
   ENDIF
 !
 !
@@ -235,7 +239,7 @@ SUBROUTINE glt_thermo  &
 ! 2.1. Define grid point selection criterion
 ! -------------------------------------------
 !
-  zfsit(:,:) = glt_iceconcm(tpdom,tpsit) 
+  zfsit(:,:) = glt_iceconcm(tpdom,tpsit,ygltparam%nt,ygltparam%nx,ygltparam%ny) 
   isel(:,:) = 0
 !
 ! In principe, calculations on tpdom%imk==1 would suffice. But it
@@ -255,14 +259,15 @@ SUBROUTINE glt_thermo  &
 !
 ! .. Reduced grid dimension
 !
-  np = SUM(isel)
+  ygltparam%np = SUM(isel)
 !
-  IF (lp3) THEN
-    WRITE(noutlu,*)  &
+  IF (ygltparam%lp3) THEN
+    WRITE(ygltparam%noutlu,*)  &
       '**********************************************************'
-    WRITE(noutlu,*) 'REDUCED GRID:'
-    WRITE(noutlu,1000) gelato_myrank, np, nx*ny, nx, ny
-    WRITE(noutlu,*)  &
+    WRITE(ygltparam%noutlu,*) 'REDUCED GRID:'
+    WRITE(ygltparam%noutlu,1000) ygltparam%gelato_myrank, ygltparam%np,&
+        ygltparam%nx*ygltparam%ny, ygltparam%nx, ygltparam%ny
+    WRITE(ygltparam%noutlu,*)  &
       '**********************************************************'
   ENDIF
 !
@@ -270,21 +275,20 @@ SUBROUTINE glt_thermo  &
 ! deallocated explicitly (this is done at the end of this subroutine).
 ! More over, the deallocations need be done in reverse order.
 !
-  IF ( np /= 0 ) THEN
 !    ALLOCATE( ind_r(2,np) )
-    ALLOCATE( tzdom_r(np) )
-    ALLOCATE( zustar_r(np) )
-    ALLOCATE( tzmxl_r(np) )
-    ALLOCATE( tzatm_r(np) )
-    ALLOCATE( tzblkw_r(np) )
-    ALLOCATE( tzblki_r(nt,np) )
-    ALLOCATE( tzbud_r(np) )
-    ALLOCATE( tzdia_r(np) )
-    ALLOCATE( tztfl_r(np) )
+    ALLOCATE( tzdom_r(ygltparam%np) )
+    ALLOCATE( zustar_r(ygltparam%np) )
+    ALLOCATE( tzmxl_r(ygltparam%np) )
+    ALLOCATE( tzatm_r(ygltparam%np) )
+    ALLOCATE( tzblkw_r(ygltparam%np) )
+    ALLOCATE( tzblki_r(ygltparam%nt,ygltparam%np) )
+    ALLOCATE( tzbud_r(ygltparam%np) )
+    ALLOCATE( tzdia_r(ygltparam%np) )
+    ALLOCATE( tztfl_r(ygltparam%np) )
 ! Note that the error check on ntd dimension will be done in glt_constrain_r
-  IF ( PRESENT(tpsit_d) ) ALLOCATE( tzsit_d_r(ntd,np) )
-    ALLOCATE( tzsit_r(nt,np) )
-    ALLOCATE( tzsil_r(nl,nt,np) )
+  IF ( PRESENT(tpsit_d) ) ALLOCATE( tzsit_d_r(ygltparam%ntd,ygltparam%np) )
+    ALLOCATE( tzsit_r(ygltparam%nt,ygltparam%np) )
+    ALLOCATE( tzsil_r(ygltparam%nl,ygltparam%nt,ygltparam%np) )
 !
 !
 ! 2.3. From global to reduced grid arrays
@@ -341,7 +345,7 @@ SUBROUTINE glt_thermo  &
 !
 ! .. Surface fluxes (over ice)
 !
-    DO jk=1,nt
+    DO jk=1,ygltparam%nt
         tzblki_r(jk,:)%swa = PACK( tpblki(jk,:,:)%swa ,gsel )
         tzblki_r(jk,:)%nsf = PACK( tpblki(jk,:,:)%nsf ,gsel )
         tzblki_r(jk,:)%dfl = PACK( tpblki(jk,:,:)%dfl ,gsel )
@@ -438,7 +442,7 @@ SUBROUTINE glt_thermo  &
 ! .. Damping / restoring data
 !
   IF ( PRESENT(tpsit_d) ) THEN
-    DO jk=1,ntd
+    DO jk=1,ygltparam%ntd
       tzsit_d_r(jk,:)%esi = PACK( tpsit_d(jk,:,:)%esi, gsel )
       tzsit_d_r(jk,:)%asn = PACK( tpsit_d(jk,:,:)%asn, gsel )
       tzsit_d_r(jk,:)%fsi = PACK( tpsit_d(jk,:,:)%fsi, gsel )
@@ -454,7 +458,7 @@ SUBROUTINE glt_thermo  &
 !
 ! .. Sea ice 2D 
 !
-    DO jk=1,nt
+    DO jk=1,ygltparam%nt
         tzsit_r(jk,:)%esi = PACK( tpsit(jk,:,:)%esi ,gsel )
         tzsit_r(jk,:)%asn = PACK( tpsit(jk,:,:)%asn ,gsel )
         tzsit_r(jk,:)%fsi = PACK( tpsit(jk,:,:)%fsi ,gsel )
@@ -469,8 +473,8 @@ SUBROUTINE glt_thermo  &
 !
 ! .. Sea ice 3D
 !
-    DO jl=1,nl
-      DO jk=1,nt
+    DO jl=1,ygltparam%nl
+      DO jk=1,ygltparam%nt
           tzsil_r(jl,jk,:)%ent = PACK( tpsil(jl,jk,:,:)%ent ,gsel )
       END DO
     END DO 
@@ -479,25 +483,33 @@ SUBROUTINE glt_thermo  &
 ! 2.4. Update domain surface
 ! ---------------------------
 !
-    xdomsrf_r = SUM( tzdom_r(:)%dxc*tzdom_r(:)%dyc )
+    ygltparam%xdomsrf_r = SUM( tzdom_r(:)%dxc*tzdom_r(:)%dyc )
 !
 !
 ! 2.5. Thermodynamics on the reduced grid
 ! ----------------------------------------
 !
-    IF ( nthermo==1 ) THEN
+  IF ( ygltparam%np /= 0 ) THEN   
+    IF ( ygltparam%nthermo==1 ) THEN
       CALL glt_thermo_r  &
         ( tzdom_r,zustar_r,tzmxl_r,tzatm_r,tzblkw_r,tzblki_r,tzbud_r,tzdia_r,  &
-        tztfl_r,tzsit_r,tzsil_r )
+        tztfl_r,tzsit_r,tzsil_r,&
+        ygltparam,ygltvhd)
+
+  
     ENDIF
 !
 !
 ! 2.6. Apply the constraint
 ! --------------------------
 !
-    IF ( ntd==1 ) THEN
-      CALL glt_constrain_r( tzdom_r,tzmxl_r,tzsit_r,tzsil_r,tzdia_r,tzsit_d_r )
+    IF ( ygltparam%ntd==1 ) THEN
+      CALL glt_constrain_r( tzdom_r,tzmxl_r,tzsit_r,tzsil_r,tzdia_r,tzsit_d_r,&
+     ygltparam%nilay,ygltparam%nl,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%ntd,&
+     ygltparam%dtt,ygltparam%xfsidmpeft,ygltparam%xfsimax,ygltparam%xhsidmpeft,&
+     ygltparam%xhsimin,ygltparam%lwg,ygltparam%ccsvdmp,ygltparam%cfsidmp,ygltparam%chsidmp,ygltparam%sf3tinv )
     ENDIF
+  ENDIF 
 !
 !
 ! 2.7. From reduced to global grid arrays
@@ -621,7 +633,7 @@ SUBROUTINE glt_thermo  &
     tptfl%llo = UNPACK( tztfl_r%llo,gsel,tztfl0%llo )
 !
 ! Non solar flux on leads
-    IF ( nsnwrad==1 ) THEN
+    IF ( ygltparam%nsnwrad==1 ) THEN
         zsnflx(:,:) = -xmhofusn0*tpatm(:,:)%sop
       ELSE
         zsnflx(:,:) = 0.
@@ -671,12 +683,12 @@ SUBROUTINE glt_thermo  &
     tzsit0(:,:,:)%hsi = 0.
     tzsit0(:,:,:)%hsn = 0.
     tzsit0(:,:,:)%rsn = rhosnwmin
-    tzsit0(:,:,:)%tsf = SPREAD( tpmxl(:,:)%mlf,1,nt )
+    tzsit0(:,:,:)%tsf = SPREAD( tpmxl(:,:)%mlf,1,ygltparam%nt )
     tzsit0(:,:,:)%ssi = 0.
     tzsit0(:,:,:)%age = 0.
     tzsit0(:,:,:)%vmp = 0.
 !
-    DO jk=1,nt
+    DO jk=1,ygltparam%nt
       tpsit(jk,:,:)%esi = UNPACK( tzsit_r(jk,:)%esi,gsel,tzsit0(jk,:,:)%esi )
       tpsit(jk,:,:)%asn = UNPACK( tzsit_r(jk,:)%asn,gsel,tzsit0(jk,:,:)%asn )
       tpsit(jk,:,:)%fsi = UNPACK( tzsit_r(jk,:)%fsi,gsel,tzsit0(jk,:,:)%fsi )
@@ -693,8 +705,8 @@ SUBROUTINE glt_thermo  &
 !
     tzsil0(:,:,:,:)%ent = 0.
 !
-    DO jl=1,nl
-      DO jk=1,nt
+    DO jl=1,ygltparam%nl
+      DO jk=1,ygltparam%nt
         tpsil(jl,jk,:,:)%ent = UNPACK( tzsil_r(jl,jk,:)%ent,gsel,  &
           tzsil0(jl,jk,:,:)%ent )
       END DO
@@ -723,7 +735,7 @@ SUBROUTINE glt_thermo  &
     DEALLOCATE( tzmxl_r )
     DEALLOCATE( zustar_r )
     DEALLOCATE( tzdom_r )
-  ENDIF
+!
 !
 !
 !
@@ -733,10 +745,10 @@ SUBROUTINE glt_thermo  &
 1000 FORMAT( " Processor ", I5," ==> Running on ", I5,  &
   " points instead of ", I6, "(" I5, " times " , I5, ")" ) 
 !
-  IF (lp1) THEN
-    WRITE(noutlu,*) ' '
-    WRITE(noutlu,*) ' *** LEVEL 3 - END SUBROUTINE THERMO'
-    WRITE(noutlu,*) ' '
+  IF (ygltparam%lp1) THEN
+    WRITE(ygltparam%noutlu,*) ' '
+    WRITE(ygltparam%noutlu,*) ' *** LEVEL 3 - END SUBROUTINE THERMO'
+    WRITE(ygltparam%noutlu,*) ' '
   ENDIF
 !
 END SUBROUTINE glt_thermo

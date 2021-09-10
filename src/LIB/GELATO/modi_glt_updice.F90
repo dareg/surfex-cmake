@@ -78,17 +78,21 @@
 ! .. Subroutine used to check global water budget.
 !
 SUBROUTINE glt_updice  &
-  ( kinit,omsg,tpdom,tptfl,tpsit,pice_a,pemps_a,psalt_a,psalf_a)
+  ( kinit,omsg,tpdom,tptfl,tpsit,pice_a,pemps_a,psalt_a,psalf_a,&
+    noutlu,nt,nx,ny,                                            &
+    dtt,xdomsrf_g,                                              &
+    lwg)
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_glt_stats
   USE mode_glt_info
 !
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit
+         kinit,noutlu,nt,nx,ny
+  REAL, INTENT(in) ::  dtt,xdomsrf_g
+  LOGICAL, INTENT(in) ::  lwg
   CHARACTER(*), INTENT(in) ::  &
         omsg
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
@@ -108,15 +112,15 @@ SUBROUTINE glt_updice  &
 !
 !
    zice(:,:) = rhoice*SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%hsi, DIM=1 )
-   zice_a = glt_avg(tpdom, zice(:,:), 1)
+   zice_a = glt_avg(tpdom, zice(:,:), 1,nx,ny,xdomsrf_g)
    zemps(:,:) = tptfl(:,:)%cio
-   zemps_a = glt_avg(tpdom, zemps(:,:), 1)
+   zemps_a = glt_avg(tpdom, zemps(:,:), 1,nx,ny,xdomsrf_g)
 ! Mass of salt in ice 
    zsalt(:,:) = rhoice*SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%hsi*tpsit(:,:,:)%ssi, DIM=1 )*1.e-3
-   zsalt_a = glt_avg(tpdom, zsalt(:,:), 1)
+   zsalt_a = glt_avg(tpdom, zsalt(:,:), 1,nx,ny,xdomsrf_g)
 ! Salt flux 
    zsalf(:,:) = tptfl(:,:)%sio
-   zsalf_a = glt_avg(tpdom, zsalf(:,:), 1)
+   zsalf_a = glt_avg(tpdom, zsalf(:,:), 1,nx,ny,xdomsrf_g)
    IF ( kinit > 0) THEN
      zdmice = ( zice_a - pice_a) / dtt
      zdemps = zemps_a - pemps_a 

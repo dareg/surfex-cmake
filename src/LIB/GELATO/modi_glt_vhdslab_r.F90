@@ -84,23 +84,27 @@
 !
 SUBROUTINE glt_vhdslab_r  &
         ( kit,pnsftop,pswtra,pderiv,  &
-          pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,osnow )
+          pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,  &
+          pcondt_m,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb,llredo,&
+          petai,petaik,petaikp1,pinvetai,pkodzi,prhocpsi,ptsi_m0,ptsi0, &
+          nilay,nl,noutlu,lp3,lp4,lp5,lwg,xswhdfr,&
+          osnow)
 !
   USE modd_glt_const_thm
-  USE modd_glt_param, only : nilay, nl
-  USE modd_glt_vhd
   USE modi_glt_invert
 !
   IMPLICIT NONE
 !
   INTEGER, INTENT(in) ::  &
-    kit
+    kit,nl,nilay,noutlu
+  LOGICAL, INTENT(in) ::  &
+    lwg,lp3,lp4,lp5,llredo
   REAL, INTENT(in) ::  &
-    pnsftop
+    pnsftop,xswhdfr,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb
   REAL, DIMENSION(nl), INTENT(in) ::  &
     pswtra
   REAL, INTENT(inout) ::  &
-    pderiv
+    pderiv,pcondt_m
   REAL, INTENT(out) ::  &
     pcondb,ptsfa,pqtopmelt
   REAL, DIMENSION(nilay+1), INTENT(out) ::  &
@@ -111,6 +115,14 @@ SUBROUTINE glt_vhdslab_r  &
     osmelt
   LOGICAL, OPTIONAL, INTENT(in) ::  &
     osnow
+
+REAL, DIMENSION(0:nilay), INTENT(in) ::  &
+          petai,pinvetai,petaik,petaikp1,ptsi_m0,ptsi0
+REAL, DIMENSION(0:nilay+1), INTENT(in) ::  &
+          pkodzi
+REAL, DIMENSION(nilay), INTENT(in) ::  &
+          prhocpsi
+
 !
 !
 ! 1.2. Local variables
@@ -152,7 +164,7 @@ SUBROUTINE glt_vhdslab_r  &
   ENDIF
 !
 ! Surface melting temperature
-  ztsm = ztsi_m0(itop)
+  ztsm = ptsi_m0(itop)
 !
 ! Surface melting boolean
 ! MAJOR MODIFICATION SINCE IPCC VERSION
@@ -160,12 +172,12 @@ SUBROUTINE glt_vhdslab_r  &
 ! if current temperature is melting point AND top conduction flux
 ! is positive (in principle, a surface gradient condition would be more
 ! correct...)
-  llmeltop = ( ztsfb>=ztsm .AND. zcondt_m>0. )
+  llmeltop = ( ptsfb>=ztsm .AND. pcondt_m>0. )
 !!  lltempcond = ( llmelt .AND. ABS(znsftop0-zcondt_m)>epsil1 )
 !
 ! Ice and snow slab melting boolean
 !  IF ( kit>2 ) THEN
-!      llmelt = ( ztsib>=ztsi_m0 )
+!      llmelt = ( ztsib>=ptsi_m0 )
 !    ELSE
       llmelt(:) = .FALSE.
 !  ENDIF
@@ -178,7 +190,7 @@ SUBROUTINE glt_vhdslab_r  &
   IF ( llmeltop ) THEN 
       IF (lp4) THEN
           WRITE(noutlu,*) '=================================='
-          WRITE(noutlu,*) '   Temp. condition: ztsfb=',ztsfb
+          WRITE(noutlu,*) '   Temp. condition: ztsfb=',ptsfb
           WRITE(noutlu,*) '=================================='
       ENDIF
       zmat(itop,itop)   = 1.
@@ -187,37 +199,37 @@ SUBROUTINE glt_vhdslab_r  &
     ELSE
       IF (lp4) THEN
           WRITE(noutlu,*) '=================================='
-          WRITE(noutlu,*) '   Flux condition : ztsfb=',ztsfb
-          WRITE(noutlu,*) '                    zcondt_m=',zcondt_m
+          WRITE(noutlu,*) '   Flux condition : ztsfb=',ptsfb
+          WRITE(noutlu,*) '                    zcondt_m=',pcondt_m
           WRITE(noutlu,*) '=================================='
       ENDIF
-      zmat(itop,itop)   = pderiv - zkodzi(itop)
-      zmat(itop,itop+1) = zkodzi(itop)
-      IF ( .NOT.llmelt(itop) ) zmat(itop+1,itop) = -zetaik(itop)
+      zmat(itop,itop)   = pderiv - pkodzi(itop)
+      zmat(itop,itop+1) = pkodzi(itop)
+      IF ( .NOT.llmelt(itop) ) zmat(itop+1,itop) = -petaik(itop)
   ENDIF
 !
   IF ( llmelt(itop) ) THEN
       zmat(itop+1,itop+1) = 1.
     ELSE
-      zmat(itop+1,itop+1) = 1. + zetaik(itop) + zetaikp1(itop)
-      zmat(itop+1,itop+2) = -zetaikp1(itop)
+      zmat(itop+1,itop+1) = 1. + petaik(itop) + petaikp1(itop)
+      zmat(itop+1,itop+2) = -petaikp1(itop)
   ENDIF
 !
   DO jl=itop+2,nilay
     IF ( llmelt(jl-1) ) THEN
         zmat(jl,jl) = 1.
       ELSE
-        zmat(jl,jl-1) = -zetaik(jl-1)
-        zmat(jl,jl)   = 1. + zetaik(jl-1) + zetaikp1(jl-1)
-        zmat(jl,jl+1) = -zetaikp1(jl-1)
+        zmat(jl,jl-1) = -petaik(jl-1)
+        zmat(jl,jl)   = 1. + petaik(jl-1) + petaikp1(jl-1)
+        zmat(jl,jl+1) = -petaikp1(jl-1)
     ENDIF
   END DO
 !
   IF ( llmelt(nilay) ) THEN
       zmat(nilay+1,nilay+1) = 1.
     ELSE
-      zmat(nilay+1,nilay) = -zetaik(nilay) + zg2*zetaikp1(nilay)
-      zmat(nilay+1,nilay+1) = 1. + zetaik(nilay) + zg1*zetaikp1(nilay)
+      zmat(nilay+1,nilay) = -petaik(nilay) + pg2*petaikp1(nilay)
+      zmat(nilay+1,nilay+1) = 1. + petaik(nilay) + pg1*petaikp1(nilay)
   ENDIF
 !
 ! .. Print the matrix on request
@@ -235,7 +247,7 @@ SUBROUTINE glt_vhdslab_r  &
 ! .. Invert the matrix 
 !
   zmatinv = zmat
-  CALL glt_invert( 1,zmatinv )
+  CALL glt_invert( 1,zmatinv,noutlu,lwg )
 !
 !
 ! 1.2. Build the y vector of the system to solve (M*x = y)
@@ -246,32 +258,32 @@ SUBROUTINE glt_vhdslab_r  &
   IF ( llmeltop ) THEN 
       zy(itop)   = ztsm
       IF ( llmelt(itop) ) THEN
-          zy(itop+1) = ztsi_m0(itop)
+          zy(itop+1) = ptsi_m0(itop)
         ELSE
-          zy(itop+1) = ztsi0(itop) + zetaik(itop)*ztsm +  &
-            xswhdfr*pswtra(nilay+1-itop)*zetai(itop)
+          zy(itop+1) = ptsi0(itop) + petaik(itop)*ztsm +  &
+            xswhdfr*pswtra(nilay+1-itop)*petai(itop)
       ENDIF
     ELSE
-      zy(itop)   = -znsftop0 + pderiv*ztsf0
+      zy(itop)   = -pnsftop0 + pderiv*ptsf0
       IF ( llmelt(itop) ) THEN
-          zy(itop+1) = ztsi_m0(itop)
+          zy(itop+1) = ptsi_m0(itop)
         ELSE
-          zy(itop+1) = ztsi0(itop) +  &
-            xswhdfr*pswtra(nilay+1-itop)*zetai(itop)
+          zy(itop+1) = ptsi0(itop) +  &
+            xswhdfr*pswtra(nilay+1-itop)*petai(itop)
       ENDIF
   ENDIF
   DO jl=itop+2,nilay
     IF ( llmelt(jl-1) ) THEN
-        zy(jl) = ztsi_m0(jl-1)
+        zy(jl) = ptsi_m0(jl-1)
       ELSE
-        zy(jl) = ztsi0(jl-1) + xswhdfr*pswtra(nilay+2-jl)*zetai(jl-1)
+        zy(jl) = ptsi0(jl-1) + xswhdfr*pswtra(nilay+2-jl)*petai(jl-1)
     ENDIF
   END DO
   IF ( llmelt(nilay) ) THEN
-      zy(nilay+1) = ztsi_m0(nilay)
+      zy(nilay+1) = ptsi_m0(nilay)
     ELSE
-      zy(nilay+1) = (zg1+zg2)*zetaikp1(nilay)*zmlf + ztsi0(nilay) +  &
-        xswhdfr*pswtra(1)*zetai(nilay)
+      zy(nilay+1) = (pg1+pg2)*petaikp1(nilay)*pmlf + ptsi0(nilay) +  &
+        xswhdfr*pswtra(1)*petai(nilay)
   ENDIF 
 !
 !
@@ -285,7 +297,7 @@ SUBROUTINE glt_vhdslab_r  &
       WRITE(noutlu,*) 'Initial vector'
       WRITE(noutlu,*) zy
       WRITE(noutlu,*) 'Initial vtp'
-      WRITE(noutlu,*) ztsi0(:)
+      WRITE(noutlu,*) ptsi0(:)
   ENDIF
 !
   DO jl=0,nilay+1
@@ -315,15 +327,15 @@ SUBROUTINE glt_vhdslab_r  &
 !
 ! .. Flux at the bottom of the slab
   pcondb =  &
-    zkodzi(nilay+1)*( zg1*( zmlf-ptsia(nilay) )+  &
-    zg2*( zmlf-ptsia(nilay-1) ) )
+    pkodzi(nilay+1)*( pg1*( pmlf-ptsia(nilay) )+  &
+    pg2*( pmlf-ptsia(nilay-1) ) )
 !
 ! .. (melting case): derive top conductive heat flux
   llmeltop = ( ptsfa>=ztsm )
   IF ( llmeltop ) THEN 
-    zcondt_m = -zkodzi(itop)* ( ptsia(itop) - ptsfa )
+    pcondt_m = -pkodzi(itop)* ( ptsia(itop) - ptsfa )
   ELSE
-    zcondt_m = pnsftop
+    pcondt_m = pnsftop
   ENDIF
 !    ( AMIN1(ptsia(itop),ztsm) - AMIN1(ptsfa,ztsm) )
 !!  lltempcond = ( llmelt .AND. ABS(znsftop0-zcondt_m)>epsil1 )
@@ -344,26 +356,26 @@ SUBROUTINE glt_vhdslab_r  &
 ! .. Collect all the energy corresponding to temperatures higher than
 ! melting point
 !  - in sea ice
-  zmelt = SUM( zinvetai(:)*MAX(ptsia(:)-ztsi_m0(:),0.) )
+  zmelt = SUM( pinvetai(:)*MAX(ptsia(:)-ptsi_m0(:),0.) )
 !!  write(noutlu,*) 'zmelt =',zmelt
 !!  write(noutlu,*) 'ptsia =',ptsia
-  ptsia(:) = MIN( ptsia(:),ztsi_m0(:) )
+  ptsia(:) = MIN( ptsia(:),ptsi_m0(:) )
 !!  write(noutlu,*) 'ptsia =',ptsia
 !    
 ! .. Deduce which part of the top non-solar flux is devoted to melting
-  pqtopmelt = znsftop0-zcondt_m+zmelt
+  pqtopmelt = pnsftop0-pcondt_m+zmelt
 !!  pqtopmelt = zmelt
 !!  write(noutlu,*) 'znsftop0 =',znsftop0
 !!  write(noutlu,*) 'zcondt_m =',zcondt_m
 !
   IF ( lp4 .OR. llredo ) THEN
-      WRITE(noutlu,*) 'Previous surface temperature =',ztsf0
+      WRITE(noutlu,*) 'Previous surface temperature =',ptsf0
       WRITE(noutlu,*) 'New surface temperature      =',ptsfa
       WRITE(noutlu,*) 'Previous vtp:'
-      WRITE(noutlu,*) ztsi0
+      WRITE(noutlu,*) ptsi0
       WRITE(noutlu,*) 'New vtp     :'
       WRITE(noutlu,*) ptsia
-      WRITE(noutlu,*) 'zcondt   =',znsftop0
+      WRITE(noutlu,*) 'zcondt   =',pnsftop0
   ENDIF 
 !
 ! .. Melting surface boolean
@@ -389,13 +401,13 @@ SUBROUTINE glt_vhdslab_r  &
         pcondb
       WRITE(noutlu,*) &
         ' Additional heat flux at the top dQ/dT*(Tnew-Told):',  &
-        zderiv*( ptsfa-ztsf0 )
+        zderiv*( ptsfa-ptsf0 )
 !!      WRITE(noutlu,*) ' Cond. heat flux at the top:',  &
 !!        zcondt_m
       WRITE(noutlu,*)
       WRITE(noutlu,*) 'Right hand-side:'
       WRITE(noutlu,*) '-----------------'
-      zdht = SUM( ( ptsia(:)-ztsi0(:) ) * zinvetai(:) )
+      zdht = SUM( ( ptsia(:)-ptsi0(:) ) * pinvetai(:) )
       WRITE(noutlu,*) '  Enthalpy change per time unit:',  &
         zdht
       WRITE(noutlu,*) '  Top melting flux:',  &
@@ -403,7 +415,7 @@ SUBROUTINE glt_vhdslab_r  &
 ! 
 !!      WRITE(noutlu,*) 'Enthalpy change per time unit (layers):'
 !!      WRITE(noutlu,*) '----------------------------------------'
-!!      WRITE(noutlu,*) ( ptsia(:)-ztsi0(:) ) * zinvetai(:)
+!!      WRITE(noutlu,*) ( ptsia(:)-ptsi0(:) ) * pinvetai(:)
 !!      WRITE(noutlu,*)
       WRITE(noutlu,*)
       WRITE(noutlu,*)  &
@@ -412,7 +424,7 @@ SUBROUTINE glt_vhdslab_r  &
         '-------------------------------------'
       zbl = zdht + pqtopmelt -  &
         ( pcondb + xswhdfr*SUM(pswtra(1:nilay+1-itop)) +  &
-          pnsftop + zderiv*( ptsfa-ztsf0 ) )
+          pnsftop + zderiv*( ptsfa-ptsf0 ) )
       WRITE(noutlu,*) zbl 
       IF ( ABS(zbl)>0.1 ) THEN
         IF (lwg) THEN
@@ -420,8 +432,8 @@ SUBROUTINE glt_vhdslab_r  &
           WRITE(noutlu,*)'llmeltop =',llmeltop
           WRITE(noutlu,*)'gsnow    =',gsnow
           WRITE(noutlu,*)'pqtopmelt=',pqtopmelt
-          WRITE(noutlu,*)'znsftop0 =',znsftop0
-          WRITE(noutlu,*)'-zcondt_m=',-zcondt_m
+          WRITE(noutlu,*)'znsftop0 =',pnsftop0
+          WRITE(noutlu,*)'-zcondt_m=',-pcondt_m
           WRITE(noutlu,*)'zmelt    =',zmelt
         ENDIF
       ENDIF 
@@ -434,42 +446,42 @@ SUBROUTINE glt_vhdslab_r  &
       WRITE(noutlu,*)  'Check the equations'
       WRITE(noutlu,*)   &
         '  (',itop,') ',  &
-!!        ( pderiv-zkodzi(itop) )*ptsfa + zkodzi(itop)*ptsia(itop),  &
+!!        ( pderiv-pkodzi(itop) )*ptsfa + pkodzi(itop)*ptsia(itop),  &
 !!        pderiv*ztsf0 - pnsftop + pqtopmelt
         zmat(itop,itop)*ptsfa + zmat(itop,itop+1)*ptsia(itop),  &
 !!        pderiv*ztsf0 - pnsftop + pqtopmelt
          zy(itop)
       WRITE(noutlu,*)   &
         '  (',itop+1,') ',  &
-!!        - zetaik(itop)*ptsfa +  &
-!!        ( 1.+zetaik(itop)+zetaikp1(itop) )*ptsia(itop)  &
-!!        - zetaikp1(itop)*ptsia(itop+1),  &
+!!        - petaik(itop)*ptsfa +  &
+!!        ( 1.+petaik(itop)+petaikp1(itop) )*ptsia(itop)  &
+!!        - petaikp1(itop)*ptsia(itop+1),  &
         - zmat(itop+1,itop)*ptsfa +  &
         zmat(itop+1,itop+1)*ptsia(itop)  &
         - zmat(itop+1,itop+2)*ptsia(itop+1),  &
-        ztsi0(itop)
-!!        write(noutlu,*) '- zetaik(itop)*ptsfa',- zetaik(itop)*ptsfa
+        ptsi0(itop)
+!!        write(noutlu,*) '- petaik(itop)*ptsfa',- petaik(itop)*ptsfa
 !!        write(noutlu,*) 'ptsfa =',ptsfa
-!!        write(noutlu,*) '( 1.+zetaik(itop)+zetaikp1(itop) )*ptsia(itop)',  &
-!!          ( 1.+zetaik(itop)+zetaikp1(itop) )*ptsia(itop)
+!!        write(noutlu,*) '( 1.+petaik(itop)+petaikp1(itop) )*ptsia(itop)',  &
+!!          ( 1.+petaik(itop)+petaikp1(itop) )*ptsia(itop)
 !!        write(noutlu,*) 'ptsia(itop) =',ptsia(itop)
-!!        write(noutlu,*) '- zetaikp1(itop)*ptsia(itop+1)', - zetaikp1(itop)*ptsia(itop+1)
+!!        write(noutlu,*) '- petaikp1(itop)*ptsia(itop+1)', - petaikp1(itop)*ptsia(itop+1)
 !!        write(noutlu,*) 'ptsia(itop+1) =',ptsia(itop+1)
 !
       DO jl=itop+2,nilay
         WRITE(noutlu,*)   &
           '  (',jl,') ',  &
-          - zetaik(jl-1)*ptsia(jl-2) +  &
-          ( 1.+zetaik(jl-1)+zetaikp1(jl-1) )*ptsia(jl-1)  &
-          - zetaikp1(jl-1)*ptsia(jl),  &
-          ztsi0(jl-1)
+          - petaik(jl-1)*ptsia(jl-2) +  &
+          ( 1.+petaik(jl-1)+petaikp1(jl-1) )*ptsia(jl-1)  &
+          - petaikp1(jl-1)*ptsia(jl),  &
+          ptsi0(jl-1)
       END DO
 !
       WRITE(noutlu,*)   &
         '  (',nilay+1,') ',  &
-        ( -zetaik(nilay)+zg2*zetaikp1(nilay) )*ptsia(nilay-1) +  &
-        ( 1.+zetaik(nilay)+zg1*zetaikp1(nilay) )*ptsia(nilay),  &
-        (zg1+zg2)*zetaikp1(nilay)*zmlf + ztsi0(nilay)
+        ( -petaik(nilay)+pg2*petaikp1(nilay) )*ptsia(nilay-1) +  &
+        ( 1.+petaik(nilay)+pg1*petaikp1(nilay) )*ptsia(nilay),  &
+        (pg1+pg2)*petaikp1(nilay)*pmlf + ptsi0(nilay)
 !
   ENDIF
 !
@@ -480,11 +492,11 @@ SUBROUTINE glt_vhdslab_r  &
 ! .. Convert gltools_enthalpy change to J.kg-1 of ice
 !
   DO jl=1,nilay
-    pdh(jl) = zrhocpsi(nilay+1-jl)/rhoice *  &
-      ( ptsia(nilay+1-jl)-ztsi0(nilay+1-jl) )
+    pdh(jl) = prhocpsi(nilay+1-jl)/rhoice *  &
+      ( ptsia(nilay+1-jl)-ptsi0(nilay+1-jl) )
   END DO
   IF ( gsnow ) THEN
-      pdh(nilay+1) = cpice0 * ( ptsia(0)-ztsi0(0) )
+      pdh(nilay+1) = cpice0 * ( ptsia(0)-ptsi0(0) )
     ELSE
       pdh(nilay+1) = 0.
   ENDIF

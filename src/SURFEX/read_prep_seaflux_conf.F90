@@ -70,7 +70,7 @@ IMPLICIT NONE
 LOGICAL, INTENT(IN) :: OMERCATOR
 !
 CHARACTER(LEN=6),  INTENT(IN)  :: HPROGRAM ! program calling ISBA
-CHARACTER(LEN=7),  INTENT(IN)  :: HVAR     ! variable treated
+CHARACTER(LEN=9),  INTENT(IN)  :: HVAR     ! variable treated
 CHARACTER(LEN=28), INTENT(OUT) :: HFILE    ! file name
 CHARACTER(LEN=6),  INTENT(OUT) :: HFILETYPE! file type
 CHARACTER(LEN=28), INTENT(OUT) :: HFILEPGD    ! file name
@@ -136,16 +136,16 @@ END IF
 !  ------------------------------
 !
 SELECT CASE (HVAR)
-   CASE ('SST    ') 
+   CASE ('SST      ') 
       OUNIF = (XSST_UNIF/=XUNDEF) 
-   CASE ('SSS    ') 
+   CASE ('SSS      ') 
       IF (CSEAICE_SCHEME == 'NONE  '.AND. &
          LEN_TRIM(HFILETYPE)==0.0   .AND. &
          XSSS_UNIF==XUNDEF                )THEN
          XSSS_UNIF=0.0
       ENDIF
       OUNIF = (XSSS_UNIF/=XUNDEF)
-   CASE ('SIC    ') 
+   CASE ('SIC      ') 
       OUNIF = (XSIC_UNIF/=XUNDEF) 
 END SELECT
 
@@ -155,7 +155,7 @@ END SELECT
 !* If no file and no uniform field is prescribed: error
 !  ---------------------------------------------
 !
-IF (HVAR=='DATE   ' .OR. HVAR=='ZS     ') THEN
+IF (HVAR=='DATE     ' .OR. HVAR=='ZS       ') THEN
   OUNIF = (HFILETYPE=='      ')
   IF (LHOOK) CALL DR_HOOK('READ_PREP_SEAFLUX_CONF',1,ZHOOK_HANDLE)
   RETURN

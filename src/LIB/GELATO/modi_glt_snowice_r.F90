@@ -90,16 +90,19 @@
 !
 ! * Subroutine which takes into account the formation of snow ice.
 !
-SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia )
+SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
+   ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,dtt,rn_htopoc,sf3tinv )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE mode_gltools_enthalpy
   USE modi_glt_updtfl_r
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(IN) :: ncdlssh,nsalflx,nilay,nslay,nl,nt,np,nleviti
+  REAL, INTENT(IN) ::  dtt,rn_htopoc
+  REAL, DIMENSION(:), INTENT(IN) ::  sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
@@ -231,7 +234,9 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia )
    DO jk=1,nt
      ztmp(jk,:) = tpmxl(:)%sml
    END DO
-  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi+zdmsn,pent=zentsi,psalt=ztmp)
+  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi+zdmsn,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      pent=zentsi,psalt=ztmp)
 !
 ! A recrire de facon plus logique apres recombinaison des 2 glt_updtfl_r
   tptfl(:)%tio = tptfl(:)%tio -  &
@@ -251,7 +256,9 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia )
 !!    write(noutlu,*)'(3) tio=',tptfl%tio
 !!    write(noutlu,*)'(3) wio=',tptfl%wio
 !!    write(noutlu,*)'(3) wlo=',tptfl%wlo
-  CALL glt_updtfl_r( 'FW2I',tpmxl,tptfl,-1.*zdmsn,zentsn )
+  CALL glt_updtfl_r( 'FW2I',tpmxl,tptfl,-1.*zdmsn,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,&
+      pent=zentsn )
 !!    write(noutlu,*)'(4) tio=',tptfl%tio
 !!    write(noutlu,*)'(4) wio=',tptfl%wio
 !!    write(noutlu,*)'(4) wlo=',tptfl%wlo

@@ -98,9 +98,9 @@
 ! ----------------------- SUBROUTINE glt_sndmlrf ----------------------------
 !
 SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
-  pustar,tpall_oce )
+  pustar,tpall_oce,&
+  nadvect,ncdlssh,ndyncor,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc )
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE modd_glt_const_evp
 #if ! defined in_surfex
@@ -108,9 +108,11 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 #endif
   USE modi_gltools_adjflx
   USE modi_glt_updtfl
-!
+  USE mode_glt_init
+  !
   IMPLICIT NONE
-
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nadvect,ndyncor,nleviti,nx,ny,nt
+  REAL,INTENT(in) :: dtt,rn_htopoc
   REAL, DIMENSION(nx,ny), INTENT(in) ::  &
         pbathy
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
@@ -208,7 +210,7 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 ! 2.1. Initialise fluxes transmitted to the ocean
 ! ------------------------------------------------
 !
-  CALL initfl( tzdfl )
+  CALL initfl( tzdfl,nx,ny )
 !
   IF ( nadvect==1 .AND. ndyncor==1 ) THEN
 !
@@ -224,12 +226,12 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !
 ! -> north hemisphere
     ycrit = ( tpdom(:,:)%lat>0..AND.tpdom(:,:)%tmk==1.AND.zfsit(:,:)>epsil1 ) 
-    zdm(1,:,:) = zdm(1,:,:) + gltools_adjflx( tpdom,ycrit,tpdia%ddn )
+    zdm(1,:,:) = zdm(1,:,:) + gltools_adjflx( tpdom,ycrit,tpdia%ddn,nx,ny,dtt )
 ! -> south hemisphere
     ycrit = ( tpdom(:,:)%lat<0..AND.tpdom(:,:)%tmk==1.AND.zfsit(:,:)>epsil1 ) 
-    zdm(1,:,:) = zdm(1,:,:) + gltools_adjflx( tpdom,ycrit,tpdia%ddn )
+    zdm(1,:,:) = zdm(1,:,:) + gltools_adjflx( tpdom,ycrit,tpdia%ddn,nx,ny,dtt )
 !
-    CALL glt_updtfl('FW2O', tpml,tzdfl,zdm,pent=zent )
+    CALL glt_updtfl('FW2O',tpml,tzdfl,zdm,ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent=zent )
 !
 !
 ! 2.3. Effect of sea ice 
@@ -244,8 +246,8 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !
 ! -> north hemisphere
     ycrit = ( tpdom(:,:)%lat>0..AND.tpdom(:,:)%tmk==1.AND.zfsit(:,:)>epsil1 ) 
-    zmsi = gltools_adjflx( tpdom,ycrit,tpdia%ddi )
-    zmsa = gltools_adjflx( tpdom,ycrit,tpdia%dds )
+    zmsi = gltools_adjflx( tpdom,ycrit,tpdia%ddi,nx,ny,dtt )
+    zmsa = gltools_adjflx( tpdom,ycrit,tpdia%dds,nx,ny,dtt)
     WHERE( ABS( zmsi(:,:) )>epsil2 )
         zssi(:,:) = zmsa(:,:)/zmsi(:,:)
       ELSEWHERE
@@ -258,8 +260,8 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !
 ! -> south hemisphere
     ycrit = ( tpdom(:,:)%lat<0..AND.tpdom(:,:)%tmk==1.AND.zfsit(:,:)>epsil1 ) 
-    zmsi = gltools_adjflx( tpdom,ycrit,tpdia%ddi )
-    zmsa = gltools_adjflx( tpdom,ycrit,tpdia%dds )
+    zmsi = gltools_adjflx( tpdom,ycrit,tpdia%ddi,nx,ny,dtt)
+    zmsa = gltools_adjflx( tpdom,ycrit,tpdia%dds,nx,ny,dtt)
     WHERE( ABS( zmsi(:,:) )>epsil2 )
         zssi(:,:) = zmsa(:,:)/zmsi(:,:)
       ELSEWHERE
@@ -276,7 +278,8 @@ SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
 !    print*,'salt mass change =',glt_avg(tpdom,tpdia%dds,0)*dtt
 !    print*,'compensatory flux=',glt_avg(tpdom,zsalt(1,:,:)*zdm(1,:,:),0)/1000.
 !
-    CALL glt_updtfl('I2O', tpml,tzdfl,zdm,pent=zent,psalt=zsalt )
+    CALL glt_updtfl('I2O', tpml,tzdfl,zdm,&
+        ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent=zent,psalt=zsalt )
 !
 ! 
 ! 2.4. Add up correction to initial fluxes

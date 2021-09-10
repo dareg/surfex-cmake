@@ -80,17 +80,24 @@
 ! .. Subroutine used to check global water budget.
 !
 SUBROUTINE glt_updsnow  &
-  ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,paddterm,paddterm2)
+  ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,&
+  noutlu,nt,nx,ny,                              &
+  dtt,xdomsrf_g,                                &
+  lwg,                                          &
+  paddterm,paddterm2)
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_glt_stats
   USE mode_glt_info
 !
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit
+         kinit,noutlu,nt,nx,ny
+  REAL, INTENT(in) ::  &
+         dtt,xdomsrf_g
+  LOGICAL, INTENT(in) ::  &
+         lwg
   CHARACTER(*), INTENT(in) ::  &
         omsg
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
@@ -112,9 +119,9 @@ SUBROUTINE glt_updsnow  &
 !
 !
    zsnow(:,:) = SUM( tpsit(:,:,:)%fsi*tpsit(:,:,:)%rsn*tpsit(:,:,:)%hsn, DIM=1 )
-   zsnow_a = glt_avg(tpdom, zsnow(:,:), 1)
+   zsnow_a = glt_avg(tpdom, zsnow(:,:), 1,nx,ny,xdomsrf_g)
    zemp(:,:) = tptfl(:,:)%wlo
-   zemp_a = glt_avg(tpdom, zemp(:,:), 1)
+   zemp_a = glt_avg(tpdom, zemp(:,:), 1,nx,ny,xdomsrf_g)
    IF ( kinit > 0) THEN
      zdmsnow = ( zsnow_a - psnow_a) / dtt
      zdemp = zemp_a - pemp_a 
@@ -127,12 +134,12 @@ SUBROUTINE glt_updsnow  &
        WRITE(noutlu,*) '    BILAN DMSNOW-EMP            :', zdmsnow + zdemp
      ENDIF
      IF ( PRESENT(paddterm) .AND. PRESENT(paddterm2) ) THEN
-        zaddterm_a = glt_avg(tpdom, paddterm(:,:), 1)
+        zaddterm_a = glt_avg(tpdom, paddterm(:,:), 1,nx,ny,xdomsrf_g)
         IF(lwg) WRITE(noutlu,*) '    Bilan snow content         :', zdmsnow + zaddterm_a 
-        zaddterm_a = glt_avg(tpdom, paddterm2(:,:), 1)
+        zaddterm_a = glt_avg(tpdom, paddterm2(:,:), 1,nx,ny,xdomsrf_g)
         IF(lwg) WRITE(noutlu,*) '    Bilan emp                  :', zdemp + zaddterm_a 
      ELSE IF ( PRESENT(paddterm) ) THEN
-        zaddterm_a = glt_avg(tpdom, paddterm(:,:), 1)
+        zaddterm_a = glt_avg(tpdom, paddterm(:,:), 1,nx,ny,xdomsrf_g)
         IF (lwg) THEN
           WRITE(noutlu,*) '    Terme additif            :', zaddterm_a
           WRITE(noutlu,*) '   BILAN DMSNOW-EMP+terme additif  :', zdmsnow + zdemp + zaddterm_a
