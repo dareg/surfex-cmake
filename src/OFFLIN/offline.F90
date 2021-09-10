@@ -83,7 +83,6 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XZ0H        ,&! surface roughness length for heat      (m)
                             XQSURF        ! specific humidity at surface           (kg/kg)
 !
-USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
@@ -327,7 +326,8 @@ CHARACTER(LEN=100) :: YNAME
 CHARACTER(LEN=10)  :: YRANK
 INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK,JIMP
 INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
-DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
+!DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
+REAL :: XTIME0, XTIME1, XTIME
 !
 ! SFX - OASIS coupling variables
 !
@@ -669,7 +669,13 @@ NB_READ_FORC=CEILING(1.*(INB_STEP_ATM+1)/INB_LINES)
 !     Gelato wizzard user)
 !
 #if ! defined in_arpege
- CALL OPNDIA()
+ !BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
+ CALL OPNDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
+             YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
+             YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
+             YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
+             YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
+             YSC%SM%S%GLTPARAM%cdiafmt)
 #endif
 !
 !       allocate local atmospheric variables
@@ -1006,7 +1012,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Receive fields to other models proc by proc
-     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W,               &
+     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W, &
+                            YSC%TM , YSC%GDM , YSC%GRM, &
                             CSURF_FILETYPE, INI, IBANDS, ZTIMEC, XTSTEP_SURF, XZENITH, &
                             XSW_BANDS, XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF   )
     ENDIF
@@ -1047,8 +1054,6 @@ DO JFORC_STEP=1,INB_STEP_ATM
     IF (LFORCATMOTARTES) THEN 
       ZD_O3(:)= XO3(:)/100 ! integrated ozone (atm-cm)
       ZD_AE(:)= XAE(:) ! aerosol optical depth
-      !PRINT*, "ZO3",ZD_O3
-      !PRINT*, "ZAE",ZD_AE
     ELSE 
       ZD_O3(:)= 0.3 ! integrated ozone (atm-cm)
       ZD_AE(:)= 0.1 ! aerosol optical depth
@@ -1680,7 +1685,13 @@ ENDIF
 !
 !    4'    Close Gelato specific diagnostic 
 #if ! defined in_arpege
- CALL CLSDIA()
+!BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
+CALL CLSDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
+            YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
+            YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
+            YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
+            YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
+            YSC%SM%S%GLTPARAM%cdiafmt)
 #endif
 !
 !
