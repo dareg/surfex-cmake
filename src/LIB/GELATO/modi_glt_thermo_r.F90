@@ -263,7 +263,8 @@ SUBROUTINE glt_thermo_r  &
         ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
 
       CALL glt_updice_r(0,' BEFORE glt_thermo_lead_r ', &
-        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt,ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt, &
+        ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a)
       zsalt_a_0 = zsalt_a
       zsalf_a_0 = zsalf_a
   ENDIF
@@ -307,7 +308,8 @@ SUBROUTINE glt_thermo_r  &
         ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lwg,ygltparam%sf3tinv)
 
       CALL glt_updice_r(1, ' AFTER THERMO_LEAD_R', &
-        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt,ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a)
+        tpdom, tpsit, zsalt_a, zice_a,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%dtt, &
+        ygltparam%xdomsrf_r,ygltparam%lwg, tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -317,7 +319,8 @@ SUBROUTINE glt_thermo_r  &
   CALL glt_thermo_ice_r  &
     ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
    ygltparam%ncdlssh,ygltparam%niceage,ygltparam%nicesal,ygltparam%nicesub,ygltparam%nilay,ygltparam%nl,ygltparam%nleviti,&
-   ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nslay,ygltparam%nsnwrad,ygltparam%nt,ygltparam%nupdbud,&
+   ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nslay, &
+   ygltparam%nsnwrad,ygltparam%nt,ygltparam%nupdbud,&
    ygltparam%albimlt,ygltparam%albsdry,ygltparam%albsmlt,&
    ygltparam%dtt,ygltparam%rn_htopoc,ygltparam%xdomsrf_r,ygltparam%xlmelt,ygltparam%xswhdfr,&
    ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lp4,ygltparam%lp5,ygltparam%lwg,&

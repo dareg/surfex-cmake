@@ -216,10 +216,13 @@ DO JT=1,IT
       !       Let Gelato process its input data
       !
       CALL GLT_GETMLRF(S%TGLT%oce_all,S%TGLT%tml,S%GLTPARAM%nx,S%GLTPARAM%ny)
-      CALL GLT_GETATMF(S%TGLT,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%ny,S%GLTPARAM%lp1,S%GLTPARAM%lwg)
-      CALL GLTOOLS_CHKINP( 20010101,S%TGLT,                                                                                                                                 &
-                           S%GLTPARAM%n0vilu,S%GLTPARAM%n2vilu,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nprinto,S%GLTPARAM%nsavinp,S%GLTPARAM%nsavlu,                &
-                           S%GLTPARAM%nt,S%GLTPARAM%ntd,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,S%GLTPARAM%xdomsrf_g,S%GLTPARAM%lwg,S%GLTPARAM%ciopath) 
+      CALL GLT_GETATMF(S%TGLT,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%ny,S%GLTPARAM%lp1, &
+                       S%GLTPARAM%lwg)
+      CALL GLTOOLS_CHKINP( 20010101,S%TGLT,                                                                                  &
+                           S%GLTPARAM%n0vilu,S%GLTPARAM%n2vilu,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nprinto,      &
+                           S%GLTPARAM%nsavinp,S%GLTPARAM%nsavlu,                                                             &
+                           S%GLTPARAM%nt,S%GLTPARAM%ntd,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,       &
+                           S%GLTPARAM%xdomsrf_g,S%GLTPARAM%lwg,S%GLTPARAM%ciopath) 
       !
       ! Compute gelato time index
       !
@@ -234,15 +237,20 @@ DO JT=1,IT
       CALL GLT_SNDATMF( S%TGLT,S%GLTPARAM%nnflxin,S%GLTPARAM%alblc)
       CALL GLT_SNDMLRF( S%TGLT%bat,S%TGLT%dom,S%TGLT%atm_all,S%TGLT%tml, &
                         S%TGLT%dia,S%TGLT%sit,S%TGLT%tfl,S%TGLT%ust,S%TGLT%all_oce,&
-                        S%GLTPARAM%nadvect,S%GLTPARAM%ncdlssh,S%GLTPARAM%ndyncor,S%GLTPARAM%nleviti,S%GLTPARAM%nsalflx,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%ny,&
+                        S%GLTPARAM%nadvect,S%GLTPARAM%ncdlssh,S%GLTPARAM%ndyncor,S%GLTPARAM%nleviti,S%GLTPARAM%nsalflx,       &
+                        S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%ny,&
                         S%GLTPARAM%dtt,S%GLTPARAM%rn_htopoc)
       CALL WRIDIA_AR5(S%TGLT,&
-                      S%GLTPARAM%gelato_leadproc,S%GLTPARAM%gelato_myrank,S%GLTPARAM%n0valu,S%GLTPARAM%n0vilu,S%GLTPARAM%n2valu,S%GLTPARAM%n2vilu,S%GLTPARAM%navedia,&
-                      S%GLTPARAM%ndiamax,S%GLTPARAM%ndiap1,S%GLTPARAM%ndiap2,S%GLTPARAM%ndiap3,S%GLTPARAM%niceage,S%GLTPARAM%nicesal,S%GLTPARAM%ninsdia,S%GLTPARAM%nleviti,&
-                      S%GLTPARAM%nmponds,S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,&
+                      S%GLTPARAM%gelato_leadproc,S%GLTPARAM%gelato_myrank,S%GLTPARAM%n0valu,S%GLTPARAM%n0vilu,                &
+                      S%GLTPARAM%n2valu,S%GLTPARAM%n2vilu,S%GLTPARAM%navedia,&
+                      S%GLTPARAM%ndiamax,S%GLTPARAM%ndiap1,S%GLTPARAM%ndiap2,S%GLTPARAM%ndiap3,S%GLTPARAM%niceage,            &
+                      S%GLTPARAM%nicesal,S%GLTPARAM%ninsdia,S%GLTPARAM%nleviti,&
+                      S%GLTPARAM%nmponds,S%GLTPARAM%noutlu,S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,        &
+                      S%GLTPARAM%nyglo,&
                       S%GLTPARAM%dtt,S%GLTPARAM%dttave,S%GLTPARAM%lp1,S%GLTPARAM%lwg,S%GLTPARAM%cdiafmt,S%GLTPARAM%cinsfld)
       CALL GLTOOLS_CHKOUT( 20010101,S%TGLT,&
-                          S%GLTPARAM%n0vilu,S%GLTPARAM%n2vilu,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nprinto,S%GLTPARAM%nsavlu,S%GLTPARAM%nsavout,&
+                          S%GLTPARAM%n0vilu,S%GLTPARAM%n2vilu,S%GLTPARAM%nnflxin,S%GLTPARAM%noutlu,S%GLTPARAM%nprinto,        &
+                          S%GLTPARAM%nsavlu,S%GLTPARAM%nsavout,&
                           S%GLTPARAM%nt,S%GLTPARAM%nx,S%GLTPARAM%nxglo,S%GLTPARAM%ny,S%GLTPARAM%nyglo,&
                           S%GLTPARAM%xdomsrf_g,S%GLTPARAM%lp1,S%GLTPARAM%lwg,S%GLTPARAM%ciopath)
       ! Sum output fields over Gelato model time step duration

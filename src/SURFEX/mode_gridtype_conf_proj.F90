@@ -32,9 +32,9 @@ CONTAINS
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    01/2004
-!!        M.Moge    06/2015 broadcast the space step to all MPI processes (necessary for reproductibility)
-!!     A. Mary      07/2018 : width of I and E zones
+!!      Original   01/2004
+!!      M.Moge     06/2015 broadcast the space step to all MPI processes (necessary for reproductibility)
+!!      A. Mary    07/2018 : width of I and E zones
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS

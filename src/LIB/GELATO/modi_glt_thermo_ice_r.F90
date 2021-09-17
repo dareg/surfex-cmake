@@ -164,7 +164,8 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! --- INTENT(in) arguments.
 !
-  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud,nl,np,nt
+  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud, &
+                          nl,np,nt
   LOGICAL, INTENT(IN) :: lp1,lp2,lp3,lp4,lp5,lwg
   REAL, INTENT(IN) ::  dtt,xdomsrf_r,xswhdfr,rn_htopoc,albimlt,albsmlt,albsdry,xlmelt
   REAL,DIMENSION(:), INTENT(IN) :: sf3t,sf3tinv,height,depth
@@ -381,7 +382,8 @@ SUBROUTINE glt_thermo_ice_r  &
         dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
           
       CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
-      CALL glt_updice_r(1, ' AFTER glt_icetrans_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
+      CALL glt_updice_r(1, ' AFTER glt_icetrans_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, &
+                        zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -432,7 +434,8 @@ SUBROUTINE glt_thermo_ice_r  &
         dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
          
       CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
-      CALL glt_updice_r(1, ' AFTER glt_vhdiff_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
+      CALL glt_updice_r(1, ' AFTER glt_vhdiff_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, &
+                        tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -456,7 +459,8 @@ SUBROUTINE glt_thermo_ice_r  &
         dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
          
       CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
-      CALL glt_updice_r(1, ' AFTER glt_updhsn_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
+      CALL glt_updice_r(1, ' AFTER glt_updhsn_r ', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, &
+                        tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
@@ -478,7 +482,8 @@ SUBROUTINE glt_thermo_ice_r  &
         dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
          
       CALL glt_updsnow_r(1, '   Snow   ', tpdom, tptfl, tpsit, zsnow_a,zemp_a,noutlu,np,nt,dtt,xdomsrf_r,lwg)
-      CALL glt_updice_r(1, ' AFTER SNOWICE_R', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, tptfl, zemps_a, zsalf_a)
+      CALL glt_updice_r(1, ' AFTER SNOWICE_R', tpdom, tpsit, zsalt_a, zice_a,noutlu,np,nt,dtt,xdomsrf_r,lwg, &
+                        tptfl, zemps_a, zsalf_a)
   ENDIF
 !
 !
