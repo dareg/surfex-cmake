@@ -43,6 +43,9 @@ export VERSION_XYZ=${VERSION_XYZ}
 #
 export ARCH=${ARCH}
 #
+# specify supercomputer architecture (for specific hard links to libraries)
+export BULL=${BULL}
+#
 #  Version of MPI
 #
 #export VER_MPI=MPIVIDE,LAMMPI,MPIAUTO,OMPI122G95
@@ -58,6 +61,9 @@ export VER_OMP=${VER_OMP}
 #export OPTLEVEL=DEBUG,O2
 #
 export OPTLEVEL=${OPTLEVEL}
+#
+# Processor-dependent optimization
+export OPT_PROC="${OPT_PROC}"
 #
 #  USER VERSION
 #

@@ -227,13 +227,13 @@ sed -e "s/CFILEPGDTYPE\ =\ \"ASCII\"/CFILEPGDTYPE\ =\ \"FA\"/g" OPTIONS.nam_save
 cp -f OPTIONS.nam OPTIONS.nam_PREP_EXTE_FILE_FA_GENE_NEW
 ./script_exec_pgd_parall.sh "PREP_EXTE_FILE_FA_GENE_NEW" $fname $2 $3
 
-#test fichier PGD PREP LONLAT_REG LFI version précédente
+#test fichier PGD PREP LONLAT_REG FA version précédente
 echo "########## PREP_EXTE_FILE_FA_GENE_OLD"
 rm -f PGD_BASE_NEW.fa
 rm -f PREP_BASE_NEW.fa
 mv -f PGD_BASE_OLD.fa PGD_BASE.fa
 mv -f PREP_BASE_OLD.fa PREP_BASE.fa
-cp -f OPTIONS.nam_PREP_EXTE_FILE_LFI_GENE_NEW OPTIONS.nam
+cp -f OPTIONS.nam_PREP_EXTE_FILE_FA_GENE_NEW OPTIONS.nam
 ./script_exec_pgd_parall.sh "PREP_EXTE_FILE_FA_GENE_OLD" $fname $2 $3
 rm -f *_BASE*.*
 

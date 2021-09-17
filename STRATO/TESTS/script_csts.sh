@@ -195,6 +195,12 @@ cp -f OPTIONS.nam_cpl OPTIONS.nam_save
 sed -e "s/LQVNPLUS\ \=\ F/LQVNPLUS\ \=\ T/g" OPTIONS.nam_save > OPTIONS.nam
 ./script_csts_canopy.sh "OPTIONS.nam" "NAM_SURF_ATM_CPL_ARP_QVNPLUS" $fname $2 $3
 
+#LARP_PN : activate ARPEGE PN values for CV and TAU_ICE
+echo "########### NAM_SURF_ATM_LARP_PN"
+cp -f OPTIONS.nam_csts OPTIONS.nam_save
+sed -e "s/LARP_PN\ \=\ F/LARP_PN\ \=\ T/g" OPTIONS.nam_save > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_LARP
+./script_csts_canopy.sh "OPTIONS.nam" "NAM_SURF_ATM_LARP_PN" $fname $2 $3
 
 #on teste les autres booléens
 

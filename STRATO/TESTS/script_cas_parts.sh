@@ -1052,7 +1052,7 @@ sed -e "s/CFILE_FORMAT_OBS = \"FA   \"/CFILE_FORMAT_OBS = \"ASCII\"/g" OPTIONS.n
 cp OPTIONS.nam OPTIONS.nam_save
 sed -e "s/LOBSNAT = F/LOBSNAT = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SODA_ENKF1
-./script_exec_soda_enkf.sh "SODA_ENKF1" $fname $2 $3 3 $dir_run
+#./script_exec_soda_enkf.sh "SODA_ENKF1" $fname $2 $3 3 $dir_run
 
 
 echo "############ SODA_ENKF2"
@@ -1065,14 +1065,14 @@ sed -e "s/LENKF = T/LENKF = F/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_save
 sed -e "s/LDENKF = F/LDENKF = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SODA_ENKF2
-./script_exec_soda_enkf.sh "SODA_ENKF2" $fname $2 $3 4 $dir_run
+#./script_exec_soda_enkf.sh "SODA_ENKF2" $fname $2 $3 4 $dir_run
 
 
 echo "############ SODA_ENKF3"
 cp -f OPTIONS.nam_SODA_ENKF1 OPTIONS.nam_save
 sed -e "s/LPERTURBATION_RUN = F/LPERTURBATION_RUN = T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_SODA_ENKF3
-./script_exec_soda_enkf.sh "SODA_ENKF3" $fname $2 $3 3 $dir_run
+#./script_exec_soda_enkf.sh "SODA_ENKF3" $fname $2 $3 3 $dir_run
 
 
 for file in `ls TESTS/CAS_PART/SODA/PREP`

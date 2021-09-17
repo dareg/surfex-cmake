@@ -25,6 +25,9 @@ ifdef BULL
   ifeq "$(BULL)" "YES"
     LIBS       += -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -L/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/mkl/lib/intel64 -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64 -Wl,-rpath,/opt/softs/intel/compilers_and_libraries_2016.1.150/linux/mkl/lib/intel64 -lintlc -lifport -limf -lifcore -lsvml -lirng
   endif
+  ifeq "$(BULL)" "2020"
+    LIBS       += -L/opt/softs/intel/2018.04/compilers_and_libraries_2018.5.274/linux/compiler/lib/intel64 -L/opt/softs/intel/2018.04/compilers_and_libraries_2018.5.274/linux/mkl/lib/intel64 -Wl,-rpath,/opt/softs/intel/2018.04/compilers_and_libraries_2018.5.274/linux/compiler/lib/intel64 -Wl,-rpath,/opt/softs/intel/2018.04/compilers_and_libraries_2018.5.274/linux/mkl/lib/intel64 -lintlc -lifport -limf -lifcoremt -lsvml -lirng
+  endif
 endif
 
 
@@ -488,6 +491,12 @@ INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
 LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
+ifeq "$(VER_GRIBAPI)" "BULL2020"
+GRIBAPI_PATH=/opt/softs/libraries/ICC_2018.5.274/grib_api-1.26
+INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
+endif
+
 ifneq "x$(VER_GRIBAPI)" "x"
 INC           += $(INC_GRIBAPI)
 LIBS          += $(LIB_GRIBAPI)
@@ -663,6 +672,28 @@ INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/incl
 LIB_NETCDF     = -Wl,-rpath,${CDF_PATH}/lib:$(HDF_PATH)/lib:$(SZIP_PATH)/lib:$(ZLIB_PATH)/lib -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl
 XIOS_CDF_OPT   = netcdf4_par
 endif
+#
+# Linux on Belenos and Taranis
+#
+ifeq "$(VER_CDF)" "CDF2020"
+CDF_PATH_C       ?= /opt/softs/libraries/ICC_2018.5.274/netcdf-c-4.7.1
+CDF_PATH_FORTRAN ?= /opt/softs/libraries/ICC_2018.5.274/netcdf-fortran-4.5.2
+INC_NETCDF     ?= -I${CDF_PATH_C}/include -I${CDF_PATH_FORTRAN}/include 
+LIB_NETCDF     ?= -L${CDF_PATH_C}/lib -L${CDF_PATH_FORTRAN}/lib -lnetcdff -lnetcdf -Wl,-rpath,$(CDF_PATH_C)/lib -Wl,-rpath,$(CDF_PATH_FORTRAN)/lib
+XIOS_CDF_OPT   = netcdf4_seq
+endif
+
+ifeq "$(VER_CDF)" "CDF2020PARALL"
+VINTEL         = /opt/softs/libraries/ICC_2018.5.274
+CDF_PATH       = ${VINTEL}/netcdf_par-4.7.1_V2
+HDF_PATH       = ${VINTEL}/phdf5-1.8.18
+SZIP_PATH      = ${VINTEL}/szip-2.1.1
+ZLIB_PATH      = ${VINTEL}/zlib-1.2.11
+INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/include -I${ZLIB_PATH}/include
+LIB_NETCDF     = -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl -Wl,-rpath,${CDF_PATH}/lib -Wl,-rpath,$(HDF_PATH)/lib -Wl,-rpath,$(SZIP_PATH)/lib -Wl,-rpath,$(ZLIB_PATH)/lib
+XIOS_CDF_OPT   = netcdf4_par
+endif
+
 #
 ifneq "x$(VER_GRIBAPI)" "x"
 INC            += $(INC_NETCDF)

@@ -173,16 +173,8 @@ IF (LNAM_READ) THEN
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWDRIFT',CSNOWDRIFT,'NONE','DFLT','VI13','GA01')
  CALL TEST_NAM_VAR_SURF(ILUOUT,'CSNOWZREF',CSNOWZREF,'CST','VAR')
  !bber>
- !
-  IF(CSNOWMETAMO .NE. 'B92' .AND. LSNOWSYTRON) THEN
-    WRITE(ILUOUT,*) '------------------------------------'
-    WRITE(ILUOUT,*) 'SYTRON scheme can only work with options: '
-    WRITE(ILUOUT,*) ' CSNOWMETAMO= B92'
-    WRITE(ILUOUT,*) '------------------------------------'
-    CALL ABOR1_SFX('READ_ISBA_CONF: UPDATE OPTION IN SNOW METAMORPHISM SCHEME')
- ENDIF
-
-   IF(LSNOWDRIFT_SUBLIM .AND. LSNOWSYTRON) THEN
+ ! 
+ IF(LSNOWDRIFT_SUBLIM .AND. LSNOWSYTRON) THEN
     WRITE(ILUOUT,*) '------------------------------------'
     WRITE(ILUOUT,*) 'SYTRON scheme already computes mass loss due to sublimation '
     WRITE(ILUOUT,*) 'Set LSNOWDRIFT_SUBLIM to FALSE'

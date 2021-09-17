@@ -14,7 +14,7 @@ import copy
 import re
 import subprocess
 import datetime
-import ConfigParser
+import configparser
 
 
 def Vercomp(dirN='a',dirO='b',simul='c') :
@@ -22,7 +22,7 @@ def Vercomp(dirN='a',dirO='b',simul='c') :
 
     """ Out files 1) differences list 2) list of nan values  """
   
-    config = ConfigParser.RawConfigParser() 
+    config = configparser.RawConfigParser() 
 
     '''    compdebug.cfg   ///     compR.cfg    '''
     config.read('compR.cfg')      
@@ -90,20 +90,20 @@ def Vercomp(dirN='a',dirO='b',simul='c') :
 
         log = str(Pgdfile)+'  found, conf '+simul+str(datetime.datetime.now())+'\n'
 
-    	open(pathfiles,"a").write(log)
+        open(pathfiles,"a").write(log)
 
     #if q : sys.exit(0)
-
-    	""" change to 2D list"""       
-   	listPgdN = myfct2.chg22Dlist(listPgdN,Pgdfile)
-    	listPgdO = myfct2.chg22Dlist(listPgdO,Pgdfile)
     
-    	""" compare two lists, create list of matching, orphan 1st and 2nd list """
-    	listPgdM,listPgdnMN,listPgdnMO = myfct2.extract_common_files(listPgdN,listPgdO)
+        """ change to 2D list"""       
+        listPgdN = myfct2.chg22Dlist(list(listPgdN),Pgdfile)
+        listPgdO = myfct2.chg22Dlist(list(listPgdO),Pgdfile)
+    
+        """ compare two lists, create list of matching, orphan 1st and 2nd list """
+        listPgdM,listPgdnMN,listPgdnMO = myfct2.extract_common_files(listPgdN,listPgdO)
 
-    	""" create log file """
-    	List_log = [len(listPgdN),len(listPgdO),len(listPgdM),len(listPgdnMN),len(listPgdnMO)]
-    	open(pathlogPgd,'w').write(head_log+'\n'+''.join(str(List_log)))
+        """ create log file """
+        List_log = [len(listPgdN),len(listPgdO),len(listPgdM),len(listPgdnMN),len(listPgdnMO)]
+        open(pathlogPgd,'w').write(head_log+'\n'+''.join(str(List_log)))
 
     """------------------------------------------------------------"""   
     
@@ -126,20 +126,20 @@ def Vercomp(dirN='a',dirO='b',simul='c') :
 
         log = str(Prepfile)+' found, conf '+simul+str(datetime.datetime.now())+'\n'
        
-    	open(pathfiles,"a").write(log)
+        open(pathfiles,"a").write(log)
 
     	#if q : sys.exit(0)
     
-    	""" change to 2D list"""
-    	listPrepN = myfct2.chg22Dlist(listPrepN,Prepfile)
-    	listPrepO = myfct2.chg22Dlist(listPrepO,Prepfile)  
+        """ change to 2D list"""
+        listPrepN = myfct2.chg22Dlist(list(listPrepN),Prepfile)
+        listPrepO = myfct2.chg22Dlist(list(listPrepO),Prepfile)  
     
-    	""" compare two lists, create list of matching, orphan 1st and 2nd list """
-    	listPrepM,listPrepnMN,listPrepnMO = myfct2.extract_common_files(listPrepN,listPrepO)  
+        """ compare two lists, create list of matching, orphan 1st and 2nd list """
+        listPrepM,listPrepnMN,listPrepnMO = myfct2.extract_common_files(listPrepN,listPrepO)  
     
-    	""" create log file """    
-    	List_log = [len(listPrepN),len(listPrepO),len(listPrepM),len(listPrepnMN),len(listPrepnMO)]
-    	open(pathlogPrep,'w').write(head_log+'\n'+''.join(str(List_log)))
+        """ create log file """    
+        List_log = [len(listPrepN),len(listPrepO),len(listPrepM),len(listPrepnMN),len(listPrepnMO)]
+        open(pathlogPrep,'w').write(head_log+'\n'+''.join(str(List_log)))
 
     """-------------------------------------------------------"""  
 
@@ -148,7 +148,6 @@ def Vercomp(dirN='a',dirO='b',simul='c') :
     listN  =myfct2.get_nc_agreg_list(dirN)
     #liste des variables dans les sorties "OLD"
     listO = myfct2.get_nc_agreg_list(dirO)
-  
     q3 = False
 
     """ Cas d une liste vide """   
@@ -156,9 +155,9 @@ def Vercomp(dirN='a',dirO='b',simul='c') :
 
         log = "Data not found, conf "+simul+str(datetime.datetime.now())+'\n'
 
-	if len(listO)>0 : 
-		print("No data found ,exiting code")
-		q3 = True
+        if len(listO)>0 : 
+            print("No data found ,exiting code")
+            q3 = True
 
     else :
 
@@ -204,39 +203,39 @@ def Vercomp(dirN='a',dirO='b',simul='c') :
 
         log = str(Outfile)+' found, conf '+simul+str(datetime.datetime.now())+'\n'
        
-    	open(pathfiles,"a").write(log)
+        open(pathfiles,"a").write(log)
 
     	#if q : sys.exit(0)
     
-    	""" change to 2D list"""
-    	listOutN = myfct2.chg22Dlist(listOutN,Outfile)
-    	listOutO = myfct2.chg22Dlist(listOutO,Outfile)  
+        """ change to 2D list"""
+        listOutN = myfct2.chg22Dlist(list(listOutN),Outfile)
+        listOutO = myfct2.chg22Dlist(list(listOutO),Outfile)  
     
-    	""" compare two lists, create list of matching, orphan 1st and 2nd list """
-    	listOutM,listOutnMN,listOutnMO = myfct2.extract_common_files(listOutN,listOutO)  
+        """ compare two lists, create list of matching, orphan 1st and 2nd list """
+        listOutM,listOutnMN,listOutnMO = myfct2.extract_common_files(listOutN,listOutO)  
     
-    	""" create log file """    
-    	List_log = [len(listOutN),len(listOutO),len(listOutM),len(listOutnMN),len(listOutnMO)]
-    	open(pathlogOut,'w').write(head_log+'\n'+''.join(str(List_log)))
+        """ create log file """    
+        List_log = [len(listOutN),len(listOutO),len(listOutM),len(listOutnMN),len(listOutnMO)]
+        open(pathlogOut,'w').write(head_log+'\n'+''.join(str(List_log)))
 
     """-------------------------------------------------------"""  
 
     """ listM   is list of [varname][filename]...  """     
     
-    print """reportPgd"""
+    print("""reportPgd""")
     if not q1 :
 
     	myfct2.trait_list('PGD ',listPgdM,dirN,dirO,simul,pathrptPgd,patherrPgd,pathsynn,pathsyno)
 
-    print """reportPrep"""
+    print("""reportPrep""")
     if not q2 :
 
     	myfct2.trait_list('PREP ',listPrepM,dirN,dirO,simul,pathrptPrep,patherrPrep,pathsynn,pathsyno)   
     
-    print """reportdata"""
+    print("""reportdata""")
     myfct2.trait_list('OUTPUT ',listM,dirN,dirO,simul,pathrpt,patherr,pathsynn,pathsyno)
 
-    print """reportOut"""
+    print("""reportOut""")
     if not q4 :
 
     	myfct2.trait_list('SURFOUT',listOutM,dirN,dirO,simul,pathrptOut,patherrOut,pathsynn,pathsyno)  

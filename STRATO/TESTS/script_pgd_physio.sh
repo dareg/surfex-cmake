@@ -144,6 +144,17 @@ sed -e "s/LEXPLICIT_SLOPE = F/LEXPLICIT_SLOPE = T/g" OPTIONS.nam_save > OPTIONS.
 cp -f OPTIONS.nam OPTIONS.nam_EXPLICIT_SLOPE
 ./script_exec_pgd_parall.sh "EXPLICIT_SLOPE" $fname $2 $3
 
+# 1.10. ORORAD
+echo "########## ORORAD "
+cp -f OPTIONS.nam_PHYSIO_UNIF OPTIONS.nam_save
+sed -e "s/LORORAD = F/LORORAD = T/g" OPTIONS.nam_save > OPTIONS.tmp
+sed -e "s/LDSV = F/LDSV = T/g" OPTIONS.tmp > OPTIONS.nam_save
+sed -e "s/LDSH = F/LDSH = T/g" OPTIONS.nam_save > OPTIONS.tmp
+sed -e "s/LDSL = F/LDSL = T/g" OPTIONS.tmp > OPTIONS.nam
+cp -f OPTIONS.nam OPTIONS.nam_ORORAD
+./script_exec_pgd_parall.sh "ORORAD" $fname $2 $3
+
+
 
 # 2. Test NAM_SEABATHY
 

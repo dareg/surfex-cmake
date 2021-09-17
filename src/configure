@@ -202,7 +202,7 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
 
                 export     ARCH=${ARCH:-LXgfortran}
                 export  VER_MPI=${VER_MPI:-MPIAUTO}
-		export  VER_XIOS=${VER_XIOS:-2}
+		export  VER_XIOS=${VER_XIOS:-0}
                 export OPTLEVEL=${OPTLEVEL:-O2}
                 export MVWORK=${MVWORK:-NO}
                 export VER_CDF=${VER_CDF:-CDFCTI}
@@ -243,6 +243,19 @@ export LIB_GRIBAPI='${GRIB_API_LIB}'
                 export NEED_NCARG=${NEED_NCARG:-NO}
                 export NEED_TOOLS=NO
                 export BULL=YES
+              ;;
+'Linux belenoslogin'*|'Linux taranislogin'*) #BELENOS and TARANIS
+                export     ARCH=${ARCH:-LXifort}
+                export  VER_MPI=${VER_MPI:-MPIAUTO}
+		export  VER_XIOS=${VER_XIOS:-0}
+                export OPTLEVEL=${OPTLEVEL:-O2}
+                export MVWORK=${MVWORK:-NO}
+                export VER_CDF=${VER_CDF:-CDF2020PARALL}
+                export VER_GRIBAPI=${VER_GRIBAPI:-BULL2020}
+                export NEED_NCARG=${NEED_NCARG:-NO}
+                export NEED_TOOLS=NO
+                export BULL=2020
+                export OPT_PROC="-march=core-avx2 -no-fma"
               ;;
 'Linux nuwa'*)      
                 export     ARCH=${ARCH:-LXifort} 

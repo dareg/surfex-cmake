@@ -17,7 +17,7 @@ USE_SPLR_WRAP = NO
 #AVOID_CPP = YES
 AVOID_CPP = NO
 #
-OPT_BASE   =  -convert big_endian -r8 -g -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise 
+OPT_BASE   =  -convert big_endian -r8 -g -assume nosource_include -assume byterecl -fpic -traceback -fp-model precise $(OPT_PROC)
 #-switch fe_inline_all_arg_copy_inout
 OPT_PERF0  =  -O0 
 OPT_PERF2  =  -O2 -fpe0 -ftz
@@ -72,7 +72,7 @@ endif
 #
 REALFC=ifort
 #
-FCFLAGS_OMP= -openmp -openmp-threadprivate=compat
+FCFLAGS_OMP= -qopenmp -qopenmp-threadprivate=compat
 CFLAGS_OMP=
 ifeq "$(VER_OMP)" "NOOMP"
 FCFLAGS_OMP=

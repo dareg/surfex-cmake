@@ -22,6 +22,7 @@ ln -s $RUNDIR/FG_OI_MAIN .
 ln -s $RUNDIR/fort.61 .
 #
 ln -s $RUNDIR/CANARI_NATURE*.DAT .
+ln -s $RUNDIR/OBSERVATIONS*.DAT .
 ln -s $RUNDIR/BGROUNDin* .
 #
 cp -f $RUNDIR/OPTIONS.nam .

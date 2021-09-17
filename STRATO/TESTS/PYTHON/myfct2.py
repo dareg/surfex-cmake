@@ -13,8 +13,7 @@ import myfct2
 import re
 #import matplotlib.pyplot as plt
 import netCDF4
-from Scientific.IO.NetCDF import NetCDFFile
-
+from netCDF4 import Dataset
 
 #---------------------------------------------------------------------------
 #---------------------------------------------------------------------------
@@ -29,7 +28,7 @@ def get_nc_var_list(path) :
 
      if os.path.isfile(path)==True :
    
-        f = NetCDFFile(path)
+        f = Dataset(path)
         var_list = f.variables.keys() 
         f.close()
 
@@ -122,7 +121,7 @@ def get_nc_out_list(dir) :
 
 #---------------------------------------------------------------------------     
 
-def trait_list(step,listM,dirN,dirO,simul,pathrpt,patherr,pathsynn,pathsyno) :
+def trait_list(step,listM,dirN,dirO,simul,pathrpt,patherr,pathsynn,pathsyno):
   
     listEc  = []  
     listall = []  
@@ -131,72 +130,68 @@ def trait_list(step,listM,dirN,dirO,simul,pathrpt,patherr,pathsynn,pathsyno) :
     nbnan = 0
     nberr = 0
     
-    if len(listM)<>0 :
+    if len(listM)!=0:
   
-        for i in range(len(listM)-0) :
+        for i in range(len(listM)-0):    
             
             """ get namefile correponding to var """  
             fic1 = dirN+listM[i][1]    
             fic2 = dirO+listM[i][1]
             var  = listM[i][0]
-	    nanN = False
+            nanN = False
             nanO = False
             """ return if presence of nan ,list of values, table of differences Emax index ...  """
-	    obj,nanN,nanO,tableN,tableO,tableD,Emax,indmax,Emin,indmin,DMoy = myfct2.diff_rpt(fic1,fic2,var)
+            obj,nanN,nanO,tableN,tableO,tableD,Emax,indmax,Emin,indmin,DMoy = myfct2.diff_rpt(fic1,fic2,var)
    
-	    if obj[0]=='0' :
+            if obj[0]=='0':
 
-		Err = np.nan
-		indmax = np.nan
+                Err = np.nan
+                indmax = np.nan
                 Cmpnewval = tableN
                 Cmpoldval = tableO
-		
-	    elif obj=='no' :
+        
+            elif obj=='no':
 
-		Err = 0.0
-		Emax = 0.0
-		indmax = 0
+                Err = 0.0
+                Emax = 0.0
+                indmax = 0
                 Cmpnewval = tableN
                 Cmpoldval = tableO
 
-	    else :
+            else:
 	 	
                 Cmpnewval = tableN[indmax]
                 Cmpoldval = tableO[indmax]
 
             """ create list of relative distance only for correct array """
             if obj=='XDr' or obj=='XDi'or obj=='0Dr' :
+                Err = 0 if (Emax.all()==0.0 and Cmpoldval.all()==0.0) else 100*abs(2*Emax/(Cmpoldval+Cmpnewval))
 
-                Err = 0 if (Emax==0.0 and Cmpoldval==0.0) else 100*abs(2*Emax/(Cmpoldval+Cmpnewval))
-
-
-	    if obj=='XDs' or obj=='XDb' : 
+            if obj=='XDs' or obj=='XDb':
                 
                 Err = 100*DMoy
 
- 	    if obj=='0Ds' or obj=='0Db' or obj=='0Di' :
+            if obj=='0Ds' or obj=='0Db' or obj=='0Di' :
 
+                Err = 100*Emax
+                DMoy = Err
+                indmax = 0
 
-		Err = 100*Emax
-		DMoy = Err
-		indmax = 0
-
-
-            listEc.append([Err,obj,indmax,Emax,Cmpnewval,Cmpoldval,DMoy,listM[i]]) 
+            listEc.append([Err,obj,indmax,Emax,Cmpnewval,Cmpoldval,DMoy,listM[i]])
 
 
             if (nanN or nanO)==True :
 
                 nbnan = nbnan+1
                 
-		""" create list files containing nan values """    
+                """ create list files containing nan values """    
                 listnan.append([nanN,nanO,Emax-Emin,listM[i]])
-            
-	    if (Emax<>0. and Emax<>-0.) :
+
+            if (Emax !=0. and Emax !=-0.) :
                 nberr = nberr+1
-            
+
             """ add field name   """  
-     
+
         """sort list by 1st value  """              
         listEc_s = myfct2.org_sort(listEc)
 
@@ -207,14 +202,13 @@ def trait_list(step,listM,dirN,dirO,simul,pathrpt,patherr,pathsynn,pathsyno) :
 
         if nberr>0 :
 
-	    open(pathsynn,'a').write(simul+": "+step+" Emax<>0: " + str(nberr) \
-			    + " " + str(listEc_s[0][0]) + " " + str(listEc_s[0][3])  \
-			    + " " + str(listEc_s[1][0]) + " " + str(listEc_s[1][3]) + "\n")
+            open(pathsynn,'a').write(simul+": "+step+" Emax!=0: " + str(nberr) \
+             + " " + str(listEc_s[0][0]) + " " + str(listEc_s[0][3])  \
+             + " " + str(listEc_s[1][0]) + " " + str(listEc_s[1][3]) + "\n")
 
         if nbnan==0 and nberr==0 :
 
             open(pathsyno,'a').write(simul+": "+step+"\n")
-            
             
         
         """ save list of relative error  and nan values"""
@@ -240,56 +234,54 @@ def diff_rpt(path1,path2,field) :
     nanN=np.nan; nanO=np.nan; Emax=np.nan;
 
     obj = ''
-    if type(DataN)==type(np.array([])) :
+    if type(DataN)==type(np.array([])) and DataN.shape != ():
 
-	if DataN.dtype.type==np.float_ :
-	    if len(DataN)==len(DataO) :
-               obj = 'XDr'
-	       DataN = np.reshape(DataN,DataO.shape)
-               nanN,nanO,tableD,Emax,indmax,Emin,indmin,Moy = diff_XDr(DataN,DataO)
-	    else :
-               obj = 'no'
-               #print(field,'no comparison because 19 vegtypes',len(DataN),len(DataO))
+        if DataN.dtype.type==np.float_ :
+            if DataN.size==DataO.size :
+                obj = 'XDr'
+                DataN = np.reshape(DataN,DataO.shape)
+                nanN,nanO,tableD,Emax,indmax,Emin,indmin,Moy = diff_XDr(DataN,DataO)
+            else :
+                obj = 'no'
+                #print(field,'no comparison because 19 vegtypes',DataN.size,DataO.size)
 
-	if DataN.dtype.type==np.float32 :
-	    if len(DataN)==len(DataO) :
-               obj = 'XDr'
-	       DataN = np.reshape(DataN,DataO.shape)
-               nanN,nanO,tableD,Emax,indmax,Emin,indmin,Moy = diff_XDr(DataN,DataO)
-	    else :
-               obj = 'no'
-               #print(field,'no comparison because 19 vegtypes',len(DataN),len(DataO))
+        if DataN.dtype.type==np.float32 :
+            if DataN.size==DataO.size :
+                obj = 'XDr'
+                DataN = np.reshape(DataN,DataO.shape)
+                nanN,nanO,tableD,Emax,indmax,Emin,indmin,Moy = diff_XDr(DataN,DataO)
+            else :
+                obj = 'no'
+                #print(field,'no comparison because 19 vegtypes',DataN.size,DataO.size)
 
-	if DataN.dtype.type==np.int32 :
-
-	    if len(DataN)==len(DataO) :
-               obj = 'XDi'
-               nanN,nanO,tableD,Emax,indmax,Emin,indmin,Moy = diff_XDi(DataN,DataO)
-	    else :
-               obj = 'no'
-               #print(field,'no comparison because 19 vegtypes',len(DataN),len(DataO))
+        if DataN.dtype.type==np.int32 :
+            if DataN.size==DataO.size :
+                obj = 'XDi'
+                nanN,nanO,tableD,Emax,indmax,Emin,indmin,Moy = diff_XDi(DataN,DataO)
+            else :
+                obj = 'no'
+                #print(field,'no comparison because 19 vegtypes',DataN.size,DataO.size)
 
         if DataN.dtype.type==np.string_ :
+            if DataN.size==DataO.size :
+                obj = 'XDs'
+                nanN,nanO,Emax,indmax,Moy = myfct2.diff_XDs(DataN,DataO)  
+            else :
+                obj = 'no'
+                #print(field,'no comparison because 19 vegtypes',DataN.size,DataO.size)
 
-	    if len(DataN)==len(DataO) :
-               obj = 'XDs'
-               nanN,nanO,Emax,indmax,Moy = myfct2.diff_XDs(DataN,DataO)  
-	    else :
-               obj = 'no'
-               #print(field,'no comparison because 19 vegtypes',len(DataN),len(DataO))
-        
         if DataN.dtype.type==np.bool_ :
+            if DataN.size==DataO.size :
+                obj = 'XDb'
+                Emax,indmax,Moy = myfct2.diff_XDb(DataN,DataO)
+                nanN = False; nanO = False
+            else :
+                obj = 'no'
+                #print(field,'no comparison because 19 vegtypes',DataN.size,DataO.size)
 
-	    if len(DataN)==len(DataO) :
-               obj = 'XDb'
-               Emax,indmax,Moy = myfct2.diff_XDb(DataN,DataO)
-	       nanN = False; nanO = False
-	    else :
-               obj = 'no'
-               #print(field,'no comparison because 19 vegtypes',len(DataN),len(DataO))
-            
     elif type(DataN)==type(DataO) :
-        
+        DataN=DataN[()]
+        DataO=DataO[()]
         """ if scalar """
         if DataN.dtype.type==np.float_ :
 
@@ -302,7 +294,7 @@ def diff_rpt(path1,path2,field) :
             nanN,nanO,Emax = myfct2.diff_0Dr(DataN,DataO) 
 
         """ if string """
-	if DataN.dtype.type==np.string_  :
+        if DataN.dtype.type==np.string_ :
 
             obj = '0Ds'
             nanN,nanO,Emax = myfct2.diff_0Ds(DataN,DataO) 
@@ -312,7 +304,7 @@ def diff_rpt(path1,path2,field) :
 
             obj='0Db'
             Emax = myfct2.diff_0Db(DataN,DataO)
-	    nanN = False; nanO = False
+            nanN = False; nanO = False
 	
     else :
         obj = 'no'
@@ -322,6 +314,9 @@ def diff_rpt(path1,path2,field) :
 
         print(field,'not found')
     
+    if DataN.dtype.type==np.string_ :
+      DataN=DataN.astype(str)
+      DataO=DataO.astype(str)
 
     return obj,nanN,nanO,DataN,DataO,tableD,Emax,indmax,Emin,indmin,Moy
 
@@ -351,12 +346,11 @@ def org_sort(L,col=0) :
 
 
 def get_ncdf_1data(path,var):
-   
-        f = NetCDFFile(path)
-        valnc= f.variables[var] 
-        val=valnc.getValue()
-        f.close()
-        return val
+    f = Dataset(path)
+    f.set_auto_mask(False)
+    val=f.variables[var][:]
+    f.close()
+    return val
 
 
 def sublist(L, inds) :
@@ -382,18 +376,19 @@ def diff_XDb(resn,reso) :
     C = 0
     E = 0
     indmax = 0
-
-    for i in range(len(resn)-0) :
-
-	C = C+1
-
-    	if (not(resn[i]==reso[i])) :
-	
-          E = E+1
-	  indmax = i
+    if resn.shape==():
+        C = C+1
+        if resn != reso:
+            E = E+1
+            indmax = i
+    else: 
+        for i in range(len(resn)-0) :
+            C = C+1
+            if (not(resn[i]==reso[i])) :
+                E = E+1
+                indmax = i
 
     mean = E/C
-
     return E,indmax,mean
 
 
@@ -401,8 +396,8 @@ def diff_0Ds(strn,stro) :
 
     E = diff_0Db(strn,stro)
         
-    nanN = len(strn)<1
-    nanO = len(stro)<1
+    nanN = strn.size<1
+    nanO = stro.size<1
     
     return nanN,nanO,E
 
@@ -411,8 +406,8 @@ def diff_XDs(strn,stro) :
 
     E,indmax,mean = diff_XDb(strn,stro)
     
-    nanN = ((strn==' ').all()) or ((strn=='').all())
-    nanO = ((stro==' ').all()) or ((stro=='').all())
+    nanN = ((strn==' ')) or ((strn==''))
+    nanO = ((stro==' ')) or ((stro==''))
     
     return nanN,nanO,E,indmax,mean
 
@@ -425,7 +420,6 @@ def diff_0Dr(resn,reso) :
     D = (resn-reso)
 
     return nanN,nanO,D
-
 
 def diff_XD(resn,reso) :
         

@@ -31,7 +31,7 @@ echo "############# $2_SNCRO8 "
 cp -f OPTIONS.nam_neige OPTIONS.nam_save
 sed -e "s/CSNOW\ =\ \"3-L\"/CSNOW\ =\ \"CRO\"/g" OPTIONS.nam_save > OPTIONS.nam
 mv -f OPTIONS.nam OPTIONS.nam_save
-sed -e "s/NSNOW\_LAYER\ =\ 3/NSNOW\_LAYER\ =\ 8/g" OPTIONS.nam_save > OPTIONS.nam
+sed -e "s/NSNOW\_LAYER\ =\ 12/NSNOW\_LAYER\ =\ 8/g" OPTIONS.nam_save > OPTIONS.nam
 #mv -f OPTIONS.nam OPTIONS.nam_save
 #sed -e "s/LPROSNOW\ =\ F/LPROSNOW\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO8"
@@ -75,7 +75,7 @@ sed -e "s/CSNOW\ =\ \"3-L\"/CSNOW\ =\ \"CRO\"/g" OPTIONS.nam_save > OPTIONS.nam
 #mv -f OPTIONS.nam OPTIONS.nam_save
 #sed -e "s/LPROSNOW\ =\ F/LPROSNOW\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
 mv -f OPTIONS.nam OPTIONS.nam_save
-sed -e "s/NSNOW\_LAYER\ =\ 3/NSNOW\_LAYER\ =\ 10/g" OPTIONS.nam_save > OPTIONS.nam
+sed -e "s/NSNOW\_LAYER\ =\ 12/NSNOW\_LAYER\ =\ 10/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO10"
 ./script_exec.sh "$2_SNCRO10" $3 $4 $5
 
@@ -97,7 +97,7 @@ sed -e "s/CSNOW\ =\ \"3-L\"/CSNOW\ =\ \"CRO\"/g" OPTIONS.nam_save > OPTIONS.nam
 #mv -f OPTIONS.nam OPTIONS.nam_save
 #sed -e "s/LPROSNOW\ =\ F/LPROSNOW\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
 mv -f OPTIONS.nam OPTIONS.nam_save
-sed -e "s/NSNOW\_LAYER\ =\ 3/NSNOW\_LAYER\ =\ 15/g" OPTIONS.nam_save > OPTIONS.nam
+sed -e "s/NSNOW\_LAYER\ =\ 12/NSNOW\_LAYER\ =\ 15/g" OPTIONS.nam_save > OPTIONS.nam
 cp -f OPTIONS.nam OPTIONS.nam_"$2_SNCRO15"
 ./script_exec.sh "$2_SNCRO15" $3 $4 $5
 
@@ -108,7 +108,7 @@ sed -e "s/CSNOW\ =\ \"3-L\"/CSNOW\ =\ \"CRO\"/g" OPTIONS.nam_save > OPTIONS.nam
 #mv -f OPTIONS.nam OPTIONS.nam_save
 #sed -e "s/LPROSNOW\ =\ F/LPROSNOW\ =\ T/g" OPTIONS.nam_save > OPTIONS.nam
 mv -f OPTIONS.nam OPTIONS.nam_save
-sed -e "s/NSNOW\_LAYER\ =\ 3/NSNOW\_LAYER\ =\ 8/g" OPTIONS.nam_save > OPTIONS.nam_metamo
+sed -e "s/NSNOW\_LAYER\ =\ 12/NSNOW\_LAYER\ =\ 8/g" OPTIONS.nam_save > OPTIONS.nam_metamo
 #C13
 echo "############# $2_SNCRO8_SNOWMETAMO_C13_B92"
 cp -f OPTIONS.nam_metamo OPTIONS.nam_save

@@ -1505,7 +1505,6 @@ REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWY0 ! Value of y of sn
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWW0 ! Value of W of snow grains at nr=1.3 (no unit)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZSNOWB0 ! absorption enhancement parameter of snow grains at nr=1.3 and at non absorbing wavelengths 
 !REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_DENSITY !impurities density (kg/m^3) (npoints,nlayer,ntypes_impurities)
-REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2),NIMPUR) :: ZSNOWIMP_CONTENT !impurities content (g/g) (npoints,nlayer,ntypes_impurities)
 REAL, DIMENSION(SIZE(PSNOWRHO,1),SIZE(PSNOWRHO,2)) :: ZRADSINK
 REAL, DIMENSION(SIZE(PSNOWRHO,1)) :: ZRADXS,ZZENITH,ZSW_RAD,ZSNOWALB
 !
@@ -1560,8 +1559,7 @@ IF ( (HSNOWRAD=="T17")) THEN
   ZSNOWB0 = XPSNOWB0
   !ZSNOWIMP_DENSITY(:,:,1) = 1270.                         !
   !ZSNOWIMP_DENSITY(:,:,2) = 2600.						  !BC actualized this portion of code duplicating Tuzet's values of impuritiens 
-  ZSNOWIMP_CONTENT(:,:,:)= PSNOWIMPUR(:,:,:)             !that arer intilialized quite roughly in snowcro.F90. this might be done insied
-! now as an output  									  ! an appropriate parameter-definition file
+  ! now as an output  									  ! an appropriate parameter-definition file
 
 
     DO JI = 1,INI
