@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Script to perform the entire SURFEX compilation procedure
+
 curdir=$PWD
 
 export ARCH=${ARCH=LXgfortran}
