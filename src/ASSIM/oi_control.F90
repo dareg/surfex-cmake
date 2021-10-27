@@ -43,7 +43,8 @@ SUBROUTINE OI_CONTROL (YSC, &
 !   (03/2011)  : Initialization of ZEVAPTR (F.Bouyssel)
 !   (03/2013)  : Use 10m wind from upperair instead surfex one (F.Taillefer)
 !   (10/2017)  : Bugfix to update sea or lake surface temperature in case XNATURE=0 and ITM>0.5 (F.Bouyssel)
-!
+!   (04/2018)  : Report 43t2modifs to make canari running again
+!   (09/2018)  : use NECHGXFU for ZEVAP (Y. Seity)
 ! ******************************************************************************************
 ! ------------------------------------------------------------------------------------------
 !
@@ -163,7 +164,7 @@ INTEGER :: ILUNAM
 LOGICAL :: GFOUND
 
 REAL                               :: PLAT0,PLON0,PRPK,PLATOR,PLONOR,DELX,DELY,PBETA,ZTHRES
-REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180, ZSCAL, ZRTCLS
+REAL(KIND=JPRB)                    :: Z1S2PI, ZPIS180, ZRTCLS
 
 INTEGER :: ISIZE_FULL
 
@@ -717,7 +718,7 @@ ZTSINC(:) = 0.0_JPRB
 
 ! b) Temperature analysis of SEA and LAKE points
 
-ZRTCLS=ZSCAL/(5.0_JPRB*XDAY)
+ZRTCLS=REAL(NECHGU)*3600._JPRB/(5.0_JPRB*XDAY)
 DO JJ = 1, ISIZE
   IF (YSC%U%XSEA(JJ)>0.0_JPRB) THEN
     ZTSINC(JJ) = PTS_O(JJ) - PSST(JJ)
@@ -725,7 +726,7 @@ DO JJ = 1, ISIZE
       PSST(JJ) = PTS_O(JJ)
     ELSE
       IF (YSC%U%XNATURE(JJ)>0.0_JPRB) PSST(JJ) = PTP(JJ,1)
-      IF (YSC%U%XNATURE(JJ)==0.0_JPRB) PSST(JJ) = PSST(JJ) + ZRTCLS*(PTCLS(JJ)-PSST(JJ)) 
+      IF (YSC%U%XNATURE(JJ)==0.0_JPRB) PSST(JJ) = PSST(JJ) + ZRTCLS*(PTCLS(JJ)-PSST(JJ))
     ENDIF
   ENDIF
   IF (YSC%U%XWATER(JJ)>0.0_JPRB) THEN
