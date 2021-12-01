@@ -72,6 +72,8 @@ REAL, DIMENSION(INT(PGRID_PAR(11)))   :: ZX, ZY, ZDX, ZDY
 !* splitted grid on processor
 INTEGER                         :: IIMAX_SPLIT, IJMAX_SPLIT
 INTEGER                         :: ILONE, ILATE
+INTEGER :: IWIDTH_I_X ! width of I zone
+INTEGER :: IWIDTH_I_Y ! width of I zone
 REAL, DIMENSION(:), ALLOCATABLE :: ZX_SPLIT, ZY_SPLIT, ZDX_SPLIT, ZDY_SPLIT
 !
 !------------------------------------------------------------------------------
@@ -81,7 +83,8 @@ IF (LHOOK) CALL DR_HOOK('SPLIT_GRID_CONF_PROJ',0,ZHOOK_HANDLE)
 !
  CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                             ZLATOR,ZLONOR,IIMAX,IJMAX,       &
-                            ZX,ZY,ZDX,ZDY,KLATE=ILATE,KLONE=ILONE        )
+                            ZX,ZY,ZDX,ZDY,KLATE=ILATE,KLONE=ILONE,&
+                            KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y)
 !
 !
 !*    2.      Splits the (pertinent) parameters of the grid
@@ -119,7 +122,8 @@ ENDIF
 NULLIFY(PGRID_PAR)
  CALL PUT_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,       &
                             ZLATOR,ZLONOR,IIMAX_SPLIT,IJMAX_SPLIT,  &
-                            ZX_SPLIT,ZY_SPLIT,ZDX_SPLIT,ZDY_SPLIT,ILATE,ILONE)
+                            ZX_SPLIT,ZY_SPLIT,ZDX_SPLIT,ZDY_SPLIT, &
+                            ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y)
                             !
 !
 KGRID_PAR = SIZE(PGRID_PAR)

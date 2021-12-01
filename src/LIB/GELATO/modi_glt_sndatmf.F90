@@ -84,9 +84,8 @@ END MODULE MODI_glt_sndatmf
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_sndatmf ----------------------------
 
-SUBROUTINE glt_sndatmf(tpglt, xtmlf)
+SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
 !USE MODI_ABOR1_SFX
 #if ! defined in_surfex
@@ -97,6 +96,8 @@ SUBROUTINE glt_sndatmf(tpglt, xtmlf)
 !
   IMPLICIT NONE 
 !
+  INTEGER,INTENT(in) :: nnflxin
+  REAL   ,INTENT(in) :: alblc
   TYPE(t_glt), INTENT(inout)  ::  &
     tpglt
   ! Useful in Surfex init phase, when SST+SSS are not yet known, and hence 

@@ -42,7 +42,7 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 INTEGER,            INTENT(IN)  :: KLUOUT    ! output listing logical unit
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
 REAL, POINTER, DIMENSION(:,:)   :: PFIELD    ! field to interpolate horizontally
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -56,26 +56,26 @@ SELECT CASE(HSURF)
 !
 !*      3.0    Orography
 !
-  CASE('ZS     ')
+  CASE('ZS       ')
     ALLOCATE(PFIELD(1,1))
     PFIELD = 0.
 !
 !*      3.1    Sea surface temperature
 !
-  CASE('SST    ')
+  CASE('SST      ')
     ALLOCATE(PFIELD(1,1))
     PFIELD = XSST_UNIF
 !
 !*      3.2    Sea surface salinity
 !
-  CASE('SSS    ')
+  CASE('SSS      ')
     ALLOCATE(PFIELD(1,1))
     PFIELD = XSSS_UNIF
 !
 !
 !*      3.3    Sea Ice Cover
 !
-  CASE('SIC    ')
+  CASE('SIC      ')
     ALLOCATE(PFIELD(1,1))
     PFIELD = XSIC_UNIF
 !

@@ -93,7 +93,6 @@ END MODULE MODI_glt_inibud
 SUBROUTINE glt_inibud(tpbud)
 !
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE 
 !

@@ -113,13 +113,14 @@ END MODULE MODI_gltools_mixice_r
 ! given their areal fractions, overlying snow layers thickness and
 ! density, and vertical temperature profiles. 
 !
-SUBROUTINE gltools_mixice_r( tpmxl,tplsit,tplsil,tpsit,tpsil )
+SUBROUTINE gltools_mixice_r(tpmxl,tplsit,tplsil,tpsit,tpsil,&
+niceage,nicesal,nilay,nl,nmponds,np,nt )
 !
   USE modd_types_glt
   USE modd_glt_const_thm
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER,INTENT(IN) :: niceage,nicesal,nmponds,nilay,nl,nt,np
 !
   TYPE(t_mxl),DIMENSION(np), INTENT(in) ::                           &
         tpmxl

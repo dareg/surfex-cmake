@@ -116,15 +116,18 @@ END MODULE MODI_glt_sublim_r
 ! -----------------------------------------------------------------------
 ! ------------------------ SUBROUTINE glt_sublim_r --------------------------
 !
-SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia)
+SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
+        ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
   USE modd_types_glt
-  USE modd_glt_param 
   USE modd_glt_const_thm
   USE modi_glt_updtfl_r
   USE mode_gltools_enthalpy
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(in) :: nilay,ncdlssh,nsalflx,nleviti,nl,np,nt
+  REAL,INTENT(IN) :: dtt,rn_htopoc
+  REAL,DIMENSION(:),INTENT(IN) :: sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::   &
         tpmxl
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
@@ -137,7 +140,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia)
         tptfl
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
         tpdia
-! 
+!
   REAL, DIMENSION(np) ::  &
         zei1,zei2,zes1,zes2
   REAL, DIMENSION(nt,np) ::  &
@@ -153,7 +156,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia)
   zhsi(:,:) = tpsit(:,:)%hsi
 !
 ! Get initial snow and ice gltools_enthalpy
-  CALL glt_aventh( tpsit,tpsil,zei1,zes1 )
+  CALL glt_aventh( tpsit,tpsil,zei1,zes1,nilay,nl,np,nt,sf3tinv )
 !
 ! 
 ! 2. Apply sublimation rate
@@ -227,8 +230,10 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia)
   tpdia(:)%suw = SUM(zsuw(:,:), DIM=1) / dtt
 ! Ice sublimated has to be put in wlo and the inverse in cio => water flux
 ! impacted but not the salt flux (???? Aurore)
-  CALL glt_updtfl_r('FW2I',tpmxl,tptfl,zsui)
-  CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zsuw)
+  CALL glt_updtfl_r('FW2I',tpmxl,tptfl,zsui,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
+  CALL glt_updtfl_r('FW2O',tpmxl,tptfl,zsuw,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
 !print*,'hsi (4) =',tpsit(:,:)%hsi
 !print*,'hsn (4) =',tpsit(:,:)%hsn
 !
@@ -253,10 +258,8 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia)
 ! back to sea ice, or to the ocean if there is no sea ice.
 ! For simplicity, here we deliver this gltools_enthalpy only to the ocean.
 !
-  CALL glt_aventh( tpsit,tpsil,zei2,zes2 )
+  CALL glt_aventh( tpsit,tpsil,zei2,zes2,nilay,nl,np,nt,sf3tinv )
   tptfl(:)%tio = tptfl(:)%tio - (zei2+zes2-zei1-zes1)/dtt
 !
 END SUBROUTINE glt_sublim_r
 
-! ---------------------- END SUBROUTINE glt_sublim_r ------------------------
-! -----------------------------------------------------------------------

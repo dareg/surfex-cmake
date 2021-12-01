@@ -134,16 +134,17 @@ END MODULE MODI_glt_icetrans_r
 ! with: 
 !                hsi0 = 0.1 m 
 !
-SUBROUTINE glt_icetrans_r( tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra )
+SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,depth )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
 !
 !* Arguments
 !
+  INTEGER          ,INTENT(in) :: nl,nt,np,nilay
+  REAL,DIMENSION(:),INTENT(in) :: depth
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::   &
         tpblki
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &

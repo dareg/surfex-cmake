@@ -133,17 +133,18 @@ END MODULE MODI_glt_updtfl_r
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE glt_updtfl_r -------------------------
 !
-SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,pent,psalt )
+SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc ,pent,psalt )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_glt_salflx_r
 !
   IMPLICIT NONE
 !
 ! .. Arguments
 !
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nleviti,nt,np
+  REAL   ,INTENT(in) :: dtt,rn_htopoc
   CHARACTER(*), INTENT(in) ::  &
         hflag  
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
@@ -227,7 +228,7 @@ SUBROUTINE glt_updtfl_r( hflag,tpmxl,tptfl,pdmass,pent,psalt )
   IF ( hflag=='I2O' ) THEN
     IF ( nleviti==1 ) THEN
 ! .. Update virtual water flux (concentration/dilution) in kg.m-2.s-1 
-      CALL glt_salflx_r( zqsalt2,tpmxl,tptfl,pdmass=pdmass,psalt=zsalt )
+      CALL glt_salflx_r(zqsalt2,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,pdmass=pdmass,psalt=zsalt )
 !
 ! .. Salt flux in kg.m-2.s-1
 !

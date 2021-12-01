@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_SEA,HASSIM_WATER,       &
                                HASSIM_ISBA,HASSIM_TEB,KPRINTLEV,            &
@@ -9,7 +5,7 @@
                                OALADSURF,OREAD_SST_FROM_FILE,               &
                                HFILE_FORMAT_SST,OEXTRAP_SEA,                &
                                OEXTRAP_WATER,OEXTRAP_NATURE,OEXTRAP_SNOW,   &
-                               OWATERTG2,KBOUTPUT,KECHGU,PRCLIMCA,          &
+                               OWATERTG2,KBOUTPUT,KECHGU,KECHGXFU,PRCLIMCA, &
                                PRCLISST,PSIGH2MO,PSIGT2MO,PSIGWGO,          &
                                PSIGWGB,PSIGW2B,OOBSWG,OOBS2M,OIMVEG,        &
                                PSPRECIP2,PRTHR_QC,PSIGWGO_MAX,              &
@@ -92,6 +88,7 @@ LOGICAL,           INTENT(OUT) :: OWATERTG2
 INTEGER,           INTENT(OUT) :: KBOUTPUT
 !
 INTEGER,           INTENT(OUT) :: KECHGU
+INTEGER,           INTENT(OUT) :: KECHGXFU
 REAL,              INTENT(OUT) :: PRCLIMCA
 REAL,              INTENT(OUT) :: PRCLISST
 REAL,              INTENT(OUT) :: PSIGH2MO
@@ -185,6 +182,7 @@ OWATERTG2      = .FALSE.
 KBOUTPUT = 1
 !
 KECHGU = 6
+KECHGXFU = 6
 !  RCLIMCA : coef. de rappel vers la climatologie des champs de surface
 !  RCLISST : coef. de rappel vers la climatologie de SST
 !PRCLIMCA=0.045

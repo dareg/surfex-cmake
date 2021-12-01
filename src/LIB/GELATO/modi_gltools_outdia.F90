@@ -105,9 +105,15 @@ END MODULE MODI_gltools_outdia
 ! -------------------------- SUBROUTINE gltools_outdia --------------------------
 !
 SUBROUTINE gltools_outdia  &
-        ( tpind,tpnam,tpdom,pfield,pcumdia,pwgt )
-!
-  USE modd_glt_param
+        ( tpind,tpnam,tpdom,pfield,pcumdia,&
+          gelato_leadproc,gelato_myrank,&
+          n0valu,n0vilu,n2valu,n2vilu,navedia,ninsdia,noutlu,&
+          nt,nx,nxglo,ny,nyglo,&
+          dtt,dttave,                                               &
+          lp1,lwg,                                                  &
+          cdiafmt,cinsfld,                                          &
+          pwgt)
+!  
   USE modd_types_glt
   USE modd_glt_const_thm
   USE modi_gltools_strlower
@@ -118,6 +124,12 @@ SUBROUTINE gltools_outdia  &
 !
 !* Arguments
 !
+  INTEGER, INTENT(IN) :: noutlu,nt,n2vilu,n0vilu,ninsdia,navedia,nx,ny,nxglo,nyglo,&
+                         gelato_myrank,gelato_leadproc,n2valu,n0valu
+  REAL, INTENT(IN) :: dtt,dttave
+  LOGICAL, INTENT(IN) :: lp1,lwg
+  CHARACTER(*),INTENT(IN) :: cdiafmt
+  CHARACTER(80),DIMENSION(:),INTENT(IN) :: cinsfld
   TYPE(t_ind), INTENT(inout) ::  &
         tpind
   TYPE(t_def), INTENT(in) ::  &
@@ -209,12 +221,15 @@ SUBROUTINE gltools_outdia  &
             IF ( ANY( cinsfld(:)==yall ) .OR.  &
                  ANY( cinsfld(:)==tpnam%sna ) .OR.  &
                  yis0d )  &
-                 CALL gltools_wrivai( tpnam,pfield,pwgt=pwgt )
+                 CALL gltools_wrivai(tpnam,pfield,n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,&
+                 pwgt=pwgt )
          ENDIF
          IF ( navedia==1 )  &
-              CALL gltools_avevai( tpind,tpnam,pfield,pcumdia,pwgt=pwgt )
+              CALL gltools_avevai(tpind,tpnam,pfield,pcumdia,&
+              gelato_leadproc,gelato_myrank,&
+              n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,dtt,dttave,lwg,pwgt=pwgt )
       ELSE
-         CALL gltools_wriios (tpnam%sna,pfield,pwgt=pwgt )
+         CALL gltools_wriios (tpnam%sna,pfield,nx,ny,pwgt=pwgt )
       ENDIF
   ENDIF
 !

@@ -3,16 +3,19 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE ISBA(IO, KK, PK, PEK, G, AG, DK, DEK, DMK, TPTIME, PPOI, PABC, PIACAN, &
-                      OMEB, PTSTEP, HIMPLICIT_WIND, PZREF, PUREF, PDIRCOSZW,     &
-                      PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,     &
-                      PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PPEW_A_COEF, PPEW_B_COEF,&
-                      PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,        &
-                      PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,  &
-                      PPALPHAN, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,          &
-                      PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PTDEEP_A,   &
-                      PCSP, PFFG_NOSNOW, PFFV_NOSNOW, PEMIST, PUSTAR, PAC_AGG,   &
-                      PHU_AGG, PRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG_GR     )
+      SUBROUTINE ISBA(IO, KK, PK, PEK, G, AG, DK, DEK, DMK, TPTIME, PPOI, PABC, &
+                      PIACAN,OMEB, PTSTEP, HIMPLICIT_WIND, PZREF, PUREF,        &
+                      PDIRCOSZW,PCVHEATF, PSLOPE_DIR, PIMPWET,PIMPDRY,          &
+                      PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, PZENITH,    &
+                      PAZIM, PSCA_SW, PSW_RAD, PLW_RAD, PVMOD, PVDIR,           &
+                      PPEW_A_COEF, PPEW_B_COEF,                                 &
+                      PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF, AT,   &
+                      PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, &
+                      PPALPHAN, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,         &
+                      PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN, PTDEEP_A,  &
+                      PCSP, PFFG_NOSNOW, PFFV_NOSNOW, PEMIST, PUSTAR, PAC_AGG,  &
+                      PHU_AGG, PRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG_GR,       &
+                      KTAB_SYT, P_DIR_SW, P_SCA_SW)
 !     ##########################################################################
 !
 !
@@ -99,6 +102,8 @@
 !!      (P. LeMoigne) 12/2014 EBA scheme update
 !!      (A. Boone)    02/2015 Consider spectral band dependence of snow for IO%LTR_ML radiation option
 !!      B. Decharme    01/16 : Bug with flood budget
+!! (M. Dumont) 11/2015 Atmotartes and spectral output
+!!      (M. Lafaysse) 2016  Crocus multiphysics (Cluzet et al 2016)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -115,13 +120,15 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_CO2V_PAR,   ONLY : XMC, XMCO2, XPCCO2
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
-USE MODD_CSTS,           ONLY : XTT
+USE MODD_CSTS,           ONLY : XTT,XPI
 USE MODD_CO2V_PAR,       ONLY : XMC, XMCO2, XPCCO2
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 USE MODD_MEB_PAR,        ONLY : XSW_WGHT_VIS, XSW_WGHT_NIR
 !
 USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_SOIL
 USE MODI_SOILDIF
@@ -176,6 +183,9 @@ REAL,                 INTENT(IN)  :: PTSTEP     ! timestep of the integration
 CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
+!
+REAL,                 INTENT(IN) :: PCVHEATF 
+!
 REAL, DIMENSION(:),   INTENT(IN) :: PZREF       ! normal distance of the first
 !                                               ! atmospheric level to the
 !                                               ! orography
@@ -185,6 +195,7 @@ REAL, DIMENSION(:),   INTENT(IN) :: PUREF       ! reference height of the wind
 !                                               ! NOT when coupled to a model (MesoNH)
 REAL, DIMENSION(:),   INTENT(IN) ::  PDIRCOSZW  ! Director Cosinus along z
 !                                               ! directions at surface w-point
+REAL, DIMENSION(:),   INTENT(IN) ::  PSLOPE_DIR ! Slope direction
 !
 !* atmospheric variables
 !  ---------------------
@@ -204,12 +215,17 @@ REAL, DIMENSION(:), INTENT(IN)  :: PRR        ! Rain rate (in kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN)  :: PSR        ! Snow rate (in kg/m2/s)
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PZENITH    ! solar zenith angle
-REAL, DIMENSION(:), INTENT(IN)  :: PSW_RAD    ! solar   incoming radiation
-REAL, DIMENSION(:), INTENT(IN)  :: PSCA_SW    ! solar diffuse incoming radiation
+REAL, DIMENSION(:), INTENT(IN)  :: PAZIM     ! azimuthal angle      (radian from North, clockwise)
+REAL, DIMENSION(:), INTENT(IN)  :: PSW_RAD    ! solar   incoming radiation on slope
+REAL, DIMENSION(:), INTENT(IN)  :: PSCA_SW    ! solar diffuse incoming radiation on slope
 REAL, DIMENSION(:), INTENT(IN)  :: PLW_RAD    ! thermal incoming radiation
+
+REAL, DIMENSION(:,:), INTENT(IN):: P_DIR_SW  ! solar direct spectral incoming radiation on slope
+REAL, DIMENSION(:,:), INTENT(IN):: P_SCA_SW ! solar diffuse spectral incoming radiation on slope
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PVMOD      ! modulus of the wind
 !                                             ! parallel to the orography
+REAL, DIMENSION(:), INTENT(IN)  :: PVDIR      ! wind direction
 !
 ! implicit coupling coefficients:
 !
@@ -222,6 +238,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PPEW_A_COEF, PPEW_B_COEF, &
 !                                  PPET_B_COEF ! B-air temperature coefficient
 !                                  PPEQ_A_COEF ! A-air specific humidity coefficient
 !                                  PPEQ_B_COEF ! B-air specific humidity coefficient
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 !* vegetation parameters
 !  ---------------------
@@ -253,6 +271,9 @@ REAL, DIMENSION(:), INTENT(IN)  :: PTDEEP_A       ! Deep soil temperature (presc
 !
 REAL, DIMENSION(:),    INTENT(IN) :: PCSP       ! atmospheric CO2 concentration
 !                                                 [ppmm]=[kg CO2 / kg air]
+REAL, DIMENSION(:,:),    INTENT(IN) :: PIMPWET  ! flux of wet deposit for each impurity type 
+REAL, DIMENSION(:,:),    INTENT(IN) :: PIMPDRY  ! flux of dry deposit for each impurity type 
+!
 !
 !* ISBA-DF variables/parameters:                  
 !  ------------------------------
@@ -291,6 +312,7 @@ REAL, DIMENSION(:),     INTENT(OUT) :: PDEEP_FLUX ! Heat flux at bottom of ISBA 
 !
 REAL   ,DIMENSION(:),INTENT(IN)    :: PIRRIG_GR ! ground irrigation rate (kg/m2/s)
 !
+INTEGER , DIMENSION(:), INTENT(IN)   ::  KTAB_SYT    ! Array of index defining opposite points for Sytron
 !
 !*      0.2    declarations of local variables
 !
@@ -327,7 +349,6 @@ REAL, DIMENSION(SIZE(PEK%XWR)) :: ZQS3L    ! surface humidity (kg/kg) (ES/CROCUS
 !
 REAL, DIMENSION(SIZE(PEK%XWR)) :: ZVEG
 !
-REAL, DIMENSION(SIZE(PEK%XWR),SIZE(PABC)) :: ZIACAN
 REAL, DIMENSION(SIZE(PEK%XWR),SIZE(PABC)) :: ZIACAN_SHADE, ZIACAN_SUNLIT
 !                                      ! absorbed PAR of each level within the
 !                                      ! canopy - Split into shaded and SUNLIT
@@ -354,6 +375,11 @@ REAL, DIMENSION(SIZE(PEK%XWR))           :: ZLITCOR   ! A possible ice (in litte
 !
 ! Misc :
 !
+
+REAL, DIMENSION(SIZE(PEK%XWR))          :: ZANGL_ILLUM ! BC : moved here from snow3L_isba.F90
+                                           !ZANGL_ILLUM  = Effective illumination angle, angle between the normal to the ground and the sun (=zenith for flat simulation)
+                                           !used only in TARTES for now
+INTEGER                                 :: JJ ! BC Loop control B
 ! -----------------------------------------------------------------------------------------------------------------------------------------------------
 ! Budget: Add to arguments, diags
 
@@ -421,11 +447,21 @@ ZDELHEATN     (:) = 0.0
 ZDELHEATN_SFC (:) = 0.0
 ZSNOWSFCH     (:) = 0.0
 ZGSFCSNOW     (:) = 0.0
+ZSNOW_THRUFAL (:) = 0.0
 !
 ZSUBVCOR(:)     = 0.0
 ZLITCOR(:)     = 0.0
 ZLES3L          = 0.0
 ZLEL3L          = 0.0
+!Misc : 
+!
+ZANGL_ILLUM(:) = PZENITH(:) ! BC 
+!
+DO JJ=1, SIZE(PEK%XWR) ! BC computation of illuminaiton angle from Tuzet calc.
+!
+    ZANGL_ILLUM(JJ) = ACOS((COS(PZENITH(JJ))*COS(ACOS(PDIRCOSZW(JJ))))+ &
+      (SIN(PZENITH(JJ))*SIN(ACOS(PDIRCOSZW(JJ))*COS(PAZIM(JJ)-(PSLOPE_DIR(JJ)*XPI/180))))) !Compute the effective illumination angle     
+ENDDO
 !
 IF(OMEB)THEN
   ZVEG(:)           = 0.0
@@ -452,7 +488,8 @@ IF(IO%CISBA =='2-L' .OR. IO%CISBA == '3-L')THEN
 !
 ELSE
 !
-   CALL SOILDIF (IO, KK, PK, PEK, DMK, ZVEG, ZFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW, ZSOILCONDZ, ZSOILHCAPZ  )
+   CALL SOILDIF (IO, KK, PK, PEK, DMK, ZVEG, ZFROZEN1, PFFG_NOSNOW, PFFV_NOSNOW, ZSOILCONDZ,&
+                 ZSOILHCAPZ,  PCVHEATF  )
 !
 ENDIF
 !
@@ -469,22 +506,22 @@ CALL SOILSTRESS(IO%CISBA, ZF2, KK, PK, PEK, ZF2WGHT, ZF5 )
 !              ---------------------------------
 !
 IF(OMEB)THEN
-   CALL ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG,                &
-                 TPTIME, OMEB, GSHADE, HIMPLICIT_WIND, PTSTEP,        &
-                 ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1, PPS, PZENITH,      &
-                 PSCA_SW, PSW_RAD, PVMOD, PRR, PSR, PRHOA, PTA, PQA,  &
-                 PDIRCOSZW, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF,   &
-                 PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF,  &
-                 PZREF, PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,&
-                 PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,       & 
-                 PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL, &
-                 PABC, PIACAN, PPOI, PCSP, PRESP_BIOMASS_INST,  PPALPHAN, &
-                 ZF2, PLW_RAD, ZGRNDFLUX, ZFLSN_COR, PUSTAR, ZEMIST,      &
-                 PHU_AGG, PAC_AGG, ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG, &
-                 ZDELHEATN, ZDELHEATN_SFC, ZGSFCSNOW, PTDEEP_A, PDEEP_FLUX, &
-                 ZRI3L, ZSNOW_THRUFAL, ZSNOW_THRUFAL_SOIL, ZEVAPCOR, ZSUBVCOR, &
-                 ZLITCOR, ZSNOWSFCH, ZQS3L   )
-
+   CALL ISBA_MEB(IO, KK, PK, PEK, DK, DEK, DMK, G, AG,                        &
+                TPTIME, OMEB, GSHADE, HIMPLICIT_WIND, PTSTEP,                 &
+                ZSOILHCAPZ, ZSOILCONDZ, ZFROZEN1, PPS, PZENITH,ZANGL_ILLUM,   &
+                PSCA_SW, PSW_RAD, PVMOD, PVDIR, PRR, PSR, PRHOA, PTA, PQA,    &
+                PDIRCOSZW, PSLOPE_DIR, PEXNS, PEXNA, PPET_A_COEF, PPET_B_COEF,&
+                PPEQ_A_COEF, PPEQ_B_COEF, PPEW_A_COEF, PPEW_B_COEF, AT,       &
+                PZREF, PUREF, PZ0G_WITHOUT_SNOW, PZ0_MEBV, PZ0H_MEBV,         &
+                PZ0EFF_MEBV, PZ0_MEBN, PZ0H_MEBN, PZ0EFF_MEBN,                & 
+                PALBNIR_TVEG, PALBVIS_TVEG,PALBNIR_TSOIL, PALBVIS_TSOIL,      &
+                PABC, PIACAN, PPOI, PCSP, PRESP_BIOMASS_INST,  PPALPHAN,      &
+                ZF2, PLW_RAD, ZGRNDFLUX, ZFLSN_COR, PUSTAR, ZEMIST,           &
+                PHU_AGG, PAC_AGG, ZDELHEATV_SFC, ZDELHEATG_SFC, ZDELHEATG,    &
+                ZDELHEATN, ZDELHEATN_SFC, ZGSFCSNOW, PTDEEP_A, PDEEP_FLUX,    &
+                ZRI3L, ZSNOW_THRUFAL, ZSNOW_THRUFAL_SOIL, ZEVAPCOR,           &
+                ZSUBVCOR,ZLITCOR, ZSNOWSFCH, ZQS3L, KTAB_SYT,                 &
+                P_DIR_SW, P_SCA_SW, PIMPWET, PIMPDRY)
 ELSE
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -493,12 +530,12 @@ ELSE
 !              -------------------
 !
   IF (IO%LTR_ML) THEN
-    CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH, PALBVIS_TVEG,   &
-                             PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, PSW_RAD,  &
-                             PEK%XLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,    &
-                             PEK%XMUS, PEK%XLAI_EFFC, GSHADE, ZIACAN, ZIACAN_SUNLIT,&
-                             ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,     &
-                             DMK%XFAPAR_BS, DMK%XFAPIR_BS  )
+    CALL RADIATIVE_TRANSFERT(IO%LAGRI_TO_GRASS, PK%XVEGTYPE_PATCH, PALBVIS_TVEG,&
+                              PALBVIS_TSOIL, PALBNIR_TVEG, PALBNIR_TSOIL, PSW_RAD,&
+                              PEK%XLAI, PZENITH, PABC, PEK%XFAPARC, PEK%XFAPIRC,&
+                              PEK%XMUS, PEK%XLAI_EFFC, GSHADE, PIACAN, ZIACAN_SUNLIT,&
+                              ZIACAN_SHADE, ZFRAC_SUN, DMK%XFAPAR, DMK%XFAPIR,&
+                              DMK%XFAPAR_BS, DMK%XFAPIR_BS  )
    ENDIF
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -513,14 +550,17 @@ ELSE
 !*      7.0    Explicit snow scheme
 !              --------------------
 !
-   CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,                   &
-                    TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT, ZSOILHCAPZ,      &
-                    ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA, PVMOD, PLW_RAD, PRR,         &
-                    PSR, PRHOA, PUREF, PEXNS, PEXNA, PDIRCOSZW, PZREF, PEK%XSNOWFREE_ALB, &
-                    PK%XDG, PK%XDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,  &
-                    PPET_B_COEF, PPEQ_B_COEF, ZSNOW_THRUFAL_SOIL, ZGRNDFLUX, ZFLSN_COR,    &
-                    ZGSFCSNOW, ZEVAPCOR, ZLES3L, ZLEL3L, ZEVAP3L, ZSNOWSFCH, ZDELHEATN,   &
-                    ZDELHEATN_SFC, ZRI3L, PZENITH, ZDELHEATG, ZDELHEATG_SFC, ZQS3L      )  
+   CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,        &
+                    TPTIME, PTSTEP, PK%XVEGTYPE_PATCH, PEK%XTG, DMK%XCT,       &
+                    ZSOILHCAPZ,ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA,        &
+                    PVMOD, PVDIR, PLW_RAD, PRR,PSR, PRHOA, PUREF, PEXNS,       &
+                    PEXNA, PDIRCOSZW, PSLOPE_DIR, PZREF, PEK%XSNOWFREE_ALB,    &
+                    PK%XDG, PK%XDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,    &
+                    PPEQ_A_COEF,PPET_B_COEF, PPEQ_B_COEF, ZSNOW_THRUFAL_SOIL,  &
+                    ZGRNDFLUX, ZFLSN_COR,ZGSFCSNOW, ZEVAPCOR, ZLES3L, ZLEL3L,  &
+                    ZEVAP3L, ZSNOWSFCH, ZDELHEATN,ZDELHEATN_SFC,ZRI3L,PZENITH, &
+                    ZANGL_ILLUM, ZDELHEATG, ZDELHEATG_SFC, ZQS3L,              &
+                    KTAB_SYT,P_DIR_SW,P_SCA_SW,PIMPWET,PIMPDRY)
 !  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 !
 !*      8.0    Plant stress, stomatal resistance and, possibly, CO2 assimilation
@@ -532,9 +572,8 @@ ELSE
       ZQSAT(:)=QSAT(PEK%XTG(:,1),PPS(:))  
       CALL COTWORES(PTSTEP, IO, GSHADE, PK, PEK, PK%XDMAX, PPOI, PCSP, PEK%XTG(:,1), &
                     ZF2, PSW_RAD, PQA, ZQSAT, PEK%XPSNV, ZDELTA, PRHOA, PZENITH,     &
-                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, ZIACAN, PABC,   &
+                    KK%XFFV, ZIACAN_SUNLIT, ZIACAN_SHADE, ZFRAC_SUN, PIACAN, PABC,   &
                     DMK%XRS, DEK%XGPP, PRESP_BIOMASS_INST(:,1))
-      PIACAN(:,:) = ZIACAN(:,:)
    ELSE
       PRESP_BIOMASS_INST(:,1) = 0.0
       DEK%XGPP(:) = 0.0
@@ -548,7 +587,7 @@ ELSE
   CALL ISBA_CEB(IO, KK, PK, PEK, DK, DEK, DMK,                      &
                 HIMPLICIT_WIND, PTSTEP, PPEW_A_COEF,                &
                 PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, &
-                PPEQ_B_COEF, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA,   &
+                PPEQ_B_COEF, AT, PSW_RAD, PLW_RAD, PEXNS, PEXNA, PTA, &
                 PVMOD, PQA, PRR, PSR, PPS, PZREF, PUREF, PDIRCOSZW, &
                 ZF5, PFFG_NOSNOW, PFFV_NOSNOW,  PRHOA, ZCS,         &
                 ZSOILCONDZ, ZSOILHCAPZ, ZFROZEN1, PTDEEP_A,         &
@@ -585,15 +624,18 @@ CALL HYDRO(IO, KK, PK, PEK, AG, DEK, DMK,                      &
 !
 CALL ISBA_SNOW_AGR(KK, PK, PEK, DMK, DK, DEK,                    &
                    OMEB, IO%LMEB_LITTER, PEXNS, PEXNA, PTA, PQA, &
-                   PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,  &
-                   ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L,     &
-                   ZEVAP3L, ZQS3L, ZALB3L, ZGSFCSNOW,         &
+                   PZREF, PUREF, PDIRCOSZW, PVMOD, PRR, PSR,     &
+                   AT, ZEMIST, ZALBT, PUSTAR, ZLES3L, ZLEL3L,    &
+                   ZEVAP3L, ZQS3L, ZALB3L, ZGSFCSNOW,            &
                    ZGRNDFLUX, ZFLSN_COR, PEMIST, PPALPHAN    )  
 !
 !***************************************************************************
 ! All output fluxes and radiative variables have recovered the same physical
 ! meaning, that is they are aggregated quantities (snow + snow-free)
 !***************************************************************************
+WHERE(PEK%TSNOW%WSNOW(:,1)==0)
+  DMK%XSNOWTEMP(:,1)=XUNDEF
+ENDWHERE
 !
 IF (LHOOK) CALL DR_HOOK('ISBA',1,ZHOOK_HANDLE)
 !

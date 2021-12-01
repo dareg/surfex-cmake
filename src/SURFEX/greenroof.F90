@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GRO, S, K, P, PEK,    &
+    SUBROUTINE GREENROOF (DTCO, G, T, TOP, TIR, AT, DTV, GB, DK, DEK, DMK, GRO, S, K, P, PEK,    &
                           HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,  &
                           PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
                           PTSTEP, PZREF, PUREF, PTA, PQA, PEXNS, PEXNA, PRHOA,      &
@@ -78,6 +78,8 @@ USE MODD_AGRI_n, ONLY : AGRI_t, AGRI_INIT
 USE MODD_SURF_PAR,             ONLY: XUNDEF
 USE MODD_TYPE_DATE_SURF,       ONLY: DATE_TIME
 USE MODD_CSTS,                 ONLY: XCPD
+USE MODD_ISBA_PAR,             ONLY: XCVHEATF
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE
@@ -102,6 +104,8 @@ TYPE(GRID_t), INTENT(INOUT) :: G
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 TYPE(DATA_ISBA_t), INTENT(INOUT) :: DTV
 TYPE(GR_BIOG_t), INTENT(INOUT) :: GB
@@ -172,8 +176,15 @@ TYPE(SSO_t) :: YSS
 TYPE(AGRI_t) :: YAG
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZSLOPEDIR           ! slope direction (=-1 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZWINDDIR            ! wind direction (=-1 in TEB)
+INTEGER, DIMENSION(SIZE(PPS))  :: KTAB_SYT        ! array of index containing
+                                                  ! opposite direction for
+                                                  ! Sytron  (=0 in TEB)
 REAL, DIMENSION(SIZE(PPS),GRO%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_DIR_SW ! spectral direct and diffuse irradiance used in snow cro 
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_SCA_SW
 !
 !  temperatures
 !
@@ -192,8 +203,11 @@ REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, ZPALPHAN, ZZ0G_WITHOUT_SNOW, &
                               ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN, &
                               ZZ0H_MEBN, ZZ0EFF_MEBN
 !
+REAL, DIMENSION(SIZE(PPS)) :: ZP_ANGL_NORM   ! angle between the normal to the surface and the sun used in snowcro$
+!
 !
 INTEGER                    :: ILU
+!
 LOGICAL :: GUPDATED, GALB
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -207,6 +221,10 @@ IF (LHOOK) CALL DR_HOOK('GREENROOF',0,ZHOOK_HANDLE)
 ILU = SIZE(PPS)
 !
 ZDIRCOSZW = 1.
+ZSLOPEDIR = -1.
+ZWINDDIR  = -1.
+!
+KTAB_SYT  = 0
 !
  CALL SSO_INIT(YSS)
 !
@@ -254,22 +272,25 @@ IF (GRO%CPHOTO=='NIT'.OR.GRO%CPHOTO=='NCB') GALB = .TRUE.
 !*      9.2    Call ISBA for greenroofs
 !              ------------------------
 !
+ZP_DIR_SW=XUNDEF
+ZP_SCA_SW=XUNDEF
 DK%XZ0(:) = PEK%XZ0(:)
 DK%XZ0H(:) = PEK%XZ0(:) / P%XZ0_O_Z0H(:)
-!
 DK%XZ0EFF(:) =  PEK%XZ0(:)
 !
 ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
- CALL ISBA(GRO, K, P, PEK, G, YAG, DK, DEK, DMK,                                  &
-           TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,                    &
-           HIMPLICIT_WIND, PZREF, PUREF, ZDIRCOSZW, PTA, PQA, PEXNA, PRHOA, PPS,  &
-           PEXNS, PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF, &
-           PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
-           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, ZPALPHAN,    &
-           ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN,         &
-           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
-           ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, PDEEP_FLUX, PIRRIG )
+ CALL ISBA(GRO, K, P, PEK, G, YAG, DK, DEK, DMK, TPTIME, S%XPOI, S%XABC,       &
+           GB%XIACAN, .FALSE., PTSTEP, HIMPLICIT_WIND, PZREF, PUREF,           &
+           ZDIRCOSZW, XCVHEATF, ZSLOPEDIR,PEK%TSNOW%GRAN2(:,:),                &
+           PEK%TSNOW%GRAN2(:,:), PTA, PQA, PEXNA, PRHOA, PPS, PEXNS, PRR, PSR, & 
+           PZENITH, ZP_ANGL_NORM, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, ZWINDDIR,    &
+           PPEW_A_COEF,PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,     &
+           PPEQ_B_COEF, AT, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,         &
+           PALBVIS_TSOIL, ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV,    &
+           ZZ0EFF_MEBV, ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2,      &
+           K%XFFG(:), K%XFFV(:), ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG,             &
+           ZRESP_BIOMASS_INST, PDEEP_FLUX,PIRRIG, KTAB_SYT, ZP_DIR_SW, ZP_SCA_SW)
 !
 IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:) = DMK%XSNOWTEMP(:,1)
 !

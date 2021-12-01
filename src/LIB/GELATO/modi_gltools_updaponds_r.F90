@@ -77,28 +77,9 @@ END MODULE MODI_gltools_updaponds_r
 !
 ! ------------------ BEGIN MODULE modi_gltools_updaponds_r -------------------
 !
-!THXS_SFX!MODULE modi_gltools_updaponds_r
-!THXS_SFX!INTERFACE
-!THXS_SFX!!
-!THXS_SFX!SUBROUTINE gltools_updaponds_r (omelt,tpatm,tpblki,tpdia,tpsit,pasi )
-!THXS_SFX!  USE modd_types_glt
-!THXS_SFX!  USE modd_glt_param
-!THXS_SFX!  LOGICAL, DIMENSION(nt,np), INTENT(in) :: &
-!THXS_SFX!        omelt
-!THXS_SFX!  TYPE(t_atm), DIMENSION(np), INTENT(in) :: &
-!THXS_SFX!        tpatm  
-!THXS_SFX!  TYPE(t_blk), DIMENSION(nt,np), INTENT(in) :: &
-!THXS_SFX!        tpblki
-!THXS_SFX!  TYPE(t_dia), DIMENSION(np), INTENT(inout) :: &
-!THXS_SFX!        tpdia
-!THXS_SFX!  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) :: &
-!THXS_SFX!        tpsit
-!THXS_SFX!  REAL, DIMENSION(nt,np), INTENT(inout) :: &
-!THXS_SFX!        pasi
-!THXS_SFX!END SUBROUTINE gltools_updaponds_r
-!THXS_SFX!!
-!THXS_SFX!END INTERFACE
-!THXS_SFX!END MODULE modi_gltools_updaponds_r
+!MODULE modi_gltools_updaponds_r !ANTMPTEST
+!CONTAINS
+
 !
 ! ------------------- END MODULE modi_gltools_updaponds_r --------------------
 !
@@ -110,14 +91,15 @@ END MODULE MODI_gltools_updaponds_r
 ! * Subroutine used to update melt ponds volume and albedo (takes into account rain, snow, or thermodynamic surface melting). 
 ! * (APONDS = Albedo of PONDS)
 !
-SUBROUTINE gltools_updaponds_r ( omelt,tpatm,tpblki,tpdia,tpsit,pasi )
+SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: nt,np
+  REAL,INTENT(IN) :: dtt
   LOGICAL, DIMENSION(nt,np), INTENT(in) :: &
         omelt
   TYPE(t_atm), DIMENSION(np), INTENT(in) :: &
@@ -379,7 +361,7 @@ SUBROUTINE gltools_updaponds_r ( omelt,tpatm,tpblki,tpdia,tpsit,pasi )
 !
 !
 END SUBROUTINE gltools_updaponds_r
-!
+!END MODULE modi_gltools_updaponds_r !ANTMPTEST
 ! ---------------------- END SUBROUTINE gltools_updaponds_r ------------------------
 ! -----------------------------------------------------------------------
 

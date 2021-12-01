@@ -7,10 +7,10 @@ SUBROUTINE PREP_SEAFLUX_EXTERN (GCP,HPROGRAM,HSURF,HFILE,HFILETYPE,HFILEPGD,HFIL
 !     #################################################################################
 !
 !
+!
+!
 USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
-!
 USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
-!
 USE MODD_TYPE_DATE_SURF
 !
 USE MODI_PREP_GRID_EXTERN
@@ -28,10 +28,11 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+!
 TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
  CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
- CHARACTER(LEN=7),   INTENT(IN)  :: HSURF     ! type of field
+ CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILE     ! name of file
  CHARACTER(LEN=6),   INTENT(IN)  :: HFILETYPE ! type of input file
  CHARACTER(LEN=28),  INTENT(IN)  :: HFILEPGD     ! name of file
@@ -92,14 +93,14 @@ SELECT CASE(HSURF)
 !*     3.      Orography
 !              ---------
 !
-  CASE('ZS     ')
+  CASE('ZS       ')
     ALLOCATE(PFIELD(INI,1))
     PFIELD(:,:) = 0.
 !
 !*      4.  Sea surface temperature
 !           -----------------------
 !
-  CASE('SST    ')
+  CASE('SST      ')
     ALLOCATE(PFIELD(INI,1))
     YRECFM='SST'
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'SEA   ')
@@ -110,7 +111,7 @@ SELECT CASE(HSURF)
 !*      5.  Sea surface salinity
 !           --------------------
 !
-  CASE('SSS    ')
+  CASE('SSS      ')
     ALLOCATE(PFIELD(INI,1))
     YRECFM='SSS'
     CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'FULL  ')
@@ -128,9 +129,434 @@ SELECT CASE(HSURF)
 !*      6.  Sea ice fraction
 !           ----------------
 !
-  CASE('SIC    ')
+
+
+  CASE('SIC      ')
     ALLOCATE(PFIELD(INI,1))
-    PFIELD = 0.0
+    YRECFM='SIC'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+!
+  CASE('SIT      ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='SIT'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEFSI_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEFSI_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICESSI_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICESSI_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEUSTAR ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEUSTAR'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEAGE_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEAGE_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEVMP_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEVMP_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEASN_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEASN_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEHSI_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEHSI_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICETSF_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICETSF_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEHSN_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEHSN_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICERSN_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICERSN_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEH_1_1 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_1'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_2 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_2'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_3 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_3'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_4 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_4'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+
+  CASE('ICEH_1_5 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_5'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_6 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_6'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_7 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_7'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_8 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_8'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_9 ')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_9'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
+
+  CASE('ICEH_1_10')
+    ALLOCATE(PFIELD(INI,1))
+    YRECFM='ICEH_1_10'
+    CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'FULL  ')
+    CALL READ_SURF(&
+                   HFILETYPE,'VERSION',IVERSION,IRESP)
+    CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+    IF(IVERSION>=8)THEN
+      CALL OPEN_AUX_IO_SURF(&
+                       HFILE,HFILETYPE,'SEA   ')
+      CALL READ_SURF(&
+                   HFILETYPE,YRECFM,PFIELD(:,1),IRESP,HDIR='A')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      WHERE (ZMASK(:)==0.) PFIELD(:,1) = XUNDEF      
+    ELSE
+      PFIELD = 0.0
+    ENDIF
 !
 !---------------------------------------------------------------------------------------
 END SELECT

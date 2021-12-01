@@ -7,7 +7,7 @@
                               OCPL_SEAICE,OWATER,                       &
                               PSEA_FWSU,PSEA_FWSV,PSEA_HEAT,PSEA_SNET, &
                               PSEA_WIND,PSEA_FWSM,PSEA_EVAP,PSEA_RAIN, &
-                              PSEA_SNOW,PSEA_WATF,                     &
+                              PSEA_SNOW,PSEA_WATF,PSEA_PRES,                     &
                               PSEAICE_HEAT,PSEAICE_SNET,PSEAICE_EVAP   )  
 !     ############################################################################
 !
@@ -79,7 +79,8 @@ REAL, DIMENSION(:), INTENT(OUT) :: PSEA_FWSM  ! Cumulated wind stress           
 REAL, DIMENSION(:), INTENT(OUT) :: PSEA_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSEA_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSEA_SNOW  ! Cumulated Snowfall rate           (kg/m2)
-REAL, DIMENSION(:), INTENT(OUT) :: PSEA_WATF  ! Cumulated Net water flux (kg/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PSEA_WATF  ! Cumulated Net water flux          (kg/m2)
+REAL, DIMENSION(:), INTENT(OUT) :: PSEA_PRES  ! Cumulated Surface pressure        (Pa.s)
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PSEAICE_HEAT ! Cumulated Sea-ice non solar net heat flux (J/m2)
 REAL, DIMENSION(:), INTENT(OUT) :: PSEAICE_SNET ! Cumulated Sea-ice solar net heat flux     (J/m2)
@@ -97,6 +98,7 @@ REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZEVAP
 REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZRAIN
 REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZSNOW
 REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZFWSM
+REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZPRES
 !
 REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZSNET_ICE
 REAL, DIMENSION(SIZE(PSEA_HEAT))  :: ZHEAT_ICE
@@ -121,6 +123,7 @@ PSEA_EVAP (:) = XUNDEF
 PSEA_RAIN (:) = XUNDEF
 PSEA_SNOW (:) = XUNDEF
 PSEA_WATF (:) = XUNDEF
+PSEA_PRES (:) = XUNDEF
 !
 PSEAICE_HEAT (:) = XUNDEF
 PSEAICE_SNET (:) = XUNDEF
@@ -154,6 +157,7 @@ IF(U%NSIZE_SEA>0)THEN
   CALL UNPACK_SAME_RANK(U%NR_SEA(:),S%XCPL_SEA_RAIN(:),PSEA_RAIN(:),XUNDEF)
   CALL UNPACK_SAME_RANK(U%NR_SEA(:),S%XCPL_SEA_SNOW(:),PSEA_SNOW(:),XUNDEF)
   CALL UNPACK_SAME_RANK(U%NR_SEA(:),S%XCPL_SEA_FWSM(:),PSEA_FWSM(:),XUNDEF)
+  CALL UNPACK_SAME_RANK(U%NR_SEA(:),S%XCPL_SEA_PRES(:),PSEA_PRES(:),XUNDEF)
   S%XCPL_SEA_WIND(:) = 0.0
   S%XCPL_SEA_EVAP(:) = 0.0
   S%XCPL_SEA_HEAT(:) = 0.0
@@ -163,6 +167,7 @@ IF(U%NSIZE_SEA>0)THEN
   S%XCPL_SEA_RAIN(:) = 0.0
   S%XCPL_SEA_SNOW(:) = 0.0
   S%XCPL_SEA_FWSM(:) = 0.0
+  S%XCPL_SEA_PRES(:) = 0.0
 !
   IF (OCPL_SEAICE) THEN
     CALL UNPACK_SAME_RANK(U%NR_SEA(:),S%XCPL_SEAICE_SNET(:),PSEAICE_SNET(:),XUNDEF)

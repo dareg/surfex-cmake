@@ -4,10 +4,10 @@
 !SFX_LIC for details. version 1.
 !#############################################################
 SUBROUTINE INIT_SURF_ATM_n (YSC, HPROGRAM,HINIT, OLAND_USE,             &
-                            KI,KSV,KSW, HSV,PCO2,PRHOA,                 &
+                            KI,KSV,KSW, HSV,PCO2,PIMPWET,PIMPDRY,PRHOA, &
                              PZENITH,PAZIM,PSW_BANDS,PDIR_ALB,PSCA_ALB, &
                              PEMIS,PTSRAD,PTSURF,                       &
-                             KYEAR, KMONTH,KDAY, PTIME, TPDATE_END,     &
+                             KYEAR, KMONTH,KDAY, PTIME, TPDATE_END, AT, &
                              HATMFILE,HATMFILETYPE, HTEST               )  
 !#############################################################
 !
@@ -66,6 +66,7 @@ USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_SURF_ATM,       ONLY : XCO2UNCPL
 !
 USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
+USE MODD_PREP_SNOW    ,  ONLY : NIMPUR
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_DST_SURF,       ONLY : NDSTMDE, NDST_MDEBEG, LVARSIG_DST, LRGFIX_DST 
 USE MODD_SLT_SURF,       ONLY : NSLTMDE, NSLT_MDEBEG, LVARSIG_SLT, LRGFIX_SLT                                
@@ -81,6 +82,8 @@ USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE
 USE MODD_SURFEX_MPI, ONLY : XTIME_INIT_SEA, XTIME_INIT_WATER, XTIME_INIT_NATURE, XTIME_INIT_TOWN, &
                             NRANK, NPIO, NSIZE
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODD_MASK, ONLY: NMASK_FULL
 USE MODN_PREP_SURF_ATM, ONLY : LWRITE_EXTERN
@@ -155,6 +158,8 @@ INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
  CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
+REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPWET      !  wet deposit coefficient for each impurity type    (g)
+REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPDRY     !  dry deposit coefficient for each impurity type    (g)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PAZIM     ! solar azimuthal angle (rad from N, clock)
@@ -172,6 +177,8 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
+!
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
  CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
@@ -179,7 +186,7 @@ TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
- CHARACTER(LEN=3)  :: YREAD
+CHARACTER(LEN=3)  :: YREAD
 !
 INTEGER           :: ISWB     ! number of shortwave bands
 INTEGER           :: JTILE    ! loop counter on tiles
@@ -205,6 +212,8 @@ REAL, DIMENSION(KI)                 :: ZTSUN          ! solar time since midnigh
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_ZENITH   ! zenithal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_AZIM     ! azimuthal angle
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_CO2      ! air CO2 concentration
+REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_IMPWET      ! wet deposit coef
+REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_IMPDRY      ! dry deposit coef
 REAL, DIMENSION(:),     ALLOCATABLE :: ZP_RHOA     ! air density
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_DIR_ALB  ! direct albedo
 REAL, DIMENSION(:,:),   ALLOCATABLE :: ZP_SCA_ALB  ! diffuse albedo
@@ -223,7 +232,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',0,ZHOOK_HANDLE)
 !
 !
- CPROGNAME=HPROGRAM
+CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
    CALL ABOR1_SFX('INIT_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -244,8 +253,9 @@ IF (LNAM_READ) THEN
  !
  !        0.1. Hard defaults
  !      
- CALL DEFAULT_SSO(YSC%USS%CROUGH, YSC%USS%XFRACZ0, YSC%USS%XCOEFBE)
- CALL DEFAULT_CH_SURF_ATM(YSC%CHU%CCHEM_SURF_FILE, YSC%CHU%LCH_SURF_EMIS)
+ CALL DEFAULT_SSO(YSC%USS%CROUGH,YSC%USS%XFRACZ0,YSC%USS%XCOEFBE, &
+                  YSC%USS%LDSV,YSC%USS%LDSH,YSC%USS%LDSL)
+ CALL DEFAULT_CH_SURF_ATM(YSC%CHU%CCHEM_SURF_FILE,YSC%CHU%LCH_SURF_EMIS)
  CALL DEFAULT_DIAG_SURF_ATM(YSC%DUO%N2M, YSC%DUO%LT2MMW, YSC%DUO%LSURF_BUDGET,&
                             YSC%DUO%L2M_MIN_ZS, YSC%DUO%LRAD_BUDGET, YSC%DUO%LCOEF,&
                             YSC%DUO%LSURF_VARS, YSC%DUO%LSURF_BUDGETC, &
@@ -317,7 +327,7 @@ END SELECT
  CALL READ_SURF(HPROGRAM,'DIM_FULL  ',YSC%U%NDIM_FULL,  IRESP)
  CALL END_IO_SURF_n(HPROGRAM)
  CALL INIT_IO_SURF_n(YSC%DTCO, YSC%U, HPROGRAM,'FULL  ','SURF  ','READ ')
-                
+!
 !
  CALL READ_SURF(HPROGRAM,'VERSION',IVERSION,IRESP)
  CALL READ_SURF(HPROGRAM,'BUG',IBUGFIX,IRESP)
@@ -409,18 +419,18 @@ IF (YSC%CHU%LCH_EMIS) THEN
     CALL READ_SURF(HPROGRAM,'CH_EMIS_OPT',YSC%CHU%CCH_EMIS,IRESP)
   END IF
   !
-  IF (YSC%CHU%CCH_EMIS=='AGGR') THEN
+      IF (YSC%CHU%CCH_EMIS=='AGGR') THEN
     CALL CH_INIT_EMISSION_n(YSC%CHE, YSC%CHU%XCONVERSION, YSC%SV%CSV, &
                             HPROGRAM,YSC%U%NSIZE_FULL,HINIT,PRHOA,YSC%CHU%CCHEM_SURF_FILE) 
-  ELSE
+      ELSE
     CALL CH_INIT_SNAP_n(YSC%CHN, YSC%SV%CSV, &
                         HPROGRAM,YSC%U%NSIZE_FULL,HINIT,PRHOA,YSC%CHU%CCHEM_SURF_FILE)
-  END IF
+  ENDIF
   !
-ENDIF
-!
-!*       2.5 Initialization of dry deposition scheme (chemistry)  
-!
+END IF
+    !
+    !*       2.5 Initialization of dry deposition scheme (chemistry)
+    !    
 IF (YSC%SV%NBEQ .GT. 0) THEN
 !
   IF (HINIT=='ALL') CALL CH_INIT_DEPCONST(HPROGRAM,YSC%CHU%CCHEM_SURF_FILE,ILUOUT,YSC%SV%CSV(YSC%SV%NSV_CHSBEG:YSC%SV%NSV_CHSEND))
@@ -545,7 +555,7 @@ IF (YSC%U%NDIM_SEA>0) &
                   HSV,ZP_CO2,ZP_RHOA,                                &
                   ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                   ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                  KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
+                  KYEAR,KMONTH,KDAY,PTIME, AT, HATMFILE,HATMFILETYPE, &
                   'OK'                                               )  
 !
 !
@@ -574,7 +584,7 @@ IF (YSC%U%NDIM_WATER>0) &
                            HSV,ZP_CO2,ZP_RHOA,                                &
                            ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                            ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                           KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
+                           KYEAR,KMONTH,KDAY,PTIME, AT, HATMFILE,HATMFILETYPE, &
                            'OK'                                               )
 !
  CALL UNPACK_SURF_INIT_ARG(JTILE,YSC%U%NSIZE_WATER,YSC%U%NR_WATER)
@@ -603,11 +613,11 @@ IF (YSC%U%NDIM_NATURE>0) &
                      KSV,KSW, HSV,ZP_CO2,ZP_RHOA,                       &
                      ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                      ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                     KYEAR,KMONTH,KDAY,PTIME,TPDATE_END,                &
+                     KYEAR,KMONTH,KDAY,PTIME,TPDATE_END, AT,            &
                      HATMFILE,HATMFILETYPE,'OK'      )
 !
 !
- CALL UNPACK_SURF_INIT_ARG(JTILE,YSC%U%NSIZE_NATURE,YSC%U%NR_NATURE)  
+ CALL UNPACK_SURF_INIT_ARG(JTILE,YSC%U%NSIZE_NATURE,YSC%U%NR_NATURE)
 !
 #ifdef SFX_MPI
 XTIME_INIT_NATURE = XTIME_INIT_NATURE + (MPI_WTIME() - XTIME0)*100./MAX(1,YSC%U%NSIZE_NATURE)
@@ -631,7 +641,7 @@ IF (YSC%U%NDIM_TOWN>0) &
                    HSV,ZP_CO2,ZP_RHOA,                                &
                    ZP_ZENITH,ZP_AZIM,PSW_BANDS,ZP_DIR_ALB,ZP_SCA_ALB, &
                    ZP_EMIS,ZP_TSRAD,ZP_TSURF,                         &
-                   KYEAR,KMONTH,KDAY,PTIME, HATMFILE,HATMFILETYPE,    &
+                   KYEAR,KMONTH,KDAY,PTIME, AT, HATMFILE,HATMFILETYPE, &
                    'OK'                                               )  
 !
 !
@@ -658,7 +668,7 @@ DEALLOCATE(ZFRAC_TILE)
 !-------------------------------------------------------------------------------
 !==============================================================================
 IF (LHOOK) CALL DR_HOOK('INIT_SURF_ATM_N',1,ZHOOK_HANDLE)
- CONTAINS
+CONTAINS
 !==============================================================================
 SUBROUTINE PACK_SURF_INIT_ARG(KSIZE,KMASK)
 !

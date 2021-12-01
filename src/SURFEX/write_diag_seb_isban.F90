@@ -259,11 +259,13 @@ IF (ID%O%LSURF_BUDGET) THEN
       DO JSW=1, SIZE(ID%D%XSWBD,2)
         YNUM=ACHAR(48+JSW)
         !
-        YRECFM='SWD_ISBA_'//YNUM
+        !YRECFM='SWD_ISBA_'//YNUM
+        YRECFM='SWD_ISBA_'
         YCOMMENT='short wave downward radiation over tile nature for spectral band'//YNUM//' (W/m2)'
         CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%D%XSWBD(:,JSW),IRESP,HCOMMENT=YCOMMENT)
         !
-        YRECFM='SWU_ISBA_'//YNUM
+        !YRECFM='SWU_ISBA_'//YNUM
+        YRECFM='SWU_ISBA_'
         YCOMMENT='short wave upward radiation over tile nature for spectral band'//YNUM//' (W/m2)'
         CALL WRITE_SURF(DUO%CSELECT,HPROGRAM,YRECFM,ID%D%XSWBU(:,JSW),IRESP,HCOMMENT=YCOMMENT)
         !

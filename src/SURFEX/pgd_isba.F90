@@ -151,6 +151,7 @@ REAL, DIMENSION(NL)               :: ZHO2IM    ! h/2 i- on all surface points
 REAL, DIMENSION(NL)               :: ZHO2JP    ! h/2 j+ on all surface points
 REAL, DIMENSION(NL)               :: ZHO2JM    ! h/2 j- on all surface points
 REAL, DIMENSION(NL)               :: ZSSO_SLOPE! subgrid slope on all surface points
+REAL, DIMENSION(NL)               :: ZSSO_DIR
 INTEGER                           :: IRESP     ! error code
 LOGICAL                           :: GMEB      ! Multi-energy balance (MEB)
 LOGICAL                           :: GFOUND    ! flag when namelist is present
@@ -277,7 +278,12 @@ IF(GMEB)THEN
   GMEB_PATCH_REC(:)=.FALSE.
 
   GMEB_PATCH_REC(:)=.TRUE.
-  GMEB_PATCH_REC(1:3)=.FALSE.
+  IF(IO%NPATCH==1) THEN
+    GMEB_PATCH_REC(1:3)=.TRUE.
+  ELSE
+    GMEB_PATCH_REC(1:3)=.FALSE.  
+  ENDIF
+
   
 
   IF(IO%NPATCH==1 .AND. GMEB_PATCH(1))THEN
@@ -452,12 +458,12 @@ ALLOCATE(ISS%XZ0EFFJPDIR(ILU))
 !             -------------------------------
 !
  CALL GET_AOS_n(USS, HPROGRAM,NL,ZAOSIP,ZAOSIM,ZAOSJP,ZAOSJM,ZHO2IP,ZHO2IM,ZHO2JP,ZHO2JM)
- CALL GET_SSO_n(USS, HPROGRAM,NL,ZSSO_SLOPE)
+ CALL GET_SSO_n(USS, HPROGRAM,NL,ZSSO_SLOPE, ZSSO_DIR)
 !
  CALL PACK_PGD_ISBA(DTCO, IG%NDIM, ISS, U, HPROGRAM,              &
                      ZAOSIP, ZAOSIM, ZAOSJP, ZAOSJM,              &
                      ZHO2IP, ZHO2IM, ZHO2JP, ZHO2JM,              &
-                     ZSSO_SLOPE                                   )  
+                     ZSSO_SLOPE ,ZSSO_DIR                         )  
 !
 !-------------------------------------------------------------------------------
 !

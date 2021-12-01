@@ -62,63 +62,8 @@
 ! ----------------- BEGIN MODULE mode_gltools_enthalpy -------------------- 
 !
 MODULE mode_gltools_enthalpy
-INTERFACE
 !
-SUBROUTINE glt_aventh(tpsit,tpsil,pentsi,pentsn)
-  USE modd_glt_param
-  USE modd_types_glt
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-    tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-    tpsil
-  REAL, DIMENSION(np), INTENT(out) ::  &
-    pentsi,pentsn
-END SUBROUTINE glt_aventh
-!
-FUNCTION glt_enthalpy0d(pt,ps)
-  REAL, INTENT(in) ::  &
-    pt
-  REAL, INTENT(in) ::  &
-    ps
-  REAL ::  &
-    glt_enthalpy0d
-END FUNCTION glt_enthalpy0d
-!
-FUNCTION glt_enthalpy1d(gmsk,pt,ps)
-  USE modd_glt_param, only: np
-  LOGICAL, DIMENSION(np), INTENT(in) ::  &
-    gmsk
-  REAL, DIMENSION(np), INTENT(in) ::  &
-    pt
-  REAL, DIMENSION(np), INTENT(in) ::  &
-    ps
-  REAL, DIMENSION(np) ::  &
-    glt_enthalpy1d
-END FUNCTION glt_enthalpy1d
-!
-FUNCTION glt_enthalpy2d(pt,ps)
-  USE modd_glt_param, only: np,nt
-  REAL, DIMENSION(nt,np), INTENT(in) ::  &
-    pt
-  REAL, DIMENSION(nt,np), INTENT(in) ::  &
-    ps
-  REAL, DIMENSION(nt,np) ::  &
-    glt_enthalpy2d
-END FUNCTION glt_enthalpy2d
-!
-FUNCTION glt_enthalpy3d(pvtp,pvsp)
-  USE modd_glt_param, only: nl,np,nt, nilay
-  REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-    pvtp
-  REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::  &
-    pvsp
-  REAL, DIMENSION(nl,nt,np) ::  &
-    glt_enthalpy3d
-END FUNCTION glt_enthalpy3d
-!
-END INTERFACE
-END MODULE mode_gltools_enthalpy
-!
+CONTAINS
 ! ------------------ END MODULE mode_gltools_enthalpy ---------------------
 !
 !
@@ -128,10 +73,12 @@ END MODULE mode_gltools_enthalpy
 !  Computes the total gltools_enthalpy (J.m-2) of sea-ice and snow (separately) 
 ! in an ice-snow slab
 !
-SUBROUTINE glt_aventh(tpsit,tpsil,pentsi,pentsn)
+SUBROUTINE glt_aventh(tpsit,tpsil,pentsi,pentsn,nilay,nl,np,nt,sf3tinv)
   USE modd_glt_const_thm
-  USE modd_glt_param
   USE modd_types_glt
+
+  INTEGER, INTENT(IN) :: nl,nt,np
+  REAL,DIMENSION(:), INTENT(IN) :: sf3tinv
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
     tpsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
@@ -172,7 +119,6 @@ END SUBROUTINE glt_aventh
 !
 FUNCTION glt_enthalpy0d(pt,ps)
 !
-  USE modd_glt_param
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
@@ -242,13 +188,13 @@ END FUNCTION glt_enthalpy0d
 !   The input arguments are temperature, in Celsius and salinity (g.kg-1)
 ! spatial fields. Note that both arguments are compulsory.
 !
-FUNCTION glt_enthalpy1d(gmsk,pt,ps)
+FUNCTION glt_enthalpy1d(gmsk,pt,ps,np)
 !
-  USE modd_glt_param, only: np
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(IN) :: np
   LOGICAL, DIMENSION(np), INTENT(in) ::  &
     gmsk
   REAL, DIMENSION(np), INTENT(in) ::  &
@@ -321,13 +267,13 @@ END FUNCTION glt_enthalpy1d
 !   The input arguments are temperature, in Celsius and salinity (g.kg-1)
 ! spatial fields. Note that both arguments are compulsory.
 !
-FUNCTION glt_enthalpy2d(pt,ps)
+FUNCTION glt_enthalpy2d(pt,ps,np,nt)
 !
-  USE modd_glt_param, only: np,nt
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(IN) :: nt, np
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
     pt
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
@@ -382,13 +328,13 @@ END FUNCTION glt_enthalpy2d
 !   The input arguments are sea ice vertical temperature profile, in 
 ! Celsius and, if available, vertical salinity profile (g.kg-1).
 !
-FUNCTION glt_enthalpy3d(pvtp,pvsp)
+FUNCTION glt_enthalpy3d(pvtp,pvsp,nilay,nl,np,nt)
 !
-  USE modd_glt_param, only: nl,np,nt, nilay
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: nl,nt,np,nilay
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
     pvtp
   REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::  &
@@ -448,5 +394,6 @@ FUNCTION glt_enthalpy3d(pvtp,pvsp)
 !
 END FUNCTION glt_enthalpy3d
 !
+END MODULE mode_gltools_enthalpy
 ! ----------------------- END FUNCTION glt_enthalpy3d ----------------------- 
 ! -----------------------------------------------------------------------

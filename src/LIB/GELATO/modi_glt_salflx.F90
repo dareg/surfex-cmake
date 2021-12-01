@@ -116,14 +116,18 @@ END MODULE MODI_glt_salflx
 ! -----------------------------------------------------------------------
 ! -------------------------- SUBROUTINE glt_salflx --------------------------
 !
-SUBROUTINE glt_salflx( pqsalt,tpmxl,tptfl,pdmass,psalt )
+SUBROUTINE glt_salflx( pqsalt,tpmxl,tptfl,       &
+                       ncdlssh,nsalflx,nt,nx,ny, &
+                       dtt,rn_htopoc,            &
+                       pdmass,psalt )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
 !
   IMPLICIT NONE
 !
+  INTEGER, INTENT(IN) :: ncdlssh,nsalflx,nt,nx,ny
+  REAL, INTENT(IN) :: dtt,rn_htopoc
   REAL, DIMENSION(nt,nx,ny), INTENT(in) ::  &
         pqsalt
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &

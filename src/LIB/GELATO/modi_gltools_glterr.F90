@@ -99,11 +99,13 @@ END MODULE MODI_gltools_glterr
 ! -------------------------- SUBROUTINE gltools_glterr --------------------------
 !
 SUBROUTINE gltools_glterr  &
-        ( hroutine,hmess,hflag )
+        ( hroutine,hmess,hflag,noutlu,lwg )
 !
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  LOGICAL, INTENT(in) :: lwg
+  INTEGER, INTENT(in) :: noutlu
+
 !
 !  CHARACTER(400), INTENT(in) ::  &
 !    hroutine

@@ -158,7 +158,6 @@ IF (GDIM) CALL READ_SURF(HPROGRAM,'SPLIT_PATCH',GDIM,IRESP)
 !
 YRECFM='BUG'
  CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
-
 !*       2.     Prognostic fields:
 !               -----------------
 !

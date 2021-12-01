@@ -308,8 +308,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:ERROR_WRITE_SURF_FA:WRITE_SURFX0_FA'
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX0_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 IF (.NOT. LFAGMAP) THEN
@@ -380,8 +379,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN0_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN0_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 IF (.NOT. LFAGMAP) THEN
@@ -453,8 +451,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL0_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL0_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 IF (.NOT. LFAGMAP) THEN
@@ -523,8 +520,8 @@ INTEGER,            INTENT(OUT) :: KRESP     ! KRESP  : return-code if a problem
 !*      0.2   Declarations of local variables
 !
 LOGICAL :: GFOUND
- CHARACTER,DIMENSION(40)  :: YFIELD
- CHARACTER(LEN=18)        :: YNAME ! Field Name
+CHARACTER,DIMENSION(40)  :: YFIELD
+CHARACTER(LEN=18)        :: YNAME ! Field Name
 INTEGER                  :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 INTEGER (KIND=8), ALLOCATABLE :: IWORK8(:)
 INTEGER                  :: J, N
@@ -534,8 +531,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 IF (GFOUND.AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
@@ -566,9 +562,10 @@ ELSE
   ENDDO
   CALL LFIECR (KRESP, NUNIT_FA, TRIM(CPREFIX1D)//HREC, IWORK8, SIZE (IWORK8))
   IF (KRESP/=0) CALL ERROR_WRITE_SURF_FA(HREC,KRESP)
-  IF (HREC=="GRID_TYPE") LMNH_COMPATIBLE = (HFIELD=="CARTESIAN " .OR. HFIELD=="CONF PROJ ")
-  IF (HREC=="GRID_TYPE" .AND. LMNH_COMPATIBLE) LCARTESIAN=(HFIELD=="CARTESIAN ")
 ENDIF
+
+IF (HREC=="GRID_TYPE") LMNH_COMPATIBLE = (HFIELD=="CARTESIAN " .OR. HFIELD=="CONF PROJ ")
+IF (HREC=="GRID_TYPE" .AND. LMNH_COMPATIBLE) LCARTESIAN=(HFIELD=="CARTESIAN ")
 
 !
 IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFC0_FA',1,ZHOOK_HANDLE)
@@ -608,12 +605,12 @@ INCLUDE "mpif.h"
 !
 !
 !
- CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),   INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN) :: KL       ! number of points
 REAL, DIMENSION(KL), INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,             INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
- CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
+CHARACTER(LEN=100),  INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),    INTENT(IN) :: HDIR     ! type of field :
                                             ! 'H' : field with
                                             !       horizontal spatial dim.
                                             ! '-' : no horizontal dim.
@@ -631,8 +628,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX1_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
@@ -722,13 +718,13 @@ INCLUDE "mpif.h"
 !
 !
 !
- CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN) :: KL1      ! number of points
 INTEGER,                  INTENT(IN) :: KL2      ! 2nd dimension
 REAL, DIMENSION(KL1,KL2), INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
- CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
@@ -749,13 +745,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX2_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
- CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
 !
 IF (NRANK==NPIO) THEN
   !
@@ -763,7 +758,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-  IF (.NOT. LFAGMAP) THEN    
+  IF (.NOT. LFAGMAP) THEN
     IF(LFANOCOMPACT)THEN
       CALL FAVEUR(KRESP,NUNIT_FA,INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL)
       ! -- Pour ecrire sans compactage
@@ -847,14 +842,14 @@ INCLUDE "mpif.h"
 !
 !
 !
- CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),        INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                  INTENT(IN) :: KL1      ! number of points
 INTEGER,                  INTENT(IN) :: KL2      ! 2nd dimension
 INTEGER,                  INTENT(IN) :: KL3      ! 2nd dimension
 REAL, DIMENSION(KL1,KL2,KL3), INTENT(IN) :: PFIELD   ! array containing the data field
 INTEGER,                  INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
- CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
+CHARACTER(LEN=100),       INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),         INTENT(IN) :: HDIR     ! type of field :
                                                  ! 'H' : field with
                                                  !       horizontal spatial dim.
                                                  ! '-' : no horizontal dim.
@@ -875,12 +870,12 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX3_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFX3_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
 !
- CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
+CALL GATHER_AND_WRITE_MPI(PFIELD,ZWORK,NMASK)
 !
 IF (NRANK==NPIO) THEN
   !
@@ -983,19 +978,19 @@ INCLUDE "mpif.h"
 !
 !
 !
- CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,                INTENT(IN) :: KL       ! number of points
 INTEGER, DIMENSION(KL), INTENT(IN) :: KFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
- CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 ! 
 LOGICAL :: GFOUND
- CHARACTER(LEN=18)         :: YNAME! Field Nam
+CHARACTER(LEN=18)         :: YNAME! Field Nam
 INTEGER                   :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 INTEGER, DIMENSION(MAX(NFULL,SIZE(KFIELD))) :: IWORK  ! work array read in the file
 INTEGER (KIND=8), ALLOCATABLE :: IWORK8(:)
@@ -1006,8 +1001,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN1_FA',0,ZHOOK_HANDLE)
 !
 KRESP = 0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+ CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFN1_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
@@ -1024,7 +1018,7 @@ IF (NRANK==NPIO) THEN
   XTIME0 = MPI_WTIME()
 #endif
   !
-  IF (.NOT. LFAGMAP) THEN    
+  IF (.NOT. LFAGMAP) THEN
     IF(LFANOCOMPACT)THEN
       CALL FAVEUR(KRESP,NUNIT_FA,INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL)
       ! -- Pour ecrire sans compactage
@@ -1092,19 +1086,19 @@ INCLUDE "mpif.h"
 !
 !
 !
- CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),      INTENT(IN) :: HREC     ! name of the article to be read
 INTEGER,             INTENT(IN) :: KL       ! number of points
 LOGICAL, DIMENSION(KL), INTENT(IN) :: OFIELD   ! array containing the data field
 INTEGER,                INTENT(OUT):: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
- CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
+CHARACTER(LEN=100),     INTENT(IN) :: HCOMMENT ! comment string
+CHARACTER(LEN=1),       INTENT(IN) :: HDIR     ! type of field :
                                                ! 'H' : field with
                                                !       horizontal spatial dim.
                                                ! '-' : no horizontal dim.
 !*      0.2   Declarations of local variables
 !
 LOGICAL :: GFOUND
- CHARACTER(LEN=18):: YNAME ! Field Name
+CHARACTER(LEN=18):: YNAME ! Field Name
 INTEGER          :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
 INTEGER          :: J
 INTEGER (KIND=8), ALLOCATABLE :: IWORK8(:)
@@ -1115,8 +1109,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL1_FA',0,ZHOOK_HANDLE)
 !
 KRESP=0
 !
- CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFL1_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
@@ -1191,18 +1184,18 @@ IMPLICIT NONE
 !
 !
 !
- CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,            INTENT(IN)  :: KYEAR    ! year
 INTEGER,            INTENT(IN)  :: KMONTH   ! month
 INTEGER,            INTENT(IN)  :: KDAY     ! day
 REAL,               INTENT(IN)  :: PTIME    ! time
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
+CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
 LOGICAL :: GFOUND
- CHARACTER(LEN=18)     :: YNAME ! Field Name
+CHARACTER(LEN=18)     :: YNAME ! Field Name
 INTEGER               :: IRET
 INTEGER               :: IHOUR, IMIN, ISEC
 INTEGER               :: INGRIB,INBPDG,INBCSP,ISTRON,IPUILA,IDMOPL
@@ -1223,8 +1216,7 @@ IF (HREC=='DTCUR') THEN
 !
 ELSE
 !
-  CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+  CALL IO_BUFF(HREC,'W',GFOUND)
   IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT0_FA',1,ZHOOK_HANDLE)
   IF (GFOUND) RETURN
 !
@@ -1304,7 +1296,7 @@ INCLUDE "mpif.h"
 !
 !
 !
- CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
+CHARACTER(LEN=12),  INTENT(IN)  :: HREC     ! name of the article to be read
 INTEGER,                      INTENT(IN) :: KL1      ! number of points
 INTEGER,                      INTENT(IN) :: KL2      ! 2nd dimension
 INTEGER, DIMENSION(KL1,KL2), INTENT(IN)  :: KYEAR    ! year
@@ -1312,7 +1304,7 @@ INTEGER, DIMENSION(KL1,KL2), INTENT(IN)  :: KMONTH   ! month
 INTEGER, DIMENSION(KL1,KL2), INTENT(IN)  :: KDAY     ! day
 REAL,    DIMENSION(KL1,KL2), INTENT(IN)  :: PTIME    ! time
 INTEGER,            INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
- CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
+CHARACTER(LEN=100), INTENT(IN)  :: HCOMMENT ! comment string
 
 !*      0.2   Declarations of local variables
 !
@@ -1326,8 +1318,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT2_FA',0,ZHOOK_HANDLE)
 !
 KRESP = 0
 !
-CALL IO_BUFF(&
-                HREC,'W',GFOUND)
+CALL IO_BUFF(HREC,'W',GFOUND)
 !
 IF (GFOUND .AND. LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT2_FA',1,ZHOOK_HANDLE)
 IF (GFOUND) RETURN
@@ -1357,3 +1348,4 @@ IF (LHOOK) CALL DR_HOOK('MODE_WRITE_SURF_FA:WRITE_SURFT2_FA',1,ZHOOK_HANDLE)
 END SUBROUTINE WRITE_SURFT2_FA
 !
 END MODULE MODE_WRITE_SURF_FA
+

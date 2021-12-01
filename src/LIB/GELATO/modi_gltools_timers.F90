@@ -88,12 +88,17 @@ END MODULE MODI_gltools_timers
 ! -----------------------------------------------------------------------
 ! -------------------------- SUBROUTINE gltools_timers --------------------------
 !
-SUBROUTINE gltools_timers( hlabel )
+SUBROUTINE gltools_timers( ntimers,ntimlu,ntimnum,&
+  xtime,clabel,lwg,hlabel)
 !
-  USE modd_glt_param
 !
   IMPLICIT NONE
+  INTEGER,INTENT(IN) :: ntimers,ntimlu
+  LOGICAL,INTENT(IN) :: lwg
+  REAL,INTENT(INOUT) :: xtime
+  INTEGER,INTENT(INOUT) ::  ntimnum
 !
+  CHARACTER(LEN=*),  INTENT(inout) ::  clabel
   CHARACTER(LEN=*), OPTIONAL, INTENT(in) ::  &
     hlabel 
 !

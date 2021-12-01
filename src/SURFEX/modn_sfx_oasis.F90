@@ -34,9 +34,10 @@ MODULE MODN_SFX_OASIS
 IMPLICIT NONE
 !
 !
-REAL             :: XTSTEP_CPL_LAND = -1.0  ! Coupling time step for land
-REAL             :: XTSTEP_CPL_SEA  = -1.0  ! Coupling time step for sea
-REAL             :: XTSTEP_CPL_LAKE = -1.0  ! Coupling time step for lake
+REAL             :: XTSTEP_CPL_LAND      = -1.0  ! Coupling time step for land
+REAL             :: XTSTEP_CPL_SEA       = -1.0  ! Coupling time step for sea
+REAL             :: XTSTEP_CPL_SEA_RECV  = -1.0  ! Coupling time step for sea
+REAL             :: XTSTEP_CPL_LAKE      = -1.0  ! Coupling time step for lake
 !
 !-------------------------------------------------------------------------------
 !
@@ -91,6 +92,7 @@ CHARACTER(LEN=8) :: CSEA_EVAP = '        '   ! Evaporation
 CHARACTER(LEN=8) :: CSEA_RAIN = '        '   ! Rainfall 
 CHARACTER(LEN=8) :: CSEA_SNOW = '        '   ! Snowfall 
 CHARACTER(LEN=8) :: CSEA_WATF = '        '   ! Net freshwater flux
+CHARACTER(LEN=8) :: CSEA_PRES = '        '   ! Surface pressure
 !
 ! Sea-ice Output variables
 !  
@@ -133,10 +135,10 @@ NAMELIST/NAM_SFX_LAKE_CPL/XTSTEP_CPL_LAKE,                              &
 !*       3.    NAMELISTS FOR OCEANIC FIELD
 !              ---------------------------------------------------------------
 !
-NAMELIST/NAM_SFX_SEA_CPL/XTSTEP_CPL_SEA, LWATER,                               &
+NAMELIST/NAM_SFX_SEA_CPL/XTSTEP_CPL_SEA, XTSTEP_CPL_SEA_RECV, LWATER,          &
                           CSEA_FWSU,CSEA_FWSV,CSEA_HEAT,CSEA_SNET,CSEA_WIND,   &
                           CSEA_FWSM,CSEA_EVAP,CSEA_RAIN,CSEA_SNOW,CSEA_WATF,   &
-                          CSEAICE_HEAT,CSEAICE_SNET,CSEAICE_EVAP,              &
+                          CSEA_PRES,CSEAICE_HEAT,CSEAICE_SNET,CSEAICE_EVAP,    &
                           CSEA_SST,CSEA_UCU,CSEA_VCU,                          &
                           CSEAICE_SIT,CSEAICE_CVR,CSEAICE_ALB
 !

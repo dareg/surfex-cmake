@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     ##################
       MODULE MODD_ASSIM
 !     ##################
@@ -68,8 +64,8 @@ IMPLICIT NONE
  LOGICAL                               :: LOBSNAT
  LOGICAL                               :: LRELCLIMSNOW         ! Relaxation to climatological snow 
 
- INTEGER, PARAMETER                    :: NOBSMAX = 5          ! Maximum number of observations
- INTEGER, PARAMETER                    :: NVARMAX = 9          ! Maximum number of control variables
+ INTEGER, PARAMETER                    :: NOBSMAX = 5
+ INTEGER, PARAMETER                    :: NVARMAX = 5
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE
@@ -152,7 +148,7 @@ LOGICAL :: LBIAS_CORRECTION
  LOGICAL ::  LHUMID,  LIMVEG, LISSEW,   L_SM_WP, LFGEL,      LCLIM,   LLDHMT,  &
              LOBSWG,  LOBS2M 
  INTEGER ::  NMINDJ,   NNEBUL, NNEIGT,   NNEIGW,  NR_SM_WP,  NECHGU,  NTVGLA,  &
-             NSEAICE, NLISSEW, NIDJ,    NITRAD 
+             NSEAICE, NLISSEW, NIDJ,    NITRAD,   NECHGXFU 
  REAL    ::  XANEBUL,  XRCLIMN, XRCLIMTP,  XRCLIMTS, XRCLIMV, XRCLIMWP, XRCLIMWS, &
              XSCOEFH,  XSCOEFT, XSEVAP,    XSIGH2MO, XSIGT2MO,    XSNEIGT,  XSNEIGW,  &
              XSPRECIP, XSWFC,   XV10MX,    XRD1,     XRTINER,     XWCRIN,   XWPMX,    &

@@ -1,3 +1,4 @@
+!
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -9,7 +10,7 @@ PROGRAM OFFLINE
 ! Driver structure
 ! ----------------
 ! 1. Initializations
-! 2. Temporal loo1s
+! 2. Temporal loops
 !   2.a Read forcing
 !   2.b Interpolate forcing in time
 !   2.c Run surface
@@ -59,6 +60,10 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XPA         ,&! pressure at forcing level             (Pa)
                             XRHOA       ,&! density at forcing level              (kg/m3)
                             XCO2        ,&! CO2 concentration in the air          (kg/m3)
+                            XIMPWET     ,&! wet deposit coef for each type of impurity (g)
+                            XIMPDRY     ,&! dry deposit coef for each type of impurity (g/j)
+                            XO3         ,&! Ozone
+                            XAE         ,&! Aerosol optical depth
                             XSNOW       ,&! snow precipitation                    (kg/m2/s)
                             XRAIN       ,&! liquid precipitation                  (kg/m2/s)
                             XSFTH       ,&! flux of heat                          (W/m2)
@@ -78,8 +83,10 @@ USE MODD_FORC_ATM,  ONLY: CSV         ,&! name of all scalar variables
                             XZ0H        ,&! surface roughness length for heat      (m)
                             XQSURF        ! specific humidity at surface           (kg/kg)
 !
+!
 USE MODD_SURF_CONF,  ONLY : CPROGNAME, CSOFTWARE
 USE MODD_CSTS,       ONLY : XPI, XDAY, XRV, XRD, XG
+USE MODD_SYTRON_PAR, ONLY : NTAB_SYT
 USE MODD_IO_SURF_ASC,ONLY : CFILEIN,CFILEIN_SAVE,CFILEOUT,CFILEPGD
 USE MODD_SURF_PAR
 USE MODD_IO_SURF_FA, ONLY : CFILEIN_FA, CFILEIN_FA_SAVE,       &
@@ -115,6 +122,8 @@ USE MODD_SLOPE_EFFECT, ONLY: XZS_THREAD,XZS_XY_THREAD,XSLOPANG_THREAD,&
 USE MODD_SFX_OASIS, ONLY : LOASIS, XRUNTIME
 !
 USE MODD_XIOS, ONLY : LXIOS, TXIOS_CONTEXT, LXIOS_DEF_CLOSED, LADD_DIM=>LALLOW_ADD_DIM, NTIMESTEP
+!
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODE_POS_SURF
 !
@@ -182,6 +191,13 @@ USE MODI_SFX_XIOS_SETUP_OL
 !
 USE MODE_GLT_DIA_LU
 !
+USE MODI_INIT_SYTRON_TABLE
+!
+! spectral repartition of irradiance
+USE MODD_CONST_ATM, ONLY : JPNBANDS_ATM, JPNLYR_CLEAR, PPZP_CUT, PPHUND, PPMU_THRESHOLD
+USE MODE_ATMO_TARTES, ONLY : IRRADIANCE, TAU_CLOUD
+USE MODI_JULIAN
+USE MODD_SNOW_METAMO,  ONLY : XUEPSI
 #ifdef SFX_MPI
 #ifdef SFX_MPL
 USE MPL_DATA_MODULE, ONLY : LMPLUSERCOMM, MPLUSERCOMM
@@ -264,6 +280,10 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZSNOW               ! snow precipitation   
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZRAIN               ! liquid precipitation                  (kg/m2/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZPS                 ! pressure at forcing level             (Pa)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZCO2                ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZO3                 ! Ozone
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZAE                 ! Aerosol optical depth
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPWET           ! wet deposit coefficient for each impurity type (kg/m²/s)
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZIMPDRY           ! dry deposit coefficient for each impurity type (kg/m²/s)
 REAL, DIMENSION(:,:), ALLOCATABLE :: ZDIR                ! wind direction
 INTEGER                           :: ILUOUT              ! ascii output unit number
 INTEGER                           :: ILUNAM              ! namelist unit number
@@ -302,9 +322,11 @@ INTEGER :: ISERIES, ISIZE
 !
 ! MPI variables
 !
- CHARACTER(LEN=100) :: YNAME
- CHARACTER(LEN=10)  :: YRANK
-INTEGER :: ILEVEL, INFOMPI, J
+CHARACTER(LEN=100) :: YNAME
+CHARACTER(LEN=10)  :: YRANK
+INTEGER :: ILEVEL, INFOMPI, J, INKPROMA, JBLOCK,JIMP
+INTEGER, DIMENSION(:), ALLOCATABLE :: ISIZE_OMP
+!DOUBLE PRECISION :: XTIME0, XTIME1, XTIME
 REAL :: XTIME0, XTIME1, XTIME
 !
 ! SFX - OASIS coupling variables
@@ -312,8 +334,21 @@ REAL :: XTIME0, XTIME1, XTIME
 LOGICAL :: GSAVHOOK
 INTEGER :: IBLOCKTOT, IBLOCK
 !
+TYPE(SURF_ATM_TURB_t) :: AT         ! atmospheric turbulence parameters
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
+!!!!!!!!!!!!!!!!!!!!! For spectral repartion of direct/diffuse solar irradiance 
+REAL, DIMENSION(:), ALLOCATABLE :: ZP_CLOUD, ZTCLOUD55, ZMU, ZD_O3,ZD_AE
+INTEGER, DIMENSION(:), ALLOCATABLE :: KCLOUD_TYPE
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZIRR_DIFF, ZIRR_DIR
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZP_CUT
+REAL, DIMENSION(:), ALLOCATABLE ::  ZINT_SCA_SW, ZINT_DIR_SW, ZINT_TOT_SW
+REAL :: ZDATI
+INTEGER :: JI
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! --------------------------------------------------------------------------------------
 !
 !*     0.1.   MPI, OASIS, XIOS and dr_hook initializations
@@ -592,6 +627,13 @@ ENDIF
 !       allocation of variables
 !
 IBANDS = 1
+! special case for snowcro tartes!!!!!!
+
+IF (CSPECSNOW) THEN 
+  IBANDS=JPNBANDS_ATM
+ENDIF 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
  CALL OL_ALLOC_ATM(INI,IBANDS,NSCAL)
 !
@@ -627,7 +669,13 @@ NB_READ_FORC=CEILING(1.*(INB_STEP_ATM+1)/INB_LINES)
 !     Gelato wizzard user)
 !
 #if ! defined in_arpege
- CALL OPNDIA()
+ !BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
+ CALL OPNDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
+             YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
+             YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
+             YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
+             YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
+             YSC%SM%S%GLTPARAM%cdiafmt)
 #endif
 !
 !       allocate local atmospheric variables
@@ -642,12 +690,20 @@ IF (.NOT.ALLOCATED(ZSNOW))  ALLOCATE(ZSNOW  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZRAIN))  ALLOCATE(ZRAIN  (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZPS))    ALLOCATE(ZPS    (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZCO2))   ALLOCATE(ZCO2   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZO3))ALLOCATE(ZO3   (INI,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZAE))ALLOCATE(ZAE   (INI,INB_LINES+1)) 
+IF (.NOT.ALLOCATED(ZIMPWET))ALLOCATE(ZIMPWET   (INI,NIMPUROF,INB_LINES+1))
+IF (.NOT.ALLOCATED(ZIMPDRY))ALLOCATE(ZIMPDRY   (INI,NIMPUROF,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZDIR))   ALLOCATE(ZDIR   (INI,INB_LINES+1))
 IF (.NOT.ALLOCATED(ZCOEF))  ALLOCATE(ZCOEF     (INI))
 IF (.NOT.ALLOCATED(ZSUMZEN))ALLOCATE(ZSUMZEN   (INI))
 !
 IF (.NOT.ALLOCATED(ZSW))ALLOCATE(ZSW    (INI))
 !
+ZIMPWET   (:,:,:)=XUNDEF
+ZIMPDRY   (:,:,:)=XUNDEF
+ZO3        (:,:) =XUNDEF
+ZAE        (:,:) =XUNDEF
 !      computes initial air co2 concentration and  density
 !
 #ifdef SFX_MPI
@@ -665,7 +721,7 @@ IF (CFORCING_FILETYPE=='ASCII ' .OR. CFORCING_FILETYPE=='BINARY') &
 !
  CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX,&
                   ZTA,ZQA,ZWIND,ZDIR_SW,ZSCA_SW,ZLW,ZSNOW,ZRAIN,ZPS,&
-                  ZCO2,ZDIR,LLIMIT_QAIR                           ) 
+                  ZCO2,ZIMPWET,ZIMPDRY,ZO3,ZAE,ZDIR,LLIMIT_QAIR     ) 
 !
  CALL WLOG_MPI(' ')
  CALL WLOG_MPI('TIME_NPIO_READ forc ',PLOG=XTIME_NPIO_READ)
@@ -685,6 +741,17 @@ XTIME0 = MPI_WTIME()
 !
 XCO2(:)  = ZCO2(:,1)
 XRHOA (:) = ZPS(:,1) / (XRD * ZTA(:,1) * ( 1.+((XRV/XRD)-1.)*ZQA(:,1) ) + XG * XZREF )
+!Set the value of impur deposit coef
+IF (LFORCATMOTARTES) THEN  
+  XO3(:)  = ZO3(:,1)
+  XAE(:)  = ZAE(:,1)
+ENDIF
+IF (LFORCIMP) THEN  
+  DO JIMP=1,NIMPUROF    
+    XIMPWET(:,JIMP)=ZIMPWET(:,JIMP,1)
+    XIMPDRY(:,JIMP)=ZIMPDRY(:,JIMP,1)
+  ENDDO 
+ENDIF
 !                 
 !       surface Initialisation     
 !
@@ -705,10 +772,11 @@ XTIME0 = MPI_WTIME()
 CALL GOTO_MODEL(1)
 !
  CALL INIT_SURF_ATM_n(YSC, CSURF_FILETYPE, YINIT, LLAND_USE, INI, NSCAL, IBANDS,  &
-                      CSV,XCO2(:),XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,  &
+                      CSV,XCO2(:),XIMPWET(:,:),XIMPDRY(:,:),                 &
+                      XRHOA(:),  XZENITH(:),XAZIM(:),XSW_BANDS,              &
                       XDIR_ALB(:,:), XSCA_ALB(:,:), XEMIS(:), XTSRAD(:),     &
-                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,      &
-                      YATMFILE, YATMFILETYPE, YTEST                          )
+                      XTSURF(:), IYEAR, IMONTH, IDAY, ZTIME, TDATE_END,AT,   &
+                     YATMFILE, YATMFILETYPE, YTEST                          )
 !
 ! initialization routines to compute shadows
 IF (GSHADOWS) THEN
@@ -718,6 +786,16 @@ IF (GSHADOWS) THEN
   CALL LOCAL_SLOPE_PARAM(1,INI)
 END IF
 !
+! initialization routines to define sytron grid
+IF (NBLOCK==0) THEN
+  IF(YSC%IM%O%LSNOWSYTRON) THEN
+    CALL INIT_SYTRON_TABLE(YSC%USS,ZZS_FORC,INI,ZLAT,ZLON)
+  ELSE
+    ALLOCATE(NTAB_SYT(INI))
+    NTAB_SYT(:)=-999
+  ENDIF
+ENDIF
+
 #ifdef SFX_MPI
 XTIME = (MPI_WTIME() - XTIME0)
 #endif
@@ -794,23 +872,35 @@ DO JFORC_STEP=1,INB_STEP_ATM
     IF (JFORC_STEP/INB_LINES==NB_READ_FORC-1) THEN 
       IDMAX=INB_STEP_ATM-JFORC_STEP+1+1
       !for ascii and binary forcing files
-      ZTA    (:,IDMAX) = ZTA   (:,SIZE(ZTA,2))
-      ZQA    (:,IDMAX) = ZQA    (:,SIZE(ZTA,2))
-      ZWIND  (:,IDMAX) = ZWIND  (:,SIZE(ZTA,2))
-      ZDIR_SW(:,IDMAX) = ZDIR_SW(:,SIZE(ZTA,2))
-      ZSCA_SW(:,IDMAX) = ZSCA_SW(:,SIZE(ZTA,2))
-      ZLW    (:,IDMAX) = ZLW    (:,SIZE(ZTA,2))
-      ZSNOW  (:,IDMAX) = ZSNOW  (:,SIZE(ZTA,2))
-      ZRAIN  (:,IDMAX) = ZRAIN  (:,SIZE(ZTA,2))
-      ZPS    (:,IDMAX) = ZPS    (:,SIZE(ZTA,2))
-      ZCO2   (:,IDMAX) = ZCO2   (:,SIZE(ZTA,2))
-      ZDIR   (:,IDMAX) = ZDIR   (:,SIZE(ZTA,2))
+      ZTA(:,IDMAX)=ZTA(:,SIZE(ZTA,2))
+      ZQA(:,IDMAX)=ZQA(:,SIZE(ZTA,2))
+      ZWIND(:,IDMAX)=ZWIND(:,SIZE(ZTA,2))
+      ZDIR_SW(:,IDMAX)=ZDIR_SW(:,SIZE(ZTA,2))
+      ZSCA_SW(:,IDMAX)=ZSCA_SW(:,SIZE(ZTA,2))
+      ZLW(:,IDMAX)=ZLW(:,SIZE(ZTA,2))
+      ZSNOW(:,IDMAX)=ZSNOW(:,SIZE(ZTA,2))
+      ZRAIN(:,IDMAX)=ZRAIN(:,SIZE(ZTA,2))
+      ZPS(:,IDMAX)=ZPS(:,SIZE(ZTA,2))
+      ZCO2(:,IDMAX)=ZCO2(:,SIZE(ZTA,2))
+      ZDIR(:,IDMAX)=ZDIR(:,SIZE(ZTA,2))
+      IF (LFORCATMOTARTES) THEN  
+        ZO3(:,IDMAX)=ZO3(:,SIZE(ZTA,2))
+        ZAE(:,IDMAX)=ZAE(:,SIZE(ZTA,2))
+      ENDIF
+      IF (LFORCIMP) THEN
+        DO JIMP=1,NIMPUROF
+          ZIMPWET(:,JIMP,IDMAX)=ZIMPWET(:,JIMP,SIZE(ZTA,2))
+          ZIMPDRY(:,JIMP,IDMAX)=ZIMPDRY(:,JIMP,SIZE(ZTA,2))
+        ENDDO 
+      ENDIF
     ENDIF
     CALL OL_READ_ATM(CSURF_FILETYPE, CFORCING_FILETYPE, ITIMESTARTINDEX+JFORC_STEP-1, &
-                     ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX),       &
-                     ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX), &
-                     ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),     &
-                     ZCO2(:,1:IDMAX),ZDIR(:,1:IDMAX),LLIMIT_QAIR         )
+                     ZTA(:,1:IDMAX),ZQA(:,1:IDMAX),ZWIND(:,1:IDMAX),        &
+                     ZDIR_SW(:,1:IDMAX),ZSCA_SW(:,1:IDMAX),ZLW(:,1:IDMAX),  &
+                     ZSNOW(:,1:IDMAX),ZRAIN(:,1:IDMAX),ZPS(:,1:IDMAX),      &
+                     ZCO2(:,1:IDMAX),ZIMPWET(:,:,1:IDMAX),                  &
+                     ZIMPDRY(:,:,1:IDMAX),ZO3(:,1:IDMAX),ZAE(:,1:IDMAX),    &
+                     ZDIR(:,1:IDMAX),LLIMIT_QAIR )
   ENDIF
 
 #ifdef SFX_MPI
@@ -867,6 +957,9 @@ DO JFORC_STEP=1,INB_STEP_ATM
                             ZPS(:,ID_FORC),ZPS(:,ID_FORC+1),         &
                             ZCO2(:,ID_FORC),ZCO2(:,ID_FORC+1),       &
                             ZDIR(:,ID_FORC),ZDIR(:,ID_FORC+1),       &
+                            ZO3(:,ID_FORC),ZO3(:,ID_FORC+1),         &
+                            ZAE(:,ID_FORC),ZAE(:,ID_FORC+1),         &
+                            ZIMPWET(:,:,ID_FORC+1), ZIMPDRY(:,:,ID_FORC+1), &
                             XZENITH+0.1,ZSUMZEN                      )
 #ifdef SFX_MPI
     XTIME_CALC(3) = XTIME_CALC(3) + (MPI_WTIME() - XTIME1)
@@ -919,7 +1012,8 @@ DO JFORC_STEP=1,INB_STEP_ATM
     !
     IF(LOASIS)THEN
      ! Receive fields to other models proc by proc
-     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W,               &
+     CALL SFX_OASIS_RECV_OL(YSC%FM%F, YSC%IM, YSC%SM%S, YSC%U, YSC%WM%W, &
+                            YSC%TM , YSC%GDM , YSC%GRM, &
                             CSURF_FILETYPE, INI, IBANDS, ZTIMEC, XTSTEP_SURF, XZENITH, &
                             XSW_BANDS, XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF   )
     ENDIF
@@ -928,19 +1022,132 @@ DO JFORC_STEP=1,INB_STEP_ATM
     XTIME1 = MPI_WTIME()
 #endif
     !
+! IF SNOWCRORAD=TARTES then spectral repartition of direct and diffuse radiation
+    ! for any spectral calculation regarding snow (tartes and/or atmotartes)
+    IF (CSPECSNOW) THEN
+      XSCA_SW(:,2:IBANDS)=0.
+      XDIR_SW(:,2:IBANDS)=0.   
+    ENDIF
+!	write(*,*) IMONTH, IDAY, ZTIME/(3600.)
+  IF (YSC%IM%O%LATMORAD) THEN
+    !
+    IF (.NOT.ALLOCATED(ZP_CLOUD)) ALLOCATE(ZP_CLOUD  (INI)       )! 
+    IF (.NOT.ALLOCATED(ZTCLOUD55)) ALLOCATE(ZTCLOUD55  (INI)       )! 
+    IF (.NOT.ALLOCATED(KCLOUD_TYPE)) ALLOCATE(KCLOUD_TYPE  (INI)       )! 
+    IF (.NOT.ALLOCATED(ZIRR_DIFF)) ALLOCATE(ZIRR_DIFF  (INI, IBANDS)       )! 
+    IF (.NOT.ALLOCATED(ZIRR_DIR)) ALLOCATE(ZIRR_DIR  (INI,IBANDS)       )! 
+    IF (.NOT.ALLOCATED(ZP_CUT)) ALLOCATE(ZP_CUT  (INI, JPNLYR_CLEAR)       )! 
+    IF (.NOT.ALLOCATED(ZINT_DIR_SW)) ALLOCATE(ZINT_DIR_SW  (INI)       )! 
+    IF (.NOT.ALLOCATED(ZINT_SCA_SW)) ALLOCATE(ZINT_SCA_SW  (INI)       )! 
+    IF (.NOT.ALLOCATED(ZMU)) ALLOCATE(ZMU (INI)       )!
+    IF (.NOT.ALLOCATED(ZINT_TOT_SW)) ALLOCATE(ZINT_TOT_SW  (INI)       )! 
+    IF (.NOT.ALLOCATED(ZD_O3)) ALLOCATE(ZD_O3  (INI)       )!
+    IF (.NOT.ALLOCATED(ZD_AE)) ALLOCATE(ZD_AE  (INI)       )!
+    !  
+    ! broadband direct and diffuse irradiance
+  
+    ZINT_SCA_SW(:)=XSCA_SW(:,1)
+    ZINT_DIR_SW(:)=XDIR_SW(:,1)
+    ZINT_TOT_SW(:)=ZINT_DIR_SW(:)+ZINT_SCA_SW(:)
+    XSCA_SW(:,2:IBANDS)=0.
+    XDIR_SW(:,2:IBANDS)=0.
+    IF (LFORCATMOTARTES) THEN 
+      ZD_O3(:)= XO3(:)/100 ! integrated ozone (atm-cm)
+      ZD_AE(:)= XAE(:) ! aerosol optical depth
+    ELSE 
+      ZD_O3(:)= 0.3 ! integrated ozone (atm-cm)
+      ZD_AE(:)= 0.1 ! aerosol optical depth
+    ENDIF
+    ZMU(:)=COS(XZENITH(:))
+    ZP_CLOUD(:)= 378.*100.! cloud bottom pressure (Pa)
+    KCLOUD_TYPE(:)= 1! cloud type
+
+    IF (MAXVAL(ZINT_TOT_SW(:))>XUEPSI) THEN
+    !IF (MINVAL(XZENITH(:))>0.) THEN
+      IF (MINVAL(ZMU(:))>XUEPSI) THEN
+       
+        ! prevent calculation during night
+        ! Julian date       
+        CALL JULIAN(IYEAR, IMONTH, IDAY, 0., ZDATI)
+      
+        IF (MAXVAL(ZINT_TOT_SW(:)-ZINT_DIR_SW(:)).GT.XUEPSI) THEN
+          ! case where diffuse and direct radiation are known 
+          ! calculation of cloud optical depth
+          CALL TAU_CLOUD(ZMU(:),ZINT_SCA_SW(:)/ZINT_TOT_SW(:),&
+                        ZTCLOUD55(:))
+          ! WRITE(*,*) ZTCLOUD55(:),XZENITH(:),IYEAR, IMONTH, IDAY, ZTIME
+          CALL IRRADIANCE(ZDATI,ZMU(:),XQA(:)/XRHOA(:),&
+                          ZD_O3(:),ZD_AE(:),&
+                          XPS(:),XTA(:),PPZP_CUT,ZP_CLOUD(:),&
+                          KCLOUD_TYPE(:),ZTCLOUD55(:),ZIRR_DIR(:,:),&
+                          ZIRR_DIFF(:,:))
+          !      
+          ! normalisation by broadband direct and diffuse irradiance  
+          !      
+          DO JI=1, INI
+            IF (SUM(ZIRR_DIFF(JI,:))>0.) THEN
+            XSCA_SW(JI,:)=ZINT_SCA_SW(JI)*ZIRR_DIFF(JI,:)/SUM(ZIRR_DIFF(JI,:))
+            ! XSCA_SW(JI,:)=0.
+            END IF 
+            IF (SUM(ZIRR_DIR(JI,:))>0.) THEN
+            XDIR_SW(JI,:)=ZINT_DIR_SW(JI)*ZIRR_DIR(JI,:)/SUM(ZIRR_DIR(JI,:))
+            ! XDIR_SW(JI,:)=(ZINT_DIR_SW(JI)+ZINT_DIR_SW(JI))*ZIRR_DIR(JI,:)/SUM(ZIRR_DIR(JI,:))
+            END IF
+          ENDDO
+          !write(*,*) IMONTH, IDAY, ZTIME/(3600.),ZMU(:), XZENITH(:), XDIR_SW(:,1)
+          !write(*,*) XSCA_SW(:,1), ZINT_SCA_SW(:), ZINT_DIR_SW(:)
+
+
+
+        ELSE ! case where only total radiation is know
+          ZTCLOUD55(:)= 0. ! cloud optical depth
+          CALL IRRADIANCE(ZDATI,ZMU(:),XQA(:)/XRHOA(:),&
+                          ZD_O3(:),ZD_AE(:),&
+                          XPS(:),XTA(:),PPZP_CUT,ZP_CLOUD(:),&
+                          KCLOUD_TYPE(:),ZTCLOUD55(:),ZIRR_DIR(:,:),&
+                          ZIRR_DIFF(:,:))
+          ! normalisation by broadband total irradiance  
+
+          DO JI=1, INI
+            IF (SUM(ZIRR_DIFF(JI,:)+ZIRR_DIR(JI,:))>0.) THEN
+              XSCA_SW(JI,:)=ZINT_TOT_SW(JI)*ZIRR_DIFF(JI,:)/&
+              SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))
+            END IF 
+            IF (SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))>0.) THEN
+              XDIR_SW(JI,:)=ZINT_TOT_SW(JI)*ZIRR_DIR(JI,:)/&
+              SUM(ZIRR_DIR(JI,:)+ZIRR_DIR(JI,:))
+            END IF
+          ENDDO
+
+        ENDIF ! end of clear cloud/case 
+        !!! add 89° threshold for mu to prevent from atmotartes divergence 
+        IF (MAXVAL(ZMU(:))<PPMU_THRESHOLD) THEN
+          ZINT_SCA_SW(:)=SUM(XSCA_SW(:,:))
+          XSCA_SW(:,:)=0.
+          XSCA_SW(:,8)=ZINT_SCA_SW(:)
+        ENDIF
+      ENDIF
+    ENDIF
+  ENDIF
+    !
     IF(GSHADOWS) THEN 
       CALL SLOPE_RADIATIVE_EFFECT(XTSTEP_SURF, XZENITH, XAZIM, XPS, XTA, XRAIN, XDIR_SW, XLW, &
                                   XZS_THREAD, XZS_XY_THREAD, XSLOPANG_THREAD, XSLOPAZI_THREAD,&
                                   XSURF_TRIANGLE_THREAD)
     END IF
     !
-    CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, IYEAR, IMONTH, IDAY, ZTIME, &
-                             INI, NSCAL, IBANDS, XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,         &
-                             XZS, XU, XV, XQA, XTA, XRHOA, XSV, XCO2, CSV, XRAIN, XSNOW, XLW, XDIR_SW,  &
-                             XSCA_SW, XSW_BANDS, XPS, XPA, XSFTQ, XSFTH, XSFTS, XSFCO2, XSFU, XSFV,     &
-                             XTSRAD, XDIR_ALB, XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF, XPEW_A_COEF, &
-                             XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,XPET_B_COEF,XPEQ_B_COEF, YTEST      )
+    CALL COUPLING_SURF_ATM_n(YSC, CSURF_FILETYPE, 'E', ZTIMEC, XTSTEP_SURF, &
+                            IYEAR, IMONTH, IDAY, ZTIME, INI, NSCAL, IBANDS, &
+                            XTSUN, XZENITH, XZENITH2, XAZIM, XZREF, XUREF,  &
+                            XZS ,XU, XV,XQA,XTA, XRHOA,XSV,XCO2,XIMPWET,    &
+                            XIMPDRY, CSV, XRAIN, XSNOW, XLW, XDIR_SW,       &
+                            XSCA_SW, XSW_BANDS, XPS, XPA, XSFTQ, XSFTH,     &
+                            XSFTS, XSFCO2, XSFU, XSFV, XTSRAD, XDIR_ALB,    &
+                            XSCA_ALB, XEMIS, XTSURF, XZ0, XZ0H, XQSURF,     &
+                            XPEW_A_COEF, XPEW_B_COEF,XPET_A_COEF,XPEQ_A_COEF,&
+                            XPET_B_COEF,XPEQ_B_COEF, YTEST      )
     !
+
 #ifdef SFX_MPI
     XTIME_CALC(5) = XTIME_CALC(5) + (MPI_WTIME() - XTIME1)
 #endif
@@ -1472,6 +1679,7 @@ IF ( LINQUIRE ) THEN
   DEALLOCATE( ZPSNV      )
   DEALLOCATE( ZZ0EFF     )
   DEALLOCATE( ZZS        )
+  DEALLOCATE(NTAB_SYT)
   !
   IF (NRANK==NPIO) THEN
     DEALLOCATE(ZSEA_FULL   )
@@ -1489,7 +1697,13 @@ ENDIF
 !
 !    4'    Close Gelato specific diagnostic 
 #if ! defined in_arpege
- CALL CLSDIA()
+!BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
+CALL CLSDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
+            YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
+            YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
+            YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
+            YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
+            YSC%SM%S%GLTPARAM%cdiafmt)
 #endif
 !
 !

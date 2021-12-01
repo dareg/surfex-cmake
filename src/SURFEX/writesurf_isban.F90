@@ -238,7 +238,7 @@ ENDIF
 DO JP = 1,IO%NPATCH
   CALL WRITESURF_GR_SNOW(OSNOWDIMNC, HSELECT, HPROGRAM, 'VEG', '     ', KI, &
            NP%AL(JP)%NR_P, JP, NPE%AL(JP)%TSNOW, S%XWSN_WR, S%XRHO_WR, &
-           S%XHEA_WR, S%XAGE_WR, S%XSG1_WR, S%XSG2_WR, S%XHIS_WR, S%XALB_WR)
+           S%XHEA_WR, S%XAGE_WR, S%XSG1_WR, S%XSG2_WR, S%XHIS_WR, S%XALB_WR, S%XIMP_WR)
 ENDDO
 !
 !* key and/or field usefull to make an external prep

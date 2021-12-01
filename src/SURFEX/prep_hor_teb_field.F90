@@ -29,6 +29,8 @@ SUBROUTINE PREP_HOR_TEB_FIELD (B, BOP, DTCO, U, GCP, G, T, TOP, &
 !!      Original    01/2004
 !!      P. Le Moigne 10/2005, Phasage Arome
 !!      P. Marguinaud10/2014, Support for a 2-part PREP
+!!    M. Dumont, 11/2016, snow impurity
+!!    F.tuzet New Dimension of snow impurities
 !!------------------------------------------------------------------
 !
 USE MODD_BEM_n, ONLY : BEM_t
@@ -54,7 +56,7 @@ USE MODD_CSTS, ONLY: XG, XP00
 USE MODD_SURF_PAR, ONLY: XUNDEF
 !
 USE MODE_PREP_CTL, ONLY : PREP_CTL, PREP_CTL_INT_PART2, PREP_CTL_INT_PART4
-!
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 USE MODE_THERMOS
 !
 USE MODI_PREP_GRIB_GRID
@@ -110,6 +112,7 @@ TYPE(NSURF_SNOW) :: TNPSNOW
  CHARACTER(LEN=6)              :: YFILEPGDTYPE ! type of input file
  CHARACTER(LEN=28)             :: YFILEPGD     ! name of file
 REAL, DIMENSION(:), ALLOCATABLE :: ZSG1SNOW, ZSG2SNOW, ZHISTSNOW, ZAGESNOW
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZIMPURSNOW
 REAL, POINTER, DIMENSION(:,:) :: ZFIELDIN  ! field to interpolate horizontally
 REAL, POINTER, DIMENSION(:,:) :: ZFIELDOUT ! field interpolated   horizontally
 REAL, ALLOCATABLE, DIMENSION(:) :: ZPS !surface pressure
@@ -118,7 +121,7 @@ INTEGER                       :: ILUOUT    ! output listing logical unit
 INTEGER :: INFOMPI, INL
 !
 TYPE (DATE_TIME)                :: TZTIME_GRIB    ! current date and time
-LOGICAL             :: GUNIF     ! flag for prescribed uniform field
+LOGICAL                       :: GUNIF     ! flag for prescribed uniform field
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -144,6 +147,7 @@ IF (HSURF=='SN_ROOF') THEN
   IF (LEN_TRIM(YFILE)>0 .AND. LEN_TRIM(YFILETYPE)>0) GUNIF = .FALSE.                                   
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROOF)))
+  ALLOCATE(ZIMPURSNOW(SIZE(XWSNOW_ROOF),NIMPUR))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROOF)))
   ALLOCATE(TNPSNOW%AL(1))
@@ -159,7 +163,7 @@ IF (HSURF=='SN_ROOF') THEN
                             XTSNOW_ROOF, XLWCSNOW_ROOF,  &
                             XASNOW_ROOF,                 &
                             LSNOW_IDEAL_TEB, ZSG1SNOW,   &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW, YDCTL)
+                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW, YDCTL,ZIMPURSNOW)
 
   CALL ALLOCATE_GR_SNOW(T%TSNOW_ROOF,SIZE(G%XLAT))
   T%TSNOW_ROOF%WSNOW = TNPSNOW%AL(1)%WSNOW
@@ -170,11 +174,11 @@ IF (HSURF=='SN_ROOF') THEN
   !
   CALL TYPE_SNOW_INIT(TNPSNOW%AL(1))
   DEALLOCATE(TNPSNOW%AL)
-
   DEALLOCATE(ZSG1SNOW)
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)
   DEALLOCATE(ZAGESNOW)                            
+  DEALLOCATE(ZIMPURSNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_FIELD',1,ZHOOK_HANDLE)
   RETURN
 ELSE IF (HSURF=='SN_ROAD') THEN
@@ -185,6 +189,7 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   ALLOCATE(ZSG1SNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZSG2SNOW(SIZE(XWSNOW_ROAD)))
   ALLOCATE(ZHISTSNOW(SIZE(XWSNOW_ROAD)))
+  ALLOCATE(ZIMPURSNOW(SIZE(XWSNOW_ROAD),NIMPUR))
   ALLOCATE(ZAGESNOW(SIZE(XWSNOW_ROAD)))    
   ALLOCATE(TNPSNOW%AL(1))
   TNPSNOW%AL(1)%SCHEME = T%TSNOW_ROAD%SCHEME
@@ -199,7 +204,8 @@ ELSE IF (HSURF=='SN_ROAD') THEN
                             XTSNOW_ROAD, XLWCSNOW_ROAD,  &
                             XASNOW_ROAD,                 &
                             LSNOW_IDEAL_TEB, ZSG1SNOW,   &
-                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW, YDCTL)
+                            ZSG2SNOW, ZHISTSNOW, ZAGESNOW, YDCTL,&
+                            ZIMPURSNOW)
 
   CALL ALLOCATE_GR_SNOW(T%TSNOW_ROAD,SIZE(G%XLAT))
   T%TSNOW_ROAD%WSNOW = TNPSNOW%AL(1)%WSNOW
@@ -215,6 +221,7 @@ ELSE IF (HSURF=='SN_ROAD') THEN
   DEALLOCATE(ZSG2SNOW)
   DEALLOCATE(ZHISTSNOW)
   DEALLOCATE(ZAGESNOW)                               
+  DEALLOCATE(ZIMPURSNOW)
   IF (LHOOK) CALL DR_HOOK('PREP_HOR_TEB_FIELD',1,ZHOOK_HANDLE)
   RETURN
 END IF

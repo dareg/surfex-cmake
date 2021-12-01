@@ -3,16 +3,16 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE URBAN_DRAG(TOP, T, B, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON, &
-                          PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,   &
-                          PTS_ROOF, PTS_ROAD, PTS_WALL, PTS_GARDEN,                &
-                          PDELT_SNOW_ROOF, PDELT_SNOW_ROAD,  PEXNS, PEXNA, PTA,    &
-                          PQA, PPS, PRHOA,PZREF, PUREF, PVMOD, PWS_ROOF_MAX,       &
-                          PWS_ROAD_MAX, PPEW_A_COEF, PPEW_B_COEF,                  &
-                          PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, PQSAT_ROOF,      &
-                          PQSAT_ROAD, PDELT_ROOF, PDELT_ROAD, PCD, PCDN, PAC_ROOF, &
-                          PAC_ROOF_WAT, PAC_WALL, PAC_ROAD, PAC_ROAD_WAT, PAC_TOP, &
-                          PAC_GARDEN, PRI, PUW_ROAD, PUW_ROOF, PDUWDU_ROAD,        &
+    SUBROUTINE URBAN_DRAG(TOP, T, B, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON,  &
+                          PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,    &
+                          PTS_ROOF, PTS_ROAD, PTS_WALL, PTS_GARDEN,                 &
+                          PDELT_SNOW_ROOF, PDELT_SNOW_ROAD,  PEXNS, PEXNA, PTA,     &
+                          PQA, PPS, PRHOA,PZREF, PUREF, PVMOD, PWS_ROOF_MAX,        &
+                          PWS_ROAD_MAX, PPEW_A_COEF, PPEW_B_COEF,                   &
+                          PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, AT, PQSAT_ROOF,   &
+                          PQSAT_ROAD, PDELT_ROOF, PDELT_ROAD, PCD, PCDN, PAC_ROOF,  &
+                          PAC_ROOF_WAT, PAC_WALL, PAC_ROAD, PAC_ROAD_WAT, PAC_TOP,  &
+                          PAC_GARDEN, PRI, PUW_ROAD, PUW_ROOF, PDUWDU_ROAD,         &
                           PDUWDU_ROOF, PUSTAR_TOWN, PAC_WIN ) 
 !   ##########################################################################
 !
@@ -74,6 +74,7 @@ USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,ONLY : XLVTT, XPI, XCPD, XG, XKARMAN
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 !USE MODE_SBLS
 USE MODE_THERMOS
@@ -91,7 +92,9 @@ TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
 TYPE(TEB_t), INTENT(INOUT) :: T
 TYPE(BEM_t), INTENT(INOUT) :: B
 !
- CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT               ! atmospheric turbulence parameters
+!
+ CHARACTER(LEN=*),     INTENT(IN) :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
@@ -99,10 +102,10 @@ REAL,               INTENT(IN)    :: PTSTEP         ! time-step
 REAL, DIMENSION(:), INTENT(IN)    :: PT_CANYON      ! canyon air temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PQ_CANYON      ! canyon air specific humidity.
 REAL, DIMENSION(:), INTENT(IN)    :: PU_CANYON      ! hor. wind in canyon
-REAL, DIMENSION(:), INTENT(IN)    :: PU_LOWCAN     ! wind near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PT_LOWCAN     ! temp. near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PQ_LOWCAN     ! hum. near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PZ_LOWCAN     ! height of atm. var. near the road
+REAL, DIMENSION(:), INTENT(IN)    :: PU_LOWCAN      ! wind near the road
+REAL, DIMENSION(:), INTENT(IN)    :: PT_LOWCAN      ! temp. near the road
+REAL, DIMENSION(:), INTENT(IN)    :: PQ_LOWCAN      ! hum. near the road
+REAL, DIMENSION(:), INTENT(IN)    :: PZ_LOWCAN      ! height of atm. var. near the road
 REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROOF       ! surface temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROAD       ! surface temperature
 REAL, DIMENSION(:), INTENT(IN)    :: PTS_WALL       ! surface temperature
@@ -313,7 +316,7 @@ ENDDO
 IF (.NOT. TOP%LCANOPY) THEN
   CALL URBAN_EXCH_COEF(TOP%CZ0H, ZZ0_O_Z0H, ZTS_TOWN, ZQ_TOWN, PEXNS, PEXNA, PTA, PQA,     &
                        PZREF+ T%XBLD_HEIGHT/3., PUREF+T%XBLD_HEIGHT/3., PVMOD, T%XZ0_TOWN, &
-                       PRI, PCD, PCDN, ZAC, ZRA, ZCH                              )
+                       AT, PRI, PCD, PCDN, ZAC, ZRA, ZCH                              )
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -327,7 +330,7 @@ IF (TOP%CCH_BEM == "DOE-2") THEN
    PAC_ROOF = CHTC_ROUGH_DOE(ZCHTCN_ROOF, ZCHTCS_ROOF, T%XROUGH_ROOF) / PRHOA / XCPD
 ELSE
    CALL URBAN_EXCH_COEF(TOP%CZ0H, ZZ0_O_Z0H, PTS_ROOF, ZQ_ROOF, PEXNS, PEXNA, PTA, PQA, &
-                        PZREF, PUREF, PVMOD, ZZ0_ROOF, ZRI, ZCD, ZCDN, PAC_ROOF,        &
+                        PZREF, PUREF, PVMOD, ZZ0_ROOF, AT, ZRI, ZCD, ZCDN, PAC_ROOF,    &
                         ZRA_ROOF, ZCH_ROOF               )
 ENDIF
 !
@@ -355,7 +358,7 @@ ENDDO
 IF (.NOT. TOP%LCANOPY) THEN
   CALL URBAN_EXCH_COEF('MASC95', 1., PT_CANYON, PQ_CANYON, PEXNS, PEXNA, PTA, PQA,    &
                         PZREF+T%XBLD_HEIGHT-PZ_LOWCAN, PUREF+T%XBLD_HEIGHT-PZ_LOWCAN, &
-                        PVMOD, ZZ0_TOP,  ZRI, ZCD, ZCDN, PAC_TOP, ZRA_TOP, ZCH_TOP  )
+                        PVMOD, ZZ0_TOP, AT, ZRI, ZCD, ZCDN, PAC_TOP, ZRA_TOP, ZCH_TOP  )
 ENDIF
 !
 !-------------------------------------------------------------------------------
@@ -392,7 +395,7 @@ DO JLOOP=1,3
   !
   CALL URBAN_EXCH_COEF(TOP%CZ0H, ZZ0_O_Z0H, PTS_ROAD, PQ_LOWCAN, PEXNS, PEXNA,  &
                        PT_LOWCAN, PQ_LOWCAN, PZ_LOWCAN, PZ_LOWCAN,              &
-                       PU_LOWCAN+ZW_CAN, ZZ0_ROAD, ZRI, ZCD_ROAD, ZCDN,         &
+                       PU_LOWCAN+ZW_CAN, ZZ0_ROAD, AT, ZRI, ZCD_ROAD, ZCDN,     &
                        PAC_ROAD, ZRA_ROAD, ZCH_ROAD   )
   !
   DO JJ=1,SIZE(PTA)

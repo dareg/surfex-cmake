@@ -98,16 +98,19 @@ END MODULE MODI_glt_mltvtp_r
 ! * Subroutine used to update sea ice vertical temperature profile, due 
 ! to sea ice melting.
 !
-SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil )
+SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
+       nilay,nl,np,nt,lp3,height,sf3tinv)
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE mode_glt_stats_r
   USE mode_gltools_interp
 !
   IMPLICIT NONE
 !
+  INTEGER,INTENT(IN) :: nilay,nt,np,nl
+  REAL,DIMENSION(:),INTENT(IN) :: height,sf3tinv
+  LOGICAL,INTENT(IN) :: lp3
   REAL, DIMENSION(nilay,nt,np), INTENT(in) ::  &
         pdhi
   REAL, DIMENSION(nt,np), INTENT(inout) ::  &
@@ -144,7 +147,7 @@ SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil )
           END DO
           zlevo(:)=zlevo/zlevo(nilay+1)
 ! Interpolate
-          zentn=glt_interpz( height,tpsil(1:nilay,jk,jp)%ent,zlevo )
+          zentn=glt_interpz( height,tpsil(1:nilay,jk,jp)%ent,zlevo,nilay )
 ! In principle, the following is now impossible...
           IF (lp3) THEN
               zavti=SUM( zsf3tinvo*tpsil(1:nilay,jk,jp)%ent )

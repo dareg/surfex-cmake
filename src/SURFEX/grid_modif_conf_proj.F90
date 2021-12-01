@@ -194,6 +194,8 @@ DEALLOCATE(ZDY1)
                               ZLATOR,ZLONOR,                       &
                               IIMAX2,IJMAX2,                       &
                               ZX2,ZY2,ZDX2,ZDY2,0,0                )  
+                              ZX2,ZY2,ZDX2,ZDY2,&
+                              0,0,8,8) ! these dimensions have no meaning in this case
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX2)

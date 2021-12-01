@@ -51,39 +51,7 @@
 ! ------------------- BEGIN MODULE mode_gltools_sigma ---------------------
 
 MODULE mode_gltools_sigma
-INTERFACE 
-
-FUNCTION glt_sigma(pt,ps)
-  USE modd_glt_param, only:nx,ny
-  REAL, DIMENSION(nx,ny) ::                                             &
-    glt_sigma
-  REAL, DIMENSION(nx,ny), INTENT(in) ::                                 &
-    pt,ps
-END FUNCTION glt_sigma
-
-FUNCTION glt_dsigmadt(pt,ps)
-  REAL ::                                                               &
-    glt_dsigmadt
-  REAL, INTENT(in) ::                                                   &
-    pt,ps
-END FUNCTION glt_dsigmadt
-
-FUNCTION glt_dsigmads(pt,ps)
-  REAL ::                                                               &
-    glt_dsigmads
-  REAL, INTENT(in) ::                                                   &
-    pt,ps
-END FUNCTION glt_dsigmads
-
-FUNCTION glt_salfrac( pv )
-  REAL ::  &
-    glt_salfrac
-  REAL, INTENT(in) ::          &! in m.s-1
-    pv
-END FUNCTION glt_salfrac
-
-END INTERFACE
-END MODULE mode_gltools_sigma
+CONTAINS
 
 ! -------------------- END MODULE mode_gltools_sigma ----------------------
 
@@ -94,13 +62,13 @@ END MODULE mode_gltools_sigma
 ! * sigma-theta as a function of temp (deg c) and salinity (mil)
 ! (friedrich-levitus 3rd degree polynomial fit)
 
-FUNCTION glt_sigma(pt,ps)
+FUNCTION glt_sigma(pt,ps,nx,ny)
 !
   USE modd_glt_const_thm
-  USE modd_glt_param, only:nx,ny
 !
   IMPLICIT NONE
 
+  INTEGER, INTENT(IN) :: nx,ny 
   REAL, DIMENSION(nx,ny) ::                                             &
     glt_sigma
   REAL, DIMENSION(nx,ny), INTENT(in) ::                                 &
@@ -206,6 +174,7 @@ FUNCTION glt_salfrac( pv )
   ENDIF
 !        
 END FUNCTION glt_salfrac
+END MODULE mode_gltools_sigma
 !
 ! ------------------------- END FUNCTION glt_salfrac ------------------------
 ! -----------------------------------------------------------------------

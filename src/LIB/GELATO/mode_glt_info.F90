@@ -49,23 +49,7 @@
 ! ------------------------ BEGIN MODULE mode_glt_info ----------------------
 
 MODULE mode_glt_info
-INTERFACE 
-
-SUBROUTINE glt_info_si(omess,tpdom,tpsit,tpsil)
-  USE modd_types_glt
-  USE modd_glt_param
-  CHARACTER(*) ::                                                              &
-        omess
-  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::                          &
-        tpdom
-  TYPE(t_sit), DIMENSION(nt,nx,ny), OPTIONAL, INTENT(in) ::             &
-        tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,nx,ny), OPTIONAL, INTENT(in) ::          &
-        tpsil
-END SUBROUTINE glt_info_si
-
-END INTERFACE
-END MODULE mode_glt_info
+CONTAINS
 
 ! ------------------------ END MODULE mode_glt_info -------------------------
 
@@ -86,14 +70,16 @@ END MODULE mode_glt_info
 !       - snow layer density
 !       - surface temperature.
 
-SUBROUTINE glt_info_si(omess,tpdom,tpsit,tpsil)
+SUBROUTINE glt_info_si(omess,tpdom,niceage,nicesal,nl,nmponds,noutlu,nt,nx,ny,lp2,lp3,tpsit,tpsil)
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
 !
-  IMPLICIT NONE
 
+  
+  IMPLICIT NONE
+  INTEGER,INTENT(IN) :: noutlu,nicesal,niceage,nmponds,nl,nt,nx,ny
+  LOGICAL,INTENT(IN) :: lp2,lp3
   CHARACTER(*) ::                                                              &
         omess
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::                          &
@@ -313,6 +299,7 @@ SUBROUTINE glt_info_si(omess,tpdom,tpsit,tpsil)
 ! *** End of routine
 !
 END SUBROUTINE glt_info_si 
+END MODULE mode_glt_info
 !
 ! ------------------------ END SUBROUTINE glt_info_si -----------------------
 ! -----------------------------------------------------------------------

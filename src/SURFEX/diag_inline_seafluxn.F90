@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,              &
+SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,                      &
                                   PTSTEP, PTA, PQA, PPA, PPS, PRHOA, PZONA,           &
                                   PMERA, PHT, PHW, PCD, PCDN, PCH, PCE, PRI, PHU,     &
                                   PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,          &
@@ -11,7 +11,7 @@ SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,              &
                                   PEMIS, PTRAD, PRAIN, PSNOW, PLMO,                   & 
                                   PCD_ICE, PCDN_ICE, PCH_ICE, PCE_ICE, PRI_ICE,       &
                                   PZ0_ICE, PZ0H_ICE, PQSAT_ICE, PSFTH_ICE, PSFTQ_ICE, &
-                                   PSFZON_ICE, PSFMER_ICE, PLMO_ICE                   )
+                                  PSFZON_ICE, PSFMER_ICE, PLMO_ICE                    )
                                           
 !     #####################################################################################
 !
@@ -50,6 +50,8 @@ USE MODD_CSTS,           ONLY : XTTS
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
 !
+USE MODD_TYPES_GLT,      ONLY : T_GLT
+USE MODE_GLT_STATS ,     ONLY : GLT_AVHICEM, GLT_AVHSNWM
 USE MODI_CLS_TQ
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_SEA
@@ -236,7 +238,6 @@ IF (.NOT. S%LSBL) THEN
            DI%XMER10M = XUNDEF
        END IF
     ENDIF 
-  END IF
 !
   IF (DGO%N2M>=1) THEN
      IF (S%LHANDLE_SIC) THEN
@@ -366,7 +367,7 @@ GSIC=(S%LHANDLE_SIC.AND.(S%CSEAICE_SCHEME /= 'NONE  '))
 IF (LCPL_SEA.OR.GSIC) THEN
 !
   CALL DIAG_CPL_ESM_SEA(S, D, DI, PTSTEP, PSFTQ, PRAIN, PSNOW, &
-                        PLW, PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW, GSIC )
+                        PLW, PPS, PSFTH_ICE, PSFTQ_ICE, PDIR_SW, PSCA_SW, GSIC )
 ! 
 ENDIF
 IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_SEAFLUX_N',1,ZHOOK_HANDLE)

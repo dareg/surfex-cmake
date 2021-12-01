@@ -86,7 +86,8 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZFIELD
 REAL :: ZLAT  ! latitude of point to define
 REAL :: ZLON  ! longitude of point to define
 REAL :: ZDIST ! current distance to valid point (in lat/lon grid)
-REAL, DIMENSION(:), ALLOCATABLE :: ZNDIST! smallest distance to valid point
+REAL :: ZWORK
+REAL, DIMENSION(:,:), ALLOCATABLE :: ZNDIST! smallest distance to valid point
 REAL :: ZCOSLA! cosine of latitude
 REAL :: ZLONSC! longitude of valid point
 REAL :: ZIDLO, ZIDLOMAX, ZIDLOMIN, ZIDLAMAX, ZIDLAMIN
@@ -117,8 +118,6 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_1',0,ZHOOK_HANDLE)
 !
 INO = SIZE(PFIELD,1)
 INL = SIZE(PFIELD,2)
-!
-ALLOCATE(ZNDIST(INL))
 !
 !-------------------------------------------------------------------------------
 !
@@ -188,10 +187,10 @@ DO JI=1,INO
   ICPT = ICPT + 1
   !
   IF (NHALO_PREP>0) THEN
-    ZTLONMIN(JI) = MINVAL(ZLO(KP(JI,:)))-ZIDLOMAX*NHALO_PREP
-    ZTLONMAX(JI) = MAXVAL(ZLO(KP(JI,:)))+ZIDLOMAX*NHALO_PREP
-    ZTLATMIN(JI) = MINVAL(ZLA(KP(JI,:)))-ZIDLAMAX*NHALO_PREP
-    ZTLATMAX(JI) = MAXVAL(ZLA(KP(JI,:)))+ZIDLAMAX*NHALO_PREP
+    ZTLONMIN(JI) = MAX(MINVAL(ZLO(:)),MINVAL(ZLO(KP(JI,:)))-ZIDLOMAX*NHALO_PREP)
+    ZTLONMAX(JI) = MIN(MAXVAL(ZLO(:)),MAXVAL(ZLO(KP(JI,:)))+ZIDLOMAX*NHALO_PREP)
+    ZTLATMIN(JI) = MAX(MINVAL(ZLA(:)),MINVAL(ZLA(KP(JI,:)))-ZIDLAMAX*NHALO_PREP)
+    ZTLATMAX(JI) = MIN(MAXVAL(ZLA(:)),MAXVAL(ZLA(KP(JI,:)))+ZIDLAMAX*NHALO_PREP)
   ELSE
     ZTLONMIN(JI) = MINVAL(ZLO(:))
     ZTLONMAX(JI) = MAXVAL(ZLO(:))
@@ -225,6 +224,7 @@ ALLOCATE(IMASK(ITSIZE(1)))
 IMASK(:) = 0
 !
 IF (NRANK==NPIO) THEN
+  PRINT*,'sous hor_extrapol_surf',MAXVAL(IBOR(1,:)),MAXVAL(IBOR(2,:))
   ALLOCATE(IVAL_EXT(MAXVAL(IBOR(1,:)),MAXVAL(IBOR(2,:))))
   ALLOCATE(ZCOOR   (MAXVAL(IBOR(1,:)),2))
 ELSE
@@ -346,10 +346,12 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
 #endif
 
       ENDIF
-    
-!$OMP PARALLEL DO PRIVATE(JI,ZNDIST,IDX,ZCOSLA,JISC,ID0,ZLONSC,ZDIST)
+
+      ALLOCATE(ZNDIST(IBOR(1,J),INL))
+   
+!$OMP PARALLEL DO PRIVATE(JI,IDX,ZCOSLA,JISC,JL,ID0,ZLONSC,ZDIST) 
         DO JI=1,IBOR(1,J)
-          ZNDIST(:) = XUNDEF
+          ZNDIST(JI,:) = XUNDEF
           IDX = IBOR(2,J)+1
           ZCOSLA=COS(ZCOOR(JI,1)*ZRAD)
           DO JISC = 1,IBOR(2,J)
@@ -366,10 +368,10 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
                 ZDIST= (ZLA(ID0)-ZCOOR(JI,1)) ** 2 + (ZLONSC-ZCOOR(JI,2)) ** 2
               END IF
               DO JL=1,INL
-                IF (ZDIST<=ZNDIST(JL)) THEN
+                IF (ZDIST<=ZNDIST(JI,JL)) THEN
                   IF (PFIELD_IN(ID0,JL)/=XUNDEF) THEN
                     ZFIELD(JI,JL) = PFIELD_IN(ID0,JL)
-                    ZNDIST(JL) = ZDIST
+                    ZNDIST(JI,JL) = ZDIST
                   ENDIF
                 ENDIF
               ENDDO
@@ -377,6 +379,8 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
           END DO   
         ENDDO
 !$OMP END PARALLEL DO
+      !
+      DEALLOCATE(ZNDIST)
       !
       IF (J/=NPIO) THEN
         !send values found to extrapolate
@@ -396,8 +400,6 @@ IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',0,ZHOOK_HANDLE_OMP)
   ENDDO
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_31',1,ZHOOK_HANDLE_OMP)
 !
-DEALLOCATE(ZNDIST)
-  !
 IF (LHOOK) CALL DR_HOOK('HOR_EXTRAPOL_SURF_32',0,ZHOOK_HANDLE)  
   !
   IDX_I = IDX_I + 3

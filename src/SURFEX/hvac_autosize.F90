@@ -37,6 +37,7 @@ USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
 USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t, TEB_IRRIG_INIT
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t, DIAG_MISC_TEB_INIT
 USE MODD_DIAG_MISC_TEB_OPTIONS_n, ONLY : DIAG_MISC_TEB_OPTIONS_t, DIAG_MISC_TEB_OPTIONS_INIT
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODD_CSTS,  ONLY : XCPD, XPI, XP00, XRD, XSTEFAN
 !
@@ -229,18 +230,18 @@ REAL, DIMENSION(KI) :: ZUW_RD      ! Momentum flux for roads
 REAL, DIMENSION(KI) :: ZUW_RF      ! Momentum flux for roofs
 REAL, DIMENSION(KI) :: ZDUWDU_RD   !
 REAL, DIMENSION(KI) :: ZDUWDU_RF   !
-REAL, DIMENSION(KI) :: ZUSTAR_TWN   ! friction velocity over town
+REAL, DIMENSION(KI) :: ZUSTAR_TWN  ! friction velocity over town
 !
-REAL, DIMENSION(KI) :: ZCD           ! town averaged drag coefficient
-REAL, DIMENSION(KI) :: ZCDN          ! town averaged neutral drag coefficient
-REAL, DIMENSION(KI) :: ZCH_TWN      ! town averaged heat transfer coefficient
-REAL, DIMENSION(KI) :: ZRI_TWN      ! town averaged Richardson number
-REAL, DIMENSION(KI) :: ZRESA_TWN    ! town aerodynamical resistance
+REAL, DIMENSION(KI) :: ZCD         ! town averaged drag coefficient
+REAL, DIMENSION(KI) :: ZCDN        ! town averaged neutral drag coefficient
+REAL, DIMENSION(KI) :: ZCH_TWN     ! town averaged heat transfer coefficient
+REAL, DIMENSION(KI) :: ZRI_TWN     ! town averaged Richardson number
+REAL, DIMENSION(KI) :: ZRESA_TWN   ! town aerodynamical resistance
 REAL, DIMENSION(KI) :: ZAC_RF      ! roof conductance
-REAL, DIMENSION(KI) :: ZAC_RD       ! road conductance
+REAL, DIMENSION(KI) :: ZAC_RD      ! road conductance
 REAL, DIMENSION(KI) :: ZAC_WL      ! wall conductance
-REAL, DIMENSION(KI) :: ZAC_TOP       ! top conductance
-REAL, DIMENSION(KI) :: ZAC_GD     ! garden conductance
+REAL, DIMENSION(KI) :: ZAC_TOP     ! top conductance
+REAL, DIMENSION(KI) :: ZAC_GD      ! garden conductance
 REAL, DIMENSION(KI) :: ZAC_RF_WAT  ! roof water conductance
 REAL, DIMENSION(KI) :: ZAC_RD_WAT  ! roof water conductance 
 REAL, DIMENSION(KI) :: ZEMIT_LW_FAC
@@ -304,6 +305,8 @@ REAL, DIMENSION(KI) :: ZLE_GR
 REAL, DIMENSION(KI) :: ZGFLUX_GR
 REAL, DIMENSION(KI) :: ZRUNOFF_GR 
 REAL, DIMENSION(KI) :: ZDRAIN_GR 
+!
+TYPE(SURF_ATM_TURB_t) :: AT   ! atmospheric turbulence parameters
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -644,25 +647,25 @@ DO JFORC_STEP= 1,INB_STEP_ATM
 !*      B.3     TEB simulation
 !               -------------
 !
-  CALL TEB  (TOP, T, BOP, B, YIR, YDMT, YIMPLICIT_WIND, ZTSUN,               &
-             ZT_CAN, ZQ_CAN, ZU_CAN, ZT_CAN, ZQ_CAN, ZU_CAN, ZZ_LOWCAN,      &
-             ZPEW_A_COEF, ZPEW_B_COEF, ZPEW_A_COEF, ZPEW_B_COEF, ZPS, ZPA,   &
-             ZEXNS, ZEXNA, ZTA, ZQA, ZRHOA, ZLW_RAD, ZRR, ZSR, ZZREF, ZZREF, &
-             ZU_CAN, T%XH_TRAFFIC, T%XLE_TRAFFIC, ZTSTEP, ZDF_RF, ZDN_RF,    &
-             ZDF_RD, ZDN_RD, ZQSAT_RF, ZQSAT_RD, ZDELT_RF, ZDELT_RD, ZTS_GD, &
-             ZLEW_RF, ZUW_GR, ZLEW_RD, ZLE_WL_A, ZLE_WL_B,ZRNSNOW_RF,        &
-             ZHSNOW_RF, ZLESNOW_RF, ZGSNOW_RF, ZMELT_RF, ZRN_GR, ZH_GR,      &
-             ZLE_GR, ZGFLUX_GR, ZDRAIN_GR, ZRUNOFF_GR, ZRNSNOW_RD,           &
-             ZHSNOW_RD, ZLESNOW_RD, ZGSNOW_RD, ZMELT_RD, ZUW_RD, ZUW_RF,     &
-             ZDUWDU_RD,  ZDUWDU_RF, ZUSTAR_TWN, ZCD, ZCDN, ZCH_TWN, ZRI_TWN, &
-             ZRESA_TWN, ZAC_RF, ZAC_RD, ZAC_WL, ZAC_TOP, ZAC_GD, ZAC_RF_WAT, &
-             ZAC_RD_WAT, ZLW_WA_TO_WB, ZLW_WA_TO_R, ZLW_WB_TO_R,             &
-             ZLW_WA_TO_NR, ZLW_WB_TO_NR, ZLW_R_TO_WA, ZLW_R_TO_WB,           &
-             ZLW_G_TO_WA, ZLW_G_TO_WB, ZLW_S_TO_WA, ZLW_S_TO_WB, ZLW_S_TO_R, &
-             ZLW_S_TO_NR, ZLW_NR_TO_WA, ZLW_NR_TO_WB, ZLW_NR_TO_WIN,         &
-             ZLW_WA_TO_WIN, ZLW_WB_TO_WIN, ZLW_G_TO_WIN, ZLW_R_TO_WIN,       &
-             ZLW_S_TO_WIN, ZLW_WIN_TO_WA, ZLW_WIN_TO_WB, ZLW_WIN_TO_R,       &
-             ZLW_WIN_TO_NR, IDAY, ZEMIT_LW_FAC, ZEMIT_LW_RD, ZT_RAD_IND,     &
+  CALL TEB  (TOP, T, BOP, B, YIR, YDMT, YIMPLICIT_WIND, ZTSUN,                 &
+             ZT_CAN, ZQ_CAN, ZU_CAN, ZT_CAN, ZQ_CAN, ZU_CAN, ZZ_LOWCAN,        &
+             ZPEW_A_COEF, ZPEW_B_COEF, ZPEW_A_COEF, ZPEW_B_COEF, AT, ZPS, ZPA, &
+             ZEXNS, ZEXNA, ZTA, ZQA, ZRHOA, ZLW_RAD, ZRR, ZSR, ZZREF, ZZREF,   &
+             ZU_CAN, T%XH_TRAFFIC, T%XLE_TRAFFIC, ZTSTEP, ZDF_RF, ZDN_RF,      &
+             ZDF_RD, ZDN_RD, ZQSAT_RF, ZQSAT_RD, ZDELT_RF, ZDELT_RD, ZTS_GD,   &
+             ZLEW_RF, ZUW_GR, ZLEW_RD, ZLE_WL_A, ZLE_WL_B,ZRNSNOW_RF,          &
+             ZHSNOW_RF, ZLESNOW_RF, ZGSNOW_RF, ZMELT_RF, ZRN_GR, ZH_GR,        &
+             ZLE_GR, ZGFLUX_GR, ZDRAIN_GR, ZRUNOFF_GR, ZRNSNOW_RD,             &
+             ZHSNOW_RD, ZLESNOW_RD, ZGSNOW_RD, ZMELT_RD, ZUW_RD, ZUW_RF,       &
+             ZDUWDU_RD,  ZDUWDU_RF, ZUSTAR_TWN, ZCD, ZCDN, ZCH_TWN, ZRI_TWN,   &
+             ZRESA_TWN, ZAC_RF, ZAC_RD, ZAC_WL, ZAC_TOP, ZAC_GD, ZAC_RF_WAT,   &
+             ZAC_RD_WAT, ZLW_WA_TO_WB, ZLW_WA_TO_R, ZLW_WB_TO_R,               &
+             ZLW_WA_TO_NR, ZLW_WB_TO_NR, ZLW_R_TO_WA, ZLW_R_TO_WB,             &
+             ZLW_G_TO_WA, ZLW_G_TO_WB, ZLW_S_TO_WA, ZLW_S_TO_WB, ZLW_S_TO_R,   &
+             ZLW_S_TO_NR, ZLW_NR_TO_WA, ZLW_NR_TO_WB, ZLW_NR_TO_WIN,           &
+             ZLW_WA_TO_WIN, ZLW_WB_TO_WIN, ZLW_G_TO_WIN, ZLW_R_TO_WIN,         &
+             ZLW_S_TO_WIN, ZLW_WIN_TO_WA, ZLW_WIN_TO_WB, ZLW_WIN_TO_R,         &
+             ZLW_WIN_TO_NR, IDAY, ZEMIT_LW_FAC, ZEMIT_LW_RD, ZT_RAD_IND,       &
              ZHU_BLD, ZTIME, ZE_SHADING  )
 ! 
 !   Time update

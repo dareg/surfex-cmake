@@ -87,10 +87,9 @@ END MODULE MODI_gltools_dealloc
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE gltools_dealloc --------------------------
 !
-SUBROUTINE gltools_dealloc(tpglt)
+SUBROUTINE gltools_dealloc(tpglt,nnflxin,noutlu,ntd,lwg)
 !
 USE modd_types_glt 
-USE modd_glt_param
 #if ! defined in_surfex
 USE modd_CB_DynVariables
 USE modd_CB_DynDim
@@ -101,6 +100,8 @@ USE modd_CB_DynForcing
 !
 IMPLICIT NONE
 !
+INTEGER,INTENT(in) :: noutlu,nnflxin,ntd
+LOGICAL,INTENT(in) :: lwg
 TYPE(t_glt), INTENT(inout) ::  &
     tpglt
 !

@@ -103,7 +103,7 @@ LOGICAL             :: GSNOW               ! snow written in the file
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',0,ZHOOK_HANDLE)
 !
 YDIR = 'H'
 IF (PRESENT(HDIR)) YDIR = HDIR
@@ -135,7 +135,7 @@ GVERSION = (IVERSION>7 .OR. IVERSION==7 .AND. IBUGFIX>=3)
 !              -------------------
 !
 ISURFTYPE_LEN=LEN_TRIM(HSURFTYPE)
-!
+! 
 IF (KPATCH<=1) THEN
 
   IF (IVERSION <=2 .OR. (IVERSION==3 .AND. IBUGFIX<=4)) THEN
@@ -211,7 +211,7 @@ ENDIF
  CALL ALLOCATE_GR_SNOW(TPSNOW,KSIZE_P)
 !
 IF (.NOT. GSNOW) THEN
-  IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',1,ZHOOK_HANDLE)
   RETURN
 END IF
 !-------------------------------------------------------------------------------
@@ -225,8 +225,8 @@ IF (IVERSION >= 7 .AND. HSURFTYPE=='VEG'.AND.KPATCH==1)  &
 !-------------------------------------------------------------------------------
 !
 !
-!*       5.    Snow reservoir
-!              --------------
+!*       5.    Snow reservoir and Snow density
+!              -------------------------------
 !
 ALLOCATE(ZWORK(KLU,INPATCH))
 !
@@ -243,7 +243,7 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
   CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"WSNOW",HSURFTYPE,TPSNOW%WSNOW)
   CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"RSNOW",HSURFTYPE,TPSNOW%RHO)
   !
-  !*       7.    Snow temperature
+  !*       6.    Snow temperature
   !              ----------------
   !
   IF (TPSNOW%SCHEME=='1-L') THEN
@@ -252,19 +252,23 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
     !
   ENDIF
   !
-  !*       8.    Heat content
+  !*       7.    Heat content
   !              ------------
   !
   IF (TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN
     !
     CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"HSNOW",HSURFTYPE,TPSNOW%HEAT)
     !
+    !
+    !*       8.    Historical parameter
+    !              -------------------
+
     IF (TPSNOW%SCHEME=='CRO') THEN
       !
       CALL READ_LAYERS(GVERSION,TPSNOW%NLAYER,YDIR,HPREFIX,YFMT,"SHIST",HSURFTYPE,TPSNOW%HIST)
       !
-      !*       9.    Snow Gran1
-      !              ------------
+      !*       9.    Snow Gran1 and  Snow Gran2 
+      !              ----------------------------
       !
       IF (GVERSION) THEN
         YFMT = "(A2,A1"//YFMT0//')'       
@@ -277,10 +281,10 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
       !
     ENDIF
     !
+    !*       10.    Age parameter
+    !              -------------------
+    !
     IF ((TPSNOW%SCHEME=='3-L'.AND.IVERSION>=8) .OR. TPSNOW%SCHEME=='CRO') THEN
-      !*       12.    Age parameter
-      !              -------------------
-      !
       IF (GVERSION) THEN
         YFMT = "(A3"//YFMT0//')'         
       ELSE
@@ -303,8 +307,15 @@ IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
     !
   ENDIF
   !
-  WRITE(YFMT,'(A5,I1,A2,I1,A1)') '(A4,A',ISURFTYPE_LEN,',A',IPAT_LEN,')'
-  WRITE(YRECFM,YFMT) 'ASN_',ADJUSTL(HSURFTYPE(:LEN_TRIM(HSURFTYPE))),ADJUSTL(YPAT)
+  !*       11.    Albedo
+  !              --------
+  IF (IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3) THEN
+    WRITE(YFMT,'(A5,I1,A2,I1,A1)')     '(A6,A',ISURFTYPE_LEN,',A',IPAT_LEN,')'
+    WRITE(YRECFM,YFMT) 'ASNOW_',ADJUSTL(HSURFTYPE(:LEN_TRIM(HSURFTYPE))),ADJUSTL(YPAT)
+  ELSE
+    WRITE(YFMT,'(A5,I1,A2,I1,A1)')     '(A4,A',ISURFTYPE_LEN,',A',IPAT_LEN,')'
+    WRITE(YRECFM,YFMT) 'ASN_',ADJUSTL(HSURFTYPE(:LEN_TRIM(HSURFTYPE))),ADJUSTL(YPAT)
+  ENDIF
   IF (GVERSION) YRECFM=ADJUSTL(HPREFIX//YRECFM)
   IF (GDIM2) THEN
     CALL READ_SURF(HPROGRAM,YRECFM,ZWORK(:,1),IRESP,HDIR=YDIR)
@@ -318,13 +329,13 @@ ENDIF
 !
 DEALLOCATE(ZWORK)
 !
-IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_1',1,ZHOOK_HANDLE)
 !
 IF (TPSNOW%SCHEME=='1-L' .OR. TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' &
                          .OR. TPSNOW%SCHEME=='3-L' .OR. TPSNOW%SCHEME=='CRO') THEN 
   !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',0,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',0,ZHOOK_HANDLE_OMP)
 !$OMP DO PRIVATE(JI,JL)
   DO JI = 1,SIZE(TPSNOW%WSNOW,1)
     !
@@ -351,10 +362,11 @@ IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',0,ZHOOK_HANDLE_OMP)
     ENDIF
   ENDDO
 !$OMP ENDDO
-IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',1,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW_2',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
   !
 ENDIF
+IF (LHOOK) CALL DR_HOOK('READ_GR_SNOW',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !

@@ -87,10 +87,9 @@ END MODULE MODI_glt_getatmf
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_getatmf ----------------------------
 
-SUBROUTINE glt_getatmf( tpglt )
+SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
   USE modd_types_glt
   USE modd_glt_const_thm
-  USE modd_glt_param
 #if ! defined in_surfex
   USE mode_gltools_bound
 #endif
@@ -98,6 +97,9 @@ SUBROUTINE glt_getatmf( tpglt )
 !
   IMPLICIT NONE 
 !
+  INTEGER,INTENT(IN) :: nnflxin,noutlu,nt,nx,ny
+  LOGICAL,INTENT(IN) :: lp1,lwg
+
   TYPE(t_glt), INTENT(inout) ::  &
     tpglt
 !

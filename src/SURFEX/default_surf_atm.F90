@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE DEFAULT_SURF_ATM(POUT_TSTEP, PCISMIN, PVMODMIN, OALDTHRES,             &
-                                    ODRAG_COEF_ARP, OALDZ0H, ONOSOF, OCPL_GCM,          &
+                                    ODRAG_COEF_ARP, OALDZ0H, ONOSOF, OSLOPE, OCPL_GCM,  &
                                     PEDB, PEDC, PEDD, PEDK, PUSURIC, PUSURID, PUSURICL, &
                                     PVCHRNK, PVZ0CM, PRIMAX, PDELTA_MAX, PWINDMIN,      &
                                     OVZIUSTAR0_ARP, PRZHZ0M,                            &
@@ -69,6 +69,7 @@ LOGICAL,           INTENT(OUT) :: OALDTHRES ! flag to activate aladin formulatio
 LOGICAL,           INTENT(OUT) :: ODRAG_COEF_ARP ! flag to activate aladin formulation for Cd and Ch
 LOGICAL,           INTENT(OUT) :: OALDZ0H
 LOGICAL,           INTENT(OUT) :: ONOSOF ! flag to deactivate the Subgrid Orography effects on Forcing
+LOGICAL,           INTENT(OUT) :: OSLOPE
 LOGICAL,           INTENT(OUT) :: OVERTSHIFT ! flag to deactivate the vertical shift between atmospheric and model orography
 LOGICAL,           INTENT(OUT) :: OVSHIFT_LW
 LOGICAL,           INTENT(OUT) :: OVSHIFT_PRCP
@@ -97,7 +98,7 @@ REAL,              INTENT(OUT) :: PRRSCALE
 REAL,              INTENT(OUT) :: PRRGAMMA
 REAL,              INTENT(OUT) :: PUTILGUST
 LOGICAL,           INTENT(OUT) :: OCPL_ARP
-LOGICAL,           INTENT(OUT) :: OARP_PN
+LOGICAL,           INTENT(OUT) :: OARP_PN   ! Flag to change Cv and TAUICE
 LOGICAL,           INTENT(OUT) :: OQVNPLUS
 LOGICAL,           INTENT(OUT) :: OCPL_GCM  ! Flag used to Read/Write some field from/into the restart file for coupling with ARPEGE/ALADIN
 REAL,              INTENT(OUT) :: PCO2UNCPL ! geochemical CO2 for photsynthesis (ppmv)
@@ -121,6 +122,7 @@ OALDTHRES = .FALSE.
 ODRAG_COEF_ARP = .FALSE.
 OALDZ0H = .FALSE.
 ONOSOF = .TRUE.
+OSLOPE = .FALSE.
 OVERTSHIFT = .FALSE.
 OVSHIFT_LW = .FALSE.
 OVSHIFT_PRCP = .FALSE.

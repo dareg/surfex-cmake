@@ -119,18 +119,18 @@ END MODULE MODI_glt_oceflx_r
 ! -----------------------------------------------------------------------
 ! ------------------------- SUBROUTINE glt_oceflx_r -------------------------
 !
-SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl )
+SUBROUTINE glt_oceflx_r( tpdom,pustar,tpmxl,np )
 !
   USE modd_glt_const_thm
   USE modd_glt_const_evp     ! omega
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_glt_salflx_r
 !
   IMPLICIT NONE
 !
 ! .. Arguments
 !
+ INTEGER,INTENT(IN) :: np
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   REAL, DIMENSION(np), INTENT(in) ::  &

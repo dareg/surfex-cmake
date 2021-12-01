@@ -1,0 +1,283 @@
+Removing src/rules/Rules.SX8.mk
+Removing src/rules/Rules.LXpgi.mk
+Removing src/rules/Rules.LXpathf95.mk
+Removing src/rules/Rules.LXifort.mk
+Removing src/rules/Rules.LXgfortran.mk
+Removing src/rules/Rules.LXg95.mk
+Removing src/rules/Rules.LXNAGf95.mk
+Removing src/rules/Rules.BG.mk
+Removing src/rules/Rules.AIX64.mk
+Auto-merging src/SURFEX/writesurf_seaicen.F90
+CONFLICT (content): Merge conflict in src/SURFEX/writesurf_seaicen.F90			DONE
+Auto-merging src/SURFEX/write_header_fa.F90
+CONFLICT (content): Merge conflict in src/SURFEX/write_header_fa.F90			DONE
+Auto-merging src/SURFEX/write_field_2d_patch.F90
+CONFLICT (content): Merge conflict in src/SURFEX/write_field_2d_patch.F90		DONE
+Auto-merging src/SURFEX/write_field_1d_patch.F90
+CONFLICT (content): Merge conflict in src/SURFEX/write_field_1d_patch.F90		DONE
+Auto-merging src/SURFEX/write_diag_seb_isban.F90
+Auto-merging src/SURFEX/urban_lw_coef.F90
+CONFLICT (content): Merge conflict in src/SURFEX/urban_lw_coef.F90			NOT DONE
+Auto-merging src/SURFEX/update_data_cover.F90
+CONFLICT (content): Merge conflict in src/SURFEX/update_data_cover.F90			DONE
+Auto-merging src/SURFEX/test_record_len.F90
+CONFLICT (content): Merge conflict in src/SURFEX/test_record_len.F90			DONE
+Auto-merging src/SURFEX/surface_aero_cond.F90
+CONFLICT (content): Merge conflict in src/SURFEX/surface_aero_cond.F90			DONE
+Auto-merging src/SURFEX/split_grid_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/split_grid_conf_proj.F90		DONE
+Auto-merging src/SURFEX/soil.F90
+CONFLICT (content): Merge conflict in src/SURFEX/soil.F90				NOT DONE STRANGE   "Changed by MF NWP team" is not in the GMAP version!?!
+Auto-merging src/SURFEX/snow3l.F90
+CONFLICT (content): Merge conflict in src/SURFEX/snow3l.F90				DONE
+Auto-merging src/SURFEX/set_surfex_filein.F90
+CONFLICT (content): Merge conflict in src/SURFEX/set_surfex_filein.F90			DONE
+CONFLICT (modify/delete): src/SURFEX/seaice_gelato1dn.F90 deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of src/SURFEX/seaice_gelato1dn.F90 left in tree.		REMOVED by git rm
+Auto-merging src/SURFEX/read_seaicen.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_seaicen.F90			NOT DONE
+Auto-merging src/SURFEX/read_pgd_isban.F90
+Auto-merging src/SURFEX/read_namelists_surfn.F90
+Auto-merging src/SURFEX/read_namelists_surf.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_surf.F90		DONE
+Auto-merging src/SURFEX/read_namelists_seafluxn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_seafluxn.F90		DONE
+Auto-merging src/SURFEX/read_namelists_isban.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_isban.F90		DONE
+Auto-merging src/SURFEX/read_nam_grid_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_nam_grid_conf_proj.F90		DONE
+Auto-merging src/SURFEX/read_isban.F90
+Auto-merging src/SURFEX/read_gridtype_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_gridtype_conf_proj.F90		DONE
+Auto-merging src/SURFEX/read_covers_param.F90
+CONFLICT (content): Merge conflict in src/SURFEX/read_covers_param.F90			DONE
+Auto-merging src/SURFEX/preps_for_meb_ebud_rad.F90
+Auto-merging src/SURFEX/prep_seaice.F90
+CONFLICT (content): Merge conflict in src/SURFEX/prep_seaice.F90			NOT DONE
+Auto-merging src/SURFEX/prep_seaflux_grib.F90
+CONFLICT (content): Merge conflict in src/SURFEX/prep_seaflux_grib.F90			DONE
+Auto-merging src/SURFEX/prep_grid_nogrid.F90
+CONFLICT (add/add): Merge conflict in src/SURFEX/prep_grid_nogrid.F90			DONE
+Auto-merging src/SURFEX/prep_grib_grid.F90
+Auto-merging src/SURFEX/pgd_surf_atm.F90
+Auto-merging src/SURFEX/pgd_isba_par.F90
+Auto-merging src/SURFEX/pack_grid_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/pack_grid_conf_proj.F90		DONE
+Auto-merging src/SURFEX/open_aux_io_surf_fa.F90
+CONFLICT (content): Merge conflict in src/SURFEX/open_aux_io_surf_fa.F90		DONE
+Auto-merging src/SURFEX/modn_teb_vegn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modn_teb_vegn.F90			DONE
+Auto-merging src/SURFEX/modn_surf_atm.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modn_surf_atm.F90			DONE
+Auto-merging src/SURFEX/modn_sson.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modn_sson.F90				DONE
+Auto-merging src/SURFEX/modn_seafluxn.F90
+Auto-merging src/SURFEX/modn_isban.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modn_isban.F90				DONE
+Auto-merging src/SURFEX/mode_write_surf_fa.F90
+CONFLICT (content): Merge conflict in src/SURFEX/mode_write_surf_fa.F90			DONE
+Auto-merging src/SURFEX/mode_snow3l.F90
+CONFLICT (content): Merge conflict in src/SURFEX/mode_snow3l.F90			DONE
+Auto-merging src/SURFEX/mode_read_surf_fa.F90
+CONFLICT (content): Merge conflict in src/SURFEX/mode_read_surf_fa.F90			DONE
+Auto-merging src/SURFEX/mode_read_surf_cov.F90
+Auto-merging src/SURFEX/mode_gridtype_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/mode_gridtype_conf_proj.F90		DONE
+Auto-merging src/SURFEX/modd_write_surf_atm.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modd_write_surf_atm.F90		DONE
+Auto-merging src/SURFEX/modd_wp.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modd_wp.F90				DONE
+Auto-merging src/SURFEX/modd_surf_atm.F90
+Auto-merging src/SURFEX/modd_sson.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modd_sson.F90				DONE
+Auto-merging src/SURFEX/modd_snow_par.F90
+Auto-merging src/SURFEX/modd_seafluxn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modd_seafluxn.F90			DONE
+Auto-merging src/SURFEX/modd_pgdwork.F90
+Auto-merging src/SURFEX/modd_isban.F90
+Auto-merging src/SURFEX/modd_isba_optionsn.F90
+Auto-merging src/SURFEX/modd_diag_misc_isban.F90
+CONFLICT (content): Merge conflict in src/SURFEX/modd_diag_misc_isban.F90		DONE
+Auto-merging src/SURFEX/isba_meb.F90
+CONFLICT (content): Merge conflict in src/SURFEX/isba_meb.F90				DONE
+Auto-merging src/SURFEX/isba.F90
+CONFLICT (content): Merge conflict in src/SURFEX/isba.F90				DONE
+Auto-merging src/SURFEX/interpol_field2d.F90
+CONFLICT (content): Merge conflict in src/SURFEX/interpol_field2d.F90			DONE
+Auto-merging src/SURFEX/init_water_sbl.F90
+CONFLICT (content): Merge conflict in src/SURFEX/init_water_sbl.F90			DONE
+Auto-merging src/SURFEX/init_veg_pgdn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/init_veg_pgdn.F90			DONE
+Auto-merging src/SURFEX/init_teb_veg_optionsn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/init_teb_veg_optionsn.F90		DONE
+Auto-merging src/SURFEX/init_surf_atmn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/init_surf_atmn.F90			DONE
+Auto-merging src/SURFEX/init_seafluxn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/init_seafluxn.F90			NOT DONE
+Auto-merging src/SURFEX/init_isban.F90
+CONFLICT (content): Merge conflict in src/SURFEX/init_isban.F90				DONE
+Auto-merging src/SURFEX/init_isba_sbl.F90
+Auto-merging src/SURFEX/ini_surf_csts.F90
+CONFLICT (content): Merge conflict in src/SURFEX/ini_surf_csts.F90			DONE
+Auto-merging src/SURFEX/ini_data_param.F90
+CONFLICT (content): Merge conflict in src/SURFEX/ini_data_param.F90			DONE
+Auto-merging src/SURFEX/ini_data_cover.F90
+Auto-merging src/SURFEX/ini_csts.F90
+CONFLICT (content): Merge conflict in src/SURFEX/ini_csts.F90				DONE
+Auto-merging src/SURFEX/grid_modif_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/grid_modif_conf_proj.F90		DONE
+Auto-merging src/SURFEX/gather_and_write_mpi.F90
+CONFLICT (content): Merge conflict in src/SURFEX/gather_and_write_mpi.F90		DONE
+Auto-merging src/SURFEX/extend_grid_on_halo_conf_proj.F90
+CONFLICT (content): Merge conflict in src/SURFEX/extend_grid_on_halo_conf_proj.F90	DONE
+Auto-merging src/SURFEX/ecume_flux.F90
+CONFLICT (content): Merge conflict in src/SURFEX/ecume_flux.F90				DONE
+Auto-merging src/SURFEX/e_budget_meb.F90
+CONFLICT (content): Merge conflict in src/SURFEX/e_budget_meb.F90			DONE
+Auto-merging src/SURFEX/diag_isba_initn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/diag_isba_initn.F90			DONE
+Auto-merging src/SURFEX/diag_inline_watfluxn.F90
+Auto-merging src/SURFEX/diag_inline_tebn.F90
+Auto-merging src/SURFEX/diag_inline_seafluxn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/diag_inline_seafluxn.F90		DONE
+Auto-merging src/SURFEX/diag_inline_isban.F90
+Auto-merging src/SURFEX/diag_inline_flaken.F90
+Auto-merging src/SURFEX/default_surf_atm.F90
+CONFLICT (content): Merge conflict in src/SURFEX/default_surf_atm.F90			DONE
+Auto-merging src/SURFEX/default_seaice.F90
+CONFLICT (content): Merge conflict in src/SURFEX/default_seaice.F90
+Auto-merging src/SURFEX/default_isba.F90
+CONFLICT (content): Merge conflict in src/SURFEX/default_isba.F90			DONE
+Auto-merging src/SURFEX/default_diag_surf_atm.F90
+Auto-merging src/SURFEX/dealloc_seafluxn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/dealloc_seafluxn.F90			NOT DONE
+Auto-merging src/SURFEX/coupling_watfluxn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/coupling_watfluxn.F90			DONE
+Auto-merging src/SURFEX/coupling_surf_atmn.F90
+CONFLICT (content): Merge conflict in src/SURFEX/coupling_surf_atmn.F90			DONE
+Auto-merging src/SURFEX/coupling_seafluxn.F90
+Auto-merging src/SURFEX/coupling_isban.F90
+Auto-merging src/SURFEX/coupling_ideal_flux.F90
+Auto-merging src/SURFEX/coupling_flaken.F90
+Auto-merging src/SURFEX/compute_isba_parameters.F90
+Auto-merging src/SURFEX/avg_urban_fluxes.F90
+CONFLICT (content): Merge conflict in src/SURFEX/avg_urban_fluxes.F90			DONE
+Auto-merging src/SURFEX/averaged_tsrad_teb.F90
+CONFLICT (content): Merge conflict in src/SURFEX/averaged_tsrad_teb.F90			DONE
+Auto-merging src/SURFEX/average_rad.F90
+CONFLICT (content): Merge conflict in src/SURFEX/average_rad.F90			DONE			
+Auto-merging src/SURFEX/average_diag_misc_isban.F90
+CONFLICT (content): Merge conflict in src/SURFEX/average_diag_misc_isban.F90		DONE
+Auto-merging src/SURFEX/albedo_ta96.F90
+Auto-merging src/OFFLIN/write_header_mnh.F90
+CONFLICT (content): Merge conflict in src/OFFLIN/write_header_mnh.F90			DONE
+Auto-merging src/OFFLIN/prep.F90
+CONFLICT (content): Merge conflict in src/OFFLIN/prep.F90				MORE TO DO
+Auto-merging src/OFFLIN/pgd.F90
+CONFLICT (content): Merge conflict in src/OFFLIN/pgd.F90				DONE
+Auto-merging src/OFFLIN/offline.F90
+Auto-merging src/OFFLIN/modn_io_offline.F90
+CONFLICT (content): Merge conflict in src/OFFLIN/modn_io_offline.F90			DONE
+Auto-merging src/OFFLIN/init_index_mpi.F90
+Auto-merging src/Makefile.SURFEX.mk
+Auto-merging src/LIB/TOPD/init_surf_topd.F90
+CONFLICT (content): Merge conflict in src/LIB/TOPD/init_surf_topd.F90			DONE
+Auto-merging src/LIB/GELATO/modi_gltools_wriios.F90
+Auto-merging src/LIB/GELATO/modi_gltools_updaponds_r.F90
+Auto-merging src/LIB/GELATO/modi_gltools_timers.F90
+Auto-merging src/LIB/GELATO/modi_gltools_readnam.F90
+Auto-merging src/LIB/GELATO/modi_gltools_outdia.F90
+Auto-merging src/LIB/GELATO/modi_gltools_nextval.F90
+Auto-merging src/LIB/GELATO/modi_gltools_nextline.F90
+Auto-merging src/LIB/GELATO/modi_gltools_newice_r.F90
+Auto-merging src/LIB/GELATO/modi_gltools_mskerr.F90
+Auto-merging src/LIB/GELATO/modi_gltools_mixice_r.F90
+Auto-merging src/LIB/GELATO/modi_gltools_mixice.F90
+Auto-merging src/LIB/GELATO/modi_gltools_glterr.F90
+Auto-merging src/LIB/GELATO/modi_gltools_dealloc.F90
+Auto-merging src/LIB/GELATO/modi_gltools_chkout.F90
+Auto-merging src/LIB/GELATO/modi_gltools_chkinp.F90
+Auto-merging src/LIB/GELATO/modi_gltools_chkglo_r.F90
+Auto-merging src/LIB/GELATO/modi_gltools_chkglo.F90
+Auto-merging src/LIB/GELATO/modi_gltools_avevai.F90
+Auto-merging src/LIB/GELATO/modi_gltools_alloc.F90
+Auto-merging src/LIB/GELATO/modi_gltools_adjflx.F90
+Auto-merging src/LIB/GELATO/modi_glt_vhdslab_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_vhdiff_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updtfl_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updtfl.F90
+Auto-merging src/LIB/GELATO/modi_glt_updsnow_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updsnow.F90
+Auto-merging src/LIB/GELATO/modi_glt_updsal_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updice_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updice_mix_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updice.F90
+Auto-merging src/LIB/GELATO/modi_glt_updhsn_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updhsi_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updbud_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_updbud.F90
+Auto-merging src/LIB/GELATO/modi_glt_updasn_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_thermo_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_thermo_lead_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_thermo_ice_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_thermo_end_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_thermo.F90
+Auto-merging src/LIB/GELATO/modi_glt_swabs_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_sublim_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_snowice_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_sndmlrf.F90
+Auto-merging src/LIB/GELATO/modi_glt_sndatmf.F90
+Auto-merging src/LIB/GELATO/modi_glt_saltrap_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_salflx_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_salflx.F90
+Auto-merging src/LIB/GELATO/modi_glt_precip_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_oceflx_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_mltvtp_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_lmltsi_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_invert.F90
+Auto-merging src/LIB/GELATO/modi_glt_inibud.F90
+Auto-merging src/LIB/GELATO/modi_glt_icevsp_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_icetrans_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_getmlrf.F90
+Auto-merging src/LIB/GELATO/modi_glt_getatmf.F90
+Auto-merging src/LIB/GELATO/modi_glt_gelato.F90
+Auto-merging src/LIB/GELATO/modi_glt_frzvtp_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_constrain_r.F90
+Auto-merging src/LIB/GELATO/modi_glt_blowsn_r.F90
+Auto-merging src/LIB/GELATO/mode_glt_init.F90
+CONFLICT (content): Merge conflict in src/LIB/GELATO/mode_glt_init.F90		NOT DONE
+Auto-merging src/ASSIM/soda.F90
+CONFLICT (content): Merge conflict in src/ASSIM/soda.F90			MORE TO DO
+Auto-merging src/ASSIM/read_namelists_assim.F90
+CONFLICT (content): Merge conflict in src/ASSIM/read_namelists_assim.F90	DONE
+Auto-merging src/ASSIM/read_assim_conf.F90
+CONFLICT (modify/delete): src/ASSIM/oi_control.F90 deleted in origin/NWP_81plus and modified in HEAD. Version HEAD of src/ASSIM/oi_control.F90 left in tree.
+Auto-merging src/ASSIM/oi_cacsts.F90
+CONFLICT (content): Merge conflict in src/ASSIM/oi_cacsts.F90			DONE
+Auto-merging src/ASSIM/modn_assim.F90
+CONFLICT (content): Merge conflict in src/ASSIM/modn_assim.F90			DONE
+Auto-merging src/ASSIM/modd_assim.F90
+CONFLICT (content): Merge conflict in src/ASSIM/modd_assim.F90			DONE
+Auto-merging src/ASSIM/default_assim.F90
+CONFLICT (content): Merge conflict in src/ASSIM/default_assim.F90		DONE
+CONFLICT (modify/delete): STRATO/TESTS/script_to_old.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_to_old.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_prep.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_prep.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_pgd_physio.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_pgd_physio.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_offline.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_offline.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_isba_neige_dif.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_isba_neige_dif.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_isba_neige.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_isba_neige.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_exec_soda_enkf0.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_exec_soda_enkf0.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_exec_soda_enkf.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_exec_soda_enkf.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_exec_soda_ekf0.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_exec_soda_ekf0.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_exec_soda_ekf.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_exec_soda_ekf.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_csts.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_csts.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/script_cas_parts.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/script_cas_parts.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/PYTHON/myfct2.py deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/PYTHON/myfct2.py left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/PYTHON/compR.cfg deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/PYTHON/compR.cfg left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/PYTHON/comp.py deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/PYTHON/comp.py left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/PREP/FILES/LAKE_LTA_NEW.nc deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/PREP/FILES/LAKE_LTA_NEW.nc left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/PC/script_all.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/PC/script_all.sh left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/OPTIONS.nam_000 deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/OPTIONS.nam_000 left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/CAS_PART/SODA/SCRIPTS/smsdate deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/CAS_PART/SODA/SCRIPTS/smsdate left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/BEAUFIX/soda.exe deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/BEAUFIX/soda.exe left in tree.
+CONFLICT (modify/delete): STRATO/TESTS/BEAUFIX/script_all.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/BEAUFIX/script_all.sh left in tree.
+Automatic merge failed; fix conflicts and then commit the result.

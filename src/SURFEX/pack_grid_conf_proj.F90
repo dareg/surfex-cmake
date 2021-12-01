@@ -26,6 +26,7 @@
 !!    ------------
 !!
 !!    Original    03/2004
+!!    A. Mary      07/2018 : width of I and E zones
 !!
 !----------------------------------------------------------------------------
 !
@@ -80,6 +81,9 @@ REAL, DIMENSION(:), ALLOCATABLE   :: ZDY2     ! Y grid mesh size
 INTEGER                           :: IL1        ! number of points of input grid
 INTEGER                           :: ILONE      ! extension zone
 INTEGER                           :: ILATE      ! extension zone
+INTEGER                           :: IWIDTH_I_X ! width of I zone
+INTEGER                           :: IWIDTH_I_Y ! width of I zone
+
 REAL, DIMENSION(:), POINTER       :: ZGRID_PAR2 ! parameters of output grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !----------------------------------------------------------------------------
@@ -97,7 +101,9 @@ ALLOCATE(ZDY1(IL1))
 !
  CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR1,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATOR,ZLONOR,IIMAX,IJMAX,        &
-                              ZX1,ZY1,ZDX1,ZDY1,KLATE=ILATE,KLONE=ILONE)  
+                              ZX1,ZY1,ZDX1,ZDY1,&
+                              KLATE=ILATE, KLONE=ILONE, &
+                              KWIDTH_I_X=IWIDTH_I_X, KWIDTH_I_Y=IWIDTH_I_Y)
 !
 ALLOCATE(ZX2 (KMASK_SIZE))
 ALLOCATE(ZY2 (KMASK_SIZE))
@@ -116,7 +122,8 @@ DEALLOCATE(ZDY1)
 !
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR2,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATOR,ZLONOR,IIMAX,IJMAX,        &
-                              ZX2,ZY2,ZDX2,ZDY2,ILATE,ILONE     )  
+                              ZX2,ZY2,ZDX2,ZDY2,&
+                              ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y) 
 !
 IF (OPACK) THEN
   PGRID_PAR2(:) = ZGRID_PAR2(:)

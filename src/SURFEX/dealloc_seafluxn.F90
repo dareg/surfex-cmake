@@ -84,10 +84,15 @@ CALL OCEAN_REL_INIT(SM%OR)
 !
 !-------------------------------------------------------------------------------------
 !
+<<<<<<< HEAD
 IF (ASSOCIATED(SM%S%ICE)) THEN
   CALL SM%S%ICE%DEALLOC()
   NULLIFY(SM%S%ICE)
 END IF
+=======
+IF (SM%S%CSEAICE_SCHEME=='GELATO' ) CALL GLTOOLS_DEALLOC(SM%S%TGLT &
+    &,SM%S%GLTPARAM%nnflxin,SM%S%GLTPARAM%noutlu,SM%S%GLTPARAM%ntd,SM%S%GLTPARAM%lwg)
+>>>>>>> origin/NWP_81plus
 !
 IF (LHOOK) CALL DR_HOOK('DEALLOC_SEAFLUX_N',1,ZHOOK_HANDLE)
 !

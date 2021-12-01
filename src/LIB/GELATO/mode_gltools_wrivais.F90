@@ -65,9 +65,10 @@ CONTAINS
 ! ------------------- SUBROUTINE gltools_wrivai_2d ----------------------
 !
 SUBROUTINE gltools_wrivai_2d  &
-        ( tpnam,pfield,kunit,kdbl,pwgt )
+        ( tpnam,pfield,&
+        n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,&
+    kunit,kdbl,pwgt  )
 !
-  USE modd_glt_param
   USE modd_types_glt
   USE modd_glt_const_thm
   USE modi_gltools_strlower
@@ -80,7 +81,10 @@ SUBROUTINE gltools_wrivai_2d  &
 #endif
 #endif
   IMPLICIT NONE
+
 !
+  INTEGER, INTENT(IN) :: nt,nx,ny,nxglo,nyglo,n2vilu,n0vilu,noutlu
+  LOGICAL, INTENT(IN) :: lwg
 !* Arguments
 !
   TYPE(t_def), INTENT(in) ::  &
@@ -250,9 +254,10 @@ END SUBROUTINE gltools_wrivai_2d
 ! ------------------- SUBROUTINE gltools_wrivai_3d ----------------------
 !
 SUBROUTINE gltools_wrivai_3d  &
-        ( tpnam,pfield,kunit,kdbl,pwgt )
+        (tpnam,pfield,&
+        gelato_leadproc,gelato_myrank,&
+        n0vilu,n2vilu,noutlu,nt,nx,nxglo,ny,nyglo,lwg,kunit,kdbl,pwgt )
 !
-  USE modd_glt_param
   USE modd_types_glt
   USE modd_glt_const_thm
   USE modi_gltools_strlower
@@ -266,6 +271,8 @@ SUBROUTINE gltools_wrivai_3d  &
 !
 !* Arguments
 !
+  INTEGER, INTENT(IN) ::  nt,nx,ny,nxglo,nyglo,gelato_myrank,gelato_leadproc,noutlu,n0vilu,n2vilu
+  LOGICAL, INTENT(IN) ::  lwg
   TYPE(t_def), INTENT(in) ::  &
         tpnam
   REAL, DIMENSION(:,:,:), INTENT(in) ::  & 

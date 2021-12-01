@@ -52,6 +52,8 @@
 !
 MODULE modd_glt_param
   IMPLICIT NONE
+
+  TYPE t_glt_param 
 !
 !
 !
@@ -150,10 +152,17 @@ CHARACTER(10) ::  &
 !       chsidmp='DAMP_FAC'   --> damp (thickness of all ice categories is 
 !         modified by the same factor: h_i => h_i * fac)
 !       chsidmp='PRESCRIBE'  --> prescribe
+!  - ccsvdmp    : sea ice conservation method, if a constraint is applied
+!       ccsvdmp='NONE'       --> do nothing
+!       ccsvdmp='VOLUME'     --> try to conserve volume. 
+!         Always possible in case of sea ice concentration damping
+!           (play on thickness)
+!         Not always in case of sea ice thickness damping
+!           (since we try to play on sea ice concentration, [0-1])
 !  - xhsidmpeft : sea ice thickness damping e-folding time (in days)
 !
 CHARACTER(20) ::  &
-  cfsidmp, chsidmp
+  cfsidmp, chsidmp, ccsvdmp
 REAL ::  &
   xfsidmpeft, xhsidmpeft
 !
@@ -547,6 +556,11 @@ REAL ::  &
 CHARACTER(80) ::  &
   clabel 
 !
+
+END TYPE t_glt_param
+
+TYPE(t_glt_param) ::  GLOBGLTPARAM
+
 END MODULE modd_glt_param
 !
 ! ------------------------ END MODULE modd_glt_param ------------------------

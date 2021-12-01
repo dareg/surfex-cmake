@@ -1,3 +1,4 @@
+!
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -2606,6 +2607,7 @@ IF (.NOT.U%LECOSG) CALL ECOCLIMAP2_LAI(DTCO%NYEAR)
 !*    11.    Secondary variables on natural covers
 !            -------------------------------------
 !
+IF (IDC == 0) THEN
  CALL INI_DATA_PARAM(PH_TREE=XDATA_H_TREE,PLAI=XDATA_LAI, &
                      PALBNIR_VEG=XDATA_ALBNIR_VEG, PALBVIS_VEG=XDATA_ALBVIS_VEG,                    &
                      PALBUV_VEG=XDATA_ALBUV_VEG, PRSMIN=XDATA_RSMIN,                                &
@@ -2621,6 +2623,7 @@ IF (.NOT.U%LECOSG) CALL ECOCLIMAP2_LAI(DTCO%NYEAR)
                      PGMES_ST=XDATA_GMES_ST, PGC_ST=XDATA_GC_ST, PBSLAI_ST=XDATA_BSLAI_ST,          &
                      PSEFOLD_ST=XDATA_SEFOLD_ST, PDMAX_ST=XDATA_DMAX_ST,                            &
                      PGNDLITTER=XDATA_GNDLITTER, PH_VEG=XDATA_H_VEG, PZ0LITTER=XDATA_Z0LITTER      )
+ENDIF
 !
 IDC = 1
 !

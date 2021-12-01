@@ -3,9 +3,9 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, DTV, GB, DK, DEK, DMK, GDO, S, K, P, PEK,    &
-                       HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF, &
-                       PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,      &
+    SUBROUTINE GARDEN (DTCO, G, T, TOP, TIR, AT, DTV, GB, DK, DEK, DMK, GDO, S, K, P, PEK,    &
+                       HIMPLICIT_WIND, TPTIME, PTSUN, PPEW_A_COEF, PPEW_B_COEF,       &
+                PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,                  &
                        PTSTEP, PZREF, PTA, PQA, PEXNS, PRHOA, PCO2, PPS, PRR,   &
                        PSR, PZENITH, PSW, PLW, PVMOD, PALBNIR_TVEG,             &
                        PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL,              &
@@ -76,7 +76,9 @@ USE MODD_AGRI_n, ONLY : AGRI_t,AGRI_INIT
 USE MODD_TYPE_DATE_SURF,    ONLY: DATE_TIME
 USE MODD_SURF_PAR,          ONLY: XUNDEF
 USE MODD_CSTS,              ONLY: XCPD
+USE MODD_ISBA_PAR,          ONLY: XCVHEATF
 !
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_ISBA
 USE MODI_VEGETATION_UPDATE
@@ -115,6 +117,8 @@ TYPE(ISBA_P_t), INTENT(INOUT) :: P
 TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
 !
 TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
+!
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
 !                                                     ! 'OLD' = direct
@@ -170,7 +174,13 @@ TYPE(AGRI_t) :: YAG
 REAL, DIMENSION(SIZE(PPS)) :: ZDIRCOSZW           ! orography slope cosine (=1 in TEB)
 REAL, DIMENSION(SIZE(PPS),GDO%NNBIOMASS) :: ZRESP_BIOMASS_INST       ! instantaneous biomass respiration (kgCO2/kgair m/s)
 REAL, DIMENSION(SIZE(PPS)) :: ZUSTAR
+REAL, DIMENSION(SIZE(PPS)) :: ZSLOPEDIR           ! slope direction (=-1 in TEB)
+REAL, DIMENSION(SIZE(PPS)) :: ZWINDDIR            ! wind direction (=-1 in TEB)
+INTEGER, DIMENSION(SIZE(PPS)) :: KTAB_SYT         ! array of index containing
+                                                  ! opposite direction for Sytron  (=0 in TEB)
 !
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_DIR_SW ! spectral direct and diffuse irradiance used in snow cro 
+REAL, DIMENSION(SIZE(PPS),1) :: ZP_SCA_SW!
 !  temperatures
 !
 REAL, DIMENSION(SIZE(PPS)) :: ZTA ! estimate of air temperature at future time
@@ -188,6 +198,7 @@ REAL, DIMENSION(SIZE(PPS)) :: ZTDEEP_A
 REAL, DIMENSION(SIZE(PPS)) :: ZP_MEB_SCA_SW, ZPALPHAN, ZZ0G_WITHOUT_SNOW, &
                               ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN, &
                               ZZ0H_MEBN, ZZ0EFF_MEBN
+REAL, DIMENSION(SIZE(PPS)) :: ZP_ANGL_NORM   ! angle between the normal to the surface and the sun used in snowcro
 INTEGER                    :: ILU
 LOGICAL :: GMASK, GALB
 LOGICAL :: GUPDATED
@@ -203,6 +214,10 @@ IF (LHOOK) CALL DR_HOOK('GARDEN',0,ZHOOK_HANDLE)
 ILU = SIZE(PPS)
 !
 ZDIRCOSZW = 1.
+ZSLOPEDIR = -1.
+ZWINDDIR  = -1.
+!
+KTAB_SYT=0
 !
 CALL SSO_INIT(YSS)
 !
@@ -241,18 +256,22 @@ DK%XZ0EFF(:) =  PEK%XZ0(:)
 !
 !*      2.2    Call ISBA for green areas
 !              -------------------------
+ZP_DIR_SW=XUNDEF
+ZP_SCA_SW=XUNDEF
 !
 ALLOCATE(GB%XIACAN(SIZE(PPS),SIZE(S%XABC)))
 !
- CALL ISBA(GDO, K, P, PEK, G, YAG, DK, DEK, DMK,                                  &
-           TPTIME, S%XPOI, S%XABC, GB%XIACAN, .FALSE., PTSTEP,                    &
-           HIMPLICIT_WIND, PZREF, PZREF, ZDIRCOSZW, PTA, PQA, PEXNS, PRHOA, PPS,  &
-           PEXNS, PRR, PSR, PZENITH, ZP_MEB_SCA_SW, PSW, PLW, PVMOD, PPEW_A_COEF, &
-           PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF, PPEQ_B_COEF,       &
-           PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL, PALBVIS_TSOIL, ZPALPHAN,    &
-           ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN,         &
-           ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2, K%XFFG(:), K%XFFV(:),          &
-           ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG, ZRESP_BIOMASS_INST, ZDEEP_FLUX, PIRRIG )     
+ CALL ISBA(GDO, K, P, PEK, G, YAG, DK, DEK, DMK, TPTIME, S%XPOI, S%XABC,       &
+           GB%XIACAN, .FALSE., PTSTEP, HIMPLICIT_WIND, PZREF, PZREF,           &
+           ZDIRCOSZW, XCVHEATF, ZSLOPEDIR, PEK%TSNOW%GRAN2(:,:),               &
+           PEK%TSNOW%GRAN2(:,:), PTA, PQA, PEXNS, PRHOA, PPS, PEXNS, PRR, PSR, &
+           PZENITH,ZP_ANGL_NORM,ZP_MEB_SCA_SW, PSW, PLW, PVMOD, ZWINDDIR,      &
+           PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, PPET_B_COEF,    &
+           PPEQ_B_COEF, AT, PALBNIR_TVEG, PALBVIS_TVEG, PALBNIR_TSOIL,         &
+           PALBVIS_TSOIL, ZPALPHAN, ZZ0G_WITHOUT_SNOW, ZZ0_MEBV, ZZ0H_MEBV,    &
+           ZZ0EFF_MEBV, ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN, ZTDEEP_A, PCO2,      &
+           K%XFFG(:), K%XFFV(:), ZEMISF, ZUSTAR, PAC_AGG, PHU_AGG,             &
+           ZRESP_BIOMASS_INST, ZDEEP_FLUX, PIRRIG, KTAB_SYT, ZP_DIR_SW, ZP_SCA_SW)
 !
 IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') PEK%TSNOW%TS(:)= DMK%XSNOWTEMP(:,1)
 !
@@ -279,7 +298,7 @@ END IF
 ! Diagnostic of respiration carbon fluxes and soil carbon evolution
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-PSFCO2          (:) = 0.
+PSFCO2(:)         = 0.
 DEK%XRESP_ECO (:) = 0.
 DEK%XRESP_AUTO(:) = 0.
 !

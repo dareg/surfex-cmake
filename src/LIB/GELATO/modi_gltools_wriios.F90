@@ -105,9 +105,8 @@ END MODULE MODI_gltools_wriios
 ! ----------------------- SUBROUTINE gltools_wriios -----------------------
 !
 SUBROUTINE gltools_wriios  &
-        ( hnam,pfield,pwgt )
+        ( hnam,pfield,nx,ny,pwgt)
 !
-  USE modd_glt_param
   USE modd_glt_const_thm
 #if ! defined in_surfex
   USE iom
@@ -117,7 +116,7 @@ SUBROUTINE gltools_wriios  &
 #endif
 
   IMPLICIT NONE
-
+  INTEGER,INTENT(in) :: nx,ny
 !
 !* Arguments
 !

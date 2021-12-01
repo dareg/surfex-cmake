@@ -139,10 +139,11 @@ END MODULE MODI_glt_updbud_r
 ! .. Subroutine used to check global heat budget.
 !
 SUBROUTINE glt_updbud_r  &
-  ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud )
+  ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud, &
+    niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,  &
+    dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
 !
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r
@@ -150,7 +151,11 @@ SUBROUTINE glt_updbud_r  &
   IMPLICIT NONE
 !
   INTEGER, INTENT(in) ::  &
-         kinit
+         kinit,noutlu,nl,nt,np,nprinto,nsnwrad,nicesal,niceage,nmponds,nilay,nslay
+  LOGICAL, INTENT(in) ::  &
+         lwg,lp1,lp2,lp3
+  REAL, INTENT(in) ::  xdomsrf_r,dtt
+  REAL,DIMENSION(:), INTENT(in) :: sf3tinv
   CHARACTER(*), INTENT(in) ::  &
          omsg
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
@@ -210,7 +215,7 @@ SUBROUTINE glt_updbud_r  &
 ! 1.2. Print information 
 ! -----------------------
 !
-  CALL glt_info_si_r( omsg,tpsit=tpsit )
+  CALL glt_info_si_r( omsg,niceage,nicesal,nl,nmponds,noutlu,np,nt,lp2,lp3,tpsit=tpsit )
 !
 !
 !
@@ -257,12 +262,12 @@ SUBROUTINE glt_updbud_r  &
   IF ( nprinto>=1 ) THEN
 !
 ! Energy
-      zhiit0 = glt_avg_r( tpdom,tpbud(:)%hii,0 )
-      zbiit0 = glt_avg_r( tpdom,tpbud(:)%bii,0 )
+      zhiit0 = glt_avg_r( tpdom,tpbud(:)%hii,0,np,xdomsrf_r )
+      zbiit0 = glt_avg_r( tpdom,tpbud(:)%bii,0,np,xdomsrf_r )
       zhii0 = zhiit0 + zbiit0
 !
 ! Water
-      zwii0 = glt_avg_r( tpdom,tpbud(:)%wii,0 )
+      zwii0 = glt_avg_r( tpdom,tpbud(:)%wii,0,np,xdomsrf_r )
 !
       IF (lwg) THEN
         WRITE(noutlu,*)  &
@@ -311,7 +316,7 @@ SUBROUTINE glt_updbud_r  &
   IF ( nprinto>=1 ) THEN
 !
 ! Energy
-      zhli0 = glt_avg_r( tpdom,tpbud(:)%hli,0 )
+      zhli0 = glt_avg_r( tpdom,tpbud(:)%hli,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total incoming ENERGY (on leads)   :',  &
           zhli0
@@ -320,7 +325,7 @@ SUBROUTINE glt_updbud_r  &
       ENDIF
 !
 ! Water
-      zwli0 = glt_avg_r( tpdom,tpbud(:)%wli,0 )
+      zwli0 = glt_avg_r( tpdom,tpbud(:)%wli,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total incoming WATER (on leads)    :',  &
           zwli0
@@ -341,7 +346,7 @@ SUBROUTINE glt_updbud_r  &
   tpbud(:)%hio = tptfl(:)%lio+tptfl(:)%tio
 !
   IF ( nprinto>=1 ) THEN
-      zhio0 = glt_avg_r( tpdom,tpbud(:)%hio,0 )
+      zhio0 = glt_avg_r( tpdom,tpbud(:)%hio,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing ENERGY (under sea ice) :',  &
           zhio0
@@ -352,7 +357,7 @@ SUBROUTINE glt_updbud_r  &
 ! Water
 ! This flux is just described by tptfl%wio
 !
-      zwio0 = glt_avg_r( tpdom,tptfl(:)%wio,0 )*xday2sec
+      zwio0 = glt_avg_r( tpdom,tptfl(:)%wio,0,np,xdomsrf_r )*xday2sec
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing WATER (under sea ice)  :',  &
           zwio0
@@ -366,7 +371,7 @@ SUBROUTINE glt_updbud_r  &
 !     D S = sml * cio
 !
       zsalt2(:) = tptfl(:)%sio
-      zcio0 = glt_avg_r( tpdom,zsalt2,0 )*xday2sec
+      zcio0 = glt_avg_r( tpdom,zsalt2,0,np,xdomsrf_r )*xday2sec
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing SALT (under sea ice)   :',  &
           zcio0
@@ -385,7 +390,7 @@ SUBROUTINE glt_updbud_r  &
   tpbud(:)%hlo = zhlo2(:)
 !
   IF ( nprinto>=1 ) THEN
-      zhlo0 = glt_avg_r( tpdom,tpbud(:)%hlo,0 )
+      zhlo0 = glt_avg_r( tpdom,tpbud(:)%hlo,0,np,xdomsrf_r )
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing ENERGY (under leads)   :',  &
           zhlo0
@@ -394,7 +399,7 @@ SUBROUTINE glt_updbud_r  &
       ENDIF
 !
 ! Water
-      zwlo0 = glt_avg_r( tpdom,tptfl%wlo,0 )*xday2sec
+      zwlo0 = glt_avg_r( tpdom,tptfl%wlo,0,np,xdomsrf_r )*xday2sec
       IF (lwg) THEN
         WRITE(noutlu,*) '    Total outgoing WATER (under leads)    :',  &
           zwlo0
@@ -445,7 +450,7 @@ SUBROUTINE glt_updbud_r  &
   ENDIF
 !
   IF ( nprinto>=1 ) THEN
-      zenthalpy0 = glt_avg_r( tpdom, tpbud(:)%enn-tpbud(:)%eni,0 ) / dtt
+      zenthalpy0 = glt_avg_r( tpdom, tpbud(:)%enn-tpbud(:)%eni,0,np,xdomsrf_r ) / dtt
       IF (lwg) THEN
         WRITE(noutlu,*)  &
           '    D(enthalpy) from beg. of time step :',  &
@@ -475,7 +480,7 @@ SUBROUTINE glt_updbud_r  &
   tpbud(:)%fwn = zwater2(:)
 !
   IF ( nprinto>=1 ) THEN
-      zwater0 = glt_avg_r( tpdom,tpbud(:)%fwn-tpbud(:)%fwi,0 ) / dtt
+      zwater0 = glt_avg_r( tpdom,tpbud(:)%fwn-tpbud(:)%fwi,0,np,xdomsrf_r ) / dtt
       IF (lwg) THEN
         WRITE(noutlu,*) '    D(water) from beg. of time step   :',  &
           zwater0
@@ -500,7 +505,7 @@ SUBROUTINE glt_updbud_r  &
   tpbud(:)%isn = zsalt2(:)
 !
   IF ( nprinto>=1 ) THEN
-      zsalt0 = glt_avg_r( tpdom,tpbud(:)%isn-tpbud(:)%isi,0 ) / dtt
+      zsalt0 = glt_avg_r( tpdom,tpbud(:)%isn-tpbud(:)%isi,0,np,xdomsrf_r ) / dtt
       IF (lwg) THEN
         WRITE(noutlu,*) '    D(salt) from beg. of time step    :',  &
           zsalt0
@@ -541,5 +546,3 @@ SUBROUTINE glt_updbud_r  &
 !
 END SUBROUTINE glt_updbud_r
 
-! ---------------------- END SUBROUTINE glt_updbud_r ------------------------
-! -----------------------------------------------------------------------

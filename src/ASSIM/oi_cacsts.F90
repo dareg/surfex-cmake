@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !option! -O nomove
 !****---------------------------------------------------------------------------
 !****   CACSTS : INITIALIZES THE SURFACE FIELDS
@@ -19,9 +15,10 @@
 !        M.Hamrud      01-Jul-2006  Revised surface fields
 !        A.Trojakova   27-Jun-2007 bugfixing ZV10M (surface pointers)
 !        F. Bouyssel    27-Mar-2011  Use of REPS2 instead of REPS3 for ZNEI
+!        Y. Seity     19-Feb-2018 : Add ZECHGXFU  
 !****---------------------------------------------------------------------------
 !
-SUBROUTINE OI_CACSTS(KNBPT,PT2INC,PH2INC,PWGINC,PWS_O,                      &
+SUBROUTINE OI_CACSTS(KNBPT,PT2INC,PH2INC,PWGINC,PSNINC,PWS_O,               &
                      KDAT,KSSSSS,                                           &
                      PTP,PWP,PTL,PSNS,PTS,PWS,                              &
                      PTCLS,PHCLS,PUCLS,PVCLS,PSSTC,PWPINC1,PWPINC2,PWPINC3, &
@@ -81,6 +78,7 @@ INTEGER,INTENT(IN)    :: KNBPT, KDAT, KSSSSS
 REAL   ,INTENT(IN)    :: PT2INC(KNBPT) 
 REAL   ,INTENT(IN)    :: PH2INC(KNBPT) 
 REAL   ,INTENT(IN)    :: PWGINC(KNBPT)
+REAL   ,INTENT(IN)    :: PSNINC(KNBPT)
 REAL   ,INTENT(IN)    :: PWS_O(KNBPT)
 REAL   ,INTENT(INOUT) :: PTP(KNBPT)
 REAL   ,INTENT(INOUT) :: PWP(KNBPT)
@@ -130,7 +128,7 @@ REAL, DIMENSION(KNBPT) :: ZIVEG
 REAL, DIMENSION(KNBPT) :: ZWFC, ZWPMX, ZWSAT, ZWSMX, ZWWILT
 REAL, DIMENSION(KNBPT) :: ZDWG_DWG, ZDWG_DW2
 !
-REAL :: ZECHGU, ZNEI, ZCLI, ZPD, ZCLIMCA
+REAL :: ZECHGU, ZECHGXFU, ZNEI, ZCLI, ZPD, ZCLIMCA
 REAL :: ZTSC, ZTPC, ZWSC, ZWPC, ZSNC
 REAL :: ZV10M, ZPRECIP, ZWPI, ZDACW, ZDACW2, ZMU0, ZMU0M
 !
@@ -152,6 +150,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('OI_CACSTS',0,ZHOOK_HANDLE)
 !
 ZECHGU = REAL(NECHGU) * 3600.
+ZECHGXFU = REAL(NECHGXFU) * 3600.
 !
 !**  1.1 Initialization of raw polynomials and reference fields.   
 !
@@ -279,7 +278,7 @@ DO JROF = 1,KNBPT
 ! coefficients : depend on the nebulosity
 !
     IF ( XANEBUL>XREPS3 ) THEN
-      ZPD = 1.0 - XANEBUL*(PATMNEB(JROF)/ZECHGU)**NNEBUL
+      ZPD = 1.0 - XANEBUL*(PATMNEB(JROF)/ZECHGXFU)**NNEBUL
     ELSE
       ZPD = 1.0
     ENDIF
@@ -445,8 +444,9 @@ DO JROF = 1,KNBPT
     PWP(JROF) = (1.0-ZCLIMCA)*PWP(JROF) + ZCLIMCA*ZWPC
 
     ! Relaxation for snow
+    ! call back of Sn with a possible correction for melting
     IF ( LRELCLIMSNOW ) THEN
-      ZSNA  = (1.0-XRCLIMCA)*PSNS(JROF) + XRCLIMCA*ZSNC
+      ZSNA  = (1.0-XRCLIMCA)*PSNS(JROF) + XRCLIMCA*ZSNC + PSNINC(JROF)
       ZMSN  = MAX(0.0, XRSNSA/21600.*ZECHGU*(PTCLS(JROF)-XTT))**XRSNSB
       PSNS(JROF) = MAX (ZSNA-ZMSN,0.0)
     ENDIF

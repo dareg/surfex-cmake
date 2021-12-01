@@ -6,7 +6,8 @@
 SUBROUTINE COUPLING_SURF_ATM_n (YSC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR, KMONTH,  &
                                 KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, PZENITH2,      &
                                 PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA, PRHOA, PSV,   &
-                                PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW, PSCA_SW, PSW_BANDS,& 
+                                PCO2, PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW,            & 
+                                PDIR_SW, PSCA_SW, PSW_BANDS,                              &
                                 PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2, PSFU, PSFV, PTRAD, &
                                 PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0, PZ0H, PQSURF,     &
                                 PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF,       &
@@ -38,11 +39,17 @@ SUBROUTINE COUPLING_SURF_ATM_n (YSC, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP, KYEAR,
 !!      B. Decharme 04/2013 new coupling variables and replace RW_PRECIP_n by CPL_GCM_n
 !!      Modified    06/2013 by J.Escobar  : replace DOUBLE PRECISION by REAL to handle problem for promotion of real on IBM SP
 !!      R. Séférian 03/2014 Adding decoupling between CO2 seen by photosynthesis and radiative CO2
+!!      A. Mary     04/2016 add ORORAD
 !!-------------------------------------------------------------
 !
 !
 USE MODD_SURFEX_n, ONLY : SURFEX_t
 USE MODD_SSO_n,    ONLY : SSO_t
+USE MODD_PREP_SNOW, ONLY : NIMPUR
+!
+#ifdef SFX_OL
+USE MODN_IO_OFFLINE, ONLY : LFORCIMP
+#endif
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 USE MODD_SURF_PAR,       ONLY : XUNDEF
@@ -79,6 +86,7 @@ USE MODI_COUPLING_SEA_n
 USE MODI_COUPLING_TOWN_n
 !
 USE MODI_CPL_GCM_n
+USE MODI_ORORAD
 !
 IMPLICIT NONE
 !
@@ -116,9 +124,9 @@ REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
-REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
+REAL, DIMENSION(KI,KSW),INTENT(INOUT) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
-REAL, DIMENSION(KI,KSW),INTENT(IN) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
+REAL, DIMENSION(KI,KSW),INTENT(INOUT) :: PSCA_SW ! diffuse solar radiation (on horizontal surf.)
 !                                             !                                       (W/m2)
 REAL, DIMENSION(KSW),INTENT(IN)  :: PSW_BANDS ! mean wavelength of each shortwave band (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZENITH   ! zenithal angle at t  (radian from the vertical)
@@ -130,6 +138,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN)  :: PIMPWET      ! 
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN)  :: PIMPDRY      !
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -166,6 +176,8 @@ INTEGER :: JTILE                        ! loop on type of surface
 LOGICAL :: GNATURE, GTOWN, GWATER, GSEA ! .T. if the corresponding surface is represented
 INTEGER :: ISWB                         ! number of shortwave spectral bands
 !
+REAL, DIMENSION(KI)  :: ZLW
+!
 REAL, DIMENSION(KI)  :: ZPEW_A_COEF ! implicit coefficients
 REAL, DIMENSION(KI)  :: ZPEW_B_COEF ! needed if HCOUPLING='I'
 REAL, DIMENSION(KI)  :: ZPET_A_COEF
@@ -195,7 +207,7 @@ REAL, DIMENSION(KI,KSW,NTILESFC) :: ZSCA_ALB_TILE ! diffuse albedo
 REAL :: XTIME0
 !
 INTEGER :: IINDEXEND
-INTEGER :: INBTS, JI
+INTEGER :: INBTS, JI , JIMP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
@@ -279,6 +291,17 @@ END IF
 #ifdef SFX_MPI
 XTIME0 = MPI_WTIME()
 #endif
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! - - - - 
+! Orographic shadowing 
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+! - - - - 
+!
+ZLW(:)=PLW(:)
+IF (YSC%USS%LDSV .OR. YSC%USS%LDSH .OR. YSC%USS%LDSL) &
+        CALL ORORAD(YSC%USS,PZENITH,PAZIM,PSCA_ALB,PTRAD,PEMIS,PDIR_SW,PSCA_SW,ZLW)
+
+!
 !
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ! SEA Tile calculations:
@@ -380,7 +403,7 @@ IF ((YSC%SV%NBEQ > 0).AND.(YSC%CHU%LCH_SURF_EMIS)) THEN
       IF (SIZE(YSC%CHE%TSEMISS(JI)%NETIMES).GT.INBTS) INBTS=SIZE(YSC%CHE%TSEMISS(JI)%NETIMES)
     ENDDO
     CALL CH_EMISSION_FLUX_n(YSC%DTCO, YSC%U, YSC%CHE, YSC%SV, YSC%CHU, &
-                        HPROGRAM,PTIME,PSFTS(:,YSC%SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
+                            HPROGRAM,PTIME,PSFTS(:,YSC%SV%NSV_CHSBEG:IINDEXEND),PRHOA,PTSTEP,INBTS)
   ELSE IF (YSC%CHU%CCH_EMIS=='SNAP') THEN
     CALL CH_EMISSION_SNAP_n(YSC%CHN, HPROGRAM,YSC%U%NSIZE_FULL,PTIME,PTSUN,KYEAR,KMONTH,KDAY,PRHOA,YSC%UG%G%XLON)
     CALL CH_EMISSION_TO_ATM_n(YSC%CHN, YSC%SV, PSFTS,PRHOA)
@@ -479,6 +502,8 @@ REAL, DIMENSION(KSIZE) :: ZP_PS       ! pressure at atmospheric model surface (P
 REAL, DIMENSION(KSIZE) :: ZP_PA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KSIZE) :: ZP_ZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KSIZE) :: ZP_CO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPWET
+REAL, DIMENSION(KSIZE,NIMPUR) :: ZP_IMPDRY
 REAL, DIMENSION(KSIZE,KSV) :: ZP_SV       ! scalar concentration in the air
 REAL, DIMENSION(KSIZE) :: ZP_SNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KSIZE) :: ZP_RAIN     ! liquid precipitation                  (kg/m2/s)
@@ -531,12 +556,22 @@ DO JJ=1,KSIZE
   ZP_CO2(JJ)        = PCO2        (JI)
   ZP_RAIN(JJ)       = PRAIN       (JI)
   ZP_SNOW(JJ)       = PSNOW       (JI)
-  ZP_LW(JJ)         = PLW         (JI)
+  ZP_LW(JJ)         = ZLW         (JI)
   ZP_PS(JJ)         = PPS         (JI)
   ZP_PA(JJ)         = PPA         (JI)
   ZP_ZS(JJ)         = PZS         (JI)
 ENDDO
 !
+#ifdef SFX_OL
+  IF (LFORCIMP) THEN        !Fill impurity forcing fields if LFORCIMP activated
+    DO JIMP=1,NIMPUR
+      DO JJ=1,KSIZE
+        ZP_IMPWET(JJ,JIMP)=PIMPWET(JI,JIMP)
+        ZP_IMPDRY(JJ,JIMP)=PIMPDRY(JI,JIMP)
+      ENDDO
+    ENDDO
+  ENDIF
+#endif
 !consider decoupling between CO2 emploied for photosynthesis and radiative CO2
 !recommended as C4MIP option (XCO2UNCPL in ppmv)
 IF(XCO2UNCPL/=XUNDEF)THEN
@@ -599,16 +634,17 @@ ELSEIF (KTILE==2) THEN
                                ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH, ZP_SFTS, ZP_SFCO2, ZP_SFU,    &
                                ZP_SFV, ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB, ZP_EMIS, ZP_TSURF,   &
                                ZP_Z0, ZP_Z0H, ZP_QSURF, ZP_PEW_A_COEF, ZP_PEW_B_COEF,        &
-                               ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,   &
-                               'OK'                      )
+               ZP_PET_A_COEF, ZP_PEQ_A_COEF, ZP_PET_B_COEF, ZP_PEQ_B_COEF,                    &
+               'OK'                                                                           )
   !
 ELSEIF (KTILE==3) THEN
   !
-  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL, &
+  CALL COUPLING_NATURE_n(YSC%DTCO, YSC%UG, YSC%U, YSC%USS, YSC%IM, YSC%DTZ, YSC%DLO, YSC%DL,  &
                          YSC%DLC, YSC%NDST, YSC%SLT, HPROGRAM, HCOUPLING, PTIMEC, PTSTEP,     &
                          KYEAR, KMONTH, KDAY, PTIME, YSC%U%NSIZE_NATURE, KSV, KSW, ZP_TSUN,   &
                          ZP_ZENITH, ZP_ZENITH2, ZP_AZIM, ZP_ZREF, ZP_UREF, ZP_ZS, ZP_U, ZP_V, &
-                         ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, HSV, ZP_RAIN, ZP_SNOW, ZP_LW,  &
+                         ZP_QA, ZP_TA, ZP_RHOA, ZP_SV, ZP_CO2, ZP_IMPWET,ZP_IMPDRY,           &
+                         HSV, ZP_RAIN, ZP_SNOW, ZP_LW,                                        &
                          ZP_DIR_SW, ZP_SCA_SW, PSW_BANDS, ZP_PS, ZP_PA, ZP_SFTQ, ZP_SFTH,     &
                          ZP_SFTS, ZP_SFCO2, ZP_SFU, ZP_SFV, ZP_TRAD, ZP_DIR_ALB, ZP_SCA_ALB,  &
                          ZP_EMIS, ZP_TSURF, ZP_Z0, ZP_Z0H, ZP_QSURF, ZP_PEW_A_COEF,           &

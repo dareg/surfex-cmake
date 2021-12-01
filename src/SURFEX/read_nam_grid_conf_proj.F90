@@ -33,6 +33,7 @@
 !!    -------------
 !!      Original    01/2004 
 !!      A.Alias    10/2010 - XLATC/XLONC added to save the XLATCEN/XLONCEN values for FA
+!!      A. Mary      07/2018 : width of I and E zones
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -47,6 +48,7 @@ USE MODE_POS_SURF
 USE MODI_OPEN_NAMELIST
 USE MODI_CLOSE_NAMELIST
 USE MODI_GET_LUOUT
+USE MODI_ABOR1_SFX
 USE MODI_READ_AND_SEND_MPI
 USE MODI_ABOR1_SFX
 !
@@ -106,6 +108,8 @@ INTEGER :: NIMAX    ! number of points in I direction
 INTEGER :: NJMAX    ! number of points in J direction
 INTEGER :: ILATE    ! size of extension zone
 INTEGER :: ILONE    ! size of extension zone
+INTEGER :: IWIDTH_I_X ! width of I zone
+INTEGER :: IWIDTH_I_Y ! width of I zone
 REAL    :: XDX      ! increment in X direction (in meters)
 REAL    :: XDY      ! increment in Y direction (in meters)
 !
@@ -115,7 +119,7 @@ LOGICAL :: GFOUND
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_CONF_PROJ/XLAT0, XLON0, XRPK, XBETA
-NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY,ILONE,ILATE
+NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY,ILONE,ILATE,IWIDTH_I_X,IWIDTH_I_Y
 !
 !------------------------------------------------------------------------------
 !
@@ -125,52 +129,55 @@ IF (LHOOK) CALL DR_HOOK('READ_NAM_GRID_CONF_PROJ',0,ZHOOK_HANDLE)
  CALL GET_LUOUT(HPROGRAM,ILUOUT)
 !
 IF (HDIR/='H') THEN
-!
- CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
-!
-!---------------------------------------------------------------------------
-!
-!*       2.    Reading of projection parameters
-!              --------------------------------
-!
- CALL POSNAM(ILUNAM,'NAM_CONF_PROJ',GFOUND,ILUOUT)
-IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ)
-!
-!---------------------------------------------------------------------------
-!
-!*       2.    Reading parameters of the grid
-!              ------------------------------
-!
- CALL POSNAM(ILUNAM,'NAM_CONF_PROJ_GRID',GFOUND,ILUOUT)
- ILONE=0
- ILATE=0
-IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ_GRID)
-!
-!---------------------------------------------------------------------------
- CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
-!---------------------------------------------------------------------------
-!
-!*       3.    Number of points
-!              ----------------
-!
-KL = NIMAX * NJMAX
-IF ((ILONE == 0 .AND. ILATE /= 0) .OR. (ILONE /= 0 .AND. ILATE == 0)) THEN
+  !      
+  CALL OPEN_NAMELIST(HPROGRAM,ILUNAM)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       2.    Reading of projection parameters
+  !              --------------------------------
+  !
+  CALL POSNAM(ILUNAM,'NAM_CONF_PROJ',GFOUND,ILUOUT)
+  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ)
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       2.    Reading parameters of the grid
+  !              ------------------------------
+  !
+  CALL POSNAM(ILUNAM,'NAM_CONF_PROJ_GRID',GFOUND,ILUOUT)
+  ILONE=0
+  ILATE=0
+  IWIDTH_I_X=8
+  IWIDTH_I_Y=8
+  IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ_GRID)
+  !
+  !---------------------------------------------------------------------------
+  CALL CLOSE_NAMELIST(HPROGRAM,ILUNAM)
+  !---------------------------------------------------------------------------
+  !
+  !*       3.    Number of points
+  !              ----------------
+  !
+  KL = NIMAX * NJMAX
+  IF ((ILONE == 0 .AND. ILATE /= 0) .OR. (ILONE /= 0 .AND. ILATE == 0)) THEN
   CALL ABOR1_SFX('READ_NAM_GRID_CONF_PROJ: KLONE AND KLATE ARE NOT CONSISTENT WRT 0')
-ENDIF
-!
-!---------------------------------------------------------------------------
-!
-!*       3.    Array of X and Y coordinates
-!              ----------------------------
-!
-!
-ALLOCATE(ZX(KL))
-ALLOCATE(ZY(KL))
-DO JJ=1,NJMAX
-  DO JI=1,NIMAX
-    JL = JI + (JJ-1) * NIMAX
-    ZX(JL) = FLOAT(JI) * XDX
-    ZY(JL) = FLOAT(JJ) * XDY
+  ENDIF
+  !
+  !---------------------------------------------------------------------------
+  !
+  !*       3.    Array of X and Y coordinates
+  !              ----------------------------
+  !
+  !
+  ALLOCATE(ZX(KL))
+  ALLOCATE(ZY(KL))
+  DO JJ=1,NJMAX
+    DO JI=1,NIMAX
+      JL = JI + (JJ-1) * NIMAX
+      ZX(JL) = FLOAT(JI) * XDX
+      ZY(JL) = FLOAT(JJ) * XDY
+    END DO
   END DO
 END DO
   !
@@ -209,7 +216,9 @@ ELSE
     CALL GET_GRIDTYPE_CONF_PROJ(PGRID_FULL_PAR,PLAT0=XLAT0,PLON0=XLON0,&
                               PRPK=XRPK,PBETA=XBETA,PLATOR=ZLATOR(1),&
                               PLONOR=ZLONOR(1),KIMAX=NIMAX,KJMAX=NJMAX,&
-                              PX=ZX0,PY=ZY0,PDX=ZDX0,PDY=ZDY0)
+                              PX=ZX0,PY=ZY0,PDX=ZDX0,PDY=ZDY0,&
+                              KLATE=ILATE,KLONE=ILONE,&
+                              KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y)   
   !
   KL = NSIZE_TASK(NRANK)
   ALLOCATE(ZX(KL),ZY(KL),ZDX(KL),ZDY(KL))
@@ -229,7 +238,8 @@ ENDIF
 !
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,XLAT0,XLON0,XRPK,XBETA,    &
                               ZLATOR(1),ZLONOR(1),NIMAX,NJMAX,     &
-                              ZX,ZY,ZDX,ZDY,ILATE,ILONE            )  
+                              ZX,ZY,ZDX,ZDY,&
+                              ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y)   
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

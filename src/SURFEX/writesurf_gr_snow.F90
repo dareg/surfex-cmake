@@ -6,7 +6,7 @@
       SUBROUTINE WRITESURF_GR_SNOW (OSNOWDIMNC, HSELECT, HPROGRAM, HSURFTYPE, &
                                     HPREFIX, KI, KMASK_P, KPATCH, TPSNOW, &
                                     PWSN_WR, PRHO_WR, PHEA_WR, PAGE_WR, PSG1_WR, &
-                                    PSG2_WR, PHIS_WR, PALB_WR)
+                                    PSG2_WR, PHIS_WR, PALB_WR, PIMP_WR)
 !     ##########################################################
 !
 !!****  *WRITESURF_GR_SNOW* - routine to write snow surface fields
@@ -46,7 +46,7 @@
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_TYPE_SNOW
-USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT
+USE MODD_PREP_SNOW, ONLY : LSNOW_FRAC_TOT,NIMPUR
 !
 USE MODD_WRITE_SURF_ATM, ONLY : LSPLIT_PATCH
 !
@@ -84,6 +84,7 @@ REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSG1_WR
 REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PSG2_WR
 REAL, DIMENSION(:,:,:), INTENT(INOUT) :: PHIS_WR
 REAL, DIMENSION(:,:), INTENT(INOUT) :: PALB_WR
+REAL, DIMENSION(:,:,:,:) ,INTENT(INOUT) :: PIMP_WR
 !
 !*       0.2   declarations of local variables
 !
@@ -96,7 +97,7 @@ REAL, DIMENSION(:,:), INTENT(INOUT) :: PALB_WR
 !
 INTEGER             :: ISURFTYPE_LEN, IPAT_LEN, IFACT
 INTEGER             :: IRESP          ! IRESP  : return-code if a problem appears
-INTEGER             :: JL, JP         ! loop counter
+INTEGER             :: JL, JP , JIMP       ! loop counter
 !
 LOGICAL             :: GSNOW          ! T --> snow exists somewhere                                  
 !
@@ -166,6 +167,11 @@ CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,GSNOW,IRESP,HCOMMENT=YCOMMENT)
 IF (KPATCH==1) THEN
   YCOMMENT    = '(LOGICAL)'
   CALL WRITE_SURF(HSELECT,HPROGRAM,'LSNOW_FRAC_T',LSNOW_FRAC_TOT,IRESP,HCOMMENT=YCOMMENT)
+ENDIF
+!
+IF (TPSNOW%SCHEME=='CRO') THEN  
+  YCOMMENT    = '(INTEGER)'
+  CALL WRITE_SURF(HSELECT,HPROGRAM,'NIMPUR',NIMPUR,IRESP,HCOMMENT=YCOMMENT)
 ENDIF
 !
 IF ( OSNOWDIMNC .AND. HPROGRAM=='OFFLIN' ) THEN
@@ -333,6 +339,19 @@ ELSE
       WRITE(YCOMMENT,YFMT) 'X_Y_SGRAN2_',HSURFTYPE,JL,' (-)'
       CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%GRAN2(:,JL),&
               KI,PSG2_WR(:,JL,:))
+      !  
+      !*       11.b    Snow impur
+      !                ----------
+      ! 
+      DO JIMP=1,NIMPUR
+        WRITE(YFMT,'(A11,I1,A6)')     '(A2,I1,A1,A',ISURFTYPE_LEN,','//YNLAYER//')'
+        WRITE(YRECFM,YFMT) 'IM',JIMP,'_',HSURFTYPE,JL
+        YRECFM=ADJUSTL(HPREFIX//YRECFM)
+        WRITE(YFMT,'(A11,I1,A9)')     '(A8,I1,A1,A',ISURFTYPE_LEN,','//YNLAYER//',A8))'
+        WRITE(YCOMMENT,YFMT) 'X_Y_SIMP',JIMP,'_',HSURFTYPE,JL,' (-)'
+        CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%IMPUR(:,JL,JIMP),&
+            KI,PIMP_WR(:,JL,JIMP,:))
+      ENDDO
       !
       !*       13.   Historical parameter
       !              -------------------
@@ -380,6 +399,36 @@ IF (TPSNOW%SCHEME=='D95' .OR. TPSNOW%SCHEME=='EBA' .OR. TPSNOW%SCHEME=='1-L' .OR
   CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,YRECFM,YCOMMENT,KPATCH,KMASK_P,TPSNOW%ALB(:),&
           KI,PALB_WR)
   !
+END IF
+!
+!
+!*       15.    Mepra
+!              ------
+!
+IF (TPSNOW%SCHEME=='CRO') THEN
+  YCOMMENT = 'Depth of superior profile'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_SUP',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%DEP_SUP(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Total snow depth'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_TOT',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%DEP_TOT(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Height of the uppest continuous block of humid snow in the sup. profile'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'DEP_HUM',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%DEP_HUM(:),KI,PALB_WR)
+  !
+    YCOMMENT = 'Natural risk index'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'NAT_LEV',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%NAT_LEV(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Type of superior profile'
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'PRO_SUP_TYP',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%PRO_SUP_TYP(:),KI,PALB_WR)
+  !
+  YCOMMENT = 'Type of avalanche '
+  CALL  WRITE_FIELD_1D_PATCH(HSELECT,HPROGRAM,'AVA_TYP',YCOMMENT,KPATCH,KMASK_P,&
+                             TPSNOW%AVA_TYP(:),KI,PALB_WR)
 END IF
 !
 IF (LHOOK) CALL DR_HOOK('WRITESURF_GR_SNOW',1,ZHOOK_HANDLE)

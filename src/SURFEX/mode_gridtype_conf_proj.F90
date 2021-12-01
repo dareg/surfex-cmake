@@ -20,7 +20,8 @@ CONTAINS
 !     ####################################################################
       SUBROUTINE PUT_GRIDTYPE_CONF_PROJ(PGRID_PAR,PLAT0,PLON0,PRPK,PBETA,&
                                           PLATOR,PLONOR,KIMAX,KJMAX,       &
-                                          PX,PY,PDX,PDY,KLATE,KLONE        )  
+                                          PX,PY,PDX,PDY,&
+                                          KLATE,KLONE,KWIDTH_I_X,KWIDTH_I_Y           )  
 !     ####################################################################
 !
 !!****  *PUT_GRIDTYPE_CONF_PROJ* - routine to store in PGRID_PAR the horizontal grid
@@ -31,10 +32,9 @@ CONTAINS
 !!
 !!    MODIFICATIONS
 !!    -------------
-!!      Original    01/2004
-!!        M.Moge    06/2015 broadcast the space step to all MPI processes (necessary for reproductibility)
-!!      24-Sep-2015 : P.Marguinaud : DX and DY may be nul in AROME extension zone; 
-!!                    take first non-null value for DX and DY 
+!!      Original   01/2004
+!!      M.Moge     06/2015 broadcast the space step to all MPI processes (necessary for reproductibility)
+!!      A. Mary    07/2018 : width of I and E zones
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -73,6 +73,8 @@ REAL, DIMENSION(:), INTENT(IN)  :: PDY      ! Y grid mesh size
 REAL, DIMENSION(:), POINTER     :: PGRID_PAR! parameters defining this grid
 INTEGER,            INTENT(IN)  :: KLATE
 INTEGER,            INTENT(IN)  :: KLONE
+INTEGER,            INTENT(IN)  :: KWIDTH_I_X ! size of I zone
+INTEGER,            INTENT(IN)  :: KWIDTH_I_Y ! size of I zone
 !
 !
 !*       0.2   Declarations of local variables
@@ -99,10 +101,10 @@ IL = SIZE(PX)
 !
 IF (GFULL) THEN
   !* entire grid : one can store only X and Y cooridnate arrays in each direction
-  ALLOCATE(PGRID_PAR(14+KIMAX+KJMAX))
+  ALLOCATE(PGRID_PAR(16+KIMAX+KJMAX))
 ELSE
   !* only some points are present : one store the coordinates of all points
-  ALLOCATE(PGRID_PAR(14+2*IL))
+  ALLOCATE(PGRID_PAR(16+2*IL))
 END IF
 !
 PGRID_PAR(1) = PLAT0
@@ -114,9 +116,22 @@ PGRID_PAR(6) = PLONOR
 PGRID_PAR(7) = FLOAT(KIMAX)
 PGRID_PAR(8) = FLOAT(KJMAX)
 IF (IL>0) THEN
-  PGRID_PAR(9) = PDX(1)
-  PGRID_PAR(10)= PDY(1)
-ENDIF
+  PGRID_PAR( 9) = 0.
+  DO JJ = 1, SIZE (PDX)
+    IF (PDX (JJ) > 0. .AND. PDX (JJ) /= XUNDEF) THEN
+      PGRID_PAR( 9) = PDX (JJ)
+      EXIT
+    ENDIF
+  ENDDO
+  PGRID_PAR(10) = 0.
+  DO JJ = 1, SIZE (PDY)
+    IF (PDY (JJ) > 0. .AND. PDY (JJ) /= XUNDEF) THEN
+      PGRID_PAR(10) = PDY (JJ)
+      EXIT
+    ENDIF
+  ENDDO 
+ ENDIF
+!WRITE(20,*)'sous put_gridtype PGRIDPAR= ',SIZE(PGRID_PAR),PGRID_PAR
 !
 #ifdef MNH_PARALLEL
 !get the index of the process with IL>0 that own the southmost and the westmost point
@@ -159,21 +174,23 @@ END IF
 PGRID_PAR(11) = SIZE(PX)
 PGRID_PAR(12) = FLOAT(KLONE)
 PGRID_PAR(13) = FLOAT(KLATE)
+PGRID_PAR(14) = FLOAT(KWIDTH_I_X)
+PGRID_PAR(15) = FLOAT(KWIDTH_I_Y)
 IF (GFULL) THEN
-  PGRID_PAR(14) = 1
+  PGRID_PAR(16) = 1
 ELSE
-  PGRID_PAR(14) = 0
+  PGRID_PAR(16) = 0
 END IF
 !
 IF (GFULL) THEN
-  PGRID_PAR(14     +1:14+KIMAX) = PX(1:KIMAX)
+  PGRID_PAR(16     +1:16+KIMAX) = PX(1:KIMAX)
   DO JJ=1,KJMAX
-    PGRID_PAR(14+KIMAX+JJ) = PY(1+(JJ-1)*KIMAX)
+    PGRID_PAR(16+KIMAX+JJ) = PY(1+(JJ-1)*KIMAX)
   END DO
 ELSE
   IF (IL>0) THEN
-    PGRID_PAR(14     +1:14+  IL) = PX(:)
-    PGRID_PAR(14+  IL+1:14+2*IL) = PY(:)
+    PGRID_PAR(16     +1:16+  IL) = PX(:)
+    PGRID_PAR(16+  IL+1:16+2*IL) = PY(:)
   END IF
 END IF
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:PUT_GRIDTYPE_CONF_PROJ',1,ZHOOK_HANDLE)
@@ -185,7 +202,8 @@ END SUBROUTINE PUT_GRIDTYPE_CONF_PROJ
 !     ####################################################################
       SUBROUTINE GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PLAT0,PLON0,PRPK,PBETA,&
                                           PLATOR,PLONOR,KIMAX,KJMAX,       &
-                                          PX,PY,PDX,PDY,KL,KLATE,KLONE     )  
+                                          PX,PY,PDX,PDY,KL,KLATE,KLONE,&
+                                          KWIDTH_I_X,KWIDTH_I_Y)   
 !     ####################################################################
 !
 !!****  *GET_GRIDTYPE_CONF_PROJ* - routine to get from PGRID_PAR the horizontal grid
@@ -197,11 +215,14 @@ END SUBROUTINE PUT_GRIDTYPE_CONF_PROJ
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2004 
+!!     A. Mary      07/2018 : width of I and E zones
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
 !              ------------
 !
+USE MODD_SURF_PAR,     ONLY :  XUNDEF
+
 IMPLICIT NONE
 !
 !
@@ -229,6 +250,8 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PDY      ! Y grid mesh size
 INTEGER,            INTENT(OUT), OPTIONAL :: KL       ! number of points
 INTEGER,            INTENT(OUT), OPTIONAL :: KLATE    ! size of extension zone
 INTEGER,            INTENT(OUT), OPTIONAL :: KLONE    ! size of extension zone
+INTEGER,            INTENT(OUT), OPTIONAL :: KWIDTH_I_X ! size of I zone
+INTEGER,            INTENT(OUT), OPTIONAL :: KWIDTH_I_Y ! size of I zone
 !
 !
 !*       0.2   Declarations of local variables
@@ -259,29 +282,33 @@ IF (PRESENT(PDY))    PDY(:)= PGRID_PAR(10)
 IF (PRESENT(KL))     KL    = IL
 IF (PRESENT(KLONE))  KLONE = NINT (PGRID_PAR (12))
 IF (PRESENT(KLATE))  KLATE = NINT (PGRID_PAR (13))
+IF (PRESENT(KWIDTH_I_X))  KWIDTH_I_X = NINT (PGRID_PAR (14))
+IF (PRESENT(KWIDTH_I_Y))  KWIDTH_I_Y = NINT (PGRID_PAR (15))
 !
-GFULL = (PGRID_PAR(14)==1)
+GFULL = (PGRID_PAR(16)==1)
 !
 IF (PRESENT(PX)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
       DO JI=1,IIMAX
-        PX(JI+(JJ-1)*IIMAX) = PGRID_PAR(14+JI)
+        PX(JI+(JJ-1)*IIMAX) = PGRID_PAR(16+JI)
       END DO
     END DO
   ELSE
-    PX(:) = PGRID_PAR(14+1:14+IL)
+    PX(:) = PGRID_PAR(16+1:16+IL)
+    WHERE(PX(:)==XUNDEF) PX(:)=0.
   END IF        
 END IF
 IF (PRESENT(PY)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
       DO JI=1,IIMAX
-        PY(JI+(JJ-1)*IIMAX) = PGRID_PAR(14+IIMAX+JJ)
+        PY(JI+(JJ-1)*IIMAX) = PGRID_PAR(16+IIMAX+JJ)
       END DO
     END DO
   ELSE
-    PY(:) = PGRID_PAR(14+IL+1:14+2*IL)
+    PY(:) = PGRID_PAR(16+IL+1:16+2*IL)
+    WHERE(PY(:)==XUNDEF) PY(:)=0.
   END IF        
 END IF
 !
@@ -396,7 +423,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !*     1.     Preliminary calculations for all projections
 !             --------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_1',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ',0,ZHOOK_HANDLE)
 ZRDSDG = XPI/180.         ! Degree to radian conversion factor
 ZEPSI  = 10.*EPSILON(1.)      ! A small number
 !
@@ -454,10 +481,10 @@ ZIRDSDG = 1./ZRDSDG
 !
 ISIZE_OMP = MAX(1,SIZE(ZY)/NBLOCKTOT)
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_1',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_1',1,ZHOOK_HANDLE)
 !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_21',0,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_21',0,ZHOOK_HANDLE_OMP)
 !$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(JI,ZXI,ZYI,ZATA,ZRO2,ZT2)
   DO JI = 1,SIZE(ZY)
   
@@ -487,7 +514,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_21',0,ZHOOK_HA
     !
   ENDDO
 !$OMP END DO
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_21',1,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_21',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
 !
 !-------------------------------------------------------------------------------
@@ -508,10 +535,10 @@ ELSE
 !
   ZT1     = ALOG(TAN(XPI/4.+PLATOR*ZRDSDG/2.))
   !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_1',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_1',1,ZHOOK_HANDLE)
 
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_22',0,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_22',0,ZHOOK_HANDLE_OMP)
 !$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JI,ZXMI0,ZYMI0,ZT2)
   DO JI = 1,SIZE(PX)
 
@@ -528,7 +555,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_22',0,ZHOOK_HA
     !
   ENDDO
 !$OMP END DO
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_22',1,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_22',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
 !---------------------------------------------------------------------------------
 !
@@ -536,9 +563,10 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_22',1,ZHOOK_HA
 !             ----
 !
 END IF
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_3',0,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_3',0,ZHOOK_HANDLE)
 PLON(:)=PLON(:)+NINT((PLON0-PLON(:))/360.)*360.
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_3',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ_3',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:LATLON_CONF_PROJ',1,ZHOOK_HANDLE)
 !---------------------------------------------------------------------------------
 END SUBROUTINE LATLON_CONF_PROJ
 !---------------------------------------------------------------------------------
@@ -872,6 +900,7 @@ REAL                              :: ZCLAT0   ! cos(lat0)
 REAL                              :: ZSLAT0   ! sin(lat0)
 REAL                              :: ZRDSDG   ! pi/180
 LOGICAL                           :: GNORTHPROJ! T: projection from north pole
+INTEGER                           :: I
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 INTEGER :: J, ISIZE_OMP
 !
@@ -880,7 +909,7 @@ INTEGER :: J, ISIZE_OMP
 !*     1.     PRELIMINARY CALCULATION FOR ALL PROJECTIONS
 !             -------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_1',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ',0,ZHOOK_HANDLE)
 ZRDSDG = XPI/180.         ! Degree to radian conversion factor
 !
 GNORTHPROJ = PRPK < 0.
@@ -900,34 +929,37 @@ ZSLAT0 = SIN(ZRDSDG*ZLAT0)
 !
 ISIZE_OMP = MAX(1,SIZE(PMAP)/NBLOCKTOT)
 !
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_1',1,ZHOOK_HANDLE)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_1',1,ZHOOK_HANDLE)
 !
 IF (ABS(ZCLAT0)<1.E-10 .AND. (ABS(ZRPK-1.)<1.E-10)) THEN
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2a',0,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2a',0,ZHOOK_HANDLE_OMP)
 !$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(J)
   DO J=1,SIZE(PMAP)
     PMAP(J) = (1.+ZSLAT0)/(1.+SIN(ZRDSDG*ZLAT(J)))
   ENDDO
 !$OMP ENDDO
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2a',1,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2a',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
 ELSE
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2b',0,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2b',0,ZHOOK_HANDLE_OMP)
 !$OMP DO SCHEDULE(STATIC,ISIZE_OMP) PRIVATE(J)
   DO J=1,SIZE(PMAP)
     IF (ABS(COS(ZRDSDG*ZLAT(J)))>1.E-10) THEN
       PMAP(J) = ((ZCLAT0/COS(ZRDSDG*ZLAT(J)))**(1.-ZRPK))      &
               * ((1.+ZSLAT0)/(1.+SIN(ZRDSDG*ZLAT(J))))**ZRPK  
-    ELSE
+    ELSEIF(SIGN(ZLAT(J),1.) == 1.) THEN
       PMAP(J) = (1.+ZSLAT0)/(1.+SIN(ZRDSDG*ZLAT(J)))
+    ELSE
+      PMAP(J) = (1.+ZSLAT0)/1.E-10
     ENDIF
   ENDDO
 !$OMP ENDDO
-IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2b',1,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ_2b',1,ZHOOK_HANDLE_OMP)
 !$OMP END PARALLEL
 END IF
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:MAP_FACTOR_CONF_PROJ',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 END SUBROUTINE MAP_FACTOR_CONF_PROJ

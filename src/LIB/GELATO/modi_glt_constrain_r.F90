@@ -114,17 +114,22 @@ END MODULE MODI_glt_constrain_r
 ! ---------------------- SUBROUTINE glt_constrain_r ---------------------
 !
 !
-SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
+SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
+    nilay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
   USE modd_types_glt
-  USE modd_glt_param
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE modi_gltools_newice_r
   USE mode_gltools_enthalpy
-  USE modi_gltools_glterr
+  USE MODI_ABOR1_SFX
 !
   IMPLICIT NONE 
 !
+  INTEGER, INTENT(IN) :: nilay,noutlu,nl,nt,np,ntd
+  REAL, INTENT(IN) :: dtt,xfsidmpeft,xhsidmpeft,xfsimax,xhsimin
+  REAL,DIMENSION(:),INTENT(in) :: sf3tinv
+  LOGICAL, INTENT(IN) :: lwg
+  CHARACTER(*), INTENT(IN) :: ccsvdmp,chsidmp,cfsidmp
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
@@ -159,7 +164,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 !
 ! .. Initial snow and ice enthalpy
 !
-  CALL glt_aventh( tpsit,tpsil,zenti_i,zents_i )
+  CALL glt_aventh( tpsit,tpsil,zenti_i,zents_i,nilay,nl,np,nt,sf3tinv )
 !
 ! .. Global initializations
 !
@@ -177,7 +182,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
     zfsinew(:,:) = tpsit(:,:)%fsi
     zhsinew(:,:) = tpsit(:,:)%hsi
     zfsit_i(:) = SUM( tpsit(:,:)%fsi,DIM=1 )  ! sea ice total concentration
-    zhsit_i(:) = glt_avhicem_r( tpsit )     ! sea ice mean thickness
+    zhsit_i(:) = glt_avhicem_r( tpsit,np,nt )     ! sea ice mean thickness
 !
 ! These arrays need to be initialized here but also in the sea ice
 ! concentration section
@@ -189,8 +194,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 !
     IF ( (SIZE(tpsit_d(1,:)%hsi) > 0) .AND. &
          (MAXVAL( tpsit_d(1,:)%hsi ) < -1.) ) THEN 
-      CALL gltools_glterr( 'constrain_r',  &
-        'Wrong ice thickness damping data (all %hsi < -1).','STOP' )
+           CALL ABOR1_SFX('constrain_r: Wrong ice thickness damping data (all%hsi < -1).')
     ENDIF
 !
     DO jp=1,np
@@ -303,12 +307,12 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 !
 ! This routine will be active only where zfsi(:,:)>=epsil1 and tpsit(:,:)<epsil1
 !
-    CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
+    CALL gltools_newice_r(nl,np,nt, zfsi,zhsi,tpmxl,tpsit,tpsil )
 !
 ! Add rate of change of sea ice mass due to thickness constraint
 !
     tpdia(:)%dci = tpdia(:)%dci +  &
-      rhoice * ( glt_avhicem_r(tpsit) - zhsit_i(:) ) / dtt
+      rhoice * ( glt_avhicem_r(tpsit,np,nt) - zhsit_i(:) ) / dtt
 !
   ENDIF
 !
@@ -333,7 +337,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
     zfsinew(:,:) = tpsit(:,:)%fsi
     zhsinew(:,:) = tpsit(:,:)%hsi
     zfsit_i(:) = SUM( tpsit(:,:)%fsi,DIM=1 )  ! sea ice total concentration
-    zhsit_i(:) = glt_avhicem_r( tpsit )     ! sea ice mean thickness
+    zhsit_i(:) = glt_avhicem_r( tpsit,np,nt )     ! sea ice mean thickness
 !
 ! These arrays need to be initialized here but also in the sea ice thickness
 ! damping section
@@ -346,9 +350,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
     IF ( (SIZE(tpsit_d(1,:)%fsi) > 0) .AND. &
          ( MINVAL( tpsit_d(1,:)%fsi ) < 0. .OR.  &
          MAXVAL( tpsit_d(1,:)%fsi ) > 1. )) THEN
-      CALL gltools_glterr( 'constrain_r',  &
-        'Wrong ice concentration damping data &
-        & (probably given in % instead of fraction of unity).','STOP' )
+      CALL ABOR1_SFX('Wrong ice concentration damping data') 
     ENDIF
     DO jp=1,np
 !
@@ -364,8 +366,10 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
             tpsit(jk,jp)%fsi = tpsit(jk,jp)%fsi *  &
               ( 1. + zdamp(jp) / zfsit_i(jp) )
 ! Conserve sea ice volume
-            tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi /  &
-              ( 1. + zdamp(jp) / zfsit_i(jp) )
+            IF ( TRIM(ccsvdmp)=='VOLUME' ) THEN
+              tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi /  &
+                ( 1. + zdamp(jp) / zfsit_i(jp) )
+            ENDIF
           END DO 
 !
         ELSE IF ( TRIM(cfsidmp)=='PRESCRIBE' ) THEN
@@ -374,7 +378,9 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
           DO jk=1,nt
             tpsit(jk,jp)%fsi = tpsit(jk,jp)%fsi * zwork(jp)
 ! Conserve sea ice volume
-            tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi / zwork(jp)
+            IF ( TRIM(ccsvdmp)=='VOLUME' ) THEN
+              tpsit(jk,jp)%hsi = tpsit(jk,jp)%hsi / zwork(jp)
+            ENDIF 
           END DO
 !
         ENDIF 
@@ -406,7 +412,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 !
 ! This routine will be active only where zfsi(:,:)>=epsil1 and tpsit(:,:)<epsil1
 !
-    CALL gltools_newice_r( zfsi,zhsi,tpmxl,tpsit,tpsil )
+    CALL gltools_newice_r(nl,np,nt, zfsi,zhsi,tpmxl,tpsit,tpsil )
 !
 ! We want to make sure that the new total sea ice concentration does not
 ! exceed xfsimax
@@ -421,7 +427,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 ! Add rate of change of sea ice mass due to ice concentration constraint
 !
     tpdia(:)%dci = tpdia(:)%dci +  &
-      rhoice * ( glt_avhicem_r(tpsit) - zhsit_i(:) ) / dtt
+      rhoice * ( glt_avhicem_r(tpsit,np,nt) - zhsit_i(:) ) / dtt
 !
 ! Diagnose constraint
 !
@@ -437,7 +443,7 @@ SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
 ! .. Diagnose changes in snow/ice enthalpy due to damping/restoring 
 ! (there is no separation of the effects of the different operations)
 !
-  CALL glt_aventh( tpsit,tpsil,zenti_f,zents_f )
+  CALL glt_aventh( tpsit,tpsil,zenti_f,zents_f,nilay,nl,np,nt,sf3tinv )
   tpdia(:)%dmp = ( zenti_f+zents_f-zenti_i-zents_i ) / dtt
 !
 END SUBROUTINE glt_constrain_r

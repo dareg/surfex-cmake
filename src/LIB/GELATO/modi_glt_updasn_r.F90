@@ -135,16 +135,19 @@ END MODULE MODI_glt_updasn_r
 ! thermodynamic surface melting). 
 ! * (ASN = Albedo SNow)
 !
-SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia )
+
+
+SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
+        nilay,nl,nmponds,np,nt,albimlt,albsdry,albsmlt,dtt )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
-!
   USE modi_gltools_updaponds_r
 !
   IMPLICIT NONE
 !
+  REAL, INTENT(IN) :: albimlt,albsmlt,albsdry,dtt
+  INTEGER,INTENT(IN) :: nmponds,nilay,nl,nt,np
   LOGICAL, DIMENSION(nt,np), INTENT(in) ::  &
         gsmelt
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
@@ -264,7 +267,7 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia )
 ! covered with meltwater ponds, and in melting bare ice (1-fmp). This parameterization 
 ! updates the global melting ice albedo.
 !
-    CALL gltools_updaponds_r(gsmelt,tpatm,tpblki,tpdia,tpsit,zasi)
+    CALL gltools_updaponds_r(np,nt,dtt,gsmelt,tpatm,tpblki,tpdia,tpsit,zasi)
   ELSE
 !
 !

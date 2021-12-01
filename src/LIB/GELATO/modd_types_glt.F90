@@ -64,7 +64,6 @@
 !
 MODULE modd_types_glt
 !
-USE modd_glt_param
 !
 !
 ! 1. Structure defining the domain of study
@@ -697,28 +696,28 @@ TYPE t_glt
 ! -----------------------
 !
 ! Bathymetry (in meters)
-  REAL, DIMENSION(:,:), POINTER ::  &
+  REAL, DIMENSION(:,:), ALLOCATABLE ::  &
     bat
 ! Main domain 
-  TYPE(t_dom), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_dom), DIMENSION(:,:), ALLOCATABLE ::  &
     dom
 #if ! defined in_surfex
 ! Domain for dynamics (EVP) and advection
   REAL ::  &
     xymin
-  REAL, DIMENSION(:,:), POINTER ::     &
+  REAL, DIMENSION(:,:), ALLOCATABLE ::     &
     dxtr,dytr,fcor,tarear
-  REAL, DIMENSION(:,:), POINTER ::     &
+  REAL, DIMENSION(:,:), ALLOCATABLE ::     &
     HTN,HTE,HTS,HTW,dxtr4,dytr4,hm,um,  &
     dxta,dyta,dxt2r,dyt2r,HTNa,HTEa,  &
     cx,cy,cxx,cxy,cyy,cxxx,cxxy,cxyy,cyyy
-  REAL, DIMENSION(:,:,:,:), POINTER ::     &
+  REAL, DIMENSION(:,:,:,:), ALLOCATABLE ::     &
     mne,mnw,msw,mse
 ! Index mapping, for 1d packed vectors
-  INTEGER, DIMENSION(:,:,:), POINTER ::  &
+  INTEGER, DIMENSION(:,:,:), ALLOCATABLE ::  &
     index2d
 ! Ice mask, to pack arrays to 1d vectors
-  REAL, DIMENSION(:,:,:), POINTER ::  &
+  REAL, DIMENSION(:,:,:), ALLOCATABLE ::  &
     mskice
 #endif
 !
@@ -727,69 +726,69 @@ TYPE t_glt
 ! ---------------------------------------------
 !
 ! Ocean forcing
-  TYPE(t_mxl), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_mxl), DIMENSION(:,:), ALLOCATABLE ::  &
     oce_all
 ! Input atmospheric forcing (independent on the nature of the surface)
-  TYPE(t_atm), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_atm), DIMENSION(:,:), ALLOCATABLE ::  &
     atm_all
 ! Atmospheric forcing (potentially dependent on the nature of the surface)
-  TYPE(t_blk), DIMENSION(:,:,:), POINTER ::  &
+  TYPE(t_blk), DIMENSION(:,:,:), ALLOCATABLE ::  &
     atm_ice, atm_mix
 ! Atmospheric forcing on water
-  TYPE(t_blk), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_blk), DIMENSION(:,:), ALLOCATABLE ::  &
     atm_wat
 ! Output to the ocean
-  TYPE(t_2oc), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_2oc), DIMENSION(:,:), ALLOCATABLE ::  &
     all_oce
 ! Output to the atmosphere
-  TYPE(t_2at), DIMENSION(:,:,:), POINTER ::  &
+  TYPE(t_2at), DIMENSION(:,:,:), ALLOCATABLE ::  &
     ice_atm, mix_atm
 ! Constraint on sea ice
-  TYPE(t_sit), DIMENSION(:,:,:), POINTER ::  &
+  TYPE(t_sit), DIMENSION(:,:,:), ALLOCATABLE ::  &
     sit_d
 !
 !
 ! 5.4. Ice and mixed layer states 
 ! --------------------------------
 !
-  TYPE(t_evp), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_evp), DIMENSION(:,:), ALLOCATABLE ::  &
     evp
 !
-  TYPE(t_jfn), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_jfn), DIMENSION(:,:), ALLOCATABLE ::  &
     jfn
 !
-  TYPE(t_sit), DIMENSION(:,:,:), POINTER ::  &
+  TYPE(t_sit), DIMENSION(:,:,:), ALLOCATABLE ::  &
     sit
 !
-  TYPE(t_vtp), DIMENSION(:,:,:,:), POINTER ::  &
+  TYPE(t_vtp), DIMENSION(:,:,:,:), ALLOCATABLE ::  &
     sil
 !
-  TYPE(t_mxl), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_mxl), DIMENSION(:,:), ALLOCATABLE ::  &
     tml
 !
 !
 ! 5.5. Fluxes, budgets, diagnostics
 ! ----------------------------------
 !
-  REAL, DIMENSION(:,:), POINTER ::  &
+  REAL, DIMENSION(:,:), ALLOCATABLE ::  &
     ust
 !
-  REAL, DIMENSION(:,:,:), POINTER ::  &
+  REAL, DIMENSION(:,:,:), ALLOCATABLE ::  &
     cdia0,cdia
 !
-  TYPE(t_blk), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_blk), DIMENSION(:,:), ALLOCATABLE ::  &
     blkw
 !
-  TYPE(t_blk), DIMENSION(:,:,:), POINTER ::  &
+  TYPE(t_blk), DIMENSION(:,:,:), ALLOCATABLE ::  &
     blki
 !
-  TYPE(t_tfl), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_tfl), DIMENSION(:,:), ALLOCATABLE ::  &
     tfl
 !
-  TYPE(t_bud), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_bud), DIMENSION(:,:), ALLOCATABLE ::  &
     bud
 !
-  TYPE(t_dia), DIMENSION(:,:), POINTER ::  &
+  TYPE(t_dia), DIMENSION(:,:), ALLOCATABLE ::  &
     dia
 !
 END TYPE t_glt

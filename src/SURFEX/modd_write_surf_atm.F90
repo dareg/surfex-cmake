@@ -35,8 +35,6 @@
 IMPLICIT NONE
 !
 !-----------------------------------------------------------------------------------------------------
-! 
-INTEGER, PARAMETER :: MAX_NOWRITE_REC = 50000
 LOGICAL    :: LNOWRITE_CANOPY  ! flag used to avoid writing of canopy fields in OUTPUT file
 LOGICAL    :: LNOWRITE_TEXFILE ! flag used to avoid writing of tex file describing parameters
 !
@@ -48,11 +46,7 @@ LOGICAL :: LNAM_TEB_WRITTEN = .TRUE.
 LOGICAL :: LNAM_WATFLUX_WRITTEN = .TRUE.
 !
 LOGICAL :: LFIRST_WRITE = .TRUE.
-LOGICAL,           DIMENSION(MAX_NOWRITE_REC) :: LNOWRITE
-!$OMP THREADPRIVATE(LNOWRITE)
-CHARACTER(LEN=12), DIMENSION(MAX_NOWRITE_REC) :: CREC_TR
-!$OMP THREADPRIVATE(CREC_TR)
-
+LOGICAL, ALLOCATABLE :: LNOWRITE(:)
 INTEGER :: NCPT_WRITE = 0
 !
 LOGICAL :: LSPLIT_PATCH = .TRUE.

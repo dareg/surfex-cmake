@@ -55,20 +55,7 @@
 ! ----------------- BEGIN MODULE modi_gltools_temper_r -------------------- 
 !
 MODULE modi_gltools_temper_r 
-INTERFACE
-!
-FUNCTION gltools_temper_r(pent,pvsp)
-  USE modd_glt_param
-  REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
-    pent
-  REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(in) ::  &
-    pvsp
-  REAL, DIMENSION(nl,nt,np) ::  &
-    gltools_temper_r
-END FUNCTION gltools_temper_r
-!
-END INTERFACE
-END MODULE modi_gltools_temper_r
+CONTAINS
 !
 ! ------------------ END MODULE modi_gltools_temper_r ---------------------
 !
@@ -78,12 +65,13 @@ END MODULE modi_gltools_temper_r
 
 !   The input argument is sea ice vertical gltools_enthalpy profile, in K.
 
-FUNCTION gltools_temper_r(pent,pvsp)
+FUNCTION gltools_temper_r(pent,pvsp,&
+  nilay,nl,np,nt)
 !
-  USE modd_glt_param
   USE modd_glt_const_thm
 !
   IMPLICIT NONE
+  INTEGER,INTENT(in) :: nl,nt,np,nilay
 !
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
     pent
@@ -159,6 +147,7 @@ FUNCTION gltools_temper_r(pent,pvsp)
   END DO
 !
 END FUNCTION gltools_temper_r
+END MODULE modi_gltools_temper_r
 !
 ! ------------------------ END FUNCTION gltools_temper_r ------------------------ 
 ! -----------------------------------------------------------------------

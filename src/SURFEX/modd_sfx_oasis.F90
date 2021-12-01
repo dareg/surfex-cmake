@@ -86,6 +86,7 @@ INTEGER             :: NLAKE_EVAP_ID ! Evaporation id
 INTEGER             :: NLAKE_RAIN_ID ! Rainfall id
 INTEGER             :: NLAKE_SNOW_ID ! Snowfall id
 INTEGER             :: NLAKE_WATF_ID ! Freshwater id
+INTEGER             :: NSEA_PRES_ID  ! Surface pressure id
 !
 !-------------------------------------------------------------------------------
 !

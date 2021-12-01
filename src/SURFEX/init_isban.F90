@@ -8,7 +8,7 @@ SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, DTZ,&
                         KI, KSV, KSW, HSV, PCO2, PRHOA, PZENITH,      &
                         PAZIM, PSW_BANDS, PDIR_ALB, PSCA_ALB, PEMIS,  &
                         PTSRAD, PTSURF, KYEAR, KMONTH, KDAY, PTIME,   &
-                        TPDATE_END, HATMFILE, HATMFILETYPE, HTEST      )
+                        TPDATE_END, AT, HATMFILE, HATMFILETYPE, HTEST      )
 !#############################################################
 !
 !!****  *INIT_ISBA_n* - routine to initialize ISBA
@@ -61,6 +61,8 @@ SUBROUTINE INIT_ISBA_n (DTCO, OREAD_BUDGETC, UG, U, USS, GCP, IM, DTZ,&
 !
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
 !
+USE MODD_PREP_SNOW,        ONLY :   NIMPUR
+!
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
@@ -99,6 +101,8 @@ USE MODD_READ_NAMELIST,  ONLY : LNAM_READ
 !
 USE MODD_CO2V_PAR,  ONLY : XMCO2, XSPIN_CO2
 USE MODD_CSTS,      ONLY : XMD
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
 !
 USE MODI_INIT_IO_SURF_n
 !
@@ -173,6 +177,7 @@ REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                           !  midnight (UTC, s)
 TYPE(DATE), INTENT(INOUT) :: TPDATE_END
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
  CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
  CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
  CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
@@ -224,7 +229,7 @@ IF (LNAM_READ) THEN
                    IM%O%LVEGUPD, IM%O%LSPINUPCARBS, IM%O%LSPINUPCARBW,             &
                    IM%O%XSPINMAXS, IM%O%XSPINMAXW, IM%O%XCO2_START, IM%O%XCO2_END, &
                    IM%O%NNBYEARSPINS, IM%O%NNBYEARSPINW, IM%O%LNITRO_DILU,         &
-                   IM%O%XCSMAX                                                     )
+                   IM%O%XCSMAX, IM%O%XCVHEATF                                      )
  !                  
  CALL DEFAULT_CH_DEP(IM%CHI%CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(IM%CHI%LCH_BIO_FLUX)                  
@@ -233,10 +238,14 @@ IF (LNAM_READ) THEN
                         IM%ID%DM%LSURF_MISC_BUDGET, IM%ID%DM%LSURF_DIAG_ALBEDO,                     &
                         IM%ID%O%LSURF_BUDGETC, IM%ID%DM%LSURF_MISC_DIF, IM%ID%O%LPATCH_BUDGET,      &
                         IM%ID%O%LPGD, IM%ID%O%LRESET_BUDGETC, IM%ID%DE%LWATER_BUDGET,               &
-                        IM%ID%DM%LPROSNOW,IM%ID%DM%LVOLUMETRIC_SNOWLIQ,IM%ID%O%XDIAG_TSTEP          )  
+                        IM%ID%DM%LPROSNOW,IM%ID%DM%LPROBANDS,IM%ID%DM%LVOLUMETRIC_SNOWLIQ,IM%ID%O%XDIAG_TSTEP)
  !
- CALL DEFAULT_CROCUS(IM%O%LSNOWDRIFT, IM%O%LSNOWDRIFT_SUBLIM, IM%O%LSNOW_ABS_ZENITH, &
-                     IM%O%CSNOWMETAMO, IM%O%CSNOWRAD)
+ CALL DEFAULT_CROCUS(IM%O%CSNOWDRIFT, IM%O%LSNOWDRIFT_SUBLIM, IM%O%LSNOW_ABS_ZENITH,                &
+                     IM%O%CSNOWMETAMO, IM%O%CSNOWRAD,IM%O%LATMORAD,IM%O%LSNOWSYTRON,IM%O%CSNOWFALL, &
+                     IM%O%CSNOWCOND, IM%O%CSNOWHOLD, IM%O%CSNOWCOMP, IM%O%CSNOWZREF,                &
+                     IM%O%LSNOWCOMPACT_BOOL,IM%O%LSNOWMAK_BOOL,IM%O%LPRODSNOWMAK,                   &
+                     IM%O%LSNOWMAK_PROP, IM%O%LSNOWTILLER, IM%O%LSELF_PROD)
+ 
  ! 
 ENDIF
 !
@@ -477,7 +486,7 @@ IF ( IM%O%CSNOWMETAMO/="B92" ) THEN
   CALL READ_FZ06('drdt_bst_fit_60.nc')
 ENDIF
 !
-IF ( IM%O%CSNOWRAD=="TAR" .OR. IM%O%CSNOWRAD=="TA1" .OR.  IM%O%CSNOWRAD=="TA2" ) THEN
+IF ( IM%O%CSNOWRAD=="T17" ) THEN
   CALL INIT_TARTES()
 END IF
 !
@@ -486,12 +495,12 @@ IF (HINIT=='ALL') THEN
   ISNOW_NLAYER = IM%NPE%AL(1)%TSNOW%NLAYER
 ENDIF
 !
-IF (.NOT.LSPLIT_PATCH) THEN
-
+IF (.NOT.LSPLIT_PATCH ) THEN
   ALLOCATE(IM%S%XWORK_WR(KI,IM%O%NPATCH))
   IM%S%XWORK_WR(:,:) = XUNDEF
 
   ALLOCATE(IM%S%XWSN_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
+  ALLOCATE(IM%S%XBANDS_WR(KI,KSW,IM%O%NPATCH))
   ALLOCATE(IM%S%XRHO_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
   ALLOCATE(IM%S%XALB_WR(KI,IM%O%NPATCH))
   IF (YSNOW_SCHEME=='3-L' .OR. YSNOW_SCHEME=='CRO') THEN
@@ -501,9 +510,15 @@ IF (.NOT.LSPLIT_PATCH) THEN
       ALLOCATE(IM%S%XSG1_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
       ALLOCATE(IM%S%XSG2_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
       ALLOCATE(IM%S%XHIS_WR(KI,ISNOW_NLAYER,IM%O%NPATCH))
+      IF ( NIMPUR > 0 ) THEN
+        ALLOCATE(IM%S%XIMP_WR(KI,ISNOW_NLAYER,NIMPUR,IM%O%NPATCH))
+      ELSE
+        ALLOCATE(IM%S%XIMP_WR(0,0,0,1))
+      ENDIF
     ELSE
       ALLOCATE(IM%S%XSG1_WR(0,0,1))
       ALLOCATE(IM%S%XSG2_WR(0,0,1)) 
+      ALLOCATE(IM%S%XIMP_WR(0,0,0,1))
       ALLOCATE(IM%S%XHIS_WR(0,0,1))   
     ENDIF
   ELSE
@@ -518,17 +533,28 @@ ELSE
   ALLOCATE(IM%S%XWORK_WR(0,1))
 
   ALLOCATE(IM%S%XWSN_WR(0,0,1))
+  ALLOCATE(IM%S%XBANDS_WR(0,0,1))
   ALLOCATE(IM%S%XRHO_WR(0,0,1))
   ALLOCATE(IM%S%XALB_WR(0,1))
   ALLOCATE(IM%S%XHEA_WR(0,0,1))
   ALLOCATE(IM%S%XAGE_WR(0,0,1))
   ALLOCATE(IM%S%XSG1_WR(0,0,1))
   ALLOCATE(IM%S%XSG2_WR(0,0,1)) 
+  ALLOCATE(IM%S%XIMP_WR(0,0,0,1))
   ALLOCATE(IM%S%XHIS_WR(0,0,1))
 
   ALLOCATE(IM%S%TDATE_WR(0,1))
 
 ENDIF
+!
+!-------------------------------------------------------------------------------
+!
+!*       3.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+IM%AT=AT
+!
+!-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('INIT_ISBA_N',1,ZHOOK_HANDLE)
 !

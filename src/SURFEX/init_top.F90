@@ -42,7 +42,7 @@ USE MODD_SURF_PAR,ONLY : XUNDEF
 !
 USE MODD_SGH_PAR, ONLY : X2, X4, XREGP, XREGA
 !
-USE MODI_DGAM
+!USE MODI_DGAM
 USE MODI_GAMMAS
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -313,7 +313,7 @@ DO JI=1,INI
 !
 !    Computation of F(0 --> ymin)
 !
-     CALL DGAM(ZPHI,ZYMIN,10.,ZG,ZGYMIN,IFLG,IFLGST)
+!     CALL DGAM(ZPHI,ZYMIN,10.,ZG,ZGYMIN,IFLG,IFLGST)
 !      
 !    if the incomplete gamma function don't work, print why
 !
@@ -324,7 +324,7 @@ DO JI=1,INI
 !
 !    Computation of F(0 --> ymax)
 !
-     CALL DGAM(ZPHI,ZYMAX,10.,ZG,ZGYMAX,IFLG,IFLGST)
+!     CALL DGAM(ZPHI,ZYMAX,10.,ZG,ZGYMAX,IFLG,IFLGST)
 !      
 !    if the incomplete gamma function don't work, print why
 !
@@ -392,7 +392,7 @@ DO JI=1,INI
 !
 !       call incomplete gamma function for xsat
 !
-        CALL DGAM(ZPHI,ZYSAT,10.,ZG,ZGYSAT,IFLG,IFLGST)  
+!        CALL DGAM(ZPHI,ZYSAT,10.,ZG,ZGYSAT,IFLG,IFLGST)  
 !
 !       if the incomplete gamma function don't works, print why
 !
@@ -403,7 +403,7 @@ DO JI=1,INI
 !
 !       call incomplete gamma function for xsat
 !
-        CALL DGAM(ZPHI,ZY0,10.,ZG,ZGY0,IFLG,IFLGST)
+!        CALL DGAM(ZPHI,ZY0,10.,ZG,ZGY0,IFLG,IFLGST)
 !
 !       if the incomplete gamma function don't works, print why
 !

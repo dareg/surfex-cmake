@@ -134,18 +134,21 @@ END MODULE MODI_glt_vhdiff_r
 !
 SUBROUTINE glt_vhdiff_r  &
         ( tpdom,pmlf,pderiv,tpsit,tpdia,  &
-        pnsftop,pswtra,pent,pvsp,pcondb,pqtopmelt,pdhmelt,gsmelt )
+        pnsftop,pswtra,pent,pvsp,pcondb,pqtopmelt,pdhmelt,gsmelt, &
+        nilay,nl,noutlu,np,nslay,nt,dtt,xdomsrf_r,xswhdfr,&
+        lp1,lp2,lp3,lp4,lp5,lwg,&
+        sf3t,sf3tinv,&
+        ygltvhd )
 !
   USE modd_glt_const_thm
-  USE modd_glt_param
   USE modd_types_glt
-  USE modd_glt_vhd
   USE modi_gltools_temper_r
   USE mode_gltools_enthalpy
-  USE modi_gltools_glterr
   USE modi_glt_vhdslab_r
   USE mode_glt_stats_r
-!
+  USE MODD_GLT_VHD, ONLY : t_glt_vhd
+  USE MODI_ABOR1_SFX
+!!
   IMPLICIT NONE
 !
 !
@@ -155,6 +158,10 @@ SUBROUTINE glt_vhdiff_r  &
 !
 ! 1.1. Dummy arguments
 ! --------------------
+  LOGICAL, INTENT(IN) :: lwg,lp1,lp2,lp3,lp4,lp5 
+  INTEGER, INTENT(IN) :: noutlu,nslay,nilay,nl,nt,np 
+  REAL, INTENT(IN) :: dtt,xswhdfr,xdomsrf_r
+  REAL, DIMENSION(:),INTENT(IN) :: sf3tinv,sf3t
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
     tpdom
   REAL, DIMENSION(np), INTENT(in) ::  &
@@ -179,6 +186,7 @@ SUBROUTINE glt_vhdiff_r  &
     pdhmelt
   LOGICAL, DIMENSION(nt,np), INTENT(out) ::  &
     gsmelt
+  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
 !
 !
 ! 1.2. Local variables
@@ -239,13 +247,15 @@ SUBROUTINE glt_vhdiff_r  &
 ! ----------------------------
 !
   IF ( nslay/=1 ) THEN 
-      CALL gltools_glterr( 'vhdiff',  &
-        'The number of snow layers should be equal to 1','STOP' ) 
+      !CALL gltools_glterr( 'vhdiff',  &
+      !  'The number of snow layers should be equal to 1','STOP',noutlu,lwg) 
+      CALL ABOR1_SFX( 'The number of snow layers should be equal to 1')
   ENDIF
 !
   IF ( nilay<3 ) THEN
-      CALL gltools_glterr( 'vhdiff',  &
-        'The number of ice layers should be >= 3','STOP' )
+      !CALL gltools_glterr( 'vhdiff',  &
+      !  'The number of ice layers should be >= 3','STOP',noutlu,lwg)
+      CALL ABOR1_SFX( 'The number of ice layers should be >= 3')
   ENDIF
 !
 !
@@ -255,15 +265,15 @@ SUBROUTINE glt_vhdiff_r  &
 ! .. Note that for some platforms, these locally-allocated arrays need be
 ! deallocated (in reverse order) after use.
 !
-  ALLOCATE( zetai(0:nilay))
-  ALLOCATE( zinvetai(0:nilay) )
-  ALLOCATE( zetaik(0:nilay))
-  ALLOCATE( zetaikp1(0:nilay) )
-  ALLOCATE( zrhocpsi(nilay))
-  ALLOCATE( ztsib(0:nilay))
-  ALLOCATE( ztsi0(0:nilay) )
-  ALLOCATE( ztsi_m0(0:nilay) )
-  ALLOCATE( zkodzi(0:nilay+1) )
+  ALLOCATE( ygltvhd%zetai(0:nilay))
+  ALLOCATE( ygltvhd%zinvetai(0:nilay) )
+  ALLOCATE( ygltvhd%zetaik(0:nilay))
+  ALLOCATE( ygltvhd%zetaikp1(0:nilay) )
+  ALLOCATE( ygltvhd%zrhocpsi(nilay))
+  ALLOCATE( ygltvhd%ztsib(0:nilay))
+  ALLOCATE( ygltvhd%ztsi0(0:nilay) )
+  ALLOCATE( ygltvhd%ztsi_m0(0:nilay) )
+  ALLOCATE( ygltvhd%zkodzi(0:nilay+1) )
 !
 !
 ! 2.3. Global initializations
@@ -310,8 +320,8 @@ SUBROUTINE glt_vhdiff_r  &
 !
 !  zg1 = 3.
 !  zg2 = -1./3. 
-  zg1 = 1.
-  zg2 = 0.
+  ygltvhd%zg1 = 1.
+  ygltvhd%zg2 = 0.
 !
 ! .. Initialize convergence boolean and loop counter
 !
@@ -364,7 +374,7 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !
 ! .. Compute temperature vertical profile from gltools_enthalpy
 !
-  zvtp(:,:,:) = gltools_temper_r( pent(:,:,:),pvsp(:,:,:) )
+  zvtp(:,:,:) = gltools_temper_r( pent(:,:,:),pvsp(:,:,:),nilay,nl,np,nt )
 !
 !
 ! 2.4. Grid point initializations
@@ -373,22 +383,22 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
   DO jp=1,np
 !
 ! Sea water freezing point
-    zmlf = pmlf(jp)
+    ygltvhd%zmlf = pmlf(jp)
 !
     DO jk = 1,nt
 !
 ! PREVIOUS ITERATION STUFF
 ! -------------------------
 ! Previous iteration temperature of the atmosphere / bare ice or snow interface
-      ztsfb = tpsit(jk,jp)%tsf
+      ygltvhd%ztsfb = tpsit(jk,jp)%tsf
 !
 ! Previous iteration ice vertical temperature profile (downward)
       DO jl=1,nilay
-        ztsib(jl) = zvtp(nilay+1-jl,jk,jp)
+        ygltvhd%ztsib(jl) = zvtp(nilay+1-jl,jk,jp)
       END DO
 !
 ! Previous iteration snow temperature (middle of the snow layer)
-      ztsib(0) = zvtp(nl,jk,jp)
+      ygltvhd%ztsib(0) = zvtp(nl,jk,jp)
 !
 ! INITIAL STUFF
 ! --------------
@@ -398,24 +408,24 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !
 ! Initial ice melting temperature (downward)
       DO jl=1,nilay
-        ztsi_m0(jl) = ztsi_m(nilay+1-jl,jk,jp)
+        ygltvhd%ztsi_m0(jl) = ztsi_m(nilay+1-jl,jk,jp)
         zvsp0(jl) = pvsp(nilay+1-jl,jk,jp)
       END DO
 !
 ! Initial snow melting temperature
-      ztsi_m0(0) = 0.
+      ygltvhd%ztsi_m0(0) = 0.
 !
 ! Initial ice vertical temperature profile (downward)
-      ztsi0(:) = ztsib(:)
+      ygltvhd%ztsi0(:) = ygltvhd%ztsib(:)
 !
 ! Initial temperature of the atmosphere / bare ice or snow interface
-      ztsf0 = ztsfb
+      ygltvhd%ztsf0 = ygltvhd%ztsfb
 !
 ! Initial top conduction heat flux
-      znsftop0 = pnsftop(jk,jp)
+      ygltvhd%znsftop0 = pnsftop(jk,jp)
 !
 ! Top conductive flux
-      zcondt_m = znsftop0 
+      ygltvhd%zcondt_m = ygltvhd%znsftop0 
 !
 ! Initial snow caracteristics
       zrks = 0.30 ! rkice * ( prsn(jk,jp)/rhow )**1.885
@@ -426,7 +436,7 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 ! Current iteration vertical temperature profile (to compute sea ice spec. heat
 ! at first iteration)
 !
-      ztsia(:) = ztsi0(:)
+      ztsia(:) = ygltvhd%ztsi0(:)
 !
 ! .. Define booleans and associated parameters 
 !
@@ -441,13 +451,13 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !
       jit = jit+1
 !
-      llredo = .false.
+      ygltvhd%llredo = .false.
 !
 10    CONTINUE
 !
 ! .. Prints
 !
-      IF ( llredo .AND. lwg ) THEN
+      IF ( ygltvhd%llredo .AND. lwg ) THEN
           WRITE(noutlu,*) 'Sea ice concentr. = ',zfsi
           WRITE(noutlu,*) 'Sea ice thickness = ',tpsit(jk,jp)%hsi
           WRITE(noutlu,*) 'Snow thickness    = ',tpsit(jk,jp)%hsn
@@ -464,10 +474,10 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !
 ! Update sea ice volumic specific heat
 !  - in the case of pure ice ( ztsi_m0=0. ) ztsi0 and or ztsia may be =0
-          zrhocpsi(:) = rhocpice0
-          WHERE( ztsi_m0(1:nilay)<-epsil1 )
-            zrhocpsi(:) = zrhocpsi(:) -  &
-              hofusn0*ztsi_m0(1:nilay) / ( ztsi0(1:nilay)*ztsia(1:nilay) )
+          ygltvhd%zrhocpsi(:) = rhocpice0
+          WHERE( ygltvhd%ztsi_m0(1:nilay)<-epsil1 )
+            ygltvhd%zrhocpsi(:) = ygltvhd%zrhocpsi(:) -  &
+              hofusn0*ygltvhd%ztsi_m0(1:nilay) / ( ygltvhd%ztsi0(1:nilay)*ztsia(1:nilay) )
           ENDWHERE
 !!          write(noutlu,*)'zrhocpsi=',zrhocpsi
 !!          write(noutlu,*)'tsi_m0  =',ztsi_m0(1:nilay)
@@ -483,8 +493,8 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
             zrkice(:) = rhoice/rhoice0 *  &
               ( xrki1 + xrki2*xtempc + xrki3 * zvsp0(:) / xtempc ) 
           ENDWHERE
-          zetai(1:nilay) = dtt / ( zrhocpsi(:)*zdzi(:) )
-          zinvetai(1:nilay) = 1./zetai(1:nilay)
+          ygltvhd%zetai(1:nilay) = dtt / ( ygltvhd%zrhocpsi(:)*zdzi(:) )
+          ygltvhd%zinvetai(1:nilay) = 1./ygltvhd%zetai(1:nilay)
 !
           IF ( llsnw ) THEN
 !IF ( tpsit(jk,jp)%rsn<epsil1 ) print*,'prsn,jk,jp=',tpsit(jk,jp)%rsn,jk,jp
@@ -492,35 +502,35 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !IF ( tpsit(jk,jp)%hsn<epsil1 ) print*,'phsn,jk,jp=',tpsit(jk,jp)%hsn,jk,jp
 !
 ! - heat capacity factor
-              zetai(0) = dtt / ( tpsit(jk,jp)%rsn*zcpsn*tpsit(jk,jp)%hsn )
-              zinvetai(0) = 1./zetai(0)
+              ygltvhd%zetai(0) = dtt / ( tpsit(jk,jp)%rsn*zcpsn*tpsit(jk,jp)%hsn )
+              ygltvhd%zinvetai(0) = 1./ygltvhd%zetai(0)
 ! - snow layer conductivity
-              zkodzi(0) = 2.*zrks / tpsit(jk,jp)%hsn
+              ygltvhd%zkodzi(0) = 2.*zrks / tpsit(jk,jp)%hsn
 ! - equivalent conductivity at the ice-snow interface
-              zkodzi(1) = 2.*zrkice(1)*zrks /  &
+              ygltvhd%zkodzi(1) = 2.*zrkice(1)*zrks /  &
                 ( zrkice(1)*tpsit(jk,jp)%hsn + zrks*zdzi(1) )
 !
             ELSE
 ! - heat capacity factor (unused -> "1" is just to avoid a division by 0)
-              zetai(0) = 1.
-              zinvetai(0) = 0.
+              ygltvhd%zetai(0) = 1.
+              ygltvhd%zinvetai(0) = 0.
 ! - snow layer conductivity (unused)
-              zkodzi(0) = 0.
+              ygltvhd%zkodzi(0) = 0.
 ! - top of the ice slab conductivity
-              zkodzi(1) = 2.*zrkice(1)/zdzi(1)
+              ygltvhd%zkodzi(1) = 2.*zrkice(1)/zdzi(1)
           ENDIF
 !
 ! - effective conductivity (general case)
           DO jl=2,nilay
-            zkodzi(jl) = 2.*zrkice(jl-1)*zrkice(jl) /  &
+            ygltvhd%zkodzi(jl) = 2.*zrkice(jl-1)*zrkice(jl) /  &
               ( zrkice(jl-1)*zdzi(jl) + zrkice(jl)*zdzi(jl-1) )
           END DO 
 ! - effective conductivity (bottom of the ice slab)
-          zkodzi(nilay+1) = 2.*zrkice(nilay)/zdzi(nilay)
+          ygltvhd%zkodzi(nilay+1) = 2.*zrkice(nilay)/zdzi(nilay)
 !
 ! Derived coefficients
-          zetaik(:) = zetai(:)*zkodzi(0:nilay) 
-          zetaikp1(:) = zetai(:)*zkodzi(1:nilay+1) 
+          ygltvhd%zetaik(:) = ygltvhd%zetai(:)*ygltvhd%zkodzi(0:nilay) 
+          ygltvhd%zetaikp1(:) = ygltvhd%zetai(:)*ygltvhd%zkodzi(1:nilay+1) 
       ENDIF
 !
 !
@@ -534,7 +544,12 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !
           CALL glt_vhdslab_r   &
             ( jit,pnsftop(jk,jp),pswtra(:,jk,jp),  &
-            zderiv,zcondb,ztsfa,zqtopmelta,zdh,ztsia,llmelt,osnow=llsnw )
+            zderiv,zcondb,ztsfa,zqtopmelta,zdh,ztsia,llmelt, &
+            ygltvhd%zcondt_m,ygltvhd%zg1,ygltvhd%zg2,ygltvhd%zmlf,ygltvhd%znsftop0,ygltvhd%ztsf0,ygltvhd%ztsfb,ygltvhd%llredo,&
+            ygltvhd%zetai,ygltvhd%zetaik,ygltvhd%zetaikp1,ygltvhd%zinvetai,ygltvhd%zkodzi,&
+            ygltvhd%zrhocpsi,ygltvhd%ztsi_m0,ygltvhd%ztsi0,&
+            nilay,nl,noutlu,lp3,lp4,lp5,lwg,xswhdfr,&
+            osnow=llsnw )
 !
           pcondb(jk,jp) = zcondb
           zderiv2(jk,jp) = zderiv
@@ -550,7 +565,7 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
               zcondb_all(jk,jp) = zcondb
               WRITE(noutlu,*) ' Cond. heat flux at the bottom:',  &
                 zcondb_all(jk,jp)    
-              zderiv_all(jk,jp) = zderiv*( ztsfa-ztsf0 )
+              zderiv_all(jk,jp) = zderiv*( ztsfa-ygltvhd%ztsf0 )
               WRITE(noutlu,*) &
                       ' Additional heat flux at the top dQ/dT*(Tnew-Told):',  &
                  zderiv_all(jk,jp)
@@ -580,15 +595,13 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
       IF ( llice .OR. llsnw ) THEN
 !
 ! .. Error in heat conduction scheme
-          IF ( llredo ) THEN
-               CALL gltools_glterr( 'vhdiff (heat conduction scheme)',  &
-                 'Error in heat conduction scheme. ' //  &
-                 'See gltout for details','WARN' ) 
-               llredo=.FALSE.
-               ztsfb = ztsf0
-               ztsfa = ztsf0
-               ztsib(:) = ztsi0(:)
-               ztsia(:) = ztsi0(:)
+          IF ( ygltvhd%llredo ) THEN
+               CALL ABOR1_SFX('Error in heat conduction scheme')
+               ygltvhd%llredo=.FALSE.
+               ygltvhd%ztsfb = ygltvhd%ztsf0
+               ztsfa = ygltvhd%ztsf0
+               ygltvhd%ztsib(:) = ygltvhd%ztsi0(:)
+               ztsia(:) = ygltvhd%ztsi0(:)
                pcondb(jk,jp) = 0.
                zderiv2(jk,jp) = 0.
                GOTO 20
@@ -600,11 +613,11 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
               WRITE( ymess,  &
                 FMT='("Vertical diffusion scheme did not converge &
               & Error at jk=",I2," jp=",I6)' ) jk,jp
-              CALL gltools_glterr( 'vhdiff (heat conduction scheme)', ymess, 'WARN' )
+              CALL ABOR1_SFX('Vertical diffusion scheme did not converge')
             ENDIF
             llconv = .TRUE.
 !!! All temperatures are recomputed as the half sum of new and previous ones
-!!            ztsfa = 0.5*( ztsfa+ztsfb )
+!!            ztsfa = 0.5*( ztsfa+ygltvhd%ztsfb )
 !!            ztsia(:) = 0.5*( ztsia(:)+ztsib(:) )
 !!! Recompute bottom heat flux
 !!            pcondb(jk,jp) =  &
@@ -630,15 +643,15 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
           ENDIF
 !
 ! .. Detect unrealistic temperatures 
-          IF ( ztsfa<=-51. .AND. .NOT.llredo ) THEN
+          IF ( ztsfa<=-51. .AND. .NOT.ygltvhd%llredo ) THEN
              IF(lwg) WRITE(noutlu,*) 'Error at ',jp,  &
                ' ztsfa(',jk,') =',ztsfa
-             llredo = .TRUE.
+             ygltvhd%llredo = .TRUE.
              GOTO 10
           ENDIF
-          IF (zmlf<=-10. .and. .NOT.llredo) THEN
-             IF(lwg) WRITE(noutlu,*) 'Error at ',jp,' zmlf =',zmlf
-             llredo = .TRUE.
+          IF (ygltvhd%zmlf<=-10. .and. .NOT.ygltvhd%llredo) THEN
+             IF(lwg) WRITE(noutlu,*) 'Error at ',jp,' ygltvhd%zmlf =',ygltvhd%zmlf
+             ygltvhd%llredo = .TRUE.
              GOTO 10
           ENDIF
       ENDIF
@@ -646,8 +659,8 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 20    CONTINUE
 !
       IF ( .NOT.llice .AND. .NOT.llsnw ) THEN
-          zvtpa(:) = zmlf
-          ztsfa = zmlf
+          zvtpa(:) = ygltvhd%zmlf
+          ztsfa = ygltvhd%zmlf
           pcondb(jk,jp) = 0.
           IF (lp4)  &
             WRITE(noutlu,*) 'no ice / snow: convergence at jk,jp=',jk,jp
@@ -666,15 +679,15 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 !                ztsia(0) = ztsi_m0(0)
 !              ENDIF
               zdhmelta(1) = zdhmelta(1) + dtt*zqtopmelta
-              ztsfa = AMIN1( ztsfa,ztsi_m0(0) )
+              ztsfa = AMIN1( ztsfa,ygltvhd%ztsi_m0(0) )
             ELSE
               zdhmelta(2) = zdhmelta(2) + dtt*zqtopmelta
-              ztsfa = AMIN1( ztsfa,ztsi_m0(1) )
+              ztsfa = AMIN1( ztsfa,ygltvhd%ztsi_m0(1) )
           ENDIF
           IF (lp5) THEN
               WRITE(noutlu,*) 'ZDHMELTA (1) llsnow = true = ', zdhmelta 
               WRITE(noutlu,*) 'ZTSFA (1)    llsnow = true = ', ztsfa
-              WRITE(noutlu,*) 'ZTSFB (1)    llsnow = true = ', ztsfb
+              WRITE(noutlu,*) 'ZTSFB (1)    llsnow = true = ', ygltvhd%ztsfb
           ENDIF  
 ! 
 ! .. If the scheme has converged: prepare glt_output (downward / upward convention)
@@ -683,7 +696,7 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
             ELSE
               zcvb = zcva
           ENDIF
-          zcva = SUM( (ztsia(1:nilay)-ztsib(1:nilay))*sf3t )
+          zcva = SUM( (ztsia(1:nilay)-ygltvhd%ztsib(1:nilay))*sf3t )
           llconv = ( llconv .OR. ABS(zcva)<0.001 )
 ! This 0.01 threshold should be a parameter of the model
           IF ( llconv ) THEN
@@ -716,7 +729,7 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
 ! .. Compute the trend on surface temperature & vertical temperature profile
 ! (non-solar only)
               zvtptrd(:,jk,jp)=zvtpa(:)-zvtp(:,jk,jp)
-              ztsftrd(jk,jp)=ztsfa-ztsf0
+              ztsftrd(jk,jp)=ztsfa-ygltvhd%ztsf0
 !
 ! .. Compute temperature at snow-ice interface (for AR5 diagnostics)
 ! (already initialized at 1.e20, where there is no sea ice at the beginning 
@@ -743,18 +756,18 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
               ENDIF
               IF (lp5) THEN
                   WRITE(noutlu,*)  &
-                    'Previous temperature profile (top -> bottom )=', ztsi0
+                    'Previous temperature profile (top -> bottom )=', ygltvhd%ztsi0
                   WRITE(noutlu,*)  &
                     'New temperature profile (top -> bottom )     =', ztsia
               ENDIF
 ! 
 ! .. Update previous time step data for new iteration
               IF ( zcva*zcvb < 0. ) THEN  
-                  ztsfa = 0.5*( ztsfa+ztsfb )
-                  ztsia(:) = 0.5*( ztsia(:)+ztsib(:) )
+                  ztsfa = 0.5*( ztsfa+ygltvhd%ztsfb )
+                  ztsia(:) = 0.5*( ztsia(:)+ygltvhd%ztsib(:) )
               ENDIF
-              ztsfb = ztsfa
-              ztsib(:) = ztsia(:)
+              ygltvhd%ztsfb = ztsfa
+              ygltvhd%ztsib(:) = ztsia(:)
           ENDIF
       ENDIF
 !
@@ -765,25 +778,25 @@ zdhmelt0 = sum(pdhmelt,dim=1)/dtt
   END DO         ! End of loop on grid cells
 !
 ! .. Change sign of pcondb
-  IF (lwg) THEN
+  IF (lp1) THEN
     ztot_ice_snow= np*nt+SUM(icv,MASK=icv<0)
-!    WRITE(noutlu,*)
-!    WRITE(noutlu,*) '                         ** WARNING **'
-!    WRITE(noutlu,*)  &
-!      '  Total number of cases with ice/snow            : ',  &
-!      ztot_ice_snow
-!    WRITE(noutlu,*)  &
-!      '  Convergence failed on # of points              : ',  &
-!      np*nt-SUM(ABS(icv))
-!    IF ( ztot_ice_snow > 0) THEN 
-!       zfailures=100.*FLOAT(np*nt-SUM(ABS(icv)))/ztot_ice_snow
-!    ELSE
-!       zfailures=0.
-!    ENDIF
-!    WRITE(noutlu,FMT='(A,F6.2)')  &
-!            '   % of failure                                  : ',  &
-!            zfailures
-!    WRITE(noutlu,*)
+    WRITE(noutlu,*)
+    WRITE(noutlu,*) '                         ** WARNING **'
+    WRITE(noutlu,*)  &
+      '  Total number of cases with ice/snow            : ',  &
+      ztot_ice_snow
+    WRITE(noutlu,*)  &
+      '  Convergence failed on # of points              : ',  &
+      np*nt-SUM(ABS(icv))
+    IF ( ztot_ice_snow > 0) THEN 
+       zfailures=100.*FLOAT(np*nt-SUM(ABS(icv)))/ztot_ice_snow
+    ELSE
+       zfailures=0.
+    ENDIF
+    WRITE(noutlu,FMT='(A,F6.2)')  &
+            '   % of failure                                  : ',  &
+            zfailures
+    WRITE(noutlu,*)
   ENDIF
 !
   pcondb(:,:) = -pcondb(:,:)
@@ -958,19 +971,19 @@ zdhmelt4 = sum(pdhmelt,dim=1)/dtt
 !
 ! .. Print top flux integral
 !
-      zinsftop = glt_avg_r( tpdom, SUM( tpsit%fsi*z1, DIM=1 ),0 )
+      zinsftop = glt_avg_r( tpdom, SUM( tpsit%fsi*z1, DIM=1 ),0,np,xdomsrf_r)
       WRITE(noutlu,FMT='(A,F8.2)')  &
         '    Top non-solar flux integral                 :', zinsftop
 !
 ! .. Print input solar energy
 !
-      ziswa = glt_avg_r( tpdom, SUM( tpsit%fsi*z4, DIM=1 ),0 )
+      ziswa = glt_avg_r( tpdom, SUM( tpsit%fsi*z4, DIM=1 ),0,np,xdomsrf_r)
       WRITE(noutlu,FMT='(A,F8.2)')  &
         '    Input solar energy                          :', ziswa
 !
 ! .. Print bottom flux integral
 !
-      zicondb = glt_avg_r( tpdom, SUM( tpsit%fsi*z2, DIM=1 ),0 )
+      zicondb = glt_avg_r( tpdom, SUM( tpsit%fsi*z2, DIM=1 ),0,np,xdomsrf_r)
       WRITE(noutlu,FMT='(A,F8.2)')  &
         '    Bottom flux integral:', zicondb 
 ! .. Total incoming energy
@@ -983,19 +996,19 @@ zdhmelt4 = sum(pdhmelt,dim=1)/dtt
 !
 ! .. Print ice enthalpy change integral (non-solar + solar)
 !
-      zidhi = glt_avg_r( tpdom, SUM( tpsit%fsi*z5, DIM=1 ),0 )
+      zidhi = glt_avg_r( tpdom, SUM( tpsit%fsi*z5, DIM=1 ),0,np,xdomsrf_r)
       WRITE(noutlu,FMT='(A,F8.2)')  &
         '    Ice enthalpy change due to heat conduction  :', zidhi
 !
 ! .. Print snow enthalpy change integral (non-solar + solar)
 !
-      zidhs = glt_avg_r( tpdom, SUM( tpsit%fsi*z3, DIM=1 ),0 )
+      zidhs = glt_avg_r( tpdom, SUM( tpsit%fsi*z3, DIM=1 ),0,np,xdomsrf_r)
       WRITE(noutlu,FMT='(A,F8.2)')  &
         '    Snow enthalpy change due to heat conduction :', zidhs
 !
 ! .. Print overwhelming energy due to melting
 !
-      zdhmelt = glt_avg_r( tpdom, SUM( tpsit%fsi*z6, DIM=1 ),0 )
+      zdhmelt = glt_avg_r( tpdom, SUM( tpsit%fsi*z6, DIM=1 ),0,np,xdomsrf_r)
       WRITE(noutlu,FMT='(A,F8.2)')  &
         '    Energy devoted to melting                   :', zdhmelt
 !
@@ -1028,37 +1041,37 @@ zdhmelt4 = sum(pdhmelt,dim=1)/dtt
 !
   IF (lp4) THEN
       WRITE(noutlu,*) ' Non-solar heat flux at the top:',  &
-        glt_avg_r( tpdom,SUM( pnsftop(:,:)*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( pnsftop(:,:)*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) ' Absorbed solar heat flux:',  &
-        glt_avg_r( tpdom,SUM( zswtra_all(:,:)*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( zswtra_all(:,:)*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) ' Cond. heat flux at the bottom:',  &
-        glt_avg_r( tpdom,SUM( zcondb_all(:,:)*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( zcondb_all(:,:)*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) ' Additional heat flux at the top dQ/dT*(Tnew-Told):',  &
-        glt_avg_r( tpdom,SUM( zderiv_all(:,:)*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( zderiv_all(:,:)*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) ' Sum of the previous two form final condb:',  &
-        glt_avg_r( tpdom,SUM( (zcondb_all(:,:)+zderiv_all(:,:) )*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( (zcondb_all(:,:)+zderiv_all(:,:) )*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) ' Enthalpy change per time unit:',  &
-        glt_avg_r( tpdom,SUM( zdh_all(:,:)*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( zdh_all(:,:)*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) ' Top melting flux:',  &
-        glt_avg_r( tpdom,SUM( zqtopmelta_all(:,:)*tpsit%fsi, DIM=1 ),0 )
+        glt_avg_r( tpdom,SUM( zqtopmelta_all(:,:)*tpsit%fsi, DIM=1),0,np,xdomsrf_r)
       WRITE(noutlu,*) 'Imbalance =', &
         glt_avg_r( tpdom,  &
           SUM( tpsit%fsi*( zdh_all(:,:)+zqtopmelta_all(:,:) -  &
             ( zcondb_all(:,:)+zswtra_all(:,:)+pnsftop(:,:)+zderiv_all(:,:) ) ), &
-            DIM=1 ),0 )
+            DIM=1 ),0,np,xdomsrf_r )
   ENDIF
 !
 ! .. Note that deallocations must be done in reverse order on some specific
 ! platforms (wrt allocations)
 !
-  DEALLOCATE( zkodzi )
-  DEALLOCATE( ztsi_m0 )
-  DEALLOCATE( ztsi0 )
-  DEALLOCATE( ztsib )
-  DEALLOCATE( zrhocpsi )
-  DEALLOCATE( zetaikp1 )
-  DEALLOCATE( zetaik )
-  DEALLOCATE( zinvetai )
-  DEALLOCATE( zetai )
+  DEALLOCATE( ygltvhd%zkodzi )
+  DEALLOCATE( ygltvhd%ztsi_m0 )
+  DEALLOCATE( ygltvhd%ztsi0 )
+  DEALLOCATE( ygltvhd%ztsib )
+  DEALLOCATE( ygltvhd%zrhocpsi )
+  DEALLOCATE( ygltvhd%zetaikp1 )
+  DEALLOCATE( ygltvhd%zetaik )
+  DEALLOCATE( ygltvhd%zinvetai )
+  DEALLOCATE( ygltvhd%zetai )
 !
   END SUBROUTINE glt_vhdiff_r

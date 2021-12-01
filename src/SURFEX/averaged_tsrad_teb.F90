@@ -150,7 +150,7 @@ ELSEWHERE
 ENDWHERE
 !
 !* LW absorbed by snow on roof
-WHERE (T%TSNOW_ROOF%TS(:) /= XUNDEF .AND. T%TSNOW_ROOF%EMIS(:) /= XUNDEF) 
+WHERE (T%TSNOW_ROOF%TS(:) /= XUNDEF .AND. T%TSNOW_ROOF%EMIS(:) /= XUNDEF)
   ZABS_LW_SNOW_ROOF(:) = T%TSNOW_ROOF%EMIS(:) * (ZLW_RAD(:) - XSTEFAN * T%TSNOW_ROOF%TS(:)**4)
 ELSEWHERE
   ZABS_LW_SNOW_ROOF(:) = 0.
@@ -224,11 +224,11 @@ PEMIS(:) = T%XBLD(:) * (1.-T%XGREENROOF(:)) * (ZDF_ROOF(:)*T%XEMIS_ROOF     (:) 
                         + ZLW_WB_TO_G (:)*(T%XT_WALL_B(:,1)-PTS_GARDEN(:)) &
                         + ZLW_WIN_TO_G(:)*(B%XT_WIN1    (:)-PTS_GARDEN(:))
    ELSEWHERE
-     ZABS_LW_GARDEN(:) =  0.
+     ZABS_LW_GARDEN(:) = 0.
    ENDWHERE
    !
    !* LW absorbed by green roofs
-   WHERE (PTS_GREENROOF (:) /= XUNDEF) 
+   WHERE (PTS_GREENROOF (:) /= XUNDEF)
      ZABS_LW_GREENROOF(:) = PEMIS_GREENROOF(:) * (ZLW_RAD(:) - XSTEFAN * PTS_GREENROOF(:)** 4)
    ELSEWHERE
      ZABS_LW_GREENROOF(:) = 0.

@@ -84,18 +84,17 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
-TYPE(ISBA_K_t), INTENT(INOUT) :: KK
-TYPE(ISBA_P_t), INTENT(INOUT) :: PK
-TYPE(ISBA_PE_t), INTENT(INOUT) :: PEK
+TYPE(ISBA_K_t), INTENT(INOUT)       :: KK
+TYPE(ISBA_P_t), INTENT(INOUT)       :: PK
+TYPE(ISBA_PE_t), INTENT(INOUT)      :: PEK
 TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
 !
-REAL, DIMENSION(:), INTENT(IN)    :: PVEG
+REAL, DIMENSION(:), INTENT(IN)      :: PVEG
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PCS, PFROZEN1
-!                                      soil and snow coefficients
-!                                      PCS = heat capacity of the snow
-!                                      PFROZEN1   = fraction of ice in superficial
-!                                               soil
+REAL, DIMENSION(:), INTENT(OUT)     :: PCS, PFROZEN1
+!                                     soil and snow coefficients
+!                                     PCS = heat capacity of the snow
+!                                     PFROZEN1   = fraction of ice in superficial soil
 !
 REAL, DIMENSION(:), INTENT(IN)   :: PFFG_NOSNOW, PFFV_NOSNOW
 !
@@ -430,7 +429,10 @@ ELSE
        ZZC   (JJ) = - ZLYMY1(JJ) * ZX2(JJ)**2
 ! More precise calculation of the largest solution
        ZDELTA(JJ) = MAX (ZZB(JJ)**2 - 4. * ZZA(JJ) * ZZC(JJ), 0.)
+<<<<<<< HEAD
 !
+=======
+>>>>>>> origin/NWP_81plus
        IF (ZZB(JJ) > 0) THEN
          ZA    (JJ) = - 2. * ZZC (JJ) / (ZZB (JJ) + SQRT (ZDELTA (JJ)))
        ELSE

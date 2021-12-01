@@ -97,10 +97,10 @@ END MODULE MODI_glt_swabs_r
 ! ------------------------- SUBROUTINE glt_swabs_r --------------------------
 !
 SUBROUTINE glt_swabs_r  &
-        ( tpsit,pswtra,pent,pvsp,pdhmelt )
+        ( tpsit,pswtra,pent,pvsp,pdhmelt,&
+      nilay,nl,noutlu,np,nt,dtt,sf3tinv,lp1)
 !
   USE modd_glt_const_thm
-  USE modd_glt_param
   USE modd_types_glt
 !
   IMPLICIT NONE
@@ -110,6 +110,13 @@ SUBROUTINE glt_swabs_r  &
 ! 1. Variables
 ! ============
 !
+
+  INTEGER ,INTENT(IN) :: noutlu,nl,nt,np,nilay
+  REAL    ,DIMENSION(:),INTENT(IN) :: sf3tinv 
+  REAL    ,INTENT(IN) :: dtt 
+  LOGICAL ,INTENT(IN) :: lp1 
+
+
 ! 1.1. Dummy arguments
 ! --------------------
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &

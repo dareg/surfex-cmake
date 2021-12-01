@@ -6,7 +6,8 @@
 SUBROUTINE COUPLING_TSZ0_n (DTCO, UG, U, USS, IM, DTZ, NDST, SLT, HPROGRAM, HCOUPLING,   &
                             PTSTEP, KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,&
                             PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
-                            PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
+                            PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, &
+														PSNOW, PLW,     &
                             PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH,    &
                             PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,   &
                             PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,          &
@@ -41,6 +42,8 @@ SUBROUTINE COUPLING_TSZ0_n (DTCO, UG, U, USS, IM, DTZ, NDST, SLT, HPROGRAM, HCOU
 !
 USE MODD_ISBA_n, ONLY : ISBA_P_t, ISBA_PE_t
 USE MODD_SURFEX_n, ONLY : ISBA_MODEL_t
+!
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
@@ -114,6 +117,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -142,7 +147,7 @@ REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_A_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPET_B_COEF
 REAL, DIMENSION(KI), INTENT(IN) :: PPEQ_B_COEF
  CHARACTER(LEN=2),    INTENT(IN) :: HTEST ! must be equal to 'OK'
-!
+
 !*      0.2    declarations of local variables
 !
 !
@@ -198,7 +203,7 @@ DO JP = 1,IM%O%NPATCH
   IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') THEN
     ZHEASN(1:PK%NSIZE_P,:,JP)= PEK%TSNOW%HEAT (:,:)
     ZEMISN(1:PK%NSIZE_P,JP)  = PEK%TSNOW%EMIS (:)
-  END IF
+	END IF
 ENDDO
 !
 !
@@ -207,10 +212,11 @@ ENDDO
 !
  CALL COUPLING_ISBA_OROGRAPHY_n(DTCO, UG, U, USS, IM%SB, IM%NAG, IM%CHI, IM%NCHI, IM%DTV, IM%ID, &
                                 IM%NGB, IM%GB, IM%ISS, IM%NISS, IM%G, IM%NG, IM%O, IM%S, IM%K, IM%NK, &
-                                IM%NP, IM%NPE, NDST, SLT, HPROGRAM, 'E', 0.001, KYEAR,   &
+                                IM%NP, IM%NPE, IM%AT, NDST, SLT, HPROGRAM, 'E', 0.001, KYEAR,   &
                                 KMONTH, KDAY, PTIME,  KI, KSV, KSW, PTSUN, PZENITH,       &
                                 PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, PQA, PTA,     &
-                                PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW, PDIR_SW,        &
+                                PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, PSNOW, PLW, &
+																PDIR_SW,        &
                                 PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH, PSFTS, PSFCO2,&
                                 PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0,&
                                 PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,      &
@@ -236,7 +242,7 @@ DO JP = 1,IM%O%NPATCH
   IF (PEK%TSNOW%SCHEME=='3-L' .OR. PEK%TSNOW%SCHEME=='CRO') THEN
     PEK%TSNOW%HEAT (:,:) = ZHEASN(1:PK%NSIZE_P,:,JP)
     PEK%TSNOW%EMIS (:)   = ZEMISN(1:PK%NSIZE_P,JP) 
-  END IF
+	END IF
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_TSZ0_N',1,ZHOOK_HANDLE)

@@ -60,7 +60,9 @@ USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_PGDWORK, ONLY : NSIZE, NSIZE_ALL, XALL, NSSO_ALL, XSSO_ALL, &
                          XSUMVAL, XEXT_ALL, CATYPE, &
                          XSSQO, LSSQO, NSSO, XMIN_WORK, XMAX_WORK, & 
-                         NVALNBR, NVALCOUNT, XVALLIST, JPVALMAX
+                         NVALNBR, NVALCOUNT, XVALLIST, JPVALMAX, &
+                         LORORAD, XFSSO_ALL, NFSSO_ALL, NFSSO, &
+                         XFSSQO, NFSSQO
 !
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NREQ, NINDEX, IDX_R, &
@@ -420,8 +422,9 @@ SELECT CASE (HSUBROUTINE)
         ENDIF
         !
       ELSEIF (HSUBROUTINE=='A_OROG') THEN
+
         !max and min
-        IF (NPROC>1) THEN
+        IF (NPROC>1) THEN                
           ALLOCATE(ZEXTVAL(U%NSIZE_FULL,1))
           DO JP = 0,NPROC-1
             CALL READ_AND_SEND_MPI(XEXT_ALL(:,1),ZEXTVAL(:,1),KPIO=JP)
@@ -465,7 +468,44 @@ SELECT CASE (HSUBROUTINE)
           WHERE(NSSO_ALL(:,:,:)==1) LSSQO(:,:,:) = .TRUE.
         ENDIF
         DEALLOCATE(NSSO_ALL)
+
+        !ssqo fields
+        IF ( LORORAD ) THEN
+          !
+          ALLOCATE(XFSSQO(U%NSIZE_FULL,NFSSO,NFSSO))
+          XFSSQO(:,:,:) = 0.
+          IF (NPROC>1) THEN
+            ALLOCATE(ZVAL(U%NSIZE_FULL,NFSSO,NFSSO))
+            DO JP = 0,NPROC-1
+              CALL READ_AND_SEND_MPI(XFSSO_ALL,ZVAL,KPIO=JP)
+              !sum of contributions coming from all tasks
+              XFSSQO(:,:,:) = XFSSQO(:,:,:) + ZVAL(:,:,:)
+            ENDDO
+            DEALLOCATE(ZVAL)
+          ELSE
+            XFSSQO(:,:,:) = XFSSO_ALL(:,:,:)
+          ENDIF
+          DEALLOCATE(XFSSO_ALL)
+          !
+          ALLOCATE(NFSSQO(U%NSIZE_FULL,NFSSO,NFSSO))
+          NFSSQO(:,:,:) = 0.
+          IF (NPROC>1) THEN
+            ALLOCATE(ISIZE(U%NSIZE_FULL,NFSSO,NFSSO))
+            DO JP = 0,NPROC-1
+              CALL READ_AND_SEND_MPI(NFSSO_ALL,ISIZE,KPIO=JP)
+              !sum of contributions coming from all tasks
+              NFSSQO(:,:,:) = NFSSQO(:,:,:) + ISIZE(:,:,:)
+            ENDDO
+            DEALLOCATE(ISIZE)
+          ELSE
+            NFSSQO(:,:,:) = NFSSO_ALL(:,:,:)
+          ENDIF
+          DEALLOCATE(NFSSO_ALL)
+          !          
+        ENDIF
+        !
       ENDIF
+      !
       DEALLOCATE(XEXT_ALL)
       !
     ENDIF
@@ -491,7 +531,7 @@ SELECT CASE (HSUBROUTINE)
 
    ELSE
 
-     ALLOCATE(XSUMVAL(U%NSIZE_FULL,1))
+     ALLOCATE(XSUMVAL(U%NSIZE_FULL,SIZE(NSIZE,2)))
      IF (HFILETYPE=='DIRECT' .AND. NPROC>1) THEN
        CALL ABOR1_SFX("TREAT_FIELD: MAJ is not possible with DIRECT filetype and NPROC>1")
      ELSE

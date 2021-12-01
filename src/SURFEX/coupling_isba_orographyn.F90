@@ -4,11 +4,12 @@
 !SFX_LIC for details. version 1.
 !     ###############################################################################
 SUBROUTINE COUPLING_ISBA_OROGRAPHY_n (DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID, NGB, GB, &
-                                      ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,   &
-                                      HPROGRAM, HCOUPLING, PTSTEP,                            &
+                                      ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, AT, NDST,    &
+                                      SLT, HPROGRAM, HCOUPLING, PTSTEP,                       &
                                       KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN,        &
                                       PZENITH, PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV,    &
-                                      PQA, PTA, PRHOA, PSV, PCO2, HSV, PRAIN, PSNOW, PLW,     &
+                                      PQA, PTA, PRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV, PRAIN, &
+                                      PSNOW, PLW,     &
                                       PDIR_SW, PSCA_SW, PSW_BANDS, PPS, PPA, PSFTQ, PSFTH,    &
                                       PSFTS, PSFCO2, PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB,   &
                                       PEMIS, PTSURF, PZ0, PZ0H, PQSURF, PPEW_A_COEF,          &
@@ -52,6 +53,7 @@ USE MODD_SSO_n, ONLY : SSO_t, SSO_NP_t
 USE MODD_SFX_GRID_n, ONLY : GRID_t, GRID_NP_t
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NK_t, ISBA_NP_t, ISBA_NPE_t
+USE MODD_PREP_SNOW, ONLY : NIMPUR
 !
 USE MODD_DST_n, ONLY : DST_NP_t
 !
@@ -67,7 +69,8 @@ USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SURF_PAR,ONLY : XUNDEF
 USE MODD_CSTS,    ONLY : XSTEFAN, XCPD, XRD, XP00
 !
-USE MODD_SURF_ATM, ONLY : LNOSOF, LVERTSHIFT
+USE MODD_SURF_ATM, ONLY : LNOSOF, LSLOPE, LVERTSHIFT
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODI_FORCING_VERT_SHIFT
 USE MODI_COUPLING_ISBA_CANOPY_n
@@ -96,6 +99,7 @@ TYPE(ISBA_K_t), INTENT(INOUT) :: K
 TYPE(ISBA_NK_t), INTENT(INOUT) :: NK
 TYPE(ISBA_NP_t), INTENT(INOUT) :: NP
 TYPE(ISBA_NPE_t), INTENT(INOUT) ::NPE
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 !
 TYPE(DST_NP_t), INTENT(INOUT) :: NDST
 !
@@ -146,6 +150,8 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PPS       ! pressure at atmospheric model su
 REAL, DIMENSION(KI), INTENT(IN)  :: PPA       ! pressure at forcing level             (Pa)
 REAL, DIMENSION(KI), INTENT(IN)  :: PZS       ! atmospheric model orography           (m)
 REAL, DIMENSION(KI), INTENT(IN)  :: PCO2      ! CO2 concentration in the air          (kg/m3)
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPWET ! Wet impur deposition
+REAL, DIMENSION(KI,NIMPUR), INTENT(IN) :: PIMPDRY ! Dry impur deposition
 REAL, DIMENSION(KI), INTENT(IN)  :: PSNOW     ! snow precipitation                    (kg/m2/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PRAIN     ! liquid precipitation                  (kg/m2/s)
 !
@@ -189,7 +195,10 @@ REAL, DIMENSION(KI)  :: ZSNOW  ! Snowfall    at forcing height above surface oro
 !
 REAL, DIMENSION(KI)    :: Z3D_TOT_SURF ! ratio between actual surface
 !                                               ! and horizontal surface
-REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV
+REAL, DIMENSION(KI)    :: Z3D_TOT_SURF_INV ! Cosine of the slope angle
+!
+REAL, DIMENSION(KI)    :: ZSKYVF ! SKY VIEW factor, portion of the sky seen by the simulation
+                                 ! point. 100% for a flat simulation
 REAL, DIMENSION(KI,KSW)::ZDIR_SW ! incoming direct SW radiation
 !                                                         ! per m2 of actual surface
 REAL, DIMENSION(KI,KSW)::ZSCA_SW ! incoming diffuse SW radiation
@@ -225,7 +234,7 @@ IF(LVERTSHIFT)THEN
   ZSNOW(:) = XUNDEF
 !     
    CALL FORCING_VERT_SHIFT(PZS, S%XZS, PTA, PQA, PPA, PRHOA, PLW, PRAIN, PSNOW, &
-                           ZTA, ZQA, ZPA, ZRHOA, ZLW, ZRAIN, ZSNOW         )
+                           ZTA,ZQA,ZPA,ZRHOA,ZLW,ZRAIN,ZSNOW         )
 !
    ZPS(:) = ZPA(:) + (PPS(:) - PPA(:))
 !
@@ -252,12 +261,62 @@ ENDIF
 !*      2.     Presence of orography slopes
 !              ----------------------------
 !
-IF(LNOSOF)THEN
+IF (LSLOPE) THEN
+! M. Lafaysse, August 2017
+!
+! Note that this effect is not conservative and should not be use with
+! atmospheric model
+!
+! This parameterization considers there is an homogeneous and infinite slope.
+! It replaces the parameterization LNOSOF = FALSE which is wrong in that case
+! (I do not know if LNOSOF = FALSE parameterization is correct in some
+! other SURFEX configurations).
+!
+! The LSLOPE parameterization must be used when the shortwave direct radiation has already
+! been projected on the slope.
+! The incoming diffuse shortwave and longwave radiations are horizontal and isotropic.
+! The modifications of these fluxes is only due to a sky view factor which is estimated for
+! an infinite slope.
+!  
+! The longwave radiation of the complementary solid angle is computed assuming
+! the surface of the opposite slopes have the same temperature.
+!
+! The shortwave radiation reflected by the opposite slopes are neglected.
+!
+! Do not modify the direct radiation which must be projected in the forcing file.
+   ZDIR_SW(:,:) = PDIR_SW(:,:)
+!
+! Compute the sky view factor
+   Z3D_TOT_SURF_INV (:) =1./SQRT(1.+ISS%XSSO_SLOPE(:)**2) ! This is cosine of the slope
+   ZSKYVF    (:) =  (1+Z3D_TOT_SURF_INV(:))/2  ! (1+cos(theta))/2 ,Dumont et al. 2017
+!
+! The diffuse component is multiplied by the sky view factor
+  ISWB = SIZE(PSW_BANDS)
+  DO JSWB=1,ISWB
+    ZSCA_SW(:,JSWB) =  PSCA_SW(:,JSWB) * ZSKYVF(:)
+  ENDDO
+! The longwave component is multiplied by the sky view factor and the radiation from  the 
+! complementary solid angle is computed with the Stefan-Boltzmann law using the
+! same surface temperature as the simulation point.
+   ZLW(:) =  ZLW(:)                                  *     ZSKYVF(:) & ! Part coming from the sky 
+   + XSTEFAN*S%XEMIS_NAT(:)*S%XTSRAD_NAT(:)**4 * (1.-ZSKYVF(:))! Part coming from the ground
+!
+! The precipitation fluxes are always provided for an horizontal surface and must be projected.
+!  Liquid precipitation per m2 of actual surface
+!
+   ZRAIN(:) = ZRAIN(:) * Z3D_TOT_SURF_INV(:)
+!
+!  Solid  precipitation per m2 of actual surface
+!
+   ZSNOW(:) = ZSNOW(:) * Z3D_TOT_SURF_INV(:)
+!   
+ELSEIF(LNOSOF)THEN
 !        
 !  No modifications to conserve mass and energy with atmosphere
 !
    Z3D_TOT_SURF    (:) = 0.
    Z3D_TOT_SURF_INV(:) = 0.
+   ZSKYVF          (:) = 1.
 !   
    ZSCA_SW(:,:) = PSCA_SW(:,:)
    ZDIR_SW(:,:) = PDIR_SW(:,:)
@@ -302,7 +361,7 @@ ELSE
 !
 !  incoming LW radiation per m2 of actual surface
 !
-   ZLW(:) =  ZLW(:)                                   *     Z3D_TOT_SURF_INV(:) &
+   ZLW(:) =  ZLW(:)                                  *     Z3D_TOT_SURF_INV(:) &
           + XSTEFAN*S%XEMIS_NAT(:)*S%XTSRAD_NAT(:)**4 * (1.-Z3D_TOT_SURF_INV(:))  
 !
 !  liquid precipitation per m2 of actual surface
@@ -321,11 +380,12 @@ ENDIF
 !              ------------
 !
  CALL COUPLING_ISBA_CANOPY_n(DTCO, UG, U, USS, SB, NAG, CHI, NCHI, DTV, ID, NGB, GB,   &
-                             ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, NDST, SLT,     &
+                             ISS, NISS, IG, NIG, IO, S, K, NK, NP, NPE, AT, NDST, SLT, &
                              HPROGRAM, HCOUPLING, PTSTEP,                              &
                              KYEAR, KMONTH, KDAY, PTIME, KI, KSV, KSW, PTSUN, PZENITH, &
                              PZENITH2, PAZIM, PZREF, PUREF, PZS, PU, PV, ZQA, ZTA,     &
-                             ZRHOA, PSV, PCO2, HSV, ZRAIN, ZSNOW, ZLW, ZDIR_SW,        &
+                             ZRHOA, PSV, PCO2,PIMPWET,PIMPDRY, HSV, ZRAIN, ZSNOW, ZLW, &
+														 ZDIR_SW,        &
                              ZSCA_SW, PSW_BANDS, ZPS, ZPA, PSFTQ, PSFTH, PSFTS, PSFCO2,&
                              PSFU, PSFV, PTRAD, PDIR_ALB, PSCA_ALB, PEMIS, PTSURF, PZ0,&
                              PZ0H, PQSURF, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF,      &

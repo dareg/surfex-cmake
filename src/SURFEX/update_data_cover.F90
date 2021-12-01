@@ -35,6 +35,7 @@
 !!
 !!    Original    09/2008
 !!    P. Samuelsson 10/2014 MEB
+!!    P. Marguinaud 10/2016 : Port to single precision
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -72,9 +73,7 @@ LOGICAL, DIMENSION(:), POINTER :: OMEB_PATCH
 INTEGER, INTENT(IN) :: KPATCH
 !
 INTEGER,             INTENT(IN)    :: KYEAR        ! new year
-!
 INTEGER, SAVE :: IYEAR = 0
-!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !
@@ -96,7 +95,7 @@ IF (KYEAR /= DTCO%NYEAR) THEN
     CALL ECOCLIMAP2_LAI(DTCO%NYEAR)
     CALL INI_DATA_PARAM(PLAI=XDATA_LAI, PH_TREE=XDATA_H_TREE, PVEG_OUT=XDATA_VEG,  &
                PGREEN=XDATA_GREEN, PZ0=XDATA_Z0, PEMIS_ECO=XDATA_EMIS_ECO,         &
-               PLAIMIN_OUT=XDATA_LAIMIN, PZ0LITTER=XDATA_Z0LITTER, PH_VEG=XDATA_H_VEG   )
+               PLAIMIN_OUT=XDATA_LAIMIN, PZ0LITTER=XDATA_Z0LITTER, PH_VEG=XDATA_H_VEG )
   ENDIF
 !$OMP END CRITICAL
 !

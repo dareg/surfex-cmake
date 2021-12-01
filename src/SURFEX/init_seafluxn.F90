@@ -7,7 +7,7 @@
                                  HPROGRAM,HINIT,KI,KSV,KSW,                 &
                                  HSV,PCO2,PRHOA,PZENITH,PAZIM,PSW_BANDS,    &
                                  PDIR_ALB,PSCA_ALB, PEMIS,PTSRAD,PTSURF,    &
-                                 KYEAR, KMONTH,KDAY,PTIME,                  &
+                                 KYEAR, KMONTH,KDAY,PTIME,AT,               &
                                  HATMFILE,HATMFILETYPE,HTEST                )  
 !     #############################################################
 !
@@ -66,11 +66,16 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_CHS_AEROSOL,    ONLY: LVARSIGI, LVARSIGJ
 USE MODD_DST_SURF,       ONLY: LVARSIG_DST, NDSTMDE, NDST_MDEBEG, LRGFIX_DST
 USE MODD_SLT_SURF,       ONLY: LVARSIG_SLT, NSLTMDE, NSLT_MDEBEG, LRGFIX_SLT
+<<<<<<< HEAD
 
 USE MODN_PREP_SEAFLUX,   ONLY : CPREP_SEAICE_SCHEME => CSEAICE_SCHEME
 USE ICE_GELATO
 USE ICE_SICE
 USE ICE_NONE
+=======
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
+!
+>>>>>>> origin/NWP_81plus
 !
 USE MODI_INIT_IO_SURF_n
 USE MODI_DEFAULT_CH_DEP
@@ -104,6 +109,7 @@ USE MODI_SET_SURFEX_FILEIN
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODD_GLT_PARAM, ONLY : GLOBGLTPARAM
 !
 !
 IMPLICIT NONE
@@ -142,6 +148,7 @@ INTEGER,                          INTENT(IN)  :: KDAY      ! current day (UTC)
 REAL,                             INTENT(IN)  :: PTIME     ! current time since
                                                            !  midnight (UTC, s)
 !
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT         ! atmospheric turbulence parameters
 CHARACTER(LEN=28),                INTENT(IN)  :: HATMFILE    ! atmospheric file name
 CHARACTER(LEN=6),                 INTENT(IN)  :: HATMFILETYPE! atmospheric file type
 CHARACTER(LEN=2),                 INTENT(IN)  :: HTEST       ! must be equal to 'OK'
@@ -191,11 +198,18 @@ IF (LNAM_READ) THEN
                       SM%S%LPRECIP,SM%S%LPWEBB,SM%S%NZ0,SM%S%NGRVWAVES,SM%O%LPROGSST,      &
                       SM%O%NTIME_COUPLING,SM%O%XOCEAN_TSTEP,SM%S%XICHCE,SM%S%CINTERPOL_SST,&
                       SM%S%CINTERPOL_SSS                            )
+<<<<<<< HEAD
  CALL DEFAULT_SEAICE(HPROGRAM,                                                  &
                      SM%S%CINTERPOL_SIC,SM%S%CINTERPOL_SIT, SM%S%XFREEZING_SST, &
                      SM%S%XSEAICE_TSTEP, SM%S%XSIC_EFOLDING_TIME,               &
                      SM%S%XSIT_EFOLDING_TIME, SM%S%XCD_ICE_CST, SM%S%XSI_FLX_DRV, &
                      SM%S%LVOLATILE_SIC )
+=======
+ CALL DEFAULT_SEAICE(HPROGRAM,                                                       &
+                     SM%S%CINTERPOL_SIC,SM%S%CINTERPOL_SIT,SM%S%CONSTRAIN_CSV,       &
+                     SM%S%XFREEZING_SST,SM%S%XSEAICE_TSTEP,SM%S%XSIC_EFOLDING_TIME,  &
+                     SM%S%XSIT_EFOLDING_TIME,SM%S%XCD_ICE_CST,SM%S%XSI_FLX_DRV       )   
+>>>>>>> origin/NWP_81plus
  !                     
  CALL DEFAULT_CH_DEP(SM%CHS%CCH_DRY_DEP) 
  !            
@@ -206,6 +220,8 @@ IF (LNAM_READ) THEN
 
 ENDIF
 !
+!COPY THE DEFAULT VALUES INSIDE CURRENT BLOCK
+SM%S%GLTPARAM=GLOBGLTPARAM
 !
 !        0.2. Defaults from file header
 !    
@@ -466,6 +482,13 @@ IF (SM%S%LHANDLE_SIC.OR.LCPL_SEAICE) &
                                OREAD_BUDGETC, SM%S, HPROGRAM,ILU,KSW)
                  
 !
+!-------------------------------------------------------------------------------
+!
+!*       9.     atmospheric turbulence parameters
+!               ---------------------------------
+!
+SM%AT=AT
+
 !-------------------------------------------------------------------------------
 !
 !         End of IO

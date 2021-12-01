@@ -86,10 +86,9 @@ END MODULE MODI_glt_getmlrf
 ! -----------------------------------------------------------------------
 ! ----------------------- SUBROUTINE glt_getmlrf ----------------------------
 
-SUBROUTINE glt_getmlrf( tpoce_all,tpml )
+SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
   USE modd_types_glt
   USE modd_glt_const_thm
-  USE modd_glt_param
   USE mode_gltools_sigma
   USE mode_gltools_swfrzt
 #if ! defined in_surfex
@@ -99,6 +98,7 @@ SUBROUTINE glt_getmlrf( tpoce_all,tpml )
 !
   IMPLICIT NONE 
 !
+  INTEGER,INTENT(IN) :: nx,ny
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
     tpoce_all
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(out) ::  &
@@ -110,7 +110,7 @@ SUBROUTINE glt_getmlrf( tpoce_all,tpml )
   tpml(:,:)%sml = tpoce_all(:,:)%sml
   tpml(:,:)%ssh = tpoce_all(:,:)%ssh
   tpml(:,:)%tml = tpoce_all(:,:)%tml - t0deg        ! in C
-  tpml(:,:)%mlf = glt_swfrzt2d( tpoce_all(:,:)%sml )
+  tpml(:,:)%mlf = glt_swfrzt2d( tpoce_all(:,:)%sml,nx,ny )
   tpml(:,:)%qml = tpoce_all(:,:)%qml
   tpml(:,:)%hco = cpsw * tpml(:,:)%tml   
 ! 

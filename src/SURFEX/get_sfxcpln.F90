@@ -5,7 +5,7 @@
 !     #########
       SUBROUTINE GET_SFXCPL_n (IM, S, U, W, &
                                HPROGRAM,KI,PRUI,PWIND,PFWSU,PFWSV,PSNET, &
-                                PHEAT,PEVAP,PRAIN,PSNOW,PICEFLUX,PFWSM,   &
+                                PHEAT,PEVAP,PRAIN,PSNOW,PICEFLUX,PFWSM,PPS,   &
                                 PHEAT_ICE,PEVAP_ICE,PSNET_ICE)  
 !     ###################################################################
 !
@@ -97,6 +97,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PRAIN
 REAL, DIMENSION(KI), INTENT(OUT) :: PSNOW
 REAL, DIMENSION(KI), INTENT(OUT) :: PICEFLUX
 REAL, DIMENSION(KI), INTENT(OUT) :: PFWSM
+REAL, DIMENSION(KI), INTENT(OUT) :: PPS
 REAL, DIMENSION(KI), INTENT(OUT) :: PHEAT_ICE
 REAL, DIMENSION(KI), INTENT(OUT) :: PEVAP_ICE
 REAL, DIMENSION(KI), INTENT(OUT) :: PSNET_ICE
@@ -119,6 +120,7 @@ REAL, DIMENSION(KI)   :: ZSEA_EVAP  ! Cumulated Evaporation             (kg/m2)
 REAL, DIMENSION(KI)   :: ZSEA_RAIN  ! Cumulated Rainfall rate           (kg/m2)
 REAL, DIMENSION(KI)   :: ZSEA_SNOW  ! Cumulated Snowfall rate           (kg/m2)
 REAL, DIMENSION(KI)   :: ZSEA_WATF  ! Cumulated freshwater flux         (kg/m2)
+REAL, DIMENSION(KI)   :: ZSEA_PRES  ! Cumulated Surface pressure        (Pa.s)
 !
 REAL, DIMENSION(KI)   :: ZSEAICE_HEAT ! Cumulated Sea-ice non solar net heat flux (J/m2)
 REAL, DIMENSION(KI)   :: ZSEAICE_SNET ! Cumulated Sea-ice solar net heat flux     (J/m2)
@@ -184,6 +186,7 @@ IF(LCPL_SEA)THEN
   ZSEA_RAIN (:) = XUNDEF
   ZSEA_SNOW (:) = XUNDEF
   ZSEA_WATF (:) = XUNDEF
+  ZSEA_PRES (:) = XUNDEF
 !
   ZSEAICE_HEAT (:) = XUNDEF
   ZSEAICE_SNET (:) = XUNDEF
@@ -195,7 +198,7 @@ IF(LCPL_SEA)THEN
                    LCPL_SEAICE,LWATER,                      &
                    ZSEA_FWSU,ZSEA_FWSV,ZSEA_HEAT,ZSEA_SNET, &
                    ZSEA_WIND,ZSEA_FWSM,ZSEA_EVAP,ZSEA_RAIN, &
-                   ZSEA_SNOW,ZSEA_WATF,                     &
+                   ZSEA_SNOW,ZSEA_WATF,ZSEA_PRES,           &
                    ZSEAICE_HEAT,ZSEAICE_SNET,ZSEAICE_EVAP   )
 !
 ! * Assign sea output fields
@@ -208,6 +211,7 @@ IF(LCPL_SEA)THEN
   PRAIN     (:) = ZSEA_RAIN (:)
   PSNOW     (:) = ZSEA_SNOW (:)
   PFWSM     (:) = ZSEA_FWSM (:)
+  PPS       (:) = ZSEA_PRES (:)
   PHEAT_ICE (:) = ZSEAICE_HEAT (:)
   PEVAP_ICE (:) = ZSEAICE_EVAP (:)
   PSNET_ICE (:) = ZSEAICE_SNET (:)

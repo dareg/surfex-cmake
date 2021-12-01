@@ -63,6 +63,7 @@
 !!                     10/11 (G. Pigeon) simplification for road, garden, roof,
 !!                           wall fractions
 !!                     08/13 (V. Masson) adds solar panels
+!!                     10/16 (P. Marguinaud) Port to single precision
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -346,8 +347,8 @@ DO JJ=1,SIZE(T%XROAD)
 !             -----------------------------------
 !
   IF (.NOT. TOP%LCANOPY) THEN
-    ZINTER = ZRD (JJ) * PAC_RD(JJ) * PDF_RD(JJ) + ZGD(JJ) * PAC_GD(JJ) + PAC_WL(JJ) * PWL_O_GRND(JJ) + PAC_TOP(JJ) 
-    PT_CAN(JJ) =  ( ZRD(JJ)      * T%XT_ROAD  (JJ,1) * PAC_RD (JJ)    * PDF_RD (JJ)        &
+    ZINTER =  ZRD (JJ) * PAC_RD(JJ) * PDF_RD(JJ) +  ZGD(JJ) * PAC_GD(JJ) + PAC_WL(JJ) * PWL_O_GRND(JJ) + PAC_TOP(JJ) 
+    PT_CAN(JJ) =  ( ZRD(JJ) * T%XT_ROAD  (JJ,1) * PAC_RD (JJ) * PDF_RD (JJ)        &
                    + T%XT_WALL_A(JJ,1) * PAC_WL (JJ) * (1.-B%XGR(JJ)) * PWL_O_GRND(JJ) * 0.5 &
                    + T%XT_WALL_B(JJ,1) * PAC_WL (JJ) * (1.-B%XGR(JJ)) * PWL_O_GRND(JJ) * 0.5 &
                    + B%XT_WIN1    (JJ) * PAC_WL (JJ) *     B%XGR(JJ)  * PWL_O_GRND(JJ)       &
@@ -367,8 +368,9 @@ DO JJ=1,SIZE(T%XROAD)
 !              ----------------------------
 !
     ZINTER = ZRD(JJ) * PAC_RD_WAT(JJ) * PDF_RD(JJ) * PDELT_RD(JJ) + ZGD(JJ) * PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ) + PAC_TOP(JJ)
-    PQ_CAN(JJ) = (  ZRD        (JJ) * PQSAT_RD  (JJ) * PAC_RD_WAT(JJ) * PDF_RD    (JJ) * PDELT_RD(JJ)    &
-                  + ZGD        (JJ) * PQSAT_GD  (JJ) * PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ)                   &
+    
+    PQ_CAN(JJ) = (  ZRD(JJ) * PQSAT_RD   (JJ) * PAC_RD_WAT(JJ) * PDF_RD    (JJ) * PDELT_RD(JJ)    &
+                  + ZGD(JJ) * PQSAT_GD   (JJ) * PAC_AGG_GD(JJ) * PHU_AGG_GD(JJ)                   &
                   + PQA        (JJ) * PAC_TOP(JJ)                                                 &
                   + PLE_TRAFFIC(JJ) / (1.-T%XBLD(JJ)) / PRHOA(JJ) / XLVTT                         &
                   + PLESN_RD   (JJ) * PDN_RD(JJ)      / PRHOA(JJ) / XLVTT * ZRD(JJ)  ) / ZINTER

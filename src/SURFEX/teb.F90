@@ -6,12 +6,12 @@
     SUBROUTINE TEB  (TOP, T, BOP, B, TIR, DMT, HIMPLICIT_WIND, PTSUN,                   &
                      PT_CANYON, PQ_CANYON, PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN,  &
                      PZ_LOWCAN, PPEW_A_COEF, PPEW_B_COEF, PPEW_A_COEF_LOWCAN,           &
-                     PPEW_B_COEF_LOWCAN, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA,       &
+                     PPEW_B_COEF_LOWCAN, AT, PPS, PPA, PEXNS, PEXNA, PTA, PQA, PRHOA,   &
                      PLW_RAD, PRR, PSR, PZREF, PUREF, PVMOD, PH_TRAFFIC, PLE_TRAFFIC,   &
                      PTSTEP, PDF_RF, PDN_RF, PDF_RD, PDN_RD, PQSAT_RF, PQSAT_RD,        &
                      PDELT_RF, PDELT_RD, PTS_GARDEN, PLEW_RF, PUW_GR, PLEW_RD, PLE_WL_A,&
-                     PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRN_GR, &
-                     PH_GR, PLE_GR, PGFLUX_GR, PDRAIN_GR, PRUNOFF_GR, PRNSN_RD,    &
+                     PLE_WL_B, PRNSN_RF, PHSN_RF, PLESN_RF, PGSN_RF, PMELT_RF, PRN_GR,  &
+                     PH_GR, PLE_GR, PGFLUX_GR, PDRAIN_GR, PRUNOFF_GR, PRNSN_RD,         &
                      PHSN_RD, PLESN_RD, PGSN_RD, PMELT_RD, PUW_RD, PUW_RF, PDUWDU_RD,   &
                      PDUWDU_RF, PUSTAR_TWN, PCD, PCDN, PCH_TWN, PRI_TWN, PRESA_TWN,     &
                      PAC_RF, PAC_RD, PAC_WL, PAC_TOP, PAC_GARDEN, PAC_RF_WAT,           &
@@ -178,18 +178,19 @@
 !*       0.     DECLARATIONS
 !     ------------
 !
-USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_OPTION_n, ONLY : BEM_OPTIONS_t
-USE MODD_BEM_n, ONLY : BEM_t
-USE MODD_TEB_IRRIG_n, ONLY : TEB_IRRIG_t
+USE MODD_TEB_OPTION_n,    ONLY : TEB_OPTIONS_t
+USE MODD_TEB_n,           ONLY : TEB_t
+USE MODD_BEM_OPTION_n,    ONLY : BEM_OPTIONS_t
+USE MODD_BEM_n,           ONLY : BEM_t
+USE MODD_TEB_IRRIG_n,     ONLY : TEB_IRRIG_t
 USE MODD_DIAG_MISC_TEB_n, ONLY : DIAG_MISC_TEB_t
 !
-USE MODD_TYPE_DATE_SURF,ONLY: DATE_TIME
-USE MODD_CSTS,         ONLY : XTT, XSTEFAN, XCPD, XLVTT
-USE MODD_SURF_PAR,     ONLY : XUNDEF
-USE MODD_SNOW_PAR,     ONLY : XEMISSN, XANSMAX_ROOF, &
+USE MODD_TYPE_DATE_SURF,  ONLY : DATE_TIME
+USE MODD_CSTS,            ONLY : XTT, XSTEFAN, XCPD, XLVTT
+USE MODD_SURF_PAR,        ONLY : XUNDEF
+USE MODD_SNOW_PAR,        ONLY : XEMISSN, XANSMAX_ROOF, &
                           XANSMAX_ROAD,XWCRN_ROOF,XWCRN_ROAD
+USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE MODE_THERMOS
 USE MODE_SURF_SNOW_FRAC
@@ -222,9 +223,9 @@ TYPE(TEB_IRRIG_t), INTENT(INOUT) :: TIR
 TYPE(DIAG_MISC_TEB_t), INTENT(INOUT) :: DMT
 !
  CHARACTER(LEN=*),     INTENT(IN)  :: HIMPLICIT_WIND   ! wind implicitation option
-!                                                     ! 'OLD' = direct
-!                                                     ! 'NEW' = Taylor serie, order 1
-REAL, DIMENSION(:),   INTENT(IN)    :: PTSUN              ! solar time   (s from midnight)
+!                                                      ! 'OLD' = direct
+!                                                      ! 'NEW' = Taylor serie, order 1
+REAL, DIMENSION(:), INTENT(IN)    :: PTSUN              ! solar time   (s from midnight)
 REAL, DIMENSION(:), INTENT(INOUT) :: PT_CANYON     ! canyon air temperature
 REAL, DIMENSION(:), INTENT(INOUT) :: PQ_CANYON     ! canyon air specific humidity
 REAL, DIMENSION(:), INTENT(IN)    :: PU_CANYON     ! canyon hor. wind
@@ -236,6 +237,7 @@ REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF   ! implicit coefficients
 REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF   ! for wind coupling
 REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF_LOWCAN ! implicit coefficients for wind coupling
 REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF_LOWCAN ! between low canyon wind and road
+TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT            ! atmospheric turbulence parameters
 REAL, DIMENSION(:), INTENT(IN)    :: PPS           ! pressure at the surface
 REAL, DIMENSION(:), INTENT(IN)    :: PPA           ! pressure at the first atmospheric level
 REAL, DIMENSION(:), INTENT(IN)    :: PEXNS         ! surface exner function
@@ -515,14 +517,14 @@ ZWS_RD_MAX(:) = ZWS_RD_MAX(:) * PDF_RD(:)
 !              ------------
 !
  CALL URBAN_DRAG(TOP, T, B, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON, &
-                 PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN, &
-                 ZTS_RF, ZTS_RD, ZTS_WL, PTS_GARDEN, PDN_RF, PDN_RD,    &
-                 PEXNS, PEXNA, PTA, PQA, PPS, PRHOA, PZREF, PUREF,      &
-                 PVMOD, ZWS_RF_MAX, ZWS_RD_MAX, PPEW_A_COEF,            &
-                 PPEW_B_COEF, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN,   &
-                 PQSAT_RF, PQSAT_RD, PDELT_RF, PDELT_RD, PCD, PCDN,     &
-                 PAC_RF, PAC_RF_WAT, PAC_WL, PAC_RD, PAC_RD_WAT,        &
-                 PAC_TOP, PAC_GARDEN, PRI_TWN, PUW_RD, PUW_RF,          &
+                 PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,   &
+                 ZTS_RF, ZTS_RD, ZTS_WL, PTS_GARDEN, PDN_RF, PDN_RD,      &
+                 PEXNS, PEXNA, PTA, PQA, PPS, PRHOA, PZREF, PUREF,        &
+                 PVMOD, ZWS_RF_MAX, ZWS_RD_MAX, PPEW_A_COEF,              &
+                 PPEW_B_COEF, PPEW_A_COEF_LOWCAN, PPEW_B_COEF_LOWCAN, AT, &
+                 PQSAT_RF, PQSAT_RD, PDELT_RF, PDELT_RD, PCD, PCDN,       &
+                 PAC_RF, PAC_RF_WAT, PAC_WL, PAC_RD, PAC_RD_WAT,          &
+                 PAC_TOP, PAC_GARDEN, PRI_TWN, PUW_RD, PUW_RF,            &
                  PDUWDU_RD, PDUWDU_RF, PUSTAR_TWN, ZAC_WIN    )
 !
 !* area-averaged heat transfer coefficient

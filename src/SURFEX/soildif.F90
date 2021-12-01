@@ -3,7 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE SOILDIF(IO, KK, PK, PEK, DMI, PVEG, PFROZEN1, PFFG, PFFV, PSOILCONDZ, PSOILHCAPZ   )
+      SUBROUTINE SOILDIF(IO, KK, PK, PEK, DMI, PVEG, PFROZEN1, PFFG, PFFV, PSOILCONDZ, &
+                         PSOILHCAPZ , PCVHEATF   )
 !     ##########################################################################
 !
 !!****  *SOIL*  
@@ -68,7 +69,7 @@ USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 USE MODD_CSTS,       ONLY : XCL, XCI, XRHOLW, XRHOLI, XPI, XDAY, XCONDI, XTT, XLMTT, XG
 USE MODD_ISBA_PAR,   ONLY : XCONDWTR, XWGMIN, XWTD_MAXDEPTH, & 
                             XOMRHO, XOMSPH, XOMCONDDRY,      &
-                            XOMCONDSLD, XCVHEATF
+                            XOMCONDSLD
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -88,7 +89,7 @@ TYPE(DIAG_MISC_ISBA_t), INTENT(INOUT) :: DMI
 REAL, DIMENSION(:), INTENT(IN)    :: PVEG
 !                                      Soil and vegetation parameters
 !                                      PVEG = fraction of vegetation
-
+!
 !
 REAL, DIMENSION(:), INTENT(OUT)   :: PFROZEN1
 !                                      PFROZEN1 = fraction of ice in superficial soil
@@ -103,6 +104,7 @@ REAL, DIMENSION(:,:), INTENT(OUT) :: PSOILCONDZ, PSOILHCAPZ
 !                                    PSOILHCAP = soil heat capacity        (J m-3 K-1)
 !                                    PSOILCOND = soil thermal conductivity (W m-1 K-1)
 !
+REAL, INTENT(IN)                 :: PCVHEATF
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PEK%XTG,1),SIZE(PEK%XTG,2)) :: ZMATPOT, ZCONDDRYZ, ZCONDSLDZ, ZVEGMULCH
@@ -293,7 +295,7 @@ DMI%XCG(:) = MIN(ZCTMAX,DMI%XCG(:))
 !
 ! Vegetation thermal inertia [(m2 K)/J]
 !
-ZCV(:) = 1.0 / ( XCVHEATF/PEK%XCV(:) +  XCL * PEK%XWR(:) )
+ZCV(:) = 1.0 / ( PCVHEATF/PEK%XCV(:) +  XCL * PEK%XWR(:) )
 !
 ZCV(:) = MIN(ZCTMAX,ZCV(:))
 !

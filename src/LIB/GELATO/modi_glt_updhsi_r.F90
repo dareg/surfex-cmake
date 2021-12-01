@@ -115,11 +115,13 @@ END MODULE MODI_glt_updhsi_r
 ! ------------------------- SUBROUTINE glt_updhsi_r -------------------------
 !
 SUBROUTINE glt_updhsi_r  &
-        ( pcondb,pqtopmelt,pdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil )
+        ( pcondb,pqtopmelt,pdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil,&
+       ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,noutlu,np,nsalflx,nslay,nt,&
+       dtt,rn_htopoc,lp3,&
+       sf3tinv,height )
 !
   USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
   USE modi_glt_updtfl_r
   USE modi_glt_saltrap_r
   USE modi_glt_frzvtp_r
@@ -131,6 +133,10 @@ SUBROUTINE glt_updhsi_r  &
 !
 !* Arguments
 !
+  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nilay,nslay,niceage,nicesal,nmponds,nleviti,nl,nt,np
+  REAL, INTENT(IN) ::  dtt,rn_htopoc
+  LOGICAL, INTENT(IN) ::  lp3
+  REAL,DIMENSION(:),INTENT(IN) ::  sf3tinv,height
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
         pcondb,pqtopmelt
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &
@@ -333,7 +339,8 @@ SUBROUTINE glt_updhsi_r  &
 !
 !CALL glt_aventh(tpsit,tpsil,zei1,zes1)
 !print*,'Enthalpie avant =',zei1+zes1
-  CALL glt_mltvtp_r( zdhi,zhsi,tpsil )
+  CALL glt_mltvtp_r( zdhi,zhsi,tpsil,&
+     nilay,nl,np,nt,lp3,height,sf3tinv)
 !print*,'zqtio2 =',sum(zqtio2*tpsit%fsi,dim=1)
 !    print*,'(2) zqfac=',sum(zqfac*tpsit%fsi,dim=1)
 !    print*,'(2) zqres=',sum(zqres*tpsit%fsi,dim=1)
@@ -344,7 +351,8 @@ SUBROUTINE glt_updhsi_r  &
     ( zhsi(:,:)-tpsit(:,:)%hsi ) * tpsit(:,:)%fsi
   zhsi_m(:,:) = zhsi(:,:)
   zwork2(:,:) = 0.
-  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,pent=zwork2,psalt=tpsit(:,:)%ssi )
+  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,pent=zwork2,psalt=tpsit(:,:)%ssi )
 !  print*,'Enthalpie envoyee a l ocean =',SUM(0.*zdmsi,dim=1)/dtt
 !
 !
@@ -359,12 +367,13 @@ SUBROUTINE glt_updhsi_r  &
   DO jk=1,nt
     ztem(:) = -2.
     yfreeze(:) = ( pcondb(jk,:)<0. )
-    CALL glt_saltrap_r( yfreeze,pcondb(jk,:),ztem(:),tpmxl,zssib,zentb,zdhsib )
+    CALL glt_saltrap_r(yfreeze,pcondb(jk,:),ztem(:),tpmxl,zssib,zentb,zdhsib,np,dtt )
     tpdia(:)%cgl = tpdia(:)%cgl + tpsit(jk,:)%fsi*zdhsib(:)
   END DO
   tpdia(:)%cgl = rhoice*tpdia(:)%cgl/dtt   ! Convert to kg.m-2.s-1
 !
-  CALL glt_frzvtp_r( tpmxl,tpsit,zqfac,zhsi,zssi,tpsil )
+  CALL glt_frzvtp_r( tpmxl,tpsit,zqfac,zhsi,zssi,tpsil,&
+     nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv)
 !
 ! .. Sea ice freezing 
 !   - zqfac was completely used: set it to 0.
@@ -376,7 +385,8 @@ SUBROUTINE glt_updhsi_r  &
 ! Update water, heat and salt fluxes affecting the ocean due to freezing
   zdmsi(:,:) = rhoice *  &
     ( zhsi(:,:)-zhsi_m(:,:) ) * tpsit(:,:)%fsi
-  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,pent=zent0,psalt=zssi )
+  CALL glt_updtfl_r( 'I2O',tpmxl,tptfl,zdmsi,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc,pent=zent0,psalt=zssi )
 !
 !
 !
@@ -427,7 +437,8 @@ SUBROUTINE glt_updhsi_r  &
 ! 5.4. Update water, heat and salt fluxes affecting the ocean
 ! ------------------------------------------------------------
 !
-  CALL glt_updtfl_r( 'FW2O',tpmxl,tptfl,zdmsn)
+  CALL glt_updtfl_r( 'FW2O',tpmxl,tptfl,zdmsn,&
+      ncdlssh,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
 !
 !
 !
