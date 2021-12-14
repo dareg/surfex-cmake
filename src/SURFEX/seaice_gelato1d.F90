@@ -1,6 +1,8 @@
 MODULE ICE_GELATO
 USE ABSTRACT_ICE
 USE MODD_TYPES_GLT, ONLY: T_GLT
+USE MODD_GLT_PARAM, ONLY : t_glt_param
+USE MODD_GLT_VHD, ONLY : t_glt_vhd
 USE YOMHOOK,   ONLY : LHOOK,   DR_HOOK
 USE PARKIND1,  ONLY : JPRB
 IMPLICIT NONE
@@ -9,6 +11,9 @@ PRIVATE
 TYPE, PUBLIC, EXTENDS(SEA_ICE_t) :: GELATO_t
   PRIVATE
     TYPE(T_GLT) :: TGLT !< GELATO sea ice state
+    TYPE(t_glt_param) :: GLTPARAM !< GELATO parameters
+    TYPE(t_glt_vhd)   :: GLTVHD! new structure
+
     REAL, POINTER :: XTICE(:)
     REAL, POINTER :: XSIC(:)
     REAL, POINTER :: XICE_ALB(:)
@@ -32,16 +37,7 @@ END TYPE GELATO_t
 CONTAINS
 
 SUBROUTINE INIT(THIS, HPROGRAM)
-USE MODD_GLT_PARAM,  ONLY :  nmkinit, nrstout, nrstgl4, nthermo, ndynami, nadvect, ntimers, &
-     ndyncor, ncdlssh, niceage, nicesal, nmponds, nsnwrad, nleviti, nsalflx, nextqoc,       &
-     nicesub, cnflxin, cfsidmp, xfsidmpeft, chsidmp, xhsidmpeft,                            &
-     cdiafmt, cdialev, dttave , navedia, ninsdia, ndiamax, nsavinp,                         &
-     nsavout, nupdbud, nprinto, nprlast, cn_grdname, rn_htopoc, nidate , niter,             &
-     dtt, nt, thick, nilay, nslay, xh0 , xh1 , xh2 , xh3 , xh4 , ntstp , ndte  , xfsimax,   &
-     xicethcr, xhsimin, alblc , xlmelt , xswhdfr, albyngi, albimlt, albsmlt, albsdry,ngrdlu,&
-     nsavlu,  nrstlu , n0vilu , n0valu , n2vilu , n2valu , nxvilu , nxvalu , nibglu ,       &
-     nspalu , noutlu , ntimlu , ciopath,                                                    &
-     gelato_leadproc, gelato_myrank, lwg, nnflxin, ntd
+USE MODD_GLT_PARAM,  ONLY :  GLOBGLTPARAM
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO
 USE MODD_SURF_PAR,   ONLY : XUNDEF
@@ -66,15 +62,15 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !
   ! .. Number of categories considered in observations towards which damping is
   ! applied
-  ntd=1
+  GLOBGLTPARAM%ntd=1
   ! .. One input non-solar forcing flux per ice category (nt) or one input
   ! non-solar flux to be shared between all the categories (1)
-  nnflxin=1
+  GLOBGLTPARAM%nnflxin=1
   ! .. Which is the leading process number (useless now ?)
-  gelato_leadproc=0
+  GLOBGLTPARAM%gelato_leadproc=0
   ! Adapt proc number and print flags to the Surfex proc numbering scheme
-  gelato_myrank=nrank
-  lwg=(nrank == npio)
+  GLOBGLTPARAM%gelato_myrank=nrank
+  GLOBGLTPARAM%lwg=(nrank == npio)
 
 
   ! Setting those Gelato parameters which are usually set by an
@@ -155,24 +151,24 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !       cnflxin    --> 'double': one flux for water, one flux for ice
   !       cnflxin    --> 'multi' : one flux for water, one flux for each ice cat
   !
-  nmkinit = 0
-  nrstout = 0
-  nrstgl4 = 1
-  nthermo = 1
-  ndynami = 0
-  nadvect = 0
-  ntimers = 0
-  ndyncor = 0
-  ncdlssh = 1
-  niceage = 1
-  nicesal = 1
-  nmponds = 1
-  nsnwrad = 1
-  nleviti = 1
-  nsalflx = 2
-  nextqoc = 0
-  nicesub = 1
-  cnflxin = 'double'
+  GLOBGLTPARAM%nmkinit = 0
+  GLOBGLTPARAM%nrstout = 0
+  GLOBGLTPARAM%nrstgl4 = 1
+  GLOBGLTPARAM%nthermo = 1
+  GLOBGLTPARAM%ndynami = 0
+  GLOBGLTPARAM%nadvect = 0
+  GLOBGLTPARAM%ntimers = 0
+  GLOBGLTPARAM%ndyncor = 0
+  GLOBGLTPARAM%ncdlssh = 1
+  GLOBGLTPARAM%niceage = 1
+  GLOBGLTPARAM%nicesal = 1
+  GLOBGLTPARAM%nmponds = 1
+  GLOBGLTPARAM%nsnwrad = 1
+  GLOBGLTPARAM%nleviti = 1
+  GLOBGLTPARAM%nsalflx = 2
+  GLOBGLTPARAM%nextqoc = 0
+  GLOBGLTPARAM%nicesub = 1
+  GLOBGLTPARAM%cnflxin = 'double'
   !
   !
   ! 2. Damping and restoring
@@ -192,10 +188,10 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !       chsidmp='PRESCRIBE'  --> prescribe
   !  - xhsidmpeft : sea ice thickness damping e-folding time (in days)
   !
-  cfsidmp='NONE'
-  xfsidmpeft=0.
-  chsidmp='NONE'
-  xhsidmpeft=0.
+  GLOBGLTPARAM%cfsidmp='NONE'
+  GLOBGLTPARAM%xfsidmpeft=0.
+  GLOBGLTPARAM%chsidmp='NONE'
+  GLOBGLTPARAM%xhsidmpeft=0.
   !
   !
   ! 3. Diagnostics output
@@ -255,17 +251,17 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !                     cinsfld = sic
   !                     ...
   !
-  cdiafmt = 'VMAR5'
-  cdialev = ''
-  dttave = 30.
-  navedia = 0
-  ninsdia = 0
-  ndiamax = 90
-  nsavinp = 0
-  nsavout = 0
-  nupdbud = 0
-  nprinto = 0
-  nprlast = 0
+  GLOBGLTPARAM%cdiafmt = 'VMAR5'
+  GLOBGLTPARAM%cdialev = ''
+  GLOBGLTPARAM%dttave = 30.
+  GLOBGLTPARAM%navedia = 0
+  GLOBGLTPARAM%ninsdia = 0
+  GLOBGLTPARAM%ndiamax = 90
+  GLOBGLTPARAM%nsavinp = 0
+  GLOBGLTPARAM%nsavout = 0
+  GLOBGLTPARAM%nupdbud = 0
+  GLOBGLTPARAM%nprinto = 0
+  GLOBGLTPARAM%nprlast = 0
   !
   !
   ! 4. Grid definition
@@ -283,8 +279,8 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !          . This is important if Gelato is coupled to an ocean model, to
   !          send the right concentration / dilution flux to the ocean.
   !
-  cn_grdname = 'SURFEX'
-  rn_htopoc = 10.
+  GLOBGLTPARAM%cn_grdname = 'SURFEX'
+  GLOBGLTPARAM%rn_htopoc = 10.
   !
   !
   ! 5. Run date position and time step
@@ -294,9 +290,9 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !  - niter      : number of iterations from reference date (-)
   !  - dtt        : time step for dynamics and thermodynamics (s)
   !
-  nidate = 20010101
-  niter = 100000
-  dtt = XUNDEF  ! means : same time step as seaflux
+  GLOBGLTPARAM%nidate = 20010101
+  GLOBGLTPARAM%niter = 100000
+  GLOBGLTPARAM%dtt = XUNDEF  ! means : same time step as seaflux
   !
   !
   ! 6. Number of ice categories
@@ -305,11 +301,11 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !  - nt         : number of ice thicknesses (-)
   !  - thick      : boundaries for thickness categories (-)
   !
-  nt = 1
-  IF (ALLOCATED(thick)) DEALLOCATE( thick )
-  ALLOCATE( thick(nt+1) )
-  thick(1)= -.01
-  thick(2) = 1000.
+  GLOBGLTPARAM%nt = 1
+  IF (ALLOCATED(GLOBGLTPARAM%thick)) DEALLOCATE( GLOBGLTPARAM%thick )
+  ALLOCATE( GLOBGLTPARAM%thick(GLOBGLTPARAM%nt+1) )
+  GLOBGLTPARAM%thick(1)= -.01
+  GLOBGLTPARAM%thick(2) = 1000.
   !
   !
   ! 7. Number of layers in the ice-snow slab
@@ -325,13 +321,13 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !  If you need to run the model with constant vertical levels
   !  (not recommended), specify xh1=1. and xh2=0.
   !
-  nilay = 9
-  nslay = 1
-  xh0 = 4.392339514718992e-01
-  xh1 = 1.049607477174487e-01
-  xh2 = 9.507487632412231e-02
-  xh3 = 1.
-  xh4 = 5.208820443636069
+  GLOBGLTPARAM%nilay = 9
+  GLOBGLTPARAM%nslay = 1
+  GLOBGLTPARAM%xh0 = 4.392339514718992e-01
+  GLOBGLTPARAM%xh1 = 1.049607477174487e-01
+  GLOBGLTPARAM%xh2 = 9.507487632412231e-02
+  GLOBGLTPARAM%xh3 = 1.
+  GLOBGLTPARAM%xh4 = 5.208820443636069
   !
   !
   ! 8. Elastic Viscous-Plastic sea ice rheology parameters
@@ -342,8 +338,8 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !  - ndte       : number of subcycles for velocity computations
   !                 during sea ice EVP dynamics.
   !
-  ntstp = 1
-  ndte = 100
+  GLOBGLTPARAM%ntstp = 1
+  GLOBGLTPARAM%ndte = 100
   !
   !
   ! 9. Limit Values for sea ice
@@ -354,9 +350,9 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   ! and thick ice (m)
   !  - xhsimin  : minimum allowable ice thickness
   !
-  xfsimax = .995
-  xicethcr = .8
-  xhsimin = .2
+  GLOBGLTPARAM%xfsimax = .995
+  GLOBGLTPARAM%xicethcr = .8
+  GLOBGLTPARAM%xhsimin = .2
   !
   !
   ! 10.  Parameterizations
@@ -378,13 +374,13 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !  - albsmlt    : albedo of melting snow
   !  - albsdry    : albedo of dry snow
   !
-  alblc = 0.
-  xlmelt = 3.e-3
-  xswhdfr = 1.00
-  albyngi = 1.
-  albimlt = 0.56
-  albsmlt = 0.77
-  albsdry = 0.84
+  GLOBGLTPARAM%alblc = 0.
+  GLOBGLTPARAM%xlmelt = 3.e-3
+  GLOBGLTPARAM%xswhdfr = 1.00
+  GLOBGLTPARAM%albyngi = 1.
+  GLOBGLTPARAM%albimlt = 0.56
+  GLOBGLTPARAM%albsmlt = 0.77
+  GLOBGLTPARAM%albsdry = 0.84
   !
   !
   ! 11.  Logical units
@@ -404,19 +400,19 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !  - noutlu     : unit for GELATO output
   !  - ntimlu     : unit for GELATO timers
   !
-  ngrdlu = 153
-  nsavlu = 111
-  nrstlu = 151
-  n0vilu = 123
-  n0valu = 125
-  n2vilu = 121
-  n2valu = 122
-  nxvilu = 133
-  nxvalu = 131
-  nibglu = 120
-  nspalu = 130
-  noutlu = ILUOUT
-  ntimlu = 201
+  GLOBGLTPARAM%ngrdlu = 153
+  GLOBGLTPARAM%nsavlu = 111
+  GLOBGLTPARAM%nrstlu = 151
+  GLOBGLTPARAM%n0vilu = 123
+  GLOBGLTPARAM%n0valu = 125
+  GLOBGLTPARAM%n2vilu = 121
+  GLOBGLTPARAM%n2valu = 122
+  GLOBGLTPARAM%nxvilu = 133
+  GLOBGLTPARAM%nxvalu = 131
+  GLOBGLTPARAM%nibglu = 120
+  GLOBGLTPARAM%nspalu = 130
+  GLOBGLTPARAM%noutlu = ILUOUT
+  GLOBGLTPARAM%ntimlu = 201
   !
   !
   ! 12. Path to keep Gelato I/O fields
@@ -429,13 +425,16 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   !
   !  - ciopath    : path for input/output fields to gelato routine
   !
-  ciopath = '.'
+  GLOBGLTPARAM%ciopath = '.'
+
+  !COPY THE DEFAULT VALUES INSIDE CURRENT BLOCK
+  THIS%GLTPARAM=GLOBGLTPARAM
+
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:INIT', 1, ZHOOK_HANDLE)
 END SUBROUTINE INIT
 
 SUBROUTINE PREP(THIS, KLU, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
-USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo
 USE MODI_GLTOOLS_ALLOC
 USE MODI_GLTOOLS_READNAM
   IMPLICIT NONE
@@ -457,18 +456,21 @@ USE MODI_GLTOOLS_READNAM
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:PREP', 0, ZHOOK_HANDLE)
 
   CALL GET_LUOUT(HPROGRAM,ILUOUT)
-  CALL GLTOOLS_READNAM(.FALSE.,ILUOUT)
+  CALL GLTOOLS_READNAM(.FALSE.,ILUOUT,THIS%GLTPARAM)
 
   !-------------------------------------------------------------------------------------
   !
   !*      Creating default initial state for Gelato
   !
   !
-  nx = KLU
-  ny=1
-  nyglo=1
-  nxglo=nx
-  CALL GLTOOLS_ALLOC(THIS%TGLT)
+  THIS%GLTPARAM%nx = KLU
+  THIS%GLTPARAM%ny=1
+  THIS%GLTPARAM%nyglo=1
+  THIS%GLTPARAM%nxglo=nx
+  CALL GLTOOLS_ALLOC( &
+    THIS%TGLT,THIS%GLTPARAM%ndiamax,THIS%GLTPARAM%ndynami,THIS%GLTPARAM%nl,&
+    THIS%GLTPARAM%nnflxin,THIS%GLTPARAM%noutlu,THIS%GLTPARAM%nt,        &
+    THIS%GLTPARAM%ntd,THIS%GLTPARAM%nx,THIS%GLTPARAM%ny,THIS%GLTPARAM%lp1  )
   !
   !*       G1    Prognostic fields with only space dimension(s) :
   !
@@ -785,6 +787,7 @@ IMPLICIT NONE
 END SUBROUTINE RUN
 
 SUBROUTINE DEALLOC(THIS)
+USE MODI_GLTOOLS_DEALLOC
   IMPLICIT NONE
   CLASS(GELATO_t) :: THIS
   REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -797,7 +800,9 @@ SUBROUTINE DEALLOC(THIS)
     DEALLOCATE(THIS%XICE_ALB)
   END IF
 
-  IF (ASSOCIATED(THIS%TGLT%bat)) CALL GLTOOLS_DEALLOC(THIS%TGLT)
+  IF (ASSOCIATED(THIS%TGLT%bat)) THEN
+    CALL GLTOOLS_DEALLOC(THIS%TGLT, THIS%GLTPARAM%nnflxin, THIS%GLTPARAM%noutlu, THIS%GLTPARAM%ntd, THIS%GLTPARAM%lwg)
+  END IF
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:DEALLOC', 1, ZHOOK_HANDLE)
 END SUBROUTINE DEALLOC
@@ -810,10 +815,6 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEAICE
 USE MODD_WATER_PAR,      ONLY : XALBSEAICE
 !
-USE MODD_TYPES_GLT,   ONLY : T_GLT
-USE MODD_GLT_PARAM, ONLY : nl, nt, nx, ny, nxglo, nyglo, xdomsrf, &
-                           xdomsrf_g, nprinto, CFSIDMP, CHSIDMP,  &
-                           XFSIDMPEFT, XHSIDMPEFT, ntd
 USE MODD_GLT_CONST_THM, ONLY : epsil1
 USE LIB_MPP,            ONLY : MPP_SUM
 USE MODI_GLT_SNDATMF
@@ -857,36 +858,45 @@ USE MODI_ABOR1_SFX
       )
   END IF
   !
-  nx=KLU
-  nxglo=nx
+  THIS%GLTPARAM%nx=KLU
+  THIS%GLTPARAM%nxglo=nx
 #if ! defined in_arpege
-  CALL mpp_sum(nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
+  CALL mpp_sum(THIS%GLTPARAM%nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
 #else
   IF (NPRINTO > 0) THEN
      WRITE(KLUOUT,*)'Gelato cannot yet compute global averages when running in Arpege (because of collective comm vs. NPROMA blocks)'
   ENDIF
-  nxglo=max(nxglo,1)
+  THIS%GLTPARAM%nxglo=max(THIS%GLTPARAM%nxglo,1)
 #endif
+
+! TODO:
+! Try to conserve volume (or not) in case of a sea ice thickness constraint
+!S%GLTPARAM%CCSVDMP=S%CONSTRAIN_CSV
+
   !
   !* Physical dimensions are set for Gelato , as a 1D field (second dimension is degenerated)
   !
   ! Supersedes Gelato hard defaults with a Gelato genuine namelist
   ! if available (for Gelato wizzards !)
-  CALL GLTOOLS_READNAM(.FALSE.,KLUOUT)
+  CALL GLTOOLS_READNAM(.FALSE., KLUOUT, THIS%GLTPARAM)
   !
-  ny=1
-  nyglo=1
-  CALL GLTOOLS_ALLOC(THIS%TGLT)
+  THIS%GLTPARAM%ny=1
+  THIS%GLTPARAM%nyglo=1
+  CALL GLTOOLS_ALLOC( &
+    THIS%TGLT, &
+    THIS%GLTPARAM%ndiamax, THIS%GLTPARAM%ndynami, THIS%GLTPARAM%nl, THIS%GLTPARAM%nnflxin,&
+    THIS%GLTPARAM%noutlu, THIS%GLTPARAM%nt, THIS%GLTPARAM%ntd, THIS%GLTPARAM%nx, THIS%GLTPARAM%ny,&
+    THIS%GLTPARAM%lp1)
   !
   !*       0.     Check dimensions : number of layers and ice categories
   !
   CALL READ_SURF(HPROGRAM,'ICENL',inl_in_file,IRESP)
-  IF (inl_in_file /= nl) THEN
+  IF (inl_in_file /= THIS%GLTPARAM%nl) THEN
      WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, nl
      CALL ABOR1_SFX(YMESS)
   END IF
   CALL READ_SURF(HPROGRAM,'ICENT',int_in_file,IRESP)
-  IF (int_in_file /= nt) THEN
+  IF (int_in_file /= THIS%GLTPARAM%nt) THEN
      WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, nt
      CALL ABOR1_SFX(YMESS)
   END IF
@@ -897,7 +907,7 @@ USE MODI_ABOR1_SFX
   !
   !*       2.     Prognostic fields with space and ice-category dimension(s) :
   !
-  DO JK=1,nt
+  DO JK=1, THIS%GLTPARAM%nt
      WRITE(YLVL,'(I2)') JK
      YCATEG='_'//ADJUSTL(YLVL)
      ! .. Read sea ice age for type JK
@@ -921,7 +931,7 @@ USE MODI_ABOR1_SFX
      !
      !*       3.     Prognostic fields with space, ice-category and layer dimensions :
      !
-     DO JL=1,nl
+     DO JL=1, THIS%GLTPARAM%nl
         WRITE(YLVL,'(I2)') JL
         YLEVEL=YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)
         ! .. Read sea ice vertical gltools_enthalpy profile for type JK and level JL
@@ -941,8 +951,8 @@ USE MODI_ABOR1_SFX
   !
   ! .. Detect negative ice concentrations
   !
-  DO JX=1,nx
-     DO JL=1,nt
+  DO JX=1, THIS%GLTPARAM%nx
+     DO JL=1, THIS%GLTPARAM%nt
         IF ( THIS%TGLT%sit(JL,JX,1)%fsi<0. ) THEN
            WRITE(KLUOUT,*)  &
                 '**** WARNING **** Correcting problem in ice conc. < 0 at i=',  &
@@ -998,13 +1008,13 @@ USE MODI_ABOR1_SFX
   !
   !    Surface of local and global ocean domain (ghost points are masked out)
   !
-  xdomsrf = SUM( THIS%TGLT%dom(:,1)%srf, MASK=(THIS%TGLT%dom(:,1)%tmk==1) )
-  xdomsrf_g = xdomsrf
+  THIS%GLTPARAM%xdomsrf = SUM( THIS%TGLT%dom(:,1)%srf, MASK=(THIS%TGLT%dom(:,1)%tmk==1) )
+  THIS%GLTPARAM%xdomsrf_g = THIS%GLTPARAM%xdomsrf
 #if ! defined in_arpege
-  CALL mpp_sum(xdomsrf_g)
+  CALL mpp_sum(THIS%GLTPARAM%xdomsrf_g)
 #else
   ! Avoid zero divide in Gelato computation of global area averages
-  xdomsrf_g = MAX(xdomsrf_g, 1.e-9)
+  THIS%GLTPARAM%xdomsrf_g = MAX(THIS%GLTPARAM%xdomsrf_g, 1.e-9)
 #endif
   !
   !    7. Initalize Gelato time parameters
@@ -1024,7 +1034,7 @@ USE MODI_ABOR1_SFX
   !! Initialize the coupling variables with 'snapshot' prognostic variables
   ! (for now, averaged over ice categories)
   !
-  CALL GLT_SNDATMF( THIS%TGLT, XTTSI - XTT )
+  CALL GLT_SNDATMF( THIS%TGLT, THIS%GLTPARAM%nnflxin, THIS%GLTPARAM%alblc, XTTSI - XTT )
   THIS%XSIC(:)     = THIS%TGLT%ice_atm(1,:,1)%fsi
   THIS%XTICE(:)    = THIS%TGLT%ice_atm(1,:,1)%tsf
   THIS%XICE_ALB(:) = THIS%TGLT%ice_atm(1,:,1)%alb
@@ -1170,8 +1180,6 @@ IMPLICIT NONE
 END SUBROUTINE DIAG_MISC
 
 SUBROUTINE SET_DAMPING(THIS, PSIC_EFOLDING_TIME, PSIT_EFOLDING_TIME)
-USE MODD_GLT_PARAM, ONLY : CFSIDMP, CHSIDMP,  &
-                           XFSIDMPEFT, XHSIDMPEFT
 IMPLICIT NONE
   CLASS(GELATO_t) :: THIS
   REAL, INTENT(IN) :: PSIC_EFOLDING_TIME
@@ -1179,19 +1187,19 @@ IMPLICIT NONE
 
   IF(THIS%LINTERPOL_SIC)THEN
     IF (PSIC_EFOLDING_TIME==0.0) THEN
-       CFSIDMP='PRESCRIBE'
+      THIS%GLTPARAM%CFSIDMP='PRESCRIBE'
     ELSE
-       CFSIDMP='DAMP'
-       XFSIDMPEFT=PSIC_EFOLDING_TIME
+      THIS%GLTPARAM%CFSIDMP='DAMP'
+      THIS%GLTPARAM%XFSIDMPEFT=PSIC_EFOLDING_TIME
     ENDIF
   ENDIF
   !
   IF(THIS%LINTERPOL_SIT)THEN
     IF (PSIT_EFOLDING_TIME==0.0) THEN
-       CHSIDMP='PRESCRIBE'
+      THIS%GLTPARAM%CHSIDMP='PRESCRIBE'
     ELSE
-       CHSIDMP='DAMP_FAC'
-       XHSIDMPEFT= PSIT_EFOLDING_TIME
+      THIS%GLTPARAM%CHSIDMP='DAMP_FAC'
+      THIS%GLTPARAM%XHSIDMPEFT= PSIT_EFOLDING_TIME
     ENDIF
   ENDIF
 END SUBROUTINE SET_DAMPING

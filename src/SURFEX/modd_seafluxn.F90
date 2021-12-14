@@ -38,8 +38,6 @@ USE MODD_TYPE_DATE_SURF
 !
 USE ABSTRACT_ICE, ONLY : SEA_ICE_t
 USE MODD_TYPES_GLT, ONLY: T_GLT
-USE MODD_GLT_PARAM, ONLY : t_glt_param
-USE MODD_GLT_VHD, ONLY : t_glt_vhd
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -152,10 +150,6 @@ TYPE SEAFLUX_t
 !
 !
 !
-
-  TYPE(t_glt_param)                  :: GLTPARAM! new structure 
-  TYPE(t_glt_vhd)                    :: GLTVHD! new structure 
-
 END TYPE SEAFLUX_t
 
 

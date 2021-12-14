@@ -57,11 +57,6 @@ USE MODI_PREP_HOR_SEAFLUX_FIELD
 USE MODI_READ_PREP_SEAFLUX_CONF
 USE MODD_PREP_SEAFLUX,   ONLY : XSIC_UNIF
 !
-<<<<<<< HEAD
-=======
-USE MODI_GLTOOLS_ALLOC
-!
->>>>>>> origin/NWP_81plus
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
@@ -115,20 +110,8 @@ IF (LHOOK) CALL DR_HOOK('PREP_SEAICE',0,ZHOOK_HANDLE)
 !*      0.     Default of configuration
 !
 !
-<<<<<<< HEAD
-=======
-CALL GET_LUOUT(HPROGRAM,ILUOUT)
-!
-!-------------------------------------------------------------------------------------
-!
-!*      1.     Interpret namelist
-!
-S%CSEAICE_SCHEME=CPREP_SEAICE_SCHEME
-IF ( S%CSEAICE_SCHEME == 'GELATO' ) THEN
-  CALL GLTOOLS_READNAM(.FALSE.,ILUOUT,S%GLTPARAM)
-ENDIF
-!
->>>>>>> origin/NWP_81plus
+!S%CSEAICE_SCHEME=CPREP_SEAICE_SCHEME ! ???
+
 S%LHANDLE_SIC = .FALSE.
 IF(TRIM(S%CSEAICE_SCHEME)/='NONE' .OR. TRIM(S%CINTERPOL_SIC)/='NONE' )THEN
   S%LHANDLE_SIC=.TRUE.
