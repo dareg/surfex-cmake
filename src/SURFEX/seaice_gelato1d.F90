@@ -651,8 +651,6 @@ USE ABSTRACT_ICE, ONLY : ESM_CPL_t
 !
 USE MODD_CSTS,ONLY : XTT
 USE MODD_SURF_PAR,   ONLY : XUNDEF
-USE MODD_GLT_PARAM , ONLY : XTSTEP=>DTT, LWG, LP1, LP2, LP3, LP4, LP5, &
-                            NPRINTO, GELATO_DIM=>NX
 
 USE MODI_GLT_GELATO
 USE MODI_GLT_SNDATMF
@@ -723,17 +721,17 @@ IMPLICIT NONE
   !
   ! Must restore Gelato problem size (nx) to the correct value for the NPROMA block
   !
-  GELATO_DIM=SIZE(THIS%XSSS)
+  THIS%GLTPARAM%nx=SIZE(THIS%XSSS)
   !
   ! Time steps stuff : default Gelato time step equals surface time step
   !
   IT = KSTEP
   IF(IT == 1) THEN
     ZT  = 1
-    XTSTEP=PTSTEP
+    THIS%GLTPARAM%DTT=PTSTEP
   ELSE
     ZT=FLOAT(IT)
-    XTSTEP=PTSTEP/ZT
+    THIS%GLTPARAM%DTT=PTSTEP/ZT
   END IF
   !
   !          Initializations
@@ -776,11 +774,11 @@ IMPLICIT NONE
   THIS%XSIC    = 0.
   THIS%XTICE   = 0.
   THIS%XICE_ALB= 0.
-  LP1 = (LWG.AND.NPRINTO>=1)
-  LP2 = (LWG.AND.NPRINTO>=2)
-  LP3 = (LWG.AND.NPRINTO>=3)
-  LP4 = (LWG.AND.NPRINTO>=4)
-  LP5 = (LWG.AND.NPRINTO>=5)
+  THIS%GLTPARAM%LP1 = (THIS%GLTPARAM%LWG.AND.THIS%GLTPARAM%NPRINTO>=1)
+  THIS%GLTPARAM%LP2 = (THIS%GLTPARAM%LWG.AND.THIS%GLTPARAM%NPRINTO>=2)
+  THIS%GLTPARAM%LP3 = (THIS%GLTPARAM%LWG.AND.THIS%GLTPARAM%NPRINTO>=3)
+  THIS%GLTPARAM%LP4 = (THIS%GLTPARAM%LWG.AND.THIS%GLTPARAM%NPRINTO>=4)
+  THIS%GLTPARAM%LP5 = (THIS%GLTPARAM%LWG.AND.THIS%GLTPARAM%NPRINTO>=5)
 
   DO JT=1,IT
      IF (SIZE(THIS%XSSS) > 0) THEN
@@ -816,35 +814,106 @@ IMPLICIT NONE
         !
         !       Let Gelato process its input data
         !
-        CALL GLT_GETMLRF( THIS%TGLT%oce_all,THIS%TGLT%tml )
-        CALL GLT_GETATMF( THIS%TGLT )
-        CALL GLTOOLS_CHKINP( 20010101,THIS%TGLT )
+        CALL GLT_GETMLRF(THIS%TGLT%oce_all,THIS%TGLT%tml,THIS%GLTPARAM%nx,THIS%GLTPARAM%ny)
+        CALL GLT_GETATMF(THIS%TGLT, &
+          THIS%GLTPARAM%nnflxin, THIS%GLTPARAM%noutlu, THIS%GLTPARAM%nt, THIS%GLTPARAM%nx, &
+          THIS%GLTPARAM%ny, THIS%GLTPARAM%lp1, THIS%GLTPARAM%lwg)
+        CALL GLTOOLS_CHKINP( 20010101,THIS%TGLT, &
+          THIS%GLTPARAM%n0vilu,   &
+          THIS%GLTPARAM%n2vilu,   &
+          THIS%GLTPARAM%nnflxin,  &
+          THIS%GLTPARAM%noutlu,   &
+          THIS%GLTPARAM%nprinto,  &
+          THIS%GLTPARAM%nsavinp,  &
+          THIS%GLTPARAM%nsavlu,   &
+          THIS%GLTPARAM%nt,       &
+          THIS%GLTPARAM%ntd,      &
+          THIS%GLTPARAM%nx,       &
+          THIS%GLTPARAM%nxglo,    &
+          THIS%GLTPARAM%ny,       &
+          THIS%GLTPARAM%nyglo,    &
+          THIS%GLTPARAM%xdomsrf_g,&
+          THIS%GLTPARAM%lwg,      &
+          THIS%GLTPARAM%ciopath)
         !
         ! Compute gelato time index
         !
-        THIS%TGLT%IND%CUR = ( PTIMEC + JT * XTSTEP ) / XTSTEP
+        THIS%TGLT%IND%CUR = ( PTIMEC + JT * THIS%GLTPARAM%DTT ) / THIS%GLTPARAM%DTT
         !
         !       Let Gelato thermodynamic scheme run
         !
-        CALL GLT_GELATO( THIS%TGLT )
+        CALL GLT_GELATO( THIS%TGLT, THIS%GLTPARAM, THIS%GLTVHD )
         !
         ! Have Gelato feed its coupling ouptut interface
         !
-        CALL GLT_SNDATMF( THIS%TGLT )
-        CALL GLT_SNDMLRF( THIS%TGLT%bat,THIS%TGLT%dom,THIS%TGLT%atm_all,THIS%TGLT%tml, &
-                          THIS%TGLT%dia,THIS%TGLT%sit,THIS%TGLT%tfl,THIS%TGLT%ust,THIS%TGLT%all_oce )
-        CALL WRIDIA_AR5( THIS%TGLT )
-        CALL GLTOOLS_CHKOUT( 20010101,THIS%TGLT ) ! Does not actually work with Arpege
+        CALL GLT_SNDATMF( &
+          THIS%TGLT, THIS%GLTPARAM%nnflxin, THIS%GLTPARAM%alblc)
+        CALL GLT_SNDMLRF( &
+          THIS%TGLT%bat,THIS%TGLT%dom,THIS%TGLT%atm_all,THIS%TGLT%tml, &
+          THIS%TGLT%dia,THIS%TGLT%sit,THIS%TGLT%tfl,THIS%TGLT%ust,THIS%TGLT%all_oce, &
+          THIS%GLTPARAM%nadvect,THIS%GLTPARAM%ncdlssh,THIS%GLTPARAM%ndyncor, &
+          THIS%GLTPARAM%nleviti,THIS%GLTPARAM%nsalflx,THIS%GLTPARAM%nt,THIS%GLTPARAM%nx, &
+          THIS%GLTPARAM%ny,THIS%GLTPARAM%dtt,THIS%GLTPARAM%rn_htopoc)
+
+        CALL WRIDIA_AR5( &
+          THIS%TGLT, &
+          THIS%GLTPARAM%gelato_leadproc, &
+          THIS%GLTPARAM%gelato_myrank,   &
+          THIS%GLTPARAM%n0valu,          &
+          THIS%GLTPARAM%n0vilu,          &
+          THIS%GLTPARAM%n2valu,          &
+          THIS%GLTPARAM%n2vilu,          &
+          THIS%GLTPARAM%navedia,         &
+          THIS%GLTPARAM%ndiamax,         &
+          THIS%GLTPARAM%ndiap1,          &
+          THIS%GLTPARAM%ndiap2,          &
+          THIS%GLTPARAM%ndiap3,          &
+          THIS%GLTPARAM%niceage,         &
+          THIS%GLTPARAM%nicesal,         &
+          THIS%GLTPARAM%ninsdia,         &
+          THIS%GLTPARAM%nleviti,         &
+          THIS%GLTPARAM%nmponds,         &
+          THIS%GLTPARAM%noutlu,          &
+          THIS%GLTPARAM%nt,              &
+          THIS%GLTPARAM%nx,              &
+          THIS%GLTPARAM%nxglo,           &
+          THIS%GLTPARAM%ny,              &
+          THIS%GLTPARAM%nyglo,           &
+          THIS%GLTPARAM%dtt,             &
+          THIS%GLTPARAM%dttave,          &
+          THIS%GLTPARAM%lp1,             &
+          THIS%GLTPARAM%lwg,             &
+          THIS%GLTPARAM%cdiafmt,         &
+          S%GLTPARAM%cinsfld)
+        CALL GLTOOLS_CHKOUT( &
+           20010101,               &
+           THIS%TGLT,              &
+           THIS%GLTPARAM%n0vilu,   &
+           THIS%GLTPARAM%n2vilu,   &
+           THIS%GLTPARAM%nnflxin,  &
+           THIS%GLTPARAM%noutlu,   &
+           THIS%GLTPARAM%nprinto,  &
+           THIS%GLTPARAM%nsavlu,   &
+           THIS%GLTPARAM%nsavout,  &
+           THIS%GLTPARAM%nt,       &
+           THIS%GLTPARAM%nx,       &
+           THIS%GLTPARAM%nxglo,    &
+           THIS%GLTPARAM%ny,       &
+           THIS%GLTPARAM%nyglo,    &
+           THIS%GLTPARAM%xdomsrf_g,&
+           THIS%GLTPARAM%lp1,      &
+           THIS%GLTPARAM%lwg,      &
+           THIS%GLTPARAM%ciopath)
         ! Sum output fields over Gelato model time step duration
-        THIS%XSIC     = THIS%XSIC     + THIS%TGLT%ice_atm(1,:,1)%fsi * XTSTEP
-        THIS%XTICE    = THIS%XTICE    + THIS%TGLT%ice_atm(1,:,1)%tsf * XTSTEP
-        THIS%XICE_ALB = THIS%XICE_ALB + THIS%TGLT%ice_atm(1,:,1)%alb * XTSTEP
+        THIS%XSIC     = THIS%XSIC     + THIS%TGLT%ice_atm(1,:,1)%fsi * THIS%GLTPARAM%DTT
+        THIS%XTICE    = THIS%XTICE    + THIS%TGLT%ice_atm(1,:,1)%tsf * THIS%GLTPARAM%DTT
+        THIS%XICE_ALB = THIS%XICE_ALB + THIS%TGLT%ice_atm(1,:,1)%alb * THIS%GLTPARAM%DTT
      ENDIF
   END DO
   !   Average output fields over coupling time
-  THIS%XSIC     = THIS%XSIC     / (IT * XTSTEP)
-  THIS%XTICE    = THIS%XTICE    / (IT * XTSTEP)
-  THIS%XICE_ALB = THIS%XICE_ALB / (IT * XTSTEP)
+  THIS%XSIC     = THIS%XSIC     / (IT * THIS%GLTPARAM%DTT)
+  THIS%XTICE    = THIS%XTICE    / (IT * THIS%GLTPARAM%DTT)
+  THIS%XICE_ALB = THIS%XICE_ALB / (IT * THIS%GLTPARAM%DTT)
   !
   ! Resets input accumulation fields for next step
   !
@@ -1124,8 +1193,6 @@ USE MODI_ABOR1_SFX
 END SUBROUTINE READSURF
 
 SUBROUTINE WRITESURF(THIS, HSELECT, HPROGRAM)
-USE MODD_GLT_PARAM, ONLY : nl, nt
-
 USE MODI_WRITE_SURF
   IMPLICIT NONE
   CLASS(GELATO_t) :: THIS
@@ -1150,9 +1217,9 @@ USE MODI_WRITE_SURF
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:WRITE_SURF',0,ZHOOK_HANDLE)
 
   YCOMMENT='Number of sea-ice layers'
-  CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENL',nl,IRESP,YCOMMENT)
+  CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENL',THIS%GLTPARAM%nl,IRESP,YCOMMENT)
   YCOMMENT='Number of ice categories'
-  CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENT',nt,IRESP,YCOMMENT)
+  CALL WRITE_SURF(HSELECT,HPROGRAM,'ICENT',THIS%GLTPARAM%nt,IRESP,YCOMMENT)
   !
   !*       1.     Prognostic fields with only space dimension(s) :
   !
@@ -1161,7 +1228,7 @@ USE MODI_WRITE_SURF
   !
   !*       2.     Prognostic fields with space and ice-category dimension(s) :
   !
-  DO JK=1,nt
+  DO JK=1,THIS%GLTPARAM%nt
     WRITE(YICECAT,'(I2)') JK
     YCATEG='_'//ADJUSTL(YICECAT)
     ! .. Write sea ice age for type JK
@@ -1194,7 +1261,7 @@ USE MODI_WRITE_SURF
     !
     !*       3.     Prognostic fields with space and ice-category and layer dimension(s) :
     !
-    DO JL=1,NL
+    DO JL=1,THIS%GLTPARAM%NL
       WRITE(YLVL,'(I2)') JL
       YLEVEL = YCATEG(1:LEN_TRIM(YCATEG))//'_'//ADJUSTL(YLVL)
       YFORM='(A6,I1.1,A4)'
@@ -1238,7 +1305,6 @@ END SUBROUTINE GET_RESPONSE
 
 SUBROUTINE DIAG_MISC(THIS, DGMSI)
 USE MODD_DIAG_MISC_SEAICE_n, ONLY: DIAG_MISC_SEAICE_t
-USE MODD_GLT_PARAM, ONLY: GELATO_DIM => NX
 USE MODE_GLT_STATS , ONLY: GLT_AVHICEM, GLT_AVHSNWM
 IMPLICIT NONE
   CLASS(GELATO_t) :: THIS
@@ -1248,8 +1314,8 @@ IMPLICIT NONE
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:DIAG_MISC', 0, ZHOOK_HANDLE)
 
   GELATO_DIM = SIZE(DGMSI%XSIT)
-  DGMSI%XSIT  = RESHAPE(glt_avhicem(THIS%TGLT%dom,THIS%TGLT%sit), [GELATO_DIM])
-  DGMSI%XSND  = RESHAPE(glt_avhsnwm(THIS%TGLT%dom,THIS%TGLT%sit), [GELATO_DIM])
+  DGMSI%XSIT  = RESHAPE(glt_avhicem(THIS%TGLT%dom,THIS%TGLT%sit), [THIS%GLTPARAM%NX])
+  DGMSI%XSND  = RESHAPE(glt_avhsnwm(THIS%TGLT%dom,THIS%TGLT%sit), [THIS%GLTPARAM%NX])
   DGMSI%XMLT  = THIS%TGLT%oce_all(:,1)%tml
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:DIAG_MISC', 1, ZHOOK_HANDLE)
