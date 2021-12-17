@@ -434,11 +434,25 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:INIT', 1, ZHOOK_HANDLE)
 END SUBROUTINE INIT
 
-SUBROUTINE PREP(THIS, KLU, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
+SUBROUTINE PREP(THIS, DTCO, U, GCP, YDCTL, KLU, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
+USE MODD_DATA_COVER_n, ONLY: DATA_COVER_t
+USE MODD_SURF_ATM_n, ONLY: SURF_ATM_t
+USE MODD_GRID_CONF_PROJ_n, ONLY: GRID_CONF_PROJ_t
+USE MODE_PREP_CTL, ONLY: PREP_CTL
+USE MODD_PREP_SEAFLUX,   ONLY : XSIC_UNIF
 USE MODI_GLTOOLS_ALLOC
 USE MODI_GLTOOLS_READNAM
+USE MODI_PREP_HOR_SEAICE_FIELD
+USE MODI_READ_PREP_SEAFLUX_CONF
+USE MODI_OPEN_AUX_IO_SURF
+USE MODI_READ_SURF
+USE MODI_CLOSE_AUX_IO_SURF
   IMPLICIT NONE
   CLASS(GELATO_t) :: THIS
+  TYPE(DATA_COVER_t),    INTENT(INOUT) :: DTCO
+  TYPE(SURF_ATM_t),      INTENT(INOUT) :: U
+  TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
+  TYPE (PREP_CTL),       INTENT(INOUT) :: YDCTL
   INTEGER, INTENT(IN) :: KLU
   CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  !< program calling surf. schemes
   CHARACTER(LEN=28),  INTENT(IN)  :: HATMFILE    !< name of the Atmospheric file
@@ -446,11 +460,19 @@ USE MODI_GLTOOLS_READNAM
   CHARACTER(LEN=28),  INTENT(IN)  :: HPGDFILE    !< name of the PGD file
   CHARACTER(LEN=6),   INTENT(IN)  :: HPGDFILETYPE!< type of the PGD file
 
-  INTEGER :: IK,IL  ! loop counter on ice categories and layers
-  INTEGER :: JMTH,INMTH
+  INTEGER :: JI
   INTEGER :: ILUOUT
   LOGICAL :: GFOUND         ! Return code when searching namelist
   INTEGER :: ILUNAM         ! logical unit of namelist file
+
+  CHARACTER(LEN=6)  :: YFILETYPE ! type of input file
+  CHARACTER(LEN=28) :: YFILE     ! name of file
+  CHARACTER(LEN=6)  :: YFILEPGDTYPE ! type of input file
+  CHARACTER(LEN=28) :: YFILEPGD     ! name of file
+  LOGICAL           :: GUNIF     ! flag for prescribed uniform field
+  CHARACTER(LEN=30) :: YWORK
+  INTEGER           :: IRESP
+  CHARACTER(LEN=9) :: YFIELD
   REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:PREP', 0, ZHOOK_HANDLE)
@@ -466,41 +488,95 @@ USE MODI_GLTOOLS_READNAM
   THIS%GLTPARAM%nx = KLU
   THIS%GLTPARAM%ny=1
   THIS%GLTPARAM%nyglo=1
-  THIS%GLTPARAM%nxglo=nx
+  THIS%GLTPARAM%nxglo=THIS%GLTPARAM%nx
   CALL GLTOOLS_ALLOC( &
     THIS%TGLT,THIS%GLTPARAM%ndiamax,THIS%GLTPARAM%ndynami,THIS%GLTPARAM%nl,&
     THIS%GLTPARAM%nnflxin,THIS%GLTPARAM%noutlu,THIS%GLTPARAM%nt,        &
     THIS%GLTPARAM%ntd,THIS%GLTPARAM%nx,THIS%GLTPARAM%ny,THIS%GLTPARAM%lp1  )
-  !
-  !*       G1    Prognostic fields with only space dimension(s) :
-  !
-  THIS%TGLT%ust(:,1)=0.
-  !
-  !*       G2     Prognostic fields with space and ice-category dimension(s) :
-  !
-  ! sea ice age
-  THIS%TGLT%sit(:,:,1)%age=0.
-  ! melt pond volume
-  THIS%TGLT%sit(:,:,1)%vmp=0.
-  ! sea ice surface albedo
-  THIS%TGLT%sit(:,:,1)%asn=0.
-  ! sea ice fraction
-  THIS%TGLT%sit(:,:,1)%fsi=0.
-  ! sea ice thickness
-  THIS%TGLT%sit(:,:,1)%hsi=1.*THIS%TGLT%sit(:,:,1)%fsi
-  ! sea ice salinity
-  THIS%TGLT%sit(:,:,1)%ssi=0.
-  ! sea ice surface temperature
-  THIS%TGLT%sit(:,:,1)%tsf=260.
-  ! snow thickness
-  THIS%TGLT%sit(:,:,1)%hsn=0.
-  ! snow density
-  THIS%TGLT%sit(:,:,1)%rsn=100.
-  !
-  !*       G3     Prognostic fields with space, ice-category and layer dimensions :
-  !
-  ! sea ice vertical gltools_enthalpy profile for all types and levels
-  THIS%TGLT%sil(:,:,:,1)%ent=-1000.
+
+  CALL READ_PREP_SEAFLUX_CONF(.FALSE., & ! LMERCATOR
+    HPROGRAM,'SIC      ',YFILE,YFILETYPE,YFILEPGD,YFILEPGDTYPE,&
+    HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,ILUOUT,GUNIF)
+  !read seaice scheme
+  CALL OPEN_AUX_IO_SURF(YFILE,YFILETYPE,'FULL  ')
+  CALL READ_SURF(YFILETYPE,'SEAICE_SCHEM',YWORK,IRESP,HDIR='A')
+  CALL CLOSE_AUX_IO_SURF(YFILE,YFILETYPE)
+
+  IF (XSIC_UNIF == XUNDEF .AND. TRIM(YWORK)=='GELATO') THEN
+
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEUSTAR ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%ust(:,1))
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEAGE_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%age)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEVMP_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%vmp)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEASN_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%asn)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEFSI_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%fsi)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICESSI_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%ssi)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEHSI_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%hsi)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICETSF_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%tsf)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICEHSN_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%hsn)
+    CALL PREP_HOR_SEAICE_FIELD( &
+      DTCO, U, GCP, HPROGRAM,'ICERSN_1 ',HATMFILE,HATMFILETYPE, &
+      HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%rsn)
+    DO JI = 1, 10
+      IF(JI < 10) THEN
+        WRITE(YFIELD, '("ICEH_1_",I1)',JI
+      ELSE
+        WRITE(YFIELD, '("ICEH_1_",I2)',JI
+      ENDIF
+
+      CALL PREP_HOR_SEAICE_FIELD( &
+        DTCO, U, GCP, HPROGRAM,YFIELD,HATMFILE,HATMFILETYPE, &
+        HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sil(JI,1,:,1)%ent)
+    END DO
+  ELSE
+    !
+    !*       G1    Prognostic fields with only space dimension(s) :
+    !
+    THIS%TGLT%ust(:,1)=0.
+    !
+    !*       G2     Prognostic fields with space and ice-category dimension(s) :
+    !
+    ! sea ice age
+    THIS%TGLT%sit(:,:,1)%age=0.
+    ! melt pond volume
+    THIS%TGLT%sit(:,:,1)%vmp=0.
+    ! sea ice surface albedo
+    THIS%TGLT%sit(:,:,1)%asn=0.
+    ! sea ice fraction
+    THIS%TGLT%sit(:,:,1)%fsi=0.
+    ! sea ice thickness
+    THIS%TGLT%sit(:,:,1)%hsi=1.*THIS%TGLT%sit(:,:,1)%fsi
+    ! sea ice salinity
+    THIS%TGLT%sit(:,:,1)%ssi=0.
+    ! sea ice surface temperature
+    THIS%TGLT%sit(:,:,1)%tsf=260.
+    ! snow thickness
+    THIS%TGLT%sit(:,:,1)%hsn=0.
+    ! snow density
+    THIS%TGLT%sit(:,:,1)%rsn=100.
+    !
+    !*       G3     Prognostic fields with space, ice-category and layer dimensions :
+    !
+    ! sea ice vertical gltools_enthalpy profile for all types and levels
+    THIS%TGLT%sil(:,:,:,1)%ent=-1000.
+  ENDIF
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:PREP', 1, ZHOOK_HANDLE)
 END SUBROUTINE PREP
