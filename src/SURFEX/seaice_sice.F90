@@ -982,10 +982,11 @@ END SUBROUTINE SET_DAMPING
 
 SUBROUTINE COUPLING_ICEFLUX_SICE(THIS, KI, PTA, PEXNA, PRHOA, PTICE, PEXNS,   &
                                 PQA, PRAIN, PSNOW, PWIND, PZREF, PUREF,  &
-                                PPS, PTWAT, PTTS, PSFTH, PSFTQ,          &
+                                PPS, PTWAT, PTTS, PSFTH, PSFTQ, AT,      &
                                 OHANDLE_SIC, PMASK, PQSAT, PZ0,          &
                                 PUSTAR, PCD, PCDN, PCH,                  &
                                 PRI, PRESA, PZ0H )
+USE MODD_SURF_ATM_TURB_n, ONLY: SURF_ATM_TURB_t
 USE MODI_COUPLING_ICEFLUX_n
 IMPLICIT NONE
   CLASS(SICE_t) :: THIS !< Ice model
@@ -1008,6 +1009,7 @@ IMPLICIT NONE
   REAL,                INTENT(IN)  :: PTTS      !< Freezing point for sea water
   REAL, DIMENSION(KI), INTENT(OUT) :: PSFTH     !< flux of heat                          [W/m2]
   REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     !< flux of water vapor                   [kg/m2/s]
+  TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT       !< atmospheric turbulence parameters
   !
   LOGICAL, INTENT(IN) , OPTIONAL:: OHANDLE_SIC  !< Should we output extended set of fields
   REAL, DIMENSION(KI), INTENT(IN) , OPTIONAL :: PMASK     !< Where to compute sea-ice fluxes (0./1.)
@@ -1027,7 +1029,7 @@ IMPLICIT NONE
 
   CALL COUPLING_ICEFLUX_n(KI, PTA, PEXNA, PRHOA, PTICE, PEXNS,     &
                           PQA, PRAIN, PSNOW, PWIND, PZREF, PUREF,  &
-                          PPS, PTWAT, PTTS, PSFTH, PSFTQ,          &
+                          PPS, PTWAT, PTTS, PSFTH, PSFTQ, AT,      &
                           OHANDLE_SIC, PMASK, PQSAT, PZ0,          &
                           PUSTAR, PCD, PCDN, PCH,                  &
                           PRI, PRESA, PZ0H )
