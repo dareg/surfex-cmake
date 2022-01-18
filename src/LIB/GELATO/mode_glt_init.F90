@@ -54,54 +54,6 @@
 MODULE mode_glt_init 
 CONTAINS
 
-<<<<<<< HEAD
-#if ! defined in_surfex
-SUBROUTINE inidmn(tpglt)
-  USE modd_types_glt
-  TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
-END SUBROUTINE inidmn
-#endif
-
-SUBROUTINE initfl(tptfl)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tptfl
-END SUBROUTINE initfl
-
-SUBROUTINE inisal  &
-  ( tpdom,tpmxl,tpsit )
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpdom
-  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpmxl
-  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(inout) ::  &
-    tpsit
-END SUBROUTINE inisal
-
-SUBROUTINE inidia(tpind,tpdia,pcumdia0,pcumdia)
-  USE modd_types_glt
-  USE modd_glt_param
-  TYPE(t_ind), INTENT(inout) ::  &
-        tpind
-  TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
-        tpdia
-  REAL, DIMENSION(ndiamax,1,1), INTENT(out) ::  &
-        pcumdia0
-  REAL, DIMENSION(ndiamax,nx,ny), INTENT(out) ::  &
-        pcumdia
-END SUBROUTINE inidia
-
-SUBROUTINE init_timers
-END SUBROUTINE init_timers
-
-END INTERFACE
-END MODULE mode_glt_init
-=======
->>>>>>> origin/NWP_81plus
 
 ! ------------------------ END MODULE mode_glt_init -------------------------
 

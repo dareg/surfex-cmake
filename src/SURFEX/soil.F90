@@ -429,10 +429,7 @@ ELSE
        ZZC   (JJ) = - ZLYMY1(JJ) * ZX2(JJ)**2
 ! More precise calculation of the largest solution
        ZDELTA(JJ) = MAX (ZZB(JJ)**2 - 4. * ZZA(JJ) * ZZC(JJ), 0.)
-<<<<<<< HEAD
 !
-=======
->>>>>>> origin/NWP_81plus
        IF (ZZB(JJ) > 0) THEN
          ZA    (JJ) = - 2. * ZZC (JJ) / (ZZB (JJ) + SQRT (ZDELTA (JJ)))
        ELSE
