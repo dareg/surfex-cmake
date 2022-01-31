@@ -752,20 +752,6 @@ DO IOBS = 1,NOBSTYPE
       YMASK="FULL"
       ALLOCATE(ZWORK(YSC%U%NSIZE_FULL))
     ENDIF
-<<<<<<< HEAD
-=======
-    ! Set observations used for possibly other tiles than nature
-    DO IOBS = 1,NOBSTYPE
-      SELECT CASE (TRIM(COBS(IOBS)))
-        CASE ("T2M")
-          ZT2M(:)=ZWORK(:,JJ)
-        CASE ("HU2M")
-          ZHU2M(:)=ZWORK(:,JJ)
-        CASE ("SWE")
-          ZSWE(:)=ZWORK(:,JJ)
-      END SELECT
-    ENDDO
->>>>>>> origin/NWP_81plus
   ENDIF
      
   ! Read observation

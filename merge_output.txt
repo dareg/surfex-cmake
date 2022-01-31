@@ -17,7 +17,7 @@ Auto-merging src/SURFEX/write_field_1d_patch.F90
 CONFLICT (content): Merge conflict in src/SURFEX/write_field_1d_patch.F90		DONE
 Auto-merging src/SURFEX/write_diag_seb_isban.F90
 Auto-merging src/SURFEX/urban_lw_coef.F90
-CONFLICT (content): Merge conflict in src/SURFEX/urban_lw_coef.F90			NOT DONE
+CONFLICT (content): Merge conflict in src/SURFEX/urban_lw_coef.F90			DONE
 Auto-merging src/SURFEX/update_data_cover.F90
 CONFLICT (content): Merge conflict in src/SURFEX/update_data_cover.F90			DONE
 Auto-merging src/SURFEX/test_record_len.F90
@@ -27,20 +27,21 @@ CONFLICT (content): Merge conflict in src/SURFEX/surface_aero_cond.F90			DONE
 Auto-merging src/SURFEX/split_grid_conf_proj.F90
 CONFLICT (content): Merge conflict in src/SURFEX/split_grid_conf_proj.F90		DONE
 Auto-merging src/SURFEX/soil.F90
-CONFLICT (content): Merge conflict in src/SURFEX/soil.F90				NOT DONE STRANGE   "Changed by MF NWP team" is not in the GMAP version!?!
+CONFLICT (content): Merge conflict in src/SURFEX/soil.F90				DONE    "Changed by MF NWP team" is not in the GMAP version!?!
 Auto-merging src/SURFEX/snow3l.F90
 CONFLICT (content): Merge conflict in src/SURFEX/snow3l.F90				DONE
 Auto-merging src/SURFEX/set_surfex_filein.F90
 CONFLICT (content): Merge conflict in src/SURFEX/set_surfex_filein.F90			DONE
 CONFLICT (modify/delete): src/SURFEX/seaice_gelato1dn.F90 deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of src/SURFEX/seaice_gelato1dn.F90 left in tree.		REMOVED by git rm
+											DONE by Yurii
 Auto-merging src/SURFEX/read_seaicen.F90
-CONFLICT (content): Merge conflict in src/SURFEX/read_seaicen.F90			NOT DONE
+CONFLICT (content): Merge conflict in src/SURFEX/read_seaicen.F90			DONE by Yurii
 Auto-merging src/SURFEX/read_pgd_isban.F90
 Auto-merging src/SURFEX/read_namelists_surfn.F90
 Auto-merging src/SURFEX/read_namelists_surf.F90
 CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_surf.F90		DONE
 Auto-merging src/SURFEX/read_namelists_seafluxn.F90
-CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_seafluxn.F90		DONE
+CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_seafluxn.F90		DONE modified by Yurii
 Auto-merging src/SURFEX/read_namelists_isban.F90
 CONFLICT (content): Merge conflict in src/SURFEX/read_namelists_isban.F90		DONE
 Auto-merging src/SURFEX/read_nam_grid_conf_proj.F90
@@ -52,7 +53,7 @@ Auto-merging src/SURFEX/read_covers_param.F90
 CONFLICT (content): Merge conflict in src/SURFEX/read_covers_param.F90			DONE
 Auto-merging src/SURFEX/preps_for_meb_ebud_rad.F90
 Auto-merging src/SURFEX/prep_seaice.F90
-CONFLICT (content): Merge conflict in src/SURFEX/prep_seaice.F90			NOT DONE
+CONFLICT (content): Merge conflict in src/SURFEX/prep_seaice.F90			DONE
 Auto-merging src/SURFEX/prep_seaflux_grib.F90
 CONFLICT (content): Merge conflict in src/SURFEX/prep_seaflux_grib.F90			DONE
 Auto-merging src/SURFEX/prep_grid_nogrid.F90
@@ -91,7 +92,7 @@ Auto-merging src/SURFEX/modd_sson.F90
 CONFLICT (content): Merge conflict in src/SURFEX/modd_sson.F90				DONE
 Auto-merging src/SURFEX/modd_snow_par.F90
 Auto-merging src/SURFEX/modd_seafluxn.F90
-CONFLICT (content): Merge conflict in src/SURFEX/modd_seafluxn.F90			DONE
+CONFLICT (content): Merge conflict in src/SURFEX/modd_seafluxn.F90			DONE modified by Yurii
 Auto-merging src/SURFEX/modd_pgdwork.F90
 Auto-merging src/SURFEX/modd_isban.F90
 Auto-merging src/SURFEX/modd_isba_optionsn.F90
@@ -112,7 +113,7 @@ CONFLICT (content): Merge conflict in src/SURFEX/init_teb_veg_optionsn.F90		DONE
 Auto-merging src/SURFEX/init_surf_atmn.F90
 CONFLICT (content): Merge conflict in src/SURFEX/init_surf_atmn.F90			DONE
 Auto-merging src/SURFEX/init_seafluxn.F90
-CONFLICT (content): Merge conflict in src/SURFEX/init_seafluxn.F90			NOT DONE
+CONFLICT (content): Merge conflict in src/SURFEX/init_seafluxn.F90			DONE by Yurii
 Auto-merging src/SURFEX/init_isban.F90
 CONFLICT (content): Merge conflict in src/SURFEX/init_isban.F90				DONE
 Auto-merging src/SURFEX/init_isba_sbl.F90
@@ -149,7 +150,7 @@ Auto-merging src/SURFEX/default_isba.F90
 CONFLICT (content): Merge conflict in src/SURFEX/default_isba.F90			DONE
 Auto-merging src/SURFEX/default_diag_surf_atm.F90
 Auto-merging src/SURFEX/dealloc_seafluxn.F90
-CONFLICT (content): Merge conflict in src/SURFEX/dealloc_seafluxn.F90			NOT DONE
+CONFLICT (content): Merge conflict in src/SURFEX/dealloc_seafluxn.F90			DONE by Yurii
 Auto-merging src/SURFEX/coupling_watfluxn.F90
 CONFLICT (content): Merge conflict in src/SURFEX/coupling_watfluxn.F90			DONE
 Auto-merging src/SURFEX/coupling_surf_atmn.F90
@@ -244,9 +245,9 @@ Auto-merging src/LIB/GELATO/modi_glt_frzvtp_r.F90
 Auto-merging src/LIB/GELATO/modi_glt_constrain_r.F90
 Auto-merging src/LIB/GELATO/modi_glt_blowsn_r.F90
 Auto-merging src/LIB/GELATO/mode_glt_init.F90
-CONFLICT (content): Merge conflict in src/LIB/GELATO/mode_glt_init.F90		NOT DONE
+CONFLICT (content): Merge conflict in src/LIB/GELATO/mode_glt_init.F90		DONE
 Auto-merging src/ASSIM/soda.F90
-CONFLICT (content): Merge conflict in src/ASSIM/soda.F90			MORE TO DO
+CONFLICT (content): Merge conflict in src/ASSIM/soda.F90			DONE
 Auto-merging src/ASSIM/read_namelists_assim.F90
 CONFLICT (content): Merge conflict in src/ASSIM/read_namelists_assim.F90	DONE
 Auto-merging src/ASSIM/read_assim_conf.F90
@@ -281,3 +282,8 @@ CONFLICT (modify/delete): STRATO/TESTS/CAS_PART/SODA/SCRIPTS/smsdate deleted in 
 CONFLICT (modify/delete): STRATO/TESTS/BEAUFIX/soda.exe deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/BEAUFIX/soda.exe left in tree.
 CONFLICT (modify/delete): STRATO/TESTS/BEAUFIX/script_all.sh deleted in HEAD and modified in origin/NWP_81plus. Version origin/NWP_81plus of STRATO/TESTS/BEAUFIX/script_all.sh left in tree.
 Automatic merge failed; fix conflicts and then commit the result.
+
+
+ADDITIONAL MODIFS BY Yurii BUT NOT RELATED TO DIRECT CONFLICTS:
+---------------------------------------------------------------
+src/SURFEX/default_seaice.F90
