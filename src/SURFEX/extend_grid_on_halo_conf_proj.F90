@@ -69,7 +69,7 @@ INTEGER                         :: IIMAX, IJMAX
 REAL, DIMENSION(INT(PGRID_PAR(11)))      :: ZX, ZY, ZDX, ZDY
 !
 !* extended grid
-INTEGER                         :: IIMAX_EXTENDED, IJMAX_EXTENDED,ILONE,ILATE
+INTEGER                         :: IIMAX_EXTENDED, IJMAX_EXTENDED
 REAL, DIMENSION(:), ALLOCATABLE :: ZX_EXTENDED, ZY_EXTENDED, ZDX_EXTENDED, ZDY_EXTENDED
 INTEGER                           :: ILONE      ! extension zone
 INTEGER                           :: ILATE      ! extension zone

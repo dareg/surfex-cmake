@@ -65,7 +65,7 @@ IMPLICIT NONE
  LOGICAL                               :: LRELCLIMSNOW         ! Relaxation to climatological snow 
 
  INTEGER, PARAMETER                    :: NOBSMAX = 5
- INTEGER, PARAMETER                    :: NVARMAX = 5
+ INTEGER, PARAMETER                    :: NVARMAX = 9
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE

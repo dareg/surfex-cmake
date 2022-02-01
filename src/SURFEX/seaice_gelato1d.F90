@@ -435,6 +435,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 END SUBROUTINE INIT
 
 SUBROUTINE PREP(THIS, DTCO, U, GCP, YDCTL, KLU, HPROGRAM, HATMFILE, HATMFILETYPE, HPGDFILE, HPGDFILETYPE)
+USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_DATA_COVER_n, ONLY: DATA_COVER_t
 USE MODD_SURF_ATM_n, ONLY: SURF_ATM_t
 USE MODD_GRID_CONF_PROJ_n, ONLY: GRID_CONF_PROJ_t
@@ -536,9 +537,9 @@ USE MODI_CLOSE_AUX_IO_SURF
       HPGDFILE,HPGDFILETYPE,YDCTL, THIS%TGLT%sit(1,:,1)%rsn)
     DO JI = 1, 10
       IF(JI < 10) THEN
-        WRITE(YFIELD, '("ICEH_1_",I1)',JI
+        WRITE(YFIELD, '("ICEH_1_",I1)') JI
       ELSE
-        WRITE(YFIELD, '("ICEH_1_",I2)',JI
+        WRITE(YFIELD, '("ICEH_1_",I2)') JI
       ENDIF
 
       CALL PREP_HOR_SEAICE_FIELD( &
@@ -747,7 +748,8 @@ IMPLICIT NONE
 
   ! First init ZSST with freezing temperature (which depends on local salinity)
   ! (Gelato uses Celsius scale for freezing temperatures)
-  ZSST=RESHAPE(glt_swfrzt2d(RESHAPE(THIS%XSSS, [SIZE(THIS%XSSS),1])) + XTT,[SIZE(THIS%XSSS)])
+  ZSST=RESHAPE(glt_swfrzt2d(RESHAPE(THIS%XSSS,[SIZE(THIS%XSSS),1]), & 
+               THIS%GLTPARAM%nx,THIS%GLTPARAM%ny) + XTT,[SIZE(THIS%XSSS)])
 
   ! Then replace freezing temp with Surfex-provided SST (THIS%XSST) where
   ! there is no (explicit or implicit) seaice and temperature is warmer
@@ -884,7 +886,7 @@ IMPLICIT NONE
           THIS%GLTPARAM%lp1,             &
           THIS%GLTPARAM%lwg,             &
           THIS%GLTPARAM%cdiafmt,         &
-          S%GLTPARAM%cinsfld)
+          THIS%GLTPARAM%cinsfld)
         CALL GLTOOLS_CHKOUT( &
            20010101,               &
            THIS%TGLT,              &
@@ -1004,7 +1006,7 @@ USE MODI_ABOR1_SFX
   END IF
   !
   THIS%GLTPARAM%nx=KLU
-  THIS%GLTPARAM%nxglo=nx
+  THIS%GLTPARAM%nxglo=THIS%GLTPARAM%nx
 #if ! defined in_arpege
   CALL mpp_sum(THIS%GLTPARAM%nxglo) ! Should also sum up over NPROMA blocks, in Arpege; but not that easy....
 #else
@@ -1037,12 +1039,12 @@ USE MODI_ABOR1_SFX
   !
   CALL READ_SURF(HPROGRAM,'ICENL',inl_in_file,IRESP)
   IF (inl_in_file /= THIS%GLTPARAM%nl) THEN
-     WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, nl
+     WRITE(YMESS,'("Mismatch in # of seaice layers : prep=",I2," nml=",I2)') inl_in_file, THIS%GLTPARAM%nl
      CALL ABOR1_SFX(YMESS)
   END IF
   CALL READ_SURF(HPROGRAM,'ICENT',int_in_file,IRESP)
   IF (int_in_file /= THIS%GLTPARAM%nt) THEN
-     WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, nt
+     WRITE(YMESS,'("Mismatch in # of seaice categories : prep=",I2," nml=",I2)') int_in_file, THIS%GLTPARAM%nt
      CALL ABOR1_SFX(YMESS)
   END IF
   !
@@ -1313,9 +1315,10 @@ IMPLICIT NONE
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:DIAG_MISC', 0, ZHOOK_HANDLE)
 
-  GELATO_DIM = SIZE(DGMSI%XSIT)
-  DGMSI%XSIT  = RESHAPE(glt_avhicem(THIS%TGLT%dom,THIS%TGLT%sit), [THIS%GLTPARAM%NX])
-  DGMSI%XSND  = RESHAPE(glt_avhsnwm(THIS%TGLT%dom,THIS%TGLT%sit), [THIS%GLTPARAM%NX])
+  DGMSI%XSIT  = RESHAPE(glt_avhicem(THIS%TGLT%dom,THIS%TGLT%sit,THIS%GLTPARAM%nt, &
+                        THIS%GLTPARAM%nx,THIS%GLTPARAM%ny),[THIS%GLTPARAM%NX])
+  DGMSI%XSND  = RESHAPE(glt_avhsnwm(THIS%TGLT%dom,THIS%TGLT%sit,THIS%GLTPARAM%nt, &
+                        THIS%GLTPARAM%nx,THIS%GLTPARAM%ny), [THIS%GLTPARAM%NX])
   DGMSI%XMLT  = THIS%TGLT%oce_all(:,1)%tml
 
   IF (LHOOK) CALL DR_HOOK('ICE_GELATO:DIAG_MISC', 1, ZHOOK_HANDLE)

@@ -237,6 +237,7 @@ IF (.NOT. S%LSBL) THEN
            DI%XMER10M = XUNDEF
        END IF
     ENDIF 
+  END IF
 !
   IF (DGO%N2M>=1) THEN
      IF (S%LHANDLE_SIC) THEN

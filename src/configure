@@ -18,6 +18,7 @@ export VERSION_GRIBAPI=${VERSION_GRIBAPI:-"1.17.0"}
 export VERSION_OASIS=${VERSION_OASIS-"3-mct"}
 export VERSION_XIOS=${VERSION_XIOS:-"trunk-1078"}
 export SFX_INT=${SFX_INT-"I4"}
+export OPT_PROC=${OPT_PROC-""}
 #
 export NEED_TOOLS=NO
 #

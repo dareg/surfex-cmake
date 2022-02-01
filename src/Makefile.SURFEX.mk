@@ -497,6 +497,12 @@ INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
 LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -L${GRIBAPI_PATH}/lib64 -lgrib_api_f90 -lgrib_api -Wl,-rpath,${GRIBAPI_PATH}/lib
 endif
 
+ifeq "$(VER_GRIBAPI)" "GRIBAPIBINSC"
+GRIBAPI_PATH=/software/sse/easybuild/prefix/software/grib_api/1.24.0-intel-2018a-nsc1
+INC_GRIBAPI   ?= -I${GRIBAPI_PATH}/include
+LIB_GRIBAPI   ?= -L${GRIBAPI_PATH}/lib -lgrib_api_f90 -lgrib_api
+endif
+
 ifneq "x$(VER_GRIBAPI)" "x"
 INC           += $(INC_GRIBAPI)
 LIBS          += $(LIB_GRIBAPI)
@@ -693,7 +699,15 @@ INC_NETCDF     = -I${CDF_PATH}/include -I${HDF_PATH}/include -I${SZIP_PATH}/incl
 LIB_NETCDF     = -L${CDF_PATH}/lib -lnetcdff -lnetcdf -L${HDF_PATH}/lib -lhdf5_hl -lhdf5  -L${SZIP_PATH}/lib -lsz  -L${ZLIB_PATH}/lib -lz  -lcurl -Wl,-rpath,${CDF_PATH}/lib -Wl,-rpath,$(HDF_PATH)/lib -Wl,-rpath,$(SZIP_PATH)/lib -Wl,-rpath,$(ZLIB_PATH)/lib
 XIOS_CDF_OPT   = netcdf4_par
 endif
-
+#
+# Linux at bi@NSC (SMHI)
+#
+ifeq "$(VER_CDF)" "CDFBINSC"
+CDF_PATH?=/software/sse/manual/netcdf/4.4.1.1/HDF5-1.8.19-nsc1-intel-2018a-eb
+INC_NETCDF     = -I${CDF_PATH}/include
+LIB_NETCDF     = -L${CDF_PATH}/lib -lnetcdff -lnetcdf -Wl,-rpath,${CDF_PATH}/lib
+endif
+#
 #
 ifneq "x$(VER_GRIBAPI)" "x"
 INC            += $(INC_NETCDF)

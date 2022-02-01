@@ -1,0 +1,35 @@
+
+#############
+#############
+For GMAP
+#############
+#############
+
+For CASSIM_ISBA=OI
+##################
+Please note that to activate snow assimilation for OI assimilation
+in oi_cacsts.F90 this namelist flag needs to be activated:
+
+NAM_ASSIM
+   LRELCLIMSNOW=.T.
+
+
+
+
+
+
+#############
+#############
+For HIRLAM
+#############
+#############
+
+For CASSIM_ISBA=OI
+##################
+Please note that an additional namelist variable is needed (same as NECHGU):
+NECHGXFU : coefficient for OI & number of hours separating 2 observation times
+
+NAM_NACVEG
+    NECHGXFU=
+
+

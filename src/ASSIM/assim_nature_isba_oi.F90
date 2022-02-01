@@ -101,7 +101,7 @@ REAL,ALLOCATABLE,DIMENSION(:) :: ZSAB_P,   ZARG_P,    ZGELAM_P,  ZGELAT_P, ZITM_
                                  ZTCLS_P,  ZHCLS_P,   ZUCLS_P,   ZVCLS_P,             &
                                  ZTS_O_P,  ZT2M_O_P,  ZHU2M_O_P, ZSM_O_P,  ZWS_O_P,   &
                                  ZSNC_P,   ZTSC_P,                                    &
-                                 ZT2INC_P, ZH2INC_P,  ZWGINC_P
+                                 ZT2INC_P, ZH2INC_P,  ZWGINC_P,  ZSNINC_P
 
  
 ! Allocatable arrays for patch dimensionn
@@ -109,6 +109,7 @@ REAL,ALLOCATABLE,DIMENSION(:) :: ZWS,  ZWP,  ZTL,  ZTP0, ZTS0,         &
                                  ZWS0, ZWP0, ZTL0, ZTP,  ZTS,          &
                                  ZWSC, ZWPC,ZTPC,  ZSSTC,              &
                                  ZSNS, ZD2, ZRSMIN, ZLAI, ZVEG, ZIVEG, &
+                                 ZALBF, ZEMISF, ZZ0F, ZZ0H,            &
                                  ZWPINC1, ZWPINC2, ZWPINC3,            &
                                  ZT2MBIAS, ZH2MBIAS, ZGEMU,            &
                                  ZWSINC, ZWPINC, ZTLINC,ZTSINC,ZTPINC 
@@ -303,6 +304,7 @@ DO JP = 1,IO%NPATCH
   ALLOCATE(ZHCLS_P(PK%NSIZE_P))
   ALLOCATE(ZH2INC_P(PK%NSIZE_P))
   ALLOCATE(ZWGINC_P(PK%NSIZE_P))
+  ALLOCATE(ZSNINC_P(PK%NSIZE_P))
   ALLOCATE(ZWS_O_P(PK%NSIZE_P))
   ALLOCATE(ZSAB_P(PK%NSIZE_P))
   ALLOCATE(ZARG_P(PK%NSIZE_P))
@@ -315,6 +317,10 @@ DO JP = 1,IO%NPATCH
   ALLOCATE(ZWP0(PK%NSIZE_P))
   ALLOCATE(ZTL0(PK%NSIZE_P))
   ALLOCATE(ZIVEG(PK%NSIZE_P))
+  ALLOCATE(ZALBF(PK%NSIZE_P))
+  ALLOCATE(ZEMISF(PK%NSIZE_P))
+  ALLOCATE(ZZ0F(PK%NSIZE_P))
+  ALLOCATE(ZZ0H(PK%NSIZE_P))
   ALLOCATE(ZSNS(PK%NSIZE_P))
   ALLOCATE(ZWPINC1(PK%NSIZE_P))
   ALLOCATE(ZWPINC2(PK%NSIZE_P))
@@ -374,6 +380,7 @@ DO JP = 1,IO%NPATCH
   ZWPINC3 (:) = XUNDEF
   ZT2MBIAS(:) = XUNDEF
   ZH2MBIAS(:) = XUNDEF
+  ZSNINC_P(:) = XUNDEF
  
   ! Climatological arrays set to missing values
   ZWSC(:) = XUNDEF
@@ -389,6 +396,11 @@ DO JP = 1,IO%NPATCH
 
   ! Set PIVEG (SURFIND.VEG.DOMI) since it is not available
   ZIVEG(:) = 0.0
+
+  ZALBF(:) = XUNDEF
+  ZEMISF(:) = XUNDEF
+  ZZ0F(:) = XUNDEF
+  ZZ0H(:) = XUNDEF
 
   ! Initialize patch variables
   ZD2(:)=PK%XDG(:,2)
@@ -428,13 +440,14 @@ DO JP = 1,IO%NPATCH
 
   ZTS(:) = ZTS0(:)
   ZTP(:) = ZTP0(:)
-  CALL OI_CACSTS(PK%NSIZE_P, ZT2INC_P, ZH2INC_P, ZWGINC_P, ZWS_O_P,               &
+  CALL OI_CACSTS(PK%NSIZE_P, ZT2INC_P, ZH2INC_P, ZWGINC_P, ZSNINC_P, ZWS_O_P,     &
                IDAT, ISSSSS,                                                      &
                ZTP, ZWP, ZTL, ZSNS, ZTS, ZWS,                                     &
                ZTCLS_P, ZHCLS_P, ZUCLS_P, ZVCLS_P, ZSSTC,                         &
                ZWPINC1, ZWPINC2, ZWPINC3, ZT2MBIAS, ZH2MBIAS,                     &
                ZRRCL_P, ZRRSL_P, ZRRCN_P, ZRRSN_P, ZATMNEB_P, ZEVAP_P, ZEVAPTR_P, &
-               ZITM_P, ZVEG, ZIVEG, ZARG_P, ZD2, ZSAB_P, ZLAI, ZRSMIN,            &
+               ZITM_P, ZVEG, ZALBF, ZEMISF, ZZ0F,                                 &
+               ZIVEG, ZARG_P, ZD2, ZSAB_P, ZLAI, ZRSMIN, ZZ0H,                    &
                ZTSC_P, ZTPC, ZWSC, ZWPC, ZSNC_P, ZGELAT_P, ZGELAM_P, ZGEMU  )  
 
  ! PRINT statistics of the soil analysis
@@ -512,6 +525,7 @@ DO JP = 1,IO%NPATCH
   DEALLOCATE(ZSAB_P)
   DEALLOCATE(ZARG_P)
   DEALLOCATE(ZWGINC_P)
+  DEALLOCATE(ZSNINC_P)
   DEALLOCATE(ZWS_O_P)
 
   DEALLOCATE(ZTS0)
@@ -525,6 +539,10 @@ DO JP = 1,IO%NPATCH
   DEALLOCATE(ZWP0)
   DEALLOCATE(ZTL0)
   DEALLOCATE(ZIVEG)
+  DEALLOCATE(ZALBF)
+  DEALLOCATE(ZEMISF)
+  DEALLOCATE(ZZ0F)
+  DEALLOCATE(ZZ0H)
   DEALLOCATE(ZSNS)
   DEALLOCATE(ZWPINC1)
   DEALLOCATE(ZWPINC2)
