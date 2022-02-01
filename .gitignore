@@ -1,0 +1,7 @@
+dir_obj*
+compile_surfex_output*
+profile_surfex
+profile_surfex-*
+*_param.bin
+a.out
+
