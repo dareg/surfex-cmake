@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE PREP_HOR_SEAICE_FIELD ( &
-  DTCO, U, GCP, HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,PFIELD)
+  DTCO, U, GCP, KLAT, HPROGRAM,HSURF,HATMFILE,HATMFILETYPE,HPGDFILE,HPGDFILETYPE,YDCTL,PFIELD)
 !     #################################################################################
 !
 !!****  *PREP_HOR_SEAICE_FIELD* - reads, interpolates and prepares a sea ice field
@@ -73,8 +73,9 @@ TYPE(DATA_COVER_t), INTENT(INOUT) :: DTCO
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(GRID_CONF_PROJ_t),INTENT(INOUT) :: GCP
 !
-TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 TYPE (PREP_CTL),    INTENT(INOUT) :: YDCTL
+!
+INTEGER, INTENT(IN) :: KLAT
 !
 CHARACTER(LEN=6),   INTENT(IN)  :: HPROGRAM  ! program calling surf. schemes
 CHARACTER(LEN=9),   INTENT(IN)  :: HSURF     ! type of field

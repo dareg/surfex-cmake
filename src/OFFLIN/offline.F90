@@ -189,8 +189,6 @@ USE XIOS, ONLY : XIOS_CONTEXT_FINALIZE, XIOS_CLOSE_CONTEXT_DEFINITION, XIOS_UPDA
 USE MODI_SFX_XIOS_READNAM_OL
 USE MODI_SFX_XIOS_SETUP_OL
 !
-USE MODE_GLT_DIA_LU
-!
 USE MODI_INIT_SYTRON_TABLE
 !
 ! spectral repartition of irradiance
@@ -668,15 +666,15 @@ NB_READ_FORC=CEILING(1.*(INB_STEP_ATM+1)/INB_LINES)
 !     open Gelato specific diagnostic files (if requested by 
 !     Gelato wizzard user)
 !
-#if ! defined in_arpege
- !BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
- CALL OPNDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
-             YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
-             YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
-             YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
-             YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
-             YSC%SM%S%GLTPARAM%cdiafmt)
-#endif
+!#if ! defined in_arpege
+! !BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
+! CALL OPNDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
+!             YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
+!             YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
+!             YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
+!             YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
+!             YSC%SM%S%GLTPARAM%cdiafmt)
+!#endif
 !
 !       allocate local atmospheric variables
 !
@@ -1696,15 +1694,15 @@ ENDIF
 ! --------------------------------------------------------------------------------------
 !
 !    4'    Close Gelato specific diagnostic 
-#if ! defined in_arpege
-!BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
-CALL CLSDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
-            YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
-            YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
-            YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
-            YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
-            YSC%SM%S%GLTPARAM%cdiafmt)
-#endif
+!#if ! defined in_arpege
+!!BROKEN INTERFACE CONTACT NAPOLY ADRIEN METEO FRANCE 
+!CALL CLSDIA(YSC%SM%S%GLTPARAM%n0valu,YSC%SM%S%GLTPARAM%n0vilu,YSC%SM%S%GLTPARAM%n2valu, &
+!            YSC%SM%S%GLTPARAM%n2vilu,YSC%SM%S%GLTPARAM%navedia,YSC%SM%S%GLTPARAM%ndiap1,&
+!            YSC%SM%S%GLTPARAM%ndiap2,YSC%SM%S%GLTPARAM%ndiap3,YSC%SM%S%GLTPARAM%ndiapx, &
+!            YSC%SM%S%GLTPARAM%ninsdia,YSC%SM%S%GLTPARAM%noutlu,YSC%SM%S%GLTPARAM%nxvalu,&
+!            YSC%SM%S%GLTPARAM%nxvilu,YSC%SM%S%GLTPARAM%lp1,YSC%SM%S%GLTPARAM%lwg,       &
+!            YSC%SM%S%GLTPARAM%cdiafmt)
+!#endif
 !
 !
 !*    5.     Close parallelized I/O

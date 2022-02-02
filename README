@@ -33,3 +33,15 @@ NAM_NACVEG
     NECHGXFU=
 
 
+#############
+#############
+General comments
+#############
+#############
+
+Hmhm, maybe it should be better to implement the option HSNOWRES=='M98' in
+SURFACE_AERO_COND as optional to avoid the need to add YSNOWRES in
+all calls to SURFACE_AERO_COND that are not from snow routines.
+
+
+
