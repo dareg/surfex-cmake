@@ -1,10 +1,21 @@
-!auto_modi:spll_gltools_alloc.D
 MODULE MODI_gltools_alloc
 INTERFACE
-SUBROUTINE gltools_alloc(tpglt)
+SUBROUTINE gltools_alloc(tpglt,ndiamax,ndynami,nl,nnflxin,noutlu,nt,ntd,nx,ny,lp1)
+!
 USE modd_types_glt 
-USE modd_glt_param
+#if ! defined in_surfex
+USE modd_CB_DynVariables
+USE modd_CB_DynDim
+USE modd_CB_const
+USE modd_CB_mask
+USE modd_CB_DynForcing
+!USE modd_CB_ThermoVariables
+#endif
+!
 IMPLICIT NONE
+!
+INTEGER,INTENT(in)         :: noutlu,nnflxin,ntd,nx,ny,nt,nl,ndynami,ndiamax
+LOGICAL,INTENT(in)         :: lp1
 TYPE(t_glt), INTENT(inout) ::  &
     tpglt
 END SUBROUTINE gltools_alloc

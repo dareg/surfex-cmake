@@ -1,12 +1,23 @@
-!auto_modi:spll_glt_sndatmf.D
 MODULE MODI_glt_sndatmf
 INTERFACE
-SUBROUTINE glt_sndatmf(tpglt, xtmlf)
+SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+!USE MODI_ABOR1_SFX
+#if ! defined in_surfex
+  USE mode_gltools_bound
+  USE modi_gltools_advmsk
+  USE modi_gltools_expand
+#endif
+!
   IMPLICIT NONE 
+!
+  INTEGER,INTENT(in) :: nnflxin
+  REAL   ,INTENT(in) :: alblc
   TYPE(t_glt), INTENT(inout)  ::  &
     tpglt
+  ! Useful in Surfex init phase, when SST+SSS are not yet known, and hence 
+  ! tml%mlf not yet filled in, but one wants a sensible value for TICE everywhere:
   REAL, OPTIONAL, INTENT(IN)  ::  &
     xtmlf
 END SUBROUTINE glt_sndatmf

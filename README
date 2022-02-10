@@ -44,4 +44,38 @@ SURFACE_AERO_COND as optional to avoid the need to add YSNOWRES in
 all calls to SURFACE_AERO_COND that are not from snow routines.
 
 
+###########################################################
+###########################################################
+Comments on what lacks in NWP_81plus (cy48t) compared to ACCORD_NWP_v81_DEVPS
+###########################################################
+###########################################################
+
+PGD:
+- Complements to avoid problems with small fractions.
+- Needed modification of grass roughness in case of ECOSG.
+
+FLake:
+- Various FLake updates related to e.g. use of latest lake depth database
+  and snow on lake ice.
+
+MEB:
+- Does not include the litter component (LMEB_LITTER in NAM_MEB_ISBA).
+- Does not include correction of MEB raditaion.
+
+Sea ice
+- No SICE model.
+
+Orography
+- No OROTUR option
+
+Diagnostics:
+- Still includes error related to diagnosics of HU2M below 0 degC.
+- flag to control reset of min/max fields.
+
+Perturbations:
+- Added functionality for ensemble perturbations.
+
+
+
+
 

@@ -1,4 +1,3 @@
-!auto_modi:spll_gltools_isdigit.D
 MODULE MODI_gltools_isdigit
 INTERFACE
 FUNCTION gltools_isdigit( hchar ) 

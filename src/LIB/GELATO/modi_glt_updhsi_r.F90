@@ -1,11 +1,28 @@
-!auto_modi:spll_glt_updhsi_r.D
 MODULE MODI_glt_updhsi_r
 INTERFACE
 SUBROUTINE glt_updhsi_r  &
-        ( pcondb,pqtopmelt,pdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil )
+        ( pcondb,pqtopmelt,pdhmelt,tpmxl,tpdia,tptfl,tpsit,tpsil,&
+       ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,noutlu,np,nsalflx,nslay,nt,&
+       dtt,rn_htopoc,lp3,&
+       sf3tinv,height )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE modi_glt_updtfl_r
+  USE modi_glt_saltrap_r
+  USE modi_glt_frzvtp_r
+  USE modi_glt_mltvtp_r
+  USE mode_glt_stats_r
+  USE mode_gltools_enthalpy
+!
   IMPLICIT NONE
+!
+!* Arguments
+!
+  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nilay,nslay,niceage,nicesal,nmponds,nleviti,nl,nt,np
+  REAL, INTENT(IN) ::  dtt,rn_htopoc
+  LOGICAL, INTENT(IN) ::  lp3
+  REAL,DIMENSION(:),INTENT(IN) ::  sf3tinv,height
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
         pcondb,pqtopmelt
   REAL, DIMENSION(nl,nt,np), INTENT(in) ::  &

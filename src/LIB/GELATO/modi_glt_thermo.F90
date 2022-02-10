@@ -1,35 +1,57 @@
-!auto_modi:spll_glt_thermo.D
 MODULE MODI_glt_thermo
 INTERFACE
 SUBROUTINE glt_thermo  &
-  ( tpdom,pustar,tpmxl,tpatm,  &
+  (ygltparam,ygltvhd,&
+    tpdom,pustar,tpmxl,tpatm,  &
     tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d )
+!
+!
+! 1. DECLARATIONS
+! ===============
+!
+! 1.1. Module declarations
+! ------------------------
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE mode_glt_stats
+  USE mode_glt_stats_r
+  USE modi_glt_thermo_r
+  USE modi_glt_constrain_r
+  USE MODD_GLT_VHD, ONLY : t_glt_vhd
+  USE MODD_GLT_PARAM, ONLY : t_glt_param
+!
   IMPLICIT NONE
-  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
+!
+!
+! 1.2. Dummy arguments declarations
+! ---------------------------------
+!
+  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd  
+  TYPE(t_glt_param), INTENT(inout) :: ygltparam
+  TYPE(t_dom), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpdom
-  REAL, DIMENSION(nx,ny), INTENT(in) ::  &
+  REAL, DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         pustar
-  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
+  TYPE(t_mxl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpmxl
-  TYPE(t_atm), DIMENSION(nx,ny), INTENT(in) ::  &
+  TYPE(t_atm), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpatm
-  TYPE(t_blk), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_blk), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpblkw
-  TYPE(t_blk), DIMENSION(nt,nx,ny), INTENT(in) ::  &
+  TYPE(t_blk), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
         tpblki
-  TYPE(t_bud), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_bud), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpbud
-  TYPE(t_dia), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_dia), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpdia
-  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(inout) ::  &
+  TYPE(t_tfl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tptfl
-  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(inout) ::  &
+  TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,nx,ny), INTENT(inout) ::  &
+  TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
         tpsil
-  TYPE(t_sit), DIMENSION(ntd,nx,ny), OPTIONAL, INTENT(in) ::  &
+  TYPE(t_sit), DIMENSION(ygltparam%ntd,ygltparam%nx,ygltparam%ny), OPTIONAL, INTENT(in) ::  &
         tpsit_d
 END SUBROUTINE glt_thermo
 END INTERFACE

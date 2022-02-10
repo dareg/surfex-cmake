@@ -1,10 +1,14 @@
-!auto_modi:spll_gltools_updaponds_r.D
 MODULE MODI_gltools_updaponds_r
 INTERFACE
-SUBROUTINE gltools_updaponds_r ( omelt,tpatm,tpblki,tpdia,tpsit,pasi )
+SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+!
   IMPLICIT NONE
+!
+  INTEGER,INTENT(IN) :: nt,np
+  REAL,INTENT(IN) :: dtt
   LOGICAL, DIMENSION(nt,np), INTENT(in) :: &
         omelt
   TYPE(t_atm), DIMENSION(np), INTENT(in) :: &

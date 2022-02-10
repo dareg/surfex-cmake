@@ -1,11 +1,19 @@
-!auto_modi:spll_glt_lmltsi_r.D
 MODULE MODI_glt_lmltsi_r
 INTERFACE
 SUBROUTINE glt_lmltsi_r  &
-        ( tpmxl,tpsil,tpsit,tpdia,tptfl ) 
+        ( tpmxl,tpsil,tpsit,tpdia,tptfl,&
+        ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t ) 
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE modi_glt_updtfl_r
+!
   IMPLICIT NONE
+!
+!* Arguments
+!
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nilay,nl,nt,np,nicesal,niceage,nmponds,nleviti,nslay
+  REAL   ,INTENT(in) :: xlmelt,dtt,rn_htopoc
+  REAL,DIMENSION(:)   ,INTENT(in) :: sf3t
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &

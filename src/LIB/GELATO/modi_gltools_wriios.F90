@@ -1,13 +1,24 @@
-!auto_modi:spll_gltools_wriios.D
 MODULE MODI_gltools_wriios
 INTERFACE
 SUBROUTINE gltools_wriios  &
-        ( hnam,pfield,pwgt )
-  USE modd_glt_param
+        ( hnam,pfield,nx,ny,pwgt)
+!
+  USE modd_glt_const_thm
+#if ! defined in_surfex
+  USE iom
+  USE par_kind
+#else
+  USE modd_wp
+#endif
+
   IMPLICIT NONE
+  INTEGER,INTENT(in) :: nx,ny
+!
+!* Arguments
+!
   CHARACTER(LEN=*), INTENT(IN) :: &
         hnam
-  REAL, DIMENSION(:,:), INTENT(in) ::  &
+  REAL, DIMENSION(:,:), INTENT(in) ::  & 
         pfield 
   REAL, DIMENSION(:,:), OPTIONAL, INTENT(in) ::  &
         pwgt

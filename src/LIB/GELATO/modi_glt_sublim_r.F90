@@ -1,10 +1,17 @@
-!auto_modi:spll_glt_sublim_r.D
 MODULE MODI_glt_sublim_r
 INTERFACE
-SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia)
+SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
+        ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
   USE modd_types_glt
-  USE modd_glt_param 
+  USE modd_glt_const_thm
+  USE modi_glt_updtfl_r
+  USE mode_gltools_enthalpy
+!
   IMPLICIT NONE
+!
+  INTEGER,INTENT(in) :: nilay,ncdlssh,nsalflx,nleviti,nl,np,nt
+  REAL,INTENT(IN) :: dtt,rn_htopoc
+  REAL,DIMENSION(:),INTENT(IN) :: sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::   &
         tpmxl
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &

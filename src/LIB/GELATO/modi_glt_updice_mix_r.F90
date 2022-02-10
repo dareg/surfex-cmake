@@ -1,13 +1,19 @@
-!auto_modi:spll_glt_updice_mix_r.D
 MODULE MODI_glt_updice_mix_r
 INTERFACE
 SUBROUTINE glt_updice_mix_r  &
-  ( kinit,intype, omsg,tpdom,tzsit,psalt_a,pice_a)
+  ( kinit,intype, omsg,tpdom,tzsit,psalt_a,pice_a,&
+  noutlu,np,nt,dtt,xdomsrf_r,lwg)
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_glt_stats_r
+  USE mode_glt_info_r
+!
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit, intype
+         kinit, intype,noutlu,nt,np
+  REAL,INTENT(IN) :: dtt,xdomsrf_r
+  LOGICAL,INTENT(IN) :: lwg
   CHARACTER(*), INTENT(in) ::  &
         omsg
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &

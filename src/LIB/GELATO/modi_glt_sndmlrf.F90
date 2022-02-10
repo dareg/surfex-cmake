@@ -1,11 +1,21 @@
-!auto_modi:spll_glt_sndmlrf.D
 MODULE MODI_glt_sndmlrf
 INTERFACE
 SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
-  pustar,tpall_oce )
+  pustar,tpall_oce,&
+  nadvect,ncdlssh,ndyncor,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc )
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE modd_glt_const_evp
+#if ! defined in_surfex
+  USE mode_gltools_bound
+#endif
+  USE modi_gltools_adjflx
+  USE modi_glt_updtfl
+  USE mode_glt_init
+  !
   IMPLICIT NONE
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nadvect,ndyncor,nleviti,nx,ny,nt
+  REAL,INTENT(in) :: dtt,rn_htopoc
   REAL, DIMENSION(nx,ny), INTENT(in) ::  &
         pbathy
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &

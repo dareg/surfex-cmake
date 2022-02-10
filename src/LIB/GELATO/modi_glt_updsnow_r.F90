@@ -1,13 +1,22 @@
-!auto_modi:spll_glt_updsnow_r.D
 MODULE MODI_glt_updsnow_r
 INTERFACE
 SUBROUTINE glt_updsnow_r  &
-  ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,paddterm,paddterm2)
+  ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,&
+  noutlu,np,nt,dtt,xdomsrf_r,lwg,&
+  paddterm,paddterm2)
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_glt_stats_r
+  USE mode_glt_info_r
+!
   IMPLICIT NONE
   INTEGER, INTENT(in) ::  &
-         kinit
+         kinit,noutlu,nt,np
+  REAL, INTENT(in) ::  &
+         xdomsrf_r,dtt
+  LOGICAL, INTENT(in) ::  &
+         lwg
   CHARACTER(*), INTENT(in) ::  &
         omsg
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &

@@ -1,10 +1,18 @@
-!auto_modi:spll_glt_snowice_r.D
 MODULE MODI_glt_snowice_r
 INTERFACE
-SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia )
+SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
+   ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,dtt,rn_htopoc,sf3tinv )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE mode_gltools_enthalpy
+  USE modi_glt_updtfl_r
+!
   IMPLICIT NONE
+!
+  INTEGER, INTENT(IN) :: ncdlssh,nsalflx,nilay,nslay,nl,nt,np,nleviti
+  REAL, INTENT(IN) ::  dtt,rn_htopoc
+  REAL, DIMENSION(:), INTENT(IN) ::  sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &

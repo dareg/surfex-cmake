@@ -1,10 +1,11 @@
-!auto_modi:spll_glt_inibud.D
 MODULE MODI_glt_inibud
 INTERFACE
 SUBROUTINE glt_inibud(tpbud)
+!
   USE modd_types_glt
-  USE modd_glt_param
+!
   IMPLICIT NONE 
+!
   TYPE(t_bud), DIMENSION(:,:), INTENT(inout) ::                         &
         tpbud
 END SUBROUTINE glt_inibud

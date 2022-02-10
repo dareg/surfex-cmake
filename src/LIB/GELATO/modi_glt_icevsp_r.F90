@@ -1,11 +1,16 @@
-!auto_modi:spll_glt_icevsp_r.D
 MODULE MODI_glt_icevsp_r
 INTERFACE
-SUBROUTINE glt_icevsp_r( tpsit,pvsp )
+SUBROUTINE glt_icevsp_r( tpsit,pvsp,&
+  nilay,nl,np,nt,height,sf3tinv )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+!
   IMPLICIT NONE
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
+!
+  INTEGER,INTENT(IN) :: nl,nt,np,nilay
+  REAL,DIMENSION(:),INTENT(IN) :: height,sf3tinv
+  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
         tpsit   
   REAL, DIMENSION(nl,nt,np), INTENT(inout) ::  &
         pvsp

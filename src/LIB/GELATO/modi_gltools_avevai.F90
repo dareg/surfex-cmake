@@ -1,22 +1,39 @@
-!auto_modi:spll_gltools_avevai.D
 MODULE MODI_gltools_avevai
 INTERFACE
 SUBROUTINE gltools_avevai  &
-        ( tpind,tpnam,pfield,pcumdia,pwgt )
-  USE modd_glt_param
+        (tpind,tpnam,pfield,pcumdia,&
+gelato_leadproc,gelato_myrank,n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,&
+dtt,dttave,lwg,pwgt)
+!
   USE modd_types_glt
+  USE modd_glt_const_thm
+  USE modi_gltools_strlower
+#if ! defined in_surfex
+  USE mode_gltools_mpi
+  USE mode_gltools_bound
+#else
+#if ! defined in_arpege
+  USE MODI_GATHER_AND_WRITE_MPI
+#endif
+#endif
   IMPLICIT NONE
+!
+!* Arguments
+!
+  INTEGER,INTENT(in) :: nx,ny,noutlu,nxglo,nyglo,gelato_leadproc,gelato_myrank,n2valu,n0valu
+  LOGICAL,INTENT(in) :: lwg 
+  REAL   ,INTENT(in) :: dtt,dttave
   TYPE(t_ind), INTENT(inout) ::  &
         tpind
   TYPE(t_def), INTENT(in) ::  &
         tpnam
-  REAL, DIMENSION(:,:), INTENT(in) ::  &
+  REAL, DIMENSION(:,:), INTENT(in) ::  & 
         pfield 
   REAL, DIMENSION(:,:,:), INTENT(inout) ::  &
         pcumdia
   REAL, DIMENSION(:,:), OPTIONAL, INTENT(inout) ::  &
         pwgt
-    END SUBROUTINE gltools_avevai
+END SUBROUTINE gltools_avevai
 END INTERFACE
 END MODULE MODI_gltools_avevai
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier

@@ -1,10 +1,16 @@
-!auto_modi:spll_gltools_mskerr.D
 MODULE MODI_gltools_mskerr
 INTERFACE
 SUBROUTINE gltools_mskerr  &
-        ( href,hfile,hword )
-  USE modd_glt_param
+        ( href,hfile,hword ,noutlu,lwg)
+!
+  USE mode_gltools_strlast
+  USE modi_gltools_glterr
+  USE MODI_ABOR1_SFX
+!
   IMPLICIT NONE
+  LOGICAL, INTENT(IN) :: lwg
+  INTEGER, INTENT(IN) :: noutlu
+!
   CHARACTER(LEN=*), INTENT(in) ::  &
         href
   CHARACTER(LEN=*), INTENT(in) ::  &

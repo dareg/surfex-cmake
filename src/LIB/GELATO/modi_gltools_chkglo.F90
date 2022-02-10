@@ -1,10 +1,17 @@
-!auto_modi:spll_gltools_chkglo.D
 MODULE MODI_gltools_chkglo
 INTERFACE
-SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit)
+SUBROUTINE gltools_chkglo(omsg,tpdom,tpsit,&
+ noutlu,nprinto,nt,nx,ny,lwg)
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+#if ! defined in_arpege
+  USE lib_mpp
+#endif
   IMPLICIT NONE
+!
+  INTEGER, INTENT(in) ::  nprinto,noutlu,nt,nx,ny
+  LOGICAL, INTENT(in) ::  lwg
   CHARACTER(*), INTENT(in) ::  &
         omsg
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &

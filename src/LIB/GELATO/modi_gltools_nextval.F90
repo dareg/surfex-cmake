@@ -1,9 +1,13 @@
-!auto_modi:spll_gltools_nextval.D
 MODULE MODI_gltools_nextval
 INTERFACE
-SUBROUTINE gltools_nextval( klun,hlistfld,klistfound,kok,hpar,hval,hcomment ) 
-USE modd_glt_param
+SUBROUTINE gltools_nextval( klun,hlistfld,klistfound,kok,hpar,hval,lwg,hcomment ) 
+!
+USE modi_gltools_nextline
+!
+!
 IMPLICIT NONE
+! 
+  LOGICAL,INTENT(IN) :: lwg
   INTEGER, INTENT(in) ::  &
     klun    
   CHARACTER(80), DIMENSION(:), INTENT(in) ::  &

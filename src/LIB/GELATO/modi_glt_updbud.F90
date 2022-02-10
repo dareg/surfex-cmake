@@ -1,13 +1,23 @@
-!auto_modi:spll_glt_updbud.D
 MODULE MODI_glt_updbud
 INTERFACE
 SUBROUTINE glt_updbud  &
-  ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud )
+  ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud,&
+    niceage,nicesal,nilay,nmponds,nl,noutlu,nprinto,nslay,nsnwrad,nt,nx,ny,dtt,xdomsrf_g,lp1,lp2,lp3,lwg,sf3tinv )
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_glt_stats
+  USE mode_glt_info
+!
   IMPLICIT NONE
+!
   INTEGER, INTENT(in) ::  &
-         kinit
+         kinit,noutlu,nsnwrad,nilay,nslay,nicesal,niceage,nmponds,nprinto,nl,nt,nx,ny
+  REAL, INTENT(in) ::  &
+         xdomsrf_g,dtt
+  REAL,DIMENSION(:), INTENT(in) ::  sf3tinv
+  LOGICAL, INTENT(in) ::  &
+         lp1,lp2,lp3,lwg
   CHARACTER(*), INTENT(in) ::  &
          omsg
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &

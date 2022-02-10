@@ -1,10 +1,14 @@
-!auto_modi:spll_gltools_mixice.D
 MODULE MODI_gltools_mixice
 INTERFACE
-SUBROUTINE gltools_mixice( tpmxl,tplsit,tplsil,tpsit,tpsil )
+SUBROUTINE gltools_mixice(tpmxl,tplsit,tplsil,tpsit,tpsil,&
+niceage,nicesal,nilay,nmponds,nl,nt,nx,ny )
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+!
   IMPLICIT NONE
+!
+  INTEGER,INTENT(IN) :: niceage,nicesal,nmponds,nilay,nl,nt,nx,ny
   TYPE(t_mxl),DIMENSION(nx,ny), INTENT(in) ::                           &
         tpmxl
   TYPE(t_sit), DIMENSION(:,:,:,:), INTENT(in) ::                        &

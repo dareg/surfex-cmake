@@ -1,10 +1,16 @@
-!auto_modi:spll_glt_blowsn_r.D
 MODULE MODI_glt_blowsn_r
 INTERFACE
-SUBROUTINE glt_blowsn_r( tpmxl,tpsil,tptfl,tpsit )
+SUBROUTINE glt_blowsn_r(tpmxl,tpsil,tptfl,tpsit,&
+        ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,nx,ny,dtt,rn_htopoc )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE modi_glt_updtfl_r
+!
   IMPLICIT NONE
+!
+  INTEGER, INTENT(IN) :: ncdlssh,nsalflx,nilay,nslay,nl,nt,np,nleviti,nx,ny
+  REAL, INTENT(IN) :: dtt,rn_htopoc
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl 
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &

@@ -1,10 +1,14 @@
-!auto_modi:spll_gltools_adjflx.D
 MODULE MODI_gltools_adjflx
 INTERFACE
-FUNCTION gltools_adjflx(tpdom,ocrit,pfield)
+FUNCTION gltools_adjflx(tpdom,ocrit,pfield,nx,ny,dtt)
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+!
   IMPLICIT NONE
+!
+  INTEGER,INTENT(IN) :: nx,ny
+  REAL,INTENT(IN) :: dtt
   TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
         tpdom
   LOGICAL, DIMENSION(nx,ny), INTENT(in) ::  &

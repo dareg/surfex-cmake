@@ -1,12 +1,59 @@
-!auto_modi:spll_glt_gelato.D
 MODULE MODI_glt_gelato
 INTERFACE
-SUBROUTINE glt_gelato( tpglt )
+SUBROUTINE glt_gelato( tpglt,ygltparam,ygltvhd)
+!
+!
+! 1. Declarations
+! ================
+!
+! 1.1. Module use declarations
+! -----------------------------
+!
+!#if ! defined in_surfex
+!USE mpi
+!#endif
+!
+! * Contains physical constants.
+USE modd_glt_const_thm 
+!
+#if ! defined in_surfex
+! * Contains physical constants for elastic viscous-plastic dynamics 
+USE modd_glt_const_evp
+#endif
+!
+! * Contains types_glt definitions.
 USE modd_types_glt 
-USE modd_glt_param
+!
+! * To send an error message
+USE modi_gltools_glterr
+!
+! * To initialize the control of energy budget
+USE modi_glt_inibud
+!
+! * Sea ice and leads thermodynamics.
+USE modi_glt_thermo
+!
+! * To print statistics in glt_gelato glt_output file.
+USE mode_glt_info
+!
+USE modi_glt_updbud
+USE modi_gltools_timers
+!
+USE MODD_GLT_PARAM, ONLY : t_glt_param
+USE MODD_GLT_VHD, ONLY : t_glt_vhd
+!
+USE mode_glt_init
+
+! * No variables are implicitely declared. 
 IMPLICIT NONE
-TYPE(t_glt), INTENT(inout) ::  &
-  tpglt
+!
+!
+! 1.2. Dummy arguments
+! ---------------------
+!
+TYPE(t_glt), INTENT(inout)       ::  tpglt
+TYPE(t_glt_param), INTENT(inout) ::  ygltparam
+TYPE(t_glt_vhd), INTENT(inout)   ::  ygltvhd
 END SUBROUTINE glt_gelato
 END INTERFACE
 END MODULE MODI_glt_gelato

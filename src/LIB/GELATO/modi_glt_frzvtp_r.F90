@@ -1,10 +1,20 @@
-!auto_modi:spll_glt_frzvtp_r.D
 MODULE MODI_glt_frzvtp_r
 INTERFACE
-SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil )
+SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
+       nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE mode_gltools_enthalpy
+  USE mode_gltools_interp
+  USE modi_glt_saltrap_r
+!
   IMPLICIT NONE
+!
+  INTEGER,INTENT(IN) :: noutlu,nl,nt,np,nilay
+  REAL,INTENT(IN) :: dtt
+  REAL,DIMENSION(:),INTENT(IN) :: sf3tinv,height
+  LOGICAL,INTENT(IN) :: lp3
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
         tpmxl
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &

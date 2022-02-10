@@ -1,11 +1,56 @@
-!auto_modi:spll_glt_thermo_ice_r.D
 MODULE MODI_glt_thermo_ice_r
 INTERFACE
 SUBROUTINE glt_thermo_ice_r  &
-  ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil )
+  ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,& 
+   ncdlssh,niceage,nicesal,nicesub,nilay,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nslay,nsnwrad,nt,nupdbud,&
+   albimlt,albsdry,albsmlt,dtt,rn_htopoc,xdomsrf_r,xlmelt,xswhdfr,&
+   lp1,lp2,lp3,lp4,lp5,lwg,&
+   depth,height,sf3t,sf3tinv,&
+   ygltvhd)
+!
+!
+!
+! 1. DECLARATIONS AND INITIALIZATIONS
+! ====================================
+!
+! 1.1. Module declarations
+! ------------------------
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE modi_glt_vhdiff_r
+!  USE modi_glt_swabs_r
+  USE mode_glt_info_r
+  USE mode_glt_stats_r
+  USE modi_glt_updasn_r 
+  USE modi_glt_icetrans_r
+  USE modi_glt_sublim_r
+  USE modi_glt_precip_r
+  USE modi_glt_snowice_r
+  USE modi_glt_updhsn_r
+  USE modi_glt_updhsi_r
+  USE modi_glt_lmltsi_r
+  USE modi_glt_updbud_r
+  USE modi_glt_updice_r
+  USE modi_glt_updsnow_r
+  USE modi_glt_icevsp_r
+  USE modi_gltools_chkglo_r
+  USE mode_gltools_enthalpy
+  USE modi_glt_updsal_r
+  USE MODD_GLT_VHD, ONLY : t_glt_vhd
+  !
   IMPLICIT NONE
+!
+!
+! 1.2. Dummy arguments declarations
+! ---------------------------------
+!
+! --- INTENT(in) arguments.
+!
+  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud, &
+                          nl,np,nt
+  LOGICAL, INTENT(IN) :: lp1,lp2,lp3,lp4,lp5,lwg
+  REAL, INTENT(IN) ::  dtt,xdomsrf_r,xswhdfr,rn_htopoc,albimlt,albsmlt,albsdry,xlmelt
+  REAL,DIMENSION(:), INTENT(IN) :: sf3t,sf3tinv,height,depth
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
@@ -14,6 +59,9 @@ SUBROUTINE glt_thermo_ice_r  &
         tpatm
   TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
         tpblki
+!
+! --- INTENT(inout) arguments.
+
   TYPE(t_bud), DIMENSION(np), INTENT(inout) ::  &
         tpbud
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
@@ -24,6 +72,7 @@ SUBROUTINE glt_thermo_ice_r  &
         tpsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
         tpsil 
+  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
 END SUBROUTINE glt_thermo_ice_r
 END INTERFACE
 END MODULE MODI_glt_thermo_ice_r

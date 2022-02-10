@@ -1,8 +1,9 @@
-!auto_modi:spll_gltools_nwords.D
 MODULE MODI_gltools_nwords
 INTERFACE
 FUNCTION gltools_nwords( hval ) RESULT(nwords)
+!
 IMPLICIT NONE
+!
 CHARACTER(*), INTENT(in) ::  &
   hval
 INTEGER ::  &

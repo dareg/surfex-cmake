@@ -1,8 +1,9 @@
-!auto_modi:spll_gltools_strlower.D
 MODULE MODI_gltools_strlower
 INTERFACE
 FUNCTION gltools_strlower( hstring ) RESULT(hresult)
+!
   IMPLICIT NONE
+!
   CHARACTER(LEN=*), INTENT(in) ::  &
     hstring
   CHARACTER(LEN=LEN(hstring)) ::  &

@@ -1,10 +1,20 @@
-!auto_modi:spll_gltools_glterr.D
 MODULE MODI_gltools_glterr
 INTERFACE
 SUBROUTINE gltools_glterr  &
-        ( hroutine,hmess,hflag )
-  USE modd_glt_param
+        ( hroutine,hmess,hflag,noutlu,lwg )
+!
+!
   IMPLICIT NONE
+  LOGICAL, INTENT(in) :: lwg
+  INTEGER, INTENT(in) :: noutlu
+
+!
+!  CHARACTER(400), INTENT(in) ::  &
+!    hroutine
+!  CHARACTER(400), INTENT(in) ::  &
+!    hmess
+!  CHARACTER(4), INTENT(in) ::  &
+!    hflag
   CHARACTER(LEN=*), INTENT(in) ::  &
         hroutine
   CHARACTER(LEN=*), INTENT(in) ::  &

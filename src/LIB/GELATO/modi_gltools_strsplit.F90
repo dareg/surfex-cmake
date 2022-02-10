@@ -1,8 +1,9 @@
-!auto_modi:spll_gltools_strsplit.D
 MODULE MODI_gltools_strsplit
 INTERFACE
 FUNCTION gltools_strsplit( hval,knword ) RESULT(hresult)
+!
 IMPLICIT NONE
+!
 CHARACTER(*), INTENT(in) ::  &
   hval
 INTEGER, INTENT(in) ::  &

@@ -1,12 +1,23 @@
-!auto_modi:spll_gltools_chkinp.D
 MODULE MODI_gltools_chkinp
 INTERFACE
-SUBROUTINE gltools_chkinp( kdate,tpglt )
+SUBROUTINE gltools_chkinp(kdate,tpglt,&
+        n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavinp,nsavlu,&
+        nt,ntd,nx,nxglo,ny,nyglo,xdomsrf_g,lwg,ciopath )
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modi_gltools_nwords
+  USE modi_gltools_strsplit
+  USE mode_gltools_wrivais
+  USE lib_mpp
   IMPLICIT none
+!
+! .. Dummy arguments
+!
   INTEGER, INTENT(in) ::  &
-    kdate
+    kdate,nprinto,nnflxin,ntd,noutlu,nsavlu,nsavinp,nt,nx,ny,n2vilu,n0vilu,nxglo,nyglo
+  REAL, INTENT(in) ::  xdomsrf_g
+  LOGICAL, INTENT(in) ::  lwg
+  CHARACTER(*), INTENT(in) ::  ciopath
   TYPE(t_glt), INTENT(in) ::  &
     tpglt
 END SUBROUTINE gltools_chkinp

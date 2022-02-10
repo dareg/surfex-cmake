@@ -1,10 +1,21 @@
-!auto_modi:spll_glt_constrain_r.D
 MODULE MODI_glt_constrain_r
 INTERFACE
-SUBROUTINE glt_constrain_r( tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d )
+SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
+    nilay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_glt_stats_r
+  USE modi_gltools_newice_r
+  USE mode_gltools_enthalpy
+  USE MODI_ABOR1_SFX
+!
   IMPLICIT NONE 
+!
+  INTEGER, INTENT(IN) :: nilay,noutlu,nl,nt,np,ntd
+  REAL, INTENT(IN) :: dtt,xfsidmpeft,xhsidmpeft,xfsimax,xhsimin
+  REAL,DIMENSION(:),INTENT(in) :: sf3tinv
+  LOGICAL, INTENT(IN) :: lwg
+  CHARACTER(*), INTENT(IN) :: ccsvdmp,chsidmp,cfsidmp
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &

@@ -1,12 +1,35 @@
-!auto_modi:spll_glt_vhdiff_r.D
 MODULE MODI_glt_vhdiff_r
 INTERFACE
 SUBROUTINE glt_vhdiff_r  &
         ( tpdom,pmlf,pderiv,tpsit,tpdia,  &
-        pnsftop,pswtra,pent,pvsp,pcondb,pqtopmelt,pdhmelt,gsmelt )
-  USE modd_glt_param
+        pnsftop,pswtra,pent,pvsp,pcondb,pqtopmelt,pdhmelt,gsmelt, &
+        nilay,nl,noutlu,np,nslay,nt,dtt,xdomsrf_r,xswhdfr,&
+        lp1,lp2,lp3,lp4,lp5,lwg,&
+        sf3t,sf3tinv,&
+        ygltvhd )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
+  USE modi_gltools_temper_r
+  USE mode_gltools_enthalpy
+  USE modi_glt_vhdslab_r
+  USE mode_glt_stats_r
+  USE MODD_GLT_VHD, ONLY : t_glt_vhd
+  USE MODI_ABOR1_SFX
+!!
   IMPLICIT NONE
+!
+!
+!
+! 1. Variables
+! ============
+!
+! 1.1. Dummy arguments
+! --------------------
+  LOGICAL, INTENT(IN) :: lwg,lp1,lp2,lp3,lp4,lp5 
+  INTEGER, INTENT(IN) :: noutlu,nslay,nilay,nl,nt,np 
+  REAL, INTENT(IN) :: dtt,xswhdfr,xdomsrf_r
+  REAL, DIMENSION(:),INTENT(IN) :: sf3tinv,sf3t
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
     tpdom
   REAL, DIMENSION(np), INTENT(in) ::  &
@@ -31,7 +54,8 @@ SUBROUTINE glt_vhdiff_r  &
     pdhmelt
   LOGICAL, DIMENSION(nt,np), INTENT(out) ::  &
     gsmelt
-  END SUBROUTINE glt_vhdiff_r
+  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
+END SUBROUTINE glt_vhdiff_r
 END INTERFACE
 END MODULE MODI_glt_vhdiff_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier

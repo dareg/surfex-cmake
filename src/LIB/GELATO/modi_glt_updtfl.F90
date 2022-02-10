@@ -1,10 +1,17 @@
-!auto_modi:spll_glt_updtfl.D
 MODULE MODI_glt_updtfl
 INTERFACE
-SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,pent,psalt )
+SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent,psalt )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE modi_glt_salflx
+!
   IMPLICIT NONE
+!
+! .. Arguments
+!
+  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nleviti,nt,nx,ny
+  REAL   ,INTENT(in) :: dtt,rn_htopoc
   CHARACTER(*), INTENT(in) ::  &
         hflag  
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &

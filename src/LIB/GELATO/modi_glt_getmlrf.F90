@@ -1,10 +1,18 @@
-!auto_modi:spll_glt_getmlrf.D
 MODULE MODI_glt_getmlrf
 INTERFACE
-SUBROUTINE glt_getmlrf( tpoce_all,tpml )
+SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_gltools_sigma
+  USE mode_gltools_swfrzt
+#if ! defined in_surfex
+  USE mode_gltools_bound
+#endif
+  USE mode_gltools_prtrarr
+!
   IMPLICIT NONE 
+!
+  INTEGER,INTENT(IN) :: nx,ny
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
     tpoce_all
   TYPE(t_mxl), DIMENSION(nx,ny), INTENT(out) ::  &

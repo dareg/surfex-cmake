@@ -1,9 +1,13 @@
-!auto_modi:spll_glt_invert.D
 MODULE MODI_glt_invert
 INTERFACE
-SUBROUTINE glt_invert(kdiag,pmat)
-  USE modd_glt_param
+SUBROUTINE glt_invert(kdiag,pmat,noutlu,lwg)
+  USE modi_gltools_glterr
+
+  USE MODI_ABOR1_SFX
+!
   IMPLICIT NONE
+  INTEGER,INTENT(IN) :: noutlu
+  LOGICAL,INTENT(IN) :: lwg
   INTEGER ::  &
         kdiag
   REAL, DIMENSION(:,:), INTENT(inout) ::  &

@@ -1,20 +1,46 @@
-!auto_modi:spll_gltools_newice_r.D
 MODULE MODI_gltools_newice_r
 INTERFACE
 SUBROUTINE gltools_newice_r  &
-  ( pfsi,phsi,tpmxl,tpsit,tpsil,  &
+  ( nl,np,nt,pfsi,phsi,tpmxl,tpsit,tpsil,  &
     ptsf,pssi,phsn,prsn,pasn,pent )
+!
+!
+!
+! 1. Declarations
+! ===============
+!
+! 1.1. Module declarations
+! ------------------------
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_gltools_enthalpy
+  USE mode_glt_info_r
+  USE mode_glt_stats_r
+!
   IMPLICIT NONE
+!
+!
+! 1.2. Dummy arguments declarations
+! ---------------------------------
+!
+! .. INTENT(in) arguments.
+!
+  INTEGER,INTENT(IN) :: nl,nt,np
   REAL, DIMENSION(nt,np), INTENT(in) ::  &
         pfsi,phsi
   TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
         tpmxl
+!
+! .. INTENT(inout) arguments.
+!
   TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
         tpsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
         tpsil
+!
+! .. OPTIONAL, INTENT(in) arguments
+!
   REAL, DIMENSION(nt,np), OPTIONAL, INTENT(inout) ::  &
         ptsf,pssi,phsn,prsn,pasn
   REAL, DIMENSION(nl,nt,np), OPTIONAL, INTENT(inout) ::  &

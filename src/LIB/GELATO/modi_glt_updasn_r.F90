@@ -1,10 +1,16 @@
-!auto_modi:spll_glt_updasn_r.D
 MODULE MODI_glt_updasn_r
 INTERFACE
-SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia )
+SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
+        nilay,nl,nmponds,np,nt,albimlt,albsdry,albsmlt,dtt )
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE modi_gltools_updaponds_r
+!
   IMPLICIT NONE
+!
+  REAL, INTENT(IN) :: albimlt,albsmlt,albsdry,dtt
+  INTEGER,INTENT(IN) :: nmponds,nilay,nl,nt,np
   LOGICAL, DIMENSION(nt,np), INTENT(in) ::  &
         gsmelt
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &

@@ -1,9 +1,11 @@
-!auto_modi:spll_gltools_nextline.D
 MODULE MODI_gltools_nextline
 INTERFACE
-SUBROUTINE gltools_nextline( klun,kend,hpar,hval,hcomment ) 
-USE modd_glt_param
+SUBROUTINE gltools_nextline( klun,kend,hpar,hval,lwg,hcomment) 
+!
+!
 IMPLICIT NONE
+!
+LOGICAL, INTENT(IN) :: lwg
 INTEGER, INTENT(in) ::  &
   klun
 INTEGER, INTENT(out) ::  &

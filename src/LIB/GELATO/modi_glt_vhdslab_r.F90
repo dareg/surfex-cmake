@@ -1,19 +1,28 @@
-!auto_modi:spll_glt_vhdslab_r.D
 MODULE MODI_glt_vhdslab_r
 INTERFACE
 SUBROUTINE glt_vhdslab_r  &
         ( kit,pnsftop,pswtra,pderiv,  &
-          pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,osnow )
-  USE modd_glt_param, only : nilay, nl
+          pcondb,ptsfa,pqtopmelt,pdh,ptsia,osmelt,  &
+          pcondt_m,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb,llredo,&
+          petai,petaik,petaikp1,pinvetai,pkodzi,prhocpsi,ptsi_m0,ptsi0, &
+          nilay,nl,noutlu,lp3,lp4,lp5,lwg,xswhdfr,&
+          osnow)
+!
+  USE modd_glt_const_thm
+  USE modi_glt_invert
+!
   IMPLICIT NONE
+!
   INTEGER, INTENT(in) ::  &
-    kit
+    kit,nl,nilay,noutlu
+  LOGICAL, INTENT(in) ::  &
+    lwg,lp3,lp4,lp5,llredo
   REAL, INTENT(in) ::  &
-    pnsftop
+    pnsftop,xswhdfr,pg1,pg2,pmlf,pnsftop0,ptsf0,ptsfb
   REAL, DIMENSION(nl), INTENT(in) ::  &
     pswtra
   REAL, INTENT(inout) ::  &
-    pderiv
+    pderiv,pcondt_m
   REAL, INTENT(out) ::  &
     pcondb,ptsfa,pqtopmelt
   REAL, DIMENSION(nilay+1), INTENT(out) ::  &
@@ -24,7 +33,14 @@ SUBROUTINE glt_vhdslab_r  &
     osmelt
   LOGICAL, OPTIONAL, INTENT(in) ::  &
     osnow
-  END SUBROUTINE glt_vhdslab_r
+
+REAL, DIMENSION(0:nilay), INTENT(in) ::  &
+          petai,pinvetai,petaik,petaikp1,ptsi_m0,ptsi0
+REAL, DIMENSION(0:nilay+1), INTENT(in) ::  &
+          pkodzi
+REAL, DIMENSION(nilay), INTENT(in) ::  &
+          prhocpsi
+END SUBROUTINE glt_vhdslab_r
 END INTERFACE
 END MODULE MODI_glt_vhdslab_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier

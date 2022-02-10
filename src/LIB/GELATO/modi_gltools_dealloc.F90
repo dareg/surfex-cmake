@@ -1,10 +1,20 @@
-!auto_modi:spll_gltools_dealloc.D
 MODULE MODI_gltools_dealloc
 INTERFACE
-SUBROUTINE gltools_dealloc(tpglt)
+SUBROUTINE gltools_dealloc(tpglt,nnflxin,noutlu,ntd,lwg)
+!
 USE modd_types_glt 
-USE modd_glt_param
+#if ! defined in_surfex
+USE modd_CB_DynVariables
+USE modd_CB_DynDim
+USE modd_CB_const
+USE modd_CB_mask
+USE modd_CB_DynForcing
+#endif
+!
 IMPLICIT NONE
+!
+INTEGER,INTENT(in) :: noutlu,nnflxin,ntd
+LOGICAL,INTENT(in) :: lwg
 TYPE(t_glt), INTENT(inout) ::  &
     tpglt
 END SUBROUTINE gltools_dealloc

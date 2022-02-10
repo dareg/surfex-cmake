@@ -1,10 +1,18 @@
-!auto_modi:spll_glt_mltvtp_r.D
 MODULE MODI_glt_mltvtp_r
 INTERFACE
-SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil )
+SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
+       nilay,nl,np,nt,lp3,height,sf3tinv)
+!
+  USE modd_glt_const_thm
   USE modd_types_glt
-  USE modd_glt_param
+  USE mode_glt_stats_r
+  USE mode_gltools_interp
+!
   IMPLICIT NONE
+!
+  INTEGER,INTENT(IN) :: nilay,nt,np,nl
+  REAL,DIMENSION(:),INTENT(IN) :: height,sf3tinv
+  LOGICAL,INTENT(IN) :: lp3
   REAL, DIMENSION(nilay,nt,np), INTENT(in) ::  &
         pdhi
   REAL, DIMENSION(nt,np), INTENT(inout) ::  &

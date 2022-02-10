@@ -1,13 +1,41 @@
-!auto_modi:spll_glt_thermo_lead_r.D
 MODULE MODI_glt_thermo_lead_r
 INTERFACE
 SUBROUTINE glt_thermo_lead_r  &
-  (tpdom,pustar,tpmxl,tpatm,tpblkw,  &
+  (ncdlssh,nextqoc,niceage,nicesal,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nsnwrad,nt,&
+  dtt,rn_htopoc,xhsimin,lp1,lp2,lp3,lwg,thick,&
+  tpdom,pustar,tpmxl,tpatm,tpblkw,  &
   tpdia,tptfl,tpsit,tpsil,  &
   tpldsit,tpldsil)
+!
+!
+!
+! 1. Declarations
+! ===============
+!
+! 1.1. Module declarations
+! ------------------------
+!
   USE modd_types_glt
-  USE modd_glt_param
+  USE modd_glt_const_thm
+  USE mode_glt_info_r
+  USE modi_gltools_chkglo_r
+  USE modi_glt_saltrap_r
+  USE modi_glt_updtfl_r
+  USE modi_glt_oceflx_r
+  USE mode_glt_stats_r
+!
   IMPLICIT NONE
+!
+!
+! 1.2. Dummy arguments declarations
+! ---------------------------------
+!
+! .. INTENT(in) arguments.
+!
+  INTEGER, INTENT(IN) ::noutlu,ncdlssh,nsalflx,nextqoc,nicesal,niceage,nmponds,nsnwrad,nleviti,nl,nt,np,nprinto
+  REAL, INTENT(IN) ::dtt,xhsimin,rn_htopoc
+  REAL,DIMENSION(:), INTENT(IN) ::thick
+  LOGICAL,INTENT(IN) :: lp1,lp2,lp3,lwg
   TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
         tpdom
   REAL, DIMENSION(np), INTENT(in) ::  &
@@ -16,6 +44,9 @@ SUBROUTINE glt_thermo_lead_r  &
         tpmxl
   TYPE(t_atm), DIMENSION(np), INTENT(in) ::   &
         tpatm
+!
+! .. INTENT(inout) arguments.
+!
   TYPE(t_blk), DIMENSION(np), INTENT(inout) ::  &
         tpblkw
   TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
@@ -26,6 +57,9 @@ SUBROUTINE glt_thermo_lead_r  &
         tpsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
         tpsil
+!
+! .. INTENT(out) arguments.
+!
   TYPE(t_sit), DIMENSION(nt,np), INTENT(out) ::  &
         tpldsit
   TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(out) ::  &
