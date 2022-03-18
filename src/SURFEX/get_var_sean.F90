@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE GET_VAR_SEA_n (DGO, D, HPROGRAM,KI,PQS,PZ0,PZ0H)
+      SUBROUTINE GET_VAR_SEA_n (DGO, D, S, HPROGRAM,KI,PQS,PZ0,PZ0H, PSIC)
 !     ##################################################
 !
 !!****  *GET_VAR_SEA_n* - routine to get variables defined only over sea
@@ -40,6 +40,7 @@
 !
 !
 USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t 
 !
 USE MODI_GET_LUOUT
 USE MODD_SURF_PAR,       ONLY   : XUNDEF
@@ -57,12 +58,14 @@ IMPLICIT NONE
 !
 TYPE(DIAG_OPTIONS_t), INTENT(IN) :: DGO
 TYPE(DIAG_t), INTENT(INOUT) :: D
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
  CHARACTER(LEN=6),     INTENT(IN)     :: HPROGRAM
 INTEGER,              INTENT(IN)     :: KI      ! Number of points
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PQS     ! surface humidity
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PSIC
 !
 !
 !*       0.2   Declarations of local variables
@@ -88,6 +91,13 @@ IF (DGO%LCOEF) THEN
         PZ0      = XUNDEF      
         PZ0H     = XUNDEF      
 ENDIF           
+
+IF (S%CSEAICE_SCHEME=='GELATO') THEN
+    PSIC=S%XSIC
+ELSE
+    PSIC(:)=0.
+ENDIF
+
 IF (LHOOK) CALL DR_HOOK('GET_VAR_SEA_N',1,ZHOOK_HANDLE)
 !
 !==============================================================================

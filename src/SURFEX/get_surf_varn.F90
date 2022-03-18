@@ -3,13 +3,14 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE GET_SURF_VAR_n (FM, IM, SM, TM, WM, DGO, D, UG, U, USS,        &
+      SUBROUTINE GET_SURF_VAR_n (FM, IM, SM, TM, WM, DGO, D, UG, U, USS, S,     &
                                  HPROGRAM, KI, KS,PSEA, PWATER, PNATURE, PTOWN, &
                                  PT2M, PQ2M, PQS, PZ0, PZ0H, PZ0EFF, PZ0_SEA,   &
                                  PZ0_WATER, PZ0_NATURE, PZ0_TOWN, PZ0H_SEA,     &
                                  PZ0H_WATER, PZ0H_NATURE, PZ0H_TOWN, PQS_SEA,   &
                                  PQS_WATER, PQS_NATURE, PQS_TOWN, PPSNG, PPSNV, &
-                                 PZS, PSERIES, PTWSNOW, PSSO_STDEV, PLON, PLAT, &
+                                 PZS, PSERIES, PTWSNOW,PSIC,                    &
+                                 PSSO_STDEV, PLON, PLAT,                        &
                                  PBARE, PLAI_TREE, PH_TREE                    )  
 !     #######################################################################
 !
@@ -58,6 +59,7 @@ USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_OPTIONS_t
 USE MODD_SURF_ATM_GRID_n, ONLY : SURF_ATM_GRID_t
 USE MODD_SURF_ATM_n, ONLY : SURF_ATM_t
 USE MODD_SSO_n, ONLY : SSO_t
+USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t 
 !
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODI_GET_LUOUT
@@ -91,6 +93,7 @@ TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
 TYPE(TEB_MODEL_t), INTENT(INOUT) :: TM
 TYPE(WATFLUX_MODEL_t), INTENT(INOUT) :: WM
+TYPE(SEAFLUX_t), INTENT(INOUT) :: S
 !
 TYPE(DIAG_OPTIONS_t), INTENT(INOUT) :: DGO
 TYPE(DIAG_t), INTENT(INOUT) :: D
@@ -138,6 +141,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PZS        ! surface orography     
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PSERIES  ! any surface field for which 
 !                                                       ! mesoNH series are required
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PTWSNOW    ! Snow total reservoir
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PSIC       ! Sea ice concentration
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PSSO_STDEV ! S.S.O. standard deviation           (m)
 !
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PLON       ! longitude
@@ -245,8 +249,8 @@ IF ( PRESENT(PQS_SEA) .OR. PRESENT(PZ0_SEA) .OR. PRESENT(PZ0H_SEA) ) THEN
    IMASK(:)=0
    CALL GET_1D_MASK(KI_SEA, KI, PSEA, IMASK(1:KI_SEA))
    !
-   CALL GET_VAR_SEA_n(SM%SD%O, SM%SD%D, &
-                      HPROGRAM, KI_SEA, ZFIELD1(1:KI_SEA), ZFIELD2(1:KI_SEA), ZFIELD3(1:KI_SEA))
+   CALL GET_VAR_SEA_n(SM%SD%O, SM%SD%D, S, &
+                      HPROGRAM, KI_SEA, ZFIELD1(1:KI_SEA),ZFIELD2(1:KI_SEA),ZFIELD3(1:KI_SEA),ZFIELD4(1:KI_SEA))
    !
    IF(PRESENT(PQS_SEA))THEN
       PQS_SEA    (:) = XUNDEF
@@ -266,6 +270,13 @@ IF ( PRESENT(PQS_SEA) .OR. PRESENT(PZ0_SEA) .OR. PRESENT(PZ0H_SEA) ) THEN
       PZ0H_SEA   (:) = XUNDEF
       DO JI = 1, KI_SEA
          PZ0H_SEA(IMASK(JI)) = ZFIELD3(JI)
+      END DO
+   ENDIF
+   !
+   IF(PRESENT(PSIC))THEN
+      PSIC   (:) = XUNDEF
+      DO JI = 1, KI_SEA
+         PSIC(IMASK(JI)) = ZFIELD4(JI)
       END DO
    ENDIF
    !
