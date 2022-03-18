@@ -212,7 +212,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------------
 IF (LHOOK) CALL DR_HOOK('COUPLING_SURF_ATM_N',0,ZHOOK_HANDLE)
-  CPROGNAME=HPROGRAM
+CPROGNAME=HPROGRAM
 !
 IF (HTEST/='OK') THEN
   CALL ABOR1_SFX('COUPLING_SURF_ATMN: FATAL ERROR DURING ARGUMENT TRANSFER')
@@ -476,8 +476,8 @@ SUBROUTINE TREAT_SURF(KTILE,KSIZE,KMASK)
 !
 IMPLICIT NONE
 !
-INTEGER, INTENT(IN)                :: KTILE
-INTEGER, INTENT(IN)                :: KSIZE
+INTEGER, INTENT(IN)               :: KTILE
+INTEGER, INTENT(IN)               :: KSIZE
 INTEGER, INTENT(IN), DIMENSION(KI) :: KMASK
 !
 REAL, DIMENSION(KSIZE) :: ZP_TSUN     ! solar time                    (s from midnight)
@@ -688,7 +688,7 @@ DO JI=1,SIZE(ZP_SFTS,2)
 !cdir nodep
 !cdir unroll=8
   DO JJ=1,KSIZE    
-     ZSFTS_TILE      (KMASK(JJ),JI,KTILE)= ZP_SFTS      (JJ,JI)
+    ZSFTS_TILE      (KMASK(JJ),JI,KTILE)= ZP_SFTS      (JJ,JI)
   ENDDO
 ENDDO
 !
@@ -696,8 +696,8 @@ DO JI=1,SIZE(ZP_DIR_ALB,2)
 !cdir nodep
 !cdir unroll=8
   DO JJ=1,KSIZE   
-     ZDIR_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_DIR_ALB   (JJ,JI)
-     ZSCA_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_SCA_ALB   (JJ,JI)
+    ZDIR_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_DIR_ALB   (JJ,JI)
+    ZSCA_ALB_TILE   (KMASK(JJ),JI,KTILE)= ZP_SCA_ALB   (JJ,JI)
   ENDDO
 ENDDO
 !
