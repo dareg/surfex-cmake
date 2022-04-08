@@ -432,7 +432,11 @@ SELECT CASE (HSURF)
         ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
   !
   !* interpolates on output levels
-        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+        IF (IO%CISBA=='3-L' .AND. SIZE(ZW%AL(JP)%ZOUT,2)==3) THEN 
+          ZF%AL(JP)%ZOUT=ZW%AL(JP)%ZOUT
+        ELSE    
+          CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+        ENDIF
   !
   !* retrieves soil water content from soil relative humidity
         ALLOCATE(PEK%XWG(PK%NSIZE_P,IO%NGROUND_LAYER))
@@ -461,81 +465,90 @@ SELECT CASE (HSURF)
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WGI    ')
-      ALLOCATE(ZF%AL(IO%NPATCH))
-      !
-      DO JP = 1,IO%NPATCH
-        KK => NK%AL(JP)
-        PK => NP%AL(JP)
-        PEK => NPE%AL(JP)
-        !
-        ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
-  !
-  !* interpolates on output levels
-        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)       
-  !
-  !* retrieves soil ice content from soil relative humidity
-        ALLOCATE(PEK%XWGI(PK%NSIZE_P,IO%NGROUND_LAYER))
-        PEK%XWGI(:,:)=0.0
-        IF(IO%CISBA=='DIF')THEN
-          IWORK(1:PK%NSIZE_P)=PK%NWG_LAYER(:)
-  ELSE
-          IWORK(1:PK%NSIZE_P)=2
-  ENDIF  
-        DO JI=1,PK%NSIZE_P
-          IF(IWORK(JI)==NUNDEF)CYCLE
-          INL=IWORK(JI)
+   ALLOCATE(ZF%AL(IO%NPATCH))
+   !
+   DO JP = 1,IO%NPATCH
+     KK => NK%AL(JP)
+     PK => NP%AL(JP)
+     PEK => NPE%AL(JP)
+     !
+     ALLOCATE(ZF%AL(JP)%ZOUT(PK%NSIZE_P,IO%NGROUND_LAYER))
+     !
+     !* interpolates on output levels
+     IF (IO%CISBA=='3-L' .AND. SIZE(ZW%AL(JP)%ZOUT,2)==3) THEN 
+       ZF%AL(JP)%ZOUT=ZW%AL(JP)%ZOUT
+     ELSE    
+       CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,PK%XDG,ZF%AL(JP)%ZOUT)
+     ENDIF
+     !
+     !* retrieves soil ice content from soil relative humidity
+     ALLOCATE(PEK%XWGI(PK%NSIZE_P,IO%NGROUND_LAYER))
+     PEK%XWGI(:,:)=0.0
+     IF(IO%CISBA=='DIF')THEN
+       IWORK(1:PK%NSIZE_P)=PK%NWG_LAYER(:)
+     ELSE
+       IWORK(1:PK%NSIZE_P)=2
+     ENDIF  
+     DO JI=1,PK%NSIZE_P
+       IF(IWORK(JI)==NUNDEF)CYCLE
+       INL=IWORK(JI)
        DO JL=1,INL
-            PEK%XWGI(JI,JL) = ZF%AL(JP)%ZOUT(JI,JL) * KK%XWSAT(JI,JL)
-            PEK%XWGI(JI,JL) = MAX(MIN(PEK%XWGI(JI,JL),KK%XWSAT(JI,JL)),0.)
+         PEK%XWGI(JI,JL) = ZF%AL(JP)%ZOUT(JI,JL) * KK%XWSAT(JI,JL)
+         PEK%XWGI(JI,JL) = MAX(MIN(PEK%XWGI(JI,JL),KK%XWSAT(JI,JL)),0.)
        ENDDO
-    ENDDO
-        !
-        WHERE(ZF%AL(JP)%ZOUT(:,:)==XUNDEF ) PEK%XWGI(:,:)=XUNDEF
-        WHERE(PEK%XWGI(:,:)<=1.0E-10)PEK%XWGI(:,:)=0.0
-        !
-        DEALLOCATE(ZF%AL(JP)%ZOUT)
-        !
-  END DO
-  !
-      DEALLOCATE(ZF%AL)
+     ENDDO
+     !
+     WHERE(ZF%AL(JP)%ZOUT(:,:)==XUNDEF ) PEK%XWGI(:,:)=XUNDEF
+     WHERE(PEK%XWGI(:,:)<=1.0E-10)PEK%XWGI(:,:)=0.0
+     !
+     DEALLOCATE(ZF%AL(JP)%ZOUT)
+     !
+   END DO
+   !
+   DEALLOCATE(ZF%AL)
   !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('TG     ') 
-      IF(IO%LTEMP_ARP)THEN
-        INL=IO%NTEMPLAYER_ARP
-  ELSE
-        INL=IO%NGROUND_LAYER
-  ENDIF
-      !
-      DO JP = 1,IO%NPATCH
-        !
-        PK => NP%AL(JP)
-        PEK => NPE%AL(JP)
-        !
-        ALLOCATE(PEK%XTG(PK%NSIZE_P,INL))
-        !
-        ALLOCATE(ZDG(SIZE(PK%XDG,1),INL))
-        IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
-          ZDG(:,1) = 0.01
-          ZDG(:,2) = 0.40                    ! deep temperature for force-restore taken at 20cm
-          IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used       
-          IF(IO%LTEMP_ARP)THEN
-            ZDG(:,3) = 1.0
-          DO JL=4,INL
-              ZDG(:,JL) = ZDG(:,JL-1)+1.0
-       ENDDO
+   IF(IO%LTEMP_ARP)THEN
+     INL=IO%NTEMPLAYER_ARP
+   ELSE
+     INL=IO%NGROUND_LAYER
+   ENDIF
+   !
+   DO JP = 1,IO%NPATCH
+     !
+     PK => NP%AL(JP)
+     PEK => NPE%AL(JP)
+     !
+     ALLOCATE(PEK%XTG(PK%NSIZE_P,INL))
+     !
+     IF (IO%CISBA=='3-L' .AND. SIZE(ZW%AL(JP)%ZOUT,2)==3) THEN
+       ! ANTMPTEST : if output scheme is 3L and input grid size is 3i then:
+       PEK%XTG=ZW%AL(JP)%ZOUT
+     ELSE    
+       ALLOCATE(ZDG(SIZE(PK%XDG,1),INL))
+       IF (IO%CISBA=='2-L'.OR.IO%CISBA=='3-L') THEN
+         ZDG(:,1) = 0.01
+         ZDG(:,2) = 0.40                    ! deep temperature for force-restore taken at 20cm
+         IF(IO%CISBA=='3-L') ZDG(:,3) = 5.00   ! climatological temperature, usually not used       
+         IF(IO%LTEMP_ARP)THEN
+           ZDG(:,3) = 1.0
+           DO JL=4,INL
+             ZDG(:,JL) = ZDG(:,JL-1)+1.0
+           ENDDO
+         ENDIF
+       ELSE
+         !* diffusion method, the soil grid is the same as for humidity
+         ZDG(:,:) = PK%XDG(:,:)
+       END IF
+       CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,ZDG,PEK%XTG)
+       DEALLOCATE(ZDG)
      ENDIF
-  ELSE
-    !* diffusion method, the soil grid is the same as for humidity
-          ZDG(:,:) = PK%XDG(:,:)
-  END IF
-        CALL INIT_FROM_REF_GRID(XGRID_SOIL,ZW%AL(JP)%ZOUT,ZDG,PEK%XTG)
-  DEALLOCATE(ZDG)
+     !
+   ENDDO
   !
-      ENDDO
-      !
-      !
+  !
   !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   !
  CASE('WR     ') 
