@@ -78,6 +78,7 @@ REAL, DIMENSION(:,:), ALLOCATABLE :: ZTG_LS! temperature on initial orography
 !
 REAL                            :: ZGRADX = 5.E-4 ! slope of ice content gradient
 REAL                            :: ZH0    = 5.E-1 ! constant used to define ice content gradient
+REAL                            :: ZEPS   = 1e-3  ! epsilon value for equality tests
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
 !
@@ -159,7 +160,7 @@ DO JP = 1,IO%NPATCH
         !
       ELSEWHERE
         !
-        WHERE (ZZS <= ZZS_LS)
+        WHERE (ZZS <= ZZS_LS + ZEPS)
           !
           ZDW(:) = ZGRADX * (ZZS - ZZS_LS)
           !
