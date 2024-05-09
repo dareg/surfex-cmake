@@ -34,6 +34,7 @@
 !!    ------------
 !!
 !!    Original    12/09/95
+!!    08/2023 F. Svabik : Unapproximated roughness length averaging
 !!
 !----------------------------------------------------------------------------
 !
@@ -49,6 +50,7 @@ USE MODD_DATA_COVER_PAR,ONLY : XCDREF
 USE MODI_GET_MESH_INDEX
 USE MODD_POINT_OVERLAY
 USE MODI_ABOR1_SFX
+USE MODD_SURF_ATM, ONLY : XZ0_OFFSET
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -148,7 +150,7 @@ DO JOV = 1, NOVMX
         XALL(IDX,JTY,1) = XALL(IDX,JTY,1) + 1./ZVALUE(JL)
 
       CASE ('CDN')
-        XALL(IDX,JTY,1) = XALL(IDX,JTY,1) + 1./(LOG(XCDREF/ZVALUE(JL)))**2
+        XALL(IDX,JTY,1) = XALL(IDX,JTY,1) + 1./(XZ0_OFFSET + LOG(XCDREF/ZVALUE(JL)))**2
 
       CASE ('MAJ')
 

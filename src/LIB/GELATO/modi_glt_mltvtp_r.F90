@@ -1,27 +1,3 @@
-MODULE MODI_glt_mltvtp_r
-INTERFACE
-SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
-       nilay,nl,np,nt,lp3,height,sf3tinv)
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-  USE mode_glt_stats_r
-  USE mode_gltools_interp
-!
-  IMPLICIT NONE
-!
-  INTEGER,INTENT(IN) :: nilay,nt,np,nl
-  REAL,DIMENSION(:),INTENT(IN) :: height,sf3tinv
-  LOGICAL,INTENT(IN) :: lp3
-  REAL, DIMENSION(nilay,nt,np), INTENT(in) ::  &
-        pdhi
-  REAL, DIMENSION(nt,np), INTENT(inout) ::  &
-        phsi
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::   &
-        tpsil
-END SUBROUTINE glt_mltvtp_r
-END INTERFACE
-END MODULE MODI_glt_mltvtp_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

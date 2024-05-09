@@ -47,6 +47,7 @@ TYPE TEB_OPTIONS_t
 !
   LOGICAL                        :: LCANOPY      ! T: SBL scheme within the canopy
                                                  ! F: no atmospheric layers below forcing level      
+  LOGICAL                        :: LREPROD      ! 
   LOGICAL                        :: LGARDEN      ! T: Urban green areas (call ISBA from TEB)
                                                  ! F: No urban green areas
   CHARACTER(LEN=4)               :: CROAD_DIR    ! TEB option for road directions

@@ -1,21 +1,3 @@
-MODULE MODI_gltools_timers
-INTERFACE
-SUBROUTINE gltools_timers( ntimers,ntimlu,ntimnum,&
-  xtime,clabel,lwg,hlabel)
-!
-!
-  IMPLICIT NONE
-  INTEGER,INTENT(IN) :: ntimers,ntimlu
-  LOGICAL,INTENT(IN) :: lwg
-  REAL,INTENT(INOUT) :: xtime
-  INTEGER,INTENT(INOUT) ::  ntimnum
-!
-  CHARACTER(LEN=*),  INTENT(inout) ::  clabel
-  CHARACTER(LEN=*), OPTIONAL, INTENT(in) ::  &
-    hlabel 
-END SUBROUTINE gltools_timers
-END INTERFACE
-END MODULE MODI_gltools_timers
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

@@ -70,6 +70,7 @@ SUBROUTINE COUPLING_ISBA_n (DTCO, UG, U, USS, NAG, CHI, NCHI, DTI, ID, NGB, GB, 
 !!      P. LeMoigne  12/2014 EBA scheme update
 !!      R. Seferian  05/2015 : Add coupling fiels to vegetation_evol call
 !!      F. Tuzet     06/2016 : Add of a new dimension for impurity: The type of impurity
+!!      J. Masek     08/2023 : Snow density passed to z0eff
 !!-------------------------------------------------------------------
 !
 USE MODD_PREP_SNOW, ONLY : NIMPUR
@@ -134,6 +135,7 @@ USE MODI_VEGETATION_UPDATE
 USE MODI_CARBON_EVOL
 USE MODI_SUBSCALE_Z0EFF
 USE MODI_SOIL_ALBEDO
+USE MODI_APPLY_SURF_PERT
 USE MODI_ALBEDO
 USE MODI_DIAG_INLINE_ISBA_n
 USE MODI_DIAG_EVAP_CUMUL_ISBA_n
@@ -219,7 +221,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !   
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables!
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables!
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -248,7 +250,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -327,8 +329,7 @@ REAL                       :: ZCONVERTFACM6_SLT, ZCONVERTFACM6_DST
 INTEGER :: ISWB   ! number of spectral shortwave bands
 INTEGER :: JSWB   ! loop on number of spectral shortwave bands
 INTEGER :: JP     ! loop on patches
-INTEGER :: JKV,JKL,JKC ! Perturbation field index
-INTEGER :: JSV, IDST, IMOMENT, II, IMASK, JI
+INTEGER :: JSV, IDST, IMOMENT, II
 INTEGER :: JLAYER, JMODE, JSV_IDX
 !
 ! logical units
@@ -532,40 +533,7 @@ IF (IO%LVEGUPD) THEN
 !
 ENDIF
 !
-IF(IO%LPERTSURF.AND.GUPDATED) THEN
-  DO JP = 1,IO%NPATCH
-    PK => NP%AL(JP)
-    PEK => NPE%AL(JP)
-    ISSK => NISS%AL(JP)
-
-    JKV=2-MOD(JP,2)
-    JKL=4-MOD(JP,2)
-    JKC=6-MOD(JP,2)
-
-    DO JI = 1,PK%NSIZE_P
-      IMASK = PK%NR_P(JI)
-      !
-      ! Random perturbation for ensembles:
-      ! reapply original perturbation patterns
-      IF(PEK%XVEG(JI)/=XUNDEF) PEK%XVEG(JI) = &
-      MAX(MIN(PEK%XVEG(JI) *(1.+ S%XPERTVEG(IMASK,JP) ),IO%XPERT_HIGH(JKV)),IO%XPERT_LOW(JKV))
-      IF(PEK%XLAI(JI)/=XUNDEF) PEK%XLAI(JI) = &
-      MAX(MIN(PEK%XLAI(JI) *(1.+ S%XPERTLAI(IMASK,JP) ),IO%XPERT_HIGH(JKL)),IO%XPERT_LOW(JKL))
-      IF(PEK%XCV(JI)/=XUNDEF)  PEK%XCV(JI)  = &
-      MAX(MIN(PEK%XCV(JI) *(1.+ S%XPERTCV(IMASK,JP) ),IO%XPERT_HIGH(JKC)),IO%XPERT_LOW(JKC))
-
-      ! Note that we miss out on the clipping here!
-      IF(PEK%XALBNIR(JI)/=XUNDEF)   PEK%XALBNIR(JI)   = PEK%XALBNIR(JI) *( 1.+ S%XPERTALB(IMASK,JP) )
-      IF(PEK%XALBVIS(JI)/=XUNDEF)   PEK%XALBVIS(JI)   = PEK%XALBVIS(JI) *( 1.+ S%XPERTALB(IMASK,JP) )
-      IF(PEK%XALBUV(JI)/=XUNDEF)    PEK%XALBUV (JI)   = PEK%XALBUV (JI) *( 1.+ S%XPERTALB(IMASK,JP) )
-      IF(PEK%XZ0(JI)/=XUNDEF)       PEK%XZ0(JI)       = PEK%XZ0(JI)      *( 1.+ S%XPERTZ0(IMASK,JP) )
-      IF(ISSK%XZ0EFFIP(JI)/=XUNDEF) ISSK%XZ0EFFIP(JI) = ISSK%XZ0EFFIP(JI)*( 1.+ S%XPERTZ0(IMASK,JP) )
-      IF(ISSK%XZ0EFFIM(JI)/=XUNDEF) ISSK%XZ0EFFIM(JI) = ISSK%XZ0EFFIM(JI)*( 1.+ S%XPERTZ0(IMASK,JP) )
-      IF(ISSK%XZ0EFFJP(JI)/=XUNDEF) ISSK%XZ0EFFJP(JI) = ISSK%XZ0EFFJP(JI)*( 1.+ S%XPERTZ0(IMASK,JP) )
-      IF(ISSK%XZ0EFFJM(JI)/=XUNDEF) ISSK%XZ0EFFJM(JI) = ISSK%XZ0EFFJM(JI)*( 1.+ S%XPERTZ0(IMASK,JP) )
-    ENDDO
-  ENDDO
-ENDIF
+IF(IO%LPERTSURF.AND.GUPDATED) CALL APPLY_SURF_PERT (ISS, NISS, IO, S, NP, NPE)
 !
 ! --------------------------------------------------------------------------------------
 ! Outputs for the atmospheric model or update the snow/flood fraction at time t+1
@@ -706,7 +674,6 @@ REAL, DIMENSION(PK%NSIZE_P) :: ZP_PA      ! pressure at forcing level           
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_ZS      ! atmospheric model orography           (m)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_SFTQ    ! flux of water vapor <w'q'>            (kg.m-2.s-1)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_SFTH    ! flux of temperature <w'T'>            (W/m2)
-REAL, DIMENSION(PK%NSIZE_P) :: ZP_LMO     ! Monin-Obukov length                   (m)
 REAL, DIMENSION(PK%NSIZE_P,KSV) :: ZP_SFTS    ! flux of scalar      <w'sv'>           (mkg/kg/s)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_SFCO2   ! flux of CO2 positive toward the atmosphere (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(PK%NSIZE_P) :: ZP_USTAR   ! friction velocity                     (m/s)
@@ -947,7 +914,8 @@ ENDIF
 !
  CALL Z0EFF(PEK%TSNOW%SCHEME, GMEB, ZP_ALFA, ZP_ZREF, ZP_UREF,             &
             PEK%XZ0, ISSK%XZ0REL, PEK%XPSN, ZPALPHAN, PEK%XZ0LITTER,       &
-            PEK%TSNOW%WSNOW(:,1), ISSK, KK%XFF, ZP_Z0FLOOD, PK%XZ0_O_Z0H,  &
+            PEK%TSNOW%WSNOW(:,1), PEK%TSNOW%RHO(:,1),                      &
+            ISSK, KK%XFF, ZP_Z0FLOOD, PK%XZ0_O_Z0H,                        &
             DK%XZ0, DK%XZ0H, DK%XZ0EFF, ZZ0G_WITHOUT_SNOW,                 &
             ZZ0_MEBV, ZZ0H_MEBV, ZZ0EFF_MEBV, ZZ0_MEBN, ZZ0H_MEBN, ZZ0EFF_MEBN )
 !
@@ -1221,12 +1189,10 @@ ENDIF !Check on CSLTYN
 ! Inline diagnostics
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !
-ZP_LMO(:) = LMO(ZP_USTAR,ZP_TA/ZP_EXNA,ZP_QA,ZP_SFTH/ZP_RHOA/XCPD,ZP_SFTQ/ZP_RHOA)
 !
  CALL DIAG_INLINE_ISBA_n(ID%O, KK, DK, IO%LCANOPY, ZP_TA, ZP_QA, ZP_PA,         &
                          ZP_PS, ZP_RHOA, ZP_U, ZP_V, ZP_ZREF, ZP_UREF, ZP_SFTH, &
-                         ZP_SFTQ, ZP_SFU, ZP_SFV, ZP_DIR_SW, ZP_SCA_SW, ZP_LW,  &
-                         ZP_LMO                                                 )  
+                         ZP_SFTQ, ZP_SFU, ZP_SFV, ZP_DIR_SW, ZP_SCA_SW, ZP_LW)
 !
 !
 !-------------------------------------------------------------------------------

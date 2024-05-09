@@ -58,9 +58,9 @@ REAL, DIMENSION(SIZE(PQIN))       :: ZTOD_BEG      ! first Time Of Day that buil
 REAL, DIMENSION(SIZE(PQIN))       :: ZTOD_END      ! last Time Of Day that building unoccupied (UTC, s)
 REAL, DIMENSION(SIZE(PQIN))       :: ZDT           ! Target temperature change when unoccupied (K)
 
-REAL(KIND=JPRB) :: ZTODOOK_HANDLE
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
-IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',0,ZTODOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',0,ZHOOK_HANDLE)
 !
 !--------------------------------------------------------------------------------------
 !  3. determine the day of the week and the local time scheme in France
@@ -140,6 +140,6 @@ ENDDO
 !
 !--------------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',1,ZTODOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('BLD_OCC_CALENDAR',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE BLD_OCC_CALENDAR

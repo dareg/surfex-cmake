@@ -259,8 +259,13 @@ ENDIF
 !
 IF(YTYPE=='INTEGER')THEN
   IF(HFIELD(1:3)=='CTI'.OR.HFIELD=='sand fraction'.OR.HFIELD=='clay fraction'.OR.&
-     HFIELD=='organic carbon'.OR.HFIELD(1:4)=='SAND'.OR. HFIELD(1:4)=='CLAY'.OR.HFIELD(1:3)=='SOC')THEN
+     HFIELD(1:4)=='SAND'.OR. HFIELD(1:4)=='CLAY')THEN
     IFACT=100
+  ELSEIF (HFIELD(1:3)=='SOC'.OR.HFIELD=='organic carbon') THEN
+    IF(IFACT==1)IFACT=100
+    WRITE(ILUOUT,*) "!WARNING! fact factor can be set in hdr file of the SOC-file."
+    WRITE(ILUOUT,*) "!WARNING! if not set, or set to 1, it will be set here to 100."
+    WRITE(ILUOUT,*) " IFACT = ",IFACT
   ELSEIF (HFIELD=='water depth') THEN
     IFACT=10
   ENDIF
@@ -501,7 +506,7 @@ DO
       ZVALUE(:)=YVALUE32R(:)
       !
       IF (ICPT==0) THEN      
-        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-30) &
              .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
           ICPT = ICPT + 1
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')
@@ -524,7 +529,7 @@ DO
       ZVALUE(:)=YVALUE64(:)
       !
       IF (ICPT==0) THEN      
-        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-30) &
                .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
           ICPT = ICPT + 1
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT: SWAP ALREADY DONE, CANNOT BE REDONE')

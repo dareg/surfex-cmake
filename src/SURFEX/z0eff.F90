@@ -5,7 +5,7 @@
 !     #########
     SUBROUTINE Z0EFF (HSNOW_SCHEME, &
                       OMEB, PALFA, PZREF, PUREF, PZ0, PZ0REL, PPSN,             &
-                      PPALPHAN,PZ0LITTER, PWSNOW, ISS, PFF, PZ0_FLOOD,          &
+                      PPALPHAN,PZ0LITTER, PWSNOW, PRHOSNOW, ISS, PFF, PZ0_FLOOD,&
                       PZ0_O_Z0H, PZ0_WITH_SNOW, PZ0H_WITH_SNOW,PZ0EFF,          &
                       PZ0G_WITHOUT_SNOW,                                        &
                       PZ0_MEBV,PZ0H_MEBV,PZ0EFF_MEBV,                           &
@@ -57,7 +57,13 @@
 !!      (P.LeMoigne) 09/02/06 computation of z0h in presence of snow
 !!      (B. Decharme)    2008 floodplains
 !!      (P. Samuelsson) 10/2014 MEB
-!!      P. LeMoigne  12/2014 EBA scheme update
+!!      (P. LeMoigne)   12/2014 EBA scheme update
+!!      (F. Svabik)     08/2023 unapproximated roughness length averaging;
+!!                              quadratic averaging snow-nowsnow for EBA scheme;
+!!                              snow roughness length taken from XZ0SN;
+!!                              orographic contribution via key LZ0_EFF;
+!!                              snow effect on roughness length via snow height
+!!                              (key LZ0SNOWH_ARP)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -67,10 +73,10 @@
 USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_CSTS,     ONLY : XPI, XG
-USE MODD_SNOW_PAR, ONLY : XZ0SN, XWCRN, XZ0HSN
+USE MODD_SNOW_PAR, ONLY : XZ0SN, XZ0HSN
 !
 USE MODI_SUBSCALE_Z0EFF
-USE MODD_SURF_ATM, ONLY : LALDZ0H
+USE MODD_SURF_ATM, ONLY : LZ0_EFF, XZ0_OFFSET, LZ0SNOWH_ARP, XRZ0_TO_HEIGHT
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -103,6 +109,7 @@ REAL, DIMENSION(:), INTENT(IN)  :: PZ0_FLOOD      ! floodplains roughness length
 REAL, DIMENSION(:), INTENT(IN)  :: PZ0LITTER      ! ground litter roughness length for MEB
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PWSNOW         ! equivalent snow water content
+REAL, DIMENSION(:), INTENT(IN)  :: PRHOSNOW       ! equivalent snow water content
 !
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0_WITH_SNOW  ! vegetation z0 modified by snow
 REAL, DIMENSION(:), INTENT(OUT) :: PZ0H_WITH_SNOW ! vegetation z0h modified by snow
@@ -125,21 +132,12 @@ REAL, DIMENSION(:), INTENT(OUT) :: PZ0EFF_MEBN        ! roughness length for mom
 !
 !
 !
-REAL, DIMENSION(SIZE(PZ0EFF)) :: ZWORK, ZALFA,       &
-                                   ZZ0EFFIP, ZZ0EFFIM, &
-                                   ZZ0EFFJP, ZZ0EFFJM, &
-                                   ZPFF
-!                                              effective roughness length in 4
-!                                              directions
-REAL                          :: Z0CR, ZUZ0CN, ZALRCN1, ZALRCN2
+REAL, DIMENSION(SIZE(PZ0EFF)) :: ZWORK, ZWORKH, ZALFA, ZPFF, ZZ0_FLOOD, ZZ0H_FLOOD
+!
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('Z0EFF',0,ZHOOK_HANDLE)
-ZALRCN1=1.E-02
-ZALRCN2=2.5E-03
-Z0CR = ZALRCN1
-ZUZ0CN=1./ZALRCN2
 ZALFA(:) = PALFA(:)
 WHERE(ZALFA(:)<=-XPI) ZALFA = ZALFA + 2.*XPI
 WHERE(ZALFA(:)>  XPI) ZALFA = ZALFA - 2.*XPI
@@ -164,87 +162,108 @@ PZ0_WITH_SNOW(:)  = PZ0(:)
 PZ0H_WITH_SNOW(:) = PZ0(:) / PZ0_O_Z0H(:)
 !
 IF(HSNOW_SCHEME=='EBA') THEN
-!        
-   WHERE (PPSN(:)>0.)
-!
-!!!!!Flooding scheme not implemented with this option 
-      PZ0_WITH_SNOW(:) = PZ0_WITH_SNOW(:) + ( Z0CR - PZ0(:))* &
-        PWSNOW(:)/(PWSNOW(:) + XWCRN*(1.0+ZUZ0CN*PZ0(:)))  
-!        
-   END WHERE 
+       
+  ! Flooding scheme not implemented with this option
+  IF (LZ0SNOWH_ARP) THEN
+    WHERE (PPSN(:) > 0..AND.PPSN(:) <= 1.)
+      PZ0_WITH_SNOW (:)=MAX(PZ0(:)-XRZ0_TO_HEIGHT*PWSNOW(:)/PRHOSNOW(:),XZ0SN)
+      PZ0H_WITH_SNOW(:)=PZ0_WITH_SNOW(:)/PZ0_O_Z0H(:)
+    ENDWHERE 
+  ELSE
+    WHERE (PPSN(:) > 0..AND.PPSN(:) <= 1.)
+      PZ0_WITH_SNOW (:)=SQRT((1.-PPSN(:))*PZ0(:)**2+PPSN(:)*XZ0SN**2)
+      PZ0H_WITH_SNOW(:)=PZ0_WITH_SNOW(:)/PZ0_O_Z0H(:)
+    ENDWHERE 
+  ENDIF
 
-
-   IF (LALDZ0H) THEN  
-     WHERE (PPSN(:)>0.)
-         PZ0H_WITH_SNOW(:) = PZ0H_WITH_SNOW(:) + ( Z0CR - PZ0H_WITH_SNOW(:))* &
-           PWSNOW(:)/(PWSNOW(:) + XWCRN*(1.0+ZUZ0CN*PZ0H_WITH_SNOW(:)))   
-     END WHERE  
-  END IF   
-    
-!        
 ELSE
-!        
-   WHERE (PPSN(:)>0..OR.PFF(:)>0.)
-!        
-      ZWORK(:) =  (            PPSN(:) /(LOG(PUREF(:)/XZ0SN       ))**2 ) &
-                + (            PFF (:) /(LOG(PUREF(:)/PZ0_FLOOD(:)))**2 ) &
-                + ((1.-PPSN(:)-PFF (:))/(LOG(PUREF(:)/PZ0(:)      ))**2 )  
-!
-      PZ0_WITH_SNOW(:) = PUREF(:) /EXP( SQRT( 1./ZWORK(:) ) )
-!
-      ZWORK(:) =  (            PPSN(:) /(LOG(PZREF(:)/XZ0HSN                      ))**2 ) &
-                + (            PFF (:) /(LOG(PZREF(:)/(PZ0_FLOOD(:)/ PZ0_O_Z0H(:))))**2 ) &
-                + ((1.-PPSN(:)-PFF (:))/(LOG(PZREF(:)/(PZ0(:)/PZ0_O_Z0H(:))       ))**2 )  
-!
-      PZ0H_WITH_SNOW(:) = PZREF(:) /EXP( SQRT( 1./ZWORK(:) ) )
-!
-   END WHERE
-!
+
+  ! PZ0_FLOOD secured from undef values
+  ZZ0_FLOOD (:)=MIN(PZ0_FLOOD(:),1000.)
+  ZZ0H_FLOOD(:)=ZZ0_FLOOD(:)/PZ0_O_Z0H(:)
+
+  IF (LZ0SNOWH_ARP) THEN
+
+    WHERE (PPSN(:) > 0..OR.PFF(:) > 0.)
+
+      ! roughness of non-flooded part (including snow)
+      PZ0_WITH_SNOW (:)=MAX(PZ0(:)-XRZ0_TO_HEIGHT*PWSNOW(:)/PRHOSNOW(:),XZ0SN)
+      PZ0H_WITH_SNOW(:)=PZ0_WITH_SNOW(:)/PZ0_O_Z0H(:)
+
+      ! averaging with flooded part
+      ZWORK(:) =  PFF(:) /(LOG(XZ0_OFFSET+PUREF(:)/ZZ0_FLOOD    (:)))**2 &
+        +(1.-PFF(:))/(LOG(XZ0_OFFSET+PUREF(:)/PZ0_WITH_SNOW(:)))**2
+      ZWORKH(:)=  PFF(:) /(LOG(XZ0_OFFSET+PZREF(:)/ZZ0H_FLOOD    (:))*LOG(XZ0_OFFSET*(1. &
+        +PUREF(:)/ZZ0_FLOOD    (:)-PZREF(:)/ZZ0H_FLOOD    (:))+PZREF(:)/ZZ0H_FLOOD    (:)))   &
+        +(1.-PFF(:))/(LOG(XZ0_OFFSET+PZREF(:)/PZ0H_WITH_SNOW(:))*LOG(XZ0_OFFSET*(1. &
+        +PUREF(:)/PZ0_WITH_SNOW(:)-PZREF(:)/PZ0H_WITH_SNOW(:))+PZREF(:)/PZ0H_WITH_SNOW(:)))
+
+      PZ0_WITH_SNOW (:)=PUREF(:)/(EXP(SQRT(1./ZWORK(:)))-XZ0_OFFSET)
+      PZ0H_WITH_SNOW(:)=PZREF(:)/(EXP((XZ0_OFFSET*(SQRT(ZWORK(:)/ZWORKH(:))-1.)+1.)/SQRT(ZWORKH(:)))-XZ0_OFFSET)
+ 
+    ENDWHERE
+
+  ELSE
+
+    WHERE (PPSN(:) > 0..OR.PFF(:) > 0.)
+        
+      ZWORK(:) =          PPSN(:) /(LOG(XZ0_OFFSET + PUREF(:)/XZ0SN       ))**2 &
+        +                 PFF (:) /(LOG(XZ0_OFFSET + PUREF(:)/ZZ0_FLOOD(:)))**2 &
+        +(1.-PPSN(:)-PFF (:))/(LOG(XZ0_OFFSET + PUREF(:)/PZ0      (:)))**2
+      ZWORKH(:)=         PPSN(:) /(LOG(XZ0_OFFSET + PZREF(:)/XZ0HSN             )*LOG(XZ0_OFFSET*(1. &
+        +PUREF(:)/XZ0SN       -PZREF(:)/XZ0HSN             )+PZREF(:)/XZ0HSN             ))               &
+        +                 PFF(:) /(LOG(XZ0_OFFSET + PZREF(:)/ZZ0H_FLOOD(:)      )*LOG(XZ0_OFFSET*(1. &
+        +PUREF(:)/ZZ0_FLOOD(:)-PZREF(:)/ZZ0H_FLOOD(:)      )+PZREF(:)/ZZ0H_FLOOD(:)      ))               &
+        +(1.-PPSN(:)-PFF(:))/(LOG(XZ0_OFFSET + PZREF(:)*PZ0_O_Z0H(:)/PZ0(:))*LOG(XZ0_OFFSET*(1. &
+        +PUREF(:)/PZ0(:)      -PZREF(:)*PZ0_O_Z0H(:)/PZ0(:))+PZREF(:)*PZ0_O_Z0H(:)/PZ0(:)))
+
+      PZ0_WITH_SNOW (:)=PUREF(:)/(EXP(SQRT(1./ZWORK(:)))-XZ0_OFFSET)
+      PZ0H_WITH_SNOW(:)=PZREF(:)/(EXP((XZ0_OFFSET*(SQRT(ZWORK(:)/ZWORKH(:))-1.)+1.)/SQRT(ZWORKH(:)))-XZ0_OFFSET)
+
+    ENDWHERE
+
+  ENDIF
+        
 ENDIF
-!
-! For multi-energy balance
-IF(OMEB)THEN
 
-! roughness length for momentum at snow-free canopy floor
-  PZ0G_WITHOUT_SNOW(:) = PZ0LITTER
-  WHERE (PFF(:)>0.)
-    ZPFF(:)=PFF(:)/(1-PPSN(:)+1.E-6)
-    ZWORK(:) =  (    ZPFF (:)  * LOG(PZ0_FLOOD(:)) )   &
-              + ( (1.-ZPFF(:)) * LOG(PZ0LITTER(:)) )
-    PZ0G_WITHOUT_SNOW(:) = EXP( ZWORK(:) )
-  END WHERE
-!
-! roughness length for momentum over MEB vegetation part of patch
-  PZ0_MEBV(:)  = PZ0(:)
-!
-! roughness length for momentum over MEB snow part of patch
-  ZWORK(:) =  (    PPALPHAN(:) /(LOG(PUREF(:)/XZ0SN       ))**2 ) &
-            + ((1.-PPALPHAN(:))/(LOG(PUREF(:)/PZ0_MEBV(:)      ))**2 )
-  PZ0_MEBN(:) = PUREF(:) /EXP( SQRT( 1./ZWORK(:) ) )
-!
+! For multi-energy balance (LSNOWH_ARP not implemented for MEB)
+IF (OMEB) THEN
 
-! roughness length for momentum over MEB total patch
-  ZWORK(:) =  (    PPSN(:) /(LOG(PUREF(:)/PZ0_MEBN(:)  ))**2 ) &
-            + ((1.-PPSN(:))/(LOG(PUREF(:)/PZ0_MEBV(:)  ))**2 )
-  PZ0_WITH_SNOW(:) = PUREF(:) /EXP( SQRT( 1./ZWORK(:) ) )
-!
-! roughness length for heat over MEB vegetation part of path
-  PZ0H_MEBV(:) = PZ0_MEBV(:)/PZ0_O_Z0H(:)
-! for nordic forest, z0h=z0m according to M&#195;&#182;lder (tested in Hirlam):
-!
-! PZ0H_MEBV(:) = PZ0_MEBV(:)   
-!
-! roughness length for heat over MEB snow part of path
-  ZWORK(:) =  (     PPALPHAN(:) /(LOG(PZREF(:)/XZ0HSN          ))**2 ) &
-            + ( (1.-PPALPHAN(:))/(LOG(PZREF(:)/PZ0H_MEBV(:)    ))**2 )
-  PZ0H_MEBN(:) = PZREF(:) /EXP( SQRT( 1./ZWORK(:) ) )
-!
+  ! roughness length for momentum at snow-free canopy floor
+  PZ0G_WITHOUT_SNOW(:)=PZ0LITTER
+  WHERE (PFF(:) > 0.)
+    ZPFF(:)=PFF(:)/(1.-PPSN(:)+1.E-6)
+    ZWORK(:)=(    ZPFF(:) *LOG(PZ0_FLOOD(:)) ) &
+      +( (1.-ZPFF(:))*LOG(PZ0LITTER(:)) )
+    PZ0G_WITHOUT_SNOW(:)=EXP(ZWORK(:))
+  ENDWHERE
 
-! roughness length for heat over MEB total path
-  ZWORK(:) =  (     PPSN(:) /(LOG(PZREF(:)/PZ0H_MEBN(:)    ))**2 ) &
-            + ( (1.-PPSN(:))/(LOG(PZREF(:)/PZ0H_MEBV(:)    ))**2 )
-  PZ0H_WITH_SNOW(:) = PZREF(:) /EXP( SQRT( 1./ZWORK(:) ) )
-!
+  ! roughness lengths for momentum and heat over MEB vegetation part of patch
+  PZ0_MEBV (:)=PZ0(:)
+  PZ0H_MEBV(:)=PZ0(:)/PZ0_O_Z0H(:)
+
+  ! roughness lengths for momentum and heat over MEB snow part of patch
+  ZWORK(:) =  PPALPHAN(:) /(LOG(XZ0_OFFSET+PUREF(:)/XZ0SN      ))**2 &
+    +(1.-PPALPHAN(:))/(LOG(XZ0_OFFSET+PUREF(:)/PZ0_MEBV(:)))**2
+  ZWORKH(:)=  PPALPHAN(:) /(LOG(XZ0_OFFSET+PZREF(:)/XZ0HSN      )*                                 &
+    LOG(XZ0_OFFSET*(1. + PUREF(:)/XZ0SN       -PZREF(:)/XZ0HSN      )+PZREF(:)/XZ0HSN      )) &
+    +(1.-PPALPHAN(:))/(LOG(XZ0_OFFSET+PZREF(:)/PZ0H_MEBV(:))*                                 &
+    LOG(XZ0_OFFSET*(1. + PUREF(:)/PZ0_MEBV(:) -PZREF(:)/PZ0H_MEBV(:))+PZREF(:)/PZ0H_MEBV(:)))
+
+  PZ0_MEBN (:)=PUREF(:)/(EXP(SQRT(1./ZWORK(:)))-XZ0_OFFSET)
+  PZ0H_MEBN(:)=PZREF(:)/(EXP((XZ0_OFFSET*(SQRT(ZWORK(:)/ZWORKH(:))-1.)+1.)/SQRT(ZWORKH(:)))-XZ0_OFFSET)
+
+  ! roughness lengths for momentum and heat over MEB total patch
+  ZWORK(:) =  PPSN(:) /(LOG(XZ0_OFFSET+PUREF(:)/PZ0_MEBN(:)))**2 &
+    +(1.-PPSN(:))/(LOG(XZ0_OFFSET+PUREF(:)/PZ0_MEBV(:)))**2
+  ZWORKH(:)=  PPSN(:) /(LOG(XZ0_OFFSET+PZREF(:)/PZ0H_MEBN(:))*                                  &
+    LOG(XZ0_OFFSET*(1.+PUREF(:)/PZ0_MEBN(:)-PZREF(:)/PZ0H_MEBN(:))+PZREF(:)/PZ0H_MEBN(:))) &
+    +(1.-PPSN(:))/(LOG(XZ0_OFFSET+PZREF(:)/PZ0H_MEBV(:))*                                  &
+    LOG(XZ0_OFFSET*(1.+PUREF(:)/PZ0_MEBV(:)-PZREF(:)/PZ0H_MEBV(:))+PZREF(:)/PZ0H_MEBV(:)))
+
+  PZ0_WITH_SNOW (:) = PUREF(:)/(EXP(SQRT(1./ZWORK(:))) - XZ0_OFFSET)
+  PZ0H_WITH_SNOW(:) = PZREF(:)/(EXP((XZ0_OFFSET*(SQRT(ZWORK(:)/ZWORKH(:)) - 1.) + 1.)/SQRT(ZWORKH(:))) - XZ0_OFFSET)
+
 ENDIF
 !
 !*       1.2    for momentum
@@ -256,10 +275,23 @@ ENDIF
 !                                     Snow and Flood effects are yet taken
 !                                     into account through ZZ0EFF
 !
-PZ0EFF(:) = PZ0_WITH_SNOW(:)
-IF(OMEB)THEN
-  PZ0EFF_MEBV(:) = PZ0_MEBV(:)
-  PZ0EFF_MEBN(:) = PZ0_MEBN(:)
+IF (LZ0_EFF) THEN
+  ! add orographic component
+  PZ0EFF       (:)=SQRT(PZ0_WITH_SNOW(:)**2+PZ0REL(:)**2)
+  PZ0_WITH_SNOW(:)=PZ0EFF(:)  ! use z0eff consistently everywhere
+  IF (OMEB) THEN
+    PZ0EFF_MEBV(:)=SQRT(PZ0_MEBV(:)**2+PZ0REL(:)**2)
+    PZ0EFF_MEBN(:)=SQRT(PZ0_MEBN(:)**2+PZ0REL(:)**2)
+    PZ0_MEBV   (:)=PZ0EFF_MEBV(:)
+    PZ0_MEBN   (:)=PZ0EFF_MEBN(:)
+  ENDIF
+ELSE
+  ! do not add orographic component
+  PZ0EFF(:) = PZ0_WITH_SNOW(:)
+  IF(OMEB)THEN
+    PZ0EFF_MEBV(:) = PZ0_MEBV(:)
+    PZ0EFF_MEBN(:) = PZ0_MEBN(:)
+  ENDIF
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('Z0EFF',1,ZHOOK_HANDLE)

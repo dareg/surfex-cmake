@@ -86,7 +86,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !*    1.      Initializations
 !             ---------------
 !
-IF (LHOOK) CALL DR_HOOK('PGD_OROGRAPHY',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('PGD_OROG_FILTER',0,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !

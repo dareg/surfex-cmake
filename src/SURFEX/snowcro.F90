@@ -134,6 +134,7 @@
 !! 	Modified by M. Dumont (11/2015) : atmotartes and spectral outputs
 !!       Modified by F. Tuzet (06/2016): Add of a new dimension for impurity: The type of impurity
 !!                                       Add of Impurity scavenging during melt
+!!       Modified by J. Masek (08/2023): XWCRN taken from MODD_SURF_ATM
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -2571,7 +2572,8 @@ SUBROUTINE SNOWCRORAD(TPTIME, OMEB, OGLACIER,                  &
 !     Needs a first calculation of the albedo to stay coherent with
 !     ISBA-ES ==> make sure to keep SNOWCRORAD coherent with SNOWCROALB
 !
-USE MODD_SNOW_PAR, ONLY : XWCRN, XANSMAX, XANSMIN, XANS_TODRY,          &
+USE MODD_SURF_ATM, ONLY : XWCRN
+USE MODD_SNOW_PAR, ONLY : XANSMAX, XANSMIN, XANS_TODRY,                 &
                           XSNOWDMIN, XANS_T, XAGLAMIN, XAGLAMAX,        &
                           XD1, XD2, XD3, XX, XVSPEC1, XVSPEC2, XVSPEC3, &
                           XVBETA1, XVBETA2, XVBETA3, XVBETA4, XVBETA5

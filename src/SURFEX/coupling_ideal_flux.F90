@@ -108,7 +108,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -134,7 +134,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -351,14 +351,12 @@ ZLWUP(:)=(1.-PEMIS(:))*PLW(:)+PEMIS(:)*XSTEFAN*PTSURF(:)**4
 
  CALL SURFACE_CD(ZRI, PZREF, PUREF, PZ0, PZ0H, ZCD, ZCDN)
 
- ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
-
  CALL DIAG_INLINE_IDEAL_n(DGO, D, DC, PTSTEP, PTA, PTSURF,             &
                           ZQA, PPA, PPS, PRHOA, PU,  PV, PZREF, PUREF,     &
                           PRAIN, PSNOW, ZCD, ZCDN, ZCH, ZRI, ZHU, PZ0,     &
                           PZ0H, PQSURF, PSFTH, PSFTQ, PSFU, PSFV,          &
                           PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,       &
-                          ZLE, ZLEI, ZSUBL, ZLWUP, ZLMO                    )
+                          ZLE, ZLEI, ZSUBL, ZLWUP                          )
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_IDEAL_FLUX',1,ZHOOK_HANDLE)
 !

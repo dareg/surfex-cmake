@@ -61,7 +61,7 @@ REAL,              INTENT(IN)   :: PTIME       ! time
 !*      0.2    declarations of local variables
 !
 TYPE(DATE) :: TDATE_END
- CHARACTER(LEN=6), DIMENSION(0)  :: YSV       ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(0)  :: YSV       ! name of all scalar variables
 REAL,             DIMENSION(0)  :: ZCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(0,1)  :: ZIMPWET      ! impurity wet deposit coef
 REAL,             DIMENSION(0,1)  :: ZIMPDRY      ! impurity dry deposit coef

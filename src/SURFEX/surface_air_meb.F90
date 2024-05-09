@@ -121,6 +121,7 @@ REAL, PARAMETER             :: ZRAFA        = 9.       !resistance factor for st
                                                        !for unstable conditions
 
 REAL, PARAMETER             :: ZRAGNC_MIN   = 1.       ! (s/m) Minimum ground to canopy air resistance
+REAL, PARAMETER             :: ZEPS         = 1.0e-03  ! Allow for XRIMAX=0.0
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !
@@ -180,7 +181,7 @@ WHERE(PRI(:) <= 0.)                                        ! Unstable - Sellers
    ZPIH(:) = SQRT(1. - ZRAFA*PRI(:))                       
 ELSEWHERE                                                  ! Stable   - Noilhan and Mahfouf
    ZZ0HG(:)= PZ0G(:)*PZ0H(:)/PZ0(:)                        
-   ZRIF(:) = MIN(1., PRI(:)/XRIMAX)
+   ZRIF(:) = MIN(1., PRI(:)/(XRIMAX + ZEPS))
    ZPIH(:) = (1/(1. + 15*PRI(:)*SQRT(1.+5*PRI(:))))* &  
              ((1.-ZRIF(:)) + ZRIF(:)*(LOG(ZDIFFH(:)/PZ0G(:))/LOG(ZDIFFH(:)/ZZ0HG(:))) )            ! continuous
 END WHERE

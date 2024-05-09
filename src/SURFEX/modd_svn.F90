@@ -38,7 +38,7 @@ TYPE SV_t
 !
 ! variables updated for the current model
 !
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CSV ! name of the scalar variables
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CSV ! name of the scalar variables
   INTEGER    :: NSV_CHSBEG, NSV_CHSEND    !  index of first and last gas chemistry related scalar variable
   INTEGER    :: NBEQ                      ! number of chemical gas species in the surface scheme
   INTEGER    :: NSV_DSTBEG, NSV_DSTEND    ! index of first and last dust related scalar variable

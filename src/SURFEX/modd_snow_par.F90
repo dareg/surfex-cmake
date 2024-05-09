@@ -32,6 +32,7 @@
 !!      Original       01/2004                    
 !! P. Samuelsson  10/2014   MEB complements
 !! P. Hagenmuller 07/2014   Mepra/Crocus complements
+!! J. Masek       08/2023   Parameter XWCRN moved to namelist NAM_SURF_ATM
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -95,11 +96,6 @@ REAL, SAVE       :: XHGLA
 !
 REAL, SAVE       :: XWSNV
 !
-! Critical value of the equivalent water content
-! of the snow reservoir for snow fractional coverage and albedo computations
-!
-REAL, SAVE       :: XWCRN  
-!
 ! Roughness length of pure snow surface (m)
 !
 REAL, SAVE       :: XZ0SN  
@@ -140,7 +136,6 @@ LOGICAL, SAVE    :: D95_ZTN_LIMIT
 ! Critical value of the equivalent water content
 ! of the snow reservoir for snow fractional coverage and albedo computations
 !
-!!!REAL, PARAMETER       :: XWCRN      = 10.0   ! (kg m-2) Veg (default value)
 REAL, PARAMETER       :: XWCRN_EXPL =  1.0   ! (kg m-2) Veg explicit
 REAL, PARAMETER       :: XWCRN_ROOF =  1.0   ! (kg m-2)  Roofs 
 REAL, PARAMETER       :: XWCRN_ROAD =  1.0   ! (kg m-2)  Roads
@@ -285,6 +280,11 @@ REAL, PARAMETER :: XVRKZ6 = 1.88
 REAL, PARAMETER :: XSNOWTHRMCOND_C11_1 = 2.5E-6   ! (W m5 K-1 kg-2)
 REAL, PARAMETER :: XSNOWTHRMCOND_C11_2 = -1.23E-4 ! (W m2 K-1 km-1)
 REAL, PARAMETER :: XSNOWTHRMCOND_C11_3 = 0.024    ! (W m-1 K-1) 
+!
+! ISBA-ES logical switch to activate reduced soil-snow heat flux
+! 
+LOGICAL,SAVE     :: LESSOILSNOWFLUX
+!
 !--------------------------------------------------------------------------------
 ! ISBA-ES CROCUS (Pahaut 1976): snowfall density coefficients:
 !

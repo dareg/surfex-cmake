@@ -34,6 +34,7 @@
 !!      Original    01/2004 
 !!      A.Alias    10/2010 - XLATC/XLONC added to save the XLATCEN/XLONCEN values for FA
 !!      A. Mary      07/2018 : width of I and E zones
+!!      O. Vignes    12/2022 : spectral truncation factor
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -112,6 +113,7 @@ INTEGER :: IWIDTH_I_X ! width of I zone
 INTEGER :: IWIDTH_I_Y ! width of I zone
 REAL    :: XDX      ! increment in X direction (in meters)
 REAL    :: XDY      ! increment in Y direction (in meters)
+REAL    :: XTRUNC   ! spectral truncation factor (2. = linear grid)
 !
 REAL, DIMENSION(:), POINTER :: ZGRID_PAR
 !
@@ -119,7 +121,8 @@ LOGICAL :: GFOUND
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_CONF_PROJ/XLAT0, XLON0, XRPK, XBETA
-NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY,ILONE,ILATE,IWIDTH_I_X,IWIDTH_I_Y
+NAMELIST/NAM_CONF_PROJ_GRID/NIMAX,NJMAX,XLATCEN,XLONCEN,XDX,XDY,ILONE,ILATE,&
+& IWIDTH_I_X,IWIDTH_I_Y,XTRUNC
 !
 !------------------------------------------------------------------------------
 !
@@ -150,6 +153,7 @@ IF (HDIR/='H') THEN
   ILATE=0
   IWIDTH_I_X=8
   IWIDTH_I_Y=8
+  XTRUNC=2.0
   IF (GFOUND) READ(UNIT=ILUNAM,NML=NAM_CONF_PROJ_GRID)
   !
   !---------------------------------------------------------------------------
@@ -203,7 +207,7 @@ IF (HDIR/='H') THEN
   ZYOR = - FLOAT(NJMAX+1)/2.*XDY
   !
   CALL LATLON_CONF_PROJ(XLAT0,XLON0,XRPK,XBETA,XLATCEN,XLONCEN, &
-                         ZXOR,ZYOR,ZLATOR,ZLONOR                 )  
+                        ZXOR,ZYOR,ZLATOR,ZLONOR                 )
   !
   GCP%XLATC=XLATCEN
   GCP%XLONC=XLONCEN
@@ -217,7 +221,8 @@ ELSE
                               PLONOR=ZLONOR(1),KIMAX=NIMAX,KJMAX=NJMAX,&
                               PX=ZX0,PY=ZY0,PDX=ZDX0,PDY=ZDY0,&
                               KLATE=ILATE,KLONE=ILONE,&
-                              KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y)   
+                              KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y,&
+                              PTRUNC=XTRUNC)
   !
   KL = NSIZE_TASK(NRANK)
   ALLOCATE(ZX(KL),ZY(KL),ZDX(KL),ZDY(KL))
@@ -238,7 +243,8 @@ ENDIF
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,XLAT0,XLON0,XRPK,XBETA,    &
                               ZLATOR(1),ZLONOR(1),NIMAX,NJMAX,     &
                               ZX,ZY,ZDX,ZDY,&
-                              ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y)   
+                              ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y, &
+                              XTRUNC)
 !
 !---------------------------------------------------------------------------
 DEALLOCATE(ZX)

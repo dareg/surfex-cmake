@@ -4,9 +4,9 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_FLUX_n (DGO, D, &
-                             HPROGRAM,KI,PRN,PH,PLE,PLEI,PGFLUX,PT2M,PQ2M,   &
+                             HPROGRAM,KI,PRN,PH,PLE,PLEI,PGFLUX,PT2M,PQ2M,  &
                             PHU2M,PZON10M,PMER10M,PSURFLWNET,PSURFSWNET,PCD,&  
-                            PEVAP, PSUBL                                    )  
+                            PCH,PEVAP,PSUBL                                 )  
 !     ########################################
 !
 !!****  *GET_FLUX_n* - routine to get some surface fields
@@ -36,6 +36,7 @@
 !!    -------------
 !!      Original    01/2004
 !       B. decharme 04/2013 : Add EVAP and SUBL diag
+!       J. Masek    08/2023 : Added argument PCH
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -74,7 +75,8 @@ REAL, DIMENSION(KI),  INTENT(OUT)    :: PZON10M   ! zonal Wind at 10 meters     
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PMER10M   ! meridian Wind at 10 meters  (m/s)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PSURFLWNET   ! LW net at the surface
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PSURFSWNET   ! SW net at the surface
-REAL, DIMENSION(KI),  INTENT(OUT)    :: PCD       ! exchange coeficient at the surface
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PCD       ! drag coeficient at the surface
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PCH       ! heat coeficient at the surface
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PEVAP     ! Total evapotranspiration  (kg/m2/s)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PSUBL     ! Sublimation (kg/m2/s)
 !
@@ -128,8 +130,10 @@ ENDIF
 !
 IF (DGO%LCOEF) THEN
   PCD      = D%XCD
+  PCH      = D%XCH
 ELSE
   PCD      = XUNDEF
+  PCH      = XUNDEF
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('GET_FLUX_N',1,ZHOOK_HANDLE)

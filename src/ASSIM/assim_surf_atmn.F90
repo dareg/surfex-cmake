@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #################################################################################
-SUBROUTINE ASSIM_SURF_ATM_n (U, IM, SM, TM, WM, HPROGRAM, KI,                          &
+SUBROUTINE ASSIM_SURF_ATM_n (KMYPROC, U, IM, SM, TM, WM, HPROGRAM, KI,                 &
                              PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, PCLOUDS,  &
                              PLSM, PEVAPTR, PEVAP, PSWEC, PTSC, PTS, PT2M, PHU2M, PSWE,&
                              PSST, PSIC, PUCLS, PVCLS, HTEST, OD_MASKEXT, PLON, PLAT,  &
@@ -58,6 +58,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+INTEGER, INTENT(IN) :: KMYPROC
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 TYPE(SEAFLUX_MODEL_t), INTENT(INOUT) :: SM
@@ -282,7 +283,7 @@ ELSEIF (KTILE==3) THEN
     WRITE(ILUOUT,*) '*********************************************'
   ENDIF
 
-  CALL ASSIM_NATURE_n(IM, U, HPROGRAM, KSIZE,                                     &
+  CALL ASSIM_NATURE_n(KMYPROC, IM, U, HPROGRAM, KSIZE,                            &
                       ZP_PCON_RAIN, ZP_PSTRAT_RAIN, ZP_PCON_SNOW, ZP_PSTRAT_SNOW, &
                       ZP_PCLOUDS,   ZP_PLSM,        ZP_PEVAPTR,   ZP_PEVAP,       & 
                       ZP_PSWEC,     ZP_PTSC,        ZP_UCLS,      ZP_VCLS,        &

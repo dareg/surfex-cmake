@@ -237,6 +237,7 @@ SUBROUTINE LW_FLUX_COMP(PPN,PLW_RAD,PFRAC,PSIGMA_F,PSIGMA_FA,      &
      PLW_I,PLW_J,PLW_K,PLW_L                                       )
 
 USE MODD_CSTS,       ONLY : XSTEFAN
+USE MODD_SURF_PAR,   ONLY : XUNDEF
 
 IMPLICIT NONE
 
@@ -264,7 +265,12 @@ PLW_G(:)      = PLW_F(:)                    *(1.-PEMIS_S(:))
 PLW_H(:)      = PLW_G(:)*(1.-PSIGMA_FA(:))
 
 ZWORK(:)      = (1.-XEMISVEG)*PSIGMA_FA(:)
-PLW_I(:)      =                                  PEMIS_S(:) * PFRAC(:) *XSTEFAN*(PTEMP_S(:)**4)
+WHERE(PEMIS_S(:) /= XUNDEF .AND. PTEMP_S(:) /= XUNDEF)
+  PLW_I(:)      = PEMIS_S(:) * PFRAC(:) *XSTEFAN*(PTEMP_S(:)**4)
+ELSEWHERE
+!!  PLW_I(:)      = XUNDEF   ! logical, but crashes at runtime
+  PLW_I(:)      = 0.0
+ENDWHERE
 PLW_J(:)      = PLW_I(:)*ZWORK(:)                           *(1.-PPN(:))
 PLW_K(:)      = PLW_I(:)*ZWORK(:)*                               PPN(:)
 PLW_L(:)      = PLW_I(:)*(1.-PSIGMA_FA(:))

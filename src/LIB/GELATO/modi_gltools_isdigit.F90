@@ -1,14 +1,3 @@
-MODULE MODI_gltools_isdigit
-INTERFACE
-FUNCTION gltools_isdigit( hchar ) 
-  IMPLICIT NONE
-  CHARACTER(1), INTENT(in) ::  &
-    hchar
-  LOGICAL ::  &
-    gltools_isdigit
-END FUNCTION gltools_isdigit 
-END INTERFACE
-END MODULE MODI_gltools_isdigit
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

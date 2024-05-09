@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_ISBA_n (IM, U, HPROGRAM, KI, &
+SUBROUTINE ASSIM_ISBA_n (KMYPROC, IM, U, HPROGRAM, KI, &
                         PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW,&
                         PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,      &
                         PSWEC,     PTSC,        PUCLS,     PVCLS,      &
@@ -64,6 +64,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+INTEGER, INTENT(IN) :: KMYPROC
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -133,16 +134,16 @@ ELSE
 ENDIF
 
 ! Soil assimilation
-IF ( CASSIM_ISBA == 'EKF  ' ) THEN
+IF ( TRIM(CASSIM_ISBA) == 'EKF' ) THEN
   !
   ! Run EKF for soil
-  CALL ASSIM_NATURE_ISBA_EKF(IM%O, IM%S, IM%K, IM%NP, IM%NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
+  CALL ASSIM_NATURE_ISBA_EKF(KMYPROC, IM%O, IM%S, IM%K, IM%NP, IM%NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
   !
-ELSEIF ( CASSIM_ISBA == 'ENKF ') THEN
+ELSEIF ( TRIM(CASSIM_ISBA) == 'ENKF' ) THEN
   !
-  CALL ASSIM_NATURE_ISBA_ENKF(IM%O, IM%S, IM%K, IM%NP, IM%NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
+  CALL ASSIM_NATURE_ISBA_ENKF(KMYPROC, IM%O, IM%S, IM%K, IM%NP, IM%NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
   !  
-ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
+ELSEIF ( TRIM(CASSIM_ISBA) == 'OI' ) THEN
   !
   ! Run OI for soil
   CALL ASSIM_NATURE_ISBA_OI(IM%O, IM%S, IM%K, IM%NP, IM%NPE, IM%ID, HPROGRAM, KI, &
@@ -152,7 +153,7 @@ ELSEIF ( CASSIM_ISBA == 'OI   ' ) THEN
                             PTS,       PT2M,        PHU2M,                        &
                             HTEST,     OD_MASKEXT,  PLON_IN,   PLAT_IN            )
   !
-ELSEIF ( CASSIM_ISBA == 'NONE ' ) THEN
+ELSEIF ( TRIM(CASSIM_ISBA) == 'NONE' ) THEN
   ! Do nothing
 ELSE
   CALL ABOR1_SFX(CASSIM_ISBA//' is not a defined scheme for ASSIM_ISBA_N')

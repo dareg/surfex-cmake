@@ -1,28 +1,3 @@
-MODULE MODI_gltools_nextval
-INTERFACE
-SUBROUTINE gltools_nextval( klun,hlistfld,klistfound,kok,hpar,hval,lwg,hcomment ) 
-!
-USE modi_gltools_nextline
-!
-!
-IMPLICIT NONE
-! 
-  LOGICAL,INTENT(IN) :: lwg
-  INTEGER, INTENT(in) ::  &
-    klun    
-  CHARACTER(80), DIMENSION(:), INTENT(in) ::  &
-    hlistfld
-  INTEGER, DIMENSION(:), INTENT(inout) ::  &
-    klistfound
-  INTEGER, INTENT(out) ::  &
-    kok
-  CHARACTER(80), INTENT(out) ::  &
-    hpar,hval
-  CHARACTER(1), OPTIONAL, INTENT(in) ::  &
-    hcomment
-END SUBROUTINE gltools_nextval
-END INTERFACE
-END MODULE MODI_gltools_nextval
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

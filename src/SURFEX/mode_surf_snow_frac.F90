@@ -1,6 +1,6 @@
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt
 !SFX_LIC for details. version 1.
 !     ##########################
       MODULE MODE_SURF_SNOW_FRAC
@@ -33,6 +33,7 @@
 !!    -------------
 !!      Original    15/03/99
 !!     (B.Decharme) 12/03/08  Make sure PPSNV <= PPSNG
+!!     (J. Masek)    08/2023  XWCRN taken from MODD_SURF_ATM
 !--------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -52,7 +53,7 @@ CONTAINS
       FUNCTION SNOW_FRAC_GROUND(PWSNOW) RESULT(PPSNG)
 !     ###############################################
 !
-USE MODD_SNOW_PAR, ONLY : XWCRN
+USE MODD_SURF_ATM, ONLY : XWCRN
 IMPLICIT NONE
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PWSNOW ! snow amount over natural areas (kg/m2)
@@ -71,7 +72,7 @@ END FUNCTION SNOW_FRAC_GROUND
       FUNCTION WSNOW_FROM_SNOW_FRAC_GROUND(PPSNG) RESULT(PWSNOW)
 !     ##########################################################
 !
-USE MODD_SNOW_PAR, ONLY : XWCRN
+USE MODD_SURF_ATM, ONLY : XWCRN
 IMPLICIT NONE
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PPSNG  ! snow fraction over bare ground
@@ -169,7 +170,7 @@ END FUNCTION SNOW_FRAC_NAT
       SUBROUTINE SNOW_FRAC_ROAD(PWSNOW_ROAD,OSNOW,PDN_ROAD,PDF_ROAD)
 !     ##############################################################
 !
-USE MODD_SNOW_PAR, ONLY : XWCRN
+USE MODD_SURF_ATM, ONLY : XWCRN
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PWSNOW_ROAD ! snow amount over roads (kg/m2) 
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OSNOW    ! T: snow-fall is occuring
@@ -199,7 +200,7 @@ END SUBROUTINE SNOW_FRAC_ROAD
       SUBROUTINE SNOW_FRAC_ROOF(PWSNOW_ROOF,OSNOW,PDN_ROOF,PDF_ROOF)
 !     ##############################################################
 !
-USE MODD_SNOW_PAR, ONLY : XWCRN
+USE MODD_SURF_ATM, ONLY : XWCRN
 !
 REAL, DIMENSION(:), INTENT(IN)  :: PWSNOW_ROOF ! snow amount over roofs (kg/m2) 
 LOGICAL, DIMENSION(:), INTENT(IN)  :: OSNOW    ! T: snow-fall is occuring

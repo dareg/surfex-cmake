@@ -32,8 +32,7 @@
 !*       0.   DECLARATIONS
 !             ------------
 !
-USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+!USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 !
 #ifdef AIX64 
  USE OMP_LIB

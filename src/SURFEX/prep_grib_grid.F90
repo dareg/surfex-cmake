@@ -99,6 +99,8 @@ INTEGER(KIND=kindOfInt)                            :: IRET          ! Return cod
 !
 ! Variable involved in the task of reading the grib file
 INTEGER                            :: ICENTER       ! number of center
+INTEGER                            :: ILEV
+INTEGER                            :: ILTYPE
 INTEGER                            :: ISCAN, JSCAN
 INTEGER                            :: ILENX ! nb points in X
 INTEGER                            :: ILENY ! nb points in Y
@@ -106,6 +108,7 @@ INTEGER                            :: ITIME, IYEAR, IMONTH, IDAY
 INTEGER                            :: IUNITTIME,IP1
 INTEGER                            :: INO, IINLA     ! output number of points
 REAL :: ZTIME
+REAL, DIMENSION(:), POINTER        :: ZFIELD1D => NULL()       ! field read
 !
 ! Grib Grid definition variables
 INTEGER                            :: JLOOP1        ! Dummy counter
@@ -160,12 +163,22 @@ SELECT CASE (ICENTER)
     SELECT CASE (HGRID)
 
       CASE('rotated_ll')
-        WRITE (KLUOUT,'(A)') ' | Grib file from HIRLAM - rotated latlon grid '  
-        HINMODEL='HIRLAM'
+         ! Try to read 4th layer soil T as level 996, if this exists it is RACMO
+         ILEV=996
+         ILTYPE=105
+         CALL READ_GRIB(HGRIB,KLUOUT,42,IRET,ZFIELD1D,KLTYPE=ILTYPE,KLEV1=ILEV)
+         IF (IRET == 0) THEN
+            WRITE (KLUOUT,'(A)') ' | Grib file from RACMO - rotated latlon grid '
+            HINMODEL='RACMO'
+            DEALLOCATE(ZFIELD1D)
+         ELSE
+            WRITE (KLUOUT,'(A)') ' | Grib file from HIRLAM - rotated latlon grid '
+            HINMODEL='HIRLAM'
+         ENDIF
         HGRIDTYPE='ROTLATLON '
 
       CASE DEFAULT
-        WRITE (KLUOUT,'(A)') ' | Grib file from HARMONY'  
+        WRITE (KLUOUT,'(A)') ' | Grib file from HARMONIE'
         HINMODEL='ALADIN'
         HGRIDTYPE='AROME     '
 
@@ -414,7 +427,7 @@ SELECT CASE (HGRIDTYPE)
      !
      CASE ('ROTLATLON ')
      !
-     ! 4.2.5 Rotated lat/lon grid (HIRLAM/ECMWF)
+     ! 4.2.5 Rotated lat/lon grid (ECMWF/RACMO/HIRLAM)
      !
        IF (NRANK==NPIO) THEN
 
@@ -422,6 +435,9 @@ SELECT CASE (HGRIDTYPE)
          CALL GRIB_GET(IGRIB,'iScansNegatively',ISCAN)
          CALL GRIB_GET(IGRIB,'jScansPositively',JSCAN)
          JSCAN=1-JSCAN
+       ELSEIF (TRIM(HINMODEL) == 'RACMO') THEN
+         CALL GRIB_GET(IGRIB,'iScansNegatively',ISCAN)
+         CALL GRIB_GET(IGRIB,'jScansPositively',JSCAN)
        ELSE
          CALL GRIB_GET(IGRIB,'iScansNegatively',ISCAN)
          CALL GRIB_GET(IGRIB,'jScansNegatively',JSCAN)

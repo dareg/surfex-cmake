@@ -1,81 +1,3 @@
-MODULE MODI_glt_thermo_ice_r
-INTERFACE
-SUBROUTINE glt_thermo_ice_r  &
-  ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,& 
-   ncdlssh,niceage,nicesal,nicesub,nilay,nl,nleviti,nmponds,noutlu,np,nprinto,nsalflx,nslay,nsnwrad,nt,nupdbud,&
-   albimlt,albsdry,albsmlt,dtt,rn_htopoc,xdomsrf_r,xlmelt,xswhdfr,&
-   lp1,lp2,lp3,lp4,lp5,lwg,&
-   depth,height,sf3t,sf3tinv,&
-   ygltvhd)
-!
-!
-!
-! 1. DECLARATIONS AND INITIALIZATIONS
-! ====================================
-!
-! 1.1. Module declarations
-! ------------------------
-  USE modd_types_glt
-  USE modd_glt_const_thm
-  USE modi_glt_vhdiff_r
-!  USE modi_glt_swabs_r
-  USE mode_glt_info_r
-  USE mode_glt_stats_r
-  USE modi_glt_updasn_r 
-  USE modi_glt_icetrans_r
-  USE modi_glt_sublim_r
-  USE modi_glt_precip_r
-  USE modi_glt_snowice_r
-  USE modi_glt_updhsn_r
-  USE modi_glt_updhsi_r
-  USE modi_glt_lmltsi_r
-  USE modi_glt_updbud_r
-  USE modi_glt_updice_r
-  USE modi_glt_updsnow_r
-  USE modi_glt_icevsp_r
-  USE modi_gltools_chkglo_r
-  USE mode_gltools_enthalpy
-  USE modi_glt_updsal_r
-  USE MODD_GLT_VHD, ONLY : t_glt_vhd
-  !
-  IMPLICIT NONE
-!
-!
-! 1.2. Dummy arguments declarations
-! ---------------------------------
-!
-! --- INTENT(in) arguments.
-!
-  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud, &
-                          nl,np,nt
-  LOGICAL, INTENT(IN) :: lp1,lp2,lp3,lp4,lp5,lwg
-  REAL, INTENT(IN) ::  dtt,xdomsrf_r,xswhdfr,rn_htopoc,albimlt,albsmlt,albsdry,xlmelt
-  REAL,DIMENSION(:), INTENT(IN) :: sf3t,sf3tinv,height,depth
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
-  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
-  TYPE(t_atm), DIMENSION(np), INTENT(in) ::  &
-        tpatm
-  TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
-        tpblki
-!
-! --- INTENT(inout) arguments.
-
-  TYPE(t_bud), DIMENSION(np), INTENT(inout) ::  &
-        tpbud
-  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
-  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil 
-  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
-END SUBROUTINE glt_thermo_ice_r
-END INTERFACE
-END MODULE MODI_glt_thermo_ice_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -242,8 +164,7 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! --- INTENT(in) arguments.
 !
-  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud, &
-                          nl,np,nt
+  INTEGER, INTENT(IN) ::  noutlu,ncdlssh,nsalflx,nleviti,nsnwrad,nicesal,niceage,nmponds,nslay,nilay,nprinto,nicesub,nupdbud,nl,np,nt
   LOGICAL, INTENT(IN) :: lp1,lp2,lp3,lp4,lp5,lwg
   REAL, INTENT(IN) ::  dtt,xdomsrf_r,xswhdfr,rn_htopoc,albimlt,albsmlt,albsdry,xlmelt
   REAL,DIMENSION(:), INTENT(IN) :: sf3t,sf3tinv,height,depth
@@ -359,7 +280,7 @@ SUBROUTINE glt_thermo_ice_r  &
 !
   IF ( nicesub==1 ) THEN
       CALL glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
-          ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv )
+          ncdlssh,nilay,nslay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv )
   ENDIF
 !
   tpdia(:)%subcio = tptfl(:)%cio - zemps(:)
@@ -491,7 +412,7 @@ SUBROUTINE glt_thermo_ice_r  &
   zwork2 = dtt*SUM( tpsit(:,:)%fsi*znsftop, DIM=1 ) 
 !
   zent(:,:,:) = tpsil(:,:,:)%ent
-  CALL glt_aventh(tpsit,tpsil,zei1,zes1,nilay,nl,np,nt,sf3tinv)
+  CALL glt_aventh(tpsit,tpsil,zei1,zes1,nilay,nslay,nl,np,nt,sf3tinv)
   CALL glt_vhdiff_r  &
     ( tpdom,tpmxl%mlf,zdcondt,tpsit,tpdia,  &
     znsftop,zswtra,zent,zvsp,zcondb,zqtopmelt,zdhmelt,osmelt,&
@@ -501,7 +422,7 @@ SUBROUTINE glt_thermo_ice_r  &
     ygltvhd )
 !
     tpsil(:,:,:)%ent = zent(:,:,:)
-  CALL glt_aventh(tpsit,tpsil,zei2,zes2,nilay,nl,np,nt,sf3tinv)
+  CALL glt_aventh(tpsit,tpsil,zei2,zes2,nilay,nslay,nl,np,nt,sf3tinv)
 !
 ! .. Checks
 !

@@ -87,7 +87,8 @@ INTEGER           :: ILUOUT
 INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
 INTEGER           :: JTIME          ! loop index
 INTEGER           :: IVERSION, IBUGFIX, NUMFORCINGSTEPS=0, YY,MM,DD,HH
-REAL(KIND=JPRB) :: ZHOOK_HANDLE, SST
+REAL(KIND=JPRB) :: SST
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 

@@ -111,14 +111,25 @@ OUNIF     = .FALSE.
 !* Select seaflux files if they are defined
 !  -----------------------------------------
 !
-IF (LEN_TRIM(HFILE)==0 .AND. LEN_TRIM(CFILE_SEAFLX)>0 .AND. LEN_TRIM(CTYPE_SEAFLX)>0) THEN
-  HFILE     = CFILE_SEAFLX
-  HFILETYPE = CTYPE_SEAFLX
-END IF
-!
-IF (LEN_TRIM(HFILEPGD)==0 .AND. LEN_TRIM(CFILEPGD_SEAFLX)>0 .AND. LEN_TRIM(CTYPEPGD)>0) THEN
-  HFILEPGD     = CFILEPGD_SEAFLX
-  HFILEPGDTYPE = CTYPEPGD
+
+
+IF (HVAR/='ICEUSTAR ' .and. HVAR/='ICEAGE_1 ' .and. HVAR/='ICEVMP_1 ' .and.      &
+    HVAR/='ICEASN_1 ' .and. HVAR/='ICEFSI_1 ' .and. HVAR/='ICESSI_1 ' .and.      &
+    HVAR/='ICEHSI_1 ' .and. HVAR/='ICETSF_1 ' .and. HVAR/='ICEHSN_1 ' .and.      &
+    HVAR/='ICERSN_1 ' .and. HVAR/='ICEH_1_1 ' .and. HVAR/='ICEH_1_2 ' .and.      &
+    HVAR/='ICEH_1_3 ' .and. HVAR/='ICEH_1_4 ' .and. HVAR/='ICEH_1_5 ' .and.      &
+    HVAR/='ICEH_1_6 ' .and. HVAR/='ICEH_1_7 ' .and. HVAR/='ICEH_1_8 ' .and.      &
+    HVAR/='ICEH_1_9 ' .and. HVAR/='ICEH_1_10' .and. HVAR/='SIC      ' .and.      &
+    HVAR/='SSS      ') then
+  IF (LEN_TRIM(HFILE)==0 .AND. LEN_TRIM(CFILE_SEAFLX)>0 .AND. LEN_TRIM(CTYPE_SEAFLX)>0) THEN
+    HFILE     = CFILE_SEAFLX
+    HFILETYPE = CTYPE_SEAFLX
+  END IF
+  !
+  IF (LEN_TRIM(HFILEPGD)==0 .AND. LEN_TRIM(CFILEPGD_SEAFLX)>0 .AND. LEN_TRIM(CTYPEPGD)>0) THEN
+    HFILEPGD     = CFILEPGD_SEAFLX
+    HFILEPGDTYPE = CTYPEPGD
+  END IF
 END IF
 !
 !! If no file name in the scheme namelist,

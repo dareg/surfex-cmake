@@ -50,6 +50,7 @@
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
 !!    R. Alkama   04/2012  add 6 new tree vegtype (9 instead 3)
+!!    F. Svabik   08/2023  Unapproximated roughness length averaging
 !
 !----------------------------------------------------------------------------
 !
@@ -57,6 +58,7 @@
 !            -----------
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
+USE MODD_SURF_ATM,       ONLY : XZ0_OFFSET
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVT_TRBD, NVT_TEBE,  &
                                 NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB, NVEGTYPE,  &
                                 XCDREF
@@ -240,8 +242,8 @@ SELECT CASE (HATYPE)
       DO JJ=1,SIZE(PFIELD)
         IMASK = KMASK(JJ)        
         ZSUM_WEIGHT_PATCH(JJ) =  ZSUM_WEIGHT_PATCH(JJ)+ ZWEIGHT(JJ,JV)
-        IF (PDATA(JJ,JV).NE.0.) THEN
-          ZWORK(JJ)= ZWORK(JJ) + 1./(LOG(ZDZ(JJ)/ PDATA(IMASK,JV)))**2    &
+        IF ((PDATA(JJ,JV) /= 0.).AND.(ZWEIGHT(JJ,JV) > 0.)) THEN
+          ZWORK(JJ)= ZWORK(JJ) + 1./(LOG(XZ0_OFFSET + ZDZ(JJ)/ PDATA(IMASK,JV)))**2    &
                             * ZWEIGHT(JJ,JV)
         ENDIF
       ENDDO
@@ -309,7 +311,7 @@ SELECT CASE (HATYPE)
 !
     DO JI=1,SIZE(PFIELD)
       IF (ZSUM_WEIGHT_PATCH(JI)>0.) THEN
-        PFIELD(JI) = ZDZ(JI) * EXP( - SQRT(ZSUM_WEIGHT_PATCH(JI)/ZWORK(JI)) )
+        PFIELD(JI) = ZDZ(JI) / (EXP( SQRT(ZSUM_WEIGHT_PATCH(JI)/ZWORK(JI)) ) - XZ0_OFFSET)
       ENDIF
     ENDDO
 !

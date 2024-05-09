@@ -33,6 +33,8 @@
 !!    -------------
 !!      Original    01/2003 
 !!      B. Decharme 06/2013 CIMPLICIT_WIND is now in NAM_SURF_REPROD_OPER
+!!      J. Masek    08/2023 Setting of XZ0_OFFSET; writing final values of
+!!                          important NAM_SURF_ATM variables
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -50,6 +52,7 @@ USE MODN_WRITE_SURF_ATM
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
+USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !
@@ -86,6 +89,10 @@ IF (GFOUND) READ(UNIT=INAM,NML=NAM_CHS_ORILAM)
  CALL POSNAM(INAM,'NAM_SURF_ATM',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=INAM,NML=NAM_SURF_ATM)
 !
+IF (LSLOPE.AND.(.NOT.LNOSOF)) THEN
+  CALL ABOR1_SFX(' if LSLOPE=T, LNOSOF must be TRUE ')
+ENDIF
+!
  CALL POSNAM(INAM,'NAM_WRITE_SURF_ATM',GFOUND,ILUOUT)
 IF (GFOUND) READ(UNIT=INAM,NML=NAM_WRITE_SURF_ATM)
 !
@@ -93,6 +100,56 @@ IF (GFOUND) READ(UNIT=INAM,NML=NAM_WRITE_SURF_ATM)
 !* close namelist file
 !
  CALL CLOSE_NAMELIST(HPROGRAM,INAM)
+
+IF (LZ0_AVG_EXACT) THEN
+  XZ0_OFFSET=1.
+ELSE
+  XZ0_OFFSET=0.
+ENDIF
+
+WRITE(ILUOUT,'(A)')              'IMPORTANT SURFEX NAM_SURF_ATM SETTINGS:'
+WRITE(ILUOUT,'(A,L)')            '  LDRAG_COEF_ARP = ',LDRAG_COEF_ARP
+WRITE(ILUOUT,'(A,L)')            '  LALDTHRES      = ',LALDTHRES
+WRITE(ILUOUT,'(A,L)')            '  LNOSOF         = ',LNOSOF
+WRITE(ILUOUT,'(A,L)')            '  LSLOPE         = ',LSLOPE
+WRITE(ILUOUT,'(A,L)')            '  LVERTSHIFT     = ',LVERTSHIFT
+WRITE(ILUOUT,'(A,L)')            '  LVSHIFT_LW     = ',LVSHIFT_LW
+WRITE(ILUOUT,'(A,L)')            '  LVSHIFT_PRCP   = ',LVSHIFT_PRCP
+WRITE(ILUOUT,'(A,L)')            '  LVZIUSTAR0_ARP = ',LVZIUSTAR0_ARP
+WRITE(ILUOUT,'(A,L)')            '  LRRGUST_ARP    = ',LRRGUST_ARP
+WRITE(ILUOUT,'(A,L)')            '  LCPL_ARP       = ',LCPL_ARP
+WRITE(ILUOUT,'(A,L)')            '  LQVNPLUS       = ',LQVNPLUS
+WRITE(ILUOUT,'(A,L)')            '  LCPL_GCM       = ',LCPL_GCM
+WRITE(ILUOUT,'(A,L)')            '  LZ0_AVG_EXACT  = ',LZ0_AVG_EXACT
+WRITE(ILUOUT,'(A,L)')            '  LZ0_EFF        = ',LZ0_EFF
+WRITE(ILUOUT,'(A,ES11.4)')       '  XZ0_OFFSET     = ',XZ0_OFFSET
+WRITE(ILUOUT,'(A,L)')            '  LZ0SNOWH_ARP   = ',LZ0SNOWH_ARP
+WRITE(ILUOUT,'(A,ES11.4)')       '  XRZ0_TO_HEIGHT = ',XRZ0_TO_HEIGHT
+WRITE(ILUOUT,'(A,ES11.4)')       '  XFACZ0         = ',XFACZ0
+WRITE(ILUOUT,'(A,ES11.4)')       '  XTAU_ICE       = ',XTAU_ICE
+WRITE(ILUOUT,'(A,ES11.4)')       '  XCISMIN        = ',XCISMIN
+WRITE(ILUOUT,'(A,ES11.4)')       '  XVMODMIN       = ',XVMODMIN
+WRITE(ILUOUT,'(A,ES11.4)')       '  XWNEW          = ',XWNEW
+WRITE(ILUOUT,'(A,ES11.4)')       '  XWCRN          = ',XWCRN
+WRITE(ILUOUT,'(A,ES11.4)')       '  XEDB           = ',XEDB
+WRITE(ILUOUT,'(A,ES11.4)')       '  XEDC           = ',XEDC
+WRITE(ILUOUT,'(A,ES11.4)')       '  XEDD           = ',XEDD
+WRITE(ILUOUT,'(A,ES11.4)')       '  XEDK           = ',XEDK
+WRITE(ILUOUT,'(A,ES11.4)')       '  XUSURIC        = ',XUSURIC
+WRITE(ILUOUT,'(A,ES11.4)')       '  XUSURID        = ',XUSURID
+WRITE(ILUOUT,'(A,ES11.4)')       '  XUSURICL       = ',XUSURICL
+WRITE(ILUOUT,'(A,ES11.4)')       '  XVCHRNK        = ',XVCHRNK
+WRITE(ILUOUT,'(A,ES11.4)')       '  XVZ0CM         = ',XVZ0CM
+WRITE(ILUOUT,'(A,ES11.4)')       '  XRIMAX         = ',XRIMAX
+WRITE(ILUOUT,'(A,ES11.4)')       '  XDELTA_MAX     = ',XDELTA_MAX
+WRITE(ILUOUT,'(A,ES11.4)')       '  XWINDMIN       = ',XWINDMIN
+WRITE(ILUOUT,'(A,ES11.4)')       '  XRZHZ0M        = ',XRZHZ0M
+WRITE(ILUOUT,'(A,ES11.4)')       '  XVZIUSTAR0     = ',XVZIUSTAR0
+WRITE(ILUOUT,'(A,ES11.4)')       '  XRRSCALE       = ',XRRSCALE
+WRITE(ILUOUT,'(A,ES11.4)')       '  XRRGAMMA       = ',XRRGAMMA
+WRITE(ILUOUT,'(A,ES11.4)')       '  XUTILGUST      = ',XUTILGUST
+WRITE(ILUOUT,'(A,ES11.4)')       '  XCO2UNCPL      = ',XCO2UNCPL
+
 IF (LHOOK) CALL DR_HOOK('READ_SURF_ATM_CONF',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

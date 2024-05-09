@@ -83,6 +83,7 @@ INTEGER                           :: ILONE      ! extension zone
 INTEGER                           :: ILATE      ! extension zone
 INTEGER                           :: IWIDTH_I_X ! width of I zone
 INTEGER                           :: IWIDTH_I_Y ! width of I zone
+REAL                              :: ZTRUNC     ! spectral truncation factor
 
 REAL, DIMENSION(:), POINTER       :: ZGRID_PAR2 ! parameters of output grid
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -103,7 +104,8 @@ ALLOCATE(ZDY1(IL1))
                               ZLATOR,ZLONOR,IIMAX,IJMAX,        &
                               ZX1,ZY1,ZDX1,ZDY1,&
                               KLATE=ILATE, KLONE=ILONE, &
-                              KWIDTH_I_X=IWIDTH_I_X, KWIDTH_I_Y=IWIDTH_I_Y)
+                              KWIDTH_I_X=IWIDTH_I_X, KWIDTH_I_Y=IWIDTH_I_Y, &
+                              PTRUNC=ZTRUNC)
 !
 ALLOCATE(ZX2 (KMASK_SIZE))
 ALLOCATE(ZY2 (KMASK_SIZE))
@@ -123,7 +125,7 @@ DEALLOCATE(ZDY1)
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR2,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATOR,ZLONOR,IIMAX,IJMAX,        &
                               ZX2,ZY2,ZDX2,ZDY2,&
-                              ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y) 
+                              ILATE,ILONE,IWIDTH_I_X,IWIDTH_I_Y,ZTRUNC)
 !
 IF (OPACK) THEN
   PGRID_PAR2(:) = ZGRID_PAR2(:)

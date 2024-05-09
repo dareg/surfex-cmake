@@ -1,39 +1,3 @@
-MODULE MODI_glt_updsnow
-INTERFACE
-SUBROUTINE glt_updsnow  &
-  ( kinit,omsg,tpdom,tptfl,tpsit,psnow_a,pemp_a,&
-  noutlu,nt,nx,ny,                              &
-  dtt,xdomsrf_g,                                &
-  lwg,                                          &
-  paddterm,paddterm2)
-!
-  USE modd_types_glt
-  USE modd_glt_const_thm
-  USE mode_glt_stats
-  USE mode_glt_info
-!
-  IMPLICIT NONE
-  INTEGER, INTENT(in) ::  &
-         kinit,noutlu,nt,nx,ny
-  REAL, INTENT(in) ::  &
-         dtt,xdomsrf_g
-  LOGICAL, INTENT(in) ::  &
-         lwg
-  CHARACTER(*), INTENT(in) ::  &
-        omsg
-  TYPE(t_dom), DIMENSION(nx,ny), INTENT(in) ::  &
-        tpdom
-  TYPE(t_tfl), DIMENSION(nx,ny), INTENT(in) ::  &
-        tptfl
-  TYPE(t_sit), DIMENSION(nt,nx,ny), INTENT(in) ::  &
-        tpsit
-  REAL, INTENT(inout) :: &
-        pemp_a, psnow_a
-  REAL, DIMENSION(nx,ny), INTENT(in), OPTIONAL :: &
-        paddterm,paddterm2
-END SUBROUTINE glt_updsnow
-END INTERFACE
-END MODULE MODI_glt_updsnow
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

@@ -15,6 +15,7 @@
 !!      Original    01/2004
 !!      Modified    01/2006 : sea flux parameterization.
 !!      B.Decharme  04/2013 : new diags
+!!      A. Napoly   08/2023 : add XT2M_NAT
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -66,6 +67,7 @@ DO JT=1,NTILESFC
   DEALLOCATE(ND%AL(JT)%XEVAP   )
   DEALLOCATE(ND%AL(JT)%XSUBL   )
   DEALLOCATE(ND%AL(JT)%XT2M    )
+  DEALLOCATE(ND%AL(JT)%XT2M_NAT)
   DEALLOCATE(ND%AL(JT)%XTS     )
   DEALLOCATE(ND%AL(JT)%XT2M_MIN)
   DEALLOCATE(ND%AL(JT)%XT2M_MAX)
@@ -112,6 +114,7 @@ DEALLOCATE(D%XGFLUX  )
 DEALLOCATE(D%XEVAP   )
 DEALLOCATE(D%XSUBL   )
 DEALLOCATE(D%XT2M    )
+DEALLOCATE(D%XT2M_NAT)
 DEALLOCATE(D%XTS     )
 DEALLOCATE(D%XT2M_MIN)
 DEALLOCATE(D%XT2M_MAX)

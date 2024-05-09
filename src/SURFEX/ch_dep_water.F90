@@ -44,7 +44,7 @@
        REAL, DIMENSION(:),     INTENT(IN)  :: PTA          ! air temperature forcing (K)
        REAL, DIMENSION(:),     INTENT(IN)  :: PTRAD        ! radiative temperature   (K)
        REAL, DIMENSION(:,:),   INTENT(IN)  :: PSV
-       CHARACTER(LEN=6), DIMENSION(:),INTENT(IN) :: HSV
+       CHARACTER(LEN=16), DIMENSION(:),INTENT(IN) :: HSV
        REAL, DIMENSION(:,:),   INTENT(INOUT):: PDEP      ! deposition dry velocity (m/s)
   !
   !

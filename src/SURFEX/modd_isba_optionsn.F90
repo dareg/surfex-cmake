@@ -175,8 +175,10 @@ LOGICAL :: LVEGUPD              ! True = update vegetation parameters every deca
 LOGICAL :: LPERTSURF            ! True  = apply random perturbations for ensemble prediction
                                 ! False = no random perturbation (default)
 
-REAL :: XPERT_LOW(6)            ! Lower limit for surface perturbations 
-REAL :: XPERT_HIGH(6)           ! Upper limit for surface perturbations
+REAL :: XPERT_LOW(10)           ! Lower limit for surface perturbations where the settings are stored as 
+                                ! parameter1_patch1, parameter1_patch2, ..., parameterN_patch1, parameterN_patch2
+                                ! where the parameters are: VEG, LAI, CV, ALB, Z0 
+REAL :: XPERT_HIGH(10)          ! Upper limit for surface perturbations, settings as above
 !
 !
 ! * SGH model options
@@ -339,9 +341,6 @@ IO%XCDRAG=0.
 IO%LGLACIER=.FALSE.
 IO%LCANOPY_DRAG=.FALSE.
 IO%LVEGUPD=.FALSE.
-IO%LPERTSURF=.FALSE.
-IO%XPERT_LOW=-HUGE(1.0)
-IO%XPERT_HIGH=HUGE(1.0)
 IO%NLAYER_HORT=0
 IO%NLAYER_DUN=0
 IO%XCVHEATF=0.2

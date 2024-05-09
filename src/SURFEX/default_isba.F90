@@ -11,6 +11,7 @@
                               OVEGUPD, OSPINUPCARBS, OSPINUPCARBW,       &
                               PSPINMAXS, PSPINMAXW, PCO2_START, PCO2_END,&
                               KNBYEARSPINS, KNBYEARSPINW,                &
+                              OPERTSURF,PPERT_LOW,PPERT_HIGH,            &
                               ONITRO_DILU, PCSMAX, PCVHEATF              )
 !     ########################################################################
 !
@@ -142,6 +143,9 @@ INTEGER, INTENT(OUT)          :: KNBYEARSPINW ! nbr years needed to reaches wood
 !
 LOGICAL, INTENT(OUT)          :: ONITRO_DILU ! nitrogen dilution fct of CO2 (Calvet et al. 2008)
 !
+LOGICAL, INTENT(OUT)          :: OPERTSURF      ! Switch for handling of surface perturbations
+REAL,    INTENT(OUT)          :: PPERT_LOW(10)  ! Lower clipping limits in the perturbation scheme
+REAL,    INTENT(OUT)          :: PPERT_HIGH(10) ! Upper clipping limits in the perturbation scheme
 REAL, INTENT(OUT) :: PCVHEATF
 !
 !*       0.2   Declarations of local variables
@@ -194,6 +198,11 @@ KNBYEARSPINS = 0
 KNBYEARSPINW = 0
 !
 ONITRO_DILU = .FALSE.
+!
+OPERTSURF = .FALSE.
+!
+PPERT_LOW  = -HUGE(1.)
+PPERT_HIGH =  HUGE(1.)
 !
 IF (LHOOK) CALL DR_HOOK('DEFAULT_ISBA',1,ZHOOK_HANDLE)
 !

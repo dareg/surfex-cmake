@@ -63,7 +63,7 @@ USE MODI_ISBA_LWNET_MEB
 USE MODI_UNPACK_SAME_RANK
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 IMPLICIT NONE
 !
@@ -118,6 +118,9 @@ REAL, DIMENSION(SIZE(PTG1,1)) :: ZLWNET_G      ! LW net for ground
 REAL, DIMENSION(SIZE(PTG1,1)) :: ZDUMMY
 REAL, DIMENSION(SIZE(PTG1,1)) :: ZEMISF
 REAL, DIMENSION(SIZE(PTG1,1)) :: ZFF
+#ifdef HIRLAM_SP_HACKS
+REAL(KIND=JPRD) :: ZTSRAD_DP
+#endif
 !
 LOGICAL :: LEXPLICIT_SNOW ! snow scheme key
 !
@@ -255,9 +258,16 @@ DO JP  =  1,IO%NPATCH
       DO JI = 1,PK%NSIZE_P
         IMASK = PK%NR_P(JI)
         IF (PEK%XEMIS(JI)/=XUNDEF .AND. ZEMIS_PATCH(IMASK,JP)/=0.) THEN
-          ZTSRAD_PATCH(IMASK,JP) =( ( (1.-PEK%XPSN(JI)) * ZEMIS(JI)*PTG1(JI,JP)**4            &
+#ifdef HIRLAM_SP_HACKS
+           ZTSRAD_DP =( ( (1.0_JPRD-PEK%XPSN(JI)) * ZEMIS(JI)*PTG1(JI,JP)**4.0_JPRD            &
+                +    PEK%XPSN(JI) *PEK%TSNOW%EMIS(JI)*PEK%TSNOW%TS(JI)**4.0_JPRD ) )**0.25_JPRD  &
+                / ZEMIS_PATCH(IMASK,JP)**0.25_JPRD
+           ZTSRAD_PATCH(IMASK,JP) = REAL(ZTSRAD_DP,JPRB)
+#else
+           ZTSRAD_PATCH(IMASK,JP) =( ( (1.-PEK%XPSN(JI)) * ZEMIS(JI)*PTG1(JI,JP)**4            &
                                      +    PEK%XPSN(JI) *PEK%TSNOW%EMIS(JI)*PEK%TSNOW%TS(JI)**4 ) )**0.25  &
-                                 / ZEMIS_PATCH(IMASK,JP)**0.25  
+                                     / ZEMIS_PATCH(IMASK,JP)**0.25
+#endif
         END IF
       ENDDO
     END IF

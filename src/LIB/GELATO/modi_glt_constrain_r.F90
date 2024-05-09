@@ -1,36 +1,3 @@
-MODULE MODI_glt_constrain_r
-INTERFACE
-SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
-    nilay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
-  USE modd_types_glt
-  USE modd_glt_const_thm
-  USE mode_glt_stats_r
-  USE modi_gltools_newice_r
-  USE mode_gltools_enthalpy
-  USE MODI_ABOR1_SFX
-!
-  IMPLICIT NONE 
-!
-  INTEGER, INTENT(IN) :: nilay,noutlu,nl,nt,np,ntd
-  REAL, INTENT(IN) :: dtt,xfsidmpeft,xhsidmpeft,xfsimax,xhsimin
-  REAL,DIMENSION(:),INTENT(in) :: sf3tinv
-  LOGICAL, INTENT(IN) :: lwg
-  CHARACTER(*), INTENT(IN) :: ccsvdmp,chsidmp,cfsidmp
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
-  TYPE(t_mxl), DIMENSION(np), INTENT(inout) ::  &
-        tpmxl
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
-  TYPE(t_vtp), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsil
-  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
-  TYPE(t_sit), DIMENSION(ntd,np), INTENT(in) ::  &
-        tpsit_d
-END SUBROUTINE glt_constrain_r
-END INTERFACE
-END MODULE MODI_glt_constrain_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -126,7 +93,7 @@ END MODULE MODI_glt_constrain_r
 !
 !
 SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
-    nilay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
+    nilay,nslay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
   USE modd_types_glt
   USE modd_glt_const_thm
   USE mode_glt_stats_r
@@ -136,7 +103,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
   IMPLICIT NONE 
 !
-  INTEGER, INTENT(IN) :: nilay,noutlu,nl,nt,np,ntd
+  INTEGER, INTENT(IN) :: nilay,nslay,noutlu,nl,nt,np,ntd
   REAL, INTENT(IN) :: dtt,xfsidmpeft,xhsidmpeft,xfsimax,xhsimin
   REAL,DIMENSION(:),INTENT(in) :: sf3tinv
   LOGICAL, INTENT(IN) :: lwg
@@ -175,7 +142,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 !
 ! .. Initial snow and ice enthalpy
 !
-  CALL glt_aventh( tpsit,tpsil,zenti_i,zents_i,nilay,nl,np,nt,sf3tinv )
+  CALL glt_aventh( tpsit,tpsil,zenti_i,zents_i,nilay,nslay,nl,np,nt,sf3tinv )
 !
 ! .. Global initializations
 !
@@ -454,7 +421,7 @@ SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
 ! .. Diagnose changes in snow/ice enthalpy due to damping/restoring 
 ! (there is no separation of the effects of the different operations)
 !
-  CALL glt_aventh( tpsit,tpsil,zenti_f,zents_f,nilay,nl,np,nt,sf3tinv )
+  CALL glt_aventh( tpsit,tpsil,zenti_f,zents_f,nilay,nslay,nl,np,nt,sf3tinv )
   tpdia(:)%dmp = ( zenti_f+zents_f-zenti_i-zents_i ) / dtt
 !
 END SUBROUTINE glt_constrain_r

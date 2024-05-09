@@ -570,6 +570,9 @@ IF (.NOT.OLAND_USE) THEN
         DTI%XPAR_LAI(:,JT,:) = XUNDEF
       ENDIF
     END DO
+    WHERE (DTI%XPAR_LAI(:,:,:) < 0.0)
+      DTI%XPAR_LAI(:,:,:) = XUNDEF
+    END WHERE
   ENDIF
 !
   IF (ANY(DTI%LDATA_Z0)) THEN

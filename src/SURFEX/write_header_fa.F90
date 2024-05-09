@@ -37,6 +37,8 @@ SUBROUTINE WRITE_HEADER_FA (GCP, HGRID, PGRID_PAR, CFILETYPE, HWRITE)
 !!         A. Mary      07/2018 : width of I and E zones
 !!         A. Mary      05/2019 : Gauss KNOZPA != 0
 !!         A. Mary      06/2019 : absolute value of RPK
+!!         S. Riette    01/2021 : add cartesian support
+!!         O. Vignes    12/2022 : spectral truncation factor
 !!
 !----------------------------------------------------------------------------
 !
@@ -52,6 +54,7 @@ USE MODD_CSTS,  ONLY : XPI
 USE MODE_GRIDTYPE_CONF_PROJ
 USE MODE_GRIDTYPE_LONLAT_REG
 USE MODE_GRIDTYPE_GAUSS
+USE MODE_GRIDTYPE_CARTESIAN
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
@@ -125,6 +128,7 @@ INTEGER :: ILATE
 INTEGER :: ILONE
 INTEGER :: IWIDTH_I_X
 INTEGER :: IWIDTH_I_Y
+REAL    :: ZTRUNC
 !
 INTEGER :: ILUOUT
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -147,14 +151,15 @@ ZCODIL=0.0
 IF (HGRID=="CONF PROJ ") THEN
 !
   CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,ZLAPO,ZLOPO,ZPRPK,ZBETA, &
-                                ZLATMIN,ZLONMIN,ILON,ILAT          )  
+                              ZLATMIN,ZLONMIN,ILON,ILAT          )
 !
   ICOUNT=ILON*ILAT
   ALLOCATE(ZDX(ICOUNT))
   ALLOCATE(ZDY(ICOUNT))
 !
   CALL GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PDX=ZDX,PDY=ZDY,KLONE=ILONE,KLATE=ILATE, &
-                              KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y)
+                              KWIDTH_I_X=IWIDTH_I_X,KWIDTH_I_Y=IWIDTH_I_Y, &
+                              PTRUNC=ZTRUNC)
 !
   ALLOCATE(ZSINLA(18))
   ALLOCATE(INLOPA(8))
@@ -172,6 +177,8 @@ IF (HGRID=="CONF PROJ ") THEN
   ZSINLA(6) = GCP%XLATC*ZRAD  
   ZSINLA(7) = ZDX(1)
   ZSINLA(8) = ZDY(1)
+  ZSINLA(9) = ZDX(1)*(ILON+ILONE)
+  ZSINLA(10) = ZDY(1)*(ILAT+ILATE)
   ZSINLA(13) = 0.0
   ZSINLA(14) = 0.0
 !
@@ -184,18 +191,78 @@ IF (HGRID=="CONF PROJ ") THEN
   INLOPA(7) = IWIDTH_I_X
   INLOPA(8) = IWIDTH_I_Y
 !
-  ITYPTR = -INT(REAL(ILON-1)/2.)
-  ITRONC = INT(REAL(ILAT-1)/2.)
 !
   INLATI = ILAT+ILATE
   INXLON = ILON+ILONE
+  ITRONC = INT(REAL(INLATI-2)/ZTRUNC)
+  ITYPTR = -INT(REAL(INXLON-2)/ZTRUNC)
+
   IF (ILONE == 0 .AND. ILATE == 0) THEN
     INLOPA(2) = 0
   ENDIF
 !
 ELSEIF (HGRID=="CARTESIAN ") THEN
 !
-  CALL ABOR1_SFX('WRITE_HEADER_FA: CARTESIAN NOT YET IMPLEMENTED')
+!
+  CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,ZLAPO,ZLOPO,ILON,ILAT)  
+!
+  ICOUNT=ILON*ILAT
+  ALLOCATE(ZDX(ICOUNT))
+  ALLOCATE(ZDY(ICOUNT))
+!
+  CALL GET_GRIDTYPE_CARTESIAN(PGRID_PAR,PDX=ZDX,PDY=ZDY)
+!
+  ALLOCATE(ZSINLA(18))
+  ALLOCATE(INLOPA(8))
+  ALLOCATE(INOZPA((1+ILAT)/2))
+!
+  ZSINLA(:)=0.0
+  INLOPA(:)=0
+  INOZPA(:)=1
+!
+  !In FA header, 4 lon/lat are provided
+  !Only one lon/lat is avaliable in GRIDTYPE_CARTESIAN
+  ZSINLA (1)  = 0.
+  ZSINLA (2)  = ZLOPO*ZRAD
+  ZSINLA (3)  = ZLAPO*ZRAD
+  ZSINLA (4)  = ZLOPO*ZRAD
+  ZSINLA (5)  = ZLAPO*ZRAD
+  ZSINLA (6)  = ZLOPO*ZRAD
+  ZSINLA (7)  = ZLAPO*ZRAD
+  ZSINLA (8)  = ZLOPO*ZRAD
+  ZSINLA (9)  = ZLAPO*ZRAD
+  ZSINLA (10) = 1.
+  ZSINLA (11) = 1.
+  ZSINLA (12) = 0.
+  ZSINLA (13) = ZDX(1)*ILON
+  ZSINLA (14) = ZDY(1)*ILAT
+  ZSINLA (15) = ZDX(1)
+  ZSINLA (16) = ZDY(1)
+  ZSINLA (17) = 0.
+  ZSINLA (18) = 0.
+!
+  INLOPA  (1)  = 0
+  INLOPA  (2)  = 1
+  INLOPA  (3)  = 1
+  INLOPA  (4)  = 1
+  INLOPA  (5)  = ILON
+  INLOPA  (6)  = ILAT
+  INLOPA  (7)  = 0
+  INLOPA  (8)  = 0
+!
+  ITYPTR = -INT(REAL(ILON-1)/2.)
+  ITRONC = INT(REAL(ILAT-1)/2.)
+!
+  INLATI = ILAT
+  INXLON = ILON
+!
+  ZCODIL = -1.
+!
+  IF(ILON .NE. 1 .OR. ILAT .NE. 4)THEN
+    !Code has been written by taking example on acadfa_sueframe subroutine
+    !Some parts may be missing *or wrong* for other geometries than the 1D one
+    CALL ABOR1_SFX('WRITE_HEADER_FA: CARTESIAN NOT YET FULLY IMPLEMENTED')
+  ENDIF
 !
 ELSEIF (HGRID=="LONLAT REG") THEN
 !

@@ -61,6 +61,8 @@
 !!                                          can introduced some model explosions for heavy clay soil
 !!                     12/14     (LeMoigne) EBA scheme update
 !!                     10/16   (Marguinaud) Port to single precision
+!!                     08/23   (Seity)      Min value for XWGEQ (avoid crash in
+!!                                          single precision)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -248,8 +250,7 @@ ELSE
 !
 ! Degree of saturation of soil:
 !
-! Changed by MF NWP team    ZSATDEG(JJ)   = MAX(0.1, (PEK%XWGI(JJ,2)+PEK%XWG(JJ,2))/KK%XWSAT(JJ,1))
-    ZSATDEG(JJ)   = MAX(0.1, PEK%XWG(JJ,2)/KK%XWSAT(JJ,1))
+    ZSATDEG(JJ)   = MAX(0.1, (PEK%XWGI(JJ,2)+PEK%XWG(JJ,2))/KK%XWSAT(JJ,1))
 !
 ! Kersten number:
 !
@@ -299,11 +300,10 @@ IF(PEK%TSNOW%SCHEME == 'D95' .OR. (PEK%TSNOW%SCHEME == 'EBA' .AND. IO%LGLACIER) 
       ZLAMS(:) = XCONDI * (PEK%TSNOW%RHO(:,1)/XRHOLW)**1.885              ! first calculate the
 !                                                                   ! conductivity of snow
       PCS(:)   = 2.0 * SQRT( XPI/(ZLAMS(:)*PEK%TSNOW%RHO(:,1)*XCI*XDAY) )
-
-! Limit the snow heat capacity:
-      PCS(:) = MIN( PCS(:), IO%XCSMAX )
-
    END WHERE
+!
+! Limit the snow heat capacity:
+   PCS(:) = MIN( PCS(:), IO%XCSMAX )
 !
 !-------------------------------------------------------------------------------
 !
@@ -429,7 +429,6 @@ ELSE
        ZZC   (JJ) = - ZLYMY1(JJ) * ZX2(JJ)**2
 ! More precise calculation of the largest solution
        ZDELTA(JJ) = MAX (ZZB(JJ)**2 - 4. * ZZA(JJ) * ZZC(JJ), 0.)
-!
        IF (ZZB(JJ) > 0) THEN
          ZA    (JJ) = - 2. * ZZC (JJ) / (ZZB (JJ) + SQRT (ZDELTA (JJ)))
        ELSE
@@ -452,8 +451,7 @@ ENDIF
 !               --------------
 ! Including vertical diffusion limiting factor for surface soil ice:
 !
-! Changed by MF NWP team IF(IO%CKSAT=='SGH' .OR. IO%CKSAT=='EXP')THEN
-IF(IO%CKSAT=='SGH')THEN
+IF(IO%CKSAT=='SGH' .OR. IO%CKSAT=='EXP')THEN
 !
 ! Adjusted root-zone soil water content
 !
@@ -484,6 +482,7 @@ DO JJ=1,SIZE(ZWSAT)
 !
   DMI%XWGEQ(JJ) = ZWG2(JJ) - ZWSAT(JJ)*KK%XACOEF(JJ) *  ZX(JJ)**KK%XPCOEF(JJ)           &
                                *( 1.-EXP(KK%XPCOEF(JJ)*8.*LOG(ZX(JJ))))  
+  DMI%XWGEQ(JJ)=MIN(DMI%XWGEQ(JJ),1.)
 !
 ENDDO
 !-------------------------------------------------------------------------------

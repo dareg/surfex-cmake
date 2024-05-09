@@ -158,7 +158,7 @@ LOGICAL,                          INTENT(IN)  :: OLAND_USE !
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
- CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -228,8 +228,9 @@ IF (LNAM_READ) THEN
                    IM%O%CRAIN, IM%O%CHORT, IM%O%LGLACIER, IM%O%LCANOPY_DRAG,       &
                    IM%O%LVEGUPD, IM%O%LSPINUPCARBS, IM%O%LSPINUPCARBW,             &
                    IM%O%XSPINMAXS, IM%O%XSPINMAXW, IM%O%XCO2_START, IM%O%XCO2_END, &
-                   IM%O%NNBYEARSPINS, IM%O%NNBYEARSPINW, IM%O%LNITRO_DILU,         &
-                   IM%O%XCSMAX, IM%O%XCVHEATF                                      )
+                   IM%O%NNBYEARSPINS, IM%O%NNBYEARSPINW,                           &
+                   IM%O%LPERTSURF, IM%O%XPERT_LOW, IM%O%XPERT_HIGH,                &
+                   IM%O%LNITRO_DILU, IM%O%XCSMAX, IM%O%XCVHEATF                    )
  !                  
  CALL DEFAULT_CH_DEP(IM%CHI%CCH_DRY_DEP)
  CALL DEFAULT_CH_BIO_FLUX(IM%CHI%LCH_BIO_FLUX)                  
@@ -369,8 +370,8 @@ ISIZE_LMEB_PATCH=COUNT(IM%O%LMEB_PATCH(:))
 !*       2.2    Check:
 !               ------
 !
-IF ( IM%O%CPHOTO/='NON' .AND. IM%O%NPATCH/=12 .AND. IM%O%NPATCH/=19 )THEN
-  CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND NPATCH')
+IF ( IM%O%CPHOTO/='NON' .AND. IM%O%NPATCH/=12 .AND. IM%O%NPATCH/=19  .AND. IM%O%NPATCH/=20 )THEN
+    CALL ABOR1_SFX('INIT_ISBAN: INCONSISTENCY BETWEEN CPHOTO AND NPATCH')
 ENDIF
 !
 IF (HINIT=='PRE' .AND. YSNOW_SCHEME.NE.'3-L' .AND. YSNOW_SCHEME.NE.'CRO' .AND. IM%O%CISBA=='DIF') THEN

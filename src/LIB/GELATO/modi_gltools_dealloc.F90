@@ -1,25 +1,3 @@
-MODULE MODI_gltools_dealloc
-INTERFACE
-SUBROUTINE gltools_dealloc(tpglt,nnflxin,noutlu,ntd,lwg)
-!
-USE modd_types_glt 
-#if ! defined in_surfex
-USE modd_CB_DynVariables
-USE modd_CB_DynDim
-USE modd_CB_const
-USE modd_CB_mask
-USE modd_CB_DynForcing
-#endif
-!
-IMPLICIT NONE
-!
-INTEGER,INTENT(in) :: noutlu,nnflxin,ntd
-LOGICAL,INTENT(in) :: lwg
-TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
-END SUBROUTINE gltools_dealloc
-END INTERFACE
-END MODULE MODI_gltools_dealloc
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

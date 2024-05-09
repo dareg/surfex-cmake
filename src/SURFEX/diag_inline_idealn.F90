@@ -8,8 +8,7 @@
                                        PRAIN, PSNOW, PCD, PCDN, PCH, PRI, PHU, PZ0,  &
                                        PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,    &
                                        PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,    &
-                                       PLE, PLEI, PSUBL, PLWUP,                      &  
-                                       PLMO                                          )
+                                       PLE, PLEI, PSUBL, PLWUP)  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_IDEAL_n * - computes diagnostics during IDEAL time-step
@@ -40,6 +39,7 @@ USE MODD_CSTS,         ONLY : XTT, XLVTT
 USE MODD_SURF_PAR,     ONLY : XUNDEF
 !
 USE MODI_CLS_TQ
+USE MODI_CLS_TQ_DIAN
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_IDEAL
 USE MODI_DIAG_SURF_BUDGETC
@@ -92,7 +92,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PLE       ! total latent heat flux (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PLEI      ! sublimation heat flux (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSUBL     ! sublimation (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PLWUP     ! upward longwave radiation (W/m2)
-REAL, DIMENSION(:), INTENT(IN) :: PLMO     ! Monin-Obukov length (m)
 !
 !*      0.2    declarations of local variables
 !
@@ -104,23 +103,27 @@ IF (LHOOK) CALL DR_HOOK('DIAG_INLINE_IDEAL_N',0,ZHOOK_HANDLE)
 !
 D%XTS(:) = PTS(:)
 !
-  IF (DGO%N2M>=2) THEN
+  IF (DGO%N2M==2) THEN
     ZH(:)=2.          
-    IF (DGO%N2M==3) THEN
-      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
-                PCD, PCH, PRI,                 &
-                PTS, PHU, PQSAT, PZ0H, ZH,       &
-                D%XT2M, D%XQ2M, D%XHU2M, PLMO  )  
-    ELSE
-      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
+    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT,         &
                 PCD, PCH, PRI,                 &
                 PTS, PHU, PQSAT, PZ0H, ZH,            &
                 D%XT2M, D%XQ2M, D%XHU2M  )  
-    ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,        &
                   PCD, PCDN, PRI, ZH,       &
-                  D%XZON10M, D%XMER10M  )  
+                  D%XZON10M, D%XMER10M  )
+  ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
+    ZH(:)=2.
+    CALL CLS_TQ_DIAN(PZONA, PMERA, PTA, PQA, PPA, &
+                  PPS, PHT, PCD, PCH, PRI,        &
+                 PTS, PHU, PQSAT, PZ0H, ZH,            &
+                 D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M )
+    ZH(:)=10.
+    CALL CLS_WIND(PZONA, PMERA, PHW,        &
+                  PCD, PCDN, PRI, ZH,       &
+                  D%XZON10M, D%XMER10M  )
+
   END IF
 !
   IF (DGO%N2M>=1) THEN

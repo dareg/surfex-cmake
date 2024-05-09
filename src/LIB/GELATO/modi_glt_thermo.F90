@@ -1,61 +1,3 @@
-MODULE MODI_glt_thermo
-INTERFACE
-SUBROUTINE glt_thermo  &
-  (ygltparam,ygltvhd,&
-    tpdom,pustar,tpmxl,tpatm,  &
-    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,tpsit_d )
-!
-!
-! 1. DECLARATIONS
-! ===============
-!
-! 1.1. Module declarations
-! ------------------------
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-  USE mode_glt_stats
-  USE mode_glt_stats_r
-  USE modi_glt_thermo_r
-  USE modi_glt_constrain_r
-  USE MODD_GLT_VHD, ONLY : t_glt_vhd
-  USE MODD_GLT_PARAM, ONLY : t_glt_param
-!
-  IMPLICIT NONE
-!
-!
-! 1.2. Dummy arguments declarations
-! ---------------------------------
-!
-  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd  
-  TYPE(t_glt_param), INTENT(inout) :: ygltparam
-  TYPE(t_dom), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpdom
-  REAL, DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        pustar
-  TYPE(t_mxl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpmxl
-  TYPE(t_atm), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpatm
-  TYPE(t_blk), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpblkw
-  TYPE(t_blk), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(in) ::  &
-        tpblki
-  TYPE(t_bud), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpbud
-  TYPE(t_dia), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpdia
-  TYPE(t_tfl), DIMENSION(ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tptfl
-  TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpsit
-  TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%nx,ygltparam%ny), INTENT(inout) ::  &
-        tpsil
-  TYPE(t_sit), DIMENSION(ygltparam%ntd,ygltparam%nx,ygltparam%ny), OPTIONAL, INTENT(in) ::  &
-        tpsit_d
-END SUBROUTINE glt_thermo
-END INTERFACE
-END MODULE MODI_glt_thermo
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -563,7 +505,7 @@ SUBROUTINE glt_thermo  &
 !
     IF ( ygltparam%ntd==1 ) THEN
       CALL glt_constrain_r( tzdom_r,tzmxl_r,tzsit_r,tzsil_r,tzdia_r,tzsit_d_r,&
-     ygltparam%nilay,ygltparam%nl,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%ntd,&
+     ygltparam%nilay,ygltparam%nslay,ygltparam%nl,ygltparam%noutlu,ygltparam%np,ygltparam%nt,ygltparam%ntd,&
      ygltparam%dtt,ygltparam%xfsidmpeft,ygltparam%xfsimax,ygltparam%xhsidmpeft,&
      ygltparam%xhsimin,ygltparam%lwg,ygltparam%ccsvdmp,ygltparam%cfsidmp,ygltparam%chsidmp,ygltparam%sf3tinv )
     ENDIF

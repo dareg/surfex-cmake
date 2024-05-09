@@ -65,7 +65,7 @@ USE MODD_XIOS, ONLY : LALLOW_ADD_DIM
 USE MODD_SURF_PAR,        ONLY :   NUNDEF, XUNDEF
 USE MODD_PREP_SNOW,        ONLY :   NIMPUR,IMPTYP
 !
-USE MODD_ASSIM, ONLY : LASSIM, CASSIM_ISBA, NVAR, CVAR, NOBSTYPE, NBOUTPUT, COBS
+USE MODD_ASSIM, ONLY : LASSIM, LLINCHECK, CASSIM_ISBA, NVAR, CVAR, NOBSTYPE, NBOUTPUT, COBS
 !                                 
 USE MODD_AGRI,            ONLY :   LAGRIP
 !
@@ -115,7 +115,7 @@ INTEGER           :: IRESP          ! IRESP  : return-code if a problem appears
  CHARACTER(LEN=2)  :: YLVL
  CHARACTER(LEN=20) :: YFORM
 !
-REAL, DIMENSION(SIZE(DM%XSWI,1)) :: ZMAX
+REAL, DIMENSION(:), ALLOCATABLE :: ZMAX
 INTEGER           :: JL, JJ, JVAR, JOBS, JP, JI, JT, JK, ISIZE, IDEPTH,JIMP
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -181,6 +181,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
   !               --------------------------------------------------------
   !  
   IF(IO%CISBA=='DIF')THEN
+    ALLOCATE(ZMAX(SIZE(DM%XSWI,1)))
     ZMAX(:) = 0.
     !
     DO JP = 1,IO%NPATCH
@@ -203,7 +204,8 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       ENDDO 
 
     ENDDO
-  ENDIF         
+    DEALLOCATE(ZMAX)
+  ENDIF
   !
   DO JL=1,IO%NGROUND_LAYER
     !
@@ -957,7 +959,7 @@ IF (DM%LSURF_MISC_BUDGET) THEN
     !
   ENDIF
   ! 
-  IF (LASSIM .AND. CASSIM_ISBA=="EKF  ") THEN
+  IF (LASSIM .AND. TRIM(CASSIM_ISBA) == "EKF") THEN
     !
     CALL END_IO_SURF_n(HPROGRAM)
     CALL INIT_IO_SURF_n(DTCO, U, HPROGRAM,'NATURE','ISBA  ','WRITE','ISBA_ANALYSIS.OUT.nc')
@@ -970,6 +972,21 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       DO JP = 1,IO%NPATCH
         CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
                                 NP%AL(JP)%NR_P,NP%AL(JP)%XINCR(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE,S%XWORK_WR)
+      ENDDO
+      !
+      YRECFM="INI_PERT"//YVAR
+      !YCOMMENT="by patch"
+      YCOMMENT="Initial perturbation for control variable "//TRIM(CVAR(JVAR))
+      DO JP = 1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
+                                NP%AL(JP)%NR_P,NP%AL(JP)%XEPS(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE,S%XWORK_WR)
+      ENDDO
+      !
+      YRECFM="BG_COVAR"//YVAR//"_"//YVAR
+      YCOMMENT="background covariance for control variable "//TRIM(CVAR(JVAR))
+      DO JP = 1,IO%NPATCH
+        CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
+                                NP%AL(JP)%NR_P,NP%AL(JP)%XB(1:NP%AL(JP)%NSIZE_P,JVAR),ISIZE,S%XWORK_WR)
       ENDDO
       !
       WRITE(YVAR,FMT='(I1.1)') JVAR
@@ -985,6 +1002,14 @@ IF (DM%LSURF_MISC_BUDGET) THEN
             CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
                                       NP%AL(JP)%NR_P,NP%AL(JP)%XHO(1:NP%AL(JP)%NSIZE_P,JK,JVAR),ISIZE,S%XWORK_WR)
           ENDDO
+          IF (LLINCHECK) THEN
+            YRECFM="HO_NEG"//YOBS//"_"//YVAR//"_"//YTIM
+            JK = (JT-1)*NOBSTYPE + JOBS
+            DO JP = 1,IO%NPATCH
+              CALL WRITE_FIELD_1D_PATCH(HSELECT, HPROGRAM, YRECFM, YCOMMENT, JP,&
+                                        NP%AL(JP)%NR_P,NP%AL(JP)%XHO_NEG(1:NP%AL(JP)%NSIZE_P,JK,JVAR),ISIZE,S%XWORK_WR)
+            ENDDO
+          ENDIF
         ENDDO
       ENDDO
     ENDDO
@@ -993,11 +1018,15 @@ IF (DM%LSURF_MISC_BUDGET) THEN
       WRITE(YTIM,FMT='(I1.1)') JT
       DO JOBS = 1,NOBSTYPE
         WRITE(YOBS,FMT='(I1.1)') JOBS
-        YRECFM="INNOV"//YOBS//"_"//YTIM
+        !YRECFM="INNOV"//YOBS//"_"//YTIM
         !YCOMMENT="not by patch"
         YCOMMENT="Innovation for observation "//TRIM(COBS(JOBS))
         JK = (JT-1)*NOBSTYPE + JOBS
-        CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%XINNOV(:,JK),IRESP,HCOMMENT=YCOMMENT)
+        DO JP = 1,IO%NPATCH
+          WRITE(YTIM,FMT='(I1.1)') JP
+          YRECFM="INNOV"//YOBS//"_"//YTIM
+          CALL WRITE_SURF(HSELECT,HPROGRAM,YRECFM,S%XINNOV(:,JK,JP),IRESP,HCOMMENT=YCOMMENT)
+        ENDDO
       ENDDO
     ENDDO
     !

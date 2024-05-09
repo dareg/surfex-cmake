@@ -746,7 +746,7 @@ CALL SNOW_LEAVES_FRAC_MEB(PEK%XPSN, PPALPHAN, PEK%XWRVN, PEK%XTV, ZCHIP, &
 !
 ! NOTE, this assumes thermodynamic variable herein is potential T
 
-ZPET_A_COEF(:) = -PPET_A_COEF(:)*XCPD 
+ZPET_A_COEF(:) = -PPET_A_COEF(:)
 ZPET_B_COEF(:) =  PPET_B_COEF(:)*XCPD
 ZTHRMA_TA(:)   =  XCPD/PEXNA(:)
 ZTHRMB_TA(:)   =  0.0
@@ -843,9 +843,11 @@ LOOP_TIME_SPLIT_EB: DO JDT=1,JTSPLIT_EB
 !*      7.2    Resolution of the surface energy budgets
 !              ----------------------------------------
 !
-   CALL E_BUDGET_MEB(IO, KK, PK, PEK, DK, DEK, DMK,  &
-                     ZTSTEP, ZLTT, PPS, ZCTSFC, PTDEEP_A, ZD_G, ZSOILCONDZ, ZSOILHCAPZ,&
-                     ZSNOWRHO, ZSNOWCOND, ZSNOWHCAP, ZTAU_N, ZDLWNET_V_DTV, ZDLWNET_V_DTG, &
+   CALL E_BUDGET_MEB(IO, KK, PK, PEK, DK, DEK, DMK,                              &
+                     ZTSTEP, ZLTT, PPS, PRHOA,                                   &
+                     ZCTSFC, PTDEEP_A, ZD_G, ZSOILCONDZ, ZSOILHCAPZ,             &
+                     ZSNOWRHO, ZSNOWCOND, ZSNOWHCAP, ZTAU_N,                     &
+                     ZDLWNET_V_DTV, ZDLWNET_V_DTG,                               &
                      ZDLWNET_V_DTN, ZDLWNET_G_DTV, ZDLWNET_G_DTG, ZDLWNET_G_DTN, &
                      ZDLWNET_N_DTV, ZDLWNET_N_DTG, ZDLWNET_N_DTN, PPEW_A_COEF,   &
                      PPEW_B_COEF, ZPET_A_COEF, PPEQ_A_COEF, ZPET_B_COEF,         &
@@ -949,7 +951,8 @@ ZVEGFACT(:) = ZSIGMA_F(:)*(1.0-PPALPHAN(:)*PEK%XPSN(:))
 !  
  CALL SNOW3L_ISBA(IO, G, PK, PEK, DK, DEK, DMK, OMEB, HIMPLICIT_WIND,       &
                   TPTIME, PTSTEP, PK%XVEGTYPE_PATCH,  ZTGL, ZCTSFC,         &
-                  ZSOILHCAPZ, ZSOILCONDZ(:,1), PPS, PTA, PSW_RAD, PQA,      &
+                  ZSOILHCAPZ, ZSOILCONDZ(:,1), PPS,                         &
+                  PEK%XTC, DEK%XSWDOWN_GN, PEK%XQC,                         &
                   PVMOD, PVDIR, PLW_RAD, ZRRSFC, DEK%XSR_GN, PRHOA, ZUREF,  &
                   PEXNS, PEXNA, PDIRCOSZW, PSLOPE_DIR, ZZREF, ZALBG, ZD_G,  &
                   ZDZG, PPEW_A_COEF, PPEW_B_COEF, PPET_A_COEF, PPEQ_A_COEF, &
@@ -1722,6 +1725,7 @@ USE MODD_SNOW_PAR, ONLY : XANSMAX, XANSMIN,XAGLAMIN, XAGLAMAX, &
                           XVSPEC3, XVW1,XVW2,XVD1,XVD2
 !
 USE MODE_SNOW3L
+USE MODI_ABOR1_SFX
 !
 IMPLICIT NONE
 !

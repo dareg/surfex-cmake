@@ -69,7 +69,7 @@
 USE MODD_SGH_PAR, ONLY : X001
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 IMPLICIT NONE
 !
@@ -111,6 +111,17 @@ REAL, DIMENSION(:), INTENT(OUT)   :: PRRVEG
 !
 !*      0.2    declarations of local variables
 !
+#ifdef HIRLAM_SP_HACKS
+REAL(KIND=JPRD), DIMENSION(SIZE(PVEG)) :: ZER
+!                                  ZER = evaporation rate from the canopy
+!
+REAL(KIND=JPRD), DIMENSION(SIZE(PVEG)) :: ZWR ! for time stability scheme
+!
+REAL(KIND=JPRD), DIMENSION(SIZE(PVEG)) :: ZRUIR, ZRUIR2 ! dripping from the vegetation
+!
+REAL(KIND=JPRD)                        :: ZLIM
+REAL(KIND=JPRD), DIMENSION(SIZE(PVEG)) :: PWR_DP, PPG_DP, PDRIP_DP, PRRVEG_DP
+#else
 REAL, DIMENSION(SIZE(PVEG)) :: ZER
 !                                  ZER = evaporation rate from the canopy
 !
@@ -119,6 +130,8 @@ REAL, DIMENSION(SIZE(PVEG)) :: ZWR ! for time stability scheme
 REAL, DIMENSION(SIZE(PVEG)) :: ZRUIR, ZRUIR2 ! dripping from the vegetation
 !
 REAL                        :: ZLIM
+REAL, DIMENSION(SIZE(PVEG)) :: PWR_DP, PPG_DP, PDRIP_DP, PRRVEG_DP
+#endif
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -127,7 +140,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('HYDRO_VEG',0,ZHOOK_HANDLE)
 ZRUIR (:) = 0.
 ZRUIR2(:) = 0.
-PDRIP (:) = 0.
+PDRIP_DP (:) = 0.
 ZWR   (:) = 0.
 !
 !*       1.     EVOLUTION OF THE EQUIVALENT WATER CONTENT Wr
@@ -139,12 +152,12 @@ ZER(:)    = (PLEV(:)-PLETR(:))  / PLVTT(:)
 !
 !intercepted rainfall rate
 !
-PRRVEG(:) = PVEG(:) * (1.-PPSNV(:)) * PRR(:)
+PRRVEG_DP(:) = PVEG(:) * (1.-PPSNV(:)) * PRR(:)
 !
 !evolution of the intercepted water
 !(if we don't consider the runoff)
 !
-PWR(:)  = PWR(:) - PTSTEP * (ZER(:) - PRRVEG(:))
+PWR_DP(:)  = PWR(:) - PTSTEP * (ZER(:) - PRRVEG_DP(:))
 !
 !When Wr < 0, the direct evaporation
 !(i.e., EV-ETR) removes too much
@@ -153,11 +166,11 @@ PWR(:)  = PWR(:) - PTSTEP * (ZER(:) - PRRVEG(:))
 !negative runoff, and it is stocked
 !in ZRUIR2.
 !
-ZRUIR2(:) = MIN(0.,PWR(:)/PTSTEP)
+ZRUIR2(:) = MIN(0.,PWR_DP(:)/PTSTEP)
 !
 !Wr must be positive
 !
-PWR(:)    = MAX(0., PWR(:))
+PWR_DP(:)    = MAX(0., PWR_DP(:))
 !
 IF(HRAIN=='SGH')THEN
 !        
@@ -169,9 +182,9 @@ IF(HRAIN=='SGH')THEN
 !
    ZLIM=X001/PTSTEP
 !
-   WHERE(PRRVEG(:)>ZLIM.AND.PWR(:)>0.0)
-        ZRUIR(:) = PRRVEG(:)*EXP(PMUF(:)*(PWR(:)-PWRMAX(:))/(PRRVEG(:)*PTSTEP))
-        ZRUIR(:) = MIN(ZRUIR(:),PWR(:)/PTSTEP) 
+   WHERE(PRRVEG_DP(:)>ZLIM.AND.PWR_DP(:)>0.0)
+        ZRUIR(:) = PRRVEG_DP(:)*EXP(PMUF(:)*(PWR_DP(:)-PWRMAX(:))/(PRRVEG_DP(:)*PTSTEP))
+        ZRUIR(:) = MIN(ZRUIR(:),PWR_DP(:)/PTSTEP) 
    ENDWHERE
 !
    IF(PTSTEP>300.)THEN
@@ -179,52 +192,52 @@ IF(HRAIN=='SGH')THEN
 !    if the isba time step is coarser than 5min, the "prediction/correction" method is applied
 !    to Wr using the predicted Wr* at the end of the time step for time numerical stability
 !
-     ZWR(:)   = PWR(:)-PTSTEP*ZRUIR(:)
+     ZWR(:)   = PWR_DP(:)-PTSTEP*ZRUIR(:)
      ZRUIR(:) = 0.0
 !
 !    if the dripping is too big, the "prediction/correction" method is applied to Wr using
 !    the predicted Wr* at the midle of the time step for time numerical stability 
 !    (<=> Runge-Kutta order 1 rang 1)
 !
-     WHERE(PRRVEG(:)>ZLIM.AND.ZWR(:)<=0.0)
-           ZRUIR(:) = PRRVEG(:)*EXP(PMUF(:)*(PWR(:)-PWRMAX(:))/(PRRVEG(:)*PTSTEP/2.))
-           ZRUIR(:) = MIN(ZRUIR(:),PWR(:)/(PTSTEP/2.))
-           ZWR  (:) = PWR(:)-PTSTEP*ZRUIR(:)/2.
+     WHERE(PRRVEG_DP(:)>ZLIM.AND.ZWR(:)<=0.0)
+           ZRUIR(:) = PRRVEG_DP(:)*EXP(PMUF(:)*(PWR_DP(:)-PWRMAX(:))/(PRRVEG_DP(:)*PTSTEP/2.))
+           ZRUIR(:) = MIN(ZRUIR(:),PWR_DP(:)/(PTSTEP/2.))
+           ZWR  (:) = PWR_DP(:)-PTSTEP*ZRUIR(:)/2.
            ZRUIR(:) = 0.0
      ENDWHERE
 !
 !    Calculate the corrected dripping from the predicted Wr*
 !
-     WHERE(PRRVEG(:)>ZLIM.AND.ZWR(:)>0.0)
-          ZRUIR(:) = PRRVEG(:)*EXP(PMUF(:)*(ZWR(:)-PWRMAX(:))/(PRRVEG(:)*PTSTEP))
-          ZRUIR(:) = MIN(ZRUIR(:),PWR(:)/PTSTEP) 
+     WHERE(PRRVEG_DP(:)>ZLIM.AND.ZWR(:)>0.0)
+          ZRUIR(:) = PRRVEG_DP(:)*EXP(PMUF(:)*(ZWR(:)-PWRMAX(:))/(PRRVEG_DP(:)*PTSTEP))
+          ZRUIR(:) = MIN(ZRUIR(:),PWR_DP(:)/PTSTEP) 
      ENDWHERE
 !
    ENDIF
 !
-   PWR(:)   = PWR(:)-PTSTEP*ZRUIR(:)  
+   PWR_DP(:)   = PWR_DP(:)-PTSTEP*ZRUIR(:)  
 !
 !  As previously Wr must be positive (numerical artefact)
 !
-   ZRUIR2(:) = ZRUIR2(:) + MIN(0.,PWR(:)/PTSTEP)
-   PWR(:)    = MAX( 0., PWR(:) )
+   ZRUIR2(:) = ZRUIR2(:) + MIN(0.,PWR_DP(:)/PTSTEP)
+   PWR_DP(:)    = MAX( 0., PWR_DP(:) )
 !
 !  Wr must be smaller then Wrmax
 !  Then if Wr remain > Wrmax, there is runoff
 !
-   ZRUIR(:) = ZRUIR(:) + MAX(0., (PWR(:) - PWRMAX(:)) / PTSTEP )
+   ZRUIR(:) = ZRUIR(:) + MAX(0., (PWR_DP(:) - PWRMAX(:)) / PTSTEP )
 !   
 ELSE
 !
 ! if Wr > Wrmax, there is runoff
 !
-  ZRUIR(:) = MAX(0., (PWR(:) - PWRMAX(:)) / PTSTEP )
+  ZRUIR(:) = MAX(0., (PWR_DP(:) - PWRMAX(:)) / PTSTEP )
 !
 ENDIF
 !
 !Wr must be smaller then Wrmax
 !
-PWR(:)   = MIN(PWR(:), PWRMAX(:))
+PWR_DP(:)   = MIN(PWR_DP(:), PWRMAX(:))
 !
 !
 !*       3.     LIQUID WATER REACHING THE GROUND Pg
@@ -234,9 +247,13 @@ PWR(:)   = MIN(PWR(:), PWRMAX(:))
 !precipitation plus the vegetation runoff (we also consider the
 !negative runoff).
 !
-PPG(:) = (1.-PVEG(:)*(1-PPSNV(:))) * PRR(:) + ZRUIR(:) + ZRUIR2(:)
+PPG_DP(:) = (1.-PVEG(:)*(1-PPSNV(:))) * PRR(:) + ZRUIR(:) + ZRUIR2(:)
 !
-PDRIP(:) = ZRUIR(:) + ZRUIR2(:)
+PDRIP_DP(:) = ZRUIR(:) + ZRUIR2(:)
+PWR = REAL(PWR_DP)
+PPG = REAL(PPG_DP)
+PDRIP = REAL(PDRIP_DP)
+PRRVEG = REAL(PRRVEG_DP)
 IF (LHOOK) CALL DR_HOOK('HYDRO_VEG',1,ZHOOK_HANDLE)
 
 !

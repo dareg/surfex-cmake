@@ -3,7 +3,8 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE COARE30_FLUX (S,PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
+    SUBROUTINE COARE30_FLUX (S, &
+                             PZ0SEA,PTA,PEXNA,PRHOA,PSST,PEXNS,PQA,  &
             PVMOD,PZREF,PUREF,PPS,PQSAT,PSFTH,PSFTQ,PUSTAR,PCD,PCDN,PCH,PCE,PRI,&
             PRESA,PRAIN,PZ0HSEA)  
 !     #######################################################################
@@ -54,6 +55,7 @@
 !!      J.Escobar      06/2013  for REAL4/8 add EPSILON management
 !!      C. Lebeaupin   03/2014 bug if PTA=PSST and PEXNA=PEXNS: set a minimum value
 !!                             add abort if no convergence
+!!      F. Svabik      08/2023 unapproximated roughness length averaging
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -65,7 +67,7 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 USE MODD_CSTS,       ONLY : XKARMAN, XG, XSTEFAN, XRD, XRV, XPI, &
                             XLVTT, XCL, XCPD, XCPV, XRHOLW, XTT, &
                             XP00
-USE MODD_SURF_ATM,   ONLY : XVZ0CM
+USE MODD_SURF_ATM,   ONLY : XVZ0CM, XZ0_OFFSET
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_WATER_PAR
@@ -270,20 +272,20 @@ DO J=1,SIZE(PTA)
   !
   !      2.3   initialization of neutral coefficients
   !
-  ZU10(J)  = ZDUWG(J)*LOG(ZS/ZO(J))/LOG(PUREF(J)/ZO(J))
+  ZU10(J)  = ZDUWG(J)*LOG(XZ0_OFFSET + ZS/ZO(J))/LOG(XZ0_OFFSET + PUREF(J)/ZO(J))
   ZUSR(J)  = 0.035*ZU10(J)
   ZVISA(J) = 1.326E-5*(1.+6.542E-3*(ZTA(J)-XTT)+&
              8.301E-6*(ZTA(J)-XTT)**2-4.84E-9*(ZTA(J)-XTT)**3) !Andrea (1989) CRREL Rep. 89-11
   ! 
   ZO10(J) = ZCHARN(J)*ZUSR(J)*ZUSR(J)/XG+0.11*ZVISA(J)/ZUSR(J)
-  ZCD(J)  = (XKARMAN/LOG(PUREF(J)/ZO10(J)))**2  !drag coefficient
-  ZCD10(J)= (XKARMAN/LOG(ZS/ZO10(J)))**2
+  ZCD(J)  = (XKARMAN/LOG(XZ0_OFFSET + PUREF(J)/ZO10(J)))**2  !drag coefficient
+  ZCD10(J)= (XKARMAN/LOG(XZ0_OFFSET + ZS/ZO10(J)))**2
   ZCT10(J)= ZCH10/SQRT(ZCD10(J))
-  ZOT10(J)= ZS/EXP(XKARMAN/ZCT10(J))
+  ZOT10(J)= ZS/(EXP(XKARMAN/ZCT10(J)) - XZ0_OFFSET)
   !
   !-------------------------------------------------------------------------------
   !             Grachev and Fairall (JAM, 1997)
-  ZCT(J) = XKARMAN/LOG(PZREF(J)/ZOT10(J))      !temperature transfer coefficient
+  ZCT(J) = XKARMAN/LOG(XZ0_OFFSET + PZREF(J)/ZOT10(J))      !temperature transfer coefficient
   ZCC(J) = XKARMAN*ZCT(J)/ZCD(J)               !z/L vs Rib linear coef.
   !
   ZRIBCU(J) = -PUREF(J)/(ZZBL*0.004*ZBETAGUST**3) !saturation or plateau Rib
@@ -303,9 +305,9 @@ DO J=1,SIZE(PTA)
 ENDDO
 !
 !  First guess M-O stability dependent scaling params. (u*,T*,q*) to estimate ZO and z/L (ZZL)
-ZUSR(:) = ZDUWG(:)*XKARMAN/(LOG(PUREF(:)/ZO10(:))-PSIFCTU(PUREF(:)/ZL10(:)))
-ZTSR(:) = -ZDT(:)*XKARMAN/(LOG(PZREF(:)/ZOT10(:))-PSIFCTT(PZREF(:)/ZL10(:)))
-ZQSR(:) = -ZDQ(:)*XKARMAN/(LOG(PZREF(:)/ZOT10(:))-PSIFCTT(PZREF(:)/ZL10(:)))
+ZUSR(:) = ZDUWG(:)*XKARMAN/(LOG(XZ0_OFFSET + PUREF(:)/ZO10(:))-PSIFCTU(PUREF(:)/ZL10(:)))
+ZTSR(:) = -ZDT(:)*XKARMAN/(LOG(XZ0_OFFSET + PZREF(:)/ZOT10(:))-PSIFCTT(PZREF(:)/ZL10(:)))
+ZQSR(:) = -ZDQ(:)*XKARMAN/(LOG(XZ0_OFFSET + PZREF(:)/ZOT10(:))-PSIFCTT(PZREF(:)/ZL10(:)))
 !
 ZZL(:) = 0.0
 !
@@ -370,9 +372,9 @@ DO JLOOP=1,MAXVAL(ITERMAX) ! begin of iterative loop
     !
     !             3.1 scale parameters
     !
-    ZUSR(J) = ZDUWG(J)*XKARMAN/(LOG(PUREF(J)/ZO(J)) -ZPUZ(J))
-    ZTSR(J) = -ZDT(J)  *XKARMAN/(LOG(PZREF(J)/ZOT(J))-ZPTZ(J))
-    ZQSR(J) = -ZDQ(J)  *XKARMAN/(LOG(PZREF(J)/ZOQ(J))-ZPQZ(J))
+    ZUSR(J) = ZDUWG(J)*XKARMAN/(LOG(XZ0_OFFSET + PUREF(J)/ZO(J)) -ZPUZ(J))
+    ZTSR(J) = -ZDT(J)  *XKARMAN/(LOG(XZ0_OFFSET + PZREF(J)/ZOT(J))-ZPTZ(J))
+    ZQSR(J) = -ZDQ(J)  *XKARMAN/(LOG(XZ0_OFFSET + PZREF(J)/ZOQ(J))-ZPQZ(J))
     !
     !             3.2 Gustiness factor (ZWG)
     !
@@ -412,9 +414,9 @@ DO J=1,SIZE(PTA)
   PCH(J) = ZUSR(J)*ZTSR(J)/(ZDUWG(J)*(ZTA(J)*PEXNS(J)/PEXNA(J)-PSST(J)))
   PCE(J) = ZUSR(J)*ZQSR(J)/(ZDUWG(J)*(PQA(J)-PQSAT(J)))
   !
-  PCDN(J) = (XKARMAN/LOG(ZS/ZO(J)))**2.
-  ZCHN(J) = (XKARMAN/LOG(ZS/ZO(J)))*(XKARMAN/LOG(ZS/ZOT(J)))
-  ZCEN(J) = (XKARMAN/LOG(ZS/ZO(J)))*(XKARMAN/LOG(ZS/ZOQ(J)))
+  PCDN(J) = (XKARMAN/LOG(XZ0_OFFSET + ZS/ZO(J)))**2.
+  ZCHN(J) = (XKARMAN/LOG(XZ0_OFFSET + ZS/ZO(J)))*(XKARMAN/LOG(XZ0_OFFSET + ZS/ZOT(J)))
+  ZCEN(J) = (XKARMAN/LOG(XZ0_OFFSET + ZS/ZO(J)))*(XKARMAN/LOG(XZ0_OFFSET + ZS/ZOQ(J)))
   !
   ZLV(J) = XLVTT + (XCPV-XCL)*(PSST(J)-XTT)
   !

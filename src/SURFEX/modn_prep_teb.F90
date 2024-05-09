@@ -45,6 +45,7 @@ INTEGER           :: NMONTH       ! MONTH for surface
 INTEGER           :: NDAY         ! DAY for surface
 REAL              :: XTIME        ! TIME for surface
 LOGICAL           :: LTEB_CANOPY  ! flag to use air layers inside the canopy
+LOGICAL           :: LREPROD      ! 
  CHARACTER(LEN=4)  :: CROAD_DIR    ! flag to use uniform road orientation or not
  CHARACTER(LEN=4)  :: CWALL_OPT    ! flag to use uniform walls or 2 separated walls
 !
@@ -53,6 +54,6 @@ NAMELIST/NAM_PREP_TEB/CFILE_TEB, CTYPE, CFILEPGD_TEB, CTYPEPGD,  &
                       CFILE_TS, CTYPE_TS, XTS_ROOF, XTS_ROAD,    &
                       XTS_WALL, XTI_BLD, XTI_ROAD, XHUI_BLD,     &
                       NYEAR, NMONTH, NDAY, XTIME, LTEB_CANOPY,   &
-                      CROAD_DIR, CWALL_OPT  
+                      CROAD_DIR, CWALL_OPT, LREPROD  
 !
 END MODULE MODN_PREP_TEB

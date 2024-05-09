@@ -1,27 +1,3 @@
-MODULE MODI_gltools_mixice_r
-INTERFACE
-SUBROUTINE gltools_mixice_r(tpmxl,tplsit,tplsil,tpsit,tpsil,&
-niceage,nicesal,nilay,nl,nmponds,np,nt )
-!
-  USE modd_types_glt
-  USE modd_glt_const_thm
-!
-  IMPLICIT NONE
-  INTEGER,INTENT(IN) :: niceage,nicesal,nmponds,nilay,nl,nt,np
-!
-  TYPE(t_mxl),DIMENSION(np), INTENT(in) ::                           &
-        tpmxl
-  TYPE(t_sit), DIMENSION(:,:,:), INTENT(in) ::                        &
-        tplsit
-  TYPE(t_vtp), DIMENSION(:,:,:,:), INTENT(in) ::                      &
-        tplsil
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::                    &
-        tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::                 &
-        tpsil
-END SUBROUTINE gltools_mixice_r
-END INTERFACE
-END MODULE MODI_gltools_mixice_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

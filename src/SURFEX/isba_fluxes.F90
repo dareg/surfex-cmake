@@ -210,6 +210,7 @@ REAL                            :: ZEPS1
 !*      0.3    declarations of local parameters
 !
 INTEGER         :: JJ
+LOGICAL         :: GMODSNOWMELT
 !
 REAL, DIMENSION(SIZE(PTA))      :: ZWORK1, ZWORK2, ZWORK3
 !
@@ -363,9 +364,19 @@ IF( (PEK%TSNOW%SCHEME == 'D95' .OR. PEK%TSNOW%SCHEME == 'EBA') .AND. IO%CISBA /=
 !                                            there is melting only if T > T0 and
 !                                            of course when SNOWSWE > 0.
 !
-      WHERE ( ZTN(:) > XTT .AND. PEK%TSNOW%WSNOW(:,1) > 0.0 )
-        PMELT(:) = ZPSN(:)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*MAX(XTAU_SMELT,PTSTEP))
-      END WHERE
+      GMODSNOWMELT=.TRUE.
+      IF(GMODSNOWMELT)THEN
+        WHERE ( ZTN(:) > XTT .AND. PEK%TSNOW%WSNOW(:,1) > 0.0 )
+!         In the original formulation of PMELT below the last few centimeters of snow
+!         tend to stay too long before they melt away. The modification here helps with
+!         this problem and is suggested by Sander Tijm (KNMI):
+          PMELT(:) = MAX(ZPSN(:),0.25)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*MAX(XTAU_SMELT,PTSTEP))
+        END WHERE
+      ELSE
+        WHERE ( ZTN(:) > XTT .AND. PEK%TSNOW%WSNOW(:,1) > 0.0 )
+          PMELT(:) = ZPSN(:)*(ZTN(:)-XTT) / (PCS(:)*XLMTT*MAX(XTAU_SMELT,PTSTEP))
+        END WHERE
+      ENDIF
 !
 !                                            close the energy budget: cannot melt 
 !                                            more than the futur available snow

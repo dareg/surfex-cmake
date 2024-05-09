@@ -74,7 +74,7 @@ NGRID_PAR=KGRID_PAR
 ALLOCATE(XGRID_PAR(NGRID_PAR))
 XGRID_PAR = PGRID_PAR
 !
-IF (LHOOK) CALL DR_HOOK('GRID_FROM_FILE',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('PUT_PGD_GRID',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !

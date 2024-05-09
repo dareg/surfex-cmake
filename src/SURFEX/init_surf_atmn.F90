@@ -156,7 +156,7 @@ LOGICAL,                          INTENT(IN)  :: OLAND_USE !
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
- CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPWET      !  wet deposit coefficient for each impurity type    (g)
 REAL,             DIMENSION(KI,NIMPUR),  INTENT(IN)  :: PIMPDRY     !  dry deposit coefficient for each impurity type    (g)
@@ -411,7 +411,7 @@ ENDIF
 !
  CALL READ_SURF(HPROGRAM,'CH_EMIS',YSC%CHU%LCH_EMIS,IRESP)
 !
-IF (YSC%CHU%LCH_EMIS) THEN
+IF ((YSC%CHU%LCH_EMIS).AND.(YSC%CHU%LCH_SURF_EMIS)) THEN
   !
   IF ( IVERSION<7 .OR. IVERSION==7 .AND. IBUGFIX<3 ) THEN
     YSC%CHU%CCH_EMIS='AGGR'

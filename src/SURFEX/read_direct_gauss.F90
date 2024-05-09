@@ -513,7 +513,7 @@ DO
       ZVALUE(:)=YVALUE32R(:)
       !
       IF (ICPT==0) THEN      
-        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-30) &
              .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN
           ICPT = ICPT + 1
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')
@@ -537,7 +537,7 @@ DO
       ZVALUE(:)=YVALUE64(:)
       !
       IF (ICPT==0) THEN      
-        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-50) &
+        IF (      ANY(ABS(ZVALUE)>0. .AND. ABS(ZVALUE)<1.E-30) &
                .OR. ANY(ABS(ZVALUE)>1.E20)                       ) THEN  
           ICPT = ICPT + 1
           IF (GSWAP) CALL ABOR1_SFX('READ_DIRECT_GAUSS: SWAP ALREADY DONE, CANNOT BE REDONE')

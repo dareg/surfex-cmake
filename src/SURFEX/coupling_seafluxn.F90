@@ -47,6 +47,7 @@ SUBROUTINE COUPLING_SEAFLUX_n (CHS, DTS, DGS, O, OR, G, S, AT, DST, SLT, &
 !!      Modified    01/2014 : S. Belamari Remove MODE_THERMOS and XLVTT
 !!      Modified    05/2014 : S. Belamari New ECUME : Include salinity & atm. pressure impact 
 !!      Modified    01/2015 : R. Séférian interactive ocaen surface albedo
+!!      Modified    08/2023 : F. Svabik Unapproximated roughness length averaging
 !!                                       
 !!---------------------------------------------------------------------
 !
@@ -66,6 +67,7 @@ USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,       ONLY : XRD, XCPD, XP00, XTT, XTTS, XTTSI, XDAY
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SURF_ATM,   ONLY : XZ0_OFFSET
 USE MODD_SFX_OASIS,  ONLY : LCPL_SEA, LCPL_SEAICE
 USE MODD_WATER_PAR,  ONLY : XEMISWAT, XEMISWATICE
 !
@@ -141,7 +143,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -166,7 +168,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -213,7 +215,8 @@ REAL, DIMENSION(KI) :: ZZ0        ! roughness length over open sea
 REAL, DIMENSION(KI) :: ZZ0_ICE    ! roughness length over seaice
 REAL, DIMENSION(KI) :: ZZ0H       ! heat roughness length over open sea
 REAL, DIMENSION(KI) :: ZZ0H_ICE   ! heat roughness length over seaice
-REAL, DIMENSION(KI) :: ZZ0W       ! Work array for Z0 and Z0H computation
+REAL, DIMENSION(KI) :: ZZ0W       ! Work array for Z0 computation
+REAL, DIMENSION(KI) :: ZZ0WH      ! Work array for Z0H computation
 REAL, DIMENSION(KI) :: ZQSAT      ! humidity at saturation on open sea
 REAL, DIMENSION(KI) :: ZQSAT_ICE  ! "     "          on seaice
 !
@@ -231,9 +234,6 @@ REAL, DIMENSION(KI) :: ZHU        ! Near surface relative humidity
 REAL, DIMENSION(KI) :: ZQA        ! specific humidity (kg/kg)
 REAL, DIMENSION(KI) :: ZEMIS      ! Emissivity at time t
 REAL, DIMENSION(KI) :: ZTRAD      ! Radiative temperature at time t
-!
-REAL, DIMENSION(KI) :: ZLMO       ! Monin-Obukov length (m)
-REAL, DIMENSION(KI) :: ZLMO_ICE   ! Monin-Obukov length (m)
 !
 REAL, DIMENSION(KI) :: ZSST       ! XSST corrected for anomalously low values (which actually are sea-ice temp)
 REAL, DIMENSION(KI) :: ZMASK      ! A mask for diagnosing where seaice exists (or, for coupling_iceflux, may appear)
@@ -533,8 +533,6 @@ IF (CHS%SVS%NSLTEQ>0) THEN
   !
 ENDIF
 !
-ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,ZSFTH/PRHOA/XCPD,ZSFTQ/PRHOA)
-ZLMO_ICE(:) = LMO(ZUSTAR_ICE,PTA/ZEXNA,ZQA,ZSFTH_ICE/PRHOA/XCPD,ZSFTQ_ICE/PRHOA)
 !
 !-------------------------------------------------------------------------------
 ! Inline diagnostics at time t for SST and TRAD
@@ -545,10 +543,10 @@ CALL DIAG_INLINE_SEAFLUX_n(DGS%O, DGS%D, DGS%DC, DGS%DI, DGS%DIC, DGS%DMI, &
                            PV, PZREF, PUREF, ZCD, ZCDN, ZCH, ZCE, ZRI, ZHU,&
                            ZZ0H, ZQSAT, ZSFTH, ZSFTQ, ZSFU, ZSFV,          &
                            PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB,      &
-                           ZEMIS, ZTRAD, PRAIN, PSNOW, ZLMO,               &
+                           ZEMIS, ZTRAD, PRAIN, PSNOW,                     &
                            ZCD_ICE, ZCDN_ICE, ZCH_ICE, ZCE_ICE, ZRI_ICE,   &
                            ZZ0_ICE, ZZ0H_ICE, ZQSAT_ICE, ZSFTH_ICE,        &
-                           ZSFTQ_ICE, ZSFU_ICE, ZSFV_ICE, ZLMO_ICE         )
+                           ZSFTQ_ICE, ZSFU_ICE, ZSFV_ICE                   )
 !
 !-------------------------------------------------------------------------------
 ! A kind of "average_flux"
@@ -657,12 +655,12 @@ IF (S%LHANDLE_SIC) THEN
   ENDIF         
   PTSURF (:) = S%XSST(:) * ( 1 - S%XSIC (:)) +   S%XTICE(:) * S%XSIC(:)
   PQSURF (:) = ZQSAT (:) * ( 1 - S%XSIC (:)) + ZQSAT_ICE(:) * S%XSIC(:)
-  ZZ0W   (:) = ( 1 - S%XSIC(:) ) * 1.0/(LOG(PUREF(:)/ZZ0(:))    **2)  +  &
-                     S%XSIC(:)   * 1.0/(LOG(PUREF(:)/ZZ0_ICE(:))**2)  
-  PZ0    (:) = PUREF (:) * EXP ( - SQRT ( 1./  ZZ0W(:) ))
-  ZZ0W   (:) = ( 1 - S%XSIC(:) ) * 1.0/(LOG(PZREF(:)/ZZ0H(:))    **2)  +  &
-                     S%XSIC(:)   * 1.0/(LOG(PZREF(:)/ZZ0H_ICE(:))**2)  
-  PZ0H   (:) = PZREF (:) * EXP ( - SQRT ( 1./  ZZ0W(:) ))
+  ZZ0W   (:) = (1 - S%XSIC(:)) * 1.0/(LOG( XZ0_OFFSET + PUREF(:)/ZZ0(:) )**2) + &
+                    S%XSIC(:)  * 1.0/(LOG( XZ0_OFFSET + PUREF(:)/ZZ0_ICE(:) )**2)
+  PZ0    (:) = PUREF(:)/(EXP( SQRT(1./ZZ0W(:)) ) - XZ0_OFFSET)
+  ZZ0WH  (:) = (1 - S%XSIC(:)) * 1.0/(LOG( XZ0_OFFSET + PZREF(:)/ZZ0H    (:) ) * LOG( XZ0_OFFSET * (1. + PUREF(:)/ZZ0    (:) - PZREF(:)/ZZ0H    (:)) + PZREF(:)/ZZ0H    (:) )) + &
+                    S%XSIC(:)  * 1.0/(LOG( XZ0_OFFSET + PZREF(:)/ZZ0H_ICE(:) ) * LOG( XZ0_OFFSET * (1. + PUREF(:)/ZZ0_ICE(:) - PZREF(:)/ZZ0H_ICE(:)) + PZREF(:)/ZZ0H_ICE(:) ))
+  PZ0H   (:) = PZREF(:)/(EXP( (XZ0_OFFSET * (SQRT(ZZ0W(:)/ZZ0WH(:)) - 1.) + 1.)/SQRT(ZZ0WH(:)) ) - XZ0_OFFSET)
 ELSE
   PTSURF (:) = S%XSST(:) 
   PQSURF (:) = ZQSAT (:) 

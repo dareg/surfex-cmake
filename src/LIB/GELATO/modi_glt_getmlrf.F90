@@ -1,25 +1,3 @@
-MODULE MODI_glt_getmlrf
-INTERFACE
-SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
-  USE modd_types_glt
-  USE modd_glt_const_thm
-  USE mode_gltools_sigma
-  USE mode_gltools_swfrzt
-#if ! defined in_surfex
-  USE mode_gltools_bound
-#endif
-  USE mode_gltools_prtrarr
-!
-  IMPLICIT NONE 
-!
-  INTEGER,INTENT(IN) :: nx,ny
-  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(in) ::  &
-    tpoce_all
-  TYPE(t_mxl), DIMENSION(nx,ny), INTENT(out) ::  &
-    tpml
-END SUBROUTINE glt_getmlrf
-END INTERFACE
-END MODULE MODI_glt_getmlrf
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

@@ -1,28 +1,3 @@
-MODULE MODI_gltools_chkout
-INTERFACE
-SUBROUTINE gltools_chkout(    kdate,tpglt,&
-        n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavlu,nsavout,nt,nx,nxglo,ny,nyglo,xdomsrf_g,lp1,lwg,ciopath )
-!
-  USE modd_types_glt
-  USE modi_gltools_nwords
-  USE modi_gltools_strsplit
-  USE mode_gltools_wrivais
-  USE lib_mpp
-  IMPLICIT none
-!
-! .. Dummy arguments
-!
-  INTEGER, INTENT(in) ::  &
-    kdate,nprinto,nnflxin,noutlu,nsavout,nsavlu,nt,nx,ny,nxglo,nyglo,n2vilu,n0vilu
-  REAL, INTENT(in) ::  xdomsrf_g
-  LOGICAL, INTENT(in) ::  lp1,lwg
-  CHARACTER(*), INTENT(in) ::  ciopath
-
-  TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
-END SUBROUTINE gltools_chkout
-END INTERFACE
-END MODULE MODI_gltools_chkout
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

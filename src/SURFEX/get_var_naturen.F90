@@ -4,7 +4,7 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE GET_VAR_NATURE_n (S, DGO, D, DMI, &
-                                   HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW,PBARE)
+                                   HPROGRAM,KI,PQS,PSNG,PSNV,PZ0EFF,PZ0,PZ0H,PTWSNOW,PTDSNOW,PBARE)
 !     ######################################################################
 !
 !!****  *GET_VAR_NATURE_n* - routine to get variables defined only over nature
@@ -36,6 +36,7 @@
 !       M. Jidane   08/2008 Z0 and Z0H recovery from nature tiles
 !       S. Riette   06/2010 TWSNOW added
 !       V. Masson   02/2015 adds LAI, height of trees, fraction of bare soil
+!       I. Etchevers 10/2022 PTDSNOW added
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -74,6 +75,7 @@ REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0EFF  ! effective roughness length (z0
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0     ! surface roughness length
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PZ0H    ! surface roughness length for heat
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PTWSNOW ! Snow total reservoir
+REAL, DIMENSION(KI),  INTENT(OUT)    :: PTDSNOW ! Snow depth (m)
 REAL, DIMENSION(KI),  INTENT(OUT)    :: PBARE   ! Bare soil fraction
 !
 !
@@ -98,10 +100,12 @@ IF (DMI%LSURF_MISC_BUDGET) THEN
         PSNG     = DMI%XPSNG      
         PSNV     = DMI%XPSNV      
         PTWSNOW  = DMI%XTWSNOW
+        PTDSNOW  = DMI%XTDSNOW
    ELSE 
         PSNG     = XUNDEF      
         PSNV     = XUNDEF      
         PTWSNOW  = XUNDEF
+        PTDSNOW  = XUNDEF
 ENDIF           
 !
 IF (DGO%LCOEF) THEN

@@ -193,6 +193,16 @@ DO JP = 1,IO%NPATCH
         PEK%XWGI(:,JL) = ZWGTOT(:) - XWGMIN
       END WHERE
       !
+    END WHERE
+    !
+  END DO
+  !
+ !YS Add  DIFF test here as in surfex v8
+  IF (IO%CISBA=='DIFF') THEN
+  DO JL=1,IWORK
+    !
+    WHERE(PEK%XTG(:,JL)/=XUNDEF) 
+     
       WHERE(PEK%XWGI(:,JL)>0.0.AND.PEK%XWGI(:,JL)/=XUNDEF)
         PEK%XTG(:,JL) = MIN(XTT,PEK%XTG(:,JL))
       ELSEWHERE
@@ -202,6 +212,7 @@ DO JP = 1,IO%NPATCH
     END WHERE
     !
   END DO
+  ENDIF
   !
   !
   !* limits in force-restore case

@@ -53,13 +53,14 @@
 !!      Original    20/01/98 
 !!                  02/04/01 (P Jabouille) limitation of Z0 with 0.5 PUREF
 !!                  05/2016 M. Lafaysse - B. Cluzet : implement Martin and Lejeune 1998 formulation for multiphysics
+!!                  08/2023 Y. Seity Add XACMAX
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,ONLY : XKARMAN
-USE MODD_SURF_ATM, ONLY : XCH_COEFF1, XRISHIFT
+USE MODD_SURF_ATM,ONLY : XCH_COEFF1, XRISHIFT, XACMAX
 USE MODI_WIND_THRESHOLD
 !
 USE MODE_THERMOS
@@ -158,6 +159,7 @@ DO JJ=1,SIZE(PRI)
         PAC(JJ) = ZCDN(JJ)*ZVMOD(JJ)/(1.+XCH_COEFF1*ZSTAMOD*ZDI(JJ)  &
              / ZWORK3(JJ) /ZVMOD(JJ) )*ZFH(JJ)
       ENDIF
+      PAC(JJ)=MIN(PAC(JJ),XACMAX)
     !
       PRA(JJ) = 1. / PAC(JJ)
     !

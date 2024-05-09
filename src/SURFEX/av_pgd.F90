@@ -152,6 +152,7 @@ END MODULE MODI_AV_PGD
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
 !!    R. Alkama   05/2012  Add 6 tree vegtypes (9 rather than 3)
+!!    F. Svabik   08/2023  Unapproximated roughness length averaging
 !!
 !----------------------------------------------------------------------------
 !
@@ -164,6 +165,7 @@ USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 USE MODD_SURFEX_OMP, ONLY : NBLOCKTOT
 USE MODD_SURFEX_MPI, ONLY : NRANK
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_SURF_ATM,       ONLY : XZ0_OFFSET
 USE MODD_DATA_COVER,     ONLY : XDATA_BLD_HEIGHT 
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
@@ -273,7 +275,7 @@ IF (HATYPE=='ARI' .OR. HATYPE=='INV' .OR. HATYPE=='CDN') THEN
       ELSEIF (HATYPE=='INV') THEN
         ZVAL(:) = 1./PDATA(JJ)
       ELSEIF (HATYPE=='CDN') THEN
-        ZVAL(:) = 1./(LOG(ZDZ(:)/PDATA(JJ)))**2 
+        ZVAL(:) = 1./(XZ0_OFFSET + LOG(ZDZ(:)/PDATA(JJ)))**2 
       ENDIF
       !
       DO JI = 1,SIZE(PCOVER,1)
@@ -292,7 +294,7 @@ IF (HATYPE=='ARI' .OR. HATYPE=='INV' .OR. HATYPE=='CDN') THEN
 ELSEIF (HATYPE=='MAJ') THEN
   !
 !!$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3',0,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3',0,ZHOOK_HANDLE_OMP)
 !!$OMP DO SCHEDULE(DYNAMIC,1) PRIVATE(JI,ID0)
   DO JI = 1,SIZE(PCOVER,1) 
     ID0 = MAXVAL(MAXLOC(PCOVER(JI,:)*ZWEIGHT(:)))
@@ -300,7 +302,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3',0,ZHOOK_HANDLE_OMP)
     ZSUM_COVER_WEIGHT(JI) = ZSUM_COVER_WEIGHT(JI) + SUM(PCOVER(JI,:)*ZWEIGHT(:))
   ENDDO
 !!$OMP END DO
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3',1,ZHOOK_HANDLE_OMP)
+!IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_3',1,ZHOOK_HANDLE_OMP)
 !!$OMP END PARALLEL
   !
 ELSE
@@ -349,7 +351,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD:AV_PGD_1D_4',0,ZHOOK_HANDLE)
   CASE('CDN')
 !
     WHERE ( ZSUM_COVER_WEIGHT(:) >0. )
-      PFIELD(:) = ZDZ(:) * EXP( - SQRT(ZSUM_COVER_WEIGHT(:)/ZWORK(:)) )
+      PFIELD(:) = ZDZ(:) / (EXP( SQRT(ZSUM_COVER_WEIGHT(:)/ZWORK(:)) ) - XZ0_OFFSET)
     END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -425,6 +427,7 @@ END SUBROUTINE AV_PGD_1D
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
 !!    R. Alkama   05/2012  Add 6 tree vegtypes (9 rather than 3)
+!!    F. Svabik   08/2023  Unapproximated roughness length averaging
 !!
 !----------------------------------------------------------------------------
 !
@@ -435,6 +438,7 @@ END SUBROUTINE AV_PGD_1D
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_SURF_ATM,       ONLY : XZ0_OFFSET
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG, XDATA_LAI
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVEGTYPE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
@@ -573,7 +577,7 @@ DO JCOVER=1,ICOVER
         ZVAL(:) = 1. / PDATA(JJ,JVEGTYPE)
       ELSEIF (HATYPE=='CDN') THEN
         DO JI=1,SIZE(PCOVER,1)
-          ZVAL(JI) = 1./(LOG(ZDZ(JI,JPATCH)/PDATA(JJ,JVEGTYPE)))**2 
+          ZVAL(JI) = 1./(XZ0_OFFSET + LOG(ZDZ(JI,JPATCH)/PDATA(JJ,JVEGTYPE)))**2 
         ENDDO
       ELSE
         CALL ABOR1_SFX('AV_PATCH_PGD_1D: (1) AVERAGING TYPE NOT ALLOWED')
@@ -662,7 +666,7 @@ ENDDO
 !cdir nodep
       DO JJ=1,JCOUNT(JPATCH)
         JI = IMASK(JJ,JPATCH)
-        PFIELD(JI,JPATCH) = ZDZ(JI,JPATCH) * EXP( - SQRT(ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH)/ZWORK(JI,JPATCH)) )
+        PFIELD(JI,JPATCH) = ZDZ(JI,JPATCH) / (EXP( SQRT(ZSUM_COVER_WEIGHT_PATCH(JI,JPATCH)/ZWORK(JI,JPATCH)) ) - XZ0_OFFSET)
       ENDDO
     ENDDO
 !
@@ -729,6 +733,7 @@ END SUBROUTINE AV_PATCH_PGD_1D
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
 !!    R. Alkama   05/2012  Add 6 tree vegtypes (9 rather than 3)
+!!    F. Svabik   08/2023  Unapproximated roughness length averaging
 !!
 !----------------------------------------------------------------------------
 !
@@ -739,6 +744,7 @@ END SUBROUTINE AV_PATCH_PGD_1D
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_SURF_ATM,       ONLY : XZ0_OFFSET
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
 !
@@ -917,7 +923,9 @@ DO JJ=1,ICOVER
 !
   CASE('CDN')
 !
-    ZWORK (:,:)= ZWORK(:,:) + 1./(LOG(ZDZ(:,:)/ZDATA))**2 * ZCOVER_WEIGHT(:,:)
+    WHERE (ZCOVER_WEIGHT(:,:) > 0.)
+      ZWORK (:,:)= ZWORK(:,:) + 1./(XZ0_OFFSET + LOG(ZDZ(:,:)/ZDATA))**2 * ZCOVER_WEIGHT(:,:)
+    END WHERE
 !
 !-------------------------------------------------------------------------------
 !
@@ -969,7 +977,7 @@ END DO
   CASE('CDN')
 !
     WHERE ( ZSUM_COVER_WEIGHT(:,:) >0. )
-      PFIELD(:,:) = ZDZ(:,:) * EXP( - SQRT(ZSUM_COVER_WEIGHT(:,:)/ZWORK(:,:)) )
+      PFIELD(:,:) = ZDZ(:,:) / (EXP( SQRT(ZSUM_COVER_WEIGHT(:,:)/ZWORK(:,:)) ) - XZ0_OFFSET)
     END WHERE
 !
 !-------------------------------------------------------------------------------
@@ -1035,6 +1043,7 @@ END SUBROUTINE AV_PGD_2D
 !!    Original    15/12/97
 !!    V. Masson   01/2004  Externalization
 !!    R. Alkama   05/2012  Add 6 tree vegtypes (9 rather than 3)
+!!    F. Svabik   08/2023  Unapproximated roughness length averaging
 !!
 !----------------------------------------------------------------------------
 !
@@ -1045,6 +1054,7 @@ END SUBROUTINE AV_PGD_2D
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_SURF_ATM,       ONLY : XZ0_OFFSET
 USE MODD_DATA_COVER,     ONLY : XDATA_VEG, XDATA_LAI  
 USE MODD_DATA_COVER_PAR, ONLY : NVT_TEBD, NVT_BONE, NVT_TRBE, NVEGTYPE, XCDREF, NVT_TRBD, &
                                 NVT_TEBE, NVT_TENE, NVT_BOBD, NVT_BOND, NVT_SHRB
@@ -1337,8 +1347,10 @@ DO JJ=1,ICOVER
 !
       DO JVEGTYPE=1,NVEGTYPE
         JPATCH=VEGTYPE_TO_PATCH (JVEGTYPE,IPATCH)
-        ZWORK(:,:,JPATCH)= ZWORK(:,:,JPATCH) + 1./(LOG(ZDZ(:,:,JPATCH)/ ZDATA(JVEGTYPE)))**2    &
+        WHERE (ZCOVER_WEIGHT(:,:,JVEGTYPE) > 0.)
+          ZWORK(:,:,JPATCH)= ZWORK(:,:,JPATCH) + 1./(XZ0_OFFSET + LOG(ZDZ(:,:,JPATCH)/ ZDATA(JVEGTYPE)))**2    &
                                 * ZCOVER_WEIGHT(:,:,JVEGTYPE)  
+        END WHERE
       END DO   
 !
 !-------------------------------------------------------------------------------
@@ -1389,7 +1401,7 @@ SELECT CASE (HATYPE)
   CASE('CDN')
 !
     WHERE ( ZSUM_COVER_WEIGHT_PATCH(:,:,:) >0. )
-      PFIELD(:,:,:) = ZDZ(:,:,:) * EXP( - SQRT(ZSUM_COVER_WEIGHT_PATCH(:,:,:)/ZWORK(:,:,:)) )
+      PFIELD(:,:,:) = ZDZ(:,:,:) / (EXP( SQRT(ZSUM_COVER_WEIGHT_PATCH(:,:,:)/ZWORK(:,:,:)) ) - XZ0_OFFSET)
     END WHERE
 !
 !-------------------------------------------------------------------------------

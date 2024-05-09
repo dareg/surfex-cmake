@@ -1,22 +1,3 @@
-MODULE MODI_gltools_nextline
-INTERFACE
-SUBROUTINE gltools_nextline( klun,kend,hpar,hval,lwg,hcomment) 
-!
-!
-IMPLICIT NONE
-!
-LOGICAL, INTENT(IN) :: lwg
-INTEGER, INTENT(in) ::  &
-  klun
-INTEGER, INTENT(out) ::  &
-  kend
-CHARACTER(80), INTENT(out) ::  &
-  hpar,hval
-CHARACTER(1), OPTIONAL, INTENT(in) ::  &
-  hcomment
-END SUBROUTINE gltools_nextline
-END INTERFACE
-END MODULE MODI_gltools_nextline
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

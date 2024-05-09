@@ -38,13 +38,13 @@ USE MODN_ASSIM,    ONLY : NAM_NACVEG,NAM_ASSIM,LASSIM,CASSIM,&
                           NAM_IO_VARASSIM,NAM_OBS,NAM_VAR,NAM_ENS
 USE MODD_ASSIM,    ONLY : NVAR,NOBSTYPE,XTPRT,XTPRT_M,XSIGMA,&
                           XSIGMA_M,CVAR,CVAR_M,COBS,NNCO,&
-                          NVARMAX,NNCV,LASSIM,CASSIM_ISBA,LPRT,&
+                          NVARMAX,NNCV,LASSIM,LLINCHECK,XALPHA,CASSIM_ISBA,LPRT,&
                           NOBSMAX,COBS_M,XERROBS_M,XERROBS, &
                           XQCOBS_M,XQCOBS,&
                           XINFL_M,XINFL,XADDINFL_M,XADDINFL, &
                           XADDTIMECORR_M, XADDTIMECORR, NIE, &
                           CFILE_FORMAT_OBS,CASSIM_SEA,&
-                          CASSIM_WATER,CASSIM_TEB
+                          CASSIM_WATER,CASSIM_TEB, LAESNM
 USE YOMHOOK,       ONLY : LHOOK,DR_HOOK
 USE PARKIND1,      ONLY : JPRB
 
@@ -131,7 +131,8 @@ ENDIF
 
 IF ( ( CASSIM_ISBA == "EKF" .AND. ( LASSIM.OR.LPRT ) ) .OR. &
      ( CASSIM_ISBA == "ENKF" .AND. ( LASSIM.OR.NIE/=0 ) ) .OR. &
-     ( CASSIM_ISBA == "OI" .AND. ( LASSIM.OR.LPRT ) ) ) THEN
+     ( CASSIM_ISBA == "OI" .AND. ( LASSIM.OR.LPRT ) ) .OR. &
+     ( LAESNM )) THEN
 
   IF (SUM(NNCO) /= NOBSTYPE) THEN
     WRITE(*,*) 'INCONSISTENCY in set-up of OBSERVATIONS',SUM(NNCO),NOBSTYPE
@@ -146,6 +147,7 @@ IF ( ( CASSIM_ISBA == "EKF" .AND. ( LASSIM.OR.LPRT ) ) .OR. &
   DO I = 1,NOBSMAX
     IF (NNCO(I) == 1 .AND. J <= NOBSTYPE ) THEN
       IF (J <= NOBSTYPE .AND. (TRIM(COBS_M(I)) == 'T2M' .OR. TRIM(COBS_M(I)) == 'HU2M' .OR. &
+          TRIM(COBS_M(I)) == 'T2M_P' .OR. TRIM(COBS_M(I)) == 'HU2M_P' .OR. &
           TRIM(COBS_M(I)) == 'WG1' .OR. TRIM(COBS_M(I)) == 'WG2' .OR. TRIM(COBS_M(I)) == 'LAI' .OR. &
           TRIM(COBS_M(I)) == 'SWE') ) THEN
         COBS(J) = TRIM(COBS_M(I))

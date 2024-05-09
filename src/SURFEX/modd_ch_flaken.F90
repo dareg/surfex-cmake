@@ -45,11 +45,11 @@ TYPE CH_FLAKE_t
                                                             ! velocity  for lakes
   TYPE(SV_t) :: SVF                                                
                                                             ! (FOR DIAG ONLY)
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CCH_NAMES      ! NAME OF CHEMICAL SPECIES
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CCH_NAMES      ! NAME OF CHEMICAL SPECIES
                                                             ! (FOR DIAG ONLY)
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CDSTNAMES
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CSLTNAMES
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CAER_NAMES
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CDSTNAMES
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CSLTNAMES
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CAER_NAMES
 
 !
 END TYPE CH_FLAKE_t

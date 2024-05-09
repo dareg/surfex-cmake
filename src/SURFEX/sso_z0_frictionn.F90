@@ -1,9 +1,9 @@
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt
 !SFX_LIC for details. version 1.
 !     ################################################################################
-SUBROUTINE SSO_Z0_FRICTION_n (USS, PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
+SUBROUTINE SSO_Z0_FRICTION_n (USS,PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COEF,PSFU,PSFV)
 !     ################################################################################
 !
 !!****  *SSO_Z0_FRICTION_n * - Computes subgrid-scale orography friction
@@ -34,6 +34,7 @@ SUBROUTINE SSO_Z0_FRICTION_n (USS, PSEA,PUREF,PRHOA,PU,PV,PPEW_A_COEF,PPEW_B_COE
 !!      B. Decharme 06/2013 CIMPLICIT_WIND in MODD_REPROD_OPER
 !!      J. Escobar  05/2014 for bug with ifort/10, replace WHERE by IF
 !!      J. Escobar  06/2015 bug with gfortran ZZ0EFF to small, change with > XSURF_EPSILON
+!!      F. Svabik   08/2023 unapproximated roughness length averaging
 !----------------------------------------------------------------
 !
 !
@@ -41,6 +42,7 @@ USE MODD_SSO_n, ONLY : SSO_t
 !
 USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
+USE MODD_SURF_ATM,         ONLY : XZ0_OFFSET
 USE MODD_SURF_PAR,         ONLY : XUNDEF, XSURF_EPSILON
 USE MODD_CSTS,             ONLY : XKARMAN, XPI
 !
@@ -162,7 +164,7 @@ DO II=1,SIZE(GMASK)
     ZZ0EFF(II) = MIN(ZZ0EFF(II),PUREF(II)/USS%XFRACZ0)
     !
     ! neutral case
-    ZCD(II) = (XKARMAN/LOG(PUREF(II)/ZZ0EFF(II)))**2
+    ZCD(II) = (XKARMAN/LOG(XZ0_OFFSET + PUREF(II)/ZZ0EFF(II)))**2
   END IF
   !
 END DO

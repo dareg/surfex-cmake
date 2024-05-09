@@ -62,7 +62,7 @@ REAL,             DIMENSION(:),  INTENT(IN)   :: PRHOA  ! Air density (kg/m3)
 !
 !*       0.2  declaration of local variables
 !
- CHARACTER(LEN=6), DIMENSION(:), POINTER :: CNAMES
+CHARACTER(LEN=16), DIMENSION(:), POINTER :: CNAMES
 TYPE(PRONOSVAR_T),POINTER :: CURPRONOS !Current pronostic variable
 !
 INTEGER :: JSPEC ! Loop counter on aggregated emitted chemical species

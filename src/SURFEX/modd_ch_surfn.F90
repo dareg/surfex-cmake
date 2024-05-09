@@ -45,8 +45,8 @@ TYPE CH_SURF_t
                                                        !    for each specie and hour
                                                        ! 'SNAP' : from SNAP data using
                                                        !    potential emission & temporal profiles
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CCH_NAMES ! NAME OF CHEMICAL
-  CHARACTER(LEN=6), DIMENSION(:), POINTER :: CAER_NAMES ! NAME OF AEROSOL SPECIES
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CCH_NAMES ! NAME OF CHEMICAL
+  CHARACTER(LEN=16), DIMENSION(:), POINTER :: CAER_NAMES ! NAME OF AEROSOL SPECIES
                                                        ! SPECIES (FOR DIAG ONLY)
   CHARACTER(LEN=28)             :: CCHEM_SURF_FILE     ! name of general 
                                                        ! (chemical) purpose

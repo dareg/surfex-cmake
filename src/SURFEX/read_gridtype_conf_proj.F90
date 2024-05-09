@@ -147,8 +147,8 @@ IF (LHOOK) CALL DR_HOOK('READ_GRIDTYPE_CONF_PROJ',0,ZHOOK_HANDLE)
  CALL PUT_GRIDTYPE_CONF_PROJ(ZGRID_PAR,ZLAT0,ZLON0,ZRPK,ZBETA,&
                               ZLATORI,ZLONORI,IIMAX,IJMAX,     &
                               ZX,ZY,ZDX,ZDY,&
-                              0,0,8,8) ! these dimensions have no meaning in
-                                       ! this case
+                              0,0,8,8,2.0) ! these dimensions have no meaning in
+                                           ! this case
 !#endif 
 !
 !---------------------------------------------------------------------------

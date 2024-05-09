@@ -22,7 +22,7 @@ TYPE DST_t
   INTEGER, DIMENSION(:), POINTER   :: NSIZE_PATCH_DST   !Number of points for a patch and a vegetation class
   INTEGER, DIMENSION(:,:), POINTER :: NR_PATCH_DST      !Mask from patch-points to dust-points
   REAL,DIMENSION(:), POINTER         :: Z0_EROD_DST       !Roughness length momentum over erodible dust emitter sfc
-  CHARACTER(LEN=6), DIMENSION(:), POINTER  :: CSV_DST     !Name of scalar variables 
+  CHARACTER(LEN=16), DIMENSION(:), POINTER  :: CSV_DST     !Name of scalar variables 
   REAL, DIMENSION(:,:),POINTER    :: XSFDST             !Dust variables to be send to output
   REAL, DIMENSION(:,:),POINTER    :: XSFDSTM            !Dust variables to be send to output
   REAL,DIMENSION(:), POINTER   :: XEMISRADIUS_DST         !Number median radius for each source mode

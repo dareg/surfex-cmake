@@ -1,65 +1,3 @@
-MODULE MODI_glt_thermo_r
-INTERFACE
-SUBROUTINE glt_thermo_r  &
-  ( tpdom,pustar,tpmxl,tpatm,  &
-    tpblkw,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
-    ygltparam,ygltvhd)
-!
-!
-! 1. DECLARATIONS
-! ===============
-!
-! 1.1. Module declarations
-! ------------------------
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-  USE mode_glt_info_r 
-  USE modi_glt_updbud_r
-  USE mode_glt_stats_r
-  USE mode_gltools_enthalpy
-  USE modi_glt_constrain_r
-  USE modi_glt_thermo_ice_r
-  USE modi_glt_thermo_lead_r
-  USE modi_glt_thermo_end_r
-  USE modi_glt_updice_r
-  USE MODD_GLT_VHD, ONLY : t_glt_vhd
-  USE MODD_GLT_PARAM, ONLY : t_glt_param
-
-!
-  IMPLICIT none
-!
-!
-! 1.2. Dummy arguments declarations
-! ---------------------------------
-!
-  TYPE(t_glt_vhd), INTENT(inout) :: ygltvhd
-  TYPE(t_glt_param), INTENT(inout) :: ygltparam
-  TYPE(t_dom), DIMENSION(ygltparam%np), INTENT(in) ::  &
-        tpdom
-  REAL, DIMENSION(ygltparam%np), INTENT(in) ::  &
-        pustar
-  TYPE(t_mxl), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpmxl
-  TYPE(t_atm), DIMENSION(ygltparam%np), INTENT(in) ::  &
-        tpatm
-  TYPE(t_blk), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpblkw
-  TYPE(t_blk), DIMENSION(ygltparam%nt,ygltparam%np), INTENT(in) ::  &
-        tpblki
-  TYPE(t_bud), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpbud
-  TYPE(t_dia), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tpdia
-  TYPE(t_tfl), DIMENSION(ygltparam%np), INTENT(inout) ::  &
-        tptfl
-  TYPE(t_sit), DIMENSION(ygltparam%nt,ygltparam%np), INTENT(inout) ::  &
-        tpsit
-  TYPE(t_vtp), DIMENSION(ygltparam%nl,ygltparam%nt,ygltparam%np), INTENT(inout) ::  &
-        tpsil
-END SUBROUTINE glt_thermo_r
-END INTERFACE
-END MODULE MODI_glt_thermo_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -381,8 +319,8 @@ SUBROUTINE glt_thermo_r  &
   CALL glt_thermo_ice_r  &
     ( tpdom,tpmxl,tpatm,tpblki,tpbud,tpdia,tptfl,tpsit,tpsil,&
    ygltparam%ncdlssh,ygltparam%niceage,ygltparam%nicesal,ygltparam%nicesub,ygltparam%nilay,ygltparam%nl,ygltparam%nleviti,&
-   ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nslay, &
-   ygltparam%nsnwrad,ygltparam%nt,ygltparam%nupdbud,&
+   ygltparam%nmponds,ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nsalflx,ygltparam%nslay,ygltparam%nsnwrad, &
+   ygltparam%nt,ygltparam%nupdbud,&
    ygltparam%albimlt,ygltparam%albsdry,ygltparam%albsmlt,&
    ygltparam%dtt,ygltparam%rn_htopoc,ygltparam%xdomsrf_r,ygltparam%xlmelt,ygltparam%xswhdfr,&
    ygltparam%lp1,ygltparam%lp2,ygltparam%lp3,ygltparam%lp4,ygltparam%lp5,ygltparam%lwg,&
@@ -478,7 +416,8 @@ ygltparam%noutlu,ygltparam%np,ygltparam%nprinto,ygltparam%nt,ygltparam%dtt,ygltp
 !
 ! Compute sea ice and snow heat content
 !
-  CALL glt_aventh( tpsit,tpsil,tpdia%sie,tpdia%sne,ygltparam%nilay,ygltparam%nl,ygltparam%np,ygltparam%nt,ygltparam%sf3tinv )
+  CALL glt_aventh( tpsit,tpsil,tpdia%sie,tpdia%sne,ygltparam%nilay,ygltparam%nslay,ygltparam%nl,ygltparam%np, &
+                 & ygltparam%nt,ygltparam%sf3tinv )
 !
 !-------------------------------------------------------------------
 ! MCH - For AMIP run

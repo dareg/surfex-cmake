@@ -126,7 +126,7 @@ NAMELIST/NAM_DATA_TEB_GREENROOF/ NTIME_GR,NLAYER_GR,                            
 !*    1.      Initializations
 !             ---------------
 !
-IF (LHOOK) CALL DR_HOOK('PGD_TEB_GREENROOF_PAR',0,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('READ_NAM_PGD_TEB_GREENROOF',0,ZHOOK_HANDLE)
 !
 NTIME_GR         = 1
 NLAYER_GR        = 6

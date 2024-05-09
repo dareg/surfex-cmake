@@ -35,7 +35,8 @@ SUBROUTINE INIT_VEG_PGD_n (ISSK, DTI, IO, S, K, KK, PK, PEK, AGK, KI, &
 !!    MODIFICATIONS
 !!    -------------
 !!      23/07/13     (Decharme) Surface / Water table depth coupling
-!!
+!!       08/2023     (J. Masek) PK%XTAUICE taken directly from XTAU_ICE which
+!!                              is now a namlist variable; removed LARP_PN
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -51,12 +52,12 @@ USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_P_t, ISBA_PE_t
 USE MODD_AGRI_n, ONLY : AGRI_t
 !
-USE MODD_SURF_ATM,       ONLY : LCPL_ARP, LARP_PN 
+USE MODD_SURF_ATM,       ONLY : LCPL_ARP
 USE MODD_DATA_COVER_PAR, ONLY : NVEGTYPE
 USE MODD_SURF_PAR,       ONLY : XUNDEF, NUNDEF
 USE MODD_CSTS,           ONLY : XCPD, XLVTT, XLSTT, XDAY
 USE MODD_SNOW_PAR,       ONLY : XEMISSN
-USE MODD_ISBA_PAR,       ONLY : XTAU_ICE
+USE MODD_SURF_ATM,       ONLY : XTAU_ICE
 !
 USE MODD_SGH_PAR,        ONLY : XICE_DEPH_MAX
 !
@@ -246,7 +247,7 @@ IF (.NOT.ASSOCIATED(K%XMPOTSAT)) THEN
     ALLOCATE(K%XCONDDRY (KI,IO%NGROUND_LAYER))
     ALLOCATE(K%XCONDSLD (KI,IO%NGROUND_LAYER))
     ! 
-    CALL HEATCAPZ(K%XSAND,K%XWSAT,K%XHCAPSOIL)
+    CALL HEATCAPZ(K%XSAND,K%XHCAPSOIL)
     CALL THRMCONDZ(K%XSAND,K%XWSAT,K%XCONDDRY,K%XCONDSLD)
   ELSE
     ALLOCATE(K%XHCAPSOIL(0,0))
@@ -481,11 +482,7 @@ ELSE
   END DO
 ENDIF
 !
-IF (.NOT.LARP_PN) THEN 
-  PK%XTAUICE(:) = XTAU_ICE 
-ELSE 
-  PK%XTAUICE(:) = 25000. 
-ENDIF 
+PK%XTAUICE(:) = XTAU_ICE
 !
 IF (IO%CISBA=='2-L' .OR. IO%CISBA=='3-L') THEN
   !

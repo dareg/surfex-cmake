@@ -76,6 +76,7 @@
 !!      (B. Decharme)        10/14 Bug in DIF composite budget
 !!                                 Use harmonic mean to compute interfacial thermal conductivities
 !!                                 "Restore" flux computed here
+!!      (D. Degrauwe)      08/2023 Fixed bug in option LCPL_ARP
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -87,7 +88,7 @@ USE MODD_DIAG_n, ONLY : DIAG_t
 USE MODD_DIAG_MISC_ISBA_n, ONLY : DIAG_MISC_ISBA_t
 !
 USE MODD_CSTS,       ONLY : XLVTT, XLSTT, XSTEFAN, XCPD, XPI, XDAY, &
-                              XTT, XCL, XCPV, XCI  
+                              XTT, XCL, XCPV, XCI, XRD, XRV
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SNOW_PAR,   ONLY : XEMISSN, XEMCRIN
 !
@@ -585,26 +586,13 @@ PTA_IC(:) =  ZPET_A_COEF(:)*PEK%XTG(:,1)   + ZPET_B_COEF(:)
 PUSTAR2_IC(:) =  ZUSTAR2(:)
 !
 !--------------------------------------------------------------------------------------
-!*       8.     Update of LSTT and LVTT for Arpege
-!               ----------------------------------
+!*       8.     Update of CPS, LSTT and LVTT for Arpege
+!               ---------------------------------------
 !
 IF (LCPL_ARP) THEN
-
-  IF (.NOT.LQVNPLUS) THEN
-    PK%XCPS(:) =  PK%XCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PEK%XTG(:,1)-PTSM(:))
-  ENDIF
-
-
-  IF (LQVNPLUS) THEN
-    PK%XCPS(:) =  PK%XCPS(:) + (XCPV-XCPD) *ZHUMS(:)*PDQSAT(:)*(PEK%XTG(:,1)-PTSM(:))  &
-                       + (XCPV-XCPD) *(1-ZHUMA(:))*(PQA_IC(:)-PQA(:))  
-  ENDIF
-
-  PK%XLSTT(:) = PK%XLSTT(:) + (XCPV-XCI)*(PEK%XTG(:,1)-PTSM(:))
-
-  PK%XLVTT(:) = PK%XLVTT(:) + (XCPV-XCL)*(PEK%XTG(:,1)-PTSM(:))
-
-
+  PK%XCPS (:)=XCPD+(XCPV-XCPD)*PQA_IC(:)
+  PK%XLSTT(:)=XLSTT+(XCPV-XCI)*(PEK%XTG(:,1)-XTT)
+  PK%XLVTT(:)=XLVTT+(XCPV-XCL)*(PEK%XTG(:,1)-XTT)
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('E_BUDGET',1,ZHOOK_HANDLE)

@@ -46,6 +46,7 @@
 !!                   remove threshold value for mixing tendency
 !!    07/2012, P. Le Moigne : CMO1D phasing
 !!    09/2016, C. Lebeaupin Brossier: XSEATEND and initialization
+!!    09/2022, A. Napoly: bugfix : initialize ZSEAS_REL under logical switch.
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -249,15 +250,32 @@ DO JPT=1,SIZE(PFSOL)
   ZSEAV(:) = O%XSEAV(JPT,:)    
   ZSEAE(:) = O%XSEAE(JPT,:)
   !
-  ZSEAU_REL(:) = OR%XSEAU_REL(JPT,:)
-  ZSEAV_REL(:) = OR%XSEAV_REL(JPT,:)
-  ZSEAT_REL(:) = OR%XSEAT_REL(JPT,:)
-  ZSEAS_REL(:) = OR%XSEAS_REL(JPT,:)
+  !ZSEAU_REL(:) = OR%XSEAU_REL(JPT,:)
+  !ZSEAV_REL(:) = OR%XSEAV_REL(JPT,:)
+  !ZSEAT_REL(:) = OR%XSEAT_REL(JPT,:)
+  !ZSEAS_REL(:) = OR%XSEAS_REL(JPT,:)
   !
   ZSEAHMO = 0.
   DO J=IUP-1,IBOT
     IF (J>=IUP .AND. ZSEAE(J)>=(ZEMIN*SQRT(2.))) ZSEAHMO = ZSEAHMO-XDZ1(J)
   ENDDO
+
+  IF (OR%LREL_TS .or. OR%LFLX_CORR) THEN
+    DO J=IUP-1,IBOT
+      ZSEAS_REL(J) = OR%XSEAS_REL(JPT,J)
+      ZSEAT_REL(J) = OR%XSEAT_REL(JPT,J)
+    ENDDO
+  ENDIF
+
+  IF (OR%LREL_CUR) THEN
+    DO J=IUP-1,IBOT
+      ZSEAU_REL(J) = OR%XSEAU_REL(JPT,J)
+      ZSEAV_REL(J) = OR%XSEAV_REL(JPT,J)
+    ENDDO
+  ENDIF
+
+
+
   O%XSEAHMO(JPT) = ZSEAHMO
   !
   !precalculation of DRHO

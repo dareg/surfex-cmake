@@ -53,7 +53,7 @@ USE MODD_MEB_PAR,   ONLY : XTAU_LW,                            &
                            XRAGNC_FACTOR, XKDELTA_WR
 USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XAGLAMIN, XAGLAMAX, XHGLA,          &
-                           XWSNV, XWCRN, XZ0SN, XZ0HSN,        &
+                           XWSNV, XZ0SN, XZ0HSN,               &
                            XTAU_SMELT,D95_ZTN_LIMIT, X_RI_MAX, &
                            XALBICE1, XALBICE2, XALBICE3,       &
                            XRHOTHRESHOLD_ICE, XZ0ICEZ0SNOW,    &
@@ -64,7 +64,8 @@ USE MODD_SNOW_PAR,  ONLY : XEMISSN, XANSMIN, XANSMAX,          &
                            XIMPUR_INIT, XIMPUR_COEFF,          &
                            XPSR_SNOWMAK, XRHO_SNOWMAK,         &
                            XPTA_SEUIL, XTIMESNOWMAK,           &
-                           XPROD_SCHEME, XSM_END, XFREQ_GRO !Grooming and Snowmaking option by P.Spandre 20160211
+                           XPROD_SCHEME, XSM_END, XFREQ_GRO,   & !Grooming and Snowmaking option by P.Spandre 20160211
+                           LESSOILSNOWFLUX
 USE MODD_SNOW_METAMO, ONLY : XVVISC3
 !
 USE MODI_GET_LUOUT
@@ -92,8 +93,8 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
 NAMELIST/NAM_SURF_CSTS/ XEMISSN, XANSMIN, XANSMAX, XAGLAMIN, XAGLAMAX, &
                         XALBWAT, XALBCOEF_TA96, XALBSCA_WAT, XEMISWAT, &
-                        XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XWCRN,  &
-                        XCFFV, XZ0SN, XZ0HSN, XTAU_SMELT, XALBSEAICE,  &
+                        XALBWATICE, XEMISWATICE, XHGLA, XWSNV, XCFFV,  &
+                        XZ0SN, XZ0HSN, XTAU_SMELT, XALBSEAICE,         &
                         XZ0FLOOD, XALBWATSNOW,                         &
                         LMEBREC,                                       &
                         XANSFRACMEL, XTEMPANS, XANSMINMEB,             &
@@ -105,7 +106,8 @@ NAMELIST/NAM_SURF_SNOW_CSTS/ XZ0ICEZ0SNOW, XRHOTHRESHOLD_ICE,          &
                              XPERCENTAGEPORE,XVVISC3,X_RI_MAX,         &
                              XIMPUR_INIT, XIMPUR_COEFF, XPSR_SNOWMAK,  &
                              XRHO_SNOWMAK, XPTA_SEUIL, XTIMESNOWMAK,   &
-                             XPROD_SCHEME, XSM_END, XFREQ_GRO
+                             XPROD_SCHEME, XSM_END, XFREQ_GRO,         &
+                             LESSOILSNOWFLUX
 !
 NAMELIST/NAM_REPROD_OPER/ LREPROD_OPER, XEVERG_RSMIN, XEVERG_VEG, &
                           CDGAVG, CDGDIF, CIMPLICIT_WIND, CQSAT,  &
@@ -164,10 +166,6 @@ XHGLA    = 33.3 !(m)
 !
 XWSNV = 5.0 !(-)
 !
-! Critical value of the equivalent water content
-! of the snow reservoir for snow fractional coverage and albedo computations
-XWCRN = 10.0   !  ! (kg m-2) Veg (default value)
-!
 ! Water direct albedo coefficient (option "TA96")
 !
 XALBCOEF_TA96 =  0.037
@@ -219,6 +217,10 @@ XKDELTA_WR   = 0.25 ! -
 !
 ! Roughness length ratio between ice and snow
 XZ0ICEZ0SNOW = 10.
+!
+! ISBA-ES logical switch to activate reduced soil-snow heat flux
+! 
+LESSOILSNOWFLUX = .FALSE.
 !
 ! 3 bands spectral albedo for glacier ice (CROCUS)
 ! Default values from Lejeune et al 2009 (Zongo, Bolivia)

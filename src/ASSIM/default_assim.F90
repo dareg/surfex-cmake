@@ -1,5 +1,5 @@
 !     #########
-      SUBROUTINE DEFAULT_ASSIM(OASSIM,HASSIM,HASSIM_SEA,HASSIM_WATER,       &
+      SUBROUTINE DEFAULT_ASSIM(OASSIM,OLINCHECK,HASSIM,HASSIM_SEA,HASSIM_WATER,       &
                                HASSIM_ISBA,HASSIM_TEB,KPRINTLEV,            &
                                OAROME,OECSST,OAESST,OAESNM,OSWE,            &
                                OALADSURF,OREAD_SST_FROM_FILE,               &
@@ -15,11 +15,11 @@
                                HFILE_FORMAT_CLIM,HOBS_M,PERROBS_M,PQCOBS_M, &
                                KNCO,KIVAR,KVAR,HVAR_M,HPREFIX_M,            &
                                PSIGMA_M,PTPRT_M,KNCV,PSCALE_Q,              &
-                               PSCALE_QLAI,HBIO,HPREFIX_BIO,PALPH,          &
+                               PSCALE_QLAI,PALPHA,HBIO,HPREFIX_BIO,PALPH,   &
                                KENS,KIE,PINFL_M,PADDINFL_M, PASSIM_WINH,    &
                                PADDTIMECORR_M,OENS_GEN,OPB_CORRELATIONS,    &
                                OPERTURBATION_RUN,OBIAS_CORRECTION,          &
-                               OENKF,ODENKF,HTEST)
+                               OENKF,ODENKF,OAESIC,OAESIT,HTEST)
 !     ########################################################################
 !
 !!****  *DEFAULT_ISBA* - routine to set default values for the configuration for ISBA assimilation scheme
@@ -66,6 +66,7 @@ IMPLICIT NONE
 !*       0.1   Declarations of arguments
 !              -------------------------
 LOGICAL,           INTENT(OUT) :: OASSIM        ! assimilation or not
+LOGICAL,           INTENT(OUT) :: OLINCHECK     ! linearity check
 CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM        ! type of corrections PLUS/2DVAR
 CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_SEA
 CHARACTER(LEN=5),  INTENT(OUT) :: HASSIM_WATER
@@ -76,6 +77,8 @@ LOGICAL,           INTENT(OUT) :: OAROME
 LOGICAL,           INTENT(OUT) :: OECSST
 LOGICAL,           INTENT(OUT) :: OAESST
 LOGICAL,           INTENT(OUT) :: OAESNM
+LOGICAL,           INTENT(OUT) :: OAESIC
+LOGICAL,           INTENT(OUT) :: OAESIT
 LOGICAL,           INTENT(OUT) :: OSWE
 LOGICAL,           INTENT(OUT) :: OALADSURF
 LOGICAL,           INTENT(OUT) :: OREAD_SST_FROM_FILE
@@ -130,6 +133,7 @@ REAL, DIMENSION(NVARMAX), INTENT(OUT) :: PTPRT_M
 INTEGER, DIMENSION(NVARMAX), INTENT(OUT) :: KNCV
 REAL,                INTENT(OUT) :: PSCALE_Q
 REAL,                INTENT(OUT) :: PSCALE_QLAI
+REAL,                INTENT(OUT) :: PALPHA
 CHARACTER(LEN=12),   INTENT(OUT) :: HBIO
 CHARACTER(LEN=100),  INTENT(OUT) :: HPREFIX_BIO
 REAL, DIMENSION(12), INTENT(OUT) :: PALPH
@@ -159,6 +163,7 @@ END IF
 
 !
 OASSIM    = .FALSE.
+OLINCHECK = .FALSE.
 HASSIM    = "PLUS "
 HASSIM_SEA = "INPUT"
 HASSIM_WATER = "INPUT"
@@ -169,6 +174,8 @@ OAROME    = .TRUE.
 OECSST    = .FALSE.
 OAESST    = .FALSE.
 OAESNM    = .FALSE.
+OAESIC    = .FALSE.
+OAESIT    = .FALSE.
 OSWE      = .TRUE.
 OALADSURF = .TRUE.
 OREAD_SST_FROM_FILE=.FALSE.
@@ -233,6 +240,7 @@ PTPRT_M = (/0.0001,0.0001,0.00001,0.00001,0.001,0.00001,0.0001,0.00001,0.00001/)
 KNCV = (/0,0,0,0,0,0,0,0,0/)
 PSCALE_Q = 0.125
 PSCALE_QLAI = 0.5
+PALPHA = 0.2
 HBIO = "BIOMA1"
 HPREFIX_BIO = ""
 PALPH = (/0., 0., 0., 0.08203445, 0.07496252, 0.06846970, 0.06771856, 0.09744689, &

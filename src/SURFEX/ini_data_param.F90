@@ -58,7 +58,9 @@
 !!    P. Samuelsson      10/14 : Multi-energy balance (MEB)
 !!    Seferian & Delire  06/15 : Updating Nitrogen content and coef (PCF,PCNA) and 
 !                            mesophyl conductance based on TRY database (Kattge et al., GCB 2011) and Jacobs Thesis
-!!
+!!    J. Masek         08/2023 : Removed key LARP_PN; array PCV set as in
+!!                               AROME case LARP_PN=F; ARPEGE case can use
+!!                               XUNIF_CV from the namelist &NAM_DATA_ISBA
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -74,7 +76,6 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_TEBD,   &
                                 NVEGTYPE, JPCOVER
 !
 USE MODD_REPROD_OPER,    ONLY : XEVERG_RSMIN
-USE MODD_SURF_ATM,       ONLY : LARP_PN
 !
 USE MODI_VEG_FROM_LAI
 USE MODI_GREEN_FROM_LAI
@@ -342,22 +343,18 @@ ENDIF
 !*    7.10   Cv
 !            --
 IF (PRESENT(PCV)) THEN
-  IF (LARP_PN) THEN
-    PCV(:,:)=0.8E-5
-  ELSE
-    PCV(:,:)=2.E-5
-    PCV(:,NVT_TEBD)= 1.E-5
-    PCV(:,NVT_TRBD)= 1.E-5
-    PCV(:,NVT_TEBE)= 1.E-5
-    PCV(:,NVT_BOBD)= 1.E-5
-    PCV(:,NVT_SHRB)= 1.E-5
-    PCV(:,NVT_BONE)= 1.E-5
-    PCV(:,NVT_TENE)= 1.E-5
-    PCV(:,NVT_BOND)= 1.E-5
-    PCV(:,NVT_TRBE)= 1.E-5 
-    IF (NVT_FLTR>0) THEN
-      PCV(:,NVT_FLTR) = 1.E-5
-    ENDIF
+  PCV(:,:)=2.E-5
+  PCV(:,NVT_TEBD)= 1.E-5
+  PCV(:,NVT_TRBD)= 1.E-5
+  PCV(:,NVT_TEBE)= 1.E-5
+  PCV(:,NVT_BOBD)= 1.E-5
+  PCV(:,NVT_SHRB)= 1.E-5
+  PCV(:,NVT_BONE)= 1.E-5
+  PCV(:,NVT_TENE)= 1.E-5
+  PCV(:,NVT_BOND)= 1.E-5
+  PCV(:,NVT_TRBE)= 1.E-5 
+  IF (NVT_FLTR>0) THEN
+    PCV(:,NVT_FLTR) = 1.E-5
   ENDIF
 ENDIF    
 !-------------------------------------------------------------------------------

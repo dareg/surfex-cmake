@@ -1,32 +1,3 @@
-MODULE MODI_glt_lmltsi_r
-INTERFACE
-SUBROUTINE glt_lmltsi_r  &
-        ( tpmxl,tpsil,tpsit,tpdia,tptfl,&
-        ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t ) 
-  USE modd_glt_const_thm
-  USE modd_types_glt
-  USE modi_glt_updtfl_r
-!
-  IMPLICIT NONE
-!
-!* Arguments
-!
-  INTEGER,INTENT(in) :: ncdlssh,nsalflx,nilay,nl,nt,np,nicesal,niceage,nmponds,nleviti,nslay
-  REAL   ,INTENT(in) :: xlmelt,dtt,rn_htopoc
-  REAL,DIMENSION(:)   ,INTENT(in) :: sf3t
-  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-        tpsil
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
-  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
-  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
-END SUBROUTINE glt_lmltsi_r
-END INTERFACE
-END MODULE MODI_glt_lmltsi_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

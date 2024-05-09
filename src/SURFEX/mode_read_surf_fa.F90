@@ -56,6 +56,7 @@ INTERFACE READ_SURFN_FA
 END INTERFACE
 INTERFACE READ_SURFT_FA
         MODULE PROCEDURE READ_SURFT0_FA
+        MODULE PROCEDURE READ_SURFT1_FA
         MODULE PROCEDURE READ_SURFT2_FA
 END INTERFACE
 !
@@ -72,8 +73,11 @@ CONTAINS
       REAL, POINTER :: ZCHAMP (:)
 
       INTEGER :: ITYPTR, ITRONC, INLATI, INXLON, INIVER
-      INTEGER :: INLOPA (1000), INOZPA (1000)
-      REAL :: ZSINLA (1000), ZAHYBR (200), ZBHYBR (200)
+      INTEGER, PARAMETER              :: MAX_LATS=5000
+      INTEGER, DIMENSION (MAX_LATS)   :: INLOPA
+      INTEGER, DIMENSION ((1+MAX_LATS)/2) :: INOZPA
+      REAL, DIMENSION (MAX_LATS)      :: ZSINLA
+      REAL, DIMENSION (2)     :: ZAHYBR, ZBHYBR
       REAL :: ZSLAPO, ZCLOPO, ZSLOPO, ZCODIL, ZREFER
       LOGICAL :: LLNOMM, LLERFA, LLIMST, LLMLAM, LLGARD
       CHARACTER (LEN=256) :: CLNOMF
@@ -89,6 +93,9 @@ CONTAINS
                  & ZCODIL, ITRONC, INLATI, INXLON, INLOPA, &
                  & INOZPA, ZSINLA, INIVER, ZREFER, ZAHYBR, &
                  & ZBHYBR, LLGARD)
+      IF ( INLATI > MAX_LATS ) THEN
+          CALL ABOR1('YOU MUST INCREASE MAX_LATS')
+      ENDIF
       LLMLAM = ITYPTR < 0
 
       IF (LLMLAM) THEN
@@ -1083,7 +1090,98 @@ HCOMMENT = YCOMMENT
 IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFT0_FA',1,ZHOOK_HANDLE)
 !
 END SUBROUTINE READ_SURFT0_FA
+!----------------------------------------------------------------------------
 !
+!     #############################################################
+      SUBROUTINE READ_SURFT1_FA (&
+                                 HREC,KYEAR,KMONTH,KDAY,PTIME,KRESP,HCOMMENT)
+!     #############################################################
+!
+!!****  *READN0* - routine to read a 1D array of dates
+!
+!
+!
+!
+USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, XTIME_NPIO_READ
+!
+USE MODD_IO_SURF_FA, ONLY : NUNIT_FA, NLUOUT, CPREFIX1D
+!
+!USE MODE_FASURFEX
+!
+!USE MODI_IO_BUFF
+USE MODI_ERROR_READ_SURF_FA
+!
+USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
+USE PARKIND1  ,ONLY : JPRB
+!
+IMPLICIT NONE
+!
+#ifdef SFX_MPI
+INCLUDE "mpif.h"
+#endif
+!
+!*      0.1   Declarations of arguments
+!
+!
+!
+CHARACTER(LEN=*),       INTENT(IN)  :: HREC     ! name of the article to be read
+INTEGER, DIMENSION(:),  INTENT(OUT) :: KYEAR    ! year
+INTEGER, DIMENSION(:),  INTENT(OUT) :: KMONTH   ! month
+INTEGER, DIMENSION(:),  INTENT(OUT) :: KDAY     ! day
+REAL,    DIMENSION(:),  INTENT(OUT) :: PTIME    ! year
+INTEGER,                INTENT(OUT) :: KRESP    ! KRESP  : return-code if a problem appears
+CHARACTER(LEN=100),     INTENT(OUT) :: HCOMMENT ! comment
+!*      0.2   Declarations of local variables
+!
+CHARACTER(LEN=50) :: YCOMMENT
+CHARACTER(LEN=18) :: YNAME ! Field Name
+!
+REAL   :: XTIME0
+INTEGER :: J
+INTEGER (KIND=8), ALLOCATABLE :: IWORK (:)
+REAL(KIND=JPRB) :: ZHOOK_HANDLE
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFN1_FA',0,ZHOOK_HANDLE)
+
+!
+#ifdef SFX_MPI
+XTIME0 = MPI_WTIME()
+#endif
+!
+IF (NRANK==NPIO) THEN
+  !
+  IF (.NOT. LFAGMAP) THEN
+    WRITE(NLUOUT,*) ' READ_SURFT1_FA : time in 1 dimension with LFAGMAP=.T. not yet implemented'
+    CALL ABOR1_SFX('MODE_READ_SURF_FA:READ_SURFT1_FA: time in 1 dimension with LFAGMAP=.T. not yet implemented')
+  ELSE
+    ALLOCATE (IWORK (SIZE(KYEAR)*4))
+    CALL LFILEC (KRESP, NUNIT_FA, CPREFIX1D//TRIM(HREC), IWORK, SIZE(IWORK))
+    IF (KRESP/=0) CALL ERROR_READ_SURF_FA(HREC,KRESP)
+    DO J = 1, SIZE(KYEAR)
+      KYEAR(J) = IWORK(1+(J-1)*4)
+      KMONTH(J) = IWORK(2+(J-1)*4)
+      KDAY(J) = IWORK(3+(J-1)*4)
+      PTIME(J) = TRANSFER(IWORK(4+(J-1)*4), PTIME(J))
+    ENDDO
+  ENDIF
+  !
+ENDIF
+!
+YCOMMENT = TRIM(HREC)
+HCOMMENT = YCOMMENT
+!
+#ifdef SFX_MPI
+XTIME_NPIO_READ = XTIME_NPIO_READ + (MPI_WTIME() - XTIME0)
+#endif
+!
+!$OMP BARRIER
+!
+!
+IF (LHOOK) CALL DR_HOOK('MODE_READ_SURF_FA:READ_SURFT1_FA',1,ZHOOK_HANDLE)
+!
+END SUBROUTINE READ_SURFT1_FA
+!
+!----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !
 !     #############################################################

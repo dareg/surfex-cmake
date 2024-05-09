@@ -1,27 +1,3 @@
-MODULE MODI_glt_blowsn_r
-INTERFACE
-SUBROUTINE glt_blowsn_r(tpmxl,tpsil,tptfl,tpsit,&
-        ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,nx,ny,dtt,rn_htopoc )
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-  USE modi_glt_updtfl_r
-!
-  IMPLICIT NONE
-!
-  INTEGER, INTENT(IN) :: ncdlssh,nsalflx,nilay,nslay,nl,nt,np,nleviti,nx,ny
-  REAL, INTENT(IN) :: dtt,rn_htopoc
-  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl 
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(in) ::  &
-        tpsil
-  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
-END SUBROUTINE glt_blowsn_r
-END INTERFACE
-END MODULE MODI_glt_blowsn_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

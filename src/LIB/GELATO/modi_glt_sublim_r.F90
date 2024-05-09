@@ -1,32 +1,3 @@
-MODULE MODI_glt_sublim_r
-INTERFACE
-SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
-        ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
-  USE modd_types_glt
-  USE modd_glt_const_thm
-  USE modi_glt_updtfl_r
-  USE mode_gltools_enthalpy
-!
-  IMPLICIT NONE
-!
-  INTEGER,INTENT(in) :: nilay,ncdlssh,nsalflx,nleviti,nl,np,nt
-  REAL,INTENT(IN) :: dtt,rn_htopoc
-  REAL,DIMENSION(:),INTENT(IN) :: sf3tinv
-  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::   &
-        tpmxl
-  TYPE(t_blk), DIMENSION(nt,np), INTENT(in) ::  &
-        tpblki
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::  &
-        tpsil
-  TYPE(t_tfl), DIMENSION(np), INTENT(inout) ::  &
-        tptfl
-  TYPE(t_dia), DIMENSION(np), INTENT(inout) ::  &
-        tpdia
-END SUBROUTINE glt_sublim_r
-END INTERFACE
-END MODULE MODI_glt_sublim_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -124,7 +95,7 @@ END MODULE MODI_glt_sublim_r
 ! ------------------------ SUBROUTINE glt_sublim_r --------------------------
 !
 SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
-        ncdlssh,nilay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
+        ncdlssh,nilay,nslay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
   USE modd_types_glt
   USE modd_glt_const_thm
   USE modi_glt_updtfl_r
@@ -132,7 +103,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
 !
   IMPLICIT NONE
 !
-  INTEGER,INTENT(in) :: nilay,ncdlssh,nsalflx,nleviti,nl,np,nt
+  INTEGER,INTENT(in) :: nilay,nslay,ncdlssh,nsalflx,nleviti,nl,np,nt
   REAL,INTENT(IN) :: dtt,rn_htopoc
   REAL,DIMENSION(:),INTENT(IN) :: sf3tinv
   TYPE(t_mxl), DIMENSION(np), INTENT(in) ::   &
@@ -163,7 +134,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
   zhsi(:,:) = tpsit(:,:)%hsi
 !
 ! Get initial snow and ice gltools_enthalpy
-  CALL glt_aventh( tpsit,tpsil,zei1,zes1,nilay,nl,np,nt,sf3tinv )
+  CALL glt_aventh( tpsit,tpsil,zei1,zes1,nilay,nslay,nl,np,nt,sf3tinv )
 !
 ! 
 ! 2. Apply sublimation rate
@@ -265,7 +236,7 @@ SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
 ! back to sea ice, or to the ocean if there is no sea ice.
 ! For simplicity, here we deliver this gltools_enthalpy only to the ocean.
 !
-  CALL glt_aventh( tpsit,tpsil,zei2,zes2,nilay,nl,np,nt,sf3tinv )
+  CALL glt_aventh( tpsit,tpsil,zei2,zes2,nilay,nslay,nl,np,nt,sf3tinv )
   tptfl(:)%tio = tptfl(:)%tio - (zei2+zes2-zei1-zes1)/dtt
 !
 END SUBROUTINE glt_sublim_r

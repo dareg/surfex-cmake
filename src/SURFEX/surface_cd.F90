@@ -1,6 +1,6 @@
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt
 !SFX_LIC for details. version 1.
 !   #################################################################
     SUBROUTINE SURFACE_CD(PRI, PZREF, PUREF, PZ0EFF, PZ0H,   &
@@ -52,14 +52,15 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    20/01/98 
-!!                  02/04/01 (P Jabouille) limitation of Z0 with 0.5 PUREF
+!!      02/04/01 (P Jabouille) limitation of Z0 with 0.5 PUREF
+!!       08/2023 (F. Svabik) unapproximated roughness length averaging
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
 !               ------------
 !
 USE MODD_CSTS,ONLY : XKARMAN
-USE MODD_SURF_ATM, ONLY : XCD_COEFF1, XCD_COEFF2, XRISHIFT
+USE MODD_SURF_ATM, ONLY : XCD_COEFF1, XCD_COEFF2, XRISHIFT, XZ0_OFFSET
 !
 USE MODE_THERMOS
 !
@@ -107,12 +108,12 @@ PM    (X) = 0.5233 - 0.0815*X + 0.0135*X*X - 0.0010*X*X*X
 !
 IF (LHOOK) CALL DR_HOOK('SURFACE_CD',0,ZHOOK_HANDLE)
 DO JJ=1,SIZE(PRI)
-  ZZ0EFF = MIN(PZ0EFF(JJ),PUREF(JJ)*0.5)
-  ZZ0H   = MIN(ZZ0EFF,PZ0H(JJ))
+  ZZ0EFF = (1. - XZ0_OFFSET)*MIN(PZ0EFF(JJ),PUREF(JJ)*0.5) + XZ0_OFFSET*PZ0EFF(JJ)
+  ZZ0H   = (1. - XZ0_OFFSET)*MIN(ZZ0EFF,PZ0H(JJ))          + XZ0_OFFSET*PZ0H(JJ)
 !
   ZMU = LOG( MIN(ZZ0EFF/ZZ0H,200.) )
 !
-  PCDN(JJ) = (XKARMAN/LOG(PUREF(JJ)/ZZ0EFF))**2
+  PCDN(JJ) = (XKARMAN/LOG(XZ0_OFFSET + PUREF(JJ)/ZZ0EFF))**2
 
   ZCMSTAR = CMSTAR(ZMU)
   ZPM     = PM(ZMU)

@@ -11,7 +11,7 @@
 !############################################################################
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 CONTAINS
 !############################################################################
@@ -21,7 +21,8 @@ CONTAINS
       SUBROUTINE PUT_GRIDTYPE_CONF_PROJ(PGRID_PAR,PLAT0,PLON0,PRPK,PBETA,&
                                           PLATOR,PLONOR,KIMAX,KJMAX,       &
                                           PX,PY,PDX,PDY,&
-                                          KLATE,KLONE,KWIDTH_I_X,KWIDTH_I_Y           )  
+                                          KLATE,KLONE,KWIDTH_I_X,KWIDTH_I_Y, &
+                                          PTRUNC)
 !     ####################################################################
 !
 !!****  *PUT_GRIDTYPE_CONF_PROJ* - routine to store in PGRID_PAR the horizontal grid
@@ -34,7 +35,10 @@ CONTAINS
 !!    -------------
 !!      Original   01/2004
 !!      M.Moge     06/2015 broadcast the space step to all MPI processes (necessary for reproductibility)
+!!      24-Sep-2015 : P.Marguinaud : DX and DY may be nul in AROME extension zone; 
+!!                    take first non-null value for DX and DY
 !!      A. Mary    07/2018 : width of I and E zones
+!!      O. Vignes  12/2022 : spectral truncation factor
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -75,6 +79,7 @@ INTEGER,            INTENT(IN)  :: KLATE
 INTEGER,            INTENT(IN)  :: KLONE
 INTEGER,            INTENT(IN)  :: KWIDTH_I_X ! size of I zone
 INTEGER,            INTENT(IN)  :: KWIDTH_I_Y ! size of I zone
+REAL,               INTENT(IN)  :: PTRUNC     ! spectral truncation factor
 !
 !
 !*       0.2   Declarations of local variables
@@ -101,10 +106,10 @@ IL = SIZE(PX)
 !
 IF (GFULL) THEN
   !* entire grid : one can store only X and Y cooridnate arrays in each direction
-  ALLOCATE(PGRID_PAR(16+KIMAX+KJMAX))
+  ALLOCATE(PGRID_PAR(17+KIMAX+KJMAX))
 ELSE
   !* only some points are present : one store the coordinates of all points
-  ALLOCATE(PGRID_PAR(16+2*IL))
+  ALLOCATE(PGRID_PAR(17+2*IL))
 END IF
 !
 PGRID_PAR(1) = PLAT0
@@ -129,9 +134,8 @@ IF (IL>0) THEN
       PGRID_PAR(10) = PDY (JJ)
       EXIT
     ENDIF
-  ENDDO 
+  ENDDO
  ENDIF
-!WRITE(20,*)'sous put_gridtype PGRIDPAR= ',SIZE(PGRID_PAR),PGRID_PAR
 !
 #ifdef MNH_PARALLEL
 !get the index of the process with IL>0 that own the southmost and the westmost point
@@ -176,21 +180,22 @@ PGRID_PAR(12) = FLOAT(KLONE)
 PGRID_PAR(13) = FLOAT(KLATE)
 PGRID_PAR(14) = FLOAT(KWIDTH_I_X)
 PGRID_PAR(15) = FLOAT(KWIDTH_I_Y)
+PGRID_PAR(16) = PTRUNC
 IF (GFULL) THEN
-  PGRID_PAR(16) = 1
+  PGRID_PAR(17) = 1
 ELSE
-  PGRID_PAR(16) = 0
+  PGRID_PAR(17) = 0
 END IF
 !
 IF (GFULL) THEN
-  PGRID_PAR(16     +1:16+KIMAX) = PX(1:KIMAX)
+  PGRID_PAR(17     +1:17+KIMAX) = PX(1:KIMAX)
   DO JJ=1,KJMAX
-    PGRID_PAR(16+KIMAX+JJ) = PY(1+(JJ-1)*KIMAX)
+    PGRID_PAR(17+KIMAX+JJ) = PY(1+(JJ-1)*KIMAX)
   END DO
 ELSE
   IF (IL>0) THEN
-    PGRID_PAR(16     +1:16+  IL) = PX(:)
-    PGRID_PAR(16+  IL+1:16+2*IL) = PY(:)
+    PGRID_PAR(17     +1:17+  IL) = PX(:)
+    PGRID_PAR(17+  IL+1:17+2*IL) = PY(:)
   END IF
 END IF
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:PUT_GRIDTYPE_CONF_PROJ',1,ZHOOK_HANDLE)
@@ -203,7 +208,7 @@ END SUBROUTINE PUT_GRIDTYPE_CONF_PROJ
       SUBROUTINE GET_GRIDTYPE_CONF_PROJ(PGRID_PAR,PLAT0,PLON0,PRPK,PBETA,&
                                           PLATOR,PLONOR,KIMAX,KJMAX,       &
                                           PX,PY,PDX,PDY,KL,KLATE,KLONE,&
-                                          KWIDTH_I_X,KWIDTH_I_Y)   
+                                          KWIDTH_I_X,KWIDTH_I_Y,PTRUNC)
 !     ####################################################################
 !
 !!****  *GET_GRIDTYPE_CONF_PROJ* - routine to get from PGRID_PAR the horizontal grid
@@ -252,6 +257,7 @@ INTEGER,            INTENT(OUT), OPTIONAL :: KLATE    ! size of extension zone
 INTEGER,            INTENT(OUT), OPTIONAL :: KLONE    ! size of extension zone
 INTEGER,            INTENT(OUT), OPTIONAL :: KWIDTH_I_X ! size of I zone
 INTEGER,            INTENT(OUT), OPTIONAL :: KWIDTH_I_Y ! size of I zone
+REAL,               INTENT(OUT), OPTIONAL :: PTRUNC   ! spectral truncation factor
 !
 !
 !*       0.2   Declarations of local variables
@@ -284,18 +290,19 @@ IF (PRESENT(KLONE))  KLONE = NINT (PGRID_PAR (12))
 IF (PRESENT(KLATE))  KLATE = NINT (PGRID_PAR (13))
 IF (PRESENT(KWIDTH_I_X))  KWIDTH_I_X = NINT (PGRID_PAR (14))
 IF (PRESENT(KWIDTH_I_Y))  KWIDTH_I_Y = NINT (PGRID_PAR (15))
+IF (PRESENT(PTRUNC)) PTRUNC = PGRID_PAR(16)
 !
-GFULL = (PGRID_PAR(16)==1)
+GFULL = (PGRID_PAR(17)==1)
 !
 IF (PRESENT(PX)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
       DO JI=1,IIMAX
-        PX(JI+(JJ-1)*IIMAX) = PGRID_PAR(16+JI)
+        PX(JI+(JJ-1)*IIMAX) = PGRID_PAR(17+JI)
       END DO
     END DO
   ELSE
-    PX(:) = PGRID_PAR(16+1:16+IL)
+    PX(:) = PGRID_PAR(17+1:17+IL)
     WHERE(PX(:)==XUNDEF) PX(:)=0.
   END IF        
 END IF
@@ -303,11 +310,11 @@ IF (PRESENT(PY)) THEN
   IF (GFULL) THEN
     DO JJ=1,IJMAX
       DO JI=1,IIMAX
-        PY(JI+(JJ-1)*IIMAX) = PGRID_PAR(16+IIMAX+JJ)
+        PY(JI+(JJ-1)*IIMAX) = PGRID_PAR(17+IIMAX+JJ)
       END DO
     END DO
   ELSE
-    PY(:) = PGRID_PAR(16+IL+1:16+2*IL)
+    PY(:) = PGRID_PAR(17+IL+1:17+2*IL)
     WHERE(PY(:)==XUNDEF) PY(:)=0.
   END IF        
 END IF
@@ -410,12 +417,12 @@ REAL, DIMENSION(:),   INTENT(OUT):: PLAT,PLON
 !
 INTEGER :: JI, ISIZE_OMP
 REAL, DIMENSION(SIZE(PX)) :: ZY
-REAL                      :: ZRPK,ZBETA,ZLAT0,ZLON0,ZLATOR,ZLONOR
-REAL                      :: ZRDSDG,ZCLAT0,ZSLAT0,ZCLATOR,ZSLATOR
+REAL                      :: ZBETA,ZLAT0,ZLON0,ZLATOR,ZLONOR
+REAL                      :: ZRDSDG,ZCLATOR,ZSLATOR
 REAL                      :: ZXBM0,ZYBM0,ZRO0,ZGA0 
-REAL                      :: ZXP,ZYP,ZEPSI,ZT1,ZCGAM,ZSGAM,ZRACLAT0
+REAL(KIND=JPRD)           :: ZXP,ZYP,ZT1,ZEPSI,ZCGAM,ZSGAM,ZRACLAT0,ZCLAT0,ZRPK,ZSLAT0
 !
-REAL :: ZATA,ZRO2,ZT2,ZXMI0,ZYMI0, ZXI, ZYI, ZIRDSDG
+REAL(KIND=JPRD) :: ZATA,ZT2,ZRO2,ZXMI0,ZYMI0,ZLATTMP,ZXI,ZYI,ZIRDSDG
 REAL(KIND=JPRB) :: ZHOOK_HANDLE, ZHOOK_HANDLE_OMP
 !
 !--------------------------------------------------------------------------------
@@ -505,7 +512,8 @@ ISIZE_OMP = MAX(1,SIZE(ZY)/NBLOCKTOT)
     !    
     ZT2  = (ZRPK**2*ZRO2)**(1./ZRPK)
     !
-    PLAT(JI) = (XPI/2.-ACOS((ZT1-ZT2)/(ZT1+ZT2)))*ZIRDSDG
+    ZLATTMP = (XPI/2.-ACOS((ZT1-ZT2)/(ZT1+ZT2)))*ZIRDSDG
+    PLAT(JI) = ZLATTMP
     !
     IF (PRPK<0.) THEN     ! projection from north pole
       PLAT(JI)=-PLAT(JI)
@@ -792,7 +800,7 @@ ELSE
 !
 !*  3.2       Conformal coordinates
 !
-!!!!IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:XY_CONF_PROJ_2',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:XY_CONF_PROJ_2',1,ZHOOK_HANDLE)
 !
 !$OMP PARALLEL PRIVATE(ZHOOK_HANDLE_OMP)
 IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_CONF_PROJ:XY_CONF_PROJ_31',0,ZHOOK_HANDLE_OMP)

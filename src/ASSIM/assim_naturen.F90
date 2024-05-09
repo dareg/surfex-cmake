@@ -3,7 +3,7 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     ###############################################################################
-SUBROUTINE ASSIM_NATURE_n (IM, U, HPROGRAM, KI, &
+SUBROUTINE ASSIM_NATURE_n (KMYPROC, IM, U, HPROGRAM, KI, &
                           PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                           PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       & 
                           PSWEC,     PTSC,   PUCLS, PVCLS,                &
@@ -48,6 +48,7 @@ IMPLICIT NONE
 !
 !*      0.1    declarations of arguments
 !
+INTEGER, INTENT(IN) :: KMYPROC
 TYPE(ISBA_MODEL_t), INTENT(INOUT) :: IM
 !
 TYPE(SURF_ATM_t), INTENT(INOUT) :: U
@@ -90,9 +91,9 @@ END IF
 !
 
 CALL GET_LUOUT(HPROGRAM,ILUOUT)
-IF (U%CNATURE=='ISBA  ') THEN
+IF (TRIM(U%CNATURE) == 'ISBA') THEN
   !
-  CALL ASSIM_ISBA_n(IM, U, HPROGRAM, KI,  &
+  CALL ASSIM_ISBA_n(KMYPROC, IM, U, HPROGRAM, KI,  &
                     PCON_RAIN, PSTRAT_RAIN, PCON_SNOW, PSTRAT_SNOW, &
                     PCLOUDS,   PLSM,        PEVAPTR,   PEVAP,       &
                     PSWEC,     PTSC,     PUCLS, PVCLS,              &

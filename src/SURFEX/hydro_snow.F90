@@ -56,6 +56,8 @@
 !!                  14/05/02 (A. Boone) snow only, and skip code if '3-L' option in force
 !!                   03/2009 (B. Decharme) Consistency with Arpege permanent snow/ice treatment
 !!                                          (LGLACIER)
+!!                   08/2023 (J. Masek) Introduced XWNEW different from XWCRN,
+!!                   as in old ISBA
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -65,9 +67,9 @@ USE MODD_TYPE_SNOW, ONLY : SURF_SNOW
 !
 USE MODD_CSTS,        ONLY : XLSTT, XLMTT, XDAY
 USE MODD_SNOW_PAR,    ONLY : XANS_T, XANS_TODRY, XANSMIN, XANSMAX, &
-                               XRHOSMAX, XRHOSMIN, XWCRN, XAGLAMIN,  &
-                               XAGLAMAX  
+                               XRHOSMAX, XRHOSMIN, XAGLAMIN, XAGLAMAX
 USE MODD_SURF_PAR,    ONLY : XUNDEF
+USE MODD_SURF_ATM,    ONLY : XWNEW
 USE MODD_DATA_COVER_PAR, ONLY : NVT_SNOW
 !
 !
@@ -166,11 +168,11 @@ WHERE (TPSNOW%WSNOW(:,1) > 0.0 )
     ! when there is melting 
     WHERE ( PMELT > 0.0 )
       TPSNOW%ALB(:) = (TPSNOW%ALB(:)-ZANSMIN(:))*EXP(-XANS_T*PTSTEP/XDAY) + ZANSMIN(:) &
-                       + PSR(:)*PTSTEP/XWCRN*(ZANSMAX(:)-ZANSMIN(:))  
+                       + PSR(:)*PTSTEP/XWNEW*(ZANSMAX(:)-ZANSMIN(:))
       ! when there is no melting
     ELSEWHERE 
       TPSNOW%ALB(:) = TPSNOW%ALB(:) - XANS_TODRY*PTSTEP/XDAY   &
-                       + PSR(:)*PTSTEP/XWCRN*(ZANSMAX(:)-ZANSMIN(:))  
+                       + PSR(:)*PTSTEP/XWNEW*(ZANSMAX(:)-ZANSMIN(:))
     END WHERE
     !
   ELSEWHERE (ZSNOWSWEM == 0.0)

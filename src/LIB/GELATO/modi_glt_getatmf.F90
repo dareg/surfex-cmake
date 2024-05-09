@@ -1,23 +1,3 @@
-MODULE MODI_glt_getatmf
-INTERFACE
-SUBROUTINE glt_getatmf( tpglt,nnflxin,noutlu,nt,nx,ny,lp1,lwg )
-  USE modd_types_glt
-  USE modd_glt_const_thm
-#if ! defined in_surfex
-  USE mode_gltools_bound
-#endif
-  USE mode_gltools_prtrarr
-!
-  IMPLICIT NONE 
-!
-  INTEGER,INTENT(IN) :: nnflxin,noutlu,nt,nx,ny
-  LOGICAL,INTENT(IN) :: lp1,lwg
-
-  TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
-END SUBROUTINE glt_getatmf
-END INTERFACE
-END MODULE MODI_glt_getatmf
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

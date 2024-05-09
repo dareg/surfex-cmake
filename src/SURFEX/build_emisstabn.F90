@@ -109,6 +109,9 @@ READ(KCH,'(A3)') YUNIT
 ALLOCATE (PCONVERSION(SIZE(PRHODREF,1)))
 ! determine the conversion factor
   PCONVERSION(:) = 1.
+
+WRITE(KLUOUT,*) 'Conversion type : ', YUNIT
+
 SELECT CASE (YUNIT)
 CASE ('MIX') ! flux given ppp*m/s,  conversion to molec/m2/s
 ! where 1 molecule/cm2/s = (224.14/6.022136E23) ppp*m/s
@@ -119,6 +122,12 @@ CASE ('MOL') ! flux given in microMol/m2/day, conversion to molec/m2/s
 ! where 1 microMol/m2/day = (22.414/86.400)*1E-12 ppp*m/s
   !XCONVERSION(:) = (22.414/86.400)*1E-12 * XAVOGADRO * PRHODREF(:) / XMD
   PCONVERSION(:) = 1E-6 * XAVOGADRO / 86400.
+!CASE ('MAS') ! Flux given in kg/m2/s, conversion to molec/m2/s 
+! not finalised, would need extra work to account for molar mass of emitted species
+! PCONVERSION(:) = 1.
+CASE('NON') ! Don't perform any conversion
+  PCONVERSION(:) = 1.
+
 
 CASE DEFAULT
   CALL ABOR1_SFX('CH_BUILDEMISSN: UNKNOWN CONVERSION FACTOR')

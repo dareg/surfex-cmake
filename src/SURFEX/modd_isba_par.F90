@@ -30,6 +30,7 @@
 !!      (S.Gollvik)    20/02/12 add XFLXMAX
 !!      (A.Boone)      20/02/12 add ISBA-MEB parameters
 !!     (B. Decharme)      07/15 Add numerical adjustement for F2 soilstress function
+!!      (J. Masek)      08/2023 XTAU_ICE moved to MODD_SURF_ATM
 !-------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
@@ -71,10 +72,6 @@ REAL, PARAMETER       :: XDENOM_MIN  = 1.E-12
 !--------------------------------------------------------------------------------
 ! Soil:
 !--------------------------------------------------------------------------------
-!                        
-! Caracteristic time for ice in force-restore (s)
-!
-REAL, PARAMETER       :: XTAU_ICE = 3300.
 !                        
 ! Bare soil emissivity
 !

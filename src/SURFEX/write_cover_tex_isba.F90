@@ -35,6 +35,7 @@
 !!    Original    08/01/98
 !!       
 !!    R. Alkama    05/2012 : from 12 to 19 vegtype 
+!!    J. Masek     08/2023 : Introduced XRZ0_TO_HEIGHT
 !----------------------------------------------------------------------------
 !
 !*    0.     DECLARATION
@@ -46,8 +47,9 @@ USE MODE_WRITE_COVER_TEX
 !
 USE MODD_WRITE_COVER_TEX,ONLY : NTEX, CNAME, CLANG, NLINES
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_DATA_COVER,     ONLY : XDATA_NATURE,                            &
-                                  XDATA_VEGTYPE, XDATA_H_TREE, XDATA_LAI,  &
+USE MODD_SURF_ATM,       ONLY : XRZ0_TO_HEIGHT
+USE MODD_DATA_COVER,     ONLY : XDATA_NATURE,                             &
+                                  XDATA_VEGTYPE, XDATA_H_TREE, XDATA_LAI, &
                                   XDATA_ROOT_DEPTH, XDATA_GROUND_DEPTH  
                                   
 USE MODD_DATA_COVER_PAR, ONLY : JPCOVER, NVEGTYPE, NVT_NO, NVT_ROCK,      & 
@@ -212,7 +214,7 @@ END DO
     WRITE(NTEX,*) '\end{tabular}'
     WRITE(NTEX,*) '\smallskip\'
     WRITE(NTEX,*) 'where $h_{allen} = e^{(lai-3.5)/1.3}$\'
-    WRITE(NTEX,*) 'The roughness length is deduced: $z_{0} = 0.13 h_{veg}$\' 
+    WRITE(NTEX,*) 'The roughness length is deduced: $z_{0} =',XRZ0_TO_HEIGHT,'h_{veg}$\' 
     WRITE(NTEX,*) 'When averaging is needed, it is performed according to the'
     WRITE(NTEX,*) '$1/{\rm ln}^2(\frac{z_{0}}{10})$ quantities.'
     WRITE(NTEX,*) "\bigskip\"
@@ -297,7 +299,7 @@ END DO
     WRITE(NTEX,*) "\smallskip\"
     WRITE(NTEX,*) "avec $h_{allen} = e^{(lai-3.5)/1.3}$\"
     WRITE(NTEX,*) "La longueur de rugosit\'e de la surface en est d\'eduite:"
-    WRITE(NTEX,*) "$z_{0} = 0.13 h_{veg}$\"
+    WRITE(NTEX,*) "$z_{0} =",XRZ0_TO_HEIGHT,"h_{veg}$\"
     WRITE(NTEX,*) "Quand une moyenne est n\'ecessaire, elle s'effectue sur les"
     WRITE(NTEX,*) "$1/{\rm ln}^2(\frac{z_{0}}{10})$."
     WRITE(NTEX,*) "\bigskip\"

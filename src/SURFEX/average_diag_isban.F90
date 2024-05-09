@@ -44,6 +44,7 @@
 !!                           Good dimension for CO2 flux
 !!      P. Samuelsson  10/13 Added min max for XT2M
 !!      B. Decharme    02/15 No dependence on HW for 10M Wind diags
+!!      F. Svabik    08/2023 Unapproximated roughness length averaging
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -53,6 +54,7 @@ USE MODD_DIAG_n, ONLY : DIAG_t, DIAG_NP_t, DIAG_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_NP_t
 !
 USE MODD_SURF_PAR,    ONLY : XUNDEF
+USE MODD_SURF_ATM,    ONLY : XZ0_OFFSET
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -232,20 +234,23 @@ IF (DGO%LCOEF) THEN
       D%XCE(IMASK)  = D%XCE(IMASK) + NP%AL(JP)%XPATCH(JI) * ND%AL(JP)%XCE(JI)
       !            
       D%XZ0(IMASK)    = D%XZ0(IMASK)    + NP%AL(JP)%XPATCH(JI) * &
-              1./(LOG(PHW(IMASK)/ND%AL(JP)%XZ0 (JI)))**2  
-      D%XZ0H(IMASK)   = D%XZ0H(IMASK)   + NP%AL(JP)%XPATCH(JI) * &
-              1./(LOG(PHT(IMASK)/ND%AL(JP)%XZ0H(JI)))**2   
-      D%XZ0EFF(IMASK) = D%XZ0EFF(IMASK) + NP%AL(JP)%XPATCH(JI) * &
-              1./(LOG(PHW(IMASK)/ND%AL(JP)%XZ0EFF(JI)))**2
+              1./(LOG(XZ0_OFFSET + PHW(IMASK)/ND%AL(JP)%XZ0(JI)))**2
       !      
+      D%XZ0H(IMASK)   = D%XZ0H(IMASK)   + NP%AL(JP)%XPATCH(JI) * &
+              1./(LOG(XZ0_OFFSET + PHT(IMASK)/ND%AL(JP)%XZ0H(JI)) * LOG(XZ0_OFFSET * (1. + PHW(IMASK)/ND%AL(JP)%XZ0(JI) - PHT(IMASK)/ND%AL(JP)%XZ0H(JI)) + PHT(IMASK)/ND%AL(JP)%XZ0H(JI)))
+      !      
+      D%XZ0EFF(IMASK) = D%XZ0EFF(IMASK) + NP%AL(JP)%XPATCH(JI) * &
+              1./(LOG(XZ0_OFFSET + PHW(IMASK)/ND%AL(JP)%XZ0EFF(JI)))**2
+      ! 
     ENDDO
   END DO
   !
-  D%XZ0(:)    = PHW(:) *  EXP( - SQRT(1./D%XZ0(:)) )
+  ! WARNING: Because of the cross term, XZ0H must be inverted before XZ0!
+  D%XZ0H(:)   = PHT(:)/( EXP( (XZ0_OFFSET * (SQRT(D%XZ0(:)/D%XZ0H(:)) - 1.) + 1.) / SQRT(D%XZ0H(:)) ) - XZ0_OFFSET )
   !
-  D%XZ0H(:)   = PHT(:) *  EXP( - SQRT(1./D%XZ0H(:)) )
+  D%XZ0(:)    = PHW(:)/( EXP( SQRT(1./D%XZ0   (:)) ) - XZ0_OFFSET )
   !
-  D%XZ0EFF(:) = PHW(:) *  EXP( - SQRT(1./D%XZ0EFF(:)) )
+  D%XZ0EFF(:) = PHW(:)/( EXP( SQRT(1./D%XZ0EFF(:)) ) - XZ0_OFFSET )
   !
 END IF
 !

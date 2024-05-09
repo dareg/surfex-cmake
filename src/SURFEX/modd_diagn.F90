@@ -32,6 +32,7 @@ MODULE MODD_DIAG_n
 !!      P. Samuelsson 10/2014 : added min max for XT2M
 !!      Modified    09/2015 : M Lafaysse LSNOWDIMNC
 !!      Modified    06/2016 : M Lafaysse LRESETCUMUL
+!!      A. Napoly   08/2023 : Add XT2M_NAT
 !
 !*       0.   DECLARATIONS
 !             ------------
@@ -111,6 +112,7 @@ TYPE DIAG_t
   REAL, POINTER, DIMENSION(:)   :: XSWE     ! snow water equivalent (kg/m2)
 !  
   REAL, POINTER, DIMENSION(:)   :: XT2M      ! temperature at 2 meters          (K)
+  REAL, POINTER, DIMENSION(:)   :: XT2M_NAT      ! temperature at 2 meters          (K)
   REAL, POINTER, DIMENSION(:)   :: XT2M_MIN  ! Minimum temperature at 2 meters          (K)
   REAL, POINTER, DIMENSION(:)   :: XT2M_MAX  ! Maximum temperature at 2 meters          (K)
   REAL, POINTER, DIMENSION(:)   :: XQ2M      ! humidity    at 2 meters          (kg/kg)
@@ -246,6 +248,7 @@ IF (LHOOK) CALL DR_HOOK("MODD_DIAG_N:DIAG_INIT",0,ZHOOK_HANDLE)
   NULLIFY(D%XALBT)  
   NULLIFY(D%XSWE)  
   NULLIFY(D%XT2M)
+  NULLIFY(D%XT2M_NAT)
   NULLIFY(D%XT2M_MIN)
   NULLIFY(D%XT2M_MAX)
   NULLIFY(D%XQ2M)

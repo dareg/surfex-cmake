@@ -158,6 +158,7 @@ IF (GDIM) CALL READ_SURF(HPROGRAM,'SPLIT_PATCH',GDIM,IRESP)
 !
 YRECFM='BUG'
  CALL READ_SURF(HPROGRAM,YRECFM,IBUGFIX,IRESP)
+!
 !*       2.     Prognostic fields:
 !               -----------------
 !
@@ -270,7 +271,10 @@ IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
          DO JI = 1,PK%NSIZE_P
            IMASK = PK%NR_P(JI)
            IF (PEK%XWG(JI,JL)/=XUNDEF ) THEN
-             PEK%XWG(JI,JL) = PEK%XWG(JI,JL) + XTPRT(NIVAR) * ZCOFSWI(IMASK) 
+             PEK%XWG(JI,JL) = max(PEK%XWG(JI,JL) + XTPRT(NIVAR) * ZCOFSWI(IMASK), XWGMIN)
+             IF (PEK%XWG(JI,JL) == XWGMIN) THEN
+                write(*,*) "LIMITED WG",JI,JL,XWGMIN
+             ENDIF
            ENDIF
          ENDDO
        END DO
@@ -299,6 +303,33 @@ DO JL=1,IWORK
   ENDDO
 ENDDO
 DEALLOCATE(ZWORK3D)
+! Perturb value if requested
+IF ( TRIM(CASSIM_ISBA)=="EKF" .AND. LPRT ) THEN
+   !
+   DO JL=1,IO%NGROUND_LAYER
+     ! read in control variable
+     IF ( (TRIM(CVAR(NIVAR))=="WGI1" .AND. JL==1) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI2" .AND. JL==2) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI3" .AND. JL==3) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI4" .AND. JL==4) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI5" .AND. JL==5) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI6" .AND. JL==6) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI7" .AND. JL==7) .OR. &
+          (TRIM(CVAR(NIVAR))=="WGI8" .AND. JL==8) ) THEN
+
+       DO JP = 1,IO%NPATCH
+         PEK => NPE%AL(JP)
+         PK => NP%AL(JP)
+         DO JI = 1,PK%NSIZE_P
+           IMASK = PK%NR_P(JI)
+           IF (PEK%XWGI(JI,JL)/=XUNDEF ) THEN
+             PEK%XWGI(JI,JL) = PEK%XWGI(JI,JL) + XTPRT(NIVAR) * ZCOFSWI(IMASK)
+           ENDIF
+         ENDDO
+       END DO
+     ENDIF
+   END DO
+ENDIF
 !
 !* water intercepted on leaves
 !
@@ -678,7 +709,7 @@ IF (IO%CRESPSL=='CNT') THEN
     YRECFM='LIGN_STR'//ADJUSTL(YLVL(:LEN_TRIM(YLVL)))
     CALL MAKE_CHOICE_ARRAY(HPROGRAM, IO%NPATCH, GDIM, YRECFM, ZWORK)
     DO JP = 1,IO%NPATCH
-      CALL PACK_SAME_RANK(NP%AL(JP)%NR_P,ZWORK(:,JP),NPE%AL(JP)%XSOILCARB(:,JNLITTLEVS))
+      CALL PACK_SAME_RANK(NP%AL(JP)%NR_P,ZWORK(:,JP),NPE%AL(JP)%XLIGNIN_STRUC(:,JNLITTLEVS))
     ENDDO     
   END DO
 !
@@ -759,35 +790,42 @@ IF ( LASSIM ) THEN
          IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,IO%NPATCH))
          XAT2M_ISBA=XUNDEF
          IF (( .NOT. IO%LCANOPY) .AND. IO%NPATCH > 1 ) THEN
-!           YRECFM='T2M_P'  ! Not yet compatible with CANARI first guess
            YRECFM='T2M'
-           !CALL IO_BUFF(YRECFM,'R',GKNOWN)
            CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
            DO JP=2,IO%NPATCH
              XAT2M_ISBA(:,JP)=XAT2M_ISBA(:,1)
            END DO
          ELSE
-!           YRECFM='T2M_ISBA'  ! Not yet compatible with CANARI first guess
            YRECFM='T2M'
            CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,1),IRESP)
          ENDIF
+
+       CASE("T2M_P")
+         IF ( .NOT. ALLOCATED(XAT2M_ISBA)) ALLOCATE(XAT2M_ISBA(ILU,IO%NPATCH))
+         XAT2M_ISBA=XUNDEF
+         YRECFM='T2M_P'  ! Not yet compatible with CANARI first guess
+         CALL READ_SURF(HPROGRAM,YRECFM,XAT2M_ISBA(:,:),IRESP)
 
        CASE("HU2M")
          IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,IO%NPATCH))
          XAHU2M_ISBA=XUNDEF
          IF (( .NOT. IO%LCANOPY) .AND. IO%NPATCH > 1 ) THEN
-!           YRECFM='HU2M_P'  ! Not yet compatible with CANARI first guess
            YRECFM='HU2M'
-           !CALL IO_BUFF(YRECFM,'R',GKNOWN)
            CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
            DO JP=2,IO%NPATCH
              XAHU2M_ISBA(:,JP)=XAHU2M_ISBA(:,1)
            END DO
          ELSE
-!           YRECFM='HU2M_ISBA'  ! Not yet compatible with CANARI first guess
            YRECFM='HU2M'
            CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,1),IRESP)
          ENDIF
+
+       CASE("HU2M_P")
+         IF ( .NOT. ALLOCATED(XAHU2M_ISBA)) ALLOCATE(XAHU2M_ISBA(ILU,IO%NPATCH))
+         XAHU2M_ISBA=XUNDEF
+         YRECFM='HU2M_P'  ! Not yet compatible with CANARI first guess
+         CALL READ_SURF(HPROGRAM,YRECFM,XAHU2M_ISBA(:,:),IRESP)
+
        CASE("WG1")
          ! This is already read above
        CASE("WG2")

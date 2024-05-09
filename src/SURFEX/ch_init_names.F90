@@ -58,9 +58,9 @@ LOGICAL,                         INTENT(OUT) :: OVARSIGI, OVARSIGJ ! type of sta
 !
 !*      0.2    declarations of local variables
 INTEGER :: JSV  !! loop  NBEQ
- CHARACTER        :: YRC1
- CHARACTER(LEN=5) :: YRC2
-REAL(KIND=JPRB) :: ZHOOK_HANDLE
+CHARACTER         :: YRC1
+CHARACTER(LEN=16) :: YRC2
+REAL(KIND=JPRB)   :: ZHOOK_HANDLE
 !
 !-------------------------------------------------------------------------------
 

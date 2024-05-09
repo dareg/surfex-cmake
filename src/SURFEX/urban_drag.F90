@@ -3,7 +3,9 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-    SUBROUTINE URBAN_DRAG(TOP, T, B, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON,  &
+    SUBROUTINE URBAN_DRAG(TOP, XWS_ROOF, XBLD, XROAD, XWS_ROAD, XBLD_HEIGHT,        &
+                          XZ0_TOWN, XROUGH_WALL, XWALL_O_GRND, XGARDEN, XROUGH_ROOF,&
+                          XT_WIN1, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON,    &
                           PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,    &
                           PTS_ROOF, PTS_ROAD, PTS_WALL, PTS_GARDEN,                 &
                           PDELT_SNOW_ROOF, PDELT_SNOW_ROAD,  PEXNS, PEXNA, PTA,     &
@@ -69,8 +71,6 @@
 !               ------------
 !
 USE MODD_TEB_OPTION_n, ONLY : TEB_OPTIONS_t
-USE MODD_TEB_n, ONLY : TEB_t
-USE MODD_BEM_n, ONLY : BEM_t
 !
 USE MODD_SURF_PAR, ONLY : XUNDEF
 USE MODD_CSTS,ONLY : XLVTT, XPI, XCPD, XG, XKARMAN
@@ -79,7 +79,6 @@ USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !USE MODE_SBLS
 USE MODE_THERMOS
 USE MODI_URBAN_EXCH_COEF
-USE MODE_CONV_DOE
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -89,8 +88,18 @@ IMPLICIT NONE
 !*      0.1    declarations of arguments
 !
 TYPE(TEB_OPTIONS_t), INTENT(INOUT) :: TOP
-TYPE(TEB_t), INTENT(INOUT) :: T
-TYPE(BEM_t), INTENT(INOUT) :: B
+
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XWS_ROOF
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XBLD
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XROAD
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XWS_ROAD
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XBLD_HEIGHT
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XZ0_TOWN
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XROUGH_WALL
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XWALL_O_GRND
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XGARDEN
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XROUGH_ROOF
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(INOUT) :: XT_WIN1
 !
 TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT               ! atmospheric turbulence parameters
 !
@@ -99,69 +108,69 @@ TYPE(SURF_ATM_TURB_t), INTENT(IN) :: AT               ! atmospheric turbulence p
 !                                                     ! 'NEW' = Taylor serie, order 1
 !
 REAL,               INTENT(IN)    :: PTSTEP         ! time-step
-REAL, DIMENSION(:), INTENT(IN)    :: PT_CANYON      ! canyon air temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PQ_CANYON      ! canyon air specific humidity.
-REAL, DIMENSION(:), INTENT(IN)    :: PU_CANYON      ! hor. wind in canyon
-REAL, DIMENSION(:), INTENT(IN)    :: PU_LOWCAN      ! wind near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PT_LOWCAN      ! temp. near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PQ_LOWCAN      ! hum. near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PZ_LOWCAN      ! height of atm. var. near the road
-REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROOF       ! surface temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PTS_ROAD       ! surface temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PTS_WALL       ! surface temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PTS_GARDEN     ! surface temperature
-REAL, DIMENSION(:), INTENT(IN)    :: PDELT_SNOW_ROOF! fraction of snow on roof
-REAL, DIMENSION(:), INTENT(IN)    :: PDELT_SNOW_ROAD! fraction of snow on road
-REAL, DIMENSION(:), INTENT(IN)    :: PEXNS          ! surface exner function
-REAL, DIMENSION(:), INTENT(IN)    :: PTA            ! temperature at the lowest level
-REAL, DIMENSION(:), INTENT(IN)    :: PQA            ! specific humidity
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PT_CANYON      ! canyon air temperature
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PQ_CANYON      ! canyon air specific humidity.
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PU_CANYON      ! hor. wind in canyon
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PU_LOWCAN      ! wind near the road
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PT_LOWCAN      ! temp. near the road
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PQ_LOWCAN      ! hum. near the road
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PZ_LOWCAN      ! height of atm. var. near the road
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PTS_ROOF       ! surface temperature
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PTS_ROAD       ! surface temperature
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PTS_WALL       ! surface temperature
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PTS_GARDEN     ! surface temperature
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PDELT_SNOW_ROOF! fraction of snow on roof
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PDELT_SNOW_ROAD! fraction of snow on road
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PEXNS          ! surface exner function
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PTA            ! temperature at the lowest level
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PQA            ! specific humidity
                                                     ! at the lowest level
-REAL, DIMENSION(:), INTENT(IN)    :: PVMOD          ! module of the horizontal wind
-REAL, DIMENSION(:), INTENT(IN)    :: PPS            ! pressure at the surface
-REAL, DIMENSION(:), INTENT(IN)    :: PEXNA          ! exner function
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PVMOD          ! module of the horizontal wind
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PPS            ! pressure at the surface
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PEXNA          ! exner function
                                                     ! at the lowest level
-REAL, DIMENSION(:), INTENT(IN)    :: PRHOA          ! air density
-REAL, DIMENSION(:), INTENT(IN)    :: PZREF          ! reference height of the first
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PRHOA          ! air density
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PZREF          ! reference height of the first
                                                     ! atmospheric level (temperature)
-REAL, DIMENSION(:), INTENT(IN)    :: PUREF          ! reference height of the first
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PUREF          ! reference height of the first
                                                     ! atmospheric level (wind)
-REAL, DIMENSION(:), INTENT(IN)    :: PWS_ROOF_MAX   ! maximum deepness of roof
-REAL, DIMENSION(:), INTENT(IN)    :: PWS_ROAD_MAX   ! and water reservoirs (kg/m2)
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF    ! implicit coefficients (m2s/kg)
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF    ! for wind coupling     (m/s)
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF_LOWCAN ! implicit coefficients for wind coupling (m2s/kg)
-REAL, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF_LOWCAN ! between low canyon wind and road (m/s)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PWS_ROOF_MAX   ! maximum deepness of roof
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PWS_ROAD_MAX   ! and water reservoirs (kg/m2)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF    ! implicit coefficients (m2s/kg)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF    ! for wind coupling     (m/s)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PPEW_A_COEF_LOWCAN ! implicit coefficients for wind coupling (m2s/kg)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PPEW_B_COEF_LOWCAN ! between low canyon wind and road (m/s)
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PQSAT_ROOF     ! qsat(Ts)
-REAL, DIMENSION(:), INTENT(OUT)   :: PQSAT_ROAD     ! qsat(Ts)
-REAL, DIMENSION(:), INTENT(OUT)   :: PDELT_ROOF     ! water fraction on
-REAL, DIMENSION(:), INTENT(OUT)   :: PDELT_ROAD     ! snow-free surfaces
-REAL, DIMENSION(:), INTENT(OUT)   :: PCD            ! drag coefficient
-REAL, DIMENSION(:), INTENT(OUT)   :: PCDN           ! neutral drag coefficient
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_ROOF       ! aerodynamical conductance
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_ROOF_WAT   ! aerodynamical conductance (for water)
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_WALL       ! aerodynamical conductance
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PQSAT_ROOF     ! qsat(Ts)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PQSAT_ROAD     ! qsat(Ts)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PDELT_ROOF     ! water fraction on
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PDELT_ROAD     ! snow-free surfaces
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PCD            ! drag coefficient
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PCDN           ! neutral drag coefficient
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_ROOF       ! aerodynamical conductance
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_ROOF_WAT   ! aerodynamical conductance (for water)
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_WALL       ! aerodynamical conductance
 !                                                   ! between canyon air and
 !                                                   ! walls 
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_ROAD       ! aerodynamical conductance
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_ROAD       ! aerodynamical conductance
 !                                                   ! between canyon air and
 !                                                   ! roads
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_ROAD_WAT   ! aerodynamical conductance
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_ROAD_WAT   ! aerodynamical conductance
 !                                                   ! between canyon air and
 !                                                   ! road (for water)
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_TOP        ! aerodynamical conductance
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_TOP        ! aerodynamical conductance
 !                                                   ! between canyon top and atm.
-REAL, DIMENSION(:), INTENT(IN)    :: PAC_GARDEN     ! aerodynamical conductance
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(IN)    :: PAC_GARDEN     ! aerodynamical conductance
 !                                                   ! between canyon air and GARDEN areas
-REAL, DIMENSION(:), INTENT(OUT)   :: PRI            ! Town Richardson number
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PRI            ! Town Richardson number
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PUW_ROAD       ! Momentum flux for roads
-REAL, DIMENSION(:), INTENT(OUT)   :: PUW_ROOF       ! Momentum flux for roofs
-REAL, DIMENSION(:), INTENT(OUT)   :: PDUWDU_ROAD    ! 
-REAL, DIMENSION(:), INTENT(OUT)   :: PDUWDU_ROOF    ! 
-REAL, DIMENSION(:), INTENT(OUT)   :: PUSTAR_TOWN    ! Fraction velocity for town
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PUW_ROAD       ! Momentum flux for roads
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PUW_ROOF       ! Momentum flux for roofs
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PDUWDU_ROAD    ! 
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PDUWDU_ROOF    ! 
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PUSTAR_TOWN    ! Fraction velocity for town
 !
-REAL, DIMENSION(:), INTENT(OUT)   :: PAC_WIN        ! aerodynamical conductance for window
+REAL, CONTIGUOUS, DIMENSION(:), INTENT(OUT)   :: PAC_WIN        ! aerodynamical conductance for window
 !
 !*      0.2    declarations of local variables
 !
@@ -214,15 +223,17 @@ REAL :: ZZ0_O_Z0H = 200.  ! z0/z0h ratio used in Mascart (1995) formulation.
 !                         ! It is set to the maximum value acceptable by
 !                         ! formulation. Observed values are often larger in cities.
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
+LOGICAL :: LLIMPLICIT_WIND_IS_OLD
+
 !-------------------------------------------------------------------------------
 !
 !
 IF (LHOOK) CALL DR_HOOK('URBAN_DRAG',0,ZHOOK_HANDLE)
 !
+LLIMPLICIT_WIND_IS_OLD = (HIMPLICIT_WIND=='OLD')
+
 ZZ0_ROOF(:)    = 0.15                      ! z0 for roofs
-ZZ0_ROAD(:)    = MIN(0.05,0.1*PZ_LOWCAN(:))! z0 for roads
 !
-ZZ0_TOP(:) = T%XZ0_TOWN(:)
 !
 PCD    (:) = XUNDEF
 PCDN   (:) = XUNDEF
@@ -246,17 +257,22 @@ PQSAT_ROAD(:) = QSAT (PTS_ROAD(:), PPS(:))
 !
 !-------------------------------------------------------------------------------
 !
+DO JJ=1,SIZE(PTA)
+
+  ZZ0_ROAD(JJ)    = MIN(0.05,0.1*PZ_LOWCAN(JJ))! z0 for roads
+
 !*      2.     fraction of water on roofs
 !              --------------------------
 !
-PDELT_ROOF=1.
 !
 !*      2.1    general case
 !              ------------
 !
-WHERE (PQSAT_ROOF(:) >= PQA(:) )
-  PDELT_ROOF(:) = (T%XWS_ROOF(:)/PWS_ROOF_MAX)**(2./3.)
-END WHERE
+  IF (PQSAT_ROOF(JJ) >= PQA(JJ) ) THEN
+    PDELT_ROOF(JJ) = (XWS_ROOF(JJ)/PWS_ROOF_MAX(JJ))**(2./3.)
+  ELSE
+    PDELT_ROOF(JJ)=1.
+  ENDIF
 !
 !*      2.2    dew deposition on roofs (PDELT_ROOF=1)
 !              -----------------------
@@ -266,30 +282,31 @@ END WHERE
 !*      3.     fraction of water on roads
 !              --------------------------
 !
-PDELT_ROAD=1.
 !
 !*      3.1    general case
 !              ------------
 !
-WHERE (PQSAT_ROAD(:) >= PQ_CANYON(:) )
-  PDELT_ROAD(:) = (T%XWS_ROAD(:)/PWS_ROAD_MAX)**(2./3.)
-END WHERE
+  IF (PQSAT_ROAD(JJ) >= PQ_CANYON(JJ) ) THEN
+    PDELT_ROAD(JJ) = (XWS_ROAD(JJ)/PWS_ROAD_MAX(JJ))**(2./3.)
+  ELSE
+    PDELT_ROAD(JJ)=1.
+  ENDIF
 !
 !*      3.2    dew deposition on roads (PDELT_ROAD=1)
 !              -----------------------
 !
+
 !-------------------------------------------------------------------------------
 !
 !*      4.     Drag coefficient for momentum between roof level and atmosphere
 !              ---------------------------------------------------------------
 !
 !
-DO JJ=1,SIZE(PTA)
 !
 !*      4.1    Averaged temperature at roof level
 !              ----------------------------------
 !
-  ZTS_TOWN(JJ) = T%XBLD(JJ) * PTS_ROOF(JJ) + (1.-T%XBLD(JJ)) * PT_CANYON(JJ)
+  ZTS_TOWN(JJ) = XBLD(JJ) * PTS_ROOF(JJ) + (1.-XBLD(JJ)) * PT_CANYON(JJ)
 !
 !*      4.2    Averaged water fraction on roofs
 !              -------------------------------
@@ -304,7 +321,7 @@ DO JJ=1,SIZE(PTA)
 !*      4.4    Averaged Saturation specific humidity
 !              -------------------------------------
 !
-  ZQ_TOWN(JJ) =  T%XBLD(JJ) * ZQ_ROOF(JJ) + (1.-T%XBLD(JJ)) * PQ_CANYON(JJ)
+  ZQ_TOWN(JJ) =  XBLD(JJ) * ZQ_ROOF(JJ) + (1.-XBLD(JJ)) * PQ_CANYON(JJ)
 !
 ENDDO
 !
@@ -315,7 +332,7 @@ ENDDO
 !
 IF (.NOT. TOP%LCANOPY) THEN
   CALL URBAN_EXCH_COEF(TOP%CZ0H, ZZ0_O_Z0H, ZTS_TOWN, ZQ_TOWN, PEXNS, PEXNA, PTA, PQA,     &
-                       PZREF+ T%XBLD_HEIGHT/3., PUREF+T%XBLD_HEIGHT/3., PVMOD, T%XZ0_TOWN, &
+                       PZREF+ XBLD_HEIGHT/3., PUREF+XBLD_HEIGHT/3., PVMOD,XZ0_TOWN, &
                        AT, PRI, PCD, PCDN, ZAC, ZRA, ZCH                              )
 ENDIF
 !
@@ -325,9 +342,11 @@ ENDIF
 !              -------------------------------------------------------------
 !
 IF (TOP%CCH_BEM == "DOE-2") THEN
-   ZCHTCN_ROOF = CHTC_UP_DOE(PTS_ROOF, PTA)
-   ZCHTCS_ROOF = CHTC_SMOOTH_WIND_DOE(ZCHTCN_ROOF, PVMOD)
-   PAC_ROOF = CHTC_ROUGH_DOE(ZCHTCN_ROOF, ZCHTCS_ROOF, T%XROUGH_ROOF) / PRHOA / XCPD
+  DO JJ=1,SIZE(PTA)
+     ZCHTCN_ROOF(JJ) = CHTC_UP_DOE_0D(PTS_ROOF(JJ), PTA(JJ))
+     ZCHTCS_ROOF(JJ) = CHTC_SMOOTH_WIND_DOE_0D(ZCHTCN_ROOF(JJ), PVMOD(JJ))
+     PAC_ROOF(JJ) = CHTC_ROUGH_DOE_0D(ZCHTCN_ROOF(JJ), ZCHTCS_ROOF(JJ),XROUGH_ROOF(JJ)) / PRHOA(JJ) / XCPD
+  ENDDO
 ELSE
    CALL URBAN_EXCH_COEF(TOP%CZ0H, ZZ0_O_Z0H, PTS_ROOF, ZQ_ROOF, PEXNS, PEXNA, PTA, PQA, &
                         PZREF, PUREF, PVMOD, ZZ0_ROOF, AT, ZRI, ZCD, ZCDN, PAC_ROOF,    &
@@ -336,7 +355,7 @@ ENDIF
 !
 !
 DO JJ=1,SIZE(PTA)
-  ZLE_MAX(JJ)     = T%XWS_ROOF(JJ) / PTSTEP * XLVTT
+  ZLE_MAX(JJ)     = XWS_ROOF(JJ) / PTSTEP * XLVTT
   ZLE    (JJ)     =(PQSAT_ROOF(JJ) - PQA(JJ)) &
                  * PAC_ROOF(JJ) * PDELT_ROOF(JJ) * XLVTT * PRHOA(JJ)
 !
@@ -356,8 +375,9 @@ ENDDO
 !  equal to roughness length for momentum.
 !
 IF (.NOT. TOP%LCANOPY) THEN
+  ZZ0_TOP(:) = XZ0_TOWN(:)
   CALL URBAN_EXCH_COEF('MASC95', 1., PT_CANYON, PQ_CANYON, PEXNS, PEXNA, PTA, PQA,    &
-                        PZREF+T%XBLD_HEIGHT-PZ_LOWCAN, PUREF+T%XBLD_HEIGHT-PZ_LOWCAN, &
+                        PZREF+XBLD_HEIGHT-PZ_LOWCAN, PUREF+XBLD_HEIGHT-PZ_LOWCAN, &
                         PVMOD, ZZ0_TOP, AT, ZRI, ZCD, ZCDN, PAC_TOP, ZRA_TOP, ZCH_TOP  )
 ENDIF
 !
@@ -371,11 +391,11 @@ ENDIF
 !
 IF (TOP%CCH_BEM == "DOE-2") THEN
   DO JJ=1,SIZE(PTA)
-    ZCHTCN_WALL(JJ) = CHTC_VERT_DOE(PTS_WALL(JJ), PT_CANYON(JJ))
-    ZCHTCS_WALL(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE (ZCHTCN_WALL(JJ), PU_CANYON(JJ)) + &
-                             CHTC_SMOOTH_WIND_DOE(ZCHTCN_WALL(JJ), PU_CANYON(JJ)) )
+    ZCHTCN_WALL(JJ) = CHTC_VERT_DOE_0D(PTS_WALL(JJ), PT_CANYON(JJ))
+    ZCHTCS_WALL(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE_0D (ZCHTCN_WALL(JJ), PU_CANYON(JJ)) + &
+                             CHTC_SMOOTH_WIND_DOE_0D(ZCHTCN_WALL(JJ), PU_CANYON(JJ)) )
                       
-    PAC_WALL(JJ) = CHTC_ROUGH_DOE(ZCHTCN_WALL(JJ), ZCHTCS_WALL(JJ), T%XROUGH_WALL(JJ)) / XCPD / PRHOA(JJ)
+    PAC_WALL(JJ) = CHTC_ROUGH_DOE_0D(ZCHTCN_WALL(JJ), ZCHTCS_WALL(JJ), XROUGH_WALL(JJ)) / XCPD / PRHOA(JJ)
   END DO
 ELSE
   PAC_WALL(:) = ( 11.8 + 4.2 * PU_CANYON(:) ) / XCPD / PRHOA(:)
@@ -400,19 +420,19 @@ DO JLOOP=1,3
   !
   DO JJ=1,SIZE(PTA)
 
-    ZQ0(JJ)     = (PTS_WALL  (JJ) - PT_CANYON(JJ)) * PAC_WALL  (JJ) * T%XWALL_O_GRND(JJ)
+    ZQ0(JJ)     = (PTS_WALL  (JJ) - PT_CANYON(JJ)) * PAC_WALL  (JJ) * XWALL_O_GRND(JJ)
 
-    IF (T%XROAD(JJ) .GT. 0.) THEN
+    IF (XROAD(JJ) .GT. 0.) THEN
       ZQ0(JJ)   = ZQ0(JJ) &
-            + (PTS_ROAD  (JJ) - PT_LOWCAN(JJ)) * PAC_ROAD  (JJ) * T%XROAD  (JJ)/(T%XROAD(JJ)+T%XGARDEN(JJ)) 
+            + (PTS_ROAD  (JJ) - PT_LOWCAN(JJ)) * PAC_ROAD  (JJ) * XROAD  (JJ)/(XROAD(JJ)+XGARDEN(JJ)) 
     ENDIF
-    IF (T%XGARDEN(JJ) .GT. 0.) THEN
+    IF (XGARDEN(JJ) .GT. 0.) THEN
       ZQ0(JJ)   = ZQ0(JJ) &
-            + (PTS_GARDEN(JJ) - PT_LOWCAN(JJ)) * PAC_GARDEN(JJ) * T%XGARDEN(JJ)/(T%XROAD(JJ)+T%XGARDEN(JJ))
+            + (PTS_GARDEN(JJ) - PT_LOWCAN(JJ)) * PAC_GARDEN(JJ) * XGARDEN(JJ)/(XROAD(JJ)+XGARDEN(JJ))
     ENDIF    
     !
     IF (ZQ0(JJ) >= 0.) THEN
-      ZW_STAR(JJ) = ( (XG * PEXNA(JJ) / PTA(JJ)) * ZQ0(JJ) * T%XBLD_HEIGHT(JJ)) ** (1/3.)
+      ZW_STAR(JJ) = ( (XG * PEXNA(JJ) / PTA(JJ)) * ZQ0(JJ) * XBLD_HEIGHT(JJ)) ** (1/3.)
     ELSE
       ZW_STAR(JJ) = 0.
     ENDIF
@@ -427,7 +447,7 @@ END DO
 !
 DO JJ=1,SIZE(PTA)
   !
-  ZLE_MAX(JJ)     = T%XWS_ROAD(JJ) / PTSTEP * XLVTT
+  ZLE_MAX(JJ)     = XWS_ROAD(JJ) / PTSTEP * XLVTT
   ZLE    (JJ)     = ( PQSAT_ROAD(JJ) - PQ_LOWCAN(JJ) )                   &
                    *   PAC_ROAD(JJ) * PDELT_ROAD(JJ) * XLVTT * PRHOA(JJ)
   !
@@ -441,10 +461,10 @@ DO JJ=1,SIZE(PTA)
   !*      8.5    aerodynamical conductance for window
   !              ------------------------------------
   !
-  ZCHTCN_WIN(JJ) = CHTC_VERT_DOE(B%XT_WIN1(JJ), PT_CANYON(JJ))
+  ZCHTCN_WIN(JJ) = CHTC_VERT_DOE_0D(XT_WIN1(JJ), PT_CANYON(JJ))
   !
-  PAC_WIN(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) + &
-                      CHTC_SMOOTH_WIND_DOE(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) ) &
+  PAC_WIN(JJ) = 0.5 * (CHTC_SMOOTH_LEE_DOE_0D(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) + &
+                      CHTC_SMOOTH_WIND_DOE_0D(ZCHTCN_WIN(JJ), PU_CANYON(JJ)) ) &
                    / PRHOA(JJ) / XCPD
   !
   !-------------------------------------------------------------------------------
@@ -461,7 +481,7 @@ DO JJ=1,SIZE(PTA)
     !
     ZUSTAR2(JJ)=XUNDEF
     !
-    IF(HIMPLICIT_WIND=='OLD')THEN
+    IF(LLIMPLICIT_WIND_IS_OLD)THEN
       !   old implicitation
       ZUSTAR2(JJ) = (ZCD_ROAD(JJ)*PU_LOWCAN(JJ)*PPEW_B_COEF_LOWCAN(JJ))/              &
                     (1.0-PRHOA(JJ)*ZCD_ROAD(JJ)*PU_LOWCAN(JJ)*PPEW_A_COEF_LOWCAN(JJ))
@@ -503,7 +523,7 @@ DO JJ=1,SIZE(PTA)
     !
     ZUSTAR2(JJ)=XUNDEF
     !  
-    IF(HIMPLICIT_WIND=='OLD')THEN
+    IF(LLIMPLICIT_WIND_IS_OLD)THEN
       !   old implicitation
       ZUSTAR2(JJ) = (PCD(JJ)*PVMOD(JJ)*PPEW_B_COEF(JJ))/            &
                     (1.0-PRHOA(JJ)*PCD(JJ)*PVMOD(JJ)*PPEW_A_COEF(JJ))
@@ -528,6 +548,14 @@ DO JJ=1,SIZE(PTA)
 ENDDO
 !
 IF (LHOOK) CALL DR_HOOK('URBAN_DRAG',1,ZHOOK_HANDLE)
+!
+CONTAINS
+INCLUDE "chtc_up_doe_0d.func.h"
+INCLUDE "chtc_smooth_wind_doe_0d.func.h"
+INCLUDE "chtc_smooth_lee_doe_0d.func.h"
+INCLUDE "chtc_rough_doe_0d.func.h"
+INCLUDE "chtc_vert_doe_0d.func.h"
+!
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE URBAN_DRAG

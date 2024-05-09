@@ -364,7 +364,7 @@ IF (TOP%LHYDRO) print*," CALL PGD_TEB_URBHYDRO(HPROGRAM,LECOCLIMAP)"
 !
 !-------------------------------------------------------------------------------
 !
-IF (LHOOK) CALL DR_HOOK('PGD_TEB_GARDEN',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('PGD_TEB_VEG',1,ZHOOK_HANDLE)
 !
 !
 !-------------------------------------------------------------------------------

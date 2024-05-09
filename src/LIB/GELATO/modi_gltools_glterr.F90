@@ -1,29 +1,3 @@
-MODULE MODI_gltools_glterr
-INTERFACE
-SUBROUTINE gltools_glterr  &
-        ( hroutine,hmess,hflag,noutlu,lwg )
-!
-!
-  IMPLICIT NONE
-  LOGICAL, INTENT(in) :: lwg
-  INTEGER, INTENT(in) :: noutlu
-
-!
-!  CHARACTER(400), INTENT(in) ::  &
-!    hroutine
-!  CHARACTER(400), INTENT(in) ::  &
-!    hmess
-!  CHARACTER(4), INTENT(in) ::  &
-!    hflag
-  CHARACTER(LEN=*), INTENT(in) ::  &
-        hroutine
-  CHARACTER(LEN=*), INTENT(in) ::  &
-        hmess
-  CHARACTER(LEN=*), INTENT(in) ::  &
-        hflag
-END SUBROUTINE gltools_glterr
-END INTERFACE
-END MODULE MODI_gltools_glterr
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

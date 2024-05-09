@@ -90,6 +90,8 @@
 !!      Modified by A. Boone     (10/2014): SNOW3LREFRZ and SNOW3LEVAPN edited to give
 !!                                          better enthalpy conservation.
 !!      Modified by B. Decharme  (03/2016): No snowdrift under forest
+!!      Modified by P. Samuelsson(04/2023): Introduced reduced soil-snow heat flux via a new
+!!                                          logical namelist option LESSOILSNOWFLUX
 !!
 !!
 !-------------------------------------------------------------------------------
@@ -552,7 +554,7 @@ ZSNOWTEMPO1(:) = ZSNOWTEMP(:,1) ! save surface snow temperature before update
 ZGRNDFLUXI(:)  = ZGRNDFLUX(:)
 !
 CALL SNOW3LSOLVT(OMEB,PTSTEP,XSNOWDZMIN,PSNOWDZ,ZSCOND,ZSCAP,PTG,              &
-                   PSOILCOND,PD_G,ZRADSINK,ZCT,ZTSTERM1,ZTSTERM2,              &
+                   PSOILCOND,PD_G,ZRADSINK,ZCT,ZTSTERM1,ZTSTERM2,PPSN3L,ZSNOW, &
                    ZPET_A_COEF_T,ZPEQ_A_COEF_T,ZPET_B_COEF_T,ZPEQ_B_COEF_T,    &
                    ZTA_IC,ZQA_IC,ZGRNDFLUX,ZGRNDFLUXO,ZSNOWTEMP,PSNOWFLUX      )  
 !
@@ -1419,6 +1421,7 @@ END SUBROUTINE SNOW3LEBUD
                                PSNOWDZ,PSCOND,PSCAP,PTG,              &
                                PSOILCOND,PD_G,                        &
                                PRADSINK,PCT,PTERM1,PTERM2,            &
+                               PPSN3L, PSNOW,                         &
                                PPET_A_COEF_T,PPEQ_A_COEF_T,           &
                                PPET_B_COEF_T,PPEQ_B_COEF_T,           &
                                PTA_IC, PQA_IC,                        &
@@ -1446,6 +1449,7 @@ END SUBROUTINE SNOW3LEBUD
 !
 !
 USE MODD_CSTS,ONLY : XTT
+USE MODD_SNOW_PAR,ONLY : LESSOILSNOWFLUX
 !
 USE MODI_TRIDIAG_GROUND
 !
@@ -1458,7 +1462,8 @@ LOGICAL,            INTENT(IN)      :: OMEB
 REAL,               INTENT(IN)      :: PTSTEP, PSNOWDZMIN
 !
 REAL, DIMENSION(:), INTENT(IN)      :: PTG, PSOILCOND, PD_G,         &
-                                         PCT, PTERM1, PTERM2  
+                                         PCT, PTERM1, PTERM2,        &
+                                         PPSN3L, PSNOW
 
 !
 REAL, DIMENSION(:,:), INTENT(IN)    :: PSNOWDZ, PSCOND, PSCAP,       &
@@ -1482,6 +1487,7 @@ INTEGER                             :: INI
 INTEGER                             :: INLVLS
 !
 REAL, DIMENSION(SIZE(PTG))                     :: ZSNOWTEMP_DELTA
+REAL, DIMENSION(SIZE(PTG))                     :: ZSOILSNRED, ZSOILSNREDFRAC, ZSOILSNREDDEPTH
 !
 REAL, DIMENSION(SIZE(PSNOWDZ,1),SIZE(PSNOWDZ,2)) :: ZSNOWTEMP, ZDTERM, ZCTERM, &
                                                       ZFRCV, ZAMTRX, ZBMTRX,     &
@@ -1526,6 +1532,26 @@ ZWORK1(:,INLVLS) = ZSNOWDZM(:,INLVLS)/(2.0*ZDZDIF(:,INLVLS)*PSCOND   (:,INLVLS))
 ZWORK2(:,INLVLS) = PD_G    (:       )/(2.0*ZDZDIF(:,INLVLS)*PSOILCOND(:       ))
 !
 ZDTERM(:,:)      = 1.0/(ZDZDIF(:,:)*(ZWORK1(:,:)+ZWORK2(:,:)))
+!
+IF(LESSOILSNOWFLUX)THEN
+!
+! Since the soil column is currently shared between the snow covered and
+! non-snow covered fractions of a patch we can have excess snow melt from
+! below due to warming via the non-snow covered fraction and an unrealistic
+! soil-snow heat flux. This option prevents this situation in a pragmatic
+! manner by modifing the heat flux between the lowest snow layer and the soil.
+!
+  ZSOILSNREDFRAC(:) = MIN(1.0,MAX( 0.05, 3.8 * PPSN3L(:) - 2.8 ))
+
+! For thin snow layers (<0.05 m) we should still allow the full soil-snow
+! heat flux while for thick (>0.15 m) not:
+  ZSOILSNREDDEPTH(:) =  MIN(1.0,MAX( 0.0, -10.0 * PSNOW(:) + 1.5 ))
+!
+  ZSOILSNRED(:) = MAX(ZSOILSNREDFRAC(:), ZSOILSNREDDEPTH(:))
+!
+  ZDTERM(:,INLVLS) = ZSOILSNRED(:) * ZDTERM(:,INLVLS)
+!
+ENDIF
 !
 ZCTERM(:,:)      = PSCAP(:,:)*ZSNOWDZM(:,:)/PTSTEP
 !

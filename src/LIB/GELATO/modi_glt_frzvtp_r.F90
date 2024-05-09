@@ -1,35 +1,3 @@
-MODULE MODI_glt_frzvtp_r
-INTERFACE
-SUBROUTINE glt_frzvtp_r( tpmxl,tpsit,pqfac,phsi,pssi,tpsil,&
-       nilay,nl,noutlu,np,nt,dtt,lp3,height,sf3tinv )
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-  USE mode_gltools_enthalpy
-  USE mode_gltools_interp
-  USE modi_glt_saltrap_r
-!
-  IMPLICIT NONE
-!
-  INTEGER,INTENT(IN) :: noutlu,nl,nt,np,nilay
-  REAL,INTENT(IN) :: dtt
-  REAL,DIMENSION(:),INTENT(IN) :: sf3tinv,height
-  LOGICAL,INTENT(IN) :: lp3
-  TYPE(t_mxl), DIMENSION(np), INTENT(in) ::  &
-        tpmxl
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) ::  &
-        tpsit
-  REAL, DIMENSION(nt,np), INTENT(in) ::  &
-        pqfac
-  REAL, DIMENSION(nt,np), INTENT(inout) ::  &
-        phsi
-  REAL, DIMENSION(nt,np), INTENT(out) ::  &
-        pssi
-  TYPE(t_vtp), DIMENSION(nl,nt,np), INTENT(inout) ::   &
-        tpsil
-END SUBROUTINE glt_frzvtp_r
-END INTERFACE
-END MODULE MODI_glt_frzvtp_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

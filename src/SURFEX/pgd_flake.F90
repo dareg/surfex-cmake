@@ -272,7 +272,7 @@ ELSE
      WRITE(ILUOUT,*)'energy budget, please use the two files for the  '
      WRITE(ILUOUT,*)'Kourzeneva 2009 method: ',CLAKELDB(1:LEN_TRIM(CLAKELDB)),' ',&
                                                CSTATUSLDB(1:LEN_TRIM(CSTATUSLDB))
-     CALL ABOR1_SFX('PGD_FLAKE: WITH THIS VERSION OF FLAKE, LRM_RIVER MUST BE TRUE')         
+     !CALL ABOR1_SFX('PGD_FLAKE: WITH THIS VERSION OF FLAKE, LRM_RIVER MUST BE TRUE')         
   ENDIF
   !
 !ek_beg

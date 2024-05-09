@@ -318,23 +318,26 @@ IF (LHOOK) CALL DR_HOOK('SNOW3L_ISBA',0,ZHOOK_HANDLE)
 !*       0.     Initialize variables:
 !               ---------------------
 !
-IF (SIZE(DMK%XSNOWDEND)>0) THEN
-  DMK%XSNOWDEND (:,:) = XUNDEF
-  DMK%XSNOWSPHER(:,:) = XUNDEF
-  DMK%XSNOWSIZE (:,:) = XUNDEF
-  DMK%XSNOWSSA  (:,:) = XUNDEF
-  DMK%XSNOWRAM  (:,:) = XUNDEF
-  DMK%XSNOWSHEAR(:,:) = XUNDEF
-  DMK%XSNOWTYPEMEPRA(:,:) = XUNDEF  
-  DMK%XACC_RAT      (:,:) = XUNDEF
-  DMK%XNAT_RAT      (:,:) = XUNDEF
-  DMK%XIMPUR_CONC (:,:,:) = XUNDEF 
+IF (associated(DMK%XSNOWDEND)) THEN
+  IF (SIZE(DMK%XSNOWDEND)>0) THEN
+    DMK%XSNOWDEND (:,:) = XUNDEF
+    DMK%XSNOWSPHER(:,:) = XUNDEF
+    DMK%XSNOWSIZE (:,:) = XUNDEF
+    DMK%XSNOWSSA  (:,:) = XUNDEF
+    DMK%XSNOWRAM  (:,:) = XUNDEF
+    DMK%XSNOWSHEAR(:,:) = XUNDEF
+    DMK%XSNOWTYPEMEPRA(:,:) = XUNDEF  
+    DMK%XACC_RAT      (:,:) = XUNDEF
+    DMK%XNAT_RAT      (:,:) = XUNDEF
+    DMK%XIMPUR_CONC (:,:,:) = XUNDEF 
+  ENDIF
 ENDIF
 !
-
-IF (SIZE(DMK%XDIFF_RATIO)>1) THEN
-  DMK%XSPEC_ALB(:,:) = XUNDEF
-  DMK%XDIFF_RATIO(:,:) = XUNDEF
+IF (associated(DMK%XDIFF_RATIO)) THEN
+ IF (SIZE(DMK%XDIFF_RATIO)>1) THEN
+   DMK%XSPEC_ALB(:,:) = XUNDEF
+   DMK%XDIFF_RATIO(:,:) = XUNDEF
+ ENDIF
 ENDIF
 !
 DEK%XSNDRIFT(:)    = 0.0
@@ -346,7 +349,9 @@ PFLSN_COR(:)   = 0.0
 PTHRUFAL(:)    = 0.0
 PEVAPCOR(:)    = 0.0
 PQS(:)         = XUNDEF
-IF (SIZE(DMK%XSYTMASS)>1) DMK%XSYTMASS(:)    = 0.0
+IF (associated(DMK%XSYTMASS))THEN 
+  IF (SIZE(DMK%XSYTMASS)>1) DMK%XSYTMASS(:)    = 0.0
+ENDIF
 !
 ZSNOW(:)       = 0.0
 ZSNOWD(:)      = 0.0
@@ -1148,6 +1153,9 @@ DO JJ=1,KSIZE1
    ZP_RNSNOW  (JJ) = DMK%XRNSNOW (JI)
    ZP_HSNOW   (JJ) = DMK%XHSNOW  (JI)   
    ZP_HPSNOW  (JJ) = DMK%XHPSNOW (JI)   
+   ZP_GFLUXSNOW (JJ) = DMK%XGFLUXSNOW(JI)
+   ZP_SNOWHMASS (JJ) = DMK%XSNOWHMASS(JI)
+   ZP_GSFCSNOW  (JJ) = PGSFCSNOW(JI)
 
    ZP_PS      (JJ) = PPS      (JI)
    ZP_SRSNOW  (JJ) = PSR      (JI)
@@ -1300,7 +1308,11 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
   ! En couplé il faudra voir si on veut virer les diagnostics, les calculer tout le temps, ou trouver une autre solution
   GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
 #else
-  GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
+  ! This condition should be applied relatively to the time since beginning of simulation, not to the absolute time.
+  ! It is temporarily removed to allow for example daily outputs with runs starting at 6h
+  ! However a correct condition should be implemented in a near future to reduce computation time
+  !GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0).AND.(MOD(TPTIME%TIME,XTSTEP_OUTPUT)==0.)
+  GCOMPUTECRODIAG = (SIZE(DMK%XSNOWDEND)>0)
 #endif
   !
   !Ajout test sur pas de temps de sortie
@@ -1506,7 +1518,7 @@ IF (PEK%TSNOW%SCHEME=='CRO') THEN
     ENDDO
   ENDIF
 !
-  IF (SIZE(DMK%XSNOWDEND)>0) THEN
+  IF (GCOMPUTECRODIAG)THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBA
     DO JWRK = 1,KSIZE2
       DO JJ=1,KSIZE1
@@ -1567,7 +1579,7 @@ DO JJ=1,KSIZE1
   ZLWNET_N      (JI) = ZP_LWNETSNOW   (JJ)
 ENDDO
 !
-IF ( SIZE(DMK%XSNOWDEND)>0 ) THEN
+IF (GCOMPUTECRODIAG)THEN
   ! This is equivalent to test the value of DGMI%LPROSNOW which does not enter in ISBATHEN
   DMK%XSNDPT_1DY     (:) = XUNDEF
   DMK%XSNDPT_3DY     (:) = XUNDEF

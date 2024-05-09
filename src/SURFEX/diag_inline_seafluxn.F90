@@ -8,10 +8,10 @@ SUBROUTINE DIAG_INLINE_SEAFLUX_n (DGO, D, DC, DI, DIC, DGMSI, S,                
                                   PMERA, PHT, PHW, PCD, PCDN, PCH, PCE, PRI, PHU,     &
                                   PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER,          &
                                   PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB,          &
-                                  PEMIS, PTRAD, PRAIN, PSNOW, PLMO,                   & 
+                                  PEMIS, PTRAD, PRAIN, PSNOW,                         & 
                                   PCD_ICE, PCDN_ICE, PCH_ICE, PCE_ICE, PRI_ICE,       &
                                   PZ0_ICE, PZ0H_ICE, PQSAT_ICE, PSFTH_ICE, PSFTQ_ICE, &
-                                  PSFZON_ICE, PSFMER_ICE, PLMO_ICE                    )
+                                  PSFZON_ICE, PSFMER_ICE )
                                           
 !     #####################################################################################
 !
@@ -48,10 +48,12 @@ USE MODD_SEAFLUX_n, ONLY : SEAFLUX_t
 !
 USE MODD_CSTS,           ONLY : XTTS
 USE MODD_SURF_PAR,       ONLY : XUNDEF
+USE MODD_SURF_ATM,       ONLY : XZ0_OFFSET
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA
 !
 USE MODE_GLT_STATS ,     ONLY : GLT_AVHICEM, GLT_AVHSNWM
 USE MODI_CLS_TQ
+USE MODI_CLS_TQ_DIAN
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_SEA
 USE MODI_DIAG_SURF_BUDGETC
@@ -109,7 +111,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PEMIS     ! emissivity                        
 !
 REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall (kg/m2/s)
-REAL, DIMENSION(:), INTENT(IN) :: PLMO      ! Monin-Obukov length (m)
 !
 REAL, DIMENSION(:), INTENT(IN)    :: PCD_ICE    ! drag coefficient for momentum
 REAL, DIMENSION(:), INTENT(IN)    :: PCDN_ICE   ! neutral drag coefficient
@@ -123,17 +124,13 @@ REAL, DIMENSION(:), INTENT(IN)    :: PSFTH_ICE  ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN)    :: PSFTQ_ICE  ! water flux (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN)    :: PSFZON_ICE ! zonal friction
 REAL, DIMENSION(:), INTENT(IN)    :: PSFMER_ICE ! meridian friction
-REAL, DIMENSION(:), INTENT(IN)    :: PLMO_ICE   ! Monin-Obukov length (m)
 !
 !*      0.2    declarations of local variables
 !
 LOGICAL                         :: GSIC
-INTEGER                         :: JNUM_ICE
 REAL, DIMENSION(SIZE(PTA))      :: ZZ0W
+REAL, DIMENSION(SIZE(PTA))      :: ZZ0WH
 REAL, DIMENSION(SIZE(PTA))      :: ZH
-REAL, DIMENSION(SIZE(PTA))      :: ZT2M_ICE, ZQ2M_ICE, ZHU2M_ICE
-REAL, DIMENSION(SIZE(PTA))      :: ZMER10M_ICE, ZZON10M_ICE,ZUNDEF
-LOGICAL, DIMENSION(SIZE(PTA))   :: GICE_MASK
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------------
@@ -154,108 +151,54 @@ IF (.NOT. S%LSBL) THEN
 !
   IF (DGO%N2M>=2) THEN
     ZH(:)=2.          
-    IF (DGO%N2M==3) THEN
-      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                S%XSST, PHU, PQSAT, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M, PLMO)
-    ELSE
+    IF (DGO%N2M==2) THEN
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
                 S%XSST, PHU, PQSAT, PZ0H, ZH,D%XT2M, D%XQ2M, D%XHU2M)
+
+    ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
+      CALL CLS_TQ_DIAN(PZONA, PMERA, PTA, PQA, PPA, &
+                  PPS, PHT, PCD, PCH, PRI,          &
+                  S%XSST, PHU, PQSAT, PZ0H, ZH,            &
+                  D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M)
     ENDIF
+
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW,PCD, PCDN, PRI, ZH,  &
                   D%XZON10M, D%XMER10M)  
     IF (S%LHANDLE_SIC) THEN
-       ZUNDEF(:) = XUNDEF
-       GICE_MASK(:) = S%XSIC(:) > 0.
-       JNUM_ICE = COUNT(GICE_MASK)
+       ZH(:)=2.          
+       IF (DGO%N2M==2) THEN
+         CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, &
+            PCD_ICE, PCH_ICE, PRI_ICE,       &
+            S%XTICE, PHU, PQSAT_ICE, PZ0H_ICE, ZH, DI%XT2M, DI%XQ2M, DI%XHU2M)  
 
-       IF(JNUM_ICE > 0) THEN
-           ZH(:)=2.          
-           IF (DGO%N2M==3) THEN
-             CALL CLS_TQ(                       &
-                 PACK(PTA,      MASK=GICE_MASK) &
-               , PACK(PQA,      MASK=GICE_MASK) &
-               , PACK(PPA,      MASK=GICE_MASK) &
-               , PACK(PPS,      MASK=GICE_MASK) &
-               , PACK(PHT,      MASK=GICE_MASK) &
-               , PACK(PCD_ICE,  MASK=GICE_MASK) &
-               , PACK(PCH_ICE,  MASK=GICE_MASK) &
-               , PACK(PRI_ICE,  MASK=GICE_MASK) &
-               , PACK(S%XTICE,  MASK=GICE_MASK) &
-               , PACK(PHU,      MASK=GICE_MASK) &
-               , PACK(PQSAT_ICE,MASK=GICE_MASK) &
-               , PACK(PZ0H_ICE, MASK=GICE_MASK) &
-               , PACK(ZH,       MASK=GICE_MASK) &
-               , ZT2M_ICE (:JNUM_ICE)           &
-               , ZQ2M_ICE (:JNUM_ICE)           &
-               , ZHU2M_ICE(:JNUM_ICE)           &
-               , PACK(PLMO_ICE, MASK=GICE_MASK) )
-           ELSE
-             CALL CLS_TQ(                       &
-                 PACK(PTA,      MASK=GICE_MASK) &
-               , PACK(PQA,      MASK=GICE_MASK) &
-               , PACK(PPA,      MASK=GICE_MASK) &
-               , PACK(PPS,      MASK=GICE_MASK) &
-               , PACK(PHT,      MASK=GICE_MASK) &
-               , PACK(PCD_ICE,  MASK=GICE_MASK) &
-               , PACK(PCH_ICE,  MASK=GICE_MASK) &
-               , PACK(PRI_ICE,  MASK=GICE_MASK) &
-               , PACK(S%XTICE,  MASK=GICE_MASK) &
-               , PACK(PHU,      MASK=GICE_MASK) &
-               , PACK(PQSAT_ICE,MASK=GICE_MASK) &
-               , PACK(PZ0H_ICE, MASK=GICE_MASK) &
-               , PACK(ZH,       MASK=GICE_MASK) &
-               , ZT2M_ICE (:JNUM_ICE)           &
-               , ZQ2M_ICE (:JNUM_ICE)           &
-               , ZHU2M_ICE(:JNUM_ICE)           )
-           ENDIF
-
-           ZH(:)=10.                
-           CALL CLS_WIND(                     &
-               PACK(PZONA,    MASK=GICE_MASK) &
-             , PACK(PMERA,    MASK=GICE_MASK) &
-             , PACK(PHW,      MASK=GICE_MASK) &
-             , PACK(PCD_ICE,  MASK=GICE_MASK) &
-             , PACK(PCDN_ICE, MASK=GICE_MASK) &
-             , PACK(PRI_ICE,  MASK=GICE_MASK) &
-             , PACK(ZH,       MASK=GICE_MASK) &
-             , ZZON10M_ICE(:JNUM_ICE)         &
-             , ZMER10M_ICE(:JNUM_ICE)         )
-
-           DI%XT2M  = UNPACK(ZT2M_ICE (:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
-           DI%XQ2M  = UNPACK(ZQ2M_ICE (:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
-           DI%XHU2M = UNPACK(ZHU2M_ICE(:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
-
-           DI%XZON10M = UNPACK(ZZON10M_ICE(:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
-           DI%XMER10M = UNPACK(ZMER10M_ICE(:JNUM_ICE), MASK=GICE_MASK, FIELD=ZUNDEF)
-       ELSE
-           DI%XT2M  = XUNDEF
-           DI%XQ2M  = XUNDEF
-           DI%XHU2M = XUNDEF
-
-           DI%XZON10M = XUNDEF
-           DI%XMER10M = XUNDEF
-       END IF
+       ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
+         CALL CLS_TQ_DIAN(PZONA, PMERA, PTA,      &
+            PQA, PPA, PPS, PHT, PCD_ICE, PCH_ICE, &
+            PRI_ICE, S%XTICE, PHU, PQSAT_ICE, PZ0H_ICE, ZH,  &
+            DI%XT2M, DI%XQ2M, DI%XHU2M,DGO%N2M)
+       ENDIF
+       ZH(:)=10.                
+       CALL CLS_WIND(PZONA, PMERA, PHW, PCD_ICE, PCDN_ICE, PRI_ICE, ZH,  &
+            DI%XZON10M, DI%XMER10M  )  
     ENDIF 
-  END IF
 !
-  IF (DGO%N2M>=1) THEN
-     IF (S%LHANDLE_SIC) THEN
-        !
-        D%XT2M    = D%XT2M    * (1 - S%XSIC) + DI%XT2M    * S%XSIC
-        D%XQ2M    = D%XQ2M    * (1 - S%XSIC) + DI%XQ2M    * S%XSIC
-        D%XHU2M   = D%XHU2M   * (1 - S%XSIC) + DI%XHU2M   * S%XSIC
-        !
-        WHERE( DI%XZON10M /= XUNDEF .AND. DI%XMER10M /= XUNDEF )
-           D%XZON10M(:) = D%XZON10M(:) * (1 - S%XSIC(:)) + DI%XZON10M(:) * S%XSIC(:)
-           D%XMER10M(:) = D%XMER10M(:) * (1 - S%XSIC(:)) + DI%XMER10M(:) * S%XSIC(:)
-           DI%XWIND10M = SQRT(DI%XZON10M**2+DI%XMER10M**2)
-        ELSEWHERE
-           DI%XWIND10M = XUNDEF
-        ENDWHERE
-        !
-        D%XRI    = PRI     * (1 - S%XSIC) + PRI_ICE     * S%XSIC
-        DI%XRI   =PRI_ICE
+    IF (S%LHANDLE_SIC) THEN
+      !
+      D%XT2M    = D%XT2M    * (1 - S%XSIC) + DI%XT2M    * S%XSIC
+      D%XQ2M    = D%XQ2M    * (1 - S%XSIC) + DI%XQ2M    * S%XSIC
+      D%XHU2M   = D%XHU2M   * (1 - S%XSIC) + DI%XHU2M   * S%XSIC
+      !
+      WHERE( DI%XZON10M /= XUNDEF .AND. DI%XMER10M /= XUNDEF )
+         D%XZON10M(:) = D%XZON10M(:) * (1 - S%XSIC(:)) + DI%XZON10M(:) * S%XSIC(:)
+         D%XMER10M(:) = D%XMER10M(:) * (1 - S%XSIC(:)) + DI%XMER10M(:) * S%XSIC(:)
+         DI%XWIND10M = SQRT(DI%XZON10M**2+DI%XMER10M**2)
+      ELSEWHERE
+         DI%XWIND10M = XUNDEF
+      ENDWHERE
+      !
+      D%XRI    = PRI     * (1 - S%XSIC) + PRI_ICE     * S%XSIC
+      DI%XRI   =PRI_ICE
      ELSE
         D%XRI    =PRI
      ENDIF
@@ -316,10 +259,13 @@ IF (DGO%LCOEF) THEN
       !
       !* Roughness lengths
       !
-      ZZ0W = ( 1 - S%XSIC ) * 1.0/(LOG(PHW/S%XZ0)    **2)  +  S%XSIC   * 1.0/(LOG(PHW/PZ0_ICE)**2)  
-      D%XZ0  = PHW  * EXP ( - SQRT ( 1./  ZZ0W ))
-      ZZ0W = ( 1 - S%XSIC ) * 1.0/(LOG(PHW/PZ0H)    **2)  +  S%XSIC   * 1.0/(LOG(PHW/PZ0H_ICE)**2)  
-      D%XZ0H = PHW  * EXP ( - SQRT ( 1./  ZZ0W ))
+      ZZ0W   = (1 - S%XSIC) * 1.0/(LOG( XZ0_OFFSET + PHW/S%XZ0   )**2) + &
+                    S%XSIC  * 1.0/(LOG( XZ0_OFFSET + PHW/PZ0_ICE )**2)
+      D%XZ0  = PHW/(EXP( SQRT(1./ZZ0W) ) - XZ0_OFFSET)
+
+      ZZ0WH  = (1 - S%XSIC) * 1.0/(LOG( XZ0_OFFSET + PHW/PZ0H     ) * LOG( XZ0_OFFSET * (1. + PHW/S%XZ0   - PHW/PZ0H    ) + PHW/PZ0H     )) + &
+                    S%XSIC  * 1.0/(LOG( XZ0_OFFSET + PHW/PZ0H_ICE ) * LOG( XZ0_OFFSET * (1. + PHW/PZ0_ICE - PHW/PZ0H_ICE) + PHW/PZ0H_ICE ))
+      D%XZ0H = PHW/(EXP( (XZ0_OFFSET * (SQRT(ZZ0W/ZZ0WH) - 1.) + 1.)/SQRT(ZZ0WH)) - XZ0_OFFSET)
 
       DI%XCD  = PCD_ICE
       DI%XCH  = PCH_ICE

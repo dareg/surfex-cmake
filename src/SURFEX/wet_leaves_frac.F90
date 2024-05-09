@@ -48,7 +48,7 @@ USE MODD_SURF_ATM, ONLY : XDELTA_MAX
 !
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 IMPLICIT NONE
 !
@@ -81,7 +81,8 @@ REAL, DIMENSION(:), INTENT(OUT)  :: PDELTA
 !
 !
 !
-REAL, DIMENSION(SIZE(PVEG)) :: ZCOEF,          &
+#ifdef HIRLAM_SP_HACKS
+REAL(KIND=JPRD), DIMENSION(SIZE(PVEG)) :: ZCOEF,          &
 !                                              ZCOEF = work array
                                  ZWR,            &
 !                                              Interception reservoir limited by WRMAX
@@ -89,6 +90,18 @@ REAL, DIMENSION(SIZE(PVEG)) :: ZCOEF,          &
 !                                              ZDELTA_LOW = fraction of the foliage covered
 !                                              by intercepted water for low vegetation
                                  ZDELTA_HIGH  
+REAL(KIND=JPRD), DIMENSION(SIZE(PVEG)) :: PWRMAX_DP, PDELTA_DP  
+#else
+REAL, DIMENSION(SIZE(PVEG)) :: ZCOEF,          &
+!                                              ZCOEF = work array
+                                 ZWR,            &
+!                                              Interception reservoir limited by WRMAX
+                                 ZDELTA_LOW,     &
+!                                              ZDELTA_LOW = fraction of the foliage covered
+!                                              by intercepted water for low vegetation
+                                 ZDELTA_HIGH 
+REAL, DIMENSION(SIZE(PVEG)) :: PWRMAX_DP, PDELTA_DP  
+#endif
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !                                              ZDELTA_HIGH = fraction of the foliage covered
 !                                              by intercepted water for high vegetation
@@ -96,7 +109,7 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('WET_LEAVES_FRAC',0,ZHOOK_HANDLE)
-PDELTA(:) = 0.
+PDELTA_DP(:) = 0.
 !
 !*       2.     FRACTION OF THE FOLIAGE COVERED BY INTERCEPTED WATER (DELTA)
 !               ------------------------------------------------------------
@@ -105,17 +118,17 @@ PDELTA(:) = 0.
 !                                         equivalent water content in the 
 !                                         vegetation canopy
 !
-PWRMAX(:) = PWRMAX_CF(:) * PVEG(:) * PLAI(:) 
+PWRMAX_DP(:) = PWRMAX_CF(:) * PVEG(:) * PLAI(:) 
 !
-ZWR(:) = MIN(PWRM(:),PWRMAX(:))
+ZWR(:) = MIN(PWRM(:),PWRMAX_DP(:))
 !
-WHERE (PVEG(:)>0. .AND. PWRMAX>0.)
+WHERE (PVEG(:)>0. .AND. PWRMAX_DP>0.)
 !*                                        calculate 'DELTA'
 !
 !*       2.1    Low vegetation, Deardorff (1978) formulmation:
 !               ---------------------------------------------
 !       
-  ZDELTA_LOW(:) = ( ZWR(:)/PWRMAX(:) )**(2./3.)
+  ZDELTA_LOW(:) = ( ZWR(:)/PWRMAX_DP(:) )**(2./3.)
 !
 !*       2.2    High vegetation, Manzi (1993) formulmation:
 !               ------------------------------------------
@@ -132,7 +145,7 @@ WHERE (PVEG(:)>0. .AND. PWRMAX>0.)
 !
   ZCOEF(:)  = 1. + 2.*PLAI(:)
 !
-  ZDELTA_HIGH(:) =   ZWR(:)/( (1.-ZCOEF(:))*ZWR(:) + ZCOEF(:)*PWRMAX(:) )
+  ZDELTA_HIGH(:) =   ZWR(:)/( (1.-ZCOEF(:))*ZWR(:) + ZCOEF(:)*PWRMAX_DP(:) )
 !
 !
 !*       2.3    Ponderation between low and high vegetation (min and max thresholds: z0 of 0.5m and 1m)
@@ -140,11 +153,13 @@ WHERE (PVEG(:)>0. .AND. PWRMAX>0.)
 !
   ZCOEF(:) = MAX(MIN(2.*PZ0(:)-1. ,1.),0.)
 !
-  PDELTA(:) = (1.-ZCOEF(:)) * ZDELTA_LOW(:) + ZCOEF(:) * ZDELTA_HIGH(:)
+  PDELTA_DP(:) = (1.-ZCOEF(:)) * ZDELTA_LOW(:) + ZCOEF(:) * ZDELTA_HIGH(:)
 !
 END WHERE
 !
-PDELTA(:) = MIN(XDELTA_MAX,PDELTA(:)) 
+PDELTA_DP(:) = MIN(XDELTA_MAX,PDELTA_DP(:))
+PDELTA = REAL(PDELTA_DP)
+PWRMAX = REAL(PWRMAX_DP)
 IF (LHOOK) CALL DR_HOOK('WET_LEAVES_FRAC',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------

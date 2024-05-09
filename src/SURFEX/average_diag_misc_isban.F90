@@ -332,11 +332,13 @@ IF(IO%CISBA=='DIF')THEN ! DIF case
     ZSUMFRD2_TG   (:) = 0.
     ZSUMFRD3_TG   (:) = 0.
 !
+    DM%XFRD2_SWI  (:) = 0.
     DM%XFRD2_TG   (:) = 0.
     DM%XFRD2_TSWI (:) = 0.
     DM%XFRD2_TWG  (:) = 0.
     DM%XFRD2_TWGI (:) = 0.
 !   
+    DM%XFRD3_SWI  (:) = 0.
     DM%XFRD3_TG   (:) = 0.
     DM%XFRD3_TSWI (:) = 0.
     DM%XFRD3_TWG  (:) = 0.

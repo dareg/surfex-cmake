@@ -61,7 +61,7 @@ USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_SURF_ATM_TURB_n, ONLY : SURF_ATM_TURB_t
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
-USE PARKIND1  ,ONLY : JPRB
+USE PARKIND1  ,ONLY : JPRB, JPRD
 !
 IMPLICIT NONE
 !
@@ -146,6 +146,9 @@ REAL, DIMENSION(:), INTENT(INOUT) :: PUSTAR   ! friction velocity
 !*      0.2    declarations of local variables
 !
 REAL, DIMENSION(SIZE(PTA))       :: ZWORK
+#ifdef HIRLAM_SP_HACKS
+REAL(KIND=JPRD), DIMENSION(SIZE(PTA)) :: ZTSRAD_DP
+#endif
 !
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !
@@ -230,9 +233,16 @@ ELSE
       DK%XALBT (:) = PALB (:)*(1.-PEK%XPSN(:)) + PEK%XPSN(:)*PALB3L(:)
       PEMIST     (:) = PEMIS(:)*(1.-PEK%XPSN(:)) + PEK%XPSN(:)*PEK%TSNOW%EMIS(:)
 !  
+#ifdef HIRLAM_SP_HACKS
+      ZTSRAD_DP(:) = ( ((1.0_JPRD-PEK%XPSN(:))*PEMIS(:)*PEK%XTG(:,1)**4.0_JPRD +   &
+                               PEK%XPSN(:) *PEK%TSNOW%EMIS(:)*DMK%XSNOWTEMP(:,1)**4.0_JPRD     &
+                               )/PEMIST(:) )**(0.25_JPRD)
+      DK%XTSRAD(:) = REAL(ZTSRAD_DP(:),JPRB)
+#else
       DK%XTSRAD(:) = ( ((1.-PEK%XPSN(:))*PEMIS(:)*PEK%XTG(:,1)**4 +   &
                                PEK%XPSN(:) *PEK%TSNOW%EMIS(:)*DMK%XSNOWTEMP(:,1)**4     &
                             )/PEMIST(:) )**(0.25)  
+#endif
 !
 !     Calculate actual fluxes from snow-free natural
 !     portion of surface: NET flux from surface is the sum of

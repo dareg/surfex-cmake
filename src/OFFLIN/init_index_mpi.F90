@@ -21,7 +21,7 @@ USE MODD_SFX_OASIS, ONLY : LOASIS
 USE MODD_SURFEX_MPI, ONLY : NRANK, NPIO, NPROC, NCOMM, NINDEX, NSIZE_TASK, NSIZE, WLOG_MPI, &
                             NREQ, NNUM, NDIM_FULL_INIT
 !
-USE MODN_IO_OFFLINE, ONLY : LLAND_USE
+USE MODN_IO_OFFLINE, ONLY : LLAND_USE,LWRITE_TOPO
 !
 USE MODD_SURF_CONF,       ONLY : CPROGNAME
 USE MODD_MASK, ONLY : NMASK_FULL
@@ -223,9 +223,11 @@ IF (NRANK==NPIO) THEN
     INBMIN = MINVAL(INBPTS)
     IP0 = MAXVAL(MINLOC(INBPTS)) - 1
     !   
-    IF (.NOT. GSHADOWS) THEN
+    IF ((.NOT. GSHADOWS) .AND. (.NOT. LWRITE_TOPO)) THEN
     ! Matthieu Lafaysse :
-    ! With shadows we don't want the repartition of points to be modified by the following instructions
+    ! With shadows or LWRITE_TOPO we don't want the repartition of points to be modified by the following instructions
+    ! The following instructions prevent the use of very useful MPI functions such as MPI_ALLGATHER
+    ! Discussions are needed with GMME to remove definitely this part of the code which disturbs any attempt of logic in the topology.
     
       DO WHILE( INBPTS(NPIO) > NINT(PIO_FRAC*INBMIN) )
         !

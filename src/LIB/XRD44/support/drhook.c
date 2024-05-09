@@ -468,11 +468,29 @@ static int timestr_len = 0;
 #define SYS_gettid __NR_gettid
 #endif
 
+#if defined(DARWIN)
+static pid_t gettid() {
+  uint64_t tid64;
+  pthread_threadid_np(NULL, &tid64);
+  pid_t tid = (pid_t)tid64;
+  return tid;
+}
+#else
+#if !defined(__GLIBC_PREREQ)
+   #define HAS_GETTID 0
+#elif !__GLIBC_PREREQ(2,30)
+   #define HAS_GETTID 0
+#else
+   #define HAS_GETTID 1
+#endif
+
+#if !HAS_GETTID
 static pid_t gettid() {
   pid_t tid = syscall(SYS_gettid);
   return tid;
 }
-
+#endif
+#endif
 
 #if !defined(NCALLSTACK)
 #ifdef PARKIND1_SINGLE

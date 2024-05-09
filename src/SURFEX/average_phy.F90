@@ -4,10 +4,10 @@
 !SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE AVERAGE_PHY(PFRAC_TILE,             &
-                   PTSURF_TILE, PZ0_TILE,               &
-                   PZ0H_TILE, PQSURF_TILE,              &   
-                   PUREF, PZREF,                        &
-                   PTSURF, PZ0, PZ0H, PQSURF            )  
+                   PTSURF_TILE, PZ0_TILE,            &
+                   PZ0H_TILE, PQSURF_TILE,           &   
+                   PUREF, PZREF,                     &
+                   PTSURF, PZ0, PZ0H, PQSURF         )  
 !     ######################################################################
 !
 !
@@ -40,6 +40,7 @@
 !!      Original    23/04/2013 
 !
 !      B. Decharme 07/2015 - Modification to deal with E-zone points in Arome/Aladin
+!      F. Svabik   08/2023 - Unapproximated roughness length averaging
 !-----------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -47,6 +48,7 @@
 !
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SURF_ATM,   ONLY : XZ0_OFFSET
 !
 !
 !
@@ -103,39 +105,33 @@ ZWORK_Z0H  (:)   = 0.
 !       1.     Grid-Box average 
 !              ----------------
 DO JP = 1, INP
-!
-  DO JI = 1, INI
+  WHERE ( PFRAC_TILE(:,JP) > 0. )
 !  
-!    surface effective temperature
+!   surface effective temperature
 !
-     PTSURF(JI) = PTSURF(JI) + PFRAC_TILE(JI,JP) * PTSURF_TILE(JI,JP)
+    PTSURF(:) = PTSURF(:) + PFRAC_TILE(:,JP) * PTSURF_TILE(:,JP)
 !
-!    specific humidity at surface
+!   specific humidity at surface
 !
-     PQSURF(JI) = PQSURF(JI) + PFRAC_TILE(JI,JP) * PQSURF_TILE(JI,JP)
+    PQSURF(:) = PQSURF(:) + PFRAC_TILE(:,JP) * PQSURF_TILE(:,JP)
 !
-!    roughness length for momentum and heat
+!   roughness length for momentum and heat
 !
-     ZWORK_Z0 (JI) = ZWORK_Z0 (JI) + PFRAC_TILE(JI,JP) * 1.0/(LOG(PUREF(JI)/PZ0_TILE (JI,JP)))**2
-     ZWORK_Z0H(JI) = ZWORK_Z0H(JI) + PFRAC_TILE(JI,JP) * 1.0/(LOG(PZREF(JI)/PZ0H_TILE(JI,JP)))**2
+    ZWORK_Z0(:) = ZWORK_Z0(:) + PFRAC_TILE(:,JP) * 1. / (LOG(XZ0_OFFSET + PUREF(:) / PZ0_TILE (:,JP)))**2
+    ZWORK_Z0H(:) = ZWORK_Z0H(:) + PFRAC_TILE(:,JP) * 1. / (LOG(XZ0_OFFSET + PZREF(:) / PZ0H_TILE(:,JP)) * LOG(XZ0_OFFSET * (1. + PUREF(:) / PZ0_TILE(:,JP) - PZREF(:) / PZ0H_TILE(:,JP)) + PZREF(:) / PZ0H_TILE(:,JP)))
+  END WHERE
+END DO
 !
-  ENDDO
-!
-ENDDO
-!
-
-DO JI = 1, INI
- IF(ZWORK_Z0(JI) /= 0 ) then
-   PZ0 (JI) = PUREF(JI) * EXP( - SQRT(1./ZWORK_Z0 (JI)) )
-   PZ0H(JI) = PZREF(JI) * EXP( - SQRT(1./ZWORK_Z0H(JI)) )
- ELSE
-   PZ0 (JI) = XUNDEF
-   PZ0H(JI) = XUNDEF
- ENDIF
-ENDDO
+WHERE ( ZWORK_Z0(:) /= 0. )
+  PZ0(:) = PUREF(:) / (EXP(SQRT(1. / ZWORK_Z0(:))) - XZ0_OFFSET)
+  PZ0H(:) = PZREF(:) / (EXP((XZ0_OFFSET * (SQRT(ZWORK_Z0(:) / ZWORK_Z0H(:)) - 1.) + 1.) / SQRT(ZWORK_Z0H(:))) - XZ0_OFFSET)
+ELSEWHERE
+  PZ0(:) = XUNDEF
+  PZ0H(:) = XUNDEF
+END WHERE
 !
 IF (LHOOK) CALL DR_HOOK('AVERAGE_PHY',1,ZHOOK_HANDLE)
-
+!
 !-------------------------------------------------------------------------------
 !
 END SUBROUTINE AVERAGE_PHY

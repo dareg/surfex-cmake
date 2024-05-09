@@ -100,6 +100,17 @@ END MODULE MODI_VEG_HEIGHT_FROM_LAI
 !!                                 and log-average vegetation height accordingly using the Z0 averaging formula (Mason 1988)
 !!                                 This will increase Z0 for patch 1. This is controlled by LFAKETREE, XHFAKETREE, XFFAKETREE 
 !!                                 in the namelist block %NAM_TREEDRAG. Not active by default.
+!!      P. Samuelsson (05/2022)  : Extended LFAKETREE to a vector
+!!                                 The logical vector has 7 positions where the positions represent:
+!!                                 1 NVT_BOGR  boreal grass
+!!                                 2 NVT_GRAS  grassland
+!!                                 3 NVT_TROG  tropical grassland
+!!                                 4 NVT_C3W   C3W cultures types
+!!                                 5 NVT_C3S   C3S cultures types
+!!                                 6 NVT_C4    C4 cultures types
+!!                                 7 NVT_FLGR  flooded grassland
+!!      J. Masek      09/2023 Vegetation height scaled by XSCALE_H_TREE_ECOFG(:)
+!!
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -112,7 +123,9 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_SHRB, NVT_C3, NVT_C4, NVT_IRR,           &
                                 NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
                                 NVT_C3S, NVT_FLTR, NVT_FLGR
-USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM, LFAKETREE, XHFAKETREE, XFFAKETREE
+USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
+                                LFAKETREE, XHFAKETREE, XFFAKETREE,           &
+                                XSCALE_H_TREE_ECOFG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -158,13 +171,15 @@ END IF
 !
 IF (NVT_PARK>0) THEN
   PH_VEG(NVT_PARK) = ZLAI / XGRASS_H_DNM                    ! irr. grassland
-  IF (LFAKETREE) THEN 
-    PH_VEG(NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_PARK)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-    PH_VEG(NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_PARK)))
-  ENDIF
+! Remove FAKETREE for NVT_PARK since NVT_PARK is only related to ECO 1st generation where FAKETREE should no be used
+!  IF (LFAKETREE) THEN 
+!    PH_VEG(NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_PARK)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!    PH_VEG(NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_PARK)))
+!  ENDIF
 ELSEIF (NVT_FLGR>0) THEN
   PH_VEG(NVT_FLGR) = ZLAI / XGRASS_H_DNM
-  IF (LFAKETREE) THEN 
+! Keep FAKETREE for NVT_FLGR (flooded grass) as default setting
+  IF (LFAKETREE(7)) THEN 
     PH_VEG(NVT_FLGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_FLGR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(NVT_FLGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_FLGR)))
   ENDIF
@@ -181,79 +196,91 @@ IF (LTREEDRAG) THEN
   PH_VEG(NVT_SHRB) = ZLAI / XGRASS_H_DNM                  ! forest  
   IF (NVT_FLTR>0) PH_VEG(NVT_FLTR) = ZLAI / XGRASS_H_DNM
 ELSE
-  PH_VEG(NVT_TEBD) = PH_TREE                  ! forest
-  PH_VEG(NVT_BONE) = PH_TREE                  ! forest
-  PH_VEG(NVT_TRBE) = PH_TREE                  ! forest
-  PH_VEG(NVT_TRBD) = PH_TREE                  ! forest
-  PH_VEG(NVT_TEBE) = PH_TREE                  ! forest
-  PH_VEG(NVT_TENE) = PH_TREE                  ! forest
-  PH_VEG(NVT_BOBD) = PH_TREE                  ! forest
-  PH_VEG(NVT_BOND) = PH_TREE                  ! forest
-  PH_VEG(NVT_SHRB) = PH_TREE                  ! forest  
-  IF (NVT_FLTR>0) PH_VEG(NVT_FLTR) = PH_TREE
+  PH_VEG(NVT_TEBD) = XSCALE_H_TREE_ECOFG(NVT_TEBD)*PH_TREE  ! forest
+  PH_VEG(NVT_BONE) = XSCALE_H_TREE_ECOFG(NVT_BONE)*PH_TREE  ! forest
+  PH_VEG(NVT_TRBE) = XSCALE_H_TREE_ECOFG(NVT_TRBE)*PH_TREE  ! forest
+  PH_VEG(NVT_TRBD) = XSCALE_H_TREE_ECOFG(NVT_TRBD)*PH_TREE  ! forest
+  PH_VEG(NVT_TEBE) = XSCALE_H_TREE_ECOFG(NVT_TEBE)*PH_TREE  ! forest
+  PH_VEG(NVT_TENE) = XSCALE_H_TREE_ECOFG(NVT_TENE)*PH_TREE  ! forest
+  PH_VEG(NVT_BOBD) = XSCALE_H_TREE_ECOFG(NVT_BOBD)*PH_TREE  ! forest
+  PH_VEG(NVT_BOND) = XSCALE_H_TREE_ECOFG(NVT_BOND)*PH_TREE  ! forest
+  PH_VEG(NVT_SHRB) = XSCALE_H_TREE_ECOFG(NVT_SHRB)*PH_TREE  ! forest
+  IF (NVT_FLTR>0) PH_VEG(NVT_FLTR) = XSCALE_H_TREE_ECOFG(NVT_FLTR)*PH_TREE
 END IF
 PH_VEG(NVT_GRAS) = ZLAI / XGRASS_H_DNM                    ! grassland
 PH_VEG(NVT_BOGR) = ZLAI / XGRASS_H_DNM                    ! boreal grassland
 PH_VEG(NVT_TROG) = ZLAI / XGRASS_H_DNM                    ! tropical grassland
-IF (LFAKETREE) THEN 
+IF (LFAKETREE(2)) THEN 
   PH_VEG(NVT_GRAS) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_GRAS)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(NVT_GRAS) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_GRAS)))
+ENDIF
+IF (LFAKETREE(1)) THEN 
   PH_VEG(NVT_BOGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_BOGR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(NVT_BOGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_BOGR)))
+ENDIF
+IF (LFAKETREE(3)) THEN 
   PH_VEG(NVT_TROG) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_TROG)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(NVT_TROG) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_TROG)))
 ENDIF
 IF(OAGRI_TO_GRASS)THEN
   IF (NVT_C3>0) THEN
     PH_VEG(NVT_C3  ) = ZLAI / XGRASS_H_DNM
-    IF (LFAKETREE) THEN   
-      PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
-    ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN   
+!      PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
+!    ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     PH_VEG(NVT_C3W ) = ZLAI / XGRASS_H_DNM
     PH_VEG(NVT_C3S ) = ZLAI / XGRASS_H_DNM
-    IF (LFAKETREE) THEN       
+    IF (LFAKETREE(4)) THEN       
       PH_VEG(NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3W)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3W)))
+    ENDIF
+    IF (LFAKETREE(5)) THEN       
       PH_VEG(NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3S)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3S)))
     ENDIF
   ENDIF
   PH_VEG(NVT_C4  ) = ZLAI / XGRASS_H_DNM
-  IF (LFAKETREE) THEN
+  IF (LFAKETREE(6)) THEN
       PH_VEG(NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C4)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C4)))
   ENDIF
+! Hmhm, no need to remove FAKETREE for NVT_IRR here since it was never implemented.
   IF (NVT_IRR>0) PH_VEG(NVT_IRR ) = ZLAI / XGRASS_H_DNM
 ELSE
   IF (NVT_C3>0) THEN
     PH_VEG(NVT_C3  ) = MIN(1. , ZALLEN_H )          ! cultures
-    IF (LFAKETREE) THEN
-      PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
-    ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN
+!      PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
+!    ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     PH_VEG(NVT_C3W ) =  MIN(1. , ZALLEN_H )
     PH_VEG(NVT_C3S ) =  MIN(1. , ZALLEN_H )
-    IF (LFAKETREE) THEN
+    IF (LFAKETREE(4)) THEN
       PH_VEG(NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3W)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3W)))
+    ENDIF
+    IF (LFAKETREE(5)) THEN
       PH_VEG(NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3S)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3S)))
     ENDIF
   ENDIF
   PH_VEG(NVT_C4  ) = MIN(2.5, ZALLEN_H )          ! C4 types
-  IF (LFAKETREE) THEN
+  IF (LFAKETREE(6)) THEN
     PH_VEG(NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C4)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C4)))
   ENDIF
   IF (NVT_IRR>0) THEN 
     PH_VEG(NVT_IRR ) = MIN(2.5, ZALLEN_H )          ! irrigated crops (as C4)
-    IF (LFAKETREE) THEN  
-      PH_VEG(NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_IRR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_IRR)))
-    ENDIF
+! Remove FAKETREE for NVT_IRR since NVT_IRR is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN  
+!      PH_VEG(NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_IRR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_IRR)))
+!    ENDIF
   ENDIF
 ENDIF
 PH_VEG(NVT_NO  ) = 0.1                          ! no vegetation (smooth)
@@ -315,7 +342,9 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_SHRB, NVT_C3, NVT_C4, NVT_IRR,           &
                                 NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
                                 NVT_C3S, NVT_FLTR, NVT_FLGR
-USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM, LFAKETREE, XHFAKETREE, XFFAKETREE
+USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
+                                LFAKETREE, XHFAKETREE, XFFAKETREE,           &
+                                XSCALE_H_TREE_ECOFG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -364,13 +393,15 @@ END WHERE
 !
 IF (NVT_PARK>0) THEN
   PH_VEG(:,NVT_PARK) = ZLAI(:) / XGRASS_H_DNM                 ! irr. grassland
-  IF (LFAKETREE) THEN
-    PH_VEG(:,NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_PARK)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-    PH_VEG(:,NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_PARK)))
-  ENDIF
+! Remove FAKETREE for NVT_PARK since NVT_PARK is only related to ECO 1st generation where FAKETREE should no be used
+!  IF (LFAKETREE) THEN
+!    PH_VEG(:,NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_PARK)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!    PH_VEG(:,NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_PARK)))
+!  ENDIF
 ELSEIF (NVT_FLGR>0) THEN
   PH_VEG(:,NVT_FLGR) = ZLAI(:) / XGRASS_H_DNM
-  IF (LFAKETREE) THEN
+! Keep FAKETREE for NVT_FLGR (flooded grass) as default setting
+  IF (LFAKETREE(7)) THEN
     PH_VEG(:,NVT_FLGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_FLGR)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(:,NVT_FLGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_FLGR)))
   ENDIF
@@ -388,79 +419,91 @@ IF (LTREEDRAG) THEN
   PH_VEG(:,NVT_SHRB) = ZLAI(:) / XGRASS_H_DNM         ! forest  
   IF (NVT_FLTR>0) PH_VEG(:,NVT_FLTR) = ZLAI(:) / XGRASS_H_DNM
 ELSE
-  PH_VEG(:,NVT_TEBD) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_BONE) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_TRBE) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_TRBD) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_TEBE) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_TENE) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_BOBD) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_BOND) = PH_TREE(:)           ! forest
-  PH_VEG(:,NVT_SHRB) = PH_TREE(:)           ! forest
-  IF (NVT_FLTR>0) PH_VEG(:,NVT_FLTR) = PH_TREE(:)  
+  PH_VEG(:,NVT_TEBD) = XSCALE_H_TREE_ECOFG(NVT_TEBD)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_BONE) = XSCALE_H_TREE_ECOFG(NVT_BONE)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_TRBE) = XSCALE_H_TREE_ECOFG(NVT_TRBE)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_TRBD) = XSCALE_H_TREE_ECOFG(NVT_TRBD)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_TEBE) = XSCALE_H_TREE_ECOFG(NVT_TEBE)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_TENE) = XSCALE_H_TREE_ECOFG(NVT_TENE)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_BOBD) = XSCALE_H_TREE_ECOFG(NVT_BOBD)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_BOND) = XSCALE_H_TREE_ECOFG(NVT_BOND)*PH_TREE(:)  ! forest
+  PH_VEG(:,NVT_SHRB) = XSCALE_H_TREE_ECOFG(NVT_SHRB)*PH_TREE(:)  ! forest
+  IF (NVT_FLTR>0) PH_VEG(:,NVT_FLTR) = XSCALE_H_TREE_ECOFG(NVT_FLTR)*PH_TREE(:)
 END IF
 PH_VEG(:,NVT_GRAS) = ZLAI(:) / XGRASS_H_DNM           ! grassland
 PH_VEG(:,NVT_BOGR) = ZLAI(:) / XGRASS_H_DNM           ! boreal grassland
 PH_VEG(:,NVT_TROG) = ZLAI(:) / XGRASS_H_DNM           ! tropical grassland
-IF (LFAKETREE) THEN
+IF (LFAKETREE(2)) THEN
   PH_VEG(:,NVT_GRAS) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_GRAS)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(:,NVT_GRAS) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_GRAS)))
+ENDIF
+IF (LFAKETREE(1)) THEN
   PH_VEG(:,NVT_BOGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_BOGR)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(:,NVT_BOGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_BOGR)))
+ENDIF
+IF (LFAKETREE(3)) THEN
   PH_VEG(:,NVT_TROG) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_TROG)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(:,NVT_TROG) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_TROG)))
 ENDIF
 IF(OAGRI_TO_GRASS)THEN
   IF (NVT_C3>0) THEN
     PH_VEG(:,NVT_C3) = ZLAI(:) / XGRASS_H_DNM
-    IF (LFAKETREE) THEN 
-      PH_VEG(:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3)))
-    ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN 
+!      PH_VEG(:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3)))
+!    ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     PH_VEG(:,NVT_C3W ) = ZLAI(:) / XGRASS_H_DNM
     PH_VEG(:,NVT_C3S ) = ZLAI(:) / XGRASS_H_DNM
-    IF (LFAKETREE) THEN 
+    IF (LFAKETREE(4)) THEN 
       PH_VEG(:,NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3W)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3W)))
+    ENDIF
+    IF (LFAKETREE(5)) THEN 
       PH_VEG(:,NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3S)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3S)))
     ENDIF
   ENDIF
   PH_VEG(:,NVT_C4  ) = ZLAI(:) / XGRASS_H_DNM
-  IF (LFAKETREE) THEN  
+  IF (LFAKETREE(6)) THEN  
     PH_VEG(:,NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C4)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(:,NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C4)))
   ENDIF
   IF (NVT_IRR>0) PH_VEG(:,NVT_IRR ) = ZLAI(:) / XGRASS_H_DNM
+! Hmhm, no need to remove FAKETREE for NVT_IRR here since it was never implemented.
 ELSE
   IF (NVT_C3>0) THEN
     PH_VEG(:,NVT_C3  ) = MIN(1. , ZALLEN_H(:) )          ! cultures
-    IF (LFAKETREE) THEN  
-      PH_VEG(:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3)))
-    ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN  
+!      PH_VEG(:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3)))
+!    ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     PH_VEG(:,NVT_C3W ) = MIN(1. , ZALLEN_H(:) )
     PH_VEG(:,NVT_C3S ) = MIN(1. , ZALLEN_H(:) )
-    IF (LFAKETREE) THEN  
+    IF (LFAKETREE(4)) THEN  
       PH_VEG(:,NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3W)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3W)))
+    ENDIF
+    IF (LFAKETREE(5)) THEN  
       PH_VEG(:,NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C3S)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C3S)))
     ENDIF
   ENDIF
   PH_VEG(:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:) )          ! C4 types
-  IF (LFAKETREE) THEN
+  IF (LFAKETREE(6)) THEN
     PH_VEG(:,NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_C4)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(:,NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_C4)))
   ENDIF
   IF (NVT_IRR>0) THEN 
     PH_VEG(:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:) )          ! irrigated crops (as C4)
-    IF (LFAKETREE) THEN
-      PH_VEG(:,NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_IRR)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_IRR)))
-    ENDIF
+! Remove FAKETREE for NVT_IRR since NVT_IRR is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN
+!      PH_VEG(:,NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,NVT_IRR)/ZZREF))**2 + (ZLAI(:)/ZLAI(:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,NVT_IRR)))
+!    ENDIF
   ENDIF
 ENDIF
 PH_VEG(:,NVT_NO  ) = 0.1                    ! no vegetation (smooth)
@@ -522,7 +565,9 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
                                 NVT_C3S, NVT_FLTR, NVT_FLGR
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM, LFAKETREE, XHFAKETREE, XFFAKETREE
+USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
+                                LFAKETREE, XHFAKETREE, XFFAKETREE,           &
+                                XSCALE_H_TREE_ECOFG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -572,12 +617,18 @@ END WHERE
 !
 IF (NVT_PARK>0) THEN
   PH_VEG(:,:,NVT_PARK) = ZLAI(:,:) / XGRASS_H_DNM               ! irr. grassland
-  IF (LFAKETREE) THEN
-    PH_VEG(:,:,NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_PARK)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-    PH_VEG(:,:,NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_PARK)))
-  ENDIF
+! Remove FAKETREE for NVT_PARK since NVT_PARK is only related to ECO 1st generation where FAKETREE should no be used
+!  IF (LFAKETREE) THEN
+!    PH_VEG(:,:,NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_PARK)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!    PH_VEG(:,:,NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_PARK)))
+!  ENDIF
 ELSEIF (NVT_FLGR>0) THEN
   PH_VEG(:,:,NVT_FLGR) = ZLAI(:,:) / XGRASS_H_DNM 
+! Keep FAKETREE for NVT_FLGR (flooded grass) as default setting
+  IF (LFAKETREE(7)) THEN
+    PH_VEG(:,:,NVT_FLGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_FLGR)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+    PH_VEG(:,:,NVT_FLGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_FLGR)))
+  ENDIF
 ENDIF
 !
 IF (LTREEDRAG) THEN
@@ -592,85 +643,97 @@ IF (LTREEDRAG) THEN
   PH_VEG(:,:,NVT_SHRB) = ZLAI(:,:) / XGRASS_H_DNM         ! forest  
   IF (NVT_FLTR>0) PH_VEG(:,:,NVT_FLTR) = ZLAI(:,:) / XGRASS_H_DNM
 ELSE
-  PH_VEG(:,:,NVT_TEBD) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_BONE) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_TRBE) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_TRBD) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_TEBE) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_TENE) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_BOBD) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_BOND) = PH_TREE(:,:)           ! forest
-  PH_VEG(:,:,NVT_SHRB) = PH_TREE(:,:)           ! forest   
-  IF (NVT_FLTR>0) PH_VEG(:,:,NVT_FLTR) = PH_TREE(:,:)
+  PH_VEG(:,:,NVT_TEBD) = XSCALE_H_TREE_ECOFG(NVT_TEBD)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_BONE) = XSCALE_H_TREE_ECOFG(NVT_BONE)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_TRBE) = XSCALE_H_TREE_ECOFG(NVT_TRBE)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_TRBD) = XSCALE_H_TREE_ECOFG(NVT_TRBD)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_TEBE) = XSCALE_H_TREE_ECOFG(NVT_TEBE)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_TENE) = XSCALE_H_TREE_ECOFG(NVT_TENE)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_BOBD) = XSCALE_H_TREE_ECOFG(NVT_BOBD)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_BOND) = XSCALE_H_TREE_ECOFG(NVT_BOND)*PH_TREE(:,:)  ! forest
+  PH_VEG(:,:,NVT_SHRB) = XSCALE_H_TREE_ECOFG(NVT_SHRB)*PH_TREE(:,:)  ! forest
+  IF (NVT_FLTR>0) PH_VEG(:,:,NVT_FLTR) = XSCALE_H_TREE_ECOFG(NVT_FLTR)*PH_TREE(:,:)
 END IF
 PH_VEG(:,:,NVT_GRAS) = ZLAI(:,:) / XGRASS_H_DNM               ! grassland
 PH_VEG(:,:,NVT_BOGR) = ZLAI(:,:) / XGRASS_H_DNM               ! boreal grassland
 PH_VEG(:,:,NVT_TROG) = ZLAI(:,:) / XGRASS_H_DNM               ! tropical grassland
-IF (LFAKETREE) THEN
+IF (LFAKETREE(2)) THEN
   PH_VEG(:,:,NVT_GRAS) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_GRAS)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(:,:,NVT_GRAS) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_GRAS)))
+ENDIF
+IF (LFAKETREE(1)) THEN
   PH_VEG(:,:,NVT_BOGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_BOGR)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(:,:,NVT_BOGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_BOGR)))
+ENDIF
+IF (LFAKETREE(3)) THEN
   PH_VEG(:,:,NVT_TROG) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_TROG)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
   PH_VEG(:,:,NVT_TROG) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_TROG)))
 ENDIF
 IF(OAGRI_TO_GRASS)THEN
   IF (NVT_C3>0) THEN
     PH_VEG(:,:,NVT_C3  ) = ZLAI(:,:) / XGRASS_H_DNM
-    IF (LFAKETREE) THEN
-      PH_VEG(:,:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3)))
-    ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN
+!      PH_VEG(:,:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3)))
+!    ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     PH_VEG(:,:,NVT_C3W ) = ZLAI(:,:) / XGRASS_H_DNM
     PH_VEG(:,:,NVT_C3S ) = ZLAI(:,:) / XGRASS_H_DNM
-    IF (LFAKETREE) THEN
+    IF (LFAKETREE(4)) THEN
       PH_VEG(:,:,NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3W)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,:,NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3W)))
+    ENDIF
+    IF (LFAKETREE(5)) THEN
       PH_VEG(:,:,NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3S)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,:,NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3S)))
     ENDIF
   ENDIF
   PH_VEG(:,:,NVT_C4  ) = ZLAI(:,:) / XGRASS_H_DNM
-  IF (LFAKETREE) THEN
+  IF (LFAKETREE(6)) THEN
     PH_VEG(:,:,NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C4)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(:,:,NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C4)))
   ENDIF
   IF (NVT_IRR>0) THEN 
     PH_VEG(:,:,NVT_IRR ) = ZLAI(:,:) / XGRASS_H_DNM
-    IF (LFAKETREE) THEN    
-      PH_VEG(:,:,NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_IRR)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,:,NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_IRR)))
-    ENDIF
+! Remove FAKETREE for NVT_IRR since NVT_IRR is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN    
+!      PH_VEG(:,:,NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_IRR)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,:,NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_IRR)))
+!    ENDIF
   ENDIF
 ELSE
   IF (NVT_C3>0) THEN
     PH_VEG(:,:,NVT_C3  ) = MIN(1. , ZALLEN_H(:,:) )          ! cultures
-    IF (LFAKETREE) THEN    
-      PH_VEG(:,:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3)))
-    ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN    
+!      PH_VEG(:,:,NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,:,NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3)))
+!    ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     PH_VEG(:,:,NVT_C3S ) = MIN(2.5, ZALLEN_H(:,:) )
     PH_VEG(:,:,NVT_C3W ) = MIN(2.5, ZALLEN_H(:,:) )
-    IF (LFAKETREE) THEN
+    IF (LFAKETREE(5)) THEN
       PH_VEG(:,:,NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3S)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,:,NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3S)))
+    ENDIF
+    IF (LFAKETREE(4)) THEN
       PH_VEG(:,:,NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C3W)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(:,:,NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C3W)))
     ENDIF
   ENDIF
   PH_VEG(:,:,NVT_C4  ) = MIN(2.5, ZALLEN_H(:,:) )          ! C4 types
-  IF (LFAKETREE) THEN  
+  IF (LFAKETREE(6)) THEN  
     PH_VEG(:,:,NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_C4)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(:,:,NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_C4)))
   ENDIF
   IF (NVT_IRR>0) THEN
     PH_VEG(:,:,NVT_IRR ) = MIN(2.5, ZALLEN_H(:,:) )          ! irrigated crops (as C4)
-    IF (LFAKETREE) THEN  
-      PH_VEG(:,:,NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_IRR)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(:,:,NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_IRR)))
-    ENDIF
+! Remove FAKETREE for NVT_IRR since NVT_IRR is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN  
+!      PH_VEG(:,:,NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(:,:,NVT_IRR)/ZZREF))**2 + (ZLAI(:,:)/ZLAI(:,:))*XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(:,:,NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(:,:,NVT_IRR)))
+!    ENDIF
   ENDIF
 ENDIF
 PH_VEG(:,:,NVT_NO  ) = 0.1                          ! no vegetation (smooth)
@@ -734,7 +797,9 @@ USE MODD_DATA_COVER_PAR, ONLY : NVT_NO, NVT_ROCK, NVT_SNOW, NVT_PARK,        &
                                 NVT_GRAS, NVT_BOGR, NVT_TROG, NVT_C3W,       &
                                 NVT_C3S, NVT_FLTR, NVT_FLGR
 USE MODD_SURF_PAR,       ONLY : XUNDEF
-USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM, LFAKETREE, XHFAKETREE, XFFAKETREE
+USE MODD_TREEDRAG,       ONLY : LTREEDRAG, XALLEN_TERM, XGRASS_H_DNM,        &
+                                LFAKETREE, XHFAKETREE, XFFAKETREE,           &
+                                XSCALE_H_TREE_ECOFG
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -774,15 +839,17 @@ PH_VEG(:) = XUNDEF
 IF (NVT_PARK>0) THEN
   IF (PLAI(NVT_PARK)/=XUNDEF) THEN
     PH_VEG(NVT_PARK) = PLAI(NVT_PARK) / XGRASS_H_DNM          ! irr. grasslands
-    IF (LFAKETREE) THEN
-      PH_VEG(NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_PARK)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-      PH_VEG(NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_PARK)))
-    ENDIF
+! Remove FAKETREE for NVT_PARK since NVT_PARK is only related to ECO 1st generation where FAKETREE should no be used
+!    IF (LFAKETREE) THEN
+!      PH_VEG(NVT_PARK) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_PARK)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!      PH_VEG(NVT_PARK) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_PARK)))
+!    ENDIF
   ENDIF
 ELSEIF (NVT_FLGR>0) THEN
   IF (PLAI(NVT_FLGR)/=XUNDEF) THEN
     PH_VEG(NVT_FLGR) = PLAI(NVT_FLGR) / XGRASS_H_DNM
-    IF (LFAKETREE) THEN
+! Keep FAKETREE for NVT_FLGR (flooded grass) as default setting
+    IF (LFAKETREE(7)) THEN
       PH_VEG(NVT_FLGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_FLGR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_FLGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_FLGR)))
     ENDIF
@@ -802,36 +869,36 @@ IF (LTREEDRAG) THEN
     IF (PLAI(NVT_FLTR)/=XUNDEF) PH_VEG(NVT_FLTR) = PLAI(NVT_FLTR) / XGRASS_H_DNM
   ENDIF
 ELSE
-  IF (PH_TREE(NVT_TEBD)/=XUNDEF) PH_VEG(NVT_TEBD) = PH_TREE(NVT_TEBD)          ! broadleaf forest
-  IF (PH_TREE(NVT_BONE)/=XUNDEF) PH_VEG(NVT_BONE) = PH_TREE(NVT_BONE)          ! coniferous forest
-  IF (PH_TREE(NVT_TRBE)/=XUNDEF) PH_VEG(NVT_TRBE) = PH_TREE(NVT_TRBE)          ! euqatorial forest
-  IF (PH_TREE(NVT_TRBD)/=XUNDEF) PH_VEG(NVT_TRBD) = PH_TREE(NVT_TRBD)          ! broadleaf forest
-  IF (PH_TREE(NVT_TEBE)/=XUNDEF) PH_VEG(NVT_TEBE) = PH_TREE(NVT_TEBE)          ! coniferous forest
-  IF (PH_TREE(NVT_TENE)/=XUNDEF) PH_VEG(NVT_TENE) = PH_TREE(NVT_TENE)          ! euqatorial forest
-  IF (PH_TREE(NVT_BOBD)/=XUNDEF) PH_VEG(NVT_BOBD) = PH_TREE(NVT_BOBD)          ! broadleaf forest
-  IF (PH_TREE(NVT_BOND)/=XUNDEF) PH_VEG(NVT_BOND) = PH_TREE(NVT_BOND)          ! coniferous forest
-  IF (PH_TREE(NVT_SHRB)/=XUNDEF) PH_VEG(NVT_SHRB) = PH_TREE(NVT_SHRB)          ! euqatorial forest  
+  IF (PH_TREE(NVT_TEBD)/=XUNDEF) PH_VEG(NVT_TEBD) = XSCALE_H_TREE_ECOFG(NVT_TEBD)*PH_TREE(NVT_TEBD)  ! broadleaf forest
+  IF (PH_TREE(NVT_BONE)/=XUNDEF) PH_VEG(NVT_BONE) = XSCALE_H_TREE_ECOFG(NVT_BONE)*PH_TREE(NVT_BONE)  ! coniferous forest
+  IF (PH_TREE(NVT_TRBE)/=XUNDEF) PH_VEG(NVT_TRBE) = XSCALE_H_TREE_ECOFG(NVT_TRBE)*PH_TREE(NVT_TRBE)  ! euqatorial forest
+  IF (PH_TREE(NVT_TRBD)/=XUNDEF) PH_VEG(NVT_TRBD) = XSCALE_H_TREE_ECOFG(NVT_TRBD)*PH_TREE(NVT_TRBD)  ! broadleaf forest
+  IF (PH_TREE(NVT_TEBE)/=XUNDEF) PH_VEG(NVT_TEBE) = XSCALE_H_TREE_ECOFG(NVT_TEBE)*PH_TREE(NVT_TEBE)  ! coniferous forest
+  IF (PH_TREE(NVT_TENE)/=XUNDEF) PH_VEG(NVT_TENE) = XSCALE_H_TREE_ECOFG(NVT_TENE)*PH_TREE(NVT_TENE)  ! euqatorial forest
+  IF (PH_TREE(NVT_BOBD)/=XUNDEF) PH_VEG(NVT_BOBD) = XSCALE_H_TREE_ECOFG(NVT_BOBD)*PH_TREE(NVT_BOBD)  ! broadleaf forest
+  IF (PH_TREE(NVT_BOND)/=XUNDEF) PH_VEG(NVT_BOND) = XSCALE_H_TREE_ECOFG(NVT_BOND)*PH_TREE(NVT_BOND)  ! coniferous forest
+  IF (PH_TREE(NVT_SHRB)/=XUNDEF) PH_VEG(NVT_SHRB) = XSCALE_H_TREE_ECOFG(NVT_SHRB)*PH_TREE(NVT_SHRB)  ! euqatorial forest  
   IF (NVT_FLTR>0) THEN
-    IF (PH_TREE(NVT_FLTR)/=XUNDEF) PH_VEG(NVT_FLTR) = PH_TREE(NVT_FLTR)
+    IF (PH_TREE(NVT_FLTR)/=XUNDEF) PH_VEG(NVT_FLTR) = XSCALE_H_TREE_ECOFG(NVT_FLTR)*PH_TREE(NVT_FLTR)
   ENDIF
 END IF
 IF (PLAI(NVT_GRAS)/=XUNDEF) THEN
 PH_VEG(NVT_GRAS) = PLAI(NVT_GRAS) / XGRASS_H_DNM          ! grassland
-  IF (LFAKETREE) THEN
+  IF (LFAKETREE(2)) THEN
     PH_VEG(NVT_GRAS) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_GRAS)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(NVT_GRAS) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_GRAS)))
   ENDIF
 ENDIF
 IF (PLAI(NVT_BOGR)/=XUNDEF) THEN
 PH_VEG(NVT_BOGR) = PLAI(NVT_BOGR) / XGRASS_H_DNM          ! boreal grassland
-  IF (LFAKETREE) THEN
+  IF (LFAKETREE(1)) THEN
     PH_VEG(NVT_BOGR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_BOGR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(NVT_BOGR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_BOGR)))
   ENDIF
 ENDIF
 IF (PLAI(NVT_TROG)/=XUNDEF) THEN 
   PH_VEG(NVT_TROG) = PLAI(NVT_TROG) / XGRASS_H_DNM          ! tropical grassland
-  IF (LFAKETREE) THEN  
+  IF (LFAKETREE(3)) THEN  
     PH_VEG(NVT_TROG) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_TROG)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(NVT_TROG) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_TROG)))
   ENDIF
@@ -840,22 +907,23 @@ IF(OAGRI_TO_GRASS)THEN
   IF (NVT_C3>0) THEN
     IF (PLAI(NVT_C3  )/=XUNDEF) THEN 
       PH_VEG(NVT_C3  ) = PLAI(NVT_C3)  / XGRASS_H_DNM  ! cultures
-      IF (LFAKETREE) THEN
-        PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-        PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
-      ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!      IF (LFAKETREE) THEN
+!        PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!        PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
+!      ENDIF
     ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     IF (PLAI(NVT_C3W )/=XUNDEF) THEN
       PH_VEG(NVT_C3W ) = PLAI(NVT_C3W) / XGRASS_H_DNM
-      IF (LFAKETREE) THEN
+      IF (LFAKETREE(4)) THEN
         PH_VEG(NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3W)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
         PH_VEG(NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3W)))
       ENDIF
     ENDIF
     IF (PLAI(NVT_C3S )/=XUNDEF) THEN
       PH_VEG(NVT_C3S ) = PLAI(NVT_C3S) / XGRASS_H_DNM
-      IF (LFAKETREE) THEN
+      IF (LFAKETREE(5)) THEN
         PH_VEG(NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3S)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
         PH_VEG(NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3S)))
       ENDIF
@@ -863,38 +931,40 @@ IF(OAGRI_TO_GRASS)THEN
   ENDIF
   IF (PLAI(NVT_C4  )/=XUNDEF) THEN
   PH_VEG(NVT_C4  ) = PLAI(NVT_C4)  / XGRASS_H_DNM  ! C4 types
-    IF (LFAKETREE) THEN
+    IF (LFAKETREE(6)) THEN
     PH_VEG(NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C4)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
     PH_VEG(NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C4)))
     ENDIF
   ENDIF
   IF (NVT_IRR>0) THEN
     IF (PLAI(NVT_IRR )/=XUNDEF) PH_VEG(NVT_IRR ) = PLAI(NVT_IRR) / XGRASS_H_DNM  ! irrigated crops (as C4)
-      IF (LFAKETREE) THEN
-        PH_VEG(NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_IRR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-        PH_VEG(NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_IRR)))
-      ENDIF
+! Remove FAKETREE for NVT_IRR since NVT_IRR is only related to ECO 1st generation where FAKETREE should no be used
+!      IF (LFAKETREE) THEN
+!        PH_VEG(NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_IRR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!        PH_VEG(NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_IRR)))
+!      ENDIF
   ENDIF
 ELSE
   IF (NVT_C3>0) THEN
     IF (ZALLEN_H(NVT_C3  )/=XUNDEF) THEN
       PH_VEG(NVT_C3  ) = MIN(1. , ZALLEN_H(NVT_C3) )  ! cultures
-      IF (LFAKETREE) THEN
-        PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-        PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
-      ENDIF
+! Remove FAKETREE for NVT_C3 since NVT_C3 is only related to ECO 1st generation where FAKETREE should no be used
+!      IF (LFAKETREE) THEN
+!        PH_VEG(NVT_C3) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!        PH_VEG(NVT_C3) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3)))
+!      ENDIF
     ENDIF
   ELSEIF (NVT_C3W>0 .AND. NVT_C3S>0) THEN
     IF (ZALLEN_H(NVT_C3W )/=XUNDEF) THEN
     PH_VEG(NVT_C3W ) = MIN(1. , ZALLEN_H(NVT_C3W) )
-      IF (LFAKETREE) THEN
+      IF (LFAKETREE(4)) THEN
         PH_VEG(NVT_C3W) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3W)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
         PH_VEG(NVT_C3W) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3W)))
       ENDIF
     ENDIF 
     IF (ZALLEN_H(NVT_C3S )/=XUNDEF) THEN
     PH_VEG(NVT_C3S ) = MIN(1. , ZALLEN_H(NVT_C3S) )
-      IF (LFAKETREE) THEN
+      IF (LFAKETREE(5)) THEN
         PH_VEG(NVT_C3S) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C3S)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
         PH_VEG(NVT_C3S) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C3S)))
       ENDIF
@@ -902,7 +972,7 @@ ELSE
   ENDIF
   IF (ZALLEN_H(NVT_C4  )/=XUNDEF) THEN
   PH_VEG(NVT_C4  ) = MIN(2.5, ZALLEN_H(NVT_C4) )  ! C4 types
-    IF (LFAKETREE) THEN
+    IF (LFAKETREE(6)) THEN
       PH_VEG(NVT_C4) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_C4)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
       PH_VEG(NVT_C4) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_C4)))
     ENDIF
@@ -910,10 +980,11 @@ ELSE
   IF (NVT_IRR>0) THEN
     IF (ZALLEN_H(NVT_IRR )/=XUNDEF) THEN
     PH_VEG(NVT_IRR ) = MIN(2.5, ZALLEN_H(NVT_IRR) ) ! irrigated crops (as C4)
-      IF (LFAKETREE) THEN
-        PH_VEG(NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_IRR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
-        PH_VEG(NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_IRR)))
-      ENDIF
+! Remove FAKETREE for NVT_IRR since NVT_IRR is only related to ECO 1st generation where FAKETREE should no be used
+!      IF (LFAKETREE) THEN
+!        PH_VEG(NVT_IRR) = (1-XFFAKETREE) / (LOG(0.13*PH_VEG(NVT_IRR)/ZZREF))**2 + XFFAKETREE / (LOG(0.13*XHFAKETREE/ZZREF))**2
+!        PH_VEG(NVT_IRR) = ZZREF / 0.13 * EXP (-1./SQRT(PH_VEG(NVT_IRR)))
+!      ENDIF
     ENDIF
   ENDIF
 ENDIF

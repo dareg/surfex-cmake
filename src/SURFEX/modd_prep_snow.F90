@@ -57,6 +57,14 @@ INTEGER                          :: NIMPUR                             ! number 
 REAL, DIMENSION (NIMPUR_MAX) , PARAMETER            ::SCAVEN_COEF= (/0.0,0.0,0.,0.,0./)           !!Scavenging efficiency of the differrent impurities                      
 !
 !--------------------------------------------------------------------------
+! Parameters for snow field initialization, mainly from ECMWF grib file
+!
+LOGICAL :: LSNOW_FRAC_ECMWF ! to use fractions or mask from ECMWF field
+REAL    :: XRM_LITTLE_SNOW  ! the minimum SWE amount, kg/m**2, which is allowed in
+                            ! the initial data. All thinner snow will be removed.
+                            ! If 0.0 (default), snow will be NOT removed (option switched off).
+!
+!--------------------------------------------------------------------------
 !
 !* normalized dimensions for interpolation grids for soil
 INTEGER, PARAMETER           :: NGRID_LEVEL = 40

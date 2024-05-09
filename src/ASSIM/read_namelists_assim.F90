@@ -4,7 +4,7 @@ SUBROUTINE READ_NAMELISTS_ASSIM(HPROGRAM)
 !
 !---------------------------    
 !
-USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_SEA,CASSIM_WATER,CASSIM_ISBA,   &
+USE MODD_ASSIM,           ONLY : LASSIM,LLINCHECK,CASSIM,CASSIM_SEA,CASSIM_WATER,CASSIM_ISBA,   &
                                  CASSIM_TEB,NPRINTLEV,LAROME,LECSST,                  &
                                  LAESST,LAESNM,LSWE,LALADSURF,LREAD_SST_FROM_FILE,    &
                                  CFILE_FORMAT_SST,LEXTRAP_SEA,LEXTRAP_WATER,LEXTRAP_SNOW,&
@@ -13,12 +13,13 @@ USE MODD_ASSIM,           ONLY : LASSIM,CASSIM,CASSIM_SEA,CASSIM_WATER,CASSIM_IS
                                  LOBSWG,LOBS2M,LIMVEG,XSPRECIP2,XRTHR_QC,XSIGWGO_MAX, &
                                  XRSCAL_JAC,LPRT,LSIM,LBEV,LBFIXED,NOBSTYPE,          &
                                  LOBSHEADER,CFILE_FORMAT_LSM,CFILE_FORMAT_OBS,        &
-                                 CFILE_FORMAT_FG,CFILE_FORMAT_CLIM,COBS_M,XERROBS_M,XQCOBS_M,&
-                                 NNCO,NIVAR,NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,XTPRT_M,   &
-                                 NNCV,XSCALE_Q,XSCALE_QLAI,CBIO,CPREFIX_BIO,XALPH,    &
-                                 NENS,NIE,XINFL_M,XADDINFL_M,XASSIM_WINH,LOBSNAT,     &
-                                 XADDTIMECORR_M,LENS_GEN,LPB_CORRELATIONS,            &
-                                 LPERTURBATION_RUN,LBIAS_CORRECTION,LENKF,LDENKF
+                                 CFILE_FORMAT_FG,CFILE_FORMAT_CLIM,COBS_M,XERROBS_M,  &
+                                 XQCOBS_M,NNCO,NIVAR,NVAR,CVAR_M,CPREFIX_M,XSIGMA_M,  &
+                                 XTPRT_M,NNCV,XSCALE_Q,XSCALE_QLAI,CBIO,CPREFIX_BIO,  &
+                                 XALPH,NENS,NIE,XINFL_M,XADDINFL_M,XASSIM_WINH,       &
+                                 LOBSNAT,XADDTIMECORR_M,LENS_GEN,LPB_CORRELATIONS,    &
+                                 LPERTURBATION_RUN,LBIAS_CORRECTION,LENKF,LDENKF,     &
+                                 XALPHA,LAESIC,LAESIT
 !
 USE MODI_DEFAULT_ASSIM
 USE MODI_READ_ASSIM_CONF
@@ -36,7 +37,7 @@ REAL(KIND=JPRB)                 :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_ASSIM',0,ZHOOK_HANDLE)
 
 ! Set default assimilation options/schemes
-CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_SEA,CASSIM_WATER,    &
+CALL DEFAULT_ASSIM(LASSIM,LLINCHECK,CASSIM,CASSIM_SEA,CASSIM_WATER,    &
                    CASSIM_ISBA,CASSIM_TEB,NPRINTLEV,         &
                    LAROME,LECSST,LAESST,LAESNM,LSWE,         &
                    LALADSURF,LREAD_SST_FROM_FILE,            &
@@ -51,11 +52,11 @@ CALL DEFAULT_ASSIM(LASSIM,CASSIM,CASSIM_SEA,CASSIM_WATER,    &
                    CFILE_FORMAT_LSM,CFILE_FORMAT_CLIM,COBS_M,&
                    XERROBS_M,XQCOBS_M,NNCO,NIVAR,NVAR,CVAR_M,&
                    CPREFIX_M,XSIGMA_M,XTPRT_M,NNCV,XSCALE_Q, &
-                   XSCALE_QLAI,CBIO,CPREFIX_BIO,XALPH,       &
+                   XSCALE_QLAI,XALPHA,CBIO,CPREFIX_BIO,XALPH,&
                    NENS,NIE,XINFL_M,XADDINFL_M,XASSIM_WINH,  &
                    XADDTIMECORR_M,LENS_GEN,LPB_CORRELATIONS, &
                    LPERTURBATION_RUN,LBIAS_CORRECTION,       &
-                   LENKF,LDENKF,'OK')
+                   LENKF,LDENKF,LAESIC,LAESIT,'OK')
 !
 ! Set default assimilations values/constants
 CALL INI_ASSIM

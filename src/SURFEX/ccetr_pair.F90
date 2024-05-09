@@ -42,6 +42,7 @@
 !-------------------------------------------------------------------------------
 !
 USE MODD_CSTS,       ONLY : XI0
+USE MODD_SURF_PAR,   ONLY : XUNDEF
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -145,8 +146,12 @@ IF (KNIV .EQ. 1) THEN
     IF (PIA(I)>0.) THEN  
       ! -- reflection of surface ---   
       ! transmittance diffuse up - all layer
-      ZTDF(I) = EXP(-ZB_DF(I)*POMEGA_DF(I)*(1.-ZABC(I))*PLAI(I))
-      PXIA(I)= PXIA(I) + (1.-PALB_VEG(I))*(1.-PALB_VEG(I))*PALB_SOIL(I)*(1.-ZTDF(I))*PTR(I)*PIA(I)
+      IF (POMEGA_DF(I) /= XUNDEF .AND. PLAI(I) /= XUNDEF) THEN
+        ZTDF(I) = EXP(-ZB_DF(I)*POMEGA_DF(I)*(1.-ZABC(I))*PLAI(I))
+        IF (PALB_VEG(I) /= XUNDEF .AND. PALB_SOIL(I) /= XUNDEF ) THEN
+          PXIA(I)= PXIA(I) + (1.-PALB_VEG(I))*(1.-PALB_VEG(I))*PALB_SOIL(I)*(1.-ZTDF(I))*PTR(I)*PIA(I)
+        ENDIF
+      ENDIF
     ENDIF
   ENDDO
 ENDIF

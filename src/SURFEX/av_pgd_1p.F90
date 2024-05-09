@@ -344,7 +344,7 @@ IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD_1P:AV_PGD_1D_1P',0,ZHOOK_HANDLE)
     CALL ABOR1_SFX('AV_PGD_1D_1P: (2) AVERAGING TYPE NOT ALLOWED')
 !
 END SELECT
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD_1P:AV_PGD_1D_1P_4',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD_1P:AV_PGD_1D_1P',1,ZHOOK_HANDLE)
 ! 
 !
 !-------------------------------------------------------------------------------
@@ -603,11 +603,11 @@ ENDDO
 !-------------------------------------------------------------------------------
 !
   CASE DEFAULT
-    CALL ABOR1_SFX('AV_1PATCH_PGD_1D_1P: (2) AVERAGING TYPE NOT ALLOWED')
+    CALL ABOR1_SFX('AV_PATCH_PGD_1D_1P: (2) AVERAGING TYPE NOT ALLOWED')
 !
 END SELECT
 !
-IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD_1P:AV_1PATCH_PGD_1D_1P',1,ZHOOK_HANDLE)
+IF (LHOOK) CALL DR_HOOK('MODI_AV_PGD_1P:AV_PATCH_PGD_1D_1P',1,ZHOOK_HANDLE)
 !
 !-------------------------------------------------------------------------------
 !   

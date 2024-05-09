@@ -1,25 +1,3 @@
-MODULE MODI_gltools_mskerr
-INTERFACE
-SUBROUTINE gltools_mskerr  &
-        ( href,hfile,hword ,noutlu,lwg)
-!
-  USE mode_gltools_strlast
-  USE modi_gltools_glterr
-  USE MODI_ABOR1_SFX
-!
-  IMPLICIT NONE
-  LOGICAL, INTENT(IN) :: lwg
-  INTEGER, INTENT(IN) :: noutlu
-!
-  CHARACTER(LEN=*), INTENT(in) ::  &
-        href
-  CHARACTER(LEN=*), INTENT(in) ::  &
-        hfile
-  CHARACTER(LEN=*), INTENT(in) ::  &
-        hword
-END SUBROUTINE gltools_mskerr
-END INTERFACE
-END MODULE MODI_gltools_mskerr
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

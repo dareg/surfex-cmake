@@ -9,8 +9,7 @@
                                        PCD, PCDN, PCH, PRI, PHU,                  &
                                        PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER, &
                                        PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB, &
-                                       PLE, PLEI, PSUBL, PLWUP, PALB, PSWE,       &
-                                       PLMO                                       )  
+                                       PLE, PLEI, PSUBL, PLWUP, PALB, PSWE        )  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_FLAKE_n * - computes diagnostics during FLAKE time-step
@@ -50,6 +49,7 @@ USE MODD_SURF_PAR,     ONLY : XUNDEF
 USE MODD_SFX_OASIS,    ONLY : LCPL_LAKE
 !
 USE MODI_CLS_TQ
+USE MODI_CLS_TQ_DIAN
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_FLAKE
 USE MODI_DIAG_SURF_BUDGETC
@@ -106,7 +106,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PLWUP     ! upward longwave radiation (W/m2)
 !
 REAL, DIMENSION(:), INTENT(IN) :: PALB      ! Flake total albedo
 REAL, DIMENSION(:), INTENT(IN) :: PSWE      ! Flake snow water equivalent (kg.m-2)
-REAL, DIMENSION(:), INTENT(IN)       :: PLMO     ! Monin-Obukov length (m)
 !
 !*      0.2    declarations of local variables
 !
@@ -120,18 +119,22 @@ D%XTS(:) = F%XTS(:)
 !
 IF (.NOT. F%LSBL) THEN
 !
-  IF (DGO%N2M>=2) THEN
+  IF (DGO%N2M==2) THEN
     ZH(:)=2.          
-    IF (DGO%N2M==3) THEN
-      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                F%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M, &
-                PLMO )
-    ELSE
-      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                F%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
-    ENDIF
+    CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
+                  F%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )
+
+  
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  
+  ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
+    ZH(:)=2.
+    CALL CLS_TQ_DIAN(PZONA, PMERA,PTA, PQA, PPA, PPS, PHT,    &
+                  PCD, PCH, PRI, F%XTS, PHU, PQSAT, PZ0H, ZH,        &
+                  D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M    )
+    ZH(:)=10.
+    CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  
+
     !
     D%XT2M_MIN(:) = MIN(D%XT2M_MIN(:),D%XT2M(:))
     D%XT2M_MAX(:) = MAX(D%XT2M_MAX(:),D%XT2M(:))

@@ -36,7 +36,8 @@ USE MODD_GRID_CONF_PROJ_n, ONLY : GRID_CONF_PROJ_t
 !
 USE MODD_SURFEX_MPI, ONLY : NRANK,NPIO
 USE MODD_PREP,           ONLY : CINGRID_TYPE, CINTERP_TYPE
-USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF
+USE MODD_PREP_ISBA,      ONLY : XGRID_SOIL, XWR_DEF, XWRV_DEF, &
+                                XWRVN_DEF, XQC_DEF
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 !
 USE MODE_READ_EXTERN
@@ -81,6 +82,10 @@ INTEGER           :: INI            ! total 1D dimension
 INTEGER           :: IPATCH         ! number of patch
 LOGICAL           :: GGLACIER
 CHARACTER(LEN=3)  :: YPHOTO
+!
+LOGICAL, DIMENSION(:), ALLOCATABLE  :: GMEB_PATCH_IN(:)    ! MEB settings for each patch in the input file. T/F
+LOGICAL                             :: GMEB                ! TRUE if MEB is activated in the input file
+REAL, DIMENSION(:,:,:), ALLOCATABLE :: ZOUT                ! work array for MEB fields
 !
 REAL, DIMENSION(:,:,:), POINTER     :: ZFIELD=>NULL()         ! field read on initial MNH vertical soil grid, all patches
 REAL, DIMENSION(:,:,:), POINTER     :: ZD=>NULL()            ! layer thicknesses
@@ -246,6 +251,70 @@ SELECT CASE(HSURF)
      DO JP=1,SIZE(PFIELD,3)
        WHERE (ZMASK(:)==0.) PFIELD(:,1,JP) = XUNDEF
      ENDDO     
+!
+  !  MEB fields
+  CASE('TV     ', 'TL     ', 'WRL    ', 'WRLI   ', 'WRVN   ', 'TC     ', 'QC     ')
+    ! Check if MEB field exists in the input file
+    CALL OPEN_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE,'NATURE')
+    YRECFM='PATCH_NUMBER'
+    CALL READ_SURF(HFILEPGDTYPE,YRECFM,IPATCH,IRESP,HDIR='-')
+    ALLOCATE(GMEB_PATCH_IN(IPATCH))
+    CALL READ_SURF(HFILEPGDTYPE,'MEB_PATCH',GMEB_PATCH_IN,IRESP,HDIR='-')
+    GMEB = COUNT(GMEB_PATCH_IN)>0
+    CALL CLOSE_AUX_IO_SURF(HFILEPGD,HFILEPGDTYPE)
+    DEALLOCATE(GMEB_PATCH_IN)
+    !
+    IF (.NOT.GMEB) THEN
+      ! No MEB in input
+      SELECT CASE(HSURF)
+        CASE('WRV    ','WRL    ','WRLI   ')
+          ALLOCATE(PFIELD(INI,1,IPATCH))
+          PFIELD(:,:,:) = XWRV_DEF
+!
+        CASE('WRVN   ')
+          ALLOCATE(PFIELD(INI,1,IPATCH))
+          PFIELD(:,:,:) = XWRVN_DEF
+!
+        CASE('QC     ')
+          ALLOCATE(PFIELD(INI,1,IPATCH))
+          PFIELD(:,:,:) = XQC_DEF
+!
+        CASE('TV     ','TC     ','TL     ')
+          !* reading of the profile and its depth definition
+          CALL READ_EXTERN_ISBA(U, DTCO, GCP, IO, HFILE,HFILETYPE,HFILEPGD,HFILEPGDTYPE,&
+                             KLUOUT,INI,'TG     ','TG     ',ZFIELD,ZD,OKEY)
+          IF (INI>0) THEN
+            ALLOCATE(ZOUT(SIZE(ZFIELD,1),SIZE(XGRID_SOIL),SIZE(ZFIELD,3)))
+            ALLOCATE(PFIELD(SIZE(ZFIELD,1),1,SIZE(ZFIELD,3)))
+            DO JP=1,SIZE(ZFIELD,3)
+              CALL INTERP_GRID_NAT(ZD(:,:,JP),ZFIELD(:,:,JP),XGRID_SOIL,ZOUT(:,:,JP))
+            END DO
+            PFIELD(:,1,:) = ZOUT(:,1,:)
+            DEALLOCATE(ZOUT)
+            DO JP=1,SIZE(PFIELD,3)
+              WHERE (ZMASK(:)==0.) PFIELD(:,1,JP) = XUNDEF
+            ENDDO
+          ENDIF
+          DEALLOCATE(ZFIELD)
+          DEALLOCATE(ZD)
+        CASE DEFAULT
+          CALL ABOR1_SFX('PREP_ISBA_EXTERN: '//TRIM(HSURF)//" MEB initialization not implemented !")
+      END SELECT
+    ELSEIF (GMEB .AND. IO%NPATCH == IPATCH) THEN
+      ! MEB in input and same number of patches
+      ALLOCATE(PFIELD(INI,1,IPATCH))
+      PFIELD(:,:,:) = XUNDEF
+      YRECFM = HSURF
+      CALL OPEN_AUX_IO_SURF(HFILE,HFILETYPE,'NATURE')
+      CALL MAKE_CHOICE_ARRAY(HFILETYPE, IPATCH, GDIM, YRECFM, PFIELD(:,1,:),HDIR='E')
+      CALL CLOSE_AUX_IO_SURF(HFILE,HFILETYPE)
+      DO JP=1,SIZE(PFIELD,3)
+        WHERE (ZMASK(:)==0.) PFIELD(:,1,JP) = XUNDEF
+      ENDDO
+    ELSEIF (GMEB .AND. IO%NPATCH /= IPATCH) THEN
+      ! MEB in input and different number of patches
+      CALL ABOR1_SFX('PREP_ISBA_EXTERN: PATCH different for '//TRIM(HSURF)//", not implemented!")
+    ENDIF
 !
   CASE DEFAULT
     CALL ABOR1_SFX('PREP_ISBA_EXTERN: '//TRIM(HSURF)//" initialization not implemented !")

@@ -1,26 +1,3 @@
-MODULE MODI_gltools_chkglo_r
-INTERFACE
-SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit,&
-        noutlu,np,nprinto,nt,lwg)
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-#if ! defined in_arpege
-  USE lib_mpp
-#endif
-  IMPLICIT NONE
-!
-  INTEGER, INTENT(in) ::  nprinto,noutlu,nt,np
-  LOGICAL, INTENT(in) ::  lwg
-  CHARACTER(*), INTENT(in) ::  &
-        omsg
-  TYPE(t_dom), DIMENSION(np), INTENT(in) ::  &
-        tpdom
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
-        tpsit
-END SUBROUTINE gltools_chkglo_r
-END INTERFACE
-END MODULE MODI_gltools_chkglo_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

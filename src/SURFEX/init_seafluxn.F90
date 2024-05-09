@@ -45,6 +45,7 @@
 !!      S. Senesi   01/2014 : introduce sea-ice model 
 !!      S. Belamari 03/2014 : add NZ0 (to choose PZ0SEA formulation)
 !!      R. Séférian 01/2015 : introduce interactive ocean surface albedo
+!!      R. Brozkova 08/2023 : added missing allocations (crashing fullpos-prep)
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -127,7 +128,7 @@ CHARACTER(LEN=3),                 INTENT(IN)  :: HINIT     ! choice of fields to
 INTEGER,                          INTENT(IN)  :: KI        ! number of points
 INTEGER,                          INTENT(IN)  :: KSV       ! number of scalars
 INTEGER,                          INTENT(IN)  :: KSW       ! number of short-wave spectral bands
-CHARACTER(LEN=6), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV), INTENT(IN)  :: HSV       ! name of all scalar variables
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PCO2      ! CO2 concentration (kg/m3)
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PRHOA     ! air density
 REAL,             DIMENSION(KI),  INTENT(IN)  :: PZENITH   ! solar zenithal angle
@@ -325,6 +326,26 @@ SM%S%ICE%LINTERPOL_SIT = SM%S%LINTERPOL_SIT
 !* if only physiographic fields are to be initialized, stop here.
 !
 IF (HINIT/='ALL' .AND. HINIT/='SOD') THEN
+  IF (.NOT.SM%O%LMERCATOR) THEN
+    ALLOCATE(SM%O%XSEAT(0,0))
+    ALLOCATE(SM%OR%XSEAT_REL(0,0))
+    ALLOCATE(SM%O%XSEAS(0,0))
+    ALLOCATE(SM%OR%XSEAS_REL(0,0))
+    ALLOCATE(SM%OR%XSEAU_REL(0,0))
+    ALLOCATE(SM%OR%XSEAV_REL(0,0))
+    ALLOCATE(SM%O%XSEAU(0,0))
+    ALLOCATE(SM%O%XSEAV(0,0))
+    ALLOCATE(SM%O%XSEAE(0,0))
+    ALLOCATE(SM%O%XSEABATH(0,0))
+    ALLOCATE(SM%O%XSEAHMO(0))
+    ALLOCATE(SM%O%XLE(0,0))
+    ALLOCATE(SM%O%XLK(0,0))
+    ALLOCATE(SM%O%XKMEL(0,0))
+    ALLOCATE(SM%O%XKMELM(0,0))
+    ALLOCATE(SM%O%XSEATEND(0))
+    ALLOCATE(SM%O%XDTFSOL(0,0))
+    ALLOCATE(SM%O%XDTFNSOL(0))
+  ENDIF
   IF (LHOOK) CALL DR_HOOK('INIT_SEAFLUX_N',1,ZHOOK_HANDLE)
   RETURN
 END IF

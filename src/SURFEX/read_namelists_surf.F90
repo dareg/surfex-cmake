@@ -1,6 +1,6 @@
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt
 !SFX_LIC for details. version 1.
 !     #########
 SUBROUTINE READ_NAMELISTS_SURF(HPROGRAM)
@@ -10,21 +10,24 @@ SUBROUTINE READ_NAMELISTS_SURF(HPROGRAM)
 !
 USE MODD_SURF_CONF,      ONLY : CPROGNAME
 !
-USE MODD_SURF_ATM,       ONLY : XCISMIN, XVMODMIN, LALDTHRES,               &
-                                   LDRAG_COEF_ARP, LALDZ0H, LNOSOF, LSLOPE, &
+USE MODD_SURF_ATM,       ONLY :    XZ0_OFFSET, XWNEW,                       &
+                                   XWCRN, XFACZ0, XTAU_ICE,                 &
+                                   XCISMIN, XVMODMIN, LALDTHRES,            &
+                                   LDRAG_COEF_ARP, LZ0_AVG_EXACT,           &
+                                   LZ0_EFF, LNOSOF, LSLOPE,                 &
                                    LCPL_GCM, XEDB, XEDC, XEDD, XEDK,        &
                                    XUSURIC, XUSURID, XUSURICL,              &
                                    XVCHRNK, XVZ0CM, XRIMAX, XDELTA_MAX,     &
-                                   XWINDMIN, LVZIUSTAR0_ARP,                &
+                                   XACMAX, XWINDMIN, LVZIUSTAR0_ARP,        &
                                    XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
                                    XRRSCALE, XRRGAMMA, XUTILGUST, LCPL_ARP, &
                                    LQVNPLUS, LVERTSHIFT, LVSHIFT_LW,        &
-                                   LVSHIFT_PRCP, LARP_PN,                   &
-                                   XCO2UNCPL,                               &
+                                   LVSHIFT_PRCP,                            &
+                                   XCO2UNCPL, LZ0SNOWH_ARP, XRZ0_TO_HEIGHT, &
                                    XCD_COEFF1, XCD_COEFF2, XCH_COEFF1,      &
                                    XRISHIFT, XVMODFAC
 !
-USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE, LSPLIT_PATCH                                    
+USE MODD_WRITE_SURF_ATM, ONLY : LNOWRITE_CANOPY, LNOWRITE_TEXFILE, LSPLIT_PATCH 
 !
 USE MODI_DEFAULT_SURF_ATM
 USE MODI_DEFAULT_WRITE_SURF_ATM
@@ -51,19 +54,23 @@ REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-----------------------------------------------------------------------------
 !
 IF (LHOOK) CALL DR_HOOK('READ_NAMELISTS_SURF',0,ZHOOK_HANDLE)
- CALL DEFAULT_SURF_ATM(ZOUT_TSTEP,XCISMIN,XVMODMIN,LALDTHRES,     &
-                         LDRAG_COEF_ARP, LALDZ0H, LNOSOF, LSLOPE, &
+ CALL DEFAULT_SURF_ATM(ZOUT_TSTEP,                                &
+                         XCISMIN, XVMODMIN, XWNEW, XWCRN,         &
+                         XFACZ0, XTAU_ICE, LALDTHRES,             &
+                         LDRAG_COEF_ARP, LZ0_AVG_EXACT,           &
+                         LZ0_EFF, LNOSOF, LSLOPE,                 &
                          LCPL_GCM, XEDB, XEDC, XEDD, XEDK,        &
                          XUSURIC, XUSURID, XUSURICL,              &
-                         XVCHRNK, XVZ0CM, XRIMAX, XDELTA_MAX,     &
-                         XWINDMIN,                                &
+                         XVCHRNK, XVZ0CM, XRIMAX, XACMAX,         &
+                         XDELTA_MAX, XWINDMIN,                    &
                          LVZIUSTAR0_ARP,                          &
                          XRZHZ0M, XVZIUSTAR0, LRRGUST_ARP,        &
                          XRRSCALE, XRRGAMMA,XUTILGUST, LCPL_ARP,  &
                          LQVNPLUS, LVERTSHIFT, LVSHIFT_LW,        &
-                         LVSHIFT_PRCP, XCO2UNCPL, LARP_PN,        &
+                         LVSHIFT_PRCP, XCO2UNCPL,                 &
                          XCD_COEFF1, XCD_COEFF2, XCH_COEFF1,      &
-                         XRISHIFT, XVMODFAC                       )
+                         XRISHIFT, XVMODFAC,                      &
+                         LZ0SNOWH_ARP, XRZ0_TO_HEIGHT             )
 !                       
  CALL DEFAULT_WRITE_SURF_ATM(LNOWRITE_CANOPY, LNOWRITE_TEXFILE, LSPLIT_PATCH)
 !

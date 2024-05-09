@@ -100,7 +100,7 @@ TYPE(PRONOSVAR_T),POINTER :: CURPRONOS !Current pronostic variable
 !
 !*       0.3  declaration of saved local variables
 !
- CHARACTER(LEN=6), DIMENSION(:), POINTER :: CNAMES
+CHARACTER(LEN=16), DIMENSION(:), POINTER :: CNAMES
 REAL,DIMENSION(SIZE(PSFSV,1),KNBTS_MAX)     :: ZWORK ! temporary array for reading data
 REAL,DIMENSION(SIZE(PSFSV,1),SIZE(PSFSV,2)) :: ZEMIS ! interpolated in time emission flux
 REAL,DIMENSION(SIZE(PSFSV,1))               :: ZFCO  ! CO flux

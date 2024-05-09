@@ -110,6 +110,7 @@ INTEGER,           DIMENSION(JPEMISMAX_F):: NEMIS_PGD_TIME
  CHARACTER(LEN=6)                       :: YMASK
 REAL, DIMENSION(:), ALLOCATABLE :: ZEMIS_FIELD, ZEMIS_FIELDS
 INTEGER, DIMENSION(:), ALLOCATABLE :: IMASK
+REAL(KIND=JPRB)   :: ZUNIF
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 
 !
@@ -200,9 +201,10 @@ DO JNBR=1,CHE%NEMIS_NBR
   ALLOCATE(ZEMIS_FIELD (IL))
   ALLOCATE(IMASK(IL))
   !*    4.1     Computes the field on the surface points where it is defined
+  ZUNIF = 0.0_JPRB 
   CALL PGD_FIELD(DTCO, UG, U, USS, &
                  HPROGRAM,CHE%CEMIS_NAME(JNBR),CHE%CEMIS_AREA(JNBR),CEMIS_PGD_FILE(JNBR), &
-                   CEMIS_PGD_FILETYPE(JNBR),XUNDEF,ZEMIS_FIELD(:)             )  
+                   CEMIS_PGD_FILETYPE(JNBR),ZUNIF,ZEMIS_FIELD(:)             )  
   CATYPE = 'ARI'
   
 !*    4.2     Expends field on all surface points

@@ -173,6 +173,7 @@
 !!          01 / 2012   V. Masson   Separates the 2 walls 
 !!     25 / 09 / 2012   B. Decharme new wind implicitation
 !!          07 / 2013   V. Masson   Adds road watering
+!!          08 / 2023   R. Brozkova Truncation of road water reservoir
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -510,13 +511,17 @@ ENDIF
 !
 ZWS_RF_MAX(:) = ZWS_RF_MAX(:) * PDF_RF(:)
 ZWS_RD_MAX(:) = ZWS_RD_MAX(:) * PDF_RD(:)
+T%XWS_ROAD(:) = MIN(T%XWS_ROAD(:),ZWS_RD_MAX(:))
 !
 !-------------------------------------------------------------------------------
 !
 !*      3.     Surface drag
 !              ------------
 !
- CALL URBAN_DRAG(TOP, T, B, HIMPLICIT_WIND, PTSTEP, PT_CANYON, PQ_CANYON, &
+ CALL URBAN_DRAG(TOP, T%XWS_ROOF, T%XBLD, T%XROAD, T%XWS_ROAD,            &
+                 T%XBLD_HEIGHT, T%XZ0_TOWN, T%XROUGH_WALL, T%XWALL_O_GRND,&
+                 T%XGARDEN, T%XROUGH_ROOF, B%XT_WIN1, HIMPLICIT_WIND,     &
+                 PTSTEP, PT_CANYON, PQ_CANYON,                            &
                  PU_CANYON, PT_LOWCAN, PQ_LOWCAN, PU_LOWCAN, PZ_LOWCAN,   &
                  ZTS_RF, ZTS_RD, ZTS_WL, PTS_GARDEN, PDN_RF, PDN_RD,      &
                  PEXNS, PEXNA, PTA, PQA, PPS, PRHOA, PZREF, PUREF,        &

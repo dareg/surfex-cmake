@@ -33,6 +33,7 @@
 !!    MODIFICATIONS
 !!    -------------
 !!      Original    01/2003 
+!       R. El Khatib 13-Jul-2023 Protect bounds violations
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -98,7 +99,10 @@ INTEGER,           INTENT(IN)  :: KPATCH   ! current TEB patch
 !*       0.2   Declarations of local variables
 !              -------------------------------
 !
-REAL, DIMENSION(0,0,1) :: ZWSN_WR, ZRHO_WR, ZHEA_WR, ZAGE_WR, ZSG1_WR, ZSG2_WR, ZHIS_WR
+! the funny dimensionning below allows to compile and run with bounds checking.
+! REK - 21-Jul-2023
+REAL, DIMENSION(0,MAX(T%TSNOW_ROOF%NLAYER,T%TSNOW_ROAD%NLAYER),1) :: &
+ & ZWSN_WR, ZRHO_WR, ZHEA_WR, ZAGE_WR, ZSG1_WR, ZSG2_WR, ZHIS_WR
 REAL, DIMENSION(0,1) :: ZALB_WR
 REAL, DIMENSION(0,0,0,1) :: ZIMP_WR
 !

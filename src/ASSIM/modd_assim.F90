@@ -38,12 +38,19 @@ IMPLICIT NONE
  LOGICAL                               :: LASSIM               ! Assimilation or not
                                                                !'.TRUE.'
                                                                !'.FALSE.'
+ LOGICAL                               :: LLINCHECK            ! Use negative
+                                                               ! pertrubations
+                                                               ! also to check
+                                                               ! validity of
+                                                               ! linearization(H)
  LOGICAL                               :: LREAD_ALL = .TRUE.
  LOGICAL                               :: LAROME               ! If reading AROME fields
  LOGICAL                               :: LECSST               ! Use ECMWF SST
  LOGICAL                               :: LAESST               ! SST analysis performed
  LOGICAL                               :: LSWE                 ! True if observation is SWE
  LOGICAL                               :: LAESNM               ! Update snow analysis
+ LOGICAL                               :: LAESIC
+ LOGICAL                               :: LAESIT
  LOGICAL                               :: LALADSURF            
  LOGICAL                               :: LREAD_SST_FROM_FILE  ! Read SST from file
  CHARACTER(LEN=6)                      :: CFILE_FORMAT_SST     ! Format of the SST file ASCII/FA
@@ -64,8 +71,8 @@ IMPLICIT NONE
  LOGICAL                               :: LOBSNAT
  LOGICAL                               :: LRELCLIMSNOW         ! Relaxation to climatological snow 
 
- INTEGER, PARAMETER                    :: NOBSMAX = 5
- INTEGER, PARAMETER                    :: NVARMAX = 9
+ INTEGER, PARAMETER                    :: NOBSMAX = 5          ! Maximum number of observations
+ INTEGER, PARAMETER                    :: NVARMAX = 9          ! Maximum number of control variables
  INTEGER,DIMENSION(NOBSMAX)            :: NNCO                 ! Select the type of observations to be assimilated 
  INTEGER,DIMENSION(NVARMAX)            :: NNCV                 ! Select the control variables to be used 
  INTEGER                               :: NOBSTYPE
@@ -99,7 +106,8 @@ IMPLICIT NONE
 !                                                              ! covariance of model errors if B evolving (max dim)
  REAL,DIMENSION(NOBSMAX)               :: XERROBS_M            ! Observational standard deviation
  REAL,DIMENSION(NOBSMAX)               :: XQCOBS_M 
- REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF_PATCH             ! vector of model observations (for each pacth)
+ REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF_PATCH             ! vector of model observations (for each pacth) for jacobian
+ REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XF_GUESS             ! vector of model observations first_guess for innovation
  REAL,DIMENSION(:,:,:,:),ALLOCATABLE   :: XF                   ! Vector of forecast control variables 
  REAL,DIMENSION(:,:,:),ALLOCATABLE     :: XI 
  REAL,DIMENSION(:,:), ALLOCATABLE      :: XYO                  ! vector of observations
@@ -117,6 +125,7 @@ IMPLICIT NONE
  REAL,DIMENSION(:),ALLOCATABLE         :: XQCOBS
  REAL                                  :: XSCALE_Q        ! scaling factor of Q matrix w.r.t. the initial B
  REAL                                  :: XSCALE_QLAI
+ REAL                                  :: XALPHA          ! Scaling factor of linearity check
 !
 INTEGER :: NENS
 INTEGER :: NIE
@@ -135,13 +144,14 @@ LOGICAL :: LPB_CORRELATIONS
 LOGICAL :: LPERTURBATION_RUN
 LOGICAL :: LBIAS_CORRECTION
 ! 
- LOGICAL                               :: LSWEPSINI            ! Logical switch to set initial values of SWE on 
+ LOGICAL                               :: LSDPSINI            ! Logical switch to set initial values of SD on
                                                                ! vegetation type PERMANENT SNOW in the snow analysis
- REAL                                  :: XSWEPSINI            ! Initial value of SWE on PERMANENT SNOW
+ REAL                                  :: XSDPSINI            ! Initial value of SD on PERMANENT SNOW
 
- LOGICAL                               :: LSWEPSMIN            ! Logical switch to set a lower limit for SWE on 
+ LOGICAL                               :: LSDPSMIN            ! Logical switch to set a lower limit for SD on
                                                                ! vegetation type PERMANENT SNOW in the snow analysis
- REAL                                  :: XSWEPSMIN            ! Lower limit of SWE on PERMANENT SNOW
+ REAL                                  :: XSDPSMIN            ! Lower limit of SD on PERMANENT SNOW
+
 !
 ! Constants and options of the soil OI analysis
 !

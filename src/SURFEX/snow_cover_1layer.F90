@@ -51,6 +51,7 @@
 !!      Original    08/09/98 
 !!      J. Escobar 24/10/2012 : BUF PGI10.X , rewrite some 1 line WHERE statement
 !!      V. Masson  13/09/2013 : implicitation of coupling with roof below
+!!      R. Brozkova   08/2023 : fix for evolution of snow (not activated)
 !-------------------------------------------------------------------------------
 !
 !*       0.     DECLARATIONS
@@ -527,7 +528,8 @@ DO JJ = 1, SIZE(TPSNOW%WSNOW,1)
 !*      6.1    snow fall
 !              ---------
 !
-  TPSNOW%WSNOW(JJ,1) = TPSNOW%WSNOW(JJ,1) + PTSTEP * PSR(JJ)
+! RBfix: do upgrade by falling snow at the end - numerical stability. Comment.
+TPSNOW%WSNOW(JJ,1) = TPSNOW%WSNOW(JJ,1) + PTSTEP * PSR(JJ)
 !
 !
 !*      6.2    sublimation
@@ -568,7 +570,10 @@ WHERE ( TPSNOW%WSNOW(:,1)<ZWSNOW_MIN .AND. PMELT(:)>0. .AND. PSR(:)==0. )
   PMELT(:) = PMELT(:) + TPSNOW%WSNOW(:,1) / PTSTEP
   TPSNOW%WSNOW(:,1)=0.
 END WHERE
-!
+
+! RBfix: snow fall here - uncomment
+!TPSNOW%WSNOW(:,1) = TPSNOW%WSNOW(:,1)+PTSTEP*PSR(:)
+
 WHERE ( TPSNOW%WSNOW(:,1)<1.E-8 * PTSTEP ) 
    TPSNOW%WSNOW(:,1) = 0.
 END WHERE

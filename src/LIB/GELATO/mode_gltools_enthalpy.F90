@@ -73,11 +73,11 @@ CONTAINS
 !  Computes the total gltools_enthalpy (J.m-2) of sea-ice and snow (separately) 
 ! in an ice-snow slab
 !
-SUBROUTINE glt_aventh(tpsit,tpsil,pentsi,pentsn,nilay,nl,np,nt,sf3tinv)
+SUBROUTINE glt_aventh(tpsit,tpsil,pentsi,pentsn,nilay,nslay,nl,np,nt,sf3tinv)
   USE modd_glt_const_thm
   USE modd_types_glt
 
-  INTEGER, INTENT(IN) :: nl,nt,np
+  INTEGER, INTENT(IN) :: nl,nt,np,nilay,nslay
   REAL,DIMENSION(:), INTENT(IN) :: sf3tinv
   TYPE(t_sit), DIMENSION(nt,np), INTENT(in) ::  &
     tpsit

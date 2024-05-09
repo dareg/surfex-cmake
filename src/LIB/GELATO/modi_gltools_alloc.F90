@@ -1,26 +1,3 @@
-MODULE MODI_gltools_alloc
-INTERFACE
-SUBROUTINE gltools_alloc(tpglt,ndiamax,ndynami,nl,nnflxin,noutlu,nt,ntd,nx,ny,lp1)
-!
-USE modd_types_glt 
-#if ! defined in_surfex
-USE modd_CB_DynVariables
-USE modd_CB_DynDim
-USE modd_CB_const
-USE modd_CB_mask
-USE modd_CB_DynForcing
-!USE modd_CB_ThermoVariables
-#endif
-!
-IMPLICIT NONE
-!
-INTEGER,INTENT(in)         :: noutlu,nnflxin,ntd,nx,ny,nt,nl,ndynami,ndiamax
-LOGICAL,INTENT(in)         :: lp1
-TYPE(t_glt), INTENT(inout) ::  &
-    tpglt
-END SUBROUTINE gltools_alloc
-END INTERFACE
-END MODULE MODI_gltools_alloc
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
@@ -239,6 +216,8 @@ ENDIF
 ALLOCATE( tpglt%oce_all(nx,ny) )
 ALLOCATE( tpglt%atm_all(nx,ny) )
 ALLOCATE( tpglt%all_oce(nx,ny) )
+tpglt%atm_all(:,:)%ztx = 0.0
+tpglt%atm_all(:,:)%mty = 0.0
 !
 IF ( nnflxin==0 ) THEN
     ALLOCATE( tpglt%atm_mix(1,nx,ny) )

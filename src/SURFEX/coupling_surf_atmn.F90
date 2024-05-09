@@ -121,7 +121,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
-CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(INOUT) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -149,8 +149,8 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFTQ     ! flux of water vapor             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux                   (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
-REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var. (kg/m2/s) and for chem. fluxes (molecules m-2 s-1) 
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(INOUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB  ! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB  ! diffuse albedo for each spectral band (-)
@@ -513,7 +513,7 @@ REAL, DIMENSION(KSIZE) :: ZP_SFTQ     ! flux of water vapor                   (k
 REAL, DIMENSION(KSIZE) :: ZP_SFU      ! zonal momentum flux                   (m/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFV      ! meridian momentum flux                (m/s)
 REAL, DIMENSION(KSIZE) :: ZP_SFCO2    ! flux of CO2                           (kg/m2/s)
-REAL, DIMENSION(KSIZE,KSV) :: ZP_SFTS     ! flux of scalar
+REAL, DIMENSION(KSIZE,KSV) :: ZP_SFTS ! flux of scalar and for chem fluxes (molecules m-2 s-1) 
 !
 REAL, DIMENSION(KSIZE) :: ZP_TRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KSIZE,ISWB) :: ZP_DIR_ALB  ! direct albedo for each spectral band  (-)

@@ -18,6 +18,7 @@
 !!                  08/2009 : TIME_BUDGETC for all Tile
 !       B. decharme 09/2012 : XQS_TILE not initialize
 !       B. decharme 04/2013 : Add EVAP and SUBL diag
+!       A. Napoly   08/2023 : Add XT2M_NAT
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -206,6 +207,7 @@ IF (.NOT.OCUM) THEN
   ALLOCATE(DA%XCE     (KSIZE1))
   !
   ALLOCATE(DA%XT2M    (KSIZE1))
+  ALLOCATE(DA%XT2M_NAT(KSIZE1))
   ALLOCATE(DA%XTS     (KSIZE1))
   ALLOCATE(DA%XT2M_MIN(KSIZE1))
   ALLOCATE(DA%XT2M_MAX(KSIZE1))
@@ -270,6 +272,7 @@ IF (.NOT.OCUM) THEN
   DA%XCE      = PVAL
   !
   DA%XT2M     = PVAL
+  DA%XT2M_NAT = PVAL
   DA%XTS      = PVAL
   DA%XT2M_MIN = PVAL
   DA%XT2M_MAX = PVAL

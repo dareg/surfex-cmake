@@ -90,8 +90,9 @@ CHARACTER(LEN=6),  OPTIONAL, INTENT(OUT) :: HFILETYPE    ! file type
 CHARACTER(LEN=3) :: CSNOW
 INTEGER :: NSNOW_LAYER
 CHARACTER(LEN=28) :: CFILE_SNOW, CFILEPGD_SNOW
-LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX
+LOGICAL :: LSNOW_IDEAL, LSNOW_FRAC_TOT, LSWEMAX, LSNOW_FRAC_ECMWF
 REAL :: XASNOW, XSWEMAX
+REAL :: XRM_LITTLE_SNOW
 REAL, DIMENSION(NSNOW_LAYER_MAX) :: XWSNOW, XZSNOW, XRSNOW, XTSNOW, XLWCSNOW, XSG1SNOW, XSG2SNOW,&
                                     XHISTSNOW, XAGESNOW
                                     
@@ -112,12 +113,13 @@ INTEGER           :: ILUOUT         ! output file logical unit
 INTEGER           :: ILUNAM         ! namelist file logical unit
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 !-------------------------------------------------------------------------------
-NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW, &
-                            CFILEPGD_SNOW, CTYPEPGD_SNOW,               & 
-                            LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,       &
+NAMELIST/NAM_PREP_ISBA_SNOW/CSNOW, NSNOW_LAYER, CFILE_SNOW, CTYPE_SNOW,        &
+                            CFILEPGD_SNOW, CTYPEPGD_SNOW,                      & 
+                            LSNOW_IDEAL, LSNOW_FRAC_TOT, LSNOW_PREP_PERM,      &
                             XWSNOW, XZSNOW, XTSNOW, XLWCSNOW, XRSNOW, XASNOW,  &
-                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,    &
-                            LSWEMAX,XSWEMAX,NIMPUR,XIMPURSNOW
+                            XSG1SNOW, XSG2SNOW, XHISTSNOW, XAGESNOW,           &
+                            LSWEMAX,XSWEMAX,NIMPUR,XIMPURSNOW,                 &
+                            LSNOW_FRAC_ECMWF, XRM_LITTLE_SNOW
 NAMELIST/NAM_PREP_GARDEN_SNOW/CSNOW_GD, NSNOW_LAYER_GD, CFILE_SNOW_GD, CTYPE_SNOW, &
                               CFILEPGD_SNOW_GD, CTYPEPGD_SNOW,               & 
                               LSNOW_IDEAL_GD, XWSNOW_GD, XZSNOW_GD, XTSNOW_GD, XLWCSNOW_GD, XRSNOW_GD, XASNOW_GD

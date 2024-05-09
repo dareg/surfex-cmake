@@ -1,7 +1,3 @@
-!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
-!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
-!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
-!SFX_LIC for details. version 1.
 !     #########
       SUBROUTINE READ_Z1D_NETCDF
 !     ##############################################################
@@ -61,14 +57,14 @@ IF (CTYPE_SEAFLX=="NETCDF") THEN
   YFILENAME=TRIM(CFILE_SEAFLX)
   YNCVARNAME="depth"
   CALL READ_DIM_CDF(YFILENAME,YNCVARNAME,JDIMENSION)
-  NOCKMAX=JDIMENSION-1
-  ALLOCATE(XZHOC(0:NOCKMAX))
+  NOCKMAX=JDIMENSION
+  ALLOCATE(XZHOC(0:JDIMENSION))
   XZHOC(0)=0.
 !
 !*    2.      Read the array in the netcdf file
 !             ---------------------------------
-  CALL READ_Z1D_CDF(YFILENAME,YNCVARNAME,XZHOC(0:NOCKMAX))
-  IF (XZHOC(1)>0) XZHOC(:)=-XZHOC(:)
+  CALL READ_Z1D_CDF(YFILENAME,YNCVARNAME,XZHOC(1:JDIMENSION))
+  IF (XZHOC(2)>0) XZHOC(:)=-XZHOC(:)
 !  WRITE(0,*) 'Oceanic vertical grid readed in netcdf file'
 !  WRITE(0,*) 'Number of level',NOCKMAX+1
 !  WRITE(0,*) 'Depth of vertical level',XZHOC(:)

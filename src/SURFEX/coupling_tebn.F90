@@ -41,6 +41,7 @@ SUBROUTINE COUPLING_TEB_n (DTCO, DST, SLT, TOP, SB, G, CHT, NT, TPN, TIR, BOP, N
 !!      J. Escobar  09/2012 KI not allowed without-interface , replace by KI
 !!      V. Masson   08/2013 adds solar panels & occupation calendar
 !!      B. Decharme  04/2013 new coupling variables
+!!      F. Svabik    08/2023 unapproximated roughness length averaging
 !!---------------------------------------------------------------
 !
 USE MODD_DATA_COVER_n, ONLY : DATA_COVER_t
@@ -65,6 +66,7 @@ USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,         ONLY : XRD, XCPD, XP00, XLVTT, XPI, XKARMAN, XG
 USE MODD_SURF_PAR,     ONLY : XUNDEF
+USE MODD_SURF_ATM,     ONLY : XZ0_OFFSET
 !                            
 USE MODD_DST_SURF
 USE MODD_SLT_SURF
@@ -146,7 +148,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -172,7 +174,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (kg/m2/s)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -857,8 +859,10 @@ IF (TOP%LCANOPY) THEN
   !
   PSFU=0.
   PSFV=0.
-  ZAVG_Z0(:) = MIN(ZAVG_Z0(:),PUREF(:)*0.5)
-  ZAVG_CDN=(XKARMAN/LOG(PUREF(:)/ZAVG_Z0(:)))**2
+  IF (XZ0_OFFSET == 0) THEN
+    ZAVG_Z0(:) = MIN(ZAVG_Z0(:),PUREF(:)*0.5)
+  ENDIF
+  ZAVG_CDN=(XKARMAN/LOG(XZ0_OFFSET + PUREF(:)/ZAVG_Z0(:)))**2
   ZAVG_CD = ZAVG_CDN
   ZAVG_RI = 0.
   DO JJ=1,SIZE(PU)

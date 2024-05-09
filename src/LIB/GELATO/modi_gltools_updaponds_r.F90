@@ -1,29 +1,3 @@
-MODULE MODI_gltools_updaponds_r
-INTERFACE
-SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
-!
-  USE modd_glt_const_thm
-  USE modd_types_glt
-!
-  IMPLICIT NONE
-!
-  INTEGER,INTENT(IN) :: nt,np
-  REAL,INTENT(IN) :: dtt
-  LOGICAL, DIMENSION(nt,np), INTENT(in) :: &
-        omelt
-  TYPE(t_atm), DIMENSION(np), INTENT(in) :: &
-        tpatm  
-  TYPE(t_blk), DIMENSION(nt,np), INTENT(in) :: &
-        tpblki
-  TYPE(t_dia), DIMENSION(np), INTENT(inout) :: &
-        tpdia
-  TYPE(t_sit), DIMENSION(nt,np), INTENT(inout) :: &
-        tpsit
-  REAL, DIMENSION(nt,np), INTENT(inout) :: &
-        pasi
-END SUBROUTINE gltools_updaponds_r
-END INTERFACE
-END MODULE MODI_gltools_updaponds_r
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

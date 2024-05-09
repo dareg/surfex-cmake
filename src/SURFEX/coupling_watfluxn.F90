@@ -118,7 +118,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -144,7 +144,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -184,7 +184,6 @@ REAL, DIMENSION(KI)  :: ZTRAD      ! Radiative temperature at time t
 REAL, DIMENSION(KI)  :: ZSFTH_ICE  ! Sea ice flux of heat
 REAL, DIMENSION(KI)  :: ZSFTQ_ICE  ! Sea ice flux of ice sublimation
 REAL, DIMENSION(KI)  :: ZWORK      ! Work array
-REAL, DIMENSION(KI)  :: ZLMO       ! Monin-Obukov length (m)
 !
 REAL, DIMENSION(KI,KSW) :: ZDIR_ALB   ! Direct albedo at time t
 REAL, DIMENSION(KI,KSW) :: ZSCA_ALB   ! Diffuse albedo at time t
@@ -227,7 +226,6 @@ ZQSAT      (:) = XUNDEF
 ZEMIS      (:) = XUNDEF
 ZTRAD      (:) = XUNDEF
 ZWORK      (:) = XUNDEF
-ZLMO       (:) = XUNDEF
 ZDIR_ALB   (:,:) = XUNDEF
 ZSCA_ALB   (:,:) = XUNDEF
 !
@@ -411,14 +409,12 @@ PSFCO2(:)       =  0.0    ! Assumes no CO2 emission over water bodies
 ! Inline diagnostics at time t for TS and TRAD
 !-------------------------------------------------------------------------------------
 !
-ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
-!
  CALL DIAG_INLINE_WATFLUX_n(DGO, D, DC, W, &
                             PTSTEP,PTA, ZQA, PPA, PPS, PRHOA, PU, PV, PZREF,  &
                             PUREF, ZCD, ZCDN, ZCH, ZRI, ZHU, ZZ0H, ZQSAT,     &
                             PSFTH, PSFTQ, PSFU, PSFV, PDIR_SW, PSCA_SW, PLW,  &
                             ZDIR_ALB, ZSCA_ALB, ZEMIS, ZTRAD, PRAIN, PSNOW,   &
-                            ZSFTH_ICE, ZSFTQ_ICE, ZLMO                        )
+                            ZSFTH_ICE, ZSFTQ_ICE                              )
 !
 !-------------------------------------------------------------------------------
 ! IMPOSED MONTHLY TS AT TIME t+1

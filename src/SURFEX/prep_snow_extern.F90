@@ -272,6 +272,7 @@ DO JP = 1,IPATCH
   !              ------------------------
   !
       CASE ('DEP')
+        IF (KLAYER /= SIZE(TZSNOW%WSNOW,DIM=2)) CALL ABOR1_SFX('FIXME !')
         IF (OSNOW_IDEAL) THEN    
           IF (JP<=1) ALLOCATE(PFIELD(INI,KLAYER,IPATCH))  
           PFIELD(:,:,JP) = TZSNOW%WSNOW(:,1:KLAYER)/TZSNOW%RHO(:,1:KLAYER)

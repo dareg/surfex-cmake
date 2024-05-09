@@ -48,7 +48,7 @@
        REAL, DIMENSION(:),     INTENT(IN)  :: PWALL_O_HOR  ! normalized wall surface
        REAL, DIMENSION(:,:),   INTENT(OUT)    :: PDEP      ! deposition dry velocity (m/s)
        REAL, DIMENSION(:,:),   INTENT(IN)     :: PSV
-       CHARACTER(LEN=6), DIMENSION(:),INTENT(IN) :: HSV
+       CHARACTER(LEN=16), DIMENSION(:),INTENT(IN) :: HSV
        !
   !
   !

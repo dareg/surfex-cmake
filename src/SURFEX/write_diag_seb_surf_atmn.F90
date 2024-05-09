@@ -31,6 +31,7 @@
 !!      Modified    08/2009 : cumulated diag
 !!      Juan        6/12/2011: parallel bug , remove local ANY(XAVG_ZON10M) test
 !!      B. Decharme  06/13   Add QS, evap and sublimation diags
+!!      A. Napoly    08/2023 Add T2M_NAT
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -124,6 +125,9 @@ IF (DGO%N2M>=1.OR.DGO%LSURF_BUDGET.OR.DGO%LSURF_BUDGETC) THEN
 ENDIF
 !
 IF (DGO%N2M>=1) THEN
+  YRECFM='T2M_NAT'
+  YCOMMENT='X_Y_'//YRECFM//' (K)'
+  CALL WRITE_SURF(DGO%CSELECT,HPROGRAM,YRECFM,D%XT2M_NAT(:),IRESP,HCOMMENT=YCOMMENT)
   !
   YRECFM='T2M'
   YCOMMENT='X_Y_'//YRECFM//' (K)'

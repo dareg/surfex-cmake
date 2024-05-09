@@ -1,23 +1,3 @@
-MODULE MODI_gltools_readnam
-INTERFACE
-SUBROUTINE gltools_readnam(hmandatory,kluout,YGLTPARAM)
-!
-USE modd_glt_param, only: t_glt_param
-USE modd_glt_const_thm
-USE modi_gltools_nextval
-USE modi_gltools_nwords
-USE modi_gltools_strsplit
-!
-IMPLICIT NONE
-!
-LOGICAL, INTENT(IN),OPTIONAL           :: &
-  hmandatory         ! Is a gltpar file mandatory ?
-INTEGER, INTENT(IN),OPTIONAL           :: &
- kluout              ! imposed output logical unit ?
-TYPE(t_glt_param),INTENT(INOUT)    :: YGLTPARAM
-END SUBROUTINE gltools_readnam
-END INTERFACE
-END MODULE MODI_gltools_readnam
 !SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  

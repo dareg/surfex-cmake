@@ -9,7 +9,7 @@
                                          PZ0H, PQSAT, PSFTH, PSFTQ, PSFZON, PSFMER, &
                                          PDIR_SW, PSCA_SW, PLW, PDIR_ALB, PSCA_ALB, &
                                          PEMIS, PTRAD, PRAIN, PSNOW, PSFTH_ICE,     &
-                                         PSFTQ_ICE, PLMO                            )  
+                                         PSFTQ_ICE                                  )  
 !     ###############################################################################
 !
 !!****  *DIAG_INLINE_WATFLUX_n * - computes diagnostics during WATFLUX time-step
@@ -49,6 +49,7 @@ USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_SFX_OASIS,      ONLY : LCPL_SEA, LCPL_SEAICE
 !
 USE MODI_CLS_TQ
+USE MODI_CLS_TQ_DIAN
 USE MODI_CLS_WIND
 USE MODI_DIAG_SURF_BUDGET_WATER
 USE MODI_DIAG_SURF_BUDGETC
@@ -103,7 +104,6 @@ REAL, DIMENSION(:), INTENT(IN) :: PRAIN     ! Rainfall (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSNOW     ! Snowfall (kg/m2/s)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTH_ICE ! heat flux  (W/m2)
 REAL, DIMENSION(:), INTENT(IN) :: PSFTQ_ICE ! water flux (kg/m2/s)
-REAL, DIMENSION(:), INTENT(IN) :: PLMO      ! Monin-Obukov length (m)
 !
 !*      0.2    declarations of local variables
 !
@@ -120,13 +120,17 @@ D%XTS(:) = W%XTS(:)
 IF (.NOT. W%LSBL) THEN
 !
   IF (DGO%N2M>=2) THEN
-    ZH(:)=2.          
-    IF (DGO%N2M==3) THEN
-      CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
-                W%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M, PLMO )  
-    ELSE
+    IF (DGO%N2M==2) THEN
+      ZH(:)=2.          
       CALL CLS_TQ(PTA, PQA, PPA, PPS, PHT, PCD, PCH, PRI, &
                 W%XTS, PHU, PQSAT, PZ0H, ZH, D%XT2M, D%XQ2M, D%XHU2M )  
+
+    ELSE IF (DGO%N2M==3.or.DGO%N2M==4) THEN
+      ZH(:)=2.
+      CALL CLS_TQ_DIAN(PZONA, PMERA,PTA, PQA, PPA, PPS, PHT,    &
+                  PCD, PCH, PRI,                   &
+                  W%XTS, PHU, PQSAT, PZ0H, ZH,              &
+                  D%XT2M, D%XQ2M, D%XHU2M,DGO%N2M      )
     ENDIF
     ZH(:)=10.                
     CALL CLS_WIND(PZONA, PMERA, PHW, PCD, PCDN, PRI, ZH, D%XZON10M, D%XMER10M )  

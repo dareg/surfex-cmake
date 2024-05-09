@@ -47,7 +47,7 @@ USE MODD_ASSIM, ONLY : LFGEL, LCLIM, XSODELX, NTVGLA, XRD1, XRTINER, XWCRIN, &
                        XRSABR, XRARGR, XGWFC, XEWFC, XGWWILT, XEWWILT, XG1WSAT, &
                        XG2WSAT, XADWR, XREPS1, XREPS2, XREPS3, NIDJ, XREPSM, &
                        XRCDTR,LRELCLIMSNOW, &
-                       LSWEPSINI, XSWEPSINI, LSWEPSMIN, XSWEPSMIN
+                       LSDPSINI, XSDPSINI, LSDPSMIN, XSDPSMIN
 !
 USE MODD_CSTS,  ONLY : XPI 
 !
@@ -241,15 +241,18 @@ XSWFC     = 1.0
 XV10MX    = 10.
 XSMU0     = 7.
 !
-! Logical switch to set an initial value - XSWEPSINI - for SWE on PERMANENT SNOW
+! Logical switch to set an initial value - XSDPSINI - for SD on PERMANENT SNOW
 !              ... to be applied e.g. on 1. September every year ... 
- LSWEPSINI  = .FALSE.
- XSWEPSINI  = 1000.
+ LSDPSINI  = .FALSE.
+ XSDPSINI  = 2.0
 
 !
-! Logical switch to set a lower limit - XSWEPSMIN - for SWE on PERMANENT SNOW
- LSWEPSMIN  = .FALSE.
- XSWEPSMIN  = 500.
+! Logical switch to set a lower limit - XSDPSMIN - for SD on PERMANENT SNOW
+ LSDPSMIN  = .FALSE.
+ XSDPSMIN  = 1.0
+!
+! Logical value that is TRUE if first guess is from patch 1,
+!                       FALSE if first guess is a grid point average
 !
 ! PARAMETERS TO SWITCH ON CASMSWI - SPATIAL SMOOTHING OF SWI (SOIL WETNESS INDEX)
 ! THEN CHANGING OF Wp ( TOTAL SOIL WATER CONTENT) IN CANARI OI. 

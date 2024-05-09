@@ -868,7 +868,7 @@ IF (LHOOK) CALL DR_HOOK('MODE_GRIDTYPE_GAUSS:XY_GAUSS',1,ZHOOK_HANDLE_OMP)
   !*       1.1 Calculation of ZFNLAT.
   !            (Fourier coefficients of series expansion for
   !            the ordinary Legendre polynomials).
-  ! Belousov, Swarztrauber use ZFN(0,0)=SQRT(2._JPRB)
+  ! Belousov, Swarztrauber use ZFN(0,0)=SQRT(2.)
   ! IFS normalisation chosen to be 0.5*Integral(Pnm**2) = 1
   ZFN(0,0) = 2.
   DO JN=1,KN

@@ -34,7 +34,7 @@ MODULE MODD_FORC_ATM
 IMPLICIT NONE
 !------------------------------------------------------------------------------
 !
- CHARACTER(LEN=6), DIMENSION(:),  ALLOCATABLE :: CSV       ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(:),  ALLOCATABLE :: CSV       ! name of all scalar variables
 REAL,             DIMENSION(:,:),ALLOCATABLE :: XDIR_ALB  ! direct albedo for each band
 REAL,             DIMENSION(:,:),ALLOCATABLE :: XSCA_ALB  ! diffuse albedo for each band
 REAL,             DIMENSION(:),  ALLOCATABLE :: XEMIS     ! emissivity

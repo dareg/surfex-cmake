@@ -310,7 +310,7 @@ ENDIF
 ! 7. Create file for analysis increments for EKF
 !----------------------------------------------------------
 
-IF(LASSIM .AND. CASSIM_ISBA=='EKF  ') THEN
+IF(LASSIM .AND. trim(CASSIM_ISBA)=='EKF') THEN
   !
   YFILE='ISBA_ANALYSIS.OUT.nc'
   CALL CREATE_FILE(YFILE,IDIMS,YNAME_DIM,IFILE_ID,IDDIMALL)

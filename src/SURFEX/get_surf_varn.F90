@@ -9,7 +9,7 @@
                                  PZ0_WATER, PZ0_NATURE, PZ0_TOWN, PZ0H_SEA,     &
                                  PZ0H_WATER, PZ0H_NATURE, PZ0H_TOWN, PQS_SEA,   &
                                  PQS_WATER, PQS_NATURE, PQS_TOWN, PPSNG, PPSNV, &
-                                 PZS, PSERIES, PTWSNOW,PSIC,                    &
+                                 PZS, PSERIES, PTWSNOW, PTDSNOW, PSIC,          &
                                  PSSO_STDEV, PLON, PLAT,                        &
                                  PBARE, PLAI_TREE, PH_TREE                    )  
 !     #######################################################################
@@ -48,6 +48,8 @@
 !       S. Riette   06/2010 PSSO_STDEV and PTWSNOW added
 !       B. Decharme 09/2012 Argument added in GET_FLUX_n
 !       B. Decharme 05/2013 Argument added in GET_FLUX_n for debug in ARP/AL/AR
+!       I. Etchevers 10/2022 PTDSNOW added
+!       J. Masek    08/2023 Modified call to GET_FLUX_n
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -141,6 +143,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PZS        ! surface orography     
 REAL, DIMENSION(:,:), INTENT(OUT), OPTIONAL :: PSERIES  ! any surface field for which 
 !                                                       ! mesoNH series are required
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PTWSNOW    ! Snow total reservoir
+REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PTDSNOW    ! Snow depth
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PSIC       ! Sea ice concentration
 REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PSSO_STDEV ! S.S.O. standard deviation           (m)
 !
@@ -158,7 +161,7 @@ REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: PH_TREE        ! Height of trees   
 !              -------------------------------
 !
 REAL, DIMENSION(KI)    :: ZFIELD1, ZFIELD2, ZFIELD3, ZFIELD4, ZFIELD5, ZFIELD6
-REAL, DIMENSION(KI)    :: ZFIELD7, ZFIELD8
+REAL, DIMENSION(KI)    :: ZFIELD7, ZFIELD8, ZFIELD9
 REAL, DIMENSION(KI,KS) :: ZSERIES
 INTEGER, DIMENSION(KI) :: IMASK
 !
@@ -200,7 +203,7 @@ IF ( PRESENT(PT2M) .OR. PRESENT(PQ2M) ) THEN
    CALL GET_FLUX_n(DGO, D, HPROGRAM, KI, &
                    ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD1, ZFIELD2, &
                    ZFIELD3, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4, &
-                   ZFIELD4, ZFIELD4, ZFIELD4                             )
+                   ZFIELD4, ZFIELD4, ZFIELD4, ZFIELD4                    )
    !
    IF (PRESENT(PT2M)   ) PT2M    = ZFIELD2
    IF (PRESENT(PQ2M)   ) PQ2M    = ZFIELD3
@@ -327,7 +330,8 @@ ENDIF
    !-------------------------------------------------------------------------------
    !
 IF ( PRESENT(PQS_NATURE) .OR. PRESENT(PPSNG) .OR. PRESENT(PPSNV) .OR.  PRESENT(PZ0EFF).OR. &
-     PRESENT(PTWSNOW) .OR. PRESENT(PBARE) .OR. PRESENT(PLAI_TREE) .OR. PRESENT(PH_TREE) ) THEN
+     PRESENT(PTWSNOW) .OR. PRESENT(PBARE) .OR. PRESENT(PLAI_TREE) .OR. PRESENT(PH_TREE) .OR.&
+     PRESENT(PTDSNOW)) THEN
    !
    ! Get parameters over nature tile
    !
@@ -347,7 +351,7 @@ IF ( PRESENT(PQS_NATURE) .OR. PRESENT(PPSNG) .OR. PRESENT(PPSNV) .OR.  PRESENT(P
      CALL GET_VAR_NATURE_n(IM%S, IM%ID%O, IM%ID%D, IM%ID%DM, HPROGRAM, KI_NATURE, &
                            ZFIELD1(1:KI_NATURE), ZFIELD2(1:KI_NATURE), ZFIELD3(1:KI_NATURE), &
                            ZFIELD4(1:KI_NATURE), ZFIELD5(1:KI_NATURE), ZFIELD6(1:KI_NATURE), &
-                           ZFIELD7(1:KI_NATURE), ZFIELD8(1:KI_NATURE))
+                           ZFIELD7(1:KI_NATURE), ZFIELD8(1:KI_NATURE), ZFIELD9(1:KI_NATURE))
    ENDIF
    !
    IF(PRESENT(PQS_NATURE))THEN
@@ -399,12 +403,20 @@ IF ( PRESENT(PQS_NATURE) .OR. PRESENT(PPSNG) .OR. PRESENT(PPSNV) .OR.  PRESENT(P
      ENDDO
    ENDIF
    !
+   IF(PRESENT(PTDSNOW)) THEN
+     PTDSNOW    (:) = XUNDEF
+     DO JI = 1, KI_NATURE
+       PTDSNOW   (IMASK(JI)) = ZFIELD8(JI)
+     ENDDO
+   ENDIF
+
+   !
    !* bare soil fraction
    !
    IF(PRESENT(PBARE)) THEN
      PBARE    (:) = XUNDEF
      DO JI = 1, KI_NATURE
-       PBARE   (IMASK(JI)) = ZFIELD8(JI)
+       PBARE   (IMASK(JI)) = ZFIELD9(JI)
      ENDDO
      PBARE(:) = PBARE(:) * U%XNATURE(:) ! averages bare soil fraction on whole grid mesh
    ENDIF

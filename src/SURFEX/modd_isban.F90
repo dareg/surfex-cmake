@@ -47,7 +47,6 @@ USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
 !
 IMPLICIT NONE
-
 !
 !
 TYPE ISBA_S_t
@@ -65,7 +64,7 @@ REAL, POINTER, DIMENSION(:)      :: XTI_MIN,XTI_MAX,XTI_MEAN,XTI_STD,XTI_SKEW
 REAL, POINTER, DIMENSION(:,:)    :: XSOC           ! soil organic carbon content             (kg/m2)
 REAL, POINTER, DIMENSION(:)      :: XPH            ! soil pH
 REAL, POINTER, DIMENSION(:)      :: XFERT          ! soil fertilisation rate (kgN/ha/h)
-!                                           
+!
 !
 REAL, POINTER, DIMENSION(:)      :: XABC           ! abscissa needed for integration
 !                                                  ! of net assimilation and stomatal
@@ -114,9 +113,9 @@ REAL, POINTER, DIMENSION(:,:)    :: XPATCH         ! fraction of each tile/patch
 !
 ! Mask and number of grid elements containing patches/tiles:
 !
-  REAL, POINTER, DIMENSION(:,:,:)  :: XVEGTYPE_PATCH ! fraction of each vegetation type for
+REAL, POINTER, DIMENSION(:,:,:)  :: XVEGTYPE_PATCH ! fraction of each vegetation type for
 !
-REAL, POINTER, DIMENSION(:,:)     :: XINNOV
+REAL, POINTER, DIMENSION(:,:,:)   :: XINNOV
 REAL, POINTER, DIMENSION(:,:)     :: XRESID
 !
 REAL, POINTER, DIMENSION(:,:) :: XWORK_WR
@@ -181,12 +180,12 @@ REAL, POINTER, DIMENSION(:)  :: XWTD          ! water table depth (negative belo
 !
 ! * Physiographic radiative fields
 !
-  REAL, POINTER, DIMENSION(:)   :: XALBNIR_DRY       ! dry soil near-infra-red albedo          (-)
-  REAL, POINTER, DIMENSION(:)   :: XALBVIS_DRY       ! dry soil visible albedo                 (-)
-  REAL, POINTER, DIMENSION(:)   :: XALBUV_DRY        ! dry soil UV albedo                      (-)
-  REAL, POINTER, DIMENSION(:)   :: XALBNIR_WET       ! wet soil near-infra-red albedo          (-)
-  REAL, POINTER, DIMENSION(:)   :: XALBVIS_WET       ! wet soil visible albedo                 (-)
-  REAL, POINTER, DIMENSION(:)   :: XALBUV_WET        ! wet soil UV albedo                      (-)
+REAL, POINTER, DIMENSION(:)   :: XALBNIR_DRY       ! dry soil near-infra-red albedo          (-)
+REAL, POINTER, DIMENSION(:)   :: XALBVIS_DRY       ! dry soil visible albedo                 (-)
+REAL, POINTER, DIMENSION(:)   :: XALBUV_DRY        ! dry soil UV albedo                      (-)
+REAL, POINTER, DIMENSION(:)   :: XALBNIR_WET       ! wet soil near-infra-red albedo          (-)
+REAL, POINTER, DIMENSION(:)   :: XALBVIS_WET       ! wet soil visible albedo                 (-)
+REAL, POINTER, DIMENSION(:)   :: XALBUV_WET        ! wet soil UV albedo                      (-)
 !
 ! * SGH initializations
 !
@@ -237,30 +236,30 @@ REAL, POINTER, DIMENSION(:)    :: XANMAX         ! maximum photosynthesis rate  
 REAL, POINTER, DIMENSION(:)    :: XFZERO         ! ideal value of F, no photo- 
 !                                                ! respiration or saturation deficit  
 REAL, POINTER, DIMENSION(:)    :: XEPSO          ! maximum initial quantum use             
-!                                                     ! efficiency                              (mg J-1 PAR)
+!                                                ! efficiency                              (mg J-1 PAR)
 REAL, POINTER, DIMENSION(:)    :: XGAMM          ! CO2 conpensation concentration          (ppm)
 REAL, POINTER, DIMENSION(:)    :: XQDGAMM        ! Log of Q10 function for CO2 conpensation 
-!                                                     ! concentration                           (-)
+!                                                ! concentration                           (-)
 REAL, POINTER, DIMENSION(:)    :: XQDGMES        ! Log of Q10 function for mesophyll conductance  (-)
 REAL, POINTER, DIMENSION(:)    :: XT1GMES        ! reference temperature for computing 
-!                                                     ! compensation concentration function for 
-!                                                     ! mesophyll conductance: minimum
-!                                                     ! temperature                             (K)
+!                                                ! compensation concentration function for 
+!                                                ! mesophyll conductance: minimum
+!                                                ! temperature                             (K)
 REAL, POINTER, DIMENSION(:)    :: XT2GMES        ! reference temperature for computing 
-!                                                     ! compensation concentration function for 
-!                                                     ! mesophyll conductance: maximum
-!                                                     ! temperature                             (K)
+!                                                ! compensation concentration function for 
+!                                                ! mesophyll conductance: maximum
+!                                                ! temperature                             (K)
 REAL, POINTER, DIMENSION(:)    :: XAMAX          ! leaf photosynthetic capacity            (mg m-2 s-1)
 REAL, POINTER, DIMENSION(:)    :: XQDAMAX        ! Log of Q10 function for leaf photosynthetic 
-!                                                     ! capacity                                (-)
+!                                                ! capacity                                (-)
 REAL, POINTER, DIMENSION(:)    :: XT1AMAX        ! reference temperature for computing 
-!                                                     ! compensation concentration function for 
-!                                                     ! leaf photosynthetic capacity: minimum
-!                                                     ! temperature                             (K)
+!                                                ! compensation concentration function for 
+!                                                ! leaf photosynthetic capacity: minimum
+!                                                ! temperature                             (K)
 REAL, POINTER, DIMENSION(:)    :: XT2AMAX        ! reference temperature for computing 
-!                                                     ! compensation concentration function for 
-!                                                     ! leaf photosynthetic capacity: maximum
-!                                                     ! temperature                             (K)
+!                                                ! compensation concentration function for 
+!                                                ! leaf photosynthetic capacity: maximum
+!                                                ! temperature                             (K)
 REAL, POINTER, DIMENSION(:)    :: XAH            ! coefficients for herbaceous water stress 
 !                                                ! response (offensive or defensive)       (log(mm/s))
 REAL, POINTER, DIMENSION(:)    :: XBH            ! coefficients for herbaceous water stress 
@@ -283,7 +282,7 @@ REAL, POINTER, DIMENSION(:)    :: XC4REF         ! 'Force-Restore' sub-surface v
 !                                                ! for lateral drainage ('DIF' option)
 !
 REAL, POINTER, DIMENSION(:)    :: XBSLAI_NITRO   ! biomass/LAI ratio from nitrogen 
-!                                                       ! decline theory                        (kg/m2)
+!                                                  ! decline theory                        (kg/m2)
 ! * Soil thermal characteristics
 !
 REAL, POINTER, DIMENSION(:)    :: XCPS
@@ -297,7 +296,7 @@ REAL, POINTER, DIMENSION(:)    :: XLSTT
 !                                                ! total soil column ('2-L'), or root zone
 !                                                ! ('3-L'). For the 'DIF' option, it can
 !                                                ! be any depth within soil column         (m)
-
+!
 REAL, POINTER, DIMENSION(:,:)  :: XDZG           ! soil layers thicknesses (DIF option)
 REAL, POINTER, DIMENSION(:,:)  :: XDZDIF         ! distance between consecuative layer mid-points (DIF option)
 REAL, POINTER, DIMENSION(:,:)  :: XSOILWGHT      ! VEG-DIF: weights for vertical
@@ -309,10 +308,10 @@ REAL, POINTER, DIMENSION(:)  :: XKSAT_ICE        ! hydraulic conductivity at sat
 REAL, POINTER, DIMENSION(:,:) :: XTOPQS  ! Topmodel subsurface flow by layer (m/s)
 !
 REAL, POINTER, DIMENSION(:,:) :: XDG           ! soil layer depth                  (m)
-!                                                    ! NOTE: in Force-Restore mode, the 
-!                                                    ! uppermost layer depth is superficial
-!                                                    ! and is only explicitly used for soil 
-!                                                    ! water phase changes                     (m)
+!                                                ! NOTE: in Force-Restore mode, the 
+!                                                ! uppermost layer depth is superficial
+!                                                ! and is only explicitly used for soil 
+!                                                ! water phase changes                     (m)
 !
 REAL, POINTER, DIMENSION(:,:)  :: XDG_OLD      ! For land use
 REAL, POINTER, DIMENSION(:)    :: XDG2
@@ -336,7 +335,10 @@ REAL, POINTER, DIMENSION(:) :: XDMAX           ! maximum air saturation deficit
 !
 REAL, POINTER, DIMENSION(:,:)     :: XRED_NOISE
 REAL, POINTER, DIMENSION(:,:)     :: XINCR
+REAL, POINTER, DIMENSION(:,:)     :: XEPS
+REAL, POINTER, DIMENSION(:,:)     :: XB
 REAL, POINTER, DIMENSION(:,:,:)   :: XHO
+REAL, POINTER, DIMENSION(:,:,:)   :: XHO_NEG
 !
 END TYPE ISBA_P_t
 !
@@ -357,13 +359,13 @@ REAL, POINTER, DIMENSION(:,:) :: XTG           ! surface and sub-surface soil
 !
 ! - Snow Cover:
 !
-  TYPE(SURF_SNOW)                       :: TSNOW         ! snow state: 
-!                                                      ! scheme type/option                      (-)
-!                                                      ! number of layers                        (-)
-!                                                      ! snow (& liq. water) content             (kg/m2)
-!                                                      ! heat content                            (J/m2)
-!                                                      ! temperature                             (K)
-!                                                      ! density                                 (kg m-3)
+TYPE(SURF_SNOW) :: TSNOW                         ! snow state: 
+!                                                ! scheme type/option                      (-)
+!                                                ! number of layers                        (-)
+!                                                ! snow (& liq. water) content             (kg/m2)
+!                                                ! heat content                            (J/m2)
+!                                                ! temperature                             (K)
+!                                                ! density                                 (kg m-3)
 !
 REAL, POINTER, DIMENSION(:) :: XICE_STO        ! Glacier ice storage reservoir
 !
@@ -377,7 +379,7 @@ REAL, POINTER, DIMENSION(:) :: XTV             ! canopy vegetation temperature  
 REAL, POINTER, DIMENSION(:) :: XTL             ! litter temperature             (K)
 REAL, POINTER, DIMENSION(:) :: XTC             ! canopy air temperature                    (K)
 REAL, POINTER, DIMENSION(:) :: XQC             ! canopy air specific humidity              (kg/kg)
-
+!
 ! * Half prognostic fields
 !
 REAL, POINTER, DIMENSION(:)     :: XRESA         ! aerodynamic resistance                  (s/m)
@@ -476,21 +478,19 @@ TYPE ISBA_NK_t
 !
 TYPE(ISBA_K_t), DIMENSION(:), POINTER :: AL=>NULL()
 !
-!
 END TYPE ISBA_NK_t
 !
 TYPE ISBA_NP_t
 !
 TYPE(ISBA_P_t), DIMENSION(:), POINTER :: AL=>NULL()
-!                                                     
+!
 END TYPE ISBA_NP_t
-!                                                     
+!
 TYPE ISBA_NPE_t
-!                                           
+!
 TYPE(ISBA_PE_t), DIMENSION(:), POINTER :: AL=>NULL()
 !
 END TYPE ISBA_NPE_t
-                                           ! 
 !
 !
 CONTAINS
@@ -509,14 +509,14 @@ NULLIFY(YISBA_S%XTI_MAX)
 NULLIFY(YISBA_S%XTI_MEAN)
 NULLIFY(YISBA_S%XTI_STD)
 NULLIFY(YISBA_S%XTI_SKEW)
-!                                        
+!
 NULLIFY(YISBA_S%XSOC)
 NULLIFY(YISBA_S%XPH)
 NULLIFY(YISBA_S%XFERT)
 !
 NULLIFY(YISBA_S%XABC)
 NULLIFY(YISBA_S%XPOI) 
-!                                            
+!
 NULLIFY(YISBA_S%XFRACSOC)
 NULLIFY(YISBA_S%XTAB_FSAT)
 NULLIFY(YISBA_S%XTAB_WTOP)
@@ -555,7 +555,7 @@ NULLIFY(YISBA_S%XIMP_WR)
 NULLIFY(YISBA_S%XHIS_WR)
 !
 NULLIFY(YISBA_S%TDATE_WR)
-! 
+!
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_S_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_S_INIT
 !
@@ -655,7 +655,7 @@ NULLIFY(YISBA_P%XSOILWGHT)
 NULLIFY(YISBA_P%XKSAT_ICE)
 NULLIFY(YISBA_P%XBSLAI_NITRO)
 NULLIFY(YISBA_P%XTOPQS)
-!  
+!
 NULLIFY(YISBA_P%XDG)
 NULLIFY(YISBA_P%XDG_OLD)
 NULLIFY(YISBA_P%NWG_LAYER)
@@ -671,10 +671,11 @@ NULLIFY(YISBA_P%XDMAX)
 NULLIFY(YISBA_P%XRED_NOISE)
 NULLIFY(YISBA_P%XINCR)
 NULLIFY(YISBA_P%XHO)
+NULLIFY(YISBA_P%XHO_NEG)
 !
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_P_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_P_INIT
-!  
+!
 SUBROUTINE ISBA_PE_INIT(YISBA_PE)
 TYPE(ISBA_PE_t), INTENT(INOUT) :: YISBA_PE
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
@@ -772,17 +773,17 @@ ELSE
     CALL ISBA_K_INIT(YISBA_NK%AL(JP))
   ENDDO
 ENDIF
-
+!
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_NK_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_NK_INIT
-
+!
 SUBROUTINE ISBA_NP_INIT(YISBA_NP,KPATCH)
 TYPE(ISBA_NP_t), INTENT(INOUT) :: YISBA_NP
 INTEGER, INTENT(IN) :: KPATCH
 INTEGER :: JP
 REAL(KIND=JPRB) :: ZHOOK_HANDLE
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_NP_INIT",0,ZHOOK_HANDLE)
-  !
+!
 IF (ASSOCIATED(YISBA_NP%AL)) THEN
   DO JP = 1,KPATCH
     CALL ISBA_P_INIT(YISBA_NP%AL(JP))
@@ -797,7 +798,7 @@ ENDIF
 !
 IF (LHOOK) CALL DR_HOOK("MODD_ISBA_N:ISBA_NP_INIT",1,ZHOOK_HANDLE)
 END SUBROUTINE ISBA_NP_INIT
-
+!
 SUBROUTINE ISBA_NPE_INIT(YISBA_NPE,KPATCH)
 TYPE(ISBA_NPE_t), INTENT(INOUT) :: YISBA_NPE
 INTEGER, INTENT(IN) :: KPATCH

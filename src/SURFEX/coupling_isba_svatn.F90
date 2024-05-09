@@ -38,6 +38,7 @@ SUBROUTINE COUPLING_ISBA_SVAT_n (DTCO, UG, U, USS, IM, NDST, SLT, HPROGRAM, HCOU
 !!     A. Boone     11/2009 Exner correction for Offline T-B coef
 !!     B. Decharme  11/2009 Implicit coupling ok with all snow scheme
 !!     B. Decharme  04/2013 new coupling variables and init local variables
+!!     F. Svabik    08/2023 Unapproximated roughness length averaging
 !!-------------------------------------------------------------------
 !
 USE MODD_PREP_SNOW, ONLY : NIMPUR
@@ -52,6 +53,7 @@ USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
 !
 USE MODD_SURF_PAR,   ONLY : XUNDEF
+USE MODD_SURF_ATM,   ONLY : XZ0_OFFSET
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK
 USE PARKIND1  ,ONLY : JPRB
@@ -92,7 +94,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -120,7 +122,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)    
 REAL, DIMENSION(KI), INTENT(OUT) :: PTRAD     ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -259,8 +261,8 @@ DO JT=1,IT
   PQSURF   = PQSURF   + ZQSURF   / ZT
 !  
   ZWORK_LW  = ZWORK_LW  + ZEMIS*ZTRAD**4 / ZT
-  ZWORK_Z0  = ZWORK_Z0  + (1.0/(LOG(PUREF(:)/ZZ0 ))**2) / ZT
-  ZWORK_Z0H = ZWORK_Z0H + (1.0/(LOG(PZREF(:)/ZZ0H))**2) / ZT
+  ZWORK_Z0  = ZWORK_Z0  + (1.0/(LOG(XZ0_OFFSET + PUREF(:)/ZZ0 ))**2) / ZT
+  ZWORK_Z0H = ZWORK_Z0H + (1.0/(LOG(XZ0_OFFSET + PZREF(:)/ZZ0H)*LOG(XZ0_OFFSET * (1. + PUREF(:)/ZZ0 - PZREF(:)/ZZ0H) + PZREF(:)/ZZ0H))) / ZT
 !  
 END DO
 !
@@ -270,8 +272,8 @@ PTRAD = (ZWORK_LW/PEMIS)**(0.25)
 !
 !* roughness length for momentum and heat
 !
-PZ0  = PUREF(:) * EXP( - SQRT(1./ZWORK_Z0 (:)) )
-PZ0H = PZREF(:) * EXP( - SQRT(1./ZWORK_Z0H(:)) )
+PZ0  = PUREF(:)/(EXP( SQRT(1./ZWORK_Z0(:)) ) - XZ0_OFFSET)
+PZ0H = PZREF(:)/(EXP( (XZ0_OFFSET * (SQRT(ZWORK_Z0(:)/ZWORK_Z0H(:)) - 1.) + 1.)/SQRT(ZWORK_Z0H(:)) ) - XZ0_OFFSET)
 !
 IF (LHOOK) CALL DR_HOOK('COUPLING_ISBA_SVAT_N',1,ZHOOK_HANDLE)
 !

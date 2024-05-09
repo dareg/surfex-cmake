@@ -2,7 +2,7 @@
 !SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
-SUBROUTINE ASSIM_NATURE_ISBA_ENKF(IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
+SUBROUTINE ASSIM_NATURE_ISBA_ENKF(KMYPROC, IO, S, K, NP, NPE, HPROGRAM, KI, PT2M, PHU2M, HTEST)
 
 ! -----------------------------------------------------------------------------
 !
@@ -35,10 +35,6 @@ USE MODD_SURF_PAR,      ONLY : XUNDEF
 USE MODD_ISBA_OPTIONS_n, ONLY : ISBA_OPTIONS_t
 USE MODD_ISBA_n, ONLY : ISBA_S_t, ISBA_K_t, ISBA_NP_t, ISBA_NPE_t, ISBA_P_t, ISBA_PE_t
 !
-#ifdef SFX_ARO
-USE YOMMP0,             ONLY : MYPROC 
-#endif
-!
 USE YOMHOOK,            ONLY : LHOOK,DR_HOOK
 USE PARKIND1,           ONLY : JPRB
 !
@@ -53,6 +49,7 @@ USE MODE_RANDOM
 !
 IMPLICIT NONE
 !
+INTEGER, INTENT(IN) :: KMYPROC
 TYPE(ISBA_OPTIONS_t), INTENT(INOUT) :: IO
 TYPE(ISBA_S_t), INTENT(INOUT) :: S
 TYPE(ISBA_K_t), INTENT(INOUT) :: K
@@ -113,7 +110,6 @@ INTEGER :: IDAY                       ! current day (UTC)
 INTEGER :: IHOUR
 INTEGER :: IRESP                      ! return code
 INTEGER :: ISTEP                      ! 
-INTEGER :: IMYPROC
 INTEGER :: IOBS, IENS
 INTEGER :: ISTAT, ICPT, IUNIT
 !
@@ -125,6 +121,7 @@ REAL(KIND=JPRB)                            :: ZHOOK_HANDLE
 !
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',0,ZHOOK_HANDLE)
+
 !
 !############################# BEGINNING ###############################
 !
@@ -140,17 +137,7 @@ IF ( NPRINTLEV>0 .AND. LPIO) THEN
   WRITE(*,*)
 ENDIF
 !
-#ifdef SFX_ARO
-IF ( MYPROC > 0 ) THEN 
-  IMYPROC = MYPROC
-ELSE
-  IMYPROC = 1
-ENDIF
-#else
-IMYPROC = NRANK+1
-#endif
-!
-WRITE(YMYPROC(1:7),'(I7.7)') IMYPROC
+WRITE(YMYPROC(1:7),'(I7.7)') KMYPROC
 !
 IF ( NPRINTLEV > 0 .AND. LPIO ) WRITE(*,*) 'number of patches =',IO%NPATCH
 !
@@ -479,5 +466,6 @@ IF ( NPRINTLEV > 0 ) THEN
 ENDIF
 !
 IF (LHOOK) CALL DR_HOOK('ASSIM_NATURE_ISBA_ENKF',1,ZHOOK_HANDLE)
+
 !
 END SUBROUTINE ASSIM_NATURE_ISBA_ENKF

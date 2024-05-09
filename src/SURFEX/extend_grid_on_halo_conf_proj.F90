@@ -75,6 +75,7 @@ INTEGER                           :: ILONE      ! extension zone
 INTEGER                           :: ILATE      ! extension zone
 INTEGER                           :: IWIDTH_I_X ! width of I zone
 INTEGER                           :: IWIDTH_I_Y ! width of I zone
+REAL                              :: ZTRUNC
 
 !
 !------------------------------------------------------------------------------
@@ -86,7 +87,8 @@ IF (LHOOK) CALL DR_HOOK('EXTEND_GRID_CONF_PROJ',0,ZHOOK_HANDLE)
                             ZLATOR,ZLONOR,IIMAX,IJMAX,        &
                             ZX,ZY,ZDX,ZDY,&
                             KLATE=ILATE, KLONE=ILONE, &
-                            KWIDTH_I_X=IWIDTH_I_X, KWIDTH_I_Y=IWIDTH_I_Y)
+                            KWIDTH_I_X=IWIDTH_I_X, KWIDTH_I_Y=IWIDTH_I_Y, &
+                            PTRUNC=ZTRUNC)
 
 !
 !
@@ -114,7 +116,7 @@ NULLIFY(PGRID_PAR)
                             ZLATOR,ZLONOR,IIMAX_EXTENDED,IJMAX_EXTENDED,  &
                             ZX_EXTENDED,ZY_EXTENDED,ZDX_EXTENDED,ZDY_EXTENDED, &
                             ILATE, ILONE, &
-                            IWIDTH_I_X, IWIDTH_I_Y)
+                            IWIDTH_I_X, IWIDTH_I_Y, ZTRUNC)
 
                             !
 !

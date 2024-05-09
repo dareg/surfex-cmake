@@ -3,18 +3,21 @@
 !SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
 !SFX_LIC for details. version 1.
 !     #########
-      SUBROUTINE DEFAULT_SURF_ATM(POUT_TSTEP, PCISMIN, PVMODMIN, OALDTHRES,             &
-                                    ODRAG_COEF_ARP, OALDZ0H, ONOSOF, OSLOPE, OCPL_GCM,  &
+      SUBROUTINE DEFAULT_SURF_ATM(POUT_TSTEP,                                           &
+                                    PCISMIN, PVMODMIN, PWNEW, PWCRN, PFACZ0,            &
+                                    PTAU_ICE, OALDTHRES,                                &
+                                    ODRAG_COEF_ARP, OZ0_AVG_EXACT,                      &
+                                    OZ0_EFF, ONOSOF, OSLOPE, OCPL_GCM,                  &
                                     PEDB, PEDC, PEDD, PEDK, PUSURIC, PUSURID, PUSURICL, &
-                                    PVCHRNK, PVZ0CM, PRIMAX, PDELTA_MAX, PWINDMIN,      &
+                                    PVCHRNK, PVZ0CM, PRIMAX, PACMAX, PDELTA_MAX, PWINDMIN,&
                                     OVZIUSTAR0_ARP, PRZHZ0M,                            &
                                     PVZIUSTAR0, ORRGUST_ARP, PRRSCALE, PRRGAMMA,        &
                                     PUTILGUST, OCPL_ARP, OQVNPLUS, OVERTSHIFT,          &
-                                    OVSHIFT_LW, OVSHIFT_PRCP,                           &
-                                    PCO2UNCPL, OARP_PN,                                 &
+                                    OVSHIFT_LW, OVSHIFT_PRCP, PCO2UNCPL,                &
                                     PCD_COEFF1, PCD_COEFF2, PCH_COEFF1,                 &
-                                    PRISHIFT, PVMODFAC                                  )
-
+                                    PRISHIFT, PVMODFAC,                                 &
+                                    OZ0SNOWH_ARP,PRZ0_TO_HEIGHT                         )
+!
 !     ########################################################################
 !
 !!****  *DEFAULT_SURF_ATM* - routine to set default values for the choice of surface schemes
@@ -45,6 +48,9 @@
 !!      Original    01/2004 
 !!      B. Decharme 04/2013 replace RW_PRECIP by CPL_GCM
 !!      R. Séférian 03/2014 adding to decouple CO2 for photosynthesis 
+!!      Y. Seity    08-2023 Add PACMAX
+!!      J. Masek    08/2023 new dummy arguments PWNEW, PWCRN, PFACZ0, PTAU_ICE,
+!!                          OZ0_AVG_EXACT, OZ0_EFF; removed OALDZ0H, OARP_PN
 !-------------------------------------------------------------------------------
 !
 !*       0.    DECLARATIONS
@@ -65,9 +71,15 @@ IMPLICIT NONE
 REAL,              INTENT(OUT) :: POUT_TSTEP! time step for writing
 REAL,              INTENT(OUT) :: PCISMIN   ! minimum wind shear
 REAL,              INTENT(OUT) :: PVMODMIN  ! minimum wind module
+REAL,              INTENT(OUT) :: PWNEW     ! factor in snow albedo calculation for melting/no-melting case
+REAL,              INTENT(OUT) :: PWCRN     ! critical value of snow reservoir in calculation of snow fraction
+REAL,              INTENT(OUT) :: PFACZ0    ! multiplicative factor for orographic roughness length
+REAL,              INTENT(OUT) :: PTAU_ICE  ! characteristic time for ice in force-restore (s)
 LOGICAL,           INTENT(OUT) :: OALDTHRES ! flag to activate aladin formulation
 LOGICAL,           INTENT(OUT) :: ODRAG_COEF_ARP ! flag to activate aladin formulation for Cd and Ch
-LOGICAL,           INTENT(OUT) :: OALDZ0H
+LOGICAL,           INTENT(OUT) :: OZ0_AVG_EXACT ! activate exact formula for z0 averaging
+                                                ! (via unapproximated neutral drag coefficient)
+LOGICAL,           INTENT(OUT) :: OZ0_EFF       ! include orog. component in mechanical roughness
 LOGICAL,           INTENT(OUT) :: ONOSOF ! flag to deactivate the Subgrid Orography effects on Forcing
 LOGICAL,           INTENT(OUT) :: OSLOPE
 LOGICAL,           INTENT(OUT) :: OVERTSHIFT ! flag to deactivate the vertical shift between atmospheric and model orography
@@ -88,6 +100,7 @@ REAL,              INTENT(OUT) :: PVMODFAC   ! Factor for threshold of wind spee
 REAL,              INTENT(OUT) :: PCD_COEFF1
 REAL,              INTENT(OUT) :: PCD_COEFF2
 REAL,              INTENT(OUT) :: PCH_COEFF1
+REAL,              INTENT(OUT) :: PACMAX  !Max aerodynamical conductance
 REAL,              INTENT(OUT) :: PDELTA_MAX ! Maximum fraction of the foliage covered by intercepted water
 REAL,              INTENT(OUT) :: PWINDMIN   ! Minimum wind speed (canopy)
 LOGICAL,           INTENT(OUT) :: OVZIUSTAR0_ARP  ! flag to activate aladin formulation for zoh over sea
@@ -98,7 +111,9 @@ REAL,              INTENT(OUT) :: PRRSCALE
 REAL,              INTENT(OUT) :: PRRGAMMA
 REAL,              INTENT(OUT) :: PUTILGUST
 LOGICAL,           INTENT(OUT) :: OCPL_ARP
-LOGICAL,           INTENT(OUT) :: OARP_PN   ! Flag to change Cv and TAUICE
+LOGICAL,           INTENT(OUT) :: OZ0SNOWH_ARP
+REAL,              INTENT(OUT) :: PRZ0_TO_HEIGHT
+
 LOGICAL,           INTENT(OUT) :: OQVNPLUS
 LOGICAL,           INTENT(OUT) :: OCPL_GCM  ! Flag used to Read/Write some field from/into the restart file for coupling with ARPEGE/ALADIN
 REAL,              INTENT(OUT) :: PCO2UNCPL ! geochemical CO2 for photsynthesis (ppmv)
@@ -117,10 +132,15 @@ POUT_TSTEP = XUNDEF
 !
 PCISMIN   = 6.7E-5
 PVMODMIN  = 0.
+PWNEW = 10.0
+PWCRN = 10.0
+PFACZ0 = 1.0
+PTAU_ICE = 3300.
 OALDTHRES = .FALSE.
 !
 ODRAG_COEF_ARP = .FALSE.
-OALDZ0H = .FALSE.
+OZ0_AVG_EXACT = .FALSE.
+OZ0_EFF = .FALSE.
 ONOSOF = .TRUE.
 OSLOPE = .FALSE.
 OVERTSHIFT = .FALSE.
@@ -146,6 +166,7 @@ PCH_COEFF1 = 15.0
 PRISHIFT = 0.0
 PVMODFAC = 0.1
 !
+PACMAX= 1000.
 PDELTA_MAX = 1.0
 !
 PWINDMIN = 1.E-6
@@ -159,7 +180,8 @@ PRRSCALE = 1.15E-4
 PRRGAMMA = 0.8
 PUTILGUST = 0.125
 OCPL_ARP=.FALSE.
-OARP_PN=.FALSE.
+OZ0SNOWH_ARP=.FALSE.
+PRZ0_TO_HEIGHT=0.13
 OQVNPLUS=.FALSE.
 !
 PCO2UNCPL = XUNDEF

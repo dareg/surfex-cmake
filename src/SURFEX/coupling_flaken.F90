@@ -44,6 +44,7 @@ SUBROUTINE COUPLING_FLAKE_n (CHF, DGO, D, DC, DMF, F, AT, DST, SLT, &
 !!      P. Le Moigne 04/2013 Chemistry, UPDATE_RAD_FLAKE
 !!      B. Decharme  04/2013 New diag, new coupling variables
 !!      P. Le Moigne 10/2014 Threshold on Cd when fluxes computed by FLake
+!!      F. Svabik    08/2023 Unapproximated roughness length averaging
 !!------------------------------------------------------------------------------
 !
 !
@@ -59,6 +60,7 @@ USE MODD_REPROD_OPER, ONLY : CIMPLICIT_WIND
 !
 USE MODD_CSTS,     ONLY : XRD, XCPD, XP00, XLVTT, XLSTT, XKARMAN, XTT
 USE MODD_SURF_PAR, ONLY : XUNDEF
+USE MODD_SURF_ATM, ONLY : XZ0_OFFSET
 !
 !                          
 !
@@ -126,7 +128,7 @@ REAL, DIMENSION(KI), INTENT(IN)  :: PRHOA     ! air density                     
 REAL, DIMENSION(KI,KSV),INTENT(IN) :: PSV     ! scalar variables
 !                                             ! chemistry:   first char. in HSV: '#'  (molecule/m3)
 !                                             !
- CHARACTER(LEN=6), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
+CHARACTER(LEN=16), DIMENSION(KSV),INTENT(IN):: HSV  ! name of all scalar variables
 REAL, DIMENSION(KI), INTENT(IN)  :: PU        ! zonal wind                            (m/s)
 REAL, DIMENSION(KI), INTENT(IN)  :: PV        ! meridian wind                         (m/s)
 REAL, DIMENSION(KI,KSW),INTENT(IN) :: PDIR_SW ! direct  solar radiation (on horizontal surf.)
@@ -152,7 +154,7 @@ REAL, DIMENSION(KI), INTENT(OUT) :: PSFU      ! zonal momentum flux             
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFV      ! meridian momentum flux                (Pa)
 REAL, DIMENSION(KI), INTENT(OUT) :: PSFCO2    ! flux of CO2                           (m/s*kg_CO2/kg_air)
 REAL, DIMENSION(KI,KSV),INTENT(OUT):: PSFTS   ! flux of scalar var.                   (kg/m2/s)
-!
+                                              ! chem. fluxes                          (molecules m-2 s-1)       
 REAL, DIMENSION(KI), INTENT(OUT) :: PTSRAD    ! radiative temperature                 (K)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PDIR_ALB! direct albedo for each spectral band  (-)
 REAL, DIMENSION(KI,KSW),INTENT(OUT):: PSCA_ALB! diffuse albedo for each spectral band (-)
@@ -208,7 +210,6 @@ REAL, DIMENSION(KI)  :: ZLEI   ! sublimation heat flux (W/m2)
 REAL, DIMENSION(KI)  :: ZSUBL  ! sublimation (kg/m2/s)
 REAL, DIMENSION(KI)  :: ZLWUP  ! upward longwave flux at t
 REAL, DIMENSION(KI)  :: ZTRAD  ! Radiative temperature at time t
-REAL, DIMENSION(KI)  :: ZLMO   ! Monin-Obukov length (m)
 REAL, DIMENSION(KI)  :: ZWORK  ! Work array
 !
 REAL                 :: ZCONVERTFACM0_SLT, ZCONVERTFACM0_DST
@@ -487,12 +488,11 @@ IF (F%CFLK_FLUX=='FLAKE') THEN  !compute some variables not present in FLake cod
      ZCH = MAX(ZEPS,PSFTH / (XCPD * PRHOA(:) * ZWIND(:) * (F%XTS(:) - PTA(:) * ZEXNS(:)/ZEXNA(:))) * ZEXNS(:))
   END WHERE
 !
-  ZCDN(:) = (XKARMAN/LOG(PUREF(:)/F%XZ0(:)))**2
+  ZCDN(:) = (XKARMAN/LOG(XZ0_OFFSET + PUREF(:)/F%XZ0(:)))**2
   ZCD (:) = MAX(ZEPS,ZCD(:))
 !
 ENDIF
 !
-ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
 !
  CALL DIAG_INLINE_FLAKE_n(DGO, D, DC, F, &
                           PTSTEP, PTA,  ZQA, PPA, PPS, PRHOA, PU,    &
@@ -500,7 +500,7 @@ ZLMO(:) = LMO(ZUSTAR,PTA/ZEXNA,ZQA,PSFTH/PRHOA/XCPD,PSFTQ/PRHOA)
                           ZCD, ZCDN, ZCH, ZRI, ZHU,                  &
                           ZZ0H, ZQSAT, PSFTH, PSFTQ, PSFU, PSFV,     &
                           PDIR_SW, PSCA_SW, PLW, ZDIR_ALB, ZSCA_ALB, &
-                          ZLE, ZLEI, ZSUBL, ZLWUP, ZALB, ZSWE, ZLMO  )  
+                          ZLE, ZLEI, ZSUBL, ZLWUP, ZALB, ZSWE        )  
 !
 !-------------------------------------------------------------------------------------
 !
