@@ -453,7 +453,7 @@ IF(IO%CISBA == 'DIF')THEN
          ZSOURCE(JJ,JL)   = DEK%XSWNET_NS(JJ)*(PTAU_N(JJ,JK-1)-PTAU_N(JJ,JK))
       ENDDO
    ENDDO
-   IF(IO%LMEB_LITTER)THEN
+   IF(IO%LMEB_LITTER .AND. MINVAL(PEK%XGNDLITTER(:))>0.0)THEN
       JL                  = JL + 1
       ZD(:,JL)            = PEK%XGNDLITTER(:)
       ZT(:,JL)            = PEK%XTL(:)

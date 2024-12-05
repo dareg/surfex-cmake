@@ -323,7 +323,7 @@ IF(GMEB)THEN
     WRITE(ILUOUT,*) GMEB_PATCH(1:IO%NPATCH).AND.GMEB_PATCH_REC(1:IO%NPATCH)
     WRITE(ILUOUT,*) '*****************************************'
   ENDIF
-  GMEB_PATCH(:)=GMEB_PATCH(:).AND.GMEB_PATCH_REC(:)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  GMEB_PATCH(:)=GMEB_PATCH(:).AND.GMEB_PATCH_REC(:)
 
   IO%LMEB_PATCH(1:IO%NPATCH) = GMEB_PATCH(1:IO%NPATCH)
 
