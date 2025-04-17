@@ -1,0 +1,525 @@
+!SFX_LIC Copyright 1994-2014 CNRS, Meteo-France and Universite Paul Sabatier
+!SFX_LIC This is part of the SURFEX software governed by the CeCILL-C licence
+!SFX_LIC version 1. See LICENSE, CeCILL-C_V1-en.txt and CeCILL-C_V1-fr.txt  
+!SFX_LIC for details. version 1.
+!     #########
+SUBROUTINE INTERPOL_NPTS(UG,U,HPROGRAM,KLUOUT,KNPTS,KCODE,PX,PY,PFIELD,KNEAR_NBR)
+!     #########################################################
+!
+!!**** *INTERPOL_NPTS* interpolates with ###ine f77 programs a 2D field
+!!                           from all grid points valid values
+!!
+!!    PURPOSE
+!!    -------
+!!
+!!    The points are all on only one grid (defined with the coordinates
+!!    of all the points). The code to apply for each point is:
+!!
+!!    KCODE>0 : data point (with field valid for interpolation)
+!!    KCODE=-1: point to ignore
+!!    KCODE=0 : point to interpolate
+!!
+!!
+!!
+!!    METHOD
+!!    ------
+!!
+!!    EXTERNAL
+!!    --------
+!!
+!!    IMPLICIT ARGUMENTS
+!!    ------------------
+!!
+!!
+!!
+!!    REFERENCE
+!!    ---------
+!!
+!!    AUTHOR
+!!    ------
+!!
+!!    V. Masson          Meteo-France
+!!
+!!    MODIFICATION
+!!    ------------
+!!
+!!    Original    03/2004
+!!    Modification
+!!    B. Decharme  2014  scan all point case if gaussien grid or NHALO = 0
+!!    A.Napoly & H.Petithomme 2023 optimisations
+!----------------------------------------------------------------------------
+!
+!*    0.     DECLARATION
+!            -----------
+!
+!
+USE MODD_SURF_ATM_GRID_N,ONLY: SURF_ATM_GRID_t
+USE MODD_SURF_ATM_N,ONLY: SURF_ATM_t
+!
+USE MODD_SURFEX_OMP,ONLY: NBLOCK
+USE MODD_SURFEX_MPI,ONLY: NRANK,NPIO,NCOMM,NPROC,IDX_I,NINDEX,NNUM,LSFX_MPI
+USE MODD_SURF_PAR,ONLY: XUNDEF
+!
+USE MODI_GATHER_AND_WRITE_MPI
+USE MODI_READ_AND_SEND_MPI
+USE MODI_GET_NEAR_MESHES
+USE MODI_SUM_ON_ALL_PROCS
+!
+USE YOMHOOK,ONLY: LHOOK,DR_HOOK, JPHOOK
+USE PARKIND1,ONLY: JPRB
+!
+#ifdef SFX_MNH
+  USE MODD_IO_ll,ONLY: ISP,ISNPROC
+  USE MODD_VAR_ll,ONLY: NMNH_COMM_WORLD
+  USE MODE_GATHER_ll
+  USE MODE_FD_ll,ONLY: GETFD,FD_ll
+  USE MODE_TOOLS_ll,ONLY: GET_GLOBALDIMS_ll
+  USE MODD_PARAMETERS_ll,ONLY: NH=>JPHEXT
+#endif
+!
+IMPLICIT NONE
+!
+#if defined(SFX_MPI) || defined(SFX_MNH)
+  include "mpif.h"
+#endif
+!
+TYPE(SURF_ATM_GRID_T),INTENT(INOUT) :: UG
+TYPE(SURF_ATM_T),INTENT(INOUT) :: U
+CHARACTER(LEN=6),INTENT(IN) :: HPROGRAM
+INTEGER,INTENT(IN) :: KLUOUT,KNPTS,KNEAR_NBR
+INTEGER,DIMENSION(:),INTENT(INOUT) :: KCODE
+REAL,DIMENSION(:),INTENT(IN) :: PX,PY
+REAL,DIMENSION(:,:),INTENT(INOUT) :: PFIELD
+!
+INTEGER,PARAMETER :: IINT4=KIND(0)/4,IREAL4=KIND(0.)/4
+INTEGER :: IP,ICPT,IL1,JL,JP,JK,INP,IL2,INPTS,INFOMPI,IDIM_FULL,INEAR,IOLD,INPX,IDIM
+INTEGER,DIMENSION(:,:,:),ALLOCATABLE :: ININD0,ININD_ALL
+INTEGER,DIMENSION(:,:),ALLOCATABLE :: ININD
+INTEGER,DIMENSION(:),ALLOCATABLE :: IINDEX,ISIZE,ISIZE_TOT,IND,INDO,INUM_TOT,IINDEX_TOT
+REAL :: ZSUM
+REAL,DIMENSION(:,:,:,:),TARGET,ALLOCATABLE :: ZFIELD,ZFIELD2
+REAL,DIMENSION(:,:,:),POINTER :: ZFIELD3
+REAL,DIMENSION(:,:),ALLOCATABLE :: ZNDIST
+REAL,DIMENSION(:),ALLOCATABLE :: ZX,ZY,ZDIST,ZZX,ZZY,ZNVAL
+REAL(KIND=JPHOOK) :: ZHOOK_HANDLE
+
+#if defined(SFX_MPI) || defined(SFX_MNH)
+INTEGER,DIMENSION(MPI_STATUS_SIZE) :: ISTATUS
+#endif
+
+#ifdef SFX_MNH
+INTEGER :: IIMAX,IJMAX,IIU,IJU,IRANK_SAVE,IPROC_SAVE,IPIO_SAVE,ICOMM_SAVE
+INTEGER,DIMENSION(:,:),ALLOCATABLE :: I2D
+REAL,DIMENSION(:,:),ALLOCATABLE :: Z2D
+TYPE(FD_LL),POINTER :: TZFD
+#endif
+
+INPTS = HUGE (INPTS)
+INPX  = HUGE (INPX)
+ICPT  = HUGE (ICPT)
+
+IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_1",0,ZHOOK_HANDLE)
+IOLD = 1
+#ifdef SFX_MNH
+  IF (KNEAR_NBR == U%NDIM_FULL) IOLD = 2
+#endif
+
+  IF (IOLD == 1) THEN
+    IDIM_FULL = U%NDIM_FULL
+    INEAR = KNEAR_NBR
+    ALLOCATE(ISIZE_TOT(IDIM_FULL))
+    CALL GATHER_AND_WRITE_MPI(KCODE,ISIZE_TOT)
+  ELSE IF (IOLD == 2) THEN
+#ifdef SFX_MNH
+    CALL GET_DIM_PHYS_LL("B",IIU,IJU)
+    CALL GET_GLOBALDIMS_LL(IIMAX,IJMAX)
+    IDIM_FULL = IIMAX*IJMAX
+    INEAR = IDIM_FULL
+    TZFD => GETFD(NMNH_COMM_WORLD)
+    IRANK_SAVE = NRANK
+    IPROC_SAVE = NPROC
+    IPIO_SAVE = NPIO
+    ICOMM_SAVE = NCOMM
+    NRANK = ISP-1
+    NPROC = ISNPROC
+    NPIO = TZFD%OWNER-1
+    NCOMM = TZFD%COMM
+    ALLOCATE(I2D(IIU+2*NH,IJU+2*NH))
+    I2D(:,:) = -1
+    I2D(1+NH:IIU+NH,1+NH:IJU+NH) = RESHAPE(KCODE,(/IIU,IJU/))
+    ALLOCATE(ISIZE_TOT(IDIM_FULL))
+    CALL GATHERFIELDN1(TZFD,IDIM_FULL,IIMAX,IJMAX,NH,I2D,ISIZE_TOT)
+    DEALLOCATE(I2D)
+#endif
+  ENDIF
+  !
+  IF (NPROC > 1) THEN
+#if defined(SFX_MPI) || defined(SFX_MNH)
+    IF (LSFX_MPI) THEN
+      CALL MPI_BCAST(ISIZE_TOT,IDIM_FULL*KIND(ISIZE_TOT)/4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+    ENDIF
+#endif
+  ENDIF
+  !
+  IF (ALL(ISIZE_TOT /= 0)) THEN
+    IF (IOLD == 2) THEN
+#ifdef SFX_MNH
+      NRANK = IRANK_SAVE
+      NPROC = IPROC_SAVE
+      NPIO = IPIO_SAVE
+      NCOMM = ICOMM_SAVE
+#endif
+    END IF
+      DEALLOCATE(ISIZE_TOT)
+      CALL DR_HOOK("INTERPOL_NPTS_1",1,ZHOOK_HANDLE)
+      RETURN
+  ENDIF
+  !
+  IP = COUNT(KCODE(:) == 0)
+  IL1 = SIZE(PFIELD,1)
+  IL2 = SIZE(PFIELD,2)
+
+  IF (IOLD == 1) THEN
+    ALLOCATE(ZX(IL1),ZY(IL1))
+    CALL READ_AND_SEND_MPI(PX,ZX)
+    CALL READ_AND_SEND_MPI(PY,ZY)
+  ELSE IF (IOLD == 2) THEN
+#ifdef SFX_MNH
+    ALLOCATE(INUM_TOT(IDIM_FULL),IINDEX_TOT(IDIM_FULL))
+    ALLOCATE(I2D(IIU+2*NH,IJU+2*NH))
+    CALL INDEXPOINT(U%IDIM_FULL,IIU,IJU,I2D)
+    CALL GATHERFIELDN1(TZFD,IDIM_FULL,IIMAX,IJMAX,NH,I2D,INUM_TOT)
+    CALL INDEXPOINT(U%IDIM_FULL,IIU,IJU,I2D,ISP-1)
+    CALL GATHERFIELDN1(TZFD,IDIM_FULL,IIMAX,IJMAX,NH,I2D,IINDEX_TOT)
+    DEALLOCATE(I2D)
+    ALLOCATE(ZX(IDIM_FULL),ZY(IDIM_FULL))
+    ALLOCATE(Z2D(IIU+2*NH,IJU+2*NH))
+    Z2D = 0
+    Z2D(1+NH:IIU+NH,1+NH:IJU+NH) = RESHAPE(PX,(/IIU,IJU/))
+    CALL GATHERFIELDX1(TZFD,IDIM_FULL,IIMAX,IJMAX,NH,Z2D,ZX)
+    Z2D(1+NH:IIU+NH,1+NH:IJU+NH) = RESHAPE(PY,(/IIU,IJU/))
+    CALL GATHERFIELDX1(TZFD,IDIM_FULL,IIMAX,IJMAX,NH,Z2D,ZY)
+    DEALLOCATE(Z2D)
+    IF (NPROC > 1) THEN
+      CALL MPI_BCAST(INUM_TOT,IDIM_FULL*IINT4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+      CALL MPI_BCAST(IINDEX_TOT,IDIM_FULL*IINT4,MPI_INTEGER,NPIO,NCOMM,INFOMPI)
+      CALL MPI_BCAST(ZX,IDIM_FULL*IREAL4,MPI_FLOAT,NPIO,NCOMM,INFOMPI)
+      CALL MPI_BCAST(ZY,IDIM_FULL*IREAL4,MPI_FLOAT,NPIO,NCOMM,INFOMPI)
+    END IF
+#endif
+  END IF
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_1",1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_3",0,ZHOOK_HANDLE)
+  ALLOCATE(ININD(KNPTS,IP),ZNDIST(KNPTS,IP))
+  ALLOCATE(IINDEX(INEAR))
+  !
+  IF (INEAR == IDIM_FULL) THEN
+    INP = 0
+    DO JL=1,IDIM_FULL
+      IF (ISIZE_TOT(JL) < 1) CYCLE
+      INP = INP+1
+      IINDEX(INP) = JL
+    END DO
+    IF (INP == 0) THEN
+      WHERE (KCODE(:) == 0) KCODE(:) = -4
+    ELSE
+      INPTS = MIN(KNPTS,INP)
+    END IF
+      ALLOCATE(IND(IP))
+      IND(:) = 0
+      ICPT = 0
+      DO JL=1,IL1
+        IF (KCODE(JL) /= 0) CYCLE
+        ICPT = ICPT+1
+        IND(ICPT) = JL
+      END DO
+      ALLOCATE(ZDIST(INP),ZZX(INP),ZZY(INP))
+      ! optim: preset zzx/zzy
+      IF (IOLD == 1) THEN
+        ZZX(:) = PX(IINDEX(1:INP))
+        ZZY(:) = PY(IINDEX(1:INP))
+      ELSE
+        ZZX(:) = ZX(IINDEX(1:INP))
+        ZZY(:) = ZY(IINDEX(1:INP))
+      END IF
+      INPTS = MIN(KNPTS,INP)
+      !$omp parallel do private(zdist)
+      DO JL=1,ICPT
+        IF (IOLD == 1) THEN
+          ZDIST(1:INP) = (ZZX(1:INP)-ZX(IND(JL)))**2+(ZZY(1:INP)-ZY(IND(JL)))**2
+        ELSE
+          ZDIST(1:INP) = (ZZX(1:INP)-PX(IND(JL)))**2+(ZZY(1:INP)-PY(IND(JL)))**2
+        END IF
+        !
+        CALL ORDERI(INP,ZDIST,INPTS,ININD(:,JL),ZNDIST(:,JL))
+        ZNDIST(1:INPTS,JL) = SQRT(ZNDIST(1:INPTS,JL))
+        ININD(1:INPTS,JL) = IINDEX(ININD(1:INPTS,JL))
+      END DO
+      !$omp end parallel do
+      DEALLOCATE(ZZX,ZZY,IND,ZDIST)
+  ELSE
+    ALLOCATE(ZDIST(INEAR),IND(INEAR))
+    IF (.NOT.ASSOCIATED(UG%NNEAR)) THEN
+      ALLOCATE(UG%NNEAR(IL1,INEAR))
+      CALL GET_NEAR_MESHES(UG%G%CGRID,UG%NGRID_FULL_PAR,IDIM_FULL,UG%XGRID_FULL_PAR,&
+        INEAR,UG%NNEAR)
+    END IF
+    ! note: 1st guess for icpt (eventually depends on kcode)
+    ICPT = 0
+    DO JL=1,IL1
+      IF (KCODE(JL) /= 0) CYCLE
+
+      ICPT = ICPT+1
+      IND(ICPT) = JL
+    END DO
+    !$omp parallel do private(jk,inp,iindex,zdist)
+    DO JL=1,ICPT
+      INP = 0
+      DO JK=1,INEAR
+        IF (UG%NNEAR(JL,JK) == 0) CYCLE
+        IF (ISIZE_TOT(UG%NNEAR(JL,JK)) == 0) CYCLE
+
+        INP = INP+1
+        IINDEX(INP) = UG%NNEAR(JL,JK)
+      END DO
+      !
+      IF (INP < KNPTS) THEN
+        KCODE(IND(JL)) = -4
+        CYCLE
+      END IF
+      !
+      IF (IOLD == 1) THEN
+        ZDIST(1:INP) = (PX(IINDEX(1:INP))-ZX(IND(JL)))**2+&
+          (PY(IINDEX(1:INP))-ZY(IND(JL)))**2
+      ELSE
+        ZDIST(1:INP) = (ZX(IINDEX(1:INP))-PX(IND(JL)))**2+&
+          (ZY(IINDEX(1:INP))-PY(IND(JL)))**2
+      END IF
+      !
+      CALL ORDERI(INP,ZDIST,INPTS,ININD(:,JL),ZNDIST(:,JL))
+      ZNDIST(1:INPTS,JL) = SQRT(ZNDIST(1:INPTS,JL))
+      ININD(1:INPTS,JL) = IINDEX(ININD(1:INPTS,JL))
+    END DO
+    !$omp end parallel do
+    ! note: account for possibly changed kcode, final icpt
+    JK = 0
+    DO JL=1,ICPT
+      IF (KCODE(IND(JL)) /= 0) THEN
+        ! changed kcode: increase lagged counter index
+        JK = JK+1
+        CYCLE
+      ELSE IF (JK == 0) THEN
+        ! no lagging yet, no self copy
+        CYCLE
+      END IF
+      ! active lagged index: copy current position at lagged one
+      ININD(:,JL-JK) = ININD(:,JL)
+      ZNDIST(:,JL-JK) = ZNDIST(:,JL)
+    END DO
+    !
+    ICPT = ICPT-JK
+    DEALLOCATE(ZDIST,IND)
+    INPTS = KNPTS
+  END IF
+
+  DEALLOCATE(IINDEX,ZX,ZY,ISIZE_TOT)
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_3",1,ZHOOK_HANDLE)
+
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_4",0,ZHOOK_HANDLE)
+  ALLOCATE(ISIZE(0:NPROC-1))
+
+  IF (NPROC == 1) THEN
+    ISIZE(:) = ICPT
+  ELSE
+#if defined(SFX_MPI) || defined(SFX_MNH)
+    IF (LSFX_MPI) THEN
+      CALL MPI_ALLGATHER(ICPT,IINT4,MPI_INTEGER,ISIZE,IINT4,MPI_INTEGER,NCOMM,INFOMPI)
+    ENDIF
+#endif
+  END IF
+
+  INPX = MAXVAL(ISIZE)
+  ALLOCATE(ININD0(INPTS,INPX,0:NPROC-1))
+  ININD0(:,:,:) = 0
+
+  DO JL=1,ICPT
+    DO JP=1,INPTS
+      ! looping on inpts asserts that any inind is set (ie non 0)
+      !if (inind(jp,jl) == 0) call abor1("Error: inind 0")
+      JK = ININD(JP,JL)
+      IF (IOLD == 1) THEN
+        ININD0(JP,JL,NINDEX(JK)) = NNUM(JK)
+      ELSE IF (IOLD == 2) THEN
+        ININD0(JP,JL,IINDEX_TOT(JK)) = INUM_TOT(JK)
+      END IF
+    END DO
+  END DO
+
+  IF (NPROC == 1) THEN
+    CALL MOVE_ALLOC(ININD0,ININD_ALL)
+  ELSE
+    ALLOCATE(ININD_ALL(KNPTS,INPX,0:NPROC-1))
+#if defined(SFX_MPI) || defined(SFX_MNH)
+    IF (LSFX_MPI) THEN
+      IDIM = INPX*KNPTS
+      DO JP=0,NPROC-1
+        CALL MPI_GATHER(ININD0(:,:,JP),IDIM*IINT4,MPI_INTEGER,ININD_ALL,IDIM*IINT4,&
+          MPI_INTEGER,JP,NCOMM,INFOMPI)
+      END DO
+    ENDIF
+#endif
+    DEALLOCATE(ININD0)
+  END IF
+  !
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_4",1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_5",0,ZHOOK_HANDLE)
+  !
+  ALLOCATE(ZFIELD(IL2,KNPTS,INPX,0:NPROC-1))
+  !
+  ZFIELD(:,:,:,:) = XUNDEF
+  !
+  DO JP=0,NPROC-1
+    DO JK=1,INPX
+      DO JL=1,KNPTS
+        IF (ININD_ALL(JL,JK,JP) /= 0)&
+          ZFIELD(:,JL,JK,JP) = PFIELD(ININD_ALL(JL,JK,JP),:)
+      END DO
+    END DO
+  END DO
+  !
+  DEALLOCATE(ININD_ALL)
+  !
+  IF (NPROC == 1) THEN
+    ZFIELD3 => ZFIELD(:,:,:,0)
+  ELSE
+#if defined(SFX_MPI) || defined(SFX_MNH)
+    IF (LSFX_MPI) THEN
+      ALLOCATE(ZFIELD3(IL2,KNPTS,ICPT))
+      ALLOCATE(ZFIELD2(IL2,KNPTS,ICPT,0:NPROC-1))
+      !
+      DO JP=0,NPROC-1
+        INP = ISIZE(JP)
+        IDIM = INP*INPTS*IL2
+        CALL MPI_GATHER(ZFIELD(:,:,1:INP,JP),IDIM*IREAL4,MPI_REAL,ZFIELD2,IDIM*IREAL4,&
+          MPI_REAL,JP,NCOMM,INFOMPI)
+      END DO
+      !
+      DO JP=0,NPROC-1
+        WHERE (ZFIELD2(:,:,:,JP) /= XUNDEF) ZFIELD3(:,:,:) = ZFIELD2(:,:,:,JP)
+      END DO
+      !
+      DEALLOCATE(ZFIELD2)
+    ENDIF
+#endif
+  END IF
+  !
+  DEALLOCATE(ISIZE)
+  !
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_5",1,ZHOOK_HANDLE)
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_6",0,ZHOOK_HANDLE)
+  ALLOCATE(ZNVAL(IL2))
+  !
+  ICPT = 0
+  DO JL=1,IL1
+    IF (KCODE(JL) /= 0) CYCLE
+    ICPT = ICPT+1
+    ZNVAL(:) = 0
+    ZSUM = 0
+    DO JP=1,INPTS
+      ZNVAL(:) = ZNVAL(:)+ZFIELD3(:,JP,ICPT)/ZNDIST(JP,ICPT)
+      ZSUM = ZSUM+1/ZNDIST(JP,ICPT)
+    END DO
+    PFIELD(JL,:) = ZNVAL(:)/ZSUM
+  END DO
+  !
+  ! note: do not deallocate zfield earlier since zfield3 may point onto it
+  IF (NPROC > 1) DEALLOCATE(ZFIELD3)
+  DEALLOCATE(ININD,ZNDIST,ZFIELD)
+  DEALLOCATE(ZNVAL)
+  !
+  IF (IOLD == 2) THEN
+#ifdef SFX_MNH
+    NRANK = IRANK_SAVE
+    NPROC = IPROC_SAVE
+    NPIO = IPIO_SAVE
+    NCOMM = ICOMM_SAVE
+    DEALLOCATE(IINDEX_TOT,INUM_TOT)
+#endif
+  END IF
+  !
+  IF (LHOOK) CALL DR_HOOK("INTERPOL_NPTS_6",1,ZHOOK_HANDLE)
+  !
+contains
+#ifdef SFX_MNH
+  SUBROUTINE INDEXPOINT(N,NI,NJ,I2D,KVAL)
+    INTEGER,INTENT(IN) :: N,NI,NJ
+    INTEGER,OPTIONAL,INTENT(IN) :: KVAL
+    INTEGER,INTENT(OUT) :: I2D(:,:)
+    INTEGER :: I,I1D(N)
+    !
+    IF (PRESENT(KVAL)) THEN
+      I1D(:) = KVAL
+    ELSE
+      DO I=1,N
+        I1D(I) = I
+      END DO
+    END IF
+    !
+    I2D(:,:) = 0
+    I2D(NH+1:NH+NI,NH+1:NH+NJ) = RESHAPE(I1D,(/NI,NJ/))
+  END SUBROUTINE INDEXPOINT
+  !
+  SUBROUTINE GATHERFIELDN1(TZFD,N,NI,NJ,NH,I2D,I1D)
+    TYPE(FD_LL),INTENT(IN) :: TZFD
+    INTEGER,INTENT(IN) :: N,NI,NJ,NH,I2D(:,:)
+    INTEGER,INTENT(OUT) :: I1D(:)
+    INTEGER :: IALL(NI+2*NH,NJ+2*NH)
+    !
+    CALL GATHER_XYFIELD(I2D,IALL,TZFD%OWNER,TZFD%COMM)
+    I1D = RESHAPE(IALL(NH+1:NH+NI,NH+1:NH+NJ),(/N/))
+  END SUBROUTINE GATHERFIELDN1
+
+  SUBROUTINE GATHERFIELDX1(TZFD,N,NI,NJ,NH,Z2D,Z1D)
+    TYPE(FD_LL),INTENT(IN) :: TZFD
+    INTEGER,INTENT(IN) :: N,NI,NJ,NH
+    REAL,INTENT(IN) :: Z2D(:,:)
+    REAL,INTENT(OUT) :: Z1D(:)
+    REAL :: ZALL(NI+2*NH,NJ+2*NH)
+    !
+    CALL GATHER_XYFIELD(Z2D,ZALL,TZFD%OWNER,TZFD%COMM)
+    Z1D = RESHAPE(ZALL(NH+1:NH+NI,NH+1:NH+NJ),(/N/))
+  END SUBROUTINE GATHERFIELDX1
+#endif
+  !
+  SUBROUTINE ORDERI(N,X,NOUT,IND,XOUT)
+    INTEGER,INTENT(IN) :: N,NOUT
+    INTEGER,INTENT(OUT) :: IND(NOUT)
+    REAL,INTENT(IN) :: X(N)
+    REAL,INTENT(OUT) :: XOUT(NOUT)
+    INTEGER :: I,J,K,NSET
+    !
+    XOUT(:) = XUNDEF
+    XOUT(1) = X(1)
+    IND(1) = 1
+    NSET = 1
+    ! search and record min value/index in non-standard way:
+    ! last index is returned, instead of first (j loop is hardly ever broken)
+    DO J=2,N
+      IF (X(J) > XOUT(NOUT)) CYCLE
+      DO I=NSET+1,2,-1
+        IF (ZDIST(J) > XOUT(I-1)) EXIT
+      END DO
+      ! prepare for insertion
+      IF (I <= NSET) THEN
+        DO K=NSET+1,I+1,-1
+          XOUT(K) = XOUT(K-1)
+          IND(K) = IND(K-1)
+        END DO
+      END IF
+      ! insert value and index (keep nset < nout!!!)
+      XOUT(I) = X(J)
+      IND(I) = J
+      IF (NSET < NOUT-1) NSET = NSET+1
+   END DO
+  END SUBROUTINE ORDERI
+END SUBROUTINE INTERPOL_NPTS
