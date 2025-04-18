@@ -1797,7 +1797,5 @@ set (src
 include(modi.cmake)
 
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
-if(NOT fiat_FOUND)
-	message(STATUS "fiat n'a pas été trouve")
-endif()
-ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_sp)
+ecbuild_find_package(netcdf COMPONENTS REQUIRED)
+ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_sp netcdf)

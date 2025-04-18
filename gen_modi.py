@@ -4,13 +4,10 @@ import sys
 import re
 from pathlib import Path
 
-pattern_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
-pattern_sub_name = re.compile(r"^\s*SUBROUTINE (\w+)", re.IGNORECASE)
-pattern_func_name = re.compile(r"^\s*FUNCTION (\w+)", re.IGNORECASE)
-pattern_end_of_decl = re.compile(r"^\s*if", re.IGNORECASE)
+reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 reg_continuation_line = re.compile(r"&\s*$")
-
 reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
+reg_starts_with_ifdef = re.compile(r"^#ifdef|#if\s+defined|#ifndef", re.IGNORECASE)
 
 all_decl_regex = [
     r"^\s*$",
@@ -27,17 +24,18 @@ all_decl_regex = [
     r"^\s*USE ",
     r"^\s*#",
     r"^\s*IMPLICIT NONE",
+    r"^\s*include ",
 ]
 
 reg_is_still_decl = re.compile("|".join(x for x in all_decl_regex), re.IGNORECASE)
 
 
-def need_modi(f90):
+def is_modi_needed(f90):
     if f90.name.startswith("modi_"):
         return False
     src = open(f90, "r")
     for line in src:
-        matches = pattern_module.match(line)
+        matches = reg_module.match(line)
         if matches:
             return False
     return True
@@ -54,6 +52,17 @@ def remove_continuation_line_mark(src):
             lines.append(buf + line + "\n")
             buf = ""
     return lines
+
+
+def remove_dangling_ifdef(lines):
+    ifdef = []
+    for idx, line in enumerate(lines):
+        if reg_starts_with_ifdef.match(line):
+            ifdef.append(idx)
+        if line.startswith("#endif"):
+            ifdef.pop()
+    for idx in reversed(ifdef):
+        lines.pop(idx)
 
 
 def gen_modi(f90):
@@ -81,12 +90,12 @@ def gen_modi(f90):
         else:
             modi_lines.append(line)
 
-    # remove_dangling_ifdef(modi_lines)
+    remove_dangling_ifdef(modi_lines)
     modi = open(modi_path, "w")
     modi.write("".join(modi_lines))
 
 
 for arg in sys.argv[1:]:
     file = Path(arg)
-    if need_modi(file):
+    if is_modi_needed(file):
         gen_modi(file)
