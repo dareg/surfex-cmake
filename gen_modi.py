@@ -10,6 +10,8 @@ pattern_func_name = re.compile(r"^\s*FUNCTION (\w+)", re.IGNORECASE)
 pattern_end_of_decl = re.compile(r"^\s*if", re.IGNORECASE)
 reg_continuation_line = re.compile(r"&\s*$")
 
+reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
+
 all_decl_regex = [
     r"^\s*$",
     r"^\s*!",
@@ -64,22 +66,16 @@ def gen_modi(f90):
     modi_lines = []
     for line in lines:
         if not sub_name:
-            matches = pattern_sub_name.match(line)
+            matches = reg_sub_func_name.match(line)
             if matches:
-                ending = "END SUBROUTINE"
-                sub_name = matches.group(1)
-            matches = pattern_func_name.match(line)
-            if matches:
-                ending = "END FUNCTION"
-                sub_name = matches.group(1)
-
-            if ending:
+                sub_name = matches.group(2)
+                ending = f"END {matches.group(1)} {sub_name}"
                 modi_lines.append(f"MODULE MODI_{sub_name}\nCONTAINS\n")
 
         matches = reg_is_still_decl.match(line)
         if not matches:
             # print("end of decl", line)
-            modi_lines.append(f"{ending} {sub_name}\n")
+            modi_lines.append(f"{ending}\n")
             modi_lines.append(f"END MODULE MODI_{sub_name}\n")
             break
         else:
