@@ -49,7 +49,7 @@ def remove_continuation_line_mark(src):
         if line.endswith("&"):
             buf += line.replace("&", "")
         else:
-            lines.append(buf + line + "\n")
+            lines.append(buf + line.replace('&','') + "\n")
             buf = ""
     return lines
 

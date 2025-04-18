@@ -1797,5 +1797,7 @@ set (src
 include(modi.cmake)
 
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
-ecbuild_find_package(netcdf COMPONENTS REQUIRED)
-ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_sp netcdf)
+#ecbuild_find_package(netcdf COMPONENTS REQUIRED)
+
+ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_sp )
+target_include_directories(libsurfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/netcdf-c-4.9.2/include/")
