@@ -3,6 +3,7 @@ find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CUR
 project(surfex VERSION 1)
 enable_language(Fortran)
 set (src
+	"eggangles.F90"
 	"ASSIM/add_noise.F90"
 	"ASSIM/assim_dist_field.F90"
 	"ASSIM/assim_extrapolate_field.F90"
@@ -24,10 +25,10 @@ set (src
 	"ASSIM/get_iok_assim.F90"
 	"ASSIM/ini_assim.F90"
 	"ASSIM/modd_assim.F90"
-	#"ASSIM/mode_assim_read_field_ascii.F90"
+	"ASSIM/mode_assim_read_field_ascii.F90"
 	"ASSIM/mode_assim_read_field_ascllv.F90"
 	"ASSIM/mode_assim_read_field_fa.F90"
-	#"ASSIM/mode_ekf.F90"
+	"ASSIM/mode_ekf.F90"
 	"ASSIM/mode_random.F90"
 	"ASSIM/modn_assim.F90"
 	"ASSIM/oi_acsolw.F90"
@@ -1793,5 +1794,10 @@ set (src
 	"TRIP/trip_xios_init.F90"
 )
 
-ecbuild_find_package(fiat REQUIRED)
-ecbuild_add_library(TARGET libsurfex SOURCES ${src} TYPE STATIC PUBLIC_LIBS fiat)
+include(modi.cmake)
+
+ecbuild_find_package(fiat COMPONENTS REQUIRED)
+if(NOT fiat_FOUND)
+	message(STATUS "fiat n'a pas été trouve")
+endif()
+ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_sp)

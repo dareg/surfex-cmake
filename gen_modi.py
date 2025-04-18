@@ -4,29 +4,93 @@ import sys
 import re
 from pathlib import Path
 
+pattern_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 pattern_sub_name = re.compile(r"^\s*SUBROUTINE (\w+)", re.IGNORECASE)
+pattern_func_name = re.compile(r"^\s*FUNCTION (\w+)", re.IGNORECASE)
 pattern_end_of_decl = re.compile(r"^\s*if", re.IGNORECASE)
+reg_continuation_line = re.compile(r"&\s*$")
+
+all_decl_regex = [
+    r"^\s*$",
+    r"^\s*!",
+    r"^\s*SUBROUTINE ",
+    r"^\s*FUNCTION ",
+    r"^\s* ",
+    r"^\s*INTEGER\s*[\(*,:\s]",
+    r"^\s*REAL\s*[\(*,:\s]",
+    r"^\s*DOUBLE PRECISION\s*[\(*,:\s]",
+    r"^\s*CHARACTER\s*[\(*,:\s]",
+    r"^\s*LOGICAL\s*[\(*,:\s]",
+    r"^\s*TYPE\s*\(",
+    r"^\s*USE ",
+    r"^\s*#",
+    r"^\s*IMPLICIT NONE",
+]
+
+reg_is_still_decl = re.compile("|".join(x for x in all_decl_regex), re.IGNORECASE)
+
+
+def need_modi(f90):
+    if f90.name.startswith("modi_"):
+        return False
+    src = open(f90, "r")
+    for line in src:
+        matches = pattern_module.match(line)
+        if matches:
+            return False
+    return True
+
+
+def remove_continuation_line_mark(src):
+    lines = []
+    buf = ""
+    for line in src:
+        line = line.strip()
+        if line.endswith("&"):
+            buf += line.replace("&", "")
+        else:
+            lines.append(buf + line + "\n")
+            buf = ""
+    return lines
 
 
 def gen_modi(f90):
     src = open(f90, "r")
     modi_path = f90.parent / Path("modi_" + str(f90.name))
-    modi = open(modi_path, "w")
     sub_name = ""
-    for line in src:
+    func_or_sub = ""
+    lines = remove_continuation_line_mark(src)
+    ending = ""
+    modi_lines = []
+    for line in lines:
         if not sub_name:
             matches = pattern_sub_name.match(line)
             if matches:
+                ending = "END SUBROUTINE"
                 sub_name = matches.group(1)
-                modi.write(f"MODULE MODI_{sub_name}\nCONTAINS\n")
+            matches = pattern_func_name.match(line)
+            if matches:
+                ending = "END FUNCTION"
+                sub_name = matches.group(1)
 
-        matches = pattern_end_of_decl.match(line)
-        if matches:
-            modi.write(f"END MODULE MODI_{sub_name}\n")
-            return
+            if ending:
+                modi_lines.append(f"MODULE MODI_{sub_name}\nCONTAINS\n")
+
+        matches = reg_is_still_decl.match(line)
+        if not matches:
+            # print("end of decl", line)
+            modi_lines.append(f"{ending} {sub_name}\n")
+            modi_lines.append(f"END MODULE MODI_{sub_name}\n")
+            break
         else:
-            modi.write(line)
+            modi_lines.append(line)
+
+    # remove_dangling_ifdef(modi_lines)
+    modi = open(modi_path, "w")
+    modi.write("".join(modi_lines))
 
 
-for file in sys.argv[1:]:
-    gen_modi(Path(file))
+for arg in sys.argv[1:]:
+    file = Path(arg)
+    if need_modi(file):
+        gen_modi(file)
