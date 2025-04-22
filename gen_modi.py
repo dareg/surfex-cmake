@@ -8,6 +8,8 @@ reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 reg_continuation_line = re.compile(r"&\s*$")
 reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
 reg_starts_with_ifdef = re.compile(r"^#ifdef|#if\s+defined|#ifndef", re.IGNORECASE)
+reg_use_module_only = re.compile(r"(?:^\s*use\s+\w+\s*,\s*only\s*:)(.*)", re.IGNORECASE)
+reg_use_module = re.compile(r"^\s*use\s+\w+", re.IGNORECASE)
 
 all_decl_regex = [
     r"^\s*$",
@@ -49,8 +51,8 @@ def simplify_code(src):
         line = line.strip()
         if line.startswith("!"):
             continue
-        if '!' in line:
-            line=line.split('!')[0].strip()
+        if "!" in line:
+            line = line.split("!")[0].strip()
         if line.endswith("&"):
             buf += line.replace("&", "")
         else:
@@ -67,6 +69,35 @@ def remove_dangling_ifdef(lines):
         if line.startswith("#endif"):
             ifdef.pop()
     for idx in reversed(ifdef):
+        lines.pop(idx)
+
+
+def remove_unsed_modules(lines):
+    use_only = {}  # line_idx -> "use only" values
+    to_rm = []  # list of lines with used module without an only clause
+    for idx, line in enumerate(lines):
+        matches = reg_use_module_only.match(line)
+        if matches:
+            use_only[idx] = [v.strip() for v in matches.group(1).split(",")]
+        else:
+            matches = reg_use_module.match(line)
+            if matches:
+                to_rm.append(idx)
+
+    for key, values in use_only.items():
+        at_least_one_found = False
+        for val in values:
+            for line in lines:
+                if not reg_use_module_only.match(line):
+                    if val in line:
+                        at_least_one_found = True
+                        break
+            if at_least_one_found:
+                break
+        if not at_least_one_found:
+            to_rm.append(key)
+
+    for idx in reversed(sorted(to_rm)):
         lines.pop(idx)
 
 
@@ -96,6 +127,7 @@ def gen_modi(f90):
             modi_lines.append(line)
 
     remove_dangling_ifdef(modi_lines)
+    remove_unsed_modules(modi_lines)
     modi = open(modi_path, "w")
     modi.write("".join(modi_lines))
 
