@@ -49,6 +49,8 @@ def simplify_code(src):
         line = line.strip()
         if line.startswith("!"):
             continue
+        if '!' in line:
+            line=line.split('!')[0].strip()
         if line.endswith("&"):
             buf += line.replace("&", "")
         else:
