@@ -7,29 +7,38 @@ from pathlib import Path
 reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 reg_continuation_line = re.compile(r"&\s*$")
 reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
+reg_sub_func_args = re.compile(r"\(([\w\s,]+)\)")
+reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)")
 reg_starts_with_ifdef = re.compile(r"^#ifdef|#if\s+defined|#ifndef", re.IGNORECASE)
 reg_use_module_only = re.compile(r"(?:^\s*use\s+\w+\s*,\s*only\s*:)(.*)", re.IGNORECASE)
 reg_use_module = re.compile(r"^\s*use\s+\w+", re.IGNORECASE)
+reg_variable_name_simple = re.compile(r"::\s*(\w+)")
 
-all_decl_regex = [
-    r"^\s*$",
-    r"^\s*!",
-    r"^\s*SUBROUTINE ",
-    r"^\s*FUNCTION ",
-    r"^\s* ",
+all_decl_variable_regex = [
     r"^\s*INTEGER\s*[\(*,:\s]",
     r"^\s*REAL\s*[\(*,:\s]",
     r"^\s*DOUBLE PRECISION\s*[\(*,:\s]",
     r"^\s*CHARACTER\s*[\(*,:\s]",
     r"^\s*LOGICAL\s*[\(*,:\s]",
     r"^\s*TYPE\s*\(",
+]
+all_decl_regex = [
+    r"^\s*$",
+    r"^\s*!",
+    r"^\s*SUBROUTINE ",
+    r"^\s*FUNCTION ",
+    r"^\s* ",
     r"^\s*USE ",
     r"^\s*#",
     r"^\s*IMPLICIT NONE",
     r"^\s*include ",
+    *all_decl_variable_regex,
 ]
 
 reg_is_still_decl = re.compile("|".join(x for x in all_decl_regex), re.IGNORECASE)
+reg_is_variable_decl = re.compile(
+    "|".join(x for x in all_decl_variable_regex), re.IGNORECASE
+)
 
 
 def is_modi_needed(f90):
@@ -109,6 +118,7 @@ def gen_modi(f90):
     lines = simplify_code(src)
     ending = ""
     modi_lines = []
+    args = []
     for line in lines:
         if not sub_name:
             matches = reg_sub_func_name.match(line)
@@ -117,14 +127,32 @@ def gen_modi(f90):
                 ending = f"END {matches.group(1)} {sub_name}"
                 modi_lines.append(f"MODULE MODI_{sub_name}\nCONTAINS\n")
 
+                # check that the subroutines has argument and if so retrieve them
+                matches = reg_sub_func_args.search(line)
+                if matches:
+                    args = [arg.strip() for arg in matches.group(1).split(",")]
+
+                # if it's a function, retrieve result
+                matches = reg_func_result.search(line)
+                if matches:
+                    args.append(matches.group(1).strip())
+
         matches = reg_is_still_decl.match(line)
         if not matches:
-            # print("end of decl", line)
             modi_lines.append(f"{ending}\n")
             modi_lines.append(f"END MODULE MODI_{sub_name}\n")
             break
-        else:
-            modi_lines.append(line)
+        if reg_is_variable_decl.match(line) and "INTENT" not in line:
+            # if there are no intent, it might be a local variable
+            # but sometimes the intent is missing, so we check also
+            # if it's not in the list of arguments, it can also be the result of a function
+            matches = reg_variable_name_simple.search(line)
+            if matches:
+                var_name = matches.group(1)
+                if var_name not in args:
+                    continue
+
+        modi_lines.append(line)
 
     remove_dangling_ifdef(modi_lines)
     remove_unsed_modules(modi_lines)
