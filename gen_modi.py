@@ -41,15 +41,18 @@ def is_modi_needed(f90):
     return True
 
 
-def remove_continuation_line_mark(src):
+def simplify_code(src):
+    """Remove continuation lines and comments"""
     lines = []
     buf = ""
     for line in src:
         line = line.strip()
+        if line.startswith("!"):
+            continue
         if line.endswith("&"):
             buf += line.replace("&", "")
         else:
-            lines.append(buf + line.replace('&','') + "\n")
+            lines.append(buf + line.replace("&", "") + "\n")
             buf = ""
     return lines
 
@@ -70,7 +73,7 @@ def gen_modi(f90):
     modi_path = f90.parent / Path("modi_" + str(f90.name))
     sub_name = ""
     func_or_sub = ""
-    lines = remove_continuation_line_mark(src)
+    lines = simplify_code(src)
     ending = ""
     modi_lines = []
     for line in lines:
