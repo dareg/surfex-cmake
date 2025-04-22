@@ -58,6 +58,8 @@ def simplify_code(src):
     buf = ""
     for line in src:
         line = line.strip()
+        if not line.startswith("#"):
+            line = line.upper()
         if line.startswith("!"):
             continue
         if "!" in line:
