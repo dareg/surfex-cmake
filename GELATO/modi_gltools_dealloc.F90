@@ -77,7 +77,7 @@
 !
 SUBROUTINE gltools_dealloc(tpglt,nnflxin,noutlu,ntd,lwg)
 !
-USE modd_types_glt 
+USE modd_types_glt, only: t_glt
 #if ! defined in_surfex
 USE modd_CB_DynVariables
 USE modd_CB_DynDim

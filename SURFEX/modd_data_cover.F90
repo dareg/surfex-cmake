@@ -42,7 +42,7 @@
 !
 !*       0.   DECLARATIONS
 !             ------------
-USE MODD_TYPE_DATE_SURF      
+USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 IMPLICIT NONE
 !

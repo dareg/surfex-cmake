@@ -37,7 +37,7 @@ SUBROUTINE PREP_SNOW_UNIF(KLUOUT,HSURF,PFIELD, TPTIME,  &
 !!      2012-11-19 M. Lafaysse initialization of liquid water content
 !!------------------------------------------------------------------
 !
-USE MODD_TYPE_DATE_SURF, ONLY : DATE_TIME
+USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_SURF_PAR,       ONLY : XUNDEF
 USE MODD_PREP,           ONLY : CINTERP_TYPE

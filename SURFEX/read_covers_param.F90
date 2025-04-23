@@ -43,7 +43,7 @@
 !*    0.     DECLARATION
 !            -----------
 
-USE MODD_TYPE_DATE_SURF
+USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_TOWN, XDATA_NATURE, XDATA_SEA, XDATA_WATER,   &
                                   XDATA_VEGTYPE, XDATA_LAI, XDATA_H_TREE,           &

@@ -91,7 +91,7 @@ SUBROUTINE gltools_outdia  &
           cdiafmt,cinsfld,                                          &
           pwgt)
 !  
-  USE modd_types_glt
+  USE modd_types_glt, only: t_ind, t_def, t_dom
   USE modd_glt_const_thm
   USE modi_gltools_strlower
   USE modi_gltools_wriios

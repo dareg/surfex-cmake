@@ -44,7 +44,7 @@
 !*       0.    DECLARATIONS
 !              ------------
 !
-USE MODD_TYPE_SNOW
+USE MODD_TYPE_SNOW, ONLY: SURF_SNOW
 !
 USE YOMHOOK   ,ONLY : LHOOK,   DR_HOOK, JPHOOK
 !

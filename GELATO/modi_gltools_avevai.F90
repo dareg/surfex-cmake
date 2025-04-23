@@ -83,7 +83,7 @@ SUBROUTINE gltools_avevai  &
 gelato_leadproc,gelato_myrank,n0valu,n2valu,noutlu,nx,nxglo,ny,nyglo,&
 dtt,dttave,lwg,pwgt)
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_ind, t_def
   USE modd_glt_const_thm
   USE modi_gltools_strlower
 #if ! defined in_surfex

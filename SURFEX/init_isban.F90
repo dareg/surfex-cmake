@@ -73,7 +73,7 @@ USE MODD_DST_n, ONLY : DST_NP_t
 USE MODD_SLT_n, ONLY : SLT_t
 USE MODD_SV_n, ONLY : SV_t
 !
-USE MODD_TYPE_DATE_SURF, ONLY : DATE
+USE MODD_TYPE_DATE_SURF, ONLY: DATE_TIME
 !
 USE MODD_DATA_COVER,     ONLY : XDATA_LAI, XDATA_H_TREE,                          &
                                 XDATA_ALBNIR_VEG, XDATA_ALBVIS_VEG,               &

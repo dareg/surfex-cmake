@@ -31,7 +31,7 @@ SUBROUTINE MKFLAG_SNOW(TPSNOW)
 !!     P. Samuelsson 10/2014 Additional snow albedos
 !!------------------------------------------------------------------
 !
-USE MODD_TYPE_SNOW
+USE MODD_TYPE_SNOW, ONLY: SURF_SNOW
 USE MODD_SURF_PAR,   ONLY : XUNDEF
 USE MODD_PREP_SNOW,   ONLY : NIMPUR
 !

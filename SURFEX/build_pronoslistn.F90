@@ -36,7 +36,7 @@ USE MODI_CH_OPEN_INPUTB
 !!    IMPLICIT ARGUMENTS
 !!    ------------------
 USE MODD_SURFEX_OMP, ONLY : NBLOCK
-USE MODD_TYPE_EFUTIL
+USE MODD_TYPE_EFUTIL, only :PRONOSVAR_T
 !------------------------------------------------------------------------------
 !
 !*       0.   DECLARATIONS
