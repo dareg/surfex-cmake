@@ -105,7 +105,7 @@ SUBROUTINE glt_vhdiff_r  &
         ygltvhd )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt, only: t_dom, t_sit, t_dia
+  USE modd_types_glt, only: t_dom, t_sit, t_dia, t_vtp
   USE modi_gltools_temper_r
   USE mode_gltools_enthalpy
   USE modi_glt_vhdslab_r

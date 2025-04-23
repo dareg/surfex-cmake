@@ -115,7 +115,7 @@
 SUBROUTINE glt_updtfl( hflag,tpmxl,tptfl,pdmass,ncdlssh,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc,pent,psalt )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt, t_mxl, t_tfl
+  USE modd_types_glt, only: t_mxl, t_tfl
   USE modi_glt_salflx
 !
   IMPLICIT NONE

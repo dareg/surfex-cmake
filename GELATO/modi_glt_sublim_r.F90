@@ -96,7 +96,7 @@
 !
 SUBROUTINE glt_sublim_r(tpmxl,tpblki,tpsit,tpsil,tptfl,tpdia,&
         ncdlssh,nilay,nslay,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc,sf3tinv)
-  USE modd_types_glt, only: t_mxl, t_sit, t_vtp, t_tfl, t_dia
+  USE modd_types_glt, only: t_mxl, t_sit, t_vtp, t_tfl, t_dia, t_blk
   USE modd_glt_const_thm
   USE modi_glt_updtfl_r
   USE mode_gltools_enthalpy

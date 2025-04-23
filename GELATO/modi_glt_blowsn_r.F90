@@ -96,7 +96,7 @@ SUBROUTINE glt_blowsn_r(tpmxl,tpsil,tptfl,tpsit,&
         ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,nx,ny,dtt,rn_htopoc )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt, t_mxl, t_vtp, t_tfl, t_sit
+  USE modd_types_glt, only: t_mxl, t_vtp, t_tfl, t_sit
   USE modi_glt_updtfl_r
 !
   IMPLICIT NONE

@@ -129,7 +129,7 @@ SUBROUTINE glt_thermo  &
 ! ------------------------
 !
   USE modd_glt_const_thm
-  USE modd_types_glt, t_dom, t_mxl, t_atm, t_blk, t_bud, t_tfl, t_vtp, t_sit
+  USE modd_types_glt, only: t_dom, t_mxl, t_atm, t_blk, t_bud, t_tfl, t_vtp, t_sit, t_dia
   USE mode_glt_stats
   USE mode_glt_stats_r
   USE modi_glt_thermo_r
