@@ -1796,11 +1796,44 @@ set (src
 
 include(modi.cmake)
 
+
+ecbuild_add_option( FEATURE DOUBLE_PRECISION
+										DEFAULT OFF
+                    DESCRIPTION "Support for Double Precision" )
+
+ecbuild_add_option( FEATURE SINGLE_PRECISION
+										DEFAULT OFF
+                    DESCRIPTION "Support for Single Precision" )
+
+
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
 #ecbuild_find_package(netcdf COMPONENTS REQUIRED)
+find_package(MPI REQUIRED)
 
-ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_sp )
-target_include_directories(libsurfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/netcdf-c-4.9.2/include/")
+ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran)
+
+if(${HAVE_DOUBLE_PRECISION})
+	ecbuild_add_fortran_flags( "-r8" )
+	target_link_libraries(libsurfex PUBLIC parkind_dp)
+else()
+	target_link_libraries(libsurfex PUBLIC parkind_sp)
+endif()
+
+target_include_directories(libsurfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1//include/")
+target_include_directories(libsurfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/include/")
+#target_include_directories(libsurfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/netcdf-c-4.9.2/include/")
+#target_include_directories(libsurfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/eccodes-2.38.3/include/")
 target_compile_definitions(libsurfex PUBLIC in_surfex)
-#target_compile_definitions(libsurfex PUBLIC SFX_FA)
+target_compile_definitions(libsurfex PUBLIC SFX_ARO)
+target_compile_definitions(libsurfex PUBLIC SFX_ASC)
+target_compile_definitions(libsurfex PUBLIC SFX_OL)
+target_compile_definitions(libsurfex PUBLIC SFX_TXT)
+target_compile_definitions(libsurfex PUBLIC SFX_FA)
 #target_compile_definitions(libsurfex PUBLIC SFX_LFI)
+target_compile_definitions(libsurfex PUBLIC ARO)
+target_compile_definitions(libsurfex PUBLIC OL)
+target_compile_definitions(libsurfex PUBLIC ASC)
+target_compile_definitions(libsurfex PUBLIC TXT)
+target_compile_definitions(libsurfex PUBLIC FA)
+target_compile_definitions(libsurfex PUBLIC LFI)
+
