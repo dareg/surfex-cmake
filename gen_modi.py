@@ -30,7 +30,7 @@ all_decl_regex = [
     r"^\s*SUBROUTINE ",
     r"^\s*FUNCTION ",
     r"^\s* ",
-    r"^\s*USE ",
+    r"^\s*USE[,\s]",
     r"^\s*#",
     r"^\s*IMPLICIT NONE",
     r"^\s*include ",
