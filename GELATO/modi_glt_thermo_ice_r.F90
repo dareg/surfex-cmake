@@ -133,7 +133,7 @@ SUBROUTINE glt_thermo_ice_r  &
 !
 ! 1.1. Module declarations
 ! ------------------------
-  USE modd_types_glt
+  USE modd_types_glt, t_blk, t_dom, t_mxl, t_atm, t_bud, t_dia, t_sit, t_tfl, t_vtp
   USE modd_glt_const_thm
   USE modi_glt_vhdiff_r
 !  USE modi_glt_swabs_r

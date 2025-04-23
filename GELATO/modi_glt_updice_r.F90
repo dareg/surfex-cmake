@@ -83,7 +83,7 @@ SUBROUTINE glt_updice_r  &
   ( kinit,omsg,tpdom,tpsit,psalt_a,pice_a,&
   noutlu,np,nt,dtt,xdomsrf_r,lwg,tptfl,pemps_a,psalf_a)
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_tfl, t_sit
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r

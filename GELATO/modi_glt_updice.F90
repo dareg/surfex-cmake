@@ -83,7 +83,7 @@ SUBROUTINE glt_updice  &
     dtt,xdomsrf_g,                                              &
     lwg)
 !
-  USE modd_types_glt
+  USE modd_types_glt, t_dom, t_tfl, t_sit
   USE modd_glt_const_thm
   USE mode_glt_stats
   USE mode_glt_info

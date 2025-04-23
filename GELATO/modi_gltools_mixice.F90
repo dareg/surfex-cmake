@@ -94,7 +94,7 @@
 SUBROUTINE gltools_mixice(tpmxl,tplsit,tplsil,tpsit,tpsil,&
 niceage,nicesal,nilay,nmponds,nl,nt,nx,ny )
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_sit, t_vtp
   USE modd_glt_const_thm
 !
   IMPLICIT NONE

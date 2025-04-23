@@ -102,7 +102,7 @@
 SUBROUTINE glt_saltrap_r  &
   ( gfreeze,phef,ptem,tpmxl,psalt,pent,phsi,np,dtt )
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl
   USE modd_glt_const_thm
   USE mode_gltools_enthalpy
   USE mode_gltools_sigma

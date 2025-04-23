@@ -99,7 +99,7 @@ SUBROUTINE glt_lmltsi_r  &
         ( tpmxl,tpsil,tpsit,tpdia,tptfl,&
         ncdlssh,niceage,nicesal,nilay,nl,nleviti,nmponds,np,nsalflx,nslay,nt,dtt,rn_htopoc,xlmelt,sf3t ) 
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_vtp, t_sit, t_dia, t_tfl
   USE modi_glt_updtfl_r
 !
   IMPLICIT NONE

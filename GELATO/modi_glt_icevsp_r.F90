@@ -83,7 +83,7 @@ SUBROUTINE glt_icevsp_r( tpsit,pvsp,&
   nilay,nl,np,nt,height,sf3tinv )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_sit
 !
   IMPLICIT NONE
 !

@@ -100,7 +100,7 @@
 SUBROUTINE glt_sndmlrf( pbathy,tpdom,tpatc,tpml,tpdia,tpsit,tptfl,  &
   pustar,tpall_oce,&
   nadvect,ncdlssh,ndyncor,nleviti,nsalflx,nt,nx,ny,dtt,rn_htopoc )
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_atm, t_mxl, t_dia, t_sit, t_tfl, t_2oc
   USE modd_glt_const_thm
   USE modd_glt_const_evp
 #if ! defined in_surfex

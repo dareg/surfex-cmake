@@ -117,7 +117,7 @@ SUBROUTINE glt_updbud  &
   ( kinit,omsg,tpdom,tpmxl,tptfl,tpatm,tpblkw,tpblki,tpsit,tpsil,tpbud,&
     niceage,nicesal,nilay,nmponds,nl,noutlu,nprinto,nslay,nsnwrad,nt,nx,ny,dtt,xdomsrf_g,lp1,lp2,lp3,lwg,sf3tinv )
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_mxl, t_tfl, t_blk, t_sit, t_bud, t_vtp
   USE modd_glt_const_thm
   USE mode_glt_stats
   USE mode_glt_info

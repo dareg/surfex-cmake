@@ -72,7 +72,7 @@
 SUBROUTINE gltools_updaponds_r(np,nt,dtt,omelt,tpatm,tpblki,tpdia,tpsit,pasi)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_atm, t_blk, t_dia, t_sit
 !
   IMPLICIT NONE
 !

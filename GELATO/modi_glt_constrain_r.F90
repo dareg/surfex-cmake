@@ -94,7 +94,7 @@
 !
 SUBROUTINE glt_constrain_r(tpdom,tpmxl,tpsit,tpsil,tpdia,tpsit_d,&
     nilay,nslay,nl,noutlu,np,nt,ntd,dtt,xfsidmpeft,xfsimax,xhsidmpeft,xhsimin,lwg,ccsvdmp,cfsidmp,chsidmp,sf3tinv )
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_mxl, t_sit, t_vtp, t_dia, t_sit
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE modi_gltools_newice_r

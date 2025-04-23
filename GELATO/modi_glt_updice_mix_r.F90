@@ -79,7 +79,7 @@ SUBROUTINE glt_updice_mix_r  &
   ( kinit,intype, omsg,tpdom,tzsit,psalt_a,pice_a,&
   noutlu,np,nt,dtt,xdomsrf_r,lwg)
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_sit
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r

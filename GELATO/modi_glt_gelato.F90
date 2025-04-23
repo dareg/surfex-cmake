@@ -108,7 +108,7 @@ USE modd_glt_const_evp
 #endif
 !
 ! * Contains types_glt definitions.
-USE modd_types_glt 
+USE modd_types_glt, only: t_glt
 !
 ! * To send an error message
 USE modi_gltools_glterr

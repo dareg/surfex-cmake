@@ -106,7 +106,7 @@ niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nt,dtt,lp1,lwg,thick )
 ! 1.1. Module declarations
 ! -------------------------
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_mxl, t_sit, t_vtp
   USE modd_glt_const_thm
   USE modi_gltools_mixice_r
   USE modi_gltools_chkglo_r

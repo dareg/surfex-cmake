@@ -110,7 +110,7 @@ SUBROUTINE glt_updbud_r  &
     niceage,nicesal,nilay,nl,nmponds,noutlu,np,nprinto,nslay,nsnwrad,nt,  &
     dtt,xdomsrf_r,lp1,lp2,lp3,lwg,sf3tinv)
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom, t_mxl, t_atm, t_vtp, t_blk, t_bud, t_sit, t_tfl
   USE modd_glt_const_thm
   USE mode_glt_stats_r
   USE mode_glt_info_r

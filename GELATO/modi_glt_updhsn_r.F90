@@ -90,7 +90,7 @@ SUBROUTINE glt_updhsn_r( gsmelt,pdhmelt,tpmxl,tptfl,tpsit,tpsil,tpdia ,&
         ncdlssh,nl,nleviti,np,nsalflx,nt,dtt,rn_htopoc)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_tfl, t_sit, t_vtp, t_dia
   USE modi_glt_updtfl_r
   USE mode_gltools_enthalpy
 !

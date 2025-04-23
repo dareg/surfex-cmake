@@ -83,7 +83,7 @@
 FUNCTION gltools_adjflx(tpdom,ocrit,pfield,nx,ny,dtt)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_dom
 !
   IMPLICIT NONE
 !

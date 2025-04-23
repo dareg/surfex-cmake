@@ -77,7 +77,7 @@
 !
 SUBROUTINE gltools_alloc(tpglt,ndiamax,ndynami,nl,nnflxin,noutlu,nt,ntd,nx,ny,lp1)
 !
-USE modd_types_glt 
+USE modd_types_glt, only: t_glt
 #if ! defined in_surfex
 USE modd_CB_DynVariables
 USE modd_CB_DynDim

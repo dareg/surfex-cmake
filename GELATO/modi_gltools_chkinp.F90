@@ -88,7 +88,7 @@ SUBROUTINE gltools_chkinp(kdate,tpglt,&
         n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavinp,nsavlu,&
         nt,ntd,nx,nxglo,ny,nyglo,xdomsrf_g,lwg,ciopath )
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_glt
   USE modi_gltools_nwords
   USE modi_gltools_strsplit
   USE mode_gltools_wrivais

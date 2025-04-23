@@ -94,7 +94,7 @@ SUBROUTINE glt_snowice_r( tpmxl,tpsil,tptfl,tpsit,tpdia,&
    ncdlssh,nilay,nl,nleviti,np,nsalflx,nslay,nt,dtt,rn_htopoc,sf3tinv )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_vtp, t_tfl, t_sit, t_dia
   USE mode_gltools_enthalpy
   USE modi_glt_updtfl_r
 !

@@ -80,7 +80,7 @@
 !
 SUBROUTINE glt_inibud(tpbud)
 !
-  USE modd_types_glt
+  USE modd_types_glt, only: t_bud
 !
   IMPLICIT NONE 
 !

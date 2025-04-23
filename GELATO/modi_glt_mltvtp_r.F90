@@ -86,7 +86,7 @@ SUBROUTINE glt_mltvtp_r( pdhi,phsi,tpsil,&
        nilay,nl,np,nt,lp3,height,sf3tinv)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_vtp
   USE mode_glt_stats_r
   USE mode_gltools_interp
 !

@@ -80,7 +80,7 @@ SUBROUTINE glt_swabs_r  &
       nilay,nl,noutlu,np,nt,dtt,sf3tinv,lp1)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_sit
 !
   IMPLICIT NONE
 !

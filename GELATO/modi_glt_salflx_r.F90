@@ -100,7 +100,7 @@
 SUBROUTINE glt_salflx_r(pqsalt,tpmxl,tptfl,ncdlssh,np,nsalflx,nt,dtt,rn_htopoc,pdmass,psalt)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl, t_tfl
 !
   IMPLICIT NONE
 !

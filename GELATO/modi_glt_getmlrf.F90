@@ -73,7 +73,7 @@
 ! ----------------------- SUBROUTINE glt_getmlrf ----------------------------
 
 SUBROUTINE glt_getmlrf( tpoce_all,tpml,nx,ny )
-  USE modd_types_glt
+  USE modd_types_glt, only: t_mxl
   USE modd_glt_const_thm
   USE mode_gltools_sigma
   USE mode_gltools_swfrzt

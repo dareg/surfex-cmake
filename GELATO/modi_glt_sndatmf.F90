@@ -71,7 +71,7 @@
 ! ----------------------- SUBROUTINE glt_sndatmf ----------------------------
 
 SUBROUTINE glt_sndatmf(tpglt,nnflxin,alblc,xtmlf)
-  USE modd_types_glt
+  USE modd_types_glt, only: t_glt
   USE modd_glt_const_thm
 !USE MODI_ABOR1_SFX
 #if ! defined in_surfex

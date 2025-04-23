@@ -86,7 +86,7 @@ SUBROUTINE gltools_chkglo_r(omsg,tpdom,tpsit,&
         noutlu,np,nprinto,nt,lwg)
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_sit, t_dom
 #if ! defined in_arpege
   USE lib_mpp
 #endif

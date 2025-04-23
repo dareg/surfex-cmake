@@ -119,7 +119,7 @@ SUBROUTINE glt_updasn_r( gsmelt,tpatm,tpblki,pvsp,tpsit,tpdia,&
         nilay,nl,nmponds,np,nt,albimlt,albsdry,albsmlt,dtt )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_atm, t_blk, t_sit, t_dia
   USE modi_gltools_updaponds_r
 !
   IMPLICIT NONE

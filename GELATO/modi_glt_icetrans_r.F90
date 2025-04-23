@@ -115,7 +115,7 @@
 SUBROUTINE glt_icetrans_r(tpblki,tpmxl,tptfl,tpsit,tpdia,pswtra,nilay,nl,np,nt,depth )
 !
   USE modd_glt_const_thm
-  USE modd_types_glt
+  USE modd_types_glt, only: t_blk, t_mxl, t_tfl, t_sit, t_dia
 !
   IMPLICIT NONE
 !
