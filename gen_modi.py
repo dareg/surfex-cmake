@@ -154,7 +154,7 @@ def gen_modi(f90):
             matches = reg_variable_name_simple.search(line)
             if matches:
                 var_name = matches.group(1)
-                if var_name not in args:
+                if var_name not in args and var_name != sub_name:
                     continue
 
         modi_lines.append(line)
