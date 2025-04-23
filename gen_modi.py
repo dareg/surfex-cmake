@@ -129,7 +129,7 @@ def gen_modi(f90):
             if matches:
                 sub_name = matches.group(2)
                 ending = f"END {matches.group(1)} {sub_name}"
-                modi_lines.append(f"MODULE MODI_{sub_name}\nCONTAINS\n")
+                modi_lines.append(f"MODULE MODI_{sub_name}\nINTERFACE\n")
 
                 # check that the subroutines has argument and if so retrieve them
                 matches = reg_sub_func_args.search(line)
@@ -144,6 +144,7 @@ def gen_modi(f90):
         matches = reg_is_still_decl.match(line)
         if not matches:
             modi_lines.append(f"{ending}\n")
+            modi_lines.append(f"END INTERFACE\n")
             modi_lines.append(f"END MODULE MODI_{sub_name}\n")
             break
         if reg_is_variable_decl.match(line) and "INTENT" not in line:
