@@ -23,6 +23,7 @@ all_decl_variable_regex = [
     r"^\s*CHARACTER\s*[\(*,:\s]",
     r"^\s*LOGICAL\s*[\(*,:\s]",
     r"^\s*TYPE\s*\(",
+    r"^\s*CLASS\s*\(",
 ]
 all_decl_regex = [
     r"^\s*$",
