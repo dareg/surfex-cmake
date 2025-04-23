@@ -7,12 +7,14 @@ from pathlib import Path
 reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 reg_continuation_line = re.compile(r"&\s*$")
 reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
-reg_sub_func_args = re.compile(r"\(([\w\s,]+)\)")
-reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)")
-reg_starts_with_ifdef = re.compile(r"^#ifdef|#if\s+defined|#ifndef", re.IGNORECASE)
+reg_sub_func_args = re.compile(r"\(([\w\s,]+)\)", re.IGNORECASE)
+reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)", re.IGNORECASE)
+reg_starts_with_ifdef = re.compile(
+    r"^#ifdef|#if\s+defined|#if\s+!\s*defined|#ifndef", re.IGNORECASE
+)
 reg_use_module_only = re.compile(r"(?:^\s*use\s+\w+\s*,\s*only\s*:)(.*)", re.IGNORECASE)
 reg_use_module = re.compile(r"^\s*use\s+\w+", re.IGNORECASE)
-reg_variable_name_simple = re.compile(r"::\s*(\w+)")
+reg_variable_name_simple = re.compile(r"::\s*(\w+)", re.IGNORECASE)
 
 all_decl_variable_regex = [
     r"^\s*INTEGER\s*[\(*,:\s]",
@@ -42,8 +44,6 @@ reg_is_variable_decl = re.compile(
 
 
 def is_modi_needed(f90):
-    if f90.name.startswith("modi_"):
-        return False
     src = open(f90, "r")
     for line in src:
         matches = reg_module.match(line)
@@ -62,7 +62,9 @@ def simplify_code(src):
             line = line.upper()
         if line.startswith("!"):
             continue
-        if "!" in line:
+        if "!" in line and not line.startswith("#"):
+            # When '!' is in the middle of a line, most of the time what follow it is comment.
+            # But sometimes, it is a negation in an ifdef, see: #if ! defined foo
             line = line.split("!")[0].strip()
         if line.endswith("&"):
             buf += line.replace("&", "")
@@ -114,7 +116,7 @@ def remove_unsed_modules(lines):
 
 def gen_modi(f90):
     src = open(f90, "r")
-    modi_path = f90.parent / Path("modi_" + str(f90.name))
+    modi_path = Path("modi/modi_" + str(f90.name))
     sub_name = ""
     func_or_sub = ""
     lines = simplify_code(src)
