@@ -99,27 +99,33 @@ def remove_dangling_ifdef(lines):
 
 def remove_unsed_modules(lines):
     use_only = {}  # line_idx -> "use only" values
-    to_rm = []  # list of lines with used module without an only clause
-    for idx, line in enumerate(lines):
-        matches = reg_use_module_only.match(line)
-        if matches:
-            use_only[idx] = [v.strip() for v in matches.group(1).split(",")]
-        else:
-            if line.startswith("USE "):
-                to_rm.append(idx)
+    # list of lines with used module without an only clause,
+    # or imported value that are not used in the procedure signature
+    to_rm = []
 
-    for key, values in use_only.items():
+    # Retrieve all explicitly imported values (eg. use foo, only: stuff)
+    # If there is no 'only' clause, the line is mark for deletion
+    for idx, line in enumerate(lines):
+        if line.startswith("USE "):
+            if "ONLY" not in line:
+                to_rm.append(idx)
+            else:
+                matches = reg_use_module_only.match(line)
+                use_only[idx] = [v.strip() for v in matches.group(1).split(",")]
+
+    # Mark for removal all lines that don't have at least one imported value in a variable declaration
+    for idx, values in use_only.items():
         at_least_one_found = False
         for val in values:
             for line in lines:
-                if not reg_use_module_only.match(line):
+                if reg_is_variable_decl.match(line):
                     if val in line:
                         at_least_one_found = True
                         break
             if at_least_one_found:
                 break
         if not at_least_one_found:
-            to_rm.append(key)
+            to_rm.append(idx)
 
     for idx in reversed(sorted(to_rm)):
         lines.pop(idx)
