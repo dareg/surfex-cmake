@@ -62,6 +62,8 @@ def simplify_code(src):
     buf = ""
     for line in src:
         line = line.strip()
+        while "  " in line:
+            line = line.replace("  ", " ")
         if not line.startswith("#"):
             line = line.upper()
         if line.startswith("!"):
