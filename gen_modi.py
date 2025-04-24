@@ -57,7 +57,7 @@ def simplify_code(src):
             continue
         while "  " in line:
             line = line.replace("  ", " ")
-        if not line.startswith("#"):
+        if not line.startswith("#") and not line.startswith("INCLUDE "):
             line = line.upper()
         if "!" in line and not line.startswith("#"):
             # When '!' is in the middle of a line, most of the time what follow it is comment.
