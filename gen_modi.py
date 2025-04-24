@@ -44,6 +44,7 @@ reg_is_variable_decl = re.compile(
 
 
 def is_modi_needed(f90):
+    # If a module is declared in the file, then no interface is needed
     src = open(f90, "r")
     for line in src:
         matches = reg_module.match(line)
@@ -53,6 +54,7 @@ def is_modi_needed(f90):
 
 
 def simplify_code(src):
+    # Remove comments, remove double spaces, join lines using continuation marker (&)
     """Remove continuation lines and comments"""
     lines = []
     buf = ""
@@ -131,41 +133,48 @@ def remove_unsed_modules(lines):
         lines.pop(idx)
 
 
+def get_proc_signature(line):
+    # Retrieve type of procedure, name, arguments (with result if any)
+    matches = reg_proc_name.match(line)
+    proc_type = matches.group(1)
+    proc_name = matches.group(2)
+
+    proc_args = []
+    matches = reg_proc_args.search(line)
+    if matches:
+        proc_args = [arg.strip() for arg in matches.group(1).split(",")]
+
+    if proc_type == "FUNCTION":
+        matches = reg_func_result.search(line)
+        if matches:
+            proc_args.append(matches.group(1).strip())
+
+    return proc_type, proc_name, proc_args
+
+
 def gen_modi(f90):
     src = open(f90, "r")
     lines = simplify_code(src)
     remove_contained_procedures(lines)
-    proc_name = ""
-    ending = ""
+
     modi_lines = []
-    args = []
+    proc_type = ""
+    proc_name = ""
+    proc_args = []
     for line in lines:
         if not proc_name:
-            matches = reg_proc_name.match(line)
-            if matches:
-                proc_name = matches.group(2)
-                ending = f"END {matches.group(1)} {proc_name}"
+            if line.startswith("SUBROUTINE ") or line.startswith("FUNCTION "):
+                proc_type, proc_name, proc_args = get_proc_signature(line)
                 modi_lines.append(f"MODULE MODI_{proc_name}\nINTERFACE\n")
-
-                # check that the subroutines has argument and if so retrieve them
-                matches = reg_proc_args.search(line)
-                if matches:
-                    args = [arg.strip() for arg in matches.group(1).split(",")]
-
-                # if it's a function, retrieve result
-                matches = reg_func_result.search(line)
-                if matches:
-                    args.append(matches.group(1).strip())
 
         matches = reg_is_still_decl.match(line)
         if not matches and proc_name:
-            modi_lines.append(f"{ending}\n")
+            modi_lines.append(f"END {proc_type} {proc_name}\n")
             modi_lines.append(f"END INTERFACE\n")
             modi_lines.append(f"END MODULE MODI_{proc_name}\n")
             proc_name = ""
-            ending = ""
-            args = []
             continue
+
         if proc_name and reg_is_variable_decl.match(line) and "INTENT" not in line:
             # if there are no intent, it might be a local variable
             # but sometimes the intent is missing, so we check also
@@ -173,7 +182,7 @@ def gen_modi(f90):
             matches = reg_variable_name_simple.search(line)
             if matches:
                 var_name = matches.group(1)
-                if var_name not in args and var_name != proc_name:
+                if var_name not in proc_args and var_name != proc_name:
                     continue
 
         if proc_name:
