@@ -5,12 +5,8 @@ import re
 from pathlib import Path
 
 reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
-reg_continuation_line = re.compile(r"&\s*$")
-reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
-reg_sub_func_end_name = re.compile(
-    r"^\s*END\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE
-)
-reg_sub_func_args = re.compile(r"\(([\w\s,]+)\)", re.IGNORECASE)
+reg_proc_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
+reg_proc_args = re.compile(r"\(([\w\s,]+)\)", re.IGNORECASE)
 reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)", re.IGNORECASE)
 reg_starts_with_ifdef = re.compile(
     r"^#ifdef|#if\s+defined|#if\s+!\s*defined|#ifndef", re.IGNORECASE
@@ -98,7 +94,7 @@ def remove_contained_procedures(lines):
 def remove_dangling_ifdef(lines):
     ifdef = []
     for idx, line in enumerate(lines):
-        if reg_starts_with_ifdef.match(line):
+        if line.startswith("#if"):
             ifdef.append(idx)
         if line.startswith("#endif"):
             ifdef.pop()
@@ -139,21 +135,20 @@ def gen_modi(f90):
     src = open(f90, "r")
     lines = simplify_code(src)
     remove_contained_procedures(lines)
-    sub_name = ""
-    func_or_sub = ""
+    proc_name = ""
     ending = ""
     modi_lines = []
     args = []
     for line in lines:
-        if not sub_name:
-            matches = reg_sub_func_name.match(line)
+        if not proc_name:
+            matches = reg_proc_name.match(line)
             if matches:
-                sub_name = matches.group(2)
-                ending = f"END {matches.group(1)} {sub_name}"
-                modi_lines.append(f"MODULE MODI_{sub_name}\nINTERFACE\n")
+                proc_name = matches.group(2)
+                ending = f"END {matches.group(1)} {proc_name}"
+                modi_lines.append(f"MODULE MODI_{proc_name}\nINTERFACE\n")
 
                 # check that the subroutines has argument and if so retrieve them
-                matches = reg_sub_func_args.search(line)
+                matches = reg_proc_args.search(line)
                 if matches:
                     args = [arg.strip() for arg in matches.group(1).split(",")]
 
@@ -163,25 +158,25 @@ def gen_modi(f90):
                     args.append(matches.group(1).strip())
 
         matches = reg_is_still_decl.match(line)
-        if not matches and sub_name:
+        if not matches and proc_name:
             modi_lines.append(f"{ending}\n")
             modi_lines.append(f"END INTERFACE\n")
-            modi_lines.append(f"END MODULE MODI_{sub_name}\n")
-            sub_name = ""
+            modi_lines.append(f"END MODULE MODI_{proc_name}\n")
+            proc_name = ""
             ending = ""
             args = []
             continue
-        if sub_name and reg_is_variable_decl.match(line) and "INTENT" not in line:
+        if proc_name and reg_is_variable_decl.match(line) and "INTENT" not in line:
             # if there are no intent, it might be a local variable
             # but sometimes the intent is missing, so we check also
             # if it's not in the list of arguments, it can also be the result of a function
             matches = reg_variable_name_simple.search(line)
             if matches:
                 var_name = matches.group(1)
-                if var_name not in args and var_name != sub_name:
+                if var_name not in args and var_name != proc_name:
                     continue
 
-        if sub_name:
+        if proc_name:
             modi_lines.append(line)
 
     remove_dangling_ifdef(modi_lines)
