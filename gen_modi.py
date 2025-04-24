@@ -48,7 +48,6 @@ def is_modi_needed(lines):
 
 def simplify_code(src):
     # Remove comments, remove double spaces, join lines using continuation marker (&)
-    """Remove continuation lines and comments"""
     lines = []
     buf = ""
     for line in src:
