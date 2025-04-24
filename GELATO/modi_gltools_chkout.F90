@@ -85,7 +85,7 @@
 SUBROUTINE gltools_chkout(    kdate,tpglt,&
         n0vilu,n2vilu,nnflxin,noutlu,nprinto,nsavlu,nsavout,nt,nx,nxglo,ny,nyglo,xdomsrf_g,lp1,lwg,ciopath )
 !
-  USE modd_types_glt, only: t_glt
+  USE modd_types_glt, only: t_glt, t_def
   USE modi_gltools_nwords
   USE modi_gltools_strsplit
   USE mode_gltools_wrivais
