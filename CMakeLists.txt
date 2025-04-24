@@ -1802,16 +1802,11 @@ ecbuild_add_option( FEATURE DOUBLE_PRECISION
 										DEFAULT OFF
                     DESCRIPTION "Support for Double Precision" )
 
-ecbuild_add_option( FEATURE SINGLE_PRECISION
-										DEFAULT OFF
-                    DESCRIPTION "Support for Single Precision" )
-
-
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
 #ecbuild_find_package(netcdf COMPONENTS REQUIRED)
 find_package(MPI REQUIRED)
 
-ecbuild_add_library(TARGET libsurfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran)
+ecbuild_add_library(TARGET surfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran)
 
 if(${HAVE_DOUBLE_PRECISION})
 	ecbuild_add_fortran_flags( "-r8" )
