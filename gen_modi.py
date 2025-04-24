@@ -4,18 +4,13 @@ import sys
 import re
 from pathlib import Path
 
-reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 reg_proc_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
 reg_proc_args = re.compile(r"\(([\w\s,]+)\)", re.IGNORECASE)
 reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)", re.IGNORECASE)
-reg_starts_with_ifdef = re.compile(
-    r"^#ifdef|#if\s+defined|#if\s+!\s*defined|#ifndef", re.IGNORECASE
-)
 reg_use_module_only = re.compile(r"(?:^\s*use\s+\w+\s*,\s*only\s*:)(.*)", re.IGNORECASE)
-reg_use_module = re.compile(r"^\s*use\s+\w+", re.IGNORECASE)
 reg_variable_name_simple = re.compile(r"::\s*(\w+)", re.IGNORECASE)
 
-all_decl_variable_regex = [
+reg_all_decl_variable = [
     r"^\s*INTEGER\s*[\(*,:\s]",
     r"^\s*REAL\s*[\(*,:\s]",
     r"^\s*DOUBLE PRECISION\s*[\(*,:\s]",
@@ -24,7 +19,7 @@ all_decl_variable_regex = [
     r"^\s*TYPE\s*\(",
     r"^\s*CLASS\s*\(",
 ]
-all_decl_regex = [
+reg_all_decl = [
     r"^\s*$",
     r"^\s*!",
     r"^\s*SUBROUTINE ",
@@ -34,21 +29,19 @@ all_decl_regex = [
     r"^\s*#",
     r"^\s*IMPLICIT NONE",
     r"^\s*include ",
-    *all_decl_variable_regex,
+    *reg_all_decl_variable,
 ]
 
-reg_is_still_decl = re.compile("|".join(x for x in all_decl_regex), re.IGNORECASE)
+reg_is_still_decl = re.compile("|".join(x for x in reg_all_decl), re.IGNORECASE)
 reg_is_variable_decl = re.compile(
-    "|".join(x for x in all_decl_variable_regex), re.IGNORECASE
+    "|".join(x for x in reg_all_decl_variable), re.IGNORECASE
 )
 
 
-def is_modi_needed(f90):
+def is_modi_needed(lines):
     # If a module is declared in the file, then no interface is needed
-    src = open(f90, "r")
-    for line in src:
-        matches = reg_module.match(line)
-        if matches:
+    for line in lines:
+        if line.startswith("MODULE "):
             return False
     return True
 
@@ -60,12 +53,12 @@ def simplify_code(src):
     buf = ""
     for line in src:
         line = line.strip()
+        if line.startswith("!"):
+            continue
         while "  " in line:
             line = line.replace("  ", " ")
         if not line.startswith("#"):
             line = line.upper()
-        if line.startswith("!"):
-            continue
         if "!" in line and not line.startswith("#"):
             # When '!' is in the middle of a line, most of the time what follow it is comment.
             # But sometimes, it is a negation in an ifdef, see: #if ! defined foo
@@ -112,8 +105,7 @@ def remove_unsed_modules(lines):
         if matches:
             use_only[idx] = [v.strip() for v in matches.group(1).split(",")]
         else:
-            matches = reg_use_module.match(line)
-            if matches:
+            if line.startswith("USE "):
                 to_rm.append(idx)
 
     for key, values in use_only.items():
@@ -155,6 +147,9 @@ def get_proc_signature(line):
 def gen_modi(f90):
     src = open(f90, "r")
     lines = simplify_code(src)
+    if not is_modi_needed(lines):
+        return
+
     remove_contained_procedures(lines)
 
     modi_lines = []
@@ -197,5 +192,4 @@ def gen_modi(f90):
 
 for arg in sys.argv[1:]:
     file = Path(arg)
-    if is_modi_needed(file):
-        gen_modi(file)
+    gen_modi(file)
