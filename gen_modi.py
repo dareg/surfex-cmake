@@ -7,6 +7,9 @@ from pathlib import Path
 reg_module = re.compile(r"^\s*MODULE (\w+)", re.IGNORECASE)
 reg_continuation_line = re.compile(r"&\s*$")
 reg_sub_func_name = re.compile(r"^\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE)
+reg_sub_func_end_name = re.compile(
+    r"^\s*END\s*(SUBROUTINE|FUNCTION)\s+(\w+)", re.IGNORECASE
+)
 reg_sub_func_args = re.compile(r"\(([\w\s,]+)\)", re.IGNORECASE)
 reg_func_result = re.compile(r"RESULT\s*\(([\w\s]+)\)", re.IGNORECASE)
 reg_starts_with_ifdef = re.compile(
@@ -117,10 +120,9 @@ def remove_unsed_modules(lines):
 
 def gen_modi(f90):
     src = open(f90, "r")
-    modi_path = Path("modi/modi_" + str(f90.name))
+    lines = simplify_code(src)
     sub_name = ""
     func_or_sub = ""
-    lines = simplify_code(src)
     ending = ""
     modi_lines = []
     args = []
@@ -143,12 +145,15 @@ def gen_modi(f90):
                     args.append(matches.group(1).strip())
 
         matches = reg_is_still_decl.match(line)
-        if not matches:
+        if not matches and sub_name:
             modi_lines.append(f"{ending}\n")
             modi_lines.append(f"END INTERFACE\n")
             modi_lines.append(f"END MODULE MODI_{sub_name}\n")
-            break
-        if reg_is_variable_decl.match(line) and "INTENT" not in line:
+            sub_name = ""
+            ending = ""
+            args = []
+            continue
+        if sub_name and reg_is_variable_decl.match(line) and "INTENT" not in line:
             # if there are no intent, it might be a local variable
             # but sometimes the intent is missing, so we check also
             # if it's not in the list of arguments, it can also be the result of a function
@@ -158,10 +163,12 @@ def gen_modi(f90):
                 if var_name not in args and var_name != sub_name:
                     continue
 
-        modi_lines.append(line)
+        if sub_name:
+            modi_lines.append(line)
 
     remove_dangling_ifdef(modi_lines)
     remove_unsed_modules(modi_lines)
+    modi_path = Path("modi/modi_" + str(f90.name))
     modi = open(modi_path, "w")
     modi.write("".join(modi_lines))
 
