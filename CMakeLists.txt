@@ -4,6 +4,7 @@ project(surfex VERSION 1)
 enable_language(Fortran)
 set (src
 	"eggangles.F90"
+	"lfi_precision.F90"
 	"ASSIM/add_noise.F90"
 	"ASSIM/assim_dist_field.F90"
 	"ASSIM/assim_extrapolate_field.F90"
