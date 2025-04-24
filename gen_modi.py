@@ -80,6 +80,21 @@ def simplify_code(src):
     return lines
 
 
+def remove_contained_procedures(lines):
+    to_rm = []
+    depth = 0
+
+    for idx, line in enumerate(lines):
+        if line.startswith("SUBROUTINE ") or line.startswith("FUNCTION "):
+            depth = depth + 1
+        if depth > 1:
+            to_rm.append(idx)
+        if line.startswith("END SUBROUTINE") or line.startswith("END FUNCTION"):
+            depth = depth - 1
+    for idx in reversed(to_rm):
+        lines.pop(idx)
+
+
 def remove_dangling_ifdef(lines):
     ifdef = []
     for idx, line in enumerate(lines):
@@ -123,6 +138,7 @@ def remove_unsed_modules(lines):
 def gen_modi(f90):
     src = open(f90, "r")
     lines = simplify_code(src)
+    remove_contained_procedures(lines)
     sub_name = ""
     func_or_sub = ""
     ending = ""
