@@ -1817,6 +1817,7 @@ ecbuild_add_option( FEATURE DOUBLE_PRECISION
 
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
 ecbuild_find_package(NetCDF REQUIRED)
+ecbuild_find_package(eccodes REQUIRED)
 find_package(MPI REQUIRED)
 
 ecbuild_add_library(TARGET surfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran NetCDF)
@@ -1829,7 +1830,7 @@ else()
 endif()
 
 #target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1//include/")
-target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/include/")
+#target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/include/")
 #target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/netcdf-c-4.9.2/include/")
 #target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/eccodes-2.38.3/include/")
 target_compile_definitions(surfex PUBLIC in_surfex)
