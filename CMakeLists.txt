@@ -1795,8 +1795,21 @@ set (src
 	"TRIP/trip_xios_init.F90"
 )
 
-include(modi.cmake)
+set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
+message(STATUS ${MODI_PATH})
+execute_process(
+	COMMAND sh ${CMAKE_SOURCE_DIR}/build_surfex_interfaces.sh ${MODI_PATH}
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	COMMAND_ERROR_IS_FATAL ANY
+	RESULT_VARIABLE RES_MODI
+	COMMAND_ECHO STDOUT
+)
 
+if(NOT ${RES_MODI} EQUAL 0)
+	message(FATAL_ERROR "${RES_MODI} Failed to generated interfaces")
+endif()
+
+include(${MODI_PATH}/CMakeLists.txt)
 
 ecbuild_add_option( FEATURE DOUBLE_PRECISION
 										DEFAULT OFF

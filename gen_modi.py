@@ -190,10 +190,21 @@ def gen_modi(f90):
 
     remove_dangling_ifdef(modi_lines)
     remove_unsed_modules(modi_lines)
-    modi_path = Path("modi/modi_" + str(f90.name))
+    modi_path = Path(modi_dir / Path("modi_" + str(f90.name)))
     modi = open(modi_path, "w")
     modi.write("".join(modi_lines))
 
+
+modi_dir = Path("modi")
+args = sys.argv
+try:
+    idx = args.index("-o")
+except:
+    idx = None
+if idx:
+    modi_dir = Path(args[idx + 1])
+    args.pop(idx + 1)
+    args.pop(idx)
 
 for arg in sys.argv[1:]:
     file = Path(arg)
