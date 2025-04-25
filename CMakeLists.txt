@@ -1806,7 +1806,7 @@ execute_process(
 )
 
 if(NOT ${RES_MODI} EQUAL 0)
-	message(FATAL_ERROR "${RES_MODI} Failed to generated interfaces")
+	message(FATAL_ERROR "Failed to generated interfaces")
 endif()
 
 include(${MODI_PATH}/CMakeLists.txt)
