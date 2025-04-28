@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
 project(surfex VERSION 1)
 enable_language(Fortran)
-set (src
+set (SRC
 	"eggangles.F90"
 	"lfi_precision.F90"
 	"ASSIM/add_noise.F90"
@@ -1796,31 +1796,29 @@ set (src
 )
 
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
-message(STATUS ${MODI_PATH})
-execute_process(
-	COMMAND sh ${CMAKE_SOURCE_DIR}/build_surfex_interfaces.sh ${MODI_PATH}
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-	COMMAND_ERROR_IS_FATAL ANY
-	RESULT_VARIABLE RES_MODI
-	COMMAND_ECHO STDOUT
-)
+file(MAKE_DIRECTORY ${MODI_PATH})
 
-if(NOT ${RES_MODI} EQUAL 0)
-	message(FATAL_ERROR "Failed to generated interfaces")
-endif()
-
-include(${MODI_PATH}/CMakeLists.txt)
+foreach(FILEPATH ${SRC})
+	get_filename_component(FILENAME ${FILEPATH} NAME)
+	set(OUTPUT_FILE ${MODI_PATH}/modi_${FILENAME})
+	add_custom_command(
+		OUTPUT ${OUTPUT_FILE}
+		COMMAND ${CMAKE_SOURCE_DIR}/gen_modi.py -o ${MODI_PATH} ${CMAKE_SOURCE_DIR}/${FILEPATH}
+		DEPENDS ${FILEPATH}
+	)
+	list(APPEND MODI_LIST ${OUTPUT_FILE})
+endforeach()
 
 ecbuild_add_option( FEATURE DOUBLE_PRECISION
-										DEFAULT OFF
-                    DESCRIPTION "Support for Double Precision" )
+	DEFAULT OFF
+	DESCRIPTION "Support for Double Precision" )
 
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
 ecbuild_find_package(NetCDF REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
 find_package(MPI REQUIRED)
 
-ecbuild_add_library(TARGET surfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran NetCDF eccodes)
+ecbuild_add_library(TARGET surfex SOURCES ${SRC} ${MODI_LIST} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran NetCDF eccodes)
 
 if(${HAVE_DOUBLE_PRECISION})
 	ecbuild_add_fortran_flags( "-r8" )
@@ -1829,10 +1827,6 @@ else()
 	target_link_libraries(surfex PUBLIC parkind_sp)
 endif()
 
-#target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1//include/")
-#target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/include/")
-#target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/netcdf-c-4.9.2/include/")
-#target_include_directories(surfex PRIVATE "/home/gmap/mrpm/khatib/opt/gcc/14.1.0/eccodes-2.38.3/include/")
 target_compile_definitions(surfex PUBLIC in_surfex)
 target_compile_definitions(surfex PUBLIC SFX_ARO)
 target_compile_definitions(surfex PUBLIC SFX_ASC)
