@@ -150,9 +150,11 @@ def get_proc_signature(line):
 
 
 def gen_modi(f90):
+    modi_path = Path(modi_dir / Path("modi_" + str(f90.name)))
     src = open(f90, "r")
     lines = simplify_code(src)
     if not is_modi_needed(lines):
+        modi_path.touch()
         return
 
     remove_contained_procedures(lines)
@@ -190,7 +192,6 @@ def gen_modi(f90):
 
     remove_dangling_ifdef(modi_lines)
     remove_unsed_modules(modi_lines)
-    modi_path = Path(modi_dir / Path("modi_" + str(f90.name)))
     modi = open(modi_path, "w")
     modi.write("".join(modi_lines))
 
