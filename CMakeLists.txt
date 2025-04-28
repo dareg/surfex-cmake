@@ -1820,7 +1820,7 @@ ecbuild_find_package(NetCDF REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
 find_package(MPI REQUIRED)
 
-ecbuild_add_library(TARGET surfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran NetCDF)
+ecbuild_add_library(TARGET surfex SOURCES ${src} ${modi} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran NetCDF eccodes)
 
 if(${HAVE_DOUBLE_PRECISION})
 	ecbuild_add_fortran_flags( "-r8" )
