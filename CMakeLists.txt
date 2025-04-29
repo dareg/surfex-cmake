@@ -1821,6 +1821,7 @@ ecbuild_find_package(MPI REQUIRED)
 ecbuild_add_library(
 	TARGET surfex
 	SOURCES ${SRC} ${MODI_LIST}
+	TYPE STATIC
 	PUBLIC_LIBS fiat
 		MPI::MPI_Fortran
 		NetCDF
