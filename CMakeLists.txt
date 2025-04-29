@@ -1830,7 +1830,6 @@ ecbuild_add_library(
 if(${HAVE_DOUBLE_PRECISION})
 	ecbuild_add_fortran_flags( "-r8" )
 	target_link_libraries(surfex PUBLIC parkind_dp)
-	target_compile_definitions(surfex PUBLIC PARKIND1_DOUBLE)
 else()
 	target_link_libraries(surfex PUBLIC parkind_sp)
 	target_compile_definitions(surfex PUBLIC PARKIND1_SINGLE)
