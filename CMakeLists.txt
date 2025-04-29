@@ -1816,15 +1816,24 @@ ecbuild_add_option( FEATURE DOUBLE_PRECISION
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
 ecbuild_find_package(NetCDF REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
-find_package(MPI REQUIRED)
+ecbuild_find_package(MPI REQUIRED)
 
-ecbuild_add_library(TARGET surfex SOURCES ${SRC} ${MODI_LIST} TYPE STATIC PUBLIC_LIBS fiat parkind_dp MPI::MPI_Fortran NetCDF eccodes)
+ecbuild_add_library(
+	TARGET surfex
+	SOURCES ${SRC} ${MODI_LIST}
+	PUBLIC_LIBS fiat
+		MPI::MPI_Fortran
+		NetCDF
+		eccodes
+	)
 
 if(${HAVE_DOUBLE_PRECISION})
 	ecbuild_add_fortran_flags( "-r8" )
 	target_link_libraries(surfex PUBLIC parkind_dp)
+	target_compile_definitions(surfex PUBLIC PARKIND1_DOUBLE)
 else()
 	target_link_libraries(surfex PUBLIC parkind_sp)
+	target_compile_definitions(surfex PUBLIC PARKIND1_SINGLE)
 endif()
 
 target_compile_definitions(surfex PUBLIC in_surfex)
