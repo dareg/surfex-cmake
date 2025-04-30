@@ -1798,14 +1798,27 @@ set (SRC
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
 file(MAKE_DIRECTORY ${MODI_PATH})
 
+#foreach(FILEPATH ${SRC})
+#	get_filename_component(FILENAME ${FILEPATH} NAME)
+#	set(OUTPUT_FILE ${MODI_PATH}/modi_${FILENAME})
+#	add_custom_command(
+#		OUTPUT ${OUTPUT_FILE}
+#		COMMAND ${CMAKE_SOURCE_DIR}/gen_modi.py -o ${MODI_PATH} ${CMAKE_SOURCE_DIR}/${FILEPATH}
+#		DEPENDS ${FILEPATH}
+#	)
+#	list(APPEND MODI_LIST ${OUTPUT_FILE})
+#endforeach()
+
 foreach(FILEPATH ${SRC})
 	get_filename_component(FILENAME ${FILEPATH} NAME)
 	set(OUTPUT_FILE ${MODI_PATH}/modi_${FILENAME})
 	add_custom_command(
 		OUTPUT ${OUTPUT_FILE}
-		COMMAND ${CMAKE_SOURCE_DIR}/gen_modi.py -o ${MODI_PATH} ${CMAKE_SOURCE_DIR}/${FILEPATH}
+		COMMAND LOC_INTFBDIR=${MODI_PATH} INTFBDIR=${MODI_PATH} ./create_modi.sh ${CMAKE_SOURCE_DIR}/${FILEPATH}
 		DEPENDS ${FILEPATH}
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/open-SURFEX
 	)
+	message(STATUS ${OUTPUT_FILE})
 	list(APPEND MODI_LIST ${OUTPUT_FILE})
 endforeach()
 
