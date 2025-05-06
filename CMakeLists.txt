@@ -529,7 +529,7 @@ set (SRC
 	"SURFEX/emis_from_veg.F90"
 	"SURFEX/end_io_surf_ascn.F90"
 	"SURFEX/end_io_surf_fan.F90"
-	"SURFEX/end_io_surfn.F90"
+	"SURFEX/end_io_surf_n.F90"
 	"SURFEX/error_read_surf_asc.F90"
 	"SURFEX/error_read_surf_fa.F90"
 	"SURFEX/error_write_surf_asc.F90"
@@ -722,7 +722,7 @@ set (SRC
 	"SURFEX/init_io_surf_ascn.F90"
 	"SURFEX/init_io_surf_fan.F90"
 	"SURFEX/init_io_surf_maskn.F90"
-	"SURFEX/init_io_surfn.F90"
+	"SURFEX/init_io_surf_n.F90"
 	"SURFEX/init_isba_landuse.F90"
 	"SURFEX/init_isba_mixpar.F90"
 	"SURFEX/init_isba_sbl.F90"
@@ -1808,19 +1808,21 @@ file(MAKE_DIRECTORY ${MODI_PATH})
 #	)
 #	list(APPEND MODI_LIST ${OUTPUT_FILE})
 #endforeach()
+#set(ALL_SRCS ${SRC} ${MODI_LIST})
 
 foreach(FILEPATH ${SRC})
-	get_filename_component(FILENAME ${FILEPATH} NAME)
-	set(OUTPUT_FILE ${MODI_PATH}/modi_${FILENAME})
+	get_filename_component(FILENAME ${FILEPATH} NAME_WE)
+	set(OUTPUT_FILE ${MODI_PATH}/spll_modi_${FILENAME}.f90)
 	add_custom_command(
 		OUTPUT ${OUTPUT_FILE}
-		COMMAND LOC_INTFBDIR=${MODI_PATH} INTFBDIR=${MODI_PATH} ./create_modi.sh ${CMAKE_SOURCE_DIR}/${FILEPATH}
+		COMMAND ./create_modi_with_splr.sh ${CMAKE_SOURCE_DIR}/${FILEPATH} ${MODI_PATH}
 		DEPENDS ${FILEPATH}
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/open-SURFEX
 	)
 	message(STATUS ${OUTPUT_FILE})
-	list(APPEND MODI_LIST ${OUTPUT_FILE})
+	list(APPEND SPL_SRCS ${OUTPUT_FILE})
 endforeach()
+set(ALL_SRCS ${SRC} ${SPL_SRCS})
 
 ecbuild_add_option( FEATURE DOUBLE_PRECISION
 	DEFAULT OFF
@@ -1831,9 +1833,10 @@ ecbuild_find_package(NetCDF REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
 ecbuild_find_package(MPI REQUIRED)
 
+
 ecbuild_add_library(
 	TARGET surfex
-	SOURCES ${SRC} ${MODI_LIST}
+	SOURCES ${ALL_SRCS}
 	TYPE STATIC
 	PUBLIC_LIBS fiat
 		MPI::MPI_Fortran
