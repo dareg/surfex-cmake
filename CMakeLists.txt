@@ -1795,6 +1795,18 @@ set (SRC
 	"TRIP/trip_xios_init.F90"
 )
 
+set(SRC_PROGRAMS
+  ASSIM/soda.F90
+  OFFLIN/ncpost.F90
+  OFFLIN/pgd.F90
+  OFFLIN/prep.F90
+  OFFLIN/sxpost.F90
+  OFFLIN/offline.F90
+  TRIP/trip_change_date.F90
+  TRIP/trip_master.F90
+  TRIP/trip_prep.F90
+)
+
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
 file(MAKE_DIRECTORY ${MODI_PATH})
 
@@ -1850,3 +1862,16 @@ target_compile_definitions(surfex PUBLIC TXT)
 target_compile_definitions(surfex PUBLIC FA)
 target_compile_definitions(surfex PUBLIC LFI)
 
+foreach(FILEPATH ${SRC_PROGRAMS})
+	cmake_path(GET FILEPATH STEM EXENAME)
+	add_executable(${EXENAME} ${FILEPATH})
+	target_link_libraries(${EXENAME} PUBLIC surfex fiat MPI::MPI_Fortran eccodes)
+	if(${HAVE_DOUBLE_PRECISION})
+		ecbuild_add_fortran_flags( "-r8" )
+		target_link_libraries(${EXENAME} PUBLIC parkind_dp)
+	else()
+		target_link_libraries(${EXENAME} PUBLIC parkind_sp)
+		target_compile_definitions(${EXENAME} PUBLIC PARKIND1_SINGLE)
+	endif()
+	message(STATUS "Added exe ${EXENAME}")
+endforeach()
