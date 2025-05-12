@@ -1811,7 +1811,7 @@ set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
 file(MAKE_DIRECTORY ${MODI_PATH})
 
 foreach(FILEPATH ${SRC})
-	get_filename_component(FILENAME ${FILEPATH} NAME)
+	cmake_path(GET FILEPATH FILENAME FILENAME)
 	set(OUTPUT_FILE ${MODI_PATH}/modi_${FILENAME})
 	add_custom_command(
 		OUTPUT ${OUTPUT_FILE}
