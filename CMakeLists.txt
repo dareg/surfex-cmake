@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
-project(surfex VERSION 1)
-enable_language(Fortran)
+project(surfex VERSION 1 LANGUAGES Fortran)
+ecbuild_enable_fortran(REQUIRED NO_MODULE_DIRECTORY)
 set (SRC
 	"eggangles.F90"
 	"lfi_precision.F90"
@@ -1875,3 +1875,9 @@ foreach(FILEPATH ${SRC_PROGRAMS})
 	endif()
 	message(STATUS "Added exe ${EXENAME}")
 endforeach()
+
+install(TARGETS surfex DESTINATION lib)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/module/ DESTINATION module/surfex)
+
+ecbuild_install_project(NAME surfex)
+ecbuild_print_summary()
