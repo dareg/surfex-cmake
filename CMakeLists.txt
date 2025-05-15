@@ -1798,21 +1798,14 @@ set (SRC
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
 file(MAKE_DIRECTORY ${MODI_PATH})
 
-#foreach(FILEPATH ${SRC})
-#	get_filename_component(FILENAME ${FILEPATH} NAME)
-#	set(OUTPUT_FILE ${MODI_PATH}/modi_${FILENAME})
-#	add_custom_command(
-#		OUTPUT ${OUTPUT_FILE}
-#		COMMAND ${CMAKE_SOURCE_DIR}/gen_modi.py -o ${MODI_PATH} ${CMAKE_SOURCE_DIR}/${FILEPATH}
-#		DEPENDS ${FILEPATH}
-#	)
-#	list(APPEND MODI_LIST ${OUTPUT_FILE})
-#endforeach()
-#set(ALL_SRCS ${SRC} ${MODI_LIST})
-
 foreach(FILEPATH ${SRC})
+	set(PATTERN "modi")
 	get_filename_component(FILENAME ${FILEPATH} NAME_WE)
-	set(OUTPUT_FILE ${MODI_PATH}/spll_modi_${FILENAME}.f90)
+	if(FILENAME MATCHES "^${PATTERN}")
+		set(OUTPUT_FILE ${MODI_PATH}/spll_${FILENAME}.f90)
+	else()
+		set(OUTPUT_FILE ${MODI_PATH}/spll_modi_${FILENAME}.f90)
+	endif()
 	add_custom_command(
 		OUTPUT ${OUTPUT_FILE}
 		COMMAND ./create_modi_with_splr.sh ${CMAKE_SOURCE_DIR}/${FILEPATH} ${MODI_PATH}
