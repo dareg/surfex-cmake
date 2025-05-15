@@ -1876,8 +1876,9 @@ foreach(FILEPATH ${SRC_PROGRAMS})
 	message(STATUS "Added exe ${EXENAME}")
 endforeach()
 
-install(TARGETS surfex DESTINATION lib)
-install(DIRECTORY ${CMAKE_BINARY_DIR}/module/ DESTINATION module/surfex)
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY} DESTINATION .)
+install(TARGETS surfex LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 
 ecbuild_install_project(NAME surfex)
 ecbuild_print_summary()
