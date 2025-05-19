@@ -1796,14 +1796,14 @@ set (SRC
 
 set(SRC_PROGRAMS
 	#ASSIM/soda.F90
-	#OFFLIN/ncpost.F90
-	#OFFLIN/pgd.F90
-	#OFFLIN/prep.F90
-	#OFFLIN/sxpost.F90
-	#OFFLIN/offline.F90
-	#TRIP/trip_change_date.F90
-	#TRIP/trip_master.F90
-	#TRIP/trip_prep.F90
+	OFFLIN/ncpost.F90
+	OFFLIN/pgd.F90
+	OFFLIN/prep.F90
+	OFFLIN/sxpost.F90
+	OFFLIN/offline.F90
+	TRIP/trip_change_date.F90
+	TRIP/trip_master.F90
+	TRIP/trip_prep.F90
 )
 
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
