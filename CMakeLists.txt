@@ -1838,14 +1838,13 @@ ecbuild_add_library(
 		MPI::MPI_Fortran
 		NetCDF::NetCDF_Fortran
 		eccodes
-		fa_dp
 	)
 
 if(${HAVE_DOUBLE_PRECISION})
 	ecbuild_add_fortran_flags( "-r8" )
-	target_link_libraries(surfex PUBLIC parkind_dp)
+	target_link_libraries(surfex PUBLIC parkind_dp fa_dp)
 else()
-	target_link_libraries(surfex PUBLIC parkind_sp)
+	target_link_libraries(surfex PUBLIC parkind_sp fa_sp)
 	target_compile_definitions(surfex PUBLIC PARKIND1_SINGLE)
 endif()
 
