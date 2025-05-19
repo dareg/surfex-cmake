@@ -4,7 +4,6 @@ project(surfex VERSION 1 LANGUAGES Fortran)
 ecbuild_enable_fortran(REQUIRED NO_MODULE_DIRECTORY)
 set (SRC
 	"eggangles.F90"
-	"lfi_precision.F90"
 	"ASSIM/add_noise.F90"
 	"ASSIM/assim_dist_field.F90"
 	"ASSIM/assim_extrapolate_field.F90"
@@ -1829,6 +1828,7 @@ ecbuild_find_package(fiat COMPONENTS REQUIRED)
 ecbuild_find_package(NetCDF REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
 ecbuild_find_package(MPI REQUIRED)
+ecbuild_find_package(falfilfa REQUIRED)
 
 ecbuild_add_library(
 	TARGET surfex
@@ -1838,6 +1838,7 @@ ecbuild_add_library(
 		MPI::MPI_Fortran
 		NetCDF
 		eccodes
+		fa_dp
 	)
 
 if(${HAVE_DOUBLE_PRECISION})
@@ -1864,13 +1865,13 @@ target_compile_definitions(surfex PUBLIC LFI)
 
 foreach(FILEPATH ${SRC_PROGRAMS})
 	cmake_path(GET FILEPATH STEM EXENAME)
-	add_executable(${EXENAME} ${FILEPATH})
-	target_link_libraries(${EXENAME} PUBLIC surfex fiat MPI::MPI_Fortran eccodes)
+	ecbuild_add_executable(TARGET ${EXENAME} SOURCES ${FILEPATH})
+	target_link_libraries( ${EXENAME} PUBLIC surfex fiat MPI::MPI_Fortran eccodes)
 	if(${HAVE_DOUBLE_PRECISION})
 		ecbuild_add_fortran_flags( "-r8" )
-		target_link_libraries(${EXENAME} PUBLIC parkind_dp)
+		target_link_libraries(${EXENAME} PUBLIC parkind_dp fa_dp)
 	else()
-		target_link_libraries(${EXENAME} PUBLIC parkind_sp)
+		target_link_libraries(${EXENAME} PUBLIC parkind_sp fa_sp)
 		target_compile_definitions(${EXENAME} PUBLIC PARKIND1_SINGLE)
 	endif()
 	message(STATUS "Added exe ${EXENAME}")
