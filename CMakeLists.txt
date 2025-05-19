@@ -1825,7 +1825,7 @@ ecbuild_add_option( FEATURE DOUBLE_PRECISION
 	DESCRIPTION "Support for Double Precision" )
 
 ecbuild_find_package(fiat COMPONENTS REQUIRED)
-ecbuild_find_package(NetCDF REQUIRED)
+ecbuild_find_package(NetCDF COMPONENTS Fortran REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
 ecbuild_find_package(MPI REQUIRED)
 ecbuild_find_package(falfilfa REQUIRED)
@@ -1836,7 +1836,7 @@ ecbuild_add_library(
 	TYPE STATIC
 	PUBLIC_LIBS fiat
 		MPI::MPI_Fortran
-		NetCDF
+		NetCDF::NetCDF_Fortran
 		eccodes
 		fa_dp
 	)
@@ -1866,7 +1866,7 @@ target_compile_definitions(surfex PUBLIC LFI)
 foreach(FILEPATH ${SRC_PROGRAMS})
 	cmake_path(GET FILEPATH STEM EXENAME)
 	ecbuild_add_executable(TARGET ${EXENAME} SOURCES ${FILEPATH})
-	target_link_libraries( ${EXENAME} PUBLIC surfex fiat MPI::MPI_Fortran eccodes)
+	target_link_libraries( ${EXENAME} PUBLIC surfex fiat MPI::MPI_Fortran eccodes NetCDF::NetCDF_Fortran)
 	if(${HAVE_DOUBLE_PRECISION})
 		ecbuild_add_fortran_flags( "-r8" )
 		target_link_libraries(${EXENAME} PUBLIC parkind_dp fa_dp)
