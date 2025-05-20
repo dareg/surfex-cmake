@@ -12,7 +12,7 @@ cmake .. \
     -Dfiat_ROOT=PATH_TO_FIAT_INSTALL_DIR \
     -Dfalfilfa_ROOT=PATH_TO_FALFILFA_INSTALL_DIR \
     -DNetCDF_DIR=/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1/ \
-    -Deccodes_ROOT=/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/
-    -DENABLE_SINGLE_PRECISION=ON \ # Can be turned OFF
-    -DENABLE_DOUBLE_PRECISION=ON   # Can be turned OFF
+    -Deccodes_ROOT=/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/ \
+    -DENABLE_SINGLE_PRECISION=ON \
+    -DENABLE_DOUBLE_PRECISION=ON
 ```
