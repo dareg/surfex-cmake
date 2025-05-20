@@ -14,5 +14,6 @@ cmake .. \
     -DNetCDF_DIR=/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1/ \
     -Deccodes_ROOT=/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/ \
     -DENABLE_SINGLE_PRECISION=ON \
-    -DENABLE_DOUBLE_PRECISION=ON
+    -DENABLE_DOUBLE_PRECISION=ON \
+    -DCMAKE_INSTALL_PREFIX=PATH_TO_DESIRED_INSTALL_DIR
 ```
