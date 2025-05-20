@@ -1,10 +1,18 @@
-fiat, netcdf, eccodes are needed
-
 # compiling on belenos
-On belenos, use this path to set them with tth eintel 18 compiler:
+
+In order to compile the surfex library, fiat, netcdf, eccodes and falfilfa (branch chikhiw\_fixEccodes) needs to be installed.
+
+falfilfa can be found here: https://github.com/walidchikhi/FALFILFA/
+
 ```
 module load intel
 module load intelmpi/2018.5.274
-# tell cmake where to find th external dependencies
-cmake .. -Dfiat_ROOT=PATH_TO_FIAT_INSTALL_DIR -DNetCDF_DIR=/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1/ -Deccodes_ROOT=/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/
 
+cmake .. \
+    -Dfiat_ROOT=PATH_TO_FIAT_INSTALL_DIR \
+    -Dfalfilfa_ROOT=PATH_TO_FALFILFA_INSTALL_DIR \
+    -DNetCDF_DIR=/home/gmap/mrpm/khatib/opt/i-2018.5.274/netcdf-4.7.1/ \
+    -Deccodes_ROOT=/home/gmap/mrpm/khatib/opt/i-2018.5.274/eccodes-2.27.0/
+    -DENABLE_SINGLE_PRECISION=ON \ # Can be turned OFF
+    -DENABLE_DOUBLE_PRECISION=ON   # Can be turned OFF
+```
