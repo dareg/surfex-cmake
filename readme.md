@@ -1,8 +1,6 @@
-# compiling on belenos
+# Compiling on belenos
 
-In order to compile the surfex library, fiat, netcdf, eccodes and falfilfa (branch chikhiw\_fixEccodes) needs to be installed.
-
-falfilfa can be found here: https://github.com/walidchikhi/FALFILFA/
+In order to compile the surfex library, fiat, netcdf, eccodes and falfilfa needs to be installed.
 
 ```
 module load intel
@@ -17,3 +15,5 @@ cmake .. \
     -DENABLE_DOUBLE_PRECISION=ON \
     -DCMAKE_INSTALL_PREFIX=PATH_TO_DESIRED_INSTALL_DIR
 ```
+
+See the script *build_surfex.sh* in the repository for information about the installation process of all the dependencies.
