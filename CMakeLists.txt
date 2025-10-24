@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-find_package( ecbuild 3.4 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
+find_package( ecbuild 3.11 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild )
 project(surfex VERSION 1 LANGUAGES Fortran)
 
 set(MODI_PATH ${CMAKE_BINARY_DIR}/modi)
@@ -84,10 +84,11 @@ foreach(PRECISION ${PRECISIONS})
 endforeach()
 
 if(${HAVE_DOUBLE_PRECISION})
-	target_compile_options(surfex_dp PUBLIC "-r8" )
+	target_compile_options(surfex_dp PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL8}>)
 endif()
 
 if(${HAVE_SINGLE_PRECISION})
+	target_compile_options(surfex_dp PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL4}>)
 	target_compile_definitions(surfex_sp PUBLIC PARKIND1_SINGLE)
 endif()
 
@@ -110,9 +111,10 @@ foreach(FILEPATH ${SRC_PROGRAMS})
 		)
 
 		if(${PRECISION} STREQUAL "dp")
-			target_compile_options(${EXENAME} PUBLIC "-r8" )
+			target_compile_options(${EXENAME} PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL8}>)
 		endif()
 		if(${PRECISION} STREQUAL "sp")
+			target_compile_options(${EXENAME} PUBLIC $<$<COMPILE_LANGUAGE:Fortran>:${ECBUILD_Fortran_COMPILE_OPTIONS_REAL4}>)
 			target_compile_definitions(${EXENAME} PUBLIC PARKIND1_SINGLE)
 		endif()
 	endforeach()
