@@ -1,5 +1,4 @@
 set (SRC
-	"eggangles.F90"
 	"ASSIM/add_noise.F90"
 	"ASSIM/assim_dist_field.F90"
 	"ASSIM/assim_extrapolate_field.F90"

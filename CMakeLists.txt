@@ -37,6 +37,7 @@ ecbuild_find_package(NetCDF COMPONENTS Fortran REQUIRED)
 ecbuild_find_package(eccodes REQUIRED)
 ecbuild_find_package(MPI REQUIRED)
 ecbuild_find_package(falfilfa REQUIRED)
+ecbuild_find_package(pinuts REQUIRED)
 
 foreach(PRECISION ${PRECISIONS})
 	set(LIBNAME surfex_${PRECISION})
@@ -51,6 +52,7 @@ foreach(PRECISION ${PRECISIONS})
 		eccodes
 		parkind_${PRECISION}
 		fa_${PRECISION}
+		pinuts_${PRECISION}
 		PUBLIC_INCLUDES
 		$<BUILD_INTERFACE:${ECCODES_INCLUDE_DIR}>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -108,6 +110,7 @@ foreach(FILEPATH ${SRC_PROGRAMS})
 			surfex_${PRECISION}
 			parkind_${PRECISION}
 			fa_${PRECISION}
+			pinuts_${PRECISION}
 		)
 
 		if(${PRECISION} STREQUAL "dp")
