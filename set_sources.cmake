@@ -957,7 +957,6 @@ set (SRC
 	"SURFEX/modd_wp.F90"
 	"SURFEX/modd_write_cover_tex.F90"
 	"SURFEX/modd_write_surf_atm.F90"
-	"SURFEX/modd_xias.F90"
 	"SURFEX/modd_xios.F90"
 	"SURFEX/mode_aer_surf.F90"
 	"SURFEX/mode_av_pgd.F90"
